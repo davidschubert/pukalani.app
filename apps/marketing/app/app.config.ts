@@ -66,7 +66,9 @@ export default defineAppConfig({
           // tone-ink-Band meint `inverted` seit B7 etwas anderes als daneben —
           // derselbe Knopf hätte im Dunkelmodus zwei Schriftfarben gehabt.
           // Der Wert steht als --puka-cta-label in puka-theme.css (dort auch
-          // die Kontrast-Rechnung); hell bleibt er Weiß wie im Bestand.
+          // die Kontrast-Rechnung). Seit Davids Entscheidung 2026-08-08 ist
+          // das in BEIDEN Modi dunkle Tinte — das frühere Weiß im Hellmodus
+          // (Bestand der Seite) maß auf der Sonne 1,81:1 und verfehlte AA.
           color: 'primary',
           variant: 'solid',
           class: 'text-(--puka-cta-label)',
@@ -110,6 +112,12 @@ export default defineAppConfig({
         // Text-Akzente konsequent --puka-sun-deep, und das IST puka-600.
         // Deshalb: überall dort, wo Nuxt UI die Primärfarbe als SCHRIFT setzt
         // (link-Buttons, subtle-Badges, subtle-Alerts), eine Stufe tiefer.
+        // SEIT 2026-08-08 IST DIE ZAHL DAHINTER STRENGER (Davids Entscheidung,
+        // WCAG AA): die REGEL „eine Stufe tiefer als die Fläche" bleibt, aber
+        // `primary-600` zeigt im hellen Scope nicht mehr auf puka-600 (#e96c0c,
+        // als Schrift nur 2,43–2,83:1 auf den tone-Flächen), sondern auf
+        // puka-800 (5,48–6,38:1). Verschoben wird in puka-theme.css, damit
+        // diese Klassen unverändert bleiben.
         {
           color: 'primary',
           variant: 'link',
@@ -420,8 +428,9 @@ export default defineAppConfig({
         // `.plan-tag` — die Ordnungszeile über dem Namen („02 · Beliebt").
         // Sie steht im `#header`-Slot, nicht als `badge`: der Bestand ist eine
         // gesperrte Versalzeile, ein `UBadge` wäre eine gefüllte Pille NEBEN
-        // dem Namen. `text-primary-600` ist --puka-sun-deep (siehe
-        // „Marken-Ton auf hellem Grund" oben). `min-h-4` hält den Platz frei,
+        // dem Namen. `text-primary-600` ist der Akzent-Ton auf hellem Grund
+        // (siehe „Marken-Ton auf hellem Grund" oben — seit 2026-08-08 zeigt
+        // die Stufe hell auf puka-800, AA). `min-h-4` hält den Platz frei,
         // damit die Namen auch dann auf einer Höhe stehen, wenn ein Plan
         // später ohne Zeichen auskommt (Bestand: `min-height: 1rem`).
         header: 'min-h-4 text-[0.75rem] font-bold uppercase tracking-[0.06em] text-primary-600',
@@ -440,7 +449,11 @@ export default defineAppConfig({
         // zweite Zeile die leisere) — der Bestand macht die Pflichtangabe
         // bewusst kräftiger als die Zeile darüber, damit sie nicht als
         // Kleingedrucktes wirkt.
-        billingPeriod: 'whitespace-normal text-[0.78rem] font-medium text-toned/70',
+        // /85 STATT /70 (Davids Entscheidung 2026-08-08, WCAG AA): auf der
+        // Plan-Karte (weiß/0,7 über tone-dawn-hold, #fefaf5) maß /70 nur
+        // 3,47:1, /85 misst 4,90:1. Die Hierarchie bleibt — die PAngV-Zeile
+        // darunter steht mit vollem `toned` bei 7,13:1 weiterhin kräftiger.
+        billingPeriod: 'whitespace-normal text-[0.78rem] font-medium text-toned/85',
         billingCycle: 'whitespace-normal text-[0.78rem] font-semibold text-toned',
         // `.plan-desc` — siehe Begründung am `footer` unten.
         tagline: 'text-base/[1.55] font-normal text-toned',

@@ -150,9 +150,19 @@
    * tone-ink-Band dreht `.tone-ink` --ui-text-inverted auf hell — siehe
    * marketing.css). Deshalb bekommt der gefüllte Knopf seine Schrift aus einem
    * eigenen Token (gebunden im `button`-Vertrag in app/app.config.ts).
-   * Hell bleibt BEWUSST Weiß — das ist der Bestand der Seite.
+   *
+   * HELL WAR BIS 2026-08-08 WEISS (der Bestand der Seite) — das ist Geschichte:
+   * Weiß auf puka-500 misst 1,81:1, WCAG AA verlangt 4,5:1. Davids Entscheidung
+   * 2026-08-08 dreht das Label deshalb in BEIDEN Modi auf dunkle Tinte; hell
+   * misst hsl(--puka-ink) auf der Sonne 9,34:1, der Dunkelmodus tut dasselbe
+   * seit B7 (8,4:1). Der Knopf sieht damit überall gleich aus — was er als
+   * einzige Stelle, an der die Sonne FLÄCHE ist, ohnehin sollte.
+   * WICHTIG: der Dark-Block unten behält seinen eigenen LITERAL-Wert
+   * `hsl(220 40% 11%)` und darf NICHT auf `hsl(var(--puka-ink))` vereinheitlicht
+   * werden — --puka-ink dreht im Dunkeln auf HELL (marketing.css), dort stünde
+   * sonst wieder helle Schrift auf der Sonne.
    */
-  --puka-cta-label: hsl(0 0% 100%);
+  --puka-cta-label: hsl(var(--puka-ink));
 
   /*
    * Die Haarlinie der Karten (Paket 2, benutzt vom `pageCard`-Vertrag in
@@ -211,9 +221,16 @@
    * fertiger Verlauf hier, damit beide Stellen dieselbe Scheibe malen und
    * keine von beiden handgeschriebenes CSS braucht.
    * Der Bestand mischte hsl(--puka-sun) → hsl(--puka-sun-deep); das SIND
-   * primary-500 → primary-600.
+   * puka-500 → puka-600.
+   *
+   * WARUM DIE ROHEN RAMP-WERTE UND NICHT `--ui-color-primary-*` (2026-08-08):
+   * die Scheibe ist eine FLÄCHE, keine Schrift. Seit die Akzent-Stufen je Modus
+   * verschoben werden (unten bzw. im Dark-Block), zeigte `primary-600` hell auf
+   * puka-800 — die Scheibe wäre ohne Grund nachgedunkelt. Die Flächen waren nie
+   * beanstandet, also nennen sie ihre Ramp-Stufe direkt; der Dark-Block setzt
+   * seinen eigenen Wert (puka-400) explizit.
    */
-  --puka-step-fill: linear-gradient(135deg, var(--ui-color-primary-500), var(--ui-color-primary-600));
+  --puka-step-fill: linear-gradient(135deg, var(--color-puka-500), var(--color-puka-600));
 
   /*
    * DIE PILLE DES PRODUKT-UMSCHALTERS in ModularSection (Paket 5). Anders als
@@ -236,8 +253,26 @@
    * einen Schatten meint. Ein nacktes `var(--token)` ist an dieser Stelle
    * mehrdeutig; `shadow-[0_20px_50px_-24px_var(--puka-plan-glow)]` beginnt mit
    * einer Länge und ist es nicht.
+   *
+   * Auch hier die ROHE Ramp-Stufe statt `--ui-color-primary-600` (2026-08-08,
+   * gleiche Begründung wie bei --puka-step-fill): ein Schein ist eine Fläche,
+   * er darf die Schrift-Verschiebung nicht mitmachen.
    */
-  --puka-plan-glow: color-mix(in oklab, var(--ui-color-primary-600) 60%, transparent);
+  --puka-plan-glow: color-mix(in oklab, var(--color-puka-600) 60%, transparent);
+
+  /*
+   * DIE AKZENT-STUFEN IM HELLEN (Davids Entscheidung 2026-08-08, WCAG AA).
+   * Spiegelbild der Verschiebung im Dark-Block unten — dort ist 600 zu dunkel,
+   * hier war es zu hell: puka-600 (#e96c0c) als SCHRIFT misst auf den
+   * tone-*-Flächen nur 2,43–2,83:1, AA verlangt 4,5:1. puka-800 (#983912)
+   * misst 5,48:1 auf tone-sun-hold/-noon und 6,38:1 auf tone-dawn/-cloud.
+   * Statt die rund dreissig `text-primary-600`-/`hover:text-primary-700`-
+   * Klassen anzufassen, zeigen die STUFEN eine Oktave tiefer: die Klassen
+   * bleiben die Aussage, die Zahl dahinter ist Theme-Sache (Punkt 2 im
+   * Fußkommentar unten, nur andersherum).
+   */
+  --ui-color-primary-600: var(--color-puka-800);
+  --ui-color-primary-700: var(--color-puka-900);
 }
 
 /*
@@ -254,15 +289,19 @@
  * 2. DIE AKZENT-STUFEN VERSCHIEBEN SICH. Die Seite schreibt
  *    `text-primary-600` (und `hover:text-primary-700`) an rund dreissig
  *    Stellen — das ist die Regel „Marken-Ton auf hellem Grund" aus
- *    app/app.config.ts: #e96c0c, damit die Sonne als SCHRIFT lesbar bleibt.
+ *    app/app.config.ts, damit die Sonne als SCHRIFT lesbar bleibt.
  *    Auf dunklem Grund gilt sie genau andersherum, dort ist 600 zu dunkel
  *    (gemessen 3,1:1 auf dem tone-sky-Ton). Statt dreissig Klassen zu ändern,
  *    zeigen die STUFEN hier eine Oktave höher: was `600` heisst, ist im
  *    Dunkeln puka-400. Das ist derselbe Gedanke wie --ui-primary oben — die
  *    Klassen bleiben die Aussage, die Zahl dahinter ist Theme-Sache.
- *    ACHTUNG: die Verschiebung wirkt auch dort, wo 600 eine FLÄCHE malt
- *    (--puka-step-fill, --puka-plan-glow). Das ist gewollt: beide sollen im
- *    Dunkeln heller leuchten, nicht dunkler.
+ *    SEIT 2026-08-08 VERSCHIEBT AUCH DER HELLE SCOPE (600 → puka-800, AA —
+ *    Begründung oben am Token). Damit gilt der alte Zusatz „die Verschiebung
+ *    wirkt auch dort, wo 600 eine FLÄCHE malt, und das ist gewollt" NICHT
+ *    mehr: im Hellen hätte sie --puka-step-fill und --puka-plan-glow ohne
+ *    Grund verdunkelt. Beide Flächen-Tokens nennen deshalb je Modus ihre
+ *    ROHE Ramp-Stufe — hell puka-500/600, hier unten puka-400. Die
+ *    Verschiebung gehört jetzt ausschliesslich der SCHRIFT.
  * 3. `success-700` folgt derselben Regel (Badge-Vertrag in app.config.ts).
  */
 .dark .marketing-site {
@@ -277,6 +316,12 @@
   /* Weiß auf der Sonne misst 1,9:1 — auf einer dunklen Seite fällt das auf,
      weil daneben nichts mehr weiß ist. Dunkle Schrift auf der Sonne: 8,4:1. */
   --puka-cta-label: hsl(220 40% 11%);
+
+  /* Die zwei FLÄCHEN-Tokens, die früher über die Stufen-Verschiebung
+     mitliefen (2026-08-08 explizit gemacht, siehe Punkt 2 oben): der Wert ist
+     unverändert das heutige Dunkel-Verhalten — 600 zeigte hier auf puka-400. */
+  --puka-step-fill: linear-gradient(135deg, var(--color-puka-500), var(--color-puka-400));
+  --puka-plan-glow: color-mix(in oklab, var(--color-puka-400) 60%, transparent);
 
   --ui-color-primary-600: var(--color-puka-400);
   --ui-color-primary-700: var(--color-puka-300);

@@ -169,7 +169,11 @@
   letter-spacing: 0.12em;
   font-size: 0.78rem;
   font-weight: 600;
-  color: hsl(var(--puka-sun-deep));
+  /* Nicht mehr das rohe Tripel (2026-08-08, WCAG AA): --puka-sun-deep ist
+     puka-600 und misst als Schrift nur 2,43–2,83:1 auf den tone-Flächen. Über
+     das Theme-Alias folgt der Kicker BEIDEN Modus-Verschiebungen der
+     Akzent-Stufe (hell puka-800 = 5,48–6,38:1, dunkel puka-400). */
+  color: var(--ui-color-primary-600);
 }
 .marketing-site .mkt-h2 {
   font-size: clamp(1.7rem, 3.6vw, 2.7rem);
