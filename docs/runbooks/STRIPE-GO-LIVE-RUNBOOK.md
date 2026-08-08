@@ -58,18 +58,36 @@ NUXT_BILLING_SETTINGS_KEY=<64 Hex-Zeichen>     # openssl rand -hex 32
 Das ist der **Entschlüsselungs**-Schlüssel. Die Stripe-Geheimnisse selbst
 liegen danach AES-256-GCM-verschlüsselt in der Appwrite-Tabelle
 `stripe_settings` (Migration **billing-002**, vorher fahren:
-`pnpm migrate --app control --layer billing`). Der Trade-off ist bewusst:
-kompromittiert ist der Key erst, wenn **DB-Dump und Env-Leck zusammenkommen**.
+`pnpm migrate --app control --layer billing`). Was das leistet, genau gesagt:
+es schützt gegen ein **DB-Leck** (ein Dump enthält nur Ciphertext), **nicht**
+gegen ein Env-Leck — wer die Env liest, hat neben diesem Schlüssel auch
+`NUXT_APPWRITE_KEY` und damit die Zeile selbst.
 
 Fehlt die Variable, sagt die Karte „Schlüssel lassen sich hier noch nicht
 ablegen" und nennt den Namen — es gibt keinen stillen Ausfall und keinen
 Rückfall auf eine schwache Ableitung. Der Wächter `pnpm ops:site-env` führt sie
 für `control` als Pflicht.
 
-> **Schlüsselwechsel:** wird `NUXT_BILLING_SETTINGS_KEY` später getauscht, sind
-> alle abgelegten Geheimnisse unlesbar (das Log meldet es). Dann einfach über
-> die Seite neu eintragen — die Env-Werte `NUXT_STRIPE_*` tragen in der
-> Zwischenzeit weiter, falls gesetzt.
+### Den Verschlüsselungs-Schlüssel rotieren
+
+Seit 2026-08-08 (Audit-Befund LOW 7) trägt jeder Umschlag eine kurze
+Schlüssel-Kennung (`v1.<kid>.…`), und der Server akzeptiert beim **Lesen** einen
+zweiten Schlüssel. Der Wechsel kostet damit keine Ausfallzeit mehr:
+
+1. `NUXT_BILLING_SETTINGS_KEY_OLD=<bisheriger>` **zusätzlich** setzen und
+   `NUXT_BILLING_SETTINGS_KEY=<neuer, openssl rand -hex 32>` ersetzen →
+   `pm2 reload ecosystem-control.config.cjs --update-env`. Die Seite arbeitet
+   unverändert weiter, sie liest die alten Umschläge über den Alt-Schlüssel.
+2. Unter `/dashboard/stripe` **jedes** Geheimnis einmal neu speichern (geheimer
+   Schlüssel; das Signatur-Geheimnis entweder eintragen oder den Webhook neu
+   anlegen lassen). Geschrieben wird **immer** mit dem neuen Schlüssel.
+3. `NUXT_BILLING_SETTINGS_KEY_OLD` wieder **entfernen** + `pm2 reload`. Danach
+   in der Statuskarte prüfen, dass Herkunft weiter „hier eingetragen" ist.
+
+Wird Schritt 3 vergessen, ist das keine Rotation, sondern ein zweiter gültiger
+Schlüssel. Wird Schritt 2 vergessen und trotzdem `OLD` entfernt, meldet das Log
+„lässt sich nicht entschlüsseln" und die Laufzeit fällt auf `NUXT_STRIPE_*`
+zurück (falls gesetzt) — reparierbar durch erneutes Eintragen über die Seite.
 
 ### Die vier Karten, in der Reihenfolge des Go-Live
 

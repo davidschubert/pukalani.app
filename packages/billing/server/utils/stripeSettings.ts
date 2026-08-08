@@ -1,7 +1,7 @@
 import type { H3Event } from 'h3'
 import type { Models } from 'node-appwrite'
 import type { StripeSecretSource } from '../../shared/stripeKeys'
-import { decryptSecret, encryptSecret, parseSecretBoxKey } from './secretBox'
+import { decryptSecretWithKeys, encryptSecret, parseSecretBoxKey } from './secretBox'
 
 /**
  * WO KOMMEN DIE STRIPE-GEHEIMNISSE HER? (F55, Davids Entscheidung 2026-08-08)
@@ -54,10 +54,27 @@ export interface ResolvedStripeSecret {
   source: StripeSecretSource
 }
 
-/** Verschlüsselungs-Schlüssel dieser Instanz (server-only Env). */
+/**
+ * Verschlüsselungs-Schlüssel dieser Instanz (server-only Env) — der Schlüssel,
+ * mit dem GESCHRIEBEN wird.
+ *
+ * Der rohe Wert geht ungeprüft an `parseSecretBoxKey`: der wirft bei jedem
+ * Nicht-String (NOTE 10 — Nitro schickt Env-Werte durch `destr`, ein Schlüssel
+ * aus lauter Ziffern käme als Number an und fiel vorher still auf „nicht
+ * konfiguriert" zurück).
+ */
 export function stripeSettingsKey(event?: H3Event): Buffer | null {
-  const raw = useRuntimeConfig(event).billingSettingsKey
-  return parseSecretBoxKey(typeof raw === 'string' ? raw : '')
+  return parseSecretBoxKey(useRuntimeConfig(event).billingSettingsKey)
+}
+
+/**
+ * ZWEITSCHLÜSSEL FÜR DIE ROTATION (LOW 7, 2026-08-08): wird NUR gelesen, nie
+ * geschrieben. Ablauf einer Rotation (Runbook „Schlüssel tauschen"):
+ * OLD=alt + NEU=neu deployen → jedes Geheimnis einmal über die Seite neu
+ * speichern (schreibt mit NEU) → OLD entfernen.
+ */
+export function stripeSettingsOldKey(event?: H3Event): Buffer | null {
+  return parseSecretBoxKey(useRuntimeConfig(event).billingSettingsKeyOld, 'NUXT_BILLING_SETTINGS_KEY_OLD')
 }
 
 /**
@@ -127,14 +144,14 @@ function hasAppwriteCode(error: unknown, code: number): boolean {
  * Ein Fehler beim Öffnen wird laut protokolliert und wie „nichts gespeichert"
  * behandelt — der Env-Rückfall greift dann.
  */
-function openEnvelope(envelope: string, key: Buffer | null, label: string): string {
+function openEnvelope(envelope: string, keys: readonly Buffer[], label: string): string {
   if (!envelope) return ''
-  if (!key) {
+  if (keys.length === 0) {
     warnMisconfiguredOnce(`stripeSettingsNoKey:${label}`, `[billing] ${label} liegt verschlüsselt in der DB, aber NUXT_BILLING_SETTINGS_KEY fehlt — der Wert ist unbenutzbar.`)
     return ''
   }
   try {
-    return decryptSecret(envelope, key)
+    return decryptSecretWithKeys(envelope, keys)
   }
   catch {
     warnMisconfiguredOnce(`stripeSettingsBroken:${label}`, `[billing] ${label} in ${STRIPE_SETTINGS_TABLE} lässt sich nicht entschlüsseln (falscher NUXT_BILLING_SETTINGS_KEY oder veränderte Zeile).`)
@@ -143,25 +160,31 @@ function openEnvelope(envelope: string, key: Buffer | null, label: string): stri
 }
 
 /**
- * Schlüssel holen, ohne bei einem Tippfehler in der Env den Geldweg zu
- * kappen: eine falsch geformte Variable macht die ABLAGE unbenutzbar
- * (`saveStripeSettings` wirft dort weiter), nicht das LESEN — die Env-Werte
- * tragen dann wie eh und je.
+ * LESE-Schlüssel in fester Reihenfolge: aktueller zuerst, Alt-Schlüssel
+ * dahinter. Beide werden einzeln abgesichert — ein Tippfehler in der Env darf
+ * den Geldweg nicht kappen: eine falsch geformte Variable macht die ABLAGE
+ * unbenutzbar (`saveStripeSettings` wirft dort weiter), nicht das LESEN, und
+ * ein kaputter ALT-Schlüssel darf den gültigen aktuellen nicht mitreißen.
  */
-function settingsKeyOrNull(event: H3Event): Buffer | null {
-  try {
-    return stripeSettingsKey(event)
+function settingsReadKeys(event: H3Event): Buffer[] {
+  const keys: Buffer[] = []
+  for (const read of [stripeSettingsKey, stripeSettingsOldKey]) {
+    try {
+      const key = read(event)
+      if (key) keys.push(key)
+    }
+    catch {
+      // Ursache steht im Fehler der Speichern-Route bzw. im Runbook.
+    }
   }
-  catch {
-    return null
-  }
+  return keys
 }
 
 /** Secret-Key zur Laufzeit: DB (entschlüsselt) vor Env. */
 export async function resolveStripeSecretKey(event: H3Event): Promise<ResolvedStripeSecret> {
-  const key = settingsKeyOrNull(event)
+  const keys = settingsReadKeys(event)
   const row = await loadStripeSettings(event)
-  const fromDb = openEnvelope(row?.stripeSecretKeyEncrypted ?? '', key, 'Stripe-Secret-Key')
+  const fromDb = openEnvelope(row?.stripeSecretKeyEncrypted ?? '', keys, 'Stripe-Secret-Key')
   if (fromDb) return { value: fromDb, source: 'db' }
 
   const fromEnv = useRuntimeConfig(event).stripeSecretKey
@@ -171,9 +194,9 @@ export async function resolveStripeSecretKey(event: H3Event): Promise<ResolvedSt
 
 /** Webhook-Signatur-Secret zur Laufzeit: DB (entschlüsselt) vor Env. */
 export async function resolveStripeWebhookSecret(event: H3Event): Promise<ResolvedStripeSecret> {
-  const key = settingsKeyOrNull(event)
+  const keys = settingsReadKeys(event)
   const row = await loadStripeSettings(event)
-  const fromDb = openEnvelope(row?.stripeWebhookSecretEncrypted ?? '', key, 'Stripe-Webhook-Secret')
+  const fromDb = openEnvelope(row?.stripeWebhookSecretEncrypted ?? '', keys, 'Stripe-Webhook-Secret')
   if (fromDb) return { value: fromDb, source: 'db' }
 
   const fromEnv = useRuntimeConfig(event).stripeWebhookSecret
