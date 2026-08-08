@@ -57,8 +57,11 @@ NUXT_BILLING_SETTINGS_KEY=<64 Hex-Zeichen>     # openssl rand -hex 32
 
 Das ist der **Entschlüsselungs**-Schlüssel. Die Stripe-Geheimnisse selbst
 liegen danach AES-256-GCM-verschlüsselt in der Appwrite-Tabelle
-`stripe_settings` (Migration **billing-002**, vorher fahren:
-`pnpm migrate --app control --layer billing`). Was das leistet, genau gesagt:
+`stripe_settings` (Migrationen **billing-002** und **billing-003**, vorher
+fahren: `pnpm migrate --app control --layer billing` — der Lauf nimmt beide
+mit). Ohne **billing-003** läuft alles, die Statuskarte kann dann aber die
+Herkunft des Signatur-Geheimnisses nie bestätigen und sagt dauerhaft
+„Herkunft unbestätigt". Was das leistet, genau gesagt:
 es schützt gegen ein **DB-Leck** (ein Dump enthält nur Ciphertext), **nicht**
 gegen ein Env-Leck — wer die Env liest, hat neben diesem Schlüssel auch
 `NUXT_APPWRITE_KEY` und damit die Zeile selbst.
@@ -111,6 +114,17 @@ zurück (falls gesetzt) — reparierbar durch erneutes Eintragen über die Seite
    `whsec_`-Teil von Schritt 5 entfallen damit. Existiert der Endpunkt bereits,
    heißt der Knopf „Ereignisse ergänzen"; dann gibt es **kein** neues Secret,
    und die Karte sagt das auch so.
+
+   Meldet die Karte **„Herkunft des Signatur-Geheimnisses unbestätigt"**, hat
+   *dieses* Deployment den Endpunkt nicht selbst angelegt — das gespeicherte
+   `whsec_` stammt dann aus der Env, wurde von Hand eingetragen oder gehört zu
+   einem früheren Endpunkt. Beweisen lässt sich das nicht (Stripe gibt das
+   Secret nur beim Anlegen heraus), und passt es nicht, weist der Webhook
+   **jede** Zustellung ab, ohne dass die Karte rot würde. Sicherheit gibt nur
+   **„Endpunkt neu anlegen"** — der löscht ihn bei Stripe, legt ihn neu an und
+   speichert das frische Secret sofort. Zustellungen, die Stripe in diesem
+   Moment gerade wiederholt, gehen dabei verloren; deshalb fragt die Seite
+   ausdrücklich nach.
 
 Danach weiter bei **§6 Verifikation** — die Proben dort gelten unverändert.
 
