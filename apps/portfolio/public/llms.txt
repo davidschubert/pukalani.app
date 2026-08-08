@@ -1,0 +1,58 @@
+# Pukalani Studio – David Schubert
+
+> David Schubert ist Senior UI/UX Designer, ausgebildeter Mediengestalter und Creative Technologist mit über 25 Jahren Erfahrung in Design und Werbung. Unter der Marke Pukalani Studio erarbeitet er Designkonzepte, Strategien und digitales Brand Design, gestaltet Websites und digitale Produkte und setzt sie technisch um – ergänzt um Content-Produktion (Fotografie, Videografie, digitale Werbemittel). Remote für mittelständische Unternehmen und Agenturen in Deutschland, Österreich und der Schweiz (DACH), zu festen Projektpreisen (Value-Based Pricing, keine Stundensätze).
+
+Wichtige Fakten:
+
+- Name: David Schubert
+- Rolle: Senior UI/UX Designer & Creative Technologist (Freelancer, Solo-Studio – direkter Senior-Kontakt)
+- Ausbildung: Mediengestalter Digital & Print, Bachelor Professional in Digital Media (IHK)
+- Werdegang: Art-Director- und Senior-Designer-Stationen in Hamburger Agenturen (u. a. Arc Worldwide, MEC, azionare, Philipp und Keuntje), heute freelance
+- Kunden & Marken (Agentur- und Freelance-Projekte): Astra, E WIE EINFACH, GEMA, Holsten, Lamborghini, NEFF, Telekom, T-Systems u. v. m.
+- Zielgruppen: Mittelständische Unternehmen sowie Werbe-, Marketing- und Digitalagenturen (auch White Label)
+- Studio: Pukalani Studio
+- Standort: Pukalani, Maui – Hawaii (USA); arbeitet remote für die DACH-Region
+- Sprachen: Deutsch (Muttersprache), Englisch
+- Werkzeuge: Figma, Adobe Creative Suite, Final Cut Pro, moderne Web-Technologie (Nuxt/Vue, TypeScript, Tailwind CSS)
+- Standards: WCAG 2.1 AA (Barrierefreiheit), Core Web Vitals
+- Kontakt: mail@davidschubert.com · https://cal.com/davidschubert/30min (kostenloses 30-Minuten-Erstgespräch)
+- Antwortzeit: innerhalb von 24 Stunden
+
+## Sprachfassungen
+
+Die Website ist zweisprachig. Englisch ist die Standardsprache und liegt ohne Präfix
+(https://pukalani.studio/), Deutsch liegt unter dem Präfix /de/ (https://pukalani.studio/de/).
+Jede unten genannte Seite existiert in beiden Sprachen; angegeben ist jeweils zuerst die
+deutsche, dann die englische Adresse.
+
+## Leistungen & Preise (Festpreise, netto)
+
+- Designkonzept & Digital Brand Design: Festpreis nach Umfang – Logos, visuelle Identitäten, Designkonzepte, Art Direction (digital & print)
+- UX-Audit & Conversion-Analyse: €2.500–5.000 (1–2 Wochen) – heuristische Evaluation, Core-Web-Vitals-Check, WCAG-Prüfung, priorisierte Maßnahmenliste
+- Landingpage & Conversion-Optimierung: €5.000–12.000 (2–3 Wochen)
+- Website-Design & technische Umsetzung: €15.000–35.000 (6–12 Wochen) – barrierefrei, schnell, suchmaschinenfreundlich
+- Produkt- & App-Design (Software, Dashboards): €25.000–75.000+ (ab 8 Wochen)
+- Content-Produktion: Festpreis nach Umfang – digitale Werbemittel, Social-Media-Assets, Fotografie, Videografie inkl. Schnitt
+- Zusätzlich: Design-Sprint-Moderation, WCAG-Audits, KI-Beratung & KI-Trainings für Teams
+
+## Seiten
+
+- [Senior UI/UX Designer für Mittelstand & Agenturen](https://pukalani.studio/de/): Haupt-Portfolio mit Leistungen, Preisen, Referenzen, Prozess und FAQ (englisch: https://pukalani.studio/)
+- [UX-Audit zum Festpreis](https://pukalani.studio/de/ux-audit): Drei Festpreis-Pakete (€2.500 / €3.900 / €5.000), Ergebnisse in 1–2 Wochen (englisch: https://pukalani.studio/ux-audit)
+- [Was kostet UX/UI Design? Preise 2026](https://pukalani.studio/de/wissen/was-kostet-ux-design): Kosten-Guide mit belegten Marktdaten (Freelancer-Kompass, German UPA, Malt) (englisch: https://pukalani.studio/wissen/was-kostet-ux-design)
+- [Freelancer oder Agentur?](https://pukalani.studio/de/wissen/freelancer-oder-agentur): Ehrlicher Vergleich mit Kosten-Tabelle und Entscheidungshilfe (englisch: https://pukalani.studio/wissen/freelancer-oder-agentur)
+- [Nuxt Entwickler Freelancer](https://pukalani.studio/de/nuxt-entwickler-freelancer): Technische Umsetzung für Digitalagenturen und Entwicklungsteams (englisch: https://pukalani.studio/nuxt-entwickler-freelancer)
+- [Eigene Projekte (Cases)](https://pukalani.studio/de/cases/pukalani-platform): Detailseiten zu selbst konzipierten und gebauten Produkten – Pukalani Platform, Comments, maui.photos
+
+## Referenz-Ergebnisse (anonymisierte Projekte)
+
+- SaaS Analytics Dashboard: +43 % Feature-Adoption, −67 % Support-Tickets
+- E-Commerce Checkout: +73 % Conversion, −41 % Kaufabbrüche, LCP 1,8 s
+- Corporate Website Relaunch: +156 % organischer Traffic, PageSpeed 94
+- B2B SaaS MVP: Launch in 12 Wochen, developer-ready Design System
+
+## Profile
+
+- [LinkedIn](https://www.linkedin.com/in/davidschubert-uiux/)
+- [GitHub](https://github.com/davidschubert)
+- [Instagram](https://www.instagram.com/davidschubert/)

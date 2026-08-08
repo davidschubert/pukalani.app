@@ -1,0 +1,386 @@
+<script setup lang="ts">
+import { CONTACT } from '../../data/contact'
+import type { Lang } from '../../data/localized'
+import {
+  AUDIT_AREAS,
+  AUDIT_AREAS_HEADING,
+  AUDIT_CROSS_LINK,
+  AUDIT_CTA,
+  AUDIT_FAQ_HEADING,
+  AUDIT_FAQS,
+  AUDIT_META,
+  AUDIT_METHOD_NOTE,
+  AUDIT_PROCESS_HEADING,
+  AUDIT_QUOTE,
+  AUDIT_QUOTE_SOURCE,
+  AUDIT_STEPS,
+  AUDIT_TIERS,
+  AUDIT_TIERS_HEADING,
+  UX_AUDIT_HERO,
+} from '../../data/uxAudit'
+import { jsonLdScript } from '../../utils/jsonLd'
+
+definePageMeta({ layout: 'site' })
+
+const { t, locale } = useI18n()
+const localePath = useLocalePath()
+const requestUrl = useRequestURL()
+
+const lang = computed<Lang>(() => (locale.value.startsWith('de') ? 'de' : 'en'))
+
+const origin = requestUrl.origin
+const homeUrl = computed(() => `${origin}${localePath('/')}`)
+const pageUrl = computed(() => `${origin}${localePath('/ux-audit')}`)
+const personId = `${origin}/#david-schubert`
+
+const jsonLd = computed(() => ({
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Person',
+      '@id': personId,
+      'name': 'David Schubert',
+      'jobTitle': 'Senior UI/UX Designer & Creative Technologist',
+      'url': homeUrl.value,
+      'sameAs': CONTACT.socialProfiles,
+    },
+    {
+      '@type': 'Service',
+      '@id': `${pageUrl.value}#service`,
+      'name': AUDIT_META.serviceName[lang.value],
+      'serviceType': AUDIT_META.serviceType[lang.value],
+      'description': AUDIT_META.serviceDescription[lang.value],
+      'url': pageUrl.value,
+      'provider': { '@id': personId },
+      'areaServed': [
+        { '@type': 'Country', 'name': 'Deutschland' },
+        { '@type': 'Country', 'name': 'Österreich' },
+        { '@type': 'Country', 'name': 'Schweiz' },
+      ],
+      'hasOfferCatalog': {
+        '@type': 'OfferCatalog',
+        'name': AUDIT_META.catalogName[lang.value],
+        // Dieselben drei Pakete wie die sichtbaren Karten (Parität).
+        'itemListElement': AUDIT_TIERS.map(tier => ({
+          '@type': 'Offer',
+          'name': `${AUDIT_META.serviceName[lang.value]} ${tier.name[lang.value]}`,
+          'description': tier.schemaDescription[lang.value],
+          'price': tier.priceValue,
+          'priceCurrency': 'EUR',
+          'url': `${pageUrl.value}#pakete`,
+        })),
+      },
+    },
+    {
+      '@type': 'WebPage',
+      '@id': `${pageUrl.value}#webpage`,
+      'url': pageUrl.value,
+      'name': AUDIT_META.title[lang.value],
+      'description': AUDIT_META.description[lang.value],
+      'inLanguage': lang.value,
+      'dateModified': CONTACT.lastUpdated,
+      'isPartOf': { '@id': `${origin}/#website` },
+      'breadcrumb': { '@id': `${pageUrl.value}#breadcrumb` },
+    },
+    {
+      '@type': 'BreadcrumbList',
+      '@id': `${pageUrl.value}#breadcrumb`,
+      'itemListElement': [
+        { '@type': 'ListItem', 'position': 1, 'name': t('portfolio.common.home'), 'item': homeUrl.value },
+        { '@type': 'ListItem', 'position': 2, 'name': UX_AUDIT_HERO.breadcrumb[lang.value], 'item': pageUrl.value },
+      ],
+    },
+    {
+      '@type': 'FAQPage',
+      '@id': `${pageUrl.value}#faq`,
+      'mainEntity': AUDIT_FAQS.map(faq => ({
+        '@type': 'Question',
+        'name': faq.question[lang.value],
+        'acceptedAnswer': { '@type': 'Answer', 'text': faq.answer[lang.value] },
+      })),
+    },
+  ],
+}))
+
+useHead(() => ({
+  title: AUDIT_META.title[lang.value],
+  meta: [
+    { name: 'robots', content: 'index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1' },
+    { name: 'author', content: 'David Schubert' },
+  ],
+  script: [jsonLdScript(jsonLd.value)],
+}))
+
+useSeoMeta({
+  description: () => AUDIT_META.description[lang.value],
+  ogType: 'website',
+  ogSiteName: 'Pukalani Studio',
+  ogTitle: () => AUDIT_META.title[lang.value],
+  ogDescription: () => AUDIT_META.description[lang.value],
+  twitterTitle: () => AUDIT_META.title[lang.value],
+  twitterDescription: () => AUDIT_META.description[lang.value],
+})
+</script>
+
+<template>
+  <div>
+    <header class="page-head">
+      <div class="container reveal">
+        <nav :aria-label="t('portfolio.common.contents')">
+          <ol class="breadcrumb">
+            <li><NuxtLink :to="localePath('/')">{{ t('portfolio.common.home') }}</NuxtLink></li>
+            <li aria-hidden="true">→</li>
+            <li aria-current="page">{{ UX_AUDIT_HERO.breadcrumb[lang] }}</li>
+          </ol>
+        </nav>
+        <h1 class="page-head__title">{{ UX_AUDIT_HERO.title[lang] }}</h1>
+        <p id="audit-answer" class="page-head__intro">{{ UX_AUDIT_HERO.intro[lang] }}</p>
+        <div class="page-head__actions">
+          <a :href="CONTACT.calLink" target="_blank" rel="noopener nofollow" class="btn btn--solid">
+            {{ UX_AUDIT_HERO.ctaPrimary[lang] }} →
+          </a>
+          <NuxtLink :to="localePath('/ux-audit#pakete')" class="btn">{{ UX_AUDIT_HERO.ctaSecondary[lang] }}</NuxtLink>
+        </div>
+        <p class="section-note">
+          {{ t('portfolio.common.state') }} {{ CONTACT.lastUpdatedHuman[lang] }} · {{ UX_AUDIT_HERO.note[lang] }}
+        </p>
+      </div>
+    </header>
+
+    <section class="section section--soft section--line" aria-labelledby="was-ist-title">
+      <div class="container">
+        <h2 id="was-ist-title" class="section-title">{{ AUDIT_AREAS_HEADING.title[lang] }}</h2>
+        <p class="section-lead">{{ AUDIT_AREAS_HEADING.lead[lang] }}</p>
+        <div class="grid-2">
+          <div v-for="area in AUDIT_AREAS" :key="area.title.en" class="card">
+            <h3 class="card__title">{{ area.title[lang] }}</h3>
+            <p class="card__text">{{ area.description[lang] }}</p>
+          </div>
+        </div>
+        <p class="section-lead method">
+          {{ AUDIT_METHOD_NOTE.lead[lang] }}
+        </p>
+        <ul class="chips method__links">
+          <li v-for="link in AUDIT_METHOD_NOTE.links" :key="link.href">
+            <a :href="link.href" target="_blank" rel="noopener external" class="chip chip--accent">{{ link.label }}</a>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="pakete" class="section section--line" aria-labelledby="pakete-title">
+      <div class="container">
+        <h2 id="pakete-title" class="section-title">{{ AUDIT_TIERS_HEADING.title[lang] }}</h2>
+        <p class="section-lead">{{ AUDIT_TIERS_HEADING.lead[lang] }}</p>
+        <div class="grid-3 tiers">
+          <article
+            v-for="tier in AUDIT_TIERS"
+            :key="tier.name.en"
+            class="card tier"
+            :class="{ 'tier--featured': tier.featured }"
+          >
+            <p v-if="tier.featured" class="tier__flag">{{ AUDIT_TIERS_HEADING.featuredLabel[lang] }}</p>
+            <h3 class="tier__name">{{ tier.name[lang] }}</h3>
+            <p class="tier__audience">{{ tier.audience[lang] }}</p>
+            <p class="tier__price">{{ tier.price[lang] }}</p>
+            <p class="tier__meta">{{ AUDIT_TIERS_HEADING.priceNote[lang] }} · {{ tier.duration[lang] }}</p>
+            <ul class="ticks tier__list">
+              <li v-for="item in tier.includes[lang]" :key="item">{{ item }}</li>
+            </ul>
+            <a
+              :href="CONTACT.calLink"
+              target="_blank"
+              rel="noopener nofollow"
+              class="btn tier__cta"
+              :class="{ 'btn--solid': tier.featured }"
+            >
+              {{ tier.name[lang] }} {{ t('portfolio.common.request') }}
+            </a>
+          </article>
+        </div>
+        <p class="section-note">{{ AUDIT_TIERS_HEADING.note[lang] }}</p>
+      </div>
+    </section>
+
+    <section class="section section--soft section--line" aria-labelledby="ablauf-title">
+      <div class="container container--narrow">
+        <h2 id="ablauf-title" class="section-title">{{ AUDIT_PROCESS_HEADING.title[lang] }}</h2>
+        <p class="section-lead">{{ AUDIT_PROCESS_HEADING.lead[lang] }}</p>
+        <ol class="steps">
+          <li v-for="(step, index) in AUDIT_STEPS" :key="step.title.en" class="step">
+            <span class="step__index" aria-hidden="true">{{ String(index + 1).padStart(2, '0') }}</span>
+            <div>
+              <h3 class="card__title">{{ step.title[lang] }}</h3>
+              <p class="card__text">{{ step.description[lang] }}</p>
+            </div>
+          </li>
+        </ol>
+        <blockquote class="quote audit__quote">
+          „{{ AUDIT_QUOTE[lang] }}"
+          <footer class="quote__source">— {{ AUDIT_QUOTE_SOURCE[lang] }}</footer>
+        </blockquote>
+      </div>
+    </section>
+
+    <section id="faq" class="section section--line" aria-labelledby="audit-faq-title">
+      <div class="container container--narrow">
+        <h2 id="audit-faq-title" class="section-title">{{ AUDIT_FAQ_HEADING[lang] }}</h2>
+        <div class="faq faq--top">
+          <details v-for="faq in AUDIT_FAQS" :key="faq.question.en" class="faq__item">
+            <summary>
+              <span>{{ faq.question[lang] }}</span>
+              <span class="faq__sign" aria-hidden="true">+</span>
+            </summary>
+            <p class="faq__answer">{{ faq.answer[lang] }}</p>
+          </details>
+        </div>
+        <p class="section-note">
+          {{ AUDIT_CROSS_LINK.lead[lang] }}
+          <NuxtLink :to="localePath(AUDIT_CROSS_LINK.to)" class="link-accent">{{ AUDIT_CROSS_LINK.label[lang] }}</NuxtLink>
+        </p>
+      </div>
+    </section>
+
+    <CtaBand :title="AUDIT_CTA.title[lang]" :text="AUDIT_CTA.text[lang]" :lang="lang" />
+  </div>
+</template>
+
+<style scoped>
+.page-head__title {
+  margin-top: 1.6rem;
+  font-size: clamp(2rem, 5.2vw, 4rem);
+  max-width: 20ch;
+}
+.page-head__intro {
+  margin-top: 1.6rem;
+  max-width: 66ch;
+  color: var(--text-soft);
+  font-size: clamp(1rem, 1.8vw, 1.15rem);
+}
+.page-head__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-top: 2.2rem;
+}
+.container--narrow {
+  max-width: 62rem;
+}
+.grid-2,
+.grid-3 {
+  display: grid;
+  gap: clamp(1rem, 2vw, 1.5rem);
+  margin-top: clamp(2rem, 4vw, 3rem);
+  list-style: none;
+}
+.grid-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.grid-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.method {
+  margin-top: 2rem;
+}
+.method__links {
+  margin-top: 1rem;
+}
+
+/* PAKETE --------------------------------------------------------------- */
+.tier {
+  display: flex;
+  flex-direction: column;
+}
+.tier--featured {
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+}
+.tier__flag {
+  align-self: flex-start;
+  margin-bottom: 0.8rem;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  padding: 0.2rem 0.7rem;
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+.tier__name {
+  font-family: "Syne", ui-sans-serif, system-ui, sans-serif;
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: 1.2rem;
+}
+.tier__audience {
+  margin-top: 0.3rem;
+  color: var(--metal);
+  font-size: 0.85rem;
+}
+.tier__price {
+  margin-top: 1.4rem;
+  font-family: "Syne", ui-sans-serif, system-ui, sans-serif;
+  font-weight: 800;
+  font-size: clamp(1.8rem, 4vw, 2.4rem);
+  line-height: 1;
+}
+.tier__meta {
+  margin-top: 0.5rem;
+  color: var(--metal);
+  font-size: 0.8rem;
+}
+.tier__list {
+  flex: 1;
+  margin-top: 1.4rem;
+}
+.tier__cta {
+  margin-top: 1.8rem;
+  justify-content: center;
+  text-align: center;
+  font-size: 0.8rem;
+}
+
+/* ABLAUF --------------------------------------------------------------- */
+.steps {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 1.6rem;
+  margin-top: clamp(2rem, 4vw, 3rem);
+}
+.step {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 1.2rem;
+  align-items: start;
+}
+.step__index {
+  font-weight: 800;
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+  padding-top: 0.15rem;
+}
+.audit__quote {
+  margin-top: clamp(2.5rem, 5vw, 3.5rem);
+}
+.quote__source {
+  margin-top: 0.8rem;
+  color: var(--metal);
+  font-size: 0.82rem;
+}
+.faq--top {
+  margin-top: 2rem;
+}
+
+@media (max-width: 960px) {
+  .grid-3 {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 680px) {
+  .grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+</style>

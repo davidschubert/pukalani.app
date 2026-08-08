@@ -19,6 +19,19 @@ export default defineNuxtConfig({
     pageTransition: { name: 'page', mode: 'out-in' },
   },
 
+  // SPRACHRICHTUNG GEDREHT (Content-Umzug aus dem alten Portfolio-Repo):
+  // dort lag Deutsch auf `/` und Englisch unter `/en`. Hier gilt die
+  // Monorepo-Konvention `prefix_except_default` — Englisch ohne Präfix,
+  // Deutsch unter `/de/*`. `/en` und `/en/**` sind damit HISTORISCHE,
+  // veröffentlichte und verlinkte Adressen (u. a. aus llms.txt und dem alten
+  // Fußzeilen-Link) und leiten dauerhaft (301) auf ihr heutiges Gegenstück.
+  // Die Quell-Muster dürfen nie mit umbenannt werden: eine Weiterleitung
+  // beschreibt die Vergangenheit, nur ihr Ziel folgt der heutigen Struktur.
+  routeRules: {
+    '/en': { redirect: { to: '/', statusCode: 301 } },
+    '/en/**': { redirect: { to: '/**', statusCode: 301 } },
+  },
+
   // Eigene Keys der App — werden mit den Core-Locales gemergt (gleicher code)
   i18n: {
     locales: [

@@ -5,30 +5,33 @@
   "portfolio": {
     "nav": {
       "label": "Main navigation",
-      "cases": "Work",
-      "about": "About",
-      "contact": "Contact"
+      "services": "Services",
+      "uxAudit": "UX audit",
+      "references": "Results",
+      "knowledge": "Knowledge",
+      "faq": "FAQ",
+      "cta": "Intro call"
     },
-    "hero": {
-      "eyebrow": "UI/UX design & web development",
-      "headline": "Digital brand experiences",
-      "intro": "A dependable design and development studio committed to growing your business. Got a project in mind? Let’s talk!",
-      "cta": "Get in touch",
-      "secondary": "View work"
-    },
-    "cases": {
-      "eyebrow": "Selected work",
-      "title": "Cases"
+    "common": {
+      "home": "Home",
+      "knowledge": "Knowledge",
+      "contents": "Contents",
+      "read": "Read →",
+      "details": "Details →",
+      "request": "Enquire →",
+      "updatedAt": "Last updated:",
+      "state": "As of:",
+      "fixedPrice": "fixed price",
+      "keyFacts": "Key facts",
+      "categories": "Project categories",
+      "results": "Results",
+      "situation": "Situation:",
+      "solution": "Solution:"
     },
     "about": {
-      "eyebrow": "About",
-      "title": "Design meets engineering",
-      "p1": "I’m David — a UI/UX designer and full-stack developer from concept to operations. I build digital products where design and engineering come from one hand: clear interfaces, clean architecture, measurable impact.",
-      "p2": "I’m currently building a multi-site platform on Nuxt 4 and Appwrite that composes sites like this one — dashboard, realtime and its own control plane included."
-    },
-    "contact": {
-      "title": "Got a project in mind? Let’s talk.",
-      "cta": "Get in touch"
+      "career": "Career",
+      "tools": "Tools & methods",
+      "alsoLabel": "Also:"
     },
     "case": {
       "back": "All work",
@@ -36,7 +39,28 @@
       "next": "Next case"
     },
     "footer": {
-      "tagline": "Pukalani Platform · Nuxt 4 + Appwrite"
+      "about": "David Schubert – senior UI/UX designer & creative technologist. Design concepts, brand design, websites and content production – remote for mid-sized companies and agencies in the DACH region.",
+      "available": "Available for new projects",
+      "profiles": "Profiles",
+      "services": "Services",
+      "knowledge": "Knowledge",
+      "contact": "Contact",
+      "book": "Book an intro call (cal.com)",
+      "rights": "All rights reserved.",
+      "imprint": "Imprint (PDF)",
+      "updated": "Last updated:",
+      "langDe": "Deutsche Version",
+      "langEn": "English version",
+      "links": {
+        "brand": "Design concept & brand design",
+        "audit": "UX audit (fixed-price packages)",
+        "website": "Website design & build",
+        "product": "Product & app design",
+        "content": "Content: photo, video & ad assets",
+        "development": "Web development (for agencies)",
+        "costs": "What does UX/UI design cost?",
+        "comparison": "Freelancer or agency?"
+      }
     }
   }
 }
