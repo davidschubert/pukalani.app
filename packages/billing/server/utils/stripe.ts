@@ -53,6 +53,10 @@ export async function useStripe(event: H3Event): Promise<Stripe> {
     throw createError({ status: 500, statusText: 'Payment provider not configured' })
   }
   if (stripeClient?.key === key) return stripeClient.client
+  // Der Preis-Cache gehört zum ALTEN Key: Test-Price-Ids an einem frischen
+  // Live-Client wären im Go-Live-Fenster bis zu 5 Minuten lang ein 502 auf
+  // jedem Checkout — genau dann, wenn jemand zuschaut (Audit F55, MEDIUM 4).
+  priceCache.clear()
   stripeClient = { key, client: new Stripe(key) }
   return stripeClient.client
 }

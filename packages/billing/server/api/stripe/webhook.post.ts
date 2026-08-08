@@ -41,7 +41,7 @@ export default defineEventHandler(async (event) => {
   // /dashboard/stripe eintragen — beim Anlegen des Endpunkts über die Seite
   // wird es sogar automatisch mitgespeichert. Ohne DB-Wert verhält sich die
   // Route EXAKT wie vorher, inklusive dieses 404.
-  const { value: secret } = await resolveStripeWebhookSecret(event)
+  const { value: secret, source: secretSource } = await resolveStripeWebhookSecret(event)
   if (!secret) {
     warnMisconfiguredOnce('webhookSecret', '[billing] Kein Stripe-Webhook-Secret — weder in stripe_settings noch als NUXT_STRIPE_WEBHOOK_SECRET. Webhook nimmt nichts an (404). Nur relevant, wenn diese Installation Stripe-Events empfangen SOLL.')
     throw createError({ status: 404, statusText: 'Not found' })
@@ -59,6 +59,12 @@ export default defineEventHandler(async (event) => {
     stripeEvent = stripe.webhooks.constructEvent(raw, signature, secret)
   }
   catch {
+    // NICHT stumm: seit F55 gibt es ZWEI Secret-Quellen (DB vor Env), und
+    // „falsch gepaartes whsec_" ist damit ein realistischer Zustand. Die
+    // HERKUNFT erklärt den Fehler, ohne das Secret zu nennen — ohne diese
+    // Zeile wäre der Ausfall nur im Stripe-Dashboard sichtbar, während die
+    // Statuskarte grün leuchtet (Audit F55, MEDIUM 3).
+    warnMisconfiguredOnce('webhookSignature', `[billing] Stripe-Webhook-Signatur ungültig — gespeichertes Secret (Quelle: ${secretSource}) passt nicht zum sendenden Endpunkt. Endpunkt über /dashboard/stripe neu anlegen ersetzt das Secret.`)
     throw createError({ status: 400, statusText: 'Invalid webhook' })
   }
 
