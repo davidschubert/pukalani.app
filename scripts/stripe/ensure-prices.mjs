@@ -30,15 +30,16 @@ const CURRENCY = 'eur'
 // Price), Enterprise ist das Studio-Angebot (kein Self-Service-Checkout).
 //
 // BRUTTO seit Davids Entscheid 2026-07-29 (OPEN-ITEMS A3): Landing und Hilfe
-// weisen diese Beträge als Endpreise „inkl. 19 % MwSt." aus. Die Prices hier
-// werden OHNE `tax_behavior` angelegt, Stripe fällt also auf das Konto-Default
-// zurück — und die Checkouts laufen mit `automatic_tax: { enabled: true }`.
-// Steht das Konto-Default auf „exclusive", schlägt Stripe die 19 % OBEN DRAUF
-// (29 € → 34,51 €) und widerspricht damit der Landing. VOR dem Live-Gang
-// prüfen: Konto-Default auf „inclusive" (Stripe → Tax Settings) ODER hier
-// `tax_behavior: 'inclusive'` an prices.create ergänzen. Siehe
-// docs/runbooks/STRIPE-GO-LIVE-RUNBOOK.md §2.4. NICHT im laufenden Testmodus
-// umstellen, ohne den Katalog neu anzulegen — tax_behavior ist unveränderlich.
+// weisen diese Beträge als Endpreise „inkl. 19 % MwSt." aus, die Checkouts
+// laufen mit `automatic_tax: { enabled: true }`. Seit 2026-08-08 (A2-Vorlauf)
+// legt dieses Skript jeden NEUEN Price fest mit `tax_behavior: 'inclusive'`
+// an — das Konto-Default kann damit nicht mehr falsch sein (auf „exclusive"
+// hätte Stripe die 19 % OBEN DRAUF gerechnet: 29 € → 34,51 €, im Widerspruch
+// zur Landing). BESTANDS-Prices bleiben unberührt: `tax_behavior` ist an
+// einem Price unveränderlich, und Preise mit stimmigem Betrag überspringt
+// das Skript ohnehin. Die Test-Prices von vor diesem Datum tragen das
+// Konto-Default — für den TESTMODUS egal, der Live-Katalog entsteht mit dem
+// Flag. Siehe docs/runbooks/STRIPE-GO-LIVE-RUNBOOK.md §2.4.
 const PRODUCTS = [
   {
     key: 'workspace_personal',
@@ -105,6 +106,8 @@ async function ensurePrice(product, price) {
     recurring: { interval: price.interval },
     lookup_key: price.lookupKey,
     transfer_lookup_key: true,
+    // Brutto-Endpreis (A3): unveränderlich, deshalb von Anfang an richtig.
+    tax_behavior: 'inclusive',
   })
   console.log(`  ✔ ${price.lookupKey} angelegt (${created.id}, ${price.amount / 100} ${CURRENCY}/${price.interval})`)
   if (current) {
