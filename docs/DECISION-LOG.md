@@ -7,6 +7,25 @@ die kleinen, verstreuten Beschlüsse.
 
 ---
 
+## 2026-08-08 — Stripe-Verwaltung wandert ins Control-Dashboard (F55)
+
+**Davids Entscheidung** (strukturierte Fragen, beim Go-Live-Anlauf): Der
+Stripe-Betrieb soll OHNE Terminal gehen — ein Bereich im Control-Dashboard
+mit (1) Key-Verwaltung: Secret-Key + Webhook-Secret über maskierte Felder,
+**AES-verschlüsselt in der DB** (Entschlüsselungs-Schlüssel bleibt
+Server-Env; Laufzeit liest DB-Wert, Fallback Env) — bewusste Kehrtwende zur
+Regel „Stripe-Keys nur in der Server-Env", Trade-off benannt: erst DB-Dump
+UND Env-Leck zusammen kompromittieren den Key. (2) Preise: die vier
+Plan-Preise anzeigen und per Klick bei Stripe anlegen/abgleichen
+(lookup_keys fest; Betragsänderung warnt „Landing zieht nicht automatisch
+nach"). (3) Webhook per Klick anlegen — das whsec kommt aus der API-Antwort
+und wird direkt mitgespeichert; Ereignis-Abgleich gegen die Neun.
+(4) Status-Karte: Modus, Steuer-Default, Signatur-Probe, lookup_keys.
+**Verworfen:** Key bleibt Env (hätte Davids Kernanliegen halbiert) ·
+Nur-Status-Ausbau. Hintergrund: der Terminal-Weg scheiterte praktisch
+(Shell-Export-Verwechslung, zsh/bash-read, Key-Fragment im Chat ⇒ Key
+rotiert) — der Go-Live läuft nach dem Bau über die neue Seite.
+
 ## 2026-08-07 — Fünfte Runde: Kündigung ist gleichgestellt mit nie-gezahlt
 
 **Davids Entscheidung** (strukturierte Frage, beim F49-Bau aufgetaucht): auch
