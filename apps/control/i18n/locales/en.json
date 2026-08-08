@@ -23,8 +23,7 @@
       "sectionFailed": "Stripe is not responding right now",
       "source": {
         "db": "(entered here)",
-        "env": "(from the server environment)",
-        "none": ""
+        "env": "(from the server environment)"
       },
       "status": {
         "title": "Status",
@@ -77,7 +76,12 @@
         "synced": "Done — {created} created, {transferred} replaced, {skipped} unchanged",
         "syncFailed": "Reconciliation failed",
         "landingTitle": "Changing amounts does not update everything",
-        "landingHint": "A new amount applies to new subscriptions immediately; existing subscriptions keep their old price. The prices shown on the website live separately in the code and have to be updated by hand."
+        "landingHint": "A new amount applies to new subscriptions immediately; existing subscriptions keep their old price. The prices shown on the website live separately in the code and have to be updated by hand.",
+        "confirmTitle": "Replace live prices?",
+        "confirmIntro": "This deployment talks to real money. For these prices the amount at Stripe differs from the catalogue — the reconciliation creates a new price each, moves the lookup_key onto it and archives the old one:",
+        "confirmRow": "{lookupKey}: {from} → {to}",
+        "confirmNote": "Existing subscriptions keep their price. New subscriptions are signed at the new amount from now on.",
+        "confirmCta": "Replace prices"
       },
       "webhook": {
         "title": "Webhook",
@@ -87,7 +91,7 @@
         "state": "State",
         "stateOk": "set up",
         "stateMissing": "missing",
-        "stateIncomplete": "{count} events missing",
+        "stateIncomplete": "{count} event missing | {count} events missing",
         "events": "These events are required:",
         "create": "Create",
         "addEvents": "Add missing events",
@@ -96,7 +100,16 @@
         "unchanged": "Already set up",
         "secretStored": "The signing secret was stored automatically.",
         "errorNoAppUrl": "Without NUXT_PUBLIC_APP_URL the address is unknown",
-        "errorGeneric": "The webhook could not be set up"
+        "errorGeneric": "The webhook could not be set up",
+        "secretUnconfirmedTitle": "Signing secret of unconfirmed origin",
+        "secretUnconfirmedHint": "The endpoint exists, but this deployment did not create it — the stored secret comes from the server environment, was entered by hand, or belongs to an earlier endpoint. Stripe only ever hands the secret out at creation time, so it cannot be compared. If it does not match, the webhook rejects every delivery. Only „Recreate endpoint“ gives certainty.",
+        "recreate": "Recreate endpoint",
+        "recreateConfirmTitle": "Recreate the endpoint and replace the secret?",
+        "recreateConfirmBody": "The existing endpoint is deleted at Stripe and a new one with all nine events is created. The signing secret produced along the way is stored immediately and replaces the previous one. Deliveries Stripe happens to be retrying at that moment are lost.",
+        "recreateConfirm": "Delete and recreate",
+        "recreated": "Endpoint recreated",
+        "errorSecretNotStored": "Endpoint created, secret NOT stored — delete it at Stripe and create it again",
+        "errorNoStorage": "Without NUXT_BILLING_SETTINGS_KEY the secret cannot be stored — nothing was created"
       }
     }
   }
