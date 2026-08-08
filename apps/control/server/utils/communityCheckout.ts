@@ -37,7 +37,7 @@ export function communityPlans(): ControlPlanCatalog {
 export async function ensureCommunityCustomer(event: H3Event, tenant: TenantRow, ownerEmail: string): Promise<string> {
   if (tenant.stripeCustomerId) return tenant.stripeCustomerId
 
-  const stripe = useStripe(event)
+  const stripe = await useStripe(event)
   const customer = await stripe.customers.create({
     email: ownerEmail,
     name: tenant.name || tenant.host,
@@ -71,7 +71,7 @@ export async function createCommunityCheckoutUrl(event: H3Event, input: {
 
   const customerId = await ensureCommunityCustomer(event, input.tenant, input.ownerEmail)
   const price = await resolvePriceByLookupKey(event, lookupKey)
-  const stripe = useStripe(event)
+  const stripe = await useStripe(event)
 
   // Der Plan-Reiter des Community-Hubs (F51, 2026-08-07). FESTER Pfad, und
   // er wird beim Anlegen der Sitzung eingefroren: eine Umbenennung hier ohne
@@ -108,7 +108,7 @@ export async function createCommunityPortalUrl(event: H3Event, tenant: TenantRow
   if (!tenant.stripeCustomerId) {
     throw createError({ status: 409, statusText: 'No billing account yet' })
   }
-  const stripe = useStripe(event)
+  const stripe = await useStripe(event)
   const session = await stripe.billingPortal.sessions.create({
     customer: tenant.stripeCustomerId,
     return_url: `https://${tenant.host}/dashboard/community/plan`,

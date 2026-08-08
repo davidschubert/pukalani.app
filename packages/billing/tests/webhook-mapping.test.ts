@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type Stripe from 'stripe'
-import { isNewPaymentFailure, isStale, paymentFailureAudience, planIdForPrice, subscriptionToPatch, toSubscriptionStatus, WEBHOOK_ALLOWLIST } from '../server/utils/webhookMapping'
+import { isNewPaymentFailure, isStale, missingWebhookEvents, paymentFailureAudience, planIdForPrice, subscriptionToPatch, toSubscriptionStatus, WEBHOOK_ALLOWLIST, WEBHOOK_EVENTS } from '../server/utils/webhookMapping'
 import type { PukalaniBillingPlan } from '../shared/types/billing'
 
 const PLANS: PukalaniBillingPlan[] = [
@@ -127,5 +127,43 @@ describe('paymentFailureAudience (wessen Glocke)', () => {
 
   it('ein LEERER Wert ist kein Community-Abo (sonst schwiege der Webhook grundlos)', () => {
     expect(paymentFailureAudience({ communityId: '' })).toBe('account')
+  })
+})
+
+/**
+ * F55: der Ereignis-Abgleich der Dashboard-Karte. Der Fehlstand, den er
+ * fangen soll, gab es real — im Testmodus fehlten bis 2026-08-02 die drei
+ * `checkout.session.*`-Nachzügler, und eine verzögerte Zahlung endete
+ * dadurch im Nichts.
+ */
+describe('missingWebhookEvents (F55, Endpunkt-Abgleich)', () => {
+  it('vollständig = nichts fehlt', () => {
+    expect(missingWebhookEvents(WEBHOOK_EVENTS)).toEqual([])
+  })
+
+  it('meldet genau die fehlenden — im historischen Fehlstand die drei Nachzügler', () => {
+    const nurCompleted = WEBHOOK_EVENTS.filter(name => !name.startsWith('checkout.session.') || name === 'checkout.session.completed')
+    expect(missingWebhookEvents(nurCompleted)).toEqual([
+      'checkout.session.async_payment_succeeded',
+      'checkout.session.async_payment_failed',
+      'checkout.session.expired',
+    ])
+  })
+
+  it('leerer Endpunkt = alle neun fehlen', () => {
+    expect(missingWebhookEvents([])).toHaveLength(9)
+    expect(WEBHOOK_EVENTS).toHaveLength(9)
+  })
+
+  it('ÜBERSCHUSS ist kein Befund — die Route beantwortet Unbekanntes mit 200', () => {
+    expect(missingWebhookEvents([...WEBHOOK_EVENTS, 'charge.refunded', 'ping'])).toEqual([])
+  })
+
+  it('die Wildcard * deckt alles ab', () => {
+    expect(missingWebhookEvents(['*'])).toEqual([])
+  })
+
+  it('WEBHOOK_EVENTS ist dieselbe Menge wie die Allowlist', () => {
+    expect(new Set(WEBHOOK_EVENTS)).toEqual(WEBHOOK_ALLOWLIST)
   })
 })

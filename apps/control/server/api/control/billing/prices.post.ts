@@ -30,7 +30,7 @@ export default defineEventHandler(async (event) => {
   const lookupKey = pickLookupKey(plan, body.interval)
   if (!lookupKey) throw createError({ status: 400, statusText: 'Plan has no price (free)' })
 
-  const stripe = useStripe(event)
+  const stripe = await useStripe(event)
   const existing = await stripe.prices.list({ lookup_keys: [lookupKey], expand: ['data.product'], limit: 1 })
     .catch((error: unknown) => toStripeSafeError(error, 'prices.list failed'))
   const oldPrice = existing.data[0]

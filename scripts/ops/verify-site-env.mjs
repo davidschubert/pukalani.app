@@ -78,6 +78,22 @@ const SITES = [
       'NUXT_SMTP_PASS',
       'NUXT_SMTP_FROM',
       'NUXT_PUBLIC_APP_URL',
+      /**
+       * F55: entschlüsselt die in `stripe_settings` abgelegten Stripe-
+       * Geheimnisse (AES-256-GCM, 64 Hex-Zeichen — `openssl rand -hex 32`).
+       *
+       * PFLICHT NUR HIER, nicht auf jeder Site: `control` ist die einzige
+       * Site, auf der ein Mensch die Stripe-Seite bedient. Die Silo-Site
+       * `comments` montiert den billing-Layer zwar auch (Event-Tickets), fährt
+       * ihre Keys aber weiter über NUXT_STRIPE_* — dort fehlt die Variable
+       * ohne Folgen, und ein Wächter, der Optionales anmahnt, wird weggelesen.
+       *
+       * Fehlt sie HIER, sieht man das sofort und ehrlich (die Karte sagt
+       * „nicht eingerichtet" und nennt den Namen) — es ist also kein stiller
+       * Ausfall wie bei F44. Sie steht trotzdem in der Liste, weil sonst nach
+       * dem nächsten Server-Umzug niemand mehr weiß, dass es sie gab.
+       */
+      'NUXT_BILLING_SETTINGS_KEY',
     ],
   },
   {

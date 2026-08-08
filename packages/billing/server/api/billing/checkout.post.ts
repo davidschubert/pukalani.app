@@ -28,7 +28,7 @@ export default defineEventHandler(async (event) => {
 
   const customer = await ensureCustomer(event, user)
   const price = await resolvePlanPrice(event, lookupKey)
-  const stripe = useStripe(event)
+  const stripe = await useStripe(event)
 
   // Redirect-Ziele: NICHT aus dem Host-Header, sondern aus der konfigurierten
   // Basis-URL der App (Audit 2026-08-02 — auf einer Wildcard-Site lenkte ein

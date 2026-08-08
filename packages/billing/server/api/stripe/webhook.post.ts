@@ -35,9 +35,15 @@ export default defineEventHandler(async (event) => {
   // öffentlichen URL, die jeder Fremde unsigniert anstoßen kann. Eine bewusst
   // nicht eingerichtete Route ist aber kein Ausfall, sondern eine Abwesenheit.
   // Live erwischt am 2026-07-30: `comments` antwortete 500, `control` 400.
-  const secret = useRuntimeConfig(event).stripeWebhookSecret
+  //
+  // Seit F55 kommt das Secret aus der Auflösung DB-vor-Env
+  // (`resolveStripeWebhookSecret`): der Betreiber kann es über
+  // /dashboard/stripe eintragen — beim Anlegen des Endpunkts über die Seite
+  // wird es sogar automatisch mitgespeichert. Ohne DB-Wert verhält sich die
+  // Route EXAKT wie vorher, inklusive dieses 404.
+  const { value: secret } = await resolveStripeWebhookSecret(event)
   if (!secret) {
-    warnMisconfiguredOnce('webhookSecret', '[billing] NUXT_STRIPE_WEBHOOK_SECRET fehlt — Webhook nimmt nichts an (404). Nur relevant, wenn diese Installation Stripe-Events empfangen SOLL.')
+    warnMisconfiguredOnce('webhookSecret', '[billing] Kein Stripe-Webhook-Secret — weder in stripe_settings noch als NUXT_STRIPE_WEBHOOK_SECRET. Webhook nimmt nichts an (404). Nur relevant, wenn diese Installation Stripe-Events empfangen SOLL.')
     throw createError({ status: 404, statusText: 'Not found' })
   }
 
@@ -47,7 +53,7 @@ export default defineEventHandler(async (event) => {
     throw createError({ status: 400, statusText: 'Invalid webhook' })
   }
 
-  const stripe = useStripe(event)
+  const stripe = await useStripe(event)
   let stripeEvent: Stripe.Event
   try {
     stripeEvent = stripe.webhooks.constructEvent(raw, signature, secret)

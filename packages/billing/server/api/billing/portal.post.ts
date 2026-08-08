@@ -28,7 +28,7 @@ export default defineEventHandler(async (event) => {
   // Host-Header (Audit 2026-08-02, s. shared/returnOrigin.ts)
   const origin = billingReturnOrigin(event)
   const localePrefix = typeof getQuery(event).locale === 'string' && getQuery(event).locale === 'de' ? '/de' : ''
-  const stripe = useStripe(event)
+  const stripe = await useStripe(event)
   const session = await stripe.billingPortal.sessions.create({
     customer: customer.rows[0].stripeCustomerId,
     return_url: `${origin}${localePrefix}/account/billing`,

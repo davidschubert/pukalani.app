@@ -48,7 +48,7 @@ export async function billingDeleteUserData(event: H3Event, userId: string): Pro
     // Stripe-Customer best-effort löschen (kündigt aktive Abos mit) —
     // scheitert er, bleibt Stripe die Wahrheit, unsere Pflicht ist erfüllt
     try {
-      const stripe = useStripe(event)
+      const stripe = await useStripe(event)
       await stripe.customers.del(row.stripeCustomerId)
     }
     catch {

@@ -17,47 +17,24 @@
  * neuen; genau so griff der P4-Rename 2026-07-26: 19 € → 29 € Personal).
  * Der Key bleibt in DEINER Shell — dieses Skript liest nur STRIPE_KEY.
  *
- * WICHTIG: Die lookup_key-Liste MUSS zu packages/control/app/app.config.ts
- * (pukalani.control.plans) passen. Ändert sich der Katalog, hier nachziehen.
+ * SEIT F55 IST DAS DER ZWEITE WEG, nicht mehr der einzige: derselbe Abgleich
+ * läuft im Control-Dashboard unter /dashboard/stripe („Preise → Bei Stripe
+ * anlegen/abgleichen"). Beide arbeiten aus DEMSELBEN Katalog
+ * (packages/control/shared/stripePriceCatalog.ts) und dieselben drei
+ * Entscheidungen (decideStripePriceAction) — dieses Skript bleibt als
+ * Terminal-Rückfall und für die Vorschau ohne --apply.
  */
 import Stripe from 'stripe'
+import { STRIPE_PRICE_CATALOG, STRIPE_PRICE_CURRENCY, STRIPE_PRICE_TAX_BEHAVIOR, decideStripePriceAction } from '../../packages/control/shared/stripePriceCatalog.ts'
 
-const CURRENCY = 'eur'
-
-// Muss pukalani.control.plans spiegeln. amount = Cent. Davids Pricing 2026-07-26:
-// Personal 29 €/Monat, Pro (Teams) 149 €/Monat, jährlich exakt −25 %
-// (29·12·0,75 = 261 €; 149·12·0,75 = 1341 €). Basic ist kostenlos (kein
-// Price), Enterprise ist das Studio-Angebot (kein Self-Service-Checkout).
-//
-// BRUTTO seit Davids Entscheid 2026-07-29 (OPEN-ITEMS A3): Landing und Hilfe
-// weisen diese Beträge als Endpreise „inkl. 19 % MwSt." aus, die Checkouts
-// laufen mit `automatic_tax: { enabled: true }`. Seit 2026-08-08 (A2-Vorlauf)
-// legt dieses Skript jeden NEUEN Price fest mit `tax_behavior: 'inclusive'`
-// an — das Konto-Default kann damit nicht mehr falsch sein (auf „exclusive"
-// hätte Stripe die 19 % OBEN DRAUF gerechnet: 29 € → 34,51 €, im Widerspruch
-// zur Landing). BESTANDS-Prices bleiben unberührt: `tax_behavior` ist an
-// einem Price unveränderlich, und Preise mit stimmigem Betrag überspringt
-// das Skript ohnehin. Die Test-Prices von vor diesem Datum tragen das
-// Konto-Default — für den TESTMODUS egal, der Live-Katalog entsteht mit dem
-// Flag. Siehe docs/runbooks/STRIPE-GO-LIVE-RUNBOOK.md §2.4.
-const PRODUCTS = [
-  {
-    key: 'workspace_personal',
-    name: 'Pukalani Personal',
-    prices: [
-      { lookupKey: 'workspace_personal_monthly', interval: 'month', amount: 2900 },
-      { lookupKey: 'workspace_personal_yearly', interval: 'year', amount: 26100 },
-    ],
-  },
-  {
-    key: 'workspace_pro',
-    name: 'Pukalani Pro',
-    prices: [
-      { lookupKey: 'workspace_pro_monthly', interval: 'month', amount: 14900 },
-      { lookupKey: 'workspace_pro_yearly', interval: 'year', amount: 134100 },
-    ],
-  },
-]
+// Beträge, lookup_keys und Produktnamen stehen NICHT mehr hier, sondern in
+// packages/control/shared/stripePriceCatalog.ts — derselben Datei, aus der die
+// Dashboard-Seite /dashboard/stripe (F55) arbeitet. Vorher war dieses Skript
+// die Wahrheit und der Kommentar mahnte, sie mit app.config abzugleichen; seit
+// es einen zweiten Klick-Weg gibt, wären das drei Kopien gewesen.
+// Node ≥ 22.18 lädt die .ts-Datei direkt (Type-Stripping ohne Flag).
+const CURRENCY = STRIPE_PRICE_CURRENCY
+const PRODUCTS = STRIPE_PRICE_CATALOG
 
 const key = process.env.STRIPE_KEY
 if (!key) {
@@ -84,11 +61,15 @@ async function ensureProduct(def) {
 async function ensurePrice(product, price) {
   const existing = await stripe.prices.list({ lookup_keys: [price.lookupKey], active: true, limit: 1 })
   const current = existing.data[0]
-  if (current && current.unit_amount === price.amount && current.currency === CURRENCY) {
+  const action = decideStripePriceAction(
+    current ? { unitAmount: current.unit_amount, currency: current.currency } : null,
+    { amount: price.amount, currency: CURRENCY },
+  )
+  if (action === 'skip') {
     console.log(`  = ${price.lookupKey} existiert bereits (${current.id}) — übersprungen`)
     return
   }
-  if (current) {
+  if (action === 'transfer') {
     // Betrag-Drift (Preisänderung): Stripe-Preise sind immutabel — neuen
     // Price anlegen, lookup_key zieht per transfer_lookup_key um, alter
     // Price wird deaktiviert (Bestands-Abos behalten ihn intern).
@@ -107,7 +88,7 @@ async function ensurePrice(product, price) {
     lookup_key: price.lookupKey,
     transfer_lookup_key: true,
     // Brutto-Endpreis (A3): unveränderlich, deshalb von Anfang an richtig.
-    tax_behavior: 'inclusive',
+    tax_behavior: STRIPE_PRICE_TAX_BEHAVIOR,
   })
   console.log(`  ✔ ${price.lookupKey} angelegt (${created.id}, ${price.amount / 100} ${CURRENCY}/${price.interval})`)
   if (current) {

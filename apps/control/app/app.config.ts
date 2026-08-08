@@ -22,6 +22,32 @@ export default defineAppConfig({
     admin: {
       modules: [
         {
+          // F55: Stripe-Verwaltung — Schlüssel, Preise, Webhook, Status.
+          // BEWUSST HIER in der App und nicht im admin- oder control-LAYER:
+          // die Routen (/api/control/stripe/*) liegen in DIESER App, weil sie
+          // den control-Plan-Katalog mit dem billing-Stripe-Transport
+          // komponieren (A14 — die Layer kennen sich nicht). Ein Eintrag im
+          // Layer hätte `apps/comments` einen Menüpunkt ins Leere gegeben,
+          // genau wie es die harte Reiter-Liste in
+          // packages/admin/app/pages/dashboard/admin.vue täte.
+          //
+          // placement 'bottom' statt einer Gruppe — aus demselben Grund wie
+          // beim Doku-Eintrag weiter unten: die Betreiber-Gruppen sind
+          // 'platform' (Communities), 'studio' (Websites) und 'management'
+          // (Werkzeuge). Stripe ist keins davon, sondern INSTANZ-UNTERBAU
+          // neben Nutzer · Admin · Speicher · System, und man geht selten
+          // hin. Die Gruppe 'settings' wäre falsch: sie gehört der
+          // Community-Ebene, und eine Gruppe mischt keine Ebenen (E9).
+          id: 'stripe',
+          scope: 'operator',
+          labelKey: 'control.stripe.nav',
+          icon: 'i-ph-credit-card',
+          to: '/dashboard/stripe',
+          requiredCapability: 'system.manage',
+          placement: 'bottom',
+          order: 2,
+        },
+        {
           // E9: Betreiber-Ebene, und laut Davids Struktur gehört die
           // Dokumentation nach UNTEN zum Instanz-Unterbau (Nutzer · Admin ·
           // Speicher · System) — daher placement 'bottom' statt einer Gruppe.

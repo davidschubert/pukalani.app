@@ -75,7 +75,7 @@ export interface CustomerSubscriptionSummary {
  * Stripe selbst nicht. Wirft bei API-Fehlern (Aufrufer entscheidet fail-closed).
  */
 export async function listCustomerSubscriptionSummaries(event: H3Event, stripeCustomerId: string): Promise<CustomerSubscriptionSummary[]> {
-  const stripe = useStripe(event)
+  const stripe = await useStripe(event)
   const { data } = await stripe.subscriptions.list({
     customer: stripeCustomerId,
     status: 'all',
@@ -117,7 +117,7 @@ export async function createSubscriptionCheckoutSession(event: H3Event, input: {
   // pukalani.billing.plans nennt. Vorher war `lookupKey` ein freier Parameter
   // — die Garantie hing allein am Aufrufer.
   const price = await resolvePlanPrice(event, input.lookupKey)
-  const stripe = useStripe(event)
+  const stripe = await useStripe(event)
 
   const metadata = { ...input.metadata, userId: user.$id }
   const session = await stripe.checkout.sessions.create({
@@ -166,7 +166,7 @@ export async function createPaymentCheckoutSession(event: H3Event, input: {
   // wiederkehrender Price, und — falls konfiguriert — nur was
   // pukalani.billing.oneTimeLookupKeys nennt. Begründung: shared/lookupKeys.ts.
   const price = await resolveOneTimePrice(event, input.lookupKey)
-  const stripe = useStripe(event)
+  const stripe = await useStripe(event)
 
   const session = await stripe.checkout.sessions.create({
     mode: 'payment',

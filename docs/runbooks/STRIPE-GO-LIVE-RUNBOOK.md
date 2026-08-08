@@ -31,6 +31,77 @@ Testmodus fehlten die drei `checkout.session.*`-Nachzügler unbemerkt.
 > Claude gibt **niemals** Schlüssel, Kontonummern oder Karten ein und fordert
 > sie auch nicht an.
 
+## Der Dashboard-Weg (seit F55) — hier anfangen
+
+Seit dem 2026-08-08 (Davids Entscheidung, DECISION-LOG) läuft der komplette
+Go-Live über **`https://control.pukalani.app/dashboard/stripe`**. Die
+Terminal-Schritte weiter unten bleiben als **Rückfall** stehen und sind
+weiterhin richtig — sie arbeiten aus demselben Katalog und mit denselben
+Entscheidungen wie die Seite.
+
+**Warum überhaupt:** der Terminal-Weg ist beim ersten Anlauf praktisch
+gescheitert (Shell-Export-Verwechslung, zsh/bash-`read`, und am Ende ein
+Key-Fragment im Chat — der Schlüssel musste rotiert werden). Ein Ablauf, den
+man einmal im Jahr braucht und der jedes Mal einen Schlüssel durch eine Shell
+schiebt, ist der falsche Ablauf.
+
+### Der eine verbleibende Server-Schritt [David]
+
+Auf der ploi-Site `control.pukalani.app` **einmalig** eine Env-Variable setzen
+(ploi → Site → Environment) und danach `pm2 reload ecosystem-control.config.cjs
+--update-env`:
+
+```bash
+NUXT_BILLING_SETTINGS_KEY=<64 Hex-Zeichen>     # openssl rand -hex 32
+```
+
+Das ist der **Entschlüsselungs**-Schlüssel. Die Stripe-Geheimnisse selbst
+liegen danach AES-256-GCM-verschlüsselt in der Appwrite-Tabelle
+`stripe_settings` (Migration **billing-002**, vorher fahren:
+`pnpm migrate --app control --layer billing`). Der Trade-off ist bewusst:
+kompromittiert ist der Key erst, wenn **DB-Dump und Env-Leck zusammenkommen**.
+
+Fehlt die Variable, sagt die Karte „Schlüssel lassen sich hier noch nicht
+ablegen" und nennt den Namen — es gibt keinen stillen Ausfall und keinen
+Rückfall auf eine schwache Ableitung. Der Wächter `pnpm ops:site-env` führt sie
+für `control` als Pflicht.
+
+> **Schlüsselwechsel:** wird `NUXT_BILLING_SETTINGS_KEY` später getauscht, sind
+> alle abgelegten Geheimnisse unlesbar (das Log meldet es). Dann einfach über
+> die Seite neu eintragen — die Env-Werte `NUXT_STRIPE_*` tragen in der
+> Zwischenzeit weiter, falls gesetzt.
+
+### Die vier Karten, in der Reihenfolge des Go-Live
+
+1. **Schlüssel** — `sk_live_…` eintragen (Feld ist maskiert). Der Schlüssel
+   wird **vor** dem Speichern einmal live gegen `GET /v1/account` geprüft; wird
+   er abgelehnt, bleibt der alte stehen. Danach zeigt die Seite nur noch Modus
+   und die **letzten vier Zeichen** — mehr gibt der Server nie heraus.
+   **[David], weil hier ein Schlüssel eingegeben wird.**
+2. **Status** — Modus-Abzeichen springt auf **„Live — echtes Geld"** (warnend
+   eingefärbt). Hier auch die **Steuer-Voreinstellung** prüfen: steht sie nicht
+   auf *inclusive*, meldet die Karte das rot samt Anleitung (§2.4 — Stripe
+   rechnet sonst 19 % oben drauf und widerspricht der Landing).
+3. **Preise** — „Bei Stripe anlegen/abgleichen". Legt die vier `lookup_key`s
+   idempotent an; jeder neue Price entsteht fest mit `tax_behavior: 'inclusive'`.
+   Ergebnis je Preis: *angelegt · unverändert · ersetzt*. Ein zweiter Klick
+   meldet überall „unverändert".
+4. **Webhook** — „Anlegen". Legt
+   `https://control.pukalani.app/api/stripe/webhook` mit **allen neun**
+   Ereignissen an. **Das Signatur-Secret kommt in der API-Antwort genau einmal
+   vor und wird sofort verschlüsselt mitgespeichert** — Schritt 4 und der
+   `whsec_`-Teil von Schritt 5 entfallen damit. Existiert der Endpunkt bereits,
+   heißt der Knopf „Ereignisse ergänzen"; dann gibt es **kein** neues Secret,
+   und die Karte sagt das auch so.
+
+Danach weiter bei **§6 Verifikation** — die Proben dort gelten unverändert.
+
+Beträge und `lookup_key`s stehen ab F55 an genau EINER Stelle:
+`packages/control/shared/stripePriceCatalog.ts`. Sowohl die Seite als auch
+`scripts/stripe/ensure-prices.mjs` lesen von dort.
+
+---
+
 ## 0. Der entscheidende Vorteil: `lookup_key` ist mode-stabil
 
 Der Code referenziert Preise über **`lookup_key`**, nie über `price_…`-IDs.
@@ -107,12 +178,13 @@ nicht") statt 500 — eine bewusst nicht eingerichtete Route ist kein Ausfall.
   an; im Live-Dashboard die Steuer-Registrierung(en) hinterlegen (OSS-Schwelle
   10 k€).
   **PFLICHT (OPEN-ITEMS A3):** Landing und Hilfe weisen 29 € / 149 € als
-  **Endpreise inkl. 19 % MwSt.** aus. Die Prices werden ohne `tax_behavior`
-  angelegt → Stripe nimmt das **Konto-Default**. Steht das auf „exclusive",
-  rechnet der Checkout 19 % oben drauf (29 € → 34,51 €) und widerspricht der
-  Landing. Also **vor dem ersten Live-Price** entweder das Konto-Default auf
-  **inclusive** stellen (Stripe → Settings → Tax → *Default tax behavior*) oder
-  `tax_behavior: 'inclusive'` in `scripts/stripe/ensure-prices.mjs` ergänzen.
+  **Endpreise inkl. 19 % MwSt.** aus. Seit dem 2026-08-08 legen BEIDE Wege
+  (Dashboard-Karte und Skript) jeden neuen Price fest mit
+  `tax_behavior: 'inclusive'` an — das Konto-Default kann damit nicht mehr
+  falsch sein. Stellt es trotzdem richtig (Stripe → Settings → Tax → *Default
+  tax behavior*): die Status-Karte zeigt es rot an, und alles, was jemand von
+  Hand im Dashboard anlegt, hängt weiter daran. Stünde es auf „exclusive",
+  rechnete der Checkout 19 % oben drauf (29 € → 34,51 €).
   `tax_behavior` ist an einem Price **unveränderlich** — ein falsch angelegter
   Price muss ersetzt werden.
 - **2.5 Zahlungsmethoden** — **nichts zu tun** (F20, Davids Entscheidung
@@ -123,7 +195,11 @@ nicht") statt 500 — eine bewusst nicht eingerichtete Route ist kein Ausfall.
   scharf würde der verzögerte Zahlungspfad erst, wenn jemand die Liste im
   Code erweitert (dann gilt Schritt 6.5, gebaut 2026-08-02, ungetestet).
 
-## 3. Preise per Skript anlegen [Claude, sobald der Key in Davids Shell steht]
+## 3. Preise per Skript anlegen — RÜCKFALL [Claude, sobald der Key in Davids Shell steht]
+
+> Seit F55 macht das die Karte **Preise** unter `/dashboard/stripe` mit einem
+> Klick, aus demselben Katalog. Dieser Abschnitt bleibt für den Fall, dass die
+> Seite nicht erreichbar ist.
 
 `scripts/stripe/ensure-prices.mjs` legt Products und Prices **idempotent** an.
 Der Key bleibt in der Shell, das Skript liest nur `STRIPE_KEY`:
@@ -139,7 +215,11 @@ Das Skript erkennt Live vs. Test am Key-Präfix und meldet den Modus. Bei
 Price. Bei einer reinen **Steuer**-Umstellung greift das nicht (`tax_behavior`
 ist unveränderlich): dann Price von Hand ersetzen.
 
-## 4. Live-Webhook-Endpunkt einrichten [David]
+## 4. Live-Webhook-Endpunkt einrichten — RÜCKFALL [David]
+
+> Seit F55 macht das die Karte **Webhook** unter `/dashboard/stripe`, und sie
+> speichert das `whsec_` gleich mit (es kommt bei Stripe nur EINMAL vorbei).
+> Von Hand angelegt, muss es in Schritt 5 nachgetragen werden.
 
 Stripe-Dashboard (Live) → Developers → Webhooks → „Add endpoint":
 
@@ -162,7 +242,11 @@ Stripe-Dashboard (Live) → Developers → Webhooks → „Add endpoint":
 Die drei `checkout.session.*`-Ereignisse außer `completed` kamen am 2026-08-02
 dazu. Ohne sie endet eine verzögerte Zahlung im Nichts.
 
-## 5. Secrets auf den Server + Reload
+## 5. Secrets auf den Server + Reload — RÜCKFALL
+
+> Seit F55 nur noch nötig, wenn die Schlüssel bewusst über die Server-Env
+> laufen sollen. Der Dashboard-Weg braucht dort einzig
+> `NUXT_BILLING_SETTINGS_KEY` (s. oben).
 
 [David] setzt die Werte in den von pm2 geparsten Env-Satz (vgl.
 `ops/ecosystem-control.config.cjs`):

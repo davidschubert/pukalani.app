@@ -20,7 +20,7 @@ export async function ensureCustomer(event: H3Event, user: Models.User<Models.Pr
   })
   if (existing.rows[0]) return existing.rows[0]
 
-  const stripe = useStripe(event)
+  const stripe = await useStripe(event)
   const customer = await stripe.customers.create({
     email: user.email || undefined,
     name: user.name || undefined,

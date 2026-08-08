@@ -15,6 +15,89 @@
       "nav": "Doku",
       "title": "Projekt-Doku",
       "overview": "Überblick"
+    },
+    "stripe": {
+      "nav": "Stripe",
+      "title": "Stripe",
+      "refresh": "Neu laden",
+      "sectionFailed": "Stripe antwortet gerade nicht",
+      "source": {
+        "db": "(hier eingetragen)",
+        "env": "(aus der Server-Umgebung)",
+        "none": ""
+      },
+      "status": {
+        "title": "Status",
+        "description": "Womit dieses Deployment gerade bei Stripe spricht.",
+        "mode": "Modus",
+        "modeLive": "Live — echtes Geld",
+        "modeTest": "Testmodus",
+        "modeNone": "kein Schlüssel",
+        "liveTitle": "Dieses Deployment bucht echtes Geld ab",
+        "liveHint": "Jeder Checkout belastet die Karte des Kunden wirklich. Zum Ausprobieren einen sk_test_-Schlüssel eintragen.",
+        "key": "Geheimer Schlüssel",
+        "keyMissing": "nicht hinterlegt",
+        "webhookSecret": "Signatur-Geheimnis",
+        "needsKey": "erst einen Schlüssel eintragen",
+        "tax": "Steuer-Voreinstellung",
+        "taxInclusive": "Brutto (richtig)",
+        "taxUnset": "nicht gesetzt",
+        "taxWrongTitle": "Die Steuer-Voreinstellung passt nicht zu den beworbenen Preisen",
+        "taxWrongHint": "Landing und Hilfe nennen 29 € und 149 € als Endpreise inkl. 19 % MwSt. Steht die Voreinstellung nicht auf „brutto“, rechnet Stripe die Steuer oben drauf. Im Stripe-Dashboard unter Einstellungen · Steuern auf „inclusive“ stellen — vor dem ersten Live-Preis, das Verhalten eines angelegten Preises lässt sich nicht mehr ändern."
+      },
+      "keys": {
+        "title": "Schlüssel",
+        "description": "Werden verschlüsselt gespeichert und schlagen die Server-Umgebung. Sichtbar bleiben immer nur die letzten vier Zeichen.",
+        "secretLabel": "Geheimer Schlüssel",
+        "secretHint": "Beginnt mit sk_live_ oder sk_test_. Wird vor dem Speichern einmal bei Stripe geprüft; schlägt die Prüfung fehl, bleibt der alte Schlüssel stehen.",
+        "webhookLabel": "Signatur-Geheimnis (optional)",
+        "webhookHint": "Beginnt mit whsec_. Wer den Webhook unten anlegen lässt, braucht das Feld nicht — das Geheimnis wird dabei automatisch gespeichert.",
+        "save": "Speichern",
+        "saved": "Gespeichert",
+        "errorInvalid": "Stripe hat diesen Schlüssel abgelehnt — nichts gespeichert",
+        "errorMalformed": "Das sieht nicht nach einem geheimen Schlüssel aus (sk_live_ oder sk_test_)",
+        "errorWebhookMalformed": "Das sieht nicht nach einem Signatur-Geheimnis aus (whsec_)",
+        "errorNoStorage": "Die Ablage ist nicht eingerichtet — NUXT_BILLING_SETTINGS_KEY fehlt",
+        "errorGeneric": "Speichern fehlgeschlagen",
+        "noStorageTitle": "Schlüssel lassen sich hier noch nicht ablegen",
+        "noStorageHint": "Dafür braucht der Server NUXT_BILLING_SETTINGS_KEY — 64 Hex-Zeichen, erzeugt mit openssl rand -hex 32. Solange die Variable fehlt, gelten weiter NUXT_STRIPE_SECRET_KEY und NUXT_STRIPE_WEBHOOK_SECRET aus der Server-Umgebung."
+      },
+      "prices": {
+        "title": "Preise",
+        "description": "Die vier Plan-Preise. Die Beträge stehen im Code — hier wird nur abgeglichen, was davon bei Stripe existiert.",
+        "interval": {
+          "month": "monatlich",
+          "year": "jährlich"
+        },
+        "ok": "angelegt",
+        "missing": "fehlt",
+        "drift": "bei Stripe: {amount}",
+        "taxWrong": "nicht brutto",
+        "sync": "Bei Stripe anlegen/abgleichen",
+        "synced": "Fertig — {created} angelegt, {transferred} ersetzt, {skipped} unverändert",
+        "syncFailed": "Abgleich fehlgeschlagen",
+        "landingTitle": "Beträge ändern zieht nicht überall nach",
+        "landingHint": "Ein neuer Betrag gilt sofort für neue Abos; bestehende Abos behalten ihren alten Preis. Die Preise auf der Website stehen getrennt davon im Code und müssen von Hand nachgezogen werden."
+      },
+      "webhook": {
+        "title": "Webhook",
+        "description": "Der Rückweg von Stripe. Ohne ihn merkt diese Instanz nichts von Zahlungen, Kündigungen und geplatzten Lastschriften.",
+        "url": "Adresse",
+        "urlMissing": "unbekannt — NUXT_PUBLIC_APP_URL fehlt",
+        "state": "Zustand",
+        "stateOk": "eingerichtet",
+        "stateMissing": "fehlt",
+        "stateIncomplete": "{count} Ereignisse fehlen",
+        "events": "Diese Ereignisse werden gebraucht:",
+        "create": "Anlegen",
+        "addEvents": "Ereignisse ergänzen",
+        "created": "Webhook angelegt",
+        "eventsAdded": "Fehlende Ereignisse ergänzt",
+        "unchanged": "Alles schon eingerichtet",
+        "secretStored": "Das Signatur-Geheimnis wurde automatisch gespeichert.",
+        "errorNoAppUrl": "Ohne NUXT_PUBLIC_APP_URL ist die Adresse unbekannt",
+        "errorGeneric": "Webhook konnte nicht eingerichtet werden"
+      }
     }
   }
 }

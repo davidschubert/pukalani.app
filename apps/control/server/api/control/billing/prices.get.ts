@@ -20,7 +20,7 @@ export default defineEventHandler(async (event) => {
   }
   if (lookupKeys.length === 0) return { prices: [], livemode: false }
 
-  const stripe = useStripe(event)
+  const stripe = await useStripe(event)
   const found = await stripe.prices.list({
     lookup_keys: lookupKeys.map(entry => entry.lookupKey),
     expand: ['data.product'],

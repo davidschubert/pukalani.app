@@ -15,6 +15,89 @@
       "nav": "Docs",
       "title": "Project docs",
       "overview": "Overview"
+    },
+    "stripe": {
+      "nav": "Stripe",
+      "title": "Stripe",
+      "refresh": "Reload",
+      "sectionFailed": "Stripe is not responding right now",
+      "source": {
+        "db": "(entered here)",
+        "env": "(from the server environment)",
+        "none": ""
+      },
+      "status": {
+        "title": "Status",
+        "description": "What this deployment is currently using to talk to Stripe.",
+        "mode": "Mode",
+        "modeLive": "Live — real money",
+        "modeTest": "Test mode",
+        "modeNone": "no key",
+        "liveTitle": "This deployment charges real money",
+        "liveHint": "Every checkout really charges the customer's card. To try things out, enter an sk_test_ key instead.",
+        "key": "Secret key",
+        "keyMissing": "not set",
+        "webhookSecret": "Signing secret",
+        "needsKey": "enter a key first",
+        "tax": "Tax default",
+        "taxInclusive": "Tax included (correct)",
+        "taxUnset": "not set",
+        "taxWrongTitle": "The tax default does not match the advertised prices",
+        "taxWrongHint": "The landing page and help centre quote 29 € and 149 € as final prices including 19 % VAT. If the default is not „tax included“, Stripe adds the tax on top. Set it to „inclusive“ in the Stripe dashboard under Settings · Tax — before the first live price, because a price's tax behaviour can never be changed afterwards."
+      },
+      "keys": {
+        "title": "Keys",
+        "description": "Stored encrypted and taking precedence over the server environment. Only the last four characters are ever shown.",
+        "secretLabel": "Secret key",
+        "secretHint": "Starts with sk_live_ or sk_test_. Verified against Stripe once before saving; if that fails, the previous key stays in place.",
+        "webhookLabel": "Signing secret (optional)",
+        "webhookHint": "Starts with whsec_. Not needed if you let the webhook below be created — the secret is then stored automatically.",
+        "save": "Save",
+        "saved": "Saved",
+        "errorInvalid": "Stripe rejected this key — nothing was saved",
+        "errorMalformed": "That does not look like a secret key (sk_live_ or sk_test_)",
+        "errorWebhookMalformed": "That does not look like a signing secret (whsec_)",
+        "errorNoStorage": "Storage is not set up — NUXT_BILLING_SETTINGS_KEY is missing",
+        "errorGeneric": "Saving failed",
+        "noStorageTitle": "Keys cannot be stored here yet",
+        "noStorageHint": "The server needs NUXT_BILLING_SETTINGS_KEY for this — 64 hex characters, generated with openssl rand -hex 32. Until it is set, NUXT_STRIPE_SECRET_KEY and NUXT_STRIPE_WEBHOOK_SECRET from the server environment remain in charge."
+      },
+      "prices": {
+        "title": "Prices",
+        "description": "The four plan prices. The amounts live in the code — this only compares which of them exist at Stripe.",
+        "interval": {
+          "month": "monthly",
+          "year": "yearly"
+        },
+        "ok": "created",
+        "missing": "missing",
+        "drift": "at Stripe: {amount}",
+        "taxWrong": "tax not included",
+        "sync": "Create/reconcile at Stripe",
+        "synced": "Done — {created} created, {transferred} replaced, {skipped} unchanged",
+        "syncFailed": "Reconciliation failed",
+        "landingTitle": "Changing amounts does not update everything",
+        "landingHint": "A new amount applies to new subscriptions immediately; existing subscriptions keep their old price. The prices shown on the website live separately in the code and have to be updated by hand."
+      },
+      "webhook": {
+        "title": "Webhook",
+        "description": "Stripe's way back. Without it this instance never learns about payments, cancellations or failed charges.",
+        "url": "Address",
+        "urlMissing": "unknown — NUXT_PUBLIC_APP_URL is missing",
+        "state": "State",
+        "stateOk": "set up",
+        "stateMissing": "missing",
+        "stateIncomplete": "{count} events missing",
+        "events": "These events are required:",
+        "create": "Create",
+        "addEvents": "Add missing events",
+        "created": "Webhook created",
+        "eventsAdded": "Missing events added",
+        "unchanged": "Already set up",
+        "secretStored": "The signing secret was stored automatically.",
+        "errorNoAppUrl": "Without NUXT_PUBLIC_APP_URL the address is unknown",
+        "errorGeneric": "The webhook could not be set up"
+      }
     }
   }
 }

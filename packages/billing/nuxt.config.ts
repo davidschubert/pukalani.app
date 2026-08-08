@@ -13,6 +13,15 @@ export default defineNuxtConfig({
     // NUXT_STRIPE_SECRET_KEY (sk_test_…/sk_live_…), NUXT_STRIPE_WEBHOOK_SECRET (whsec_…)
     stripeSecretKey: '',
     stripeWebhookSecret: '',
+    /**
+     * NUXT_BILLING_SETTINGS_KEY — 64 Hex-Zeichen (32 Bytes, `openssl rand -hex 32`).
+     * Entschlüsselt die in `stripe_settings` abgelegten Geheimnisse (F55).
+     * LEER = die Key-Verwaltung im Dashboard sagt ehrlich „nicht konfiguriert";
+     * die Laufzeit fällt dann wie eh und je auf NUXT_STRIPE_* zurück.
+     * BEWUSST OHNE FALLBACK auf eine abgeleitete Ersatz-Passphrase — eine
+     * Verschlüsselung mit Schlüssel aus dem Repository ist eine Verkleidung.
+     */
+    billingSettingsKey: '',
   },
 
   // Eigene Layer-Strings — mergen mit Core- und App-Locales (gleiche codes)

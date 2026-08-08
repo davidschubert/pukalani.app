@@ -1,0 +1,445 @@
+<script setup lang="ts">
+/**
+ * STRIPE — Betreiber-Seite (F55, Davids Entscheidung 2026-08-08).
+ *
+ * Vier Karten in genau der Reihenfolge, in der man sie beim Go-Live braucht:
+ * Status (wo stehe ich?) · Schlüssel (was gilt?) · Preise (was verkaufe ich?)
+ * · Webhook (kommt das Geld auch an?). Der komplette Go-Live läuft danach
+ * ohne Terminal — der Weg über `scripts/stripe/ensure-prices.mjs` bleibt als
+ * Rückfall bestehen und arbeitet aus demselben Katalog.
+ *
+ * SIE STEHT NICHT IN DER ADMIN-HÜLLE (packages/admin/.../admin.vue) — Davids
+ * Vorgabe und der richtige Ort: die Reiter dort sind eine HARTE Liste im
+ * admin-LAYER, und `apps/comments` erbt sie mit. Ein Stripe-Reiter dort hätte
+ * dem Silo einen Menüpunkt gegeben, dessen Routen (`/api/control/stripe/*`)
+ * es gar nicht gibt. Als eigene Dashboard-Seite mit Sidebar-Eintrag aus
+ * `apps/control/app/app.config.ts` existiert sie genau dort, wo auch die
+ * Routen existieren.
+ *
+ * WAS DIE SEITE NIE ZU SEHEN BEKOMMT: den Schlüssel. Aus dem Server kommen
+ * Modus und die letzten VIER Zeichen, mehr nicht — die Eingabefelder sind
+ * `type="password"` und werden nach dem Speichern geleert.
+ */
+definePageMeta({ layout: 'dashboard', middleware: ['auth', 'admin'], requiredCapability: 'system.manage' })
+
+const { t, locale } = useI18n()
+const toast = useToast()
+useHead({ title: () => t('control.stripe.title') })
+
+interface SectionError { error: true }
+
+interface PriceStatus {
+  lookupKey: string
+  interval: 'month' | 'year'
+  expectedAmount: number
+  exists: boolean
+  amount: number | null
+  currency: string | null
+  active: boolean
+  taxBehavior: string | null
+}
+
+interface WebhookStatus {
+  found: boolean
+  id: string | null
+  status: string | null
+  enabledEvents: string[]
+  missingEvents: string[]
+  otherEndpoints: number
+}
+
+interface TaxStatus {
+  defaultTaxBehavior: string | null
+  status: string | null
+}
+
+interface StripeStatus {
+  mode: 'live' | 'test' | 'none'
+  keySource: 'db' | 'env' | 'none'
+  keyTail: string
+  webhookSecretSource: 'db' | 'env' | 'none'
+  webhookSecretTail: string
+  storageAvailable: boolean
+  expectedWebhookUrl: string
+  expectedEvents: string[]
+  tax: TaxStatus | SectionError | null
+  prices: PriceStatus[] | SectionError | null
+  webhook: WebhookStatus | SectionError | null
+}
+
+const { data, refresh, status: fetchStatus } = await useFetch<StripeStatus>('/api/control/stripe/status', {
+  lazy: true,
+  server: false,
+})
+
+/** Hat der Abschnitt Daten? (`null` = kein Key, `{error:true}` = Stripe-Störung) */
+function ok<T>(section: T | SectionError | null | undefined): section is T {
+  return !!section && (section as SectionError).error !== true
+}
+
+function failed(section: unknown): boolean {
+  return !!section && (section as SectionError).error === true
+}
+
+const tax = computed(() => (ok<TaxStatus>(data.value?.tax) ? data.value!.tax as TaxStatus : null))
+const prices = computed(() => (ok<PriceStatus[]>(data.value?.prices) ? data.value!.prices as PriceStatus[] : null))
+const webhook = computed(() => (ok<WebhookStatus>(data.value?.webhook) ? data.value!.webhook as WebhookStatus : null))
+
+/** Brutto ist Pflicht (A3) — alles andere rechnet 19 % oben drauf. */
+const taxOk = computed(() => tax.value?.defaultTaxBehavior === 'inclusive')
+
+const isLive = computed(() => data.value?.mode === 'live')
+const hasKey = computed(() => !!data.value && data.value.keySource !== 'none')
+
+function money(cents: number, currency: string | null): string {
+  return new Intl.NumberFormat(locale.value, { style: 'currency', currency: (currency ?? 'eur').toUpperCase() }).format(cents / 100)
+}
+
+/** Der fachliche Grund reist im Envelope als `reason` (core/server/error.ts). */
+function reasonOf(error: unknown): string {
+  return (error as { data?: { reason?: string } })?.data?.reason ?? ''
+}
+
+// ── Schlüssel ───────────────────────────────────────────────────────────────
+const form = reactive({ secretKey: '', webhookSecret: '' })
+const savingKeys = ref(false)
+
+async function saveKeys() {
+  const body: { secretKey?: string, webhookSecret?: string } = {}
+  if (form.secretKey.trim()) body.secretKey = form.secretKey.trim()
+  if (form.webhookSecret.trim()) body.webhookSecret = form.webhookSecret.trim()
+  if (!body.secretKey && !body.webhookSecret) return
+
+  savingKeys.value = true
+  try {
+    await $fetch('/api/control/stripe/keys', { method: 'POST', body })
+    // Sofort leeren: ein stehengebliebener Klartext im Feld überlebt sonst
+    // jeden Screenshot und jede Bildschirmfreigabe.
+    form.secretKey = ''
+    form.webhookSecret = ''
+    toast.add({ title: t('control.stripe.keys.saved'), color: 'success' })
+    await refresh()
+  }
+  catch (error) {
+    const reason = reasonOf(error)
+    const key = reason === 'key_invalid'
+      ? 'control.stripe.keys.errorInvalid'
+      : reason === 'key_malformed'
+        ? 'control.stripe.keys.errorMalformed'
+        : reason === 'webhook_secret_malformed'
+          ? 'control.stripe.keys.errorWebhookMalformed'
+          : reason === 'encryption_unconfigured'
+            ? 'control.stripe.keys.errorNoStorage'
+            : 'control.stripe.keys.errorGeneric'
+    toast.add({ title: t(key), color: 'error' })
+  }
+  finally {
+    savingKeys.value = false
+  }
+}
+
+// ── Preise ──────────────────────────────────────────────────────────────────
+interface PriceSyncResult { lookupKey: string, outcome: 'created' | 'skipped' | 'transferred' }
+const syncingPrices = ref(false)
+
+async function syncPrices() {
+  syncingPrices.value = true
+  try {
+    const report = await $fetch<{ results: PriceSyncResult[] }>('/api/control/stripe/prices', { method: 'POST' })
+    const created = report.results.filter(r => r.outcome === 'created').length
+    const transferred = report.results.filter(r => r.outcome === 'transferred').length
+    const skipped = report.results.filter(r => r.outcome === 'skipped').length
+    toast.add({ title: t('control.stripe.prices.synced', { created, transferred, skipped }), color: 'success' })
+    await refresh()
+  }
+  catch {
+    toast.add({ title: t('control.stripe.prices.syncFailed'), color: 'error' })
+  }
+  finally {
+    syncingPrices.value = false
+  }
+}
+
+// ── Webhook ─────────────────────────────────────────────────────────────────
+const creatingWebhook = ref(false)
+
+async function ensureWebhook() {
+  creatingWebhook.value = true
+  try {
+    const result = await $fetch<{ action: 'created' | 'events_added' | 'unchanged', secretStored: boolean }>(
+      '/api/control/stripe/webhook',
+      { method: 'POST' },
+    )
+    const title = result.action === 'created'
+      ? t('control.stripe.webhook.created')
+      : result.action === 'events_added'
+        ? t('control.stripe.webhook.eventsAdded')
+        : t('control.stripe.webhook.unchanged')
+    toast.add({
+      title,
+      description: result.secretStored ? t('control.stripe.webhook.secretStored') : undefined,
+      color: 'success',
+    })
+    await refresh()
+  }
+  catch (error) {
+    const key = reasonOf(error) === 'app_url_missing'
+      ? 'control.stripe.webhook.errorNoAppUrl'
+      : 'control.stripe.webhook.errorGeneric'
+    toast.add({ title: t(key), color: 'error' })
+  }
+  finally {
+    creatingWebhook.value = false
+  }
+}
+</script>
+
+<template>
+  <UDashboardPanel id="stripe">
+    <template #header>
+      <UDashboardNavbar :title="t('control.stripe.title')">
+        <template #leading>
+          <UDashboardSidebarCollapse />
+        </template>
+        <template #right>
+          <UButton
+            icon="i-ph-arrows-clockwise"
+            variant="ghost"
+            color="neutral"
+            :loading="fetchStatus === 'pending'"
+            :aria-label="t('control.stripe.refresh')"
+            @click="refresh()"
+          />
+        </template>
+      </UDashboardNavbar>
+    </template>
+
+    <template #body>
+      <div class="mx-auto flex w-full max-w-3xl flex-col gap-6">
+        <!-- ── Status ────────────────────────────────────────────────────── -->
+        <UPageCard
+          :title="t('control.stripe.status.title')"
+          :description="t('control.stripe.status.description')"
+          variant="subtle"
+        >
+          <UAlert
+            v-if="isLive"
+            color="warning"
+            variant="subtle"
+            icon="i-ph-warning-circle"
+            class="mb-4"
+            :title="t('control.stripe.status.liveTitle')"
+            :description="t('control.stripe.status.liveHint')"
+          />
+
+          <dl class="divide-y divide-default text-sm">
+            <div class="flex items-center justify-between gap-4 py-3 first:pt-0">
+              <dt class="text-muted">{{ t('control.stripe.status.mode') }}</dt>
+              <dd>
+                <UBadge v-if="data?.mode === 'live'" color="warning" variant="subtle">{{ t('control.stripe.status.modeLive') }}</UBadge>
+                <UBadge v-else-if="data?.mode === 'test'" color="neutral" variant="subtle">{{ t('control.stripe.status.modeTest') }}</UBadge>
+                <UBadge v-else color="neutral" variant="outline">{{ t('control.stripe.status.modeNone') }}</UBadge>
+              </dd>
+            </div>
+
+            <div class="flex items-center justify-between gap-4 py-3">
+              <dt class="text-muted">{{ t('control.stripe.status.key') }}</dt>
+              <dd class="text-right">
+                <span v-if="hasKey" class="font-mono">…{{ data?.keyTail }}</span>
+                <span v-else>{{ t('control.stripe.status.keyMissing') }}</span>
+                <span class="ml-2 text-muted">{{ t(`control.stripe.source.${data?.keySource ?? 'none'}`) }}</span>
+              </dd>
+            </div>
+
+            <div class="flex items-center justify-between gap-4 py-3">
+              <dt class="text-muted">{{ t('control.stripe.status.webhookSecret') }}</dt>
+              <dd class="text-right">
+                <span v-if="data?.webhookSecretSource !== 'none'" class="font-mono">…{{ data?.webhookSecretTail }}</span>
+                <span v-else>{{ t('control.stripe.status.keyMissing') }}</span>
+                <span class="ml-2 text-muted">{{ t(`control.stripe.source.${data?.webhookSecretSource ?? 'none'}`) }}</span>
+              </dd>
+            </div>
+
+            <div class="flex items-center justify-between gap-4 py-3 last:pb-0">
+              <dt class="text-muted">{{ t('control.stripe.status.tax') }}</dt>
+              <dd class="text-right">
+                <span v-if="!hasKey" class="text-muted">{{ t('control.stripe.status.needsKey') }}</span>
+                <span v-else-if="failed(data?.tax)" class="text-muted">{{ t('control.stripe.sectionFailed') }}</span>
+                <UBadge v-else-if="taxOk" color="success" variant="subtle">{{ t('control.stripe.status.taxInclusive') }}</UBadge>
+                <UBadge v-else color="error" variant="subtle">{{ tax?.defaultTaxBehavior || t('control.stripe.status.taxUnset') }}</UBadge>
+              </dd>
+            </div>
+          </dl>
+
+          <UAlert
+            v-if="hasKey && tax && !taxOk"
+            color="error"
+            variant="subtle"
+            icon="i-ph-receipt"
+            class="mt-4"
+            :title="t('control.stripe.status.taxWrongTitle')"
+            :description="t('control.stripe.status.taxWrongHint')"
+          />
+        </UPageCard>
+
+        <!-- ── Schlüssel ─────────────────────────────────────────────────── -->
+        <UPageCard
+          :title="t('control.stripe.keys.title')"
+          :description="t('control.stripe.keys.description')"
+          variant="subtle"
+        >
+          <UAlert
+            v-if="data && !data.storageAvailable"
+            color="warning"
+            variant="subtle"
+            icon="i-ph-lock-key-open"
+            :title="t('control.stripe.keys.noStorageTitle')"
+            :description="t('control.stripe.keys.noStorageHint')"
+          />
+
+          <form v-else class="flex flex-col gap-4" @submit.prevent="saveKeys">
+            <UFormField
+              :label="t('control.stripe.keys.secretLabel')"
+              :description="t('control.stripe.keys.secretHint')"
+            >
+              <UInput
+                v-model="form.secretKey"
+                type="password"
+                autocomplete="off"
+                class="w-full"
+                placeholder="sk_live_…"
+              />
+            </UFormField>
+
+            <UFormField
+              :label="t('control.stripe.keys.webhookLabel')"
+              :description="t('control.stripe.keys.webhookHint')"
+            >
+              <UInput
+                v-model="form.webhookSecret"
+                type="password"
+                autocomplete="off"
+                class="w-full"
+                placeholder="whsec_…"
+              />
+            </UFormField>
+
+            <div class="flex justify-end">
+              <UButton
+                type="submit"
+                :loading="savingKeys"
+                :disabled="!form.secretKey.trim() && !form.webhookSecret.trim()"
+              >
+                {{ t('control.stripe.keys.save') }}
+              </UButton>
+            </div>
+          </form>
+        </UPageCard>
+
+        <!-- ── Preise ────────────────────────────────────────────────────── -->
+        <UPageCard
+          :title="t('control.stripe.prices.title')"
+          :description="t('control.stripe.prices.description')"
+          variant="subtle"
+        >
+          <p v-if="!hasKey" class="text-sm text-muted">{{ t('control.stripe.status.needsKey') }}</p>
+          <p v-else-if="failed(data?.prices)" class="text-sm text-muted">{{ t('control.stripe.sectionFailed') }}</p>
+
+          <div v-else-if="prices" class="divide-y divide-default">
+            <div
+              v-for="price in prices"
+              :key="price.lookupKey"
+              class="flex items-center justify-between gap-4 py-3 first:pt-0"
+            >
+              <div class="min-w-0">
+                <p class="text-sm font-medium">
+                  {{ money(price.expectedAmount, 'eur') }}
+                  <span class="text-muted">· {{ t(`control.stripe.prices.interval.${price.interval}`) }}</span>
+                </p>
+                <p class="truncate font-mono text-xs text-muted">{{ price.lookupKey }}</p>
+              </div>
+              <div class="shrink-0 text-right">
+                <UBadge v-if="!price.exists" color="warning" variant="subtle">{{ t('control.stripe.prices.missing') }}</UBadge>
+                <UBadge v-else-if="price.amount !== price.expectedAmount" color="warning" variant="subtle">
+                  {{ t('control.stripe.prices.drift', { amount: money(price.amount ?? 0, price.currency) }) }}
+                </UBadge>
+                <UBadge v-else-if="price.taxBehavior !== 'inclusive'" color="error" variant="subtle">
+                  {{ t('control.stripe.prices.taxWrong') }}
+                </UBadge>
+                <UBadge v-else color="success" variant="subtle">{{ t('control.stripe.prices.ok') }}</UBadge>
+              </div>
+            </div>
+          </div>
+
+          <UAlert
+            color="neutral"
+            variant="subtle"
+            icon="i-ph-info"
+            class="mt-4"
+            :title="t('control.stripe.prices.landingTitle')"
+            :description="t('control.stripe.prices.landingHint')"
+          />
+
+          <div class="mt-4 flex justify-end">
+            <UButton :loading="syncingPrices" :disabled="!hasKey" @click="syncPrices">
+              {{ t('control.stripe.prices.sync') }}
+            </UButton>
+          </div>
+        </UPageCard>
+
+        <!-- ── Webhook ───────────────────────────────────────────────────── -->
+        <UPageCard
+          :title="t('control.stripe.webhook.title')"
+          :description="t('control.stripe.webhook.description')"
+          variant="subtle"
+        >
+          <dl class="divide-y divide-default text-sm">
+            <div class="flex items-start justify-between gap-4 py-3 first:pt-0">
+              <dt class="text-muted">{{ t('control.stripe.webhook.url') }}</dt>
+              <dd class="break-all text-right font-mono text-xs">
+                {{ data?.expectedWebhookUrl || t('control.stripe.webhook.urlMissing') }}
+              </dd>
+            </div>
+            <div class="flex items-center justify-between gap-4 py-3 last:pb-0">
+              <dt class="text-muted">{{ t('control.stripe.webhook.state') }}</dt>
+              <dd>
+                <span v-if="!hasKey" class="text-muted">{{ t('control.stripe.status.needsKey') }}</span>
+                <span v-else-if="failed(data?.webhook)" class="text-muted">{{ t('control.stripe.sectionFailed') }}</span>
+                <UBadge v-else-if="!webhook?.found" color="warning" variant="subtle">{{ t('control.stripe.webhook.stateMissing') }}</UBadge>
+                <UBadge v-else-if="webhook.missingEvents.length" color="warning" variant="subtle">
+                  {{ t('control.stripe.webhook.stateIncomplete', { count: webhook.missingEvents.length }) }}
+                </UBadge>
+                <UBadge v-else color="success" variant="subtle">{{ t('control.stripe.webhook.stateOk') }}</UBadge>
+              </dd>
+            </div>
+          </dl>
+
+          <div class="mt-4">
+            <p class="mb-2 text-sm text-muted">{{ t('control.stripe.webhook.events') }}</p>
+            <ul class="flex flex-wrap gap-1.5">
+              <li v-for="name in data?.expectedEvents ?? []" :key="name">
+                <UBadge
+                  variant="subtle"
+                  :color="webhook && !webhook.missingEvents.includes(name) ? 'success' : 'neutral'"
+                  class="font-mono text-xs"
+                >
+                  {{ name }}
+                </UBadge>
+              </li>
+            </ul>
+          </div>
+
+          <div class="mt-4 flex justify-end">
+            <UButton
+              :loading="creatingWebhook"
+              :disabled="!hasKey || !data?.expectedWebhookUrl"
+              @click="ensureWebhook"
+            >
+              {{ webhook?.found ? t('control.stripe.webhook.addEvents') : t('control.stripe.webhook.create') }}
+            </UButton>
+          </div>
+        </UPageCard>
+      </div>
+    </template>
+  </UDashboardPanel>
+</template>

@@ -212,3 +212,31 @@ export const WEBHOOK_ALLOWLIST = new Set([
   'invoice.paid',
   'invoice.payment_failed',
 ])
+
+/**
+ * Die NEUN Ereignisse in stabiler Reihenfolge — für das Anlegen des
+ * Stripe-Endpunkts und die Anzeige im Dashboard (F55). Ein `Set` hat keine
+ * Reihenfolge, die man einem Menschen zeigen möchte; die Liste ist dieselbe
+ * Wahrheit, nur sortiert.
+ */
+export const WEBHOOK_EVENTS: readonly string[] = [...WEBHOOK_ALLOWLIST]
+
+/**
+ * WELCHE UNSERER NEUN FEHLEN AM ENDPUNKT? Pure Mengendifferenz — die Frage,
+ * die den Testmodus-Fehlstand von 2026-08-02 unbemerkt ließ (drei
+ * `checkout.session.*`-Nachzügler fehlten; eine verzögerte Zahlung endete
+ * damit im Nichts).
+ *
+ * BEWUSST NUR IN EINE RICHTUNG: ein Endpunkt, der MEHR abonniert hat, ist
+ * kein Befund — die Route beantwortet Unbekanntes mit 200 und tut nichts.
+ * Ein Wächter, der Überschuss anmahnt, erzeugt eine rote Meldung ohne
+ * Handlung dahinter, und die liest man weg.
+ *
+ * `enabled_events` kann bei Stripe die Wildcard `*` enthalten („alle
+ * Ereignisse"). Dann fehlt nichts.
+ */
+export function missingWebhookEvents(enabledEvents: readonly string[]): string[] {
+  if (enabledEvents.includes('*')) return []
+  const have = new Set(enabledEvents)
+  return WEBHOOK_EVENTS.filter(name => !have.has(name))
+}

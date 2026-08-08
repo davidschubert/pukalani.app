@@ -29,21 +29,42 @@ export function __resetMisconfigurationWarnings(): void {
 }
 
 /**
- * Stripe-Server-Fundament (B8/B10): lazy Singleton, Key aus runtimeConfig
- * (NUXT_STRIPE_SECRET_KEY, server-only). Fehlender Key → generischer 500 +
+ * Stripe-Server-Fundament (B8/B10): Key aus der Auflösung DB-vor-Env
+ * (`resolveStripeSecretKey`, F55). Fehlender Key → generischer 500 +
  * Server-Log (kein Boot-Crash, keine Details an Clients).
+ *
+ * ASYNC SEIT F55, und das ist keine Kosmetik: der Key kann seit der
+ * Dashboard-Verwaltung in einer Appwrite-Zeile liegen, und die liest man
+ * nicht synchron. Alle Aufrufer wurden mitgezogen (`await useStripe(event)`);
+ * der Typ erzwingt das bei jedem neuen dazu.
+ *
+ * DER CLIENT WIRD AM KEY GECACHT, nicht als nacktes Singleton. Ein Singleton
+ * überlebte einen Key-Wechsel über die Oberfläche: der Betreiber trägt einen
+ * neuen Key ein, die Karte meldet Erfolg — und der laufende Prozess spricht
+ * bis zum nächsten Deploy mit dem alten. Auf einem Wechsel test → live wäre
+ * das genau der Fehler, den F55 verhindern soll.
  */
-let stripeSingleton: Stripe | null = null
+let stripeClient: { key: string, client: Stripe } | null = null
 
-export function useStripe(event: H3Event): Stripe {
-  if (stripeSingleton) return stripeSingleton
-  const key = useRuntimeConfig(event).stripeSecretKey
+export async function useStripe(event: H3Event): Promise<Stripe> {
+  const { value: key } = await resolveStripeSecretKey(event)
   if (!key) {
-    warnMisconfiguredOnce('secretKey', '[billing] NUXT_STRIPE_SECRET_KEY fehlt — Billing ist enabled, aber ohne Key nicht funktionsfähig.')
+    warnMisconfiguredOnce('secretKey', '[billing] Kein Stripe-Secret-Key — weder in stripe_settings noch als NUXT_STRIPE_SECRET_KEY. Billing ist enabled, aber nicht funktionsfähig.')
     throw createError({ status: 500, statusText: 'Payment provider not configured' })
   }
-  stripeSingleton = new Stripe(key)
-  return stripeSingleton
+  if (stripeClient?.key === key) return stripeClient.client
+  stripeClient = { key, client: new Stripe(key) }
+  return stripeClient.client
+}
+
+/**
+ * Stripe-Client zu einem MITGEGEBENEN Key — für die Prüfung eines gerade
+ * eingetippten Schlüssels, BEVOR er gespeichert wird (F55). Bewusst ohne
+ * Cache und ohne Auflösung: dieser Client soll ausdrücklich nicht der der
+ * Instanz sein.
+ */
+export function stripeClientForKey(key: string): Stripe {
+  return new Stripe(key)
 }
 
 /** Stripe-Fehler → generische h3-Fehler (keine Provider-Details leaken) */
@@ -137,7 +158,7 @@ export async function resolvePriceByLookupKey(event: H3Event, lookupKey: string)
   const cached = priceCache.get(lookupKey)
   if (cached && Date.now() - cached.at < PRICE_TTL_MS) return cached.price
 
-  const stripe = useStripe(event)
+  const stripe = await useStripe(event)
   const res = await stripe.prices.list({ lookup_keys: [lookupKey], active: true, limit: 1 })
     .catch(error => toStripeSafeError(error, `prices.list für lookup_key '${lookupKey}' fehlgeschlagen`))
   const price = res.data[0]
