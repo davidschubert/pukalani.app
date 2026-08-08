@@ -23,8 +23,7 @@
       "sectionFailed": "Stripe antwortet gerade nicht",
       "source": {
         "db": "(hier eingetragen)",
-        "env": "(aus der Server-Umgebung)",
-        "none": ""
+        "env": "(aus der Server-Umgebung)"
       },
       "status": {
         "title": "Status",
@@ -77,7 +76,12 @@
         "synced": "Fertig — {created} angelegt, {transferred} ersetzt, {skipped} unverändert",
         "syncFailed": "Abgleich fehlgeschlagen",
         "landingTitle": "Beträge ändern zieht nicht überall nach",
-        "landingHint": "Ein neuer Betrag gilt sofort für neue Abos; bestehende Abos behalten ihren alten Preis. Die Preise auf der Website stehen getrennt davon im Code und müssen von Hand nachgezogen werden."
+        "landingHint": "Ein neuer Betrag gilt sofort für neue Abos; bestehende Abos behalten ihren alten Preis. Die Preise auf der Website stehen getrennt davon im Code und müssen von Hand nachgezogen werden.",
+        "confirmTitle": "Live-Preise ersetzen?",
+        "confirmIntro": "Dieses Deployment spricht mit echtem Geld. Für diese Preise weicht der Betrag bei Stripe vom Katalog ab — der Abgleich legt je einen neuen Preis an, zieht den lookup_key darauf um und archiviert den alten:",
+        "confirmRow": "{lookupKey}: {from} → {to}",
+        "confirmNote": "Bestehende Abos behalten ihren Preis. Neue Abos werden ab sofort zum neuen Betrag abgeschlossen.",
+        "confirmCta": "Preise ersetzen"
       },
       "webhook": {
         "title": "Webhook",
@@ -87,7 +91,7 @@
         "state": "Zustand",
         "stateOk": "eingerichtet",
         "stateMissing": "fehlt",
-        "stateIncomplete": "{count} Ereignisse fehlen",
+        "stateIncomplete": "{count} Ereignis fehlt | {count} Ereignisse fehlen",
         "events": "Diese Ereignisse werden gebraucht:",
         "create": "Anlegen",
         "addEvents": "Ereignisse ergänzen",
@@ -96,7 +100,16 @@
         "unchanged": "Alles schon eingerichtet",
         "secretStored": "Das Signatur-Geheimnis wurde automatisch gespeichert.",
         "errorNoAppUrl": "Ohne NUXT_PUBLIC_APP_URL ist die Adresse unbekannt",
-        "errorGeneric": "Webhook konnte nicht eingerichtet werden"
+        "errorGeneric": "Webhook konnte nicht eingerichtet werden",
+        "secretUnconfirmedTitle": "Herkunft des Signatur-Geheimnisses unbestätigt",
+        "secretUnconfirmedHint": "Der Endpunkt existiert, aber dieses Deployment hat ihn nicht selbst angelegt — das gespeicherte Geheimnis stammt aus der Server-Umgebung, wurde von Hand eingetragen oder gehört zu einem früheren Endpunkt. Stripe gibt das Geheimnis nur beim Anlegen heraus, ein Abgleich ist deshalb unmöglich. Passt es nicht, weist der Webhook jede Zustellung ab. Sicherheit gibt nur „Endpunkt neu anlegen“.",
+        "recreate": "Endpunkt neu anlegen",
+        "recreateConfirmTitle": "Endpunkt neu anlegen und Geheimnis ersetzen?",
+        "recreateConfirmBody": "Der bestehende Endpunkt wird bei Stripe gelöscht und ein neuer mit allen neun Ereignissen angelegt. Das dabei erzeugte Signatur-Geheimnis wird sofort gespeichert und ersetzt das bisherige. Zustellungen, die Stripe in diesem Moment gerade wiederholt, gehen verloren.",
+        "recreateConfirm": "Löschen und neu anlegen",
+        "recreated": "Endpunkt neu angelegt",
+        "errorSecretNotStored": "Endpunkt angelegt, Geheimnis NICHT gespeichert — bei Stripe löschen und neu anlegen",
+        "errorNoStorage": "Ohne NUXT_BILLING_SETTINGS_KEY kann das Geheimnis nicht abgelegt werden — nichts angelegt"
       }
     }
   }

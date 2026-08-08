@@ -46,6 +46,13 @@ interface WebhookStatus {
   enabledEvents: string[]
   missingEvents: string[]
   otherEndpoints: number
+  /**
+   * Gehört das gespeicherte Signatur-Geheimnis zu DIESEM Endpunkt? (MEDIUM 2)
+   * 'created_here' = ja, weil dieses Deployment ihn selbst angelegt hat.
+   * 'unconfirmed'  = ein Geheimnis ist da, seine Herkunft ist aber unbelegbar.
+   * 'none'         = gar keins.
+   */
+  secretOrigin: 'created_here' | 'unconfirmed' | 'none'
 }
 
 interface TaxStatus {
@@ -141,6 +148,37 @@ async function saveKeys() {
 // ── Preise ──────────────────────────────────────────────────────────────────
 interface PriceSyncResult { lookupKey: string, outcome: 'created' | 'skipped' | 'transferred' }
 const syncingPrices = ref(false)
+const showPriceConfirm = ref(false)
+
+/**
+ * WELCHE PREISE WÜRDE DER ABGLEICH ERSETZEN? (LOW 6) — die existieren, aber
+ * einen anderen Betrag tragen als der Katalog. Genau diese legt
+ * `syncStripePriceCatalog` neu an und archiviert den alten; fehlende Preise
+ * werden dagegen nur ANGELEGT und sind harmlos.
+ */
+const priceReplacements = computed(() =>
+  (prices.value ?? []).filter(price => price.exists && price.amount !== price.expectedAmount),
+)
+
+/**
+ * BEI LIVE-GELD ERST FRAGEN (LOW 6). Der Knopf ersetzte bisher ohne Rückfrage
+ * echte Preise — und was er ersetzen würde, stand nur als kleines Abzeichen in
+ * der Liste daneben. Im Testmodus bleibt der Weg direkt: dort ist ein Fehlgriff
+ * kostenlos, und eine Rückfrage, die man immer wegklickt, schützt beim
+ * einunddreißigsten Mal niemanden mehr.
+ */
+function requestPriceSync() {
+  if (isLive.value && priceReplacements.value.length > 0) {
+    showPriceConfirm.value = true
+    return
+  }
+  return syncPrices()
+}
+
+async function confirmPriceSync() {
+  showPriceConfirm.value = false
+  await syncPrices()
+}
 
 async function syncPrices() {
   syncingPrices.value = true
@@ -162,31 +200,58 @@ async function syncPrices() {
 
 // ── Webhook ─────────────────────────────────────────────────────────────────
 const creatingWebhook = ref(false)
+const showRecreateConfirm = ref(false)
 
-async function ensureWebhook() {
+type WebhookAction = 'created' | 'recreated' | 'events_added' | 'unchanged'
+
+/**
+ * Herkunft des Signatur-Geheimnisses ist unbelegbar (MEDIUM 2). Nur zeigen,
+ * wenn es überhaupt etwas zu belegen gäbe: ohne Endpunkt oder ohne Geheimnis
+ * sagt die Karte an anderer Stelle schon das Wesentliche.
+ */
+const secretUnconfirmed = computed(() => !!webhook.value?.found && webhook.value.secretOrigin === 'unconfirmed')
+
+async function confirmRecreateWebhook() {
+  showRecreateConfirm.value = false
+  await ensureWebhook(true)
+}
+
+async function ensureWebhook(recreate = false) {
   creatingWebhook.value = true
   try {
-    const result = await $fetch<{ action: 'created' | 'events_added' | 'unchanged', secretStored: boolean }>(
+    const result = await $fetch<{ action: WebhookAction, secretStored: boolean }>(
       '/api/control/stripe/webhook',
-      { method: 'POST' },
+      { method: 'POST', body: recreate ? { recreate: true } : {} },
     )
-    const title = result.action === 'created'
-      ? t('control.stripe.webhook.created')
-      : result.action === 'events_added'
-        ? t('control.stripe.webhook.eventsAdded')
-        : t('control.stripe.webhook.unchanged')
+    const titles: Record<WebhookAction, string> = {
+      created: t('control.stripe.webhook.created'),
+      recreated: t('control.stripe.webhook.recreated'),
+      events_added: t('control.stripe.webhook.eventsAdded'),
+      unchanged: t('control.stripe.webhook.unchanged'),
+    }
     toast.add({
-      title,
+      title: titles[result.action],
       description: result.secretStored ? t('control.stripe.webhook.secretStored') : undefined,
       color: 'success',
     })
     await refresh()
   }
   catch (error) {
-    const key = reasonOf(error) === 'app_url_missing'
+    const reason = reasonOf(error)
+    const key = reason === 'app_url_missing'
       ? 'control.stripe.webhook.errorNoAppUrl'
-      : 'control.stripe.webhook.errorGeneric'
+      // Der Endpunkt STEHT bei Stripe, nur sein Geheimnis fehlt — das ist eine
+      // andere Nachricht als „konnte nicht eingerichtet werden" und verlangt
+      // eine andere Handlung (dort löschen, hier neu anlegen).
+      : reason === 'secret_not_stored'
+        ? 'control.stripe.webhook.errorSecretNotStored'
+        : reason === 'encryption_unconfigured'
+          ? 'control.stripe.webhook.errorNoStorage'
+          : 'control.stripe.webhook.errorGeneric'
     toast.add({ title: t(key), color: 'error' })
+    // Auch der Fehlschlag ändert womöglich den Zustand (beim Neu-Anlegen ist
+    // der alte Endpunkt dann schon weg) — die Karte muss die Wahrheit zeigen.
+    await refresh()
   }
   finally {
     creatingWebhook.value = false
@@ -247,16 +312,22 @@ async function ensureWebhook() {
               <dd class="text-right">
                 <span v-if="hasKey" class="font-mono">…{{ data?.keyTail }}</span>
                 <span v-else>{{ t('control.stripe.status.keyMissing') }}</span>
-                <span class="ml-2 text-muted">{{ t(`control.stripe.source.${data?.keySource ?? 'none'}`) }}</span>
+                <!-- Ohne Herkunft steht hier NICHTS. Vorher trug der Schlüssel
+                     `source.none` bewusst einen leeren Wert — vue-i18n rendert
+                     den zwar wirklich als '' (11.4.8 nachgemessen), aber ein
+                     leerer Übersetzungswert ist von einem VERGESSENEN nicht zu
+                     unterscheiden, und beim nächsten Bibliotheks-Wechsel
+                     stünde dort womöglich der Schlüssel. -->
+                <span v-if="hasKey" class="ml-2 text-muted">{{ t(`control.stripe.source.${data!.keySource}`) }}</span>
               </dd>
             </div>
 
             <div class="flex items-center justify-between gap-4 py-3">
               <dt class="text-muted">{{ t('control.stripe.status.webhookSecret') }}</dt>
               <dd class="text-right">
-                <span v-if="data?.webhookSecretSource !== 'none'" class="font-mono">…{{ data?.webhookSecretTail }}</span>
+                <span v-if="data && data.webhookSecretSource !== 'none'" class="font-mono">…{{ data.webhookSecretTail }}</span>
                 <span v-else>{{ t('control.stripe.status.keyMissing') }}</span>
-                <span class="ml-2 text-muted">{{ t(`control.stripe.source.${data?.webhookSecretSource ?? 'none'}`) }}</span>
+                <span v-if="data && data.webhookSecretSource !== 'none'" class="ml-2 text-muted">{{ t(`control.stripe.source.${data.webhookSecretSource}`) }}</span>
               </dd>
             </div>
 
@@ -381,7 +452,7 @@ async function ensureWebhook() {
           />
 
           <div class="mt-4 flex justify-end">
-            <UButton :loading="syncingPrices" :disabled="!hasKey" @click="syncPrices">
+            <UButton :loading="syncingPrices" :disabled="!hasKey" @click="requestPriceSync">
               {{ t('control.stripe.prices.sync') }}
             </UButton>
           </div>
@@ -407,7 +478,9 @@ async function ensureWebhook() {
                 <span v-else-if="failed(data?.webhook)" class="text-muted">{{ t('control.stripe.sectionFailed') }}</span>
                 <UBadge v-else-if="!webhook?.found" color="warning" variant="subtle">{{ t('control.stripe.webhook.stateMissing') }}</UBadge>
                 <UBadge v-else-if="webhook.missingEvents.length" color="warning" variant="subtle">
-                  {{ t('control.stripe.webhook.stateIncomplete', { count: webhook.missingEvents.length }) }}
+                  <!-- Pluralform (LOW 8): bei genau einem fehlenden Ereignis
+                       stand hier „1 Ereignisse fehlen". -->
+                  {{ t('control.stripe.webhook.stateIncomplete', { count: webhook.missingEvents.length }, webhook.missingEvents.length) }}
                 </UBadge>
                 <UBadge v-else color="success" variant="subtle">{{ t('control.stripe.webhook.stateOk') }}</UBadge>
               </dd>
@@ -429,11 +502,31 @@ async function ensureWebhook() {
             </ul>
           </div>
 
-          <div class="mt-4 flex justify-end">
+          <UAlert
+            v-if="secretUnconfirmed"
+            color="warning"
+            variant="subtle"
+            icon="i-ph-seal-question"
+            class="mt-4"
+            :title="t('control.stripe.webhook.secretUnconfirmedTitle')"
+            :description="t('control.stripe.webhook.secretUnconfirmedHint')"
+          />
+
+          <div class="mt-4 flex flex-wrap justify-end gap-2">
+            <UButton
+              v-if="webhook?.found"
+              color="error"
+              variant="subtle"
+              :loading="creatingWebhook"
+              :disabled="!hasKey || !data?.expectedWebhookUrl"
+              @click="showRecreateConfirm = true"
+            >
+              {{ t('control.stripe.webhook.recreate') }}
+            </UButton>
             <UButton
               :loading="creatingWebhook"
               :disabled="!hasKey || !data?.expectedWebhookUrl"
-              @click="ensureWebhook"
+              @click="ensureWebhook()"
             >
               {{ webhook?.found ? t('control.stripe.webhook.addEvents') : t('control.stripe.webhook.create') }}
             </UButton>
@@ -442,4 +535,44 @@ async function ensureWebhook() {
       </div>
     </template>
   </UDashboardPanel>
+
+  <!-- Live-Preise ersetzen (LOW 6): nennt die betroffenen lookup_keys mit
+       alt→neu, damit die Zustimmung eine Zustimmung ZU ETWAS ist. -->
+  <UModal v-model:open="showPriceConfirm" :title="t('control.stripe.prices.confirmTitle')">
+    <template #body>
+      <div class="space-y-3 text-sm">
+        <p class="text-muted">{{ t('control.stripe.prices.confirmIntro') }}</p>
+        <ul class="divide-y divide-default rounded-md border border-default">
+          <li v-for="price in priceReplacements" :key="price.lookupKey" class="px-3 py-2 font-mono text-xs">
+            {{ t('control.stripe.prices.confirmRow', {
+              lookupKey: price.lookupKey,
+              from: money(price.amount ?? 0, price.currency),
+              to: money(price.expectedAmount, 'eur'),
+            }) }}
+          </li>
+        </ul>
+        <p class="text-muted">{{ t('control.stripe.prices.confirmNote') }}</p>
+      </div>
+    </template>
+    <template #footer>
+      <div class="flex w-full justify-end gap-2">
+        <UButton color="neutral" variant="ghost" :label="t('ui.cancel')" @click="showPriceConfirm = false" />
+        <UButton color="warning" :loading="syncingPrices" :label="t('control.stripe.prices.confirmCta')" @click="confirmPriceSync" />
+      </div>
+    </template>
+  </UModal>
+
+  <!-- Endpunkt neu anlegen (MEDIUM 2): löscht bei Stripe und ersetzt das
+       Signatur-Geheimnis — deshalb nie ohne ausdrückliche Zustimmung. -->
+  <UModal v-model:open="showRecreateConfirm" :title="t('control.stripe.webhook.recreateConfirmTitle')">
+    <template #body>
+      <p class="text-sm text-muted">{{ t('control.stripe.webhook.recreateConfirmBody') }}</p>
+    </template>
+    <template #footer>
+      <div class="flex w-full justify-end gap-2">
+        <UButton color="neutral" variant="ghost" :label="t('ui.cancel')" @click="showRecreateConfirm = false" />
+        <UButton color="error" :loading="creatingWebhook" :label="t('control.stripe.webhook.recreateConfirm')" @click="confirmRecreateWebhook" />
+      </div>
+    </template>
+  </UModal>
 </template>
