@@ -22,6 +22,15 @@ export default defineNuxtConfig({
      * Verschlüsselung mit Schlüssel aus dem Repository ist eine Verkleidung.
      */
     billingSettingsKey: '',
+    /**
+     * NUXT_BILLING_SETTINGS_KEY_OLD — derselbe Aufbau, aber NUR ZUM LESEN
+     * (LOW 7). Trägt während einer Schlüssel-Rotation den bisherigen
+     * Schlüssel, damit die abgelegten Geheimnisse im Deploy-Moment nicht
+     * unlesbar werden. Nach dem Neu-Speichern jedes Geheimnisses wieder
+     * entfernen — ein dauerhaft gesetzter Alt-Schlüssel ist keine Rotation,
+     * sondern ein zweiter gültiger Schlüssel.
+     */
+    billingSettingsKeyOld: '',
   },
 
   // Eigene Layer-Strings — mergen mit Core- und App-Locales (gleiche codes)
