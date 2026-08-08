@@ -126,6 +126,34 @@ ebenfalls aus; er passiert nach dem Deploy.
 
 ---
 
+### F55 — Stripe-Verwaltung im Control-Dashboard ✅ 2026-08-08
+
+**Was gebaut wurde** (Davids Entscheidung am selben Tag, nachdem der
+Terminal-Weg praktisch scheiterte — Shell-Export-Verwechslung, zsh/bash-read,
+Key-Fragment im Chat ⇒ Key rotiert): `/dashboard/stripe` auf apps/control
+(system.manage) mit vier Karten — Status (Modus/Steuer-Default/Signatur/
+lookup_keys, fail-soft je Abschnitt) · Schlüssel (maskiert, vor dem Speichern
+per accounts.retrieve verifiziert, AES-256-GCM in `stripe_settings`
+[billing-002]; Entschlüsselung über `NUXT_BILLING_SETTINGS_KEY`, ohne sie
+ehrlich „nicht eingerichtet") · Preise (Katalog jetzt EINE Quelle:
+`control/shared/stripePriceCatalog.ts`, `ensure-prices.mjs` importiert sie;
+`tax_behavior: inclusive` wird EXPLIZIT gesetzt — die A3-Konto-Default-Falle
+ist damit konstruktiv zu) · Webhook (Anlegen mit den neun Ereignissen, das
+whsec aus der API-Antwort wird sofort verschlüsselt mitgespeichert).
+Laufzeit-Auflösung DB-vor-Env für useStripe (async, Client am Key gecacht)
+und die Webhook-Route — ohne DB-Wert exakt das Vor-F55-Verhalten.
+**Betrieb:** Env-Schlüssel AUF dem Server erzeugt (nie übertragen),
+billing-002 auf control UND comments (Prod) gefahren, pm2-Reload mit
+--update-env (Falle: der Prozess heißt `controlpukalaniapp`, nicht
+`control`). **Beweise:** billing 94/94, control 375/375, 4 Apps typecheck 0,
+alle Doku-Gates; live: Seite 302→Login, status-API 401 anonym, Webhook
+unsigniert 400, Build-SHA = F55-Commit, Env-Schlüssel im Prozess bestätigt.
+**Gelernt:** (1) `git add -A` in einem geteilten Checkout ist verboten —
+es hat uncommittete FREMDE Portfolio-Dateien in den Commit gezogen
+(chirurgisch per reset --soft + restore --staged getrennt); immer explizite
+Pfade adden. (2) GitHubs Push-Protection matcht auch ERFUNDENE
+sk_live_-Beispielwerte in Tests — Fixture-Keys zur Laufzeit zusammensetzen.
+
 ### F38-Rest + B1-Rest — Pool-media live, Baselines gesichtet ✅ 2026-08-08
 
 **F38:** Die Console-Rechte (Migrations-Key buckets+files, Laufzeit-Key

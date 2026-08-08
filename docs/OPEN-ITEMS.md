@@ -1,6 +1,6 @@
 # Offene Punkte
 
-**Stand: 4 offen · 3 geparkt/wartend · 9 bewusst zurückgestellt** (Zahlen bei JEDEM Umzug nach COMPLETE mitführen)
+**Stand: 3 offen · 3 geparkt/wartend · 9 bewusst zurückgestellt** (Zahlen bei JEDEM Umzug nach COMPLETE mitführen)
 
 Stand: **2026-08-08**. Hier steht **nur, was noch offen ist** — in der
 Reihenfolge, in der es abgearbeitet wird. Alles Erledigte (mit Begründung,
@@ -20,7 +20,6 @@ Legende — **Prio:** Hoch / Mittel / Niedrig ·
 | --- | --- | --- | --- | --- | --- |
 | 1 · F54 | **Portfolio-Domain fertig freischalten.** Zertifikat und Origins stehen seit dem Erstlauf, der Status hängt auf `pending_platform` — die Fixes dafür sind gebaut. Nach dem Deploy von control **und** portfolio: `/dashboard/websites` → portfolio → Eigene Domain → **„Prüfen"** ⇒ muss `active` werden. | Hoch | S — ein Klick nach dem Deploy | Nein | [Runbook B4](runbooks/CUSTOM-DOMAIN-ERSTAKTIVIERUNG.md) |
 | 3 · A1 | **Echte Rechtstexte** für Impressum, Datenschutz und AGB. Die Seiten stehen, die Texte sind Entwürfe mit sichtbarem Hinweis. Schaltet Schritt 4 frei. | Hoch | S — Adresse eintragen, Anwalt lesen lassen | Ja: nur David (ggf. Anwalt) | [Notizen](#notizen) |
-| 2 · F55 | **Stripe-Bereich im Control-Dashboard** (Davids Entscheidung 2026-08-08): Keys maskiert eintragen (AES-verschlüsselt in DB, Entschlüsselung per Env-Schlüssel), Preise per Klick anlegen/abgleichen, Webhook per Klick (whsec aus der API-Antwort direkt gespeichert), Status-Karte (Modus/Steuer/Signatur/lookup_keys). Der A2-Go-Live läuft danach über diese Seite. | Hoch | M–L | Nein — Entscheidungen stehen | [DECISION-LOG 2026-08-08](DECISION-LOG.md) |
 | 4 · A2 | **Stripe auf echtes Geld umstellen — über die neue F55-Seite.** Vorstufe A2a komplett grün (2026-08-08). Bei David bleiben: Bank-Aktivierung, Steuer-Registrierung, Live-Key ROTIERT eintragen (der erste ist teil-geleakt und rotiert), Portal-Konfiguration; alles andere klickt die F55-Seite. Braucht 2 (F55) und 3 (A1). | Hoch | S — nach F55 | Ja: Bank, Konto, Portal | [STRIPE-GO-LIVE-RUNBOOK.md](runbooks/STRIPE-GO-LIVE-RUNBOOK.md) |
 
 ## ⏸️ Geparkt / wartet — in Arbeitsreihenfolge
