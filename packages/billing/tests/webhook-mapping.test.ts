@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type Stripe from 'stripe'
-import { isNewPaymentFailure, isStale, missingWebhookEvents, paymentFailureAudience, planIdForPrice, subscriptionToPatch, toSubscriptionStatus, WEBHOOK_ALLOWLIST, WEBHOOK_EVENTS } from '../server/utils/webhookMapping'
+import { isNewPaymentFailure, isStale, paymentFailureAudience, planIdForPrice, subscriptionToPatch, toSubscriptionStatus } from '../server/utils/webhookMapping'
+import { missingWebhookEvents, WEBHOOK_ALLOWLIST, WEBHOOK_EVENTS } from '../shared/webhookEvents'
 import type { PukalaniBillingPlan } from '../shared/types/billing'
 
 const PLANS: PukalaniBillingPlan[] = [

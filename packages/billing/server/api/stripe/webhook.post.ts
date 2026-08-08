@@ -8,7 +8,8 @@ import {
   type BillingSubscriptionRow,
   type SubscriptionStatus,
 } from '../../../shared/types/billing'
-import { checkoutOutcome, isNewPaymentFailure, isStale, paymentFailureAudience, subscriptionToPatch, subscriptionToVerifiedUpdate, toSubscriptionStatus, WEBHOOK_ALLOWLIST, type CheckoutOutcome, type SubscriptionPatch } from '../../utils/webhookMapping'
+import { checkoutOutcome, isNewPaymentFailure, isStale, paymentFailureAudience, subscriptionToPatch, subscriptionToVerifiedUpdate, toSubscriptionStatus, type CheckoutOutcome, type SubscriptionPatch } from '../../utils/webhookMapping'
+import { WEBHOOK_ALLOWLIST } from '../../../shared/webhookEvents'
 
 /**
  * Stripe-Webhook (B1/B4): Signatur-Verifikation über den RAW-Body, Event-

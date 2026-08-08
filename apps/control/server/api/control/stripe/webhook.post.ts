@@ -1,5 +1,5 @@
 import type Stripe from 'stripe'
-import { missingWebhookEvents, WEBHOOK_EVENTS } from '../../../../../../packages/billing/server/utils/webhookMapping'
+import { missingWebhookEvents, WEBHOOK_EVENTS } from '../../../../../../packages/billing/shared/webhookEvents'
 import { stripeWebhookUrl } from '../../../utils/stripeWebhookEndpoint'
 
 /**
