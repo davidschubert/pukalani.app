@@ -64,3 +64,43 @@ export function looksLikeStripeSecretKey(value: string): boolean {
 export function looksLikeStripeWebhookSecret(value: string): boolean {
   return /^whsec_[A-Za-z0-9_]{8,}$/.test(value)
 }
+
+/**
+ * GEHÖRT DAS GESPEICHERTE `whsec_` ZU DEM ENDPUNKT, DEN DIE KARTE ZEIGT?
+ * (Audit-Befund MEDIUM 2, 2026-08-08)
+ *
+ * Die Frage ist PRINZIPIELL NICHT BEWEISBAR: Stripe gibt das Secret nur beim
+ * Anlegen heraus, es gibt keine Vergleichs-API und keinen Fingerabdruck. Die
+ * Statuskarte behauptete vorher trotzdem „eingerichtet", sobald URL und
+ * Ereignisse stimmten — und war damit grün, während der Webhook jede
+ * Zustellung an der Signaturprüfung abwies.
+ *
+ * Beweisbar ist nur der eine Moment, in dem wir es sicher WUSSTEN: hat DIESE
+ * Instanz genau diesen Endpunkt selbst angelegt und das dabei erhaltene Secret
+ * abgelegt? Das merkt sich `stripe_settings.webhookEndpointId`.
+ *
+ * `source` MUSS dabei 'db' sein. Ein Secret aus der Server-Env kann zufällig
+ * das richtige sein — belegen lässt sich das nicht, und die Marke daneben
+ * gehört zu einem Wert, der gerade gar nicht gilt (DB schlägt Env nur, wenn
+ * dort etwas steht). Ohne diese Bedingung wäre die Zusicherung übertragbar.
+ *
+ * Drei Antworten, keine vierte:
+ * - 'created_here' → belegt.
+ * - 'unconfirmed'  → ein Secret ist da, seine Herkunft ist unbelegbar.
+ * - 'none'         → gar keins; das sagt die Karte an anderer Stelle schon.
+ *
+ * BEWUSST KEIN 'wrong': die Karte behauptet nie einen Fehler, den sie nicht
+ * belegen kann. Sie sagt, was sie nicht weiß.
+ */
+export type StripeWebhookSecretOrigin = 'created_here' | 'unconfirmed' | 'none'
+
+export function webhookSecretOrigin(
+  source: StripeSecretSource,
+  markedEndpointId: string | null | undefined,
+  foundEndpointId: string | null | undefined,
+): StripeWebhookSecretOrigin {
+  if (source === 'none') return 'none'
+  if (source !== 'db') return 'unconfirmed'
+  if (!markedEndpointId || !foundEndpointId) return 'unconfirmed'
+  return markedEndpointId === foundEndpointId ? 'created_here' : 'unconfirmed'
+}

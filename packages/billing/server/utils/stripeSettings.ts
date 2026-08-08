@@ -44,6 +44,18 @@ export const STRIPE_SETTINGS_ROW_ID = 'stripe'
 export interface StripeSettingsRow extends Models.Row {
   stripeSecretKeyEncrypted: string
   stripeWebhookSecretEncrypted: string
+  /**
+   * HERKUNFTS-MARKE des Webhook-Secrets (MEDIUM 2, Migration billing-003):
+   * die Id des Stripe-Endpunkts, den DIESE Instanz selbst angelegt hat und
+   * dessen `secret` sie dabei abgelegt hat. Leer = unbekannte Herkunft.
+   *
+   * Sie beantwortet die einzige Frage, die die Statuskarte sonst nicht
+   * beantworten KANN: ob das gespeicherte `whsec_` zu dem Endpunkt gehört, den
+   * sie gerade anzeigt. Stripe gibt das Secret nur beim Anlegen heraus — ein
+   * nachträglicher Abgleich ist prinzipiell unmöglich, also merken wir uns den
+   * einen Moment, in dem wir es sicher wussten.
+   */
+  webhookEndpointId: string
   updatedAt: string
   updatedBy: string
 }
@@ -202,6 +214,48 @@ export async function resolveStripeWebhookSecret(event: H3Event): Promise<Resolv
   const fromEnv = useRuntimeConfig(event).stripeWebhookSecret
   if (fromEnv) return { value: fromEnv, source: 'env' }
   return { value: '', source: 'none' }
+}
+
+/**
+ * Zu WELCHEM Stripe-Endpunkt gehört das gespeicherte Webhook-Secret? (MEDIUM 2)
+ *
+ * Leer heißt „unbekannt" — und zwar in DREI Fällen, die alle dieselbe ehrliche
+ * Antwort verdienen: das Secret kam aus der Env, es wurde von Hand eingetragen,
+ * oder es liegt aus der Zeit vor dieser Marke in der Zeile. Der Aufrufer sagt
+ * dann „Herkunft unbestätigt", nie „falsch".
+ */
+export async function resolveStripeWebhookEndpointId(event: H3Event): Promise<string> {
+  const row = await loadStripeSettings(event)
+  return row?.webhookEndpointId ?? ''
+}
+
+/**
+ * Die Herkunfts-Marke setzen (oder mit '' löschen) — FAIL-SOFT und bewusst
+ * getrennt von `saveStripeSettings`.
+ *
+ * WARUM GETRENNT: die Spalte kommt aus Migration billing-003. Läuft der Code
+ * auf einer Instanz, auf der die Migration noch nicht gefahren ist, lehnt
+ * Appwrite das unbekannte Feld ab — und läge es im selben Aufruf, risse es das
+ * SPEICHERN DES SECRETS mit. Ein Endpunkt ohne Secret ist genau der Schaden,
+ * den MEDIUM 1 beseitigt; die Marke ist dagegen nur Diagnose. Sie fehlt dann,
+ * die Karte sagt „Herkunft unbestätigt", und das ist die konservative Seite.
+ */
+export async function rememberStripeWebhookEndpointId(event: H3Event, endpointId: string, updatedBy: string): Promise<boolean> {
+  try {
+    const config = useRuntimeConfig(event)
+    await createAdminClient(event).tablesDB.updateRow({
+      databaseId: config.public.appwriteDatabaseId,
+      tableId: STRIPE_SETTINGS_TABLE,
+      rowId: STRIPE_SETTINGS_ROW_ID,
+      data: { webhookEndpointId: endpointId, updatedAt: new Date().toISOString(), updatedBy },
+    })
+    invalidateStripeSettingsCache()
+    return true
+  }
+  catch (error) {
+    console.error(`[billing] Herkunfts-Marke des Webhook-Secrets nicht gespeichert (Migration billing-003 gefahren?):`, (error as { code?: number })?.code ?? 'unknown')
+    return false
+  }
 }
 
 /**

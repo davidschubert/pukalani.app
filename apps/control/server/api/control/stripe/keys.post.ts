@@ -79,7 +79,33 @@ export default defineEventHandler(async (event) => {
     ...(body.webhookSecret !== undefined ? { webhookSecret: body.webhookSecret } : {}),
   }, user.$id)
 
+  // EIN VON HAND EINGETRAGENES SIGNATUR-GEHEIMNIS HAT UNBEKANNTE HERKUNFT
+  // (MEDIUM 2): es mag zum bestehenden Endpunkt gehören oder nicht — beweisen
+  // lässt sich das nicht. Die Marke wird deshalb gelöscht, statt eine alte
+  // Zusicherung auf ein neues Geheimnis zu übertragen.
+  if (body.webhookSecret !== undefined) {
+    await rememberStripeWebhookEndpointId(event, '', user.$id)
+  }
+
   console.info(`[control/stripe/keys] Geheimnisse aktualisiert (${body.secretKey !== undefined ? 'secretKey' : ''}${body.secretKey !== undefined && body.webhookSecret !== undefined ? '+' : ''}${body.webhookSecret !== undefined ? 'webhookSecret' : ''}) durch ${user.$id}`)
+
+  // AUDIT (MEDIUM 5): die TATSACHE einer Rotation gehört ins Protokoll — bis
+  // hierher stand sie nur in `console.info`, also nirgends, wo jemand
+  // nachschlägt. Was NICHT hineingehört, ist der Wert: Modus und die letzten
+  // vier Zeichen, dieselbe Regel wie in der Antwort dieser Route.
+  await recordAudit(event, {
+    action: 'stripe.key_rotated',
+    targetType: 'stripe_settings',
+    targetId: 'stripe',
+    metadata: {
+      ...(body.secretKey !== undefined
+        ? { mode: stripeModeFromKey(body.secretKey), keyTail: secretTail(body.secretKey) }
+        : {}),
+      ...(body.webhookSecret !== undefined
+        ? { webhookSecretTail: secretTail(body.webhookSecret) }
+        : {}),
+    },
+  })
 
   return {
     ok: true,

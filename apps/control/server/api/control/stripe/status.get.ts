@@ -1,5 +1,5 @@
 import type Stripe from 'stripe'
-import { secretTail, stripeModeFromKey, type StripeKeyMode, type StripeSecretSource } from '../../../../../../packages/billing/shared/stripeKeys'
+import { secretTail, stripeModeFromKey, webhookSecretOrigin, type StripeKeyMode, type StripeSecretSource } from '../../../../../../packages/billing/shared/stripeKeys'
 import { missingWebhookEvents, WEBHOOK_EVENTS } from '../../../../../../packages/billing/shared/webhookEvents'
 import { readStripePriceStatus, type StripePriceStatus } from '../../../utils/stripePrices'
 import { stripeWebhookUrl } from '../../../utils/stripeWebhookEndpoint'
@@ -87,6 +87,7 @@ export default defineEventHandler(async (event) => {
     const wanted = base.expectedWebhookUrl
     const list = await stripe.webhookEndpoints.list({ limit: 100 })
     const found = wanted ? list.data.find((endpoint: Stripe.WebhookEndpoint) => endpoint.url === wanted) ?? null : null
+    const markedEndpointId = await resolveStripeWebhookEndpointId(event)
     return {
       found: !!found,
       id: found?.id ?? null,
@@ -95,6 +96,12 @@ export default defineEventHandler(async (event) => {
       missingEvents: found ? missingWebhookEvents(found.enabled_events ?? []) : WEBHOOK_EVENTS.slice(),
       /** Andere Endpunkte desselben Kontos — nur die ANZAHL, nie fremde URLs. */
       otherEndpoints: list.data.length - (found ? 1 : 0),
+      /**
+       * Gehört das gespeicherte `whsec_` zu DIESEM Endpunkt? (MEDIUM 2) —
+       * pure Regel samt Begründung in shared/stripeKeys.ts, hier nur die
+       * drei Eingaben.
+       */
+      secretOrigin: webhookSecretOrigin(base.webhookSecretSource, markedEndpointId, found?.id ?? null),
     }
   })
 
