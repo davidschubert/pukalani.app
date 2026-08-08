@@ -4,6 +4,7 @@ import {
   looksLikeStripeWebhookSecret,
   secretTail,
   stripeModeFromKey,
+  webhookSecretOrigin,
 } from '../shared/stripeKeys'
 
 describe('secretTail — was die Oberfläche sehen darf', () => {
@@ -76,5 +77,39 @@ describe('looksLikeStripeWebhookSecret', () => {
     expect(looksLikeStripeWebhookSecret('sk_live_51ABCdefGHIjkl')).toBe(false)
     expect(looksLikeStripeWebhookSecret('whsec_')).toBe(false)
     expect(looksLikeStripeWebhookSecret('')).toBe(false)
+  })
+})
+
+describe('webhookSecretOrigin — Herkunft des Signatur-Geheimnisses (MEDIUM 2)', () => {
+  it('BELEGT: aus der DB und die Marke zeigt auf genau diesen Endpunkt', () => {
+    expect(webhookSecretOrigin('db', 'we_123', 'we_123')).toBe('created_here')
+  })
+
+  it('kein Geheimnis = „none", nicht „unbestätigt"', () => {
+    // Die Karte sagt an anderer Stelle schon „nicht hinterlegt"; ein zweiter
+    // Warnhinweis daneben wäre Lärm.
+    expect(webhookSecretOrigin('none', 'we_123', 'we_123')).toBe('none')
+    expect(webhookSecretOrigin('none', '', null)).toBe('none')
+  })
+
+  it('ENV-Geheimnis bleibt unbestätigt — auch wenn die Marke passt', () => {
+    // Die Marke gehört zum DB-Wert. Gilt der Env-Wert, sagt sie nichts über
+    // ihn aus; ohne diese Bedingung wäre die Zusicherung übertragbar.
+    expect(webhookSecretOrigin('env', 'we_123', 'we_123')).toBe('unconfirmed')
+  })
+
+  it('ERSETZTER Endpunkt: Marke da, aber eine andere Id → unbestätigt', () => {
+    // Der Fall, der vorher grün aussah und trotzdem jede Zustellung abwies.
+    expect(webhookSecretOrigin('db', 'we_alt', 'we_neu')).toBe('unconfirmed')
+  })
+
+  it('ohne Marke (von Hand eingetragen, Bestand vor billing-003) unbestätigt', () => {
+    expect(webhookSecretOrigin('db', '', 'we_123')).toBe('unconfirmed')
+    expect(webhookSecretOrigin('db', null, 'we_123')).toBe('unconfirmed')
+    expect(webhookSecretOrigin('db', undefined, 'we_123')).toBe('unconfirmed')
+  })
+
+  it('ohne gefundenen Endpunkt gibt es nichts zu bestätigen', () => {
+    expect(webhookSecretOrigin('db', 'we_123', null)).toBe('unconfirmed')
   })
 })
