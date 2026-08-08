@@ -1,6 +1,6 @@
 import type Stripe from 'stripe'
 import { secretTail, stripeModeFromKey, type StripeKeyMode, type StripeSecretSource } from '../../../../../../packages/billing/shared/stripeKeys'
-import { missingWebhookEvents, WEBHOOK_EVENTS } from '../../../../../../packages/billing/server/utils/webhookMapping'
+import { missingWebhookEvents, WEBHOOK_EVENTS } from '../../../../../../packages/billing/shared/webhookEvents'
 import { readStripePriceStatus, type StripePriceStatus } from '../../../utils/stripePrices'
 import { stripeWebhookUrl } from '../../../utils/stripeWebhookEndpoint'
 

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { checkoutOutcome, mayFulfillCheckout, WEBHOOK_ALLOWLIST } from '../server/utils/webhookMapping'
+import { checkoutOutcome, mayFulfillCheckout } from '../server/utils/webhookMapping'
+import { WEBHOOK_ALLOWLIST } from '../shared/webhookEvents'
 import { lookupKeyAllowedBy, matchesLookupKeyPattern, planLookupKeys, rejectOneTimeLookupKey, rejectSubscriptionLookupKey } from '../shared/lookupKeys'
 import { resolveBillingReturnOrigin } from '../shared/returnOrigin'
 import type { PukalaniBillingPlan } from '../shared/types/billing'
