@@ -46,11 +46,18 @@ export default defineEventHandler(async (event) => {
   // Ohne Verschlüsselungs-Schlüssel gibt es keinen Ort, an den das gehen
   // könnte. 503 + `data.code`, damit die Karte den Env-Namen nennen kann
   // statt „unbekannter Fehler".
-  if (!stripeSettingsStorageAvailable(event)) {
+  //
+  // ZWEI GRÜNDE, ZWEI MELDUNGEN (Session-Audit 2026-08-09): ein GESETZTER,
+  // aber falsch geformter NUXT_BILLING_SETTINGS_KEY (Tippfehler, halbe Zeile
+  // kopiert, 63 statt 64 Zeichen) kam hier bis heute als „nicht konfiguriert"
+  // an — und schickte den Betreiber los, eine Variable anzulegen, die schon
+  // dasteht. Der Unterschied kostet eine Zeile und spart die Suche.
+  const storage = stripeSettingsStorageState(event)
+  if (storage !== 'available') {
     throw createError({
       status: 503,
-      statusText: 'Secret storage not configured',
-      data: { code: 'encryption_unconfigured' },
+      statusText: storage === 'invalid' ? 'Secret storage key malformed' : 'Secret storage not configured',
+      data: { code: storage === 'invalid' ? 'encryption_key_invalid' : 'encryption_unconfigured' },
     })
   }
 

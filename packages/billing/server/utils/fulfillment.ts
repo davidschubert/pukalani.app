@@ -41,8 +41,13 @@ export interface VerifiedSubscriptionUpdate {
   status: SubscriptionStatus
   currentPeriodEnd: string
   cancelAtPeriodEnd: boolean
-  /** subscription_data.metadata aus dem Checkout (z. B. communityId, plan). */
+  /** subscription_data.metadata aus dem Checkout (z. B. communityId, plan).
+   *  ACHTUNG: seit dem Checkout EINGEFROREN — ein Plan-Wechsel im Kundenportal
+   *  fasst sie nicht an. Wer den GELTENDEN Plan braucht, liest `lookupKey`. */
   metadata: Record<string, string>
+  /** `lookup_key` des ersten Subscription-Items = was gerade wirklich bezahlt
+   *  wird. '' wenn der Price keinen trägt. */
+  lookupKey: string
   eventCreated: number
 }
 

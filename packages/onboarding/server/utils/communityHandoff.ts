@@ -42,7 +42,14 @@ import { callControlPlane, mintRuntimeJwt } from './controlPlane'
  *
  * Der Preis ist ein Ruf ins Control Plane pro Klick (JWT + zwei Tabellen). Das
  * ist derselbe Aufwand wie `/api/onboarding/communities` und deshalb im selben
- * Rate-Limit-Budget — ein Klick pro Sprung, kein heißer Pfad.
+ * Rate-Limit-Budget — ein Klick pro Sprung, kein heißer Pfad. GENAU GESAGT:
+ * alle VIER Einstiege teilen den Bucket `onboarding:communities`
+ * (`/api/onboarding/communities`, `/api/onboarding/handoff`,
+ * `/api/community/switcher`, `/api/community/switch`). Die letzten beiden
+ * standen bis zum Session-Audit 2026-08-09 nicht in
+ * `core/server/middleware/05.rate-limit.ts` — der Satz stimmte also für den
+ * Kundenbereich und nicht für den Dashboard-Wechsler. Ein neuer Aufrufer
+ * dieser Datei gehört dort eingetragen.
  */
 
 /** Was der Aufrufer zurückbekommt: Siegel UND das Ziel, für das es gilt. */

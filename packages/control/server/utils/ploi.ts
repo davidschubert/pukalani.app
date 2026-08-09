@@ -150,6 +150,28 @@ export function ploiConfigured(config: PloiConfig): boolean {
   return Boolean(config.token && config.serverId && config.siteId)
 }
 
+/**
+ * WIE VIELE EINTRÄGE EINE LISTE HERGIBT (Session-Audit 2026-08-09).
+ *
+ * ploi ist eine Laravel-Anwendung, und Laravel paginiert Listen standardmäßig
+ * (oft 15 je Seite) und nimmt `per_page` entgegen. Belegt ist das für DIESE
+ * API im Repo nirgends — nachgemessen wurde nur an Sites mit einer Handvoll
+ * Einträge, wo eine Kappung gar nicht auffiele. Deshalb die günstige
+ * Absicherung statt einer Behauptung: `per_page` mitschicken (wird es
+ * ignoriert, ändert sich nichts) UND melden, wenn die Antwort DOCH weitere
+ * Seiten führt. Eine still gekappte Liste wäre hier teuer — sie ließe
+ * `ensurePloiTenants` einen bestehenden Hostnamen für fehlend halten und
+ * `coveringCertificate` ein liegendes Zertifikat übersehen.
+ */
+const PLOI_PER_PAGE = 100
+
+function warnIfPaginated(data: unknown, label: string): void {
+  const lastPage = (data as { meta?: { last_page?: unknown } })?.meta?.last_page
+  if (typeof lastPage === 'number' && lastPage > 1) {
+    logEvent('warn', 'ploi.list_paginated', { list: label, lastPage })
+  }
+}
+
 async function ploiFetch(
   config: PloiConfig,
   path: string,
@@ -207,8 +229,9 @@ export async function listPloiTenants(config: PloiConfig): Promise<{ ok: boolean
   // erreichen, die er zeigen soll.
   if (config.dryRun) return { ok: true, tenants: [], message: '' }
   if (!ploiConfigured(config)) return { ok: false, tenants: [], message: 'ploi ist nicht konfiguriert (Token/Server/Site).' }
-  const result = await ploiFetch(config, `/servers/${config.serverId}/sites/${config.siteId}/tenants`, { method: 'GET' })
+  const result = await ploiFetch(config, `/servers/${config.serverId}/sites/${config.siteId}/tenants?per_page=${PLOI_PER_PAGE}`, { method: 'GET' })
   if (!result.ok) return { ok: false, tenants: [], message: result.message }
+  warnIfPaginated(result.data, 'tenants')
   const raw = (result.data as { data?: { tenants?: unknown } })?.data?.tenants
   const tenants = Array.isArray(raw) ? raw.filter((entry): entry is string => typeof entry === 'string') : []
   return { ok: true, tenants, message: '' }
@@ -345,8 +368,9 @@ export async function listPloiSiteAliases(config: PloiConfig): Promise<{ ok: boo
   const empty: PloiSiteInfo = { main: '', aliases: [] }
   if (config.dryRun) return { ok: true, info: empty, message: '' }
   if (!ploiConfigured(config)) return { ok: false, info: empty, message: 'ploi ist nicht konfiguriert (Token/Server/Site).' }
-  const result = await ploiFetch(config, `/servers/${config.serverId}/sites/${config.siteId}/aliases`, { method: 'GET' })
+  const result = await ploiFetch(config, `/servers/${config.serverId}/sites/${config.siteId}/aliases?per_page=${PLOI_PER_PAGE}`, { method: 'GET' })
   if (!result.ok) return { ok: false, info: empty, message: result.message }
+  warnIfPaginated(result.data, 'aliases')
   const data = (result.data as { data?: { aliases?: unknown, main?: unknown } })?.data
   return {
     ok: true,
@@ -417,8 +441,9 @@ export function siteCertificateDomains(info: PloiSiteInfo, add: string[]): strin
 export async function listPloiCertificates(config: PloiConfig): Promise<{ ok: boolean, certificates: { domain: string, status: string }[], message: string }> {
   if (config.dryRun) return { ok: true, certificates: [], message: '' }
   if (!ploiConfigured(config)) return { ok: false, certificates: [], message: 'ploi ist nicht konfiguriert (Token/Server/Site).' }
-  const result = await ploiFetch(config, `/servers/${config.serverId}/sites/${config.siteId}/certificates`, { method: 'GET' })
+  const result = await ploiFetch(config, `/servers/${config.serverId}/sites/${config.siteId}/certificates?per_page=${PLOI_PER_PAGE}`, { method: 'GET' })
   if (!result.ok) return { ok: false, certificates: [], message: result.message }
+  warnIfPaginated(result.data, 'certificates')
   const raw = (result.data as { data?: unknown })?.data
   const certificates = Array.isArray(raw)
     ? raw.map(entry => ({
@@ -430,10 +455,19 @@ export async function listPloiCertificates(config: PloiConfig): Promise<{ ok: bo
 }
 
 /**
- * PURE: der erste Zertifikats-Eintrag, dessen Namensmenge ALLE gewünschten
- * Namen abdeckt — UNABHÄNGIG vom Status. Auch die noch in Ausstellung
- * befindlichen zählen, denn genau während der Ausstellung ist der
- * Wiederholungs-Klick gefährlich. Leere Wunschliste deckt nichts (fail-closed).
+ * PURE: ein Zertifikats-Eintrag, dessen Namensmenge ALLE gewünschten Namen
+ * abdeckt — UNABHÄNGIG vom Status. Auch die noch in Ausstellung befindlichen
+ * zählen, denn genau während der Ausstellung ist der Wiederholungs-Klick
+ * gefährlich. Leere Wunschliste deckt nichts (fail-closed).
+ *
+ * AKTIVE ZUERST (Session-Audit 2026-08-09): gesucht wird in ZWEI Durchgängen —
+ * erst nach einem deckenden `active`, dann erst nach irgendeinem deckenden.
+ * ploi liefert die Liste in seiner Reihenfolge, und ein toter Alt-Eintrag
+ * (fehlgeschlagen, ersetzt) kann darin VOR dem gültigen stehen. Der eine
+ * Durchgang von vorher hätte dann „in Arbeit (Status ‚failed')" gemeldet und
+ * bei einem längst liegenden Zertifikat zum Löschen eines Eintrags in ploi
+ * aufgefordert — und für einen wirklich fehlenden Namen wäre die Nachbestellung
+ * an einem Eintrag gescheitert, der nie mehr aktiv wird.
  *
  * Den STATUS bewertet `certificateOrderDecision` — die einzige Stelle, die
  * das tut. Es gab hier bis 2026-08-08 einen zweiten Leser (`certificateCovers`,
@@ -446,11 +480,14 @@ export function coveringCertificate(
 ): { domain: string, status: string } | null {
   const need = wanted.map(host => host.trim().toLowerCase()).filter(Boolean)
   if (!need.length) return null
-  return certificates.find((entry) => {
+  const covers = (entry: { domain: string }) => {
     // ploi legt die Namen eines Zertifikats kommagetrennt in `domain` ab.
     const covered = new Set(entry.domain.split(',').map(host => host.trim().toLowerCase()).filter(Boolean))
     return need.every(host => covered.has(host))
-  }) ?? null
+  }
+  return certificates.find(entry => entry.status === 'active' && covers(entry))
+    ?? certificates.find(covers)
+    ?? null
 }
 
 export interface CertificateOrderDecision {

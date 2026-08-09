@@ -90,22 +90,49 @@ export function stripeSettingsOldKey(event?: H3Event): Buffer | null {
 }
 
 /**
- * Kann diese Instanz überhaupt Geheimnisse ablegen? Wenn nicht, zeigt die
- * Oberfläche den Env-Namen statt der Eingabefelder — statt ein Formular
- * anzubieten, dessen Absenden nur scheitern kann.
+ * DREI ZUSTÄNDE, NICHT ZWEI (Session-Audit 2026-08-09).
+ *
+ * `unconfigured` ist ein gültiger Betriebszustand (Silo, lokale Entwicklung —
+ * die Env-Keys tragen). `invalid` ist es NICHT: da hat jemand einen Schlüssel
+ * gesetzt und sich vertippt. Beides als „nicht konfiguriert" zu melden, schickt
+ * ihn zum Anlegen eines Schlüssels, den er längst hat — die Meldung nennt dann
+ * genau die Variable, die schon dasteht.
  */
-export function stripeSettingsStorageAvailable(event?: H3Event): boolean {
+export type StripeSettingsStorageState = 'available' | 'unconfigured' | 'invalid'
+
+export function stripeSettingsStorageState(event?: H3Event): StripeSettingsStorageState {
   try {
-    return stripeSettingsKey(event) !== null
+    return stripeSettingsKey(event) !== null ? 'available' : 'unconfigured'
   }
   catch {
-    // Gesetzt, aber falsch geformt: für die Oberfläche dasselbe wie „fehlt",
-    // die genaue Ursache steht im Fehler der Speichern-Route.
-    return false
+    // Gesetzt, aber falsch geformt (`parseSecretBoxKey` wirft) — der genaue
+    // Wortlaut bleibt im Server, nach draußen geht nur die Unterscheidung.
+    return 'invalid'
   }
 }
 
-/** 30 s Gedächtnis: der Geldweg fragt sonst je Checkout eine Zeile nach. */
+/**
+ * Kann diese Instanz überhaupt Geheimnisse ablegen? Wenn nicht, zeigt die
+ * Oberfläche den Env-Namen statt der Eingabefelder — statt ein Formular
+ * anzubieten, dessen Absenden nur scheitern kann. Für die Statuskarte reicht
+ * das Ja/Nein; WARUM nicht, sagt `stripeSettingsStorageState`.
+ */
+export function stripeSettingsStorageAvailable(event?: H3Event): boolean {
+  return stripeSettingsStorageState(event) === 'available'
+}
+
+/**
+ * 30 s Gedächtnis: der Geldweg fragt sonst je Checkout eine Zeile nach.
+ *
+ * EINZELPROZESS-ANNAHME, ausdrücklich (Session-Audit 2026-08-09): Cache und
+ * Leerung leben im Speicher DIESES Node-Prozesses. `control` läuft als
+ * pm2-Einzelinstanz, deshalb trägt das. Liefe es je als Cluster mit mehr als
+ * einem Worker, sähe nur der schreibende Worker den neuen Schlüssel sofort —
+ * die anderen bis zu 30 s den alten, und ein gerade rotierter Stripe-Key wäre
+ * für sie eine halbe Minute lang der abgelaufene. Dann bräuchte es eine
+ * Leerung über Redis (dasselbe gilt für den Reihenfolge-Riegel in
+ * apps/control/server/api/control/stripe/webhook.post.ts).
+ */
 const CACHE_TTL_MS = 30_000
 let cache: { at: number, row: StripeSettingsRow | null } | null = null
 
@@ -314,6 +341,19 @@ export async function saveStripeSettings(
         ...data,
       },
       permissions: [],
+    }).catch(async (createError_) => {
+      // DER DOPPELKLICK AUF DIE ERSTE ABLAGE (Session-Audit 2026-08-09): zwei
+      // gleichzeitige Speichern-Klicks laufen BEIDE in den 404 und legen beide
+      // an — der zweite bekommt 409 und wäre bis heute als „Speichern
+      // fehlgeschlagen" beim Betreiber gelandet, obwohl die Zeile existiert.
+      // Einmal als `update` wiederholen: derselbe Patch, dasselbe Ergebnis.
+      if (!hasAppwriteCode(createError_, 409)) throw createError_
+      await admin.tablesDB.updateRow({
+        databaseId,
+        tableId: STRIPE_SETTINGS_TABLE,
+        rowId: STRIPE_SETTINGS_ROW_ID,
+        data,
+      })
     })
   }
 

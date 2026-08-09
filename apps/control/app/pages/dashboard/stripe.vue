@@ -107,6 +107,17 @@ function reasonOf(error: unknown): string {
   return (error as { data?: { reason?: string } })?.data?.reason ?? ''
 }
 
+/**
+ * Der Meldungstext des Envelopes. Er ist NUR bei 4xx echt (ab 500 ersetzt ihn
+ * der zentrale Handler durch „Internal server error") — hier gebraucht für den
+ * einen Fall, in dem eine ADRESSE mitreisen muss: die Id des Stripe-Endpunkts,
+ * dessen Geheimnis nicht abgelegt werden konnte.
+ */
+function messageOf(error: unknown): string | undefined {
+  const message = (error as { data?: { message?: string } })?.data?.message
+  return typeof message === 'string' && message ? message : undefined
+}
+
 // ── Schlüssel ───────────────────────────────────────────────────────────────
 const form = reactive({ secretKey: '', webhookSecret: '' })
 const savingKeys = ref(false)
@@ -137,7 +148,11 @@ async function saveKeys() {
           ? 'control.stripe.keys.errorWebhookMalformed'
           : reason === 'encryption_unconfigured'
             ? 'control.stripe.keys.errorNoStorage'
-            : 'control.stripe.keys.errorGeneric'
+            // Der Schlüssel STEHT in der Env, er ist nur falsch geformt — eine
+            // andere Handlung als „anlegen".
+            : reason === 'encryption_key_invalid'
+              ? 'control.stripe.keys.errorStorageKeyInvalid'
+              : 'control.stripe.keys.errorGeneric'
     toast.add({ title: t(key), color: 'error' })
   }
   finally {
@@ -248,7 +263,14 @@ async function ensureWebhook(recreate = false) {
         : reason === 'encryption_unconfigured'
           ? 'control.stripe.webhook.errorNoStorage'
           : 'control.stripe.webhook.errorGeneric'
-    toast.add({ title: t(key), color: 'error' })
+    toast.add({
+      title: t(key),
+      // Nur hier trägt der Rohtext eine Information, die kein Übersetzungs-
+      // schlüssel haben kann: WELCHEN Endpunkt der Betreiber bei Stripe
+      // löschen muss.
+      description: reason === 'secret_not_stored' ? messageOf(error) : undefined,
+      color: 'error',
+    })
     // Auch der Fehlschlag ändert womöglich den Zustand (beim Neu-Anlegen ist
     // der alte Endpunkt dann schon weg) — die Karte muss die Wahrheit zeigen.
     await refresh()

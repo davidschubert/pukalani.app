@@ -57,6 +57,7 @@
         "errorMalformed": "That does not look like a secret key (sk_live_ or sk_test_)",
         "errorWebhookMalformed": "That does not look like a signing secret (whsec_)",
         "errorNoStorage": "Storage is not set up — NUXT_BILLING_SETTINGS_KEY is missing",
+        "errorStorageKeyInvalid": "NUXT_BILLING_SETTINGS_KEY is set but malformed — 64 hex characters expected (openssl rand -hex 32). Nothing was saved.",
         "errorGeneric": "Saving failed",
         "noStorageTitle": "Keys cannot be stored here yet",
         "noStorageHint": "The server needs NUXT_BILLING_SETTINGS_KEY for this — 64 hex characters, generated with openssl rand -hex 32. Until it is set, NUXT_STRIPE_SECRET_KEY and NUXT_STRIPE_WEBHOOK_SECRET from the server environment remain in charge."

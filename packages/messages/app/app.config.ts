@@ -73,6 +73,14 @@ export default defineAppConfig({
            */
           id: 'messages',
           scope: 'community',
+          // DASSELBE TOR WIE DIE SEITE (Session-Audit 2026-08-09). Die Seite
+          // dahinter hängt an `requirePlanProduct(event, 'messages')` und
+          // antwortet ohne den Tarif hart 404 — ein Reiter ohne diese Felder
+          // ist genau die Gate-Asymmetrie, gegen die F51 sie eingeführt hat:
+          // sichtbar, klickbar, Sackgasse. Die Schwester `messages-reports`
+          // oben trägt sie längst.
+          productKey: 'messages',
+          planProduct: 'messages',
           labelKey: 'messages.nav.settings',
           icon: 'i-ph-envelope-simple',
           to: '/dashboard/community/messages',

@@ -93,14 +93,17 @@ const WRITE_LIMITED: { re: RegExp, bucket: string, max?: number }[] = [
   // Kostenklasse, gleicher Deckel; ein Mensch klickt eine Community an, kein
   // Dutzend je Minute.
   { re: /^POST \/api\/onboarding\/handoff$/, bucket: 'onboarding:communities', max: TOKEN_MAX },
-  // Die zwei F50-Geschwister auf den MANDANTEN-Hosts (Selbst-Review
-  // 2026-08-09 — der Kommentar in communityHandoff.ts versprach „dasselbe
-  // Rate-Limit-Budget", der Code hielt es nicht): `switch` prägt dasselbe JWT
-  // und liest dieselben zwei Control-Plane-Tabellen wie der Kundenbereichs-
-  // Handoff darüber — ungedrosselt wäre eine Session ein Verstärker auf das
-  // Control Plane. `control-handoff` ist zwar nur ein Krypto-Aufruf, aber ein
-  // Siegel-Aussteller ohne Deckel bleibt ein Geschenk an Skripte; gleicher
-  // Bucket, ein Klick pro Sprung ist für Menschen unerreichbar weit weg.
+  // Die F50-Geschwister auf den MANDANTEN-Hosts — zweimal unabhängig gefunden
+  // (Session-Audit + Selbst-Review, beide 2026-08-09; der Kommentar in
+  // communityHandoff.ts versprach „dasselbe Rate-Limit-Budget", der Code hielt
+  // es nicht): `switcher` (Liste) und `switch` (Sprung) prägen je ein
+  // Appwrite-JWT und lassen das Control Plane zwei Tabellen lesen — Wort für
+  // Wort die Kostenklasse der Kundenbereichs-Zwillinge darüber, mit denen sie
+  // sich die Implementierung teilen. `control-handoff` ist nur ein
+  // Krypto-Aufruf, aber ein Siegel-Aussteller ohne Deckel bleibt ein Geschenk
+  // an Skripte. Gemeinsamer Bucket, weil es EIN Verhalten ist: aufklappen und
+  // springen; ein Klick pro Sprung ist für Menschen unerreichbar weit weg.
+  { re: /^GET \/api\/community\/switcher$/, bucket: 'onboarding:communities', max: TOKEN_MAX },
   { re: /^POST \/api\/community\/switch$/, bucket: 'onboarding:communities', max: TOKEN_MAX },
   { re: /^POST \/api\/community\/control-handoff$/, bucket: 'onboarding:communities', max: TOKEN_MAX },
   // Öffentliche Kommentar-Lese-Routen (Embed macht sie zur beworbenen Fläche

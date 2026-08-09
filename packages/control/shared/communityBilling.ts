@@ -1,4 +1,5 @@
 import type { ControlPlan, ControlPlanCatalog, PlanBillingInterval } from './types/planCatalog'
+import { DEFAULT_TENANT_PLAN, normalizeTenantPlan } from './types/tenantRecord'
 
 /**
  * A6 — die Community ist das zahlende Objekt (Davids Entscheidung 2026-07-30):
@@ -28,10 +29,27 @@ import type { ControlPlan, ControlPlanCatalog, PlanBillingInterval } from './typ
 export interface CommunitySubscriptionUpdate {
   /** Stripe-Statusraum (billing B3): active/trialing/past_due/canceled/… */
   status: string
-  /** subscription_data.metadata aus dem Community-Checkout. */
+  /** subscription_data.metadata aus dem Community-Checkout. EINGEFROREN seit
+   *  dem Checkout — nur noch Rückfall, siehe `planFromLookupKey`. */
   metadata: Record<string, string>
+  /** `lookup_key` des laufenden Preises = was der Kunde JETZT bezahlt. */
+  lookupKey: string
   stripeCustomerId: string
   stripeSubscriptionId: string
+}
+
+/**
+ * PURE: welcher Plan gehört zu diesem `lookup_key`? — der Umkehrschluss zu
+ * `pickLookupKey`. Monats- UND Jahres-Preis zeigen auf denselben Plan.
+ * `null` = der Katalog kennt den Schlüssel nicht (oder es wurde keiner
+ * geliefert). Unit-getestet.
+ */
+export function planFromLookupKey(plans: ControlPlanCatalog, lookupKey: string): string | null {
+  if (!lookupKey) return null
+  for (const [key, plan] of Object.entries(plans)) {
+    if (plan.lookupKey === lookupKey || plan.lookupKeyYearly === lookupKey) return key
+  }
+  return null
 }
 
 export type CommunityBillingAction =
@@ -53,8 +71,30 @@ export function subscriptionUpdateToCommunityAction(
   switch (update.status) {
     case 'active':
     case 'trialing': {
-      const plan = update.metadata.plan
-      if (!plan || !plans[plan]) return { kind: 'ignore', reason: `unknown-plan-${plan ?? 'missing'}` }
+      // WOHER KOMMT DER PLAN? ZUERST AUS DEM PREIS (Session-Audit 2026-08-09).
+      //
+      // Das Kundenportal erlaubt den Plan-Wechsel (Runbook 2.3) — Stripe
+      // tauscht dabei das Subscription-Item, die Checkout-`metadata` bleibt
+      // aber auf ewig die des ERSTEN Kaufs. Wer über das Portal von Personal
+      // auf Pro geht, bezahlt seither Pro und stünde hier weiter auf
+      // `personal`: bezahlt und nicht bekommen, ohne jede Spur.
+      //
+      // Der `lookup_key` ist die einzige Angabe, die mit dem Abo mitwandert;
+      // der Katalog übersetzt ihn zurück. FALLBACK bleibt die metadata — für
+      // Abos aus der Zeit vor diesem Feld und für Preise ohne lookup_key —,
+      // und auf sie kommt `normalizeTenantPlan`, weil dort noch Alt-Werte
+      // (free/business) aus der P4-Zeit stehen können. `normalizeTenantPlan`
+      // fällt für ALLES Unbekannte auf 'basic' — der Fallback darf deshalb nur
+      // greifen, wenn er wirklich ÜBERSETZT hat und nicht bloß aufgegeben:
+      // sonst degradierte ein Tippfehler in der metadata eine zahlende
+      // Community, statt (wie bisher) als `ignore` protokolliert zu werden.
+      const raw = update.metadata.plan ?? ''
+      const normalized = normalizeTenantPlan(raw)
+      const fromMetadata = plans[raw]
+        ? raw
+        : (normalized !== DEFAULT_TENANT_PLAN && plans[normalized] ? normalized : '')
+      const plan = planFromLookupKey(plans, update.lookupKey) ?? fromMetadata
+      if (!plan || !plans[plan]) return { kind: 'ignore', reason: `unknown-plan-${raw || 'missing'}` }
       return {
         kind: 'apply-plan',
         communityId,

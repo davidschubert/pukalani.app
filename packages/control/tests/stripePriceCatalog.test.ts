@@ -42,6 +42,27 @@ describe('Katalog-Inhalt (Davids Pricing 2026-07-26)', () => {
   it('unbekannter lookup_key = null', () => {
     expect(catalogPriceFor('workspace_enterprise_monthly')).toBeNull()
   })
+
+  /**
+   * KEINE ANFÜHRUNGSZEICHEN IN SCHLÜSSELN (Session-Audit 2026-08-09).
+   *
+   * Der Produkt-`key` wird in eine Stripe-SUCHANFRAGE interpoliert
+   * (`metadata['maui_key']:'<key>'` — apps/control/server/utils/stripePrices.ts
+   * und scripts/stripe/ensure-prices.mjs), der `lookupKey` reist als
+   * Query-Parameter. Ein Apostroph darin bräche die Anfrage STILL: die Suche
+   * fände nichts, `ensureProduct` legte ein zweites Produkt an, und der Katalog
+   * hätte ab da zwei Wahrheiten bei Stripe. Deshalb sind die Zeichen hier
+   * verboten statt anderswo maskiert — Schlüssel sind Identitäten, kein Text.
+   */
+  it('kein Schlüssel trägt Apostroph oder Anführungszeichen', () => {
+    const forbidden = /['"\\`]/
+    for (const product of STRIPE_PRICE_CATALOG) {
+      expect(product.key, `Produkt-Schlüssel ${product.key}`).not.toMatch(forbidden)
+      for (const price of product.prices) {
+        expect(price.lookupKey, `lookup_key ${price.lookupKey}`).not.toMatch(forbidden)
+      }
+    }
+  })
 })
 
 /**

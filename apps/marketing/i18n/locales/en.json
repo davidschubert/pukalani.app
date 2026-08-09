@@ -72,7 +72,7 @@
       "rows": [
         {
           "pain": "High base prices + transaction fees",
-          "gain": "Fair, predictable price. Free to start."
+          "gain": "Fair, predictable price. 14-day free trial."
         },
         {
           "pain": "Unclear data flows & ad tracking",
@@ -571,7 +571,7 @@
       "rows": [
         {
           "label": "Entry price per month",
-          "us": "free",
+          "us": "from €29",
           "circle": "$89 (Professional)",
           "skool": "$9 (Hobby)",
           "mighty": "$79 (Launch)"
@@ -719,12 +719,12 @@
           "a": "Starting with German and English; more languages will follow."
         },
         {
-          "q": "Do I have to use all blocks?",
-          "a": "No – every block can be switched on or off. Start lean and add what you need."
+          "q": "Do I have to use all products?",
+          "a": "No – every product can be switched on or off. Start lean and add what you need."
         }
       ],
       "metaTitle": "Frequently asked questions – privacy, pricing, switching",
-      "metaDescription": "Answers to the most common questions: where the data lives, what it costs, whether you can keep your site, cancellation, languages, blocks."
+      "metaDescription": "Answers to the most common questions: where the data lives, what it costs, whether you can keep your site, cancellation, languages, products."
     },
     "story": {
       "kicker": "Our story",

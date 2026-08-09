@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { CommunityProductEntry } from '../../../../server/api/community/products.get'
+import type { CommunityProductEntry } from '../../../../shared/communityProducts'
 
 /**
  * COMMUNITY-EINSTELLUNGEN → PRODUKTE: was der TARIF dieser Community

@@ -158,11 +158,27 @@ export async function resolvePlanPrice(event: H3Event, lookupKey: string): Promi
 const PRICE_TTL_MS = 5 * 60_000
 const priceCache = new Map<string, { at: number, price: Stripe.Price }>()
 
+/**
+ * Preis-Cache von außen leeren — für die EINE Stelle, die Preise UMBAUT
+ * (Betrags-Drift im Dashboard: neuer Price, lookup_key umgezogen, alter
+ * archiviert). Ohne die Leerung lösten Checkouts bis zu 5 Minuten auf die
+ * ARCHIVIERTE Price-Id auf (Session-Audit 2026-08-09, HIGH 2).
+ */
+export function invalidateStripePriceCache(): void {
+  priceCache.clear()
+}
+
 export async function resolvePriceByLookupKey(event: H3Event, lookupKey: string): Promise<Stripe.Price> {
+  // ERST der Client, DANN der Cache — und das ist die halbe Sicherung: die
+  // Key-Wechsel-Leerung wohnt in useStripe(), und ein Cache-Treffer VOR dem
+  // Client-Aufruf liefe an ihr vorbei (Test-Price-Ids am frischen Live-Client,
+  // 502 im Go-Live-Fenster — Session-Audit 2026-08-09, HIGH 1: genau der
+  // Checkout-Pfad traf den Cache zuerst, weil ensureCommunityCustomer bei
+  // bestehendem Customer früh zurückkehrt).
+  const stripe = await useStripe(event)
+
   const cached = priceCache.get(lookupKey)
   if (cached && Date.now() - cached.at < PRICE_TTL_MS) return cached.price
-
-  const stripe = await useStripe(event)
   const res = await stripe.prices.list({ lookup_keys: [lookupKey], active: true, limit: 1 })
     .catch(error => toStripeSafeError(error, `prices.list für lookup_key '${lookupKey}' fehlgeschlagen`))
   const price = res.data[0]
