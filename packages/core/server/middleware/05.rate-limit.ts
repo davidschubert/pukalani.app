@@ -93,6 +93,16 @@ const WRITE_LIMITED: { re: RegExp, bucket: string, max?: number }[] = [
   // Kostenklasse, gleicher Deckel; ein Mensch klickt eine Community an, kein
   // Dutzend je Minute.
   { re: /^POST \/api\/onboarding\/handoff$/, bucket: 'onboarding:communities', max: TOKEN_MAX },
+  // DIESELBEN ZWEI ROUTEN, NUR AUF DEM MANDANTEN-HOST (F50, 2026-08-07): der
+  // Community-Wechsler im Dashboard-Kopf. `switcher` ist die Liste, `switch`
+  // der Sprung — beide prägen ein Appwrite-JWT und lassen danach das Control
+  // Plane zwei Tabellen lesen, also Wort für Wort die Kostenklasse der
+  // Zwillinge darüber (sie teilen sich sogar die Implementierung,
+  // communityHandoff.ts). Sie fehlten hier, und damit war der teure Weg über
+  // den zweiten Ort ungedrosselt erreichbar. Gemeinsamer Bucket, weil es EIN
+  // Verhalten ist: aufklappen und springen.
+  { re: /^GET \/api\/community\/switcher$/, bucket: 'onboarding:communities', max: TOKEN_MAX },
+  { re: /^POST \/api\/community\/switch$/, bucket: 'onboarding:communities', max: TOKEN_MAX },
   // Öffentliche Kommentar-Lese-Routen (Embed macht sie zur beworbenen Fläche
   // auf fremden Seiten) — eigener Read-Bucket statt „GET ist frei".
   // count (E3) ist CORS-offen und microcached, teilt denselben Bucket.

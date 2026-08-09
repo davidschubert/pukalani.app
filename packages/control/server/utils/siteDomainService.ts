@@ -163,6 +163,21 @@ export async function advanceSiteDomain(event: H3Event, row: WebsiteRow): Promis
   const certDomains = siteCertificateDomains(info.info, dns.pointingForms)
   const cert = await requestPloiSiteCertificate(ploi, certDomains)
   if (!cert.ok) return halt(cert.message)
+  // NICHT BESTELLT IST NICHT NICHTS (Session-Audit 2026-08-09, wortgleich zum
+  // Pool-Zwilling): die F52-Sperre antwortet mit `ok`, hat aber nichts getan
+  // und trägt den einzigen Ausweg im Text („Eintrag in ploi löschen, dann
+  // erneut prüfen"). Ohne diesen Zweig lief der Ablauf weiter und scheiterte
+  // eine Stufe später mit „Zertifikat noch nicht aktiv" — wahr, aber ohne den
+  // Hinweis, dass niemand mehr nachbestellt. Ein stiller Übersprung (deckendes
+  // `active`, Trockenlauf) trägt `message: ''` und hält hier nichts auf.
+  if (cert.skipped && cert.message) {
+    logEvent('warn', 'website.custom_domain_cert_pending', {
+      websiteId: row.$id,
+      domain,
+      detail: cert.message.slice(0, 400),
+    })
+    return halt(cert.message)
+  }
 
   // ── 3. Antwortet die Domain wirklich über HTTPS? ─────────────────────────
   // Im Trockenlauf übersprungen — dieselbe ehrliche Grenze wie im Pool: ohne

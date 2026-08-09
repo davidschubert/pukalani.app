@@ -76,6 +76,7 @@ export function subscriptionToVerifiedUpdate(
     currentPeriodEnd: string
     cancelAtPeriodEnd: boolean
     metadata: Record<string, string>
+    lookupKey: string
     eventCreated: number
   } {
   const item = subscription.items.data[0]
@@ -89,6 +90,13 @@ export function subscriptionToVerifiedUpdate(
     currentPeriodEnd: new Date(periodEnd * 1000).toISOString(),
     cancelAtPeriodEnd: subscription.cancel_at_period_end === true,
     metadata: (subscription.metadata ?? {}) as Record<string, string>,
+    // WAS DER KUNDE GERADE WIRKLICH BEZAHLT (Session-Audit 2026-08-09): der
+    // `lookup_key` des ersten Subscription-Items. Die Checkout-`metadata` sagt
+    // nur, was er EINMAL gekauft hat — sie ist ab dem Checkout eingefroren,
+    // während das Kundenportal den Plan wechseln lässt (Runbook 2.3).
+    // Dieselbe Quelle, aus der `planIdForPrice` oben schon liest; hier ohne
+    // Katalog, weil der Empfänger seinen eigenen hat.
+    lookupKey: item?.price.lookup_key ?? '',
     eventCreated,
   }
 }

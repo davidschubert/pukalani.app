@@ -28,9 +28,14 @@ import { selectUsagePosts, type CommunityUsageResponse } from '../../../shared/c
  * `as: 'operator'` nimmt den Admin-Client, weil das Kontingent AUSGEBLENDETE
  * und private Zeilen mitzählt — die Bremse tut das auch (sie zählt roh über den
  * Admin-Client), und eine Anzeige, die weniger zählt als die Bremse, ist eine
- * Lüge über den eigenen Verbrauch. `actor: 'member'` sagt die Wahrheit über den
- * HANDELNDEN: hier sieht ein Owner seine eigene Community an, kein Betreiber
- * moderiert. Der Mandanten-Filter der Tür ist in beiden Fällen die Grenze.
+ * Lüge über den eigenen Verbrauch. Der `actor` sagt die Wahrheit über den
+ * HANDELNDEN — und er wird DURCHGEREICHT, statt hier auf 'member' festgenagelt
+ * zu werden (C1c-Vertrag, Session-Audit 2026-08-09): im Normalfall sieht ein
+ * Owner seine eigene Community an, über den Betreiber-Break-Glass ist es aber
+ * ein 'operator', und `requireCommunityPermission` weiß das bereits. Folgenlos,
+ * solange nur gezählt wird — aber ein festgeschriebener Actor ist genau die
+ * stille Abmeldung von der Sperre, die C1c beseitigt hat. Der Mandanten-Filter
+ * der Tür ist in beiden Fällen die Grenze.
  *
  * FAIL-SOFT je Posten: fehlt die Tabelle im Projekt (Produkt nie migriert) oder
  * antwortet Appwrite nicht, fällt DIESER Posten aus der Antwort — nicht die
@@ -45,9 +50,9 @@ export default defineEventHandler(async (event): Promise<CommunityUsageResponse>
     throw createError({ status: 404, statusText: 'Not found' })
   }
 
-  await requireCommunityPermission(event, 'team.manage')
+  const { actor } = await requireCommunityPermission(event, 'team.manage')
 
-  const db = tenantDb(event, { as: 'operator', actor: 'member' })
+  const db = tenantDb(event, { as: 'operator', actor })
   const counts = await Promise.all(listCommunityUsageCounters().map(async counter => ({
     kind: counter.kind,
     total: await db.count(counter.tableId).catch(() => null),

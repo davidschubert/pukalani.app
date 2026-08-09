@@ -59,7 +59,7 @@ async function ensureProduct(def) {
 
 /** Price per lookup_key sicherstellen (idempotent, betrag-bewusst). */
 async function ensurePrice(product, price) {
-  const existing = await stripe.prices.list({ lookup_keys: [price.lookupKey], active: true, limit: 1 })
+  const existing = await stripe.prices.list({ lookup_keys: [price.lookupKey], active: true, expand: ['data.product'], limit: 1 })
   const current = existing.data[0]
   const action = decideStripePriceAction(
     current ? { unitAmount: current.unit_amount, currency: current.currency } : null,
@@ -92,6 +92,20 @@ async function ensurePrice(product, price) {
   })
   console.log(`  ✔ ${price.lookupKey} angelegt (${created.id}, ${price.amount / 100} ${CURRENCY}/${price.interval})`)
   if (current) {
+    // Ist der alte Price der `default_price` des Products, VERWEIGERT Stripe
+    // das Archivieren — erst umhängen. Die Dashboard-Fassung
+    // (apps/control/server/utils/stripePrices.ts) tut das seit F55; hier fehlte
+    // der Schritt, und der Kopf dieser Datei sagt „dieselben Entscheidungen"
+    // (Session-Audit 2026-08-09). Ein 400 mitten im Lauf ließe den Katalog
+    // halb umgezogen zurück.
+    const productObject = typeof current.product === 'object' && !('deleted' in current.product) ? current.product : null
+    const defaultPriceId = typeof productObject?.default_price === 'string'
+      ? productObject.default_price
+      : productObject?.default_price?.id
+    if (defaultPriceId === current.id) {
+      await stripe.products.update(product.id, { default_price: created.id })
+      console.log(`  ✔ default_price des Produkts auf ${created.id} umgehängt`)
+    }
     await stripe.prices.update(current.id, { active: false })
     console.log(`  ✔ Alt-Price ${current.id} deaktiviert`)
   }

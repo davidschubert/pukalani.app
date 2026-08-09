@@ -103,6 +103,11 @@ async function ensurePrice(
     await stripe.products.update(product.id, { default_price: created.id })
   }
   await stripe.prices.update(current.id, { active: false })
+  // Der Umzug hat den lookup_key auf eine NEUE Price-Id gehängt — der
+  // Preis-Cache des billing-Layers hielte sonst bis zu 5 Minuten die
+  // ARCHIVIERTE Id fest, und jeder Checkout liefe in Stripes „price inactive"
+  // (Session-Audit 2026-08-09, HIGH 2).
+  invalidateStripePriceCache()
 
   return {
     lookupKey: def.lookupKey,
@@ -149,10 +154,26 @@ export interface StripePriceStatus {
   taxBehavior: string | null
 }
 
+/**
+ * Stripe nimmt höchstens ZEHN `lookup_keys` je Abfrage entgegen. Heute hat der
+ * Katalog vier — aber er ist die Wachstumsstelle dieses Systems (jeder neue
+ * Plan bringt zwei), und der elfte Schlüssel hätte die Statuskarte mit einem
+ * Stripe-400 lahmgelegt, an einer Stelle, an der niemand einen Fehler erwartet
+ * (Session-Audit 2026-08-09).
+ */
+const LOOKUP_KEYS_PER_CALL = 10
+
 export async function readStripePriceStatus(stripe: Stripe): Promise<StripePriceStatus[]> {
   const keys = catalogLookupKeys()
-  const found = await stripe.prices.list({ lookup_keys: keys, active: true, limit: 100 })
-  const byLookup = new Map(found.data.map(price => [price.lookup_key ?? '', price]))
+  const byLookup = new Map<string, Stripe.Price>()
+  for (let offset = 0; offset < keys.length; offset += LOOKUP_KEYS_PER_CALL) {
+    const found = await stripe.prices.list({
+      lookup_keys: keys.slice(offset, offset + LOOKUP_KEYS_PER_CALL),
+      active: true,
+      limit: 100,
+    })
+    for (const price of found.data) byLookup.set(price.lookup_key ?? '', price)
+  }
 
   return STRIPE_PRICE_CATALOG.flatMap(product => product.prices.map((def) => {
     const price = byLookup.get(def.lookupKey)

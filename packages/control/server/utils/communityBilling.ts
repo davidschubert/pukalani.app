@@ -44,6 +44,16 @@ export async function handleCommunitySubscriptionUpdate(event: H3Event, update: 
 
   switch (action.kind) {
     case 'ignore':
+      // NIE STILL (Session-Audit 2026-08-09): die häufigsten Gründe hier sind
+      // harmlos (fremdes Abo ohne `communityId`, Status `incomplete`) — einer
+      // ist es nicht: ein BEZAHLTES Abo, dessen Plan der Katalog nicht kennt,
+      // bleibt spurlos wirkungslos. Der Kunde hat gezahlt, die Community steht
+      // weiter auf ihrem alten Plan, und im Log stand bis heute nichts. Ein
+      // Grund je Zeile kostet nichts und macht genau diese Sackgasse sichtbar.
+      logEvent('warn', 'billing.community_update_ignored', {
+        reason: action.reason,
+        subscriptionId: update.stripeSubscriptionId,
+      })
       return
     case 'apply-plan': {
       // Zahlung ist da: eine laufende BILLING-Sperre fällt im selben Schreibvorgang

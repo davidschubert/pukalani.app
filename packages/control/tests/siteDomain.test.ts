@@ -290,10 +290,13 @@ describe('acmeChallengeReachable gegen einen echten Port 80', () => {
 
 describe('coveringCertificate', () => {
   /**
-   * F52, Tenant-Pfad: hier zählt ANDERS als bei certificateCovers auch ein
-   * Zertifikat, das noch in Ausstellung ist — genau während der Ausstellung
-   * ist der Wiederholungs-Klick gefährlich (fünf identische pro Woche, der
-   * sechste sperrt sieben Tage). Der Aufrufer entscheidet anhand des Status.
+   * F52: gezählt wird JEDER Status, auch „noch in Ausstellung" — genau
+   * während der Ausstellung ist der Wiederholungs-Klick gefährlich (fünf
+   * identische pro Woche, der sechste sperrt sieben Tage). Den Status bewertet
+   * danach `certificateOrderDecision`, und zwar als einzige Stelle: den
+   * zweiten Leser `certificateCovers` (nur aktive) gibt es seit F54-2 nicht
+   * mehr — zwei Lesarten derselben ploi-Liste waren der Grund, warum auf dem
+   * Silo-Pfad nach einem Fehlschlag nicht mehr nachbestellt wurde.
    */
   it('findet einen deckenden Eintrag unabhängig vom Status', () => {
     expect(coveringCertificate(
@@ -318,6 +321,43 @@ describe('coveringCertificate', () => {
 
   it('liefert null für eine leere Wunschliste (fail-closed)', () => {
     expect(coveringCertificate([{ domain: 'a.example.com', status: 'active' }], [])).toBeNull()
+  })
+
+  /**
+   * AKTIVE ZUERST (Session-Audit 2026-08-09). ploi liefert die Liste in seiner
+   * Reihenfolge, und ein toter Alt-Eintrag kann VOR dem gültigen stehen. Ohne
+   * den ersten Durchgang meldete die Entscheidung „in Arbeit (Status
+   * ‚failed')" und forderte zum Löschen eines Eintrags auf, obwohl das
+   * Zertifikat längst liegt.
+   */
+  it('bevorzugt den aktiven Eintrag, auch wenn ein toter davor steht', () => {
+    expect(coveringCertificate(
+      [
+        { domain: 'kunde.example.com', status: 'failed' },
+        { domain: 'kunde.example.com', status: 'active' },
+      ],
+      ['kunde.example.com'],
+    )).toEqual({ domain: 'kunde.example.com', status: 'active' })
+  })
+
+  it('ohne aktiven Eintrag bleibt der erste deckende — die Sperre greift weiter', () => {
+    expect(coveringCertificate(
+      [
+        { domain: 'kunde.example.com', status: 'creating' },
+        { domain: 'kunde.example.com', status: 'failed' },
+      ],
+      ['kunde.example.com'],
+    )).toEqual({ domain: 'kunde.example.com', status: 'creating' })
+  })
+
+  it('und die Entscheidung darüber sagt dann „active" statt „in Arbeit"', () => {
+    expect(certificateOrderDecision({
+      ok: true,
+      certificates: [
+        { domain: 'kunde.example.com', status: 'failed' },
+        { domain: 'kunde.example.com', status: 'active' },
+      ],
+    }, ['kunde.example.com'])).toMatchObject({ order: false, reason: 'active' })
   })
 })
 

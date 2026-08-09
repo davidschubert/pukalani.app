@@ -66,9 +66,40 @@ function requireSecretStorage(event: H3Event): void {
   })
 }
 
+/**
+ * EIN AUFRUF NACH DEM ANDEREN (Session-Audit 2026-08-09).
+ *
+ * Der Ablauf ist „lesen, ob es den Endpunkt gibt — sonst anlegen", und
+ * dazwischen liegen zwei Netzabfragen. Zwei gleichzeitige Aufrufe (der
+ * Doppelklick, ein zweiter Tab) sehen beide „gibt es nicht" und legen ZWEI
+ * Endpunkte auf derselben URL an: jedes Ereignis käme doppelt, und das
+ * zweite `create` überschreibt obendrein das Secret des ersten. Die
+ * Reihenfolge hier macht daraus ein Warten — der Zweite liest danach den
+ * Endpunkt des Ersten und meldet ehrlich `unchanged`.
+ *
+ * EINZELPROZESS-ANNAHME, ausdrücklich: das gilt innerhalb DIESES Node-
+ * Prozesses. `control` läuft als pm2-Einzelinstanz (dieselbe Annahme, unter
+ * der der 30-Sekunden-Cache in stripeSettings.ts steht); bei einem Cluster
+ * mit mehr als einem Worker wäre wieder das Rennen von vorhin möglich und es
+ * bräuchte eine Sperre in Redis.
+ */
+let webhookChain: Promise<unknown> = Promise.resolve()
+
+function oneAtATime<T>(task: () => Promise<T>): Promise<T> {
+  // `.then(task, task)` statt `.finally`: ein FEHLER des Vorgängers darf den
+  // Nachfolger nicht mitreißen, die Kette muss ihn aber abwarten.
+  const run = webhookChain.then(task, task)
+  webhookChain = run.catch(() => {})
+  return run
+}
+
 export default defineEventHandler(async (event) => {
   const user = requirePermission(event, 'system.manage')
   await requireBillingEnabled(event)
+  return oneAtATime(() => ensureWebhookEndpoint(event, user))
+})
+
+async function ensureWebhookEndpoint(event: H3Event, user: { $id: string }) {
 
   const body = schema.parse(await readBody(event).catch(() => ({})) ?? {})
 
@@ -120,9 +151,18 @@ export default defineEventHandler(async (event) => {
       }
       catch (error) {
         console.error(`[control/stripe/webhook] Endpunkt ${created.id} angelegt, Secret NICHT gespeichert:`, error)
+        // DIE ID GEHÖRT IN DEN TEXT, und deshalb steht hier 409 statt 500
+        // (Session-Audit 2026-08-09): der zentrale Handler ersetzt die Meldung
+        // JEDES 5xx durch „Internal server error" und hebt aus `data` nur den
+        // `code` ins Envelope — `data.endpointId` kam also nie beim Betreiber
+        // an, obwohl der Kopf dieser Datei genau das zusagt. 409 ist auch
+        // sachlich richtiger: bei Stripe steht jetzt etwas, das hier fehlt, und
+        // der Aufrufer muss HANDELN (dort löschen bzw. neu anlegen), nicht
+        // wiederholen. Nur ASCII im statusText — er wird zusätzlich als
+        // HTTP-Reason-Phrase gesetzt.
         throw createError({
-          status: 500,
-          statusText: 'Webhook created but secret not stored',
+          status: 409,
+          statusText: `Webhook endpoint ${created.id} created at Stripe, but its signing secret could not be stored - delete it there, then try again`,
           data: { code: 'secret_not_stored', endpointId: created.id },
         })
       }
@@ -176,4 +216,4 @@ export default defineEventHandler(async (event) => {
     addedEvents: missing,
     missingEvents: [] as string[],
   }
-})
+}

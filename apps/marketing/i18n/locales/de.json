@@ -72,7 +72,7 @@
       "rows": [
         {
           "pain": "Hohe Grundpreise + Transaktionsgebühren",
-          "gain": "Fairer, planbarer Preis. Kostenloser Einstieg."
+          "gain": "Fairer, planbarer Preis. 14 Tage kostenlos testen."
         },
         {
           "pain": "Unklare Datenwege & Werbe-Tracking",
@@ -109,7 +109,7 @@
     "blocks": {
       "kicker": "Die Produkte",
       "title": "Eine Plattform, viele Produkte. Du entscheidest, welche.",
-      "lead": "Jeder Produkt ist an- und abschaltbar. Kein Ballast.",
+      "lead": "Jedes Produkt ist an- und abschaltbar. Kein Ballast.",
       "available": "Verfügbar",
       "earlyAccess": "Early Access",
       "items": [
@@ -571,7 +571,7 @@
       "rows": [
         {
           "label": "Einstiegspreis pro Monat",
-          "us": "kostenlos",
+          "us": "ab 29 €",
           "circle": "89 $ (Professional)",
           "skool": "9 $ (Hobby)",
           "mighty": "79 $ (Launch)"
@@ -720,7 +720,7 @@
         },
         {
           "q": "Muss ich alle Produkte nutzen?",
-          "a": "Nein – jeder Produkt ist an- und abschaltbar. Du startest schlank und ergänzt, was du brauchst."
+          "a": "Nein – jedes Produkt ist an- und abschaltbar. Du startest schlank und ergänzt, was du brauchst."
         }
       ],
       "metaTitle": "Häufige Fragen zu Pukalani – Datenschutz, Preise, Umzug",

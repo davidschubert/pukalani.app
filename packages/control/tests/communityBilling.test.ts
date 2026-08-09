@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { deleteBlockedBySubscription, hasLiveSubscription, pickLookupKey, shouldApplyFreeFallback, subscriptionUpdateToCommunityAction, transferBlockedBySubscription } from '../shared/communityBilling'
+import { deleteBlockedBySubscription, hasLiveSubscription, pickLookupKey, planFromLookupKey, shouldApplyFreeFallback, subscriptionUpdateToCommunityAction, transferBlockedBySubscription } from '../shared/communityBilling'
 import type { ControlPlanCatalog } from '../shared/types/planCatalog'
 
 /**
@@ -11,11 +11,14 @@ import type { ControlPlanCatalog } from '../shared/types/planCatalog'
 
 const plans: ControlPlanCatalog = {
   basic: { lookupKey: null, products: ['comments'] },
-  personal: { lookupKey: 'workspace_personal_monthly', products: ['comments', 'posts'] },
-  pro: { lookupKey: 'workspace_pro_monthly', products: ['comments', 'posts', 'events'] },
+  personal: { lookupKey: 'workspace_personal_monthly', lookupKeyYearly: 'workspace_personal_yearly', products: ['comments', 'posts'] },
+  pro: { lookupKey: 'workspace_pro_monthly', lookupKeyYearly: 'workspace_pro_yearly', products: ['comments', 'posts', 'events'] },
 }
 
-const base = { stripeCustomerId: 'cus_1', stripeSubscriptionId: 'sub_1' }
+// `lookupKey: ''` ist der Normalfall aller Alt-Fälle hier: ein Abo, dessen
+// Preis keinen lookup_key trägt (oder ein Ereignis aus der Zeit vor dem Feld).
+// Dann gilt weiter die Checkout-metadata.
+const base = { stripeCustomerId: 'cus_1', stripeSubscriptionId: 'sub_1', lookupKey: '' }
 
 describe('subscriptionUpdateToCommunityAction', () => {
   it('bezahltes Abo → apply-plan auf die Community (mit Customer + Sub für den Cross-Sub-Guard)', () => {
@@ -41,6 +44,44 @@ describe('subscriptionUpdateToCommunityAction', () => {
       .toEqual({ kind: 'ignore', reason: 'unknown-plan-missing' })
   })
 
+  /**
+   * DER PORTAL-UPGRADER (Session-Audit 2026-08-09). Das Kundenportal tauscht
+   * das Subscription-Item, die Checkout-metadata bleibt die des ERSTEN Kaufs.
+   * Ohne die Herkunft aus dem Preis zahlte er Pro und bliebe personal.
+   */
+  it('der laufende Preis schlägt die eingefrorene metadata', () => {
+    expect(subscriptionUpdateToCommunityAction({
+      status: 'active',
+      metadata: { communityId: 't-1', plan: 'personal' },
+      ...base,
+      lookupKey: 'workspace_pro_monthly',
+    }, plans)).toMatchObject({ kind: 'apply-plan', plan: 'pro' })
+  })
+
+  it('der Jahres-lookup_key zeigt auf denselben Plan', () => {
+    expect(subscriptionUpdateToCommunityAction({
+      status: 'active', metadata: { communityId: 't-1' }, ...base, lookupKey: 'workspace_pro_yearly',
+    }, plans)).toMatchObject({ kind: 'apply-plan', plan: 'pro' })
+  })
+
+  it('unbekannter lookup_key fällt auf die metadata zurück (statt zu raten)', () => {
+    expect(subscriptionUpdateToCommunityAction({
+      status: 'active', metadata: { communityId: 't-1', plan: 'personal' }, ...base, lookupKey: 'workspace_fremd_monthly',
+    }, plans)).toMatchObject({ kind: 'apply-plan', plan: 'personal' })
+  })
+
+  it('der Alt-Wert business im Fallback wird übersetzt (P4-Rename)', () => {
+    expect(subscriptionUpdateToCommunityAction({
+      status: 'active', metadata: { communityId: 't-1', plan: 'business' }, ...base,
+    }, plans)).toMatchObject({ kind: 'apply-plan', plan: 'pro' })
+  })
+
+  it('aber Unbekanntes bleibt ignore — normalizeTenantPlan darf nicht still auf basic degradieren', () => {
+    expect(subscriptionUpdateToCommunityAction({
+      status: 'active', metadata: { communityId: 't-1', plan: 'gold' }, ...base,
+    }, plans)).toEqual({ kind: 'ignore', reason: 'unknown-plan-gold' })
+  })
+
   it('past_due/unpaid: Marker, Plan bleibt (Dunning ist die Grace-Periode)', () => {
     expect(subscriptionUpdateToCommunityAction({ status: 'past_due', metadata: { communityId: 't-1' }, ...base }, plans))
       .toEqual({ kind: 'past-due', communityId: 't-1' })
@@ -57,6 +98,22 @@ describe('subscriptionUpdateToCommunityAction', () => {
     for (const status of ['incomplete', 'paused', 'somethingnew']) {
       expect(subscriptionUpdateToCommunityAction({ status, metadata: { communityId: 't-1' }, ...base }, plans).kind).toBe('ignore')
     }
+  })
+})
+
+describe('planFromLookupKey (der Umkehrschluss zu pickLookupKey)', () => {
+  it('findet den Plan über Monats- wie Jahres-Schlüssel', () => {
+    expect(planFromLookupKey(plans, 'workspace_personal_monthly')).toBe('personal')
+    expect(planFromLookupKey(plans, 'workspace_pro_yearly')).toBe('pro')
+  })
+
+  it('null für unbekannt und für leer (ein Preis ohne lookup_key)', () => {
+    expect(planFromLookupKey(plans, 'workspace_gold_monthly')).toBeNull()
+    expect(planFromLookupKey(plans, '')).toBeNull()
+  })
+
+  it('ein Plan ohne Preis (basic, lookupKey null) ist über nichts erreichbar', () => {
+    expect(planFromLookupKey(plans, 'null')).toBeNull()
   })
 })
 

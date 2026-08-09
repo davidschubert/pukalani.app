@@ -1,4 +1,4 @@
-import type { ManifestText } from '../../../../core/shared/types/manifest'
+import type { CommunityProductEntry, CommunityProductsResponse } from '../../../shared/communityProducts'
 
 /**
  * DER PRODUKT-KATALOG AUS SICHT EINER COMMUNITY — Datenquelle des Reiters
@@ -40,16 +40,7 @@ import type { ManifestText } from '../../../../core/shared/types/manifest'
  * Browser liest — die Seite rechnet also nicht gegen eine zweite Quelle,
  * sondern bekommt hier nur das, was ihr sonst fehlt: die Texte.
  */
-export interface CommunityProductEntry {
-  key: string
-  title: ManifestText
-  description: ManifestText
-  icon?: string
-  /** Mindest-Plan aus `pukalani.tenancy.products`; '' = in jedem Tarif dabei. */
-  minPlan: string
-}
-
-export default defineEventHandler(async (event): Promise<{ products: CommunityProductEntry[] }> => {
+export default defineEventHandler(async (event): Promise<CommunityProductsResponse> => {
   const tenant = useTenant(event)
   // Kein Pool-Mandant ⇒ es gibt keinen Tarif, der etwas freischalten könnte.
   if (tenant?.mode !== 'pool') {

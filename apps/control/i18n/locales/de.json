@@ -57,6 +57,7 @@
         "errorMalformed": "Das sieht nicht nach einem geheimen Schlüssel aus (sk_live_ oder sk_test_)",
         "errorWebhookMalformed": "Das sieht nicht nach einem Signatur-Geheimnis aus (whsec_)",
         "errorNoStorage": "Die Ablage ist nicht eingerichtet — NUXT_BILLING_SETTINGS_KEY fehlt",
+        "errorStorageKeyInvalid": "NUXT_BILLING_SETTINGS_KEY ist gesetzt, aber falsch geformt — 64 Hex-Zeichen erwartet (openssl rand -hex 32). Nichts gespeichert.",
         "errorGeneric": "Speichern fehlgeschlagen",
         "noStorageTitle": "Schlüssel lassen sich hier noch nicht ablegen",
         "noStorageHint": "Dafür braucht der Server NUXT_BILLING_SETTINGS_KEY — 64 Hex-Zeichen, erzeugt mit openssl rand -hex 32. Solange die Variable fehlt, gelten weiter NUXT_STRIPE_SECRET_KEY und NUXT_STRIPE_WEBHOOK_SECRET aus der Server-Umgebung."

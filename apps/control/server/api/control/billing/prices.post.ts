@@ -66,6 +66,13 @@ export default defineEventHandler(async (event) => {
   await stripe.prices.update(oldPrice.id, { active: false })
     .catch((error: unknown) => toStripeSafeError(error, 'prices.update (archive) failed'))
 
+  // Der lookup_key hängt jetzt an einer NEUEN Price-Id — der Preis-Cache des
+  // billing-Layers hielte sonst bis zu 5 Minuten die ARCHIVIERTE fest, und
+  // jeder Checkout in diesem Fenster liefe in Stripes „price inactive"
+  // (Session-Audit 2026-08-09, HIGH 2 — derselbe Griff wie im Zwilling
+  // apps/control/server/utils/stripePrices.ts).
+  invalidateStripePriceCache()
+
   return {
     unchanged: false,
     amount: created.unit_amount,

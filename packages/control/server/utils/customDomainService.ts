@@ -201,9 +201,25 @@ export async function advanceCustomDomain(event: H3Event, row: TenantRow): Promi
   }
 
   const certErrors: string[] = []
+  /**
+   * NICHT BESTELLT IST NICHT NICHTS (Session-Audit 2026-08-09).
+   *
+   * Die Sperre gegen den Wiederholungs-Klick (F52) antwortet mit `ok: true,
+   * skipped: true` — sie hat aber NICHTS bestellt und trägt den einzigen
+   * Ausweg im Text („hängt es fest: Eintrag in ploi löschen, dann erneut
+   * prüfen"). Bis heute fiel genau dieser Satz weg: der Ablauf lief weiter,
+   * scheiterte eine Stufe später an der HTTPS-Prüfung, und der Owner las
+   * „Zertifikat noch nicht aktiv" — wahr, aber ohne jeden Hinweis darauf, dass
+   * ein festgefahrener Eintrag ihn hält und niemand mehr nachbestellt.
+   *
+   * Ein stiller Übersprung (deckendes Zertifikat `active`, Trockenlauf) trägt
+   * `message: ''` und landet hier gar nicht erst.
+   */
+  const certNotices: string[] = []
   for (const form of dns.pointingForms) {
     const cert = await requestPloiTenantCertificate(ploiConfig(event), form)
     if (!cert.ok) certErrors.push(`${form}: ${cert.message}`)
+    else if (cert.skipped && cert.message) certNotices.push(`${form}: ${cert.message}`)
   }
   if (certErrors.length) {
     logEvent('warn', 'community.custom_domain_cert_failed', {
@@ -212,14 +228,24 @@ export async function advanceCustomDomain(event: H3Event, row: TenantRow): Promi
       detail: certErrors.join(' · ').slice(0, 400),
     })
   }
-  // NUR die kanonische Form hält auf. Scheitert die Geschwister-Form, wird das
-  // protokolliert und ignoriert — sie ist Zugabe, und ein Kunde soll nicht auf
-  // seiner Hauptadresse warten, weil sein Apex-Anbieter kein CNAME kann.
-  if (certErrors.some(entry => entry.startsWith(`${domain}:`))) {
+  if (certNotices.length) {
+    logEvent('warn', 'community.custom_domain_cert_pending', {
+      communityId: row.$id,
+      domain,
+      detail: certNotices.join(' · ').slice(0, 400),
+    })
+  }
+  // NUR die kanonische Form hält auf. Scheitert (oder wartet) die
+  // Geschwister-Form, wird das protokolliert und ignoriert — sie ist Zugabe,
+  // und ein Kunde soll nicht auf seiner Hauptadresse warten, weil sein
+  // Apex-Anbieter kein CNAME kann.
+  const certBlocking = [...certErrors, ...certNotices]
+  if (certBlocking.some(entry => entry.startsWith(`${domain}:`))) {
+    const message = certBlocking.join(' · ')
     return {
-      patch: { customDomainStatus: 'pending_cert', customDomainError: certErrors.join(' · ').slice(0, 500), customDomainVerifiedAt: now },
+      patch: { customDomainStatus: 'pending_cert', customDomainError: message.slice(0, 500), customDomainVerifiedAt: now },
       status: 'pending_cert',
-      error: certErrors.join(' · '),
+      error: message,
       needsPlatformRegistration: false,
     }
   }
