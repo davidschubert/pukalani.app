@@ -28,9 +28,10 @@ import { TRIAL_PLAN, trialDaysLeft } from '../../../../../control/shared/onboard
  *
  * DREI KARTEN, EINE ARBEITSTEILUNG:
  *  1. Aktueller Plan — was gilt gerade.
- *  2. Plan wählen — der KAUF (nur aufwärts: personal/pro). Basic hat bewusst
- *     keinen Knopf: es ist seit F49 (2026-08-07) kein Angebot mehr, sondern der
- *     Zustand OHNE Abo — die Community ist dort nur zum Lesen. HERUNTER geht es
+ *  2. Plan wählen — der KAUF (nur aufwärts: personal/pro). Basic steht seit
+ *     Davids Entscheidung vom 2026-08-09 GAR NICHT mehr im Raster (F49-Nachtrag,
+ *     gleiche Logik wie die öffentliche Preisseite): es ist kein Angebot,
+ *     sondern der Zustand OHNE Abo, und den sagt schon Karte 1. HERUNTER geht es
  *     über das Portal, weil Proration, Steuern und Fristen bei Stripe gerechnet
  *     werden. Zwei Wege zum selben Vertrag wären zwei Wahrheiten.
  *  3. Rechnungen & Zahlungsmethode — das Stripe-Portal.
@@ -76,7 +77,16 @@ useHead({ title: () => t('onboarding.subscription.title') })
 const { plan: currentPlan } = useTenantPlan()
 const isTenantHost = computed(() => currentPlan.value !== null)
 
-const PLAN_KEYS = ['basic', 'personal', 'pro'] as const
+/**
+ * Die KÄUFLICHEN Pläne — und nur die stehen im Raster.
+ *
+ * Davids Entscheidung 2026-08-09 (F49-Nachtrag, gleiche Logik wie die
+ * öffentliche Preisseite): Basic ist kein Angebot, sondern der Zustand OHNE
+ * Abo. Eine „0 €"-Spalte daneben las sich wie ein buchbarer Gratis-Tarif; den
+ * Zustand erklärt bereits die Karte „Aktueller Plan" („Kein Abo – Free Plan"
+ * plus der Nur-lesen-Satz). Ein Angebot ohne Knopf ist kein Angebot.
+ */
+const PLAN_KEYS = ['personal', 'pro'] as const
 type PlanKey = (typeof PLAN_KEYS)[number]
 
 /**
@@ -84,7 +94,7 @@ type PlanKey = (typeof PLAN_KEYS)[number]
  * den Index adressiert (`…bullets.0`) — dasselbe Muster wie die FAQ-Liste im
  * marketing-Layer. Wer hier eine Zeile ergänzt, zählt diese Zahl mit hoch.
  */
-const PLAN_BULLETS: Record<PlanKey, number> = { basic: 3, personal: 5, pro: 5 }
+const PLAN_BULLETS: Record<PlanKey, number> = { personal: 5, pro: 5 }
 
 const yearly = ref(false)
 const interval = computed<'monthly' | 'yearly'>(() => (yearly.value ? 'yearly' : 'monthly'))
@@ -151,9 +161,8 @@ const planLabel = computed(() => {
 const showReadOnlyNote = computed(() => trialDays.value === null && currentPlan.value === 'basic')
 
 async function buy(key: PlanKey) {
-  // Basic hat keinen Checkout (kein Stripe-Price) — der Knopf existiert gar
-  // nicht, diese Zeile ist der Typ-Beweis für den Body unten.
-  if (key === 'basic' || busy.value) return
+  // `PlanKey` kennt nur noch käufliche Pläne — Basic hätte keinen Stripe-Price.
+  if (busy.value) return
   busy.value = key
   try {
     const { url } = await $fetch<{ url: string }>('/api/community/billing/checkout', {
@@ -287,9 +296,9 @@ onMounted(() => {
     </div>
 
     <!-- BEWUSST KEINE UTable (B6): Preiskarten, keine Datenliste — der Kunde
-         vergleicht drei Angebote und wählt eines, er sortiert und blättert
+         vergleicht zwei Angebote und wählt eines, er sortiert und blättert
          nicht. Dieselbe Darstellung wie auf der öffentlichen Preisseite. -->
-    <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
       <div
         v-for="key in PLAN_KEYS"
         :key="key"
@@ -308,8 +317,8 @@ onMounted(() => {
         <p class="text-xs text-muted">
           {{ yearly ? t('onboarding.subscription.perMonthYearly') : t('onboarding.subscription.perMonth') }}
         </p>
-        <!-- PAngV: Endpreis-Hinweis AM Preis — nur bei Plänen, die etwas kosten. -->
-        <p v-if="key !== 'basic'" class="mt-1 text-xs font-medium text-toned">
+        <!-- PAngV: Endpreis-Hinweis AM Preis. Beide Pläne kosten etwas. -->
+        <p class="mt-1 text-xs font-medium text-toned">
           {{ t('onboarding.subscription.vatNote') }}
         </p>
 
@@ -322,7 +331,7 @@ onMounted(() => {
 
         <div class="mt-5">
           <UButton
-            v-if="key !== 'basic' && !isCurrent(key)"
+            v-if="!isCurrent(key)"
             block
             :loading="busy === key"
             :disabled="busy !== '' && busy !== key"
@@ -332,7 +341,7 @@ onMounted(() => {
             {{ t('onboarding.subscription.buy', { plan: t(`onboarding.subscription.plans.${key}.name`) }) }}
           </UButton>
           <p v-else class="text-xs text-muted">
-            {{ isCurrent(key) ? t('onboarding.subscription.currentPlanNote') : t('onboarding.subscription.downgradeHint') }}
+            {{ t('onboarding.subscription.currentPlanNote') }}
           </p>
         </div>
       </div>
