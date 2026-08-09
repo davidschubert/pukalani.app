@@ -170,6 +170,43 @@ ebenfalls aus; er passiert nach dem Deploy.
 
 ---
 
+### Session-Audit 2026-08-09 — drei Stränge, 4 HIGHs, 14 Fixes ✅ 2026-08-09
+
+**Auftrag David:** alles aus der Session (F49–F55) technisch, konzeptionell
+und auf Code-Sauberkeit/Sicherheit prüfen. **Aufbau:** volle Testbatterie
+(19 Pakete, 7 Typechecks, 6 Gates, Live-Spots aller 7 Hosts — alles grün)
+plus drei audit-worker in Strängen (Stripe/Billing · Nav/Hub/Switcher ·
+Cert/Pricing/Marketing), jeder Befund im Hauptloop verifiziert.
+**Die vier HIGHs:** (1) Preis-Cache wurde VOR der Client-Auflösung gelesen —
+die Key-Wechsel-Leerung (Audit MEDIUM 4) griff auf dem Checkout-Pfad nie;
+(2) Preis-Umzug invalidierte den Cache nicht (Checkouts auf archivierte Ids);
+(3) die zwei F50-Switcher-Routen fehlten im Rate-Limit (ungedrosselte
+JWT-Mints + Control-Plane-Reads) — dieselbe Lücke fand zeitgleich eine
+Selbst-Review-Session, der Merge vereinte beide (switcher+switch+
+control-handoff); (4) die F52-Sperr-Meldung („Eintrag in ploi löschen …")
+erreichte weder Owner noch Log — ein festgefahrenes Zertifikat blockierte
+dauerhaft und unsichtbar. Dazu u. a.: stiller ignore im Fulfillment loggt
+jetzt (einzige Sackgasse der Zustandsmaschine), Plan kommt aus dem
+tatsächlichen lookup_key statt der eingefrorenen Checkout-Metadata
+(Portal-Plan-Wechsel; Alt-Wert-Übersetzung GEGUARDET — Unbekanntes bleibt
+ignore statt Degradierung), Webhook-Anlegen serialisiert, 409 statt 500 wo
+die Endpunkt-Id sonst nie ankäme (der zentrale Handler ersetzt jede
+5xx-Meldung), Marketing-Vergleichstabelle „ab 29 €" statt „kostenlos".
+**Sicherheitsfragen alle sauber:** kein Klartext-Key-Leck möglich, alle
+Stripe-Endpunkte hinter system.manage, Host-Sprung-Siegel dicht,
+Verbrauchszählung mandantenscharf, abuse-Sperren unantastbar.
+**Bewusst liegen gelassen** (Geschmacks-/Betriebsfragen): Davids
+noPlanLabel-Wortlaut (seine explizite Entscheidung), Basic-Karte im
+Plan-Raster, Studio-CTA-Ziel, en-„blocks"-Umbenennung (~25 Stellen),
+Cross-Host-Sprünge landen auf EN-Pfaden, conflicts-Wächter
+onboarding×domains, marketing error.vue ohne Layout(-Dark).
+**Gelernt:** (1) Der Merge zweier unabhängiger Fixes derselben Lücke ist die
+VEREINIGUNG, nicht die Wahl einer Seite. (2) Hand-aufgelöste Konflikte ohne
+Typecheck sind unfertig — der Worktree-Typecheck fing eine doppelte
+Deklaration, die drei grüne Testsuiten nicht sahen. (3) `git add -A` bleibt
+im geteilten Checkout verboten; der PR-Weg (Branch + Remote-Merge) umgeht
+den blockierten lokalen Checkout sauber.
+
 ### F55 — Stripe-Verwaltung im Control-Dashboard ✅ 2026-08-08
 
 **Was gebaut wurde** (Davids Entscheidung am selben Tag, nachdem der
