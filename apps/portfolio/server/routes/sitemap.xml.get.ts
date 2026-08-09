@@ -1,4 +1,5 @@
 import { CASES } from '../../app/data/cases'
+import { escapeXmlText, siteRequestOrigin } from '../utils/siteRequestOrigin'
 
 /**
  * sitemap.xml — bewusst als schlanke Server-Route statt per Extra-Modul
@@ -33,7 +34,11 @@ const ROUTES: SitemapRoute[] = [
 ]
 
 export default defineEventHandler((event) => {
-  const base = getRequestURL(event).origin
+  // NICHT `getRequestURL(event).origin` roh: der Host-Header ist Client-
+  // Eingabe, und diese Antwort wird eine Stunde lang öffentlich gecacht
+  // (siehe `siteRequestOrigin`). Escapen kommt trotzdem obendrauf — `&` ist
+  // ein gültiges Host-Zeichen und in XML ohne Entity ein Syntaxfehler.
+  const base = escapeXmlText(siteRequestOrigin(event))
 
   const urls = ROUTES.flatMap((route) => {
     const enUrl = `${base}${route.path}`

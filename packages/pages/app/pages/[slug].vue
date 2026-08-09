@@ -6,7 +6,14 @@ import type { PublicPage } from '../../shared/types/page'
  * Öffentliche Inhaltsseite unter sprechendem Pfad (/imprint, /terms …).
  * Dynamische Route mit NIEDRIGER Priorität — statische App-Routen (/login,
  * /dashboard …) gewinnen. Nur veröffentlichte Seiten; sonst 404.
+ *
+ * `key` = voller Pfad: bei einem Slug-Wechsel IM BROWSER (/imprint → /xyz)
+ * baut Nuxt die Komponente neu auf, statt sie wiederzuverwenden. Ohne das
+ * läuft das `setup` kein zweites Mal — der 404-Wurf unten bliebe aus und die
+ * Seite zeigte den alten Inhalt bzw. eine leere Sektion.
  */
+definePageMeta({ key: route => route.fullPath })
+
 const route = useRoute()
 const { locale } = useI18n()
 const slug = computed(() => String(route.params.slug ?? ''))
@@ -19,7 +26,9 @@ const slug = computed(() => String(route.params.slug ?? ''))
 const requestFetch = useRequestFetch()
 const { data: page, error } = await useAsyncData(
   () => `page-${slug.value}-${locale.value}`,
-  () => requestFetch<PublicPage>(`/api/pages/public/${slug.value}`, { query: { locale: locale.value } }),
+  // encodeURIComponent: vue-router liefert den Param DEKODIERT — ein `%2F`
+  // oder `..` in der Adresse stünde sonst roh im API-Pfad.
+  () => requestFetch<PublicPage>(`/api/pages/public/${encodeURIComponent(slug.value)}`, { query: { locale: locale.value } }),
   { watch: [locale] },
 )
 

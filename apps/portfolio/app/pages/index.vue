@@ -30,18 +30,20 @@ definePageMeta({ layout: 'site' })
 
 const { t, locale } = useI18n()
 const localePath = useLocalePath()
-const requestUrl = useRequestURL()
 
 const lang = computed<Lang>(() => (locale.value.startsWith('de') ? 'de' : 'en'))
 
 /**
- * Absolute URLs für das Structured Data. Der Origin kommt aus dem REQUEST
+ * Absolute URLs für das Structured Data. Host und Port kommen aus dem REQUEST
  * (nicht aus einer Env): diese Site bedient nach der Domain-Freischaltung zwei
  * Hosts, und ein fest verdrahteter Origin zeigte auf dem zweiten ins Leere.
- * canonical/hreflang/og:url macht davon unabhängig `useLocaleSeoHead()` in der
- * app.vue — hier geht es nur um die URLs INNERHALB des Graphen.
+ * Das SCHEMA kommt aus der Env — hinter nginx spricht Node http, roh aus dem
+ * Request stünden hier also `http`-Adressen, während canonical im selben
+ * Dokument `https` sagt. `useSiteOrigin()` rechnet dafür exakt dasselbe wie
+ * `useLocaleSeoHead()` in der app.vue; hier geht es nur um die URLs INNERHALB
+ * des Graphen.
  */
-const origin = requestUrl.origin
+const origin = useSiteOrigin()
 const pageUrl = computed(() => `${origin}${localePath('/')}`)
 const personId = `${origin}/#david-schubert`
 const orgId = `${origin}/#pukalani-studio`
@@ -186,7 +188,7 @@ const jsonLd = computed(() => ({
 useHead(() => ({
   title: HOME_META.title[lang.value],
   meta: [
-    { name: 'robots', content: 'index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1' },
+    // `robots` steht EINMAL in der app.vue (ohne index,follow) — siehe dort.
     { name: 'author', content: 'David Schubert' },
   ],
   script: [jsonLdScript(jsonLd.value)],

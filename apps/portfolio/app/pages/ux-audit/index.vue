@@ -24,11 +24,13 @@ definePageMeta({ layout: 'site' })
 
 const { t, locale } = useI18n()
 const localePath = useLocalePath()
-const requestUrl = useRequestURL()
 
 const lang = computed<Lang>(() => (locale.value.startsWith('de') ? 'de' : 'en'))
 
-const origin = requestUrl.origin
+// Host+Port aus dem Request, SCHEMA aus der Env — dieselbe Rechnung, aus der
+// `useLocaleSeoHead()` canonical/og:url baut (siehe useSiteOrigin). Roh aus
+// `useRequestURL()` stünden hinter nginx `http`-Adressen im Graphen.
+const origin = useSiteOrigin()
 const homeUrl = computed(() => `${origin}${localePath('/')}`)
 const pageUrl = computed(() => `${origin}${localePath('/ux-audit')}`)
 const personId = `${origin}/#david-schubert`
@@ -105,7 +107,7 @@ const jsonLd = computed(() => ({
 useHead(() => ({
   title: AUDIT_META.title[lang.value],
   meta: [
-    { name: 'robots', content: 'index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1' },
+    // `robots` steht EINMAL in der app.vue (ohne index,follow) — siehe dort.
     { name: 'author', content: 'David Schubert' },
   ],
   script: [jsonLdScript(jsonLd.value)],
