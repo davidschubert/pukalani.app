@@ -1,9 +1,25 @@
 <script setup lang="ts">
+import type { PublicPageNavItem } from '../../../../packages/pages/shared/types/page'
 import { CONTACT } from '../data/contact'
 
 const { t, locale } = useI18n()
 const localePath = useLocalePath()
 const switchLocalePath = useSwitchLocalePath()
+
+/**
+ * Rechtsseiten aus dem pages-CMS (Muster blueprint-Layout): nur VERÖFFENT-
+ * LICHTES erscheint — ein Entwurf im Dashboard erzeugt keinen toten Link.
+ * useRequestFetch, damit SSR den Host-Header weiterreicht; fail-soft auf [].
+ */
+const LEGAL_SLUGS = ['imprint', 'impressum', 'privacy', 'datenschutz', 'terms', 'agb']
+const requestFetch = useRequestFetch()
+const { data: publicPages } = await useAsyncData(
+  () => `footer-legal-pages-${locale.value}`,
+  () => requestFetch<PublicPageNavItem[]>('/api/pages/public', { query: { locale: locale.value } })
+    .catch(() => [] as PublicPageNavItem[]),
+  { watch: [locale] },
+)
+const legalPages = computed(() => (publicPages.value ?? []).filter(page => LEGAL_SLUGS.includes(page.slug)))
 
 const isGerman = computed(() => locale.value.startsWith('de'))
 const lang = computed<'de' | 'en'>(() => (isGerman.value ? 'de' : 'en'))
@@ -86,8 +102,11 @@ const knowledgeLinks = computed(() => [
     <div class="container footer__base">
       <p class="footer__muted">© {{ new Date().getFullYear() }} David Schubert · Pukalani Studio. {{ t('portfolio.footer.rights') }}</p>
       <p class="footer__muted">
-        <a :href="CONTACT.imprintUrl" target="_blank" rel="noopener" class="footer__link">{{ t('portfolio.footer.imprint') }}</a>
-        · {{ t('portfolio.footer.updated') }} {{ CONTACT.lastUpdatedHuman[lang] }}
+        <template v-for="page in legalPages" :key="page.slug">
+          <NuxtLink :to="localePath(`/${page.slug}`)" class="footer__link">{{ page.title }}</NuxtLink>
+          <span aria-hidden="true"> · </span>
+        </template>
+        {{ t('portfolio.footer.updated') }} {{ CONTACT.lastUpdatedHuman[lang] }}
       </p>
     </div>
   </footer>

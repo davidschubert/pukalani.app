@@ -14,7 +14,6 @@ export interface ContactData {
   phoneHuman: string
   phoneTel: string
   calLink: string
-  imprintUrl: string
   socialProfiles: string[]
   /** ISO-Datum für dateModified/article:modified_time. */
   lastUpdated: string
@@ -27,7 +26,6 @@ export const CONTACT: ContactData = {
   phoneHuman: '+1 808 866 0676',
   phoneTel: '+18088660676',
   calLink: 'https://cal.com/davidschubert/30min',
-  imprintUrl: 'https://pukalani.studio/imprint.pdf',
   socialProfiles: [
     'https://www.linkedin.com/in/davidschubert-uiux/',
     'https://github.com/davidschubert',
