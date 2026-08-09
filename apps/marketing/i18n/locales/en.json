@@ -101,15 +101,15 @@
         },
         {
           "n": "3",
-          "title": "Pick your blocks",
+          "title": "Pick your products",
           "text": "Turn feed, courses, events and comments on or off. Add your design. Done."
         }
       ]
     },
     "blocks": {
       "kicker": "The products",
-      "title": "One platform, many blocks. You decide which.",
-      "lead": "Every block can be switched on or off. No ballast.",
+      "title": "One platform, many products. You decide which.",
+      "lead": "Every product can be switched on or off. No ballast.",
       "available": "Available",
       "earlyAccess": "Early access",
       "items": [
@@ -320,7 +320,7 @@
         }
       },
       "eaBannerTitle": "Early access – not released to everyone yet",
-      "eaBannerText": "This block is built and running, but not yet part of the open offer. You can use it in early access by invitation – we enable it together. Buying it here is deliberately not possible.",
+      "eaBannerText": "This product is built and running, but not yet part of the open offer. You can use it in early access by invitation – we enable it together. Buying it here is deliberately not possible.",
       "eaCta": "Request early access"
     },
     "glossary": {
@@ -352,7 +352,7 @@
         },
         {
           "term": "Embed",
-          "def": "A block of your community placed inside another website – for example comments under your blog posts. You don't have to migrate anything."
+          "def": "A product of your community placed inside another website – for example comments under your blog posts. You don't have to migrate anything."
         },
         {
           "term": "Custom domain",
@@ -368,7 +368,7 @@
         },
         {
           "term": "Early access",
-          "def": "A block that exists but isn't released to everyone yet. We label it that way – instead of letting it look like a finished plan promise."
+          "def": "A product that exists but isn't released to everyone yet. We label it that way – instead of letting it look like a finished plan promise."
         },
         {
           "term": "Members-only",
@@ -399,7 +399,7 @@
         },
         {
           "n": "2",
-          "title": "Pick your blocks",
+          "title": "Pick your products",
           "text": "Switch on what you actually use. Many people notice here: nobody ever opened half of the old features."
         },
         {
@@ -430,7 +430,7 @@
       "title": "How we implement privacy",
       "lead": "No seal, no marketing formula: here's where your data lives, what we don't do – and what we deliberately don't promise.",
       "disclaimerTitle": "What this page is – and isn't",
-      "disclaimer": "This page explains our technology and operations. It is not legal advice and does not replace your community's own privacy policy – you need that for your own site, matching the blocks you switch on.",
+      "disclaimer": "This page explains our technology and operations. It is not legal advice and does not replace your community's own privacy policy – you need that for your own site, matching the products you switch on.",
       "legalLink": "Our own privacy policy",
       "sections": [
         {
@@ -514,7 +514,7 @@
     "audiencePages": {
       "backHome": "Back to home",
       "fitTitle": "Why Pukalani fits here",
-      "blocksTitle": "The blocks you need for this",
+      "blocksTitle": "The products you need for this",
       "ctaTitle": "Sounds like you?",
       "ctaLead": "Start free – your community stands in 60 seconds.",
       "items": {
@@ -534,7 +534,7 @@
           "metaDescription": "Sell courses with a community around them: lessons, progress, paid access via Stripe – under your brand, hosted in Germany, no transaction fee.",
           "title": "Sell courses – with a community around them",
           "sub": "Lessons, progress and paid access, without a cut of your revenue.",
-          "intro": "A course on its own is a file. A course with a community is an outcome: participants ask, stay engaged, recommend it. That combination is one block-click apart in Pukalani.",
+          "intro": "A course on its own is a file. A course with a community is an outcome: participants ask, stay engaged, recommend it. That combination is one product-click apart in Pukalani.",
           "fit": "Access free, members-only or paid – paid access runs through Stripe. We take no transaction fee: what you earn stays yours. Predictable price, data in Germany, export anytime.",
           "blocks": "Courses (early access) · comments · pages & branding"
         },
@@ -545,7 +545,7 @@
           "title": "Your readers get a place – with you",
           "sub": "Discussion under your brand, embeddable in the site you already have.",
           "intro": "Comments under posts, a feed for announcements, the occasional live session: that's how an audience becomes a community. On your domain – not in a network that can take your reach away tomorrow.",
-          "fit": "Individual blocks embed into your existing website – you don't have to move anything. No ad tracking, no ads, no passing data on: your readers stay your readers.",
+          "fit": "Individual products embed into your existing website – you don't have to move anything. No ad tracking, no ads, no passing data on: your readers stay your readers.",
           "blocks": "Comments (embeddable) · moderation · pages & branding · feed later"
         },
         "vereine": {
@@ -598,14 +598,14 @@
           "mighty": "yes"
         },
         {
-          "label": "Blocks can be switched off individually",
+          "label": "Products can be switched off individually",
           "us": "yes",
           "circle": "suite",
           "skool": "suite",
           "mighty": "suite"
         },
         {
-          "label": "Blocks embeddable in your own website",
+          "label": "Products embeddable in your own website",
           "us": "yes (comments, events)",
           "circle": "n/a",
           "skool": "n/a",
@@ -637,7 +637,7 @@
           "sub": "The lean, privacy-close alternative — for communities that don't need a whole suite.",
           "intro": "Circle is powerful: a broad suite, automations, scale. For small and mid-sized communities that's often more than they need – and pricier than they want. Pukalani bets on a few well-made products, hosting in Germany and a predictable price with no transaction fee.",
           "whenThem": "You need a broad suite with lots of automations, native mobile apps with push, or you're scaling to very large memberships with enterprise requirements. Circle gives you more surface there.",
-          "whenUs": "You want your own community home under your name, hosted in Germany, without ad tracking and without transaction fees – and you only want to switch on the blocks you actually use."
+          "whenUs": "You want your own community home under your name, hosted in Germany, without ad tracking and without transaction fees – and you only want to switch on the products you actually use."
         },
         "skool": {
           "name": "Skool",
@@ -655,9 +655,9 @@
           "metaDescription": "Pukalani vs Mighty Networks: your own community platform, hosted in Germany, modular instead of a suite, no transaction fee. Honest comparison with sources.",
           "title": "Pukalani vs Mighty Networks",
           "sub": "Modular instead of a suite — your community, your design, your data in Germany.",
-          "intro": "Mighty Networks brings community, courses and events together, mobile apps included. That's strong if you want the full breadth. Pukalani is the lean counter-proposal: only the blocks you need, hosted in Germany, no transaction fee – and individual blocks are embeddable in your own website.",
+          "intro": "Mighty Networks brings community, courses and events together, mobile apps included. That's strong if you want the full breadth. Pukalani is the lean counter-proposal: only the products you need, hosted in Germany, no transaction fee – and individual products are embeddable in your own website.",
           "whenThem": "You need native mobile apps with push and the full breadth of an established suite, including big reach features. Mighty delivers more there.",
-          "whenUs": "You want to start lean, pay predictably, host in Germany and decide yourself which blocks are even visible – without ballast you never open."
+          "whenUs": "You want to start lean, pay predictably, host in Germany and decide yourself which products are even visible – without ballast you never open."
         }
       }
     },
@@ -704,7 +704,7 @@
         },
         {
           "q": "Can I keep my existing site?",
-          "a": "Yes. Your community runs under your name and design; individual blocks like comments can even be embedded into your existing website."
+          "a": "Yes. Your community runs under your name and design; individual products like comments can even be embedded into your existing website."
         },
         {
           "q": "What does it cost?",
@@ -756,6 +756,15 @@
       "primary": "Start free",
       "secondary": "See the live demo",
       "refrain": "“Where the sun breaks through.”"
+    },
+    "contact": {
+      "kicker": "Contact",
+      "title": "A project built to fit",
+      "lead": "Pukalani Studio is the route for everything a plan cannot cover: your own instance, your own domain, your own concept — consulting, strategy, design and the technical build from one hand. Write two sentences about your plan; you get an honest read on whether it fits.",
+      "cta": "Ask by email",
+      "mailSubject": "Pukalani Studio - interest",
+      "addressLabel": "Or write directly to",
+      "note": "No form, no tracking: the message goes straight from your mail client to the inbox."
     },
     "footer": {
       "tagline": "Your own community platform — lean, privacy-first, hosted in Germany.",

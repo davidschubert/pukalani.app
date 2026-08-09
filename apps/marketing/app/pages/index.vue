@@ -79,5 +79,12 @@ useHead(() => ({
          entkräftet die FAQ die letzten Zweifel direkt VOR der Aufforderung. -->
     <FaqSection />
     <CtaSection />
+    <!-- Kontakt als LETZTE Sektion (Davids Entscheidung 2026-08-09): das Ziel
+         des Studio-Knopfes aus der Preistabelle. Sie steht hinter dem
+         Abschluss-CTA, weil sie nicht mit ihm konkurriert — der CTA ist die
+         Selbstbedienung („in 60 Sekunden"), der Kontakt das Angebot nach Maß.
+         Beide tragen `tone-ink`, das dunkle Band läuft also ohne Bruch bis in
+         den Fuß (§6.3). -->
+    <ContactSection />
   </div>
 </template>

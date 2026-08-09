@@ -371,7 +371,6 @@
       "perMonthYearly": "per month, billed yearly",
       "vatNote": "Final price incl. 19% VAT.",
       "buy": "Get {plan}",
-      "downgradeHint": "Without a paid subscription your community is read-only — content and members are kept. Cancelling goes through \"Invoices & payment method\".",
       "portalTitle": "Invoices & payment method",
       "portalHint": "The Stripe portal holds every invoice and lets you change the payment method, switch plans or cancel.",
       "portalNote": "You briefly leave Pukalani and land at Stripe.",
@@ -384,16 +383,6 @@
       "checkoutErrorHint": "The checkout never opened — nothing was charged and your plan stays as it is.",
       "portalErrorHint": "The billing portal could not be opened. Your subscription is unaffected.",
       "plans": {
-        "basic": {
-          "name": "Basic",
-          "price": "€0",
-          "priceYearly": "€0",
-          "bullets": [
-            "The state without a subscription: the community is read-only",
-            "Content, members and settings are all kept",
-            "A subscription opens it again right away"
-          ]
-        },
         "personal": {
           "name": "Personal",
           "price": "€29",

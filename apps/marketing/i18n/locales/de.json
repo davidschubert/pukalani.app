@@ -320,7 +320,7 @@
         }
       },
       "eaBannerTitle": "Early Access – noch nicht für alle freigegeben",
-      "eaBannerText": "Dieser Produkt ist gebaut und läuft, aber noch nicht Teil des offenen Angebots. Du kannst ihn im Early Access auf Einladung nutzen – wir schalten ihn gemeinsam frei. Ein Kauf ist hier bewusst nicht möglich.",
+      "eaBannerText": "Dieses Produkt ist gebaut und läuft, aber noch nicht Teil des offenen Angebots. Du kannst es im Early Access auf Einladung nutzen – wir schalten es gemeinsam frei. Ein Kauf ist hier bewusst nicht möglich.",
       "eaCta": "Early Access anfragen"
     },
     "glossary": {
@@ -368,7 +368,7 @@
         },
         {
           "term": "Early Access",
-          "def": "Ein Produkt, den es gibt, der aber noch nicht für alle freigegeben ist. Wir markieren das so – statt es wie ein fertiges Tarif-Versprechen aussehen zu lassen."
+          "def": "Ein Produkt, das es gibt, das aber noch nicht für alle freigegeben ist. Wir markieren das so – statt es wie ein fertiges Tarif-Versprechen aussehen zu lassen."
         },
         {
           "term": "Mitglieder-only",
@@ -756,6 +756,15 @@
       "primary": "Kostenlos starten",
       "secondary": "Live-Demo ansehen",
       "refrain": "„Wo die Sonne durchbricht.“"
+    },
+    "contact": {
+      "kicker": "Kontakt",
+      "title": "Projekt nach Maß",
+      "lead": "Pukalani Studio ist der Weg für alles, was über ein Paket hinausgeht: eigene Instanz, eigene Domain, eigenes Konzept — Beratung, Strategie, Design und technische Umsetzung aus einer Hand. Schreib in zwei Sätzen, worum es geht; du bekommst eine ehrliche Einschätzung, ob das zusammenpasst.",
+      "cta": "Anfrage per E-Mail",
+      "mailSubject": "Pukalani Studio – Interesse",
+      "addressLabel": "Oder direkt schreiben an",
+      "note": "Kein Formular, kein Tracking: die Nachricht geht aus deinem Mail-Programm direkt ins Postfach."
     },
     "footer": {
       "tagline": "Deine eigene Community-Plattform — schlank, DSGVO-nativ, in Deutschland gehostet.",

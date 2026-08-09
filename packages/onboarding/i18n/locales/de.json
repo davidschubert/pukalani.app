@@ -371,7 +371,6 @@
       "perMonthYearly": "pro Monat, jährlich abgerechnet",
       "vatNote": "Endpreis inkl. 19 % MwSt.",
       "buy": "{plan} holen",
-      "downgradeHint": "Ohne bezahltes Abo ist deine Community nur zum Lesen — Inhalte und Mitglieder bleiben erhalten. Kündigen läuft über „Rechnungen & Zahlungsmethode\".",
       "portalTitle": "Rechnungen & Zahlungsmethode",
       "portalHint": "Im Stripe-Portal siehst du alle Rechnungen, änderst die Zahlungsmethode, wechselst den Plan oder kündigst.",
       "portalNote": "Du verlässt dabei kurz Pukalani und landest bei Stripe.",
@@ -384,16 +383,6 @@
       "checkoutErrorHint": "Der Bezahlvorgang wurde nicht geöffnet — berechnet wurde nichts, und dein Plan bleibt unverändert.",
       "portalErrorHint": "Das Rechnungs-Portal ließ sich nicht öffnen. An deinem Abo ändert das nichts.",
       "plans": {
-        "basic": {
-          "name": "Basic",
-          "price": "0 €",
-          "priceYearly": "0 €",
-          "bullets": [
-            "Der Zustand ohne Abo: die Community ist nur zum Lesen",
-            "Inhalte, Mitglieder und Einstellungen bleiben vollständig erhalten",
-            "Ein Abo öffnet sie sofort wieder"
-          ]
-        },
         "personal": {
           "name": "Personal",
           "price": "29 €",
