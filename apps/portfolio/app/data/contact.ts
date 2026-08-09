@@ -33,8 +33,8 @@ export const CONTACT: ContactData = {
     'https://github.com/davidschubert',
     'https://www.instagram.com/davidschubert/',
   ],
-  lastUpdated: '2026-07-14',
-  lastUpdatedHuman: { de: '14. Juli 2026', en: 'July 14, 2026' },
+  lastUpdated: '2026-08-08',
+  lastUpdatedHuman: { de: '8. August 2026', en: 'August 8, 2026' },
   location: {
     de: 'Pukalani, Maui · Hawaii (USA) · Remote für DACH',
     en: 'Pukalani, Maui · Hawaii (USA) · Remote for the DACH region',
