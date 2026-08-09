@@ -1,5 +1,11 @@
 /**
- * Rechtsseiten-Vorlagen für DIESE Silo-Site anlegen (Impressum + Datenschutz).
+ * Rechtsseiten-Vorlagen einer SILO-INSTANZ anlegen (Impressum + Datenschutz).
+ *
+ * GILT FÜR JEDE Silo-Instanz mit dem Produkt `pages` — nicht nur für
+ * `portfolio`, wo es entstanden ist. Deshalb wohnt es seit dem Review hier im
+ * pages-Layer, neben `seed-demo.mjs`: eine App darf keinen Layer besitzen, und
+ * ein Skript, das ausschließlich die Vorlagen DIESES Layers ausrollt, ist
+ * Layer-Sache. Die nächste Silo-Site erbt es damit, statt es zu kopieren.
  *
  * Das Pool-Nachrüst-Skript (packages/control/scripts/backfill-legal-templates.mjs)
  * überspringt Silo-Instanzen bewusst — es hat für deren eigene Appwrite-Projekte
@@ -12,15 +18,18 @@
  *  - IDEMPOTENT je slug+locale: vorhandene Zeilen (auch Kundentexte) bleiben
  *    unberührt, ein 409 aus einem Wettlauf gilt als „schon da".
  *  - KEIN communityId-Stempel: im Silo läuft die Datentür ungescopt, die
- *    Dashboard-Routen stempeln hier ebenfalls nichts.
+ *    Dashboard-Routen stempeln hier ebenfalls nichts. Für eine POOL-Instanz
+ *    ist es damit das falsche Werkzeug — dort gilt die Pflicht-Entscheidung
+ *    `--community` (Muster `seed-demo.mjs` nebenan).
  *
- * Aufruf (wie bootstrap.ts):
- *   pnpm --filter portfolio seed:legal   # gegen die .env der App
+ * Aufruf — IMMER mit der `.env` der Ziel-App (die Env sagt, welche Instanz
+ * gemeint ist; ohne sie bricht das Skript unten ab):
+ *   pnpm --filter portfolio seed:legal   # gegen apps/portfolio/.env
  *   # andere Instanz (z. B. Prod): node --experimental-strip-types \
- *   #   --env-file=<pfad> apps/portfolio/scripts/seed-legal-pages.ts
+ *   #   --env-file=<pfad> packages/pages/scripts/seed-legal-pages.ts
  */
 import { Client, ID, Query, TablesDB } from 'node-appwrite'
-import { LEGAL_TEMPLATE_LOCALES, legalTemplates } from '../../../packages/pages/shared/legalTemplates.ts'
+import { LEGAL_TEMPLATE_LOCALES, legalTemplates } from '../shared/legalTemplates.ts'
 
 const endpoint = process.env.NUXT_PUBLIC_APPWRITE_ENDPOINT
 const projectId = process.env.NUXT_PUBLIC_APPWRITE_PROJECT_ID

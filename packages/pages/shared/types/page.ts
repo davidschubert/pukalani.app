@@ -22,6 +22,39 @@ export type PageStatus = (typeof PAGE_STATUSES)[number]
 export const GUIDELINES_SLUG = 'guidelines'
 
 /**
+ * Die Slugs, die eine CMS-Seite zu einer RECHTSSEITE machen — sie gehören in
+ * die Fußzeile, nicht in die Hauptnavigation.
+ *
+ * STAND VOR DIESER KONSTANTE: dieselbe Liste lebte dreimal — im
+ * blueprint-Layout (vier Slugs), in der Fußzeile von `apps/portfolio` (sechs)
+ * und als `LEGAL_TEMPLATE_SLUGS` in `legalTemplates.ts` (zwei, andere
+ * Aufgabe: was wir SEEDEN). Zwei Listen, die dasselbe meinen und verschieden
+ * lang sind, sind kein Stil-Problem: eine veröffentlichte `terms`-Seite stand
+ * in blueprint-Apps in der HAUPTNAVIGATION und in portfolio im Fuß. Jetzt
+ * gibt es überall dieselbe Antwort.
+ *
+ * ZWEI SCHREIBWEISEN JE BEGRIFF, und das ist Absicht: die Slugs im Dashboard
+ * sind FREI benennbar, und ein deutschsprachiger Kunde legt „impressum" an,
+ * kein „imprint". Die SPRACHE einer Seite steckt dagegen in der ZEILE
+ * (`PageRow.locale`), nicht im Slug — ein Dokument hat EINEN Slug und je
+ * Sprache eine Row. Beide Schreibweisen zu kennen kostet nichts und ist der
+ * einzige Weg, den Bestand mitzunehmen.
+ *
+ * STEHT HIER UND NICHT IN `legalTemplates.ts`, obwohl sie inhaltlich dorthin
+ * gehörte — aus demselben Grund wie `GUIDELINES_SLUG` oben: die Konsumenten
+ * sind App-Code (blueprint-Layout, Fußzeilen), und ein Wert-Import aus der
+ * Vorlagen-Datei zöge deren gesamten Text (beide Sprachen, mehrere Kilobyte)
+ * in das CLIENT-Bundle jeder App — für sechs Zeichenketten.
+ */
+export const LEGAL_PAGE_SLUGS = ['imprint', 'impressum', 'privacy', 'datenschutz', 'terms', 'agb'] as const
+export type LegalPageSlug = (typeof LEGAL_PAGE_SLUGS)[number]
+
+/** Ist dieser Slug eine Rechtsseite? Der EINE Test für Nav und Fußzeile. */
+export function isLegalPageSlug(slug: string): boolean {
+  return (LEGAL_PAGE_SLUGS as readonly string[]).includes(slug)
+}
+
+/**
  * Die Adresse des Beschreibungs- und Kontakttextes der About-Seite (F1 Stufe 2).
  *
  * WARUM ÜBER DEN pages-LAYER und nicht über eine eigene Einstellung: der Text

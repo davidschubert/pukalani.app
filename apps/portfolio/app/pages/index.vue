@@ -24,7 +24,14 @@ import {
   TRUST_BADGES,
 } from '../data/home'
 import type { Lang } from '../data/localized'
-import { jsonLdScript } from '../utils/jsonLd'
+import {
+  DACH_AREA_SERVED,
+  faqPage,
+  organizationId,
+  personNode,
+  SITE_NAME,
+  STUDIO_ADDRESS,
+} from '../utils/schema'
 
 definePageMeta({ layout: 'site' })
 
@@ -32,22 +39,6 @@ const { t, locale } = useI18n()
 const localePath = useLocalePath()
 
 const lang = computed<Lang>(() => (locale.value.startsWith('de') ? 'de' : 'en'))
-
-/**
- * Absolute URLs für das Structured Data. Host und Port kommen aus dem REQUEST
- * (nicht aus einer Env): diese Site bedient nach der Domain-Freischaltung zwei
- * Hosts, und ein fest verdrahteter Origin zeigte auf dem zweiten ins Leere.
- * Das SCHEMA kommt aus der Env — hinter nginx spricht Node http, roh aus dem
- * Request stünden hier also `http`-Adressen, während canonical im selben
- * Dokument `https` sagt. `useSiteOrigin()` rechnet dafür exakt dasselbe wie
- * `useLocaleSeoHead()` in der app.vue; hier geht es nur um die URLs INNERHALB
- * des Graphen.
- */
-const origin = useSiteOrigin()
-const pageUrl = computed(() => `${origin}${localePath('/')}`)
-const personId = `${origin}/#david-schubert`
-const orgId = `${origin}/#pukalani-studio`
-const websiteId = `${origin}/#website`
 
 const contactChannels = computed(() => CONTACT_CHANNELS.map(channel => ({
   ...channel,
@@ -58,64 +49,51 @@ const contactChannels = computed(() => CONTACT_CHANNELS.map(channel => ({
       : `tel:${CONTACT.phoneTel}`,
 })))
 
-const jsonLd = computed(() => ({
-  '@context': 'https://schema.org',
-  '@graph': [
-    {
-      '@type': 'Person',
-      '@id': personId,
-      'name': 'David Schubert',
-      'jobTitle': 'Senior UI/UX Designer & Creative Technologist',
-      'description': HOME_META.personDescription[lang.value],
-      'url': pageUrl.value,
-      'email': `mailto:${CONTACT.email}`,
-      'telephone': CONTACT.phoneTel,
-      'sameAs': CONTACT.socialProfiles,
-      'worksFor': { '@id': orgId },
-      'knowsLanguage': ['de', 'en'],
-      'hasCredential': [
+usePortfolioSeo({
+  path: '/',
+  title: () => HOME_META.title[lang.value],
+  description: () => HOME_META.description[lang.value],
+  ogType: 'website',
+  // Person, Marke, Angebot, Site, Seite, FAQ — die Startseite ist die einzige
+  // Seite, die den Graphen VOLLSTÄNDIG aufspannt; alle anderen verweisen nur
+  // noch auf diese `@id`s.
+  graph: ctx => [
+    personNode(ctx.origin, ctx.homeUrl, {
+      description: HOME_META.personDescription[lang.value],
+      email: `mailto:${CONTACT.email}`,
+      telephone: CONTACT.phoneTel,
+      sameAs: CONTACT.socialProfiles,
+      worksFor: { '@id': organizationId(ctx.origin) },
+      knowsLanguage: ['de', 'en'],
+      hasCredential: [
         { '@type': 'EducationalOccupationalCredential', 'name': 'Mediengestalter Digital und Print (Ausbildung)' },
         { '@type': 'EducationalOccupationalCredential', 'name': 'Bachelor Professional in Digital Media (IHK)' },
       ],
-      'knowsAbout': KNOWS_ABOUT[lang.value],
-      'address': {
-        '@type': 'PostalAddress',
-        'addressLocality': 'Pukalani',
-        'addressRegion': 'HI',
-        'addressCountry': 'US',
-      },
-    },
+      knowsAbout: KNOWS_ABOUT[lang.value],
+      address: STUDIO_ADDRESS,
+    }),
     {
       '@type': 'Organization',
-      '@id': orgId,
-      'name': 'Pukalani Studio',
-      'url': origin,
-      'logo': `${origin}/icon.svg`,
-      'founder': { '@id': personId },
+      '@id': organizationId(ctx.origin),
+      'name': SITE_NAME,
+      'url': ctx.origin,
+      'logo': `${ctx.origin}/icon.svg`,
+      'founder': { '@id': ctx.personId },
       'sameAs': CONTACT.socialProfiles,
     },
     {
       '@type': 'ProfessionalService',
-      '@id': `${origin}/#service`,
+      '@id': `${ctx.origin}/#service`,
       'name': 'Pukalani Studio – UI/UX Design, Brand Design & Web-Umsetzung',
       'description': HOME_META.serviceDescription[lang.value],
-      'url': pageUrl.value,
-      'image': `${origin}/images/og-pukalani-studio.png`,
+      'url': ctx.pageUrl,
+      'image': `${ctx.origin}/images/og-pukalani-studio.png`,
       'priceRange': '€2.500 – €75.000+',
       'telephone': CONTACT.phoneTel,
       'email': `mailto:${CONTACT.email}`,
-      'provider': { '@id': personId },
-      'address': {
-        '@type': 'PostalAddress',
-        'addressLocality': 'Pukalani',
-        'addressRegion': 'HI',
-        'addressCountry': 'US',
-      },
-      'areaServed': [
-        { '@type': 'Country', 'name': 'Deutschland' },
-        { '@type': 'Country', 'name': 'Österreich' },
-        { '@type': 'Country', 'name': 'Schweiz' },
-      ],
+      'provider': { '@id': ctx.personId },
+      'address': STUDIO_ADDRESS,
+      'areaServed': DACH_AREA_SERVED,
       'availableLanguage': ['Deutsch', 'Englisch'],
       'hasOfferCatalog': {
         '@type': 'OfferCatalog',
@@ -128,7 +106,7 @@ const jsonLd = computed(() => ({
             '@type': 'Service',
             'name': service.title[lang.value],
             'description': service.schemaDescription[lang.value],
-            'url': `${pageUrl.value}#${service.id}`,
+            'url': `${ctx.pageUrl}#${service.id}`,
           },
           ...(service.minPrice
             ? {
@@ -145,25 +123,27 @@ const jsonLd = computed(() => ({
     },
     {
       '@type': 'WebSite',
-      '@id': websiteId,
-      'url': origin,
-      'name': 'Pukalani Studio',
-      'publisher': { '@id': orgId },
+      '@id': ctx.websiteId,
+      'url': ctx.origin,
+      'name': SITE_NAME,
+      'publisher': { '@id': organizationId(ctx.origin) },
       'inLanguage': lang.value,
     },
     {
       '@type': 'WebPage',
-      '@id': `${pageUrl.value}#webpage`,
-      'url': pageUrl.value,
+      '@id': `${ctx.pageUrl}#webpage`,
+      'url': ctx.pageUrl,
       'name': HOME_META.title[lang.value],
       'description': HOME_META.description[lang.value],
-      'isPartOf': { '@id': websiteId },
-      'about': { '@id': personId },
-      'dateModified': CONTACT.lastUpdated,
+      'isPartOf': { '@id': ctx.websiteId },
+      'about': { '@id': ctx.personId },
+      // Das Datum DIESER Seite (HOME_META), nicht der Site-Stand: die
+      // Startseite ist ein eigenes Dokument mit eigener Pflege (Befund B7).
+      'dateModified': HOME_META.updated,
       'inLanguage': lang.value,
       'primaryImageOfPage': {
         '@type': 'ImageObject',
-        'url': `${origin}/images/og-pukalani-studio.png`,
+        'url': `${ctx.origin}/images/og-pukalani-studio.png`,
         'width': 1200,
         'height': 630,
       },
@@ -172,36 +152,9 @@ const jsonLd = computed(() => ({
         'cssSelector': ['#hero-answer', '#ueberblick'],
       },
     },
-    {
-      '@type': 'FAQPage',
-      '@id': `${pageUrl.value}#faq`,
-      // Parität: dasselbe Array wie das sichtbare FAQ weiter unten.
-      'mainEntity': FAQS.map(faq => ({
-        '@type': 'Question',
-        'name': faq.question[lang.value],
-        'acceptedAnswer': { '@type': 'Answer', 'text': faq.answer[lang.value] },
-      })),
-    },
+    // Parität: dasselbe Array wie das sichtbare FAQ weiter unten.
+    faqPage(ctx.pageUrl, FAQS, lang.value),
   ],
-}))
-
-useHead(() => ({
-  title: HOME_META.title[lang.value],
-  meta: [
-    // `robots` steht EINMAL in der app.vue (ohne index,follow) — siehe dort.
-    { name: 'author', content: 'David Schubert' },
-  ],
-  script: [jsonLdScript(jsonLd.value)],
-}))
-
-useSeoMeta({
-  description: () => HOME_META.description[lang.value],
-  ogType: 'website',
-  ogSiteName: 'Pukalani Studio',
-  ogTitle: () => HOME_META.title[lang.value],
-  ogDescription: () => HOME_META.description[lang.value],
-  twitterTitle: () => HOME_META.title[lang.value],
-  twitterDescription: () => HOME_META.description[lang.value],
 })
 </script>
 
@@ -243,7 +196,8 @@ useSeoMeta({
             <dd class="facts__value">{{ fact.value[lang] }}</dd>
           </div>
         </dl>
-        <p class="section-note">{{ t('portfolio.common.updatedAt') }} {{ CONTACT.lastUpdatedHuman[lang] }}</p>
+        <!-- Das Datum DIESER Seite, nicht der Site-Stand (der steht im Fuß). -->
+        <p class="section-note">{{ t('portfolio.common.updatedAt') }} {{ HOME_META.updatedHuman[lang] }}</p>
       </div>
     </section>
 

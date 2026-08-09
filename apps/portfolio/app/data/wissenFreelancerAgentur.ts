@@ -315,6 +315,25 @@ export const AGENTUR_CTA = {
 }
 
 export const AGENTUR_META = {
+  /**
+   * DAS DATUM DIESES ARTIKELS (Befund B7).
+   *
+   * Vorher stempelten Startseite und beide Guides alle drei
+   * `CONTACT.lastUpdated` — EIN Datum für drei Dokumente, das mit jeder Pflege
+   * irgendeiner Ecke der Site weiterrückte. `datePublished`/`dateModified`
+   * sind aber Aussagen über den INHALT dieses Artikels; ein gemeinsames Datum
+   * meldet Suchmaschinen (und Lesern) eine Überarbeitung, die es nicht gab —
+   * und macht ein echtes Update ununterscheidbar.
+   *
+   * `published` ist der Stand der Übernahme aus dem alten Portfolio-Repo
+   * (14. Juli 2026). `updated` und `updatedHuman` gehören zusammen — wer eines
+   * ändert, ändert beide; die sichtbare Zeile im Kopf des Artikels und das
+   * JSON-LD lesen dieselben Felder. Der SITE-Stand in der Fußzeile bleibt
+   * `CONTACT.lastUpdatedHuman`.
+   */
+  published: '2026-07-14',
+  updated: '2026-08-08',
+  updatedHuman: { de: '8. August 2026', en: 'August 8, 2026' } satisfies Localized,
   title: {
     de: 'Freelancer oder Agentur für UX & Webdesign? Ehrlicher Vergleich 2026',
     en: 'Freelancer or agency for UX & web design? An honest comparison for 2026',

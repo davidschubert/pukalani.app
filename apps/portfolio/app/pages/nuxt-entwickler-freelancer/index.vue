@@ -15,7 +15,7 @@ import {
   NUXT_STACK_HEADING,
   NUXT_WHY_HEADING,
 } from '../../data/nuxtFreelancer'
-import { jsonLdScript } from '../../utils/jsonLd'
+import { breadcrumbList, DACH_AREA_SERVED, faqPage, personNode } from '../../utils/schema'
 
 definePageMeta({ layout: 'site' })
 
@@ -24,88 +24,47 @@ const localePath = useLocalePath()
 
 const lang = computed<Lang>(() => (locale.value.startsWith('de') ? 'de' : 'en'))
 
-// Host+Port aus dem Request, SCHEMA aus der Env — dieselbe Rechnung, aus der
-// `useLocaleSeoHead()` canonical/og:url baut (siehe useSiteOrigin). Roh aus
-// `useRequestURL()` stünden hinter nginx `http`-Adressen im Graphen.
-const origin = useSiteOrigin()
-const homeUrl = computed(() => `${origin}${localePath('/')}`)
-const pageUrl = computed(() => `${origin}${localePath('/nuxt-entwickler-freelancer')}`)
-const personId = `${origin}/#david-schubert`
-
-const jsonLd = computed(() => ({
-  '@context': 'https://schema.org',
-  '@graph': [
-    {
-      '@type': 'Person',
-      '@id': personId,
-      'name': 'David Schubert',
-      'jobTitle': 'Senior UI/UX Designer & Creative Technologist',
-      'url': homeUrl.value,
-      'knowsAbout': ['Nuxt', 'Vue.js', 'TypeScript', 'Tailwind CSS', 'Appwrite', 'UI/UX Design'],
-      'sameAs': CONTACT.socialProfiles,
-    },
+usePortfolioSeo({
+  path: '/nuxt-entwickler-freelancer',
+  title: () => NUXT_META.title[lang.value],
+  description: () => NUXT_META.description[lang.value],
+  ogType: 'website',
+  graph: ctx => [
+    // Diese Seite spricht Entwicklungsteams an — sie ergänzt die Person um die
+    // technischen Themen, die sonst nirgends stehen.
+    personNode(ctx.origin, ctx.homeUrl, {
+      knowsAbout: ['Nuxt', 'Vue.js', 'TypeScript', 'Tailwind CSS', 'Appwrite', 'UI/UX Design'],
+      sameAs: CONTACT.socialProfiles,
+    }),
     {
       '@type': 'Service',
-      '@id': `${pageUrl.value}#service`,
+      '@id': `${ctx.pageUrl}#service`,
       'name': NUXT_META.serviceName[lang.value],
       'serviceType': NUXT_META.serviceType[lang.value],
       'description': NUXT_META.serviceDescription[lang.value],
-      'url': pageUrl.value,
-      'provider': { '@id': personId },
-      'areaServed': [
-        { '@type': 'Country', 'name': 'Deutschland' },
-        { '@type': 'Country', 'name': 'Österreich' },
-        { '@type': 'Country', 'name': 'Schweiz' },
-      ],
+      'url': ctx.pageUrl,
+      'provider': { '@id': ctx.personId },
+      'areaServed': DACH_AREA_SERVED,
     },
     {
       '@type': 'WebPage',
-      '@id': `${pageUrl.value}#webpage`,
-      'url': pageUrl.value,
+      '@id': `${ctx.pageUrl}#webpage`,
+      'url': ctx.pageUrl,
       'name': NUXT_META.title[lang.value],
       'description': NUXT_META.description[lang.value],
       'inLanguage': lang.value,
+      // Angebotsseite, kein Artikel: hier ist der SITE-Stand die ehrliche
+      // Angabe — dieselbe Zeile steht sichtbar unter dem Titel (B7).
       'dateModified': CONTACT.lastUpdated,
-      'isPartOf': { '@id': `${origin}/#website` },
-      'breadcrumb': { '@id': `${pageUrl.value}#breadcrumb` },
+      'isPartOf': { '@id': ctx.websiteId },
+      'breadcrumb': { '@id': `${ctx.pageUrl}#breadcrumb` },
     },
-    {
-      '@type': 'BreadcrumbList',
-      '@id': `${pageUrl.value}#breadcrumb`,
-      'itemListElement': [
-        { '@type': 'ListItem', 'position': 1, 'name': t('portfolio.common.home'), 'item': homeUrl.value },
-        { '@type': 'ListItem', 'position': 2, 'name': NUXT_HERO.breadcrumb[lang.value], 'item': pageUrl.value },
-      ],
-    },
-    {
-      '@type': 'FAQPage',
-      '@id': `${pageUrl.value}#faq`,
-      'mainEntity': NUXT_FAQS.map(faq => ({
-        '@type': 'Question',
-        'name': faq.question[lang.value],
-        'acceptedAnswer': { '@type': 'Answer', 'text': faq.answer[lang.value] },
-      })),
-    },
+    breadcrumbList(ctx.pageUrl, [
+      { name: t('portfolio.common.home'), item: ctx.homeUrl },
+      { name: NUXT_HERO.breadcrumb[lang.value], item: ctx.pageUrl },
+    ]),
+    faqPage(ctx.pageUrl, NUXT_FAQS, lang.value),
   ],
-}))
-
-useHead(() => ({
-  title: NUXT_META.title[lang.value],
-  meta: [
-    // `robots` steht EINMAL in der app.vue (ohne index,follow) — siehe dort.
-    { name: 'author', content: 'David Schubert' },
-  ],
-  script: [jsonLdScript(jsonLd.value)],
-}))
-
-useSeoMeta({
-  description: () => NUXT_META.description[lang.value],
-  ogType: 'website',
-  ogSiteName: 'Pukalani Studio',
-  ogTitle: () => NUXT_META.title[lang.value],
-  ogDescription: () => NUXT_META.description[lang.value],
-  twitterTitle: () => NUXT_META.title[lang.value],
-  twitterDescription: () => NUXT_META.description[lang.value],
 })
 </script>
 

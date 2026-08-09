@@ -10,7 +10,7 @@
     "preview": "nuxi preview",
     "typecheck": "nuxi typecheck",
     "bootstrap": "node --experimental-strip-types --env-file=.env scripts/bootstrap.ts",
-    "seed:legal": "node --experimental-strip-types --env-file=.env scripts/seed-legal-pages.ts",
+    "seed:legal": "node --experimental-strip-types --env-file=.env ../../packages/pages/scripts/seed-legal-pages.ts",
     "e2e": "playwright test"
   },
   "dependencies": {

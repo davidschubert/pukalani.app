@@ -18,7 +18,7 @@ import {
   AUDIT_TIERS_HEADING,
   UX_AUDIT_HERO,
 } from '../../data/uxAudit'
-import { jsonLdScript } from '../../utils/jsonLd'
+import { breadcrumbList, DACH_AREA_SERVED, faqPage, personNode } from '../../utils/schema'
 
 definePageMeta({ layout: 'site' })
 
@@ -27,38 +27,22 @@ const localePath = useLocalePath()
 
 const lang = computed<Lang>(() => (locale.value.startsWith('de') ? 'de' : 'en'))
 
-// Host+Port aus dem Request, SCHEMA aus der Env — dieselbe Rechnung, aus der
-// `useLocaleSeoHead()` canonical/og:url baut (siehe useSiteOrigin). Roh aus
-// `useRequestURL()` stünden hinter nginx `http`-Adressen im Graphen.
-const origin = useSiteOrigin()
-const homeUrl = computed(() => `${origin}${localePath('/')}`)
-const pageUrl = computed(() => `${origin}${localePath('/ux-audit')}`)
-const personId = `${origin}/#david-schubert`
-
-const jsonLd = computed(() => ({
-  '@context': 'https://schema.org',
-  '@graph': [
-    {
-      '@type': 'Person',
-      '@id': personId,
-      'name': 'David Schubert',
-      'jobTitle': 'Senior UI/UX Designer & Creative Technologist',
-      'url': homeUrl.value,
-      'sameAs': CONTACT.socialProfiles,
-    },
+usePortfolioSeo({
+  path: '/ux-audit',
+  title: () => AUDIT_META.title[lang.value],
+  description: () => AUDIT_META.description[lang.value],
+  ogType: 'website',
+  graph: ctx => [
+    personNode(ctx.origin, ctx.homeUrl, { sameAs: CONTACT.socialProfiles }),
     {
       '@type': 'Service',
-      '@id': `${pageUrl.value}#service`,
+      '@id': `${ctx.pageUrl}#service`,
       'name': AUDIT_META.serviceName[lang.value],
       'serviceType': AUDIT_META.serviceType[lang.value],
       'description': AUDIT_META.serviceDescription[lang.value],
-      'url': pageUrl.value,
-      'provider': { '@id': personId },
-      'areaServed': [
-        { '@type': 'Country', 'name': 'Deutschland' },
-        { '@type': 'Country', 'name': 'Österreich' },
-        { '@type': 'Country', 'name': 'Schweiz' },
-      ],
+      'url': ctx.pageUrl,
+      'provider': { '@id': ctx.personId },
+      'areaServed': DACH_AREA_SERVED,
       'hasOfferCatalog': {
         '@type': 'OfferCatalog',
         'name': AUDIT_META.catalogName[lang.value],
@@ -69,58 +53,29 @@ const jsonLd = computed(() => ({
           'description': tier.schemaDescription[lang.value],
           'price': tier.priceValue,
           'priceCurrency': 'EUR',
-          'url': `${pageUrl.value}#pakete`,
+          'url': `${ctx.pageUrl}#pakete`,
         })),
       },
     },
     {
       '@type': 'WebPage',
-      '@id': `${pageUrl.value}#webpage`,
-      'url': pageUrl.value,
+      '@id': `${ctx.pageUrl}#webpage`,
+      'url': ctx.pageUrl,
       'name': AUDIT_META.title[lang.value],
       'description': AUDIT_META.description[lang.value],
       'inLanguage': lang.value,
+      // Angebotsseite, kein Artikel: hier ist der SITE-Stand die ehrliche
+      // Angabe — dieselbe Zeile steht sichtbar unter dem Titel (B7).
       'dateModified': CONTACT.lastUpdated,
-      'isPartOf': { '@id': `${origin}/#website` },
-      'breadcrumb': { '@id': `${pageUrl.value}#breadcrumb` },
+      'isPartOf': { '@id': ctx.websiteId },
+      'breadcrumb': { '@id': `${ctx.pageUrl}#breadcrumb` },
     },
-    {
-      '@type': 'BreadcrumbList',
-      '@id': `${pageUrl.value}#breadcrumb`,
-      'itemListElement': [
-        { '@type': 'ListItem', 'position': 1, 'name': t('portfolio.common.home'), 'item': homeUrl.value },
-        { '@type': 'ListItem', 'position': 2, 'name': UX_AUDIT_HERO.breadcrumb[lang.value], 'item': pageUrl.value },
-      ],
-    },
-    {
-      '@type': 'FAQPage',
-      '@id': `${pageUrl.value}#faq`,
-      'mainEntity': AUDIT_FAQS.map(faq => ({
-        '@type': 'Question',
-        'name': faq.question[lang.value],
-        'acceptedAnswer': { '@type': 'Answer', 'text': faq.answer[lang.value] },
-      })),
-    },
+    breadcrumbList(ctx.pageUrl, [
+      { name: t('portfolio.common.home'), item: ctx.homeUrl },
+      { name: UX_AUDIT_HERO.breadcrumb[lang.value], item: ctx.pageUrl },
+    ]),
+    faqPage(ctx.pageUrl, AUDIT_FAQS, lang.value),
   ],
-}))
-
-useHead(() => ({
-  title: AUDIT_META.title[lang.value],
-  meta: [
-    // `robots` steht EINMAL in der app.vue (ohne index,follow) — siehe dort.
-    { name: 'author', content: 'David Schubert' },
-  ],
-  script: [jsonLdScript(jsonLd.value)],
-}))
-
-useSeoMeta({
-  description: () => AUDIT_META.description[lang.value],
-  ogType: 'website',
-  ogSiteName: 'Pukalani Studio',
-  ogTitle: () => AUDIT_META.title[lang.value],
-  ogDescription: () => AUDIT_META.description[lang.value],
-  twitterTitle: () => AUDIT_META.title[lang.value],
-  twitterDescription: () => AUDIT_META.description[lang.value],
 })
 </script>
 

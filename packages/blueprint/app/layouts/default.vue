@@ -27,7 +27,7 @@
 import type { DropdownMenuItem } from '@nuxt/ui'
 import { isProductStateEnabled } from '../../../core/shared/types/config'
 import type { PukalaniChromeNavEntry, PukalaniChromeUtility } from '../../../core/shared/types/chrome'
-import type { PublicPageNavItem } from '../../../pages/shared/types/page'
+import { isLegalPageSlug, type PublicPageNavItem } from '../../../pages/shared/types/page'
 
 const { t, locale } = useI18n()
 const localePath = useLocalePath()
@@ -66,11 +66,13 @@ const { data: navPages } = await useAsyncData(
 )
 
 // Rechts-Slugs (Entscheidung 5): diese CMS-Seiten gehören in den Footer,
-// nicht in die Haupt-Nav.
-const LEGAL_SLUGS = ['imprint', 'impressum', 'privacy', 'datenschutz']
+// nicht in die Haupt-Nav. Die Liste stand hier als eigenes Array und in der
+// Fußzeile von apps/portfolio ein zweites Mal, unterschiedlich lang — `terms`
+// und `agb` fehlten hier und landeten deshalb in der HAUPTNAVIGATION. Jetzt
+// EINE Quelle: pages/shared/types/page.ts.
 const cmsPages = computed(() => (navPages.value ?? []).filter(page => page.slug !== 'home'))
-const cmsNavPages = computed(() => cmsPages.value.filter(page => !LEGAL_SLUGS.includes(page.slug)))
-const cmsLegalPages = computed(() => cmsPages.value.filter(page => LEGAL_SLUGS.includes(page.slug)))
+const cmsNavPages = computed(() => cmsPages.value.filter(page => !isLegalPageSlug(page.slug)))
+const cmsLegalPages = computed(() => cmsPages.value.filter(page => isLegalPageSlug(page.slug)))
 
 interface NavItem {
   id: string

@@ -15,16 +15,27 @@
  *    nachlesen kann — als Platzhalter zum Bestätigen, KEINE Zusicherung
  *    (die Liste der Auftragsverarbeiter ist Sache des Plattform-Vertrags).
  *
- * Reines Daten-Modul (keine Imports, kein Laufzeit-Coupling): der Seed-Helfer
- * im Server und das Nachrüst-Skript im Control Plane teilen sich EINE Quelle,
- * damit Bestand und Neuanlage nie auseinanderlaufen.
+ * Daten-Modul ohne Laufzeit-Coupling (der einzige Import ist ein TYP, siehe
+ * unten): der Seed-Helfer im Server und das Nachrüst-Skript im Control Plane
+ * teilen sich EINE Quelle, damit Bestand und Neuanlage nie auseinanderlaufen.
  *
  * Markdown-Subset: nur was core/shared/markdown.ts parst — `##`/`###`,
  * Absätze, Listen, `>`-Zitat, `**fett**`. Keine horizontalen Linien, keine
  * Tabellen, keine Links in Platzhaltern (sonst wird der Marker ein Link).
  */
+import type { LegalPageSlug } from './types/page'
 
-export const LEGAL_TEMPLATE_SLUGS = ['imprint', 'privacy'] as const
+/**
+ * Was WIR SEEDEN — eine echte Teilmenge der Rechts-Slugs (`LEGAL_PAGE_SLUGS`
+ * in types/page.ts beantwortet die andere Frage: „gehört in den Fuß"). Die
+ * zwei Listen bleiben getrennt, weil eine Community ihre AGB „agb" nennen
+ * darf, ohne dass wir dafür eine Vorlage hätten.
+ *
+ * Das `satisfies` ist der Draht dazwischen: fiele ein Slug drüben aus der
+ * Rechts-Liste, bräche diese Zeile — statt dass wir still eine Vorlage
+ * anlegen, die anschliessend in der Hauptnavigation landet.
+ */
+export const LEGAL_TEMPLATE_SLUGS = ['imprint', 'privacy'] as const satisfies readonly LegalPageSlug[]
 export type LegalTemplateSlug = (typeof LEGAL_TEMPLATE_SLUGS)[number]
 
 /** Sprachen, für die es eine Vorlage gibt. Alles andere bekommt die englische. */

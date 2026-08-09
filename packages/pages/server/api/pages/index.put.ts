@@ -52,13 +52,18 @@ export default defineEventHandler(async (event): Promise<PageRow> => {
      * Dieselbe Regel wie bei `neutral` im Community-PATCH: ein weggelassenes
      * Feld ist eine Nicht-Aussage, kein Nullwert.
      */
-    return await db.update<PageRow>(PAGES_TABLE, existing.$id, {
+    const updated = await db.update<PageRow>(PAGES_TABLE, existing.$id, {
       ...data,
       ...(body.sortOrder === undefined ? {} : { sortOrder: body.sortOrder }),
     })
       .catch((error) => {
         throw toH3Error(error, 'Could not save page')
       })
+    // Die öffentliche Liste dieses Mandanten ist jetzt veraltet — verwerfen,
+    // damit ein Veröffentlichen sofort in Navigation und Fußzeile steht und
+    // nicht erst nach der Ablaufzeit (server/utils/publicPagesCache.ts).
+    forgetPublicPages(event)
+    return updated
   }
   // permissions: [] BEWUSST — Seiten-Rows tragen keine Row-Permissions
   // (Entwürfe sind server-only, die öffentliche Route filtert auf published).
@@ -66,8 +71,10 @@ export default defineEventHandler(async (event): Promise<PageRow> => {
   // Entwürfe per Roh-REST für Mitglieder lesbar machen.
   // Beim ANLEGEN ist 0 dagegen richtig: eine neue Seite hat noch keine
   // Reihenfolge, und die Spalte ist required.
-  return await db.create<PageRow>(PAGES_TABLE, { ...data, sortOrder: body.sortOrder ?? 0 }, { permissions: [] })
+  const created = await db.create<PageRow>(PAGES_TABLE, { ...data, sortOrder: body.sortOrder ?? 0 }, { permissions: [] })
     .catch((error) => {
       throw toH3Error(error, 'Could not save page')
     })
+  forgetPublicPages(event)
+  return created
 })

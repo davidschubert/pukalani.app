@@ -1,28 +1,65 @@
 <script setup lang="ts">
-import type { PublicPageNavItem } from '../../../../packages/pages/shared/types/page'
+import { isLegalPageSlug, type PublicPageNavItem } from '../../../../packages/pages/shared/types/page'
 import { CONTACT } from '../data/contact'
+import { SERVICES } from '../data/home'
 
 const { t, locale } = useI18n()
 const localePath = useLocalePath()
 const switchLocalePath = useSwitchLocalePath()
+const appConfig = useAppConfig() as { pukalani?: { chrome?: { pagesNav?: boolean } } }
+
+const isGerman = computed(() => locale.value.startsWith('de'))
+const lang = computed<'de' | 'en'>(() => (isGerman.value ? 'de' : 'en'))
 
 /**
  * Rechtsseiten aus dem pages-CMS (Muster blueprint-Layout): nur VERÖFFENT-
  * LICHTES erscheint — ein Entwurf im Dashboard erzeugt keinen toten Link.
- * useRequestFetch, damit SSR den Host-Header weiterreicht; fail-soft auf [].
+ * useRequestFetch, damit SSR den Host-Header weiterreicht.
+ *
+ * Gefragt wird nur, wenn der pages-Layer überhaupt dabei ist (er registriert
+ * `pukalani.chrome.pagesNav` — dieselbe Wache wie im blueprint-Layout): sonst
+ * liefe je Seitenaufbau eine Anfrage gegen eine Route, die es nicht gibt.
+ *
+ * DREI ZUSTÄNDE, NICHT ZWEI: `null` heißt „die Anfrage ist GESCHEITERT", `[]`
+ * heißt „es ist nichts veröffentlicht". Vorher fielen beide auf `[]` zusammen
+ * — und das ist der teurere von zwei Fehlern: bei einem Appwrite-Schluckauf
+ * verschwand der Impressums-Link einer deutschen Geschäftsseite still aus dem
+ * Fuß. Ein Link, der im Ausfall auf eine 404 zeigt, ist besser als kein
+ * Impressums-Link; deshalb der feste Rückfall unten. Wer bewusst NICHTS
+ * veröffentlicht hat, bekommt weiterhin nichts — das ist eine Entscheidung,
+ * kein Ausfall.
  */
-const LEGAL_SLUGS = ['imprint', 'impressum', 'privacy', 'datenschutz', 'terms', 'agb']
+const pagesNavEnabled = appConfig.pukalani?.chrome?.pagesNav === true
 const requestFetch = useRequestFetch()
 const { data: publicPages } = await useAsyncData(
   () => `footer-legal-pages-${locale.value}`,
-  () => requestFetch<PublicPageNavItem[]>('/api/pages/public', { query: { locale: locale.value } })
-    .catch(() => [] as PublicPageNavItem[]),
+  () => pagesNavEnabled
+    ? requestFetch<PublicPageNavItem[]>('/api/pages/public', { query: { locale: locale.value } })
+        .catch(() => null)
+    : Promise.resolve([] as PublicPageNavItem[]),
   { watch: [locale] },
 )
-const legalPages = computed(() => (publicPages.value ?? []).filter(page => LEGAL_SLUGS.includes(page.slug)))
 
-const isGerman = computed(() => locale.value.startsWith('de'))
-const lang = computed<'de' | 'en'>(() => (isGerman.value ? 'de' : 'en'))
+/** Der Rückfall für den Ausfall (siehe oben) — die zwei Pflichtseiten. */
+const LEGAL_FALLBACK: Record<'de' | 'en', PublicPageNavItem[]> = {
+  de: [
+    { slug: 'imprint', title: 'Impressum', sortOrder: 90 },
+    { slug: 'privacy', title: 'Datenschutz', sortOrder: 91 },
+  ],
+  en: [
+    { slug: 'imprint', title: 'Imprint', sortOrder: 90 },
+    { slug: 'privacy', title: 'Privacy', sortOrder: 91 },
+  ],
+}
+
+const legalPages = computed(() => {
+  const pages = publicPages.value
+  // Nur das ausdrückliche `null` ist der Ausfall. `undefined` heißt „noch
+  // nicht gelaufen" (der Zustand vor dem ersten Auflösen) — dort den
+  // Rückfall zu zeigen hiesse, ihn beim Nachladen wieder wegzunehmen.
+  if (pages === null) return LEGAL_FALLBACK[lang.value]
+  return (pages ?? []).filter(page => isLegalPageSlug(page.slug))
+})
 
 /** Sprachwechsel: Ziel ist immer die ANDERE Sprache derselben Seite. */
 const otherLocale = computed(() => (isGerman.value ? 'en' : 'de'))
@@ -30,12 +67,28 @@ const otherLocaleLabel = computed(() =>
   isGerman.value ? t('portfolio.footer.langEn') : t('portfolio.footer.langDe'),
 )
 
+/**
+ * Die Leistungen im Fuß kommen aus DENSELBEN Daten wie die Karten auf der
+ * Startseite und der OfferCatalog im JSON-LD.
+ *
+ * Vorher waren es sechs i18n-Schlüssel, die die Titel aus `home.ts`
+ * nachbildeten — und sie waren bereits abgewandert: der Fuß sagte englisch
+ * „Design concept & brand design", die Daten sagen „… & digital brand
+ * design". Ein Fuß, der eine Leistung anders nennt als die Seite, auf die er
+ * zeigt, ist ein Widerspruch im selben Dokument.
+ *
+ * `link` (eigene Detailseite) schlägt den Anker auf der Startseite; die
+ * Anker-Ids sind laut `home.ts` fest und werden nie umbenannt.
+ */
 const serviceLinks = computed(() => [
-  { to: '/#brand-design', label: t('portfolio.footer.links.brand') },
-  { to: '/ux-audit', label: t('portfolio.footer.links.audit') },
-  { to: '/#corporate-website', label: t('portfolio.footer.links.website') },
-  { to: '/#saas-design', label: t('portfolio.footer.links.product') },
-  { to: '/#content-produktion', label: t('portfolio.footer.links.content') },
+  ...SERVICES.map(service => ({
+    to: service.link ?? `/#${service.id}`,
+    label: service.title[lang.value],
+  })),
+  // KEIN Eintrag in SERVICES: die Entwickler-Seite ist kein Angebot aus dem
+  // Katalog, sondern eine eigene Zielgruppen-Seite (Agenturen, Entwickler-
+  // teams). Ihre Beschriftung hat deshalb keine Entsprechung in den Daten und
+  // bleibt der einzige verbliebene `footer.links.*`-Schlüssel dieser Spalte.
   { to: '/nuxt-entwickler-freelancer', label: t('portfolio.footer.links.development') },
 ])
 

@@ -16,7 +16,7 @@ import {
   AGENTUR_TOC,
   COMPARISON_ROWS,
 } from '../../../data/wissenFreelancerAgentur'
-import { jsonLdScript } from '../../../utils/jsonLd'
+import { breadcrumbList, faqPage, personNode } from '../../../utils/schema'
 
 definePageMeta({ layout: 'site' })
 
@@ -25,81 +25,45 @@ const localePath = useLocalePath()
 
 const lang = computed<Lang>(() => (locale.value.startsWith('de') ? 'de' : 'en'))
 
-// Host+Port aus dem Request, SCHEMA aus der Env — dieselbe Rechnung, aus der
-// `useLocaleSeoHead()` canonical/og:url baut (siehe useSiteOrigin). Roh aus
-// `useRequestURL()` stünden hinter nginx `http`-Adressen im Graphen.
-const origin = useSiteOrigin()
-const homeUrl = computed(() => `${origin}${localePath('/')}`)
-const knowledgeUrl = computed(() => `${origin}${localePath('/#wissen')}`)
-const pageUrl = computed(() => `${origin}${localePath('/wissen/freelancer-oder-agentur')}`)
-const personId = `${origin}/#david-schubert`
+// Die „Wissen"-Station der Brotkrumen ist ein ANKER auf der Startseite und
+// deshalb nicht aus `ctx` ableitbar — die Composable kennt nur diese Seite.
+// `useSiteOrigin()` MUSS im Setup stehen (es liest `useRequestURL()`); in
+// einem `computed` liefe es beim Auswerten ausserhalb des Nuxt-Kontexts und
+// die Seite antwortete 500 (NUXT_E1001, beim Beweis live erwischt).
+const siteOrigin = useSiteOrigin()
+const knowledgeUrl = computed(() => `${siteOrigin}${localePath('/#wissen')}`)
 
-const jsonLd = computed(() => ({
-  '@context': 'https://schema.org',
-  '@graph': [
-    {
-      '@type': 'Person',
-      '@id': personId,
-      'name': 'David Schubert',
-      'jobTitle': 'Senior UI/UX Designer & Creative Technologist',
-      'url': homeUrl.value,
-      'sameAs': CONTACT.socialProfiles,
-    },
-    {
-      '@type': 'Article',
-      '@id': `${pageUrl.value}#article`,
-      'headline': AGENTUR_META.headline[lang.value],
-      'description': AGENTUR_META.description[lang.value],
-      'url': pageUrl.value,
-      'inLanguage': lang.value,
-      'author': { '@id': personId },
-      'publisher': { '@id': personId },
-      'datePublished': CONTACT.lastUpdated,
-      'dateModified': CONTACT.lastUpdated,
-      'image': `${origin}/images/og-pukalani-studio.png`,
-      'isPartOf': { '@id': `${origin}/#website` },
-    },
-    {
-      '@type': 'BreadcrumbList',
-      '@id': `${pageUrl.value}#breadcrumb`,
-      'itemListElement': [
-        { '@type': 'ListItem', 'position': 1, 'name': t('portfolio.common.home'), 'item': homeUrl.value },
-        { '@type': 'ListItem', 'position': 2, 'name': t('portfolio.common.knowledge'), 'item': knowledgeUrl.value },
-        { '@type': 'ListItem', 'position': 3, 'name': AGENTUR_HERO.breadcrumb[lang.value], 'item': pageUrl.value },
-      ],
-    },
-    {
-      '@type': 'FAQPage',
-      '@id': `${pageUrl.value}#faq`,
-      'mainEntity': AGENTUR_FAQS.map(faq => ({
-        '@type': 'Question',
-        'name': faq.question[lang.value],
-        'acceptedAnswer': { '@type': 'Answer', 'text': faq.answer[lang.value] },
-      })),
-    },
-  ],
-}))
-
-useHead(() => ({
-  title: AGENTUR_META.title[lang.value],
-  meta: [
-    // `robots` steht EINMAL in der app.vue (ohne index,follow) — siehe dort.
-    { name: 'author', content: 'David Schubert' },
-  ],
-  script: [jsonLdScript(jsonLd.value)],
-}))
-
-useSeoMeta({
+usePortfolioSeo({
+  path: '/wissen/freelancer-oder-agentur',
+  title: () => AGENTUR_META.title[lang.value],
   description: () => AGENTUR_META.description[lang.value],
   ogType: 'article',
-  ogSiteName: 'Pukalani Studio',
-  ogTitle: () => AGENTUR_META.title[lang.value],
-  ogDescription: () => AGENTUR_META.description[lang.value],
-  articlePublishedTime: CONTACT.lastUpdated,
-  articleModifiedTime: CONTACT.lastUpdated,
-  articleAuthor: ['David Schubert'],
-  twitterTitle: () => AGENTUR_META.title[lang.value],
-  twitterDescription: () => AGENTUR_META.description[lang.value],
+  // Das Datum DIESES Artikels (B7) — dieselben Felder speisen die sichtbare
+  // Zeile im Kopf.
+  article: { published: AGENTUR_META.published, modified: AGENTUR_META.updated },
+  graph: ctx => [
+    personNode(ctx.origin, ctx.homeUrl, { sameAs: CONTACT.socialProfiles }),
+    {
+      '@type': 'Article',
+      '@id': `${ctx.pageUrl}#article`,
+      'headline': AGENTUR_META.headline[lang.value],
+      'description': AGENTUR_META.description[lang.value],
+      'url': ctx.pageUrl,
+      'inLanguage': lang.value,
+      'author': { '@id': ctx.personId },
+      'publisher': { '@id': ctx.personId },
+      'datePublished': AGENTUR_META.published,
+      'dateModified': AGENTUR_META.updated,
+      'image': `${ctx.origin}/images/og-pukalani-studio.png`,
+      'isPartOf': { '@id': ctx.websiteId },
+    },
+    breadcrumbList(ctx.pageUrl, [
+      { name: t('portfolio.common.home'), item: ctx.homeUrl },
+      { name: t('portfolio.common.knowledge'), item: knowledgeUrl.value },
+      { name: AGENTUR_HERO.breadcrumb[lang.value], item: ctx.pageUrl },
+    ]),
+    faqPage(ctx.pageUrl, AGENTUR_FAQS, lang.value),
+  ],
 })
 </script>
 
@@ -125,7 +89,7 @@ useSeoMeta({
           </p>
           <p>
             {{ t('portfolio.common.updatedAt') }}
-            <time :datetime="CONTACT.lastUpdated">{{ CONTACT.lastUpdatedHuman[lang] }}</time>
+            <time :datetime="AGENTUR_META.updated">{{ AGENTUR_META.updatedHuman[lang] }}</time>
           </p>
         </div>
         <p class="note head__note">

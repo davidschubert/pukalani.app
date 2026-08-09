@@ -27,5 +27,10 @@ export default defineEventHandler(async (event) => {
       throw toH3Error(error, 'Could not delete page')
     })
 
+  // Die öffentliche Liste dieses Mandanten ist jetzt veraltet — verwerfen,
+  // sonst zeigte die Navigation bis zu 30 Sekunden auf eine gelöschte Seite
+  // (server/utils/publicPagesCache.ts).
+  forgetPublicPages(event)
+
   return { deleted: res.rows.length }
 })

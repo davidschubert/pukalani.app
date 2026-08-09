@@ -1094,6 +1094,24 @@ export const SERVICES_NOTE: Localized = {
 }
 
 export const HOME_META = {
+  /**
+   * DAS DATUM DIESER SEITE (Befund B7).
+   *
+   * Vorher stempelten Startseite und beide Guides alle drei `CONTACT.
+   * lastUpdated` — EIN Datum für drei Dokumente, das mit jeder Pflege
+   * irgendeiner Ecke der Site weiterrückte. `dateModified` ist aber eine
+   * Aussage über den INHALT dieses Dokuments, und Inhalte werden hier je Seite
+   * gepflegt; ein gemeinsames Datum meldet Suchmaschinen (und Lesern) eine
+   * Änderung, die es nicht gab.
+   *
+   * `published` ist der Stand der Übernahme aus dem alten Portfolio-Repo
+   * (14. Juli 2026, siehe Kopf dieser Datei). `updated` und `updatedHuman`
+   * gehören zusammen — wer eines ändert, ändert beide. Der SITE-Stand in der
+   * Fußzeile bleibt `CONTACT.lastUpdatedHuman`.
+   */
+  published: '2026-07-14',
+  updated: '2026-08-08',
+  updatedHuman: { de: '8. August 2026', en: 'August 8, 2026' } satisfies Localized,
   title: {
     de: 'Senior UI/UX Designer Freelancer – Mittelstand & Agenturen | David Schubert',
     en: 'Freelance Senior UI/UX Designer for DACH | David Schubert',

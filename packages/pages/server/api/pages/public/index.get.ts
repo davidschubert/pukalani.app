@@ -18,9 +18,17 @@ import { GUIDELINES_SLUG, PAGES_TABLE, type PageRow, type PublicPageNavItem } fr
  * aus, und ein Fehler soll ein Fehler bleiben.
  */
 export default defineEventHandler(async (event): Promise<PublicPageNavItem[]> => {
+  // VOR dem Cache: gecacht wird das Ergebnis, nie die Erlaubnis.
   assertCommunityContentReadable(event, 'Pages not found')
 
   const requested = String(getQuery(event).locale || 'en').slice(0, 8)
+
+  // Microcache (30 s, mandanten- UND sprachgenau): diese Route läuft bei JEDEM
+  // SSR-Seitenaufbau — Navigation und Fußzeile lesen sie. Die Schreibrouten
+  // verwerfen den Eintrag sofort, ein Veröffentlichen wartet also nicht auf
+  // die Ablaufzeit. Begründung: server/utils/publicPagesCache.ts.
+  const cached = cachedPublicPages(event, requested)
+  if (cached) return cached
 
   const res = await tenantDb(event, { as: 'operator' }).list<PageRow>(PAGES_TABLE, [
     Query.equal('status', 'published'),
@@ -53,5 +61,7 @@ export default defineEventHandler(async (event): Promise<PublicPageNavItem[]> =>
     items.push(guidelinesFallbackNavItem(requested))
   }
 
-  return items.sort((a, b) => a.sortOrder - b.sortOrder)
+  const sorted = items.sort((a, b) => a.sortOrder - b.sortOrder)
+  rememberPublicPages(event, requested, sorted)
+  return sorted
 })
