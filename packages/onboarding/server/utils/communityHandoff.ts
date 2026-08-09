@@ -2,7 +2,7 @@ import type { H3Event } from 'h3'
 // Cross-Layer als EXPLIZITER Vertrag (A14): der Umschlag gehört dem Control
 // Plane — reiner Typ-Import, kein Laufzeit-Coupling.
 import type { MyCommunitiesResponse, MyCommunityView } from '../../../control/shared/myCommunities'
-import { deriveHandoffKey, handoffAudience, sealHandoffToken } from '../../../core/server/utils/embedHandoff'
+import { deriveHandoffKey, sealHandoffToken } from '../../../core/server/utils/embedHandoff'
 import { sessionCookieName } from '../../../core/server/lib/appwrite'
 import { callControlPlane, mintRuntimeJwt } from './controlPlane'
 
@@ -149,12 +149,11 @@ export function sealControlHostHandoff(event: H3Event, host: string): SealedComm
     userId: event.context.user.$id,
   })
   return {
-    // `handoffAudience`, nicht der rohe Host: eingelöst wird gegen den
-    // NORMALISIERTEN Request-Host (Port weg, s. site-session.get.ts) — lokale
-    // Kontroll-Hosts tragen aber einen Port (`my.localhost:3016`), und ein roh
-    // gesiegeltes Token öffnete dort nie. Kanonische Community-Hosts oben sind
-    // portlos, deshalb fällt das dort nicht auf.
-    token: sealHandoffToken(secret, deriveHandoffKey(config.appwriteKey), handoffAudience(host)),
+    // Der rohe Host genügt: `sealHandoffToken` normalisiert die Audience
+    // SELBST (handoffAudience — Kleinschreibung, Port weg), genau wie beim
+    // Community-Sprung oben. Ein lokaler Kontroll-Host mit Port ist damit
+    // abgedeckt.
+    token: sealHandoffToken(secret, deriveHandoffKey(config.appwriteKey), host),
     host,
   }
 }

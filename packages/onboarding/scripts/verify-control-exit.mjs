@@ -196,13 +196,45 @@ try {
   const redeemCreate = await call(WIZARD_HOST, `/api/auth/site-session?token=${encodeURIComponent(create.json?.token ?? '')}&to=${encodeURIComponent(create.json?.path ?? '/')}`)
   check('Einlösung auf dem Wizard-Host → 302 auf /start', redeemCreate.status === 302 && redeemCreate.location === '/start', `Status ${redeemCreate.status} → ${redeemCreate.location}`)
   check('setzt auch dort das Session-Cookie', redeemCreate.setCookie.some(c => c.startsWith('a_session_')))
+
+  // ── 5. Härtetests am Siegel selbst ────────────────────────────────────────
+  console.log('\n5. Härtetests')
+  // Manipulation: ein gekipptes Zeichen muss am GCM-Tag scheitern — dieselbe
+  // Antwort wie „falscher Host", damit nichts über die Ursache verrät.
+  const raw = create.json?.token ?? ''
+  const tampered = raw.slice(0, -2) + (raw.endsWith('AA') ? 'BB' : 'AA')
+  const tamperedRes = await call(WIZARD_HOST, `/api/auth/site-session?token=${encodeURIComponent(tampered)}&to=%2F`)
+  check('manipuliertes Token → 401', tamperedRes.status === 401, `Status ${tamperedRes.status}`)
+
+  // Open-Redirect: `to` darf nur ein relativer Pfad sein (safeRedirectTarget);
+  // `//evil.example` liest ein Browser als schema-relative URL.
+  const openRedirect = await call(WIZARD_HOST, `/api/auth/site-session?token=${encodeURIComponent(raw)}&to=${encodeURIComponent('//evil.example')}`)
+  check('Weiterleitungsziel //evil.example → 400', openRedirect.status === 400, `Status ${openRedirect.status}`)
+
+  // Replay INNERHALB der 60 s ist BEWUSST akzeptiert (embedHandoff.ts, Kopf):
+  // das Secret wird ohnehin gegen Appwrite geprüft, und die Bindung an den
+  // einen Host bleibt. Diese Prüfung NAGELT die Entscheidung fest — kippt sie
+  // eines Tages auf Einmal-Token, soll dieser Beweis es melden, nicht ein
+  // verwirrter Kunde mit zwei Tabs.
+  const replay = await call(WIZARD_HOST, `/api/auth/site-session?token=${encodeURIComponent(raw)}&to=%2Fstart`)
+  check('Replay binnen 60 s → 302 (dokumentierte Entscheidung)', replay.status === 302, `Status ${replay.status}`)
+
+  // Drossel (Selbst-Review 2026-08-09): der Siegel-Aussteller teilt den Bucket
+  // `onboarding:communities` (10/min und IP). Die bisherigen Aufrufe dieses
+  // Laufs zählen mit — spätestens nach zwölf weiteren muss ein 429 kommen.
+  let throttled = false
+  for (let i = 0; i < 12; i++) {
+    const res = await call(site.host, '/api/community/control-handoff', { method: 'POST', cookie, body: { target: 'manage' } })
+    if (res.status === 429) { throttled = true; break }
+  }
+  check('Siegel-Aussteller ist gedrosselt (429 im Dauerfeuer)', throttled)
 }
 catch (error) {
   fail++
   console.error('\n✗ Abbruch:', error?.message || error)
 }
 finally {
-  console.log('\n5. Aufräumen')
+  console.log('\n6. Aufräumen')
   for (const tenantRow of cleanup.tenants) {
     const t = await control.getRow({ databaseId, tableId: 'communities', rowId: tenantRow }).catch(() => null)
     if (!t?.tenantId) continue

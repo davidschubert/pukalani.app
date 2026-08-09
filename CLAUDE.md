@@ -262,9 +262,11 @@ Vollständiges Konzept: docs/CONCEPT.md
   AUSGÄNGE („Community anlegen" → start.*, „Communities verwalten" → my.*)
   springen GESIEGELT (F50-Nachtrag 2026-08-08): `POST /api/community/
   control-handoff` + `sealControlHostHandoff()` — Ziel-Host aus der CONFIG
-  (`controlExitTarget`, controlHosts/wizardHosts), kein Control-Plane-Ruf,
-  Audience via `handoffAudience()` normalisiert (lokale Hosts tragen Ports).
-  Beweis: packages/onboarding/scripts/verify-control-exit.mjs (16/16).
+  (`controlExitTarget`, controlHosts/wizardHosts), kein Control-Plane-Ruf
+  (die Audience normalisiert `sealHandoffToken` SELBST — kein Wrapper nötig).
+  `switch` + `control-handoff` sind gedrosselt (Bucket
+  `onboarding:communities`, wie der Kundenbereichs-Handoff).
+  Beweis: packages/onboarding/scripts/verify-control-exit.mjs.
 
 ## Hosts (Umbenennung 2026-07-25, Cutover 2026-07-26 — Davids Entscheidung)
 - `control.pukalani.app` = Betreiber-Oberfläche, seit dem Cutover VOLLSTÄNDIG:

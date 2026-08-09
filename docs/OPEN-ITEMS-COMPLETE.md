@@ -316,15 +316,18 @@ kommt aus der CONFIG (`controlExitTarget` in `shared/controlExit.ts`,
 2026-08-02 bleibt). Menü-Einträge holen das Siegel beim KLICK, Fallback bleibt
 der statische Link. Beweis: `verify-control-exit.mjs` **16/16** (Verweigerungen
 401/400/404, beide Ziele eingeloggt angekommen, Host-Bindung hält).
-**Gelernt:** (1) Die Siegel-AUDIENCE muss über `handoffAudience()` normalisiert
-werden — eingelöst wird gegen den Request-Host OHNE Port, und lokale
-Kontroll-Hosts tragen einen (`my.localhost:3016`); roh gesiegelt öffnete das
-Token dort nie, und der Fallback kaschierte es als „funktioniert, nur
-ausgeloggt". Kanonischen Community-Hosts fällt das nicht auf, weil sie portlos
-sind. (2) Der Wizard-Host lebt auf ZWEI Achsen: er muss lokal auch in
+**Gelernt:** (1) Der Wizard-Host lebt auf ZWEI Achsen: er muss lokal auch in
 `NUXT_PUBLIC_TENANCY_CONTROL_HOSTS` stehen (wie in prod `start.pukalani.app` in
 beiden Listen steht), sonst ist er ein unbekannter Host und die Einlösung
-antwortet 404.
+antwortet 404. (2) Eine Sicherung erst LESEN, dann „fixen": im Review-Eifer
+wurde hier ein `handoffAudience()`-Wrapper um den Siegel-Aufruf gelegt gegen
+eine Port-Falle, die es nicht gibt — `sealHandoffToken` normalisiert die
+Audience selbst (erste Zeile der Funktion). Der Wrapper war harmlos (doppelt
+normalisiert), aber seine Begründung stand einen Tag lang als falsche
+Tatsache in drei Dokumenten; beim Selbst-Review am 2026-08-09 zurückgebaut.
+(3) `POST /api/community/switch` und `control-handoff` fehlten im
+Rate-Limit (der Kommentar „im selben Budget" war Absicht, nicht Code) —
+nachgezogen, Bucket `onboarding:communities` wie der Kundenbereichs-Handoff.
 
 ### A2a — Stripe-Testmodus-Walkthrough: alle sechs Proben real durchgespielt ✅ 2026-08-08
 
