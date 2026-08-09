@@ -303,6 +303,29 @@ CI-Lint grün, die CI fährt mehr Schritte. (2) `scopeVisibleAt('operator', …)
 gilt in JEDER single-tenant-App — wer Betreiber-Reiter registriert, braucht
 zusätzlich einen Bau-Schalter, sonst erben ihn control und photos.
 
+**Nachtrag (2026-08-08, Davids UX-Befund):** die zwei AUSGÄNGE des Switchers
+(„Community anlegen" → `start.*`, „Communities verwalten" → `my.*`) waren
+schlichte Links — der Klickende stand drüben ausgeloggt vor dem Login-Formular,
+obwohl es dieselbe Platform-App und dasselbe Pool-Projekt ist (Session-Cookies
+sind host-only). Jetzt springen sie über dasselbe Siegel-Verfahren wie der
+Community-Wechsel: `POST /api/community/control-handoff` (onboarding, nur
+`mode: 'pool'`) siegelt per neuer `sealControlHostHandoff()` — OHNE
+Control-Plane-Ruf, denn ein Kontroll-Host ist kein Mandant und der Ziel-Host
+kommt aus der CONFIG (`controlExitTarget` in `shared/controlExit.ts`,
+`resolveControlHosts` Env-vor-Config), nie vom Aufrufer (Audit-Eigenschaft
+2026-08-02 bleibt). Menü-Einträge holen das Siegel beim KLICK, Fallback bleibt
+der statische Link. Beweis: `verify-control-exit.mjs` **16/16** (Verweigerungen
+401/400/404, beide Ziele eingeloggt angekommen, Host-Bindung hält).
+**Gelernt:** (1) Die Siegel-AUDIENCE muss über `handoffAudience()` normalisiert
+werden — eingelöst wird gegen den Request-Host OHNE Port, und lokale
+Kontroll-Hosts tragen einen (`my.localhost:3016`); roh gesiegelt öffnete das
+Token dort nie, und der Fallback kaschierte es als „funktioniert, nur
+ausgeloggt". Kanonischen Community-Hosts fällt das nicht auf, weil sie portlos
+sind. (2) Der Wizard-Host lebt auf ZWEI Achsen: er muss lokal auch in
+`NUXT_PUBLIC_TENANCY_CONTROL_HOSTS` stehen (wie in prod `start.pukalani.app` in
+beiden Listen steht), sonst ist er ein unbekannter Host und die Einlösung
+antwortet 404.
+
 ### A2a — Stripe-Testmodus-Walkthrough: alle sechs Proben real durchgespielt ✅ 2026-08-08
 
 **Was bewiesen wurde** (gegen die Produktions-Deployments im Stripe-Testmodus,

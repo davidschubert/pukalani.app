@@ -2,7 +2,7 @@ import type { H3Event } from 'h3'
 // Cross-Layer als EXPLIZITER Vertrag (A14): der Umschlag gehört dem Control
 // Plane — reiner Typ-Import, kein Laufzeit-Coupling.
 import type { MyCommunitiesResponse, MyCommunityView } from '../../../control/shared/myCommunities'
-import { deriveHandoffKey, sealHandoffToken } from '../../../core/server/utils/embedHandoff'
+import { deriveHandoffKey, handoffAudience, sealHandoffToken } from '../../../core/server/utils/embedHandoff'
 import { sessionCookieName } from '../../../core/server/lib/appwrite'
 import { callControlPlane, mintRuntimeJwt } from './controlPlane'
 
@@ -109,5 +109,52 @@ export async function sealCommunityHandoff(
   return {
     token: sealHandoffToken(secret, deriveHandoffKey(config.appwriteKey), community.host),
     host: community.host,
+  }
+}
+
+/**
+ * Session siegeln für den Sprung auf einen KONTROLL-Host (F50-Nachtrag,
+ * 2026-08-08).
+ *
+ * Dieselben Schritte wie oben, MINUS den Ruf ins Control Plane: Session
+ * beweisen, Cookie-Secret holen, an den Ziel-Host binden. Der Kontroll-Host ist
+ * kein Mandant — es gibt dort keine Mitgliedschaft, die man belegen könnte, und
+ * nichts, wozu eine berechtigen würde (Begründung ausführlich in
+ * `shared/controlExit.ts`). Diese Fassung spart deshalb JWT + zwei Tabellen und
+ * ist ein reiner Krypto-Aufruf.
+ *
+ * DER HOST BLEIBT TROTZDEM SERVERSEITIG BESTIMMT — und das ist die Bedingung,
+ * unter der das Weglassen der Mitgliedschaftsprüfung harmlos ist. `host` kommt
+ * vom AUFRUFER DIESER FUNKTION, nicht aus dem Request: die Route liest ihn über
+ * `controlExitTarget()` aus `pukalani.tenancy.*`. Wer hier eines Tages einen
+ * Wert aus dem Body durchreicht, baut den Audit-Befund vom 2026-08-02 (KRITISCH,
+ * Kontoübernahme) wieder ein — ein Siegel für einen fremden Host ist genau das,
+ * was ein Angreifer braucht.
+ */
+export function sealControlHostHandoff(event: H3Event, host: string): SealedCommunityHandoff {
+  if (!event.context.user) {
+    throw createError({ status: 401, statusText: 'Unauthorized' })
+  }
+
+  const secret = getCookie(event, sessionCookieName(event))
+  if (!secret) {
+    // Kein Cookie trotz Session-Kontext: dann käme ein Token heraus, das nichts
+    // öffnet — lieber ehrlich 401 als ein Link, der beim Kunden scheitert.
+    throw createError({ status: 401, statusText: 'Unauthorized' })
+  }
+
+  const config = useRuntimeConfig(event)
+  logEvent('info', 'onboarding.control_handoff_issued', {
+    host,
+    userId: event.context.user.$id,
+  })
+  return {
+    // `handoffAudience`, nicht der rohe Host: eingelöst wird gegen den
+    // NORMALISIERTEN Request-Host (Port weg, s. site-session.get.ts) — lokale
+    // Kontroll-Hosts tragen aber einen Port (`my.localhost:3016`), und ein roh
+    // gesiegeltes Token öffnete dort nie. Kanonische Community-Hosts oben sind
+    // portlos, deshalb fällt das dort nicht auf.
+    token: sealHandoffToken(secret, deriveHandoffKey(config.appwriteKey), handoffAudience(host)),
+    host,
   }
 }
