@@ -9,6 +9,7 @@ import {
   type MyCommunityFacts,
 } from '../../../../shared/myCommunities'
 import { COMMUNITY_MEMBERS_TABLE, isCommunityMemberStatus, type CommunityMemberRow } from '../../../../shared/types/communityMember'
+import { canonicalHostFor } from '../../../../shared/customDomain'
 import { COMMUNITIES_TABLE, type TenantRow } from '../../../../shared/types/tenantRecord'
 import { verifyRuntimeIdentity } from '../../../utils/onboardingService'
 
@@ -109,7 +110,14 @@ export default defineEventHandler(async (event): Promise<MyCommunitiesResponse> 
     facts.push({
       communityId: community.$id,
       name: community.name || community.host,
-      host: community.host,
+      /**
+       * Der KANONISCHE Host, nicht die Spalte: eine Community mit aktiver
+       * eigener Domain wohnt DORT. Mit `community.host` siegelte der
+       * Community-Switcher auf die Subdomain, deren 301 warf den Klick auf
+       * die Kundendomain, und dort verfiel das Siegel — 401 statt Login
+       * (Wochen-Audit 2026-08-09, HIGH-1; einzige Stelle, die es nicht tat).
+       */
+      host: canonicalHostFor(community),
       role: membership.role,
       communityStatus: community.status,
       plan: community.plan,
