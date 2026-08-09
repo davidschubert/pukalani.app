@@ -10,6 +10,7 @@
     "preview": "nuxi preview",
     "typecheck": "nuxi typecheck",
     "bootstrap": "node --experimental-strip-types --env-file=.env scripts/bootstrap.ts",
+    "seed:legal": "node --experimental-strip-types --env-file=.env scripts/seed-legal-pages.ts",
     "e2e": "playwright test"
   },
   "dependencies": {
@@ -19,6 +20,7 @@
     "@pukalani/analytics": "workspace:*",
     "@pukalani/core": "workspace:*",
     "@pukalani/domains": "workspace:*",
+    "@pukalani/pages": "workspace:*",
     "@pukalani/system": "workspace:*",
     "@pukalani/themes": "workspace:*",
     "@nuxt/image": "catalog:",

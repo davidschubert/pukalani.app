@@ -151,7 +151,11 @@ const sources = [
   font-weight: 700;
   color: hsl(var(--puka-ink));
 }
-.cmp-table thead .col-us { color: hsl(var(--puka-sun-deep)); }
+/* TEXT-Akzente über das Theme-Alias statt über das rohe Tripel (2026-08-08,
+   WCAG AA): --puka-sun-deep = puka-600 misst als Schrift nur 2,43–2,83:1, das
+   Alias zeigt hell auf puka-800 (5,48–6,38:1) und dunkel auf puka-400. Die
+   FLÄCHE eine Zeile höher (--puka-sun / 0.14) bleibt bewusst das Tripel. */
+.cmp-table thead .col-us { color: var(--ui-color-primary-600); }
 .cmp-table tbody tr:last-child th,
 .cmp-table tbody tr:last-child td { border-bottom: 0; }
 
@@ -166,5 +170,6 @@ const sources = [
   gap: 0.5rem 0.85rem;
   margin-top: 0.5rem;
 }
-.cmp-sources a { color: hsl(var(--puka-sun-deep)); text-decoration: underline; }
+/* Dieselbe AA-Umstellung wie oben (2026-08-08) — Quellen-Links sind Text. */
+.cmp-sources a { color: var(--ui-color-primary-600); text-decoration: underline; }
 </style>

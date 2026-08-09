@@ -41,6 +41,18 @@ interface SwitcherEntry {
   current: boolean
 }
 
+/**
+ * Dasselbe für die zwei Ausgänge (F50-Nachtrag, 2026-08-08): die Antwort von
+ * `POST /api/community/control-handoff`. Wahrheit ist
+ * `packages/onboarding/shared/controlExit.ts` (`ControlExitHandoff`) — hier
+ * steht sie lokal, aus demselben A14-Grund wie oben.
+ */
+interface ControlExitHandoff {
+  token: string
+  host: string
+  path: string
+}
+
 defineProps<{ collapsed?: boolean }>()
 
 const { t } = useI18n()
@@ -57,6 +69,10 @@ const loaded = ref(false)
 const failed = ref(false)
 /** Die Community, deren Sprung gerade gesiegelt wird (Spinner + Doppelklick-Sperre). */
 const switching = ref<string | null>(null)
+/** Der Ausgang, dessen Sprung gerade gesiegelt wird — dieselbe Rolle für die zwei Kontroll-Hosts. */
+const exiting = ref<'create' | 'manage' | null>(null)
+/** Irgendein Sprung ist unterwegs: der Rest des Menüs wartet, statt einen zweiten zu starten. */
+const busy = computed(() => switching.value !== null || exiting.value !== null)
 
 async function load() {
   if (loaded.value || loading.value) return
@@ -94,7 +110,7 @@ watch(open, (isOpen) => { if (isOpen) void load() })
  * mit Anmeldung. Ein kaputter Handoff darf keine Sackgasse sein.
  */
 async function switchTo(entry: SwitcherEntry) {
-  if (switching.value || entry.current) return
+  if (busy.value || entry.current) return
   switching.value = entry.communityId
   let target = `${communityOrigin(entry.host)}/dashboard`
   try {
@@ -113,9 +129,49 @@ async function switchTo(entry: SwitcherEntry) {
   window.location.href = target
 }
 
-/** Die zwei Ausgänge auf die Kontroll-Hosts (pur + getestet, s. shared/). */
+/**
+ * Die zwei Ausgänge auf die Kontroll-Hosts (pur + getestet, s. shared/).
+ *
+ * Sie entscheiden weiterhin, OB der Menüpunkt erscheint — und sie sind das
+ * FALLBACK-Ziel. Das echte Sprungziel kommt seit dem F50-Nachtrag aus der
+ * Antwort von `/api/community/control-handoff` (s. `exitTo`).
+ */
 const createUrl = computed(() => switcherExternalLink(appConfig.pukalani?.tenancy?.wizardHosts, '/start'))
 const manageUrl = computed(() => switcherExternalLink(appConfig.pukalani?.tenancy?.controlHosts, '/communities'))
+
+/**
+ * Der Sprung auf einen KONTROLL-Host — EINGELOGGT (F50-Nachtrag, Davids
+ * Entscheidung 2026-08-08).
+ *
+ * Bis hierher waren die zwei Ausgänge schlichte Links, und der Klickende stand
+ * auf `start.*` bzw. `my.*` vor dem Anmeldeformular: dieselbe App, dasselbe
+ * Pool-Projekt, aber Session-Cookies sind host-only. Also dasselbe Verfahren wie
+ * beim Community-Wechsel eine Funktion höher — Siegel beim KLICK holen (60 s
+ * Gültigkeit, ein beim Rendern erzeugtes wäre tot), Ziel aus der ANTWORT bauen.
+ *
+ * Host UND Pfad kommen aus der Antwort, nicht von hier: das Siegel ist an den
+ * Host gebunden (Audit 2026-08-02), und den Pfad kennt der Server ohnehin
+ * besser — er hat ihn aus derselben Regel wie den Host.
+ *
+ * Scheitert der Handoff, führt der Klick trotzdem zum Ziel — dann eben mit
+ * Anmeldung. Ein kaputter Handoff darf keine Sackgasse sein.
+ */
+async function exitTo(target: 'create' | 'manage', fallbackUrl: string) {
+  if (busy.value) return
+  exiting.value = target
+  let destination = fallbackUrl
+  try {
+    const { token, host, path } = await $fetch<ControlExitHandoff>('/api/community/control-handoff', {
+      method: 'POST',
+      body: { target },
+    })
+    destination = `${communityOrigin(host)}/api/auth/site-session?token=${encodeURIComponent(token)}&to=${encodeURIComponent(path)}`
+  }
+  catch {
+    // Fallback: ohne Handoff wenigstens auf den Kontroll-Host (dort Login).
+  }
+  window.location.href = destination
+}
 
 const items = computed<DropdownMenuItem[][]>(() => {
   const list: DropdownMenuItem[] = []
@@ -143,18 +199,33 @@ const items = computed<DropdownMenuItem[][]>(() => {
         type: 'checkbox',
         checked: entry.current,
         loading: switching.value === entry.communityId,
-        disabled: switching.value !== null && switching.value !== entry.communityId,
+        disabled: busy.value && switching.value !== entry.communityId,
         onSelect: (event: Event) => { event.preventDefault(); void switchTo(entry) },
       })
     }
   }
 
+  // Die zwei Ausgänge sind seit dem F50-Nachtrag KEINE `to:`-Links mehr,
+  // sondern gesiegelte Sprünge (s. `exitTo`) — sichtbar bleiben sie unter
+  // derselben Bedingung wie vorher: nur mit konfiguriertem Kontroll-Host.
   const exits: DropdownMenuItem[] = []
   if (createUrl.value) {
-    exits.push({ label: t('dashboard.communitySwitcher.create'), icon: 'i-ph-plus', to: createUrl.value, target: '_self' })
+    exits.push({
+      label: t('dashboard.communitySwitcher.create'),
+      icon: 'i-ph-plus',
+      loading: exiting.value === 'create',
+      disabled: busy.value && exiting.value !== 'create',
+      onSelect: (event: Event) => { event.preventDefault(); void exitTo('create', createUrl.value) },
+    })
   }
   if (manageUrl.value) {
-    exits.push({ label: t('dashboard.communitySwitcher.manage'), icon: 'i-ph-list-checks', to: manageUrl.value, target: '_self' })
+    exits.push({
+      label: t('dashboard.communitySwitcher.manage'),
+      icon: 'i-ph-list-checks',
+      loading: exiting.value === 'manage',
+      disabled: busy.value && exiting.value !== 'manage',
+      onSelect: (event: Event) => { event.preventDefault(); void exitTo('manage', manageUrl.value) },
+    })
   }
 
   const heading: DropdownMenuItem[] = [{ type: 'label', label: t('dashboard.communitySwitcher.label') }]

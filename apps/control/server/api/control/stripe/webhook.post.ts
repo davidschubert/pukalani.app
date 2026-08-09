@@ -103,6 +103,8 @@ async function ensureWebhookEndpoint(event: H3Event, user: { $id: string }) {
 
   const body = schema.parse(await readBody(event).catch(() => ({})) ?? {})
 
+  const body = schema.parse(await readBody(event).catch(() => ({})) ?? {})
+
   const url = stripeWebhookUrl(event)
   if (!url) {
     // Ohne NUXT_PUBLIC_APP_URL wüsste diese Instanz nicht, wohin Stripe

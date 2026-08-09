@@ -6,11 +6,16 @@ import { expect, test } from '@playwright/test'
  */
 
 test.describe('Landing', () => {
-  test('rendert Hero + Cases (englisch, Default ohne Prefix)', async ({ page }) => {
+  // Geprüft wird über die ANKER-Ids, nicht über den Überschriften-Text: die
+  // Sektions-Texte kommen aus app/data/home.ts und dürfen sich ändern, die
+  // Anker sind verlinkt (Navigation, Fußzeile, JSON-LD) und sind damit die
+  // stabilere Zusage.
+  test('rendert Hero + Referenzen + eigene Cases (englisch, Default ohne Prefix)', async ({ page }) => {
     await page.goto('/')
     await expect(page).toHaveTitle(/David Schubert/i)
     await expect(page.locator('h1')).toBeVisible()
-    await expect(page.getByRole('heading', { name: /cases/i })).toBeVisible()
+    await expect(page.locator('#referenzen-title')).toBeVisible()
+    await expect(page.locator('[data-cases]')).toBeVisible()
   })
 
   test('liefert hreflang-Alternates + canonical (useLocaleHead)', async ({ page }) => {

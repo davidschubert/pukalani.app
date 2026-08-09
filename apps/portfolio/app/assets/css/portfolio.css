@@ -103,6 +103,276 @@ html:has(body.portfolio-site) {
   padding-block: clamp(4rem, 9vw, 8rem);
 }
 
+/* ---------------------------------------------------------------------------
+   GETEILTE BAUSTEINE (seit dem Content-Umzug aus dem alten Portfolio-Repo)
+
+   Fünf Seiten benutzen dieselben Formen: Sektions-Kopf, Karte, Chip, FAQ,
+   Datentabelle, Callout. Sie stehen deshalb HIER und nicht fünfmal in einem
+   `<style scoped>` — eine Farbentscheidung darf nicht an fünf Orten gepflegt
+   werden. Seiten-EIGENE Rasterungen bleiben dagegen bewusst scoped.
+   --------------------------------------------------------------------------- */
+
+.portfolio-site .section--soft {
+  background: var(--bg-soft);
+}
+
+.portfolio-site .section--line {
+  border-top: 1px solid var(--line);
+}
+
+/* Kopf einer Unterseite: schiebt den Inhalt unter die fixierte Kopfzeile. */
+.portfolio-site .page-head {
+  padding-top: clamp(7rem, 15vh, 10rem);
+  padding-bottom: clamp(2rem, 5vw, 3.5rem);
+}
+
+.portfolio-site .section-title {
+  font-size: clamp(1.7rem, 4.2vw, 3rem);
+  margin-top: 0.7rem;
+}
+
+.portfolio-site .section-title--lg {
+  font-size: clamp(1.9rem, 5vw, 3.4rem);
+}
+
+.portfolio-site .section-lead {
+  margin-top: 1.2rem;
+  max-width: 68ch;
+  color: var(--text-soft);
+  font-size: clamp(1rem, 1.6vw, 1.12rem);
+}
+
+.portfolio-site .section-note {
+  margin-top: 1.5rem;
+  max-width: 78ch;
+  color: var(--metal);
+  font-size: 0.86rem;
+}
+
+.portfolio-site .subheading {
+  font-size: clamp(1.15rem, 2.4vw, 1.5rem);
+}
+
+/* Textkörper der Guides — Fließtext bleibt weich, Links tragen den Akzent. */
+.portfolio-site .prose p {
+  margin-top: 1.1rem;
+  color: var(--text-soft);
+  max-width: 72ch;
+}
+
+.portfolio-site .link-accent {
+  color: var(--text);
+  text-decoration: underline;
+  text-decoration-color: var(--accent);
+  text-underline-offset: 0.25em;
+  transition: color 0.3s var(--ease);
+}
+
+.portfolio-site .link-accent:hover {
+  color: var(--accent);
+}
+
+.portfolio-site .card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: clamp(1.2rem, 2.5vw, 1.7rem);
+}
+
+.portfolio-site .card__title {
+  font-family: "Syne", ui-sans-serif, system-ui, sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  font-size: 1.05rem;
+}
+
+.portfolio-site .card__text {
+  margin-top: 0.7rem;
+  color: var(--text-soft);
+  font-size: 0.95rem;
+}
+
+.portfolio-site .chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  list-style: none;
+}
+
+.portfolio-site .chip {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.3rem 0.85rem;
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-soft);
+}
+
+.portfolio-site .chip--accent {
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  color: var(--accent);
+}
+
+/* Aufzählung mit Häkchen — der Punkt ist ein ::before, kein Zeichen im Text. */
+.portfolio-site .ticks {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.portfolio-site .ticks li {
+  position: relative;
+  padding-left: 1.4rem;
+  color: var(--text-soft);
+  font-size: 0.95rem;
+}
+
+.portfolio-site .ticks li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+/* Callout — Hinweis, Transparenz-Notiz, Quer-Verweis. */
+.portfolio-site .note {
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--accent);
+  border-radius: 10px;
+  background: var(--bg-soft);
+  padding: 1rem 1.2rem;
+  color: var(--text-soft);
+  font-size: 0.92rem;
+}
+
+.portfolio-site .quote {
+  border-left: 3px solid var(--accent);
+  padding-left: 1.2rem;
+  font-size: clamp(1.05rem, 2vw, 1.25rem);
+  color: var(--text);
+}
+
+/* FAQ als natives details/summary: funktioniert ohne JavaScript. */
+.portfolio-site .faq {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--line);
+}
+
+.portfolio-site .faq__item {
+  border-bottom: 1px solid var(--line);
+}
+
+.portfolio-site .faq__item summary {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1.5rem;
+  cursor: pointer;
+  list-style: none;
+  padding-block: 1.1rem;
+  font-weight: 700;
+  transition: color 0.3s var(--ease);
+}
+
+.portfolio-site .faq__item summary::-webkit-details-marker {
+  display: none;
+}
+
+.portfolio-site .faq__item summary:hover {
+  color: var(--accent);
+}
+
+.portfolio-site .faq__sign {
+  color: var(--accent);
+  font-weight: 800;
+  transition: transform 0.3s var(--ease);
+}
+
+.portfolio-site .faq__item[open] .faq__sign {
+  transform: rotate(45deg);
+}
+
+.portfolio-site .faq__answer {
+  padding-bottom: 1.3rem;
+  color: var(--text-soft);
+  max-width: 78ch;
+}
+
+/* Datentabellen (Marktdaten, Vergleiche): der Wrapper scrollt, nie die Seite. */
+.portfolio-site .table-wrap {
+  margin-top: 1.6rem;
+  overflow-x: auto;
+}
+
+.portfolio-site .data-table {
+  width: 100%;
+  min-width: 34rem;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  text-align: left;
+}
+
+.portfolio-site .data-table caption {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.portfolio-site .data-table th,
+.portfolio-site .data-table td {
+  padding: 0.85rem 1rem 0.85rem 0;
+  vertical-align: top;
+  border-bottom: 1px solid var(--line);
+}
+
+.portfolio-site .data-table thead th {
+  border-bottom-width: 2px;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--metal);
+}
+
+.portfolio-site .data-table tbody th {
+  font-weight: 700;
+  color: var(--text);
+}
+
+.portfolio-site .data-table td {
+  color: var(--text-soft);
+}
+
+.portfolio-site .data-table .is-accent {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+/* Brotkrumen der Unterseiten. */
+.portfolio-site .breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  list-style: none;
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--metal);
+}
+
+.portfolio-site .breadcrumb a:hover {
+  color: var(--accent);
+}
+
 /* fade-in on load */
 .portfolio-site .reveal {
   opacity: 0;

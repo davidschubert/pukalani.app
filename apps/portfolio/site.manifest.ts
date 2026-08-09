@@ -19,5 +19,9 @@ export default {
     // denselben Seiten-Pfad — zwei Dateien dafuer wuerden einander
     // ueberlagern (Begruendung im Kopf von packages/domains/nuxt.config.ts).
     'domains',
+    // Rechtsseiten als CMS (2026-08-08): Impressum/Datenschutz entstehen als
+    // Entwurfs-Vorlagen (scripts/seed-legal-pages.ts) und werden im Dashboard
+    // gefüllt und veröffentlicht — der Footer verlinkt nur Veröffentlichtes.
+    'pages',
   ],
 } satisfies SiteManifest

@@ -29,6 +29,50 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### F53-Nachtrag — Die drei WCAG-Hell-Befunde entschieden und behoben ✅ 2026-08-08
+
+**Ausgangslage.** F53 hatte drei HELL-Bestandswerte der Marketing-Landing
+unter AA gefunden und bewusst als Befund liegen lassen (Optik-Entscheidung
+Davids). David hat heute per strukturierter Frage entschieden — dreimal die
+Empfehlung, keinmal „bewusst lassen" (DECISION-LOG 2026-08-08):
+
+**1 · Kicker/Link-Akzent → puka-800.** puka-600 (#e96c0c) als Schrift auf
+den tone-Flächen maß 2,43–2,83:1; jetzt zeigt die STUFE im hellen
+`.marketing-site`-Scope auf puka-800 (#983912, 5,48:1 auf sun-hold/noon bis
+6,38:1 auf dawn/cloud) — exakt das Spiegelbild der Dark-Verschiebung aus B7,
+die ~30 `text-primary-600`-Klassen bleiben unverändert (puka-theme.css).
+DREI Folgen, die dazugehören: (a) die zwei FLÄCHEN-Konsumenten der Stufe
+(`--puka-step-fill`, `--puka-plan-glow`) nennen jetzt je Modus ihre ROHE
+Ramp-Stufe, sonst hätte die Hell-Verschiebung sie grundlos verdunkelt — der
+alte Fußkommentar „die Verschiebung wirkt auch auf Flächen, das ist gewollt"
+galt nur für dunkel und ist umgeschrieben; (b) vier direkte
+`hsl(var(--puka-sun-deep))`-TEXT-Stellen (Kicker, Vergleichstabellen-Kopf,
+Quellen-Links, Hero-Mock-Datum) zeigen jetzt auf `var(--ui-color-primary-600)`
+und folgen damit BEIDEN Modus-Verschiebungen; Schatten/Verläufe bleiben auf
+dem Tripel; (c) die ~10 `text-primary-600`-Icons und das „−25 %" werden hell
+sichtbar gedeckter — bewusst mitgenommen.
+
+**2 · CTA-Label → dunkle Tinte in beiden Modi.** Weiß auf der Sonne maß
+1,81:1 (B7-Bestand); `--puka-cta-label` ist hell jetzt `hsl(var(--puka-ink))`
+(9,34:1), der Dark-Block behält seinen LITERAL-Wert `hsl(220 40% 11%)`
+(8,4:1) — er darf NICHT auf das Tripel vereinheitlicht werden, weil
+--puka-ink im Dunkeln hell dreht.
+
+**3 · Preis-Kleinzeile → toned/85.** `billingPeriod` (12,5 px) maß mit /70
+nur 3,47:1 auf der Plan-Karte (#fefaf5); /85 misst 4,90:1, die PAngV-Zeile
+darunter bleibt mit vollem toned (7,13:1) bewusst kräftiger.
+
+**Beweise:** Kontraste per WCAG-Formel gerechnet (Skript, Werte oben);
+lint + typecheck marketing 0; Browser-Beweis am Worktree-Dev-Server
+(Port 3025, berechnete Farben): hell Kicker/primary-600 = puka-800,
+CTA-Label rgb(20,29,46), billingPeriod toned/0.85, Step-Verlauf unverändert
+500→600 — dunkel bitgenau wie vorher (600→puka-400, Step 500→400, Glow
+puka-400, CTA-Literal 11 %). **Gelernt:** Wer eine Theme-Stufe je Modus
+verschiebt, muss ihre FLÄCHEN-Konsumenten explizit machen — die
+Dark-Verschiebung nahm die Flächen absichtlich mit, die Hell-Verschiebung
+hätte dieselbe Mechanik zum Fehler gemacht; seither nennen Flächen ihre
+Ramp-Stufe direkt und nur Schrift läuft über die verschobenen Aliase.
+
 ### F54 — Silo-Domain-Erstlauf: vier Fehler, die lokal unsichtbar waren ✅ 2026-08-08
 
 **Was passiert ist.** Der erste echte Domain-Umzug (`portfolio.pukalani.app`
@@ -258,6 +302,32 @@ Pfad-Nennungen in OPEN-ITEMS/Runbooks mit um; lokal „lint grün" heißt nicht
 CI-Lint grün, die CI fährt mehr Schritte. (2) `scopeVisibleAt('operator', …)`
 gilt in JEDER single-tenant-App — wer Betreiber-Reiter registriert, braucht
 zusätzlich einen Bau-Schalter, sonst erben ihn control und photos.
+
+**Nachtrag (2026-08-08, Davids UX-Befund):** die zwei AUSGÄNGE des Switchers
+(„Community anlegen" → `start.*`, „Communities verwalten" → `my.*`) waren
+schlichte Links — der Klickende stand drüben ausgeloggt vor dem Login-Formular,
+obwohl es dieselbe Platform-App und dasselbe Pool-Projekt ist (Session-Cookies
+sind host-only). Jetzt springen sie über dasselbe Siegel-Verfahren wie der
+Community-Wechsel: `POST /api/community/control-handoff` (onboarding, nur
+`mode: 'pool'`) siegelt per neuer `sealControlHostHandoff()` — OHNE
+Control-Plane-Ruf, denn ein Kontroll-Host ist kein Mandant und der Ziel-Host
+kommt aus der CONFIG (`controlExitTarget` in `shared/controlExit.ts`,
+`resolveControlHosts` Env-vor-Config), nie vom Aufrufer (Audit-Eigenschaft
+2026-08-02 bleibt). Menü-Einträge holen das Siegel beim KLICK, Fallback bleibt
+der statische Link. Beweis: `verify-control-exit.mjs` **16/16** (Verweigerungen
+401/400/404, beide Ziele eingeloggt angekommen, Host-Bindung hält).
+**Gelernt:** (1) Der Wizard-Host lebt auf ZWEI Achsen: er muss lokal auch in
+`NUXT_PUBLIC_TENANCY_CONTROL_HOSTS` stehen (wie in prod `start.pukalani.app` in
+beiden Listen steht), sonst ist er ein unbekannter Host und die Einlösung
+antwortet 404. (2) Eine Sicherung erst LESEN, dann „fixen": im Review-Eifer
+wurde hier ein `handoffAudience()`-Wrapper um den Siegel-Aufruf gelegt gegen
+eine Port-Falle, die es nicht gibt — `sealHandoffToken` normalisiert die
+Audience selbst (erste Zeile der Funktion). Der Wrapper war harmlos (doppelt
+normalisiert), aber seine Begründung stand einen Tag lang als falsche
+Tatsache in drei Dokumenten; beim Selbst-Review am 2026-08-09 zurückgebaut.
+(3) `POST /api/community/switch` und `control-handoff` fehlten im
+Rate-Limit (der Kommentar „im selben Budget" war Absicht, nicht Code) —
+nachgezogen, Bucket `onboarding:communities` wie der Kundenbereichs-Handoff.
 
 ### A2a — Stripe-Testmodus-Walkthrough: alle sechs Proben real durchgespielt ✅ 2026-08-08
 

@@ -200,7 +200,8 @@ const TOGGLE_PROPS = computed(() => ({
 const NAV_UI = {
   list: 'gap-1',
   // `.nav-link`: 0,95rem / 500 / --puka-ink-soft ≈ `text-toned` (in Paket 2
-  // als Treffer belegt), Hover auf --puka-sun-deep = primary-600. `py-0.5`
+  // als Treffer belegt), Hover auf primary-600 — den Akzent-Ton auf hellem
+  // Grund (seit 2026-08-08 puka-800, AA; vorher --puka-sun-deep). `py-0.5`
   // hält die Zeile auf den 27px des Bestands — die Vorgabe `py-1.5` machte die
   // ganze Leiste 23px höher.
   link: 'px-2.5 py-0.5 text-[0.95rem] font-medium text-toned hover:text-primary-600',

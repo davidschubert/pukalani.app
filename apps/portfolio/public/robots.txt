@@ -1,0 +1,58 @@
+# pukalani.studio – robots.txt
+# Klassische Suchmaschinen und AI-Crawler sind ausdrücklich erlaubt (SEO + GEO).
+# Kompakte Inhaltsübersicht für LLMs: https://pukalani.studio/llms.txt
+
+User-Agent: *
+Disallow:
+
+# --- AI-Assistenten & Answer Engines (explizit erlaubt) ---
+
+User-Agent: GPTBot
+Disallow:
+
+User-Agent: OAI-SearchBot
+Disallow:
+
+User-Agent: ChatGPT-User
+Disallow:
+
+User-Agent: ClaudeBot
+Disallow:
+
+User-Agent: Claude-SearchBot
+Disallow:
+
+User-Agent: Claude-User
+Disallow:
+
+User-Agent: PerplexityBot
+Disallow:
+
+User-Agent: Perplexity-User
+Disallow:
+
+User-Agent: Google-Extended
+Disallow:
+
+User-Agent: Applebot
+Disallow:
+
+User-Agent: Applebot-Extended
+Disallow:
+
+User-Agent: Amazonbot
+Disallow:
+
+User-Agent: meta-externalagent
+Disallow:
+
+User-Agent: DuckAssistBot
+Disallow:
+
+User-Agent: CCBot
+Disallow:
+
+User-Agent: MistralAI-User
+Disallow:
+
+Sitemap: https://pukalani.studio/sitemap.xml

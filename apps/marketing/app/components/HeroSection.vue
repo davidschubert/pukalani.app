@@ -182,7 +182,11 @@ const trust = computed(() => [
 .mock-date {
   width: 2.3rem; height: 2.3rem; border-radius: 0.5rem; flex: none;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  background: hsl(var(--puka-dawn)); color: hsl(var(--puka-sun-deep));
+  /* Nur die SCHRIFT wandert aufs Theme-Alias (2026-08-08, WCAG AA — das rohe
+     puka-600 misst als Text 2,43–2,83:1, das Alias hell puka-800 mit
+     5,48–6,38:1). Die Fläche daneben und der Verlauf in .mock-avatar bleiben
+     bewusst auf dem Tripel: Flächen waren nie beanstandet. */
+  background: hsl(var(--puka-dawn)); color: var(--ui-color-primary-600);
   line-height: 1;
 }
 .mock-date b { font-size: 0.95rem; }

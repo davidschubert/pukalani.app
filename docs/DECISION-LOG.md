@@ -7,6 +7,27 @@ die kleinen, verstreuten Beschlüsse.
 
 ---
 
+## 2026-08-08 — Die drei WCAG-Hell-Befunde aus F53: zweimal fixen, nie „lassen"
+
+**Davids Entscheidung** (strukturierte Fragen, je Empfehlung gewählt) zu den
+drei Hell-Bestandswerten unter AA aus der F53-Kontrastmessung:
+(1) **Kicker/Link-Akzent** auf den tone-Flächen (puka-600 #e96c0c, nur
+2,43–2,83:1): die Akzent-STUFE zeigt im hellen Scope auf **puka-800** #983912
+(5,48–6,38:1) — Spiegelbild der Dark-Verschiebung aus B7, die ~30
+`text-primary-600`-Klassen bleiben unverändert. **Verworfen:** Zwischenton
+#a3470a außerhalb der Ramp (AA nur knapp, Sonderwert gegen die
+Theme-Token-Regel) · puka-700 (verfehlt AA überall knapp) · lassen.
+(2) **CTA-Weiß auf der Sonne** (1,81:1, in B7 bewusst belassen): das Label
+dreht hell wie dunkel auf **dunkle Tinte** (--puka-ink, 9,34:1; der
+Dunkelmodus tat es seit B7 mit 8,4:1) — die Sonnen-Fläche bleibt identisch.
+**Verworfen:** Fläche auf puka-700 vertiefen (CTA wäre nicht mehr die
+Sonne) · lassen. (3) **Preis-Kleinzeile** `text-toned/70` bei 12,5 px
+(3,47:1): auf **/85** (4,90:1) — die PAngV-Zeile darunter (7,13:1) bleibt
+bewusst kräftiger, die Hierarchie lebt. **Verworfen:** volles toned
+(Abstufung nur noch über Schriftstärke) · lassen. Nebenwirkung, bewusst
+mitgenommen: die ~10 `text-primary-600`-Icons und das „−25 %" werden hell
+gedeckter. Details: OPEN-ITEMS-COMPLETE.md (F53-Nachtrag).
+
 ## 2026-08-08 — Stripe-Verwaltung wandert ins Control-Dashboard (F55)
 
 **Davids Entscheidung** (strukturierte Fragen, beim Go-Live-Anlauf): Der

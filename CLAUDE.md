@@ -258,7 +258,15 @@ Vollständiges Konzept: docs/CONCEPT.md
   Switcher (pukalani.chrome.communitySwitcher, nur platform) springt über
   die EINE `sealCommunityHandoff()` (onboarding) — Ziel-Host IMMER aus der
   Mitgliedschaftsliste, nie vom Aufrufer (Audit 2026-08-02); nur Team-Rollen
-  (owner/admin/moderator/editor), viewer bewusst nicht.
+  (owner/admin/moderator/editor), viewer bewusst nicht. Auch die zwei
+  AUSGÄNGE („Community anlegen" → start.*, „Communities verwalten" → my.*)
+  springen GESIEGELT (F50-Nachtrag 2026-08-08): `POST /api/community/
+  control-handoff` + `sealControlHostHandoff()` — Ziel-Host aus der CONFIG
+  (`controlExitTarget`, controlHosts/wizardHosts), kein Control-Plane-Ruf
+  (die Audience normalisiert `sealHandoffToken` SELBST — kein Wrapper nötig).
+  `switch` + `control-handoff` sind gedrosselt (Bucket
+  `onboarding:communities`, wie der Kundenbereichs-Handoff).
+  Beweis: packages/onboarding/scripts/verify-control-exit.mjs.
 
 ## Hosts (Umbenennung 2026-07-25, Cutover 2026-07-26 — Davids Entscheidung)
 - `control.pukalani.app` = Betreiber-Oberfläche, seit dem Cutover VOLLSTÄNDIG:

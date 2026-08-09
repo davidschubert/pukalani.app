@@ -56,6 +56,15 @@
       "port": 3005
     },
     {
+      "name": "portfolio-3015",
+      "runtimeExecutable": "zsh",
+      "runtimeArgs": [
+        "-c",
+        "source ~/.nvm/nvm.sh && nvm use 22 >/dev/null && exec pnpm --filter portfolio exec nuxi dev --port 3015"
+      ],
+      "port": 3015
+    },
+    {
       "name": "comments-auto",
       "runtimeExecutable": "zsh",
       "runtimeArgs": [
