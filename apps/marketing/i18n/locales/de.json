@@ -757,6 +757,15 @@
       "secondary": "Live-Demo ansehen",
       "refrain": "„Wo die Sonne durchbricht.“"
     },
+    "contact": {
+      "kicker": "Kontakt",
+      "title": "Projekt nach Maß",
+      "lead": "Pukalani Studio ist der Weg für alles, was über ein Paket hinausgeht: eigene Instanz, eigene Domain, eigenes Konzept — Beratung, Strategie, Design und technische Umsetzung aus einer Hand. Schreib in zwei Sätzen, worum es geht; du bekommst eine ehrliche Einschätzung, ob das zusammenpasst.",
+      "cta": "Anfrage per E-Mail",
+      "mailSubject": "Pukalani Studio – Interesse",
+      "addressLabel": "Oder direkt schreiben an",
+      "note": "Kein Formular, kein Tracking: die Nachricht geht aus deinem Mail-Programm direkt ins Postfach."
+    },
     "footer": {
       "tagline": "Deine eigene Community-Plattform — schlank, DSGVO-nativ, in Deutschland gehostet.",
       "refrain": "„Wo die Sonne durchbricht.“",

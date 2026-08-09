@@ -14,7 +14,22 @@
 // Bauteile: `UTabs` (Intervall) + `UPricingPlans`/`UPricingPlan` (Karten).
 // Die Optik der Karte steht als `pricingPlan`-Vertrag in app/app.config.ts.
 const { t, n } = useI18n()
+const localePath = useLocalePath()
 const { signIn } = useProductLinks()
+
+/**
+ * Ziel der Studio-Karte (Davids Entscheidung 2026-08-09): die Kontakt-Sektion
+ * der Startseite, nicht mehr die Anmeldung. Studio ist kein Selbstbedienungs-
+ * Kauf — der Anmelde-Trichter hatte dafür kein Angebot, der Knopf lief also ins
+ * Leere.
+ *
+ * ALS { path, hash }, nicht als rohes href="#kontakt": diese Sektion steht auch
+ * unter /use-cases/* (siehe pages/use-cases/[slug].vue), und dort zeigte ein
+ * blanker Anker auf einen Abschnitt, den es auf der Seite nicht gibt. Dieselbe
+ * Rechnung wie bei den Anker-Zielen des Kopfes (MarketingHeader.vue) —
+ * `localePath`, damit der Sprach-Präfix (/de/…) nicht verloren geht.
+ */
+const contactTarget = computed(() => ({ path: localePath('/'), hash: '#kontakt' }))
 
 // Der Umschalter führt den Zustand als Wert, nicht als Schalter: `UTabs`
 // arbeitet mit dem Wert des gewählten Reiters (String|Number), und das Rechnen
@@ -114,7 +129,7 @@ const studio = computed(() => ({
   price: t('marketing.pricing.enterprisePrice'),
   billingPeriod: t('marketing.pricing.enterpriseNote'),
   button: {
-    to: signIn,
+    to: contactTarget.value,
     label: t('marketing.pricing.plans.enterprise.cta'),
     color: 'neutral' as const,
     variant: 'soft' as const,
