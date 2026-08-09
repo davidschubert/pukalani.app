@@ -28,6 +28,20 @@ bewusst kräftiger, die Hierarchie lebt. **Verworfen:** volles toned
 mitgenommen: die ~10 `text-primary-600`-Icons und das „−25 %" werden hell
 gedeckter. Details: OPEN-ITEMS-COMPLETE.md (F53-Nachtrag).
 
+## 2026-08-09 — Audit-Nachlese: drei Oberflächen-Entscheidungen
+
+**Davids Entscheidungen** (strukturierte Fragen nach dem Session-Audit):
+(1) Die **Basic-Karte fliegt aus dem Plan-Raster** des Dashboards — nur noch
+Personal und Pro sind wählbar; den Ohne-Abo-Zustand erklärt die „Aktueller
+Plan"-Karte (Davids noPlanLabel-Wortlaut bleibt). Gleiche Logik wie die
+öffentliche Preisseite. (2) Der **Studio-CTA der Landing führt auf einen
+eigenen Kontakt-Abschnitt** (`#kontakt`, Sektion am Seitenende) — v1 als
+Mail-CTA mit sichtbarer Adresse, BEWUSST ohne Formular: die Landing-Site hat
+kein SMTP (nachgemessen), ein Formular würde still verwerfen (F44-Falle);
+andockbar, sobald NUXT_SMTP_* dort liegt. (3) Die **englische Landing sagt
+durchgehend „products"** statt „blocks" (E11: EIN Wort; 18 Text-Werte,
+JSON-Schlüssel bleiben).
+
 ## 2026-08-08 — Stripe-Verwaltung wandert ins Control-Dashboard (F55)
 
 **Davids Entscheidung** (strukturierte Fragen, beim Go-Live-Anlauf): Der
