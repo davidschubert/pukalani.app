@@ -1,7 +1,7 @@
 # Doku-Karte
 
 Wo steht was — und was ist die **eine** Datei, in die offene Arbeit gehört.
-Stand: 2026-07-28.
+Stand: 2026-08-09.
 
 ## Die vier Sorten
 
@@ -37,7 +37,7 @@ gepflegt).
 | Datei | Thema |
 | --- | --- |
 | [referenz/HORIZONT-3-POOL-SILO-BLUEPRINT.md](referenz/HORIZONT-3-POOL-SILO-BLUEPRINT.md) | Pool vs. Silo — das Mandanten-Modell |
-| [referenz/MULTI-SITE-PLATFORM-STRATEGIE.md](referenz/MULTI-SITE-PLATFORM-STRATEGIE.md) | Feature-Manifeste, Layer/App-Komposition |
+| [referenz/MULTI-SITE-PLATFORM-STRATEGIE.md](referenz/MULTI-SITE-PLATFORM-STRATEGIE.md) | Produkt-Manifeste, Layer/App-Komposition |
 | [referenz/PRODUKT-BILANZ.md](referenz/PRODUKT-BILANZ.md) | „Ein Konzept pro Produkt" — welche App welches Produkt montiert, wer durch die Datentür geht (ERZEUGT: `node scripts/produkt-bilanz.mjs`) |
 | [referenz/G0-PRODUKTVERTRAG.md](referenz/G0-PRODUKTVERTRAG.md) | Produktvertrag: Rollen, Tarif, Umfang |
 | [referenz/RBAC-CONCEPT.md](referenz/RBAC-CONCEPT.md) | Operator-Labels + Capability-Matrix |
@@ -45,7 +45,9 @@ gepflegt).
 | [referenz/THEMES-CONCEPT-V2.md](referenz/THEMES-CONCEPT-V2.md) | Theme-System + bewusste Ablehnungen |
 | [referenz/AUTH-FORMS.md](referenz/AUTH-FORMS.md) | Warum Login/Register eigene UForms sind |
 | [referenz/EMBED.md](referenz/EMBED.md) | Embed-Widget: Gates, CSP, Cookie-Verhalten |
+| [referenz/EIGENE-DOMAIN.md](referenz/EIGENE-DOMAIN.md) | Kundendomains: Pool-Tenant vs. Silo-Alias, Zustandskette, kanonischer Host |
 | [referenz/CHANGELOG-WORKFLOW.md](referenz/CHANGELOG-WORKFLOW.md) | Release-Please + Kunden-Changelog |
+| [referenz/LIVE-BEWEISE.md](referenz/LIVE-BEWEISE.md) | Welche Beweis-Skripte es gibt und wogegen sie laufen |
 
 ## Runbooks — Schritt für Schritt im Betrieb
 
@@ -57,6 +59,7 @@ gepflegt).
 | [runbooks/CONTROL-CUTOVER.md](runbooks/CONTROL-CUTOVER.md) | Control-Host-Umzug (+ die drei Restkrümel) |
 | [runbooks/PLATFORM-CONTROL-KEY-SWAP.md](runbooks/PLATFORM-CONTROL-KEY-SWAP.md) | Appwrite-Key rotieren |
 | [runbooks/APPWRITE-KEYS.md](runbooks/APPWRITE-KEYS.md) | Wer hält welchen Schlüssel im Projekt `control` — und wie man das nachmisst |
+| [runbooks/CUSTOM-DOMAIN-ERSTAKTIVIERUNG.md](runbooks/CUSTOM-DOMAIN-ERSTAKTIVIERUNG.md) | Erste echte Kundendomain freischalten (Pool-Community **und** Silo-Site) |
 
 Die Häkchen in Runbooks sind **echt** — sie werden pro Durchlauf abgehakt und
 gehören dort hin.
@@ -65,15 +68,19 @@ gehören dort hin.
 
 | Datei | Zustand |
 | --- | --- |
-| [plans/DISCUSSIONS-KONZEPT.md](plans/DISCUSSIONS-KONZEPT.md) | fertig spezifiziert, wartet auf Bau-Go |
-| [plans/CHANGELOG-3.0.0-ENTWURF.md](plans/CHANGELOG-3.0.0-ENTWURF.md) | fertiger Kundentext, wartet aufs Einfügen |
+| [plans/DISCUSSIONS-KONZEPT.md](plans/DISCUSSIONS-KONZEPT.md) | Stufen 1–4 + Teil 5 gebaut; **offen aus Teil 4:** Reaktionen, Mitglieder-Einladungen, Like-Limit, Themen-Verlinkung (F57) |
+| [plans/PRIVATE-NACHRICHTEN-KONZEPT.md](plans/PRIVATE-NACHRICHTEN-KONZEPT.md) | Stufe 1 gebaut + live; offen: Einstieg am Autorennamen (F56), Stufen 2/3 |
+| [plans/DASHBOARD-IA.md](plans/DASHBOARD-IA.md) | Schritt 3 + Community-Hub gebaut; **12 der 14 Schritt-4-Seiten fehlen** |
+| [plans/ANALYTICS-V2.md](plans/ANALYTICS-V2.md) | Pakete 1–4 live; Rest = Optionales (F47) |
+| [plans/F7-PAYMENTS-CONNECT.md](plans/F7-PAYMENTS-CONNECT.md) | Entscheidungsvorlage, nichts gebaut (F7) |
+| [plans/CHANGELOG-3.0.0-ENTWURF.md](plans/CHANGELOG-3.0.0-ENTWURF.md) | fertiger Kundentext — **ob er eingefügt ist, muss David nachsehen** |
 
 **Regel:** Sobald ein Plan ausgeführt ist, wandert er nach `archiv/` und seine
 Reste nach `OPEN-ITEMS.md`. Ein Plan-Dokument ist nie eine To-do-Liste.
 
 ## Archiv — ausgeführt, nur noch Historie
 
-`archiv/` enthält 23 abgearbeitete Pläne (M1–M10, Phase 17, Themes-Vollausbau,
+`archiv/` enthält 30 abgearbeitete Pläne (M1–M10, Phase 17, Themes-Vollausbau,
 Embed-Widget, Landingpage, SaaS-Roadmap, …) und `archiv/audits/` die drei
 Audits (Gesamtaudit 05.07., Pool-Audit 27.07., Dashboard-Audit 28.07.).
 

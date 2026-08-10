@@ -1,10 +1,12 @@
 # Customer Feedback — zentrale Rückmeldung aus allen Communities
 
-> **Status: gebaut am 2026-07-31, NOCH NICHT migriert und nicht deployt.**
-> Migration `control-032` ist geschrieben, aber bewusst nicht gefahren. Die
-> Umsetzung samt der drei Auslegungs-Entscheidungen steht unten unter
-> „Umsetzung". Solange die Migration aussteht, bleibt diese Datei in
-> `docs/plans/`; danach zieht sie nach `docs/archiv/`.
+> **Status: AUSGEFÜHRT — gebaut am 2026-07-31 (E10), archiviert am 2026-08-09.**
+> Die Bedingung, die dieser Kopf selbst für den Umzug nannte, ist erfüllt:
+> Migration `control-032` ist lokal **und** auf prod gefahren (Beleg:
+> `docs/OPEN-ITEMS-COMPLETE.md`, Eintrag „E10 — Customer Feedback zentral"),
+> vier spätere `control`-Migrationen liegen darüber, und `apps/control`
+> extendet `packages/feedback` + `packages/tickets`.
+> Diese Datei ist ab hier **Begründung und Rezept, keine Arbeitsliste**.
 >
 > Davids Auftrag vom 2026-07-30.
 > **Bestand (vor dem Umbau):** `packages/feedback` (Tabelle `feedback` +

@@ -1,6 +1,18 @@
 # Vokabular aufräumen — ein Wort je Sache
 
-> **Status:** Bestandsaufnahme + Plan, teilweise noch nicht entschieden.
+> **Status: AUSGEFÜHRT (E11 + E11b, 2026-07-30/31), archiviert am 2026-08-09.**
+> Alle vier Umbenennungen sind am Code nachgemessen durch: `feature` →
+> `product` inklusive Zusammenziehen, `pukalani.studio.*` →
+> `pukalani.control.*`, `maui` → `pukalani` im Inhalt, und die `reddit`-Reste
+> sind eine Dauerentscheidung. Bewusst stehen geblieben: Repo-/Ordnername
+> `maui-monorepo`, Domain `maui.photos`, Stripe-Datenschlüssel, drei
+> `reddit`-Kommentare.
+>
+> **Zwei Abschnitte sind Protokoll und seit dem 2026-07-30 überholt** — nicht
+> mehr als Arbeitsauftrag lesen: „⚠️ control-024 war UNVOLLSTÄNDIG" (die
+> geforderte Migration existiert als `packages/system/scripts/migrations/023-app-config-products.ts`)
+> und „Zwischenstand Etappe B (noch nicht geschrieben)".
+>
 > Davids Auftrag vom 2026-07-30: „will, dass alles einen sauberen Stand
 > bekommt."
 > **Keine Doppelpflege:** Der Community-Teil (`tenants` → `communities`,

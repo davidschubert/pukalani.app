@@ -1,10 +1,24 @@
 # Dashboard-Informationsarchitektur
 
-**Status:** Menü-Umbau (Schritt 3) GEBAUT am 2026-07-31 (E9) — die neuen Seiten
-(Schritt 4) fehlen noch · **Entschieden:** 2026-07-29/30 (David)
+**Status (2026-08-09):** Menü-Umbau (Schritt 3) GEBAUT am 2026-07-31 (E9);
+**Community-Settings-Hub `/dashboard/community` GEBAUT am 2026-08-07/08
+(F50/F51)** · **Entschieden:** 2026-07-29/30 (David)
 
-> Liegt weiter in `docs/plans/`, weil Schritt 4 offen ist. Erledigte Teile
-> wandern nach `docs/OPEN-ITEMS.md` bzw. beim Abschluss nach `docs/archiv/`.
+> Liegt weiter in `docs/plans/`, weil Schritt 4 offen ist.
+>
+> **Was F50/F51 wirklich gebracht haben:** eine zweite Reiter-Hülle für die
+> Community-Ebene (Registry `pukalani.admin.communityTabs`) — sie sammelt die
+> BESTANDSseiten (Allgemein, Plan, Branding, Mitglieder, Nachrichten,
+> Aktivität, Analytics) unter einem Dach und bringt **Produkte** und
+> **Speicher** neu. Dazu der Community-Switcher (F50). Das ist die Umsetzung
+> der „halb da"-Einträge, **nicht** Schritt 4.
+>
+> **Von den 14 Schritt-4-Seiten ist genau EINE geliefert:** *Custom domain*
+> (control-035/036, 2026-08-07/08). *Single sign-on* bleibt dauerhaft
+> gestrichen. **Zwölf fehlen weiter** — darunter die beiden, die dieser Plan
+> als erste nennt: Navigation · SEO · Redirects · Defaults · Bulk logs ·
+> Taxes · Email settings · Tokens · Zwei-Faktor · Zeitzone · Bio/soziale
+> Links · öffentliches Profil.
 
 ## Das Prinzip: EINE Struktur, drei Ebenen
 

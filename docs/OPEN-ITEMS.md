@@ -1,8 +1,8 @@
 # Offene Punkte
 
-**Stand: 3 offen · 3 geparkt/wartend · 9 bewusst zurückgestellt** (Zahlen bei JEDEM Umzug nach COMPLETE mitführen)
+**Stand: 4 offen · 4 geparkt/wartend · 8 bewusst zurückgestellt** (Zahlen bei JEDEM Umzug nach COMPLETE mitführen)
 
-Stand: **2026-08-08**. Hier steht **nur, was noch offen ist** — in der
+Stand: **2026-08-09**. Hier steht **nur, was noch offen ist** — in der
 Reihenfolge, in der es abgearbeitet wird. Alles Erledigte (mit Begründung,
 Beweis und den gelernten Lektionen) steht final in
 **[OPEN-ITEMS-COMPLETE.md](OPEN-ITEMS-COMPLETE.md)**.
@@ -19,8 +19,9 @@ Legende — **Prio:** Hoch / Mittel / Niedrig ·
 | # | Was (einfach erklärt) | Prio | Aufwand | Braucht David? | Details |
 | --- | --- | --- | --- | --- | --- |
 | 1 · F54 | **Portfolio-Domain fertig freischalten.** Zertifikat und Origins stehen seit dem Erstlauf, der Status hängt auf `pending_platform` — die Fixes dafür sind gebaut. Nach dem Deploy von control **und** portfolio: `/dashboard/websites` → portfolio → Eigene Domain → **„Prüfen"** ⇒ muss `active` werden. | Hoch | S — ein Klick nach dem Deploy | Nein | [Runbook B4](runbooks/CUSTOM-DOMAIN-ERSTAKTIVIERUNG.md) |
-| 3 · A1 | **Echte Rechtstexte** für Impressum, Datenschutz und AGB. Die Seiten stehen, die Texte sind Entwürfe mit sichtbarem Hinweis. Schaltet Schritt 4 frei. Dazu seit 2026-08-08: die vier Entwürfe auf **pukalani.studio** (`/dashboard/pages`, Impressum + Datenschutz je de/en) füllen und veröffentlichen — der Footer-Link erscheint dann von selbst. | Hoch | S — Adresse eintragen, Anwalt lesen lassen | Ja: nur David (ggf. Anwalt) | [Notizen](#notizen) |
-| 4 · A2 | **Stripe auf echtes Geld umstellen — über die neue F55-Seite.** Vorstufe A2a komplett grün (2026-08-08). Bei David bleiben: Bank-Aktivierung, Steuer-Registrierung, Live-Key ROTIERT eintragen (der erste ist teil-geleakt und rotiert), Portal-Konfiguration; alles andere klickt die F55-Seite. Braucht 2 (F55) und 3 (A1). | Hoch | S — nach F55 | Ja: Bank, Konto, Portal | [STRIPE-GO-LIVE-RUNBOOK.md](runbooks/STRIPE-GO-LIVE-RUNBOOK.md) |
+| 2 · A1 | **Echte Rechtstexte** für Impressum, Datenschutz und AGB. Die Seiten stehen, die Texte sind Entwürfe mit sichtbarem Hinweis. Schaltet Punkt 3 frei. Dazu seit 2026-08-08: die vier Entwürfe auf **pukalani.studio** (`/dashboard/pages`, Impressum + Datenschutz je de/en) füllen und veröffentlichen — der Footer-Link erscheint dann von selbst. | Hoch | S — Adresse eintragen, Anwalt lesen lassen | Ja: nur David (ggf. Anwalt) | [Notizen](#notizen) |
+| 3 · A2 | **Stripe auf echtes Geld umstellen — über die F55-Seite.** Vorstufe A2a komplett grün, F55 selbst erledigt (beide 2026-08-08). Bei David bleiben: Bank-Aktivierung, Steuer-Registrierung, Live-Key ROTIERT eintragen (der erste ist teil-geleakt und rotiert), Portal-Konfiguration; alles andere klickt die F55-Seite. Braucht Punkt 2 (A1). | Hoch | S | Ja: Bank, Konto, Portal | [STRIPE-GO-LIVE-RUNBOOK.md](runbooks/STRIPE-GO-LIVE-RUNBOOK.md) |
+| 4 · F56 | **Private Nachrichten sind schwer zu finden.** Der Einstieg „Nachricht schreiben" neben dem Autorennamen ist im Konzept § 1 zugesagt; `MessageWriteButton.vue` ist gebaut, aber **nirgends verdrahtet**. Heute führt nur der Posteingang hin. | Mittel | S — Knopf im blueprint andocken | Nein | [PN-Konzept § 1](plans/PRIVATE-NACHRICHTEN-KONZEPT.md) |
 
 ## ⏸️ Geparkt / wartet — in Arbeitsreihenfolge
 
@@ -34,6 +35,7 @@ Nachmittag hält, plant an F1/F3/F7 vorbei.
 | --- | --- | --- | --- | --- | --- | --- |
 | F7 | 5 — Wochen | **Bezahlte Communities** — der Owner nimmt Geld von seinen Mitgliedern (Stripe Connect). Eigene Mechanik und eigene Rechtsfragen. **Schluckt D1** (Davids Entscheidung 2026-08-02): bezahlte Pool-Events/-Kurse ergeben erst mit Connect Sinn — sonst landete das Ticketgeld beim Betreiber und der Owner bräuchte je Preis einen lookup_key von David. Events-Hälfte technisch M (S7+A6 haben den alten Webhook-Wartegrund erledigt), Kurse-Hälfte L/XL (community-scoped Entitlements sind unentworfen). | Mittel | XL | Ja: Rechtsfragen | nach dem Go-Live; erst muss Geldfluss 1 (A6) ankommen |
 | F3 | 6 — Wochen | **Silo → Pool:** `comments` und `portfolio` laufen als eigene Instanzen. Langfristig ist der Pool das Produkt, Silo bleibt das Enterprise-Angebot. | Niedrig | XL | Ja: strategisch | eine strategische Entscheidung |
+| F57 | 5 — Tage | **Die drei sozialen Mechaniken aus dem Discussions-Konzept Teil 4** — Emoji-**Reaktionen**, **Einladungen durch Mitglieder**, **Tages-Limit für Likes** — plus **Themen-Verlinkung mit Rückverweis**. Alle vier stehen dort als „gebaut", existieren aber nirgends im Code; an ihnen hängen auch sechs noch fehlende Abzeichen. Beim F1-Abschluss stillschweigend untergegangen, deshalb hier neu geführt. | Mittel | L | Ja: Zuschnitt + Reihenfolge | [DISCUSSIONS-KONZEPT.md](plans/DISCUSSIONS-KONZEPT.md) Teil 4 |
 | F47 | 7 — Tage | **Analytics v2, Rest = nur noch Optionales** (Pakete 1–4 live seit 2026-08-04 — Schalter, Dashboard-Zahlen, Landing-Seite/Pricing, Hilfe + Datenschutz-Vorlage): Adblock-Proxy · vordefinierte Events/Goals · Plausible-Mail-Reports. Nichts davon drängt. | Niedrig | je S–M | Nein | [ANALYTICS-V2.md](plans/ANALYTICS-V2.md) |
 
 ---
@@ -95,40 +97,16 @@ Zero-Downtime Stufe 2, Changelog-2B, Alerting, GDPR, pages-Layer
 Self-Service-Onboarding komplett, **alle sechs Kundenprodukte durch die
 Datentür** (comments, posts, pages, moderation, events, courses).
 Release **v3.0.0** (2026-07-28).
+
+**Dazu seit der Woche 2026-08-04..09:** **eigene Kundendomains** (Pool ab Pro,
+Silo je Site) mit `www.pukalani.studio` als erstem echten Fall — Rest siehe
+Punkt 1 —, **private Nachrichten** (Layer `messages`, ab Personal, ab Werk
+ausgeschaltet), **Vertrauensstufen + 22 Abzeichen** in den Diskussionen,
+**Handles/Erwähnungen** und die **Stripe-Verwaltung im Control-Dashboard**
+(F55).
 **Als Betriebssystem für eigene Sites: ~98 %. Als verkaufbares SaaS: ~85 %.**
 
 ### Einzelheiten zu den offenen Punkten
-
-<a id="media-activity-prod"></a>
-
-**F38 — ERLEDIGT (2026-08-08).** Die Key-Rechte waren gesetzt und die
-media-Migration im Pool bereits gefahren (nachgemessen: `media_items` +
-Bucket existieren); die Nachmessung lief frisch — media 14/14, activity 8/8
-gegen die echte Pool-Instanz ([COMPLETE](OPEN-ITEMS-COMPLETE.md)). Die alte
-Anleitung darunter bleibt als Protokoll:
-
-1. **Rechte am Pool-Projekt setzen (David, Console) — VOR allem anderen.**
-   Migrations-Schlüssel: `buckets.read`, `buckets.write`, `files.read`,
-   `files.write`. Laufzeit-Schlüssel: `files.read`, `files.write`. Ohne den
-   ersten bricht `media-001` beim Anlegen des Buckets ab (401), ohne den
-   zweiten scheitert danach jeder Upload, jedes Löschen und jedes Umschalten
-   der Sichtbarkeit. Das ist der alte F36-Punkt — er war „heute folgenlos",
-   bis media in den Pool zog.
-2. **Migrieren:** `pnpm migrate --app platform`. Neu läuft dabei nur der
-   media-Zweig (`media-001` … `media-005`, in dieser Reihenfolge, idempotent) —
-   die Pool-Instanz hat den Layer nie gefahren, `media_items` und der Bucket
-   `media` entstehen also frisch. `activity` bringt **nichts** mit: die Table
-   `activities` gehört `system` und läuft auf jeder Instanz längst mit
-   (system-014/017/021/025/026, alle gefahren).
-3. **Dann erst deployen.** Kein Schema-Fenster in die andere Richtung: alter
-   Code kennt `media_items` nicht, die Tabelle liegt also bis zum Deploy
-   unbenutzt herum. Umgekehrt (Deploy vor Migration) antwortet
-   `/dashboard/media` mit einem Fehler und der erste Upload sagt „Media bucket
-   missing — run migrations".
-4. **Nachmessen:** `packages/media/scripts/verify-pool-isolation.mjs` und
-   `packages/activity/scripts/verify-pool-isolation.mjs` gegen die Pool-Env
-   (beide räumen selbst auf); der activity-Beweis nennt am Ende die Zahl der
-   Alt-Zeilen ohne `communityId` — die bleiben bewusst unsichtbar.
 
 **C19 — `/de` war für englischsprachige Browser eine Endlosschleife.**
 Code-Fix erledigt 2026-07-31, auf prod REPRODUZIERT und lokal behoben. Kein
@@ -191,53 +169,6 @@ der Landing. Prüfung vor dem Live-Gang: Runbook §2.4. Der Klammer-Hinweis „z
 noch auf den `studio`-Alias" ist seit 2026-07-30 gegenstandslos: der
 Test-Webhook zeigt auf `control`, der Alias ist entfernt.
 
-**C18 — Sichtbarkeit pro Community. GEBAUT am 2026-07-30**, ein Rest ist offen.
-
-Gebaut ist der ganze Umfang: der Schalter unter /dashboard/settings/community
-(`team.manage`, weil es eine Zugangsregel ist und keine Optik), der
-Bestands-Umzug der Row-Permissions in BEIDE Richtungen
-(`core/server/utils/audienceRepermission.ts` — seitenweise, idempotent,
-protokolliert; die Layer melden ihre Tabellen per Nitro-Plugin an), `noindex`
-im zentralen Kopf-Aufruf, `Disallow: /` in der robots.txt, 404 auf
-sitemap.xml und `/og/<key>.png`, und eine eigene Wache für die
-permission-losen `pages`-Zeilen. Neue Communities entstehen ÖFFENTLICH — die
-bewusste Kehrtwende zur G0-Entscheidung 7, protokolliert im DECISION-LOG.
-Beweis: `packages/control/scripts/verify-audience-flip.mjs` (Gast ohne Key
-gegen die echte Instanz, 19/19).
-
-**OFFEN — und das ist ein Betriebs-, kein Bau-Punkt:** bis C18 hat die Spalte
-NICHTS gesteuert. Jede Community von vor diesem Deploy trägt `audience = null`,
-und `resolveTenantAudience` liest das fail-closed als „nur für Mitglieder".
-Ihre Zeilen bleiben zwar lesbar (niemand fasst fremde Permissions ungefragt
-an), aber robots, sitemap, Vorschaubild und die öffentliche Startseite gehen
-zu — eine Community, die halb geschlossen ist, ohne dass jemand es entschieden
-hat. Wer öffentlich bleiben soll, braucht einmal
-`packages/control/scripts/stamp-audience.mjs --host <host> --audience public`
-(ohne `--yes` ein Trockenlauf). `demo.pukalani.app` ist der klare Fall.
-Bewusst KEIN Sammel-Backfill: „alle auf öffentlich" wäre genau die
-stillschweigende Entscheidung über fremde Communities, die die
-fail-closed-Regel verhindern soll. **ENTSCHIEDEN (2026-08-07, 4. Runde): NUR
-demo.pukalani.app wird gestempelt**, alle übrigen bleiben unangetastet.
-**Nachgemessen am selben Tag (Trockenlauf gegen prod): demo steht BEREITS auf
-`public` — nichts zu tun, der C18-Rest ist damit erledigt.**
-
-**Kleine bekannte Kante:** ein GAST-Kommentar in einer geschlossenen Community
-bekommt `read(label:…)` und ist damit für seinen eigenen Verfasser unsichtbar.
-Das ist die ehrliche Folge (Gast-Kommentare und „nur für Mitglieder"
-widersprechen sich) — wer es sauber will, schaltet
-`pukalani.comments.embed.guests` ab. Ebenfalls unangetastet: `courses` tragen
-`read("users")` statt `read("any")` und waren nie öffentlich; sie ziehen
-deshalb nicht mit.
-
-**B1 — Visual-Baselines.** Das Neubacken
-(`pnpm --filter comments e2e -- --update-snapshots=all themes-visual`) ist am
-2026-08-01 erledigt — offen ist nur noch das Sichten der neun Bilder. Der
-Header-Umbau (S9) hatte sie erwartungsgemäß gebrochen. Die Theme-Entscheidungen
-vom 2026-07-29 (B3/B5) kommen NICHT dazu: `themes-visual` läuft gegen
-`apps/comments` (Silo, `pukalani.tenancy` aus ⇒ das Theme-Cookie der Specs
-gewinnt dort weiter), und das Label „Aloha" steht nur im geschlossenen
-Picker/Dropdown, nicht auf der `/visual`-Seite.
-
 **C5 — Seitentitel.** Der ursprünglich gemeldete Teil war schon erledigt
 (nachgemessen 2026-07-30): `register/index.vue`, `forgot-password.vue` und
 `reset-password.vue` rufen alle drei `useBrandTitle(...)`. **Daneben liegt eine
@@ -268,11 +199,6 @@ Ausführen, und die Reihenfolge ist Pflicht:** erst den Code deployen, dann
 migrieren — andersherum liest der Fallback gegen eine gelöschte Spalte.
 Herkunft: Pool-Audit N2.
 
-**B7/F53 — ERLEDIGT (2026-08-08):** Dark Mode war seit dem 2026-08-01
-bereits gebaut (B7, `c84c681e` — diese Notiz war veraltet); F53 hat die vier
-fehlenden Stücke nachgezogen (Storage-Altlast, theme-color, Studio-Karte,
-Hero-Thumbs). Details: [OPEN-ITEMS-COMPLETE.md](OPEN-ITEMS-COMPLETE.md).
-
 **M13 — Reste des Self-Service-Onboardings:** Trial-Banner +
 Ablauf-Erinnerung · Kundenbereich-Umzug `/workspace` → `my.*` ·
 Abuse-/Suspend-Pfad · 301 von den Altnamen (bewusst später: Deploy-Verify und
@@ -298,33 +224,6 @@ E3 und E4 wurden dabei bewusst NICHT gewählt und bleiben liegen).** Die anderen
 „Doppel-Zertifikat" ist bewusst KEIN Aufräum-Punkt — Einzelheiten in
 [OPEN-ITEMS-COMPLETE.md](OPEN-ITEMS-COMPLETE.md).
 
-**B1 — ERLEDIGT (2026-08-08): David hat die Vorher/Nachher-Bildpaare
-gesichtet und freigegeben** (die Bilder waren zu dem Zeitpunkt bereits
-committet und von Folge-Sessions erneuert — Nav-Eintrag „Diskussionen" +
-Impressum-Link). Zum Bestand: die
-neun Referenzbilder wurden am 2026-08-01 im Zuge von E7 neu aufgenommen
-(gebündeltes Chromium) und am selben Tag ein zweites Mal — die Bilder sind
-damit FINAL, es steht nur noch das Sichten aus. Der Vergleich
-`git show HEAD:<pfad>` gegen die Arbeitskopie zeigt drei GEWOLLTE Änderungen:
-den neuen Kopfbereich (Navigation links, ohne Symbole), dadurch 16 px weniger
-Höhe — und den behobenen ECHTEN Fund: `app/pages/visual.vue` fragte
-`home.products.<key>.text` und `home.ctaDemo`/`home.ctaDashboard` ab, die
-Sprachdatei kennt aber `.desc` bzw. `tryDemo`/`toDashboard`. Auf der
-/visual-Seite standen deshalb rohe Schlüssel im Bild (vorher genauso, damals
-als `home.features.*.text`): deterministisch, also grün — aber falsch. Die
-Seite fragt jetzt die vorhandenen Schlüssel (keine neuen erfunden, dieselben,
-die `index.vue` benutzt), die Karten tragen echten Text und die beiden Knöpfe
-heißen „Try the demo"/„Go to dashboard". Der Rest des Bildes ist unverändert.
-
-**Nachtrag 2026-08-01 (drittes und letztes Backen — die Bilder sind JETZT
-final):** in allen neun Baselines stand mitten im Bild das
-**Nuxt-DevTools-Abzeichen** mit einer bei jedem Laden anderen ms-Zahl. Es fiel
-nie auf, weil `maxDiffPixelRatio: 0.02` es verschluckte. Die DevTools sind für
-den E2E-Kontext abgeschaltet (`PW_E2E`, s. COMPLETE-Eintrag), die Bilder ohne
-Abzeichen neu gebacken und die Toleranz auf `0.0001` gesenkt — Läufe sind jetzt
-pixelgleich. Beim Sichten also ein Unterschied mehr, und zwar der einzige:
-das schwebende Abzeichen ist weg, sonst ändert sich nichts.
-
 ### Bewusst zurückgestellt (kein Aufgabenpunkt)
 
 - **Flag-Registry statt `commentsEnabled`** — mittlerer Refactor der
@@ -339,5 +238,10 @@ das schwebende Abzeichen ist weg, sonst ändert sich nichts.
   generiert.
 - **Glocke auf `my.pukalani.app`** — dort gibt es heute nichts zu zeigen;
   kommt Pool-Billing (D1), braucht das Onboarding-Layout eine.
+- **Gast-Kommentar in einer geschlossenen Community** bekommt `read(label:…)`
+  und ist damit für seinen eigenen Verfasser unsichtbar — die ehrliche Folge
+  daraus, dass Gast-Kommentare und „nur für Mitglieder" einander
+  widersprechen. Wer es sauber will, schaltet `pukalani.comments.embed.guests`
+  ab. (Aus dem C18-Abschluss übernommen.)
 - **Inline-Embed ohne iframe** (eigener Sanitizer + CORS-Allowlist) und eine
   dedizierte `apps/embed-comments` — bewusst später, supervised.

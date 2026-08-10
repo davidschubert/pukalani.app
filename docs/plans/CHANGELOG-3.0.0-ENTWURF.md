@@ -1,5 +1,16 @@
 # Kunden-Changelog v3.0.0 — Entwurf zum Einfügen
 
+> **OFFENE FRAGE (Stand 2026-08-09) — braucht einen Blick von David.**
+> Ob dieser Text inzwischen eingefügt wurde, ist **aus dem Repo nicht
+> feststellbar**: die `changelog`-Tabelle liegt nur auf der comments-Instanz,
+> und deren Runtime-Key ist nicht im Repo. Es gibt hier weder einen Beleg
+> dafür noch dagegen.
+>
+> **Einmal im Dashboard nachsehen** (Changelog → Einträge): steht er drin,
+> zieht diese Datei nach `docs/archiv/`. Steht er nicht drin, gehört ein
+> Ein-Zeiler nach `docs/OPEN-ITEMS.md` — sonst verliert sich der Punkt
+> zwischen den Sorten.
+
 **Warum als Datei und nicht direkt in prod:** Die `changelog`-Table existiert
 weder im Projekt `control` noch im Pool (beide geprüft: `table_not_found`) —
 sie lebt auf der `comments`-Instanz. Deren Runtime-Key liegt nur auf dem

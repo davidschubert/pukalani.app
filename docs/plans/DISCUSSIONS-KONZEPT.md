@@ -5,8 +5,27 @@
 Grenze zu `posts` wirklich verläuft, und welche drei Entscheidungen vor dem
 ersten Commit fallen müssen.
 
-Status: **entscheidungskomplett (3.8); Stufen 1–4 gebaut** — der Baustand steht
-in Teil 5 ganz unten.
+Status (2026-08-09): **entscheidungskomplett (3.8); Stufen 1–4 gebaut, und
+alle acht Punkte aus Teil 5 sind durch** — Jahrestag, Regeln-Vorlage,
+Hilfe-Umbenennung, `posts.editedAt`, Mehrfach-Abzeichen + Benachrichtigung,
+Vertrauensstufen und Private Nachrichten (eigener Layer `packages/messages`).
+
+**Die Datei bleibt trotzdem in `docs/plans/`**, weil **Teil 4** vier Dinge
+zusagt, die es im Code nirgends gibt:
+
+- **Themen-Verlinkung mit Rückverweis** (das Erwähnungs-Menü sucht Personen,
+  nicht Themen),
+- **Einladungen durch Mitglieder**,
+- **Tages-Limit für Likes**,
+- **Emoji-Reaktionen**
+
+— samt der Abzeichen, die daran hängen (`first-reaction`, `promoter`,
+`out-of-love` …). Geführt werden sie als **offener Punkt F57** in
+[OPEN-ITEMS.md](../OPEN-ITEMS.md); dort und nur dort wird darüber entschieden.
+**Zitat und Emoji im Editor sind seit F48 (2026-08-04) gebaut** — die
+Aufzählung in Teil 4, die sie als fehlend führt, ist insoweit überholt.
+
+Der Baustand steht in Teil 5 ganz unten.
 
 ---
 

@@ -1,6 +1,22 @@
 # Private Nachrichten — Produkt-Konzept
 
-Entwurf vom 2026-08-04. **Noch nicht gebaut, noch nicht entschieden.**
+Entwurf vom 2026-08-04. **Stand 2026-08-09: entschieden (alle sieben
+Entscheidungen aus § 8) und in Stufe 1 GEBAUT** — Layer `packages/messages`,
+live seit dem 2026-08-05, Migration `messages-001` auf allen vier Instanzen,
+Produkt-Gate `messages: 'personal'`, Owner-Schalter ab Werk AUS.
+
+**Die Datei bleibt in `docs/plans/`**, weil Folgendes offen ist:
+
+- **Aus Stufe 1 selbst:** der in § 1 zugesagte Einstieg „Nachricht schreiben"
+  neben dem Autorennamen. `MessageWriteButton.vue` ist gebaut, aber nirgends
+  verdrahtet — heute führt nur der Posteingang hin. Geführt als **F56** in
+  [OPEN-ITEMS.md](../OPEN-ITEMS.md).
+- **Stufe 2** (§ 7): Suche im Posteingang und Digest-Anbindung fehlen; „tippt
+  gerade" und „Konversation für sich entfernen" sind gebaut.
+- **Stufe 3** (§ 7): Gruppen-Nachrichten — vollständig ungebaut.
+
+Stufe 2 und 3 sind bewusst **keine** offenen Punkte: sie werden erst bei
+Bedarf welche (Beschluss im COMPLETE-Eintrag zu F1).
 
 Herkunft: Davids Rahmensetzung in `DISCUSSIONS-KONZEPT.md` Teil 4, wörtlich —
 „eigenes Produkt mit eigener Missbrauchsfläche (Belästigung, Spam) und eigener

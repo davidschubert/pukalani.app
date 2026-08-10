@@ -275,7 +275,7 @@ begrenzt werden nur **Verwaltungs-Sitze** (Rollen ab Moderator).
 | Import / Export | – | ✓ | ✓ | #6 |
 | Analytics / Insights | Basis | ✓ | ✓ | #5 |
 | **Webhooks / API** | – | – | ✓ | #7 |
-| **Eigene Domain** | – | – | ✓ (Silo) | #9 |
+| **Eigene Domain** | – | – | ✓ | gebaut 2026-08-07/08 — Pool ab **Pro** (`customDomain: 'pro'`) **und** je Silo-Site; s. [EIGENE-DOMAIN.md](EIGENE-DOMAIN.md) |
 | Community-Mitglieder (Viewer) | ∞ | ∞ | ∞ | — |
 | **Verwaltungs-Sitze** (Mod/Editor/Admin) | 0 (nur Owner) | klein (z. B. 3) | ∞ (inkl. mehrere Admins) | #2 |
 | Usage-Limits (Quota) | niedrig | mittel | hoch | Studio-Katalog (existiert) |
@@ -297,7 +297,7 @@ Jeder öffentliche Claim → sein Gate. Vor Veröffentlichung abhaken.
 | C2 | „Feed, Kurse, Events" | Baustein-Gate (§B) grün je Layer | ⛔ Layer da, nicht im Angebot |
 | C3 | „In 60 Sekunden startklar" | 10 unbeaufsichtigte Onboardings, Median ≤ 60 s | ⛔ Ziel |
 | C4 | „Free/Pro/Business + Self-Service-Upgrade" | Signup + Checkout/Portal + Planwechsel live getestet | 🟡 teilweise |
-| C5 | „Eigene Domain" | DNS-Verifikation + TLS + Rollback + Dogfood bewiesen | ⛔ geplant (Silo) |
+| C5 | „Eigene Domain" | DNS-Verifikation + TLS + Rollback + Dogfood bewiesen | 🟡 gebaut (Pool ab Pro + Silo), DNS/TLS/Rollback belegt — **Dogfood** `www.pukalani.studio` hängt noch auf dem letzten Klick (OPEN-ITEMS #1) |
 | C6 | „Import/Export, Analytics, Usage" | jeweiliges Roadmap-DoD | ⛔ geplant |
 | C7 | „kein Cookie-Banner nötig" | konkrete Seite + aktive Dienste rechtlich/technisch geprüft | ⛔ nicht pauschal |
 | C8 | „Backup/Restore-Versprechen" | dokumentierter Restore-Test + RPO/RTO veröffentlicht | ⛔ nicht freigegeben |
