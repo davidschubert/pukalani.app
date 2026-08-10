@@ -130,6 +130,13 @@ Dark-Verschiebung nahm die Flächen absichtlich mit, die Hell-Verschiebung
 hätte dieselbe Mechanik zum Fehler gemacht; seither nennen Flächen ihre
 Ramp-Stufe direkt und nur Schrift läuft über die verschobenen Aliase.
 
+### F54 — Silo-Domain scharf: pukalani.studio ist die kanonische Adresse ✅ 2026-08-10
+
+- **Freischaltung abgeschlossen** (Klick „Prüfen" im Control-Dashboard → `active`). Live nachgemessen statt der Anzeige geglaubt: `pukalani.studio` antwortet 200, `portfolio.pukalani.app` leitet **301** dorthin, und `canonical` zeigt auf **beiden** Hosts auf `https://pukalani.studio/…` — der `originFromRequest`-Schalter der App tut also genau das, wofür er eingebaut wurde (Audit-Befund B1 in Silo-Gestalt). Zertifikat: EINE Lineage mit drei SANs (`portfolio.pukalani.app`, `pukalani.studio`, `www.pukalani.studio`), 87 Tage Restlaufzeit.
+- **Dabei gefunden und geschlossen — der Wächter kannte die Kundendomain nicht.** `scripts/ops/verify-tls.mjs` überwachte nur Hosts der Zone `pukalani.app`; `pukalani.studio` liegt außerhalb und ist von der Wildcard **nicht** gedeckt. Eine gescheiterte Erneuerung hätte die Kundendomain getötet, ohne dass ein einziger Eintrag rot geworden wäre — die Lücke war exakt so groß wie der Nutzen der eigenen Domain. Jetzt 13 statt 11 Hosts (`pukalani.studio` + `www`), Lauf grün.
+
+**Gelernt:** Eine eigene Domain ist nicht nur ein DNS- und ein Zertifikats-Vorgang, sondern auch ein ÜBERWACHUNGS-Vorgang. Die Wildcard-Bequemlichkeit der eigenen Zone endet an der Zonengrenze: jeder Kundendomain-Host muss beim Freischalten in den TLS-Wächter — sonst wächst mit jedem Kunden ein blinder Fleck, der genau dann auffällt, wenn seine Seite schon tot ist.
+
 ### P13 — Portfolio-Relaunch: pukalani.studio trägt wieder die volle Freelancer-Site ✅ 2026-08-09
 
 - **Inhalte des alten Repos `nuxt4-portfolio` vollständig ins Monorepo portiert** (`apps/portfolio`): Homepage mit 11 Sektionen (Leistungen & Preise, Prozess, Referenzen, FAQ …), `/ux-audit`, `/nuxt-entwickler-freelancer`, zwei `/wissen`-Guides — Texte, JSON-LD-Graph und SEO-Struktur 1:1, visuell ins bestehende Syne/Glibbergreen-Design eingepasst. Zweisprachig nach Monorepo-Konvention (EN auf `/`, DE unter `/de`, alte `/en/**`-Adressen 301); die vorher DE-only-Unterseiten bekamen neu übersetzte EN-Fassungen. Content als typisierte Datenmodule (cases.ts-Muster); `robots.txt`/`llms.txt`/Sitemap waren vorher live 404. Inhalts-Stichprobe gegen die Quelle: null Abweichungen bei allen Preisen/Kennzahlen.

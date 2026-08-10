@@ -36,6 +36,16 @@ const HOSTS = [
   { host: 'control.pukalani.app', ip: '49.13.211.173', note: 'Control Plane' },
   { host: 'comments.pukalani.app', ip: '49.13.211.173', note: 'Silo-Kunde' },
   { host: 'portfolio.pukalani.app', ip: '49.13.211.173', note: 'Silo-Kunde' },
+  // EIGENE DOMAIN (F54, seit 2026-08-08) — und der Grund, warum sie hier
+  // stehen MUSS: `pukalani.studio` liegt außerhalb der Zone `pukalani.app`,
+  // die Wildcard deckt sie also NICHT. Ihr Zertifikat ist die Lineage von
+  // `portfolio.pukalani.app` (ein Zertifikat, drei SANs: portfolio +
+  // pukalani.studio + www) — geht deren Erneuerung schief, fällt die
+  // KUNDENDOMAIN aus, und kein anderer Eintrag dieser Liste würde es
+  // bemerken. `www` steht mit drin, weil es im selben Zertifikat hängt und
+  // eine stille Lücke dort genauso teuer wäre.
+  { host: 'pukalani.studio', ip: '49.13.211.173', note: 'Eigene Domain der Portfolio-Site (eigene Lineage, NICHT von der Wildcard gedeckt)' },
+  { host: 'www.pukalani.studio', ip: '49.13.211.173', note: 'Eigene Domain, www-Variante (im selben Zertifikat)' },
   { host: 'platform.pukalani.app', ip: '49.13.211.173', note: 'Pool-App' },
   { host: 'demo.pukalani.app', ip: '49.13.211.173', note: 'Pool-Tenant (Stellvertreter für ALLE Kunden)' },
   { host: 'my.pukalani.app', ip: '49.13.211.173', note: 'Kundenbereich' },

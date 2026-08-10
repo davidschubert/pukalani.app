@@ -1,8 +1,8 @@
 # Offene Punkte
 
-**Stand: 4 offen · 4 geparkt/wartend · 8 bewusst zurückgestellt** (Zahlen bei JEDEM Umzug nach COMPLETE mitführen)
+**Stand: 3 offen · 4 geparkt/wartend · 8 bewusst zurückgestellt** (Zahlen bei JEDEM Umzug nach COMPLETE mitführen)
 
-Stand: **2026-08-09**. Hier steht **nur, was noch offen ist** — in der
+Stand: **2026-08-10**. Hier steht **nur, was noch offen ist** — in der
 Reihenfolge, in der es abgearbeitet wird. Alles Erledigte (mit Begründung,
 Beweis und den gelernten Lektionen) steht final in
 **[OPEN-ITEMS-COMPLETE.md](OPEN-ITEMS-COMPLETE.md)**.
@@ -18,7 +18,6 @@ Legende — **Prio:** Hoch / Mittel / Niedrig ·
 
 | # | Was (einfach erklärt) | Prio | Aufwand | Braucht David? | Details |
 | --- | --- | --- | --- | --- | --- |
-| 1 · F54 | **Portfolio-Domain fertig freischalten.** Zertifikat und Origins stehen seit dem Erstlauf, der Status hängt auf `pending_platform` — die Fixes dafür sind gebaut. Nach dem Deploy von control **und** portfolio: `/dashboard/websites` → portfolio → Eigene Domain → **„Prüfen"** ⇒ muss `active` werden. | Hoch | S — ein Klick nach dem Deploy | Nein | [Runbook B4](runbooks/CUSTOM-DOMAIN-ERSTAKTIVIERUNG.md) |
 | 2 · A1 | **Echte Rechtstexte** für Impressum, Datenschutz und AGB. Die Seiten stehen, die Texte sind Entwürfe mit sichtbarem Hinweis. Schaltet Punkt 3 frei. Dazu seit 2026-08-08: die vier Entwürfe auf **pukalani.studio** (`/dashboard/pages`, Impressum + Datenschutz je de/en) füllen und veröffentlichen — der Footer-Link erscheint dann von selbst. | Hoch | S — Adresse eintragen, Anwalt lesen lassen | Ja: nur David (ggf. Anwalt) | [Notizen](#notizen) |
 | 3 · A2 | **Stripe auf echtes Geld umstellen — über die F55-Seite.** Vorstufe A2a komplett grün, F55 selbst erledigt (beide 2026-08-08). Bei David bleiben: Bank-Aktivierung, Steuer-Registrierung, Live-Key ROTIERT eintragen (der erste ist teil-geleakt und rotiert), Portal-Konfiguration; alles andere klickt die F55-Seite. Braucht Punkt 2 (A1). | Hoch | S | Ja: Bank, Konto, Portal | [STRIPE-GO-LIVE-RUNBOOK.md](runbooks/STRIPE-GO-LIVE-RUNBOOK.md) |
 | 4 · F56 | **Private Nachrichten sind schwer zu finden.** Der Einstieg „Nachricht schreiben" neben dem Autorennamen ist im Konzept § 1 zugesagt; `MessageWriteButton.vue` ist gebaut, aber **nirgends verdrahtet**. Heute führt nur der Posteingang hin. | Mittel | S — Knopf im blueprint andocken | Nein | [PN-Konzept § 1](plans/PRIVATE-NACHRICHTEN-KONZEPT.md) |
