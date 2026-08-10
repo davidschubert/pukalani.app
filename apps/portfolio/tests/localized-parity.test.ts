@@ -3,6 +3,7 @@ import * as contact from '../app/data/contact'
 import * as home from '../app/data/home'
 import * as localized from '../app/data/localized'
 import * as nuxtFreelancer from '../app/data/nuxtFreelancer'
+import * as services from '../app/data/services'
 import * as uxAudit from '../app/data/uxAudit'
 import * as wissenFreelancerAgentur from '../app/data/wissenFreelancerAgentur'
 import * as wissenKosten from '../app/data/wissenKosten'
@@ -36,6 +37,7 @@ import * as wissenKosten from '../app/data/wissenKosten'
 const MODULES: Record<string, Record<string, unknown>> = {
   'localized.ts': localized,
   'contact.ts': contact,
+  'services.ts': services,
   'home.ts': home,
   'uxAudit.ts': uxAudit,
   'nuxtFreelancer.ts': nuxtFreelancer,

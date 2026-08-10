@@ -1,4 +1,5 @@
 import type { Localized, LocalizedFaq } from './localized'
+import { SERVICE_CORES, type ServiceCore, type ServiceId } from './services'
 
 /**
  * Inhalte der Startseite — Single Source of Truth für Markup UND Structured
@@ -21,10 +22,12 @@ export interface Audience {
   description: Localized
 }
 
-export interface HomeService {
-  /** Anker-Id — wird in Fußzeile und JSON-LD verlinkt, nie umbenennen. */
-  id: string
-  title: Localized
+/**
+ * Was die STARTSEITE über eine Leistung zusätzlich erzählt. Id, Titel und
+ * Detailseite stehen in `services.ts` — dort, weil auch die Fußzeile sie
+ * braucht (Begründung im Kopf jener Datei).
+ */
+export interface ServiceDetail {
   description: Localized
   deliverables: Localized<string[]>
   result: Localized
@@ -34,9 +37,10 @@ export interface HomeService {
   schemaDescription: Localized
   minPrice?: number
   maxPrice?: number
-  /** Eigene Detailseite statt Sprung zum Kontaktformular. */
-  link?: string
 }
+
+/** Die vollständige Leistung, wie Karten und OfferCatalog sie sehen. */
+export type HomeService = ServiceCore & ServiceDetail
 
 export interface ProcessStep {
   title: Localized
@@ -261,13 +265,14 @@ export const AUDIENCES: Audience[] = [
   },
 ]
 
-export const SERVICES: HomeService[] = [
-  {
-    id: 'brand-design',
-    title: {
-      de: 'Designkonzept & Digital Brand Design',
-      en: 'Design concept & digital brand design',
-    },
+/**
+ * Die Ergänzungen je Leistung, aufgeschlüsselt nach der Anker-Id aus
+ * `services.ts`. `Record<ServiceId, …>` ist hier die Sicherung: eine neue
+ * Leistung dort ohne Eintrag hier bricht den Typecheck, statt eine Karte ohne
+ * Beschreibung und ein Angebot ohne Schema-Text zu erzeugen.
+ */
+const SERVICE_DETAILS: Record<ServiceId, ServiceDetail> = {
+  'brand-design': {
     description: {
       de: 'Der Auftritt, an dem man Sie erkennt: Logos, visuelle Identitäten, Designkonzepte und Strategien – digital und print, aus einem Guss.',
       en: 'The presence people recognise you by: logos, visual identities, design concepts and strategies — digital and print, all of a piece.',
@@ -297,12 +302,7 @@ export const SERVICES: HomeService[] = [
       en: 'Design concepts, logos, visual identities and art direction for digital and printed brand presences.',
     },
   },
-  {
-    id: 'ux-audit',
-    title: {
-      de: 'UX-Audit & Conversion-Analyse',
-      en: 'UX audit & conversion analysis',
-    },
+  'ux-audit': {
     description: {
       de: 'Der schnellste Einstieg: Ich analysiere Ihre Website oder App strukturiert und liefere eine priorisierte Maßnahmenliste mit Quick Wins.',
       en: 'The fastest way in: I analyse your website or app in a structured way and deliver a prioritised action list with quick wins.',
@@ -333,14 +333,8 @@ export const SERVICES: HomeService[] = [
     },
     minPrice: 2500,
     maxPrice: 5000,
-    link: '/ux-audit',
   },
-  {
-    id: 'landingpage-cro',
-    title: {
-      de: 'Landingpage & CRO',
-      en: 'Landing page & CRO',
-    },
+  'landingpage-cro': {
     description: {
       de: 'Landingpages mit Conversion-Fokus: Nutzerpsychologie, Social Proof und technische Performance – gestaltet und auf Wunsch direkt entwickelt.',
       en: 'Landing pages built for conversion: user psychology, social proof and technical performance — designed and, on request, built right away.',
@@ -372,12 +366,7 @@ export const SERVICES: HomeService[] = [
     minPrice: 5000,
     maxPrice: 12000,
   },
-  {
-    id: 'corporate-website',
-    title: {
-      de: 'Website-Design & technische Umsetzung',
-      en: 'Website design & technical implementation',
-    },
+  'corporate-website': {
     description: {
       de: 'Ihr Unternehmensauftritt aus einer Hand: Inhalte strukturieren, Design entwickeln, barrierefrei und schnell umsetzen – fertig zum Launch.',
       en: 'Your corporate presence from a single source: structure the content, develop the design, build it accessibly and fast — ready to launch.',
@@ -409,12 +398,7 @@ export const SERVICES: HomeService[] = [
     minPrice: 15000,
     maxPrice: 35000,
   },
-  {
-    id: 'saas-design',
-    title: {
-      de: 'Produkt- & App-Design (Software, Dashboards)',
-      en: 'Product & app design (software, dashboards)',
-    },
+  'saas-design': {
     description: {
       de: 'Komplexe Software verständlich machen: Nutzer-Recherche, klare Strukturen, Oberflächen-Design und skalierbare Design-Systeme.',
       en: 'Making complex software understandable: user research, clear structures, interface design and scalable design systems.',
@@ -446,12 +430,7 @@ export const SERVICES: HomeService[] = [
     minPrice: 25000,
     maxPrice: 75000,
   },
-  {
-    id: 'content-produktion',
-    title: {
-      de: 'Content-Produktion: Foto, Video & Werbemittel',
-      en: 'Content production: photo, video & ad assets',
-    },
+  'content-produktion': {
     description: {
       de: 'Inhalte, die zum Design passen: digitale Werbemittel, Fotografie und Videografie inklusive Schnitt – als ausgebildeter Mediengestalter aus einer Hand.',
       en: 'Content that fits the design: digital ad assets, photography and video including editing — from a single source, by a trained media designer.',
@@ -481,7 +460,17 @@ export const SERVICES: HomeService[] = [
       en: 'Content production for brands: digital ad assets, social media assets, photography and video production including editing.',
     },
   },
-]
+}
+
+/**
+ * Die sechs Leistungen, vollständig — Reihenfolge und Titel kommen aus
+ * `SERVICE_CORES`, alles Weitere aus `SERVICE_DETAILS`. Speist die Karten der
+ * Startseite UND den OfferCatalog im JSON-LD.
+ */
+export const SERVICES: HomeService[] = SERVICE_CORES.map(core => ({
+  ...core,
+  ...SERVICE_DETAILS[core.id],
+}))
 
 export const PROCESS_STEPS: ProcessStep[] = [
   {

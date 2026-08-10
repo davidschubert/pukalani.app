@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { isLegalPageSlug, type PublicPageNavItem } from '../../../../packages/pages/shared/types/page'
 import { CONTACT } from '../data/contact'
-import { SERVICES } from '../data/home'
+import { SERVICE_CORES } from '../data/services'
 
 const { t, locale } = useI18n()
 const localePath = useLocalePath()
@@ -77,11 +77,18 @@ const otherLocaleLabel = computed(() =>
  * design". Ein Fuß, der eine Leistung anders nennt als die Seite, auf die er
  * zeigt, ist ein Widerspruch im selben Dokument.
  *
+ * GEZOGEN WIRD NUR `services.ts`, NIE `home.ts`: dieser Fuß hängt im
+ * `site`-Layout, sein Import landet also im JS JEDER Seite. Über `home.ts`
+ * kamen dort die kompletten Startseiten-Inhalte mit (FAQ, Case Studies,
+ * Timeline — 15 KiB gzip für sechs Wörter). `services.ts` trägt genau Id,
+ * Titel und Detailseite; die eine Quelle je Fakt bleibt dadurch unberührt,
+ * denn `home.ts` reichert DIESELBE Liste nur an.
+ *
  * `link` (eigene Detailseite) schlägt den Anker auf der Startseite; die
- * Anker-Ids sind laut `home.ts` fest und werden nie umbenannt.
+ * Anker-Ids sind laut `services.ts` fest und werden nie umbenannt.
  */
 const serviceLinks = computed(() => [
-  ...SERVICES.map(service => ({
+  ...SERVICE_CORES.map(service => ({
     to: service.link ?? `/#${service.id}`,
     label: service.title[lang.value],
   })),
