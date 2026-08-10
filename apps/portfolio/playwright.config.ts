@@ -18,6 +18,14 @@ const baseURL = process.env.PW_BASE_URL ?? 'http://localhost:3005'
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: true,
+  // Playwrights Standard sind 30 s pro Test. Diese Suite fährt aber gegen den
+  // DEV-Server (webServer unten), und der kompiliert jede SEITE beim ERSTEN
+  // Zugriff — bei sieben eigenen Seiten trifft das fast jeden Test einmal.
+  // Mit 30 s scheitert dann nicht der Testgegenstand, sondern der Kaltstart,
+  // und der Bericht zeigt auf eine beliebige Wartezeile. 90 s trennt „Server
+  // baut noch" von „Sache kaputt" (dieselbe Zahl und dieselbe Begründung wie
+  // in apps/comments); die inneren Erwartungen bleiben eng.
+  timeout: 90_000,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? 'github' : 'list',

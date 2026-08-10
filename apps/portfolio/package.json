@@ -11,6 +11,7 @@
     "typecheck": "nuxi typecheck",
     "bootstrap": "node --experimental-strip-types --env-file=.env scripts/bootstrap.ts",
     "seed:legal": "node --experimental-strip-types --env-file=.env ../../packages/pages/scripts/seed-legal-pages.ts",
+    "test": "nuxi prepare && vitest run",
     "e2e": "playwright test"
   },
   "dependencies": {
@@ -44,6 +45,7 @@
     "@types/nodemailer": "catalog:",
     "eslint": "catalog:",
     "typescript": "catalog:",
+    "vitest": "catalog:",
     "vue-tsc": "catalog:"
   }
 }
