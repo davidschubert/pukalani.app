@@ -35,6 +35,22 @@ für den Vertragszustand, „Tarif" wird gestrichen (U6).
 geparkt**, bis AP1–AP8 durch sind; danach zuerst U15-Navigation bzw.
 F57-Reaktionen. **Verworfen:** eines oder beides jetzt einplanen.
 
+**Nachtrag (zweite Runde, gleicher Tag)** — vier Restfragen, je Empfehlung
+gewählt:
+(7) **U4-Checkliste = Beitrag · Farbwelt · Einladen · Startseite · Abo**
+(Benchmark-Satz E1; Ghost-Daten: Branding-Anpasser konvertieren ~10×, der
+Abo-Punkt macht die Liste zum Umsatz-Hebel). **Verworfen:** Trichter-G2-Satz
+ohne Abo · Variante mit @handle statt Abo.
+(8) **Die Landing liest den Tor-Schalter dynamisch** (SSR-gecachter Abruf des
+Zustands, Muster wie `/api/platform/products`; unbekannt ⇒ fail-safe die
+Einladungs-Variante). **Verworfen:** statische Beide-Zustände-Formulierung ·
+statisch mit Text-Deploy beim Umschalten.
+(9) **Rolle `viewer` heißt in der Oberfläche „Leser/in"** (en „Reader") —
+„Mitglied" bleibt der Sammelbegriff aller Beigetretenen; nur Anzeige-Texte,
+der Rollen-Key bleibt (Teil von U6/AP4). **Verworfen:** „Mitglied" als
+Rollen-Label behalten.
+(10) **AP1 startet sofort** (U18 Messung zuerst, dann U1/U2/U3).
+
 ## 2026-08-08 — Die drei WCAG-Hell-Befunde aus F53: zweimal fixen, nie „lassen"
 
 **Davids Entscheidung** (strukturierte Fragen, je Empfehlung gewählt) zu den
