@@ -27,7 +27,7 @@ später an der falschen Stelle.
 | Wo | Was passiert dort | Appwrite-Projekt |
 |---|---|---|
 | `https://<community-host>/dashboard/community/plan` | Der **Owner klickt**: Plan wählen, Portal öffnen. App `platform`. | `pool` |
-| `https://control.pukalani.app` | **Stripe lebt hier**: Schlüssel, Checkout-Session, Portal-Session, Webhook. App `control`. | `control` |
+| `https://admin.pukalani.app` | **Stripe lebt hier**: Schlüssel, Checkout-Session, Portal-Session, Webhook. App `control` (ploi-Site und Verzeichnis heißen weiter `control.pukalani.app`). | `control` |
 | Stripe-Dashboard (Test-Modus) | Preise, Webhook-Endpunkt, Test-Clock. | — |
 
 > **Seit F51 (2026-08-07)** heißt die Abo-Seite `/dashboard/community/plan` —
@@ -48,7 +48,7 @@ Browser des Owners
       · Service-Secret sagt WELCHES Deployment fragt, das JWT WER handelt
       · createCommunityCheckoutUrl                (apps/control/server/utils/communityCheckout.ts)
   → Stripe Checkout
-  → Stripe Webhook an https://control.pukalani.app/api/stripe/webhook
+  → Stripe Webhook an https://admin.pukalani.app/api/stripe/webhook
                                                  (packages/billing/server/api/stripe/webhook.post.ts)
       · apps/control/server/plugins/billing-fulfillment.ts
       · handleCommunitySubscriptionUpdate         (packages/control/server/utils/communityBilling.ts)
@@ -99,8 +99,12 @@ STRIPE_KEY=sk_test_…  node scripts/stripe/ensure-prices.mjs --apply  # legt an
 **Webhook.** Stripe-Dashboard (Test-Modus) → Developers → Webhooks. Endpunkt:
 
 ```
-https://control.pukalani.app/api/stripe/webhook
+https://admin.pukalani.app/api/stripe/webhook
 ```
+
+**Stripe folgt keiner Weiterleitung:** der Altname `control.pukalani.app`
+antwortet seit dem AH-4-Cutover mit 301, das reicht für einen Webhook nicht.
+Die URL im Stripe-Dashboard aktiv umhängen — im Test-Modus genauso wie live.
 
 Die Ereignis-Liste ist seit 2026-08-02 **neun** Einträge lang, nicht mehr sechs
 (`WEBHOOK_ALLOWLIST` in `packages/billing/server/utils/webhookMapping.ts` —
@@ -122,12 +126,13 @@ antworten (Signatur greift). Kommt **404**, ist `NUXT_STRIPE_WEBHOOK_SECRET` auf
 statt 500 (`packages/billing/server/api/stripe/webhook.post.ts`).
 
 ```bash
-curl -s -o /dev/null -w '%{http_code}\n' -X POST https://control.pukalani.app/api/stripe/webhook -d '{}'
+curl -s -o /dev/null -w '%{http_code}\n' -X POST https://admin.pukalani.app/api/stripe/webhook -d '{}'
 ```
 
 ## Probe 2 🔑 — Als **Community-Owner** einloggen
 
-Nicht mehr auf `control.pukalani.app`, sondern auf dem **Host der Community**:
+Nicht mehr auf der Betreiber-Konsole (`admin.pukalani.app`), sondern auf dem
+**Host der Community**:
 
 ```
 https://<community-host>/dashboard/community/plan
@@ -302,7 +307,7 @@ fehlgeschlagen" an — im Projekt `control`, adressiert an
 `billing_subscriptions.userId`. Dieser Wert stammt aus der Checkout-Metadata und
 ist die **Nutzer-Id aus dem Pool-Projekt** (`identity.userId` in
 `packages/control/server/utils/communityTeam.ts`), nicht die eines
-control-Kontos. **Erwartung daher unklar: die Glocke auf `control.pukalani.app`
+control-Kontos. **Erwartung daher unklar: die Glocke auf `admin.pukalani.app`
 könnte leer bleiben.** Wenn ja: notieren, es ist ein echter Befund und keine
 Fehlbedienung. Der Zustand in `communities` (Punkt 1–3) ist davon unberührt.
 

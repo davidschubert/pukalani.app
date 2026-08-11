@@ -99,7 +99,7 @@ entschärft, damit sie nicht als Arbeit gelesen werden.
 `content/` ist **Produkt**, kein Planungsdokument: die interne, durchsuchbare
 Doku-Site (Nuxt UI + Nuxt Content nach dem Vorbild des
 [Nuxt-Docs-Templates](https://docs-template.nuxt.dev/)), live hinter
-Operator-Login auf `control.pukalani.app/docs`.
+Operator-Login auf `admin.pukalani.app/docs`.
 
 Bewusst **kein** Pukalani-Layer und keine App unter `apps/` — der Manifest-Check
 verlangt dort Site-Manifest + Appwrite-Setup, und die Docs brauchen beides

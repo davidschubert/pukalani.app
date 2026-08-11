@@ -39,7 +39,7 @@ die Regeln, was erlaubt ist, teilen sie sich.
 | Bei ploi | **Tenant** an `platform.pukalani.app` | **Alias** an der eigenen Site |
 | Zertifikat | eigene Lineage je Tenant | die Lineage der Site, um den Namen erweitert |
 | Kunden-Oberfläche | `packages/onboarding` → `/dashboard/community/domain` | `packages/domains` → derselbe Pfad |
-| Betreiber-Oberfläche | — | `control.pukalani.app/dashboard/websites` |
+| Betreiber-Oberfläche | — | `admin.pukalani.app/dashboard/websites` |
 
 `packages/domains` wird bewusst **nicht** an `apps/platform` ausgeliefert:
 beide Seiten belegen denselben Pfad, und zwei Seiten auf einem Pfad wären ein

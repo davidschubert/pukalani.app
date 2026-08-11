@@ -30,7 +30,7 @@ identisch, nur die Erscheinung variabel".
 Der Grund, warum das die richtige Antwort ist: Davids erste Liste enthielt
 Einträge aus drei verschiedenen Welten, und zwei davon sind gar keine
 Betreiber-Sache. „Moderation", „Custom domain", „Plans (Preisvergleich)" sind
-die Einstellungen **einer Community** — auf `control.pukalani.app` wären es
+die Einstellungen **einer Community** — auf `admin.pukalani.app` wären es
 Einstellungen für eine Community, die der Betreiber nicht hat, und der Kunde
 sähe sie nie, weil er sich dort nie anmeldet. Ein Profil und Benachrichtigungen
 braucht **jeder** in **jeder** App.

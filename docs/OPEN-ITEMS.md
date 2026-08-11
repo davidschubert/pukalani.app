@@ -106,11 +106,13 @@ Audit-Wochen bewährt hat:
 **7 Hosts:** **pukalani.app** (Landing, seit 2026-07-27 — Apex proxied über
 Cloudflare, braucht am Ursprung KEIN Zertifikat mehr und kann das
 Kunden-Wildcard damit nicht mehr überschreiben; TLS-Wächter alle 30 min),
-**control** (Betreiber) + **account** (Kundenbereich + Wizard; my/start leiten seit AH-1 am 2026-08-11 per 301 weiter),
+**admin** (Betreiber; `control.pukalani.app` leitet seit AH-4 per 301 weiter,
+ploi-Site und Server-Verzeichnis behalten den Altnamen) + **account**
+(Kundenbereich + Wizard; my/start leiten seit AH-1 am 2026-08-11 per 301 weiter),
 comments + portfolio, **platform** (Multi-Tenant, `*.pukalani.app`-Wildcard —
 demo.pukalani.app als erster Pool-Tenant, neue Kundensite = ein Klick im
 Control, kein Build), **help.pukalani.app** (Hilfe-Site, seit 2026-07-27) und
-die interne Doku unter `control.pukalani.app/docs`. Auto-Deploy (6 Sites),
+die interne Doku unter `admin.pukalani.app/docs`. Auto-Deploy (6 Sites),
 Zero-Downtime Stufe 2, Changelog-2B, Alerting, GDPR, pages-Layer
 (/imprint,/terms,/privacy editierbar + Footer-Links). M1–M9 komplett,
 Self-Service-Onboarding komplett, **alle sechs Kundenprodukte durch die

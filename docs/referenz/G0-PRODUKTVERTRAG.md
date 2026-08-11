@@ -82,7 +82,7 @@ Site-Dashboard  (RBAC- + Feature-gefiltert; Feature-Registry bleibt Quelle)
 ```
 
 ### 1.3 Operator Studio
-*Zielgruppe:* NUR Plattformbetreiber (du). *Wo:* `control.pukalani.app`. *Zweck:*
+*Zielgruppe:* NUR Plattformbetreiber (du). *Wo:* `admin.pukalani.app`. *Zweck:*
 die Plattform selbst. **Niemals Teil der Kundennavigation.**
 
 ```

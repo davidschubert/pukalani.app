@@ -279,9 +279,25 @@ Vollständiges Konzept: docs/CONCEPT.md
   Beweis: packages/onboarding/scripts/verify-control-exit.mjs.
 
 ## Hosts (Umbenennung 2026-07-25, Cutover 2026-07-26 — Davids Entscheidung)
-- `control.pukalani.app` = Betreiber-Oberfläche, seit dem Cutover VOLLSTÄNDIG:
-  eigene ploi-Site 392163 (nginx → Port 3003, eigenes LE-Zertifikat für
-  control+studio), Release-Slot `releases/control`, Appwrite-Projekt
+- `admin.pukalani.app` = Betreiber-Oberfläche (AH-4, Davids Entscheidung
+  2026-08-11 — davor `control.pukalani.app`, das jetzt 301 hierher antwortet:
+  `apps/control/server/middleware/00.legacy-console-hosts.ts`, Runbook
+  docs/runbooks/ADMIN-CUTOVER.md). NUR DIE ADRESSE HAT SICH GEÄNDERT: ploi-Site,
+  Verzeichnis `/home/ploi/control.pukalani.app/`, Release-Slot, pm2-Prozessname,
+  certbot-Lineage und das Appwrite-Projekt heißen weiter `control` — eine
+  Site-Umbenennung war beim studio→control-Umzug die teuerste Falle (pm2 findet
+  den Prozess über den NAMEN und startet bei einer Umbenennung DANEBEN), der
+  Name ist seither ein reiner Infra-Anker wie `platform.pukalani.app`. In
+  deploy.yml fallen deshalb SITE (Verzeichnis) und PROBE (Health-Host)
+  auseinander. Das Zertifikat der Site muss BEIDE Namen tragen, weil die 301
+  erst nach dem Handshake gesprochen wird; der Stripe-Webhook wurde von Hand
+  umgehängt, denn Stripe folgt keiner Weiterleitung. Die Weiterleitung läuft
+  BEWUSST nicht über `pukalani.tenancy.legacyControlHosts`: deren Ziel-Liste
+  `controlHosts` beantwortet anderswo die Frage „ist das der KUNDENBEREICH?"
+  (Konto-Menü, Glocken-Publikum, Trichter-Ereignisse) — die Begründung steht im
+  Kopf der Middleware.
+- Was der Cutover 2026-07-26 gebracht hat und weiterhin gilt: eigene ploi-Site
+  392163 (nginx → Port 3003), Release-Slot `releases/control`, Appwrite-Projekt
   `control` (Session-Cookie a_session_control). Der Alias
   `studio.pukalani.app` ist am 2026-07-30 ENTFERNT (ploi → Site → Verwalte →
   Domain aliases; ploi pflegt `server_name` selbst und lädt nginx neu). Grund:
@@ -317,14 +333,18 @@ Vollständiges Konzept: docs/CONCEPT.md
   deshalb auch im TLS-Wächter: eine 301 wird erst NACH dem Handshake gesprochen.
   `app.pukalani.app` (Altname) ist am 2026-07-27 ENTFERNT — nie beworben, kein
   DNS-Eintrag, stand nur in controlHosts; antwortet jetzt 404. ALLE Altnamen
-  bleiben in RESERVED_SUBDOMAINS gesperrt (Phishing), dazu `admin` (AH-4) und
-  `master` (AH-5) vorreserviert.
+  bleiben in RESERVED_SUBDOMAINS gesperrt (Phishing), dazu `admin` (seit AH-4
+  die Betreiber-Konsole, also vergeben statt nur gesperrt) und `master` (AH-5)
+  vorreserviert.
 - TLS-Fallen (beide live erwischt): (1) Port 80 antwortet nur für explizit
   konfigurierte Hosts — die HTTP-Prüfung von Let's Encrypt scheitert für
   Aliase/Wildcards, deshalb IMMER DNS-01 über Cloudflare. (2) ploi benennt die
   certbot-Lineage nach der Root-Domain DER SITE — es gibt also mehrere
   (am 2026-07-30 nachgemessen: `comments.pukalani.app`, `control.pukalani.app`,
-  `portfolio.pukalani.app` je eigen). GETEILT ist nur `pukalani.app`, und darin
+  `portfolio.pukalani.app` je eigen). Die Lineage `control.pukalani.app` heißt
+  seit AH-4 nicht mehr wie ihr Haupt-Host: sie trägt `admin.pukalani.app` UND
+  den Altnamen `control.pukalani.app` — die Lineage folgt der SITE, und die
+  behält ihren Namen. GETEILT ist nur `pukalani.app`, und darin
   liegt das **Wildcard** `*.pukalani.app`: die Sites `pukalani.app` UND
   `platform.pukalani.app` binden dieselbe Lineage ein, und daran hängen platform,
   demo, help und JEDER Mandanten-Host. Eine Anforderung dort überschreibt sie
@@ -1022,7 +1042,7 @@ niemand weiß, ob ein Häkchen noch Arbeit bedeutet.
   offene Kästchen sind bewusst zu Aufzählungen entschärft.
 - `docs/plans/` enthält nur, was NOCH NICHT gebaut ist. Sobald ein Plan
   ausgeführt ist: Datei nach `archiv/`, Reste nach OPEN-ITEMS.md.
-- `docs/content/` = interne Doku-SITE (control.pukalani.app/docs),
+- `docs/content/` = interne Doku-SITE (admin.pukalani.app/docs),
   `apps/help/content/` = Kunden-Hilfe (help.pukalani.app) — beides Produkt,
   kein Planungsdokument.
 - Regelwerk für Agenten: NUR CLAUDE.md. `AGENTS.md` ist ein Zeiger darauf —

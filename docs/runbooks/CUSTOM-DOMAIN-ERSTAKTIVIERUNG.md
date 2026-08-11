@@ -199,7 +199,9 @@ Die drei realistischen Fälle:
       „unknown attribute".
 - [ ] Code deployt: **control** UND **portfolio** (beide Seiten der Naht).
 - [x] Auf der **portfolio**-Site gesetzt (`pnpm ops:site-env` zeigt nur Namen):
-      `NUXT_ONBOARDING_CONTROL_URL` = `https://control.pukalani.app`,
+      `NUXT_ONBOARDING_CONTROL_URL` = `https://admin.pukalani.app`
+      (seit dem AH-4-Cutover die Adresse der Konsole; der Altname antwortet
+      nur mit 301 und ist für einen Dienst-Aufruf kein Ersatz),
       `NUXT_ONBOARDING_SERVICE_SECRET` = derselbe Wert wie
       `NUXT_CONTROL_ONBOARDING_SECRET` auf control.
       **Ohne beides passiert nichts Schlimmes** — die Site läuft weiter unter
@@ -215,7 +217,7 @@ Die drei realistischen Fälle:
 
 ## B1. ploi-Kennungen an der Website hinterlegen
 
-`control.pukalani.app/dashboard/websites` → Zeile *portfolio* → Menü → **Eigene
+`admin.pukalani.app/dashboard/websites` → Zeile *portfolio* → Menü → **Eigene
 Domain** → unten „Wo diese Site bei ploi wohnt".
 
 - [ ] Server-Id **118713**, Site-Id **390041**, speichern.
@@ -303,7 +305,7 @@ nächste Neustart nimmt sie vom Netz. Das Rezept steht in **B7**.
 >
 > **Was zu tun ist, in dieser Reihenfolge:**
 > 1. `control` **und** `portfolio` deployen (beide Seiten der Naht).
-> 2. `control.pukalani.app/dashboard/websites` → Zeile *portfolio* → Menü →
+> 2. `admin.pukalani.app/dashboard/websites` → Zeile *portfolio* → Menü →
 >    **Eigene Domain** → **„Prüfen"**.
 > 3. **Was herauskommen muss:** Status springt auf **`active`**, der
 >    Fehlertext wird leer, `customDomainActivatedAt` bekommt einen Zeitstempel.

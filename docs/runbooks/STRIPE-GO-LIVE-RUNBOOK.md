@@ -34,7 +34,7 @@ Testmodus fehlten die drei `checkout.session.*`-Nachzügler unbemerkt.
 ## Der Dashboard-Weg (seit F55) — hier anfangen
 
 Seit dem 2026-08-08 (Davids Entscheidung, DECISION-LOG) läuft der komplette
-Go-Live über **`https://control.pukalani.app/dashboard/stripe`**. Die
+Go-Live über **`https://admin.pukalani.app/dashboard/stripe`**. Die
 Terminal-Schritte weiter unten bleiben als **Rückfall** stehen und sind
 weiterhin richtig — sie arbeiten aus demselben Katalog und mit denselben
 Entscheidungen wie die Seite.
@@ -49,7 +49,8 @@ schiebt, ist der falsche Ablauf.
 
 Auf der ploi-Site `control.pukalani.app` **einmalig** eine Env-Variable setzen
 (ploi → Site → Environment) und danach `pm2 reload ecosystem-control.config.cjs
---update-env`:
+--update-env`. Die ploi-Site behält bewusst den Altnamen; die öffentliche
+Adresse der Konsole ist seit dem AH-4-Cutover `admin.pukalani.app`:
 
 ```bash
 NUXT_BILLING_SETTINGS_KEY=<64 Hex-Zeichen>     # openssl rand -hex 32
@@ -108,7 +109,7 @@ zurück (falls gesetzt) — reparierbar durch erneutes Eintragen über die Seite
    Ergebnis je Preis: *angelegt · unverändert · ersetzt*. Ein zweiter Klick
    meldet überall „unverändert".
 4. **Webhook** — „Anlegen". Legt
-   `https://control.pukalani.app/api/stripe/webhook` mit **allen neun**
+   `https://admin.pukalani.app/api/stripe/webhook` mit **allen neun**
    Ereignissen an. **Das Signatur-Secret kommt in der API-Antwort genau einmal
    vor und wird sofort verschlüsselt mitgespeichert** — Schritt 4 und der
    `whsec_`-Teil von Schritt 5 entfallen damit. Existiert der Endpunkt bereits,
@@ -154,16 +155,21 @@ alten Fassung dieses Runbooks — die Community-Hosts haben kein Stripe:
 
 | App / Host | Rolle im Geldweg | Braucht Stripe-Secrets? |
 |---|---|---|
-| **control** — `control.pukalani.app` | Checkout-Session, Portal-Session, **Webhook**, Fulfillment. Appwrite-Projekt `control`. | **Ja** |
+| **control** — `admin.pukalani.app` (ploi-Site und Verzeichnis heißen weiter `control.pukalani.app`) | Checkout-Session, Portal-Session, **Webhook**, Fulfillment. Appwrite-Projekt `control`. | **Ja** |
 | **platform** — `*.pukalani.app` (jeder Community-Host) | Der Owner **klickt** hier; die Route reicht über die Service-Naht an `control` weiter. Appwrite-Projekt `pool`. | **Nein** — `apps/platform/nuxt.config.ts` extended `packages/billing` gar nicht |
 | **comments** — `comments.pukalani.app` | Silo-App mit **Einmalkäufen** (Event-Tickets). Eigenes Appwrite-Projekt, eigener Webhook. | Ja, wenn dort verkauft werden soll |
 
 Webhook-URLs (Live wie Test):
 
 ```
-https://control.pukalani.app/api/stripe/webhook      # Community-Abos  ← der Geldweg
+https://admin.pukalani.app/api/stripe/webhook        # Community-Abos  ← der Geldweg
 https://comments.pukalani.app/api/stripe/webhook     # Event-Tickets (nur falls genutzt)
 ```
+
+> **Stripe folgt keiner Weiterleitung.** Der Altname `control.pukalani.app`
+> antwortet seit dem AH-4-Cutover mit 301 — für einen Webhook ist das kein
+> Ersatz. Die URL im Stripe-Dashboard muss aktiv auf `admin.pukalani.app`
+> umgehängt werden (Live UND Test), sonst kommt kein Ereignis mehr an.
 
 Env-Variablen, server-only, **nie** `NUXT_PUBLIC_*`:
 
@@ -255,7 +261,7 @@ ist unveränderlich): dann Price von Hand ersetzen.
 
 Stripe-Dashboard (Live) → Developers → Webhooks → „Add endpoint":
 
-- **URL**: `https://control.pukalani.app/api/stripe/webhook`
+- **URL**: `https://admin.pukalani.app/api/stripe/webhook`
 - **Ereignisse — exakt diese neun** (die Allowlist in
   `packages/billing/server/utils/webhookMapping.ts`; alles andere beantwortet die
   Route mit 200 und tut nichts, alles Fehlende kommt nie an):
@@ -307,7 +313,7 @@ pm2 env <id> | grep -c STRIPE
 **400**. Kommt **404**, fehlt das Secret; kommt **200**, ist etwas grundfalsch.
 
 ```bash
-curl -s -o /dev/null -w '%{http_code}\n' -X POST https://control.pukalani.app/api/stripe/webhook -d '{}'
+curl -s -o /dev/null -w '%{http_code}\n' -X POST https://admin.pukalani.app/api/stripe/webhook -d '{}'
 ```
 
 **6.2 Echter Mini-Kauf** [David] — als **Owner** einer echten Community auf
