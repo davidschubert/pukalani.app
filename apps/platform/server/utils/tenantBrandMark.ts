@@ -21,7 +21,7 @@ import { resolveBrandColor, type BrandThemeEntry } from '../../../../packages/th
  * Der interne Aufruf reicht den Host-Header weiter — ohne ihn löste die
  * Tenant-Middleware einen anderen (oder gar keinen) Mandanten auf.
  *
- * Kontroll-Hosts (my./start.) haben keinen Mandanten und `/api/themes` steht
+ * Kontroll-Hosts (account.pukalani.app) haben keinen Mandanten und `/api/themes` steht
  * dort nicht auf der Freigabeliste (01.control-center.ts) → App-Brand + Farbe
  * des Core-Defaults. Das ist gewollt: der Kundenbereich ist Pukalani, keine
  * Community. Fehler/leere Antwort → Default-Farbe statt 500: eine Bildmarke

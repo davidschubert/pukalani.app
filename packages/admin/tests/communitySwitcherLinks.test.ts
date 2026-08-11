@@ -8,20 +8,24 @@ import { switcherExternalLink } from '../shared/communitySwitcherLinks'
  */
 describe('switcherExternalLink', () => {
   it('baut eine absolute https-URL aus dem ERSTEN Host', () => {
-    expect(switcherExternalLink(['my.pukalani.app', 'start.pukalani.app'], '/communities'))
-      .toBe('https://my.pukalani.app/communities')
-    expect(switcherExternalLink(['start.pukalani.app'], '/start'))
-      .toBe('https://start.pukalani.app/start')
+    // Seit AH-1 tragen beide Ausgänge denselben Host — der Anlege-Ausgang
+    // bekommt ihn über `resolveWizardHosts()` (core), nicht von hier.
+    expect(switcherExternalLink(['account.pukalani.app'], '/communities'))
+      .toBe('https://account.pukalani.app/communities')
+    expect(switcherExternalLink(['account.pukalani.app'], '/start'))
+      .toBe('https://account.pukalani.app/start')
+    expect(switcherExternalLink(['start.localhost', 'app.localhost'], '/start'))
+      .toBe('http://start.localhost/start')
   })
 
   it('spricht lokal http (Entwicklungs-Hosts)', () => {
-    expect(switcherExternalLink(['my.localhost'], '/communities')).toBe('http://my.localhost/communities')
+    expect(switcherExternalLink(['app.localhost'], '/communities')).toBe('http://app.localhost/communities')
     expect(switcherExternalLink(['localhost'], '/start')).toBe('http://localhost/start')
   })
 
   it('überspringt leere Einträge', () => {
-    expect(switcherExternalLink(['  ', 'my.pukalani.app'], '/communities'))
-      .toBe('https://my.pukalani.app/communities')
+    expect(switcherExternalLink(['  ', 'account.pukalani.app'], '/communities'))
+      .toBe('https://account.pukalani.app/communities')
   })
 
   it('liefert leer, wenn kein Host konfiguriert ist — dann fehlt der Menüpunkt', () => {

@@ -18,7 +18,7 @@ import { callControlPlane } from '../../utils/controlPlane'
  * `pukalani.tenancy.controlApiPrefixes`: die Route liegt bewusst unter dem
  * bereits freigegebenen Präfix `/api/onboarding/` (01.control-center.ts). Wer
  * hier einen Endpunkt AUSSERHALB dieses Präfixes anlegt, muss ihn dort
- * eintragen — sonst antwortet er auf my./start. mit 404.
+ * eintragen — sonst antwortet er auf dem Kontroll-Host mit 404.
  *
  * MICROCACHE STATT DURCHREICHEN: user-agnostisch, also genau der Fall, für den
  * createMicrocache gebaut ist. 60 s ist die Obergrenze aus dem Auftrag und

@@ -304,7 +304,7 @@ describe('Slug (der Kunde wählt nur das erste Label)', () => {
   })
 
   it('sperrt die Plattform-Hosts der Umbenennung (control/my/start)', () => {
-    // Sonst könnte ein Selbstbedienungs-Kunde `my.pukalani.app` bekommen — mit
+    // Sonst könnte ein Selbstbedienungs-Kunde `account.pukalani.app` bekommen — mit
     // gültigem Zertifikat und unserem Namen die perfekte Anmeldedaten-Falle.
     for (const reserved of ['control', 'my', 'start', 'manage', 'new', 'photos', 'status', 'docs']) {
       expect(isReservedSlug(reserved), reserved).toBe(true)

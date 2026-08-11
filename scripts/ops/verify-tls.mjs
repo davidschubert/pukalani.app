@@ -48,8 +48,13 @@ const HOSTS = [
   { host: 'www.pukalani.studio', ip: '49.13.211.173', note: 'Eigene Domain, www-Variante (im selben Zertifikat)' },
   { host: 'platform.pukalani.app', ip: '49.13.211.173', note: 'Pool-App' },
   { host: 'demo.pukalani.app', ip: '49.13.211.173', note: 'Pool-Tenant (Stellvertreter für ALLE Kunden)' },
-  { host: 'my.pukalani.app', ip: '49.13.211.173', note: 'Kundenbereich' },
-  { host: 'start.pukalani.app', ip: '49.13.211.173', note: 'Wizard-Kurzlink' },
+  { host: 'account.pukalani.app', ip: '49.13.211.173', note: 'Kundenbereich' },
+  // ABGESCHALTETE Altnamen (AH-1, 2026-08-11) — sie bleiben in dieser Liste,
+  // weil sie weiter TLS brauchen: eine 301 wird erst nach dem Handshake
+  // gesprochen. Ein abgelaufenes Zertifikat hier bricht jeden alten
+  // Einladungs-Link, ohne dass die neue Adresse etwas davon merkt.
+  { host: 'my.pukalani.app', ip: '49.13.211.173', note: 'Altname → 301 auf account (AH-1)' },
+  { host: 'start.pukalani.app', ip: '49.13.211.173', note: 'Altname → 301 auf account (AH-1)' },
   // Von der Wildcard gedeckt — es gibt und braucht KEINE eigene Zertifikats-
   // Anforderung fuer diesen Host (Lineage-Falle, s. Kopf der Datei). Der
   // Handshake ist schon gruen, BEVOR die ploi-Site existiert: nginx liefert

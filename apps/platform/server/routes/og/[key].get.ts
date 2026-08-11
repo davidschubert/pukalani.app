@@ -26,7 +26,7 @@ import { brandCardPng } from '../../utils/brandImageStore'
  * aktuelle Bild statt eines 404: das ist die freundlichere Antwort für einen
  * Link, der schon in einem Chat steht.
  *
- * Kontroll-Hosts (my./start.) dürfen hier durch: `/og/*` ist keine `/api/`-Route
+ * Kontroll-Hosts (account.pukalani.app) dürfen hier durch: `/og/*` ist keine `/api/`-Route
  * (01.control-center.ts greift nicht) und liefert dort App-Brand + Default-Farbe
  * — dieselbe Antwort wie `/favicon.svg`. Unbekannte Hosts hat `00.tenant.ts`
  * längst mit 404 erledigt.

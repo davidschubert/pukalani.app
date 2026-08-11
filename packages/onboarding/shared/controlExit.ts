@@ -3,8 +3,9 @@
  * (F50-Nachtrag, Davids Entscheidung 2026-08-08).
  *
  * Unter der Community-Liste stehen zwei Einträge, die den Mandanten-Host
- * verlassen: „Community anlegen" führt auf den Wizard-Host (`start.*`),
- * „Communities verwalten" auf den Kundenbereich (`my.*`). Bis heute waren das
+ * verlassen: „Community anlegen" führt in den Wizard (`/start`), „Communities
+ * verwalten" in die Übersicht (`/communities`) — seit AH-1 auf demselben
+ * Kontroll-Host. Bis heute waren das
  * schlichte Links — und wer sie klickte, stand drüben VOR DEM LOGIN-FORMULAR,
  * obwohl es dieselbe Platform-App und dasselbe Pool-Projekt ist. Session-Cookies
  * sind host-only; das ist keine Panne, sondern die Bauart. Der Community-WECHSEL
@@ -31,7 +32,7 @@
  * Beim Community-Sprung ist die Prüfung der Kern der Sache: dort betritt man
  * einen fremden MANDANTEN-Kontext, und die Zugehörigkeit muss serverseitig
  * belegt sein, bevor ein Siegel entsteht. Ein Kontroll-Host ist kein Mandant —
- * auf `my.*` und `start.*` ist man nur „man selbst": die Übersicht zeigt
+ * auf `account.*` ist man nur „man selbst": die Übersicht zeigt
  * ausschließlich die eigenen Mitgliedschaften, der Wizard legt eine neue
  * Community an. Es gibt dort nichts, wozu eine Mitgliedschaft berechtigen
  * könnte, also gäbe es auch nichts zu prüfen. Die einzige Bedingung ist eine
@@ -39,13 +40,22 @@
  * zu siegeln.
  *
  * ── HOST-WAHL: DERSELBE GRIFF WIE IM MENÜ ─────────────────────────────────
- * Erster nicht-leerer, getrimmter Eintrag. Die zwei Listen sind eigene Achsen
- * (s. `controlHomeTarget` in core/shared/controlCenter.ts) — es wird nichts aus
- * der Reihenfolge der jeweils ANDEREN geraten. KEINE Liste, kein Ziel: `null`.
+ * Erster nicht-leerer, getrimmter Eintrag. KEINE Liste, kein Ziel: `null`.
  * Eine App ohne konfigurierte Kontroll-Hosts (Silo, Playground) zeigt den
  * Menüpunkt gar nicht erst; die Route antwortet dann 404 statt auf `https:///`
  * zu siegeln.
+ *
+ * WELCHE Liste der Anlege-Ausgang liest, entscheidet seit AH-1 nicht mehr
+ * diese Datei, sondern `resolveWizardHosts()` in core/shared/controlCenter.ts:
+ * eigene Wizard-Hosts, wenn es welche gibt, sonst die Kontroll-Hosts. Das ist
+ * KEIN Raten aus einer fremden Achse — `/start` liegt auf JEDEM Kontroll-Host,
+ * die Seite gehört dem onboarding-Layer und nicht einem Hostnamen. Vor dem
+ * Cutover war die Unterscheidung sichtbar (`start.pukalani.app`), seither ist
+ * `wizardHosts` in Produktion leer; ohne den Rückfall wäre „Community anlegen"
+ * still verschwunden.
  */
+
+import { resolveWizardHosts } from '../../core/shared/controlCenter'
 
 /** Welcher der zwei Ausgänge gemeint ist. */
 export type ControlExit = 'create' | 'manage'
@@ -86,7 +96,9 @@ export function controlExitTarget(
   target: ControlExit,
   tenancy: ControlExitTenancy,
 ): ControlExitDestination | null {
-  const hosts = target === 'create' ? tenancy.wizardHosts : tenancy.controlHosts
+  const hosts = target === 'create'
+    ? resolveWizardHosts(tenancy.controlHosts, tenancy.wizardHosts)
+    : tenancy.controlHosts
   const host = (hosts ?? []).map(entry => entry.trim()).find(entry => entry !== '')
   if (!host) return null
   return { host, path: EXIT_PATHS[target] }

@@ -15,7 +15,7 @@ import { verifyRuntimeIdentity } from '../../../utils/onboardingService'
 
 /**
  * „Deine Communities" — die Datenquelle der Kunden-Übersicht auf
- * `my.pukalani.app` (F12).
+ * `account.pukalani.app` (F12).
  *
  * KEIN `communityId` IM BODY, und das ist der ganze Unterschied zu den übrigen
  * Community-Routen dieser Naht: hier fragt jemand nach SICH. Die Grenze ist
@@ -104,7 +104,7 @@ export default defineEventHandler(async (event): Promise<MyCommunitiesResponse> 
     const community = byId.get(membership.communityId)
     // Fremdes Projekt: derselbe Mensch kann in mehreren Runtimes Mitglied sein —
     // in DIESER Antwort haben nur die Communities des JWT-Projekts etwas zu
-    // suchen, sonst zeigte `my.pukalani.app` Hosts, auf denen diese Session
+    // suchen, sonst zeigte der Kundenbereich Hosts, auf denen diese Session
     // nichts gilt.
     if (!community || community.projectId !== identity.projectId) continue
     facts.push({

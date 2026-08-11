@@ -39,7 +39,7 @@ import { Client, ID, Query, TablesDB, Users } from 'node-appwrite'
 
 const PORT = Number(process.env.PLATFORM_PORT || 3154)
 // Lokal ist der Kontroll-Host `app.localhost` (NUXT_PUBLIC_TENANCY_CONTROL_HOSTS
-// in apps/platform/.env); produktiv sind es my./start.pukalani.app.
+// in apps/platform/.env); produktiv ist es account.pukalani.app.
 const CONTROL_HOST = process.env.CONTROL_HOST || 'app.localhost'
 
 const endpoint = process.env.NUXT_PUBLIC_APPWRITE_ENDPOINT

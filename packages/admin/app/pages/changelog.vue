@@ -9,7 +9,7 @@ import type { ChangelogEntry, ChangelogListResponse } from '../../shared/types/a
 // (pukalani.chrome.changelogLink/whatsNew: false) direkt aufrufbar — die
 // Chrome-Registry versteckt nur, sie sperrt nicht. Auf einem Mandanten-Host
 // gibt es diese Seite deshalb schlicht nicht: 404 wie jeder unbekannte Inhalt.
-// UNVERÄNDERT bleiben Kontroll-Hosts (my./start., dort kein Mandant) und die
+// UNVERÄNDERT bleiben der Kontroll-Host (account.pukalani.app, dort kein Mandant) und die
 // Silo-Apps (comments: /changelog ist dort gewollt und im Footer verlinkt).
 // Zweite, serverseitige Sperre: server/api/changelog.get.ts.
 if (useIsTenantHost()) {

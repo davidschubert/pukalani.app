@@ -28,14 +28,20 @@ export const OPERATOR_APEX = 'pukalani.app'
 export const RESERVED_SUBDOMAINS = new Set([
   'www', 'api', 'app', 'mail', 'smtp', 'admin', 'console', 'status',
   'comments', 'portfolio', 'studio', 'platform', 'changelog', 'functions', 'send',
-  // Umbenennung 2026-07-25: die neuen Plattform-Hosts. `control` ist der
-  // Maschinenraum, `my` der Kundenbereich, `start` der Kurz-Link in den
-  // Wizard — dieselbe Phishing-Logik wie unten: in fremder Hand wären das
-  // Anmeldedaten-Fallen mit unserem Namen und gültigem Zertifikat.
-  // Merke: `app` (oben) und `studio` sind ABGESCHALTETE Altnamen, bleiben
-  // aber gesperrt — ein zurückgegebener Plattform-Name ist der beste
-  // Phishing-Köder, den es gibt.
-  'control', 'my', 'start', 'manage', 'new', 'photos',
+  // Die Plattform-Hosts — dieselbe Phishing-Logik wie unten: in fremder Hand
+  // wären das Anmeldedaten-Fallen mit unserem Namen und gültigem Zertifikat.
+  //
+  // `account` ist seit AH-1 (2026-08-11) DER Kundenbereich; es steht schon
+  // weiter unten in der Phishing-Liste und bleibt dort — hier nur der Hinweis,
+  // dass der Name jetzt zusätzlich vergeben IST, nicht bloß gesperrt.
+  // `admin` (oben) und `master` sind für AH-4 (Cutover control. → admin.) und
+  // AH-5 (master-Community als Werkstatt) VORRESERVIERT: ein Name gehört
+  // gesperrt, bevor er beworben wird, nicht danach.
+  // `control` ist der Maschinenraum. ABGESCHALTETE Altnamen bleiben gesperrt —
+  // ein zurückgegebener Plattform-Name ist der beste Phishing-Köder, den es
+  // gibt: `app` und `studio` (oben) sowie `my` und `start`, die seit AH-1
+  // nur noch 301 auf `account` weiterleiten.
+  'control', 'my', 'start', 'master', 'manage', 'new', 'photos',
   // Phishing-Schutz (Self-Service-Onboarding, SAAS-ROADMAP #1): Hosts, die wie
   // die Plattform selbst klingen, dürfen nie einem Kunden gehören —
   // `login.pukalani.app` in fremder Hand ist eine Anmeldedaten-Falle mit

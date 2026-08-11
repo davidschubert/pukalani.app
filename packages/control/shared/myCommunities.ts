@@ -3,7 +3,7 @@ import { communityIsReadOnly, resolveCommunitySuspension, type CommunitySuspensi
 import { normalizeTenantPlan, type TenantPlan } from './types/tenantRecord'
 
 /**
- * „Deine Communities" — der Vertrag der Kunden-Übersicht auf `my.pukalani.app`
+ * „Deine Communities" — der Vertrag der Kunden-Übersicht auf `account.pukalani.app`
  * (F12). PURE, unit-getestet, ohne h3/Appwrite: das Control Plane setzt ihn
  * durch, der onboarding-Layer konsumiert ihn, die Seite rendert ihn.
  *

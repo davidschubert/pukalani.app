@@ -19,7 +19,7 @@ import {
  * der Fall für createMicrocache) — die Startseite ist die meistbesuchte Seite
  * des Systems, sie darf keinen fremden Dienst pro Aufruf antippen.
  *
- * KURZER TIMEOUT UND FAIL-SAFE: die Landing muss rendern, auch wenn my.* gerade
+ * KURZER TIMEOUT UND FAIL-SAFE: die Landing muss rendern, auch wenn account.* gerade
  * nicht antwortet. Was dann steht, ist die Einladungs-Variante — der Zustand,
  * der heute ohnehin gilt und der niemandem etwas verspricht, das er nicht
  * bekommt. Der Fehlschlag wird NICHT gecacht, damit die Seite sofort wieder

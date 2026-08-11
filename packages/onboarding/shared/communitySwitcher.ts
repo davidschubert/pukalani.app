@@ -20,7 +20,7 @@ import type { MyCommunityView } from '../../control/shared/myCommunities'
  * capability-gefiltert weg. Wer in zwanzig Communities mitliest und in einer
  * arbeitet, bekäme ein Menü mit neunzehn Sackgassen.
  *
- * Der KUNDENBEREICH auf `my.*` bleibt davon unberührt und zeigt weiter ALLE
+ * Der KUNDENBEREICH auf `account.*` bleibt davon unberührt und zeigt weiter ALLE
  * Mitgliedschaften (`projectMyCommunities`) — das ist die vollständige Liste,
  * dies hier ist die Arbeits-Auswahl. Beide Wege stehen im Menü nebeneinander:
  * unten führt „Communities verwalten" genau dorthin.

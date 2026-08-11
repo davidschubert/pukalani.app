@@ -230,7 +230,7 @@ const columns = computed(() => [
   },
   {
     // Rechtstexte liegen auf DIESER Domain (Impressumspflicht), nicht als Link
-    // auf my.pukalani.app.
+    // auf den Kundenbereich.
     aria: t('marketing.footer.aria.legal'),
     label: t('marketing.footer.colLegal'),
     children: [

@@ -8,7 +8,7 @@ import { ABUSE_CATEGORIES, type AbuseCategory } from '../../../control/shared/ab
  * fast nie Mitglied der gemeldeten Community. Ein Konto zur Bedingung zu machen
  * hieße, die meisten Meldungen nie zu bekommen.
  *
- * SIE LIEGT AUF DEM KUNDENBEREICH-HOST (`my.*`/`start.*`), weil der niemandem
+ * SIE LIEGT AUF DEM KUNDENBEREICH-HOST (`account.*`/`account.*`), weil der niemandem
  * gehört und deshalb nie gesperrt werden kann — dieselbe Überlegung wie bei
  * `anfragen.vue`. Auf einem lebenden Community-Host rendert sie ebenfalls
  * (Seiten sind nicht auf Kontroll-Hosts beschränkt), auch auf einem wegen

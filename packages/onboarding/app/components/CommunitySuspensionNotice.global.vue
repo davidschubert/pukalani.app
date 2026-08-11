@@ -17,7 +17,7 @@
  * ES KANN HIER NUR 'billing' STEHEN. Eine wegen Missbrauch gesperrte Community
  * löst ihren Host nicht mehr auf: dort gibt es kein Dashboard, in dem ein
  * Banner hängen könnte. Der Owner erfährt DAVON im Kundenbereich
- * (my.pukalani.app) und per Mail. Trotzdem behandelt die Vorlage beide Fälle —
+ * (account.pukalani.app) und per Mail. Trotzdem behandelt die Vorlage beide Fälle —
  * eine Komponente, die bei einem unerwarteten Wert nichts sagt, wäre der
  * schlechtere Fehler.
  *

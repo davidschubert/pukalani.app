@@ -12,7 +12,7 @@ import { callControlPlane } from '../../utils/controlPlane'
  * strenges Zod-Schema.
  *
  * WO SIE ERREICHBAR IST — und wo bewusst nicht:
- *  - auf den KONTROLL-Hosts (`my.*`, `start.*`): `/api/abuse` steht dafür in
+ *  - auf den KONTROLL-Hosts (`account.*`): `/api/abuse` steht dafür in
  *    `pukalani.tenancy.controlApiPrefixes`. Das ist das Zuhause des Formulars,
  *    weil ein Kontroll-Host niemandem gehört und deshalb nie gesperrt ist.
  *  - auf jedem LEBENDEN Community-Host, einschließlich der wegen Zahlungsverzug
@@ -23,7 +23,7 @@ import { callControlPlane } from '../../utils/controlPlane'
  *    genau der Zweck der Maßnahme. Eine Ausnahme in `00.tenant.ts` wäre ein
  *    Loch in der einen Middleware, die die Mandantengrenze zieht — für einen
  *    Fall, den es nicht gibt: über eine bereits abgeschaltete Community muss
- *    niemand mehr Meldung erstatten, und jede ANDERE ist von `my.pukalani.app`
+ *    niemand mehr Meldung erstatten, und jede ANDERE ist von `account.pukalani.app`
  *    aus meldbar.
  *
  * Die Antwort ist IMMER `{ ok: true }` — auch beim Honeypot und auch, wenn der

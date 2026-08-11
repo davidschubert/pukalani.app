@@ -46,7 +46,7 @@ export default defineAppConfig({
        * apps/comments). `scope: 'operator'` allein reicht NICHT: es hält die
        * Reiter zwar von jedem Mandanten-Host fern — genau Davids „System
        * entfällt im Pool" —, lässt sie aber im Kundenbereich
-       * my.pukalani.app (`place: 'control'`) und in apps/control/apps/photos
+       * account.pukalani.app (`place: 'control'`) und in apps/control/apps/photos
        * (`place: 'single-tenant'`) stehen. Die vollständige Begründung steht
        * am Schalter in packages/core/app/app.config.ts.
        *

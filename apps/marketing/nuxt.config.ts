@@ -83,9 +83,12 @@ export default defineNuxtConfig({
   //      _REQUEST_URL
   runtimeConfig: {
     public: {
-      // Kundenbereich (Umbenennung 2026-07-25, vorher app.pukalani.app)
-      marketingStartUrl: 'https://my.pukalani.app/register',
-      marketingSignInUrl: 'https://my.pukalani.app/login',
+      // Kundenbereich. Seit AH-1 (2026-08-11) EIN Name: account.pukalani.app
+      // (vorher my.pukalani.app, davor app.pukalani.app). Die Altnamen leiten
+      // 301 weiter — hier steht trotzdem der heutige, damit eine beworbene URL
+      // nicht dauerhaft über einen Umweg läuft.
+      marketingStartUrl: 'https://account.pukalani.app/register',
+      marketingSignInUrl: 'https://account.pukalani.app/login',
       marketingDemoUrl: 'https://demo.pukalani.app',
       /**
        * Zugang anfragen (U3, 2026-08-10) — das Ziel für jede Absicht, die
@@ -102,7 +105,7 @@ export default defineNuxtConfig({
        * (`redirectOn: 'all'`) auf `/de/anfragen` weitergeleitet, genau wie bei
        * `/register` oben.
        */
-      marketingRequestUrl: 'https://my.pukalani.app/request-access',
+      marketingRequestUrl: 'https://account.pukalani.app/request-access',
       /**
        * ZUSTAND DES EARLY-ACCESS-TORS (U2, Davids Entscheidung 8 vom
        * 2026-08-10): braucht eine eigene Community gerade einen
@@ -117,7 +120,7 @@ export default defineNuxtConfig({
        *
        * Env: NUXT_PUBLIC_MARKETING_GATE_URL
        */
-      marketingGateUrl: 'https://my.pukalani.app/api/onboarding/gate',
+      marketingGateUrl: 'https://account.pukalani.app/api/onboarding/gate',
     },
   },
 

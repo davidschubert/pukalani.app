@@ -19,7 +19,7 @@ import { tenantSitemapEntries, tenantSitemapXml } from '../utils/tenantSitemap'
  * in Nitro als @experimental markiert, und die Tür ist der kürzere, hier schon
  * verbindliche Weg (die Route bräuchte nur die Slugs, nicht ihr DTO).
  *
- * KONTROLL-Hosts (my./start.) antworten 404 — konsistent zu ihrer robots.txt
+ * KONTROLL-Hosts (account.pukalani.app) antworten 404 — konsistent zu ihrer robots.txt
  * (`Disallow: /`): dort gibt es keinen öffentlichen Inhalt, also nichts zu
  * deklarieren. Eine leere Sitemap wäre die zweite mögliche Antwort, aber ein
  * `<urlset>` ohne URLs ist eine Aussage über nichts — und sie stünde in einer

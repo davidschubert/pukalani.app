@@ -129,7 +129,7 @@ export function tenantRobotsTxt(origin: string): string {
 }
 
 /**
- * robots.txt eines KONTROLL-Hosts (my./start. — pukalani.tenancy.controlHosts).
+ * robots.txt eines KONTROLL-Hosts (pukalani.tenancy.controlHosts).
  *
  * Kundenbereich und Onboarding-Wizard sind kein SEO-Ziel: sie tragen keinen
  * öffentlichen Inhalt, führen hinter eine Anmeldung und würden als

@@ -1,7 +1,7 @@
 /**
  * Trennt die zwei Welten DESSELBEN Deployments, symmetrisch:
  *
- *  - Auf einem KONTROLL-Host (my./start.pukalani.app) zeigt `/` den
+ *  - Auf einem KONTROLL-Host (account.pukalani.app) zeigt `/` den
  *    Kundenbereich, nicht die Startseite einer Community — dort gibt es keine.
  *  - Auf einem Community-Host bleiben Trichter UND Übersicht unerreichbar
  *    (404). Ein „Community anlegen" unter `kunde.pukalani.app/start` wäre für
@@ -11,7 +11,7 @@
  *    (dieselbe Regel wie beim Changelog, N7).
  *
  * WOHIN `/` auf einem Kontroll-Host führt, entscheidet seit F12 eine pure
- * Funktion (`controlHomeTarget`, core/shared/controlCenter.ts): auf `start.*`
+ * Funktion (`controlHomeTarget`, core/shared/controlCenter.ts): auf `account.*`
  * der Wizard, sonst die Übersicht — und ein `?code=` schlägt beides. Vorher
  * ging JEDER Kontroll-Host hart nach `/start`; ein Bestandskunde wurde damit
  * auf seinem eigenen Kundenbereich mit „Neue Community anlegen" begrüßt.
@@ -30,7 +30,7 @@ export default defineNuxtRouteMiddleware((to) => {
       const hasInviteCode = typeof to.query.code === 'string' && to.query.code.trim() !== ''
       const target = useControlHomeTarget(hasInviteCode) === 'wizard' ? '/start' : '/communities'
       // Query MITNEHMEN: der Direktlink aus der Einladungs-Mail ist
-      // `https://start.pukalani.app?code=…`. Ohne das fiele der Code beim
+      // `https://account.pukalani.app?code=…`. Ohne das fiele der Code beim
       // Weiterleiten weg und der Eingeladene müsste ihn abtippen.
       return navigateTo({ path: localePath(target), query: to.query })
     }

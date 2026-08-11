@@ -1,7 +1,7 @@
 /**
- * Ziel-Links der Marketing-CTAs. Der Kundenbereich lebt auf my.pukalani.app
- * (Umbenennung 2026-07-25, vorher app.pukalani.app), die Live-Demo auf
- * demo.pukalani.app.
+ * Ziel-Links der Marketing-CTAs. Der Kundenbereich lebt seit AH-1
+ * (2026-08-11) auf account.pukalani.app (vorher my., davor app.), die
+ * Live-Demo auf demo.pukalani.app.
  *
  * Die Werte stehen als Skeleton in nuxt.config.ts (runtimeConfig.public) —
  * dort auch die Prod-Defaults. Lokal/Staging per NUXT_PUBLIC_MARKETING_*_URL

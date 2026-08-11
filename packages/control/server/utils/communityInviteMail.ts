@@ -6,7 +6,7 @@ import type { CommunityRole } from '../../../core/shared/communityAuthz'
  *
  * Der Link zeigt auf den HOST DER COMMUNITY, nicht auf den Kundenbereich: die
  * Mitgliedschaft entsteht dort, und Session-Cookies sind host-gebunden (wer sich
- * auf my.pukalani.app anmeldet, ist auf kunde-a.pukalani.app NICHT eingeloggt).
+ * auf account.pukalani.app anmeldet, ist auf kunde-a.pukalani.app NICHT eingeloggt).
  * Der Auth-Guard der Seite hängt das Ziel als `?redirect=` an — wer schon ein
  * Konto hat, ist nach dem Anmelden mit EINEM Klick drin; wer keines hat,
  * registriert sich zuerst und landet danach an derselben Stelle. Genau das ist

@@ -5,13 +5,13 @@ import { listMyCommunities } from '../../utils/communityHandoff'
  * DIE LISTE FÜR DEN COMMUNITY-SWITCHER im Dashboard-Kopf (F50, 2026-08-07).
  *
  * Gegenstück zu `GET /api/onboarding/communities`, aber am ANDEREN Ort und mit
- * engerer Auswahl: der Kundenbereich auf `my.*` zeigt jede Mitgliedschaft, das
+ * engerer Auswahl: der Kundenbereich auf `account.*` zeigt jede Mitgliedschaft, das
  * Dashboard-Menü nur die, in denen es etwas zu verwalten gibt (Team-Rollen —
  * die Begründung steht bei `projectCommunitySwitcher`).
  *
  * ── NUR AUF POOL-MANDANTEN-HOSTS (404 sonst) ──────────────────────────────
  * Drei Orte, drei Antworten, und keiner davon braucht diese Route:
- *  - KONTROLL-HOST (`my.*`, `start.*`): dort steht die vollständige Übersicht
+ *  - KONTROLL-HOST (`account.*`): dort steht die vollständige Übersicht
  *    schon als eigene Seite. Zusätzlich fiele die Route ohnehin durch das
  *    fail-closed Präfix-Tor (`/api/community/` steht nicht in
  *    `controlApiPrefixes`) — dieses `mode !== 'pool'` ist die zweite Hälfte,

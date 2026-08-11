@@ -1,5 +1,5 @@
 /**
- * Beweis für F12 — die Kunden-Übersicht auf `my.*`.
+ * Beweis für F12 — die Kunden-Übersicht auf `account.*`.
  *
  * Fährt den ECHTEN Weg gegen den laufenden Platform-Server: zwei Communities
  * per Wizard anlegen, Mitgliedschaften setzen, und dann messen, WAS WER SIEHT

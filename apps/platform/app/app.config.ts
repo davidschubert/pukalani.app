@@ -46,7 +46,9 @@ export default defineAppConfig({
     // führt in den Self-Service-Trichter.
     demo: {
       hosts: ['demo.pukalani.app'],
-      ctaUrl: 'https://start.pukalani.app',
+      // AH-1: der Trichter hat keinen eigenen Host mehr — er liegt unter
+      // `/start` auf dem Kundenbereich.
+      ctaUrl: 'https://account.pukalani.app/start',
     },
     // Chrome-Registry (S9): der Operator-Changelog (admin-Layer schaltet
     // WhatsNew-Button + Footer-Link per Default an) ist KEIN Tenant-Inhalt —
@@ -188,27 +190,36 @@ export default defineAppConfig({
     tenancy: {
       enabled: true,
       // Der Kundenbereich (Self-Service-Onboarding, SAAS-ROADMAP #1) läuft auf
-      // DEMSELBEN Deployment, ist aber kein Mandant. Alle drei Namen sind in
-      // RESERVED_SUBDOMAINS gesperrt, können also niemals Tenant-Hosts werden;
+      // DEMSELBEN Deployment, ist aber kein Mandant. Der Name ist in
+      // RESERVED_SUBDOMAINS gesperrt, kann also niemals Tenant-Host werden;
       // die Wildcard-DNS `*.pukalani.app` zeigt schon hierher — es braucht
-      // also keine neue ploi-Site. Lokal per
+      // also keine neue ploi-Site und KEIN neues Zertifikat (die Lineage-Falle
+      // steht in docs/content/2.architektur/6.hosts-und-ports.md). Lokal per
       // NUXT_PUBLIC_TENANCY_CONTROL_HOSTS=app.localhost überschreiben.
       //
-      // Umbenennung 2026-07-25 (Davids Entscheidung): `my` ist der Kundenbereich
-      // (trägt Anmeldung UND späteren Kontobereich — Abo, Rechnungen, Team),
-      // `start` ist der Kurz-Link in den Wizard (Visitenkarte, Bio).
-      // Der Altname `app` ist am 2026-07-27 ENTFERNT (Davids Entscheidung):
-      // er war nie beworben, hatte nie einen eigenen DNS-Eintrag (lief über
-      // die Wildcard) und stand nur noch hier. Er antwortet jetzt 404 wie
-      // jeder unbekannte Host. `app` bleibt in RESERVED_SUBDOMAINS gesperrt —
-      // ein Selbstbedienungs-Kunde darf den Namen NIE bekommen (Phishing).
-      controlHosts: ['my.pukalani.app', 'start.pukalani.app'],
-      // F12: `start.*` ist der Kurz-Link in den Wizard — dort bleibt `/` der
-      // Trichter. `my.*` ist der KUNDENBEREICH und zeigt seit F12 die
-      // Übersicht „Deine Communities"; wer dort keine hat, wird von der
-      // Übersicht selbst in den Wizard weitergeschickt. Lokal per
-      // NUXT_PUBLIC_TENANCY_WIZARD_HOSTS überschreiben.
-      wizardHosts: ['start.pukalani.app'],
+      // AH-1 (Davids Entscheidung 2026-08-11): EIN Name für den Kundenbereich —
+      // `account.pukalani.app`. Er trägt Anmeldung, Konto, Communities und den
+      // Wizard (`/start`). Die Vorgänger `my` (Kundenbereich) und `start`
+      // (Kurz-Link in den Wizard) sind abgeschaltet und stehen unten in
+      // `legacyControlHosts`; `app` fiel schon am 2026-07-27. ALLE DREI bleiben
+      // in RESERVED_SUBDOMAINS gesperrt — ein zurückgegebener Plattform-Name
+      // ist der beste Phishing-Köder, den es gibt.
+      controlHosts: ['account.pukalani.app'],
+      // LEER SEIT AH-1, und das ist die Aussage: mit nur einem Kontroll-Host
+      // gibt es keinen Host mehr, dessen `/` in den Trichter führt — `/` zeigt
+      // die Übersicht „Deine Communities", und wer keine hat, wird von der
+      // Übersicht selbst in den Wizard weitergeschickt (F12). Der Wizard bleibt
+      // unter `/start` erreichbar, und ein `?code=` aus einer Einladungs-Mail
+      // führt weiterhin direkt dorthin. Lokal per
+      // NUXT_PUBLIC_TENANCY_WIZARD_HOSTS=start.localhost überschreibbar.
+      wizardHosts: [],
+      // AH-1: die zwei abgeschalteten Namen antworten 301 auf
+      // `controlHosts[0]`, Pfad und Query unverändert (core/shared/
+      // legacyControlHosts.ts). Sie MÜSSEN das eine Weile: eine
+      // Einladungs-Mail trägt ihren `?code=` sieben Tage, und in Bios,
+      // Lesezeichen und Chat-Verläufen steht der alte Name unbefristet.
+      // Env-Override: NUXT_PUBLIC_TENANCY_LEGACY_CONTROL_HOSTS.
+      legacyControlHosts: ['my.pukalani.app', 'start.pukalani.app'],
       // H3-4.3 Quota (Blueprint S4): Pool-Kunden erschöpfen den geteilten
       // Server nicht. PRO PLAN gestaffelt (David-Freigabe 2026-07-23) — der
       // Tenant trägt seinen Plan (tenants.plan, control-013, Default free).

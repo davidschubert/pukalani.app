@@ -11,7 +11,7 @@ import { tenantRequestOrigin } from '../utils/tenantRequestOrigin'
  *    Was nur Mitglieder sehen, gehört nicht in den Index — und die Seiten
  *    sagen zusätzlich `noindex` im Kopf (useLocaleSeoHead), weil robots.txt
  *    das Crawlen regelt, nicht das Indexieren bereits bekannter URLs.
- *  - KONTROLL-Host (my./start. — pukalani.tenancy.controlHosts): Disallow: /.
+ *  - KONTROLL-Host (pukalani.tenancy.controlHosts): Disallow: /.
  *    Kundenbereich und Wizard sind kein SEO-Ziel.
  *  - unbekannter Host: 404 — das entscheidet aber nicht diese Route, sondern
  *    schon `00.tenant.ts` (kein Mandant → 404, KEINE Default-Site). Deshalb

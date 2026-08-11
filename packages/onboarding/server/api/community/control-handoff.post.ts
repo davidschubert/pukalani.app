@@ -38,7 +38,7 @@ import { sealControlHostHandoff } from '../../utils/communityHandoff'
  * `resolveControlHosts` statt eines rohen Griffs in die app.config — dieselbe
  * Reihenfolge wie in `useControlCenter`/`useTenantHost`. Lokal heißen die
  * Kontroll-Hosts anders (`app.localhost`), und ein Siegel für
- * `my.pukalani.app` schickte den Entwickler mitten aus seiner Sitzung in die
+ * Der Kundenbereich schickte den Entwickler mitten aus seiner Sitzung in die
  * Produktion.
  */
 const bodySchema = z.object({

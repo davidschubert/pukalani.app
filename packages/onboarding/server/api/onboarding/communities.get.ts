@@ -6,7 +6,7 @@ import { callControlPlane, mintRuntimeJwt } from '../../utils/controlPlane'
 
 /**
  * „Deine Communities" für den eingeloggten Nutzer (F12) — die Datenquelle der
- * Kunden-Übersicht auf `my.pukalani.app`.
+ * Kunden-Übersicht auf `account.pukalani.app`.
  *
  * KEIN NEUER PRÄFIX NÖTIG, und das ist eine Entscheidung, keine Bequemlichkeit:
  * `/api/onboarding/` steht schon in `pukalani.tenancy.controlApiPrefixes`, und

@@ -10,7 +10,7 @@ import { callControlPlane, mintRuntimeJwt } from './controlPlane'
  * DAS SIEGEL FÜR DEN SPRUNG AUF EINEN COMMUNITY-HOST — EINE Fassung für alle
  * Aufrufer (F50, 2026-08-07).
  *
- * Session-Cookies sind host-only: die Anmeldung auf `my.*` (oder auf Community
+ * Session-Cookies sind host-only: die Anmeldung auf `account.*` (oder auf Community
  * A) gilt auf Community B nicht. Deshalb siegelt der abgebende Host beim KLICK
  * ein 60-Sekunden-Token, das der Ziel-Host gegen Appwrite prüft, bevor er sein
  * eigenes Cookie setzt (`GET /api/auth/site-session`).

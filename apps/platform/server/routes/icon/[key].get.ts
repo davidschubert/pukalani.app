@@ -38,7 +38,7 @@ import { brandIconPng } from '../../utils/brandImageStore'
  * auf dessen Gerät. Es trägt keinen Inhalt nach außen, und es zu sperren
  * hieße, genau den treuesten Mitgliedern eine graue Kachel zu geben.
  *
- * Kontroll-Hosts (my./start.) dürfen hier durch: `/icon/*` ist keine
+ * Kontroll-Hosts (account.pukalani.app) dürfen hier durch: `/icon/*` ist keine
  * `/api/`-Route (01.control-center.ts greift nicht) und liefert dort App-Brand
  * + Default-Farbe — dieselbe Antwort wie `/favicon.svg`. Unbekannte Hosts hat
  * `00.tenant.ts` längst mit 404 erledigt.

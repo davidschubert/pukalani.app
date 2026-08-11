@@ -115,7 +115,7 @@ const operatorHere = scopeVisibleAt('operator', place)
  *     onboarding-Layer besitzt sie, A14) — sonst wäre das Menü eine Attrappe,
  *     die beim ersten Öffnen in einen 404 läuft.
  *  2. Der ORT sagt, ob es hier etwas zu wechseln GIBT. Auf einem Kontroll-Host
- *     (`my.*`) steht die vollständige Übersicht ohnehin als eigene Seite, und
+ *     (`account.*`) steht die vollständige Übersicht ohnehin als eigene Seite, und
  *     `/api/community/switcher` antwortet dort bewusst 404; im Einzelbetrieb
  *     gibt es überhaupt nur eine Community.
  * Trifft eines nicht zu, bleibt es beim Branding wie bisher (DashboardBrand).

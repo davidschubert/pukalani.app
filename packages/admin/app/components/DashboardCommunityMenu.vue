@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { DropdownMenuItem } from '@nuxt/ui'
+import { resolveWizardHosts } from '../../../core/shared/controlCenter'
 import { communityOrigin } from '../../../core/shared/notificationLinks'
 import { switcherExternalLink } from '../../shared/communitySwitcherLinks'
 
@@ -104,7 +105,7 @@ watch(open, (isOpen) => { if (isOpen) void load() })
  * also nicht. Deshalb wird beim KLICK ein 60-Sekunden-Handoff-Token gesiegelt
  * (nicht beim Rendern: bei einem langsamen Leser wäre es abgelaufen), das der
  * Ziel-Host gegen Appwrite prüft, bevor er sein Cookie setzt — dasselbe
- * Verfahren wie im Kundenbereich auf `my.*` und am Ende des Wizards.
+ * Verfahren wie im Kundenbereich auf `account.*` und am Ende des Wizards.
  *
  * Scheitert der Handoff, führt der Klick trotzdem zur Community — dann eben
  * mit Anmeldung. Ein kaputter Handoff darf keine Sackgasse sein.
@@ -135,8 +136,17 @@ async function switchTo(entry: SwitcherEntry) {
  * Sie entscheiden weiterhin, OB der Menüpunkt erscheint — und sie sind das
  * FALLBACK-Ziel. Das echte Sprungziel kommt seit dem F50-Nachtrag aus der
  * Antwort von `/api/community/control-handoff` (s. `exitTo`).
+ *
+ * Der Anlege-Ausgang holt seine Liste über `resolveWizardHosts()` — dieselbe
+ * pure Regel, die auch der Server dafür liest (`controlExitTarget`). Seit AH-1
+ * ist `wizardHosts` in Produktion leer, `/start` liegt auf dem Kundenbereich;
+ * ohne den gemeinsamen Rückfall zeigte das Menü hier einen anderen Ausgang als
+ * die Route drüben ansteuert.
  */
-const createUrl = computed(() => switcherExternalLink(appConfig.pukalani?.tenancy?.wizardHosts, '/start'))
+const createUrl = computed(() => switcherExternalLink(
+  resolveWizardHosts(appConfig.pukalani?.tenancy?.controlHosts, appConfig.pukalani?.tenancy?.wizardHosts),
+  '/start',
+))
 const manageUrl = computed(() => switcherExternalLink(appConfig.pukalani?.tenancy?.controlHosts, '/communities'))
 
 /**
@@ -144,7 +154,7 @@ const manageUrl = computed(() => switcherExternalLink(appConfig.pukalani?.tenanc
  * Entscheidung 2026-08-08).
  *
  * Bis hierher waren die zwei Ausgänge schlichte Links, und der Klickende stand
- * auf `start.*` bzw. `my.*` vor dem Anmeldeformular: dieselbe App, dasselbe
+ * auf `account.*` vor dem Anmeldeformular: dieselbe App, dasselbe
  * Pool-Projekt, aber Session-Cookies sind host-only. Also dasselbe Verfahren wie
  * beim Community-Wechsel eine Funktion höher — Siegel beim KLICK holen (60 s
  * Gültigkeit, ein beim Rendern erzeugtes wäre tot), Ziel aus der ANTWORT bauen.

@@ -3,14 +3,14 @@ import { trialNotice } from '../../../control/shared/onboarding'
 import type { MyCommunitiesResponse, MyCommunityView } from '../../../control/shared/myCommunities'
 
 /**
- * „Deine Communities" — das Zuhause des Kundenbereichs auf `my.pukalani.app`
+ * „Deine Communities" — das Zuhause des Kundenbereichs auf `account.pukalani.app`
  * (F12).
  *
- * DAS PROBLEM, das diese Seite löst: `my.*` hatte keine Landeseite. `/` leitete
+ * DAS PROBLEM, das diese Seite löst: `account.*` hatte keine Landeseite. `/` leitete
  * hart in den Anlege-Wizard, und der Post-Login-Redirect landete über `/`
  * ebenfalls dort — ein Bestandskunde wurde also in seinem eigenen Kundenbereich
  * mit „Neue Community anlegen" begrüßt, statt seine Community zu sehen. Die
- * Roadmap-Zusage „my.* = Kundenbereich" war damit nur halb eingelöst.
+ * Roadmap-Zusage „account.* = Kundenbereich" war damit nur halb eingelöst.
  *
  * WER 0 COMMUNITIES HAT, sieht diese Seite gar nicht: sie schickt ihn weiter in
  * den Wizard (`replace`, damit „Zurück" nicht in eine Schleife führt). Das ist
@@ -80,7 +80,7 @@ function isOffline(community: MyCommunityView): boolean {
 /**
  * Der Sprung in die Community — EINGELOGGT.
  *
- * Session-Cookies sind host-only, die Anmeldung auf `my.*` gilt auf der
+ * Session-Cookies sind host-only, die Anmeldung auf `account.*` gilt auf der
  * Community-Subdomain also nicht. Deshalb wird beim KLICK ein 60-Sekunden-
  * Handoff-Token gesiegelt (nicht beim Rendern: bei einem langsamen Leser wäre
  * es abgelaufen), das der Community-Host gegen Appwrite prüft, bevor er sein

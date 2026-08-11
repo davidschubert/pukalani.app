@@ -22,10 +22,12 @@ export default defineNuxtConfig({
     controlOnboardingSecret: '',
     // Wohin die Einladungs-Mail verlinkt (Kundenbereich, nicht das Control).
     // Env: NUXT_ONBOARDING_START_URL — Default zeigt auf die Prod-Adresse.
-    // Umbenennung 2026-07-25: der Kunde bekommt den Kurz-Link. `start` ist ein
-    // Kontroll-Host derselben Platform-App, die Weiterleitung auf den Wizard
-    // macht die control-center-Middleware.
-    onboardingStartUrl: 'https://start.pukalani.app',
+    // AH-1 (2026-08-11): der Kurz-Link-Host `start.` ist abgeschaltet, der
+    // Kundenbereich heißt `account.`. Die Mail hängt ihren `?code=` an DIESE
+    // Adresse — dass ein Code in den Wizard führt und nicht in die Übersicht,
+    // entscheidet weiterhin die control-center-Middleware (`controlHomeTarget`,
+    // ein `?code=` schlägt alles). Es braucht hier also KEIN `/start`.
+    onboardingStartUrl: 'https://account.pukalani.app',
     /**
      * EIGENE DOMAINS (control-035, Davids Entscheidungen vom 2026-08-07).
      *

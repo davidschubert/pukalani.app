@@ -29,10 +29,12 @@ import { Client, ID, Query, TablesDB, Users } from 'node-appwrite'
 const PORT = Number(process.env.PLATFORM_PORT || 3006)
 const CONTROL_HOST = process.env.CONTROL_HOST || 'app.localhost'
 // Lokal MUSS der Platform-Server den Wizard-Host kennen — und zwar auf BEIDEN
-// Achsen (wie in prod, wo `start.pukalani.app` in controlHosts UND wizardHosts
-// steht): NUXT_PUBLIC_TENANCY_CONTROL_HOSTS=app.localhost,start.localhost
+// Achsen: NUXT_PUBLIC_TENANCY_CONTROL_HOSTS=app.localhost,start.localhost
 // NUXT_PUBLIC_TENANCY_WIZARD_HOSTS=start.localhost. Fehlt der Host in
 // controlHosts, ist er ein UNBEKANNTER Host und die Einlösung antwortet 404.
+// Der Beweis prüft damit den Fall MIT eigenem Wizard-Host; in Produktion ist
+// die Liste seit AH-1 leer und der Ausgang fällt auf den Kontroll-Host zurück
+// (`resolveWizardHosts`, unit-getestet in core + onboarding).
 const WIZARD_HOST = process.env.WIZARD_HOST || 'start.localhost'
 
 const endpoint = process.env.NUXT_PUBLIC_APPWRITE_ENDPOINT

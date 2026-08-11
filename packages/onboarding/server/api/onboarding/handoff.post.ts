@@ -8,7 +8,7 @@ import { sealCommunityHandoff, type SealedCommunityHandoff } from '../../utils/c
  * Wird beim KLICK gerufen, nicht beim Seitenaufbau: das Token lebt 60 Sekunden,
  * ein beim Rendern erzeugtes wäre bei einem langsamen Leser längst tot.
  *
- * DIESE ROUTE IST DIE HÄLFTE DES KUNDENBEREICHS (`my.*`, Kontroll-Host): sie
+ * DIESE ROUTE IST DIE HÄLFTE DES KUNDENBEREICHS (`account.*`, Kontroll-Host): sie
  * lebt unter `/api/onboarding/`, das in `pukalani.tenancy.controlApiPrefixes`
  * steht, und ist damit genau dort erreichbar. Der Community-Switcher im
  * Dashboard hat sein eigenes Gegenstück auf den MANDANTEN-Hosts

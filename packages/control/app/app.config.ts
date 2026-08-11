@@ -5,9 +5,20 @@
 export default defineAppConfig({
   pukalani: {
     control: {
-      /** Das geteilte Pool-Appwrite-Projekt neuer Tenants (Onboarding-Default —
-       *  der Betreiber tippt nur noch Name/Host, das Projekt füllt der Server). */
-      defaultPoolProject: 'pool',
+      /**
+       * Das geteilte Appwrite-Projekt neuer Tenants (Onboarding-Default — der
+       * Betreiber tippt nur noch Name/Host, das Projekt füllt der Server).
+       *
+       * AH-1 (2026-08-11): heißt `account` (Anzeigename „Account"). Das
+       * Vorgänger-Projekt `pool` ist nach der Migration eingefroren — eine
+       * Appwrite-Projekt-Id ist unveränderlich, „umbenennen" war deshalb
+       * Neuanlage + Datenumzug. Steht hier je die alte Id, legt der Wizard
+       * neue Communities in der EINGEFRORENEN Instanz an, und zwar lautlos.
+       *
+       * Env-Override je Umgebung: NUXT_PUBLIC_CONTROL_POOL_PROJECT (lokal
+       * heißt das Dev-Projekt weiterhin `pool`).
+       */
+      defaultPoolProject: 'account',
       // Plan-Katalog der COMMUNITY (P4-Rename 2026-07-26, Davids Pricing-Entscheid:
       // Basic 0 € / Personal 29 € / Pro 149 €, jährlich −25 %; Enterprise =
       // Studio-Angebot, KEIN Self-Service-Plan) — bewusst Code statt Table
