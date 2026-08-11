@@ -413,7 +413,25 @@ export default defineAppConfig({
        * an das Control Plane weiter, und dort landet die Meldung in einer
        * Tabelle ohne jede Client-Berechtigung.
        */
-      controlApiPrefixes: ['/api/auth/', '/api/onboarding/', '/api/health', '/api/telemetry/', '/api/notifications', '/api/feedback', '/api/abuse'] as string[],
+      /**
+       * `/api/account/activity` ist seit AH-3 dabei — die eigene Aktivität über
+       * alle Communities (`/profile/activity`).
+       *
+       * BEWUSST DER EXAKTE PFAD, kein Verzeichnis-Präfix `/api/account/`: der
+       * Vergleich läuft an der Segmentgrenze, ein Verzeichnis öffnete damit
+       * JEDE künftige Route unter diesem Namen mit — ohne dass jemand sie
+       * gegen den fehlenden Mandanten-Scope geprüft hätte. Der nächste
+       * Konto-Endpunkt bekommt seine eigene Zeile, und das ist die Absicht.
+       *
+       * Sicher ohne Mandanten-Scope, obwohl die Route ANDERS begründet ist als
+       * `/api/feedback` und `/api/abuse` (die keine Tabelle dieses Projekts
+       * berühren): sie liest sehr wohl Produkt-Tabellen, aber ausschließlich
+       * über die Besitz-Spalte (`authorId`/`userId` = Session-Nutzer). Der
+       * Mandant ist hier keine Grenze, weil die Frage user-zentriert ist —
+       * die Grenze ist der Besitz, und die setzen die Contributors
+       * (core/server/utils/userActivity.ts) durch.
+       */
+      controlApiPrefixes: ['/api/auth/', '/api/onboarding/', '/api/health', '/api/telemetry/', '/api/notifications', '/api/feedback', '/api/abuse', '/api/account/activity'] as string[],
     },
     /**
      * Realtime-Gate (F14, 2026-08-01) — der EINE Schalter, mit dem eine App

@@ -4,6 +4,15 @@ import type { H3Event } from 'h3'
  * „WO WAR DIESER MENSCH ZULETZT AKTIV?" — als Cross-Layer-Vertrag
  * (F1 Stufe 3, Stück 4).
  *
+ * ── NICHT VERWECHSELN (Zeiger, seit AH-3) ──────────────────────────────────
+ * Dieser Vertrag ist MANDANTEN-GESCOPT: seine Provider lesen über `tenantDb`,
+ * und das ist Absicht — die Seitenleiste einer Community darf nicht zeigen,
+ * was jemand woanders getan hat. Die KONTO-weite Gegenfrage („was habe ich
+ * über alle Communities geschrieben?") beantwortet ein eigener Vertrag,
+ * `registerAccountActivityContributor` in `accountActivity.ts`. Die
+ * ausführliche Abgrenzung steht dort; hier genügt: wer diese beiden Registries
+ * zusammenlegt, opfert entweder die Mandantengrenze oder die Konto-Seite.
+ *
  * ── Die Schuld, die das hier begleicht ─────────────────────────────────────
  * Davids Entscheidung 7 lautet: die Seitenleiste der Discussions zeigt „meine
  * letzten fünf Kategorien — in denen ich GEPOSTET ODER KOMMENTIERT habe".
