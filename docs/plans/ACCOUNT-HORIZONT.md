@@ -132,5 +132,8 @@ Auth-Welten: **account** (alle Menschen) und **admin** (Betreiber).
 
 - Name der master-Community (master. / lab. / werkstatt.?).
 - Zeitfenster des AH-1-Cutovers (einmalige Kunden-Abmeldung).
+- Plausible-Site für die Kontroll-Hosts (U18: 5 von 7 Trichter-Ereignissen
+  schlafen dort) — erst NACH AH-1 anlegen, sonst trüge die Site den alten
+  Namen my.pukalani.app; Davids Entscheidung dazu ist zurückgestellt.
 - Hash-Algorithmus der Bestandskonten gegen die Users-API-Endpunkte der
   1.9.6 verifizieren, BEVOR AH-1 beginnt.

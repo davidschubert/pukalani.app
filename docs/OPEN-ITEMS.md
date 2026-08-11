@@ -1,6 +1,6 @@
 # Offene Punkte
 
-**Stand: 21 offen · 5 geparkt/wartend · 10 bewusst zurückgestellt** (Zahlen bei JEDEM Umzug nach COMPLETE mitführen)
+**Stand: 20 offen · 5 geparkt/wartend · 10 bewusst zurückgestellt** (Zahlen bei JEDEM Umzug nach COMPLETE mitführen)
 
 Stand: **2026-08-11**. Hier steht **nur, was noch offen ist** — in der
 Reihenfolge, in der es abgearbeitet wird. Alles Erledigte (mit Begründung,
@@ -27,7 +27,6 @@ demo-Ausbau, comments in den Pool. Entscheidungen: DECISION-LOG 2026-08-11.
 | --- | --- | --- | --- | --- | --- |
 | 2 · A1 | **Echte Rechtstexte** für Impressum, Datenschutz und AGB. Die Seiten stehen, die Texte sind Entwürfe mit sichtbarem Hinweis. Schaltet Punkt 3 frei. Dazu seit 2026-08-08: die vier Entwürfe auf **pukalani.studio** (`/dashboard/pages`) füllen und veröffentlichen. **Direkt danach `pukalani.auth.termsUrl` in `apps/platform` setzen** — die AGB-Checkbox fehlt heute genau dort, wo Kunden sich registrieren (Trichter M9). | Hoch | S — Adresse eintragen, Anwalt lesen lassen | Ja: nur David (ggf. Anwalt) | [Notizen](#notizen) |
 | 3 · A2 | **Stripe auf echtes Geld umstellen — über die F55-Seite.** Vorstufe A2a komplett grün, F55 selbst erledigt (beide 2026-08-08). Bei David bleiben: Bank-Aktivierung, Steuer-Registrierung, Live-Key ROTIERT eintragen (der erste ist teil-geleakt und rotiert), Portal-Konfiguration; alles andere klickt die F55-Seite. Braucht Punkt 2 (A1). | Hoch | S | Ja: Bank, Konto, Portal | [STRIPE-GO-LIVE-RUNBOOK.md](runbooks/STRIPE-GO-LIVE-RUNBOOK.md) |
-| 4 · AP1 | **[AP1] Trichter dicht — GEBAUT, wird gerade live geschaltet** (U18 Funnel-Events · U1 Code-Wand-Ausgang · U2 Tor-Schalter + ehrliche Landing · U3 Kauf-Knöpfe). Sechs Commits auf `ap1-trichter`, alle Gates grün, am Code nachgeprüft. Rest: Migration system-030 auf allen Instanzen → Merge → Deploy → Live-Beweis; danach zieht der Punkt nach COMPLETE. | Hoch | S (Rest) | Nein | [UX-Trichter K1–K3](archiv/audits/2026-08-09-ux-trichter.md) |
 | 5 · AH-1 | **EIN Cutover: Projekt `pool` → `account` + Host `my.`/`start.` → `account.`** Davids Entscheidung 2026-08-11 (echte ID-Migration, gegen die Empfehlung — jetzt ist mit einer Handvoll Konten der einzige günstige Moment). Nutzer samt Passwort-Hashes über die Users-API, Schema+Daten+Buckets, Web-Plattform, Redirects, Mail-Vorlagen; Kunden werden genau EINMAL abgemeldet. | Hoch | L–XL | Ja: Zeitfenster | [ACCOUNT-HORIZONT.md](plans/ACCOUNT-HORIZONT.md) |
 | 6 · AH-2 | **Der Account-Bereich auf account.pukalani.app.** Startseite `/`, `/profile` (Pukalani-ID: Bild, Name, @handle — dieselbe Implementierung bleibt im Community-Dashboard eingebunden), `/settings`-Ordnung (security · sessions · notifications · **data** = Export/Löschen raus aus „Sicherheit", Audit M10). | Hoch | M–L | Nein | [ACCOUNT-HORIZONT.md](plans/ACCOUNT-HORIZONT.md) |
 | 7 · AH-3 | **`/profile/activity` + Account-Billing.** Community-übergreifende EIGENE Aktivität (nur eigene Inhalte, Aggregation nach dem GDPR-Export-Muster) und die Abrechnung auf Konto-Ebene; Community-Abos bleiben bewusst im Community-Dashboard. | Mittel | L | Nein | [ACCOUNT-HORIZONT.md](plans/ACCOUNT-HORIZONT.md) |

@@ -29,6 +29,56 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### AP1 — Trichter dicht: U18 + U1 + U2 + U3 ✅ 2026-08-11
+
+Vier Punkte als EIN Paket (Branch `ap1-trichter`, zwei Opus-Agenten, jede
+Behauptung am Code nachgeprüft), live seit `2c183d65`:
+
+- **U18 — Funnel-Events.** Sieben benannte Ereignisse
+  (`core/shared/funnelEvents.ts`, `useFunnelEvent()` — meldet NUR über das
+  eingebundene `window.plausible`, kein eigener Transport, SSR-frei).
+  Marketing misst sofort; **5 der 7 Ereignisse auf my./start. schlafen**, bis
+  die Kontroll-Hosts eine Plausible-Site haben — bewusst KEINE Script-Id
+  erfunden; Entscheidung zurückgestellt und in ACCOUNT-HORIZONT.md notiert
+  (sinnvoll erst nach AH-1, sonst trüge die Site den alten Hostnamen).
+- **U1 — Die Code-Wand hat einen Ausgang.** `noCode` verlinkt die
+  Anfrage-Seite (über den Routen-NAMEN, s. Gelernt), das onboarding-Layout
+  hat ein Konto-Menü mit Abmelden, `guest.ts` respektiert `?redirect=`
+  (`safeRedirectTarget` — der „schon angemeldet"-Fall aus der Einladungs-Mail
+  landet jetzt bei seiner Einladung).
+- **U2 — Das Tor hat einen Schalter.** `app_config.onboardingInviteOnly`
+  (system-030, VOR dem Code-Deploy auf allen vier Instanzen gefahren),
+  Betreiber-Schalter auf `/dashboard/invites` (`sites.manage`, auditiert),
+  Durchsetzung server-seitig in `site.post.ts`/`precheck` (offenes Tor prüft
+  UND verbraucht keinen Code — er soll gelten, wenn das Tor wieder schließt),
+  fail-safe-Kette control→platform→marketing (nur ein AUSDRÜCKLICHES `false`
+  öffnet, nur Erfolge werden gecacht), Landing liest den Zustand dynamisch,
+  Register-Seite trägt den Early-Access-Hinweis über die neue
+  `pukalani.auth.notices`-Registry.
+- **U3 — Kaufabsicht landet nicht mehr im Passwortfeld.** `marketingRequestUrl`
+  (`/request-access`, nicht `/anfragen` — Sprachpfade!), Preis-CTAs →
+  `/register`, Early-Access-CTAs → Anfrage-Seite, „Anmelden" im Header.
+  Studio-CTA blieb bewusst auf `#kontakt` (Entscheidung 2026-08-09).
+
+**Beweise:** fünf Gates lokal UND in CI grün (inkl. E2E gegen
+Wegwerf-Appwrite, TLS-Wächter), Live-Messung: `pukalani.app/api/gate` und
+`my.pukalani.app/api/onboarding/gate` antworten `{"inviteRequired":true}`;
+Landing EN/DE zeigt „Request access“/„I have a code“ bzw. „Zugang
+anfragen“/„Ich habe einen Code“ je 3×; das Register-SSR trägt den Hinweis.
+
+**Gelernt:** (1) `localePath('/pfad')` ist auf Seiten mit
+`defineI18nRoute`-Sprachpfaden eine 404-Falle — auf EN kommt der rohe Pfad
+unverändert zurück (im Worktree beidsprachig nachgemessen; der Agent hätte
+den toten Link ausgeliefert). Links auf solche Seiten IMMER über den
+Routen-Namen: `localePath({ name: '…' })`. (2) `pnpm check:bilanz` läuft in
+der CI-Lint, aber NICHT im lokalen `pnpm lint` — jede neue `server/api`-Route
+ändert die Routen-Zählung der Produkt-Bilanz; gehört ab jetzt in die lokale
+Gate-Runde. (3) Ein roter Deploy kann reiner Upstream sein: fonts.gstatic
+lieferte einmalig 404 auf eine Inter-Datei, der Wiederholungslauf war grün —
+erst diagnostizieren, dann fixen.
+
+---
+
 ### U13 — Eigene Domain bleibt ab Pro (Entscheidung, kein Code) ✅ 2026-08-10
 
 **Frage** aus dem Wettbewerbs-Benchmark (E3): Pukalanis Domain-Sperre auf Pro
