@@ -5,7 +5,7 @@
  * ── WOFÜR ÜBERHAUPT ──────────────────────────────────────────────────────
  * Die Freischaltung einer Domain hat einen letzten Schritt, den NUR diese App
  * tun kann: die Appwrite-Web-Platform in IHREM Projekt (F45). Steht der
- * Betreiber dabei in seiner Konsole (`control.pukalani.app/dashboard/websites`)
+ * Betreiber dabei in seiner Konsole (`admin.pukalani.app/dashboard/websites`)
  * und drückt „Prüfen", ist dort niemand, der ein JWT dieses Silos hätte — die
  * Konsole läuft in einem anderen Appwrite-Projekt.
  *

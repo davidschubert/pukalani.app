@@ -33,7 +33,16 @@ import tls from 'node:tls'
 const HOSTS = [
   { host: 'pukalani.app', note: 'Landing (Apex — proxied über Cloudflare; am Ursprung seit D4 ein Cloudflare-Origin-Zertifikat, NICHT browservertraut und deshalb hier nur über die Kante geprüft)' },
   { host: 'www.pukalani.app', ip: '49.13.211.173', note: 'Landing am Ursprung (von der Wildcard gedeckt)' },
-  { host: 'control.pukalani.app', ip: '49.13.211.173', note: 'Control Plane' },
+  { host: 'admin.pukalani.app', ip: '49.13.211.173', note: 'Betreiber-Konsole (AH-4)' },
+  // Der Altname der Konsole (AH-4, 2026-08-11) — er BLEIBT hier stehen, aus
+  // demselben Grund wie my./start. weiter unten: die 301 wird erst NACH dem
+  // Handshake gesprochen. Ein abgelaufenes Zertifikat hier bricht jedes
+  // Lesezeichen und jeden Dienst, der noch auf den Altnamen zeigt, ohne dass
+  // die neue Adresse etwas davon merkt. Beide Namen hängen an EINER Lineage
+  // (`control.pukalani.app` — ploi benennt sie nach der SITE, und die behält
+  // ihren Namen); ein Zertifikat, das nur einen der beiden trägt, macht den
+  // anderen sofort unerreichbar.
+  { host: 'control.pukalani.app', ip: '49.13.211.173', note: 'Altname → 301 auf admin (AH-4); zugleich Name der certbot-Lineage beider Hosts' },
   { host: 'comments.pukalani.app', ip: '49.13.211.173', note: 'Silo-Kunde' },
   { host: 'portfolio.pukalani.app', ip: '49.13.211.173', note: 'Silo-Kunde' },
   // EIGENE DOMAIN (F54, seit 2026-08-08) — und der Grund, warum sie hier

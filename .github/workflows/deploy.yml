@@ -168,7 +168,7 @@ jobs:
           # AUSNAHME von der docs/-Ignorierung: docs/content/ ist seit control/docs
           # (2026-07-28) Teil des control-BUILDS (Nuxt Content bettet die interne
           # Doku ins Server-Bundle ein) — Aenderungen dort MUESSEN deployen, sonst
-          # bleibt control.pukalani.app/docs veraltet. grep -E kennt keine
+          # bleibt admin.pukalani.app/docs veraltet. grep -E kennt keine
           # Lookaheads, deshalb hier explizit zurueckgeholt statt im IGNORE-Regex.
           DOCS_CONTENT=$(echo "$FILES" | grep -E '^docs/content/' || true)
           RELEVANT=$(printf '%s\n%s\n' "$RELEVANT" "$DOCS_CONTENT" | grep -v '^$' || true)
@@ -254,14 +254,30 @@ jobs:
         if: steps.changes.outputs.skip != 'true'
         run: |
           set -eu
-          # SITE = ploi-Site (Verzeichnis + Host fuer die Health-Probe),
+          # SITE  = ploi-Site: VERZEICHNIS auf dem Server (/home/ploi/$site/ops)
+          #         und Quelle des pm2-Prozessnamens.
           # SLOT  = Release-Verzeichnis unter /home/ploi/releases.
+          # PROBE = der HOST, unter dem die App oeffentlich antwortet.
           # Seit dem Cutover (2026-07-26) heisst auch die Maschine control:
           # eigene ploi-Site 392163, Release-Slot releases/control.
+          #
+          # WARUM SITE UND PROBE AUSEINANDERFALLEN (AH-4, 2026-08-11): die
+          # Betreiber-Konsole heisst seither `admin.pukalani.app`, ihre ploi-Site
+          # und ihr Verzeichnis behalten aber bewusst den Namen
+          # `control.pukalani.app`. Eine Site-Umbenennung war beim
+          # studio→control-Umzug die teuerste Falle (pm2 findet den Prozess ueber
+          # den NAMEN und startet bei einer Umbenennung DANEBEN statt zu
+          # ersetzen: zwei Prozesse, ein Port, gemischte Builds). Der Site-Name
+          # ist damit ein reiner Infra-Anker wie `platform.pukalani.app`, und die
+          # Probe muss den Namen fragen, den die Aussenwelt benutzt — gegen den
+          # Altnamen gefragt bekaeme sie eine 301 und `jq` saehe nie ein
+          # `.build`. Fuer alle anderen Apps sind beide Namen identisch.
           declare -A SITE=( [comments]=comments.pukalani.app [portfolio]=portfolio.pukalani.app [control]=control.pukalani.app [platform]=platform.pukalani.app [marketing]=pukalani.app [help]=help.pukalani.app )
           declare -A SLOT=( [comments]=comments [portfolio]=portfolio [control]=control [platform]=platform [marketing]=marketing [help]=help )
+          declare -A PROBE=( [comments]=comments.pukalani.app [portfolio]=portfolio.pukalani.app [control]=admin.pukalani.app [platform]=platform.pukalani.app [marketing]=pukalani.app [help]=help.pukalani.app )
           for app in comments portfolio control platform marketing help; do
             site="${SITE[$app]}"
+            probe="${PROBE[$app]}"
             echo "::group::Deploy $app → $site"
             RELEASES="/home/ploi/releases/${SLOT[$app]}"
             RELEASE="$RELEASES/$EXPECTED_SHA"
@@ -313,10 +329,10 @@ jobs:
             # nicht, dass alle ihn haben. Genau daran ist der Rename-Deploy
             # vorbeigelaufen: zwei Prozesse auf einem Port, einer alt, und die
             # erste Abfrage traf zufaellig den neuen.
-            echo "[$app] Erwarte Commit $EXPECTED_SHA auf https://$site/api/health (3x in Folge) …"
+            echo "[$app] Erwarte Commit $EXPECTED_SHA auf https://$probe/api/health (3x in Folge) …"
             ok=""; streak=0
             for i in $(seq 1 20); do
-              BUILD=$(curl -fsS -m 15 "https://$site/api/health" | jq -r '.build // empty' || true)
+              BUILD=$(curl -fsS -m 15 "https://$probe/api/health" | jq -r '.build // empty' || true)
               if [ "$BUILD" = "$EXPECTED_SHA" ]; then
                 streak=$((streak + 1))
                 if [ "$streak" -ge 3 ]; then

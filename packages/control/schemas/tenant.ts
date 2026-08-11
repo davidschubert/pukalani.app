@@ -34,12 +34,13 @@ export const RESERVED_SUBDOMAINS = new Set([
   // `account` ist seit AH-1 (2026-08-11) DER Kundenbereich; es steht schon
   // weiter unten in der Phishing-Liste und bleibt dort — hier nur der Hinweis,
   // dass der Name jetzt zusätzlich vergeben IST, nicht bloß gesperrt.
-  // `admin` (oben) ist für AH-4 (Cutover control. → admin.) VORRESERVIERT:
-  // ein Name gehört gesperrt, bevor er beworben wird, nicht danach.
+  // `admin` (oben) ist seit AH-4 (2026-08-12) DIE Betreiber-Konsole und damit
+  // nicht mehr bloß vorreserviert, sondern vergeben.
   // `master` bleibt gesperrt (Plattform-naher Premium-Name): AH-5 heißt seit
   // Davids Entscheidung vom 2026-08-11 freelancer.pukalani.app — die kurze
   // Streichung von `master` (9701bfa9) ist damit gegenstandslos und rückgängig.
-  // `control` ist der Maschinenraum. ABGESCHALTETE Altnamen bleiben gesperrt —
+  // `control` ist der Maschinenraum und seit AH-4 zusätzlich der ABGESCHALTETE
+  // Name der Konsole (301 auf `admin`). ABGESCHALTETE Altnamen bleiben gesperrt —
   // ein zurückgegebener Plattform-Name ist der beste Phishing-Köder, den es
   // gibt: `app` und `studio` (oben) sowie `my` und `start`, die seit AH-1
   // nur noch 301 auf `account` weiterleiten.

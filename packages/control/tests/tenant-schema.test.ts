@@ -30,7 +30,11 @@ describe('tenantCreateSchema', () => {
     expect(tenantCreateSchema.safeParse({ ...valid, host: `${'a'.repeat(63)}.pukalani.app` }).success).toBe(true)
   })
   it('reservierte Betreiber-Subdomains sind tabu — fremde Kundendomains frei', () => {
-    for (const host of ['control.pukalani.app', 'studio.pukalani.app', 'api.pukalani.app', 'www.pukalani.app', 'pukalani.app', 'foo.functions.pukalani.app']) {
+    // `admin` ist seit AH-4 (2026-08-11) die Betreiber-Konsole, `control` ihr
+    // abgeschalteter Altname — BEIDE bleiben gesperrt. Ein zurückgegebener
+    // Plattform-Name ist der beste Phishing-Köder, den es gibt, und der
+    // Altname zeigt per 301 auf eine echte Anmeldemaske.
+    for (const host of ['admin.pukalani.app', 'control.pukalani.app', 'studio.pukalani.app', 'api.pukalani.app', 'www.pukalani.app', 'pukalani.app', 'foo.functions.pukalani.app']) {
       expect(tenantCreateSchema.safeParse({ ...valid, host }).success, host).toBe(false)
     }
     expect(tenantCreateSchema.safeParse({ ...valid, host: 'kunde-a.pukalani.app' }).success).toBe(true)

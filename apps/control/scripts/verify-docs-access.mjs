@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Beweis für den internen /docs-Bereich (control.pukalani.app/docs).
+ * Beweis für den internen /docs-Bereich (admin.pukalani.app/docs).
  *
  * Prüft BEIDE Türen, weil eine allein nichts wert ist:
  *  - die Seiten `/docs/**`

@@ -217,7 +217,7 @@ const record = (file, line, token, kind) => {
 }
 
 /**
- * DIE ROUTEN DER DOKU-SITE (`docs/content/**` → control.pukalani.app/docs).
+ * DIE ROUTEN DER DOKU-SITE (`docs/content/**` → admin.pukalani.app/docs).
  *
  * Dort sind interne Links KEINE Dateipfade, sondern Nuxt-Content-Routen
  * (`/architektur/migrationen`). Ein toter Link darin ist besonders teuer: er

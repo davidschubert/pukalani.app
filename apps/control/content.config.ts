@@ -3,7 +3,7 @@ import { defineContentConfig, defineCollection } from '@nuxt/content'
 
 /**
  * Interne Projekt-Doku im Betreiber-Bereich (Davids Entscheidung 2026-07-28):
- * control.pukalani.app/docs rendert DIESELBEN Markdown-Quellen wie die
+ * admin.pukalani.app/docs rendert DIESELBEN Markdown-Quellen wie die
  * eigenständige Docs-App auf Port 4000 — `docs/content/**`.
  *
  * EINE Quelle, zwei Konsumenten: hier wird NICHTS kopiert und NICHTS

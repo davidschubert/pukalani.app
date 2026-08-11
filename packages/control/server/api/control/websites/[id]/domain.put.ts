@@ -10,7 +10,7 @@ import { customDomainTakenByOther } from '../../../../utils/customDomainOwnershi
  *
  * ── ZWEI OBERFLÄCHEN, EIN ABLAUF ─────────────────────────────────────────
  * Davids Auftrag nennt beides: die Betreiber-Konsole
- * (`control.pukalani.app/dashboard/websites`) UND das Dashboard der Silo-App.
+ * (`admin.pukalani.app/dashboard/websites`) UND das Dashboard der Silo-App.
  * Dies ist die erste. Sie tut FACHLICH dasselbe wie
  * `/api/control/site/domain/set`, nur mit einer anderen Tür davor:
  *

@@ -42,10 +42,10 @@ describe('csrfOriginVerdict — same-site (DER BEFUND)', () => {
       origin: 'https://kunde-b.pukalani.app',
       host: HOST,
     })).toBe('reject')
-    // Auch der Kontroll-Host ist nur ein Nachbar, kein Freibrief.
+    // Auch die Betreiber-Konsole ist nur ein Nachbar, kein Freibrief.
     expect(csrfOriginVerdict({
       secFetchSite: 'same-site',
-      origin: 'https://control.pukalani.app',
+      origin: 'https://admin.pukalani.app',
       host: HOST,
     })).toBe('reject')
   })

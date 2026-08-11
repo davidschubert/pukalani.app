@@ -14,7 +14,7 @@ import { GUIDELINES_SLUG, PAGES_TABLE, type PageRow } from '../../shared/types/p
  * Discussions-Navigationspunkt), in `control` pflegt der BETREIBER seine
  * eigenen Rechtstexte. Ohne Schalter bekäme die Betreiber-Konsole eine
  * Vorlage für Community-Regeln in ihre Seiten-Liste und unter
- * `control.pukalani.app/guidelines` einen Text, der dort niemanden meint.
+ * `admin.pukalani.app/guidelines` einen Text, der dort niemanden meint.
  *
  * Layer-Default AUS, App schaltet ein (Hausregel für Config-Gates). Der
  * Schalter sitzt bewusst NICHT beim Discussions-Produkt: `pages` darf `posts`

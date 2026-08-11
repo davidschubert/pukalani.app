@@ -9,6 +9,31 @@ export default defineAppConfig({
   // }
   pukalani: {
     brand: { name: 'Pukalani Control' },
+    /**
+     * DIE ADRESSE DIESER KONSOLE (AH-4, Davids Entscheidung 2026-08-11).
+     *
+     * `control.pukalani.app` heißt seit dem Cutover `admin.pukalani.app`. Der
+     * Altname bleibt erreichbar und antwortet 301 — server/middleware/
+     * 00.legacy-console-hosts.ts, dort steht auch, warum das NICHT über
+     * `pukalani.tenancy.legacyControlHosts` läuft.
+     *
+     * EIGENER Namensraum und nicht `pukalani.control.*`: der gehört dem
+     * gleichnamigen LAYER (A14). Wie diese APP im Netz heißt, ist eine Frage
+     * der App — apps/control ist ihr einziger Beantworter.
+     *
+     * NICHT betroffen und bewusst beim Altnamen geblieben: die ploi-Site, das
+     * Verzeichnis `/home/ploi/control.pukalani.app/`, der Release-Slot und der
+     * pm2-Prozessname. Eine Site-Umbenennung war beim studio→control-Umzug die
+     * teuerste Falle (pm2 startet daneben statt zu ersetzen); der Name ist
+     * seither ein reiner Infra-Anker wie `platform.pukalani.app`.
+     *
+     * Env-Override je Umgebung (lokal gibt es beides nicht):
+     * NUXT_PUBLIC_CONTROL_CANONICAL_HOST · NUXT_PUBLIC_CONTROL_LEGACY_HOSTS.
+     */
+    adminConsole: {
+      canonicalHost: 'admin.pukalani.app',
+      legacyHosts: ['control.pukalani.app'],
+    },
     // Betreiber-Login per OTP-Code (H2-Live): der Control-Admin braucht kein
     // Passwort — Prod-Konto wurde server-seitig ohne Passwort angelegt.
     auth: { otp: true, termsUrl: '/terms' },

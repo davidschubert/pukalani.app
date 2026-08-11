@@ -42,7 +42,7 @@ Migrations-Runner heraus (`scripts/migrate.mjs` ignoriert `_*`).
 
 ## Interne Projekt-Doku unter `/docs`
 
-`control.pukalani.app/docs` rendert **dieselben Markdown-Quellen** wie die
+`admin.pukalani.app/docs` rendert **dieselben Markdown-Quellen** wie die
 eigenständige Docs-App (`pnpm dev:docs`, Port 4000): `docs/content/**`. Es wird
 nichts kopiert und nichts synchronisiert — `content.config.ts` zeigt per `cwd`
 direkt dorthin (Collection `internalDocs`, `prefix: '/docs'`).

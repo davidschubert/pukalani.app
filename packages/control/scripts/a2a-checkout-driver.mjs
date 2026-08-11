@@ -33,7 +33,7 @@ import { join } from 'node:path'
 import { Client, ID, Query, TablesDB, Users } from 'node-appwrite'
 
 const ENDPOINT = 'https://api.pukalani.app/v1'
-const CONTROL_HOST = 'https://control.pukalani.app'
+const CONTROL_HOST = 'https://admin.pukalani.app'
 const DATABASE_ID = 'main'
 
 const secret = name => readFileSync(join(homedir(), '.appwrite-secrets', name), 'utf8').trim()
