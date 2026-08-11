@@ -29,6 +29,28 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### AH-3 — /profile/activity + Konto-Abrechnung ✅ 2026-08-11
+
+Eigene Aktivität über alle Communities (`/profile/activity`): neuer
+Registry-Vertrag `registerAccountActivityContributor` (GDPR-Muster), gefüllt
+von posts/comments/events/courses; Route `/api/account/activity` als EXAKTER
+controlApiPrefixes-Eintrag (kein Verzeichnis — Segmentgrenze, live 404-belegt
+für Nachbarn), userId NUR aus der Session, Besitz doppelt gefiltert
+(Query + Zeilen-Nachprüfung), Community-Hosts über den gebündelten Resolver.
+Dazu `/settings/billing` als Owner-Übersicht (Plan/Testphase je Community,
+Links in die Community-Plan-Seiten — KEIN neuer Zahlpfad, M13/A6 unangetastet).
+Live 8/8 im Worktree; Prod-Proben nach Deploy.
+
+**Gelernt:** (1) Es gab schon einen ZWEITEN, mandanten-gescopten
+Aktivitäts-Vertrag (`registerUserActivityProvider`, comments/F1-Stufe-3) —
+der Agent hat ihn erst überschrieben (Auto-Import lautlos beschattet, Lint UND
+Typecheck blieben grün!), dann wiederhergestellt und die neue Oberfläche auf
+`AccountActivity*` umbenannt; beide Verträge tragen jetzt
+Abgrenzungs-Kommentare. Vor neuen Registry-Namen: erst greppen. (2) Verfasste
+Events/Kurse bewusst ausgelassen — ohne Index auf organizerId/authorId wäre
+das ein Pool-weiter Scan je Seitenaufruf (Kandidat für eine spätere additive
+Index-Migration).
+
 ### AH-2 — Der Account-Bereich auf account.pukalani.app ✅ 2026-08-11
 
 Gebaut als GETEILTE Flächen statt Kopien (Davids Vorgabe „ein Account-Layer

@@ -79,6 +79,10 @@ statisch mit Text-Deploy beim Umschalten.
 der Rollen-Key bleibt (Teil von U6/AP4). **Verworfen:** „Mitglied" als
 Rollen-Label behalten.
 (10) **AP1 startet sofort** (U18 Messung zuerst, dann U1/U2/U3).
+(11) **Der @handle wird KONTO-WEIT** (2026-08-11, bei AH-3 gefragt): eine
+Pukalani-ID = ein Handle überall, als eigener Punkt AH-7 nach AH-4/AH-5;
+Kollisionsregel: wer zuerst kam, behält. **Verworfen:** je Community
+behalten · Hybrid (konto-weit mit Community-Override, komplexeste Variante).
 
 ## 2026-08-08 — Die drei WCAG-Hell-Befunde aus F53: zweimal fixen, nie „lassen"
 
