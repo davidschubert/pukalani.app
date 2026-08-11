@@ -9,6 +9,17 @@
  * gehören Default UND Key in die Config, nicht hierher.
  */
 export function useProductLinks() {
-  const { marketingStartUrl, marketingSignInUrl, marketingDemoUrl } = useRuntimeConfig().public
-  return { start: marketingStartUrl, signIn: marketingSignInUrl, demo: marketingDemoUrl }
+  const {
+    marketingStartUrl,
+    marketingSignInUrl,
+    marketingDemoUrl,
+    marketingRequestUrl,
+  } = useRuntimeConfig().public
+  return {
+    start: marketingStartUrl,
+    signIn: marketingSignInUrl,
+    demo: marketingDemoUrl,
+    /** Zugang anfragen — für Absichten ohne Selbstbedienungs-Kauf (U3). */
+    request: marketingRequestUrl,
+  }
 }

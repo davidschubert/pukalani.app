@@ -15,7 +15,14 @@
 // Die Optik der Karte steht als `pricingPlan`-Vertrag in app/app.config.ts.
 const { t, n } = useI18n()
 const localePath = useLocalePath()
-const { signIn } = useProductLinks()
+/**
+ * „Personal holen" / „Pro holen" führen auf die REGISTRIERUNG, nicht auf die
+ * Anmeldung (U3, 2026-08-10). Wer hier klickt, hat in aller Regel noch kein
+ * Konto — er bekam bis dahin ein Passwortfeld ohne jeden Bezug zu dem, was er
+ * gerade wollte. Für Bestandskunden steht der Anmelde-Link jetzt im Kopf
+ * (MarketingHeader.vue), und die Registrierungsseite verlinkt ihn ohnehin.
+ */
+const { start } = useProductLinks()
 const { trackFunnel } = useFunnelEvent()
 
 /**
@@ -103,7 +110,7 @@ const plans = computed(() => [
   tag: t(`marketing.pricing.plans.${plan.key}.tag`),
   tagline: t(`marketing.pricing.plans.${plan.key}.desc`),
   button: {
-    to: signIn,
+    to: start,
     label: t(`marketing.pricing.plans.${plan.key}.cta`),
     // Der hervorgehobene Knopf war bis Paket 4 `color="warning"` — die letzte
     // Stelle der Seite, die eine STATUSFARBE als Markenfarbe benutzte. Seit

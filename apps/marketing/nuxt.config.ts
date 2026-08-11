@@ -79,13 +79,30 @@ export default defineNuxtConfig({
   // Ziel-Links der Marketing-CTAs (useProductLinks). Die Werte sind die
   // PROD-Hosts; lokal/Staging per Env überschreibbar — ohne Skeleton-Key
   // mappt die Env-Var ins Leere (gleiches Muster wie appUrl im Core).
-  // Env: NUXT_PUBLIC_MARKETING_START_URL / _SIGN_IN_URL / _DEMO_URL
+  // Env: NUXT_PUBLIC_MARKETING_START_URL / _SIGN_IN_URL / _DEMO_URL /
+  //      _REQUEST_URL
   runtimeConfig: {
     public: {
       // Kundenbereich (Umbenennung 2026-07-25, vorher app.pukalani.app)
       marketingStartUrl: 'https://my.pukalani.app/register',
       marketingSignInUrl: 'https://my.pukalani.app/login',
       marketingDemoUrl: 'https://demo.pukalani.app',
+      /**
+       * Zugang anfragen (U3, 2026-08-10) — das Ziel für jede Absicht, die
+       * KEIN Selbstbedienungs-Kauf ist (Early Access). Vorher zeigten diese
+       * Knöpfe auf `/login`: der Besucher wollte etwas hinterlassen und bekam
+       * ein Passwortfeld.
+       *
+       * `/request-access` UND NICHT `/anfragen`: die Seite trägt
+       * `defineI18nRoute({ paths: { de: '/anfragen', en: '/request-access' } })`
+       * (packages/onboarding/app/pages/anfragen.vue), und die App steht auf
+       * `prefix_except_default` mit `en` als Vorgabe — es gibt dort also
+       * `/request-access` und `/de/anfragen`, aber KEIN `/anfragen`. Ein
+       * deutschsprachiger Besucher wird von `detectBrowserLanguage`
+       * (`redirectOn: 'all'`) auf `/de/anfragen` weitergeleitet, genau wie bei
+       * `/register` oben.
+       */
+      marketingRequestUrl: 'https://my.pukalani.app/request-access',
     },
   },
 

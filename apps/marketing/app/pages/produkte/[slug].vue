@@ -75,7 +75,7 @@ setI18nParams({
  */
 const HIGHLIGHT_MAX = 12
 const localePath = useLocalePath()
-const { start, demo, signIn } = useProductLinks()
+const { start, demo, request } = useProductLinks()
 useReveal()
 
 const isEarlyAccess = computed(() => EARLY_ACCESS_KEYS.includes(productKey))
@@ -97,10 +97,15 @@ const highlights = computed(() => {
  * Verzweigung ist deshalb hier — eine Liste, zwei mögliche erste Einträge —
  * und nicht ein `v-if` an einem Knopf im Markup: so kann kein späterer
  * Umbau den Gratis-Knopf versehentlich wieder danebenstellen.
+ *
+ * DAS ZIEL IST DIE ANFRAGE, NICHT DIE ANMELDUNG (U3, 2026-08-10). „Early
+ * Access anfragen" hieß bis dahin `/login` — der Besucher wollte etwas
+ * hinterlassen und bekam ein Passwortfeld. Die Seite dafür stand die ganze
+ * Zeit da und war von hier nirgends verlinkt.
  */
 const ctaLinks = computed(() => [
   isEarlyAccess.value
-    ? { to: signIn, color: 'primary' as const, size: 'xl' as const, label: t('marketing.products.eaCta') }
+    ? { to: request, color: 'primary' as const, size: 'xl' as const, label: t('marketing.products.eaCta') }
     : { to: start, color: 'primary' as const, size: 'xl' as const, label: t('marketing.hero.ctaPrimary') },
   {
     to: demo,

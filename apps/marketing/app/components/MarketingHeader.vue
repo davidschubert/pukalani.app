@@ -15,7 +15,7 @@ import { type ProductKey, slugForLocale } from '#shared/marketing'
 
 const { t, locale } = useI18n()
 const localePath = useLocalePath()
-const { start } = useProductLinks()
+const { start, signIn } = useProductLinks()
 const { trackFunnel } = useFunnelEvent()
 
 // Die Produkte der Hauptnavigation, am KANONISCHEN Schlüssel. Reihenfolge
@@ -115,6 +115,12 @@ const mobileItems = computed(() => [
     // den Anker auf der Startseite, so wie im Footer.
     { ...LINK_DEFAULTS, label: t('marketing.faq.kicker'), to: localePath({ name: 'faq' }) },
   ],
+  // Der Ausgang für Bestandskunden (U3) — eigene Liste, damit `UNavigationMenu`
+  // einen Trenner davor zieht: „Anmelden" verlässt diese Seite, alles darüber
+  // bleibt auf ihr.
+  [
+    { ...LINK_DEFAULTS, label: t('marketing.nav.signIn'), icon: 'i-ph-sign-in-bold', to: signIn },
+  ],
 ])
 
 /**
@@ -132,8 +138,21 @@ const openMenu = ref('')
  * er ist in den Fuß gewandert, unten rechts als Auswahlmenü mit Flagge
  * (MarketingFooter.vue — dort auch die Begründung des Hash-Strips). Der Kopf
  * trägt nur noch Navigation und den einen CTA: „Kostenlos starten" ist das
- * Ziel dieser Seite, und ein zweiter Knopf daneben nimmt ihm Aufmerksamkeit
+ * Ziel dieser Seite, und ein zweiter KNOPF daneben nimmt ihm Aufmerksamkeit
  * für eine Entscheidung, die die meisten Besucher nie treffen.
+ *
+ * SEIT U3 (2026-08-10) STEHT „ANMELDEN" TROTZDEM DA — und zwar genau deshalb
+ * als TEXTLINK und nicht als Knopf. Der Schlüssel `marketing.nav.signIn`
+ * existierte in beiden Sprachen und wurde nirgends gerendert (Trichter S2):
+ * ein Bestandskunde, der auf pukalani.app landet, fand von hier keinen Weg in
+ * seinen Kundenbereich. Ein Link in Menü-Optik ist der billigste mögliche
+ * Ausgang — er nimmt dem CTA seine Fläche nicht weg, und wer ihn sucht,
+ * sucht ihn genau hier.
+ *
+ * Auf schmalen Fenstern ist er ausgeblendet (`hidden md:inline-flex`): dort
+ * steht neben dem CTA nur noch das Burger-Zeichen, und ein dritter Eintrag
+ * bräche die Leiste auf drei Zeilen. Im Mobil-Menü unten steht er dafür als
+ * eigener Eintrag.
  */
 
 // Mobil-Menü: `UHeader` schließt es beim Routenwechsel selbst (`autoClose`).
@@ -317,6 +336,19 @@ const MOBILE_NAV_UI = {
     </UNavigationMenu>
 
     <template #right>
+      <!-- „Anmelden" für Bestandskunden (U3) — bewusst `link`, siehe oben.
+           `color="neutral"` + `variant="link"` trägt hier den Menü-Ton; der
+           `ghost`-Vertrag aus app.config.ts wäre auf der hellen Leiste weiß
+           (dieselbe Falle wie beim Umschalt-Knopf). -->
+      <UButton
+        :to="signIn"
+        color="neutral"
+        variant="link"
+        size="sm"
+        class="hidden md:inline-flex px-2.5 text-[0.95rem] font-medium text-toned hover:text-primary-600"
+      >
+        {{ t('marketing.nav.signIn') }}
+      </UButton>
       <!-- Derselbe Trichter-Punkt wie im Hero (U18): beide Knöpfe führen auf
            dieselbe Registrierung, gezählt wird der EINSTIEG, nicht die Stelle. -->
       <UButton :to="start" color="primary" size="sm" @click="trackFunnel('funnel_cta_start')">
