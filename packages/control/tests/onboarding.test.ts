@@ -337,9 +337,26 @@ describe('Wizard-Nutzlast', () => {
     expect(parsed.slug).toBe('jungle-zipline')
   })
 
-  it('verlangt einen Einladungs-Code (Early-Access-Tor)', () => {
+  /**
+   * SEIT U2 (2026-08-10) IST DER CODE OPTIONAL — im SCHEMA. Das ist kein
+   * Aufweichen des Early-Access-Tors, sondern seine Verlagerung an die einzige
+   * Stelle, die den Schalter kennt: `control/server/api/control/onboarding/
+   * site.post.ts` liest `app_config.onboardingInviteOnly` und weist ohne
+   * gültigen Code ab, solange das Tor zu ist. Ein Pflichtfeld hier hätte bei
+   * OFFENEM Tor jeden Wizard-Abschluss mit 400 beantwortet.
+   *
+   * Was das Schema weiterhin durchsetzt: die FORM. Ein mitgeschickter Code
+   * muss wie ein Code aussehen.
+   */
+  it('lässt den Einladungs-Code weg — die Entscheidung fällt in der Route', () => {
     const { inviteCode: _drop, ...withoutCode } = valid
-    expect(schema.safeParse(withoutCode).success).toBe(false)
+    expect(schema.safeParse(withoutCode).success).toBe(true)
+  })
+
+  it('weist einen formlosen Code trotzdem ab', () => {
+    for (const code of ['', 'kurz', 'viel zu lang mit leerzeichen', 'A'.repeat(65)]) {
+      expect(schema.safeParse({ ...valid, inviteCode: code }).success, code).toBe(false)
+    }
   })
 
   it('lehnt Felder ab, die der Selbstbedienungs-Pfad nicht setzen darf', () => {

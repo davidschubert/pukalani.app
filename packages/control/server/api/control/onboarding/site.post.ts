@@ -1,7 +1,8 @@
 import { z } from 'zod'
 import { onboardingSiteSchema } from '../../../../schemas/onboarding'
-import { checkInviteCode, consumeInviteCode } from '../../../utils/inviteCodes'
+import { checkInviteCode, consumeInviteCode, type InviteCheck } from '../../../utils/inviteCodes'
 import { markCodeRedeemed } from '../../../utils/inviteRequests'
+import { readOnboardingGate } from '../../../utils/onboardingGate'
 import { provisionCommunity } from '../../../utils/onboardingProvision'
 import { requireOnboardingCaller, verifyRuntimeIdentity } from '../../../utils/onboardingService'
 import { isNameReservedInDb } from '../../../utils/reservedNames'
@@ -43,27 +44,38 @@ export default defineEventHandler(async (event) => {
     throw createError({ status: 409, statusText: 'Slug not available' })
   }
 
-  // Early-Access-Tor. Nach außen bleibt jede Ablehnung dieselbe Antwort
-  // (kein Code-Ratespiel), der Grund steht nur im Log. Die Adresse geht mit:
-  // ein an jemanden vergebener Code (control-017) gilt NUR für dessen Konto —
-  // weiterleiten bringt nichts.
-  const invite = await checkInviteCode(event, body.site.inviteCode, Date.now(), identity.email, identity.emailVerified)
-  if (!invite.valid) {
-    logEvent('warn', 'onboarding.invite_rejected', {
-      reason: invite.reason,
-      runtimeUserId: identity.userId,
-    })
-    // DIE EINE AUSNAHME von „jede Ablehnung sieht gleich aus": eine
-    // unbestätigte Adresse. Sie ist erst erreichbar, NACHDEM die Adresse zum
-    // gebundenen Code gepasst hat — der Code gehört dem Fragenden also
-    // nachweislich, es ist nichts zu erraten. Ohne diesen Grund stünde ein
-    // eingeladener Kunde vor einem „geht nicht" ohne Ausweg; mit ihm sagt der
-    // Wizard, was zu tun ist (Bestätigungsmail anfordern).
-    throw createError({
-      status: 403,
-      statusText: 'Invalid invite code',
-      ...(invite.reason === 'unverified_email' ? { data: { code: 'email_unverified' } } : {}),
-    })
+  // Early-Access-Tor — aber nur, solange der Betreiber es angeschaltet lässt
+  // (U2, Davids Entscheidung 1 vom 2026-08-10). DIESE Stelle ist die Wahrheit:
+  // der Wizard überspringt das Code-Feld anhand desselben Zustands, aber wer
+  // die Route direkt ruft, wird hier abgewiesen — und wer bei offenem Tor
+  // ohne Code kommt, kommt durch, egal was ein Client behauptet.
+  const { inviteRequired } = await readOnboardingGate(event)
+  let invite: InviteCheck | null = null
+
+  if (inviteRequired) {
+    // Nach außen bleibt jede Ablehnung dieselbe Antwort (kein Code-Ratespiel),
+    // der Grund steht nur im Log. Die Adresse geht mit: ein an jemanden
+    // vergebener Code (control-017) gilt NUR für dessen Konto — weiterleiten
+    // bringt nichts. Ein FEHLENDER Code ist seit U2 im Schema erlaubt und
+    // fällt hier auf denselben stummen Weg wie ein falscher.
+    invite = await checkInviteCode(event, body.site.inviteCode ?? '', Date.now(), identity.email, identity.emailVerified)
+    if (!invite.valid) {
+      logEvent('warn', 'onboarding.invite_rejected', {
+        reason: invite.reason,
+        runtimeUserId: identity.userId,
+      })
+      // DIE EINE AUSNAHME von „jede Ablehnung sieht gleich aus": eine
+      // unbestätigte Adresse. Sie ist erst erreichbar, NACHDEM die Adresse zum
+      // gebundenen Code gepasst hat — der Code gehört dem Fragenden also
+      // nachweislich, es ist nichts zu erraten. Ohne diesen Grund stünde ein
+      // eingeladener Kunde vor einem „geht nicht" ohne Ausweg; mit ihm sagt der
+      // Wizard, was zu tun ist (Bestätigungsmail anfordern).
+      throw createError({
+        status: 403,
+        statusText: 'Invalid invite code',
+        ...(invite.reason === 'unverified_email' ? { data: { code: 'email_unverified' } } : {}),
+      })
+    }
   }
 
   const result = await provisionCommunity(event, identity, {
@@ -77,12 +89,15 @@ export default defineEventHandler(async (event) => {
       goal: body.site.goal,
       ...(body.site.description ? { description: body.site.description } : {}),
     },
-    inviteCode: invite.row,
+    inviteCode: invite?.row ?? null,
   })
 
   // Erst nach erfolgreicher Anlage — und nur, wenn wirklich etwas Neues
   // entstanden ist: ein Retry (reused) darf den Code nicht zweimal kosten.
-  if (!result.reused && invite.row) {
+  // Bei OFFENEM Tor ist `invite` null: ein mitgeschickter Code wird dann gar
+  // nicht erst geprüft und deshalb auch nicht verbraucht — er soll noch gelten,
+  // wenn der Betreiber das Tor wieder schließt.
+  if (!result.reused && invite?.row) {
     await consumeInviteCode(event, invite.row)
     // Rückschreibung: aus „zugewiesen" wird die TATSACHE „eingelöst am … →
     // diese Community". Ohne sie wüsste der Betreiber nie, ob seine Einladung

@@ -1,6 +1,7 @@
 import { Query } from 'node-appwrite'
 import { INVITE_CODES_TABLE, inviteCodeState, summarizeStock, type InviteCodeRow } from '../../../../shared/types/inviteCode'
 import { COMMUNITIES_TABLE } from '../../../../shared/types/tenantRecord'
+import { readOnboardingGate } from '../../../utils/onboardingGate'
 
 /**
  * Betreiber: ausgestellte Einladungs-Codes (sites.manage).
@@ -33,6 +34,11 @@ export default defineEventHandler(async (event) => {
     queries: [Query.limit(1)],
   }).then(res => res.total).catch(() => 0)
 
+  // Der Zustand des Tors gehört auf DIESE Seite (U2): der Vorrat ist nur so
+  // wichtig, wie das Tor geschlossen ist. Steht es offen, sagt die Seite oben,
+  // dass gerade jeder gründen kann — und die Codes darunter sind ohne Wirkung.
+  const gate = await readOnboardingGate(event)
+
   const now = Date.now()
 
   // Freie Plätze trägt die Statistik; in der Liste wären sie 50-mal dasselbe
@@ -41,6 +47,8 @@ export default defineEventHandler(async (event) => {
 
   return {
     total,
+    /** Braucht das Gründen einen Code? (U2 — der Schalter über der Liste.) */
+    inviteRequired: gate.inviteRequired,
     stock: summarizeStock(rows, now),
     /** true = mehr Codes als ein Abruf fasst; die Zahlen sind dann eine
      *  Untergrenze, keine Wahrheit. */

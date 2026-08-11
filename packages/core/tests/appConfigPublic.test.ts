@@ -23,8 +23,12 @@ const full: AppConfig = {
   registrationEnabled: false,
   commentsEnabled: false,
   maintenanceMode: true,
+  onboardingInviteOnly: false,
   products: { posts: { enabled: false, status: 'inactive' } },
 }
+
+/** Was der Client sehen darf — die Liste, gegen die geprüft wird. */
+const PUBLIC_KEYS = ['registrationEnabled', 'commentsEnabled', 'maintenanceMode', 'products'].sort()
 
 describe('toPublicAppConfig', () => {
   it('AppConfig trägt kein Entitlement-Dokument mehr (N2)', () => {
@@ -54,10 +58,31 @@ describe('toPublicAppConfig', () => {
     })
   })
 
-  it('hält genau die Schlüssel der Voll-Config', () => {
-    const expected = Object.keys(DEFAULT_APP_CONFIG).sort()
-    expect(Object.keys(toPublicAppConfig(full)).sort()).toEqual(expected)
-    expect(Object.keys(DEFAULT_PUBLIC_APP_CONFIG).sort()).toEqual(expected)
+  it('hält genau die freigegebenen Schlüssel — nicht mehr, nicht weniger', () => {
+    expect(Object.keys(toPublicAppConfig(full)).sort()).toEqual(PUBLIC_KEYS)
+    expect(Object.keys(DEFAULT_PUBLIC_APP_CONFIG).sort()).toEqual(PUBLIC_KEYS)
+    // Jeder freigegebene Schlüssel muss es in der Voll-Config auch geben —
+    // sonst reicht die Projektion etwas durch, das gar nicht existiert.
+    expect(Object.keys(DEFAULT_APP_CONFIG)).toEqual(expect.arrayContaining(PUBLIC_KEYS))
+  })
+
+  /**
+   * DER ERSTE BEWUSST SERVER-ONLY GEBLIEBENE SCHLÜSSEL (U2, 2026-08-10) — und
+   * damit der erste Beweis für die `Pick`-Regel aus shared/types/config.ts
+   * („neue Felder sind erst mal server-only").
+   *
+   * `onboardingInviteOnly` ist nicht geheim, es ist WERTLOS AM FALSCHEN ORT:
+   * geschrieben und gelesen wird es ausschließlich im Projekt `control`. In
+   * der Pool-Instanz stünde dort der unbeschriebene Default, und wer im
+   * Browser `useRuntimeFlags().onboardingInviteOnly` läse, bekäme eine Zahl,
+   * die niemand pflegt — auf my.pukalani.app also womöglich das Gegenteil der
+   * Wahrheit. Der öffentliche Weg für diesen Zustand ist GET
+   * /api/onboarding/gate, nicht die Laufzeit-Flags.
+   */
+  it('trägt den Tor-Schalter NICHT in den Client-Payload', () => {
+    expect('onboardingInviteOnly' in toPublicAppConfig(full)).toBe(false)
+    expect('onboardingInviteOnly' in DEFAULT_PUBLIC_APP_CONFIG).toBe(false)
+    expect(DEFAULT_APP_CONFIG.onboardingInviteOnly).toBe(true)
   })
 
   it('die öffentlichen Defaults bleiben permissiv wie die Voll-Defaults', () => {

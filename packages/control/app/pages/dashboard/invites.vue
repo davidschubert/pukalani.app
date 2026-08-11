@@ -33,12 +33,48 @@ interface StockSummary { total: number, free: number, assigned: number, redeemed
 
 const { data, refresh } = await useFetch<{
   total: number
+  inviteRequired: boolean
   stock: StockSummary
   truncated: boolean
   communities: number
   codes: InviteDto[]
 }>('/api/control/invites', { lazy: true, server: false })
 const stock = computed(() => data.value?.stock)
+
+/**
+ * DAS TOR (U2, Davids Entscheidung 1 vom 2026-08-10). Die Code-Pflicht bleibt,
+ * aber ihr Abschalten ist ab jetzt ein Schalter und kein Deploy.
+ *
+ * Der Schalter zeigt IMMER den Zustand des Servers, nie eine Absicht: umgelegt
+ * wird er erst durch das erneute Laden nach einer bestätigten Antwort. Solange
+ * nichts geladen ist (`data` noch leer), steht er auf „Einladung nötig" —
+ * dieselbe Fail-safe-Richtung wie überall sonst in dieser Kette.
+ */
+const inviteRequired = computed(() => data.value?.inviteRequired !== false)
+const gateSaving = ref(false)
+
+async function setGate(next: boolean) {
+  if (gateSaving.value) return
+  gateSaving.value = true
+  try {
+    await $fetch('/api/control/invites/gate', { method: 'PATCH', body: { inviteRequired: next } })
+    toast.add({
+      title: t(next ? 'control.invites.gate.savedOn' : 'control.invites.gate.savedOff'),
+      description: t(next ? 'control.invites.gate.savedOnHint' : 'control.invites.gate.savedOffHint'),
+      color: 'success',
+    })
+  }
+  catch {
+    toast.add({ title: t('control.invites.gate.saveFailed'), description: t('control.invites.gate.saveFailedHint'), color: 'error' })
+  }
+  finally {
+    // In BEIDEN Fällen neu laden: nach dem Fehlschlag springt die Anzeige
+    // damit auf den tatsächlichen Serverzustand zurück statt auf dem Klick
+    // stehen zu bleiben.
+    await refresh()
+    gateSaving.value = false
+  }
+}
 
 /** Die Liste enthält (serverseitig gefiltert) nur Codes mit Vorgang — freie
  *  Vorrats-Plätze wären 50-mal dieselbe leere Zeile und stehen als Zahl oben. */
@@ -208,6 +244,22 @@ const columns = computed<TableColumn<InviteDto>[]>(() => [
 
     <template #body>
       <p class="mb-4 text-sm text-muted">{{ t('control.invites.subtitle') }}</p>
+
+      <!--
+        DER SCHALTER STEHT ÜBER DEM VORRAT (U2), weil er ihn erklärt: bei
+        offenem Tor sind die Codes darunter wirkungslos, und das darf der
+        Betreiber nicht erst aus dem Verhalten der Landing schließen müssen.
+      -->
+      <div class="mb-6 rounded-xl border border-default p-4" data-invites-gate>
+        <USwitch
+          :model-value="inviteRequired"
+          :loading="gateSaving"
+          :disabled="gateSaving"
+          :label="t('control.invites.gate.label')"
+          :description="inviteRequired ? t('control.invites.gate.onHint') : t('control.invites.gate.offHint')"
+          @update:model-value="setGate"
+        />
+      </div>
 
       <!-- Vorrat + Trichter: frei → zugewiesen → eingelöst → Community -->
       <div v-if="stock" class="mb-6 space-y-3" data-invites-stock>

@@ -32,6 +32,21 @@ export interface AppConfig {
   /** Wartungsmodus — friert Schreibvorgänge (Registrierung + Kommentare) ein */
   maintenanceMode: boolean
   /**
+   * Braucht das GRÜNDEN einer eigenen Community einen Einladungs-Code? (U2,
+   * system-030, gelesen nur auf dem Control Plane.) Der Schalter dafür sitzt
+   * unter /dashboard/invites — Abschalten soll kein Deploy sein.
+   *
+   * NICHT ZU VERWECHSELN mit `registrationEnabled`: das ist die KONTOANLAGE
+   * und war nie hinter diesem Tor. Mitmachen kann jeder; hier geht es um die
+   * eigene Community.
+   *
+   * `true` als Default an JEDER Stelle (Spalten-Default, DEFAULT_APP_CONFIG,
+   * die pure Regel in shared/onboardingGate.ts): eine fehlende Spalte, eine
+   * unerreichbare Datenbank oder ein Deploy vor der Migration darf die
+   * Selbstbedienung nicht stillschweigend aufreißen.
+   */
+  onboardingInviteOnly: boolean
+  /**
    * Laufzeit-Produkt-Gates (F2): Overrides pro Produkt-Key. Fehlender
    * Eintrag = Produkt AN (kompiliert = von der Site gewollt, Site-Manifest).
    * Persistiert als JSON-String in app_config.products (system-018).
@@ -43,6 +58,7 @@ export const DEFAULT_APP_CONFIG: AppConfig = {
   registrationEnabled: true,
   commentsEnabled: true,
   maintenanceMode: false,
+  onboardingInviteOnly: true,
   products: {},
 }
 

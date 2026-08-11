@@ -27,6 +27,9 @@ export async function getAppConfig(event?: H3Event): Promise<AppConfig> {
       registrationEnabled: row.registrationEnabled ?? DEFAULT_APP_CONFIG.registrationEnabled,
       commentsEnabled: row.commentsEnabled ?? DEFAULT_APP_CONFIG.commentsEnabled,
       maintenanceMode: row.maintenanceMode ?? DEFAULT_APP_CONFIG.maintenanceMode,
+      // Fehlende Spalte (Deploy vor system-030) ⇒ Einladung nötig. Der `??`
+      // hält ein ausdrückliches `false` fest — nur die ABWESENHEIT fällt zurück.
+      onboardingInviteOnly: row.onboardingInviteOnly ?? DEFAULT_APP_CONFIG.onboardingInviteOnly,
       // Spalte ist ein JSON-String (system-018) — fehlertolerant geparst
       products: parseProductsColumn(row.products),
     }

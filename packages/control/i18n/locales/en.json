@@ -92,6 +92,17 @@
     "invites": {
       "title": "Invite codes",
       "subtitle": "During early access, creating a community requires a code. The plaintext appears exactly ONCE — when you issue it.",
+      "gate": {
+        "label": "Creating your own community requires an invite code",
+        "onHint": "Early access: only people with a code can create a community. Signing up and joining other communities stays open to everyone.",
+        "offHint": "Off: anyone with an account can create their own community right away. The codes below stay untouched and take effect again once you switch this back on.",
+        "savedOn": "Gate closed",
+        "savedOnHint": "Creating a community requires an invite code again.",
+        "savedOff": "Gate open",
+        "savedOffHint": "Anyone with an account can now create their own community.",
+        "saveFailed": "Could not save the switch",
+        "saveFailedHint": "Nothing changed. Please try again in a moment."
+      },
       "new": "New code",
       "create": "Issue code",
       "createFailed": "Could not issue the code",

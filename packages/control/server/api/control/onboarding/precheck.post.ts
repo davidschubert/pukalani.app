@@ -4,6 +4,7 @@ import { inviteCodeSchema } from '../../../../schemas/onboarding'
 import { createSlugSchema, slugToHost } from '../../../../schemas/tenant'
 import { COMMUNITIES_TABLE, type TenantRow } from '../../../../shared/types/tenantRecord'
 import { checkInviteCode } from '../../../utils/inviteCodes'
+import { readOnboardingGate } from '../../../utils/onboardingGate'
 import { requireOnboardingCaller } from '../../../utils/onboardingService'
 import { isNameReservedInDb } from '../../../utils/reservedNames'
 
@@ -42,16 +43,25 @@ export default defineEventHandler(async (event) => {
   const result: { codeValid?: boolean, slugAvailable?: boolean, codeReason?: 'email_unverified' } = {}
 
   if (body.code !== undefined) {
-    const invite = await checkInviteCode(event, body.code, Date.now(), body.email, body.emailVerified)
-    if (!invite.valid) {
-      logEvent('info', 'onboarding.precheck_invite_rejected', { reason: invite.reason })
+    // Steht das Tor offen (U2), gibt es keinen Code zu prüfen — die Antwort
+    // muss dieselbe sein wie die des Anlegens, sonst hielte der Wizard jemanden
+    // an einer Wand fest, die der Server gar nicht mehr aufstellt.
+    const { inviteRequired } = await readOnboardingGate(event)
+    if (!inviteRequired) {
+      result.codeValid = true
     }
-    result.codeValid = invite.valid
-    // Nur DIESER eine Grund verlässt die Route (s. site.post.ts): er ist erst
-    // erreichbar, wenn die Adresse zum gebundenen Code passt — er verrät also
-    // nichts, was der Fragende nicht schon wüsste, und ohne ihn stünde der
-    // Eingeladene vor einem stummen „Code ungültig".
-    if (invite.reason === 'unverified_email') result.codeReason = 'email_unverified'
+    else {
+      const invite = await checkInviteCode(event, body.code, Date.now(), body.email, body.emailVerified)
+      if (!invite.valid) {
+        logEvent('info', 'onboarding.precheck_invite_rejected', { reason: invite.reason })
+      }
+      result.codeValid = invite.valid
+      // Nur DIESER eine Grund verlässt die Route (s. site.post.ts): er ist erst
+      // erreichbar, wenn die Adresse zum gebundenen Code passt — er verrät also
+      // nichts, was der Fragende nicht schon wüsste, und ohne ihn stünde der
+      // Eingeladene vor einem stummen „Code ungültig".
+      if (invite.reason === 'unverified_email') result.codeReason = 'email_unverified'
+    }
   }
 
   if (body.slug !== undefined) {

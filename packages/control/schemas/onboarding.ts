@@ -52,7 +52,15 @@ export function createOnboardingSiteSchema(t: TranslateFn = identity) {
     goal: z.enum(GOAL_IDS),
     description: z.string().trim().max(SITE_DESCRIPTION_MAX).optional(),
     vibe: z.enum(VIBE_IDS),
-    inviteCode: inviteCodeSchema,
+    /**
+     * OPTIONAL seit U2 (2026-08-10): das Tor lässt sich im Betreiber-Dashboard
+     * abschalten, und dann gibt es keinen Code, den der Wizard mitschicken
+     * könnte. Ein Pflichtfeld hier hieße 400 statt einer Entscheidung — und
+     * ausgerechnet die Entscheidung gehört an EINE Stelle
+     * (control/server/api/control/onboarding/site.post.ts), nicht in ein
+     * Schema, das den Zustand des Schalters gar nicht kennt.
+     */
+    inviteCode: inviteCodeSchema.optional(),
     /** Sprache des Erstellers — bestimmt die Locale der erzeugten Startseite. */
     locale: z.enum(['de', 'en']).optional(),
   }).strict()
