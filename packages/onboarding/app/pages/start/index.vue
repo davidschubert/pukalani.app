@@ -132,10 +132,15 @@ useHead({ title: () => t('onboarding.gate.title') })
       Spiegelbild von `anfragen.vue` („Du hast schon einen Code? Hier
       einlösen"), damit die beiden Seiten aufeinander zeigen statt aneinander
       vorbei.
+
+      ÜBER DEN ROUTEN-NAMEN, nicht den Pfad: die Zielseite trägt
+      defineI18nRoute-Sprachpfade (de /anfragen, en /request-access), und
+      localePath('/anfragen') gibt auf EN wörtlich „/anfragen" zurück — eine
+      404 (am 2026-08-11 im Worktree nachgemessen, beide Locales).
     -->
     <p class="text-sm text-dimmed">
       {{ t('onboarding.gate.noCode') }}
-      <NuxtLink :to="localePath('/anfragen')" class="font-medium underline">{{ t('onboarding.gate.noCodeLink') }}</NuxtLink>
+      <NuxtLink :to="localePath({ name: 'anfragen' })" class="font-medium underline">{{ t('onboarding.gate.noCodeLink') }}</NuxtLink>
     </p>
   </div>
 </template>
