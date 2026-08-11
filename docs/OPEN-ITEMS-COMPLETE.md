@@ -29,6 +29,30 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### AH-1 — EIN Cutover: Projekt pool→account + Host my./start.→account. ✅ 2026-08-11
+
+**Davids „go" um die Mittagszeit, live um kurz nach Mitternacht** — der ganze
+Cutover an einem Tag, weil der Moment einmalig günstig war: genau 2 Konten
+(beide OTP-only, keine Passwort-Hashes nötig), 87 Zeilen, 3 Dateien.
+Ablauf + Messwerte: [ACCOUNT-CUTOVER.md](runbooks/ACCOUNT-CUTOVER.md) (alle
+Kästchen dieses Laufs abgehakt). Kern: Wegwerf-Provisioner nach Memory-Rezept
+→ Projekt `account` in Davids Team (Wildcard-Plattform SOFORT — F45-Falle) →
+volles Schema über den Runner → Kopie (Nutzer+Labels+Prefs, Rows mit
+$permissions, Buckets+Dateien) → Delta leer → Env-Patches + Deploy `ce2dd5b0`
+→ 7/7 Live-Proben → Wartungs-Mail OHNE Link (Davids Vorgabe; 1 gesendet, das
+example.com-Seed-Konto blockt Resend mit 550) → Provisioner/Temp-Keys
+rückstandslos entfernt. `pool` bleibt eingefroren als Fallback; die 301 der
+Altnamen erhält Pfad+Query (Einladungs-Links!). Code-Paket: 3 Commits
+(Redirect-Regel pur+getestet, Ziel NIE aus dem Request, Schleifen-Sperre).
+
+**Gelernt:** (1) **Bucket-Anlage fehlt in den Migrationen** — avatars und
+gdpr-exports existierten nur von Hand; in jeder frischen Instanz fehlen sie
+(Krümel in OPEN-ITEMS). (2) Das Provisioner-Rezept braucht neben
+WHITELIST_ROOT auch **WHITELIST_EMAILS** (Signup-550; Memory ergänzt).
+(3) `getFileDownload` des Server-SDK liefert keinen Buffer-tauglichen Typ —
+Datei-Kopien per REST. (4) Resend verweigert `example.com`-Empfänger (550) —
+Seed-Konten von Massen-Mails ausnehmen.
+
 ### AP1 — Trichter dicht: U18 + U1 + U2 + U3 ✅ 2026-08-11
 
 Vier Punkte als EIN Paket (Branch `ap1-trichter`, zwei Opus-Agenten, jede

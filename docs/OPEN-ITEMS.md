@@ -1,6 +1,6 @@
 # Offene Punkte
 
-**Stand: 20 offen · 5 geparkt/wartend · 10 bewusst zurückgestellt** (Zahlen bei JEDEM Umzug nach COMPLETE mitführen)
+**Stand: 19 offen · 5 geparkt/wartend · 10 bewusst zurückgestellt** (Zahlen bei JEDEM Umzug nach COMPLETE mitführen)
 
 Stand: **2026-08-11**. Hier steht **nur, was noch offen ist** — in der
 Reihenfolge, in der es abgearbeitet wird. Alles Erledigte (mit Begründung,
@@ -27,7 +27,6 @@ demo-Ausbau, comments in den Pool. Entscheidungen: DECISION-LOG 2026-08-11.
 | --- | --- | --- | --- | --- | --- |
 | 2 · A1 | **Echte Rechtstexte** für Impressum, Datenschutz und AGB. Die Seiten stehen, die Texte sind Entwürfe mit sichtbarem Hinweis. Schaltet Punkt 3 frei. Dazu seit 2026-08-08: die vier Entwürfe auf **pukalani.studio** (`/dashboard/pages`) füllen und veröffentlichen. **Direkt danach `pukalani.auth.termsUrl` in `apps/platform` setzen** — die AGB-Checkbox fehlt heute genau dort, wo Kunden sich registrieren (Trichter M9). | Hoch | S — Adresse eintragen, Anwalt lesen lassen | Ja: nur David (ggf. Anwalt) | [Notizen](#notizen) |
 | 3 · A2 | **Stripe auf echtes Geld umstellen — über die F55-Seite.** Vorstufe A2a komplett grün, F55 selbst erledigt (beide 2026-08-08). Bei David bleiben: Bank-Aktivierung, Steuer-Registrierung, Live-Key ROTIERT eintragen (der erste ist teil-geleakt und rotiert), Portal-Konfiguration; alles andere klickt die F55-Seite. Braucht Punkt 2 (A1). | Hoch | S | Ja: Bank, Konto, Portal | [STRIPE-GO-LIVE-RUNBOOK.md](runbooks/STRIPE-GO-LIVE-RUNBOOK.md) |
-| 5 · AH-1 | **EIN Cutover: Projekt `pool` → `account` + Host `my.`/`start.` → `account.`** Davids Entscheidung 2026-08-11 (echte ID-Migration, gegen die Empfehlung — jetzt ist mit einer Handvoll Konten der einzige günstige Moment). Nutzer samt Passwort-Hashes über die Users-API, Schema+Daten+Buckets, Web-Plattform, Redirects, Mail-Vorlagen; Kunden werden genau EINMAL abgemeldet. | Hoch | L–XL | Ja: Zeitfenster | [ACCOUNT-HORIZONT.md](plans/ACCOUNT-HORIZONT.md) |
 | 6 · AH-2 | **Der Account-Bereich auf account.pukalani.app.** Startseite `/`, `/profile` (Pukalani-ID: Bild, Name, @handle — dieselbe Implementierung bleibt im Community-Dashboard eingebunden), `/settings`-Ordnung (security · sessions · notifications · **data** = Export/Löschen raus aus „Sicherheit", Audit M10). | Hoch | M–L | Nein | [ACCOUNT-HORIZONT.md](plans/ACCOUNT-HORIZONT.md) |
 | 7 · AH-3 | **`/profile/activity` + Account-Billing.** Community-übergreifende EIGENE Aktivität (nur eigene Inhalte, Aggregation nach dem GDPR-Export-Muster) und die Abrechnung auf Konto-Ebene; Community-Abos bleiben bewusst im Community-Dashboard. | Mittel | L | Nein | [ACCOUNT-HORIZONT.md](plans/ACCOUNT-HORIZONT.md) |
 | 8 · AH-4 | **Cutover `control.` → `admin.`** — zweiter Host-Umzug nach dem studio→control-Muster (Runbook existiert). Nicht vergessen: Stripe-Webhook-URL, eigenes Zertifikat per DNS-01 (NIE über die Wildcard-Site), CI-Ziele, RESERVED_SUBDOMAINS. | Mittel | M–L | Ja: Zeitpunkt | [ACCOUNT-HORIZONT.md](plans/ACCOUNT-HORIZONT.md) · [CONTROL-CUTOVER.md](runbooks/CONTROL-CUTOVER.md) |
@@ -110,7 +109,7 @@ Audit-Wochen bewährt hat:
 **7 Hosts:** **pukalani.app** (Landing, seit 2026-07-27 — Apex proxied über
 Cloudflare, braucht am Ursprung KEIN Zertifikat mehr und kann das
 Kunden-Wildcard damit nicht mehr überschreiben; TLS-Wächter alle 30 min),
-**control** (Betreiber) + **my/start** (Kundenbereich + Wizard),
+**control** (Betreiber) + **account** (Kundenbereich + Wizard; my/start leiten seit AH-1 am 2026-08-11 per 301 weiter),
 comments + portfolio, **platform** (Multi-Tenant, `*.pukalani.app`-Wildcard —
 demo.pukalani.app als erster Pool-Tenant, neue Kundensite = ein Klick im
 Control, kein Build), **help.pukalani.app** (Hilfe-Site, seit 2026-07-27) und
@@ -155,6 +154,8 @@ einen Betreiber-Schalter (U2) · eigene Domain bleibt Pro-only (U13, damit
 erledigt → COMPLETE) · Wizard-Pflicht = Name/Adresse · Kategorie · Vibe (U12) ·
 Social-Login nur Google, nach AP1–AP8 (U14) · Geld-Wort „Plan" (U6) ·
 U15/F57 bleiben geparkt bis AP1–AP8.
+
+**AH-1-Krümel — Bucket-Anlage in die Migrationen.** Beim Cutover zeigte sich: `avatars` und `gdpr-exports` existierten im Pool nur von Hand — kein Migrations-Script legt sie an (fonts/media/event-covers/ticket-files schon). Nachziehen, sonst fehlt beides in jeder frischen Instanz. [Klein, S]
 
 **C19 — `/de` war für englischsprachige Browser eine Endlosschleife.**
 Code-Fix erledigt 2026-07-31, auf prod REPRODUZIERT und lokal behoben. Kein

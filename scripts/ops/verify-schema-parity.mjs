@@ -50,7 +50,7 @@ const SYSTEM_TABLES = [
  * und ein Wächter darf daran nicht scheitern.
  */
 const INSTANCES = [
-  { name: 'pool', env: join(homedir(), '.appwrite-secrets/migrations/pool.env') },
+  { name: 'account', env: join(homedir(), '.appwrite-secrets/migrations/account.env') },
   { name: 'control', env: join(homedir(), '.appwrite-secrets/migrations/control.env') },
   { name: 'comments', env: 'apps/comments/.env.production' },
   { name: 'portfolio', env: 'apps/portfolio/.env.production' },
