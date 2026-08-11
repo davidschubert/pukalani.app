@@ -1,6 +1,6 @@
 # Offene Punkte
 
-**Stand: 3 offen · 4 geparkt/wartend · 8 bewusst zurückgestellt** (Zahlen bei JEDEM Umzug nach COMPLETE mitführen)
+**Stand: 16 offen · 6 geparkt/wartend · 10 bewusst zurückgestellt** (Zahlen bei JEDEM Umzug nach COMPLETE mitführen)
 
 Stand: **2026-08-10**. Hier steht **nur, was noch offen ist** — in der
 Reihenfolge, in der es abgearbeitet wird. Alles Erledigte (mit Begründung,
@@ -20,21 +20,35 @@ Legende — **Prio:** Hoch / Mittel / Niedrig ·
 | --- | --- | --- | --- | --- | --- |
 | 2 · A1 | **Echte Rechtstexte** für Impressum, Datenschutz und AGB. Die Seiten stehen, die Texte sind Entwürfe mit sichtbarem Hinweis. Schaltet Punkt 3 frei. Dazu seit 2026-08-08: die vier Entwürfe auf **pukalani.studio** (`/dashboard/pages`, Impressum + Datenschutz je de/en) füllen und veröffentlichen — der Footer-Link erscheint dann von selbst. | Hoch | S — Adresse eintragen, Anwalt lesen lassen | Ja: nur David (ggf. Anwalt) | [Notizen](#notizen) |
 | 3 · A2 | **Stripe auf echtes Geld umstellen — über die F55-Seite.** Vorstufe A2a komplett grün, F55 selbst erledigt (beide 2026-08-08). Bei David bleiben: Bank-Aktivierung, Steuer-Registrierung, Live-Key ROTIERT eintragen (der erste ist teil-geleakt und rotiert), Portal-Konfiguration; alles andere klickt die F55-Seite. Braucht Punkt 2 (A1). | Hoch | S | Ja: Bank, Konto, Portal | [STRIPE-GO-LIVE-RUNBOOK.md](runbooks/STRIPE-GO-LIVE-RUNBOOK.md) |
-| 4 · F56 | **Private Nachrichten sind schwer zu finden.** Der Einstieg „Nachricht schreiben" neben dem Autorennamen ist im Konzept § 1 zugesagt; `MessageWriteButton.vue` ist gebaut, aber **nirgends verdrahtet**. Heute führt nur der Posteingang hin. | Mittel | S — Knopf im blueprint andocken | Nein | [PN-Konzept § 1](plans/PRIVATE-NACHRICHTEN-KONZEPT.md) |
+| 4 · U1 | **Wer keine Einladung hat, sitzt fest.** Nach der Anmeldung ohne Code steht dort ein Satz („Schreib uns, wofür du Pukalani nutzen willst") — ohne Knopf, ohne Adresse, ohne Abmelden, ohne Rückweg. Die Anfrage-Seite gibt es, sie ist von dort nur nicht verlinkt. Wer einer Einladungs-Mail folgt und schon angemeldet ist, landet ebenfalls woanders. | Hoch | S | Nein | [UX-Trichter K2, M2](archiv/audits/2026-08-09-ux-trichter.md) |
+| 5 · U2 | **Dass man eine Einladung braucht, erfährt man erst ganz zum Schluss.** Die Startseite verspricht „In 60 Sekunden deine eigene Community", dann folgen Name, E-Mail und Passwort — und danach die Wand. Soll: schon auf der Startseite und im Anmeldeformular sagen, dass Mitmachen jedem offensteht, eine **eigene** Community aber eine Einladung braucht. | Hoch | S | **Ja: Soll das Einladungs-Tor überhaupt bleiben?** (kein Wettbewerber hat eins) | [UX-Trichter K1](archiv/audits/2026-08-09-ux-trichter.md) · [Wettbewerb 2.2](archiv/audits/2026-08-09-wettbewerb-benchmark.md) |
+| 6 · U3 | **Wer kaufen will, landet im Passwortfeld.** „Personal holen", „Pro holen", „Interesse anmelden" und „Early Access anfragen" führen alle vier auf die Anmeldung — ohne jeden Bezug zu dem, was der Besucher gerade wollte. Die Seite zum Anfragen ist von der Marketing-Seite nirgends verlinkt, ein Anmelde-Link für Bestandskunden fehlt ganz. | Hoch | S | Nein | [UX-Trichter K3](archiv/audits/2026-08-09-ux-trichter.md) |
+| 7 · U4 | **Die ersten Minuten in der neuen Community sind leer.** Der frisch angelegte Owner wird mit „Willkommen **zurück**" begrüßt, sieht lauter Nullen und bekommt zum leeren Moderationsstapel ein „🎉". Soll: eine Startliste mit höchstens fünf Schritten, ein erster Beispiel-Inhalt und eine Mail mit der Adresse seiner Community. Ghost misst dafür **26 % statt 7 %** Abschluss. | Hoch | M | Nein | [UX-Trichter G1, G2, G6](archiv/audits/2026-08-09-ux-trichter.md) · [Wettbewerb E1, E2](archiv/audits/2026-08-09-wettbewerb-benchmark.md) |
+| 8 · U5 | **Ein Tippfehler im Community-Namen bleibt für immer.** Der Name wird einmal im Wizard gesetzt und ist danach für niemanden mehr änderbar — auch nicht für uns. Er steht im Menükopf, im Browser-Tab, im Vorschaubild und als Absender jeder Mail. Soll: ein Feld „Name und Beschreibung" dort, wo man es sucht; die Adresse bleibt unberührt. | Hoch | M | Nein | [UX-Dashboard K1](archiv/audits/2026-08-09-ux-dashboard.md) |
+| 9 · F56 | **Private Nachrichten sind schwer zu finden.** Der Einstieg „Nachricht schreiben" neben dem Autorennamen ist im Konzept § 1 zugesagt; `MessageWriteButton.vue` ist gebaut, aber **nirgends verdrahtet**. Heute führt nur der Posteingang hin. | Mittel | S — Knopf im blueprint andocken | Nein | [PN-Konzept § 1](plans/PRIVATE-NACHRICHTEN-KONZEPT.md) |
+| 10 · U6 | **Ein Wort je Sache.** Dieselbe Preisstufe heißt Plan, Tarif und Abo — der Knopf „Tarif ansehen" führt auf den Reiter „Plan" in der Seite „Abo & Rechnung". Englisch stehen „products" und „blocks" in drei aufeinanderfolgenden Zeilen, im Betreiber-Menü Tenant, Mandant und Community in einer Tabelle. Rund 40 Textstellen, kein Code. | Mittel | M | Nein | [UX-Trichter § 3](archiv/audits/2026-08-09-ux-trichter.md) · [UX-Dashboard § 3](archiv/audits/2026-08-09-ux-dashboard.md) |
+| 11 · U7 | **Das Menü aufräumen.** 27 Einträge in sieben Gruppen, drei davon mit einem einzigen Eintrag — und für Moderatoren gibt es keine Gruppe „Moderation": ihre vier Arbeitsflächen liegen unter „Produkte" und „Einstellungen". Im Silo heißt der Sammelpunkt „Community-Einstellungen" und enthält „System". Soll: eine Gruppe je Aufgabe, dazu ein Suchfeld. | Mittel | M | Nein | [UX-Dashboard G1, G5, G8](archiv/audits/2026-08-09-ux-dashboard.md) · [Wettbewerb E8](archiv/audits/2026-08-09-wettbewerb-benchmark.md) |
+| 12 · U8 | **Die Adressen sagen etwas anderes als die Namen darüber.** Zwei Adressen unterscheiden sich um ein einziges Wort und meinen Gegensätzliches: der Posteingang jedes Mitglieds und der Owner-Schalter „gibt es hier private Nachrichten?". Dazu Adressen mit Wörtern, die in keiner Oberfläche vorkommen, und eine Umbenennung ohne Weiterleitung. | Mittel | M | Nein | [UX-Dashboard G4, G7, M13](archiv/audits/2026-08-09-ux-dashboard.md) |
+| 13 · U9 | **Die Übersichtsseite zeigt echte Zahlen.** Der Owner sieht auf seiner Startseite genau eine Zahl, und die zählt Kommentare — keine Mitglieder, keine Beiträge, keinen Speicherplatz, kein Wort zur Testphase. Die Kacheln stammen aus der Zeit, als es nur Kommentare gab. Gezählt wird das meiste ohnehin schon an anderer Stelle. | Mittel | M | Nein | [UX-Dashboard K2](archiv/audits/2026-08-09-ux-dashboard.md) |
+| 14 · U10 | **Preise und Pläne erzählen überall dasselbe.** Im Produkt steht weiterhin eine Spalte „Basic — 0 €" samt „Free Plan", obwohl es die seit der Preisentscheidung nicht mehr gibt — genau das Missverständnis, das die Preisseite bewusst vermeidet. Dazu auf der Preisseite: Vergleichstabelle unter die Karten, Jahresrabatt als „drei Monate geschenkt". | Mittel | S–M | Nein | [UX-Trichter G5](archiv/audits/2026-08-09-ux-trichter.md) · [Wettbewerb E4, M5, M6](archiv/audits/2026-08-09-wettbewerb-benchmark.md) |
+| 15 · U11 | **Fehlermeldungen und leere Seiten, die weiterhelfen.** Wer sich zu oft vertippt, liest „Passwort falsch" und läuft ins Zurücksetzen — dabei greift nur eine Sperre für eine Minute. Eine Hinweisseite verweist auf einen Knopf, den es dort nicht gibt. Und ein Dutzend leerer Listen zeigt einen Gedankenstrich statt „Beitrag schreiben". | Mittel | M | Nein | [UX-Trichter G7, M3, M7](archiv/audits/2026-08-09-ux-trichter.md) · [UX-Dashboard M8](archiv/audits/2026-08-09-ux-dashboard.md) |
+| 16 · U12 | **Der Wizard fragt sieben Mal und macht aus vier Antworten nichts.** Größe, Zweck, Kategorie und Ziel werden gespeichert und nie wieder gelesen — obwohl Schritt 5 wörtlich verspricht, daraus „die richtigen nächsten Schritte" zu zeigen. Der Wettbewerb stellt eine bis vier Fragen. Soll: drei Pflichtschritte, der Rest nach dem ersten Erfolg. | Mittel | M | **Ja: welche drei Fragen bleiben Pflicht** | [UX-Trichter M1](archiv/audits/2026-08-09-ux-trichter.md) · [Wettbewerb E5, M3](archiv/audits/2026-08-09-wettbewerb-benchmark.md) |
+| 17 · U13 | **Eigene Adresse schon ab Personal statt erst ab Pro?** Heute gibt es sie erst ab 149 € — die härteste Sperre im ganzen Vergleichsfeld (Ghost ab 18 $ auf jeder bezahlten Stufe, Circle im Einstiegsplan). Für Verein und Coach ist die eigene Adresse *der* Grund zu zahlen. Kostet aber ein Verkaufsargument für Pro; Kompromiss: eine Domain bei Personal, beliebig viele bei Pro. | Mittel | S (nur die Plan-Grenze) | **Ja: Preisentscheidung** | [Wettbewerb E3, 2.5](archiv/audits/2026-08-09-wettbewerb-benchmark.md) |
 
 ## ⏸️ Geparkt / wartet — in Arbeitsreihenfolge
 
-Die Reihenfolge ist die, in der wir sie anfassen würden: erst was in Minuten
-geht, dann was eine Entscheidung braucht, dann die großen Brocken. **Die
-Aufwände sind ehrlich gemeint** — Zeilen 1–2 sind zusammen eine Viertelstunde,
-ab Zeile 3 geht es um Tage bis Wochen. Wer die Liste als Ganzes für einen
-Nachmittag hält, plant an F1/F3/F7 vorbei.
+Die Reihenfolge ist die, in der wir sie anfassen würden: erst was eine
+Entscheidung braucht, dann die großen Brocken. **Die Aufwände sind ehrlich
+gemeint** — hier steht nichts mehr, was an einem Nachmittag fertig wird; F7 und
+F3 sind Wochen.
 
 | # | Reihenfolge | Was (einfach erklärt) | Prio | Aufwand | Braucht David? | Wartet auf … |
 | --- | --- | --- | --- | --- | --- | --- |
 | F7 | 5 — Wochen | **Bezahlte Communities** — der Owner nimmt Geld von seinen Mitgliedern (Stripe Connect). Eigene Mechanik und eigene Rechtsfragen. **Schluckt D1** (Davids Entscheidung 2026-08-02): bezahlte Pool-Events/-Kurse ergeben erst mit Connect Sinn — sonst landete das Ticketgeld beim Betreiber und der Owner bräuchte je Preis einen lookup_key von David. Events-Hälfte technisch M (S7+A6 haben den alten Webhook-Wartegrund erledigt), Kurse-Hälfte L/XL (community-scoped Entitlements sind unentworfen). | Mittel | XL | Ja: Rechtsfragen | nach dem Go-Live; erst muss Geldfluss 1 (A6) ankommen |
 | F3 | 6 — Wochen | **Silo → Pool:** `comments` und `portfolio` laufen als eigene Instanzen. Langfristig ist der Pool das Produkt, Silo bleibt das Enterprise-Angebot. | Niedrig | XL | Ja: strategisch | eine strategische Entscheidung |
 | F57 | 5 — Tage | **Die drei sozialen Mechaniken aus dem Discussions-Konzept Teil 4** — Emoji-**Reaktionen**, **Einladungen durch Mitglieder**, **Tages-Limit für Likes** — plus **Themen-Verlinkung mit Rückverweis**. Alle vier stehen dort als „gebaut", existieren aber nirgends im Code; an ihnen hängen auch sechs noch fehlende Abzeichen. Beim F1-Abschluss stillschweigend untergegangen, deshalb hier neu geführt. | Mittel | L | Ja: Zuschnitt + Reihenfolge | [DISCUSSIONS-KONZEPT.md](plans/DISCUSSIONS-KONZEPT.md) Teil 4 |
+| U14 | 4 — Tage | **Anmelden mit Apple oder Google.** Pukalani ist der einzige Anbieter im Vergleich ohne diesen Knopf; der Schalter dafür ist gebaut und nur nicht belegt. Er braucht aber eine erklärte Haltung neben dem Versprechen „kein Werbe-Tracking" — und eine Antwort darauf, dass so ein Knopf bei Kunden mit eigener Adresse anderswo dauerhaft ausfällt. | Mittel | M | Ja: Haltung + Anbieter | [Wettbewerb E7](archiv/audits/2026-08-09-wettbewerb-benchmark.md) |
+| U15 | 8 — Tage | **Die zugesagten Dashboard-Seiten, die es nicht gibt** — allen voran „Navigation" (der Owner stellt das Menü seiner eigenen Community zusammen) und „SEO". Beide standen im Dashboard-Plan als erste Prioritäten und tauchten seit dem 2026-07-31 in keiner Liste mehr auf; deshalb hier neu geführt. | Mittel | L | Ja: Zuschnitt | [UX-Dashboard § 5](archiv/audits/2026-08-09-ux-dashboard.md) · [DASHBOARD-IA.md](plans/DASHBOARD-IA.md) |
 | F47 | 7 — Tage | **Analytics v2, Rest = nur noch Optionales** (Pakete 1–4 live seit 2026-08-04 — Schalter, Dashboard-Zahlen, Landing-Seite/Pricing, Hilfe + Datenschutz-Vorlage): Adblock-Proxy · vordefinierte Events/Goals · Plausible-Mail-Reports. Nichts davon drängt. | Niedrig | je S–M | Nein | [ANALYTICS-V2.md](plans/ANALYTICS-V2.md) |
 
 ---
@@ -106,6 +120,28 @@ ausgeschaltet), **Vertrauensstufen + 22 Abzeichen** in den Diskussionen,
 **Als Betriebssystem für eigene Sites: ~98 %. Als verkaufbares SaaS: ~85 %.**
 
 ### Einzelheiten zu den offenen Punkten
+
+<a id="ux-herkunft"></a>
+
+**U1–U15 — Herkunft und Zuschnitt.** Am 2026-08-09/10 sind drei Berichte
+entstanden und im Archiv abgelegt: die **Reise von der Startseite bis in die
+neue Community** ([UX-Trichter](archiv/audits/2026-08-09-ux-trichter.md), 26
+Befunde), das **Dashboard** mit allen 57 Seiten und vier Menü-Registern
+([UX-Dashboard](archiv/audits/2026-08-09-ux-dashboard.md), 36 Befunde) und ein
+**Vergleich mit zwölf Wettbewerbern**
+([Wettbewerb](archiv/audits/2026-08-09-wettbewerb-benchmark.md), Preise und
+Zitate mit Quelle und Datum). Die 88 Einzelbefunde stehen dort — hier oben
+stehen nur die **Pakete**, die man am Stück bauen kann. Was die Berichte
+ausdrücklich als *richtig entschieden* markieren (Testphase ohne Karte, 404
+statt 403 bei fehlendem Produkt, Karten statt Tabelle im Kundenbereich, der
+ehrliche „Prüfen"-Knopf bei der Domain, kein Basic auf der Preisseite), ist
+bewusst **kein** Punkt geworden.
+
+**Zwei Entscheidungen hängen an David** und gehören in einem Rutsch gefragt
+(U2, U13; U12 und U14 kommen als dritte und vierte dazu): ob das
+**Einladungs-Tor** bleibt — kein Wettbewerber hat eines, und es ist heute der
+teuerste Punkt im Trichter — und ob die **eigene Adresse schon ab Personal**
+gilt; das gewinnt Kunden am Einstieg und nimmt Pro ein Verkaufsargument.
 
 **C19 — `/de` war für englischsprachige Browser eine Endlosschleife.**
 Code-Fix erledigt 2026-07-31, auf prod REPRODUZIERT und lokal behoben. Kein
@@ -244,3 +280,12 @@ E3 und E4 wurden dabei bewusst NICHT gewählt und bleiben liegen).** Die anderen
   ab. (Aus dem C18-Abschluss übernommen.)
 - **Inline-Embed ohne iframe** (eigener Sanitizer + CORS-Allowlist) und eine
   dedizierte `apps/embed-comments` — bewusst später, supervised.
+- **Gebühr auf die Einnahmen der Kunden, Preis pro Mitglied, ein dritter
+  „Köder"-Plan** — der Wettbewerbsvergleich rät von allen dreien ab: die
+  Gebühr ist der meistkritisierte Mechanismus im ganzen Feld (8–14 % des
+  Umsatzes gehen anderswo an die Plattform), und 0 % ist der eine Satz, der
+  Pukalani unterscheidet.
+- **Produkttour mit Sprechblasen und Kreditkarte in der Testphase** — für die
+  Tour ist belegt, dass sie nichts verbessert (die Startliste aus U4 ist die
+  Alternative, nicht ihre Vorstufe); auf die Karte verzichtet das ganze Feld
+  außer einem Anbieter, und der wird dafür kritisiert.
