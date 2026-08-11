@@ -85,9 +85,30 @@
     "profile": {
       "title": "Profile",
       "heading": "Your Pukalani ID",
-      "intro": "Picture, name and short description. They apply across all your communities.",
+      "intro": "Who you are and what you have done — both apply across all your communities.",
       "handleNote": "Your name for mentions belongs to one community at a time — you set it there, not here.",
-      "handleAction": "Go to your communities"
+      "handleAction": "Go to your communities",
+      "tabs": {
+        "profile": "Profile",
+        "activity": "Activity"
+      }
+    },
+    "activity": {
+      "title": "Activity",
+      "emptyTitle": "No activity yet",
+      "emptyText": "As soon as you write something, RSVP or enrol, it shows up here — from all of your communities.",
+      "emptyAction": "Go to your communities",
+      "unknownCommunity": "No longer reachable",
+      "truncated": "There is more than shown here. This list holds the most recent entries.",
+      "unavailable": "Part of your activity could not be loaded right now, so this list is incomplete.",
+      "errorTitle": "Activity not loaded",
+      "errorText": "Please reload the page.",
+      "kinds": {
+        "post": "Wrote a post",
+        "comment": "Wrote a comment",
+        "rsvp": "Said yes",
+        "enrollment": "Enrolled"
+      }
     },
     "settings": {
       "title": "Settings",
@@ -97,7 +118,21 @@
         "security": "Security",
         "sessions": "Sessions",
         "notifications": "Notifications",
-        "data": "Data"
+        "data": "Data",
+        "billing": "Billing"
+      }
+    },
+    "billing": {
+      "title": "Billing",
+      "note": "You pay per community, in its own dashboard. This page only shows how each one stands.",
+      "emptyTitle": "Nothing to bill",
+      "emptyText": "You do not own a community. Taking part costs nothing.",
+      "stateActive": "Active",
+      "manage": "Manage plan",
+      "columns": {
+        "community": "Community",
+        "plan": "Plan",
+        "state": "State"
       }
     }
   },

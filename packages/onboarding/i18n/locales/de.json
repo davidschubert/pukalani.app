@@ -85,9 +85,30 @@
     "profile": {
       "title": "Profil",
       "heading": "Deine Pukalani-ID",
-      "intro": "Bild, Name und Kurzbeschreibung. Sie gelten in allen deinen Communities.",
+      "intro": "Wer du bist und was du getan hast — beides gilt über alle deine Communities hinweg.",
       "handleNote": "Dein Name für Erwähnungen gehört zu je einer Community — du legst ihn dort fest, nicht hier.",
-      "handleAction": "Zu deinen Communities"
+      "handleAction": "Zu deinen Communities",
+      "tabs": {
+        "profile": "Profil",
+        "activity": "Aktivität"
+      }
+    },
+    "activity": {
+      "title": "Aktivität",
+      "emptyTitle": "Noch keine Aktivität",
+      "emptyText": "Sobald du etwas schreibst, zusagst oder dich einschreibst, steht es hier — aus allen deinen Communities.",
+      "emptyAction": "Zu deinen Communities",
+      "unknownCommunity": "Nicht mehr erreichbar",
+      "truncated": "Es gibt mehr als hier steht. Diese Liste zeigt die neuesten Einträge.",
+      "unavailable": "Ein Teil deiner Aktivität konnte gerade nicht geladen werden. Die Liste ist deshalb unvollständig.",
+      "errorTitle": "Aktivität nicht geladen",
+      "errorText": "Bitte lade die Seite neu.",
+      "kinds": {
+        "post": "Beitrag geschrieben",
+        "comment": "Kommentar geschrieben",
+        "rsvp": "Zugesagt",
+        "enrollment": "Eingeschrieben"
+      }
     },
     "settings": {
       "title": "Einstellungen",
@@ -97,7 +118,21 @@
         "security": "Sicherheit",
         "sessions": "Sitzungen",
         "notifications": "Benachrichtigungen",
-        "data": "Daten"
+        "data": "Daten",
+        "billing": "Abrechnung"
+      }
+    },
+    "billing": {
+      "title": "Abrechnung",
+      "note": "Bezahlt wird je Community — in ihrem eigenen Dashboard. Hier siehst du nur, wie es um jede steht.",
+      "emptyTitle": "Nichts abzurechnen",
+      "emptyText": "Du besitzt keine Community. Wer nur mitmacht, zahlt nichts.",
+      "stateActive": "Aktiv",
+      "manage": "Plan verwalten",
+      "columns": {
+        "community": "Community",
+        "plan": "Plan",
+        "state": "Zustand"
       }
     }
   },

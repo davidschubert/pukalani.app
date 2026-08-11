@@ -24,8 +24,16 @@ import type { NavigationMenuItem } from '@nuxt/ui'
  * KEINE Reiter-REGISTRY (`pukalani.admin.settingsTabs`) wie im Dashboard: die
  * beschickt die Community-Hülle mit fremden Layern und filtert über Ort ×
  * Capability × Produkt. Hier gibt es weder Community noch Rolle, gegen die zu
- * filtern wäre. Wenn mit AH-3 das Konto-Billing dazukommt, ist das die Stelle,
- * an der die Frage neu zu stellen ist — nicht vorher.
+ * filtern wäre.
+ *
+ * AH-3 HAT DIESE FRAGE NEU GESTELLT und bei derselben Antwort belassen. Der
+ * fünfte Reiter „Abrechnung" liegt im SELBEN Layer wie die Hülle, kommt aus
+ * keinem fremden, und es gibt nichts zu filtern: er steht jedem Konto offen
+ * und ist für Konten ohne eigene Community schlicht leer (ehrlicher
+ * Leerzustand statt versteckter Reiter — ein Reiter, der je nach Besitz
+ * erscheint und verschwindet, macht die Seite unvorhersehbar). Eine Registry
+ * wäre Gerüst ohne Last; sie wird gebraucht, sobald ein FREMDER Layer hier
+ * einen Reiter anmelden will.
  */
 definePageMeta({ layout: 'onboarding', middleware: 'auth' })
 
@@ -37,6 +45,7 @@ const links = computed<NavigationMenuItem[]>(() => [
   { label: t('onboarding.account.settings.tabs.sessions'), icon: 'i-ph-devices', to: localePath('/settings/sessions') },
   { label: t('onboarding.account.settings.tabs.notifications'), icon: 'i-ph-bell', to: localePath('/settings/notifications') },
   { label: t('onboarding.account.settings.tabs.data'), icon: 'i-ph-database', to: localePath('/settings/data') },
+  { label: t('onboarding.account.settings.tabs.billing'), icon: 'i-ph-receipt', to: localePath('/settings/billing') },
 ])
 </script>
 
