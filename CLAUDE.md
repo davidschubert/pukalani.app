@@ -62,6 +62,16 @@ Vollständiges Konzept: docs/CONCEPT.md
   Container (Swoole-Crash → `docker compose up -d --no-deps appwrite-realtime`).
 - Session-Cookie: a_session_<PROJECT_ID>, httpOnly+secure+sameSite,
   Appwrite-Endpoint als Subdomain derselben Root-Domain
+- Das geteilte Projekt aller Pool-Communities und aller Konten heißt seit AH-1
+  (2026-08-11) **`account`** (Session-Cookie `a_session_account`); der Vorgänger
+  `pool` ist nach dem Datenumzug EINGEFROREN. Projekt-Ids sind unveränderlich —
+  „umbenennen" war Neuanlage + Migration (Schema, Nutzer MIT Passwort-Hashes,
+  Rows, Buckets) und braucht eine EIGENE Web-Platform `*.pukalani.app`, sonst
+  ist dort jede Realtime tot (F45). Code-Default neuer Communities:
+  `pukalani.control.defaultPoolProject` (packages/control/app/app.config.ts),
+  Env-Override NUXT_PUBLIC_CONTROL_POOL_PROJECT. LOKAL heißt das Dev-Projekt
+  weiterhin `pool` — die Verify-Skripte fallen bewusst darauf zurück.
+  Runbook: docs/runbooks/ACCOUNT-CUTOVER.md.
 - Jede App: EIGENE Appwrite-Instanz, Config aus .env
   (NUXT_APPWRITE_KEY server-only, NUXT_PUBLIC_* für Endpoint/Project)
 - Immer explizites Query.limit() (Default 25)
@@ -221,7 +231,7 @@ Vollständiges Konzept: docs/CONCEPT.md
   die Testumgebung. DASSELBE IN PROD (F45, 2026-08-03): im Projekt `control`
   stand GAR KEINE Web-Platform, also war auf der Betreiber-Konsole jede Realtime
   tot — Sofort-Abmeldung, Glocke, Live-Theme. Jedes Appwrite-Projekt braucht
-  seinen Host dort (`pool` hat ein Wildcard `*.pukalani.app` und deckt damit
+  seinen Host dort (`account` hat ein Wildcard `*.pukalani.app` und deckt damit
   jeden neuen Mandanten automatisch). DIAGNOSE: der WS-**Handshake** verrät
   nichts, er antwortet `101` auch für einen abgewiesenen Origin — die Ablehnung
   kommt als erste Nachricht IM Socket (`code 1008`). Billiger Test:
@@ -287,12 +297,28 @@ Vollständiges Konzept: docs/CONCEPT.md
   Die control-Site hat BEWUSST kein Repository: die CI rsynct .output UND
   ops/-Configs; ploi-Fallback-Deploy gibt es für control nicht (Fallback =
   Runbook docs/runbooks/CONTROL-CUTOVER.md).
-- `my.pukalani.app` = Kundenbereich, `start.pukalani.app` = Kurz-Link in den
-  Wizard. BEIDE sind Kontroll-Hosts derselben Platform-App und brauchen weder
-  DNS noch eigene Site (Wildcard `*.pukalani.app` zeigt schon dorthin).
+- `account.pukalani.app` = DER Kundenbereich (AH-1, Davids Entscheidung
+  2026-08-11): Anmeldung, Konto, Communities UND der Wizard (`/start`). EIN
+  Kontroll-Host derselben Platform-App, ohne DNS- oder Site-Bedarf (Wildcard
+  `*.pukalani.app` zeigt schon dorthin, KEIN Zertifikat anfordern —
+  Lineage-Falle). `wizardHosts` ist damit LEER: `/` zeigt die Übersicht, und
+  wer keine Community hat, wird von ihr in den Wizard geschickt; ein `?code=`
+  führt weiterhin direkt dorthin. Ein LINK auf den Wizard holt seinen Host über
+  `resolveWizardHosts()` (core/shared/controlCenter.ts) — eigene Wizard-Hosts,
+  sonst die Kontroll-Hosts; ohne diesen Rückfall wäre „Community anlegen" still
+  aus dem Switcher verschwunden.
+  DIE VORGÄNGER `my.` UND `start.` ANTWORTEN 301, NICHT 404 (Pfad + Query
+  unverändert): sie wurden BEWORBEN, und eine Einladungs-Mail trägt ihren
+  `?code=` sieben Tage. Regel `core/shared/legacyControlHosts.ts`, Middleware
+  `core/server/middleware/00.legacy-control-hosts.ts` (liegt in core, weil sie
+  VOR `00.tenant.ts` laufen muss — innerhalb EINES Verzeichnisses ist die
+  Reihenfolge nachprüfbar, über Layer-Grenzen hinweg nicht), Liste in
+  `apps/platform/app/app.config.ts` (`tenancy.legacyControlHosts`). Sie bleiben
+  deshalb auch im TLS-Wächter: eine 301 wird erst NACH dem Handshake gesprochen.
   `app.pukalani.app` (Altname) ist am 2026-07-27 ENTFERNT — nie beworben, kein
-  DNS-Eintrag, stand nur in controlHosts; antwortet jetzt 404. Der Name bleibt
-  in RESERVED_SUBDOMAINS gesperrt (Phishing).
+  DNS-Eintrag, stand nur in controlHosts; antwortet jetzt 404. ALLE Altnamen
+  bleiben in RESERVED_SUBDOMAINS gesperrt (Phishing), dazu `admin` (AH-4) und
+  `master` (AH-5) vorreserviert.
 - TLS-Fallen (beide live erwischt): (1) Port 80 antwortet nur für explizit
   konfigurierte Hosts — die HTTP-Prüfung von Let's Encrypt scheitert für
   Aliase/Wildcards, deshalb IMMER DNS-01 über Cloudflare. (2) ploi benennt die
