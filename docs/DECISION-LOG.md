@@ -7,6 +7,35 @@ die kleinen, verstreuten Beschlüsse.
 
 ---
 
+## 2026-08-11 — Account-Horizont: ein Konto, das überall gilt
+
+**Davids Richtungsentscheidung** (nach der Subdomain-/Architektur-Diskussion;
+Appwrite-Faktenlage vorher gegen die Docs geprüft: User sind strikt pro
+Projekt, Custom Tokens sind der offizielle Baustein, „ein Konto" heißt „ein
+Projekt"): das Ein-Konto-Modell des Pools wird zum sichtbaren Kern der
+Plattform ausgebaut. **Diese Punkte stehen VOR allen anderen offenen Punkten**
+(AH-1…AH-6 in OPEN-ITEMS; Tiefe in docs/plans/ACCOUNT-HORIZONT.md):
+(1) **Echte Projekt-ID-Migration `pool` → `account`** — GEGEN die Empfehlung
+„nur Anzeigename" (Appwrite-IDs sind unveränderlich, also Neuanlage +
+Migration; Kunden werden einmal abgemeldet). Sachargument dafür: im Early
+Access mit einer Handvoll Konten ist es der EINZIGE günstige Moment, und die
+Users-API übernimmt Passwort-Hashes offiziell. **Verworfen:** Anzeigename
+„Account" mit ID `pool` (die Empfehlung).
+(2) **Host-Konsolidierung**: `my.` UND `start.` gehen in `account.pukalani.app`
+auf — EIN Cutover zusammen mit (1). URL-Ziel: `/` (Account-Startseite),
+`/profile`, `/settings` (inkl. `data` für Export/Löschen), `/communities`,
+Wizard; `/profile/activity` + Account-Billing als Phase 2.
+(3) **`control.` → `admin.`** (kosmetisch, Kunden sehen ihn nie — bewusste
+Namensentscheidung; studio→control-Runbook ist das Muster, Stripe-Webhook
+wandert mit).
+(4) **master-Werkstatt-Community + demo-Vollausbau** — als normale Pool-
+Community mit Rollen, KEIN zweiter Konten-Pool („blueprint" als Name gesperrt,
+so heißt der Layer; endgültiger Name offen).
+(5) **F3 fest eingeplant** (comments → Pool) als Abschluss — danach zwei
+Auth-Welten: account (alle Menschen) + admin (Betreiber); portfolio bleibt
+Davids eigenes Silo. **Dazu:** AP1 wird SOFORT deployt (URLs sind env-basiert,
+der Host-Umzug später ist eine Env-Zeile + Redirect).
+
 ## 2026-08-10 — UX-Planungsrunde: sechs Entscheidungen zu den U-Paketen
 
 **Davids Entscheidungen** (strukturierte Fragen nach den drei Audits vom
