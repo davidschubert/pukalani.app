@@ -125,7 +125,8 @@
       }
     },
     "layout": {
-      "footer": "Pukalani · Community software made and hosted in Germany"
+      "footer": "Pukalani · Community software made and hosted in Germany",
+      "accountMenu": "Account menu"
     },
     "communities": {
       "title": "Your communities",
@@ -151,6 +152,7 @@
       "submit": "Continue",
       "rejected": "That code isn't valid (any more). Check the spelling — or ask us for a new one.",
       "noCode": "No code? Tell us what you want to use Pukalani for — we invite new communities continuously.",
+      "noCodeLink": "Request access",
       "verifyFirst": "Your code is valid — just confirm your email address"
     },
     "request": {

@@ -125,7 +125,8 @@
       }
     },
     "layout": {
-      "footer": "Pukalani · Community-Software aus Deutschland, gehostet in Deutschland"
+      "footer": "Pukalani · Community-Software aus Deutschland, gehostet in Deutschland",
+      "accountMenu": "Konto-Menü"
     },
     "communities": {
       "title": "Deine Communities",
@@ -150,7 +151,8 @@
       "codePlaceholder": "PUKA-XXXX-XXXX",
       "submit": "Weiter",
       "rejected": "Dieser Code gilt nicht (mehr). Prüfe die Schreibweise — oder frag uns nach einem neuen.",
-      "noCode": "Keinen Code? Schreib uns, wofür du Pukalani nutzen willst — wir laden laufend neue Communities ein.",
+      "noCode": "Keinen Code? Sag uns, wofür du Pukalani nutzen willst — wir laden laufend neue Communities ein.",
+      "noCodeLink": "Zugang anfragen",
       "verifyFirst": "Dein Code gilt — bestätige nur noch deine E-Mail-Adresse"
     },
     "request": {

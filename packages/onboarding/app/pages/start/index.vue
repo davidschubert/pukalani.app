@@ -125,8 +125,17 @@ useHead({ title: () => t('onboarding.gate.title') })
       </UButton>
     </form>
 
+    <!--
+      DER RÜCKWEG (U1, 2026-08-10). Der Satz stand hier als reiner Text: keine
+      Adresse, kein Knopf, kein Link — wer keinen Code hatte, saß in einer
+      Seite fest, aus der nichts herausführte. Der Link ist exakt das
+      Spiegelbild von `anfragen.vue` („Du hast schon einen Code? Hier
+      einlösen"), damit die beiden Seiten aufeinander zeigen statt aneinander
+      vorbei.
+    -->
     <p class="text-sm text-dimmed">
       {{ t('onboarding.gate.noCode') }}
+      <NuxtLink :to="localePath('/anfragen')" class="font-medium underline">{{ t('onboarding.gate.noCodeLink') }}</NuxtLink>
     </p>
   </div>
 </template>
