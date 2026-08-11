@@ -13,6 +13,16 @@ const appConfig = useAppConfig()
 const auth = useAuthStore()
 const { completeEmbedLogin } = useEmbedPopup()
 const toast = useToast()
+/**
+ * Trichter-Punkt „registriert" (U18) — dieselbe Kontroll-Host-Klammer wie im
+ * Passwort-Formular (RegisterForm.vue, dort die Begründung). Zusätzlich hängt
+ * er an `register`: dieselbe Maske bedient auch die ANMELDUNG bestehender
+ * Konten, und ein Login ist kein Trichter-Eintritt. Der Preis ist bekannt: wer
+ * über /register/code ein BESTEHENDES Konto anmeldet, wird mitgezählt — die
+ * Route unterscheidet Anlegen und Anmelden bewusst nicht (Auto-Signup).
+ */
+const { trackFunnel } = useFunnelEvent()
+const isControlCenter = useIsControlCenter()
 
 const step = ref<'email' | 'code'>('email')
 const loading = ref(false)
@@ -140,6 +150,8 @@ async function verify() {
         // Name setzen fehlgeschlagen — Login bleibt trotzdem erfolgreich
       }
     }
+
+    if (props.register && isControlCenter) trackFunnel('funnel_register_done')
 
     // Embed-Popup (E2): Session ans iframe übergeben statt zu navigieren
     if (await completeEmbedLogin()) return

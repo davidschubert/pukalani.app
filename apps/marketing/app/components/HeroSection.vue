@@ -4,9 +4,14 @@
 // oben rechts bereits durch — das Leitmotiv setzt sofort ein.
 const { t } = useI18n()
 const { start, demo } = useProductLinks()
+const { trackFunnel } = useFunnelEvent()
 
 const links = computed(() => [
-  { to: start, color: 'primary' as const, label: t('marketing.hero.ctaPrimary') },
+  // `onClick` im Link-Objekt statt `@click` am Knopf: die Liste wird per
+  // `v-bind` auf EINEN `UButton` in einer Schleife ausgerollt — ein Zuhörer im
+  // Markup träfe beide Knöpfe. Vue liest `onXxx` aus einem v-bind-Objekt als
+  // Zuhörer, das Ziel des Links bleibt unberührt (U18).
+  { to: start, color: 'primary' as const, label: t('marketing.hero.ctaPrimary'), onClick: () => trackFunnel('funnel_cta_start') },
   {
     to: demo,
     color: 'neutral' as const,

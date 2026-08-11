@@ -16,6 +16,7 @@ import { type ProductKey, slugForLocale } from '#shared/marketing'
 const { t, locale } = useI18n()
 const localePath = useLocalePath()
 const { start } = useProductLinks()
+const { trackFunnel } = useFunnelEvent()
 
 // Die Produkte der Hauptnavigation, am KANONISCHEN Schlüssel. Reihenfolge
 // = Reihenfolge im Bausteine-Abschnitt; Texte kommen aus i18n
@@ -316,7 +317,9 @@ const MOBILE_NAV_UI = {
     </UNavigationMenu>
 
     <template #right>
-      <UButton :to="start" color="primary" size="sm">
+      <!-- Derselbe Trichter-Punkt wie im Hero (U18): beide Knöpfe führen auf
+           dieselbe Registrierung, gezählt wird der EINSTIEG, nicht die Stelle. -->
+      <UButton :to="start" color="primary" size="sm" @click="trackFunnel('funnel_cta_start')">
         {{ t('marketing.nav.start') }}
       </UButton>
     </template>

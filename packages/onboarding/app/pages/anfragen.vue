@@ -14,6 +14,7 @@ defineI18nRoute({ paths: { de: '/anfragen', en: '/request-access' } })
 
 const { t, locale } = useI18n()
 const localePath = useLocalePath()
+const { trackFunnel } = useFunnelEvent()
 
 const email = ref('')
 const note = ref('')
@@ -38,6 +39,9 @@ async function submit() {
       },
     })
     sent.value = true
+    // Trichter-Punkt „Zugang angefragt" (U18): der zweite Ausgang neben dem
+    // Code — er zählt nur, wenn der Server die Anfrage angenommen hat.
+    trackFunnel('funnel_request_submitted')
   }
   catch {
     failed.value = true

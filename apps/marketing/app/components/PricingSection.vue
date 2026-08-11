@@ -16,6 +16,7 @@
 const { t, n } = useI18n()
 const localePath = useLocalePath()
 const { signIn } = useProductLinks()
+const { trackFunnel } = useFunnelEvent()
 
 /**
  * Ziel der Studio-Karte (Davids Entscheidung 2026-08-09): die Kontakt-Sektion
@@ -112,6 +113,16 @@ const plans = computed(() => [
     // `UPricingPlan` gibt seinem Knopf sonst `size: 'lg'`; der Bestand steht
     // auf der Standardgröße.
     size: 'md' as const,
+    /**
+     * Trichter-Punkt „Kaufabsicht" (U18). Die Eigenschaft `plan` ist hier der
+     * eigentliche Wert: welches Paket geklickt wurde, ist die Frage — ein
+     * bloßer Zähler „jemand wollte kaufen" beantwortet sie nicht.
+     *
+     * Als `onClick` IM Knopf-Objekt, weil `UPricingPlan` seinen Knopf selbst
+     * rendert und dafür nur dieses Objekt bekommt; ein Zuhörer an der Karte
+     * träfe auch Klicks auf die Kartenfläche.
+     */
+    onClick: () => trackFunnel('funnel_cta_plan', { plan: plan.key }),
   },
 })))
 

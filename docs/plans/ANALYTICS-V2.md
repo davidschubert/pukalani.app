@@ -64,10 +64,56 @@ Datenschutz-Vorlagen der Communities (gemeinsam mit A1 abarbeiten).
 - **Adblock-Proxy**: Script + `/api/event` über den eigenen Community-Host
   proxyen (offiziell dokumentiert, „Bypass adblockers") — spürbar genauere
   Zahlen, etwas nginx-/Nitro-Arbeit.
-- **Vordefinierte Events/Goals** der Plattform: „Mitglied geworden",
-  „Kommentar geschrieben", … (Custom Events + Goals per Sites-API anlegen).
+- ~~**Vordefinierte Events/Goals** der Plattform~~ → als **U18** vorgezogen
+  und gebaut, siehe den Abschnitt „Trichter-Ereignisse" unten.
 - **Plausible-E-Mail-Reports** (weekly/monthly) je Site aktivieren.
 
 ## Grobe Rechnung
 Pakete 1+2 zusammen ≈ ein solides Wochenpaket · 3+4 ≈ ein Nachmittag plus
 Text-Abnahme · 5 nach Bedarf.
+
+---
+
+## Trichter-Ereignisse (U18, gebaut 2026-08-10)
+
+Damit die UX-Pakete U1–U4 einen Vorher-Wert haben, meldet der Anmelde-Trichter
+jetzt sieben benannte Ereignisse. Sie sind **Custom Events**; die **Goals**
+dazu legt David in der Plausible-Oberfläche je Site von Hand an (die CE hat
+keine Sites-API — s. o.). Der Name muss dabei WÖRTLICH übereinstimmen.
+
+**Wie es misst:** `useFunnelEvent()` (`packages/core/app/composables/`) ruft
+ausschließlich das `plausible()` des schon eingebundenen Scripts auf. Kein
+eigener Transport, kein eigener `fetch` — was das doppelte Gate aus
+`core/app/plugins/analytics.ts` (`pukalani.analytics.enabled` + ggf.
+`pukalani.consent`) nicht geladen hat, meldet auch nichts. Fehlt das Script,
+tut der Helfer still gar nichts. Die Namensliste steht einmal in
+`packages/core/shared/funnelEvents.ts` und ist per Unit-Test festgenagelt.
+
+| Ereignis | Feuert bei | Datei | Empfangende Site |
+| --- | --- | --- | --- |
+| `funnel_cta_start` | Klick auf den Haupt-CTA („Kostenlos starten") in Hero **oder** Kopfleiste | `apps/marketing/app/components/HeroSection.vue`, `MarketingHeader.vue` | `pukalani.app` |
+| `funnel_cta_plan` | Klick auf den CTA einer Preiskarte — Eigenschaft `plan` = `personal` \| `pro` | `apps/marketing/app/components/PricingSection.vue` | `pukalani.app` |
+| `funnel_register_done` | Registrierung erfolgreich (Passwort **und** Code-Weg), nur auf Kontroll-Hosts | `packages/core/app/components/auth/RegisterForm.vue`, `OtpLoginForm.vue` | *(noch keine — s. u.)* |
+| `funnel_gate_no_code` | Die Code-Wand `/start` ohne Code im Link erreicht | `packages/onboarding/app/pages/start/index.vue` | *(noch keine)* |
+| `funnel_code_redeemed` | Einladungs-Code erfolgreich geprüft | `packages/onboarding/app/pages/start/index.vue` | *(noch keine)* |
+| `funnel_site_created` | Wizard durch, Community angelegt (beim Anlegen, nicht auf `/start/done`) | `packages/onboarding/app/pages/start/community.vue` | *(noch keine)* |
+| `funnel_request_submitted` | Zugangs-Anfrage vom Server angenommen | `packages/onboarding/app/pages/anfragen.vue` | *(noch keine)* |
+
+**Offene Voraussetzung — die Kontroll-Hosts messen heute gar nichts.**
+`apps/platform` bindet das Plausible-Script bewusst nur über die
+Selbstbedienung ein (`instance` ohne `src`), und `GET /api/analytics/config`
+antwortet auf einem Kontroll-Host per Entwurf leer (`event.context.controlCenter`
+⇒ `EMPTY`, sonst käme dort die Id einer fremden Community heraus). Auf
+`my.pukalani.app` und `start.pukalani.app` gibt es also kein `window.plausible`
+— die fünf Ereignisse des Kundenbereichs laufen ins Leere, bis eine eigene
+Plausible-Site dafür existiert. Die zwei Marketing-Ereignisse messen sofort.
+
+Zwei Wege, wenn die fünf Zahlen gebraucht werden (beide brauchen David):
+1. **Eigene Site** `my.pukalani.app` in Plausible anlegen und ihre Script-Id
+   auf den Kontroll-Hosts ausliefern (eine Fallunterscheidung in
+   `packages/analytics/server/api/analytics/config.get.ts` statt des heutigen
+   `EMPTY`). Sauberste Trennung, ein Handgriff mehr.
+2. **Sammel-Site mitbenutzen** (`communities.pukalani.app`): die Zahlen je
+   Community bleiben trotzdem sauber, weil die Stats-Route ohnehin auf
+   `event:hostname` filtert und `my.`/`start.` zu keiner Community gehören.
+   Kostet keine neue Site, mischt aber die Gesamtsumme dieser Site.

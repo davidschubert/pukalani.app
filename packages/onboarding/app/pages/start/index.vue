@@ -15,6 +15,7 @@ const { t } = useI18n()
 const localePath = useLocalePath()
 const auth = useAuthStore()
 const draft = useOnboardingDraft()
+const { trackFunnel } = useFunnelEvent()
 
 /**
  * Der Code kann aus DREI Quellen kommen, in dieser Reihenfolge:
@@ -39,7 +40,19 @@ const needsVerification = ref(false)
 // Kam der Code per Link, muss niemand auf „Weiter" drücken — das ist der
 // „direkt loslegen"-Teil, den die Mail verspricht.
 onMounted(() => {
-  if (codeFromLink) void submit()
+  if (codeFromLink) {
+    void submit()
+    return
+  }
+  /**
+   * Trichter-Punkt „vor der Wand" (U18): hier steht, wer sich registriert hat
+   * und KEINEN Code mitbringt. Gezählt wird das ANKOMMEN, nicht ein
+   * Fehlversuch — der Verlust passiert genau in dem Moment, in dem die Wand
+   * das erste Mal zu sehen ist. Ein bereits GESPEICHERTER Entwurfs-Code zählt
+   * dabei nicht als „mit Code": er ist ungeprüft und stammt aus einem früheren
+   * Anlauf, der genauso an dieser Wand endete.
+   */
+  trackFunnel('funnel_gate_no_code')
 })
 
 async function submit() {
@@ -60,6 +73,9 @@ async function submit() {
       return
     }
     draft.value.inviteCode = code.value.trim()
+    // Trichter-Punkt „Tor offen" (U18) — der Code ist geprüft, aber noch nicht
+    // eingelöst; verbraucht wird er erst beim Anlegen.
+    trackFunnel('funnel_code_redeemed')
     await navigateTo(localePath('/start/community'))
   }
   catch {

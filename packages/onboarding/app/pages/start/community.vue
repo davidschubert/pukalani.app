@@ -42,6 +42,7 @@ const router = useRouter()
 const localePath = useLocalePath()
 const draft = useOnboardingDraft()
 const auth = useAuthStore()
+const { trackFunnel } = useFunnelEvent()
 
 // ── Schritt aus der URL (fehlerhafte Werte → erster Schritt) ────────────────
 const step = computed<WizardStep>(() => normalizeStep(route.query.step))
@@ -186,6 +187,13 @@ async function create() {
         locale: locale.value,
       },
     })
+    /**
+     * Trichter-Punkt „angelegt" (U18) — HIER und nicht auf der Abschluss-Seite:
+     * `/start/done` ist eine Adresse mit Query, die man neu laden, teilen und
+     * über den Zurück-Knopf wieder betreten kann. Gezählt würde dort der
+     * BESUCH, nicht das Ereignis.
+     */
+    trackFunnel('funnel_site_created')
     // NUR die Id — die Adresse holt sich die Abschluss-Seite aus der eigenen
     // Mitgliedschafts-Liste. Ein `host` in der Query war der Einstieg für die
     // Handoff-Übernahme (Audit 2026-08-02) und darf hier nicht wieder auftauchen.

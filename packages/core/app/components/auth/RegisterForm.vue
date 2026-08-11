@@ -6,6 +6,16 @@ const { t } = useI18n()
 const { afterAuthTarget } = useAuthRedirect()
 const appConfig = useAppConfig()
 const auth = useAuthStore()
+/**
+ * Trichter-Punkt „registriert" (U18) — NUR auf einem Kontroll-Host.
+ *
+ * Dieses Formular gehört dem Core und läuft damit auch auf JEDEM
+ * Mandanten-Host. Dort misst die Community ihre eigene Plausible-Site; ein
+ * Betreiber-Trichter-Ereignis in fremden Kundenzahlen wäre schlicht falsch.
+ * Der Trichter, um den es geht, beginnt auf my./start.pukalani.app.
+ */
+const { trackFunnel } = useFunnelEvent()
+const isControlCenter = useIsControlCenter()
 const loading = ref(false)
 const errorMessage = ref<string | null>(null)
 const showPassword = ref(false)
@@ -39,6 +49,7 @@ async function onSubmit(event: FormSubmitEvent<RegisterFormInput>) {
       body: { name: event.data.name, email: event.data.email, password: event.data.password },
     })
     await auth.refresh()
+    if (isControlCenter) trackFunnel('funnel_register_done')
     await navigateTo(afterAuthTarget())
   }
   catch (error) {
