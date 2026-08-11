@@ -29,6 +29,31 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### AH-2 — Der Account-Bereich auf account.pukalani.app ✅ 2026-08-11
+
+Gebaut als GETEILTE Flächen statt Kopien (Davids Vorgabe „ein Account-Layer
+überall"): `/` ist eine echte Account-Startseite (Weiche in der App-Seite,
+Host-stabil, kein Hydration-Zweig; `?code=` schlägt weiter alles), `/profile`
+rendert dieselbe `UserProfilePanel` wie die Dashboard-Konto-Hülle, `/settings`
+hat vier Reiter — Sicherheit (nur noch Passwort), Sitzungen,
+Benachrichtigungen und NEU „Daten" (Export + Konto löschen, Audit M10, an
+BEIDEN Orten). Mandanten-Hosts sperren die Konto-Pfade per
+`controlOnlyPaths` (exakte Segmente, kein startsWith-Übergriff auf z. B.
+`/settings-der-community`). Live-Proben 6/6: Redirect-mit-`?redirect=` auf
+allen neuen Pfaden, demo./profile 404, demo./ unberührt.
+
+**Offen daraus:** der @handle ist je Community vergeben — `/profile` zeigt
+ihn als Auskunft, nicht als Formular; ein konto-weiter Handle wäre eine
+Datenmodell-Entscheidung (Frage an David gestellt).
+
+**Gelernt:** (1) `useHead` UNTER dem script-Block ist toter Text — der
+SFC-Compiler verwirft ihn still; zwei Bestands-Seiten waren so titellos
+(Dashboard-Audit M6 hatte es schon einmal an anderen Dateien gezeigt — beim
+Bauen neuer Seiten den Block-Ort prüfen). (2) Der Shell-Arbeitsordner der
+Session springt gelegentlich auf das Haupt-Repo zurück — Push/Gates aus
+Worktrees IMMER mit explizitem Pfad (`git -C <worktree>`), sonst prüft man
+alten Code oder pusht den falschen Stand.
+
 ### AH-1 — EIN Cutover: Projekt pool→account + Host my./start.→account. ✅ 2026-08-11
 
 **Davids „go" um die Mittagszeit, live um kurz nach Mitternacht** — der ganze
