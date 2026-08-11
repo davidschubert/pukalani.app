@@ -1,20 +1,40 @@
+import { safeRedirectTarget } from '../../../core/shared/redirectTarget'
+import { isControlOnlyPath } from '../../shared/controlOnlyPaths'
+
 /**
  * Trennt die zwei Welten DESSELBEN Deployments, symmetrisch:
  *
  *  - Auf einem KONTROLL-Host (account.pukalani.app) zeigt `/` den
  *    Kundenbereich, nicht die Startseite einer Community — dort gibt es keine.
- *  - Auf einem Community-Host bleiben Trichter UND Übersicht unerreichbar
- *    (404). Ein „Community anlegen" unter `kunde.pukalani.app/start` wäre für
- *    Mitglieder verwirrend und würde suggerieren, es hätte etwas mit dieser
- *    Community zu tun; eine Liste FREMDER Communities unter
- *    `kunde.pukalani.app/communities` wäre Betreiber-Inhalt am falschen Ort
- *    (dieselbe Regel wie beim Changelog, N7).
+ *  - Auf einem Community-Host bleiben Trichter, Übersicht und die Konto-Flächen
+ *    unerreichbar (404, Liste + Begründung in shared/controlOnlyPaths.ts).
  *
- * WOHIN `/` auf einem Kontroll-Host führt, entscheidet seit F12 eine pure
- * Funktion (`controlHomeTarget`, core/shared/controlCenter.ts): auf `account.*`
- * der Wizard, sonst die Übersicht — und ein `?code=` schlägt beides. Vorher
- * ging JEDER Kontroll-Host hart nach `/start`; ein Bestandskunde wurde damit
- * auf seinem eigenen Kundenbereich mit „Neue Community anlegen" begrüßt.
+ * ── WAS `/` AUF DEM KONTROLL-HOST IST (AH-2, 2026-08-11) ───────────────────
+ * Seit AH-2 ist es eine SEITE und keine Weiterleitung mehr: die
+ * Account-Startseite mit den Wegen in die Bereiche (Communities, Profil,
+ * Einstellungen, Community anlegen). Vorher ging `/` hart auf `/communities`
+ * weiter — was ein Konto ohne Community sofort weiter in den Wizard warf und
+ * jedem anderen die Frage „wo ist mein Profil?" gar nicht erst stellte.
+ *
+ * Die pure Regel dahinter (`controlHomeTarget`, core/shared/controlCenter.ts)
+ * ist UNVERÄNDERT geblieben und beantwortet weiterhin genau eine Frage:
+ * Trichter oder Kundenbereich? Nur die Antwort „Kundenbereich" führt jetzt
+ * nicht mehr woanders hin, sondern bleibt hier stehen. Ein `?code=` schlägt
+ * nach wie vor alles — eine Einladung ist eine unmissverständliche Absicht.
+ *
+ * ── WARUM DIE ANMELDE-PFLICHT HIER STEHT UND NICHT IN DER SEITE ────────────
+ * `/` gehört der APP (apps/platform/app/pages/index.vue), nicht diesem Layer:
+ * auf einem Mandanten-Host rendert dieselbe Route die öffentliche
+ * Startseite der Community, die JEDER sehen darf. Ein
+ * `definePageMeta({ middleware: 'auth' })` dort würde also die Community-
+ * Startseite hinter eine Anmeldung sperren. Die Pflicht gilt nur für die
+ * Kontroll-Host-Hälfte — und die entscheidet sich hier. Der Rückweg reist als
+ * `?redirect=` mit, damit man nach der Anmeldung dort landet, wo man hinwollte
+ * (dieselbe Mechanik wie in der `auth`-Middleware des Core).
+ *
+ * `setPageLayout` gehört aus demselben Grund hierher: die Layout-Wahl fällt bei
+ * SSR, BEVOR das Setup der Seite läuft — in der Seite gesetzt käme sie zu spät
+ * und der Browser hydrierte ein anderes Layout, als der Server geschickt hat.
  *
  * Serverseitig hängt die Grenze nicht an dieser Middleware, sondern an
  * 00.tenant.ts + 01.control-center.ts — das hier ist die Navigations-Hälfte.
@@ -28,16 +48,28 @@ export default defineNuxtRouteMiddleware((to) => {
   if (isControlCenter) {
     if (path === '/') {
       const hasInviteCode = typeof to.query.code === 'string' && to.query.code.trim() !== ''
-      const target = useControlHomeTarget(hasInviteCode) === 'wizard' ? '/start' : '/communities'
-      // Query MITNEHMEN: der Direktlink aus der Einladungs-Mail ist
-      // `https://account.pukalani.app?code=…`. Ohne das fiele der Code beim
-      // Weiterleiten weg und der Eingeladene müsste ihn abtippen.
-      return navigateTo({ path: localePath(target), query: to.query })
+      if (useControlHomeTarget(hasInviteCode) === 'wizard') {
+        // Query MITNEHMEN: der Direktlink aus der Einladungs-Mail ist
+        // `https://account.pukalani.app?code=…`. Ohne das fiele der Code beim
+        // Weiterleiten weg und der Eingeladene müsste ihn abtippen.
+        return navigateTo({ path: localePath('/start'), query: to.query })
+      }
+
+      if (!useAuthStore().isLoggedIn) {
+        const target = safeRedirectTarget(to.fullPath)
+        return navigateTo({
+          path: localePath('/login'),
+          ...(target ? { query: { redirect: target } } : {}),
+        })
+      }
+
+      setPageLayout('onboarding')
+      return
     }
     return
   }
 
-  if (path === '/start' || path.startsWith('/start/') || path === '/communities') {
+  if (isControlOnlyPath(path)) {
     throw createError({ status: 404, statusText: 'Not found' })
   }
 })

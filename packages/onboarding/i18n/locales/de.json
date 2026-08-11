@@ -59,6 +59,48 @@
     }
   },
   "onboarding": {
+    "account": {
+    "home": {
+      "title": "Dein Konto",
+      "navLabel": "Übersicht",
+      "greeting": "Hallo, {name}",
+      "intro": "Hier verwaltest du dein Pukalani-Konto und deine Communities.",
+      "communities": {
+        "title": "Deine Communities",
+        "description": "Eine Community | {count} Communities"
+      },
+      "profile": {
+        "title": "Profil",
+        "description": "Bild, Name und wie du auftrittst."
+      },
+      "settings": {
+        "title": "Einstellungen",
+        "description": "Passwort, Sitzungen, Benachrichtigungen und Daten."
+      },
+      "create": {
+        "title": "Community anlegen",
+        "description": "Leg deine erste Community an — das dauert etwa eine Minute."
+      }
+    },
+    "profile": {
+      "title": "Profil",
+      "heading": "Deine Pukalani-ID",
+      "intro": "Bild, Name und Kurzbeschreibung. Sie gelten in allen deinen Communities.",
+      "handleNote": "Dein Name für Erwähnungen gehört zu je einer Community — du legst ihn dort fest, nicht hier.",
+      "handleAction": "Zu deinen Communities"
+    },
+    "settings": {
+      "title": "Einstellungen",
+      "heading": "Konto-Einstellungen",
+      "intro": "Diese Einstellungen gelten für dein Konto, nicht für eine einzelne Community.",
+      "tabs": {
+        "security": "Sicherheit",
+        "sessions": "Sitzungen",
+        "notifications": "Benachrichtigungen",
+        "data": "Daten"
+      }
+    }
+  },
     "domain": {
       "navLabel": "Eigene Domain",
       "title": "Eigene Domain",

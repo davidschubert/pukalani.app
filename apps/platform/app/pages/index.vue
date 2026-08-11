@@ -12,13 +12,37 @@ import type { PublicPage } from '../../../../packages/pages/shared/types/page'
  */
 const { t, locale } = useI18n()
 
+/**
+ * ZWEI SEITEN UNTER EINER ADRESSE (AH-2, 2026-08-11).
+ *
+ * Auf einem KONTROLL-Host (account.pukalani.app) ist `/` die
+ * Account-Startseite; die Fläche selbst gehört dem onboarding-Layer
+ * (`AccountHome`), diese Datei ist nur die Weiche. Sie muss es sein, weil eine
+ * Route genau EINER Datei gehören kann und `/` hier schon von der
+ * Tenant-Startseite belegt ist — eine `pages/index.vue` im Layer würde von
+ * dieser App-Seite verdeckt.
+ *
+ * Der Host steht bei SSR und im Browser gleich fest, es gibt also keinen
+ * Zweig-Wechsel bei der Hydration. Anmeldepflicht und Layout entscheidet die
+ * globale Middleware des onboarding-Layers (control-center.global.ts) — dort,
+ * wo sie noch vor dem Rendern greifen.
+ */
+const isControlCenter = useIsControlCenter()
+
 // useRequestFetch: der SSR-interne Aufruf MUSS den Host-Header (= Tenant)
 // der eingehenden Anfrage weiterreichen, sonst löst die Tenant-Middleware
 // den falschen/keinen Mandanten auf und die home-Seite bliebe leer.
 const requestFetch = useRequestFetch()
 const { data: page } = await useAsyncData(
   () => `home-${locale.value}`,
-  () => requestFetch<PublicPage>('/api/pages/public/home', { query: { locale: locale.value } }).catch(() => null),
+  // Auf dem Kundenbereich gibt es keinen Mandanten und deshalb auch keine
+  // `home`-Seite: `/api/pages/public/home` steht dort nicht in
+  // `controlApiPrefixes` und antwortet 404. Der Abruf unterbleibt ganz, statt
+  // sich auf den `.catch()` zu verlassen — ein Request, dessen einzige
+  // mögliche Antwort ein Fehler ist, gehört nicht abgeschickt.
+  () => (isControlCenter
+    ? Promise.resolve(null)
+    : requestFetch<PublicPage>('/api/pages/public/home', { query: { locale: locale.value } }).catch(() => null)),
   { watch: [locale] },
 )
 
@@ -36,13 +60,20 @@ const parts = computed(() => {
 // als Fallback die Betreiber-Tagline im Tab JEDES Mandanten (K11).
 // Ohne home-Eintrag bleibt die description WEG: der Platzhaltertext der
 // Willkommens-Sektion ist keine Beschreibung dieses Mandanten (K11).
-useBrandTitle(() => page.value?.title ?? '', {
-  description: () => (page.value ? pageExcerpt(parts.value.markdown) : undefined),
-})
+// Den Kopf setzt auf dem Kundenbereich `AccountHome` selbst — hier bliebe
+// ohnehin nur der Brand allein stehen und würde den dortigen Titel
+// überschreiben, weil das Setup der Seite VOR dem der Komponente läuft.
+if (!isControlCenter) {
+  useBrandTitle(() => page.value?.title ?? '', {
+    description: () => (page.value ? pageExcerpt(parts.value.markdown) : undefined),
+  })
+}
 </script>
 
 <template>
-  <UContainer class="py-8 sm:py-12">
+  <AccountHome v-if="isControlCenter" />
+
+  <UContainer v-else class="py-8 sm:py-12">
     <article v-if="page" class="mx-auto max-w-3xl space-y-4">
       <h1 class="text-2xl font-bold tracking-tight">{{ page.title }}</h1>
       <MarkdownContent :source="parts.markdown" />

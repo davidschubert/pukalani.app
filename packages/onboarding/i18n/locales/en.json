@@ -59,6 +59,48 @@
     }
   },
   "onboarding": {
+    "account": {
+    "home": {
+      "title": "Your account",
+      "navLabel": "Overview",
+      "greeting": "Hello, {name}",
+      "intro": "Manage your Pukalani account and your communities here.",
+      "communities": {
+        "title": "Your communities",
+        "description": "One community | {count} communities"
+      },
+      "profile": {
+        "title": "Profile",
+        "description": "Picture, name and how you appear."
+      },
+      "settings": {
+        "title": "Settings",
+        "description": "Password, sessions, notifications and data."
+      },
+      "create": {
+        "title": "Create a community",
+        "description": "Set up your first community — it takes about a minute."
+      }
+    },
+    "profile": {
+      "title": "Profile",
+      "heading": "Your Pukalani ID",
+      "intro": "Picture, name and short description. They apply across all your communities.",
+      "handleNote": "Your name for mentions belongs to one community at a time — you set it there, not here.",
+      "handleAction": "Go to your communities"
+    },
+    "settings": {
+      "title": "Settings",
+      "heading": "Account settings",
+      "intro": "These settings apply to your account, not to a single community.",
+      "tabs": {
+        "security": "Security",
+        "sessions": "Sessions",
+        "notifications": "Notifications",
+        "data": "Data"
+      }
+    }
+  },
     "domain": {
       "navLabel": "Custom domain",
       "title": "Custom domain",

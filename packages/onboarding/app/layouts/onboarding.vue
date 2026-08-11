@@ -20,18 +20,31 @@
 import type { DropdownMenuItem } from '@nuxt/ui'
 
 const { t } = useI18n()
+const localePath = useLocalePath()
 const auth = useAuthStore()
 const { logout } = useLogout()
 
 /**
- * „Meine Communities" steht nur da, wenn es welche gibt — und das weiß dieses
- * Layout nicht. Es bleibt deshalb bei den zwei Einträgen, die IMMER stimmen:
- * die Adresse als Beschriftung und der Weg hinaus. (`/communities` würde einen
- * Nutzer ohne Community sofort wieder hierher werfen, communities.vue:52-56 —
- * das wäre ein Ausgang, der im Kreis führt.)
+ * DIE AUSGÄNGE, SEIT ES SIE GIBT (AH-2, 2026-08-11).
+ *
+ * Hier stand bis AH-2 nur die Adresse und „Abmelden", mit einer Begründung, die
+ * damals stimmte: „Meine Communities" wäre für ein Konto OHNE Community ein
+ * Ausgang im Kreis gewesen (`/communities` schickt genau die weiter in den
+ * Wizard). Das Argument ist mit der Account-Startseite hinfällig — `/` ist die
+ * EINE Adresse, die für beide Fälle stimmt: mit Communities zeigt sie die
+ * Liste, ohne sie den ersten Schritt. Verlinkt wird deshalb sie, nicht
+ * `/communities`.
+ *
+ * Profil und Einstellungen stehen bedingungslos: sie gehören dem KONTO und
+ * brauchen keine Community. Genau das war der Grund für AH-2 — bis dahin lagen
+ * beide ausschließlich im Dashboard einer Community.
  */
 const items = computed<DropdownMenuItem[]>(() => [
   { label: auth.user?.email ?? '', type: 'label' },
+  { type: 'separator' },
+  { label: t('onboarding.account.home.navLabel'), icon: 'i-ph-house', to: localePath('/') },
+  { label: t('account.nav.profile'), icon: 'i-ph-user-circle', to: localePath('/profile') },
+  { label: t('onboarding.account.settings.title'), icon: 'i-ph-gear', to: localePath('/settings') },
   { type: 'separator' },
   {
     label: t('auth.logout'),
