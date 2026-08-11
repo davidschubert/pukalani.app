@@ -177,6 +177,9 @@
     "avatarPlaceholder": "https://…"
   },
   "account": {
+    "nav": {
+      "profile": "Profil"
+    },
     "profile": {
       "title": "Profil",
       "description": "Aktualisiere deinen Namen und dein Profil."
