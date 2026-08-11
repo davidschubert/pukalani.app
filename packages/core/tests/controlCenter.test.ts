@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import { controlHomeTarget, isAllowedControlPath, isControlHost, isTenantHost, parseControlHosts, resolveControlHosts } from '../shared/controlCenter'
+import { controlHomeTarget, isAllowedControlPath, isControlHost, isTenantHost, parseControlHosts, resolveControlHosts, resolveWizardHosts } from '../shared/controlCenter'
 
 const PREFIXES = ['/api/auth/', '/api/onboarding/', '/api/health', '/api/telemetry/']
 
 describe('Kontroll-Hosts auflösen', () => {
   it('liest die kommagetrennte Env-Liste und normalisiert', () => {
-    expect(parseControlHosts(' My.Pukalani.App , start.pukalani.app ')).toEqual([
-      'my.pukalani.app', 'start.pukalani.app',
+    expect(parseControlHosts(' Account.Pukalani.App , start.localhost ')).toEqual([
+      'account.pukalani.app', 'start.localhost',
     ])
   })
 
@@ -17,42 +17,51 @@ describe('Kontroll-Hosts auflösen', () => {
   })
 
   it('nimmt die Env VOR der app.config (Umgebung schlägt Build)', () => {
-    expect(resolveControlHosts('app.localhost', ['my.pukalani.app'])).toEqual(['app.localhost'])
-    expect(resolveControlHosts('', ['my.pukalani.app'])).toEqual(['my.pukalani.app'])
+    expect(resolveControlHosts('app.localhost', ['account.pukalani.app'])).toEqual(['app.localhost'])
+    expect(resolveControlHosts('', ['account.pukalani.app'])).toEqual(['account.pukalani.app'])
     expect(resolveControlHosts(undefined, undefined)).toEqual([])
   })
 
   it('vergleicht Hosts unabhängig von Groß-/Kleinschreibung', () => {
-    const hosts = resolveControlHosts(undefined, ['my.pukalani.app'])
-    expect(isControlHost('MY.pukalani.app', hosts)).toBe(true)
-    expect(isControlHost('my.pukalani.app', hosts)).toBe(true)
+    const hosts = resolveControlHosts(undefined, ['account.pukalani.app'])
+    expect(isControlHost('ACCOUNT.pukalani.app', hosts)).toBe(true)
+    expect(isControlHost('account.pukalani.app', hosts)).toBe(true)
   })
 
   it('hält Community-Hosts und Leerwerte draußen', () => {
-    const hosts = ['my.pukalani.app']
-    for (const host of ['kunde.pukalani.app', 'pukalani.app', 'my.pukalani.app.evil.com', '', undefined, null]) {
+    const hosts = ['account.pukalani.app']
+    for (const host of ['kunde.pukalani.app', 'pukalani.app', 'account.pukalani.app.evil.com', '', undefined, null]) {
       expect(isControlHost(host, hosts), String(host)).toBe(false)
     }
   })
 
+  it('lässt die ABGESCHALTETEN Altnamen nicht mehr durch (AH-1)', () => {
+    // `my.`/`start.` sind keine Kontroll-Hosts mehr, sondern bekommen eine 301
+    // (00.legacy-control-hosts.ts). Stünden sie hier noch, hätte der Cutover
+    // zwei Kundenbereiche statt einen.
+    const hosts = ['account.pukalani.app']
+    expect(isControlHost('my.pukalani.app', hosts)).toBe(false)
+    expect(isControlHost('start.pukalani.app', hosts)).toBe(false)
+  })
+
   it('ist ohne konfigurierte Hosts immer false (kein Versehens-Kundenbereich)', () => {
-    expect(isControlHost('my.pukalani.app', [])).toBe(false)
+    expect(isControlHost('account.pukalani.app', [])).toBe(false)
   })
 })
 
 describe('Mandanten-Host erkennen (Betreiber-Inhalt sperren, N7)', () => {
-  const CONTROL = ['my.pukalani.app', 'start.pukalani.app']
+  const CONTROL = ['account.pukalani.app']
 
   it('ist ohne Tenant-Gate IMMER false — Silo-Apps bleiben unverändert', () => {
-    for (const host of ['localhost', 'kommentare.example.com', 'my.pukalani.app']) {
+    for (const host of ['localhost', 'kommentare.example.com', 'account.pukalani.app']) {
       expect(isTenantHost(false, host, CONTROL), String(host)).toBe(false)
       expect(isTenantHost(false, host, []), String(host)).toBe(false)
     }
   })
 
   it('lässt die Kontroll-Hosts der Pool-App in Ruhe', () => {
-    expect(isTenantHost(true, 'my.pukalani.app', CONTROL)).toBe(false)
-    expect(isTenantHost(true, 'START.pukalani.app', CONTROL)).toBe(false)
+    expect(isTenantHost(true, 'account.pukalani.app', CONTROL)).toBe(false)
+    expect(isTenantHost(true, 'ACCOUNT.pukalani.app', CONTROL)).toBe(false)
   })
 
   it('erkennt jede Kunden-Community als Mandanten-Host', () => {
@@ -71,29 +80,66 @@ describe('Mandanten-Host erkennen (Betreiber-Inhalt sperren, N7)', () => {
 })
 
 describe('Wohin führt `/` auf einem Kontroll-Host? (F12)', () => {
-  const WIZARD = ['start.pukalani.app']
+  // Lokal gibt es weiterhin einen eigenen Kurz-Link-Host; in Produktion ist die
+  // Liste seit AH-1 leer (s. der eigene Block darunter).
+  const WIZARD = ['start.localhost']
 
   it('schickt den Kurz-Link-Host in den Wizard', () => {
-    expect(controlHomeTarget('start.pukalani.app', WIZARD, false)).toBe('wizard')
-    expect(controlHomeTarget('START.Pukalani.app', WIZARD, false)).toBe('wizard')
+    expect(controlHomeTarget('start.localhost', WIZARD, false)).toBe('wizard')
+    expect(controlHomeTarget('START.localhost', WIZARD, false)).toBe('wizard')
   })
 
   it('zeigt auf dem Kundenbereich die Übersicht', () => {
-    expect(controlHomeTarget('my.pukalani.app', WIZARD, false)).toBe('overview')
+    expect(controlHomeTarget('app.localhost', WIZARD, false)).toBe('overview')
   })
 
   it('lässt ein `?code=` immer in den Wizard — auch auf dem Kundenbereich', () => {
     // Weitergeleitete Mail, kopierter Link: die Absicht steht in der Query.
-    expect(controlHomeTarget('my.pukalani.app', WIZARD, true)).toBe('wizard')
-    expect(controlHomeTarget('start.pukalani.app', WIZARD, true)).toBe('wizard')
+    expect(controlHomeTarget('app.localhost', WIZARD, true)).toBe('wizard')
+    expect(controlHomeTarget('start.localhost', WIZARD, true)).toBe('wizard')
   })
 
   it('ist ohne konfigurierte Wizard-Hosts überall die Übersicht', () => {
     // Die Übersicht schickt Konten OHNE Community selbst weiter — der
     // Neukunde landet also auch dann im Trichter, nur einen Schritt später.
-    for (const host of ['my.pukalani.app', 'start.pukalani.app', '', undefined, null]) {
+    for (const host of ['app.localhost', 'start.localhost', '', undefined, null]) {
       expect(controlHomeTarget(host, [], false), String(host)).toBe('overview')
     }
+  })
+
+  /**
+   * DIE PRODUKTIONS-FORM SEIT AH-1 (2026-08-11): ein Kontroll-Host, keine
+   * Wizard-Hosts. Beide Zusagen des Cutovers stehen hier nebeneinander, weil
+   * die zweite die erste sonst still aushebeln könnte — eine Einladungs-Mail
+   * ist sieben Tage gültig und landet nach der 301 von `start.*` mit ihrem
+   * `?code=` auf genau diesem Host.
+   */
+  it('account.pukalani.app: `/` = Übersicht, `?code=` = Wizard', () => {
+    expect(controlHomeTarget('account.pukalani.app', [], false)).toBe('overview')
+    expect(controlHomeTarget('account.pukalani.app', [], true)).toBe('wizard')
+  })
+})
+
+/**
+ * WO LIEGT DER WIZARD? (AH-1) — die Liste für einen LINK dorthin, nicht die
+ * Frage, was `/` zeigt.
+ */
+describe('resolveWizardHosts', () => {
+  it('nimmt eigene Wizard-Hosts, wenn es welche gibt', () => {
+    expect(resolveWizardHosts(['app.localhost'], ['start.localhost'])).toEqual(['start.localhost'])
+  })
+
+  it('fällt ohne Wizard-Hosts auf die Kontroll-Hosts zurück (Produktion seit AH-1)', () => {
+    // `/start` liegt auf JEDEM Kontroll-Host — das ist kein Raten aus einer
+    // fremden Achse, sondern die Bauart des onboarding-Layers.
+    expect(resolveWizardHosts(['account.pukalani.app'], [])).toEqual(['account.pukalani.app'])
+    expect(resolveWizardHosts(['account.pukalani.app'], undefined)).toEqual(['account.pukalani.app'])
+    expect(resolveWizardHosts(['account.pukalani.app'], ['', '  '])).toEqual(['account.pukalani.app'])
+  })
+
+  it('bleibt leer, wenn beide Listen leer sind (Silo, Playground)', () => {
+    expect(resolveWizardHosts(undefined, undefined)).toEqual([])
+    expect(resolveWizardHosts([], [])).toEqual([])
   })
 })
 

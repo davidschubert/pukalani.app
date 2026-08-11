@@ -49,7 +49,7 @@ export type NotifyScope = 'tenant' | 'account'
 export type NotificationAudience =
   /** Community-Host im Pool. */
   | { kind: 'tenant', tenantId: string }
-  /** Kontroll-Host = Kundenbereich (my.pukalani.app). */
+  /** Kontroll-Host = Kundenbereich (account.pukalani.app). */
   | { kind: 'account' }
   /** Silo-App / Single-Tenant / Playground: es gibt nur eine Welt. */
   | { kind: 'all' }

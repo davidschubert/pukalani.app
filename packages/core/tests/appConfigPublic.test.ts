@@ -75,7 +75,7 @@ describe('toPublicAppConfig', () => {
    * geschrieben und gelesen wird es ausschließlich im Projekt `control`. In
    * der Pool-Instanz stünde dort der unbeschriebene Default, und wer im
    * Browser `useRuntimeFlags().onboardingInviteOnly` läse, bekäme eine Zahl,
-   * die niemand pflegt — auf my.pukalani.app also womöglich das Gegenteil der
+   * die niemand pflegt — auf account.pukalani.app also womöglich das Gegenteil der
    * Wahrheit. Der öffentliche Weg für diesen Zustand ist GET
    * /api/onboarding/gate, nicht die Laufzeit-Flags.
    */

@@ -253,8 +253,14 @@ export default defineNuxtConfig({
         // Die Kontroll-Hosts, auf denen `/` direkt in den Anlege-Wizard führt
         // (F12), kommagetrennt: NUXT_PUBLIC_TENANCY_WIZARD_HOSTS. Laufzeit-
         // Override von pukalani.tenancy.wizardHosts — lokal heißen sie anders
-        // als in Produktion (start.localhost vs. start.pukalani.app).
+        // als in Produktion (start.localhost; in Produktion gibt es seit AH-1
+        // keinen eigenen Wizard-Host mehr).
         wizardHosts: '',
+        // Abgeschaltete Kontroll-Host-NAMEN, die 301 auf controlHosts[0]
+        // weiterleiten (AH-1), kommagetrennt:
+        // NUXT_PUBLIC_TENANCY_LEGACY_CONTROL_HOSTS. Laufzeit-Override von
+        // pukalani.tenancy.legacyControlHosts.
+        legacyControlHosts: '',
       },
     },
   },

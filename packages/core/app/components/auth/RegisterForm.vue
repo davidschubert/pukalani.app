@@ -12,7 +12,7 @@ const auth = useAuthStore()
  * Dieses Formular gehört dem Core und läuft damit auch auf JEDEM
  * Mandanten-Host. Dort misst die Community ihre eigene Plausible-Site; ein
  * Betreiber-Trichter-Ereignis in fremden Kundenzahlen wäre schlicht falsch.
- * Der Trichter, um den es geht, beginnt auf my./start.pukalani.app.
+ * Der Trichter, um den es geht, beginnt auf account.pukalani.app.
  */
 const { trackFunnel } = useFunnelEvent()
 const isControlCenter = useIsControlCenter()

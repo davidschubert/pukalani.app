@@ -65,19 +65,25 @@ export function isTenantHost(
  *
  * Bis F12 gab es darauf nur eine Antwort: der Wizard. Das war richtig, solange
  * es nur Neukunden gab, und wurde zur Zumutung, sobald jemand eine Community
- * HAT — `my.pukalani.app` begrüßte den Bestandskunden mit „Neue Community
+ * HAT — der Kundenbereich begrüßte den Bestandskunden mit „Neue Community
  * anlegen" statt mit seiner eigenen.
  *
- * Zwei Kontroll-Hosts, zwei Aufgaben (Davids Namensentscheidung 2026-07-25):
- *  - `my.*`    = Kundenbereich  → die ÜBERSICHT ist das Zuhause.
- *  - `start.*` = Kurz-Link in den Wizard (Visitenkarte, Bio, Einladungs-Mail)
- *                → dort bleibt `/` der Trichter. Wer diesen Namen abtippt, will
- *                anlegen; ihn auf eine Liste zu werfen, wäre ein Bruch des
- *                Versprechens, das im Hostnamen steht.
+ * SEIT AH-1 (2026-08-11) ist `wizardHosts` in Produktion LEER: es gibt nur noch
+ * `account.pukalani.app`, und dort ist die ÜBERSICHT das Zuhause. Der Fall
+ * bleibt trotzdem gebaut, weil er kostenlos ist und die Umgebungen
+ * auseinanderlaufen dürfen — lokal ist `start.localhost` weiterhin ein
+ * nützlicher Kurz-Link, und die Regel entscheidet ihn ohne Deploy.
+ *
+ * Die frühere Aufteilung (`my.*` = Übersicht, `start.*` = Trichter) war eine
+ * NAMENS-Entscheidung, keine technische: wer einen Host namens „start" abtippt,
+ * will anlegen; ihn auf eine Liste zu werfen, wäre ein Bruch des Versprechens,
+ * das im Hostnamen steht. Genau deshalb hat der EINE Name „account" jetzt auch
+ * nur EINE Antwort.
  *
  * `hasInviteCode` schlägt beides: `?code=…` ist eine unmissverständliche
- * Absicht und kommt auch auf `my.*` vor (weitergeleitete Mail, kopierter Link).
- * Ein Code, der auf einer Übersicht landet, wäre still verloren.
+ * Absicht und kommt auf jedem Kontroll-Host vor (weitergeleitete Mail,
+ * kopierter Link, seit AH-1 auch jede 301 von `start.*`). Ein Code, der auf
+ * einer Übersicht landet, wäre still verloren.
  *
  * Die Liste der Wizard-Hosts ist eine EIGENE Achse, keine Reihenfolge in
  * controlHosts: „der erste Eintrag ist der Kundenbereich" wäre eine Regel, die
@@ -92,6 +98,29 @@ export function controlHomeTarget(
 ): ControlHomeTarget {
   if (hasInviteCode) return 'wizard'
   return isControlHost(host, wizardHosts) ? 'wizard' : 'overview'
+}
+
+/**
+ * WO LIEGT DER WIZARD? — die Host-Liste für einen LINK dorthin (AH-1).
+ *
+ * Das ist NICHT dieselbe Frage wie `controlHomeTarget()`. Dort geht es darum,
+ * was `/` auf einem Host ZEIGT; hier darum, wohin ein Link FÜHRT, der den
+ * Wizard meint. Und genau deshalb darf hier zurückgefallen werden, wo dort
+ * nichts geraten werden darf: `/start` existiert auf JEDEM Kontroll-Host —
+ * die Seite gehört dem onboarding-Layer, nicht einem bestimmten Hostnamen.
+ *
+ * Nötig geworden mit dem Cutover: bis dahin gab es mit `start.pukalani.app`
+ * einen eigenen Wizard-Host, seither ist `wizardHosts` in Produktion leer.
+ * Ohne diesen Rückfall verschwände „Community anlegen" stillschweigend aus dem
+ * Community-Switcher und `POST /api/community/control-handoff` antwortete 404 —
+ * ein Ausgang weniger, ohne dass irgendwo etwas rot würde.
+ */
+export function resolveWizardHosts(
+  controlHosts: readonly string[] | undefined,
+  wizardHosts: readonly string[] | undefined,
+): readonly string[] {
+  const wizard = wizardHosts ?? []
+  return wizard.some(host => host.trim() !== '') ? wizard : (controlHosts ?? [])
 }
 
 /**

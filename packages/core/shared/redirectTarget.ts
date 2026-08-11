@@ -2,7 +2,8 @@
  * Wohin nach der Anmeldung? (`?redirect=`)
  *
  * Anlass (2026-07-25): der Direktlink in der Einladungs-Mail ist
- * `https://start.pukalani.app?code=PUKA-…`. Der Eingeladene ist dabei
+ * `https://account.pukalani.app?code=PUKA-…` (bis AH-1: `start.`, das seither
+ * 301 dorthin weiterleitet). Der Eingeladene ist dabei
  * naturgemäß NICHT angemeldet — ohne diesen Mechanismus schickt ihn der
  * Auth-Guard zur Anmeldung und der Code ist weg. Die Mail verspricht dann
  * „direkt loslegen" und hält es nicht.

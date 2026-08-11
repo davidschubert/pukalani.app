@@ -93,7 +93,7 @@ export default defineAppConfig({
        *    „Community-Einstellungen" für eine Community, die es dort nicht
        *    gibt, und dazu Speicher/System ein zweites Mal (die harten
        *    bottomLinks bleiben).
-       *  · `place: 'control'` — auf dem KUNDENBEREICH my.pukalani.app sind
+       *  · `place: 'control'` — auf dem KUNDENBEREICH account.pukalani.app sind
        *    Operator-Reiter sichtbar. Genau dort wäre eine Instanz-Verwaltung
        *    unter der Überschrift „Community-Einstellungen" am irreführendsten.
        *
@@ -359,6 +359,20 @@ export default defineAppConfig({
        * Laufzeit-Override: NUXT_PUBLIC_TENANCY_WIZARD_HOSTS (kommagetrennt).
        */
       wizardHosts: [] as string[],
+      /**
+       * ABGESCHALTETE Kontroll-Host-Namen (AH-1): Requests darauf bekommen
+       * eine 301 auf `controlHosts[0]` — Pfad und Query unverändert. Ohne die
+       * Liste wären sie 404 wie jeder unbekannte Host, und ein verschickter
+       * Einladungs-Link (`?code=…`, 7 Tage gültig) liefe ins Leere.
+       *
+       * Die Namen bleiben zusätzlich in RESERVED_SUBDOMAINS gesperrt: ein
+       * zurückgegebener Plattform-Name ist der beste Phishing-Köder, den es
+       * gibt.
+       *
+       * Laufzeit-Override: NUXT_PUBLIC_TENANCY_LEGACY_CONTROL_HOSTS
+       * (kommagetrennt). Leer = die Middleware ist ein No-Op.
+       */
+      legacyControlHosts: [] as string[],
       /**
        * Was auf einem Kontroll-Host überhaupt aufgerufen werden darf (Präfix-
        * Vergleich, fail-closed: alles andere → 404).

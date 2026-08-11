@@ -92,7 +92,7 @@ describe('resolveSettingsTabs', () => {
 
   it('der Schalter der App hält die INSTANZ-Sicht aus Kundenbereich und Konsole heraus', () => {
     // `scope: 'operator'` allein reicht NICHT: an `place: 'control'`
-    // (my.pukalani.app) und `place: 'single-tenant'` (apps/control, apps/photos)
+    // (account.pukalani.app) und `place: 'single-tenant'` (apps/control, apps/photos)
     // bliebe die Instanz-Verwaltung unter der Überschrift
     // „Community-Einstellungen" stehen. Deshalb hängt jeder der vier Reiter an
     // `configFlag: 'admin.instanceTabs'` — Core-Default AUS, an nur in
