@@ -526,7 +526,8 @@
       "general": "General",
       "notifications": "Notifications",
       "sessions": "Sessions",
-      "security": "Security"
+      "security": "Security",
+      "data": "Data"
     },
     "communitySettings": {
       "title": "Community settings"

@@ -30,6 +30,10 @@ const place = resolveDashboardPlace(
   useIsTenantHost(),
 )
 
+// Kundenbereich oder Community? Entscheidet, wohin die Konto-Einträge zeigen
+// (AH-2) — dieselbe pure Host-Rechnung wie überall, also SSR-gleich.
+const isControlCenter = useIsControlCenter()
+
 // Sidebar-Optik (sidebar | floating | inset) — geteilt mit dem Dashboard-Layout via Cookie
 const sidebarVariant = useCookie<'sidebar' | 'floating' | 'inset'>('pukalani-sidebar-variant', { default: () => 'floating' })
 
@@ -152,7 +156,26 @@ const items = computed<SwatchItem[][]>(() => {
     [{ type: 'label', label: displayName.value, avatar: avatar.value }],
     [
       ...userMenuModules,
-      { label: t('dashboard.settings.title'), icon: 'i-ph-gear', to: localePath('/dashboard/settings') },
+      /**
+       * WOHIN „Einstellungen" ZEIGT, hängt am HOST (AH-2, 2026-08-11).
+       *
+       * Auf einem Kontroll-Host (account.pukalani.app) gibt es keine Community,
+       * deren Dashboard das wäre — dort liegt das Konto unter `/profile` und
+       * `/settings` (onboarding-Layer). Der alte, feste Link führte genau dort
+       * in eine Hülle, deren Reiter-Registry leer filtert.
+       *
+       * Auf einem Mandanten-Host bleibt alles wie es war: `useIsControlCenter()`
+       * ist ohne konfigurierte Kontroll-Hosts immer `false`, Silo-Apps
+       * (comments) und die Betreiber-Konsole sehen also keinen Unterschied.
+       */
+      ...(isControlCenter
+        ? [{ label: t('account.nav.profile'), icon: 'i-ph-user-circle', to: localePath('/profile') }]
+        : []),
+      {
+        label: t('dashboard.settings.title'),
+        icon: 'i-ph-gear',
+        to: localePath(isControlCenter ? '/settings' : '/dashboard/settings'),
+      },
     ],
     [
       // Farbwelt nur, wo die Wahl dem Betrachter gehört (kein Mandanten-Host,
