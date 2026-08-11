@@ -29,6 +29,25 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### U13 — Eigene Domain bleibt ab Pro (Entscheidung, kein Code) ✅ 2026-08-10
+
+**Frage** aus dem Wettbewerbs-Benchmark (E3): Pukalanis Domain-Sperre auf Pro
+(149 €) ist die härteste im Vergleichsfeld — Ghost gibt die Domain auf jeder
+bezahlten Stufe ab 18 $, Circle im Einstiegsplan (89 $), Bettermode und coapp
+ab Starter; nur Skool bietet gar keine an. Für Verein und Coach ist die eigene
+Adresse oft *der* Grund zu zahlen.
+
+**Davids Entscheidung** (strukturierte Frage, 2026-08-10): **bleibt Pro-only.**
+Pro behält damit sein stärkstes Verkaufsargument neben Team/KI/Kursen, und der
+Zertifikats-/Prüf-Betrieb wächst nicht mit der Personal-Kundschaft.
+**Verworfen:** 1 Domain ab Personal + mehrere ab Pro (die Audit-Empfehlung) ·
+unbegrenzt auf allen bezahlten Stufen.
+
+**Folgen statt Code:** die Preisseiten-Vergleichstabelle (U10) führt die Zeile
+„Eigene Domain — ab Pro" ehrlich, und die Pro-Domain wird als Ausgleich
+hochwertiger gemacht (U16: CAA-Prüfung, Registrar-Anleitungen, TTL-Hinweis,
+Auto-Nachprüfen).
+
 ### Doku-Abschluss der Woche 2026-08-04..09 ✅ 2026-08-09
 
 **Davids Auftrag** als Abschluss der Launch-Vorbereitung: Kunden-Hilfe und

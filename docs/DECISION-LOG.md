@@ -7,6 +7,34 @@ die kleinen, verstreuten Beschlüsse.
 
 ---
 
+## 2026-08-10 — UX-Planungsrunde: sechs Entscheidungen zu den U-Paketen
+
+**Davids Entscheidungen** (strukturierte Fragen nach den drei Audits vom
+2026-08-09; die 88 Befunde wurden zu Arbeitspaketen AP1–AP10 sortiert, vier
+Lücken kamen als U16–U18 + C5→U11 dazu):
+(1) **Die Einladungscode-Pflicht fürs Gründen bleibt**, bis David sie selbst
+abschaltet — und sie bekommt dafür einen **An/Aus-Schalter im
+Betreiber-Dashboard** (Teil von U2), damit das Abschalten kein Deploy ist.
+**Verworfen:** automatisches Fallen mit dem Stripe-Go-Live (Empfehlung) ·
+sofort abschaffen.
+(2) **Eigene Domain bleibt Pro-only** (U13 damit erledigt, kein Code).
+**Verworfen:** 1 Domain ab Personal, mehrere ab Pro (Audit-Empfehlung E3) ·
+unbegrenzt auf allen bezahlten Stufen. Ausgleich: die Pro-Domain wird poliert
+(U16) und die Preisseiten-Tabelle führt die Zeile ehrlich (U10).
+(3) **Wizard-Pflicht = Name/Adresse · Kategorie · Vibe** (U12, Empfehlung
+gewählt) — Größe, Zweck, Ziel, Beschreibung wandern hinter den ersten Erfolg
+in die U4-Checkliste. Klargestellt: der **@handle ist NICHT Teil des Wizards**
+(er ist eine Konto-Einstellung; optional als Checklisten-Punkt in U4).
+(4) **Social-Login: nur Google** — Apple verworfen, weil das Developer-Programm
+99 $/Jahr kostet. Umsetzung nach AP1–AP8, mit erklärter Datenschutz-Zeile und
+der Circle-Falle (Kunden-Domains) im Design (U14).
+(5) **Das deutsche Geld-Wort ist „Plan"** — löst den Widerspruch zwischen
+Trichter-G3 (empfahl „Plan") und Dashboard-M4 (empfahl „Abo"): „Abo" bleibt nur
+für den Vertragszustand, „Tarif" wird gestrichen (U6).
+(6) **U15 (Navigation/SEO-Seiten) und F57 (soziale Mechaniken) bleiben
+geparkt**, bis AP1–AP8 durch sind; danach zuerst U15-Navigation bzw.
+F57-Reaktionen. **Verworfen:** eines oder beides jetzt einplanen.
+
 ## 2026-08-08 — Die drei WCAG-Hell-Befunde aus F53: zweimal fixen, nie „lassen"
 
 **Davids Entscheidung** (strukturierte Fragen, je Empfehlung gewählt) zu den
