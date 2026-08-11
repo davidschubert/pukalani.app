@@ -39,7 +39,19 @@ für Nachbarn), userId NUR aus der Session, Besitz doppelt gefiltert
 (Query + Zeilen-Nachprüfung), Community-Hosts über den gebündelten Resolver.
 Dazu `/settings/billing` als Owner-Übersicht (Plan/Testphase je Community,
 Links in die Community-Plan-Seiten — KEIN neuer Zahlpfad, M13/A6 unangetastet).
-Live 8/8 im Worktree; Prod-Proben nach Deploy.
+Live 8/8 im Worktree; Prod 3x-Serien-Probe gruen.
+
+**Der Weg zum Deploy war die eigentliche Geschichte:** (a) das Deploy-Gate
+wertete den AH-3-Commit als „nichts zu deployen" (deploy-Job skipped bei
+gruenem Gate — vermutlich vom schnellen Doku-Push in der concurrency-Gruppe
+gestoert; Kruemel unten). (b) Danach VIER rote Deploys durch tote
+fonts.gstatic-URLs: Googles CDN/Metadaten liefen auseinander, die Runner
+loesten konsistent stale URLs auf, waehrend dieselbe Aufloesung lokal
+funktionierte. Zwischenloesung: platform manuell nach CI-Rezept geflippt
+(rsync → Symlink → pm2, 3x-Serien-Probe). Dauerloesung: deploy.yml saet den
+@nuxt/fonts-Cache (WOFF2s UND meta/*-data.json mit den aufgeloesten URLs)
+vom Prod-Server (~/fonts-cache) und schreibt NUR ADDITIV zurueck — der
+naechste CI-Lauf war gruen mit NULL fonts.gstatic-Zugriffen im Log.
 
 **Gelernt:** (1) Es gab schon einen ZWEITEN, mandanten-gescopten
 Aktivitäts-Vertrag (`registerUserActivityProvider`, comments/F1-Stufe-3) —
