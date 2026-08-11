@@ -103,6 +103,21 @@ export default defineNuxtConfig({
        * `/register` oben.
        */
       marketingRequestUrl: 'https://my.pukalani.app/request-access',
+      /**
+       * ZUSTAND DES EARLY-ACCESS-TORS (U2, Davids Entscheidung 8 vom
+       * 2026-08-10): braucht eine eigene Community gerade einen
+       * Einladungs-Code? Die Landing beschriftet ihre Haupt-CTAs danach —
+       * dynamisch, damit das Umlegen des Schalters im Betreiber-Dashboard kein
+       * Text-Deploy hier ist.
+       *
+       * Gelesen wird AUSSCHLIESSLICH serverseitig (server/api/gate.get.ts) —
+       * dass der Wert unter `public` steht, ist nur der Skeleton-Mechanismus
+       * für die Env-Var. Es gibt hier nichts zu verbergen: die Antwort ist ein
+       * Ja/Nein, das anschließend auf der Startseite steht.
+       *
+       * Env: NUXT_PUBLIC_MARKETING_GATE_URL
+       */
+      marketingGateUrl: 'https://my.pukalani.app/api/onboarding/gate',
     },
   },
 

@@ -141,6 +141,11 @@
       "suspendedAbuse": "Suspended — not reachable",
       "readOnly": "Read-only — contributions are paused right now"
     },
+    "foundingNotice": {
+      "title": "Joining is open to everyone",
+      "text": "An account is free, and it lets you take part in existing communities right away. Creating your own community still needs an invitation during early access.",
+      "link": "Request access"
+    },
     "gate": {
       "title": "Set up your community",
       "heading": "Welcome, {name}.",

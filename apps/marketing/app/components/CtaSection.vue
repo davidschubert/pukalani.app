@@ -2,10 +2,38 @@
 // Szene 13 — Call to Adventure (§6.4): tritt durch das Tor. Der erreichte Ort:
 // dunkler, warmer Peak mit der puka als Lichtquelle, direkt vor dem Footer.
 const { t } = useI18n()
-const { start, demo } = useProductLinks()
+const { start, demo, request } = useProductLinks()
+
+/**
+ * DIESER BLOCK MUSSTE MIT (U2): der Hero sagt bei geschlossenem Tor „Zugang
+ * anfragen", und 13 Szenen später stand hier weiter „in 60 Sekunden steht
+ * deine Community. Kostenlos, ohne Risiko." — dasselbe Versprechen, das
+ * Audit-Befund K1 beanstandet hat, nur weiter unten auf derselben Seite. Zwei
+ * verschiedene Ansagen auf EINER Seite sind schlechter als jede einzelne.
+ *
+ * Die Knopf-Beschriftungen kommen aus dem Hero-Block (`marketing.hero.cta*`):
+ * es ist derselbe Weg, und sechs Unterseiten teilen sich `hero.ctaPrimary`
+ * bereits auf genau diese Weise. Nur der Fließtext ist eigen, weil er hier
+ * eine ganze Szene trägt.
+ */
+const gate = useOnboardingGate()
+const lead = computed(() => gate.value.inviteRequired
+  ? t('marketing.cta.leadGated')
+  : t('marketing.cta.lead'))
 
 const links = computed(() => [
-  { to: start, color: 'primary' as const, size: 'xl' as const, label: t('marketing.cta.primary') },
+  gate.value.inviteRequired
+    ? { to: request, color: 'primary' as const, size: 'xl' as const, label: t('marketing.hero.ctaRequest') }
+    : { to: start, color: 'primary' as const, size: 'xl' as const, label: t('marketing.cta.primary') },
+  ...(gate.value.inviteRequired
+    ? [{
+        to: start,
+        color: 'neutral' as const,
+        variant: 'subtle' as const,
+        size: 'xl' as const,
+        label: t('marketing.hero.ctaHasCode'),
+      }]
+    : []),
   {
     to: demo,
     color: 'neutral' as const,
@@ -29,7 +57,7 @@ const links = computed(() => [
     id="los-gehts"
     as="section"
     class="cta-section tone-ink [--mkt-cta-py:clamp(4rem,9vw,7rem)] [--mkt-cta-title:clamp(1.9rem,4.5vw,3rem)]"
-    :description="t('marketing.cta.lead')"
+    :description="lead"
     :links="links"
     :ui="{
       container: 'pb-0 sm:pb-0 lg:pb-0',

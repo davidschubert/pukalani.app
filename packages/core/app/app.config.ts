@@ -1,5 +1,6 @@
 import type { PukalaniAdminModule } from '../shared/types/admin-module'
 import type { PukalaniAdminNoticeConfig } from '../shared/types/admin-notice'
+import type { PukalaniAuthNoticeConfig } from '../shared/types/auth-notice'
 import type { PukalaniSettingsTab } from '../shared/types/settings-tab'
 import type { PukalaniChromeNavConfig, PukalaniChromeUtilityConfig } from '../shared/types/chrome'
 
@@ -194,6 +195,19 @@ export default defineAppConfig({
        *  IMMER nur an verifizierte Adressen — unabhängig von diesem Flag
        *  (Spam-Schutz). OTP-Logins verifizieren automatisch. */
       verification: true,
+      /**
+       * Hinweis-Registry über dem Register-Formular (U2, 2026-08-10) —
+       * Objekt-Map wie `pukalani.admin.notices`, Key = stabile Id, `false`
+       * schaltet einen geerbten Eintrag ab. Core-Default leer.
+       *
+       * WOFÜR: die Register-Seite gehört dem Core und wird von JEDER App
+       * geerbt — der ehrliche Satz „für eine EIGENE Community brauchst du
+       * derzeit eine Einladung" gilt aber nur dort, wo es ein Early-Access-Tor
+       * gibt. Der onboarding-Layer meldet seine Komponente hier an; der Core
+       * kennt weder sie noch den Anlass (A14). Typ + Auflösung:
+       * shared/types/auth-notice.ts.
+       */
+      notices: {} as PukalaniAuthNoticeConfig,
     },
     analytics: {
       enabled: false,

@@ -3,15 +3,54 @@
 // Der Gegenspieler-Raum ist noch „bewölkt" (kühles Grau), aber die puka bricht
 // oben rechts bereits durch — das Leitmotiv setzt sofort ein.
 const { t } = useI18n()
-const { start, demo } = useProductLinks()
+const { start, demo, request } = useProductLinks()
 const { trackFunnel } = useFunnelEvent()
+
+/**
+ * ZWEIGLEISIG, SOLANGE DAS TOR ZU IST (U2 / Audit-Befund K1). „Kostenlos
+ * starten" war ein Versprechen, das der Trichter nicht hielt: der Besucher
+ * legte ein Konto an und stand danach vor einem Code-Feld. Bei geschlossenem
+ * Tor führt der Haupt-Knopf deshalb dorthin, wo man wirklich etwas erreicht
+ * (Zugang anfragen), und daneben steht der Weg für die, die schon eingeladen
+ * sind. Macht der Betreiber das Tor auf, steht hier wieder der eine
+ * „Kostenlos starten"-Knopf — ohne Text-Deploy.
+ */
+const gate = useOnboardingGate()
 
 const links = computed(() => [
   // `onClick` im Link-Objekt statt `@click` am Knopf: die Liste wird per
   // `v-bind` auf EINEN `UButton` in einer Schleife ausgerollt — ein Zuhörer im
   // Markup träfe beide Knöpfe. Vue liest `onXxx` aus einem v-bind-Objekt als
   // Zuhörer, das Ziel des Links bleibt unberührt (U18).
-  { to: start, color: 'primary' as const, label: t('marketing.hero.ctaPrimary'), onClick: () => trackFunnel('funnel_cta_start') },
+  //
+  // DERSELBE Trichter-Punkt in beiden Zuständen, nur mit der Eigenschaft
+  // `gate`: die Frage ist „wie viele steigen hier ein", und die darf nicht
+  // daran zerbrechen, dass der Knopf zwischendurch anders heißt. Der Vergleich
+  // vorher/nachher ist genau der Wert dieser Messung.
+  ...(gate.value.inviteRequired
+    ? [
+        {
+          to: request,
+          color: 'primary' as const,
+          label: t('marketing.hero.ctaRequest'),
+          onClick: () => trackFunnel('funnel_cta_start', { gate: 'on', cta: 'request' }),
+        },
+        {
+          to: start,
+          color: 'neutral' as const,
+          variant: 'subtle' as const,
+          label: t('marketing.hero.ctaHasCode'),
+          onClick: () => trackFunnel('funnel_cta_start', { gate: 'on', cta: 'code' }),
+        },
+      ]
+    : [
+        {
+          to: start,
+          color: 'primary' as const,
+          label: t('marketing.hero.ctaPrimary'),
+          onClick: () => trackFunnel('funnel_cta_start', { gate: 'off', cta: 'start' }),
+        },
+      ]),
   {
     to: demo,
     color: 'neutral' as const,

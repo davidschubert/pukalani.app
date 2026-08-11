@@ -21,6 +21,23 @@
  */
 export default defineAppConfig({
   pukalani: {
+    auth: {
+      /**
+       * DER EHRLICHE SATZ ÜBER DEM REGISTER-FORMULAR (U2, Audit-Befund K1).
+       *
+       * Er steht in DIESEM Layer und nicht im Core, weil nur hier bekannt ist,
+       * dass es überhaupt ein Early-Access-Tor gibt, wie sein Zustand zu
+       * erfragen ist (`/api/onboarding/gate`) und wohin die Anfrage-Seite
+       * zeigt. Eine Silo-App ohne onboarding (apps/comments) trägt den Eintrag
+       * nicht und sieht deshalb auch nichts.
+       *
+       * Die Komponente entscheidet selbst, ob sie etwas rendert: auf einem
+       * Mandanten-Host und bei offenem Tor bleibt sie leer.
+       */
+      notices: {
+        founding: { component: 'OnboardingFoundingNotice', order: 10 },
+      },
+    },
     admin: {
       /**
        * REITER DES COMMUNITY-HUBS (F51). Reihenfolge = `order`, gerendert von

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { resolveAuthNotices, type PukalaniAuthNoticeConfig } from '../../../shared/types/auth-notice'
+
 // Out-of-the-box Register-Page aus dem Core — Apps können sie überschreiben.
 // Passwort-Registrierung; mit pukalani.auth.otp zusätzlich ein Link zur Code-Registrierung
 // (eigene Page /register/code).
@@ -23,6 +25,19 @@ const registrationClosed = computed(() => !flags.value.registrationEnabled || fl
 const closedText = computed(() => flags.value.maintenanceMode
   ? t('auth.register.maintenanceText')
   : t('auth.register.closedText'))
+
+/**
+ * Hinweise anderer Layer über dem Formular (U2). Der Core kennt weder ihren
+ * Anlass noch ihren Text — er fragt nur, wer etwas zu sagen hat. OB eine
+ * Komponente tatsächlich etwas rendert, entscheidet sie selbst; erster Fall
+ * ist der Early-Access-Satz aus dem onboarding-Layer.
+ *
+ * Bewusst NUR im offenen Zweig gerendert: steht die Registrierung zu oder
+ * nimmt die Community nur Eingeladene auf, ist die Ansage darüber eine andere
+ * und ein zweiter Hinweis daneben nur Lärm.
+ */
+const authNotices = computed(() =>
+  resolveAuthNotices((appConfig.pukalani as { auth?: { notices?: PukalaniAuthNoticeConfig } }).auth?.notices))
 </script>
 
 <template>
@@ -50,6 +65,8 @@ const closedText = computed(() => flags.value.maintenanceMode
     </template>
 
     <template v-else>
+      <component :is="notice.component" v-for="notice in authNotices" :key="notice.id" />
+
       <AuthRegisterForm />
 
       <template v-if="otpEnabled">

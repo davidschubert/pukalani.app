@@ -141,6 +141,11 @@
       "suspendedAbuse": "Gesperrt — nicht erreichbar",
       "readOnly": "Nur zum Lesen — gerade sind keine Beiträge möglich"
     },
+    "foundingNotice": {
+      "title": "Mitmachen kann jeder",
+      "text": "Ein Konto ist kostenlos: damit kannst du sofort bei bestehenden Communities mitmachen. Für eine eigene Community brauchst du im Early Access noch eine Einladung.",
+      "link": "Zugang anfragen"
+    },
     "gate": {
       "title": "Community einrichten",
       "heading": "Willkommen, {name}.",

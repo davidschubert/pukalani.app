@@ -157,6 +157,14 @@ function next() {
   const target = nextStep(step.value)
   if (target) goTo(target)
 }
+/**
+ * Der Zurück-Weg AUS dem ersten Schritt führt auf das Code-Tor — und das gibt
+ * es nur, solange es eines gibt (U2). Steht es offen, leitet `/start` sofort
+ * wieder hierher zurück; ein Knopf, der nichts tut, gehört nicht ins Bild.
+ */
+const gate = useOnboardingGate()
+const canGoBack = computed(() => previousStep(step.value) !== null || gate.value.inviteRequired)
+
 function back() {
   const target = previousStep(step.value)
   if (target) goTo(target)
@@ -183,7 +191,11 @@ async function create() {
         goal: draft.value.goal,
         ...(draft.value.description?.trim() ? { description: draft.value.description.trim() } : {}),
         vibe: draft.value.vibe,
-        inviteCode: draft.value.inviteCode,
+        // Bei OFFENEM Tor (U2) gibt es keinen Code, und ein leerer Wert wäre
+        // ein 400 aus dem Schema statt einer Anlage. Weggelassen heißt hier
+        // wirklich „keiner" — geprüft wird er ohnehin nur, wenn das Control
+        // Plane das Tor geschlossen meldet.
+        ...(draft.value.inviteCode ? { inviteCode: draft.value.inviteCode } : {}),
         locale: locale.value,
       },
     })
@@ -398,9 +410,12 @@ useHead({ title: () => `${t(`onboarding.steps.${step.value}.title`)} · ${t('onb
 
       <!-- Steuerung -->
       <div class="flex items-center justify-between gap-3 border-t border-default pt-6">
-        <UButton type="button" color="neutral" variant="ghost" icon="i-ph-arrow-left" @click="back">
+        <UButton v-if="canGoBack" type="button" color="neutral" variant="ghost" icon="i-ph-arrow-left" @click="back">
           {{ t('onboarding.back') }}
         </UButton>
+        <!-- Platzhalter, damit der Weiter-Knopf rechts stehen bleibt, wenn es
+             nichts zurück zu gehen gibt (justify-between). -->
+        <span v-else />
 
         <UButton
           v-if="step === 'summary'"

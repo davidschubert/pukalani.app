@@ -7,6 +7,8 @@
     "nav": {
       "pricing": "Preise",
       "story": "Geschichte",
+      "request": "Zugang anfragen",
+      "hasCode": "Ich habe einen Code",
       "signIn": "Anmelden",
       "start": "Kostenlos starten",
       "menu": "Menü öffnen",
@@ -54,6 +56,8 @@
       "title": "Deine Community. Deine Kurse. Deine Regeln.",
       "sub": "Beiträge, Kurse, Events und Kommentare unter deinem Namen und deinem Design. In Deutschland gehostet und ohne Werbe-Tracking. Die schlanke, faire Alternative zu großen Community-Suiten.",
       "ctaPrimary": "Kostenlos starten",
+      "ctaRequest": "Zugang anfragen",
+      "ctaHasCode": "Ich habe einen Code",
       "ctaSecondary": "Live-Demo ansehen",
       "trust": {
         "hosting": "In Deutschland gehostet",
@@ -753,6 +757,7 @@
     "cta": {
       "title": "Bereit für deine eigene Community?",
       "lead": "Tritt durch das Tor – in 60 Sekunden steht deine Community. Kostenlos, ohne Risiko.",
+      "leadGated": "Tritt durch das Tor. Im Early Access brauchst du dafür noch eine Einladung — frag sie an, wir melden uns.",
       "primary": "Kostenlos starten",
       "secondary": "Live-Demo ansehen",
       "refrain": "„Wo die Sonne durchbricht.“"

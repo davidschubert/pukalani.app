@@ -8,6 +8,12 @@
  *
  * Die Prüfung ist nicht verbrauchend (POST /api/onboarding/precheck) — der
  * Code wird erst beim Anlegen der Community eingelöst.
+ *
+ * SEIT U2 IST DIESER SCHRITT BEDINGT (Davids Entscheidung 1 vom 2026-08-10):
+ * der Betreiber kann das Tor im Dashboard abschalten, und dann gibt es hier
+ * nichts zu tun. Die WAHRHEIT bleibt der Server (site.post.ts im Control
+ * Plane) — diese Seite liest denselben Zustand nur, um niemanden vor ein Feld
+ * zu stellen, das keine Wirkung mehr hat.
  */
 definePageMeta({ layout: 'onboarding', middleware: 'auth' })
 
@@ -16,6 +22,20 @@ const localePath = useLocalePath()
 const auth = useAuthStore()
 const draft = useOnboardingDraft()
 const { trackFunnel } = useFunnelEvent()
+
+/**
+ * Der Zustand kommt aus dem SSR-Payload, nicht aus einem Client-Zweig: bei
+ * offenem Tor ist die Weiterleitung schon die Server-Antwort, es blitzt also
+ * keine Code-Wand auf. Fehlt die Auskunft, gilt die Einladungs-Variante.
+ */
+const gate = useOnboardingGate()
+
+if (!gate.value.inviteRequired) {
+  // `replace`: die übersprungene Wand darf nicht im Verlauf liegen — der
+  // Zurück-Knopf aus Schritt 1 gehört auf die Seite DAVOR, nicht in ein Tor,
+  // das sofort wieder weiterleitet.
+  await navigateTo(localePath('/start/community'), { replace: true })
+}
 
 /**
  * Der Code kann aus DREI Quellen kommen, in dieser Reihenfolge:
@@ -40,6 +60,12 @@ const needsVerification = ref(false)
 // Kam der Code per Link, muss niemand auf „Weiter" drücken — das ist der
 // „direkt loslegen"-Teil, den die Mail verspricht.
 onMounted(() => {
+  // Steht das Tor offen, ist diese Seite auf dem Weg nach draußen (die
+  // Weiterleitung oben läuft) — dann gibt es weder etwas zu prüfen noch einen
+  // Trichter-Punkt zu zählen: `funnel_gate_no_code` misst eine WAND, und die
+  // steht gerade nicht (U18/U2).
+  if (!gate.value.inviteRequired) return
+
   if (codeFromLink) {
     void submit()
     return
