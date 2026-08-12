@@ -1,7 +1,8 @@
 {
   "admin": {
     "nav": {
-      "analytics": "Analytics"
+      "analytics": "Analytics",
+      "statistics": "Statistiken"
     }
   },
   "analytics": {
@@ -55,7 +56,51 @@
       "statsEmptyTitle": "Noch keine Daten",
       "statsEmptyHint": "Der erste Besuch zählt in wenigen Minuten. Ruf deine Seite einmal in einem anderen Browser auf, wenn du nicht warten willst.",
       "statsUnavailableTitle": "Statistik gerade nicht erreichbar",
-      "statsUnavailableHint": "Gemessen wird weiter — nur die Anzeige klemmt. Versuch es in ein paar Minuten noch einmal."
+      "statsUnavailableHint": "Gemessen wird weiter — nur die Anzeige klemmt. Versuch es in ein paar Minuten noch einmal.",
+      "statsAll": "Alle Statistiken"
+    },
+    "stats": {
+      "title": "Statistiken",
+      "subtitle": "Woher deine Besucher kommen, was sie lesen und womit sie es lesen.",
+      "range": {
+        "7d": "7 Tage",
+        "30d": "30 Tage",
+        "90d": "90 Tage"
+      },
+      "rangeHint": {
+        "7d": "Besucher der letzten 7 Tage",
+        "30d": "Besucher der letzten 30 Tage",
+        "90d": "Besucher der letzten 90 Tage"
+      },
+      "visitors": "Besucher",
+      "today": "Heute",
+      "visits": "Besuche",
+      "pageviews": "Seitenaufrufe",
+      "viewsPerVisit": "Aufrufe je Besuch",
+      "duration": "Verweildauer (Min.)",
+      "bounceRate": "Absprungrate",
+      "bounceRateHint": "nur eine Seite gesehen",
+      "recent": "Besucher · letzte 30 Min.",
+      "chartTitle": "Besucher pro Tag",
+      "bar": "{date}: {count} Besucher",
+      "countries": "Länder",
+      "regions": "Regionen",
+      "topPages": "Meistbesuchte Seiten",
+      "entryPages": "Einstiegsseiten",
+      "sources": "Woher die Besucher kommen",
+      "devices": "Geräte",
+      "browsers": "Browser",
+      "os": "Betriebssysteme",
+      "listEmpty": "Noch nichts zu zeigen.",
+      "planTitle": "Ab dem Plan Personal",
+      "planHint": "Analytics gehört ab Personal dazu. Solange dein Plan es nicht enthält, wird auf deinen Seiten nichts gemessen und es gibt hier nichts zu zeigen.",
+      "inactiveTitle": "Es wird nichts gemessen",
+      "inactiveHint": "Schalte die Messung ein — deine Seiten melden sich ab dem nächsten Aufruf selbst, und die ersten Zahlen stehen wenige Minuten später hier.",
+      "inactiveAction": "Messung einschalten",
+      "emptyTitle": "Noch keine Daten",
+      "emptyHint": "Der erste Besuch zählt in wenigen Minuten. Ruf deine Seite einmal in einem anderen Browser auf, wenn du nicht warten willst.",
+      "unavailableTitle": "Statistik gerade nicht erreichbar",
+      "unavailableHint": "Gemessen wird weiter — nur die Anzeige klemmt. Versuch es in ein paar Minuten noch einmal."
     },
     "validation": {
       "scriptIdInvalid": "Bitte eine gültige Script-ID eintragen — sie beginnt mit pa- und enthält nur Buchstaben, Ziffern, Bindestrich und Unterstrich.",

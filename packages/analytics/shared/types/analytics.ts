@@ -51,9 +51,25 @@ export interface AnalyticsNamedCount {
   visitors: number
 }
 
+/**
+ * Eine Zeile der Länderliste. Der CODE steht neben dem Namen, weil er die
+ * Flagge trägt — aus „Deutschland" lässt sich kein Emoji rechnen, aus „DE"
+ * schon (`countryFlagEmoji`).
+ */
+export interface AnalyticsCountryCount {
+  /** ISO-3166-alpha-2, so wie Plausible ihn liefert ('' ist möglich). */
+  code: string
+  name: string
+  visitors: number
+}
+
 export interface AnalyticsTotals {
   visitors: number
+  /** Besuche (Sitzungen) — ein Besucher kann mehrere haben. */
+  visits: number
   pageviews: number
+  /** Seitenaufrufe je Besuch, mit Nachkommastelle. */
+  viewsPerVisit: number
   visitDurationSeconds: number
   /** Absprungrate in Prozent, so wie Plausible sie liefert (0–100). */
   bounceRate: number
@@ -77,4 +93,20 @@ export interface AnalyticsStatsResponse {
   series?: AnalyticsSeriesPoint[]
   topPages?: AnalyticsNamedCount[]
   topSources?: AnalyticsNamedCount[]
+
+  /**
+   * DIE FELDER DER STATISTIK-SEITE — alle OPTIONAL, und das ist kein
+   * Halbherzigkeit, sondern Rückwärts-Kompatibilität: die kleine Karte auf der
+   * Einstellungs-Seite liest weiter nur die Felder oben. Ein neues PFLICHTfeld
+   * hätte jeden Leser dieser Antwort zu einer Änderung gezwungen — für Zahlen,
+   * die er gar nicht zeigt.
+   */
+  countries?: AnalyticsCountryCount[]
+  regions?: AnalyticsNamedCount[]
+  devices?: AnalyticsNamedCount[]
+  browsers?: AnalyticsNamedCount[]
+  os?: AnalyticsNamedCount[]
+  entryPages?: AnalyticsNamedCount[]
+  /** Besucher der letzten 30 Minuten — bewusst NICHT „live" genannt. */
+  recentVisitors?: number
 }

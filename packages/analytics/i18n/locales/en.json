@@ -1,7 +1,8 @@
 {
   "admin": {
     "nav": {
-      "analytics": "Analytics"
+      "analytics": "Analytics",
+      "statistics": "Statistics"
     }
   },
   "analytics": {
@@ -55,7 +56,51 @@
       "statsEmptyTitle": "No data yet",
       "statsEmptyHint": "The first visit counts within a few minutes. Open your page in another browser if you do not want to wait.",
       "statsUnavailableTitle": "Statistics not reachable right now",
-      "statsUnavailableHint": "Measuring continues — only the display is stuck. Please try again in a few minutes."
+      "statsUnavailableHint": "Measuring continues — only the display is stuck. Please try again in a few minutes.",
+      "statsAll": "All statistics"
+    },
+    "stats": {
+      "title": "Statistics",
+      "subtitle": "Where your visitors come from, what they read and what they read it with.",
+      "range": {
+        "7d": "7 days",
+        "30d": "30 days",
+        "90d": "90 days"
+      },
+      "rangeHint": {
+        "7d": "Visitors of the last 7 days",
+        "30d": "Visitors of the last 30 days",
+        "90d": "Visitors of the last 90 days"
+      },
+      "visitors": "Visitors",
+      "today": "Today",
+      "visits": "Visits",
+      "pageviews": "Page views",
+      "viewsPerVisit": "Views per visit",
+      "duration": "Time on site (min)",
+      "bounceRate": "Bounce rate",
+      "bounceRateHint": "saw one page only",
+      "recent": "Visitors · last 30 min",
+      "chartTitle": "Visitors per day",
+      "bar": "{date}: {count} visitors",
+      "countries": "Countries",
+      "regions": "Regions",
+      "topPages": "Most visited pages",
+      "entryPages": "Entry pages",
+      "sources": "Where visitors come from",
+      "devices": "Devices",
+      "browsers": "Browsers",
+      "os": "Operating systems",
+      "listEmpty": "Nothing to show yet.",
+      "planTitle": "From the Personal plan",
+      "planHint": "Analytics is included from Personal onwards. While your plan does not include it, nothing is measured on your pages and there is nothing to show here.",
+      "inactiveTitle": "Nothing is being measured",
+      "inactiveHint": "Switch measuring on — your pages report themselves from the next page view on, and the first numbers show up here a few minutes later.",
+      "inactiveAction": "Switch measuring on",
+      "emptyTitle": "No data yet",
+      "emptyHint": "The first visit counts within a few minutes. Open your page in another browser if you do not want to wait.",
+      "unavailableTitle": "Statistics not reachable right now",
+      "unavailableHint": "Measuring continues — only the display is stuck. Please try again in a few minutes."
     },
     "validation": {
       "scriptIdInvalid": "Please enter a valid script id — it starts with pa- and contains only letters, digits, hyphen and underscore.",

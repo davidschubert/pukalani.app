@@ -1,7 +1,12 @@
 /**
- * analytics meldet seinen Einstieg bei der Reiter-Registry des
+ * analytics meldet seine Einstiege bei der Reiter-Registry des
  * Community-Hubs an (pukalani.admin.communityTabs, deep-merged) —
  * capability-gefiltert (A14).
+ *
+ * ZWEI REITER, ZWEI FRAGEN: „Statistiken" zeigt die Zahlen, „Analytics" stellt
+ * die Messung ein. Beide hängen an derselben Capability und demselben Produkt —
+ * getrennt sind sie, weil man das eine täglich anschaut und das andere einmal
+ * einstellt.
  *
  * Bis F51 (2026-08-07) war das ein Sidebar-Modul in der Gruppe
  * „Settings · Community". Der Eintrag in `pukalani.admin.modules` ist
@@ -34,6 +39,31 @@ export default defineAppConfig({
           to: '/dashboard/community/analytics',
           requiredCapability: 'community.analytics',
           order: 80,
+        },
+        {
+          /**
+           * DIE ZAHLEN, nicht die Einstellung — deshalb ein EIGENER Reiter und
+           * kein weiterer Kasten auf der Seite daneben: der Owner kommt fast
+           * immer zum Schauen und fast nie zum Umstellen, und wer schauen will,
+           * soll nicht erst an einem Schalter vorbei.
+           *
+           * ORDNUNG 79 = DAVOR. Der Reiter mit dem Inhalt steht vor dem mit dem
+           * Schalter; die Einstellungs-Seite behält ihre 80 und damit ihre
+           * Adresse (sie ist von Links und Lesezeichen erreichbar).
+           *
+           * `planProduct` fehlt aus demselben Grund wie beim Eintrag darüber:
+           * die Antwort auf „warum sehe ich keine Zahlen?" gehört auf DIESE
+           * Seite (sie sagt „ab Personal"), nicht in ein leeres Menü. Die Route
+           * bleibt trotzdem zu (`requirePlanProduct`).
+           */
+          id: 'analytics-statistics',
+          scope: 'community',
+          productKey: 'analytics',
+          labelKey: 'admin.nav.statistics',
+          icon: 'i-ph-squares-four',
+          to: '/dashboard/community/statistics',
+          requiredCapability: 'community.analytics',
+          order: 79,
         },
       ],
     },

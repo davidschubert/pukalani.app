@@ -1,10 +1,12 @@
 import type { H3Event } from 'h3'
 import {
   buildStatsQueries,
+  mapCountryCounts,
   mapNamedCounts,
   mapSeries,
   mapTotals,
   mapVisitors,
+  normalizeStatsRange,
   resolveStatsTarget,
 } from '../../../shared/analyticsStats'
 import type { PlausibleQuery, PlausibleQueryResponse } from '../../../shared/analyticsStats'
@@ -92,7 +94,15 @@ export default defineEventHandler(async (event): Promise<AnalyticsStatsResponse>
   await requireCommunityPermission(event, 'community.analytics')
   requirePlanProduct(event, 'analytics')
 
-  const cached = readAnalyticsStatsCache(event)
+  /**
+   * Der Zeitraum ist EINGABE und wird deshalb nie roh weitergereicht: er landet
+   * sonst unverändert in `date_range` einer Abfrage gegen eine fremde Instanz
+   * UND im Cache-Schlüssel. `normalizeStatsRange` ist fail-closed — alles
+   * Unbekannte wird zu 30 Tagen.
+   */
+  const range = normalizeStatsRange(getQuery(event).range)
+
+  const cached = readAnalyticsStatsCache(event, range)
   if (cached) return cached
 
   const appConfig = useAppConfig() as { pukalani?: { analytics?: AnalyticsAppConfig } }
@@ -118,32 +128,50 @@ export default defineEventHandler(async (event): Promise<AnalyticsStatsResponse>
   const target = resolveStatsTarget(row, analytics.shared ?? {}, requestHost(event))
   if (target.state === 'off') {
     const off: AnalyticsStatsResponse = { active: false }
-    writeAnalyticsStatsCache(event, off)
+    writeAnalyticsStatsCache(event, off, range)
     return off
   }
   // „Gerade nicht erreichbar" wird BEWUSST nicht gecacht: der Grund ist meist
   // vorübergehend (Instanz weg, Schlüssel gerade nachgetragen), und zwei
   // Minuten künstliche Wartezeit auf eine wieder funktionierende Anzeige wären
-  // teurer als fünf Abfragen bei einem erneuten Öffnen der Seite.
+  // teurer als ein Dutzend Abfragen bei einem erneuten Öffnen der Seite.
   if (target.state === 'unavailable') return UNAVAILABLE
 
   const baseUrl = (analytics.instance ?? '').replace(/\/+$/, '')
   const apiKey = useRuntimeConfig(event).analyticsStatsApiKey
   if (!baseUrl || !apiKey) return UNAVAILABLE
 
-  const queries = buildStatsQueries(target.siteId, target.filters)
+  /**
+   * Die Uhr wird HIER gelesen und hineingereicht — `buildStatsQueries` bleibt
+   * damit pur und das Fenster „letzte 30 Minuten" testbar.
+   */
+  const queries = buildStatsQueries(target.siteId, target.filters, range, new Date().toISOString())
 
   try {
-    // Fünf Abfragen, weil `date_range` für die GANZE Abfrage gilt — „heute" und
-    // „30 Tage" lassen sich nicht zusammenlegen. Nebeneinander, damit die Seite
-    // nicht fünf Umläufe lang wartet.
-    const [today, totals, series, topPages, topSources] = await Promise.all([
-      query(baseUrl, apiKey, queries.today),
-      query(baseUrl, apiKey, queries.totals),
-      query(baseUrl, apiKey, queries.series),
-      query(baseUrl, apiKey, queries.topPages),
-      query(baseUrl, apiKey, queries.topSources),
-    ])
+    /**
+     * Ein Dutzend Abfragen, weil `date_range` und `dimensions` je für die GANZE
+     * Abfrage gelten — „heute", „letzte 30 Minuten" und jede Aufschlüsselung
+     * brauchen eine eigene. Nebeneinander, damit die Seite nicht ein Dutzend
+     * Umläufe lang wartet: die Dauer ist die der LANGSAMSTEN, nicht ihre Summe.
+     * Eine einzige, die scheitert, macht die ganze Ansicht zu „gerade nicht
+     * erreichbar" — halb gefüllte Kacheln wären schlimmer als eine ehrliche
+     * Ansage.
+     */
+    const [today, totals, series, topPages, topSources, countries, regions, devices, browsers, os, entryPages, recent]
+      = await Promise.all([
+        query(baseUrl, apiKey, queries.today),
+        query(baseUrl, apiKey, queries.totals),
+        query(baseUrl, apiKey, queries.series),
+        query(baseUrl, apiKey, queries.topPages),
+        query(baseUrl, apiKey, queries.topSources),
+        query(baseUrl, apiKey, queries.countries),
+        query(baseUrl, apiKey, queries.regions),
+        query(baseUrl, apiKey, queries.devices),
+        query(baseUrl, apiKey, queries.browsers),
+        query(baseUrl, apiKey, queries.os),
+        query(baseUrl, apiKey, queries.entryPages),
+        query(baseUrl, apiKey, queries.recent),
+      ])
 
     const response: AnalyticsStatsResponse = {
       active: true,
@@ -152,8 +180,15 @@ export default defineEventHandler(async (event): Promise<AnalyticsStatsResponse>
       series: mapSeries(series),
       topPages: mapNamedCounts(topPages),
       topSources: mapNamedCounts(topSources),
+      countries: mapCountryCounts(countries),
+      regions: mapNamedCounts(regions),
+      devices: mapNamedCounts(devices),
+      browsers: mapNamedCounts(browsers),
+      os: mapNamedCounts(os),
+      entryPages: mapNamedCounts(entryPages),
+      recentVisitors: mapVisitors(recent),
     }
-    writeAnalyticsStatsCache(event, response)
+    writeAnalyticsStatsCache(event, response, range)
     return response
   }
   catch {

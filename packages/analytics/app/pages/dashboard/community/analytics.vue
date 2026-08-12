@@ -33,6 +33,7 @@ import type { AnalyticsConfigResponse, AnalyticsStatsResponse } from '../../../.
 definePageMeta({ layout: 'dashboard', middleware: ['auth', 'admin'], requiredCapability: 'community.analytics' })
 
 const { t, locale } = useI18n()
+const localePath = useLocalePath()
 const toast = useToast()
 const appConfig = useAppConfig() as {
   pukalani?: { analytics?: { instance?: string, shared?: { scriptId?: string, siteId?: string } } }
@@ -423,6 +424,21 @@ function formatDay(date: string): string {
               </ul>
             </div>
           </div>
+
+          <!-- Diese Karte ist die Antwort auf „läuft es?" und bleibt es. Alles
+               darüber hinaus (Länder, Geräte, Einstiegsseiten, andere
+               Zeiträume) steht einen Reiter weiter — verlinkt statt kopiert,
+               damit es die Zahlen nicht zweimal in zwei Formen gibt. -->
+          <UButton
+            :to="localePath('/dashboard/community/statistics')"
+            color="neutral"
+            variant="subtle"
+            size="xs"
+            icon="i-ph-squares-four"
+            class="self-start"
+            data-analytics-stats-all
+            :label="t('analytics.admin.statsAll')"
+          />
         </template>
       </UPageCard>
 

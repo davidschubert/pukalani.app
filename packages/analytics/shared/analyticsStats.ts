@@ -1,6 +1,6 @@
 import { isPlausibleScriptId } from '../../core/shared/analyticsScript'
 import type { AnalyticsSettingsLike } from '../../core/shared/analyticsScript'
-import type { AnalyticsNamedCount, AnalyticsSeriesPoint, AnalyticsTotals } from './types/analytics'
+import type { AnalyticsCountryCount, AnalyticsNamedCount, AnalyticsSeriesPoint, AnalyticsTotals } from './types/analytics'
 
 /**
  * DER VERTRAG ZUR PLAUSIBLE-STATS-API — pur, ohne h3, ohne fetch.
@@ -21,10 +21,19 @@ import type { AnalyticsNamedCount, AnalyticsSeriesPoint, AnalyticsTotals } from 
 /** Ein Filter der v2-API. Wir brauchen genau eine Form: `is` auf eine Liste. */
 export type PlausibleFilter = ['is', string, string[]]
 
+/**
+ * Der Zeitraum einer Abfrage — ENTWEDER ein Kürzel („30d", „day") ODER ein
+ * Paar aus zwei ISO-Zeitpunkten. Beide Formen sind am 2026-08-11 live gegen
+ * plausible.hawaii.studio gemessen; das Paar wird als ZEITPUNKT geparst
+ * (Suffix „Z" nötig, die Antwort echot in der Zeitzone der Site zurück —
+ * derselbe Augenblick, andere Schreibweise).
+ */
+export type PlausibleDateRange = string | [string, string]
+
 export interface PlausibleQuery {
   site_id: string
   metrics: string[]
-  date_range: string
+  date_range: PlausibleDateRange
   filters?: PlausibleFilter[]
   dimensions?: string[]
   pagination?: { limit: number }
@@ -106,14 +115,67 @@ export function resolveStatsTarget(
 /**
  * Die Metriken der Übersicht — die REIHENFOLGE ist der Vertrag: die v2-API
  * antwortet mit einem Zahlen-Array in genau dieser Ordnung, ohne Namen.
+ *
+ * `views_per_visit` darf hier stehen, weil das eine REINE Metrik-Abfrage ist:
+ * mit `dimensions` zusammen lehnt die API sie ab (live gemessen 2026-08-11,
+ * `{"error":"…"}`). Wer diese Liste je in eine Listen-Abfrage kopiert, bekommt
+ * darum keinen halben Wert, sondern einen Fehlschlag — und die Seite sagt
+ * „gerade nicht erreichbar".
  */
-export const ANALYTICS_TOTAL_METRICS = ['visitors', 'pageviews', 'visit_duration', 'bounce_rate'] as const
+export const ANALYTICS_TOTAL_METRICS = [
+  'visitors',
+  'visits',
+  'pageviews',
+  'views_per_visit',
+  'visit_duration',
+  'bounce_rate',
+] as const
 
-/** Wie viele Zeilen die beiden Listen zeigen. */
+/** Wie viele Zeilen eine Liste zeigt. */
 export const ANALYTICS_LIST_LIMIT = 8
 
-/** Zeitraum aller Auswertungen außer „heute". */
+/** Zeitraum aller Auswertungen außer „heute" (Vorgabe, s. `AnalyticsStatsRange`). */
 export const ANALYTICS_RANGE = '30d'
+
+/**
+ * DIE WÄHLBAREN ZEITRÄUME — eine WEISSE LISTE, kein freies Feld.
+ *
+ * Der Wert kommt als Query-Parameter, ist also EINGABE. Er wandert unverändert
+ * in `date_range` einer Abfrage gegen eine fremde Instanz und in den
+ * Cache-Schlüssel; beides sind Gründe, ihn nicht zu glauben. Alle drei sind am
+ * 2026-08-11 live gegen plausible.hawaii.studio gemessen.
+ */
+export const ANALYTICS_STATS_RANGES = ['7d', '30d', '90d'] as const
+
+export type AnalyticsStatsRange = typeof ANALYTICS_STATS_RANGES[number]
+
+/**
+ * PURE (unit-getestet): Eingabe → gültiger Zeitraum. FAIL-CLOSED — alles, was
+ * nicht in der Liste steht (fehlend, Array, Unfug, ein Zeitraum, den Plausible
+ * zwar kennt, wir aber nicht anbieten), wird zur Vorgabe.
+ *
+ * Bewusst KEIN Fehler: ein kaputter Link soll die Statistik zeigen, nicht eine
+ * Fehlerseite. Falsch messen kann er dabei nicht — 30 Tage sind genau das, was
+ * die Seite ohne Auswahl ohnehin zeigt.
+ */
+export function normalizeStatsRange(input: unknown): AnalyticsStatsRange {
+  return (ANALYTICS_STATS_RANGES as readonly string[]).includes(input as string)
+    ? input as AnalyticsStatsRange
+    : ANALYTICS_RANGE
+}
+
+/** Die Breite des „letzte Minuten"-Fensters. */
+const RECENT_WINDOW_MS = 30 * 60 * 1000
+
+/**
+ * Ein Zeitpunkt in der Schreibweise, die die v2-API als Instant liest:
+ * ISO mit „Z", auf Sekunden gekürzt. Millisekunden wegzulassen ist kein
+ * Geschmack, sondern Lesbarkeit im Server-Log — die Grenze eines
+ * 30-Minuten-Fensters interessiert auf die Sekunde genau niemanden.
+ */
+function instant(ms: number): string {
+  return `${new Date(ms).toISOString().slice(0, 19)}Z`
+}
 
 export interface AnalyticsQuerySet {
   today: PlausibleQuery
@@ -121,34 +183,76 @@ export interface AnalyticsQuerySet {
   series: PlausibleQuery
   topPages: PlausibleQuery
   topSources: PlausibleQuery
+  countries: PlausibleQuery
+  regions: PlausibleQuery
+  devices: PlausibleQuery
+  browsers: PlausibleQuery
+  os: PlausibleQuery
+  entryPages: PlausibleQuery
+  recent: PlausibleQuery
 }
 
 /**
- * PURE (unit-getestet): die fünf Abfragen einer Dashboard-Ansicht.
+ * PURE (unit-getestet): alle Abfragen einer Dashboard-Ansicht.
  *
- * „Heute" und „30 Tage" lassen sich NICHT zusammenlegen — `date_range` gilt für
- * die ganze Abfrage, zwei Zeiträume brauchen also zwei Anfragen. Die Route
- * schickt alle fünf nebeneinander los.
+ * „Heute", „letzte 30 Minuten" und der gewählte Zeitraum lassen sich NICHT
+ * zusammenlegen — `date_range` gilt für die ganze Abfrage, drei Zeiträume
+ * brauchen also drei Anfragen. Die Route schickt alle nebeneinander los.
+ *
+ * `nowIso` ist ein PARAMETER und keine Uhr im Rumpf: sonst wäre die Funktion
+ * nicht mehr testbar, und ausgerechnet das Fenster „letzte 30 Minuten" wäre
+ * dann der einzige Teil des Vertrags ohne Beweis. Die Route reicht
+ * `new Date().toISOString()` herein; ohne Angabe nimmt sie die Uhr des
+ * Aufrufers, damit ein vergessenes Argument nicht in einer kaputten Abfrage
+ * endet.
+ *
+ * DAS 30-MINUTEN-FENSTER IST EIN CUSTOM-RANGE, kein Kürzel. Plausible CE hat
+ * kein „realtime" in der v2-Abfrage, wohl aber ein Paar aus zwei
+ * ISO-Zeitpunkten MIT „Z" — am 2026-08-11 live gemessen, inklusive
+ * `event:hostname`-Filter, also auch für die Sammel-Site tragfähig. Die
+ * Antwort kommt in der Zeitzone der Site zurück; derselbe Augenblick, andere
+ * Schreibweise — für eine Zahl ohne Datumsanzeige ist das ohne Belang.
  */
-export function buildStatsQueries(siteId: string, filters: PlausibleFilter[]): AnalyticsQuerySet {
+export function buildStatsQueries(
+  siteId: string,
+  filters: PlausibleFilter[],
+  range: AnalyticsStatsRange = ANALYTICS_RANGE,
+  nowIso: string = new Date().toISOString(),
+): AnalyticsQuerySet {
   const base = { site_id: siteId, ...(filters.length ? { filters } : {}) }
+  const now = new Date(nowIso).getTime()
+
+  /** Eine Rang-Liste: eine Dimension, eine Zahl, acht Zeilen. */
+  const list = (dimensions: string[]): PlausibleQuery => ({
+    ...base,
+    metrics: ['visitors'],
+    date_range: range,
+    dimensions,
+    pagination: { limit: ANALYTICS_LIST_LIMIT },
+  })
+
   return {
     today: { ...base, metrics: ['visitors'], date_range: 'day' },
-    totals: { ...base, metrics: [...ANALYTICS_TOTAL_METRICS], date_range: ANALYTICS_RANGE },
-    series: { ...base, metrics: ['visitors'], date_range: ANALYTICS_RANGE, dimensions: ['time:day'] },
-    topPages: {
+    totals: { ...base, metrics: [...ANALYTICS_TOTAL_METRICS], date_range: range },
+    series: { ...base, metrics: ['visitors'], date_range: range, dimensions: ['time:day'] },
+    topPages: list(['event:page']),
+    topSources: list(['visit:source']),
+    /**
+     * ZWEI Dimensionen in EINER Abfrage: der ISO-Code (für die Flagge) und der
+     * Name (zum Lesen). Getrennt zu fragen hieße, zwei Listen anhand ihrer
+     * Reihenfolge wieder zusammenzustecken — und die Reihenfolge ist bei
+     * Gleichstand nichts, worauf man bauen sollte.
+     */
+    countries: list(['visit:country', 'visit:country_name']),
+    regions: list(['visit:region_name']),
+    devices: list(['visit:device']),
+    browsers: list(['visit:browser']),
+    os: list(['visit:os']),
+    entryPages: list(['visit:entry_page']),
+    recent: {
       ...base,
       metrics: ['visitors'],
-      date_range: ANALYTICS_RANGE,
-      dimensions: ['event:page'],
-      pagination: { limit: ANALYTICS_LIST_LIMIT },
-    },
-    topSources: {
-      ...base,
-      metrics: ['visitors'],
-      date_range: ANALYTICS_RANGE,
-      dimensions: ['visit:source'],
-      pagination: { limit: ANALYTICS_LIST_LIMIT },
+      date_range: [instant(now - RECENT_WINDOW_MS), instant(now)],
     },
   }
 }
@@ -173,14 +277,20 @@ export function mapVisitors(response: PlausibleQueryResponse): number {
   return numberAt(response.results?.[0]?.metrics, 0)
 }
 
-/** PURE: die vier Übersichtszahlen — Reihenfolge = ANALYTICS_TOTAL_METRICS. */
+/**
+ * PURE: die Übersichtszahlen — die Indizes SIND die Reihenfolge von
+ * ANALYTICS_TOTAL_METRICS. Wer dort eine Metrik einschiebt, muss hier
+ * mitzählen; der Test daneben ist genau dafür da.
+ */
 export function mapTotals(response: PlausibleQueryResponse): AnalyticsTotals {
   const metrics = response.results?.[0]?.metrics
   return {
     visitors: numberAt(metrics, 0),
-    pageviews: numberAt(metrics, 1),
-    visitDurationSeconds: Math.round(numberAt(metrics, 2)),
-    bounceRate: numberAt(metrics, 3),
+    visits: numberAt(metrics, 1),
+    pageviews: numberAt(metrics, 2),
+    viewsPerVisit: numberAt(metrics, 3),
+    visitDurationSeconds: Math.round(numberAt(metrics, 4)),
+    bounceRate: numberAt(metrics, 5),
   }
 }
 
@@ -203,4 +313,42 @@ export function mapNamedCounts(response: PlausibleQueryResponse): AnalyticsNamed
   return (response.results ?? [])
     .map(entry => ({ name: textAt(entry.dimensions, 0), visitors: numberAt(entry.metrics, 0) }))
     .filter(entry => entry.name !== '')
+}
+
+/**
+ * PURE: die Länderliste — Code und Name aus DERSELBEN Zeile (dimensions[0] =
+ * ISO-Code, [1] = Name).
+ *
+ * Gefiltert wird über den NAMEN, nicht über den Code: Plausible liefert für
+ * Besuche ohne Geo-Zuordnung eine leere Zeile, und eine Flagge ohne Land wäre
+ * ein Rätsel statt einer Angabe. Umgekehrt bleibt ein Land OHNE brauchbaren
+ * Code drin — es verliert dann nur seine Flagge (s. `countryFlagEmoji`).
+ */
+export function mapCountryCounts(response: PlausibleQueryResponse): AnalyticsCountryCount[] {
+  return (response.results ?? [])
+    .map(entry => ({
+      code: textAt(entry.dimensions, 0),
+      name: textAt(entry.dimensions, 1),
+      visitors: numberAt(entry.metrics, 0),
+    }))
+    .filter(entry => entry.name !== '')
+}
+
+/**
+ * PURE: ISO-Ländercode → Flaggen-Emoji, per Codepoint-Rechnung.
+ *
+ * Zwei Buchstaben werden zu zwei „Regional Indicator Symbols" (U+1F1E6 ist
+ * „A"), die jedes System als Flagge zusammensetzt. Bewusst KEIN Paket: das
+ * wären ein paar Dutzend Kilobyte Tabelle im Bundle jeder Kunden-Community für
+ * eine Zeile Arithmetik.
+ *
+ * Alles, was nicht aus genau zwei Buchstaben besteht, ergibt '' — die Liste
+ * zeigt dann den Namen ohne Flagge. Ein Sondercode wie „XX" ergibt zwei
+ * Indikator-Zeichen ohne Flaggen-Bild; das ist harmlos und billiger als eine
+ * gepflegte Liste aller gültigen Codes, die bei jeder Staatsgründung veraltet.
+ */
+export function countryFlagEmoji(code: string): string {
+  const upper = code.toUpperCase()
+  if (!/^[A-Z]{2}$/.test(upper)) return ''
+  return String.fromCodePoint(...[...upper].map(letter => 0x1F1E6 + letter.charCodeAt(0) - 65))
 }

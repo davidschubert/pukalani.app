@@ -124,13 +124,16 @@ const links = computed<NavigationMenuItem[]>(() => tabs.value.map(tab => ({
 })))
 
 /**
- * Zwei Breiten, ein Grund: Formularseiten lesen sich schmal besser, Tabellen
- * brauchen Platz (dieselbe Rechnung wie in der Konto-Hülle bei den Sitzungen).
- * Mitglieder und Analytics sind die beiden Reiter mit Datenlisten bzw. breiten
- * Kästen.
+ * Drei Breiten, ein Grund: Formularseiten lesen sich schmal besser, Tabellen
+ * brauchen Platz (dieselbe Rechnung wie in der Konto-Hülle bei den Sitzungen),
+ * und das Statistik-Bento (analytics) legt vier Spalten nebeneinander — in der
+ * Formular-Breite wären das Kacheln von unter 180 px, in denen keine Zahl mehr
+ * neben ihrem Label steht.
  */
-const containerWidth = computed(() =>
-  route.path.endsWith('/community/members') ? 'lg:max-w-5xl' : 'lg:max-w-3xl')
+const containerWidth = computed(() => {
+  if (route.path.endsWith('/community/statistics')) return 'lg:max-w-6xl'
+  return route.path.endsWith('/community/members') ? 'lg:max-w-5xl' : 'lg:max-w-3xl'
+})
 </script>
 
 <template>

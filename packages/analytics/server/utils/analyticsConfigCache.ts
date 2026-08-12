@@ -1,4 +1,6 @@
 import type { H3Event } from 'h3'
+import { ANALYTICS_RANGE, ANALYTICS_STATS_RANGES } from '../../shared/analyticsStats'
+import type { AnalyticsStatsRange } from '../../shared/analyticsStats'
 import type { AnalyticsConfigResponse, AnalyticsStatsResponse } from '../../shared/types/analytics'
 
 /**
@@ -37,8 +39,8 @@ export function writeAnalyticsConfigCache(event: H3Event, value: AnalyticsConfig
  *
  * Es sind zwei verschiedene Dinge mit zwei verschiedenen Kosten: die Config ist
  * ein Feld aus Appwrite und wird bei JEDEM Seitenaufbau gelesen; die Statistik
- * sind FÜNF Abfragen gegen eine fremde Instanz und wird nur beim Öffnen einer
- * Dashboard-Seite gebraucht. Ein gemeinsamer Eintrag hieße, dass jeder Gast
+ * sind EIN DUTZEND Abfragen gegen eine fremde Instanz und wird nur beim Öffnen
+ * einer Dashboard-Seite gebraucht. Ein gemeinsamer Eintrag hieße, dass jeder Gast
  * einer Community die Zahlen ihres Owners mit im Speicher hätte.
  *
  * DER SCHLÜSSEL TRÄGT MANDANT UND ZWECK: derselbe Grund wie oben, plus der
@@ -51,28 +53,51 @@ export function writeAnalyticsConfigCache(event: H3Event, value: AnalyticsConfig
  * liegt hinter dieser Prüfung, nicht vor ihr.
  *
  * 120 s, weil Plausible selbst in Minuten denkt: eine Ansicht, die 2 Minuten
- * alt ist, sieht niemand — fünf Abfragen bei jedem F5 dagegen schon.
+ * alt ist, sieht niemand — ein Dutzend Abfragen bei jedem F5 dagegen schon.
+ * Die Kachel „letzte 30 Minuten" lebt mit denselben 120 s: sie ist eine
+ * grobe Anwesenheits-Anzeige, keine Uhr — und sie heißt deshalb auch nicht
+ * „live".
  */
 const analyticsStatsCache = createMicrocache<AnalyticsStatsResponse>(120_000)
 
-export function analyticsStatsCacheKey(event: H3Event): string {
-  return `analytics:stats:${tenantCacheScope(event)}`
+/**
+ * DER SCHLÜSSEL TRÄGT AUCH DEN ZEITRAUM (Statistik-Seite): 7, 30 und 90 Tage
+ * sind drei verschiedene Antworten. Ohne diesen Teil bekäme der Owner beim
+ * Umschalten zwei Minuten lang die Zahlen des vorigen Zeitraums mit der neuen
+ * Beschriftung — falsch, und zwar unsichtbar falsch.
+ */
+export function analyticsStatsCacheKey(event: H3Event, range: AnalyticsStatsRange = ANALYTICS_RANGE): string {
+  return `analytics:stats:${tenantCacheScope(event)}:${range}`
 }
 
-export function readAnalyticsStatsCache(event: H3Event): AnalyticsStatsResponse | undefined {
-  return analyticsStatsCache.get(analyticsStatsCacheKey(event))
+export function readAnalyticsStatsCache(
+  event: H3Event,
+  range: AnalyticsStatsRange = ANALYTICS_RANGE,
+): AnalyticsStatsResponse | undefined {
+  return analyticsStatsCache.get(analyticsStatsCacheKey(event, range))
 }
 
-export function writeAnalyticsStatsCache(event: H3Event, value: AnalyticsStatsResponse): void {
-  analyticsStatsCache.set(analyticsStatsCacheKey(event), value)
+export function writeAnalyticsStatsCache(
+  event: H3Event,
+  value: AnalyticsStatsResponse,
+  range: AnalyticsStatsRange = ANALYTICS_RANGE,
+): void {
+  analyticsStatsCache.set(analyticsStatsCacheKey(event, range), value)
 }
 
 /**
- * Nach dem Umschalten: den Eintrag GENAU dieses Mandanten wegwerfen. Neu setzen
- * geht hier nicht — die neuen Zahlen kommen aus einer anderen Plausible-Site
- * und müssen erst geholt werden; ein `clear()` wiederum träfe alle anderen
+ * Nach dem Umschalten: die Einträge GENAU dieses Mandanten wegwerfen — alle
+ * Zeiträume, denn die Messung hat sich für jeden von ihnen geändert. Neu setzen
+ * geht hier nicht: die neuen Zahlen kommen aus einer anderen Plausible-Site und
+ * müssen erst geholt werden; ein `clear()` wiederum träfe alle anderen
  * Communities ohne Not.
+ *
+ * Die Schleife über die weiße Liste ist der Grund, warum es sie als Konstante
+ * gibt: ein vierter Zeitraum wird hier sonst vergessen, und dann bliebe genau
+ * er nach dem Abschalten mit alten Zahlen stehen.
  */
 export function clearAnalyticsStatsCache(event: H3Event): void {
-  analyticsStatsCache.delete(analyticsStatsCacheKey(event))
+  for (const range of ANALYTICS_STATS_RANGES) {
+    analyticsStatsCache.delete(analyticsStatsCacheKey(event, range))
+  }
 }
