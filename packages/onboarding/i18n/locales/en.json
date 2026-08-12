@@ -271,30 +271,16 @@
     "progress": "Step {step} of {total}",
     "back": "Back",
     "next": "Continue",
-    "skip": "Skip",
     "create": "Create community",
-    "earlyAccessBadge": "soon",
     "steps": {
       "basics": {
         "title": "Name and address",
         "heading": "Let's start, {name}.",
         "intro": "A working title is perfectly fine — you can change both later."
       },
-      "size": {
-        "title": "How many people are you bringing?",
-        "intro": "An estimate is enough. We use it to set things up for you, not to hold you back."
-      },
       "category": {
         "title": "What is yours about?",
         "intro": "Pick the closest one. It doesn't decide what you get — it helps us show you relevant things."
-      },
-      "description": {
-        "title": "Who are you bringing together?",
-        "intro": "Two sentences are enough. They become the first version of your home page — editable once you're in."
-      },
-      "goal": {
-        "title": "What would feel like real success in six months?",
-        "intro": "Pick what matters most. We use it to show you the right next steps."
       },
       "vibe": {
         "title": "Which mood fits?",
@@ -316,27 +302,7 @@
       "addressChecking": "Checking …",
       "addressFree": "{host} is available.",
       "addressTaken": "That address is already taken. Please pick another one.",
-      "addressUnknown": "We couldn't check just now — you can still continue.",
-      "purpose": "Why are you here?",
-      "description": "Description",
-      "descriptionHint": "Who do you bring together, and what for? Write it the way you'd tell a friend.",
-      "descriptionPlaceholder": "We're people who …",
-      "suggest": "Draft it for me",
-      "suggestFailed": "The draft didn't work. Feel free to write your own — or try again later.",
-      "suggestNote": "The draft comes from an AI and is just that: read it, change it, throw it away. Nothing is saved until you continue."
-    },
-    "purposes": {
-      "new": { "label": "Build a new community", "hint": "You're starting from zero." },
-      "migrate": { "label": "Move an existing community", "hint": "It exists already — somewhere else." },
-      "looking": { "label": "Just looking around", "hint": "Perfectly fine." }
-    },
-    "sizes": {
-      "none": "Nobody yet",
-      "to100": "Up to 100",
-      "to500": "100 to 500",
-      "to1000": "500 to 1,000",
-      "to5000": "1,000 to 5,000",
-      "over5000": "More than 5,000"
+      "addressUnknown": "We couldn't check just now — you can still continue."
     },
     "categories": {
       "coaching": { "label": "Coaching & consulting", "hint": "Guidance, groups, sparring" },
@@ -347,15 +313,6 @@
       "health": { "label": "Health & sport", "hint": "Training, nutrition, recovery" },
       "craft": { "label": "Craft & hobby", "hint": "Making, collecting, repairing" },
       "other": { "label": "Something else", "hint": "Tell us in the next step." }
-    },
-    "goals": {
-      "relationships": { "label": "Build relationships", "hint": "Members who show up for each other." },
-      "discussion": { "label": "Get conversations going", "hint": "Threads where something actually happens." },
-      "knowledge": { "label": "Collect knowledge", "hint": "Findable instead of lost in chat." },
-      "reach": { "label": "Reach more of the right people", "hint": "Publicly readable content that gets found." },
-      "events": { "label": "Host events", "hint": "Dates, sign-ups, reminders." },
-      "courses": { "label": "Start a programme", "hint": "Courses with structure and progress." },
-      "revenue": { "label": "Charge membership fees", "hint": "Paid memberships." }
     },
     "vibes": {
       "calm": { "label": "Calm & clear", "hint": "Restrained, lots of air" },
@@ -368,10 +325,7 @@
     "summary": {
       "name": "Name",
       "address": "Address",
-      "purpose": "Why you're here",
-      "size": "Members",
       "category": "Field",
-      "goal": "Goal for 6 months",
       "vibe": "Mood",
       "trialTitle": "14 days of Pro, no payment details",
       "trialBody": "You can try everything for 14 days. After that your community is read-only until you pick a plan — content and members stay, nothing is deleted."
@@ -463,7 +417,7 @@
         },
         "homePage": {
           "label": "Adjust the home page",
-          "hint": "It is already there, with the text you wrote in the wizard."
+          "hint": "It is already there — write two sentences about who you bring together."
         },
         "plan": {
           "label": "Set up your subscription",

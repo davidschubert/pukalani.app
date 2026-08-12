@@ -11,16 +11,17 @@ import type { SiteVibeId } from '../../../control/shared/onboarding'
  * mit dem Tab, weil ein liegengebliebener Entwurf in einem geteilten Browser
  * nichts von jemandem verraten soll.
  */
+/**
+ * Seit U12 nur noch die drei Pflicht-Antworten. Ein Entwurf aus der Zeit
+ * davor kann weitere Schlüssel tragen — die bleiben schlicht ungelesen und
+ * verschwinden mit dem Tab; ein Aufräum-Schritt wäre mehr Code als Nutzen.
+ */
 export interface OnboardingDraft {
   inviteCode?: string
   name?: string
   slug?: string
   slugTouched?: boolean
-  purpose?: string
-  memberRange?: string
   category?: string
-  description?: string
-  goal?: string
   vibe?: SiteVibeId
 }
 

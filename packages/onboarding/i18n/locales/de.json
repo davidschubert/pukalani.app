@@ -271,30 +271,16 @@
     "progress": "Schritt {step} von {total}",
     "back": "Zurück",
     "next": "Weiter",
-    "skip": "Überspringen",
     "create": "Community erstellen",
-    "earlyAccessBadge": "bald",
     "steps": {
       "basics": {
         "title": "Name und Adresse",
         "heading": "Fangen wir an, {name}.",
         "intro": "Ein Arbeitstitel reicht völlig — beides lässt sich später ändern."
       },
-      "size": {
-        "title": "Wie viele Menschen bringst du mit?",
-        "intro": "Eine Schätzung genügt. Wir richten die Community danach ein, nicht ab."
-      },
       "category": {
         "title": "Worum geht es bei dir?",
         "intro": "Wähle das Naheliegendste. Es bestimmt keine Funktionen, sondern hilft uns, dir Passendes zu zeigen."
-      },
-      "description": {
-        "title": "Wen bringst du zusammen?",
-        "intro": "Zwei Sätze reichen. Daraus entsteht die erste Version deiner Startseite — änderbar, sobald du drin bist."
-      },
-      "goal": {
-        "title": "Was wäre in sechs Monaten ein echter Erfolg?",
-        "intro": "Wähle das Wichtigste. Wir nutzen die Antwort, um dir die richtigen nächsten Schritte zu zeigen."
       },
       "vibe": {
         "title": "Welche Stimmung passt?",
@@ -316,27 +302,7 @@
       "addressChecking": "Wird geprüft …",
       "addressFree": "{host} ist frei.",
       "addressTaken": "Diese Adresse ist schon belegt. Wähle bitte eine andere.",
-      "addressUnknown": "Konnte gerade nicht geprüft werden — du kannst trotzdem weitermachen.",
-      "purpose": "Warum bist du hier?",
-      "description": "Beschreibung",
-      "descriptionHint": "Wen bringst du zusammen, und wofür? Schreib es, wie du es einem Bekannten erzählen würdest.",
-      "descriptionPlaceholder": "Wir sind Menschen, die …",
-      "suggest": "Vorschlag schreiben",
-      "suggestFailed": "Der Vorschlag hat nicht funktioniert. Schreib gern selbst — oder versuch es später noch einmal.",
-      "suggestNote": "Der Vorschlag kommt von einer KI und ist ein Entwurf: lies ihn, ändere ihn, wirf ihn weg. Er wird erst gespeichert, wenn du weitergehst."
-    },
-    "purposes": {
-      "new": { "label": "Eine neue Community aufbauen", "hint": "Du startest bei null." },
-      "migrate": { "label": "Eine bestehende Community umziehen", "hint": "Es gibt sie schon — woanders." },
-      "looking": { "label": "Ich schaue mich erst mal um", "hint": "Völlig in Ordnung." }
-    },
-    "sizes": {
-      "none": "Noch niemand",
-      "to100": "Bis 100",
-      "to500": "100 bis 500",
-      "to1000": "500 bis 1.000",
-      "to5000": "1.000 bis 5.000",
-      "over5000": "Mehr als 5.000"
+      "addressUnknown": "Konnte gerade nicht geprüft werden — du kannst trotzdem weitermachen."
     },
     "categories": {
       "coaching": { "label": "Coaching & Beratung", "hint": "Begleitung, Gruppen, Sparring" },
@@ -347,15 +313,6 @@
       "health": { "label": "Gesundheit & Sport", "hint": "Training, Ernährung, Genesung" },
       "craft": { "label": "Handwerk & Hobby", "hint": "Machen, Sammeln, Reparieren" },
       "other": { "label": "Etwas anderes", "hint": "Erzähl es uns im nächsten Schritt." }
-    },
-    "goals": {
-      "relationships": { "label": "Beziehungen aufbauen", "hint": "Mitglieder, die füreinander da sind." },
-      "discussion": { "label": "Gespräche in Gang bringen", "hint": "Threads, in denen wirklich etwas passiert." },
-      "knowledge": { "label": "Wissen sammeln", "hint": "Auffindbar statt im Chat verschwunden." },
-      "reach": { "label": "Mehr von den richtigen Leuten erreichen", "hint": "Öffentlich lesbare Inhalte, die gefunden werden." },
-      "events": { "label": "Events veranstalten", "hint": "Termine, Anmeldungen, Erinnerungen." },
-      "courses": { "label": "Ein Programm starten", "hint": "Kurse mit Struktur und Fortschritt." },
-      "revenue": { "label": "Mitgliedsbeiträge einnehmen", "hint": "Bezahlte Mitgliedschaften." }
     },
     "vibes": {
       "calm": { "label": "Ruhig & klar", "hint": "Zurückgenommen, viel Luft" },
@@ -368,10 +325,7 @@
     "summary": {
       "name": "Name",
       "address": "Adresse",
-      "purpose": "Warum du hier bist",
-      "size": "Mitglieder",
       "category": "Bereich",
-      "goal": "Ziel für 6 Monate",
       "vibe": "Stimmung",
       "trialTitle": "14 Tage Pro, ohne Zahlungsdaten",
       "trialBody": "14 Tage lang kannst du alles ausprobieren. Danach ist deine Community nur noch zum Lesen, bis du einen Plan wählst — Inhalte und Mitglieder bleiben, gelöscht wird nichts."
@@ -463,7 +417,7 @@
         },
         "homePage": {
           "label": "Pass die Startseite an",
-          "hint": "Sie steht schon da, mit deinem Text aus dem Wizard."
+          "hint": "Sie steht schon da — schreib in zwei Sätzen, wen du hier zusammenbringst."
         },
         "plan": {
           "label": "Schließ dein Abo ab",

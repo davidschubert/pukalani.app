@@ -31,7 +31,8 @@ export default defineEventHandler(async (event) => {
     // indem er sich selbst für bestätigt erklärt).
     { ...body, email: event.context.user.email, emailVerified: event.context.user.emailVerification },
   )
-  // Wird hier mitgeliefert, damit das UI den KI-Knopf (Schritt 4) nur zeigt,
-  // wenn er auch funktioniert — der Wizard fragt diese Route ohnehin.
-  return { ...result, aiAvailable: isAiAvailable(event) }
+  // Bis U12 stand hier zusätzlich `aiAvailable` für den KI-Knopf des
+  // Beschreibungs-Schritts. Den Schritt gibt es nicht mehr, also auch die
+  // Auskunft nicht — ein Flag ohne Leser ist eine Zusage ohne Deckung.
+  return result
 })

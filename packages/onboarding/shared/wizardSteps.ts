@@ -6,7 +6,20 @@
  * (pages/start/community.vue) liest sie, hält sie aber nicht.
  */
 
-export const WIZARD_STEPS = ['basics', 'size', 'category', 'description', 'goal', 'vibe', 'summary'] as const
+/**
+ * DREI FRAGEN, DANN DER ABSCHLUSS (U12, Davids Entscheidung 2026-08-10).
+ *
+ * Vorher waren es sieben Schritte, von denen vier nur uns dienten: Größe,
+ * Zweck und Ziel wurden erhoben und danach von KEINEM Codepfad je gelesen,
+ * die Beschreibung war die einzige mit Gegenwert (sie füllte die Startseite).
+ * Geblieben ist, was den ERSTEN ZUSTAND der Community formt: Name/Adresse
+ * (der Host), Kategorie (die Zeile im ersten Beitrag) und Vibe (die Farbwelt).
+ *
+ * Die Beschreibung schreibt der Owner jetzt unter /dashboard/community, und
+ * die Startseite steht bis dahin mit ihrem Rückfalltext da — beides ist ein
+ * Punkt der Willkommens-Checkliste (shared/gettingStarted.ts).
+ */
+export const WIZARD_STEPS = ['basics', 'category', 'vibe', 'summary'] as const
 export type WizardStep = (typeof WIZARD_STEPS)[number]
 
 /** Unbekannte/fehlende Werte → erster Schritt (eine manipulierte URL darf den
@@ -35,23 +48,17 @@ export type SlugCheck = 'idle' | 'checking' | 'free' | 'taken' | 'error'
 export interface WizardAnswers {
   name?: string
   slug?: string
-  purpose?: string
-  memberRange?: string
   category?: string
-  description?: string
-  goal?: string
   vibe?: string
 }
 
 /**
  * Darf dieser Schritt verlassen werden?
  *
- * Zwei bewusste Entscheidungen:
- *  - `description` ist IMMER erfüllt (überspringbar) — der Text ist ein
- *    Angebot, keine Hürde.
- *  - Ein Adress-Prüffehler ('error') blockiert NICHT: wenn unsere Prüfung
- *    ausfällt, darf das nicht wie ein besetzter Name aussehen. Belegt
- *    ('taken') und „läuft noch" ('checking') blockieren dagegen.
+ * Eine bewusste Entscheidung, die bleibt: ein Adress-Prüffehler ('error')
+ * blockiert NICHT — wenn unsere Prüfung ausfällt, darf das nicht wie ein
+ * besetzter Name aussehen. Belegt ('taken') und „läuft noch" ('checking')
+ * blockieren dagegen.
  */
 export function isStepComplete(step: WizardStep, answers: WizardAnswers, slug: SlugCheck = 'idle'): boolean {
   switch (step) {
@@ -60,11 +67,7 @@ export function isStepComplete(step: WizardStep, answers: WizardAnswers, slug: S
         && (answers.slug ?? '').length >= 3
         && slug !== 'taken'
         && slug !== 'checking'
-        && Boolean(answers.purpose)
-    case 'size': return Boolean(answers.memberRange)
     case 'category': return Boolean(answers.category)
-    case 'description': return true
-    case 'goal': return Boolean(answers.goal)
     case 'vibe': return Boolean(answers.vibe)
     case 'summary': return true
     // Ein künftiger Schritt ohne eigene Bedingung ist „noch nicht fertig“.
