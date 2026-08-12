@@ -1,63 +1,88 @@
-import { Query } from 'node-appwrite'
-import type { AdminStats } from '../../../shared/types/admin'
-import { decideCommunityAccess } from '../../../../core/shared/communityAccess'
+import type { Capability } from '../../../../core/shared/types/authz'
+import type { DashboardStatValue, PukalaniDashboardStatConfig } from '../../../../core/shared/types/dashboard-stat'
+import { resolveDashboardStats } from '../../../../core/shared/types/dashboard-stat'
+import { hasCapability } from '../../../../core/shared/authz'
+import { communityRoleHasCapability } from '../../../../core/shared/communityAuthz'
+import { configFlagEnabled, resolveDashboardPlace } from '../../../../core/shared/dashboardNav'
+import { isProductStateEnabled } from '../../../../core/shared/types/config'
+import { planAllowsProduct } from '../../../../core/server/utils/tenantPlanProducts'
 
 /**
- * Übersichts-Zahlen: Users-API total + Kennzahlen der registrierten
- * DashboardStatsContributors (comments/moderation via Nitro-Plugin, CONCEPT
- * A14) — admin kennt keine Produkt-Tabellen mehr; fehlende Layer liefern
- * schlicht keine Kennzahl (0-Default).
+ * DIE ZAHLEN DER ÜBERSICHT — EINE Route für ALLE Kacheln (U9/K2, 2026-08-11).
  *
- * AUTORISIERUNG (C1): `await requireCommunityPermission(event, 'dashboard.access')`.
- * Vorher stand hier das label-only `requirePermission` — ein Kunden-Owner hat
- * kein globales Label, bekam 403 und sah eine Übersicht aus lauter Nullen.
+ * Vorher standen hier drei fest verdrahtete Felder (`usersTotal`,
+ * `commentsTotal`, `commentsReported`) aus der Silo-Vergangenheit von
+ * `apps/comments`. Jetzt beantwortet die Route eine allgemeinere Frage: „welche
+ * Kennzahlen sieht DIESER Betrachter an DIESEM Ort — und wie lauten sie?"
+ * Die Kacheln melden die Layer selbst an (`pukalani.admin.stats`), die Zahlen
+ * liefern ihre Provider (`registerDashboardStatValueProvider`).
  *
- * WARUM `dashboard.access` und nicht enger: das sind die Zahlen DER
- * Dashboard-Startseite, und laut Rollen-Matrix (communityAuthz.ts) tragen ALLE
- * fünf Site-Rollen `dashboard.access` — sie landen also alle auf dieser Seite.
- * Eine engere Capability (z. B. `comments.moderate`) würde die leeren Kacheln
- * für Editor UND Viewer exakt reproduzieren, also den Befund nur verschieben.
- * Der Gate belegt darum die MITGLIEDSCHAFT in dieser Site; was von den Zahlen
- * jemand sehen darf, entscheidet die Kennzahl selbst (s. u.).
+ * WARUM GEBÜNDELT: die Übersicht ist die meistbesuchte Seite des Dashboards.
+ * Eine Kachel, die sich ihre Zahl selbst holt, wäre ein Request pro Kachel —
+ * bei sieben Kacheln sieben Verbindungen für eine Landeseite. Derselbe
+ * Grundsatz wie beim Aktivitäts-Vertrag (AH-3).
  *
- * NUTZERZAHL IM POOL (Audit-Befund B2, 2026-07-27): `users.list()` zählt alle
- * Konten des geteilten Appwrite-PROJEKTS — im Pool ist das die Summe aller
- * Communities, nicht „Nutzer dieser Site". Mandantengenau wäre nur ein Count
- * über `community_members` im Control Plane; das ist ein neuer Cross-Projekt-Vertrag
- * (heute gibt es dort nur den Einzel-Lookup des CommunityRoleResolvers) und für eine
- * Übersichtszahl nicht angemessen. Deshalb: im Pool KEINE Zahl (`null`) statt
- * einer fremden — die Karte entfällt im Dashboard. Silo/Einzelbetrieb bleibt
- * unverändert, dort IST das Projekt die Site.
+ * ERST FILTERN, DANN ZÄHLEN — und das ist keine Optimierung, sondern die
+ * Autorisierung. `resolveDashboardStats` ist DIESELBE pure Regel, die die
+ * Seite fürs Rendern benutzt (Ort × Capability × Produkt-Gates). Sie
+ * entscheidet hier, WELCHE Zahlen überhaupt erhoben werden — ohne das wäre die
+ * gebündelte Route eine Abkürzung um die Capability herum: sie liefe unter
+ * `dashboard.access` und gäbe einem `viewer` die Zahl der offenen Meldungen.
+ * Die Provider prüfen zusätzlich selbst, wo eine Zahl mehr verrät als die
+ * Kachel (C1) — zwei Netze, weil ein Deklarations-Fehler in einer Registry
+ * weit trägt.
  *
- * GEMELDETE KOMMENTARE (C1): offene Meldungen sind Moderations-Wissen, kein
- * Gemeingut der Community — ein `viewer` oder `editor` soll nicht ablesen
- * können, wie viel gerade in der Warteschlange liegt. Die Zahl kommt deshalb
- * nur mit `comments.moderate` (Site-Rolle ODER Operator-Label, dieselbe
- * Entscheidung wie am Gate); sonst `null` → die Kachel entfällt, passend dazu,
- * dass die Schnellmoderation auf der Seite ebenfalls verschwindet.
+ * AUTORISIERUNG (C1, unverändert): `await requireCommunityPermission(event,
+ * 'dashboard.access')`. Das ist der Gate der SEITE — alle fünf Site-Rollen
+ * tragen ihn und landen hier (communityAuthz.ts). Was jemand von den Zahlen
+ * sieht, entscheidet die Kachel, nicht der Gate; eine engere Capability hier
+ * ließe Editor und Viewer wieder vor leeren Kacheln stehen. Das `await` ist
+ * Pflicht: `requireCommunityPermission` ist bewusst asynchron.
+ *
+ * DER ORT KOMMT AUS DEM AUFGELÖSTEN KONTEXT, nicht aus der Host-Rechnung:
+ * `isTenantHost` (shared/controlCenter.ts) ist die Ausschluss-Rechnung FÜR DEN
+ * BROWSER; serverseitig liegt die Wahrheit in `useTenant(event)`. Beide Wege
+ * enden am selben Ort, aber nur einer davon kann hier nicht lügen.
+ *
+ * NUTZERZAHL IM POOL (Befund B2): die Kachel ist heute eine Deklaration mit
+ * `scope: 'operator'` (packages/admin/app/app.config.ts) und verschwindet damit
+ * auf jedem Mandanten-Host von selbst — die Regel steht jetzt an der Kachel
+ * statt als `null` im Rückgabe-Objekt. Ihr Provider zählt zusätzlich nur
+ * außerhalb des Pools; die Begründung steht dort.
  */
-export default defineEventHandler(async (event): Promise<AdminStats> => {
+export default defineEventHandler(async (event): Promise<Record<string, DashboardStatValue>> => {
   const { user, role } = await requireCommunityPermission(event, 'dashboard.access')
 
-  const tenant = useTenant(event)
-  const poolTenant = tenant?.mode === 'pool'
-  const canModerate = decideCommunityAccess({
-    capability: 'comments.moderate',
-    labels: user.labels ?? [],
-    tenantScoped: Boolean(tenant),
-    role,
-  }).allowed
-
-  const admin = createAdminClient(event)
-
-  const [users, stats] = await Promise.all([
-    poolTenant ? Promise.resolve(null) : admin.users.list({ queries: [Query.limit(1)] }),
-    collectDashboardStats(event),
-  ])
-
-  return {
-    usersTotal: users?.total ?? null,
-    commentsTotal: stats.commentsTotal ?? 0,
-    commentsReported: canModerate ? stats.commentsReported ?? 0 : null,
+  const appConfig = useAppConfig() as {
+    pukalani?: {
+      tenancy?: { enabled?: boolean, products?: Record<string, string | undefined>, quota?: { plans?: Record<string, unknown> } }
+      admin?: { stats?: PukalaniDashboardStatConfig }
+    }
   }
+  const pukalani = appConfig.pukalani
+  const tenant = useTenant(event)
+  const place = resolveDashboardPlace(pukalani?.tenancy?.enabled === true, tenant?.mode === 'pool')
+
+  // Dieselben zwei Rechte-Quellen wie in der Nav (N1) und BEWUSST getrennt:
+  // ein Betreiber-Eintrag ist nie über eine Community-Rolle erreichbar.
+  const canAsOperator = (capability: Capability) => hasCapability(user.labels ?? [], capability)
+  const canAsMember = (capability: Capability) => (role ? communityRoleHasCapability(role, capability) : false)
+
+  // Produkt-Gates wie im Layout — nur eben aus den Server-Quellen. Die
+  // Laufzeit-Flags sind 5 s gecacht (productGates.ts), der Tarif ist eine reine
+  // Config-Rechnung: beide kosten hier keine Abfrage.
+  const products = await getEffectiveProducts(event)
+  const planOrder = Object.keys(pukalani?.tenancy?.quota?.plans ?? {})
+  const poolPlan = tenant?.mode === 'pool' ? tenant.plan : undefined
+
+  const visible = resolveDashboardStats(pukalani?.admin?.stats, {
+    place,
+    canAsOperator,
+    canAsMember,
+    productOn: productKey => !productKey || isProductStateEnabled(products[productKey]),
+    planOn: planProduct => planAllowsProduct(planOrder, pukalani?.tenancy?.products, poolPlan, planProduct),
+    configOn: configFlag => configFlagEnabled(pukalani, configFlag),
+  })
+
+  return await collectDashboardStatValues(event, new Set(visible.map(stat => stat.id)))
 })

@@ -194,21 +194,19 @@
     },
     "stats": {
       "users": "Registered users",
-      "comments": "Total comments",
-      "reported": "Reported comments",
       "online": "online"
     },
     "overview": {
       "greeting": "Welcome back, {name}",
       "greetingFirst": "Welcome, {name}",
-      "delta": "+{count} in {days} days",
       "moderate": "To moderate",
       "recentActivity": "Recent activity",
       "storage": "Storage",
       "allClear": "Nothing to moderate right now.",
       "activityEmpty": "No activity yet",
       "activityEmptyHint": "This is where admin actions by you and your team show up.",
-      "viewAll": "View all"
+      "viewAll": "View all",
+      "statOf": "{value} of {limit}"
     },
     "users": {
       "name": "Name",

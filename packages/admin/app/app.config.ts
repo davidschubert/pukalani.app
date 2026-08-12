@@ -18,6 +18,32 @@ export default defineAppConfig({
     },
     admin: {
       /**
+       * KENNZAHL DES admin-LAYERS (U9/K2, 2026-08-11) — die einzige, die ihm
+       * selbst gehört. Alles andere auf der Übersicht zählt Produkt-Inhalte und
+       * wird von deren Layern angemeldet (`pukalani.admin.stats`,
+       * core/shared/types/dashboard-stat.ts).
+       *
+       * `scope: 'operator'` ist die ganze Pool-Regel (Befund B2): eine
+       * Nutzerzahl ist eine Aussage über die INSTANZ. Im Silo ist das Projekt
+       * die Site und die Zahl stimmt; auf einem Mandanten-Host gibt es sie
+       * nicht, und die Kachel verschwindet von selbst — früher stand dafür ein
+       * `null` im Rückgabe-Objekt der Route und ein Sonderfall im Markup.
+       *
+       * `users.manage` ist zugleich das Netz unter dem Link: die Kachel führt
+       * nach /dashboard/users, und dorthin führt kein Weg ohne diese
+       * Capability (Befund S5 — ein Link ins 403 lügt).
+       */
+      stats: {
+        users: {
+          scope: 'operator',
+          labelKey: 'admin.stats.users',
+          icon: 'i-ph-users',
+          to: '/dashboard/users',
+          requiredCapability: 'users.manage',
+          order: 10,
+        },
+      },
+      /**
        * DIE INSTANZ-SICHT IM COMMUNITY-HUB (F51 Paket 2, 2026-08-07 — Davids
        * Ebenen-Entscheidung, DECISION-LOG „Community-Settings-Hub": Pool-Owner
        * sehen die Community-Sicht, System entfällt im Pool; das SILO zeigt die

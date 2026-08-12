@@ -2,7 +2,7 @@
 import type { Models } from 'node-appwrite'
 import type {
   AdminAnalytics,
-  AdminStats,
+  AdminStatsResponse,
   AuditLogEntry,
   AuditLogListResponse,
   ReportedCommentsSummary,
@@ -11,6 +11,10 @@ import type {
 import type { Capability } from '../../../../core/shared/types/authz'
 import { resolveAdminNotices } from '../../../../core/shared/types/admin-notice'
 import type { PukalaniAdminNoticeConfig } from '../../../../core/shared/types/admin-notice'
+import { resolveDashboardStats } from '../../../../core/shared/types/dashboard-stat'
+import type { PukalaniDashboardStatConfig } from '../../../../core/shared/types/dashboard-stat'
+import { configFlagEnabled, resolveDashboardPlace } from '../../../../core/shared/dashboardNav'
+import { isProductStateEnabled } from '../../../../core/shared/types/config'
 import { isArrivalGreeting } from '../../../shared/greeting'
 
 // BEWUSST ohne `requiredCapability`: die Übersicht ist die Landeseite JEDER
@@ -88,31 +92,85 @@ const canManageUsers = computed(() => can('users.manage'))
 const notices = computed(() =>
   resolveAdminNotices((appConfig.pukalani as { admin?: { notices?: PukalaniAdminNoticeConfig } }).admin?.notices, can))
 
-// --- Kennzahlen + Chart (SSR) -------------------------------------------------
-const { data: stats, refresh: refreshStats } = await useFetch<AdminStats>('/api/admin/stats')
+// --- Kennzahlen (Registry, SSR) ----------------------------------------------
+// U9/K2: die Kacheln kommen aus `pukalani.admin.stats` — jeder Layer meldet
+// seine eigene an (core/shared/types/dashboard-stat.ts). Vorher standen hier
+// drei fest verdrahtete Zahlen aus der Silo-Vergangenheit von apps/comments;
+// dem Owner einer Beiträge-, Termine- oder Kurs-Community blieb davon genau
+// eine, und die zählte ein Produkt, das er womöglich gar nicht gebucht hat.
+//
+// EINE Route für alle Zahlen (Performance): die Übersicht ist die
+// meistbesuchte Seite des Dashboards, ein Fetch je Kachel wären sieben.
+const { data: stats, refresh: refreshStats } = await useFetch<AdminStatsResponse>('/api/admin/stats')
 
-const days = ref(30)
-const { data: analytics, refresh: refreshAnalytics } = await useFetch<AdminAnalytics>('/api/admin/analytics', {
-  query: computed(() => ({ days: days.value })),
-})
+// Dieselbe Filter-Trias wie die Reiter des Community-Hubs (F51) und die
+// Sidebar-Module — Ort × Capability × Produkt-Gates. Der SERVER rechnet sie
+// mit derselben puren Funktion noch einmal und erhebt nur, was hier auch
+// gerendert würde; hier entscheidet sie über Reihenfolge, Wort und Ziel.
+const place = resolveDashboardPlace(
+  (appConfig.pukalani as { tenancy?: { enabled?: boolean } }).tenancy?.enabled === true,
+  useIsTenantHost(),
+)
+const runtimeFlags = useRuntimeFlags()
+const { planAllows } = useTenantPlan()
+const declaredStats = computed(() => resolveDashboardStats(
+  (appConfig.pukalani as { admin?: { stats?: PukalaniDashboardStatConfig } }).admin?.stats,
+  {
+    place,
+    canAsOperator: (capability: Capability) => userHasCapability(auth.user, capability),
+    canAsMember: (capability: Capability) => siteCaps.value.has(capability),
+    productOn: productKey => !productKey || isProductStateEnabled(runtimeFlags.value.products[productKey]),
+    planOn: planProduct => planAllows(planProduct),
+    configOn: configFlag => configFlagEnabled(appConfig.pukalani, configFlag),
+  },
+))
 
-// `null` = diese Zahl wird für diesen Aufrufer bewusst nicht ausgewiesen — die
-// Karte entfällt dann ganz, statt eine fremde oder eine 0 zu zeigen:
-//  - `usersTotal` im Pool (Projekt-Nutzer ≠ Mitglieder DIESER Site, Befund B2)
-//  - `commentsReported` ohne `comments.moderate` (Moderations-Wissen, C1)
-const cards = computed(() => [
-  ...(stats.value?.usersTotal !== null && stats.value?.usersTotal !== undefined
-    ? [{ label: t('admin.stats.users'), value: stats.value.usersTotal, delta: analytics.value?.usersInRange ?? 0, icon: 'i-ph-users', to: localePath('/dashboard/users') }]
-    : []),
-  { label: t('admin.stats.comments'), value: stats.value?.commentsTotal ?? 0, delta: analytics.value?.commentsInRange ?? 0, icon: 'i-ph-chat-circle', to: localePath('/dashboard/comments') },
-  ...(stats.value?.commentsReported !== null && stats.value?.commentsReported !== undefined
-    ? [{ label: t('admin.stats.reported'), value: stats.value.commentsReported, delta: 0, icon: 'i-ph-flag', to: localePath({ path: '/dashboard/comments', query: { status: 'reported' } }) }]
-    : []),
-])
+/**
+ * WAS KEINE ZAHL HAT, HAT KEINE KACHEL. Das ersetzt das frühere `null` je Feld
+ * und sagt dasselbe: „diese Zahl wird für diesen Aufrufer bewusst nicht
+ * ausgewiesen" — der Provider liefert sie gar nicht erst (Nutzerzahl im Pool,
+ * Mitgliederzahl ohne Auskunft der Naht). Lieber keine Karte als eine fremde
+ * oder eine erfundene 0.
+ */
+const cards = computed(() => declaredStats.value.flatMap((stat) => {
+  const measured = stats.value?.[stat.id]
+  if (!measured) return []
+  const empty = measured.value !== null && measured.value < (stat.emptyBelow ?? 1)
+  return [{
+    ...stat,
+    measured,
+    to: stat.to ? localePath({ path: stat.to, ...(stat.query ? { query: stat.query } : {}) }) : undefined,
+    hintKey: measured.hintKey ?? (empty ? stat.emptyHintKey : undefined),
+    hintCount: measured.hintCount,
+  }]
+}))
 
 const cardGridClass = computed(() => {
   if (cards.value.length >= 3) return 'sm:grid-cols-3'
   return cards.value.length === 2 ? 'sm:grid-cols-2' : ''
+})
+
+// --- Chart (nur wo seine Achsen stimmen) --------------------------------------
+/**
+ * ORT-GATE STATT LÖSCHUNG (U9/K2): das Diagramm hat zwei Achsen, Nutzer und
+ * Kommentare. Die NUTZER-Achse zählt `users.list()`, also die Konten des
+ * geteilten Appwrite-PROJEKTS — im Pool die Summe aller Communities, nicht die
+ * Mitglieder DIESER (Befund B2). Die Route weiß das und liefert dort
+ * `usersInRange: null` mit leeren Balken; übrig blieb ein Diagramm mit einer
+ * toten Achse und einer Legende, die auf null zeigt.
+ *
+ * Es KANN im Pool also nicht ehrlich sein, ohne ein anderes Diagramm zu werden.
+ * Deshalb erscheint es nur noch dort, wo das Projekt die Site IST
+ * (`single-tenant`: Silo, Betreiber-Konsole, Playground) — und die Anfrage
+ * unterbleibt dort, wo es nicht erscheint: `/api/admin/analytics` paginiert
+ * über den ganzen Zeitraum und ist die teuerste Abfrage dieser Seite.
+ */
+const chartHere = place === 'single-tenant'
+const days = ref(30)
+const { data: analytics, refresh: refreshAnalytics } = await useFetch<AdminAnalytics>('/api/admin/analytics', {
+  query: computed(() => ({ days: days.value })),
+  immediate: chartHere,
+  server: chartHere,
 })
 
 // --- Online-Presence (live) ---------------------------------------------------
@@ -206,8 +264,11 @@ useRealtimeRows<Models.Row & { communityId?: string }>(config.public.appwriteDat
   clearTimeout(commentsTimer)
   commentsTimer = setTimeout(() => {
     void refreshStats()
-    void refreshAnalytics()
-    // refresh() würde die unterdrückte Anfrage nachholen — nur mit Capability.
+    // `refresh()` würde die unterdrückte Anfrage NACHHOLEN — beide Aufrufe
+    // brauchen deshalb dieselbe Bedingung wie ihr `immediate`, sonst holt sich
+    // die Seite über den Umweg Realtime genau das zurück, was sie bewusst
+    // nicht geladen hat (das Diagramm im Pool, die Meldungen ohne Capability).
+    if (chartHere) void refreshAnalytics()
     if (canModerateComments.value) void refreshReported()
   }, 500)
 }, { where: payload => rowBelongsToHost(payload, tenantId.value) })
@@ -269,22 +330,35 @@ onScopeDispose(() => {
           </div>
         </UCard>
 
-        <!-- KPIs -->
+        <!-- Kennzahlen (Registry — jede Kachel gehört dem Layer, der sie
+             angemeldet hat; die Zahlen kommen gebündelt aus EINER Route) -->
         <div class="grid gap-4" :class="cardGridClass" data-stat-cards>
-          <UCard v-for="card in cards" :key="card.label">
-            <NuxtLink :to="card.to" class="flex items-center gap-3">
+          <UCard v-for="card in cards" :key="card.id" :data-stat="card.id">
+            <!-- Eine Kachel OHNE `to` ist reine Anzeige — ein Link ins Nichts
+                 wäre schlechter als kein Link. -->
+            <component :is="card.to ? 'NuxtLink' : 'div'" :to="card.to" class="flex items-center gap-3">
               <UIcon :name="card.icon" class="size-8 shrink-0 text-primary" />
               <div class="min-w-0">
-                <p class="text-2xl font-bold tabular-nums">{{ card.value }}</p>
-                <p class="truncate text-sm text-muted">{{ card.label }}</p>
-                <p v-if="card.delta > 0" class="text-xs text-success">{{ t('admin.overview.delta', { count: card.delta, days }) }}</p>
+                <!-- Zahl ODER Wort: der Plan-Zustand ist die Antwort auf seine
+                     Frage, aber keine Zahl — er kommt als i18n-Schlüssel des
+                     liefernden Layers (A14). -->
+                <p v-if="card.measured.value !== null" class="text-2xl font-bold tabular-nums">
+                  {{ card.measured.limit
+                    ? t('admin.overview.statOf', { value: card.measured.value, limit: card.measured.limit })
+                    : card.measured.value }}
+                </p>
+                <p v-else-if="card.measured.textKey" class="truncate text-lg font-bold">{{ t(card.measured.textKey) }}</p>
+                <p class="truncate text-sm text-muted">{{ t(card.labelKey) }}</p>
+                <p v-if="card.hintKey" class="truncate text-xs text-primary">
+                  {{ card.hintCount === undefined ? t(card.hintKey) : t(card.hintKey, card.hintCount) }}
+                </p>
               </div>
-            </NuxtLink>
+            </component>
           </UCard>
         </div>
 
-        <!-- Chart -->
-        <UCard v-if="analytics">
+        <!-- Chart — nur wo seine Nutzer-Achse die Site meint (s. `chartHere`) -->
+        <UCard v-if="chartHere && analytics">
           <template #header>
             <div class="flex flex-wrap items-center justify-between gap-2">
               <h2 class="font-semibold">{{ t('admin.analytics.title') }}</h2>

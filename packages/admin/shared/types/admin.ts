@@ -1,3 +1,5 @@
+import type { DashboardStatValue } from '../../../core/shared/types/dashboard-stat'
+
 /** Auf sichere Felder reduzierter Appwrite-User für die Admin-UI */
 export interface AdminUserRow {
   $id: string
@@ -96,15 +98,17 @@ export interface AdminUserDetailResponse {
   commentsTotal: number
 }
 
-export interface AdminStats {
-  /** null = im Pool bewusst nicht ausgewiesen (Projekt-Nutzer ≠ Site-Mitglieder,
-   *  Audit-Befund B2) — die Karte entfällt dann. */
-  usersTotal: number | null
-  commentsTotal: number
-  /** null = ohne `comments.moderate` bewusst nicht ausgewiesen (offene Meldungen
-   *  sind Moderations-Wissen, C1) — die Karte entfällt dann. */
-  commentsReported: number | null
-}
+/**
+ * Antwort von `GET /api/admin/stats` (U9/K2, 2026-08-11): die Zahlen zu den
+ * Kacheln, die dieser Betrachter an diesem Ort sieht — Kachel-Id → Wert.
+ *
+ * Vorher standen hier drei feste Felder (`usersTotal`, `commentsTotal`,
+ * `commentsReported`). Die Kacheln kommen jetzt aus `pukalani.admin.stats`
+ * (core/shared/types/dashboard-stat.ts), die Zahlen aus den Providern der
+ * Layer. WAS FEHLT, HAT KEINE KACHEL — das frühere `null` je Feld sagt jetzt
+ * die Abwesenheit des Eintrags.
+ */
+export type AdminStatsResponse = Record<string, DashboardStatValue>
 
 /** Ein Tag in der Analytics-Zeitreihe */
 export interface AnalyticsPoint {

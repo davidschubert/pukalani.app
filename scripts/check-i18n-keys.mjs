@@ -146,6 +146,24 @@ const FIELDS = [
     keys: p => arr(p.admin?.communityTabs).flatMap(t => str(t?.labelKey)),
   },
   {
+    // U9/K2 (2026-08-11): die Kennzahlen-Registry der Dashboard-Übersicht.
+    // Dieselbe Klasse Versprechen wie die Reiter — die SEITE gehört admin, die
+    // Texte gehören den Layern, die ihre Kachel anmelden (posts, events,
+    // courses, media, comments, onboarding). OBJEKT-Map wie `chrome.nav`:
+    // `false` = abgeschaltet, wird nie gerendert und braucht kein Label.
+    pfad: 'pukalani.admin.stats.<id>.labelKey',
+    quelle: 'packages/admin/app/pages/dashboard/index.vue',
+    keys: p => Object.values(p.admin?.stats ?? {}).flatMap(s => (s ? str(s.labelKey) : [])),
+  },
+  {
+    // Die Zusatzzeile im Leerzustand („Jemanden einladen") — derselbe
+    // Renderer, dieselbe Registry, deshalb ein eigener Eintrag statt einer
+    // stillen Mitnahme.
+    pfad: 'pukalani.admin.stats.<id>.emptyHintKey',
+    quelle: 'packages/admin/app/pages/dashboard/index.vue',
+    keys: p => Object.values(p.admin?.stats ?? {}).flatMap(s => (s ? str(s.emptyHintKey) : [])),
+  },
+  {
     pfad: 'pukalani.billing.plans[].labelKey',
     quelle: 'packages/billing/app/components/BillingPricingTable.vue · BillingCompareTable.vue · pages/dashboard/billing.vue',
     keys: p => arr(p.billing?.plans).flatMap(pl => str(pl?.labelKey)),
