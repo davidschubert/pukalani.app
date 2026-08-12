@@ -199,11 +199,14 @@
     },
     "overview": {
       "greeting": "Willkommen zurück, {name}",
+      "greetingFirst": "Willkommen, {name}",
       "delta": "+{count} in {days} Tagen",
       "moderate": "Zu moderieren",
       "recentActivity": "Letzte Aktivität",
       "storage": "Speicher",
-      "allClear": "Nichts zu moderieren 🎉",
+      "allClear": "Zurzeit nichts zu moderieren.",
+      "activityEmpty": "Noch keine Aktivität",
+      "activityEmptyHint": "Hier steht, was du und dein Team in der Verwaltung tut.",
       "viewAll": "Alle ansehen"
     },
     "users": {

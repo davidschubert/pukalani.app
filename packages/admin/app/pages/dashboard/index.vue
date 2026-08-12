@@ -11,6 +11,7 @@ import type {
 import type { Capability } from '../../../../core/shared/types/authz'
 import { resolveAdminNotices } from '../../../../core/shared/types/admin-notice'
 import type { PukalaniAdminNoticeConfig } from '../../../../core/shared/types/admin-notice'
+import { isArrivalGreeting } from '../../../shared/greeting'
 
 // BEWUSST ohne `requiredCapability`: die Übersicht ist die Landeseite JEDER
 // Site-Rolle (alle fünf tragen `dashboard.access`, communityAuthz.ts). Gegated
@@ -29,6 +30,24 @@ const { formatRelativeTime } = useFormatRelativeTime()
 useHead({ title: () => t('admin.nav.overview') })
 
 const firstName = computed(() => auth.user?.name?.split(' ')[0] || t('ui.account'))
+/**
+ * „Willkommen zurück" nur für Wiederkehrer (Trichter-G2). Die Regel steht pur
+ * in shared/greeting.ts; die Quelle ist das Konto-Alter aus dem SSR-Payload,
+ * also ohne zusätzliche Abfrage.
+ *
+ * `useState` statt `computed`, weil `Date.now()` im Spiel ist: der Server legt
+ * den Wert fest und der Client übernimmt ihn aus dem Payload, statt ihn beim
+ * Hydrieren neu zu rechnen — genau an der Fenstergrenze (oder bei einer
+ * verstellten Uhr im Browser) stünden sonst zwei verschiedene Sätze in
+ * demselben Absatz. Dieselbe Sorge wie beim Datum eine Zeile weiter unten,
+ * nur mit der billigeren Kur.
+ */
+const arrival = useState('admin-overview-arrival', () => isArrivalGreeting(auth.user?.$createdAt, Date.now()))
+const greeting = computed(() => (
+  arrival.value
+    ? t('admin.overview.greetingFirst', { name: firstName.value })
+    : t('admin.overview.greeting', { name: firstName.value })
+))
 // Datum erst clientseitig füllen: SSR rendert in der Server-TZ, der Client in
 // der lokalen — um Mitternacht/über TZ-Grenzen liefe das auseinander und löste
 // einen Hydration-Mismatch aus.
@@ -224,7 +243,7 @@ onScopeDispose(() => {
       <div class="mx-auto flex w-full flex-col gap-4 sm:gap-6 lg:max-w-5xl">
         <!-- Begrüßung -->
         <div>
-          <h1 class="text-xl font-semibold">{{ t('admin.overview.greeting', { name: firstName }) }}</h1>
+          <h1 class="text-xl font-semibold">{{ greeting }}</h1>
           <p class="text-sm text-muted">{{ today }}</p>
         </div>
 
@@ -331,7 +350,15 @@ onScopeDispose(() => {
                 <ULink :to="localePath('/dashboard/admin')" class="text-sm text-primary hover:underline">{{ t('admin.overview.viewAll') }}</ULink>
               </div>
             </template>
-            <p v-if="!auditList.length" class="text-sm text-muted">—</p>
+            <!-- S5: der nackte Gedankenstrich war weder übersetzt noch als
+                 leerer Zustand erkennbar. CoreEmptyState OHNE Aktion: hier gibt
+                 es nichts anzulegen, das Protokoll füllt sich von selbst. -->
+            <CoreEmptyState
+              v-if="!auditList.length"
+              icon="i-ph-clock-counter-clockwise"
+              :title="t('admin.overview.activityEmpty')"
+              :description="t('admin.overview.activityEmptyHint')"
+            />
             <ul v-else class="space-y-2.5">
               <li v-for="e in auditList" :key="e.$id" class="flex items-center gap-2 text-sm">
                 <UserAvatar :user="{ name: e.actorName, prefs: { avatarUrl: e.actorAvatarUrl } }" size="2xs" />

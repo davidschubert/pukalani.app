@@ -199,11 +199,14 @@
     },
     "overview": {
       "greeting": "Welcome back, {name}",
+      "greetingFirst": "Welcome, {name}",
       "delta": "+{count} in {days} days",
       "moderate": "To moderate",
       "recentActivity": "Recent activity",
       "storage": "Storage",
-      "allClear": "Nothing to moderate 🎉",
+      "allClear": "Nothing to moderate right now.",
+      "activityEmpty": "No activity yet",
+      "activityEmptyHint": "This is where admin actions by you and your team show up.",
       "viewAll": "View all"
     },
     "users": {
