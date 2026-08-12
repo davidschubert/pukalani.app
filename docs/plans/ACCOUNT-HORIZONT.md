@@ -1,8 +1,8 @@
 # Account-Horizont — ein Konto, das überall gilt
 
 **Stand: 2026-08-11 · Status: beschlossen (Davids Entscheidungen, s. DECISION-LOG
-2026-08-11), noch nicht gebaut.** Dieses Dokument trägt die Tiefe; die
-Arbeitsliste bleibt OPEN-ITEMS.md (Punkte AH-1 … AH-6).
+2026-08-11), teilweise gebaut (AH-1, AH-5, AH-7).** Dieses Dokument trägt die
+Tiefe; die Arbeitsliste bleibt OPEN-ITEMS.md (Punkte AH-1 … AH-7).
 
 ## Die Vision (Davids Worte, 2026-08-11)
 
@@ -109,6 +109,68 @@ an, Mitwirkende über normale Rollen (kein zweiter Konten-Pool nötig — Pool
 liefert das per Konstruktion). `demo.pukalani.app` bekommt alle FERTIGEN
 Produkte (reine Konfiguration). „Fertig → freigeschaltet" läuft über den
 bestehenden Produkt-Katalog (product_catalog, Plan-Gates).
+
+### AH-7 · Der konto-weite @handle (GEBAUT 2026-08-11)
+
+Davids Entscheidung (DECISION-LOG 2026-08-11, Punkt 11): **eine Pukalani-ID =
+EIN Handle, überall.** Bis dahin galt ein Name je Community — derselbe Mensch
+konnte in A `@david` und in B `@dave` heissen, und zwei verschiedene Menschen
+konnten in A und B beide `@david` sein.
+
+**Datenmodell.** Neue Tabelle `account_handles` (Migration **system-031**,
+additiv — muss VOR dem Code-Deploy laufen): `userId`, `handle`, `handleLower`,
+`status`, `changedAt`. Der eindeutige Index trägt **`handleLower` allein** und
+damit keinen Mandanten mehr — die bewusste Ausnahme von der Pool-Unique-Regel,
+weil ein Handle ab jetzt eine Eigenschaft des KONTOS ist (wie die E-Mail) und
+kein tenant-relativer Schlüssel. Historien-Zeilen (`status: 'former'`) bleiben
+wie gehabt: der alte Name bleibt belegt UND löst weiter auf dieselbe Person auf.
+
+**Übernahme-Regel, wörtlich** (pure Rechnung in
+`packages/core/shared/handleAdoption.ts`, unit-getestet, ausgeführt als letzter
+Schritt derselben Migration): *Je Konto ist der ÄLTESTE eigene AKTIVE
+Community-Handle der Kandidat. Die Kandidaten werden nach derselben Anlage-Zeit
+vergeben. Ist `handleLower` global schon vergeben, bekommt das Konto KEINEN
+Eintrag — es wählt später selbst im Formular.* Es wird nichts umbenannt und
+nichts gelöscht; `community_handles` bleibt vollständig erhalten.
+
+**Warum leer ausgehen und kein `@david2`:** eine automatische Umbenennung wäre
+die schlechteste Antwort — der Mensch fände einen Namen vor, den er nie gewählt
+hat, und erführe nichts davon. Ohne Eintrag vergibt `ensureAccountHandle` beim
+nächsten Öffnen des Profils einen Vorschlag aus dem Anzeigenamen, oder er wählt
+selbst.
+
+**Auflösungs-Kette** (`core/server/utils/handles.ts`): Konto-Register zuerst,
+`community_handles` als Lese-Fallback für alles, was dort keinen Besitzer hat.
+Der Preis ist benannt: ein alter Beitrag, dessen `@david` in seiner Community
+jemand anderem gehörte, zeigt jetzt auf den globalen Gewinner. Klein gehalten
+durch „ältester Handle je Konto"; die Gegenrichtung hätte den Fehler nur
+verschoben und dazu die Zusage gebrochen, dass `@david` überall derselbe ist.
+
+**Die Grenze musste mitwandern — und brauchte eine Schicht mehr.** Vorher hielten
+zwei Dinge (Mandanten-Filter der Datentür + `read(label:<communityId>)`). Der
+Filter fällt weg. Die Row-Permissions allein reichen NICHT: eine Konto-Zeile
+trägt eine Lese-Rolle je Mitgliedschaft, ein LESER trägt Labels mehrerer
+Communities, und Appwrite fragt nicht, auf welchem Host er steht — ohne weiteres
+Zutun stünden A-Mitglieder im Erwähnungs-Menü von B (beim Bau am Beweis
+aufgefallen, nicht in Betrieb). Deshalb jetzt: **Mitglieder-Gate** auf
+`/api/handles/search` (die Umkehrung der Vor-AH-7-Begründung, die genau diesen
+Fall vorgesehen hatte) **plus** Publikums-Filter auf die aktuelle Community,
+und derselbe Filter im Code bei der Auflösung (Admin-Client). Das Publikum wird
+gepflegt in `accountHandlePermissions` (Vergabe), `ensureAccountHandleAudience`
+(erstes Auftauchen) und `revokeCommunityLabel` (Entzug — der Name bleibt, die
+Sicht geht).
+
+**Oberfläche.** `/profile` bekommt das echte Formular; der Ersatztext samt
+`onboarding.account.profile.handleNote/handleAction` ist entfallen.
+`UserHandleForm` hängt an `GET`/`PATCH /api/account/handle` (core, damit auch
+Silo-Apps sie haben) — die alten `GET`/`PATCH /api/handles/me` sind ENTFERNT.
+`/api/handles/search` bleibt, jetzt gegen das Konto-Register.
+
+**Offen (Folgearbeit).** Die Live-Beweise sind auf die neuen Pfade und die neue
+Semantik umgebaut, aber seither NICHT gefahren (kein lebendes Appwrite in der
+Bau-Sitzung) — inklusive der drei Gegenproben, die im Kopf von
+`verify-handle-search-boundary.mjs` benannt sind. Ohne sie ist ihr Grün nur ein
+Grün.
 
 ### AH-6 · F3: comments → Pool
 

@@ -764,11 +764,40 @@ Vollständiges Konzept: docs/CONCEPT.md
   Knoten geht durch seinen Handler, dessen Rückgabe wörtlich übernommen wird.
   `@handle` selbst ist gewöhnlicher Text (`@` steht in keiner Maskierungs-
   liste) — das PRODUKT hängt also am Text, das Menü ist nur Bedienhilfe.
-  Handles: je Community eindeutig, Tabelle `community_handles` (system-029,
-  Unique `(communityId, handleLower)`), Zugriff in core — dasselbe Muster wie
-  `notify()`. Alte Handles bleiben über eine HISTORIEN-Zeile belegt, damit
-  alte Erwähnungen weiter auf dieselbe Person auflösen. Angezeigt wird
+  Handles sind seit AH-7 (2026-08-11, Davids Entscheidung: eine Pukalani-ID =
+  EIN Handle überall) KONTO-weit: Tabelle `account_handles` (system-031, Unique
+  auf `handleLower` ALLEIN — global, ohne Mandanten-Spalte), Dienst
+  `core/server/utils/accountHandles.ts`, Routen `GET`/`PATCH
+  /api/account/handle` (in `controlApiPrefixes`, EXAKTER Pfad wie
+  `/api/account/activity`). Zugriff in core, Tabelle in system — dasselbe
+  Muster wie `notify()`. Alte Handles bleiben über eine HISTORIEN-Zeile belegt,
+  damit alte Erwähnungen weiter auf dieselbe Person auflösen. Angezeigt wird
   hervorgehoben, NICHT verlinkt (öffentliche Profile gibt es nicht).
+  `community_handles` (system-029, je Community eindeutig) LEBT als ALT-BESTAND
+  weiter: dort wird nichts mehr vergeben, aber gelesen — die Auflösungs-Kette
+  in `core/server/utils/handles.ts` fragt ZUERST das Konto-Register und erst
+  für den Rest den Alt-Bestand (sonst liefen Erwähnungen in Bestands-Beiträgen
+  unbemerkt ins Leere). Kollisionsregel der Übernahme (Migration 031, pure +
+  getestet in `core/shared/handleAdoption.ts`): je Konto der ÄLTESTE eigene
+  aktive Handle, vergeben in dieser Reihenfolge — wer zuerst kam, behält; der
+  Zweite bekommt KEINEN Eintrag und wählt neu (nie eine automatische
+  Umbenennung).
+  DREI DINGE, DIE MAN NICHT VEREINFACHEN DARF: (1) Das LESE-PUBLIKUM einer
+  Konto-Zeile ist eine LISTE von Row-Permissions, eine
+  `read(label:<communityId>)` je Mitgliedschaft
+  (`core/shared/accountHandleAudience.ts`) — angelegt bei der Vergabe,
+  nachgetragen beim ersten Auftauchen (`ensureAccountHandleAudience`), entzogen
+  in `revokeCommunityLabel`. Sie ersetzt die weggefallene `communityId`-Spalte.
+  (2) Das Erwähnungs-MENÜ (`/api/handles/search`) braucht seit AH-7 ein
+  MITGLIEDER-GATE **und** einen Publikums-Filter: die Row-Permissions allein
+  reichen NICHT, weil ein LESER Labels mehrerer Communities trägt und Appwrite
+  nicht fragt, auf welchem Host er steht — ohne Gate stünden A-Mitglieder im
+  Menü von B (beim Bau von AH-7 am Beweis aufgefallen). (3) Die AUFLÖSUNG
+  (`resolveHandleOwners`, Admin-Client) filtert dieselbe Zugehörigkeit im Code;
+  ohne sie wäre ein Beitrag ein Fernzünder für Benachrichtigungen an fremde
+  Konten. Beweis: `packages/core/scripts/verify-handle-search-boundary.mjs` —
+  nach dem AH-7-Umbau steht seine GEGENPROBE noch aus (Liste im Kopf der
+  Datei).
   `@tiptap/extension-mention` gehört EXAKT auf `3.27.1` gepinnt (Katalog, kein
   Caret): ungepinnt löst pnpm neu auf und der Lockfile bewegt sich um 1898
   Zeilen statt um 6. Messung, Optionen, Nebenbefunde:
