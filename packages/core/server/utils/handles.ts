@@ -1,125 +1,79 @@
 import { Query } from 'node-appwrite'
 import type { H3Event } from 'h3'
-import {
-  HANDLE_MAX_LENGTH,
-  handleCandidate,
-  isValidHandle,
-  normalizeHandle,
-  suggestHandleBase,
-} from '../../shared/handles'
+import { HANDLE_MAX_LENGTH, normalizeHandle } from '../../shared/handles'
 import { HANDLES_TABLE, type CommunityHandleRow } from '../../shared/types/handle'
+import { accountHandleOwners, accountHandlesForUsers } from './accountHandles'
 
 /**
- * HANDLES — der Zugriff auf `community_handles` (Tabelle: system-029).
+ * DIE AUFLÖSUNGS-KETTE (AH-7, 2026-08-11) — von `@name` zum Menschen.
  *
- * Dass der Zugriff in core liegt und die Tabelle in system, ist kein Bruch von
- * A14, sondern das bestehende Muster: `notify()` lebt genauso in core, während
- * `notifications` von system-003 kommt. Core BESITZT keine Tabelle — es
- * benutzt eine, die auf jeder Instanz existiert. Die Alternative wäre gewesen,
- * die Handles in `posts` zu legen; dann hätte `comments` von `posts` abhängen
- * müssen, sobald dort auch erwähnt wird — genau die Kreuz-Abhängigkeit, die
- * A14 verbietet.
+ * Seit AH-7 gehört ein Handle dem KONTO (`account_handles`, Migration
+ * system-031, Dienst nebenan in accountHandles.ts). `community_handles`
+ * (system-029) ist ALT-BESTAND: dort wird nichts mehr vergeben, die Zeilen
+ * bleiben aber stehen. Diese Datei ist die einzige Stelle, die beides kennt:
  *
- * ── WARUM ALLES ÜBER `as: 'operator'` LÄUFT ────────────────────────────────
- * Die Tabelle trägt bewusst KEINE Tabellen-Rechte (Migration system-029), also
- * kann ein Session-Client dort nichts anlegen. Der Handle ist eine Zusage des
- * Systems („du bist ab jetzt erwähnbar"), keine Zeile, die ein Browser selbst
- * schreiben können soll — sonst könnte jemand die 30-Tage-Sperrfrist und die
- * Reservierungs-Liste umgehen, indem er direkt schreibt.
+ *   1. KONTO-Register — die Wahrheit. Global eindeutig, Historien-Zeilen
+ *      inklusive (ein früherer Name zeigt weiter auf denselben Menschen).
+ *   2. COMMUNITY-Alt-Bestand — nur für das, was Schritt 1 NICHT beantwortet.
  *
- * ── UND WARUM `actor: 'operator'`, obwohl ein Mensch handelt ───────────────
- * Zwei Gründe, beide bewusst (die Regel aus CLAUDE.md lautet, bei einer
- * Operator-Klinke IMMER zu prüfen, ob `actor` gesetzt gehört — hier lautet die
- * Antwort nein):
- *  1. EIN HANDLE IST KEIN INHALT. M13 friert Inhalte ein (Kommentare,
- *     Beiträge, Stimmen) und lässt persönliche Einstellungen sowie
- *     Owner-Einstellungen bewusst offen. Seinen eigenen Namen zu ändern gehört
- *     in die zweite Gruppe; ein `actor: 'member'` hätte das ohne Not gesperrt.
- *  2. KEIN BEITRITT IM BEITRITT. `ensureCommunityHandle` läuft als NEBENwirkung
- *     eines anderen Schreibvorgangs, der über dieselbe Datentür geht — mit
- *     `actor: 'member'` würde `tenantDb().create` dort ein zweites Mal
- *     `joinCommunity('contribution')` auslösen, mitten im ersten.
- * Die Autorisierung („darf dieser Mensch das?") passiert deshalb VOR dem
- * Aufruf, in der Route — nicht an der Türklinke.
+ * ── WARUM DAS KONTO ZUERST KOMMT, UND WAS DAS KOSTET ──────────────────────
+ * Ein Name kann in beiden Registern stehen und dort auf VERSCHIEDENE Menschen
+ * zeigen: in Community X hiess A einmal `@david`, global hat B den Namen
+ * gewonnen (Übernahme-Regel „wer zuerst kam, behält", shared/handleAdoption.ts).
+ * Ein alter Beitrag in X meinte A, aufgelöst wird jetzt B.
  *
- * ── UND WARUM DIE ZUGEHÖRIGKEIT TROTZDEM HIER STEHT (H1, 2026-08-05) ───────
- * Der Satz eine Zeile höher war ein Versprechen an die Disziplin, und die
- * Disziplin hat es nicht gehalten: `GET /api/handles/me` prüfte nur die
- * SITZUNG. Gemessen am 2026-08-05 bekam ein Pool-Konto ohne jede Zugehörigkeit
- * auf einem fremden Community-Host eine Zeile — es wurde kein Mitglied (kein
- * Label), belegte den Namen dort aber DAUERHAFT (die Historien-Zeile gibt ihn
- * nie frei) und stand im Erwähnungs-Menü der fremden Community. `@vorstand`
- * war damit pool-weit automatisiert wegschnappbar.
+ * Das ist die BEWUSSTE Wahl (Davids Entscheidung: eine Pukalani-ID, ein Handle
+ * überall — der Name bedeutet ab jetzt überall dieselbe Person), und der Preis
+ * ist klein gehalten: die Übernahme hat jedem Konto genau seinen ÄLTESTEN
+ * Namen mitgegeben, der Alt-Bestand greift also nur noch für Namen, die im
+ * Konto-Register gar keinen Besitzer haben — Kollisions-Verlierer und Menschen,
+ * die seither gegangen sind. Die Gegenrichtung (Community zuerst) hätte den
+ * Fehler nur verschoben und dazu die Zusage gebrochen, dass `@david` überall
+ * derselbe ist.
  *
- * Die Wache sitzt deshalb in den beiden SCHREIB-Funktionen, nicht (nur) in den
- * zwei heutigen Routen: dasselbe Muster wie beim A5-Beitritt, den die Datentür
- * abfängt statt zwanzig Routen. `packages/posts/.../posts/index.post.ts` ruft
- * `ensureCommunityHandle` ebenfalls — eine Route-only-Wache hätte diesen
- * Aufrufer und jeden künftigen wieder der Erinnerung überlassen.
- *
- * Zwei Antworten auf dasselbe Nein, weil zwei verschiedene Dinge gefragt
- * wurden: die VERGABE ist eine Nebenwirkung und schweigt (`null`, sie wirft
- * ohnehin nie), der WECHSEL ist eine Absicht und bekommt einen Grund (403
- * `not_a_member`).
+ * Beide Schritte sind mandantengebunden: Schritt 1 filtert am Publikum der
+ * Zeile (accountHandleOwners), Schritt 2 an der Datentür. Eine Erwähnung
+ * erreicht nie jemanden ausserhalb DIESER Community.
  */
 
-/** Wie viele Kandidaten (`david`, `david2`, …) probiert die Vergabe? */
-const MAX_ASSIGN_ATTEMPTS = 12
-
-function hasCode(error: unknown, code: number): boolean {
-  return typeof error === 'object' && error !== null && 'code' in error && error.code === code
-}
-
-/** Der Zugang für ALLE Handle-Operationen — siehe Kopf. */
-function handleDb(event: H3Event) {
+/** Der Zugang zum ALT-Bestand — Begründung für die Operator-Klinke unten. */
+function legacyDb(event: H3Event) {
+  /**
+   * `as: 'operator'` + `actor: 'operator'` unverändert aus der Zeit vor AH-7:
+   *  1. Die Tabelle trägt keine Tabellen-Rechte, ein Session-Client liest dort
+   *     nur, was ihm die Row-Permissions geben — für die Auflösung fremder
+   *     Erwähnungen zu wenig.
+   *  2. EIN HANDLE IST KEIN INHALT. M13 friert Inhalte ein und lässt
+   *     persönliche Einstellungen offen; ein `actor: 'member'` hätte das
+   *     Auflösen einer Erwähnung in einer zahlungsgesperrten Community
+   *     gesperrt, obwohl nur gelesen wird.
+   */
   return tenantDb(event, { as: 'operator', actor: 'operator' })
 }
 
-/**
- * Die AKTIVE Zeile dieses Menschen in dieser Community — oder null.
- *
- * Filtert auf `status: 'active'`: gefragt ist „wie heisst er JETZT". Die
- * Gegenrichtung (eine alte Erwähnung auflösen) darf genau das NICHT tun, siehe
- * `resolveHandleOwners`.
- */
-export async function activeHandleRow(event: H3Event, userId: string): Promise<CommunityHandleRow | null> {
-  if (!userId) return null
+/** Schritt 2 der Kette: `handleLower` → `userId` aus dem Alt-Bestand. */
+async function legacyHandleOwners(event: H3Event, handleLowers: string[]): Promise<Map<string, string>> {
+  if (handleLowers.length === 0) return new Map()
   try {
-    return await handleDb(event).find<CommunityHandleRow>(HANDLES_TABLE, [
-      Query.equal('userId', userId),
-      Query.equal('status', 'active'),
+    const { rows } = await legacyDb(event).list<CommunityHandleRow>(HANDLES_TABLE, [
+      Query.equal('handleLower', handleLowers),
+      Query.limit(handleLowers.length),
     ])
+    return new Map(rows.map(row => [row.handleLower, row.userId]))
   }
   catch {
-    // Fail-soft: solange system-029 auf einer Instanz noch nicht gelaufen ist,
-    // soll KEINE Seite deswegen 500 werfen — sie zeigt dann nur keinen Handle.
-    return null
+    return new Map()
   }
 }
 
-/**
- * Die AKTIVEN Handles VIELER Menschen — die Umkehrung von
- * `resolveHandleOwners` (Handle → Person) in die andere Richtung
- * (Person → Handle).
- *
- * EINE Abfrage für alle Kandidaten, nie eine je Person. `activeHandleRow`
- * nebenan beantwortet dieselbe Frage für EINEN Menschen; in einer LISTE wäre
- * sie ein N+1 — ein Posteingang hat schnell 50 Gegenüber, eine
- * Mitgliederliste mehr. Genau dieselbe Überlegung wie bei `resolveUserNames`.
- *
- * FAIL-SOFT: ein Lesefehler ergibt eine leere Karte. Ein Handle ist eine
- * Annehmlichkeit — die Oberfläche fällt auf den Anzeigenamen zurück.
- */
-export async function resolveUserHandles(event: H3Event, userIds: string[]): Promise<Map<string, string>> {
-  const wanted = [...new Set(userIds.filter(Boolean))]
-  if (wanted.length === 0) return new Map()
-
+/** Schritt 2 der Kette in der anderen Richtung: `userId` → aktueller Name. */
+async function legacyHandlesForUsers(event: H3Event, userIds: string[]): Promise<Map<string, string>> {
+  if (userIds.length === 0) return new Map()
   const map = new Map<string, string>()
   try {
-    // `Query.equal` fasst 100 Werte — in Stapeln, wie bei den Namen.
-    for (let i = 0; i < wanted.length; i += 100) {
-      const batch = wanted.slice(i, i + 100)
-      const { rows } = await handleDb(event).list<CommunityHandleRow>(HANDLES_TABLE, [
+    for (let i = 0; i < userIds.length; i += 100) {
+      const batch = userIds.slice(i, i + 100)
+      const { rows } = await legacyDb(event).list<CommunityHandleRow>(HANDLES_TABLE, [
         Query.equal('userId', batch),
         Query.equal('status', 'active'),
         Query.limit(batch.length),
@@ -134,90 +88,15 @@ export async function resolveUserHandles(event: H3Event, userIds: string[]): Pro
 }
 
 /**
- * „Sorge dafür, dass dieser Mensch hier einen Namen hat" — idempotent.
+ * `handleLower` → `userId`. Konto-Register zuerst, Alt-Bestand für den Rest.
  *
- * Davids Entscheidung 2: automatisch vergeben, niemand wird blockiert, jeder
- * ist ab Tag 1 erwähnbar. Deshalb gibt es KEINEN Zustand „hat noch keinen
- * Handle, muss erst einen wählen".
+ * Eine Abfrage je Register für ALLE Kandidaten (nie eine je Name — eine
+ * Beitragsliste hat schnell 25 davon). Der zweite Zugriff entfällt ganz, wenn
+ * das Konto-Register schon alles beantwortet hat, und das ist nach der
+ * Übernahme der Normalfall.
  *
- * DIE MECHANIK IST DER UNIQUE-INDEX, nicht ein Vorab-Blick: erst nachsehen und
- * dann schreiben wäre bei zwei gleichzeitigen Anmeldungen ein Rennen mit zwei
- * Gewinnern. Hier wird blind geschrieben, und ein 409 heisst „jemand war
- * schneller" — dann kommt der nächste Kandidat dran.
- *
- * `changedAt` bleibt bei der automatischen Vergabe LEER: die Sperrfrist soll
- * nicht schon verbraucht sein, bevor der Mensch seinen Namen überhaupt gesehen
- * hat.
- *
- * Wirft nie. Der Handle ist eine Annehmlichkeit; er darf keine Anmeldung und
- * keinen Beitrag kosten. Im Fehlerfall kommt `null` zurück.
- */
-export async function ensureCommunityHandle(
-  event: H3Event,
-  userId: string,
-  displayName: string,
-): Promise<string | null> {
-  if (!userId) return null
-
-  try {
-    // H1: Namen gehören Mitgliedern. Steht VOR dem Lesen, damit ein Fremder
-    // nicht einmal erfährt, ob er hier eine Zeile hat.
-    // `userId` kann ein ANDERER als der Request-Nutzer sein — dann ist die
-    // Frage nicht beantwortbar (die Zugehörigkeit hängt am Kontext-User), und
-    // fail-closed heisst hier: nichts vergeben.
-    if (userId !== event.context.user?.$id) return null
-    if (!(await resolveCommunityMembership(event))) return null
-
-    const existing = await activeHandleRow(event, userId)
-    if (existing) return existing.handle
-
-    const db = handleDb(event)
-    const base = suggestHandleBase(displayName)
-
-    for (let attempt = 1; attempt <= MAX_ASSIGN_ATTEMPTS; attempt++) {
-      // Ab dem sechsten Versuch ist die Community offensichtlich voller
-      // `david`s — dann eine Zufallszahl statt weiter zu zählen, sonst laufen
-      // gleichzeitige Anmeldungen immer wieder in dieselbe Reihenfolge.
-      const index = attempt <= 5 ? attempt : 100 + Math.floor(Math.random() * 9900)
-      const candidate = handleCandidate(base, index)
-      if (!isValidHandle(candidate)) continue
-
-      try {
-        const row = await db.create<CommunityHandleRow>(HANDLES_TABLE, {
-          userId,
-          handle: candidate,
-          handleLower: candidate,
-          status: 'active',
-          changedAt: '',
-        }, { ownerUserId: userId })
-        return row.handle
-      }
-      catch (error) {
-        // 409 = der eindeutige Index hat gegriffen: Name ist vergeben (auch als
-        // FRÜHERER Name eines anderen Menschen). Nächster Kandidat.
-        if (hasCode(error, 409)) continue
-        throw error
-      }
-    }
-    return null
-  }
-  catch {
-    return null
-  }
-}
-
-/**
- * `handleLower` → `userId` für eine Liste von Kandidaten.
- *
- * FILTERT DEN STATUS BEWUSST NICHT. Genau hier zahlt sich die Historien-Zeile
- * aus: eine Erwähnung in einem zwei Jahre alten Beitrag trägt den DAMALIGEN
- * Namen, und der zeigt weiterhin auf denselben Menschen. Mit einem
- * `status: 'active'`-Filter wäre jede Erwähnung von vor einer Umbenennung
- * stillschweigend ins Leere gelaufen — und niemandem wäre es aufgefallen,
- * weil die Meldung ja nur ausbleibt.
- *
- * Eine Abfrage für alle Kandidaten (nie eine je Name — eine Beitragsliste hat
- * schnell 25 davon). Gibt im Fehlerfall eine leere Map zurück.
+ * Gibt im Fehlerfall eine leere Map zurück (fail-soft: `splitMentions` hebt
+ * dann nichts hervor, der Text bleibt Text).
  */
 export async function resolveHandleOwners(
   event: H3Event,
@@ -226,88 +105,34 @@ export async function resolveHandleOwners(
   const wanted = [...new Set(handles.map(normalizeHandle).filter(h => h && h.length <= HANDLE_MAX_LENGTH))]
   if (wanted.length === 0) return new Map()
 
-  try {
-    const { rows } = await handleDb(event).list<CommunityHandleRow>(HANDLES_TABLE, [
-      Query.equal('handleLower', wanted),
-      Query.limit(wanted.length),
-    ])
-    return new Map(rows.map(row => [row.handleLower, row.userId]))
+  const owners = await accountHandleOwners(event, wanted)
+
+  const missing = wanted.filter(handle => !owners.has(handle))
+  if (missing.length > 0) {
+    for (const [handle, userId] of await legacyHandleOwners(event, missing)) {
+      owners.set(handle, userId)
+    }
   }
-  catch {
-    return new Map()
-  }
+  return owners
 }
 
 /**
- * Welche dieser Kandidaten gibt es in dieser Community wirklich? Das ist die
- * Menge, die der Renderer hervorhebt — alles andere bleibt gewöhnlicher Text.
+ * Die AKTIVEN Handles VIELER Menschen (`userId` → Name) — die Umkehrung.
+ * Dieselbe Kette: Konto-Register zuerst, Alt-Bestand nur für die Menschen, die
+ * dort noch keinen Eintrag haben (Kollisions-Verlierer der Übernahme, solange
+ * sie ihr Profil nicht geöffnet haben).
  */
-export async function knownHandles(event: H3Event, handles: string[]): Promise<string[]> {
-  return [...(await resolveHandleOwners(event, handles)).keys()]
-}
+export async function resolveUserHandles(event: H3Event, userIds: string[]): Promise<Map<string, string>> {
+  const wanted = [...new Set(userIds.filter(Boolean))]
+  if (wanted.length === 0) return new Map()
 
-/** Ist dieser Name in dieser Community noch frei? (Aktiv ODER früher belegt.) */
-export async function handleIsTaken(event: H3Event, handle: string): Promise<boolean> {
-  const value = normalizeHandle(handle)
-  if (!value) return true
-  return (await resolveHandleOwners(event, [value])).has(value)
-}
+  const map = await accountHandlesForUsers(event, wanted)
 
-/**
- * Den Namen wechseln. Die REGELN (Sperrfrist, Zeichensatz, reservierte Namen)
- * prüft die Route — hier steht nur der Schreibvorgang, und der ist die
- * Umsetzung von Davids Entscheidung 3+4:
- *
- *   NEUE Zeile anlegen, ALTE auf 'former' setzen. Die alte wird NICHT gelöscht.
- *
- * Reihenfolge mit Absicht: erst die neue Zeile (sie kann am eindeutigen Index
- * scheitern — dann ist nichts passiert), danach die alte umstellen. Andersherum
- * stünde jemand nach einem Fehlschlag ganz ohne aktiven Namen da.
- *
- * Gibt `null` zurück, wenn der Name inzwischen vergeben ist (409) — die Route
- * macht daraus einen fachlichen Ablehnungsgrund.
- */
-export async function changeCommunityHandle(
-  event: H3Event,
-  userId: string,
-  nextHandle: string,
-): Promise<CommunityHandleRow | null> {
-  // H1, zweite Wache: die Route prüft dasselbe, bevor sie hierher kommt. Das
-  // ist Absicht — diese Funktion legt eine Zeile an, die einen Namen in einer
-  // Community FÜR IMMER belegt, und sie soll das nicht davon abhängig machen,
-  // dass ihr Aufrufer daran gedacht hat.
-  await requireCommunityMembership(event)
-
-  const db = handleDb(event)
-  const lower = normalizeHandle(nextHandle)
-  const previous = await activeHandleRow(event, userId)
-
-  // Derselbe Name wie bisher: nichts tun und die Sperrfrist nicht verbrauchen.
-  if (previous && previous.handleLower === lower) return previous
-
-  let created: CommunityHandleRow
-  try {
-    created = await db.create<CommunityHandleRow>(HANDLES_TABLE, {
-      userId,
-      handle: nextHandle.trim().replace(/^@+/, ''),
-      handleLower: lower,
-      status: 'active',
-      changedAt: new Date().toISOString(),
-    }, { ownerUserId: userId })
+  const missing = wanted.filter(userId => !map.has(userId))
+  if (missing.length > 0) {
+    for (const [userId, handle] of await legacyHandlesForUsers(event, missing)) {
+      map.set(userId, handle)
+    }
   }
-  catch (error) {
-    if (hasCode(error, 409)) return null
-    throw error
-  }
-
-  if (previous) {
-    // Fail-soft: bliebe das hier stecken, hätte der Mensch zwei aktive Zeilen.
-    // Unschön, aber harmlos — beide lösen auf ihn auf, und `activeHandleRow`
-    // nimmt die erste. Der Wechsel selbst ist bereits vollzogen und soll nicht
-    // an der Aufräumarbeit scheitern.
-    await db.update(HANDLES_TABLE, previous.$id, { status: 'former' })
-      .catch(() => undefined)
-  }
-
-  return created
+  return map
 }

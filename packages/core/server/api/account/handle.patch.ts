@@ -6,10 +6,10 @@ import {
   mayChangeHandleAt,
   normalizeHandle,
 } from '../../../shared/handles'
-import { activeHandleRow, changeCommunityHandle } from '../../utils/handles'
+import { activeAccountHandleRow, changeAccountHandle } from '../../utils/accountHandles'
 
 /**
- * Den eigenen @namen ändern.
+ * Den eigenen @namen ändern — konto-weit (AH-7, 2026-08-11).
  *
  * ── DIE REGELN STEHEN HIER, NICHT IM CLIENT ────────────────────────────────
  * Zeichensatz, reservierte Namen und die 30-Tage-Sperrfrist kommen aus
@@ -17,6 +17,13 @@ import { activeHandleRow, changeCommunityHandle } from '../../utils/handles'
  * Die Oberfläche KENNT die Regeln (damit sie sofort etwas sagen kann), diese
  * Route SETZT sie durch. Dasselbe Muster wie bei den Schutzregeln des Teams
  * (communityTeam.ts).
+ *
+ * ── DIE KOLLISION IST EIN 409 AUS DEM INDEX, KEINE ABFRAGE ────────────────
+ * Es wird NICHT erst nachgesehen, ob der Name frei ist. Zwei Menschen, die im
+ * selben Moment `@david` schicken, würden beide ein „ist frei" lesen und beide
+ * schreiben. Der eindeutige Index auf `handleLower` ist die Wahrheit; wer den
+ * 409 bekommt, war der Zweite („wer zuerst kam, behält" — dieselbe Regel, nach
+ * der auch die Übernahme der Alt-Namen entschieden hat).
  *
  * Ablehnungsgründe reisen als `data: { code }` — der zentrale Fehler-Handler
  * hebt genau diesen Schlüssel als `reason` ins Envelope, die Oberfläche macht
@@ -30,13 +37,16 @@ const bodySchema = z.object({
 
 export default defineEventHandler(async (event) => {
   /**
-   * H1 (2026-08-05): ZUERST die Zugehörigkeit, vor jeder Regel und vor jedem
-   * Blick in die Tabelle. Ein Fremder soll auf einem Community-Host nicht
-   * einmal erfahren, ob ein Name dort noch frei ist — ohne diese Reihenfolge
-   * wäre die Route ein Verfügbarkeits-Orakel für eine fremde Community
-   * (`taken` vs. `reserved` unterscheiden sich sichtbar).
+   * Nur die Sitzung, KEINE Mitglieder-Wache — anders als beim Vorgänger
+   * `PATCH /api/handles/me`. Begründung im Kopf von `handle.get.ts`: der Name
+   * gehört dem Konto, nicht einer Community, und gesetzt wird er in erster
+   * Linie auf `/profile`, wo es gar keine gibt. Ein Verfügbarkeits-Orakel für
+   * eine fremde Community ist die Route damit auch nicht mehr — es gibt nur
+   * noch EINEN Namensraum, und dass ein Name in ihm vergeben ist, erfährt
+   * ohnehin jeder, der ihn selbst versucht.
    */
-  const user = await requireCommunityMembership(event)
+  const user = event.context.user
+  if (!user) throw createError({ status: 401, statusText: 'Unauthorized' })
 
   const body = await readValidatedBody(event, bodySchema.parse)
   const next = normalizeHandle(body.handle)
@@ -47,7 +57,7 @@ export default defineEventHandler(async (event) => {
     throw createError({ status: 400, statusText: 'Invalid handle', data: { code: rejection } })
   }
 
-  const current = await activeHandleRow(event, user.$id)
+  const current = await activeAccountHandleRow(event, user.$id)
 
   // 2. Sperrfrist. Die Ausnahme ist bewusst: wer denselben Namen noch einmal
   //    schickt (Doppelklick, erneutes Speichern eines unveränderten Formulars),
@@ -62,7 +72,7 @@ export default defineEventHandler(async (event) => {
 
   // 3. Schreiben. `null` heisst: der eindeutige Index hat gegriffen — der Name
   //    ist vergeben, aktiv ODER als früherer Name eines anderen Menschen.
-  const row = await changeCommunityHandle(event, user.$id, body.handle)
+  const row = await changeAccountHandle(event, user.$id, body.handle)
   if (!row) {
     throw createError({ status: 409, statusText: 'Handle taken', data: { code: 'taken' } })
   }

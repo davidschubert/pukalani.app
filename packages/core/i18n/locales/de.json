@@ -186,21 +186,19 @@
     },
     "handle": {
       "title": "Dein Name für Erwähnungen",
-      "description": "So können dich andere in Beiträgen erwähnen. Er ist innerhalb dieser Community eindeutig.",
+      "description": "So können dich andere in Beiträgen erwähnen. Er gehört zu deinem Konto und gilt in allen deinen Communities.",
       "label": "Kurzname",
       "hint": "{min}–{max} Zeichen: Kleinbuchstaben, Ziffern und Unterstriche.",
       "save": "Namen speichern",
       "saved": "Name gespeichert.",
       "saveFailed": "Name konnte nicht gespeichert werden",
       "lockedUntil": "Du kannst deinen Namen alle {days} Tage ändern — das nächste Mal am {date}.",
-      "notAMember": "Hier hast du keinen Namen: Kurznamen gelten je Community, und zu dieser gehörst du nicht. Sobald du beitrittst, bekommst du einen.",
       "errors": {
-        "not_a_member": "Du gehörst dieser Community nicht an.",
         "too_short": "Zu kurz.",
         "too_long": "Zu lang.",
         "charset": "Erlaubt sind nur Kleinbuchstaben, Ziffern und Unterstriche — nicht am Anfang oder Ende.",
         "reserved": "Dieser Name ist reserviert.",
-        "taken": "Dieser Name ist in dieser Community schon vergeben.",
+        "taken": "Dieser Name ist schon vergeben.",
         "change_too_soon": "Du hast deinen Namen erst vor Kurzem geändert.",
         "generic": "Das hat nicht geklappt."
       }

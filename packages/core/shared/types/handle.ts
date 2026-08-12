@@ -18,6 +18,20 @@ import type { Models } from 'node-appwrite'
  */
 export const HANDLES_TABLE = 'community_handles'
 
+/**
+ * DAS KONTO-WEITE REGISTER (AH-7, Migration system-031) — seit 2026-08-11 die
+ * WAHRHEIT über Namen. Eine Pukalani-ID hat EINEN @namen, überall (Davids
+ * Entscheidung, DECISION-LOG 2026-08-11 Punkt 11).
+ *
+ * `community_handles` daneben ist ab jetzt ALT-BESTAND: es werden dort keine
+ * Namen mehr vergeben, die Zeilen bleiben aber stehen und lösen alte
+ * Erwähnungen weiter auf (Lese-Fallback, zweite Stufe der Kette in
+ * core/server/utils/handles.ts). Löschen würde Erwähnungen in Bestands-
+ * Beiträgen ins Leere laufen lassen — und zwar unbemerkt, weil eine
+ * ausbleibende Hervorhebung niemandem auffällt.
+ */
+export const ACCOUNT_HANDLES_TABLE = 'account_handles'
+
 export type HandleStatus
   = /** Der aktuelle Name dieser Person in dieser Community. */
   | 'active'
@@ -29,6 +43,27 @@ export type HandleStatus
    * auf DIESELBE Person auf, statt ins Leere zu laufen.
    */
   | 'former'
+
+/**
+ * Eine Zeile des KONTO-weiten Registers. Dieselben Felder wie die
+ * Community-Zeile — MINUS `communityId`, und genau das ist die ganze
+ * Änderung von AH-7: der eindeutige Index trägt nur noch `handleLower`,
+ * also gilt ein Name in der ganzen Instanz.
+ *
+ * Das Lese-Publikum steht deshalb nicht mehr in einer Spalte, sondern in den
+ * Row-Permissions (eine `read("label:<communityId>")` je Mitgliedschaft) —
+ * Regeln und Begründung: core/shared/accountHandleAudience.ts.
+ */
+export interface AccountHandleRow extends Models.Row {
+  userId: string
+  /** Die vom Menschen gewählte Schreibweise — so wird sie angezeigt. */
+  handle: string
+  /** Vergleichsform (klein). Trägt den GLOBALEN eindeutigen Index. */
+  handleLower: string
+  status: HandleStatus
+  /** Wann diese Zeile zur AKTIVEN wurde; '' = automatisch vergeben. */
+  changedAt: string
+}
 
 export interface CommunityHandleRow extends Models.Row {
   /** Pool-Mandant; im Silo ''. Erste Spalte JEDES Index (Pool-Regel). */

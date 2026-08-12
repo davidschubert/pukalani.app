@@ -8,10 +8,23 @@ import {
 } from '../../../shared/handles'
 
 /**
- * Der eigene @name in DIESER Community — anzeigen und ändern.
+ * Der eigene @name — anzeigen und ändern. KONTO-WEIT seit AH-7 (2026-08-11).
+ *
+ * ── EINE FLÄCHE, ZWEI ORTE, EIN NAME ──────────────────────────────────────
+ * Dieselbe Komponente steht auf `/profile` (account.pukalani.app) und im
+ * Konto-Reiter jedes Community-Dashboards — und sie zeigt an beiden Orten
+ * DASSELBE, weil es seit Davids Entscheidung vom 2026-08-11 nur noch einen
+ * Namen je Pukalani-ID gibt. Vorher war das ein Slot mit Ersatztext, weil ein
+ * Kontroll-Host keine Community hat und der Name pro Community galt; diese
+ * Unterscheidung ist ersatzlos weg.
+ *
+ * Es gibt deshalb auch KEINE Mitglieder-Unterscheidung mehr (das `member`-Feld
+ * der Vorgänger-Route ist mit ihr verschwunden): der Name gehört dem Konto,
+ * gesetzt werden darf er überall. Was von der Zugehörigkeit abhängt, ist nur
+ * die SICHTBARKEIT im Erwähnungs-Menü — und die pflegt der Server.
  *
  * ── DIE REGELN KOMMEN AUS DERSELBEN DATEI WIE AUF DEM SERVER ───────────────
- * `handleRejection` ist genau die Funktion, die auch `PATCH /api/handles/me`
+ * `handleRejection` ist genau die Funktion, die auch `PATCH /api/account/handle`
  * benutzt. Hier sagt sie sofort, was stört; dort setzt sie es durch. Zwei
  * Regelwerke für eine Frage laufen auseinander — deshalb eines.
  *
@@ -31,28 +44,16 @@ interface HandleState {
   changedAt: string | null
   canChange: boolean
   availableAt: number | null
-  /**
-   * Gehört dieser Mensch zu der Community DIESES Hosts? (H1, 2026-08-05.)
-   *
-   * OPTIONAL im Typ, und das ist Betrieb statt Bequemlichkeit: Kontoseite und
-   * API werden getrennt ausgeliefert, und eine ältere Antwort ohne das Feld
-   * darf nicht dazu führen, dass ein Mitglied plötzlich „du gehörst nicht
-   * dazu" liest. Fehlt es, gilt wie bisher „gehört dazu".
-   */
-  member?: boolean
 }
 
 // `server: false` mit Absicht: die Route VERGIBT beim ersten Aufruf einen
 // Namen — das ist ein Schreibvorgang und gehört nicht in einen SSR-Durchlauf,
 // den ein Crawler auslösen kann.
-const { data, refresh } = await useFetch<HandleState>('/api/handles/me', {
+const { data, refresh } = await useFetch<HandleState>('/api/account/handle', {
   lazy: true,
   server: false,
   default: () => ({ handle: null, changedAt: null, canChange: true, availableAt: null }),
 })
-
-/** Nur `false` heisst „nicht dazugehörig" — `undefined` ist keine Aussage. */
-const isMember = computed(() => data.value?.member !== false)
 
 const draft = ref('')
 const saving = ref(false)
@@ -85,7 +86,7 @@ async function save() {
   if (saving.value || rejection.value || unchanged.value) return
   saving.value = true
   try {
-    await $fetch('/api/handles/me', { method: 'PATCH', body: { handle: draft.value } })
+    await $fetch('/api/account/handle', { method: 'PATCH', body: { handle: draft.value } })
     touched.value = false
     await refresh()
     toast.add({ title: t('account.handle.saved'), color: 'success' })
@@ -112,53 +113,44 @@ async function save() {
       <p class="text-sm text-muted">{{ t('account.handle.description') }}</p>
     </div>
 
-    <!-- H1: kein Mitglied, kein Name. Ein Eingabefeld, das jede Eingabe mit
-         403 quittiert, wäre eine Attrappe — deshalb steht hier ein Satz
-         statt eines abgeblendeten Formulars. -->
-    <p v-if="!isMember" class="text-sm text-muted" data-handle-not-member>
-      {{ t('account.handle.notAMember') }}
+    <UFormField
+      :label="t('account.handle.label')"
+      :help="t('account.handle.hint', { min: HANDLE_MIN_LENGTH, max: HANDLE_MAX_LENGTH })"
+      :error="rejection ? reasonText(rejection) : undefined"
+    >
+      <UInput
+        v-model="draft"
+        :disabled="!canChange || saving"
+        :maxlength="HANDLE_MAX_LENGTH"
+        autocapitalize="off"
+        autocorrect="off"
+        spellcheck="false"
+        data-handle-input
+        @update:model-value="touched = true"
+      >
+        <!-- Das `@` lebt hier, nicht in den Übersetzungen (siehe Kopf). -->
+        <template #leading>
+          <span class="text-dimmed">@</span>
+        </template>
+      </UInput>
+    </UFormField>
+
+    <!-- Die Sperrfrist als Satz, mit Datum — „geht nicht" allein beantwortet
+         nicht, ab wann es wieder geht. -->
+    <p v-if="!canChange" class="text-xs text-warning" data-handle-locked>
+      {{ t('account.handle.lockedUntil', { date: availableDate, days: HANDLE_CHANGE_INTERVAL_DAYS }) }}
     </p>
 
-    <template v-else>
-      <UFormField
-        :label="t('account.handle.label')"
-        :help="t('account.handle.hint', { min: HANDLE_MIN_LENGTH, max: HANDLE_MAX_LENGTH })"
-        :error="rejection ? reasonText(rejection) : undefined"
+    <div class="flex justify-end">
+      <UButton
+        size="sm"
+        :loading="saving"
+        :disabled="!canChange || !!rejection || unchanged"
+        data-handle-save
+        @click="save"
       >
-        <UInput
-          v-model="draft"
-          :disabled="!canChange || saving"
-          :maxlength="HANDLE_MAX_LENGTH"
-          autocapitalize="off"
-          autocorrect="off"
-          spellcheck="false"
-          data-handle-input
-          @update:model-value="touched = true"
-        >
-          <!-- Das `@` lebt hier, nicht in den Übersetzungen (siehe Kopf). -->
-          <template #leading>
-            <span class="text-dimmed">@</span>
-          </template>
-        </UInput>
-      </UFormField>
-
-      <!-- Die Sperrfrist als Satz, mit Datum — „geht nicht" allein beantwortet
-           nicht, ab wann es wieder geht. -->
-      <p v-if="!canChange" class="text-xs text-warning" data-handle-locked>
-        {{ t('account.handle.lockedUntil', { date: availableDate, days: HANDLE_CHANGE_INTERVAL_DAYS }) }}
-      </p>
-
-      <div class="flex justify-end">
-        <UButton
-          size="sm"
-          :loading="saving"
-          :disabled="!canChange || !!rejection || unchanged"
-          data-handle-save
-          @click="save"
-        >
-          {{ t('account.handle.save') }}
-        </UButton>
-      </div>
-    </template>
+        {{ t('account.handle.save') }}
+      </UButton>
+    </div>
   </div>
 </template>

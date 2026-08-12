@@ -4,61 +4,64 @@
  * ZWEI FRAGEN IN EINER DATEI, weil sie denselben teuren Aufbau brauchen (zwei
  * echte Communities auf einer Instanz, drei Konten, der echte Wizard):
  *   Abschnitte 1–7  — `GET /api/handles/search` reicht nicht über die Grenze.
- *   Abschnitte 8–10 — H1: einen NAMEN bekommt hier nur, wer dazugehört.
+ *   Abschnitte 8–10 — AH-7: der NAME gehört dem Konto, das PUBLIKUM der Community.
  *
  * ── WARUM ES DIESEN BEWEIS BRAUCHT ─────────────────────────────────────────
- * Handles sind je Community eindeutig (`community_handles`, Unique
- * `(communityId, handleLower)`) — ZWEI Communities auf DERSELBEN Instanz legen
- * ihre Namen also in DIESELBE Tabelle. Eine Vorschlagsliste, die dort über die
- * Grenze greift, wäre die Mitgliederliste von Kunde B in der Schreibfläche von
- * Kunde A. Der bisherige Beweis (`packages/posts/scripts/verify-mention-menu.mjs`)
- * lief gegen `apps/comments` — ein SILO, in dem es die Grenze gar nicht gibt.
- * Deshalb hier: der Pool, mit zwei echten Communities.
+ * Seit AH-7 (2026-08-11) ist ein Handle GLOBAL eindeutig (`account_handles`,
+ * Unique auf `handleLower` allein) — alle Communities einer Instanz legen ihre
+ * Namen also in DIESELBE Tabelle, und zwar ohne jede Mandanten-Spalte. Eine
+ * Vorschlagsliste, die dort über die Grenze greift, wäre die Mitgliederliste
+ * von Kunde B in der Schreibfläche von Kunde A. Der bisherige Beweis
+ * (`packages/posts/scripts/verify-mention-menu.mjs`) lief gegen `apps/comments`
+ * — ein SILO, in dem es die Grenze gar nicht gibt. Deshalb hier: der Pool, mit
+ * zwei echten Communities.
  *
- * ── ZWEI SCHICHTEN, ZWEI MESSUNGEN ─────────────────────────────────────────
- * Die Route liest über `tenantDb(event).list` mit der Türklinke 'member'. Es
- * halten also ZWEI unabhängige Dinge, und ein Beweis, der sie zusammen misst,
- * kann nicht sagen, welches davon trägt (und würde still grün bleiben, wenn
- * eines wegfällt):
+ * ── DREI SCHICHTEN SEIT AH-7, EINZELN GEMESSEN ─────────────────────────────
+ * Vor AH-7 hielten hier zwei Dinge: der Mandanten-FILTER der Datentür und die
+ * Row-Permissions. Der Filter ist ersatzlos weg (keine `communityId`-Spalte
+ * mehr), und die Row-Permissions allein reichen NICHT — genau das ist der
+ * Befund, der beim Bau von AH-7 an diesem Beweis auffiel:
  *
- *   (1) DER MANDANTEN-FILTER der Datentür (`Query.equal('communityId', …)`).
- *       Allein gemessen in Abschnitt 5: derselbe Mensch ist Mitglied BEIDER
- *       Communities, hat also BEIDE Labels — die Row-Permissions ließen die
- *       fremde Zeile durch, nur der Filter hält sie zurück.
- *   (2) DIE ROW-PERMISSIONS (`read(label:<communityId>)`, gestempelt von der
- *       Tür). Allein gemessen in Abschnitt 6: ein Mitglied von A steht auf dem
- *       HOST von B, der Filter zeigt also auf B und würde die Zeile liefern —
- *       nur das fehlende Label hält sie zurück.
+ *   (1) DIE ROW-PERMISSIONS (`read(label:<communityId>)` je Mitgliedschaft,
+ *       gestempelt bei der Vergabe und nachgetragen beim ersten Auftauchen).
+ *       Sie sagen, WER eine Zeile lesen darf — aber ein Leser trägt selbst
+ *       Labels aus mehreren Communities, und Appwrite fragt nicht, auf welchem
+ *       HOST er gerade steht.
+ *   (2) DAS MITGLIEDER-GATE der Route (`requireCommunityMembership`).
+ *       Allein gemessen in Abschnitt 6: der Nachbar ist Mitglied von A und
+ *       steht auf Host B; über sein Label A dürfte er die Zeile von Owner A
+ *       lesen (der inzwischen auch zu B gehört) — abgewiesen wird er, weil er
+ *       zu B nicht gehört.
+ *   (3) DER PUBLIKUMS-FILTER auf die aktuelle Community. Allein gemessen in
+ *       Abschnitt 5/5b: Owner A ist Mitglied BEIDER Communities, darf also
+ *       beide Zeilen lesen und passiert jedes Gate — auf Host A sieht er
+ *       @…_beta trotzdem nicht, weil diese Zeile B nicht in ihrem Publikum
+ *       führt.
  *
  * Zu JEDER Sperre gehört die GEGENPROBE im selben Abschnitt. Ohne sie beweist
  * eine leere Antwort nur, dass die Suche kaputt ist.
  *
- * ── DER BEWEIS IST SELBST GEGENGEPROBT (2026-08-05) ────────────────────────
- * Ein Beweis, der beim ersten Lauf grün ist, hat noch nichts gezeigt. Zwei
- * absichtliche Mutationen an `server/api/handles/search.get.ts`, je eine je
- * Schicht — beide wurden gefangen, und zwar GENAU von dem Abschnitt, der die
- * betroffene Schicht misst:
- *   (a) Filter weg (roher Session-Client statt `tenantDb`) ⇒ Abschnitt 5 rot:
- *       Owner A sah `["grenzprobe_alpha","grenzprobe_beta"]` auf SEINEM Host.
- *   (b) `as: 'operator'` statt 'member' (Filter bleibt, Row-Permissions
- *       umgangen) ⇒ Abschnitt 6 rot: der Nachbar sah `["grenzprobe_beta"]`
- *       auf einem Host, zu dem er nicht gehört.
- * Wer den Beweis umbaut, macht diese zwei Proben wieder — sonst weiss niemand,
- * ob das Grün noch etwas bedeutet.
+ * ── DER BEWEIS WAR SELBST GEGENGEPROBT (2026-08-05, VOR AH-7) ──────────────
+ * Ein Beweis, der beim ersten Lauf grün ist, hat noch nichts gezeigt. Für die
+ * damalige Fassung wurden vier absichtliche Mutationen gefahren (Filter weg,
+ * `as: 'operator'`, Wache weg) und jede vom zuständigen Abschnitt gefangen.
  *
- * Dasselbe für die H1-Abschnitte (2026-08-05): Wache entfernt (`return true`
- * am Anfang von `resolveCommunityMembership`) ⇒ 31/37 statt 37/37, und die
- * sechs Roten sind GENAU die Abschnitte 8+9; Abschnitt 10 („für Mitglieder
- * ändert sich nichts") bleibt grün. Gemessen wurde dabei wörtlich der Befund:
- *   - der Fremde bekam auf Host B `{"handle":"probenachbar","member":true}`,
- *     die Tabelle wuchs von 1 auf 2 Zeilen,
- *   - er nahm `@grenzprobe_vorstand`, und das rechtmässige Mitglied bekam
- *     danach `409 {"reason":"taken"}` — für immer.
+ * ⚠️ NACH DEM UMBAU AUF AH-7 (2026-08-11) STEHT DIESE PROBE WIEDER AUS.
+ * Die Abschnitte messen jetzt andere Schichten (Gate + Publikums-Filter statt
+ * Mandanten-Filter), und ein umgebauter Beweis, dessen Rot niemand gesehen
+ * hat, ist nur ein Grün. Vor dem nächsten Deploy dieser Grenze zu wiederholen:
+ *   (a) `requireCommunityMembership` in `search.get.ts` entfernen ⇒ Abschnitt 6
+ *       muss rot werden (der Nachbar sieht auf Host B @grenzprobe_alpha).
+ *   (b) den `handleAudienceIncludes`-Filter entfernen ⇒ Abschnitt 5 muss rot
+ *       werden (Owner A sieht auf Host A auch @grenzprobe_beta).
+ *   (c) `ensureAccountHandleAudience` in `handle.get.ts` entfernen ⇒ Abschnitt
+ *       5b muss rot werden (das Publikum wächst nie).
  *
  * ── AUFBAU ─────────────────────────────────────────────────────────────────
  * Zwei Wegwerf-Communities über den ECHTEN Wizard-Abschluss, zwei Owner, ein
- * Nachbar. Jeder Owner setzt seinen Namen über `PATCH /api/handles/me` — also
- * über die Produktionsroute, nicht per Admin-Client in die Tabelle geschrieben.
+ * Nachbar, dazu ein viertes Konto ohne jede Community (Abschnitt 9). Jeder
+ * setzt seinen Namen über `PATCH /api/account/handle` — also über die
+ * Produktionsroute, nicht per Admin-Client in die Tabelle geschrieben.
  * Das `finally` räumt alles wieder ab.
  *
  * ── SO WIRD ER GEFAHREN ────────────────────────────────────────────────────
@@ -96,16 +99,19 @@ const control = new TablesDB(new Client().setEndpoint(endpoint).setProject(contr
 const poolUsers = new Users(new Client().setEndpoint(endpoint).setProject(poolProject).setKey(poolKey))
 const poolDb = new TablesDB(new Client().setEndpoint(endpoint).setProject(poolProject).setKey(poolKey))
 
-const HANDLES_TABLE = 'community_handles'
+/**
+ * Gemessen wird am KONTO-Register (AH-7, system-031). `community_handles`
+ * (system-029) lebt daneben als Alt-Bestand weiter, vergibt aber nichts mehr —
+ * ein Beweis, der dort nachsähe, prüfte die Vergangenheit.
+ */
+const HANDLES_TABLE = 'account_handles'
 /** Gemeinsames Präfix — genau darum geht es: EINE Suche, zwei Communities. */
 const PREFIX = 'grenzprobe'
 const HANDLE_A = `${PREFIX}_alpha`
 const HANDLE_B = `${PREFIX}_beta`
-/** Der Name, den sich der Fremde auf HOST B nehmen will (H1). */
+/** Der Name, den sich der Fremde von einem fremden Host aus nimmt (AH-7 §9). */
 const HANDLE_SQUAT = `${PREFIX}_vorstand`
-/** Der Name, den derselbe Mensch auf SEINEM Host bekommen darf (Gegenprobe). */
-const HANDLE_HOME = `${PREFIX}_nachbar`
-const ALL_HANDLES = [HANDLE_A, HANDLE_B, HANDLE_SQUAT, HANDLE_HOME]
+const ALL_HANDLES = [HANDLE_A, HANDLE_B, HANDLE_SQUAT]
 
 let pass = 0
 let fail = 0
@@ -276,10 +282,10 @@ try {
   check('Host B antwortet', await waitForHost(siteB.host), siteB.host)
 
   console.log('\n2. Zwei Namen mit GEMEINSAMEM Präfix — über die echte Route gesetzt')
-  const setA = await call(siteA.host, '/api/handles/me', { method: 'PATCH', cookie: cookieA, body: { handle: HANDLE_A } })
+  const setA = await call(siteA.host, '/api/account/handle', { method: 'PATCH', cookie: cookieA, body: { handle: HANDLE_A } })
   check(`Owner A heißt @${HANDLE_A}`, setA.status === 200 && setA.json?.handle === HANDLE_A,
     `Status ${setA.status} ${setA.text.slice(0, 160)}`)
-  const setB = await call(siteB.host, '/api/handles/me', { method: 'PATCH', cookie: cookieB, body: { handle: HANDLE_B } })
+  const setB = await call(siteB.host, '/api/account/handle', { method: 'PATCH', cookie: cookieB, body: { handle: HANDLE_B } })
   check(`Owner B heißt @${HANDLE_B}`, setB.status === 200 && setB.json?.handle === HANDLE_B,
     `Status ${setB.status} ${setB.text.slice(0, 160)}`)
 
@@ -293,10 +299,13 @@ try {
   const rowA = rowsInTable.rows.find(row => row.handleLower === HANDLE_A)
   const rowB = rowsInTable.rows.find(row => row.handleLower === HANDLE_B)
   check('beide Namen liegen in DERSELBEN Tabelle', rowsInTable.total === 2, `total=${rowsInTable.total}`)
-  check('… getrennt nur durch die Spalte communityId',
-    rowA?.communityId === siteA.tenantId && rowB?.communityId === siteB.tenantId,
-    `${rowA?.communityId} / ${rowB?.communityId} vs ${siteA.tenantId} / ${siteB.tenantId}`)
-  check('… und durch ihr Lese-Publikum read(label:<communityId>)',
+  // SEIT AH-7 GIBT ES KEINE MANDANTEN-SPALTE MEHR. Vorher trennten zwei Dinge
+  // diese Zeilen (die Spalte `communityId` UND das Lese-Publikum); jetzt ist es
+  // genau eines — deshalb steht dieser Beweis überhaupt noch hier.
+  check('… OHNE Mandanten-Spalte (der Name gehört dem Konto, nicht der Community)',
+    rowA?.communityId === undefined && rowB?.communityId === undefined,
+    `${JSON.stringify(rowA?.communityId)} / ${JSON.stringify(rowB?.communityId)}`)
+  check('… getrennt EINZIG durch ihr Lese-Publikum read(label:<communityId>)',
     (rowA?.$permissions ?? []).includes(`read("label:${siteA.communityId}")`)
     && (rowB?.$permissions ?? []).includes(`read("label:${siteB.communityId}")`),
     `${JSON.stringify(rowA?.$permissions)} / ${JSON.stringify(rowB?.$permissions)}`)
@@ -321,10 +330,12 @@ try {
   check('… und in der Gegenrichtung ebenso',
     exactA.status === 200 && exactA.handles?.length === 0, `Status ${exactA.status} ${JSON.stringify(exactA.handles)}`)
 
-  console.log('\n5. Schicht 1 ALLEIN: der Mandanten-Filter (Mehrfach-Mitgliedschaft)')
-  // Owner A tritt Community B bei. Ab jetzt trägt er BEIDE Labels — die
-  // Row-Permissions sind also KEINE Sperre mehr. Was auf seinem eigenen Host
-  // noch hält, ist einzig der Filter der Datentür.
+  console.log('\n5. Mehrfach-Mitgliedschaft: das Publikum ist eine LISTE, kein Schalter')
+  // Owner A tritt Community B bei. Ab jetzt trägt SEIN KONTO beide Labels — er
+  // darf also die Zeile von Owner B lesen. Was das NICHT ändert: dass Owner B
+  // seinerseits nur zu B gehört. Vor AH-7 hielt hier der Mandanten-Filter der
+  // Datentür; den gibt es nicht mehr, und genau deshalb wird hier gemessen,
+  // dass die Grenze trotzdem an derselben Stelle liegt.
   check('Owner A ist jetzt auch Mitglied von B (beide Labels)',
     await joinAs(ownerA, cookieA, siteB, siteB.host))
   const bothLabels = (await poolUsers.get({ userId: ownerA.userId })).labels ?? []
@@ -336,14 +347,42 @@ try {
     crossFind.status === 200 && crossFind.handles?.includes(HANDLE_B),
     `Status ${crossFind.status} ${JSON.stringify(crossFind.handles)}`)
   const homeFind = await search(siteA.host, cookieA, PREFIX)
-  check('auf Host A bleibt es trotz Label B bei @' + HANDLE_A + ' — der FILTER hält allein',
+  check('auf Host A bleibt es trotz Label B bei @' + HANDLE_A + ' — @' + HANDLE_B + ' hat dort kein Publikum',
     homeFind.status === 200 && homeFind.handles?.includes(HANDLE_A) && !homeFind.handles.includes(HANDLE_B),
     `Status ${homeFind.status} ${JSON.stringify(homeFind.handles)}`)
 
-  console.log('\n6. Schicht 2 ALLEIN: die Row-Permissions (fremder Host, kein Label)')
-  // Der Nachbar ist Mitglied von A. Steht er auf dem Host von B, zeigt der
-  // Filter auf B und würde die fremde Zeile ausliefern — es fehlt ihm nur das
-  // Label. Genau das misst dieser Abschnitt.
+  console.log('\n5b. AH-7: das Publikum WÄCHST erst beim Auftauchen (ensureAccountHandleAudience)')
+  // Vor dem ersten Blick auf die Kontoseite kennt B den Namen von Owner A
+  // nicht: er ist Mitglied, aber seine ZEILE trägt B noch nicht. Genau dieses
+  // Nachtragen ist der Ersatz für die weggefallene Mandanten-Spalte.
+  const beforeAudience = await search(siteB.host, cookieB, HANDLE_A)
+  check(`Owner B sieht @${HANDLE_A} noch NICHT (Publikum noch nicht nachgetragen)`,
+    beforeAudience.status === 200 && beforeAudience.handles?.length === 0,
+    `Status ${beforeAudience.status} ${JSON.stringify(beforeAudience.handles)}`)
+  const touchB = await call(siteB.host, '/api/account/handle', { cookie: cookieA })
+  check('… Owner A ruft auf Host B seine Kontoseite auf', touchB.status === 200 && touchB.json?.handle === HANDLE_A,
+    `Status ${touchB.status} ${touchB.text.slice(0, 160)}`)
+  const rowAfter = await poolDb.listRows({
+    databaseId: poolDatabaseId, tableId: HANDLES_TABLE,
+    queries: [Query.equal('userId', ownerA.userId), Query.limit(5)],
+  })
+  check('… und SEINE Zeile trägt danach BEIDE Lese-Rollen',
+    rowAfter.rows.some(row => (row.$permissions ?? []).includes(`read("label:${siteA.communityId}")`)
+      && (row.$permissions ?? []).includes(`read("label:${siteB.communityId}")`)),
+    JSON.stringify(rowAfter.rows.map(r => r.$permissions)))
+  const afterAudience = await search(siteB.host, cookieB, HANDLE_A)
+  check(`… erst JETZT schlägt B ihn vor (@${HANDLE_A})`,
+    afterAudience.status === 200 && afterAudience.handles?.includes(HANDLE_A),
+    `Status ${afterAudience.status} ${JSON.stringify(afterAudience.handles)}`)
+
+  console.log('\n6. Der Fremde auf einem fremden Host — das MITGLIEDER-GATE (AH-7)')
+  // Der Nachbar ist Mitglied von A, nicht von B. Vor AH-7 bekam er auf Host B
+  // eine LEERE Liste (die Row-Permissions hielten allein). Das reicht seit dem
+  // konto-weiten Register NICHT mehr: Owner A trägt inzwischen beide Labels,
+  // seine ZEILE ebenso — und Appwrite fragt nicht, auf welchem Host jemand
+  // steht. Ohne Gate sähe der Nachbar auf Host B also @grenzprobe_alpha, weil
+  // er dessen Zeile über SEIN Label A lesen darf. Deshalb antwortet die Route
+  // einem Nicht-Mitglied jetzt gar nicht mehr.
   check('Nachbar ist Mitglied von A', await joinAs(neighbour, cookieN, siteA, siteA.host))
   const neighbourLabels = (await poolUsers.get({ userId: neighbour.userId })).labels ?? []
   check('… und NICHT von B', !neighbourLabels.includes(siteB.communityId), JSON.stringify(neighbourLabels))
@@ -353,9 +392,10 @@ try {
     neighbourHome.status === 200 && neighbourHome.handles?.includes(HANDLE_A),
     `Status ${neighbourHome.status} ${JSON.stringify(neighbourHome.handles)}`)
   const neighbourAway = await search(siteB.host, cookieN, PREFIX)
-  check('auf Host B bekommt er NICHTS — die ROW-PERMISSIONS halten allein',
-    neighbourAway.status === 200 && neighbourAway.handles?.length === 0,
-    `Status ${neighbourAway.status} ${JSON.stringify(neighbourAway.handles)}`)
+  check('auf Host B wird er ABGEWIESEN (403) — das Gate hält',
+    neighbourAway.status === 403, `Status ${neighbourAway.status} ${neighbourAway.raw.text.slice(0, 160)}`)
+  check('… mit fachlichem Grund im Envelope (reason: not_a_member)',
+    neighbourAway.raw.json?.reason === 'not_a_member', JSON.stringify(neighbourAway.raw.json))
 
   console.log('\n7. Ohne Sitzung gibt es gar nichts')
   for (const [label, host] of [['A', siteA.host], ['B', siteB.host]]) {
@@ -364,74 +404,92 @@ try {
   }
 
   /**
-   * ── H1 (2026-08-05) ────────────────────────────────────────────────────────
-   * Die Abschnitte 1–7 zeigen, dass ein Fremder auf einem Community-Host nichts
-   * SIEHT. Sie sagen nichts darüber, ob er dort etwas NEHMEN kann — und genau
-   * das konnte er: `GET /api/handles/me` prüfte nur die Sitzung und vergab beim
-   * Hinsehen. Der Nachbar ist hier der Fremde: Mitglied von A, auf Host B ohne
-   * jede Zugehörigkeit.
+   * ── WAS AH-7 AN H1 ÄNDERT (2026-08-11) ────────────────────────────────────
+   * H1 (2026-08-05) schloss eine Lücke, die es SO nicht mehr gibt: solange ein
+   * Handle je Community galt, konnte sich ein Fremder durch den ganzen Pool
+   * arbeiten und überall `@vorstand` wegschnappen — eine Zeile je Community,
+   * jede für immer belegt. Im konto-weiten Register hält ein Konto GENAU EINEN
+   * Namen; der Angriff ist nicht abgesichert, sondern nicht mehr formulierbar.
+   *
+   * Was dafür NEU gilt und hier gemessen wird, weil es Davids Entscheidung ist
+   * und keine Nachlässigkeit: der Namensraum ist GLOBAL. Wer zuerst kommt,
+   * behält — auch wenn er mit der Community, die den Namen gern hätte, nichts
+   * zu tun hat. Was H1 wirklich geschützt hat, hält weiter: SICHTBAR wird
+   * niemand in einer Community, zu der er nicht gehört.
    */
-  console.log('\n8. H1: der Fremde sieht hin — und bekommt NICHTS angelegt')
-  // Gezählt wird über `communityId` (die führende Spalte beider Indizes aus
-  // system-029) — ein `Query.equal('userId', …)` allein hat hier keinen Index.
-  const rowsOfB = () => poolDb.listRows({
+  console.log('\n8. AH-7: der Fremde bekommt einen KONTO-Namen — aber kein Publikum in B')
+  const rowsOfNeighbour = () => poolDb.listRows({
     databaseId: poolDatabaseId, tableId: HANDLES_TABLE,
-    queries: [Query.equal('communityId', siteB.tenantId), Query.limit(50)],
+    queries: [Query.equal('userId', neighbour.userId), Query.limit(25)],
   })
-  const beforeRows = await rowsOfB()
-  const mineAway = await call(siteB.host, '/api/handles/me', { cookie: cookieN })
-  check('GET /api/handles/me auf dem fremden Host → 200 (kein roher Fehler)',
+  const beforeRows = await rowsOfNeighbour()
+  const mineAway = await call(siteB.host, '/api/account/handle', { cookie: cookieN })
+  check('GET /api/account/handle auf dem fremden Host → 200 (kein roher Fehler)',
     mineAway.status === 200, `Status ${mineAway.status} ${mineAway.text.slice(0, 160)}`)
-  check('… und sagt ehrlich: hier gehörst du nicht dazu',
-    mineAway.json?.member === false && mineAway.json?.handle === null, JSON.stringify(mineAway.json))
+  check('… und vergibt einen Namen, denn der gehört dem KONTO', !!mineAway.json?.handle,
+    JSON.stringify(mineAway.json))
 
-  const afterRows = await rowsOfB()
+  const afterRows = await rowsOfNeighbour()
   cleanup.handles.push(...afterRows.rows.map(row => row.$id))
-  check('IN COMMUNITY B ist dadurch keine Zeile entstanden',
-    afterRows.total === beforeRows.total,
-    `vorher ${beforeRows.total}, nachher ${afterRows.total}: ${JSON.stringify(afterRows.rows.map(r => `${r.handle}/${r.userId}`))}`)
-  check('… und keine einzige gehört dem Fremden',
-    !afterRows.rows.some(row => row.userId === neighbour.userId),
-    JSON.stringify(afterRows.rows.map(r => `${r.handle}/${r.userId}`)))
+  check('… es bleibt bei GENAU EINER Zeile — nicht einer je Community',
+    afterRows.total <= 1 && afterRows.total >= beforeRows.total,
+    `vorher ${beforeRows.total}, nachher ${afterRows.total}`)
+  check('… und sie trägt KEIN Lese-Publikum der fremden Community B',
+    !(afterRows.rows[0]?.$permissions ?? []).includes(`read("label:${siteB.communityId}")`),
+    JSON.stringify(afterRows.rows[0]?.$permissions))
 
-  console.log('\n9. H1: und er kann sich dort auch keinen Namen NEHMEN')
-  const squat = await call(siteB.host, '/api/handles/me', {
+  const bSuggests = await search(siteB.host, cookieB, mineAway.json?.handle ?? 'probe')
+  check('… und das Erwähnungs-Menü von B kennt ihn NICHT',
+    bSuggests.status === 200 && bSuggests.handles?.length === 0,
+    `Status ${bSuggests.status} ${JSON.stringify(bSuggests.handles)}`)
+
+  console.log('\n9. AH-7: der Namensraum ist GLOBAL — wer zuerst kam, behält')
+  const squat = await call(siteB.host, '/api/account/handle', {
     method: 'PATCH', cookie: cookieN, body: { handle: HANDLE_SQUAT },
   })
-  check(`PATCH auf dem fremden Host → 403`, squat.status === 403, `Status ${squat.status} ${squat.text.slice(0, 160)}`)
-  check('… mit fachlichem Grund im Envelope (reason: not_a_member)',
-    squat.json?.reason === 'not_a_member', JSON.stringify(squat.json))
+  check(`PATCH auf dem fremden Host → 200 (ein Konto-Name hängt an keinem Host)`,
+    squat.status === 200 && squat.json?.handle === HANDLE_SQUAT,
+    `Status ${squat.status} ${squat.text.slice(0, 160)}`)
 
-  // Die schärfste Messung: der Name muss danach noch FREI sein. Eine
-  // Historien-Zeile gibt ihn nie wieder her — hätte der Fremde ihn bekommen,
-  // scheiterte das hier mit 409 `taken`, und zwar für immer.
-  // Es holt ihn OWNER A (seit Abschnitt 5 Mitglied von B und dort noch ohne
-  // Namen), nicht Owner B: der hat in Abschnitt 2 gerade erst geändert und
-  // liefe in die 30-Tage-Sperrfrist — dann bewiese ein Fehlschlag nichts.
-  const rightfulMember = await call(siteB.host, '/api/handles/me', {
-    method: 'PATCH', cookie: cookieA, body: { handle: HANDLE_SQUAT },
+  // Die Kehrseite derselben Entscheidung, ausdrücklich gemessen: der Name ist
+  // damit für JEDEN anderen weg. Geprüft mit einem FRISCHEN Konto — die drei
+  // aus Abschnitt 2/9 sitzen jetzt alle in der 30-Tage-Sperrfrist, und die
+  // gilt seit AH-7 ebenfalls konto-weit.
+  const fremder = await createPoolUser('fremder')
+  const cookieF = await login(fremder)
+  const taken = await call(siteA.host, '/api/account/handle', {
+    method: 'PATCH', cookie: cookieF, body: { handle: HANDLE_SQUAT },
   })
-  check(`@${HANDLE_SQUAT} ist in Community B noch frei — ein MITGLIED bekommt ihn`,
-    rightfulMember.status === 200 && rightfulMember.json?.handle === HANDLE_SQUAT,
-    `Status ${rightfulMember.status} ${rightfulMember.text.slice(0, 160)}`)
+  check(`@${HANDLE_SQUAT} ist danach WELTWEIT vergeben (409 taken)`,
+    taken.status === 409 && taken.json?.reason === 'taken',
+    `Status ${taken.status} ${taken.text.slice(0, 160)}`)
 
-  console.log('\n10. GEGENPROBE: für ein MITGLIED ändert sich nichts')
-  const mineHome = await call(siteA.host, '/api/handles/me', { cookie: cookieN })
-  check('auf SEINEM Host bekommt derselbe Mensch beim Hinsehen einen Namen',
-    mineHome.status === 200 && mineHome.json?.member === true && !!mineHome.json?.handle,
+  const bAfterSquat = await search(siteB.host, cookieB, HANDLE_SQUAT)
+  check('… und trotzdem steht der Fremde NICHT im Menü von B',
+    bAfterSquat.status === 200 && bAfterSquat.handles?.length === 0,
+    `Status ${bAfterSquat.status} ${JSON.stringify(bAfterSquat.handles)}`)
+
+  console.log('\n10. GEGENPROBE: EIN Name, überall derselbe')
+  const mineHome = await call(siteA.host, '/api/account/handle', { cookie: cookieN })
+  check('auf SEINEM Host trägt derselbe Mensch denselben Namen',
+    mineHome.status === 200 && mineHome.json?.handle === HANDLE_SQUAT,
     `Status ${mineHome.status} ${JSON.stringify(mineHome.json)}`)
-  const changeHome = await call(siteA.host, '/api/handles/me', {
-    method: 'PATCH', cookie: cookieN, body: { handle: HANDLE_HOME },
+  const homeSuggests = await search(siteA.host, cookieN, HANDLE_SQUAT)
+  check('… und SEINE Community schlägt ihn vor (das Publikum wurde nachgetragen)',
+    homeSuggests.status === 200 && homeSuggests.handles?.includes(HANDLE_SQUAT),
+    `Status ${homeSuggests.status} ${JSON.stringify(homeSuggests.handles)}`)
+  const tooSoon = await call(siteA.host, '/api/account/handle', {
+    method: 'PATCH', cookie: cookieN, body: { handle: `${PREFIX}_zweitversuch` },
   })
-  check(`… und darf ihn auf @${HANDLE_HOME} ändern`,
-    changeHome.status === 200 && changeHome.json?.handle === HANDLE_HOME,
-    `Status ${changeHome.status} ${changeHome.text.slice(0, 160)}`)
-  const ownerStillWorks = await call(siteA.host, '/api/handles/me', { cookie: cookieA })
+  check('… und die 30-Tage-Sperrfrist gilt ebenfalls konto-weit (change_too_soon)',
+    tooSoon.status === 400 && tooSoon.json?.reason === 'change_too_soon',
+    `Status ${tooSoon.status} ${tooSoon.text.slice(0, 160)}`)
+  const ownerStillWorks = await call(siteA.host, '/api/account/handle', { cookie: cookieA })
   check('… und Owner A behält seinen',
     ownerStillWorks.status === 200 && ownerStillWorks.json?.handle === HANDLE_A,
     `Status ${ownerStillWorks.status} ${JSON.stringify(ownerStillWorks.json)}`)
 
-  const guestMine = await call(siteA.host, '/api/handles/me', {})
+  const guestMine = await call(siteA.host, '/api/account/handle', {})
   check('ohne Sitzung bleibt es bei 401 (die Wache ersetzt sie nicht)',
     guestMine.status === 401, `Status ${guestMine.status}`)
 }
@@ -449,10 +507,12 @@ finally {
     databaseId: poolDatabaseId, tableId: HANDLES_TABLE,
     queries: [Query.equal('handleLower', ALL_HANDLES), Query.limit(50)],
   }).catch(() => ({ rows: [] }))
-  const mine = cleanup.tenantIds.length
+  // Konto-Zeilen tragen keine communityId mehr (AH-7) — gesucht wird über die
+  // Wegwerf-Konten selbst.
+  const mine = cleanup.users.length
     ? await poolDb.listRows({
         databaseId: poolDatabaseId, tableId: HANDLES_TABLE,
-        queries: [Query.equal('communityId', cleanup.tenantIds), Query.limit(100)],
+        queries: [Query.equal('userId', cleanup.users), Query.limit(100)],
       }).catch(() => ({ rows: [] }))
     : { rows: [] }
   strays.rows.push(...mine.rows)

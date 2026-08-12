@@ -431,7 +431,20 @@ export default defineAppConfig({
        * die Grenze ist der Besitz, und die setzen die Contributors
        * (core/server/utils/userActivity.ts) durch.
        */
-      controlApiPrefixes: ['/api/auth/', '/api/onboarding/', '/api/health', '/api/telemetry/', '/api/notifications', '/api/feedback', '/api/abuse', '/api/account/activity'] as string[],
+      /**
+       * `/api/account/handle` (AH-7, 2026-08-11) — EXAKTER Pfad, aus demselben
+       * Grund wie `/api/account/activity` daneben: `/api/account/` als Präfix
+       * hätte jede künftige Konto-Route ungefragt mit aufgemacht.
+       *
+       * Sicher ohne Mandanten-Scope, weil der @name seit AH-7 dem KONTO gehört
+       * und nicht mehr einer Community (`account_handles`, global eindeutig).
+       * Die Route liest und schreibt ausschließlich über die Besitz-Spalte
+       * `userId` = Session-Nutzer. Genau deshalb steht `/api/handles/`
+       * weiterhin NICHT hier: die Suche dahinter ist eine Mitgliederliste und
+       * bezieht ihre Grenze aus dem Publikum der Zeile — ohne Community gibt
+       * es dort nichts zu beantworten.
+       */
+      controlApiPrefixes: ['/api/auth/', '/api/onboarding/', '/api/health', '/api/telemetry/', '/api/notifications', '/api/feedback', '/api/abuse', '/api/account/activity', '/api/account/handle'] as string[],
     },
     /**
      * Realtime-Gate (F14, 2026-08-01) — der EINE Schalter, mit dem eine App

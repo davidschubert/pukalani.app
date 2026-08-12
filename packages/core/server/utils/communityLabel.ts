@@ -184,6 +184,16 @@ export async function setCommunityModeratorLabel(
  * Kein Fehler, wenn nichts wegzunehmen ist (idempotent): der Entzug läuft an
  * zwei Stellen — sofort in der Entfernen-Route und als Selbstheilung in der
  * Label-Middleware, falls der erste Versuch danebenging.
+ *
+ * ── SEIT AH-7 FÄLLT DER @NAME MIT AUS DEM BLICKFELD ───────────────────────
+ * Ein Handle gehört seit 2026-08-11 dem KONTO (`account_handles`), nicht mehr
+ * der Community. Sein Lese-Publikum steht deshalb als LISTE an der Zeile —
+ * eine Rolle je Mitgliedschaft. Der Entzug nimmt genau diese eine Rolle weg:
+ * der Mensch BEHÄLT seinen Namen (er ist seiner), er wird hier nur nicht mehr
+ * vorgeschlagen. Ohne diesen Schritt stünde ein Entfernter weiter im
+ * Erwähnungs-Menü — dieselbe Lücke, die A5 für alle anderen Zeilen geschlossen
+ * hat. Fail-soft (siehe Implementierung): der Label-Entzug ist die Grenze,
+ * dies hier räumt die Anzeige nach.
  */
 export async function revokeCommunityLabel(event: H3Event, communityId: string, userId?: string): Promise<void> {
   const targetId = userId ?? event.context.user?.$id
@@ -197,4 +207,5 @@ export async function revokeCommunityLabel(event: H3Event, communityId: string, 
     { remove: modLabel ? [communityId, modLabel] : [communityId] },
     'revoked',
   )
+  await revokeAccountHandleAudience(event, targetId, communityId)
 }

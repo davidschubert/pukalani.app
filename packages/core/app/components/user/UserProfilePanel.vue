@@ -14,19 +14,18 @@
  * Überschriften. Genau die war bisher im Seiten-Markup von
  * packages/admin/app/pages/dashboard/settings/index.vue eingebacken.
  *
- * ── WARUM DER @name EIN SLOT IST ──────────────────────────────────────────
- * Ein @name gilt PRO COMMUNITY (Tabelle `community_handles`, eindeutig je
- * `(communityId, handleLower)`) — es gibt keinen konto-weiten. Auf einem
- * Kontroll-Host gibt es aber gar keine Community, und `/api/handles/me` steht
- * dort bewusst nicht in `pukalani.tenancy.controlApiPrefixes`: die Route würde
- * ohne Mandanten-Kontext antworten müssen, und der Präfix nähme `/api/handles/
- * search` gleich mit — eine ungescopte Namensliste über den ganzen Pool.
+ * ── DER @name IST SEIT AH-7 ÜBERALL DASSELBE FORMULAR ─────────────────────
+ * Bis zum 2026-08-11 galt ein @name PRO COMMUNITY, und auf einem Kontroll-Host
+ * gab es keine — dort stand deshalb ein Ersatztext im Slot `handle` statt eines
+ * Eingabefelds, das jede Eingabe mit 404 quittiert hätte.
  *
- * Ohne Slot stünde dort ein Eingabefeld, das jede Eingabe mit 404 quittiert.
- * Der Standard-Inhalt bleibt deshalb das echte Formular (Dashboard, Mandanten-
- * Host); wer die Fläche ohne Community rendert, ERSETZT den Slot durch seine
- * eigene Erklärung. Ein Slot und kein Prop, weil der Ersatztext dann dem Layer
- * gehört, der ihn erklären kann — der Core weiß nichts von `/communities`.
+ * Mit AH-7 (Davids Entscheidung: eine Pukalani-ID, EIN Handle, überall) ist
+ * dieser Unterschied ersatzlos weg: `account_handles` ist global, die Route
+ * `/api/account/handle` steht in `pukalani.tenancy.controlApiPrefixes` und
+ * antwortet auf jedem Host. Der Slot BLEIBT trotzdem — als Öffnung, nicht als
+ * Notlösung: eine App, die den @namen gar nicht anbieten will (oder ihn anders
+ * erklären muss), ersetzt ihn, ohne dass diese Anordnung sich ändert. Der
+ * Standard-Inhalt ist jetzt an BEIDEN Orten das echte Formular.
  */
 const { t } = useI18n()
 </script>
@@ -38,8 +37,8 @@ const { t } = useI18n()
     </UPageCard>
 
     <!-- Der @name steht neben dem Profil, weil er dasselbe beantwortet: „wie
-         trete ich hier auf". Eigene Karte, weil er anders als Name und Bio
-         PRO COMMUNITY gilt und nur alle 30 Tage änderbar ist. -->
+         trete ich auf". Eigene Karte, weil er anders als Name und Bio
+         eindeutig sein muss und nur alle 30 Tage änderbar ist. -->
     <UPageCard variant="subtle">
       <slot name="handle">
         <UserHandleForm />

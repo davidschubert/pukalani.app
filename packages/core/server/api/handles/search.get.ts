@@ -1,10 +1,13 @@
 import { Query } from 'node-appwrite'
 import { z } from 'zod'
 import { HANDLE_MAX_LENGTH, normalizeHandle } from '../../../shared/handles'
-import { HANDLES_TABLE, type CommunityHandleRow } from '../../../shared/types/handle'
+import { handleAudienceIncludes } from '../../../shared/accountHandleAudience'
+import { ACCOUNT_HANDLES_TABLE, type AccountHandleRow } from '../../../shared/types/handle'
 
 /** Kurze Liste — das Menü in der Schreibfläche zeigt ohnehin nur eine Handvoll. */
 const LIMIT = 8
+/** Reserve für den Publikums-Filter, der erst nach der Abfrage greift. */
+const READ_LIMIT = 50
 
 const querySchema = z.object({
   q: z.string().trim().max(HANDLE_MAX_LENGTH).optional(),
@@ -13,65 +16,87 @@ const querySchema = z.object({
 /**
  * Vorschläge für das Erwähnungs-Menü der Schreibfläche.
  *
- * ── DIE TÜRKLINKE IST HIER BEWUSST 'member' ────────────────────────────────
- * Anders als der Rest von core/server/utils/handles.ts (der den Admin-Client
- * braucht, weil die Tabelle keine Schreibrechte trägt) liest DIESE Route mit
- * dem Session-Client. Das ist kein Zufall: eine Liste ALLER Namen einer
- * Community ist ihre Mitgliederliste, und die soll nur sehen, wer dazugehört.
- * Die Zeilen tragen `read(label:<communityId>)` — wer das Label nicht hat,
- * bekommt von Appwrite nichts, ganz ohne eigene Prüfung hier. Der
- * Mandanten-Filter der Datentür bleibt das Netz darunter.
+ * Seit AH-7 (2026-08-11) kommen sie aus dem KONTO-Register (`account_handles`)
+ * statt aus `community_handles` — vorgeschlagen wird also der eine Name, den
+ * dieser Mensch überall trägt. Was sich NICHT ändert, ist die Grenze:
+ * vorgeschlagen werden nur MITGLIEDER DIESER Community, nie der ganze Pool.
+ *
+ * ── DIE GRENZE BRAUCHT SEIT AH-7 ZWEI SCHICHTEN, UND EINE DAVON IST NEU ────
+ * Bis AH-7 hielten hier zwei unabhängige Dinge: der Mandanten-FILTER der
+ * Datentür (`Query.equal('communityId', …)`) und die Row-Permissions
+ * (`read(label:<communityId>)`). Beide sind mit dem konto-weiten Register
+ * angefasst worden, und zwar so:
+ *
+ *  1. DER FILTER FÄLLT WEG — es gibt keine `communityId`-Spalte mehr, ein
+ *     `tenantDb()` fände hier nie eine Zeile.
+ *  2. DIE ROW-PERMISSIONS ALLEIN REICHEN NICHT MEHR. Das ist der Punkt, den
+ *     man leicht übersieht: eine Konto-Zeile trägt eine Lese-Rolle JE
+ *     Mitgliedschaft, und ein LESER trägt ebenso Labels aus mehreren
+ *     Communities. Wer in A und B ist, darf die Zeilen von A UND B lesen —
+ *     Appwrite fragt nicht, auf welchem HOST er gerade steht. Ohne weiteres
+ *     Zutun stünden also A-Mitglieder im Erwähnungs-Menü von B (gemessen beim
+ *     Bau von AH-7 an `verify-handle-search-boundary.mjs`, Abschnitt 5/6).
+ *
+ * Deshalb hier jetzt BEIDES, und beides ist nötig:
+ *  (a) EIN MITGLIEDER-GATE. Eine Namensliste IST die Mitgliederliste einer
+ *      Community; wer nicht dazugehört, bekommt gar keine Antwort. Das ist die
+ *      Umkehrung der Vor-AH-7-Begründung („kein Gate nötig, die Datenebene
+ *      erledigt es") — dort stand ausdrücklich, dass es hierher gehört, sobald
+ *      die Datenebene die Frage nicht mehr allein beantwortet. Genau das ist
+ *      eingetreten. Kosten: eine Rollen-Auflösung, die für diesen Request
+ *      ohnehin schon gelaufen ist (Label-Middleware, 30 s Cache).
+ *  (b) DER PUBLIKUMS-FILTER auf DIESE Community. Er beantwortet die zweite
+ *      Frage: gehört die gefundene Zeile hierher? Gelesen wird weiter mit dem
+ *      SESSION-Client — die Row-Permissions bleiben die harte Schicht darunter,
+ *      dieser Filter ist die mandantengenaue darüber.
+ *
+ * NACHGELESEN WIRD GROSSZÜGIGER ALS AUSGEGEBEN (`READ_LIMIT` > `LIMIT`), weil
+ * der Publikums-Filter erst NACH der Abfrage greift: würden 8 gelesen und 6
+ * davon verworfen, zeigte das Menü 2 Vorschläge, obwohl es mehr gäbe.
  *
  * `status: 'active'` filtert richtig: vorgeschlagen wird, wie jemand HEUTE
  * heisst. Frühere Namen lösen weiterhin auf (resolveHandleOwners), aber
  * niemand soll sie neu tippen.
  *
- * ── WARUM HIER BEWUSST KEIN MITGLIEDER-GATE STEHT (H1, 2026-08-05) ─────────
- * Die Schwestern-Routen (`me.get`/`me.patch`) haben seit H1 eine
- * Zugehörigkeits-Wache. Diese hier bekommt bewusst keine, und das ist eine
- * Entscheidung, keine Auslassung:
- *
- *  - SIE VERGIBT NICHTS. Der Schaden von H1 war die dauerhafte BELEGUNG eines
- *    Namens durch einen Fremden (die Historien-Zeile gibt ihn nie frei). Diese
- *    Route schreibt nicht.
- *  - SIE ZEIGT EINEM FREMDEN OHNEHIN NICHTS. Zwei unabhängige Schichten halten
- *    das, beide einzeln gemessen (`packages/core/scripts/
- *    verify-handle-search-boundary.mjs`, Abschnitte 5 und 6): der
- *    Mandanten-Filter der Datentür und die Row-Permissions
- *    `read(label:<communityId>)`, die genau das Lese-Publikum sind, das ein
- *    Nicht-Mitglied nicht hat. Ein Gate obendrauf würde aus einer leeren Liste
- *    ein 403 machen — mehr nicht.
- *  - ES KOSTET AUF DEM HEISSEN PFAD. Das Erwähnungs-Menü fragt beim Tippen
- *    (debounced); eine Rollen-Auflösung je Anfrage wäre Aufwand für eine
- *    Antwort, die die Datenebene schon gegeben hat.
- *
- * Im SILO (apps/comments) gilt dasselbe aus dem anderen Grund: dort gibt es
- * keine Mandanten-Grenze, die Zeilen tragen `read("users")`, und jedes Konto
- * der Instanz ist zuhause. Ein Gate wäre dort keine Grenze, sondern eine
- * Aussperrung — genauso wie `resolveCommunityMembership` dort bewusst „ja"
- * sagt.
- *
- * WENN SICH DAS ÄNDERT: sobald diese Route etwas ANLEGT oder mit dem
- * Admin-Client läse (`as: 'operator'`), fällt beides weg — dann gehört das Gate
- * hierher.
+ * Im SILO (apps/comments) laufen beide Schichten bewusst ins Leere:
+ * `resolveCommunityMembership` sagt dort ja (das Projekt IST die Grenze), die
+ * Zeilen tragen `read("users")`, und `handleAudienceIncludes` gibt ohne Pool
+ * ebenfalls ja zurück. Ein Gate wäre dort keine Grenze, sondern eine
+ * Aussperrung.
  */
 export default defineEventHandler(async (event) => {
-  const user = event.context.user
-  if (!user) throw createError({ status: 401, statusText: 'Unauthorized' })
+  // (a) Das Gate. Wirft 401 ohne Sitzung und 403 mit fachlichem Grund für
+  //     Fremde — im Silo und auf Single-Tenant-Instanzen lässt es jeden durch.
+  await requireCommunityMembership(event)
 
   const { q } = await getValidatedQuery(event, querySchema.parse)
   const prefix = normalizeHandle(q ?? '')
 
-  const { rows } = await tenantDb(event).list<CommunityHandleRow>(HANDLES_TABLE, [
-    Query.equal('status', 'active'),
-    ...(prefix ? [Query.startsWith('handleLower', prefix)] : []),
-    Query.orderAsc('handleLower'),
-    Query.limit(LIMIT),
-  ])
+  const { tablesDB } = createSessionClient(event)
+  const databaseId = useRuntimeConfig(event).public.appwriteDatabaseId
+
+  const { rows } = await tablesDB.listRows<AccountHandleRow>({
+    databaseId,
+    tableId: ACCOUNT_HANDLES_TABLE,
+    queries: [
+      Query.equal('status', 'active'),
+      ...(prefix ? [Query.startsWith('handleLower', prefix)] : []),
+      Query.orderAsc('handleLower'),
+      Query.limit(READ_LIMIT),
+    ],
+  })
+
+  // (b) Der Publikums-Filter: gehört diese Zeile in DIESE Community?
+  const tenant = useTenant(event)
+  const pool = tenant?.mode === 'pool'
+  const communityId = pool ? (tenant?.communityId ?? '') : ''
 
   // `id` UND `label` tragen denselben Wert: das Menü fügt den Handle als
   // gewöhnlichen Text ein, es gibt keine Id im Fliesstext (siehe
   // shared/mentions.ts). Ein Feld mit einer Nutzer-Id wäre hier ein
   // Datenleck ohne Zweck.
-  return rows.map(row => ({ id: row.handle, label: row.handle }))
+  return rows
+    .filter(row => handleAudienceIncludes(row.$permissions, pool, communityId))
+    .slice(0, LIMIT)
+    .map(row => ({ id: row.handle, label: row.handle }))
 })
