@@ -600,7 +600,7 @@
       "admin": "Administrator/in",
       "moderator": "Moderator/in",
       "editor": "Redakteur/in",
-      "viewer": "Mitglied"
+      "viewer": "Leser/in"
     },
     "roleHelp": {
       "owner": "Volle Rechte inklusive Übergabe des Besitzes.",

@@ -76,7 +76,7 @@
       "rows": [
         {
           "pain": "Hohe Grundpreise + Transaktionsgebühren",
-          "gain": "Fairer, planbarer Preis. 14 Tage kostenlos testen."
+          "gain": "Fairer, planbarer Preis. 14 Tage Testphase, kostenlos."
         },
         {
           "pain": "Unklare Datenwege & Werbe-Tracking",
@@ -100,7 +100,7 @@
         },
         {
           "n": "2",
-          "title": "Deine Site benennen",
+          "title": "Deine Community benennen",
           "text": "deinname.pukalani.app ist sofort live."
         },
         {
@@ -204,7 +204,7 @@
           "text": "Transportverschlüsselung"
         }
       ],
-      "note": "Was am Ende zählt, ist die konkrete Konfiguration deiner Site und deine Rechtstexte – pauschale Versprechen machen wir bewusst nicht."
+      "note": "Was am Ende zählt, ist die konkrete Konfiguration deiner Community und deine Rechtstexte – pauschale Versprechen machen wir bewusst nicht."
     },
     "products": {
       "backHome": "Zur Startseite",
@@ -434,7 +434,7 @@
       "title": "Wie wir Datenschutz umsetzen",
       "lead": "Kein Siegel, keine Marketing-Formel: hier steht, wo deine Daten liegen, was wir nicht tun – und was wir bewusst nicht versprechen.",
       "disclaimerTitle": "Was diese Seite ist – und was nicht",
-      "disclaimer": "Diese Seite erklärt unsere Technik und unseren Betrieb. Sie ist keine Rechtsberatung und ersetzt nicht die Datenschutzerklärung deiner Community – die brauchst du für deine eigene Site, passend zu den Produkten, die du aktivierst.",
+      "disclaimer": "Diese Seite erklärt unsere Technik und unseren Betrieb. Sie ist keine Rechtsberatung und ersetzt nicht die Datenschutzerklärung deiner Community – die brauchst du für deine eigene Community, passend zu den Produkten, die du aktivierst.",
       "legalLink": "Unsere eigene Datenschutzerklärung",
       "sections": [
         {
@@ -559,7 +559,7 @@
           "title": "Mitglieder, Termine und Austausch an einem Ort",
           "sub": "Ein Mitgliederbereich, den auch Nicht-Techniker bedienen – gehostet in Deutschland.",
           "intro": "Rundmails, drei Chatgruppen und ein PDF-Kalender: so verliert man Mitglieder statt sie einzubinden. Ein ruhiger, gemeinsamer Ort ersetzt das – ohne dass jemand einen Server betreuen muss.",
-          "fit": "Kein Betrieb, keine Plugin-Bastelei: du legst die Site an und arbeitest los. Daten liegen in Deutschland, Rollen regeln klar, wer moderiert, schreibt oder nur mitliest – und der Einstieg ist kostenlos.",
+          "fit": "Kein Betrieb, keine Plugin-Bastelei: du legst die Community an und arbeitest los. Daten liegen in Deutschland, Rollen regeln klar, wer moderiert, schreibt oder nur mitliest – und der Einstieg ist kostenlos.",
           "blocks": "Kommentare · Moderation · Seiten & Branding · später Events"
         }
       }
@@ -668,7 +668,7 @@
     "pricing": {
       "kicker": "Preise",
       "title": "Ein fairer Preis für deine ganze Community – nicht pro Produkt.",
-      "lead": "14 Tage kostenlos testen, jederzeit kündbar, Datenexport inklusive. Aktuell im Early Access mit Einladung.",
+      "lead": "14 Tage kostenlose Testphase, jederzeit kündbar, Datenexport inklusive. Aktuell im Early Access mit Einladung.",
       "intervalLabel": "Abrechnungszeitraum",
       "monthly": "Monatlich",
       "yearly": "Jährlich",

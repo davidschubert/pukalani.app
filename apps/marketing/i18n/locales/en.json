@@ -100,7 +100,7 @@
         },
         {
           "n": "2",
-          "title": "Name your site",
+          "title": "Name your community",
           "text": "yourname.pukalani.app is live instantly."
         },
         {
@@ -204,7 +204,7 @@
           "text": "Transport encryption"
         }
       ],
-      "note": "What matters in the end is your site's actual configuration and your legal texts – we deliberately avoid blanket promises."
+      "note": "What matters in the end is your community's actual configuration and your legal texts – we deliberately avoid blanket promises."
     },
     "products": {
       "backHome": "Back to home",
@@ -434,7 +434,7 @@
       "title": "How we implement privacy",
       "lead": "No seal, no marketing formula: here's where your data lives, what we don't do – and what we deliberately don't promise.",
       "disclaimerTitle": "What this page is – and isn't",
-      "disclaimer": "This page explains our technology and operations. It is not legal advice and does not replace your community's own privacy policy – you need that for your own site, matching the products you switch on.",
+      "disclaimer": "This page explains our technology and operations. It is not legal advice and does not replace your community's own privacy policy – you need that for your own community, matching the products you switch on.",
       "legalLink": "Our own privacy policy",
       "sections": [
         {
@@ -559,7 +559,7 @@
           "title": "Members, dates and exchange in one place",
           "sub": "A members' area that non-technical people can run – hosted in Germany.",
           "intro": "Mass emails, three chat groups and a PDF calendar: that's how you lose members instead of involving them. One calm, shared place replaces it – without anyone having to maintain a server.",
-          "fit": "No ops, no plugin tinkering: you create the site and get going. Data sits in Germany, roles clearly govern who moderates, writes or just reads – and getting started is free.",
+          "fit": "No ops, no plugin tinkering: you create the community and get going. Data sits in Germany, roles clearly govern who moderates, writes or just reads – and getting started is free.",
           "blocks": "Comments · moderation · pages & branding · events later"
         }
       }

@@ -600,7 +600,7 @@
       "admin": "Administrator",
       "moderator": "Moderator",
       "editor": "Editor",
-      "viewer": "Member"
+      "viewer": "Reader"
     },
     "roleHelp": {
       "owner": "Full rights, including transferring ownership.",
