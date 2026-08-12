@@ -83,7 +83,8 @@
       "successTitle": "E-Mail bestätigt",
       "successMessage": "Danke! Deine Adresse ist jetzt verifiziert.",
       "invalidTitle": "Link ungültig oder abgelaufen",
-      "invalidMessage": "Fordere über das Banner einen neuen Bestätigungslink an.",
+      "invalidMessage": "Fordere hier einen neuen Bestätigungslink an.",
+      "invalidMessageGuest": "Melde dich an, danach kannst du einen neuen Bestätigungslink anfordern.",
       "backHome": "Zur Startseite",
       "requiredMessage": "Diese Adresse ({email}) ist noch nicht bestätigt. Klick auf den Link in unserer Bestätigungsmail — dann geht es hier weiter."
     },

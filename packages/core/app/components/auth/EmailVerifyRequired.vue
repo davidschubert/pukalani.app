@@ -24,37 +24,13 @@ const props = defineProps<{
 }>()
 
 const { t } = useI18n()
-const toast = useToast()
 const { user } = useCurrentUser()
-
-const sending = ref(false)
-const sent = ref(false)
+// Der Vorgang ist derselbe wie im Banner und auf /verify — er liegt seit M3
+// EINMAL in useEmailVerifyResend(); hier bleibt nur die Erscheinung.
+const { sending, sent, resend } = useEmailVerifyResend()
 
 const description = computed(() =>
   t('auth.verification.requiredMessage', { email: user.value?.email ?? '' }))
-
-async function resend() {
-  sending.value = true
-  try {
-    await $fetch('/api/auth/verification', { method: 'POST' })
-    sent.value = true
-    toast.add({
-      title: t('auth.verification.sentTitle'),
-      description: t('auth.verification.sentDescription'),
-      color: 'success',
-    })
-  }
-  catch {
-    toast.add({
-      title: t('auth.verification.sendFailed'),
-      description: t('auth.verification.sendFailedDescription'),
-      color: 'error',
-    })
-  }
-  finally {
-    sending.value = false
-  }
-}
 </script>
 
 <template>

@@ -83,7 +83,8 @@
       "successTitle": "Email confirmed",
       "successMessage": "Thanks! Your address is now verified.",
       "invalidTitle": "Link invalid or expired",
-      "invalidMessage": "Request a new confirmation link from the banner.",
+      "invalidMessage": "Request a new confirmation link here.",
+      "invalidMessageGuest": "Sign in, then you can request a new confirmation link.",
       "backHome": "Back to home",
       "requiredMessage": "This address ({email}) is not confirmed yet. Open the link in our confirmation email, then come back here."
     },

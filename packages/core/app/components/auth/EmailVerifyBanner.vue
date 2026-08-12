@@ -2,14 +2,15 @@
 const { t } = useI18n()
 const appConfig = useAppConfig()
 const { user, isLoggedIn } = useCurrentUser()
-const toast = useToast()
+// Der Vorgang selbst liegt in useEmailVerifyResend() — dieselbe Anforderung
+// bedient auch die Seite /verify (M3). Hier bleibt nur die Erscheinung.
+const { sending, resend } = useEmailVerifyResend()
 
 // BEWUSST kein Close/X und keine UBanner-id: solange die Adresse
 // unverifiziert ist, soll der Banner bei jedem Besuch wiederkommen (ein
 // localStorage-Dismiss würde die Verifizierung dauerhaft unsichtbar machen).
 // Nur nach erfolgreichem Resend verschwindet er für die laufende Sitzung.
 const dismissed = ref(false)
-const sending = ref(false)
 
 const visible = computed(() =>
   appConfig.pukalani?.auth?.verification === true
@@ -21,26 +22,11 @@ const visible = computed(() =>
 const actions = computed(() => [{
   label: t('auth.verification.resend'),
   loading: sending.value,
-  onClick: () => { void resend() },
+  onClick: () => { void onResend() },
 }])
 
-async function resend() {
-  sending.value = true
-  try {
-    await $fetch('/api/auth/verification', { method: 'POST' })
-    toast.add({ title: t('auth.verification.sentTitle'), description: t('auth.verification.sentDescription'), color: 'success' })
-    dismissed.value = true
-  }
-  catch {
-    toast.add({
-      title: t('auth.verification.sendFailed'),
-      description: t('auth.verification.sendFailedDescription'),
-      color: 'error',
-    })
-  }
-  finally {
-    sending.value = false
-  }
+async function onResend() {
+  if (await resend()) dismissed.value = true
 }
 </script>
 

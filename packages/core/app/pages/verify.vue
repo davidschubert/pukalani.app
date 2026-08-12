@@ -19,6 +19,19 @@ useBrandTitle(() => t('auth.verification.pageTitle'))
 
 const state = ref<'working' | 'success' | 'invalid'>('working')
 
+/**
+ * M3: Bei einem abgelaufenen Link stand hier „Fordere über das Banner einen
+ * neuen Bestätigungslink an" — die Seite hat kein Banner, und die einzige
+ * Schaltfläche führte nach Hause. Jetzt steht der Knopf DA, wo der Nutzer
+ * gerade steht; der Vorgang ist derselbe wie im Banner
+ * (useEmailVerifyResend).
+ *
+ * Anfordern geht nur MIT Session (die Route braucht sie). Der Link wird oft
+ * auf einem zweiten Gerät geöffnet — ohne Anmeldung führt der Weg deshalb
+ * ehrlich über /login statt über einen Knopf, der 401 antwortet.
+ */
+const { sending, sent, resend } = useEmailVerifyResend()
+
 onMounted(async () => {
   const userId = typeof route.query.userId === 'string' ? route.query.userId : ''
   const secret = typeof route.query.secret === 'string' ? route.query.secret : ''
@@ -53,8 +66,34 @@ onMounted(async () => {
     <template v-else>
       <UIcon name="i-ph-warning-circle" class="mx-auto size-10 text-error" />
       <h1 class="mt-3 text-xl font-semibold">{{ t('auth.verification.invalidTitle') }}</h1>
-      <p class="mt-2 text-sm text-muted">{{ t('auth.verification.invalidMessage') }}</p>
-      <UButton :to="localePath('/')" color="neutral" variant="subtle" class="mt-6">{{ t('auth.verification.backHome') }}</UButton>
+      <p class="mt-2 text-sm text-muted">
+        {{ isLoggedIn ? t('auth.verification.invalidMessage') : t('auth.verification.invalidMessageGuest') }}
+      </p>
+
+      <div class="mt-6 flex flex-col items-center gap-2">
+        <UAlert
+          v-if="sent"
+          color="success"
+          variant="subtle"
+          :title="t('auth.verification.sentTitle')"
+          :description="t('auth.verification.sentDescription')"
+          class="text-left"
+        />
+        <UButton
+          v-else-if="isLoggedIn"
+          icon="i-ph-envelope-simple"
+          :loading="sending"
+          data-verify-resend
+          @click="resend()"
+        >
+          {{ t('auth.verification.resend') }}
+        </UButton>
+        <UButton v-else :to="localePath('/login')" icon="i-ph-sign-in">
+          {{ t('auth.login.submit') }}
+        </UButton>
+
+        <UButton :to="localePath('/')" color="neutral" variant="subtle">{{ t('auth.verification.backHome') }}</UButton>
+      </div>
     </template>
   </div>
 </template>
