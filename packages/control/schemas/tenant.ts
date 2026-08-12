@@ -34,14 +34,18 @@ export const RESERVED_SUBDOMAINS = new Set([
   // `account` ist seit AH-1 (2026-08-11) DER Kundenbereich; es steht schon
   // weiter unten in der Phishing-Liste und bleibt dort — hier nur der Hinweis,
   // dass der Name jetzt zusätzlich vergeben IST, nicht bloß gesperrt.
-  // `admin` (oben) und `master` sind für AH-4 (Cutover control. → admin.) und
-  // AH-5 (master-Community als Werkstatt) VORRESERVIERT: ein Name gehört
-  // gesperrt, bevor er beworben wird, nicht danach.
+  // `admin` (oben) ist für AH-4 (Cutover control. → admin.) VORRESERVIERT:
+  // ein Name gehört gesperrt, bevor er beworben wird, nicht danach.
+  // `master` steht seit AH-5 (2026-08-11) NICHT mehr hier: die Werkstatt-
+  // Community master.pukalani.app IST angelegt — ab da hält der Unique-Index
+  // uq_host den Namen, und ein Eintrag in dieser Liste würde umgekehrt jede
+  // Betreiber-Pflege des Bestands-Tenants blockieren (die Anlage-Route prüft
+  // sie bei JEDEM Anlegen, auch dem des Betreibers).
   // `control` ist der Maschinenraum. ABGESCHALTETE Altnamen bleiben gesperrt —
   // ein zurückgegebener Plattform-Name ist der beste Phishing-Köder, den es
   // gibt: `app` und `studio` (oben) sowie `my` und `start`, die seit AH-1
   // nur noch 301 auf `account` weiterleiten.
-  'control', 'my', 'start', 'master', 'manage', 'new', 'photos',
+  'control', 'my', 'start', 'manage', 'new', 'photos',
   // Phishing-Schutz (Self-Service-Onboarding, SAAS-ROADMAP #1): Hosts, die wie
   // die Plattform selbst klingen, dürfen nie einem Kunden gehören —
   // `login.pukalani.app` in fremder Hand ist eine Anmeldedaten-Falle mit
