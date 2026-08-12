@@ -29,6 +29,53 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### AP9 / U16 + U10-Rest — Domain-Politur + Preisseiten, die dasselbe erzählen ✅ 2026-08-12
+
+**Domain (U16, Wettbewerb E6):** Der „Prüfen"-Lauf fragt jetzt zusätzlich die
+**CAA-Kette** (eigener Resolver, keine Fremd-API; nebenläufig gestartet, kostet
+den Klick nichts). Regeln pur in `packages/control/shared/customDomain.ts`
+(`caaChain` + `caaVerdictFromRecords`): Kette von unten nach oben, weil CAA
+erbt (RFC 8659 § 3), TLD bewusst außen vor; ein Satz ohne `issue`-Feld
+beschränkt nichts (`iodef` ist kein Verbot); `issue ";"` ist das Verbot für
+ALLE — gezählt wird das Vorhandensein des Feldes, nicht der Name darin;
+`issuewild` wird nicht bewertet (für Kundendomains wird nie ein Wildcard
+bestellt); DNS-Fehler ⇒ `unknown`, NIE eine Warnung. Live gegen echtes DNS:
+google.com → blocked, www.google.com erbt, letsencrypt.org → ok. Dazu
+**Registrar-Anleitungen** (IONOS, Strato, United Domains, Hetzner, Cloudflare
++ generisch) als Aufklapper — sie beschreiben den WEG, die Werte (TXT, IP,
+CNAME) bleiben die EINE Server-Anzeige darüber; **TTL-Hinweis**; **30-s-Auto-
+Nachprüfen** (`useDomainAutoCheck`: nur solange nicht aktiv, Pause bei
+`document.hidden`, sofort beim Zurückkommen mit Mindestabstand, nie zwei
+gleichzeitig, Fehlschläge still — die Meldung gehört dem Knopf, der bleibt).
+
+**Preise (U10: G5, E4, M5, M6):** Vergleichstabelle unter den Karten der
+www-Startseite — **14 Zeilen, jede aus den echten Gates**
+(`pukalani.tenancy.products` + `quota.plans`, inkl. „Eigene Domain — ab Pro",
+U13), lokalisierte Zahlen, scrollt bei 375 px im Kasten statt die Seite.
+Jahresrabatt überall als „**drei Monate geschenkt**" (Preis-Umschalter, FAQ,
+Plan-Reiter, Hilfe-Seite — dasselbe Geld: 261 = 3×29). Zwei Angleichungen, die
+erst die Tabelle sichtbar machte: Personals „unter eigener Adresse" las sich
+wie die Pro-Domain; Pros Stichpunkte verschwiegen die eigene Domain.
+
+Deploy `3f4d51fc` gate+deploy=success; live in beiden Sprachen nachgemessen.
+Betreiber-Konsole bekommt CAA als Log statt Feld (andere Antwortform);
+Silo-Domain-Seite: CAA + TTL, keine Registrar-Aufklapper (Operator-Publikum).
+
+**Für David gemerkt:** Die Pro-Karte wirbt mit „plus Team-Rollen" — Team-Rollen
+sind aber NIRGENDS plan-gegated (`communityTeam.ts` kennt keine Pläne), und
+die Behauptung steht jetzt direkt über einer Tabelle, die die Zeile ehrlich
+nicht führt. Entweder das Gate bauen oder den Satz streichen.
+
+**Gelernt:** (1) `@click="handler"` reicht dem Handler das MouseEvent als
+erstes Argument durch — ein optionaler `quiet`-Parameter wird damit IMMER
+truthy und der Knopf dauerhaft stumm; Handler mit optionalen Parametern im
+Template als `handler()` rufen. (2) Beim CAA-Parsen die leeren Werte NICHT
+wegfiltern: `issue ";"` ist die härteste Policy des Feldes und sähe gefiltert
+aus wie „keine Beschränkung" — am eigenen Test aufgefallen, bevor es ein
+Kunde erlebte. (3) Eine Vergleichstabelle aus den ECHTEN Gates deckt
+Marketing-Übertreibungen auf, die freier Text jahrelang trägt („unter eigener
+Adresse", verschwiegene Pro-Domain, ungegatete Team-Rollen).
+
 ### AP8 / U12 — Der Wizard fragt drei Mal statt sieben ✅ 2026-08-12
 
 Davids Entscheidung (2026-08-10) umgesetzt: Pflicht sind **Name/Adresse ·
