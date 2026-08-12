@@ -672,11 +672,36 @@
       "intervalLabel": "Abrechnungszeitraum",
       "monthly": "Monatlich",
       "yearly": "Jährlich",
+      "yearlySave": "3 Monate geschenkt",
       "perMonth": "pro Monat",
       "perMonthYearly": "pro Monat, jährlich abgerechnet",
       "vatNote": "inkl. 19 % MwSt.",
       "enterprisePrice": "Individuell",
       "enterpriseNote": "Projekt nach Maß",
+      "compare": {
+        "title": "Personal und Pro im Vergleich",
+        "description": "Alles aus Personal steckt auch in Pro. Die Mengen sind Tagesgrenzen beziehungsweise Bestände.",
+        "feature": "Merkmal",
+        "yes": "enthalten",
+        "no": "nicht enthalten",
+        "note": "Enterprise (Pukalani Studio) ist ein Projekt nach Maß und steht deshalb nicht in dieser Tabelle — sprich uns an.",
+        "rows": {
+          "discussions": "Diskussionen, Kommentare und Moderation",
+          "pages": "Eigene Seiten",
+          "themes": "Eigenes Erscheinungsbild: Farben und Schriften",
+          "activity": "Aktivitäts-Verlauf",
+          "posts": "Beiträge-Feed mit Umfragen",
+          "media": "Medien-Galerie",
+          "analytics": "Besucherstatistik ohne Cookies",
+          "messages": "Private Nachrichten",
+          "events": "Events mit Anmeldung",
+          "courses": "Kurse mit Lektionen und Fortschritt",
+          "ai": "KI-Assistent für die Moderation",
+          "customDomain": "Eigene Domain",
+          "commentsPerDay": "Kommentare pro Tag",
+          "mediaFiles": "Bilder in der Galerie"
+        }
+      },
       "plans": {
         "personal": {
           "name": "Personal",
@@ -712,7 +737,7 @@
         },
         {
           "q": "Was kostet es?",
-          "a": "Personal kostet 29 € und Pro 149 € im Monat – Endpreise inkl. 19 % MwSt., jährlich gezahlt 25 % weniger. Jede neue Community startet mit 14 Tagen Pro zum Ausprobieren; danach braucht sie einen Plan, sonst ist sie nur noch zum Lesen. Mitmachen – Konto anlegen, kommentieren, beitreten – kostet nie etwas. Enterprise ist das begleitete Projekt mit Pukalani Studio; aktuell läuft ein Early Access auf Einladung."
+          "a": "Personal kostet 29 € und Pro 149 € im Monat – Endpreise inkl. 19 % MwSt.; wer jährlich zahlt, bekommt drei Monate geschenkt. Jede neue Community startet mit 14 Tagen Pro zum Ausprobieren; danach braucht sie einen Plan, sonst ist sie nur noch zum Lesen. Mitmachen – Konto anlegen, kommentieren, beitreten – kostet nie etwas. Enterprise ist das begleitete Projekt mit Pukalani Studio; aktuell läuft ein Early Access auf Einladung."
         },
         {
           "q": "Kann ich jederzeit kündigen?",

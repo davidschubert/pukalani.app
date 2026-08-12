@@ -95,7 +95,7 @@ type PlanKey = (typeof PLAN_KEYS)[number]
  * den Index adressiert (`…bullets.0`) — dasselbe Muster wie die FAQ-Liste im
  * marketing-Layer. Wer hier eine Zeile ergänzt, zählt diese Zahl mit hoch.
  */
-const PLAN_BULLETS: Record<PlanKey, number> = { personal: 5, pro: 5 }
+const PLAN_BULLETS: Record<PlanKey, number> = { personal: 5, pro: 6 }
 
 const yearly = ref(false)
 const interval = computed<'monthly' | 'yearly'>(() => (yearly.value ? 'yearly' : 'monthly'))

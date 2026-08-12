@@ -485,7 +485,7 @@
       "chooseHelp": "After you buy we hand you over to Stripe. You come back to this page; the new plan appears once the payment is confirmed.",
       "intervalMonthly": "Monthly",
       "intervalYearly": "Yearly",
-      "yearlyDiscount": "Save 25%",
+      "yearlyDiscount": "3 months free",
       "perMonth": "per month",
       "perMonthYearly": "per month, billed yearly",
       "vatNote": "Final price incl. 19% VAT.",
@@ -507,7 +507,7 @@
           "price": "€29",
           "priceYearly": "€21.75",
           "bullets": [
-            "Discussions, comments, your own pages and moderation — under your own address and your own look",
+            "Discussions, comments, your own pages and moderation — at your Pukalani address and in your own look",
             "Post feed with polls",
             "Activity stream and feedback channel",
             "Email notifications for your members",
@@ -520,6 +520,7 @@
           "priceYearly": "€111.75",
           "bullets": [
             "Everything in Personal",
+            "Custom domain — your community at your own address",
             "Events with RSVPs",
             "Courses with lessons and progress",
             "AI assistant for moderation",

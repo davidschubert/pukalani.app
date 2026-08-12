@@ -485,7 +485,7 @@
       "chooseHelp": "Nach dem Kauf leiten wir dich zu Stripe. Zurück kommst du auf diese Seite; der neue Plan erscheint, sobald die Zahlung bestätigt ist.",
       "intervalMonthly": "Monatlich",
       "intervalYearly": "Jährlich",
-      "yearlyDiscount": "25 % sparen",
+      "yearlyDiscount": "3 Monate geschenkt",
       "perMonth": "pro Monat",
       "perMonthYearly": "pro Monat, jährlich abgerechnet",
       "vatNote": "Endpreis inkl. 19 % MwSt.",
@@ -507,7 +507,7 @@
           "price": "29 €",
           "priceYearly": "21,75 €",
           "bullets": [
-            "Diskussionen, Kommentare, eigene Seiten und Moderation — unter eigener Adresse und eigenem Erscheinungsbild",
+            "Diskussionen, Kommentare, eigene Seiten und Moderation — unter deiner Pukalani-Adresse und in deinem Erscheinungsbild",
             "Beiträge-Feed mit Umfragen",
             "Aktivitäts-Verlauf und Feedback-Kanal",
             "E-Mail-Benachrichtigungen für deine Mitglieder",
@@ -520,6 +520,7 @@
           "priceYearly": "111,75 €",
           "bullets": [
             "Alles aus Personal",
+            "Eigene Domain — deine Community unter deiner eigenen Adresse",
             "Events mit Anmeldung",
             "Kurse mit Lektionen und Fortschritt",
             "KI-Assistent für die Moderation",

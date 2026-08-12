@@ -200,7 +200,18 @@ const studio = computed(() => ({
         }"
       >
         <template #default="{ item }">
-          {{ item.label }} <span v-if="item.value === 'yearly'" class="text-primary-600">−25 %</span>
+          <!--
+            DER RABATT WIRD IN MONATEN ERZÄHLT, NICHT IN PROZENT (U10,
+            Wettbewerb E4 + Muster M6): Skool („2 Months Free!"), Mighty
+            („2 Months Free") und Notion machen es so. −25 % auf zwölf Monate
+            SIND rechnerisch genau drei Monate (29·12 = 348 ⇒ 261 = 3×29;
+            149·12 = 1788 ⇒ 1341 = 3×149) — die Erzählung ist also nicht
+            großzügiger als die Wahrheit, nur greifbarer. Als i18n-Schlüssel
+            statt als Literal: der Satz stand hier als hartkodiertes „−25 %"
+            und war damit die einzige Stelle der Preisseite, die sich nicht
+            übersetzen ließ.
+          -->
+          {{ item.label }} <span v-if="item.value === 'yearly'" class="text-primary-600">{{ t('marketing.pricing.yearlySave') }}</span>
         </template>
       </UTabs>
     </div>
@@ -248,6 +259,15 @@ const studio = computed(() => ({
         :button="studio.button"
       />
     </div>
+
+    <!-- „Karten für die Entscheidung, Tabelle für den Zweifler" (U10,
+         Wettbewerb M5). UNTER den Karten und unter der Studio-Zeile: wer sich
+         schon entschieden hat, klickt oben und liest hier gar nicht weiter.
+         Eigener `mkt-inner`-Container, weil der Bestand darüber ebenfalls
+         einen hat (die `margin: 0 auto`-Kurzform in marketing.css schlägt
+         jede Tailwind-Utility aus @layer — sie gehört auf ein eigenes
+         Element). -->
+    <PricingComparison />
   </section>
 </template>
 

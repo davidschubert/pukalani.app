@@ -672,11 +672,36 @@
       "intervalLabel": "Billing interval",
       "monthly": "Monthly",
       "yearly": "Yearly",
+      "yearlySave": "3 months free",
       "perMonth": "per month",
       "perMonthYearly": "per month, billed yearly",
       "vatNote": "incl. 19 % VAT",
       "enterprisePrice": "Custom",
       "enterpriseNote": "Tailored project",
+      "compare": {
+        "title": "Personal and Pro side by side",
+        "description": "Everything in Personal is also in Pro. The numbers are daily limits or totals.",
+        "feature": "Feature",
+        "yes": "included",
+        "no": "not included",
+        "note": "Enterprise (Pukalani Studio) is a tailored project and therefore not in this table — just get in touch.",
+        "rows": {
+          "discussions": "Discussions, comments and moderation",
+          "pages": "Custom pages",
+          "themes": "Your own look: colours and fonts",
+          "activity": "Activity feed",
+          "posts": "Posting feed with polls",
+          "media": "Media gallery",
+          "analytics": "Cookieless visitor statistics",
+          "messages": "Private messages",
+          "events": "Events with sign-up",
+          "courses": "Courses with lessons and progress",
+          "ai": "AI assistant for moderation",
+          "customDomain": "Custom domain",
+          "commentsPerDay": "Comments per day",
+          "mediaFiles": "Images in the gallery"
+        }
+      },
       "plans": {
         "personal": {
           "name": "Personal",
@@ -712,7 +737,7 @@
         },
         {
           "q": "What does it cost?",
-          "a": "Personal is €29 and Pro €149 per month – final prices incl. 19 % VAT, 25 % less when paid yearly. Every new community starts with 14 days of Pro to try things out; after that it needs a plan, otherwise it becomes read-only. Taking part – creating an account, commenting, joining – never costs anything. Enterprise is the guided project with Pukalani Studio; right now there's an early access by invitation."
+          "a": "Personal is €29 and Pro €149 per month – final prices incl. 19 % VAT; pay yearly and you get three months free. Every new community starts with 14 days of Pro to try things out; after that it needs a plan, otherwise it becomes read-only. Taking part – creating an account, commenting, joining – never costs anything. Enterprise is the guided project with Pukalani Studio; right now there's an early access by invitation."
         },
         {
           "q": "Can I cancel anytime?",
