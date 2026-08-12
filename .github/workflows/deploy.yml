@@ -103,17 +103,39 @@ jobs:
             echo "Manueller Start — Vorprüfung übersprungen."
             echo "go=true" >> "$GITHUB_OUTPUT"; exit 0
           fi
-          go=true
-          for wf in "Test" "E2E (Appwrite)"; do
-            concl=$(gh api "repos/$REPO/actions/runs?head_sha=$SHA&per_page=100" \
-              --jq "[.workflow_runs[] | select(.name==\"$wf\")] | sort_by(.created_at) | last | .conclusion // \"läuft-noch\"")
-            echo "  $wf: $concl"
-            [ "$concl" = "success" ] || go=false
+          # WARTEN STATT EINMAL SCHAUEN (2026-08-13, nach VIER stillen Skips —
+          # AH-3, AH-7, AH-4, AP2): der Auslöser feuert je Prüf-Workflow einmal.
+          # Der FRÜHE Trigger sah den anderen Lauf „läuft-noch" und stieg mit
+          # go=false aus; der SPÄTE Trigger kam gar nicht erst an, sobald der
+          # überholte Prüflauf von einem schnellen Folge-Push CANCELLED wurde —
+          # die if-Bedingung des Jobs verlangt conclusion == success. Ergebnis:
+          # NIEMAND deployte, und „Deploy: success" im Lauf-Fazit sah trotzdem
+          # grün aus (der Job war nur geskippt). Deshalb POLLT die Vorprüfung
+          # jetzt bis zu 30 Minuten: ein einziger Trigger reicht, egal in
+          # welcher Reihenfolge die Prüfungen fertig werden. Ein CANCELLED
+          # bleibt ein ehrliches Nein — dieser Commit wurde überholt, der
+          # Nachfolger bringt seinen eigenen Deploy mit.
+          go=false
+          for versuch in $(seq 1 60); do
+            offen=false; rot=false
+            for wf in "Test" "E2E (Appwrite)"; do
+              concl=$(gh api "repos/$REPO/actions/runs?head_sha=$SHA&per_page=100" \
+                --jq "[.workflow_runs[] | select(.name==\"$wf\")] | sort_by(.created_at) | last | .conclusion // \"läuft-noch\"")
+              echo "  [$versuch] $wf: $concl"
+              case "$concl" in
+                success) ;;
+                läuft-noch) offen=true ;;
+                *) rot=true ;;
+              esac
+            done
+            if [ "$rot" = "true" ]; then break; fi
+            if [ "$offen" = "false" ]; then go=true; break; fi
+            sleep 30
           done
           if [ "$go" = "true" ]; then
             echo "✔ Beide grün für $SHA — Deploy startet."
           else
-            echo "⏸ Noch nicht beide grün für $SHA — kein Deploy."
+            echo "⏸ Nicht beide grün für $SHA (rot/abgebrochen/Timeout) — kein Deploy."
           fi
           echo "go=$go" >> "$GITHUB_OUTPUT"
 

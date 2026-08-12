@@ -152,8 +152,6 @@ erledigt → COMPLETE) · Wizard-Pflicht = Name/Adresse · Kategorie · Vibe (U1
 Social-Login nur Google, nach AP1–AP8 (U14) · Geld-Wort „Plan" (U6) ·
 U15/F57 bleiben geparkt bis AP1–AP8.
 
-**AH-3-Krümel — Deploy-Gate prüfen (ESKALIERT: ZWEIMAL aufgetreten, AH-3 und AH-7 — beide Male gate:success/deploy:skipped bei echtem Code-Diff; Prio jetzt Hoch).** Der AH-3-Code-Commit wurde vom Diff-Gate als „nichts zu deployen" gewertet (deploy-Job skipped, Gate grün) — vermutlich stört ein schneller Folge-Push die Diff-Auflösung in der concurrency-Gruppe. Nachstellen und härten; der workflow_dispatch-Hebel bleibt der Ausweg. [Klein, S]
-
 **Font-Seed-Krümel — der Schutz verfällt am 2026-08-18 still.** Die unifont-Metadaten im Prod-Seed (`~/fonts-cache`) tragen eine 7-Tage-TTL (`expires` nachgemessen), und das additive Zurückschreiben (`--ignore-existing`) ersetzt gleichnamige Metadaten-Dateien nie — nach Ablauf löst jeder CI-Build wieder LIVE gegen Google auf, das gstatic-404-Risiko ist zurück. Seed periodisch von einer gesunden Maschine auffrischen ODER das Rückschreiben für `meta/*/…-data.json` gezielt öffnen (Blobs bleiben additiv). [Klein, S]
 
 **AH-1-Krümel — Bucket-Anlage in die Migrationen.** Beim Cutover zeigte sich: `avatars` und `gdpr-exports` existierten im Pool nur von Hand — kein Migrations-Script legt sie an (fonts/media/event-covers/ticket-files schon). Nachziehen, sonst fehlt beides in jeder frischen Instanz. [Klein, S]

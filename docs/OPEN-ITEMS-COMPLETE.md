@@ -29,6 +29,21 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### Deploy-Gate-Skip (der eskalierte Krümel) ✅ 2026-08-13
+
+VIER stille Skips an zwei Tagen (AH-3, AH-7, AH-4, AP2): das Gate schaute
+EINMAL, ob Test+E2E grün sind — der frühe workflow_run-Trigger sah den
+anderen Lauf noch offen (go=false), und der späte Trigger scheiterte an der
+if-Bedingung, sobald ein schneller Folge-Push den überholten Prüflauf
+CANCELLED hatte. Niemand deployte, und das Lauf-Fazit sah trotzdem grün aus
+(Job nur geskippt). Fix: die Vorprüfung POLLT bis 30 Minuten — ein Trigger
+reicht; cancelled bleibt ein ehrliches Nein (der Nachfolger-Commit deployt
+selbst). **Gelernt:** (1) Ein „success" am LAUF beweist nichts über die JOBS —
+Wachen müssen die Job-Conclusions lesen. (2) Ein Gate, das auf zwei
+asynchrone Ergebnisse angewiesen ist, darf nicht vom Timing seiner Trigger
+abhängen — warten gehört ins Gate, nicht in die Hoffnung auf den zweiten
+Anlauf.
+
 ### AH-6 / F3 — comments-Silo → Pool ✅ 2026-08-12
 
 Das letzte Kunden-Silo ist eingeschmolzen: comments.pukalani.app ist eine
