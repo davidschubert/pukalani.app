@@ -141,5 +141,16 @@ export type TenantContext =
    * verriete jedem Gast, dass diese Community gerade testet oder ausgelaufen
    * ist. Er wird stattdessen von der Route `/api/community/billing/trial`
    * herausgegeben — capability-gegated an den EINEN, der etwas tun kann.
+   *
+   * `billingStatus` (U4, 2026-08-12) steht DANEBEN und aus demselben Grund:
+   * roh durchgereicht, nirgends ausgewertet, NICHT im SSR-Payload. Der Wert ist
+   * der Stripe-Statusraum aus `communities.billingStatus`
+   * ('' | 'active' | 'past_due' | 'canceled'); die einzige Frage, die er hier
+   * beantwortet, ist „zahlt diese Community?" — und zwar AUTORITATIV statt
+   * hergeleitet. Aus `plan` + `trialEndsAt` allein ließe sich das nicht
+   * rechnen: eine Testphase setzt `plan: 'pro'`, und `trialEndsAt` wird beim
+   * Kauf NICHT geräumt — wer während der Testphase kauft, sähe sonst weiter
+   * „Abo abschließen". Der Resolver liest die Row ohnehin (30-s-Cache), das
+   * Feld kostet also keinen zusätzlichen Zugriff.
    */
-  | ({ mode: 'pool', projectId: string, tenantId: string, plan?: string, limits?: Record<string, { perDay?: number, total?: number }>, communityId?: string, trialEndsAt?: string | null } & TenantBranding & TenantPolicy & TenantAddress)
+  | ({ mode: 'pool', projectId: string, tenantId: string, plan?: string, limits?: Record<string, { perDay?: number, total?: number }>, communityId?: string, trialEndsAt?: string | null, billingStatus?: string } & TenantBranding & TenantPolicy & TenantAddress)

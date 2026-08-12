@@ -65,6 +65,18 @@ describe('mapTenantRowToContext (pure)', () => {
     expect(mapTenantRowToContext({ mode: 'silo', projectId: 'p1', tenantId: '', status: 'active', plan: '', trialEndsAt: end }))
       .not.toHaveProperty('trialEndsAt')
   })
+  it('U4: billingStatus reist in den Pool-Context — leer heißt „nie ein Abo"', () => {
+    expect(mapTenantRowToContext({ mode: 'pool', projectId: 'shared', tenantId: 't-1', status: 'active', plan: 'pro', billingStatus: 'active' }))
+      .toMatchObject({ billingStatus: 'active' })
+    // Dieselbe Bauart wie trialEndsAt: fehlend/null/'' lässt das Feld WEG.
+    for (const value of [undefined, null, '']) {
+      expect(mapTenantRowToContext({ mode: 'pool', projectId: 'shared', tenantId: 't-1', status: 'active', plan: 'pro', billingStatus: value }))
+        .not.toHaveProperty('billingStatus')
+    }
+    // Silo = Enterprise-Vertrag, der läuft nicht über Stripe-Abos.
+    expect(mapTenantRowToContext({ mode: 'silo', projectId: 'p1', tenantId: '', status: 'active', plan: '', billingStatus: 'active' }))
+      .not.toHaveProperty('billingStatus')
+  })
   it('S1: openRegistration=false reist in den Context (pool + silo)', () => {
     expect(mapTenantRowToContext({ mode: 'pool', projectId: 'shared', tenantId: 't-1', status: 'active', plan: '', openRegistration: false }))
       .toMatchObject({ openRegistration: false })

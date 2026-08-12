@@ -27,7 +27,7 @@ import { canonicalHostFor, customDomainCandidates } from '../../shared/customDom
  *  gesetzt, wenn die Row eine $id trägt (der reale Read immer; Test-Fixtures
  *  optional). Trägt die Site-Rollen-Auflösung (requireCommunityPermission). */
 export function mapTenantRowToContext(
-  row: (Pick<TenantRow, 'mode' | 'projectId' | 'tenantId' | 'status' | 'plan'> & { $id?: string, host?: string | null, theme?: string | null, variant?: string | null, neutral?: string | null, name?: string | null, openRegistration?: boolean | null, audience?: string | null, trialEndsAt?: string | null, suspension?: string | null, customDomain?: string | null, customDomainStatus?: string | null }) | null,
+  row: (Pick<TenantRow, 'mode' | 'projectId' | 'tenantId' | 'status' | 'plan'> & { $id?: string, host?: string | null, theme?: string | null, variant?: string | null, neutral?: string | null, name?: string | null, openRegistration?: boolean | null, audience?: string | null, trialEndsAt?: string | null, billingStatus?: string | null, suspension?: string | null, customDomain?: string | null, customDomainStatus?: string | null }) | null,
   planCatalog?: Record<string, Record<string, TenantPlanLimits>>,
 ): TenantContext | null {
   if (!row || row.status !== 'active') return null
@@ -109,7 +109,13 @@ export function mapTenantRowToContext(
     // in shared/onboarding.ts. Fehlende Spalte/leerer Wert ⇒ Feld bleibt weg
     // und heißt „keine Testphase".
     const trial = row.trialEndsAt ? { trialEndsAt: row.trialEndsAt } : {}
-    return { mode: 'pool', projectId: row.projectId, tenantId: row.tenantId, plan, ...(limits ? { limits } : {}), ...communityId, ...branding, ...policy, ...trial, ...address }
+    // Abo-Zustand (U4): genauso roh durchgereicht wie die Testphase und aus
+    // demselben Grund NICHT hier ausgewertet — was „aktiv" heißt, entscheidet
+    // der Konsument (heute die Willkommens-Checkliste, pur in
+    // packages/onboarding/shared/gettingStarted.ts). Leerer Wert ⇒ Feld bleibt
+    // weg und heißt „nie ein Abo" (Bestands-Rows tragen die Spalte als null).
+    const billing = row.billingStatus ? { billingStatus: row.billingStatus } : {}
+    return { mode: 'pool', projectId: row.projectId, tenantId: row.tenantId, plan, ...(limits ? { limits } : {}), ...communityId, ...branding, ...policy, ...trial, ...billing, ...address }
   }
   return null
 }
