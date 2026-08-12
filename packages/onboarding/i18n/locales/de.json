@@ -374,7 +374,7 @@
       "addressLabel": "Deine Adresse",
       "open": "Community öffnen",
       "hints": {
-        "private": "Öffentlich gestartet: eure Inhalte sind für alle lesbar und werden von Suchmaschinen gefunden. „Nur für Mitglieder\" ist ein Schalter in den Einstellungen — er nimmt auch alles Bisherige aus der Öffentlichkeit.",
+        "visibility": "Öffentlich gestartet: eure Inhalte sind für alle lesbar und werden von Suchmaschinen gefunden. „Nur für Mitglieder\" ist ein Schalter in den Einstellungen — er nimmt auch alles Bisherige aus der Öffentlichkeit.",
         "trial": "Die Testphase läuft 14 Tage, mit allem was Pro kann. Danach ist deine Community nur noch zum Lesen, bis du einen Plan wählst — gelöscht wird nichts.",
         "settings": "Name, Adresse, Farben und Startseite änderst du jederzeit im Dashboard deiner Community."
       }
@@ -424,6 +424,35 @@
         "events": "Termine",
         "courses": "Kurse",
         "media": "Bilder"
+      }
+    },
+    "gettingStarted": {
+      "title": "Die ersten fünf Schritte",
+      "intro": "In dieser Reihenfolge ist deine Community in einer halben Stunde startklar.",
+      "progress": "{done} von {total}",
+      "dismiss": "Liste ausblenden",
+      "dismissFailed": "Die Liste konnte nicht ausgeblendet werden.",
+      "steps": {
+        "post": {
+          "label": "Schreib den ersten Beitrag",
+          "hint": "Sag hallo und erklär in drei Sätzen, worum es hier geht."
+        },
+        "branding": {
+          "label": "Wähl eure Farbwelt",
+          "hint": "Farbe und Schrift machen aus der Adresse euren Ort."
+        },
+        "invite": {
+          "label": "Lad das erste Mitglied ein",
+          "hint": "Eine E-Mail-Adresse genügt — die Einladung gilt sieben Tage."
+        },
+        "homePage": {
+          "label": "Pass die Startseite an",
+          "hint": "Sie steht schon da, mit deinem Text aus dem Wizard."
+        },
+        "plan": {
+          "label": "Schließ dein Abo ab",
+          "hint": "Nach der Testphase bleibt die Community ohne Abo nur zum Lesen."
+        }
       }
     },
     "trial": {

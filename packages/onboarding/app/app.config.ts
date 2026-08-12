@@ -221,6 +221,22 @@ export default defineAppConfig({
           requiredCapability: 'community.billing',
           order: 10,
         },
+        /**
+         * Die Willkommens-Checkliste (U4) steht NACH den beiden Geld-Hinweisen:
+         * eine nur-lesende Community oder eine ablaufende Testphase sind
+         * dringlicher als der Aufbau. Sie verschwindet von selbst, sobald alle
+         * fünf Schritte erledigt sind.
+         *
+         * `team.manage` statt `community.billing`, anders als die zwei
+         * darüber: die Liste ist eine AUFBAU-Liste, und die bauen Owner UND
+         * Admin. Ein Moderator, der zu einer fremden Community dazugestoßen
+         * ist, braucht keine Startliste — seine Route weist ihn ohnehin ab.
+         */
+        communityGettingStarted: {
+          component: 'CommunityGettingStartedNotice',
+          requiredCapability: 'team.manage',
+          order: 20,
+        },
       },
     },
   },

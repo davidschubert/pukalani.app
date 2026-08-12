@@ -374,7 +374,7 @@
       "addressLabel": "Your address",
       "open": "Open community",
       "hints": {
-        "private": "Public by default: your content is readable by anyone and found by search engines. \"Members only\" is a switch in the settings — it also takes everything published so far out of public view.",
+        "visibility": "Public by default: your content is readable by anyone and found by search engines. \"Members only\" is a switch in the settings — it also takes everything published so far out of public view.",
         "trial": "The trial runs for 14 days, with everything Pro can do. After that your community is read-only until you pick a plan — nothing is deleted.",
         "settings": "Name, address, colours and home page can be changed any time in your community's dashboard."
       }
@@ -424,6 +424,35 @@
         "events": "Events",
         "courses": "Courses",
         "media": "Images"
+      }
+    },
+    "gettingStarted": {
+      "title": "Your first five steps",
+      "intro": "Work through them in order and your community is ready in half an hour.",
+      "progress": "{done} of {total}",
+      "dismiss": "Hide this list",
+      "dismissFailed": "The list could not be hidden.",
+      "steps": {
+        "post": {
+          "label": "Write the first post",
+          "hint": "Say hello and explain in three sentences what this place is for."
+        },
+        "branding": {
+          "label": "Pick your colours",
+          "hint": "Colour and type turn an address into your place."
+        },
+        "invite": {
+          "label": "Invite your first member",
+          "hint": "One email address is enough — invitations are valid for seven days."
+        },
+        "homePage": {
+          "label": "Adjust the home page",
+          "hint": "It is already there, with the text you wrote in the wizard."
+        },
+        "plan": {
+          "label": "Set up your subscription",
+          "hint": "After the trial your community stays read-only without one."
+        }
       }
     },
     "trial": {
