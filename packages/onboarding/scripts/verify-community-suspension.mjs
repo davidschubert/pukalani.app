@@ -878,7 +878,10 @@ try {
   check('Selbst der Owner kommt auf dem Host nicht mehr durch', loggedInGone.status === 404, `Status ${loggedInGone.status}`)
 
   console.log('\n6. Das Meldeformular bleibt erreichbar')
-  const formPage = await call(CONTROL_HOST, '/de/missbrauch-melden')
+  // U8 (2026-08-11): die Adresse heißt in BEIDEN Sprachen `/report-abuse`
+  // (Trichter-Befund M5). `/de/missbrauch-melden` antwortet weiter — aber mit
+  // 301, und dieser Beweis prüft auf 200.
+  const formPage = await call(CONTROL_HOST, '/de/report-abuse')
   check('Formular-Seite auf dem Kontroll-Host (200)', formPage.status === 200, `Status ${formPage.status}`)
   check('…und trägt das Formular', /data-abuse-form/.test(formPage.text), formPage.text.slice(0, 120))
 

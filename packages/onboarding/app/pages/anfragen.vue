@@ -9,8 +9,25 @@
  * stehen — kein Redirect. Wer gerade seine Adresse hinterlassen hat, will
  * sehen, dass es angekommen ist.
  */
+/**
+ * DIE ADRESSE IST IN BEIDEN SPRACHEN ENGLISCH (U8, Trichter-Befund M5,
+ * 2026-08-11 — die Sprachregel für Pfade).
+ *
+ * Regel: die öffentliche MARKETING-Seite lokalisiert ihre Pfade (`/produkte` ↔
+ * `/products`, `/wechseln` ↔ `/switch`), der KUNDENBEREICH nicht. Er ist
+ * Werkzeug-Oberfläche — kurz, stabil, und ein `defineI18nRoute` an jeder Seite
+ * wäre dauerhafte Pflegelast. Vorher tat er es genau EINMAL, hier: ein
+ * deutscher Nutzer sah `/de/communities` und `/de/anfragen` nebeneinander.
+ *
+ * DER AUFRUF BLEIBT, WEIL DER ROUTEN-NAME BLEIBT: die Datei heißt weiter
+ * `anfragen.vue`, also heißt die Route weiter `anfragen`, und jeder interne
+ * Verweis läuft seit AP1 über `localePath({ name: 'anfragen' })` statt über
+ * einen Pfad-String (OnboardingFoundingNotice, start/index.vue). Genau dafür
+ * gibt es die Namensregel — ein Pfad-Literal hätte hier heute gebrochen.
+ * Alt-Adresse `/de/anfragen`: 301 in packages/onboarding/nuxt.config.ts.
+ */
 definePageMeta({ layout: 'onboarding' })
-defineI18nRoute({ paths: { de: '/anfragen', en: '/request-access' } })
+defineI18nRoute({ paths: { de: '/request-access', en: '/request-access' } })
 
 const { t, locale } = useI18n()
 const localePath = useLocalePath()

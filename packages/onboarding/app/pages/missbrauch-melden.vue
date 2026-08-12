@@ -25,8 +25,16 @@ import { ABUSE_CATEGORIES, type AbuseCategory } from '../../../control/shared/ab
  * schreibgeschützt — der Melder muss ihn korrigieren können, und geprüft wird
  * er ohnehin serverseitig.
  */
+/**
+ * ADRESSE IN BEIDEN SPRACHEN ENGLISCH — dieselbe Regel und dieselbe Begründung
+ * wie bei `anfragen.vue` (U8, Trichter-Befund M5, 2026-08-11). Sie gilt für
+ * BEIDE Seiten oder für keine: eine Regel, die die eine Ausnahme abschafft und
+ * die andere stehen lässt, ist keine Regel, sondern ein zweiter Sonderfall.
+ * Der Routen-Name bleibt `missbrauch-melden` (Dateiname);
+ * Alt-Adresse `/de/missbrauch-melden`: 301 in nuxt.config.ts.
+ */
 definePageMeta({ layout: 'onboarding' })
-defineI18nRoute({ paths: { de: '/missbrauch-melden', en: '/report-abuse' } })
+defineI18nRoute({ paths: { de: '/report-abuse', en: '/report-abuse' } })
 
 const { t } = useI18n()
 const route = useRoute()

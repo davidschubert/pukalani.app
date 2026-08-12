@@ -46,6 +46,18 @@ export default defineNuxtConfig({
     '/de/dashboard/settings/domain': { redirect: { to: '/de/dashboard/community/domain', statusCode: 301 } },
     '/dashboard/settings/subscription': { redirect: { to: '/dashboard/community/plan', statusCode: 301 } },
     '/de/dashboard/settings/subscription': { redirect: { to: '/de/dashboard/community/plan', statusCode: 301 } },
+    /**
+     * DIE ZWEI DEUTSCHEN SPRACHPFADE (U8, Trichter-Befund M5, 2026-08-11).
+     * Der Kundenbereich lokalisiert seine Adressen nicht mehr; beide Seiten
+     * heißen jetzt in beiden Sprachen englisch (Begründung an den Seiten).
+     *
+     * Hier steht NUR die `/de/`-Zeile, und das ist kein vergessenes Paar: mit
+     * `prefix_except_default` gab es `/request-access` (en) und `/de/anfragen`
+     * (de) — ein unprefixtes `/anfragen` hat es NIE gegeben. Eine Regel dafür
+     * wäre eine Weiterleitung von einer Adresse, die nie jemand hatte.
+     */
+    '/de/anfragen': { redirect: { to: '/de/request-access', statusCode: 301 } },
+    '/de/missbrauch-melden': { redirect: { to: '/de/report-abuse', statusCode: 301 } },
   },
 
   i18n: {

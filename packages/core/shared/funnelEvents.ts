@@ -33,7 +33,7 @@ export const FUNNEL_EVENTS = [
   'funnel_code_redeemed',
   /** Kundenbereich: Wizard durch, Community angelegt. */
   'funnel_site_created',
-  /** Kundenbereich: Zugang angefragt (/request-access bzw. /de/anfragen). */
+  /** Kundenbereich: Zugang angefragt (/request-access, beide Sprachen). */
   'funnel_request_submitted',
 ] as const
 

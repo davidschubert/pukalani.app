@@ -160,9 +160,10 @@ useHead({ title: () => t('onboarding.gate.title') })
       vorbei.
 
       ÜBER DEN ROUTEN-NAMEN, nicht den Pfad: die Zielseite trägt
-      defineI18nRoute-Sprachpfade (de /anfragen, en /request-access), und
-      localePath('/anfragen') gibt auf EN wörtlich „/anfragen" zurück — eine
-      404 (am 2026-08-11 im Worktree nachgemessen, beide Locales).
+      `defineI18nRoute` (seit U8 in beiden Sprachen /request-access), und ein
+      Pfad-Literal bricht bei jeder Adress-Änderung still — am 2026-08-11 im
+      Worktree nachgemessen (beide Locales), und am selben Tag hat U8 die
+      Adresse geändert. Der NAME hat es überlebt.
     -->
     <p class="text-sm text-dimmed">
       {{ t('onboarding.gate.noCode') }}

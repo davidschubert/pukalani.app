@@ -96,14 +96,17 @@ export default defineNuxtConfig({
        * Knöpfe auf `/login`: der Besucher wollte etwas hinterlassen und bekam
        * ein Passwortfeld.
        *
-       * `/request-access` UND NICHT `/anfragen`: die Seite trägt
-       * `defineI18nRoute({ paths: { de: '/anfragen', en: '/request-access' } })`
-       * (packages/onboarding/app/pages/anfragen.vue), und die App steht auf
-       * `prefix_except_default` mit `en` als Vorgabe — es gibt dort also
-       * `/request-access` und `/de/anfragen`, aber KEIN `/anfragen`. Ein
-       * deutschsprachiger Besucher wird von `detectBrowserLanguage`
-       * (`redirectOn: 'all'`) auf `/de/anfragen` weitergeleitet, genau wie bei
-       * `/register` oben.
+       * `/request-access` IN BEIDEN SPRACHEN: der Kundenbereich lokalisiert
+       * seine Adressen seit U8 (Trichter-Befund M5, 2026-08-11) nicht mehr —
+       * nur die Marketing-Seite tut das (`/produkte` ↔ `/products`). Die Seite
+       * trägt `defineI18nRoute({ paths: { de: '/request-access', en:
+       * '/request-access' } })` (packages/onboarding/app/pages/anfragen.vue —
+       * der DATEIname bleibt, weil an ihm der Routen-Name hängt, über den die
+       * internen Links laufen). Die App steht auf `prefix_except_default` mit
+       * `en` als Vorgabe: ein deutschsprachiger Besucher wird von
+       * `detectBrowserLanguage` (`redirectOn: 'all'`) von hier auf
+       * `/de/request-access` weitergeleitet, genau wie bei `/register` oben.
+       * Die alte `/de/anfragen` bleibt als 301 erhalten.
        */
       marketingRequestUrl: 'https://account.pukalani.app/request-access',
       /**

@@ -37,10 +37,12 @@ const show = computed(() => !isTenantHost && gate.value.inviteRequired)
 
 <template>
   <!--
-    LINK ÜBER DEN ROUTEN-NAMEN, nicht den Pfad: die Zielseite trägt
-    defineI18nRoute-Sprachpfade (de /anfragen, en /request-access), und
-    localePath('/anfragen') gibt auf EN wörtlich „/anfragen" zurück — eine 404
-    (nachgemessen am 2026-08-11, s. Commit dcfb991b).
+    LINK ÜBER DEN ROUTEN-NAMEN, nicht den Pfad. Beides ist heute noch wahr:
+    die Zielseite trägt `defineI18nRoute` (seit U8 in beiden Sprachen
+    /request-access), und ein Pfad-Literal in localePath() ist genau das, was
+    bei jeder Adress-Änderung still bricht — am 2026-08-11 nachgemessen
+    (s. Commit dcfb991b), und am selben Tag hat U8 die Adresse geändert.
+    Der NAME hat es überlebt.
   -->
   <UAlert
     v-if="show"
