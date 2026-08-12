@@ -47,17 +47,10 @@ const registered = computed<PukalaniSettingsTab[]>(() => resolveSettingsTabs(
 
 const links = computed<NavigationMenuItem[]>(() => [
   // Die fünf KONTO-Reiter gehören dem admin-Layer selbst — er bringt die Hülle
-  // mit, ein Registry-Umweg zu sich selbst brächte nichts.
-  //
-  // „Daten" ist seit AH-2 (2026-08-11) der fünfte: Datenexport und
-  // Konto-Löschung lagen unter „Sicherheit" (Audit-Befund M10). Dieselbe
-  // Aufteilung trägt die Konto-Hülle auf account.pukalani.app — die Reiter
-  // sind an beiden Orten dieselbe Antwort auf dieselbe Frage.
-  { label: t('dashboard.settings.general'), icon: 'i-ph-user', to: localePath('/dashboard/settings'), exact: true },
-  { label: t('dashboard.settings.notifications'), icon: 'i-ph-bell', to: localePath('/dashboard/settings/notifications') },
-  { label: t('dashboard.settings.sessions'), icon: 'i-ph-devices', to: localePath('/dashboard/settings/sessions') },
-  { label: t('dashboard.settings.security'), icon: 'i-ph-shield', to: localePath('/dashboard/settings/security') },
-  { label: t('dashboard.settings.data'), icon: 'i-ph-database', to: localePath('/dashboard/settings/data') },
+  // mit, ein Registry-Umweg zu sich selbst brächte nichts. Die LISTE steht
+  // seit U7/E8 in app/utils/accountSettingsTabs.ts, weil die ⌘K-Suche sie
+  // ebenfalls liest; hier bleibt nur, was die Hülle daraus macht.
+  ...ACCOUNT_SETTINGS_TABS.map(tab => ({ label: t(tab.labelKey), icon: tab.icon, to: localePath(tab.to), exact: tab.exact })),
   ...registered.value.map(tab => ({ label: t(tab.labelKey), icon: tab.icon, to: localePath(tab.to) })),
 ])
 
