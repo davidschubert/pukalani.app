@@ -22,7 +22,7 @@ import type { H3Event } from 'h3'
  * genau so passiert — die Regel hat es gefangen, nicht der Mensch.
  *
  * Dieselbe Bauart wie `registerCommunityUsageCounter`,
- * `registerDashboardStatsContributor` und `registerUserDataContributor`: der
+ * `registerDashboardStatValueProvider` und `registerUserDataContributor`: der
  * Produkt-Layer meldet sich per Nitro-Plugin selbst an, der Konsument fragt.
  *
  * ── EIN VERTRAG MIT ZWEI METHODEN, NICHT ZWEI REGISTRIES ───────────────────

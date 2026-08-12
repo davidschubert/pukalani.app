@@ -6,7 +6,7 @@
  * beantworten, wer die TABELLEN kennt. Die kennt aber jeder Produkt-Layer nur
  * für sich, und der onboarding-Layer, dem die Seite gehört, kennt keine davon
  * (A14 — er dürfte `COMMENTS_TABLE` gar nicht importieren). Deshalb dasselbe
- * Muster wie bei `registerDashboardStatsContributor` und
+ * Muster wie bei `registerDashboardStatValueProvider` und
  * `registerUserDataContributor`: der Produkt-Layer meldet sich per Nitro-Plugin
  * selbst an, der Konsument zählt.
  *
