@@ -29,6 +29,51 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### AP10 / U17 — Die Wettbewerbs-Munition auf der Marketing-Seite ✅ 2026-08-12
+
+Vier Teile, jede Zahl aus dem Benchmark, jede Pukalani-Aussage am Code geprüft:
+
+**Gebühren-Rechner** (`FeeCalculator.vue`, Daten `FEE_PROVIDERS` in
+`apps/marketing/shared/marketing.ts`) auf allen `/vs/*` und `/wechseln`:
+Mitglieder × Beitrag → Plattform-Gebühr je Wettbewerber (Circle 2 %, Mighty
+2 %, Skool 2,9 %, Heartbeat 5 %, coapp 15 % — Quelle je Zeile verlinkt, Stand
+10.08.2026) gegen Pukalani 0 % + 149 € Fixpreis; Stripe-Gebühren ehrlich
+erwähnt. Grundpreise BEWUSST nicht addiert (vier Währungs-/Steuerwelten, kein
+belegter Wechselkurs). Rundung nur in der Anzeige, Jahreswert aus dem
+ungerundeten Monat.
+
+**Belegte Branding-Zitate** auf /vs/circle und /vs/mighty-networks (Capterra,
+mit Name+Datum, Original-Englisch in beiden Sprachen); /vs/skool bekommt statt
+eines unbelegten Halbsatzes die belegte Tatsache (eigene Adresse nur im
+teureren Plan, 100 $ je URL-Änderung). Gegenaussage am Code geprüft: Pukalani
+hat KEIN Fremd-Branding und folglich kein Branding-Gate.
+
+**Testphasen-Satz** genau einmal unter den Preisen: „Nach der Testphase wird
+nichts gelöscht – deine Community wird nur-lesend, bis du dich entscheidest."
+(F49/M13-belegt; die Preis-FAQ entsprechend geschärft.)
+
+**Datenexport-FAQ**: Konto-Export als JSON (`GET /api/auth/export`, 11
+Contributoren) ehrlich beschrieben — und ehrlich gesagt, dass es einen
+gebündelten Community-Export NICHT gibt; das unbelegte Glossar-Versprechen
+(„Mitgliederdaten") korrigiert.
+
+Deploy `80512641` gate+deploy=success; live belegt (Startseiten-Satz, Rechner
+auf /wechseln, Zitate+Quellen auf /vs/*, FAQ).
+
+**Für David gemerkt:** Community-Export bauen oder das
+`/wechseln`-Versprechen („jederzeit exportieren", „Kein Lock-in") senken —
+der Benchmark nennt genau das den stärksten K4-Kontrast; Vergleichszeile
+„Kurse inkl. Bezahl-Zugang (Early Access)" stand schon vorher da, im Pool
+gibt es aber keinen Mitglieder-Zahlungsweg.
+
+**Gelernt:** (1) `USlider` ist für Screenreader unbedienbar (fest verdrahtetes
+`aria-label="Thumb"`) — für Eingaben Zahlenfelder nehmen; der Theme-Editor
+trägt das Problem noch (Krümel in OPEN-ITEMS). (2) `UInputNumber` rastet
+getippte Werte auf `min + n × step` — großzügige Schrittweite verfälscht
+Eingaben (437 → 440), für freie Eingaben step 1. (3) Sekundärquellen aus einem
+Benchmark (Trustpilot via Dritt-Seite) nicht zitieren, auch wenn sie saftiger
+sind — die belegten Capterra-Zitate tragen genauso.
+
 ### AP9 / U16 + U10-Rest — Domain-Politur + Preisseiten, die dasselbe erzählen ✅ 2026-08-12
 
 **Domain (U16, Wettbewerb E6):** Der „Prüfen"-Lauf fragt jetzt zusätzlich die

@@ -1,6 +1,6 @@
 # Offene Punkte
 
-**Stand: 3 offen · 5 geparkt/wartend · 10 bewusst zurückgestellt** (Zahlen bei JEDEM Umzug nach COMPLETE mitführen)
+**Stand: 2 offen · 5 geparkt/wartend · 10 bewusst zurückgestellt** (Zahlen bei JEDEM Umzug nach COMPLETE mitführen)
 
 Stand: **2026-08-12**. Hier steht **nur, was noch offen ist** — in der
 Reihenfolge, in der es abgearbeitet wird. Alles Erledigte (mit Begründung,
@@ -27,7 +27,6 @@ demo-Ausbau, comments in den Pool. Entscheidungen: DECISION-LOG 2026-08-11.
 | --- | --- | --- | --- | --- | --- |
 | 2 · A1 | **Echte Rechtstexte** für Impressum, Datenschutz und AGB. **pukalani.studio ist seit 2026-08-12 live** — Impressum + Datenschutz in de/en veröffentlicht, ohne erfundene Angaben, aber **ohne ladungsfähige Anschrift** (Davids Entscheidung: erst mal ohne); nachzutragen dort die Anschrift (§ 5 DDG, Pflicht — Postfach genügt nicht) und die Prüfung zu Art. 27 DSGVO (Vertreter in der Union) samt Drittland-Grundlage. Für **pukalani.app** stehen die Texte weiter aus. **Direkt danach `pukalani.auth.termsUrl` in `apps/platform` setzen** — die AGB-Checkbox fehlt heute genau dort, wo Kunden sich registrieren (Trichter M9). Schaltet Punkt 3 frei. | Hoch | S — Anschrift eintragen, Anwalt lesen lassen | Ja: nur David (ggf. Anwalt) | [Notizen](#notizen) |
 | 3 · A2 | **Stripe auf echtes Geld umstellen — über die F55-Seite.** Vorstufe A2a komplett grün, F55 selbst erledigt (beide 2026-08-08). Bei David bleiben: Bank-Aktivierung, Steuer-Registrierung, Live-Key ROTIERT eintragen (der erste ist teil-geleakt und rotiert), Portal-Konfiguration; alles andere klickt die F55-Seite. Braucht Punkt 2 (A1). | Hoch | S | Ja: Bank, Konto, Portal | [STRIPE-GO-LIVE-RUNBOOK.md](runbooks/STRIPE-GO-LIVE-RUNBOOK.md) |
-| 22 · U17 | **[AP10] Die Wettbewerbs-Munition auf die Marketing-Seite.** Gebühren-Rechner auf `/vs/*` und `/wechseln` (300 Mitglieder à 20 € ⇒ anderswo 8–14 % Gebühr, hier 0 %), die belegten Branding-Zitate der Wettbewerber, das Testphasen-Argument („danach wird nichts gelöscht") und eine Datenexport-FAQ. | Mittel | S–M | Nein | [Wettbewerb E9, V3, V5, K4](archiv/audits/2026-08-09-wettbewerb-benchmark.md) |
 
 ## ⏸️ Geparkt / wartet — in Arbeitsreihenfolge
 
@@ -142,6 +141,10 @@ Social-Login nur Google, nach AP1–AP8 (U14) · Geld-Wort „Plan" (U6) ·
 U15/F57 bleiben geparkt bis AP1–AP8.
 
 **Font-Seed-Krümel — der Schutz verfällt am 2026-08-18 still.** Die unifont-Metadaten im Prod-Seed (`~/fonts-cache`) tragen eine 7-Tage-TTL (`expires` nachgemessen), und das additive Zurückschreiben (`--ignore-existing`) ersetzt gleichnamige Metadaten-Dateien nie — nach Ablauf löst jeder CI-Build wieder LIVE gegen Google auf, das gstatic-404-Risiko ist zurück. Seed periodisch von einer gesunden Maschine auffrischen ODER das Rückschreiben für `meta/*/…-data.json` gezielt öffnen (Blobs bleiben additiv). [Klein, S]
+
+**AP10-Krümel — `USlider` ist für Screenreader unbedienbar** (Nuxt UI verdrahtet `aria-label="Thumb"` fest im Daumen, die `UFormField`-Beschriftung landet per `for` nur auf der nicht fokussierbaren Wurzel). Der Gebühren-Rechner nutzt deshalb Zahlenfelder; betroffen bleibt der **Theme-Editor** (`CustomizeEditor.vue`, 6 Regler). Upstream-Issue prüfen/melden oder Beschriftung per `:ui`-Slot nachrüsten. [Klein, S]
+
+**AP8/AP9/AP10-Entscheidungen bei David (gebündelt gefragt am 2026-08-12):** KI-Beschreibungs-Vorschlag wiederandocken oder gelöscht lassen · Markt-Signal Größe/Zweck/Ziel (weg oder „hinter den Aha") · Pro-Karte „Team-Rollen" (Gate bauen oder Satz streichen) · Community-Export bauen oder `/wechseln`-Versprechen senken · Vergleichszeile „Kurse inkl. Bezahl-Zugang" (im Pool gibt es keinen Mitglieder-Zahlungsweg).
 
 **AH-1-Krümel — Bucket-Anlage in die Migrationen.** Beim Cutover zeigte sich: `avatars` und `gdpr-exports` existierten im Pool nur von Hand — kein Migrations-Script legt sie an (fonts/media/event-covers/ticket-files schon). Nachziehen, sonst fehlt beides in jeder frischen Instanz. [Klein, S]
 
