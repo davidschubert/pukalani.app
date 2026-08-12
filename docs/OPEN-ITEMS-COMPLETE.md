@@ -29,6 +29,28 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### AP5 — U7 (Menü) + U8 (Adressen) ✅ 2026-08-13
+
+**Menü:** neue Gruppe **Moderation** (der Moderator findet seine vier
+Arbeitsflächen unter einem Wort statt verstreut auf „Produkte" und
+„Einstellungen"), scope:account-Einträge in **„Dein Konto"**, Silo-Hub heißt
+ehrlich **„Instanz-Einstellungen"**, Admin-Hülle „Instanz", order-Vergabe in
+dokumentierten Zehnerschritten je Layer, und die ⌘K-Suche findet jetzt die
+VEREINIGTE Menge (Sidebar + Community-Hub-Reiter + Konto-Reiter) über die
+vorhandenen Registries — kein zweites Suchfeld. **Adressen:** neun
+Umbenennungen mit 301 in beiden Locales (categories, trust-levels,
+community/embed als Hub-Reiter, private-messages entschärft die
+Posteingang-Falle, communities statt tenants, sites→websites nachgeholt,
+request-access + report-abuse in beiden Sprachen — die Pfad-Sprachregel gilt
+jetzt). Prod-Serien-Probe 7/7. Stripe-Rückkehr-Pfad unangetastet.
+
+**Gelernt:** (1) Ein Beweis-Skript prüfte die alte Adresse auf 200 — nach
+der Umbenennung wäre der Beweis still rot geworden; Pfad-Änderungen brauchen
+den Grep auch über scripts/. (2) Das Deploy-Gate feuert je Prüf-Workflow
+einen eigenen Lauf: der Zwilling eines stornierten Triggers zeigt
+gate=skipped und sieht wie ein Fehler aus — die Wache muss den Lauf des
+ERFOLGS-Triggers verfolgen, nicht den ersten Treffer.
+
 ### AP4 / U6 — Ein Wort je Sache ✅ 2026-08-13
 
 ~110 i18n-Werte in 27 Dateien auf das entschiedene Vokabular gezogen:
