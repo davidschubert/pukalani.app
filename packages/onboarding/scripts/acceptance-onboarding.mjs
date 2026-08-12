@@ -119,6 +119,10 @@ async function runOnce(index, code) {
   if (!cookie) throw new Error('kein Session-Cookie')
 
   // 3. Community anlegen (der Wizard-Abschluss).
+  //
+  // GENAU DIE DREI PFLICHT-ANTWORTEN (U12): Name/Adresse, Kategorie, Vibe —
+  // mehr schickt der Wizard seit dem 2026-08-10 nicht mehr. Dass die alte,
+  // siebenteilige Nutzlast weiterhin gilt, beweist Abschnitt 2 (Retry).
   const slug = `abnahme-${index}-${started.toString(36)}`
   const createRes = await call(CONTROL_HOST, '/api/onboarding/site', {
     method: 'POST',
@@ -126,11 +130,7 @@ async function runOnce(index, code) {
     body: {
       name: `Abnahme ${index}`,
       slug,
-      purpose: 'new',
-      memberRange: 'to100',
       category: 'other',
-      goal: 'discussion',
-      description: `Durchlauf ${index} des Abnahmelaufs.`,
       vibe: 'calm',
       inviteCode: code,
       locale: 'de',
@@ -189,34 +189,48 @@ try {
   check(`Median ≤ 60 s (ist ${(median / 1000).toFixed(1)} s)`, median <= 60_000, `${(median / 1000).toFixed(1)} s`)
   check(`Langsamster Durchlauf: ${(sorted.at(-1) / 1000).toFixed(1)} s`, true)
 
-  console.log('\n2. Retry ist idempotent')
+  console.log('\n2. Retry ist idempotent — mit der ALTEN Nutzlast')
+  /**
+   * ZWEI BEWEISE IN EINEM AUFRUF. Der Retry schickt bewusst die
+   * SIEBENTEILIGE Nutzlast von vor U12 (purpose/memberRange/goal/description):
+   * das ist die Lage zwischen zwei Deploys, wenn eine ältere `platform` mit
+   * der schon ausgetauschten `control` spricht (deploy.yml fährt control
+   * zuerst). Das Naht-Schema ist `.strict()` — wären die Felder gestrichen
+   * statt optional, stünde hier ein 400 und JEDE Anlage in diesem Fenster
+   * wäre tot.
+   */
   const retry = await call(CONTROL_HOST, '/api/onboarding/site', {
     method: 'POST',
     cookie: last.cookie,
     body: {
       name: last.site.host, slug: last.site.host.split('.')[0], purpose: 'new', memberRange: 'to100',
-      category: 'other', goal: 'discussion', vibe: 'calm', inviteCode: code, locale: 'de',
+      category: 'other', goal: 'discussion', description: 'Aus einer älteren platform.',
+      vibe: 'calm', inviteCode: code, locale: 'de',
     },
   })
+  check('alte Nutzlast bleibt gültig (nicht 400)', retry.status === 200, `Status ${retry.status}: ${retry.text.slice(0, 120)}`)
   check('gibt dieselbe Community zurück', retry.json?.communityId === last.site.communityId && retry.json?.reused === true, JSON.stringify(retry.json))
   // Seiten sind Teil der Idempotenz: ein Doppelklick darf keine zweite
   // Startseite und keine zweiten Rechtsseiten-Vorlagen erzeugen (Befund S7).
   const pagesAfterRetry = await pool.listRows({
     databaseId: poolDatabaseId, tableId: 'pages',
-    queries: [Query.equal('tenantId', last.site.tenantId), Query.limit(25)],
+    queries: [Query.equal('communityId', last.site.tenantId), Query.limit(25)],
   })
-  check('genau 3 Seiten nach dem Retry (home + Impressum + Datenschutz)', pagesAfterRetry.rows.length === 3,
+  // FÜNF, nicht drei: die Startseite wird seit U4 in BEIDE Sprachen gesät
+  // (Trichter-M4), dazu Impressum, Datenschutz und die Community-Regeln.
+  check('genau 5 Seiten nach dem Retry (home de+en, Impressum, Datenschutz, Regeln)',
+    pagesAfterRetry.rows.length === 5,
     pagesAfterRetry.rows.map(row => `${row.slug}/${row.locale}`).join(', '))
 
   console.log('\n3. Abbruch hinterlässt nichts')
   const before = await countTenants()
   const invalid = await call(CONTROL_HOST, '/api/onboarding/site', {
     method: 'POST', cookie: last.cookie,
-    body: { name: 'x', slug: 'login', purpose: 'new', memberRange: 'to100', category: 'other', goal: 'discussion', vibe: 'calm', inviteCode: code },
+    body: { name: 'x', slug: 'login', category: 'other', vibe: 'calm', inviteCode: code },
   })
   const quotaBlocked = await call(CONTROL_HOST, '/api/onboarding/site', {
     method: 'POST', cookie: last.cookie,
-    body: { name: 'Zweite', slug: `zweite-${Date.now().toString(36)}`, purpose: 'new', memberRange: 'to100', category: 'other', goal: 'discussion', vibe: 'calm', inviteCode: code },
+    body: { name: 'Zweite', slug: `zweite-${Date.now().toString(36)}`, category: 'other', vibe: 'calm', inviteCode: code },
   })
   const after = await countTenants()
   check('abgelehnte Eingabe (reservierter Name) → 400', invalid.status === 400, `Status ${invalid.status}`)
@@ -239,8 +253,22 @@ try {
   // C18 (2026-07-30): öffentlich als Default — siehe onboardingProvision.ts.
   check('alle öffentlich (audience public)', tenantRows.rows.every(row => row.audience === 'public'))
 
+  /**
+   * DIE STARTSEITE STEHT — MIT DEM RÜCKFALLTEXT (U12).
+   *
+   * Bis zum 2026-08-10 kam ihr Text aus der Wizard-Beschreibung; die fragt
+   * der Wizard nicht mehr, also greift der Rückfalltext aus site.post.ts.
+   * Geprüft wird beides: dass die Seite überhaupt da und veröffentlicht ist
+   * (sonst stünde der Owner vor einer leeren Community), und dass sie den
+   * Namen seiner Community trägt statt eines Platzhalters. Den eigenen Text
+   * schreibt er danach — das ist der Checklisten-Punkt „Startseite".
+   */
   const homeRes = await call(last.site.host, '/api/pages/public/home?locale=de')
-  check('Startseite aus der Beschreibung erzeugt', homeRes.status === 200 && /Abnahmelauf/.test(homeRes.json?.body ?? ''), `Status ${homeRes.status}`)
+  const homeBody = homeRes.json?.body ?? ''
+  check('Startseite steht und ist öffentlich', homeRes.status === 200, `Status ${homeRes.status}`)
+  check('Startseite trägt den Rückfalltext mit dem Community-Namen',
+    homeBody.includes(last.site.host.split('.')[0]) || /Willkommen bei/.test(homeBody),
+    homeBody.slice(0, 120))
 
   // Audit-Befund S7: Impressum + Datenschutz entstehen als VORLAGEN-ENTWÜRFE.
   // Geprüft werden beide Seiten der Sache — im Datenbestand vorhanden UND
@@ -248,11 +276,11 @@ try {
   // etwas zum Ausfüllen, aber niemand sieht einen leeren Rechtstext.
   const legalRows = await pool.listRows({
     databaseId: poolDatabaseId, tableId: 'pages',
-    queries: [Query.equal('tenantId', last.site.tenantId), Query.equal('slug', ['imprint', 'privacy']), Query.limit(25)],
+    queries: [Query.equal('communityId', last.site.tenantId), Query.equal('slug', ['imprint', 'privacy']), Query.limit(25)],
   })
   check('Impressum + Datenschutz als Vorlage angelegt', legalRows.rows.length === 2, `${legalRows.rows.length} Rows`)
   check('beide sind ENTWURF (nicht veröffentlicht)', legalRows.rows.every(row => row.status === 'draft'))
-  check('beide tragen den Mandanten-Scope', legalRows.rows.every(row => row.tenantId === last.site.tenantId))
+  check('beide tragen den Mandanten-Scope', legalRows.rows.every(row => row.communityId === last.site.tenantId))
   check('beide tragen Platzhalter-Marker', legalRows.rows.every(row => row.body.includes('[AUSFÜLLEN:')))
   const imprintPublic = await call(last.site.host, '/api/pages/public/imprint?locale=de')
   check('Impressum ist öffentlich NICHT abrufbar → 404', imprintPublic.status === 404, `Status ${imprintPublic.status}`)
@@ -275,7 +303,7 @@ finally {
   for (const tenantRow of cleanup.tenants) {
     const t = await control.getRow({ databaseId, tableId: 'communities', rowId: tenantRow }).catch(() => null)
     if (!t?.tenantId) continue
-    const pages = await pool.listRows({ databaseId: poolDatabaseId, tableId: 'pages', queries: [Query.equal('tenantId', t.tenantId), Query.limit(25)] }).catch(() => null)
+    const pages = await pool.listRows({ databaseId: poolDatabaseId, tableId: 'pages', queries: [Query.equal('communityId', t.tenantId), Query.limit(25)] }).catch(() => null)
     for (const page of pages?.rows ?? []) {
       await pool.deleteRow({ databaseId: poolDatabaseId, tableId: 'pages', rowId: page.$id }).catch(() => {})
       cleanup.pages.push(page.$id)

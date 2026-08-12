@@ -107,20 +107,34 @@ try {
   const invite = await issueCode()
   const slug = `o2-${Date.now().toString(36)}`
 
+  /**
+   * DIE NUTZLAST DES HEUTIGEN WIZARDS (U12, 2026-08-10): Name/Adresse,
+   * Kategorie, Vibe — drei Pflicht-Antworten, mehr fragt er nicht.
+   */
   const payload = {
     jwt: owner.jwt,
     site: {
       name: 'Jungle Zipline',
       slug,
-      purpose: 'new',
-      memberRange: 'to100',
       category: 'creator',
-      goal: 'relationships',
-      description: 'Menschen, die gern in Bäumen hängen.',
       vibe: 'fresh',
       inviteCode: invite.code,
       locale: 'de',
     },
+  }
+
+  /**
+   * Die Nutzlast einer ÄLTEREN platform (sieben Antworten). Sie muss weiter
+   * gelten: deploy.yml fährt `control` VOR `platform`, zwischen beiden Deploys
+   * ruft also der alte Wizard die neue Naht. Weil das Schema `.strict()` ist,
+   * wäre ein gestrichenes Feld dort ein 400 auf jede Anlage.
+   */
+  const legacySite = {
+    ...payload.site,
+    purpose: 'new',
+    memberRange: 'to100',
+    goal: 'relationships',
+    description: 'Menschen, die gern in Bäumen hängen.',
   }
 
   console.log('1. Abwehr')
@@ -135,6 +149,11 @@ try {
   check('reservierter Slug (login) → 400', reserved.status === 400, `war ${reserved.status}`)
   const extra = await post('/api/control/onboarding/site', { ...payload, site: { ...payload.site, plan: 'business' } }, withSecret)
   check('geschmuggeltes plan-Feld → 400', extra.status === 400, `war ${extra.status}`)
+  // Optional heißt „darf fehlen", nicht „darf alles sein": ein mitgeschicktes
+  // Alt-Feld wird weiter gegen seinen Katalog geprüft, sonst stünde beliebiger
+  // Text in `communities.profile`.
+  const badGoal = await post('/api/control/onboarding/site', { ...payload, site: { ...legacySite, goal: 'weltherrschaft' } }, withSecret)
+  check('unbekanntes Ziel im Alt-Feld → 400', badGoal.status === 400, `war ${badGoal.status}`)
 
   console.log('\n2. Anlage')
   const created = await post('/api/control/onboarding/site', payload, withSecret)
@@ -157,13 +176,25 @@ try {
   // Schalter unter /dashboard/community, keine Voreinstellung.
   check('Row: audience public (öffentlich als Default)', tenant?.audience === 'public', String(tenant?.audience))
   check('Row: Vibe fresh → spring/bright', tenant?.theme === 'spring' && tenant?.variant === 'bright', `${tenant?.theme}/${tenant?.variant}`)
-  check('Row: Profil enthält die Antworten', (() => {
+  check('Row: Profil enthält die Kategorie', (() => {
     try {
-      const p = JSON.parse(tenant?.profile || '{}')
-      return p.category === 'creator' && p.goal === 'relationships' && p.description?.startsWith('Menschen')
+      return JSON.parse(tenant?.profile || '{}').category === 'creator'
     }
     catch { return false }
-  })())
+  })(), tenant?.profile)
+  /**
+   * KEIN ERFUNDENER DEFAULT (U12). Was der Wizard nicht mehr fragt, steht auch
+   * nicht im Profil — ein gesetzter Default wäre eine Antwort, die niemand
+   * gegeben hat, und später nicht mehr von einer echten zu unterscheiden.
+   */
+  check('Row: Profil erfindet keine Antworten', (() => {
+    try {
+      const p = JSON.parse(tenant?.profile || '{}')
+      return p.purpose === undefined && p.memberRange === undefined
+        && p.goal === undefined && p.description === undefined
+    }
+    catch { return false }
+  })(), tenant?.profile)
   check('Row: Code-Spur gesetzt', tenant?.inviteCodeId === invite.id)
 
   // Gezielt nach DIESER Community fragen (mit explizitem Limit): ohne Filter
@@ -183,7 +214,11 @@ try {
   check('Code einmal verbraucht', codeAfter.uses === 1, `uses=${codeAfter.uses}`)
 
   console.log('\n3. Idempotenz + Grenzen')
-  const retry = await post('/api/control/onboarding/site', payload, withSecret)
+  // Der Retry fährt bewusst die ALTE Nutzlast: er beweist damit zweierlei —
+  // die Idempotenz am Hostnamen UND dass die Naht den Stand einer noch nicht
+  // ausgetauschten platform annimmt (s. Kommentar an `legacySite`).
+  const retry = await post('/api/control/onboarding/site', { ...payload, site: legacySite }, withSecret)
+  check('alte Nutzlast bleibt gültig (nicht 400)', retry.status === 200, `war ${retry.status}: ${retry.text.slice(0, 160)}`)
   check('Retry gibt dieselbe Site zurück', retry.json?.communityId === created.json?.communityId && retry.json?.reused === true, JSON.stringify(retry.json))
   const codeAfterRetry = await control.getRow({ databaseId, tableId: 'invite_codes', rowId: invite.id })
   check('Retry kostet den Code NICHT erneut', codeAfterRetry.uses === 1, `uses=${codeAfterRetry.uses}`)
