@@ -59,11 +59,9 @@ if (error.value || !initial.value) {
  * die URL anzeigen — ausgerechnet auf der Seite, deren Text gerade entfernt
  * wurde. Der Platzhalter kommt aus derselben i18n-Quelle wie die Überschrift.
  */
-useHead({
-  title: () => eventIsRedacted(initial.value?.redactedAt)
-    ? t('events.redacted.title')
-    : initial.value?.title ?? '',
-})
+useBrandTitle(() => eventIsRedacted(initial.value?.redactedAt)
+  ? t('events.redacted.title')
+  : initial.value?.title ?? '')
 
 // Cast wie im blueprint-Layout: die AppConfig-Typen entstehen erst im
 // Merge der jeweiligen App, der Layer liest sie bewusst defensiv.

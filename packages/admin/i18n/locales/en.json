@@ -84,7 +84,8 @@
     },
     "audit": {
       "title": "Audit log",
-      "empty": "No admin activity recorded yet.",
+      "emptyTitle": "No admin activity yet",
+      "empty": "As soon as you or your team change something in here, it shows up.",
       "col": {
         "user": "Admin",
         "event": "Event",
@@ -202,7 +203,8 @@
       "moderate": "To moderate",
       "recentActivity": "Recent activity",
       "storage": "Storage",
-      "allClear": "Nothing to moderate right now.",
+      "allClear": "Nothing to moderate right now",
+      "allClearHint": "Reported comments land here as soon as someone reports one.",
       "activityEmpty": "No activity yet",
       "activityEmptyHint": "This is where admin actions by you and your team show up.",
       "viewAll": "View all",
@@ -583,7 +585,8 @@
         "title": "Server",
         "description": "Host the application runs on.",
         "hostname": "Hostname",
-        "ip": "IP addresses"
+        "ip": "IP addresses",
+        "noIp": "none"
       },
       "stack": {
         "title": "Stack",

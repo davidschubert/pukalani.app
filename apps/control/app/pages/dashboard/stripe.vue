@@ -24,7 +24,7 @@ definePageMeta({ layout: 'dashboard', middleware: ['auth', 'admin'], requiredCap
 
 const { t, locale } = useI18n()
 const toast = useToast()
-useHead({ title: () => t('control.stripe.title') })
+useBrandTitle(() => t('control.stripe.title'))
 
 interface SectionError { error: true }
 
@@ -437,6 +437,18 @@ async function ensureWebhook(recreate = false) {
         >
           <p v-if="!hasKey" class="text-sm text-muted">{{ t('control.stripe.status.needsKey') }}</p>
           <p v-else-if="failed(data?.prices)" class="text-sm text-muted">{{ t('control.stripe.sectionFailed') }}</p>
+
+          <!-- `prices` ist eine LEERE Liste, wenn der Plan-Katalog nichts
+               hergibt — die Karte stand dann komplett leer da, ohne einen
+               Hinweis, dass etwas fehlt (M8). Kein Knopf: das ist ein
+               Katalog-Fehler, kein Schritt, den man hier tut; der
+               Abgleich-Knopf sitzt ohnehin in der Kopfzeile der Seite. -->
+          <CoreEmptyState
+            v-else-if="prices && prices.length === 0"
+            icon="i-ph-tag"
+            :title="t('control.stripe.prices.emptyTitle')"
+            :description="t('control.stripe.prices.emptyText')"
+          />
 
           <div v-else-if="prices" class="divide-y divide-default">
             <div

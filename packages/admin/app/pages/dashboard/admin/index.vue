@@ -12,7 +12,7 @@ const { formatRelativeTime } = useFormatRelativeTime()
 const { page, setPage } = usePagination()
 const { sortField, sortDir, toggle } = useTableSort('$createdAt', 'desc')
 
-useHead({ title: () => t('admin.audit.title') })
+useBrandTitle(() => t('admin.audit.title'))
 
 const { data, status, refresh } = useFetch<AuditLogListResponse>('/api/admin/audit', {
   query: computed(() => ({ page: page.value, sort: sortField.value, dir: sortDir.value })),
@@ -90,9 +90,15 @@ const columns: TableColumn<AuditLogEntry>[] = [
       <UIcon name="i-ph-spinner" class="size-6 animate-spin text-muted" />
     </div>
 
-    <p v-else-if="(data?.entries.length ?? 0) === 0" class="text-sm text-muted">
-      {{ t('admin.audit.empty') }}
-    </p>
+    <!-- CoreEmptyState statt nacktem Absatz (M8). OHNE Aktion: ein Protokoll
+         legt man nicht an, es füllt sich bei der nächsten Admin-Handlung von
+         selbst — genau das sagt die Beschreibung. -->
+    <CoreEmptyState
+      v-else-if="(data?.entries.length ?? 0) === 0"
+      icon="i-ph-clock-counter-clockwise"
+      :title="t('admin.audit.emptyTitle')"
+      :description="t('admin.audit.empty')"
+    />
 
     <template v-else>
       <UTable :data="data?.entries ?? []" :columns="columns">

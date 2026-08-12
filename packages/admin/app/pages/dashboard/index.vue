@@ -31,7 +31,7 @@ const appConfig = useAppConfig()
 const auth = useAuthStore()
 const { formatRelativeTime } = useFormatRelativeTime()
 
-useHead({ title: () => t('admin.nav.overview') })
+useBrandTitle(() => t('admin.nav.overview'))
 
 const firstName = computed(() => auth.user?.name?.split(' ')[0] || t('ui.account'))
 /**
@@ -399,7 +399,15 @@ onScopeDispose(() => {
                 <ULink :to="localePath({ path: '/dashboard/comments', query: { status: 'reported' } })" class="text-sm text-primary hover:underline">{{ t('admin.overview.viewAll') }}</ULink>
               </div>
             </template>
-            <p v-if="!reportedList.length" class="text-sm text-muted">{{ t('admin.overview.allClear') }}</p>
+            <!-- Dieselbe Bauform wie die Schwester-Karte daneben (S5). BEWUSST
+                 OHNE Aktion: nichts zu moderieren ist eine gute Nachricht,
+                 kein Auftrag — „Alle ansehen" steht oben in der Kopfzeile. -->
+            <CoreEmptyState
+              v-if="!reportedList.length"
+              icon="i-ph-shield-check"
+              :title="t('admin.overview.allClear')"
+              :description="t('admin.overview.allClearHint')"
+            />
             <ul v-else class="space-y-3">
               <li v-for="c in reportedList" :key="c.$id" class="border-b border-default/60 pb-3 text-sm last:border-0 last:pb-0">
                 <div class="mb-1 flex items-center gap-2 text-xs text-muted">

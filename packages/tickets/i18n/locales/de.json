@@ -9,6 +9,9 @@
       "title": "Aufgaben",
       "subtitle": "Feedback sichten, Tickets planen, Umsetzung verfolgen",
       "addList": "Eine weitere Liste hinzufügen",
+      "addFirstList": "Erste Liste anlegen",
+      "emptyTitle": "Noch keine Listen",
+      "emptyText": "Ein Brett besteht aus Listen — etwa „Eingang“, „In Arbeit“, „Erledigt“. Leg die erste an, dann kannst du Tickets hineinziehen.",
       "listTitlePlaceholder": "Listen-Titel …",
       "listAdded": "Liste angelegt.",
       "listAddedHint": "Sie steht am rechten Ende des Boards.",
@@ -128,7 +131,8 @@
       "toggleFailed": "Die Beobachtung wurde nicht geändert — es gilt weiter der bisherige Stand.",
       "listTitle": "Beobachtet",
       "listDescription": "Alle Tickets, denen du folgst — hier auch wieder ausschaltbar.",
-      "empty": "Du beobachtest noch keine Tickets."
+      "emptyTitle": "Du beobachtest nichts",
+      "empty": "Öffne ein Ticket und klick auf das Auge — dann steht es hier."
     },
     "files": {
       "title": "Anhänge",

@@ -70,6 +70,8 @@
           "year": "jährlich"
         },
         "ok": "angelegt",
+        "emptyTitle": "Keine Preise im Katalog",
+        "emptyText": "Zu diesem Plan-Katalog gehört kein einziger Preis. Prüf die Plan-Definition — ohne Preise kann niemand ein Abo abschließen.",
         "missing": "fehlt",
         "drift": "bei Stripe: {amount}",
         "taxWrong": "nicht brutto",

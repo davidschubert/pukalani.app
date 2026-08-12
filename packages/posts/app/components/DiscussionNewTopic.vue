@@ -70,7 +70,13 @@ const canOpen = computed(() => (props.categorySlug
   ? presetCategoryId.value !== ''
   : activeCategories.value.length > 0))
 
-const open = ref(false)
+/**
+ * Der Öffnungs-Zustand ist ein optionales Modell, kein privates `ref`: der
+ * LEERE Zustand der Themen-Tabelle bietet dieselbe Handlung an (M7) und liegt
+ * in einer Geschwister-Komponente. Ohne `v-model:open` verhält sich der Knopf
+ * unverändert — die Vorgabe `false` trägt ihn dann allein.
+ */
+const open = defineModel<boolean>('open', { default: false })
 
 function onCreated(_post: unknown, scheduled: boolean) {
   open.value = false

@@ -9,7 +9,7 @@ const toast = useToast()
 const confirm = useConfirm()
 const isDev = import.meta.dev
 
-useHead({ title: () => t('dashboard.system.title') })
+useBrandTitle(() => t('dashboard.system.title'))
 
 // Live-/per-Request-Daten ohne SEO-Relevanz → client-seitig (kein SSR-Render,
 // sonst Hydration-Mismatch über uptime/memory/generatedAt).
@@ -274,7 +274,10 @@ async function updateDep(dep: Dep) {
                 <dt class="text-muted">{{ t('dashboard.system.server.ip') }}</dt>
                 <dd class="flex flex-wrap justify-end gap-1">
                   <UBadge v-for="ip in data.server.ipAddresses" :key="ip" color="neutral" variant="subtle" class="font-mono">{{ ip }}</UBadge>
-                  <span v-if="data.server.ipAddresses.length === 0">—</span>
+                  <!-- Kein CoreEmptyState: das hier ist EINE Zeile einer
+                       Definitionsliste, keine Datenfläche. Der Gedankenstrich
+                       war aber weder übersetzt noch aussagekräftig (M8). -->
+                  <span v-if="data.server.ipAddresses.length === 0" class="text-muted">{{ t('dashboard.system.server.noIp') }}</span>
                 </dd>
               </div>
             </dl>

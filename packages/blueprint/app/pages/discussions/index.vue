@@ -26,6 +26,11 @@ useBrandTitle(() => t('posts.discussions.title'), { description: () => t('posts.
 const showCategories = computed(() => route.query.order === 'categories')
 
 const { replyCounts, loadCounts } = useDiscussionReplyCounts()
+
+// Der LEERE Zustand der Themen-Tabelle bietet dieselbe Handlung an wie die
+// Kopfzeile (M7) — verdrahtet wird sie hier, weil Knopf und Tabelle
+// Geschwister sind. EIN Composer, zwei Auslöser.
+const composerOpen = ref(false)
 </script>
 
 <template>
@@ -35,7 +40,7 @@ const { replyCounts, loadCounts } = useDiscussionReplyCounts()
         <h1 class="text-2xl font-bold">{{ t('posts.discussions.title') }}</h1>
         <p class="mt-1 text-sm text-muted">{{ t('posts.discussions.description') }}</p>
       </div>
-      <DiscussionNewTopic />
+      <DiscussionNewTopic v-model:open="composerOpen" />
     </div>
 
     <div class="mt-6 flex flex-col gap-6 md:flex-row">
@@ -48,7 +53,12 @@ const { replyCounts, loadCounts } = useDiscussionReplyCounts()
 
       <div class="min-w-0 flex-1">
         <DiscussionCategories v-if="showCategories" />
-        <DiscussionTopics v-else :reply-counts="replyCounts" @rows-changed="loadCounts" />
+        <DiscussionTopics
+          v-else
+          :reply-counts="replyCounts"
+          @rows-changed="loadCounts"
+          @new-topic="composerOpen = true"
+        />
       </div>
     </div>
   </UContainer>

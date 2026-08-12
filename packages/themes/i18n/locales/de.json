@@ -51,6 +51,8 @@
       "navLabel": "Theme-Katalog",
       "title": "Theme anpassen",
       "gallery": "Theme-Galerie",
+      "galleryEmptyTitle": "Keine Themes vorhanden",
+      "galleryEmptyText": "Hier stehen sonst alle mitgelieferten Themes. Steht die Liste leer, leg ein eigenes an.",
       "galleryHint": "Klick auf eine Zeile wechselt das Theme live — Varianten über die Farbpunkte. Die Auswahl gilt für DEINEN Browser (Cookie), wie im Anzeige-Menü.",
       "previewLockedTitle": "Live-Vorschau hier nicht möglich",
       "previewLockedText": "Auf dem Host einer Community gilt deren Farbwelt für alle Besucher — ein Theme-Cookie wird dort nicht gelesen. Anlegen, Bearbeiten, Voreinstellung und Reihenfolge wirken weiter; zum Durchprobieren einen Instanz-Host benutzen.",

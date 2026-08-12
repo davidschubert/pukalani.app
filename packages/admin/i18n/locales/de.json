@@ -84,7 +84,8 @@
     },
     "audit": {
       "title": "Protokoll",
-      "empty": "Noch keine Admin-Aktivität aufgezeichnet.",
+      "emptyTitle": "Noch keine Admin-Aktivität",
+      "empty": "Sobald du oder dein Team etwas in der Verwaltung tut, steht es hier.",
       "col": {
         "user": "Admin",
         "event": "Ereignis",
@@ -202,7 +203,8 @@
       "moderate": "Zu moderieren",
       "recentActivity": "Letzte Aktivität",
       "storage": "Speicher",
-      "allClear": "Zurzeit nichts zu moderieren.",
+      "allClear": "Zurzeit nichts zu moderieren",
+      "allClearHint": "Gemeldete Kommentare landen hier, sobald jemand einen meldet.",
       "activityEmpty": "Noch keine Aktivität",
       "activityEmptyHint": "Hier steht, was du und dein Team in der Verwaltung tut.",
       "viewAll": "Alle ansehen",
@@ -583,7 +585,8 @@
         "title": "Server",
         "description": "Host, auf dem die Anwendung läuft.",
         "hostname": "Hostname",
-        "ip": "IP-Adressen"
+        "ip": "IP-Adressen",
+        "noIp": "keine"
       },
       "stack": {
         "title": "Stack",

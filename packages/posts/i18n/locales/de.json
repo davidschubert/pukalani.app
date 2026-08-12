@@ -115,8 +115,8 @@
       "title": "Beiträge moderieren",
       "queue": "Geplante Beiträge",
       "recent": "Neueste Beiträge",
-      "empty": "Keine Beiträge.",
-      "emptyTitle": "Keine Beiträge",
+      "empty": "Sobald jemand einen Beitrag schreibt, steht er hier. Gemeldete erkennst du am Fähnchen.",
+      "emptyTitle": "Nichts zu moderieren",
       "rowActions": "Aktionen für diesen Beitrag",
       "col": {
         "post": "Beitrag",

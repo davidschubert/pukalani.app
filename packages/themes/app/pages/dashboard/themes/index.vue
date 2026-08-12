@@ -20,6 +20,11 @@ const { theme, variant, setTheme, setVariant, neutrals, neutral, setNeutral, can
 const customThemes = useCustomThemesState()
 const settings = useThemeSettingsState()
 
+// Die EINZIGE Dashboard-Seite, die gar keinen Titel setzte — im Tab stand
+// deshalb der Titel der zuvor besuchten Seite (C5). Ihre Geschwister
+// (/new, /:id, /fonts) hatten immer einen.
+useBrandTitle(() => t('themes.customize.title'))
+
 const capitalize = (value: string) => value.charAt(0).toUpperCase() + value.slice(1)
 
 // Alle Built-in-Theme-CSS vorladen: der Live-Wechsel in der Galerie tauscht
@@ -481,6 +486,21 @@ async function importTheme(event: Event) {
                   />
                 </UDropdownMenu>
               </div>
+            </template>
+
+            <!-- Diese Tabelle ist praktisch nie leer (26 Built-ins stehen
+                 immer darin). Der Slot fehlte trotzdem, und damit stand für
+                 den kaputten Fall Nuxt UIs unübersetztes „No data." da (M8).
+                 MIT Aktion, weil hier tatsächlich etwas anzulegen ist. -->
+            <template #empty>
+              <CoreEmptyState
+                icon="i-ph-palette"
+                :title="t('themes.customize.galleryEmptyTitle')"
+                :description="t('themes.customize.galleryEmptyText')"
+                :action-label="t('themes.customize.create')"
+                action-icon="i-ph-plus"
+                :action-to="localePath('/dashboard/themes/new')"
+              />
             </template>
           </UTable>
           <p class="mt-2 text-xs text-muted">{{ t('themes.customize.galleryHint') }}</p>

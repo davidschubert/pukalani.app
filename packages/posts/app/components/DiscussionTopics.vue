@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import type { TableColumn } from '@nuxt/ui'
-import { DISCUSSION_TOPICS_KEY } from '../../shared/discussionDataKeys'
+import { CATEGORY_LIST_KEY, DISCUSSION_TOPICS_KEY } from '../../shared/discussionDataKeys'
 import { activeTopicFilterCount, parseTopicFilters, type TopicFilters } from '../../shared/discussionFilters'
 import { TOP_PERIODS, isTopPeriod, isTopicOrder, type TopPeriod } from '../../shared/discussionSort'
-import type { DiscussionListResponse, DiscussionTopic } from '../../shared/types/post'
+import type { CategoryListResponse, DiscussionListResponse, DiscussionTopic } from '../../shared/types/post'
 
 /**
  * Die Topics-Tabelle der Discussions (F1 Stufe 1) — UTable, wie jede
@@ -33,7 +33,17 @@ const props = defineProps<{
   replyCounts?: Record<string, number>
 }>()
 
-const emit = defineEmits<{ rowsChanged: [ids: string[]] }>()
+const emit = defineEmits<{
+  rowsChanged: [ids: string[]]
+  /**
+   * „Hier ist noch nichts — eröffne das erste Thema." Der leere Zustand bietet
+   * die Handlung an, die Komposition öffnet dafür denselben `DiscussionNewTopic`
+   * wie die Kopfzeile (M7). BEWUSST kein zweiter Composer und BEWUSST kein Link
+   * in den Feed: Feed und Discussions sind eigenständige Produkte, die
+   * Kernhandlung muss aus dem eigenen Produkt heraus erreichbar bleiben.
+   */
+  newTopic: []
+}>()
 
 const { t } = useI18n()
 const route = useRoute()
@@ -213,6 +223,23 @@ function filterByAuthor(row: DiscussionTopic) {
 const hasSearch = computed(() =>
   filters.value.search.length > 0 || activeTopicFilterCount(filters.value) > 0)
 
+/**
+ * Darf der leere Zustand „Thema eröffnen" anbieten? GENAU dieselbe Bedingung
+ * wie beim Knopf in der Kopfzeile (DiscussionNewTopic): angemeldet UND eine
+ * aktive Kategorie, auf einer Kategorie-Seite eben DIESE. Ein Knopf, der
+ * sicher ins Leere greift, ist schlechter als keiner.
+ *
+ * `useNuxtData` statt einer zweiten Abfrage: die Kategorien liegen unter
+ * demselben Schlüssel schon im Payload (die Seite und der Kopfzeilen-Knopf
+ * holen sie). Kein Request, kein `await` — diese Komponente darf ihren
+ * Suspense-Zustand nicht von einer Nebensache abhängig machen.
+ */
+const { isLoggedIn } = useCurrentUser()
+const { data: categoryList } = useNuxtData<CategoryListResponse>(CATEGORY_LIST_KEY)
+const canOpenTopic = computed(() => isLoggedIn.value
+  && (categoryList.value?.rows ?? []).some(entry => entry.category.active
+    && (!props.categorySlug || entry.category.slug === props.categorySlug)))
+
 function resetSearch() {
   search.value = ''
   filters.value = {
@@ -355,6 +382,9 @@ function resetSearch() {
           icon="i-ph-chats-circle"
           :title="t('posts.discussions.emptyTitle')"
           :description="t('posts.discussions.emptyText')"
+          :action-label="canOpenTopic ? t('posts.discussions.newTopic') : undefined"
+          action-icon="i-ph-plus"
+          @action="emit('newTopic')"
         />
       </template>
     </UTable>

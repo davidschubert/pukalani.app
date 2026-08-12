@@ -9,6 +9,9 @@
       "title": "Tasks",
       "subtitle": "Triage feedback, plan tickets, track delivery",
       "addList": "Add another list",
+      "addFirstList": "Create the first list",
+      "emptyTitle": "No lists yet",
+      "emptyText": "A board is made of lists — Inbox, In progress, Done. Create the first one, then you can drag tickets into it.",
       "listTitlePlaceholder": "List title …",
       "listAdded": "List created.",
       "listAddedHint": "It sits at the far right of the board.",
@@ -128,7 +131,8 @@
       "toggleFailed": "Watching was not changed — the previous state still applies.",
       "listTitle": "Watching",
       "listDescription": "All tickets you follow — unwatch them right here.",
-      "empty": "You are not watching any tickets yet."
+      "emptyTitle": "You are not watching anything",
+      "empty": "Open a ticket and click the eye — then it shows up here."
     },
     "files": {
       "title": "Attachments",

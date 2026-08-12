@@ -115,8 +115,8 @@
       "title": "Moderate posts",
       "queue": "Scheduled posts",
       "recent": "Recent posts",
-      "empty": "No posts.",
-      "emptyTitle": "No posts",
+      "empty": "As soon as someone writes a post, it shows up here. Reported ones carry a flag.",
+      "emptyTitle": "Nothing to moderate",
       "rowActions": "Actions for this post",
       "col": {
         "post": "Post",

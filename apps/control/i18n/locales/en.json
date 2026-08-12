@@ -70,6 +70,8 @@
           "year": "yearly"
         },
         "ok": "created",
+        "emptyTitle": "No prices in the catalogue",
+        "emptyText": "This plan catalogue carries no prices at all. Check the plan definition — without prices nobody can subscribe.",
         "missing": "missing",
         "drift": "at Stripe: {amount}",
         "taxWrong": "tax not included",

@@ -13,7 +13,7 @@ const route = useRoute()
 const router = useRouter()
 const toast = useToast()
 
-useHead({ title: () => t('tickets.board.title') })
+useBrandTitle(() => t('tickets.board.title'))
 
 const { data, lists, ticketsByList, refresh, error, moveTicket, moveList, localMoveIds } = useTicketBoard()
 
@@ -195,6 +195,27 @@ async function addList() {
         :actions="[{ label: t('tickets.board.retry'), color: 'error', variant: 'solid', onClick: () => { void refresh() } }]"
       />
 
+      <!-- Ein frisches Brett hat NULL Spalten (nichts sät Standard-Listen) —
+           sichtbar war davon nur ein einzelner „Liste hinzufügen"-Knopf ohne
+           jede Erklärung (M8). Der Kasten sagt, was ein Brett ist, und bietet
+           denselben Schritt an.
+           IN ClientOnly, und das ist Pflicht: der Board-Fetch läuft mit
+           `server: false`, SSR kennt also nie Spalten. Ohne die Klammer stünde
+           der leere Zustand in JEDEM ausgelieferten HTML und verschwände erst
+           nach dem Laden — ein Aufblitzen bei jedem Aufruf. Der Fehlerfall
+           bleibt draußen (oben eigener Alert): ein 401 ist kein leeres Brett. -->
+      <ClientOnly>
+        <CoreEmptyState
+          v-if="!error && !lists.length"
+          icon="i-ph-kanban"
+          :title="t('tickets.board.emptyTitle')"
+          :description="t('tickets.board.emptyText')"
+          :action-label="t('tickets.board.addFirstList')"
+          action-icon="i-ph-plus"
+          @action="() => { addingList = true }"
+        />
+      </ClientOnly>
+
       <!-- Kein v-if-Branch-Swap: SSR (idle) und Client (pending) rendern sonst
            unterschiedliche Zweige → Hydration-Mismatch, der spätere Unmounts
            (Modal-Teleport) mit vDOM-Fehlern crashen lässt -->
@@ -272,9 +293,14 @@ async function addList() {
            bewusst kein Tabellen-Fall: dort IST die Spalte der Status. -->
       <USlideover v-model:open="watchingOpen" :title="t('tickets.watch.listTitle')" :description="t('tickets.watch.listDescription')">
         <template #body>
-          <p v-if="!watchedTickets.length" class="py-8 text-center text-sm text-muted">
-            {{ t('tickets.watch.empty') }}
-          </p>
+          <!-- OHNE Aktion: beobachtet wird AM Ticket, nicht hier — ein Knopf
+               in diesem Fach hätte kein Ziel (M8). -->
+          <CoreEmptyState
+            v-if="!watchedTickets.length"
+            icon="i-ph-eye"
+            :title="t('tickets.watch.emptyTitle')"
+            :description="t('tickets.watch.empty')"
+          />
           <ul v-else class="divide-y divide-default" data-testid="watching-list">
             <li v-for="ticket in watchedTickets" :key="ticket.$id" class="flex items-center gap-2 py-3">
               <button type="button" class="min-w-0 flex-1 cursor-pointer text-start" @click="openWatched(ticket.$id)">

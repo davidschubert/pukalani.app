@@ -40,6 +40,10 @@ useBrandTitle(() => category.value?.name ?? t('posts.discussions.title'), {
 })
 
 const { replyCounts, loadCounts } = useDiscussionReplyCounts()
+
+// Siehe discussions/index.vue: der leere Zustand der Tabelle löst denselben
+// Composer aus wie der Knopf in der Kopfzeile (M7).
+const composerOpen = ref(false)
 </script>
 
 <template>
@@ -62,7 +66,7 @@ const { replyCounts, loadCounts } = useDiscussionReplyCounts()
         <h1 class="text-2xl font-bold">{{ category?.name }}</h1>
         <p v-if="category?.description" class="mt-1 text-sm text-muted">{{ category.description }}</p>
       </div>
-      <DiscussionNewTopic :category-slug="slug" />
+      <DiscussionNewTopic v-model:open="composerOpen" :category-slug="slug" />
     </div>
 
     <div class="mt-6 flex flex-col gap-6 md:flex-row">
@@ -76,6 +80,7 @@ const { replyCounts, loadCounts } = useDiscussionReplyCounts()
           :category-slug="slug"
           :reply-counts="replyCounts"
           @rows-changed="loadCounts"
+          @new-topic="composerOpen = true"
         />
       </div>
     </div>

@@ -21,11 +21,9 @@ if (error.value || !initial.value) {
  * tatsächlich gerendert wird, und eine Kopie ohne die andere wäre genau der
  * Unterschied zwischen Pool und Silo, den PRODUKT-BILANZ.md ausschließt.
  */
-useHead({
-  title: () => eventIsRedacted(initial.value?.redactedAt)
-    ? t('events.redacted.title')
-    : initial.value?.title ?? '',
-})
+useBrandTitle(() => eventIsRedacted(initial.value?.redactedAt)
+  ? t('events.redacted.title')
+  : initial.value?.title ?? '')
 </script>
 
 <template>

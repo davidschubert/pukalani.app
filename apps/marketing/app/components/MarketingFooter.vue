@@ -220,7 +220,12 @@ const columns = computed(() => [
     aria: t('marketing.footer.aria.company'),
     label: t('marketing.footer.colCompany'),
     children: [
-      { ...LINK_DEFAULTS, label: t('marketing.footer.story'), to: localePath('/') },
+      // DASSELBE Ziel wie „Geschichte" im Header (MarketingHeader.vue,
+      // storyTarget): der Abschnitt auf der Startseite, nicht ihr Anfang.
+      // Ohne den Anker landete derselbe Beschriftungstext eine Bildschirmhöhe
+      // vom Versprochenen entfernt, und wer schon auf `/` steht, sah gar
+      // keine Bewegung — der Link las sich als tot (Audit-Befund M6).
+      { ...LINK_DEFAULTS, label: t('marketing.footer.story'), to: { path: localePath('/'), hash: '#geschichte' } },
       page('dsgvo', t('marketing.footer.privacyHow')),
       { ...LINK_DEFAULTS, label: t('marketing.footer.changelog'), to: 'https://changelog.pukalani.app' },
       // Die Statusseite liegt bewusst NICHT bei uns: sie muss antworten, wenn
