@@ -178,6 +178,9 @@
       "planTitle": "Custom domains are a Pro feature",
       "planDesc": "With Pro your community is reachable at your own address — certificate, www and redirect included.",
       "planCta": "See plans",
+      "caaTitle": "Your domain blocks Let's Encrypt",
+      "caaDesc": "Your zone has a CAA record and it does not allow letsencrypt.org. Without that permission your domain cannot get a certificate. Allow letsencrypt.org at your domain provider — or remove the CAA record.",
+      "autoCheckNote": "While this page stays open we check again every 30 seconds on our own. You can still press Check at any time.",
       "dnsTitle": "Add these records at your domain provider",
       "dnsDescription": "Copy them exactly. Then press Check above.",
       "steps": {
@@ -200,7 +203,42 @@
         "aHelp": "An A record pointing at our server address.",
         "cname": "3. Where the www form points",
         "cnameHelp": "A CNAME record. Some providers call this an alias.",
-        "note": "Depending on your provider, DNS changes take a few minutes to a few hours to reach everyone."
+        "note": "Depending on your provider, DNS changes take a few minutes to a few hours to reach everyone.",
+        "ttl": "Tip before you switch: set the TTL of your records to 5 minutes (300 seconds) first, then the change takes effect quickly. You can raise it again afterwards."
+      },
+      "registrars": {
+        "title": "Where do I find the DNS settings?",
+        "description": "Add the records above wherever your domain is registered. Here are the paths for the most common providers.",
+        "ionos": {
+          "label": "IONOS",
+          "path": "Menu Domains and SSL → click the domain → DNS tab → Add record.",
+          "note": "For the A record leave the hostname field empty or enter {'@'}; for the CNAME enter www."
+        },
+        "strato": {
+          "label": "Strato",
+          "path": "Customer area → Domains → Domain management → gear icon next to the domain → DNS settings.",
+          "note": "Strato allows CNAME only for subdomains such as www. The main domain therefore needs the A record above."
+        },
+        "united": {
+          "label": "United Domains",
+          "path": "Domain portfolio → click the domain → DNS → Manage DNS records.",
+          "note": "There the A record uses name {'@'} and the CNAME uses name www. Changes only apply once you save."
+        },
+        "hetzner": {
+          "label": "Hetzner",
+          "path": "DNS Console at dns.hetzner.com → select the zone → Add record.",
+          "note": "This only applies if the nameservers of your domain point at Hetzner. If another provider is listed there, the records belong there instead."
+        },
+        "cloudflare": {
+          "label": "Cloudflare",
+          "path": "Dashboard → click the domain → DNS → Records → Add record.",
+          "note": "Important: set the proxy status to DNS only (grey cloud). With the orange cloud your domain points at Cloudflare instead of at us, and our check fails."
+        },
+        "other": {
+          "label": "Other provider",
+          "path": "Look for DNS, zone editor or nameserver records in the customer area of your provider.",
+          "note": "If there is no DNS section, another service manages your nameservers — the records belong there. The three records themselves are the same everywhere."
+        }
       },
       "errors": {
         "domain_empty": "Please enter a domain.",

@@ -178,6 +178,9 @@
       "planTitle": "Eigene Domains gibt es ab Pro",
       "planDesc": "Mit Pro erreichst du deine Community unter deiner eigenen Adresse — samt Zertifikat, www und Weiterleitung.",
       "planCta": "Abo ansehen",
+      "caaTitle": "Deine Domain verbietet Let's Encrypt",
+      "caaDesc": "In deiner Zone steht ein CAA-Eintrag, und er erlaubt letsencrypt.org nicht. Ohne diese Erlaubnis bekommt deine Domain kein Zertifikat. Erlaube letsencrypt.org bei deinem Domain-Anbieter — oder entferne den CAA-Eintrag.",
+      "autoCheckNote": "Solange diese Seite offen ist, prüfen wir alle 30 Sekunden von selbst nach. Du kannst auch jederzeit auf Prüfen drücken.",
       "dnsTitle": "Das musst du bei deinem Domain-Anbieter eintragen",
       "dnsDescription": "Kopiere die Einträge unverändert. Danach oben auf Prüfen drücken.",
       "steps": {
@@ -200,7 +203,42 @@
         "aHelp": "Ein A-Eintrag auf unsere Server-Adresse.",
         "cname": "3. Wo die www-Form hinzeigt",
         "cnameHelp": "Ein CNAME-Eintrag. Manche Anbieter nennen das Alias.",
-        "note": "Bis DNS-Änderungen überall ankommen, dauert es je nach Anbieter wenige Minuten bis einige Stunden."
+        "note": "Bis DNS-Änderungen überall ankommen, dauert es je nach Anbieter wenige Minuten bis einige Stunden.",
+        "ttl": "Tipp vor dem Umzug: Stell die TTL deiner Einträge vorher auf 5 Minuten (300 Sekunden), dann greift der Wechsel schnell. Danach kannst du sie wieder hochsetzen."
+      },
+      "registrars": {
+        "title": "Wo finde ich die DNS-Einstellungen?",
+        "description": "Die Einträge von oben trägst du dort ein, wo deine Domain liegt. Hier die Wege der häufigsten Anbieter.",
+        "ionos": {
+          "label": "IONOS",
+          "path": "Menü Domains und SSL → Domain anklicken → Reiter DNS → Eintrag hinzufügen.",
+          "note": "Für den A-Eintrag lässt du das Feld Hostname leer oder trägst {'@'} ein; für den CNAME schreibst du www hinein."
+        },
+        "strato": {
+          "label": "Strato",
+          "path": "Kundenbereich → Domains → Domainverwaltung → Zahnrad neben der Domain → DNS-Einstellungen.",
+          "note": "Strato erlaubt CNAME nur für Unterdomains wie www. Die Hauptdomain braucht deshalb den A-Eintrag von oben."
+        },
+        "united": {
+          "label": "United Domains",
+          "path": "Domain-Portfolio → Domain anklicken → DNS → DNS-Records verwalten.",
+          "note": "Der A-Eintrag heißt dort Name {'@'}, der CNAME Name www. Die Änderung wird erst mit Speichern übernommen."
+        },
+        "hetzner": {
+          "label": "Hetzner",
+          "path": "DNS Console unter dns.hetzner.com → Zone auswählen → Add record.",
+          "note": "Das gilt nur, wenn die Nameserver deiner Domain auch auf Hetzner zeigen. Steht dort ein anderer Anbieter, gehören die Einträge dorthin."
+        },
+        "cloudflare": {
+          "label": "Cloudflare",
+          "path": "Dashboard → Domain anklicken → DNS → Records → Add record.",
+          "note": "Wichtig: Proxy-Status auf DNS only stellen (graue Wolke). Mit der orangen Wolke zeigt deine Domain auf Cloudflare statt auf uns — unsere Prüfung schlägt dann fehl."
+        },
+        "other": {
+          "label": "Anderer Anbieter",
+          "path": "Suche im Kundenbereich nach DNS, Zone-Editor oder Nameserver-Einträge.",
+          "note": "Findest du dort keinen DNS-Bereich, verwaltet ein anderer Dienst deine Nameserver — dann gehören die Einträge dorthin. Die drei Einträge selbst sind überall dieselben."
+        }
       },
       "errors": {
         "domain_empty": "Bitte trage eine Domain ein.",

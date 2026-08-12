@@ -45,6 +45,13 @@ interface CustomDomainState {
   fallbackHost: string
   plan: string
   planAllows: boolean
+  /**
+   * NUR aus einer Antwort auf „Prüfen" (U16) — die Lade- und die
+   * Speicher-Antwort tragen es bewusst nicht, weil dort nichts gemessen wurde.
+   * `undefined` heißt deshalb „nicht geprüft" und blendet die Warnung aus,
+   * statt sie zu verneinen.
+   */
+  caaBlocked?: boolean
   instructions: {
     txtName: string
     txtValue: string
@@ -128,12 +135,29 @@ async function save() {
   }
 }
 
-async function verify() {
-  if (busy.value) return
-  busy.value = 'verify'
+/**
+ * Läuft gerade IRGENDEIN Prüf-Lauf? Knopf und Takt (U16) teilen sich diese
+ * Sperre — `busy` allein reichte nicht, weil der automatische Lauf es bewusst
+ * NICHT setzt (sonst blinkte alle 30 s der Ladezustand über die Knöpfe und
+ * finge dabei Klicks ab).
+ */
+const checking = ref(false)
+
+/**
+ * `quiet` = der Lauf kommt vom Takt, nicht vom Knopf: gleiche Anfrage,
+ * gleicher Zustand, aber KEINE Meldung. Ein Toast alle 30 s („noch nicht
+ * fertig") wäre die Belästigung, für die niemand einen Auto-Check will — und
+ * eine automatische FEHLERmeldung ließe einen kurzen Netzhänger wie ein
+ * Problem der Domain aussehen.
+ */
+async function verify(quiet = false) {
+  if (busy.value || checking.value) return
+  checking.value = true
+  if (!quiet) busy.value = 'verify'
   try {
     const next = await $fetch<CustomDomainState>('/api/community/domain/verify', { method: 'POST' })
     state.value = next
+    if (quiet) return
     if (next.status === 'active') {
       toast.add({ title: t('onboarding.domain.activeTitle'), description: t('onboarding.domain.activeDesc', { domain: next.domain }), color: 'success' })
     }
@@ -144,12 +168,23 @@ async function verify() {
     }
   }
   catch (error) {
-    toast.add({ title: t('onboarding.domain.saveFailed'), description: rejectionText(error), color: 'error' })
+    if (!quiet) toast.add({ title: t('onboarding.domain.saveFailed'), description: rejectionText(error), color: 'error' })
   }
   finally {
-    busy.value = ''
+    checking.value = false
+    if (!quiet) busy.value = ''
   }
 }
+
+/**
+ * Nachgeprüft wird NUR, solange etwas offen ist: eine eingetragene Domain, die
+ * noch nicht aktiv ist. Danach hört der Takt von selbst auf — ein Takt ohne
+ * Frage ist nur eine Anfrage-Quelle. Der manuelle Knopf bleibt unberührt.
+ */
+const autoCheckActive = computed(() =>
+  isTenantHost.value && allowed.value && !!state.value?.domain && state.value.status !== 'active',
+)
+useDomainAutoCheck({ active: () => autoCheckActive.value, run: () => verify(true) })
 
 const confirm = useConfirm()
 
@@ -175,6 +210,24 @@ async function remove() {
     busy.value = ''
   }
 }
+
+/**
+ * ANLEITUNGEN JE ANBIETER (U16, Wettbewerb E6.2 — Ghost, Discourse, Circle und
+ * Framer führen alle eine solche Liste; Pukalani hatte keine).
+ *
+ * Die fünf im DACH-Raum häufigsten plus einen ehrlichen Sammel-Abschnitt. Was
+ * hier steht, ist der WEG zur DNS-Oberfläche und die jeweilige Falle — NICHT
+ * die Werte: die stehen genau einmal oben in der Anleitungs-Karte und kommen
+ * vom Server (Server-IP und CNAME-Ziel sind env-überschreibbar). Eine zweite
+ * Abschrift hier wäre bei einem Server-Umzug die Kopie, die niemand mitzieht.
+ */
+const REGISTRARS = ['ionos', 'strato', 'united', 'hetzner', 'cloudflare', 'other'] as const
+
+const registrarItems = computed(() => REGISTRARS.map(key => ({
+  label: t(`onboarding.domain.registrars.${key}.label`),
+  path: t(`onboarding.domain.registrars.${key}.path`),
+  note: t(`onboarding.domain.registrars.${key}.note`),
+})))
 
 /** Die Kette der Schritte — jeder Schritt weiß, ob er schon durch ist. */
 const steps = computed(() => {
@@ -250,7 +303,7 @@ const steps = computed(() => {
               :label="t('onboarding.domain.check')"
               :loading="busy === 'verify'"
               :disabled="busy !== ''"
-              @click="verify"
+              @click="verify()"
             />
             <UButton
               v-if="state?.domain"
@@ -289,6 +342,20 @@ const steps = computed(() => {
             </li>
           </ul>
 
+          <!--
+            CAA VOR dem allgemeinen Fehlertext (U16): steht sie unten, liest der
+            Owner zuerst „Zertifikat noch nicht aktiv" und wartet — dabei ist
+            genau das die ERKLÄRUNG dafür, und sie ist in zehn Sekunden behoben.
+          -->
+          <UAlert
+            v-if="state.caaBlocked"
+            icon="i-ph-seal-warning"
+            color="error"
+            variant="subtle"
+            :title="t('onboarding.domain.caaTitle')"
+            :description="t('onboarding.domain.caaDesc')"
+          />
+
           <UAlert
             v-if="state.error"
             icon="i-ph-warning"
@@ -297,6 +364,12 @@ const steps = computed(() => {
             :title="t('onboarding.domain.pendingTitle')"
             :description="state.error"
           />
+
+          <!-- Der Takt ist unsichtbar; dass er läuft, gehört trotzdem gesagt —
+               sonst drückt der Owner weiter im Minutentakt selbst. -->
+          <p v-if="autoCheckActive" class="text-sm text-dimmed">
+            {{ t('onboarding.domain.autoCheckNote') }}
+          </p>
 
           <UAlert
             v-if="state.status === 'active'"
@@ -348,7 +421,31 @@ const steps = computed(() => {
           <p class="text-dimmed">
             {{ t('onboarding.domain.dns.note') }}
           </p>
+
+          <!-- Der praktischste Satz im ganzen Vergleichsfeld (U16, Wettbewerb
+               E6.3) und der einzige, der WÄHREND der Wartezeit nichts mehr
+               nützt — deshalb steht er hier, direkt an den Einträgen. -->
+          <p class="text-dimmed">
+            {{ t('onboarding.domain.dns.ttl') }}
+          </p>
         </div>
+      </UPageCard>
+
+      <UPageCard
+        v-if="state?.domain"
+        :title="t('onboarding.domain.registrars.title')"
+        :description="t('onboarding.domain.registrars.description')"
+      >
+        <UAccordion :items="registrarItems" type="multiple">
+          <template #body="{ item }">
+            <div class="space-y-1 text-sm">
+              <p>{{ item.path }}</p>
+              <p class="text-dimmed">
+                {{ item.note }}
+              </p>
+            </div>
+          </template>
+        </UAccordion>
       </UPageCard>
     </template>
   </div>

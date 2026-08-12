@@ -16,6 +16,8 @@
     "checkAgain": "Noch nicht fertig. DNS-Änderungen brauchen manchmal ein paar Minuten — drücke später noch einmal auf Prüfen.",
     "statusTitle": "Stand",
     "pendingTitle": "Hier hängt es gerade",
+    "caaTitle": "Die Domain verbietet Let's Encrypt",
+    "caaDesc": "In der Zone dieser Domain steht ein CAA-Eintrag, und er erlaubt letsencrypt.org nicht. Ohne diese Erlaubnis wird kein Zertifikat ausgestellt. Erlaube letsencrypt.org beim Domain-Anbieter — oder entferne den CAA-Eintrag.",
     "activeTitle": "Deine Domain ist aktiv",
     "activeDesc": "Die Site ist jetzt unter {domain} zu Hause.",
     "removedTitle": "Domain entfernt",
@@ -48,7 +50,8 @@
       "aHelp": "Ein A-Eintrag auf unsere Server-Adresse.",
       "cname": "3. Wo die www-Form hinzeigt",
       "cnameHelp": "Ein CNAME-Eintrag. Manche Anbieter nennen das Alias.",
-      "note": "Bis DNS-Änderungen überall ankommen, dauert es je nach Anbieter wenige Minuten bis einige Stunden."
+      "note": "Bis DNS-Änderungen überall ankommen, dauert es je nach Anbieter wenige Minuten bis einige Stunden.",
+      "ttl": "Tipp vor dem Umzug: Stell die TTL der Einträge vorher auf 5 Minuten (300 Sekunden), dann greift der Wechsel schnell. Danach kann sie wieder hoch."
     },
     "errors": {
       "domain_empty": "Bitte trage eine Domain ein.",

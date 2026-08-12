@@ -48,6 +48,9 @@ interface SiteDomainState {
   fallbackHost: string
   knownHosts: string[]
   ploiConfigured: boolean
+  /** NUR aus einer Antwort auf „Prüfen" (U16) — Laden und Speichern messen
+   *  nichts, `undefined` heißt deshalb „nicht geprüft". */
+  caaBlocked?: boolean
   instructions: {
     txtName: string
     txtValue: string
@@ -268,6 +271,18 @@ const steps = computed(() => {
           </li>
         </ul>
 
+        <!-- Dieselbe Regel wie beim ploi-Kasten darunter: die URSACHE steht vor
+             dem Symptom. Ein CAA-Satz, der Let's Encrypt aussperrt, erklärt
+             das „Zertifikat noch nicht aktiv" in der Fehlerzeile. -->
+        <UAlert
+          v-if="state.caaBlocked"
+          icon="i-ph-seal-warning"
+          color="error"
+          variant="subtle"
+          :title="t('siteDomain.caaTitle')"
+          :description="t('siteDomain.caaDesc')"
+        />
+
         <!-- Die Ursache steht VOR dem Symptom: ohne hinterlegte ploi-Site ist
              der Fehlertext darunter nur die Folge. -->
         <UAlert
@@ -337,6 +352,10 @@ const steps = computed(() => {
 
         <p class="text-dimmed">
           {{ t('siteDomain.dns.note') }}
+        </p>
+
+        <p class="text-dimmed">
+          {{ t('siteDomain.dns.ttl') }}
         </p>
       </div>
     </UPageCard>

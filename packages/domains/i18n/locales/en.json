@@ -16,6 +16,8 @@
     "checkAgain": "Not there yet. DNS changes sometimes take a few minutes — press Check again later.",
     "statusTitle": "Status",
     "pendingTitle": "This is where it is stuck",
+    "caaTitle": "The domain blocks Let's Encrypt",
+    "caaDesc": "The zone of this domain has a CAA record and it does not allow letsencrypt.org. Without that permission no certificate is issued. Allow letsencrypt.org at the domain provider — or remove the CAA record.",
     "activeTitle": "Your domain is live",
     "activeDesc": "The site now lives at {domain}.",
     "removedTitle": "Domain removed",
@@ -48,7 +50,8 @@
       "aHelp": "An A record to our server address.",
       "cname": "3. Where the www form points",
       "cnameHelp": "A CNAME record. Some providers call this an alias.",
-      "note": "Depending on your provider, DNS changes take a few minutes to a few hours to reach everyone."
+      "note": "Depending on your provider, DNS changes take a few minutes to a few hours to reach everyone.",
+      "ttl": "Tip before you switch: set the TTL of the records to 5 minutes (300 seconds) first, then the change takes effect quickly. You can raise it again afterwards."
     },
     "errors": {
       "domain_empty": "Please enter a domain.",
