@@ -259,6 +259,9 @@
       "actionFailedHint": "Nothing about the event changed. Reload the page and try again.",
       "emptyTitle": "Nothing to moderate",
       "empty": "This is where the published events of this community show up. Reported ones carry a flag."
+    },
+    "stats": {
+      "total": "Events"
     }
   },
   "admin": {

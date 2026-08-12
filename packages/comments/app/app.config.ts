@@ -31,6 +31,47 @@ export default defineAppConfig({
         },
       ],
       /**
+       * KENNZAHLEN DES comments-LAYERS (U9/K2, 2026-08-11).
+       *
+       * Beide standen bis hierher fest verdrahtet im Markup der Übersicht —
+       * die letzte Silo-Annahme dieser Seite. Jetzt melden sie sich hier an,
+       * und eine App ohne diesen Layer hat sie schlicht nicht.
+       *
+       * DIE ZAHL zur Kachel `comments` kommt aus dem Verbrauchs-Vertrag
+       * (`kind: 'comments'`, server/plugins/community-usage.ts): die Kachel-Id
+       * IST der Quota-Posten, deshalb braucht sie keinen eigenen Provider.
+       * `commentsReported` hat einen (offene Meldungen sind kein
+       * Zeilen-Zähler).
+       *
+       * BEIDE VERLANGEN `comments.moderate` — und das ist eine ECHTE Änderung
+       * gegenüber vorher, nicht eine Übertragung: die Gesamtzahl hing am
+       * schwachen `dashboard.access`, die Kachel verlinkte aber nach
+       * /dashboard/comments, wohin ein `viewer` oder `editor` nicht darf. Sie
+       * war damit für zwei der fünf Rollen ein Link ins 403 (Befund S5). Eine
+       * Kachel trägt die Capability ihrer Zielseite.
+       */
+      stats: {
+        comments: {
+          scope: 'community',
+          productKey: 'comments',
+          labelKey: 'comments.stats.total',
+          icon: 'i-ph-chat-circle',
+          to: '/dashboard/comments',
+          requiredCapability: 'comments.moderate',
+          order: 110,
+        },
+        commentsReported: {
+          scope: 'community',
+          productKey: 'comments',
+          labelKey: 'comments.stats.reported',
+          icon: 'i-ph-flag',
+          to: '/dashboard/comments',
+          query: { status: 'reported' },
+          requiredCapability: 'comments.moderate',
+          order: 120,
+        },
+      },
+      /**
        * DAS EINBETTER-REGISTER IST EIN REITER, KEIN MENÜPUNKT (U8/G7,
        * 2026-08-11). Es stand als Sidebar-Modul unter `/dashboard/embed` —
        * flach, obwohl es eine reine Owner-EINSTELLUNG ist (`community.embed`),

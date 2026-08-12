@@ -348,10 +348,18 @@ try {
   console.log('\n6b. Die Kennzahlen der Übersicht gehören dagegen dem Owner (C1)')
   const ownerStats = await call(host, '/api/admin/stats', { cookie: ownerCookie })
   check('/api/admin/stats → 200 (vorher 403: der Gate war label-only)', ownerStats.status === 200, `Status ${ownerStats.status}`)
+  // U9/K2: die Antwort ist seit der Kennzahlen-Registry eine Karte
+  // Kachel-Id → Wert. „Wird nicht ausgewiesen" heißt jetzt: der Eintrag FEHLT
+  // (vorher ein Feld mit `null`).
   check('Nutzerzahl bleibt im Pool leer — Projekt-Nutzer ≠ Site-Mitglieder',
-    ownerStats.json?.usersTotal === null, JSON.stringify(ownerStats.json))
+    ownerStats.json?.users === undefined, JSON.stringify(ownerStats.json))
   check('gemeldete Kommentare kommen mit (Owner trägt comments.moderate)',
-    typeof ownerStats.json?.commentsReported === 'number', JSON.stringify(ownerStats.json))
+    typeof ownerStats.json?.commentsReported?.value === 'number', JSON.stringify(ownerStats.json))
+  check('die Mitgliederzahl der Community steht dort jetzt auch (U9)',
+    typeof ownerStats.json?.members?.value === 'number', JSON.stringify(ownerStats.json))
+  check('der Plan-Zustand kommt als Text-Schlüssel, nicht als Zahl (U9)',
+    ownerStats.json?.plan?.value === null && typeof ownerStats.json?.plan?.textKey === 'string',
+    JSON.stringify(ownerStats.json))
   const ownerAnalytics = await call(host, '/api/admin/analytics?days=7', { cookie: ownerCookie })
   check('/api/admin/analytics → 200 mit 7 Tagespunkten',
     ownerAnalytics.status === 200 && ownerAnalytics.json?.points?.length === 7,

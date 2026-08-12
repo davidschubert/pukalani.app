@@ -1,6 +1,5 @@
 import { Query } from 'node-appwrite'
 import type { H3Event } from 'h3'
-import type { CommunityTeamResponse } from '../../../../control/shared/communityTeam'
 // Der pages-Layer BESITZT die Tabelle und stellt Typ + Id bereit (A14,
 // dasselbe explizite Konsumieren wie `seedHomePage` im Wizard-Abschluss).
 import { PAGES_TABLE, type PageRow } from '../../../../pages/shared/types/page'
@@ -8,10 +7,11 @@ import {
   communityDismissedGettingStarted,
   hasActiveCommunitySubscription,
   homePageEdited,
+  teamHasReach,
   GETTING_STARTED_PREF_KEY,
   type GettingStartedResponse,
 } from '../../../shared/gettingStarted'
-import { callControlPlane, mintRuntimeJwt } from '../../utils/controlPlane'
+import { resolveCommunityTeamSnapshot } from '../../utils/communityTeamSnapshot'
 
 /**
  * DIE FÜNF TATSACHEN HINTER DER WILLKOMMENS-CHECKLISTE (U4).
@@ -28,7 +28,7 @@ import { callControlPlane, mintRuntimeJwt } from '../../utils/controlPlane'
  * | Beitrag    | core-Vertrag, beantwortet vom posts-Layer  | 1 Zählabfrage, `limit(1)`,    |
  * |            | (Beispiel-Saat ausgenommen, s. unten)      | + 1 Blick nur im Grenzfall    |
  * | Startseite | `pages`-Zeilen mit slug 'home'             | 1 Abfrage, ≤ 4 Zeilen         |
- * | Einladen   | Team-Route der BESTEHENDEN Service-Naht    | 1 Ruf, 30 s gecacht           |
+ * | Einladen   | Team-Route der BESTEHENDEN Service-Naht    | 1 Ruf, 30 s gecacht, GETEILT  |
  *
  * WARUM DER MITGLIEDER-PUNKT TROTZDEM ÜBER DAS CONTROL PLANE GEHT: sowohl
  * `community_members` als auch `community_invites` leben dort, und der
@@ -54,9 +54,6 @@ import { callControlPlane, mintRuntimeJwt } from '../../utils/controlPlane'
  * Andersherum wäre die Karte unsterblich — ein technischer Fehler darf keine
  * Aufgabe erfinden, die niemand erledigen kann.
  */
-
-/** Mitglieder/Einladungen: 30 s, wie der Mandanten-Resolver. */
-const teamCache = createMicrocache<boolean>(30_000)
 
 export default defineEventHandler(async (event): Promise<GettingStartedResponse> => {
   const tenant = useTenant(event)
@@ -91,7 +88,7 @@ export default defineEventHandler(async (event): Promise<GettingStartedResponse>
   const [post, homePage, invite] = await Promise.all([
     countsFirstPost(event),
     homePageTouched(db),
-    teamHasReach(event, communityId),
+    resolveCommunityTeamSnapshot(event, communityId).then(teamHasReach),
   ])
 
   return {
@@ -145,31 +142,4 @@ async function homePageTouched(db: TenantDb): Promise<boolean> {
     .list<PageRow>(PAGES_TABLE, [Query.equal('slug', 'home'), Query.limit(4)])
     .then(res => res.rows.some(row => homePageEdited(row.$createdAt, row.$updatedAt)))
     .catch(() => true)
-}
-
-/**
- * „Es ist jemand eingeladen." — erledigt, sobald die Community außer dem Owner
- * noch jemanden erreicht: ein weiteres Mitglied MIT Zugang oder eine offene
- * (nicht abgelaufene) Einladung. Beides steht in derselben Antwort, also
- * kostet die Frage genau einen Ruf.
- */
-async function teamHasReach(event: H3Event, communityId: string): Promise<boolean> {
-  const cached = teamCache.get(communityId)
-  if (cached !== undefined) return cached
-  try {
-    const jwt = await mintRuntimeJwt(event)
-    const team = await callControlPlane<CommunityTeamResponse>(
-      event, '/api/control/community/members/list', { jwt, communityId },
-    )
-    const reach = team.members.filter(member => member.status !== 'removed').length > 1
-      || team.invites.length > 0
-    teamCache.set(communityId, reach)
-    return reach
-  }
-  catch {
-    // Fail-soft wie die zwei Abfragen darüber, und in dieselbe Richtung —
-    // aber NICHT gecacht: ein Aussetzer der Naht soll den Punkt nicht 30 s
-    // lang als erledigt festschreiben.
-    return true
-  }
 }

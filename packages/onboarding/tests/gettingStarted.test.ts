@@ -4,6 +4,7 @@ import {
   hasActiveCommunitySubscription,
   homePageEdited,
   resolveGettingStarted,
+  teamHasReach,
   withCommunityDismissed,
   GETTING_STARTED_STEPS,
   type GettingStartedState,
@@ -117,5 +118,25 @@ describe('Ausblenden-Merker (prefs, konto-weit)', () => {
   })
   it('ohne communityId wird nichts ausgeblendet', () => {
     expect(communityDismissedGettingStarted('c-1', '')).toBe(false)
+  })
+})
+
+/**
+ * U9/K2: die Reichweiten-Regel ist pur geworden, weil dieselbe Team-Auskunft
+ * jetzt zwei Leser hat — die Checkliste (Ja/Nein) und die Mitglieder-Kachel
+ * der Übersicht (Zahl).
+ */
+describe('teamHasReach', () => {
+  it('ist erledigt, sobald jemand ausser dem Owner da ist', () => {
+    expect(teamHasReach({ members: 2, invites: 0 })).toBe(true)
+  })
+  it('ist erledigt, sobald eine Einladung offen ist — sonst liefe die Liste dem Owner nach', () => {
+    expect(teamHasReach({ members: 1, invites: 1 })).toBe(true)
+  })
+  it('ist offen, solange der Owner allein und ohne offene Einladung ist', () => {
+    expect(teamHasReach({ members: 1, invites: 0 })).toBe(false)
+  })
+  it('gilt ohne Auskunft als erledigt — ein Naht-Aussetzer darf keine Aufgabe erfinden', () => {
+    expect(teamHasReach(null)).toBe(true)
   })
 })

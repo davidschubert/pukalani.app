@@ -33,6 +33,23 @@ export default defineAppConfig({
           order: 70,
         },
       ],
+      /**
+       * KENNZAHL DES courses-LAYERS (U9/K2, 2026-08-11) — die Kachel „Kurse".
+       * Zahl aus dem Verbrauchs-Vertrag (`kind: 'courses'`), Gates und
+       * Capability wie am Menüpunkt darüber.
+       */
+      stats: {
+        courses: {
+          scope: 'community',
+          productKey: 'courses',
+          planProduct: 'courses',
+          labelKey: 'courses.stats.total',
+          icon: 'i-ph-graduation-cap',
+          to: '/dashboard/courses',
+          requiredCapability: 'courses.manage',
+          order: 70,
+        },
+      },
     },
   },
 })

@@ -129,6 +129,9 @@
       "urlInvalid": "Keine gültige URL.",
       "paidNeedsProduct": "Pro-Kurse brauchen einen Freischalt-Schlüssel.",
       "orderRequired": "Reihenfolge fehlt."
+    },
+    "stats": {
+      "total": "Kurse"
     }
   },
   "admin": {

@@ -40,6 +40,45 @@ export default defineAppConfig({
     },
     admin: {
       /**
+       * KENNZAHLEN DER COMMUNITY (U9/K2, 2026-08-11) — die zwei Zahlen, die
+       * dem Owner über seine Community etwas sagen, ohne ein Produkt zu
+       * zählen: wie viele Menschen sind hier, und woran ist sie vertraglich?
+       *
+       * Beide gehören diesem Layer, weil hier die Service-Naht zum Control
+       * Plane liegt (A14) — `community_members` und `communities.plan` leben
+       * dort, der admin-Layer könnte keine der beiden beantworten.
+       *
+       * SIE STEHEN VORNE (`order` 30/40 vor den Produkt-Zählern ab 50), weil
+       * sie über die Community selbst sprechen und nicht über einen ihrer
+       * Inhalte.
+       *
+       * `emptyBelow: 2` bei den Mitgliedern: der Owner zählt mit, die Zahl ist
+       * also nie 0 — allein ist er trotzdem, und genau dann ist „Einladen" der
+       * nützliche Satz. Der Hinweis führt auf dasselbe Ziel wie die Kachel;
+       * ein zweiter Knopf wäre eine Doppel-Aufforderung neben der
+       * Willkommens-Checkliste (AP2).
+       */
+      stats: {
+        members: {
+          scope: 'community',
+          labelKey: 'onboarding.stats.members',
+          icon: 'i-ph-users-three',
+          to: '/dashboard/community/members',
+          requiredCapability: 'team.manage',
+          emptyHintKey: 'onboarding.stats.membersEmpty',
+          emptyBelow: 2,
+          order: 30,
+        },
+        plan: {
+          scope: 'community',
+          labelKey: 'onboarding.stats.plan',
+          icon: 'i-ph-seal-check',
+          to: '/dashboard/community/plan',
+          requiredCapability: 'community.billing',
+          order: 40,
+        },
+      },
+      /**
        * REITER DES COMMUNITY-HUBS (F51). Reihenfolge = `order`, gerendert von
        * packages/admin/app/pages/dashboard/community.vue, gefiltert mit
        * `resolveSettingsTabs` (Ort × Capability × Produkt-Gates).

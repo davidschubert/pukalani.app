@@ -259,6 +259,9 @@
       "actionFailedHint": "Am Event hat sich nichts geändert. Lade die Seite neu und versuch es noch einmal.",
       "emptyTitle": "Nichts zu moderieren",
       "empty": "Hier stehen die veröffentlichten Events dieser Community. Gemeldete erkennst du am Fähnchen."
+    },
+    "stats": {
+      "total": "Termine"
     }
   },
   "admin": {

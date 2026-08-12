@@ -54,6 +54,9 @@
       "quotaTitle": "Kontingent erreicht",
       "quotaHint": "Dein Plan ist voll. Lösche nicht mehr gebrauchte Bilder oder wechsle in einen größeren Plan.",
       "quotaTodayHint": "Für heute ist das Kontingent erreicht — morgen geht es weiter. Für mehr auf einmal hilft ein größerer Plan."
+    },
+    "stats": {
+      "total": "Medien"
     }
   }
 }

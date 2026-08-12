@@ -90,6 +90,27 @@ export function hasActiveCommunitySubscription(billingStatus: string | null | un
 }
 
 /**
+ * „Es ist jemand eingeladen." — erledigt, sobald die Community außer dem Owner
+ * noch jemanden erreicht: ein weiteres Mitglied MIT Zugang oder eine offene
+ * (nicht abgelaufene) Einladung.
+ *
+ * PUR SEIT U9 (vorher stand die Rechnung in der Route): dieselbe
+ * Team-Auskunft speist jetzt auch die Mitglieder-Kachel der Übersicht
+ * (`resolveCommunityTeamSnapshot`), und eine Regel, die zwei Leser hat, gehört
+ * an EINE Stelle.
+ *
+ * `null` = keine Auskunft ⇒ ERLEDIGT. Die Richtung ist dieselbe wie bei den
+ * anderen Punkten: ein technischer Fehler darf keine Aufgabe erfinden, die
+ * niemand erledigen kann. Die KACHEL entscheidet bei `null` andersherum
+ * (sie entfällt) — beide Male ist die ehrlichere Antwort gemeint, nur zeigt
+ * eine Aufgabenliste sie anders als eine Zahl.
+ */
+export function teamHasReach(snapshot: { members: number, invites: number } | null): boolean {
+  if (!snapshot) return true
+  return snapshot.members > 1 || snapshot.invites > 0
+}
+
+/**
  * „Die gesäte Startseite wurde angefasst."
  *
  * Es gibt keine Saat-Markierung an der Zeile (und es soll auch keine geben —

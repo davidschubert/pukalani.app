@@ -93,6 +93,33 @@ export default defineAppConfig({
           order: 40,
         },
       ],
+      /**
+       * KENNZAHL DES posts-LAYERS (U9/K2, 2026-08-11) — die Kachel „Beiträge"
+       * auf der Übersicht.
+       *
+       * DIE ZAHL kommt aus dem Verbrauchs-Vertrag, den dieser Layer schon
+       * bedient (`kind: 'posts'`, server/plugins/community-usage.ts): die
+       * Kachel-Id IST der Quota-Posten. Kein eigener Provider, kein zweiter
+       * Zähler — und sobald jemand im Katalog Zahlen für `posts` einträgt,
+       * zeigt die Kachel von selbst „x von y".
+       *
+       * DIESELBEN GATES WIE DER MENÜPUNKT (`productKey` + `planProduct`): eine
+       * Beitrags-Kachel in einer Community, deren Tarif Beiträge nicht
+       * enthält, wäre dieselbe Lüge wie ein Menüpunkt, der in eine Wand führt
+       * (C2). `posts.moderate` ist die Capability der Zielseite.
+       */
+      stats: {
+        posts: {
+          scope: 'community',
+          productKey: 'posts',
+          planProduct: 'posts',
+          labelKey: 'posts.stats.total',
+          icon: 'i-ph-users-three',
+          to: '/dashboard/posts',
+          requiredCapability: 'posts.moderate',
+          order: 20,
+        },
+      },
     },
   },
 })

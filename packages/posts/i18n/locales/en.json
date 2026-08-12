@@ -463,6 +463,9 @@
         "3": "Regular",
         "4": "Leader"
       }
+    },
+    "stats": {
+      "total": "Posts"
     }
   },
   "admin": {

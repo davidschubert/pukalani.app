@@ -54,6 +54,9 @@
       "quotaTitle": "Quota reached",
       "quotaHint": "Your plan is full. Delete images you no longer need, or move to a larger plan.",
       "quotaTodayHint": "Today's quota is used up — it resets tomorrow. For more at once, a larger plan helps."
+    },
+    "stats": {
+      "total": "Media"
     }
   }
 }

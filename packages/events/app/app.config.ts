@@ -74,6 +74,23 @@ export default defineAppConfig({
           order: 60,
         },
       ],
+      /**
+       * KENNZAHL DES events-LAYERS (U9/K2, 2026-08-11) — die Kachel „Termine".
+       * Zahl aus dem Verbrauchs-Vertrag (`kind: 'events'`), Gates und
+       * Capability wie am Menüpunkt darüber.
+       */
+      stats: {
+        events: {
+          scope: 'community',
+          productKey: 'events',
+          planProduct: 'events',
+          labelKey: 'events.stats.total',
+          icon: 'i-ph-calendar-dots',
+          to: '/dashboard/events',
+          requiredCapability: 'events.manage',
+          order: 50,
+        },
+      },
     },
   },
 })

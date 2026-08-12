@@ -129,6 +129,9 @@
       "urlInvalid": "Not a valid URL.",
       "paidNeedsProduct": "Paid courses need an unlock key.",
       "orderRequired": "Missing order."
+    },
+    "stats": {
+      "total": "Courses"
     }
   },
   "admin": {

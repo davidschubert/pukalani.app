@@ -27,6 +27,28 @@ export default defineAppConfig({
           order: 80,
         },
       ],
+      /**
+       * KENNZAHL DES media-LAYERS (U9/K2, 2026-08-11) — die Kachel „Medien".
+       *
+       * SIE IST DIE „x von y"-KACHEL: der Speicher-Reiter rechnet Belegung
+       * gegen Kontingent bereits, und zwar aus genau dieser Quelle
+       * (`kind: 'media'` im Verbrauchs-Vertrag, Grenze aus `tenantLimitsFor`).
+       * Die Übersicht zeigt dieselbe Rechnung als eine Zeile, damit der Owner
+       * sein Kontingent sieht, ohne einen Reiter zu suchen — dieselben Zahlen,
+       * kein zweiter Weg sie zu erheben.
+       */
+      stats: {
+        media: {
+          scope: 'community',
+          productKey: 'media',
+          planProduct: 'media',
+          labelKey: 'media.stats.total',
+          icon: 'i-ph-image',
+          to: '/dashboard/media',
+          requiredCapability: 'media.manage',
+          order: 80,
+        },
+      },
     },
   },
 })
