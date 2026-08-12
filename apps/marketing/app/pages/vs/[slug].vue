@@ -76,6 +76,11 @@ useMarketingSeo({
     <!-- dieselbe Tabelle wie auf der Startseite: ein Stand, eine Wahrheit -->
     <ComparisonSection />
 
+    <!-- Der Rechner steht NACH der Tabelle: die Tabelle sagt „2 %", der
+         Rechner sagt, was 2 % bei DIESER Community heißen. Die Zeile des
+         Anbieters, um den es hier geht, ist hervorgehoben. -->
+    <FeeCalculator :highlight="slug" />
+
     <section class="mkt-section tone-dawn-hold">
       <UPageGrid as="div" class="mkt-inner mkt-narrow gap-5 sm:grid-cols-1 lg:grid-cols-2" data-reveal>
         <UPageCard as="article" :description="t(`${base}.whenThem`)">

@@ -988,6 +988,27 @@
         }
       },
       "honest": "If real customer quotes ever appear here, they will come with a name, a community and consent — and not before."
+    },
+    "fees": {
+      "kicker": "Do the math",
+      "title": "What a percentage fee actually costs",
+      "lead": "Almost every platform in this field takes a cut of what your members pay. That cut grows with your community; a fixed price does not. Set the sliders to your numbers.",
+      "membersLabel": "Paying members",
+      "contributionLabel": "Contribution per member per month (€)",
+      "revenue": "That's {month} a month – {year} a year.",
+      "colProvider": "Provider",
+      "colPlan": "Plan",
+      "colBase": "Base price",
+      "colRate": "Fee rate",
+      "colMonth": "Fee per month",
+      "colYear": "Fee per year",
+      "us": "Pukalani",
+      "claim": "With us this column stays at zero no matter how big you get: Pro costs a flat {price} a month.",
+      "baseNote": "You pay the base price on top everywhere – which is why it sits in its own column and is not added in. Adding it up would be dishonest: the others quote dollars and pre-tax, we quote euros as a final price including 19 % VAT.",
+      "stripeNote": "Payment fees are everyone's – the payment provider takes its share regardless of the platform. With Circle and Mighty Networks the platform fee comes on top of Stripe; with Skool processing is included, because Skool is merchant of record and files EU VAT itself. We aren't in your payment flow at all: you collect member contributions wherever you do today – we take nothing from it.",
+      "cumulativeNote": "Added together – platform fee plus payment processing – 8 to 14 per cent of community revenue goes away at 500 paying members, depending on the provider.",
+      "asOf": "As of 10 August 2026 · rates, plans and base prices from the providers' own pricing pages",
+      "sources": "Sources:"
     }
   }
 }

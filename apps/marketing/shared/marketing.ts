@@ -194,3 +194,99 @@ export const VS_SLUGS = ['circle', 'skool', 'mighty-networks'] as const
 export const FAQ_COUNT = 6
 
 export type VsSlug = (typeof VS_SLUGS)[number]
+
+/**
+ * Die Gebühren-Rechnung (U17/E9) — der Datensatz hinter `FeeCalculator.vue`.
+ *
+ * JEDE ZAHL STAMMT AUS `docs/archiv/audits/2026-08-09-wettbewerb-benchmark.md`
+ * (Abschnitt 1 Kurzprofile + Tabelle 2.1, Erhebungstag 2026-08-10) und trägt
+ * ihre Quelle mit. Nichts hier ist geschätzt, umgerechnet oder aus dem
+ * Gedächtnis ergänzt — wer eine Zahl ändert, ändert zuerst den Beleg.
+ *
+ * WARUM `shared/` UND NICHT IN DER KOMPONENTE: dieselbe Regel wie bei
+ * VS_SLUGS und FAQ_COUNT — die Sätze sind Domänen-Wahrheit, sie werden von
+ * einem Unit-Test gelesen (tests/feeBenchmark.test.ts) und sollen nicht in
+ * einem Template versauern. Die NAMEN der Anbieter stehen bewusst hier und
+ * nicht in i18n: Eigennamen werden nicht übersetzt (dieselbe Regel wie bei
+ * den Theme-Namen).
+ *
+ * WARUM DER GRUNDPREIS NICHT MITGERECHNET WIRD: er steht in vier Währungs-
+ * und Steuer-Welten (89 $ netto, 99 $ netto, 19 € netto, 149 € brutto). Eine
+ * Summe daraus bräuchte einen Wechselkurs und einen Steuersatz, die der
+ * Benchmark nicht hergibt — sie wäre erfunden. Der Rechner zeigt deshalb
+ * GENAU die Größe, die mit der Community wächst: die Plattform-Gebühr. Die
+ * Grundpreise stehen daneben als Angabe, nicht als Summand.
+ */
+export interface FeeProvider {
+  /** Stabiler Schlüssel; bei den drei Vergleichsseiten identisch mit dem VS_SLUG. */
+  key: string
+  /** Eigenname des Anbieters — nicht übersetzt. */
+  name: string
+  /** Plattform-Gebühr als Anteil am Mitglieder-Umsatz (0.02 = 2 %). */
+  rate: number
+  /** Der Plan, für den dieser Satz gilt — sonst wäre die Zahl ohne Bezug. */
+  plan: string
+  /** Grundpreis dieses Plans, WÖRTLICH wie erhoben (inkl. Währung). */
+  base: string
+  /** Beleg-URL aus dem Benchmark. */
+  source: string
+}
+
+/**
+ * Reihenfolge = aufsteigender Satz. Die drei Anbieter mit eigener
+ * Vergleichsseite stehen zwingend drin (sonst zeigte `/vs/skool` einen
+ * Rechner ohne Skool); Heartbeat und coapp kommen aus E9 dazu — coapp, weil
+ * es der deutsche Nachbar und mit 15 % der Ausreisser nach oben ist.
+ */
+export const FEE_PROVIDERS: readonly FeeProvider[] = [
+  { key: 'circle', name: 'Circle', rate: 0.02, plan: 'Professional', base: '89 $', source: 'https://circle.so/pricing' },
+  { key: 'mighty-networks', name: 'Mighty Networks', rate: 0.02, plan: 'Launch', base: '95 $', source: 'https://www.mightynetworks.com/pricing' },
+  { key: 'skool', name: 'Skool', rate: 0.029, plan: 'Pro', base: '99 $', source: 'https://www.skool.com/pricing' },
+  { key: 'heartbeat', name: 'Heartbeat', rate: 0.05, plan: 'Build', base: '49 $', source: 'https://www.heartbeat.chat/pricing' },
+  { key: 'coapp', name: 'coapp', rate: 0.15, plan: 'Starter', base: '19 €', source: 'https://www.coapp.io/preise' },
+] as const
+
+/**
+ * Beleg für den kumulierten Satz („8 bis 14 Prozent", Benchmark K3). Er steht
+ * NEBEN den Anbieter-Quellen, weil er etwas anderes misst: nicht die Gebühr
+ * EINES Anbieters, sondern Plattform-Gebühr plus Zahlungsabwicklung zusammen.
+ * Ohne eigene Quellenangabe wäre es die einzige Zahl des Abschnitts ohne Beleg.
+ */
+export const FEE_CUMULATIVE_SOURCE = {
+  name: 'wbcomdesigns',
+  href: 'https://wbcomdesigns.com/mighty-networks-circle-skool-wordpress-cost/',
+} as const
+
+/** Vorbelegung des Rechners (U17): 300 Mitglieder à 20 € im Monat. */
+export const FEE_DEFAULT_MEMBERS = 300
+export const FEE_DEFAULT_CONTRIBUTION = 20
+
+/**
+ * Grenzen der beiden Eingabefelder. Ganzzahlig, damit SSR und Client dasselbe
+ * rechnen.
+ *
+ * SCHRITTWEITE 1, OBWOHL DIE PFEILE DAMIT LANGSAM SIND: `UInputNumber` rastet
+ * eine GETIPPTE Zahl auf `min + n × step` ein — mit Schritt 10 wurde aus „437
+ * Mitglieder" beim Verlassen des Feldes stillschweigend 440 (am 2026-08-12 im
+ * Browser nachgemessen). Das Feld steht hier aber genau dafür, dass jemand
+ * seine EIGENE Zahl einträgt; ein Raster, das sie heimlich verschiebt, nimmt
+ * dem Rechner seinen Zweck.
+ */
+export const FEE_MEMBERS_MIN = 10
+export const FEE_MEMBERS_MAX = 2000
+export const FEE_MEMBERS_STEP = 1
+export const FEE_CONTRIBUTION_MIN = 1
+export const FEE_CONTRIBUTION_MAX = 100
+export const FEE_CONTRIBUTION_STEP = 1
+
+/** Der feste Pro-Preis, gegen den gerechnet wird (Stripe-Katalog, brutto). */
+export const FEE_PUKALANI_MONTHLY = 149
+
+/**
+ * Die EINE Rechnung. Pur und ohne Rundung im Zwischenschritt — gerundet wird
+ * erst bei der Anzeige durch `n()`, sonst weicht die Jahressumme von zwölf
+ * Monatswerten ab.
+ */
+export function monthlyFee(revenue: number, rate: number): number {
+  return revenue * rate
+}

@@ -126,6 +126,11 @@ useMarketingSeo({
     <!-- Der Vergleich gehört hierher: wer wechselt, will Zahlen sehen. -->
     <ComparisonSection />
 
+    <!-- Und direkt darunter die Zahl, die den Wechsel begründet: was die
+         Prozent-Gebühr der alten Plattform bei DIESER Community kostet.
+         Ohne `highlight` — auf dieser Seite ist kein Anbieter der gemeinte. -->
+    <FeeCalculator />
+
     <UPageCTA
       as="section"
       class="tone-ink"

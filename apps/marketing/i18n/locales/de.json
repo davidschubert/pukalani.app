@@ -988,6 +988,27 @@
         }
       },
       "honest": "Wenn hier irgendwann echte Kundenstimmen stehen, dann mit Namen, Community und Einwilligung — und nicht vorher."
+    },
+    "fees": {
+      "kicker": "Rechne nach",
+      "title": "Was eine Prozent-Gebühr wirklich kostet",
+      "lead": "Fast jede Plattform im Feld nimmt einen Anteil an dem, was deine Mitglieder zahlen. Der Anteil wächst mit deiner Community, ein fester Preis nicht. Stell die Regler auf deine Zahlen.",
+      "membersLabel": "Zahlende Mitglieder",
+      "contributionLabel": "Beitrag je Mitglied im Monat (€)",
+      "revenue": "Das sind {month} im Monat – {year} im Jahr.",
+      "colProvider": "Anbieter",
+      "colPlan": "Plan",
+      "colBase": "Grundpreis",
+      "colRate": "Gebührensatz",
+      "colMonth": "Gebühr im Monat",
+      "colYear": "Gebühr im Jahr",
+      "us": "Pukalani",
+      "claim": "Bei uns bleibt diese Spalte auf null, egal wie groß du wirst: Pro kostet fest {price} im Monat.",
+      "baseNote": "Den Grundpreis zahlst du überall zusätzlich – er steht deshalb als eigene Spalte da und wird nicht dazugerechnet. Eine Summe daraus wäre unehrlich: die anderen nennen Dollar und netto, wir nennen Euro als Endpreis inklusive 19 % Mehrwertsteuer.",
+      "stripeNote": "Zahlungsgebühren hat jeder – der Zahlungsanbieter berechnet seinen Anteil unabhängig von der Plattform. Bei Circle und Mighty Networks kommt die Plattform-Gebühr zusätzlich zu Stripe; bei Skool ist die Abwicklung enthalten, weil Skool Merchant of Record ist und die EU-Umsatzsteuer selbst abführt. Wir sitzen gar nicht erst in deinem Zahlungsfluss: Beiträge deiner Mitglieder wickelst du dort ab, wo du es heute tust – wir nehmen davon nichts.",
+      "cumulativeNote": "Zusammengerechnet – Plattform-Gebühr plus Zahlungsabwicklung – gehen bei 500 zahlenden Mitgliedern je nach Anbieter 8 bis 14 Prozent des Community-Umsatzes weg.",
+      "asOf": "Stand: 10. August 2026 · Sätze, Pläne und Grundpreise von den Preisseiten der Anbieter",
+      "sources": "Quellen:"
     }
   }
 }
