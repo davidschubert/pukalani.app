@@ -10,6 +10,10 @@ const route = useRoute()
 const toast = useToast()
 const loading = ref(false)
 const failed = ref(false)
+// Der Grund des Fehlschlags, sobald wir einen kennen (heute: die Minuten-
+// Sperre). Sonst bleibt es beim allgemeinen „hat nicht geklappt".
+const failedMessage = ref('')
+const { authErrorMessage } = useAuthErrorMessage()
 
 // Seitentitel „Neues Passwort · <Brand>" — gleiche Kette wie /login (B3-Rest).
 useBrandTitle(() => t('auth.reset.title'))
@@ -25,6 +29,7 @@ const state = reactive<ResetFormInput>({ password: '', passwordConfirm: '' })
 async function onSubmit(event: FormSubmitEvent<ResetFormInput>) {
   loading.value = true
   failed.value = false
+  failedMessage.value = ''
   try {
     await $fetch('/api/auth/recovery', {
       method: 'PUT',
@@ -33,8 +38,12 @@ async function onSubmit(event: FormSubmitEvent<ResetFormInput>) {
     toast.add({ title: t('auth.reset.success'), color: 'success' })
     await navigateTo(localePath('/login'))
   }
-  catch {
+  catch (error) {
+    // Auch das Setzen des neuen Passworts ist gedrosselt (PUT /recovery,
+    // FAILURE_LIMITED) — nach fünf Fehlversuchen ist „hat nicht geklappt"
+    // richtig, aber unbrauchbar; die Sperre nennt sich selbst (G7).
     failed.value = true
+    failedMessage.value = authErrorMessage(error, t('auth.reset.failed'))
   }
   finally {
     loading.value = false
@@ -53,7 +62,7 @@ async function onSubmit(event: FormSubmitEvent<ResetFormInput>) {
     <UAlert v-if="!linkValid" color="error" variant="subtle" :title="t('auth.reset.invalidLink')" />
 
     <template v-else>
-      <UAlert v-if="failed" color="error" variant="subtle" :title="t('auth.reset.failed')" />
+      <UAlert v-if="failed" color="error" variant="subtle" :title="failedMessage || t('auth.reset.failed')" />
 
       <UForm :schema="schema" :validate-on="[]" :state="state" class="space-y-4" @submit="onSubmit">
         <UFormField :label="t('auth.fields.password')" name="password" required>

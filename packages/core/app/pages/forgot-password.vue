@@ -8,6 +8,8 @@ const { t } = useI18n()
 const localePath = useLocalePath()
 const loading = ref(false)
 const sent = ref(false)
+const blockedMessage = ref('')
+const { authErrorMessage } = useAuthErrorMessage()
 
 // Seitentitel „Passwort vergessen · <Brand>" — gleiche Kette wie /login (B3-Rest).
 useBrandTitle(() => t('auth.forgot.title'))
@@ -18,13 +20,19 @@ const state = reactive<RecoveryInput>({ email: sharedEmail.value })
 
 async function onSubmit(event: FormSubmitEvent<RecoveryInput>) {
   loading.value = true
+  blockedMessage.value = ''
   try {
     await $fetch('/api/auth/recovery', { method: 'POST', body: event.data })
     sent.value = true
   }
-  catch {
-    // Auch bei 429 etc. keine Account-Detail-Leaks — generische Anzeige
-    sent.value = true
+  catch (error) {
+    // Keine Account-Detail-Leaks — jeder Fehlschlag sieht aus wie ein Versand.
+    // AUSNAHME seit G7: die Minuten-Sperre. Sie zählt pro IP und ROUTE, sagt
+    // also nichts darüber, ob es diese Adresse gibt — und „Schau in dein
+    // Postfach" wäre hier schlicht falsch: es wurde nichts verschickt, und der
+    // Nutzer wartet auf eine Mail, die nie kommt.
+    if (isRateLimited(error)) blockedMessage.value = authErrorMessage(error, '')
+    else sent.value = true
   }
   finally {
     loading.value = false
@@ -40,6 +48,7 @@ async function onSubmit(event: FormSubmitEvent<RecoveryInput>) {
       <p class="text-sm text-muted">{{ t('auth.forgot.description') }}</p>
     </div>
 
+    <UAlert v-if="blockedMessage" color="error" variant="subtle" :title="blockedMessage" />
     <UAlert v-if="sent" color="success" variant="subtle" :title="t('auth.forgot.success')" />
 
     <UForm v-else :schema="schema" :validate-on="[]" :state="state" class="space-y-4" @submit="onSubmit">

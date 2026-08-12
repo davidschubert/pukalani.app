@@ -12,6 +12,7 @@ const { afterAuthTarget } = useAuthRedirect()
 const appConfig = useAppConfig()
 const auth = useAuthStore()
 const { completeEmbedLogin } = useEmbedPopup()
+const { authErrorMessage } = useAuthErrorMessage()
 const toast = useToast()
 /**
  * Trichter-Punkt „registriert" (U18) — dieselbe Kontroll-Host-Klammer wie im
@@ -105,13 +106,16 @@ async function requestCode(event: FormSubmitEvent<OtpRequestInput>) {
  * überlastete Instanz sein.
  */
 function requestErrorMessage(error: unknown): string {
-  if (isNetworkError(error)) return t('auth.networkError')
+  // `otp_unavailable` steht VOR dem geteilten Helfer, weil es der speziellere
+  // Grund ist; Netzwerk und Sperre erledigt danach authErrorMessage (G7).
   if ((error as { data?: { reason?: string } })?.data?.reason === 'otp_unavailable') {
     return t('auth.otp.unavailable')
   }
   const status = (error as { statusCode?: number }).statusCode
-  if (props.register && status === 403) return t('auth.register.disabled')
-  return t('auth.otp.requestFailed')
+  const fallback = props.register && status === 403
+    ? t('auth.register.disabled')
+    : t('auth.otp.requestFailed')
+  return authErrorMessage(error, fallback)
 }
 
 async function resend() {
@@ -158,8 +162,11 @@ async function verify() {
     toast.add({ title: t('auth.login.success'), color: 'success', icon: 'i-ph-check-circle' })
     await navigateTo(afterAuthTarget())
   }
-  catch {
-    errorMessage.value = t('auth.otp.invalidCode')
+  catch (error) {
+    // Auch die Code-PRÜFUNG ist gedrosselt (FAILURE_LIMITED) — nach fünf
+    // Fehlversuchen wäre „Der Code stimmt nicht" die zweite Unwahrheit
+    // hintereinander, denn geprüft wurde er gar nicht mehr (G7).
+    errorMessage.value = authErrorMessage(error, t('auth.otp.invalidCode'))
     code.value = []
   }
   finally {

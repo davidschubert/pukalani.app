@@ -68,6 +68,8 @@
       "requestNew": "Neuen Link anfordern"
     },
     "networkError": "Server nicht erreichbar — bitte später erneut versuchen.",
+    "rateLimited": "Zu viele Versuche. Warte kurz und versuch es dann noch einmal.",
+    "rateLimitedIn": "Zu viele Versuche. Warte noch eine Sekunde und versuch es dann noch einmal. | Zu viele Versuche. Warte noch {n} Sekunden und versuch es dann noch einmal.",
     "verification": {
       "bannerMessage": "Wir haben dir einen Bestätigungslink geschickt. Erst nach der Bestätigung können wir dir E-Mails zustellen.",
       "resend": "Link erneut senden",

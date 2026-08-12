@@ -6,6 +6,7 @@ const { t } = useI18n()
 const { afterAuthTarget } = useAuthRedirect()
 const appConfig = useAppConfig()
 const auth = useAuthStore()
+const { authErrorMessage } = useAuthErrorMessage()
 /**
  * Trichter-Punkt „registriert" (U18) — NUR auf einem Kontroll-Host.
  *
@@ -53,13 +54,15 @@ async function onSubmit(event: FormSubmitEvent<RegisterFormInput>) {
     await navigateTo(afterAuthTarget())
   }
   catch (error) {
-    // Server weg ≠ Account existiert ≠ Registrierung zu — ehrliche Meldung je nach Ursache
+    // Server weg ≠ gesperrt ≠ Account existiert ≠ Registrierung zu — ehrliche
+    // Meldung je nach Ursache. Netzwerk und Sperre beantwortet der geteilte
+    // Helfer (G7), den Rest nur dieses Formular.
     const status = (error as { statusCode?: number }).statusCode
-    if (isNetworkError(error)) errorMessage.value = t('auth.networkError')
-    else if (status === 403) errorMessage.value = t('auth.register.disabled')
-    else if (status === 409) errorMessage.value = t('auth.register.emailExists')
-    else if (status === 422) errorMessage.value = t('auth.register.emailNotAllowed')
-    else errorMessage.value = t('auth.register.failed')
+    let fallback = t('auth.register.failed')
+    if (status === 403) fallback = t('auth.register.disabled')
+    else if (status === 409) fallback = t('auth.register.emailExists')
+    else if (status === 422) fallback = t('auth.register.emailNotAllowed')
+    errorMessage.value = authErrorMessage(error, fallback)
   }
   finally {
     loading.value = false

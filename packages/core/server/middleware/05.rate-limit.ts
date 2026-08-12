@@ -203,7 +203,15 @@ export default defineEventHandler(async (event) => {
 
   if (counting ? state.count > max : state.count >= max) {
     setHeader(event, 'Retry-After', Math.max(1, Math.ceil(state.resetInMs / 1000)))
-    throw createError({ status: 429, statusText: 'Too Many Requests' })
+    // Der GRUND reist als `data.code` — der zentrale Handler (server/error.ts)
+    // hebt genau diesen Schlüssel als `reason` ins Envelope. Ohne ihn konnten
+    // die Auth-Formulare eine Sperre nicht von einem echten Fehlversuch
+    // unterscheiden und schrieben „Passwort falsch" bzw. „bitte erneut
+    // versuchen" — beides falsch, und beides fordert genau die Handlung, die
+    // gerade geblockt wird (Audit-Befund G7, 2026-08-09). Der Status allein
+    // reicht dem Client nicht: eine 429 kann auch von einem vorgelagerten
+    // Proxy kommen und trägt dann nicht unser Fenster.
+    throw createError({ status: 429, statusText: 'Too Many Requests', data: { code: 'rate_limited' } })
   }
 
   if (!always && !write) {

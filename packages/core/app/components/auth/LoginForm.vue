@@ -8,6 +8,7 @@ const { afterAuthTarget } = useAuthRedirect()
 const appConfig = useAppConfig()
 const auth = useAuthStore()
 const toast = useToast()
+const { authErrorMessage } = useAuthErrorMessage()
 const { isEmbedPopup, completeEmbedLogin } = useEmbedPopup()
 
 const loading = ref(false)
@@ -49,7 +50,7 @@ async function onSubmit(event: FormSubmitEvent<LoginInput>) {
     await navigateTo(afterAuthTarget())
   }
   catch (error) {
-    errorMessage.value = isNetworkError(error) ? t('auth.networkError') : t('auth.login.failed')
+    errorMessage.value = authErrorMessage(error, t('auth.login.failed'))
   }
   finally {
     loading.value = false
