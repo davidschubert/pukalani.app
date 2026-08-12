@@ -29,6 +29,61 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### AP7 / U11 — Fehlermeldungen, leere Seiten, Seitentitel, die weiterhelfen ✅ 2026-08-12
+
+Vier Teile (Trichter G7/M3/M6/M7 + Dashboard M6/M8 + C5), live nachgemessen:
+
+**429 sagt die Wahrheit (G7):** die Minuten-Sperre in
+`core/server/middleware/05.rate-limit.ts` trägt jetzt `data.code:
+'rate_limited'` → Envelope-`reason`; `isRateLimited()` +
+`rateLimitRetrySeconds()` (liest `Retry-After`, rät NIE) in
+`core/app/utils/fetchError.ts`, EIN Zweig `useAuthErrorMessage()` in **fünf**
+Stellen statt der gemeldeten drei: Login, Register, OTP-Anforderung, OTP-
+Code-Prüfung, reset-password. `forgot-password` behält die Anti-Enumerations-
+Fassade („Schau ins Postfach" auch bei Fehlern), macht aber bei der Sperre die
+begründete Ausnahme: sie zählt pro IP+Route und verrät nichts über die
+Adresse — und die Fassade wäre dort eine Lüge (es ging keine Mail raus, der
+Nutzer wartet auf nichts). Prod-Beweis: 6. Login-Versuch → 429 +
+`retry-after: 56` + `reason: rate_limited`. Unit-Test mit Gegenprobe
+(`rateLimitedError.test.ts`).
+
+**/verify hilft sich selbst (M3):** der Resend lag DREIMAL abgeschrieben vor
+(Banner, `EmailVerifyRequired`, auf `/verify` gar nicht) — jetzt einmal in
+`useEmailVerifyResend()`. Ohne Session führt der Weg über `/login` statt über
+einen Knopf, der 401 antwortet (der Link wird oft auf einem zweiten Gerät
+geöffnet).
+
+**Titel (C5 + Dashboard-M6):** der Audit-Stand war überholt — 0 der 17
+gemeldeten Seiten noch titellos, 0 tote `useHead` (alle 90 Treffer geprüft).
+Die ungezählte Lücke daneben: **67 Seiten** auf rohem `useHead({title})` ohne
+Marke und ohne Sprachwechsel-Reaktivität → alle auf `useBrandTitle` (repo-weit,
+sonst wären Tabs derselben Seitenleiste uneinheitlich); `/dashboard/themes`
+hatte GAR keinen Titel (stand in keinem Audit). Bewusst ausgelassen:
+Marketing-/Portfolio-SEO-Blöcke, Hüllen `/profile`+`/settings` (Kinder
+titeln), `/embed` (noindex-iframe).
+
+**Leere Zustände (M7/M8):** `CoreEmptyState` mit Aktion, wo eine Handlung
+existiert — Discussions-Themen (öffnet den BESTEHENDEN Composer per
+`v-model:open`, nicht Link in den Feed: eigenständige Produkte),
+Theme-Galerie, Ticket-Brett (in `ClientOnly`, Board-Fetch ist
+`server: false`); ohne Aktion ehrlich betitelt: Moderationsstapel,
+Audit-Protokoll, beobachtete Tickets, Stripe-Preisliste.
+`posts.moderation.empty`-Dopplung bereinigt; Footer-„Geschichte" zeigt wie der
+Header auf `#geschichte` (M6). Bewusst OHNE EmptyState: `admin/config`,
+onboarding `branding`/`plan`, beide Domain-Seiten — dort ist die leere Fläche
+ein Formular oder eine Konstanten-Liste, kein Bestand.
+
+Deploy `ff25c1a6`, gate+deploy=success, Proben auf account./www./Mandanten.
+
+**Gelernt:** (1) Ein Audit-Befund über ZÄHLBARES (17 Seiten, 2 tote Aufrufe)
+ist nach drei Wochen Parallelarbeit Geschichte — Fundstellen vor dem Bauen neu
+greppen, der Agent fand stattdessen die GRÖSSERE ungezählte Lücke (67 rohe
+`useHead`). (2) Eine Fassade gegen Konto-Enumeration gilt nur, solange sie
+nichts verrät UND wahr bleibt — bei einer IP+Routen-Sperre ist „Schau ins
+Postfach" beides nicht mehr. (3) Wartezeiten in Fehlertexten nur aus der
+Antwort (`Retry-After`), nie geraten — sonst ist die Korrektur die nächste
+falsche Meldung.
+
 ### AP6 / U9 — Die Übersichtsseite zeigt echte Zahlen ✅ 2026-08-12
 
 Kennzahlen-Registry `pukalani.admin.stats` (Deklaration in app.config wie

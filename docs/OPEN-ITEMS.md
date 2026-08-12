@@ -1,8 +1,8 @@
 # Offene Punkte
 
-**Stand: 7 offen · 5 geparkt/wartend · 10 bewusst zurückgestellt** (Zahlen bei JEDEM Umzug nach COMPLETE mitführen)
+**Stand: 6 offen · 5 geparkt/wartend · 10 bewusst zurückgestellt** (Zahlen bei JEDEM Umzug nach COMPLETE mitführen)
 
-Stand: **2026-08-11**. Hier steht **nur, was noch offen ist** — in der
+Stand: **2026-08-12**. Hier steht **nur, was noch offen ist** — in der
 Reihenfolge, in der es abgearbeitet wird. Alles Erledigte (mit Begründung,
 Beweis und den gelernten Lektionen) steht final in
 **[OPEN-ITEMS-COMPLETE.md](OPEN-ITEMS-COMPLETE.md)**.
@@ -28,7 +28,6 @@ demo-Ausbau, comments in den Pool. Entscheidungen: DECISION-LOG 2026-08-11.
 | 2 · A1 | **Echte Rechtstexte** für Impressum, Datenschutz und AGB. **pukalani.studio ist seit 2026-08-12 live** — Impressum + Datenschutz in de/en veröffentlicht, ohne erfundene Angaben, aber **ohne ladungsfähige Anschrift** (Davids Entscheidung: erst mal ohne); nachzutragen dort die Anschrift (§ 5 DDG, Pflicht — Postfach genügt nicht) und die Prüfung zu Art. 27 DSGVO (Vertreter in der Union) samt Drittland-Grundlage. Für **pukalani.app** stehen die Texte weiter aus. **Direkt danach `pukalani.auth.termsUrl` in `apps/platform` setzen** — die AGB-Checkbox fehlt heute genau dort, wo Kunden sich registrieren (Trichter M9). Schaltet Punkt 3 frei. | Hoch | S — Anschrift eintragen, Anwalt lesen lassen | Ja: nur David (ggf. Anwalt) | [Notizen](#notizen) |
 | 3 · A2 | **Stripe auf echtes Geld umstellen — über die F55-Seite.** Vorstufe A2a komplett grün, F55 selbst erledigt (beide 2026-08-08). Bei David bleiben: Bank-Aktivierung, Steuer-Registrierung, Live-Key ROTIERT eintragen (der erste ist teil-geleakt und rotiert), Portal-Konfiguration; alles andere klickt die F55-Seite. Braucht Punkt 2 (A1). | Hoch | S | Ja: Bank, Konto, Portal | [STRIPE-GO-LIVE-RUNBOOK.md](runbooks/STRIPE-GO-LIVE-RUNBOOK.md) |
 | 18 · U10 | **[AP9] Preise und Pläne erzählen überall dasselbe.** Produktteil ist ERLEDIGT (Basic-Karte war seit 2026-08-09 raus, „Free Plan"-Text seit AP4). Preisseiten-Teil mit AP9: Vergleichstabelle unter die Karten (Zeile „Eigene Domain — ab Pro", U13-Entscheidung 2026-08-10), Jahresrabatt als „drei Monate geschenkt". | Mittel | S–M | Nein | [UX-Trichter G5](archiv/audits/2026-08-09-ux-trichter.md) · [Wettbewerb E4, M5, M6](archiv/audits/2026-08-09-wettbewerb-benchmark.md) |
-| 19 · U11 | **[AP7] Fehlermeldungen, leere Seiten, Seitentitel.** Die Minuten-Sperre sagt „Passwort falsch", eine Hinweisseite verweist auf einen Knopf, den es dort nicht gibt, ein Dutzend leerer Listen zeigt einen Gedankenstrich. Dazu: 17 Dashboard-Seiten ohne Browser-Titel + 2 tote `useHead`-Aufrufe (C5, Dashboard M6) und der „Geschichte"-Doppellink (Trichter M6). | Mittel | M | Nein | [UX-Trichter G7, M3, M6, M7](archiv/audits/2026-08-09-ux-trichter.md) · [UX-Dashboard M6, M8](archiv/audits/2026-08-09-ux-dashboard.md) |
 | 20 · U12 | **[AP8] Der Wizard fragt sieben Mal.** Entschieden 2026-08-10: Pflicht bleiben **Name/Adresse · Kategorie · Vibe** (beide formen den ersten Zustand) — Größe, Zweck, Ziel und Beschreibung wandern in die Checkliste aus U4, deshalb NACH U4 bauen. Der @handle gehört nicht in den Wizard (Konto-Einstellung). | Mittel | M | Nein (entschieden) | [UX-Trichter M1](archiv/audits/2026-08-09-ux-trichter.md) · [Wettbewerb E5, M3](archiv/audits/2026-08-09-wettbewerb-benchmark.md) |
 | 21 · U16 | **[AP9] Die Pro-Domain spürbar hochwertiger machen.** CAA-Prüfung im „Prüfen"-Lauf (häufigste Zertifikatsfehler-Ursache, macht Circle vor), Anleitungen je Registrar (IONOS, Strato, United Domains, Hetzner, Cloudflare), TTL-Hinweis vor dem Umzug, automatisches Nachprüfen bei offener Seite. Der ehrliche „Prüfen"-Knopf bleibt. | Mittel | M | Nein | [Wettbewerb E6](archiv/audits/2026-08-09-wettbewerb-benchmark.md) |
 | 22 · U17 | **[AP10] Die Wettbewerbs-Munition auf die Marketing-Seite.** Gebühren-Rechner auf `/vs/*` und `/wechseln` (300 Mitglieder à 20 € ⇒ anderswo 8–14 % Gebühr, hier 0 %), die belegten Branding-Zitate der Wettbewerber, das Testphasen-Argument („danach wird nichts gelöscht") und eine Datenexport-FAQ. | Mittel | S–M | Nein | [Wettbewerb E9, V3, V5, K4](archiv/audits/2026-08-09-wettbewerb-benchmark.md) |
@@ -209,18 +208,6 @@ Konto-Default auf „exclusive", rechnet Stripe 19 % oben drauf und widerspricht
 der Landing. Prüfung vor dem Live-Gang: Runbook §2.4. Der Klammer-Hinweis „zeigt
 noch auf den `studio`-Alias" ist seit 2026-07-30 gegenstandslos: der
 Test-Webhook zeigt auf `control`, der Alias ist entfernt.
-
-**C5 — Seitentitel.** Der ursprünglich gemeldete Teil war schon erledigt
-(nachgemessen 2026-07-30): `register/index.vue`, `forgot-password.vue` und
-`reset-password.vue` rufen alle drei `useBrandTitle(...)`. **Daneben liegt eine
-größere, nie erfasste Lücke:** von allen Seiten in core/admin/blueprint setzen
-nur **9** einen Titel — **17 Dashboard-Seiten** (`dashboard/index`,
-`settings/*`, `users/*`, `admin/*`, `storage`, `system`) und das ÖFFENTLICHE
-`core/app/pages/verify.vue` setzen gar keinen, und **kein Layout springt ein**.
-In einer SPA heißt das nicht „kein Titel", sondern: der Titel der ZUVOR
-besuchten Seite bleibt im Tab stehen. Fix ist mechanisch (`useBrandTitle` je
-Seite, i18n-Schlüssel existieren größtenteils). **Seit 2026-08-10 Teil von U11
-(AP7)** — zusammen mit den zwei toten `useHead`-Aufrufen aus Dashboard-M6.
 
 **C2 — UI-Plan-Gate für Kurse/Events** in der Nav (`pukalani.chrome.nav`,
 blueprint) — heute per Direktlink erreichbar, läuft in den API-404.
