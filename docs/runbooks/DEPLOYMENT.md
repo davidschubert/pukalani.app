@@ -9,7 +9,8 @@ alle Go-Live-Learnings im Detail).
 > **Ist-Stand (pukalani.app), EIN App-Server (app-prod, 49.13.211.173) mit
 > VIER ploi-Sites:** `comments.pukalani.app` (Site 389772, Port **3001**) ·
 > `portfolio.pukalani.app` (Site 390041, Port **3002**) ·
-> `control.pukalani.app` (Site 390042, Port **3003**) ·
+> `control.pukalani.app` (Site 392163, Port **3003** — beim Cutover
+> 2026-07-26 NEU angelegt; die alte studio-Site 390042 ist gelöscht) ·
 > `platform.pukalani.app` (Site 391312, Port **3004**, seit H3-Rollout
 > 2026-07-23 — Multi-Tenant-App: `server_name platform.pukalani.app
 > *.pukalani.app` + ploi-verwaltetes **Wildcard-TLS** `*.pukalani.app`
