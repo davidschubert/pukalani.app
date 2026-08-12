@@ -37,6 +37,21 @@ export interface TenantBranding {
    *  Header der Community-Hosts („Morgenlicht" statt App-Brand). Reiner
    *  Text, wird NIE als Attribut/HTML interpoliert. */
   name?: string
+  /**
+   * Selbstbeschreibung der Community (U5) — die Wizard-Antwort aus
+   * `communities.profile`, nicht eine zweite daneben.
+   *
+   * BEWUSST NICHT im SSR-Payload gespiegelt (tenant-brand.server.ts,
+   * „Spiegel-Inventar"), obwohl `name` direkt darüber es ist: der Name steht
+   * im Header jeder öffentlichen Seite und muss deshalb überall vorliegen,
+   * die Beschreibung wird heute an GENAU EINER Stelle gebraucht — im
+   * Formular, das sie ändert. Sie reiste sonst auf jeder Seite jedes
+   * Mandanten mit, für einen Leser, den es nicht gibt. Herausgegeben wird sie
+   * von `/api/community/profile` (onboarding), capability-gegated wie
+   * `trialEndsAt` es vormacht. Der Resolver liest die Row ohnehin (30-s-Cache),
+   * das Feld kostet also keinen zusätzlichen Zugriff.
+   */
+  description?: string
 }
 
 /**

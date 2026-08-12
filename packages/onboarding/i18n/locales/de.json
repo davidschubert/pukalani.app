@@ -3,6 +3,16 @@
     "community": {
       "title": "Community",
       "description": "Einstellungen, die dieser Community gehören.",
+      "profile": {
+        "title": "Name und Beschreibung",
+        "description": "Wie deine Community heißt und wofür sie da ist.",
+        "nameLabel": "Name der Community",
+        "nameHelp": "Steht im Menükopf, im Browser-Tab, im Vorschaubild und als Absender jeder Benachrichtigungs-Mail.",
+        "descriptionLabel": "Beschreibung",
+        "descriptionHelp": "Ein oder zwei Sätze, wofür diese Community da ist. Darf leer bleiben.",
+        "addressHint": "Die Adresse deiner Community ändert sich dadurch nicht — die verwaltest du unter „Eigene Domain“.",
+        "submit": "Speichern"
+      },
       "openRegistration": "Offene Registrierung",
       "openRegistrationDesc": "Ist der Schalter an, kann sich jeder ein Konto anlegen und wird damit Mitglied deiner Community — ebenso, wer schon ein Konto hat und hier den ersten Beitrag oder Kommentar schreibt. Aus heißt: Mitglied wird man nur auf Einladung. Wem du den Zugang entzogen hast, kommt in beiden Fällen nicht von selbst zurück.",
       "audience": {

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { createCommunityProfileSchema } from '../../../../../control/schemas/communityProfile'
+
 /**
  * COMMUNITY-EINSTELLUNGEN → ALLGEMEIN: die Schalter, die der KUNDIN gehören
  * (nicht dem Betreiber). Seit F51 (2026-08-07) der INDEX des Community-Hubs
@@ -80,6 +82,74 @@ useHead({ title: () => t('dashboard.settings.community') })
 const { openRegistration } = useTenantOpenRegistration()
 /** null = kein Mandanten-Host → die Schalter haben hier keine Bedeutung. */
 const isTenantHost = computed(() => openRegistration.value !== null)
+
+// ── Name und Beschreibung (U5, Befund K1) ───────────────────────────────────
+//
+// GANZ OBEN, weil es der einzige Fehler war, den ein Owner nicht mehr
+// gutmachen konnte: der Name wurde im Wizard gesetzt und war danach für
+// NIEMANDEN änderbar — auch nicht für uns. Er trägt Menükopf, Browser-Titel,
+// Vorschaubild und den Absender jeder Mail.
+//
+// DIE ADRESSE BLEIBT UNBERÜHRT, und die Karte sagt das ausdrücklich: „meine
+// Community umbenennen" heißt für die meisten Menschen auch „meine Adresse
+// ändern", und wer das hier erwartet und nicht findet, sucht es nicht auf dem
+// Reiter „Eigene Domain" — er hält es für kaputt.
+const profileSchema = createCommunityProfileSchema(t)
+const profileState = reactive({ name: '', description: '' })
+
+/**
+ * Der SSR-Name steht über `useTenantBrand()` bereit, die BESCHREIBUNG bewusst
+ * nicht (sie reist nicht im Payload mit). Deshalb EIN Abruf für beide — er
+ * kostet nichts extra, weil die Route ihn aus dem Resolver-Cache beantwortet.
+ */
+const brandName = useTenantBrand()
+const { data: profile } = await useAsyncData(
+  'community-profile',
+  () => isTenantHost.value
+    ? $fetch<{ name: string, description: string }>('/api/community/profile')
+    : Promise.resolve(null),
+  { watch: [isTenantHost] },
+)
+watchEffect(() => {
+  profileState.name = profile.value?.name ?? ''
+  profileState.description = profile.value?.description ?? ''
+})
+
+const savingProfile = ref(false)
+async function saveProfile() {
+  savingProfile.value = true
+  try {
+    const result = await $fetch<{ name: string, description: string }>('/api/community/profile', {
+      method: 'PATCH',
+      body: { name: profileState.name, description: profileState.description },
+    })
+    // Aus der ANTWORT übernehmen — dieselbe Regel wie beim Schalter darunter.
+    profile.value = result
+    /**
+     * UND EINMAL OPTIMISTISCH IN DEN KOPF DER SEITE: `useBrandName()` liest
+     * diesen State, und der stammt aus dem Resolver-Cache (≤30 s). Ohne diese
+     * Zeile stünde nach dem Speichern noch eine halbe Minute lang der ALTE
+     * Name im Sidebar-Kopf und im Browser-Titel — direkt neben dem Formular,
+     * das gerade „gespeichert" gemeldet hat. Ein D6-Spiegel wie beim Branding
+     * kommt dafür bewusst NICHT in Frage: `community_branding` ist
+     * read(any) und darf laut Migration 028 nie ein identifizierendes Feld
+     * tragen. Andere offene Fenster holen den Namen beim nächsten
+     * Seitenaufbau; der Wächter bleibt heil.
+     */
+    brandName.value = result.name
+    toast.add({ title: t('dashboard.community.saved'), color: 'success' })
+  }
+  catch {
+    toast.add({
+      title: t('dashboard.community.saveFailed'),
+      description: t('dashboard.community.saveFailedDesc'),
+      color: 'error',
+    })
+  }
+  finally {
+    savingProfile.value = false
+  }
+}
 
 const value = ref(openRegistration.value !== false)
 watch(openRegistration, next => { value.value = next !== false })
@@ -239,6 +309,59 @@ async function deleteCommunity() {
 </script>
 
 <template>
+  <!-- Name und Beschreibung (U5): die erste Karte, weil sie den einzigen
+       unumkehrbaren Fehler des Produkts umkehrbar macht. Nur auf einem
+       Mandanten-Host — ohne Community gibt es keinen Namen zu ändern. -->
+  <UPageCard
+    v-if="isTenantHost"
+    :title="t('dashboard.community.profile.title')"
+    :description="t('dashboard.community.profile.description')"
+    variant="subtle"
+  >
+    <UForm
+      :schema="profileSchema"
+      :state="profileState"
+      class="flex flex-col gap-4"
+      data-community-profile
+      @submit="saveProfile"
+    >
+      <UFormField
+        name="name"
+        :label="t('dashboard.community.profile.nameLabel')"
+        :description="t('dashboard.community.profile.nameHelp')"
+        required
+      >
+        <UInput v-model="profileState.name" class="w-full" data-community-profile-name />
+      </UFormField>
+
+      <UFormField
+        name="description"
+        :label="t('dashboard.community.profile.descriptionLabel')"
+        :description="t('dashboard.community.profile.descriptionHelp')"
+      >
+        <UTextarea
+          v-model="profileState.description"
+          :rows="3"
+          class="w-full"
+          data-community-profile-description
+        />
+      </UFormField>
+
+      <!-- Der Satz, der die häufigste Fehlerwartung abfängt: „umbenennen"
+           heißt für viele auch „Adresse ändern". -->
+      <p class="flex items-start gap-2 text-sm text-muted">
+        <UIcon name="i-ph-link" class="mt-0.5 size-4 shrink-0" />
+        {{ t('dashboard.community.profile.addressHint') }}
+      </p>
+
+      <div class="flex justify-end">
+        <UButton type="submit" :loading="savingProfile" data-community-profile-save>
+          {{ t('dashboard.community.profile.submit') }}
+        </UButton>
+      </div>
+    </UForm>
+  </UPageCard>
+
   <UPageCard
     :title="t('dashboard.community.title')"
     :description="t('dashboard.community.description')"

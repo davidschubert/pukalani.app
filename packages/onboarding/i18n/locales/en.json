@@ -3,6 +3,16 @@
     "community": {
       "title": "Community",
       "description": "Settings that belong to this community.",
+      "profile": {
+        "title": "Name and description",
+        "description": "What your community is called and what it is for.",
+        "nameLabel": "Community name",
+        "nameHelp": "Shown in the menu header, the browser tab, the preview image and as the sender of every notification email.",
+        "descriptionLabel": "Description",
+        "descriptionHelp": "A sentence or two about what this community is for. May stay empty.",
+        "addressHint": "This does not change your community’s address — you manage that under “Custom domain”.",
+        "submit": "Save"
+      },
       "openRegistration": "Open registration",
       "openRegistrationDesc": "When this is on, anyone can create an account and thereby becomes a member of your community — and so does anyone who already has an account and writes their first post or comment here. When it's off, people become members by invitation only. Either way, someone whose access you revoked never comes back on their own.",
       "audience": {

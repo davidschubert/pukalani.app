@@ -4,7 +4,7 @@ import type { TenantResolver } from '../../../core/server/utils/tenantResolver'
 import type { TenantContext } from '../../../core/shared/types/tenant'
 import { communityIsOffline, resolveCommunitySuspension } from '../../../core/shared/communitySuspension'
 import { DEFAULT_TENANT_PLAN, COMMUNITY_PLANS_TABLE, COMMUNITIES_TABLE, normalizeTenantPlan, parseTenantPlanLimits, resolveTenantAudience, resolveTenantOpenRegistration, type TenantPlanLimits, type TenantPlanRow, type TenantRow } from '../../shared/types/tenantRecord'
-import { isSafeThemeToken } from '../../shared/onboarding'
+import { isSafeThemeToken, parseSiteProfile } from '../../shared/onboarding'
 import { canonicalHostFor, customDomainCandidates } from '../../shared/customDomain'
 
 /**
@@ -27,7 +27,7 @@ import { canonicalHostFor, customDomainCandidates } from '../../shared/customDom
  *  gesetzt, wenn die Row eine $id trägt (der reale Read immer; Test-Fixtures
  *  optional). Trägt die Site-Rollen-Auflösung (requireCommunityPermission). */
 export function mapTenantRowToContext(
-  row: (Pick<TenantRow, 'mode' | 'projectId' | 'tenantId' | 'status' | 'plan'> & { $id?: string, host?: string | null, theme?: string | null, variant?: string | null, neutral?: string | null, name?: string | null, openRegistration?: boolean | null, audience?: string | null, trialEndsAt?: string | null, billingStatus?: string | null, suspension?: string | null, customDomain?: string | null, customDomainStatus?: string | null }) | null,
+  row: (Pick<TenantRow, 'mode' | 'projectId' | 'tenantId' | 'status' | 'plan'> & { $id?: string, host?: string | null, theme?: string | null, variant?: string | null, neutral?: string | null, name?: string | null, profile?: string | null, openRegistration?: boolean | null, audience?: string | null, trialEndsAt?: string | null, billingStatus?: string | null, suspension?: string | null, customDomain?: string | null, customDomainStatus?: string | null }) | null,
   planCatalog?: Record<string, Record<string, TenantPlanLimits>>,
 ): TenantContext | null {
   if (!row || row.status !== 'active') return null
@@ -77,11 +77,20 @@ export function mapTenantRowToContext(
   // „keine Wahl der Community" (Besucher-Verhalten wie bisher).
   // `name` ist bewusst UNGEFILTERT dabei — reiner Anzeigetext (Header), wird
   // nur interpoliert gerendert, nie als Attribut/HTML.
+  const description = parseSiteProfile(row.profile ?? undefined).description ?? ''
   const branding = {
     ...(row.theme && isSafeThemeToken(row.theme) ? { theme: row.theme } : {}),
     ...(row.variant && isSafeThemeToken(row.variant) ? { variant: row.variant } : {}),
     ...(row.neutral && isSafeThemeToken(row.neutral) ? { neutral: row.neutral } : {}),
     ...(row.name ? { name: row.name } : {}),
+    /**
+     * Die Selbstbeschreibung (U5) — aus dem `profile`-JSON, nicht aus einer
+     * eigenen Spalte. Ungefiltert wie `name` und aus demselben Grund: reiner
+     * Anzeigetext. Sie geht NICHT in den SSR-Payload (Begründung am Feld in
+     * core/shared/types/tenant.ts); ihr einziger Leser ist die Route
+     * `/api/community/profile`, die das Bearbeitungs-Formular füllt.
+     */
+    ...(description ? { description } : {}),
   }
   /**
    * DIE KANONISCHE ADRESSE (control-035, Davids Entscheidung 2): aktive eigene
