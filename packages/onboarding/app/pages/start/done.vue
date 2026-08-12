@@ -111,7 +111,7 @@ useHead({ title: () => t('onboarding.done.title') })
     </div>
 
     <ul class="space-y-3 text-sm">
-      <li v-for="hint in ['private', 'trial', 'settings']" :key="hint" class="flex items-start gap-3">
+      <li v-for="hint in ['visibility', 'trial', 'settings']" :key="hint" class="flex items-start gap-3">
         <UIcon name="i-ph-check-circle" class="mt-0.5 size-4 shrink-0 text-primary" />
         <span class="text-muted">{{ t(`onboarding.done.hints.${hint}`) }}</span>
       </li>

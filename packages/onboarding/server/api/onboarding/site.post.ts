@@ -46,21 +46,41 @@ export default defineEventHandler(async (event) => {
   // scheitern. Der Owner sieht dann die Willkommens-Variante und kann selbst
   // eine anlegen — der Fehler steht im Log, nicht im Gesicht des Kunden.
   if (!result.reused) {
-    await seedHomePage(event, {
-      tenantId: result.tenantId,
-      locale: site.locale ?? 'de',
-      title: site.name,
-      description: site.description,
-      fallbackBody: site.locale === 'en'
-        ? `Welcome to ${site.name}. This page is yours — edit it in the dashboard whenever you like.`
-        : `Willkommen bei ${site.name}. Diese Seite gehört dir — du kannst sie im Dashboard jederzeit ändern.`,
-    }).catch((error) => {
-      logEvent('error', 'onboarding.home_page_failed', {
-        communityId: result.communityId,
-        message: error instanceof Error ? error.message : String(error),
+    /**
+     * BEIDE SPRACHEN, DERSELBE TEXT (Trichter-M4).
+     *
+     * Gesät wurde bisher nur `site.locale`; GELESEN wird die Startseite aber
+     * für die aktuelle UI-Locale des Besuchers (apps/platform/app/pages/
+     * index.vue). Ein englischsprachiger Gast auf einer deutsch angelegten
+     * Community sah deshalb den Platzhalter „Diese Community ist gerade im
+     * Aufbau" — obwohl eine Startseite existierte und der Owner einen Text
+     * dafür geschrieben hatte.
+     *
+     * ÜBERSETZT WIRD NICHTS: die Beschreibung aus dem Wizard ist Nutzertext
+     * und gehört der Community; sie steht in beiden Sprachfassungen wörtlich
+     * gleich. Nur der Rückfalltext (leere Beschreibung) ist je Sprache
+     * gefasst. `seedHomePage` ist idempotent je (Community, slug, locale) und
+     * fasst bestehende Zeilen nie an — der Owner kann jede Fassung danach
+     * einzeln ändern, ohne dass ein zweiter Lauf sie überschreibt.
+     */
+    for (const locale of ['de', 'en'] as const) {
+      await seedHomePage(event, {
+        tenantId: result.tenantId,
+        locale,
+        title: site.name,
+        description: site.description,
+        fallbackBody: locale === 'en'
+          ? `Welcome to ${site.name}. This page is yours — edit it in the dashboard whenever you like.`
+          : `Willkommen bei ${site.name}. Diese Seite gehört dir — du kannst sie im Dashboard jederzeit ändern.`,
+      }).catch((error) => {
+        logEvent('error', 'onboarding.home_page_failed', {
+          communityId: result.communityId,
+          locale,
+          message: error instanceof Error ? error.message : String(error),
+        })
+        return null
       })
-      return null
-    })
+    }
 
     // Impressum + Datenschutz als VORLAGEN-ENTWÜRFE (Audit-Befund S7). Bewusst
     // unveröffentlicht: der Kunde ist Betreiber seiner Community, er muss die
@@ -93,6 +113,40 @@ export default defineEventHandler(async (event) => {
       })
       return null
     })
+
+    /**
+     * „Deine Community steht" (Trichter-G6) — der einzige Beleg, der den
+     * geschlossenen Tab überlebt: Adresse, Dashboard, Kundenbereich, Ende der
+     * Testphase.
+     *
+     * NUR BEI EINER ECHTEN NEUANLAGE (im `!reused`-Zweig): ein Retry oder ein
+     * Doppelklick soll keine zweite Bestätigung derselben Community
+     * verschicken.
+     *
+     * BEST EFFORT wie die Saat darüber — die Community existiert schon, an
+     * einem SMTP-Aussetzer darf die Anlage nicht scheitern. Der Kundenbereich
+     * kommt aus der Konfiguration (`controlHosts`), nicht aus einer festen
+     * Zeichenkette: dieser Request LÄUFT auf genau diesem Host, und beim
+     * nächsten Host-Umzug wandert die Mail von selbst mit.
+     */
+    const accountHost = controlHosts(event)[0]
+    if (event.context.user?.email && accountHost) {
+      await sendCommunityReadyMail(event, {
+        to: event.context.user.email,
+        siteName: site.name,
+        host: result.host,
+        accountHost,
+        trialEndsAt: result.trialEndsAt,
+        wizardLocale: site.locale ?? 'de',
+        prefs: event.context.user.prefs as Record<string, unknown> | undefined,
+      }).catch((error) => {
+        logEvent('error', 'onboarding.ready_mail_failed', {
+          communityId: result.communityId,
+          message: error instanceof Error ? error.message : String(error),
+        })
+        return false
+      })
+    }
   }
 
   logEvent('info', 'onboarding.site_requested', {
