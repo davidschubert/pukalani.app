@@ -86,8 +86,6 @@
       "title": "Profil",
       "heading": "Deine Pukalani-ID",
       "intro": "Wer du bist und was du getan hast — beides gilt über alle deine Communities hinweg.",
-      "handleNote": "Dein Name für Erwähnungen gehört zu je einer Community — du legst ihn dort fest, nicht hier.",
-      "handleAction": "Zu deinen Communities",
       "tabs": {
         "profile": "Profil",
         "activity": "Aktivität"

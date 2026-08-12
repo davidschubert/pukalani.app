@@ -133,14 +133,17 @@ export default defineEventHandler(async (event) => {
      * das ist eine bewusste Lücke und im Bericht benannt.
      *
      * Zwei getrennte Nebenwirkungen, beide best-effort:
-     *  - Der AUTOR bekommt (falls noch nicht geschehen) selbst einen Handle.
-     *    Wer schreibt, soll erwähnbar sein — und genau hier ist bewiesen, dass
-     *    dieser Mensch zu dieser Community gehört.
+     *  - Der AUTOR bekommt (falls noch nicht geschehen) selbst einen Handle,
+     *    und diese Community darf ihn sehen. Wer schreibt, soll erwähnbar
+     *    sein — und genau hier ist bewiesen, dass dieser Mensch zu dieser
+     *    Community gehört. Seit AH-7 sind das zwei Dinge: der NAME gehört dem
+     *    Konto (global), das PUBLIKUM hängt an der Mitgliedschaft.
      *  - Die Genannten werden benachrichtigt.
      * `link` ist '/feed' wie beim Activity-Eintrag zwei Zeilen darüber; ein
      * Discussions-Pfad bräuchte den Kategorie-Slug, den diese Route nicht hat.
      */
-    await ensureCommunityHandle(event, user.$id, user.name)
+    await ensureAccountHandle(event, user.$id, user.name)
+    await ensureAccountHandleAudience(event, user.$id)
     await notifyPostMentions(event, row, user, '/feed')
       .catch(() => undefined)
   }

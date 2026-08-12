@@ -30,11 +30,12 @@ import type { MyCommunitiesResponse, MyCommunityView } from '../../../control/sh
  * der Karte der ehrliche erste Schritt.
  *
  * ── KEIN @name IN DER BEGRÜSSUNG ──────────────────────────────────────────
- * Ein @name gilt PRO COMMUNITY (`community_handles`, eindeutig je
- * `(communityId, handleLower)`); auf diesem Host gibt es keine, und
- * `/api/handles/me` ist hier bewusst nicht erreichbar. Begrüßt wird deshalb mit
- * dem Konto-Namen und, solange keiner gesetzt ist, mit der Adresse — die
- * stimmt immer. Ausführlich im Kopf von UserProfilePanel (core).
+ * Seit AH-7 (2026-08-11) GÄBE es hier einen: der @name gehört dem Konto
+ * (`account_handles`), und `/api/account/handle` antwortet auch auf diesem
+ * Host. Begrüßt wird trotzdem mit dem Konto-Namen und, solange keiner gesetzt
+ * ist, mit der Adresse — eine Begrüßung nennt den Menschen, nicht seine
+ * Kennung, und der Rückfall auf die Adresse stimmt immer. Gesetzt wird der
+ * @name eine Seite weiter, unter `/profile`.
  */
 const { t } = useI18n()
 const localePath = useLocalePath()

@@ -2,21 +2,20 @@
 /**
  * `/profile` — die PUKALANI-ID (AH-2, Davids URL-Liste vom 2026-08-11).
  *
- * Bild, Name, Bio: das Konto, mit dem jemand überall auftritt, unabhängig von
- * einer einzelnen Community. Die Fläche selbst ist `UserProfilePanel` (core) —
- * dieselbe Komponente, die im Community-Dashboard unter
- * `/dashboard/settings` steht. Davids Vorgabe war EINE Implementierung; wer
- * hier ein Feld ergänzt, ergänzt es dort mit.
+ * Bild, Name, Bio, @name: das Konto, mit dem jemand überall auftritt,
+ * unabhängig von einer einzelnen Community. Die Fläche selbst ist
+ * `UserProfilePanel` (core) — dieselbe Komponente, die im Community-Dashboard
+ * unter `/dashboard/settings` steht. Davids Vorgabe war EINE Implementierung;
+ * wer hier ein Feld ergänzt, ergänzt es dort mit.
  *
- * DER @name IST HIER EINE AUSKUNFT, KEIN FORMULAR. Er gilt pro Community
- * (`community_handles`, eindeutig je `(communityId, handleLower)`) — auf diesem
- * Host gibt es keine, und `/api/handles/me` steht bewusst nicht in
- * `pukalani.tenancy.controlApiPrefixes`. Ein Eingabefeld, das jede Eingabe mit
- * 404 quittiert, wäre eine Attrappe; stattdessen steht hier der Satz, der
- * stimmt, samt Weg dorthin, wo der Name wirklich gesetzt wird. Ein konto-weiter
- * @name wäre eine Datenmodell-Entscheidung (eine zweite Tabelle und eine
- * Regel, was bei Kollisionen mit bestehenden Community-Namen passiert) — die
- * gehört David, nicht dieser Seite.
+ * ── SEIT AH-7 STEHT HIER DAS ECHTE FORMULAR ──────────────────────────────
+ * Bis zum 2026-08-11 war der @name an dieser Stelle nur eine AUSKUNFT samt
+ * Weg ins Dashboard: er galt pro Community (`community_handles`), und auf
+ * diesem Host gibt es keine. Mit Davids Entscheidung „eine Pukalani-ID, EIN
+ * Handle, überall" (DECISION-LOG 2026-08-11, Punkt 11) ist der Name genau das
+ * geworden, was diese Seite ohnehin verwaltet — eine Eigenschaft des Kontos.
+ * Der Slot-Ersatztext ist damit ersatzlos entfallen; der Standard-Inhalt des
+ * Panels IST das Formular.
  *
  * Seit AH-3 ist das ein KIND von `profile.vue` (Reiter-Hülle) — Überschrift
  * und Reiter stehen dort, hier nur noch der Inhalt.
@@ -24,29 +23,10 @@
 definePageMeta({ layout: 'onboarding', middleware: 'auth' })
 
 const { t } = useI18n()
-const localePath = useLocalePath()
 
 useBrandTitle(() => t('onboarding.account.profile.title'))
 </script>
 
 <template>
-  <UserProfilePanel>
-    <template #handle>
-      <div class="space-y-3" data-account-handle-note>
-        <div>
-          <p class="text-sm font-medium text-highlighted">{{ t('account.handle.title') }}</p>
-          <p class="text-sm text-muted">{{ t('onboarding.account.profile.handleNote') }}</p>
-        </div>
-        <UButton
-          :to="localePath('/communities')"
-          size="sm"
-          color="neutral"
-          variant="subtle"
-          icon="i-ph-users-three"
-        >
-          {{ t('onboarding.account.profile.handleAction') }}
-        </UButton>
-      </div>
-    </template>
-  </UserProfilePanel>
+  <UserProfilePanel />
 </template>

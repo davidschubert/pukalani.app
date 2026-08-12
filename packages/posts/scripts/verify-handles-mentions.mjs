@@ -110,14 +110,14 @@ try {
   // ──────────────────────────────────────────────────────────────────────
   // (1) VERGABE
   // ──────────────────────────────────────────────────────────────────────
-  const mineRes = await targetCtx.request.get('/api/handles/me')
-  check('GET /api/handles/me antwortet 200', mineRes.ok(), `Status ${mineRes.status()}`)
+  const mineRes = await targetCtx.request.get('/api/account/handle')
+  check('GET /api/account/handle antwortet 200', mineRes.ok(), `Status ${mineRes.status()}`)
   const mine = await mineRes.json()
   checkEqual('Vorschlag aus dem Anzeigenamen (Umlaute ausgeschrieben)', mine.handle, 'juergengross')
   checkEqual('Die automatische Vergabe verbraucht die Sperrfrist NICHT', mine.canChange, true)
   checkEqual('… und trägt deshalb kein Änderungsdatum', mine.changedAt, null)
 
-  const againRes = await targetCtx.request.get('/api/handles/me')
+  const againRes = await targetCtx.request.get('/api/account/handle')
   const again = await againRes.json()
   checkEqual('Zweiter Aufruf vergibt nicht neu (idempotent)', again.handle, mine.handle)
 
@@ -125,7 +125,7 @@ try {
 
   // Der Autor bekommt seinen ebenfalls — und zwar OHNE die Einstellungsseite
   // zu öffnen, allein durch das Schreiben (siehe unten, Prüfung am Ende).
-  const authorMine = await (await authorCtx.request.get('/api/handles/me')).json()
+  const authorMine = await (await authorCtx.request.get('/api/account/handle')).json()
   check('Auch der Autor hat einen Namen', typeof authorMine.handle === 'string' && authorMine.handle.length >= 3, authorMine.handle)
 
   // Suche (der Zuträger für die Namensvervollständigung)
@@ -137,7 +137,7 @@ try {
   // (2) REGELN — der SERVER lehnt ab, nicht nur das Formular
   // ──────────────────────────────────────────────────────────────────────
   async function patchHandle(ctx, handle) {
-    const res = await ctx.request.patch('/api/handles/me', { data: { handle } })
+    const res = await ctx.request.patch('/api/account/handle', { data: { handle } })
     let body
     try { body = await res.json() } catch { body = null }
     return { status: res.status(), reason: body?.reason ?? null, handle: body?.handle ?? null }
@@ -288,7 +288,7 @@ try {
   const second = await patchHandle(targetCtx, `nochmal${stamp}`.slice(0, 24))
   checkEqual('Zweites Ändern innerhalb der Frist wird abgelehnt', second.reason, 'change_too_soon')
 
-  const afterChange = await (await targetCtx.request.get('/api/handles/me')).json()
+  const afterChange = await (await targetCtx.request.get('/api/account/handle')).json()
   checkEqual('Der aktive Name ist der neue', afterChange.handle, newHandle)
   checkEqual('… und die Sperrfrist steht', afterChange.canChange, false)
   check('… mit einem nennbaren Zeitpunkt', typeof afterChange.availableAt === 'number', String(afterChange.availableAt))

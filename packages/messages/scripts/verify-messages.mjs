@@ -166,9 +166,9 @@ async function createAccount(tag, labels = []) {
   if (res.status !== 200) throw new Error(`Login ${tag} fehlgeschlagen (${res.status}): ${res.text.slice(0, 160)}`)
   const cookie = (res.setCookie.find(c => c.startsWith('a_session_')) ?? '').split(';')[0]
   if (!cookie) throw new Error(`Kein Session-Cookie für ${tag}`)
-  // Der Handle entsteht beim ersten Hinsehen (core/server/api/handles/me.get.ts)
+  // Der Handle entsteht beim ersten Hinsehen (core/server/api/account/handle.get.ts)
   // — er ist die Adresse, unter der man hier angeschrieben wird.
-  const handle = await call('/api/handles/me', { cookie })
+  const handle = await call('/api/account/handle', { cookie })
   return { userId: user.$id, cookie, handle: handle.json?.handle ?? '' }
 }
 

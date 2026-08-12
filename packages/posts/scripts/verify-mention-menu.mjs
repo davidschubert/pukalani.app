@@ -116,8 +116,8 @@ try {
   const targetCtx = await contextFor(target)
 
   // Handles vergeben (die Route legt beim ersten Aufruf an).
-  const targetHandle = (await (await targetCtx.request.get('/api/handles/me')).json()).handle
-  await authorCtx.request.get('/api/handles/me')
+  const targetHandle = (await (await targetCtx.request.get('/api/account/handle')).json()).handle
+  await authorCtx.request.get('/api/account/handle')
   check('Das Ziel hat einen Handle', typeof targetHandle === 'string' && targetHandle.length >= 3, String(targetHandle))
 
   // Der Zuträger selbst — und die Gegenprobe, dass er eine Sitzung VERLANGT.
