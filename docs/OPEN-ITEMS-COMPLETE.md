@@ -29,6 +29,33 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### AH-7 — Der konto-weite @handle ✅ 2026-08-12
+
+Eine Pukalani-ID = EIN Handle überall: `account_handles` (system-031, Unique
+global auf handleLower, Historien-Zeilen wie beim Bestand), Übernahme „je
+Konto der älteste aktive Community-Handle; global vergeben ⇒ kein Eintrag,
+neu wählen im Formular" — nichts umbenannt, nichts zerstört.
+Auflösungs-Kette: Konto-Register (publikums-gefiltert auf die Community) →
+Community-Alt-Bestand. `/profile` trägt das echte Formular
+(`PATCH /api/account/handle`, exakter Präfix), die alte per-Community-Route
+ist entfernt (einziger UI-Konsument umgestellt, Beweise nachgezogen).
+Migration VOR dem Deploy auf allen vier Instanzen. Live 3x-Serie: neue Route
+401, alte Route 404, Such-Gate 401.
+
+**Sicherheitsfund im Bau:** `/api/handles/search` hielt die Community-Grenze
+nur über Row-Permissions — ein Leser mit Labels MEHRERER Communities hätte im
+Erwähnungs-Menü von B die Mitglieder von A gesehen. Jetzt:
+`requireCommunityMembership`-Gate + Publikums-Filter.
+
+**Gelernt:** (1) Vor neuen Registry-/Vertragsnamen IMMER greppen — es gab
+schon einen mandanten-gescopten Aktivitäts-Vertrag (AH-3) und hier fast
+dieselbe Falle bei den Beweis-Skripten. (2) Das Deploy-Gate hat den
+gate:success/deploy:skipped-Fehler ZUM ZWEITEN MAL gezeigt — Krümel auf Hoch
+eskaliert; der workflow_dispatch-Hebel bleibt der Ausweg. (3) Bekannter,
+dokumentierter Preis der Globalisierung: gehörte ein @name in einer Community
+historisch jemand anderem als dem globalen Gewinner UND ist der Gewinner dort
+Mitglied, zeigt ein Alt-Beitrag jetzt auf den Gewinner.
+
 ### AH-5 — Freelancer Community + demo-Vollausbau ✅ 2026-08-12
 
 Davids Kurskorrektur bei der Anlage: die Werkstatt heißt NICHT master.,
