@@ -9,6 +9,25 @@
  */
 export default defineAppConfig({
   pukalani: {
+    chrome: {
+      /**
+       * DER EINSTIEG NEBEN DEM NAMEN (F56, Konzept § 1) — die eine Zeile, mit
+       * der „Nachricht schreiben" an fremden Autorenzeilen erscheint.
+       *
+       * Dieselben zwei Tore wie die Menüpunkte unten, und aus demselben Grund
+       * (Gate-Asymmetrie, F51): ein Knopf ohne Plan wäre sichtbar, klickbar
+       * und eine Sackgasse. Owner-Schalter und Vertrauensstufe kann eine
+       * Config nicht kennen — die prüft die Hülle selbst.
+       */
+      authorActions: {
+        messages: {
+          component: 'MessageWriteAuthorAction',
+          productKey: 'messages',
+          planProduct: 'messages',
+          order: 10,
+        },
+      },
+    },
     admin: {
       modules: [
         {

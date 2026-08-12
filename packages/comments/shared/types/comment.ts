@@ -56,6 +56,15 @@ export interface Comment extends Models.Row {
    * es verschwindet nie falsch.
    */
   authorFormerMember?: boolean
+  /**
+   * Der @-Name des Autors (ohne @) — KEINE DB-Spalte, gebündelt angereichert
+   * wie Avatar und „ehemaliges Mitglied". Er trägt die Autoren-Aktionen der
+   * Kopfzeile (F56, `CoreAuthorActions`): „dieser Person schreiben" braucht
+   * eine Adresse. Gäste haben keine (authorId ''), und bei Realtime-Events
+   * fehlt das Feld wie die Geschwister nebenan, bis neu geladen wird — die
+   * Aktion erscheint dann später, sie erscheint nie falsch.
+   */
+  authorHandle?: string
   parentId: string | null
   /** Interner Pfad der Seite, auf der der Kommentar lebt — für die Reply-Notification (null = unbekannt → '/') */
   targetUrl: string | null

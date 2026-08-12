@@ -216,6 +216,14 @@ export interface PollState {
 
 export interface FeedPost extends CommunityPost {
   authorAvatarUrl?: string
+  /**
+   * Der @-Name des Autors (ohne @), gebündelt aufgelöst wie der Avatar —
+   * KEINE Spalte. Er trägt die Autoren-Aktionen der Kopfzeile (F56,
+   * `CoreAuthorActions`): „dieser Person schreiben" braucht eine Adresse,
+   * und die einzige, die dieses Produkt kennt, ist der Handle. Fehlt er
+   * (Konto ohne Namen, Gast), bleibt die Zeile wie bisher.
+   */
+  authorHandle?: string
   poll?: PollState
   /** eigener Up-/Downvote auf den Post (nicht die Poll-Stimme) */
   myPostVote?: PostVoteValue | null

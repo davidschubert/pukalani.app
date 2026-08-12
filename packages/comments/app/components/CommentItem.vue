@@ -103,6 +103,15 @@ const reportReasons = computed(() => [
       <UserAvatar :user="{ name: comment.authorName, prefs: { avatarUrl: comment.authorAvatarUrl } }" size="xs" />
       <span class="font-medium text-default">{{ comment.authorName }}</span>
       <!--
+        AKTIONEN AM NAMEN (F56) — Registry `pukalani.chrome.authorActions`
+        (core/shared/types/chrome.ts), nicht ein Import aus messages: comments
+        darf dieses Produkt nicht kennen (A14). `iconOnly`, weil diese
+        Kopfzeile eine gedrängte Reihe aus Name, Zeichen und Zeitstempel ist —
+        ein beschrifteter Knopf würde sie sprengen. Ein Gast (authorId '')
+        bekommt nichts: `CoreAuthorActions` rendert ohne userId nicht.
+      -->
+      <CoreAuthorActions :user-id="comment.authorId" :handle="comment.authorHandle" size="xs" icon-only />
+      <!--
         „Ehemaliges Mitglied" (Davids Zusatz vom 2026-07-29): ein ICON mit
         Tooltip, kein Badge — der Name bleibt die Hauptsache, das Zeichen
         erklärt nur, warum diese Person nicht mehr antwortet. Es steht direkt

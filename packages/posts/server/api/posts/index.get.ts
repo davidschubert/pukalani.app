@@ -27,8 +27,11 @@ export default defineEventHandler(async (event): Promise<PostListResponse> => {
   })
 
   const userId = event.context.user?.$id ?? null
-  const [avatars, pollStates, postVotes] = await Promise.all([
+  // Handles gebündelt wie die Avatare — EINE Abfrage für die ganze Seite, nie
+  // eine je Beitrag (F56: die Kopfzeile trägt daran ihre Autoren-Aktionen).
+  const [avatars, handles, pollStates, postVotes] = await Promise.all([
     resolveAvatars(event, res.rows.map(row => row.authorId)),
+    resolveUserHandles(event, res.rows.map(row => row.authorId)),
     pollStatesFor(event, res.rows, userId),
     postVotesFor(event, res.rows, userId),
   ])
@@ -39,6 +42,7 @@ export default defineEventHandler(async (event): Promise<PostListResponse> => {
   const rows: FeedPost[] = res.rows.map(row => ({
     ...row,
     authorAvatarUrl: avatars.get(row.authorId),
+    authorHandle: handles.get(row.authorId),
     poll: pollStates.get(row.$id),
     myPostVote: postVotes.get(row.$id) ?? null,
     mentions: mentions.get(row.$id),

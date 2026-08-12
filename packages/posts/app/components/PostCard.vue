@@ -248,6 +248,15 @@ const showTooltip = computed(() => (props.replyCount ?? 0) > 0)
       <div class="min-w-0 flex-1">
         <p class="flex flex-wrap items-center gap-x-2 text-sm">
           <span class="font-semibold">{{ post.authorName || t('posts.card.someone') }}</span>
+          <!--
+            AKTIONEN AM NAMEN (F56) — was hier erscheint, trägt kein Layer
+            dieses Produkts ein, sondern die Registry
+            `pukalani.chrome.authorActions` (core/shared/types/chrome.ts).
+            posts darf messages nicht kennen (A14), und blueprint kommt an
+            diese Zeile nicht heran — sie liegt im Inneren der Karte. Ohne
+            Eintrag rendert die Komponente NICHTS.
+          -->
+          <CoreAuthorActions :user-id="post.authorId" :handle="post.authorHandle" size="xs" />
           <span class="text-xs text-dimmed">{{ formatRelativeTime(post.publishedAt || post.$createdAt) }}</span>
           <!-- F1: „bearbeitet" steht nur da, wenn der TEXT geändert wurde —
                nicht beim Anheften, Umkategorisieren oder Abstimmen (die Regel

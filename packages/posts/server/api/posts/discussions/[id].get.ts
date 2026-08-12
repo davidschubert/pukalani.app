@@ -65,8 +65,9 @@ export default defineEventHandler(async (event): Promise<DiscussionTopicResponse
   await recordTopicView(event, row.$id)
 
   const userId = event.context.user?.$id ?? null
-  const [avatars, pollStates, postVotes] = await Promise.all([
+  const [avatars, handles, pollStates, postVotes] = await Promise.all([
     resolveAvatars(event, [row.authorId]),
+    resolveUserHandles(event, [row.authorId]),
     pollStatesFor(event, [row], userId),
     postVotesFor(event, [row], userId),
   ])
@@ -74,6 +75,7 @@ export default defineEventHandler(async (event): Promise<DiscussionTopicResponse
   const post: FeedPost = {
     ...row,
     authorAvatarUrl: avatars.get(row.authorId),
+    authorHandle: handles.get(row.authorId),
     poll: pollStates.get(row.$id),
     myPostVote: postVotes.get(row.$id) ?? null,
   }

@@ -194,9 +194,17 @@ export default defineEventHandler(async (event): Promise<CommentListResponse> =>
    * für Gäste ohnehin im Microcache liegt.
    */
   const formerMembers = await resolveFormerMembers(event, authorIds)
+  /**
+   * Die @-Namen derselben Autoren (F56) — EINE gebündelte Abfrage je Seite,
+   * dieselbe Regel wie oben: `authorIds` enthält Gäste gar nicht erst
+   * (authorId ''), und wer keinen Namen hat, fehlt in der Map und bekommt
+   * keine Aktion neben seinen Namen.
+   */
+  const handles = await resolveUserHandles(event, authorIds)
   const rows = combined.map(row => ({
     ...row,
     authorAvatarUrl: avatars.get(row.authorId),
+    ...(handles.has(row.authorId) ? { authorHandle: handles.get(row.authorId) } : {}),
     ...(formerMembers.has(row.authorId) ? { authorFormerMember: true } : {}),
   }))
 
