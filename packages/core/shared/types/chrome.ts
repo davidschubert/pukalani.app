@@ -59,6 +59,47 @@ export interface PukalaniChromeUtility {
   zone?: 'menu' | 'overlay'
 }
 
+/**
+ * AKTION NEBEN EINEM AUTORENNAMEN (F56, 2026-08-11).
+ *
+ * Dieselbe Registry-Idee wie `utilities`, aber eine Etage tiefer: nicht im
+ * Kopf der Seite, sondern dort, wo ein MENSCH steht — an der Kopfzeile eines
+ * Beitrags und eines Kommentars. Erster (und bisher einziger) Eintrag ist
+ * „Nachricht schreiben" aus dem messages-Layer.
+ *
+ * ── WARUM EINE REGISTRY UND KEINE DIREKTE VERDRAHTUNG ────────────────────
+ * Der Knopf gehört `messages`, die Kopfzeilen gehören `posts` und `comments`.
+ * Kein Produkt-Layer darf einen anderen kennen (A14), und `blueprint` — der
+ * EINZIGE Layer, der das dürfte — kommt hier nicht heran: er komponiert
+ * SEITEN, die Autorenzeile liegt im Inneren von `PostCard`/`CommentItem`.
+ * Also derselbe Ausweg wie bei der Glocke: core besitzt den VERTRAG, das
+ * anzeigende Produkt rendert ihn, das besitzende Produkt trägt sich ein.
+ * Niemand importiert jemanden.
+ *
+ * ── UNTERSCHIED ZU `utilities`: HIER FLIESSEN PROPS ──────────────────────
+ * Eine Utility ist ein Knopf ohne Gegenstand. Eine Autoren-Aktion hat einen:
+ * `CoreAuthorActions` reicht `userId` und `handle` an jede eingetragene
+ * Komponente durch. Eine Komponente, die damit nichts anfangen kann, muss
+ * sich SELBST ausblenden — genau das tut `MessageWriteButton` (kein Handle,
+ * eigenes Profil, nicht angemeldet ⇒ kein Knopf).
+ */
+export interface PukalaniChromeAuthorAction {
+  /**
+   * Komponenten-Name. MUSS global registriert sein (Datei-Suffix
+   * `.global.vue` im besitzenden Layer), sonst kann `<component :is>` den
+   * String zur Laufzeit nicht auflösen — dieselbe Bedingung wie bei den
+   * Utilities.
+   */
+  component: string
+  /** Sortierung (aufsteigend, Default 50) */
+  order?: number
+  /** Laufzeit-Produkt-Gate (F2) */
+  productKey?: string
+  /** Plan-Gate im Pool (P4) — useTenantPlan().planAllows */
+  planProduct?: string
+}
+
 /** `false` = Eintrag von einer App/einem späteren Layer bewusst abgeschaltet. */
 export type PukalaniChromeNavConfig = Record<string, PukalaniChromeNavEntry | false>
 export type PukalaniChromeUtilityConfig = Record<string, PukalaniChromeUtility | false>
+export type PukalaniChromeAuthorActionConfig = Record<string, PukalaniChromeAuthorAction | false>

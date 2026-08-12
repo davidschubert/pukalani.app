@@ -2,7 +2,7 @@ import type { PukalaniAdminModule } from '../shared/types/admin-module'
 import type { PukalaniAdminNoticeConfig } from '../shared/types/admin-notice'
 import type { PukalaniAuthNoticeConfig } from '../shared/types/auth-notice'
 import type { PukalaniSettingsTab } from '../shared/types/settings-tab'
-import type { PukalaniChromeNavConfig, PukalaniChromeUtilityConfig } from '../shared/types/chrome'
+import type { PukalaniChromeAuthorActionConfig, PukalaniChromeNavConfig, PukalaniChromeUtilityConfig } from '../shared/types/chrome'
 
 export default defineAppConfig({
   // pukalani.* Config-Gates: Core-Default ist IMMER aus — Apps aktivieren explizit.
@@ -118,6 +118,17 @@ export default defineAppConfig({
         // kommen aus den Produkt-Layern.
         notifications: { component: 'NotificationBell', order: 40, requiresAuth: true },
       } as PukalaniChromeUtilityConfig,
+      /**
+       * Aktionen neben einem AUTORENNAMEN (F56) — gerendert von
+       * `CoreAuthorActions` aus den Kopfzeilen der Produkte, die Autorenzeilen
+       * besitzen (heute posts und comments), NICHT vom Layout.
+       *
+       * Core trägt hier bewusst nichts ein: es gibt keine Handlung an einem
+       * fremden Namen, die das Fundament anzubieten hätte. Bleibt die Map
+       * leer, rendert `CoreAuthorActions` kein einziges Element — eine App
+       * ohne messages sieht ihre Autorenzeilen unverändert.
+       */
+      authorActions: {} as PukalaniChromeAuthorActionConfig,
       /** Footer-Link auf /changelog — der admin-Layer (Besitzer der Seite)
        *  schaltet ihn an; Apps können ihn wieder abschalten (platform). */
       changelogLink: false,
