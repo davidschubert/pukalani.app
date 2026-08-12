@@ -25,6 +25,24 @@ useReveal()
 const base = `marketing.vs.items.${slug}`
 const name = computed(() => t(`${base}.name`))
 
+/**
+ * Der Branding-Block (U17, Benchmark K2/V3). Zwei Bausteine, von denen je
+ * nach Anbieter EINER leer sein darf — und genau das ist der Punkt:
+ *
+ * - `quote` ist ein WÖRTLICHES Rezensions-Zitat mit Name und Datum. Für Skool
+ *   steht im Benchmark kein solches Zitat (nur ein Halbsatz ohne Herkunft),
+ *   also steht dort keins — lieber eine Lücke als ein Beleg, der keiner ist.
+ * - `line` ist eine belegte TATSACHE von der Preisseite des Anbieters. Für
+ *   Mighty Networks gibt der Benchmark zum Branding keine her, also fehlt sie
+ *   dort.
+ *
+ * Zitate laufen bewusst NICHT durch die Übersetzung: sie stehen in beiden
+ * Sprachen im englischen Original. Übersetzt ist nur der Rahmen.
+ */
+const brandingQuote = computed(() => t(`${base}.branding.quote`))
+const brandingLine = computed(() => t(`${base}.branding.line`))
+const brandingSource = computed(() => t(`${base}.branding.source`))
+
 const ctaLinks = computed(() => [
   { to: start, color: 'primary' as const, size: 'xl' as const, label: t('marketing.hero.ctaPrimary') },
   {
@@ -82,6 +100,29 @@ useMarketingSeo({
     <FeeCalculator :highlight="slug" />
 
     <section class="mkt-section tone-dawn-hold">
+      <div class="mkt-inner mkt-narrow" data-reveal>
+        <h2 class="mkt-h2">{{ t('marketing.vs.brandingTitle') }}</h2>
+        <!-- Zitat als <blockquote> mit <cite>: das ist die Bauform, die eine
+             Vorlesehilfe als fremde Rede ansagt — und die einzige, in der die
+             Quelle am Zitat klebt statt daneben zu liegen. -->
+        <figure v-if="brandingQuote" class="vs-quote">
+          <blockquote>{{ brandingQuote }}</blockquote>
+          <figcaption><cite>{{ brandingSource }}</cite></figcaption>
+        </figure>
+        <p v-if="brandingLine" class="vs-fact">{{ brandingLine }}</p>
+        <p v-if="brandingLine && !brandingQuote" class="vs-source">{{ brandingSource }}</p>
+        <p class="vs-fact">{{ t('marketing.vs.brandingFact') }}</p>
+        <UAlert
+          color="primary" variant="subtle" icon="i-ph-paint-brush-bold"
+          :description="t('marketing.vs.brandingUs')"
+          class="mt-6"
+          :ui="{ description: 'text-base/relaxed opacity-100' }"
+        />
+        <p class="vs-source">{{ t('marketing.vs.brandingAsOf') }}</p>
+      </div>
+    </section>
+
+    <section class="mkt-section tone-dawn-hold">
       <UPageGrid as="div" class="mkt-inner mkt-narrow gap-5 sm:grid-cols-1 lg:grid-cols-2" data-reveal>
         <UPageCard as="article" :description="t(`${base}.whenThem`)">
           <template #title>
@@ -121,5 +162,36 @@ useMarketingSeo({
   width: 34rem;
   height: 34rem;
   opacity: 0.6;
+}
+
+/* Das Zitat trägt eine Akzentkante links — dieselbe Geste wie die
+   hervorgehobene `UPageCard` weiter unten, damit fremde Rede optisch als
+   eingelegtes Zitat lesbar ist und nicht als unser eigener Satz. */
+.vs-quote {
+  margin-top: 1.75rem;
+  border-left: 3px solid var(--ui-color-primary-500);
+  padding-left: 1.1rem;
+}
+.vs-quote blockquote {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  font-style: italic;
+  color: hsl(var(--puka-ink));
+}
+.vs-quote figcaption {
+  margin-top: 0.55rem;
+  font-size: 0.85rem;
+  color: hsl(var(--puka-ink-soft) / 0.85);
+}
+.vs-quote cite { font-style: normal; }
+.vs-fact {
+  margin-top: 1.1rem;
+  font-size: 1rem;
+  color: hsl(var(--puka-ink-soft));
+}
+.vs-source {
+  margin-top: 0.7rem;
+  font-size: 0.85rem;
+  color: hsl(var(--puka-ink-soft) / 0.8);
 }
 </style>

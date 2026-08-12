@@ -641,7 +641,12 @@
           "sub": "The lean, privacy-close alternative — for communities that don't need a whole suite.",
           "intro": "Circle is powerful: a broad suite, automations, scale. For small and mid-sized communities that's often more than they need – and pricier than they want. Pukalani bets on a few well-made products, hosting in Germany and a predictable price with no transaction fee.",
           "whenThem": "You need a broad suite with lots of automations, native mobile apps with push, or you're scaling to very large memberships with enterprise requirements. Circle gives you more surface there.",
-          "whenUs": "You want your own community home under your name, hosted in Germany, without ad tracking and without transaction fees – and you only want to switch on the products you actually use."
+          "whenUs": "You want your own community home under your name, hosted in Germany, without ad tracking and without transaction fees – and you only want to switch on the products you actually use.",
+          "branding": {
+            "quote": "Only comes with one template making all Circle communities look very homogenous and restricted in customizations.",
+            "source": "Jessa B. on Capterra, 12 Jan 2023 · pricing: circle.so/pricing",
+            "line": "Circle's own branding only disappears on the $199 a month plan."
+          }
         },
         "skool": {
           "name": "Skool",
@@ -651,7 +656,12 @@
           "sub": "Community and courses under your brand — without a cut of your revenue.",
           "intro": "Skool is deliberately simple and strong on gamification. Entry is cheap, but on the Hobby plan it costs you 10% of your revenue. Pukalani takes no transaction fee, hosts in Germany, and lets you decide on design, domain and products yourself.",
           "whenThem": "You like the gamified, highly guided approach, want zero setup worries, and it's fine that your community looks like Skool. Then Skool is fast and coherent.",
-          "whenUs": "Your community should look and be named like YOU, your revenue stays fully yours, and privacy isn't just a checkbox. Plus you want to embed comments or events into your existing website."
+          "whenUs": "Your community should look and be named like YOU, your revenue stays fully yours, and privacy isn't just a checkbox. Plus you want to embed comments or events into your existing website.",
+          "branding": {
+            "quote": "",
+            "source": "skool.com/pricing and help.skool.com",
+            "line": "At Skool your own address is part of the pricier plan: Hobby at $9 and Pro at $99 differ mainly in the fee rate and exactly that address. Changing the address later costs $100."
+          }
         },
         "mighty-networks": {
           "name": "Mighty Networks",
@@ -661,9 +671,18 @@
           "sub": "Modular instead of a suite — your community, your design, your data in Germany.",
           "intro": "Mighty Networks brings community, courses and events together, mobile apps included. That's strong if you want the full breadth. Pukalani is the lean counter-proposal: only the products you need, hosted in Germany, no transaction fee – and individual products are embeddable in your own website.",
           "whenThem": "You need native mobile apps with push and the full breadth of an established suite, including big reach features. Mighty delivers more there.",
-          "whenUs": "You want to start lean, pay predictably, host in Germany and decide yourself which products are even visible – without ballast you never open."
+          "whenUs": "You want to start lean, pay predictably, host in Germany and decide yourself which products are even visible – without ballast you never open.",
+          "branding": {
+            "quote": "The branding capabilities are very subpar… I wish there were more flexibility with what you could do to design the landing pages.",
+            "source": "Marlena B. on Capterra, 29 Jul 2021",
+            "line": ""
+          }
         }
-      }
+      },
+      "brandingTitle": "Whose look is it?",
+      "brandingUs": "There is no \"Powered by Pukalani\" on your community and no foreign logo – on no plan, because there is nothing to switch off. The theme catalogue, your own fonts and your base colour are included from the first plan; a custom domain from Pro.",
+      "brandingFact": "Elsewhere, removing the platform's branding is a plan feature: at Circle only on the $199 plan, at Bettermode only from Growth at $1,500.",
+      "brandingAsOf": "Quotes in the original, collected on 10 August 2026."
     },
     "pricing": {
       "kicker": "Pricing",
