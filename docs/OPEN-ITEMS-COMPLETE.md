@@ -29,6 +29,26 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### AH-4 — Cutover control. → admin. ✅ 2026-08-12
+
+Die Betreiber-Konsole heißt admin.pukalani.app; control. antwortet 301 mit
+Pfad+Query. BEWUSST als Alias-Cutover statt Site-Umzug (die studio→control-
+pm2-Falle war die Lehre): ploi-Site/Verzeichnis/Prozess behalten den Namen
+control.pukalani.app als Infra-Anker, deploy.yml trennt Site (rsync) von
+Probe-Host (Serien-Probe gegen admin.). Die 301-Middleware ist app-eigen —
+der Agent belegte DREI stille Brüche, die der tenancy-Config-Weg verursacht
+hätte (Konto-Menü, Glocken-Publikum, Trichter-Ereignisse). Zertifikat per
+acme.sh/DNS-01 mit automatischer Verlängerung inkl. ploi-Upload-Hook;
+Stripe-Webhook per API umgehängt. Details/Messwerte: ADMIN-CUTOVER.md.
+
+**Gelernt:** (1) ploi-HTTP-01 scheitert für ALIASE wirklich (zweimal
+gemessen) — der Token-Weg (acme.sh dns_cf + ploi-Custom-Upload + Renew-Hook)
+ist jetzt das wiederverwendbare Rezept. (2) Cloudflare vor ploi.io blockt
+python-urllib (1010) — curl mit Browser-UA. (3) Der Deploy-Gate-Skip trat
+zum DRITTEN Mal auf; der Krümel steht auf Hoch. (4) Cloudflare-Token-Werte
+sind nach der Erstellung NIE wieder einsehbar — und bestehende Tokens nie
+„rollen", einer davon verlängert das Kunden-Wildcard.
+
 ### AH-7 — Der konto-weite @handle ✅ 2026-08-12
 
 Eine Pukalani-ID = EIN Handle überall: `account_handles` (system-031, Unique
