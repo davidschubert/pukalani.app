@@ -6,14 +6,12 @@
     },
     "nav": {
       "overview": "Übersicht",
-      "users": "Benutzer",
       "comments": "Kommentare",
       "config": "Konfiguration",
       "storage": "Speicher",
       "system": "System",
       "admin": "Admin",
-      "audit": "Aktivitätsprotokoll",
-      "homepage": "Zur Website",
+      "homepage": "Zur Startseite",
       "people": "Personen",
       "products": "Produkte",
       "communitySettings": "Community-Einstellungen",
@@ -23,7 +21,7 @@
         "management": "Management",
         "website": "Website",
         "products": "Produkte",
-        "branding": "Branding",
+        "branding": "Gestaltung",
         "settings": "Einstellungen"
       }
     },
@@ -82,7 +80,7 @@
       "today": "Heute"
     },
     "audit": {
-      "title": "Aktivitätsprotokoll",
+      "title": "Protokoll",
       "empty": "Noch keine Admin-Aktivität aufgezeichnet.",
       "col": {
         "user": "Admin",
@@ -130,8 +128,8 @@
           "deleted": "hat einen Changelog-Eintrag gelöscht"
         },
         "gdpr_export": {
-          "downloaded": "GDPR-Export heruntergeladen",
-          "deleted": "GDPR-Export gelöscht"
+          "downloaded": "DSGVO-Export heruntergeladen",
+          "deleted": "DSGVO-Export gelöscht"
         },
         "theme": {
           "created": "Theme erstellt",
@@ -229,7 +227,7 @@
       "exportFailedDesc": "Es wurde nichts heruntergeladen. Versuch es noch einmal — am Konto selbst hat sich nichts geändert.",
       "deleteUser": "Account löschen",
       "deleted": "Benutzer gelöscht.",
-      "deletedDesc": "Der Daten-Snapshot liegt noch 30 Tage unter „GDPR-Exporte“.",
+      "deletedDesc": "Der Daten-Snapshot liegt noch 30 Tage unter „DSGVO-Exporte“.",
       "lastAdmin": "Es muss immer mindestens ein Admin übrig bleiben.",
       "lastAdminDesc": "Mach zuerst eine andere Person zum Admin — danach lässt sich diese Rolle abgeben.",
       "deletionIncomplete": "Nur teilweise gelöscht — der Account ist gesperrt.",
@@ -459,7 +457,7 @@
       "viewingPage": "{count} andere sehen diese Seite gerade"
     },
     "gdprExports": {
-      "title": "GDPR-Exporte",
+      "title": "DSGVO-Exporte",
       "hint": "Pre-Delete-Snapshots gelöschter Accounts — bei jeder Account-Löschung automatisch erstellt, nach 30 Tagen automatisch entfernt.",
       "empty": "Keine Snapshots vorhanden.",
       "emptyTitle": "Keine Snapshots",

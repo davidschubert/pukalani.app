@@ -32,21 +32,21 @@
       "rateLimited": "Too many comments in a short time. Please try again in a moment."
     },
     "embedAdmin": {
-      "title": "Embed sites",
+      "title": "Embedder domains",
       "subtitle": "Registered embedder domains of the comment widget: only these websites may embed the widget (frame-ancestors CSP). Changes apply immediately.",
-      "new": "New site",
+      "new": "New domain",
       "empty": "No embedder domains registered yet.",
-      "created": "Site registered",
+      "created": "Domain registered",
       "createdHint": "The domain is live right away — the widget can be embedded there from now on.",
-      "createFailed": "Could not register site",
+      "createFailed": "Could not register domain",
       "createFailedHint": "Most likely causes: the domain is already registered, or it was not given as a plain hostname (no https://, no path).",
-      "enabled": "Site enabled",
-      "disabled": "Site disabled",
+      "enabled": "Domain enabled",
+      "disabled": "Domain disabled",
       "disabledHint": "Existing embeds on this domain stop showing comments immediately.",
-      "updateFailed": "Could not update site",
+      "updateFailed": "Could not update domain",
       "updateFailedHint": "The switch is back where it was. Reload the page and try again.",
-      "deleted": "Site deleted",
-      "deleteFailed": "Could not delete site",
+      "deleted": "Domain deleted",
+      "deleteFailed": "Could not delete domain",
       "deleteFailedHint": "The domain is still registered. Reload the page and try again.",
       "confirmDeleteTitle": "Delete embedder domain?",
       "confirmDeleteText": "{host} will no longer be allowed to embed the widget. This takes effect immediately.",
@@ -149,7 +149,7 @@
   },
   "admin": {
     "nav": {
-      "embedSites": "Embed sites"
+      "embedSites": "Embedder domains"
     }
   }
 }

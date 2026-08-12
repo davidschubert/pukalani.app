@@ -69,7 +69,6 @@
     },
     "networkError": "Server unreachable — please try again later.",
     "verification": {
-      "bannerTitle": "Please confirm your email address",
       "bannerMessage": "We sent you a confirmation link. We can only email you once your address is confirmed.",
       "resend": "Resend link",
       "later": "Later",

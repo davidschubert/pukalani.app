@@ -1,12 +1,12 @@
 {
   "admin": {
     "nav": {
-      "tickets": "Board"
+      "tickets": "Tasks"
     }
   },
   "tickets": {
     "board": {
-      "title": "Ticket board",
+      "title": "Tasks",
       "subtitle": "Triage feedback, plan tickets, track delivery",
       "addList": "Add another list",
       "listTitlePlaceholder": "List title …",

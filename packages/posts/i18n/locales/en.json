@@ -112,7 +112,7 @@
       "retitleHint": "You cannot change the text here — only the title and the category."
     },
     "moderation": {
-      "title": "Feed posts",
+      "title": "Moderate posts",
       "queue": "Scheduled posts",
       "recent": "Recent posts",
       "empty": "No posts.",
@@ -467,7 +467,7 @@
   },
   "admin": {
     "nav": {
-      "posts": "Feed",
+      "posts": "Posts",
       "myPosts": "My posts"
     }
   },

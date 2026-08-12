@@ -54,7 +54,7 @@
         "title": "Appearance",
         "description": "The colour world of this community — everyone visiting your pages sees it.",
         "change": "Change",
-        "pickerTitle": "Community colours",
+        "pickerTitle": "Community colors",
         "inherited": "Nothing chosen yet (default)",
         "propagation": "A new colour reaches every page within half a minute.",
         "saved": "Appearance saved.",
@@ -386,7 +386,7 @@
       "hints": {
         "visibility": "Public by default: your content is readable by anyone and found by search engines. \"Members only\" is a switch in the settings — it also takes everything published so far out of public view.",
         "trial": "The trial runs for 14 days, with everything Pro can do. After that your community is read-only until you pick a plan — nothing is deleted.",
-        "settings": "Name, address, colours and home page can be changed any time in your community's dashboard."
+        "settings": "Name, address, colors and home page can be changed any time in your community's dashboard."
       }
     },
     "validation": {
@@ -448,7 +448,7 @@
           "hint": "Say hello and explain in three sentences what this place is for."
         },
         "branding": {
-          "label": "Pick your colours",
+          "label": "Pick your colors",
           "hint": "Colour and type turn an address into your place."
         },
         "invite": {

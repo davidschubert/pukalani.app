@@ -8,7 +8,7 @@
       "title": "Theme wählen",
       "variants": "Farbvariation"
     },
-    "modeLabel": "Erscheinungsbild",
+    "modeLabel": "Hell & dunkel",
     "appearance": {
       "light": "Hell",
       "dark": "Dunkel",
@@ -48,7 +48,7 @@
       "customGroup": "Eigene"
     },
     "customize": {
-      "navLabel": "Branding",
+      "navLabel": "Theme-Katalog",
       "title": "Theme anpassen",
       "gallery": "Theme-Galerie",
       "galleryHint": "Klick auf eine Zeile wechselt das Theme live — Varianten über die Farbpunkte. Die Auswahl gilt für DEINEN Browser (Cookie), wie im Anzeige-Menü.",

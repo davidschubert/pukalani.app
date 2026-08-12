@@ -22,7 +22,7 @@
       "loginBlocked": "Dein Browser blockiert die Anmeldung im eingebetteten Widget.",
       "openSite": "Direkt auf unserer Seite kommentieren",
       "notRegisteredTitle": "Diese Website ist nicht freigeschaltet",
-      "notRegisteredText": "Das Kommentar-Widget ist für diese Domain oder diesen Inhaltstyp nicht registriert. Betreiber schalten Domains im Dashboard unter „Embed-Sites“ frei."
+      "notRegisteredText": "Das Kommentar-Widget ist für diese Domain oder diesen Inhaltstyp nicht registriert. Betreiber schalten Domains im Dashboard unter „Einbetter-Domains“ frei."
     },
     "guest": {
       "badge": "Gast",
@@ -32,21 +32,21 @@
       "rateLimited": "Zu viele Kommentare in kurzer Zeit. Bitte versuch es gleich noch einmal."
     },
     "embedAdmin": {
-      "title": "Embed-Sites",
+      "title": "Einbetter-Domains",
       "subtitle": "Registrierte Einbetter-Domains des Kommentar-Widgets: nur diese Websites dürfen das Widget einbetten (frame-ancestors-CSP). Änderungen greifen sofort.",
-      "new": "Neue Site",
+      "new": "Neue Domain",
       "empty": "Noch keine Einbetter-Domains registriert.",
-      "created": "Site registriert",
+      "created": "Domain registriert",
       "createdHint": "Die Domain ist sofort freigeschaltet — das Widget lässt sich dort ab jetzt einbetten.",
-      "createFailed": "Site konnte nicht registriert werden",
+      "createFailed": "Domain konnte nicht registriert werden",
       "createFailedHint": "Häufigste Ursachen: Die Domain ist schon registriert, oder sie steht nicht als reiner Hostname da (ohne https:// und ohne Pfad).",
-      "enabled": "Site aktiviert",
-      "disabled": "Site deaktiviert",
+      "enabled": "Domain aktiviert",
+      "disabled": "Domain deaktiviert",
       "disabledHint": "Bestehende Einbindungen auf dieser Domain zeigen ab sofort keine Kommentare mehr.",
-      "updateFailed": "Site konnte nicht aktualisiert werden",
+      "updateFailed": "Domain konnte nicht aktualisiert werden",
       "updateFailedHint": "Der Schalter steht wieder wie vorher. Lade die Seite neu und versuch es noch einmal.",
-      "deleted": "Site gelöscht",
-      "deleteFailed": "Site konnte nicht gelöscht werden",
+      "deleted": "Domain gelöscht",
+      "deleteFailed": "Domain konnte nicht gelöscht werden",
       "deleteFailedHint": "Die Domain ist weiter registriert. Lade die Seite neu und versuch es noch einmal.",
       "confirmDeleteTitle": "Einbetter-Domain löschen?",
       "confirmDeleteText": "{host} darf das Widget danach nicht mehr einbetten. Das wirkt sofort.",
@@ -149,7 +149,7 @@
   },
   "admin": {
     "nav": {
-      "embedSites": "Embed-Sites"
+      "embedSites": "Einbetter-Domains"
     }
   }
 }

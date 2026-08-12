@@ -8,14 +8,14 @@
       "title": "Choose a theme",
       "variants": "Color variation"
     },
-    "modeLabel": "Appearance",
+    "modeLabel": "Light & dark",
     "appearance": {
       "light": "Light",
       "dark": "Dark",
       "system": "System"
     },
     "fonts": {
-      "navLabel": "Typefaces",
+      "navLabel": "Fonts",
       "title": "Custom fonts",
       "add": "Add font",
       "edit": "Edit font",
@@ -48,9 +48,9 @@
       "customGroup": "Custom"
     },
     "customize": {
-      "navLabel": "Branding",
+      "navLabel": "Theme catalog",
       "title": "Customize theme",
-      "gallery": "Theme Gallery",
+      "gallery": "Theme gallery",
       "galleryHint": "Clicking a row switches the theme live — variants via the color dots. The choice applies to YOUR browser (cookie), like the display menu.",
       "previewLockedTitle": "Live preview not available here",
       "previewLockedText": "On a community's own host its colour world applies to every visitor — a theme cookie is not read there. Creating, editing, the default setting and ordering still work; use an instance host to try themes out.",
@@ -130,7 +130,7 @@
       "keepEditing": "Keep editing",
       "random": "Random color",
       "sectionColors": "Colors",
-      "sectionFonts": "Typefaces",
+      "sectionFonts": "Fonts",
       "advanced": "Advanced",
       "curves": "Curve profile: lightness (L), chroma (C), hue (H) — dot = anchor shade",
       "tintedNeutral": "Tint surfaces with theme color",

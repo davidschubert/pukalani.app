@@ -2,7 +2,7 @@
   "feedback": {
     "cta": "Feedback",
     "nav": {
-      "section": "Customer Feedback",
+      "section": "Feedback",
       "feedback": "Feedback",
       "roadmap": "Roadmap",
       "changelog": "Changelog"
@@ -50,7 +50,7 @@
       "commentMax": "Comment is too long (max. 1,000 characters)."
     },
     "list": {
-      "title": "Customer Feedback",
+      "title": "Feedback",
       "refresh": "Reload",
       "vote": "Vote for this",
       "fromCommunities": "from {count} communities",

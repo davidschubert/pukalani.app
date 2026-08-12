@@ -1,12 +1,12 @@
 {
   "admin": {
     "nav": {
-      "tickets": "Board"
+      "tickets": "Aufgaben"
     }
   },
   "tickets": {
     "board": {
-      "title": "Ticket-Board",
+      "title": "Aufgaben",
       "subtitle": "Feedback sichten, Tickets planen, Umsetzung verfolgen",
       "addList": "Eine weitere Liste hinzufügen",
       "listTitlePlaceholder": "Listen-Titel …",

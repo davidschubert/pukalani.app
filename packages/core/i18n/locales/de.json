@@ -69,7 +69,6 @@
     },
     "networkError": "Server nicht erreichbar — bitte später erneut versuchen.",
     "verification": {
-      "bannerTitle": "Bitte bestätige deine E-Mail-Adresse",
       "bannerMessage": "Wir haben dir einen Bestätigungslink geschickt. Erst nach der Bestätigung können wir dir E-Mails zustellen.",
       "resend": "Link erneut senden",
       "later": "Später",

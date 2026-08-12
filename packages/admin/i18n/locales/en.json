@@ -6,14 +6,12 @@
     },
     "nav": {
       "overview": "Overview",
-      "users": "Users",
       "comments": "Comments",
       "config": "Configuration",
       "storage": "Storage",
       "system": "System",
       "admin": "Admin",
-      "audit": "Activity log",
-      "homepage": "View site",
+      "homepage": "Go to home page",
       "people": "People",
       "products": "Products",
       "communitySettings": "Community settings",
@@ -23,7 +21,7 @@
         "management": "Management",
         "website": "Website",
         "products": "Products",
-        "branding": "Branding",
+        "branding": "Design",
         "settings": "Settings"
       }
     },
@@ -82,7 +80,7 @@
       "today": "Today"
     },
     "audit": {
-      "title": "Activity log",
+      "title": "Audit log",
       "empty": "No admin activity recorded yet.",
       "col": {
         "user": "Admin",

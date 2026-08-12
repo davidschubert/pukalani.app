@@ -112,7 +112,7 @@
       "retitleHint": "Den Text kannst du hier nicht ändern — nur Titel und Einordnung."
     },
     "moderation": {
-      "title": "Feed-Beiträge",
+      "title": "Beiträge moderieren",
       "queue": "Geplante Beiträge",
       "recent": "Neueste Beiträge",
       "empty": "Keine Beiträge.",
@@ -467,7 +467,7 @@
   },
   "admin": {
     "nav": {
-      "posts": "Feed",
+      "posts": "Beiträge",
       "myPosts": "Meine Beiträge"
     }
   },
