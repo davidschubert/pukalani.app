@@ -258,6 +258,22 @@ const studio = computed(() => ({
         :billing-period="studio.billingPeriod"
         :button="studio.button"
       />
+
+      <!--
+        DER TESTPHASEN-SATZ (U17, Benchmark V5) — er steht GENAU EINMAL auf
+        der Seite, und zwar hier: unter den Preisen, wo die Frage entsteht,
+        die der Kopf offen lässt („14 Tage kostenlos … und danach?").
+
+        Er ist am Code geprüft und nicht geschönt: nach der Testphase greift
+        die `billing`-Sperre (F49/M13), und die friert AUSSCHLIESSLICH Inhalte
+        ein — die Community wird nur-lesend, gelöscht wird nichts. Genau so
+        steht es da. Wer ihn ändert, ändert eine Zusage über das Verhalten der
+        Software, nicht einen Werbesatz.
+
+        NICHT auf jeder Seite wiederholt: die zweite und letzte Stelle, an der
+        die Testphase erklärt wird, ist die Preis-Antwort der FAQ.
+      -->
+      <p class="pricing-trial">{{ t('marketing.pricing.trialNote') }}</p>
     </div>
 
     <!-- „Karten für die Entscheidung, Tabelle für den Zweifler" (U10,
@@ -276,4 +292,10 @@ const studio = computed(() => ({
    (siehe `pricingPlan` in app/app.config.ts). */
 .pricing-head { text-align: center; }
 .pricing-head .mkt-lead { margin-inline: auto; }
+.pricing-trial {
+  margin-top: 1.5rem;
+  text-align: center;
+  font-size: 0.95rem;
+  color: hsl(var(--puka-ink-soft));
+}
 </style>

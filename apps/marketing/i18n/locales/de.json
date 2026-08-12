@@ -380,7 +380,7 @@
         },
         {
           "term": "Datenexport",
-          "def": "Deine Inhalte und Mitgliederdaten in einem maschinenlesbaren Paket. Er ist der Grund, warum ein Wechsel zu uns keine Einbahnstraße ist."
+          "def": "Deine Daten in einer maschinenlesbaren Datei. Heute holt sich jedes Konto seine eigenen Daten selbst als JSON; ein Export der ganzen Community auf Knopfdruck fehlt noch. Er ist der Grund, warum ein Wechsel zu uns keine Einbahnstraße ist."
         }
       ],
       "ctaTitle": "Genug gelesen?",
@@ -740,7 +740,8 @@
           "desc": "Eigene Instanz, eigene Domain – mit Beratung, Strategie, Konzeption, Design und technischer Umsetzung aus einer Hand.",
           "cta": "Interesse anmelden"
         }
-      }
+      },
+      "trialNote": "Nach der Testphase wird nichts gelöscht – deine Community wird nur-lesend, bis du dich entscheidest."
     },
     "faq": {
       "kicker": "Häufige Fragen",
@@ -756,7 +757,7 @@
         },
         {
           "q": "Was kostet es?",
-          "a": "Personal kostet 29 € und Pro 149 € im Monat – Endpreise inkl. 19 % MwSt.; wer jährlich zahlt, bekommt drei Monate geschenkt. Jede neue Community startet mit 14 Tagen Pro zum Ausprobieren; danach braucht sie einen Plan, sonst ist sie nur noch zum Lesen. Mitmachen – Konto anlegen, kommentieren, beitreten – kostet nie etwas. Enterprise ist das begleitete Projekt mit Pukalani Studio; aktuell läuft ein Early Access auf Einladung."
+          "a": "Personal kostet 29 € und Pro 149 € im Monat – Endpreise inkl. 19 % MwSt.; wer jährlich zahlt, bekommt drei Monate geschenkt. Jede neue Community startet mit 14 Tagen Pro zum Ausprobieren; danach braucht sie einen Plan; gelöscht wird dabei nichts, die Community ist dann nur noch zum Lesen. Mitmachen – Konto anlegen, kommentieren, beitreten – kostet nie etwas. Enterprise ist das begleitete Projekt mit Pukalani Studio; aktuell läuft ein Early Access auf Einladung."
         },
         {
           "q": "Kann ich jederzeit kündigen?",
@@ -769,6 +770,10 @@
         {
           "q": "Muss ich alle Produkte nutzen?",
           "a": "Nein – jedes Produkt ist an- und abschaltbar. Du startest schlank und ergänzt, was du brauchst."
+        },
+        {
+          "q": "Komme ich mit meinen Daten wieder raus?",
+          "a": "Ja, und zwar selbst: Jedes Konto lädt seine eigenen Daten als JSON-Datei herunter, darunter Profil und Sitzungen, Beiträge, Kommentare, private Nachrichten, Kursfortschritt, Zu- und Absagen zu Terminen, Benachrichtigungen und Abo-Daten. Der Knopf sitzt in den Konto-Einstellungen unter „Daten\"; niemand muss dafür bei uns nachfragen. Was es heute noch nicht gibt: einen gebündelten Export der ganzen Community auf Knopfdruck. Wenn du umziehst, stellen wir ihn von Hand zusammen – das sagen wir dir lieber ehrlich, als eine Schaltfläche zu behaupten, die es nicht gibt. Dein Konto löschst du ebenfalls selbst; Beiträge und Kommentare bleiben danach als leerer Platzhalter stehen, damit die Diskussionen anderer nicht zerreißen."
         }
       ],
       "metaTitle": "Häufige Fragen zu Pukalani – Datenschutz, Preise, Umzug",

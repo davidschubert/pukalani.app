@@ -191,7 +191,7 @@ export const VS_SLUGS = ['circle', 'skool', 'mighty-networks'] as const
  * MÜSSEN deckungsgleich sein — Google verlangt, dass eine ausgezeichnete
  * Antwort auch im Seiteninhalt steht.
  */
-export const FAQ_COUNT = 6
+export const FAQ_COUNT = 7
 
 export type VsSlug = (typeof VS_SLUGS)[number]
 

@@ -380,7 +380,7 @@
         },
         {
           "term": "Data export",
-          "def": "Your content and member data in a machine-readable package. It's the reason switching to us isn't a one-way street."
+          "def": "Your data in a machine-readable file. Today every account downloads its own data as JSON; a one-click export of a whole community is not there yet. It is the reason switching to us is not a one-way street."
         }
       ],
       "ctaTitle": "Read enough?",
@@ -740,7 +740,8 @@
           "desc": "Your own instance, your own domain – with consultation, strategy, concept, design, and technical implementation from one hand.",
           "cta": "Register interest"
         }
-      }
+      },
+      "trialNote": "Nothing is deleted when the trial ends – your community becomes read-only until you decide."
     },
     "faq": {
       "kicker": "Common questions",
@@ -756,7 +757,7 @@
         },
         {
           "q": "What does it cost?",
-          "a": "Personal is €29 and Pro €149 per month – final prices incl. 19 % VAT; pay yearly and you get three months free. Every new community starts with 14 days of Pro to try things out; after that it needs a plan, otherwise it becomes read-only. Taking part – creating an account, commenting, joining – never costs anything. Enterprise is the guided project with Pukalani Studio; right now there's an early access by invitation."
+          "a": "Personal is €29 and Pro €149 per month – final prices incl. 19 % VAT; pay yearly and you get three months free. Every new community starts with 14 days of Pro to try things out; after that it needs a plan; nothing is deleted, the community just becomes read-only. Taking part – creating an account, commenting, joining – never costs anything. Enterprise is the guided project with Pukalani Studio; right now there's an early access by invitation."
         },
         {
           "q": "Can I cancel anytime?",
@@ -769,6 +770,10 @@
         {
           "q": "Do I have to use all products?",
           "a": "No – every product can be switched on or off. Start lean and add what you need."
+        },
+        {
+          "q": "Can I get my data back out?",
+          "a": "Yes, and you do it yourself: every account downloads its own data as a JSON file, including profile and sessions, posts, comments, private messages, course progress, event RSVPs, notifications and subscription data. The button sits in your account settings under \"Data\"; nobody has to ask us for it. What does not exist yet: a one-click bundled export of a whole community. If you are moving, we put it together by hand – we would rather tell you that honestly than claim a button that is not there. You can delete your account yourself too; posts and comments then remain as an empty placeholder so other people's discussions do not fall apart."
         }
       ],
       "metaTitle": "Frequently asked questions – privacy, pricing, switching",
