@@ -9,6 +9,21 @@ export default defineAppConfig({
   // }
   pukalani: {
     /**
+     * DER NAME, DEN DER BESUCHER SIEHT (2026-08-12).
+     *
+     * `useBrandName()` im Core geht die Kette Mandanten-Name → App-Marke →
+     * Rückfall „Pukalani". Diese Site ist ein Silo, hat also keinen
+     * Mandanten-Namen — und ohne diesen Eintrag stand im Tab-Titel jeder
+     * CMS-Seite „Impressum · **Pukalani**", während Fußzeile, Structured Data
+     * und `og:site_name` überall „Pukalani Studio" sagen. Der Rückfall ist der
+     * PLATTFORM-Name; die Marke DIESER Site ist das Studio.
+     *
+     * Wirkt auf Seitentitel und Social-Tags (useBrandTitle) sowie auf die
+     * Fehlerseite (CoreErrorPage). Kopf- und Fußzeile tragen ihre eigene
+     * Wortmarke und bleiben unberührt.
+     */
+    brand: { name: 'Pukalani Studio' },
+    /**
      * SEO-BASIS AUS DEM REQUEST-HOST (control-036, 2026-08-07).
      *
      * Sobald diese Site eine eigene Domain hat, bedient DERSELBE Prozess zwei

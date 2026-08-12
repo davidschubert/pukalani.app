@@ -18,7 +18,7 @@ import type { PublicPage } from '../../../../packages/pages/shared/types/page'
 definePageMeta({ layout: 'site', key: route => route.fullPath })
 
 const route = useRoute()
-const { locale } = useI18n()
+const { t, locale } = useI18n()
 const slug = computed(() => String(route.params.slug ?? ''))
 
 // useRequestFetch statt $fetch: SSR muss den Host-Header weiterreichen
@@ -39,6 +39,32 @@ if (error.value || !page.value) {
 useBrandTitle(() => page.value?.title ?? '', {
   description: () => pageExcerpt(page.value?.body ?? ''),
 })
+
+/**
+ * DAS DATUM DIESER SEITE, NICHT DAS DER SITE.
+ *
+ * Die Fußzeile trägt `CONTACT.lastUpdatedHuman` — den Stand der im CODE
+ * gepflegten Portfolio-Inhalte. Eine CMS-Seite ändert sich aber im
+ * Dashboard, ohne dass jemand eine Datei anfasst; die Fußzeile wies damit
+ * ein Datum aus, das mit dem gelesenen Text nichts zu tun hat. Bei einem
+ * Rechtstext ist genau das die Frage des Lesers („welche Fassung lese
+ * ich?"), deshalb steht das Datum hier an der Seite selbst und kommt aus
+ * `$updatedAt` der Zeile.
+ *
+ * `timeZone: 'UTC'` ist Pflicht, kein Detail: ohne sie rechnet der Server in
+ * seiner Zone und der Browser in seiner — bei einem Zeitpunkt kurz nach
+ * Mitternacht stünden dort zwei verschiedene Tage, und Nuxt meldete einen
+ * Hydration-Mismatch. Aus demselben Grund bewusst ohne Uhrzeit.
+ */
+const updatedHuman = computed<string | null>(() => {
+  const raw = page.value?.updatedAt
+  if (!raw) return null
+  const date = new Date(raw)
+  if (Number.isNaN(date.getTime())) return null
+  return date.toLocaleDateString(locale.value.startsWith('de') ? 'de-DE' : 'en-US', {
+    year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC',
+  })
+})
 </script>
 
 <template>
@@ -50,6 +76,9 @@ useBrandTitle(() => page.value?.title ?? '', {
       <div class="prose cms-page__body">
         <MarkdownContent :source="page.body" />
       </div>
+      <p v-if="updatedHuman" class="cms-page__updated">
+        {{ t('portfolio.page.updated') }} <time :datetime="page.updatedAt">{{ updatedHuman }}</time>
+      </p>
     </article>
   </div>
 </template>
@@ -86,6 +115,13 @@ useBrandTitle(() => page.value?.title ?? '', {
   border-left: 2px solid var(--accent);
   padding-left: 1rem;
   color: var(--text-soft);
+}
+.cms-page__updated {
+  margin-top: clamp(2rem, 4vw, 3rem);
+  padding-top: 1.2rem;
+  border-top: 1px solid var(--line);
+  color: var(--metal);
+  font-size: 0.82rem;
 }
 .cms-page__body :deep(a) {
   color: var(--accent);

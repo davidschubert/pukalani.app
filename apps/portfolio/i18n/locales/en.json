@@ -55,6 +55,9 @@
         "costs": "What does UX/UI design cost?",
         "comparison": "Freelancer or agency?"
       }
+    },
+    "page": {
+      "updated": "Last updated:"
     }
   }
 }
