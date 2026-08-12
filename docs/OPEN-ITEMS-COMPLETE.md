@@ -29,6 +29,32 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### AP4 / U6 — Ein Wort je Sache ✅ 2026-08-13
+
+~110 i18n-Werte in 27 Dateien auf das entschiedene Vokabular gezogen:
+**Plan** (Tarif gestrichen, „Abo" nur Vertragszustand, Reiter+Titel
+„Plan & Rechnung", „Kein Abo — nur zum Lesen") · **Community** statt
+Tenant/Mandant/Site im Betreiber-Menü (Werte, Schlüssel+Pfade bleiben) ·
+Rolle viewer = **Leser/in**/Reader · **Beiträge** statt Feed im Dashboard ·
+Gestaltung/Theme-Katalog/Hell & dunkel (G6) · Aufgaben statt Board ·
+Wünsche & Ideen statt Customer Feedback · Einbetter-Domains statt
+Embed-Sites · DSGVO statt GDPR (de) · en-Satzschreibung/colors/Fonts ·
+3 tote Schlüssel gelöscht. „Schon erledigt vorgefunden" sauber getrennt
+(Basic-Karte, Landing-blocks, Dieser→Dieses Produkt). Bewusst NICHT: alles
+mit Host-Weiche (S8 → neutraler „Zur Startseite"), technische
+tenantId-Wörter, billing.account („Abo" ist dort der Vertrag).
+
+**Flag an David:** noPlanLabel wurde auf den G5-Wortlaut gezogen, obwohl die
+Notiz vom 2026-08-09 den damaligen Wortlaut schützte — F49/Matrix streichen
+„Free Plan" ausdrücklich; Revert wäre eine Zeile.
+
+**Gelernt:** (1) Der lokale Gate-Satz war UNVOLLSTÄNDIG — die CI-Lint fährt
+zusätzlich check:doc-links (und check:themes): drei tote Verweise aus dem
+F3-Archiv-Umzug hielten den Deploy auf. check:doc-links gehört ab jetzt in
+die lokale Runde, und JEDER Datei-Umzug in docs/ zieht seine Verweise mit.
+(2) Das gefixte Deploy-Gate hat sich zweimal bewiesen: einmal ehrlich NEIN
+(Lint rot → kein Deploy) und einmal selbstständig JA nach Warten.
+
 ### AP3 — U5 (Community umbenennbar) + F56 (Nachricht-schreiben-Knopf) ✅ 2026-08-13
 
 **U5:** Karte „Name und Beschreibung" ganz oben auf dem Reiter „Allgemein",
