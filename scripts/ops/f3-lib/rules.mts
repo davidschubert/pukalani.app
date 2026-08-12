@@ -442,6 +442,16 @@ export const TABLE_PLAN: readonly TablePlanEntry[] = [
   { tableId: 'billing_customers', layer: 'billing', action: 'skip', reason: 'Entscheidung (9): Stripe-TESTMODUS, ersatzlos; billing ist in apps/platform nicht montiert' },
   { tableId: 'billing_subscriptions', layer: 'billing', action: 'skip', reason: 'Wie billing_customers' },
   { tableId: 'stripe_settings', layer: 'billing', action: 'skip', reason: 'Wie billing_customers — die Keys werden in Phase 8 widerrufen' },
+  // Beim Inventar-Lauf 2026-08-12 gefunden — fünf Tabellen ohne Plan-Zeile,
+  // alle BETREIBER-Werkzeuge der alten Silo-Instanz, kein Community-Inhalt:
+  // Tickets (Board des Betreibers) und Feedback (seit E10 zentral im Control
+  // Plane, control-032) gehören nicht auf einen Mandanten-Host (N7) — sie
+  // bleiben, wie audit_logs, beim eingefrorenen Projekt.
+  { tableId: 'feedback', layer: 'feedback', action: 'skip', reason: 'Betreiber-Feedback der Alt-Instanz — zentral seit E10 im Control Plane' },
+  { tableId: 'tickets', layer: 'tickets', action: 'skip', reason: 'Betreiber-Board der Alt-Instanz (N7) — bleibt beim eingefrorenen Projekt' },
+  { tableId: 'ticket_lists', layer: 'tickets', action: 'skip', reason: 'Wie tickets' },
+  { tableId: 'ticket_watchers', layer: 'tickets', action: 'skip', reason: 'Wie tickets' },
+  { tableId: 'ticket_files', layer: 'tickets', action: 'skip', reason: 'Wie tickets' },
   { tableId: 'changelog', layer: 'admin', action: 'skip', reason: 'BETREIBER-Inhalt (N7) — gehört nicht auf einen Mandanten-Host' },
 ]
 
