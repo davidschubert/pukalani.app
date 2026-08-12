@@ -29,6 +29,31 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### AP2 / U4 — Die Ankunft in der neuen Community ✅ 2026-08-13
+
+Fünf Teile, live seit 0cce9167 (der Deploy brauchte den vierten Gate-Skip —
+der ist seither GEFIXT, eigener Eintrag): (1) Willkommens-Checkliste mit den
+fünf entschiedenen Punkten (Beitrag · Farbwelt · Einladen · Startseite ·
+Abo), je aus VORHANDENEN Daten berechnet (keine neue Tabelle, keine neue
+Naht), nur team.manage, ausblendbar; (2) Erst-/Wiederkehr-Begrüßung
+(Konto-Alter-Heuristik, 0 Abfragen), Emoji vor leerem Moderationsstapel raus,
+CoreEmptyState statt nacktem Gedankenstrich; (3) „Deine Community steht"-Mail
+(Adresse, Dashboard-Link, account.-Hinweis, Testphasen-Ende — fail-soft, darf
+Links tragen: Bestätigung einer Handlung von eben, kein Scam-Muster);
+(4) Startseiten-Saat in BEIDE Sprachen + S6-Schlüssel-Umbenennung;
+(5) Beispiel-Beitrag im Feed über den neuen core-Vertrag
+`registerCommunityFirstContentProvider` — ableitbare Zeilen-Id
+`wp-<tenantId>` ist zugleich Idempotenz und Wiedererkennung, damit die Saat
+den eigenen Checklisten-Punkt NICHT abhakt (und ein gelöschtes Beispiel den
+Punkt nicht verschenkt: Soft-Delete mitgedacht).
+
+**Gelernt:** (1) Eine Checkliste, deren Saat sich selbst als „erledigt"
+zählt, ist eine Attrappe — Wiedererkennung gehört in die Id, nicht in eine
+Marker-Spalte. (2) Der A14-Wächter hat den direkten posts-Import ZWEIMAL
+gefangen, bevor er ins Repo kam — der Registry-Vertrag war der richtige Weg.
+(3) `billingStatus` gehört in den Mandanten-Kontext: jede Herleitung aus
+plan/trialEndsAt hätte zahlenden Kunden „Abo abschließen" gezeigt.
+
 ### Deploy-Gate-Skip (der eskalierte Krümel) ✅ 2026-08-13
 
 VIER stille Skips an zwei Tagen (AH-3, AH-7, AH-4, AP2): das Gate schaute
