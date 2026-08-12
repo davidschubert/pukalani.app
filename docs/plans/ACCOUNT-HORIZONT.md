@@ -101,7 +101,7 @@ LE-Lineage — admin per DNS-01 NEU, NIE über die Wildcard-Site), Envs, Doku,
 `admin` + `control` in RESERVED_SUBDOMAINS, pm2-Namen. Rein kosmetisch für
 Kunden unsichtbar — Davids bewusste Namensentscheidung.
 
-### AH-5 · master-Community + demo-Vollausbau
+### AH-5 · Freelancer Community + demo-Vollausbau (GEFAHREN 2026-08-12)
 
 Eine RESERVIERTE Pool-Community als Werkstatt (Name offen — „blueprint" ist
 gesperrt, so heißt der Kompositions-Layer): alle Produkte inkl. Early Access
@@ -130,7 +130,7 @@ Auth-Welten: **account** (alle Menschen) und **admin** (Betreiber).
 
 ## Bewusst offen (je beim Bau fragen)
 
-- Name der master-Community (master. / lab. / werkstatt.?).
+- (erledigt) Die Werkstatt heißt freelancer.pukalani.app — „Freelancer Community", offen, pro.
 - Zeitfenster des AH-1-Cutovers (einmalige Kunden-Abmeldung).
 - Plausible-Site für die Kontroll-Hosts (U18: 5 von 7 Trichter-Ereignissen
   schlafen dort) — erst NACH AH-1 anlegen, sonst trüge die Site den alten

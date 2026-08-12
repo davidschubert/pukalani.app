@@ -29,6 +29,23 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### AH-5 — Freelancer Community + demo-Vollausbau ✅ 2026-08-12
+
+Davids Kurskorrektur bei der Anlage: die Werkstatt heißt NICHT master.,
+sondern **freelancer.pukalani.app** („Freelancer Community", Beitritt offen,
+Plan pro) — `master` bleibt deshalb in RESERVED_SUBDOMAINS (die kurze
+Streichung 9701bfa9 wurde noch am selben Abend zurückgenommen, ca7bafdc).
+Angelegt über eine server-seitige Operator-Session (Custom Token → Session →
+`POST /api/control/tenants`; Secrets blieben auf dem Server, alle
+Wegwerf-Sessions danach gelöscht). `demo.` lief bereits auf pro — der
+Vollausbau war schon gegeben. Live: freelancer. antwortet 200 mit Namen im
+SSR-HTML. Kein Deploy nötig (`freelancer` stand nie auf der Sperrliste).
+
+**Gelernt:** Die control-App antwortet in ihren eigenen Routen mit `id`,
+nicht `$id` — ein Skript, das Appwrite-Konventionen erwartet, stolpert nach
+dem ERSTEN Erfolg (Community war angelegt, der Rest des Skripts starb; der
+Nachlauf musste beide Feldnamen können).
+
 ### AH-3 — /profile/activity + Konto-Abrechnung ✅ 2026-08-11
 
 Eigene Aktivität über alle Communities (`/profile/activity`): neuer
