@@ -21,10 +21,17 @@ import type { H3Event } from 'h3'
  * keinen Empfänger. Query degradiert auf leere Menge, solange die Table
  * auf einer Instanz noch nicht existiert (Migration ausstehend).
  *
- * community_handles (Migration 029): Export + Hard-Delete, über ALLE
- * Communities (der Mensch kann in mehreren einen Namen haben) und über beide
- * Status — auch die 'former'-Zeilen, denn ein früherer Name ist genauso ein
- * personenbezogenes Datum wie der aktuelle.
+ * community_handles (Migration 029) + account_handles (Migration 031, AH-7):
+ * Export + Hard-Delete, über ALLE Communities (der Mensch kann im Alt-Bestand
+ * in mehreren einen Namen haben) und über beide Status — auch die
+ * 'former'-Zeilen, denn ein früherer Name ist genauso ein personenbezogenes
+ * Datum wie der aktuelle.
+ *
+ * BEIDE Tabellen, und das ist kein Übergangszustand: seit AH-7 (2026-08-11)
+ * ist `account_handles` die Wahrheit, `community_handles` bleibt als
+ * Alt-Bestand LESBAR (alte Erwähnungen lösen darüber auf). Ein Name in der
+ * einen Tabelle ist genau so personenbezogen wie in der anderen — wer nur die
+ * neue räumte, liesse `@davidschubert` in der alten stehen.
  *
  * DAS GIBT DEN NAMEN WIEDER FREI, und das ist eine bewusste Abwägung gegen
  * Davids Entscheidung 4 („der alte Handle bleibt gesperrt"). Diese Sperre
@@ -41,16 +48,21 @@ type NotificationRow = Models.Row & { recipientId: string, type: string, title: 
 type AuditRow = Models.Row & { actorId: string, actorName: string, action: string, targetId: string, targetName: string, metadata: string, ip: string }
 type ActivityRow = Models.Row & { actorId: string, actorName: string, type: string, objectType: string, objectId: string, link: string, metadata: string, visibility: string }
 type HandleRow = Models.Row & { communityId: string, userId: string, handle: string, handleLower: string, status: string, changedAt: string }
+type AccountHandleRow = Models.Row & { userId: string, handle: string, handleLower: string, status: string, changedAt: string }
 
 const NOTIFICATIONS = 'notifications'
 const AUDIT_LOGS = 'audit_logs'
 const ACTIVITIES = 'activities'
 const HANDLES = 'community_handles'
+const ACCOUNT_HANDLES = 'account_handles'
 
 interface SystemUserDataExport {
   notifications: Array<{ type: string, title: string, body: string, link: string, read: boolean, createdAt: string }>
   activities: Array<{ type: string, objectType: string, objectId: string, link: string, createdAt: string }>
+  /** Alt-Bestand je Community (system-029). */
   handles: Array<{ communityId: string, handle: string, status: string, changedAt: string, createdAt: string }>
+  /** Der konto-weite Name (system-031, AH-7) — aktiv und früher. */
+  accountHandles: Array<{ handle: string, status: string, changedAt: string, createdAt: string }>
 }
 
 export async function systemExportUserData(event: H3Event, userId: string): Promise<SystemUserDataExport> {
@@ -77,6 +89,13 @@ export async function systemExportUserData(event: H3Event, userId: string): Prom
     HANDLES,
     [Query.equal('userId', userId)],
   ).catch(() => [] as HandleRow[])
+  // Degradiert auf leer, solange Migration 031 auf der Instanz aussteht
+  const accountHandles = await listAllRows<AccountHandleRow>(
+    tablesDB,
+    config.public.appwriteDatabaseId,
+    ACCOUNT_HANDLES,
+    [Query.equal('userId', userId)],
+  ).catch(() => [] as AccountHandleRow[])
   return {
     notifications: received.map(r => ({
       type: r.type,
@@ -96,6 +115,12 @@ export async function systemExportUserData(event: H3Event, userId: string): Prom
     // Beide Status — ein FRÜHERER Name gehört genauso in die Auskunft.
     handles: handles.map(r => ({
       communityId: r.communityId,
+      handle: r.handle,
+      status: r.status,
+      changedAt: r.changedAt,
+      createdAt: r.$createdAt,
+    })),
+    accountHandles: accountHandles.map(r => ({
       handle: r.handle,
       status: r.status,
       changedAt: r.changedAt,
@@ -181,6 +206,15 @@ export async function systemDeleteUserData(event: H3Event, userId: string): Prom
     .catch(() => [] as HandleRow[])
   for (const row of handles) {
     await tablesDB.deleteRow({ databaseId, tableId: HANDLES, rowId: row.$id })
+    deleted++
+  }
+
+  // Dasselbe für das konto-weite Register (AH-7). Ohne diesen Griff überlebte
+  // der Name die Löschung — und zwar der EINE, den der Mensch überall trug.
+  const accountHandles = await listAllRows<AccountHandleRow>(tablesDB, databaseId, ACCOUNT_HANDLES, [Query.equal('userId', userId)])
+    .catch(() => [] as AccountHandleRow[])
+  for (const row of accountHandles) {
+    await tablesDB.deleteRow({ databaseId, tableId: ACCOUNT_HANDLES, rowId: row.$id })
     deleted++
   }
 
