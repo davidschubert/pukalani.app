@@ -7,6 +7,22 @@ die kleinen, verstreuten Beschlüsse.
 
 ---
 
+## 2026-08-12 — F3 abgenommen: comments zieht in den Pool (AH-6)
+
+**Davids Abnahme** (strukturierte Fragen; zwei Rückfragen — „wieso bleibt
+apps/comments?" und „gibts auch apps/courses?" — beantwortet: Produkte sind
+LAYER, nie Apps; comments war die eine historische Ausnahme, apps/comments
+bleibt als Code das E2E-Fahrzeug + der Studio-Beweis nach dem photos-Muster,
+der BETRIEB verschwindet vollständig). Plan: docs/plans/F3-COMMENTS-POOL.md.
+Detail-Entscheidungen: (a) **Embed-Gäste: Verlust akzeptiert** — künftig
+kommentieren nur Angemeldete, Bestands-Gastkommentare bleiben lesbar.
+(b) **Konto-Merge fail-closed**: gleiche Mail = gleiche Person NUR bei
+beidseitig bestätigter Adresse; Rest als Einzelfall-Liste an David.
+(c) **Cutover-Fenster: direkt nach AH-4**, ohne weiteres Nachfragen;
+Wartungs-Mail ohne Link. Die sechs technischen Empfehlungen des Plans sind
+mit abgenommen (Einmal-Skript-Anlage, pro ohne Abo, David Owner,
+guest_authors nicht migrieren, Standard-Startseite, billing-Testdaten weg).
+
 ## 2026-08-11 — Account-Horizont: ein Konto, das überall gilt
 
 **Davids Richtungsentscheidung** (nach der Subdomain-/Architektur-Diskussion;
