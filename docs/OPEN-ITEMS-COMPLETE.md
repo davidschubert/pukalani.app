@@ -29,6 +29,30 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### AP3 — U5 (Community umbenennbar) + F56 (Nachricht-schreiben-Knopf) ✅ 2026-08-13
+
+**U5:** Karte „Name und Beschreibung" ganz oben auf dem Reiter „Allgemein",
+`PATCH /api/community/profile` → Service-Naht → control (Secret+JWT+Site-Rolle,
+Nachbar-Muster), KEINE Migration. Der D6-Spiegel wurde BEWUSST NICHT
+erweitert — Agenten-Fund: community_branding ist read(any)/anonym auflistbar
+und verbietet identifizierende Felder wörtlich (verify-site-branding §12
+ginge rot); Live-Gefühl kommt aus Resolver-Cache + optimistischem Update im
+speichernden Fenster. Namens-Grenzen an den KUNDEN-Anlagepfad genagelt
+(min 2 — sonst stellte Umbenennen Zustände her, die das Anlegen verweigert).
+**F56:** neuer core-Registry-Vertrag `pukalani.chrome.authorActions`
+(Glocken-Muster: niemand importiert jemanden) — der messages-Layer meldet den
+Knopf an, PostCard (Feed+Discussions) und CommentItem rendern ihn neben
+fremden Autorennamen; Tore: Owner-Schalter (ab Werk aus) + messages.write.
+authorHandle wird gebündelt angereichert (eine Abfrage je Seite, kein N+1).
+Live: profile-Routen 401 ohne Session, Hosts gesund — und der erste
+NATÜRLICHE Deploy nach dem Gate-Fix lief ohne manuellen Hebel durch.
+
+**Gelernt:** (1) Ein Auftrag kann falsch liegen: der Brief verlangte den
+Namen im D6-Spiegel — der dokumentierte Anonymitäts-Vertrag der Tabelle
+schlägt den Brief, und der Agent hat richtig widersprochen statt gebaut.
+(2) Grenzwerte immer an den PFAD nageln, mit dem sie koexistieren
+(Umbenennen ↔ Kunden-Anlage), nicht an den bequemsten.
+
 ### AP2 / U4 — Die Ankunft in der neuen Community ✅ 2026-08-13
 
 Fünf Teile, live seit 0cce9167 (der Deploy brauchte den vierten Gate-Skip —
