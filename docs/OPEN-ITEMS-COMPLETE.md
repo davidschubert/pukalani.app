@@ -29,6 +29,32 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### AP6 / U9 — Die Übersichtsseite zeigt echte Zahlen ✅ 2026-08-12
+
+Kennzahlen-Registry `pukalani.admin.stats` (Deklaration in app.config wie
+notices, Werte über `DashboardStatValueProvider`-Nitro-Plugins je Layer) —
+9 Kacheln aus 7 Layern: Mitglieder, Beiträge, Events, Kurse, Medien,
+Speicher „x von y", Plan-/Testphasen-Zustand, Kommentare + offene Meldungen.
+EINE gebündelte Route; die Sichtbarkeits-Trias (Ort × Capability ×
+Produkt-Gates) wird server-seitig ERNEUT gerechnet — das ist Autorisierung:
+ein viewer bekommt die Meldungs-Zahl gar nicht geliefert, „nicht
+ausgewiesen" heißt Eintrag-fehlt statt null. Kosten je Kachel 0–1 Abfrage
+(Usage-Counter-Wiederverwendung; Kachel-Id = Quota-kind), der Team-Ruf wird
+mit der AP2-Checkliste GETEILT — netto ist die Pool-Übersicht billiger als
+vorher. Der Nutzer/Kommentar-Chart ist Ort-gegatet (nur Silo — im Pool war
+seine Nutzer-Achse längst tot, B2); usersTotal ist eine operator-Kachel
+statt einer Markup-Ausnahme.
+
+**Sichtbare Verhaltensänderung (gemeldet):** viewer/editor sehen auf der
+Pool-Übersicht KEINE Kachel mehr — vorher eine, die in ein 403 führte.
+
+**Gelernt:** (1) Eine Werte-Route, die mehr liefert als die UI zeigt, ist
+eine stille Autorisierungs-Lücke — der Filter gehört in die Route, nicht
+nur ins Rendering. (2) Wenn Kachel-Id = Quota-kind, zählt niemand doppelt:
+Verträge wiederverwenden schlägt parallelbauen. (3) Deploy-Wachen müssen
+über ALLE Zwilling-Läufe auf deploy=success warten (AP5-Lektion,
+hier erstmals eingebaut).
+
 ### AP5 — U7 (Menü) + U8 (Adressen) ✅ 2026-08-13
 
 **Menü:** neue Gruppe **Moderation** (der Moderator findet seine vier
