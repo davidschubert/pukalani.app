@@ -154,7 +154,15 @@ jobs:
             echo "Manueller Trigger — deploye immer."
             echo "skip=false" >> "$GITHUB_OUTPUT"; exit 0
           fi
-          PROD=$(curl -fsS -m 15 https://comments.pukalani.app/api/health | jq -r '.build // empty' || true)
+          # DIE DIFF-BASIS IST EIN BELIEBIGER, ABER LEBENDER HOST (F3, 2026-08-12).
+          # Vorher stand hier comments.pukalani.app — der wird seit dem Umzug ins
+          # account-Projekt von der Wildcard-Site `platform` bedient und meldete
+          # damit ohnehin platforms Build-SHA. Der Aufruf hätte weiter
+          # funktioniert (/api/health ist host-frei, 00.tenant.ts lässt genau
+          # diesen Pfad vor der Mandanten-Auflösung durch), aber der Host hätte
+          # etwas anderes bedeutet als der Kommentar behauptet. Jetzt fragt die
+          # Basis den Host, dem sie gehört.
+          PROD=$(curl -fsS -m 15 https://platform.pukalani.app/api/health | jq -r '.build // empty' || true)
           if [ -z "$PROD" ] || ! git cat-file -e "${PROD}^{commit}" 2>/dev/null; then
             echo "Prod-SHA unbekannt oder nicht im Repo ('${PROD:-n/a}') — deploye sicherheitshalber."
             echo "skip=false" >> "$GITHUB_OUTPUT"; exit 0
@@ -226,7 +234,7 @@ jobs:
         if: steps.changes.outputs.skip != 'true'
         run: |
           set -eu
-          for app in comments portfolio control platform marketing help; do
+          for app in portfolio control platform marketing help; do
             mkdir -p "apps/$app/node_modules/.cache/nuxt/fonts"
             rsync -a "prod:/home/ploi/fonts-cache/" "apps/$app/node_modules/.cache/nuxt/fonts/" || true
           done
@@ -237,7 +245,7 @@ jobs:
         if: steps.changes.outputs.skip != 'true'
         run: |
           set -eu
-          for app in comments portfolio control platform marketing help; do
+          for app in portfolio control platform marketing help; do
             echo "::group::Build $app"
             pnpm --filter "$app" build
             echo "::endgroup::"
@@ -246,7 +254,7 @@ jobs:
       - name: Font-Cache additiv zurückschreiben
         if: steps.changes.outputs.skip != 'true'
         run: |
-          for app in comments portfolio control platform marketing help; do
+          for app in portfolio control platform marketing help; do
             rsync -a --ignore-existing "apps/$app/node_modules/.cache/nuxt/fonts/" "prod:/home/ploi/fonts-cache/" || true
           done
 
@@ -272,10 +280,10 @@ jobs:
           # Probe muss den Namen fragen, den die Aussenwelt benutzt — gegen den
           # Altnamen gefragt bekaeme sie eine 301 und `jq` saehe nie ein
           # `.build`. Fuer alle anderen Apps sind beide Namen identisch.
-          declare -A SITE=( [comments]=comments.pukalani.app [portfolio]=portfolio.pukalani.app [control]=control.pukalani.app [platform]=platform.pukalani.app [marketing]=pukalani.app [help]=help.pukalani.app )
-          declare -A SLOT=( [comments]=comments [portfolio]=portfolio [control]=control [platform]=platform [marketing]=marketing [help]=help )
-          declare -A PROBE=( [comments]=comments.pukalani.app [portfolio]=portfolio.pukalani.app [control]=admin.pukalani.app [platform]=platform.pukalani.app [marketing]=pukalani.app [help]=help.pukalani.app )
-          for app in comments portfolio control platform marketing help; do
+          declare -A SITE=( [portfolio]=portfolio.pukalani.app [control]=control.pukalani.app [platform]=platform.pukalani.app [marketing]=pukalani.app [help]=help.pukalani.app )
+          declare -A SLOT=( [portfolio]=portfolio [control]=control [platform]=platform [marketing]=marketing [help]=help )
+          declare -A PROBE=( [portfolio]=portfolio.pukalani.app [control]=admin.pukalani.app [platform]=platform.pukalani.app [marketing]=pukalani.app [help]=help.pukalani.app )
+          for app in portfolio control platform marketing help; do
             site="${SITE[$app]}"
             probe="${PROBE[$app]}"
             echo "::group::Deploy $app → $site"
@@ -304,8 +312,8 @@ jobs:
             # `pm2 delete <name>` vor dem startOrReload.
             PROC=$(echo "$site" | tr -d .)
             # Der pm2-Prozessname ist IMMER die Site ohne Punkte (so heissen
-            # sie in den Ecosystem-Dateien: comments.pukalani.app →
-            # commentspukalaniapp, pukalani.app → pukalaniapp). Nicht aus dem
+            # sie in den Ecosystem-Dateien: portfolio.pukalani.app →
+            # portfoliopukalaniapp, pukalani.app → pukalaniapp). Nicht aus dem
             # App-Namen zusammensetzen — bei marketing waere daraus
             # "marketingpukalaniapp" geworden und der Heiler haette still
             # nichts gefunden.

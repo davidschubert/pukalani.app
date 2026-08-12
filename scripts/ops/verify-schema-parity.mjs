@@ -52,7 +52,10 @@ const SYSTEM_TABLES = [
 const INSTANCES = [
   { name: 'account', env: join(homedir(), '.appwrite-secrets/migrations/account.env') },
   { name: 'control', env: join(homedir(), '.appwrite-secrets/migrations/control.env') },
-  { name: 'comments', env: 'apps/comments/.env.production' },
+  // `comments` ist seit F3 (2026-08-12) keine eigene Instanz mehr, sondern eine
+  // Pool-Community im `account`-Projekt — der Eintrag ist RAUS statt auf
+  // „übersprungen" stehen zu bleiben: ein Wächter, der dauerhaft meldet, er habe
+  // etwas ausgelassen, wird weggelesen. `apps/comments` selbst bleibt (E2E).
   { name: 'portfolio', env: 'apps/portfolio/.env.production' },
   { name: 'photos', env: 'apps/photos/.env.production' },
 ]

@@ -43,7 +43,23 @@ const HOSTS = [
   // ihren Namen); ein Zertifikat, das nur einen der beiden trägt, macht den
   // anderen sofort unerreichbar.
   { host: 'control.pukalani.app', ip: '49.13.211.173', note: 'Altname → 301 auf admin (AH-4); zugleich Name der certbot-Lineage beider Hosts' },
-  { host: 'comments.pukalani.app', ip: '49.13.211.173', note: 'Silo-Kunde' },
+  // POOL-COMMUNITY seit F3 (2026-08-12) — vorher ein Silo-Kunde mit eigener
+  // ploi-Site und eigener certbot-Lineage.
+  //
+  // WELCHES ZERTIFIKAT HIER AUSGELIEFERT WIRD, HÄNGT AM AUFRÄUM-STAND, und der
+  // Wächter darf davon nicht abhängen: unmittelbar nach dem Cutover steht die
+  // ploi-Site noch (ihr nginx-Block proxyt nur auf platform:3004) und liefert
+  // WEITER ihre eigene Lineage `comments.pukalani.app` aus; löscht David die
+  // Site später im Panel, fällt der Host in den Default-vHost und bekommt
+  // `*.pukalani.app` — dasselbe Muster wie `help.pukalani.app` seit
+  // 2026-07-27. BEIDE Zustände sind grün, weil hier SAN-Deckung und
+  // Restlaufzeit geprüft werden und nicht die Herkunft (`sanCovers` deckt
+  // `comments.pukalani.app` als Ein-Label-Name unter der Wildcard ab).
+  //
+  // Der Eintrag BLEIBT deshalb stehen: ein Kunden-Host, dessen Zertifikat
+  // niemand mehr beobachtet, ist genau die stille Lücke, gegen die dieser
+  // Wächter gebaut wurde. NIE für ihn neu anfordern (Lineage-Falle, s. Kopf).
+  { host: 'comments.pukalani.app', ip: '49.13.211.173', note: 'Pool-Community (F3) — eigene Lineage ODER Wildcard, je nach Aufräum-Stand; beides gedeckt' },
   { host: 'portfolio.pukalani.app', ip: '49.13.211.173', note: 'Silo-Kunde' },
   // EIGENE DOMAIN (F54, seit 2026-08-08) — und der Grund, warum sie hier
   // stehen MUSS: `pukalani.studio` liegt außerhalb der Zone `pukalani.app`,

@@ -83,10 +83,11 @@ const SITES = [
        * Geheimnisse (AES-256-GCM, 64 Hex-Zeichen — `openssl rand -hex 32`).
        *
        * PFLICHT NUR HIER, nicht auf jeder Site: `control` ist die einzige
-       * Site, auf der ein Mensch die Stripe-Seite bedient. Die Silo-Site
-       * `comments` montiert den billing-Layer zwar auch (Event-Tickets), fährt
-       * ihre Keys aber weiter über NUXT_STRIPE_* — dort fehlt die Variable
-       * ohne Folgen, und ein Wächter, der Optionales anmahnt, wird weggelesen.
+       * Site, auf der ein Mensch die Stripe-Seite bedient. (Bis F3 galt der
+       * Zusatz „die Silo-Site `comments` montiert billing zwar auch, fährt
+       * ihre Keys aber über NUXT_STRIPE_*" — sie wird seit dem Umzug ins
+       * account-Projekt nicht mehr ausgerollt; `apps/comments` gibt es weiter,
+       * aber nur noch als E2E-Fahrzeug ohne Server-.env.)
        *
        * Fehlt sie HIER, sieht man das sofort und ehrlich (die Karte sagt
        * „nicht eingerichtet" und nennt den Namen) — es ist also kein stiller
@@ -94,28 +95,6 @@ const SITES = [
        * dem nächsten Server-Umzug niemand mehr weiß, dass es sie gab.
        */
       'NUXT_BILLING_SETTINGS_KEY',
-    ],
-  },
-  {
-    dir: 'comments.pukalani.app',
-    name: 'comments',
-    note: 'Silo-Kunde',
-    required: [
-      'NUXT_APPWRITE_KEY',
-      'NUXT_PUBLIC_APPWRITE_ENDPOINT',
-      'NUXT_PUBLIC_APPWRITE_PROJECT_ID',
-      'NUXT_SMTP_HOST',
-      'NUXT_SMTP_PORT',
-      'NUXT_SMTP_USER',
-      'NUXT_SMTP_PASS',
-      'NUXT_SMTP_FROM',
-      'NUXT_PUBLIC_APP_URL',
-      // Analytics v2 (der Silo hat eine eigene Plausible-Site, aber dasselbe
-      // Dashboard — ohne Schlüssel bleibt es dort leer).
-      'NUXT_ANALYTICS_STATS_API_KEY',
-      // Silo-Naht (control-036) — s. Begründung bei portfolio.
-      'NUXT_ONBOARDING_CONTROL_URL',
-      'NUXT_ONBOARDING_SERVICE_SECRET',
     ],
   },
   {
