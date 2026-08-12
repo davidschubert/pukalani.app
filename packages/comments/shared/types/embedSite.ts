@@ -6,7 +6,8 @@ import type { Models } from 'node-appwrite'
  * statischen Allowlist; `pukalani.comments.embed.allowedOrigins` bleibt als
  * Betreiber-Option — '*' = offen wie Disqus, Einträge wie
  * 'http://localhost:*' fürs Dev-/E2E-Umfeld). Verwaltet unter
- * /dashboard/embed (system.manage), Table gehört dem comments-Layer (A14).
+ * /dashboard/community/embed (community.embed), Table gehört dem
+ * comments-Layer (A14).
  */
 
 export const EMBED_SITES_TABLE = 'embed_sites'

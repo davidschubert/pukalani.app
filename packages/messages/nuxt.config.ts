@@ -23,13 +23,24 @@
  */
 export default defineNuxtConfig({
   /**
-   * ALT-PFAD (F51, 2026-08-07): der Owner-Schalter ist von der Konto-Hülle in
-   * den Community-Hub gezogen. Beide Locales, weil eine routeRule nur Pfade
-   * sieht (`prefix_except_default`).
+   * ZWEI ALT-PFADE AUF DIESELBE SEITE, beide auf das HEUTIGE Ziel — kein
+   * Kettenschluss über eine Adresse, die selbst schon eine Weiterleitung ist.
+   * Je zwei Zeilen, weil eine routeRule nur Pfade sieht
+   * (`prefix_except_default`: `en` ohne Prefix, `de` unter `/de/*`).
+   *
+   *  - F51 (2026-08-07): der Owner-Schalter zog von der Konto-Hülle in den
+   *    Community-Hub.
+   *  - U8/G7 (2026-08-11): dort hieß er `messages` und lag damit EIN Segment
+   *    neben dem Posteingang `/dashboard/messages` — zwei Adressen, zwei
+   *    Publika (jedes Mitglied vs. nur der Owner), völlig verschiedene Dinge.
+   *    Der Schalter heißt jetzt `private-messages`; der Posteingang bleibt,
+   *    wo er ist. Der Abstand ist die Sicherung.
    */
   routeRules: {
-    '/dashboard/settings/messages': { redirect: { to: '/dashboard/community/messages', statusCode: 301 } },
-    '/de/dashboard/settings/messages': { redirect: { to: '/de/dashboard/community/messages', statusCode: 301 } },
+    '/dashboard/settings/messages': { redirect: { to: '/dashboard/community/private-messages', statusCode: 301 } },
+    '/de/dashboard/settings/messages': { redirect: { to: '/de/dashboard/community/private-messages', statusCode: 301 } },
+    '/dashboard/community/messages': { redirect: { to: '/dashboard/community/private-messages', statusCode: 301 } },
+    '/de/dashboard/community/messages': { redirect: { to: '/de/dashboard/community/private-messages', statusCode: 301 } },
   },
 
   // Eigene Layer-Strings — mergen mit Core- und App-Locales (gleiche codes)

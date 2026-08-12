@@ -105,7 +105,9 @@ pukalani: {
   Gäste senden keinen Heartbeat, erzeugen also keine Presence-Last.
 
 - **Site-Registry (E3, empfohlen):** registrierte Einbetter-Domains verwaltest
-  du im Dashboard unter **„Embed-Sites"** (`/dashboard/embed`, `system.manage`).
+  du im Dashboard unter **„Embed-Sites"** — seit U8 (2026-08-11) ein Reiter des
+  Community-Hubs: `/dashboard/community/embed` (`community.embed`; die alte
+  flache Adresse leitet mit 301 dorthin).
   Nur diese Domains dürfen das Widget einbetten (frame-ancestors-CSP);
   optional je Domain die erlaubten `targetTypes` begrenzen. Änderungen greifen
   sofort (Cache write-invalidiert). Unregistrierte Einbetter sehen eine

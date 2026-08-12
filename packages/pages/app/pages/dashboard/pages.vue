@@ -247,7 +247,7 @@ async function saveActiveLocale() {
   }
   catch {
     // Übersetzter Text statt rohem `statusMessage` (Audit-Befund C12) — s. die
-    // gleichlautende Stelle in comments/dashboard/embed.vue.
+    // gleichlautende Stelle in comments/dashboard/community/embed.vue.
     toast.add({
       title: t('pages.admin.saveFailed'),
       description: t('pages.admin.saveFailedHint'),

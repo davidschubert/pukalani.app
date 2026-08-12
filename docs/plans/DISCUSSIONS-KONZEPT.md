@@ -548,7 +548,8 @@ nach `docs/OPEN-ITEMS.md`.
   Cross-Projekt) wird erst geholt, wenn die billige (Zähler) überhaupt für eine
   höhere Stufe reicht.
   TL4 ERNENNT DER OWNER (`posts.appoint`, owner-only) unter
-  `/dashboard/discussion-leaders` — gelistet wird, wer hier schon geschrieben
+  `/dashboard/trust-levels` (bis U8: `/dashboard/discussion-leaders`) —
+  gelistet wird, wer hier schon geschrieben
   hat (`member_counters`), bewusst NICHT die Mitgliederliste: die gehört
   onboarding, und eine Stufe für jemanden ohne jede Aktivität wäre eine Aussage
   ohne Grundlage. Protokolliert über `logEvent`, nicht `audit_logs` (A14, wie

@@ -142,9 +142,11 @@ export default defineAppConfig({
        * der Schalter fehlte. Jetzt kann jede Community ihr Widget auf ihrer
        * eigenen Website einbinden.
        *
-       * Wer die Einbetter registriert: der OWNER, über `community.embed`
-       * (/dashboard/embed). Bis heute verlangte diese Seite `system.manage` —
-       * ein Instanz-Label, das kein Kunde je trägt.
+       * Wer die Einbetter registriert: der OWNER, über `community.embed` —
+       * seit U8 (2026-08-11) als Reiter des Community-Hubs unter
+       * `/dashboard/community/embed` (vorher flach: `/dashboard/embed`).
+       * Bis F37 verlangte diese Seite `system.manage` — ein Instanz-Label,
+       * das kein Kunde je trägt.
        *
        * `allowedOrigins` sind ZUSÄTZLICHE, statische Origins zur Registry:
        * localhost fürs Entwickeln und für die Beweis-Skripte. In Produktion

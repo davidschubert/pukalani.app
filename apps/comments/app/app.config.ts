@@ -123,7 +123,7 @@ export default defineAppConfig({
       // Öffentlichkeit, bis die Moderation entscheidet (Meldungen bleiben offen)
       autoHideReports: 3,
       // iframe-Embed: seit E3 speist die SITE-REGISTRY (embed_sites,
-      // /dashboard/embed) die frame-ancestors-CSP — hier stehen nur noch
+      // /dashboard/community/embed) die frame-ancestors-CSP — hier stehen nur noch
       // statische Zusatz-Origins: localhost:* fürs Dev-/E2E-Umfeld
       // (Port-Wildcard ist gültige CSP-host-source; in Prod praktisch
       // wirkungslos, ein „Angreifer" bräuchte die Maschine des Users).

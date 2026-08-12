@@ -1,11 +1,29 @@
 <script setup lang="ts">
 import type { TableColumn } from '@nuxt/ui'
 
-// F37 (2026-08-02): `community.embed` statt `system.manage`. Die Seite stand
-// im Kunden-Dashboard, verlangte aber ein Instanz-Label — im Pool war sie
-// damit für den Owner der Community unerreichbar. Die Middleware prüft BEIDE
-// Quellen (Label ODER Community-Rolle, N1); die Autorität bleiben die Gates in
-// server/api/admin/embed-sites/*.
+/**
+ * REITER DES COMMUNITY-HUBS (U8/G7, 2026-08-11) — vorher ein eigener
+ * Sidebar-Eintrag unter `/dashboard/embed`.
+ *
+ * Die Regel, die G7 benannt hat, lautet: was der Community-Hub zeigt, liegt
+ * unter `/dashboard/community/*`; Arbeitsflächen liegen flach. „Wer darf mein
+ * Widget einbetten?" ist eine reine Owner-EINSTELLUNG (`community.embed`) —
+ * sie wird einmal gesetzt und danach selten angefasst, genau wie Domain,
+ * Publikum und Zugang, neben denen sie jetzt steht. Flach lag sie nur aus
+ * Gewohnheit.
+ *
+ * Als KIND der Hülle bringt diese Seite kein eigenes `UDashboardPanel` mehr
+ * mit: Kopfzeile und Reiter-Zeile gehören der Hülle
+ * (packages/admin/app/pages/dashboard/community.vue), und zwei Kopfzeilen
+ * übereinander wären eine Ebene ohne Gewinn. Der „Neu"-Knopf sitzt deshalb in
+ * der Werkzeug-Reihe über der Liste — dasselbe Muster wie bei den Mitgliedern.
+ *
+ * F37 (2026-08-02): `community.embed` statt `system.manage`. Die Seite stand
+ * im Kunden-Dashboard, verlangte aber ein Instanz-Label — im Pool war sie
+ * damit für den Owner der Community unerreichbar. Die Middleware prüft BEIDE
+ * Quellen (Label ODER Community-Rolle, N1); die Autorität bleiben die Gates in
+ * server/api/admin/embed-sites/*.
+ */
 definePageMeta({ layout: 'dashboard', middleware: ['auth', 'admin'], requiredCapability: 'community.embed' })
 
 // Bau-Schalter (F37): dieselbe Antwort wie /embed selbst — ohne
@@ -133,69 +151,63 @@ async function removeSite(site: EmbedSiteDto) {
 </script>
 
 <template>
-  <UDashboardPanel id="embed-sites">
-    <template #header>
-      <UDashboardNavbar :title="t('comments.embedAdmin.title')">
-        <template #leading>
-          <UDashboardSidebarCollapse />
-        </template>
-        <template #right>
-          <UButton icon="i-ph-plus" data-embed-sites-create :label="t('comments.embedAdmin.new')" @click="openCreate" />
-        </template>
-      </UDashboardNavbar>
-    </template>
+  <!-- Kind der Community-Hülle (U8/G7): kein eigenes UDashboardPanel —
+       Kopfzeile und Reiter-Zeile bringt die Hülle mit. Der Anlegen-Knopf sitzt
+       deshalb über der Liste statt in einer Navbar, die es hier nicht mehr
+       gibt (dasselbe Muster wie bei den Mitgliedern). -->
+  <div class="flex w-full flex-col">
+    <div class="mb-4 flex items-start justify-between gap-4">
+      <p class="max-w-2xl text-sm text-muted">{{ t('comments.embedAdmin.subtitle') }}</p>
+      <UButton icon="i-ph-plus" data-embed-sites-create :label="t('comments.embedAdmin.new')" @click="openCreate" />
+    </div>
 
-    <template #body>
-      <p class="mb-4 text-sm text-muted">{{ t('comments.embedAdmin.subtitle') }}</p>
-
-      <UTable :data="sites" :columns="columns" data-embed-sites-list>
-        <template #host-cell="{ row }">
-          <span class="font-mono font-medium" :data-embed-site="row.original.host">{{ row.original.host }}</span>
-        </template>
-        <template #label-cell="{ row }">
-          <span class="text-sm text-muted">{{ row.original.label || '—' }}</span>
-        </template>
-        <template #targets-cell="{ row }">
-          <span class="text-sm text-muted">
-            {{ row.original.targetTypes.length ? row.original.targetTypes.join(', ') : t('comments.embedAdmin.allTargetTypes') }}
-          </span>
-        </template>
-        <template #active-cell="{ row }">
-          <USwitch
-            :model-value="row.original.active"
-            :disabled="pending === row.original.id"
-            :aria-label="row.original.active ? t('comments.embedAdmin.disable') : t('comments.embedAdmin.enable')"
-            :data-embed-site-toggle="row.original.host"
-            @update:model-value="() => toggleActive(row.original)"
+    <UTable :data="sites" :columns="columns" data-embed-sites-list>
+      <template #host-cell="{ row }">
+        <span class="font-mono font-medium" :data-embed-site="row.original.host">{{ row.original.host }}</span>
+      </template>
+      <template #label-cell="{ row }">
+        <span class="text-sm text-muted">{{ row.original.label || '—' }}</span>
+      </template>
+      <template #targets-cell="{ row }">
+        <span class="text-sm text-muted">
+          {{ row.original.targetTypes.length ? row.original.targetTypes.join(', ') : t('comments.embedAdmin.allTargetTypes') }}
+        </span>
+      </template>
+      <template #active-cell="{ row }">
+        <USwitch
+          :model-value="row.original.active"
+          :disabled="pending === row.original.id"
+          :aria-label="row.original.active ? t('comments.embedAdmin.disable') : t('comments.embedAdmin.enable')"
+          :data-embed-site-toggle="row.original.host"
+          @update:model-value="() => toggleActive(row.original)"
+        />
+      </template>
+      <template #actions-cell="{ row }">
+        <div class="flex justify-end">
+          <UButton
+            color="error"
+            variant="ghost"
+            size="xs"
+            icon="i-ph-trash"
+            :aria-label="t('comments.embedAdmin.delete')"
+            @click="() => removeSite(row.original)"
           />
-        </template>
-        <template #actions-cell="{ row }">
-          <div class="flex justify-end">
-            <UButton
-              color="error"
-              variant="ghost"
-              size="xs"
-              icon="i-ph-trash"
-              :aria-label="t('comments.embedAdmin.delete')"
-              @click="() => removeSite(row.original)"
-            />
-          </div>
-        </template>
+        </div>
+      </template>
 
-        <template #empty>
-          <CoreEmptyState
-            icon="i-ph-code"
-            :title="t('comments.embedAdmin.emptyTitle')"
-            :description="t('comments.embedAdmin.empty')"
-            :action-label="t('comments.embedAdmin.new')"
-            action-icon="i-ph-plus"
-            data-embed-sites-empty
-            @action="openCreate"
-          />
-        </template>
-      </UTable>
-    </template>
-  </UDashboardPanel>
+      <template #empty>
+        <CoreEmptyState
+          icon="i-ph-code"
+          :title="t('comments.embedAdmin.emptyTitle')"
+          :description="t('comments.embedAdmin.empty')"
+          :action-label="t('comments.embedAdmin.new')"
+          action-icon="i-ph-plus"
+          data-embed-sites-empty
+          @action="openCreate"
+        />
+      </template>
+    </UTable>
+  </div>
 
   <UModal v-model:open="showCreate" :title="t('comments.embedAdmin.new')">
     <template #body>

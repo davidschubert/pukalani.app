@@ -6,6 +6,30 @@
  * Site-Inhalte und keine Site-Sessions (Vertrauensgrenze, Strategie § 8).
  */
 export default defineNuxtConfig({
+  /**
+   * ALT-PFADE DER BETREIBER-KONSOLE. Je ZWEI Zeilen, weil eine routeRule keine
+   * Locales kennt — sie sieht nur den Pfad (`prefix_except_default`: `en` ohne
+   * Prefix, `de` unter `/de/*`).
+   *
+   *  - `/dashboard/sites` → `/dashboard/websites` (U8/M13, nachgeholt
+   *    2026-08-11): die Umbenennung ist seit `f1fcf5ce` committed, die
+   *    Weiterleitung fehlte als EINZIGE von dreizehn — ein gebrochenes
+   *    Lesezeichen, und zwar Davids eigenes.
+   *  - `/dashboard/tenants` → `/dashboard/communities` (U8/G2, 2026-08-11):
+   *    E8 hat `tenants` → `communities` umbenannt; die Adresse war das letzte
+   *    Stück Oberfläche mit der alten Vokabel.
+   *
+   * Geringe Reichweite (nur der Betreiber kommt hier vorbei) — aber ein 301
+   * kostet nichts, und „geringe Reichweite" war noch nie ein Grund, eine
+   * Adresse ins Leere zeigen zu lassen.
+   */
+  routeRules: {
+    '/dashboard/sites': { redirect: { to: '/dashboard/websites', statusCode: 301 } },
+    '/de/dashboard/sites': { redirect: { to: '/de/dashboard/websites', statusCode: 301 } },
+    '/dashboard/tenants': { redirect: { to: '/dashboard/communities', statusCode: 301 } },
+    '/de/dashboard/tenants': { redirect: { to: '/de/dashboard/communities', statusCode: 301 } },
+  },
+
   runtimeConfig: {
     // server-only! Aussteller-Schlüssel der Entitlement-Zustellung (F3):
     // Ed25519 PKCS8-DER base64 + kid — erzeugt scripts/entitlements-keygen.mjs.

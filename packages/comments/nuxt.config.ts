@@ -15,6 +15,17 @@ export default defineNuxtConfig({
     dirs: [join(currentDir, './app/stores')],
   },
 
+  /**
+   * ALT-PFAD (U8/G7, 2026-08-11): das Einbetter-Register ist vom flachen
+   * `/dashboard/embed` in den Community-Hub gezogen. Beide Locales, weil eine
+   * routeRule nur Pfade sieht (`prefix_except_default`: `en` ohne Prefix,
+   * `de` unter `/de/*`).
+   */
+  routeRules: {
+    '/dashboard/embed': { redirect: { to: '/dashboard/community/embed', statusCode: 301 } },
+    '/de/dashboard/embed': { redirect: { to: '/de/dashboard/community/embed', statusCode: 301 } },
+  },
+
   // Eigene Layer-Strings — mergen mit Core- und App-Locales (gleiche codes)
   i18n: {
     locales: [

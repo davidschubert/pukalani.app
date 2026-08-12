@@ -7,11 +7,14 @@ import type { CategoryListResponse, CategoryWithCount, PostCategory } from '../.
 /**
  * Kategorien der Discussions verwalten (F1 Stufe 1).
  *
- * PFAD vs. BESCHRIFTUNG: die Route heißt `/dashboard/discussions`, der
- * Menüpunkt „Kategorien". Der Pfad benennt den BEREICH (er wächst mit den
- * späteren Stufen — Views, Regelwerk, Badges), die Beschriftung benennt, was
- * heute darin steht. Ein Pfad, der `categories` heißt, müsste beim ersten
- * Ausbau umziehen und jeden Bookmark mitnehmen.
+ * PFAD = BESCHRIFTUNG (U8/G4, 2026-08-11): die Route heißt `/dashboard/
+ * categories`, der Menüpunkt „Kategorien". Vorher hieß der Pfad
+ * `discussions` — ein Wort, das in keiner Oberfläche vorkam; die Begründung
+ * („der Pfad benennt den BEREICH, der später wächst") hat drei Stufen lang
+ * niemandem geholfen und dafür jedem Lesezeichen einen dritten Namen für
+ * dieselbe Sache gegeben. Wächst der Bereich, wächst er unter dem Namen, der
+ * dann im Menü steht — mit 301, wie dieser hier
+ * (packages/posts/nuxt.config.ts).
  *
  * Liste, dann Editor — dasselbe Muster wie Seiten, Kurse und Themes (B6):
  * UTable mit Sortierung und Leerzustand, und erst auf Klick tritt das Formular

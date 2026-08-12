@@ -49,12 +49,19 @@ export default defineAppConfig({
         {
           // Communities · Overview — steht an erster Stelle der Plattform:
           // das ist der Bestand, alles andere führt hierher.
+          //
+          // U8/G2 (2026-08-11): der PFAD heißt `communities`, nicht mehr
+          // `tenants`. E8 hat das Objekt umbenannt (Daten, Code, Routen), die
+          // Oberfläche hat es mit U6 nachgeholt — die Adresse war das letzte
+          // Stück, das noch die alte Vokabel trug. Die Registry-`id` bleibt
+          // `tenants` (Protokoll, kein Anzeigetext); 301 in
+          // packages/control/nuxt.config.ts.
           id: 'tenants',
           scope: 'operator',
           productKey: 'control',
           labelKey: 'admin.nav.tenants',
           icon: 'i-ph-users-three',
-          to: '/dashboard/tenants',
+          to: '/dashboard/communities',
           requiredCapability: 'sites.manage',
           group: 'platform',
           order: 1,
