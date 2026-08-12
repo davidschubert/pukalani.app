@@ -55,13 +55,17 @@ useBrandTitle(() => page.value?.title ?? '', {
  * seiner Zone und der Browser in seiner — bei einem Zeitpunkt kurz nach
  * Mitternacht stünden dort zwei verschiedene Tage, und Nuxt meldete einen
  * Hydration-Mismatch. Aus demselben Grund bewusst ohne Uhrzeit.
+ *
+ * `en-GB` statt `en-US`: die englischen Inhalte sind durchgehend
+ * britisch gesetzt (Datum „8 August 2026", nicht „August 8, 2026") — die
+ * CMS-Seiten zeigen damit dasselbe Format wie die im Code gepflegten Texte.
  */
 const updatedHuman = computed<string | null>(() => {
   const raw = page.value?.updatedAt
   if (!raw) return null
   const date = new Date(raw)
   if (Number.isNaN(date.getTime())) return null
-  return date.toLocaleDateString(locale.value.startsWith('de') ? 'de-DE' : 'en-US', {
+  return date.toLocaleDateString(locale.value.startsWith('de') ? 'de-DE' : 'en-GB', {
     year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC',
   })
 })

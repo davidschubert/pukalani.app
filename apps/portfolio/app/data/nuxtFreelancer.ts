@@ -38,7 +38,7 @@ export const NUXT_HERO = {
   } satisfies Localized,
   intro: {
     de: 'David Schubert ist Freelance Nuxt-Entwickler und Senior UI/UX Designer mit über 25 Jahren Web-Erfahrung. Er entwickelt SaaS-Frontends, Corporate Websites und Landingpages mit Nuxt 4, Vue 3, TypeScript und Tailwind CSS 4 – remote für Teams in Deutschland, Österreich und der Schweiz, zu festen Projektpreisen. Die Besonderheit: Design und Entwicklung kommen aus einer Hand.',
-    en: 'David Schubert is a freelance Nuxt developer and senior UI/UX designer with more than 25 years of web experience. He builds SaaS frontends, corporate websites and landing pages with Nuxt 4, Vue 3, TypeScript and Tailwind CSS 4 — remote for teams in Germany, Austria and Switzerland, at fixed project prices. What makes it different: design and development come from one source.',
+    en: 'David Schubert is a freelance Nuxt developer and senior UI/UX designer with more than 25 years of web experience. He builds SaaS frontends, corporate websites and landing pages with Nuxt 4, Vue 3, TypeScript and Tailwind CSS 4 — remote for teams in Germany, Austria and Switzerland, at fixed project prices. What makes it different: design and development come from the same pair of hands.',
   } satisfies Localized,
   ctaPrimary: {
     de: 'Kostenloses Erstgespräch (30 Min)',
@@ -51,7 +51,7 @@ export const NUXT_HERO = {
   } satisfies Localized,
   audienceNote: {
     de: 'Diese Seite richtet sich an Digitalagenturen und Entwicklungsteams. Sie suchen Design, Konzept oder einen kompletten Webauftritt in verständlicher Sprache?',
-    en: 'This page is aimed at digital agencies and development teams. Looking for design, concept or a complete web presence in plain language?',
+    en: 'This page is aimed at digital agencies and development teams. Looking for design, concept or a complete web presence, explained without the jargon?',
   } satisfies Localized,
   audienceNoteLink: {
     de: 'Hier geht es zum Design-Portfolio',
@@ -74,7 +74,7 @@ export const NUXT_WHY_HEADING = {
   title: { de: 'Warum Nuxt für Ihr Projekt?', en: 'Why Nuxt for your project?' } satisfies Localized,
   lead: {
     de: 'Nuxt ist das führende Full-Stack-Framework für Vue: Server-Side-Rendering für SEO und schnelle Ladezeiten, automatisches Code-Splitting, eine ausgereifte Modul-Landschaft und TypeScript-Support ab Werk. Für Marketing-Websites bedeutet das bessere Rankings, für Web-Apps kürzere Entwicklungszeit.',
-    en: 'Nuxt is the leading full-stack framework for Vue: server-side rendering for SEO and fast load times, automatic code splitting, a mature module ecosystem and TypeScript support out of the box. For marketing websites that means better rankings; for web apps, shorter development time.',
+    en: 'Nuxt is the leading full-stack framework for Vue: server-side rendering for SEO and fast load times, automatic code splitting, a mature module ecosystem and TypeScript support out of the box. For marketing websites, that means better rankings; for web apps, shorter development time.',
   } satisfies Localized,
 }
 
@@ -106,7 +106,7 @@ export const NUXT_SERVICES_HEADING = {
   title: { de: 'Nuxt-Entwicklung: Leistungen', en: 'Nuxt development: services' } satisfies Localized,
   lead: {
     de: 'Von der Landingpage bis zur Web-App mit Backend: Ich klassifiziere jedes Projekt als Erlebnis-Website, App oder Hybrid – daraus ergibt sich der passende technische Zuschnitt.',
-    en: 'From the landing page to a web app with a backend: I classify every project as an experience website, an app or a hybrid — and the right technical cut follows from that.',
+    en: 'From the landing page to a web app with a backend: I classify every project as an experience website, an app or a hybrid — and that determines the right technical setup.',
   } satisfies Localized,
 }
 
@@ -119,7 +119,7 @@ export const NUXT_SERVICES: NuxtService[] = [
     price: { de: 'ab €5.000', en: 'from €5,000' },
     description: {
       de: 'Conversion-starke Websites mit hochwertigen Scroll-Animationen (GSAP, Lenis), SSR/Prerendering für SEO, Core Web Vitals im grünen Bereich und CMS-Anbindung nach Bedarf.',
-      en: 'High-converting websites with polished scroll animations (GSAP, Lenis), SSR/prerendering for SEO, Core Web Vitals in the green and a CMS connection where needed.',
+      en: 'High-converting websites with polished scroll animations (GSAP, Lenis), SSR/prerendering for SEO, Core Web Vitals passing across the board and a CMS integration where needed.',
     },
     tags: ['Nuxt 4', 'GSAP + Lenis', 'SEO/SSR', 'Tailwind CSS 4'],
   },
@@ -140,10 +140,10 @@ export const NUXT_SERVICES: NuxtService[] = [
       de: 'Hybrid-Projekte & Design Systems',
       en: 'Hybrid projects & design systems',
     },
-    price: { de: 'Festpreis nach Umfang', en: 'Fixed price by scope' },
+    price: { de: 'Festpreis nach Umfang', en: 'Fixed price based on scope' },
     description: {
       de: 'Marketing-Site plus App-Bereich in einer Codebasis, gemeinsame Component Library mit Design Tokens – als Nuxt Layer wiederverwendbar über mehrere Projekte.',
-      en: 'A marketing site plus an app area in one codebase, with a shared component library and design tokens — reusable across projects as a Nuxt layer.',
+      en: 'A marketing site plus an app section in one codebase, with a shared component library and design tokens — reusable across projects as a Nuxt layer.',
     },
     tags: ['Nuxt Layers', 'Design Tokens', 'Monorepo (pnpm)', 'i18n'],
   },
@@ -169,7 +169,7 @@ export const NUXT_STACK_HEADING = {
   } satisfies Localized,
   note: {
     de: 'Als Senior UI/UX Designer entwerfe ich die Interfaces, die ich entwickle – Sie brauchen keine Übergabe zwischen Designer und Entwickler. Das spart Abstimmung, Zeit und Budget.',
-    en: 'As a senior UI/UX designer I design the interfaces I build — there is no handover between designer and developer. That saves coordination, time and budget.',
+    en: 'As a senior UI/UX designer I design the interfaces I build — there is no design handoff between designer and developer. That cuts coordination overhead and saves time and budget.',
   } satisfies Localized,
   noteLabel: { de: 'Design + Code:', en: 'Design + code:' } satisfies Localized,
 }
@@ -186,7 +186,7 @@ export const NUXT_STACK_DETAIL: StackDetail[] = [
     label: { de: 'UI & Styling', en: 'UI & styling' },
     value: {
       de: 'Nuxt UI und Tailwind CSS 4 (CSS-first mit @theme-Tokens) – konsistente Design Systems, Dark Mode inklusive.',
-      en: 'Nuxt UI and Tailwind CSS 4 (CSS-first with theme tokens) — consistent design systems, dark mode included.',
+      en: 'Nuxt UI and Tailwind CSS 4 (CSS-first with @theme tokens) — consistent design systems, dark mode included.',
     },
   },
   {
@@ -200,7 +200,7 @@ export const NUXT_STACK_DETAIL: StackDetail[] = [
     label: { de: 'Backend', en: 'Backend' },
     value: {
       de: 'Appwrite (Auth, Datenbank, Storage, Realtime, Functions) als Backend-as-a-Service – oder Anbindung an Ihre bestehende API.',
-      en: 'Appwrite (auth, database, storage, realtime, functions) as backend-as-a-service — or a connection to your existing API.',
+      en: 'Appwrite (auth, database, storage, realtime, functions) as the backend-as-a-service layer — or integration with your existing API.',
     },
   },
   {
@@ -242,7 +242,7 @@ export const NUXT_FAQS: LocalizedFaq[] = [
     },
     answer: {
       de: 'Beide sind ausgereifte Full-Stack-Frameworks. Nuxt (Vue) punktet mit einfacherer Lernkurve, sehr guter Developer Experience und schlankem Code; Next.js (React) mit dem größeren Ökosystem. Wenn Ihr Team bereits Vue kennt oder das Projekt neu startet, ist Nuxt meist die effizientere Wahl. Entscheidend ist saubere Umsetzung – nicht das Framework-Logo.',
-      en: 'Both are mature full-stack frameworks. Nuxt (Vue) wins on a gentler learning curve, very good developer experience and lean code; Next.js (React) on the larger ecosystem. If your team already knows Vue or the project is starting fresh, Nuxt is usually the more efficient choice. What decides the outcome is clean execution — not the framework logo.',
+      en: 'Both are mature full-stack frameworks. Nuxt (Vue) wins on a gentler learning curve, very good developer experience and lean code; Next.js (React) on the larger ecosystem. If your team already knows Vue or the project is starting fresh, Nuxt is usually the more efficient choice. What matters is clean execution — not the logo on the framework.',
     },
   },
   {
@@ -259,7 +259,7 @@ export const NUXT_FAQS: LocalizedFaq[] = [
     question: { de: 'Machen Sie auch das Design?', en: 'Do you do the design as well?' },
     answer: {
       de: 'Ja – das ist mein Alleinstellungsmerkmal: Als Senior UI/UX Designer und Entwickler liefere ich Design und Umsetzung aus einer Hand. Kein Reibungsverlust zwischen Figma und Code, keine doppelten Abstimmungsschleifen. Auf Wunsch arbeite ich auch mit Ihrem bestehenden Design-Team und setze deren Figma-Designs um.',
-      en: 'Yes — that is what sets me apart: as a senior UI/UX designer and developer I deliver design and implementation from one source. No friction between Figma and code, no duplicated review loops. On request I also work with your existing design team and implement their Figma designs.',
+      en: 'Yes — that is what sets me apart: as a senior UI/UX designer and developer I deliver design and implementation from the same pair of hands. No friction between Figma and code, no duplicated review loops. On request I also work with your existing design team and implement their Figma designs.',
     },
   },
   {
@@ -269,7 +269,7 @@ export const NUXT_FAQS: LocalizedFaq[] = [
     },
     answer: {
       de: 'Ja. Ich integriere mich in bestehende Teams (Git-Workflow, Code-Reviews, Slack/Linear) oder arbeite eigenständig mit regelmäßigen Reviews. Die Zusammenarbeit läuft remote und asynchron dokumentiert – Video-Calls lege ich auf den DACH-Abend.',
-      en: 'Yes. I integrate into existing teams (git workflow, code reviews, Slack/Linear) or work independently with regular reviews. Collaboration is remote and documented asynchronously — I schedule video calls for the European evening.',
+      en: 'Yes. I integrate into existing teams (Git workflow, code reviews, Slack/Linear) or work independently with regular reviews. Collaboration is remote and documented asynchronously — I schedule video calls for the CET evening.',
     },
   },
   {
@@ -279,7 +279,7 @@ export const NUXT_FAQS: LocalizedFaq[] = [
     },
     answer: {
       de: 'Ja. Der Ablauf: technisches Audit der bestehenden App, Migrationsplan mit Aufwandsschätzung, dann schrittweise Migration (Composition API, TypeScript, neue Verzeichnisstruktur) mit laufenden Tests. Festpreis nach Audit – ab €2.500 für kleinere Apps.',
-      en: 'Yes. The sequence: a technical audit of the existing app, a migration plan with an effort estimate, then a step-by-step migration (Composition API, TypeScript, new directory structure) with tests along the way. Fixed price after the audit — from €2,500 for smaller apps.',
+      en: 'Yes. The process: a technical audit of the existing app, a migration plan with an effort estimate, then a step-by-step migration (Composition API, TypeScript, new directory structure) with tests along the way. Fixed price after the audit — from €2,500 for smaller apps.',
     },
   },
 ]
@@ -295,11 +295,11 @@ export const NUXT_CTA = {
 export const NUXT_META = {
   title: {
     de: 'Nuxt Entwickler Freelancer – Nuxt 4, Vue 3, TypeScript | David Schubert',
-    en: 'Freelance Nuxt Developer — Nuxt 4, Vue 3, TypeScript | David Schubert',
+    en: 'Freelance Nuxt developer — Nuxt 4, Vue 3, TypeScript | David Schubert',
   } satisfies Localized,
   description: {
     de: 'Freelance Nuxt-Entwickler für DACH: SaaS-Frontends, Corporate Websites & Landingpages mit Nuxt 4, Vue 3, TypeScript, Tailwind CSS 4 und Appwrite. Design + Code aus einer Hand, Festpreise.',
-    en: 'Freelance Nuxt developer for the DACH region: SaaS frontends, corporate websites & landing pages with Nuxt 4, Vue 3, TypeScript, Tailwind CSS 4 and Appwrite. Design + code from one source, fixed prices.',
+    en: 'Freelance Nuxt developer for the DACH region: SaaS frontends, corporate websites & landing pages with Nuxt 4, Vue 3, TypeScript, Tailwind CSS 4 and Appwrite. Design + code from the same pair of hands, fixed prices.',
   } satisfies Localized,
   serviceName: {
     de: 'Nuxt-Entwicklung (Freelance)',

@@ -32,7 +32,7 @@ export const CONTACT: ContactData = {
     'https://www.instagram.com/davidschubert/',
   ],
   lastUpdated: '2026-08-08',
-  lastUpdatedHuman: { de: '8. August 2026', en: 'August 8, 2026' },
+  lastUpdatedHuman: { de: '8. August 2026', en: '8 August 2026' },
   location: {
     de: 'Pukalani, Maui · Hawaii (USA) · Remote für DACH',
     en: 'Pukalani, Maui · Hawaii (USA) · Remote for the DACH region',
@@ -42,7 +42,7 @@ export const CONTACT: ContactData = {
 /** Fester Text des CTA-Bandes vor der Fußzeile (Antwort- und Angebotsfristen). */
 export const CTA_NOTE: Localized = {
   de: 'Antwort innerhalb von 24 Stunden · Festpreis-Angebot innerhalb von 48 Stunden nach dem Gespräch',
-  en: 'Reply within 24 hours · fixed-price quote within 48 hours after the call',
+  en: 'Reply within 24 hours · fixed-price quote within 48 hours of the call',
 }
 
 /** Beschriftung der beiden Kontakt-Knöpfe — überall dieselbe Zusage. */

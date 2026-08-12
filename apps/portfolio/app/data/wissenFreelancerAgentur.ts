@@ -146,7 +146,7 @@ export const AGENTUR_COSTS = {
   } satisfies Localized,
   paragraph1: {
     de: 'Freelance-Webdesigner und UX-Designer in Deutschland berechnen üblicherweise 60–120 € pro Stunde, Agenturen wegen Overhead (Projektleitung, Büro, Vertrieb) meist 100–200 € pro Stunde. Auf Projektebene bedeutet das: Ein Projekt, das beim Freelancer €15.000 kostet, liegt bei einer Agentur häufig bei €25.000–35.000 – bei vergleichbarem Ergebnis, wenn der Freelancer Senior-Niveau hat.',
-    en: 'Freelance web and UX designers in Germany usually charge €60–120 per hour; agencies, because of overhead (project management, offices, sales), mostly €100–200 per hour. At project level that means: a project costing €15,000 with a freelancer often lands at €25,000–35,000 with an agency — for a comparable result, provided the freelancer works at senior level.',
+    en: 'Freelance web and UX designers in Germany usually charge €60–120 per hour; agencies, because of overhead (project management, offices, sales), usually charge €100–200 per hour. At project level that means: a project costing €15,000 with a freelancer often lands at €25,000–35,000 with an agency — for a comparable result, provided the freelancer works at senior level.',
   } satisfies Localized,
   paragraph2Lead: {
     de: 'Wichtig ist der Blick auf die',
@@ -187,9 +187,9 @@ export const AGENTUR_FREELANCER_FIT = {
     en: [
       'Clearly defined projects: website relaunch, landing page, UX audit, dashboard redesign, design system',
       'Budgets up to about €75,000 where every euro should go into execution rather than overhead',
-      'You want direct access to the person doing the work — short paths, fast iterations',
+      'You want direct access to the person doing the work — short lines of communication, fast iterations',
       'An in-house team that needs senior reinforcement for a specific job (design or development)',
-      'Design AND development from one source — with no losses at handover',
+      'Design AND development from a single provider — nothing lost at handover',
     ],
   } satisfies Localized<string[]>,
 }
@@ -236,7 +236,7 @@ export const AGENTUR_RISKS = {
   agencyTitle: { de: 'Risiko Agentur', en: 'Agency risk' } satisfies Localized,
   agencyText: {
     de: 'Junior-Staffing nach Senior-Pitch, träge Abstimmungswege, Budget-Verbrauch durch Projektmanagement. Absicherung: Namentlich festgelegtes Team im Vertrag, direkte Kommunikationswege und transparente Stundenaufstellung verlangen.',
-    en: 'Junior staffing after a senior pitch, sluggish review paths, budget consumed by project management. Safeguards: insist on a named team in the contract, direct communication channels and a transparent breakdown of hours.',
+    en: 'Junior staffing after a senior pitch, slow approval chains, budget consumed by project management. Safeguards: insist on a named team in the contract, direct communication channels and a transparent breakdown of hours.',
   } satisfies Localized,
 }
 
@@ -250,7 +250,7 @@ export const AGENTUR_FAQS: LocalizedFaq[] = [
     },
     answer: {
       de: 'Bei vergleichbarer Seniorität in der Regel ja. Der Unterschied entsteht durch den Agentur-Overhead (Projektleitung, Vertrieb, Büro) und dadurch, dass beim Freelancer jede Stunde Senior-Zeit ist. Marktüblich sind in Deutschland 60–120 € pro Stunde für Senior-Freelancer im UX-/Webdesign gegenüber 100–200 € bei Agenturen. Entscheidend ist der Projektpreis fürs gleiche Ergebnis – vergleichen Sie Angebote immer auf Basis definierter Leistungen.',
-      en: 'At comparable seniority, usually yes. The difference comes from agency overhead (project management, sales, offices) and from the fact that with a freelancer every hour is senior time. The German market norm is €60–120 per hour for senior freelancers in UX and web design versus €100–200 at agencies. What decides it is the project price for the same result — always compare quotes on the basis of defined deliverables.',
+      en: 'At comparable seniority, usually yes. The difference comes from agency overhead (project management, sales, offices) and from the fact that with a freelancer every hour is senior time. The German market norm is €60–120 per hour for senior freelancers in UX and web design versus €100–200 at agencies. What matters is the project price for the same result — always compare quotes on the basis of defined deliverables.',
     },
   },
   {
@@ -260,7 +260,7 @@ export const AGENTUR_FAQS: LocalizedFaq[] = [
     },
     answer: {
       de: 'Seriöse Freelancer sichern das ab: dokumentierte Arbeitsstände in gemeinsamen Tools (Figma, Git, Notion), Meilenstein-Abnahmen mit Teillieferungen und vertraglich geregelte Datei-Übergabe. So bleibt Ihr Projekt auch im Ausfallszenario fortführbar. Fragen Sie im Erstgespräch konkret danach – die Antwort zeigt die Professionalität.',
-      en: 'Serious freelancers cover this: documented work in shared tools (Figma, git, Notion), milestone sign-offs with partial deliveries and a contractually agreed handover of files. That keeps your project workable even in the worst case. Ask about it explicitly in the intro call — the answer tells you how professional the setup is.',
+      en: 'Serious freelancers cover this: documented work in shared tools (Figma, Git, Notion), milestone sign-offs with partial deliveries and a contractually agreed handover of files. That keeps your project going even if the freelancer drops out. Ask about it explicitly in the intro call — the answer tells you how professional the setup is.',
     },
   },
   {
@@ -270,7 +270,7 @@ export const AGENTUR_FAQS: LocalizedFaq[] = [
     },
     answer: {
       de: 'Projekte bis etwa €75.000 sind für erfahrene Solo-Freelancer gut machbar, wenn der Umfang klar geschnitten ist. Darüber hinaus arbeiten viele Freelancer mit Partnernetzwerken – Sie behalten einen Ansprechpartner, bekommen aber zusätzliche Kapazität. Für echte Multi-Team-Vorhaben ist die Agentur die richtige Wahl.',
-      en: 'Projects up to roughly €75,000 are well within reach for experienced solo freelancers, provided the scope is cleanly cut. Beyond that, many freelancers work with partner networks — you keep a single point of contact but gain extra capacity. For genuine multi-team undertakings, the agency is the right choice.',
+      en: 'Projects up to roughly €75,000 are well within reach for experienced solo freelancers, provided the scope is clearly defined. Beyond that, many freelancers work with partner networks — you keep a single point of contact but gain extra capacity. For genuine multi-team undertakings, the agency is the right choice.',
     },
   },
   {
@@ -280,7 +280,7 @@ export const AGENTUR_FAQS: LocalizedFaq[] = [
     },
     answer: {
       de: 'An vier Dingen: 1. Nachweisbare Ergebnisse mit Zahlen (Conversion, Traffic, Nutzerzufriedenheit) statt nur schöner Bilder. 2. Ein klarer, dokumentierter Prozess von Discovery bis Launch. 3. Transparente Preise oder nachvollziehbare Festpreis-Angebote. 4. Ehrlichkeit über Grenzen – wer jedes Projekt annimmt, ist ein Warnsignal.',
-      en: 'By four things: 1. demonstrable results with numbers (conversion, traffic, user satisfaction) rather than pretty pictures alone. 2. A clear, documented process from discovery to launch. 3. Transparent prices or fixed-price quotes you can follow. 4. Honesty about limits — anyone who takes on every project is a warning sign.',
+      en: 'By four things: 1. Demonstrable results with numbers (conversion, traffic, user satisfaction) rather than pretty pictures alone. 2. A clear, documented process from discovery to launch. 3. Transparent prices or fixed-price quotes you can follow. 4. Honesty about limits — anyone who takes on every project is a warning sign.',
     },
   },
   {
@@ -290,7 +290,7 @@ export const AGENTUR_FAQS: LocalizedFaq[] = [
     },
     answer: {
       de: 'Mit einem kleinen, klar definierten Einstiegsprojekt: Ein UX-Audit (bei mir €2.500–5.000, ein bis zwei Wochen) zeigt Arbeitsweise, Kommunikationsstil und Qualität, bevor Sie ein großes Redesign beauftragen. Gute Freelancer rechnen die Audit-Kosten bei Folgeprojekten teilweise an.',
-      en: 'With a small, clearly defined entry project: a UX audit (€2,500–5,000 with me, one to two weeks) shows the way of working, the communication style and the quality before you commission a large redesign. Good freelancers credit part of the audit fee against follow-up projects.',
+      en: 'With a small, clearly defined entry project: a UX audit (€2,500–5,000 with me, one to two weeks) shows how I work, how I communicate and the quality I deliver before you commission a large redesign. Good freelancers credit part of the audit fee against follow-up projects.',
     },
   },
 ]
@@ -299,7 +299,7 @@ export const AGENTUR_CONCLUSION = {
   title: { de: 'Fazit', en: 'Conclusion' } satisfies Localized,
   text: {
     de: 'Für die meisten Design- und Web-Projekte im Mittelstand und bei SaaS-Unternehmen liefert ein Senior-Freelancer das bessere Preis-Leistungs-Verhältnis: Sie zahlen ausschließlich für Senior-Arbeit, entscheiden schneller und bleiben flexibler. Eine Agentur ist die richtige Wahl bei sehr großen, multidisziplinären Vorhaben mit hohem Kapazitätsbedarf. Prüfen Sie in beiden Fällen dasselbe: nachweisbare Ergebnisse, klare Prozesse und wer konkret an Ihrem Projekt arbeitet.',
-    en: 'For most design and web projects at mid-sized companies and SaaS businesses, a senior freelancer delivers the better value: you pay exclusively for senior work, decide faster and stay more flexible. An agency is the right choice for very large, multidisciplinary undertakings with high capacity requirements. In both cases check the same things: demonstrable results, clear processes and who exactly will work on your project.',
+    en: 'For most design and web projects in the German Mittelstand and at SaaS businesses, a senior freelancer delivers the better value: you pay exclusively for senior work, decide faster and stay more flexible. An agency is the right choice for very large, multidisciplinary undertakings with high capacity requirements. In both cases check the same things: demonstrable results, clear processes and who exactly will work on your project.',
   } satisfies Localized,
 }
 
@@ -333,7 +333,7 @@ export const AGENTUR_META = {
    */
   published: '2026-07-14',
   updated: '2026-08-08',
-  updatedHuman: { de: '8. August 2026', en: 'August 8, 2026' } satisfies Localized,
+  updatedHuman: { de: '8. August 2026', en: '8 August 2026' } satisfies Localized,
   title: {
     de: 'Freelancer oder Agentur für UX & Webdesign? Ehrlicher Vergleich 2026',
     en: 'Freelancer or agency for UX & web design? An honest comparison for 2026',

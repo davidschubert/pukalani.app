@@ -7,7 +7,7 @@
       "label": "Main navigation",
       "services": "Services",
       "uxAudit": "UX audit",
-      "references": "Results",
+      "references": "Selected work",
       "knowledge": "Knowledge",
       "faq": "FAQ",
       "cta": "Intro call"
@@ -57,7 +57,7 @@
       }
     },
     "page": {
-      "updated": "Last updated:"
+      "updated": "As of:"
     }
   }
 }

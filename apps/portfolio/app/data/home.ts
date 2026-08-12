@@ -99,7 +99,7 @@ export interface ContactChannel {
 export const HERO = {
   availability: {
     de: 'Verfügbar für neue Projekte · UX-Audits laufend',
-    en: 'Available for new projects · UX audits ongoing',
+    en: 'Available for new projects · UX audits on a rolling basis',
   } satisfies Localized,
   eyebrow: {
     de: 'David Schubert · Pukalani Studio · Remote für DACH',
@@ -111,11 +111,11 @@ export const HERO = {
   } satisfies Localized,
   intro: {
     de: 'Ich bin David Schubert, Senior UI/UX Designer und ausgebildeter Mediengestalter mit über 25 Jahren Erfahrung in Design und Werbung. Ich erarbeite mit Ihnen Designkonzepte, Strategien und digitales Brand Design, gestalte Websites und digitale Produkte – und setze sie auf Wunsch technisch um. Remote für Unternehmen und Agenturen in Deutschland, Österreich und der Schweiz, zu festen Projektpreisen.',
-    en: 'I am David Schubert, a senior UI/UX designer, trained media designer and creative technologist with more than 25 years in design and advertising. I develop design concepts, strategies and digital brand design with you, design websites and digital products — and build them technically if you want me to. Remote for companies and agencies in Germany, Austria and Switzerland, at fixed project prices.',
+    en: 'I am David Schubert, a senior UI/UX designer, trained media designer and creative technologist with more than 25 years in design and advertising. I develop design concepts, strategies and digital brand design with you, design websites and digital products — and build them myself if you would like. Remote for companies and agencies in Germany, Austria and Switzerland, at fixed project prices.',
   } satisfies Localized,
   brandsLead: {
     de: 'In Agentur- und Freelance-Projekten verantwortlich für Konzepte und Gestaltung für Marken wie',
-    en: 'In agency and freelance projects, responsible for concepts and design for brands such as',
+    en: 'In agency and freelance projects I have led concept and design work for brands such as',
   } satisfies Localized,
   brands: {
     de: 'Astra, E WIE EINFACH, GEMA, Holsten, Lamborghini, NEFF, Telekom und T-Systems',
@@ -143,7 +143,7 @@ export const TRUST_BADGES: Localized<string[]> = {
     '25+ years of experience',
     'Trained media designer',
     'Concept, design & build',
-    'Fixed project prices',
+    'Fixed prices, not day rates',
     'Reply within 24 hours',
   ],
 }
@@ -250,7 +250,7 @@ export const AUDIENCES: Audience[] = [
     },
     description: {
       de: 'Ich verstärke Ihr Team als Senior-Freelancer – zuverlässig, remote und auf Wunsch unsichtbar für Ihren Kunden (White Label). Konzept, UI/UX-Design, Art Direction oder technische Umsetzung: Sie buchen genau die Kompetenz, die im Projekt fehlt.',
-      en: 'I reinforce your team as a senior freelancer — reliable, remote and, on request, invisible to your client (white label). Concept, UI/UX design, art direction or technical implementation: you book exactly the skill your project is missing.',
+      en: 'I add senior capacity to your team — reliable, remote and, on request, invisible to your client (white label). Concept, UI/UX design, art direction or technical implementation: you book exactly the skill your project is missing.',
     },
   },
   {
@@ -275,7 +275,7 @@ const SERVICE_DETAILS: Record<ServiceId, ServiceDetail> = {
   'brand-design': {
     description: {
       de: 'Der Auftritt, an dem man Sie erkennt: Logos, visuelle Identitäten, Designkonzepte und Strategien – digital und print, aus einem Guss.',
-      en: 'The presence people recognise you by: logos, visual identities, design concepts and strategies — digital and print, all of a piece.',
+      en: 'The presence people recognise you by: logos, visual identities, design concepts and strategies — digital and print, consistent throughout.',
     },
     deliverables: {
       de: [
@@ -285,7 +285,7 @@ const SERVICE_DETAILS: Record<ServiceId, ServiceDetail> = {
         'Art Direction für Kampagnen & Werbemittel',
       ],
       en: [
-        'Design concept & creative leading idea',
+        'Design concept & core creative idea',
         'Logo & visual identity (colour, typography, imagery)',
         'Design guidelines for digital & print',
         'Art direction for campaigns & ad assets',
@@ -337,7 +337,7 @@ const SERVICE_DETAILS: Record<ServiceId, ServiceDetail> = {
   'landingpage-cro': {
     description: {
       de: 'Landingpages mit Conversion-Fokus: Nutzerpsychologie, Social Proof und technische Performance – gestaltet und auf Wunsch direkt entwickelt.',
-      en: 'Landing pages built for conversion: user psychology, social proof and technical performance — designed and, on request, built right away.',
+      en: 'Landing pages built for conversion: user psychology, social proof and technical performance — designed and, on request, built by me as well.',
     },
     deliverables: {
       de: [
@@ -369,7 +369,7 @@ const SERVICE_DETAILS: Record<ServiceId, ServiceDetail> = {
   'corporate-website': {
     description: {
       de: 'Ihr Unternehmensauftritt aus einer Hand: Inhalte strukturieren, Design entwickeln, barrierefrei und schnell umsetzen – fertig zum Launch.',
-      en: 'Your corporate presence from a single source: structure the content, develop the design, build it accessibly and fast — ready to launch.',
+      en: 'Your corporate presence end to end: structure the content, develop the design, build it accessibly and fast — ready to launch.',
     },
     deliverables: {
       de: [
@@ -433,7 +433,7 @@ const SERVICE_DETAILS: Record<ServiceId, ServiceDetail> = {
   'content-produktion': {
     description: {
       de: 'Inhalte, die zum Design passen: digitale Werbemittel, Fotografie und Videografie inklusive Schnitt – als ausgebildeter Mediengestalter aus einer Hand.',
-      en: 'Content that fits the design: digital ad assets, photography and video including editing — from a single source, by a trained media designer.',
+      en: 'Content that fits the design: digital ad assets, photography and video including editing — all from one trained media designer.',
     },
     deliverables: {
       de: [
@@ -451,7 +451,7 @@ const SERVICE_DETAILS: Record<ServiceId, ServiceDetail> = {
     },
     result: {
       de: 'Design & Content aus einer Hand – ohne Reibungsverluste',
-      en: 'Design & content from one source — no friction in between',
+      en: 'Design & content end to end — no friction in between',
     },
     price: { de: 'Festpreis nach Umfang', en: 'Fixed price by scope' },
     duration: { de: 'je nach Projekt', en: 'per project' },
@@ -477,7 +477,7 @@ export const PROCESS_STEPS: ProcessStep[] = [
     title: { de: 'Discovery & Zieldefinition', en: 'Discovery & goal definition' },
     description: {
       de: 'Ziele, Stakeholder, KPIs und Nutzergruppen werden gemeinsam geschärft – als belastbare Basis für alle Entscheidungen.',
-      en: 'We sharpen goals, stakeholders, KPIs and user groups together — a solid basis for every decision that follows.',
+      en: 'Together we define the goals, stakeholders, KPIs and user groups — a solid basis for every decision that follows.',
     },
     duration: { de: '3–5 Tage', en: '3–5 days' },
   },
@@ -584,7 +584,7 @@ export const CASE_STUDIES: CaseStudy[] = [
     },
     results: {
       de: ['+156 % organischer Traffic', '+84 % Anfragen', 'PageSpeed 94'],
-      en: ['+156% organic traffic', '+84% inquiries', 'PageSpeed 94'],
+      en: ['+156% organic traffic', '+84% enquiries', 'PageSpeed 94'],
     },
   },
   {
@@ -622,7 +622,7 @@ export const TESTIMONIALS: Testimonial[] = [
   {
     text: {
       de: 'Endlich jemand, der Design und Code verbindet. Die Übergabe an unsere Entwickler lief komplett reibungslos.',
-      en: 'Finally someone who connects design and code. The handover to our developers went entirely without friction.',
+      en: 'Finally someone who connects design and code. The handover to our developers went completely smoothly.',
     },
     attribution: {
       de: 'Lead Frontend Developer, Software-Unternehmen, München',
@@ -632,7 +632,7 @@ export const TESTIMONIALS: Testimonial[] = [
   {
     text: {
       de: 'Unsere Website generiert dreimal mehr Anfragen als vorher. Professionell, zuverlässig, schnell.',
-      en: 'Our website generates three times as many inquiries as before. Professional, reliable, fast.',
+      en: 'Our website generates three times as many enquiries as before. Professional, reliable, fast.',
     },
     attribution: {
       de: 'Geschäftsführerin, Mittelständler, Zürich',
@@ -656,7 +656,7 @@ export const TIMELINE: Milestone[] = [
     period: { de: 'Ausbildung', en: 'Training' },
     description: {
       de: 'Mediengestalter Digital und Print in Hamburg – das Handwerk von Layout und Typografie bis Druck und Bildbearbeitung. Später ergänzt um den Bachelor Professional in Digital Media (IHK) und den Ausbilderschein.',
-      en: 'Media designer for digital and print in Hamburg — the craft, from layout and typography to print and image editing. Later complemented by a Bachelor Professional in Digital Media and a trainer certification.',
+      en: 'Media designer for digital and print in Hamburg — the craft, from layout and typography to print and image editing. Later complemented by a Bachelor Professional in Digital Media (IHK) and a certified trainer qualification.',
     },
   },
   {
@@ -747,7 +747,7 @@ export const REMOTE_CARDS: RemoteCard[] = [
     title: { de: 'Vor Ort in DACH', en: 'On site in the DACH region' },
     description: {
       de: 'Für Kickoffs, Design Sprints und Workshops komme ich nach Vereinbarung zu Ihnen – u. a. nach Berlin, Hamburg, München, Wien, Zürich oder Basel.',
-      en: 'For kickoffs, design sprints and workshops I come to you by arrangement — Berlin, Hamburg, Munich, Vienna, Zurich or Basel among others.',
+      en: 'For kickoffs, design sprints and workshops I come to you by arrangement — to Berlin, Hamburg, Munich, Vienna, Zurich or Basel, among others.',
     },
   },
 ]
@@ -785,7 +785,7 @@ export const GUIDES: Guide[] = [
     title: { de: 'Nuxt-Entwicklung als Freelancer', en: 'Freelance Nuxt development' },
     description: {
       de: 'SaaS-Frontends, Corporate Websites und Migrationen mit Nuxt 4, Vue 3 und TypeScript – Design und Code aus einer Hand.',
-      en: 'SaaS frontends, corporate websites and migrations with Nuxt 4, Vue 3 and TypeScript — design and code from one source.',
+      en: 'SaaS frontends, corporate websites and migrations with Nuxt 4, Vue 3 and TypeScript — design and code from the same pair of hands.',
     },
     to: '/nuxt-entwickler-freelancer',
   },
@@ -820,13 +820,13 @@ export const FAQS: LocalizedFaq[] = [
     },
     answer: {
       de: 'Bei mir arbeiten Sie direkt mit einem Senior – ohne Projektleitungs-Overhead und ohne dass Juniors die Arbeit machen. Das ist in der Regel 30–50 % günstiger als eine Agentur und deutlich schneller in den Entscheidungen. Für Full-Service-Anforderungen ziehe ich bei Bedarf Partner aus meinem Netzwerk hinzu.',
-      en: 'With me you work directly with a senior — no project-management overhead and no juniors doing the work. That is usually 30–50% cheaper than an agency and considerably faster in decision-making. For full-service requirements I bring in partners from my network when needed.',
+      en: 'With me you work directly with a senior — no project-management overhead and no juniors doing the work. That is usually 30–50% cheaper than an agency and decisions get made considerably faster. For full-service requirements I bring in partners from my network when needed.',
     },
   },
   {
     question: {
       de: 'Wie läuft ein Projekt ab?',
-      en: 'How does a project run?',
+      en: 'What does the process look like?',
     },
     answer: {
       de: 'In sechs Schritten: 1. Discovery & Zieldefinition, 2. Research & UX-Konzept, 3. UI-Design & Prototyping, 4. Design System & Dokumentation, 5. Entwicklung oder Developer-Handoff, 6. Launch, Messung & Optimierung. Jede Phase ist auch einzeln buchbar und endet mit einem dokumentierten Ergebnis.',
@@ -846,7 +846,7 @@ export const FAQS: LocalizedFaq[] = [
   {
     question: {
       de: 'Wie funktioniert Remote-Arbeit von Hawaii aus für die DACH-Region?',
-      en: 'How does remote work from Hawaii work for clients in the DACH region?',
+      en: 'How does remote collaboration from Hawaii work for clients in the DACH region?',
     },
     answer: {
       de: 'Sehr gut – die Zeitverschiebung ist ein Vorteil: Feedback, das Sie am Ende Ihres Arbeitstags senden, wird über Nacht umgesetzt und liegt am nächsten Morgen fertig vor. Video-Calls finden am DACH-Abend statt (Hawaii-Morgen). Die restliche Kommunikation läuft asynchron über Slack, Notion oder Linear – auf Deutsch oder Englisch. Workshops vor Ort in DACH sind nach Vereinbarung möglich.',
@@ -860,7 +860,7 @@ export const FAQS: LocalizedFaq[] = [
     },
     answer: {
       de: 'Ja. Ich gestalte nicht nur, sondern setze Websites und Web-Anwendungen auch selbst um – mit moderner, schneller und suchmaschinenfreundlicher Web-Technologie (u. a. Nuxt/Vue). Sie bekommen eine fertige, live geschaltete Website statt nur Design-Dateien. Alternativ übergebe ich sauber dokumentierte Design-Vorlagen an Ihr Entwicklungsteam oder Ihre Agentur.',
-      en: 'Yes. I do not just design — I build websites and web applications myself, with modern, fast and search-engine-friendly web technology (Nuxt/Vue among others). You get a finished, live website instead of design files alone. Alternatively I hand cleanly documented design templates to your development team or agency.',
+      en: 'Yes. I do not just design — I build websites and web applications myself, with modern, fast and search-engine-friendly web technology (Nuxt/Vue among others). You get a finished, live website instead of design files alone. Alternatively I hand over cleanly documented design files to your development team or agency.',
     },
   },
   {
@@ -870,7 +870,7 @@ export const FAQS: LocalizedFaq[] = [
     },
     answer: {
       de: 'Ja. Als ausgebildeter Mediengestalter produziere ich auch den Content zum Design: digitale Werbemittel, Social-Media-Assets, Fotografie sowie Videografie inklusive Schnitt (Final Cut Pro). Der Vorteil: Design und Inhalte kommen aus einer Hand und passen von Anfang an zusammen.',
-      en: 'Yes. As a trained media designer I also produce the content that goes with the design: digital ad assets, social media assets, photography and video including editing (Final Cut Pro). The advantage: design and content come from one source and fit together from the start.',
+      en: 'Yes. As a trained media designer I also produce the content that goes with the design: digital ad assets, social media assets, photography and video including editing (Final Cut Pro). The advantage: design and content come from the same pair of hands and fit together from the start.',
     },
   },
   {
@@ -880,7 +880,7 @@ export const FAQS: LocalizedFaq[] = [
     },
     answer: {
       de: 'Ja, regelmäßig. Ich verstärke Werbe-, Marketing- und Digitalagenturen als Senior-Freelancer – für Konzept, UI/UX-Design, Art Direction oder technische Umsetzung. Auf Wunsch White Label, also unsichtbar für Ihren Endkunden. Agentur-Erfahrung bringe ich aus über einem Jahrzehnt auf Agenturseite selbst mit.',
-      en: 'Yes, regularly. I reinforce advertising, marketing and digital agencies as a senior freelancer — for concept, UI/UX design, art direction or technical implementation. White label on request, so invisible to your end client. I bring more than a decade of my own agency-side experience with me.',
+      en: 'Yes, regularly. I work with advertising, marketing and digital agencies as a senior freelancer — for concept, UI/UX design, art direction or technical implementation. White label on request, so invisible to your end client. I spent more than a decade on the agency side myself.',
     },
   },
   {
@@ -900,7 +900,7 @@ export const FAQS: LocalizedFaq[] = [
     },
     answer: {
       de: 'Ein UX-Audit ist eine strukturierte Analyse Ihrer Website oder App: heuristische Evaluation, Conversion-Analyse, Performance-Check (Core Web Vitals) und WCAG-Accessibility-Prüfung. Sie erhalten in 1–2 Wochen eine priorisierte Maßnahmenliste mit Quick Wins – der schnellste und günstigste Einstieg in eine Zusammenarbeit (€2.500–5.000).',
-      en: 'A UX audit is a structured analysis of your website or app: heuristic evaluation, conversion analysis, performance check (Core Web Vitals) and WCAG accessibility review. Within 1–2 weeks you get a prioritised action list with quick wins — the fastest and cheapest way into a collaboration (€2,500–5,000).',
+      en: 'A UX audit is a structured analysis of your website or app: heuristic evaluation, conversion analysis, performance check (Core Web Vitals) and WCAG accessibility review. Within 1–2 weeks you get a prioritised action list with quick wins — the fastest and most affordable way to start working together (€2,500–5,000).',
     },
   },
   {
@@ -920,7 +920,7 @@ export const FAQS: LocalizedFaq[] = [
     },
     answer: {
       de: 'Kurzfristig: Das Erstgespräch ist meist innerhalb weniger Tage direkt über cal.com buchbar, das Festpreis-Angebot folgt innerhalb von 48 Stunden nach dem Gespräch. UX-Audits sind laufend möglich. Auf E-Mails antworte ich innerhalb von 24 Stunden.',
-      en: 'At short notice: the intro call can usually be booked within a few days directly via cal.com, and the fixed-price quote follows within 48 hours of the call. UX audits are available on a rolling basis. I answer emails within 24 hours.',
+      en: 'Quickly: the intro call can usually be booked within a few days directly via cal.com, and the fixed-price quote follows within 48 hours of the call. UX audits are available on a rolling basis. I answer emails within 24 hours.',
     },
   },
 ]
@@ -975,7 +975,7 @@ export const SECTIONS = {
     title: { de: 'Für wen ich arbeite', en: 'Who I work with' },
     lead: {
       de: 'Meine Kunden sind mittelständische Unternehmen, die einen erfahrenen Design-Partner ohne Agentur-Overhead suchen – und Agenturen, die punktuell Senior-Verstärkung brauchen. Viele kommen über Empfehlungen ehemaliger Kolleginnen und Kollegen.',
-      en: 'My clients are mid-sized companies looking for an experienced design partner without agency overhead — and agencies that need senior reinforcement for a specific job. Many of them arrive through referrals from former colleagues.',
+      en: 'My clients are mid-sized companies looking for an experienced design partner without agency overhead — and agencies that need extra senior capacity for a specific job. Many of them come to me through referrals from former colleagues.',
     },
   },
   services: {
@@ -985,7 +985,7 @@ export const SECTIONS = {
     },
     lead: {
       de: 'Alles aus einer Hand: Designkonzept, Gestaltung, technische Umsetzung und Content. Klar definierte Leistungen mit festen Projektpreisen – vom UX-Audit ab €2.500 bis zum kompletten Produkt-Design ab €25.000. Sie wissen vor Projektstart, was Sie bekommen und was es kostet.',
-      en: 'Everything from one source: design concept, visual design, technical implementation and content. Clearly defined services at fixed project prices — from a UX audit at €2,500 to a complete product design from €25,000. You know what you get and what it costs before the project starts.',
+      en: 'Everything from a single provider: design concept, visual design, technical implementation and content. Clearly defined services at fixed project prices — from a UX audit at €2,500 to a complete product design from €25,000. You know what you get and what it costs before the project starts.',
     },
   },
   process: {
@@ -1001,11 +1001,11 @@ export const SECTIONS = {
   references: {
     title: {
       de: 'Referenzen: Case Studies aus SaaS, E-Commerce & Corporate',
-      en: 'Results: case studies from SaaS, e-commerce & corporate',
+      en: 'Selected work: case studies from SaaS, e-commerce & corporate websites',
     },
     lead: {
       de: 'Ausgewählte Projekte mit messbaren Ergebnissen – von +43 % Feature-Adoption in einem SaaS-Dashboard bis +73 % Conversion nach einem Checkout-Redesign. Aus Vertraulichkeitsgründen anonymisiert; Details und weitere Referenzen gern im persönlichen Gespräch.',
-      en: 'Selected projects with measurable outcomes — from +43% feature adoption in a SaaS dashboard to +73% conversion after a checkout redesign. Anonymised for confidentiality; details and further references gladly in a personal conversation.',
+      en: 'Selected projects with measurable outcomes — from +43% feature adoption in a SaaS dashboard to +73% conversion after a checkout redesign. Anonymised for confidentiality; I am happy to share details and further references in a call.',
     },
   },
   ownWork: {
@@ -1032,7 +1032,7 @@ export const SECTIONS = {
     },
     lead: {
       de: 'David Schubert ist Senior UI/UX Designer und Creative Technologist mit über 25 Jahren Erfahrung in Design und Werbung – ausgebildeter Mediengestalter, langjähriger Art Director und Senior Designer in Hamburger Agenturen, heute selbstständig unter der Marke Pukalani Studio. Sie arbeiten immer direkt mit ihm: von der kreativen Leitidee über das Design bis zur technischen Umsetzung und Content-Produktion.',
-      en: 'David Schubert is a senior UI/UX designer and creative technologist with more than 25 years in design and advertising — a trained media designer, long-time art director and senior designer in Hamburg agencies, today self-employed under the Pukalani Studio brand. You always work with him directly: from the creative leading idea through design to technical implementation and content production.',
+      en: 'David Schubert is a senior UI/UX designer and creative technologist with more than 25 years in design and advertising — a trained media designer, long-time art director and senior designer in Hamburg agencies, today self-employed under the Pukalani Studio brand. You always work with him directly: from the core creative idea through design to technical implementation and content production.',
     },
   },
   remote: {
@@ -1048,7 +1048,7 @@ export const SECTIONS = {
   knowledge: {
     title: {
       de: 'Wissen: Preise, Entscheidungshilfen & Guides',
-      en: 'Knowledge: pricing, decision guides & how-tos',
+      en: 'Knowledge: pricing, comparisons & guides',
     },
     lead: {
       de: 'Fundierte Antworten auf die Fragen, die vor jedem Projekt stehen – mit echten Marktdaten, benannten Quellen und ehrlichen Einordnungen. Alle Guides werden quartalsweise aktualisiert.',
@@ -1062,7 +1062,7 @@ export const SECTIONS = {
     },
     lead: {
       de: 'Antworten auf die häufigsten Fragen zu Preisen, Projektablauf und Zusammenarbeit mit Pukalani Studio.',
-      en: 'Answers to the most common questions about pricing, project flow and working with Pukalani Studio.',
+      en: 'Answers to the most common questions about pricing, process and working with Pukalani Studio.',
     },
   },
   contact: {
@@ -1072,14 +1072,14 @@ export const SECTIONS = {
     },
     lead: {
       de: 'Der schnellste Weg: Buchen Sie direkt ein kostenloses, 30-minütiges Erstgespräch – oder schreiben Sie eine E-Mail. Sie erhalten innerhalb von 24 Stunden eine Antwort und nach dem Gespräch innerhalb von 48 Stunden ein Festpreis-Angebot.',
-      en: 'The fastest route: book a free 30-minute intro call directly — or send an email. You get a reply within 24 hours and a fixed-price quote within 48 hours after the call.',
+      en: 'The fastest route: book a free 30-minute intro call directly — or send an email. You get a reply within 24 hours and a fixed-price quote within 48 hours of the call.',
     },
   },
 } satisfies Record<string, SectionHeading>
 
 export const SERVICES_NOTE: Localized = {
   de: 'Alle Preise netto, als Festpreis nach Value-Based Pricing – Sie zahlen für Ergebnisse, nicht für Stunden. Zusätzlich buchbar: Design-Sprint-Moderation, WCAG-Audits sowie KI-Workshops für Teams.',
-  en: 'All prices are net, quoted as a fixed price under value-based pricing — you pay for results, not for hours. Also bookable: design sprint facilitation, WCAG audits and AI workshops for teams.',
+  en: 'All prices are net, quoted as a fixed price under value-based pricing — you pay for results, not for hours. Also available: design sprint facilitation, WCAG audits and AI workshops for teams.',
 }
 
 export const HOME_META = {
@@ -1100,14 +1100,14 @@ export const HOME_META = {
    */
   published: '2026-07-14',
   updated: '2026-08-08',
-  updatedHuman: { de: '8. August 2026', en: 'August 8, 2026' } satisfies Localized,
+  updatedHuman: { de: '8. August 2026', en: '8 August 2026' } satisfies Localized,
   title: {
     de: 'Senior UI/UX Designer Freelancer – Mittelstand & Agenturen | David Schubert',
-    en: 'Freelance Senior UI/UX Designer for DACH | David Schubert',
+    en: 'Freelance Senior UI/UX Designer for Mid-Sized Companies & Agencies | David Schubert',
   } satisfies Localized,
   description: {
     de: 'David Schubert: Senior UI/UX Designer & ausgebildeter Mediengestalter (25+ Jahre, u. a. für Astra, GEMA, NEFF, Telekom). Designkonzepte, Brand Design, Websites & Content – remote für DACH, Festpreise.',
-    en: 'David Schubert – freelance senior UI/UX designer & creative technologist for Germany, Austria & Switzerland. Design concepts, brand design, websites, content production. 25+ years, brands like Astra, GEMA, Telekom. Fixed prices.',
+    en: 'David Schubert – freelance senior UI/UX designer & creative technologist for Germany, Austria & Switzerland. Design concepts, brand design, websites, content production. 25+ years, brands like Astra, GEMA, NEFF, Telekom. Fixed prices.',
   } satisfies Localized,
   /** Beschreibung der Person im JSON-LD (länger als die Meta-Description). */
   personDescription: {

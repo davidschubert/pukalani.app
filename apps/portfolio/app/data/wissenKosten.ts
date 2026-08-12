@@ -1,7 +1,7 @@
 import type { Localized, LocalizedFaq } from './localized'
 
 /**
- * Inhalte des Guides „Was kostet UX/UI Design?"
+ * Inhalte des Guides „Was kostet UX/UI Design?“
  * (/wissen/was-kostet-ux-design · /de/wissen/was-kostet-ux-design).
  *
  * Alle Zahlen sind BELEGT und tragen ihre Quelle mit — das ist der Kern dieses
@@ -100,7 +100,7 @@ export const KOSTEN_RATES = {
     en: 'Hourly and day rates in Germany (2025/2026 data)',
   } satisfies Localized,
   lead: {
-    de: 'Der durchschnittliche Freelancer-Stundensatz in der DACH-Region liegt laut Freelancer-Kompass 2026 (freelancermap, 5.400+ Befragte) bei 103 € – der erste Rückgang in der Geschichte der Studie, nach 104 € im Jahr 2025. Im Feld „Grafik, Content, Medien" lag der Schnitt 2025 bei 82 € pro Stunde. Der Branchenreport der German UPA (Berufsverband der UX-Professionals) nennt für selbstständige UX-Professionals einen Median-Stundensatz von 92 € (2023) und einen Median-Tagessatz von 735 €.',
+    de: 'Der durchschnittliche Freelancer-Stundensatz in der DACH-Region liegt laut Freelancer-Kompass 2026 (freelancermap, 5.400+ Befragte) bei 103 € – der erste Rückgang in der Geschichte der Studie, nach 104 € im Jahr 2025. Im Feld „Grafik, Content, Medien“ lag der Schnitt 2025 bei 82 € pro Stunde. Der Branchenreport der German UPA (Berufsverband der UX-Professionals) nennt für selbstständige UX-Professionals einen Median-Stundensatz von 92 € (2023) und einen Median-Tagessatz von 735 €.',
     en: 'According to the Freelancer-Kompass 2026 (freelancermap, 5,400+ respondents) the average freelance hourly rate in the DACH region is €103 — the first decline in the study’s history, after €104 in 2025. In the “graphics, content, media” field the 2025 average was €82 per hour. The industry report by German UPA (the professional association of UX practitioners) states a median hourly rate of €92 (2023) and a median day rate of €735 for self-employed UX professionals.',
   } satisfies Localized,
   note: {
@@ -130,7 +130,7 @@ export const RATE_ROWS: RateRow[] = [
   },
   {
     metric: {
-      de: 'Ø Stundensatz „Grafik, Content, Medien"',
+      de: 'Ø Stundensatz „Grafik, Content, Medien“',
       en: 'Average hourly rate, “graphics, content, media”',
     },
     value: { de: '82 € (2025)', en: '€82 (2025)' },
@@ -164,7 +164,7 @@ export const RATE_ROWS: RateRow[] = [
       de: 'Berlin 578 € · München 658 € · Hamburg 657 €',
       en: 'Berlin €578 · Munich €658 · Hamburg €657',
     },
-    source: 'Malt Tarifbarometer (Juli 2026)',
+    source: 'Malt Tarifbarometer (07/2026)',
     sourceUrl: 'https://www.malt.de/t/tarifbarometer/web-grafikdesign/ux-designer',
   },
   {
@@ -287,7 +287,7 @@ export const COST_FACTORS: CostFactor[] = [
     },
     description: {
       de: 'Endet das Projekt mit Figma-Files oder mit einer live geschalteten Website? Design und Entwicklung aus einer Hand spart Übergabe- und Abstimmungskosten – ein Grund, warum ich beides anbiete.',
-      en: 'Does the project end with Figma files or with a live website? Design and development from one source saves handover and coordination costs — one reason I offer both.',
+      en: 'Does the project end with Figma files or with a live website? Design and development from a single provider saves handover and coordination costs — one reason I offer both.',
     },
   },
 ]
@@ -298,7 +298,7 @@ export const KOSTEN_ROI = {
     en: 'Is it worth it? What good UX design demonstrably delivers',
   } satisfies Localized,
   lead: {
-    de: 'Vorab eine ehrliche Einordnung: Die oft zitierte Faustformel „1 Dollar in UX bringt 100 Dollar zurück" lässt sich nicht seriös belegen – sie kursiert seit Jahren ohne nachvollziehbare Primärquelle. Wer sie Ihnen als Fakt verkauft, hat nicht recherchiert. Es gibt aber belastbare Daten, die den Business Case für gutes UX-Design klar stützen:',
+    de: 'Vorab eine ehrliche Einordnung: Die oft zitierte Faustformel „1 Dollar in UX bringt 100 Dollar zurück“ lässt sich nicht seriös belegen – sie kursiert seit Jahren ohne nachvollziehbare Primärquelle. Wer sie Ihnen als Fakt verkauft, hat nicht recherchiert. Es gibt aber belastbare Daten, die den Business Case für gutes UX-Design klar stützen:',
     en: 'An honest note up front: the frequently quoted rule of thumb that “one dollar in UX returns one hundred” cannot be substantiated — it has been circulating for years without a traceable primary source. Anyone selling it to you as a fact has not done the research. There are, however, solid figures that clearly support the business case for good UX design:',
   } satisfies Localized,
   sourceLabel: { de: 'Quelle:', en: 'Source:' } satisfies Localized,
@@ -316,9 +316,9 @@ export const ROI_STATS: RoiStat[] = [
   {
     claim: {
       de: 'Rund 70 % aller Online-Warenkörbe werden abgebrochen (Meta-Auswertung von ~50 Studien). Besseres Checkout-Design allein kann die Conversion großer Shops um durchschnittlich 35 % steigern.',
-      en: 'Around 70% of all online shopping carts are abandoned (meta-analysis of about 50 studies). Better checkout design alone can raise the conversion of large shops by an average of 35%.',
+      en: 'Around 70% of all online shopping carts are abandoned (meta-analysis of about 50 studies). Better checkout design alone can raise the conversion rate of large online stores by an average of 35%.',
     },
-    source: 'Baymard Institute – Cart Abandonment Research (laufend aktualisiert)',
+    source: 'Baymard Institute – Cart Abandonment Research (ongoing)',
     sourceUrl: 'https://baymard.com/lists/cart-abandonment-rate',
   },
   {
@@ -350,7 +350,7 @@ export const KOSTEN_MODELS = {
   } satisfies Localized,
   paragraph2Lead: {
     de: 'Achten Sie beim Vergleich von Angeboten weniger auf den Stundensatz als auf drei Fragen: Was genau ist enthalten? Wer macht die Arbeit (Senior oder Junior)? Und was passiert bei Mehraufwand? Mehr dazu im Vergleich',
-    en: 'When comparing quotes, pay less attention to the hourly rate and more to three questions: what exactly is included? Who does the work (senior or junior)? And what happens if it takes longer? More on that in the comparison',
+    en: 'When comparing quotes, pay less attention to the hourly rate and more to three questions: what exactly is included? Who does the work (senior or junior)? And what happens if the work exceeds the estimate? More on that in the comparison',
   } satisfies Localized,
   paragraph2Link: {
     de: 'Freelancer oder Agentur',
@@ -369,7 +369,7 @@ export const KOSTEN_BFSG = {
   } satisfies Localized,
   linkLabel: {
     de: 'Barrierefreiheitsstärkungsgesetz (BFSG)',
-    en: 'Accessibility Strengthening Act (BFSG)',
+    en: 'Barrierefreiheitsstärkungsgesetz (BFSG — Accessibility Strengthening Act)',
   } satisfies Localized,
   linkUrl: 'https://www.bundesfachstelle-barrierefreiheit.de/DE/Fachwissen/Produkte-und-Dienstleistungen/Barrierefreiheitsstaerkungsgesetz/barrierefreiheitsstaerkungsgesetz_node.html',
   paragraphRest: {
@@ -396,7 +396,7 @@ export const KOSTEN_FAQS: LocalizedFaq[] = [
     },
     answer: {
       de: 'Marktdaten 2025/2026: Der Freelancer-Kompass von freelancermap nennt 103 € Durchschnitts-Stundensatz über alle Felder (Grafik/Content/Medien: 82 €), der German-UPA-Branchenreport 92 € Median für selbstständige UX-Professionals. Senior-UX-Designer mit Spezialisierung liegen typischerweise bei 90–120 € pro Stunde, Einsteiger bei 50–70 €.',
-      en: 'Market data for 2025/2026: freelancermap’s Freelancer-Kompass reports an average hourly rate of €103 across all fields (graphics/content/media: €82); the German UPA industry report gives a median of €92 for self-employed UX professionals. Senior UX designers with a specialisation typically sit at €90–120 per hour, entrants at €50–70.',
+      en: 'Market data for 2025/2026: freelancermap’s Freelancer-Kompass reports an average hourly rate of €103 across all fields (graphics/content/media: €82); the German UPA industry report gives a median of €92 for self-employed UX professionals. Senior UX designers with a specialisation typically sit at €90–120 per hour, juniors at €50–70.',
     },
   },
   {
@@ -425,7 +425,7 @@ export const KOSTEN_FAQS: LocalizedFaq[] = [
       en: 'Why are the price ranges so wide?',
     },
     answer: {
-      de: 'Weil „Website" oder „App-Design" keine definierten Produkte sind: Umfang, Research-Tiefe, Design-System-Bedarf, Seniorität und die Frage Design-only vs. Design + Entwicklung können den Preis um den Faktor 5–10 verändern. Seriöse Anbieter machen deshalb erst ein Erstgespräch und dann ein Angebot mit definiertem Umfang – Misstrauen ist angebracht, wenn jemand ohne Briefing einen Preis nennt.',
+      de: 'Weil „Website“ oder „App-Design“ keine definierten Produkte sind: Umfang, Research-Tiefe, Design-System-Bedarf, Seniorität und die Frage Design-only vs. Design + Entwicklung können den Preis um den Faktor 5–10 verändern. Seriöse Anbieter machen deshalb erst ein Erstgespräch und dann ein Angebot mit definiertem Umfang – Misstrauen ist angebracht, wenn jemand ohne Briefing einen Preis nennt.',
       en: 'Because “website” or “app design” are not defined products: scope, depth of research, the need for a design system, seniority and the question of design-only versus design plus development can move the price by a factor of five to ten. Serious providers therefore run an intro call first and then quote against a defined scope — be suspicious of anyone who names a price without a briefing.',
     },
   },
@@ -455,7 +455,7 @@ export const KOSTEN_SOURCES_TITLE: Localized = { de: 'Quellen', en: 'Sources' }
 
 export const KOSTEN_SOURCES = [
   {
-    label: 'freelancermap – Freelancer-Kompass 2026 (5.400+ Befragte, DACH)',
+    label: 'freelancermap – Freelancer-Kompass 2026 (n = 5.400+, DACH)',
     url: 'https://www.freelancermap.de/freelancer-kompass',
   },
   {
@@ -463,7 +463,7 @@ export const KOSTEN_SOURCES = [
     url: 'https://germanupa.de/wissen/branchenreport',
   },
   {
-    label: 'Malt – Tarifbarometer UX-Designer (abgerufen Juli 2026)',
+    label: 'Malt – Tarifbarometer UX-Designer (07/2026)',
     url: 'https://www.malt.de/t/tarifbarometer/web-grafikdesign/ux-designer',
   },
   {
@@ -487,7 +487,7 @@ export const KOSTEN_SOURCES = [
     url: 'https://www.bundesfachstelle-barrierefreiheit.de/DE/Fachwissen/Produkte-und-Dienstleistungen/Barrierefreiheitsstaerkungsgesetz/barrierefreiheitsstaerkungsgesetz_node.html',
   },
   {
-    label: 'eparo – öffentliche Preisliste UX-Tests (Hamburg)',
+    label: 'eparo – UX-Test-Preisliste (Hamburg)',
     url: 'https://eparo.de/preise',
   },
 ]
@@ -522,7 +522,7 @@ export const KOSTEN_META = {
    */
   published: '2026-07-14',
   updated: '2026-08-08',
-  updatedHuman: { de: '8. August 2026', en: 'August 8, 2026' } satisfies Localized,
+  updatedHuman: { de: '8. August 2026', en: '8 August 2026' } satisfies Localized,
   title: {
     de: 'Was kostet UX/UI Design? Preise & Stundensätze 2026 (mit Quellen)',
     en: 'What does UX/UI design cost? Prices & rates 2026 (with sources)',

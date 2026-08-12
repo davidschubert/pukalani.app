@@ -32,7 +32,7 @@ export const CASES: PortfolioCase[] = [
     stack: ['Nuxt 4', 'Appwrite', 'TypeScript', 'pnpm Workspaces', 'Stripe'],
     teaser: {
       de: 'Multi-Site-Plattform: ein Monorepo, aus dem beliebig viele Sites entstehen — mit Control Plane, Produkt-Katalog und signierten Entitlements.',
-      en: 'Multi-site platform: one monorepo that spawns any number of sites — with a control plane, product catalog and signed entitlements.',
+      en: 'Multi-site platform: one monorepo that spawns any number of sites — with a control plane, product catalogue and signed entitlements.',
     },
     paragraphs: [
       {
@@ -41,7 +41,7 @@ export const CASES: PortfolioCase[] = [
       },
       {
         de: 'Das Control Plane (Studio) provisioniert neue Sites als Job — Appwrite-Projekt, Schema-Migrationen, Register-Eintrag und Produkt-Zuteilung entstehen aus einem Klick. Entitlements werden als signierte Ed25519-Dokumente zugestellt und serverseitig durchgesetzt.',
-        en: 'The control plane (Studio) provisions new sites as a job — Appwrite project, schema migrations, registry entry and product grants spring from a single click. Entitlements are delivered as signed Ed25519 documents and enforced server-side.',
+        en: 'The control plane (Studio) provisions new sites as a job — Appwrite project, schema migrations, registry entry and product grants are all created from a single click. Entitlements are delivered as signed Ed25519 documents and enforced server-side.',
       },
     ],
   },
@@ -58,7 +58,7 @@ export const CASES: PortfolioCase[] = [
     paragraphs: [
       {
         de: 'Verschachtelte Kommentare mit Votes, @-Mentions und Markdown, live über einen geteilten Realtime-Socket. Die Auth läuft SSR-first über httpOnly-Session-Cookies — das Web-SDK spricht im Browser ausschließlich Realtime.',
-        en: 'Nested comments with votes, @-mentions and markdown, live via a shared realtime socket. Auth is SSR-first through httpOnly session cookies — the web SDK only ever speaks realtime in the browser.',
+        en: 'Nested comments with votes, @-mentions and markdown, live via a shared realtime socket. Auth is SSR-first through httpOnly session cookies — the web SDK only ever speaks real-time in the browser.',
       },
       {
         de: 'Moderation als Zweiphasen-Flow (Ausblenden + Meldungs-Auflösung), Presence-Anzeigen („tippt gerade"), E-Mail-Digests und eine Playwright-Suite, die in der CI gegen eine echte Wegwerf-Appwrite läuft.',

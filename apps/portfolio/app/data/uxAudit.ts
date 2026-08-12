@@ -35,11 +35,11 @@ export const UX_AUDIT_HERO = {
   breadcrumb: { de: 'UX-Audit', en: 'UX audit' } satisfies Localized,
   title: {
     de: 'UX-Audit zum Festpreis: ab €2.500, Ergebnisse in 1–2 Wochen',
-    en: 'UX audit at a fixed price: from €2,500, results in 1–2 weeks',
+    en: 'Fixed-price UX audit: from €2,500, results in 1–2 weeks',
   } satisfies Localized,
   intro: {
     de: 'Ein UX-Audit ist eine strukturierte Analyse Ihrer Website oder Web-App durch einen erfahrenen UX-Experten. Bei Pukalani Studio kostet ein UX-Audit €2.500 bis €5.000 als Festpreis, dauert ein bis zwei Wochen und liefert eine priorisierte Maßnahmenliste – von Quick Wins bis zur Conversion-Roadmap. Durchgeführt von David Schubert, Senior UI/UX Designer und Creative Technologist mit über 25 Jahren Erfahrung.',
-    en: 'A UX audit is a structured analysis of your website or web app by an experienced UX practitioner. At Pukalani Studio a UX audit costs €2,500 to €5,000 at a fixed price, takes one to two weeks and delivers a prioritised action list — from quick wins to a conversion roadmap. Carried out by David Schubert, senior UI/UX designer and creative technologist with more than 25 years of experience.',
+    en: 'A UX audit is a structured analysis of your website or web app by an experienced UX practitioner. At Pukalani Studio a fixed-price UX audit costs between €2,500 and €5,000, takes one to two weeks and delivers a prioritised action list — from quick wins to a conversion roadmap. Carried out by David Schubert, senior UI/UX designer and creative technologist with more than 25 years of experience.',
   } satisfies Localized,
   ctaPrimary: { de: 'Audit-Erstgespräch buchen', en: 'Book an audit intro call' } satisfies Localized,
   ctaSecondary: { de: 'Pakete & Preise ansehen', en: 'See packages & prices' } satisfies Localized,
@@ -53,23 +53,23 @@ export const AUDIT_AREAS_HEADING = {
   title: { de: 'Was wird im UX-Audit geprüft?', en: 'What does the UX audit examine?' } satisfies Localized,
   lead: {
     de: 'Das Audit kombiniert vier Prüfebenen zu einem Gesamtbild: Nutzerführung, Conversion, Performance und Barrierefreiheit. Jede Ebene liefert konkrete, belegte Befunde – keine Bauchgefühl-Meinungen.',
-    en: 'The audit combines four layers into one picture: user guidance, conversion, performance and accessibility. Each layer produces concrete, evidenced findings — not gut-feeling opinions.',
+    en: 'The audit combines four levels of review into a single picture: user flows, conversion, performance and accessibility. Each one produces concrete, evidence-backed findings — not opinions based on gut feeling.',
   } satisfies Localized,
 }
 
 export const AUDIT_AREAS: AuditArea[] = [
   {
-    title: { de: 'Usability & Nutzerführung', en: 'Usability & user guidance' },
+    title: { de: 'Usability & Nutzerführung', en: 'Usability & user flows' },
     description: {
       de: 'Heuristische Evaluation der wichtigsten Seiten und Flows: Navigation, Informationsarchitektur, Formulare, Fehlertoleranz und mentale Modelle Ihrer Nutzer.',
-      en: 'Heuristic evaluation of the most important pages and flows: navigation, information architecture, forms, error tolerance and your users’ mental models.',
+      en: 'Heuristic evaluation of the most important pages and flows: navigation, information architecture, forms, error handling and your users’ mental models.',
     },
   },
   {
     title: { de: 'Conversion & Funnel', en: 'Conversion & funnel' },
     description: {
       de: 'Analyse der Conversion-Pfade vom Einstieg bis zum Abschluss: Call-to-Actions, Vertrauens-Elemente, Reibungspunkte im Checkout oder Anfrage-Prozess.',
-      en: 'Analysis of the conversion paths from entry to completion: calls to action, trust elements, friction points in the checkout or inquiry process.',
+      en: 'Analysis of the conversion paths from entry to completion: calls to action, trust signals, friction points in the checkout or enquiry process.',
     },
   },
   {
@@ -83,7 +83,7 @@ export const AUDIT_AREAS: AuditArea[] = [
     title: { de: 'Barrierefreiheit (WCAG 2.1 AA)', en: 'Accessibility (WCAG 2.1 AA)' },
     description: {
       de: 'Quick-Audit gegen die WCAG-2.1-AA-Kriterien: Kontraste, Tastaturbedienung, Screenreader-Tauglichkeit, Formular-Labels. Seit Juni 2025 gilt in Deutschland das Barrierefreiheitsstärkungsgesetz (BFSG) für viele digitale Angebote.',
-      en: 'A quick audit against the WCAG 2.1 AA criteria: contrast, keyboard operation, screen-reader support, form labels. Since June 2025 the German Accessibility Strengthening Act (BFSG) applies to many digital offerings.',
+      en: 'A quick audit against the WCAG 2.1 AA criteria: contrast, keyboard navigation, screen-reader support, form labels. Since June 2025 the German Accessibility Act (BFSG), which implements the European Accessibility Act, applies to many digital products and services.',
     },
   },
 ]
@@ -91,7 +91,7 @@ export const AUDIT_AREAS: AuditArea[] = [
 export const AUDIT_METHOD_NOTE = {
   lead: {
     de: 'Methodische Grundlage sind etablierte Usability-Heuristiken, wie sie u. a. die Nielsen Norman Group beschreibt, ergänzt um Core Web Vitals und die WCAG 2.1.',
-    en: 'The methodological basis are established usability heuristics as described by the Nielsen Norman Group among others, complemented by Core Web Vitals and WCAG 2.1.',
+    en: 'The method is grounded in established usability heuristics — as described by the Nielsen Norman Group, among others — complemented by Core Web Vitals and WCAG 2.1.',
   } satisfies Localized,
   links: [
     { label: 'Nielsen Norman Group', href: 'https://www.nngroup.com/articles/ten-usability-heuristics/' },
@@ -104,14 +104,14 @@ export const AUDIT_TIERS_HEADING = {
   title: { de: 'UX-Audit-Pakete & Preise', en: 'UX audit packages & prices' } satisfies Localized,
   lead: {
     de: 'Drei Festpreis-Pakete, netto, ohne versteckte Kosten. Welches Paket passt, klären wir im kostenlosen Erstgespräch – danach erhalten Sie das Angebot innerhalb von 48 Stunden.',
-    en: 'Three fixed-price packages, net, with no hidden costs. Which one fits is settled in the free intro call — after that you get the quote within 48 hours.',
+    en: 'Three fixed-price packages, all prices excluding VAT, with no hidden costs. We work out which one fits in the free intro call — and you have your quote within 48 hours.',
   } satisfies Localized,
   note: {
     de: 'Alle Pakete beinhalten: schriftlicher Audit-Report, priorisierte Maßnahmenliste und Ergebnis-Call. Die Audit-Kosten werden bei einem Folgeprojekt (z. B. Redesign oder Landingpage) zu 50 % angerechnet.',
     en: 'Every package includes a written audit report, a prioritised action list and a results call. 50% of the audit fee is credited against a follow-up project (for example a redesign or landing page).',
   } satisfies Localized,
   featuredLabel: { de: 'Meistgewählt', en: 'Most popular' } satisfies Localized,
-  priceNote: { de: 'Festpreis netto', en: 'Fixed price, net' } satisfies Localized,
+  priceNote: { de: 'Festpreis netto', en: 'Fixed price, excl. VAT' } satisfies Localized,
 }
 
 export const AUDIT_TIERS: AuditTier[] = [
@@ -158,7 +158,7 @@ export const AUDIT_TIERS: AuditTier[] = [
       en: [
         'Everything in Compact',
         'Analysis of the complete conversion funnel',
-        'WCAG 2.1 AA quick audit (BFSG relevance)',
+        'WCAG 2.1 AA quick audit (relevant for BFSG compliance)',
         'Benchmark against 3 competitors',
         'Prioritised conversion roadmap + video walkthrough',
       ],
@@ -198,10 +198,10 @@ export const AUDIT_TIERS: AuditTier[] = [
 ]
 
 export const AUDIT_PROCESS_HEADING = {
-  title: { de: 'So läuft das UX-Audit ab', en: 'How the UX audit runs' } satisfies Localized,
+  title: { de: 'So läuft das UX-Audit ab', en: 'How the UX audit works' } satisfies Localized,
   lead: {
     de: 'Vom Erstgespräch bis zum Ergebnis-Call vergehen ein bis zwei Wochen. Sie brauchen dafür kaum eigene Zeit – nur Zugang und ein einziges Briefing-Gespräch.',
-    en: 'One to two weeks pass between the intro call and the results call. It barely costs you any time — only access and a single briefing call.',
+    en: 'There are one to two weeks between the intro call and the results call. It takes almost none of your own time — only access and a single briefing call.',
   } satisfies Localized,
 }
 
@@ -210,21 +210,21 @@ export const AUDIT_STEPS: AuditStep[] = [
     title: { de: 'Kostenloses Erstgespräch (30 Min)', en: 'Free intro call (30 min)' },
     description: {
       de: 'Wir klären Ziele, Zielgruppen und den Umfang. Sie erhalten innerhalb von 48 Stunden ein Festpreis-Angebot mit klarem Leistungsumfang.',
-      en: 'We clarify goals, audiences and scope. You receive a fixed-price quote with a clearly defined scope within 48 hours.',
+      en: 'We clarify goals, target audiences and scope. Within 48 hours you receive a fixed-price quote with clearly defined deliverables.',
     },
   },
   {
     title: { de: 'Briefing & Zugänge', en: 'Briefing & access' },
     description: {
       de: 'Ein Briefing-Call (60 Min) plus Zugang zu Analytics und ggf. Testumgebung. Mehr brauche ich von Ihnen nicht – Ihr Team bleibt entlastet.',
-      en: 'One briefing call (60 min) plus access to analytics and, if available, a staging environment. That is all I need from you — your team stays free.',
+      en: 'One briefing call (60 min) plus access to analytics and, if available, a staging environment. That is all I need from you — it keeps the workload off your team.',
     },
   },
   {
     title: { de: 'Analyse', en: 'Analysis' },
     description: {
       de: 'Heuristische Evaluation, Funnel-Analyse, Performance-Messung und WCAG-Prüfung. Alle Befunde werden mit Screenshots und Daten belegt.',
-      en: 'Heuristic evaluation, funnel analysis, performance measurement and WCAG review. Every finding is evidenced with screenshots and data.',
+      en: 'Heuristic evaluation, funnel analysis, performance measurement and WCAG review. Every finding is backed by screenshots and data.',
     },
   },
   {
@@ -238,7 +238,7 @@ export const AUDIT_STEPS: AuditStep[] = [
 
 export const AUDIT_QUOTE: Localized = {
   de: 'Das UX-Audit ist der schnellste und günstigste Einstieg in eine Zusammenarbeit: Sie sehen nach zwei Wochen schwarz auf weiß, wo Ihre Website Umsatz liegen lässt – und was zuerst zu tun ist.',
-  en: 'The UX audit is the fastest and cheapest way into a collaboration: after two weeks you see in black and white where your website is leaving revenue on the table — and what to do first.',
+  en: 'The UX audit is the fastest and least expensive way to start working together: after two weeks you see in black and white where your website is leaving revenue on the table — and what to do first.',
 }
 
 export const AUDIT_QUOTE_SOURCE: Localized = {
@@ -256,42 +256,42 @@ export const AUDIT_FAQS: LocalizedFaq[] = [
     question: { de: 'Was kostet ein UX-Audit?', en: 'What does a UX audit cost?' },
     answer: {
       de: 'Ein UX-Audit kostet bei Pukalani Studio zwischen €2.500 und €5.000 netto als Festpreis – abhängig vom Umfang: Kompakt (€2.500) für Landingpages, Standard (€3.900) für Corporate Websites und Shops, Plus (€5.000) für SaaS-Produkte inklusive Workshop und Prototyp. Bei einem Folgeprojekt werden 50 % der Audit-Kosten angerechnet.',
-      en: 'At Pukalani Studio a UX audit costs between €2,500 and €5,000 net as a fixed price, depending on scope: Compact (€2,500) for landing pages, Standard (€3,900) for corporate websites and shops, Plus (€5,000) for SaaS products including workshop and prototype. 50% of the audit fee is credited against a follow-up project.',
+      en: 'At Pukalani Studio a UX audit costs between €2,500 and €5,000 as a fixed price, excluding VAT, depending on scope: Compact (€2,500) for landing pages, Standard (€3,900) for corporate websites and shops, Plus (€5,000) for SaaS products including workshop and prototype. 50% of the audit fee is credited against a follow-up project.',
     },
   },
   {
     question: { de: 'Wie lange dauert ein UX-Audit?', en: 'How long does a UX audit take?' },
     answer: {
       de: 'Ein bis zwei Wochen ab Briefing: Das Kompakt-Paket liefert Ergebnisse nach einer Woche, Standard und Plus nach zwei Wochen. Der Start ist meist innerhalb einer Woche nach Beauftragung möglich, da UX-Audits laufend eingeplant werden.',
-      en: 'One to two weeks from the briefing: the Compact package delivers results after one week, Standard and Plus after two. Work usually starts within a week of the order, because audit slots are planned on a rolling basis.',
+      en: 'One to two weeks from the briefing: the Compact package delivers results after one week, Standard and Plus after two. Work usually starts within a week of your go-ahead, because audit slots are planned on a rolling basis.',
     },
   },
   {
     question: { de: 'Was bekomme ich am Ende konkret?', en: 'What exactly do I get in the end?' },
     answer: {
       de: 'Einen schriftlichen Audit-Report mit allen Befunden (belegt mit Screenshots und Messdaten), eine nach Aufwand und Wirkung priorisierte Maßnahmenliste sowie einen Ergebnis-Call. Je nach Paket zusätzlich: Conversion-Roadmap, Wettbewerbs-Benchmark, Video-Walkthrough, Workshop und klickbarer Prototyp.',
-      en: 'A written audit report with all findings (evidenced with screenshots and measurements), an action list prioritised by effort and impact, and a results call. Depending on the package, also: conversion roadmap, competitive benchmark, video walkthrough, workshop and a clickable prototype.',
+      en: 'A written audit report with all findings (backed by screenshots and measurements), an action list prioritised by effort and impact, and a results call. Depending on the package, you also get a conversion roadmap, a competitive benchmark, a video walkthrough, a workshop and a clickable prototype.',
     },
   },
   {
     question: { de: 'Was brauchen Sie von mir?', en: 'What do you need from me?' },
     answer: {
       de: 'Wenig: ein Briefing-Gespräch (60 Minuten), Zugang zu Ihren Analytics-Daten (z. B. GA4, Plausible oder Matomo) und – falls vorhanden – eine Testumgebung. Alles Weitere übernehme ich.',
-      en: 'Very little: a briefing call (60 minutes), access to your analytics data (GA4, Plausible or Matomo for example) and — if you have one — a staging environment. I take care of the rest.',
+      en: 'Very little: a briefing call (60 minutes), access to your analytics data (for example GA4, Plausible or Matomo) and — if you have one — a staging environment. I take care of the rest.',
     },
   },
   {
     question: { de: 'Für wen lohnt sich ein UX-Audit?', en: 'Who is a UX audit worth it for?' },
     answer: {
       de: 'Für alle, die Traffic haben, aber zu wenig Anfragen oder Käufe: Corporate Websites mit schwacher Lead-Generierung, Shops mit hoher Abbruchrate, SaaS-Produkte mit geringer Feature-Adoption oder hoher Support-Last. Wer noch keine Website hat, braucht kein Audit, sondern ein Konzept.',
-      en: 'For anyone who has traffic but too few inquiries or purchases: corporate websites with weak lead generation, shops with high abandonment, SaaS products with low feature adoption or a heavy support load. If you do not have a website yet, you do not need an audit — you need a concept.',
+      en: 'For anyone who has traffic but too few enquiries or purchases: corporate websites with weak lead generation, shops with high cart-abandonment rates, SaaS products with low feature adoption or a heavy support load. If you do not have a website yet, you do not need an audit — you need a plan.',
     },
   },
   {
     question: { de: 'Setzen Sie die Maßnahmen auch um?', en: 'Do you implement the recommendations too?' },
     answer: {
       de: 'Ja, auf Wunsch. Als Designer und Nuxt-Entwickler kann ich die Empfehlungen direkt umsetzen – vom Quick Win bis zum Redesign. 50 % der Audit-Kosten werden dabei angerechnet. Alternativ arbeitet Ihr Team mit dem Report; er ist bewusst so geschrieben, dass Entwickler damit arbeiten können.',
-      en: 'Yes, on request. As a designer and Nuxt developer I can implement the recommendations directly — from quick win to redesign, with 50% of the audit fee credited. Alternatively your team works from the report; it is deliberately written so that developers can act on it.',
+      en: 'Yes, on request. As a designer and Nuxt developer I can implement the recommendations directly — from quick win to redesign, with 50% of the audit fee credited. Alternatively, your team works from the report; it is deliberately written so that developers can act on it.',
     },
   },
 ]
@@ -309,7 +309,7 @@ export const AUDIT_CTA = {
   title: { de: 'UX-Audit anfragen', en: 'Request a UX audit' } satisfies Localized,
   text: {
     de: 'Buchen Sie ein kostenloses Erstgespräch – wir klären in 30 Minuten, welches Audit-Paket zu Ihrer Website passt. Start meist innerhalb einer Woche.',
-    en: 'Book a free intro call — in 30 minutes we settle which audit package fits your website. Work usually starts within a week.',
+    en: 'Book a free intro call — in 30 minutes we work out which audit package fits your website. Work usually starts within a week.',
   } satisfies Localized,
 }
 
