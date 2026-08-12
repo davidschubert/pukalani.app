@@ -48,7 +48,7 @@ definePageMeta({ layout: 'dashboard', middleware: ['auth', 'admin'], requiredCap
 const { t, locale } = useI18n()
 const localePath = useLocalePath()
 
-useHead({ title: () => t('onboarding.communityProducts.title') })
+useBrandTitle(() => t('onboarding.communityProducts.title'))
 
 const lang = computed(() => (locale.value === 'de' ? 'de' : 'en'))
 

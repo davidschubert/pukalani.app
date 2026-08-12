@@ -25,7 +25,7 @@ definePageMeta({ layout: 'dashboard', middleware: ['auth', 'admin'], requiredCap
 const { t } = useI18n()
 const { formatRelativeTime } = useFormatRelativeTime()
 
-useHead({ title: () => t('messages.reports.title') })
+useBrandTitle(() => t('messages.reports.title'))
 
 const { data, status } = await useFetch<{ messages: ReportedMessageView[] }>(
   '/api/messages/moderation',

@@ -3,7 +3,7 @@ definePageMeta({ middleware: 'auth' })
 
 const { t } = useI18n()
 
-useHead({ title: () => t('activity.title') })
+useBrandTitle(() => t('activity.title'))
 </script>
 
 <template>

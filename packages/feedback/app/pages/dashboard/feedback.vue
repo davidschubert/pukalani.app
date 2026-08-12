@@ -36,7 +36,7 @@ const { formatRelativeTime } = useFormatRelativeTime()
 const { page, setPage } = usePagination({ pageSize: FEEDBACK_PAGE_SIZE })
 const { toggleVote } = useCustomerFeedback()
 
-useHead({ title: () => t('feedback.list.title') })
+useBrandTitle(() => t('feedback.list.title'))
 
 const sort = ref<FeedbackSort>('trending')
 const state = ref<FeedbackState | ''>('')

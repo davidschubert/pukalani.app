@@ -25,7 +25,7 @@ const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 
-useHead({ title: () => t('messages.inbox.title') })
+useBrandTitle(() => t('messages.inbox.title'))
 
 const selectedId = ref(String(route.query.c ?? ''))
 const composeOpen = ref(false)

@@ -60,10 +60,10 @@ function categoryColor(c: string) {
   return c === 'fix' ? 'error' : c === 'improvement' ? 'success' : 'primary'
 }
 
-useSeoMeta({
-  title: () => t('changelog.title'),
-  description: () => t('changelog.description'),
-})
+// Wie jede andere Seite: „Changelog · Marke". useSeoMeta stand hier direkt und
+// setzte den Titel deshalb OHNE die Marke — im Tab stand nur „Changelog", und
+// auf einem Silo-Host verrät das nicht, wessen Changelog man liest.
+useBrandTitle(() => t('changelog.title'), { description: () => t('changelog.description') })
 </script>
 
 <template>

@@ -112,7 +112,7 @@ async function submit() {
   }
 }
 
-useHead({ title: () => t('onboarding.gate.title') })
+useBrandTitle(() => t('onboarding.gate.title'))
 </script>
 
 <template>

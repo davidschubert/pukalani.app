@@ -20,7 +20,11 @@ if (error.value || !lesson.value || !course.value) {
   throw createError({ status: 404, statusText: 'Lesson not found' })
 }
 
-useHead({ title: () => lesson.value?.title ?? '' })
+// Der Titel gehört hierher und nicht in die Seite: die Lektion kennt nur diese
+// Komponente (die Bauplan-Seite reicht bloß den Kommentar-Slot durch).
+// useBrandTitle statt useHead — sonst stünde im Tab nur „Lektion 3", ohne die
+// Community, zu der sie gehört.
+useBrandTitle(() => lesson.value?.title ?? '')
 
 const lessonIndex = computed(() => course.value!.lessons.findIndex(l => l.$id === lesson.value!.$id))
 const prev = computed(() => (lessonIndex.value > 0 ? course.value!.lessons[lessonIndex.value - 1] : null))

@@ -7,7 +7,7 @@ definePageMeta({ middleware: ['auth'] })
 const { t } = useI18n()
 const localePath = useLocalePath()
 
-useHead({ title: () => t('courses.list.title') })
+useBrandTitle(() => t('courses.list.title'))
 
 const { data, status } = await useFetch<CourseListResponse>('/api/courses')
 

@@ -26,7 +26,7 @@ const confirm = useConfirm()
 const { formatDateTime } = useEventDateFormat()
 const { formatRelativeTime } = useFormatRelativeTime()
 
-useHead({ title: () => t('events.moderation.title') })
+useBrandTitle(() => t('events.moderation.title'))
 
 const { data, status, refresh } = await useFetch<EventModerationResponse>('/api/events/moderation', {
   lazy: true,

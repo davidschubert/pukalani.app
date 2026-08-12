@@ -26,7 +26,7 @@ definePageMeta({ layout: 'dashboard', middleware: ['auth', 'admin'], requiredCap
 const { t } = useI18n()
 const toast = useToast()
 const confirm = useConfirm()
-useHead({ title: () => t('posts.categories.title') })
+useBrandTitle(() => t('posts.categories.title'))
 
 const { data, status, refresh } = await useFetch<CategoryListResponse>('/api/posts/categories/manage', {
   lazy: true,

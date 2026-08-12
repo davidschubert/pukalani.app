@@ -44,7 +44,7 @@ definePageMeta({ layout: 'dashboard', middleware: ['auth', 'admin'], requiredCap
 
 const { t } = useI18n()
 const toast = useToast()
-useHead({ title: () => t('control.abuse.title') })
+useBrandTitle(() => t('control.abuse.title'))
 
 const { page, setPage } = usePagination({ pageSize: ABUSE_REPORTS_PAGE_SIZE })
 

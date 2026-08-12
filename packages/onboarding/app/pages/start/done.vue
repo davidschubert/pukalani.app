@@ -77,7 +77,7 @@ async function openCommunity() {
   window.location.href = target
 }
 
-useHead({ title: () => t('onboarding.done.title') })
+useBrandTitle(() => t('onboarding.done.title'))
 </script>
 
 <template>

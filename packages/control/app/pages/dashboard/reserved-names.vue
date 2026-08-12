@@ -20,7 +20,7 @@ definePageMeta({ layout: 'dashboard', middleware: ['auth', 'admin'], requiredCap
 const { t } = useI18n()
 const toast = useToast()
 const confirm = useConfirm()
-useHead({ title: () => t('control.reservedNames.title') })
+useBrandTitle(() => t('control.reservedNames.title'))
 
 interface CustomEntry { name: string, note: string, createdAt: string }
 

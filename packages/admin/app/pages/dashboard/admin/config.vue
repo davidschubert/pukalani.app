@@ -16,7 +16,7 @@ interface AppConfig {
 const { t } = useI18n()
 const toast = useToast()
 
-useHead({ title: () => t('admin.config.title') })
+useBrandTitle(() => t('admin.config.title'))
 
 const { data } = await useFetch<AppConfig>('/api/admin/config')
 

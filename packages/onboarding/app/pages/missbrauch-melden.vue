@@ -87,7 +87,7 @@ async function submit() {
   }
 }
 
-useHead({ title: () => t('onboarding.abuse.title') })
+useBrandTitle(() => t('onboarding.abuse.title'))
 </script>
 
 <template>

@@ -12,7 +12,7 @@ const toast = useToast()
 const confirm = useConfirm()
 const { formatDateTime } = useEventDateFormat()
 
-useHead({ title: () => t('events.admin.title') })
+useBrandTitle(() => t('events.admin.title'))
 
 const { data, status, refresh } = await useFetch<{ rows: EventRow[] }>('/api/events/manage', {
   lazy: true,

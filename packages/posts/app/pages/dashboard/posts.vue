@@ -8,7 +8,7 @@ const { t } = useI18n()
 const toast = useToast()
 const { formatRelativeTime } = useFormatRelativeTime()
 
-useHead({ title: () => t('posts.moderation.title') })
+useBrandTitle(() => t('posts.moderation.title'))
 
 const { data, status, refresh } = await useFetch<PostModerationResponse>('/api/posts/moderation', {
   lazy: true,

@@ -25,7 +25,7 @@ definePageMeta({ layout: 'dashboard', middleware: ['auth', 'admin'], requiredCap
 const { t } = useI18n()
 const toast = useToast()
 const confirm = useConfirm()
-useHead({ title: () => t('posts.trustLevels.title') })
+useBrandTitle(() => t('posts.trustLevels.title'))
 
 const { data, status, refresh } = await useFetch<TrustLevelMembersResponse>('/api/posts/trust-levels', {
   lazy: true,

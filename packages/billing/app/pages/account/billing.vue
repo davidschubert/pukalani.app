@@ -9,7 +9,7 @@ definePageMeta({ middleware: ['auth'] })
 const { t } = useI18n()
 const route = useRoute()
 
-useHead({ title: () => t('billing.account.title') })
+useBrandTitle(() => t('billing.account.title'))
 
 const confirming = computed(() => route.query.checkout === 'success')
 </script>

@@ -59,7 +59,7 @@ const { t } = useI18n()
 const toast = useToast()
 const localePath = useLocalePath()
 
-useHead({ title: () => t('onboarding.domain.title') })
+useBrandTitle(() => t('onboarding.domain.title'))
 
 /** null = kein Pool-Mandant (Silo, Kontroll-Host) → hier gibt es keine Adresse. */
 const { plan, planAllows } = useTenantPlan()

@@ -77,7 +77,7 @@ definePageMeta({ layout: 'dashboard', middleware: ['auth', 'admin'], requiredCap
 const { t } = useI18n()
 const toast = useToast()
 
-useHead({ title: () => t('dashboard.settings.community') })
+useBrandTitle(() => t('dashboard.settings.community'))
 
 const { openRegistration } = useTenantOpenRegistration()
 /** null = kein Mandanten-Host → die Schalter haben hier keine Bedeutung. */

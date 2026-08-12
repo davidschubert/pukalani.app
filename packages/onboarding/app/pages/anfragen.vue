@@ -68,7 +68,7 @@ async function submit() {
   }
 }
 
-useHead({ title: () => t('onboarding.request.title') })
+useBrandTitle(() => t('onboarding.request.title'))
 </script>
 
 <template>

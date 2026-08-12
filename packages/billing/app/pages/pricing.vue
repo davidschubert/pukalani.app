@@ -6,7 +6,7 @@
 const { t } = useI18n()
 const { config } = useBilling()
 
-useHead({ title: () => t('billing.pricing.title') })
+useBrandTitle(() => t('billing.pricing.title'))
 </script>
 
 <template>

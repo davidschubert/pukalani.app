@@ -41,7 +41,7 @@ const { formatRelativeTime } = useFormatRelativeTime()
 const toast = useToast()
 const confirm = useConfirm()
 
-useHead({ title: () => t('members.title') })
+useBrandTitle(() => t('members.title'))
 
 /** Besitz übertragen ist eine OWNER-Sache (community.transfer), nicht team.manage. */
 const canTransfer = useCommunityCapability('community.transfer')

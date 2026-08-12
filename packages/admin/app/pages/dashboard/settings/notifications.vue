@@ -8,7 +8,7 @@ const { t } = useI18n()
 
 // Wie in index.vue: dieser Aufruf stand außerhalb des `<script>`-Blocks und
 // wurde deshalb nie ausgeführt.
-useHead({ title: () => t('dashboard.settings.notifications') })
+useBrandTitle(() => t('dashboard.settings.notifications'))
 </script>
 
 <template>

@@ -21,7 +21,7 @@ const { t } = useI18n()
  * sucht ihn TEXTUELL und würde den Block hier beenden — beim Schreiben dieser
  * Zeile prompt passiert.)
  */
-useHead({ title: () => t('dashboard.settings.general') })
+useBrandTitle(() => t('dashboard.settings.general'))
 </script>
 
 <template>

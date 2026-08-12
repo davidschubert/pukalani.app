@@ -37,7 +37,7 @@ definePageMeta({ layout: 'dashboard', middleware: ['auth', 'admin'], requiredCap
 const { t } = useI18n()
 const toast = useToast()
 const confirm = useConfirm()
-useHead({ title: () => t('pages.admin.title') })
+useBrandTitle(() => t('pages.admin.title'))
 
 // EN = Standardsprache, DE = weiterer Reiter (weitere Sprachen später additiv)
 const LOCALES = ['en', 'de'] as const

@@ -54,7 +54,7 @@ definePageMeta({ layout: 'dashboard', middleware: ['auth', 'admin'], requiredCap
 const { t } = useI18n()
 const toast = useToast()
 
-useHead({ title: () => t('dashboard.community.appearance.title') })
+useBrandTitle(() => t('dashboard.community.appearance.title'))
 
 /** `isTenantHost` = false heißt: kein Mandanten-Host, hier gibt es keine
  *  Community-Farbwelt (die Optik gehört dann der Instanz). */

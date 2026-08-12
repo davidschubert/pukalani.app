@@ -39,7 +39,7 @@ const appConfig = useAppConfig() as {
   pukalani?: { analytics?: { instance?: string, shared?: { scriptId?: string, siteId?: string } } }
 }
 
-useHead({ title: () => t('analytics.admin.title') })
+useBrandTitle(() => t('analytics.admin.title'))
 
 /**
  * Die Basis-Adresse kommt AUS DER CONFIG, nie aus der Eingabe (Begründung in

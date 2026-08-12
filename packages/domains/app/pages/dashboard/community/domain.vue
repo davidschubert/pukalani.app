@@ -62,7 +62,7 @@ const { t } = useI18n()
 const toast = useToast()
 const confirm = useConfirm()
 
-useHead({ title: () => t('siteDomain.title') })
+useBrandTitle(() => t('siteDomain.title'))
 
 const state = ref<SiteDomainState | null>(null)
 const loading = ref(true)

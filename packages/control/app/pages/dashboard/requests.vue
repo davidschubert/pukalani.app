@@ -16,7 +16,7 @@ definePageMeta({ layout: 'dashboard', middleware: ['auth', 'admin'], requiredCap
 
 const { t, locale } = useI18n()
 const toast = useToast()
-useHead({ title: () => t('control.requests.title') })
+useBrandTitle(() => t('control.requests.title'))
 
 interface RequestDto {
   id: string

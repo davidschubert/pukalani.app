@@ -14,7 +14,7 @@ const { t, locale } = useI18n()
 const toast = useToast()
 const confirm = useConfirm()
 
-useHead({ title: () => t('control.websites.title') })
+useBrandTitle(() => t('control.websites.title'))
 
 type WebsiteWithEntitlements = WebsiteRow & { entitlements: string[], domain: SiteDomainState }
 const { data, refresh } = await useFetch<{ websites: WebsiteWithEntitlements[] }>('/api/control/websites')

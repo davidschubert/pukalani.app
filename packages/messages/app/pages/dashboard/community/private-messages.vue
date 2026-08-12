@@ -19,7 +19,7 @@ definePageMeta({ layout: 'dashboard', middleware: ['auth', 'admin'], requiredCap
 const { t } = useI18n()
 const toast = useToast()
 
-useHead({ title: () => t('messages.settings.title') })
+useBrandTitle(() => t('messages.settings.title'))
 
 const { data, refresh } = await useFetch<{ enabled: boolean }>('/api/messages/settings', {
   lazy: true,

@@ -40,7 +40,7 @@ definePageMeta({ layout: 'dashboard', middleware: ['auth', 'admin'], requiredCap
 const { t, te, locale } = useI18n()
 const localePath = useLocalePath()
 
-useHead({ title: () => t('onboarding.communityStorage.title') })
+useBrandTitle(() => t('onboarding.communityStorage.title'))
 
 const { plan } = useTenantPlan()
 /** null = kein Pool-Mandant (Silo, Kontroll-Host) — dort gibt es kein Kontingent. */

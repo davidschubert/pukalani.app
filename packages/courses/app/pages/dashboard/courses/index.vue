@@ -9,7 +9,7 @@ const { t } = useI18n()
 const toast = useToast()
 const localePath = useLocalePath()
 
-useHead({ title: () => t('courses.admin.title') })
+useBrandTitle(() => t('courses.admin.title'))
 
 const { data, status } = await useFetch<CourseManageResponse>('/api/courses/manage', {
   lazy: true,

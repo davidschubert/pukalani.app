@@ -13,7 +13,7 @@ const { formatDate } = useFormatDate()
 const { page, setPage } = usePagination()
 const { config } = useBilling()
 
-useHead({ title: () => t('billing.admin.title') })
+useBrandTitle(() => t('billing.admin.title'))
 
 // Nachschlagen statt Volltext: der Betreiber sucht das Abo EINES Kontos —
 // über die Nutzer-ID oder die Stripe-Kunden-ID (beide indiziert).

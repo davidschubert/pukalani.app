@@ -245,7 +245,7 @@ const summaryRows = computed(() => [
   { label: t('onboarding.summary.vibe'), value: draft.value.vibe ? t(`onboarding.vibes.${draft.value.vibe}.label`) : '' },
 ].filter(row => row.value))
 
-useHead({ title: () => `${t(`onboarding.steps.${step.value}.title`)} · ${t('onboarding.gate.title')}` })
+useBrandTitle(() => `${t(`onboarding.steps.${step.value}.title`)} · ${t('onboarding.gate.title')}`)
 </script>
 
 <template>

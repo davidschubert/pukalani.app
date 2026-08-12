@@ -68,7 +68,7 @@ const hullTitle = computed(() =>
     ? t('admin.nav.instanceSettings')
     : t('dashboard.communitySettings.title'))
 
-useHead({ title: () => hullTitle.value })
+useBrandTitle(() => hullTitle.value)
 
 const place = resolveDashboardPlace(
   (appConfig.pukalani as { tenancy?: { enabled?: boolean } }).tenancy?.enabled === true,

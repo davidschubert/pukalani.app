@@ -6,7 +6,7 @@ const { t } = useI18n()
 const route = useRoute()
 const themeId = computed(() => String(route.params.id ?? ''))
 
-useHead({ title: () => t('themes.customize.edit') })
+useBrandTitle(() => t('themes.customize.edit'))
 </script>
 
 <template>

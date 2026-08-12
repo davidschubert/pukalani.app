@@ -29,7 +29,7 @@ definePageMeta({ layout: 'dashboard', middleware: ['auth', 'admin'], requiredCap
 const { t, locale } = useI18n()
 const localePath = useLocalePath()
 
-useHead({ title: () => t('analytics.stats.title') })
+useBrandTitle(() => t('analytics.stats.title'))
 
 /**
  * TARIF (P4): nur Sichtbarkeit. Ohne den Plan antwortet die Route 404 — ein

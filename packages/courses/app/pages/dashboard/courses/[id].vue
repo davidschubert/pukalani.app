@@ -22,7 +22,7 @@ const { data: course, status, refresh } = await useFetch<CourseRow & { lessons: 
   server: false,
 })
 
-useHead({ title: () => course.value?.title ?? t('courses.admin.title') })
+useBrandTitle(() => course.value?.title ?? t('courses.admin.title'))
 
 // Edit-Awareness: „<Name> bearbeitet gerade" (Presence-Fundament, Core)
 const { editors } = useEditAwareness(`course:${courseId}`)

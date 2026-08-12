@@ -42,7 +42,7 @@ const { formatRelativeTime } = useFormatRelativeTime()
 // laut eigener Doku der Kopf ÖFFENTLICHER Seiten und spiegelt Titel/Text
 // zusätzlich in og:*/description. Hinter dem Login teilt niemand einen Link,
 // und Social-Tags für eine Verwaltungsseite wären Rauschen.
-useHead({ title: () => t('posts.mine.title') })
+useBrandTitle(() => t('posts.mine.title'))
 
 const { data, status, refresh } = await useFetch<PostMineResponse>('/api/posts/mine', {
   lazy: true,

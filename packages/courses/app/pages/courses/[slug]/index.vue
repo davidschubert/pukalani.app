@@ -36,7 +36,7 @@ if (error.value || !course.value) {
   throw createError({ status: 404, statusText: 'Course not found' })
 }
 
-useHead({ title: () => course.value?.title ?? '' })
+useBrandTitle(() => course.value?.title ?? '')
 
 const progressPercent = computed(() => {
   const c = course.value

@@ -4,7 +4,7 @@
  */
 const { t } = useI18n()
 
-useHead({ title: () => t('events.list.title') })
+useBrandTitle(() => t('events.list.title'))
 </script>
 
 <template>

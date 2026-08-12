@@ -9,7 +9,7 @@ definePageMeta({ layout: 'dashboard', middleware: ['auth', 'admin'], requiredCap
 const { t } = useI18n()
 const toast = useToast()
 const confirm = useConfirm()
-useHead({ title: () => t('control.tenants.title') })
+useBrandTitle(() => t('control.tenants.title'))
 
 interface TenantDto { id: string, name: string, host: string, mode: TenantMode, projectId: string, tenantId: string, status: TenantStatus, wave: TenantWave, plan: TenantPlan, openRegistration: boolean, suspension: CommunitySuspension, suspensionReason: string, suspendedAt: string | null, pastDueSince: string | null }
 

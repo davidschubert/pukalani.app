@@ -14,7 +14,7 @@ const confirm = useConfirm()
 const auth = useAuthStore()
 const { user: me } = useCurrentUser()
 
-useHead({ title: () => t('admin.nav.people') })
+useBrandTitle(() => t('admin.nav.people'))
 
 const search = ref('')
 const activeSearch = ref('')

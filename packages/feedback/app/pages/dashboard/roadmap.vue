@@ -25,7 +25,7 @@ definePageMeta({ layout: 'dashboard', middleware: ['auth'], requiredCapability: 
 const { t } = useI18n()
 const { toggleVote } = useCustomerFeedback()
 
-useHead({ title: () => t('feedback.roadmap.title') })
+useBrandTitle(() => t('feedback.roadmap.title'))
 
 const STATE_ICON: Record<FeedbackState, string> = {
   under_review: 'i-ph-eye',

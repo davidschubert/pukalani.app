@@ -38,7 +38,7 @@ if (!embedConfig.pukalani?.comments?.embed?.enabled) {
 const { t } = useI18n()
 const toast = useToast()
 const confirm = useConfirm()
-useHead({ title: () => t('comments.embedAdmin.title') })
+useBrandTitle(() => t('comments.embedAdmin.title'))
 
 interface EmbedSiteDto { id: string, host: string, label: string, targetTypes: string[], active: boolean }
 

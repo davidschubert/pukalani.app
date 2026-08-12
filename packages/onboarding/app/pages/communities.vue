@@ -112,7 +112,7 @@ async function open(community: MyCommunityView) {
   window.location.href = target
 }
 
-useHead({ title: () => t('onboarding.communities.title') })
+useBrandTitle(() => t('onboarding.communities.title'))
 </script>
 
 <template>

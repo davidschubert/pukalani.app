@@ -17,7 +17,7 @@ definePageMeta({ layout: 'dashboard', middleware: ['auth', 'admin'], requiredCap
 
 const { t } = useI18n()
 
-useHead({ title: () => t('activity.moderation.title') })
+useBrandTitle(() => t('activity.moderation.title'))
 </script>
 
 <template>

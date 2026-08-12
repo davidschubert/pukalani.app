@@ -4,7 +4,7 @@ definePageMeta({ layout: 'dashboard', middleware: ['auth', 'admin'], requiredCap
 
 const { t } = useI18n()
 
-useHead({ title: () => t('themes.customize.create') })
+useBrandTitle(() => t('themes.customize.create'))
 </script>
 
 <template>

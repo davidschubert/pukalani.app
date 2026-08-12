@@ -10,7 +10,7 @@ definePageMeta({ layout: 'dashboard', middleware: ['auth', 'admin'] })
 
 const { t } = useI18n()
 
-useHead({ title: () => t('dashboard.settings.security') })
+useBrandTitle(() => t('dashboard.settings.security'))
 </script>
 
 <template>

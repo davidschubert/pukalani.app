@@ -15,7 +15,7 @@ const route = useRoute()
 const auth = useAuthStore()
 const appConfig = useAppConfig()
 
-useHead({ title: () => t('dashboard.settings.title') })
+useBrandTitle(() => t('dashboard.settings.title'))
 
 /**
  * FREMDE REITER (F24, 2026-08-02) kommen aus der Registry, nicht von hier.
