@@ -104,4 +104,14 @@ export interface SiteDomainState extends SiteDomainAddress {
  *  den letzten Schritt (Appwrite-Web-Platform, F45) zu erledigen. */
 export interface SiteDomainVerifyResult extends SiteDomainState {
   needsPlatformRegistration?: boolean
+  /**
+   * true = eine CAA-Policy der Zone lässt Let's Encrypt NICHT ausstellen (U16).
+   *
+   * OPTIONAL, und das ist Betrieb statt Geschmack (dieselbe Rechnung wie
+   * `neutral` im Branding-PATCH): Control Plane und Silo-/Platform-App sind
+   * getrennte Deployments. Ein Pflichtfeld hieße, dass eine neue App an einem
+   * alten Control Plane über ein fehlendes Feld stolpert; fehlend heißt hier
+   * „nicht gemessen", und das ist genau richtig — die Warnung bleibt aus.
+   */
+  caaBlocked?: boolean
 }

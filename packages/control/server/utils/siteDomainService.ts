@@ -99,6 +99,10 @@ export interface SiteDomainAdvance {
   /** true = der nächste Schritt gehört der SILO-APP (Appwrite-Web-Platform,
    *  F45). Das Control Plane hat für fremde Projekte keinen Schlüssel. */
   needsPlatformRegistration: boolean
+  /** true = eine CAA-Policy der Zone lässt Let's Encrypt NICHT ausstellen
+   *  (U16). Befund, kein Status — Begründung beim Pool-Zwilling
+   *  (`CustomDomainAdvance` in customDomainService.ts). */
+  caaBlocked: boolean
 }
 
 /**
@@ -120,28 +124,42 @@ export async function advanceSiteDomain(event: H3Event, row: WebsiteRow): Promis
   const domain = row.customDomain || ''
   const token = row.customDomainToken || ''
   if (!domain || !token) {
-    return { patch: {}, status: 'none', error: '', needsPlatformRegistration: false }
+    return { patch: {}, status: 'none', error: '', needsPlatformRegistration: false, caaBlocked: false }
   }
 
   const settings = customDomainSettings(event)
   const forms = customDomainForms(domain)
   const now = new Date().toISOString()
 
+  /** Veränderlich, weil die Antwort später kommt als die Helfer — dieselbe
+   *  Begründung wie beim Pool-Zwilling. */
+  let caaBlocked = false
+
   const stop = (status: SiteDomainStatus, error: string): SiteDomainAdvance => ({
     patch: { customDomainStatus: status, customDomainError: error.slice(0, 500) },
     status,
     error,
     needsPlatformRegistration: false,
+    caaBlocked,
   })
   const halt = (error: string): SiteDomainAdvance => ({
     patch: { customDomainStatus: 'pending_cert', customDomainError: error.slice(0, 500), customDomainVerifiedAt: now },
     status: 'pending_cert',
     error,
     needsPlatformRegistration: false,
+    caaBlocked,
   })
 
   // ── 1. Gehört die Domain dieser Website, und zeigt sie auf uns? ───────────
   const dns = await checkDomainDns(forms, token, settings)
+  caaBlocked = dns.caa === 'blocked'
+  if (caaBlocked) {
+    logEvent('warn', 'website.custom_domain_caa_blocked', {
+      websiteId: row.$id,
+      domain,
+      detail: `CAA-Satz auf ${dns.caaZone || domain} erlaubt letsencrypt.org nicht`,
+    })
+  }
   if (!dns.owned) {
     return stop('pending_dns', dns.error
       ? `TXT-Eintrag ${dns.txtRecordName} nicht gefunden (${dns.error}).`
@@ -194,5 +212,6 @@ export async function advanceSiteDomain(event: H3Event, row: WebsiteRow): Promis
     status: 'pending_platform',
     error: '',
     needsPlatformRegistration: true,
+    caaBlocked,
   }
 }

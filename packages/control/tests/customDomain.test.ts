@@ -13,6 +13,8 @@ import {
   customDomainTokenPresent,
   customDomainVerifyRecordName,
   customDomainVerifyRecordValue,
+  caaChain,
+  caaVerdictFromRecords,
   domainPointsToUs,
   isCustomDomainToken,
   isOperatorDomain,
@@ -317,5 +319,82 @@ describe('isDryRunFlag', () => {
     for (const value of ['', '0', 'false', 'no', undefined, null, 0]) {
       expect(isDryRunFlag(value)).toBe(false)
     }
+  })
+})
+
+/**
+ * CAA — die häufigste Ursache eines fehlgeschlagenen Zertifikats (U16,
+ * Wettbewerb E6).
+ *
+ * Getestet werden die zwei PUREN Hälften: welche Namen gefragt werden und wie
+ * ein gefundener Satz gelesen wird. Das Fragen selbst (`checkDomainCaa`)
+ * braucht einen Resolver und gehört damit zum Live-Rundlauf.
+ */
+describe('caaChain', () => {
+  it('läuft von unten nach oben, ohne die TLD', () => {
+    expect(caaChain('www.kunde.de')).toEqual(['www.kunde.de', 'kunde.de'])
+    expect(caaChain('kunde.de')).toEqual(['kunde.de'])
+    expect(caaChain('a.b.c.kunde.de')).toEqual(['a.b.c.kunde.de', 'b.c.kunde.de', 'c.kunde.de', 'kunde.de'])
+  })
+
+  it('normalisiert wie der Rest des Moduls (Punkt am Ende, Grossschreibung)', () => {
+    expect(caaChain('WWW.Kunde.DE.')).toEqual(['www.kunde.de', 'kunde.de'])
+  })
+
+  it('eine TLD allein ergibt keine Frage', () => {
+    expect(caaChain('de')).toEqual([])
+    expect(caaChain('')).toEqual([])
+  })
+})
+
+describe('caaVerdictFromRecords', () => {
+  it('ein Satz, der uns nennt, erlaubt', () => {
+    expect(caaVerdictFromRecords([{ issue: 'letsencrypt.org' }])).toBe('ok')
+  })
+
+  it('Parameter hinter dem Namen ändern das WIE, nicht das WER', () => {
+    expect(caaVerdictFromRecords([{ issue: 'letsencrypt.org; validationmethods=dns-01' }])).toBe('ok')
+  })
+
+  it('ein fremder Aussteller allein sperrt', () => {
+    expect(caaVerdictFromRecords([{ issue: 'sectigo.com' }])).toBe('blocked')
+  })
+
+  it('mehrere Aussteller: einer davon genügt', () => {
+    expect(caaVerdictFromRecords([{ issue: 'sectigo.com' }, { issue: 'letsencrypt.org' }])).toBe('ok')
+  })
+
+  /**
+   * `issue ";"` ist das ausdrückliche Verbot für ALLE (RFC 8659 § 4.2) — der
+   * Name vor dem Semikolon ist leer und fällt damit heraus. Ohne diesen Fall
+   * hätte ein leerer Aussteller-Name als „keine Beschränkung" gelesen werden
+   * können, und die härteste Policy des Feldes wäre still durchgerutscht.
+   */
+  it('das Verbot für alle sperrt auch uns', () => {
+    expect(caaVerdictFromRecords([{ issue: ';' }])).toBe('blocked')
+    expect(caaVerdictFromRecords([{ issue: ';' }, { issue: 'letsencrypt.org' }])).toBe('ok')
+  })
+
+  /**
+   * GEGENPROBE ZUM FEHLALARM: ein Satz aus reinen `iodef`- oder
+   * `issuewild`-Einträgen beschränkt das Ausstellen für konkrete Namen NICHT.
+   * Wer ihn als Sperre läse, schickte den Kunden in seiner Zone auf die Suche
+   * nach einem Fehler, den es nicht gibt — und für eine Kundendomain wird nie
+   * ein Wildcard bestellt.
+   */
+  it('ohne issue-Feld wird nichts beschränkt', () => {
+    expect(caaVerdictFromRecords([{ iodef: 'mailto:security@kunde.de' }])).toBe('ok')
+    expect(caaVerdictFromRecords([{ issuewild: ';' }])).toBe('ok')
+    expect(caaVerdictFromRecords([])).toBe('ok')
+  })
+
+  it('Grossschreibung und Punkt am Ende sind egal', () => {
+    expect(caaVerdictFromRecords([{ issue: 'LetsEncrypt.ORG.' }])).toBe('ok')
+  })
+
+  /** Die Kennung ist ein fester Bezeichner, kein Hostname-Muster: eine
+   *  Subdomain davon ist NICHT Let's Encrypt. */
+  it('eine Subdomain der Kennung zählt nicht', () => {
+    expect(caaVerdictFromRecords([{ issue: 'acme.letsencrypt.org' }])).toBe('blocked')
   })
 })

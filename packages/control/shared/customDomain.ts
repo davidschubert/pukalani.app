@@ -379,3 +379,93 @@ export function domainPointsToUs(input: DomainPointingInput): boolean {
   if (!ips.length) return false
   return input.a.some(record => ips.includes(record.trim()))
 }
+
+// ── CAA: darf Let's Encrypt für diese Zone überhaupt ausstellen? ────────────
+
+/**
+ * DIE HÄUFIGSTE URSACHE EINES FEHLGESCHLAGENEN ZERTIFIKATS (U16, Wettbewerb
+ * E6 — Circle erkennt es selbst und fordert den Eintrag gezielt nach).
+ *
+ * Ein CAA-Eintrag sagt, WELCHE Zertifizierungsstelle für eine Zone ausstellen
+ * darf. Steht dort `issue "sectigo.com"` und sonst nichts, lehnt Let's
+ * Encrypt jede Anforderung ab — und zwar SPÄT, nämlich erst in der
+ * Bestellung. Der Kunde sieht bei uns „Zertifikat noch nicht aktiv", wartet,
+ * drückt wieder, und nichts an dieser Meldung sagt ihm, dass die Ursache in
+ * seiner eigenen Zone liegt und dort in zehn Sekunden behoben wäre.
+ *
+ * KEINE FREMD-API: gefragt wird über denselben eigenen Resolver wie A/CNAME/
+ * TXT (`checkDomainCaa` in server/utils/customDomainDns.ts), die REGELN
+ * stehen pur hier.
+ */
+
+/** Die Ausstellerkennung von Let's Encrypt. Exakt dieser Name muss im
+ *  `issue`-Feld stehen — ein `subdomain.letsencrypt.org` gilt NICHT
+ *  (die Kennung ist ein fester Bezeichner, kein Hostname-Muster). */
+export const LETSENCRYPT_CAA_ISSUER = 'letsencrypt.org'
+
+/**
+ * `ok`      = ausstellen erlaubt (kein CAA-Satz, oder einer der uns nennt)
+ * `blocked` = es gibt einen CAA-Satz, und Let's Encrypt steht nicht drin
+ * `unknown` = die Abfrage ist nicht durchgekommen (SERVFAIL, Zeitüberschreitung)
+ *
+ * `unknown` ist BEWUSST kein `blocked`: ein hakendes DNS darf keine Warnung
+ * erzeugen, die den Kunden in seiner Zone nach einem Fehler suchen lässt, den
+ * es nicht gibt.
+ */
+export type DomainCaaVerdict = 'ok' | 'blocked' | 'unknown'
+
+/**
+ * PURE: die Namen, unter denen ein CAA-Satz gelten kann — vom Namen selbst
+ * aufwärts. CAA ERBT: gefunden wird der Satz des NÄCHSTEN Vorfahren, der einen
+ * hat (RFC 8659 § 3), deshalb wird die Kette von unten nach oben abgeklappert
+ * und der erste nicht-leere Satz entscheidet.
+ *
+ * Die TLD selbst bleibt AUSSEN VOR (`www.a.de` ⇒ `www.a.de`, `a.de` — nicht
+ * `de`). Formal erlaubt RFC 8659 auch dort einen Satz; praktisch trägt keine
+ * Registry einen, und die Abfrage kostet nur eine weitere Runde mit
+ * Zeitbudget an einem Prüf-Klick, der an einem Request hängt.
+ */
+export function caaChain(domain: string): string[] {
+  const labels = normalizeCustomDomain(domain).split('.').filter(Boolean)
+  const names: string[] = []
+  for (let i = 0; i + 1 < labels.length; i++) names.push(labels.slice(i).join('.'))
+  return names
+}
+
+/** Was `dns.resolveCaa` je Record liefert (Node `CaaRecord`, hier nur das,
+ *  was uns interessiert). */
+export interface DomainCaaRecord {
+  issue?: string
+  issuewild?: string
+  iodef?: string
+  critical?: number
+}
+
+/**
+ * PURE: entscheidet EIN gefundener CAA-Satz gegen uns?
+ *
+ * DREI REGELN, jede mit Grund:
+ *  1. **Ein Satz ohne `issue`-Feld beschränkt nichts.** Ein `iodef`-Eintrag
+ *     (Meldeadresse) allein ist kein Verbot — wer ihn als solches läse,
+ *     warnte einen Kunden grundlos.
+ *  2. **`issue ";"` ist das ausdrückliche Verbot für ALLE** (RFC 8659 § 4.2)
+ *     und damit auch für uns. Gezählt wird deshalb, ob ein `issue`-FELD DA
+ *     ist — nicht, ob ein Name darin steht. Wer stattdessen die leeren Namen
+ *     wegwirft, liest die HÄRTESTE Policy des Feldes als „keine
+ *     Beschränkung" (beim Bau am eigenen Test aufgefallen).
+ *  3. **Verglichen wird nur `issue`, nicht `issuewild`.** Für eine
+ *     Kundendomain wird nie ein Wildcard-Zertifikat bestellt (`kunde.de` und
+ *     `www.kunde.de` einzeln) — ein fehlendes `issuewild` ist also kein
+ *     Hindernis, und es als eines zu melden wäre ein Fehlalarm.
+ *
+ * Parameter hinter dem Namen (`letsencrypt.org; validationmethods=dns-01`)
+ * werden abgeschnitten: sie schränken das WIE ein, nicht das WER.
+ */
+export function caaVerdictFromRecords(records: readonly DomainCaaRecord[]): DomainCaaVerdict {
+  const issueRecords = records.filter(record => typeof record.issue === 'string')
+  // Regel 1: kein `issue`-Feld im Satz ⇒ keine Beschränkung.
+  if (!issueRecords.length) return 'ok'
+  const issuers = issueRecords.map(record =>
+    (record.issue ?? '').split(';')[0]?.trim().toLowerCase().replace(/\.$/, '') ?? '')
+  return issuers.includes(LETSENCRYPT_CAA_ISSUER) ? 'ok' : 'blocked'
+}

@@ -32,7 +32,10 @@
  * Gesamtzeit ist Versuche × Timeout).
  */
 import { Resolver } from 'node:dns/promises'
+import type { DomainCaaRecord, DomainCaaVerdict } from '../../shared/customDomain'
 import {
+  caaChain,
+  caaVerdictFromRecords,
   customDomainBase,
   customDomainTokenPresent,
   customDomainVerifyRecordName,
@@ -62,6 +65,12 @@ export interface DomainDnsCheck {
   pointingForms: string[]
   /** Wo der TXT-Record gesucht wurde (Anzeige + Fehlersuche). */
   txtRecordName: string
+  /** Darf Let's Encrypt für diese Zone ausstellen? (U16) — `unknown` heißt
+   *  „nicht messbar" und wird wie `ok` behandelt. */
+  caa: DomainCaaVerdict
+  /** Der Name, dessen CAA-Satz gilt ('' = keiner gefunden). Für die
+   *  Fehlersuche: bei `www.a.de` liegt der Satz fast immer auf `a.de`. */
+  caaZone: string
   /** Roher Fehlertext einer DNS-Abfrage, '' = keiner. Nie an den Kunden
    *  durchgereicht ohne Einordnung — er sagt „NXDOMAIN", nicht „was tun". */
   error: string
@@ -99,6 +108,36 @@ async function safe<T>(run: () => Promise<T>, fallback: T): Promise<{ value: T, 
 }
 
 /**
+ * DIE CAA-KETTE HOCHLAUFEN (U16, Wettbewerb E6).
+ *
+ * CAA erbt: gilt für `www.kunde.de` kein eigener Satz, gilt der von
+ * `kunde.de`. Gesucht wird deshalb von unten nach oben, und der ERSTE
+ * nicht-leere Satz entscheidet — genau so prüft es auch die
+ * Zertifizierungsstelle (RFC 8659 § 3). Die Namensliste ist pur und getestet
+ * (`caaChain`), das Urteil ebenso (`caaVerdictFromRecords`); hier steht nur
+ * das Fragen.
+ *
+ * WIRFT NIE. Ein Netzfehler endet in `unknown`, und `unknown` erzeugt keine
+ * Warnung — eine Warnung über einen Eintrag, den es vielleicht gar nicht
+ * gibt, schickt den Kunden in seiner Zone auf die Suche nach nichts.
+ */
+export async function checkDomainCaa(
+  domain: string,
+  resolver: Resolver,
+): Promise<{ verdict: DomainCaaVerdict, zone: string }> {
+  for (const name of caaChain(domain)) {
+    const answer = await safe(() => resolver.resolveCaa(name), [] as DomainCaaRecord[])
+    // Ein HARTER Fehler (SERVFAIL, Zeitüberschreitung) beendet die Suche:
+    // weiter oben weiterzufragen hieße, ein „hier steht nichts" zu behaupten,
+    // das wir gar nicht gemessen haben.
+    if (answer.error) return { verdict: 'unknown', zone: '' }
+    if (answer.value.length) return { verdict: caaVerdictFromRecords(answer.value), zone: name }
+  }
+  // Kein Satz auf der ganzen Kette — der Normalfall, und er heißt „erlaubt".
+  return { verdict: 'ok', zone: '' }
+}
+
+/**
  * Beide Fragen stellen. Wirft NIE — ein DNS-Ausfall darf einen Prüf-Klick
  * nicht in einen 500 verwandeln, er soll in einer ehrlichen Statuszeile enden.
  */
@@ -111,6 +150,13 @@ export async function checkDomainDns(
   const txtRecordName = customDomainVerifyRecordName(canonical || customDomainBase(canonical))
   const resolver = createResolver(options.dnsServers)
   const errors: string[] = []
+
+  // ── 0. CAA, NEBENHER ─────────────────────────────────────────────────────
+  // Losgeschickt, bevor die Kette der übrigen Abfragen läuft, und erst am Ende
+  // eingesammelt: die Antwort wird für keine der anderen Fragen gebraucht, und
+  // c-ares beantwortet nebenläufige Abfragen auf demselben Resolver. So kostet
+  // die Prüfung KEINE zusätzliche Wartezeit am Prüf-Klick.
+  const caaPending = checkDomainCaa(canonical, resolver)
 
   // ── 1. Eigentum ──────────────────────────────────────────────────────────
   const txt = await safe(() => resolver.resolveTxt(txtRecordName), [] as string[][])
@@ -135,12 +181,20 @@ export async function checkDomainDns(
     if (points) pointingForms.push(form)
   }
 
+  const caa = await caaPending
+
   return {
     owned,
     pointing: pointingForms.length > 0,
     canonicalPointing: pointingForms.includes(canonical),
     pointingForms,
     txtRecordName,
+    caa: caa.verdict,
+    caaZone: caa.zone,
+    // Die CAA-Abfrage steuert BEWUSST nichts zu `error` bei: sie ist eine
+    // eigene Aussage mit eigenem Text, und ein `CAA a.de: SERVFAIL` in der
+    // Statuszeile („TXT nicht gefunden · CAA …") würde nur die Fehlersuche
+    // des Kunden verwässern.
     error: errors.join(' · '),
   }
 }

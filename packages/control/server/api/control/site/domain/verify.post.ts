@@ -49,5 +49,8 @@ export default defineEventHandler(async (event) => {
   return {
     ...siteDomainStateFor(event, saved),
     needsPlatformRegistration: advance.needsPlatformRegistration,
+    // Aus dem LAUF, nicht aus der Zeile (U16): der CAA-Befund wird nicht
+    // gespeichert — er gilt nur für diese Messung.
+    caaBlocked: advance.caaBlocked,
   }
 })

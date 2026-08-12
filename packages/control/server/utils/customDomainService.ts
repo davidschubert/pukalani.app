@@ -139,6 +139,17 @@ export interface CustomDomainAdvance {
    * Grenze wie bei `revokeCommunityLabel` (A5) und der Zahlungswarnung (C15).
    */
   needsPlatformRegistration: boolean
+  /**
+   * true = eine CAA-Policy der Zone lässt Let's Encrypt NICHT ausstellen (U16).
+   *
+   * ES IST EIN BEFUND, KEIN STATUS: der Ablauf hält deswegen nicht an (die
+   * Bestellung darf es versuchen, und `unknown` wäre sonst ein Fehlalarm mit
+   * Sperrwirkung), und geschrieben wird er auch nicht — er entsteht bei jedem
+   * Prüf-Lauf neu und reist nur in der ANTWORT mit. Das erspart eine Spalte
+   * und damit eine Migration für eine Tatsache, die ohnehin nur so lange gilt,
+   * bis der Kunde seinen Eintrag ändert.
+   */
+  caaBlocked: boolean
 }
 
 /**
@@ -161,22 +172,39 @@ export async function advanceCustomDomain(event: H3Event, row: TenantRow): Promi
   const domain = row.customDomain || ''
   const token = row.customDomainToken || ''
   if (!domain || !token) {
-    return { patch: {}, status: 'none', error: '', needsPlatformRegistration: false }
+    return { patch: {}, status: 'none', error: '', needsPlatformRegistration: false, caaBlocked: false }
   }
 
   const settings = customDomainSettings(event)
   const forms = customDomainForms(domain)
   const now = new Date().toISOString()
 
+  /**
+   * VERÄNDERLICH, WEIL DIE ANTWORT SPÄTER KOMMT ALS DIE HELFER: `stop()` wird
+   * hier oben gebaut, den CAA-Befund liefert erst die DNS-Runde. Ein `let`
+   * spart, den Befund durch sieben Rücksprungstellen einzeln durchzureichen —
+   * und weil er in JEDER Rückgabe steht, kann keine ihn vergessen.
+   */
+  let caaBlocked = false
+
   const stop = (status: CustomDomainStatus, error: string): CustomDomainAdvance => ({
     patch: { customDomainStatus: status, customDomainError: error.slice(0, 500) },
     status,
     error,
     needsPlatformRegistration: false,
+    caaBlocked,
   })
 
   // ── 1. Gehört die Domain dieser Community, und zeigt sie auf uns? ─────────
   const dns = await checkDomainDns(forms, token, settings)
+  caaBlocked = dns.caa === 'blocked'
+  if (caaBlocked) {
+    logEvent('warn', 'community.custom_domain_caa_blocked', {
+      communityId: row.$id,
+      domain,
+      detail: `CAA-Satz auf ${dns.caaZone || domain} erlaubt letsencrypt.org nicht`,
+    })
+  }
   if (!dns.owned) {
     return stop('pending_dns', dns.error
       ? `TXT-Eintrag ${dns.txtRecordName} nicht gefunden (${dns.error}).`
@@ -197,6 +225,7 @@ export async function advanceCustomDomain(event: H3Event, row: TenantRow): Promi
       status: 'pending_cert',
       error: tenants.message,
       needsPlatformRegistration: false,
+      caaBlocked,
     }
   }
 
@@ -247,6 +276,7 @@ export async function advanceCustomDomain(event: H3Event, row: TenantRow): Promi
       status: 'pending_cert',
       error: message,
       needsPlatformRegistration: false,
+      caaBlocked,
     }
   }
 
@@ -264,6 +294,7 @@ export async function advanceCustomDomain(event: H3Event, row: TenantRow): Promi
         status: 'pending_cert',
         error: `Zertifikat noch nicht aktiv (${https.error}).`,
         needsPlatformRegistration: false,
+        caaBlocked,
       }
     }
   }
@@ -274,5 +305,6 @@ export async function advanceCustomDomain(event: H3Event, row: TenantRow): Promi
     status: 'pending_platform',
     error: '',
     needsPlatformRegistration: true,
+    caaBlocked,
   }
 }

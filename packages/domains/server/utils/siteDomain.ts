@@ -124,7 +124,7 @@ export async function setSiteDomain(event: H3Event, domain: string): Promise<Sit
  * und Appwrite hinter sich — es kann abgelaufen sein. Ein neues kostet einen
  * Appwrite-Aufruf, ein abgelaufenes kostet die Freischaltung.
  */
-export async function verifySiteDomain(event: H3Event): Promise<SiteDomainState> {
+export async function verifySiteDomain(event: H3Event): Promise<SiteDomainVerifyResult> {
   const projectId = siteProjectId(event)
   const jwt = await mintServiceJwt(event)
   const checked = await callControlService<SiteDomainVerifyResult>(event, '/api/control/site/domain/verify', {
