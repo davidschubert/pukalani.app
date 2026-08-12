@@ -30,26 +30,54 @@ export const inviteCodeSchema = z.string().trim().regex(inviteCodeRe)
 export const inviteCheckSchema = z.object({ code: inviteCodeSchema }).strict()
 
 /**
- * Der Wizard-Abschluss (Schritt 7 → „Community erstellen").
+ * Der Wizard-Abschluss (letzter Schritt → „Community erstellen").
  *
- * Bewusst EIN Aufruf mit allen Antworten statt sieben Teil-Schreibvorgängen:
+ * Bewusst EIN Aufruf mit allen Antworten statt mehrerer Teil-Schreibvorgänge:
  * so entsteht die Community entweder ganz oder gar nicht — kein halb
- * angelegter Mandant, wenn der Browser zwischen Schritt 4 und 5 zugeht
+ * angelegter Mandant, wenn der Browser mitten im Flow zugeht
  * (DoD der Roadmap: „keine verwaiste Community-Row bei Abbruch").
  *
  * `slug` statt `host`: der Server baut den Hostnamen (s. createSlugSchema).
  * Es gibt bewusst KEINEN `plan`/`projectId`/`mode`-Parameter — Selbst-
  * bedienung landet immer im Pool mit der Testphase; alles andere bleibt
  * Betreiber-Weg.
+ *
+ * PFLICHT SIND DREI ANTWORTEN (U12, Davids Entscheidung 2026-08-10):
+ * **Name/Adresse · Kategorie · Vibe** — die drei, die den ERSTEN ZUSTAND der
+ * Community formen (Host + Willkommens-Beitrag + Farbwelt). `purpose`,
+ * `memberRange`, `goal` und `description` fragt der Wizard nicht mehr.
+ *
+ * SIE BLEIBEN TROTZDEM IM SCHEMA, und zwar OPTIONAL statt gestrichen: das
+ * Schema ist die Naht zwischen ZWEI Deployments (platform ruft, control
+ * empfängt — dieselbe Lage wie bei `neutral` im Branding-PATCH). `.strict()`
+ * heißt, dass ein unbekanntes Feld 400 wirft; ein GESTRICHENES Feld hätte
+ * also jede Anlage aus einer noch nicht ausgetauschten platform abgewiesen.
+ * deploy.yml fährt `control` VOR `platform`, das ist genau diese Richtung.
+ *
+ * BEWUSST OHNE `.default()`: ein Default schriebe eine Antwort in
+ * `communities.profile`, die niemand gegeben hat — und da diese drei Felder
+ * reine Marktforschung sind (kein Codepfad LIEST sie, s. `parseSiteProfile`),
+ * wäre sie von einer echten Antwort später nicht mehr zu unterscheiden.
+ * Fehlt das Feld, fehlt es auch im Profil (site.post.ts). Bestehende Zeilen
+ * behalten ihre Antworten unverändert.
  */
 export function createOnboardingSiteSchema(t: TranslateFn = identity) {
   return z.object({
     name: z.string().trim().min(2, t('onboarding.validation.nameRequired')).max(120),
     slug: createSlugSchema(t),
-    purpose: z.enum(SITE_PURPOSES),
-    memberRange: z.enum(SITE_MEMBER_RANGES),
+    /** Nicht mehr gefragt (U12) — angenommen, solange eine ältere platform sendet. */
+    purpose: z.enum(SITE_PURPOSES).optional(),
+    /** Nicht mehr gefragt (U12) — s. o. */
+    memberRange: z.enum(SITE_MEMBER_RANGES).optional(),
     category: z.enum(SITE_CATEGORIES),
-    goal: z.enum(GOAL_IDS),
+    /** Nicht mehr gefragt (U12) — s. o. */
+    goal: z.enum(GOAL_IDS).optional(),
+    /**
+     * Nicht mehr gefragt (U12). War schon vorher optional und ist das EINZIGE
+     * der vier Felder mit einem echten Leser: es füllte die Startseite. Der
+     * Owner schreibt den Text jetzt unter /dashboard/community („Name und
+     * Beschreibung"), die Saat nimmt bis dahin ihren Rückfalltext.
+     */
     description: z.string().trim().max(SITE_DESCRIPTION_MAX).optional(),
     vibe: z.enum(VIBE_IDS),
     /**

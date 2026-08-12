@@ -15,24 +15,35 @@
 
 // ── 1. Antwort-Kataloge ─────────────────────────────────────────────────────
 
-/** Schritt 1 „Warum bist du hier?" */
+/**
+ * NICHT MEHR GEFRAGT — seit U12 (2026-08-10) fragt der Wizard drei Dinge:
+ * Name/Adresse · Kategorie · Vibe. `SITE_PURPOSES`, `SITE_MEMBER_RANGES` und
+ * `SITE_GOALS` bleiben trotzdem hier: das Naht-Schema nimmt sie weiter an
+ * (ältere platform, s. schemas/onboarding.ts), und `parseSiteProfile` liest
+ * sie aus BESTEHENDEN `communities.profile`-Zeilen. Nur die Wizard-Seite
+ * rendert sie nicht mehr.
+ */
+
+/** Früher Schritt 1 „Warum bist du hier?" */
 export const SITE_PURPOSES = ['new', 'migrate', 'looking'] as const
 export type SitePurpose = (typeof SITE_PURPOSES)[number]
 
-/** Schritt 2 „Wie viele Mitglieder hast du etwa?" (Spannen, keine Zahlen —
- *  gefragt ist eine Selbsteinschätzung, nicht eine Messung). */
+/** Früher Schritt 2 „Wie viele Mitglieder hast du etwa?" (Spannen, keine
+ *  Zahlen — gefragt war eine Selbsteinschätzung, nicht eine Messung). */
 export const SITE_MEMBER_RANGES = ['none', 'to100', 'to500', 'to1000', 'to5000', 'over5000'] as const
 export type SiteMemberRange = (typeof SITE_MEMBER_RANGES)[number]
 
-/** Schritt 3 „Welche Kategorie passt am besten?" — deckungsgleich mit den
- *  Zielgruppen-Seiten der Landingpage (/use-cases/*), plus Auffangkategorie. */
+/** „Welche Kategorie passt am besten?" — deckungsgleich mit den
+ *  Zielgruppen-Seiten der Landingpage (/use-cases/*), plus Auffangkategorie.
+ *  EINE der drei Pflicht-Antworten (U12): sie trägt eine Zeile im ersten
+ *  Beitrag der neuen Community. */
 export const SITE_CATEGORIES = [
   'coaching', 'education', 'creator', 'club', 'business', 'health', 'craft', 'other',
 ] as const
 export type SiteCategory = (typeof SITE_CATEGORIES)[number]
 
 /**
- * Schritt 5 „Was wäre in 6 Monaten ein echter Erfolg?"
+ * Früher Schritt 5 „Was wäre in 6 Monaten ein echter Erfolg?"
  *
  * `earlyAccess: true` markiert Ziele, deren Baustein NOCH NICHT allgemein
  * verfügbar ist (G0-Entscheidung: Early-Access-Scope = belegter Scope). Das
@@ -57,7 +68,7 @@ export function isEarlyAccessGoal(id: string): boolean {
   return SITE_GOALS.some(goal => goal.id === id && goal.earlyAccess)
 }
 
-// ── 2. Vibes (Schritt 6) ────────────────────────────────────────────────────
+// ── 2. Vibes (dritte Pflicht-Antwort) ───────────────────────────────────────
 
 /**
  * Sechs Vibes = sechs kuratierte Paare aus dem BESTEHENDEN 26×11-Theme-Katalog

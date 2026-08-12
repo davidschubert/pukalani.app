@@ -82,11 +82,18 @@ export default defineEventHandler(async (event) => {
     name: body.site.name,
     slug: body.site.slug,
     vibe: body.site.vibe,
+    /**
+     * NUR WAS GEFRAGT WURDE (U12). Seit der Wizard drei Dinge fragt, kommen
+     * `purpose`/`memberRange`/`goal` nur noch aus einer älteren platform —
+     * fehlen sie, stehen sie auch nicht im Profil. Ein gesetzter Default wäre
+     * eine erfundene Antwort und später nicht mehr von einer echten zu
+     * unterscheiden (Begründung im Kopf von schemas/onboarding.ts).
+     */
     profile: {
-      purpose: body.site.purpose,
-      memberRange: body.site.memberRange,
+      ...(body.site.purpose ? { purpose: body.site.purpose } : {}),
+      ...(body.site.memberRange ? { memberRange: body.site.memberRange } : {}),
       category: body.site.category,
-      goal: body.site.goal,
+      ...(body.site.goal ? { goal: body.site.goal } : {}),
       ...(body.site.description ? { description: body.site.description } : {}),
     },
     inviteCode: invite?.row ?? null,

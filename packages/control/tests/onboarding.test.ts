@@ -338,6 +338,49 @@ describe('Wizard-Nutzlast', () => {
   })
 
   /**
+   * DIE NAHT TRÄGT BEIDE STÄNDE (U12, 2026-08-10).
+   *
+   * `platform` ruft, `control` empfängt — zwei Deployments, und deploy.yml
+   * fährt control ZUERST. Zwischen beiden Deploys spricht also eine ALTE
+   * platform (sieben Antworten) mit einer NEUEN control. Weil das Schema
+   * `.strict()` ist, wäre ein GESTRICHENES Feld dort ein 400 auf jede Anlage.
+   */
+  it('nimmt die drei Pflicht-Antworten allein an (neuer Wizard)', () => {
+    const parsed = schema.parse({
+      name: 'Jungle Zipline',
+      slug: 'jungle-zipline',
+      category: 'creator',
+      vibe: 'calm',
+    })
+    expect(parsed.category).toBe('creator')
+    // Kein erfundener Default: was niemand gesagt hat, steht auch nicht da.
+    expect(parsed.purpose).toBeUndefined()
+    expect(parsed.memberRange).toBeUndefined()
+    expect(parsed.goal).toBeUndefined()
+    expect(parsed.description).toBeUndefined()
+  })
+
+  it('nimmt die alte Antwortliste weiter an (ältere platform)', () => {
+    const parsed = schema.parse({ ...valid, description: 'Zwei Sätze.' })
+    expect(parsed.purpose).toBe('new')
+    expect(parsed.memberRange).toBe('to100')
+    expect(parsed.goal).toBe('relationships')
+    expect(parsed.description).toBe('Zwei Sätze.')
+  })
+
+  it('prüft die weggefallenen Felder weiterhin, wenn sie mitkommen', () => {
+    // Optional heißt „darf fehlen", nicht „darf alles sein" — sonst stünde
+    // beliebiger Text in `communities.profile`.
+    for (const bad of [
+      { ...valid, purpose: 'weltherrschaft' },
+      { ...valid, memberRange: 'viele' },
+      { ...valid, goal: 'gibt-es-nicht' },
+    ]) {
+      expect(schema.safeParse(bad).success).toBe(false)
+    }
+  })
+
+  /**
    * SEIT U2 (2026-08-10) IST DER CODE OPTIONAL — im SCHEMA. Das ist kein
    * Aufweichen des Early-Access-Tors, sondern seine Verlagerung an die einzige
    * Stelle, die den Schalter kennt: `control/server/api/control/onboarding/
