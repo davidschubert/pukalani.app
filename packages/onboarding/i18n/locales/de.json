@@ -43,7 +43,7 @@
         "done": "Community stillgelegt.",
         "doneDesc": "Die Adresse antwortet binnen einer halben Minute nicht mehr. Inhalte bleiben gespeichert.",
         "errors": {
-          "subscription_active": "Es läuft noch ein Abo. Kündige es zuerst unter „Abo & Rechnung\", danach lässt sich die Community löschen.",
+          "subscription_active": "Es läuft noch ein Abo. Kündige es zuerst unter „Plan & Rechnung\", danach lässt sich die Community löschen.",
           "already_disabled": "Diese Community ist bereits stillgelegt.",
           "owner_protected": "Nur die Inhaberin oder der Inhaber kann die Community löschen."
         }
@@ -397,7 +397,7 @@
       "slugReserved": "Diese Adresse ist reserviert. Wähle bitte eine andere."
     },
     "nav": {
-      "subscription": "Abo & Rechnung"
+      "subscription": "Plan & Rechnung"
     },
     "communityTabs": {
       "general": "Allgemein",
@@ -407,16 +407,16 @@
     },
     "communityProducts": {
       "title": "Produkte",
-      "noTenantTitle": "Hier gibt es keinen Tarif",
-      "noTenantDesc": "Diese Seite zeigt, was der Tarif einer Community enthält. Auf dieser Adresse gibt es keine Community.",
-      "includedTitle": "In deinem Tarif enthalten",
+      "noTenantTitle": "Hier gibt es keinen Plan",
+      "noTenantDesc": "Diese Seite zeigt, was der Plan einer Community enthält. Auf dieser Adresse gibt es keine Community.",
+      "includedTitle": "In deinem Plan enthalten",
       "includedDesc": "Diese Produkte kannst du sofort benutzen.",
       "included": "Enthalten",
       "emptyTitle": "Noch keine Produkte",
       "emptyDesc": "Für diese Community ist gerade kein Produkt freigeschaltet.",
-      "lockedTitle": "Nicht in deinem Tarif",
-      "lockedDesc": "Diese Produkte gibt es ab einem höheren Tarif. Deine Inhalte bleiben in jedem Fall erhalten.",
-      "upgradeCta": "Tarif ansehen"
+      "lockedTitle": "Nicht in deinem Plan",
+      "lockedDesc": "Diese Produkte gibt es ab einem höheren Plan. Deine Inhalte bleiben in jedem Fall erhalten.",
+      "upgradeCta": "Plan ansehen"
     },
     "communityStorage": {
       "title": "Speicher",
@@ -427,7 +427,7 @@
       "emptyDesc": "Für diese Community ist gerade keine Obergrenze gesetzt. Sobald eine gilt, steht sie hier.",
       "of": "{used} von {limit}",
       "hint": "Gezählt werden Einträge, nicht Megabyte. Tageswerte stehen hier bewusst nicht.",
-      "planCta": "Tarif ansehen",
+      "planCta": "Plan ansehen",
       "posts": {
         "comments": "Kommentare",
         "posts": "Beiträge",
@@ -473,14 +473,14 @@
       "action": "Plan wählen"
     },
     "subscription": {
-      "title": "Abo & Rechnung",
+      "title": "Plan & Rechnung",
       "help": "Welcher Plan für deine Community gilt, was er kostet und wo du Rechnungen und Zahlungsmethode findest.",
       "noTenantTitle": "Hier gibt es kein Abo",
       "noTenantText": "Diese Seite gehört zu einer Community. Auf einer eigenen Instanz rechnet der Betreiber ab, nicht die einzelne Community.",
       "currentPlan": "Aktueller Plan",
       "currentPlanNote": "Dein aktueller Plan.",
       "trialLabel": "Testphase ({plan}) – noch 1 Tag übrig | Testphase ({plan}) – noch {n} Tage übrig",
-      "noPlanLabel": "Kein Abo – Free Plan",
+      "noPlanLabel": "Kein Abo — nur zum Lesen",
       "readOnlyNote": "Ohne Abo ist deine Community nur zum Lesen. Inhalte und Mitglieder bleiben; ein Plan öffnet sie sofort wieder.",
       "priceNote": "Verbindlich ist der Betrag, den der Stripe-Checkout zeigt — dort wird auch die Steuer nach deiner Rechnungsadresse berechnet.",
       "choosePlan": "Plan wählen",

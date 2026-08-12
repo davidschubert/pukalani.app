@@ -52,8 +52,8 @@
       "saveFailedHint": "Deine Angaben stehen noch im Formular. Prüf die Verbindung und speicher noch einmal.",
       "cancel": "Abbrechen",
       "quotaTitle": "Kontingent erreicht",
-      "quotaHint": "Dein Tarif ist voll. Lösche nicht mehr gebrauchte Bilder oder wechsle in einen größeren Tarif.",
-      "quotaTodayHint": "Für heute ist das Kontingent erreicht — morgen geht es weiter. Für mehr auf einmal hilft ein größerer Tarif."
+      "quotaHint": "Dein Plan ist voll. Lösche nicht mehr gebrauchte Bilder oder wechsle in einen größeren Plan.",
+      "quotaTodayHint": "Für heute ist das Kontingent erreicht — morgen geht es weiter. Für mehr auf einmal hilft ein größerer Plan."
     }
   }
 }

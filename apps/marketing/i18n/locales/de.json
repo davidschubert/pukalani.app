@@ -372,7 +372,7 @@
         },
         {
           "term": "Early Access",
-          "def": "Ein Produkt, das es gibt, das aber noch nicht für alle freigegeben ist. Wir markieren das so – statt es wie ein fertiges Tarif-Versprechen aussehen zu lassen."
+          "def": "Ein Produkt, das es gibt, das aber noch nicht für alle freigegeben ist. Wir markieren das so – statt es wie ein fertiges Plan-Versprechen aussehen zu lassen."
         },
         {
           "term": "Mitglieder-only",
@@ -649,7 +649,7 @@
           "metaDescription": "Pukalani vs Skool: Community + Kurse unter deiner Marke, in Deutschland gehostet, ohne Transaktionsgebühr auf deine Umsätze. Ehrlicher Vergleich mit Quellen.",
           "title": "Pukalani vs Skool",
           "sub": "Community und Kurse unter deiner Marke — ohne Anteil an deinen Umsätzen.",
-          "intro": "Skool ist bewusst einfach und stark im Gamification-Ansatz. Der Einstieg ist günstig, kostet dich im Hobby-Tarif aber 10 % deiner Umsätze. Pukalani nimmt keine Transaktionsgebühr, hostet in Deutschland und lässt dich Design, Domain und Produkte selbst bestimmen.",
+          "intro": "Skool ist bewusst einfach und stark im Gamification-Ansatz. Der Einstieg ist günstig, kostet dich im Hobby-Plan aber 10 % deiner Umsätze. Pukalani nimmt keine Transaktionsgebühr, hostet in Deutschland und lässt dich Design, Domain und Produkte selbst bestimmen.",
           "whenThem": "Du magst den gamifizierten, sehr geführten Ansatz, willst dich um nichts kümmern und die Community darf aussehen wie Skool. Dann ist Skool schnell und stimmig.",
           "whenUs": "Deine Community soll aussehen und heißen wie DU, deine Umsätze bleiben vollständig bei dir, und Datenschutz ist dir nicht nur ein Häkchen. Dazu willst du Kommentare oder Events auch in deine bestehende Website einbetten."
         },
@@ -914,7 +914,7 @@
           },
           {
             "title": "Leistungen und Verfügbarkeit",
-            "body": "Leistungsumfang je Tarif; eine Verfügbarkeitszusage geben wir erst, wenn sie belegt ist."
+            "body": "Leistungsumfang je Plan; eine Verfügbarkeitszusage geben wir erst, wenn sie belegt ist."
           },
           {
             "title": "Preise und Zahlung",

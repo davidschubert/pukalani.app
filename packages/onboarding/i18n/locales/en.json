@@ -43,7 +43,7 @@
         "done": "Community shut down.",
         "doneDesc": "The address stops answering within half a minute. Content stays stored.",
         "errors": {
-          "subscription_active": "A subscription is still running. Cancel it under \"Subscription & billing\" first, then the community can be deleted.",
+          "subscription_active": "A subscription is still running. Cancel it under \"Plan & billing\" first, then the community can be deleted.",
           "already_disabled": "This community is already shut down.",
           "owner_protected": "Only the owner can delete the community."
         }
@@ -397,7 +397,7 @@
       "slugReserved": "That address is reserved. Please pick another one."
     },
     "nav": {
-      "subscription": "Subscription"
+      "subscription": "Plan & billing"
     },
     "communityTabs": {
       "general": "General",
@@ -473,14 +473,14 @@
       "action": "Choose a plan"
     },
     "subscription": {
-      "title": "Subscription & billing",
+      "title": "Plan & billing",
       "help": "Which plan applies to your community, what it costs, and where to find invoices and payment details.",
       "noTenantTitle": "No subscription here",
       "noTenantText": "This page belongs to a community. On a dedicated instance the operator handles billing, not an individual community.",
       "currentPlan": "Current plan",
       "currentPlanNote": "Your current plan.",
       "trialLabel": "Trial ({plan}) – 1 day left | Trial ({plan}) – {n} days left",
-      "noPlanLabel": "No subscription – Free plan",
+      "noPlanLabel": "No subscription — read-only",
       "readOnlyNote": "Without a subscription your community is read-only. Content and members stay; a plan opens it again right away.",
       "priceNote": "The binding amount is the one shown in the Stripe checkout — that is also where tax is calculated from your billing address.",
       "choosePlan": "Choose a plan",

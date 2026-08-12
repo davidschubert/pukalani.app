@@ -2,7 +2,7 @@
 import { TRIAL_PLAN, trialDaysLeft } from '../../../../../control/shared/onboarding'
 
 /**
- * Abo & Rechnung EINER Community (A6 Schritt 3, Platform-Seite).
+ * Plan & Rechnung EINER Community (A6 Schritt 3, Platform-Seite).
  *
  * WARUM HIER IM ONBOARDING-LAYER: die Seite kann nur so weit reichen wie ihre
  * Routen, und die liegen hier (`/api/community/billing/*`) — dieser Layer besitzt die
@@ -39,10 +39,11 @@ import { TRIAL_PLAN, trialDaysLeft } from '../../../../../control/shared/onboard
  * ── WAS DIE ERSTE KARTE SAGT (F51, Davids eigene Formulierung) ─────────────
  * Nicht der rohe Plan-Key, sondern der ZUSTAND:
  *   · laufende Testphase → „Testphase (Pro) – X Tage übrig"
- *   · kein Abo          → „Kein Abo – Free Plan" MIT dem Nur-lesen-Satz daneben
+ *   · kein Abo          → „Kein Abo — nur zum Lesen" MIT dem Nur-lesen-Satz daneben
  *   · gekauft           → der Plan-Name wie bisher
- * Der Zusatz beim zweiten Fall ist keine Verzierung: „Free Plan" allein
- * verspräche einen funktionsfähigen Gratis-Tarif, den es seit F49 nicht gibt.
+ * Der Wortlaut sagt die FOLGE, nicht ein Angebot: bis U6 stand hier „Free
+ * Plan", und das verspricht einen funktionsfähigen Gratis-Plan, den es seit
+ * F49 nicht gibt (Dashboard-Audit-Matrix „Geld": „Free Plan" streichen).
  * Das VERHALTEN ist unverändert — nur-lesend bis bezahlt (M13-Sperre) —, diese
  * Karte macht es nur an der Stelle sichtbar, an der man etwas dagegen tun kann.
  *
@@ -82,9 +83,9 @@ const isTenantHost = computed(() => currentPlan.value !== null)
  *
  * Davids Entscheidung 2026-08-09 (F49-Nachtrag, gleiche Logik wie die
  * öffentliche Preisseite): Basic ist kein Angebot, sondern der Zustand OHNE
- * Abo. Eine „0 €"-Spalte daneben las sich wie ein buchbarer Gratis-Tarif; den
- * Zustand erklärt bereits die Karte „Aktueller Plan" („Kein Abo – Free Plan"
- * plus der Nur-lesen-Satz). Ein Angebot ohne Knopf ist kein Angebot.
+ * Abo. Eine „0 €"-Spalte daneben las sich wie ein buchbarer Gratis-Plan; den
+ * Zustand erklärt bereits die Karte „Aktueller Plan" („Kein Abo — nur zum
+ * Lesen" plus der Nur-lesen-Satz). Ein Angebot ohne Knopf ist kein Angebot.
  */
 const PLAN_KEYS = ['personal', 'pro'] as const
 type PlanKey = (typeof PLAN_KEYS)[number]
@@ -147,7 +148,7 @@ const trialDays = computed<number | null>(() => {
 /**
  * DREI ZUSTÄNDE, EIN LABEL. `basic` ist seit F49 kein Plan mehr, sondern die
  * Abwesenheit eines Abos — genau das muss dastehen, sonst liest sich der
- * Plan-Name „Basic" wie ein gebuchter Gratis-Tarif.
+ * Plan-Name „Basic" wie ein gebuchter Gratis-Plan.
  */
 const planLabel = computed(() => {
   if (trialDays.value !== null) {
@@ -250,8 +251,8 @@ onMounted(() => {
         <UIcon name="i-ph-seal-check" class="mt-0.5 size-5 shrink-0 text-muted" />
         <div>
           <p class="text-sm font-medium">{{ t('onboarding.subscription.currentPlan') }}</p>
-          <!-- Ohne Abo zuerst die FOLGE, dann der Preis-Hinweis: „Free Plan"
-               allein verspräche einen Tarif, den es nicht gibt (F49/F51). -->
+          <!-- Ohne Abo zuerst die FOLGE, dann der Preis-Hinweis: ein Plan-Name
+               allein verspräche ein Angebot, das es nicht gibt (F49/F51). -->
           <p v-if="showReadOnlyNote" class="text-sm text-warning" data-subscription-readonly>
             {{ t('onboarding.subscription.readOnlyNote') }}
           </p>
