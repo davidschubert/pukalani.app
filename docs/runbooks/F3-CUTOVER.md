@@ -7,7 +7,7 @@ CODE bestehen** (Muster `photos`) — die gesamte CI-E2E hängt daran, und die A
 ist die Silo-Gegenform für die Grenzbeweise. Verschwindet der Betrieb, nicht der
 Code.
 
-Grundlage: [F3-COMMENTS-POOL.md](../plans/F3-COMMENTS-POOL.md) · Davids Abnahme
+Grundlage: [F3-COMMENTS-POOL.md](../archiv/F3-COMMENTS-POOL.md) · Davids Abnahme
 im [DECISION-LOG](../DECISION-LOG.md) vom 2026-08-12 · Muster für die
 Handgriffe: [ACCOUNT-CUTOVER.md](ACCOUNT-CUTOVER.md) (AH-1) und
 [ADMIN-CUTOVER.md](ADMIN-CUTOVER.md) (AH-4).
@@ -337,7 +337,7 @@ Rückweg mehr.
 
 ## 11 · Doku und Archiv
 
-- [x] `docs/plans/F3-COMMENTS-POOL.md` → `docs/archiv/`, offene Kästchen zu
+- [x] `docs/archiv/F3-COMMENTS-POOL.md` → `docs/archiv/`, offene Kästchen zu
       Aufzählungen entschärft.
 - [x] Eintrag in `docs/OPEN-ITEMS-COMPLETE.md` (mit Datum und einer fetten Zeile
       **Gelernt:**), Punkt 10 aus `docs/OPEN-ITEMS.md` entfernt.
