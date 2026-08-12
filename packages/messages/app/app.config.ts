@@ -56,7 +56,7 @@ export default defineAppConfig({
           to: '/dashboard/messages',
           requiredCapability: 'dashboard.access',
           group: 'products',
-          order: 5,
+          order: 90,
         },
         {
           /**
@@ -73,8 +73,10 @@ export default defineAppConfig({
           icon: 'i-ph-flag-banner',
           to: '/dashboard/message-reports',
           requiredCapability: 'reports.moderate',
-          group: 'settings',
-          order: 25,
+          // U7/G5 (2026-08-11): die Melde-Warteschlange stand unter
+          // „Einstellungen" — dort stellt ein Moderator nichts ein.
+          group: 'moderation',
+          order: 100,
         },
       ],
       communityTabs: [
@@ -89,6 +91,13 @@ export default defineAppConfig({
            * Seit F51 (2026-08-07) in der COMMUNITY-Hülle statt in der Konto-
            * Hülle: „darf es hier private Nachrichten geben?" ist eine
            * Entscheidung über die Community, nicht über das eigene Konto.
+           *
+           * U8/G7 (2026-08-11): und seither heißt der Pfad `private-messages`
+           * statt `messages`. Er lag EIN Segment neben dem Posteingang
+           * (`/dashboard/messages`, jedes Mitglied) — zwei Adressen mit
+           * verschiedenen Publika, die sich um ein Wort unterschieden. Der
+           * Menü-NAME war nie das Problem („Private Nachrichten" stand längst
+           * da), die Adresse schon.
            */
           id: 'messages',
           scope: 'community',
@@ -102,7 +111,7 @@ export default defineAppConfig({
           planProduct: 'messages',
           labelKey: 'messages.nav.settings',
           icon: 'i-ph-envelope-simple',
-          to: '/dashboard/community/messages',
+          to: '/dashboard/community/private-messages',
           requiredCapability: 'messages.manage',
           order: 60,
         },

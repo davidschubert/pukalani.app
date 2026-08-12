@@ -47,7 +47,7 @@ export default defineAppConfig({
           to: '/dashboard/events',
           requiredCapability: 'events.manage',
           group: 'products',
-          order: 3,
+          order: 50,
         },
         {
           // F15: ZWEI Einträge auf dasselbe Produkt — dieselbe Begründung wie bei
@@ -69,8 +69,9 @@ export default defineAppConfig({
           icon: 'i-ph-flag',
           to: '/dashboard/events-moderation',
           requiredCapability: 'events.moderate',
-          group: 'products',
-          order: 4,
+          // U7/G5 (2026-08-11): Moderationsfläche ⇒ Gruppe „Moderation".
+          group: 'moderation',
+          order: 60,
         },
       ],
     },

@@ -10,19 +10,22 @@
       "config": "Configuration",
       "storage": "Storage",
       "system": "System",
-      "admin": "Admin",
+      "admin": "Instance",
       "homepage": "Go to home page",
       "people": "People",
       "products": "Products",
       "communitySettings": "Community settings",
+      "instanceSettings": "Instance settings",
       "groups": {
         "platform": "Platform",
         "studio": "Studio",
         "management": "Management",
         "website": "Website",
         "products": "Products",
+        "moderation": "Moderation",
         "branding": "Design",
-        "settings": "Settings"
+        "settings": "Settings",
+        "account": "Your account"
       }
     },
     "config": {
@@ -512,6 +515,7 @@
   "dashboard": {
     "search": {
       "label": "Go to",
+      "settings": "Settings",
       "button": "Search…",
       "placeholder": "Search users, comments…",
       "users": "Users",

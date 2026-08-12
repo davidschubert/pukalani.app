@@ -28,6 +28,34 @@ import type { Capability } from './types/authz'
  * Page-Meta. Diese Regel entscheidet, was im Menü STEHT — nie, was geht.
  */
 
+/**
+ * DIE VERGABE-REGEL FÜR `order` (U7/M1, 2026-08-11).
+ *
+ * Sortiert wird stabil nach `order` (packages/admin/app/layouts/dashboard.vue);
+ * bei GLEICHSTAND entscheidet die Merge-Reihenfolge der Registry-Arrays, also
+ * die Reihenfolge in `extends`. Genau das war der Zustand bis hierher: neun
+ * Einträge der Gruppe „Produkte" vergaben 1–5 über sechs Layer hinweg, mit drei
+ * Gleichständen. Die Reihenfolge war damit nicht entworfen, sondern zufällig
+ * stabil — und ein neuer Layer hätte sie verschoben, ohne dass jemand etwas
+ * geändert hätte.
+ *
+ * Deshalb bekommt JEDER Layer einen eigenen Zehner-Block, und innerhalb zählt
+ * er in Zehnerschritten. Kein Block überschneidet einen anderen, zwischen zwei
+ * Einträgen ist immer Platz für einen dritten:
+ *
+ *   posts 10–40 · events 50–60 · courses 70 · media 80 · messages 90–100 ·
+ *   comments 110–120 · feedback 10 (eigene Gruppe „Dein Konto")
+ *
+ * Die Blöcke gelten je LAYER, nicht je Gruppe: `posts` vergibt 10 an seine
+ * Moderationsfläche (Gruppe „Moderation") und 20–40 an seine drei übrigen
+ * (Gruppe „Produkte"). So bleibt die Vergabe an EINER Stelle nachlesbar, auch
+ * wenn ein Eintrag später die Gruppe wechselt.
+ *
+ * Ein NEUER Layer nimmt den nächsten freien Zehner-Block und trägt ihn hier
+ * ein. Die `communityTabs` machen es schon länger so (10–120,
+ * packages/onboarding/app/app.config.ts).
+ */
+
 /** Ebene, auf der ein Dashboard-Modul lebt. Pflichtfeld an jeder Registrierung. */
 export type DashboardScope = 'operator' | 'community' | 'account'
 

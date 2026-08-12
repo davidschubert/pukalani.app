@@ -48,8 +48,16 @@ export default defineAppConfig({
           icon: 'i-ph-megaphone-simple',
           to: '/dashboard/feedback',
           requiredCapability: 'dashboard.access',
-          group: 'management',
-          order: 1,
+          // U7/G8 (2026-08-11): GRUPPE `account` statt `management`. Die Ebene
+          // ('account' = überall, für jeden Angemeldeten) ist unverändert —
+          // Davids E10-Entscheidung bleibt unangetastet. Falsch war nur die
+          // Schublade: ein Mitglied einer Kunden-Community sah eine Gruppe
+          // „Management" mit genau diesem einen Eintrag darin und konnte
+          // nichts managen. Beim BETREIBER steht der Punkt weiterhin an
+          // derselben Stelle, weil die neue Gruppe direkt hinter „Management"
+          // einsortiert ist (packages/admin/app/layouts/dashboard.vue).
+          group: 'account',
+          order: 10,
           children: [
             { id: 'customer-feedback-list', labelKey: 'feedback.nav.feedback', icon: 'i-ph-chats-circle', to: '/dashboard/feedback', exact: true },
             { id: 'customer-feedback-roadmap', labelKey: 'feedback.nav.roadmap', icon: 'i-ph-map-trifold', to: '/dashboard/roadmap' },

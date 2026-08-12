@@ -10,19 +10,22 @@
       "config": "Konfiguration",
       "storage": "Speicher",
       "system": "System",
-      "admin": "Admin",
+      "admin": "Instanz",
       "homepage": "Zur Startseite",
       "people": "Personen",
       "products": "Produkte",
       "communitySettings": "Community-Einstellungen",
+      "instanceSettings": "Instanz-Einstellungen",
       "groups": {
         "platform": "Plattform",
         "studio": "Studio",
         "management": "Management",
         "website": "Website",
         "products": "Produkte",
+        "moderation": "Moderation",
         "branding": "Gestaltung",
-        "settings": "Einstellungen"
+        "settings": "Einstellungen",
+        "account": "Dein Konto"
       }
     },
     "config": {
@@ -512,6 +515,7 @@
   "dashboard": {
     "search": {
       "label": "Gehe zu",
+      "settings": "Einstellungen",
       "button": "Suchen…",
       "placeholder": "Benutzer, Kommentare suchen…",
       "users": "Benutzer",

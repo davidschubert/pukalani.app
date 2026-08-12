@@ -55,7 +55,20 @@ const route = useRoute()
 const auth = useAuthStore()
 const appConfig = useAppConfig()
 
-useHead({ title: () => t('dashboard.communitySettings.title') })
+/**
+ * WIE DIE HÜLLE HEISST (U7/G1, 2026-08-11) — dieselbe Rechnung wie am
+ * Menüpunkt in der Seitenleiste (packages/admin/app/layouts/dashboard.vue):
+ * wo `admin.instanceTabs` an ist (heute apps/comments), stehen hier die vier
+ * Reiter der INSTANZ-Verwaltung und keine Community. Ein Menüpunkt und eine
+ * Kopfzeile mit zwei verschiedenen Namen für dieselbe Fläche wären der
+ * nächste Befund; deshalb liest auch dieser Titel den Schalter.
+ */
+const hullTitle = computed(() =>
+  configFlagEnabled(appConfig.pukalani, 'admin.instanceTabs')
+    ? t('admin.nav.instanceSettings')
+    : t('dashboard.communitySettings.title'))
+
+useHead({ title: () => hullTitle.value })
 
 const place = resolveDashboardPlace(
   (appConfig.pukalani as { tenancy?: { enabled?: boolean } }).tenancy?.enabled === true,
@@ -123,7 +136,7 @@ const containerWidth = computed(() =>
 <template>
   <UDashboardPanel id="community-settings" :ui="{ body: 'lg:py-12' }">
     <template #header>
-      <UDashboardNavbar :title="t('dashboard.communitySettings.title')">
+      <UDashboardNavbar :title="hullTitle">
         <template #leading>
           <UDashboardSidebarCollapse />
         </template>

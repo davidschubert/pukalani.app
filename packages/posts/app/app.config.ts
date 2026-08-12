@@ -21,8 +21,12 @@ export default defineAppConfig({
           icon: 'i-ph-users-three',
           to: '/dashboard/posts',
           requiredCapability: 'posts.moderate',
-          group: 'products',
-          order: 1,
+          // U7/G5 (2026-08-11): die Moderationsfläche zieht aus „Produkte" in
+          // die neue Gruppe „Moderation" — sie ist die Aufsicht über den
+          // Inhalt, nicht das Produkt selbst. Die drei Geschwister unten
+          // bleiben, wo sie sind. Der Pfad ändert sich nicht.
+          group: 'moderation',
+          order: 10,
         },
         {
           // C16: ZWEI Einträge auf dasselbe Produkt, und das ist kein Versehen.
@@ -45,7 +49,7 @@ export default defineAppConfig({
           to: '/dashboard/my-posts',
           requiredCapability: 'posts.write',
           group: 'products',
-          order: 2,
+          order: 20,
         },
         {
           // F1 Stufe 1: die STRUKTUR der Discussions. Dritter Eintrag auf
@@ -61,10 +65,10 @@ export default defineAppConfig({
           planProduct: 'posts',
           labelKey: 'posts.nav.categories',
           icon: 'i-ph-chats-circle',
-          to: '/dashboard/discussions',
+          to: '/dashboard/categories',
           requiredCapability: 'posts.manage',
           group: 'products',
-          order: 3,
+          order: 30,
         },
         {
           // F1 Teilpaket 3: die Vertrauensstufen. VIERTER Eintrag auf dasselbe
@@ -73,7 +77,7 @@ export default defineAppConfig({
           // `posts.appoint` hat AUSSCHLIESSLICH der Owner (communityAuthz.ts).
           //
           // Warum eine eigene Seite und nicht ein Abschnitt in
-          // /dashboard/discussions: die Kategorien-Seite verlangt
+          // /dashboard/categories: die Kategorien-Seite verlangt
           // `posts.manage` und steht damit auch dem Admin offen. Ein Abschnitt
           // darin, den nur der Owner bedienen darf, wäre für jeden Admin eine
           // Wand — genau die Lage, die C16 hier schon einmal aufgelöst hat.
@@ -83,10 +87,10 @@ export default defineAppConfig({
           planProduct: 'posts',
           labelKey: 'posts.nav.trustLevels',
           icon: 'i-ph-medal',
-          to: '/dashboard/discussion-leaders',
+          to: '/dashboard/trust-levels',
           requiredCapability: 'posts.appoint',
           group: 'products',
-          order: 4,
+          order: 40,
         },
       ],
     },

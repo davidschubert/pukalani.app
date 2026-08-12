@@ -155,12 +155,30 @@ const links = computed<NavigationMenuItem[]>(() => {
   )
   for (const m of modules.filter(m => !m.group)) items.push(toItem(m))
   // Gruppen in fester Reihenfolge (Davids Struktur, E9): erst die Betreiber-
-  // Ebene (Plattform · Studio · Management), dann die Community-Ebene
-  // (Website · Produkte · Branding · Einstellungen). Am Ort schließt sich
-  // ohnehin immer eine der beiden Hälften aus — die eine Liste genügt.
-  // Innerhalb sortiert 'order' (sonst Registry-Reihenfolge); Label-Abstand
-  // kommt einheitlich über :ui der UNavigationMenu.
-  for (const group of ['platform', 'studio', 'management', 'website', 'products', 'branding', 'settings'] as const) {
+  // Ebene (Plattform · Studio · Management), dann die Konto-Ebene, dann die
+  // Community-Ebene (Website · Produkte · Moderation · Gestaltung ·
+  // Einstellungen). Am Ort schließt sich ohnehin immer eine der beiden Hälften
+  // aus — die eine Liste genügt.
+  //
+  // ZWEI GRUPPEN KAMEN MIT U7 DAZU (2026-08-11):
+  //
+  //  - `moderation` (Audit-Befund G5). Die vier Moderations-Arbeitsflächen
+  //    lagen in zwei Gruppen, von denen eine „Einstellungen" hieß (ein
+  //    Moderator darf dort nichts einstellen) und die andere „Produkte" (er
+  //    verwaltet keine). Für die Rolle, deren einziger Zweck Moderation ist,
+  //    gab es keinen Ort, der so heißt. Sie steht zwischen „Produkte" und
+  //    „Gestaltung": erst der Inhalt, dann seine Aufsicht, dann das Aussehen.
+  //  - `account` (Audit-Befund G8). `scope: 'account'` heißt „überall, für
+  //    jeden Angemeldeten" — solche Einträge gehören nicht in die Gruppe
+  //    „Management" des Betreibers. Sie steht DIREKT HINTER `management`,
+  //    damit der Betreiber „Wünsche & Ideen" weiterhin an derselben Stelle
+  //    findet; für ein Mitglied einer Kunden-Community ist sie die einzige
+  //    der ersten vier, die überhaupt Inhalt hat.
+  //
+  // Innerhalb sortiert 'order' (sonst Registry-Reihenfolge; Vergabe-Regel in
+  // core/shared/dashboardNav.ts); Label-Abstand kommt einheitlich über :ui der
+  // UNavigationMenu.
+  for (const group of ['platform', 'studio', 'management', 'account', 'website', 'products', 'moderation', 'branding', 'settings'] as const) {
     const grouped = modules
       .filter(m => m.group === group)
       .sort((a, b) => (a.order ?? 999) - (b.order ?? 999))
@@ -204,6 +222,30 @@ const communityTabsHere = computed(() => resolveSettingsTabs(
   { place, canAsOperator, canAsMember, productOn, planOn, configOn },
 ))
 
+/**
+ * WIE DIESE HÜLLE HEISST (U7/G1, 2026-08-11).
+ *
+ * In einer SILO-App (apps/comments) gibt es keine Community — trotzdem hieß
+ * der Menüpunkt „Community-Einstellungen", und darin standen Produkte,
+ * Speicher, Konfiguration und System. Das ist keine Struktur-, sondern eine
+ * WORT-Frage: für ein Verzeichnis der Instanz-Verwaltung ist „Community" eine
+ * falsche Auskunft.
+ *
+ * Der Schalter dafür war schon da: `admin.instanceTabs` (Core-Default aus)
+ * hängt genau die vier Betreiber-Reiter in diese Hülle (packages/admin/app/
+ * app.config.ts). Wo er an ist, heißt sie nach dem, was drin steht. Gelesen
+ * über dieselbe pure Regel wie die Registry-Gates (`configFlagEnabled`,
+ * fail-closed) — kein zweiter Weg zu derselben Tatsache.
+ *
+ * Dieselbe Rechnung steht in der Hülle selbst (packages/admin/app/pages/
+ * dashboard/community.vue): Menüpunkt und Kopfzeile dürfen nicht zwei Namen
+ * für eine Fläche tragen.
+ */
+const communityHullLabel = computed(() =>
+  configFlagEnabled(appConfig.pukalani, 'admin.instanceTabs')
+    ? t('admin.nav.instanceSettings')
+    : t('admin.nav.communitySettings'))
+
 const bottomLinks = computed<NavigationMenuItem[]>(() => {
   const items: NavigationMenuItem[] = []
   // Ziel ist der ERSTE sichtbare Reiter, nicht fest `/dashboard/community`:
@@ -213,7 +255,7 @@ const bottomLinks = computed<NavigationMenuItem[]>(() => {
   // führte in eine leere Fläche.
   const firstCommunityTab = communityTabsHere.value[0]
   if (firstCommunityTab) {
-    items.push({ label: t('admin.nav.communitySettings'), icon: 'i-ph-users-three', to: localePath(firstCommunityTab.to), onSelect: close })
+    items.push({ label: communityHullLabel.value, icon: 'i-ph-users-three', to: localePath(firstCommunityTab.to), onSelect: close })
   }
   if (operatorHere && canManageUsers.value) {
     items.push({ label: t('admin.nav.people'), icon: 'i-ph-users', to: localePath('/dashboard/users'), onSelect: close })
@@ -308,13 +350,57 @@ watch(searchTerm, (term) => {
   searchTimer = setTimeout(() => runSearch(term), 250)
 })
 
+/**
+ * WAS DIE SUCHE FINDET (U7/E8, 2026-08-11).
+ *
+ * Bis hierher indexierte sie NUR die Seitenleiste (`links` + `bottomLinks`) —
+ * und die kennt von den Einstellungen genau zwei Einträge: den EINEN Menüpunkt
+ * in den Community-Hub und den EINEN ins Konto. Die Flächen dahinter (heute bis
+ * zu elf Community-Reiter und fünf Konto-Reiter) waren über die Suche
+ * unerreichbar; wer „Domain", „Mitglieder" oder „Sitzungen" tippte, bekam
+ * nichts. Eine Suche, die die halbe Anwendung nicht kennt, erzieht dazu, sie
+ * nicht zu benutzen.
+ *
+ * Zwei Quellen, beide schon da, keine dritte Liste:
+ *  - `communityTabsHere` — dieselbe gefilterte Reiter-Liste, die auch der
+ *    Menüpunkt unten links benutzt (Ort × Capability × die drei Produkt-Gates).
+ *    Damit findet die Suche nie einen Reiter, den die Hülle wegfiltert.
+ *  - `ACCOUNT_SETTINGS_TABS` — die fünf Konto-Reiter aus der Hülle selbst
+ *    (app/utils/accountSettingsTabs.ts). Sie tragen keine Capability: sein
+ *    eigenes Konto verwaltet jeder Angemeldete.
+ * Registrierte FREMDE Konto-Reiter (`pukalani.admin.settingsTabs`) kommen
+ * dazu, sobald es welche gibt — die Registry hat heute null Produzenten
+ * (Audit-Befund M11), der Weg ist aber derselbe.
+ *
+ * EINE Gruppe für beides, weil ein Suchender die Hüllen nicht auseinanderhält:
+ * er sucht eine Fläche, nicht ihren Behälter. Die Vereinigung ist bewusst
+ * doppelfrei — `to` ist der Schlüssel, und der ist je Fläche eindeutig.
+ */
+const settingsTabsHere = computed(() => resolveSettingsTabs(
+  (appConfig.pukalani?.admin?.settingsTabs ?? []) as PukalaniSettingsTab[],
+  { place, canAsOperator, canAsMember, productOn, planOn, configOn },
+))
+
 const searchGroups = computed(() => {
   const navGroup: PaletteGroup = {
     id: 'links',
     label: t('dashboard.search.label'),
     items: [...links.value, ...bottomLinks.value].map(link => ({ label: String(link.label), icon: link.icon, to: String(link.to) })),
   }
-  return [navGroup, ...searchResults.value] as unknown as CommandPaletteGroup<CommandPaletteItem>[]
+  const seen = new Set(navGroup.items.map(item => item.to))
+  const tabItems: PaletteItem[] = []
+  for (const tab of [
+    ...communityTabsHere.value,
+    ...settingsTabsHere.value,
+    ...ACCOUNT_SETTINGS_TABS,
+  ]) {
+    const to = localePath(tab.to)
+    if (seen.has(to)) continue
+    seen.add(to)
+    tabItems.push({ label: t(tab.labelKey), icon: tab.icon, to, onSelect: close })
+  }
+  const tabsGroup: PaletteGroup = { id: 'settings-tabs', label: t('dashboard.search.settings'), items: tabItems }
+  return [navGroup, ...(tabItems.length ? [tabsGroup] : []), ...searchResults.value] as unknown as CommandPaletteGroup<CommandPaletteItem>[]
 })
 </script>
 
