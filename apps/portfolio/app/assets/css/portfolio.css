@@ -50,6 +50,18 @@ html:has(body.portfolio-site) {
   line-height: 1.02;
   letter-spacing: -0.02em;
   text-transform: uppercase;
+  /* LANGE DEUTSCHE WÖRTER (2026-08-12 auf 390 px live gemessen): die
+     Überschrift „Wissen: Preise, Entscheidungshilfen & Guides" schob die
+     ganze Seite 15 px nach rechts — ein einzelnes Wort passte nicht in die
+     Zeile und lief aus dem Container heraus. Auf Englisch trat es nicht auf,
+     weshalb es bei den früheren Messungen durchrutschte.
+     `overflow-wrap` ist das Netz (bricht nur, wenn ein Wort ALLEIN nicht
+     passt), `hyphens` das schöne Ergebnis davor: der <html>-Tag trägt die
+     Sprache, also trennt der Browser „Ent-schei-dungs-hilfen" statt hart
+     umzubrechen. Beides gehört hierher und nicht an die eine Überschrift —
+     jede künftige deutsche Zeile hat dasselbe Problem. */
+  overflow-wrap: break-word;
+  hyphens: auto;
 }
 
 .portfolio-site .container {
