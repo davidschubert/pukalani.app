@@ -115,6 +115,35 @@ export default defineEventHandler(async (event) => {
     })
 
     /**
+     * DER ERSTE BEITRAG IM FEED (Benchmark-E2) — der erste Zustand darf nicht
+     * leer sein. EINMAL und in `site.locale`, nicht in beiden Sprachen wie die
+     * Startseite: `community_posts` hat kein locale-Feld und der Feed filtert
+     * nicht danach — ein Beitrag ist genau ein Beitrag, in genau der Sprache,
+     * in der er geschrieben wurde. Zwei Fassungen wären zwei Beiträge.
+     *
+     * Über die core-Registry `registerCommunityFirstContentProvider`, NICHT
+     * per Import: `onboarding` ist ein Naht-Layer und darf `posts` nicht
+     * kennen (A14 — anders als `pages`, das für Naht-Layer erlaubt ist und
+     * deshalb oben direkt importiert werden darf). Eine App ohne Feed-Produkt
+     * hat keinen Anbieter, dann passiert hier schlicht nichts.
+     *
+     * Das `.catch()` fehlt hier bewusst: der Registry-Helfer ist SELBST
+     * fail-soft (er protokolliert und schluckt) — die Sicherung sitzt einmal
+     * im Vertrag statt an jeder Aufrufstelle.
+     */
+    if (event.context.user) {
+      await seedCommunityFirstContent(event, {
+        tenantId: result.tenantId,
+        ownerUserId: event.context.user.$id,
+        ownerName: event.context.user.name ?? '',
+        siteName: site.name,
+        description: site.description,
+        category: site.category,
+        locale: site.locale ?? 'de',
+      })
+    }
+
+    /**
      * „Deine Community steht" (Trichter-G6) — der einzige Beleg, der den
      * geschlossenen Tab überlebt: Adresse, Dashboard, Kundenbereich, Ende der
      * Testphase.

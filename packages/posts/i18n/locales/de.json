@@ -9,6 +9,21 @@
       "guestTitle": "Sieh dich um!",
       "guestText": "Melde dich an, um zu posten, abzustimmen und mitzudiskutieren."
     },
+    "welcome": {
+      "title": "Willkommen bei {name}",
+      "feedIntro": "Das hier ist der Feed: Ankündigungen, Fragen und alles, was ihr miteinander besprecht. Jeder Beitrag kann kommentiert werden.",
+      "exampleNote": "**Dieser Beitrag ist ein Beispiel von Pukalani.** Du kannst ihn über das Menü an der Beitragskarte löschen, sobald du deinen eigenen ersten Beitrag geschrieben hast.",
+      "categories": {
+        "coaching": "Für Coaching und Beratung eignet sich der Feed für kurze Impulse zwischen den Terminen — und für Fragen, die sonst in Einzelnachrichten untergehen.",
+        "education": "Für Kurse und Bildung ist der Feed der Ort für Ankündigungen, Materialien und Rückfragen zum Stoff.",
+        "creator": "Als Creator kündigst du hier Neues an und siehst am Kommentar, was dein Publikum wirklich beschäftigt.",
+        "club": "Für Vereine und Ehrenamt heißt das meistens: Termine, kurze Absprachen und die Suche nach helfenden Händen.",
+        "business": "Für Unternehmen und Teams ist der Feed die ruhige Alternative zum Gruppenchat: nachlesbar, sortiert, ohne Zeitdruck.",
+        "health": "Für Gesundheit und Sport eignet sich der Feed für Termine, Erfolge und Fragen, die man lieber in der Gruppe stellt.",
+        "craft": "Für Handwerk und Hobby ist der Feed der Ort für Zwischenstände, Tipps und die Frage, wie andere es gelöst haben.",
+        "other": "Fang einfach an: ein Beitrag, eine Frage, eine Ankündigung — der Rest ergibt sich."
+      }
+    },
     "editor": {
       "bold": "Fett",
       "italic": "Kursiv",

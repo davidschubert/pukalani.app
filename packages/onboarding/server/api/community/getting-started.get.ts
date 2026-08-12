@@ -25,8 +25,8 @@ import { callControlPlane, mintRuntimeJwt } from '../../utils/controlPlane'
  * |------------|------------------------------------------|-------------------------------|
  * | Farbwelt   | `tenant.theme` aus dem Mandanten-Kontext  | 0 (30-s-Resolver-Cache)       |
  * | Abo        | `tenant.billingStatus`, ebendaher         | 0 (dito)                      |
- * | Beitrag    | `db.count()` auf die Tabelle, die der      | 1 Zählabfrage, `limit(1)`,    |
- * |            | posts-Layer per Usage-Registry meldet      | index-gestützt über communityId|
+ * | Beitrag    | core-Vertrag, beantwortet vom posts-Layer  | 1 Zählabfrage, `limit(1)`,    |
+ * |            | (Beispiel-Saat ausgenommen, s. unten)      | + 1 Blick nur im Grenzfall    |
  * | Startseite | `pages`-Zeilen mit slug 'home'             | 1 Abfrage, ≤ 4 Zeilen         |
  * | Einladen   | Team-Route der BESTEHENDEN Service-Naht    | 1 Ruf, 30 s gecacht           |
  *
@@ -89,7 +89,7 @@ export default defineEventHandler(async (event): Promise<GettingStartedResponse>
   const db = tenantDb(event, { as: 'operator', actor })
 
   const [post, homePage, invite] = await Promise.all([
-    countsFirstPost(db),
+    countsFirstPost(event),
     homePageTouched(db),
     teamHasReach(event, communityId),
   ])
@@ -111,24 +111,27 @@ export default defineEventHandler(async (event): Promise<GettingStartedResponse>
 type TenantDb = ReturnType<typeof tenantDb>
 
 /**
- * „Es gibt einen ersten Beitrag." — gezählt wird jeder Beitrag DIESER
- * Community, nicht nur der eigene: in einer frischen Community schreibt
- * ohnehin der Owner, und schreibt ausnahmsweise ein Mitglied zuerst, ist die
- * Community trotzdem nicht mehr leer (genau das ist der Punkt). Der Preis
- * wäre sonst ein zweiter Filter auf `authorId` — index-gestützt zwar, aber für
- * eine Unterscheidung ohne Bedeutung.
+ * „Es gibt einen ersten Beitrag." — beantwortet vom Layer, dem der Feed
+ * gehört, über den core-Vertrag `registerCommunityFirstContentProvider`.
  *
- * WELCHE Tabelle das ist, sagt die Usage-Registry: dieser Layer darf
- * `POSTS_TABLE` nicht importieren (A14), und eine App ohne posts-Layer hat den
- * Posten schlicht nicht — dann gilt der Punkt als erledigt, statt eine
- * Aufgabe ohne Ziel anzuzeigen.
+ * WARUM NICHT SELBST ZÄHLEN: dieser Layer darf `posts` nicht kennen (A14,
+ * ESLint `pukalani/no-cross-layer-relative` — anders als `pages`, das für
+ * Naht-Layer ausdrücklich erlaubt ist). Er kennt daher weder die Tabelle noch
+ * die Id des Beispiel-Beitrags und fragt nur die eine Frage.
+ *
+ * DIE SAAT ZÄHLT DORT AUSDRÜCKLICH NICHT MIT: seit U4 Teil 5 legt der Wizard
+ * einen Beispiel-Beitrag an (E2) — ohne diese Ausnahme hakte die Liste ihren
+ * ersten Punkt mit unserer eigenen Saat ab und gratulierte dem Owner zu einem
+ * Beitrag, den er nicht geschrieben hat. Wie das Beispiel wiedererkannt wird,
+ * ist Sache des posts-Layers (ableitbare Zeilen-Id).
+ *
+ * `null` = kein Feed-Produkt komponiert oder keine Auskunft ⇒ ERLEDIGT, wie
+ * bei den zwei Abfragen darunter: ein technischer Fehler darf keine Aufgabe
+ * erfinden, die niemand erledigen kann.
  */
-async function countsFirstPost(db: TenantDb): Promise<boolean> {
-  const counter = listCommunityUsageCounters().find(entry => entry.kind === 'posts')
-  if (!counter) return true
-  // Ohne eigene Queries: `count()` hängt sein `limit(1)` selbst an, ein
-  // zweites Limit wäre eine widersprüchliche Abfrage.
-  return await db.count(counter.tableId).then(total => total > 0).catch(() => true)
+async function countsFirstPost(event: H3Event): Promise<boolean> {
+  const authored = await communityHasAuthoredContent(event)
+  return authored ?? true
 }
 
 /**

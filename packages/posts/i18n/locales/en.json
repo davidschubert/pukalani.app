@@ -9,6 +9,21 @@
       "guestTitle": "Have a look around!",
       "guestText": "Sign in to post, vote and join the conversation."
     },
+    "welcome": {
+      "title": "Welcome to {name}",
+      "feedIntro": "This is the feed: announcements, questions and everything you discuss with each other. Every post can be commented on.",
+      "exampleNote": "**This post is an example from Pukalani.** You can delete it from the menu on the post card as soon as you have written your own first post.",
+      "categories": {
+        "coaching": "For coaching and consulting the feed works well for short prompts between sessions — and for questions that would otherwise get lost in direct messages.",
+        "education": "For courses and education the feed is the place for announcements, materials and questions about the subject.",
+        "creator": "As a creator you announce what is new here, and the comments tell you what your audience actually cares about.",
+        "club": "For clubs and volunteering that usually means dates, quick arrangements and looking for helping hands.",
+        "business": "For companies and teams the feed is the calm alternative to a group chat: readable later, sorted, without time pressure.",
+        "health": "For health and sport the feed suits dates, milestones and questions people would rather ask the group.",
+        "craft": "For craft and hobby the feed is the place for work in progress, tips and asking how others solved it.",
+        "other": "Just start: one post, one question, one announcement — the rest follows."
+      }
+    },
     "editor": {
       "bold": "Bold",
       "italic": "Italic",
