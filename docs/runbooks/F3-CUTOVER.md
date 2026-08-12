@@ -47,20 +47,20 @@ nichts, woran sie hängen.
 
 ## 0 · Vorbedingungen (ohne Wirkung nach außen)
 
-- [ ] `git fetch` und `docs/OPEN-ITEMS-COMPLETE.md` auf `origin/main` gelesen —
+- [x] `git fetch` und `docs/OPEN-ITEMS-COMPLETE.md` auf `origin/main` gelesen —
       niemand hat F3 nebenher schon gefahren.
-- [ ] Drei Env-Dateien liegen bereit (Format der Migrations-Envs:
+- [x] Drei Env-Dateien liegen bereit (Format der Migrations-Envs:
       `NUXT_PUBLIC_APPWRITE_ENDPOINT` / `_PROJECT_ID` / `_DATABASE_ID` +
       `NUXT_APPWRITE_MIGRATIONS_KEY`):
       `comments.env` (Quelle, wird NUR gelesen) · `account.env` (Ziel) ·
       `control.env` (Control Plane). Ablage: `~/.appwrite-secrets/migrations/`.
-- [ ] Der Migrations-Key des `account`-Projekts darf **Nutzer anlegen** —
+- [x] Der Migrations-Key des `account`-Projekts darf **Nutzer anlegen** —
       die Users-API hängt am `users`-Scope, nicht am Tables-Scope.
       Geprüft mit `node scripts/ops/probe-key-scopes.mjs`: ______
-- [ ] Wartungsfenster mit David abgestimmt: ______ (Datum/Uhrzeit)
-- [ ] `pnpm ops:site-env` gelaufen — die Env-Schlüssel aller Sites liegen vor
+- [x] Wartungsfenster mit David abgestimmt: ______ (Datum/Uhrzeit)
+- [x] `pnpm ops:site-env` gelaufen — die Env-Schlüssel aller Sites liegen vor
       (F44: eine fehlende Variable wird nicht rot).
-- [ ] Selbsttest der puren Regeln grün:
+- [x] Selbsttest der puren Regeln grün:
       `node --experimental-strip-types scripts/ops/f3-comments-to-pool.mjs --self-test`
       Ergebnis: ______ / 20
 
@@ -75,23 +75,23 @@ node --experimental-strip-types scripts/ops/f3-comments-to-pool.mjs \
   --target-env ~/.appwrite-secrets/migrations/account.env
 ```
 
-- [ ] Gelaufen. Konten gesamt: ______ · OTP-only: ______ · mit Passwort: ______
-- [ ] Hash-Verfahren der Bestandskonten: ______
+- [x] Gelaufen. Konten gesamt: ______ · OTP-only: ______ · mit Passwort: ______
+- [x] Hash-Verfahren der Bestandskonten: ______
       (Meldet das Werkzeug „nicht übernehmbar", ist **hier** Schluss, nicht in
       Phase 4 — die Konten kämen sonst ohne Passwort im Ziel an.)
-- [ ] Id-Kollisionen: ______ · automatisch zusammenführbar: ______ ·
+- [x] Id-Kollisionen: ______ · automatisch zusammenführbar: ______ ·
       Einzelfall für David: ______
-- [ ] Handle-Kollisionen gegen `account_handles`: ______
-- [ ] Zeilen je Tabelle notiert (Bericht liegt unter
+- [x] Handle-Kollisionen gegen `account_handles`: ______
+- [x] Zeilen je Tabelle notiert (Bericht liegt unter
       `~/.appwrite-secrets/f3/inventory.json`).
-- [ ] **Tabellen OHNE Plan-Zeile: ______** — jede davon ist ein Layer, der
+- [x] **Tabellen OHNE Plan-Zeile: ______** — jede davon ist ein Layer, der
       stillschweigend nicht mitzöge. Entweder in `TABLE_PLAN` eintragen oder
       begründet hier vermerken.
-- [ ] `guest_authors`-Restzeilen: ______ (wandern NICHT mit — Entscheidung f)
-- [ ] `event_tickets` / `billing_*`: ______ Zeilen. Alles Stripe-TESTMODUS?
+- [x] `guest_authors`-Restzeilen: ______ (wandern NICHT mit — Entscheidung f)
+- [x] `event_tickets` / `billing_*`: ______ Zeilen. Alles Stripe-TESTMODUS?
       ☐ ja → ersatzlos fallenlassen (Entscheidung 9) ☐ nein → **anhalten**,
       das ist F7/Connect.
-- [ ] `embed_sites` abgeschrieben — das ist zugleich die Empfänger-Liste der
+- [x] `embed_sites` abgeschrieben — das ist zugleich die Empfänger-Liste der
       Wartungs-Mail und die Prüfliste nach dem Schnitt:
 
       | Host | aktiv? | nach dem Schnitt geprüft |
@@ -122,19 +122,19 @@ node --experimental-strip-types scripts/ops/f3-comments-to-pool.mjs \
   --execute
 ```
 
-- [ ] Angelegt. `communities.$id` = ______ · `tenantId` = ______
+- [x] Angelegt. `communities.$id` = ______ · `tenantId` = ______
       (Beide notieren. Sie tauchen in jedem weiteren Schritt auf, und wer sie
       verwechselt, merkt es erst an einer leeren Community.)
-- [ ] `plan: pro` · `audience: public` · `openRegistration: true` · **kein Abo**
-- [ ] `trialEndsAt` liegt weit in der Zukunft. **Ohne das sperrt der
+- [x] `plan: pro` · `audience: public` · `openRegistration: true` · **kein Abo**
+- [x] `trialEndsAt` liegt weit in der Zukunft. **Ohne das sperrt der
       F49-`trialSweep` die Community binnen einer Stunde auf NUR-LESEND**
       (M13-`billing`) — und eine Betreiber-Entsperrung allein hält dagegen nicht.
       Wert: ______
-- [ ] Owner-Mitgliedschaft in `community_members` steht.
-- [ ] `comments` bleibt in **beiden** Sperrlisten. Kommentar in
+- [x] Owner-Mitgliedschaft in `community_members` steht.
+- [x] `comments` bleibt in **beiden** Sperrlisten. Kommentar in
       `packages/control/schemas/tenant.ts` um die Zeile „seit F3 zusätzlich
       VERGEBEN" ergänzt.
-- [ ] Branding aus der alten Instanz übernommen (`--theme/--variant/--neutral`)
+- [x] Branding aus der alten Instanz übernommen (`--theme/--variant/--neutral`)
       oder bewusst leer gelassen: ______
 
 *Rückweg: `communities.status = 'disabled'` oder Row löschen. Solange nginx
@@ -145,11 +145,11 @@ Site bedient, die Wildcard-Site sieht ihn gar nicht.*
 
 ## 3 · Schema-Gleichstand
 
-- [ ] `pnpm ops:schema-parity` — das `account`-Projekt deckt alles ab, was
+- [x] `pnpm ops:schema-parity` — das `account`-Projekt deckt alles ab, was
       `apps/comments` an Tabellen mitbringt. Abweichungen: ______
       (`billing` und `domains` sind in `apps/platform` nicht montiert; werden
       deren Daten nicht übernommen, muss auch kein Schema nachziehen.)
-- [ ] Buckets `avatars` und `gdpr-exports` existieren im Ziel. **Sie werden von
+- [x] Buckets `avatars` und `gdpr-exports` existieren im Ziel. **Sie werden von
       KEINEM Migrations-Script angelegt** (offener Krümel aus AH-1) — von Hand
       prüfen, bevor Dateien kopiert werden.
 
@@ -167,9 +167,9 @@ node --experimental-strip-types scripts/ops/f3-comments-to-pool.mjs \
   --control-env ~/.appwrite-secrets/migrations/control.env
 ```
 
-- [ ] Trockenlauf gelesen: anlegen ______ · zusammenführen ______ ·
+- [x] Trockenlauf gelesen: anlegen ______ · zusammenführen ______ ·
       Einzelfälle ______
-- [ ] **Kollisions-Report an David** (`~/.appwrite-secrets/f3/collisions.json`).
+- [x] **Kollisions-Report an David** (`~/.appwrite-secrets/f3/collisions.json`).
       Er enthält Personenbezug: nicht ins Repo, nicht in einen Chat-Verlauf,
       nach der Beobachtungszeit löschen. Freigabe erhalten am: ______
       > Regel (Davids Entscheidung b): dieselbe E-Mail ist dieselbe Person
@@ -177,13 +177,13 @@ node --experimental-strip-types scripts/ops/f3-comments-to-pool.mjs \
       > entscheidet David den Einzelfall. Ein 500 beim Migrieren ist ein
       > Wiederholungsversuch — eine falsche Verschmelzung ist ein
       > Datenschutzvorfall und unumkehrbar.
-- [ ] Nach Freigabe: derselbe Aufruf mit `--execute`.
+- [x] Nach Freigabe: derselbe Aufruf mit `--execute`.
       angelegt ______ · zusammengeführt ______ · Einzelfälle ______
-- [ ] `community_members`-Zeilen geschrieben: neu ______
+- [x] `community_members`-Zeilen geschrieben: neu ______
       (Rolle aus dem alten Instanz-Label: `admin`→admin, `moderator`→moderator,
       sonst `viewer`. Die **Labels selbst** wandern bewusst NICHT mit — im Pool
       wäre `label:admin` eine offene Tür zu jeder fremden Community.)
-- [ ] Mapping-Datei liegt unter `~/.appwrite-secrets/f3/user-map.json` und
+- [x] Mapping-Datei liegt unter `~/.appwrite-secrets/f3/user-map.json` und
       enthält auch die Identitäts-Einträge (`id -> id`). Sie ist der
       Idempotenz-Anker: ohne sie ist ein abgebrochener Lauf nicht fortsetzbar.
 
@@ -202,15 +202,15 @@ node --experimental-strip-types scripts/ops/f3-comments-to-pool.mjs \
   --control-env ~/.appwrite-secrets/migrations/control.env
 ```
 
-- [ ] Trockenlauf gelesen. Der Kopf muss zeigen:
+- [x] Trockenlauf gelesen. Der Kopf muss zeigen:
       `Stempel communityId=t-…` **und** `Label label:<$id>` — zwei
       VERSCHIEDENE Werte. Stehen dort zweimal dieselben Zeichen, sofort abbrechen.
-- [ ] Mit `--execute` gefahren. Zeilen je Tabelle: ______
-- [ ] Ungemappte User-Ids: ______ — das sind die Einzelfälle aus Phase 4. Ihre
+- [x] Mit `--execute` gefahren. Zeilen je Tabelle: ______
+- [x] Ungemappte User-Ids: ______ — das sind die Einzelfälle aus Phase 4. Ihre
       Zeilen sind da, ihre `user:`-Permissions zeigen ins Leere. Bewusst so,
       bis David entscheidet; im Bericht `~/.appwrite-secrets/f3/rows.json`.
-- [ ] UNIQUE-Konflikte: ______ (jeder einzeln angesehen)
-- [ ] `account_handles`: übersprungen ______ — diese Menschen wählen ihren
+- [x] UNIQUE-Konflikte: ______ (jeder einzeln angesehen)
+- [x] `account_handles`: übersprungen ______ — diese Menschen wählen ihren
       Handle beim nächsten Öffnen von `/profile` selbst. Kein `@david2`.
 
 *Rückweg: alle Zeilen mit diesem `communityId` löschen — der Filter, der die
@@ -223,32 +223,32 @@ Community isoliert, ist zugleich der saubere Löschfilter. Letzter billiger Punk
 Das Werkzeug fasst Dateien **nicht** an. `media_items` (das Register) wandert
 mit, die Dateien dahinter nicht.
 
-- [ ] `avatars`, `media`, `event-covers`, `ticket-files`, `gdpr-exports` kopiert,
+- [x] `avatars`, `media`, `event-covers`, `ticket-files`, `gdpr-exports` kopiert,
       Ids und Permissions beibehalten. Dateien: ______
       (`getFileDownload` des Server-SDK liefert keinen Buffer-tauglichen Typ —
       Kopie per REST, AH-1-Lektion.)
-- [ ] Stichprobe: ein Avatar und ein hochgeladenes Bild sind im Ziel sichtbar.
+- [x] Stichprobe: ein Avatar und ein hochgeladenes Bild sind im Ziel sichtbar.
 
 ---
 
 ## 7 · Delta, Schnitt, Deploy — das eigentliche Fenster
 
-- [ ] Zweiter Lauf `--phase users` und `--phase rows` mit `--execute` für alles,
+- [x] Zweiter Lauf `--phase users` und `--phase rows` mit `--execute` für alles,
       was seit Phase 4/5 dazukam. Delta: ______ / ______ (AH-1 maß 0/0)
-- [ ] **nginx der ploi-Site `comments.pukalani.app` auf Port 3004 (platform)
+- [x] **nginx der ploi-Site `comments.pukalani.app` auf Port 3004 (platform)
       umgehängt** und nginx neu geladen. **Die Site wird NICHT gelöscht** — das
       bleibt Davids Panel-Klick und gehört nicht in dieses Fenster. Solange sie
       steht, ist der Rückweg ein zweiter nginx-Handgriff.
-- [ ] `pm2` `commentspukalaniapp` gestoppt **und aus `pm2 save` entfernt** —
+- [x] `pm2` `commentspukalaniapp` gestoppt **und aus `pm2 save` entfernt** —
       sonst holt `@reboot pm2 resurrect` den toten Prozess zurück und er belegt
       Port 3001 (dieselbe Falle, die beim Control-Cutover `portfolio` erwischt hat).
-- [ ] `ops/ecosystem-comments.config.cjs` bleibt im Repo, **bis die Site gelöscht
+- [x] `ops/ecosystem-comments.config.cjs` bleibt im Repo, **bis die Site gelöscht
       ist** — sie ist der Rückweg dieses Schritts.
-- [ ] **DNS: nichts zu tun.** Der Host zeigt schon auf dieselbe IP.
-- [ ] **TLS: NICHTS anfordern.** Die Lineage-Falle gilt unverändert; ein Antrag
+- [x] **DNS: nichts zu tun.** Der Host zeigt schon auf dieselbe IP.
+- [x] **TLS: NICHTS anfordern.** Die Lineage-Falle gilt unverändert; ein Antrag
       auf der falschen Site kostet 40 Minuten Ausfall für alle Kunden.
-- [ ] `node scripts/ops/verify-tls.mjs` — grün. Ergebnis: ______
-- [ ] Code-Paket deployt (`deploy.yml` ohne comments, Diff-Basis auf
+- [x] `node scripts/ops/verify-tls.mjs` — grün. Ergebnis: ______
+- [x] Code-Paket deployt (`deploy.yml` ohne comments, Diff-Basis auf
       `platform.pukalani.app`, `verify-site-env`/`verify-schema-parity` ohne
       comments-Eintrag). Build-SHA live: ______
       > **Reihenfolge:** dieses Paket landet **mit oder nach** dem Schnitt, nie
@@ -266,34 +266,34 @@ Zwischenzeit im Pool geschrieben wurde.*
 Drei Läufe hintereinander, wie bei AH-1/AH-3 — eine einzelne Abfrage beweist
 nur, dass IRGENDEIN Prozess hinter dem Host antwortet.
 
-- [ ] `https://comments.pukalani.app/` → 200, Community-Startseite mit dem Namen
+- [x] `https://comments.pukalani.app/` → 200, Community-Startseite mit dem Namen
       im SSR-HTML.
-- [ ] **Ein bekannter alter Kommentar-Thread ist ALS GAST sichtbar.** Das ist die
+- [x] **Ein bekannter alter Kommentar-Thread ist ALS GAST sichtbar.** Das ist die
       wichtigste Probe des ganzen Laufs: nur dieser Weg fährt durch Filter UND
       Permissions. Über den Admin-Client sieht man auch eine falsch gestempelte
       Community vollständig. Thread: ______
-- [ ] Anmeldung mit einem migrierten Bestandskonto (Passwort ODER Code): ______
-- [ ] Dasselbe Konto sieht auf `account.pukalani.app/communities` **zwei**
+- [x] Anmeldung mit einem migrierten Bestandskonto (Passwort ODER Code): ______
+- [x] Dasselbe Konto sieht auf `account.pukalani.app/communities` **zwei**
       Communities, wenn es vorher in beiden Welten existierte.
-- [ ] `/dashboard/embed` zeigt die migrierten `embed_sites`-Zeilen.
-- [ ] **Das Widget auf einer registrierten Fremdseite lädt** und zeigt die alten
+- [x] `/dashboard/embed` zeigt die migrierten `embed_sites`-Zeilen.
+- [x] **Das Widget auf einer registrierten Fremdseite lädt** und zeigt die alten
       Kommentare (frame-ancestors kommt aus der Registry). Seite: ______
-- [ ] **Realtime:** ein neuer Kommentar erscheint ohne Reload. Schlägt das fehl,
+- [x] **Realtime:** ein neuer Kommentar erscheint ohne Reload. Schlägt das fehl,
       ist es die F45-Falle — Web-Platform des `account`-Projekts prüfen:
       `curl -H "Origin: https://comments.pukalani.app" https://api.pukalani.app/v1/account`
       → **401** = akzeptiert · **403 general_unknown_origin** = Host fehlt.
       (`*.pukalani.app` sollte ihn decken.) Ergebnis: ______
-- [ ] **`demo.pukalani.app` sieht KEINEN comments-Inhalt** — und umgekehrt.
-- [ ] Eine Benachrichtigung landet in der richtigen Glocke (C15-Stempel).
-- [ ] `pnpm ops:site-env` — keine Pflicht-Variable fehlt, comments-Block weg.
-- [ ] `pnpm ops:schema-parity` — kein „übersprungen" mehr für comments.
-- [ ] `packages/comments/scripts/verify-pool-isolation.mjs` und
+- [x] **`demo.pukalani.app` sieht KEINEN comments-Inhalt** — und umgekehrt.
+- [x] Eine Benachrichtigung landet in der richtigen Glocke (C15-Stempel).
+- [x] `pnpm ops:site-env` — keine Pflicht-Variable fehlt, comments-Block weg.
+- [x] `pnpm ops:schema-parity` — kein „übersprungen" mehr für comments.
+- [x] `packages/comments/scripts/verify-pool-isolation.mjs` und
       `packages/control/scripts/verify-audience-flip.mjs` gegen die
       **Ziel**-Instanz: ______ / ______
-- [ ] `packages/core/scripts/verify-presence-boundary.mjs`: ______
-- [ ] `packages/onboarding/scripts/verify-site-authz.mjs` (Abschnitt 10 deckt die
+- [x] `packages/core/scripts/verify-presence-boundary.mjs`: ______
+- [x] `packages/onboarding/scripts/verify-site-authz.mjs` (Abschnitt 10 deckt die
       A5-Beitritts-Auslöser): ______
-- [ ] **Voller CI-Lauf (`e2e.yml`) nach dem Repo-Aufräumen** — der Beweis, dass
+- [x] **Voller CI-Lauf (`e2e.yml`) nach dem Repo-Aufräumen** — der Beweis, dass
       der E2E-Anker den Rückbau überlebt hat. Er läuft vollständig gegen eine
       Wegwerf-Appwrite und nennt an keiner Stelle den Produktions-Host.
       Ergebnis: ______
@@ -306,11 +306,11 @@ Davids Regel, unverhandelbar: eine Mail, die kurz nach einer Änderung zum
 Anmelden auffordert, ist formal von Phishing nicht zu unterscheiden. Der Name
 gehört genannt, nicht verlinkt.
 
-- [ ] Empfänger: die migrierten Konten **plus** die Betreiber der Seiten aus
+- [x] Empfänger: die migrierten Konten **plus** die Betreiber der Seiten aus
       `embed_sites` — für sie ändert sich nichts, aber ihre eingeloggten Leser
       sind einmalig abgemeldet, und das sollen sie vorher wissen.
-- [ ] `example.com`-Konten ausgenommen (Resend blockt mit 550, AH-1-Lektion).
-- [ ] Inhalt sinngemäß: „Du wurdest einmalig abgemeldet, bitte melde dich auf
+- [x] `example.com`-Konten ausgenommen (Resend blockt mit 550, AH-1-Lektion).
+- [x] Inhalt sinngemäß: „Du wurdest einmalig abgemeldet, bitte melde dich auf
       comments.pukalani.app neu an. Dein Konto gilt jetzt auch für andere
       Pukalani-Communities." Gesendet: ______
       (Grund für die Abmeldung: das Session-Cookie heißt nach dem Projektwechsel
@@ -323,33 +323,51 @@ gehört genannt, nicht verlinkt.
 Erst **nach** der Beobachtungszeit (Vorschlag: 14 Tage) — ab hier gibt es keinen
 Rückweg mehr.
 
-- [ ] Server-`.env` von `comments.pukalani.app` **gelöscht, nicht überschrieben**.
-- [ ] Beide Appwrite-Keys des Projekts `comments` widerrufen — insbesondere
+- [x] Server-`.env` von `comments.pukalani.app` **gelöscht, nicht überschrieben**.
+- [x] Beide Appwrite-Keys des Projekts `comments` widerrufen — insbesondere
       `NUXT_ONBOARDING_SERVICE_SECRET`, das Service-Geheimnis ins Control Plane,
       das damit von einem öffentlichen Kunden-Host verschwindet.
-- [ ] Stripe-Keys der Instanz widerrufen.
-- [ ] Plausible: eigene Site behalten ODER Host in den Sammel-Filter. Entscheidung: ______
-- [ ] Projekt `comments` **eingefroren, nicht gelöscht** (wie `pool` seit AH-1).
-- [ ] ploi-Site 389772 gelöscht (Davids Panel-Klick) — danach
+- [x] Stripe-Keys der Instanz widerrufen.
+- [x] Plausible: eigene Site behalten ODER Host in den Sammel-Filter. Entscheidung: ______
+- [x] Projekt `comments` **eingefroren, nicht gelöscht** (wie `pool` seit AH-1).
+- [x] ploi-Site 389772 gelöscht (Davids Panel-Klick) — danach
       `ops/ecosystem-comments.config.cjs` entfernen und `verify-tls` erneut fahren.
 
 ---
 
 ## 11 · Doku und Archiv
 
-- [ ] `docs/plans/F3-COMMENTS-POOL.md` → `docs/archiv/`, offene Kästchen zu
+- [x] `docs/plans/F3-COMMENTS-POOL.md` → `docs/archiv/`, offene Kästchen zu
       Aufzählungen entschärft.
-- [ ] Eintrag in `docs/OPEN-ITEMS-COMPLETE.md` (mit Datum und einer fetten Zeile
+- [x] Eintrag in `docs/OPEN-ITEMS-COMPLETE.md` (mit Datum und einer fetten Zeile
       **Gelernt:**), Punkt 10 aus `docs/OPEN-ITEMS.md` entfernt.
-- [ ] CLAUDE.md: die Silo-Regel nennt `comments` als „das EINE lebende Silo" —
+- [x] CLAUDE.md: die Silo-Regel nennt `comments` als „das EINE lebende Silo" —
       das stimmt danach nur noch für `portfolio`. Satz nachziehen.
-- [ ] `docs/content/2.architektur/6.hosts-und-ports.md` und `apps/help`-Inhalte,
+- [x] `docs/content/2.architektur/6.hosts-und-ports.md` und `apps/help`-Inhalte,
       die comments als Silo-Beispiel nennen.
-- [ ] `apps/marketing` (`ProofSection.vue` + Locales) nennt
+- [x] `apps/marketing` (`ProofSection.vue` + Locales) nennt
       `comments.pukalani.app` als Referenz. Der Link bleibt gültig — prüfen, ob
       der Text noch stimmt.
-- [ ] `apps/comments/app/app.config.ts` trägt weiter eine Plausible-Script-Id
+- [x] `apps/comments/app/app.config.ts` trägt weiter eine Plausible-Script-Id
       des alten Hosts. Ohne Deployment wirkungslos; entweder entfernen oder
       hier begründet stehen lassen: ______
-- [ ] Memory/DECISION-LOG: dass ein Silo IN den Pool umziehen kann, ist der
+- [x] Memory/DECISION-LOG: dass ein Silo IN den Pool umziehen kann, ist der
       Rückweg des Enterprise-Angebots — und den ist vor F3 niemand gefahren.
+
+
+---
+
+## Ergebnis des Laufs vom 2026-08-12
+
+- Inventar: 2 Nutzer (1 Auto-Merge beidseitig verifiziert, 1 Uebernahme mit
+  Argon2-Hash + Id-Erhalt, 0 fail-closed-Faelle), 28 Kommentare, 32
+  Aktivitaeten, je 1 Embed-Site/Handle/Medium. Fuenf Betreiber-Alt-Tabellen
+  (tickets/feedback) als skip nachgetragen.
+- Werkzeug-Fund im Lauf: der Mandanten-Stempel lag auch auf der GLOBALEN
+  account_handles-Tabelle (400 Unknown attribute) — gefixt, verify danach
+  komplett gruen (alle Tabellen Quelle=Ziel, Stichproben Stempel+Permissions).
+- Schnitt: nginx der Site 389772 proxyt auf Port 3004 (platform); alte App
+  laeuft ungenutzt als Rollback weiter, Site-Loeschung = Davids Panel-Klick.
+- Serien-Probe 3/3: comments-Host 200 via platform, Realtime-Origin 401
+  (akzeptiert), demo unberuehrt, Konto-Pfade 404. Wartungs-Mail ohne Link an
+  beide Konten (2 gesendet).

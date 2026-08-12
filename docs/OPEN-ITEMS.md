@@ -1,6 +1,6 @@
 # Offene Punkte
 
-**Stand: 15 offen · 5 geparkt/wartend · 10 bewusst zurückgestellt** (Zahlen bei JEDEM Umzug nach COMPLETE mitführen)
+**Stand: 14 offen · 5 geparkt/wartend · 10 bewusst zurückgestellt** (Zahlen bei JEDEM Umzug nach COMPLETE mitführen)
 
 Stand: **2026-08-11**. Hier steht **nur, was noch offen ist** — in der
 Reihenfolge, in der es abgearbeitet wird. Alles Erledigte (mit Begründung,
@@ -27,7 +27,6 @@ demo-Ausbau, comments in den Pool. Entscheidungen: DECISION-LOG 2026-08-11.
 | --- | --- | --- | --- | --- | --- |
 | 2 · A1 | **Echte Rechtstexte** für Impressum, Datenschutz und AGB. **pukalani.studio ist seit 2026-08-12 live** — Impressum + Datenschutz in de/en veröffentlicht, ohne erfundene Angaben, aber **ohne ladungsfähige Anschrift** (Davids Entscheidung: erst mal ohne); nachzutragen dort die Anschrift (§ 5 DDG, Pflicht — Postfach genügt nicht) und die Prüfung zu Art. 27 DSGVO (Vertreter in der Union) samt Drittland-Grundlage. Für **pukalani.app** stehen die Texte weiter aus. **Direkt danach `pukalani.auth.termsUrl` in `apps/platform` setzen** — die AGB-Checkbox fehlt heute genau dort, wo Kunden sich registrieren (Trichter M9). Schaltet Punkt 3 frei. | Hoch | S — Anschrift eintragen, Anwalt lesen lassen | Ja: nur David (ggf. Anwalt) | [Notizen](#notizen) |
 | 3 · A2 | **Stripe auf echtes Geld umstellen — über die F55-Seite.** Vorstufe A2a komplett grün, F55 selbst erledigt (beide 2026-08-08). Bei David bleiben: Bank-Aktivierung, Steuer-Registrierung, Live-Key ROTIERT eintragen (der erste ist teil-geleakt und rotiert), Portal-Konfiguration; alles andere klickt die F55-Seite. Braucht Punkt 2 (A1). | Hoch | S | Ja: Bank, Konto, Portal | [STRIPE-GO-LIVE-RUNBOOK.md](runbooks/STRIPE-GO-LIVE-RUNBOOK.md) |
-| 10 · AH-6 | **F3: comments zieht in den Pool.** ABGENOMMEN (2026-08-12, inkl. Detail-Entscheidungen im DECISION-LOG) — IN BAU — Empfehlung: Pool-Community im Projekt account, apps/comments bleibt als Code der E2E-Anker (photos-Muster); 10 Entscheidungen im Plan nummeriert. Danach: genau zwei Auth-Welten (account + admin); portfolio bleibt Davids Silo. | Mittel | XL | Nein (abgenommen) | [F3-COMMENTS-POOL.md](plans/F3-COMMENTS-POOL.md) |
 | 11 · U4 | **[AP2] Die ersten Minuten in der neuen Community sind leer.** Der frisch angelegte Owner wird mit „Willkommen **zurück**" begrüßt, sieht lauter Nullen. Entschieden 2026-08-10, die fünf Schritte: **Beitrag · Farbwelt · Einladen · Startseite · Abo**. Dazu ein erster Beispiel-Inhalt und eine Mail mit der Adresse der Community. Dazu: die gesäte Startseite in **beide** Sprachen (Trichter M4). Ghost misst dafür **26 % statt 7 %** Abschluss. | Hoch | M | Nein | [UX-Trichter G1, G2, G6, M4](archiv/audits/2026-08-09-ux-trichter.md) · [Wettbewerb E1, E2](archiv/audits/2026-08-09-wettbewerb-benchmark.md) |
 | 12 · U5 | **[AP3] Ein Tippfehler im Community-Namen bleibt für immer.** Der Name wird einmal im Wizard gesetzt und ist danach für niemanden mehr änderbar — auch nicht für uns. Er steht im Menükopf, im Browser-Tab, im Vorschaubild und als Absender jeder Mail. Soll: ein Feld „Name und Beschreibung" dort, wo man es sucht; die Adresse bleibt unberührt. | Hoch | M | Nein | [UX-Dashboard K1](archiv/audits/2026-08-09-ux-dashboard.md) |
 | 13 · F56 | **[AP3] Private Nachrichten sind schwer zu finden.** Der Einstieg „Nachricht schreiben" neben dem Autorennamen ist im Konzept § 1 zugesagt; `MessageWriteButton.vue` ist gebaut, aber **nirgends verdrahtet**. Heute führt nur der Posteingang hin. | Mittel | S — Knopf im blueprint andocken | Nein | [PN-Konzept § 1](plans/PRIVATE-NACHRICHTEN-KONZEPT.md) |
@@ -108,7 +107,7 @@ Kunden-Wildcard damit nicht mehr überschreiben; TLS-Wächter alle 30 min),
 **admin** (Betreiber; `control.pukalani.app` leitet seit AH-4 per 301 weiter,
 ploi-Site und Server-Verzeichnis behalten den Altnamen) + **account**
 (Kundenbereich + Wizard; my/start leiten seit AH-1 am 2026-08-11 per 301 weiter),
-comments + portfolio, **platform** (Multi-Tenant, `*.pukalani.app`-Wildcard —
+portfolio (comments ist seit F3 am 2026-08-12 eine Pool-Community), **platform** (Multi-Tenant, `*.pukalani.app`-Wildcard —
 demo.pukalani.app als erster Pool-Tenant, neue Kundensite = ein Klick im
 Control, kein Build), **help.pukalani.app** (Hilfe-Site, seit 2026-07-27) und
 die interne Doku unter `admin.pukalani.app/docs`. Auto-Deploy (6 Sites),

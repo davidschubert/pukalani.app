@@ -20,9 +20,10 @@ Vollständiges Konzept: docs/CONCEPT.md
   DEPLOYMENT sind ZWEI Entscheidungen. Neues Produkt ⇒ IMMER eigener Layer,
   aber standardmäßig KEINE eigene Site/Instanz (Kosten: Migrationen je
   Instanz, Env-Drift, TLS, Schema-Parity) — Playground + demo.pukalani.app
-  reichen; eine Site nur mit kundenförmigem Grund. `comments` bleibt das EINE
-  lebende Silo (E2E-Anker, Embed, Beweis der Studio-Form und Gegenform für
-  Grenzbeweise); `photos` zeigt das Muster App-ohne-Deployment.
+  reichen; eine Site nur mit kundenförmigem Grund. `comments` ist seit F3 (2026-08-12) eine POOL-COMMUNITY —
+  der Ordner apps/comments bleibt als CODE der E2E-Anker und der Beweis der
+  Studio-Form (App-ohne-Deployment wie `photos`); das einzige verbliebene
+  Silo-DEPLOYMENT ist portfolio (Davids eigene Site).
   DECISION-LOG 2026-08-04.
 - Produkt-Manifeste (Plattform-Strategie F1): JEDER Layer hat
   product.manifest.ts (key/tier/requires/Katalog-Texte, nur `import type`!),

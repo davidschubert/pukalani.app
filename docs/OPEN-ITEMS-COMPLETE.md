@@ -29,6 +29,29 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### AH-6 / F3 — comments-Silo → Pool ✅ 2026-08-12
+
+Das letzte Kunden-Silo ist eingeschmolzen: comments.pukalani.app ist eine
+Pool-Community im Projekt `account` (plan pro ohne Abo, oeffentlich, Owner
+David), bedient von apps/platform via nginx-Proxy der alten Site (Rollback =
+eine proxy_pass-Zeile, Site-Loeschung bleibt Davids Panel-Klick). Nutzer:
+1 Auto-Merge (beidseitig verifizierte Adresse, Davids Kommentare auf die
+Pukalani-ID umgeschrieben), 1 Uebernahme mit Hash + Id-Erhalt, 0 Einzelfaelle.
+Alle Inhalts-Tabellen Quelle=Ziel-verifiziert; apps/comments bleibt als CODE
+der E2E-Anker (photos-Muster) — e2e.yml nachweislich unberuehrt. Details:
+docs/runbooks/F3-CUTOVER.md, Plan jetzt in docs/archiv/F3-COMMENTS-POOL.md.
+Danach existieren genau ZWEI Auth-Welten: account (alle Menschen) und
+admin (Betreiber); portfolio bleibt Davids eigenes Silo.
+
+**Gelernt:** (1) Ein universeller Mandanten-Stempel im Kopier-Werkzeug trifft
+auch GLOBALE Tabellen (account_handles, 400 Unknown attribute) — Stempel-
+Entscheidung gehoert je Tabelle in den Plan, nicht in die Schleife.
+(2) Runtime- und Migrations-Keys haben je Instanz VERSCHIEDENE Scope-Saetze
+(comments-Runtime ohne tables.read, Migrations ohne users.read) — Migrations-
+Werkzeuge brauchen deshalb Env-Flags JE PHASE. (3) Der Inventar-Lauf mit
+fail-loud auf Tabellen ohne Plan-Zeile hat fuenf vergessene Betreiber-
+Alt-Tabellen gefunden, BEVOR sie stillschweigend mitgezogen wurden.
+
 ### AH-4 — Cutover control. → admin. ✅ 2026-08-12
 
 Die Betreiber-Konsole heißt admin.pukalani.app; control. antwortet 301 mit
