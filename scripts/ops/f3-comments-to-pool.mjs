@@ -640,7 +640,12 @@ async function phaseRows() {
     try {
       for await (const row of eachRow(source, entry.tableId)) {
         seen++
-        const data = { ...payloadOf(row), ...rowStampFor(keys) }
+        // `copy-if-handle-free` ist die GLOBALE Tabelle (account_handles, AH-7):
+        // sie hat keine communityId-Spalte — der Mandanten-Stempel gehört nur
+        // auf Community-Inhalte (400 Unknown attribute, live erwischt 2026-08-12).
+        const data = entry.action === 'copy-if-handle-free'
+          ? payloadOf(row)
+          : { ...payloadOf(row), ...rowStampFor(keys) }
         const rewritten = rewriteRowPermissions(row.$permissions ?? [], { keys, mapping, audiencePublic })
         for (const id of rewritten.unmapped) unmappedAll.add(id)
 
