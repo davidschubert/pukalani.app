@@ -29,6 +29,47 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### AP8 / U12 — Der Wizard fragt drei Mal statt sieben ✅ 2026-08-12
+
+Davids Entscheidung (2026-08-10) umgesetzt: Pflicht sind **Name/Adresse ·
+Kategorie · Vibe** — die drei Antworten, die den ERSTEN ZUSTAND der Community
+formen (Host, Willkommens-Beitrag, Farbwelt). Der Flow hat 4 Seiten statt 7
+(`basics, category, vibe, summary`); `?step=goal` aus alten Lesezeichen landet
+auf Schritt 1.
+
+**Verbleib der vier gefallenen Fragen:** Beschreibung → Karte „Name und
+Beschreibung" unter `/dashboard/community` (existiert seit U5); ihre
+Zweitwirkung (Startseiten-Text) hängt am Checklisten-Punkt „Startseite", dessen
+Hinweistext korrigiert wurde („mit deinem Text aus dem Wizard" wäre eine Lüge
+geworden). Größe/Zweck/Ziel: NIRGENDS — bewusst; sie waren reine
+Marktforschung, kein Codepfad hat sie je gelesen. KEINE neuen
+Checklisten-Punkte: die fünf entschiedenen bleiben.
+
+**Naht abwärtskompatibel** (dieselbe Lage wie `neutral` im Branding-PATCH —
+control deployt VOR platform): `purpose`/`memberRange`/`goal` sind im
+`.strict()`-Schema OPTIONAL statt gestrichen, mitgeschickte Alt-Werte werden
+weiter gegen ihre Kataloge geprüft. BEWUSST ohne `.default()`: ein Default
+schriebe eine Antwort ins Profil, die niemand gegeben hat — Abweichung vom
+Brief-Wortlaut, mit Gegenprobe belegt (testweises `.default('new')` ⇒ Test
+rot). Beweise: verify-onboarding 28/28 (neu: Alt-Nutzlast bleibt gültig,
+Profil erfindet nichts, `goal: 'weltherrschaft'` → 400), acceptance 21/21
+(Median 0,5 s), Deploy `2ce922fd` gate+deploy=success, alle Hosts + 301er grün.
+
+**Für David gemerkt (drei Folge-Entscheidungen, keine Blocker):** (1) der
+KI-Beschreibungs-Vorschlag (`/api/onboarding/suggest`, Entscheidung 2026-07-24)
+ist mit seinem einzigen Aufrufer GELÖSCHT — Wiederandocken an
+`/dashboard/community` wäre ~30 Zeilen; (2) das Markt-Signal Größe/Zweck/Ziel
+ist weg, nicht verschoben (Benchmark-E5 schlug „hinter den Aha" vor); (3) kein
+Default in der Naht — falls Wire-Symmetrie gewünscht, eine Zeile je Feld.
+
+**Gelernt:** (1) „Wandert in die Checkliste" verdient eine Prüfung statt
+Gehorsam: drei der vier Felder hatte NIE jemand gelesen — sie zu verschieben
+hätte die Checkliste mit toten Fragen gefüllt; der richtige Umzug war die
+Löschung plus ein ehrlicher Hinweistext. (2) Beweis-Skripte, die hinter der
+ersten roten Erwartung abbrechen, verstecken die nächsten: drei Erwartungen
+waren SCHON VORHER falsch (`pages.tenantId`→`communityId`, „genau 3 Seiten",
+Startseiten-Zusage) und fielen erst auf, als die erste repariert war.
+
 ### AP7 / U11 — Fehlermeldungen, leere Seiten, Seitentitel, die weiterhelfen ✅ 2026-08-12
 
 Vier Teile (Trichter G7/M3/M6/M7 + Dashboard M6/M8 + C5), live nachgemessen:
