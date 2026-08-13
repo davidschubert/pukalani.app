@@ -46,16 +46,41 @@
  * damalige Fassung wurden vier absichtliche Mutationen gefahren (Filter weg,
  * `as: 'operator'`, Wache weg) und jede vom zuständigen Abschnitt gefangen.
  *
- * ⚠️ NACH DEM UMBAU AUF AH-7 (2026-08-11) STEHT DIESE PROBE WIEDER AUS.
- * Die Abschnitte messen jetzt andere Schichten (Gate + Publikums-Filter statt
- * Mandanten-Filter), und ein umgebauter Beweis, dessen Rot niemand gesehen
- * hat, ist nur ein Grün. Vor dem nächsten Deploy dieser Grenze zu wiederholen:
+ * ── UND NACH DEM AH-7-UMBAU ERNEUT (2026-08-12) ────────────────────────────
+ * Die Abschnitte messen seit AH-7 andere Schichten (Gate + Publikums-Filter
+ * statt Mandanten-Filter), die Probe stand also wieder aus. Sie ist jetzt
+ * gefahren — und hat sich gelohnt: der ERSTE Lauf war 41/44, das Rot war echt.
+ *
+ * DAS LOCH (gefunden 2026-08-12, im selben Zug gefixt): das Publikum wurde
+ * bei der ANLAGE gestempelt. `ensureAccountHandle` schrieb
+ * `accountHandlePermissions(pool, communityId, …)`, und `handle.get.ts` gatet
+ * die Zugehörigkeit erst NACH dem Anlegen — ein Fremder bekam das Lese-Publikum
+ * einer fremden Community allein dadurch, dass er dort seine Kontoseite
+ * öffnete, und stand danach in deren Erwähnungs-Menü. `changeAccountHandle`
+ * vergab dasselbe Publikum beim Umbenennen ein zweites Mal
+ * (`handleAudienceWith` auf den AKTUELLEN Host). Beides ist entfernt; die
+ * Anlage stempelt kein Label mehr, die Umbenennung ERBT nur noch, und das
+ * mitgliedschafts-gegatete `ensureAccountHandleAudience` ist der EINZIGE
+ * Schreiber von `read(label:…)` — gerufen aus `handle.get.ts` UND (neu)
+ * `handle.patch.ts`. Ohne den zweiten Aufruf verlöre ein Mitglied, das seinen
+ * ersten Namen per PATCH setzt, das Publikum seiner eigenen Community (in
+ * genau diese Falle lief der erste Fix-Versuch: 37/44).
+ *
+ * DIE DREI MUTATIONEN, jede vom zuständigen Abschnitt gefangen — bei jeder
+ * Wiederholung dieser Grenze erneut zu fahren:
  *   (a) `requireCommunityMembership` in `search.get.ts` entfernen ⇒ Abschnitt 6
- *       muss rot werden (der Nachbar sieht auf Host B @grenzprobe_alpha).
- *   (b) den `handleAudienceIncludes`-Filter entfernen ⇒ Abschnitt 5 muss rot
- *       werden (Owner A sieht auf Host A auch @grenzprobe_beta).
+ *       wird rot (der Nachbar sieht auf Host B @grenzprobe_alpha).
+ *       Gemessen: 40/44 — nimmt Abschnitt 7 mit, denn dieselbe Wache
+ *       erzwingt auch die Sitzung (Gast bekam 200 statt 401).
+ *   (b) den `handleAudienceIncludes`-Filter entfernen ⇒ Abschnitt 5 wird rot
+ *       (Owner A sieht auf Host A auch @grenzprobe_beta). Gemessen: 43/44.
  *   (c) `ensureAccountHandleAudience` in `handle.get.ts` entfernen ⇒ Abschnitt
- *       5b muss rot werden (das Publikum wächst nie).
+ *       5b wird rot (das Publikum wächst nie). Gemessen: 41/44.
+ *
+ * BEIM MUTIEREN: die Bearbeitung löst einen Nitro-Neubau aus. Wer sofort
+ * startet, verliert die laufende Anfrage — die `node:http`-Aufrufe hier haben
+ * keinen Timeout und warten dann ewig (2026-08-12 live erwischt, 20 Minuten).
+ * Erst den Neubau abwarten, dann fahren.
  *
  * ── AUFBAU ─────────────────────────────────────────────────────────────────
  * Zwei Wegwerf-Communities über den ECHTEN Wizard-Abschluss, zwei Owner, ein
