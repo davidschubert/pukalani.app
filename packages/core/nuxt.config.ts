@@ -228,6 +228,20 @@ export default defineNuxtConfig({
     // redis://127.0.0.1:6379 — ALLE Sites eines Servers teilen die Instanz,
     // die Keys sind pro Appwrite-Projekt gescoped (keine App-Kollisionen).
     redisUrl: '',
+    /**
+     * server-only! Env: NUXT_ANALYTICS_PROXY_ORIGIN — biegt die Herkunft des
+     * Adblock-Proxys (F47/Paket 5) auf eine andere Adresse um.
+     *
+     * LEER = der Normalfall: die Herkunft folgt der App-Config
+     * (`pukalani.analytics.instance` bzw. der Basis aus `…analytics.src`). Die
+     * Variable gibt es für den BEWEIS — sie zeigt dort auf eine Attrappe statt
+     * auf die Produktions-Instanz — und als Notnagel, falls die Instanz einmal
+     * unter einer anderen Adresse steht als der `<script src>` im Head.
+     *
+     * Sie läuft durch dieselbe Prüfung wie die Config-Werte (`http(s)://…`);
+     * ein Tippfehler schaltet den Proxy ab (404), statt irgendwohin zu zeigen.
+     */
+    analyticsProxyOrigin: '',
     public: {
       // Deployter Commit (Build-Zeit aus git) — /api/health spiegelt ihn,
       // der Deploy-Workflow verifiziert damit, dass ploi den erwarteten

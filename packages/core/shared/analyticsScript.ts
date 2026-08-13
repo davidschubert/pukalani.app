@@ -42,6 +42,104 @@ export function plausibleScriptUrl(instance: string | undefined, scriptId: strin
   return `${instance.replace(/\/+$/, '')}/js/${scriptId}.js`
 }
 
+/**
+ * ─── DER ADBLOCK-PROXY (F47/Paket 5, 2026-08-12) ──────────────────────────
+ *
+ * Zwei Pfade auf dem EIGENEN Host, über die Script und Ereignisse laufen. Der
+ * Grund ist der einzige, den es dafür gibt: Filterlisten kennen die Adresse
+ * jeder Plausible-Instanz, und ein guter Teil der Besucher wird damit nie
+ * gezählt. Kommen Script und Ereignis vom selben Host wie die Seite, sind sie
+ * von den eigenen Dateien nicht zu unterscheiden.
+ *
+ * DIE NAMEN SIND ABSICHT: nichts hier heißt „plausible", „analytics" oder
+ * „track" — genau diese Wörter stehen in den Filterlisten, und ein Proxy unter
+ * `/api/plausible.js` wäre eine Attrappe, die man sich hätte sparen können.
+ * Wer sie umbenennt, hebt die Wirkung auf; es sind auch keine Namen, die je ein
+ * Kunde lesen muss.
+ */
+export const ANALYTICS_PROXY_SCRIPT_PATH = '/api/stats-script.js'
+export const ANALYTICS_PROXY_EVENT_PATH = '/api/stats-event'
+
+/**
+ * PURE (unit-getestet): die Basis-Adresse unserer Plausible-Instanz, wie sie
+ * aus der App-Config folgt — die einzige Herkunft, die der Proxy anfragen darf.
+ *
+ * ZWEI HERKÜNFTE, dieselben zwei wie beim Script-Tag selbst:
+ *  1. `instance` (Selbstbedienung, platform) steht schon als Basis da.
+ *  2. Sonst wird sie aus dem statischen `src` zurückgerechnet (marketing,
+ *     comments, portfolio haben nur den) — alles VOR `/js/`.
+ *
+ * `''`, wenn nichts Brauchbares dasteht. Die Prüfung auf `http(s)://` ist kein
+ * Zierrat: dieser Wert wird zur Ziel-Adresse eines server-seitigen `fetch`. Er
+ * kommt heute aus der App-Config und nie aus einer Anfrage — genau das soll
+ * auch dann noch gelten, wenn ihn eines Tages eine Env-Variable setzt.
+ */
+export function analyticsUpstreamBase(
+  analytics: { instance?: string, src?: string } | null | undefined,
+): string {
+  const instance = normalizeUpstreamBase(analytics?.instance)
+  if (instance) return instance
+
+  const src = analytics?.src ?? ''
+  const cut = src.indexOf('/js/')
+  return cut > 0 ? normalizeUpstreamBase(src.slice(0, cut)) : ''
+}
+
+/** Trailing-Slashes weg — und nur echte http(s)-Adressen kommen durch. */
+function normalizeUpstreamBase(value: string | undefined | null): string {
+  const trimmed = (value ?? '').trim().replace(/\/+$/, '')
+  return /^https?:\/\/[^/\s]+$/i.test(trimmed) ? trimmed : ''
+}
+
+/**
+ * PURE (unit-getestet): die Script-Id aus einer fertigen Script-Adresse
+ * zurückgewinnen (`…/js/pa-xyz.js` → `pa-xyz`).
+ *
+ * Gebraucht, weil drei Apps ihre Site als VOLLE URL in der Config stehen haben,
+ * der Proxy aber eine Id braucht — die Upstream-Adresse baut er selbst.
+ *
+ * Das Ergebnis läuft durch dieselbe Formprüfung wie eine Kunden-Eingabe. Beim
+ * LEGACY-Script (`…/js/script.js`) fällt es damit auf `''`: dessen Id ist keine
+ * `pa-…`-Id, und das alte Snippet wird von dieser Umstellung bewusst nicht
+ * mitgenommen (es benutzt `data-domain`/`data-api`, einen anderen Mechanismus).
+ */
+export function scriptIdFromUrl(src: string | undefined | null): string {
+  const id = /\/js\/([^/?#]+)\.js(?:[?#]|$)/.exec(src ?? '')?.[1] ?? ''
+  return id && isPlausibleScriptId(id) ? id : ''
+}
+
+/**
+ * PURE (unit-getestet): WELCHE Id gehört in den Head dieses Seitenaufbaus?
+ *
+ * Dieselbe Rangfolge wie überall — die Zeile der Community (Selbstbedienung)
+ * schlägt die gebaute Config. `effectiveScriptId` hat die erste Hälfte dieser
+ * Frage schon in der Route beantwortet; hier kommt nur der statische Fall dazu.
+ */
+export function headScriptId(
+  analytics: { src?: string } | null | undefined,
+  selfServiceId: string | undefined,
+): string {
+  if (selfServiceId && isPlausibleScriptId(selfServiceId)) return selfServiceId
+  return scriptIdFromUrl(analytics?.src)
+}
+
+/**
+ * PURE (unit-getestet): die Script-Adresse AUF DEM EIGENEN HOST — oder `''`,
+ * wenn es keine gültige Id gibt.
+ *
+ * `''` ist der Sicherheitsgurt dieser ganzen Umstellung: der Aufrufer fällt
+ * dann auf die direkte Adresse zurück. Der Proxy kann eine laufende Messung
+ * damit nicht kaputtmachen — er schaltet sich nur dazu, wenn alles stimmt.
+ *
+ * Die Id steht im Query und braucht kein Encoding: ihr Zeichenvorrat
+ * (`ANALYTICS_SCRIPT_ID_RE`) ist URL-sicher, und was ihm nicht entspricht,
+ * kommt hier gar nicht erst durch.
+ */
+export function proxiedScriptSrc(scriptId: string | undefined): string {
+  if (!scriptId || !isPlausibleScriptId(scriptId)) return ''
+  return `${ANALYTICS_PROXY_SCRIPT_PATH}?id=${scriptId}`
+}
+
 /** Die gespeicherte Einstellung EINER Community — nur, was hier zählt. */
 export interface AnalyticsSettingsLike {
   /** Eigene Plausible-Site der Community ('' = keine). */
