@@ -31,12 +31,26 @@ interface AnalyticsAppConfig {
 
 export default defineEventHandler(async (event): Promise<AnalyticsConfigResponse> => {
   /**
-   * KONTROLL-HOST: dort gibt es keinen Mandanten, und genau deshalb würde die
-   * Datentür hier NICHT scopen — `find` gäbe die erste beste Zeile des
-   * Pool-Projekts zurück, also die Script-Id einer fremden Community. Der
-   * Kundenbereich misst nichts; die Antwort ist leer.
+   * KONTROLL-HOST: dort gibt es keinen Mandanten, und genau deshalb darf die
+   * Datentür hier NIE befragt werden — `find` gäbe die erste beste Zeile des
+   * Pool-Projekts zurück, also die Script-Id einer fremden Community.
+   *
+   * SEIT 2026-08-12 (Davids Entscheidung, F47-Rest) misst der Kundenbereich
+   * aber IN DIE SAMMEL-SITE: die Antwort ist die `shared`-Id aus der
+   * App-Config — reine Konfiguration, kein Datenzugriff, der Hostname
+   * (account.pukalani.app) trennt die Zahlen im Report. Damit erwachen die
+   * sieben Trichter-Ereignisse (useFunnelEvent), von denen fünf nur auf den
+   * Kontroll-Hosts feuern und bis dahin ins Leere liefen. Ohne konfigurierte
+   * `shared`-Id bleibt die Antwort leer wie zuvor.
    */
-  if (event.context.controlCenter) return EMPTY
+  if (event.context.controlCenter) {
+    const appConfig = useAppConfig() as {
+      pukalani?: { analytics?: AnalyticsAppConfig }
+    }
+    const sharedId = appConfig.pukalani?.analytics?.shared?.scriptId ?? ''
+    if (!isPlausibleScriptId(sharedId) || !sharedId) return EMPTY
+    return { scriptId: sharedId, ownScriptId: '', enabled: false }
+  }
 
   const cached = readAnalyticsConfigCache(event)
   if (cached) return cached

@@ -483,7 +483,13 @@ export default defineAppConfig({
        * bezieht ihre Grenze aus dem Publikum der Zeile — ohne Community gibt
        * es dort nichts zu beantworten.
        */
-      controlApiPrefixes: ['/api/auth/', '/api/onboarding/', '/api/health', '/api/telemetry/', '/api/notifications', '/api/feedback', '/api/abuse', '/api/account/activity', '/api/account/handle'] as string[],
+      // '/api/analytics/config' + die zwei stats-Pfade seit 2026-08-12 (Davids
+      // Trichter-Entscheidung): der Kundenbereich misst in die Sammel-Site —
+      // Config-Abfrage, Script-Proxy und Event-Proxy müssen die Allowlist
+      // passieren, sonst 404t die Messung dort still (lokal erwischt, BEVOR
+      // es deployt war). Bewusst der exakte config-Pfad, nicht '/api/analytics/'
+      // — settings.patch und stats.get bleiben Mandanten-Routen.
+      controlApiPrefixes: ['/api/auth/', '/api/onboarding/', '/api/health', '/api/telemetry/', '/api/notifications', '/api/feedback', '/api/abuse', '/api/account/activity', '/api/account/handle', '/api/analytics/config', '/api/stats-script.js', '/api/stats-event'] as string[],
     },
     /**
      * Realtime-Gate (F14, 2026-08-01) — der EINE Schalter, mit dem eine App

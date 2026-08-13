@@ -7,6 +7,23 @@ die kleinen, verstreuten Beschlüsse.
 
 ---
 
+## 2026-08-12 — Zweite Runde: Export-Zuschnitt, U19-Leser, Trichter-Site
+
+**Davids Antworten** (strukturierte Fragen nach der Krümel-/F47-/U14-Runde):
+(1) **U20 Community-Export = Inhalte + Team, OHNE Mitglieder-PII** — Beiträge,
+Kommentare, Seiten, Events/Kurse-Struktur als JSON/ZIP; vom Team Name+Rolle,
+von gewöhnlichen Mitgliedern nur anonyme Zähler. DSGVO-seitig unkritisch,
+deckt den Umzugs-Fall; die volle Mitgliederliste hätte einen AGB-Passus/Anwalt
+gebraucht. (2) **U19-Leser = Betreiber-Seite im admin-Dashboard** — Antworten
+landen im Control Plane, eine Auswertungs-Seite unter admin.pukalani.app zeigt
+Verteilungen; David ist der definierte Empfänger (Bedingung aus der
+Wizard-Lektion erfüllt). (3) **Trichter-Messung = Sammel-Site mitbenutzen** —
+account.* meldet in `communities.pukalani.app`, der Hostname trennt; die
+sieben Trichter-Goals funktionieren damit, sobald David sie in der
+Plausible-UI anlegt. Umgesetzt als EIN Zweig in
+`packages/analytics/server/api/analytics/config.get.ts` (Kontroll-Host ⇒
+`shared`-Id aus der App-Config, weiterhin KEIN Datentür-Zugriff dort).
+
 ## 2026-08-12 — Nach der UX-Kette: vier Entscheidungen in einem Rutsch
 
 **Davids Antworten** (strukturierte Fragen nach dem AP10-Abschluss):
