@@ -122,6 +122,13 @@ const WRITE_LIMITED: { re: RegExp, bucket: string, max?: number }[] = [
   // wer sie zweimal je Minute braucht, tut etwas anderes als exportieren.
   // Eigener Bucket, weil ein Export das Budget des Switchers sonst leerräumt.
   { re: /^GET \/api\/community\/export$/, bucket: 'community:export', max: 2 },
+  // Das Community-MENÜ speichern (U15): owner-/admin-gated, also kein offener
+  // Vektor — aber jeder Klick im Editor schreibt eine Appwrite-Zeile UND liest
+  // vorher die veröffentlichten Seiten, um die eigenen Links zu prüfen. Ein
+  // Ziehen-und-Ablegen-Formular lädt zum Speichern im Sekundentakt ein; der
+  // Standard-Schreibdeckel (60/min) liegt weit über jedem Menschen und stoppt
+  // genau das Skript, das die Zeile in einer Schleife umschreibt.
+  { re: /^PATCH \/api\/pages\/navigation$/, bucket: 'pages:navigation' },
   // Öffentliche Kommentar-Lese-Routen (Embed macht sie zur beworbenen Fläche
   // auf fremden Seiten) — eigener Read-Bucket statt „GET ist frei".
   // count (E3) ist CORS-offen und microcached, teilt denselben Bucket.
