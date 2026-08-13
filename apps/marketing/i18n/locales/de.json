@@ -380,7 +380,7 @@
         },
         {
           "term": "Datenexport",
-          "def": "Deine Daten in einer maschinenlesbaren Datei. Heute holt sich jedes Konto seine eigenen Daten selbst als JSON; ein Export der ganzen Community auf Knopfdruck fehlt noch. Er ist der Grund, warum ein Wechsel zu uns keine Einbahnstraße ist."
+          "def": "Deine Daten in einer maschinenlesbaren Datei. Jedes Konto holt sich seine eigenen Daten als JSON, und wer eine Community besitzt, lädt zusätzlich das gebündelte Archiv herunter – Inhalte und Team, ohne Mitgliederliste. Er ist der Grund, warum ein Wechsel zu uns keine Einbahnstraße ist."
         }
       ],
       "ctaTitle": "Genug gelesen?",
@@ -393,7 +393,7 @@
       "title": "Wechseln, ohne dass deine Community es ausbadet",
       "lead": "Kein Stichtag, kein Blindflug: Du startest parallel, holst deine Leute in Ruhe rüber und behältst die alte Plattform, bis du sicher bist.",
       "honestTitle": "Ehrlich zum Import",
-      "honest": "Automatische Importer für Circle, Skool oder Mighty Networks haben wir noch nicht – sie sind geplant. Heute begleiten wir den Umzug: Inhalte, die dir wichtig sind, ziehen wir gemeinsam um, den Rest lässt du bewusst zurück (meistens ist das ein Vorteil). Deine Konto-Daten (Beiträge, Kommentare, Nachrichten, Kursfortschritt) lädst du jederzeit selbst als Export herunter; ein gebündelter Community-Export ist geplant – bis dahin begleiten wir auch den Rückweg.",
+      "honest": "Automatische Importer für Circle, Skool oder Mighty Networks haben wir noch nicht – sie sind geplant. Heute begleiten wir den Umzug: Inhalte, die dir wichtig sind, ziehen wir gemeinsam um, den Rest lässt du bewusst zurück (meistens ist das ein Vorteil). Deine Konto-Daten (Beiträge, Kommentare, Nachrichten, Kursfortschritt) lädst du jederzeit selbst als Export herunter; die Community als Ganzes ebenfalls – eine JSON-Datei mit Beiträgen, Kommentaren, Seiten, Terminen, Kursaufbau und dem Team. Nur die Mitgliederliste bleibt aus Datenschutzgründen draußen. Und ja, wir begleiten auch den Rückweg.",
       "stepsTitle": "Der Umzug in vier Schritten",
       "steps": [
         {
@@ -422,7 +422,7 @@
         "Planbarer Preis ohne Transaktionsgebühr auf deine Umsätze",
         "Daten in Deutschland, kein Werbe-Tracking",
         "Deine Domain, dein Design – deine Community heißt wie du",
-        "Kein Lock-in: Konto-Export und Löschung sind eingebaut, nicht erkauft – der gebündelte Community-Export ist geplant"
+        "Kein Lock-in: Konto-Export, Community-Export und Löschung sind eingebaut, nicht erkauft"
       ],
       "ctaTitle": "Parallel starten – kostenlos",
       "ctaLead": "Erst anlegen, dann entscheiden. Die alte Plattform bleibt, bis du sicher bist."
@@ -773,7 +773,7 @@
         },
         {
           "q": "Komme ich mit meinen Daten wieder raus?",
-          "a": "Ja, und zwar selbst: Jedes Konto lädt seine eigenen Daten als JSON-Datei herunter, darunter Profil und Sitzungen, Beiträge, Kommentare, private Nachrichten, Kursfortschritt, Zu- und Absagen zu Terminen, Benachrichtigungen und Abo-Daten. Der Knopf sitzt in den Konto-Einstellungen unter „Daten\"; niemand muss dafür bei uns nachfragen. Was es heute noch nicht gibt: einen gebündelten Export der ganzen Community auf Knopfdruck. Wenn du umziehst, stellen wir ihn von Hand zusammen – das sagen wir dir lieber ehrlich, als eine Schaltfläche zu behaupten, die es nicht gibt. Dein Konto löschst du ebenfalls selbst; Beiträge und Kommentare bleiben danach als leerer Platzhalter stehen, damit die Diskussionen anderer nicht zerreißen."
+          "a": "Ja, und zwar selbst: Jedes Konto lädt seine eigenen Daten als JSON-Datei herunter, darunter Profil und Sitzungen, Beiträge, Kommentare, private Nachrichten, Kursfortschritt, Zu- und Absagen zu Terminen, Benachrichtigungen und Abo-Daten. Der Knopf sitzt in den Konto-Einstellungen unter „Daten\"; niemand muss dafür bei uns nachfragen. Und die Community als Ganzes: Unter „Community → Export\" lädt die Inhaberin oder der Inhaber ein Bündel als JSON herunter – Beiträge, Kommentare, Seiten, Termine und Kursaufbau, dazu das Team mit Name und Rolle. Die Mitgliederliste und E-Mail-Adressen bleiben bewusst draußen; gewöhnliche Mitglieder erscheinen nur als Anzahl. Dein Konto löschst du ebenfalls selbst; Beiträge und Kommentare bleiben danach als leerer Platzhalter stehen, damit die Diskussionen anderer nicht zerreißen."
         }
       ],
       "metaTitle": "Häufige Fragen zu Pukalani – Datenschutz, Preise, Umzug",

@@ -380,7 +380,7 @@
         },
         {
           "term": "Data export",
-          "def": "Your data in a machine-readable file. Today every account downloads its own data as JSON; a one-click export of a whole community is not there yet. It is the reason switching to us is not a one-way street."
+          "def": "Your data in a machine-readable file. Every account downloads its own data as JSON, and whoever owns a community also downloads the bundled archive – content and team, without the member list. It is the reason switching to us is not a one-way street."
         }
       ],
       "ctaTitle": "Read enough?",
@@ -393,7 +393,7 @@
       "title": "Switch without your community paying for it",
       "lead": "No cut-off date, no blind flight: you start in parallel, bring your people over calmly, and keep the old platform until you're sure.",
       "honestTitle": "Honest about import",
-      "honest": "We don't have automatic importers for Circle, Skool or Mighty Networks yet – they're planned. Today we guide the move: we bring over the content that matters to you, and you deliberately leave the rest behind (usually that's an advantage). Your account data (posts, comments, messages, course progress) can be downloaded as an export at any time; a bundled community export is planned – until then we also assist with the way back.",
+      "honest": "We don't have automatic importers for Circle, Skool or Mighty Networks yet – they're planned. Today we guide the move: we bring over the content that matters to you, and you deliberately leave the rest behind (usually that's an advantage). Your account data (posts, comments, messages, course progress) can be downloaded as an export at any time; so can the community as a whole – one JSON file with posts, comments, pages, events, course structure and the team. Only the member list stays out, for data protection reasons. And yes, we also assist with the way back.",
       "stepsTitle": "The move in four steps",
       "steps": [
         {
@@ -422,7 +422,7 @@
         "A predictable price with no transaction fee on your revenue",
         "Data in Germany, no ad tracking",
         "Your domain, your design – your community is named after you",
-        "No lock-in: account export and deletion are built in, not sold to you – a bundled community export is planned"
+        "No lock-in: account export, community export and deletion are built in, not sold to you"
       ],
       "ctaTitle": "Start in parallel – free",
       "ctaLead": "Create first, decide later. The old platform stays until you're sure."
@@ -773,7 +773,7 @@
         },
         {
           "q": "Can I get my data back out?",
-          "a": "Yes, and you do it yourself: every account downloads its own data as a JSON file, including profile and sessions, posts, comments, private messages, course progress, event RSVPs, notifications and subscription data. The button sits in your account settings under \"Data\"; nobody has to ask us for it. What does not exist yet: a one-click bundled export of a whole community. If you are moving, we put it together by hand – we would rather tell you that honestly than claim a button that is not there. You can delete your account yourself too; posts and comments then remain as an empty placeholder so other people's discussions do not fall apart."
+          "a": "Yes, and you do it yourself: every account downloads its own data as a JSON file, including profile and sessions, posts, comments, private messages, course progress, event RSVPs, notifications and subscription data. The button sits in your account settings under \"Data\"; nobody has to ask us for it. And the community as a whole: under \"Community → Export\" the owner downloads a bundle as JSON – posts, comments, pages, events and course structure, plus the team with name and role. The member list and e-mail addresses deliberately stay out; ordinary members appear only as a count. You can delete your account yourself too; posts and comments then remain as an empty placeholder so other people's discussions do not fall apart."
         }
       ],
       "metaTitle": "Frequently asked questions – privacy, pricing, switching",

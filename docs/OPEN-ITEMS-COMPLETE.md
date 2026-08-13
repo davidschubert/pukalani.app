@@ -29,6 +29,66 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### U20 — Community-Export: der Owner nimmt seine Community mit ✅ 2026-08-12
+
+`GET /api/community/export` (onboarding) liefert EINE JSON-Datei mit Beiträgen,
+Kommentaren, Seiten, Terminen und Kursaufbau samt Lektionen, dazu das Team mit
+Name und Rolle. Owner-only über die neue Capability `community.export` —
+dieselbe Klasse wie `community.transfer`/`community.delete`, weil hier das
+gesamte Archiv das Haus verlässt und nicht etwas nach innen verwaltet wird.
+Gedrosselt auf 2/min (eigener Bucket `community:export`, damit ein Export das
+Budget des Switchers nicht leerräumt). Reiter „Export" unter
+`/dashboard/community`, de+en.
+
+**Gesammelt wird über einen VERTRAG, nicht über einen Sammler:**
+`registerCommunityExportContributor` (core, wortgleich zum GDPR-Zwilling
+`registerUserDataContributor`) + je ein Nitro-Plugin in posts, comments, pages,
+events, courses und onboarding. Ein onboarding, das `community_posts` und
+`lessons` beim Namen kennt, wäre genau die Cross-Layer-Kopplung, die A14
+verbietet; so hat eine App ohne `courses` automatisch kein Kurs-Kapitel, ohne
+dass irgendwo eine Liste gepflegt wird. Der Contributor bekommt bewusst NUR den
+`H3Event` und keine communityId — damit ist die Datentür der einzige Weg zu
+lesen.
+
+**Die PII-Lesart** (Davids Zuschnitt, DECISION-LOG 2026-08-12): Inhalte tragen
+den öffentlich sichtbaren ANZEIGENAMEN ihres Autors — ein Beitrag ohne Verfasser
+wäre kein Archiv, sondern Konfetti. Verboten ist die MITGLIEDERLISTE: keine
+E-Mail, keine Appwrite-Id, kein `authorId`, keine Einladungen (die tragen die
+Adressen von Leuten, die noch nicht einmal Mitglied sind), keine
+Gast-Autoren-Tabelle, keine Zahlungsdaten. Gewöhnliche Mitglieder erscheinen
+ausschließlich in `memberCounts`. Das Bündel nennt sein eigenes Schweigen: das
+Feld `omitted` listet auf, was bewusst fehlt — sonst rät der Leser, ob seine
+Community leer oder der Export unvollständig ist.
+
+**Beweis:** `packages/onboarding/scripts/verify-community-export.mjs` —
+**34 bestanden, 0 fehlgeschlagen**, zweimal hintereinander. Er pflanzt ein
+gewöhnliches Mitglied MIT Adresse und beweist zuerst, dass es mitgezählt wird
+(`memberCounts.members ≥ 1`), und erst dann seine Abwesenheit im Text; dazu ein
+rekursiver Schlüssel-Lauf über das ganze Bündel gegen
+`email/authorId/organizerId/userId/runtimeUserId`. Fremder → 403, viewer → 403,
+Gast → 401, dritter Aufruf → 429.
+
+**Gelernt:** Drei Dinge, die nicht auf Anhieb stimmten.
+(1) **Ein Session-Client hätte den Export still halbiert.** Entwürfe und
+ausgeblendete Zeilen tragen moderations- oder besitzer-eigene Row-Permissions —
+die Klinke `member` liest sie nicht. Der Export läuft deshalb
+`as: 'operator', actor: 'member'` (Vorbild `seedWelcomePost.ts`): die Tür bleibt
+die Grenze, der Handelnde bleibt ehrlich benannt, und weil der Export NICHTS
+schreibt, greift `assertWritable` nie — er funktioniert also auch in einer
+`billing`-gesperrten Community. Genau so gehört es: die Sperre soll zum Zahlen
+bewegen, nicht Daten als Geisel nehmen.
+(2) **Eine neue Capability steht an ZWEI Stellen, und der Typ erzwingt nur
+eine.** Union in `shared/types/authz.ts` + Rolle in `communityAuthz.ts`
+kompilierten grün — `ALL_CAPABILITIES` in `shared/authz.ts` ist ein
+Laufzeit-Array, das der Typ nicht auf Vollständigkeit prüft. Gemerkt hat es
+allein `communityAuthz.test.ts` („jede Site-Cap existiert im globalen
+Katalog"). Wer eine Capability anlegt, fasst drei Dateien an.
+(3) **Eine Drossel macht den eigenen Beweis beim zweiten Lauf rot.** Mit festen
+Test-IPs räumt der 429-Abschnitt sein eigenes Minutenbudget leer, und der
+nächste Lauf scheitert an „1. Lauf kommt durch" — was wie ein Produktfehler
+aussieht. Kur: zufälliges Oktett je Lauf, wie es die Geschwister-Skripte für
+`RUN_IP` längst machen.
+
 ### U14 (Code-Teil) — Anmelden mit Google, unsichtbar bis zu Davids Klicks ✅ 2026-08-12
 
 Der komplette Code-Teil ist live und GEFAHRLOS ohne Credentials: kein
