@@ -29,6 +29,67 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### U19 — „Hilf uns, Pukalani zu schärfen": das Markt-Signal hinter dem Aha ✅ 2026-08-12
+
+Die drei Fragen, die U12 aus dem Wizard geworfen hat — **Größe · Zweck · Ziel** —
+werden wieder gestellt, aber an der richtigen Stelle: als freiwillige Karte im
+Dashboard des Owners, **nachdem** er seinen ersten eigenen Beitrag geschrieben
+hat (Benchmark-Befund E5: „das Produkt-Signal geht nicht verloren, es kommt
+später und von Leuten, die schon investiert sind"). Teilantworten erlaubt,
+„Später" (30 Tage) und „Nicht mehr fragen" (für immer) daneben.
+
+**Der Leser war die Bedingung** (Davids Entscheidung 2026-08-12): Betreiber-Seite
+**Markt-Signal** unter `admin.pukalani.app/dashboard/market-signal` — drei
+Verteilungen als Balken, Beteiligungsquote, keine Community-Namen. Ohne sie wäre
+der Wizard-Fehler wiederholt worden (erhoben, nie gelesen).
+
+**KEINE Migration, KEINE neue Tabelle.** Die Antworten haben in
+`communities.profile` ihren angestammten Platz: `SiteProfile` trägt
+`purpose`/`memberRange`/`goal` seit dem ersten Wizard als optionale Felder,
+`parseSiteProfile` liest sie, und die Communities von VOR U12 haben dort echte
+Werte stehen — eine eigene Tabelle hätte die Auswertung gezwungen, Alt- und
+Neubestand zu vereinigen.
+
+Gebaut: pure Regeln in `packages/onboarding/shared/profileSignal.ts` und
+`packages/control/shared/marketSignal.ts` · Karte
+`CommunityProfileSignalNotice.global.vue` (zweistufig — eine Zeile, die Fragen
+erst auf Wunsch; 16 Auswahlkarten wären auf der Übersicht kein Hinweis mehr)
+· Routen `GET/POST /api/community/profile-signal` +
+`/profile-signal/postpone` (onboarding) → Service-Naht →
+`POST /api/control/community/profile-signal` · Auswertung
+`GET /api/control/market-signal` + Seite + Registry-Eintrag (`sites.manage`).
+Beweis `packages/onboarding/scripts/verify-profile-signal.mjs`: **35/35**
+gegen zwei Worktree-Server mit echter Naht.
+
+**Gelernt (1): Die Checkliste taugte NICHT als Erscheinungs-Bedingung** — die
+Aufgabe sah sie dafür vor, zwei Messungen haben sie widerlegt. Erstens ist
+„teilweise abgehakt" ab Minute eins wahr: der Wizard setzt den Vibe, und der Vibe
+IST `communities.theme`, also steht der Punkt „Farbwelt" schon erledigt da, bevor
+der Owner das Dashboard zum ersten Mal sieht. Zweitens meldet die
+Checklisten-Route nach dem Wegklicken **alle fünf Punkte als `false`** (bewusst —
+sie spart dem Wegklickenden drei Abfragen und einen Control-Ruf pro
+Seitenaufruf); wer die Checkliste ausblendet, wäre für die Markt-Frage FÜR IMMER
+unsichtbar gewesen — und das sind gerade die entschlossenen Owner. Genommen wurde
+deshalb der erste Punkt der Checkliste als das, was er ohnehin ist: der
+Aha-Moment (`communityHasAuthoredContent`, derselbe core-Vertrag, dieselbe
+Ausnahme für den gesäten Beispiel-Beitrag). Regel daraus: **eine geerbte
+Bedingung erst messen, dann übernehmen.**
+
+**Gelernt (2): `apps/control` extended `onboarding` NICHT.** Die Auswertungs-Seite
+griff zuerst auf `onboarding.profileSignal.*` zu — dieselben Beschriftungen, die
+die Karte benutzt. Auf `admin.pukalani.app` hätten dort die ROHEN Schlüssel
+gestanden, genau der Impressum-Fall, den `check:i18n-keys` für Config-Schlüssel
+abfängt und für `t()`-Aufrufe im Markup bewusst nicht. Die Betreiber-Seite hat
+jetzt eigene, kürzere Labels unter `control.marketSignal.options.*`. Regel:
+**vor jedem `t()` auf fremde Layer-Schlüssel die `extends`-Kette der App prüfen.**
+
+**Gelernt (3):** Die Testphase lässt **eine Community je Konto** zu — der Beweis
+für „Nicht mehr fragen" brauchte deshalb einen zweiten Owner. Und
+`scheduledAt: null` wird von `createPostSchema` abgewiesen (`.optional()`, nicht
+nullable): das Feld gehört weggelassen, nicht genullt.
+
+---
+
 ### U20 — Community-Export: der Owner nimmt seine Community mit ✅ 2026-08-12
 
 `GET /api/community/export` (onboarding) liefert EINE JSON-Datei mit Beiträgen,
