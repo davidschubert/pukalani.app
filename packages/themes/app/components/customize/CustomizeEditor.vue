@@ -198,16 +198,16 @@ function confirmLeave() {
                         />
                       </UFormField>
                       <UFormField :label="`${t('themes.customize.hueShift')} (${draft.config.hueShift}°)`" class="col-span-2">
-                        <USlider v-model="draft.config.hueShift" :min="-180" :max="180" :step="5" :disabled="draft.config.mode === 'linear'" />
+                        <CustomizeSlider v-model="draft.config.hueShift" :label="t('themes.customize.hueShift')" :min="-180" :max="180" :step="5" :disabled="draft.config.mode === 'linear'" />
                       </UFormField>
                       <UFormField :label="`${t('themes.customize.saturation')} (${draft.config.saturation.toFixed(2)})`" class="col-span-2">
-                        <USlider v-model="draft.config.saturation" :min="0" :max="2" :step="0.05" :disabled="draft.config.mode === 'linear'" />
+                        <CustomizeSlider v-model="draft.config.saturation" :label="t('themes.customize.saturation')" :min="0" :max="2" :step="0.05" :disabled="draft.config.mode === 'linear'" />
                       </UFormField>
                       <UFormField :label="`${t('themes.customize.lightnessMax')} (${draft.config.lightnessMax}%)`">
-                        <USlider v-model="draft.config.lightnessMax" :min="80" :max="100" :step="1" :disabled="draft.config.mode === 'linear'" />
+                        <CustomizeSlider v-model="draft.config.lightnessMax" :label="t('themes.customize.lightnessMax')" :min="80" :max="100" :step="1" :disabled="draft.config.mode === 'linear'" />
                       </UFormField>
                       <UFormField :label="`${t('themes.customize.lightnessMin')} (${draft.config.lightnessMin}%)`">
-                        <USlider v-model="draft.config.lightnessMin" :min="0" :max="40" :step="1" :disabled="draft.config.mode === 'linear'" />
+                        <CustomizeSlider v-model="draft.config.lightnessMin" :label="t('themes.customize.lightnessMin')" :min="0" :max="40" :step="1" :disabled="draft.config.mode === 'linear'" />
                       </UFormField>
                       <UFormField :label="t('themes.customize.darkAlias')" class="col-span-2">
                         <div class="flex items-center gap-1.5">
@@ -327,7 +327,7 @@ function confirmLeave() {
                       </div>
                     </UFormField>
                     <UFormField :label="`${t('themes.customize.headingTracking')} (${draft.config.headingTracking}px)`">
-                      <USlider v-model="draft.config.headingTracking" :min="-3" :max="6" :step="0.5" />
+                      <CustomizeSlider v-model="draft.config.headingTracking" :label="t('themes.customize.headingTracking')" :min="-3" :max="6" :step="0.5" />
                     </UFormField>
                     <UFormField>
                       <USwitch v-model="draft.config.headingUppercase" :label="t('themes.customize.headingUppercase')" />

@@ -36,7 +36,7 @@ const demoRange = ref(60)
           <UCheckbox v-model="demoCheck" :label="t('themes.customize.demo.checkbox')" />
           <USwitch v-model="demoSwitch" :label="t('themes.customize.demo.switch')" />
         </div>
-        <USlider v-model="demoRange" />
+        <CustomizeSlider v-model="demoRange" :label="t('themes.customize.demo.slider')" />
         <UProgress :model-value="demoRange" />
         <UAlert icon="i-ph-info" color="primary" variant="subtle" :title="t('themes.customize.demo.alertTitle')" :description="t('themes.customize.demo.alertText')" />
       </div>

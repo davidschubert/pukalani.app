@@ -101,6 +101,7 @@
         "placeholder": "Search…",
         "checkbox": "Checkbox",
         "switch": "Switch",
+        "slider": "Slider",
         "alertTitle": "Note",
         "alertText": "This is how alerts look in the active theme."
       },

@@ -101,6 +101,7 @@
         "placeholder": "Suchen…",
         "checkbox": "Checkbox",
         "switch": "Schalter",
+        "slider": "Regler",
         "alertTitle": "Hinweis",
         "alertText": "So sehen Alerts im aktiven Theme aus."
       },
