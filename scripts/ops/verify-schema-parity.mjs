@@ -33,11 +33,15 @@ import { join } from 'node:path'
  * anmahnt, wird weggelesen. Neue system-Tabelle ⇒ hier eintragen.
  */
 const SYSTEM_TABLES = [
+  'account_handles',
   'activities',
   'app_config',
   'app_secrets',
   'audit_logs',
   'community_branding',
+  'community_handles',
+  'community_navigation',
+  'community_seo',
   'custom_fonts',
   'custom_themes',
   'notifications',

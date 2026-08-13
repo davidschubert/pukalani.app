@@ -62,7 +62,7 @@
  *
  *   pnpm migrate --app <app> --layer system
  */
-import { Client, Permission, Role, TablesDB } from 'node-appwrite'
+import { Client, Query, TablesDB } from 'node-appwrite'
 
 const endpoint = process.env.NUXT_PUBLIC_APPWRITE_ENDPOINT
 const projectId = process.env.NUXT_PUBLIC_APPWRITE_PROJECT_ID
@@ -113,17 +113,55 @@ await step('Table community_navigation', () => tablesDB.createTable({
   databaseId: db,
   tableId: 'community_navigation',
   name: 'Community Navigation (Menü)',
-  // read: any → dieselbe Begründung wie community_branding (s. Kopf).
-  // Kein write: geschrieben wird nur mit dem Server-Key.
-  permissions: [Permission.read(Role.any())],
+  // LEAST PRIVILEGE (Davids Runde 2026-08-13, s. Kopf): KEIN Client-Recht —
+  // gelesen wird nur server-seitig (SSR, Admin-Client). Die Live-Propagation
+  // à la D6 ist eine bewusste Tür: sie bräuchte genau EIN read(any) per
+  // Folge-Migration. ACHTUNG PROTOKOLL: die erste Fassung dieser Migration
+  // vergab read(any) und lief so am 2026-08-13 gegen alle vier Instanzen —
+  // der Reparatur-Schritt unten zieht Bestand nach (die Tabelle war leer,
+  // nichts war exponiert).
+  permissions: [],
   rowSecurity: false,
 }))
+
+// REPARATUR + DURCHSETZUNG: eine schon existierende Tabelle (409-Skip oben)
+// wird auf die heutigen Permissions GEZOGEN statt nur belassen — sonst wäre
+// dieser Fix nur auf frischen Instanzen wahr. Idempotent: derselbe Zustand
+// nochmal gesetzt ist ein No-op.
+await step('Table community_navigation → permissions []', () => tablesDB.updateTable({
+  databaseId: db,
+  tableId: 'community_navigation',
+  name: 'Community Navigation (Menü)',
+  permissions: [],
+  rowSecurity: false,
+}))
+
+/**
+ * WIE 034: eine vorhandene Varchar-Spalte antwortet auf createVarcharColumn
+ * mit 400 `column_limit_exceeded`, NICHT mit 409 — die 409-Abkürzung von
+ * step() greift also nicht, und der Wiederholungslauf stürbe genau hier
+ * (am 2026-08-13 live erwischt: der Reparatur-Lauf setzte die Permissions
+ * und starb dann an dieser Zeile). Deshalb erst nachsehen, dann anlegen.
+ */
+async function ensureColumn(tableId: string, key: string, create: () => Promise<unknown>) {
+  try {
+    const { columns } = await tablesDB.listColumns({ databaseId: db, tableId, queries: [Query.limit(200)] })
+    if (columns.some(column => column.key === key)) {
+      console.log(`↷ Column ${tableId}.${key} (existiert bereits)`)
+      return
+    }
+  }
+  catch {
+    // Table fehlt o. Ä. — step() unten meldet es sauber.
+  }
+  await step(`Column ${tableId}.${key}`, create)
+}
 
 // `config` = das serialisierte Override-Dokument ({ entries: [...] }).
 // '' ist ein gültiger Wert und heisst „keine eigene Wahl" — deshalb nicht
 // required. Der Leser (parseCommunityNavOverride) macht daraus `null` und das
 // Menü sieht aus wie vor U15.
-await step('Column community_navigation.config', () => tablesDB.createVarcharColumn({
+await ensureColumn('community_navigation', 'config', () => tablesDB.createVarcharColumn({
   databaseId: db, tableId: 'community_navigation', key: 'config', size: 8192, required: false, xdefault: '',
 }))
 
