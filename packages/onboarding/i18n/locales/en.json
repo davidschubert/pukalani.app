@@ -401,7 +401,8 @@
       "general": "General",
       "plan": "Plan",
       "products": "Products",
-      "storage": "Storage"
+      "storage": "Storage",
+      "export": "Export"
     },
     "communityProducts": {
       "title": "Products",
@@ -433,6 +434,35 @@
         "courses": "Courses",
         "media": "Images"
       }
+    },
+    "communityExport": {
+      "title": "Export",
+      "description": "Download everything in this community as a single JSON file.",
+      "noTenantTitle": "Nothing to export here",
+      "noTenantDesc": "This page downloads a community's content. There is no community on this address.",
+      "inBundleTitle": "What's included",
+      "inBundle": {
+        "posts": "Posts",
+        "comments": "Comments",
+        "pages": "Pages",
+        "events": "Events",
+        "courses": "The structure of your courses",
+        "team": "Your team with name and role"
+      },
+      "notInBundleTitle": "What's not included",
+      "notInBundle": {
+        "members": "The member list — ordinary members appear as a count only",
+        "emails": "Email addresses",
+        "messages": "Private messages",
+        "reports": "Moderation reports"
+      },
+      "hint": "You get one JSON file. Exporting changes nothing in your community.",
+      "cta": "Download bundle",
+      "successTitle": "Bundle created",
+      "successDesc": "The file is in your downloads folder now.",
+      "failedTitle": "Export failed",
+      "failedDesc": "That did not work just now. Please try again.",
+      "rateLimited": "Too many exports in a short time. Wait a moment, then try again."
     },
     "gettingStarted": {
       "title": "Your first five steps",

@@ -230,6 +230,27 @@ export default defineAppConfig({
           requiredCapability: 'team.manage',
           order: 100,
         },
+        {
+          /**
+           * EXPORT — das Community-Bündel als eine JSON-Datei (U20,
+           * 2026-08-12).
+           *
+           * `community.export` trägt NUR der Owner; ein Admin sieht den Reiter
+           * gar nicht erst. Aus demselben Grund wie bei Übergabe und Löschung:
+           * hier verlässt das gesamte Archiv das Haus. Die Autorität bleibt
+           * der Server — `/api/community/export` prüft dieselbe Capability.
+           *
+           * `order: 110` ganz hinten, hinter Speicher: eine einmalige
+           * Handlung, keine Einstellung, die man pflegt.
+           */
+          id: 'community-export',
+          scope: 'community',
+          labelKey: 'onboarding.communityTabs.export',
+          icon: 'i-ph-download-simple',
+          to: '/dashboard/community/export',
+          requiredCapability: 'community.export',
+          order: 110,
+        },
       ],
       /**
        * Der Hinweis auf die ablaufende Testphase (M13). Aus DEMSELBEN Grund in

@@ -401,7 +401,8 @@
       "general": "Allgemein",
       "plan": "Plan",
       "products": "Produkte",
-      "storage": "Speicher"
+      "storage": "Speicher",
+      "export": "Export"
     },
     "communityProducts": {
       "title": "Produkte",
@@ -433,6 +434,35 @@
         "courses": "Kurse",
         "media": "Bilder"
       }
+    },
+    "communityExport": {
+      "title": "Export",
+      "description": "Lade alles herunter, was in dieser Community steht — als eine einzige JSON-Datei.",
+      "noTenantTitle": "Hier gibt es nichts zu exportieren",
+      "noTenantDesc": "Diese Seite lädt den Inhalt einer Community herunter. Auf dieser Adresse gibt es keine Community.",
+      "inBundleTitle": "Das ist drin",
+      "inBundle": {
+        "posts": "Beiträge",
+        "comments": "Kommentare",
+        "pages": "Seiten",
+        "events": "Termine",
+        "courses": "Der Aufbau deiner Kurse",
+        "team": "Dein Team mit Name und Rolle"
+      },
+      "notInBundleTitle": "Das ist nicht drin",
+      "notInBundle": {
+        "members": "Die Mitgliederliste — gewöhnliche Mitglieder erscheinen nur als Zahl",
+        "emails": "E-Mail-Adressen",
+        "messages": "Private Nachrichten",
+        "reports": "Meldungen aus der Moderation"
+      },
+      "hint": "Du bekommst eine JSON-Datei. Der Export ändert nichts an deiner Community.",
+      "cta": "Bündel herunterladen",
+      "successTitle": "Bündel erstellt",
+      "successDesc": "Die Datei liegt jetzt in deinem Download-Ordner.",
+      "failedTitle": "Export nicht möglich",
+      "failedDesc": "Das hat gerade nicht geklappt. Versuch es bitte noch einmal.",
+      "rateLimited": "Zu viele Exporte in kurzer Zeit. Warte einen Moment und versuch es dann erneut."
     },
     "gettingStarted": {
       "title": "Die ersten fünf Schritte",
