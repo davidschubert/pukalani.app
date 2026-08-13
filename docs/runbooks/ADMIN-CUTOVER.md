@@ -83,6 +83,18 @@ Schritt hier gefahrlos ist.
       für einen Dienst-Aufruf kein Ersatz:
       - [x] `apps/platform` → `NUXT_ONBOARDING_CONTROL_URL=https://admin.pukalani.app`
       - [x] weitere Fundstellen prüfen: `pnpm ops:site-env`
+
+      > ⚠️ **Nachtrag 2026-08-12: dieser Punkt war abgehakt, aber live NICHT
+      > geschehen** — platform (391312) UND portfolio (390041) trugen weiter
+      > `https://control.pukalani.app`. Die Folge war unsichtbar, bis der
+      > erste Deploy nach dem Cutover die 301-Middleware aktivierte: `fetch`
+      > macht beim Folgen einer 301 aus dem Naht-**POST** ein **GET**, jede
+      > Naht-Route antwortete „Page not found" (404) — auf allen
+      > Pool-Communities waren Eigene Domain und Mitglieder-Verwaltung tot
+      > (erster Melder: freelancer, „Domain lässt sich nicht speichern").
+      > Beide Envs am 2026-08-12 über das ploi-Panel korrigiert + Deploy.
+      > **Lehre: ein Env-Häkchen gilt erst nach `pnpm ops:site-env`-Gegenprobe
+      > gegen die LIVE-Datei, nicht nach dem Editieren.**
 - [x] `pm2 reload` (bzw. der Deploy in Schritt 4) übernimmt die Env
       (`--update-env`).
 
