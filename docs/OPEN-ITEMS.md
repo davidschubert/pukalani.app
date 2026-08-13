@@ -142,13 +142,9 @@ erledigt → COMPLETE) · Wizard-Pflicht = Name/Adresse · Kategorie · Vibe (U1
 Social-Login nur Google, nach AP1–AP8 (U14) · Geld-Wort „Plan" (U6) ·
 U15/F57 bleiben geparkt bis AP1–AP8.
 
-**Font-Seed-Krümel — BEHOBEN 2026-08-12:** das Zurückschreiben in deploy.yml läuft jetzt zweistufig — WOFF2-Blobs bleiben strikt additiv (`--ignore-existing`), die unifont-METADATEN (`meta/**`, tragen die 7-Tage-TTL) dürfen aktualisieren. Gefahrlos, weil der Schritt nur nach einem GRÜNEN Build läuft. Jeder Deploy frischt den Seed damit auf; der stille Verfall am 2026-08-18 ist abgewendet.
-
-**AP10-Krümel — `USlider` ist für Screenreader unbedienbar** (Nuxt UI verdrahtet `aria-label="Thumb"` fest im Daumen, die `UFormField`-Beschriftung landet per `for` nur auf der nicht fokussierbaren Wurzel). Der Gebühren-Rechner nutzt deshalb Zahlenfelder; betroffen bleibt der **Theme-Editor** (`CustomizeEditor.vue`, 6 Regler). Upstream-Issue prüfen/melden oder Beschriftung per `:ui`-Slot nachrüsten. [Klein, S]
+**Krümel-Welle 2026-08-12 — KOMPLETT ERLEDIGT** (Font-Seed, Buckets, USlider, C2/C3/C4, C6, Handle-Gegenprobe + Sicherheitsfix): vollständiger Eintrag mit Beweisen in [OPEN-ITEMS-COMPLETE.md](OPEN-ITEMS-COMPLETE.md).
 
 **AP8/AP9/AP10-Entscheidungen — ALLE ENTSCHIEDEN am 2026-08-12** (DECISION-LOG): KI-Vorschlag bleibt gelöscht · Markt-Signal „hinter dem Aha" = neuer Punkt U19 · Copy ehrlich gemacht (Team-Rollen raus, Kurse-Zeile aufs Belegte) · Export-Versprechen gesenkt + Community-Export = neuer Punkt U20.
-
-**AH-1-Krümel — BEHOBEN 2026-08-12:** `system-032` (032-core-buckets.ts) legt `avatars` + `gdpr-exports` an (Einstellungen aus der Prod-Instanz `account` abgelesen: fileSecurity, 30 MB, Encryption+Antivirus). Gegen alle vier Instanzen gefahren — account hatte beide (409-Skip = Idempotenz-Beweis), **control und portfolio fehlten BEIDE, comments fehlte gdpr-exports**: die Lücke war auf drei von vier Instanzen real.
 
 **C19 — `/de` war für englischsprachige Browser eine Endlosschleife.**
 Code-Fix erledigt 2026-07-31, auf prod REPRODUZIERT und lokal behoben. Kein
@@ -210,14 +206,6 @@ Konto-Default auf „exclusive", rechnet Stripe 19 % oben drauf und widerspricht
 der Landing. Prüfung vor dem Live-Gang: Runbook §2.4. Der Klammer-Hinweis „zeigt
 noch auf den `studio`-Alias" ist seit 2026-07-30 gegenstandslos: der
 Test-Webhook zeigt auf `control`, der Alias ist entfernt.
-
-**C6 — Aufräum-Migration:** Legacy-Spalte `app_config.entitlements` droppen.
-Gebaut am 2026-07-31 als `packages/system/scripts/migrations/027-drop-app-config-entitlements.ts`,
-zusammen mit dem Code-Abbau des 2-Wege-Reads (`getLegacyEntitlementsDocument`/
-`clearLegacyEntitlementsDocument` sind gefallen). **Offen ist nur noch das
-Ausführen, und die Reihenfolge ist Pflicht:** erst den Code deployen, dann
-migrieren — andersherum liest der Fallback gegen eine gelöschte Spalte.
-Herkunft: Pool-Audit N2.
 
 **M13 — Reste des Self-Service-Onboardings:** Trial-Banner +
 Ablauf-Erinnerung · Kundenbereich-Umzug `/workspace` → `my.*` ·

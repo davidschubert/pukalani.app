@@ -29,6 +29,54 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### Krümel-Welle — sieben Aufräumer + ein gefundenes Sicherheitsloch ✅ 2026-08-12
+
+**Font-Seed** (deploy.yml): Zurückschreiben zweistufig — Blobs additiv,
+unifont-Metadaten (`meta/**`, 7-Tage-TTL) dürfen aktualisieren; läuft nur nach
+GRÜNEM Build. Der stille Seed-Verfall am 2026-08-18 ist abgewendet, jeder
+Deploy frischt auf. **Buckets** (system-032): `avatars` + `gdpr-exports` aus
+der Prod-Instanz abgelesen und als Migration verewigt; gegen alle vier
+Instanzen gefahren — auf DREI von vier fehlten Buckets real (control +
+portfolio beide, comments eins). **C6**: die Drop-Migration war durch die
+vollen AH-1-Läufe faktisch längst ausgeführt („schon weg" auf allen vier),
+`ops:schema-parity` deckungsgleich. **USlider-a11y** (`CustomizeSlider`-
+Wrapper in themes): Nuxt UI überschreibt reka-uis korrektes aria-label
+hartkodiert mit „Thumb" — Beschriftung sitzt jetzt am `[data-slot="thumb"]`,
+Browser-Gegenprobe: roher USlider sagt weiter „Thumb", die sechs Regler sagen
+ihre Namen. **C2/C3/C4**: waren seit 2026-07-31 GEBAUT und standen nur noch
+als stale Doppel-Einträge in den Notizen — am Code verifiziert
+(planAllows-Gate im blueprint-Layout, Slot-Füllungen in blueprint,
+Nav-Einträge in den Layern; `chrome.nav` ist Objekt-Map, keine
+Array-Dopplung möglich).
+
+**Handle-Gegenprobe (AH-7-Rest) → Sicherheitsloch gefunden und gefixt:**
+Der Beweis lief erst 41/44 — deterministisch. `ensureAccountHandle` stempelte
+bei der ANLAGE das Publikum des aktuellen Hosts ohne Mitgliedschafts-Prüfung
+(das Gate in `handle.get.ts` kam eine Zeile zu spät); die Umbenennung erbte
+und vergab zusätzlich. Wer eingeloggt nur seine Kontoseite auf fremdem
+Community-Host öffnete, stand in deren Erwähnungs-Menü. KEIN Inhalts-Leck
+(resolveHandleOwners filtert Mitgliedschaft separat — Benachrichtigungen an
+Fremde waren nie möglich). Fix: Anlage und Umbenennung vergeben NIE ein Label;
+das mitgliedschafts-gegatete `ensureAccountHandleAudience` ist der EINZIGE
+Schreiber (GET **und** PATCH — ohne den PATCH-Aufruf verlöre ein Mitglied beim
+ersten Namen-Setzen sein eigenes Publikum, gemessen: 37/44). Beweis danach
+**44/44**, plus drei Mutations-Gegenproben (je gezielt rot). Bestands-Reparatur
+`repair-handle-audience.mjs` (trocken per Default, `hasCommunityAccess`
+wörtlich, entfernt nur): gegen Prod `account` — **1 vergiftete Zeile** (Label
+der Comments-Community am Handle eines Kontos ohne aktive Mitgliedschaft),
+mit `--apply` bereinigt, Kontroll-Dry-Run 0.
+
+**Gelernt:** (1) Eine Gegenprobe, die „nur bestätigen" soll, findet das Loch —
+der ⚠️-Vermerk „Probe steht aus" im Skript-Kopf war drei Tage lang die einzige
+Wahrheit über eine offene Grenze; solche Vermerke sind Arbeitsaufträge, keine
+Fußnoten. (2) Ein Gate NACH der schreibenden Zeile ist kein Gate —
+Publikums-Vergabe gehört in genau EINEN mitgliedschafts-geprüften Schreiber,
+alle anderen Pfade erben nur. (3) Notizen-Krümel altern wie Audit-Befunde:
+C2/C3/C4 waren längst gebaut — vor dem Bauen COMPLETE gegenlesen (die Regel
+galt bisher nur für OPEN-ITEMS-Punkte, sie gilt auch für Notizen). (4) Ein
+frischer Worktree hat kein node_modules — der erste Gate-Lauf dort ist sonst
+komplett rot und sieht wie ein echter Schaden aus.
+
 ### AP10 / U17 — Die Wettbewerbs-Munition auf der Marketing-Seite ✅ 2026-08-12
 
 Vier Teile, jede Zahl aus dem Benchmark, jede Pukalani-Aussage am Code geprüft:
