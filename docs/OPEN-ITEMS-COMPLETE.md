@@ -1,5 +1,6 @@
 # Erledigte Punkte (Archiv)
 
+
 Das ist das **finale Archiv der erledigten offenen Punkte** — jeder Eintrag
 steht hier vollständig, mit Begründung, Beweis und Datum, damit später
 nachlesbar bleibt, warum etwas so gebaut wurde. **Es ist KEINE Arbeitsliste:**
@@ -28,6 +29,49 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 > Ab `F20` ist die Nummerierung wieder eindeutig.
 
 ---
+
+### U15 Teil 1 — Navigations-Editor: der Owner stellt sein Menü zusammen ✅ 2026-08-13
+
+Davids Zuschnitt (2026-08-13): Produkt-Einträge **ausblenden + umordnen +
+umbenennen** (eigene Labels für beide Sprachen — bewusster Übersetzungs-
+Verzicht, leeres Feld fällt zurück) plus **eigene Links** (CMS-Seiten der
+Community + externe https-URLs, neuer Tab mit `rel="noopener"`).
+
+**Bau:** system-033 `community_navigation` (EINE Row je Community, rowId =
+communities.$id, `config`-JSON 8192 — nachgerechnet gegen das
+utf8mb4-Zeilenbudget, nicht geraten) mit **`permissions: []`** (Least
+Privilege: heute liest nur SSR über den Admin-Client; Live-Propagation ist
+eine dokumentierte Tür, keine vergessene). EINE pure Regel
+`resolveCommunityNav` (core/shared) mit vier Zusagen: das Tarif-Gate filtert
+VOR dem Override und bleibt autoritativ · unbekannte Ids werden ignoriert,
+bleiben aber gespeichert · nicht Erwähntes hängt hinten an · ohne Wahl ändert
+sich nichts. Dazu **umbenennen ja, umlenken nein** — ein Produkt-Eintrag trägt
+nie ein eigenes Ziel (sonst zeigte „Beiträge" auf eine fremde Adresse);
+Ziel-Prüfung fail-closed (URL-geparst, https-Pflicht). Editor
+`/dashboard/community/navigation` im **pages-Layer** (der hatte sich seit E9
+selbst angekündigt; keine Control-Plane-Naht nötig, der Link-Wähler braucht
+die Seiten des Layers), Capability `branding.manage` (Gestaltungs-Klasse wie
+F5 — bewusst NICHT `pages.manage`, das auch Editoren tragen).
+
+**Beweise:** verify-community-navigation.mjs **66/66** — u. a. Umordnen/
+Ausblenden/Umbenennen im SSR-HTML, Tarif-Gate-Gegenprobe (basic-Plan hält
+/feed + /events trotz Override versteckt, die Wahl bleibt gespeichert),
+`http://`/`javascript:`/`//host` je 400, fremde Seite 400 `unknown_page`,
+Fremder 403/Gast 401, Mandanten-Isolation, Least-Privilege-Gegenprobe
+(Owner-Session getRow → 404, listRows → 401, Admin-Key ok). Migration vor dem
+Deploy auf allen vier Instanzen, `ops:schema-parity` deckungsgleich. Deploy
+`35f5a851` gate+deploy=success; live: PATCH als Gast 401, öffentliches GET
+`{"entries":[]}` = Standard-Menü, alle Hosts grün.
+
+**Gelernt:** (1) Ein Agent, der seinen Beweis an einen Subagenten delegiert,
+kann mit „Beweis läuft" fertig aussehen, während NICHTS gelandet ist — der
+Blick in den Worktree (Skript existiert? Server laufen?) gehört zur Abnahme.
+(2) Für öffentliche Community-Konfiguration ist `read(any)` nicht automatisch
+das richtige Vorbild: wenn heute nur SSR liest, ist `permissions: []` der
+billigere und engere Schnitt, und die Live-Propagation bleibt als EINE
+dokumentierte Folge-Migration möglich. (3) Zeilenbudgets nachrechnen: 40
+Einträge × 512-Zeichen-Ziele hätten in keine varchar-Spalte gepasst — die
+Grenze gehört in Spalte UND Zod, sonst wird aus einem 400 ein Appwrite-500.
 
 ### U19 — „Hilf uns, Pukalani zu schärfen": das Markt-Signal hinter dem Aha ✅ 2026-08-12
 
