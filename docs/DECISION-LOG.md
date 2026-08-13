@@ -7,6 +7,26 @@ die kleinen, verstreuten Beschlüsse.
 
 ---
 
+## 2026-08-12 — Nach der UX-Kette: vier Entscheidungen in einem Rutsch
+
+**Davids Antworten** (strukturierte Fragen nach dem AP10-Abschluss):
+(1) **KI-Beschreibungs-Vorschlag bleibt gelöscht** — die 2026-07-24 gebaute
+Suggest-Route kehrt NICHT an /dashboard/community zurück; wer eine
+Beschreibung will, schreibt sie selbst. (2) **Markt-Signal „hinter dem Aha"
+wird gebaut** (gegen die Empfehlung „weg lassen"): eine „Hilf uns, Pukalani zu
+schärfen"-Karte im Dashboard NACH den ersten Erfolgen (Benchmark-E5-Muster) —
+diesmal MIT definiertem Leser, sonst wiederholt sich der Wizard-Fehler
+(erhoben, nie gelesen). Neuer OPEN-ITEMS-Punkt. (3) **Marketing-Copy wird
+ehrlich statt gegatet**: „plus Team-Rollen" fliegt aus der Pro-Karte (sie sind
+in jedem Plan — ein Personal-Verkaufsargument, kein Pro-Exklusiv), die
+/vs-Vergleichszeile wird „Kurse mit Lektionen und Fortschritt — ja (ab Pro)"
+statt „inkl. Bezahl-Zugang" (im Pool gibt es keinen Mitglieder-Zahlungsweg).
+(4) **Export: Versprechen jetzt senken UND Community-Export einplanen** —
+/wechseln sagt ab sofort präzise „Konto-Export heute, gebündelter
+Community-Export geplant"; der Export selbst wird ein eigener
+OPEN-ITEMS-Punkt (M–L), weil Datenportabilität laut Benchmark der stärkste
+K4-Kontrast ist.
+
 ## 2026-08-12 — F3 abgenommen: comments zieht in den Pool (AH-6)
 
 **Davids Abnahme** (strukturierte Fragen; zwei Rückfragen — „wieso bleibt

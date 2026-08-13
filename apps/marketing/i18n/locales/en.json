@@ -393,7 +393,7 @@
       "title": "Switch without your community paying for it",
       "lead": "No cut-off date, no blind flight: you start in parallel, bring your people over calmly, and keep the old platform until you're sure.",
       "honestTitle": "Honest about import",
-      "honest": "We don't have automatic importers for Circle, Skool or Mighty Networks yet – they're planned. Today we guide the move: we bring over the content that matters to you, and you deliberately leave the rest behind (usually that's an advantage). Whatever you create with us you can export at any time – the way back stays open.",
+      "honest": "We don't have automatic importers for Circle, Skool or Mighty Networks yet – they're planned. Today we guide the move: we bring over the content that matters to you, and you deliberately leave the rest behind (usually that's an advantage). Your account data (posts, comments, messages, course progress) can be downloaded as an export at any time; a bundled community export is planned – until then we also assist with the way back.",
       "stepsTitle": "The move in four steps",
       "steps": [
         {
@@ -422,7 +422,7 @@
         "A predictable price with no transaction fee on your revenue",
         "Data in Germany, no ad tracking",
         "Your domain, your design – your community is named after you",
-        "No lock-in: export and deletion are built in, not sold to you"
+        "No lock-in: account export and deletion are built in, not sold to you – a bundled community export is planned"
       ],
       "ctaTitle": "Start in parallel – free",
       "ctaLead": "Create first, decide later. The old platform stays until you're sure."
@@ -595,8 +595,8 @@
           "mighty": "USA"
         },
         {
-          "label": "Courses incl. paid access",
-          "us": "yes (early access)",
+          "label": "Courses with lessons and progress",
+          "us": "yes (from Pro)",
           "circle": "yes",
           "skool": "yes",
           "mighty": "yes"
@@ -731,7 +731,7 @@
         "pro": {
           "name": "Pro",
           "tag": "02 · Teams",
-          "desc": "For teams – everything in Personal, including cookieless visitor statistics, plus team roles, AI moderation assistant, highest limits. Courses and events first.",
+          "desc": "For teams – everything in Personal, including cookieless visitor statistics, plus AI moderation assistant, custom domain, highest limits. Courses and events first.",
           "cta": "Get Pro"
         },
         "enterprise": {

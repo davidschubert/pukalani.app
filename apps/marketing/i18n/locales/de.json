@@ -393,7 +393,7 @@
       "title": "Wechseln, ohne dass deine Community es ausbadet",
       "lead": "Kein Stichtag, kein Blindflug: Du startest parallel, holst deine Leute in Ruhe rüber und behältst die alte Plattform, bis du sicher bist.",
       "honestTitle": "Ehrlich zum Import",
-      "honest": "Automatische Importer für Circle, Skool oder Mighty Networks haben wir noch nicht – sie sind geplant. Heute begleiten wir den Umzug: Inhalte, die dir wichtig sind, ziehen wir gemeinsam um, den Rest lässt du bewusst zurück (meistens ist das ein Vorteil). Was du bei uns anlegst, kannst du jederzeit exportieren – der Rückweg bleibt offen.",
+      "honest": "Automatische Importer für Circle, Skool oder Mighty Networks haben wir noch nicht – sie sind geplant. Heute begleiten wir den Umzug: Inhalte, die dir wichtig sind, ziehen wir gemeinsam um, den Rest lässt du bewusst zurück (meistens ist das ein Vorteil). Deine Konto-Daten (Beiträge, Kommentare, Nachrichten, Kursfortschritt) lädst du jederzeit selbst als Export herunter; ein gebündelter Community-Export ist geplant – bis dahin begleiten wir auch den Rückweg.",
       "stepsTitle": "Der Umzug in vier Schritten",
       "steps": [
         {
@@ -422,7 +422,7 @@
         "Planbarer Preis ohne Transaktionsgebühr auf deine Umsätze",
         "Daten in Deutschland, kein Werbe-Tracking",
         "Deine Domain, dein Design – deine Community heißt wie du",
-        "Kein Lock-in: Export und Löschung sind eingebaut, nicht erkauft"
+        "Kein Lock-in: Konto-Export und Löschung sind eingebaut, nicht erkauft – der gebündelte Community-Export ist geplant"
       ],
       "ctaTitle": "Parallel starten – kostenlos",
       "ctaLead": "Erst anlegen, dann entscheiden. Die alte Plattform bleibt, bis du sicher bist."
@@ -595,8 +595,8 @@
           "mighty": "USA"
         },
         {
-          "label": "Kurse inkl. Bezahl-Zugang",
-          "us": "ja (Early Access)",
+          "label": "Kurse mit Lektionen und Fortschritt",
+          "us": "ja (ab Pro)",
           "circle": "ja",
           "skool": "ja",
           "mighty": "ja"
@@ -731,7 +731,7 @@
         "pro": {
           "name": "Pro",
           "tag": "02 · Teams",
-          "desc": "Für Teams – alles aus Personal, inklusive Besucherstatistik ohne Cookies, plus Team-Rollen, KI-Moderations-Assistent, höchste Limits. Kurse und Events zuerst.",
+          "desc": "Für Teams – alles aus Personal, inklusive Besucherstatistik ohne Cookies, plus KI-Moderations-Assistent, eigene Domain, höchste Limits. Kurse und Events zuerst.",
           "cta": "Pro holen"
         },
         "enterprise": {

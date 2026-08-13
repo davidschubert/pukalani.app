@@ -1,6 +1,6 @@
 # Offene Punkte
 
-**Stand: 2 offen · 5 geparkt/wartend · 10 bewusst zurückgestellt** (Zahlen bei JEDEM Umzug nach COMPLETE mitführen)
+**Stand: 4 offen · 5 geparkt/wartend · 10 bewusst zurückgestellt** (Zahlen bei JEDEM Umzug nach COMPLETE mitführen)
 
 Stand: **2026-08-12**. Hier steht **nur, was noch offen ist** — in der
 Reihenfolge, in der es abgearbeitet wird. Alles Erledigte (mit Begründung,
@@ -27,6 +27,8 @@ demo-Ausbau, comments in den Pool. Entscheidungen: DECISION-LOG 2026-08-11.
 | --- | --- | --- | --- | --- | --- |
 | 2 · A1 | **Echte Rechtstexte** für Impressum, Datenschutz und AGB. **pukalani.studio ist seit 2026-08-12 live** — Impressum + Datenschutz in de/en veröffentlicht, ohne erfundene Angaben, aber **ohne ladungsfähige Anschrift** (Davids Entscheidung: erst mal ohne); nachzutragen dort die Anschrift (§ 5 DDG, Pflicht — Postfach genügt nicht) und die Prüfung zu Art. 27 DSGVO (Vertreter in der Union) samt Drittland-Grundlage. Für **pukalani.app** stehen die Texte weiter aus. **Direkt danach `pukalani.auth.termsUrl` in `apps/platform` setzen** — die AGB-Checkbox fehlt heute genau dort, wo Kunden sich registrieren (Trichter M9). Schaltet Punkt 3 frei. | Hoch | S — Anschrift eintragen, Anwalt lesen lassen | Ja: nur David (ggf. Anwalt) | [Notizen](#notizen) |
 | 3 · A2 | **Stripe auf echtes Geld umstellen — über die F55-Seite.** Vorstufe A2a komplett grün, F55 selbst erledigt (beide 2026-08-08). Bei David bleiben: Bank-Aktivierung, Steuer-Registrierung, Live-Key ROTIERT eintragen (der erste ist teil-geleakt und rotiert), Portal-Konfiguration; alles andere klickt die F55-Seite. Braucht Punkt 2 (A1). | Hoch | S | Ja: Bank, Konto, Portal | [STRIPE-GO-LIVE-RUNBOOK.md](runbooks/STRIPE-GO-LIVE-RUNBOOK.md) |
+| 23 · U20 | **Community-Export** — der Owner lädt seine Community gebündelt herunter (Beiträge, Kommentare, Seiten, Mitgliederliste als JSON/ZIP aus dem Dashboard). Davids Entscheidung 2026-08-12: /wechseln-Versprechen ist gesenkt und sagt „geplant" — dieser Punkt löst das Versprechen ein; laut Benchmark der stärkste K4-Kontrast. Zuschnitt (was genau ins Bündel gehört, PII der Mitglieder!) vor dem Bau mit David. | Mittel | M–L | Ja: Zuschnitt | [Wettbewerb K4, V5](archiv/audits/2026-08-09-wettbewerb-benchmark.md) |
+| 24 · U19 | **„Hilf uns, Pukalani zu schärfen"-Karte** hinter dem Aha-Moment (Benchmark E5): das mit U12 gefallene Markt-Signal (Größe/Zweck/Ziel) freiwillig im Dashboard erheben, NACH den ersten Erfolgen. Davids Entscheidung 2026-08-12 — Bedingung aus der Wizard-Lektion: erst bauen, wenn der LESER definiert ist (wer wertet aus, wo landet es), sonst wieder Marktforschung ohne Empfänger. | Niedrig | S–M | Ja: Leser definieren | [Wettbewerb E5](archiv/audits/2026-08-09-wettbewerb-benchmark.md) |
 
 ## ⏸️ Geparkt / wartet — in Arbeitsreihenfolge
 
@@ -144,7 +146,7 @@ U15/F57 bleiben geparkt bis AP1–AP8.
 
 **AP10-Krümel — `USlider` ist für Screenreader unbedienbar** (Nuxt UI verdrahtet `aria-label="Thumb"` fest im Daumen, die `UFormField`-Beschriftung landet per `for` nur auf der nicht fokussierbaren Wurzel). Der Gebühren-Rechner nutzt deshalb Zahlenfelder; betroffen bleibt der **Theme-Editor** (`CustomizeEditor.vue`, 6 Regler). Upstream-Issue prüfen/melden oder Beschriftung per `:ui`-Slot nachrüsten. [Klein, S]
 
-**AP8/AP9/AP10-Entscheidungen bei David (gebündelt gefragt am 2026-08-12):** KI-Beschreibungs-Vorschlag wiederandocken oder gelöscht lassen · Markt-Signal Größe/Zweck/Ziel (weg oder „hinter den Aha") · Pro-Karte „Team-Rollen" (Gate bauen oder Satz streichen) · Community-Export bauen oder `/wechseln`-Versprechen senken · Vergleichszeile „Kurse inkl. Bezahl-Zugang" (im Pool gibt es keinen Mitglieder-Zahlungsweg).
+**AP8/AP9/AP10-Entscheidungen — ALLE ENTSCHIEDEN am 2026-08-12** (DECISION-LOG): KI-Vorschlag bleibt gelöscht · Markt-Signal „hinter dem Aha" = neuer Punkt U19 · Copy ehrlich gemacht (Team-Rollen raus, Kurse-Zeile aufs Belegte) · Export-Versprechen gesenkt + Community-Export = neuer Punkt U20.
 
 **AH-1-Krümel — Bucket-Anlage in die Migrationen.** Beim Cutover zeigte sich: `avatars` und `gdpr-exports` existierten im Pool nur von Hand — kein Migrations-Script legt sie an (fonts/media/event-covers/ticket-files schon). Nachziehen, sonst fehlt beides in jeder frischen Instanz. [Klein, S]
 
