@@ -27,7 +27,9 @@
 import type { DropdownMenuItem } from '@nuxt/ui'
 import { isProductStateEnabled } from '../../../core/shared/types/config'
 import type { PukalaniChromeNavEntry, PukalaniChromeUtility } from '../../../core/shared/types/chrome'
-import { isLegalPageSlug, type PublicPageNavItem } from '../../../pages/shared/types/page'
+import type { CommunityNavCandidate, CommunityNavOverride } from '../../../core/shared/communityNavigation'
+import { filterChromeNavEntries, resolveCommunityNav } from '../../../core/shared/communityNavigation'
+import { CMS_PAGE_NAV_ORDER, cmsPageNavId, isLegalPageSlug, type PublicPageNavItem } from '../../../pages/shared/types/page'
 
 const { t, locale } = useI18n()
 const localePath = useLocalePath()
@@ -46,6 +48,8 @@ type ChromeConfig = {
   nav?: Record<string, PukalaniChromeNavEntry | false>
   utilities?: Record<string, PukalaniChromeUtility | false>
   pagesNav?: boolean
+  /** U15: der pages-Layer bringt den Navigations-Editor UND seine Route mit. */
+  navOverride?: boolean
   changelogLink?: boolean
 }
 const chrome = computed<ChromeConfig>(() => (appConfig.pukalani as { chrome?: ChromeConfig }).chrome ?? {})
@@ -74,38 +78,59 @@ const cmsPages = computed(() => (navPages.value ?? []).filter(page => page.slug 
 const cmsNavPages = computed(() => cmsPages.value.filter(page => !isLegalPageSlug(page.slug)))
 const cmsLegalPages = computed(() => cmsPages.value.filter(page => isLegalPageSlug(page.slug)))
 
-interface NavItem {
-  id: string
-  label: string
-  to: string
-  icon?: string
-  planProduct?: string
-}
+/**
+ * DIE MENÜ-WAHL DES OWNERS (U15 Teil 1) — ausblenden, umordnen, umbenennen,
+ * eigene Links. Sie kommt aus dem pages-Layer, der den Editor und die Route
+ * besitzt; ohne ihn (`navOverride`) wird gar nicht erst gefragt.
+ *
+ * `requestFetch` wie beim Seiten-Abruf darüber, und aus demselben Grund: der
+ * SSR-interne Aufruf MUSS den Host-Header weiterreichen, sonst weiss die Route
+ * nicht, WELCHE Community fragt. Fehler werden verschluckt — ein Menü ohne
+ * eigene Wahl ist der dokumentierte Normalfall, kein Zwischenfall.
+ */
+const navOverrideEnabled = chrome.value.navOverride === true
+const { data: navOverride } = await useAsyncData(
+  () => 'chrome-nav-override',
+  () => navOverrideEnabled
+    ? requestFetch<CommunityNavOverride>('/api/pages/navigation').catch(() => null)
+    : Promise.resolve(null),
+)
 
-// Registry-Einträge (gefiltert: abgeschaltet/Produkt/Auth/Plan) + CMS-Seiten
-// (order 60 — nach den Produkten, vor „Pricing" bei order 90), sortiert.
-const navItems = computed<NavItem[]>(() => {
-  const entries = Object.entries(chrome.value.nav ?? {})
-    .filter((pair): pair is [string, PukalaniChromeNavEntry] => pair[1] !== false && !!pair[1])
-    .filter(([, entry]) => productOn(entry.productKey))
-    .filter(([, entry]) => !entry.requiresAuth || isLoggedIn.value)
-    .filter(([, entry]) => !entry.planProduct || planAllows(entry.planProduct))
-    .map(([id, entry]) => ({
-      id,
-      label: t(entry.labelKey),
-      to: localePath(entry.to),
-      icon: entry.icon,
-      planProduct: entry.planProduct,
-      order: entry.order ?? 50,
-    }))
+/**
+ * Was das Layout ANBIETET: Registry-Einträge (gefiltert nach
+ * abgeschaltet/Produkt/Auth/Plan) + CMS-Seiten.
+ *
+ * DIESE FILTER LAUFEN VOR DEM OVERRIDE, und das ist die Zusage, um die es bei
+ * U15 sicherheitshalber geht: was hier herausfällt — allen voran ein Produkt,
+ * das der Tarif dieser Community nicht enthält (`planAllows`, C2) — kann durch
+ * kein gespeichertes Menü zurückkommen. `resolveCommunityNav` kennt nur diese
+ * Liste; eine Id, die nicht darin steht, ignoriert es.
+ */
+const navCandidates = computed<CommunityNavCandidate[]>(() => {
+  const entries = filterChromeNavEntries(chrome.value.nav, {
+    isLoggedIn: isLoggedIn.value,
+    productOn,
+    planAllows,
+  }).map(entry => ({
+    id: entry.id,
+    label: t(entry.labelKey),
+    to: localePath(entry.to),
+    icon: entry.icon,
+    planProduct: entry.planProduct,
+    order: entry.order ?? 50,
+  }))
   const pages = cmsNavPages.value.map(page => ({
-    id: `page-${page.slug}`,
+    id: cmsPageNavId(page.slug),
     label: page.title,
     to: localePath(`/${page.slug}`),
-    order: 60,
+    order: CMS_PAGE_NAV_ORDER,
   }))
-  return [...entries, ...pages].sort((a, b) => a.order - b.order)
+  return [...entries, ...pages]
 })
+
+// Die EINE Regel (core/shared/communityNavigation.ts). Ohne gespeicherte Wahl
+// liefert sie exakt die frühere Sortierung nach `order`.
+const navItems = computed(() => resolveCommunityNav(navCandidates.value, navOverride.value))
 
 // Überlauf (Entscheidung 1): bis 5 Einträge inline; darüber bleiben 4 stehen
 // und der Rest wandert in ein „Mehr"-Dropdown.
@@ -114,7 +139,15 @@ const hasOverflow = computed(() => navItems.value.length > MAX_INLINE)
 const inlineNav = computed(() => (hasOverflow.value ? navItems.value.slice(0, MAX_INLINE - 1) : navItems.value))
 const overflowNav = computed<DropdownMenuItem[]>(() =>
   hasOverflow.value
-    ? navItems.value.slice(MAX_INLINE - 1).map(item => ({ label: item.label, icon: item.icon, to: item.to }))
+    ? navItems.value.slice(MAX_INLINE - 1).map(item => ({
+        label: item.label,
+        icon: item.icon,
+        to: item.to,
+        // Ein eigener externer Link trägt im Dropdown dieselbe Absicherung wie
+        // in der Reihe: neuer Tab, und `rel="noopener"` nimmt der Zielseite den
+        // `window.opener`-Griff auf die Community.
+        ...(item.external ? { target: '_blank' as const, rel: 'noopener' } : {}),
+      }))
     : [])
 
 // Utilities (Komponenten global registriert — `.global.vue`): Zone 'menu'
@@ -154,15 +187,30 @@ const showChangelog = computed(() => chrome.value.changelogLink === true)
         <div class="flex min-w-0 items-center gap-6">
           <NuxtLink :to="localePath('/')" class="shrink-0 font-bold tracking-tight">{{ brand }}</NuxtLink>
           <div data-testid="chrome-nav" class="flex items-center gap-4 overflow-x-auto text-sm">
-            <NuxtLink
-              v-for="item in inlineNav"
-              :key="item.id"
-              :to="item.to"
-              class="flex items-center gap-1.5 whitespace-nowrap text-muted hover:text-default"
-            >
-              {{ item.label }}
-              <CorePlanBadge v-if="item.planProduct" :product="item.planProduct" />
-            </NuxtLink>
+            <template v-for="item in inlineNav" :key="item.id">
+              <!-- Eigener EXTERNER Link (U15): bewusst ein rohes <a> statt
+                   NuxtLink — neuer Tab und `rel="noopener"` sollen wörtlich im
+                   HTML stehen und nicht davon abhängen, was NuxtLink für eine
+                   absolute Adresse selbst ergänzt. -->
+              <a
+                v-if="item.external"
+                :href="item.to"
+                target="_blank"
+                rel="noopener"
+                data-nav-external="true"
+                class="flex items-center gap-1.5 whitespace-nowrap text-muted hover:text-default"
+              >
+                {{ item.label }}
+              </a>
+              <NuxtLink
+                v-else
+                :to="item.to"
+                class="flex items-center gap-1.5 whitespace-nowrap text-muted hover:text-default"
+              >
+                {{ item.label }}
+                <CorePlanBadge v-if="item.planProduct" :product="item.planProduct" />
+              </NuxtLink>
+            </template>
             <UDropdownMenu v-if="hasOverflow" :items="overflowNav">
               <UButton
                 :label="t('ui.more')"
