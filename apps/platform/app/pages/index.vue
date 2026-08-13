@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { pageExcerpt } from '../../../../packages/pages/shared/pageExcerpt'
 import type { PublicPage } from '../../../../packages/pages/shared/types/page'
+import { resolveCommunitySeo } from '../../../../packages/core/shared/communitySeo'
 
 /**
  * Tenant-Homepage (H3, „pro Tenant konfigurierbar"): rendert die im Dashboard
@@ -55,17 +56,38 @@ const parts = computed(() => {
   return { markdown: body.slice(0, idx), showComments: true }
 })
 
-// „<Seitenname> · <Brand>", ohne home-Eintrag der Brand allein (Audit S8) +
-// Beschreibung aus dem ersten Textabsatz der home-Seite (S5). Vorher stand hier
-// als Fallback die Betreiber-Tagline im Tab JEDES Mandanten (K11).
-// Ohne home-Eintrag bleibt die description WEG: der Platzhaltertext der
-// Willkommens-Sektion ist keine Beschreibung dieses Mandanten (K11).
-// Den Kopf setzt auf dem Kundenbereich `AccountHome` selbst — hier bliebe
-// ohnehin nur der Brand allein stehen und würde den dortigen Titel
-// überschreiben, weil das Setup der Seite VOR dem der Komponente läuft.
+/**
+ * „<Seitenname> · <Brand>", ohne home-Eintrag der Brand allein (Audit S8).
+ *
+ * DIE BESCHREIBUNG HAT SEIT U15 TEIL 2 ZWEI QUELLEN, und die Reihenfolge ist
+ * die ganze Änderung: zuerst die EIGENE Beschreibung, die der Owner unter
+ * /dashboard/community/seo geschrieben hat, sonst wie bisher der erste
+ * Textabsatz der home-Seite (S5). Gerechnet wird das nicht hier, sondern in
+ * `resolveCommunitySeo` — dieselbe Funktion, die der Editor für seine Vorschau
+ * benutzt und `useLocaleSeoHead` für das robots-Signal. Eine zweite Rechnung
+ * daneben wäre der Anfang zweier verschiedener Antworten auf dieselbe Frage.
+ *
+ * Vor U15 stand hier als Fallback die Betreiber-Tagline im Tab JEDES Mandanten
+ * (K11); ohne home-Eintrag UND ohne eigene Beschreibung bleibt die description
+ * weiterhin ganz WEG — der Platzhaltertext der Willkommens-Sektion ist keine
+ * Beschreibung dieses Mandanten (K11), und `resolveCommunitySeo` antwortet in
+ * genau diesem Fall mit '' (`useBrandTitle` lässt das Tag dann weg).
+ *
+ * Der zweite Wert der SEO-Seite, `noindex`, landet BEWUSST nicht hier: er gilt
+ * für die ganze Community, nicht für diese Seite, und gehört deshalb in den
+ * EINEN Kopf-Aufruf (`useLocaleSeoHead`).
+ *
+ * Den Kopf setzt auf dem Kundenbereich `AccountHome` selbst — hier bliebe
+ * ohnehin nur der Brand allein stehen und würde den dortigen Titel
+ * überschreiben, weil das Setup der Seite VOR dem der Komponente läuft.
+ */
+const communitySeo = useCommunitySeoSettings()
 if (!isControlCenter) {
   useBrandTitle(() => page.value?.title ?? '', {
-    description: () => (page.value ? pageExcerpt(parts.value.markdown) : undefined),
+    description: () => resolveCommunitySeo(
+      communitySeo.value,
+      page.value ? pageExcerpt(parts.value.markdown) : '',
+    ).description || undefined,
   })
 }
 </script>

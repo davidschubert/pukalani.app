@@ -64,6 +64,30 @@ export default defineAppConfig({
           requiredCapability: 'branding.manage',
           order: 25,
         },
+        /**
+         * WIE DIE COMMUNITY IN DER SUCHE ERSCHEINT (U15 Teil 2) — der zweite
+         * der beiden Punkte, die der Dashboard-Audit vom 2026-08-09 als
+         * Erst-Prioritäten führt (§ 5, „Settings · Website · SEO").
+         *
+         * Dieselbe Capability wie Menü und Erscheinungsbild, und hier ist sie
+         * am wenigsten verhandelbar: der noindex-Schalter ist die
+         * folgenreichste Einstellung dieser Fläche (zurück in den Index kommt
+         * eine Community erst nach dem nächsten Crawl). Begründung an der
+         * Route (server/api/pages/seo.patch.ts).
+         *
+         * `order: 26` direkt hinter das Menü (25): Erscheinungsbild, Menü und
+         * Sucheintrag sind die drei Flächen, auf denen der Owner seinen
+         * öffentlichen Auftritt einstellt, und sie gehören nebeneinander.
+         */
+        {
+          id: 'community-seo',
+          scope: 'community',
+          labelKey: 'pages.seo.navLabel',
+          icon: 'i-ph-magnifying-glass',
+          to: '/dashboard/community/seo',
+          requiredCapability: 'branding.manage',
+          order: 26,
+        },
       ],
       modules: [
         {

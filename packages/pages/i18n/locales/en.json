@@ -116,6 +116,42 @@
         "duplicateId": "One entry appears twice",
         "tooLarge": "The menu is too large. Please use shorter names or fewer entries."
       }
+    },
+    "seo": {
+      "navLabel": "Search listing",
+      "title": "Search listing",
+      "description": "Decide how your community shows up in search engines — and whether it should show up at all.",
+      "saved": "Search listing saved",
+      "errorSave": "The search listing could not be saved.",
+      "field": {
+        "label": "Description of your home page",
+        "placeholder": "In one or two sentences: what is this about?",
+        "hint": "This text appears below the title in a search result.",
+        "usingExcerpt": "Empty: the first paragraph of your home page is used.",
+        "noneAtAll": "Empty and no home page: the search result shows no description at all.",
+        "counter": "{count} characters · up to {recommended} recommended"
+      },
+      "noindex": {
+        "label": "Keep this community out of search engines",
+        "description": "Search engines are asked not to list the community in their results.",
+        "delayTitle": "Takes effect the next time a search engine visits",
+        "delayText": "Pages that are already listed do not disappear right away. It can take days or weeks until a search engine comes back.",
+        "notPrivate": "This does not make the community private: anyone with the link still gets in. For that, use the members-only setting under General."
+      },
+      "preview": {
+        "title": "Preview",
+        "description": "This is how your listing looks when someone finds it or shares your link.",
+        "searchTitle": "In search",
+        "noDescription": "No description",
+        "hiddenNote": "While the switch above is on, this listing is not meant to appear at all.",
+        "socialTitle": "When a link is shared",
+        "socialGenerated": "This card is generated automatically from your community colour and name.",
+        "socialOffTitle": "No preview card",
+        "socialOffText": "Preview cards are not enabled on this instance. Shared links appear without an image."
+      },
+      "validation": {
+        "descriptionMax": "The description is too long."
+      }
     }
   }
 }

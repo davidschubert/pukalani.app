@@ -116,6 +116,42 @@
         "duplicateId": "Ein Eintrag kommt doppelt vor",
         "tooLarge": "Das Menü ist zu groß. Bitte kürzere Namen oder weniger Einträge verwenden."
       }
+    },
+    "seo": {
+      "navLabel": "Sucheintrag",
+      "title": "Sucheintrag",
+      "description": "Lege fest, mit welchem Text deine Community in Suchmaschinen erscheint — und ob sie dort überhaupt erscheinen soll.",
+      "saved": "Sucheintrag gespeichert",
+      "errorSave": "Der Sucheintrag konnte nicht gespeichert werden.",
+      "field": {
+        "label": "Beschreibung der Startseite",
+        "placeholder": "In ein bis zwei Sätzen: worum geht es hier?",
+        "hint": "Dieser Text steht unter dem Titel im Suchergebnis.",
+        "usingExcerpt": "Leer: es gilt der erste Absatz deiner Startseite.",
+        "noneAtAll": "Leer und keine Startseite: das Suchergebnis zeigt gar keine Beschreibung.",
+        "counter": "{count} Zeichen · empfohlen bis {recommended}"
+      },
+      "noindex": {
+        "label": "Diese Community aus Suchmaschinen raushalten",
+        "description": "Suchmaschinen werden gebeten, die Community nicht in ihre Ergebnisse aufzunehmen.",
+        "delayTitle": "Wirkt erst beim nächsten Besuch der Suchmaschine",
+        "delayText": "Bereits aufgenommene Seiten verschwinden nicht sofort. Bis eine Suchmaschine wieder vorbeikommt, können Tage bis Wochen vergehen.",
+        "notPrivate": "Das macht die Community nicht privat: wer den Link hat, kommt weiterhin hinein. Dafür gibt es unter Allgemein die Einstellung „nur für Mitglieder“."
+      },
+      "preview": {
+        "title": "Vorschau",
+        "description": "So sieht dein Eintrag aus, wenn jemand ihn findet oder deinen Link teilt.",
+        "searchTitle": "In der Suche",
+        "noDescription": "Keine Beschreibung",
+        "hiddenNote": "Solange der Schalter oben an ist, soll dieser Eintrag gar nicht erscheinen.",
+        "socialTitle": "Beim Teilen eines Links",
+        "socialGenerated": "Diese Karte entsteht automatisch aus Farbe und Name deiner Community.",
+        "socialOffTitle": "Keine Vorschau-Karte",
+        "socialOffText": "Für diese Instanz sind Vorschau-Karten nicht eingeschaltet. Geteilte Links erscheinen ohne Bild."
+      },
+      "validation": {
+        "descriptionMax": "Die Beschreibung ist zu lang."
+      }
     }
   }
 }
