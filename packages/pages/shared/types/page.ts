@@ -144,6 +144,29 @@ export interface PublicPageNavItem {
   sortOrder: number
 }
 
+/**
+ * Die Nav-Id einer CMS-Seite (U15) — der Schlüssel, unter dem der
+ * Navigations-Editor sie ausblendet, umbenennt oder verschiebt.
+ *
+ * STEHT HIER UND NICHT AN DEN BEIDEN VERWENDUNGSSTELLEN, obwohl es nur ein
+ * Präfix ist: die Id wird an ZWEI Orten gebildet — im blueprint-Layout, das
+ * das Menü rendert, und im Editor, der es beschreibt. Zwei Zeichenketten, die
+ * gleich sein MÜSSEN, aber getrennt gepflegt werden, laufen auseinander; hier
+ * wäre die Folge still und hässlich: der Owner blendet eine Seite aus, sie
+ * bleibt stehen, und niemand sieht warum. (Dasselbe Argument wie bei
+ * `GUIDELINES_SLUG` und `LEGAL_PAGE_SLUGS` darüber.)
+ */
+export function cmsPageNavId(slug: string): string {
+  return `page-${slug}`
+}
+
+/**
+ * Wo CMS-Seiten im Menü stehen, wenn niemand etwas anderes gesagt hat: nach
+ * den Produkten (Default 50), vor „Pricing" (90). Wie oben aus EINER Quelle,
+ * weil Layout und Editor dieselbe Reihenfolge zeigen müssen.
+ */
+export const CMS_PAGE_NAV_ORDER = 60
+
 /** Admin-Gruppierung: ein slug mit allen seinen Sprachversionen. */
 export interface PageGroup {
   slug: string

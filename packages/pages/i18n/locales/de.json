@@ -66,6 +66,56 @@
       "titleMax": "Titel ist zu lang",
       "bodyMax": "Inhalt ist zu lang",
       "statusInvalid": "Ungültiger Status"
+    },
+    "navigation": {
+      "navLabel": "Navigation",
+      "title": "Navigation",
+      "description": "Lege fest, was im Menü deiner Community steht, in welcher Reihenfolge und unter welchem Namen.",
+      "empty": {
+        "title": "Noch nichts zu ordnen",
+        "description": "Sobald deine Community Produkte oder veröffentlichte Seiten hat, stehen sie hier."
+      },
+      "labelPlaceholder": "Mitgelieferten Namen behalten",
+      "labelAria": "Name des Menüpunkts",
+      "externalHint": "öffnet in einem neuen Tab",
+      "unavailable": "gerade nicht verfügbar",
+      "show": "Im Menü zeigen",
+      "hide": "Aus dem Menü nehmen",
+      "moveUp": "Nach oben",
+      "moveDown": "Nach unten",
+      "reset": "Auf das Standard-Menü zurücksetzen",
+      "saved": "Menü gespeichert",
+      "errorSave": "Das Menü konnte nicht gespeichert werden.",
+      "errorUnknownPage": "Einer deiner Links zeigt auf eine Seite, die es hier nicht gibt.",
+      "link": {
+        "add": "Link hinzufügen",
+        "confirm": "Hinzufügen",
+        "remove": "Link entfernen",
+        "kindPage": "Eine Seite dieser Community",
+        "kindExternal": "Eine externe Adresse",
+        "labelPlaceholder": "Wie der Link heißen soll",
+        "labelAria": "Name des Links",
+        "urlAria": "Webadresse",
+        "homePage": "Startseite"
+      },
+      "preview": {
+        "title": "Vorschau",
+        "description": "So sehen Besucher die Reihenfolge. Ab dem sechsten Eintrag wandert der Rest in ein „Mehr“-Menü.",
+        "emptyMenu": "Das Menü ist leer."
+      },
+      "validation": {
+        "idInvalid": "Unbekannter Menüpunkt",
+        "labelMax": "Dieser Name ist zu lang",
+        "targetMax": "Diese Adresse ist zu lang",
+        "notRetargetable": "Mitgelieferte Einträge lassen sich umbenennen, aber nicht umlenken. Lege dafür einen eigenen Link an.",
+        "labelRequired": "Bitte gib dem Link einen Namen",
+        "targetRequired": "Bitte wähle, wohin der Link führt",
+        "externalInvalid": "Externe Links müssen mit https:// beginnen",
+        "internalInvalid": "Das ist keine gültige Seitenadresse",
+        "tooMany": "Das sind mehr Einträge, als ein Menü fassen kann",
+        "duplicateId": "Ein Eintrag kommt doppelt vor",
+        "tooLarge": "Das Menü ist zu groß. Bitte kürzere Namen oder weniger Einträge verwenden."
+      }
     }
   }
 }

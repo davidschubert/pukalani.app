@@ -66,6 +66,56 @@
       "titleMax": "Title is too long",
       "bodyMax": "Content is too long",
       "statusInvalid": "Invalid status"
+    },
+    "navigation": {
+      "navLabel": "Navigation",
+      "title": "Navigation",
+      "description": "Decide what appears in your community’s menu, in which order, and under which name.",
+      "empty": {
+        "title": "Nothing to arrange yet",
+        "description": "As soon as your community offers products or published pages, they show up here."
+      },
+      "labelPlaceholder": "Keep the built-in name",
+      "labelAria": "Menu entry name",
+      "externalHint": "opens in a new tab",
+      "unavailable": "not available right now",
+      "show": "Show in the menu",
+      "hide": "Hide from the menu",
+      "moveUp": "Move up",
+      "moveDown": "Move down",
+      "reset": "Reset to the default menu",
+      "saved": "Menu saved",
+      "errorSave": "The menu could not be saved.",
+      "errorUnknownPage": "One of your links points to a page that does not exist here.",
+      "link": {
+        "add": "Add link",
+        "confirm": "Add",
+        "remove": "Remove link",
+        "kindPage": "A page of this community",
+        "kindExternal": "An external address",
+        "labelPlaceholder": "What the link is called",
+        "labelAria": "Link name",
+        "urlAria": "Web address",
+        "homePage": "Home"
+      },
+      "preview": {
+        "title": "Preview",
+        "description": "This is the order visitors will see. Entries beyond the fifth move into a “More” menu.",
+        "emptyMenu": "The menu is empty."
+      },
+      "validation": {
+        "idInvalid": "Unknown menu entry",
+        "labelMax": "That name is too long",
+        "targetMax": "That address is too long",
+        "notRetargetable": "Built-in entries can be renamed, but not pointed somewhere else. Add your own link instead.",
+        "labelRequired": "Please give the link a name",
+        "targetRequired": "Please choose where the link goes",
+        "externalInvalid": "External links must start with https://",
+        "internalInvalid": "That is not a valid page address",
+        "tooMany": "That is more entries than a menu can hold",
+        "duplicateId": "One entry appears twice",
+        "tooLarge": "The menu is too large. Please use shorter names or fewer entries."
+      }
     }
   }
 }
