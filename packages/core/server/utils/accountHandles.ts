@@ -135,7 +135,9 @@ export async function ensureAccountHandle(
     if (existing) return existing.handle
 
     const { tablesDB, databaseId, tableId } = accountHandleDb(event)
-    const { pool, communityId } = audienceContext(event)
+    // NUR `pool` — die Community des aktuellen Hosts geht die Anlage bewusst
+    // nichts mehr an (siehe die Permissions unten).
+    const { pool } = audienceContext(event)
     const base = suggestHandleBase(displayName)
 
     for (let attempt = 1; attempt <= MAX_ASSIGN_ATTEMPTS; attempt++) {
@@ -158,7 +160,15 @@ export async function ensureAccountHandle(
             status: 'active',
             changedAt: '',
           },
-          permissions: accountHandlePermissions(pool, communityId, userId),
+          // OHNE Community-Label — auch auf einem Mandanten-Host (Gegenprobe
+          // 2026-08-12, Abschnitt 8). Die Vergabe läuft auf JEDEM Host und
+          // fragt NICHT nach Mitgliedschaft: `handle.get.ts` gatet erst NACH
+          // dem Anlegen. Stünde hier `communityId`, bekäme ein Fremder allein
+          // durch das Öffnen seiner Kontoseite auf fremdem Host das Publikum
+          // dieser Community — sein Name stünde dort im Erwähnungs-Menü.
+          // EINZIGER Schreiber von `read(label:…)` bleibt das
+          // mitgliedschafts-gegatete `ensureAccountHandleAudience`.
+          permissions: accountHandlePermissions(pool, '', userId),
         })
         return row.handle
       }
@@ -344,15 +354,24 @@ export async function changeAccountHandle(
   nextHandle: string,
 ): Promise<AccountHandleRow | null> {
   const { tablesDB, databaseId, tableId } = accountHandleDb(event)
-  const { pool, communityId } = audienceContext(event)
+  // NUR `pool` — die Umbenennung vergibt kein Publikum mehr, sie erbt (unten).
+  const { pool } = audienceContext(event)
   const lower = normalizeHandle(nextHandle)
   const previous = await activeAccountHandleRow(event, userId)
 
   // Derselbe Name wie bisher: nichts tun und die Sperrfrist nicht verbrauchen.
   if (previous && previous.handleLower === lower) return previous
 
-  const inherited = previous?.$permissions ?? accountHandlePermissions(pool, communityId, userId)
-  const permissions = handleAudienceWith(inherited, pool, communityId) ?? [...inherited]
+  // GEERBT, NICHT DAZUVERDIENT (Gegenprobe 2026-08-12, Abschnitt 9).
+  // Erben ist richtig: ein legitimes Publikum stammt aus dem
+  // mitgliedschafts-gegateten `ensureAccountHandleAudience` und soll das
+  // Umbenennen überleben. Das Publikum des AKTUELLEN Hosts hier zusätzlich zu
+  // vergeben wäre aber genau dieselbe Lücke wie bei der Anlage: die
+  // Umbenennung fragt nicht nach Mitgliedschaft, also könnte sich ein Fremder
+  // per Namenswechsel auf fremdem Host in deren Erwähnungs-Menü schreiben.
+  // Ist er Mitglied, steht das Label längst in `previous` und reist mit.
+  const inherited = previous?.$permissions ?? accountHandlePermissions(pool, '', userId)
+  const permissions = [...inherited]
 
   let created: AccountHandleRow
   try {

@@ -6,7 +6,7 @@ import {
   mayChangeHandleAt,
   normalizeHandle,
 } from '../../../shared/handles'
-import { activeAccountHandleRow, changeAccountHandle } from '../../utils/accountHandles'
+import { activeAccountHandleRow, changeAccountHandle, ensureAccountHandleAudience } from '../../utils/accountHandles'
 
 /**
  * Den eigenen @namen ändern — konto-weit (AH-7, 2026-08-11).
@@ -75,6 +75,21 @@ export default defineEventHandler(async (event) => {
   const row = await changeAccountHandle(event, user.$id, body.handle)
   if (!row) {
     throw createError({ status: 409, statusText: 'Handle taken', data: { code: 'taken' } })
+  }
+
+  // 4. Publikum — DIESELBE Klammer wie in handle.get.ts, und aus demselben
+  //    Grund. `changeAccountHandle` erbt nur noch die Lese-Rollen der alten
+  //    Zeile und vergibt selbst keine mehr (Gegenprobe 2026-08-12, §9):
+  //    die Umbenennung fragt nicht nach Zugehörigkeit, sonst schriebe sich
+  //    ein Fremder per Namenswechsel ins Erwähnungs-Menü einer fremden
+  //    Community. Das Nachtragen gehört deshalb hierher, hinter das Gate —
+  //    `ensureAccountHandleAudience` ist der EINZIGE Schreiber von
+  //    `read(label:…)`. Ohne diesen Schritt verlöre ein Mitglied, das seinen
+  //    ERSTEN Namen per PATCH setzt, das Publikum seiner eigenen Community.
+  //    Fail-soft wie dort: die Zugehörigkeits-Frage ist fail-closed und darf
+  //    eine erfolgreiche Umbenennung nicht nachträglich umbringen.
+  if (await resolveCommunityMembership(event).catch(() => false)) {
+    await ensureAccountHandleAudience(event, user.$id)
   }
 
   return {
