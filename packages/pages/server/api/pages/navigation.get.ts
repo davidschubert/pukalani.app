@@ -21,9 +21,14 @@ import { emptyCommunityNavOverride } from '../../../../core/shared/communityNavi
  * Gast einer geschlossenen Community ihr eigenes Menü, aber weiterhin keine
  * ihrer Seiten — zwei Regeln für eine Fläche. Die Folge ist gutartig: er
  * bekommt 404, das Layout fängt es ab und zeigt das Menü aus dem Bauplan (der
- * dokumentierte Normalfall „keine eigene Wahl"). Zu SCHÜTZEN hat diese Zeile
- * nichts — die Tabelle ist bewusst `read(any)` (system-033) —, sie hält nur
- * zwei Nachbarn im Gleichschritt.
+ * dokumentierte Normalfall „keine eigene Wahl").
+ *
+ * UND SEIT DEM 2026-08-13 SCHÜTZT SIE AUCH ETWAS. Solange die Tabelle
+ * `read(any)` trug, war diese Zeile bloss Gleichschritt — wer die Zeile wollte,
+ * holte sie sich direkt bei Appwrite. Mit `permissions: []` (system-033,
+ * Least Privilege) ist DIESE ROUTE der einzige Weg nach draussen, und damit ist
+ * ihre Publikums-Prüfung die einzige, die es gibt. Wer sie entfernt, macht das
+ * Menü jeder geschlossenen Community wieder öffentlich.
  */
 export default defineEventHandler(async (event): Promise<CommunityNavOverride> => {
   assertCommunityContentReadable(event, 'Navigation not found')

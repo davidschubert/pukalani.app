@@ -9,24 +9,33 @@ import {
 /**
  * DIE ABLAGE DES COMMUNITY-MENÜS (U15 Teil 1) — lesen, schreiben, vergessen.
  *
- * ── WARUM ADMIN-CLIENT UND NICHT `tenantDb()` ─────────────────────────────
- * Wort für Wort die Begründung von `core/server/utils/communityBrandingMirror.ts`,
- * weil es Wort für Wort dieselbe Form ist: das hier ist keine Nutzerzeile eines
- * Mandanten, sondern eine INFRASTRUKTUR-Zeile ÜBER einen Mandanten — ihre rowId
- * IST die Community. Die Datentür wäre dafür das falsche Werkzeug, und zwar
- * dreifach:
+ * ── ES LIEST NIEMAND, ES WIRD GELESEN ─────────────────────────────────────
+ * `community_navigation` trägt seit Davids Entscheidung vom 2026-08-13
+ * **keinerlei Client-Rechte** (`permissions: []`, system-033). Kein Besucher,
+ * kein Mitglied und kein Owner kommt an die Zeile — der SERVER liest sie beim
+ * Seitenaufbau und rendert das Ergebnis ins HTML. Beide Zugriffe hier laufen
+ * deshalb mit dem ADMIN-Client, und beide in der Haltung, die die Datentür
+ * `as: 'operator', actor: 'operator'` nennt: es handelt kein Mensch, es
+ * arbeitet das System. Daran hängt, was `actor: 'operator'` überall sonst
+ * bedeutet — keine M13-Inhaltssperre (das ist kein Inhalt) und kein
+ * A5-Beitritt (ein Owner, der sein Menü sortiert, tritt nichts bei).
  *
- *  1. `create` stempelte eine `communityId`-Spalte, die es hier nicht gibt und
- *     nicht geben soll (die rowId sagt dasselbe, nur fälschungssicher).
- *  2. `create` legte Row-Permissions auf eine Tabelle, die BEWUSST table-weit
- *     `read(any)` trägt (system-033) — zwei Rechtequellen für eine Zeile.
- *  3. Die Türklinke 'member' löste über `actorJoinsByWriting` einen
- *     A5-Beitritt aus. Ein Owner, der sein Menü sortiert, tritt nichts bei.
+ * ── WARUM NICHT DURCH `tenantDb()`, obwohl die Haltung dieselbe ist ───────
+ * Weil die Tür an dieser Zeile keinen Angriffspunkt hat, und zwar buchstäblich:
+ * `tenantDb().get()` prüft mit `rowBelongsToTenant`, ob `row.communityId` zum
+ * Mandanten passt — diese Tabelle hat aber gar keine `communityId`-Spalte,
+ * ihre **rowId IST die Community** (Form von `community_branding`, system-028).
+ * Die Prüfung fiele damit fail-closed auf JEDE Zeile aus. Eine Spalte
+ * nachzuziehen, nur damit die Tür etwas prüfen kann, was die rowId schon sagt,
+ * wäre eine zweite Wahrheit über denselben Mandanten — genau die Sorte
+ * Doppelablage, die auseinanderläuft.
  *
- * Die MANDANTEN-GRENZE geht dadurch nicht verloren, sie liegt nur woanders:
- * die `communityId` kommt in beiden Richtungen aus `useTenant(event)`, also aus
+ * DIE MANDANTEN-GRENZE GEHT DADURCH NICHT VERLOREN, sie liegt nur woanders:
+ * die `communityId` kommt in BEIDEN Richtungen aus `useTenant(event)`, also aus
  * der Host-Auflösung des Servers — NIE aus dem Aufrufer. Eine fremde Community
- * ist damit nicht adressierbar, und zwar unabhängig davon, was im Body steht.
+ * ist nicht adressierbar, unabhängig davon, was im Body steht. Zusätzlich
+ * hätte `tenantDb().create` Row-Permissions gesetzt, die auf einer Tabelle
+ * ohne Client-Rechte nichts zu suchen haben.
  *
  * Die ESLint-Regel gegen rohes `.tablesDB` zielt auf `server/api/**` und
  * `server/plugins/**` (Request-Routen); diese Datei liegt bewusst in
@@ -35,11 +44,11 @@ import {
  * ── KEIN `upsertRow` ──────────────────────────────────────────────────────
  * UPDATE, bei 404 CREATE. Appwrite 1.9.6 schreibt bei `upsertRow` korrekt,
  * PUBLIZIERT dafür aber KEIN Realtime-Event (live erwischt am 2026-08-01, D6).
- * Heute liest nur der Server, das Menü käme also auch mit `upsertRow` an — aber
- * die Tabelle ist `read(any)` gebaut, damit ein Browser sie später abonnieren
- * KANN, und ein `upsertRow` an dieser Stelle machte diese Möglichkeit still
- * zunichte. Zwei Aufrufe statt einem sind der Preis dafür, dass die Tür offen
- * bleibt.
+ * Heute liest ohnehin nur der Server, das Menü käme also auch mit `upsertRow`
+ * an — aber der Weg zur Live-Propagation soll offen bleiben, und der besteht
+ * dann aus GENAU einer Ergänzung (`read(any)` an der Tabelle, s. system-033).
+ * Ein `upsertRow` hier machte diese eine Zeile wirkungslos, ohne dass jemand
+ * den Zusammenhang sähe. Zwei Aufrufe statt einem sind der Preis dafür.
  */
 
 const TTL_MS = 30_000

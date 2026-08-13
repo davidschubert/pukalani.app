@@ -17,26 +17,34 @@
  * Tabelle legen und über die Türklinke 'member' einen A5-Beitritt auslösen).
  * Nachzulesen im Kopf des Stores.
  *
- * PERMISSIONS: `read(any)`, kein write — wie `app_config` (system-005),
- * `custom_themes` (system-013) und `community_branding` (system-028).
- * `rowSecurity: false`, weil das Lese-Recht an der Tabelle hängt.
+ * PERMISSIONS: **KEINE** — `permissions: []`, `rowSecurity: false`. Weder
+ * `read(any)` noch sonst ein Client-Recht. Gelesen und geschrieben wird
+ * ausschliesslich server-seitig mit dem Admin-Key.
  *
- * WARUM ÖFFENTLICH LESBAR, obwohl heute nur der SERVER liest: das Menü IST der
- * öffentlichste Teil einer Website — jeder Besucher sieht es im Kopf jeder
- * Seite. Ein Lese-Recht, das etwas verbirgt, was daneben im HTML steht, wäre
- * eine Zeremonie. Und es hält den Weg für die Live-Propagation offen, die
- * `community_branding` schon geht (Browser abonniert genau seine Row) — ohne
- * eine zweite Migration, die die Rechte einer bestehenden Tabelle ändert.
+ * ── DAS IST DIE ABWEICHUNG VON system-028, UND SIE IST GEWOLLT ────────────
+ * Der Branding-Spiegel MUSS `read(any)` tragen: dort ist der Browser der
+ * Leser, er abonniert seine Row per Realtime. Hier ist er es nicht — das Menü
+ * wird beim SSR-Aufbau in das HTML gerendert und kommt fertig beim Besucher
+ * an. Ein Lese-Recht, das heute niemand benutzt, ist kein Komfort, sondern
+ * eine offene Tür: die Tabelle wäre AUFZÄHLBAR, und anders als bei system-028
+ * (Farb-Tokens) lägen darin vom Owner GESCHRIEBENE Texte und Adressen. Davids
+ * Entscheidung 2026-08-13: Least Privilege — das Recht kommt, wenn der Leser
+ * kommt, nicht vorher.
  *
- * DAS HEISST AUFZÄHLBAR, und das ist hier eine Abwägung mit einer schärferen
- * Kante als bei system-028: dort liegen Farb-Tokens, hier liegen vom Owner
- * GESCHRIEBENE Texte und Adressen. Tragbar, weil (a) genau diese Texte auf
- * jeder Seite der Community öffentlich stehen, (b) die Zeile ausser einer
- * undurchsichtigen Row-Id nichts trägt, was sie einer Community, einem Host
- * oder einer Person ZUORDNET, und (c) ein Menü ohne diese Zuordnung als
- * Beute wertlos ist. DIESELBE REGEL WIE DORT: NIE eine Spalte mit Name, Host
- * oder sonst etwas Identifizierendem dazunehmen — wer das täte, machte aus
- * einer belanglosen Liste ein Verzeichnis aller Kunden.
+ * ── DIE TÜR BLEIBT ABSICHTLICH ZU, NICHT VERSEHENTLICH ────────────────────
+ * Soll das Menü später live morphen wie das Branding (D6), braucht es GENAU
+ * eine Ergänzung: `Permission.read(Role.any())` an dieser Tabelle, per
+ * `updateTable` in einer Folge-Migration — die Schreibseite kann bereits
+ * Realtime auslösen, weil sie `updateRow`/`createRow` benutzt und NIE
+ * `upsertRow` (das schreibt in 1.9.6 korrekt, publiziert aber kein Event;
+ * live erwischt am 2026-08-01). Wer diese Migration hier liest und `[]` für
+ * ein Versehen hält, irrt: es ist der bewusste Zustand, und der Weg zurück
+ * ist eine Zeile.
+ *
+ * WENN dieses Recht je erteilt wird, gilt ab dann die Regel von system-028:
+ * NIE eine Spalte mit Name, Host oder sonst etwas Identifizierendem
+ * dazunehmen — sonst wird aus einer belanglosen Liste ein Verzeichnis aller
+ * Kunden.
  *
  * KEINE INDIZES, und das ist kein Vergessen (wie system-028): die Tabelle wird
  * ausschliesslich über die rowId angesprochen. Es gibt keine Abfrage, die einen
