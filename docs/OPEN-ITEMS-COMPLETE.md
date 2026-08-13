@@ -30,6 +30,48 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### U15 Teil 2 — „Sucheintrag" (SEO): Beschreibung, noindex, Vorschau ✅ 2026-08-13
+
+Davids Zuschnitt: Meta-Beschreibung der Startseite (Fallback: Seiten-Anriss
+wie bisher) + noindex-Schalter + Vorschau (Google-Snippet + generierte
+Social-Karte — KEIN Upload, og:image bleibt generiert). Bau nach dem
+Navigations-Muster: system-034 `community_seo` (`metaDescription` 320 +
+`noindex`, `permissions: []`), pure Regel `resolveCommunitySeo`, Beschreibung
+fließt in den BESTEHENDEN Kopf (index.vue-description), das robots-Signal
+liegt in `useLocaleSeoHead()` neben C18-membersOnly (gilt der ganzen
+Community) — Weg dorthin ohne zweiten Kopf-Pfad und ohne Extra-Fetch über
+Middleware → context → Server-Plugin → Store. Reiter heißt kundensprachlich
+„Sucheintrag"/„Search listing". Beweis **49/49** (u. a.: noindex aus ⇒ Tag
+weg; 320 ⇒ 200, 321 ⇒ 400; Kontroll-Host trägt As noindex nie; og:image
+überlebt den Schalter; Row per Session nicht lesbar). Migration auf allen
+vier Instanzen (Parität 12 Tabellen deckungsgleich), Deploy `8abe1fca`, live:
+kein robots-Meta im Default, Gast-PATCH 401, www unberührt.
+
+**Im selben Zug zwei ernste Funde geschlossen:** (1) **system-033 hielt sein
+Least-Privilege-Versprechen nicht** — der Fix-Commit hatte nur den KOMMENTAR
+geändert, die Migration vergab weiter `read(any)` und lief so gegen alle vier
+Instanzen (Tabellen leer, nichts exponiert). Jetzt: `permissions: []` +
+updateTable-REPARATURSCHRITT in der Migration (heilt Bestand — gefahren,
+per GET-Gegenkontrolle überall `[]`) + ensureColumn gegen die
+400-column_limit-Falle (033 war nicht idempotent — der Wiederholungslauf
+starb NACH dem Permissions-Schritt, live erwischt). (2) **Der
+Paritäts-Wächter meldete währenddessen fälschlich „deckungsgleich"**: seine
+handgepflegte SYSTEM_TABLES-Liste kannte `account_handles`,
+`community_handles`, `community_navigation`, `community_seo` nicht — genau in
+dem Moment, als drei Instanzen eine Tabelle NICHT hatten (der
+034-Erstlauf traf durch eine Env-Falle viermal portfolio). Liste nachgezogen,
+alle vier Instanzen über 12 Tabellen deckungsgleich.
+
+**Gelernt:** (1) Ein Commit mit „fix"-Botschaft kann nur den Kommentar
+ändern — die Abnahme eines Permissions-Fixes ist der GREP auf die
+Permissions-ZEILE, nicht die Commit-Message. (2) `node --env-file`
+überschreibt EXPORTIERTE Variablen nicht: ein `set -a; source`-Prüfblock vor
+einem Migrations-Loop lenkt ALLE Läufe auf die letzte gesourcte Instanz —
+Migrations-Läufe und Env-Sourcing nie im selben Shell-Aufruf mischen, und die
+„Projekt X"-Zeile jedes Laufs LESEN. (3) Ein Wächter mit handgepflegter Liste
+ist nur so wach wie sein letzter Pfleger — „Neue system-Tabelle ⇒ hier
+eintragen" gehört in die Migrations-Checkliste, nicht ins Gedächtnis.
+
 ### U15 Teil 1 — Navigations-Editor: der Owner stellt sein Menü zusammen ✅ 2026-08-13
 
 Davids Zuschnitt (2026-08-13): Produkt-Einträge **ausblenden + umordnen +
