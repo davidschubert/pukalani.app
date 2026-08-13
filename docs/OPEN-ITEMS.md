@@ -148,7 +148,7 @@ U15/F57 bleiben geparkt bis AP1–AP8.
 
 **AP8/AP9/AP10-Entscheidungen — ALLE ENTSCHIEDEN am 2026-08-12** (DECISION-LOG): KI-Vorschlag bleibt gelöscht · Markt-Signal „hinter dem Aha" = neuer Punkt U19 · Copy ehrlich gemacht (Team-Rollen raus, Kurse-Zeile aufs Belegte) · Export-Versprechen gesenkt + Community-Export = neuer Punkt U20.
 
-**AH-1-Krümel — Bucket-Anlage in die Migrationen.** Beim Cutover zeigte sich: `avatars` und `gdpr-exports` existierten im Pool nur von Hand — kein Migrations-Script legt sie an (fonts/media/event-covers/ticket-files schon). Nachziehen, sonst fehlt beides in jeder frischen Instanz. [Klein, S]
+**AH-1-Krümel — BEHOBEN 2026-08-12:** `system-032` (032-core-buckets.ts) legt `avatars` + `gdpr-exports` an (Einstellungen aus der Prod-Instanz `account` abgelesen: fileSecurity, 30 MB, Encryption+Antivirus). Gegen alle vier Instanzen gefahren — account hatte beide (409-Skip = Idempotenz-Beweis), **control und portfolio fehlten BEIDE, comments fehlte gdpr-exports**: die Lücke war auf drei von vier Instanzen real.
 
 **C19 — `/de` war für englischsprachige Browser eine Endlosschleife.**
 Code-Fix erledigt 2026-07-31, auf prod REPRODUZIERT und lokal behoben. Kein
