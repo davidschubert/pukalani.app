@@ -133,6 +133,33 @@ export interface TenantAddress {
   canonicalHost?: string
 }
 
+/**
+ * DIE DREI MARKT-ANTWORTEN einer Community (U19) — Größe, Zweck, Ziel, so wie
+ * sie in `communities.profile` stehen.
+ *
+ * WARUM STRINGS UND KEINE ENUMS: die Kataloge (`SITE_PURPOSES`,
+ * `SITE_MEMBER_RANGES`, `SITE_GOALS`) gehören dem control-Layer, und ein
+ * Fundament-Layer hängt NIE von einem Produkt ab (A14). Der Resolver füllt das
+ * Feld aus `parseSiteProfile()`, das bereits gegen die Kataloge geprüft hat —
+ * hier kommt also nie ein Fremdwert an, und die Route validiert beim SCHREIBEN
+ * ohnehin noch einmal gegen dieselben Kataloge.
+ *
+ * BEWUSST NICHT im SSR-Payload gespiegelt — dieselbe Begründung wie bei
+ * `description` und `trialEndsAt` direkt daneben: die Antworten haben genau
+ * EINEN Leser (die Karte, die fragt, ob sie überhaupt noch fragen muss), und
+ * sie gingen sonst auf jeder öffentlichen Seite jedes Mandanten an jeden Gast.
+ * Herausgegeben werden sie von `/api/community/profile-signal` (onboarding),
+ * capability-gegated auf `team.manage`.
+ *
+ * Der Resolver liest die Row ohnehin (30-s-Cache) und parst das Profil schon
+ * für `description` — das Feld kostet also keinen zusätzlichen Zugriff.
+ */
+export interface TenantProfileSignal {
+  purpose?: string
+  memberRange?: string
+  goal?: string
+}
+
 export type TenantContext =
   /** Eigenes Appwrite-Projekt (Isolation am Projekt) — Spezial-/Enterprise-Kunde. */
   | ({ mode: 'silo', projectId: string, communityId?: string } & TenantBranding & TenantPolicy & TenantAddress)
@@ -168,4 +195,10 @@ export type TenantContext =
    * „Abo abschließen". Der Resolver liest die Row ohnehin (30-s-Cache), das
    * Feld kostet also keinen zusätzlichen Zugriff.
    */
-  | ({ mode: 'pool', projectId: string, tenantId: string, plan?: string, limits?: Record<string, { perDay?: number, total?: number }>, communityId?: string, trialEndsAt?: string | null, billingStatus?: string } & TenantBranding & TenantPolicy & TenantAddress)
+  /**
+   * `profileSignal` (U19): die drei Markt-Antworten aus `communities.profile`.
+   * NUR im Pool — die Karte, die sie erhebt, hängt an der Willkommens-Welt
+   * einer Pool-Community; ein Silo-Kunde ist ein Enterprise-Vertrag, dessen
+   * Markt David persönlich kennt. Fehlend = keine einzige Antwort gegeben.
+   */
+  | ({ mode: 'pool', projectId: string, tenantId: string, plan?: string, limits?: Record<string, { perDay?: number, total?: number }>, communityId?: string, trialEndsAt?: string | null, billingStatus?: string, profileSignal?: TenantProfileSignal } & TenantBranding & TenantPolicy & TenantAddress)
