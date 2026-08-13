@@ -1,4 +1,4 @@
-import { plausibleScriptUrl } from '../../shared/analyticsScript'
+import { ANALYTICS_PROXY_EVENT_PATH, headScriptId, plausibleScriptUrl, proxiedScriptSrc } from '../../shared/analyticsScript'
 
 /**
  * Analytics mit doppeltem Gate (Konzept A5):
@@ -62,6 +62,28 @@ export default defineNuxtPlugin(async () => {
   // können damit gar nicht auseinanderlaufen.
   const selfServiceSrc = plausibleScriptUrl(analytics.instance, selfServiceId.value)
 
+  /**
+   * DER ADBLOCK-PROXY (F47/Paket 5, 2026-08-12): läuft die Messung über den
+   * eigenen Host, ist sie für einen Inhalte-Blocker nicht mehr von den eigenen
+   * Dateien der Seite zu unterscheiden.
+   *
+   * `proxiedSrc` ist `''`, sobald irgendetwas nicht stimmt — Schalter aus, oder
+   * es lässt sich keine `pa-…`-Id ermitteln (Legacy-Snippet). Dann bleibt unten
+   * ALLES exakt wie vorher. Diese Umstellung kann eine laufende Messung deshalb
+   * nicht kaputtmachen; sie schaltet sich nur dazu, wenn alles stimmt.
+   *
+   * DIE EREIGNIS-ADRESSE GEHÖRT ZUM SCRIPT, nicht zum Tag: das v3-Script
+   * (`pa-…`) kennt `data-api` NICHT mehr — dafür gibt es die `endpoint`-Option
+   * von `plausible.init()` (offizielle Proxy-Anleitung). Wer das auf ein
+   * Attribut zurückbaut, bekommt ein Script, das brav über uns lädt und seine
+   * Ereignisse trotzdem direkt an die Instanz schickt — also genau das, was der
+   * Blocker abfängt.
+   */
+  const proxiedSrc = analytics.proxy === false
+    ? ''
+    : proxiedScriptSrc(headScriptId(analytics, selfServiceId.value))
+  const initOptions = proxiedSrc ? JSON.stringify({ endpoint: ANALYTICS_PROXY_EVENT_PATH }) : ''
+
   const consentRequired = appConfig.pukalani?.consent?.enabled === true
   const { hasConsent } = useCookieConsent()
 
@@ -83,8 +105,8 @@ export default defineNuxtPlugin(async () => {
       // SPA-Navigationen zählt das Script selbst (History-API).
       useHead({
         script: [
-          { src: selfServiceSrc || analytics.src, async: true },
-          { innerHTML: 'window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};plausible.init()' },
+          { src: proxiedSrc || selfServiceSrc || analytics.src, async: true },
+          { innerHTML: `window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};plausible.init(${initOptions})` },
         ],
       })
       return

@@ -268,6 +268,34 @@ export default defineAppConfig({
         scriptId: '',
         siteId: '',
       },
+      /**
+       * ADBLOCK-PROXY (F47/Paket 5, 2026-08-12) — **Core-Default AN**, und das
+       * ist die zweite begründete Ausnahme von „Core-Default ist IMMER aus"
+       * (die erste ist `pukalani.realtime.enabled`, F14).
+       *
+       * Der Grund ist derselbe: dieser Schalter schaltet kein PRODUKT ein,
+       * sondern wählt den TRANSPORT eines Produkts, das die App mit
+       * `analytics.enabled` schon ausdrücklich bestellt hat. Ein Default AUS
+       * hieße, dass jede der vier messenden Apps eine zweite Zeile schreiben
+       * muss, um das zu bekommen, worum sie schon gebeten hat — und die eine
+       * App, die es vergisst, misst dauerhaft schlechter, ohne dass es irgendwo
+       * auffällt (genau die Klasse Fehler wie die fehlende SMTP-Env, F44).
+       *
+       * WAS ER TUT: das Mess-Script kommt von `/api/stats-script.js` statt von
+       * der Plausible-Instanz, die Ereignisse gehen an `/api/stats-event`.
+       * Beides sind Adressen auf dem Host der Seite selbst, also für einen
+       * Inhalte-Blocker nicht von eigenen Dateien zu unterscheiden.
+       *
+       * AUF `false` GESETZT ist er der Not-Aus: Script und Ereignisse gehen
+       * wieder direkt zur Instanz, die zwei Routen antworten 404. Er kostet
+       * nichts, wenn ohnehin nicht gemessen wird — ohne `enabled` wird keine
+       * der beiden Routen je bedient.
+       *
+       * KEINE WIRKUNG auf das Legacy-Snippet (`data-domain`, ohne `pa-…`-Id):
+       * dort kommt der Proxy nicht zum Zug, weil sich aus der Adresse keine
+       * Script-Id zurückrechnen lässt (core/shared/analyticsScript.ts).
+       */
+      proxy: true,
     },
     consent: {
       enabled: false,
