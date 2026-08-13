@@ -1,4 +1,5 @@
 import { ROBOTS_NOINDEX } from '../../shared/communityAudience'
+import { resolveCommunitySeo } from '../../shared/communitySeo'
 import { rebaseSeoLinks, rebaseSeoMeta, rebaseSeoUrl, resolveSeoOrigin, type SeoHeadMeta } from '../../shared/seoOrigin'
 
 /**
@@ -37,6 +38,15 @@ import { rebaseSeoLinks, rebaseSeoMeta, rebaseSeoUrl, resolveSeoOrigin, type Seo
  * Hosts 404 antwortet: ein Tag auf ein 404 wäre eine Lüge im Kopf.
  * Suchmaschinen sehen das SSR-HTML — deshalb kommt der Wert aus dem
  * SSR-Payload (useTenantAudience), nicht aus einem Client-Nachtrag.
+ *
+ * SUCHE, ZWEITER GRUND (U15 Teil 2, seit 2026-08-13): der Owner kann seine
+ * Community auch OHNE sie zuzumachen aus Suchmaschinen nehmen
+ * (/dashboard/community/seo). Das Signal kommt aus demselben SSR-Payload
+ * (useCommunitySeoSettings) und mündet in dasselbe robots-Tag — der
+ * Unterschied zu C18 und die Folge fürs Vorschaubild stehen unten bei
+ * `robotsMeta`. Die zweite Einstellung dieser Seite, die eigene Beschreibung,
+ * landet BEWUSST nicht hier: eine description gehört zur SEITE (useBrandTitle),
+ * nicht zum Host — hier stünde sie auf jeder Unterseite gleich.
  */
 export function useLocaleSeoHead(): void {
   const localeHead = useLocaleHead({ seo: true, lang: true, dir: true })
@@ -48,6 +58,7 @@ export function useLocaleSeoHead(): void {
   const brand = useBrandName()
   const { t } = useI18n()
   const { membersOnly } = useTenantAudience()
+  const communitySeo = useCommunitySeoSettings()
 
   // '' = kein Umschreiben (Silo-Apps + jeder Fall, in dem kein Origin steht)
   const origin = appConfig.pukalani?.seo?.originFromRequest === true
@@ -79,14 +90,33 @@ export function useLocaleSeoHead(): void {
   })
 
   /**
-   * Die Ansage an Suchmaschinen. Leer, solange die Community öffentlich ist —
-   * ein `index, follow` zu stempeln wäre überflüssig (das ist die Voreinstellung
-   * jedes Crawlers) und würde ein `noindex` einer einzelnen Seite (z. B.
-   * /embed, Rechtstexte) überschreiben können.
+   * Die Ansage an Suchmaschinen. Leer, solange die Community öffentlich ist und
+   * gefunden werden will — ein `index, follow` zu stempeln wäre überflüssig
+   * (das ist die Voreinstellung jedes Crawlers) und würde ein `noindex` einer
+   * einzelnen Seite (z. B. /embed, Rechtstexte) überschreiben können.
+   *
+   * ZWEI GRÜNDE, EIN TAG (U15 Teil 2). Bis hierher gab es nur den ersten:
+   *   (1) C18 — die Community ist „nur für Mitglieder". Das ist eine
+   *       SICHTBARKEITS-Grenze: die Inhalte sind für Gäste gar nicht lesbar,
+   *       das noindex ist die Ansage dazu, und das og:image fällt mit weg.
+   *   (2) U15 — der Owner hat „aus Suchmaschinen raushalten" gesetzt. Das ist
+   *       eine reine SUCH-Entscheidung: die Community bleibt öffentlich
+   *       lesbar, jeder mit dem Link kommt hinein.
+   * Deshalb schaltet nur (1) das Vorschaubild ab: wer seine Community aus
+   * Google nimmt, will trotzdem, dass ein geteilter Link im Chat als Karte
+   * erscheint — das ist für viele sogar der GRUND, auf die Suche zu
+   * verzichten. Wer beides koppelte, nähme ihnen den verbliebenen Weg.
+   *
+   * Gerechnet wird mit der EINEN Regel (`resolveCommunitySeo`), nicht mit
+   * einem zweiten `=== true` daneben: die Härtung gegen kaputte Zeilen (nur
+   * ein echtes `true` zählt, fail-open) soll genau einmal existieren.
    */
-  const robotsMeta = computed<SeoHeadMeta[]>(() => (
-    membersOnly.value ? [{ name: 'robots', content: ROBOTS_NOINDEX }] : []
-  ))
+  const robotsMeta = computed<SeoHeadMeta[]>(() => {
+    const communityNoindex = resolveCommunitySeo(communitySeo.value).noindex
+    return membersOnly.value || communityNoindex
+      ? [{ name: 'robots', content: ROBOTS_NOINDEX }]
+      : []
+  })
 
   useHead(() => ({
     htmlAttrs: localeHead.value.htmlAttrs,

@@ -1,6 +1,7 @@
 import type { CurrentUser } from './appwrite'
 import type { TenantContext } from './tenant'
 import type { CommunityRole } from '../communityAuthz'
+import type { CommunitySeoSettings } from '../communitySeo'
 import type { TrustLevel } from '../trustLevel'
 
 declare module 'h3' {
@@ -30,6 +31,16 @@ declare module 'h3' {
      * undefined = nicht aufgelöst; 0 = aufgelöst, keine Stufe.
      */
     communityTrustLevel?: TrustLevel
+    /**
+     * Sucheinstellung dieser Community (U15 Teil 2) — gesetzt von
+     * server/middleware/09.community-seo.ts, NUR für Seiten-SSR (kein
+     * /api/-Pfad; der Kopf entsteht nur dort).
+     *
+     * undefined = nicht aufgelöst (kein Mandant, API-Pfad); null = aufgelöst,
+     * aber keine eigene Wahl. Beide Fälle bedeuten für den Kopf dasselbe —
+     * der Unterschied bleibt sichtbar, weil er zwei verschiedene Gründe hat.
+     */
+    communitySeo?: CommunitySeoSettings | null
     /**
      * Der Request lief auf einem KONTROLL-Host (Kundenbereich, z. B.
      * app.pukalani.app) — gesetzt von server/middleware/00.tenant.ts.
