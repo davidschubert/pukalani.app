@@ -6,10 +6,50 @@
       "inviteRequests": "Requests",
       "invites": "Invites",
       "reservedNames": "Reserved names",
-      "abuseReports": "Abuse reports"
+      "abuseReports": "Abuse reports",
+      "marketSignal": "Market signal"
     }
   },
   "control": {
+    "marketSignal": {
+      "title": "Market signal",
+      "intro": "What owners say about their communities — collected by the dashboard card, voluntarily and after their first own post. No names, just distributions.",
+      "communities": "Communities",
+      "answered": "Of those, answered",
+      "participation": "Participation",
+      "answeredOf": "{answered} answered · {unanswered} open",
+      "empty": "No answers to this question yet.",
+      "truncated": "This evaluation shows only an excerpt — there are more communities than were queried.",
+      "questions": {
+        "purpose": "Why are they here?",
+        "memberRange": "How big are they?",
+        "goal": "What would success look like?"
+      },
+      "options": {
+        "purpose": {
+          "new": "Building something new",
+          "migrate": "Moving from elsewhere",
+          "looking": "Just looking around"
+        },
+        "memberRange": {
+          "none": "None yet",
+          "to100": "Up to 100",
+          "to500": "100 to 500",
+          "to1000": "500 to 1,000",
+          "to5000": "1,000 to 5,000",
+          "over5000": "More than 5,000"
+        },
+        "goal": {
+          "relationships": "Relationships",
+          "discussion": "Discussion",
+          "knowledge": "Knowledge",
+          "reach": "Reach",
+          "events": "Events",
+          "courses": "Courses",
+          "revenue": "Revenue"
+        }
+      }
+    },
     "reservedNames": {
       "title": "Reserved names",
       "help": "These pukalani.app subdomains are never handed out to a community — the platform's own names are fixed in code, your own entries can be added and released here at any time.",

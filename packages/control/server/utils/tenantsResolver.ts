@@ -77,7 +77,22 @@ export function mapTenantRowToContext(
   // „keine Wahl der Community" (Besucher-Verhalten wie bisher).
   // `name` ist bewusst UNGEFILTERT dabei — reiner Anzeigetext (Header), wird
   // nur interpoliert gerendert, nie als Attribut/HTML.
-  const description = parseSiteProfile(row.profile ?? undefined).description ?? ''
+  const siteProfile = parseSiteProfile(row.profile ?? undefined)
+  const description = siteProfile.description ?? ''
+  /**
+   * DIE DREI MARKT-ANTWORTEN (U19) — Größe, Zweck, Ziel. Dieselbe EINE
+   * Parse-Operation wie die Beschreibung darüber, also kostenlos.
+   *
+   * Das Feld bleibt WEG, wenn keine einzige Antwort vorliegt: „nicht gefragt"
+   * und „mit leeren Antworten gefragt" sind zwei verschiedene Zustände, und
+   * genau daran entscheidet die Karte, ob sie noch fragen muss.
+   */
+  const signal = {
+    ...(siteProfile.purpose ? { purpose: siteProfile.purpose } : {}),
+    ...(siteProfile.memberRange ? { memberRange: siteProfile.memberRange } : {}),
+    ...(siteProfile.goal ? { goal: siteProfile.goal } : {}),
+  }
+  const profileSignal = Object.keys(signal).length > 0 ? { profileSignal: signal } : {}
   const branding = {
     ...(row.theme && isSafeThemeToken(row.theme) ? { theme: row.theme } : {}),
     ...(row.variant && isSafeThemeToken(row.variant) ? { variant: row.variant } : {}),
@@ -124,7 +139,7 @@ export function mapTenantRowToContext(
     // packages/onboarding/shared/gettingStarted.ts). Leerer Wert ⇒ Feld bleibt
     // weg und heißt „nie ein Abo" (Bestands-Rows tragen die Spalte als null).
     const billing = row.billingStatus ? { billingStatus: row.billingStatus } : {}
-    return { mode: 'pool', projectId: row.projectId, tenantId: row.tenantId, plan, ...(limits ? { limits } : {}), ...communityId, ...branding, ...policy, ...trial, ...billing, ...address }
+    return { mode: 'pool', projectId: row.projectId, tenantId: row.tenantId, plan, ...(limits ? { limits } : {}), ...communityId, ...branding, ...policy, ...trial, ...billing, ...address, ...profileSignal }
   }
   return null
 }

@@ -6,10 +6,50 @@
       "inviteRequests": "Anfragen",
       "invites": "Einladungen",
       "reservedNames": "Gesperrte Namen",
-      "abuseReports": "Missbrauchsmeldungen"
+      "abuseReports": "Missbrauchsmeldungen",
+      "marketSignal": "Markt-Signal"
     }
   },
   "control": {
+    "marketSignal": {
+      "title": "Markt-Signal",
+      "intro": "Was die Owner über ihre Communities sagen — erhoben von der Karte im Dashboard, freiwillig und nach dem ersten eigenen Beitrag. Keine Namen, nur Verteilungen.",
+      "communities": "Communities",
+      "answered": "Davon geantwortet",
+      "participation": "Beteiligung",
+      "answeredOf": "{answered} beantwortet · {unanswered} offen",
+      "empty": "Zu dieser Frage liegt noch keine Antwort vor.",
+      "truncated": "Die Auswertung zeigt nur einen Ausschnitt — es gibt mehr Communities als abgefragt wurden.",
+      "questions": {
+        "purpose": "Warum sind sie hier?",
+        "memberRange": "Wie groß sind sie?",
+        "goal": "Was wäre für sie ein Erfolg?"
+      },
+      "options": {
+        "purpose": {
+          "new": "Baut etwas Neues auf",
+          "migrate": "Zieht von woanders um",
+          "looking": "Schaut sich um"
+        },
+        "memberRange": {
+          "none": "Noch keine",
+          "to100": "Bis 100",
+          "to500": "100 bis 500",
+          "to1000": "500 bis 1.000",
+          "to5000": "1.000 bis 5.000",
+          "over5000": "Mehr als 5.000"
+        },
+        "goal": {
+          "relationships": "Beziehungen",
+          "discussion": "Diskussion",
+          "knowledge": "Wissen",
+          "reach": "Reichweite",
+          "events": "Veranstaltungen",
+          "courses": "Kurse",
+          "revenue": "Einnahmen"
+        }
+      }
+    },
     "reservedNames": {
       "title": "Gesperrte Namen",
       "help": "Diese Subdomains von pukalani.app werden nie an eine Community vergeben — die Namen der Plattform stehen fest im Code, eigene Einträge kannst du hier jederzeit ergänzen und wieder freigeben.",

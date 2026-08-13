@@ -67,6 +67,29 @@ export default defineAppConfig({
           order: 1,
         },
         {
+          // Markt-Signal (U19): die Auswertung der Karte „Hilf uns, Pukalani zu
+          // schärfen" — Größe, Zweck, Ziel als Verteilungen.
+          //
+          // Sie steht direkt HINTER den Communities, weil sie über denselben
+          // Bestand spricht, nur zusammengefasst statt einzeln: erst der
+          // Bestand, dann was er über den Markt sagt.
+          //
+          // DASS ES DIESEN EINTRAG GIBT, IST DIE HALBE ARBEIT: Davids
+          // Entscheidung vom 2026-08-12 macht den definierten LESER zur
+          // Bedingung des Baus — die alten Wizard-Antworten wurden erhoben und
+          // nie gelesen. Wer diesen Menüpunkt entfernt, nimmt der Karte drüben
+          // ihre Berechtigung.
+          id: 'market-signal',
+          scope: 'operator',
+          productKey: 'control',
+          labelKey: 'admin.nav.marketSignal',
+          icon: 'i-ph-chart-bar',
+          to: '/dashboard/market-signal',
+          requiredCapability: 'sites.manage',
+          group: 'platform',
+          order: 2,
+        },
+        {
           // Die Warteschlange: wer hat Early Access angefragt, wem wurde ein
           // Code geschickt, wer hat ihn eingelöst. Steht VOR den Codes, weil
           // hier die tägliche Arbeit passiert.
@@ -78,7 +101,7 @@ export default defineAppConfig({
           to: '/dashboard/requests',
           requiredCapability: 'sites.manage',
           group: 'platform',
-          order: 2,
+          order: 3,
         },
         {
           // Early-Access-Tor des Self-Service-Onboardings: hier stellt der
@@ -92,7 +115,7 @@ export default defineAppConfig({
           to: '/dashboard/invites',
           requiredCapability: 'sites.manage',
           group: 'platform',
-          order: 4,
+          order: 5,
         },
         {
           // Missbrauchsmeldungen von außen (M13). Steht direkt hinter den
@@ -106,7 +129,7 @@ export default defineAppConfig({
           to: '/dashboard/abuse',
           requiredCapability: 'sites.manage',
           group: 'platform',
-          order: 3,
+          order: 4,
         },
         {
           // Gesperrte Namen: die Code-Basisliste (RESERVED_SUBDOMAINS) zum
@@ -121,7 +144,7 @@ export default defineAppConfig({
           to: '/dashboard/reserved-names',
           requiredCapability: 'sites.manage',
           group: 'platform',
-          order: 5,
+          order: 6,
         },
         {
           // Studio = das Kundenangebot des Betreibers (Davids Wort, nicht
