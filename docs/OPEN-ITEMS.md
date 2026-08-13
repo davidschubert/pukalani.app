@@ -25,7 +25,7 @@ demo-Ausbau, comments in den Pool. Entscheidungen: DECISION-LOG 2026-08-11.
 
 | # | Was (einfach erklärt) | Prio | Aufwand | Braucht David? | Details |
 | --- | --- | --- | --- | --- | --- |
-| 2 · A1 | **Echte Rechtstexte** für Impressum, Datenschutz und AGB. **pukalani.studio ist fertig** (2026-08-12): Impressum + Datenschutz in de/en veröffentlicht, inkl. **ladungsfähiger Anschrift**; die Texte nennen nur Belegbares, Erfundenes wurde weggelassen. Dort noch offen und beim Anwalt: die Prüfung zu **Art. 27 DSGVO** (Vertreter in der Union — Sitz ausserhalb der EU bei DACH-Ansprache) samt Drittland-Grundlage, dazu die Angabe zur Verbraucherstreitbeilegung. Für **pukalani.app** stehen die Texte weiter aus. **Direkt danach `pukalani.auth.termsUrl` in `apps/platform` setzen** — die AGB-Checkbox fehlt heute genau dort, wo Kunden sich registrieren (Trichter M9). Schaltet Punkt 3 frei. | Hoch | S — Anwalt lesen lassen | Ja: nur David (ggf. Anwalt) | [Notizen](#notizen) |
+| 2 · A1 | **Echte Rechtstexte** für Impressum, Datenschutz und AGB. **pukalani.studio ist fertig** (2026-08-12): Impressum + Datenschutz in de/en veröffentlicht, inkl. **ladungsfähiger Anschrift**; die Texte nennen nur Belegbares, Erfundenes wurde weggelassen. Dort noch offen und beim Anwalt: die Prüfung zu **Art. 27 DSGVO** (Vertreter in der Union — Sitz ausserhalb der EU bei DACH-Ansprache) samt Drittland-Grundlage, dazu die Angabe zur Verbraucherstreitbeilegung. Für **pukalani.app** stehen die Texte weiter aus. **Direkt danach `pukalani.auth.termsUrl` in `apps/platform` setzen** — die AGB-Checkbox fehlt heute genau dort, wo Kunden sich registrieren (Trichter M9). Schaltet Punkt 3 frei. | Hoch | S — Anwalt lesen lassen | Ja: nur David (ggf. Anwalt) | [Agenda für den Anwaltstermin](#a1-anwalt) |
 | 3 · A2 | **Stripe auf echtes Geld umstellen — über die F55-Seite.** Vorstufe A2a komplett grün, F55 selbst erledigt (beide 2026-08-08). Bei David bleiben: Bank-Aktivierung, Steuer-Registrierung, Live-Key ROTIERT eintragen (der erste ist teil-geleakt und rotiert), Portal-Konfiguration; alles andere klickt die F55-Seite. Braucht Punkt 2 (A1). | Hoch | S | Ja: Bank, Konto, Portal | [STRIPE-GO-LIVE-RUNBOOK.md](runbooks/STRIPE-GO-LIVE-RUNBOOK.md) |
 
 ## ⏸️ Geparkt / wartet — in Arbeitsreihenfolge
@@ -163,13 +163,67 @@ comments/portfolio/help) erben den Fix über core mit ihrem jeweils nächsten
 Release — keine Eile, der Bug traf praktisch nur die Landing (einzige Seite,
 deren `/de`-Links öffentlich geteilt werden).
 
-**A1 — Rechtstexte.** Entwürfe sind LIVE (2026-07-23): vollständige,
-stack-spezifische Texte (Impressum § 5 DDG, DSGVO-Datenschutzerklärung mit
-Hetzner/Resend/Stripe/Cookies/Betroffenenrechten, AGB mit Plänen/Kündigung/
-UGC/Haftung) DE+EN auf /imprint, /terms, /privacy — jeweils mit sichtbarem
-„Entwurf"-Hinweis und `noindex`. Rest bei David: Adresse und
-USt-IdNr.-Platzhalter im Dashboard ausfüllen + Anwalt drüberschauen lassen.
-Schaltet A2 frei.
+<a id="a1-anwalt"></a>
+
+**A1 — Rechtstexte: Stand und Agenda für den Anwaltstermin.**
+
+**Fertig (2026-08-12):** `pukalani.studio` hat Impressum und
+Datenschutzerklärung in de+en, veröffentlicht, mit ladungsfähiger Anschrift.
+Die Texte nennen ausschließlich Belegbares — was eine Bewertung oder eine
+Willenserklärung braucht, wurde WEGGELASSEN statt geraten. Sie sind live
+lesbar (`/de/imprint`, `/de/privacy` und die en-Fassungen) und damit die beste
+Vorlage für das Gespräch.
+
+**Offen ist keine Datenlücke mehr, sondern fünf Bewertungen.** Die Fragen sind
+so gestellt, dass sie in einem Termin beantwortbar sind — sie sind FRAGEN, keine
+Rechtsauffassungen:
+
+1. **Vertreter in der Union (Art. 27 DSGVO)?** Der Verantwortliche sitzt in den
+   USA, das Angebot richtet sich deutschsprachig und in Euro an DACH — das
+   Marktortprinzip (Art. 3 Abs. 2) greift also. Verarbeitet werden nur
+   Server-Protokolle, ein Sprach-Cookie, cookielose Reichweitenmessung und
+   Kontaktanfragen; es gibt keine Besucherkonten, keine Profilbildung, keine
+   besonderen Kategorien. **Frage:** Greift die Ausnahme nach Art. 27 Abs. 2
+   lit. a (gelegentlich, geringes Risiko) — oder ist ein Vertreter zu benennen?
+   Falls ja: Name und Anschrift, sie gehören dann in beide Dokumente.
+2. **Drittland-Grundlage.** Die Server stehen in Deutschland, der
+   Verantwortliche greift aus den USA darauf zu. **Frage:** Ist das eine
+   Übermittlung im Sinne von Kapitel V, und was ist im Abschnitt „Zugriff aus
+   dem Ausland" konkret zu nennen?
+3. **Gilt § 5 DDG überhaupt?** Er verpflichtet in Deutschland niedergelassene
+   Anbieter. **Frage:** Welche Pflichten treffen einen US-Anbieter mit
+   DACH-Ausrichtung stattdessen (Marktortprinzip, UWG), reicht die jetzige
+   Fassung — und ist der Block „Verantwortlich für den Inhalt" wegen der
+   redaktionellen Wissen-Artikel (§ 18 Abs. 2 MStV) richtig besetzt?
+4. **Verbraucherstreitbeilegung (§ 36 VSBG).** Das Angebot richtet sich an
+   Unternehmen, die Guides sind öffentlich. **Frage:** Ist eine Erklärung nötig,
+   und wie soll sie lauten? (Der Abschnitt fehlt derzeit bewusst — eine
+   Willenserklärung kann niemand außer David abgeben.)
+5. **Umsatzsteuer.** Dienstleistungen eines US-Anbieters an Unternehmen in der
+   EU. **Frage:** Reverse-Charge-Hinweis nötig, USt-IdNr. erforderlich? Das
+   betrifft Rechnungen ebenso wie den Impressums-Abschnitt.
+
+**Mitnehmen zum Termin** (alles steht in der veröffentlichten
+Datenschutzerklärung, hier als Kurzfassung): Einzelunternehmen, Sitz Makawao
+(Hawaii, USA) · Zielgruppe Unternehmen und Agenturen in DACH · verarbeitet
+werden Server-Protokolle, ein Sprach-Cookie (`i18n_redirected`), cookielose
+Reichweitenmessung mit **selbst gehostetem** Plausible auf einem Server in
+Deutschland sowie Kontaktanfragen per E-Mail/Telefon · Terminbuchung über
+cal.com ist nur VERLINKT, nicht eingebettet · keine Besucherkonten, kein
+Newsletter, keine Werbenetzwerke, keine eingebetteten Drittinhalte, Schriften
+vom eigenen Server · Hosting in Deutschland.
+
+**Danach umzusetzen** (Claude, je Antwort eine Textstelle): Vertreter →
+eigener Abschnitt in der Datenschutzerklärung de+en · Drittland-Grundlage →
+Abschnitt „Zugriff aus dem Ausland" · Verbraucherstreitbeilegung und
+USt-IdNr. → je ein Abschnitt im Impressum de+en. Rechnen: rund eine halbe
+Stunde, danach live nachgemessen.
+
+**Getrennt davon — pukalani.app.** Die Plattform ist ein anderer Fall
+(Konten, Zahlungen, Kunden-Communities): dort geht es um die Rolle als
+Auftragsverarbeiter, AV-Verträge mit Kunden, AGB und Widerruf. Sinnvoll im
+selben Termin, aber als eigener Block; danach `pukalani.auth.termsUrl` in
+`apps/platform` setzen. Schaltet A2 frei.
 
 <a id="a2a"></a>
 
