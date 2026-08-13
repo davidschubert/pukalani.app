@@ -273,11 +273,21 @@ jobs:
             echo "::endgroup::"
           done
 
-      - name: Font-Cache additiv zurückschreiben
+      # ZWEI Durchgänge mit Grund (Krümel vom 2026-08-12 — der Seed wäre am
+      # 2026-08-18 still verfallen): die unifont-METADATEN tragen eine
+      # 7-Tage-TTL (`expires`), und --ignore-existing erneuert sie nie — nach
+      # Ablauf löste jeder Build wieder LIVE gegen Google auf, das
+      # gstatic-404-Risiko wäre zurück. Deshalb dürfen NUR die Metadaten
+      # (meta/**-data.json) aktualisieren; die WOFF2-Blobs bleiben strikt
+      # additiv (eine stale Runner-Auflösung ersetzt nie eine gute Datei).
+      # Gefahrlos, weil dieser Schritt NACH einem GRÜNEN Build läuft — wessen
+      # Auflösung scheiterte, dessen Deploy stirbt vorher.
+      - name: Font-Cache zurückschreiben (Blobs additiv, Metadaten aktualisierend)
         if: steps.changes.outputs.skip != 'true'
         run: |
           for app in portfolio control platform marketing help; do
             rsync -a --ignore-existing "apps/$app/node_modules/.cache/nuxt/fonts/" "prod:/home/ploi/fonts-cache/" || true
+            rsync -a --include='meta/' --include='meta/**' --exclude='*' "apps/$app/node_modules/.cache/nuxt/fonts/" "prod:/home/ploi/fonts-cache/" || true
           done
 
       - name: Ausliefern + verifizieren (rsync → Symlink-Flip → pm2 reload)

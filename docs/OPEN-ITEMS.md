@@ -142,7 +142,7 @@ erledigt → COMPLETE) · Wizard-Pflicht = Name/Adresse · Kategorie · Vibe (U1
 Social-Login nur Google, nach AP1–AP8 (U14) · Geld-Wort „Plan" (U6) ·
 U15/F57 bleiben geparkt bis AP1–AP8.
 
-**Font-Seed-Krümel — der Schutz verfällt am 2026-08-18 still.** Die unifont-Metadaten im Prod-Seed (`~/fonts-cache`) tragen eine 7-Tage-TTL (`expires` nachgemessen), und das additive Zurückschreiben (`--ignore-existing`) ersetzt gleichnamige Metadaten-Dateien nie — nach Ablauf löst jeder CI-Build wieder LIVE gegen Google auf, das gstatic-404-Risiko ist zurück. Seed periodisch von einer gesunden Maschine auffrischen ODER das Rückschreiben für `meta/*/…-data.json` gezielt öffnen (Blobs bleiben additiv). [Klein, S]
+**Font-Seed-Krümel — BEHOBEN 2026-08-12:** das Zurückschreiben in deploy.yml läuft jetzt zweistufig — WOFF2-Blobs bleiben strikt additiv (`--ignore-existing`), die unifont-METADATEN (`meta/**`, tragen die 7-Tage-TTL) dürfen aktualisieren. Gefahrlos, weil der Schritt nur nach einem GRÜNEN Build läuft. Jeder Deploy frischt den Seed damit auf; der stille Verfall am 2026-08-18 ist abgewendet.
 
 **AP10-Krümel — `USlider` ist für Screenreader unbedienbar** (Nuxt UI verdrahtet `aria-label="Thumb"` fest im Daumen, die `UFormField`-Beschriftung landet per `for` nur auf der nicht fokussierbaren Wurzel). Der Gebühren-Rechner nutzt deshalb Zahlenfelder; betroffen bleibt der **Theme-Editor** (`CustomizeEditor.vue`, 6 Regler). Upstream-Issue prüfen/melden oder Beschriftung per `:ui`-Slot nachrüsten. [Klein, S]
 
