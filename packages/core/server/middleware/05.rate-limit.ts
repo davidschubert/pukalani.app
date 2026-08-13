@@ -115,6 +115,13 @@ const WRITE_LIMITED: { re: RegExp, bucket: string, max?: number }[] = [
   { re: /^GET \/api\/community\/switcher$/, bucket: 'onboarding:communities', max: TOKEN_MAX },
   { re: /^POST \/api\/community\/switch$/, bucket: 'onboarding:communities', max: TOKEN_MAX },
   { re: /^POST \/api\/community\/control-handoff$/, bucket: 'onboarding:communities', max: TOKEN_MAX },
+  // Der Community-Export (U20): die mit Abstand teuerste Leseroute im Haus —
+  // sie paginiert durch JEDEN Produkt-Layer (Beiträge, Kommentare, Seiten,
+  // Termine, Kurse, Lektionen), prägt zusätzlich ein Appwrite-JWT und lässt
+  // das Control Plane die Mitgliederliste lesen. EIN Klick baut eine Datei;
+  // wer sie zweimal je Minute braucht, tut etwas anderes als exportieren.
+  // Eigener Bucket, weil ein Export das Budget des Switchers sonst leerräumt.
+  { re: /^GET \/api\/community\/export$/, bucket: 'community:export', max: 2 },
   // Öffentliche Kommentar-Lese-Routen (Embed macht sie zur beworbenen Fläche
   // auf fremden Seiten) — eigener Read-Bucket statt „GET ist frei".
   // count (E3) ist CORS-offen und microcached, teilt denselben Bucket.

@@ -56,6 +56,15 @@ export const ALL_CAPABILITIES: readonly Capability[] = [
    * existiert.
    */
   'community.domain',
+  /**
+   * Der Community-Export (U20, 2026-08-12). Im Wildcard aus demselben Grund
+   * wie jede andere Community-Cap: eine Silo-App hat keine Community-Rollen,
+   * dort trägt der Betreiber-Admin die Fähigkeit über sein globales Label —
+   * und der Betreiber IST dort der Eigentümer. Dass es im Pool ausschließlich
+   * eine Owner-Sache ist, entscheidet `communityAuthz.ts`; hier steht nur,
+   * dass die Fähigkeit existiert.
+   */
+  'community.export',
   // F1 Teilpaket 3 (Vertrauensstufen): die drei Stufen-Rechte und die
   // Ernennung. Im Wildcard aus demselben Grund wie jede andere Community-Cap —
   // im Silo (apps/comments) gibt es keine Community-Rolle, dort trägt der

@@ -80,6 +80,24 @@ export type Capability =
   | 'community.domain'
   | 'community.delete' // Community löschen (nur Owner)
   /**
+   * Das Bündel herunterladen: Inhalte + Team dieser Community als eine Datei
+   * (U20, Davids Zuschnitt vom 2026-08-12). Nur Owner.
+   *
+   * Warum eine EIGENE Capability und nicht `team.manage` mitbenutzt: der
+   * Export liest quer durch JEDEN Produkt-Layer — Beiträge, Kommentare,
+   * Seiten, Termine, Kurse —, und zwar auch Entwürfe und ausgeblendetes.
+   * `team.manage` hat ein Admin; ein Admin verwaltet aber, was INNEN
+   * passiert, während eine Datei mit dem gesamten Archiv das Haus VERLÄSST.
+   * Dieselbe Klasse von Entscheidung wie `community.transfer` und
+   * `community.delete` — und dieselbe Antwort: das gehört dem Eigentümer.
+   *
+   * VERWORFEN: `community.transfer` mitzubenutzen, um keine neue Capability
+   * anzulegen. Sie heißt, was sie tut (Besitz übergeben); ein Export ist kein
+   * Besitzwechsel, und eine Capability, deren Name ihre zweite Bedeutung
+   * verschweigt, ist beim nächsten Rollen-Umbau eine Falle.
+   */
+  | 'community.export' // Community-Export herunterladen (nur Owner)
+  /**
    * Einbetter-Register des Kommentar-Widgets (F37, 2026-08-02): welche FREMDE
    * Seite das Widget dieser Community rahmen darf. Nur Owner.
    *

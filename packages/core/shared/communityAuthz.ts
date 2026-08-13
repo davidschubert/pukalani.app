@@ -177,6 +177,14 @@ const OWNER: readonly Capability[] = [
      * Namen, und die Antwort darauf gehört dem Eigentümer.
      */
     'messages.manage',
+    /**
+     * U20 (2026-08-12): das Community-Bündel herunterladen. Aus DEMSELBEN
+     * Grund beim Owner wie die Übergabe und die Löschung — hier verlässt das
+     * gesamte Archiv das Haus, inklusive Entwürfen und ausgeblendeter
+     * Inhalte. Ein Admin verwaltet, was es gibt; wer es mitnehmen darf, ist
+     * der Eigentümer.
+     */
+    'community.export',
   ]),
 ]
 
