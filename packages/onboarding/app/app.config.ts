@@ -297,6 +297,27 @@ export default defineAppConfig({
           requiredCapability: 'team.manage',
           order: 20,
         },
+        /**
+         * Die Markt-Signal-Karte (U19) steht GANZ HINTEN — hinter Sperre,
+         * Testphase und Willkommens-Checkliste. Die drei davor sagen dem Owner,
+         * was ER zu tun hat; diese hier ist eine BITTE von uns, und eine Bitte
+         * drängelt sich nicht vor die eigenen Aufgaben.
+         *
+         * Sie erscheint ohnehin erst, wenn die Community eigenen Inhalt hat
+         * (die Regel steht pur in `shared/profileSignal.ts`) — praktisch treffen
+         * sie und die Willkommens-Checkliste sich also nur in einem schmalen
+         * Fenster, und dann in der richtigen Reihenfolge.
+         *
+         * `team.manage` wie die Checkliste darüber: die Frage „wie gross seid
+         * ihr, was habt ihr vor?" beantwortet, wer die Community aufbaut. Ein
+         * `viewer` sieht die Karte damit nie — und die Route würde ihm ohnehin
+         * 403 antworten.
+         */
+        communityProfileSignal: {
+          component: 'CommunityProfileSignalNotice',
+          requiredCapability: 'team.manage',
+          order: 30,
+        },
       },
     },
   },

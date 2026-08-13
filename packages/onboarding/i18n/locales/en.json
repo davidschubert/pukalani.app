@@ -464,6 +464,56 @@
       "failedDesc": "That did not work just now. Please try again.",
       "rateLimited": "Too many exports in a short time. Wait a moment, then try again."
     },
+    "profileSignal": {
+      "title": "Help us sharpen Pukalani",
+      "intro": "Three short questions about your community. Entirely optional, and one answer is plenty.",
+      "start": "Happy to",
+      "submit": "Send answers",
+      "later": "Later",
+      "never": "Do not ask again",
+      "thanks": "Thank you — this genuinely helps.",
+      "failed": "That did not work just now. Please try again later.",
+      "earlyAccess": "In progress",
+      "questions": {
+        "purpose": "Why are you here?",
+        "memberRange": "Roughly how many members do you have?",
+        "goal": "What would count as real success in six months?"
+      },
+      "purpose": {
+        "new": {
+          "label": "I am building something new",
+          "hint": "The community is just getting started."
+        },
+        "migrate": {
+          "label": "I am moving from somewhere else",
+          "hint": "It already exists — on another platform."
+        },
+        "looking": {
+          "label": "I am just looking around",
+          "hint": "Still undecided whether and how to begin."
+        }
+      },
+      "memberRange": {
+        "none": "None yet",
+        "to100": "Up to 100",
+        "to500": "100 to 500",
+        "to1000": "500 to 1,000",
+        "to5000": "1,000 to 5,000",
+        "over5000": "More than 5,000"
+      },
+      "goal": {
+        "relationships": "People know one another",
+        "discussion": "Discussion is lively",
+        "knowledge": "Knowledge is collected and findable",
+        "reach": "More people find their way here",
+        "events": "We meet regularly",
+        "courses": "My courses run here",
+        "revenue": "The community pays for itself"
+      },
+      "validation": {
+        "empty": "Please answer at least one question."
+      }
+    },
     "gettingStarted": {
       "title": "Your first five steps",
       "intro": "Work through them in order and your community is ready in half an hour.",

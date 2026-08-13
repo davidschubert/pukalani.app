@@ -464,6 +464,56 @@
       "failedDesc": "Das hat gerade nicht geklappt. Versuch es bitte noch einmal.",
       "rateLimited": "Zu viele Exporte in kurzer Zeit. Warte einen Moment und versuch es dann erneut."
     },
+    "profileSignal": {
+      "title": "Hilf uns, Pukalani zu schärfen",
+      "intro": "Drei kurze Fragen zu deiner Community. Freiwillig, und du kannst auch nur eine beantworten.",
+      "start": "Gerne",
+      "submit": "Antworten senden",
+      "later": "Später",
+      "never": "Nicht mehr fragen",
+      "thanks": "Danke — das hilft uns wirklich weiter.",
+      "failed": "Das hat gerade nicht geklappt. Bitte versuch es später noch einmal.",
+      "earlyAccess": "In Arbeit",
+      "questions": {
+        "purpose": "Warum bist du bei Pukalani?",
+        "memberRange": "Wie viele Mitglieder hast du etwa?",
+        "goal": "Was wäre in sechs Monaten ein echter Erfolg?"
+      },
+      "purpose": {
+        "new": {
+          "label": "Ich baue etwas Neues auf",
+          "hint": "Die Community entsteht gerade erst."
+        },
+        "migrate": {
+          "label": "Ich ziehe von woanders um",
+          "hint": "Es gibt sie schon — auf einer anderen Plattform."
+        },
+        "looking": {
+          "label": "Ich schaue mich erst einmal um",
+          "hint": "Noch unentschieden, ob und wie es losgeht."
+        }
+      },
+      "memberRange": {
+        "none": "Noch keine",
+        "to100": "Bis 100",
+        "to500": "100 bis 500",
+        "to1000": "500 bis 1.000",
+        "to5000": "1.000 bis 5.000",
+        "over5000": "Mehr als 5.000"
+      },
+      "goal": {
+        "relationships": "Menschen kennen einander",
+        "discussion": "Es wird lebhaft diskutiert",
+        "knowledge": "Wissen ist gesammelt und auffindbar",
+        "reach": "Mehr Menschen finden hierher",
+        "events": "Wir treffen uns regelmäßig",
+        "courses": "Meine Kurse laufen hier",
+        "revenue": "Die Community trägt sich finanziell"
+      },
+      "validation": {
+        "empty": "Bitte beantworte mindestens eine Frage."
+      }
+    },
     "gettingStarted": {
       "title": "Die ersten fünf Schritte",
       "intro": "In dieser Reihenfolge ist deine Community in einer halben Stunde startklar.",
