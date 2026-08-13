@@ -77,7 +77,7 @@
  *
  *   pnpm migrate --app <app> --layer system
  */
-import { Client, TablesDB } from 'node-appwrite'
+import { Client, Query, TablesDB } from 'node-appwrite'
 
 const endpoint = process.env.NUXT_PUBLIC_APPWRITE_ENDPOINT
 const projectId = process.env.NUXT_PUBLIC_APPWRITE_PROJECT_ID
@@ -113,6 +113,40 @@ async function step(label: string, run: () => Promise<unknown>) {
   }
 }
 
+/**
+ * Spalte anlegen — ABER VORHER NACHSEHEN, ob es sie schon gibt.
+ *
+ * DIE 409-ABKÜRZUNG TRÄGT HIER NICHT, und das ist keine Vorsicht, sondern eine
+ * Lehre aus 002-app-config.ts (dort steht dieselbe Warnung): fordert man eine
+ * bereits vorhandene Varchar-Spalte ein zweites Mal an, antwortet Appwrite
+ * nicht immer mit 409 „existiert schon", sondern mit **400
+ * `column_limit_exceeded`** — es prüft das Zeilenbudget von MariaDB, bevor es
+ * die Doppelung bemerkt. Ein `step()` mit reinem 409-Fang läuft dann beim
+ * ZWEITEN Lauf auf einen harten Fehler, und die Migration ist genau das nicht
+ * mehr, was oben zugesagt ist: idempotent.
+ *
+ * Das ist kein theoretischer Fall — am 2026-08-13 lokal live erwischt, an
+ * system-033, das die Abkürzung benutzt: `pnpm migrate --layer system` stirbt
+ * dort auf jeder Instanz, auf der 033 bereits gelaufen ist.
+ *
+ * `Query.limit(200)` ist PFLICHT: ohne explizites Limit liefert `listColumns`
+ * 25 Spalten. Eine abgeschnittene Liste meldet „Spalte fehlt" — und dann steht
+ * man wieder vor genau dem 400.
+ */
+async function ensureColumn(tableId: string, key: string, create: () => Promise<unknown>) {
+  try {
+    const { columns } = await tablesDB.listColumns({ databaseId: db, tableId, queries: [Query.limit(200)] })
+    if (columns.some(column => column.key === key)) {
+      console.log(`↷ Column ${tableId}.${key} (existiert bereits)`)
+      return
+    }
+  }
+  catch {
+    // Table fehlt o. Ä. — step() unten meldet es sauber.
+  }
+  await step(`Column ${tableId}.${key}`, create)
+}
+
 async function waitForColumns(tableId: string) {
   for (let i = 0; i < 60; i++) {
     const { columns } = await tablesDB.listColumns({ databaseId: db, tableId })
@@ -138,12 +172,12 @@ await step('Table community_seo', () => tablesDB.createTable({
 // „keine eigene Wahl" — deshalb nicht required. Der Leser
 // (`resolveCommunitySeo`) fällt dann auf den Anriss der Startseite zurück,
 // also auf das Verhalten vor U15.
-await step('Column community_seo.metaDescription', () => tablesDB.createVarcharColumn({
+await ensureColumn('community_seo', 'metaDescription', () => tablesDB.createVarcharColumn({
   databaseId: db, tableId: 'community_seo', key: 'metaDescription', size: 320, required: false, xdefault: '',
 }))
 
 // „Diese Community aus Suchmaschinen raushalten."
-await step('Column community_seo.noindex', () => tablesDB.createBooleanColumn({
+await ensureColumn('community_seo', 'noindex', () => tablesDB.createBooleanColumn({
   databaseId: db, tableId: 'community_seo', key: 'noindex', required: false, xdefault: false,
 }))
 
