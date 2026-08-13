@@ -80,6 +80,15 @@ const WRITE_LIMITED: { re: RegExp, bucket: string, max?: number }[] = [
   // Writes/JWTs erzeugen lassen. heartbeat+leave teilen EIN Budget.
   { re: /^POST \/api\/presence\/(heartbeat|leave)$/, bucket: 'presence:write', max: PRESENCE_MAX },
   { re: /^GET \/api\/auth\/realtime-token$/, bucket: 'auth:jwt', max: TOKEN_MAX },
+  // Social-Login (U14): zwei GETs, die beide ÜBER DEN ADMIN-CLIENT schreiben —
+  // der Start prägt einen OAuth-Token bei Appwrite, die Rückkehr eine SESSION.
+  // Beide sind session-los erreichbar, Appwrites eigene Bremse greift wegen des
+  // API-Keys nicht, und der Rest der Auth-Routen ist längst gedeckelt: hier
+  // fehlte es schlicht (Befund beim Bau von U14). EIN gemeinsamer Bucket, weil
+  // es EIN Vorgang ist — hin und zurück; ein Mensch macht das einmal, 10/min
+  // sind fünf vollständige Anmeldungen je Minute und IP.
+  { re: /^GET \/api\/auth\/oauth$/, bucket: 'auth:oauth', max: TOKEN_MAX },
+  { re: /^GET \/api\/auth\/oauth\/callback$/, bucket: 'auth:oauth', max: TOKEN_MAX },
   // „Deine Communities" (F12): ein GET, aber kein billiger. Jeder Aufruf prägt
   // ein Appwrite-JWT und lässt danach das Control Plane zwei Tabellen lesen —
   // vier Operationen über ZWEI Projekte, also dieselbe Kostenklasse wie der

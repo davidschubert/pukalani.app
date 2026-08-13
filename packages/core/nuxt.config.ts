@@ -258,6 +258,14 @@ export default defineNuxtConfig({
       appwriteGdprBucket: '',
       // Gegenpart zu NUXT_PUBLIC_APP_URL — ohne Skeleton-Key mappt die Env-Var ins Leere
       appUrl: '',
+      // Social-Login: welche Provider hat DIESE INSTANZ wirklich belegt
+      // (kommagetrennt, heute nur `google`) — NUXT_PUBLIC_AUTH_OAUTH_PROVIDERS.
+      // ZWEITE Bedingung neben `pukalani.auth.providers`: die Client-Id und das
+      // Geheimnis liegen in der Appwrite-Console, nicht bei uns; eine
+      // app.config gilt aber für jede Instanz, die den Layer erbt. Leer =
+      // kein Knopf, und genau deshalb ist dieser Bau ohne Credentials
+      // gefahrlos. Regeln + Begründung: core/shared/oauthProviders.ts
+      authOauthProviders: '',
       tenancy: {
         // Kontroll-Hosts der Multi-Tenant-App (Kundenbereich/Onboarding),
         // kommagetrennt: NUXT_PUBLIC_TENANCY_CONTROL_HOSTS. Laufzeit-Override
