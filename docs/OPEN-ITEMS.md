@@ -211,17 +211,6 @@ der Landing. Prüfung vor dem Live-Gang: Runbook §2.4. Der Klammer-Hinweis „z
 noch auf den `studio`-Alias" ist seit 2026-07-30 gegenstandslos: der
 Test-Webhook zeigt auf `control`, der Alias ist entfernt.
 
-**C2 — UI-Plan-Gate für Kurse/Events** in der Nav (`pukalani.chrome.nav`,
-blueprint) — heute per Direktlink erreichbar, läuft in den API-404.
-Herkunft: Kurse-Bericht / Audit S4.
-
-**C3 — Kompositionen Events + Kurse in den Bauplan.** `EventDetail` und
-`LessonView` füllen ihren `#comments`-Slot bisher nur in `apps/comments`.
-Herkunft: Produkt-Bilanz.
-
-**C4 — Nav-Einträge events/courses** aus `apps/comments/app/app.config.ts` in
-die Layer verschieben. Herkunft: S9-Bericht.
-
 **C6 — Aufräum-Migration:** Legacy-Spalte `app_config.entitlements` droppen.
 Gebaut am 2026-07-31 als `packages/system/scripts/migrations/027-drop-app-config-entitlements.ts`,
 zusammen mit dem Code-Abbau des 2-Wege-Reads (`getLegacyEntitlementsDocument`/
