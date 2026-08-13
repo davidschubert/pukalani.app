@@ -30,6 +30,12 @@
       "termsLink": "Read Terms and Conditions"
     },
     "logout": "Sign out",
+    "oauth": {
+      "google": "Sign in with Google",
+      "github": "Sign in with GitHub",
+      "privacy": "Google learns that you sign in here, and we receive your name and email address. Nothing more: no ad tracking, no contacts, no access to your Google account.",
+      "oauth_unavailable": "Signing in with the external provider did not work. Please sign in with email and password."
+    },
     "or": "or",
     "password": {
       "min": "8 or more characters",

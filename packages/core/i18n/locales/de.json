@@ -30,6 +30,12 @@
       "termsLink": "AGB lesen"
     },
     "logout": "Abmelden",
+    "oauth": {
+      "google": "Mit Google anmelden",
+      "github": "Mit GitHub anmelden",
+      "privacy": "Google erfährt dabei, dass du dich hier anmeldest, und wir bekommen deinen Namen und deine E-Mail-Adresse. Mehr nicht: kein Werbe-Tracking, keine Kontakte, kein Zugriff auf dein Google-Konto.",
+      "oauth_unavailable": "Die Anmeldung über den externen Anbieter hat nicht geklappt. Bitte melde dich mit E-Mail und Passwort an."
+    },
     "or": "oder",
     "password": {
       "min": "8 oder mehr Zeichen",

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { FormSubmitEvent } from '@nuxt/ui'
 import { createLoginSchema, type LoginInput } from '../../../schemas/auth'
+import { OAUTH_UNAVAILABLE_CODE } from '../../../shared/oauthProviders'
 
 const { t } = useI18n()
 const localePath = useLocalePath()
@@ -18,16 +19,16 @@ const showPassword = ref(false)
 // Code-Login-Link nur, wenn Email-OTP aktiviert ist (config-gated)
 const otpEnabled = computed(() => appConfig.pukalani?.auth?.otp === true)
 
-// Social-Login config-gated (pukalani.auth.providers) — Default leer, keine Deko-Buttons
-const PROVIDER_META: Record<string, { label: string, icon: string }> = {
-  github: { label: 'GitHub', icon: 'i-ph-github-logo' },
-  google: { label: 'Google', icon: 'i-ph-google-logo' },
-}
-const providers = computed(() =>
-  (appConfig.pukalani?.auth?.providers ?? []).flatMap((id) => {
-    const meta = PROVIDER_META[id]
-    return meta ? [{ id, ...meta }] : []
-  }),
+/**
+ * Ein gescheiterter Social-Login kommt als WEITERLEITUNG zurück, nicht als
+ * abgelehnter $fetch — die Routen können kein Formular ansprechen, sie können
+ * nur einen Grund an die Adresse hängen. Ohne diesen Leser landete der Gast
+ * auf einer makellosen Anmeldeseite und erführe nie, dass eben etwas
+ * schiefging (der Grund wurde bis U14 gesetzt und nirgends gelesen).
+ */
+const route = useRoute()
+const oauthError = computed(() =>
+  route.query.error === OAUTH_UNAVAILABLE_CODE ? t(`auth.oauth.${OAUTH_UNAVAILABLE_CODE}`) : null,
 )
 
 // Eingegebene E-Mail überlebt den Wechsel Login ↔ Register ↔ Code
@@ -67,23 +68,9 @@ async function onSubmit(event: FormSubmitEvent<LoginInput>) {
     </div>
 
     <UAlert v-if="errorMessage" color="error" variant="subtle" :title="errorMessage" />
+    <UAlert v-else-if="oauthError" color="error" variant="subtle" :title="oauthError" data-oauth-error />
 
-    <div v-if="providers.length" class="space-y-2">
-      <UButton
-        v-for="provider in providers"
-        :key="provider.id"
-        :label="provider.label"
-        :icon="provider.icon"
-        color="neutral"
-        variant="subtle"
-        size="lg"
-        block
-        :to="`/api/auth/oauth?provider=${provider.id}`"
-        external
-        :data-provider="provider.id"
-      />
-      <USeparator :label="t('auth.or')" />
-    </div>
+    <AuthOauthButtons />
 
     <UForm :schema="schema" :validate-on="[]" :state="state" class="space-y-4" @submit="onSubmit">
       <UFormField :label="t('auth.fields.email')" name="email" required>

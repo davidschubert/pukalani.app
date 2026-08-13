@@ -143,6 +143,22 @@ async function onSubmit(event: FormSubmitEvent<RegisterFormInput>) {
       <UButton type="submit" block size="lg" :loading="loading">{{ t('auth.register.submit') }}</UButton>
     </UForm>
 
+    <!--
+      Social-Login BEWUSST unter dem Formular (U14): das AGB-Häkchen gilt für
+      JEDEN Weg ins Konto, nicht nur für den mit Passwort. Stünde der
+      Google-Knopf oben, wäre er die Hintertür um genau diese Zusage herum;
+      gesperrt neben der Checkbox ist der Zusammenhang sichtbar.
+      Der Server kann die Zustimmung nicht nachprüfen — er bekommt sie auch
+      beim Passwort-Weg nicht (`terms` ist reine UI-Validierung, s. onSubmit).
+      Damit ist der Google-Weg genauso streng wie der bestehende, und nicht
+      strenger vorgetäuscht.
+    -->
+    <AuthOauthButtons
+      separator="before"
+      :disabled="requireTerms && !state.terms"
+      :disabled-hint="t('auth.register.termsLabel')"
+    />
+
     <p v-if="termsUrl" class="text-center">
       <ULink :to="termsUrl" target="_blank" class="text-sm text-muted hover:text-primary">
         {{ t('auth.register.termsLink') }}
