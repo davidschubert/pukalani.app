@@ -29,6 +29,40 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### U14 (Code-Teil) — Anmelden mit Google, unsichtbar bis zu Davids Klicks ✅ 2026-08-12
+
+Der komplette Code-Teil ist live und GEFAHRLOS ohne Credentials: kein
+konfigurierter Provider ⇒ kein Button, Start-Route 404, Callback mit Müll ⇒
+saubere Umleitung OHNE Session-Cookie (alles live nachgemessen). Flow:
+`GET /api/auth/oauth?provider=google` (zwei Bedingungen: Config-Flag UND Env)
+→ `createOAuth2Token` (NICHT createOAuth2Session — das Cookie muss auf
+UNSEREM Host landen) → Google → Appwrite-Callback → unser
+`/api/auth/oauth/callback` tauscht userId+secret gegen die Session und setzt
+das httpOnly-Cookie mit DEMSELBEN Helfer wie der Passwort-Login. Redirect-Ziel
+reist als 10-min-Lax-Cookie durch `safeRedirectTarget`.
+
+**Die Circle-Falle trifft uns nicht** (am lebenden Appwrite verifiziert, nicht
+angenommen): Google sieht ausschließlich Appwrites Redirect-URI — EIN
+Google-Client für die ganze Plattform; je Host braucht es nur die Appwrite
+Web-Platform, und die existiert wegen Realtime/F45 längst automatisch (Wildcard
++ `pending_platform` für Kundendomains). Erstkontakt = vollwertiges Konto:
+A5-Beitritt, Feed, Meilenstein, Auth-Log wie beim Passwort-Weg; bei
+geschlossener Registrierung wird die frische Session EINGEZOGEN, das Konto
+NICHT gelöscht (Appwrite legt es vor unserem Code an — Verweigern ja,
+Vernichten nie). AGB-Häkchen gatet die Buttons in der UI, exakt so streng wie
+der Passwort-Weg. 35 neue Unit-Tests; Beweis in Schichten, der Voll-Flow ist
+ohne echten Client ehrlich als „nicht messbar" ausgewiesen. Deploy `942e58c1`.
+Rest: Davids Klick-Liste in docs/runbooks/GOOGLE-LOGIN.md.
+
+**Gelernt:** (1) Ein „geparkt" geglaubter Punkt kann ein halbes Skelett im
+Code haben (Phase-4-OAuth-Routen existierten) — vor dem Bauen greppen, aus
+„neu bauen" wird „härten und vervollständigen". (2) `createOAuth2Session`
+wäre bei SSR-Cookie-Architektur der falsche Appwrite-Weg — die Session-Cookies
+landeten auf der Appwrite-Domain; Token-Flow + eigener Callback ist das
+Muster. (3) Appwrite validiert success/failure-URLs gegen die registrierten
+Platforms — Start-Routen dafür fail-soft bauen, sonst ist ein fehlender
+Platform-Eintrag ein 500 statt einer stillen Abschaltung.
+
 ### F47-Rest / Adblock-Proxy — die Statistik läuft über den eigenen Host ✅ 2026-08-12
 
 Plausibles offizielles „Bypass adblockers"-Muster als Nitro-Routen im
