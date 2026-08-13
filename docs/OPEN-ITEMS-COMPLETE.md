@@ -29,6 +29,31 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### F47-Rest / Adblock-Proxy — die Statistik läuft über den eigenen Host ✅ 2026-08-12
+
+Plausibles offizielles „Bypass adblockers"-Muster als Nitro-Routen im
+core-Layer (dort entsteht auch das Script-Tag): `GET /api/stats-script.js`
+(proxyt das Script, Microcache 6 h) + `POST /api/stats-event` (proxyt
+`/api/event`, nie gecacht) — Pfade bewusst neutral benannt, EIN gemeinsames
+Gate (`analyticsProxy.ts`): ohne `pukalani.analytics.enabled` antworten beide
+404. Kopfzeilen als ERLAUBNISLISTE gebaut: user-agent, x-forwarded-for aus
+`trustedClientIp()` (nie der rohe Header), proto/host, content-type —
+BEWUSST ohne `cookie` (trüge auf Mandanten-Hosts die Appwrite-Session) und
+`authorization`. Korrektur am Plan: `data-api` gibt es im v3-Script nicht
+mehr — Events gehen über `plausible.init({endpoint})`; mit `data-api` hätte
+das Script über uns geladen und trotzdem direkt an die Instanz gemeldet
+(genau an den Blocker). Legacy-Snippets ohne `pa-`-Id fallen sauber aufs alte
+Verhalten. Live belegt (pukalani.app): `plausible.hawaii.studio` 0× im HTML,
+Script 200 über den eigenen Pfad, Event **202** vom echten Upstream, `help`
+(ohne Analytics) 404. Deploy `593bc6ab` gate+deploy=success.
+
+**Gelernt:** (1) Ein Proxy-Rezept aus einer Doku altert mit der
+Script-Generation — das v3-Script kennt `data-api` nicht mehr, und der halbe
+Proxy (Script ja, Events nein) sähe funktionierend aus und misst nichts.
+(2) Script- und Event-Route brauchen EIN gemeinsames Gate — getrennt gepflegt
+könnte das Script laden, während die Events 404 bekommen: derselbe stille
+Halb-Zustand.
+
 ### Krümel-Welle — sieben Aufräumer + ein gefundenes Sicherheitsloch ✅ 2026-08-12
 
 **Font-Seed** (deploy.yml): Zurückschreiben zweistufig — Blobs additiv,
