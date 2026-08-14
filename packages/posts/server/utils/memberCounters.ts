@@ -3,6 +3,13 @@ import type { H3Event } from 'h3'
 import type { TenantDb } from '../../../core/server/utils/tenantDb'
 import type { UserCounterEvent } from '../../../core/server/utils/userCounterEvents'
 import {
+  crossesLikeLimit,
+  decideLikeSpend,
+  likeLimitFrom,
+  utcDayKey,
+  type LikeAllowance,
+} from '../../../core/shared/likeAllowance'
+import {
   counterFellBehind,
   emptyMemberCounterValues,
   healedValues,
@@ -117,8 +124,15 @@ async function createRow(
   userId: string,
   values: MemberCounterValues,
   seeded: boolean,
+  /**
+   * Felder NEBEN den Zählern, die beim Anlegen gleich mitgeschrieben werden
+   * sollen (heute: der Tagesstand des Like-Limits). Sie stehen bewusst nicht
+   * in `MemberCounterValues` — das sind die additiv geführten ZAHLEN, und
+   * `likeDay` ist keine Zahl, die man hoch- oder herunterzählt.
+   */
+  extra: Partial<Pick<MemberCounters, 'likeDay' | 'likesToday'>> = {},
 ): Promise<{ row: MemberCounters | null, created: boolean }> {
-  const row = await db.create<MemberCounters>(MEMBER_COUNTERS_TABLE, { userId, ...values, seeded }, {
+  const row = await db.create<MemberCounters>(MEMBER_COUNTERS_TABLE, { userId, ...values, ...extra, seeded }, {
     // KEINE Row-Permissions: gelesen wird ausschließlich über die
     // Operator-Klinke. Ohne Leser gibt es kein Realtime-Ereignis — und ein
     // Zähler, der bei jeder fremden Stimme in offene Fenster funkt, wäre
@@ -236,6 +250,130 @@ export async function applyMemberCounterEvents(event: H3Event, events: readonly 
       })
     }
   }))
+}
+
+/* ─── Das Tages-Limit für Likes (F57 Mechanik 3) ─────────────────────────── */
+
+/**
+ * PURE genug für hier: das Kontingent aus der App-Config.
+ *
+ * Gelesen über `useAppConfig()` wie das Mandanten-Kontingent
+ * (`core/server/utils/tenantQuota.ts`) — es ist eine Bau-Einstellung dieser
+ * Instanz, keine Zeile in `app_config`, die ein Betreiber zur Laufzeit dreht.
+ * Wäre sie das, hinge an jeder einzelnen Stimme eine zusätzliche Abfrage.
+ */
+function likesPerDayFromConfig(): unknown {
+  const appConfig = useAppConfig() as { pukalani?: { discussions?: { likesPerDay?: unknown } } }
+  return appConfig.pukalani?.discussions?.likesPerDay
+}
+
+/**
+ * Den erreichten Tag verbuchen — über DENSELBEN Zähl-Vertrag wie jede andere
+ * Buchung, nicht mit einem eigenen Schreibweg daneben.
+ *
+ * Der Umweg ist Absicht: `recordUserCounterEvents` ist die Stelle, an der aus
+ * einem neuen Stand ein Abzeichen wird (`awardCounterBadges`). Würde hier
+ * direkt hochgezählt, müsste die Verleihung ein zweites Mal angestoßen
+ * werden — und ein Layer mit zwei Wegen in dieselbe Verleihung bekommt früher
+ * oder später zwei Regeln.
+ */
+async function bookLikeLimitDay(event: H3Event, userId: string): Promise<void> {
+  await recordUserCounterEvents(event, [{ userId, kind: 'likeLimitDays', delta: 1 }])
+}
+
+/**
+ * EIN LIKE VERBRAUCHEN — die posts-Seite des Core-Vertrags
+ * `registerLikeAllowanceAuthority` (F57 Mechanik 3).
+ *
+ * ── WARUM DER STAND IN `member_counters` LIEGT UND NICHT IN EIGENEN ZEILEN ─
+ * Weil es die Zeile schon gibt, und zwar genau EINE je (Community, Mensch) —
+ * angelegt, im Prozess gemerkt (`rowIds`) und bei JEDER Aufstimme ohnehin
+ * gelesen und geschrieben. Der Tagesstand kostet damit KEINE zusätzliche
+ * Abfrage im heißen Pfad, nur drei Spalten.
+ *
+ * Die Alternative wäre eine Zeile je (Mensch, Tag) gewesen — sie hätte das
+ * Aufräumen mitgebracht (wer räumt die Tage von vorgestern weg?) und für die
+ * Frage „wie viele heute" einen eigenen Index verlangt. Und die Alternative
+ * ohne jede eigene Spalte — bei jeder Stimme die heutigen Vote-Zeilen zählen —
+ * ist nicht nur teurer (zwei Abfragen über zwei Tabellen in zwei Layern), sie
+ * ist FALSCH: die Rücknahme LÖSCHT eine Vote-Zeile, ein Zählen des Bestands
+ * gäbe das Kontingent also zurück, und das Limit wäre mit zwei Klicks je Like
+ * beliebig oft zu umgehen. Der Stand muss deshalb ein VERBRAUCH sein, kein
+ * Bestand.
+ *
+ * ── DIE KLINKE: `operator`/`operator` WIE DIE ÜBRIGEN BUCHUNGEN ───────────
+ * Über `counterDb` und damit aus denselben zwei Gründen wie dort (A5: eine
+ * Buchung ist kein Beitritt; M13: die Stimme selbst scheitert schon eine Zeile
+ * vorher an der Mitglieds-Klinke, wenn die Community gesperrt ist). Ein
+ * `actor: 'member'` hier hieße, dass ausgerechnet das VERBRAUCHEN eines Likes
+ * jemanden zum Mitglied macht.
+ *
+ * ── ES WIRFT (und der Vertrag fängt) ──────────────────────────────────────
+ * Anders als `applyMemberCounterEvents` schluckt diese Funktion nichts selbst:
+ * `spendLikeAllowance` im Core hat den einen begründeten Fail-open-Zweig, und
+ * zwei Netze übereinander machen aus einem Ausfall eine stille Lüge.
+ */
+export async function spendMemberLikeAllowance(event: H3Event, userId: string): Promise<LikeAllowance> {
+  const limit = likeLimitFrom(likesPerDayFromConfig())
+  if (limit <= 0) return { ok: true }
+
+  const db = counterDb(event)
+  const today = utcDayKey(Date.now())
+
+  let row = await findRow(event, db, userId)
+  if (!row) {
+    // Erste Stimme dieses Menschen überhaupt: die Zeile trägt den Tagesstand
+    // gleich mit — ein getrenntes Anlegen und Hochzählen wäre ein Schritt und
+    // ein Wettlauf mehr (dieselbe Überlegung wie bei den Zähler-Deltas).
+    const attempt = await createRow(event, db, userId, emptyMemberCounterValues(), false, { likeDay: today, likesToday: 1 })
+    if (attempt.created) {
+      if (crossesLikeLimit(1, limit)) await bookLikeLimitDay(event, userId)
+      return { ok: true }
+    }
+    // Wettlauf verloren ⇒ die fremde Zeile gilt; ohne Zeile (Störung) bleibt es
+    // beim erlaubenden Ausgang, wie im Vertrag beschrieben.
+    if (!attempt.row) return { ok: true }
+    row = attempt.row
+  }
+
+  const decision = decideLikeSpend({
+    limit,
+    today,
+    storedDay: row.likeDay ?? '',
+    storedCount: row.likesToday ?? 0,
+  })
+  if (decision.mode === 'off') return { ok: true }
+  if (decision.mode === 'denied') return { ok: false }
+
+  if (decision.mode === 'reset') {
+    /**
+     * NEUER TAG: absolut setzen statt hochzählen — der alte Stand gehört einem
+     * vergangenen Tag und darf nicht weiterwachsen.
+     *
+     * Das ist die EINE Stelle ohne atomares Hochzählen, und der Preis ist
+     * benannt: treffen sich zwei erste Stimmen desselben Menschen in derselben
+     * Sekunde, schreiben beide die 1 und eine Stimme bleibt ungezählt. Höchstens
+     * ein Like je Tag und Mensch — dafür ein Lesen-Rechnen-Schreiben zu
+     * vermeiden, hieße den Tageswechsel in einen nächtlichen Lauf über alle
+     * Zeilen zu verlegen.
+     */
+    await db.update<MemberCounters>(MEMBER_COUNTERS_TABLE, row.$id, { likeDay: today, likesToday: 1 }, 'Counters not found')
+    if (crossesLikeLimit(1, limit)) await bookLikeLimitDay(event, userId)
+    return { ok: true }
+  }
+
+  /**
+   * DERSELBE TAG: atomar hochzählen — und die Antwort des Hochzählens ist
+   * zugleich die Antwort auf „war ich der, der das Limit erreicht hat?".
+   *
+   * Genau daran hängt die Idempotenz des Abzeichen-Zählers: bei fünf parallelen
+   * Stimmen sieht jeder Aufrufer einen ANDEREN Wert, also trifft `=== limit`
+   * höchstens einen. Ein Lesen-Rechnen-Schreiben hätte hier zwei Fehler auf
+   * einmal — verlorene Likes UND ein doppelt gebuchter Tag.
+   */
+  const latest = await db.increment<MemberCounters>(MEMBER_COUNTERS_TABLE, row.$id, 'likesToday', { value: 1 }, 'Counters not found')
+  if (crossesLikeLimit(latest.likesToday ?? 0, limit)) await bookLikeLimitDay(event, userId)
+  return { ok: true }
 }
 
 /* ─── Der Leseweg (Abzeichen-Auswertung) ─────────────────────────────────── */

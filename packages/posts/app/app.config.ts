@@ -142,6 +142,24 @@ export default defineAppConfig({
      */
     discussions: {
       reactions: ['laugh', 'tada', 'thinking', 'eyes', 'sad', 'fire', 'thanks', 'idea'],
+
+      /**
+       * DAS TAGES-LIMIT FÜR LIKES (F57 Mechanik 3, Davids Zahl vom 2026-08-14).
+       *
+       * 50 Aufstimmen je Mensch, Community und UTC-Kalendertag. Im Alltag
+       * unspürbar — wer der Reihe nach durch einen Feed klickt, merkt es.
+       * `0` schaltet die Mechanik ganz aus (und damit auch die drei Abzeichen,
+       * die daran hängen: ohne Limit gibt es keinen Tag, an dem es erreicht
+       * wäre).
+       *
+       * DIE ZAHL STEHT HIER UND NICHT IN EINER DATENBANK-ZEILE: sie ist eine
+       * Eigenschaft dieses Bauplans, keine Stellschraube, die ein Betreiber je
+       * Community dreht. Läge sie in `app_config`, hinge an JEDER Aufstimme
+       * eine zusätzliche Abfrage — und die Frage „warum ging das gestern noch"
+       * hätte keine nachlesbare Antwort mehr. Der Code-Default ist zugleich das
+       * Produktversprechen; eine App darf ihn kürzen, nicht verstecken.
+       */
+      likesPerDay: 50,
     },
   },
 })

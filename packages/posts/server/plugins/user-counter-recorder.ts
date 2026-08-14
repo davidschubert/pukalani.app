@@ -14,4 +14,12 @@
  */
 export default defineNitroPlugin(() => {
   registerUserCounterRecorder(applyMemberCounterEvents)
+  /**
+   * DASSELBE FÜR DAS TAGES-LIMIT (F57 Mechanik 3): der Tagesstand steht in
+   * derselben Zeile, also gehört auch diese Autorität hierher — und in
+   * dasselbe Plugin, damit „wer besitzt member_counters" an EINER Stelle
+   * beantwortet ist. Ohne posts-Layer bleibt der Vertrag unbesetzt und es gibt
+   * schlicht kein Limit (erlaubender No-Op, Begründung im Vertrag).
+   */
+  registerLikeAllowanceAuthority(spendMemberLikeAllowance)
 })

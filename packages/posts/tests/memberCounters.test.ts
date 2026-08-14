@@ -34,6 +34,12 @@ describe('seedValuesFrom', () => {
       // Quellzeilen (`community_invites`) liegen im Control Plane, zu dem die
       // Runtime keinen Schlüssel hat. Startet für alle bei 0, wie `edits`.
       invitesAccepted: 0,
+      // F57 Mechanik 3: ebenfalls nicht eichbar, und zwar aus dem schaerfsten
+      // Grund von allen — es gibt gar keine Quelle. „An diesem Tag war das
+      // Kontingent aufgebraucht" laesst sich aus dem Bestand nicht einmal
+      // falsch rekonstruieren: die zurueckgenommenen Stimmen haben mitgezaehlt
+      // und sind geloescht.
+      likeLimitDays: 0,
     })
   })
 
@@ -110,6 +116,8 @@ describe('memberCounterValues', () => {
       'reactionsGiven',
       // posts-018 (F57 Mechanik 2)
       'invitesAccepted',
+      // posts-019 (F57 Mechanik 3)
+      'likeLimitDays',
     ])
   })
 })

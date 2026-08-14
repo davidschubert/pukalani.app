@@ -521,6 +521,27 @@ export interface MemberCounters extends Models.Row {
    * Begründung im Kopf von Migration posts-016).
    */
   trustLevelLeader: boolean
+  /**
+   * DER TAGESSTAND DES LIKE-LIMITS (F57 Mechanik 3, Migration posts-019) —
+   * `likeDay` + `likesToday` gehören zusammen und sind nur zusammen wahr.
+   *
+   * `likeDay` ist der UTC-Kalendertag (`YYYY-MM-DD`, `''` = noch nie gestimmt),
+   * `likesToday` die Anzahl der an JENEM Tag vergebenen Aufstimmen. Der
+   * Tageswechsel ist deshalb kein Sweep, sondern ein Vergleich beim nächsten
+   * Like: steht dort ein anderer Tag, ist der alte Stand bedeutungslos und wird
+   * überschrieben. Ein nächtlicher Lauf, der Millionen Zeilen auf 0 setzt,
+   * wäre Arbeit für Zeilen, die an dem Tag ohnehin niemand anfasst.
+   */
+  likeDay: string
+  likesToday: number
+  /**
+   * An WIE VIELEN Tagen das Limit erreicht wurde — der Zähler hinter „Out of
+   * Love" / „Higher Love" / „Crazy in Love" (1 / 5 / 20 Tage).
+   *
+   * Rein mitschreibend wie `edits` und `invitesAccepted`: er wird nie geeicht,
+   * weil es kein Aggregat gibt, aus dem sich vergangene Tage ableiten ließen.
+   */
+  likeLimitDays: number
 }
 
 /**

@@ -17,6 +17,7 @@ export const MEMBER_COUNTER_COLUMNS = [
   'edits',
   'reactionsGiven',
   'invitesAccepted',
+  'likeLimitDays',
 ] as const
 
 export type MemberCounterColumn = (typeof MEMBER_COUNTER_COLUMNS)[number]
@@ -25,7 +26,7 @@ export type MemberCounterColumn = (typeof MEMBER_COUNTER_COLUMNS)[number]
 export type MemberCounterValues = Record<MemberCounterColumn, number>
 
 export function emptyMemberCounterValues(): MemberCounterValues {
-  return { topicsCreated: 0, repliesCreated: 0, upvotesGiven: 0, upvotesReceived: 0, edits: 0, reactionsGiven: 0, invitesAccepted: 0 }
+  return { topicsCreated: 0, repliesCreated: 0, upvotesGiven: 0, upvotesReceived: 0, edits: 0, reactionsGiven: 0, invitesAccepted: 0, likeLimitDays: 0 }
 }
 
 /**
@@ -72,6 +73,14 @@ function whole(value: number | undefined): number {
  *    grundsätzlich kein Aggregat, nicht bloß ein zu teures — gemeldet wird die
  *    Annahme von der Route, die sie abwickelt.
  *
+ *  - `likeLimitDays` (F57 Mechanik 3) hat ÜBERHAUPT KEINE Quelle, nicht bloß
+ *    eine unerreichbare. „An diesem Tag war das Kontingent aufgebraucht" ist
+ *    ein Zustand, der vergeht: die Stimmen jenes Tages stehen zwar noch in
+ *    `comment_votes`/`post_votes`, aber eine zurückgenommene ist dort
+ *    gelöscht — und gerade sie hat gezählt (die Rücknahme erstattet nichts).
+ *    Aus dem Bestand ließe sich der Tag also nicht einmal falsch
+ *    rekonstruieren.
+ *
  * Was das praktisch heißt, gehört ausgesprochen: das Abzeichen „Editor" zählt
  * ab der Umstellung, und eine spätere Trust-Level-Schwelle „erhaltene
  * Zustimmung" ebenso. Das ist der Preis dafür, dass es diese Zahlen überhaupt
@@ -93,6 +102,7 @@ export function seedValuesFrom(input: Partial<MemberCounterSeedInput>): MemberCo
     edits: 0,
     reactionsGiven: whole(input.reactionsGiven),
     invitesAccepted: 0,
+    likeLimitDays: 0,
   }
 }
 
@@ -139,6 +149,7 @@ export function healedValues(
     edits: stored.edits,
     reactionsGiven: Math.max(stored.reactionsGiven, seed.reactionsGiven),
     invitesAccepted: stored.invitesAccepted,
+    likeLimitDays: stored.likeLimitDays,
   }
 }
 
