@@ -7,6 +7,7 @@ import { COMMUNITY_MEMBERS_TABLE, type CommunityMemberRow } from '../../shared/t
 import { COMMUNITY_INVITES_TABLE, type CommunityInviteRow } from '../../shared/types/communityInvite'
 import { COMMUNITIES_TABLE, type TenantRow } from '../../shared/types/tenantRecord'
 import type { CommunityTeamDecision, CommunityTeamMemberFacts } from '../../shared/communityTeam'
+import { memberInviteLimitFrom } from '../../shared/communityInviteQuota'
 import { verifyRuntimeIdentity, type RuntimeIdentity } from './onboardingService'
 
 /**
@@ -135,6 +136,60 @@ export async function listCommunityInvites(event: H3Event, communityId: string):
     ],
   }).catch((error) => { throw toH3Error(error, 'Could not read site invites') })
   return rows
+}
+
+/**
+ * Wie viele Einladungen hat DIESE Person in DIESER Community im laufenden
+ * Fenster erzeugt? (F57 Mechanik 2 — die Zahl hinter „noch 3 von 5".)
+ *
+ * ZWEI Dinge, die man beim Lesen erwartet und die hier bewusst FEHLEN:
+ *
+ *  1. **Kein `status`-Filter.** Gezählt wird jede erzeugte Zeile — auch
+ *     `revoked` und `accepted`. Verbraucht ist eine Einladung mit ihrer
+ *     ERZEUGUNG (Begründung in shared/communityInviteQuota.ts): wer denselben
+ *     Empfänger fünfmal anschreibt, hat fünfmal eine Mail ausgelöst, und
+ *     genau das soll das Kontingent begrenzen. Ein Filter auf `pending`
+ *     machte das Zurückziehen zur Kontingent-Wäsche.
+ *  2. **Kein `Query.limit(1)` mit `total`-Vertrauen allein** — `total` IST der
+ *     gelesene Wert, aber das Fenster muss trotzdem im Filter stehen, und
+ *     `$createdAt` ist über `Query.greaterThan` adressierbar, auch wenn es
+ *     nicht im Index steht (control-037 erklärt, warum das reicht).
+ *
+ * Der Index `idx_community_inviter` (control-037) deckt die beiden
+ * Gleichheits-Filter ab.
+ */
+export async function countCommunityInvitesBy(
+  event: H3Event,
+  communityId: string,
+  invitedBy: string,
+  since: string,
+): Promise<number> {
+  const config = useRuntimeConfig(event)
+  const admin = createAdminClient(event)
+  const { total } = await admin.tablesDB.listRows<CommunityInviteRow>({
+    databaseId: config.public.appwriteDatabaseId,
+    tableId: COMMUNITY_INVITES_TABLE,
+    queries: [
+      Query.equal('communityId', communityId),
+      Query.equal('invitedBy', invitedBy),
+      Query.greaterThan('$createdAt', since),
+      Query.limit(1),
+    ],
+  }).catch((error) => { throw toH3Error(error, 'Could not count invitations') })
+  return total
+}
+
+/**
+ * Das Wochen-Kontingent aus der App-Config (`pukalani.community
+ * .memberInvitesPerWeek`, Core-Default 5).
+ *
+ * Gelesen wird es HIER, im Control Plane, weil hier die Entscheidung fällt.
+ * `apps/control` erbt den onboarding-Layer NICHT (Lehre vom 2026-08-12), der
+ * Wert steht deshalb im CORE — den erben beide Apps.
+ */
+export function memberInviteLimit(): number {
+  const appConfig = useAppConfig() as { pukalani?: { community?: { memberInvitesPerWeek?: unknown } } }
+  return memberInviteLimitFrom(appConfig.pukalani?.community?.memberInvitesPerWeek)
 }
 
 export async function requireCommunityTeamContext(

@@ -1,9 +1,11 @@
 import { ID } from 'node-appwrite'
 import { z } from 'zod'
 import { decideInvite } from '../../../../../shared/communityTeam'
+import { decideMemberInvite, memberInviteWindowStart } from '../../../../../shared/communityInviteQuota'
 import { COMMUNITY_INVITES_TABLE, COMMUNITY_INVITE_TTL_MS, type CommunityInviteRow } from '../../../../../shared/types/communityInvite'
-import { COMMUNITY_ROLES } from '../../../../../../core/shared/communityAuthz'
-import { listCommunityInvites, requireCommunityTeamContext, createCommunityInviteToken, memberFacts, throwOnDenied } from '../../../../utils/communityTeam'
+import { resolveTenantMemberInvitesEnabled } from '../../../../../shared/types/tenantRecord'
+import { COMMUNITY_ROLES, communityRoleHasCapability } from '../../../../../../core/shared/communityAuthz'
+import { countCommunityInvitesBy, listCommunityInvites, memberInviteLimit, requireCommunityTeamContext, createCommunityInviteToken, memberFacts, throwOnDenied } from '../../../../utils/communityTeam'
 import { sendCommunityInviteMail } from '../../../../utils/communityInviteMail'
 
 /**
@@ -20,6 +22,22 @@ import { sendCommunityInviteMail } from '../../../../utils/communityInviteMail'
  *
  * 'owner' ist hier verboten (decideInvite): Besitz entsteht durch Gründung oder
  * Übergabe, nie durch eine Einladung.
+ *
+ * ── SEIT F57 DÜRFEN AUCH MITGLIEDER EINLADEN (Davids Entscheidung 2026-08-14)
+ * Die Capability heißt jetzt `members.invite` statt `team.manage` und sitzt
+ * beim VIEWER — jedes Mitglied mit Zugang. Für ein Mitglied kommen drei
+ * Bedingungen dazu, alle in der PUREN `decideMemberInvite`: der Owner-Schalter
+ * der Community, die eingeladene Rolle (immer `viewer`) und das Kontingent
+ * (5 je rollierender Woche). Owner/Admin gehen unverändert durch.
+ *
+ * WO DIE PRÜFUNG STEHT, IST DIE HALBE MECHANIK: VOR der Mail. Stünde sie
+ * danach, hätte ein erschöpftes Kontingent trotzdem eine Mail verschickt und
+ * nur die Zeile verweigert — die Drossel säße hinter dem Missbrauch.
+ *
+ * WARUM DIE ROLLEN-PRÜFUNG HIER UND NICHT NUR IN DER OBERFLÄCHE: ohne sie
+ * wäre `role: 'admin'` im Body eine Rollen-Vergabe per Mitglieds-Capability —
+ * dieselbe Klasse Fehler, gegen die `community.transfer` als eigene
+ * Capability geschnitten wurde. Ein verstecktes Auswahlfeld ist keine Grenze.
  */
 const bodySchema = z.object({
   jwt: z.string().min(1).max(4096),
@@ -32,7 +50,61 @@ const bodySchema = z.object({
 export default defineEventHandler(async (event) => {
   requireOnboardingCaller(event)
   const body = await readValidatedBody(event, bodySchema.parse)
-  const context = await requireCommunityTeamContext(event, body, 'team.manage')
+  const context = await requireCommunityTeamContext(event, body, 'members.invite')
+
+  /**
+   * F57: die Zusatz-Regeln für MITGLIEDER. `managesTeam` beantwortet die
+   * Capability-Matrix, nicht ein Rollen-Vergleich — käme je eine sechste Rolle
+   * dazu, stimmt diese Zeile weiter.
+   *
+   * Der Verbrauch wird nur GEZÄHLT, wenn er zählt: für Owner/Admin ist das
+   * Kontingent unendlich, und eine Abfrage, deren Ergebnis niemand liest, ist
+   * eine Abfrage zu viel auf dem Weg jeder Team-Einladung.
+   */
+  const managesTeam = communityRoleHasCapability(context.actorRole, 'team.manage')
+  const limit = memberInviteLimit()
+  const used = managesTeam
+    ? 0
+    : await countCommunityInvitesBy(
+        event,
+        body.communityId,
+        context.identity.userId,
+        memberInviteWindowStart(Date.now()),
+      )
+
+  const gate = decideMemberInvite({
+    managesTeam,
+    role: body.role,
+    invitesEnabled: resolveTenantMemberInvitesEnabled(context.tenant.memberInvitesEnabled),
+    limit,
+    used,
+  })
+  if (!gate.ok) {
+    logEvent('info', 'community.member_invite_denied', {
+      communityId: body.communityId,
+      actor: context.identity.userId,
+      role: body.role,
+      reason: gate.reason,
+      used,
+      limit,
+    })
+    /**
+     * 429 NUR fürs erschöpfte Kontingent — das ist die einzige der drei
+     * Ablehnungen, die sich von selbst erledigt (in spätestens sieben Tagen).
+     * Abgeschaltete Mechanik und verbotene Rolle sind 403: daran ändert
+     * Warten nichts, und ein 429 lüde zum Wiederholen ein.
+     *
+     * `Retry-After` bleibt bewusst WEG. Ehrlich wäre „wenn deine älteste
+     * Einladung sieben Tage alt ist" — dafür müsste die Route deren Datum
+     * nachschlagen, und der Header ist auf die Sekunde genau gemeint, nicht
+     * auf den Tag. Der Text in der Oberfläche sagt es besser.
+     */
+    throw createError({
+      status: gate.reason === 'invite_quota_exhausted' ? 429 : 403,
+      statusText: gate.reason === 'invite_quota_exhausted' ? 'Invite quota exhausted' : 'Forbidden',
+      data: { code: gate.reason },
+    })
+  }
 
   const email = body.email.trim().toLowerCase()
   const activeEmails = context.members
@@ -91,7 +163,23 @@ export default defineEventHandler(async (event) => {
     inviteId: row.$id,
     role: body.role,
     actor: context.identity.userId,
+    // F57: woher das Recht kam. Ohne diese Zeile ließe sich im Nachhinein
+    // nicht unterscheiden, ob eine Einladungswelle vom Team oder aus der
+    // Mitgliedschaft kam — genau die Frage, die man bei Missbrauch stellt.
+    viaQuota: !managesTeam,
   })
 
-  return { ok: true, inviteId: row.$id, email, role: body.role, expiresAt: row.expiresAt }
+  /**
+   * Das Kontingent NACH dieser Einladung reist mit — die Oberfläche schreibt
+   * „noch 2 von 5" fort, ohne eine zweite Runde zum Server. `used + 1` ist
+   * hier keine Schätzung: die Zeile ist eine Anweisung weiter oben entstanden.
+   */
+  return {
+    ok: true,
+    inviteId: row.$id,
+    email,
+    role: body.role,
+    expiresAt: row.expiresAt,
+    quota: { unlimited: managesTeam, limit, used: used + 1, remaining: managesTeam ? limit : Math.max(0, limit - used - 1) },
+  }
 })

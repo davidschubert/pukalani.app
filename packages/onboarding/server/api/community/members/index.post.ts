@@ -20,11 +20,31 @@ import { requireCommunityTeamGate } from '../../../utils/communityTeamGate'
  *
  * 'owner' lehnt das Control Plane ab (decideInvite) — Besitz entsteht durch
  * Gründung oder Übergabe.
+ *
+ * ── SEIT F57 IST DAS NICHT MEHR NUR DER BETREIBER ──────────────────────────
+ * Die Capability heißt `members.invite` (beim VIEWER, also jedem Mitglied mit
+ * Zugang) statt `team.manage`. Was für ein Mitglied ZUSÄTZLICH gilt —
+ * Owner-Schalter, Rolle immer `viewer`, 5 je rollierender Woche — entscheidet
+ * das CONTROL PLANE, weil dort die Zeilen liegen, an denen gezählt wird.
+ *
+ * Diese Route prüft die Zusatzregeln BEWUSST NICHT selbst: sie könnte den
+ * Verbrauch gar nicht sehen (`community_invites` gehört dem Control Plane),
+ * und eine halbe Kopie der Regel wäre schlimmer als keine — sie wäre die,
+ * der man glaubt. Hier steht nur die schnelle Rechte-Prüfung, die schon 403
+ * gibt, bevor ein JWT geprägt wird.
  */
 const bodySchema = z.object({
   email: z.string().email().max(254),
   role: z.enum(COMMUNITY_ROLES),
 }).strict()
+
+/** Das Kontingent NACH dieser Einladung — die Oberfläche schreibt es fort. */
+interface InviteQuota {
+  unlimited: boolean
+  limit: number
+  used: number
+  remaining: number
+}
 
 interface InviteResult {
   ok: boolean
@@ -32,10 +52,11 @@ interface InviteResult {
   email: string
   role: string
   expiresAt: string
+  quota: InviteQuota
 }
 
 export default defineEventHandler(async (event) => {
-  const { communityId, jwt } = await requireCommunityTeamGate(event, 'team.manage')
+  const { communityId, jwt } = await requireCommunityTeamGate(event, 'members.invite')
   const body = await readValidatedBody(event, bodySchema.parse)
   const email = body.email.trim().toLowerCase()
 

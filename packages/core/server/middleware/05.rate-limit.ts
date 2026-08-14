@@ -213,6 +213,26 @@ const WRITE_LIMITED: { re: RegExp, bucket: string, max?: number }[] = [
   // Early-Access-Anfrage: die EINZIGE session-lose Schreibroute des Trichters,
   // und sie verschickt Mail an den Betreiber → engstes Budget.
   { re: /^POST \/api\/onboarding\/request$/, bucket: 'onboarding:request', max: 3 },
+  /**
+   * Einladen (F57 Mechanik 2): seit dem 2026-08-14 darf JEDES Mitglied das,
+   * und jeder Versuch verschickt eine MAIL an eine frei wählbare fremde
+   * Adresse. Das ist die Kostenklasse der Early-Access-Anfrage, nur mit
+   * Session — also derselbe enge Deckel.
+   *
+   * DIE DROSSEL IST NICHT DAS KONTINGENT, und beide werden gebraucht. Das
+   * Kontingent (5 je Woche, an den erzeugten Zeilen gezählt) begrenzt die
+   * MENGE über die Zeit; es liegt hinter Rollen- und Schalter-Prüfung, hinter
+   * einem JWT-Mint und hinter einer Zähl-Abfrage über die Service-Naht. Diese
+   * Zeile hier begrenzt den ANSTURM davor — sie kostet nichts und hält ein
+   * Skript ab, das dieselbe teure Kette hundertmal je Minute anstößt, nur um
+   * am Ende fünfmal 429 zu bekommen. Ein Deckel, der erst NACH der Arbeit
+   * greift, schützt den Server nicht.
+   *
+   * Der Bucket ist EIGEN und wird NICHT mit `onboarding:communities` geteilt:
+   * wer gerade sechs Leute einlädt, soll deswegen nicht den
+   * Community-Wechsler verlieren.
+   */
+  { re: /^POST \/api\/community\/members$/, bucket: 'community:invite', max: 5 },
   // Missbrauchsmeldung (M13): ebenfalls session-los, verschickt Mail UND weckt
   // jeden Betreiber per Glocke. Etwas großzügiger als die Early-Access-Anfrage
   // (5 statt 3), weil bei einem echten Vorfall mehrere Menschen gleichzeitig
