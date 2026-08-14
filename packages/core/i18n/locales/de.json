@@ -117,7 +117,25 @@
     "logoutError": "Abmelden fehlgeschlagen — bitte erneut versuchen.",
     "logoutErrorDescription": "Deine Sitzung könnte noch aktiv sein. Prüfe deine Verbindung und versuche es erneut.",
     "sessionRevoked": "Deine Sitzung wurde beendet — bitte melde dich erneut an.",
-    "sessionRevokedDescription": "Das passiert, wenn du dich auf einem anderen Gerät abgemeldet hast oder ein Administrator die Sitzung beendet hat."
+    "sessionRevokedDescription": "Das passiert, wenn du dich auf einem anderen Gerät abgemeldet hast oder ein Administrator die Sitzung beendet hat.",
+    "mfa": {
+      "challenge": {
+        "title": "Zwei-Faktor-Bestätigung",
+        "description": "Gib den sechsstelligen Code aus deiner Authenticator-App ein.",
+        "recoveryDescription": "Gib einen deiner Wiederherstellungs-Codes ein. Jeder Code gilt nur einmal.",
+        "submit": "Bestätigen",
+        "failed": "Der Code stimmt nicht. Bitte versuche es erneut.",
+        "useRecovery": "Wiederherstellungs-Code verwenden",
+        "useTotp": "Code aus der App verwenden",
+        "cancel": "Abbrechen"
+      },
+      "fields": {
+        "code": "Code",
+        "codePlaceholder": "123456",
+        "recoveryCode": "Wiederherstellungs-Code",
+        "recoveryPlaceholder": "z. B. 4f3a9c2b10"
+      }
+    }
   },
   "validation": {
     "required": "Dieses Feld ist erforderlich",
@@ -130,7 +148,8 @@
     "urlInvalid": "Bitte eine gültige URL eingeben",
     "passwordMismatch": "Die Passwörter stimmen nicht überein",
     "passwordConfirmRequired": "Bitte das Passwort bestätigen",
-    "termsRequired": "Bitte akzeptiere die AGB"
+    "termsRequired": "Bitte akzeptiere die AGB",
+    "mfaCodeInvalid": "Der Code stimmt nicht."
   },
   "ui": {
     "backToHome": "Zurück zur Startseite",
@@ -268,6 +287,32 @@
       "success": "Account gelöscht.",
       "failed": "Löschen fehlgeschlagen — bitte erneut versuchen.",
       "failedDescription": "Dein Account ist unverändert — es wurde nichts gelöscht. Versuche es gleich noch einmal."
+    },
+    "twoFactor": {
+      "title": "Zwei-Faktor",
+      "description": "Zusätzlich zum Passwort ein Code aus deiner Authenticator-App.",
+      "stateOn": "Eingeschaltet",
+      "stateOff": "Ausgeschaltet",
+      "enable": "Einrichten",
+      "disable": "Abschalten",
+      "scanHint": "Scanne den Code mit deiner Authenticator-App und gib danach den angezeigten Code ein.",
+      "qrAlt": "QR-Code für die Authenticator-App",
+      "manualHint": "Kein Scanner zur Hand? Dann trage dieses Geheimnis von Hand ein:",
+      "confirm": "Bestätigen",
+      "invalidCode": "Der Code stimmt nicht. Bitte versuche es erneut.",
+      "setupFailed": "Die Einrichtung hat nicht geklappt. Bitte versuche es erneut.",
+      "codesTitle": "Wiederherstellungs-Codes",
+      "codesWarning": "Notiere sie jetzt an einem sicheren Ort. Sie werden nur dieses eine Mal angezeigt und sind dein Weg zurück, wenn du dein Telefon verlierst.",
+      "codesConfirm": "Ich habe die Codes notiert.",
+      "copyCodes": "Codes kopieren",
+      "codesCopied": "Codes kopiert.",
+      "done": "Fertig",
+      "enabled": "Zwei-Faktor ist eingeschaltet.",
+      "disabled": "Zwei-Faktor ist abgeschaltet.",
+      "disableHint": "Gib zur Bestätigung den aktuellen Code aus deiner Authenticator-App ein.",
+      "disableRecoveryHint": "Gib zur Bestätigung einen deiner Wiederherstellungs-Codes ein.",
+      "disableConfirm": "Zwei-Faktor abschalten",
+      "disableFailed": "Das Abschalten hat nicht geklappt. Bitte versuche es erneut."
     }
   },
   "notifications": {

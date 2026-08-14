@@ -16,6 +16,15 @@ const loading = ref(false)
 const errorMessage = ref<string | null>(null)
 const showPassword = ref(false)
 
+/**
+ * Zwei-Faktor (U15 Teil 4): steht das auf true, hat das PASSWORT bereits
+ * gestimmt und die Session existiert — es fehlt nur noch der zweite Faktor.
+ * Der Erfolgspfad unten (refresh/Embed/Toast/Navigation) ist derselbe, egal
+ * ob mit oder ohne zweiten Schritt; deshalb liegt er in `finishLogin()` und
+ * nicht zweimal im Formular.
+ */
+const mfaRequired = ref(false)
+
 // Code-Login-Link nur, wenn Email-OTP aktiviert ist (config-gated)
 const otpEnabled = computed(() => appConfig.pukalani?.auth?.otp === true)
 
@@ -38,17 +47,28 @@ watch(() => state.email, (value) => { sharedEmail.value = value })
 
 const schema = computed(() => createLoginSchema(t))
 
+async function finishLogin() {
+  await auth.refresh()
+  // Embed-Popup (E2): Session ans iframe übergeben statt zu navigieren
+  if (await completeEmbedLogin()) return
+  // Toast (unten rechts, auto-dismiss) — überlebt die Navigation
+  toast.add({ title: t('auth.login.success'), color: 'success', icon: 'i-ph-check-circle' })
+  await navigateTo(afterAuthTarget())
+}
+
 async function onSubmit(event: FormSubmitEvent<LoginInput>) {
   loading.value = true
   errorMessage.value = null
   try {
-    await $fetch('/api/auth/login', { method: 'POST', body: event.data })
-    await auth.refresh()
-    // Embed-Popup (E2): Session ans iframe übergeben statt zu navigieren
-    if (await completeEmbedLogin()) return
-    // Toast (unten rechts, auto-dismiss) — überlebt die Navigation
-    toast.add({ title: t('auth.login.success'), color: 'success', icon: 'i-ph-check-circle' })
-    await navigateTo(afterAuthTarget())
+    const result = await $fetch('/api/auth/login', { method: 'POST', body: event.data })
+    // KEIN auth.refresh() vor dem zweiten Faktor: /api/auth/me antwortet auf
+    // eine halbe Session mit 401, der Store würde den Nutzer also als
+    // ausgeloggt führen und der Erfolgspfad liefe ins Leere.
+    if (result.mfaRequired) {
+      mfaRequired.value = true
+      return
+    }
+    await finishLogin()
   }
   catch (error) {
     errorMessage.value = authErrorMessage(error, t('auth.login.failed'))
@@ -57,10 +77,17 @@ async function onSubmit(event: FormSubmitEvent<LoginInput>) {
     loading.value = false
   }
 }
+
+function onMfaCancelled() {
+  mfaRequired.value = false
+  state.password = ''
+}
 </script>
 
 <template>
-  <div class="w-full max-w-sm space-y-4" data-login-form>
+  <AuthMfaChallengeForm v-if="mfaRequired" @solved="finishLogin" @cancel="onMfaCancelled" />
+
+  <div v-else class="w-full max-w-sm space-y-4" data-login-form>
     <div class="text-center">
       <UIcon name="i-ph-user-circle" class="mx-auto size-8 text-primary" />
       <h1 class="mt-2 text-xl font-semibold">{{ t('auth.login.title') }}</h1>

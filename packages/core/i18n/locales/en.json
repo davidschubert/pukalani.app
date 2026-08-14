@@ -117,7 +117,25 @@
     "logoutError": "Sign-out failed — please try again.",
     "logoutErrorDescription": "Your session may still be active. Check your connection and try again.",
     "sessionRevoked": "Your session was ended — please sign in again.",
-    "sessionRevokedDescription": "This happens when you signed out on another device or an administrator ended the session."
+    "sessionRevokedDescription": "This happens when you signed out on another device or an administrator ended the session.",
+    "mfa": {
+      "challenge": {
+        "title": "Two-factor confirmation",
+        "description": "Enter the six-digit code from your authenticator app.",
+        "recoveryDescription": "Enter one of your recovery codes. Each code works only once.",
+        "submit": "Confirm",
+        "failed": "That code is not right. Please try again.",
+        "useRecovery": "Use a recovery code",
+        "useTotp": "Use the code from your app",
+        "cancel": "Cancel"
+      },
+      "fields": {
+        "code": "Code",
+        "codePlaceholder": "123456",
+        "recoveryCode": "Recovery code",
+        "recoveryPlaceholder": "e.g. 4f3a9c2b10"
+      }
+    }
   },
   "validation": {
     "required": "This field is required",
@@ -130,7 +148,8 @@
     "urlInvalid": "Please enter a valid URL",
     "passwordMismatch": "The passwords do not match",
     "passwordConfirmRequired": "Please confirm the password",
-    "termsRequired": "Please accept the Terms and Conditions"
+    "termsRequired": "Please accept the Terms and Conditions",
+    "mfaCodeInvalid": "That code is not right."
   },
   "ui": {
     "backToHome": "Back to home",
@@ -268,6 +287,32 @@
       "success": "Account deleted.",
       "failed": "Deletion failed — please try again.",
       "failedDescription": "Your account is unchanged — nothing was deleted. Try again in a moment."
+    },
+    "twoFactor": {
+      "title": "Two-factor",
+      "description": "A code from your authenticator app, on top of your password.",
+      "stateOn": "On",
+      "stateOff": "Off",
+      "enable": "Set up",
+      "disable": "Turn off",
+      "scanHint": "Scan the code with your authenticator app, then enter the code it shows.",
+      "qrAlt": "QR code for your authenticator app",
+      "manualHint": "No scanner at hand? Enter this secret manually:",
+      "confirm": "Confirm",
+      "invalidCode": "That code is not right. Please try again.",
+      "setupFailed": "Setup did not work. Please try again.",
+      "codesTitle": "Recovery codes",
+      "codesWarning": "Write them down somewhere safe now. They are shown this one time only and are your way back in if you lose your phone.",
+      "codesConfirm": "I have written the codes down.",
+      "copyCodes": "Copy codes",
+      "codesCopied": "Codes copied.",
+      "done": "Done",
+      "enabled": "Two-factor is on.",
+      "disabled": "Two-factor is off.",
+      "disableHint": "Enter the current code from your authenticator app to confirm.",
+      "disableRecoveryHint": "Enter one of your recovery codes to confirm.",
+      "disableConfirm": "Turn off two-factor",
+      "disableFailed": "Turning it off did not work. Please try again."
     }
   },
   "notifications": {
