@@ -195,7 +195,9 @@
       "categorySlugMax": "Adresse ist zu lang.",
       "categorySlugFormat": "Nur Kleinbuchstaben, Ziffern und Bindestriche.",
       "categorySlugReserved": "Diese Adresse ist reserviert.",
-      "categoryDescriptionMax": "Beschreibung ist zu lang."
+      "categoryDescriptionMax": "Beschreibung ist zu lang.",
+      "reactionInvalid": "Diese Reaktion gibt es nicht.",
+      "reactionTargetInvalid": "Auf diesen Inhalt kann nicht reagiert werden."
     },
     "discussions": {
       "title": "Diskussionen",
@@ -336,7 +338,8 @@
           "trust-basic": "Grundstufe",
           "trust-member": "Mitglied",
           "trust-regular": "Stammgast",
-          "trust-leader": "Wortführer"
+          "trust-leader": "Wortführer",
+          "first-reaction": "Erste Reaktion"
         },
         "criterion": {
           "profile": "Du hast einen Text über dich und ein Profilbild hinterlegt.",
@@ -360,7 +363,8 @@
           "trust-basic": "Vertrauensstufe 1 erreicht: 2 Tage dabei, 1 eigener Inhalt, 1 vergebene Zustimmung",
           "trust-member": "Vertrauensstufe 2 erreicht: 15 Tage dabei, 5 eigene Inhalte, 10 vergebene und 5 erhaltene Zustimmungen",
           "trust-regular": "Vertrauensstufe 3 erreicht: 60 Tage dabei, 25 eigene Inhalte, 50 vergebene und 25 erhaltene Zustimmungen",
-          "trust-leader": "Vertrauensstufe 4: von der Leitung der Community ernannt"
+          "trust-leader": "Vertrauensstufe 4: von der Leitung der Community ernannt",
+          "first-reaction": "Du hast zum ersten Mal mit einem Emoji reagiert."
         }
       },
       "trust": {
@@ -466,6 +470,21 @@
     },
     "stats": {
       "total": "Beiträge"
+    },
+    "reactions": {
+      "add": "Reaktion hinzufügen",
+      "failed": "Reaktion nicht gespeichert",
+      "failedHint": "Bitte versuche es noch einmal.",
+      "name": {
+        "laugh": "Lustig",
+        "tada": "Glückwunsch",
+        "thinking": "Nachdenklich",
+        "eyes": "Interessant",
+        "sad": "Betroffen",
+        "fire": "Stark",
+        "thanks": "Danke",
+        "idea": "Hilfreich"
+      }
     }
   },
   "admin": {

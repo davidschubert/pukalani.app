@@ -319,6 +319,25 @@ const showTooltip = computed(() => (props.replyCount ?? 0) > 0)
       <PollBlock v-if="post.type === 'poll' && post.poll" :post-id="post.$id" :poll="post.poll" @updated="onPollUpdated" />
     </div>
 
+    <!--
+      REAKTIONEN (F57 Mechanik 1) — NUR an Diskussions-THEMEN.
+
+      Die Bedingung ist die Kategorie, und sie ist die ganze Abgrenzung: Thema
+      und Feed-Beitrag sind DIESELBE Tabelle und dieselbe Karte, unterschieden
+      allein dadurch, dass ein Thema in einer Kategorie steht (Konzept-
+      Entscheidung 1, Weg B). „Feed-Beiträge nicht im MVP" heißt deshalb genau
+      das hier — und weil kategorisierte Beiträge laut Entscheidung 2 IM Feed
+      bleiben, reagiert man dort auf dasselbe Thema mit derselben Leiste. Die
+      Route setzt dieselbe Regel noch einmal durch (409), diese Zeile ist die
+      Anzeige, nicht die Sicherung.
+
+      ÜBER der Aktionszeile, nicht darin: Reaktionen sind eine Antwort auf den
+      TEXT, die Stimmen und der Kommentar-Knopf sind Bedienelemente der Karte.
+    -->
+    <div v-if="post.categoryId" class="mt-3">
+      <ReactionBar :target-id="post.$id" />
+    </div>
+
     <div class="mt-3 flex items-center gap-2 border-t border-default pt-2">
       <PostVoteButtons :post="post" @updated="p => emit('updated', p)" />
 

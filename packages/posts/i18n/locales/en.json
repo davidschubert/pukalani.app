@@ -195,7 +195,9 @@
       "categorySlugMax": "Address is too long.",
       "categorySlugFormat": "Lowercase letters, digits and hyphens only.",
       "categorySlugReserved": "This address is reserved.",
-      "categoryDescriptionMax": "Description is too long."
+      "categoryDescriptionMax": "Description is too long.",
+      "reactionInvalid": "That reaction does not exist.",
+      "reactionTargetInvalid": "You cannot react to this content."
     },
     "discussions": {
       "title": "Discussions",
@@ -336,7 +338,8 @@
           "trust-basic": "Basic",
           "trust-member": "Member",
           "trust-regular": "Regular",
-          "trust-leader": "Leader"
+          "trust-leader": "Leader",
+          "first-reaction": "First Reaction"
         },
         "criterion": {
           "profile": "You added a few words about yourself and a profile picture.",
@@ -360,7 +363,8 @@
           "trust-basic": "Reached trust level 1: 2 days here, 1 post of your own, 1 upvote given",
           "trust-member": "Reached trust level 2: 15 days here, 5 posts of your own, 10 upvotes given and 5 received",
           "trust-regular": "Reached trust level 3: 60 days here, 25 posts of your own, 50 upvotes given and 25 received",
-          "trust-leader": "Trust level 4: appointed by the people who run this community"
+          "trust-leader": "Trust level 4: appointed by the people who run this community",
+          "first-reaction": "You reacted with an emoji for the first time."
         }
       },
       "trust": {
@@ -466,6 +470,21 @@
     },
     "stats": {
       "total": "Posts"
+    },
+    "reactions": {
+      "add": "Add reaction",
+      "failed": "Reaction not saved",
+      "failedHint": "Please try again.",
+      "name": {
+        "laugh": "Funny",
+        "tada": "Congrats",
+        "thinking": "Thoughtful",
+        "eyes": "Interesting",
+        "sad": "Moved",
+        "fire": "Brilliant",
+        "thanks": "Thanks",
+        "idea": "Helpful"
+      }
     }
   },
   "admin": {
