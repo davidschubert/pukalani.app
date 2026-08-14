@@ -56,6 +56,14 @@ import type { H3Event } from 'h3'
  *    Aggregat dahinter: eine Bearbeitung hinterlässt in `community_posts` und
  *    `comments` nur einen Zeitstempel, keine Anzahl. Wer sie nicht mitschreibt,
  *    kann sie nie nachrechnen.
+ *  - `reactionsGiven` — selbst abgegebene Emoji-Reaktionen (F57 Mechanik 1).
+ *    NUR die GEGEBENE Richtung, und das ist die Aussage: Reaktionen sind laut
+ *    Konzept Teil 4 Punkt 3 **badge-neutral**, Abzeichen zählen weiterhin
+ *    ausschliesslich Upvotes. Ein `reactionsReceived` wäre der Anfang einer
+ *    zweiten Like-Quelle und fehlt deshalb ABSICHTLICH — wer ihn nachrüsten
+ *    will, hebt damit Davids Entscheidung 4 auf und braucht ein eigenes Ja.
+ *    Der eine erlaubte Verbraucher ist das Abzeichen `first-reaction` („erste
+ *    ABGEGEBENE Reaktion"), die einzige Ausnahme, die das Konzept nennt.
  *
  * NICHT dabei und bewusst nicht: abgesetzte Meldungen. Die beantwortet der
  * moderation-Provider mit EINER exakten `count`-Abfrage über Zeilen, die nie
@@ -68,6 +76,7 @@ export const USER_COUNTER_KINDS = [
   'upvotesGiven',
   'upvotesReceived',
   'edits',
+  'reactionsGiven',
 ] as const
 
 export type UserCounterKind = (typeof USER_COUNTER_KINDS)[number]

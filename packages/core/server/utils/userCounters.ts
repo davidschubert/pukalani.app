@@ -127,6 +127,22 @@ export const COUNTER_LIKES_GIVEN = 'likesGiven'
 export const COUNTER_FLAGS_RAISED = 'flagsRaised'
 
 /**
+ * Wie viele Emoji-Reaktionen hat der Nutzer VERGEBEN? (F57 Mechanik 1)
+ *
+ * DER NAME IST DERSELBE WIE DIE GLEICHNAMIGE EREIGNIS-ART in
+ * `userCounterEvents.ts` — dieselbe Absicht wie bei `topicsCreated`: der Seed
+ * setzt die Antwort ohne Übersetzungstabelle in die Zähler-Zeile. Anders als
+ * `likesGiven` (das die Brücke `upvotesGiven → likesGiven` braucht) heisst
+ * dieser Zähler auf beiden Seiten gleich, weil es für Reaktionen kein zweites
+ * Wort gibt.
+ *
+ * GEGENSTÜCK FEHLT ABSICHTLICH: es gibt kein `reactionsReceived`. Reaktionen
+ * sind badge-neutral (Konzept Teil 4 Punkt 3); erhalten wird hier nichts
+ * gezählt, weil daraus sonst eine zweite Like-Quelle entstünde.
+ */
+export const COUNTER_REACTIONS_GIVEN = 'reactionsGiven'
+
+/**
  * Wie viele eigene, sichtbare Inhalte hat der Nutzer im Fenster `key` verfasst?
  * (alle Inhaltsarten zusammen)
  *
