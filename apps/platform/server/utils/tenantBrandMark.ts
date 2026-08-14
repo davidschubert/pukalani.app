@@ -65,7 +65,41 @@ export async function resolveTenantBrandMark(event: H3Event): Promise<TenantBran
   const appConfig = useAppConfig() as { pukalani?: { brand?: { name?: string } } }
   const name = tenant?.name || appConfig.pukalani?.brand?.name || ''
 
-  const data = await $fetch<ThemesResponse>('/api/themes', { headers: { host } }).catch(() => null)
+  /**
+   * `, string` ALS ANFRAGE-GENERIC — DIE STELLE, AN DER DIE TYPEN KIPPTEN
+   * (F57, 2026-08-14). Wer hier aufräumen will, liest bitte erst zu Ende.
+   *
+   * Nuxt tippt `$fetch` über die Vereinigung ALLER Server-Routen der App und
+   * leitet daraus zusätzlich den Options-Typ ab. Diese Ableitung wächst mit
+   * jeder neuen Route mit — beim Anlegen von zwei Routen
+   * (`/api/community/invites/quota`, `/api/community/member-invites`) kippte
+   * sie über die Rekursionsgrenze des Compilers: `TS2589 Type instantiation is
+   * excessively deep`, gefolgt von einem Folgefehler, der ausgerechnet die
+   * `headers` als unzuweisbar meldet.
+   *
+   * DIE FEHLERMELDUNG ZEIGT AUF DIE FALSCHE STELLE. Sie erscheint HIER,
+   * verursacht hat sie eine neue Datei in einem ganz anderen Layer — und
+   * sobald man diesen einen Aufruf entschärft, wandert sie zum nächsten
+   * `$fetch` (damals `packages/admin/server/utils/dependencies.ts`). Wer sie
+   * das nächste Mal sieht, sucht den Fehler sonst in der gemeldeten Datei und
+   * findet dort nichts. Die Schwelle war vor F57 schon fast erreicht; die zwei
+   * Routen haben sie nur sichtbar gemacht.
+   *
+   * DER GENERIC KOSTET HIER NICHTS: der Antwort-Typ steht mit `ThemesResponse`
+   * ohnehin explizit da, die Pfad-Inferenz hätte nur den Options-Typ gerechnet.
+   * Was verloren geht, ist der Compiler-Hinweis auf einen Tippfehler IM PFAD —
+   * dagegen steht das `.catch(() => null)` samt Rückfall auf die App-Marke,
+   * das einen fehlgeschlagenen Abruf ohnehin abfangen muss: das ist ein
+   * Netzwerk-Aufruf, kein Funktionsaufruf.
+   *
+   * VERWORFEN: eine der beiden neuen Routen einsparen, indem der
+   * Mitglieder-Schalter im bestehenden `registration.patch.ts` mitreist. Das
+   * hätte einen Compiler-Grenzwert zur Architektur-Entscheidung gemacht, eine
+   * Route zur Sammelstelle, die laut ihrem eigenen Kopf „AUSSCHLIESSLICH
+   * openRegistration" schreibt — und die Grenze wäre bei der nächsten Route
+   * trotzdem wieder da gewesen.
+   */
+  const data = await $fetch<ThemesResponse, string>('/api/themes', { headers: { host } }).catch(() => null)
   const customs: BrandThemeEntry[] = (data?.themes ?? []).map(entry => ({
     id: customThemeAttr(entry.id),
     color: entry.primary,

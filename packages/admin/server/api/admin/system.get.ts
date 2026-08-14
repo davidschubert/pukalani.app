@@ -51,7 +51,9 @@ export default defineEventHandler(async (event): Promise<SystemInfo> => {
   // Appwrite-Serverversion (öffentlicher health/version-Endpoint, kein Key nötig)
   // + neueste Release-Version von GitHub (Cache) parallel.
   const [versionRes, latestAppwrite] = await Promise.all([
-    $fetch<{ version: string }>(`${endpoint}/health/version`, {
+    // Fremde URL (Appwrite-Instanz), `, string` — Begruendung in
+    // apps/platform/server/utils/tenantBrandMark.ts.
+    $fetch<{ version: string }, string>(`${endpoint}/health/version`, {
       headers: { 'X-Appwrite-Project': projectId },
     }).catch(() => null),
     latestAppwriteVersion(),

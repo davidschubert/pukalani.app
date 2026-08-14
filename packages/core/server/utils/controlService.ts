@@ -101,7 +101,10 @@ export async function callControlService<T>(event: H3Event, path: string, body: 
   try {
     // Cast: $fetch typisiert die Antwort über NitroFetchRequest (die Route liegt
     // in einer ANDEREN App, also gibt es hier keine abgeleiteten Route-Typen).
-    return await $fetch<T>(`${url}${path}`, {
+    // Fremder Dienst (das Control Plane ist ein EIGENES Deployment), deshalb
+    // `, string` als Anfrage-Generic — Begruendung in
+    // apps/platform/server/utils/tenantBrandMark.ts.
+    return await $fetch<T, string>(`${url}${path}`, {
       method: 'POST',
       headers: { [SERVICE_HEADER]: secret },
       body,
