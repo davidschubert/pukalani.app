@@ -5,27 +5,56 @@
 
 const DATE_ONLY = /^(\d{4})-(\d{2})-(\d{2})$/
 
-/** dd.MM.yyyy — z.B. 01.01.2026 */
-export function formatDate(value: Date | string | number, locale = 'de-DE'): string {
-  let date: Date
-
-  if (value instanceof Date) {
-    date = value
-  }
-  else if (typeof value === 'string' && DATE_ONLY.test(value)) {
-    // Date-only Strings als LOKALES Datum parsen — new Date('2026-01-01')
-    // wäre UTC-Mitternacht und kippt je nach Zeitzone auf den Vortag
+/**
+ * dd.MM.yyyy — z.B. 01.01.2026
+ *
+ * `timeZone` ist die Zeitzone des KONTOS (`prefs.timezone`, U15 Teil 5).
+ * Ohne Angabe rechnet `Intl` in der Zone der Laufzeit — exakt das Verhalten von
+ * vor der Einstellung. MIT Angabe rechnen Server und Browser dieselbe Zeile
+ * aus, was die Anzeige nebenbei hydrations-fest macht.
+ */
+export function formatDate(value: Date | string | number, locale = 'de-DE', timeZone?: string): string {
+  if (typeof value === 'string' && DATE_ONLY.test(value)) {
+    // Ein Date-only-String ist ein KALENDERTAG OHNE Zeitzone: der 31.12.2025
+    // ist in Tokio derselbe Tag wie in Denver. Deshalb wird er als
+    // UTC-Mitternacht gebaut UND in UTC formatiert — die beiden heben sich
+    // auf, und weder die Laufzeit-Zone noch die Konto-Zone kann ihn auf den
+    // Vortag kippen. (Früher: lokale Mitternacht + lokale Formatierung, mit
+    // demselben Ergebnis; sobald `timeZone` mitkommt, wäre dieses Paar aber
+    // gemischt und der Tag verschöbe sich.)
     const [, year, month, day] = DATE_ONLY.exec(value)!
-    date = new Date(Number(year), Number(month) - 1, Number(day))
+    return new Intl.DateTimeFormat(locale, {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      timeZone: 'UTC',
+    }).format(new Date(Date.UTC(Number(year), Number(month) - 1, Number(day))))
   }
-  else {
-    date = new Date(value)
-  }
+
+  const date = value instanceof Date ? value : new Date(value)
 
   return new Intl.DateTimeFormat(locale, {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
+    ...(timeZone ? { timeZone } : {}),
+  }).format(date)
+}
+
+/**
+ * HH:mm — die Uhrzeit eines Zeitpunkts in einer bestimmten Zone.
+ *
+ * Gebaut für die Wirkungs-Anzeige der Zeitzonen-Einstellung („Jetzt: 14:32 in
+ * Europe/Berlin"): eine Einstellung, deren Wirkung man erst morgen bemerkt,
+ * kann man nicht prüfen. Ohne `timeZone` wieder die Zone der Laufzeit.
+ */
+export function formatTime(value: Date | string | number, locale = 'de-DE', timeZone?: string): string {
+  const date = value instanceof Date ? value : new Date(value)
+
+  return new Intl.DateTimeFormat(locale, {
+    hour: '2-digit',
+    minute: '2-digit',
+    ...(timeZone ? { timeZone } : {}),
   }).format(date)
 }
 

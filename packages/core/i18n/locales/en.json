@@ -313,6 +313,19 @@
       "disableRecoveryHint": "Enter one of your recovery codes to confirm.",
       "disableConfirm": "Turn off two-factor",
       "disableFailed": "Turning it off did not work. Please try again."
+    },
+    "timezone": {
+      "title": "Time zone",
+      "description": "Sets the time zone used to display dates and times.",
+      "label": "Time zone",
+      "help": "Automatic uses the time zone of your device.",
+      "placeholder": "Search time zone",
+      "automatic": "Automatic (browser)",
+      "now": "Now: {time} in {zone}",
+      "save": "Save time zone",
+      "saved": "Time zone saved.",
+      "saveFailed": "Could not save time zone",
+      "saveFailedDescription": "Please try again."
     }
   },
   "notifications": {

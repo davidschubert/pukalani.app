@@ -313,6 +313,19 @@
       "disableRecoveryHint": "Gib zur Bestätigung einen deiner Wiederherstellungs-Codes ein.",
       "disableConfirm": "Zwei-Faktor abschalten",
       "disableFailed": "Das Abschalten hat nicht geklappt. Bitte versuche es erneut."
+    },
+    "timezone": {
+      "title": "Zeitzone",
+      "description": "Bestimmt, in welcher Zeitzone Datum und Uhrzeit angezeigt werden.",
+      "label": "Zeitzone",
+      "help": "Automatisch nimmt die Zeitzone deines Geräts.",
+      "placeholder": "Zeitzone suchen",
+      "automatic": "Automatisch (Browser)",
+      "now": "Jetzt: {time} in {zone}",
+      "save": "Zeitzone speichern",
+      "saved": "Zeitzone gespeichert.",
+      "saveFailed": "Zeitzone konnte nicht gespeichert werden",
+      "saveFailedDescription": "Bitte versuche es noch einmal."
     }
   },
   "notifications": {

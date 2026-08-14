@@ -44,5 +44,12 @@ const { t } = useI18n()
         <UserHandleForm />
       </slot>
     </UPageCard>
+
+    <!-- Die Zeitzone steht hier, weil sie dieselbe Frage beantwortet wie Name
+         und Bio: „wie sieht mein Konto mich". Sie ist reine Anzeige und
+         gehört deshalb NICHT zu den Benachrichtigungen (U15 Teil 5). -->
+    <UPageCard :title="t('account.timezone.title')" :description="t('account.timezone.description')" variant="subtle">
+      <UserTimezoneSettings />
+    </UPageCard>
   </div>
 </template>

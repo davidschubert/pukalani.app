@@ -14,6 +14,8 @@ export type AppwriteRow = Models.Row
 export interface PukalaniUserPrefs extends Models.Preferences {
   bio?: string
   avatarUrl?: string
+  /** IANA-Zone für die Datums-/Zeit-Anzeige; '' oder fehlend = automatisch */
+  timezone?: string
 }
 
 export type CurrentUser = Models.User<PukalaniUserPrefs>
