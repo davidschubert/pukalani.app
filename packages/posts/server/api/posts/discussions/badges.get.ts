@@ -140,6 +140,9 @@ export default defineEventHandler(async (event): Promise<DiscussionBadgesRespons
     topicsCreated: counters[COUNTER_TOPICS_CREATED],
     repliesCreated: counters[COUNTER_REPLIES_CREATED],
     upvotesGiven: counters[COUNTER_LIKES_GIVEN],
+    // F57: gleicher Name auf beiden Seiten — fuer Reaktionen gibt es kein
+    // zweites Wort, also auch keine Namensbruecke wie bei likesGiven.
+    reactionsGiven: counters[COUNTER_REACTIONS_GIVEN],
   })
 
   // Für die Anzeige (und die Fortschritts-Regel) zählt das JÜNGSTE gefragte

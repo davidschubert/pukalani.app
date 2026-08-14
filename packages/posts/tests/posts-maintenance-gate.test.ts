@@ -82,7 +82,7 @@ const memberWriteRoutes = routeFiles(apiDir).filter(file =>
   && !TRUST_LEVEL_ADMIN_ROUTES.has(file))
 
 describe('Wartungsmodus: jede schreibende Mitglieder-Route prüft ihn', () => {
-  it('findet genau die sechs Mitglieder-Schreibwege', () => {
+  it('findet genau die sieben Mitglieder-Schreibwege', () => {
     expect([...memberWriteRoutes].sort()).toEqual([
       '[id].delete.ts',
       '[id].patch.ts',
@@ -97,6 +97,12 @@ describe('Wartungsmodus: jede schreibende Mitglieder-Route prüft ihn', () => {
       '[id]/state.patch.ts',
       '[id]/score.post.ts',
       '[id]/vote.post.ts',
+      /**
+       * F57 Mechanik 1: eine Emoji-Reaktion ist INHALT — sie geht durch die
+       * Mitglieder-Klinke, faellt damit unter M13 und macht laut A5 zum
+       * Mitglied. Also gehoert sie in diese Liste und prueft den Schalter.
+       */
+      'discussions/reactions.post.ts',
       'index.post.ts',
     ].sort())
   })

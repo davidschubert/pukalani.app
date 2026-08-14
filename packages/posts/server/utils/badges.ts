@@ -101,7 +101,7 @@ export function badgeFactsFrom(
   facts.profileComplete = (counters[COUNTER_PROFILE_COMPLETE] ?? 0) >= 1
   /**
    * DIE MITSCHREIBENDEN ZÄHLER SIND DIE AUTORITÄT, WO SIE DIESELBE FRAGE
-   * BEANTWORTEN (F1) — und das sind heute genau zwei:
+   * BEANTWORTEN (F1) — und das sind heute genau drei:
    *
    *  - `likesGiven` ⇔ `upvotesGiven`: identische Frage, zwei Wege. Der Zähler
    *    gewinnt, weil er der Weg ist, den die späteren Teilpakete gehen (Trust
@@ -111,6 +111,10 @@ export function badgeFactsFrom(
    *    (`ensureSeededCounters` ⇒ `counterFellBehind`).
    *  - `edits`: kommt AUSSCHLIESSLICH von dort — eine Bearbeitung hinterlässt
    *    in den Inhalts-Tabellen keinen zählbaren Bestand.
+   *  - `reactionsGiven` ⇔ derselbe Name im Aggregat (F57): identische Frage,
+   *    zwei Wege, dieselbe Vorfahrt wie bei `likesGiven`. Eine Übersetzung wie
+   *    `upvotesGiven → likesGiven` braucht es nicht — für Reaktionen gibt es
+   *    kein zweites Wort.
    *
    * Die Schwellen-Zahlen (`likedItems` und Geschwister) bleiben Aggregat, und
    * das ist kein Übergangszustand: ein laufender Zähler kann „wie viele meiner
@@ -124,6 +128,7 @@ export function badgeFactsFrom(
    */
   facts.likesGiven = written?.upvotesGiven ?? counters[COUNTER_LIKES_GIVEN] ?? 0
   facts.edits = written?.edits ?? 0
+  facts.reactionsGiven = written?.reactionsGiven ?? counters[COUNTER_REACTIONS_GIVEN] ?? 0
   facts.flagsRaised = counters[COUNTER_FLAGS_RAISED] ?? 0
   for (const threshold of thresholds) {
     facts.likedItems[threshold] = counters[counterLikedItems(threshold)] ?? 0
@@ -368,5 +373,5 @@ export async function awardTrustLevelBadges(
  * Katalog keine Spaltennamen kennen soll.
  */
 function counterFactsOf(values: MemberCounterValues): CounterBadgeFacts {
-  return { likesGiven: values.upvotesGiven, edits: values.edits }
+  return { likesGiven: values.upvotesGiven, edits: values.edits, reactionsGiven: values.reactionsGiven }
 }

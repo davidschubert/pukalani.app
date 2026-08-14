@@ -25,12 +25,15 @@ function badge(key: string) {
 
 describe('der Katalog selbst', () => {
   it('hat genau so viele Abzeichen, wie sein Kopf behauptet', () => {
-    // Reiner Wächter über einen SATZ: der Dateikopf nennt „22 (4 + 8 + 6 + 4)"
+    // Reiner Wächter über einen SATZ: der Dateikopf nennt „23 (5 + 8 + 6 + 4)"
     // und erklärt daneben, was fehlt. Wächst der Katalog, ohne dass jemand die
     // Auslassungsliste nachzieht, wird aus einer Begründung eine Behauptung.
     // Die vierte Gruppe kam mit F1 Teilpaket 3 (Vertrauensstufen) dazu.
-    expect(BADGE_CATALOG.length).toBe(22)
-    for (const [group, size] of [['gettingStarted', 4], ['community', 8], ['posting', 6], ['trustLevel', 4]] as const) {
+    // Das fuenfte „erste Mal" kam mit F57 (`first-reaction`) — die EINZIGE
+    // Stelle, an der Reaktionen ein Abzeichen beruehren; alle uebrigen zaehlen
+    // weiterhin ausschliesslich Upvotes (Konzept Teil 4 Punkt 3).
+    expect(BADGE_CATALOG.length).toBe(23)
+    for (const [group, size] of [['gettingStarted', 5], ['community', 8], ['posting', 6], ['trustLevel', 4]] as const) {
       expect(BADGE_CATALOG.filter(entry => entry.group === group).length, group).toBe(size)
     }
   })

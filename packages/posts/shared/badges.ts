@@ -9,7 +9,7 @@
  * ── DER ZUSCHNITT: NUR, WAS HEUTE MESSBAR IST ─────────────────────────────
  * Davids Vorgabe fuer Stufe 4 lautet „nur heute messbare Abzeichen … fehlende
  * kommen automatisch dazu, sobald ihre Funktion existiert". Der Katalog aus
- * § 3.6 hat 40+ Eintraege; hier stehen 22 (4 + 8 + 6 + 4 — ein Test haelt die
+ * § 3.6 hat 40+ Eintraege; hier stehen 23 (5 + 8 + 6 + 4 — ein Test haelt die
  * Zahl an den Katalog gebunden, damit dieser Satz nicht mit der Zeit unwahr
  * wird).
  * Was fehlt und WARUM, gehoert an diese Stelle und nicht in eine Notiz, sonst
@@ -21,10 +21,14 @@
  *    Nice/Good/Great Share und Popular/Hot/Famous Link (Klick-Zaehlung).
  *    Neun Abzeichen, und sie kommen NICHT spaeter.
  *  - **Wartet auf seine Funktion** — First Emoji, First Quote, First Link,
- *    First Reaction, First Onebox, First Reply By Email, Wiki Editor,
+ *    First Onebox, First Reply By Email, Wiki Editor,
  *    Certified/Licensed, Promoter/Campaigner/Champion (Einladungen durch
  *    Mitglieder), Out of Love/Higher Love/Crazy in Love (Tages-Like-Limit).
- *    Die Reihenfolge dieser Funktionen steht in Teil 4.
+ *    Die Reihenfolge dieser Funktionen steht in Teil 4. „First Reaction" ist
+ *    seit F57 (2026-08-13) GEBAUT und steht als `first-reaction` im Katalog —
+ *    es ist zugleich die EINZIGE Stelle, an der Reaktionen ueberhaupt ein
+ *    Abzeichen beruehren (Teil 4 Punkt 3: Abzeichen zaehlen ausschliesslich
+ *    Upvotes, Reaktionen sind badge-neutral).
  *  - **Trust Level (TL1–TL4)** war ausgespart und ist es NICHT MEHR: Davids
  *    Entscheidung 5 machte daraus ein eigenes Projekt mit eigenem Ja, und
  *    dieses Ja ist am 2026-08-04 gefallen (F1 Teilpaket 3). Die vier stehen
@@ -155,6 +159,17 @@ export interface BadgeRequirement {
   /** Mindestens so viele abgesetzte Meldungen. */
   flagsRaised?: number
   /**
+   * Mindestens so viele selbst ABGEGEBENE Emoji-Reaktionen (F57).
+   *
+   * DIE EINE AUSNAHME VON DER BADGE-NEUTRALITAET, und sie ist im Konzept
+   * namentlich zugesagt: Reaktionen zaehlen sonst fuer KEIN Abzeichen (Teil 4
+   * Punkt 3 — Abzeichen zaehlen ausschliesslich Upvotes), aber
+   * `first-reaction` haengt genau an der ersten abgegebenen. Deshalb steht hier
+   * bewusst nur die GEBENDE Richtung; ein `reactionsReceived` gibt es nirgends,
+   * es waere die zweite Like-Quelle, die Entscheidung 4 ausschliesst.
+   */
+  reactionsGiven?: number
+  /**
    * Mindestens so viele Bearbeitungen EIGENER Inhalte.
    *
    * Der erste Wert, der NICHT aus einem Aggregat kommt, sondern aus dem
@@ -226,6 +241,15 @@ export const BADGE_CATALOG: readonly BadgeDefinition[] = [
    * Schwelle, nicht ein erstes Mal, das es nur einmal geben kann.
    */
   { key: 'editor', group: 'gettingStarted', awardedPer: 'once', requires: { edits: 1 } },
+  /**
+   * „Erste Reaktion": einmal mit einem Emoji reagiert (F57 Mechanik 1).
+   *
+   * EINMALIG wie die vier darueber — ein erstes Mal gibt es nur einmal. Und es
+   * ist das EINZIGE Abzeichen im ganzen Katalog, das ueberhaupt von Reaktionen
+   * weiss: erhaltene Reaktionen aendern KEINE Zahl hier, keine Posting-Schwelle
+   * und keine Vertrauensstufe.
+   */
+  { key: 'first-reaction', group: 'gettingStarted', awardedPer: 'once', requires: { reactionsGiven: 1 } },
 
   // ── Die Gemeinschaft: Zuspruch bekommen UND geben ─────────────────────
   // EINMALIG, und zwar alle: das sind BESTANDS-Schwellen ueber das ganze Konto
@@ -306,6 +330,8 @@ export interface BadgeFacts {
   flagsRaised: number
   /** Bearbeitungen eigener Inhalte (mitschreibender Zaehler, nie ein Aggregat). */
   edits: number
+  /** Selbst abgegebene Emoji-Reaktionen (F57). Erhaltene zaehlt niemand. */
+  reactionsGiven: number
   /** Schwelle → Anzahl eigener Inhalte, die sie erreichen. */
   likedItems: Record<number, number>
   likedTopics: Record<number, number>
@@ -332,6 +358,7 @@ export function emptyBadgeFacts(): BadgeFacts {
     likesGiven: 0,
     flagsRaised: 0,
     edits: 0,
+    reactionsGiven: 0,
     likedItems: {},
     likedTopics: {},
     likedReplies: {},
@@ -429,6 +456,7 @@ export function badgeEarned(badge: BadgeDefinition, facts: BadgeFacts): boolean 
   if (requires.profileComplete && !facts.profileComplete) return false
   if (requires.likesGiven !== undefined && facts.likesGiven < requires.likesGiven) return false
   if (requires.flagsRaised !== undefined && facts.flagsRaised < requires.flagsRaised) return false
+  if (requires.reactionsGiven !== undefined && facts.reactionsGiven < requires.reactionsGiven) return false
   if (requires.edits !== undefined && facts.edits < requires.edits) return false
   if (!meetsLikedItems(facts.likedItems, requires.likedItems)) return false
   if (!meetsLikedItems(facts.likedTopics, requires.likedTopics)) return false
@@ -481,6 +509,7 @@ export function badgeProgress(badge: BadgeDefinition, facts: BadgeFacts): BadgeP
   if (badge.requires.likesGiven !== undefined) countable.push({ current: facts.likesGiven, target: badge.requires.likesGiven })
   if (badge.requires.flagsRaised !== undefined) countable.push({ current: facts.flagsRaised, target: badge.requires.flagsRaised })
   if (badge.requires.edits !== undefined) countable.push({ current: facts.edits, target: badge.requires.edits })
+  if (badge.requires.reactionsGiven !== undefined) countable.push({ current: facts.reactionsGiven, target: badge.requires.reactionsGiven })
   if (badge.requires.likedItems) countable.push({ current: facts.likedItems[badge.requires.likedItems.threshold] ?? 0, target: badge.requires.likedItems.count })
   if (badge.requires.likedTopics) countable.push({ current: facts.likedTopics[badge.requires.likedTopics.threshold] ?? 0, target: badge.requires.likedTopics.count })
   if (badge.requires.likedReplies) countable.push({ current: facts.likedReplies[badge.requires.likedReplies.threshold] ?? 0, target: badge.requires.likedReplies.count })
@@ -559,12 +588,13 @@ export function contentBadgeCrossings(
  *
  * Nur dann darf die Zaehl-Buchung ein Abzeichen verleihen — sie kennt weder das
  * Profil noch die Meldungen noch die Verteilungs-Aggregate, und ein „vielleicht
- * erfuellt" waere ein Abzeichen zu viel. Heute trifft das auf `likesGiven` und
- * `edits` zu; kaeme ein Zaehler dazu, muss dieser Filter mitwachsen.
+ * erfuellt" waere ein Abzeichen zu viel. Heute trifft das auf `likesGiven`,
+ * `edits` und `reactionsGiven` zu; kaeme ein Zaehler dazu, muss dieser Filter
+ * mitwachsen.
  */
 export function badgeFollowsFromCounters(badge: BadgeDefinition): boolean {
   const { requires } = badge
-  if (requires.likesGiven === undefined && requires.edits === undefined) return false
+  if (requires.likesGiven === undefined && requires.edits === undefined && requires.reactionsGiven === undefined) return false
   return !requires.profileComplete
     && requires.flagsRaised === undefined
     && !requires.likedItems
@@ -618,6 +648,8 @@ export function trustLevelBadgeCrossings(
 export interface CounterBadgeFacts {
   likesGiven: number
   edits: number
+  /** Abgegebene Reaktionen (F57) — traegt allein `first-reaction`. */
+  reactionsGiven: number
 }
 
 /** PURE: Welche Abzeichen folgen bei diesem Stand allein aus den Zaehlern? */
@@ -628,7 +660,8 @@ export function counterBadgeKeysFor(
   return catalog
     .filter(badge => badgeFollowsFromCounters(badge)
       && (badge.requires.likesGiven === undefined || values.likesGiven >= badge.requires.likesGiven)
-      && (badge.requires.edits === undefined || values.edits >= badge.requires.edits))
+      && (badge.requires.edits === undefined || values.edits >= badge.requires.edits)
+      && (badge.requires.reactionsGiven === undefined || values.reactionsGiven >= badge.requires.reactionsGiven))
     .map(badge => badge.key)
 }
 

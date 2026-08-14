@@ -21,12 +21,15 @@ function stored(overrides: Partial<ReturnType<typeof emptyMemberCounterValues>> 
 
 describe('seedValuesFrom', () => {
   it('übernimmt, was sich aus dem Bestand ausrechnen lässt', () => {
-    expect(seedValuesFrom({ topicsCreated: 12, repliesCreated: 340, upvotesGiven: 88 })).toEqual({
+    expect(seedValuesFrom({ topicsCreated: 12, repliesCreated: 340, upvotesGiven: 88, reactionsGiven: 7 })).toEqual({
       topicsCreated: 12,
       repliesCreated: 340,
       upvotesGiven: 88,
       upvotesReceived: 0,
       edits: 0,
+      // F57: eichbar wie die vergebenen Stimmen — jede abgegebene Reaktion ist
+      // eine Zeile, also exakt zählbar.
+      reactionsGiven: 7,
     })
   })
 
@@ -99,6 +102,8 @@ describe('memberCounterValues', () => {
   it('kennt genau die Spalten, die die Migration anlegt', () => {
     expect([...MEMBER_COUNTER_COLUMNS]).toEqual([
       'topicsCreated', 'repliesCreated', 'upvotesGiven', 'upvotesReceived', 'edits',
+      // posts-017 (F57)
+      'reactionsGiven',
     ])
   })
 })

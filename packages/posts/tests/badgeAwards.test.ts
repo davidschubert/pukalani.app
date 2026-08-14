@@ -45,7 +45,9 @@ describe('die Zuordnung am Katalog', () => {
     ])
     expect(byMode('membershipYear')).toEqual(['anniversary'])
     expect(byMode('once')).toEqual([
-      'profile', 'first-like', 'first-flag', 'editor',
+      // `first-reaction` (F57) steht bei den ersten Malen: ein erstes Mal gibt
+      // es nur einmal, auch wenn der Zähler dahinter weiterläuft.
+      'profile', 'first-like', 'first-flag', 'editor', 'first-reaction',
       'welcome', 'appreciated', 'thank-you', 'gives-back', 'empathetic', 'respected', 'admired',
       // F1 Teilpaket 3: die vier Stufen. EINMALIG, auch „Leader" — bei 1–3
       // folgt das aus „kein Abstieg", bei 4 ist es eine Entscheidung
@@ -114,7 +116,10 @@ describe('Posting-Abzeichen: das Merkmal ist der Inhalt', () => {
 describe('Zähler-Abzeichen: was die Buchung allein entscheiden darf', () => {
   it('erkennt genau die Bedingungen, die aus Zählern folgen', () => {
     for (const badge of BADGE_CATALOG) {
-      const expected = badge.key === 'first-like' || badge.key === 'editor'
+      // F57: `first-reaction` folgt ebenfalls allein aus einem mitschreibenden
+      // Zähler (`reactionsGiven`) — es ist das dritte und bleibt das einzige
+      // Abzeichen, das überhaupt von Reaktionen weiß.
+      const expected = badge.key === 'first-like' || badge.key === 'editor' || badge.key === 'first-reaction'
       expect(badgeFollowsFromCounters(badge), badge.key).toBe(expected)
     }
   })
@@ -126,15 +131,15 @@ describe('Zähler-Abzeichen: was die Buchung allein entscheiden darf', () => {
   })
 
   it('verleiht beim Stand, den die Zähler zeigen', () => {
-    expect(counterBadgeKeysFor({ likesGiven: 0, edits: 0 })).toEqual([])
-    expect(counterBadgeKeysFor({ likesGiven: 1, edits: 0 })).toEqual(['first-like'])
-    expect(counterBadgeKeysFor({ likesGiven: 3, edits: 2 })).toEqual(['first-like', 'editor'])
+    expect(counterBadgeKeysFor({ likesGiven: 0, edits: 0, reactionsGiven: 0 })).toEqual([])
+    expect(counterBadgeKeysFor({ likesGiven: 1, edits: 0, reactionsGiven: 0 })).toEqual(['first-like'])
+    expect(counterBadgeKeysFor({ likesGiven: 3, edits: 2, reactionsGiven: 0 })).toEqual(['first-like', 'editor'])
   })
 
   it('verleiht nur beim ÜBERSCHREITEN, nicht bei jedem Stand darüber', () => {
-    expect(counterBadgeCrossings({ likesGiven: 0, edits: 0 }, { likesGiven: 1, edits: 0 })).toEqual(['first-like'])
-    expect(counterBadgeCrossings({ likesGiven: 1, edits: 0 }, { likesGiven: 2, edits: 0 })).toEqual([])
-    expect(counterBadgeCrossings({ likesGiven: 5, edits: 0 }, { likesGiven: 5, edits: 1 })).toEqual(['editor'])
+    expect(counterBadgeCrossings({ likesGiven: 0, edits: 0, reactionsGiven: 0 }, { likesGiven: 1, edits: 0, reactionsGiven: 0 })).toEqual(['first-like'])
+    expect(counterBadgeCrossings({ likesGiven: 1, edits: 0, reactionsGiven: 0 }, { likesGiven: 2, edits: 0, reactionsGiven: 0 })).toEqual([])
+    expect(counterBadgeCrossings({ likesGiven: 5, edits: 0, reactionsGiven: 0 }, { likesGiven: 5, edits: 1, reactionsGiven: 0 })).toEqual(['editor'])
   })
 })
 
