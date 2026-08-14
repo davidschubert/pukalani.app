@@ -9,7 +9,7 @@
  * ── DER ZUSCHNITT: NUR, WAS HEUTE MESSBAR IST ─────────────────────────────
  * Davids Vorgabe fuer Stufe 4 lautet „nur heute messbare Abzeichen … fehlende
  * kommen automatisch dazu, sobald ihre Funktion existiert". Der Katalog aus
- * § 3.6 hat 40+ Eintraege; hier stehen 24 (5 + 9 + 6 + 4 — ein Test haelt die
+ * § 3.6 hat 40+ Eintraege; hier stehen 27 (5 + 12 + 6 + 4 — ein Test haelt die
  * Zahl an den Katalog gebunden, damit dieser Satz nicht mit der Zeit unwahr
  * wird).
  * Was fehlt und WARUM, gehoert an diese Stelle und nicht in eine Notiz, sonst
@@ -23,11 +23,12 @@
  *  - **Wartet auf seine Funktion** — First Emoji, First Quote, First Link,
  *    First Onebox, First Reply By Email, Wiki Editor,
  *    Certified/Licensed, Campaigner/Champion (Vertrauensstufe der
- *    Eingeladenen — Begruendung am Katalog-Eintrag `promoter`),
- *    Out of Love/Higher Love/Crazy in Love (Tages-Like-Limit).
+ *    Eingeladenen — Begruendung am Katalog-Eintrag `promoter`).
  *    Die Reihenfolge dieser Funktionen steht in Teil 4. „First Reaction" ist
  *    seit F57 (2026-08-13) GEBAUT und steht als `first-reaction` im Katalog;
- *    „Promoter" ist seit F57 Mechanik 2 (2026-08-14) dazugekommen —
+ *    „Promoter" ist seit F57 Mechanik 2 (2026-08-14) dazugekommen, und
+ *    „Out of Love"/„Higher Love"/„Crazy in Love" seit Mechanik 3 (2026-08-14,
+ *    Tages-Like-Limit) —
  *    es ist zugleich die EINZIGE Stelle, an der Reaktionen ueberhaupt ein
  *    Abzeichen beruehren (Teil 4 Punkt 3: Abzeichen zaehlen ausschliesslich
  *    Upvotes, Reaktionen sind badge-neutral).
@@ -186,6 +187,20 @@ export interface BadgeRequirement {
    */
   invitesAccepted?: number
   /**
+   * An mindestens so vielen TAGEN das Tages-Like-Limit erreicht (F57 Mechanik 3).
+   *
+   * TAGE, NICHT LIKES — und das ist die ganze Pointe der drei Abzeichen, die
+   * daran hängen. „50 Likes vergeben" hätte schon `likesGiven` gesagt; hier
+   * geht es darum, an einem Tag ALLES ausgegeben zu haben, und das an 1, 5
+   * oder 20 verschiedenen Tagen. Wer 500 Likes über ein Jahr verteilt, hat
+   * keinen einzigen dieser Tage.
+   *
+   * Der Zähler zählt AB der Einführung: „an diesem Tag war das Kontingent
+   * aufgebraucht" lässt sich aus dem Bestand nicht rekonstruieren (Begründung
+   * bei `seedValuesFrom`).
+   */
+  likeLimitDays?: number
+  /**
    * Mindestens so viele Bearbeitungen EIGENER Inhalte.
    *
    * Der erste Wert, der NICHT aus einem Aggregat kommt, sondern aus dem
@@ -321,6 +336,27 @@ export const BADGE_CATALOG: readonly BadgeDefinition[] = [
    */
   { key: 'promoter', group: 'community', awardedPer: 'once', requires: { invitesAccepted: 1 } },
 
+  /**
+   * „Out of Love" / „Higher Love" / „Crazy in Love" (F57 Mechanik 3, seit
+   * 2026-08-14) — an 1 / 5 / 20 Tagen alle Tages-Likes verbraucht.
+   *
+   * EINMALIG wie ihre Nachbarn: `likeLimitDays` ist ein BESTAND, der nur
+   * wächst, und jede weitere Stufe hat im Katalog schon ihren eigenen Namen.
+   *
+   * WARUM DIE ZAHLEN NICHT IM KATALOG STEHEN, SONDERN NUR DIE TAGE: die 50
+   * Likes je Tag sind eine Config (`pukalani.discussions.likesPerDay`), die
+   * Tage sind die Bedingung. Senkt eine Community ihr Limit, wird das
+   * Abzeichen leichter — das ist gewollt und der Grund, warum die Bedingung
+   * „alle Tages-Likes verbraucht" heißt und nicht „50 Likes an einem Tag".
+   *
+   * SIE FOLGEN ALLEIN AUS DEM ZÄHLER und werden deshalb schon bei der Buchung
+   * verliehen (`counterBadgeCrossings`), also in dem Moment, in dem jemand sein
+   * Kontingent leerräumt — nicht erst beim nächsten Blick in die Galerie.
+   */
+  { key: 'out-of-love', group: 'community', awardedPer: 'once', requires: { likeLimitDays: 1 } },
+  { key: 'higher-love', group: 'community', awardedPer: 'once', requires: { likeLimitDays: 5 } },
+  { key: 'crazy-in-love', group: 'community', awardedPer: 'once', requires: { likeLimitDays: 20 } },
+
   // ── Das Schreiben: EIN Stueck, das eingeschlagen hat ──────────────────
   // JE INHALT (`content`): hier sitzt das neue qualifizierende Ereignis, das
   // Davids Regel meint. Der zweite Beitrag mit 10 Stimmen ist ein zweiter
@@ -369,6 +405,8 @@ export interface BadgeFacts {
   reactionsGiven: number
   /** Angenommene eigene Einladungen (F57 Mechanik 2) — nie die verschickten. */
   invitesAccepted: number
+  /** Tage, an denen das Tages-Like-Limit erreicht war (F57 Mechanik 3). */
+  likeLimitDays: number
   /** Schwelle → Anzahl eigener Inhalte, die sie erreichen. */
   likedItems: Record<number, number>
   likedTopics: Record<number, number>
@@ -397,6 +435,7 @@ export function emptyBadgeFacts(): BadgeFacts {
     edits: 0,
     reactionsGiven: 0,
     invitesAccepted: 0,
+    likeLimitDays: 0,
     likedItems: {},
     likedTopics: {},
     likedReplies: {},
@@ -497,6 +536,7 @@ export function badgeEarned(badge: BadgeDefinition, facts: BadgeFacts): boolean 
   if (requires.reactionsGiven !== undefined && facts.reactionsGiven < requires.reactionsGiven) return false
   if (requires.edits !== undefined && facts.edits < requires.edits) return false
   if (requires.invitesAccepted !== undefined && facts.invitesAccepted < requires.invitesAccepted) return false
+  if (requires.likeLimitDays !== undefined && facts.likeLimitDays < requires.likeLimitDays) return false
   if (!meetsLikedItems(facts.likedItems, requires.likedItems)) return false
   if (!meetsLikedItems(facts.likedTopics, requires.likedTopics)) return false
   if (!meetsLikedItems(facts.likedReplies, requires.likedReplies)) return false
@@ -550,6 +590,7 @@ export function badgeProgress(badge: BadgeDefinition, facts: BadgeFacts): BadgeP
   if (badge.requires.edits !== undefined) countable.push({ current: facts.edits, target: badge.requires.edits })
   if (badge.requires.reactionsGiven !== undefined) countable.push({ current: facts.reactionsGiven, target: badge.requires.reactionsGiven })
   if (badge.requires.invitesAccepted !== undefined) countable.push({ current: facts.invitesAccepted, target: badge.requires.invitesAccepted })
+  if (badge.requires.likeLimitDays !== undefined) countable.push({ current: facts.likeLimitDays, target: badge.requires.likeLimitDays })
   if (badge.requires.likedItems) countable.push({ current: facts.likedItems[badge.requires.likedItems.threshold] ?? 0, target: badge.requires.likedItems.count })
   if (badge.requires.likedTopics) countable.push({ current: facts.likedTopics[badge.requires.likedTopics.threshold] ?? 0, target: badge.requires.likedTopics.count })
   if (badge.requires.likedReplies) countable.push({ current: facts.likedReplies[badge.requires.likedReplies.threshold] ?? 0, target: badge.requires.likedReplies.count })
@@ -629,13 +670,13 @@ export function contentBadgeCrossings(
  * Nur dann darf die Zaehl-Buchung ein Abzeichen verleihen — sie kennt weder das
  * Profil noch die Meldungen noch die Verteilungs-Aggregate, und ein „vielleicht
  * erfuellt" waere ein Abzeichen zu viel. Heute trifft das auf `likesGiven`,
- * `edits` und `reactionsGiven` zu; kaeme ein Zaehler dazu, muss dieser Filter
- * mitwachsen.
+ * `edits`, `reactionsGiven`, `invitesAccepted` und `likeLimitDays` zu; kaeme
+ * ein Zaehler dazu, muss dieser Filter mitwachsen.
  */
 export function badgeFollowsFromCounters(badge: BadgeDefinition): boolean {
   const { requires } = badge
   if (requires.likesGiven === undefined && requires.edits === undefined && requires.reactionsGiven === undefined
-    && requires.invitesAccepted === undefined) return false
+    && requires.invitesAccepted === undefined && requires.likeLimitDays === undefined) return false
   return !requires.profileComplete
     && requires.flagsRaised === undefined
     && !requires.likedItems
@@ -693,6 +734,11 @@ export interface CounterBadgeFacts {
   reactionsGiven: number
   /** Angenommene Einladungen (F57 Mechanik 2) — traegt allein `promoter`. */
   invitesAccepted: number
+  /**
+   * Tage mit erreichtem Like-Limit (F57 Mechanik 3) — traegt „Out of Love",
+   * „Higher Love" und „Crazy in Love".
+   */
+  likeLimitDays: number
 }
 
 /** PURE: Welche Abzeichen folgen bei diesem Stand allein aus den Zaehlern? */
@@ -705,7 +751,8 @@ export function counterBadgeKeysFor(
       && (badge.requires.likesGiven === undefined || values.likesGiven >= badge.requires.likesGiven)
       && (badge.requires.edits === undefined || values.edits >= badge.requires.edits)
       && (badge.requires.reactionsGiven === undefined || values.reactionsGiven >= badge.requires.reactionsGiven)
-      && (badge.requires.invitesAccepted === undefined || values.invitesAccepted >= badge.requires.invitesAccepted))
+      && (badge.requires.invitesAccepted === undefined || values.invitesAccepted >= badge.requires.invitesAccepted)
+      && (badge.requires.likeLimitDays === undefined || values.likeLimitDays >= badge.requires.likeLimitDays))
     .map(badge => badge.key)
 }
 

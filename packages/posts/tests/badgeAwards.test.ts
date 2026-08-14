@@ -52,6 +52,10 @@ describe('die Zuordnung am Katalog', () => {
       // F57 Mechanik 2: `promoter` steht NACH `anniversary` im Katalog, aber
       // vor den Stufen — die erste angenommene Einladung gibt es einmal.
       'promoter',
+      // F57 Mechanik 3: die drei Like-Limit-Tage. EINMALIG, weil
+      // `likeLimitDays` ein Bestand ist, der nur waechst — und jede Stufe
+      // hat im Katalog schon ihren eigenen Namen.
+      'out-of-love', 'higher-love', 'crazy-in-love',
       // F1 Teilpaket 3: die vier Stufen. EINMALIG, auch „Leader" — bei 1–3
       // folgt das aus „kein Abstieg", bei 4 ist es eine Entscheidung
       // (verliehen ist verliehen, auch wenn die Ernennung zurückgenommen wird).
@@ -124,8 +128,13 @@ describe('Zähler-Abzeichen: was die Buchung allein entscheiden darf', () => {
       // Abzeichen, das überhaupt von Reaktionen weiß.
       // F57 Mechanik 2: `promoter` ist das vierte — `invitesAccepted` ist ein
       // rein mitschreibender Zähler wie `edits`, die Buchung entscheidet allein.
+      // F57 Mechanik 3: die drei Like-Limit-Abzeichen sind die naechsten —
+      // `likeLimitDays` ist wie `edits` rein mitschreibend, die Buchung
+      // entscheidet allein.
       const expected = badge.key === 'first-like' || badge.key === 'editor'
         || badge.key === 'first-reaction' || badge.key === 'promoter'
+        || badge.key === 'out-of-love' || badge.key === 'higher-love'
+        || badge.key === 'crazy-in-love'
       expect(badgeFollowsFromCounters(badge), badge.key).toBe(expected)
     }
   })
@@ -137,21 +146,21 @@ describe('Zähler-Abzeichen: was die Buchung allein entscheiden darf', () => {
   })
 
   it('verleiht beim Stand, den die Zähler zeigen', () => {
-    expect(counterBadgeKeysFor({ likesGiven: 0, edits: 0, reactionsGiven: 0, invitesAccepted: 0 })).toEqual([])
-    expect(counterBadgeKeysFor({ likesGiven: 1, edits: 0, reactionsGiven: 0, invitesAccepted: 0 })).toEqual(['first-like'])
-    expect(counterBadgeKeysFor({ likesGiven: 3, edits: 2, reactionsGiven: 0, invitesAccepted: 0 })).toEqual(['first-like', 'editor'])
+    expect(counterBadgeKeysFor({ likesGiven: 0, edits: 0, reactionsGiven: 0, invitesAccepted: 0, likeLimitDays: 0 })).toEqual([])
+    expect(counterBadgeKeysFor({ likesGiven: 1, edits: 0, reactionsGiven: 0, invitesAccepted: 0, likeLimitDays: 0 })).toEqual(['first-like'])
+    expect(counterBadgeKeysFor({ likesGiven: 3, edits: 2, reactionsGiven: 0, invitesAccepted: 0, likeLimitDays: 0 })).toEqual(['first-like', 'editor'])
     // F57 Mechanik 2: die erste ANGENOMMENE Einladung — und nur sie.
-    expect(counterBadgeKeysFor({ likesGiven: 0, edits: 0, reactionsGiven: 0, invitesAccepted: 1 })).toEqual(['promoter'])
+    expect(counterBadgeKeysFor({ likesGiven: 0, edits: 0, reactionsGiven: 0, invitesAccepted: 1, likeLimitDays: 0 })).toEqual(['promoter'])
   })
 
   it('verleiht nur beim ÜBERSCHREITEN, nicht bei jedem Stand darüber', () => {
-    expect(counterBadgeCrossings({ likesGiven: 0, edits: 0, reactionsGiven: 0, invitesAccepted: 0 }, { likesGiven: 1, edits: 0, reactionsGiven: 0, invitesAccepted: 0 })).toEqual(['first-like'])
-    expect(counterBadgeCrossings({ likesGiven: 1, edits: 0, reactionsGiven: 0, invitesAccepted: 0 }, { likesGiven: 2, edits: 0, reactionsGiven: 0, invitesAccepted: 0 })).toEqual([])
-    expect(counterBadgeCrossings({ likesGiven: 5, edits: 0, reactionsGiven: 0, invitesAccepted: 0 }, { likesGiven: 5, edits: 1, reactionsGiven: 0, invitesAccepted: 0 })).toEqual(['editor'])
+    expect(counterBadgeCrossings({ likesGiven: 0, edits: 0, reactionsGiven: 0, invitesAccepted: 0, likeLimitDays: 0 }, { likesGiven: 1, edits: 0, reactionsGiven: 0, invitesAccepted: 0, likeLimitDays: 0 })).toEqual(['first-like'])
+    expect(counterBadgeCrossings({ likesGiven: 1, edits: 0, reactionsGiven: 0, invitesAccepted: 0, likeLimitDays: 0 }, { likesGiven: 2, edits: 0, reactionsGiven: 0, invitesAccepted: 0, likeLimitDays: 0 })).toEqual([])
+    expect(counterBadgeCrossings({ likesGiven: 5, edits: 0, reactionsGiven: 0, invitesAccepted: 0, likeLimitDays: 0 }, { likesGiven: 5, edits: 1, reactionsGiven: 0, invitesAccepted: 0, likeLimitDays: 0 })).toEqual(['editor'])
     // F57 Mechanik 2: die ZWEITE angenommene Einladung feiert niemand noch
     // einmal — sonst liefe jede weitere Annahme in einen 409.
-    expect(counterBadgeCrossings({ likesGiven: 0, edits: 0, reactionsGiven: 0, invitesAccepted: 0 }, { likesGiven: 0, edits: 0, reactionsGiven: 0, invitesAccepted: 1 })).toEqual(['promoter'])
-    expect(counterBadgeCrossings({ likesGiven: 0, edits: 0, reactionsGiven: 0, invitesAccepted: 1 }, { likesGiven: 0, edits: 0, reactionsGiven: 0, invitesAccepted: 2 })).toEqual([])
+    expect(counterBadgeCrossings({ likesGiven: 0, edits: 0, reactionsGiven: 0, invitesAccepted: 0, likeLimitDays: 0 }, { likesGiven: 0, edits: 0, reactionsGiven: 0, invitesAccepted: 1, likeLimitDays: 0 })).toEqual(['promoter'])
+    expect(counterBadgeCrossings({ likesGiven: 0, edits: 0, reactionsGiven: 0, invitesAccepted: 1, likeLimitDays: 0 }, { likesGiven: 0, edits: 0, reactionsGiven: 0, invitesAccepted: 2 })).toEqual([])
   })
 })
 

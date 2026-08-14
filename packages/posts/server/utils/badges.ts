@@ -135,6 +135,14 @@ export function badgeFactsFrom(
   facts.edits = written?.edits ?? 0
   facts.reactionsGiven = written?.reactionsGiven ?? counters[COUNTER_REACTIONS_GIVEN] ?? 0
   facts.invitesAccepted = written?.invitesAccepted ?? 0
+  /**
+   * `likeLimitDays` (F57 Mechanik 3) kommt AUSSCHLIESSLICH vom Zähler, und
+   * zwar aus dem schärfsten der drei Gründe: es gibt nichts, was man
+   * stattdessen fragen könnte. Ein Tag, an dem das Kontingent aufgebraucht
+   * war, hinterlässt außer dieser Zahl keine Spur — die Stimmen jenes Tages
+   * stehen zwar noch da, aber gerade die zurückgenommenen haben mitgezählt.
+   */
+  facts.likeLimitDays = written?.likeLimitDays ?? 0
   facts.flagsRaised = counters[COUNTER_FLAGS_RAISED] ?? 0
   for (const threshold of thresholds) {
     facts.likedItems[threshold] = counters[counterLikedItems(threshold)] ?? 0
@@ -379,5 +387,11 @@ export async function awardTrustLevelBadges(
  * Katalog keine Spaltennamen kennen soll.
  */
 function counterFactsOf(values: MemberCounterValues): CounterBadgeFacts {
-  return { likesGiven: values.upvotesGiven, edits: values.edits, reactionsGiven: values.reactionsGiven, invitesAccepted: values.invitesAccepted }
+  return {
+    likesGiven: values.upvotesGiven,
+    edits: values.edits,
+    reactionsGiven: values.reactionsGiven,
+    invitesAccepted: values.invitesAccepted,
+    likeLimitDays: values.likeLimitDays,
+  }
 }

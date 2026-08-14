@@ -1,5 +1,6 @@
 import { AppwriteException, Permission, Query, Role } from 'node-appwrite'
-import { upvoteDelta } from '../../../../../core/shared/upvoteDelta'
+import { LIKE_LIMIT_REACHED } from '../../../../../core/shared/likeAllowance'
+import { upvoteDelta, type UpvoteState } from '../../../../../core/shared/upvoteDelta'
 import { scoreVoteSchema } from '../../../../schemas/post'
 import { POSTS_TABLE, POST_VOTES_TABLE, type CommunityPost, type PostVote, type PostVoteResponse, type PostVoteValue } from '../../../../shared/types/post'
 
@@ -50,6 +51,33 @@ export default defineEventHandler(async (event): Promise<PostVoteResponse> => {
     Query.equal('postId', postId),
     Query.equal('userId', user.$id),
   ])
+
+  /**
+   * DAS TAGES-LIMIT FÜR LIKES (F57 Mechanik 3, Davids Entscheidung 2026-08-14).
+   *
+   * VOR dem Schreiben, und NUR für ein Like, das gerade neu vergeben wird: der
+   * beabsichtigte Folgezustand ergibt sich aus der Umschalt-Semantik (gleicher
+   * Wert = weg), und ob das ein Like IST, beantwortet `upvoteDelta` — dieselbe
+   * Rechnung, die unten den Zähler bewegt. Damit gilt hier automatisch, was
+   * dort gilt: eine Abstimme kostet nichts, eine Rücknahme kostet nichts (sie
+   * erstattet aber auch nichts), und der Wechsel von Ab- auf Aufstimme ist ein
+   * Like.
+   *
+   * NACH den Status-Prüfungen, damit eine Stimme auf einen nicht stimmbaren
+   * Beitrag kein Kontingent verbraucht.
+   */
+  const previousVote: UpvoteState = current?.value === 1 ? 1 : current?.value === -1 ? -1 : null
+  const intendedVote: UpvoteState = previousVote === value ? null : value
+  if (upvoteDelta(previousVote, intendedVote) === 1) {
+    const allowance = await spendLikeAllowance(event, user.$id)
+    if (!allowance.ok) {
+      throw createError({
+        status: 429,
+        statusText: 'Like limit reached',
+        data: { code: LIKE_LIMIT_REACHED },
+      })
+    }
+  }
 
   if (current && current.value === value) {
     await db.remove(POST_VOTES_TABLE, current.$id)

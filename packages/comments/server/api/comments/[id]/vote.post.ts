@@ -1,4 +1,5 @@
 import { AppwriteException, Permission, Query, Role } from 'node-appwrite'
+import { LIKE_LIMIT_REACHED } from '../../../../../core/shared/likeAllowance'
 import { upvoteDelta, type UpvoteState } from '../../../../../core/shared/upvoteDelta'
 import { voteSchema } from '../../../../schemas/comment'
 import {
@@ -63,6 +64,34 @@ export default defineEventHandler(async (event): Promise<VoteResponse> => {
     Query.equal('commentId', commentId),
     Query.equal('userId', user.$id),
   ])
+
+  /**
+   * DAS TAGES-LIMIT FÜR LIKES (F57 Mechanik 3, Davids Entscheidung 2026-08-14).
+   *
+   * VOR dem Schreiben, und NUR für ein Like, das gerade neu vergeben wird. Der
+   * beabsichtigte Folgezustand ergibt sich aus der Umschalt-Semantik (gleicher
+   * Wert = weg); ob das ein Like IST, beantwortet `upvoteDelta` — dieselbe
+   * Rechnung, die unten den Zähler bewegt, damit „was ist ein Like" hier und
+   * dort dasselbe heißt. Abstimmen und Rücknahmen kosten also nichts; eine
+   * Rücknahme erstattet aber auch nichts (sonst wäre das Limit ein Toggle
+   * entfernt).
+   *
+   * DIE ZEILE, DIE DEN STAND HÄLT, GEHÖRT EINEM ANDEREN LAYER — gefragt wird
+   * deshalb über den Core-Vertrag, nicht bei `posts` (A14). In einer App ohne
+   * Discussions ist der Vertrag unbesetzt und es gibt kein Limit.
+   */
+  const previousVote: UpvoteState = current?.value === 1 ? 1 : current?.value === -1 ? -1 : null
+  const intendedVote: UpvoteState = previousVote === value ? null : value
+  if (upvoteDelta(previousVote, intendedVote) === 1) {
+    const allowance = await spendLikeAllowance(event, user.$id)
+    if (!allowance.ok) {
+      throw createError({
+        status: 429,
+        statusText: 'Like limit reached',
+        data: { code: LIKE_LIMIT_REACHED },
+      })
+    }
+  }
 
   if (current && current.value === value) {
     // Toggle: Vote entfernen
@@ -129,12 +158,14 @@ export default defineEventHandler(async (event): Promise<VoteResponse> => {
      * GAST-KOMMENTARE fallen von selbst heraus: sie tragen `authorId: ''`, und
      * ohne Konto gibt es niemanden, dem etwas gutzuschreiben wäre.
      */
-    // `CommentVote.value` ist ein loser `number` (die Spalte ist ein Integer),
-    // die Regel kennt nur die drei gemeinten Zustände. Die Einengung hier ist
-    // deshalb keine Formalie: sie macht aus einem versehentlichen 0 oder 7 ein
-    // „keine Aufstimme" statt eines Typfehlers zur Laufzeit.
-    const before: UpvoteState = current?.value === 1 ? 1 : current?.value === -1 ? -1 : null
-    const delta = upvoteDelta(before, myVote)
+    // `previousVote` ist der Stand von VORHER — dieselbe Einengung, die schon
+    // das Tages-Limit oben gebraucht hat, und deshalb bewusst nicht ein zweites
+    // Mal hingeschrieben: zwei Namen für denselben Zustand laufen beim nächsten
+    // Sonderfall auseinander. Sie ist keine Formalie — `CommentVote.value` ist
+    // ein loser `number` (die Spalte ist ein Integer), und sie macht aus einem
+    // versehentlichen 0 oder 7 ein „keine Aufstimme" statt eines Typfehlers zur
+    // Laufzeit.
+    const delta = upvoteDelta(previousVote, myVote)
     if (delta !== 0) {
       await recordUserCounterEvents(event, [
         { userId: user.$id, kind: 'upvotesGiven', delta },

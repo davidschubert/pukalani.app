@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { LIKE_LIMIT_REACHED } from '../../../core/shared/likeAllowance'
 import type { FeedPost, PostVoteResponse, PostVoteValue } from '../../shared/types/post'
 
 /**
@@ -27,8 +28,22 @@ async function vote(value: PostVoteValue) {
     })
     emit('updated', { ...props.post, ...res.post, myPostVote: res.myVote })
   }
-  catch {
-    toast.add({ title: t('posts.card.voteFailed'), description: t('posts.card.voteFailedHint'), color: 'error' })
+  catch (error) {
+    /**
+     * DAS TAGES-LIMIT IST KEIN FEHLER (F57 Mechanik 3) — und wird deshalb
+     * nicht wie einer gemeldet. „Stimme konnte nicht gespeichert werden. Klick
+     * noch einmal" wäre hier schlicht falsch: es kam an, es war nur alle, und
+     * noch einmal klicken hilft bis morgen nicht.
+     *
+     * KEIN DAUERHAFTES AUSGRAUEN des Knopfes: ob noch Kontingent da ist, weiß
+     * nur der Server, und der Stand kann sich zwischen zwei Klicks ändern (ein
+     * neuer UTC-Tag beginnt). Ein Knopf, der aus einer geratenen Zahl heraus
+     * grau wird, wäre irgendwann grau, obwohl es ginge — und umgekehrt.
+     */
+    const reason = (error as { data?: { reason?: string } })?.data?.reason
+    toast.add(reason === LIKE_LIMIT_REACHED
+      ? { title: t('posts.card.likeLimitReached'), description: t('posts.card.likeLimitReachedHint'), color: 'warning' }
+      : { title: t('posts.card.voteFailed'), description: t('posts.card.voteFailedHint'), color: 'error' })
   }
   finally {
     busy.value = false

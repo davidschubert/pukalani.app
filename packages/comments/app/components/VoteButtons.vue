@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { LIKE_LIMIT_REACHED } from '../../../core/shared/likeAllowance'
 import type { Comment } from '../../shared/types/comment'
 
 const props = defineProps<{ comment: Comment }>()
@@ -19,10 +20,20 @@ async function vote(value: 1 | -1) {
     // Optimistic im Store — Zähler springen sofort, Rollback bei Fehler
     await store.vote(props.comment.$id, value)
   }
-  catch {
-    // Der Zähler springt durch den Rollback sichtbar zurück — ohne Erklärung
-    // sieht das nach einem zweiten Fehler aus.
-    toast.add({ title: t('comments.item.voteError'), description: t('comments.item.voteErrorHint'), color: 'error' })
+  catch (error) {
+    /**
+     * Der Zähler springt durch den Rollback sichtbar zurück — ohne Erklärung
+     * sieht das nach einem zweiten Fehler aus.
+     *
+     * DAS TAGES-LIMIT (F57 Mechanik 3) bekommt seine EIGENE Erklärung: der
+     * Rollback ist dort richtig (die Stimme steht wirklich nicht), aber „prüf
+     * die Verbindung und stimm noch einmal ab" führte in die Irre — es lag
+     * nicht an der Verbindung, und noch einmal geht es erst morgen.
+     */
+    const reason = (error as { data?: { reason?: string } })?.data?.reason
+    toast.add(reason === LIKE_LIMIT_REACHED
+      ? { title: t('comments.item.likeLimitReached'), description: t('comments.item.likeLimitReachedHint'), color: 'warning' }
+      : { title: t('comments.item.voteError'), description: t('comments.item.voteErrorHint'), color: 'error' })
   }
 }
 </script>

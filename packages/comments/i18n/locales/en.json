@@ -124,6 +124,8 @@
       "cancel": "Cancel",
       "upvote": "Upvote",
       "downvote": "Downvote",
+      "likeLimitReached": "You are out of likes for today.",
+      "likeLimitReachedHint": "You can pick up again tomorrow.",
       "voteError": "Vote failed — please try again.",
       "voteErrorHint": "That is why the count jumped back. Check your connection and vote again.",
       "error": "Action failed — please try again.",

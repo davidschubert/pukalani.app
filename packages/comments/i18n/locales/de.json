@@ -124,6 +124,8 @@
       "cancel": "Abbrechen",
       "upvote": "Upvote",
       "downvote": "Downvote",
+      "likeLimitReached": "Für heute sind deine Likes aufgebraucht.",
+      "likeLimitReachedHint": "Morgen geht es weiter.",
       "voteError": "Vote fehlgeschlagen — bitte erneut versuchen.",
       "voteErrorHint": "Deshalb ist der Zähler zurückgesprungen. Prüf die Verbindung und stimm noch einmal ab.",
       "error": "Aktion fehlgeschlagen — bitte erneut versuchen.",

@@ -34,8 +34,11 @@ describe('der Katalog selbst', () => {
     // weiterhin ausschliesslich Upvotes (Konzept Teil 4 Punkt 3).
     // `promoter` (F57 Mechanik 2) kam als NEUNTES in die Gruppe „Community" —
     // Einladen ist Gemeinschaft, kein erstes Mal am eigenen Schreibtisch.
-    expect(BADGE_CATALOG.length).toBe(24)
-    for (const [group, size] of [['gettingStarted', 5], ['community', 9], ['posting', 6], ['trustLevel', 4]] as const) {
+    // `out-of-love`/`higher-love`/`crazy-in-love` (F57 Mechanik 3) sind die
+    // Nummern 10 bis 12 derselben Gruppe: sein Kontingent an einem Tag
+    // auszugeben ist eine Zuwendung an andere, kein eigener Meilenstein.
+    expect(BADGE_CATALOG.length).toBe(27)
+    for (const [group, size] of [['gettingStarted', 5], ['community', 12], ['posting', 6], ['trustLevel', 4]] as const) {
       expect(BADGE_CATALOG.filter(entry => entry.group === group).length, group).toBe(size)
     }
   })
