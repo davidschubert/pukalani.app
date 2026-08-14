@@ -41,6 +41,7 @@ const SYSTEM_TABLES = [
   'community_branding',
   'community_handles',
   'community_navigation',
+  'community_redirects',
   'community_seo',
   'custom_fonts',
   'custom_themes',
