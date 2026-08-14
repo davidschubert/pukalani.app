@@ -25,6 +25,19 @@ Ziel: Diskussions-THEMEN (die Antworten liegen im comments-Layer — offene
 Folge-Frage an David); mehrere Emojis je Nutzer, je Emoji Toggle. Realtime
 bewusst optimistisch statt Socket (Andockpunkt dokumentiert).
 
+**Umsetzung Mechanik 2 (Einladungen, am selben Tag gebaut):** neue Capability
+`members.invite` beim `viewer` — bewusst NEBEN `team.manage` statt durch
+Absenken, sonst wäre Rollen-Vergabe per Mitglieds-Capability erreichbar. Die
+eingeladene Rolle ist IMMER `viewer`, geprüft in der Route. Owner/Admin bleiben
+kontingent- UND schalterfrei (die Mechanik fügt ein Recht hinzu, sie beschneidet
+keines). Kontingent rollierend über 7 Tage an den ERZEUGTEN Zeilen, verbraucht
+mit dem Versand. Der Owner-Schalter hängt an `team.manage`: wer einladen darf,
+darf das Einladen nicht abschalten. **Offen geblieben und David vorgelegt:**
+Campaigner/Champion — das Konzept definiert sie über die Vertrauensstufe der
+EINGELADENEN, das braucht einen eigenen Verleihungs-Pfad; sie ersatzweise an
+„3 bzw. 10 angenommene" zu hängen wurde verworfen (das Abzeichen hieße dann
+etwas anderes als das Konzept sagt).
+
 ## 2026-08-13 — U15-Zuschnitt-Runde + MFA-Folgen
 
 **Davids Antworten (drei Fragerunden):** (1) Navigations-Editor: ausblenden +

@@ -30,6 +30,107 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### F57 Mechanik 2 — Einladungen durch Mitglieder ✅ 2026-08-14
+
+**Der Wachstumshebel aus dem Discussions-Konzept (Teil 4 Punkt 1).** Bis hierher
+lud nur das Team ein; jetzt darf **jedes Mitglied ab Rolle Leser/in** Menschen
+dazuholen. Davids Zuschnitt vom 2026-08-14: **5 pro Woche je Mitglied**, **je
+Community vom Owner abschaltbar**, die Zahl als Config-Wert.
+
+**Die eingeladene Rolle ist IMMER `viewer`** — und zwar in der ROUTE, nicht nur
+im Formular. Ohne diese Prüfung wäre `role: 'admin'` im Body eine Rollen-Vergabe
+per Mitglieds-Capability gewesen, also dieselbe Klasse Fehler, gegen die
+`community.transfer` seinerzeit als eigene Capability geschnitten wurde. Aus
+demselben Grund ist die neue Capability `members.invite` NEBEN `team.manage`
+entstanden statt durch Absenken von `team.manage`: sie sagt „darf jemanden
+herholen", nicht „darf über die Besetzung bestimmen". Der Schalter selbst hängt
+weiterhin an `team.manage` — wer einladen darf, darf das Einladen nicht
+abschalten.
+
+**Owner und Admins bleiben kontingent- und schalterfrei.** Das war die
+Bedingung, unter der die Mechanik gebaut werden durfte: sie fügt ein Recht hinzu
+und beschneidet keines. Ein Owner, der seine eigene Community nicht mehr voll
+besetzen kann, weil er den Schalter für seine Mitglieder umgelegt hat, wäre ein
+Rückschritt gewesen.
+
+**Das Kontingent zählt an den ERZEUGTEN Zeilen**, rollierend über sieben Tage —
+kein Kalenderfenster, das um Mitternacht fünf frische Versuche verschenkt.
+Verbraucht ist eine Einladung mit dem VERSAND, nicht mit der Annahme: 500 nie
+angenommene Einladungen kosteten sonst nichts, und genau die sind der
+Missbrauchsfall. Dass eine zweite Einladung an dieselbe Adresse die erste nur
+auf `revoked` setzt statt sie zu löschen, ist dabei die tragende Eigenschaft —
+wer dort je auf „aufräumen" umstellt, hebt das Kontingent auf, ohne es
+anzufassen.
+
+**Die Drossel ist NICHT das Kontingent, und beide werden gebraucht.** Das
+Kontingent begrenzt die Menge über die Zeit und liegt hinter Rollen-Prüfung,
+JWT-Mint und einer Zähl-Abfrage über die Service-Naht; die neue Drossel
+(`community:invite`) begrenzt den Ansturm davor. Ein Deckel, der erst nach der
+Arbeit greift, schützt den Server nicht.
+
+**Regeln PURE und unit-getestet** (`packages/control/shared/communityInviteQuota.ts`):
+`decideMemberInvite` setzt durch, `memberInviteQuota` zeigt an — und die Anzeige
+ruft die Entscheidung SELBST auf. Ein Test hält beide über alle Kombinationen
+aneinander, denn ein Knopf, der 403 erntet, ist schlimmer als kein Knopf.
+
+**Abzeichen `promoter`** (erste ANGENOMMENE Einladung, neuer Zähler
+`member_counters.invitesAccepted`). Gezählt wird die ANNAHME, nicht der Versand
+— ein Abzeichen für verschickte Einladungen wäre eine Auszeichnung für Spam
+gewesen und hätte gegen das Kontingent gearbeitet. Gebucht wird in der RUNTIME
+(dort liegen die Zähler), das Control Plane reicht dafür `invitedBy` zurück:
+dieselbe Arbeitsteilung wie bei `revokeCommunityLabel` (A5) und der
+Verzugs-Meldung (C15).
+
+**Campaigner/Champion bleiben BEWUSST offen** (David-Entscheidung nötig): das
+Konzept definiert sie über die Vertrauensstufe DER EINGELADENEN („3 wurden
+Basic", „5 wurden Member"). Das ist keine Zahl auf der Zeile des Einladenden —
+sie entsteht Wochen später in einer fremden `member_counters`-Zeile und fällt
+damit aus dem Zähl-Kreuzungs-Weg heraus, den alle Abzeichen dieser Klasse
+benutzen. Sie brauchten einen dritten Verleihungs-Pfad (beim Aufstieg des
+Eingeladenen, mit Rückverweis auf den Einladenden). Sie stattdessen still mit
+„3 bzw. 10 angenommene" zu belegen wäre die billige und die falsche Lösung: das
+Abzeichen hieße dann etwas anderes als das Konzept sagt, und niemand würde je
+nachlesen, warum.
+
+**Migrationen** (BEIDE vor dem Code-Deploy, `createRow`-Regel): **control-037**
+(`communities.memberInvitesEnabled`, fail-open wie `openRegistration`, +
+`community_invites.idx_community_inviter`) — nur das Control Plane;
+**posts-018** (`member_counters.invitesAccepted`) — jede Instanz mit
+posts-Layer. Die neue `communities`-Spalte traf DREI Anlegestellen, nicht zwei:
+der Nagel-Test aus F3 hat `scripts/ops/f3-lib/rules.mts` gefunden.
+
+**Beweis:** `packages/onboarding/scripts/verify-member-invites.mjs` **40/40**,
+zweimal hintereinander (selbsträumend), gegen platform + control aus demselben
+Worktree mit echter Service-Naht und echtem Mailversand über Mailpit.
+
+**Gelernt:** (1) **Zwei 429 sind eines zu viel.** Drossel und Kontingent
+antworten beide 429, die Drossel läuft als Middleware zuerst — mit einer
+gemeinsamen Client-IP wäre die 6. Einladung am Rate-Limit gestorben und die
+Kontingent-Prüfung nie erreicht worden. Der Test wäre GRÜN gewesen, ohne die
+Mechanik zu berühren. Jeder Versuch bekommt deshalb eine eigene IP, und die
+Drossel hat einen eigenen Abschnitt mit fester IP und kontingentfreiem Owner.
+(2) **`communities.$id` ≠ `communities.tenantId`.** Die Datentür stempelt in
+den Runtime-Tabellen `communityId = tenantId` (`t-…`); mit der `$id` gesucht
+liefern `member_counters` und `user_badges` still eine LEERE Menge. Beide
+Abzeichen-Prüfungen waren im ersten Lauf rot, obwohl das Produkt stimmte —
+dieselbe Verwechslung, vor der CLAUDE.md bei `notify()` warnt.
+(3) **Zwei neue Routen können die Typen einer ganz anderen App umwerfen.** Nuxt
+tippt `$fetch` über die Vereinigung ALLER Server-Routen; die Ableitung des
+Options-Typs kippte mit den zwei F57-Routen über die Rekursionsgrenze
+(`TS2589`). Gemeldet wurde `apps/platform/server/utils/tenantBrandMark.ts` —
+eine Datei, die niemand angefasst hatte; entschärft man den einen Aufruf,
+wandert der Fehler zum nächsten `$fetch`. Vier der fünf betroffenen Aufrufe
+zeigen ohnehin auf FREMDE Dienste, dort ist `, string` als Anfrage-Generic
+präziser als die Inferenz gegen interne Routen. Die Schwelle war vorher schon
+fast erreicht; F57 hat sie nur sichtbar gemacht.
+(4) **Ein frisch beigetretenes Mitglied wartet bis zu 30 s auf seine Rolle**
+(gemessen: t=0…25 s `role: null`, t=30 s `viewer`) — der bestehende
+Rollen-Cache, der für jede Capability gilt. Wer das im Beweis nicht abwartet,
+misst den Cache statt der Mechanik, und der generische 403 ohne `reason` sieht
+aus wie ein kaputtes Gate.
+(5) Die Testphase lässt **eine Community je Konto** zu — ein Beweis mit zwei
+Communities braucht zwei Gründer.
+
 ### U15 Teil 5 (letzter) — Zeitzone: Datum und Uhrzeit in der eigenen Zone ✅ 2026-08-13
 
 **Damit ist U15 zu.** Konto → Allgemein bekommt eine Karte „Zeitzone": ein

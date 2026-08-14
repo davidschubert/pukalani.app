@@ -337,7 +337,7 @@ Entscheidung Nr. 4 in 3.7 — ohne sie ist keine der Like-Zeilen baubar.
 | Enthusiast / Aficionado / Devotee | 10 / 100 / 365 Tage in Folge besucht **[fehlt: Besuchs-Streaks]** |
 | Anniversary | 1 Jahr Mitglied + ≥1 Beitrag in dem Jahr |
 | Out of Love / Higher Love / Crazy in Love | alle 50 Tages-Likes an 1 / 5 / 20 Tagen verbraucht **[fehlt: Tages-Like-Limit]** |
-| Promoter / Campaigner / Champion | 1 Einladung / 3 Eingeladene wurden Basic / 5 wurden Member **[fehlt: Einladungen DURCH MITGLIEDER — community_invites gehört Owner/Admin; Stufen brauchen Trust Levels]** |
+| Promoter / Campaigner / Champion | 1 Einladung / 3 Eingeladene wurden Basic / 5 wurden Member — **`promoter` GEBAUT** (2026-08-14, zählt die erste ANGENOMMENE Einladung); **[fehlen: Campaigner/Champion — sie hängen an der Vertrauensstufe der EINGELADENEN und brauchen einen eigenen Verleihungs-Pfad, s. Teil 5]** |
 | Nice/Good/Great Share | geteilter Link von 25 / 300 / 1000 externen Besuchern geklickt **[fehlt: Klick-Zählung]** |
 
 ### Posting
@@ -441,6 +441,10 @@ eigenes Paket mit Sicherheitsentwurf.
 1. **Einladungen durch Mitglieder** (heute nur Owner/Admin) — der einzige
    echte Wachstumshebel, plattformweit nützlich. Braucht ein Kontingent gegen
    Missbrauch. Bringt Promoter/Campaigner/Champion.
+   **GEBAUT am 2026-08-14** (5/Woche je Mitglied, Owner-Schalter, Rolle immer
+   `viewer`) — Einzelheiten in Teil 5. Davon gekommen ist `promoter`;
+   Campaigner/Champion brauchen die Vertrauensstufe der EINGELADENEN und damit
+   einen eigenen Verleihungs-Pfad.
 2. **Tages-Limit für Likes** — klein; macht Likes knapp. Bringt Out of
    Love/Higher Love/Crazy in Love.
 3. **Emoji-Reaktionen neben den Stimmen.** Ich hatte abgeraten (drittes Signal
@@ -513,6 +517,33 @@ nach `docs/OPEN-ITEMS.md`.
   Hilfe-Umbenennung Stunden zuvor auf genau diesem Pfad hinterlassen hatte, ist
   entfernt — eine routeRule gewinnt gegen die Seite, beides ging nicht
   (Begründung im Kopf von `apps/help/nuxt.config.ts`).
+
+- **Einladungen durch Mitglieder** (2026-08-14, Teil-4-Mechanik 1 — Davids
+  Zuschnitt vom selben Tag: 5 pro Woche je Mitglied, je Community abschaltbar,
+  Zahl als Config-Wert). Neue Capability `members.invite` beim `viewer`, also
+  bei jedem Mitglied mit Zugang; die eingeladene Rolle ist IMMER `viewer`, und
+  zwar geprüft in der Route — ein verstecktes Auswahlfeld ist keine Grenze.
+  Owner/Admin bleiben kontingent- und schalterfrei: die Mechanik fügt ein Recht
+  hinzu und beschneidet keines. Regeln PURE in
+  `packages/control/shared/communityInviteQuota.ts`, gezählt an den ERZEUGTEN
+  `community_invites`-Zeilen (rollierend 7 Tage, verbraucht mit dem VERSAND —
+  nie angenommene Einladungen sind der Missbrauchsfall). Owner-Schalter
+  `communities.memberInvitesEnabled` (control-037, fail-open) unter
+  /dashboard/community neben der offenen Registrierung; eine Drossel
+  (`community:invite`) liegt ZUSÄTZLICH davor, weil das Kontingent erst hinter
+  JWT-Mint und Zähl-Abfrage greift. Beweis
+  `packages/onboarding/scripts/verify-member-invites.mjs` (40/40).
+  **BRINGT `promoter`** (erste ANGENOMMENE Einladung, Zähler
+  `member_counters.invitesAccepted`, posts-018) — gezählt wird die ANNAHME, nie
+  der Versand; ein Abzeichen fürs Anschreiben wäre eine Auszeichnung für Spam.
+  **CAMPAIGNER/CHAMPION FEHLEN WEITERHIN**, und die Begründung gehört hierher:
+  sie hängen laut Tabelle oben an der Vertrauensstufe DER EINGELADENEN („3
+  wurden Basic", „5 wurden Member"). Das ist keine Zahl auf der Zeile des
+  Einladenden — sie entsteht Wochen später in einer FREMDEN
+  `member_counters`-Zeile und fällt aus dem Zähl-Kreuzungs-Weg heraus, den alle
+  Abzeichen dieser Klasse benutzen. Nötig wäre ein dritter Verleihungs-Pfad
+  (beim Aufstieg des Eingeladenen, mit Rückverweis auf den Einladenden) —
+  eigenes Paket, eigene Entscheidung.
 
 - **Emoji-Reaktionen** (2026-08-13, Teil-4-Mechanik 3 — Davids Entscheidung
   vom 2026-08-10 „Reaktionen zuerst"). Ein kuratierter Satz von acht Emojis
