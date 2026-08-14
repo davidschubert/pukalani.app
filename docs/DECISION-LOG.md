@@ -7,6 +7,21 @@ die kleinen, verstreuten Beschlüsse.
 
 ---
 
+## 2026-08-13 — U15-Zuschnitt-Runde + MFA-Folgen
+
+**Davids Antworten (drei Fragerunden):** (1) Navigations-Editor: ausblenden +
+umordnen + umbenennen PLUS eigene Links (CMS-Seiten + externe https-URLs).
+(2) SEO-Seite: Beschreibung + noindex + Vorschau (kein Sitemap-Bau, og:image
+bleibt generiert). (3) Rest-Seiten: BAUEN Weiterleitungen → Zwei-Faktor →
+Zeitzone (alle drei am 2026-08-13 live); ABGELEHNT Taxes (automatic_tax
+erledigt es) + Bulk-Logs (Audit-Protokolle existieren); GEPARKT mit Bedingung
+Bio/öffentl. Profil, API-Tokens, SSO, E-Mail-Settings je Community.
+(4) OAuth+MFA (U21): Appwrite nimmt OAuth-Sessions bewusst von MFA aus —
+Davids Weg: EHRLICH HINSCHREIBEN (Satz auf der Sicherheits-Karte, de+en),
+kein Bau gegen Appwrite. (5) MFA-Notausgang: KEIN Dashboard-Reset — der
+Konsolen-Eingriff ist der Weg (Runbook docs/runbooks/MFA-NOTAUSGANG.md);
+neu bewertet, wenn Support-Fälle sich häufen.
+
 ## 2026-08-12 — Zweite Runde: Export-Zuschnitt, U19-Leser, Trichter-Site
 
 **Davids Antworten** (strukturierte Fragen nach der Krümel-/F47-/U14-Runde):

@@ -290,7 +290,7 @@
     },
     "twoFactor": {
       "title": "Zwei-Faktor",
-      "description": "Zusätzlich zum Passwort ein Code aus deiner Authenticator-App.",
+      "description": "Zusätzlich zum Passwort ein Code aus deiner Authenticator-App. Gilt für die Anmeldung mit Passwort — bei der Anmeldung über Google prüft Google die Faktoren, dein Pukalani-Code greift dort nicht.",
       "stateOn": "Eingeschaltet",
       "stateOff": "Ausgeschaltet",
       "enable": "Einrichten",

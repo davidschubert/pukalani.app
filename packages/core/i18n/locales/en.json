@@ -290,7 +290,7 @@
     },
     "twoFactor": {
       "title": "Two-factor",
-      "description": "A code from your authenticator app, on top of your password.",
+      "description": "A code from your authenticator app, on top of your password. Applies to password sign-in — when you sign in with Google, Google verifies your factors and your Pukalani code is not requested.",
       "stateOn": "On",
       "stateOff": "Off",
       "enable": "Set up",
