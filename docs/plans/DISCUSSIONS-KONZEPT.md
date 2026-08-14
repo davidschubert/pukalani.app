@@ -16,11 +16,11 @@ zusagt, die es im Code nirgends gibt:
 - **Themen-Verlinkung mit Rückverweis** (das Erwähnungs-Menü sucht Personen,
   nicht Themen),
 - **Einladungen durch Mitglieder**,
-- **Tages-Limit für Likes**,
-- **Emoji-Reaktionen**
+- **Tages-Limit für Likes**
 
-— samt der Abzeichen, die daran hängen (`first-reaction`, `promoter`,
-`out-of-love` …). Geführt werden sie als **offener Punkt F57** in
+— samt der Abzeichen, die daran hängen (`promoter`, `out-of-love` …).
+**Emoji-Reaktionen sind seit dem 2026-08-13 GEBAUT** (Teil 5, „Reaktionen");
+`first-reaction` steht im Katalog. Geführt werden sie als **offener Punkt F57** in
 [OPEN-ITEMS.md](../OPEN-ITEMS.md); dort und nur dort wird darüber entschieden.
 **Zitat und Emoji im Editor sind seit F48 (2026-08-04) gebaut** — die
 Aufzählung in Teil 4, die sie als fehlend führt, ist insoweit überholt.
@@ -514,6 +514,40 @@ nach `docs/OPEN-ITEMS.md`.
   entfernt — eine routeRule gewinnt gegen die Seite, beides ging nicht
   (Begründung im Kopf von `apps/help/nuxt.config.ts`).
 
+- **Emoji-Reaktionen** (2026-08-13, Teil-4-Mechanik 3 — Davids Entscheidung
+  vom 2026-08-10 „Reaktionen zuerst"). Ein kuratierter Satz von acht Emojis
+  (`packages/posts/shared/reactions.ts`), umgeschaltet je (Ziel, Mensch,
+  Emoji) über `POST /api/posts/discussions/reactions`; gelesen wird
+  GEBÜNDELT (eine Abfrage je Seite, nicht eine je Karte). Tabelle
+  `discussion_reactions` (posts-017), Unique auf (targetId, userId, reaction)
+  — ohne `communityId`, weil eine Row-Id global eindeutig ist.
+  **BADGE-NEUTRAL, und zwar nachprüfbar** (die Folgeregel aus Teil 4 Punkt 3):
+  eine Reaktion meldet AUSSCHLIESSLICH den neuen Zähler `reactionsGiven` für
+  den Gebenden — kein `reportContentUpvotes`, kein Empfänger-Zähler, kein
+  `reactionsReceived`. Das einzige Abzeichen, das überhaupt von Reaktionen
+  weiß, ist `first-reaction`. Festgenagelt an drei Stellen:
+  `tests/reactions.test.ts` (Katalog), `tests/reactions-door.test.ts`
+  (Schreibweg) und die Gegenprobe im Live-Beweis
+  `packages/posts/scripts/verify-reactions.mjs` (27/27) — fünf Reaktionen
+  lassen Upvote-Zähler, Beitrags-Score und Like-Abzeichen unverändert.
+  **WEDER 👍 NOCH ❤️ im Satz**: beide würden neben dem Aufstimm-Pfeil als
+  zweite Zustimmung gelesen und wären damit die zweite Like-Quelle, die
+  Entscheidung 4 ausschließt. Gespeichert wird ein SCHLÜSSEL (`tada`), nie das
+  Zeichen — ein Emoji ist keine stabile Zeichenkette (Variantenselektor,
+  Hauttöne).
+  **NUR AM THEMA, und das ist eine offene Produkt-Entscheidung:** reagiert
+  wird auf `community_posts`-Zeilen MIT Kategorie. Die Antwort-Ebene sind
+  `comments`-Zeilen in einem ANDEREN Layer — eine Leiste dort hieße entweder
+  eine Abhängigkeit comments→posts (A14-Umkehr; `CommentItem.vue` hat keinen
+  Slot) oder ein zweites Datenmodell im comments-Layer nach dem Muster der
+  Stimmen. Die Spalte `targetType` steht deshalb von Anfang an in der Tabelle:
+  die Erweiterung ist danach additiv, ohne Migration. Feed-Beiträge bleiben
+  bewusst draußen (409 `reaction_target_not_topic`).
+  **Keine Realtime** — bewusst: eine Reaktion ist kein Zustand, auf den jemand
+  wartet, und ein eingehendes Ereignis müsste gegen die eigene Handlung
+  entdoppelt werden. Optimistisch gerechnet wird trotzdem (`toggledChips`,
+  dieselbe pure Regel wie auf dem Server); der Andockpunkt für später ist
+  `applyServerState()` in `useReactions`.
 - **Vertrauensstufen** (2026-08-04, Teilpaket 3 des gemeinsamen Pakets) Davids
   Architektur-Entscheidung ist wörtlich umgesetzt: die Stufe SPEIST das
   bestehende RBAC, es gibt kein zweites Prüfsystem. Zwei pure Regeln an zwei
@@ -566,8 +600,9 @@ jemand liest, der ein Abzeichen nachreichen will. Kurzfassung:
 
 - **Dauerhaft draußen** (Davids Entscheidung, Teil 4): die neun, die ein
   personenbezogenes Verhaltensprotokoll bräuchten.
-- **Wartet auf seine Funktion**: Emoji, Zitat, Themen-Verlinkung, Reaktionen,
+- **Wartet auf seine Funktion**: Emoji, Zitat, Themen-Verlinkung,
   Einladungen durch Mitglieder, Tages-Like-Limit — Reihenfolge in Teil 4.
+  („Erste Reaktion" ist seit dem 2026-08-13 gebaut und daher hier heraus.)
 - **Nicht baubar, obwohl es so aussieht**: dieser Absatz hat sich geleert —
   „Anniversary" ist seit dem 2026-08-04 GEBAUT (Teil-5-Entscheidung 1), und
   „Editor" ebenfalls (gemeinsames Paket, Teilpaket 1: `posts.editedAt` kam
