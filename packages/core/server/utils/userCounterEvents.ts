@@ -108,6 +108,23 @@ export const USER_COUNTER_KINDS = [
    * dieser Zahl. Das Abzeichen zählt deshalb AB JETZT.
    */
   'likeLimitDays',
+  /**
+   * Gesetzte Themen-Verweise (F57, letzte Mechanik) — der Zähler hinter
+   * „First Link".
+   *
+   * Gemeldet wird die Anzahl NEU ANGELEGTER Rückverweis-Zeilen, nicht die der
+   * Tokens im Text. Der Unterschied ist wichtig und beabsichtigt: ein Verweis
+   * auf ein erfundenes, gelöschtes oder fremdes Thema legt keine Zeile an und
+   * zählt deshalb nicht — sonst verdiente man das Abzeichen mit `#` plus
+   * zwanzig ausgedachten Zeichen. Wer beim Bearbeiten einen bestehenden
+   * Verweis stehen lässt, zählt ebenfalls nicht erneut.
+   *
+   * Wie `edits`, `invitesAccepted` und `likeLimitDays` rein MITSCHREIBEND: die
+   * Verweis-Zeile trägt bewusst kein `authorId` (sie soll nichts
+   * Personenbezogenes enthalten), also gibt es kein Aggregat zum Eichen. Das
+   * Abzeichen zählt AB JETZT.
+   */
+  'linksMade',
 ] as const
 
 export type UserCounterKind = (typeof USER_COUNTER_KINDS)[number]

@@ -176,6 +176,16 @@ const WRITE_LIMITED: { re: RegExp, bucket: string, max?: number }[] = [
   // Lese-Deckel wie die öffentlichen Kommentar-Routen: die Seite fragt beim
   // Aufbau und danach alle 20 s, 120/min ist dafür reichlich.
   { re: /^GET \/api\/presence\/count$/, bucket: 'presence:read', max: READ_MAX },
+  // Die Themen-Suche des `#`-Menüs (F57): sie läuft bei JEDEM getippten
+  // Zeichen los (client-seitig um 150 ms entprellt, mehr nicht) und macht je
+  // Aufruf eine Volltext-Abfrage. Ein eigener Bucket, weil sie ein
+  // MITGLIEDER-Gate hat und deshalb nicht zu den öffentlichen Lese-Routen
+  // gehört. Die Rückverweise sind gastoffen und teilen ihn: beide gehören zur
+  // selben Funktion, und 120/min reicht für beide zusammen bequem.
+  // Die Handle-Suche (`/api/handles/search`) hat bis heute KEINEN Eintrag —
+  // das ist eine bekannte Lücke, kein Vorbild.
+  { re: /^GET \/api\/posts\/discussions\/link-search$/, bucket: 'posts:links', max: READ_MAX },
+  { re: /^GET \/api\/posts\/discussions\/backlinks$/, bucket: 'posts:links', max: READ_MAX },
   // Medien-Upload: der einzige Schreibweg, der BINÄRDATEN auf die geteilte
   // Platte legt (bis 15 MB je Bild) — ein ungedrosseltes Budget ist hier nicht
   // „viele Zeilen", sondern viele Gigabyte. 30/min ist für eine Redaktion, die

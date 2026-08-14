@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { h, resolveComponent, type VNodeChild } from 'vue'
 import { parseMarkdown, type BlockNode, type InlineNode } from '../../shared/markdown'
-import { classifyContentLink } from '../../shared/contentLinks'
+import { classifyContentLink, splitContentLinks, type ContentLink } from '../../shared/contentLinks'
 import { splitMentions } from '../../shared/mentions'
 
 /**
@@ -34,7 +34,22 @@ import { splitMentions } from '../../shared/mentions'
  * Erwähnungs-Stück ist ein vnode-TEXTknoten, es gibt weiterhin keinen
  * v-html-Pfad.
  */
-const props = defineProps<{ source: string, mentions?: string[] }>()
+/**
+ * VERWEISE IM FLIESSTEXT (F57) — `links` sind die vom SERVER aufgelösten
+ * Ziele, die als gewöhnlicher Text im Beitrag stehen (heute: Themen-Verweise
+ * `#<id>-<deko>` aus dem posts-Layer).
+ *
+ * Anders als eine Erwähnung wird ein Verweis VERLINKT: ein Thema hat, was
+ * einem Menschen fehlt — eine Zielseite. Angezeigt wird `label`, also der
+ * HEUTIGE Titel des Ziels, nicht der Token. Wer sein Thema umbenennt, ändert
+ * damit die Anzeige in jedem fremden Beitrag, der darauf zeigt.
+ *
+ * Diese Komponente kennt weder `#` noch Themen — sie ersetzt exakt die
+ * Zeichenketten, die ihr gereicht werden (Begründung in
+ * `shared/contentLinks.ts`). Weggelassen heisst: keine Verlinkung, kein
+ * Verhalten ändert sich für die bestehenden Aufrufer.
+ */
+const props = defineProps<{ source: string, mentions?: string[], links?: ContentLink[] }>()
 
 const knownMentions = computed(() => (props.mentions?.length ? new Set(props.mentions) : undefined))
 
@@ -77,13 +92,34 @@ function renderInline(nodes: InlineNode[]): VNodeChild[] {
   })
 }
 
-/** Ein Text-Blatt: gewöhnlicher Text, mit hervorgehobenen Erwähnungen darin. */
+/**
+ * Ein Text-Blatt: gewöhnlicher Text, mit hervorgehobenen Erwähnungen und
+ * verlinkten Verweisen darin.
+ *
+ * ZWEI DURCHGÄNGE, NICHT EIN GEMEINSAMER REGEX: erst die Erwähnungen (`@`),
+ * dann die Verweise (`#`) auf dem, was davon Text geblieben ist. So bleibt
+ * `splitMentions` unangetastet, und die beiden Regeln können einander nicht in
+ * die Quere kommen — ein `@handle` steht nie in einem Verweis-Token und
+ * umgekehrt.
+ */
 function renderText(text: string): VNodeChild {
-  const segments = splitMentions(text, knownMentions.value)
-  if (segments.length === 1) return text
-  return segments.map(segment => segment.type === 'mention'
-    ? h('span', { class: 'font-medium text-primary', 'data-mention': segment.handle }, segment.text)
-    : segment.text)
+  const parts = splitMentions(text, knownMentions.value)
+
+  return parts.flatMap((part): VNodeChild[] => {
+    if (part.type === 'mention') {
+      return [h('span', { class: 'font-medium text-primary', 'data-mention': part.handle }, part.text)]
+    }
+    return splitContentLinks(part.text, props.links).map(segment => (segment.type === 'link'
+      // localePath() gibt für nicht auflösbare Pfade '' zurück — dann bleibt
+      // der Href wie geliefert, statt auf die aktuelle Seite zu zeigen
+      // (dieselbe Vorsicht wie in renderLink).
+      ? h(NuxtLinkComponent, {
+          to: localePath(segment.href) || segment.href,
+          class: 'font-medium text-primary underline underline-offset-2',
+          'data-topic-link': '',
+        }, () => segment.label)
+      : segment.text))
+  })
 }
 
 function renderBlock(block: BlockNode): VNodeChild {
