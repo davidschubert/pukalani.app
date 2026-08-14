@@ -49,6 +49,9 @@ describe('die Zuordnung am Katalog', () => {
       // es nur einmal, auch wenn der Zähler dahinter weiterläuft.
       'profile', 'first-like', 'first-flag', 'editor', 'first-reaction',
       'welcome', 'appreciated', 'thank-you', 'gives-back', 'empathetic', 'respected', 'admired',
+      // F57 Mechanik 2: `promoter` steht NACH `anniversary` im Katalog, aber
+      // vor den Stufen — die erste angenommene Einladung gibt es einmal.
+      'promoter',
       // F1 Teilpaket 3: die vier Stufen. EINMALIG, auch „Leader" — bei 1–3
       // folgt das aus „kein Abstieg", bei 4 ist es eine Entscheidung
       // (verliehen ist verliehen, auch wenn die Ernennung zurückgenommen wird).
@@ -119,7 +122,10 @@ describe('Zähler-Abzeichen: was die Buchung allein entscheiden darf', () => {
       // F57: `first-reaction` folgt ebenfalls allein aus einem mitschreibenden
       // Zähler (`reactionsGiven`) — es ist das dritte und bleibt das einzige
       // Abzeichen, das überhaupt von Reaktionen weiß.
-      const expected = badge.key === 'first-like' || badge.key === 'editor' || badge.key === 'first-reaction'
+      // F57 Mechanik 2: `promoter` ist das vierte — `invitesAccepted` ist ein
+      // rein mitschreibender Zähler wie `edits`, die Buchung entscheidet allein.
+      const expected = badge.key === 'first-like' || badge.key === 'editor'
+        || badge.key === 'first-reaction' || badge.key === 'promoter'
       expect(badgeFollowsFromCounters(badge), badge.key).toBe(expected)
     }
   })
@@ -131,15 +137,21 @@ describe('Zähler-Abzeichen: was die Buchung allein entscheiden darf', () => {
   })
 
   it('verleiht beim Stand, den die Zähler zeigen', () => {
-    expect(counterBadgeKeysFor({ likesGiven: 0, edits: 0, reactionsGiven: 0 })).toEqual([])
-    expect(counterBadgeKeysFor({ likesGiven: 1, edits: 0, reactionsGiven: 0 })).toEqual(['first-like'])
-    expect(counterBadgeKeysFor({ likesGiven: 3, edits: 2, reactionsGiven: 0 })).toEqual(['first-like', 'editor'])
+    expect(counterBadgeKeysFor({ likesGiven: 0, edits: 0, reactionsGiven: 0, invitesAccepted: 0 })).toEqual([])
+    expect(counterBadgeKeysFor({ likesGiven: 1, edits: 0, reactionsGiven: 0, invitesAccepted: 0 })).toEqual(['first-like'])
+    expect(counterBadgeKeysFor({ likesGiven: 3, edits: 2, reactionsGiven: 0, invitesAccepted: 0 })).toEqual(['first-like', 'editor'])
+    // F57 Mechanik 2: die erste ANGENOMMENE Einladung — und nur sie.
+    expect(counterBadgeKeysFor({ likesGiven: 0, edits: 0, reactionsGiven: 0, invitesAccepted: 1 })).toEqual(['promoter'])
   })
 
   it('verleiht nur beim ÜBERSCHREITEN, nicht bei jedem Stand darüber', () => {
-    expect(counterBadgeCrossings({ likesGiven: 0, edits: 0, reactionsGiven: 0 }, { likesGiven: 1, edits: 0, reactionsGiven: 0 })).toEqual(['first-like'])
-    expect(counterBadgeCrossings({ likesGiven: 1, edits: 0, reactionsGiven: 0 }, { likesGiven: 2, edits: 0, reactionsGiven: 0 })).toEqual([])
-    expect(counterBadgeCrossings({ likesGiven: 5, edits: 0, reactionsGiven: 0 }, { likesGiven: 5, edits: 1, reactionsGiven: 0 })).toEqual(['editor'])
+    expect(counterBadgeCrossings({ likesGiven: 0, edits: 0, reactionsGiven: 0, invitesAccepted: 0 }, { likesGiven: 1, edits: 0, reactionsGiven: 0, invitesAccepted: 0 })).toEqual(['first-like'])
+    expect(counterBadgeCrossings({ likesGiven: 1, edits: 0, reactionsGiven: 0, invitesAccepted: 0 }, { likesGiven: 2, edits: 0, reactionsGiven: 0, invitesAccepted: 0 })).toEqual([])
+    expect(counterBadgeCrossings({ likesGiven: 5, edits: 0, reactionsGiven: 0, invitesAccepted: 0 }, { likesGiven: 5, edits: 1, reactionsGiven: 0, invitesAccepted: 0 })).toEqual(['editor'])
+    // F57 Mechanik 2: die ZWEITE angenommene Einladung feiert niemand noch
+    // einmal — sonst liefe jede weitere Annahme in einen 409.
+    expect(counterBadgeCrossings({ likesGiven: 0, edits: 0, reactionsGiven: 0, invitesAccepted: 0 }, { likesGiven: 0, edits: 0, reactionsGiven: 0, invitesAccepted: 1 })).toEqual(['promoter'])
+    expect(counterBadgeCrossings({ likesGiven: 0, edits: 0, reactionsGiven: 0, invitesAccepted: 1 }, { likesGiven: 0, edits: 0, reactionsGiven: 0, invitesAccepted: 2 })).toEqual([])
   })
 })
 

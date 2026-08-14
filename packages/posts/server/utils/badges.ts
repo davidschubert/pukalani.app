@@ -115,6 +115,11 @@ export function badgeFactsFrom(
    *    zwei Wege, dieselbe Vorfahrt wie bei `likesGiven`. Eine Übersetzung wie
    *    `upvotesGiven → likesGiven` braucht es nicht — für Reaktionen gibt es
    *    kein zweites Wort.
+   *  - `invitesAccepted` (F57 Mechanik 2): kommt AUSSCHLIESSLICH vom Zähler,
+   *    wie `edits` — und zwar aus einem schärferen Grund. Die Quellzeilen
+   *    (`community_invites`) liegen in einem ANDEREN PROJEKT, zu dem diese
+   *    Auswertestelle keinen Schlüssel hat. Es gibt hier also gar kein
+   *    Aggregat, das man befragen könnte, nicht bloß ein zu teures.
    *
    * Die Schwellen-Zahlen (`likedItems` und Geschwister) bleiben Aggregat, und
    * das ist kein Übergangszustand: ein laufender Zähler kann „wie viele meiner
@@ -129,6 +134,7 @@ export function badgeFactsFrom(
   facts.likesGiven = written?.upvotesGiven ?? counters[COUNTER_LIKES_GIVEN] ?? 0
   facts.edits = written?.edits ?? 0
   facts.reactionsGiven = written?.reactionsGiven ?? counters[COUNTER_REACTIONS_GIVEN] ?? 0
+  facts.invitesAccepted = written?.invitesAccepted ?? 0
   facts.flagsRaised = counters[COUNTER_FLAGS_RAISED] ?? 0
   for (const threshold of thresholds) {
     facts.likedItems[threshold] = counters[counterLikedItems(threshold)] ?? 0
@@ -373,5 +379,5 @@ export async function awardTrustLevelBadges(
  * Katalog keine Spaltennamen kennen soll.
  */
 function counterFactsOf(values: MemberCounterValues): CounterBadgeFacts {
-  return { likesGiven: values.upvotesGiven, edits: values.edits, reactionsGiven: values.reactionsGiven }
+  return { likesGiven: values.upvotesGiven, edits: values.edits, reactionsGiven: values.reactionsGiven, invitesAccepted: values.invitesAccepted }
 }

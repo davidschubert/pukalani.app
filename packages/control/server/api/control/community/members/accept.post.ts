@@ -162,5 +162,20 @@ export default defineEventHandler(async (event) => {
     role: invite.role,
   })
 
-  return { ok: true, communityId: invite.communityId, host: tenant.host, role: invite.role }
+  /**
+   * `invitedBy` reist MIT (F57 Mechanik 2) — der Runtime-Aufrufer schreibt
+   * damit das Abzeichen `promoter` gut.
+   *
+   * WARUM NICHT HIER GUTGESCHRIEBEN WIRD: `member_counters` liegt im
+   * RUNTIME-Projekt, das Control Plane hat dafür keinen Schlüssel — dieselbe
+   * Grenze wie bei `revokeCommunityLabel` (A5) und der Verzugs-Meldung (C15).
+   * Also dieselbe Arbeitsteilung: das Control Plane stellt fest, die Runtime
+   * bucht.
+   *
+   * Der Wert ist eine RUNTIME-User-Id (so schreibt ihn `invite.post.ts`) und
+   * kann '' sein — bei Einladungen aus der Zeit vor control-019. Der Aufrufer
+   * muss das prüfen; hier bleibt der Rohwert stehen, damit die Route nicht
+   * beurteilt, was sie nur weiterreicht.
+   */
+  return { ok: true, communityId: invite.communityId, host: tenant.host, role: invite.role, invitedBy: invite.invitedBy ?? '' }
 })

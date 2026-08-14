@@ -9,7 +9,7 @@
  * ── DER ZUSCHNITT: NUR, WAS HEUTE MESSBAR IST ─────────────────────────────
  * Davids Vorgabe fuer Stufe 4 lautet „nur heute messbare Abzeichen … fehlende
  * kommen automatisch dazu, sobald ihre Funktion existiert". Der Katalog aus
- * § 3.6 hat 40+ Eintraege; hier stehen 23 (5 + 8 + 6 + 4 — ein Test haelt die
+ * § 3.6 hat 40+ Eintraege; hier stehen 24 (5 + 9 + 6 + 4 — ein Test haelt die
  * Zahl an den Katalog gebunden, damit dieser Satz nicht mit der Zeit unwahr
  * wird).
  * Was fehlt und WARUM, gehoert an diese Stelle und nicht in eine Notiz, sonst
@@ -22,10 +22,12 @@
  *    Neun Abzeichen, und sie kommen NICHT spaeter.
  *  - **Wartet auf seine Funktion** — First Emoji, First Quote, First Link,
  *    First Onebox, First Reply By Email, Wiki Editor,
- *    Certified/Licensed, Promoter/Campaigner/Champion (Einladungen durch
- *    Mitglieder), Out of Love/Higher Love/Crazy in Love (Tages-Like-Limit).
+ *    Certified/Licensed, Campaigner/Champion (Vertrauensstufe der
+ *    Eingeladenen — Begruendung am Katalog-Eintrag `promoter`),
+ *    Out of Love/Higher Love/Crazy in Love (Tages-Like-Limit).
  *    Die Reihenfolge dieser Funktionen steht in Teil 4. „First Reaction" ist
- *    seit F57 (2026-08-13) GEBAUT und steht als `first-reaction` im Katalog —
+ *    seit F57 (2026-08-13) GEBAUT und steht als `first-reaction` im Katalog;
+ *    „Promoter" ist seit F57 Mechanik 2 (2026-08-14) dazugekommen —
  *    es ist zugleich die EINZIGE Stelle, an der Reaktionen ueberhaupt ein
  *    Abzeichen beruehren (Teil 4 Punkt 3: Abzeichen zaehlen ausschliesslich
  *    Upvotes, Reaktionen sind badge-neutral).
@@ -170,6 +172,20 @@ export interface BadgeRequirement {
    */
   reactionsGiven?: number
   /**
+   * Mindestens so viele ANGENOMMENE Einladungen (F57 Mechanik 2).
+   *
+   * GEZAEHLT WIRD DIE ANNAHME, NICHT DER VERSAND — und das ist die ganze
+   * Aussage des Abzeichens. Wer hundert Adressen anschreibt, hat niemanden
+   * hergeholt; wer einen Menschen ueberzeugt, schon. Ein Abzeichen fuer
+   * verschickte Einladungen waere eine Auszeichnung fuer Spam, und das
+   * Kontingent (5/Woche) haette gegen die Absicht anzukaempfen statt sie zu
+   * stuetzen.
+   *
+   * Wie `edits` ein rein MITSCHREIBENDER Zaehler: er beginnt fuer alle bei 0
+   * (Begruendung bei `seedValuesFrom`).
+   */
+  invitesAccepted?: number
+  /**
    * Mindestens so viele Bearbeitungen EIGENER Inhalte.
    *
    * Der erste Wert, der NICHT aus einem Aggregat kommt, sondern aus dem
@@ -285,6 +301,25 @@ export const BADGE_CATALOG: readonly BadgeDefinition[] = [
    * offene Jahr — die uebrigen Jahre rechnet die Auswertestelle.
    */
   { key: 'anniversary', group: 'community', awardedPer: 'membershipYear', requires: { memberForDays: 365, recentContent: { withinDays: 365, count: 1 } } },
+  /**
+   * „Promoter" (F57 Mechanik 2, seit 2026-08-14) — die erste Einladung, die
+   * jemand ANGENOMMEN hat.
+   *
+   * DIE STUFEN „Campaigner"/„Champion" FEHLEN WEITERHIN, und zwar mit Grund.
+   * Das Konzept (Teil 4) definiert sie ueber die Vertrauensstufe DER
+   * EINGELADENEN — „3 Eingeladene wurden Basic", „5 wurden Member". Das ist
+   * keine Zahl auf der Zeile des Einladenden: sie entsteht Wochen spaeter, in
+   * einer FREMDEN `member_counters`-Zeile, und faellt damit aus dem
+   * Zaehl-Kreuzungs-Weg heraus, den alle Abzeichen dieser Klasse benutzen. Sie
+   * braeuchten einen dritten Verleihungs-Pfad (wie `awardTrustLevelBadges`,
+   * nur beim Aufstieg des EINGELADENEN und mit einem Rueckverweis auf den
+   * Einladenden) — ein eigenes Paket, keine Zeile hier.
+   *
+   * Sie mit „3 bzw. 10 angenommene Einladungen" zu belegen waere die billige
+   * Loesung und die falsche: das Abzeichen hiesse dann etwas anderes als das
+   * Konzept sagt, und niemand wuerde je nachlesen, warum.
+   */
+  { key: 'promoter', group: 'community', awardedPer: 'once', requires: { invitesAccepted: 1 } },
 
   // ── Das Schreiben: EIN Stueck, das eingeschlagen hat ──────────────────
   // JE INHALT (`content`): hier sitzt das neue qualifizierende Ereignis, das
@@ -332,6 +367,8 @@ export interface BadgeFacts {
   edits: number
   /** Selbst abgegebene Emoji-Reaktionen (F57). Erhaltene zaehlt niemand. */
   reactionsGiven: number
+  /** Angenommene eigene Einladungen (F57 Mechanik 2) — nie die verschickten. */
+  invitesAccepted: number
   /** Schwelle → Anzahl eigener Inhalte, die sie erreichen. */
   likedItems: Record<number, number>
   likedTopics: Record<number, number>
@@ -359,6 +396,7 @@ export function emptyBadgeFacts(): BadgeFacts {
     flagsRaised: 0,
     edits: 0,
     reactionsGiven: 0,
+    invitesAccepted: 0,
     likedItems: {},
     likedTopics: {},
     likedReplies: {},
@@ -458,6 +496,7 @@ export function badgeEarned(badge: BadgeDefinition, facts: BadgeFacts): boolean 
   if (requires.flagsRaised !== undefined && facts.flagsRaised < requires.flagsRaised) return false
   if (requires.reactionsGiven !== undefined && facts.reactionsGiven < requires.reactionsGiven) return false
   if (requires.edits !== undefined && facts.edits < requires.edits) return false
+  if (requires.invitesAccepted !== undefined && facts.invitesAccepted < requires.invitesAccepted) return false
   if (!meetsLikedItems(facts.likedItems, requires.likedItems)) return false
   if (!meetsLikedItems(facts.likedTopics, requires.likedTopics)) return false
   if (!meetsLikedItems(facts.likedReplies, requires.likedReplies)) return false
@@ -510,6 +549,7 @@ export function badgeProgress(badge: BadgeDefinition, facts: BadgeFacts): BadgeP
   if (badge.requires.flagsRaised !== undefined) countable.push({ current: facts.flagsRaised, target: badge.requires.flagsRaised })
   if (badge.requires.edits !== undefined) countable.push({ current: facts.edits, target: badge.requires.edits })
   if (badge.requires.reactionsGiven !== undefined) countable.push({ current: facts.reactionsGiven, target: badge.requires.reactionsGiven })
+  if (badge.requires.invitesAccepted !== undefined) countable.push({ current: facts.invitesAccepted, target: badge.requires.invitesAccepted })
   if (badge.requires.likedItems) countable.push({ current: facts.likedItems[badge.requires.likedItems.threshold] ?? 0, target: badge.requires.likedItems.count })
   if (badge.requires.likedTopics) countable.push({ current: facts.likedTopics[badge.requires.likedTopics.threshold] ?? 0, target: badge.requires.likedTopics.count })
   if (badge.requires.likedReplies) countable.push({ current: facts.likedReplies[badge.requires.likedReplies.threshold] ?? 0, target: badge.requires.likedReplies.count })
@@ -594,7 +634,8 @@ export function contentBadgeCrossings(
  */
 export function badgeFollowsFromCounters(badge: BadgeDefinition): boolean {
   const { requires } = badge
-  if (requires.likesGiven === undefined && requires.edits === undefined && requires.reactionsGiven === undefined) return false
+  if (requires.likesGiven === undefined && requires.edits === undefined && requires.reactionsGiven === undefined
+    && requires.invitesAccepted === undefined) return false
   return !requires.profileComplete
     && requires.flagsRaised === undefined
     && !requires.likedItems
@@ -650,6 +691,8 @@ export interface CounterBadgeFacts {
   edits: number
   /** Abgegebene Reaktionen (F57) — traegt allein `first-reaction`. */
   reactionsGiven: number
+  /** Angenommene Einladungen (F57 Mechanik 2) — traegt allein `promoter`. */
+  invitesAccepted: number
 }
 
 /** PURE: Welche Abzeichen folgen bei diesem Stand allein aus den Zaehlern? */
@@ -661,7 +704,8 @@ export function counterBadgeKeysFor(
     .filter(badge => badgeFollowsFromCounters(badge)
       && (badge.requires.likesGiven === undefined || values.likesGiven >= badge.requires.likesGiven)
       && (badge.requires.edits === undefined || values.edits >= badge.requires.edits)
-      && (badge.requires.reactionsGiven === undefined || values.reactionsGiven >= badge.requires.reactionsGiven))
+      && (badge.requires.reactionsGiven === undefined || values.reactionsGiven >= badge.requires.reactionsGiven)
+      && (badge.requires.invitesAccepted === undefined || values.invitesAccepted >= badge.requires.invitesAccepted))
     .map(badge => badge.key)
 }
 

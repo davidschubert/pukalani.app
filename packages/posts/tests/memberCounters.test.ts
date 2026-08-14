@@ -30,6 +30,10 @@ describe('seedValuesFrom', () => {
       // F57: eichbar wie die vergebenen Stimmen — jede abgegebene Reaktion ist
       // eine Zeile, also exakt zählbar.
       reactionsGiven: 7,
+      // F57 Mechanik 2: NICHT eichbar, und zwar grundsätzlich — die
+      // Quellzeilen (`community_invites`) liegen im Control Plane, zu dem die
+      // Runtime keinen Schlüssel hat. Startet für alle bei 0, wie `edits`.
+      invitesAccepted: 0,
     })
   })
 
@@ -104,6 +108,8 @@ describe('memberCounterValues', () => {
       'topicsCreated', 'repliesCreated', 'upvotesGiven', 'upvotesReceived', 'edits',
       // posts-017 (F57)
       'reactionsGiven',
+      // posts-018 (F57 Mechanik 2)
+      'invitesAccepted',
     ])
   })
 })

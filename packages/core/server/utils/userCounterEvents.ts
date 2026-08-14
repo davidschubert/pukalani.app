@@ -77,6 +77,19 @@ export const USER_COUNTER_KINDS = [
   'upvotesReceived',
   'edits',
   'reactionsGiven',
+  /**
+   * ANGENOMMENE eigene Einladungen (F57 Mechanik 2) — der Zähler hinter dem
+   * Abzeichen `promoter`.
+   *
+   * Wie `upvotesReceived` eine Buchung auf eine FREMDE Zeile: gehandelt hat
+   * der Eingeladene (er nimmt an), gutgeschrieben wird dem Einladenden.
+   * Genau dafür trägt dieser Vertrag seine `userId` explizit.
+   *
+   * GEMELDET WIRD DIE ANNAHME, NIE DER VERSAND. Ein Zähler auf verschickte
+   * Einladungen wäre eine Auszeichnung fürs Anschreiben und liefe der
+   * Kontingent-Mechanik direkt zuwider.
+   */
+  'invitesAccepted',
 ] as const
 
 export type UserCounterKind = (typeof USER_COUNTER_KINDS)[number]

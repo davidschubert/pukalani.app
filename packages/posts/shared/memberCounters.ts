@@ -16,6 +16,7 @@ export const MEMBER_COUNTER_COLUMNS = [
   'upvotesReceived',
   'edits',
   'reactionsGiven',
+  'invitesAccepted',
 ] as const
 
 export type MemberCounterColumn = (typeof MEMBER_COUNTER_COLUMNS)[number]
@@ -24,7 +25,7 @@ export type MemberCounterColumn = (typeof MEMBER_COUNTER_COLUMNS)[number]
 export type MemberCounterValues = Record<MemberCounterColumn, number>
 
 export function emptyMemberCounterValues(): MemberCounterValues {
-  return { topicsCreated: 0, repliesCreated: 0, upvotesGiven: 0, upvotesReceived: 0, edits: 0, reactionsGiven: 0 }
+  return { topicsCreated: 0, repliesCreated: 0, upvotesGiven: 0, upvotesReceived: 0, edits: 0, reactionsGiven: 0, invitesAccepted: 0 }
 }
 
 /**
@@ -56,7 +57,7 @@ function whole(value: number | undefined): number {
  *    eine Zeile in `discussion_reactions`, also exakt zählbar. Anders als bei
  *    `upvotesReceived` gibt es hier nichts zu summieren.
  *
- * Die anderen beiden STARTEN BEI 0, und beide Male ist das unvermeidlich:
+ * Die anderen DREI STARTEN BEI 0, und jedes Mal ist das unvermeidlich:
  *  - `upvotesReceived` wäre die SUMME der `upvotes`-Spalte über alle eigenen
  *    Inhalte. Appwrite kann eine Spalte nicht summieren; man müsste jeden
  *    eigenen Beitrag und jede eigene Antwort seitenweise laden — bei einem
@@ -65,6 +66,11 @@ function whole(value: number | undefined): number {
  *  - `edits` wäre gar nicht erst ausrechenbar: eine Bearbeitung hinterlässt
  *    einen ZEITSTEMPEL, keine Anzahl. Wer vor der Umstellung zehnmal
  *    nachgebessert hat, ist von seiner Vergangenheit nicht zu unterscheiden.
+ *  - `invitesAccepted` (F57 Mechanik 2) hat seine Quelle in einem ANDEREN
+ *    PROJEKT: die angenommenen Einladungen stehen in `community_invites` im
+ *    Control Plane, zu dem die Runtime keinen Schlüssel hat. Hier gibt es also
+ *    grundsätzlich kein Aggregat, nicht bloß ein zu teures — gemeldet wird die
+ *    Annahme von der Route, die sie abwickelt.
  *
  * Was das praktisch heißt, gehört ausgesprochen: das Abzeichen „Editor" zählt
  * ab der Umstellung, und eine spätere Trust-Level-Schwelle „erhaltene
@@ -86,6 +92,7 @@ export function seedValuesFrom(input: Partial<MemberCounterSeedInput>): MemberCo
     upvotesReceived: 0,
     edits: 0,
     reactionsGiven: whole(input.reactionsGiven),
+    invitesAccepted: 0,
   }
 }
 
@@ -131,6 +138,7 @@ export function healedValues(
     upvotesReceived: stored.upvotesReceived,
     edits: stored.edits,
     reactionsGiven: Math.max(stored.reactionsGiven, seed.reactionsGiven),
+    invitesAccepted: stored.invitesAccepted,
   }
 }
 

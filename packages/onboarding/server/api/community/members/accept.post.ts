@@ -31,7 +31,7 @@ export default defineEventHandler(async (event) => {
   const body = await readValidatedBody(event, bodySchema.parse)
   const jwt = await mintRuntimeJwt(event)
 
-  const result = await callControlPlane<{ ok: boolean, communityId: string, host: string, role: string }>(
+  const result = await callControlPlane<{ ok: boolean, communityId: string, host: string, role: string, invitedBy: string }>(
     event,
     '/api/control/community/members/accept',
     { jwt, ...(body.token ? { token: body.token } : { inviteId: body.inviteId }) },
@@ -57,6 +57,38 @@ export default defineEventHandler(async (event) => {
     const userId = event.context.user?.$id
     if (userId) forgetCommunityAccessDecision(result.communityId, userId)
     await grantCommunityLabel(event, result.communityId)
+
+    /**
+     * DAS ABZEICHEN „PROMOTER" (F57 Mechanik 2): gutgeschrieben wird dem
+     * EINLADENDEN, und zwar hier — in der Runtime, wo `member_counters` liegt
+     * und wo `recordUserCounterEvents` einen Mandanten-Kontext hat.
+     *
+     * GEZÄHLT WIRD DIE ANNAHME, NICHT DER VERSAND. Genau deshalb steht diese
+     * Zeile hier und nicht in der Einladungs-Route: hundert verschickte
+     * Einladungen sind keine Leistung, eine angenommene ist eine.
+     *
+     * GENAU EINMAL, ohne dass hier etwas dafür getan wird: eine Einladung geht
+     * nur ein einziges Mal von `pending` nach `accepted` (das Control Plane
+     * lehnt jede weitere ab), also kann dieser Punkt für dieselbe Einladung
+     * kein zweites Mal erreicht werden. Darüber liegen zusätzlich die drei
+     * bestehenden Netze der Verleihung (Zähler-Kreuzung, Unique-Index auf
+     * `user_badges`, Idempotenz-Schlüssel der Meldung).
+     *
+     * DREI GRÜNDE ZUM AUSSTEIGEN, alle mit Absicht:
+     *  - kein `invitedBy` — Einladung aus der Zeit vor control-019.
+     *  - `invitedBy === userId` — jemand hat seine eigene Einladung
+     *    angenommen. Heute unerreichbar (`decideInvite` lehnt bestehende
+     *    Mitglieder ab), aber ein Abzeichen, das man sich selbst schicken
+     *    kann, ist keines.
+     *  - Der Aufruf ist FAIL-SOFT wie jede Zähl-Buchung: eine Feier darf eine
+     *    Mitgliedschaft nicht kosten. `recordUserCounterEvents` wirft nicht;
+     *    das `catch` ist der Gürtel dazu.
+     */
+    if (result.invitedBy && result.invitedBy !== userId) {
+      await recordUserCounterEvents(event, [
+        { userId: result.invitedBy, kind: 'invitesAccepted', delta: 1 },
+      ]).catch(() => {})
+    }
   }
 
   return result

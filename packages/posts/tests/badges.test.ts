@@ -32,8 +32,10 @@ describe('der Katalog selbst', () => {
     // Das fuenfte „erste Mal" kam mit F57 (`first-reaction`) — die EINZIGE
     // Stelle, an der Reaktionen ein Abzeichen beruehren; alle uebrigen zaehlen
     // weiterhin ausschliesslich Upvotes (Konzept Teil 4 Punkt 3).
-    expect(BADGE_CATALOG.length).toBe(23)
-    for (const [group, size] of [['gettingStarted', 5], ['community', 8], ['posting', 6], ['trustLevel', 4]] as const) {
+    // `promoter` (F57 Mechanik 2) kam als NEUNTES in die Gruppe „Community" —
+    // Einladen ist Gemeinschaft, kein erstes Mal am eigenen Schreibtisch.
+    expect(BADGE_CATALOG.length).toBe(24)
+    for (const [group, size] of [['gettingStarted', 5], ['community', 9], ['posting', 6], ['trustLevel', 4]] as const) {
       expect(BADGE_CATALOG.filter(entry => entry.group === group).length, group).toBe(size)
     }
   })
