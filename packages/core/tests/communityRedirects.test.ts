@@ -103,6 +103,21 @@ describe('isReservedRedirectPath', () => {
     expect(isReservedRedirectPath('/logindaten')).toBe(false)
     expect(isReservedRedirectPath('/dashboards')).toBe(false)
   })
+
+  /**
+   * BEIM BEWEIS AUFGEFALLEN: die Schreibroute nahm `/de/login` mit 200 an,
+   * weil die Sperrliste nur auf dem rohen Pfad stand — eine Regel, die der
+   * Leser (der das Präfix abstreift) nie befolgt hätte.
+   */
+  it('ein Sprach-Präfix schützt nicht vor der Sperre', () => {
+    expect(isReservedRedirectPath('/de/login')).toBe(true)
+    expect(isReservedRedirectPath('/en/dashboard/pages')).toBe(true)
+    expect(isReservedRedirectPath('/en-US/settings')).toBe(true)
+    // … aber ein gewöhnlicher Pfad hinter dem Präfix bleibt erlaubt.
+    expect(isReservedRedirectPath('/de/ueber-uns')).toBe(false)
+    // … und ein Segment, das nur zufällig zwei Buchstaben hat, sperrt nichts.
+    expect(isReservedRedirectPath('/de/team')).toBe(false)
+  })
 })
 
 describe('Ziele', () => {

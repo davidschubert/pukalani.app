@@ -235,8 +235,31 @@ export function normalizeRedirectPath(raw: unknown): string {
  * Segment, sondern ein NAMENSRAUM am ersten Zeichen — `/_nuxt/entry.js`,
  * `/_ipx/…`, `/_i18n/…`. Segmentweise verglichen fiele keiner davon in die
  * Sperre (beim Bau am Test aufgefallen, nicht beim Nachdenken).
+ *
+ * ── EIN SPRACH-PRÄFIX SCHÜTZT NICHT VOR DER SPERRE ────────────────────────
+ * `/de/login` wird ebenso abgelehnt wie `/login`. Beim BEWEIS aufgefallen und
+ * kein Schönheitsfehler: die Sperrliste stand nur auf dem rohen Pfad, also
+ * nahm die Schreibroute `/de/login` mit 200 an — eine Regel, die der Leser
+ * (der das Präfix vorher abstreift) danach nie befolgt hätte. Gespeicherter
+ * Unsinn, den niemand erklären kann.
+ *
+ * Abgestreift wird hier BEWUSST jedes Segment, das wie ein Sprachcode
+ * AUSSIEHT (zwei Buchstaben, optional mit Region) — nicht nur die
+ * konfigurierten Sprachen. Diese Funktion kennt die i18n-Konfiguration nicht,
+ * und sie muss sie auch nicht kennen: sie zeigt in die fail-CLOSED-Richtung.
+ * Eine Community, die tatsächlich eine Seite `/it/login` hatte, kann diese
+ * eine Adresse nicht umleiten — der Preis für die Zusage, dass keine
+ * Anmeldeseite dieser Plattform je das Ziel einer Weiterleitung wird. Der
+ * LESER bleibt exakt (er streift nur echte Sprachen ab); breiter sperren als
+ * lesen ist die richtige Richtung, umgekehrt wäre es ein Loch.
  */
 export function isReservedRedirectPath(path: string): boolean {
+  if (isReservedExactPath(path)) return true
+  const withoutLanguageLike = path.replace(/^\/[a-z]{2}(?:-[A-Za-z]{2})?(?=\/)/, '')
+  return withoutLanguageLike !== path && isReservedExactPath(withoutLanguageLike)
+}
+
+function isReservedExactPath(path: string): boolean {
   if (path.startsWith('/_')) return true
   return RESERVED_REDIRECT_PREFIXES.some(
     prefix => path === prefix || path.startsWith(`${prefix}/`),
