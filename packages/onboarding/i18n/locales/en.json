@@ -15,6 +15,8 @@
       },
       "openRegistration": "Open registration",
       "openRegistrationDesc": "When this is on, anyone can create an account and thereby becomes a member of your community — and so does anyone who already has an account and writes their first post or comment here. When it's off, people become members by invitation only. Either way, someone whose access you revoked never comes back on their own.",
+      "memberInvites": "Members can invite",
+      "memberInvitesDesc": "Every member can bring in five people per week — always as readers. Off: only you and your admins invite.",
       "audience": {
         "title": "Visibility",
         "description": "Who is allowed to read your posts, comments, events, media and pages.",
@@ -656,6 +658,7 @@
   },
   "members": {
     "title": "Members",
+    "memberDescription": "Bring in people who belong here. Your invitation makes them readers.",
     "description": "Everyone who belongs to your community. People become members by joining (when registration is open) or by invitation. \"Revoke access\" really does take that membership away — they no longer see members-only content and can only come back through a new invitation.",
     "scope": {
       "team": "Team ({n})",
@@ -698,6 +701,9 @@
       "cta": "Invite",
       "title": "Invite a member",
       "description": "Enter an email address, pick a role — done.",
+      "asViewer": "Your invitation makes this person a reader.",
+      "quotaLeft": "{remaining} of {limit} invitations left this week.",
+      "disabled": "Member invitations are currently switched off in this community.",
       "emailLabel": "Email address",
       "emailHelp": "If the person already has a Pukalani account, one click after signing in is enough. Otherwise they create one via the link.",
       "roleLabel": "Role",
@@ -744,6 +750,9 @@
       "not_a_member": "This person is not (or no longer) part of this community.",
       "invalid_role": "That role does not exist.",
       "unchanged": "This person already has that role.",
+      "invite_quota_exhausted": "You have used up this week's invitations. It resets in a few days.",
+      "member_invites_disabled": "Only the team can invite people in this community right now.",
+      "invite_role_forbidden": "As a member you can only invite people as readers.",
       "failed": "That didn't work just now. Please try again.",
       "failedHint": "Nothing in the member list changed. Reload the page and try again."
     }

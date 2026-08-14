@@ -2,6 +2,7 @@
 import type { DropdownMenuItem, TableColumn } from '@nuxt/ui'
 import { COMMUNITY_ROLES, type CommunityRole } from '../../../../../core/shared/communityAuthz'
 import type { CommunityInviteView, CommunityMemberView, CommunityTeamResponse } from '../../../../../control/shared/communityTeam'
+import type { MemberInviteQuotaView } from '../../../../../control/shared/communityInviteQuota'
 
 /**
  * Mitglieder-Verwaltung EINER Community (Audit-Befund S9: `team.manage` war eine
@@ -33,7 +34,18 @@ import type { CommunityInviteView, CommunityMemberView, CommunityTeamResponse } 
  * Control Plane, das jede Regel noch einmal selbst prüft. Was hier ausgegraut
  * ist, ist Freundlichkeit — keine Grenze.
  */
-definePageMeta({ layout: 'dashboard', middleware: ['auth', 'admin'], requiredCapability: 'team.manage' })
+/**
+ * SEIT F57 STEHT DIESE SEITE JEDEM MITGLIED OFFEN (Davids Entscheidung
+ * 2026-08-14) — aber sie zeigt zwei verschiedene Dinge.
+ *
+ * Das Gate ist `members.invite` (jede Rolle ab `viewer`) statt `team.manage`.
+ * Wer nur diese Fähigkeit hat, sieht AUSSCHLIESSLICH die Einladen-Karte samt
+ * seinem Wochen-Kontingent: keine Mitgliederliste, keine offenen Einladungen,
+ * keine Rollen. Das ist keine Freundlichkeit, sondern eine Grenze — die Liste
+ * kommt aus `/api/community/members`, und die Route bleibt `team.manage`.
+ * Ein Leser bekäme dort 403, deshalb wird sie für ihn gar nicht erst geholt.
+ */
+definePageMeta({ layout: 'dashboard', middleware: ['auth', 'admin'], requiredCapability: 'members.invite' })
 
 const { t } = useI18n()
 const { formatDate } = useFormatDate()
@@ -46,7 +58,32 @@ useBrandTitle(() => t('members.title'))
 /** Besitz übertragen ist eine OWNER-Sache (community.transfer), nicht team.manage. */
 const canTransfer = useCommunityCapability('community.transfer')
 
-const { data, refresh, status } = await useFetch<CommunityTeamResponse>('/api/community/members')
+/**
+ * DIE EINE WEICHE DIESER SEITE (F57): verwaltet dieser Mensch das Team, oder
+ * darf er nur einladen? Daran hängen die Liste, die offenen Einladungen, die
+ * Rollen-Wahl und die Werkzeug-Reihe.
+ */
+const canManageTeam = useCommunityCapability('team.manage')
+
+// `immediate` statt `v-if` am Markup: ein Leser darf diese Route nicht rufen
+// (403), und ein Fehler im Nuxt-Payload färbt die ganze Seite rot, obwohl für
+// ihn alles in Ordnung ist.
+const { data, refresh, status } = await useFetch<CommunityTeamResponse>('/api/community/members', {
+  immediate: canManageTeam.value,
+})
+
+/**
+ * MEIN Kontingent (F57). Gerechnet hat es der Server aus derselben puren Regel,
+ * die die Einladungs-Route durchsetzt — hier wird nichts nachgerechnet, nur
+ * angezeigt. Owner/Admin bekommen `unlimited: true` und sehen deshalb keine
+ * Zahlen; für sie hat sich nichts geändert.
+ */
+const { data: quota, refresh: refreshQuota } = await useFetch<MemberInviteQuotaView>('/api/community/invites/quota')
+
+/** Der Knopf erscheint GENAU DANN, wenn die Route ihn auch bedient. */
+const canInvite = computed(() => quota.value?.enabled === true)
+/** „noch 3 von 5 diese Woche" — nur für Mitglieder mit Kontingent. */
+const showQuotaHint = computed(() => quota.value !== null && quota.value !== undefined && !quota.value.unlimited)
 
 const members = computed<CommunityMemberView[]>(() => data.value?.members ?? [])
 const invites = computed<CommunityInviteView[]>(() => data.value?.invites ?? [])
@@ -132,7 +169,11 @@ function ruleMessage(error: unknown): { title: string, description?: string } {
   // shared/types/error.ts) — die rohe `data` eines Fehlers wirft der zentrale
   // Handler bewusst weg, genau EIN geprüfter Grund reist mit.
   const reason = (error as { data?: { reason?: string } })?.data?.reason
-  const known = ['self_demote', 'self_remove', 'last_owner', 'owner_protected', 'already_member', 'not_a_member', 'invalid_role', 'unchanged']
+  // F57: die drei Gründe der Mitglieder-Mechanik. Sie sagen die WAHRHEIT über
+  // das eigene Kontingent — kein Anti-Enumerations-Theater: dass MEIN Vorrat
+  // leer ist, ist eine Tatsache über mich selbst.
+  const known = ['self_demote', 'self_remove', 'last_owner', 'owner_protected', 'already_member', 'not_a_member', 'invalid_role', 'unchanged',
+    'invite_quota_exhausted', 'member_invites_disabled', 'invite_role_forbidden']
   // Die benannten Regeln sagen den nächsten Schritt schon im Satz. Nur der
   // Rückfall stand nackt da — der bekommt eine zweite Zeile (Audit-Befund C12).
   if (reason && known.includes(reason)) return { title: t(`members.errors.${reason}`) }
@@ -154,6 +195,9 @@ const roleItems = computed<{ label: string, value: CommunityRole }[]>(
 
 function openInvite() {
   inviteForm.email = ''
+  // F57: für ein Mitglied ist 'viewer' nicht die Vorauswahl, sondern die
+  // einzige Möglichkeit — das Auswahlfeld erscheint für ihn gar nicht. Die
+  // GRENZE ist trotzdem die Route: ein verstecktes Feld hält niemanden auf.
   inviteForm.role = 'viewer'
   inviteOpen.value = true
 }
@@ -161,9 +205,11 @@ function openInvite() {
 async function sendInvite() {
   inviteBusy.value = true
   try {
-    const result = await $fetch<{ email: string, existingAccount: boolean }>('/api/community/members', {
+    const result = await $fetch<{ email: string, existingAccount: boolean, quota: MemberInviteQuotaView }>('/api/community/members', {
       method: 'POST',
-      body: { email: inviteForm.email.trim(), role: inviteForm.role },
+      // Ein Mitglied schickt IMMER 'viewer' — nicht, weil das Feld fehlt,
+      // sondern weil alles andere die Route mit 403 beantwortet.
+      body: { email: inviteForm.email.trim(), role: canManageTeam.value ? inviteForm.role : 'viewer' },
     })
     toast.add({
       title: result.existingAccount
@@ -175,10 +221,16 @@ async function sendInvite() {
       color: 'success',
     })
     inviteOpen.value = false
-    await refresh()
+    // Das Kontingent kommt mit der Antwort zurück — fortgeschrieben ohne eine
+    // zweite Runde zum Server.
+    if (result.quota) quota.value = result.quota
+    if (canManageTeam.value) await refresh()
   }
   catch (error) {
     toast.add({ ...ruleMessage(error), color: 'error' })
+    // Eine Ablehnung heißt: unsere Zahl war nicht mehr aktuell (zweiter Tab,
+    // Schalter gerade umgelegt). Den Wahrheitswert nachholen, statt ihn zu raten.
+    await refreshQuota()
   }
   finally {
     inviteBusy.value = false
@@ -301,12 +353,39 @@ function rowActions(member: CommunityMemberView): DropdownMenuItem[][] {
        Einladen-Knopf sitzt deshalb in der Werkzeug-Reihe über der Liste
        statt in einer Navbar, die es hier nicht mehr gibt. -->
   <div class="flex w-full flex-col">
-    <p class="mb-4 max-w-2xl text-sm text-muted">{{ t('members.description') }}</p>
+    <p class="mb-4 max-w-2xl text-sm text-muted">
+      {{ canManageTeam ? t('members.description') : t('members.memberDescription') }}
+    </p>
+
+    <!-- F57: DIE ANSICHT EINES MITGLIEDS. Kein Team, keine Liste, keine
+         offenen Einladungen — die eine Handlung, die es hier hat, und die
+         ehrliche Auskunft darüber, wie oft sie noch geht. Ist die Mechanik
+         aus oder das Kontingent leer, steht hier ein Satz statt eines
+         Knopfes, der 403 erntet. -->
+    <UPageCard
+      v-if="!canManageTeam"
+      :title="t('members.invite.cta')"
+      :description="t('members.invite.description')"
+      variant="subtle"
+      data-member-invite-card
+    >
+      <div class="flex flex-wrap items-center gap-3">
+        <UButton v-if="canInvite" icon="i-ph-user-plus" data-invite-open @click="openInvite">
+          {{ t('members.invite.cta') }}
+        </UButton>
+        <p v-if="showQuotaHint" class="text-sm text-muted" data-invite-quota>
+          {{ t('members.invite.quotaLeft', { remaining: quota?.remaining ?? 0, limit: quota?.limit ?? 0 }) }}
+        </p>
+        <p v-else-if="!canInvite" class="text-sm text-muted" data-invite-disabled>
+          {{ t('members.invite.disabled') }}
+        </p>
+      </div>
+    </UPageCard>
 
     <!-- Offene Einladungen zuerst: sie sind der Zustand, der auf eine Antwort
          wartet — und der einzige, den man widerrufen kann. -->
     <UPageCard
-      v-if="invites.length > 0"
+      v-if="canManageTeam && invites.length > 0"
       :title="t('members.invites.title')"
       :description="t('members.invites.description')"
       variant="subtle"
@@ -335,7 +414,7 @@ function rowActions(member: CommunityMemberView): DropdownMenuItem[][] {
       </UTable>
     </UPageCard>
 
-    <div class="mb-4 flex flex-wrap items-center gap-3">
+    <div v-if="canManageTeam" class="mb-4 flex flex-wrap items-center gap-3">
       <form class="flex min-w-64 flex-1 gap-2" @submit.prevent>
         <UInput
           v-model="search"
@@ -366,12 +445,12 @@ function rowActions(member: CommunityMemberView): DropdownMenuItem[][] {
            es als Reiter der Community-Hülle nicht mehr (dort steht der Titel
            der Hülle), also steht die Haupthandlung jetzt in der Werkzeug-Reihe
            direkt über der Liste, auf die sie wirkt. -->
-      <UButton icon="i-ph-user-plus" size="sm" data-invite-open @click="openInvite">
+      <UButton v-if="canInvite" icon="i-ph-user-plus" size="sm" data-invite-open @click="openInvite">
         {{ t('members.invite.cta') }}
       </UButton>
     </div>
 
-    <UTable :data="filtered" :columns="columns" :loading="status === 'pending'" data-members-table>
+    <UTable v-if="canManageTeam" :data="filtered" :columns="columns" :loading="status === 'pending'" data-members-table>
       <template #name-header>
         <SortableHeader :label="t('members.name')" field="name" :active="sortField" :dir="sortDir" @toggle="toggle" />
       </template>
@@ -466,9 +545,21 @@ function rowActions(member: CommunityMemberView): DropdownMenuItem[][] {
           <UFormField :label="t('members.invite.emailLabel')" :help="t('members.invite.emailHelp')" required>
             <UInput v-model="inviteForm.email" type="email" class="w-full" :maxlength="254" data-invite-email />
           </UFormField>
-          <UFormField :label="t('members.invite.roleLabel')" :help="t(`members.roleHelp.${inviteForm.role}`)" required>
+          <!-- F57: die Rollen-WAHL bleibt an `team.manage`. Ein Mitglied lädt
+               immer als Leser/in ein — es bekommt deshalb kein Auswahlfeld,
+               sondern den Satz, was seine Einladung bewirkt. Die Grenze ist
+               trotzdem die Route (403 auf jede andere Rolle); dieses `v-if`
+               ist nur die ehrliche Oberfläche dazu. -->
+          <UFormField v-if="canManageTeam" :label="t('members.invite.roleLabel')" :help="t(`members.roleHelp.${inviteForm.role}`)" required>
             <USelect v-model="inviteForm.role" :items="roleItems" class="w-full" data-invite-role />
           </UFormField>
+          <p v-else class="text-sm text-muted" data-invite-fixed-role>
+            {{ t('members.invite.asViewer') }}
+          </p>
+
+          <p v-if="showQuotaHint" class="text-sm text-muted" data-invite-quota-modal>
+            {{ t('members.invite.quotaLeft', { remaining: quota?.remaining ?? 0, limit: quota?.limit ?? 0 }) }}
+          </p>
 
           <div class="flex justify-end gap-2 pt-2">
             <UButton color="neutral" variant="ghost" @click="() => { inviteOpen = false }">{{ t('ui.cancel') }}</UButton>

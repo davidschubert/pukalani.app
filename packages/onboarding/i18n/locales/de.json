@@ -15,6 +15,8 @@
       },
       "openRegistration": "Offene Registrierung",
       "openRegistrationDesc": "Ist der Schalter an, kann sich jeder ein Konto anlegen und wird damit Mitglied deiner Community — ebenso, wer schon ein Konto hat und hier den ersten Beitrag oder Kommentar schreibt. Aus heißt: Mitglied wird man nur auf Einladung. Wem du den Zugang entzogen hast, kommt in beiden Fällen nicht von selbst zurück.",
+      "memberInvites": "Mitglieder dürfen einladen",
+      "memberInvitesDesc": "Jedes Mitglied kann fünf Menschen pro Woche dazuholen — immer als Leserin oder Leser. Aus: nur du und deine Admins laden ein.",
       "audience": {
         "title": "Sichtbarkeit",
         "description": "Wer eure Beiträge, Kommentare, Termine, Medien und Seiten lesen darf.",
@@ -656,6 +658,7 @@
   },
   "members": {
     "title": "Mitglieder",
+    "memberDescription": "Hol Menschen dazu, die hierher passen. Deine Einladung macht sie zu Leserinnen und Lesern.",
     "description": "Alle, die zu deiner Community gehören. Mitglied wird man durch Beitritt (bei offener Registrierung) oder durch eine Einladung. „Zugang entziehen\" nimmt die Zugehörigkeit wirklich weg — die Person sieht danach keine Mitglieder-Inhalte mehr und kommt nur über eine neue Einladung zurück.",
     "scope": {
       "team": "Team ({n})",
@@ -698,6 +701,9 @@
       "cta": "Einladen",
       "title": "Mitglied einladen",
       "description": "E-Mail-Adresse eintragen, Rolle wählen — fertig.",
+      "asViewer": "Deine Einladung macht die Person zu einer Leserin oder einem Leser.",
+      "quotaLeft": "Noch {remaining} von {limit} Einladungen diese Woche.",
+      "disabled": "Einladungen durch Mitglieder sind in dieser Community gerade nicht möglich.",
       "emailLabel": "E-Mail-Adresse",
       "emailHelp": "Hat die Person schon ein Pukalani-Konto, ist sie nach dem Anmelden mit einem Klick dabei. Sonst legt sie über den Link eins an.",
       "roleLabel": "Rolle",
@@ -744,6 +750,9 @@
       "not_a_member": "Diese Person gehört nicht (mehr) zu dieser Community.",
       "invalid_role": "Diese Rolle gibt es nicht.",
       "unchanged": "Diese Rolle hat die Person bereits.",
+      "invite_quota_exhausted": "Dein Kontingent für diese Woche ist aufgebraucht. In ein paar Tagen geht es weiter.",
+      "member_invites_disabled": "In dieser Community lädt gerade nur das Team ein.",
+      "invite_role_forbidden": "Als Mitglied kannst du nur als Leserin oder Leser einladen.",
       "failed": "Das hat gerade nicht geklappt. Versuch es noch einmal.",
       "failedHint": "An der Mitgliederliste hat sich nichts geändert. Lade die Seite neu und versuch es noch einmal."
     }

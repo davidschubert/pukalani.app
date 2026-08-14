@@ -154,6 +154,45 @@ async function saveProfile() {
 const value = ref(openRegistration.value !== false)
 watch(openRegistration, next => { value.value = next !== false })
 
+/**
+ * F57 Mechanik 2 (Davids Entscheidung 2026-08-14): „Mitglieder dürfen
+ * einladen" — der Schwester-Schalter der offenen Registrierung, und deshalb
+ * direkt darunter. Beide beantworten dieselbe Frage: wer kommt hier herein?
+ *
+ * Er nimmt dem Owner NICHTS: aus heißt „nur Owner/Admin laden ein", also der
+ * Zustand von vor dem 2026-08-14.
+ */
+const { memberInvitesEnabled } = useTenantMemberInvites()
+const memberInvites = ref(memberInvitesEnabled.value !== false)
+watch(memberInvitesEnabled, next => { memberInvites.value = next !== false })
+
+const savingMemberInvites = ref(false)
+async function saveMemberInvites(next: boolean) {
+  savingMemberInvites.value = true
+  try {
+    const result = await $fetch<{ memberInvitesEnabled: boolean }>('/api/community/member-invites', {
+      method: 'PATCH',
+      body: { memberInvitesEnabled: next },
+    })
+    // Aus der ANTWORT übernehmen, aus demselben Grund wie beim Schalter
+    // darüber: der SSR-Wert stammt aus dem Resolver-Cache (≤30 s).
+    memberInvitesEnabled.value = result.memberInvitesEnabled
+    memberInvites.value = result.memberInvitesEnabled
+    toast.add({ title: t('dashboard.community.saved'), color: 'success' })
+  }
+  catch {
+    memberInvites.value = memberInvitesEnabled.value !== false
+    toast.add({
+      title: t('dashboard.community.saveFailed'),
+      description: t('dashboard.community.saveFailedDesc'),
+      color: 'error',
+    })
+  }
+  finally {
+    savingMemberInvites.value = false
+  }
+}
+
 const saving = ref(false)
 async function save(next: boolean) {
   saving.value = true
@@ -392,6 +431,25 @@ async function deleteCommunity() {
         :disabled="saving"
         :aria-label="t('dashboard.community.openRegistration')"
         @update:model-value="(next: boolean) => save(next)"
+      />
+    </div>
+
+    <!-- F57 Mechanik 2: derselbe Bereich, weil es dieselbe Frage ist — wer
+         kommt hier herein. Aus heißt „nur Owner/Admin laden ein", also der
+         Zustand von vor dem 2026-08-14; das Recht des Owners schrumpft nie. -->
+    <div v-if="isTenantHost" class="flex items-center justify-between gap-4" data-community-member-invites>
+      <div class="flex items-start gap-3">
+        <UIcon name="i-ph-paper-plane-tilt" class="mt-0.5 size-5 shrink-0 text-muted" />
+        <div>
+          <p class="text-sm font-medium">{{ t('dashboard.community.memberInvites') }}</p>
+          <p class="text-sm text-muted">{{ t('dashboard.community.memberInvitesDesc') }}</p>
+        </div>
+      </div>
+      <USwitch
+        v-model="memberInvites"
+        :disabled="savingMemberInvites"
+        :aria-label="t('dashboard.community.memberInvites')"
+        @update:model-value="(next: boolean) => saveMemberInvites(next)"
       />
     </div>
 

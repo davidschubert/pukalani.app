@@ -138,8 +138,18 @@ export default defineAppConfig({
           scope: 'community',
           labelKey: 'admin.nav.members',
           icon: 'i-ph-users-three',
-          to: '/dashboard/community/members',
-          requiredCapability: 'team.manage',
+          /**
+           * SEIT F57 `members.invite` STATT `team.manage` (2026-08-14): jedes
+           * Mitglied darf einladen, und der Einstieg dafür ist diese Seite.
+           *
+           * Der Reiter muss dieselbe Fähigkeit verlangen wie die SEITE, sonst
+           * gibt es ihn für ein Mitglied nicht — und eine Fähigkeit ohne
+           * Einstieg ist genau der Befund S9, gegen den dieser Eintrag
+           * überhaupt entstanden ist. Was die Seite dann ZEIGT, entscheidet
+           * sie selbst: Mitglieder sehen nur die Einladen-Karte, die
+           * Mitgliederliste bleibt an `team.manage`.
+           */
+          requiredCapability: 'members.invite',
           order: 30,
         },
         {
