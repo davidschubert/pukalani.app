@@ -1,7 +1,7 @@
 import { Permission, Query, Role } from 'node-appwrite'
 import type { H3Event } from 'h3'
 import { communityModeratorLabel } from '../../../core/shared/communityModeratorLabel'
-import { MEMBER_COUNTERS_TABLE, POLL_VOTES_TABLE, POSTS_TABLE, POST_VOTES_TABLE, USER_BADGES_TABLE, type CommunityPost, type MemberCounters, type PollVote, type PostVote, type UserBadge } from '../../shared/types/post'
+import { DISCUSSION_REACTIONS_TABLE, MEMBER_COUNTERS_TABLE, POLL_VOTES_TABLE, POSTS_TABLE, POST_VOTES_TABLE, USER_BADGES_TABLE, type CommunityPost, type DiscussionReaction, type MemberCounters, type PollVote, type PostVote, type UserBadge } from '../../shared/types/post'
 
 /**
  * GDPR-Contributor des posts-Layers (Vertrag: core/server/utils/userData.ts).
@@ -52,6 +52,11 @@ export async function postsExportUserData(event: H3Event, userId: string) {
   // gehören hinein. Degradiert auf leer, solange posts-012 aussteht.
   const badges = await listAllRows<UserBadge>(tablesDB, databaseId, USER_BADGES_TABLE, [Query.equal('userId', userId)])
     .catch(() => [] as UserBadge[])
+  // F57: abgegebene Emoji-Reaktionen sind Verhaltens-Daten dieses Menschen —
+  // dieselbe Sorte wie eine Stimme. Degradiert auf leer, solange posts-017
+  // auf einer Instanz aussteht.
+  const reactions = await listAllRows<DiscussionReaction>(tablesDB, databaseId, DISCUSSION_REACTIONS_TABLE, [Query.equal('userId', userId)])
+    .catch(() => [] as DiscussionReaction[])
 
   return {
     posts: posts.map(p => ({
@@ -76,6 +81,10 @@ export async function postsExportUserData(event: H3Event, userId: string) {
     })),
     badges: badges.map(b => ({
       badgeKey: b.badgeKey, qualifier: b.qualifier, awardedAt: b.$createdAt,
+    })),
+    reactions: reactions.map(r => ({
+      targetType: r.targetType, targetId: r.targetId,
+      reaction: r.reaction, createdAt: r.$createdAt,
     })),
   }
 }
@@ -129,6 +138,23 @@ export async function postsDeleteUserData(event: H3Event, userId: string): Promi
     .catch(() => [] as UserBadge[])
   for (const row of badges) {
     await tablesDB.deleteRow({ databaseId, tableId: USER_BADGES_TABLE, rowId: row.$id })
+    deleted++
+  }
+
+  /**
+   * F57: abgegebene Reaktionen sind Hard-Delete.
+   *
+   * Wie die Stimmen und aus demselben Grund: kein Gesprächskontext anderer,
+   * sondern eine Handlung DIESES Menschen. Die Anzeige zählt danach eins
+   * weniger — das ist richtig so, die Reaktion gibt es nicht mehr. Ein
+   * Grabstein wäre hier ein Chip ohne Absender.
+   *
+   * Liste degradiert vor posts-017, Löschung strikt (Muster der Stimmen).
+   */
+  const reactions = await listAllRows<DiscussionReaction>(tablesDB, databaseId, DISCUSSION_REACTIONS_TABLE, [Query.equal('userId', userId)])
+    .catch(() => [] as DiscussionReaction[])
+  for (const row of reactions) {
+    await tablesDB.deleteRow({ databaseId, tableId: DISCUSSION_REACTIONS_TABLE, rowId: row.$id })
     deleted++
   }
 

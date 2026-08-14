@@ -274,7 +274,7 @@ export async function ensureSeededCounters(
   event: H3Event,
   userId: string,
   row: MemberCounters | null,
-  aggregates: { topicsCreated?: number, repliesCreated?: number, upvotesGiven?: number },
+  aggregates: { topicsCreated?: number, repliesCreated?: number, upvotesGiven?: number, reactionsGiven?: number },
 ): Promise<MemberCounterValues> {
   const db = counterDb(event)
 

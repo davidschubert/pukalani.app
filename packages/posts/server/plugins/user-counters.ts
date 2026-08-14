@@ -1,12 +1,13 @@
 import { Query } from 'node-appwrite'
-import { POSTS_TABLE, POST_VOTES_TABLE } from '../../shared/types/post'
+import { DISCUSSION_REACTIONS_TABLE, POSTS_TABLE, POST_VOTES_TABLE } from '../../shared/types/post'
 
 /**
  * Die posts-Seite des Zähl-Vertrags (F1 Stufe 4): vergebene Upvotes und eigene
  * Beiträge nach erhaltenen Upvotes.
  *
- * ── SIEBEN `count`-ABFRAGEN, UND KEINE ZEILE WANDERT ──────────────────────
- * Eine für die vergebenen Stimmen, je eine pro Schwelle. `count` überträgt
+ * ── ACHT `count`-ABFRAGEN, UND KEINE ZEILE WANDERT ────────────────────────
+ * Eine für die vergebenen Stimmen, eine für die abgegebenen Reaktionen (F57),
+ * je eine pro Schwelle. `count` überträgt
  * bewusst nichts: die Alternative wäre, alle eigenen Beiträge zu laden und im
  * Speicher zu zählen — bei jemandem mit 800 Beiträgen sind das 32 Seiten, und
  * die Zahl der Abfragen hinge dann daran, wie lange jemand dabei ist. So ist
@@ -51,10 +52,21 @@ export default defineNitroPlugin(() => {
     const db = tenantDb(event)
     const asked = windows ?? []
 
-    const [likesGiven, topicsCreated, ...rest] = await Promise.all([
+    const [likesGiven, reactionsGiven, topicsCreated, ...rest] = await Promise.all([
       db.count(POST_VOTES_TABLE, [
         Query.equal('userId', userId),
         Query.equal('value', 1),
+      ]),
+      /**
+       * ABGEGEBENE Reaktionen (F57) — immer gemeldet, wie `likesGiven`: eine
+       * `count`-Abfrage, und der Lazy-Seed bekommt sie damit gratis.
+       *
+       * NUR DIE GEBENDE RICHTUNG. Ein Gegenstück „erhaltene Reaktionen" gibt
+       * es nirgends: Reaktionen sind badge-neutral (Konzept Teil 4 Punkt 3),
+       * der einzige Verbraucher ist `first-reaction`.
+       */
+      db.count(DISCUSSION_REACTIONS_TABLE, [
+        Query.equal('userId', userId),
       ]),
       // Fester Platz in der Reihe, damit die Fenster und Schwellen dahinter
       // ihre Position behalten — ohne Nachfrage ein `null`, keine Abfrage.
@@ -86,7 +98,10 @@ export default defineNitroPlugin(() => {
       ])),
     ])
 
-    const counters: Record<string, number> = { [COUNTER_LIKES_GIVEN]: likesGiven }
+    const counters: Record<string, number> = {
+      [COUNTER_LIKES_GIVEN]: likesGiven,
+      [COUNTER_REACTIONS_GIVEN]: reactionsGiven,
+    }
     if (topicsCreated !== null) counters[COUNTER_TOPICS_CREATED] = topicsCreated
     asked.forEach((window, index) => {
       counters[counterContentIn(window.key)] = rest[index] ?? 0

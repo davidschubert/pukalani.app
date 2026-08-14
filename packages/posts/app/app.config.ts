@@ -121,5 +121,27 @@ export default defineAppConfig({
         },
       },
     },
+
+    /**
+     * DER KURATIERTE REAKTIONS-SATZ (F57 Mechanik 1).
+     *
+     * Die Liste steht hier als AUSSAGE dieses Layers, obwohl der Code ohne sie
+     * denselben Satz nähme (`allowedReactions()` fällt auf die Registry
+     * zurück): so ist an EINER Stelle nachlesbar, was eine Community sieht,
+     * und eine App kann sie KÜRZEN, ohne den Layer anzufassen.
+     *
+     * ERWEITERN GEHT BEWUSST NICHT — was nicht in `REACTION_KEYS` steht, wird
+     * verworfen. Sonst wanderte ein per Config erfundenes Zeichen in die
+     * Datenbank und wäre danach nicht mehr darstellbar; ein freier Picker ist
+     * zudem eine Moderationsfläche, die es im MVP nicht gibt.
+     *
+     * WARUM WEDER 👍 NOCH ❤️ DARIN STEHEN, steht bei der Registry
+     * (`packages/posts/shared/reactions.ts`): beide würden neben dem
+     * Aufstimm-Pfeil als zweite Zustimmung gelesen — genau die zweite
+     * Like-Quelle, die Konzept-Entscheidung 4 ausschließt.
+     */
+    discussions: {
+      reactions: ['laugh', 'tada', 'thinking', 'eyes', 'sad', 'fire', 'thanks', 'idea'],
+    },
   },
 })

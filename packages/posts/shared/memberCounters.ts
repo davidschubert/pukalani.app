@@ -15,6 +15,7 @@ export const MEMBER_COUNTER_COLUMNS = [
   'upvotesGiven',
   'upvotesReceived',
   'edits',
+  'reactionsGiven',
 ] as const
 
 export type MemberCounterColumn = (typeof MEMBER_COUNTER_COLUMNS)[number]
@@ -23,7 +24,7 @@ export type MemberCounterColumn = (typeof MEMBER_COUNTER_COLUMNS)[number]
 export type MemberCounterValues = Record<MemberCounterColumn, number>
 
 export function emptyMemberCounterValues(): MemberCounterValues {
-  return { topicsCreated: 0, repliesCreated: 0, upvotesGiven: 0, upvotesReceived: 0, edits: 0 }
+  return { topicsCreated: 0, repliesCreated: 0, upvotesGiven: 0, upvotesReceived: 0, edits: 0, reactionsGiven: 0 }
 }
 
 /**
@@ -34,6 +35,8 @@ export interface MemberCounterSeedInput {
   topicsCreated: number
   repliesCreated: number
   upvotesGiven: number
+  /** Abgegebene Emoji-Reaktionen (F57) — eine exakte `count`-Abfrage, wie `upvotesGiven`. */
+  reactionsGiven: number
 }
 
 /** PURE: eine gemeldete Zahl auf eine brauchbare Anzahl bringen. */
@@ -45,10 +48,13 @@ function whole(value: number | undefined): number {
 /**
  * PURE: die STARTWERTE aus den Aggregat-Zählern (Lazy-Seed).
  *
- * ── DREI VON FÜNF, UND DAS IST KEINE LÜCKE, SONDERN DIE WAHRHEIT ───────────
+ * ── VIER VON SECHS, UND DAS IST KEINE LÜCKE, SONDERN DIE WAHRHEIT ──────────
  * Geeicht werden kann nur, was sich aus dem BESTAND ausrechnen lässt:
  *  - `topicsCreated` / `repliesCreated` — eine `count`-Abfrage je Quelle, exakt.
  *  - `upvotesGiven` — der Zähler `likesGiven`, den die Quellen ohnehin melden.
+ *  - `reactionsGiven` — dieselbe Bauart (F57): jede abgegebene Reaktion ist
+ *    eine Zeile in `discussion_reactions`, also exakt zählbar. Anders als bei
+ *    `upvotesReceived` gibt es hier nichts zu summieren.
  *
  * Die anderen beiden STARTEN BEI 0, und beide Male ist das unvermeidlich:
  *  - `upvotesReceived` wäre die SUMME der `upvotes`-Spalte über alle eigenen
@@ -79,6 +85,7 @@ export function seedValuesFrom(input: Partial<MemberCounterSeedInput>): MemberCo
     upvotesGiven: whole(input.upvotesGiven),
     upvotesReceived: 0,
     edits: 0,
+    reactionsGiven: whole(input.reactionsGiven),
   }
 }
 
@@ -105,6 +112,7 @@ export function counterFellBehind(
   return seed.topicsCreated > stored.topicsCreated
     || seed.repliesCreated > stored.repliesCreated
     || seed.upvotesGiven > stored.upvotesGiven
+    || seed.reactionsGiven > stored.reactionsGiven
 }
 
 /**
@@ -122,6 +130,7 @@ export function healedValues(
     upvotesGiven: Math.max(stored.upvotesGiven, seed.upvotesGiven),
     upvotesReceived: stored.upvotesReceived,
     edits: stored.edits,
+    reactionsGiven: Math.max(stored.reactionsGiven, seed.reactionsGiven),
   }
 }
 

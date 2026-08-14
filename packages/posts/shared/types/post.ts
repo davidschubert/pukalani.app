@@ -1,5 +1,6 @@
 import type { Models } from 'node-appwrite'
 import type { BadgeFacts, BadgeGroup } from '../badges'
+import type { ReactionCount, ReactionKey, ReactionSummary } from '../reactions'
 import type { TrustLevelProgress } from '../trustLevels'
 
 export const POSTS_TABLE = 'community_posts'
@@ -38,6 +39,19 @@ export const USER_BADGES_TABLE = 'user_badges'
  * Levels).
  */
 export const MEMBER_COUNTERS_TABLE = 'member_counters'
+/**
+ * F57 Mechanik 1: die abgegebenen Emoji-Reaktionen, EINE Zeile je
+ * (Ziel, Mensch, Reaktion) — Migration posts-017.
+ *
+ * DER UNIQUE-INDEX BRAUCHT KEINE `communityId` (Pool-Regel, und hier ist die
+ * Ausnahme die richtige): sein erster Schluessel ist `targetId`, also eine
+ * Appwrite-Row-Id — die ist global eindeutig, da kann kein Mandant mit einem
+ * anderen kollidieren. Dieselbe Ueberlegung wie bei (courseId, userId); nur
+ * mandanten-RELATIVE Schluessel wie Host oder Slug brauchen die Spalte im
+ * Index. Gestempelt und gefiltert wird `communityId` trotzdem an jeder Stelle
+ * — sie ist die Datentuer, nicht die Eindeutigkeit.
+ */
+export const DISCUSSION_REACTIONS_TABLE = 'discussion_reactions'
 
 export const POST_TYPES = ['post', 'poll', 'question'] as const
 export type PostType = (typeof POST_TYPES)[number]
@@ -401,6 +415,36 @@ export interface DiscussionSidebarResponse {
  * eine zweite Spalte daneben wäre eine zweite Wahrheit über dasselbe. Die
  * `communityId` steht bewusst nicht im Typ — sie gehört der Datentür.
  */
+/** Antwort der gebündelten Leseroute: Ziel-Id → Chips, plus der erlaubte Satz. */
+export interface ReactionsResponse {
+  reactions: ReactionSummary
+  /** Was diese App zulässt — die UI baut ihr „+"-Menü daraus, nie aus der Registry. */
+  allowed: ReactionKey[]
+}
+
+/** Antwort des Umschaltens: der neue Stand GENAU dieses Ziels. */
+export interface ReactionToggleResponse {
+  targetId: string
+  reactions: ReactionCount[]
+}
+
+/**
+ * EINE abgegebene Emoji-Reaktion (F57, Migration posts-017).
+ *
+ * `communityId` steht bewusst nicht im Typ — sie gehört der Datentür (Muster
+ * `UserBadge`, `MemberCounters`). `reaction` trägt den SCHLÜSSEL aus
+ * `shared/reactions.ts`, nie das Zeichen selbst (Begründung dort).
+ */
+export interface DiscussionReaction extends Models.Row {
+  /** Art des Ziels — heute ausschließlich 'post'. Siehe `REACTION_TARGET_TYPES`. */
+  targetType: string
+  /** Row-Id des Ziels (global eindeutig, deshalb trägt sie den Unique-Index). */
+  targetId: string
+  userId: string
+  /** Schlüssel aus `REACTION_KEYS`, z. B. 'tada'. */
+  reaction: string
+}
+
 export interface UserBadge extends Models.Row {
   userId: string
   badgeKey: string
@@ -440,6 +484,14 @@ export interface MemberCounters extends Models.Row {
   upvotesReceived: number
   /** Bearbeitungen EIGENER Inhalte. */
   edits: number
+  /**
+   * Selbst ABGEGEBENE Emoji-Reaktionen (F57, Migration posts-017).
+   *
+   * Es gibt bewusst kein Gegenstück `reactionsReceived`: Reaktionen sind
+   * badge-neutral (Konzept Teil 4 Punkt 3), erhaltene werden nirgends gezählt.
+   * Der einzige Verbraucher ist das Abzeichen `first-reaction`.
+   */
+  reactionsGiven: number
   /**
    * Wurden die Startwerte schon aus den Aggregaten gesetzt?
    *
