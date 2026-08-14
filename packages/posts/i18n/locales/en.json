@@ -345,7 +345,8 @@
           "trust-member": "Member",
           "trust-regular": "Regular",
           "trust-leader": "Leader",
-          "first-reaction": "First Reaction"
+          "first-reaction": "First Reaction",
+          "first-link": "First Link"
         },
         "criterion": {
           "profile": "You added a few words about yourself and a profile picture.",
@@ -374,7 +375,8 @@
           "trust-member": "Reached trust level 2: 15 days here, 5 posts of your own, 10 upvotes given and 5 received",
           "trust-regular": "Reached trust level 3: 60 days here, 25 posts of your own, 50 upvotes given and 25 received",
           "trust-leader": "Trust level 4: appointed by the people who run this community",
-          "first-reaction": "You reacted with an emoji for the first time."
+          "first-reaction": "You reacted with an emoji for the first time.",
+          "first-link": "You linked to another topic for the first time."
         }
       },
       "trust": {
@@ -394,6 +396,9 @@
           "upvotesGiven": "{target} upvotes given — done",
           "upvotesReceived": "{target} upvotes received — done"
         }
+      },
+      "backlinks": {
+        "title": "Linked from"
       }
     },
     "categories": {

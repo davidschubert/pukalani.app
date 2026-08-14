@@ -47,7 +47,8 @@ describe('die Zuordnung am Katalog', () => {
     expect(byMode('once')).toEqual([
       // `first-reaction` (F57) steht bei den ersten Malen: ein erstes Mal gibt
       // es nur einmal, auch wenn der Zähler dahinter weiterläuft.
-      'profile', 'first-like', 'first-flag', 'editor', 'first-reaction',
+      // `first-link` (F57, letzte Mechanik) ist das sechste erste Mal.
+      'profile', 'first-like', 'first-flag', 'editor', 'first-reaction', 'first-link',
       'welcome', 'appreciated', 'thank-you', 'gives-back', 'empathetic', 'respected', 'admired',
       // F57 Mechanik 2: `promoter` steht NACH `anniversary` im Katalog, aber
       // vor den Stufen — die erste angenommene Einladung gibt es einmal.
@@ -131,10 +132,12 @@ describe('Zähler-Abzeichen: was die Buchung allein entscheiden darf', () => {
       // F57 Mechanik 3: die drei Like-Limit-Abzeichen sind die naechsten —
       // `likeLimitDays` ist wie `edits` rein mitschreibend, die Buchung
       // entscheidet allein.
+      // F57 letzte Mechanik: `first-link` folgt aus `linksMade` — ebenfalls
+      // rein mitschreibend, ebenfalls allein von der Buchung entscheidbar.
       const expected = badge.key === 'first-like' || badge.key === 'editor'
         || badge.key === 'first-reaction' || badge.key === 'promoter'
         || badge.key === 'out-of-love' || badge.key === 'higher-love'
-        || badge.key === 'crazy-in-love'
+        || badge.key === 'crazy-in-love' || badge.key === 'first-link'
       expect(badgeFollowsFromCounters(badge), badge.key).toBe(expected)
     }
   })

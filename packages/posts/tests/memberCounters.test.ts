@@ -40,6 +40,7 @@ describe('seedValuesFrom', () => {
       // falsch rekonstruieren: die zurueckgenommenen Stimmen haben mitgezaehlt
       // und sind geloescht.
       likeLimitDays: 0,
+      linksMade: 0,
     })
   })
 
@@ -118,6 +119,7 @@ describe('memberCounterValues', () => {
       'invitesAccepted',
       // posts-019 (F57 Mechanik 3)
       'likeLimitDays',
+      'linksMade',
     ])
   })
 })

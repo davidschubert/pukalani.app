@@ -18,6 +18,7 @@ export const MEMBER_COUNTER_COLUMNS = [
   'reactionsGiven',
   'invitesAccepted',
   'likeLimitDays',
+  'linksMade',
 ] as const
 
 export type MemberCounterColumn = (typeof MEMBER_COUNTER_COLUMNS)[number]
@@ -26,7 +27,7 @@ export type MemberCounterColumn = (typeof MEMBER_COUNTER_COLUMNS)[number]
 export type MemberCounterValues = Record<MemberCounterColumn, number>
 
 export function emptyMemberCounterValues(): MemberCounterValues {
-  return { topicsCreated: 0, repliesCreated: 0, upvotesGiven: 0, upvotesReceived: 0, edits: 0, reactionsGiven: 0, invitesAccepted: 0, likeLimitDays: 0 }
+  return { topicsCreated: 0, repliesCreated: 0, upvotesGiven: 0, upvotesReceived: 0, edits: 0, reactionsGiven: 0, invitesAccepted: 0, likeLimitDays: 0, linksMade: 0 }
 }
 
 /**
@@ -50,7 +51,7 @@ function whole(value: number | undefined): number {
 /**
  * PURE: die STARTWERTE aus den Aggregat-Zählern (Lazy-Seed).
  *
- * ── VIER VON SECHS, UND DAS IST KEINE LÜCKE, SONDERN DIE WAHRHEIT ──────────
+ * ── VIER VON NEUN, UND DAS IST KEINE LÜCKE, SONDERN DIE WAHRHEIT ───────────
  * Geeicht werden kann nur, was sich aus dem BESTAND ausrechnen lässt:
  *  - `topicsCreated` / `repliesCreated` — eine `count`-Abfrage je Quelle, exakt.
  *  - `upvotesGiven` — der Zähler `likesGiven`, den die Quellen ohnehin melden.
@@ -58,7 +59,7 @@ function whole(value: number | undefined): number {
  *    eine Zeile in `discussion_reactions`, also exakt zählbar. Anders als bei
  *    `upvotesReceived` gibt es hier nichts zu summieren.
  *
- * Die anderen DREI STARTEN BEI 0, und jedes Mal ist das unvermeidlich:
+ * Die anderen FÜNF STARTEN BEI 0, und jedes Mal ist das unvermeidlich:
  *  - `upvotesReceived` wäre die SUMME der `upvotes`-Spalte über alle eigenen
  *    Inhalte. Appwrite kann eine Spalte nicht summieren; man müsste jeden
  *    eigenen Beitrag und jede eigene Antwort seitenweise laden — bei einem
@@ -80,6 +81,13 @@ function whole(value: number | undefined): number {
  *    gelöscht — und gerade sie hat gezählt (die Rücknahme erstattet nichts).
  *    Aus dem Bestand ließe sich der Tag also nicht einmal falsch
  *    rekonstruieren.
+ *
+ *  - `linksMade` (F57, Themen-Verlinkung) hat seine Quelle ABSICHTLICH nicht:
+ *    die Rückverweis-Zeilen (`discussion_links`) gäbe es zwar, sie tragen aber
+ *    bewusst kein `authorId` — eine Zeile aus zwei Row-Ids ist nichts
+ *    Personenbezogenes und soll es nicht werden. Wer sie gesetzt hat, ist
+ *    damit nicht nachträglich zu ermitteln, und das ist der Preis, den diese
+ *    Entscheidung kostet.
  *
  * Was das praktisch heißt, gehört ausgesprochen: das Abzeichen „Editor" zählt
  * ab der Umstellung, und eine spätere Trust-Level-Schwelle „erhaltene
@@ -103,6 +111,7 @@ export function seedValuesFrom(input: Partial<MemberCounterSeedInput>): MemberCo
     reactionsGiven: whole(input.reactionsGiven),
     invitesAccepted: 0,
     likeLimitDays: 0,
+    linksMade: 0,
   }
 }
 
@@ -150,6 +159,7 @@ export function healedValues(
     reactionsGiven: Math.max(stored.reactionsGiven, seed.reactionsGiven),
     invitesAccepted: stored.invitesAccepted,
     likeLimitDays: stored.likeLimitDays,
+    linksMade: stored.linksMade,
   }
 }
 

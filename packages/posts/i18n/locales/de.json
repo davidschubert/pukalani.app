@@ -345,7 +345,8 @@
           "trust-member": "Mitglied",
           "trust-regular": "Stammgast",
           "trust-leader": "Wortführer",
-          "first-reaction": "Erste Reaktion"
+          "first-reaction": "Erste Reaktion",
+          "first-link": "Erster Themen-Verweis"
         },
         "criterion": {
           "profile": "Du hast einen Text über dich und ein Profilbild hinterlegt.",
@@ -374,7 +375,8 @@
           "trust-member": "Vertrauensstufe 2 erreicht: 15 Tage dabei, 5 eigene Inhalte, 10 vergebene und 5 erhaltene Zustimmungen",
           "trust-regular": "Vertrauensstufe 3 erreicht: 60 Tage dabei, 25 eigene Inhalte, 50 vergebene und 25 erhaltene Zustimmungen",
           "trust-leader": "Vertrauensstufe 4: von der Leitung der Community ernannt",
-          "first-reaction": "Du hast zum ersten Mal mit einem Emoji reagiert."
+          "first-reaction": "Du hast zum ersten Mal mit einem Emoji reagiert.",
+          "first-link": "Du hast zum ersten Mal auf ein anderes Thema verwiesen."
         }
       },
       "trust": {
@@ -394,6 +396,9 @@
           "upvotesGiven": "{target} Zustimmungen vergeben — geschafft",
           "upvotesReceived": "{target} Zustimmungen erhalten — geschafft"
         }
+      },
+      "backlinks": {
+        "title": "Verlinkt von"
       }
     },
     "categories": {

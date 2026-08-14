@@ -37,8 +37,11 @@ describe('der Katalog selbst', () => {
     // `out-of-love`/`higher-love`/`crazy-in-love` (F57 Mechanik 3) sind die
     // Nummern 10 bis 12 derselben Gruppe: sein Kontingent an einem Tag
     // auszugeben ist eine Zuwendung an andere, kein eigener Meilenstein.
-    expect(BADGE_CATALOG.length).toBe(27)
-    for (const [group, size] of [['gettingStarted', 5], ['community', 12], ['posting', 6], ['trustLevel', 4]] as const) {
+    // `first-link` (F57, letzte Mechanik) ist das SECHSTE „erste Mal" — der
+    // erste Verweis auf ein anderes Thema; die Funktion dahinter fehlte bis
+    // dahin, deshalb stand es in der Auslassungsliste.
+    expect(BADGE_CATALOG.length).toBe(28)
+    for (const [group, size] of [['gettingStarted', 6], ['community', 12], ['posting', 6], ['trustLevel', 4]] as const) {
       expect(BADGE_CATALOG.filter(entry => entry.group === group).length, group).toBe(size)
     }
   })

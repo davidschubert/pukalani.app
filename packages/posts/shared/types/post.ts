@@ -52,6 +52,19 @@ export const MEMBER_COUNTERS_TABLE = 'member_counters'
  * — sie ist die Datentuer, nicht die Eindeutigkeit.
  */
 export const DISCUSSION_REACTIONS_TABLE = 'discussion_reactions'
+/**
+ * F57 letzte Mechanik: der RÜCKVERWEIS-INDEX der Themen-Verlinkung, EINE Zeile
+ * je (Quelle, Ziel) — Migration posts-020.
+ *
+ * KEINE zweite Wahrheit: welche Verweise ein Beitrag TRÄGT, steht in seinem
+ * Text (`shared/topicLinks.ts`) und wird von dort gelesen. Diese Tabelle
+ * beantwortet allein die Gegenrichtung — „wer zeigt auf mich?" —, die aus dem
+ * Text eines fremden Beitrags nicht zu erfahren ist, ohne alle zu lesen.
+ *
+ * Der Unique-Index braucht wie bei den Reaktionen KEINE `communityId`: beide
+ * Schlüssel sind Appwrite-Row-Ids und damit global eindeutig.
+ */
+export const DISCUSSION_LINKS_TABLE = 'discussion_links'
 
 export const POST_TYPES = ['post', 'poll', 'question'] as const
 export type PostType = (typeof POST_TYPES)[number]
@@ -247,6 +260,12 @@ export interface FeedPost extends CommunityPost {
    * gewöhnlicher Text. Vom Server aufgelöst, gebündelt für die ganze Seite.
    */
   mentions?: string[]
+  /**
+   * Die im Text genannten Themen-Verweise (`#<id>-<deko>`), aufgelöst und
+   * fertig für `MarkdownContent` (F57). Was hier fehlt — gelöscht, verborgen,
+   * fremde Community, erfundene Id —, bleibt gewöhnlicher Text.
+   */
+  topicLinks?: TopicLink[]
 }
 
 export interface PostListResponse {
@@ -445,6 +464,56 @@ export interface DiscussionReaction extends Models.Row {
   reaction: string
 }
 
+/**
+ * EIN Rückverweis-Eintrag (F57, Migration posts-020).
+ *
+ * `communityId` steht bewusst nicht im Typ — sie gehört der Datentür (Muster
+ * `DiscussionReaction`, `UserBadge`). Es gibt auch KEIN `authorId`: die Zeile
+ * trägt damit nichts Personenbezogenes und braucht keinen GDPR-Beitrag
+ * (Begründung im Kopf der Migration).
+ */
+export interface DiscussionLink extends Models.Row {
+  /** Row-Id des Beitrags, der den Verweis SCHREIBT. */
+  sourceId: string
+  /** Row-Id des Themas, auf das er ZEIGT. */
+  targetId: string
+}
+
+/**
+ * Ein im Beitragstext aufgelöster Themen-Verweis — die Form, die
+ * `MarkdownContent` erwartet (`core/shared/contentLinks.ts`).
+ *
+ * `token` ist WÖRTLICH die Schreibweise aus dem Text, `label` der HEUTIGE
+ * Titel des Ziels. Dass beide auseinanderfallen dürfen, ist Absicht: wer sein
+ * Thema umbenennt, ändert damit die Anzeige in jedem fremden Beitrag, der
+ * darauf zeigt — ein eingefrorener Linktext täte das nicht.
+ */
+export interface TopicLink {
+  token: string
+  href: string
+  label: string
+}
+
+/** Ein Thema, das auf das gerade gezeigte verweist („Verlinkt von …"). */
+export interface TopicBacklink {
+  $id: string
+  title: string
+  path: string
+}
+
+/** Antwort von GET /api/posts/discussions/backlinks. */
+export interface TopicBacklinksResponse {
+  backlinks: TopicBacklink[]
+}
+
+/** Ein Treffer der Themen-Suche im Editor-Menü (GET .../link-search). */
+export interface TopicLinkSuggestion {
+  /** Der einzufügende Token, fertig gebildet (`#<id>-<deko>`). */
+  id: string
+  /** Was im Menü steht — der Titel des Themas. */
+  label: string
+}
+
 export interface UserBadge extends Models.Row {
   userId: string
   badgeKey: string
@@ -492,6 +561,17 @@ export interface MemberCounters extends Models.Row {
    * Der einzige Verbraucher ist das Abzeichen `first-reaction`.
    */
   reactionsGiven: number
+  /**
+   * Gesetzte Themen-Verweise (F57, Migration posts-020) — der Zähler hinter
+   * „First Link".
+   *
+   * Gezählt werden NEU angelegte Rückverweis-Zeilen, nicht Tokens im Text:
+   * wer denselben Verweis beim Bearbeiten stehen lässt, zählt nicht erneut,
+   * und ein Verweis auf ein nicht existierendes Thema zählt nie. Startet für
+   * alle bei 0 und wird NIE geeicht (kein `authorId` an der Zeile — siehe
+   * Migration).
+   */
+  linksMade: number
   /**
    * Wurden die Startwerte schon aus den Aggregaten gesetzt?
    *

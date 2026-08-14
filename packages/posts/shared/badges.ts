@@ -9,7 +9,7 @@
  * ── DER ZUSCHNITT: NUR, WAS HEUTE MESSBAR IST ─────────────────────────────
  * Davids Vorgabe fuer Stufe 4 lautet „nur heute messbare Abzeichen … fehlende
  * kommen automatisch dazu, sobald ihre Funktion existiert". Der Katalog aus
- * § 3.6 hat 40+ Eintraege; hier stehen 27 (5 + 12 + 6 + 4 — ein Test haelt die
+ * § 3.6 hat 40+ Eintraege; hier stehen 28 (6 + 12 + 6 + 4 — ein Test haelt die
  * Zahl an den Katalog gebunden, damit dieser Satz nicht mit der Zeit unwahr
  * wird).
  * Was fehlt und WARUM, gehoert an diese Stelle und nicht in eine Notiz, sonst
@@ -20,7 +20,7 @@
  *    Enthusiast/Aficionado/Devotee (Besuchs-Streaks),
  *    Nice/Good/Great Share und Popular/Hot/Famous Link (Klick-Zaehlung).
  *    Neun Abzeichen, und sie kommen NICHT spaeter.
- *  - **Wartet auf seine Funktion** — First Emoji, First Quote, First Link,
+ *  - **Wartet auf seine Funktion** — First Emoji, First Quote,
  *    First Onebox, First Reply By Email, Wiki Editor,
  *    Certified/Licensed, Campaigner/Champion (Vertrauensstufe der
  *    Eingeladenen — Begruendung am Katalog-Eintrag `promoter`).
@@ -28,7 +28,8 @@
  *    seit F57 (2026-08-13) GEBAUT und steht als `first-reaction` im Katalog;
  *    „Promoter" ist seit F57 Mechanik 2 (2026-08-14) dazugekommen, und
  *    „Out of Love"/„Higher Love"/„Crazy in Love" seit Mechanik 3 (2026-08-14,
- *    Tages-Like-Limit) —
+ *    Tages-Like-Limit), und „First Link" seit der letzten Mechanik
+ *    (2026-08-14, Themen-Verlinkung mit Rueckverweis) —
  *    es ist zugleich die EINZIGE Stelle, an der Reaktionen ueberhaupt ein
  *    Abzeichen beruehren (Teil 4 Punkt 3: Abzeichen zaehlen ausschliesslich
  *    Upvotes, Reaktionen sind badge-neutral).
@@ -201,6 +202,14 @@ export interface BadgeRequirement {
    */
   likeLimitDays?: number
   /**
+   * Mindestens so viele WIRKSAME Themen-Verweise (F57, letzte Mechanik).
+   *
+   * „Wirksam" heisst: es ist eine Rueckverweis-Zeile entstanden, das Ziel
+   * existiert also. Der Zaehler zaehlt AB der Einfuehrung (Begruendung bei
+   * `seedValuesFrom` — die Zeile traegt bewusst kein `authorId`).
+   */
+  linksMade?: number
+  /**
    * Mindestens so viele Bearbeitungen EIGENER Inhalte.
    *
    * Der erste Wert, der NICHT aus einem Aggregat kommt, sondern aus dem
@@ -281,6 +290,17 @@ export const BADGE_CATALOG: readonly BadgeDefinition[] = [
    * und keine Vertrauensstufe.
    */
   { key: 'first-reaction', group: 'gettingStarted', awardedPer: 'once', requires: { reactionsGiven: 1 } },
+  /**
+   * „First Link" — der erste Verweis auf ein anderes Thema (F57, letzte
+   * Mechanik). EINMALIG wie die anderen ersten Male.
+   *
+   * Gezaehlt wird der WIRKSAME Verweis: `linksMade` steigt nur, wenn eine
+   * Rueckverweis-Zeile entsteht, also wenn das Ziel existiert, veroeffentlicht
+   * ist und zu dieser Community gehoert. Ein `#` plus zwanzig ausgedachte
+   * Zeichen bringt nichts — sonst waere das Abzeichen in zehn Sekunden ohne
+   * jeden Beitrag zu holen.
+   */
+  { key: 'first-link', group: 'gettingStarted', awardedPer: 'once', requires: { linksMade: 1 } },
 
   // ── Die Gemeinschaft: Zuspruch bekommen UND geben ─────────────────────
   // EINMALIG, und zwar alle: das sind BESTANDS-Schwellen ueber das ganze Konto
@@ -407,6 +427,8 @@ export interface BadgeFacts {
   invitesAccepted: number
   /** Tage, an denen das Tages-Like-Limit erreicht war (F57 Mechanik 3). */
   likeLimitDays: number
+  /** Gesetzte Themen-Verweise, die ein echtes Ziel hatten (F57). */
+  linksMade: number
   /** Schwelle → Anzahl eigener Inhalte, die sie erreichen. */
   likedItems: Record<number, number>
   likedTopics: Record<number, number>
@@ -436,6 +458,7 @@ export function emptyBadgeFacts(): BadgeFacts {
     reactionsGiven: 0,
     invitesAccepted: 0,
     likeLimitDays: 0,
+    linksMade: 0,
     likedItems: {},
     likedTopics: {},
     likedReplies: {},
@@ -537,6 +560,7 @@ export function badgeEarned(badge: BadgeDefinition, facts: BadgeFacts): boolean 
   if (requires.edits !== undefined && facts.edits < requires.edits) return false
   if (requires.invitesAccepted !== undefined && facts.invitesAccepted < requires.invitesAccepted) return false
   if (requires.likeLimitDays !== undefined && facts.likeLimitDays < requires.likeLimitDays) return false
+  if (requires.linksMade !== undefined && facts.linksMade < requires.linksMade) return false
   if (!meetsLikedItems(facts.likedItems, requires.likedItems)) return false
   if (!meetsLikedItems(facts.likedTopics, requires.likedTopics)) return false
   if (!meetsLikedItems(facts.likedReplies, requires.likedReplies)) return false
@@ -591,6 +615,7 @@ export function badgeProgress(badge: BadgeDefinition, facts: BadgeFacts): BadgeP
   if (badge.requires.reactionsGiven !== undefined) countable.push({ current: facts.reactionsGiven, target: badge.requires.reactionsGiven })
   if (badge.requires.invitesAccepted !== undefined) countable.push({ current: facts.invitesAccepted, target: badge.requires.invitesAccepted })
   if (badge.requires.likeLimitDays !== undefined) countable.push({ current: facts.likeLimitDays, target: badge.requires.likeLimitDays })
+  if (badge.requires.linksMade !== undefined) countable.push({ current: facts.linksMade, target: badge.requires.linksMade })
   if (badge.requires.likedItems) countable.push({ current: facts.likedItems[badge.requires.likedItems.threshold] ?? 0, target: badge.requires.likedItems.count })
   if (badge.requires.likedTopics) countable.push({ current: facts.likedTopics[badge.requires.likedTopics.threshold] ?? 0, target: badge.requires.likedTopics.count })
   if (badge.requires.likedReplies) countable.push({ current: facts.likedReplies[badge.requires.likedReplies.threshold] ?? 0, target: badge.requires.likedReplies.count })
@@ -670,13 +695,15 @@ export function contentBadgeCrossings(
  * Nur dann darf die Zaehl-Buchung ein Abzeichen verleihen — sie kennt weder das
  * Profil noch die Meldungen noch die Verteilungs-Aggregate, und ein „vielleicht
  * erfuellt" waere ein Abzeichen zu viel. Heute trifft das auf `likesGiven`,
- * `edits`, `reactionsGiven`, `invitesAccepted` und `likeLimitDays` zu; kaeme
+ * `edits`, `reactionsGiven`, `invitesAccepted`, `likeLimitDays` und
+ * `linksMade` zu; kaeme
  * ein Zaehler dazu, muss dieser Filter mitwachsen.
  */
 export function badgeFollowsFromCounters(badge: BadgeDefinition): boolean {
   const { requires } = badge
   if (requires.likesGiven === undefined && requires.edits === undefined && requires.reactionsGiven === undefined
-    && requires.invitesAccepted === undefined && requires.likeLimitDays === undefined) return false
+    && requires.invitesAccepted === undefined && requires.likeLimitDays === undefined
+    && requires.linksMade === undefined) return false
   return !requires.profileComplete
     && requires.flagsRaised === undefined
     && !requires.likedItems
@@ -739,6 +766,8 @@ export interface CounterBadgeFacts {
    * „Higher Love" und „Crazy in Love".
    */
   likeLimitDays: number
+  /** Wirksame Themen-Verweise (F57, letzte Mechanik) — traegt allein `first-link`. */
+  linksMade: number
 }
 
 /** PURE: Welche Abzeichen folgen bei diesem Stand allein aus den Zaehlern? */
@@ -752,7 +781,8 @@ export function counterBadgeKeysFor(
       && (badge.requires.edits === undefined || values.edits >= badge.requires.edits)
       && (badge.requires.reactionsGiven === undefined || values.reactionsGiven >= badge.requires.reactionsGiven)
       && (badge.requires.invitesAccepted === undefined || values.invitesAccepted >= badge.requires.invitesAccepted)
-      && (badge.requires.likeLimitDays === undefined || values.likeLimitDays >= badge.requires.likeLimitDays))
+      && (badge.requires.likeLimitDays === undefined || values.likeLimitDays >= badge.requires.likeLimitDays)
+      && (badge.requires.linksMade === undefined || values.linksMade >= badge.requires.linksMade))
     .map(badge => badge.key)
 }
 

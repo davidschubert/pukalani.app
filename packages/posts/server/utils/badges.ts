@@ -393,5 +393,6 @@ function counterFactsOf(values: MemberCounterValues): CounterBadgeFacts {
     reactionsGiven: values.reactionsGiven,
     invitesAccepted: values.invitesAccepted,
     likeLimitDays: values.likeLimitDays,
+    linksMade: values.linksMade,
   }
 }
