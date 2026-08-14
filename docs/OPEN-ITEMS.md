@@ -25,7 +25,7 @@ demo-Ausbau, comments in den Pool. Entscheidungen: DECISION-LOG 2026-08-11.
 
 | # | Was (einfach erklärt) | Prio | Aufwand | Braucht David? | Details |
 | --- | --- | --- | --- | --- | --- |
-| 2 · A1 | **Echte Rechtstexte** für Impressum, Datenschutz und AGB. **pukalani.studio ist fertig** (2026-08-12): Impressum + Datenschutz in de/en veröffentlicht, inkl. **ladungsfähiger Anschrift**; die Texte nennen nur Belegbares, Erfundenes wurde weggelassen. Dort noch offen und beim Anwalt: die Prüfung zu **Art. 27 DSGVO** (Vertreter in der Union — Sitz ausserhalb der EU bei DACH-Ansprache) samt Drittland-Grundlage, dazu die Angabe zur Verbraucherstreitbeilegung. Für **pukalani.app** stehen die Texte weiter aus. **Direkt danach `pukalani.auth.termsUrl` in `apps/platform` setzen** — die AGB-Checkbox fehlt heute genau dort, wo Kunden sich registrieren (Trichter M9). Schaltet Punkt 3 frei. | Hoch | S — Anwalt lesen lassen | Ja: nur David (ggf. Anwalt) | [Agenda für den Anwaltstermin](#a1-anwalt) |
+| 2 · A1 | **Echte Rechtstexte** für Impressum, Datenschutz und AGB. **pukalani.studio ist fertig** (2026-08-12): Impressum + Datenschutz in de/en veröffentlicht, inkl. **ladungsfähiger Anschrift**; die Texte nennen nur Belegbares, Erfundenes wurde weggelassen. Dort noch offen und beim Anwalt: die Prüfung zu **Art. 27 DSGVO** (Vertreter in der Union — Sitz ausserhalb der EU bei DACH-Ansprache) samt Drittland-Grundlage, dazu die Angabe zur Verbraucherstreitbeilegung. Für **pukalani.app** stehen die Texte weiter aus. **Direkt danach `pukalani.auth.termsUrl` in `apps/platform` setzen** — die AGB-Checkbox fehlt heute genau dort, wo Kunden sich registrieren (Trichter M9). Schaltet Punkt 3 frei. | Hoch | S — Anwalt lesen lassen | Ja: nur David (ggf. Anwalt) | [Agenda: Studio](#a1-anwalt) · [Agenda: Plattform](#a1-plattform) |
 | 3 · A2 | **Stripe auf echtes Geld umstellen — über die F55-Seite.** Vorstufe A2a komplett grün, F55 selbst erledigt (beide 2026-08-08). Bei David bleiben: Bank-Aktivierung, Steuer-Registrierung, Live-Key ROTIERT eintragen (der erste ist teil-geleakt und rotiert), Portal-Konfiguration; alles andere klickt die F55-Seite. Braucht Punkt 2 (A1). | Hoch | S | Ja: Bank, Konto, Portal | [STRIPE-GO-LIVE-RUNBOOK.md](runbooks/STRIPE-GO-LIVE-RUNBOOK.md) |
 
 ## ⏸️ Geparkt / wartet — in Arbeitsreihenfolge
@@ -218,11 +218,90 @@ Abschnitt „Zugriff aus dem Ausland" · Verbraucherstreitbeilegung und
 USt-IdNr. → je ein Abschnitt im Impressum de+en. Rechnen: rund eine halbe
 Stunde, danach live nachgemessen.
 
-**Getrennt davon — pukalani.app.** Die Plattform ist ein anderer Fall
-(Konten, Zahlungen, Kunden-Communities): dort geht es um die Rolle als
-Auftragsverarbeiter, AV-Verträge mit Kunden, AGB und Widerruf. Sinnvoll im
-selben Termin, aber als eigener Block; danach `pukalani.auth.termsUrl` in
-`apps/platform` setzen. Schaltet A2 frei.
+<a id="a1-plattform"></a>
+
+**A1b — pukalani.app: eigener Block im selben Termin.** Die Plattform ist ein
+anderer Fall als die Studio-Site: dort sind es Davids eigene Daten, hier sind
+es die Daten FREMDER Leute in fremden Communities, dazu Geld und
+nutzergenerierte Inhalte. Stand: Impressum, Datenschutz und AGB existieren als
+Platzhalter mit sichtbarem Entwurfs-Hinweis und `noindex` — ehrlich, aber leer;
+auf Mandanten- und Kontroll-Hosts gibt es gar keine Rechtsseiten (der Fuß
+verlinkt auf `pukalani.app`).
+
+**Die Kernfrage, an der alles hängt: Auftragsverarbeiter oder gemeinsam
+verantwortlich?** Das eigene Strategiepapier hält beides für möglich und
+verlangt eine Einzelfallprüfung. Vier gebaute Tatsachen gehören dem Anwalt
+dafür auf den Tisch, weil sie gegen die reine Auftragsverarbeitung sprechen
+könnten: (a) **ein Konto gilt plattformweit** — alle Pool-Communities und alle
+Nutzer liegen in EINEM Appwrite-Projekt, man registriert sich bei Pukalani,
+nicht bei der Community; (b) der Betreiber hat einen **protokollierten
+Break-Glass-Zugriff** auf Kunden-Communities; (c) der Betreiber kann eine
+Community **sperren** (`suspension: 'abuse'` ⇒ Host 404); (d) der
+**Auto-Hide-Schwellwert** (3 offene Meldungen) ist vom Betreiber gesetzt, nicht
+vom Owner. Von der Antwort hängen AVV, Rollen-Formulierung in ALLEN Texten und
+die Kunden-Vorlagen im `pages`-Layer ab.
+
+**Weitere Fragen, beantwortbar formuliert:**
+
+1. **Anbieter-Identität.** Ist Anbieter von `pukalani.app` dieselbe Person und
+   Rechtsform wie bei der Studio-Site (Einzelunternehmen, Sitz USA)? Falls ja,
+   gelten die fünf Studio-Fragen (Art. 27, Drittland, § 5 DDG, VSBG, USt) hier
+   **erneut und schärfer**, weil es um fremde Nutzerdaten geht.
+2. **Verbraucher oder Unternehmer?** Pläne 29 €/149 € im Monat, Brutto-Preise
+   „inkl. 19 % MwSt.", Selbstbedienung ohne USt-IdNr.-Abfrage. Richten sie sich
+   auch an Verbraucher? Falls ja: **Widerrufsrecht** (im Code und in allen
+   Texten bisher nirgends behandelt), Button-Lösung, Preisangaben.
+3. **Umsatzsteuer.** US-Anbieter verkauft digital an EU-Kunden, Stripe Tax ist
+   an, Rechnungsadresse Pflicht, USt-IdNr. wird **nicht** erfasst, OSS ist ein
+   manueller Schritt. Was ist nötig — Reverse Charge, OSS, USt-IdNr.-Erfassung?
+4. **DSA-Pflichten.** Die Plattform hostet fremde Inhalte und hat ein
+   Meldesystem — aber **kein Beschwerdeverfahren** gegen Moderations-
+   entscheidungen, **keine Benachrichtigung des Autors** beim Ausblenden und
+   **keinen Transparenzbericht**. Frage: Welche Pflichten treffen einen
+   Hosting-Dienst dieser Größe (Art. 16/17/20 DSA), und was davon muss vor dem
+   Go-Live gebaut sein?
+5. **Mindestalter.** Es gibt keine Altersgrenze, keine Abfrage, keinen Hinweis.
+   Ab welchem Alter dürfen Konten entstehen (Art. 8 DSGVO), und wie ist das
+   nachzuweisen?
+6. **Aufbewahrung.** `audit_logs` enthalten **IP-Adressen ohne Löschfrist**
+   (bei Kontolöschung wird pseudonymisiert, nicht gelöscht); Server-Protokolle
+   haben kein logrotate. Welche Fristen sind vertretbar, was muss in die Texte?
+
+**Was danach GEBAUT/GESCHRIEBEN werden muss — unabhängig vom Ausgang:**
+ein **AVV/DPA für Kunden** (existiert nicht, ist aber auf `/gdpr` öffentlich
+zugesagt: „sprich uns an, wir klären das vor dem Start deiner Community" — ein
+Versprechen ohne Deckung), eine **Subprozessoren-Liste** (nach dieser Erhebung
+mindestens Hetzner, ploi.io, Cloudflare, Resend, Stripe, OpenRouter,
+UptimeRobot), die drei echten Texte, ein Zustimmungsschritt im Onboarding und
+`pukalani.auth.termsUrl` in `apps/platform` (fehlt genau dort, wo Kunden sich
+registrieren).
+
+**Faktenblatt zum Mitnehmen** (alles am Code erhoben, Stand 2026-08-14):
+Konten mit E-Mail/Name/Bio/Avatar in **einem** Appwrite-Projekt · Inhalte immer
+mit Autor-Id UND Autorname · private Nachrichten (bei Meldung wird eine
+Beweiskopie 90 Tage eingefroren) · Meldungen, zweiphasiges Ausblenden statt
+Löschen, Auto-Hide ab 3 Meldungen (nur Kommentare, nicht KI-basiert) ·
+KI-Assist ist **rein beratend** und bekommt Kommentar-/Beitragstexte samt
+Autorname (OpenRouter, in `apps/platform` freigeschaltet) · Zahlungen über
+gehostetes Stripe Checkout, **Vertragspartner ist die Community, nicht das
+Konto**, Kündigung/Rechnungen laufen über das Stripe-Portal, 14 Tage Testphase
+ohne Zahlungsdaten, danach nur-lesend statt Löschung · Stripe Connect ist
+**nicht** gebaut · Server bei Hetzner in Deutschland, Appwrite self-hosted auf
+eigenem Server, Backups 14 Tage lokal + offsite auf eine Hetzner Storage Box ·
+Cookies: Session (nur eingeloggt), Sprache, Darstellung, aufgeklappte Threads —
+**kein Consent-Banner aktiv** · Google-Login gebaut, aber nirgends
+eingeschaltet · Gast-Kommentare in `apps/platform` bewusst aus.
+
+**Drei Stellen, an denen die AUSSAGE dem CODE widerspricht — die gehören nicht
+dem Anwalt, sondern mir** (Reihenfolge = Dringlichkeit): (1) „Plausible
+speichert keine personenbezogenen Daten" steht in Kunden-Vorlage,
+Entwurfs-Datenschutzseite und `/gdpr` — der Analytics-Proxy leitet aber **IP
+und User-Agent** an die Plausible-Instanz weiter; die Aussage beschreibt das
+Cookie-Verhalten, nicht die Übermittlung. (2) `/gdpr` wirbt mit „Community
+starten – kostenlos", seit F49 ist eine Community ohne Abo nach 14 Tagen
+nur-lesend (die Preisseite formuliert es korrekt). (3) Die Hilfeseite führt
+Basic weiter als Plan mit „0 €", die Preisseite hat ihn entfernt.
+Schaltet A2 frei.
 
 <a id="a2a"></a>
 
