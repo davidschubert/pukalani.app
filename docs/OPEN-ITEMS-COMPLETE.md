@@ -30,6 +30,85 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### U15 Teil 4 — Zwei-Faktor: TOTP als zweiter Schlüssel fürs Konto ✅ 2026-08-13
+
+Konto → Sicherheit bekommt eine Karte „Zwei-Faktor" (aus → einrichten → Codes
+notieren → an), die Anmeldung einen zweiten Schritt (Code aus der App **oder**
+Wiederherstellungs-Code). Alles läuft server-seitig über Appwrites MFA und den
+Session-Client — kein eigener Code-Speicher, keine eigene Krypto, der Browser
+spricht weiterhin nie mit Appwrite. Fünf Routen unter `/api/auth/mfa`
+(setup · verify · challenge · disable · status), Regeln pur in
+`core/shared/mfa.ts`, Drossel auf challenge/verify/disable.
+
+Gebaut wurde gegen das GEMESSENE Verhalten von Appwrite 1.9.6, nicht gegen die
+Doku — vier Punkte, an denen beides auseinanderfällt:
+
+- **Der Login mit aktivem MFA ist ein ERFOLG.** `createEmailPasswordSession`
+  liefert eine gültige Session mit `factors: ['password']`; das Cookie wird
+  gesetzt. Der zweite Faktor fehlt nur noch, und Appwrite sagt das auf jedem
+  Konto-Aufruf mit `401 user_more_factors_required`. Ob er fällig ist, fragen
+  wir deshalb Appwrite (ein `account.get()` mit der frischen Session), statt
+  `minimumFactors` nachzubauen — die Rechnung hängt auch an verifizierter
+  Mail/Telefon und wäre nachgebaut sofort falsch.
+- **`updateMFAChallenge` gibt eine Session mit LEEREM `secret` zurück.** Wer
+  daraufhin das Cookie neu setzt, meldet den Nutzer im Moment des Erfolgs ab.
+- **Ein falscher Code verbraucht die Challenge nicht** (Appwrite löscht sie nur
+  bei Erfolg), und sein `abuse-limit` hängt am `challengeId` — wer je Versuch
+  eine frische Challenge anlegt, läuft daran vorbei. Die wirksame Bremse ist
+  unsere Drossel.
+- **Abschalten verlangt bei Appwrite GAR NICHTS** — `updateMFA(false)` und
+  `deleteMFAAuthenticator` gehen mit nichts als einer Session durch. Die
+  Bestätigung ist unsere und ist bewusst ein gültiger zweiter Faktor statt des
+  Passworts: wer den Zweitfaktor entfernt, soll belegen, dass er ihn noch hat
+  (Wiederherstellungs-Code zählt, sonst wäre ein verlorenes Telefon eine
+  Sackgasse).
+
+**OAuth bleibt außen vor, und zwar von Appwrite so gewollt.** Eine
+OAuth2-Session bekommt `'factors' => [TYPE::EMAIL, 'oauth2']`, im Quelltext
+kommentiert mit „include a special oauth2 factor to bypass MFA checks"
+(`app/controllers/api/account.php:1936`). Sie zählt damit schon zwei Faktoren
+und wird nie zur Challenge geschickt. Wer den Zweitfaktor einschaltet und sich
+danach mit Google anmeldet, kommt ohne Code hinein — **eine Entscheidung für
+David** (s. OPEN-ITEMS), kein Fehler unseres Baus.
+
+QR-Bild ohne neues Paket: es rendert Appwrites Avatars-API und reist als
+`data:`-URI in der setup-Antwort mit. Eine eigene Bild-Route hätte die
+otpauth-URL — und damit das Geheimnis — in eine URL gelegt (Verlauf, Proxy-
+Logs, Referer). Fällt es aus, bleiben Geheimnis und Link im Klartext bedienbar.
+
+Beweis `packages/core/scripts/verify-mfa.mjs` **39/39**, zweimal hintereinander;
+Unit-Tests `packages/core/tests/mfa.test.ts`; E2E `24/24` als Gegenprobe, dass
+ein Login OHNE Zwei-Faktor unverändert läuft.
+
+**Gelernt:** Der Wiederherstellungs-Code war mit dem offiziellen SDK **komplett
+tot**, und der Fehler sah exakt wie ein Tippfehler des Nutzers aus.
+`Auth/MFA/Type::RECOVERY_CODE` ist `'recoveryCode'` (camelCase), jedes SDK-Enum
+sendet `'recoverycode'`; die `WhiteList` beim Anlegen prüft case-INsensitiv und
+speichert die Kleinschreibung, `Challenges/Update.php` vergleicht danach mit
+`===` — der Zweig fällt in `default => false` und antwortet
+`401 user_invalid_token`, also ununterscheidbar von „Code falsch". Gefunden
+wurde das erst, als die naheliegenden Verdächtigen (Verschlüsselung der Spalte,
+Cache, halbe Session) alle widerlegt waren: `getMFARecoveryCodes` gab dieselben
+Codes im Klartext zurück, die die Challenge ablehnte. Die Regel daraus: **wenn
+Lesen und Prüfen desselben Werts auseinanderfallen, liegt der Fehler im
+Vergleich, nicht in den Daten** — und der Quelltext im Container (`docker exec
+… /usr/src/code/…`) beantwortet solche Fragen in Minuten, wo Messen von außen
+nur immer neue Hypothesen erzeugt. Der A/B-Beleg auf demselben Konto:
+`factor="recoverycode"` → abgelehnt, `factor="recoveryCode"` → akzeptiert.
+Abschnitt 6 des Beweises prüft weiterhin BEIDE Schreibweisen und fällt, sobald
+Appwrite repariert — dann darf die Sonderbehandlung weg.
+
+**Zweitens gelernt (am eigenen Beweis):** Ein Beweis, der beim zweiten Lauf rot
+wird, misst sich selbst. Feste Client-IPs erbten das 60-Sekunden-Budget der
+Drossel aus dem vorigen Lauf (429 schon beim ERSTEN Versuch), und Appwrites
+Challenge-Deckel pro `userId` (10) ließ zwei Abschnitte an ihrem eigenen
+Vorlauf scheitern statt an ihrer Aussage. Jetzt: frische IP je Abschnitt,
+eigenes Konto je Abschnitt, der es braucht. Und eine Prüfung stand als
+`check(..., true)` da und konnte nie fallen — sie belegt jetzt wirklich, dass
+`mfa_invalid_code` und `rate_limited` als Grund mitreisen.
+
+---
+
 ### U15 Teil 3 — Weiterleitungen: alte Adressen führen wieder wohin ✅ 2026-08-13
 
 Owner legt Redirects an (`/dashboard/community/redirects`, Capability
