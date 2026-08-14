@@ -17,6 +17,12 @@ export type AuthAuditAction =
   | 'user.recovery_requested'
   | 'user.email_verified'
   | 'user.profile_updated'
+  // Zwei-Faktor (U15 Teil 4). Der FEHLVERSUCH gehört mit ins Protokoll: er ist
+  // das einzige Signal, an dem man sieht, dass jemand mit gültigem Passwort
+  // vor dem zweiten Faktor steht und rät.
+  | 'user.mfa_enabled'
+  | 'user.mfa_disabled'
+  | 'user.mfa_challenge_failed'
 
 /**
  * Schreibt ein Auth-Ereignis ins Aktivitätsprotokoll (audit_logs). Bewusst

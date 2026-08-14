@@ -57,6 +57,21 @@ const FAILURE_LIMITED = new Set([
   // Site-Handoff (O6): dito — der Token IST der Beweis, also nur Fehlversuche
   // zählen (ein erfolgreicher Sprung in die eigene Community kostet nichts).
   'GET /api/auth/site-session',
+  // Zwei-Faktor (U15 Teil 4) — die drei Stellen, an denen ein CODE geraten
+  // werden kann. Hier zählen bewusst nur FEHLversuche: ein TOTP-Code lebt 30 s,
+  // wer sich vertippt und sofort korrigiert, darf nicht am eigenen Budget
+  // scheitern. Fünf Fehlversuche je Minute und IP reichen für Menschen bequem
+  // und machen Raten aussichtslos (6-stellig ⇒ 10^6 Möglichkeiten).
+  //
+  // Diese Drossel ist NICHT bloß Gürtel zum Hosenträger: ein falscher Code
+  // VERBRAUCHT Appwrites Challenge nicht (Challenges/Update.php löscht sie nur
+  // bei Erfolg), dieselbe Challenge lässt sich also weiter beschicken. Appwrites
+  // eigenes `abuse-limit` von 10 hängt zudem am challengeId bzw. an der userId —
+  // wer je Versuch eine FRISCHE Challenge anlegt, läuft daran vorbei. Der
+  // wirksame Deckel ist deshalb dieser hier.
+  'POST /api/auth/mfa/challenge',
+  'POST /api/auth/mfa/verify',
+  'POST /api/auth/mfa/disable',
 ])
 // Schreib-Routen mit teils dynamischen Segmenten ([id]) → Regex + stabiler
 // Bucket-Name, damit z.B. Vote-Spam über viele Kommentar-IDs EIN Budget teilt
@@ -80,6 +95,12 @@ const WRITE_LIMITED: { re: RegExp, bucket: string, max?: number }[] = [
   // Writes/JWTs erzeugen lassen. heartbeat+leave teilen EIN Budget.
   { re: /^POST \/api\/presence\/(heartbeat|leave)$/, bucket: 'presence:write', max: PRESENCE_MAX },
   { re: /^GET \/api\/auth\/realtime-token$/, bucket: 'auth:jwt', max: TOKEN_MAX },
+  // Zwei-Faktor einrichten (U15 Teil 4): jeder Aufruf legt bei Appwrite einen
+  // neuen TOTP-Authenticator an (der vorherige wird still ersetzt) und lässt
+  // zusätzlich ein QR-Bild rendern. Session-gated, also kein offener Vektor —
+  // aber ein Skript soll daraus keine Schleife machen. Ein Mensch richtet
+  // einmal ein.
+  { re: /^POST \/api\/auth\/mfa\/setup$/, bucket: 'auth:mfa-setup', max: 10 },
   // Social-Login (U14): zwei GETs, die beide ÜBER DEN ADMIN-CLIENT schreiben —
   // der Start prägt einen OAuth-Token bei Appwrite, die Rückkehr eine SESSION.
   // Beide sind session-los erreichbar, Appwrites eigene Bremse greift wegen des

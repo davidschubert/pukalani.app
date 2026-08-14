@@ -157,3 +157,28 @@ export type RegisterInput = z.infer<typeof registerSchema>
 export type RegisterFormInput = z.infer<ReturnType<typeof createRegisterFormSchema>>
 export type RecoveryInput = z.infer<typeof recoverySchema>
 export type ResetFormInput = z.infer<ReturnType<typeof createResetSchema>>
+
+/**
+ * Zwei-Faktor (U15 Teil 4). Der Code ist ENTWEDER ein sechsstelliger
+ * TOTP-Code ODER ein zehnstelliger Wiederherstellungs-Code — welcher, sagt
+ * `mode`. Geputzt wird vorher (normalizeMfaCode), damit eingetippte
+ * Leerzeichen/Bindestriche nicht als Tippfehler durchgehen.
+ */
+export const mfaChallengeSchema = z.object({
+  mode: z.enum(['totp', 'recovery']),
+  code: z.string().transform(value => value.replace(/[\s-]/g, '')),
+}).refine(
+  data => data.mode === 'totp' ? /^\d{6}$/.test(data.code) : /^[a-zA-Z0-9]{10}$/.test(data.code),
+  { message: 'validation.mfaCodeInvalid', path: ['code'] },
+)
+
+/** Bestätigung beim Einrichten: immer TOTP (der Wiederherstellungs-Code entsteht erst danach). */
+export const mfaVerifySchema = z.object({
+  code: z.string().transform(value => value.replace(/[\s-]/g, '')).refine(
+    value => /^\d{6}$/.test(value),
+    { message: 'validation.mfaCodeInvalid' },
+  ),
+})
+
+export type MfaChallengeInput = z.infer<typeof mfaChallengeSchema>
+export type MfaVerifyInput = z.infer<typeof mfaVerifySchema>

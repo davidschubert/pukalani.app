@@ -1,4 +1,4 @@
-import { Client, Account, TablesDB, Health, Storage, Users, Presences } from 'node-appwrite'
+import { Client, Account, TablesDB, Health, Storage, Users, Presences, Avatars } from 'node-appwrite'
 import type { H3Event } from 'h3'
 
 /**
@@ -115,7 +115,7 @@ export function createAdminClient(event?: H3Event) {
  * Pro Request NEU erstellen, NIE über Requests teilen — sonst leakt
  * eine User-Session in fremde Responses.
  */
-export function createSessionClient(event: H3Event) {
+export function createSessionClient(event: H3Event, secret?: string) {
   const config = useRuntimeConfig(event)
   const client = new Client()
     .setEndpoint(config.public.appwriteEndpoint)
@@ -123,7 +123,12 @@ export function createSessionClient(event: H3Event) {
     // Session-Cookie-Name zieht über sessionCookieName() automatisch mit.
     .setProject(resolvedProjectId(event))
 
-  const session = getCookie(event, sessionCookieName(event))
+  // `secret` ist die Ausnahme für eine Session, die es im REQUEST noch nicht
+  // gibt: der Login setzt sein Cookie auf die ANTWORT, `getCookie` liest aber
+  // die Anfrage — ohne diesen Weg könnte die Login-Route ihre eigene frische
+  // Session nicht befragen („braucht die noch einen zweiten Faktor?", U15
+  // Teil 4). Sonst gilt unverändert: Cookie, und pro Request neu.
+  const session = secret ?? getCookie(event, sessionCookieName(event))
   if (session) client.setSession(session)
 
   forwardClientContext(client, event)
@@ -132,5 +137,8 @@ export function createSessionClient(event: H3Event) {
     get account() { return new Account(client) },
     get tablesDB() { return new TablesDB(client) },
     get storage() { return new Storage(client) },
+    // Avatars: bislang nur fürs QR-Bild der Zwei-Faktor-Einrichtung (U15
+    // Teil 4). Bewusst am SESSION-Client — der Aufruf gehört dem Nutzer.
+    get avatars() { return new Avatars(client) },
   }
 }
