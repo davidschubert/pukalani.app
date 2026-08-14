@@ -135,6 +135,14 @@ const WRITE_LIMITED: { re: RegExp, bucket: string, max?: number }[] = [
   // damit ein Owner, der an seiner Beschreibung feilt, sich nicht sein
   // Menü-Budget verbraucht.
   { re: /^PATCH \/api\/pages\/seo$/, bucket: 'pages:seo' },
+  // Die Weiterleitungen speichern (U15 Teil 3): dieselbe Sorte Formular wie die
+  // zwei Zeilen darüber — owner-/admin-gated, aber eine Tabelle mit
+  // Hinzufügen und Löschen je Zeile lädt zum Speichern nach jedem Handgriff
+  // ein. Eigener Bucket, damit ein Owner, der zwanzig alte Adressen einträgt,
+  // sich nicht sein Menü- oder Sucheintrags-Budget verbraucht. Der
+  // Standard-Schreibdeckel (60/min) liegt weit über jedem Menschen und stoppt
+  // genau das Skript, das die Zeile in einer Schleife umschreibt.
+  { re: /^PATCH \/api\/pages\/redirects$/, bucket: 'pages:redirects' },
   // Öffentliche Kommentar-Lese-Routen (Embed macht sie zur beworbenen Fläche
   // auf fremden Seiten) — eigener Read-Bucket statt „GET ist frei".
   // count (E3) ist CORS-offen und microcached, teilt denselben Bucket.
