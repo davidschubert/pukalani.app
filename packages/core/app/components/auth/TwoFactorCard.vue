@@ -28,7 +28,11 @@ const codesNoted = ref(false)
 
 const disableMode = ref<'totp' | 'recovery'>('totp')
 
-const { data: status, refresh } = await useFetch('/api/auth/mfa/status')
+// BEWUSST ohne top-level await: das machte die Karte zu einer async-Komponente
+// und haengte das Rendern der Seite an einen Appwrite-Aufruf. Die Vorlagen
+// unten vertragen `status === null` (der Zustand heisst dann „aus"), und der
+// Nachtrag kommt still an.
+const { data: status, refresh } = useFetch('/api/auth/mfa/status')
 const enabled = computed(() => status.value?.enabled === true)
 
 function reset() {
