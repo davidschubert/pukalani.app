@@ -90,6 +90,24 @@ export const USER_COUNTER_KINDS = [
    * Kontingent-Mechanik direkt zuwider.
    */
   'invitesAccepted',
+  /**
+   * TAGE, AN DENEN DAS LIKE-LIMIT ERREICHT WURDE (F57 Mechanik 3) — der
+   * Zähler hinter „Out of Love" / „Higher Love" / „Crazy in Love" (1 / 5 / 20
+   * Tage).
+   *
+   * DIE EINZIGE ART, DIE KEINE HANDLUNG ZÄHLT, SONDERN EINEN ZUSTAND: gemeldet
+   * wird nicht „hat geliked", sondern „hat heute alles verbraucht". Genau
+   * einmal je Tag — die Meldung entsteht an dem einen Hochzählen, das den
+   * Stand auf das Limit setzt (`crossesLikeLimit`), nicht an den Versuchen
+   * danach. Ein Zähler auf die ABGEWIESENEN Versuche wäre etwas ganz anderes
+   * (er zählte Ungeduld) und ergäbe an einem einzigen Abend „20 Tage".
+   *
+   * Wie `edits` und `invitesAccepted` rein MITSCHREIBEND: es gibt kein
+   * Aggregat, aus dem sich vergangene Tage nachrechnen ließen — ein Tag, an
+   * dem das Limit erreicht war, hinterlässt in keiner Tabelle eine Spur außer
+   * dieser Zahl. Das Abzeichen zählt deshalb AB JETZT.
+   */
+  'likeLimitDays',
 ] as const
 
 export type UserCounterKind = (typeof USER_COUNTER_KINDS)[number]
