@@ -10,15 +10,15 @@ alle acht Punkte aus Teil 5 sind durch** — Jahrestag, Regeln-Vorlage,
 Hilfe-Umbenennung, `posts.editedAt`, Mehrfach-Abzeichen + Benachrichtigung,
 Vertrauensstufen und Private Nachrichten (eigener Layer `packages/messages`).
 
-**Die Datei bleibt trotzdem in `docs/plans/`**, weil **Teil 4** vier Dinge
-zusagt, die es im Code nirgends gibt:
+**Teil 4 ist seit dem 2026-08-14 VOLLSTÄNDIG GEBAUT.** Die vier Mechaniken —
+Emoji-Reaktionen, Einladungen durch Mitglieder, Tages-Limit für Likes und
+zuletzt die **Themen-Verlinkung mit Rückverweis** — stehen samt der Abzeichen,
+die daran hängen (`first-reaction`, `promoter`, `out-of-love` …, `first-link`).
 
-- **Themen-Verlinkung mit Rückverweis** (das Erwähnungs-Menü sucht Personen,
-  nicht Themen),
-- **Einladungen durch Mitglieder**,
-- **Tages-Limit für Likes**
-
-— samt der Abzeichen, die daran hängen (`promoter`, `out-of-love` …).
+**Die Datei bleibt trotzdem in `docs/plans/`**, weil zwei Dinge offen sind:
+`Campaigner`/`Champion` (sie hängen an der Vertrauensstufe der EINGELADENEN und
+brauchen einen eigenen Verleihungs-Pfad) und Davids Frage, ob Reaktionen auch
+auf ANTWORTEN gehören.
 **Emoji-Reaktionen sind seit dem 2026-08-13 GEBAUT** (Teil 5, „Reaktionen");
 `first-reaction` steht im Katalog. Geführt werden sie als **offener Punkt F57** in
 [OPEN-ITEMS.md](../OPEN-ITEMS.md); dort und nur dort wird darüber entschieden.
@@ -310,7 +310,7 @@ Entscheidung Nr. 4 in 3.7 — ohne sie ist keine der Like-Zeilen baubar.
 | First Emoji | erstes Emoji im Beitrag **[fehlt: Emoji-Picker im Editor]** |
 | First Flag | erste Meldung (Melde-Weg existiert) |
 | First Like | erstes vergebenes Like |
-| First Link | erster Link auf ein anderes Topic **[fehlt: Topic-Verlinkung mit Rückverweisen]** |
+| First Link | erster Link auf ein anderes Topic — **GEBAUT** (2026-08-14, F57 letzte Mechanik; Zähler `member_counters.linksMade`, gezählt wird der WIRKSAME Verweis) |
 | First Mention | erste @-Erwähnung (existiert: comments/server/utils/mentions.ts) |
 | First Onebox | erste automatische Link-Vorschau **[fehlt: Onebox]** |
 | First Quote | erstes Zitat in einer Antwort **[fehlt: Zitier-Funktion]** |
@@ -434,6 +434,8 @@ nicht „später".
 **Schreib-Werkzeuge — gebaut wird (alles über die Nuxt-UI-Editor-Bausteine,
 nichts selbst gebaut):** Zitieren (UEditor Blockquote) · Emoji-Auswahl
 (UEditorEmojiMenu) · Themen verlinken mit Rückverweis (UEditorSuggestionMenu).
+**Alle drei GEBAUT** — Zitat und Emoji seit F48 (2026-08-04), die
+Themen-Verlinkung seit dem 2026-08-14 (Einzelheiten in Teil 5).
 **Onebox NICHT** — der Server holte fremde URLs ab (SSRF); wenn, dann als
 eigenes Paket mit Sicherheitsentwurf.
 
@@ -520,6 +522,47 @@ nach `docs/OPEN-ITEMS.md`.
   Hilfe-Umbenennung Stunden zuvor auf genau diesem Pfad hinterlassen hatte, ist
   entfernt — eine routeRule gewinnt gegen die Seite, beides ging nicht
   (Begründung im Kopf von `apps/help/nuxt.config.ts`).
+
+- **Themen-Verlinkung mit Rückverweis** (2026-08-14, die LETZTE Teil-4-Mechanik
+  — Davids Entscheidung vom 2026-08-13/14, als eigenes Paket nach den
+  Mechaniken 2+3). Im Editor öffnet **`#`** ein Menü über die Themen der
+  eigenen Community; das Ziel-Thema zeigt darunter „**Verlinkt von …**".
+  **EIN VERWEIS IST GEWÖHNLICHER TEXT**, wie `@handle` — der Parser
+  (`core/shared/markdown.ts`) bleibt UNANGETASTET, es gibt keine neue
+  Markdown-Marke und keine Migration für Bestandsinhalte.
+  **ER TRÄGT DIE ROW-ID, NICHT DEN SLUG** (`#<id>-<deko>`), und das war keine
+  Geschmacksfrage: der Themen-Slug ist nirgends gespeichert (`topicSlug()`
+  leitet ihn bei jedem Aufruf aus Titel und Text ab), er ist nicht eindeutig
+  (zwei Themen dürfen denselben Titel tragen) und er vergeht beim Umbenennen.
+  Jeder der drei Punkte allein hätte `#mein-thema` unbaubar gemacht — der
+  erste sogar auf Kosten der Laufzeit: eine Auflösung Slug → Thema wäre ein
+  Vollscan über alle Titel bei JEDEM Seitenaufbau. Es ist damit dieselbe
+  Arbeitsteilung wie in der URL: die Id ist die Wahrheit, die Deko dahinter
+  steht für Menschen da und wird beim Auflösen ignoriert.
+  **DIE ERKENNUNGS-REGEL IST FAIL-CLOSED** (`shared/topicLinks.ts`): `#` +
+  16–36 rein alphanumerische Zeichen + optionale `-`-Deko, links kein
+  Wortzeichen und kein `#`. Damit sind `#42`, `# Überschrift`, `##thema`, der
+  Anker einer URL und jeder Verweis in Code-Spans/Codeblöcken draußen. Ids MIT
+  Trennzeichen sind bewusst nicht verlinkbar (sonst ließe sich `#<id>-<deko>`
+  nicht eindeutig zerlegen) — betroffen ist genau der Willkommens-Beitrag
+  (`wp-…`), und der ist ein Feed-Beitrag ohne Kategorie, also ohnehin nie ein
+  Ziel.
+  **DER TEXT IST DIE WAHRHEIT, DIE TABELLE IST DER INDEX**: `discussion_links`
+  (posts-020, je Paar EINE Zeile) wird NIE gelesen, um einen Beitrag zu
+  rendern — die Verweise löst der Server beim Lesen aus dem TEXT auf
+  (gebündelt, wie `mentionsForPosts`). Die Tabelle beantwortet allein die
+  Gegenrichtung, die im Text nicht steht. Beim Bearbeiten wird sie ERSETZT,
+  nicht ergänzt, sonst bliebe ein entfernter Verweis für immer am Ziel stehen.
+  Sie trägt bewusst KEIN `authorId` (zwei Row-Ids sind nichts
+  Personenbezogenes ⇒ kein GDPR-Beitrag); der Preis dafür ist, dass
+  `linksMade` nie geeicht werden kann und „First Link" ab jetzt zählt.
+  **ZWEI TÜREN**: die Index-Zeilen laufen über die Operator-Klinke (sie
+  gehören keinem Menschen — ohne `ownerUserId` vergibt die Tür nur Leserechte,
+  und das Entfernen scheiterte im ersten Beweislauf genau daran, still), die
+  ZIELE über die Mitglieds-Tür (wer ein Thema nicht sehen darf, kann weder
+  darauf verweisen noch als Verweis darauf erscheinen).
+  Ein toter Verweis bleibt schlicht Text und meldet nichts. Beweis:
+  `packages/posts/scripts/verify-topic-links.mjs` (42/42).
 
 - **Tages-Limit für Likes** (2026-08-14, Teil-4-Mechanik 2 — Davids Zuschnitt
   vom selben Tag: 50 pro Tag je Mensch und Community, Config-Wert, `0` = aus).
@@ -675,10 +718,11 @@ jemand liest, der ein Abzeichen nachreichen will. Kurzfassung:
 
 - **Dauerhaft draußen** (Davids Entscheidung, Teil 4): die neun, die ein
   personenbezogenes Verhaltensprotokoll bräuchten.
-- **Wartet auf seine Funktion**: Emoji, Zitat, Themen-Verlinkung —
-  Reihenfolge in Teil 4. („Erste Reaktion" ist seit dem 2026-08-13 gebaut,
-  „Promoter" und die drei Like-Limit-Abzeichen seit dem 2026-08-14; alle vier
-  sind daher hier heraus.)
+- **Wartet auf seine Funktion**: First Emoji, First Quote, First Onebox,
+  First Reply By Email, Wiki Editor, Certified/Licensed, Campaigner/Champion.
+  („Erste Reaktion" ist seit dem 2026-08-13 gebaut, „Promoter" und die drei
+  Like-Limit-Abzeichen seit dem 2026-08-14, „First Link" seit der letzten
+  Mechanik desselben Tages — alle sechs sind daher hier heraus.)
 - **Nicht baubar, obwohl es so aussieht**: dieser Absatz hat sich geleert —
   „Anniversary" ist seit dem 2026-08-04 GEBAUT (Teil-5-Entscheidung 1), und
   „Editor" ebenfalls (gemeinsames Paket, Teilpaket 1: `posts.editedAt` kam

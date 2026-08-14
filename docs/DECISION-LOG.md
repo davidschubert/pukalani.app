@@ -25,6 +25,22 @@ Ziel: Diskussions-THEMEN (die Antworten liegen im comments-Layer — offene
 Folge-Frage an David); mehrere Emojis je Nutzer, je Emoji Toggle. Realtime
 bewusst optimistisch statt Socket (Andockpunkt dokumentiert).
 
+**Umsetzung der letzten Mechanik (Themen-Verlinkung mit Rückverweis,
+2026-08-14):** ein Verweis ist **gewöhnlicher Text** wie `@handle` — der
+Markdown-Parser bleibt unangetastet. Er trägt aber die **Row-Id**
+(`#<id>-<deko>`) und nicht den Slug, weil der Themen-Slug nirgends gespeichert
+ist (er wird bei jedem Aufruf aus Titel und Text abgeleitet), nicht eindeutig
+ist und beim Umbenennen vergeht — `#mein-thema` hätte einen Vollscan über alle
+Titel je Seitenaufbau gekostet und wäre trotzdem mehrdeutig geblieben. Damit
+gilt dieselbe Arbeitsteilung wie in der URL: die Id ist die Wahrheit, die Deko
+ist für Menschen. Der **Text bleibt die Wahrheit**, die neue Tabelle
+`discussion_links` (posts-020) ist nur der Index für die Gegenrichtung
+(„wer zeigt auf mich?") und wird nie gelesen, um zu rendern; beim Bearbeiten
+wird sie ersetzt, nicht ergänzt. Sie trägt bewusst **kein `authorId`** — zwei
+Row-Ids sind nichts Personenbezogenes, Preis ist ein nie eichbarer Zähler
+`linksMade` (das Abzeichen „First Link" zählt ab jetzt). Tote Verweise bleiben
+Text und melden nichts.
+
 **Umsetzung Mechanik 3 (Tages-Like-Limit, am selben Tag gebaut):** „Tag" ist
 der **UTC-Kalendertag** — nicht die Nutzer-Zeitzone, obwohl `prefs.timezone`
 seit U15 existiert: ein Limit, das mit der Zonen-Wahl wandert, schenkt beim
