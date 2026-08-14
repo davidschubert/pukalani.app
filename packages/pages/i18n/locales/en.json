@@ -152,6 +152,47 @@
       "validation": {
         "descriptionMax": "The description is too long."
       }
+    },
+    "redirects": {
+      "navLabel": "Redirects",
+      "title": "Redirects",
+      "description": "When you rename or move a page, old links break. Here you say where they should lead instead.",
+      "saved": "Redirects saved",
+      "errorSave": "The redirects could not be saved.",
+      "emptyTitle": "No redirect yet",
+      "empty": "Add an old address and its new target above.",
+      "remove": "Remove redirect",
+      "footnote": "A redirect applies to exactly this one address — there are no wildcards. The stored path also catches the German version, and for a target on this site the language is preserved. Query parameters travel along.",
+      "add": {
+        "title": "Add a redirect",
+        "hint": "Old address as a path, for example /about. The target is either a path on this site or a full https address.",
+        "fromLabel": "Old address",
+        "fromPlaceholder": "/about",
+        "toLabel": "New target",
+        "toPlaceholder": "/team",
+        "action": "Add",
+        "full": "More than {max} redirects are not possible."
+      },
+      "col": {
+        "from": "Old address",
+        "to": "New target",
+        "kind": "Type"
+      },
+      "kind": {
+        "internal": "This site",
+        "external": "Another site"
+      },
+      "validation": {
+        "fromMax": "The old address is too long.",
+        "toMax": "The target is too long.",
+        "fromInvalid": "This cannot be used as an old address: it must be a path starting with /, and it must not be an area the platform needs for itself (sign-in, administration, home page).",
+        "internalInvalid": "The target must be a path on this site and start with /.",
+        "externalInvalid": "A target on another site must start with https://.",
+        "duplicateFrom": "There is already a redirect for this old address.",
+        "chain": "A target must not itself appear as an old address in this list — otherwise visitors are redirected twice in a row, or a loop is created.",
+        "tooMany": "There are too many redirects.",
+        "tooLarge": "The list is too long overall."
+      }
     }
   }
 }

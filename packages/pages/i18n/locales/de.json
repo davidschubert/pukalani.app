@@ -152,6 +152,47 @@
       "validation": {
         "descriptionMax": "Die Beschreibung ist zu lang."
       }
+    },
+    "redirects": {
+      "navLabel": "Weiterleitungen",
+      "title": "Weiterleitungen",
+      "description": "Wenn du eine Seite umbenennst oder verschiebst, bleiben alte Links tot. Hier sagst du, wohin sie stattdessen führen sollen.",
+      "saved": "Weiterleitungen gespeichert",
+      "errorSave": "Die Weiterleitungen konnten nicht gespeichert werden.",
+      "emptyTitle": "Noch keine Weiterleitung",
+      "empty": "Trage oben eine alte Adresse und ihr neues Ziel ein.",
+      "remove": "Weiterleitung entfernen",
+      "footnote": "Eine Weiterleitung gilt für genau diese eine Adresse — Platzhalter gibt es nicht. Der gespeicherte Pfad fängt auch die deutsche Fassung, und bei einem Ziel auf dieser Seite bleibt die Sprache erhalten. Angehängte Parameter reisen mit.",
+      "add": {
+        "title": "Weiterleitung hinzufügen",
+        "hint": "Alte Adresse als Pfad, zum Beispiel /ueber-uns. Das Ziel ist entweder ein Pfad auf dieser Seite oder eine vollständige https-Adresse.",
+        "fromLabel": "Alte Adresse",
+        "fromPlaceholder": "/ueber-uns",
+        "toLabel": "Neues Ziel",
+        "toPlaceholder": "/team",
+        "action": "Hinzufügen",
+        "full": "Mehr als {max} Weiterleitungen sind nicht möglich."
+      },
+      "col": {
+        "from": "Alte Adresse",
+        "to": "Neues Ziel",
+        "kind": "Art"
+      },
+      "kind": {
+        "internal": "Diese Seite",
+        "external": "Andere Seite"
+      },
+      "validation": {
+        "fromMax": "Die alte Adresse ist zu lang.",
+        "toMax": "Das Ziel ist zu lang.",
+        "fromInvalid": "Das ist als alte Adresse nicht möglich: Sie muss ein Pfad sein, der mit / beginnt, und darf kein Bereich sein, den die Plattform selbst braucht (Anmeldung, Verwaltung, Startseite).",
+        "internalInvalid": "Das Ziel muss ein Pfad auf dieser Seite sein und mit / beginnen.",
+        "externalInvalid": "Ein Ziel auf einer anderen Seite muss mit https:// beginnen.",
+        "duplicateFrom": "Für diese alte Adresse gibt es schon eine Weiterleitung.",
+        "chain": "Ein Ziel darf nicht selbst als alte Adresse in dieser Liste stehen — sonst wird zweimal hintereinander weitergeleitet oder es entsteht eine Schleife.",
+        "tooMany": "Es sind zu viele Weiterleitungen.",
+        "tooLarge": "Die Liste ist insgesamt zu lang."
+      }
     }
   }
 }

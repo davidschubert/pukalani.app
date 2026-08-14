@@ -88,6 +88,29 @@ export default defineAppConfig({
           requiredCapability: 'branding.manage',
           order: 26,
         },
+        /**
+         * WEITERLEITUNGEN (U15 Teil 3, Davids Entscheidung 2026-08-13) — die
+         * alten Adressen einer Community zeigen auf die neuen.
+         *
+         * Dieselbe Capability wie Erscheinungsbild, Menü und Sucheintrag, und
+         * hier mit dem stärksten Grund von allen: das ist die einzige der vier
+         * Flächen, die einen Besucher WEGSCHICKT, bevor die Seite lädt.
+         * Begründung an der Route (server/api/pages/redirects.patch.ts).
+         *
+         * `order: 27` direkt hinter den Sucheintrag (26). Die Reihenfolge
+         * erzählt den Weg: erst wie die Community AUSSIEHT (20), dann wie man
+         * sich in ihr BEWEGT (25), dann wie man sie FINDET (26), dann wo die
+         * alten Wege HINFÜHREN (27).
+         */
+        {
+          id: 'community-redirects',
+          scope: 'community',
+          labelKey: 'pages.redirects.navLabel',
+          icon: 'i-ph-arrow-bend-up-right',
+          to: '/dashboard/community/redirects',
+          requiredCapability: 'branding.manage',
+          order: 27,
+        },
       ],
       modules: [
         {
