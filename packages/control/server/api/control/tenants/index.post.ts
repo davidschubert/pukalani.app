@@ -67,6 +67,11 @@ export default defineEventHandler(async (event) => {
       // geschrieben statt auf den Spalten-Default vertraut — dann trägt die Row
       // die Entscheidung selbst und der Resolver braucht keinen Fallback.
       openRegistration: true,
+      // Einladungen durch Mitglieder an (control-037, F57 Mechanik 2) — aus
+      // demselben Grund explizit wie die Zeile darüber. Das Kontingent (5 je
+      // Woche und Mitglied) steckt in der Config, nicht in der Row: eine Zahl,
+      // die der Betreiber justieren können soll, gehört nicht in 10 000 Zeilen.
+      memberInvitesEnabled: true,
       // A6 (control-028): Betreiber-Weg legt nie mit Abo an — der Community-
       // Checkout (Geldfluss 1) füllt die Felder beim ersten Kauf.
       stripeCustomerId: '',

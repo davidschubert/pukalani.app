@@ -61,8 +61,39 @@ describe('Rollen-Gitter (Subset-Beziehungen)', () => {
 })
 
 describe('Rollen-Trennung (die harten Grenzen)', () => {
-  it('viewer verwaltet nichts — nur dashboard.access', () => {
-    expect([...COMMUNITY_ROLE_CAPABILITIES.viewer]).toEqual(['dashboard.access'])
+  /**
+   * DER VIEWER VERWALTET IMMER NOCH NICHTS — er darf seit F57 nur EINLADEN.
+   *
+   * Bis zum 2026-08-14 stand hier `['dashboard.access']` und der Testname
+   * sagte „verwaltet nichts". Davids Entscheidung hat genau EINE Fähigkeit
+   * dazugelegt (`members.invite`, 5 je Woche, vom Owner abschaltbar) — und
+   * die Liste bleibt bewusst eine VOLLSTÄNDIGE Gleichheit statt eines
+   * `toContain`: sie ist der Ort, an dem eine still zugewachsene
+   * Mitglieder-Rolle auffällt. Wer hier eine dritte Zeile einträgt, muss sie
+   * begründen können.
+   *
+   * Dass Einladen KEINE Verwaltung ist, hängt an den zwei Zeilen darunter und
+   * nicht an der Absicht: die eingeladene Rolle ist immer `viewer`, und
+   * `team.manage` bleibt draußen. Fiele eine der beiden Zusicherungen, wäre
+   * die Rollen-Vergabe über eine Mitglieds-Capability erreichbar.
+   */
+  it('viewer verwaltet nichts — er darf nur einladen', () => {
+    expect([...COMMUNITY_ROLE_CAPABILITIES.viewer]).toEqual(['dashboard.access', 'members.invite'])
+    expect(communityRoleHasCapability('viewer', 'team.manage')).toBe(false)
+    expect(communityRoleHasCapability('viewer', 'community.transfer')).toBe(false)
+  })
+
+  /**
+   * F57: Einladen kann JEDE Rolle — das ist der Punkt der Mechanik. Ohne
+   * diese Zeile könnte jemand die Capability aus `VIEWER` nach `EDITOR`
+   * schieben, ohne dass ein Test es merkt; Leser wären dann still wieder
+   * ausgesperrt, und die Oberfläche zeigte einen Knopf, den die Route mit 403
+   * beantwortet.
+   */
+  it('F57: jede Community-Rolle darf einladen', () => {
+    for (const role of COMMUNITY_ROLES) {
+      expect(communityRoleHasCapability(role, 'members.invite')).toBe(true)
+    }
   })
 
   it('editor verfasst, moderiert aber NICHT', () => {

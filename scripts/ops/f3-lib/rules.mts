@@ -532,6 +532,11 @@ export function communityRowData(input: CommunityRowInput): Record<string, unkno
     profile: '',
     inviteCodeId: '',
     openRegistration: true,
+    // Einladungen durch Mitglieder an (control-037, F57 Mechanik 2): der
+    // Vorgabe-Zustand jeder Community. Explizit geschrieben wie die Zeile
+    // darüber — dieser Weg legt Zeilen an, die kein Owner je durch ein
+    // Formular geschickt hat.
+    memberInvitesEnabled: true,
     // Entscheidung (3): kein Abo. Der Community-Checkout füllt das beim ersten Kauf.
     stripeCustomerId: '',
     stripeSubscriptionId: '',

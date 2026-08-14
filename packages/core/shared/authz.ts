@@ -36,6 +36,14 @@ export const ALL_CAPABILITIES: readonly Capability[] = [
   'posts.manage',
   'branding.manage',
   'team.manage',
+  /**
+   * Einladen (F57 Mechanik 2, 2026-08-14). Im Wildcard aus demselben Grund
+   * wie jede andere Community-Cap: eine Silo-App hat keine Community-Rollen,
+   * dort trägt der Betreiber-Admin sie über sein globales Label. Dass sie im
+   * Pool JEDEM Mitglied ab `viewer` gehört, entscheidet `communityAuthz.ts` —
+   * hier steht nur, dass es die Fähigkeit gibt.
+   */
+  'members.invite',
   'community.billing',
   'community.transfer',
   'community.delete',

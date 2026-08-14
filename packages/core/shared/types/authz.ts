@@ -64,6 +64,29 @@ export type Capability =
   | 'posts.manage' // Kategorien der Discussions (Admin/Owner)
   | 'branding.manage' // Themes/Schriften der Community (Admin) — nicht Editor
   | 'team.manage' // Community-Mitglieder + Rollen (Owner/Admin) — nicht Moderator/Editor
+  /**
+   * Jemanden in DIESE Community einladen (F57 Mechanik 2, Davids Entscheidung
+   * 2026-08-14). Sie sitzt beim VIEWER und damit bei jedem Mitglied mit Zugang.
+   *
+   * BEWUSST NEBEN `team.manage` STATT DARIN: die beiden beantworten zwei
+   * verschiedene Fragen. `team.manage` heißt „darf über die Besetzung der
+   * Community bestimmen" — Rollen vergeben, entfernen, jede offene Einladung
+   * sehen und zurückziehen. `members.invite` heißt nur „darf jemanden
+   * herholen", und was dabei entsteht, ist immer ein `viewer`.
+   *
+   * Hätte man stattdessen `team.manage` an den Viewer gegeben, wäre mit dem
+   * Einladen die ganze Mitgliederverwaltung mitgewandert — Rollen-Vergabe per
+   * Mitglieds-Capability, also dieselbe Klasse Fehler, gegen die
+   * `community.transfer` als eigene Capability geschnitten wurde. Die
+   * Rollen-WAHL bleibt deshalb an `team.manage` hängen und wird in der
+   * Einladungs-Route gegen den Rollen-Wunsch geprüft, nicht nur in der
+   * Oberfläche versteckt.
+   *
+   * Das Kontingent (5/Woche) ist NICHT Teil dieser Capability: ein Recht sagt
+   * OB, ein Kontingent sagt WIE OFT. Wer `team.manage` hält, umgeht es —
+   * sein heutiges Recht sollte nicht schrumpfen.
+   */
+  | 'members.invite' // Einladen (jedes Mitglied ab viewer; Rolle immer 'viewer')
   | 'community.transfer' // Owner-Übergabe (nur Owner)
   | 'community.billing' // Abo der Community: Kauf + Stripe-Portal (nur Owner, A6)
   /**

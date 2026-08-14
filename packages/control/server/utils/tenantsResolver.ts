@@ -3,7 +3,7 @@ import { createMicrocache } from '../../../core/server/utils/microcache'
 import type { TenantResolver } from '../../../core/server/utils/tenantResolver'
 import type { TenantContext } from '../../../core/shared/types/tenant'
 import { communityIsOffline, resolveCommunitySuspension } from '../../../core/shared/communitySuspension'
-import { DEFAULT_TENANT_PLAN, COMMUNITY_PLANS_TABLE, COMMUNITIES_TABLE, normalizeTenantPlan, parseTenantPlanLimits, resolveTenantAudience, resolveTenantOpenRegistration, type TenantPlanLimits, type TenantPlanRow, type TenantRow } from '../../shared/types/tenantRecord'
+import { DEFAULT_TENANT_PLAN, COMMUNITY_PLANS_TABLE, COMMUNITIES_TABLE, normalizeTenantPlan, parseTenantPlanLimits, resolveTenantAudience, resolveTenantMemberInvitesEnabled, resolveTenantOpenRegistration, type TenantPlanLimits, type TenantPlanRow, type TenantRow } from '../../shared/types/tenantRecord'
 import { isSafeThemeToken, parseSiteProfile } from '../../shared/onboarding'
 import { canonicalHostFor, customDomainCandidates } from '../../shared/customDomain'
 
@@ -27,7 +27,7 @@ import { canonicalHostFor, customDomainCandidates } from '../../shared/customDom
  *  gesetzt, wenn die Row eine $id trägt (der reale Read immer; Test-Fixtures
  *  optional). Trägt die Site-Rollen-Auflösung (requireCommunityPermission). */
 export function mapTenantRowToContext(
-  row: (Pick<TenantRow, 'mode' | 'projectId' | 'tenantId' | 'status' | 'plan'> & { $id?: string, host?: string | null, theme?: string | null, variant?: string | null, neutral?: string | null, name?: string | null, profile?: string | null, openRegistration?: boolean | null, audience?: string | null, trialEndsAt?: string | null, billingStatus?: string | null, suspension?: string | null, customDomain?: string | null, customDomainStatus?: string | null }) | null,
+  row: (Pick<TenantRow, 'mode' | 'projectId' | 'tenantId' | 'status' | 'plan'> & { $id?: string, host?: string | null, theme?: string | null, variant?: string | null, neutral?: string | null, name?: string | null, profile?: string | null, openRegistration?: boolean | null, memberInvitesEnabled?: boolean | null, audience?: string | null, trialEndsAt?: string | null, billingStatus?: string | null, suspension?: string | null, customDomain?: string | null, customDomainStatus?: string | null }) | null,
   planCatalog?: Record<string, Record<string, TenantPlanLimits>>,
 ): TenantContext | null {
   if (!row || row.status !== 'active') return null
@@ -62,6 +62,11 @@ export function mapTenantRowToContext(
   // resolveTenantAudience() überhaupt eine Funktion ist).
   const policy = {
     openRegistration: resolveTenantOpenRegistration(row.openRegistration),
+    // F57 Mechanik 2 (control-037): fail-OPEN wie openRegistration, aus
+    // demselben Grund — eine Bestands-Row hat `null`, und niemand hat dort je
+    // „nein" gesagt. Auch hier gilt: ab hier trägt der Kontext den aufgelösten
+    // Wert, die rohe Spalte vergleicht niemand mehr selbst.
+    memberInvitesEnabled: resolveTenantMemberInvitesEnabled(row.memberInvitesEnabled),
     audience: resolveTenantAudience(row.audience),
     // Nach dem Abuse-Ausstieg oben kann hier nur noch '' oder 'billing' stehen.
     // IMMER explizit gesetzt — dieselbe Regel wie bei openRegistration: ab hier

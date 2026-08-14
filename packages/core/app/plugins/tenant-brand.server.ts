@@ -111,6 +111,14 @@ export default defineNuxtPlugin(() => {
   useState<boolean | null>('pukalani-tenant-open-registration', () => (
     tenant ? tenant.openRegistration !== false : null
   ))
+  // Einladungen durch Mitglieder (F57 Mechanik 2, control-037): der Zustand
+  // des Owner-SCHALTERS für seine Einstellungs-Karte. Er ist bewusst NICHT das
+  // Gate für den Einladen-Knopf — das beantwortet
+  // `/api/community/invites/quota` mitsamt Rolle, Kontingent und Verbrauch.
+  // null = kein Tenant-Host.
+  useState<boolean | null>('pukalani-tenant-member-invites', () => (
+    tenant ? tenant.memberInvitesEnabled !== false : null
+  ))
   // Lese-Publikum der Community (C18): 'members' schaltet die Suchmaschinen-
   // Ansage auf noindex und blendet im Dashboard den gesetzten Zustand ein.
   // null = kein Tenant-Host (Silo, Kontroll-Host, Playground) — dort gibt es

@@ -70,6 +70,21 @@ export interface TenantPolicy {
    *  Auth-Routen antworten 403). undefined/true = offen wie bisher. */
   openRegistration?: boolean
   /**
+   * Dürfen MITGLIEDER einladen? (F57 Mechanik 2, control-037.) false = nur
+   * Owner/Admin, wie vor dem 2026-08-14.
+   *
+   * OPTIONAL und `undefined` heißt „ja" — dieselbe Bauart und dieselbe
+   * Begründung wie bei `openRegistration`: Silo-Apps, Kontroll-Hosts,
+   * Playground und Bestands-Fixtures bauen den Kontext ohne das Feld.
+   *
+   * Er sagt NUR, ob die Community die Mechanik anhat. Ob ICH gerade einladen
+   * darf, beantwortet `/api/community/invites/quota` — dort kommen Rolle,
+   * Config-Kontingent und Verbrauch dazu. Dieses Feld ist für die
+   * EINSTELLUNGS-KARTE des Owners da, nicht als Gate für den Knopf; ein Gate
+   * daraus zu bauen hieße, die halbe Regel zweimal zu schreiben.
+   */
+  memberInvitesEnabled?: boolean
+  /**
    * Lese-Publikum der Community (C18, Davids Entscheidung vom 2026-07-30:
    * WÄHLBAR, Default öffentlich). 'members' = Inhalte nur für Mitglieder
    * (Row-Permissions `read(label:<communityId>)`, noindex, leere sitemap,

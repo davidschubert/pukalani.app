@@ -506,6 +506,30 @@ export default defineAppConfig({
     realtime: {
       enabled: true,
     },
+    community: {
+      /**
+       * EINLADUNGEN DURCH MITGLIEDER — wie viele pro rollierender Woche
+       * (F57 Mechanik 2, Davids Zahl vom 2026-08-14: **5**).
+       *
+       * `0` schaltet die Mechanik plattformweit ab; der Owner-Schalter je
+       * Community (`communities.memberInvitesEnabled`) liegt daneben und
+       * gewinnt immer nach unten — eine Community kann zumachen, was die
+       * Plattform offen lässt, nie umgekehrt.
+       *
+       * WARUM DER WERT IM CORE STEHT und nicht im onboarding-Layer: gelesen
+       * wird er im CONTROL PLANE (dort liegen `community_invites` und die
+       * Wahrheit über die Community), und `apps/control` erbt onboarding
+       * NICHT — das war 2026-08-12 schon einmal die Falle bei der
+       * Auswertungs-Seite. Core erben beide Apps.
+       *
+       * BEGRÜNDETE AUSNAHME von „Core-Default ist IMMER aus": der Default ist
+       * hier kein Schalter, sondern eine GRENZE. Ein Default `0` hieße nicht
+       * „sicher aus", sondern „Mechanik gebaut und überall tot", und die
+       * Sicherheits-Frage beantwortet ohnehin die Zahl selbst, nicht ihr
+       * Vorhandensein.
+       */
+      memberInvitesPerWeek: 5,
+    },
     security: {
       /** CSRF-Origin-Check für unsichere Methoden auf /api/* (server/middleware/
        *  csrf-origin.ts). PFLICHT, sobald eine App das partitionierte

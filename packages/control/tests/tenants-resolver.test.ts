@@ -13,11 +13,11 @@ import { COMMUNITIES_TABLE, parseTenantPlanLimits } from '../shared/types/tenant
 describe('mapTenantRowToContext (pure)', () => {
   it('active silo → silo-Context', () => {
     expect(mapTenantRowToContext({ mode: 'silo', projectId: 'p1', tenantId: '', status: 'active', plan: '' }))
-      .toEqual({ mode: 'silo', projectId: 'p1', openRegistration: true, audience: 'members', suspension: '' })
+      .toEqual({ mode: 'silo', projectId: 'p1', openRegistration: true, memberInvitesEnabled: true, audience: 'members', suspension: '' })
   })
   it('active pool → pool-Context mit tenantId + Plan-Default basic', () => {
     expect(mapTenantRowToContext({ mode: 'pool', projectId: 'shared', tenantId: 't-1', status: 'active', plan: '' }))
-      .toEqual({ mode: 'pool', projectId: 'shared', tenantId: 't-1', plan: 'basic', openRegistration: true, audience: 'members', suspension: '' })
+      .toEqual({ mode: 'pool', projectId: 'shared', tenantId: 't-1', plan: 'basic', openRegistration: true, memberInvitesEnabled: true, audience: 'members', suspension: '' })
   })
   it('disabled → null (Host bewusst offline)', () => {
     expect(mapTenantRowToContext({ mode: 'silo', projectId: 'p1', tenantId: '', status: 'disabled', plan: '' })).toBeNull()
@@ -34,22 +34,22 @@ describe('mapTenantRowToContext (pure)', () => {
       personal: { comments: { perDay: 1000, total: 50000 } },
     }
     expect(mapTenantRowToContext({ mode: 'pool', projectId: 'shared', tenantId: 't-1', status: 'active', plan: 'personal' }, catalog))
-      .toEqual({ mode: 'pool', projectId: 'shared', tenantId: 't-1', plan: 'personal', limits: { comments: { perDay: 1000, total: 50000 } }, openRegistration: true, audience: 'members', suspension: '' })
+      .toEqual({ mode: 'pool', projectId: 'shared', tenantId: 't-1', plan: 'personal', limits: { comments: { perDay: 1000, total: 50000 } }, openRegistration: true, memberInvitesEnabled: true, audience: 'members', suspension: '' })
   })
   it('Plan-Katalog: unbekannter Plan wird auf basic normalisiert', () => {
     const catalog = { basic: { comments: { perDay: 200 } } }
     expect(mapTenantRowToContext({ mode: 'pool', projectId: 'shared', tenantId: 't-1', status: 'active', plan: 'enterprise' as never }, catalog))
-      .toEqual({ mode: 'pool', projectId: 'shared', tenantId: 't-1', plan: 'basic', limits: { comments: { perDay: 200 } }, openRegistration: true, audience: 'members', suspension: '' })
+      .toEqual({ mode: 'pool', projectId: 'shared', tenantId: 't-1', plan: 'basic', limits: { comments: { perDay: 200 } }, openRegistration: true, memberInvitesEnabled: true, audience: 'members', suspension: '' })
   })
   it('leerer Katalog: Context ohne limits (app.config-Fallback greift)', () => {
     expect(mapTenantRowToContext({ mode: 'pool', projectId: 'shared', tenantId: 't-1', status: 'active', plan: 'pro' }, {}))
-      .toEqual({ mode: 'pool', projectId: 'shared', tenantId: 't-1', plan: 'pro', openRegistration: true, audience: 'members', suspension: '' })
+      .toEqual({ mode: 'pool', projectId: 'shared', tenantId: 't-1', plan: 'pro', openRegistration: true, memberInvitesEnabled: true, audience: 'members', suspension: '' })
   })
   it('G1: $id reist als communityId in den Context (pool + silo)', () => {
     expect(mapTenantRowToContext({ $id: 'site-abc', mode: 'silo', projectId: 'p1', tenantId: '', status: 'active', plan: '' }))
-      .toEqual({ mode: 'silo', projectId: 'p1', communityId: 'site-abc', openRegistration: true, audience: 'members', suspension: '' })
+      .toEqual({ mode: 'silo', projectId: 'p1', communityId: 'site-abc', openRegistration: true, memberInvitesEnabled: true, audience: 'members', suspension: '' })
     expect(mapTenantRowToContext({ $id: 'site-xyz', mode: 'pool', projectId: 'shared', tenantId: 't-1', status: 'active', plan: '' }))
-      .toEqual({ mode: 'pool', projectId: 'shared', tenantId: 't-1', plan: 'basic', communityId: 'site-xyz', openRegistration: true, audience: 'members', suspension: '' })
+      .toEqual({ mode: 'pool', projectId: 'shared', tenantId: 't-1', plan: 'basic', communityId: 'site-xyz', openRegistration: true, memberInvitesEnabled: true, audience: 'members', suspension: '' })
   })
   it('M13: trialEndsAt reist in den Pool-Context — leer heißt „keine Testphase"', () => {
     const end = '2026-08-14T12:00:00.000Z'
@@ -82,6 +82,23 @@ describe('mapTenantRowToContext (pure)', () => {
       .toMatchObject({ openRegistration: false })
     expect(mapTenantRowToContext({ mode: 'silo', projectId: 'p1', tenantId: '', status: 'active', plan: '', openRegistration: false }))
       .toMatchObject({ openRegistration: false })
+  })
+  /**
+   * F57 Mechanik 2: derselbe fail-OPEN-Weg wie `openRegistration` — und die
+   * Gegenprobe gehört dazu. Ohne sie wäre auch eine Regel „gib immer true
+   * zurück" grün, und genau die wäre der Fehler, den man erst bemerkt, wenn
+   * ein Owner seinen Schalter umlegt und nichts passiert.
+   */
+  it('F57: memberInvitesEnabled reist in den Context (fail-OPEN, aber schaltbar)', () => {
+    expect(mapTenantRowToContext({ mode: 'pool', projectId: 'shared', tenantId: 't-1', status: 'active', plan: '', memberInvitesEnabled: false }))
+      .toMatchObject({ memberInvitesEnabled: false })
+    expect(mapTenantRowToContext({ mode: 'silo', projectId: 'p1', tenantId: '', status: 'active', plan: '', memberInvitesEnabled: false }))
+      .toMatchObject({ memberInvitesEnabled: false })
+    // Bestand vor control-037 (null) und frische Row (true) sind beide „an".
+    for (const value of [null, undefined, true]) {
+      expect(mapTenantRowToContext({ mode: 'pool', projectId: 'shared', tenantId: 't-1', status: 'active', plan: '', memberInvitesEnabled: value }), String(value))
+        .toMatchObject({ memberInvitesEnabled: true })
+    }
   })
   it('C18: audience reist in den Context — fail-CLOSED gelesen', () => {
     // Bewusster Gegensatz zu openRegistration eine Zeile darüber: dort
@@ -119,9 +136,9 @@ describe('mapTenantRowToContext (pure)', () => {
     // lesen sich als null. Fail-OPEN ist hier Absicht: eine Community, die nie
     // etwas entschieden hat, darf nicht stillschweigend zugemacht werden.
     expect(mapTenantRowToContext({ mode: 'pool', projectId: 'shared', tenantId: 't-1', status: 'active', plan: '', openRegistration: null }))
-      .toMatchObject({ openRegistration: true, audience: 'members' })
+      .toMatchObject({ openRegistration: true, memberInvitesEnabled: true, audience: 'members' })
     expect(mapTenantRowToContext({ mode: 'pool', projectId: 'shared', tenantId: 't-1', status: 'active', plan: '' }))
-      .toMatchObject({ openRegistration: true, audience: 'members' })
+      .toMatchObject({ openRegistration: true, memberInvitesEnabled: true, audience: 'members' })
   })
 })
 

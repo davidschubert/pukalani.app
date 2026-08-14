@@ -71,6 +71,25 @@ export function resolveTenantOpenRegistration(value: boolean | null | undefined)
 }
 
 /**
+ * PURE: Dürfen die MITGLIEDER dieser Community einladen? (control-037, F57
+ * Mechanik 2 — Davids Entscheidung 2026-08-14: „je Community vom Owner
+ * abschaltbar".)
+ *
+ * FAIL-OPEN wie `resolveTenantOpenRegistration` und aus demselben Grund:
+ * `null` (Rows von VOR der Migration — Appwrite backfillt Spalten-Defaults
+ * nicht) und `undefined` heißen „nie etwas entschieden". Der Owner hat den
+ * Schalter nie gesehen; ihn stillschweigend als NEIN zu lesen wäre eine
+ * Entscheidung, die niemand getroffen hat.
+ *
+ * Dass fail-open hier ungefährlich ist, liegt am Kontingent: die Mechanik
+ * bringt einem Bestands-Mandanten fünf Einladungen je Mitglied und Woche,
+ * keine offene Tür. Ohne das Kontingent wäre dieser Default nicht vertretbar.
+ */
+export function resolveTenantMemberInvitesEnabled(value: boolean | null | undefined): boolean {
+  return value !== false
+}
+
+/**
  * PURE (unit-getestet): das Lese-Publikum einer Row auflösen — FAIL-CLOSED.
  *
  * Nur der exakte Wert `'public'` öffnet eine Site. Alles andere (`null` bei
@@ -132,6 +151,11 @@ export interface TenantRow extends Models.Row {
    *  bei Rows von VOR der Migration — IMMER über
    *  resolveTenantOpenRegistration() lesen, nie direkt vergleichen. */
   openRegistration: boolean | null
+  /** Dürfen MITGLIEDER einladen? (control-037, F57 Mechanik 2). `null` bei Rows
+   *  von VOR der Migration — IMMER über resolveTenantMemberInvitesEnabled()
+   *  lesen. Owner/Admin bleiben davon unberührt: der Schalter regelt die
+   *  Mitglieder-Mechanik, nicht das Recht des Betreibers. */
+  memberInvitesEnabled: boolean | null
   /** A6 (control-028): das Abo hängt an der COMMUNITY — Stripe-Kunde dieses
    *  Vertrags (Geldfluss 1: Community zahlt an Pukalani). '' / `null` (Rows
    *  von vor der Migration) = nie ein Abo gehabt. */

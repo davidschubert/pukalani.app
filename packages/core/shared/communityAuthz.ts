@@ -33,6 +33,24 @@ export type CommunityRole = (typeof COMMUNITY_ROLES)[number]
 /** Viewer: liest die Community + kommentiert. Kein Dashboard-Verwaltungsrecht. */
 const VIEWER: readonly Capability[] = [
   'dashboard.access',
+  /**
+   * Einladen (F57 Mechanik 2, Davids Entscheidung 2026-08-14: 5 pro Woche je
+   * Mitglied, ab Rolle Leser/in). Sie steht HIER und damit bei jeder Rolle —
+   * das ist der ganze Punkt der Mechanik: das Wachstum einer Community soll
+   * nicht am Owner hängen.
+   *
+   * Sie ist die EINZIGE Verwaltungs-nahe Capability des Viewers, und sie ist
+   * es nur, weil drei Sicherungen NICHT an ihr hängen: die eingeladene Rolle
+   * ist immer `viewer` (Rollen-Vergabe bleibt an `team.manage`), das
+   * Kontingent begrenzt die Menge, und der Owner kann die Mechanik für seine
+   * Community ganz abschalten (`communities.memberInvitesEnabled`).
+   *
+   * Der Viewer ist zugleich die Rolle, die der automatische Beitritt vergibt
+   * (A5) — ein frisch beigetretenes Konto darf also einladen. Das ist
+   * beabsichtigt und der Grund, warum das Kontingent nicht optional ist:
+   * ohne es wäre das hier eine Spam-Schleuder mit fremdem Absender.
+   */
+  'members.invite',
 ]
 
 /** Editor: verfasst Inhalte (Beiträge, Seiten, Events, Medien) — moderiert NICHT. */

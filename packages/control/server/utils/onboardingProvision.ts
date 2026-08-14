@@ -211,6 +211,11 @@ export async function provisionCommunity(
       // entstand, gilt fürs GRÜNDEN — nicht fürs Beitreten. Umschalten kann die
       // Owner-Rolle jederzeit unter /dashboard/community.
       openRegistration: true,
+      // Einladungen durch Mitglieder an (control-037, F57 Mechanik 2): eine
+      // frische Community wächst über die Menschen, die schon da sind — genau
+      // dafür ist die Mechanik gebaut. Abschalten kann der Owner jederzeit
+      // unter /dashboard/community, neben der Registrierung.
+      memberInvitesEnabled: true,
       // A6 (control-028): frisch angelegt = nie ein Abo — der Community-
       // Checkout (Geldfluss 1) füllt die Felder beim ersten Kauf.
       stripeCustomerId: '',
