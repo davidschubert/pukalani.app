@@ -38,7 +38,7 @@ ist Wochen. (F3 ist am 2026-08-11 als AH-6 in die Hauptliste gezogen.)
 | # | Reihenfolge | Was (einfach erklärt) | Prio | Aufwand | Braucht David? | Wartet auf … |
 | --- | --- | --- | --- | --- | --- | --- |
 | U14 | 1 — Tage | **Anmelden mit Google.** Der CODE ist gebaut (Knopf auf Anmelden + Registrieren, erklärte Datenschutz-Zeile, Beitritt/Feed wie beim Passwort-Weg, gedrosselt, ohne Credentials unsichtbar). Offen sind nur noch **Klicks bei David**: Google-Console, Appwrite-Console, zwei Schalter. Die Circle-Falle trifft uns nicht — Google sieht nur die Appwrite-Adresse, nie einen Kunden-Host. | Mittel | S (Rest) | Ja: die Klicks | [Runbook GOOGLE-LOGIN.md](runbooks/GOOGLE-LOGIN.md) |
-| U15 | 2 — Tage | **Die zugesagten Dashboard-Seiten** — IN ARBEIT: **„Navigation" + „Sucheintrag/SEO" sind LIVE seit 2026-08-13** (→ COMPLETE). Offen: die Zuschnitt-Runde für die restlichen Seiten (Redirects, Zeitzone, Zwei-Faktor, Bio, E-Mail-Einstellungen, Tokens, Bulk-Logs, SSO, Taxes — welche bauen/ablehnen/parken), Fragen liegen bei David. | Mittel | L | Ja: Zuschnitt-Runde | [UX-Dashboard § 5](archiv/audits/2026-08-09-ux-dashboard.md) · [DASHBOARD-IA.md](plans/DASHBOARD-IA.md) |
+| U15 | 2 — Tage | **Die zugesagten Dashboard-Seiten** — IN ARBEIT: **Navigation + Sucheintrag + Weiterleitungen sind LIVE** (→ COMPLETE). Zuschnitt-Runde ENTSCHIEDEN 2026-08-13: noch bauen **Zwei-Faktor** (TOTP, Konto→Sicherheit), dann **Zeitzone** (Konto-Einstellung) — danach ist U15 zu. Taxes + Bulk-Logs bewusst abgelehnt (s. Zurückgestellt), Bio/Profil, Tokens, SSO, E-Mail-Settings geparkt mit Bedingung. | Mittel | M (Rest) | Nein (entschieden) | [DASHBOARD-IA.md](plans/DASHBOARD-IA.md) · DECISION-LOG 2026-08-13 |
 | F57 | 3 — Tage | **Die drei sozialen Mechaniken aus dem Discussions-Konzept Teil 4** — Emoji-**Reaktionen**, **Einladungen durch Mitglieder**, **Tages-Limit für Likes** — plus **Themen-Verlinkung mit Rückverweis**; an ihnen hängen sechs fehlende Abzeichen. Entschieden 2026-08-10: bleibt geparkt bis Account-Horizont + AP2–AP8; dann Reaktionen zuerst. | Mittel | L | Ja: Rest-Zuschnitt | Account-Horizont + AP2–AP8 · [DISCUSSIONS-KONZEPT.md](plans/DISCUSSIONS-KONZEPT.md) Teil 4 |
 | F7 | 4 — Wochen | **Bezahlte Communities** — der Owner nimmt Geld von seinen Mitgliedern (Stripe Connect). Eigene Mechanik und eigene Rechtsfragen. **Schluckt D1** (Davids Entscheidung 2026-08-02): bezahlte Pool-Events/-Kurse ergeben erst mit Connect Sinn. Events-Hälfte technisch M, Kurse-Hälfte L/XL (community-scoped Entitlements sind unentworfen). Messlatte laut Benchmark: Skools Merchant-of-Record-Modell inkl. EU-USt., nicht der Prozentsatz. | Mittel | XL | Ja: Rechtsfragen | nach dem Go-Live; erst muss Geldfluss 1 (A6) ankommen |
 | F47 | 5 — Klicks | **Analytics v2, Rest = nur noch Plausible-UI-Klicks** (Adblock-Proxy live 2026-08-12; Kundenbereich-Messung ENTSCHIEDEN: Sammel-Site, Code live): (1) Goals der sieben Trichter-Ereignisse in der Sammel-Site WÖRTLICH anlegen (`funnel_cta_start` …, CE hat keine Goals-API), (2) E-Mail-Reports je Site aktivieren. | Niedrig | S | Ja: Plausible-UI | [ANALYTICS-V2.md](plans/ANALYTICS-V2.md) § 5 · DECISION-LOG 2026-08-12 |
@@ -285,6 +285,18 @@ E3 und E4 wurden dabei bewusst NICHT gewählt und bleiben liegen).** Die anderen
 [OPEN-ITEMS-COMPLETE.md](OPEN-ITEMS-COMPLETE.md).
 
 ### Bewusst zurückgestellt (kein Aufgabenpunkt)
+
+- **„Taxes"-Seite** (U15-Runde 2026-08-13): Stripe `automatic_tax` rechnet die
+  Steuer im Checkout — eine eigene Seite wäre eine Attrappe. Der Rest ist
+  Runbook A2 § 2.4 (Konto-Default „inclusive" prüfen).
+- **„Bulk-Logs"-Seite** (U15-Runde 2026-08-13): Aktivitäts- und
+  Audit-Protokolle existieren; eine dritte Log-Ansicht ohne neuen Inhalt
+  wäre Doppelpflege.
+- **Geparkt mit Bedingung** (U15-Runde 2026-08-13): Bio/öffentliches Profil
+  (erst wenn öffentliche Profile gewollt sind — heute bewusst nicht) ·
+  API-Tokens (erst mit einer öffentlichen API-Story) · SSO (Enterprise-/
+  Studio-Angebot) · E-Mail-Einstellungen je Community (erst mit eigenem
+  Absender/SMTP je Kunde).
 
 - **Flag-Registry statt `commentsEnabled`** — mittlerer Refactor der
   AppConfig-Typen, lohnt erst mit dem nächsten neuen Flag.

@@ -30,6 +30,36 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### U15 Teil 3 — Weiterleitungen: alte Adressen führen wieder wohin ✅ 2026-08-13
+
+Owner legt Redirects an (`/dashboard/community/redirects`, Capability
+`branding.manage`): exakte Pfad-Treffer, **intern 301** (dauerhafter Umzug
+nimmt sein Such-Ansehen mit), **extern 302** (ein fremdes Ziel erbt kein
+Ansehen, und ein gemerktes 301 wäre im Browser nicht mehr abstellbar). Bau
+nach dem 033/034-Muster: system-035 `community_redirects` (EINE Row je
+Community, `permissions: []` + Reparaturschritt + ensureColumn; Spalte
+**MEDIUMTEXT** — nachgerechnet: 100 Regeln × (256+512+Gerüst) ≈ 79k Zeichen,
+varchar endet bei 16.381; `MAX_REDIRECT_RULES = 100` in Zod, Kommentar und
+Test). Middleware bei `01.` (nach Tenant-Auflösung, vor allem anderen):
+Treffer = 301/302 ohne Seitenaufbau, Fehltreffer = ein Blick in den
+mandanten-gescopten 30-s-Microcache; nur GET/HEAD, Query bleibt. Sperrliste
+für System-Pfade (`/api /dashboard /login /settings …`, sprachpräfix-fest —
+der Beweis fand `from: "/de/login"` als angenommenen Unsinn und schloss die
+Lücke fail-closed), Ketten UND Ringe beim Schreiben abgelehnt, Wildcards
+bewusst nicht (Kunden-Regex im heißesten Pfad = Ein-Anfrage-DoS). Beweis
+**61/61**, Migration auf allen vier Instanzen (Parität 13 Tabellen), Deploy
+`f521730f`, live: Gast-PATCH 401, normale Seiten unverändert 200.
+
+Drei Defaults zur Kenntnis für David (umkehrbar, je eine Zeile): Sperrliste
+wie oben (Produkt-Pfade wie `/feed` bleiben umleitbar) · Obergrenze 100
+Regeln · Ketten komplett verboten statt nur Ringschlüsse.
+
+**Gelernt:** (1) Ein Pfad-Filter, der VOR der Sprachpräfix-Normalisierung
+prüft, prüft einen Pfad, den der Leser nie sieht — Sperrlisten gehören auf
+die NORMALISIERTE Form, und die Gegenprobe gehört in den Beweis. (2)
+Weiterleitungs-Middleware so früh wie möglich einhängen: bei `10.` zahlte
+jeder Treffer den vollen Aufbau einer Seite, die niemand sieht.
+
 ### U15 Teil 2 — „Sucheintrag" (SEO): Beschreibung, noindex, Vorschau ✅ 2026-08-13
 
 Davids Zuschnitt: Meta-Beschreibung der Startseite (Fallback: Seiten-Anriss
