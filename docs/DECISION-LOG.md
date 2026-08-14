@@ -25,6 +25,19 @@ Ziel: Diskussions-THEMEN (die Antworten liegen im comments-Layer — offene
 Folge-Frage an David); mehrere Emojis je Nutzer, je Emoji Toggle. Realtime
 bewusst optimistisch statt Socket (Andockpunkt dokumentiert).
 
+**Umsetzung Mechanik 3 (Tages-Like-Limit, am selben Tag gebaut):** „Tag" ist
+der **UTC-Kalendertag** — nicht die Nutzer-Zeitzone, obwohl `prefs.timezone`
+seit U15 existiert: ein Limit, das mit der Zonen-Wahl wandert, schenkt beim
+Umstellen ein zweites Kontingent am selben Abend. Die **Rücknahme erstattet
+nichts** (sonst wäre das Limit mit zwei Klicks je Like zu umgehen) — genau
+deshalb ist der Stand ein VERBRAUCH in `member_counters` (posts-019) und kein
+Zählen der heutigen Vote-Zeilen, die beim Zurücknehmen verschwinden.
+Downvotes kosten nichts, der Wechsel von Ab- auf Aufstimme schon. Der
+Abzeichen-Tag wird am atomaren Hochzählen gebucht, das exakt auf dem Limit
+landet (`=== limit`, nicht `>=`) — sonst hieße „an 5 Tagen" nur „fünfmal
+dagegengelaufen". Fail-**open** bei Störung: eine irrtümlich verweigerte
+Stimme trifft jemanden, der nichts falsch gemacht hat.
+
 **Umsetzung Mechanik 2 (Einladungen, am selben Tag gebaut):** neue Capability
 `members.invite` beim `viewer` — bewusst NEBEN `team.manage` statt durch
 Absenken, sonst wäre Rollen-Vergabe per Mitglieds-Capability erreichbar. Die

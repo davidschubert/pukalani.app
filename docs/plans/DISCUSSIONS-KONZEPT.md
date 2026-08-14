@@ -336,7 +336,7 @@ Entscheidung Nr. 4 in 3.7 — ohne sie ist keine der Like-Zeilen baubar.
 | Admired | ≥5 Likes auf 300 Beiträgen |
 | Enthusiast / Aficionado / Devotee | 10 / 100 / 365 Tage in Folge besucht **[fehlt: Besuchs-Streaks]** |
 | Anniversary | 1 Jahr Mitglied + ≥1 Beitrag in dem Jahr |
-| Out of Love / Higher Love / Crazy in Love | alle 50 Tages-Likes an 1 / 5 / 20 Tagen verbraucht **[fehlt: Tages-Like-Limit]** |
+| Out of Love / Higher Love / Crazy in Love | alle 50 Tages-Likes an 1 / 5 / 20 Tagen verbraucht — **GEBAUT** (2026-08-14, F57 Mechanik 3; Zähler `member_counters.likeLimitDays`) |
 | Promoter / Campaigner / Champion | 1 Einladung / 3 Eingeladene wurden Basic / 5 wurden Member — **`promoter` GEBAUT** (2026-08-14, zählt die erste ANGENOMMENE Einladung); **[fehlen: Campaigner/Champion — sie hängen an der Vertrauensstufe der EINGELADENEN und brauchen einen eigenen Verleihungs-Pfad, s. Teil 5]** |
 | Nice/Good/Great Share | geteilter Link von 25 / 300 / 1000 externen Besuchern geklickt **[fehlt: Klick-Zählung]** |
 
@@ -447,6 +447,9 @@ eigenes Paket mit Sicherheitsentwurf.
    einen eigenen Verleihungs-Pfad.
 2. **Tages-Limit für Likes** — klein; macht Likes knapp. Bringt Out of
    Love/Higher Love/Crazy in Love.
+   **GEBAUT am 2026-08-14** (50/Tag je Mensch und Community, UTC-Kalendertag,
+   Config-Wert; Rücknahme erstattet nichts) — Einzelheiten in Teil 5. Alle
+   drei Abzeichen sind damit da.
 3. **Emoji-Reaktionen neben den Stimmen.** Ich hatte abgeraten (drittes Signal
    am selben Beitrag); Davids Entscheidung steht. **Folgeregel, damit die
    Bedeutung eindeutig bleibt:** Badges zählen weiter AUSSCHLIESSLICH Upvotes
@@ -517,6 +520,47 @@ nach `docs/OPEN-ITEMS.md`.
   Hilfe-Umbenennung Stunden zuvor auf genau diesem Pfad hinterlassen hatte, ist
   entfernt — eine routeRule gewinnt gegen die Seite, beides ging nicht
   (Begründung im Kopf von `apps/help/nuxt.config.ts`).
+
+- **Tages-Limit für Likes** (2026-08-14, Teil-4-Mechanik 2 — Davids Zuschnitt
+  vom selben Tag: 50 pro Tag je Mensch und Community, Config-Wert, `0` = aus).
+  Durchgesetzt in BEIDEN Aufstimm-Routen (Themen `posts/[id]/score`, Antworten
+  `comments/[id]/vote`) VOR dem Schreiben; abgewiesen wird mit **429** und
+  `reason: like_limit_reached`, die Oberfläche macht daraus einen eigenen
+  Hinweis statt der Fehlermeldung „Stimme kam nicht an".
+  **„TAG" IST DER UTC-KALENDERTAG**, ausdrücklich nicht die Zeitzone des
+  Nutzers: `prefs.timezone` gibt es seit U15, aber ein Limit, das mit der
+  Zonen-Wahl wandert, schenkt beim Umstellen ein zweites Kontingent am selben
+  Abend — eine Sicherung darf nicht an einer Einstellung hängen, die der
+  Betroffene selbst dreht. Preis: wer in UTC+13 lebt, bekommt sein Kontingent
+  mittags.
+  **DIE RÜCKNAHME ERSTATTET NICHTS**, und das ist die tragende Eigenschaft:
+  eine Stimme lässt sich per Klick zurücknehmen, also wäre ein Limit mit
+  Erstattung mit zwei Klicks je Like beliebig zu umgehen. Verbraucht ist ein
+  Like mit seiner VERGABE — wie eine Einladung mit ihrer Erzeugung. Abstimmen
+  kosten nichts, der Wechsel von Ab- auf Aufstimme schon; entschieden wird das
+  über dasselbe `upvoteDelta`, das die Abzeichen-Zähler steuert, damit „was ist
+  ein Like" nur EINE Antwort hat.
+  **DER STAND LIEGT IN `member_counters`** (posts-019: `likeDay`, `likesToday`,
+  `likeLimitDays`) und nicht in eigenen Zeilen — die Zeile gibt es schon, genau
+  eine je (Community, Mensch), und sie wird bei jeder Aufstimme ohnehin
+  geschrieben. Der Tageswechsel ist deshalb ein Vergleich beim nächsten Like
+  und kein nächtlicher Lauf über Millionen Zeilen. Ein Zählen der heutigen
+  Vote-Zeilen wäre die naheliegende Alternative und ist FALSCH: die Rücknahme
+  löscht die Zeile, das Kontingent käme zurück.
+  Regeln PURE in `packages/core/shared/likeAllowance.ts` (dort, weil zwei
+  Layer sie brauchen und einander nicht kennen dürfen), Autorität im
+  posts-Layer über den Core-Vertrag `registerLikeAllowanceAuthority` — ohne
+  posts-Layer gibt es schlicht kein Limit (erlaubender No-Op). Beweis
+  `packages/posts/scripts/verify-like-limit.mjs` (28/28 gegen ein testweise auf
+  3 gesenktes Kontingent, 75/75 gegen die echten 50).
+  **BRINGT `out-of-love` / `higher-love` / `crazy-in-love`** (1 / 5 / 20 Tage
+  mit erreichtem Limit). Gebucht wird der Tag GENAU EINMAL — an dem atomaren
+  Hochzählen, dessen Ergebnis exakt auf dem Limit landet (`crossesLikeLimit`,
+  `=== limit` statt `>=`); jeder weitere abgewiesene Versuch desselben Tages
+  bucht nichts, sonst hieße „an 5 Tagen" nur „fünfmal dagegengelaufen".
+  Der Zähler startet für alle bei 0 und wird NIE geeicht: „an diesem Tag war
+  das Kontingent aufgebraucht" lässt sich aus dem Bestand nicht einmal falsch
+  rekonstruieren.
 
 - **Einladungen durch Mitglieder** (2026-08-14, Teil-4-Mechanik 1 — Davids
   Zuschnitt vom selben Tag: 5 pro Woche je Mitglied, je Community abschaltbar,
@@ -625,15 +669,16 @@ nach `docs/OPEN-ITEMS.md`.
 
 ## Was Stufe 4 an Abzeichen NICHT bringt — und warum
 
-Der Katalog aus § 3.6 hat 40+ Einträge, gebaut sind 16. Die vollständige
+Der Katalog aus § 3.6 hat 40+ Einträge, gebaut sind 19. Die vollständige
 Begründung steht im Kopf von `packages/posts/shared/badges.ts` — dort, wo sie
 jemand liest, der ein Abzeichen nachreichen will. Kurzfassung:
 
 - **Dauerhaft draußen** (Davids Entscheidung, Teil 4): die neun, die ein
   personenbezogenes Verhaltensprotokoll bräuchten.
-- **Wartet auf seine Funktion**: Emoji, Zitat, Themen-Verlinkung,
-  Einladungen durch Mitglieder, Tages-Like-Limit — Reihenfolge in Teil 4.
-  („Erste Reaktion" ist seit dem 2026-08-13 gebaut und daher hier heraus.)
+- **Wartet auf seine Funktion**: Emoji, Zitat, Themen-Verlinkung —
+  Reihenfolge in Teil 4. („Erste Reaktion" ist seit dem 2026-08-13 gebaut,
+  „Promoter" und die drei Like-Limit-Abzeichen seit dem 2026-08-14; alle vier
+  sind daher hier heraus.)
 - **Nicht baubar, obwohl es so aussieht**: dieser Absatz hat sich geleert —
   „Anniversary" ist seit dem 2026-08-04 GEBAUT (Teil-5-Entscheidung 1), und
   „Editor" ebenfalls (gemeinsames Paket, Teilpaket 1: `posts.editedAt` kam
