@@ -175,6 +175,39 @@ eigenes Konto je Abschnitt, der es braucht. Und eine Prüfung stand als
 
 ---
 
+### F57 Mechanik 1 — Emoji-Reaktionen + der demo-Nachzügler des Account-Cutovers ✅ 2026-08-14
+
+**Reaktionen:** fester 8er-Satz an Diskussions-Themen (Details/Zuschnitt im
+DECISION-LOG 2026-08-14), Tabelle `discussion_reactions` (posts-017, Pool nur
+account-Instanz), Toggle je (Ziel, Nutzer, Emoji), gebündelte Aggregation
+(EINE Abfrage je Themenseite), badge-neutral mit Gegenprobe (5 Reaktionen
+ändern keinen Upvote-Zähler), `first-reaction`-Badge an der ersten
+ABGEGEBENEN Reaktion. Beweis 27/27, alle sieben Gates, Deploy `fb64a0ab`.
+
+**Der Live-Beweis fand einen AH-1-NACHZÜGLER:** die Reaktions-Route
+antwortete auf demo 500 — `communities.projectId` von demo und fünf
+stillgelegten Probe-Communities zeigte noch auf das EINGEFRORENE
+`pool`-Projekt. demo las und schrieb seit dem Cutover (2026-08-11) im
+falschen Projekt; jede seitdem neue Tabelle fehlte dort (Nav/SEO warnten nur
+fail-soft — die Reaktions-LESEROUTE machte das Loch als 500 sichtbar).
+Reparatur über `scripts/ops/repair-runtime-project.mjs` (Dry-Run-Default,
+defensive Gegenprüfung: bricht ab, wenn seit dem Stichtag ins eingefrorene
+Projekt geschrieben wurde): Abweichung über alle 37 pool-Tabellen = 0,
+Bestände t-demo beidseitig identisch (10/8/24), dann 6 Zeiger auf `account`
+— demo antwortet seither 200 mit dem echten Emoji-Satz.
+
+**Gelernt:** (1) Ein Cutover ist erst zu, wenn auch die ZEIGER umgezogen
+sind — AH-1 migrierte Daten und fror pool ein, aber `communities.projectId`
+der Bestands-Communities blieb; drei Tage lang bediente ein eingefrorenes
+Projekt live Traffic, und nur fail-soft-Leser verdeckten es. Cutover-Runbooks
+brauchen einen Punkt „alle Verweise auf das alte Ziel aufzählen und
+umhängen". (2) Fail-soft ist zweischneidig: die Nav-/SEO-Warnungen standen
+seit Tagen im Log, ohne dass sie jemand las — eine WARN-Zeile ohne Leser ist
+kein Netz; die erste NICHT-fail-softe Route deckte den Zustand auf.
+(3) `node --env-file` überschreibt exportierte Variablen nicht (zweiter
+Treffer dieser Falle diese Woche) — Migrations-Läufe nie mit
+`source`-Blöcken im selben Shell-Aufruf mischen.
+
 ### U15 Teil 3 — Weiterleitungen: alte Adressen führen wieder wohin ✅ 2026-08-13
 
 Owner legt Redirects an (`/dashboard/community/redirects`, Capability

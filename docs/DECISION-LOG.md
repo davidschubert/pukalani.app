@@ -7,6 +7,24 @@ die kleinen, verstreuten Beschlüsse.
 
 ---
 
+## 2026-08-14 — F57-Stellschrauben + Reaktions-Zuschnitt
+
+**Davids Antworten:** (1) Einladungen durch Mitglieder: **5 pro Woche je
+Mitglied** (ab Rolle Leser/in), je Community vom Owner abschaltbar,
+Config-Wert. (2) Tages-Limit für Likes: **50 pro Tag** (Discourse-Standard —
+im Alltag unspürbar, beim Binge-Liken erreicht; speist Out-of-Love).
+(3) Themen-Verlinkung mit Rückverweis: **nach** den Mechaniken 2+3 als
+eigenes Paket. Reihenfolge damit: Reaktionen (live 2026-08-14) → Einladungen
+→ Like-Limit → Verlinkung.
+
+**Reaktions-Zuschnitt (Mechanik 1, umgesetzt):** fester 8er-Satz
+(laugh/tada/thinking/eyes/sad/fire/thanks/idea) — BEWUSST ohne 👍/❤️, die
+neben dem Aufstimm-Pfeil als zweite Zustimmung gelesen würden
+(Badge-Neutralitäts-Regel); gespeichert wird der Schlüssel, nie das Zeichen.
+Ziel: Diskussions-THEMEN (die Antworten liegen im comments-Layer — offene
+Folge-Frage an David); mehrere Emojis je Nutzer, je Emoji Toggle. Realtime
+bewusst optimistisch statt Socket (Andockpunkt dokumentiert).
+
 ## 2026-08-13 — U15-Zuschnitt-Runde + MFA-Folgen
 
 **Davids Antworten (drei Fragerunden):** (1) Navigations-Editor: ausblenden +
