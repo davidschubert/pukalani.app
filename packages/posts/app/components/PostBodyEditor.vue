@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { EditorToolbarItem } from '@nuxt/ui'
-import Mention from '@tiptap/extension-mention'
+import Mention, { type MentionOptions } from '@tiptap/extension-mention'
+import type { TopicLinkSuggestion } from '../../shared/types/post'
 import { POST_EMOJI_ITEMS } from '../utils/emojiMenuItems'
 
 /**
@@ -183,10 +184,68 @@ const editorProps = {
  * als Vergleichsform zusagt. Fehlt es wider Erwarten, fällt der Knoten auf
  * eine leere Zeichenkette zurück — lieber nichts im Beitrag als `@undefined`.
  */
+/**
+ * Wie ein eingefügter Knoten IM EDITOR aussieht (nicht, wie er gespeichert
+ * wird — das macht `renderMarkdown`).
+ *
+ * Der Token eines Themen-Verweises trägt sein `#` bereits; ein Handle trägt
+ * sein `@` nie. Deshalb wird nur vorangestellt, was noch fehlt.
+ */
+function mentionNodeLabel(attrs: Record<string, unknown>): string {
+  const char = typeof attrs.mentionSuggestionChar === 'string' ? attrs.mentionSuggestionChar : '@'
+  const text = attrs.label ?? attrs.id
+  if (typeof text !== 'string' || !text) return char
+  return text.startsWith(char) ? text : `${char}${text}`
+}
+
 const MENTION_AS_PLAIN_TEXT = Mention.extend({
+  /**
+   * ── ZWEI MENÜS, EIN KNOTEN (F57, Themen-Verlinkung) ──────────────────────
+   * `UEditorMentionMenu` fügt IMMER `type: 'mention'` ein — auch das
+   * `#`-Menü. Ein eigener Knotentyp wäre also gar nicht erreichbar, ohne den
+   * `onSelect` der Komponente zu ersetzen. Er ist auch nicht nötig: das
+   * auslösende Zeichen reist als Attribut mit (`mentionSuggestionChar`, von
+   * `@tiptap/extension-mention` deklariert und beim Einfügen gesetzt), und
+   * daran unterscheidet dieser eine Serialisierer die beiden Fälle.
+   *
+   * `#` ⇒ `attrs.id` ist der FERTIGE Token, den `/api/posts/discussions/
+   * link-search` gebildet hat (`#<id>-<deko>`), und wird WÖRTLICH übernommen —
+   * die Route ist die einzige Stelle, die Id und Slug kennt.
+   * `@` ⇒ `attrs.id` ist der nackte Handle, das `@` kommt hierher.
+   *
+   * Fehlt `id` wider Erwarten, bleibt es bei der leeren Zeichenkette: lieber
+   * nichts im Beitrag als `@undefined`.
+   */
   renderMarkdown: (node) => {
-    const handle = node.attrs?.id
-    return typeof handle === 'string' && handle ? `@${handle}` : ''
+    const value = node.attrs?.id
+    if (typeof value !== 'string' || !value) return ''
+    return node.attrs?.mentionSuggestionChar === '#' ? value : `@${value}`
+  },
+
+  /**
+   * NUR DIE ANZEIGE IM EDITOR, nicht das Speicherformat.
+   *
+   * Die Vorgabe von `@tiptap/extension-mention` nimmt das Zeichen aus der
+   * `suggestions`-Konfiguration — die hier LEER ist (die Suggestion-Plugins
+   * stellt `useEditorMenu` von @nuxt/ui, nicht die Extension). `null` fällt
+   * dort auf `'@'` zurück, ein gerade eingefügter Themen-Verweis sähe also bis
+   * zum nächsten Laden aus wie eine Erwähnung. Genommen wird deshalb das
+   * Attribut am KNOTEN.
+   *
+   * `suggestions: [{ char: '#' }, …]` wäre der naheliegende Weg gewesen und
+   * ist bewusst NICHT gewählt: die Extension legt daraus eigene
+   * Suggestion-Plugins an, die mit denen der Menü-Komponenten kollidierten.
+   */
+  addOptions(): MentionOptions {
+    return {
+      ...(this.parent?.() ?? {}) as MentionOptions,
+      // Array-Form statt schlichtem String: die Laufzeit nähme beides, der
+      // Typ nur diese. `options.HTMLAttributes` trägt an dieser Stelle bereits
+      // `data-type` und die zusammengeführten Attribute (der Wrapper mergt sie
+      // vor dem Aufruf) — genau wie in der Vorgabe der Extension.
+      renderHTML: ({ options, node }) => ['span', options.HTMLAttributes, mentionNodeLabel(node.attrs)],
+      renderText: ({ node }) => mentionNodeLabel(node.attrs),
+    }
   },
 })
 const extensions = [MENTION_AS_PLAIN_TEXT]
@@ -235,6 +294,49 @@ watch(mentionQuery, (query) => {
     mentionItems.value = rows
   }, SEARCH_DEBOUNCE_MS)
 })
+
+/**
+ * ── DAS `#`-MENÜ: THEMEN STATT MENSCHEN (F57) ────────────────────────────
+ * Dieselbe Bauart wie oben, mit EINEM Unterschied, der Absicht ist: ein
+ * nacktes `#` zeigt hier die zuletzt aktiven Themen, statt nichts.
+ *
+ * Bei den Erwähnungen wäre die leere Anfrage das Aufblättern der
+ * Mitgliederliste gewesen — hier ist sie das Naheliegende: wer `#` tippt,
+ * meint fast immer etwas, worüber gerade gesprochen wird. Die Route deckelt
+ * auf acht und lässt nur Themen dieser Community durch.
+ *
+ * Preis, den man kennen muss: `onExit` setzt den Suchbegriff auf '' zurück,
+ * und '' ist hier eine gültige Anfrage. Nach dem Schließen des Menüs läuft
+ * also noch EIN Abruf ins Leere. Er ist entprellt, gedrosselt und sein
+ * Ergebnis landet in einer Liste, die niemand mehr sieht — das ist billiger
+ * als ein zweiter Zustand, der „gerade `#` getippt" von „Menü beendet"
+ * unterscheiden müsste.
+ */
+const topicQuery = ref('')
+const topicItems = ref<TopicLinkSuggestion[]>([])
+
+let topicTimer: ReturnType<typeof setTimeout> | undefined
+let topicSeq = 0
+
+watch(topicQuery, (query) => {
+  clearTimeout(topicTimer)
+
+  const seq = ++topicSeq
+  topicTimer = setTimeout(async () => {
+    let rows: TopicLinkSuggestion[] = []
+    try {
+      rows = await $fetch<TopicLinkSuggestion[]>('/api/posts/discussions/link-search', {
+        query: query ? { q: query } : {},
+      })
+    }
+    catch {
+      // Wie oben: eine Tipphilfe bleibt still, wenn sie nicht helfen kann.
+      rows = []
+    }
+    if (seq !== topicSeq) return
+    topicItems.value = rows
+  }, SEARCH_DEBOUNCE_MS)
+})
 </script>
 
 <template>
@@ -269,6 +371,18 @@ watch(mentionQuery, (query) => {
         v-model:search-term="mentionQuery"
         :editor="editor"
         :items="mentionItems"
+        ignore-filter
+      />
+      <!-- Themen verlinken: `#` öffnet, der Server sucht (siehe Kopf des
+           Loaders). EIGENER `plugin-key` ist PFLICHT — der Default
+           ('mentionMenu') gehört schon dem `@`-Menü, und zwei Suggestion-
+           Plugins mit demselben Schlüssel schließen einander aus. -->
+      <UEditorMentionMenu
+        v-model:search-term="topicQuery"
+        :editor="editor"
+        :items="topicItems"
+        char="#"
+        plugin-key="topicLinkMenu"
         ignore-filter
       />
     </template>

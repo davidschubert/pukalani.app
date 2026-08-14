@@ -85,6 +85,13 @@ const post = ref(topic.value.post)
 
     <PostCard :post="post" default-comments-open @updated="p => { post = p }">
       <template #comments="{ post: slotPost }">
+        <!-- „Verlinkt von …" (F57) steht VOR den Kommentaren, nicht hinter
+             ihnen: es gehört zum Beitrag, und hinter einer aufgeklappten
+             Kommentarliste sähe es niemand. Nur hier, nie im Feed — die
+             Komponente holt ihre Daten selbst, und 25 Karten wären 25
+             Abfragen. -->
+        <TopicBacklinks :target-id="slotPost.$id" />
+
         <!-- `locked` ist reine Anzeige (der Server lehnt ohnehin ab, F1
              Stufe 3) — aber sie erspart dem Leser, seinen Text erst zu
              schreiben und dann abgewiesen zu werden. -->

@@ -38,6 +38,8 @@ export default defineEventHandler(async (event): Promise<PostListResponse> => {
 
   // Erwähnungen: EINE Abfrage für die ganze Seite (nie eine je Beitrag).
   const mentions = await mentionsForPosts(event, res.rows)
+  // Themen-Verweise (F57): derselbe Bündel-Schnitt, aus demselben Grund.
+  const topicLinks = await topicLinksForPosts(event, res.rows)
 
   const rows: FeedPost[] = res.rows.map(row => ({
     ...row,
@@ -46,6 +48,7 @@ export default defineEventHandler(async (event): Promise<PostListResponse> => {
     poll: pollStates.get(row.$id),
     myPostVote: postVotes.get(row.$id) ?? null,
     mentions: mentions.get(row.$id),
+    topicLinks: topicLinks.get(row.$id),
   }))
 
   return {

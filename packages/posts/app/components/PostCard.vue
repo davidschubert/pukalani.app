@@ -311,6 +311,7 @@ const showTooltip = computed(() => (props.replyCount ?? 0) > 0)
         <MarkdownContent
           :source="post.body"
           :mentions="post.mentions"
+          :links="post.topicLinks"
           class="text-default"
           :class="post.type === 'question' && !post.title ? 'text-lg font-medium' : 'text-sm'"
         />

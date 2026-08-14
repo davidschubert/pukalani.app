@@ -72,12 +72,28 @@ export default defineEventHandler(async (event): Promise<DiscussionTopicResponse
     postVotesFor(event, [row], userId),
   ])
 
+  /**
+   * Was im TEXT steht, aufgelöst (F57).
+   *
+   * `mentions` fehlte hier bis dahin — im Feed wurden Erwähnungen
+   * hervorgehoben, auf der Themen-Detailseite nicht. Das war schon vorher
+   * schief; mit den Verweisen daneben wäre es unerklärlich geworden (die eine
+   * Auszeichnung da, die andere nicht). Beide kosten hier je EINE Abfrage,
+   * weil es EIN Beitrag ist.
+   */
+  const [mentions, topicLinks] = await Promise.all([
+    mentionsForPosts(event, [row]),
+    topicLinksForPost(event, row),
+  ])
+
   const post: FeedPost = {
     ...row,
     authorAvatarUrl: avatars.get(row.authorId),
     authorHandle: handles.get(row.authorId),
     poll: pollStates.get(row.$id),
     myPostVote: postVotes.get(row.$id) ?? null,
+    mentions: mentions.get(row.$id),
+    topicLinks: topicLinks.length > 0 ? topicLinks : undefined,
   }
 
   const slug = topicSlug(row.title, row.body)

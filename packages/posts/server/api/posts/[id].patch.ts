@@ -220,5 +220,26 @@ export default defineEventHandler(async (event) => {
     await recordUserCounterEvents(event, [{ userId: user.$id, kind: 'edits', delta: 1 }])
   }
 
+  /**
+   * F57: den Rückverweis-Index nachziehen — ERSETZEN, nicht anhängen.
+   *
+   * Ohne diesen Schritt bliebe ein entfernter Verweis für immer am Ziel
+   * stehen: „Verlinkt von" zeigte auf einen Beitrag, in dem längst nichts
+   * mehr steht. Das Ersetzen ist der eigentliche Grund, warum `syncTopicLinks`
+   * ein Diff macht.
+   *
+   * BEDINGUNG IST `contentEdited` ALLEIN, NICHT `&& isAuthor` — anders als
+   * beim Zähler eine Zeile darüber. Der Text ist der Text: hat ein Kurator ihn
+   * geändert, haben sich die Verweise geändert, und der Index muss das
+   * abbilden. Das Abzeichen dagegen gehört dem, der seinen EIGENEN Beitrag
+   * verlinkt hat.
+   */
+  if (contentEdited) {
+    const linked = await syncTopicLinks(event, updated).catch(() => ({ added: 0, removed: 0 }))
+    if (linked.added > 0 && isAuthor) {
+      await recordUserCounterEvents(event, [{ userId: user.$id, kind: 'linksMade', delta: linked.added }])
+    }
+  }
+
   return updated
 })

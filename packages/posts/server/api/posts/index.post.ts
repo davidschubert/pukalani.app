@@ -146,6 +146,24 @@ export default defineEventHandler(async (event) => {
     await ensureAccountHandleAudience(event, user.$id)
     await notifyPostMentions(event, row, user, '/feed')
       .catch(() => undefined)
+
+    /**
+     * F57: der Rückverweis-Index der Themen-Verlinkung.
+     *
+     * FAIL-SOFT wie die Erwähnungen darüber — ein misslungener Index kostet
+     * einen Rückverweis, nie den Beitrag. Der Zähler bekommt nur, was
+     * WIRKLICH angelegt wurde (`added`): ein Verweis auf ein erfundenes Thema
+     * legt keine Zeile an und verdient deshalb kein „First Link".
+     *
+     * Im `!scheduled`-Zweig aus demselben Grund wie die Benachrichtigung: ein
+     * geplanter Beitrag ist noch nicht in der Welt, ein Rückverweis auf ihn
+     * zeigte auf etwas, das niemand aufrufen kann. Nachgeholt wird er beim
+     * Fälligwerden nicht — dieselbe bewusste Lücke wie bei den Erwähnungen.
+     */
+    const linked = await syncTopicLinks(event, row).catch(() => ({ added: 0, removed: 0 }))
+    if (linked.added > 0) {
+      await recordUserCounterEvents(event, [{ userId: user.$id, kind: 'linksMade', delta: linked.added }])
+    }
   }
 
   setResponseStatus(event, 201)
