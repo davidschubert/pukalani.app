@@ -30,6 +30,72 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### U15 Teil 5 (letzter) — Zeitzone: Datum und Uhrzeit in der eigenen Zone ✅ 2026-08-13
+
+**Damit ist U15 zu.** Konto → Allgemein bekommt eine Karte „Zeitzone": ein
+Auswahlfeld mit Suche, „Automatisch (Browser)" als erste Option und Vorgabe,
+darunter die 418 Zonen der Laufzeit nach Region gruppiert. Darunter steht die
+Wirkung im Klartext („Jetzt: 04:24 AM in Europe/Berlin") — eine Einstellung,
+deren Folge man erst morgen bemerkt, kann niemand prüfen.
+
+Abgelegt in den Appwrite-Account-Prefs (`prefs.timezone`, IANA-Name, `''` =
+automatisch) wie `emailNotifications`/`emailLocale` — **keine Tabelle, keine
+Migration**. Geschrieben über eine eigene kleine Route `PUT /api/auth/timezone`
+(Session-Client, `updatePrefs` MIT MERGE); `/api/auth/` steht schon in
+`controlApiPrefixes`, die Karte funktioniert deshalb auch auf den
+Kontroll-Hosts, wo dieselbe Fläche als `/profile` läuft.
+
+WIRKUNG AN EINEM PUNKT: `useFormatDate()` ist der zentrale Datums-Formatter und
+der einzige Anfasspunkt. Ohne Wahl wird gar keine `timeZone`-Option gesetzt —
+`Intl` rechnet wie bisher in der Zone der Laufzeit, das Verhalten ist Byte für
+Byte das alte. `useFormatRelativeTime()` ist BEWUSST unberührt: „vor 5 Minuten"
+ist eine Differenz und kennt keine Zeitzone.
+
+Drei Dinge, die man nicht „vereinfachen" darf:
+
+- **Fail-closed beim Schreiben, fail-soft beim Lesen** (`core/shared/timezone.ts`).
+  Die Route prüft gegen `Intl.supportedValuesOf('timeZone')` und lehnt
+  Unbekanntes mit 400 ab; ein Tippfehler in den Prefs ließe sonst
+  `Intl.DateTimeFormat` bei JEDER späteren Anzeige eine RangeError werfen. Beim
+  LESEN wird eine unbekannte Zone still zu „automatisch" — die tzdb streicht
+  Zonen, und eine alte Wahl darf kein Dashboard weiß machen.
+- **Ein Date-only-String hat keine Zeitzone.** `'2025-12-31'` ist in Tokio
+  derselbe Tag wie in Denver. Er wird deshalb als UTC-Mitternacht gebaut UND in
+  UTC formatiert; das Paar hebt sich auf. Vorher stand dort lokale Mitternacht
+  mit lokaler Formatierung — dasselbe Ergebnis, aber sobald eine Konto-Zone
+  dazukommt, wäre das Paar gemischt und der Tag verschöbe sich.
+- **Kein Hydrations-Risiko, und zwar aus einem Grund:** die Zone kommt aus dem
+  Auth-Store, den `plugins/auth.server.ts` schon beim SSR aus
+  `event.context.user` füllt. Server-Render und erste Client-Render lesen
+  denselben Wert aus demselben Payload. Die laufende Uhr der „Jetzt"-Zeile ist
+  das Einzige, was der Server nicht wissen kann — sie steht in `<ClientOnly>`.
+
+Beweis `packages/core/scripts/verify-timezone.mjs` **11/11** gegen einen
+Worktree-Server (Gast 401 · `Mars/Olympus` 400 · `UTC` 400 · `europe/berlin`
+400 · echte Zone 200 · `''` 200 · SSR-HTML trägt die gewählte Zone · zurück auf
+automatisch = alter Zustand). Der entscheidende Vergleich nimmt
+`Pacific/Kiritimati` (UTC+14) gegen `Pacific/Niue` (UTC−11): 25 Stunden
+Abstand heißt zu JEDEM Zeitpunkt ein anderer Kalendertag, der Test kann also
+nicht zufällig grün sein. Gegenprobe gefahren: mit einem `useFormatDate()`, das
+die Zone ignoriert, fällt genau diese Prüfung (10/11). Dazu 25 Unit-Tests
+(`format.test.ts`, `timezone.test.ts`) und ein Durchgang im Browser — Auswahl,
+Suche, Speichern, Prefs-Merge (`emailNotifications` überlebt).
+
+**Gelernt:** (1) `Intl.supportedValuesOf('timeZone')` liefert **nur kanonische
+geografische Zonen** — kein `UTC`, kein `Etc/*`, keine Aliasse. Die
+Erlaubnisliste lehnt „UTC" deshalb ab; das ist eine Folge der Liste, kein
+Fehler, und steht als Test fest, damit es niemand „repariert". (2) Nuxt UIs
+`USelectMenu` behandelt `type: 'label'` als STRUKTUR und filtert es bei einer
+Suche NIE mit — die Suche nach „Berlin" zeigte sechs leere Regions-Zeilen über
+dem einen Treffer. Kur: `v-model:search-term` binden und die Überschriften
+weglassen, solange gesucht wird. (3) Eine dritte Anzeige-Stelle lief an der
+zentralen Rechnung vorbei: `/profile/activity` rief die rohe Util mit
+selbstgebauter Locale-Zeile. Wer eine Einstellung „im zentralen Formatter"
+verankert, muss die direkten Util-Aufrufe mitgreppen — sonst wirkt sie überall
+außer dort, wo ausdrücklich absolute Daten stehen.
+
+---
+
 ### U15 Teil 4 — Zwei-Faktor: TOTP als zweiter Schlüssel fürs Konto ✅ 2026-08-13
 
 Konto → Sicherheit bekommt eine Karte „Zwei-Faktor" (aus → einrichten → Codes

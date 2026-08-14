@@ -31,7 +31,7 @@ import type { AccountActivityEntry, AccountActivityResponse } from '../../../../
  */
 definePageMeta({ layout: 'onboarding', middleware: 'auth' })
 
-const { t, locale } = useI18n()
+const { t } = useI18n()
 const localePath = useLocalePath()
 
 const { data, status, error } = await useFetch<AccountActivityResponse>('/api/account/activity', {
@@ -60,7 +60,15 @@ const namesByHost = computed(() => {
 })
 
 const groups = computed(() => data.value?.groups ?? [])
-const dateLocale = computed(() => (locale.value === 'de' ? 'de-DE' : 'en-US'))
+
+/**
+ * Datum über `useFormatDate()` statt über die rohe Util (U15 Teil 5): der
+ * Composable bindet BEIDES — die Sprache (das tat die abgelöste Zeile
+ * `dateLocale` von Hand) und die Zeitzone des Kontos aus `prefs.timezone`.
+ * Eine Seite, die ausdrücklich absolute Daten zeigt, ist der letzte Ort, an
+ * dem eine zweite Rechnung stehen sollte.
+ */
+const { formatDate } = useFormatDate()
 
 function groupLabel(host: string): string {
   if (!host) return t('onboarding.account.activity.unknownCommunity')
@@ -152,7 +160,7 @@ useBrandTitle(() => t('onboarding.account.activity.title'))
                 <span class="block truncate text-sm text-muted">{{ entry.title }}</span>
               </span>
               <time :datetime="entry.createdAt" class="shrink-0 text-sm text-dimmed">
-                {{ formatDate(entry.createdAt, dateLocale) }}
+                {{ formatDate(entry.createdAt) }}
               </time>
             </component>
           </li>
