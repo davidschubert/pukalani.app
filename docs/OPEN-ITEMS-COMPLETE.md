@@ -30,6 +30,55 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### D7 — die Demo-Community war halb leer, und das Füllen legte einen Fehler frei ✅ 2026-08-15
+
+`demo.pukalani.app` ist von der Startseite verlinkt und das Erste, was ein
+Interessent vom Produkt sieht. Der Feed war gefüllt, **Diskussionen und Events
+aber leer** — genau die zwei Produkte, mit denen die Marketing-Seite am
+stärksten wirbt. Gefunden beim Durchspielen der Kundenreise.
+
+Eingespielt über zwei idempotente Seeds im Repo
+(`packages/posts/scripts/seed-demo-discussions.mjs`,
+`packages/events/scripts/seed-demo-events.mjs`, getrennt nach Layer wegen A14):
+4 Kategorien, 9 zweisprachige Themen von sieben Autoren über fünf Wochen
+gestaffelt, 15 Antworten (4 verschachtelt), 3 Termine mit 11 echten
+RSVP-Zeilen. Alle drei Zustände sind vertreten (angeheftet, geschlossen,
+gelöst). Beide Skripte verlangen `--community` UND `--public` als
+ausdrückliche Angaben: der Mandanten-Stempel ist auf einer Pool-Instanz nicht
+zu sehen, wenn er fehlt, und `communities.audience` steht im
+Control-Plane-Projekt, zu dem ein Pool-Schlüssel keinen Zugang hat — geraten
+würde dort im schlimmsten Fall eine geschlossene Community öffentlich.
+
+**Der eigentliche Ertrag war ein Produktfehler** (Commit `8cdc0fa3`): Nach dem
+Einspielen sagte die Events-Seite weiterhin „Aktuell sind keine Events
+geplant", während der Kalender darunter denselben Termin zeigte. Im Pool
+entscheidet der HOST über die Community, und ein blankes `$fetch('/api/…')`
+trägt ihn im SSR nicht mit — die Route antwortete `404 Unknown host`,
+`useAsyncData` merkte sich den Fehlschlag, der Browser heilte ihn nicht mehr.
+Der Kalender lief nur, weil er clientseitig lädt. Betroffen waren **vier**
+Stellen (EventList, Community-Karte im Dashboard, zwei Seiten-Editoren); die
+letzten zwei fand erst der neue Wächter `packages/core/tests/ssrTenantFetch.test.ts`,
+der alle mandantenfähigen Layer absucht und beidseitig bewiesen ist.
+
+**Gelernt:** (1) **Ein leeres Ergebnis ist von einem kaputten nicht zu
+unterscheiden, solange die Tabelle leer ist.** Der SSR-Fehler bestand
+vermutlich seit dem Bau des Events-Produkts und war unsichtbar, weil nirgends
+Termine lagen — Schaufenster zu füllen ist deshalb auch eine Prüfmethode, nicht
+nur Kosmetik. (2) **`listColumns` ohne `Query.limit()` liefert 25 Spalten.**
+Ich hielt die `events`-Tabelle daraufhin für unvollständig migriert und war
+nahe an einer unnötigen Produktions-Migration; eine Probe-Zeile (anlegen,
+sofort löschen) hat es geklärt, bevor etwas passierte. Die
+CLAUDE.md-Regel „immer explizites `Query.limit()`" gilt auch für die
+Metadaten-Abfragen, nicht nur für Datenzeilen. (3) **Eine Handsuche nach einem
+Muster findet die mehrzeiligen Fälle nicht** — meine Grep-Suche fand zwei von
+vier Stellen, der Wächter alle. (4) **Appwrite übernimmt ein mitgegebenes
+`$createdAt`.** Ohne das trugen alle 15 Antworten die Sekunde des Seed-Laufs,
+unter Themen von „vor drei Wochen"; die Zeilen mussten gelöscht und datiert neu
+geschrieben werden. Der Bestands-Seed der Demo hat denselben Makel, er ist dort
+nur schon eingealtert.
+
+---
+
 ### TS2589-Strukturfix — Nitros Routen-Typkarte ist aus ✅ 2026-08-14
 
 Zwei Pakete hintereinander waren an `TS2589` gestorben oder hatten drumherum

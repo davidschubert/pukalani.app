@@ -1,6 +1,6 @@
 # Offene Punkte
 
-**Stand: 2 offen · 4 geparkt/wartend · 13 bewusst zurückgestellt** (Zahlen bei JEDEM Umzug nach COMPLETE mitführen)
+**Stand: 2 offen · 3 geparkt/wartend · 13 bewusst zurückgestellt** (Zahlen bei JEDEM Umzug nach COMPLETE mitführen)
 
 Stand: **2026-08-12**. Hier steht **nur, was noch offen ist** — in der
 Reihenfolge, in der es abgearbeitet wird. Alles Erledigte (mit Begründung,
@@ -37,7 +37,6 @@ ist Wochen. (F3 ist am 2026-08-11 als AH-6 in die Hauptliste gezogen.)
 
 | # | Reihenfolge | Was (einfach erklärt) | Prio | Aufwand | Braucht David? | Wartet auf … |
 | --- | --- | --- | --- | --- | --- | --- |
-| D7 | 1 — Stunden | **Die Demo-Community ist halb leer.** `demo.pukalani.app` hat einen gefüllten Feed, aber **Diskussionen** („Noch keine Themen", null Kategorien) und **Events** („Aktuell sind keine Events geplant") sind leer — genau die zwei Produkte, mit denen die Startseite wirbt und auf die sie direkt verlinkt. Ein Interessent klickt aufs Unterscheidungsmerkmal und sieht eine leere Tabelle. Kein Code-Fehler, es fehlt Inhalt: 3–4 Kategorien, eine Handvoll Themen, zwei bis drei Termine — in der Stimme von „Lena / Morgenlicht". | Mittel | S | Ja: Freigabe der Texte (öffentliches Schaufenster) | gefunden bei der Kundenreise 2026-08-15 |
 | U14 | 1 — Tage | **Anmelden mit Google.** Der CODE ist gebaut (Knopf auf Anmelden + Registrieren, erklärte Datenschutz-Zeile, Beitritt/Feed wie beim Passwort-Weg, gedrosselt, ohne Credentials unsichtbar). Offen sind nur noch **Klicks bei David**: Google-Console, Appwrite-Console, zwei Schalter. Die Circle-Falle trifft uns nicht — Google sieht nur die Appwrite-Adresse, nie einen Kunden-Host. | Mittel | S (Rest) | Ja: die Klicks | [Runbook GOOGLE-LOGIN.md](runbooks/GOOGLE-LOGIN.md) |
 | F7 | 3 — Wochen | **Bezahlte Communities** — der Owner nimmt Geld von seinen Mitgliedern (Stripe Connect). Eigene Mechanik und eigene Rechtsfragen. **Schluckt D1** (Davids Entscheidung 2026-08-02): bezahlte Pool-Events/-Kurse ergeben erst mit Connect Sinn. Events-Hälfte technisch M, Kurse-Hälfte L/XL (community-scoped Entitlements sind unentworfen). Messlatte laut Benchmark: Skools Merchant-of-Record-Modell inkl. EU-USt., nicht der Prozentsatz. | Mittel | XL | Ja: Rechtsfragen | nach dem Go-Live; erst muss Geldfluss 1 (A6) ankommen |
 | F47 | 4 — Klicks | **Analytics v2, Rest = nur noch Plausible-UI-Klicks** (Adblock-Proxy live 2026-08-12; Kundenbereich-Messung ENTSCHIEDEN: Sammel-Site, Code live): (1) Goals der sieben Trichter-Ereignisse in der Sammel-Site WÖRTLICH anlegen (`funnel_cta_start` …, CE hat keine Goals-API), (2) E-Mail-Reports je Site aktivieren. | Niedrig | S | Ja: Plausible-UI | [ANALYTICS-V2.md](plans/ANALYTICS-V2.md) § 5 · DECISION-LOG 2026-08-12 |
