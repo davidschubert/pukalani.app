@@ -622,6 +622,41 @@ export interface MemberCounters extends Models.Row {
    * weil es kein Aggregat gibt, aus dem sich vergangene Tage ableiten ließen.
    */
   likeLimitDays: number
+  /**
+   * Der Tag, für den `likeLimitDays` zuletzt hochgezählt wurde (F57-Stufen,
+   * Migration posts-021) — `''` = noch nie.
+   *
+   * DIE ZUSAGE „GENAU EINMAL JE TAG" HÄNGT SEIT DER STAFFEL AN DIESER SPALTE:
+   * das Limit ist an einem Tag nicht mehr fest, weil ein Aufstieg mitten am
+   * Tag passieren kann (siehe `booksLikeLimitDay`). Die Gleichheit
+   * `likesToday === limit` allein trifft dann zweimal.
+   */
+  likeLimitDay: string
+  /**
+   * WER DIESEN MENSCHEN EINGELADEN HAT (F57-Stufen, Migration posts-021) —
+   * `''` = niemand (selbst gekommen, oder Einladung von vor diesem Paket).
+   *
+   * Die Runtime-Ablage einer Tatsache, deren Wahrheit im CONTROL PLANE steht
+   * (`community_invites.invitedBy`): hinterlegt EINMAL bei der Annahme, danach
+   * nie wieder angefasst. Sie macht den Aufstiegs-Hook zu einer reinen
+   * Runtime-Sache — ohne sie müsste jeder Stufen-Aufstieg über die Projekt-
+   * grenze fragen, wer den Aufsteiger hergeholt hat.
+   *
+   * NUR WENN LEER wird geschrieben: die erste Einladung gewinnt. Wer entfernt
+   * und später erneut eingeladen wird, zählt weiter für den, der ihn zuerst
+   * geholt hat — sonst wäre eine zweite Einladung ein Weg, eine bestehende
+   * Zuordnung umzuschreiben.
+   */
+  invitedBy: string
+  /**
+   * Wie viele EINGELADENE dieses Menschen Stufe 1 bzw. Stufe 2 erreicht haben
+   * (F57-Stufen) — die Zähler hinter `campaigner` (3) und `champion` (5).
+   *
+   * Gebucht beim Aufstieg des EINGELADENEN, nicht bei einer eigenen Handlung.
+   * Rein mitschreibend, nie geeicht.
+   */
+  inviteesBasic: number
+  inviteesMember: number
 }
 
 /**
@@ -697,4 +732,23 @@ export interface DiscussionBadgesResponse {
    * (Stufe 3 erreicht, Ernennung, oder Gast).
    */
   trustProgress: TrustLevelProgress | null
+  /**
+   * DAS TAGES-LIMIT FÜR ZUSTIMMUNGEN, so wie es für DIESEN Menschen gilt
+   * (F57-Stufen) — und was die nächste Stufe daran ändert.
+   *
+   * ES STEHT HIER, WEIL DIE STUFE SONST ETWAS VERSPRICHT, WAS NIEMAND SIEHT:
+   * „mehr Tages-Likes" ist keine Aussage, „100 statt 75 am Tag" ist eine. Die
+   * Zahlen kommen aus der Staffel-Config und werden NIE in einen
+   * Übersetzungs-Text geschrieben — sonst stünde nach der ersten Änderung der
+   * Config eine Zusage in der Oberfläche, die das Produkt nicht mehr hält.
+   *
+   * `next` ist `null`, wenn es keine nächste Stufe gibt ODER wenn sie am
+   * Kontingent nichts ändert (TL0 → TL1). Eine Zeile „ab Stufe 1: genauso
+   * viele" wäre Lärm.
+   *
+   * `0` heißt: es gibt kein Limit (Mechanik aus). Die Galerie sagt dann gar
+   * nichts — ein „unbegrenzt" wäre eine Zusage, die eine Config-Änderung
+   * still zurücknimmt.
+   */
+  likeLimit: { current: number, next: { level: number, limit: number } | null }
 }

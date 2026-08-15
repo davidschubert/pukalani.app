@@ -3,12 +3,14 @@ import type { H3Event } from 'h3'
 import type { TenantDb } from '../../../core/server/utils/tenantDb'
 import type { UserCounterEvent } from '../../../core/server/utils/userCounterEvents'
 import {
-  crossesLikeLimit,
+  booksLikeLimitDay,
   decideLikeSpend,
-  likeLimitFrom,
+  likeLimitForLevel,
+  likeMechanicOff,
   utcDayKey,
   type LikeAllowance,
 } from '../../../core/shared/likeAllowance'
+import { effectiveTrustLevel } from '../../shared/trustLevels'
 import {
   counterFellBehind,
   emptyMemberCounterValues,
@@ -130,7 +132,7 @@ async function createRow(
    * in `MemberCounterValues` — das sind die additiv geführten ZAHLEN, und
    * `likeDay` ist keine Zahl, die man hoch- oder herunterzählt.
    */
-  extra: Partial<Pick<MemberCounters, 'likeDay' | 'likesToday'>> = {},
+  extra: Partial<Pick<MemberCounters, 'likeDay' | 'likesToday' | 'likeLimitDay' | 'invitedBy'>> = {},
 ): Promise<{ row: MemberCounters | null, created: boolean }> {
   const row = await db.create<MemberCounters>(MEMBER_COUNTERS_TABLE, { userId, ...values, ...extra, seeded }, {
     // KEINE Row-Permissions: gelesen wird ausschließlich über die
@@ -263,8 +265,20 @@ export async function applyMemberCounterEvents(event: H3Event, events: readonly 
  * Wäre sie das, hinge an jeder einzelnen Stimme eine zusätzliche Abfrage.
  */
 function likesPerDayFromConfig(): unknown {
-  const appConfig = useAppConfig() as { pukalani?: { discussions?: { likesPerDay?: unknown } } }
-  return appConfig.pukalani?.discussions?.likesPerDay
+  const appConfig = useAppConfig() as { pukalani?: { discussions?: { likesPerDayByLevel?: unknown } } }
+  return appConfig.pukalani?.discussions?.likesPerDayByLevel
+}
+
+/**
+ * Das Kontingent EINER Stufe — die EINE Leseweise der Staffel für alles außer
+ * dem Verbrauch selbst (heute: die Auskunft in der Abzeichen-Galerie).
+ *
+ * Sie liegt hier und nicht bei der Galerie, damit der Config-Schlüssel genau
+ * einmal im Code steht: eine zweite Lesestelle wäre die, die beim nächsten
+ * Umbenennen vergessen wird und dann stillschweigend die Vorgabe anzeigt.
+ */
+export function memberLikeLimitFor(level: number): number {
+  return likeLimitForLevel(likesPerDayFromConfig(), level)
 }
 
 /**
@@ -279,6 +293,29 @@ function likesPerDayFromConfig(): unknown {
  */
 async function bookLikeLimitDay(event: H3Event, userId: string): Promise<void> {
   await recordUserCounterEvents(event, [{ userId, kind: 'likeLimitDays', delta: 1 }])
+}
+
+/**
+ * Den erreichten Tag ERST FESTHALTEN, dann buchen (F57-Stufen).
+ *
+ * Die Reihenfolge ist eine Abwägung und keine Gewohnheit: schlägt das
+ * Festhalten fehl, wird GAR NICHT gebucht — ein Tag, der nicht als gebucht
+ * markiert werden konnte, könnte sonst nach einem Stufen-Aufstieg am selben
+ * Tag ein zweites Mal gebucht werden. Lieber ein Tag zu wenig als ein
+ * Abzeichen zu viel; das ist dieselbe gutmütige Richtung, in die der ganze
+ * Verleihungs-Weg zeigt.
+ */
+async function stampAndBookLikeLimitDay(
+  event: H3Event,
+  db: TenantDb,
+  rowId: string,
+  userId: string,
+  today: string,
+): Promise<void> {
+  const stamped = await db.update<MemberCounters>(MEMBER_COUNTERS_TABLE, rowId, { likeLimitDay: today }, 'Counters not found')
+    .catch(() => null)
+  if (!stamped) return
+  await bookLikeLimitDay(event, userId)
 }
 
 /**
@@ -314,20 +351,40 @@ async function bookLikeLimitDay(event: H3Event, userId: string): Promise<void> {
  * zwei Netze übereinander machen aus einem Ausfall eine stille Lüge.
  */
 export async function spendMemberLikeAllowance(event: H3Event, userId: string): Promise<LikeAllowance> {
-  const limit = likeLimitFrom(likesPerDayFromConfig())
-  if (limit <= 0) return { ok: true }
+  const staffel = likesPerDayFromConfig()
+  /**
+   * DER BILLIGE AUSSTIEG BLEIBT, ER FRAGT NUR ANDERS (F57-Stufen): seit das
+   * Kontingent an der Stufe hängt, kann man es ohne die Zeile nicht mehr
+   * ausrechnen — wohl aber, ob es überhaupt eines gibt. Nur wenn KEINE Stufe
+   * eines hat, ist die Mechanik aus und die Zeile bleibt ungelesen.
+   */
+  if (likeMechanicOff(staffel)) return { ok: true }
 
   const db = counterDb(event)
   const today = utcDayKey(Date.now())
 
   let row = await findRow(event, db, userId)
   if (!row) {
-    // Erste Stimme dieses Menschen überhaupt: die Zeile trägt den Tagesstand
-    // gleich mit — ein getrenntes Anlegen und Hochzählen wäre ein Schritt und
-    // ein Wettlauf mehr (dieselbe Überlegung wie bei den Zähler-Deltas).
-    const attempt = await createRow(event, db, userId, emptyMemberCounterValues(), false, { likeDay: today, likesToday: 1 })
+    /**
+     * Erste Stimme dieses Menschen überhaupt: die Zeile trägt den Tagesstand
+     * gleich mit — ein getrenntes Anlegen und Hochzählen wäre ein Schritt und
+     * ein Wettlauf mehr (dieselbe Überlegung wie bei den Zähler-Deltas).
+     *
+     * OHNE ZEILE GIBT ES KEINE STUFE, also gilt Stufe 0. Das ist keine
+     * Notlösung, sondern die Wahrheit: die kleinste Schwelle verlangt zwei
+     * Tage Zugehörigkeit und einen eigenen Inhalt — wer hier steht, hat beides
+     * nicht.
+     */
+    const limit = likeLimitForLevel(staffel, 0)
+    if (limit <= 0) return { ok: true }
+    const books = booksLikeLimitDay(1, limit, '', today)
+    const attempt = await createRow(event, db, userId, emptyMemberCounterValues(), false, {
+      likeDay: today,
+      likesToday: 1,
+      ...(books ? { likeLimitDay: today } : {}),
+    })
     if (attempt.created) {
-      if (crossesLikeLimit(1, limit)) await bookLikeLimitDay(event, userId)
+      if (books) await bookLikeLimitDay(event, userId)
       return { ok: true }
     }
     // Wettlauf verloren ⇒ die fremde Zeile gilt; ohne Zeile (Störung) bleibt es
@@ -335,6 +392,14 @@ export async function spendMemberLikeAllowance(event: H3Event, userId: string): 
     if (!attempt.row) return { ok: true }
     row = attempt.row
   }
+
+  /**
+   * DAS KONTINGENT DIESES MENSCHEN (F57-Stufen): Staffel-Config mal WIRKENDE
+   * Stufe. Die Zeile hält beide Hälften der Stufe (erarbeitet + Ernennung),
+   * sie liegt also ohnehin vor — die Staffel kostet keine einzige zusätzliche
+   * Abfrage im heißesten Pfad des Produkts.
+   */
+  const limit = likeLimitForLevel(staffel, effectiveTrustLevel(row.trustLevel, row.trustLevelLeader === true))
 
   const decision = decideLikeSpend({
     limit,
@@ -357,8 +422,13 @@ export async function spendMemberLikeAllowance(event: H3Event, userId: string): 
      * vermeiden, hieße den Tageswechsel in einen nächtlichen Lauf über alle
      * Zeilen zu verlegen.
      */
-    await db.update<MemberCounters>(MEMBER_COUNTERS_TABLE, row.$id, { likeDay: today, likesToday: 1 }, 'Counters not found')
-    if (crossesLikeLimit(1, limit)) await bookLikeLimitDay(event, userId)
+    const books = booksLikeLimitDay(1, limit, row.likeLimitDay ?? '', today)
+    await db.update<MemberCounters>(MEMBER_COUNTERS_TABLE, row.$id, {
+      likeDay: today,
+      likesToday: 1,
+      ...(books ? { likeLimitDay: today } : {}),
+    }, 'Counters not found')
+    if (books) await bookLikeLimitDay(event, userId)
     return { ok: true }
   }
 
@@ -372,8 +442,51 @@ export async function spendMemberLikeAllowance(event: H3Event, userId: string): 
    * einmal — verlorene Likes UND ein doppelt gebuchter Tag.
    */
   const latest = await db.increment<MemberCounters>(MEMBER_COUNTERS_TABLE, row.$id, 'likesToday', { value: 1 }, 'Counters not found')
-  if (crossesLikeLimit(latest.likesToday ?? 0, limit)) await bookLikeLimitDay(event, userId)
+  if (booksLikeLimitDay(latest.likesToday ?? 0, limit, row.likeLimitDay ?? '', today)) {
+    await stampAndBookLikeLimitDay(event, db, row.$id, userId, today)
+  }
   return { ok: true }
+}
+
+/* ─── Wer hat wen hergeholt? (F57-Stufen) ────────────────────────────────── */
+
+/**
+ * DEN EINLADENDEN AN DER ZEILE DES EINGELADENEN HINTERLEGEN — die posts-Seite
+ * des Core-Vertrags `registerCommunityInviterRecorder`.
+ *
+ * Gerufen von der Annahme-Route, EINMAL im Leben einer Mitgliedschaft. Danach
+ * ist der Aufstiegs-Hook (`creditInviterForAscent`) eine reine Runtime-Sache:
+ * die Antwort auf „wer hat ihn hergeholt" steht in der Zeile, die er ohnehin
+ * in der Hand hält.
+ *
+ * ── DIE ERSTE EINLADUNG GEWINNT ───────────────────────────────────────────
+ * Ein bereits gesetzter Wert wird NIE überschrieben. Wer entfernt und später
+ * erneut eingeladen wird, zählt weiter für den, der ihn zuerst geholt hat —
+ * sonst wäre eine zweite Einladung ein Weg, eine bestehende Zuordnung
+ * umzuschreiben, und mit ihr die Abzeichen zweier Menschen.
+ *
+ * ── DIE ZEILE KANN FEHLEN, UND DANN ENTSTEHT SIE HIER ─────────────────────
+ * Ein frisch Eingeladener hat in dieser Community noch nichts getan, also gibt
+ * es seine Zähler-Zeile in aller Regel noch nicht. Sie wird ungeeicht angelegt
+ * (`seeded: false`) — die Startwerte holt das erste Hinsehen, wie überall
+ * sonst. Die Alternative wäre, den Stempel bis zum ersten Schreibvorgang
+ * aufzuschieben; dann müsste ihn dieser Schreibvorgang aus dem Control Plane
+ * holen, und genau das soll dieser Weg vermeiden.
+ */
+export async function rememberCommunityInviter(
+  event: H3Event,
+  record: { userId: string, inviterId: string },
+): Promise<void> {
+  const db = counterDb(event)
+  const row = await findRow(event, db, record.userId)
+
+  if (!row) {
+    await createRow(event, db, record.userId, emptyMemberCounterValues(), false, { invitedBy: record.inviterId })
+    return
+  }
+
+  if ((row.invitedBy ?? '') !== '') return
+  await db.update<MemberCounters>(MEMBER_COUNTERS_TABLE, row.$id, { invitedBy: record.inviterId }, 'Counters not found')
 }
 
 /* ─── Der Leseweg (Abzeichen-Auswertung) ─────────────────────────────────── */

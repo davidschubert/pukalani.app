@@ -143,6 +143,24 @@ export function badgeFactsFrom(
    * stehen zwar noch da, aber gerade die zurückgenommenen haben mitgezählt.
    */
   facts.likeLimitDays = written?.likeLimitDays ?? 0
+  /**
+   * `linksMade` (F57, Themen-Verlinkung) und `inviteesBasic`/`inviteesMember`
+   * (F57-Stufen) kommen ebenfalls ausschliesslich vom Zaehler.
+   *
+   * Bei den beiden Einladungs-Zaehlern ist der Grund der haerteste im ganzen
+   * Satz: die Antwort steckt in FREMDEN Zeilen (den Stufen der Eingeladenen)
+   * UND in einem fremden Projekt (der Zuordnung). Es gibt hier nichts zu
+   * fragen, nicht einmal teuer.
+   *
+   * `linksMade` STAND HIER BIS ZU DIESEM PAKET NICHT — die Zeile fehlte, und
+   * damit blieb `first-link` fuer jeden unverdient, der es nicht schon beim
+   * Setzen des Verweises bekommen hatte (der Zaehl-Weg verleiht es, das NETZ
+   * beim Hinsehen sah eine 0). Ein Loch derselben Bauart, gegen das dieser
+   * ganze Nachzuegler-Weg gebaut ist.
+   */
+  facts.linksMade = written?.linksMade ?? 0
+  facts.inviteesBasic = written?.inviteesBasic ?? 0
+  facts.inviteesMember = written?.inviteesMember ?? 0
   facts.flagsRaised = counters[COUNTER_FLAGS_RAISED] ?? 0
   for (const threshold of thresholds) {
     facts.likedItems[threshold] = counters[counterLikedItems(threshold)] ?? 0
@@ -394,5 +412,7 @@ function counterFactsOf(values: MemberCounterValues): CounterBadgeFacts {
     invitesAccepted: values.invitesAccepted,
     likeLimitDays: values.likeLimitDays,
     linksMade: values.linksMade,
+    inviteesBasic: values.inviteesBasic,
+    inviteesMember: values.inviteesMember,
   }
 }

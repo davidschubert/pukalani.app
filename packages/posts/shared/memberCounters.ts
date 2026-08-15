@@ -19,6 +19,8 @@ export const MEMBER_COUNTER_COLUMNS = [
   'invitesAccepted',
   'likeLimitDays',
   'linksMade',
+  'inviteesBasic',
+  'inviteesMember',
 ] as const
 
 export type MemberCounterColumn = (typeof MEMBER_COUNTER_COLUMNS)[number]
@@ -27,7 +29,7 @@ export type MemberCounterColumn = (typeof MEMBER_COUNTER_COLUMNS)[number]
 export type MemberCounterValues = Record<MemberCounterColumn, number>
 
 export function emptyMemberCounterValues(): MemberCounterValues {
-  return { topicsCreated: 0, repliesCreated: 0, upvotesGiven: 0, upvotesReceived: 0, edits: 0, reactionsGiven: 0, invitesAccepted: 0, likeLimitDays: 0, linksMade: 0 }
+  return { topicsCreated: 0, repliesCreated: 0, upvotesGiven: 0, upvotesReceived: 0, edits: 0, reactionsGiven: 0, invitesAccepted: 0, likeLimitDays: 0, linksMade: 0, inviteesBasic: 0, inviteesMember: 0 }
 }
 
 /**
@@ -82,6 +84,14 @@ function whole(value: number | undefined): number {
  *    Aus dem Bestand ließe sich der Tag also nicht einmal falsch
  *    rekonstruieren.
  *
+ *  - `inviteesBasic` / `inviteesMember` (F57-Stufen) haben ZWEI Quellen, und
+ *    beide fehlen zugleich: die Zuordnung „wer hat wen eingeladen" liegt in
+ *    `community_invites` im Control Plane (unerreichbar, wie bei
+ *    `invitesAccepted`), und die Stufe der Eingeladenen liegt in DEREN
+ *    Zähler-Zeilen — sie zu ermitteln hieße, zu jedem Einladenden alle
+ *    Eingeladenen zu laden und je Person eine weitere Zeile. Beides für eine
+ *    Zahl, die ab jetzt ohnehin mitläuft.
+ *
  *  - `linksMade` (F57, Themen-Verlinkung) hat seine Quelle ABSICHTLICH nicht:
  *    die Rückverweis-Zeilen (`discussion_links`) gäbe es zwar, sie tragen aber
  *    bewusst kein `authorId` — eine Zeile aus zwei Row-Ids ist nichts
@@ -112,6 +122,8 @@ export function seedValuesFrom(input: Partial<MemberCounterSeedInput>): MemberCo
     invitesAccepted: 0,
     likeLimitDays: 0,
     linksMade: 0,
+    inviteesBasic: 0,
+    inviteesMember: 0,
   }
 }
 
@@ -160,6 +172,8 @@ export function healedValues(
     invitesAccepted: stored.invitesAccepted,
     likeLimitDays: stored.likeLimitDays,
     linksMade: stored.linksMade,
+    inviteesBasic: stored.inviteesBasic,
+    inviteesMember: stored.inviteesMember,
   }
 }
 

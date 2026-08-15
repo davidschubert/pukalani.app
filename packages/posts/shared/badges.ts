@@ -9,7 +9,7 @@
  * ── DER ZUSCHNITT: NUR, WAS HEUTE MESSBAR IST ─────────────────────────────
  * Davids Vorgabe fuer Stufe 4 lautet „nur heute messbare Abzeichen … fehlende
  * kommen automatisch dazu, sobald ihre Funktion existiert". Der Katalog aus
- * § 3.6 hat 40+ Eintraege; hier stehen 28 (6 + 12 + 6 + 4 — ein Test haelt die
+ * § 3.6 hat 40+ Eintraege; hier stehen 30 (6 + 14 + 6 + 4 — ein Test haelt die
  * Zahl an den Katalog gebunden, damit dieser Satz nicht mit der Zeit unwahr
  * wird).
  * Was fehlt und WARUM, gehoert an diese Stelle und nicht in eine Notiz, sonst
@@ -22,14 +22,15 @@
  *    Neun Abzeichen, und sie kommen NICHT spaeter.
  *  - **Wartet auf seine Funktion** — First Emoji, First Quote,
  *    First Onebox, First Reply By Email, Wiki Editor,
- *    Certified/Licensed, Campaigner/Champion (Vertrauensstufe der
- *    Eingeladenen — Begruendung am Katalog-Eintrag `promoter`).
+ *    Certified/Licensed.
  *    Die Reihenfolge dieser Funktionen steht in Teil 4. „First Reaction" ist
  *    seit F57 (2026-08-13) GEBAUT und steht als `first-reaction` im Katalog;
  *    „Promoter" ist seit F57 Mechanik 2 (2026-08-14) dazugekommen, und
  *    „Out of Love"/„Higher Love"/„Crazy in Love" seit Mechanik 3 (2026-08-14,
- *    Tages-Like-Limit), und „First Link" seit der letzten Mechanik
- *    (2026-08-14, Themen-Verlinkung mit Rueckverweis) —
+ *    Tages-Like-Limit), „First Link" seit der letzten Mechanik
+ *    (2026-08-14, Themen-Verlinkung mit Rueckverweis) und zuletzt
+ *    „Campaigner"/„Champion" (F57-Stufen, 2026-08-14, eigener
+ *    Verleihungs-Pfad ueber den Aufstieg der EINGELADENEN) —
  *    es ist zugleich die EINZIGE Stelle, an der Reaktionen ueberhaupt ein
  *    Abzeichen beruehren (Teil 4 Punkt 3: Abzeichen zaehlen ausschliesslich
  *    Upvotes, Reaktionen sind badge-neutral).
@@ -188,6 +189,30 @@ export interface BadgeRequirement {
    */
   invitesAccepted?: number
   /**
+   * Mindestens so viele EINGELADENE, die Vertrauensstufe 1 („Basic") erreicht
+   * haben (F57-Stufen) — die Bedingung von `campaigner`.
+   *
+   * NICHT „so viele angenommene Einladungen": der Katalog sagt „3 Eingeladene
+   * wurden Basic", und das ist eine ganz andere Aussage. Eine angenommene
+   * Einladung ist ein Klick; eine erreichte Stufe 1 heisst, dass dieser Mensch
+   * zwei Tage spaeter noch da war, etwas geschrieben und jemandem zugestimmt
+   * hat. Genau das soll das Abzeichen belegen — dass jemand nicht Adressen
+   * hergeholt hat, sondern Leute.
+   *
+   * Rein MITSCHREIBEND wie `invitesAccepted`, und zwar aus zwei Gruenden auf
+   * einmal (Zuordnung im Control Plane, Stufen in fremden Zeilen — Begruendung
+   * bei `seedValuesFrom`). Zaehlt AB der Einfuehrung.
+   */
+  inviteesBasic?: number
+  /**
+   * Mindestens so viele EINGELADENE, die Vertrauensstufe 2 („Member") erreicht
+   * haben (F57-Stufen) — die Bedingung von `champion`.
+   *
+   * Dieselbe Bauart wie `inviteesBasic`, eine Stufe hoeher. Derselbe Mensch
+   * zaehlt in BEIDE: wer Stufe 2 erreicht, hat Stufe 1 ueberschritten.
+   */
+  inviteesMember?: number
+  /**
    * An mindestens so vielen TAGEN das Tages-Like-Limit erreicht (F57 Mechanik 3).
    *
    * TAGE, NICHT LIKES — und das ist die ganze Pointe der drei Abzeichen, die
@@ -340,21 +365,37 @@ export const BADGE_CATALOG: readonly BadgeDefinition[] = [
    * „Promoter" (F57 Mechanik 2, seit 2026-08-14) — die erste Einladung, die
    * jemand ANGENOMMEN hat.
    *
-   * DIE STUFEN „Campaigner"/„Champion" FEHLEN WEITERHIN, und zwar mit Grund.
-   * Das Konzept (Teil 4) definiert sie ueber die Vertrauensstufe DER
-   * EINGELADENEN — „3 Eingeladene wurden Basic", „5 wurden Member". Das ist
-   * keine Zahl auf der Zeile des Einladenden: sie entsteht Wochen spaeter, in
-   * einer FREMDEN `member_counters`-Zeile, und faellt damit aus dem
-   * Zaehl-Kreuzungs-Weg heraus, den alle Abzeichen dieser Klasse benutzen. Sie
-   * braeuchten einen dritten Verleihungs-Pfad (wie `awardTrustLevelBadges`,
-   * nur beim Aufstieg des EINGELADENEN und mit einem Rueckverweis auf den
-   * Einladenden) — ein eigenes Paket, keine Zeile hier.
+   * DIE STUFEN „Campaigner"/„Champion" STEHEN SEIT F57-STUFEN DARUNTER — der
+   * dritte Verleihungs-Pfad, den dieser Absatz frueher als fehlend beschrieb,
+   * ist gebaut (`inviteeLevelCrossings` beim Aufstieg des Eingeladenen).
    *
-   * Sie mit „3 bzw. 10 angenommene Einladungen" zu belegen waere die billige
-   * Loesung und die falsche: das Abzeichen hiesse dann etwas anderes als das
-   * Konzept sagt, und niemand wuerde je nachlesen, warum.
+   * Was NICHT passiert ist, gehoert dazu: sie mit „3 bzw. 10 angenommene
+   * Einladungen" zu belegen waere die billige Loesung und die falsche gewesen —
+   * das Abzeichen hiesse dann etwas anderes als das Konzept sagt, und niemand
+   * wuerde je nachlesen, warum.
    */
   { key: 'promoter', group: 'community', awardedPer: 'once', requires: { invitesAccepted: 1 } },
+  /**
+   * „Campaigner" / „Champion" (F57-Stufen, 2026-08-14) — WOERTLICH nach dem
+   * Katalog (§ 3.6): „3 Eingeladene wurden Basic" / „5 wurden Member".
+   *
+   * EINMALIG wie ihre Nachbarn: beide Zaehler sind Bestaende, die nur wachsen.
+   *
+   * SIE FOLGEN NICHT ALLEIN AUS EINER EIGENEN HANDLUNG, und das ist die
+   * Besonderheit dieser zwei: das qualifizierende Ereignis ist der AUFSTIEG
+   * EINES ANDEREN MENSCHEN, Wochen nach der Einladung. Verliehen werden sie
+   * trotzdem ueber den gewoehnlichen Zaehl-Weg (`counterBadgeCrossings`) —
+   * weil der Aufstieg des Eingeladenen eine Buchung auf der Zeile des
+   * Einladenden ausloest, genau wie eine erhaltene Stimme. Der Unterschied
+   * steckt in der QUELLE der Buchung, nicht im Weg der Verleihung.
+   *
+   * WER IHN EINGELADEN HAT, STEHT AN DER ZEILE DES EINGELADENEN
+   * (`member_counters.invitedBy`, gestempelt bei der Annahme). Ohne diesen
+   * Stempel muesste der Aufstieg das Control Plane fragen — an einer Stelle,
+   * die im Schreibpfad haengt, fuer eine Antwort, die sich nie aendert.
+   */
+  { key: 'campaigner', group: 'community', awardedPer: 'once', requires: { inviteesBasic: 3 } },
+  { key: 'champion', group: 'community', awardedPer: 'once', requires: { inviteesMember: 5 } },
 
   /**
    * „Out of Love" / „Higher Love" / „Crazy in Love" (F57 Mechanik 3, seit
@@ -425,6 +466,10 @@ export interface BadgeFacts {
   reactionsGiven: number
   /** Angenommene eigene Einladungen (F57 Mechanik 2) — nie die verschickten. */
   invitesAccepted: number
+  /** Eingeladene, die Stufe 1 erreicht haben (F57-Stufen) — traegt `campaigner`. */
+  inviteesBasic: number
+  /** Eingeladene, die Stufe 2 erreicht haben (F57-Stufen) — traegt `champion`. */
+  inviteesMember: number
   /** Tage, an denen das Tages-Like-Limit erreicht war (F57 Mechanik 3). */
   likeLimitDays: number
   /** Gesetzte Themen-Verweise, die ein echtes Ziel hatten (F57). */
@@ -457,6 +502,8 @@ export function emptyBadgeFacts(): BadgeFacts {
     edits: 0,
     reactionsGiven: 0,
     invitesAccepted: 0,
+    inviteesBasic: 0,
+    inviteesMember: 0,
     likeLimitDays: 0,
     linksMade: 0,
     likedItems: {},
@@ -559,6 +606,8 @@ export function badgeEarned(badge: BadgeDefinition, facts: BadgeFacts): boolean 
   if (requires.reactionsGiven !== undefined && facts.reactionsGiven < requires.reactionsGiven) return false
   if (requires.edits !== undefined && facts.edits < requires.edits) return false
   if (requires.invitesAccepted !== undefined && facts.invitesAccepted < requires.invitesAccepted) return false
+  if (requires.inviteesBasic !== undefined && facts.inviteesBasic < requires.inviteesBasic) return false
+  if (requires.inviteesMember !== undefined && facts.inviteesMember < requires.inviteesMember) return false
   if (requires.likeLimitDays !== undefined && facts.likeLimitDays < requires.likeLimitDays) return false
   if (requires.linksMade !== undefined && facts.linksMade < requires.linksMade) return false
   if (!meetsLikedItems(facts.likedItems, requires.likedItems)) return false
@@ -614,6 +663,11 @@ export function badgeProgress(badge: BadgeDefinition, facts: BadgeFacts): BadgeP
   if (badge.requires.edits !== undefined) countable.push({ current: facts.edits, target: badge.requires.edits })
   if (badge.requires.reactionsGiven !== undefined) countable.push({ current: facts.reactionsGiven, target: badge.requires.reactionsGiven })
   if (badge.requires.invitesAccepted !== undefined) countable.push({ current: facts.invitesAccepted, target: badge.requires.invitesAccepted })
+  // Beide sind zaehlbar und beide haben ein Ziel ueber 1 — die Galerie zeigt
+  // hier also einen echten Fortschritt („1 von 3 Eingeladenen"). Das ist der
+  // Fall, fuer den `badgeProgress` gebaut ist: EINE Bedingung, eine Zahl.
+  if (badge.requires.inviteesBasic !== undefined) countable.push({ current: facts.inviteesBasic, target: badge.requires.inviteesBasic })
+  if (badge.requires.inviteesMember !== undefined) countable.push({ current: facts.inviteesMember, target: badge.requires.inviteesMember })
   if (badge.requires.likeLimitDays !== undefined) countable.push({ current: facts.likeLimitDays, target: badge.requires.likeLimitDays })
   if (badge.requires.linksMade !== undefined) countable.push({ current: facts.linksMade, target: badge.requires.linksMade })
   if (badge.requires.likedItems) countable.push({ current: facts.likedItems[badge.requires.likedItems.threshold] ?? 0, target: badge.requires.likedItems.count })
@@ -695,15 +749,16 @@ export function contentBadgeCrossings(
  * Nur dann darf die Zaehl-Buchung ein Abzeichen verleihen — sie kennt weder das
  * Profil noch die Meldungen noch die Verteilungs-Aggregate, und ein „vielleicht
  * erfuellt" waere ein Abzeichen zu viel. Heute trifft das auf `likesGiven`,
- * `edits`, `reactionsGiven`, `invitesAccepted`, `likeLimitDays` und
- * `linksMade` zu; kaeme
+ * `edits`, `reactionsGiven`, `invitesAccepted`, `likeLimitDays`, `linksMade`,
+ * `inviteesBasic` und `inviteesMember` zu; kaeme
  * ein Zaehler dazu, muss dieser Filter mitwachsen.
  */
 export function badgeFollowsFromCounters(badge: BadgeDefinition): boolean {
   const { requires } = badge
   if (requires.likesGiven === undefined && requires.edits === undefined && requires.reactionsGiven === undefined
     && requires.invitesAccepted === undefined && requires.likeLimitDays === undefined
-    && requires.linksMade === undefined) return false
+    && requires.linksMade === undefined
+    && requires.inviteesBasic === undefined && requires.inviteesMember === undefined) return false
   return !requires.profileComplete
     && requires.flagsRaised === undefined
     && !requires.likedItems
@@ -762,6 +817,17 @@ export interface CounterBadgeFacts {
   /** Angenommene Einladungen (F57 Mechanik 2) — traegt allein `promoter`. */
   invitesAccepted: number
   /**
+   * Eingeladene, die Stufe 1 bzw. 2 erreicht haben (F57-Stufen) — sie tragen
+   * `campaigner` und `champion`.
+   *
+   * Sie stehen hier, obwohl ihr Ereignis KEINE eigene Handlung ist: gebucht
+   * wird auf die Zeile des Einladenden, und ab diesem Punkt ist es eine
+   * Zaehl-Buchung wie jede andere. Genau deshalb brauchen die zwei Abzeichen
+   * keinen eigenen Verleihungs-Weg, nur eine eigene QUELLE.
+   */
+  inviteesBasic: number
+  inviteesMember: number
+  /**
    * Tage mit erreichtem Like-Limit (F57 Mechanik 3) — traegt „Out of Love",
    * „Higher Love" und „Crazy in Love".
    */
@@ -781,6 +847,8 @@ export function counterBadgeKeysFor(
       && (badge.requires.edits === undefined || values.edits >= badge.requires.edits)
       && (badge.requires.reactionsGiven === undefined || values.reactionsGiven >= badge.requires.reactionsGiven)
       && (badge.requires.invitesAccepted === undefined || values.invitesAccepted >= badge.requires.invitesAccepted)
+      && (badge.requires.inviteesBasic === undefined || values.inviteesBasic >= badge.requires.inviteesBasic)
+      && (badge.requires.inviteesMember === undefined || values.inviteesMember >= badge.requires.inviteesMember)
       && (badge.requires.likeLimitDays === undefined || values.likeLimitDays >= badge.requires.likeLimitDays)
       && (badge.requires.linksMade === undefined || values.linksMade >= badge.requires.linksMade))
     .map(badge => badge.key)

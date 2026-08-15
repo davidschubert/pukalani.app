@@ -7,6 +7,7 @@ import { memberCounterValues } from '../../shared/memberCounters'
 import {
   earnedTrustLevel,
   effectiveTrustLevel,
+  inviteeLevelCrossings,
   raisedTrustLevel,
   trustLevelReached,
   TRUST_LEVEL_THRESHOLDS,
@@ -158,6 +159,50 @@ export function countersAllowHigherLevel(stored: unknown, facts: TrustLevelFacts
 }
 
 /**
+ * „DIESER MENSCH IST AUFGESTIEGEN — SCHREIB ES DEM GUT, DER IHN HERGEHOLT HAT."
+ * (F57-Stufen, 2026-08-14.)
+ *
+ * ── WARUM DAS ÜBERHAUPT GEHT, OHNE DAS CONTROL PLANE ZU FRAGEN ────────────
+ * Weil die Zuordnung schon in dieser Zeile steht: `invitedBy` wurde EINMAL bei
+ * der Annahme hinterlegt (`rememberCommunityInviter`). Der Aufstieg schlägt
+ * damit nichts nach — er liest ein Feld, das er ohnehin geladen hat.
+ *
+ * ── GENAU EINMAL JE EINGELADENEM UND STUFE ────────────────────────────────
+ * Nicht durch eine Prüfung, sondern durch die Mechanik: die gespeicherte Stufe
+ * wird ausschließlich nach oben geschrieben, also wird jede Stufen-Grenze im
+ * Leben eines Menschen genau einmal überschritten. Gemeldet wird die DIFFERENZ
+ * `(before, after]` — ein zweiter Aufstieg desselben Menschen zählt für die
+ * schon überschrittenen Grenzen nicht erneut.
+ *
+ * ── DREI AUSSTIEGE ────────────────────────────────────────────────────────
+ *  - kein `invitedBy` (selbst gekommen, oder eingeladen vor diesem Paket),
+ *  - der Einladende ist der Aufsteiger selbst (heute unerreichbar, s. Vertrag),
+ *  - der Aufstieg überspringt keine der beiden Grenzen (der Normalfall bei
+ *    Stufe 3).
+ *
+ * FAIL-SOFT wie jede Zähl-Buchung: `recordUserCounterEvents` wirft nicht, und
+ * der Preis steht ausgesprochen — geht eine Buchung unter, ist sie WEG. Es
+ * gibt kein Netz beim Hinsehen, weil es kein Aggregat gibt, aus dem sich „drei
+ * meiner Eingeladenen sind Basic" nachrechnen ließe (Begründung bei
+ * `seedValuesFrom`).
+ */
+async function creditInviterForAscent(
+  event: H3Event,
+  row: MemberCounters,
+  userId: string,
+  before: TrustLevel,
+  after: TrustLevel,
+): Promise<void> {
+  const inviter = (row.invitedBy ?? '').trim()
+  if (!inviter || inviter === userId) return
+
+  const counters = inviteeLevelCrossings(before, after)
+  if (counters.length === 0) return
+
+  await recordUserCounterEvents(event, counters.map(kind => ({ userId: inviter, kind, delta: 1 })))
+}
+
+/**
  * Die Stufe neu prüfen und — wenn sie gestiegen ist — festhalten, die
  * Abzeichen verleihen und den Cache räumen.
  *
@@ -192,6 +237,22 @@ export async function refreshTrustLevel(
 
     const after = effectiveTrustLevel(raised, leader)
     forgetTrustLevel(tenantCacheScope(event), userId)
+
+    /**
+     * DER EINLADENDE BEKOMMT DIESEN AUFSTIEG GUTGESCHRIEBEN (F57-Stufen) —
+     * der dritte Verleihungs-Pfad, den `campaigner` und `champion` brauchen.
+     *
+     * HIER UND NICHT IM ZÄHL-WEG: das qualifizierende Ereignis ist der
+     * AUFSTIEG, nicht die Buchung, die ihn ausgelöst hat. Diese Stelle ist die
+     * einzige, an der „vorher Stufe X, jetzt Stufe Y" für einen Menschen
+     * vorliegt.
+     *
+     * GERECHNET WIRD MIT DER GESPEICHERTEN STUFE (`row.trustLevel` → `raised`),
+     * nicht mit der wirkenden: eine Ernennung ist keine erreichte Stufe 1 und
+     * 2 (Begründung am Vertrag). `setTrustLevelLeader` ruft hier deshalb gar
+     * nicht erst hinein.
+     */
+    await creditInviterForAscent(event, row, userId, normalizeTrustLevel(row.trustLevel), raised)
 
     /**
      * FAIL-SOFT und ausdrücklich NACH dem Schreiben: die Stufe ist das Recht,

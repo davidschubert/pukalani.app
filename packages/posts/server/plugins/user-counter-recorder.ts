@@ -22,4 +22,11 @@ export default defineNitroPlugin(() => {
    * schlicht kein Limit (erlaubender No-Op, Begründung im Vertrag).
    */
   registerLikeAllowanceAuthority(spendMemberLikeAllowance)
+  /**
+   * UND DASSELBE FÜR „WER HAT WEN HERGEHOLT" (F57-Stufen): der Stempel landet
+   * in derselben Zeile, also gehört auch diese Autorität hierher. Ohne
+   * posts-Layer bleibt der Vertrag unbesetzt — eine Einladung wird dann
+   * angenommen wie bisher, es gibt dort nur weder Stufen noch Abzeichen.
+   */
+  registerCommunityInviterRecorder(rememberCommunityInviter)
 })

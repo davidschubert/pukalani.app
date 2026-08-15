@@ -88,6 +88,24 @@ export default defineEventHandler(async (event) => {
       await recordUserCounterEvents(event, [
         { userId: result.invitedBy, kind: 'invitesAccepted', delta: 1 },
       ]).catch(() => {})
+
+      /**
+       * UND DIE ZUORDNUNG SELBST FESTHALTEN (F57-Stufen): `invitedBy` wandert
+       * an die Zähler-Zeile DES EINGELADENEN.
+       *
+       * WARUM HIER UND NICHT SPÄTER: `campaigner`/`champion` hängen laut
+       * Katalog an der Vertrauensstufe der Eingeladenen — ein Ereignis, das
+       * Wochen später in einer fremden Zeile entsteht. Wüsste der Aufstieg
+       * nicht, wer diesen Menschen hergeholt hat, müsste er das Control Plane
+       * fragen: eine Naht über die Projektgrenze, in einem Schreibpfad, für
+       * eine Antwort, die sich nie ändert. Der Stempel kostet EINEN
+       * Schreibvorgang, EINMAL im Leben dieser Mitgliedschaft.
+       *
+       * Dieselbe Zeile deckt beide Abzeichen-Familien: `invitesAccepted` zählt
+       * die ANNAHME (Promoter), `invitedBy` merkt sich, wem die späteren
+       * Aufstiege gutgeschrieben werden.
+       */
+      await recordCommunityInviter(event, { userId: userId ?? '', inviterId: result.invitedBy })
     }
   }
 

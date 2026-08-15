@@ -76,6 +76,25 @@ export default defineEventHandler(async (event): Promise<DiscussionBadgesRespons
     key, group, earned: false, awardedAt: null, count: 0,
   })
 
+  /**
+   * DAS TAGES-LIMIT ALS AUSKUNFT (F57-Stufen).
+   *
+   * Die Staffel ist der einzige greifbare VORTEIL einer Vertrauensstufe, den
+   * ein gewöhnliches Mitglied überhaupt bemerkt (die Stufen-Capabilities
+   * betreffen fremde Themen und sieht nur, wer sie hat). Ihn nicht zu zeigen
+   * hieße, eine Stufe zu vergeben und ihre Wirkung geheimzuhalten.
+   *
+   * `next` bleibt leer, wenn die nächste Stufe am Kontingent nichts ändert:
+   * zwischen TL0 und TL1 ist die Zahl dieselbe, und „ab Stufe 1: genauso
+   * viele" wäre eine Zeile, die nichts sagt.
+   */
+  const likeLimitOf = (level: number, nextLevel: number | null) => {
+    const current = memberLikeLimitFor(level)
+    if (current <= 0 || nextLevel === null) return { current, next: null }
+    const limit = memberLikeLimitFor(nextLevel)
+    return { current, next: limit > current ? { level: nextLevel, limit } : null }
+  }
+
   const user = event.context.user
   if (!user) {
     return {
@@ -83,6 +102,9 @@ export default defineEventHandler(async (event): Promise<DiscussionBadgesRespons
       facts: null,
       trustLevel: 0,
       trustProgress: null,
+      // Auch für Gäste: die Galerie sagt, was es hier zu holen gibt — und das
+      // Kontingent der Stufe 0 ist genau das, womit sie anfangen würden.
+      likeLimit: likeLimitOf(0, 1),
     }
   }
 
@@ -224,5 +246,6 @@ export default defineEventHandler(async (event): Promise<DiscussionBadgesRespons
     facts,
     trustLevel,
     trustProgress,
+    likeLimit: likeLimitOf(trustLevel, trustProgress?.level ?? null),
   }
 })

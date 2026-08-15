@@ -66,6 +66,19 @@ function progressValues(progress: BadgeProgress): Record<string, number> {
 const trustLevel = computed(() => data.value?.trustLevel ?? 0)
 const trustProgress = computed(() => data.value?.trustProgress ?? null)
 
+/**
+ * DAS TAGES-LIMIT (F57-Stufen) — die eine Zahl, an der man eine Stufe MERKT.
+ *
+ * Sie kommt aus der Antwort und steht in KEINEM Übersetzungs-Text: die Staffel
+ * ist eine Config, und eine in den Text geschriebene 50 wäre nach der ersten
+ * Änderung eine Zusage, die das Produkt nicht mehr hält.
+ *
+ * Nichts anzeigen, wenn es kein Limit gibt (Mechanik aus). Ein „unbegrenzt"
+ * wäre ein Versprechen, das eine Config-Zeile still zurücknimmt.
+ */
+const likeLimit = computed(() => data.value?.likeLimit ?? null)
+const showsLikeLimit = computed(() => (likeLimit.value?.current ?? 0) > 0)
+
 /** Getrennt, weil `t()` ein reines Werte-Objekt will (wie oben). */
 function trustValues(entry: TrustLevelProgressEntry): Record<string, number> {
   return { missing: entry.missing, current: entry.current ?? 0, target: entry.target }
@@ -132,6 +145,17 @@ function trustValues(entry: TrustLevelProgressEntry): Record<string, number> {
           </p>
           <p v-else class="mt-2 text-sm text-muted">
             {{ t('posts.discussions.trust.guestHint') }}
+          </p>
+
+          <!-- Was die Stufe konkret einbringt: die Zahl, nicht das Versprechen. -->
+          <p v-if="showsLikeLimit" class="mt-3 text-sm text-muted" data-trust-like-limit>
+            {{ t('posts.discussions.trust.likeLimit', { limit: likeLimit!.current }) }}
+            <span v-if="likeLimit!.next">
+              {{ t('posts.discussions.trust.likeLimitNext', {
+                level: t(`posts.trustLevels.level.${likeLimit!.next.level}`),
+                limit: likeLimit!.next.limit,
+              }) }}
+            </span>
           </p>
         </div>
 

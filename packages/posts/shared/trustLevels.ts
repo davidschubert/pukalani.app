@@ -1,4 +1,5 @@
 import { TRUST_LEVEL_EARNABLE_MAX, TRUST_LEVEL_LEADER, normalizeTrustLevel, type TrustLevel } from '../../core/shared/trustLevel'
+import type { MemberCounterColumn } from './memberCounters'
 
 /**
  * DIE SCHWELLEN DER VERTRAUENSSTUFEN (F1 Teilpaket 3, Davids Entscheidung
@@ -143,6 +144,55 @@ export function raisedTrustLevel(stored: unknown, earned: TrustLevel): TrustLeve
  */
 export function effectiveTrustLevel(stored: unknown, leader: boolean): TrustLevel {
   return leader ? TRUST_LEVEL_LEADER : normalizeTrustLevel(stored)
+}
+
+/* ─── Was der Aufstieg dem EINLADENDEN einbringt (F57-Stufen) ────────────── */
+
+/**
+ * WELCHE STUFE ZAHLT AUF WELCHEN ZÄHLER EIN — die Katalog-Definition von
+ * `Campaigner` und `Champion`, in Zahlen.
+ *
+ * Der Katalog (§ 3.6) sagt wörtlich: „Promoter / Campaigner / Champion —
+ * 1 Einladung / **3 Eingeladene wurden Basic** / **5 wurden Member**". „Basic"
+ * ist Stufe 1, „Member" ist Stufe 2; die ANZAHL (3 bzw. 5) steht nicht hier,
+ * sondern am Katalog-Eintrag des Abzeichens — hier steht nur, wann ein
+ * Eingeladener überhaupt zählt.
+ *
+ * BEIDE ZÄHLEN GETRENNT, und derselbe Mensch zählt in beide: wer auf Stufe 2
+ * steigt, überschreitet auch die 1 (sofern er sie nicht schon hatte). Ein
+ * einziger Zähler mit zwei Schwellen ginge nicht — „3 Eingeladene auf Stufe 1"
+ * und „5 auf Stufe 2" sind zwei verschiedene Mengen von Menschen.
+ */
+/**
+ * Aus der Spaltenliste HERAUSGESCHNITTEN statt danebengeschrieben: so ist der
+ * Name genau einmal gepflegt, und eine Umbenennung der Spalte macht diese
+ * Stelle rot statt still falsch.
+ */
+export type InviteeTrustCounter = Extract<MemberCounterColumn, 'inviteesBasic' | 'inviteesMember'>
+
+export const INVITEE_TRUST_COUNTERS: readonly { level: TrustLevel, counter: InviteeTrustCounter }[] = [
+  { level: 1, counter: 'inviteesBasic' },
+  { level: 2, counter: 'inviteesMember' },
+]
+
+/**
+ * PURE: Welche Zähler des EINLADENDEN steigen durch DIESEN Aufstieg?
+ *
+ * Die Differenz und nicht der Stand — aus demselben Grund wie bei
+ * `trustLevelBadgeCrossings`, hier aber nicht bloß aus Sparsamkeit: ein
+ * Zähler, der den STAND meldete, würde bei jedem weiteren Aufstieg desselben
+ * Menschen erneut hochzählen, und ein einziger Eingeladener trüge den
+ * Einladenden allein bis „Champion". Gezählt wird `(before, after]` — jede
+ * Stufen-Grenze also genau bei ihrer einzigen Überschreitung.
+ *
+ * GERECHNET WIRD MIT DER ERARBEITETEN STUFE, nie mit der wirkenden: die
+ * Ernennung zu Stufe 4 ist keine erreichte Stufe 1 und 2 (Begründung am
+ * Vertrag `USER_COUNTER_KINDS`).
+ */
+export function inviteeLevelCrossings(before: number, after: number): InviteeTrustCounter[] {
+  return INVITEE_TRUST_COUNTERS
+    .filter(entry => entry.level > before && entry.level <= after)
+    .map(entry => entry.counter)
 }
 
 /** Eine einzelne Bedingung auf dem Weg zur nächsten Stufe. */

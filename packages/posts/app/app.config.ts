@@ -144,22 +144,34 @@ export default defineAppConfig({
       reactions: ['laugh', 'tada', 'thinking', 'eyes', 'sad', 'fire', 'thanks', 'idea'],
 
       /**
-       * DAS TAGES-LIMIT FÜR LIKES (F57 Mechanik 3, Davids Zahl vom 2026-08-14).
+       * DAS TAGES-LIMIT FÜR LIKES, GESTAFFELT NACH VERTRAUENSSTUFE
+       * (F57 Mechanik 3 + F57-Stufen, Davids Zahlen vom 2026-08-14).
        *
-       * 50 Aufstimmen je Mensch, Community und UTC-Kalendertag. Im Alltag
-       * unspürbar — wer der Reihe nach durch einen Feed klickt, merkt es.
-       * `0` schaltet die Mechanik ganz aus (und damit auch die drei Abzeichen,
-       * die daran hängen: ohne Limit gibt es keinen Tag, an dem es erreicht
-       * wäre).
+       * Der INDEX ist die Vertrauensstufe: **TL0 und TL1 bekommen 50, TL2
+       * bekommt 75, TL3 (und die ernannte TL4) bekommen 100** Aufstimmen je
+       * Mensch, Community und UTC-Kalendertag. Im Alltag unspürbar — wer der
+       * Reihe nach durch einen Feed klickt, merkt es.
        *
-       * DIE ZAHL STEHT HIER UND NICHT IN EINER DATENBANK-ZEILE: sie ist eine
-       * Eigenschaft dieses Bauplans, keine Stellschraube, die ein Betreiber je
-       * Community dreht. Läge sie in `app_config`, hinge an JEDER Aufstimme
-       * eine zusätzliche Abfrage — und die Frage „warum ging das gestern noch"
-       * hätte keine nachlesbare Antwort mehr. Der Code-Default ist zugleich das
-       * Produktversprechen; eine App darf ihn kürzen, nicht verstecken.
+       * WARUM ÜBERHAUPT GESTAFFELT: das Limit ist eine Missbrauchs-Bremse, und
+       * eine Bremse soll den treffen, über den man nichts weiß. Wer 60 Tage
+       * dabei ist, 25 Inhalte geschrieben und 25 Zustimmungen bekommen hat,
+       * ist genau der, über den man etwas weiß — ihn so knapp zu halten wie
+       * ein frisches Konto wäre eine Bremse gegen die eigenen Leute.
+       *
+       * EINE LISTE UND NICHT VIER SCHLÜSSEL, weil das eine Aussage ist und
+       * nicht vier (Begründung in `core/shared/likeAllowance.ts`). Eine App
+       * darf sie kürzen; `[0, 0, 0, 0]` schaltet die Mechanik ganz aus — und
+       * damit auch die drei Abzeichen, die daran hängen (ohne Limit gibt es
+       * keinen Tag, an dem es erreicht wäre).
+       *
+       * DIE ZAHLEN STEHEN HIER UND NICHT IN EINER DATENBANK-ZEILE: sie sind
+       * eine Eigenschaft dieses Bauplans, keine Stellschraube, die ein
+       * Betreiber je Community dreht. Lägen sie in `app_config`, hinge an
+       * JEDER Aufstimme eine zusätzliche Abfrage — und die Frage „warum ging
+       * das gestern noch" hätte keine nachlesbare Antwort mehr. Der
+       * Code-Default ist zugleich das Produktversprechen.
        */
-      likesPerDay: 50,
+      likesPerDayByLevel: [50, 50, 75, 100],
     },
   },
 })
