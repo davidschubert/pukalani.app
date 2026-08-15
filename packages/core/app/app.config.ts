@@ -489,7 +489,7 @@ export default defineAppConfig({
       // passieren, sonst 404t die Messung dort still (lokal erwischt, BEVOR
       // es deployt war). Bewusst der exakte config-Pfad, nicht '/api/analytics/'
       // — settings.patch und stats.get bleiben Mandanten-Routen.
-      controlApiPrefixes: ['/api/auth/', '/api/onboarding/', '/api/health', '/api/telemetry/', '/api/notifications', '/api/feedback', '/api/abuse', '/api/account/activity', '/api/account/handle', '/api/analytics/config', '/api/stats-script.js', '/api/stats-event'] as string[],
+      controlApiPrefixes: ['/api/auth/', '/api/onboarding/', '/api/health', '/api/telemetry/', '/api/notifications', '/api/feedback', '/api/abuse', '/api/account/activity', '/api/account/handle', '/api/analytics/config', '/api/stats-script.js', '/api/stats-event', '/api/_nuxt_icon/'] as string[],
     },
     /**
      * Realtime-Gate (F14, 2026-08-01) — der EINE Schalter, mit dem eine App

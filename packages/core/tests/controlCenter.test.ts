@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import { controlHomeTarget, isAllowedControlPath, isControlHost, isTenantHost, parseControlHosts, resolveControlHosts, resolveWizardHosts } from '../shared/controlCenter'
 
@@ -148,6 +149,29 @@ describe('Erlaubte Pfade im Kundenbereich (fail-closed)', () => {
     for (const path of ['/api/auth/me', '/api/auth/login', '/api/onboarding/site', '/api/health', '/api/telemetry/error']) {
       expect(isAllowedControlPath(path, PREFIXES), path).toBe(true)
     }
+  })
+
+  it('lässt die Icon-Route durch — gegen die ECHTE Liste aus der app.config', () => {
+    // Gemessen am 2026-08-14 auf account.pukalani.app: `/api/_nuxt_icon/ph.json`
+    // fiel in das Fail-Closed dieser Wache, und damit fehlte auf ANMELDEN und
+    // REGISTRIEREN jedes Symbol — sichtbar vor allem an der Passwort-Prüfliste,
+    // die ihre Häkchen verlor und nur noch Text war. Die Route liefert
+    // SVG-Pfade aus dem Iconify-Paket, fasst keine Datenbank an und hat mit
+    // Mandanten-Scoping nichts zu tun.
+    //
+    // Geprüft wird bewusst die ECHTE Liste aus `app/app.config.ts`, nicht die
+    // nachgebaute Konstante oben: ein Wächter, der seine eigene Kopie befragt,
+    // bemerkt genau die Änderung nicht, gegen die er schützen soll.
+    const config = readFileSync(new URL('../app/app.config.ts', import.meta.url), 'utf8')
+    const line = /controlApiPrefixes:\s*\[([^\]]*)\]/.exec(config)
+    expect(line, 'controlApiPrefixes in app.config.ts gefunden').toBeTruthy()
+    const livePrefixes = [...line![1]!.matchAll(/'([^']+)'/g)].map(m => m[1]!)
+    expect(livePrefixes.length).toBeGreaterThan(5)
+    for (const path of ['/api/_nuxt_icon/ph.json', '/api/_nuxt_icon/lucide.json']) {
+      expect(isAllowedControlPath(path, livePrefixes), path).toBe(true)
+    }
+    // Die Wache bleibt fail-closed: was nicht in der Liste steht, ist zu.
+    expect(isAllowedControlPath('/api/comments', livePrefixes)).toBe(false)
   })
 
   it('sperrt JEDEN anderen API-Pfad — dort wäre nichts mandanten-gescopt', () => {

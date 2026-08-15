@@ -288,6 +288,15 @@ export function usePresence(predicate: (u: PresenceUser) => boolean = () => true
     // `clients === null` = Config-Gate aus (F14) — der Guard oben hat das
     // abgefangen; der nullable Typ verlangt die Zeile trotzdem.
     if (disposed || !clients) return
+    // GÄSTE LESEN KEINE ANWESENHEIT (gemessen 2026-08-14 auf demo.pukalani.app):
+    // `presences.list()` läuft über den COOKIE-Client, ein Gast hat aber keine
+    // Session — Appwrite antwortet 401, und zwar bei jedem Seitenaufruf eines
+    // öffentlichen Mandanten-Hosts. Sichtbar wurde nur die Konsolenmeldung; der
+    // eigentliche Preis waren das nachgeladene Web-SDK und ein 20-s-Poll, die
+    // beide nie ein Ergebnis liefern konnten. Wer nicht angemeldet ist, sieht
+    // ohnehin niemanden: die Presence-Rows tragen `read(label:<communityId>)`
+    // bzw. `read("users")` (A4/A5), also nichts für Gäste.
+    if (!auth.user) { loaded.value = true; return }
     presences = new Presences(clients.cookieClient)
     await ensureRealtimeJwt() // WS authentifizieren, BEVOR er sich verbindet (sonst Gast)
     if (disposed) return
