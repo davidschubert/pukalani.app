@@ -40,8 +40,13 @@ describe('der Katalog selbst', () => {
     // `first-link` (F57, letzte Mechanik) ist das SECHSTE „erste Mal" — der
     // erste Verweis auf ein anderes Thema; die Funktion dahinter fehlte bis
     // dahin, deshalb stand es in der Auslassungsliste.
-    expect(BADGE_CATALOG.length).toBe(28)
-    for (const [group, size] of [['gettingStarted', 6], ['community', 12], ['posting', 6], ['trustLevel', 4]] as const) {
+    // `campaigner`/`champion` (F57-Stufen) sind die Nummern 13 und 14 der
+    // Gruppe „Community" — und die ersten beiden Abzeichen ueberhaupt, deren
+    // qualifizierendes Ereignis ein ANDERER Mensch ausloest (der Aufstieg
+    // eines Eingeladenen). Sie standen bis dahin in der Auslassungsliste,
+    // weil ihr Verleihungs-Pfad fehlte, nicht ihre Definition.
+    expect(BADGE_CATALOG.length).toBe(30)
+    for (const [group, size] of [['gettingStarted', 6], ['community', 14], ['posting', 6], ['trustLevel', 4]] as const) {
       expect(BADGE_CATALOG.filter(entry => entry.group === group).length, group).toBe(size)
     }
   })

@@ -4,8 +4,10 @@ import { BADGE_CATALOG, trustLevelBadgeCrossings, trustLevelBadgeKeysFor } from 
 import {
   TRUST_LEVEL_CONDITIONS,
   TRUST_LEVEL_THRESHOLDS,
+  INVITEE_TRUST_COUNTERS,
   earnedTrustLevel,
   effectiveTrustLevel,
+  inviteeLevelCrossings,
   raisedTrustLevel,
   trustLevelProgress,
   trustLevelRequirement,
@@ -235,5 +237,62 @@ describe('der Fortschritt zur nächsten Stufe', () => {
   it('schweigt auf der höchsten erarbeitbaren Stufe und bei einer Ernennung', () => {
     expect(trustLevelProgress(3, facts())).toBeNull()
     expect(trustLevelProgress(4, facts())).toBeNull()
+  })
+})
+
+/**
+ * WAS DER AUFSTIEG DEM EINLADENDEN EINBRINGT (F57-Stufen, 2026-08-14).
+ *
+ * Der Katalog (§ 3.6) sagt wörtlich „3 Eingeladene wurden Basic" / „5 wurden
+ * Member" — hier steht die Hälfte davon, die eine Regel ist: WANN ein
+ * Eingeladener zählt. Geprüft wird vor allem die Zusage, an der die beiden
+ * Abzeichen hängen: derselbe Mensch zählt je Stufe GENAU EINMAL.
+ */
+describe('inviteeLevelCrossings — der Aufstieg eines Eingeladenen', () => {
+  it('bindet die Zähler an die Stufen des Katalogs', () => {
+    expect(INVITEE_TRUST_COUNTERS).toEqual([
+      { level: 1, counter: 'inviteesBasic' },
+      { level: 2, counter: 'inviteesMember' },
+    ])
+  })
+
+  it('meldet die Stufe, die dieser Aufstieg überschreitet', () => {
+    expect(inviteeLevelCrossings(0, 1)).toEqual(['inviteesBasic'])
+    expect(inviteeLevelCrossings(1, 2)).toEqual(['inviteesMember'])
+  })
+
+  it('meldet BEIDE, wenn ein Aufstieg zwei Grenzen auf einmal nimmt', () => {
+    // Der Normalfall beim ersten Hinsehen eines Bestands-Mitglieds: die Zähler
+    // standen längst, nur die Stufe war nie gerechnet. Ohne diese Zeile fiele
+    // die übersprungene Grenze lautlos aus.
+    expect(inviteeLevelCrossings(0, 2)).toEqual(['inviteesBasic', 'inviteesMember'])
+    expect(inviteeLevelCrossings(0, 3)).toEqual(['inviteesBasic', 'inviteesMember'])
+  })
+
+  /**
+   * DIE ZUSAGE, AN DER ALLES HÄNGT. Ein Zähler, der den STAND meldete, würde
+   * bei jedem weiteren Aufstieg desselben Menschen erneut hochzählen — ein
+   * einziger Eingeladener trüge den Einladenden allein bis „Champion".
+   */
+  it('zählt eine schon überschrittene Grenze NIE ein zweites Mal', () => {
+    expect(inviteeLevelCrossings(1, 3)).toEqual(['inviteesMember'])
+    expect(inviteeLevelCrossings(2, 3)).toEqual([])
+    expect(inviteeLevelCrossings(3, 3)).toEqual([])
+  })
+
+  it('meldet nichts, wenn nichts gestiegen ist', () => {
+    expect(inviteeLevelCrossings(2, 1)).toEqual([])
+    expect(inviteeLevelCrossings(0, 0)).toEqual([])
+  })
+
+  /**
+   * DIE ERNENNUNG ZÄHLT NICHT MIT — und das steht hier, weil man es an der
+   * Rechnung nicht sieht: `creditInviterForAscent` ruft mit der ERARBEITETEN
+   * Stufe, nie mit der wirkenden. Käme die 4 einer Ernennung hier an, bekäme
+   * der Einladende beide Zähler geschenkt, weil ein Owner jemanden ernannt
+   * hat — und ein Owner könnte die Abzeichen Dritter vergeben.
+   */
+  it('WÜRDE eine 4 wie jede andere Stufe behandeln — deshalb kommt sie nicht her', () => {
+    expect(inviteeLevelCrossings(0, 4)).toEqual(['inviteesBasic', 'inviteesMember'])
   })
 })

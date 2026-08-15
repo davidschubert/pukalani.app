@@ -53,6 +53,10 @@ describe('die Zuordnung am Katalog', () => {
       // F57 Mechanik 2: `promoter` steht NACH `anniversary` im Katalog, aber
       // vor den Stufen — die erste angenommene Einladung gibt es einmal.
       'promoter',
+      // F57-Stufen: `campaigner`/`champion` stehen direkt daneben — auch sie
+      // sind Bestaende (Eingeladene, die eine Stufe erreicht haben), und ein
+      // Bestand wird nur einmal ueberschritten.
+      'campaigner', 'champion',
       // F57 Mechanik 3: die drei Like-Limit-Tage. EINMALIG, weil
       // `likeLimitDays` ein Bestand ist, der nur waechst — und jede Stufe
       // hat im Katalog schon ihren eigenen Namen.
@@ -138,6 +142,10 @@ describe('Zähler-Abzeichen: was die Buchung allein entscheiden darf', () => {
         || badge.key === 'first-reaction' || badge.key === 'promoter'
         || badge.key === 'out-of-love' || badge.key === 'higher-love'
         || badge.key === 'crazy-in-love' || badge.key === 'first-link'
+        // F57-Stufen: `campaigner`/`champion` folgen ebenfalls allein aus
+        // Zaehlern — dass die Buchung dahinter vom Aufstieg eines ANDEREN
+        // Menschen kommt, sieht dieser Filter nicht und muss er nicht sehen.
+        || badge.key === 'campaigner' || badge.key === 'champion'
       expect(badgeFollowsFromCounters(badge), badge.key).toBe(expected)
     }
   })

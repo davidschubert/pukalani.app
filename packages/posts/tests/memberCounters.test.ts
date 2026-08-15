@@ -41,6 +41,11 @@ describe('seedValuesFrom', () => {
       // und sind geloescht.
       likeLimitDays: 0,
       linksMade: 0,
+      // F57-Stufen: ZWEI fehlende Quellen auf einmal — die Zuordnung
+      // („wer hat wen eingeladen") liegt im Control Plane, die Stufen der
+      // Eingeladenen liegen in DEREN Zeilen. Startet fuer alle bei 0.
+      inviteesBasic: 0,
+      inviteesMember: 0,
     })
   })
 
@@ -120,6 +125,8 @@ describe('memberCounterValues', () => {
       // posts-019 (F57 Mechanik 3)
       'likeLimitDays',
       'linksMade',
+      // posts-021 (F57-Stufen)
+      'inviteesBasic', 'inviteesMember',
     ])
   })
 })

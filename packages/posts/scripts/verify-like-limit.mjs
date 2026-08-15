@@ -14,7 +14,10 @@
  *
  * Aus packages/posts (dort loest node-appwrite auf), gegen einen LAUFENDEN
  * Dev-Server DERSELBEN Instanz, dessen App-Config das Limit testweise auf 3
- * senkt (`pukalani.discussions.likesPerDay: 3`):
+ * senkt. SEIT F57-STUFEN IST DAS EINE STAFFEL, kein einzelner Wert — gesenkt
+ * wird sie deshalb fuer JEDE Stufe, sonst misst dieser Lauf bei einem
+ * aufgestiegenen Nutzer etwas anderes als er sagt:
+ * `pukalani.discussions.likesPerDayByLevel: [3, 3, 3, 3]`:
  *   node --env-file=../../apps/comments/.env scripts/verify-like-limit.mjs http://localhost:3011 3
  *
  * Das erwartete Limit ist ein ARGUMENT und keine Konstante im Skript: mit
@@ -312,7 +315,7 @@ try {
   // Produktions-Default im CODE steht und nicht in dieser Testumgebung.
   console.log(`\nHinweis: dieser Lauf hat gegen das Kontingent ${LIMIT} geprueft.`)
   console.log('Die Gegenprobe „ohne Override greift 50" ist ein zweiter Lauf ohne')
-  console.log('`pukalani.discussions.likesPerDay` in der App-Config.')
+  console.log('`pukalani.discussions.likesPerDayByLevel` in der App-Config.')
 }
 catch (error) {
   failed++

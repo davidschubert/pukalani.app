@@ -398,6 +398,26 @@ try {
   })
   check('das Abzeichen „promoter" ist GENAU EINMAL verliehen', badges.total === 1, `total ${badges.total}`)
 
+  /**
+   * F57-Stufen: dieselbe Annahme hinterlegt zusätzlich den EINLADENDEN an der
+   * Zeile des Angenommenen (`invitedBy`). Er ist die Voraussetzung dafür, dass
+   * ein Aufstieg WOCHEN später noch weiß, wem er gutgeschrieben gehört —
+   * geprüft wird er hier, weil hier die Annahme stattfindet; was daraus folgt
+   * (Campaigner/Champion), beweist `packages/posts/scripts/verify-trust-perks.mjs`.
+   */
+  check('der Angenommene trägt `invitedBy` = den Einladenden (F57-Stufen)',
+    inviteeCounters.rows[0]?.invitedBy === second.userId,
+    `invitedBy=${inviteeCounters.rows[0]?.invitedBy} erwartet=${second.userId}`)
+  /**
+   * Und die Kette stimmt je PERSON: das zweite Mitglied wurde selbst vom Owner
+   * geholt, trägt also DESSEN Id — nicht seine eigene und nicht die des
+   * Gastes, den es gerade eingeladen hat. Der erste Anlauf dieser Zeile prüfte
+   * auf LEER und lag falsch: `second` ist im Beweis selbst ein Eingeladener.
+   */
+  check('und die Kette stimmt: der Einladende trägt seinerseits den Owner',
+    counters.rows[0]?.invitedBy === owner.userId,
+    `invitedBy=${counters.rows[0]?.invitedBy} erwartet=${owner.userId}`)
+
   // ── 7. Fremde und Gäste ──────────────────────────────────────────────────
   console.log('\n7. Fremde Community, fremdes Konto, kein Konto')
   const foreign = await invite(b.host, memberCookie, `f57-foreign-${Date.now()}@example.test`)
