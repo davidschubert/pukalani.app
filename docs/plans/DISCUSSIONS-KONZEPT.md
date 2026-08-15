@@ -545,7 +545,7 @@ nach `docs/OPEN-ITEMS.md`.
   Laufzeit-Rückfall (Schalter `pukalani.pages.guidelinesFallback`, in
   `platform` an) und die Hilfe-Umbenennung „Diskussionen" → „Kommentare".
 - **Kunden-Hilfe** (2026-08-04) eigene Seite
-  `apps/help/content/anleitung/3.produkte/4.diskussionen.md` →
+  `apps/help/content/anleitung/3.produkte/04.diskussionen.md` →
   `/anleitung/produkte/diskussionen`, plus je eine Zeile in der Produkt- und
   der Plan-Tabelle (Personal — Discussions sitzt auf dem Produkt-Key `posts`).
   Beschrieben ist AUSSCHLIESSLICH der Baustand oben; ein Abschnitt „Was es

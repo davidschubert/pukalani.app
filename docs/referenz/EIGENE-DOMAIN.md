@@ -12,7 +12,7 @@
   Selbstbedienung · www+Apex automatisch): `docs/DECISION-LOG.md`, 2026-08-07.
 - **Der Bau-Beleg mit Beweiszahlen und Gelernt-Zeilen:**
   `docs/OPEN-ITEMS-COMPLETE.md` (F52, F54 und der Domain-Eintrag).
-- **Was der Kunde liest:** `apps/help/content/anleitung/3.produkte/9.eigene-domain.md`.
+- **Was der Kunde liest:** `apps/help/content/anleitung/3.produkte/10.eigene-domain.md`.
 - **Wo die Hosts in der Landkarte stehen:**
   `docs/content/2.architektur/6.hosts-und-ports.md`.
 
