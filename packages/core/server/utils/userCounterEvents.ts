@@ -125,6 +125,35 @@ export const USER_COUNTER_KINDS = [
    * Abzeichen zählt AB JETZT.
    */
   'linksMade',
+  /**
+   * EINGELADENE, DIE STUFE 1 (Basic) BZW. STUFE 2 (Member) ERREICHT HABEN
+   * (F57-Stufen, 2026-08-14) — die Zähler hinter `campaigner` (3) und
+   * `champion` (5).
+   *
+   * DIE EINZIGEN ARTEN, DEREN EREIGNIS EIN ANDERER MENSCH AUSLÖST, OHNE ES ZU
+   * TUN: gemeldet wird beim STUFEN-AUFSTIEG des Eingeladenen, gutgeschrieben
+   * dem, der ihn hergeholt hat. Wer wen eingeladen hat, steht seit F57-Stufen
+   * an der Zähler-Zeile des Eingeladenen (`recordCommunityInviter`) — und
+   * genau deshalb braucht dieser Weg keine Naht ins Control Plane.
+   *
+   * JE EINGELADENEM UND STUFE GENAU EINMAL, und das folgt aus der Mechanik
+   * statt aus einer Prüfung: die gespeicherte Stufe wird ausschließlich nach
+   * OBEN geschrieben (`raisedTrustLevel`), also wird jede Stufen-Grenze im
+   * Leben eines Menschen genau einmal überschritten. Gemeldet wird die
+   * DIFFERENZ dieses Aufstiegs, nie der Stand.
+   *
+   * DIE ERNENNUNG (Stufe 4) MELDET NICHTS. Der Katalog sagt „wurden Basic"
+   * bzw. „wurden Member" — das sind ERARBEITETE Stufen. Eine Ernennung ist
+   * eine Entscheidung des Owners über einen Menschen, kein Beleg dafür, dass
+   * der Einladende jemand Brauchbares hergeholt hat; sie mitzuzählen hieße
+   * außerdem, dass ein Owner die Abzeichen anderer Leute vergeben kann.
+   *
+   * Rein MITSCHREIBEND wie `edits` und `invitesAccepted`: die Stufen der
+   * Eingeladenen von heute lassen sich nicht rückwirkend zuordnen (vor
+   * F57-Stufen hat niemand `invitedBy` hinterlegt). Beide zählen AB JETZT.
+   */
+  'inviteesBasic',
+  'inviteesMember',
 ] as const
 
 export type UserCounterKind = (typeof USER_COUNTER_KINDS)[number]

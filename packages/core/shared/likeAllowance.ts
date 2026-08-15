@@ -2,10 +2,25 @@
  * DAS TAGES-LIMIT FÜR LIKES — die Rechenregeln (F57 Mechanik 3).
  *
  * Davids Zuschnitt vom 2026-08-14: **50 Likes pro Tag** je Mensch und
- * Community, als Config-Wert justierbar (`pukalani.discussions.likesPerDay`,
- * `0` = Mechanik aus). Im Alltag unspürbar, beim Reihum-Liken erreicht — und
- * genau dieses Erreichen trägt die Abzeichen „Out of Love" / „Higher Love" /
- * „Crazy in Love" (an 1 / 5 / 20 Tagen).
+ * Community, als Config-Wert justierbar (`0` = Mechanik aus). Im Alltag
+ * unspürbar, beim Reihum-Liken erreicht — und genau dieses Erreichen trägt die
+ * Abzeichen „Out of Love" / „Higher Love" / „Crazy in Love" (an 1 / 5 / 20
+ * Tagen).
+ *
+ * ── SEIT F57-STUFEN (2026-08-14): DAS LIMIT STAFFELT MIT DER STUFE ────────
+ * `pukalani.discussions.likesPerDayByLevel` — **TL0/TL1 = 50, TL2 = 75,
+ * TL3+ = 100**. Der Index IST die Vertrauensstufe; wer darüber liegt (die
+ * ernannte Stufe 4), bekommt den letzten Eintrag.
+ *
+ * WARUM EINE LISTE UND NICHT VIER SCHLÜSSEL: die Staffel ist EINE Aussage
+ * („mit dem Vertrauen wächst das Kontingent"), und eine Liste zwingt dazu, sie
+ * als Ganzes zu lesen. Vier Schlüssel laden dazu ein, einen davon zu setzen
+ * und die drei anderen zu vergessen — genau der Zustand, in dem eine höhere
+ * Stufe stillschweigend WENIGER darf als eine niedrigere.
+ *
+ * DIE ALTE ZAHL BLEIBT DIE ERSTE: `LIKES_PER_DAY_DEFAULT` ist weiterhin 50 und
+ * damit der Wert der Stufen 0 und 1. Wer nie aufsteigt, merkt von der Staffel
+ * nichts — sie gibt etwas dazu, sie nimmt niemandem etwas weg.
  *
  * PURE und unit-getestet, dieselbe Arbeitsteilung wie beim Einladungs-
  * Kontingent (`control/shared/communityInviteQuota.ts`): hier stehen die
@@ -52,8 +67,21 @@
  */
 export const LIKE_LIMIT_REACHED = 'like_limit_reached'
 
-/** Davids Zahl (2026-08-14). Config: `pukalani.discussions.likesPerDay`. */
+/** Davids Zahl (2026-08-14) — zugleich der Wert der Stufen 0 und 1. */
 export const LIKES_PER_DAY_DEFAULT = 50
+
+/**
+ * DIE STAFFEL (F57-Stufen, 2026-08-14). Index = Vertrauensstufe.
+ *
+ * `[50, 50, 75, 100]` — TL0 und TL1 bekommen Davids ursprüngliche Zahl, TL2
+ * bekommt 75, TL3 bekommt 100. Für die ERNANNTE Stufe 4 steht hier bewusst
+ * KEIN eigener Eintrag: sie ist keine erarbeitete Stufe, und eine fünfte Zahl
+ * hieße, sich zu überlegen, ob eine Ernennung mehr Likes bedeutet als der
+ * höchste erarbeitete Rang. Sie bekommt den letzten Eintrag (`TL3+`).
+ *
+ * Config: `pukalani.discussions.likesPerDayByLevel`.
+ */
+export const LIKES_PER_DAY_BY_LEVEL_DEFAULT: readonly number[] = [50, 50, 75, 100]
 
 /**
  * PURE: der UTC-Kalendertag als Schlüssel (`YYYY-MM-DD`).
@@ -74,10 +102,71 @@ export function utcDayKey(now: number): string {
  * aufheben; abschalten geht ausdrücklich über die `0` (Muster
  * `memberInviteLimitFrom`).
  */
-export function likeLimitFrom(value: unknown): number {
-  if (typeof value !== 'number' || !Number.isFinite(value)) return LIKES_PER_DAY_DEFAULT
-  if (value < 0) return LIKES_PER_DAY_DEFAULT
+export function likeLimitFrom(value: unknown, fallback: number = LIKES_PER_DAY_DEFAULT): number {
+  if (typeof value !== 'number' || !Number.isFinite(value)) return fallback
+  if (value < 0) return fallback
   return Math.floor(value)
+}
+
+/**
+ * PURE: der Stufen-Index, den die Staffel benutzt.
+ *
+ * Alles, was keine brauchbare Stufe ist (fehlt, kaputt, negativ), wird zu 0 —
+ * der KLEINSTEN Staffel-Stufe. Die gutmütige Richtung wäre hier die falsche:
+ * ein unlesbarer Stufen-Wert darf niemandem das größere Kontingent schenken,
+ * er darf ihm nur nicht mehr geben, als die unterste Stufe ohnehin hat.
+ *
+ * Nach oben wird auf den LETZTEN Eintrag geklemmt — dort landet die ernannte
+ * Stufe 4, und dort landet auch jede Stufe, die eine spätere Erweiterung
+ * einführt, ohne die Staffel zu verlängern.
+ */
+function levelIndex(level: unknown, length: number): number {
+  if (length <= 0) return 0
+  if (typeof level !== 'number' || !Number.isFinite(level) || level < 0) return 0
+  return Math.min(Math.floor(level), length - 1)
+}
+
+/**
+ * PURE: die Staffel aus der App-Config lesen — defensiv, Eintrag für Eintrag.
+ *
+ * Was KEINE Liste ist (fehlt, Zahl, Objekt, leer), ergibt die Vorgabe. Eine
+ * halb kaputte Liste ergibt NICHT die Vorgabe: jeder unbrauchbare Eintrag wird
+ * einzeln durch den Vorgabewert SEINER Stufe ersetzt. Der Grund ist derselbe
+ * wie bei `likeLimitFrom` — ein Tippfehler an Stelle drei darf die bewusst
+ * gesetzte 0 an Stelle eins nicht aufheben.
+ */
+export function likeLimitStaffel(value: unknown): number[] {
+  const raw = Array.isArray(value) && value.length > 0 ? value : LIKES_PER_DAY_BY_LEVEL_DEFAULT
+  return raw.map((entry, index) => likeLimitFrom(
+    entry,
+    LIKES_PER_DAY_BY_LEVEL_DEFAULT[Math.min(index, LIKES_PER_DAY_BY_LEVEL_DEFAULT.length - 1)] ?? LIKES_PER_DAY_DEFAULT,
+  ))
+}
+
+/**
+ * PURE: das Kontingent DIESES Menschen — Staffel-Config plus seine Stufe.
+ *
+ * Die EINE Stelle, an der aus „welche Stufe" ein „wie viele Likes" wird.
+ * Gefragt wird mit der WIRKENDEN Stufe (erarbeitet oder ernannt), nicht mit
+ * der gespeicherten Zahl: wer zum Leader ernannt wurde, soll nicht am
+ * Kontingent eines Neulings hängen.
+ */
+export function likeLimitForLevel(value: unknown, level: unknown): number {
+  const staffel = likeLimitStaffel(value)
+  return staffel[levelIndex(level, staffel.length)] ?? LIKES_PER_DAY_DEFAULT
+}
+
+/**
+ * PURE: Ist die Mechanik GANZ aus?
+ *
+ * Nur dann, wenn KEINE Stufe ein Kontingent hat. Der Aufrufer spart sich damit
+ * das Lesen der Zähler-Zeile — aber nur im eindeutigen Fall: eine Staffel wie
+ * `[0, 50, 75, 100]` (Neulinge unbegrenzt, alle anderen begrenzt) wäre
+ * seltsam, ist aber nicht „aus", und ein vorschnelles Ja hier hieße, dass die
+ * Stufen 1–3 ihr Limit stillschweigend verlieren.
+ */
+export function likeMechanicOff(value: unknown): boolean {
+  return likeLimitStaffel(value).every(limit => limit <= 0)
 }
 
 /** Der gespeicherte Tagesstand eines Menschen, so wie die Zeile ihn hergibt. */
@@ -152,6 +241,32 @@ export function decideLikeSpend(facts: LikeSpendFacts): LikeSpendDecision {
  */
 export function crossesLikeLimit(countAfter: number, limit: number): boolean {
   return limit > 0 && countAfter === limit
+}
+
+/**
+ * PURE: Soll für DIESEN Tag ein Abzeichen-Tag gebucht werden?
+ *
+ * ── WARUM DIE GLEICHHEIT SEIT DER STAFFEL NICHT MEHR ALLEIN TRÄGT ─────────
+ * `crossesLikeLimit` war genau einmal je Tag wahr, weil das Limit an einem Tag
+ * eine feste Zahl war. Mit der Staffel ist es das nicht mehr: wer mit 50 sein
+ * Kontingent leerräumt, DANN auf Stufe 2 aufsteigt (der Aufstieg passiert beim
+ * Schreiben, also mitten am Tag) und weiterklickt, trifft bei 75 ein ZWEITES
+ * Mal die Gleichheit — und hätte an EINEM Nachmittag zwei „Tage" für „Out of
+ * Love"/„Higher Love"/„Crazy in Love" gesammelt. Die Zusage des Zähl-Vertrags
+ * lautet „genau einmal je Tag"; sie darf nicht davon abhängen, ob jemand
+ * zwischendurch aufgestiegen ist.
+ *
+ * Deshalb merkt sich die Zeile den GEBUCHTEN Tag (`likeLimitDay`) — eine
+ * Zeichenkette neben dem Zähler, kein zweiter Zähler. Der Vergleich ist die
+ * ganze Regel: derselbe Tag ⇒ schon gebucht ⇒ nichts tun.
+ */
+export function booksLikeLimitDay(
+  countAfter: number,
+  limit: number,
+  bookedDay: string,
+  today: string,
+): boolean {
+  return crossesLikeLimit(countAfter, limit) && bookedDay !== today
 }
 
 /** Was die Durchsetzung dem Aufrufer antwortet. */
