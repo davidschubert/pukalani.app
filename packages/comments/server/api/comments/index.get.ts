@@ -1,6 +1,18 @@
 import { Query } from 'node-appwrite'
 import { SORT_MODES } from '../../../schemas/comment'
 import { hotness } from '../../../shared/sort'
+/**
+ * AUSDRÜCKLICH IMPORTIERT, NICHT AUTO-IMPORTIERT (F57, beim Bau live
+ * erwischt). Nitros Auto-Import ist über ALLE Layer FLACH: `posts` hat in
+ * `server/utils/reactions.ts` gleichnamige Helfer, und bei einer Kollision
+ * gewinnt einer — hier gewann posts. Die Liste hätte damit still
+ * `discussion_reactions` gelesen und den Emoji-Satz der THEMEN angewendet;
+ * sichtbar war das nur als `WARN Duplicated imports` in einem Dev-Log.
+ * Deshalb tragen die Helfer dieses Layers seither eindeutige Namen UND
+ * werden hier explizit geholt — der Import ist die Zusicherung, der Name die
+ * Vorsichtsmaßnahme.
+ */
+import { allowedCommentReactionsFor, loadCommentReactionSummary } from '../../utils/commentReactions'
 import {
   COMMENTS_TABLE,
   VOTES_TABLE,
@@ -253,8 +265,8 @@ export default defineEventHandler(async (event): Promise<CommentListResponse> =>
    * Konto keine eigene Reaktion gibt. Der Cache macht sie bis zu 10 s alt,
    * dieselbe Frist, die für die Kommentare selbst schon gilt.
    */
-  const reactionsAllowed = allowedReactionsFor()
-  const reactions = await loadReactionSummary(
+  const reactionsAllowed = allowedCommentReactionsFor()
+  const reactions = await loadCommentReactionSummary(
     event,
     rows.map(row => row.$id),
     user?.$id ?? null,

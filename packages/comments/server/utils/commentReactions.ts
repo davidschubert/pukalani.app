@@ -38,7 +38,7 @@ const REACTION_ID_CHUNK = 100
  * Wird die Grenze real erreicht, sind die Spalten der naechste Schritt —
  * nicht ein groesseres Fenster.
  */
-export const REACTION_BUNDLE_LIMIT = 1000
+const REACTION_BUNDLE_LIMIT = 1000
 
 /**
  * Der in DIESER App erlaubte Satz — App-Config kuerzt, erweitert nie.
@@ -54,7 +54,7 @@ export const REACTION_BUNDLE_LIMIT = 1000
  * verwechseln mit `getAppConfig(event)` — das ist die Zeile in der Datenbank
  * (Wartungsmodus, Kommentare an/aus) und sehr wohl request-abhaengig.
  */
-export function allowedReactionsFor(): ReactionKey[] {
+export function allowedCommentReactionsFor(): ReactionKey[] {
   const appConfig = useAppConfig() as {
     pukalani?: { comments?: { reactions?: string[] } }
   }
@@ -93,7 +93,7 @@ export function allowedReactionsFor(): ReactionKey[] {
  * nicht: ein Gast kann selbst nicht reagieren (401 in der Route), weil eine
  * Reaktion ein Konto braucht.
  */
-export async function resolveReactionTarget(event: H3Event, targetId: string): Promise<Comment> {
+export async function resolveCommentReactionTarget(event: H3Event, targetId: string): Promise<Comment> {
   const ops = tenantDb(event, { as: 'operator' })
   const target = await ops.get<Comment>(COMMENTS_TABLE, targetId, 'Comment not found')
 
@@ -140,7 +140,7 @@ export async function resolveReactionTarget(event: H3Event, targetId: string): P
  *
  * Gelesen wird NIE geschrieben: keine Sperre (M13), kein Beitritt (A5).
  */
-export async function loadReactionSummary(
+export async function loadCommentReactionSummary(
   event: H3Event,
   targetIds: readonly string[],
   viewerId: string | null,

@@ -1,6 +1,6 @@
 import { AppwriteException, Query } from 'node-appwrite'
 import { reactionToggleSchema } from '../../../../schemas/reaction'
-import { allowedReactionsFor, loadReactionSummary, resolveReactionTarget } from '../../../utils/commentReactions'
+import { allowedCommentReactionsFor, loadCommentReactionSummary, resolveCommentReactionTarget } from '../../../utils/commentReactions'
 import { COMMENT_REACTIONS_TABLE, type CommentReaction, type CommentReactionToggleResponse } from '../../../../shared/types/comment'
 
 /**
@@ -80,7 +80,7 @@ export default defineEventHandler(async (event): Promise<CommentReactionToggleRe
    * Fragen sind noetig: ein gekuerzter Satz waere sonst eine reine
    * Anzeige-Empfehlung, an der ein direkter Aufruf vorbeischreibt.
    */
-  const allowed = allowedReactionsFor()
+  const allowed = allowedCommentReactionsFor()
   if (!allowed.includes(reaction)) {
     throw createError({
       status: 400,
@@ -90,7 +90,7 @@ export default defineEventHandler(async (event): Promise<CommentReactionToggleRe
   }
 
   // Belegt die Mandanten-Zugehoerigkeit UND dass der Kommentar sichtbar ist.
-  await resolveReactionTarget(event, targetId)
+  await resolveCommentReactionTarget(event, targetId)
 
   // Drossel: ein Mensch, eine Community, ein Fenster. Fail-open wie ueberall —
   // ein toter Redis darf das Reagieren nicht abschalten. EIGENER Eimer neben
@@ -131,7 +131,7 @@ export default defineEventHandler(async (event): Promise<CommentReactionToggleRe
          * Mitglieder herunter, wenn die Community das so eingestellt hat —
          * deshalb steht hier die ABSICHT und keine Verzweigung. Der eine Fall,
          * in dem das nicht reichen wuerde (interne Ticket-Diskussionen), ist
-         * oben in `resolveReactionTarget` schon abgewiesen.
+         * oben in `resolveCommentReactionTarget` schon abgewiesen.
          */
         read: 'public',
         ownerUserId: user.$id,
@@ -163,7 +163,7 @@ export default defineEventHandler(async (event): Promise<CommentReactionToggleRe
 
   // Autoritativ neu gelesen statt optimistisch gerechnet: zwischen Klick und
   // Antwort koennen fremde Reaktionen dazugekommen sein.
-  const reactions = await loadReactionSummary(event, [targetId], user.$id, allowed)
+  const reactions = await loadCommentReactionSummary(event, [targetId], user.$id, allowed)
 
   return { targetId, reactions: reactions[targetId] ?? [] }
 })
