@@ -15,10 +15,15 @@ Emoji-Reaktionen, Einladungen durch Mitglieder, Tages-Limit für Likes und
 zuletzt die **Themen-Verlinkung mit Rückverweis** — stehen samt der Abzeichen,
 die daran hängen (`first-reaction`, `promoter`, `out-of-love` …, `first-link`).
 
-**Die Datei bleibt trotzdem in `docs/plans/`**, weil zwei Dinge offen sind:
-`Campaigner`/`Champion` (sie hängen an der Vertrauensstufe der EINGELADENEN und
-brauchen einen eigenen Verleihungs-Pfad) und Davids Frage, ob Reaktionen auch
-auf ANTWORTEN gehören.
+**`Campaigner`/`Champion` sind seit dem 2026-08-14 ebenfalls GEBAUT**
+(F57-Stufen) — samt dem eigenen Verleihungs-Pfad, den sie brauchten: der
+Einladende wird bei der ANNAHME an der Zähler-Zeile des Eingeladenen
+hinterlegt (`invitedBy`), und dessen späterer Stufen-Aufstieg zählt bei ihm
+hoch. Im selben Paket staffelt das Tages-Like-Limit mit der Vertrauensstufe
+(50/50/75/100).
+
+**Die Datei bleibt trotzdem in `docs/plans/`**, weil EIN Ding offen ist:
+Davids Frage, ob Reaktionen auch auf ANTWORTEN gehören.
 **Emoji-Reaktionen sind seit dem 2026-08-13 GEBAUT** (Teil 5, „Reaktionen");
 `first-reaction` steht im Katalog. Geführt werden sie als **offener Punkt F57** in
 [OPEN-ITEMS.md](../OPEN-ITEMS.md); dort und nur dort wird darüber entschieden.
@@ -336,8 +341,8 @@ Entscheidung Nr. 4 in 3.7 — ohne sie ist keine der Like-Zeilen baubar.
 | Admired | ≥5 Likes auf 300 Beiträgen |
 | Enthusiast / Aficionado / Devotee | 10 / 100 / 365 Tage in Folge besucht **[fehlt: Besuchs-Streaks]** |
 | Anniversary | 1 Jahr Mitglied + ≥1 Beitrag in dem Jahr |
-| Out of Love / Higher Love / Crazy in Love | alle 50 Tages-Likes an 1 / 5 / 20 Tagen verbraucht — **GEBAUT** (2026-08-14, F57 Mechanik 3; Zähler `member_counters.likeLimitDays`) |
-| Promoter / Campaigner / Champion | 1 Einladung / 3 Eingeladene wurden Basic / 5 wurden Member — **`promoter` GEBAUT** (2026-08-14, zählt die erste ANGENOMMENE Einladung); **[fehlen: Campaigner/Champion — sie hängen an der Vertrauensstufe der EINGELADENEN und brauchen einen eigenen Verleihungs-Pfad, s. Teil 5]** |
+| Out of Love / Higher Love / Crazy in Love | alle Tages-Likes an 1 / 5 / 20 Tagen verbraucht — **GEBAUT** (2026-08-14, F57 Mechanik 3; Zähler `member_counters.likeLimitDays`). Das Kontingent staffelt seit F57-Stufen mit der Vertrauensstufe (50/50/75/100), die Bedingung heißt deshalb „alle **eigenen** Tages-Likes" |
+| Promoter / Campaigner / Champion | 1 Einladung / 3 Eingeladene wurden Basic / 5 wurden Member — **alle drei GEBAUT** (2026-08-14; `promoter` zählt die erste ANGENOMMENE Einladung, `campaigner`/`champion` den Stufen-Aufstieg der Eingeladenen über `member_counters.invitedBy` + `inviteesBasic`/`inviteesMember`, posts-021) |
 | Nice/Good/Great Share | geteilter Link von 25 / 300 / 1000 externen Besuchern geklickt **[fehlt: Klick-Zählung]** |
 
 ### Posting
@@ -444,14 +449,17 @@ eigenes Paket mit Sicherheitsentwurf.
    echte Wachstumshebel, plattformweit nützlich. Braucht ein Kontingent gegen
    Missbrauch. Bringt Promoter/Campaigner/Champion.
    **GEBAUT am 2026-08-14** (5/Woche je Mitglied, Owner-Schalter, Rolle immer
-   `viewer`) — Einzelheiten in Teil 5. Davon gekommen ist `promoter`;
-   Campaigner/Champion brauchen die Vertrauensstufe der EINGELADENEN und damit
-   einen eigenen Verleihungs-Pfad.
+   `viewer`) — Einzelheiten in Teil 5. Davon gekommen sind `promoter` und —
+   mit dem Nachzügler-Paket F57-Stufen desselben Tages — `campaigner` und
+   `champion`: der Einladende wird bei der Annahme hinterlegt, der spätere
+   Aufstieg des Eingeladenen zählt bei ihm hoch.
 2. **Tages-Limit für Likes** — klein; macht Likes knapp. Bringt Out of
    Love/Higher Love/Crazy in Love.
-   **GEBAUT am 2026-08-14** (50/Tag je Mensch und Community, UTC-Kalendertag,
-   Config-Wert; Rücknahme erstattet nichts) — Einzelheiten in Teil 5. Alle
-   drei Abzeichen sind damit da.
+   **GEBAUT am 2026-08-14** (UTC-Kalendertag, Config-Wert; Rücknahme erstattet
+   nichts) — Einzelheiten in Teil 5. Alle drei Abzeichen sind damit da. Seit
+   F57-Stufen **staffelt das Kontingent mit der Vertrauensstufe**: TL0/TL1 =
+   50, TL2 = 75, TL3+ = 100 (`likesPerDayByLevel`) — die Bremse trifft den,
+   über den man nichts weiß, nicht die eigenen Leute.
 3. **Emoji-Reaktionen neben den Stimmen.** Ich hatte abgeraten (drittes Signal
    am selben Beitrag); Davids Entscheidung steht. **Folgeregel, damit die
    Bedeutung eindeutig bleibt:** Badges zählen weiter AUSSCHLIESSLICH Upvotes
@@ -510,6 +518,24 @@ nach `docs/OPEN-ITEMS.md`.
   Antworten mitzählen. KEINE Migration, keine neue Tabelle. Ohne Naht
   (apps/comments, Silo) bleibt das Abzeichen unverdient und die About-Kachel
   verschwindet — nie eine 0.
+- **F57-Stufen** (2026-08-14) Zwei Nachzügler des Teil-4-Pakets, beide an der
+  Vertrauensstufe:
+  (a) Das **Tages-Like-Limit staffelt** (`likesPerDayByLevel: [50, 50, 75,
+  100]`, Index = Stufe, TL4 bekommt den letzten Eintrag) — EINE pure Regel
+  (`likeLimitForLevel`), gelesen an der Datentür-Klinke, die die Zeile ohnehin
+  in der Hand hat; kostet keine zusätzliche Abfrage. Die Galerie NENNT die
+  Zahl statt „mehr Likes" zu versprechen (`likeLimit` in der Badges-Antwort,
+  nie im Übersetzungs-Text).
+  (b) **`Campaigner`/`Champion`** konzepttreu: der Einladende wird bei der
+  ANNAHME an der Zähler-Zeile des Eingeladenen hinterlegt
+  (`member_counters.invitedBy`, posts-021), sein späterer Aufstieg zählt beim
+  Einladenden hoch (`inviteesBasic`/`inviteesMember`, Differenz
+  `(vorher, nachher]` ⇒ je Eingeladenem und Stufe genau einmal). Die Ernennung
+  zu Stufe 4 meldet bewusst nichts.
+  Mitgekommen ist eine Sicherung, die die Staffel nötig machte:
+  `likeLimitDay` hält den schon gebuchten Abzeichen-Tag fest — ohne sie hätte
+  ein Aufstieg mitten am Tag zwei „Tage" für „Out of Love" ergeben.
+  Beweis `packages/posts/scripts/verify-trust-perks.mjs` (47/47).
 - **Kleines Paket** (2026-08-04) Regeln-Vorlage für Bestands-Communities als
   Laufzeit-Rückfall (Schalter `pukalani.pages.guidelinesFallback`, in
   `platform` an) und die Hilfe-Umbenennung „Diskussionen" → „Kommentare".
@@ -712,14 +738,14 @@ nach `docs/OPEN-ITEMS.md`.
 
 ## Was Stufe 4 an Abzeichen NICHT bringt — und warum
 
-Der Katalog aus § 3.6 hat 40+ Einträge, gebaut sind 19. Die vollständige
+Der Katalog aus § 3.6 hat 40+ Einträge, gebaut sind 21. Die vollständige
 Begründung steht im Kopf von `packages/posts/shared/badges.ts` — dort, wo sie
 jemand liest, der ein Abzeichen nachreichen will. Kurzfassung:
 
 - **Dauerhaft draußen** (Davids Entscheidung, Teil 4): die neun, die ein
   personenbezogenes Verhaltensprotokoll bräuchten.
 - **Wartet auf seine Funktion**: First Emoji, First Quote, First Onebox,
-  First Reply By Email, Wiki Editor, Certified/Licensed, Campaigner/Champion.
+  First Reply By Email, Wiki Editor, Certified/Licensed.
   („Erste Reaktion" ist seit dem 2026-08-13 gebaut, „Promoter" und die drei
   Like-Limit-Abzeichen seit dem 2026-08-14, „First Link" seit der letzten
   Mechanik desselben Tages — alle sechs sind daher hier heraus.)

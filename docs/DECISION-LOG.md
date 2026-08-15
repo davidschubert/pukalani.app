@@ -7,6 +7,66 @@ die kleinen, verstreuten Beschlüsse.
 
 ---
 
+## 2026-08-14 — F57-Stufen: die Like-Staffel und Campaigner/Champion
+
+**Davids Entscheidungen (bindend):** (1) Das Tages-Limit für Likes **staffelt
+mit der Vertrauensstufe**: TL0/TL1 = 50, TL2 = 75, TL3+ = 100. (2)
+`Campaigner`/`Champion` werden **konzepttreu** gebaut, also nach der
+Katalog-Definition aus § 3.6 — „3 Eingeladene wurden Basic" / „5 wurden
+Member" —, nicht als billige Umdeutung auf „3 bzw. 10 angenommene
+Einladungen".
+
+**Zur Staffel.** Sie steht als LISTE in der Config
+(`pukalani.discussions.likesPerDayByLevel: [50, 50, 75, 100]`, Index = Stufe,
+die ernannte Stufe 4 bekommt den letzten Eintrag) und wird an EINER Stelle
+gelesen (`likeLimitForLevel` in `core/shared/likeAllowance.ts`). Vier einzelne
+Schlüssel wären die Einladung gewesen, einen davon zu setzen und die anderen
+drei zu vergessen — der Zustand, in dem eine höhere Stufe stillschweigend
+weniger darf. Der frühere Skalar `likesPerDay` ist damit ERSETZT, nicht
+ergänzt; abgeschaltet wird weiterhin mit Nullen (`[0,0,0,0]`).
+
+**Was die Staffel gekostet hat, und das ist der lehrreiche Teil:** die Zusage
+„der Abzeichen-Tag wird genau EINMAL je Tag gebucht" hing daran, dass das
+Limit an einem Tag eine feste Zahl ist. Steigt jemand mitten am Tag auf, ist
+sie es nicht mehr — er räumt bei 50 auf, steigt auf TL2 und trifft bei 75 ein
+zweites Mal die Gleichheit. Ein Nachmittag hätte zwei „Tage" für
+„Out of Love"/„Higher Love" ergeben. Deshalb merkt sich die Zeile jetzt den
+gebuchten Tag (`member_counters.likeLimitDay`, posts-021) — die Sicherung
+gehört in die Daten, nicht in die Disziplin.
+
+**Zu Campaigner/Champion — der dritte Verleihungs-Pfad.** Das qualifizierende
+Ereignis ist der **Stufen-Aufstieg eines ANDEREN Menschen**, Wochen nach der
+Einladung, in einer fremden Zähler-Zeile. Verworfen wurden zwei naheliegende
+Wege: beim Aufstieg das Control Plane fragen „wer hat den hergeholt?" (eine
+Naht über die Projektgrenze, mitten im Schreibpfad, für eine Antwort, die sich
+NIE ändert) und die Einladungen des Einladenden durchzählen (N+1 über dieselbe
+Grenze). Gebaut ist die billigste Wahrheit: **die Annahme hinterlegt den
+Einladenden** an der Zähler-Zeile des Eingeladenen (`invitedBy`, posts-021) —
+ein Schreibvorgang, einmal im Leben einer Mitgliedschaft, an der Stelle, die
+`invitedBy` ohnehin schon zurückbekommt (sie zählt dort `promoter`). Danach
+ist der Aufstiegs-Hook eine reine Runtime-Sache ohne jede Naht.
+
+**Drei Eigenschaften, die man nicht „vereinfachen" darf:** (a) Gezählt wird die
+DIFFERENZ `(vorher, nachher]` der ERARBEITETEN Stufe — dadurch zählt ein
+Eingeladener je Stufe genau einmal, ohne dass irgendwo nachgesehen werden
+müsste. (b) Die **Ernennung zu Stufe 4 meldet nichts**: der Katalog sagt
+„wurden Basic/Member", und ein Owner könnte sonst die Abzeichen Dritter
+vergeben. (c) `invitedBy` wird nur gesetzt, wenn es LEER ist — die erste
+Einladung gewinnt, sonst wäre eine zweite Einladung ein Weg, eine bestehende
+Zuordnung umzuschreiben.
+
+**Ehrlicher Preis:** beide Zähler starten für alle bei 0 und werden nie
+geeicht (die Zuordnung liegt im Control Plane, die Stufen der Eingeladenen in
+deren Zeilen). Wer vor diesem Paket zwanzig Leute hergeholt hat, fängt bei
+null an — wie schon bei „Editor" und „Promoter".
+
+**Beweis:** `packages/posts/scripts/verify-trust-perks.mjs` (47/47, echter
+Aufstieg über eine zurückdatierte `community_members`-Zeile), Regressionen
+`verify-like-limit.mjs` 28/28 und `verify-member-invites.mjs` 42/42 (+2 neue
+Prüfungen auf den Stempel).
+
+---
+
 ## 2026-08-14 — F57-Stellschrauben + Reaktions-Zuschnitt
 
 **Davids Antworten:** (1) Einladungen durch Mitglieder: **5 pro Woche je
