@@ -14,7 +14,7 @@ import { isNameReservedInDb } from '../../../utils/reservedNames'
  * Zwei Fragen in einer Route, weil sie im Wizard an zwei Stellen gebraucht
  * werden und beide dasselbe Recht verlangen (unser eigenes Deployment fragt):
  *  - `code`: gilt der Einladungs-Code? (Eintritt in den Wizard — niemand soll
- *    sieben Schritte füllen, um am Ende abgewiesen zu werden.)
+ *    vier Schritte füllen, um am Ende abgewiesen zu werden.)
  *  - `slug`: ist die Adresse noch frei? (Live-Rückmeldung im Namensschritt.)
  *
  * Antwortet bewusst NUR mit Booleans: der Ablehnungsgrund eines Codes bleibt
@@ -30,7 +30,7 @@ const bodySchema = z.object({
   email: z.string().trim().toLowerCase().email().max(254).optional(),
   /** Hat Appwrite diese Adresse bestätigt? Pflicht-Bedingung für gebundene
    *  Codes seit dem Audit 2026-08-02 — hier nur, damit der Wizard dieselbe
-   *  Antwort gibt wie das Anlegen und niemand sieben Schritte füllt, um am Ende
+   *  Antwort gibt wie das Anlegen und niemand vier Schritte füllt, um am Ende
    *  an der Bestätigung zu scheitern. Der VERBINDLICHE Ort der Prüfung ist
    *  site.post.ts (dort steht ein JWT dahinter, hier nur das Service-Secret). */
   emailVerified: z.boolean().optional(),

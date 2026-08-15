@@ -3,7 +3,7 @@
  * Eintritt in den Setup-Flow (SAAS-ROADMAP #1).
  *
  * Schritt 0 ist das Early-Access-Tor: der Einladungs-Code wird HIER geprüft,
- * nicht am Ende. Sieben Schritte auszufüllen und dann abgewiesen zu werden
+ * nicht am Ende. Vier Schritte auszufüllen und dann abgewiesen zu werden
  * wäre die schlechteste mögliche erste Erfahrung mit dem Produkt.
  *
  * Die Prüfung ist nicht verbrauchend (POST /api/onboarding/precheck) — der

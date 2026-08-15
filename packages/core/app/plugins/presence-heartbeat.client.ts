@@ -26,8 +26,25 @@
  * 404 gelandet ist, für den Rest der Sitzung unsichtbar machen.
  * `usePresenceState()` ist idempotent (Modul-Flag), ein doppelter Aufruf
  * kostet also nichts.
+ *
+ * UND NICHT IM KUNDENBEREICH (2026-08-15, beim Durchspielen der eingeloggten
+ * Kundenreise gemessen). Der Absatz darüber begründet den Fehlerseiten-Fall
+ * mit „es gibt dort keinen Mandanten, in dem jemand anwesend sein könnte" —
+ * genau das gilt auf einem KONTROLL-Host ebenso, nur wurde die Wache dort nie
+ * gezogen. `01.control-center.ts` lässt dort nur die freigegebenen Präfixe
+ * durch, `/api/presence/heartbeat` gehört nicht dazu: jeder eingeloggte
+ * Besucher von account.pukalani.app feuerte deshalb alle 20 Sekunden einen
+ * POST, der garantiert 404 wird — pro offenem Tab, für die ganze Sitzung,
+ * verschluckt vom `.catch(() => {})` und nur im Netzwerk-Log sichtbar.
+ *
+ * Die Frage ist bewusst „ist das ein Kontroll-Host?" und nicht „ist das ein
+ * Mandanten-Host?": eine SILO-App (comments) hat gar keine Kontroll-Hosts,
+ * ihre Anwesenheit muss weiterlaufen. `useIsControlCenter()` liefert dort
+ * `false` und ändert nichts.
  */
 export default defineNuxtPlugin((nuxtApp) => {
+  if (nuxtApp.runWithContext(() => useIsControlCenter())) return
+
   const error = useError()
   const start = () => nuxtApp.runWithContext(() => { usePresenceState() })
 

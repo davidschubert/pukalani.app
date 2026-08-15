@@ -10,7 +10,7 @@ import type { Models } from 'node-appwrite'
  * NICHT für die Registrierung. Sonst könnten die eingeladenen MITGLIEDER einer
  * bestehenden Community sich nicht mehr anmelden — sie registrieren sich im
  * selben Pool-Projekt. Geprüft wird der Code beim Betreten des Wizards
- * (nicht verbrauchend, damit niemand sieben Schritte umsonst füllt) und
+ * (nicht verbrauchend, damit niemand vier Schritte umsonst füllt) und
  * verbraucht beim Anlegen.
  *
  * Der Klartext-Code wird NIE gespeichert (nur sha256), genau wie die

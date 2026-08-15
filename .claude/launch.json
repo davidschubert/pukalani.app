@@ -92,6 +92,15 @@
       "port": 3006
     },
     {
+      "name": "platform-kundenbereich",
+      "runtimeExecutable": "zsh",
+      "runtimeArgs": [
+        "-c",
+        "source ~/.nvm/nvm.sh && nvm use 22 >/dev/null && NUXT_PUBLIC_TENANCY_CONTROL_HOSTS=localhost exec pnpm --filter platform dev"
+      ],
+      "port": 3006
+    },
+    {
       "name": "help",
       "runtimeExecutable": "zsh",
       "runtimeArgs": [
