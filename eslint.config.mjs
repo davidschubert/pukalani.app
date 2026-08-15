@@ -503,3 +503,66 @@ export default createConfigForNuxt({
     ],
   },
 })
+.append({
+  /**
+   * JEDER `$fetch`/`useFetch` NENNT SEINEN ANTWORTTYP (2026-08-14).
+   *
+   * Der Wächter zu der Entscheidung in `packages/core/nuxt.config.ts`
+   * (`types:extend` leert Nitros `InternalApi`). Dort steht das WARUM samt
+   * Messung; hier steht die Durchsetzung.
+   *
+   * KURZ: Nitros Routen-Typisierung ist aus, weil sie an JEDER Aufrufstelle
+   * den Routen-Literal gegen ALLE Routen auflöst — Kosten `Aufrufstellen ×
+   * Routen`, gemessen 92 % aller Typ-Instanziierungen der Platform-App und die
+   * Ursache jedes `TS2589`, das zuletzt fremde Dateien umwarf. Der Preis ist
+   * genau diese Regel: ohne Ableitung liefert `$fetch('/api/x')` `unknown`.
+   *
+   * SIE GREIFT NUR, WO DAS ERGEBNIS AUCH GEBUNDEN WIRD — und das ist der
+   * ganze Trick. Gemessen im Bestand: 111 der 114 `$fetch`-Aufrufe ohne
+   * Typangabe stehen in ANWEISUNGSPOSITION (`await $fetch('/api/x', { method:
+   * 'POST' })`) und werfen ihre Antwort weg. Dort ist eine erfundene
+   * `<{ ok: boolean }>`-Angabe reines Rauschen: sie behauptet eine Form, die
+   * niemand liest, und muss bei jeder Routen-Änderung mitgepflegt werden. Ein
+   * Wächter, der 111 Stellen zu Lärm zwingt, wird abgeschaltet — und nimmt die
+   * 3 echten Fälle mit.
+   *
+   * DIE 3 ECHTEN: `const payload = await $fetch('/api/…')` — `payload` ist
+   * `unknown` und wandert weiter. TypeScript schweigt dazu, solange niemand ein
+   * FELD daraus liest (`JSON.stringify(unknown)` ist erlaubt), genau deshalb
+   * braucht es hier einen Wächter neben `strict`. Wird ein Feld gelesen, meldet
+   * schon der Compiler `TS18046` — beim Umstellen waren das 6 Stellen in 2
+   * Dateien, die der Typecheck von selbst gefunden hat.
+   *
+   * `useFetch` steht OHNE Einschränkung drin: sein Ergebnis wird über `data`
+   * IMMER gelesen, eine Anweisungsposition gibt es dort nicht. Bestand: 0
+   * Verstöße.
+   *
+   * NICHT ERFASST (bewusst): `$fetch.raw`/`$fetch.create` (MemberExpression,
+   * anderer Rückgabetyp) und die aus `useRequestFetch()` gezogenen lokalen
+   * Funktionen — deren NAME ist Konvention, kein Vertrag, und ein Selektor auf
+   * einen Variablennamen wäre ein Wächter, den man durch Umbenennen abschaltet.
+   * Sie tragen ihre Typangabe heute alle; wer dort eine vergisst, merkt es am
+   * `unknown`.
+   *
+   * NUR `app/**`, UND DAS IST KEINE NACHLÄSSIGKEIT: `no-restricted-syntax` wird
+   * von einem späteren Block ERSETZT, nicht ergänzt (Flat Config). Ein Glob,
+   * der auch die `server`-Ordner der Layer fängt, hätte hier unten die
+   * tablesDB-Sperre der gepoolten Layer (Block „EINE Datentür") ABGESCHALTET — also genau
+   * den Wächter, an dem die Mandanten-Isolation hängt. Beim Bau dieser Regel
+   * einmal so gebaut und am Gegentest gemerkt. Server-Code braucht sie ohnehin
+   * nicht: dort steht kein einziger untypisierter `$fetch` (nachgemessen), und
+   * die wenigen Aufrufe zeigen auf FREMDE Dienste, wo `<T, string>` schon
+   * heute die richtige Angabe ist.
+   */
+  files: ['packages/*/app/**/*.{ts,vue}', 'apps/*/app/**/*.{ts,vue}'],
+  rules: {
+    'no-restricted-syntax': ['error',
+      { selector: 'VariableDeclarator > CallExpression[callee.name="$fetch"]:not([typeArguments])',
+        message: 'Ein gebundenes $fetch-Ergebnis braucht ein Typ-Argument: $fetch<AntwortTyp>(…). Nitros Routen-Ableitung ist bewusst aus (packages/core/nuxt.config.ts, types:extend) — ohne Angabe ist die Variable `unknown` und reist unbemerkt weiter. Antwort-Typ nach shared/types/ (CLAUDE.md).' },
+      { selector: 'VariableDeclarator > AwaitExpression > CallExpression[callee.name="$fetch"]:not([typeArguments])',
+        message: 'Ein gebundenes $fetch-Ergebnis braucht ein Typ-Argument: $fetch<AntwortTyp>(…). Nitros Routen-Ableitung ist bewusst aus (packages/core/nuxt.config.ts, types:extend) — ohne Angabe ist die Variable `unknown` und reist unbemerkt weiter. Antwort-Typ nach shared/types/ (CLAUDE.md).' },
+      { selector: 'CallExpression[callee.name="useFetch"]:not([typeArguments])',
+        message: 'useFetch braucht ein Typ-Argument: useFetch<AntwortTyp>(…). Nitros Routen-Ableitung ist bewusst aus (packages/core/nuxt.config.ts, types:extend) — ohne Angabe ist `data` vom Typ `unknown`. Antwort-Typ nach shared/types/ (CLAUDE.md).' },
+    ],
+  },
+})
