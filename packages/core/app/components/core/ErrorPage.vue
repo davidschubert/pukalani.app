@@ -37,6 +37,27 @@ const homeUrl = computed(() => appConfig.pukalani?.brand?.homeUrl || '')
 // Titel statt nackter URL im Tab/in geteilten Links: „404 · Morgenlicht" —
 // über dieselbe Composable wie alle anderen Seiten (ui.metaTitle-Muster, S8).
 useBrandTitle(() => String(status.value))
+
+/**
+ * `lang` und `dir` am <html> — und zwar HIER, weil `useLocaleSeoHead()` in
+ * app.vue sitzt und Nuxt bei einem Fehler `error.vue` STATT app.vue rendert.
+ * Der Kopf von dort läuft also nie: jede 404 kam mit nacktem `<html>` heraus
+ * (am 2026-08-15 auf pukalani.app, demo, help und account nachgemessen). Der
+ * TEXT war die ganze Zeit richtig übersetzt — das Dokument sagte nur nicht, in
+ * welcher Sprache er ist, und ein Screenreader spricht deutschen Text dann in
+ * seiner Vorgabesprache aus.
+ *
+ * BEWUSST NUR lang/dir, nicht der ganze `useLocaleSeoHead()`: eine Fehlerseite
+ * darf kein canonical auf sich selbst setzen und keine hreflang-Alternates für
+ * eine Seite anbieten, die es nicht gibt. Das wäre die Einladung an
+ * Suchmaschinen, 404 zu indexieren.
+ */
+const localeHead = useLocaleHead({ seo: false, lang: true, dir: true })
+// Reaktiv ist die GANZE Angabe, nicht das einzelne Feld — dieselbe Form wie in
+// `useLocaleSeoHead()`. Ein `htmlAttrs: () => …` wäre ein Typfehler: unhead
+// erwartet dort ein Objekt, dessen Felder Getter sein dürfen, keine Funktion
+// an der Stelle des Objekts.
+useHead(() => ({ htmlAttrs: localeHead.value.htmlAttrs }))
 </script>
 
 <template>
