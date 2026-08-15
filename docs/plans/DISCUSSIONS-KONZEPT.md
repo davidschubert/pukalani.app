@@ -22,11 +22,16 @@ hinterlegt (`invitedBy`), und dessen späterer Stufen-Aufstieg zählt bei ihm
 hoch. Im selben Paket staffelt das Tages-Like-Limit mit der Vertrauensstufe
 (50/50/75/100).
 
-**Die Datei bleibt trotzdem in `docs/plans/`**, weil EIN Ding offen ist:
-Davids Frage, ob Reaktionen auch auf ANTWORTEN gehören.
+**NICHTS IST MEHR OFFEN — die Datei ist reif fürs Archiv.** Der eine Grund,
+aus dem sie noch in `docs/plans/` lag, war Davids Frage, ob Reaktionen auch
+auf ANTWORTEN gehören. Sie ist am 2026-08-13 mit **„Ja, nachbauen"**
+beantwortet und am 2026-08-14 gebaut (eigenes Datenmodell im comments-Layer,
+`comment_reactions`/comments-019 — Begründung unten bei „Emoji-Reaktionen").
 **Emoji-Reaktionen sind seit dem 2026-08-13 GEBAUT** (Teil 5, „Reaktionen");
-`first-reaction` steht im Katalog. Geführt werden sie als **offener Punkt F57** in
-[OPEN-ITEMS.md](../OPEN-ITEMS.md); dort und nur dort wird darüber entschieden.
+`first-reaction` steht im Katalog. F57 ist damit geschlossen und aus
+[OPEN-ITEMS.md](../OPEN-ITEMS.md) heraus — der Abschluss steht in
+[OPEN-ITEMS-COMPLETE.md](../OPEN-ITEMS-COMPLETE.md), die Entscheidung im
+[DECISION-LOG](../DECISION-LOG.md) (2026-08-14).
 **Zitat und Emoji im Editor sind seit F48 (2026-08-04) gebaut** — die
 Aufzählung in Teil 4, die sie als fehlend führt, ist insoweit überholt.
 
@@ -679,14 +684,27 @@ nach `docs/OPEN-ITEMS.md`.
   Entscheidung 4 ausschließt. Gespeichert wird ein SCHLÜSSEL (`tada`), nie das
   Zeichen — ein Emoji ist keine stabile Zeichenkette (Variantenselektor,
   Hauttöne).
-  **NUR AM THEMA, und das ist eine offene Produkt-Entscheidung:** reagiert
-  wird auf `community_posts`-Zeilen MIT Kategorie. Die Antwort-Ebene sind
-  `comments`-Zeilen in einem ANDEREN Layer — eine Leiste dort hieße entweder
-  eine Abhängigkeit comments→posts (A14-Umkehr; `CommentItem.vue` hat keinen
-  Slot) oder ein zweites Datenmodell im comments-Layer nach dem Muster der
-  Stimmen. Die Spalte `targetType` steht deshalb von Anfang an in der Tabelle:
-  die Erweiterung ist danach additiv, ohne Migration. Feed-Beiträge bleiben
+  **AM THEMA UND — seit 2026-08-14 — AUCH AN DER ANTWORT.** Am Thema wird auf
+  `community_posts`-Zeilen MIT Kategorie reagiert; Feed-Beiträge bleiben
   bewusst draußen (409 `reaction_target_not_topic`).
+  Die Antwort-Ebene sind `comments`-Zeilen in einem ANDEREN Layer, und dafür
+  standen zwei Wege zur Wahl: eine Abhängigkeit comments→posts (A14-Umkehr)
+  oder ein zweites Datenmodell im comments-Layer nach dem Muster der Stimmen.
+  **Gebaut ist der zweite** (Davids Entscheidung 2026-08-13 „Ja, nachbauen").
+  Die vorsorgliche Spalte `targetType` in `discussion_reactions` kam damit
+  NICHT zum Einsatz und bleibt auf `'post'` stehen: sie war für eine
+  gemeinsame Tabelle gedacht, und die gibt es bewusst nicht — der Zugriff
+  hätte über einen blossen Tabellen-Namen die Layer-Grenze umgangen, ohne
+  irgendwo rot zu werden. Die Antworten haben deshalb ihre eigene Tabelle
+  (`comment_reactions`, comments-019) und ihre eigene Toggle-Route; GELESEN
+  werden ihre Chips ohne eigene Route, nämlich mit der Kommentar-Liste
+  (`GET /api/comments`, neben `myVotes`/`myReports`).
+  **Geteilt wird die REGEL, nie das Datenmodell:** der 8er-Satz, die
+  Aggregation und das Umschalten liegen seither in
+  `core/shared/reactions.ts`, die Chip-Leiste als `CoreReactionBar` — Core
+  darf von beiden Produkten konsumiert werden. Der Zähler ist bewusst
+  derselbe (`reactionsGiven`), also bleibt `first-reaction` EIN Abzeichen,
+  egal wo man zuerst reagiert.
   **Keine Realtime** — bewusst: eine Reaktion ist kein Zustand, auf den jemand
   wartet, und ein eingehendes Ereignis müsste gegen die eigene Handlung
   entdoppelt werden. Optimistisch gerechnet wird trotzdem (`toggledChips`,

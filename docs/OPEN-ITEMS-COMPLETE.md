@@ -30,6 +30,79 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### F57 — die vier sozialen Mechaniken sind KOMPLETT ✅ 2026-08-14
+
+**Der Schlussstein: Emoji-Reaktionen auch auf ANTWORTEN** (Davids
+Entscheidung 2026-08-13 „Ja, nachbauen" — die eine Frage, wegen der das
+Discussions-Konzept noch in `plans/` lag). Damit ist F57 zu.
+
+**Wie die Antwort-Ebene gebaut ist — der zweite von zwei Wegen.** Das Konzept
+hatte sie als „additiv ohne Migration" in Aussicht gestellt (die vorsorgliche
+`targetType`-Spalte aus posts-017). Dieser Weg fällt aus: `discussion_reactions`
+gehört posts, und `comments` steht in jedem `extends` DAVOR — eine
+comments-Route auf diese Tabelle wäre die A14-Umkehr, und zwar die schlimmste
+Sorte, weil sie über einen blossen Tabellen-NAMEN läuft und nirgends rot wird.
+Gebaut ist deshalb der zweite Weg, den das Konzept selbst nennt: ein eigenes
+Datenmodell nach dem Muster der STIMMEN (`comment_reactions`, comments-019 —
+so wie `comment_votes` neben `post_votes` steht). Geteilt wird stattdessen die
+REGEL: der 8er-Satz, `allowedReactions`, `aggregateReactions` und
+`toggledChips` sind nach `core/shared/reactions.ts` gezogen, die Chip-Leiste
+als `CoreReactionBar` dazu. Fundament dürfen beide konsumieren; das
+Datenmodell bleibt bei jedem Produkt.
+
+**Gelesen wird ohne eigene Route:** die Chips reisen in `GET /api/comments`
+mit, neben `myVotes` und `myReports`. Das ist billiger als eine zweite
+gebündelte Abfrage (25 Antworten = 0 statt 1 Anfrage) und löst den
+Realtime-Fall von selbst — ein während der Sitzung eintreffender Kommentar HAT
+keine Reaktionen. Geschrieben wird durch die Mitglieder-Klinke (M13 + A5),
+badge-neutral, in DENSELBEN `reactionsGiven`-Zähler wie die Themen:
+`first-reaction` bleibt EIN Abzeichen, egal wo man zuerst reagiert. Interne
+Ticket-Diskussionen bleiben draussen (409 `reaction_target_not_public`) —
+sonst wäre die Reaktions-Zeile lesbarer als der Kommentar, auf den sie zeigt.
+Beweis 35/35, Mechanik-1-Regression 27/27, E2E 24/24, alle sieben Gates.
+
+**Die drei anderen Mechaniken, gebaut am 2026-08-13/14:**
+- **Mechanik 1 — Emoji-Reaktionen an Themen** (fester 8er-Satz ohne 👍/❤️,
+  posts-017): eigener Eintrag „F57 Mechanik 1" weiter unten in dieser Datei.
+- **Mechanik 2 — Einladungen durch Mitglieder** (`promoter`, control-037 +
+  posts-018, 40/40): eigener Eintrag „F57 Mechanik 2" oben.
+- **Mechanik 3 — Tages-Limit für Likes** und **Mechanik 4 — Themen-Verlinkung
+  mit Rückverweis** (`first-link`, posts-019/-020) sowie die **F57-Stufen**
+  (Like-Staffel 50/50/75/100 nach Vertrauensstufe, `campaigner`/`champion`
+  über `invitedBy`, posts-021, 47/47) haben KEINEN eigenen Archiv-Eintrag
+  bekommen — sie sind im DECISION-LOG (2026-08-14) und im Baustand des
+  Discussions-Konzepts dokumentiert. Hier steht das, damit die Lücke nicht
+  später als „nie gebaut" gelesen wird.
+
+**Gelernt:** (1) **Auto-Import ist über Layer hinweg FLACH — und bei einer
+Kollision gewinnt lautlos einer.** `comments` und `posts` hatten beide
+`loadReactionSummary`/`allowedReactionsFor`/`resolveReactionTarget`; posts
+gewann, und die Kommentar-Liste las still die THEMEN-Tabelle mit dem
+THEMEN-Emoji-Satz. Sichtbar war das ausschliesslich als
+`WARN Duplicated imports` in einem Dev-Log — kein Test, kein Typecheck, kein
+Lint sieht es, und die Seite funktioniert. Helfer eines Produkt-Layers
+gehören deshalb eindeutig benannt UND explizit importiert; ein Dev-Log beim
+ersten Start zu lesen ist billiger als jeder Test, den man dafür schreiben
+müsste. (2) **Ein Beweis, der nichts beweist, sieht aus wie ein Teilerfolg.**
+Die gesäten Kommentare hatten keine Row-Permissions (`comments` ist
+rowSecurity) — die Liste kam leer zurück, und weil „keine Reaktionen" und
+„keine Kommentare" beide als leere Map ankommen, waren fünf Prüfungen still
+grün; 29/34 sah nach einem echten Befund aus und war ein Messfehler. Jeder
+Beweis, der aus einer LISTE liest, braucht zuerst die Zusicherung, DASS die
+Liste das Gesuchte enthält. (3) **Eine neue Server-Route kostet inzwischen
+Compiler-Budget.** Zwei neue Routen kippten `$fetch` erneut über die
+Rekursionsgrenze (TS2589, zweiter Treffer nach commit 4fe38d78) — und diesmal
+wären es rund 45 Aufrufstellen gewesen, die man mit `, string` hätte
+entschärfen müssen. Der Ausweg war nicht Patchen, sondern EINE Route weniger:
+die Leseabfrage an die bestehende Liste zu hängen war ohnehin der bessere
+Entwurf. Wenn eine Compiler-Grenze zum Patch-Feldzug einlädt, ist meistens
+der Entwurf die günstigere Stellschraube. (4) Der C18-Publikums-Umzug hatte
+`discussion_reactions` NIE erfasst, obwohl die Datentür die Zeilen mit
+`read: 'public'` anlegt — ein Umschalten auf „nur für Mitglieder" hätte die
+Beiträge zugemacht und die Emoji-Zeilen darunter offen gelassen. Beim Bau des
+Zwillings aufgefallen und in beiden Layern nachgetragen: wer eine Tabelle mit
+Veröffentlichungs-Permission anlegt, meldet sie im selben Commit an.
+
 ### F57 Mechanik 2 — Einladungen durch Mitglieder ✅ 2026-08-14
 
 **Der Wachstumshebel aus dem Discussions-Konzept (Teil 4 Punkt 1).** Bis hierher

@@ -7,6 +7,49 @@ die kleinen, verstreuten Beschlüsse.
 
 ---
 
+## 2026-08-14 — Reaktionen auch auf Antworten (F57 ist damit komplett)
+
+**Entscheidung (David, 2026-08-13): „Ja, nachbauen."** Die offene Frage aus
+dem Reaktions-Zuschnitt vom 2026-08-14 — ob die Emoji-Leiste auch unter die
+ANTWORTEN gehört — ist mit Ja beantwortet. Sie stand bis hierher NIRGENDS auf
+Platte (OPEN-ITEMS, DECISION-LOG und das Konzept führten sie alle drei noch
+als „offene Frage an David"); dieser Eintrag holt das nach.
+
+**Umgesetzt als eigenes Datenmodell im comments-Layer**, nicht über die
+vorgesehene `targetType`-Spalte von `discussion_reactions`. Grund: die Tabelle
+gehört `posts`, und `comments` steht in jedem `extends` DAVOR — ein Zugriff
+von dort wäre die A14-Umkehr, getarnt als blosser Tabellen-Name und damit
+durch nichts zu fangen. Gebaut ist deshalb der zweite Weg, den das Konzept
+selbst gegen den ersten gestellt hatte: `comment_reactions` (comments-019)
+nach dem Muster der Stimmen. **Verworfen:** die gemeinsame Tabelle (A14) und
+eine zweite Emoji-Liste im comments-Layer (Doppelpflege — der 8er-Satz und die
+👍/❤️-Sperre hätten zwei Orte gehabt).
+
+**Geteilt wird die REGEL, nie das Datenmodell.** Der kuratierte Satz, die
+Aggregation, das Umschalten und die Chip-Leiste sind nach `core` gezogen
+(`core/shared/reactions.ts`, `CoreReactionBar`); bei den Produkten bleiben
+Route, Tabelle und Publikum. Dieselbe Arbeitsteilung wie überall sonst: der
+Mechanismus ist gemeinsam, der Einstieg nie. Der Zähler ist bewusst DERSELBE
+(`reactionsGiven`, Core-Vertrag) — `first-reaction` bleibt EIN Abzeichen, egal
+ob man zuerst an einem Thema oder an einer Antwort reagiert.
+
+**Befund nebenbei (C18):** `discussion_reactions` war seit Mechanik 1 nie beim
+Publikums-Umzug angemeldet, obwohl die Datentür die Zeilen mit `read: 'public'`
+anlegt. Ein Umschalten auf „nur für Mitglieder" hätte die Beiträge zugemacht
+und die Emoji-Zeilen darunter offen gelassen. In beiden Layern nachgetragen.
+
+**Befund nebenbei (Werkzeug):** Nitros Auto-Import ist über alle Layer flach.
+Gleichnamige Helfer in `comments` und `posts` liessen die Kommentar-Liste
+still die THEMEN-Tabelle lesen — sichtbar nur als `WARN Duplicated imports` in
+einem Dev-Log. Produkt-Layer-Helfer heissen seither eindeutig und werden
+explizit importiert.
+
+Beweis 35/35, Mechanik-1-Regression 27/27, E2E 24/24, alle sieben Gates.
+Damit sind alle vier Mechaniken aus Konzept Teil 4 gebaut und F57 ist
+geschlossen (Archiv-Eintrag in OPEN-ITEMS-COMPLETE.md).
+
+---
+
 ## 2026-08-14 — F57-Stufen: die Like-Staffel und Campaigner/Champion
 
 **Davids Entscheidungen (bindend):** (1) Das Tages-Limit für Likes **staffelt
