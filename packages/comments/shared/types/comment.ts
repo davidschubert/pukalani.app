@@ -1,7 +1,19 @@
 import type { Models } from 'node-appwrite'
+import type { ReactionCount, ReactionKey, ReactionSummary } from '../../../core/shared/reactions'
 
 export const COMMENTS_TABLE = 'comments'
 export const VOTES_TABLE = 'comment_votes'
+/**
+ * Emoji-Reaktionen auf ANTWORTEN (F57, comments-019).
+ *
+ * Eine EIGENE Tabelle neben `discussion_reactions` (posts) — nicht aus
+ * Verdopplungslust, sondern weil `comments` in jedem `extends` VOR `posts`
+ * steht und ein Griff dorthin die A14-Umkehr waere. Dasselbe Verhaeltnis wie
+ * `comment_votes` zu `post_votes`. Geteilt wird die REGEL
+ * (`core/shared/reactions.ts`), nie die Tabelle. Begruendung ausfuehrlich im
+ * Kopf der Migration.
+ */
+export const COMMENT_REACTIONS_TABLE = 'comment_reactions'
 /**
  * Kontaktdaten der Gast-Kommentatoren (operator-read, comments-013).
  *
@@ -111,12 +123,51 @@ export interface CommentListResponse {
   myVotes: Record<string, VoteValue>
   /** IDs der Kommentare, die der eingeloggte User offen gemeldet hat (Moderation-Layer) */
   myReports: string[]
+  /**
+   * Emoji-Reaktionen dieser Kommentare (F57) — Kommentar-Id → Chips.
+   *
+   * Sie reisen MIT der Liste statt über eine eigene Route, wie `myVotes` und
+   * `myReports` daneben: die Zeilen sind beim Lesen ohnehin bekannt, und ein
+   * Kommentar, der später per Realtime hereinkommt, hat naturgemäß noch keine
+   * Reaktionen — ein fehlender Eintrag heißt hier also „keine", nicht
+   * „ungeladen".
+   */
+  reactions: ReactionSummary
+  /** Der in DIESER App freigeschaltete Satz — die Leiste baut ihr „+"-Menü daraus. */
+  reactionsAllowed: ReactionKey[]
 }
 
 /** POST /:id/vote Response: frischer Zähler-Stand + eigener Vote (null = entfernt) */
 export interface VoteResponse {
   comment: Comment
   myVote: VoteValue | null
+}
+
+/**
+ * EINE abgegebene Emoji-Reaktion auf eine Antwort (F57, Migration comments-019).
+ *
+ * `communityId` steht bewusst nicht im Typ — sie gehört der Datentür, die sie
+ * stempelt und filtert (dasselbe Muster wie bei `Comment` und `CommentVote`).
+ * `reaction` trägt den SCHLÜSSEL aus `core/shared/reactions.ts`, nie das
+ * Zeichen selbst (Begründung dort).
+ *
+ * Das Feld heißt `targetId` und nicht `commentId`, obwohl es hier immer eine
+ * Kommentar-Id ist: die pure Aggregation (`aggregateReactions`) liest genau
+ * diesen Namen, und sie ist für beide Produkte dieselbe. Ein eigener
+ * Spaltenname hier hieße, die Zeilen vor jedem Zählen umzuschreiben.
+ */
+export interface CommentReaction extends Models.Row {
+  /** Row-Id des Kommentars (global eindeutig, deshalb trägt sie den Unique-Index). */
+  targetId: string
+  userId: string
+  /** Schlüssel aus `REACTION_KEYS`, z. B. 'tada'. */
+  reaction: string
+}
+
+/** POST /api/comments/:id/reactions: der neue Stand GENAU dieses Kommentars. */
+export interface CommentReactionToggleResponse {
+  targetId: string
+  reactions: ReactionCount[]
 }
 
 /** Baumknoten für die rekursive Darstellung */

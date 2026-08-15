@@ -120,6 +120,28 @@ export default defineAppConfig({
        *  schreiben und lesen — z. B. 'ticket' (Board-Diskussionen).
        *  Andere Layer/Apps tragen sich hier ein (Array wird konkateniert). */
       operatorTargets: [] as string[],
+      /**
+       * DER KURATIERTE REAKTIONS-SATZ UNTER DEN ANTWORTEN (F57, Davids
+       * Entscheidung 2026-08-13 „Ja, nachbauen").
+       *
+       * Die Liste steht hier als AUSSAGE dieses Layers, obwohl der Code ohne
+       * sie denselben Satz nähme (`allowedReactions()` fällt auf die Registry
+       * zurück): so ist an EINER Stelle nachlesbar, was eine Community sieht,
+       * und eine App kann sie KÜRZEN, ohne den Layer anzufassen.
+       *
+       * EIGENER SCHLÜSSEL NEBEN `pukalani.discussions.reactions`, und das ist
+       * kein Versehen: Themen und Antworten sind zwei Produkte. Eine Community
+       * darf die Leiste unter den Antworten kürzen, ohne die an den Themen
+       * anzufassen — und eine Silo-App wie `comments` hat den anderen
+       * Schlüssel gar nicht, weil sie den posts-Layer nicht ziehen muss.
+       *
+       * ERWEITERN GEHT BEWUSST NICHT — was nicht in `REACTION_KEYS`
+       * (`packages/core/shared/reactions.ts`) steht, wird verworfen. Dort steht
+       * auch, warum weder 👍 noch ❤️ im Satz sind: beide würden neben dem
+       * Aufstimm-Pfeil als zweite Zustimmung gelesen, und genau die schließt
+       * Konzept-Entscheidung 4 („Like = Upvote") aus.
+       */
+      reactions: ['laugh', 'tada', 'thinking', 'eyes', 'sad', 'fire', 'thanks', 'idea'],
       /** Auto-Hide-Threshold: ab so vielen OFFENEN Meldungen wird ein Kommentar
        *  automatisch (zweiphasig + Cascade) ausgeblendet — Meldungen bleiben
        *  offen, der Moderator entscheidet final. 0 = aus (Default). */

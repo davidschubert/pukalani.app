@@ -1,6 +1,6 @@
 import { Permission, Query, Role } from 'node-appwrite'
 import type { H3Event } from 'h3'
-import { COMMENTS_TABLE, VOTES_TABLE, type Comment, type CommentVote } from '../../shared/types/comment'
+import { COMMENTS_TABLE, COMMENT_REACTIONS_TABLE, VOTES_TABLE, type Comment, type CommentReaction, type CommentVote } from '../../shared/types/comment'
 
 /**
  * GDPR-Contributor des comments-Layers (Vertrag: core/server/utils/userData.ts).
@@ -43,9 +43,10 @@ async function exportData(event: H3Event, userId: string) {
   const { tablesDB } = createAdminClient(event)
   const databaseId = config.public.appwriteDatabaseId
 
-  const [comments, votes] = await Promise.all([
+  const [comments, votes, reactions] = await Promise.all([
     listAllRows<Comment>(tablesDB, databaseId, COMMENTS_TABLE, [Query.equal('authorId', userId)]),
     listAllRows<CommentVote>(tablesDB, databaseId, VOTES_TABLE, [Query.equal('userId', userId)]),
+    listAllRows<CommentReaction>(tablesDB, databaseId, COMMENT_REACTIONS_TABLE, [Query.equal('userId', userId)]),
   ])
 
   return {
@@ -60,6 +61,16 @@ async function exportData(event: H3Event, userId: string) {
     votes: votes.map(r => ({
       commentId: r.commentId,
       value: r.value,
+      createdAt: r.$createdAt,
+    })),
+    /**
+     * Emoji-Reaktionen auf Antworten (F57, comments-019). Exportiert wird der
+     * SCHLÜSSEL ('tada'), weil genau der gespeichert ist — ein Zeichen wäre
+     * hier eine Übersetzung und keine Auskunft.
+     */
+    reactions: reactions.map(r => ({
+      commentId: r.targetId,
+      reaction: r.reaction,
       createdAt: r.$createdAt,
     })),
   }
@@ -101,5 +112,23 @@ export async function commentsDeleteUserData(event: H3Event, userId: string): Pr
     await tablesDB.deleteRow({ databaseId, tableId: VOTES_TABLE, rowId: row.$id })
   }
 
-  return { deleted: votes.length, anonymized: comments.length }
+  /**
+   * Reaktionen → Hard-Delete, wie die Stimmen und aus demselben Grund: die
+   * Zeile IST der Personenbezug (wer hat worauf reagiert), sie trägt nichts,
+   * was ohne die Person noch einen Sinn hätte. Ein Tombstone wie beim
+   * Kommentar wäre hier sinnlos — er zerrisse keinen Thread, er stünde nur als
+   * anonymer Chip herum.
+   *
+   * Die Anzeige heilt sich von selbst: die Leiste zählt bei jedem Aufbau neu
+   * aus den vorhandenen Zeilen (es gibt keine denormalisierte Zähler-Spalte),
+   * also verschwindet der Chip mit der letzten Zeile. `reactionsGiven` in
+   * `member_counters` gehört dem posts-Layer und wird dort mit derselben
+   * Löschung abgeräumt.
+   */
+  const reactions = await listAllRows<CommentReaction>(tablesDB, databaseId, COMMENT_REACTIONS_TABLE, [Query.equal('userId', userId)])
+  for (const row of reactions) {
+    await tablesDB.deleteRow({ databaseId, tableId: COMMENT_REACTIONS_TABLE, rowId: row.$id })
+  }
+
+  return { deleted: votes.length + reactions.length, anonymized: comments.length }
 }

@@ -235,7 +235,33 @@ export default defineEventHandler(async (event): Promise<CommentListResponse> =>
     myReports = [...reported]
   }
 
-  const response = { total, activeTotal, topLevelTotal, rows, myVotes, myReports }
+  /**
+   * DIE EMOJI-REAKTIONEN REISEN MIT DER LISTE (F57, Davids Entscheidung
+   * 2026-08-13) — wie `myVotes` und `myReports` daneben, und aus demselben
+   * Grund: die Zeilen sind gerade gelesen, ihre Ids stehen hier, und eine
+   * zweite Runde durch Nitro, Middleware und Datentür würde für dieselbe
+   * Antwort noch einmal bezahlt. Bei 25 Antworten sind das 0 zusätzliche
+   * Anfragen statt 25 — und statt einer gebündelten Nachfrage.
+   *
+   * `reactionsAllowed` kommt mit, weil die Leiste ihr „+"-Menü aus dem in
+   * DIESER App freigeschalteten Satz baut, nie aus der Registry. Ohne dieses
+   * Feld wäre eine gekürzte Konfiguration eine reine Server-Angelegenheit und
+   * die Oberfläche böte Emojis an, die 400 bekommen.
+   *
+   * FÜR GÄSTE MITGELIEFERT (und damit im Microcache): die Zahlen sieht jeder,
+   * der die Antwort sieht — `mine` ist dort überall `false`, weil es ohne
+   * Konto keine eigene Reaktion gibt. Der Cache macht sie bis zu 10 s alt,
+   * dieselbe Frist, die für die Kommentare selbst schon gilt.
+   */
+  const reactionsAllowed = allowedReactionsFor()
+  const reactions = await loadReactionSummary(
+    event,
+    rows.map(row => row.$id),
+    user?.$id ?? null,
+    reactionsAllowed,
+  )
+
+  const response = { total, activeTotal, topLevelTotal, rows, myVotes, myReports, reactions, reactionsAllowed }
   if (isGuest && page === 1) {
     guestCache.set(cacheKey, response)
   }
