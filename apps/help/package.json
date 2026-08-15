@@ -8,7 +8,8 @@
     "build": "nuxi build",
     "lint": "eslint .",
     "preview": "nuxi preview",
-    "typecheck": "nuxi typecheck"
+    "typecheck": "nuxi typecheck",
+    "test": "nuxi prepare && vitest run"
   },
   "dependencies": {
     "@iconify-json/lucide": "catalog:",
@@ -35,6 +36,7 @@
     "@types/nodemailer": "catalog:",
     "eslint": "catalog:",
     "typescript": "catalog:",
+    "vitest": "catalog:",
     "vue-tsc": "catalog:"
   }
 }

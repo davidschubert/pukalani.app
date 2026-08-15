@@ -63,6 +63,32 @@ export function docsSectionPrefix(section: DocsSectionKey, locale: string): stri
 }
 
 /**
+ * Sucht den Knoten mit genau diesem Pfad — auch TIEFER als auf der obersten
+ * Ebene.
+ *
+ * Die Tiefe ist kein Vorratsdenken: die englischen Sammlungen liegen unter
+ * `content/en/…`, ihr Navigationsbaum trägt deshalb `/en` als Wurzel und den
+ * Abschnitt erst als dessen Kind. Ein `items.find(…)` auf der obersten Ebene
+ * ging dort ins Leere und fiel auf den GANZEN Baum zurück — sichtbar wurde das
+ * als Abschnitts-Zeile „En" über der Überschrift von `/en/anleitung` und
+ * `/en/entwickler`: der Leser bekam den Ordnernamen zu sehen statt „Guide"
+ * (2026-08-15 live gemessen). Deutsch war nicht betroffen, weil dort kein
+ * Sprachordner dazwischenliegt — ein Fehler, den man also nur auf EINER der
+ * beiden Sprachen sieht.
+ */
+function findeKnoten(
+  items: ContentNavigationItem[],
+  pfad: string,
+): ContentNavigationItem | undefined {
+  for (const item of items) {
+    if (item.path === pfad) return item
+    const treffer = item.children?.length ? findeKnoten(item.children, pfad) : undefined
+    if (treffer) return treffer
+  }
+  return undefined
+}
+
+/**
  * Prefix-Sammlungen liefern EINEN Wurzelknoten (`/anleitung` bzw.
  * `/en/anleitung`) mit den Seiten als Kinder. Die Seitenleiste zeigt die
  * Kinder, weil der Abschnitt schon in der Kopfzeile gewählt wird — sonst
@@ -74,7 +100,6 @@ export function docsSectionItems(
   locale: string,
 ): ContentNavigationItem[] {
   const items = navigation?.[section] ?? []
-  const prefix = docsSectionPrefix(section, locale)
-  const root = items.find(item => item.path === prefix)
+  const root = findeKnoten(items, docsSectionPrefix(section, locale))
   return root?.children ?? items
 }
