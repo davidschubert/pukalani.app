@@ -86,7 +86,7 @@ Wo willst du hin?
   Abrechnung
 
   #description
-  Basic, Personal, Pro und Enterprise: Preise, Testphase, Kontingente und wie du den Plan wechselst.
+  Personal, Pro und Enterprise: Preise, Testphase, Kontingente und wie du den Plan wechselst.
   :::
 
   :::u-page-product

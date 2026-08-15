@@ -1,6 +1,25 @@
 <script setup lang="ts">
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const year = new Date().getFullYear()
+
+/**
+ * Die Fußzeile verlinkt auf die MARKETING-Site, nicht auf diese hier — deren
+ * Adressen kennt `localePath()` also nicht, sie müssen von Hand gebildet
+ * werden.
+ *
+ * Warum das nicht egal ist: `pukalani.app/impressum` leitet dort auf
+ * `/imprint` weiter, und das ist die ENGLISCHE Fassung (am 2026-08-15
+ * nachgemessen). Der deutsche Fuß schickte seine Leser also ins Englische. Die
+ * Namen unterscheiden sich je Sprache — deutsch `/de/impressum` und
+ * `/de/datenschutz`, englisch `/imprint` und `/privacy` (Englisch ist dort die
+ * Vorgabe und trägt deshalb kein Prefix).
+ */
+const istEnglisch = computed(() => locale.value.startsWith('en'))
+const marke = 'https://pukalani.app'
+
+const links = computed(() => istEnglisch.value
+  ? { website: marke, imprint: `${marke}/imprint`, privacy: `${marke}/privacy` }
+  : { website: `${marke}/de`, imprint: `${marke}/de/impressum`, privacy: `${marke}/de/datenschutz` })
 </script>
 
 <template>
@@ -11,7 +30,7 @@ const year = new Date().getFullYear()
 
     <template #right>
       <UButton
-        to="https://pukalani.app"
+        :to="links.website"
         color="neutral"
         variant="ghost"
         size="sm"
@@ -19,7 +38,7 @@ const year = new Date().getFullYear()
         {{ t('docs.footer.website') }}
       </UButton>
       <UButton
-        to="https://pukalani.app/impressum"
+        :to="links.imprint"
         color="neutral"
         variant="ghost"
         size="sm"
@@ -27,7 +46,7 @@ const year = new Date().getFullYear()
         {{ t('docs.footer.imprint') }}
       </UButton>
       <UButton
-        to="https://pukalani.app/datenschutz"
+        :to="links.privacy"
         color="neutral"
         variant="ghost"
         size="sm"

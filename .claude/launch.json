@@ -92,6 +92,15 @@
       "port": 3006
     },
     {
+      "name": "help",
+      "runtimeExecutable": "zsh",
+      "runtimeArgs": [
+        "-c",
+        "source ~/.nvm/nvm.sh && nvm use 22 >/dev/null && exec pnpm --filter help dev"
+      ],
+      "port": 3008
+    },
+    {
       "name": "marketing",
       "runtimeExecutable": "zsh",
       "runtimeArgs": [

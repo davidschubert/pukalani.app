@@ -3,12 +3,25 @@
 // Fuß kommen aus app.vue, die Seitenleiste gehört nur den Inhaltsseiten.
 definePageMeta({ layout: false })
 
-const { data: page } = await useAsyncData('docs-landing', () => queryCollection('landing').path('/').first())
+// Die Startseite gibt es je Sprache einmal: `/` (de) und `/en` (en). Abgefragt
+// wird über den ROUTENPFAD, nicht über ein festes '/', denn die englische
+// Sammlung trägt das Prefix `/en` — mit '/' fände sie nichts und die Seite
+// antwortete 404.
+const localePath = useLocalePath()
+const { locale } = useI18n()
+
+const { data: page } = await useAsyncData(() => `docs-landing-${locale.value}`, () =>
+  queryCollection(docsLandingCollection(locale.value)).path(localePath('/')).first(), { watch: [locale] })
 if (!page.value) {
   throw createError({ status: 404, statusText: 'Page not found', fatal: true })
 }
 
-const brand = useBrandName()
+// Die Marke dieser Site ist ein ÜBERSETZTER Ausdruck („Pukalani Hilfe" /
+// „Pukalani Help"), kein Eigenname — deshalb kommt sie aus i18n und nicht aus
+// `useBrandName()`. Ohne diese Übergabe stünde auf jeder englischen Seite ein
+// deutscher Markenname im Titel.
+const { t } = useI18n()
+const brand = computed(() => t('docs.siteName'))
 
 // Titel im Hausmuster „<Seite> · <Brand>" (useBrandTitle, Core). Die Startseite
 // trägt den Site-Namen in ihrem Frontmatter schon selbst — dann bleibt der
@@ -19,6 +32,7 @@ const pageName = computed(() => {
 })
 
 useBrandTitle(pageName, {
+  brand,
   description: () => page.value?.seo?.description || page.value?.description,
 })
 </script>

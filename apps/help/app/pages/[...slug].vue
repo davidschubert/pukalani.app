@@ -4,34 +4,39 @@ import type { DocsNavigation } from '../../shared/types/docs'
 
 definePageMeta({ layout: 'docs' })
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const route = useRoute()
 
 const fallback = ref<DocsNavigation | null>(null)
 const navigation = inject(docsNavigationKey, fallback)
 
-// Der Abschnitt bestimmt die Sammlung — beide sind mit ihrem Pfad-Prefix
-// indiziert, Route und Content-Pfad sind deshalb identisch (i18n: no_prefix).
+// Abschnitt + Sprache bestimmen die Sammlung. Alle vier sind mit ihrem
+// Pfad-Prefix indiziert (`/anleitung`, `/en/anleitung`, …), Route und
+// Content-Pfad sind deshalb identisch — die Abfrage bleibt eine Zeile.
 const section = computed(() => resolveDocsSection(route.path))
+const collection = computed(() => docsCollection(section.value, locale.value))
 
 const { data: page } = await useAsyncData(route.path, () =>
-  queryCollection(section.value).path(route.path).first())
+  queryCollection(collection.value).path(route.path).first())
 if (!page.value) {
   throw createError({ status: 404, statusText: 'Page not found', fatal: true })
 }
 
 const { data: surround } = await useAsyncData(`${route.path}-surround`, () =>
-  queryCollectionItemSurroundings(section.value, route.path, { fields: ['description'] }))
+  queryCollectionItemSurroundings(collection.value, route.path, { fields: ['description'] }))
 
 // Titel + Social-Tags im Hausmuster „<Seite> · <Brand>" (useBrandTitle, Core —
 // Audit-Befund S8/S5). Getter statt fixer Werte, damit ein Seitenwechsel
 // innerhalb der Route ([...slug]) den Kopf mitzieht.
+// `brand` aus i18n statt aus `useBrandName()`: die Marke dieser Site ist ein
+// übersetzter Ausdruck, kein Eigenname (Begründung in app/pages/index.vue).
 useBrandTitle(() => page.value?.seo?.title || page.value?.title || '', {
+  brand: () => t('docs.siteName'),
   description: () => page.value?.seo?.description || page.value?.description,
 })
 
 const headline = computed(() => findPageHeadline(
-  docsSectionItems(navigation.value, section.value),
+  docsSectionItems(navigation.value, section.value, locale.value),
   page.value?.path,
 ))
 </script>
