@@ -12,7 +12,8 @@ const localePath = useLocalePath()
 </script>
 
 <template>
-  <main class="relative flex min-h-screen flex-col items-center justify-center gap-5 p-8">
+  <!-- `pt-16`: Platz für die festen Bedienelemente — Begründung im Core-Layout. -->
+  <main class="relative flex min-h-screen flex-col items-center justify-center gap-5 p-8 pt-16">
     <UButton
       :to="localePath('/')"
       icon="i-ph-arrow-left"
