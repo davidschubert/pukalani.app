@@ -170,9 +170,24 @@ const reportReasons = computed(() => [
       {{ replyingText }}
     </p>
 
-    <!-- Aktionszeile: Votes · Antworten ein-/ausklappen · Antworten · ⋯ -->
-    <div v-if="!editing" class="mt-1.5 -ml-1.5 flex items-center gap-1 text-muted">
+    <!-- Aktionszeile: Votes · Reaktionen · Antworten ein-/ausklappen · Antworten · ⋯ -->
+    <!--
+      `flex-wrap` seit F57: die Emoji-Leiste kann bis zu acht Chips tragen, und
+      eine Reihe, die nicht umbricht, schiebt auf dem Telefon das ⋯-Menü aus
+      dem Bild. Ohne Reaktionen sieht die Zeile aus wie vorher.
+    -->
+    <div v-if="!editing" class="mt-1.5 -ml-1.5 flex flex-wrap items-center gap-1 text-muted">
       <VoteButtons :comment="comment" />
+
+      <!--
+        REAKTIONEN AUF ANTWORTEN (F57, Davids Entscheidung 2026-08-13).
+        Sie stehen NEBEN den Stimmen, nicht statt ihrer: eine Reaktion ist
+        reiner Ausdruck und zählt für kein Abzeichen ausser „erste Reaktion".
+        Auf einem `[gelöscht]`-Platzhalter gibt es nichts auszudrücken — die
+        Route weist ihn ebenfalls ab (409), das hier ist nur die Anzeige-Seite
+        derselben Regel.
+      -->
+      <CommentReactionBar v-if="!isDeleted" :target-id="comment.$id" />
 
       <UButton
         v-if="childCount > 0"

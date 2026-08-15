@@ -24,6 +24,13 @@ const commentStoreSetup = () => {
   // myReports hydratisieren leer (eigene Votes nach hartem Reload „weg").
   // useRequestFetch forwarded die Request-Header; im Client = normales $fetch.
   const requestFetch = useRequestFetch()
+  /**
+   * Die Emoji-Leisten der Antworten (F57). Der Store HÄLT sie nicht selbst —
+   * er reicht nur weiter, was die Liste ohnehin mitbringt; gelesen wird der
+   * Stand dort, wo er gebraucht wird (`CommentReactionBar`). So bleibt eine
+   * Zustandsquelle, auch wenn zwei Stellen schreiben (Liste und Umschalten).
+   */
+  const reactions = useCommentReactions()
   const targetId = ref('')
   const targetType = ref('')
   /** Interner Pfad der Seite (für die Reply-Notification) — vom CommentSection gesetzt */
@@ -102,6 +109,11 @@ const commentStoreSetup = () => {
       topLevelTotal.value = response.topLevelTotal
       userVotes.value = response.myVotes
       userReports.value = new Set(response.myReports)
+      // Emoji-Reaktionen reisen mit der Liste (F57) — wie myVotes/myReports.
+      // `?? {}` deckt denselben Fall wie `activeTotal` oben ab: der
+      // 10-s-Gast-Cache kann direkt nach einem Deploy noch eine Antwort ohne
+      // das Feld liefern.
+      reactions.seedFromList(response.reactions ?? {}, response.reactionsAllowed)
       pending.value = []
       pendingReplies.value = []
       removedByHide.clear()
@@ -138,6 +150,10 @@ const commentStoreSetup = () => {
           rows.value = [...rows.value, ...fresh]
           userVotes.value = { ...userVotes.value, ...response.myVotes }
           userReports.value = new Set([...userReports.value, ...response.myReports])
+          // Die Chips der nachgeladenen Seite dazulegen (F57) — `seedFromList`
+          // führt zusammen statt zu ersetzen, sonst verlören die schon
+          // sichtbaren Antworten ihre Leiste.
+          reactions.seedFromList(response.reactions ?? {}, response.reactionsAllowed)
         }
         // Keine neuen Top-Level-Threads auf dieser Seite → fertig
         if (!fresh.some(row => !row.parentId)) break
