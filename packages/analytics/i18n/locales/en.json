@@ -8,13 +8,13 @@
   "analytics": {
     "admin": {
       "title": "Analytics",
-      "subtitle": "How many people visit your pages — without cookies and without personal data.",
+      "subtitle": "How many people visit your pages — without cookies and without stored visitor data.",
       "section": "Plausible",
-      "intro": "We measure with Plausible on our own server. Plausible sets no cookies, does not follow anyone across sites and stores no personal data — so you do not need a consent banner for it.",
+      "intro": "We measure with Plausible on our own server: no cookies, no profiles across sites. IP address and browser identification are transmitted to the measurement service, but there they are only processed into a hash that changes daily, to recognise repeat visits, and are not stored — what remains stored is only page, source, country, browser and device type. So you do not need a consent banner for it.",
       "howTo": "Create a site there for your address. Plausible then shows you a script id that starts with pa-. Enter it here — that is all it takes, your pages report themselves from the next page view on.",
       "openInstance": "Open Plausible",
       "measureTitle": "Count visitors",
-      "measureHint": "We measure with Plausible on our own server: no cookies, no personal data, no consent banner. Switching it on is all it takes — your pages report themselves from the next page view on.",
+      "measureHint": "We measure with Plausible on our own server: no cookies, no consent banner. IP address and browser identification are transmitted but not stored — what remains stored is only page, source, country, browser and device type. Switching it on is all it takes, your pages report themselves from the next page view on.",
       "measureLabel": "Measuring active",
       "measureOn": "Your pages are being counted. The numbers appear below.",
       "measureOff": "Nothing is being measured.",

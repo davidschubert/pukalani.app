@@ -311,9 +311,9 @@
         "analytics": {
           "name": "Analytics",
           "metaTitle": "Besucherstatistik ohne Cookies – wissen, was ankommt",
-          "metaDescription": "Pukalani misst Besuche mit Plausible auf eigenen Servern in der EU: keine Cookies, kein Banner, keine personenbezogenen Daten. Ein Schalter im Dashboard genügt.",
+          "metaDescription": "Pukalani misst Besuche mit Plausible auf eigenen Servern in der EU: keine Cookies, kein Banner, keine gespeicherten Besucherdaten. Ein Schalter im Dashboard genügt.",
           "title": "Wissen, was ankommt — ohne Cookies",
-          "sub": "Pukalani misst Besuche mit Plausible auf eigenen Servern in der EU: keine Cookies, kein Banner, keine personenbezogenen Daten.",
+          "sub": "Pukalani misst Besuche mit Plausible auf eigenen Servern in der EU: keine Cookies, kein Banner — IP-Adresse und Browser-Kennung werden nicht gespeichert.",
           "intro": "Ein Schalter im Dashboard — und du siehst, wie deine Community wächst.",
           "highlights": [
             "Besucher, Seitenaufrufe und Verlauf direkt im Dashboard",
@@ -485,7 +485,7 @@
         }
       ],
       "ctaTitle": "Community starten – kostenlos",
-      "ctaLead": "Kostenlos testen, jederzeit exportieren, jederzeit löschen."
+      "ctaLead": "14 Tage kostenlos testen, jederzeit exportieren, jederzeit löschen."
     },
     "audience": {
       "kicker": "Für wen",
@@ -940,7 +940,7 @@
           },
           {
             "title": "Reichweitenmessung",
-            "body": "Zur Reichweitenmessung setzen wir Plausible Analytics ein, selbst gehostet in der EU. Dabei werden keine Cookies gesetzt und keine personenbezogenen Daten gespeichert."
+            "body": "Zur Reichweitenmessung setzen wir Plausible Analytics ein, selbst gehostet in der EU. Dabei werden keine Cookies gesetzt. IP-Adresse und Browser-Kennung werden an die Messstelle übermittelt, dort aber nur zur Erkennung wiederkehrender Besuche zu einem täglich wechselnden Hashwert verarbeitet und nicht gespeichert. Gespeichert werden nur zusammengefasste Angaben: aufgerufene Seite, Herkunft, Land, Browser und Gerätetyp."
           },
           {
             "title": "Anfragen für den Early Access",

@@ -8,13 +8,13 @@
   "analytics": {
     "admin": {
       "title": "Analytics",
-      "subtitle": "Wie viele Menschen deine Seiten besuchen — ohne Cookies und ohne persönliche Daten.",
+      "subtitle": "Wie viele Menschen deine Seiten besuchen — ohne Cookies und ohne gespeicherte Besucherdaten.",
       "section": "Plausible",
-      "intro": "Wir messen mit Plausible auf unserem eigenen Server. Plausible setzt keine Cookies, verfolgt niemanden über Seiten hinweg und speichert keine personenbezogenen Daten — deshalb brauchst du dafür kein Zustimmungs-Banner.",
+      "intro": "Wir messen mit Plausible auf unserem eigenen Server: keine Cookies, keine Profile über Seiten hinweg. IP-Adresse und Browser-Kennung werden an die Messstelle übermittelt, dort aber nur zur Erkennung wiederkehrender Besuche zu einem täglich wechselnden Hashwert verarbeitet und nicht gespeichert — gespeichert bleiben nur Seite, Herkunft, Land, Browser und Gerätetyp. Deshalb brauchst du dafür kein Zustimmungs-Banner.",
       "howTo": "Lege dort eine Site für deine Adresse an. Plausible zeigt dir danach eine Script-Id, die mit pa- beginnt. Trage sie hier ein — mehr ist nicht nötig, die Seiten melden sich ab dem nächsten Aufruf selbst.",
       "openInstance": "Plausible öffnen",
       "measureTitle": "Besucher zählen",
-      "measureHint": "Wir messen mit Plausible auf unserem eigenen Server: keine Cookies, keine personenbezogenen Daten, kein Zustimmungs-Banner. Einschalten genügt — deine Seiten melden sich ab dem nächsten Aufruf selbst.",
+      "measureHint": "Wir messen mit Plausible auf unserem eigenen Server: keine Cookies, kein Zustimmungs-Banner. IP-Adresse und Browser-Kennung werden übermittelt, aber nicht gespeichert — gespeichert bleiben nur Seite, Herkunft, Land, Browser und Gerätetyp. Einschalten genügt, deine Seiten melden sich ab dem nächsten Aufruf selbst.",
       "measureLabel": "Messung aktiv",
       "measureOn": "Deine Seiten werden gezählt. Die Zahlen erscheinen unten.",
       "measureOff": "Es wird nichts gemessen.",

@@ -170,7 +170,11 @@ verarbeitet die Daten in deinem Auftrag.
 
 ## Reichweitenmessung
 
-Zur Reichweitenmessung setzen wir Plausible Analytics ein, selbst gehostet in der EU. Dabei werden keine Cookies gesetzt und keine personenbezogenen Daten gespeichert.
+Zur Reichweitenmessung setzen wir Plausible Analytics ein, selbst gehostet in der EU. Dabei werden keine Cookies gesetzt und keine Profile über Seiten hinweg gebildet.
+
+Beim Aufruf einer Seite werden deine IP-Adresse und deine Browser-Kennung (User-Agent) an die Messstelle übermittelt. Dort dienen sie ausschließlich dazu, wiederkehrende Besuche innerhalb eines Tages zu erkennen: Beides geht zusammen mit einem täglich wechselnden Zufallswert in einen Hashwert ein, der sich nicht zurückrechnen lässt und spätestens nach 24 Stunden seinen Bezug verliert. Die IP-Adresse und die Browser-Kennung selbst werden nicht gespeichert.
+
+Gespeichert werden nur zusammengefasste Angaben: die aufgerufene Seite, die Herkunft (verweisende Seite), das Land, der Browser und der Gerätetyp. Eine Zuordnung zu einzelnen Personen ist damit nicht möglich.
 [AUSFÜLLEN: nur behalten, wenn die Besucherstatistik in deiner Community eingeschaltet ist — sonst diesen Abschnitt löschen; misst du in eine eigene Plausible-Site, hier deren Betreiber und Standort nennen]
 
 ## Weitere Empfänger
@@ -250,7 +254,11 @@ data on your behalf.
 
 ## Audience measurement
 
-For audience measurement we use Plausible Analytics, self-hosted in the EU. No cookies are set and no personal data is stored.
+For audience measurement we use Plausible Analytics, self-hosted in the EU. No cookies are set and no profiles are built across sites.
+
+When a page is opened, your IP address and your browser identification (user agent) are transmitted to the measurement service. There they serve one purpose only: recognising repeat visits within the same day. Both are combined with a value that changes daily into a hash that cannot be reversed and loses its reference after 24 hours at the latest. The IP address and the browser identification themselves are not stored.
+
+Only aggregated information is stored: the page opened, the source (referring site), the country, the browser and the device type. This does not allow any attribution to individual people.
 [FILL IN: only keep this if visitor statistics are switched on for your community — otherwise delete this section; if you measure into your own Plausible site, name its operator and location here]
 
 ## Other recipients

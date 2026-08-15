@@ -311,9 +311,9 @@
         "analytics": {
           "name": "Analytics",
           "metaTitle": "Cookieless visitor statistics – know what lands",
-          "metaDescription": "Pukalani measures visits with Plausible on our own servers in the EU: no cookies, no banner, no personal data. One switch in the dashboard is all it takes.",
+          "metaDescription": "Pukalani measures visits with Plausible on our own servers in the EU: no cookies, no banner, no stored visitor data. One switch in the dashboard is all it takes.",
           "title": "Know what lands — without cookies",
-          "sub": "Pukalani measures visits with Plausible on our own servers in the EU: no cookies, no banner, no personal data.",
+          "sub": "Pukalani measures visits with Plausible on our own servers in the EU: no cookies, no banner — IP address and browser identification are not stored.",
           "intro": "One switch in the dashboard — and you can see how your community grows.",
           "highlights": [
             "Visitors, page views and the trend, right in your dashboard",
@@ -485,7 +485,7 @@
         }
       ],
       "ctaTitle": "Start your community – free",
-      "ctaLead": "Try it free, export anytime, delete anytime."
+      "ctaLead": "Try it free for 14 days, export anytime, delete anytime."
     },
     "audience": {
       "kicker": "Who it's for",
@@ -940,7 +940,7 @@
           },
           {
             "title": "Audience measurement",
-            "body": "For audience measurement we use Plausible Analytics, self-hosted in the EU. No cookies are set and no personal data is stored."
+            "body": "For audience measurement we use Plausible Analytics, self-hosted in the EU. No cookies are set. IP address and browser identification are transmitted to the measurement service, but there they are only processed into a hash that changes daily, to recognise repeat visits, and are not stored. Only aggregated information is stored: the page opened, the source, the country, the browser and the device type."
           },
           {
             "title": "Early access requests",
