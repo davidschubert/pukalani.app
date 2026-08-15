@@ -3,7 +3,7 @@ import {
   type ReactionKey,
   REACTION_KEYS,
   toggledChips,
-} from '../../shared/reactions'
+} from '../../../core/shared/reactions'
 import type { ReactionToggleResponse, ReactionsResponse } from '../../shared/types/post'
 
 /**

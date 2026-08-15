@@ -1,5 +1,6 @@
 import { z } from 'zod'
-import { type ReactionKey, type ReactionTargetType, REACTION_TARGET_TYPES, isReactionKey } from '../shared/reactions'
+import { type ReactionKey, isReactionKey } from '../../core/shared/reactions'
+import { type ReactionTargetType, REACTION_TARGET_TYPES } from '../shared/reactions'
 
 type TranslateFn = (key: string) => string
 const identity: TranslateFn = key => key

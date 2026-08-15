@@ -1,6 +1,6 @@
 import type { Models } from 'node-appwrite'
 import type { BadgeFacts, BadgeGroup } from '../badges'
-import type { ReactionCount, ReactionKey, ReactionSummary } from '../reactions'
+import type { ReactionCount, ReactionKey, ReactionSummary } from '../../../core/shared/reactions'
 import type { TrustLevelProgress } from '../trustLevels'
 
 export const POSTS_TABLE = 'community_posts'

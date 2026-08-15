@@ -371,5 +371,20 @@
     "banner": "This is a demo community with sample content.",
     "cta": "Start your own community",
     "planBadge": "From {plan}"
+  },
+  "reactions": {
+    "add": "Add reaction",
+    "failed": "Reaction not saved",
+    "failedHint": "Please try again.",
+    "name": {
+      "laugh": "Funny",
+      "tada": "Congrats",
+      "thinking": "Thoughtful",
+      "eyes": "Interesting",
+      "sad": "Moved",
+      "fire": "Brilliant",
+      "thanks": "Thanks",
+      "idea": "Helpful"
+    }
   }
 }

@@ -136,9 +136,15 @@ export default defineAppConfig({
      * zudem eine Moderationsfläche, die es im MVP nicht gibt.
      *
      * WARUM WEDER 👍 NOCH ❤️ DARIN STEHEN, steht bei der Registry
-     * (`packages/posts/shared/reactions.ts`): beide würden neben dem
-     * Aufstimm-Pfeil als zweite Zustimmung gelesen — genau die zweite
+     * (`packages/core/shared/reactions.ts` — seit 2026-08-14 dort, weil die
+     * Antworten im comments-Layer dieselbe Liste brauchen): beide würden neben
+     * dem Aufstimm-Pfeil als zweite Zustimmung gelesen — genau die zweite
      * Like-Quelle, die Konzept-Entscheidung 4 ausschließt.
+     *
+     * DIESER SCHALTER GILT NUR FÜR THEMEN. Die Leiste unter den ANTWORTEN hat
+     * ihren eigenen (`pukalani.comments.reactions`) — zwei Produkte, zwei
+     * Entscheidungen; eine Community darf das eine kürzen, ohne das andere
+     * anzufassen.
      */
     discussions: {
       reactions: ['laugh', 'tada', 'thinking', 'eyes', 'sad', 'fire', 'thanks', 'idea'],

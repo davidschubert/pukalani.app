@@ -371,5 +371,20 @@
     "banner": "Das ist eine Demo-Community mit Beispiel-Inhalten.",
     "cta": "Eigene Community starten",
     "planBadge": "Ab {plan}"
+  },
+  "reactions": {
+    "add": "Reaktion hinzufügen",
+    "failed": "Reaktion nicht gespeichert",
+    "failedHint": "Bitte versuche es noch einmal.",
+    "name": {
+      "laugh": "Lustig",
+      "tada": "Glückwunsch",
+      "thinking": "Nachdenklich",
+      "eyes": "Interessant",
+      "sad": "Betroffen",
+      "fire": "Stark",
+      "thanks": "Danke",
+      "idea": "Hilfreich"
+    }
   }
 }

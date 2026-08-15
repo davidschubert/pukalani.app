@@ -3,10 +3,10 @@ import type { H3Event } from 'h3'
 import {
   type ReactionKey,
   type ReactionSummary,
-  type ReactionTargetType,
   aggregateReactions,
   allowedReactions,
-} from '../../shared/reactions'
+} from '../../../core/shared/reactions'
+import type { ReactionTargetType } from '../../shared/reactions'
 import { DISCUSSION_REACTIONS_TABLE, POSTS_TABLE, type CommunityPost, type DiscussionReaction } from '../../shared/types/post'
 
 /**
