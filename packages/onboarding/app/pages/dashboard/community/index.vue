@@ -102,11 +102,20 @@ const profileState = reactive({ name: '', description: '' })
  * nicht (sie reist nicht im Payload mit). Deshalb EIN Abruf für beide — er
  * kostet nichts extra, weil die Route ihn aus dem Resolver-Cache beantwortet.
  */
+/**
+ * `useRequestFetch` statt `$fetch` — dieselbe Regel und derselbe Fehler wie in
+ * events/app/components/EventList.vue: im Pool entscheidet der HOST über den
+ * Mandanten, und im SSR trägt ein blankes `$fetch` ihn nicht mit. Die Route
+ * antwortete dann `404 Unknown host`, und die Karte stand leer da — dauerhaft,
+ * denn `watch: [isTenantHost]` löst kein zweites Mal aus: der Wert ist beim
+ * Hydrieren schon `true` und ändert sich nicht mehr.
+ */
 const brandName = useTenantBrand()
+const requestFetch = useRequestFetch()
 const { data: profile } = await useAsyncData(
   'community-profile',
   () => isTenantHost.value
-    ? $fetch<{ name: string, description: string }>('/api/community/profile')
+    ? requestFetch<{ name: string, description: string }>('/api/community/profile')
     : Promise.resolve(null),
   { watch: [isTenantHost] },
 )

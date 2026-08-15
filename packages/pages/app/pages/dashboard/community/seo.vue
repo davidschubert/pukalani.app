@@ -69,9 +69,18 @@ const saving = ref(false)
 
 // Die Startseite — für den Titel und für den Rückfall der Beschreibung.
 // Dieselbe Route und derselbe Fehlerfall wie auf der Startseite selbst.
+/**
+ * `useRequestFetch` statt `$fetch`: im Pool entscheidet der HOST über den
+ * Mandanten, und im SSR trägt ein blankes `$fetch` ihn nicht mit — die Route
+ * antwortet dann `404 Unknown host`. Hier fiel es besonders leise aus, weil
+ * beide Abrufe ihren Fehler mit `.catch()` in einen leeren Wert verwandeln:
+ * die Seite sah dann einfach unbefüllt aus. Wächter:
+ * `packages/core/tests/ssrTenantFetch.test.ts`.
+ */
+const requestFetch = useRequestFetch()
 const { data: home } = await useAsyncData(
   () => `seo-home-${locale.value}`,
-  () => $fetch<PublicPage>('/api/pages/public/home', { query: { locale: locale.value } }).catch(() => null),
+  () => requestFetch<PublicPage>('/api/pages/public/home', { query: { locale: locale.value } }).catch(() => null),
   { watch: [locale] },
 )
 

@@ -86,15 +86,24 @@ const rows = ref<EditorRow[]>([])
 const saving = ref(false)
 const dragIndex = ref<number | null>(null)
 
+/**
+ * `useRequestFetch` statt `$fetch`: im Pool entscheidet der HOST über den
+ * Mandanten, und im SSR trägt ein blankes `$fetch` ihn nicht mit — die Route
+ * antwortet dann `404 Unknown host`. Hier fiel es besonders leise aus, weil
+ * beide Abrufe ihren Fehler mit `.catch()` in einen leeren Wert verwandeln:
+ * die Seite sah dann einfach unbefüllt aus. Wächter:
+ * `packages/core/tests/ssrTenantFetch.test.ts`.
+ */
+const requestFetch = useRequestFetch()
 const { data: navPages } = await useAsyncData(
   () => `nav-editor-pages-${locale.value}`,
-  () => $fetch<PublicPageNavItem[]>('/api/pages/public', { query: { locale: locale.value } })
+  () => requestFetch<PublicPageNavItem[]>('/api/pages/public', { query: { locale: locale.value } })
     .catch(() => [] as PublicPageNavItem[]),
   { watch: [locale] },
 )
 const { data: saved } = await useAsyncData(
   () => 'nav-editor-override',
-  () => $fetch<CommunityNavOverride>('/api/pages/navigation').catch(() => null),
+  () => requestFetch<CommunityNavOverride>('/api/pages/navigation').catch(() => null),
 )
 
 /**

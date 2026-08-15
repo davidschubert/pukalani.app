@@ -85,9 +85,26 @@ const listQuery = computed<Record<string, string>>(() => {
   }
 })
 
+/**
+ * `useRequestFetch` statt `$fetch`: im Pool entscheidet der HOST über den
+ * Mandanten, und ein blankes `$fetch` verliert ihn im SSR (dieselbe Regel wie
+ * in blueprint/app/pages/feed.vue, CLAUDE.md).
+ *
+ * Was das konkret hiess: `/api/events` antwortete beim serverseitigen Rendern
+ * mit `404 Unknown host`, `useAsyncData` merkte sich den Fehler, und die Seite
+ * schrieb auf JEDEM Mandanten-Host „Aktuell sind keine Events geplant" — auch
+ * dann, wenn Termine da waren. Der Kalender direkt darunter zeigte sie
+ * trotzdem, weil er erst im Browser lädt; genau dieser Widerspruch auf
+ * demselben Bildschirm hat den Fehler am 2026-08-15 auf demo.pukalani.app
+ * auffliegen lassen.
+ *
+ * `loadMore()` unten darf bei `$fetch` bleiben: das läuft ausschliesslich nach
+ * einem Klick, also im Browser, und dort ist der Host echt.
+ */
+const requestFetch = useRequestFetch()
 const { data, status } = await useAsyncData<EventListResponse>(
   'events:list',
-  () => $fetch('/api/events', { query: listQuery.value }),
+  () => requestFetch<EventListResponse>('/api/events', { query: listQuery.value }),
   { watch: [filter, debouncedSearch] },
 )
 
