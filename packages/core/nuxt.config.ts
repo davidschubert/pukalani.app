@@ -2,6 +2,7 @@ import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 import { execSync } from 'node:child_process'
 import { FETCH_ERROR_HOOK } from './shared/fetchErrorBridge'
+import { clearNitroRouteTypes } from './build/nitroRouteTypes'
 
 const currentDir = dirname(fileURLToPath(import.meta.url))
 
@@ -193,6 +194,57 @@ export default defineNuxtConfig({
         : (Array.isArray(existing) ? existing : [existing])
       if (chain.includes(ownHandler)) return
       nitroConfig.errorHandler = [ownHandler, ...chain]
+    },
+
+    /**
+     * NITROS ROUTEN-TYPISIERUNG IST AUS (2026-08-14). Der Grund ist gemessen,
+     * nicht geschätzt — und er ist der EINZIGE Grund, warum eine neue
+     * Server-Route zuletzt fremde Dateien umwarf (`TS2589`).
+     *
+     * WAS NITRO NORMAL TUT: es schreibt `.nuxt/types/nitro-routes.d.ts` mit
+     * EINEM Eintrag je Route — `'/api/x': { get: Simplify<Serialize<Awaited<
+     * ReturnType<typeof import('…').default>>>> }`. Diese `InternalApi`-Map
+     * lässt `$fetch('/api/x')` seinen Antworttyp aus dem Handler ABLEITEN.
+     *
+     * WARUM DAS HIER NICHT MEHR GEHT: `$fetch` löst an JEDER Aufrufstelle den
+     * Routen-Literal gegen `keyof InternalApi` auf (`MatchedRoutes` verteilt
+     * über ALLE Schlüssel). Die Kosten sind damit
+     * `Aufrufstellen × Routen` — bei ~370 Aufrufstellen und 210 Routen in
+     * `platform` waren das **6,9 Mio. der 7,5 Mio. Typ-Instanziierungen (92 %)**.
+     * TypeScript bricht bei 5 Mio. in einem Ausdruck mit `TS2589` ab; der
+     * Fehler erscheint dann an einer BELIEBIGEN Aufrufstelle — zuletzt in
+     * `packages/core/app/plugins/analytics.ts`, einer Datei, die niemand
+     * angefasst hatte. Zwölf zusätzliche Probe-Routen genügten, um ihn erneut
+     * auszulösen.
+     *
+     * WAS NICHT HILFT (beides gemessen, 2026-08-14): explizite
+     * Rückgabe-Annotationen an den Handlern. Ersetzt man testweise JEDEN
+     * Routen-Rückgabetyp durch ein flaches Objekt, fallen die
+     * Instanziierungen von 7.505.010 auf 7.430.076 — **1 %**. Die Tiefe der
+     * Rückgabetypen ist NICHT das Problem, die ANZAHL der Schlüssel ist es.
+     * Wer diese Zeilen also durch „wir annotieren die Handler" ersetzen will,
+     * misst bitte vorher.
+     *
+     * DER PREIS: `$fetch('/api/x')` liefert `unknown` statt des abgeleiteten
+     * Typs. Das kostete beim Umstellen GENAU 6 Stellen in 2 Dateien — 98 %
+     * aller Aufrufstellen nennen ihren Typ ohnehin selbst (`$fetch<T>(…)`),
+     * und ein selbst genannter Typ hat die Ableitung nie benutzt: `$fetch<T>`
+     * kürzt `TypedInternalResponse` sofort auf `T` ab, OHNE gegen den Handler
+     * zu prüfen. Wir geben hier also fast nichts auf, was wir hatten.
+     * Gegenzug: ESLint verlangt in `app/**` ein Typ-Argument an `$fetch`/
+     * `useFetch` (eslint.config.mjs) — sonst käme `unknown` still durch.
+     *
+     * WIRKUNG: 7.505.010 → 618.515 Instanziierungen (−92 %), Check-Zeit
+     * 10,7 s → 5,6 s. Der Abstand zur 5-Mio.-Grenze ist damit wieder ~8×
+     * statt ~0. Eine neue Route kostet jetzt NICHTS.
+     *
+     * `types:extend` läuft, BEVOR Nitro die Dateien schreibt, und
+     * `generateRoutes()` liest `types.routes` erst beim Schreiben (lazy) —
+     * das Leeren hier ist deshalb der vorgesehene Weg, kein Eingriff in eine
+     * fertige Datei.
+     */
+    'nitro:init': (nitro) => {
+      nitro.hooks.hook('types:extend', clearNitroRouteTypes)
     },
   },
 
