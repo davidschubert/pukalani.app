@@ -39,6 +39,25 @@ Die Häkchen hier sind ECHT und werden pro Durchlauf abgehakt.
 
 # Teil A — Pool-Community (control-035)
 
+> ## ⚠️ Der POOL-Erstlauf IST GELAUFEN — 2026-08-13..15 (freelancer.supply)
+>
+> `freelancer.supply` + `www` sind **active** (aktiviert 2026-08-15 01:13 UTC),
+> alle Proben unten grün, beide Formen im TLS-Wächter. Der Lauf hat DREI
+> Befunde geliefert, die es beim Silo nicht gab:
+>
+> | # | Was schiefging | Fix |
+> | --- | --- | --- |
+> | 1 | **certbot-Webroot fehlte**: `/home/ploi/platform.pukalani.app/public` existiert bei einer CI-deployten Site nicht; jede Bestellung scheiterte nur im ploi-Site-Log („does not exist or is not a directory"), das Dashboard sagte bloß „Zertifikat noch nicht aktiv". | `mkdir -p` — und seit 2026-08-13 legt deploy.yml das Verzeichnis bei jedem Flip für jede Site an. |
+> | 2 | **ploi's Tenant-Jobs erzeugen `tenants/<form>-ssl-redirect.conf`**, die apex↔www im KREIS aufeinander umleiten und dabei das Zertifikat der jeweils anderen Form ausliefern. Diese Blöcke laden über `before/000-tenants.conf` alphabetisch VOR den echten Tenant-Configs und gewinnen den server_name-Konflikt — nginx sagt es nur als `[warn] conflicting server name … ignored`. Sah aus wie „Zertifikate in den falschen Lineages", drei Reparatur-Anläufe (inkl. Revoke+Reissue — ploi's Tenant-Revoke ERSETZT sofort statt zu löschen!) liefen deshalb ins Leere. | `before/000-tenants.conf` auskommentiert (Begründung steht darin); die echten Tenant-Configs (`before/<form>`) tragen jetzt selbst Port 80 (ACME + https-Redirect) und den **Proxy auf 127.0.0.1:3004** — ploi's Tenant-Schablone ist eine PHP-Site und hätte NIE die App ausgeliefert. Alles über ploi's nginx-Editor (Verwalte → NGINX, mit Config-Test) bzw. die Tenant-Config-API — kein root nötig. |
+> | 3 | Direkt nach dem Umstellen einer vorher **proxied** Cloudflare-DNS hält der SERVER-Resolver die Proxy-IPs noch im Cache — die HTTPS-Probe sagt „fetch failed", obwohl das Zertifikat von außen längst gültig ist. | Warten (TTL, Minuten), wieder „Prüfen". |
+>
+> **Für den NÄCHSTEN Pool-Kunden heißt das:** Nach „Prüfen" (Tenants + Zertifikate
+> da) die Tenant-Configs nach dem Muster von `before/freelancer.supply`
+> anlegen/prüfen (Proxy!), `000-tenants.conf` bleibt aus, beide Formen in
+> `scripts/ops/verify-tls.mjs` eintragen. Und: die Domain-Dashboard-Seite
+> WÄHREND der Zertifikats-Phase schließen — ihr 30-s-Auto-Poll bestellt sonst
+> parallel nach. ploi-Support-Fall zu Befund 2 ist offen (Stand 2026-08-15).
+
 ---
 
 ## 0. Was vorher stimmen muss
@@ -96,6 +115,18 @@ möglich.
       beide Formen als Tenants.
 - [ ] Ein Zertifikat wurde je Form angefordert. Das dauert Sekunden bis
       Minuten; ploi arbeitet den Job asynchron ab.
+
+> ⚠️ **Befund des Pool-Erstlaufs (freelancer.supply, 2026-08-13):** certbot
+> legt seine ACME-Prüfdatei ins Webroot `/home/ploi/platform.pukalani.app/public`
+> — das Verzeichnis existierte bei der CI-deployten Site NICHT (sie lebt in
+> Release-Slots), jede Bestellung scheiterte mit „does not exist or is not a
+> directory" **nur im ploi-Site-Log**; das Dashboard sagte bloß „Zertifikat
+> noch nicht aktiv". Seit demselben Tag legt deploy.yml das Verzeichnis bei
+> jedem Flip an (`mkdir -p /home/ploi/<site>/public`). Zweiter Befund: direkt
+> nach dem Umstellen einer vorher **proxied** Cloudflare-DNS kann der
+> SERVER-Resolver noch die Proxy-IPs cachen — die HTTPS-Probe sagt dann
+> „fetch failed", obwohl das Zertifikat von außen längst gültig ist. Kein
+> Fehler, nur TTL: ein paar Minuten warten, wieder „Prüfen".
 
 **Wenn es hier hängt**, steht der Grund im Dashboard des Kunden (`customDomainError`).
 Die drei realistischen Fälle:

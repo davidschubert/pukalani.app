@@ -71,6 +71,16 @@ const HOSTS = [
   // eine stille Lücke dort genauso teuer wäre.
   { host: 'pukalani.studio', ip: '49.13.211.173', note: 'Eigene Domain der Portfolio-Site (eigene Lineage, NICHT von der Wildcard gedeckt)' },
   { host: 'www.pukalani.studio', ip: '49.13.211.173', note: 'Eigene Domain, www-Variante (im selben Zertifikat)' },
+  // ERSTE POOL-KUNDENDOMAIN (2026-08-15, freelancer). Anders als beim Silo
+  // sind das ZWEI ploi-Tenant-Zertifikate (je eine Lineage pro Form) an der
+  // Site platform.pukalani.app — und die Tenant-Blöcke sind seit dem Erstlauf
+  // HANDGEFÜHRT (before/<host> mit Proxy; ploi's tenants/*-ssl-redirect.conf
+  // ist deaktiviert, weil es die Zertifikate der beiden Formen überkreuzt
+  // auslieferte und apex↔www im Kreis umleitete). Wenn einer dieser zwei
+  // Einträge rot wird: zuerst Runbook CUSTOM-DOMAIN-ERSTAKTIVIERUNG,
+  // Abschnitt „Befund des Pool-Erstlaufs" lesen — NICHT blind neu anfordern.
+  { host: 'freelancer.supply', ip: '49.13.211.173', note: 'Pool-Kundendomain (Tenant-Lineage, NICHT von der Wildcard gedeckt)' },
+  { host: 'www.freelancer.supply', ip: '49.13.211.173', note: 'Pool-Kundendomain, www-Form (eigene Tenant-Lineage)' },
   { host: 'platform.pukalani.app', ip: '49.13.211.173', note: 'Pool-App' },
   { host: 'demo.pukalani.app', ip: '49.13.211.173', note: 'Pool-Tenant (Stellvertreter für ALLE Kunden)' },
   { host: 'account.pukalani.app', ip: '49.13.211.173', note: 'Kundenbereich' },

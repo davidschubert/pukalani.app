@@ -355,6 +355,12 @@ jobs:
             # studio-Site → spawn-ENOENT, portfolio down). Ecosystem-Dateien
             # setzen seitdem cwd: CURRENT — der Heiler bleibt als Backstop.
             ssh prod "set -eu
+              # certbot-Webroot sicherstellen (2026-08-13, erster Pool-Tenant):
+              # Tenant-/Alias-Zertifikate legen ihre ACME-Prüfdatei in
+              # /home/ploi/<site>/public — das Verzeichnis existiert bei
+              # CI-deployten Sites sonst nie, und ploi meldet nur
+              # 'does not exist or is not a directory' im Site-Log.
+              mkdir -p '/home/ploi/$site/public'
               ln -s '$RELEASE' '$RELEASES/current.tmp'
               mv -Tf '$RELEASES/current.tmp' '$RELEASES/current'
               bash /home/ploi/$site/ops/pm2-heal.sh $PROC
