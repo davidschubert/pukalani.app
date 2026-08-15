@@ -1,4 +1,5 @@
 import { createSessionClient } from '../../../lib/appwrite'
+import type { MfaStatusResponse } from '../../../../shared/types/auth-responses'
 
 /**
  * Zeigt die Sicherheits-Karte, ob der Zweitfaktor an ist.
@@ -8,7 +9,7 @@ import { createSessionClient } from '../../../lib/appwrite'
  * und verlangt dann trotzdem keinen zweiten (gemessen 2026-08-13). „An" heißt
  * hier deshalb: Flag gesetzt UND ein TOTP-Authenticator verifiziert.
  */
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async (event): Promise<MfaStatusResponse> => {
   const user = event.context.user
   if (!user) {
     throw createError({ status: 401, statusText: 'Unauthorized' })

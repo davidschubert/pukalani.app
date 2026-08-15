@@ -6,7 +6,7 @@ const loading = ref(false)
 async function exportData() {
   loading.value = true
   try {
-    const data = await $fetch('/api/auth/export')
+    const data = await $fetch<Record<string, unknown>>('/api/auth/export')
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
     const link = document.createElement('a')

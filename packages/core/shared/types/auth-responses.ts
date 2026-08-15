@@ -1,0 +1,54 @@
+/**
+ * ANTWORT-TYPEN DER AUTH-ROUTEN — von BEIDEN Seiten benutzt.
+ *
+ * Seit Nitros Routen-Typisierung aus ist (packages/core/nuxt.config.ts,
+ * `types:extend`), leitet `$fetch('/api/…')` seinen Antworttyp nicht mehr aus
+ * dem Handler ab. Statt jede Aufrufstelle ihre eigene Form erfinden zu lassen,
+ * steht die Form EINMAL hier und wird an beiden Enden verlangt:
+ *
+ *   - der Handler annotiert `): Promise<LoginResponse>` — er kann die Form
+ *     also nicht mehr versehentlich ändern,
+ *   - die Aufrufstelle schreibt `$fetch<LoginResponse>(…)`.
+ *
+ * Das ist STRENGER als das, was die Ableitung vorher geliefert hat: `$fetch<T>`
+ * hat den Handler NIE gegengeprüft (`TypedInternalResponse` kürzt bei
+ * angegebenem `T` sofort auf `T` ab). Ein geteilter Typ prüft beide Seiten.
+ *
+ * Domain-Types gehören nach `shared/types/`, nie nach `app/types/` — der Server
+ * sieht sie sonst nicht (CLAUDE.md).
+ */
+
+/** POST /api/auth/login */
+export interface LoginResponse {
+  ok: true
+  /** true = erste Stufe steht, der zweite Faktor fehlt noch. */
+  mfaRequired: boolean
+}
+
+/** GET /api/auth/mfa/status */
+export interface MfaStatusResponse {
+  enabled: boolean
+  totpVerified: boolean
+  /** Ob noch ungenutzte Wiederherstellungs-Codes existieren (nie die Codes selbst). */
+  hasRecoveryCodes: boolean
+}
+
+/** POST /api/auth/mfa/setup */
+export interface MfaSetupResponse {
+  secret: string
+  uri: string
+  /** QR-Code als Data-URI. */
+  qr: string
+}
+
+/** POST /api/auth/mfa/verify */
+export interface MfaVerifyResponse {
+  ok: true
+  /** Genau EINMAL gezeigt — danach gibt sie keine Route mehr heraus. */
+  recoveryCodes: string[]
+}
+
+/** POST /api/auth/mfa/disable */
+export interface MfaDisableResponse {
+  ok: true
+}

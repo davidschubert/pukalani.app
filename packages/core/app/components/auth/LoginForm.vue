@@ -2,6 +2,7 @@
 import type { FormSubmitEvent } from '@nuxt/ui'
 import { createLoginSchema, type LoginInput } from '../../../schemas/auth'
 import { OAUTH_UNAVAILABLE_CODE } from '../../../shared/oauthProviders'
+import type { LoginResponse } from '../../../shared/types/auth-responses'
 
 const { t } = useI18n()
 const localePath = useLocalePath()
@@ -60,7 +61,7 @@ async function onSubmit(event: FormSubmitEvent<LoginInput>) {
   loading.value = true
   errorMessage.value = null
   try {
-    const result = await $fetch('/api/auth/login', { method: 'POST', body: event.data })
+    const result = await $fetch<LoginResponse>('/api/auth/login', { method: 'POST', body: event.data })
     // KEIN auth.refresh() vor dem zweiten Faktor: /api/auth/me antwortet auf
     // eine halbe Session mit 401, der Store würde den Nutzer also als
     // ausgeloggt führen und der Erfolgspfad liefe ins Leere.

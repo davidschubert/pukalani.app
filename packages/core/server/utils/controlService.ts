@@ -104,7 +104,7 @@ export async function callControlService<T>(event: H3Event, path: string, body: 
     // Fremder Dienst (das Control Plane ist ein EIGENES Deployment), deshalb
     // `, string` als Anfrage-Generic — Begruendung in
     // apps/platform/server/utils/tenantBrandMark.ts.
-    return await $fetch<T, string>(`${url}${path}`, {
+    return await $fetch<T>(`${url}${path}`, {
       method: 'POST',
       headers: { [SERVICE_HEADER]: secret },
       body,

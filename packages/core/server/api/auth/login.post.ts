@@ -1,8 +1,9 @@
 import { createAdminClient, createSessionClient, setSessionCookie } from '../../lib/appwrite'
 import { loginSchema } from '../../../schemas/auth'
 import { isMoreFactorsRequired } from '../../../shared/mfa'
+import type { LoginResponse } from '../../../shared/types/auth-responses'
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async (event): Promise<LoginResponse> => {
   const { email, password } = await readValidatedBody(event, loginSchema.parse)
   const { account } = createAdminClient(event)
 

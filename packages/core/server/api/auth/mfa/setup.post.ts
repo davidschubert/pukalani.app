@@ -1,5 +1,6 @@
 import { AuthenticatorType } from 'node-appwrite'
 import { createSessionClient } from '../../../lib/appwrite'
+import type { MfaSetupResponse } from '../../../../shared/types/auth-responses'
 
 /**
  * Einrichtung Schritt 1: TOTP-Authenticator anlegen und dem Nutzer zeigen.
@@ -7,7 +8,7 @@ import { createSessionClient } from '../../../lib/appwrite'
  * Läuft als der User selbst (SessionClient) und braucht eine VOLLE Session —
  * `event.context.user` ist genau dann gesetzt.
  */
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async (event): Promise<MfaSetupResponse> => {
   if (!event.context.user) {
     throw createError({ status: 401, statusText: 'Unauthorized' })
   }

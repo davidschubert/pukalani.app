@@ -3,6 +3,7 @@ import type { AuthenticationFactor } from 'node-appwrite'
 import { createSessionClient } from '../../../lib/appwrite'
 import { mfaChallengeSchema } from '../../../../schemas/auth'
 import { isInvalidMfaCode, mfaFactorFor } from '../../../../shared/mfa'
+import type { MfaDisableResponse } from '../../../../shared/types/auth-responses'
 
 /**
  * Zwei-Faktor abschalten.
@@ -20,7 +21,7 @@ import { isInvalidMfaCode, mfaFactorFor } from '../../../../shared/mfa'
  * stehen (oder auch nur eine verifizierte E-Mail), rechnet Appwrite bei einem
  * späteren `mfa: true` sofort wieder mit zwei Faktoren.
  */
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async (event): Promise<MfaDisableResponse> => {
   if (!event.context.user) {
     throw createError({ status: 401, statusText: 'Unauthorized' })
   }

@@ -10,6 +10,13 @@
  * Mal nur beim Neu-Würfeln heraus). Deshalb kommt man aus diesem Schritt nur
  * mit einer aktiven Bestätigung heraus, nicht durch Wegklicken.
  */
+import type {
+  MfaDisableResponse,
+  MfaSetupResponse,
+  MfaStatusResponse,
+  MfaVerifyResponse,
+} from '../../../shared/types/auth-responses'
+
 const { t } = useI18n()
 const toast = useToast()
 
@@ -32,7 +39,7 @@ const disableMode = ref<'totp' | 'recovery'>('totp')
 // und haengte das Rendern der Seite an einen Appwrite-Aufruf. Die Vorlagen
 // unten vertragen `status === null` (der Zustand heisst dann „aus"), und der
 // Nachtrag kommt still an.
-const { data: status, refresh } = useFetch('/api/auth/mfa/status')
+const { data: status, refresh } = useFetch<MfaStatusResponse>('/api/auth/mfa/status')
 const enabled = computed(() => status.value?.enabled === true)
 
 function reset() {
@@ -50,7 +57,7 @@ async function startSetup() {
   busy.value = true
   errorMessage.value = null
   try {
-    const result = await $fetch('/api/auth/mfa/setup', { method: 'POST' })
+    const result = await $fetch<MfaSetupResponse>('/api/auth/mfa/setup', { method: 'POST' })
     secret.value = result.secret
     uri.value = result.uri
     qr.value = result.qr
@@ -68,7 +75,7 @@ async function confirmSetup() {
   busy.value = true
   errorMessage.value = null
   try {
-    const result = await $fetch('/api/auth/mfa/verify', { method: 'POST', body: { code: code.value } })
+    const result = await $fetch<MfaVerifyResponse>('/api/auth/mfa/verify', { method: 'POST', body: { code: code.value } })
     recoveryCodes.value = result.recoveryCodes
     // Ab hier ist der Zweitfaktor scharf — das Geheimnis darf aus dem Speicher.
     secret.value = ''
@@ -93,7 +100,7 @@ async function confirmDisable() {
   busy.value = true
   errorMessage.value = null
   try {
-    await $fetch('/api/auth/mfa/disable', { method: 'POST', body: { mode: disableMode.value, code: code.value } })
+    await $fetch<MfaDisableResponse>('/api/auth/mfa/disable', { method: 'POST', body: { mode: disableMode.value, code: code.value } })
     toast.add({ title: t('account.twoFactor.disabled'), color: 'success', icon: 'i-ph-check-circle' })
     reset()
     await refresh()

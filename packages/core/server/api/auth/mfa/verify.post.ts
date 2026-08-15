@@ -2,6 +2,7 @@ import { AuthenticatorType } from 'node-appwrite'
 import { createSessionClient } from '../../../lib/appwrite'
 import { mfaVerifySchema } from '../../../../schemas/auth'
 import { isInvalidMfaCode } from '../../../../shared/mfa'
+import type { MfaVerifyResponse } from '../../../../shared/types/auth-responses'
 
 /**
  * Einrichtung Schritt 2: den frischen Authenticator mit dem ersten Code
@@ -14,7 +15,7 @@ import { isInvalidMfaCode } from '../../../../shared/mfa'
  * sähe für uns geschützt aus und wäre es nicht. Also erst bestätigen, dann
  * scharfschalten.
  */
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async (event): Promise<MfaVerifyResponse> => {
   if (!event.context.user) {
     throw createError({ status: 401, statusText: 'Unauthorized' })
   }
