@@ -6,6 +6,22 @@ export interface BrandTitleOptions {
    * kein Tag — ein leeres description-Meta ist schlechter als keines.
    */
   description?: MaybeRefOrGetter<string | undefined>
+  /**
+   * Markenname abweichend von `useBrandName()`. Gedacht für die EINE Sorte
+   * App, deren Marke ein ÜBERSETZTER Ausdruck ist statt eines Eigennamens:
+   * die Hilfe heißt „Pukalani Hilfe" bzw. „Pukalani Help". `useBrandName()`
+   * liefert dort einen festen String aus der app.config, weshalb auf jeder
+   * englischen Seite ein deutscher Markenname im Titel stünde.
+   *
+   * Ein Community-Name bleibt bewusst unübersetzt — „Morgenlicht" heißt in
+   * jeder Sprache so. Deshalb ist das eine OPTION und nicht der Normalfall;
+   * ohne sie bleibt die Kette Tenant → App-Brand → „Pukalani" unverändert.
+   *
+   * Leer oder nur Leerzeichen ⇒ ignoriert (Rückfall auf `useBrandName()`),
+   * damit ein noch nicht geladener Übersetzungs-Schlüssel nicht einen
+   * titellosen Kopf erzeugt.
+   */
+  brand?: MaybeRefOrGetter<string | undefined>
 }
 
 /**
@@ -28,7 +44,12 @@ export interface BrandTitleOptions {
  */
 export function useBrandTitle(page: MaybeRefOrGetter<string>, options: BrandTitleOptions = {}): void {
   const { t } = useI18n()
-  const brand = useBrandName()
+  const fallbackBrand = useBrandName()
+
+  const brand = computed<string>(() => {
+    const override = toValue(options.brand)?.trim()
+    return override && override.length > 0 ? override : fallbackBrand.value
+  })
 
   // Ohne Seitenname (Inhalt noch nicht da) bleibt der Brand allein stehen —
   // nie „ · Morgenlicht" mit führendem Trenner.
