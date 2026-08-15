@@ -84,7 +84,7 @@ export async function latestVersion(name: string): Promise<string | null> {
     // Vereinigung aller Server-Routen und kippt ueber die Rekursionsgrenze
     // (TS2589), sobald die App genug Routen hat. Begruendung ausfuehrlich in
     // apps/platform/server/utils/tenantBrandMark.ts.
-    const res = await $fetch<{ version?: string }, string>(`https://registry.npmjs.org/${name}/latest`, {
+    const res = await $fetch<{ version?: string }>(`https://registry.npmjs.org/${name}/latest`, {
       timeout: 4000,
     })
     const value = res.version ?? null
@@ -105,7 +105,7 @@ export async function latestAppwriteVersion(): Promise<string | null> {
   try {
     // GitHub verlangt einen User-Agent; releases/latest = neuestes Nicht-Prerelease.
     // Fremde URL, `, string` — siehe die Begruendung eine Funktion darueber.
-    const res = await $fetch<{ tag_name?: string }, string>('https://api.github.com/repos/appwrite/appwrite/releases/latest', {
+    const res = await $fetch<{ tag_name?: string }>('https://api.github.com/repos/appwrite/appwrite/releases/latest', {
       timeout: 4000,
       headers: { Accept: 'application/vnd.github+json', 'User-Agent': 'pukalani-monorepo' },
     })

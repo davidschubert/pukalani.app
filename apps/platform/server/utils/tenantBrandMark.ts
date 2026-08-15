@@ -99,7 +99,7 @@ export async function resolveTenantBrandMark(event: H3Event): Promise<TenantBran
    * openRegistration" schreibt — und die Grenze wäre bei der nächsten Route
    * trotzdem wieder da gewesen.
    */
-  const data = await $fetch<ThemesResponse, string>('/api/themes', { headers: { host } }).catch(() => null)
+  const data = await $fetch<ThemesResponse>('/api/themes', { headers: { host } }).catch(() => null)
   const customs: BrandThemeEntry[] = (data?.themes ?? []).map(entry => ({
     id: customThemeAttr(entry.id),
     color: entry.primary,

@@ -177,7 +177,7 @@ async function exportData() {
   if (!user.value) return
   exporting.value = true
   try {
-    const payload = await $fetch(`/api/admin/users/${user.value.$id}/export`)
+    const payload = await $fetch<Record<string, unknown>>(`/api/admin/users/${user.value.$id}/export`)
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
     const link = document.createElement('a')

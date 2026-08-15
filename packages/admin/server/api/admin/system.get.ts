@@ -53,7 +53,7 @@ export default defineEventHandler(async (event): Promise<SystemInfo> => {
   const [versionRes, latestAppwrite] = await Promise.all([
     // Fremde URL (Appwrite-Instanz), `, string` — Begruendung in
     // apps/platform/server/utils/tenantBrandMark.ts.
-    $fetch<{ version: string }, string>(`${endpoint}/health/version`, {
+    $fetch<{ version: string }>(`${endpoint}/health/version`, {
       headers: { 'X-Appwrite-Project': projectId },
     }).catch(() => null),
     latestAppwriteVersion(),

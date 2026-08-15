@@ -191,7 +191,7 @@ function exportCsv() {
 async function exportUser(user: AdminUserRow) {
   exportingId.value = user.$id
   try {
-    const payload = await $fetch(`/api/admin/users/${user.$id}/export`)
+    const payload = await $fetch<Record<string, unknown>>(`/api/admin/users/${user.$id}/export`)
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
     const link = document.createElement('a')
