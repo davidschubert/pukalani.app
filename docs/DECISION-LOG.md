@@ -110,6 +110,19 @@ Prüfungen auf den Stempel).
 
 ---
 
+## 2026-08-14 — TS2589: Nitros Routen-Typkarte ist aus
+
+**Davids Ratifizierung** (nach Messung, gegen den ursprünglich vorgesehenen
+Weg): Nitros generierte Routen-Typkarte wird per `types:extend`-Hook geleert —
+sie war mit Aufrufstellen × Routen für 92 % aller Typ-Instanziierungen
+verantwortlich und die Ursache jedes TS2589 (7,5 Mio → 618k, Typecheck
+halbiert; 12 neue Routen brachen vorher den Build, 100 Proberouten kosten
+jetzt +142). Preis: `$fetch` ohne Typ-Parameter liefert `unknown` — jeder
+gebundene Aufruf nennt seinen Antworttyp aus `shared/types/`, ESLint
+erzwingt es, der `, string`-Trick ist verboten. Der VORGESEHENE Weg
+(explizite Handler-Annotationen) wurde gemessen und verworfen: 1 % Wirkung
+bei 268 Handlern Aufwand. Coding-Rule in CLAUDE.md.
+
 ## 2026-08-14 — F57-Stellschrauben + Reaktions-Zuschnitt
 
 **Davids Antworten:** (1) Einladungen durch Mitglieder: **5 pro Woche je

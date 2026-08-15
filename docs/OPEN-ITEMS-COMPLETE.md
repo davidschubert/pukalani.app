@@ -30,6 +30,34 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### TS2589-Strukturfix — Nitros Routen-Typkarte ist aus ✅ 2026-08-14
+
+Zwei Pakete hintereinander waren an `TS2589` gestorben oder hatten drumherum
+gebaut. Der Auftrag sagte „explizite Handler-Annotationen"; der Agent hat
+GEMESSEN statt geglaubt (`vue-tsc --extendedDiagnostics`): Annotationen
+ändern **1 %** — der Täter ist die generierte Routen-Typkarte, die jeder
+`$fetch` an jeder Aufrufstelle gegen ALLE ~210 Routen auflöst
+(Aufrufstellen × Routen = 92 % aller Instanziierungen). Fix: die Karte wird
+im `types:extend`-Hook geleert (`packages/core/build/nitroRouteTypes.ts`,
+offizieller Hook, kein Datei-Patchen) — **7.505.010 → 617.983
+Instanziierungen (−91,8 %), Typecheck 10,7 s → 5,4 s**; 100 Proberouten
+kosten +142 Instanziierungen, wo vorher 12 den Build brachen. Preis (Davids
+Ratifizierung): `$fetch` ohne Typ-Parameter ist `unknown` — Umstellung
+kostete 6 Stellen in 2 Dateien, weil 98 % der Aufrufe ihren Typ längst
+nennen; ESLint erzwingt Typen für GEBUNDENE Aufrufe in `app/**` (111
+Feuer-und-vergiss-POSTs bleiben bewusst frei), alle fünf `, string`-Tricks
+sind entfernt (Grep 0), Verhalten per Konstruktion nullsummig (kein Test
+angefasst, E2E 24/24). Wächter: Verhaltens-Unit-Test mit Gegenprobe.
+
+**Gelernt:** (1) Ein vorgeschriebener Fix-Weg verdient dieselbe Messung wie
+das Problem — die naheliegende Erklärung („tiefe Rückgabetypen") war um zwei
+Größenordnungen daneben, und 268 Handler zu annotieren wäre fleißige
+Wirkungslosigkeit gewesen. (2) Flat-ESLint-Configs ERSETZEN
+no-restricted-syntax je Scope: eine neue Regel auf `packages/*/server/**`
+hätte still den tablesDB-Datentür-Backstop abgeschaltet — jede neue Regel im
+selben Scope braucht die Gegenprobe, dass die alten noch feuern. (3) Ein
+Kommentar, der `**/` enthält, beendet seinen eigenen Blockkommentar.
+
 ### F57 — die vier sozialen Mechaniken sind KOMPLETT ✅ 2026-08-14
 
 **Der Schlussstein: Emoji-Reaktionen auch auf ANTWORTEN** (Davids

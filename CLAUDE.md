@@ -917,6 +917,22 @@ Vollständiges Konzept: docs/CONCEPT.md
   DISKRIMINIERTE Unions — ein `rel: string` wird zu `never`. In `useHead`-Aufrufen
   `rel` literal halten (`as const`); bedingte Spreads nehmen dem Array-Literal
   sonst den Kontext-Typ.
+- NITROS ROUTEN-TYPISIERUNG IST AUS (Davids Entscheidung 2026-08-14, TS2589-
+  Strukturfix): `packages/core/nuxt.config.ts` leert `types.routes` im
+  `types:extend`-Hook — `$fetch('/api/x')` liefert damit `unknown`, und JEDER
+  gebundene `$fetch`/`useFetch` nennt seinen Antworttyp SELBST
+  (`$fetch<XyzResponse>(…)`); Antwort-Typen leben in `shared/types/` und
+  werden an BEIDEN Enden verlangt (Handler-Annotation + Aufrufstelle). ESLint
+  erzwingt es für gebundene Aufrufe in `app/**` (no-restricted-syntax);
+  Feuer-und-vergiss-POSTs bleiben bewusst untypisiert. GRUND (gemessen, nicht
+  geglaubt): `$fetch` löste jeden Routen-Literal gegen ALLE ~210 Routen auf —
+  Aufrufstellen × Routen = 92 % aller Typ-Instanziierungen (7,5 Mio → 618k,
+  Typecheck 10,7 s → 5,4 s); 12 neue Routen reichten vorher für TS2589, jetzt
+  kosten 100 Proberouten +142 Instanziierungen. Explizite Handler-
+  Annotationen allein ändern gemessene 1 % — NICHT als Ausweg anbieten.
+  Der Trick `$fetch<…, string>` ist verboten (kompensierte nur die Karte;
+  Grep-Stand 0). Umkehrbar über den einen Hook; Verhalten getestet in
+  `packages/core/tests/nitroRouteTypes.test.ts`.
 - pnpm, TypeScript strict (kein any), vollständige Dateien, keine Spekulation
 - Dependencies via pnpm Catalog: Versionen zentral in pnpm-workspace.yaml,
   package.json referenziert "catalog:" — geteilte Deps auch in App-package.json
