@@ -243,6 +243,43 @@ BEWEIS umbringen — `waitForMembership` pollt genau die Route, die AU1 gedeckel
 hat, 45-mal im Sekundentakt; ohne frische IP je Poll hätte der Beweis seine
 eigene Drossel gemessen und „die Rolle kommt nicht an" gemeldet.
 
+### AU4 — Schema-Paritäts-Wächter prüft jetzt Soll pro Instanz über alle Layer ✅ 2026-08-16
+
+`scripts/ops/verify-schema-parity.mjs` prüfte bisher NUR `system`-Tabellen
+und nur die VEREINIGUNG der Instanzen — eine überall (oder auf der einen
+Instanz, wo sie hingehört) fehlende Tabelle fiel damit nie auf (so blieb die
+`changelog`-Lücke auf control monatelang unbemerkt). Jetzt: **kuratiertes
+Soll pro Instanz**, aus benannten Layer-Blöcken zusammengesetzt (ADMIN_TABLES,
+PAGES_TABLES, POSTS_TABLES, …; neue Tabelle ⇒ EINMAL im Block eintragen, gilt
+dann überall, wo der Layer läuft). Drei Prüfungen: **Präsenz (fatal)** — jede
+Soll-Tabelle muss da sein (der AU4-Kern, fängt die changelog-Klasse);
+**Spalten-Parität (fatal)** über die gleichlaufenden Tabellen; **Drift
+(Warnung)** — jede Ist-Tabelle ausserhalb des Soll. Live: account/control
+sauber grün, portfolio grün auf allen 39 Soll-Tabellen + genau die sechs
+Alt-Warnungen. **Gegenprobe** (Bogus-Tabelle ins Soll injiziert): `TABELLE
+FEHLT` → exit 1. Dazu `scripts/ops/cleanup-portfolio-legacy-tables.mjs`
+(`pnpm ops:cleanup-portfolio-legacy`, Trockenlauf-Default, löscht defensiv nur
+bei 0 Zeilen) für portfolios sechs tote Alt-Tabellen (`sites`,
+`feature_catalog`, `workspaces`, `workspace_invites`, `workspace_members`,
+`feedback` — leer + code-unreferenziert; das Löschen selbst löst David aus,
+weil der Harness destruktive Prod-Eingriffe sperrt). CLAUDE.md-E5-Absatz
+nachgezogen.
+
+**Gelernt:** Die wörtliche Vorgabe „Spalten-Parität über JEDE geteilte Tabelle"
+lieferte live 29 SCHEINBEFUNDE — portfolios Single-Tenant-Legacy trägt die
+Pool-Spalten (`communityId`) bewusst nicht, und control-native Tabellen
+(`communities` & Co.) leben laut Migration control-037 NUR im Control-Plane-
+Projekt, auf dem Pool nur als eingefrorener Alt-Schatten (dem genau
+`memberInvitesEnabled` fehlt). Deshalb prüft die Spalten-Parität eng nur die
+gleichlaufenden Tabellen (system+admin+pages+analytics), während die
+PRÄSENZ-Prüfung — der eigentliche Fix — ALLE Soll-Tabellen abdeckt. Zweite
+Lehre: ein Wächter, der wegen Architektur-bedingter Unterschiede dauernd rot
+ist, wird weggelesen; die Drift-Meldung ist deshalb bewusst NICHT fatal.
+Nebenbefund für später: schriebe `account` je wieder Communities in sein
+eigenes Projekt, wäre das fehlende `communities.memberInvitesEnabled` ein
+echtes Risiko (control-037 warnt) — heute reiner Alt-Schatten, daher offen
+gelassen.
+
 ### F47 zu + Changelog eingefügt — und ein still leerer Betreiber-Changelog gefunden ✅ 2026-08-15
 
 Davids Dreierpaket abgearbeitet: (1) **Plausible** — die sieben

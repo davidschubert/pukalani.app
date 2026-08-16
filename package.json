@@ -24,7 +24,8 @@
     "check:single-copy": "node scripts/check-single-copy.mjs",
     "check:doc-links": "node scripts/ops/verify-doc-links.mjs",
     "ops:site-env": "node scripts/ops/verify-site-env.mjs",
-    "ops:schema-parity": "node scripts/ops/verify-schema-parity.mjs"
+    "ops:schema-parity": "node scripts/ops/verify-schema-parity.mjs",
+    "ops:cleanup-portfolio-legacy": "node scripts/ops/cleanup-portfolio-legacy-tables.mjs"
   },
   "devDependencies": {
     "@nuxt/eslint-config": "catalog:",
