@@ -1,8 +1,16 @@
 # 🏗️ Pukalani Core Layer – Nuxt Monorepo
 
-> **Stand:** Juni 2026 · Konzept v2.1 — SSR-Architektur, TablesDB, Feature-Layer-Ebene.
-> v2.1 gleicht das Dokument mit der Realität nach Phasen 1–10 ab (Realtime-Korrektur,
-> Strukturfixes, Key-Trennung, erweiterte Stolperfallen — Nachweise in docs/GOALS.md).
+> **Stand:** Konzept v2.1 (Juni 2026, Realitäts-Abgleich nach Phasen 1–10), in Teilen
+> nachgezogen am **2026-08-16**.
+>
+> **Was aktuell ist:** Stack & Katalog, Verzeichnisstruktur (21 Layer, 8 Apps),
+> Layer-Tabelle, A9 (Deployment), A10 (Migrations), A11–A13, Stolperfallen.
+>
+> **Was noch den Stand von Juni 2026 beschreibt:** die Drei-Ebenen-Darstellung und
+> A14 (Layer-Grenzen-Matrix, 6 von 21 Layern) kennen den Kompositions-Layer
+> `blueprint` nicht, und die **Mandanten-Architektur fehlt ganz** — Datentür
+> (`tenantDb`), Pool/Silo, Sperr-Stufen. Dafür ist bis auf Weiteres die CLAUDE.md
+> im Repo-Root die Wahrheit.
 
 ## Projektbeschreibung
 
@@ -53,28 +61,37 @@ Vier Prüffragen pro Feature:
 
 ## Stack & Tooling
 
-| Technologie | Version (Stand 06/2026) | Rolle |
-|---|---|---|
-| Nuxt | 4.4.x (aktuell 4.4.8) | Framework (Composition API, SSR) |
-| Nuxt UI | 4.8.x (aktuell 4.8.2) | UI-Komponentenbibliothek (inkl. `UAuthForm`) |
-| Appwrite (self-hosted) | 1.9.5 (MariaDB, seit Phase 28) | Backend: Auth, TablesDB, Storage, Realtime, Presences |
-| Pinia | latest | State Management |
-| node-appwrite | latest, 1.9-kompatibel pinnen* | **Server SDK** — Auth + TablesDB via Server Routes |
-| appwrite (Web SDK) | latest, 1.9-kompatibel pinnen* | **Nur Realtime** im Browser |
-| Tailwind CSS | 4.x | Styling |
-| Zod | latest | Schema Validation |
-| @nuxtjs/i18n | latest | Internationalisierung (de + en) |
-| TypeScript | strict | Typsicherheit |
-| pnpm Workspaces | latest | Monorepo-Verwaltung |
+Verbindlich ist der **pnpm-Katalog** in `pnpm-workspace.yaml`, nicht diese Tabelle —
+sie ist eine Momentaufnahme (Stand 08/2026) und veraltet zwangsläufig.
 
-> *SDK-Pinning, präzisiert (Erfahrung Phase 10): Die SDKs werden für **Cloud**-Releases
-> gebaut (Warnung "built for 1.9.5" bei Server 1.9.0). REST ist abwärtskompatibel —
-> dort ist latest okay. **Protokollnahe Features (Realtime, künftig Presences) gegen
-> die eigene Server-Version empirisch testen** — Versions-Tabellen helfen da nicht (A4).
+| Technologie | Version | Rolle |
+|---|---|---|
+| Nuxt | ^4.5.1 | Framework (Composition API, SSR) |
+| Nuxt UI | ^4.10.0 | UI-Komponentenbibliothek (inkl. `UAuthForm`, `UEditor`) |
+| Appwrite (self-hosted) | 1.9.6 (MariaDB) | Backend: Auth, TablesDB, Storage, Realtime, Presences |
+| Pinia | ^4.0.2 (`@pinia/nuxt` ^1.0.1) | State Management — die beiden sind fest gekoppelt, nur gemeinsam bumpen |
+| node-appwrite | ^26.2.0 | **Server SDK** — Auth + TablesDB via Server Routes |
+| appwrite (Web SDK) | ^26.2.0 | **Nur Realtime** im Browser |
+| Tailwind CSS | ^4.3.2 | Styling |
+| Zod | ^4.4.3 | Schema Validation |
+| @nuxtjs/i18n | ^10.6.0 | Internationalisierung (de + en) — gehört zur Nuxt-Generation (10.6 ↔ 4.5) und wird **mit Nuxt zusammen** gezogen |
+| TypeScript | ^5.9.3, strict | Typsicherheit |
+| pnpm Workspaces | Node 22 | Monorepo-Verwaltung |
+
+> **Eine Caret-Range pinnt nichts** (`^4.4.8` erlaubt 4.5.1). Die wirkliche Version
+> steht nur im Lockfile: `node -p "require('./apps/<app>/node_modules/<pkg>/package.json').version"`.
+> Eine Version je Kernabhängigkeit erzwingt das CI-Gate `pnpm check:single-copy` —
+> zwei Kopien brechen Typen oder Build, und welche gewinnt, entscheidet pnpms
+> Hoisting, nicht das Lockfile.
+
+> **SDK-Pinning:** Die SDKs werden für **Cloud**-Releases gebaut (daher Warnungen wie
+> „built for 1.9.5" gegen einen älteren Server). REST ist abwärtskompatibel — dort ist
+> die neueste Version okay. **Protokollnahe Features (Realtime, Presences) gegen die
+> eigene Server-Version empirisch testen** — Versions-Tabellen helfen da nicht (A4).
 
 > **Warum pnpm?** npm hoisted alles in Root `node_modules` → Phantom Dependencies → Bugs in CI/Deploy. pnpm erzwingt saubere Dependency-Deklaration pro Package, ist schneller und Standard im Nuxt/Vite Ecosystem.
 
-> **Terminologie (Appwrite 2025+):** `Databases` → `TablesDB`, `Collections/Documents` → `Tables/Rows`. Immer die neue API nutzen (`tablesDB.createRow()` etc.) — nur sie unterstützt Transactions, Bulk Ops, Atomic Ops. Self-hosted Stand: **1.9.5** (seit Phase 28; TablesDB, neues SDK-Realtime-Protokoll + Query-gefilterte Subscriptions, Presences API, Realtime-Metriken, Resource-based API Keys, Multiple Application Domains pro Projekt, Sparse Updates — `updateRow` sendet nur geänderte Attribute).
+> **Terminologie (Appwrite 2025+):** `Databases` → `TablesDB`, `Collections/Documents` → `Tables/Rows`. Immer die neue API nutzen (`tablesDB.createRow()` etc.) — nur sie unterstützt Transactions, Bulk Ops, Atomic Ops. Self-hosted Stand: **1.9.6** (TablesDB, neues SDK-Realtime-Protokoll + Query-gefilterte Subscriptions, Presences API, Realtime-Metriken, Resource-based API Keys, Multiple Application Domains pro Projekt, Sparse Updates — `updateRow` sendet nur geänderte Attribute).
 
 ---
 
@@ -159,12 +176,14 @@ packages:
   - 'packages/*'
   - 'apps/*'
 catalog:
-  nuxt: ^4.4.8
-  '@nuxt/ui': ^4.8.2
-  '@pinia/nuxt': ^0.11.0
-  zod: ^4.0.0
-  node-appwrite: <1.9-kompatibel>
-  appwrite: <1.9-kompatibel>
+  nuxt: ^4.5.1
+  '@nuxt/ui': ^4.10.0
+  '@nuxtjs/i18n': ^10.6.0     # gehört zur Nuxt-Generation — mit Nuxt zusammen bumpen
+  pinia: ^4.0.2
+  '@pinia/nuxt': ^1.0.1       # fest an pinia 4 gekoppelt (0.11.x ↔ pinia 3)
+  zod: ^4.4.3
+  node-appwrite: ^26.2.0
+  appwrite: ^26.2.0
 ```
 
 ```jsonc
@@ -280,25 +299,42 @@ maui-monorepo/
 │   │
 │   ├── system/                            # Fundament-Layer (Infra-Tabellen)
 │   ├── moderation/                        # Fundament-Layer (Reports)
-│   ├── themes/                            # Feature Layer
-│   ├── comments/                          # Feature Layer (eigene Tables!)
-│   ├── admin/                             # Feature Layer
-│   ├── posts/                             # Feature Layer
-│   ├── events/                            # Feature Layer
-│   ├── feed/                              # Feature Layer
-│   ├── feedback/                          # Feature Layer
-│   ├── billing/                           # Feature Layer (Stripe)
-│   └── courses/                           # Feature Layer (LMS)
+│   ├── onboarding/                        # Fundament-Layer (Trichter, Mitglieder, Naht)
+│   ├── blueprint/                         # KOMPOSITIONS-Layer — der einzige, der
+│   │                                      # mehrere Produkt-Layer kennen darf;
+│   │                                      # in extends VOR den Produkt-Layern
+│   ├── themes/                            # Produkt-Layer
+│   ├── comments/                          # Produkt-Layer (eigene Tables!)
+│   ├── admin/                             # Produkt-Layer
+│   ├── posts/                             # Produkt-Layer (Discussions)
+│   ├── events/                            # Produkt-Layer
+│   ├── activity/                          # Produkt-Layer (Activity Feed; hieß feed)
+│   ├── messages/                          # Produkt-Layer (private Nachrichten)
+│   ├── media/                             # Produkt-Layer (Galerie)
+│   ├── pages/                             # Produkt-Layer (Inhaltsseiten)
+│   ├── courses/                           # Produkt-Layer (LMS)
+│   ├── tickets/                           # Produkt-Layer (Ticket-Board)
+│   ├── feedback/                          # Produkt-Layer
+│   ├── analytics/                         # Produkt-Layer (Plausible)
+│   ├── domains/                           # Produkt-Layer (eigene Domain)
+│   ├── billing/                           # Produkt-Layer (Stripe)
+│   └── control/                           # Control Plane (nur Betreiber-Site)
 │
-├── apps/
-│   ├── comments/                   # dünn: Komposition + Branding
+├── apps/                                  # dünn: Komposition + Branding
+│   ├── comments/                          # extends: [comments, core] — der E2E-Anker
 │   │   ├── app/                           # nur Overrides + app-spezifische Pages
+│   │   ├── e2e/                           # Playwright (7 Specs, laufen in der CI)
 │   │   ├── scripts/migrations/
 │   │   ├── app.config.ts                  # Theme-Override + pukalani.* Gates
-│   │   ├── nuxt.config.ts                 # extends: [comments, core]
+│   │   ├── site.manifest.ts               # Single Source der Produkt-Wahl
+│   │   ├── nuxt.config.ts
 │   │   ├── .env                           # eigene Appwrite-Instanz!
 │   │   └── package.json
-│   └── (weitere Projekte)
+│   ├── platform/                          # Mehr-Mandanten-App (Pool + Kundenbereich)
+│   ├── control/                           # Betreiber-Konsole (admin.pukalani.app)
+│   ├── portfolio/                         # Davids eigene Site (einziges Silo-Deployment)
+│   ├── photos/ · marketing/ · help/       # weitere Apps
+│   └── _template/                         # Vorlage für neue Apps
 │
 ├── .github/workflows/                     # typecheck, lint, deploy
 ├── .nvmrc                                 # Node 22
@@ -433,27 +469,55 @@ App > früher gelisteter Layer > später gelisteter Layer. `app.config.ts` wird 
 
 Für jetzt: alles im Monorepo. Migration raus ist einfacher als rein.
 
-### A9 — Deployment: ploi.io mit Monorepo
+### A9 — Deployment: CI baut, ploi hält die Sites
+
+**Seit 2026-07-23 baut der App-Server nichts mehr.** GitHub Actions (`deploy.yml`) baut
+alle Apps und schiebt nur das fertige `.output` per rsync auf den Server
+(Symlink-Flip + `pm2 reload`, Zero-Downtime Stufe 2). Feuert nur, wenn der
+Test-Workflow auf `main` grün war.
+
+Grund: der App-Server ist eine CX23 (2 Cores / 3,7 GB) — zwei parallele Nuxt-Builds
+haben ihn per OOM-Kill (137) zerlegt. Diese RAM-Regel betrifft heute nur noch den
+Fallback.
+
+**Fallback** (Actions down): die ploi-Deploy-Scripts der Sites sind unverändert
+funktionsfähig und bauen auf dem Server —
 
 ```
-Root Path:      apps/comments
-Build Command:  pnpm --filter comments build
-Start Command:  node apps/comments/.output/server/index.mjs
+Root Path:      apps/<app>
+Build Command:  pnpm --filter <app> build
+Start Command:  node apps/<app>/.output/server/index.mjs
 ```
 
-Deploy-Script: `npm i -g pnpm && pnpm install --frozen-lockfile && pnpm --filter <app> build`. Env Vars in ploi.io als Server Environment Variables (nie als Datei).
+Env Vars in ploi.io als Server Environment Variables je Site (nie als Datei, nie im
+Repo). ploi „Quick Deploy" bleibt AUS. Die `control`-Site hat bewusst kein
+Repository — für sie gibt es keinen ploi-Fallback, sondern das Runbook.
 
 ### A10 — Migrations
 
 Appwrite hat kein eingebautes Migrations-System → manuelle Scripts, nie automatisch im Deploy. **Core hat kein Schema** — nur die Konvention + README. Feature Layers und Apps bringen eigene Migrations mit (z.B. `packages/comments/scripts/migrations/002-target-architecture.ts`). Beim Server-Upgrade (z.B. 1.8→1.9) immer die Appwrite-Migration sauber durchlaufen lassen.
 
-**Konventionen (v2.1, etabliert in Phase 10):**
-- Aufruf ohne Zusatz-Dependencies: `node --experimental-strip-types
-  --env-file=apps/<app>/.env packages/<layer>/scripts/migrations/00X-….ts`
+**Konventionen:**
+- **Aufruf IMMER über den zentralen Runner:** `pnpm migrate --app <app>`
+  (`scripts/migrate.mjs`). Bei mehreren Apps ist `--app` **Pflicht** — genau dafür
+  gibt es ihn: ein direkter `node --env-file=apps/<app>/.env …`-Aufruf auf ein
+  Layer-Script trifft bei einem Tippfehler die falsche Instanz.
 - **Idempotent**: 409 (existiert bereits) → loggen und überspringen; Scripts sind
   beliebig oft wiederholbar, kein Migrations-State nötig
-- Nach Column-Anlage auf `status === 'available'` pollen, BEVOR Indizes erstellt werden
+- **Indizes NUR über die Fabrik** `scripts/migrations-lib/indexRetry.mts` — einmal je
+  Datei `const { indexStep } = createIndexSteps(tablesDB, databaseId)`, dann
+  `await indexStep('Index x.idx_y', { tableId, key, type, columns })`. Sie ruft
+  `createIndex` selbst und bringt Retry + Cache-Anstoß mit. **Auf `available` zu
+  pollen reicht nicht:** der Index-Endpunkt liest die Spaltenliste aus Appwrites
+  Metadaten-Cache, der dem Spalten-Status hinterherhinkt (in der CI zweimal live
+  erwischt). Rohes `tablesDB.createIndex` in `packages/*/scripts/migrations/**`
+  verbietet ESLint — der einzige greifende Wächter, weil diese Scripts in keiner
+  tsconfig liegen.
 - Ein Script pro Schema-Änderung, fortlaufend nummeriert; läuft mit dem Migrations-Key (A2)
+- **Kein Migrations-Register in der DB** — die Labels (`control-019`, `system-021`, …)
+  sind reine Anzeige, die Idempotenz kommt vom 409. „Welche Migration lief hier?" ist
+  damit nicht beantwortbar, wohl aber, was dabei herauskam: `pnpm ops:schema-parity`
+  vergleicht die Spalten über alle Instanzen und meldet, wo eine fehlt.
 
 ### A11 — Environment Variables
 
@@ -466,18 +530,43 @@ NUXT_PUBLIC_APPWRITE_DATABASE_ID=
 NUXT_PUBLIC_APP_URL=https://<app-domain>
 ```
 
-`runtimeConfig` im Core mit Leer-Defaults definieren (Typ-Inferenz), echte Werte aus `.env`/Host. **Der API Key gehört nie in `runtimeConfig.public`.** Nie `.env` committen, nur `.env.example`. ⚠️ Jede `NUXT_*`-Variable braucht ihren Gegenpart im runtimeConfig-Skeleton — sonst mappt sie ins Leere (Beispiel: `NUXT_PUBLIC_APP_URL` ↔ `public.appUrl`). Künftig zusätzlich `NUXT_APPWRITE_MIGRATIONS_KEY` für den separaten Migrations-Key (A2).
+`runtimeConfig` im Core mit Leer-Defaults definieren (Typ-Inferenz), echte Werte aus `.env`/Host. **Der API Key gehört nie in `runtimeConfig.public`.** Nie `.env` committen, nur `.env.example`. ⚠️ Jede `NUXT_*`-Variable braucht ihren Gegenpart im runtimeConfig-Skeleton — sonst mappt sie ins Leere (Beispiel: `NUXT_PUBLIC_APP_URL` ↔ `public.appUrl`). Dazu `NUXT_APPWRITE_MIGRATIONS_KEY` für den separaten Migrations-Key (A2).
+
+> **Eine fehlende Env-Variable wird nicht rot.** `platform` hatte kein `NUXT_SMTP_*`,
+> also ging für jede Kunden-Community nie eine Benachrichtigungs-Mail raus — die App
+> lief, die Seiten antworteten, nur die Mail blieb aus. Zwei Netze: `pnpm ops:site-env`
+> liest über ssh die Schlüssel**namen** jeder Server-`.env` (Werte bleiben dort) und
+> hält sie gegen eine Pflicht-Liste; zur Laufzeit schreibt der Mailer beim ersten
+> verworfenen Versand einmal ins Log. Neue Pflicht-Variable ⇒ in die Liste im Skript.
 
 ### A12 — Node.js, Ports, Git
 
 - `.nvmrc`: Node 22 (nvm lokal, ploi.io + GitHub Actions via `node-version-file`)
-- Ports: Core Playground 3000, comments 3001, weitere 3002+ · parallel: `pnpm --parallel -r dev`
+- Ports (fest je App in ihrer `package.json`): Core-Playground 3000 · comments 3001 ·
+  _template 3002 · photos 3003 · control 3004 · portfolio 3005 · platform 3006 ·
+  marketing 3007 · help 3008 · Docs-Site 4000 (`pnpm dev:docs`).
+  Parallel: `pnpm --parallel -r dev`
+- **Eigener Port im Worktree:** `pnpm --filter <app> dev -- --port N` wirkt **nicht**
+  (das `dev`-Skript hat `--port` fest verdrahtet) — richtig ist
+  `pnpm --filter <app> exec nuxi dev --port N`. Nuxt weicht bei belegtem Port still
+  auf einen anderen aus, ein „Beweis" misst dann den falschen Server.
 - Branches: `main` / `dev` / `feature/*` / `fix/*` · Conventional Commits
 - `.gitignore`: `.env*` (außer `.env.example`), `.nuxt/`, `.output/`, `node_modules/`
 
 ### A13 — Testing
 
-Vitest Unit Tests für Core Composables ohne Browser-Abhängigkeit (`useFormatDate`, `useFormatCurrency`, `usePagination`). Component Tests vorerst nicht (Nuxt Component Testing mit Layers fehleranfällig). E2E mit Playwright pro App — erst wenn Core stabil.
+Vitest Unit Tests (`pnpm -r test`) für Composables und pure Regeln ohne
+Browser-Abhängigkeit. Component Tests weiterhin nicht (Nuxt Component Testing mit
+Layers fehleranfällig).
+
+**E2E mit Playwright ist gebaut** (die frühere Bedingung „erst wenn Core stabil" ist
+eingelöst): 7 Specs in `apps/comments/e2e`, Base-URL über `PW_BASE_URL`
+überschreibbar. Die CI (`e2e.yml`) fährt dafür eine echte Wegwerf-Appwrite. Zwei
+Dinge, die man nicht ändern sollte: Tests laufen gegen den **Dev**-Server (der jede
+Seite beim ersten Zugriff kompiliert → großzügige Budgets statt der 30-s-Standards),
+und Playwrights **gebündeltes Chromium** statt `channel: 'chrome'` — System-Chrome
+weckt auf macOS einen Updater, dessen Prozess die Worker-Sockets erbt und den
+Teardown nie beenden lässt.
 
 ### A14 — Layer-Grenzen-Matrix & Durchsetzung ✨ neu
 
@@ -695,10 +784,12 @@ Immer explizites `Query.limit(...)` setzen (Default 25 → stille Trunkierung).
 | Fehlerseite greift nicht | error.vue in einem Layer | Wird nicht aus Layern aufgelöst → Markup als Core-Komponente (`CoreErrorPage`), dünne `app/error.vue` pro App; neue error.vue braucht Dev-Server-Neustart |
 | Layer-Store nicht gefunden | `app/stores/` wird in Layern nicht gescannt | In Layer-nuxt.config: `imports.dirs` mit absolutem Pfad |
 | Kompletter Locale-Load bricht | `@` in einer Message = vue-i18n Linked-Syntax | Literal escapen: `du{'@'}example.com` ("Invalid linked format" killt die GANZE Datei) |
-| Realtime disconnected im Loop | SDK ≥25.x spricht neues Protokoll, Server 1.9.0 kann es nicht | Nativer WebSocket-Client mit Legacy-URL-Protokoll (A4) |
+| Realtime disconnected im Loop | **Historisch** (Server 1.9.0): SDK ≥25.x sprach ein Protokoll, das der Server nicht konnte. Seit 1.9.5 erledigt — die Lösung von damals (nativer WebSocket-Client) wurde mit P1 abgelöst, s. A4 | Heute: gesunden `appwrite-realtime`-Container prüfen; bei einem unbekannten Host greift `startWhenHostResolves()` |
+| Realtime tot auf einem neuen Host, Handshake sieht aber okay aus | Im Appwrite-Projekt fehlt die **Web-Platform** für diesen Host. Der WS-Handshake antwortet `101` auch für einen abgewiesenen Origin — die Ablehnung kommt als erste Nachricht IM Socket (`code 1008`) | `curl -H "Origin: https://<host>" …/v1/account` → `403 general_unknown_origin` = Host unbekannt, `401` = akzeptiert. Platform im Projekt nachtragen (Wildcard deckt neue Mandanten) |
 | ESLint findet Config-Pakete nicht | Flat-Config-Imports lösen vom Config-Ort auf | `@nuxt/eslint-config` auch im Root-package.json deklarieren |
 | multi-word-Rule schlägt auf Layer-Dateien an | Nuxt-Ausnahmen matchen `packages/*/app/…` nicht | Regel für `**/app/pages/**`, `**/app/layouts/**`, `**/app/error.vue` deaktivieren |
-| Index-Erstellung schlägt fehl | Columns noch im Status `processing` | In Migrations auf `available` pollen, dann Indizes anlegen |
+| Index-Erstellung schlägt fehl (400 `column_not_available`) | Der Index-Endpunkt liest die Spaltenliste aus Appwrites Metadaten-Cache, der dem Spalten-Status hinterherhinkt — **Pollen auf `available` reicht nicht** | Index-Anlage nur über `createIndexSteps()` aus `scripts/migrations-lib/indexRetry.mts` (Retry + Cache-Anstoß); rohes `createIndex` ist in Migrations ESLint-verboten (A10) |
+| Spalte steht für immer auf `processing` | Appwrite räumt den Cache, während ein Leser noch seinen alten Stand hält — Warten hilft dann nie mehr (23 Versuche ohne Bewegung) | Nur ein Schreibzugriff auf die Tabelle räumt ihn (`tableCacheNudge`) — steckt in derselben Fabrik |
 
 ---
 
@@ -719,6 +810,17 @@ Immer explizites `Query.limit(...)` setzen (Default 25 → stille Trunkierung).
 
 ## Notizen & Entscheidungen
 
+- **2026-08-16:** Faktischer Nachzug (kein v3). Korrigiert, weil es zu falschem
+  Handeln führen konnte: **A10** beschrieb den direkten Layer-Script-Aufruf mit
+  hartem `--env-file` statt des zentralen Runners `pnpm migrate --app <app>` (dessen
+  Sinn „nie die falsche Instanz" ist) und nannte das Pollen auf `available` als
+  ausreichend vor der Index-Anlage — das ist es nicht (Fabrik `createIndexSteps`,
+  Cache-Anstoß); **A9** beschrieb den Server-Build über ploi, obwohl seit
+  2026-07-23 die CI baut und nur `.output` rsynct. Dazu Stack + Katalog-Beispiel
+  auf die echten Versionen, Verzeichnisstruktur auf 21 Layer und 8 Apps (`feed`
+  hieß längst `activity`), Ports, A11–A13, und zwei Stolperfallen-Zeilen, die dem
+  eigenen A4 widersprachen. Bewusst **nicht** angefasst: A14 und die
+  Drei-Ebenen-Darstellung (s. Kopf).
 - **2026-06-10:** Konzept v2.1 — Realitäts-Abgleich nach Phasen 1–10: A4 korrigiert
   (SDK-Realtime-Protokoll + Query-Subscriptions sind Cloud-only → nativer
   WebSocket-Client im Core), Strukturfixes (app/app.config.ts, CoreErrorPage-Pattern,
