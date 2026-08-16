@@ -97,12 +97,12 @@ apps/       ← Vollständige, deploybare Nuxt-Applikationen
 | `packages/core` | ✅ Aktiv | Nuxt Layer: SSR-Auth, Appwrite-Fundament, RBAC, Design-Basis, Utils, GDPR-/Stats-Verträge |
 | `packages/system` | ✅ Aktiv | Fundament: Schema-Owner der Infra-Tabellen (audit_logs, app_config, notifications, custom_themes, custom_fonts) + GDPR-Contributor, öffentliche Read-Routen /api/themes + /api/fonts |
 | `packages/moderation` | ✅ Aktiv | Fundament: generisches Melde-/Report-System (reports-Table, Queue-Verträge, ReportButton) |
-| `packages/themes` | ✅ Aktiv | Theme-Studio (Galerie + Editor), 9 Built-ins + Custom Themes (OKLCH-Ramp-Generator), 2 Schrift-Rollen inkl. WOFF2-Uploads, Live-Propagation — Konzept: docs/referenz/THEMES-CONCEPT-V2.md |
+| `packages/themes` | ✅ Aktiv | Theme-Studio (Galerie + Editor), Built-in-Katalog 26 × 11 (286 generierte Varianten, Quelle `theme.catalog.ts`, CI-Gate `check:themes`) + Custom Themes (OKLCH-Ramp-Generator), 2 Schrift-Rollen inkl. WOFF2-Uploads, Live-Propagation — Konzept: docs/referenz/THEMES-CONCEPT-V2.md |
 | `packages/comments` | ✅ Aktiv | Kommentarsystem: targetId/targetType, Votes, Realtime — Spec: [[reddit-comment-system-setup]] |
 | `packages/admin` | ✅ Aktiv | Dashboard (RBAC-Capabilities), User-Verwaltung, Moderations-Queue, Changelog, Audit, GDPR-Exporte, Theme-/Font-Admin-Routen |
 | `packages/posts` | ✅ Aktiv | Community-Feed: Posts, Multiple-Choice-Polls (verdeckte Ergebnisse), offene Fragen, Scheduled Questions (publish-on-read), zweiphasiges Hide, Kommentare via `#comments`-Slot |
 | `packages/events` | ✅ Aktiv | Event-Kalender: RSVP mit server-autoritativem Zähler, Landing Pages, Monats-Kalender, „Join live", Replays, Reminder ohne Cron, Paid-Tickets via billing-Vertrag — Plan: docs/archiv/EVENTS-V2.md |
-| `packages/feed` | ✅ Aktiv | Activity-Feed: UI zum Core-Vertrag `recordActivity()` (Cursor-Pagination, Realtime, Gruppierung, 9 Ereignis-Typen) |
+| `packages/activity` | ✅ Aktiv | Activity-Feed: UI zum Core-Vertrag `recordActivity()` (Cursor-Pagination, Realtime, Gruppierung, 9 Ereignis-Typen). Seiten `/activity` + `/dashboard/community/activity`, Capability `activity.manage`. Hieß bis zur Umbenennung `packages/feed` — ältere Dokumente nennen ihn noch so |
 | `packages/feedback` | ✅ Aktiv | Feedback-Widget: Button unten links, Popup (Gäste + Rate-Limit), Admin-Sichtung (`feedback.manage`) |
 | `packages/billing` | ✅ Aktiv | Stripe: hosted Checkout/Portal, Webhook (Signatur/Allowlist/Stale-Guard), Entitlements + `useBilling` (Realtime), Fulfillment-Vertrag `registerCheckoutFulfillment` — Plan: docs/archiv/BILLING-STRIPE.md |
 | `packages/courses` | ✅ Aktiv | LMS v1: Markdown-Lektionen, Enrollment + server-autoritativer Fortschritt, Builder mit Edit-Awareness, Zugang free/members/paid via `registerCourseAccessGuard` (billing-Entitlements) |

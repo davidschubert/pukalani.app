@@ -33,7 +33,7 @@ Drei Ebenen, klar getrennt:
 | `system.manage` | System-Info, Self-Update, App-Config-Gates |
 | `storage.manage` | Storage-Browser, Orphans löschen |
 | `audit.read` | Audit-Log lesen |
-| `feed.manage` | Activity-Feed moderieren (Einträge löschen) |
+| `activity.manage` | Activity-Feed moderieren (Einträge löschen) |
 | `posts.moderate` | Community-Posts ausblenden/wiederherstellen |
 | `events.manage` | Events anlegen/bearbeiten/absagen |
 | `feedback.manage` | Nutzer-Feedback sichten/erledigen/löschen |
@@ -67,7 +67,7 @@ pro Route durch die spezifische Capability ersetzt:
 | `system.manage` | `system.get`, `system/update.post`, `config.{get,patch}` |
 | `storage.manage` | `storage.get`, `storage/[fileId].delete` |
 | `audit.read` | `audit.get` |
-| `feed.manage` | `packages/feed`: `feed/[id].delete` |
+| `activity.manage` | `packages/activity`: `activity/[id].delete` |
 | `posts.moderate` | `packages/posts`: `posts/[id]/hide.post`, `posts/[id]/restore.post` |
 | `events.manage` | `packages/events`: `events/index.post`, `events/[id].patch`, `events/[id].delete`, `events/manage.get` |
 | `feedback.manage` | `packages/feedback`: `feedback/index.get`, `feedback/[id].patch`, `feedback/[id].delete` |
