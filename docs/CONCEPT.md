@@ -6,12 +6,13 @@
 > **Was aktuell ist:** die Ebenen-Darstellung (inkl. Kompositions-Layer `blueprint`),
 > Stack & Katalog, Verzeichnisstruktur (21 Layer, 8 Apps), Layer-Tabelle,
 > A9 (Deployment), A10 (Migrations), A11–A13, **A14 (Layer-Grenzen-Matrix, alle 21
-> Layer + Durchsetzung inkl. Datentür-Backstop)**, Stolperfallen.
+> Layer + Durchsetzung inkl. Datentür-Backstop)**, **A15 (Mandanten-Architektur:
+> Pool/Silo, Datentür, Publikum, Sperr-Stufen)**, Stolperfallen.
 >
-> **Was hier weiterhin fehlt:** die Mandanten-Architektur als eigenes Kapitel —
-> Pool vs. Silo, wie `tenantDb` scopet, die Sperr-Stufen, Hosts und Kontroll-Hosts.
-> A14 nennt die Datentür, erklärt sie aber nicht. Dafür ist die **CLAUDE.md** im
-> Repo-Root die Wahrheit.
+> **Was hier bewusst nicht steht:** die Betriebs-Wirklichkeit — welche Hosts es gibt,
+> welche Site auf welchem Port läuft, TLS-Lineages, Cutover-Historie. Das ändert sich
+> zu schnell für ein Konzept; dafür sind die **CLAUDE.md** (Hosts-Abschnitt),
+> `docs/runbooks/` und `docs/content/2.architektur/6.hosts-und-ports.md` zuständig.
 
 ## Projektbeschreibung
 
@@ -720,6 +721,121 @@ in ihrer Datei eine Regel steht, sondern weil sie im Themes-Layer liegt.
 > `GET /api/themes` + `/api/fonts` — die Control-UI liegt im themes-Layer, die Admin-CRUD-Routen
 > im admin-Layer (Schema-Owner ≠ UI-Welt bleibt gewahrt).
 
+### A15 — Mandanten-Architektur: eine Datentür ✨ neu 2026-08-16
+
+#### Zwei Betriebsarten, drei Zustände
+
+`event.context.tenant` (`core/shared/types/tenant.ts`) beschreibt den Mandanten
+**pro Request**:
+
+| Modus | Bedeutung | Isolation durch |
+|---|---|---|
+| `pool` | Viele Communities in **einem** Appwrite-Projekt (der Normalfall) | Zeilen-Scope + Row-Permissions |
+| `silo` | Eine Community mit **eigenem** Projekt/Deployment | Das Projekt selbst |
+| *kein Kontext* | Single-Tenant-Betrieb (Playground, `help`, `marketing`) | Entfällt |
+
+**Die Silo-Regel** (Davids Entscheidung 2026-08-04): Isolation im **Code** und im
+**Deployment** sind zwei Entscheidungen. Ein neues Produkt bekommt **immer** einen
+eigenen Layer, aber standardmäßig **keine** eigene Site/Instanz — jede Instanz
+kostet Migrationen, Env-Drift, TLS und Schema-Parität. Eine eigene Site nur mit
+kundenförmigem Grund.
+
+#### Wo die Wahrheit liegt
+
+Die Community selbst (`communities`, `community_members`, `community_invites`,
+Plan, Abo, Domain) lebt im **Control-Plane-Projekt**; die Inhalte leben im
+**Runtime-Projekt**. Beide Projekte haben getrennte Schlüssel und sehen einander
+nicht — deshalb läuft alles, was Mitglieder, Rollen oder Vertrag betrifft, über
+die **Service-Naht** (`onboarding` → `control`, s. A14), und deshalb kann das
+Control Plane z. B. kein Pool-Label vergeben.
+
+#### Die Datentür
+
+In `server/api/**` mandantenfähiger Layer läuft Datenzugriff über
+`tenantDb(event)` — **nicht** über `createAdminClient().tablesDB` oder
+`createSessionClient().tablesDB`:
+
+- `list` / `find` / `count` hängen den Mandanten-Filter **immer** an
+- `get` / `update` / `remove` belegen die Zugehörigkeit **vor** der Aktion
+- `create` stempelt den Mandanten **und** setzt die Row-Permissions
+
+Warum eine Tür statt Disziplin: Isolation hing vorher an drei Dingen, an die man
+sich erinnern musste. Am 2026-07-26 hat genau das versagt — drei Moderations-Routen
+lasen fremde Zeilen per ID.
+
+**Zwei Fragen, zwei Felder** (seit 2026-08-02):
+
+- `as` = **welcher Client** zugreift (`'member' | 'operator'`) — Technik:
+  Row-Permissions, Admin-Sicht für Moderation
+- `actor` = **wer handelt** (`'member' | 'guest' | 'operator'`, Default = `as`) —
+  Fachlichkeit: daran hängen die Sperre (`actorFacesContentLock`) und der
+  Beitritt-durch-Schreiben (`actorJoinsByWriting`)
+
+Getrennt, weil viele Routen `'operator'` nur wegen der Permissions wählen —
+gehandelt hat trotzdem ein Mitglied. Solange beides ein Feld war, meldeten sich
+diese Routen still von der Sperre ab. Drei Actor-Werte, weil ein **Gast**-Kommentar
+Inhalt ist (Sperre gilt) und trotzdem niemanden zum Mitglied macht (kein Konto).
+
+> **Die Mandanten-Id kommt NIE vom Aufrufer.** `stripTenantKey()` entfernt sie aus
+> jedem Body — sonst schreibt ein durchgereichtes Objekt in einen fremden Mandanten.
+
+#### `tenantId` ≠ `communityId` — die teuerste Verwechslung
+
+Beide stehen im Kontext und meinen Verschiedenes:
+
+- **`tenantId`** ist der **Wert im Zeilen-Stempel**. Die Spalte heißt seit E8-3
+  `communityId`, der Kontext-Wert blieb `tenant.tenantId` —
+  `scopeRowFor()` schreibt also `communityId: tenant.tenantId`. Das sieht wie ein
+  Fehler aus und ist keiner.
+- **`communityId`** ist `communities.$id`, die kanonische Site-Id. Sie trägt das
+  **Lese-Publikum** (`read(label:<communityId>)`) und wird von
+  `requireCommunityPermission` verlangt (fehlt sie → fail-closed).
+
+#### Publikum statt Sichtbarkeits-Flag
+
+`tenantRowPermissionsFor()` kennt drei Publika: `'members'` (Default) →
+`read(label:<communityId>)`; `'public'` → `read(any)` **nur**, wenn die Community
+öffentlich ist, sonst fällt es auf `members` zurück; `'moderators'` → das
+Moderatoren-Label. Ohne `communityId` gibt es **kein** Read statt `any` —
+fail-closed.
+
+**Das Site-Label heißt „ist Mitglied dieser Community"** (A5, seit 2026-07-29):
+`06.community-label.ts` vergibt es genau dem, der eine `community_members`-Zeile
+mit Zugang hat. Ein Label ist ein **Lese-Publikum, keine Rolle** — autorisiert
+wird über `requireCommunityPermission`. Mitgliedschaft entsteht durch genau zwei
+Ereignisse: Kontoanlage auf dem Mandanten-Host und den **ersten eigenen
+Schreibvorgang** (abgefangen in der Datentür, statt in zwanzig Routen). Ein
+Seitenaufruf löst bewusst nichts aus — sonst wäre jeder Vorbeisurfer Mitglied und
+„Zugang entziehen" wirkungslos.
+
+#### Sperren: zwei Stufen, zwei Wirkungen
+
+`communities.suspension` (`core/shared/communitySuspension.ts`):
+
+- **`'abuse'`** → der Resolver nimmt die Community vom Netz: **404** wie ein
+  unbekannter Host, Seite und API.
+- **`'billing'`** → **nur-lesend**, und zwar **an der Datentür**, nur an der Klinke
+  `member`. Zu ist damit jeder **Inhalt**. Offen bleiben bewusst alle
+  Owner-Einstellungen und die **Moderation** — die laufen über die Service-Naht,
+  nicht durch die Tür.
+
+Grund für den Zuschnitt: die Sperre soll zum Zahlen bewegen, nicht den Owner aus
+seiner Community aussperren. Eine gesperrte Community, die niemand mehr moderieren
+kann, wird zum Problem des Betreibers. **Eine neue Owner-Einstellung gehört also
+nicht hinter die Sperre; eine neue Inhalts-Route muss nichts tun.**
+
+#### Außerhalb der Tür — und was trotzdem gilt
+
+Per Definition mandantenübergreifend und damit erlaubt: Migrationen, Sweeps und
+Intervall-Plugins, die GDPR-Orchestrierung, das Control Plane.
+
+Was auch dort gilt: **jeder Microcache auf einer mandantenfähigen App muss den
+Mandanten im Schlüssel tragen** (`tenantCacheScopeFor`) — sonst liefert er die
+Antwort von Kunde A an Kunde B; im Silo sogar aus einem anderen Appwrite-Projekt.
+
+> Durchgesetzt wird die Tür von ESLint (A14, Stufe 3) — nicht von Typen. Ein
+> `H3Event` in der Hand heißt: hinter die Tür.
+
 ---
 
 ## Core Layer – Detailspezifikation
@@ -923,7 +1039,16 @@ Immer explizites `Query.limit(...)` setzen (Default 25 → stille Trunkierung).
   `no-restricted-syntax` auf `server/api/**` + `server/plugins/**` von 11 Layern,
   dazu das `createIndex`-Verbot in Migrationen). Die Ebenen-Darstellung kennt jetzt
   `blueprint` und die Regel, dass er in `extends` VOR den Produkt-Layern steht.
-  Weiterhin offen: die Mandanten-Architektur als eigenes Kapitel (s. Kopf).
+- **2026-08-16 (dritter Durchgang):** **A15 — Mandanten-Architektur** neu. Pool/Silo
+  + Single-Tenant, die Silo-Regel (Code-Isolation ≠ Deployment-Isolation), die
+  Trennung Control-Plane-Projekt / Runtime-Projekt, die **Datentür** `tenantDb`
+  samt `as` (welcher Client) vs. `actor` (wer handelt), die Publikums-Regel der
+  Row-Permissions, das Site-Label als Mitgliedschaft und die zwei Sperr-Stufen
+  (`abuse` = 404, `billing` = nur-lesend an der Klinke `member`). Ausdrücklich
+  aufgeschrieben ist die Verwechslung, die am meisten kostet: `scopeRowFor()`
+  schreibt **`communityId: tenant.tenantId`** — die Spalte wurde umbenannt, der
+  Kontext-Wert nicht. Betriebs-Wirklichkeit (Hosts, Ports, TLS) bleibt bewusst
+  draußen (s. Kopf).
 - **2026-06-10:** Konzept v2.1 — Realitäts-Abgleich nach Phasen 1–10: A4 korrigiert
   (SDK-Realtime-Protokoll + Query-Subscriptions sind Cloud-only → nativer
   WebSocket-Client im Core), Strukturfixes (app/app.config.ts, CoreErrorPage-Pattern,
