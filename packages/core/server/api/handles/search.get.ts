@@ -2,7 +2,7 @@ import { Query } from 'node-appwrite'
 import { z } from 'zod'
 import { HANDLE_MAX_LENGTH, normalizeHandle } from '../../../shared/handles'
 import { handleAudienceIncludes } from '../../../shared/accountHandleAudience'
-import { ACCOUNT_HANDLES_TABLE, type AccountHandleRow } from '../../../shared/types/handle'
+import { ACCOUNT_HANDLES_TABLE, type AccountHandleRow, type HandleSuggestion } from '../../../shared/types/handle'
 
 /** Kurze Liste — das Menü in der Schreibfläche zeigt ohnehin nur eine Handvoll. */
 const LIMIT = 8
@@ -64,7 +64,7 @@ const querySchema = z.object({
  * ebenfalls ja zurück. Ein Gate wäre dort keine Grenze, sondern eine
  * Aussperrung.
  */
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async (event): Promise<HandleSuggestion[]> => {
   // (a) Das Gate. Wirft 401 ohne Sitzung und 403 mit fachlichem Grund für
   //     Fremde — im Silo und auf Single-Tenant-Instanzen lässt es jeden durch.
   await requireCommunityMembership(event)

@@ -6,6 +6,7 @@ import {
   handleRejection,
   normalizeHandle,
 } from '../../../shared/handles'
+import type { AccountHandleResponse } from '../../../shared/types/handle'
 
 /**
  * Der eigene @name — anzeigen und ändern. KONTO-WEIT seit AH-7 (2026-08-11).
@@ -39,17 +40,14 @@ import {
 const { t, te, locale } = useI18n()
 const toast = useToast()
 
-interface HandleState {
-  handle: string | null
-  changedAt: string | null
-  canChange: boolean
-  availableAt: number | null
-}
-
 // `server: false` mit Absicht: die Route VERGIBT beim ersten Aufruf einen
 // Namen — das ist ein Schreibvorgang und gehört nicht in einen SSR-Durchlauf,
 // den ein Crawler auslösen kann.
-const { data, refresh } = await useFetch<HandleState>('/api/account/handle', {
+//
+// Der Antworttyp kommt aus `shared/types/handle.ts` und wird vom Handler
+// ebenfalls verlangt (TS2589-Umbau, 2026-08-14): eine hier lokal erfundene
+// Form wäre eine Behauptung, die niemand gegenprüft.
+const { data, refresh } = await useFetch<AccountHandleResponse>('/api/account/handle', {
   lazy: true,
   server: false,
   default: () => ({ handle: null, changedAt: null, canChange: true, availableAt: null }),

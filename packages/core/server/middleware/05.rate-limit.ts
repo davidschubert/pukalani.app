@@ -88,6 +88,24 @@ const WRITE_LIMITED: { re: RegExp, bucket: string, max?: number }[] = [
   { re: /^PATCH \/api\/comments\/[^/]+$/, bucket: 'comments:edit' },
   { re: /^POST \/api\/comments\/[^/]+\/vote$/, bucket: 'comments:vote' },
   { re: /^POST \/api\/reports$/, bucket: 'reports:create' },
+  /**
+   * EMOJI-REAKTIONEN (F57) — die beiden Umschalter, hier und beim Beitrag.
+   *
+   * Sie haben SCHON eine Drossel, und die bleibt: 60 Umschaltungen je Mensch,
+   * Community und Minute, gezählt IN der Route. Was ihr fehlt, ist die
+   * Reihenfolge — sie greift erst, NACHDEM `resolveReactionTarget` die fremde
+   * Zeile über die Operator-Klinke gelesen hat. Eine Anfrage, die ohnehin
+   * abgewiesen wird, kostete damit einen Appwrite-Abruf. Ein Deckel, der erst
+   * nach der Arbeit greift, schützt den Server nicht (dieselbe Begründung wie
+   * beim Einladungs-Kontingent weiter unten).
+   *
+   * Die Zeile hier zählt deshalb DAVOR, je IP, mit dem Standard-Schreibdeckel
+   * (60/min) — genau die Zahl der Route, damit die feinere Grenze (Mensch +
+   * Community) im Normalfall die wirksame bleibt und diese hier nur den
+   * Ansturm abfängt. Eigene Buckets je Layer, wie bei den Stimmen darüber.
+   */
+  { re: /^POST \/api\/comments\/[^/]+\/reactions$/, bucket: 'comments:reactions' },
+  { re: /^POST \/api\/posts\/discussions\/reactions$/, bucket: 'posts:reactions' },
   // Community-Posts (Phase 25): member-led → Spam-Backstop. hide/restore
   // fehlen bewusst (Moderator-gated, wie reports/resolve).
   { re: /^POST \/api\/posts$/, bucket: 'posts:create' },
@@ -104,6 +122,33 @@ const WRITE_LIMITED: { re: RegExp, bucket: string, max?: number }[] = [
   // aber ein Skript soll daraus keine Schleife machen. Ein Mensch richtet
   // einmal ein.
   { re: /^POST \/api\/auth\/mfa\/setup$/, bucket: 'auth:mfa-setup', max: 10 },
+  /**
+   * DEN EIGENEN @NAMEN ÄNDERN (AH-7) — Audit-Befund AU2, 2026-08-15.
+   *
+   * Zwei Gründe, und der zweite ist der schärfere:
+   *  1. SCHREIBLAST. Jeder Versuch legt über den ADMIN-Client eine Zeile in
+   *     `account_handles` an (und stellt die alte um). Appwrites eigene Bremse
+   *     greift wegen des API-Keys nicht — dieselbe Lage wie bei den
+   *     Auth-Routen ganz oben.
+   *  2. EIN EXISTENZ-ORAKEL ÜBER DEN GLOBALEN NAMENSRAUM. Der Namensraum ist
+   *     seit AH-7 instanzweit; ein 409 `taken` verbraucht weder Zustand noch
+   *     die 30-Tage-Sperrfrist. Ungedrosselt liess sich damit die gesamte
+   *     Namensliste durchprobieren UND ein freiwerdender Name automatisch im
+   *     selben Moment wegschnappen. Der Kommentar in `accountHandles.ts`
+   *     begründet das Zuschnappen — nicht das beliebig schnelle Fragen.
+   *
+   * FÜNF JE MINUTE UND IP, wie die Auth-Geschwister. Ein Mensch benennt sich
+   * einmal in dreissig Tagen um; ein erfolgreicher Wechsel sperrt sich danach
+   * ohnehin selbst.
+   *
+   * WARUM HIER UND NICHT (auch) IN `FAILURE_LIMITED`: der Vorschlag im Audit
+   * war „beides". Beides geht nicht und wäre auch schwächer — steht eine Route
+   * in WRITE_LIMITED, gewinnt dieser Eintrag unten Bucket, Deckel UND
+   * Zählweise, der FAILURE-Eintrag bliebe wirkungslos. Vor allem aber ist
+   * „jeder Versuch zählt" strikt schärfer als „nur Fehlversuche zählen": das
+   * Orakel FRAGT, und jede Frage ist hier ein Request.
+   */
+  { re: /^PATCH \/api\/account\/handle$/, bucket: 'account:handle', max: 5 },
   // Social-Login (U14): zwei GETs, die beide ÜBER DEN ADMIN-CLIENT schreiben —
   // der Start prägt einen OAuth-Token bei Appwrite, die Rückkehr eine SESSION.
   // Beide sind session-los erreichbar, Appwrites eigene Bremse greift wegen des
@@ -185,10 +230,30 @@ const WRITE_LIMITED: { re: RegExp, bucket: string, max?: number }[] = [
   // MITGLIEDER-Gate hat und deshalb nicht zu den öffentlichen Lese-Routen
   // gehört. Die Rückverweise sind gastoffen und teilen ihn: beide gehören zur
   // selben Funktion, und 120/min reicht für beide zusammen bequem.
-  // Die Handle-Suche (`/api/handles/search`) hat bis heute KEINEN Eintrag —
-  // das ist eine bekannte Lücke, kein Vorbild.
   { re: /^GET \/api\/posts\/discussions\/link-search$/, bucket: 'posts:links', max: READ_MAX },
   { re: /^GET \/api\/posts\/discussions\/backlinks$/, bucket: 'posts:links', max: READ_MAX },
+  /**
+   * Die Handle-Suche des `@`-Menüs (AU2, 2026-08-15) — bis heute stand hier
+   * statt eines Eintrags nur die Notiz, dass sie fehlt. Sie ist der EXAKTE
+   * Zwilling der beiden Zeilen darüber: dasselbe Menü in derselben
+   * Schreibfläche, ein `startsWith` je getipptem Zeichen, ein MITGLIEDER-Gate
+   * davor. Ungedrosselt war sie die Ausleitung der MITGLIEDERLISTE im
+   * Sekundentakt — acht Namen je Antwort, aber beliebig oft und über jedes
+   * Präfix (`a`, `b`, `aa`, …).
+   *
+   * EIGENER BUCKET, NICHT `posts:links`: beide Menüs leben in DERSELBEN
+   * Schreibfläche (PostBodyEditor), und wer in einem Beitrag Themen UND
+   * Menschen verlinkt, würde sich sonst mitten im Satz selbst aussperren.
+   *
+   * WARUM 120 UND NICHT 30 (der Vorschlag aus dem Audit): der Client entprellt
+   * um 150 ms, ein Mensch tippt langsamer als das — es fliegt also im Regelfall
+   * EINE Anfrage JE ZEICHEN. Ein Beitrag mit vier Erwähnungen von je acht
+   * Zeichen verbraucht damit gut 30 Anfragen ganz allein; 30/min hätte das
+   * Menü im normalen Schreiben abgewürgt. 120/min ist dieselbe Zahl, die die
+   * gleich teure Themen-Suche trägt, und begrenzt die Ausleitung trotzdem hart
+   * (eine Anfrage je halbe Sekunde statt beliebig vieler).
+   */
+  { re: /^GET \/api\/handles\/search$/, bucket: 'handles:search', max: READ_MAX },
   // Medien-Upload: der einzige Schreibweg, der BINÄRDATEN auf die geteilte
   // Platte legt (bis 15 MB je Bild) — ein ungedrosseltes Budget ist hier nicht
   // „viele Zeilen", sondern viele Gigabyte. 30/min ist für eine Redaktion, die
@@ -206,6 +271,20 @@ const WRITE_LIMITED: { re: RegExp, bucket: string, max?: number }[] = [
   // Client-Error-Inbox (Observability-Gate): der Client dedupliziert/kappt
   // selbst (10/Session) — das Limit hier stoppt Scripting/kaputte Clients.
   { re: /^POST \/api\/telemetry\/error$/, bucket: 'telemetry:error', max: 30 },
+  /**
+   * Das Mess-Ereignis (F47, Eintrag AU2 2026-08-15): gastoffen, und jeder
+   * Request löst einen AUSGEHENDEN `fetch` an die Plausible-Instanz aus (bis
+   * 16 KiB Rumpf, die Route reicht ihn 1:1 weiter). Ungedrosselt ist das kein
+   * „ein paar Zeilen mehr in der Statistik", sondern ein Weiterleitungsdienst,
+   * mit dem ein Fremder unsere Instanz auf eine andere Maschine zielen lässt.
+   * Dasselbe Budget wie das Geschwister `telemetry/error` — dieselbe Klasse
+   * (gastoffener Client-Melder, ein ausgehender Ruf je Aufruf).
+   *
+   * DASS 30/min JE IP FÜR EIN GETEILTES NETZ KNAPP SEIN KANN, ist bekannt und
+   * hier hinnehmbar: verloren geht dann eine MESSUNG, keine Handlung — und
+   * dieselbe Datei deckelt die Registrierung längst bei 5/min je IP.
+   */
+  { re: /^POST \/api\/stats-event$/, bucket: 'stats:event', max: 30 },
   // Feedback-Widget: auch Gäste dürfen senden → enges Budget gegen Spam
   { re: /^POST \/api\/feedback$/, bucket: 'feedback:create', max: 5 },
   // E10, Davids Entscheidung 8 („volle Notbremse in Fassung 1"): Wählen und

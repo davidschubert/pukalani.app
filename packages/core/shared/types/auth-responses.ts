@@ -52,3 +52,14 @@ export interface MfaVerifyResponse {
 export interface MfaDisableResponse {
   ok: true
 }
+
+/**
+ * PUT /api/auth/timezone
+ *
+ * Die Route gibt die GESPEICHERTE Zone zurück, nicht die geschickte: '' ist
+ * hier ein gültiger Wert und heisst „automatisch" (shared/timezone.ts).
+ */
+export interface TimezoneResponse {
+  ok: true
+  timezone: string
+}

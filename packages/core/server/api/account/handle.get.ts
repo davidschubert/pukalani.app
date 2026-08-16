@@ -1,4 +1,5 @@
 import { handleChangeAvailableAt, mayChangeHandleAt } from '../../../shared/handles'
+import type { AccountHandleResponse } from '../../../shared/types/handle'
 import { activeAccountHandleRow, ensureAccountHandle, ensureAccountHandleAudience } from '../../utils/accountHandles'
 
 /**
@@ -31,7 +32,7 @@ import { activeAccountHandleRow, ensureAccountHandle, ensureAccountHandleAudienc
  * die Lese-Rolle dieser Community nach, damit das Erwähnungs-Menü den Menschen
  * kennt, ohne dass er erst etwas schreiben muss.
  */
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async (event): Promise<AccountHandleResponse> => {
   const user = event.context.user
   if (!user) throw createError({ status: 401, statusText: 'Unauthorized' })
 

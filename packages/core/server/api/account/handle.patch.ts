@@ -6,6 +6,7 @@ import {
   mayChangeHandleAt,
   normalizeHandle,
 } from '../../../shared/handles'
+import type { AccountHandleChangeResponse } from '../../../shared/types/handle'
 import { activeAccountHandleRow, changeAccountHandle, ensureAccountHandleAudience } from '../../utils/accountHandles'
 
 /**
@@ -35,7 +36,7 @@ const bodySchema = z.object({
   handle: z.string().trim().min(1).max(HANDLE_MAX_LENGTH + 1),
 })
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async (event): Promise<AccountHandleChangeResponse> => {
   /**
    * Nur die Sitzung, KEINE Mitglieder-Wache — anders als beim Vorgänger
    * `PATCH /api/handles/me`. Begründung im Kopf von `handle.get.ts`: der Name

@@ -224,7 +224,27 @@ export async function ensureAccountHandleAudience(event: H3Event, userId: string
  * Alle Zeilen dieses Kontos, auch die `former`-Zeilen: eine frühere
  * Schreibweise soll in einer fremden Community nicht länger auftauchen als die
  * aktuelle.
+ *
+ * „ALLE" HEISST SEIT AU2 (2026-08-15) WIRKLICH ALLE. Vorher stand hier ein
+ * einzelnes `Query.limit(25)` ohne Schleife: wer öfter als 25-mal umbenannt
+ * hatte, behielt in den ÄLTESTEN Zeilen das Lese-Publikum einer Community, aus
+ * der er längst entfernt war — genau die Zusage, die der Absatz darüber macht,
+ * fiel damit still aus. Der Zuschnitt sah harmlos aus, weil eine Historie
+ * langsam wächst (eine Zeile je 30 Tage); ein Entzug, der bei Zeile 26 aufhört,
+ * ist trotzdem kein Entzug.
  */
+
+/** Wie viele Zeilen eine Seite trägt. */
+const AUDIENCE_PAGE_SIZE = 100
+/**
+ * Ein hartes Ende für die Schleife (10 000 Zeilen). Es ist nicht der
+ * Normalfall, sondern das Netz: diese Funktion ist fail-soft und läuft im
+ * Request eines Rollen-Entzugs — sie darf unter keinen Umständen zu einer
+ * Endlosschleife werden, falls die Abfrage wider Erwarten immer dieselbe Seite
+ * liefert.
+ */
+const AUDIENCE_MAX_PAGES = 100
+
 export async function revokeAccountHandleAudience(
   event: H3Event,
   userId: string,
@@ -233,15 +253,34 @@ export async function revokeAccountHandleAudience(
   if (!userId || !communityId) return
   try {
     const { tablesDB, databaseId, tableId } = accountHandleDb(event)
-    const { rows } = await tablesDB.listRows<AccountHandleRow>({
-      databaseId,
-      tableId,
-      queries: [Query.equal('userId', userId), Query.limit(25)],
-    })
-    for (const row of rows) {
-      const next = handleAudienceWithout(row.$permissions, communityId)
-      if (!next) continue
-      await tablesDB.updateRow({ databaseId, tableId, rowId: row.$id, permissions: next })
+
+    // Cursor statt Offset: die Schleife SCHREIBT, während sie liest. Die
+    // Aktualisierung ändert nur die Permissions — nicht `userId`, nicht die
+    // Sortierung —, ein Cursor bleibt dabei gültig, während ein Offset bei
+    // jeder Seitengrenze Zeilen überspringen könnte.
+    let cursor: string | undefined
+    for (let page = 0; page < AUDIENCE_MAX_PAGES; page++) {
+      const { rows } = await tablesDB.listRows<AccountHandleRow>({
+        databaseId,
+        tableId,
+        queries: [
+          Query.equal('userId', userId),
+          Query.limit(AUDIENCE_PAGE_SIZE),
+          ...(cursor ? [Query.cursorAfter(cursor)] : []),
+        ],
+      })
+      if (rows.length === 0) return
+
+      for (const row of rows) {
+        const next = handleAudienceWithout(row.$permissions, communityId)
+        if (!next) continue
+        await tablesDB.updateRow({ databaseId, tableId, rowId: row.$id, permissions: next })
+      }
+
+      // Kürzere Seite als angefragt ⇒ es gibt keine weitere.
+      if (rows.length < AUDIENCE_PAGE_SIZE) return
+      cursor = rows[rows.length - 1]?.$id
+      if (!cursor) return
     }
   }
   catch {

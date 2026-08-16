@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { createSessionClient } from '../../lib/appwrite'
 import { AUTOMATIC_TIMEZONE, isSupportedTimezone } from '../../../shared/timezone'
+import type { TimezoneResponse } from '../../../shared/types/auth-responses'
 
 /**
  * Zeitzone des Kontos setzen (Konto-Einstellungen → Allgemein, U15 Teil 5).
@@ -30,7 +31,7 @@ const timezoneSchema = z.object({
   ),
 })
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async (event): Promise<TimezoneResponse> => {
   if (!event.context.user) {
     throw createError({ status: 401, statusText: 'Unauthorized' })
   }

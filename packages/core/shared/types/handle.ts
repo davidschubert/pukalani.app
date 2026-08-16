@@ -65,6 +65,48 @@ export interface AccountHandleRow extends Models.Row {
   changedAt: string
 }
 
+/**
+ * ── ANTWORT-TYPEN DER HANDLE-ROUTEN ────────────────────────────────────────
+ * Seit Nitros Routen-Typisierung aus ist (packages/core/nuxt.config.ts,
+ * `types:extend`), leitet `$fetch`/`useFetch` seinen Antworttyp nicht mehr aus
+ * dem Handler ab. Die Form steht deshalb EINMAL hier und wird an beiden Enden
+ * verlangt: der Handler annotiert sie, die Aufrufstelle nennt sie. Vorher
+ * erfand jede Aufrufstelle ihre eigene Form (`interface HandleState` im
+ * Formular, `type HandleSuggestion` in der Schreibfläche, ein Inline-Literal im
+ * Nachrichten-Dialog) — drei Behauptungen über dieselbe Route, keine davon vom
+ * Handler gegengeprüft.
+ */
+
+/** GET /api/account/handle — `handle: null`, solange keine Zeile existiert. */
+export interface AccountHandleResponse {
+  handle: string | null
+  /** ISO-Zeitpunkt der letzten Umbenennung; null = automatisch vergeben. */
+  changedAt: string | null
+  canChange: boolean
+  /** Millisekunden-Zeitstempel oder null („jederzeit"). */
+  availableAt: number | null
+}
+
+/**
+ * PATCH /api/account/handle — dieselbe Auskunft, nur ist der Name nach einem
+ * erfolgreichen Wechsel nie mehr `null`.
+ */
+export interface AccountHandleChangeResponse extends Omit<AccountHandleResponse, 'handle'> {
+  handle: string
+}
+
+/**
+ * GET /api/handles/search — ein Vorschlag für das Erwähnungs-Menü.
+ *
+ * `id` UND `label` tragen BEWUSST denselben Handle: das Menü fügt ihn als
+ * gewöhnlichen Text ein, es gibt keine Id im Fliesstext (shared/mentions.ts).
+ * Ein Feld mit einer Nutzer-Id wäre hier ein Datenleck ohne Zweck.
+ */
+export interface HandleSuggestion {
+  id: string
+  label: string
+}
+
 export interface CommunityHandleRow extends Models.Row {
   /** Pool-Mandant; im Silo ''. Erste Spalte JEDES Index (Pool-Regel). */
   communityId: string
