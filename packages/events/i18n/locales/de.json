@@ -6,6 +6,8 @@
       "upcoming": "Kommende",
       "past": "Archiv",
       "empty": "Aktuell sind keine Events geplant.",
+      "manage": "Verwalten",
+      "create": "Neues Event",
       "pastEmpty": "Noch keine vergangenen Events.",
       "loadMore": "Mehr laden",
       "searchPlaceholder": "Events durchsuchen …",
@@ -37,6 +39,7 @@
     },
     "detail": {
       "cancelled": "Dieses Event wurde abgesagt.",
+      "edit": "Event bearbeiten",
       "organizer": "Organisiert von {name}",
       "ics": "Zum Kalender hinzufügen",
       "link": "Event-Link öffnen",

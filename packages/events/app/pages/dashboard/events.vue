@@ -2,7 +2,7 @@
 import type { DropdownMenuItem, TableColumn } from '@nuxt/ui'
 import { createEventSchema } from '../../../schemas/event'
 import { eventIsEditable, eventIsRedacted } from '../../../shared/eventModerationPolicy'
-import type { EventRow } from '../../../shared/types/event'
+import type { EventDetailResponse, EventRow } from '../../../shared/types/event'
 import { effectiveLocationType, isSeriesEvent, isSeriesMaster, paidAccessChoosable } from '../../../shared/types/event'
 
 definePageMeta({ layout: 'dashboard', middleware: ['auth', 'admin'], requiredCapability: 'events.manage' })
@@ -193,6 +193,51 @@ function openCreate() {
   modalOpen.value = true
 }
 
+/**
+ * TIEFE LINKS AUS DEM PRODUKT (F58, 2026-08-16) — die Ziele der beiden Knöpfe
+ * auf den öffentlichen Terminseiten: `?new=1` öffnet den Anlege-Dialog,
+ * `?edit=<id>` genau diesen Termin. Ohne sie wären die Beschriftungen nur halb
+ * wahr („Neuer Termin" landet in einer Liste, „Bearbeiten" in einer Tabelle,
+ * in der man die Zeile erst wiederfinden muss).
+ *
+ * `?edit` MUSS auf die Daten warten: die Liste lädt lazy und client-seitig, der
+ * Dialog braucht aber die Zeile (Formular-Vorbelegung, Titelbild, ob 'paid'
+ * wählbar ist). `watch(..., { immediate: true })` deckt beide Fälle ab —
+ * Antwort noch unterwegs oder schon da.
+ *
+ * DIE LISTE ALLEIN REICHT NICHT, und das war beim Bau live zu sehen:
+ * `/api/events/manage` liefert 100 Zeilen, in einer Community mit Serien sind
+ * das schnell nur die jüngsten — der Knopf landete dann in der Tabelle und tat
+ * NICHTS. Genau die halbe Wahrheit, gegen die F58 antritt. Deshalb der
+ * Nachschlag über `/api/events/:id`: er kann für den Knopf gar nicht fehlgehen,
+ * denn der steht nur auf einer Detailseite, die sich öffnen ließ — und
+ * Entwürfe antworten dort 404, stehen also ohnehin nur über die Liste zur
+ * Verfügung (die sie, frisch angelegt, auch führt).
+ *
+ * Die Adresse wird danach bereinigt (replace), damit ein Reload oder ein
+ * Zurück-Sprung den Dialog nicht erneut aufreisst. Bleibt auch der Nachschlag
+ * leer (gelöscht, fremde Community), passiert bewusst NICHTS: die Liste steht
+ * da, und das ist die ehrlichere Antwort als ein leeres Formular.
+ */
+const route = useRoute()
+onMounted(() => {
+  if (route.query.new === '1') {
+    openCreate()
+    void navigateTo({ query: {} }, { replace: true })
+  }
+})
+watch(() => [route.query.edit, data.value] as const, async ([editId]) => {
+  if (typeof editId !== 'string' || !editId) return
+  const listed = data.value?.rows.find(r => r.$id === editId)
+  // Erst wenn die Liste DA ist (nur dann ist „nicht dabei" eine Aussage) darf
+  // der Nachschlag laufen — sonst feuerte er bei jedem Aufruf zusätzlich.
+  if (!listed && !data.value) return
+  const row = listed ?? await $fetch<EventDetailResponse>(`/api/events/${editId}`).catch(() => null)
+  if (!row) return
+  openEdit(row)
+  void navigateTo({ query: {} }, { replace: true })
+}, { immediate: true })
+
 function openEdit(row: EventRow) {
   editingId.value = row.$id
   paidChoosable.value = paidAccessChoosable(ticketCheckoutPath.value, row.access)
@@ -290,12 +335,36 @@ const accessItems = computed(() => [
 
 // ---- Serie (§7e) ----
 
+/**
+ * „Einmalig" TRÄGT EINEN WERT, und das ist kein Geschmack (2026-08-16 live
+ * erwischt): `USelect` reicht seine Items an Rekas `SelectItem` durch, und das
+ * WIRFT bei `value: ''` — „must have a value prop that is not an empty string",
+ * weil der leere String dort reserviert ist („Auswahl gelöscht, Platzhalter
+ * zeigen").
+ *
+ * Die Items mounten erst beim ÖFFNEN der Liste, deshalb sah das Formular heil
+ * aus: der Dialog ging auf, der Knopf zeigte „Einmalig" — und jeder Klick auf
+ * die Liste stürzte ab. Serien-Termine waren damit über die Oberfläche gar
+ * nicht anzulegen (der Absturz riss beim Vorab-Öffnen über `?new=1` die ganze
+ * Seite mit, so ist er aufgefallen).
+ *
+ * Der Sentinel bleibt in DIESER Datei: das Formularfeld und die Nutzlast führen
+ * weiter '' (`recurrence: '' | 'weekly' | …`, die Route kennt nur das) —
+ * übersetzt wird an genau einer Stelle, dem Proxy darunter.
+ */
+const RECURRENCE_NONE = 'none'
 const recurrenceItems = computed(() => [
-  { label: t('events.admin.form.recurrenceNone'), value: '' },
+  { label: t('events.admin.form.recurrenceNone'), value: RECURRENCE_NONE },
   { label: t('events.series.weekly'), value: 'weekly' },
   { label: t('events.series.biweekly'), value: 'biweekly' },
   { label: t('events.series.monthly'), value: 'monthly' },
 ])
+const recurrenceChoice = computed({
+  get: () => form.recurrence || RECURRENCE_NONE,
+  set: (value: string) => {
+    form.recurrence = value === RECURRENCE_NONE ? '' : value as EventForm['recurrence']
+  },
+})
 
 async function stopSeries(master: EventRow) {
   try {
@@ -544,7 +613,7 @@ function rowActions(row: EventRow): DropdownMenuItem[][] {
             <!-- Serie (§7e): nur beim Anlegen — danach gibt es „Serie beenden" -->
             <div v-if="!editingId" class="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <UFormField :label="t('events.admin.form.recurrence')" :help="t('events.admin.form.recurrenceHelp')">
-                <USelect v-model="form.recurrence" :items="recurrenceItems" class="w-full" data-testid="event-form-recurrence" />
+                <USelect v-model="recurrenceChoice" :items="recurrenceItems" class="w-full" data-testid="event-form-recurrence" />
               </UFormField>
               <UFormField v-if="form.recurrence" :label="t('events.admin.form.seriesUntil')" :help="t('events.admin.form.seriesUntilHelp')">
                 <UInput v-model="form.seriesUntil" type="date" class="w-full" data-testid="event-form-series-until" />

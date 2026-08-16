@@ -182,6 +182,23 @@ async function share() {
  * Queue.
  */
 
+/**
+ * „Termin bearbeiten" (F58, 2026-08-16) — der Einstieg in die Verwaltung, den
+ * es von der Detailseite aus bis hierher nicht gab.
+ *
+ * ER STEHT IN DIESER KOMPONENTE UND NICHT IN DER SEITE, und das ist der Punkt:
+ * die Detailseite gibt es ZWEIMAL (events-Layer + Bauplan-Fassung in
+ * packages/blueprint) — eine Kopie ohne die andere wäre genau der Unterschied
+ * zwischen Pool und Silo, den PRODUKT-BILANZ.md ausschließt. Beide rendern
+ * `EventDetail`, also trägt sie den Knopf.
+ *
+ * `?edit=<id>` statt eines eigenen Builder-Pfades: die Verwaltung ist EINE
+ * Seite mit Dialog (anders als bei Kursen), und der Parameter öffnet dort genau
+ * diesen Termin. Ohne ihn landete „Bearbeiten" in einer Liste, in der man die
+ * Zeile erst wiederfinden müsste.
+ */
+const canManage = useCapability('events.manage')
+
 /** Gäste: geblurte Platzhalter statt echter Teilnehmer */
 const placeholderCount = computed(() => Math.min(event.value.attendeeCount, 8))
 
@@ -190,17 +207,29 @@ const start = computed(() => new Date(event.value.startAt))
 
 <template>
   <article>
-    <UButton
-      :to="localePath('/events')"
-      color="neutral"
-      variant="ghost"
-      size="sm"
-      icon="i-ph-arrow-left"
-      class="mb-4"
-      data-testid="event-back"
-    >
-      {{ t('events.detail.back') }}
-    </UButton>
+    <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+      <UButton
+        :to="localePath('/events')"
+        color="neutral"
+        variant="ghost"
+        size="sm"
+        icon="i-ph-arrow-left"
+        data-testid="event-back"
+      >
+        {{ t('events.detail.back') }}
+      </UButton>
+      <UButton
+        v-if="canManage"
+        :to="localePath({ path: '/dashboard/events', query: { edit: event.$id } })"
+        color="neutral"
+        variant="subtle"
+        size="sm"
+        icon="i-ph-pencil-simple"
+        data-testid="event-edit"
+      >
+        {{ t('events.detail.edit') }}
+      </UButton>
+    </div>
 
     <UAlert
       v-if="event.status === 'cancelled'"
