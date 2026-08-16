@@ -18,6 +18,23 @@ const { data, status } = await useFetch<CourseManageResponse>('/api/courses/mana
 
 const modalOpen = ref(false)
 const saving = ref(false)
+
+/**
+ * `?new=1` öffnet den Anlege-Dialog sofort (F58) — das Ziel des Knopfes „Neuer
+ * Kurs" auf der öffentlichen Kurs-Seite. Ohne den Parameter landete er auf
+ * einer Liste, in der man den Knopf ein zweites Mal suchen muss; die
+ * Beschriftung wäre dann nur halb wahr.
+ *
+ * Client-seitig (onMounted), weil der Dialog ohnehin erst dort rendert
+ * (ClientOnly-Hülle) — und die Adresse wird danach bereinigt, damit ein Reload
+ * oder ein Zurück-Sprung den Dialog nicht erneut aufreisst.
+ */
+const route = useRoute()
+onMounted(() => {
+  if (route.query.new !== '1') return
+  modalOpen.value = true
+  void navigateTo({ query: {} }, { replace: true })
+})
 const form = reactive({ title: '', slug: '', description: '', access: 'free' as 'free' | 'members' | 'paid', entitlementProduct: '' })
 
 /** Slug-Vorschlag aus dem Titel (editierbar) */

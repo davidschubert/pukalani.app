@@ -11,14 +11,56 @@ useBrandTitle(() => t('courses.list.title'))
 
 const { data, status } = await useFetch<CourseListResponse>('/api/courses')
 
+/**
+ * DER EINSTIEG IN DIE VERWALTUNG (F58, 2026-08-16) — bis hierher gab es ihn auf
+ * dieser Seite GAR NICHT, für keine Rolle: Anlegen und Bearbeiten lebten
+ * ausschließlich unter /dashboard/courses, und wer den Pfad nicht auswendig
+ * kannte, stand vor einer Galerie ohne Ausgang. Das sah wie ein Rechte-Problem
+ * aus und war eine fehlende Tür (Davids Leitprinzip: die Kernhandlung eines
+ * Produkts muss AUS DEM PRODUKT HERAUS erreichbar sein).
+ *
+ * `useCapability` statt `useCommunityCapability`: im Silo/Playground gibt es
+ * keine Community-Rolle, wohl aber Betreiber mit dem globalen Label.
+ *
+ * ZWEI Knöpfe, weil sie zwei verschiedene Fragen beantworten — und der zweite
+ * ist der wichtigere: ENTWÜRFE stehen nicht in dieser Galerie (sie tragen
+ * bewusst keine Read-Permission). Wer gerade einen Kurs angelegt hat, findet
+ * ihn hier also nicht wieder; „Verwalten" ist der einzige Weg dorthin.
+ */
+const canManage = useCapability('courses.manage')
+
 const accessColor = (access: string) =>
   access === 'paid' ? 'warning' as const : access === 'members' ? 'info' as const : 'success' as const
 </script>
 
 <template>
   <UContainer class="max-w-4xl py-8">
-    <h1 class="text-2xl font-bold">{{ t('courses.list.title') }}</h1>
-    <p class="mt-1 text-sm text-muted">{{ t('courses.list.description') }}</p>
+    <div class="flex flex-wrap items-start justify-between gap-3">
+      <div class="min-w-0">
+        <h1 class="text-2xl font-bold">{{ t('courses.list.title') }}</h1>
+        <p class="mt-1 text-sm text-muted">{{ t('courses.list.description') }}</p>
+      </div>
+      <div v-if="canManage" class="flex shrink-0 items-center gap-2" data-testid="courses-manage-actions">
+        <UButton
+          :to="localePath('/dashboard/courses')"
+          color="neutral"
+          variant="ghost"
+          size="sm"
+          icon="i-ph-sliders-horizontal"
+          data-testid="courses-manage"
+        >
+          {{ t('courses.list.manage') }}
+        </UButton>
+        <UButton
+          :to="localePath({ path: '/dashboard/courses', query: { new: '1' } })"
+          size="sm"
+          icon="i-ph-plus"
+          data-testid="courses-create"
+        >
+          {{ t('courses.list.create') }}
+        </UButton>
+      </div>
+    </div>
 
     <div v-if="status === 'pending' && !data" class="flex justify-center py-16">
       <UIcon name="i-ph-spinner" class="size-6 animate-spin text-muted" />

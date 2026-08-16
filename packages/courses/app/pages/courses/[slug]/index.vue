@@ -38,6 +38,17 @@ if (error.value || !course.value) {
 
 useBrandTitle(() => course.value?.title ?? '')
 
+/**
+ * „Kurs bearbeiten" (F58, 2026-08-16) — dieselbe fehlende Tür wie in der
+ * Galerie: der Kurs-Aufbau lag nur unter /dashboard/courses/:id, und von der
+ * Seite, auf der man den Fehler SIEHT, führte kein Weg dorthin.
+ *
+ * Verlinkt wird die ROW-ID, nicht der Slug: der Builder adressiert per Id
+ * (`/api/courses/:id/manage` liest sie so), und die Antwort trägt sie mit
+ * (`CourseDetailResponse extends CourseRow`) — kein zweiter Abruf nötig.
+ */
+const canManage = useCapability('courses.manage')
+
 const progressPercent = computed(() => {
   const c = course.value
   if (!c || c.lessons.length === 0) return 0
@@ -81,9 +92,22 @@ async function enroll() {
 
 <template>
   <UContainer class="max-w-3xl py-8">
-    <UButton :to="localePath('/courses')" color="neutral" variant="ghost" size="sm" icon="i-ph-arrow-left" class="mb-4">
-      {{ t('courses.detail.back') }}
-    </UButton>
+    <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+      <UButton :to="localePath('/courses')" color="neutral" variant="ghost" size="sm" icon="i-ph-arrow-left">
+        {{ t('courses.detail.back') }}
+      </UButton>
+      <UButton
+        v-if="canManage"
+        :to="localePath(`/dashboard/courses/${course!.$id}`)"
+        color="neutral"
+        variant="subtle"
+        size="sm"
+        icon="i-ph-pencil-simple"
+        data-testid="course-edit"
+      >
+        {{ t('courses.detail.edit') }}
+      </UButton>
+    </div>
 
     <div class="flex flex-wrap items-start justify-between gap-3">
       <div class="min-w-0">

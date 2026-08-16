@@ -5,7 +5,9 @@
       "description": "Learn at your own pace — lesson by lesson.",
       "empty": "No courses published yet.",
       "lessons": "{count} lessons",
-      "enrolled": "Enrolled"
+      "enrolled": "Enrolled",
+      "manage": "Manage",
+      "create": "New course"
     },
     "access": {
       "free": "Free",
@@ -19,6 +21,7 @@
     },
     "detail": {
       "back": "All courses",
+      "edit": "Edit course",
       "by": "by {name}",
       "enrollHint": "Enroll to unlock all lessons.",
       "enroll": "Enroll",
