@@ -5,7 +5,14 @@ import { createRecoverySchema, type RecoveryInput } from '../../schemas/auth'
 definePageMeta({ layout: 'auth', middleware: 'guest' })
 
 const { t } = useI18n()
-const localePath = useLocalePath()
+/**
+ * Auch der Rückweg trägt das Ziel: „Passwort vergessen" ist eine SCHLEIFE
+ * (`/login?redirect=…` → hier → zurück zur Anmeldung), und ohne diesen Helfer
+ * bricht sie das Ziel genau in der Mitte ab. Der Schaden ist derselbe wie bei
+ * den übrigen Quer-Links (Einladung bleibt offen, Rolle fällt still auf
+ * `viewer`) — nur auf dem Weg, den ein Fix am 2026-08-15 zunächst ausließ.
+ */
+const { authLinkTarget } = useAuthRedirect()
 const loading = ref(false)
 const sent = ref(false)
 const blockedMessage = ref('')
@@ -59,7 +66,7 @@ async function onSubmit(event: FormSubmitEvent<RecoveryInput>) {
     </UForm>
 
     <p class="text-center text-sm text-muted">
-      <ULink :to="localePath('/login')" class="font-medium text-primary">{{ t('auth.forgot.back') }}</ULink>
+      <ULink :to="authLinkTarget('/login')" class="font-medium text-primary">{{ t('auth.forgot.back') }}</ULink>
     </p>
   </div>
 </template>

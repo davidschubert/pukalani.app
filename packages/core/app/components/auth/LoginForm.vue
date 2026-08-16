@@ -5,7 +5,6 @@ import { OAUTH_UNAVAILABLE_CODE } from '../../../shared/oauthProviders'
 import type { LoginResponse } from '../../../shared/types/auth-responses'
 
 const { t } = useI18n()
-const localePath = useLocalePath()
 const { afterAuthTarget, authLinkTarget } = useAuthRedirect()
 const appConfig = useAppConfig()
 const auth = useAuthStore()
@@ -107,7 +106,7 @@ function onMfaCancelled() {
 
       <UFormField :label="t('auth.fields.password')" name="password" required>
         <template #hint>
-          <ULink :to="localePath('/forgot-password')" class="text-sm text-muted hover:text-primary">
+          <ULink :to="authLinkTarget('/forgot-password')" class="text-sm text-muted hover:text-primary">
             {{ t('auth.login.forgot') }}
           </ULink>
         </template>

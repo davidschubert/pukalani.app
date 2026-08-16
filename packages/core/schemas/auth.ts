@@ -163,14 +163,26 @@ export type ResetFormInput = z.infer<ReturnType<typeof createResetSchema>>
  * TOTP-Code ODER ein zehnstelliger Wiederherstellungs-Code — welcher, sagt
  * `mode`. Geputzt wird vorher (normalizeMfaCode), damit eingetippte
  * Leerzeichen/Bindestriche nicht als Tippfehler durchgehen.
+ *
+ * ES GIBT ZWEI FASSUNGEN, UND ZWAR AUS DEM ÜBLICHEN GRUND (Audit 2026-08-15,
+ * Schnitt C): das Challenge-Formular bindet die Regel jetzt selbst, damit ein
+ * Tippfehler im Browser scheitert statt gegen den 5/min-Eimer der Route zu
+ * zählen — und ein Formular zeigt seine Meldung dem MENSCHEN. Die Route
+ * validiert weiter mit der Key-Fassung, das Formular mit `create…Schema(t)`;
+ * die REGEL steht nur einmal.
  */
-export const mfaChallengeSchema = z.object({
-  mode: z.enum(['totp', 'recovery']),
-  code: z.string().transform(value => value.replace(/[\s-]/g, '')),
-}).refine(
-  data => data.mode === 'totp' ? /^\d{6}$/.test(data.code) : /^[a-zA-Z0-9]{10}$/.test(data.code),
-  { message: 'validation.mfaCodeInvalid', path: ['code'] },
-)
+export function createMfaChallengeSchema(t: TranslateFn = identity) {
+  return z.object({
+    mode: z.enum(['totp', 'recovery']),
+    code: z.string().transform(value => value.replace(/[\s-]/g, '')),
+  }).refine(
+    data => data.mode === 'totp' ? /^\d{6}$/.test(data.code) : /^[a-zA-Z0-9]{10}$/.test(data.code),
+    { message: t('validation.mfaCodeInvalid'), path: ['code'] },
+  )
+}
+
+/** Die Key-Fassung für die Server-Routen (`readValidatedBody`). */
+export const mfaChallengeSchema = createMfaChallengeSchema()
 
 /** Bestätigung beim Einrichten: immer TOTP (der Wiederherstellungs-Code entsteht erst danach). */
 export const mfaVerifySchema = z.object({
