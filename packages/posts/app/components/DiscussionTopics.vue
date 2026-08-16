@@ -240,6 +240,46 @@ const canOpenTopic = computed(() => isLoggedIn.value
   && (categoryList.value?.rows ?? []).some(entry => entry.category.active
     && (!props.categorySlug || entry.category.slug === props.categorySlug)))
 
+/**
+ * ── DIE SACKGASSE, DIE HIER ENDET ──────────────────────────────────────────
+ * Ohne eine einzige aktive Kategorie blenden sich BEIDE Einstiege zum
+ * Eröffnen aus (dieser hier und der Knopf in der Kopfzeile,
+ * DiscussionNewTopic) — richtig, weil `resolveCategoryId` sonst 422 wirft.
+ * Übrig blieb aber „Noch keine Themen" ohne Knopf und ohne Grund: eine Seite,
+ * die aussieht wie ein Fehler und keinen Ausweg zeigt. Am 2026-08-16 an einer
+ * echten Community aufgeschlagen — der Owner suchte den Knopf, den es nie
+ * gab, und nichts nannte ihm die Ursache.
+ *
+ * Deshalb ein EIGENER Leerzustand für genau diesen Fall. Er sagt beiden
+ * Seiten die Wahrheit, aber nicht dieselbe: wer Kategorien anlegen darf,
+ * bekommt den Weg dorthin, alle anderen den Satz, dass hier noch nichts zu
+ * eröffnen ist. Ein Link ins Dashboard für jemanden ohne `posts.manage` wäre
+ * ein Knopf in eine 403-Seite — dieselbe Abstufung wie beim Hinweis auf der
+ * About-Seite (blueprint/discussions/about.vue).
+ *
+ * NUR auf der Übersicht: eine Kategorie-Seite hat ihre Kategorie schon
+ * aufgelöst — dort ist die leere Liste eine leere Kategorie und keine
+ * fehlende Struktur.
+ */
+const hasNoCategory = computed(() => !props.categorySlug
+  && !(categoryList.value?.rows ?? []).some(entry => entry.category.active))
+
+/**
+ * ZWEI QUELLEN, WIE ÜBERALL SONST (N1): Operator-Label ODER Site-Rolle —
+ * dieselbe Rechnung, mit der `middleware/admin.ts` das Ziel
+ * (/dashboard/categories, `requiredCapability: 'posts.manage'`) bewacht, und
+ * dasselbe Muster wie in comments/dashboard/comments.vue.
+ *
+ * `useCommunityCapability` ALLEIN wäre hier zu eng, und das ist gemessen, nicht
+ * vermutet: in einer SILO-App gibt es gar keine Community-Rolle, ein Instanz-
+ * Admin bekäme also den Mitglieder-Satz zu sehen und keinen Weg — obwohl er die
+ * Seite öffnen darf. Nur UX-Schicht; die Autorität bleibt der Gate der Route.
+ */
+const { user: currentUser } = useCurrentUser()
+const { capabilities: siteCaps } = useCommunityRole()
+const canManageCategories = computed(() =>
+  userHasCapability(currentUser.value, 'posts.manage') || siteCaps.value.has('posts.manage'))
+
 function resetSearch() {
   search.value = ''
   filters.value = {
@@ -376,6 +416,17 @@ function resetSearch() {
           :action-label="t('posts.discussions.resetSearch')"
           action-icon="i-ph-arrow-counter-clockwise"
           @action="resetSearch"
+        />
+        <CoreEmptyState
+          v-else-if="hasNoCategory"
+          icon="i-ph-folder-plus"
+          :title="t('posts.discussions.noCategoryTitle')"
+          :description="canManageCategories
+            ? t('posts.discussions.noCategoryText')
+            : t('posts.discussions.noCategoryMemberText')"
+          :action-label="canManageCategories ? t('posts.discussions.noCategoryAction') : undefined"
+          action-icon="i-ph-folder-plus"
+          :action-to="localePath('/dashboard/categories')"
         />
         <CoreEmptyState
           v-else

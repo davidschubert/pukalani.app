@@ -123,6 +123,14 @@ export interface SeedWelcomePostInput {
   description?: string
   category?: string
   locale: string
+  /**
+   * Zeilen-Id der gesäten ersten Kategorie (`seedDefaultCategory`), leer wenn
+   * die Saat nicht griff. Sie macht aus dem Beispiel-Beitrag zugleich das
+   * erste THEMA: ohne `categoryId` erscheint er nur im Feed, und Discussions
+   * stünde am Tag eins leer daneben — zwei Produkte, von denen eines beim
+   * Anlegen bedacht wurde und das andere nicht.
+   */
+  categoryId?: string
 }
 
 export async function seedWelcomePost(event: H3Event, input: SeedWelcomePostInput): Promise<CommunityPost | null> {
@@ -177,8 +185,11 @@ export async function seedWelcomePost(event: H3Event, input: SeedWelcomePostInpu
         upvotes: 0,
         downvotes: 0,
         score: 0,
-        // '' = keine Kategorie: eine frische Community hat noch keine.
-        categoryId: '',
+        // Die gesäte erste Kategorie (shared/defaultCategory.ts) — damit ist
+        // der Beispiel-Beitrag zugleich das erste Thema. '' bleibt der
+        // Rückfall, wenn die Kategorie-Saat nicht griff: dann steht er wie
+        // bisher nur im Feed, statt dass die ganze Anlage daran scheitert.
+        categoryId: input.categoryId ?? '',
         pinned: false,
         closed: false,
         solved: false,

@@ -34,6 +34,22 @@ const columns = computed<TableColumn<CategoryWithCount>[]>(() => [
   { id: 'category', header: () => t('posts.discussions.col.category') },
   { id: 'topics', header: () => t('posts.discussions.col.topics') },
 ])
+
+/**
+ * Ohne Kategorie steht diese Community still — dieselbe Sackgasse wie in der
+ * Themen-Tabelle (DiscussionTopics), nur von der anderen Registerkarte aus
+ * gesehen. Der Text sagte das schon; was fehlte, war der Weg dorthin für den,
+ * der ihn gehen darf. Wer `posts.manage` nicht hat, behält den erklärenden
+ * Satz ohne Knopf — ein Link in eine 403-Seite ist keine Hilfe.
+ *
+ * ZWEI QUELLEN (N1): Operator-Label ODER Site-Rolle — dieselbe Rechnung wie in
+ * DiscussionTopics und wie in der Middleware, die /dashboard/categories
+ * bewacht. Die Begründung steht dort ausführlich.
+ */
+const { user: currentUser } = useCurrentUser()
+const { capabilities: siteCaps } = useCommunityRole()
+const canManageCategories = computed(() =>
+  userHasCapability(currentUser.value, 'posts.manage') || siteCaps.value.has('posts.manage'))
 </script>
 
 <template>
@@ -85,6 +101,9 @@ const columns = computed<TableColumn<CategoryWithCount>[]>(() => [
           icon="i-ph-folders"
           :title="t('posts.discussions.emptyCategoriesTitle')"
           :description="t('posts.discussions.emptyCategoriesText')"
+          :action-label="canManageCategories ? t('posts.discussions.noCategoryAction') : undefined"
+          action-icon="i-ph-folder-plus"
+          :action-to="localePath('/dashboard/categories')"
         />
       </template>
     </UTable>
