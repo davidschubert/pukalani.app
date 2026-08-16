@@ -5,6 +5,7 @@ definePageMeta({ layout: 'auth', middleware: 'guest' })
 
 const { t } = useI18n()
 const localePath = useLocalePath()
+const { authLinkTarget } = useAuthRedirect()
 const appConfig = useAppConfig()
 
 // OTP deaktiviert → zurück zum Passwort-Login (kein toter Pfad bei Direktaufruf)
@@ -22,7 +23,7 @@ useBrandTitle(() => t('auth.otp.title'))
 
     <USeparator :label="t('auth.or')" />
     <UButton
-      :to="localePath('/login')"
+      :to="authLinkTarget('/login')"
       icon="i-ph-password"
       color="neutral"
       variant="subtle"
@@ -36,7 +37,7 @@ useBrandTitle(() => t('auth.otp.title'))
     <USeparator />
     <p class="text-center text-sm text-muted">
       {{ t('auth.login.noAccount') }}
-      <ULink :to="localePath('/register/code')" class="font-medium text-primary">{{ t('auth.login.registerLink') }}</ULink>
+      <ULink :to="authLinkTarget('/register/code')" class="font-medium text-primary">{{ t('auth.login.registerLink') }}</ULink>
     </p>
   </div>
 </template>

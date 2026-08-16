@@ -5,6 +5,7 @@ definePageMeta({ layout: 'auth', middleware: 'guest' })
 
 const { t } = useI18n()
 const localePath = useLocalePath()
+const { authLinkTarget } = useAuthRedirect()
 const appConfig = useAppConfig()
 const flags = useRuntimeFlags()
 // S1: „nur auf Einladung" ist ebenfalls geschlossen — sonst wäre die
@@ -27,7 +28,7 @@ useBrandTitle(() => t('auth.otp.registerTitle'))
 
     <USeparator :label="t('auth.or')" />
     <UButton
-      :to="localePath('/register')"
+      :to="authLinkTarget('/register')"
       icon="i-ph-password"
       color="neutral"
       variant="subtle"
@@ -41,7 +42,7 @@ useBrandTitle(() => t('auth.otp.registerTitle'))
     <USeparator />
     <p class="text-center text-sm text-muted">
       {{ t('auth.register.hasAccount') }}
-      <ULink :to="localePath('/login/code')" class="font-medium text-primary">{{ t('auth.register.loginLink') }}</ULink>
+      <ULink :to="authLinkTarget('/login/code')" class="font-medium text-primary">{{ t('auth.register.loginLink') }}</ULink>
     </p>
   </div>
 </template>

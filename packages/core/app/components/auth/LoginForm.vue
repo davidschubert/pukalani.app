@@ -6,7 +6,7 @@ import type { LoginResponse } from '../../../shared/types/auth-responses'
 
 const { t } = useI18n()
 const localePath = useLocalePath()
-const { afterAuthTarget } = useAuthRedirect()
+const { afterAuthTarget, authLinkTarget } = useAuthRedirect()
 const appConfig = useAppConfig()
 const auth = useAuthStore()
 const toast = useToast()
@@ -139,7 +139,7 @@ function onMfaCancelled() {
     <template v-if="otpEnabled">
       <USeparator :label="t('auth.or')" />
       <UButton
-        :to="{ path: localePath('/login/code'), query: isEmbedPopup ? { embed: '1' } : {} }"
+        :to="authLinkTarget('/login/code', isEmbedPopup ? { embed: '1' } : {})"
         icon="i-ph-envelope-simple"
         color="neutral"
         variant="subtle"
@@ -154,7 +154,7 @@ function onMfaCancelled() {
     <USeparator />
     <p class="text-center text-sm text-muted">
       {{ t('auth.login.noAccount') }}
-      <ULink :to="localePath('/register')" class="font-medium text-primary">{{ t('auth.login.registerLink') }}</ULink>
+      <ULink :to="authLinkTarget('/register')" class="font-medium text-primary">{{ t('auth.login.registerLink') }}</ULink>
     </p>
   </div>
 </template>

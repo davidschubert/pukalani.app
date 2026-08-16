@@ -17,5 +17,32 @@ export function useAuthRedirect() {
     return safeRedirectTarget(route.query.redirect) ?? localePath('/')
   }
 
-  return { afterAuthTarget }
+  /**
+   * Ziel eines QUER-LINKS zwischen den Auth-Formularen — mit `?redirect=`.
+   *
+   * Die Formulare oben haben das Ziel längst richtig behandelt; verloren ging
+   * es auf dem WEG zwischen ihnen. Neun Links (Anmelden ↔ Registrieren ↔
+   * Code-Varianten) zeigten auf den nackten Pfad, und mit dem ersten Klick war
+   * das Ziel weg.
+   *
+   * Was das kostete, ist am Einladungs-Link zu sehen (2026-08-15 durchgespielt):
+   * Wer eingeladen wird und noch KEIN Konto hat, landet über
+   * `/join?token=…` → Auth-Guard → `/login?redirect=…` genau richtig — klickt
+   * dann aber auf „Registrieren" und steht auf `/register` ohne Ziel. Nach der
+   * Anmeldung geht es auf die Startseite statt zur Einladung: die Einladung
+   * bleibt offen, und die darin vergebene ROLLE ist still verloren (der
+   * A5-Beitritt macht die Person zum `viewer`, egal was der Owner wollte).
+   *
+   * Durch `safeRedirectTarget` auch beim WEITERREICHEN, nicht nur beim Landen:
+   * was wir nicht annehmen würden, geben wir auch nicht weiter.
+   */
+  function authLinkTarget(path: string, extra: Record<string, string> = {}) {
+    const target = safeRedirectTarget(route.query.redirect)
+    return {
+      path: localePath(path),
+      query: { ...(target ? { redirect: target } : {}), ...extra },
+    }
+  }
+
+  return { afterAuthTarget, authLinkTarget }
 }

@@ -7,7 +7,7 @@ import { resolveAuthNotices, type PukalaniAuthNoticeConfig } from '../../../shar
 definePageMeta({ layout: 'auth', middleware: 'guest' })
 
 const { t } = useI18n()
-const localePath = useLocalePath()
+const { authLinkTarget } = useAuthRedirect()
 const appConfig = useAppConfig()
 const flags = useRuntimeFlags()
 
@@ -48,7 +48,7 @@ const authNotices = computed(() =>
         <h1 class="text-xl font-semibold">{{ t('auth.register.inviteOnlyTitle') }}</h1>
         <p class="text-sm text-muted">{{ t('auth.register.inviteOnlyText', { brand }) }}</p>
       </div>
-      <UButton :to="localePath('/login')" color="primary" size="lg" block>
+      <UButton :to="authLinkTarget('/login')" color="primary" size="lg" block>
         {{ t('auth.register.toLogin') }}
       </UButton>
     </template>
@@ -59,7 +59,7 @@ const authNotices = computed(() =>
         <h1 class="text-xl font-semibold">{{ t('auth.register.closedTitle') }}</h1>
         <p class="text-sm text-muted">{{ closedText }}</p>
       </div>
-      <UButton :to="localePath('/login')" color="primary" size="lg" block>
+      <UButton :to="authLinkTarget('/login')" color="primary" size="lg" block>
         {{ t('auth.register.toLogin') }}
       </UButton>
     </template>
@@ -72,7 +72,7 @@ const authNotices = computed(() =>
       <template v-if="otpEnabled">
         <USeparator :label="t('auth.or')" />
         <UButton
-          :to="localePath('/register/code')"
+          :to="authLinkTarget('/register/code')"
           icon="i-ph-envelope-simple"
           color="neutral"
           variant="subtle"
@@ -87,7 +87,7 @@ const authNotices = computed(() =>
       <USeparator />
       <p class="text-center text-sm text-muted">
         {{ t('auth.register.hasAccount') }}
-        <ULink :to="localePath('/login')" class="font-medium text-primary">{{ t('auth.register.loginLink') }}</ULink>
+        <ULink :to="authLinkTarget('/login')" class="font-medium text-primary">{{ t('auth.register.loginLink') }}</ULink>
       </p>
     </template>
   </div>
