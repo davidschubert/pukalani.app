@@ -52,6 +52,19 @@ import { listCategories, topicTitle } from './discussions'
 export const MAX_TOPIC_BACKLINKS = 20
 
 /**
+ * Wie viele Ziel-Ids in EINE Abfrage passen.
+ *
+ * Keine Politik, sondern Appwrite: `Query.equal` nimmt hoechstens 100 Werte.
+ * Dieselbe Stapelung fahren die Reaktionen (`commentReactions.ts`) und die
+ * eigenen Stimmen — und hier ist sie nicht theoretisch: eine Feed-Seite hat 25
+ * Beitraege, jeder darf `MAX_TOPIC_LINKS_PER_CONTENT` Verweise tragen, das sind
+ * bis zu 250 Ids in EINER Auflösung. Ohne Stapel antwortet Appwrite mit 400,
+ * der fail-soft-Zweig unten macht daraus eine leere Menge — und ALLE `#`-Links
+ * der Seite fallen still auf Rohtext zurück.
+ */
+const TOPIC_ID_CHUNK = 100
+
+/**
  * ZWEI TÜREN, ZWEI FRAGEN — und die Trennung ist wichtig.
  *
  * Die INDEX-Zeilen laufen über die Operator-Klinke, die ZIELE über die
@@ -85,11 +98,20 @@ interface ResolvedTopic {
 }
 
 /**
- * Viele Ids, EINE Abfrage — plus EINE für die Kategorien.
+ * Viele Ids, WENIGE Abfragen — plus EINE für die Kategorien.
  *
  * Der naheliegende Weg (je Verweis eine `get`-Abfrage) wäre bei einer
  * Feed-Seite mit 25 Beiträgen und je zwei Verweisen 50 Abfragen. Deshalb
- * derselbe Bündel-Schnitt wie bei `mentionsForPosts`.
+ * derselbe Bündel-Schnitt wie bei `mentionsForPosts` — GESTAPELT zu je
+ * `TOPIC_ID_CHUNK`, weil die Bündelung sonst genau dann bricht, wenn sie sich
+ * lohnt (Begründung an der Konstante).
+ *
+ * ── DER FEHLSCHLAG BLEIBT FAIL-SOFT, ABER NICHT MEHR STUMM ────────────────
+ * Ein toter Verweis ist kein Fehler; eine gescheiterte ABFRAGE schon. Vorher
+ * verschluckte der `.catch` beides ununterscheidbar — die Seite sah heil aus,
+ * nur ohne Links, und im Protokoll stand nichts. Jetzt wird der Stapel EINMAL
+ * gemeldet (`logEvent`, wie in `applyMemberCounterEvents`) und die Auflösung
+ * läuft weiter: der Leser verliert Verweise, nie den Beitrag.
  */
 async function resolveTopics(event: H3Event, ids: string[]): Promise<Map<string, ResolvedTopic>> {
   const resolved = new Map<string, ResolvedTopic>()
@@ -97,11 +119,22 @@ async function resolveTopics(event: H3Event, ids: string[]): Promise<Map<string,
 
   const db = tenantDb(event)
 
-  const { rows } = await db.list<CommunityPost>(POSTS_TABLE, [
-    Query.equal('$id', ids),
-    Query.equal('status', 'published'),
-    Query.limit(ids.length),
-  ]).catch(() => ({ rows: [] as CommunityPost[] }))
+  const rows: CommunityPost[] = []
+  for (let i = 0; i < ids.length; i += TOPIC_ID_CHUNK) {
+    const batch = ids.slice(i, i + TOPIC_ID_CHUNK)
+    const page = await db.list<CommunityPost>(POSTS_TABLE, [
+      Query.equal('$id', batch),
+      Query.equal('status', 'published'),
+      Query.limit(batch.length),
+    ]).catch((error: unknown) => {
+      logEvent('warn', 'posts.topic_links_resolve_failed', {
+        ids: batch.length,
+        message: error instanceof Error ? error.message : String(error),
+      })
+      return { rows: [] as CommunityPost[] }
+    })
+    rows.push(...page.rows)
+  }
 
   const topics = rows.filter(row => Boolean(row.categoryId))
   if (topics.length === 0) return resolved

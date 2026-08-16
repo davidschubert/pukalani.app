@@ -24,6 +24,10 @@ import type { TopicBacklink, TopicBacklinksResponse } from '../../shared/types/p
 const props = defineProps<{ targetId: string }>()
 
 const { t } = useI18n()
+// Der Server liefert den nackten Pfad (`/discussions/…`); der Locale-Prefix
+// gehört an die Anzeige — ohne ihn springt ein Klick auf `/de/*` in die
+// englische Fassung. Dieselbe Kette wie in `DiscussionTopics.vue`.
+const localePath = useLocalePath()
 
 const backlinks = ref<TopicBacklink[]>([])
 
@@ -50,7 +54,7 @@ watch(() => props.targetId, (id) => {
     </p>
     <ul class="mt-1 space-y-1">
       <li v-for="entry in backlinks" :key="entry.$id" class="text-sm">
-        <ULink :to="entry.path" class="text-primary underline underline-offset-2">
+        <ULink :to="localePath(entry.path)" class="text-primary underline underline-offset-2">
           {{ entry.title }}
         </ULink>
       </li>
