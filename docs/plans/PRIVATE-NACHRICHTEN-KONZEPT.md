@@ -5,12 +5,14 @@ Entscheidungen aus § 8) und in Stufe 1 GEBAUT** — Layer `packages/messages`,
 live seit dem 2026-08-05, Migration `messages-001` auf allen vier Instanzen,
 Produkt-Gate `messages: 'personal'`, Owner-Schalter ab Werk AUS.
 
-**Die Datei bleibt in `docs/plans/`**, weil Folgendes offen ist:
+**Stufe 1 ist damit KOMPLETT — auch ihr letzter Rest:** der in § 1 zugesagte
+Einstieg „Nachricht schreiben" neben dem Autorennamen ist seit dem 2026-08-13
+gebaut (F56, COMPLETE-Eintrag „AP3"): der core-Registry-Vertrag
+`pukalani.chrome.authorActions` (Glocken-Muster), der messages-Layer meldet
+den Knopf an, PostCard (Feed + Discussions) und CommentItem rendern ihn.
 
-- **Aus Stufe 1 selbst:** der in § 1 zugesagte Einstieg „Nachricht schreiben"
-  neben dem Autorennamen. `MessageWriteButton.vue` ist gebaut, aber nirgends
-  verdrahtet — heute führt nur der Posteingang hin. Geführt als **F56** in
-  [OPEN-ITEMS.md](../OPEN-ITEMS.md).
+**Die Datei bleibt in `docs/plans/`**, weil zwei Stufen ungebaut sind:
+
 - **Stufe 2** (§ 7): Suche im Posteingang und Digest-Anbindung fehlen; „tippt
   gerade" und „Konversation für sich entfernen" sind gebaut.
 - **Stufe 3** (§ 7): Gruppen-Nachrichten — vollständig ungebaut.
@@ -23,8 +25,8 @@ wörtlich —
 „eigenes Produkt mit eigener Missbrauchsfläche (Belästigung, Spam) und eigener
 Moderation. Bekommt ein EIGENES Konzept vor dem Bau … ein Nachrichtenweg ohne
 Meldeweg und Sperre ist ein Missbrauchskanal, den man hinterher nicht mehr
-zumacht." Es ist die letzte offene F1-Position und das einzige Stück des
-Discourse-Katalogs, das ausdrücklich VOR dem Bau eine eigene Begründung braucht.
+zumacht." Es war die letzte offene F1-Position und das einzige Stück des
+Discourse-Katalogs, das ausdrücklich VOR dem Bau eine eigene Begründung brauchte.
 
 Dieses Dokument ist nach derselben Regel gebaut wie das Discussions-Konzept:
 gemessen statt behauptet. Jede Aussage über den Bestand nennt die Datei, an der

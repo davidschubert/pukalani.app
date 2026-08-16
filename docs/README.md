@@ -70,7 +70,7 @@ gehören dort hin.
 
 | Datei | Zustand |
 | --- | --- |
-| [plans/PRIVATE-NACHRICHTEN-KONZEPT.md](plans/PRIVATE-NACHRICHTEN-KONZEPT.md) | Stufe 1 gebaut + live; offen: Einstieg am Autorennamen (F56), Stufen 2/3 |
+| [plans/PRIVATE-NACHRICHTEN-KONZEPT.md](plans/PRIVATE-NACHRICHTEN-KONZEPT.md) | Stufe 1 komplett (inkl. F56, 2026-08-13); ungebaut nur Stufen 2/3 — bewusst keine offenen Punkte |
 | [plans/DASHBOARD-IA.md](plans/DASHBOARD-IA.md) | Schritt 3 + Community-Hub gebaut; **12 der 14 Schritt-4-Seiten fehlen** — als U15 jetzt in OPEN-ITEMS geführt |
 | [plans/ANALYTICS-V2.md](plans/ANALYTICS-V2.md) | Pakete 1–4 live; Rest = Optionales (F47) |
 | [plans/F7-PAYMENTS-CONNECT.md](plans/F7-PAYMENTS-CONNECT.md) | Entscheidungsvorlage, nichts gebaut (F7) |
