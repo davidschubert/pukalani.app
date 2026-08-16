@@ -4,7 +4,7 @@
 Umsetzungsplan · **Erstellt:** 2026-08-15 · **Wartet auf:** A2 (Stripe live)
 
 > Diese Datei liegt in `docs/plans/`, weil noch nichts davon existiert. Sie
-> enthält BEWUSST keine Häkchen-Liste: zuerst müssen vier Fragen (Abschnitt 7)
+> enthält BEWUSST keine Häkchen-Liste: zuerst müssen vier Fragen (Abschnitt 8)
 > beantwortet sein, danach entsteht der Umsetzungsplan. Offene Punkte gehören
 > weiter ausschließlich in [OPEN-ITEMS.md](../OPEN-ITEMS.md) (Zeile F7) — nicht
 > hierher.
@@ -23,7 +23,7 @@ stehen unten mit Quelle:
 
 1. **Die Mitgliedschaft ist architektonisch die EINFACHSTE der drei Etappen,
    nicht die schwerste** — weil ihr Zielobjekt bereits dort liegt, wo der
-   Stripe-Webhook ankommt (§ 3.3).
+   Stripe-Webhook ankommt (§ 4.3).
 2. **Die Empfehlung „Express + direct charges" ist so nicht haltbar.** Stripe
    empfiehlt direct charges ausdrücklich für Konten MIT vollem Dashboard und
    destination charges für Express — und daran hängt eine Restriktion, die
@@ -33,7 +33,14 @@ stehen unten mit Quelle:
 Was aus dem Vorgängerdokument **unverändert gilt** und hier nicht wiederholt
 wird: die Rechts-Checkliste für Anwalt und Steuerberater (§ 6 dort), die
 Anbieter-Naht für einen späteren zweiten Zahlungsdienst (§ 4 dort), und die
-ZAG-/PSD2-Begründung, warum Pukalani Geld niemals selbst durchleiten darf.
+Begründung, warum Pukalani Geld niemals selbst durchleiten darf.
+
+**Beantwortet wird hier zusätzlich eine Frage, die das Vorgängerdokument nur
+stellt:** ob uns direct charges vor der umsatzsteuerlichen
+Leistenden-Stellung schützen (dort Rechts-Checkliste Nr. 1). Die Antwort lautet
+sehr wahrscheinlich **nein** — § 3. Sie ändert die Empfehlung nicht, aber ihre
+Begründung und die Trade-offs von Frage 1. Die ZAG-Frage stellt das
+Vorgängerdokument außerdem an der falschen Norm; die Korrektur steht in § 9.
 
 ---
 
@@ -90,7 +97,7 @@ Vorgängerdokument ist durch die neue Erhebung bestätigt.
 3. **„Ein Preis je Community" ist überholt.** Skool kennt heute fünf Modelle —
    Free, Subscription, **Freemium**, **Tiers** und **Einmalzahlung** — und
    Freemium erlaubt ausdrücklich einen freien UND einen bezahlten Plan in
-   derselben Gruppe. Der V1-Schnitt in § 6.1 ist deshalb eine bewusste
+   derselben Gruppe. Der V1-Schnitt in § 7.1 ist deshalb eine bewusste
    Verengung gegenüber dem Benchmark, keine Abbildung davon.
 
 ### 1.4 Zwei Dinge, die Skool schlechter kann als wir
@@ -119,16 +126,31 @@ und den Kauf danach.
 charges · `application_fee_percent` als Plan-Hebel. Start EUR-only,
 Owner-aktiviert, ganze Community bezahlt.**
 
-Der Owner ist Verkäufer und Merchant of Record. Das ist Davids D1-Entscheidung
-vom 2026-08-02 („kein Betreiber-als-Verkäufer"), und direct charges sind die
-einzige Variante, in der das auch nach außen stimmt.
+Der Owner ist Verkäufer — **zivilrechtlich und gegenüber Stripe**. Das ist
+Davids D1-Entscheidung vom 2026-08-02 („kein Betreiber-als-Verkäufer"), und
+direct charges sind die einzige Variante, in der das auch nach außen stimmt.
 
-**Diese Empfehlung erfüllt die Skool-Messlatte NICHT, und das gehört an den
-Anfang statt in eine Fußnote.** Die OPEN-ITEMS-Zeile zu F7 nennt als Messlatte
-ausdrücklich *„Skools Merchant-of-Record-Modell inkl. EU-USt., nicht den
-Prozentsatz"* — also genau das, was D1 ausschließt. Beides gleichzeitig geht
-nicht. Das ist Entscheidungsfrage 1 (§ 7.1), und sie ist die einzige, die vor
-allen anderen fallen muss.
+**UMSATZSTEUERLICH gilt das aller Voraussicht nach NICHT.** Art. 9a
+MwSt-DVO stellt bei elektronisch erbrachten Leistungen über eine Plattform eine
+Vermutung auf, die schon ein Plattform-Checkout auslöst und die dann
+**unwiderlegbar** ist — Pukalani wäre Steuerschuldner gegenüber dem Endnutzer,
+gleich welche Stripe-Mechanik darunter liegt und was in den AGB steht. Der
+gesamte § 3 handelt davon; er ist erst nach dem Schreiben dieser Empfehlung
+recherchiert worden und ändert ihre Begründung, nicht ihr Ergebnis.
+
+**Was daraus folgt:** Option A bleibt die Empfehlung, aber **mit einer
+OSS-Registrierung der Plattform als eingeplanter Betriebsaufgabe** — nicht als
+Restrisiko. Wer glaubt, direct charges ersparten die Umsatzsteuer in 27
+Ländern, plant mit einer Annahme, die der EuGH 2023 an einem fast identischen
+Sachverhalt verworfen hat (§ 3.2).
+
+**Die Skool-Messlatte erfüllt diese Empfehlung trotzdem nicht** — aber der
+Abstand ist kleiner, als er aussah. Die OPEN-ITEMS-Zeile zu F7 nennt als
+Messlatte *„Skools Merchant-of-Record-Modell inkl. EU-USt., nicht den
+Prozentsatz"*. Greift Art. 9a, tragen wir die EU-USt.-Pflicht ohnehin; was
+Skool zusätzlich übernimmt, sind Chargebacks, Widerruf und die Rolle des
+Vertragspartners. Das ist Entscheidungsfrage 1 (§ 8.1), und sie ist die
+einzige, die vor allen anderen fallen muss.
 
 ### 2.1 Warum direct charges
 
@@ -142,7 +164,7 @@ allen anderen fallen muss.
   eine gesonderte Freigabe für grenzüberschreitende Auszahlungen). Pukalanis
   Anbieter sitzt in den USA, die Owner sitzen im DACH-Raum. Das ist kein
   Nachteil, den man abwägt, sondern womöglich ein Ausschlussgrund — **vor jeder
-  Entscheidung für ein MoR-Modell über Connect zu prüfen** (§ 7.1, Option B).
+  Entscheidung für ein MoR-Modell über Connect zu prüfen** (§ 8.1, Option B).
 - **Es kostet Pukalani nichts.** Bei direct charges mit „Stripe handles
   pricing" rechnet Stripe direkt mit dem Connected Account ab: keine
   Monatsgebühr je aktivem Konto, keine Auszahlungsgebühr für die Plattform. Das
@@ -234,9 +256,164 @@ ohnehin prozentual gedacht.
 
 ---
 
-## 3. Entitlements-Design — was eine bezahlte Mitgliedschaft im BESTEHENDEN Bau ist
+## 3. Umsatzsteuer — der Befund, der die Begründung der Empfehlung trägt
 
-### 3.1 Die eine Frage, an der alles hängt: wie viele Publiken hat eine Community?
+> **Kennzeichnung:** **(a)** = an einer Primärquelle belegt · **(b)** = unsicher
+> oder widersprüchlich · **(c)** = nicht auffindbar. Nichts hiervon ist eine
+> Rechtsauskunft; § 3.3 ist ausdrücklich eine ABLEITUNG und gehört in denselben
+> Anwaltstermin wie A1.
+
+Dieser Abschnitt ist nach § 1 und § 2 recherchiert worden. Er ändert das
+Ergebnis der Empfehlung nicht, aber ihre Begründung — und er verschiebt die
+Trade-offs von Frage 1 spürbar. Deshalb steht er VOR der Architektur.
+
+### 3.1 Art. 9a MwSt-DVO — eine Vermutung, die ein Checkout auslöst (a)
+
+Bei **elektronisch erbrachten Dienstleistungen über eine Plattform** gilt die
+Vermutung, dass die Plattform im eigenen Namen für fremde Rechnung handelt. Sie
+ist dann Umsatzsteuerschuldnerin gegenüber dem Endnutzer — **unabhängig davon,
+welche Stripe-Mechanik darunter liegt.** Deutsche Umsetzung: § 3 Abs. 11a UStG.
+
+Entscheidend ist die Bauart der Regel: Die Vermutung wird **unwiderlegbar**,
+sobald **einer** von drei Tatbeständen erfüllt ist —
+
+1. die Plattform **autorisiert die Abrechnung** beim Endnutzer,
+2. sie **genehmigt die Erbringung** der Leistung,
+3. sie **legt die allgemeinen Bedingungen** fest.
+
+Ist einer erfüllt, laufen AGB-Klauseln und Rechnungsangaben („Vertragspartner
+ist der Owner") ins Leere — sie können die Vermutung nicht mehr entkräften.
+Die einzige Ausnahme gilt für **reine Zahlungsabwickler ohne Beteiligung an der
+Leistung**; auf eine Plattform, die Zugang freischaltet und Inhalte hostet,
+passt sie nicht.
+
+Quellen: [VO (EU) 1042/2013](https://eur-lex.europa.eu/legal-content/DE/TXT/HTML/?uri=CELEX:32013R1042) · [§ 3 UStG](https://www.gesetze-im-internet.de/ustg_1980/__3.html)
+
+### 3.2 EuGH C-695/20 „Fenix/OnlyFans" — derselbe Sachverhalt, schon entschieden (a)
+
+Am 28.02.2023 hat der EuGH Art. 9a für gültig erklärt, und zwar an einem
+Sachverhalt, der unserem sehr nahe kommt: Creator-Abos, die Plattform behält
+20 % ein und stellt die Bedingungen. Ergebnis: Die **Plattform** ist die
+Leistende.
+
+Der Teil, der uns direkt trifft: **Provisions-Einbehalt und Zahlungsführung
+über das eigene Konto führen gerade NICHT in die Zahlungsabwickler-Ausnahme.**
+Genau darauf würde ein Modell hinauslaufen, das sich auf „wir nehmen doch nur
+eine `application_fee`" beruft.
+
+Quelle: [EuGH C-695/20](https://eur-lex.europa.eu/legal-content/DE/TXT/HTML/?uri=CELEX:62020CJ0695)
+
+### 3.3 Was das für unsere Empfehlung heißt — ABLEITUNG, keine Auskunft
+
+Läuft der Checkout in **unserer** Oberfläche und stellen **wir** die
+Endnutzer-AGB, ist Tatbestand (i) erfüllt — und sehr wahrscheinlich auch (iii).
+Dann gilt:
+
+> **„Der Owner ist Verkäufer" stimmt zivilrechtlich und gegenüber Stripe, aber
+> NICHT umsatzsteuerlich.** Die USt.-Pflichten in den Verbrauchsländern lägen
+> bei Pukalani, abzuwickeln über OSS.
+
+Das gilt **auch für Option A** (direct charges). Damit rückt A näher an B, als
+§ 2 es zunächst dargestellt hat: Der Unterschied zwischen „Owner verkauft" und
+„Pukalani verkauft" schrumpft umsatzsteuerlich auf wenig bis nichts. Was
+zwischen den Optionen real verschieden bleibt:
+
+| | Option A (direct charges) | Option B (MoR) |
+|---|---|---|
+| USt.-Schuldner ggü. Endnutzer | **vermutlich Pukalani** (Art. 9a) | Pukalani |
+| Zivilrechtlicher Vertragspartner | der Owner | Pukalani |
+| Chargebacks / Negativsaldo | zuerst der Owner | Pukalani |
+| Widerruf, Impressum, Beleg | der Owner | Pukalani |
+| Connect-Kosten für uns | keine | Monats- + Auszahlungsgebühr |
+| Auszahlung an den Owner | macht Stripe | müssten wir organisieren (ZAG!) |
+
+**Denkbare Gestaltung dagegen — offene Anwaltsfrage:** Checkout und AGB so
+strukturieren, dass keiner der drei Tatbestände greift. Praktisch schwer, denn
+ein Plattform-Checkout IST Tatbestand (i). Wer diesen Weg gehen will, muss ihn
+sich bestätigen lassen, bevor gebaut wird — nicht danach.
+
+### 3.4 Für die OWNER ist Art. 9a eine ENTLASTUNG (Ableitung)
+
+Greift Art. 9a, verkauft der Owner umsatzsteuerlich **an die Plattform**, nicht
+an die Endnutzer. Seine eigenen Schwellen-, OSS- und Registrierungsfragen
+stellen sich damit völlig anders — aus 27 Verbrauchsländern wird eine einzige
+B2B-Beziehung zu uns.
+
+Das ist bemerkenswert: **Es ist genau die Entlastung, die Skool als Leistung
+verkauft** (§ 1.2) — sie fiele bei Art. 9a ohnehin an, statt eine bewusste
+Produktentscheidung zu sein. Der Kleinunternehmer-Owner, um den sich
+F7-PAYMENTS-CONNECT sorgt, stünde damit besser da als dort angenommen. Wie er
+das in seiner Buchführung abbildet, bleibt seine Steuerberaterfrage — aber das
+Produkt müsste ihm nicht mehr zumuten, OSS zu verstehen.
+
+### 3.5 Der Rahmen für Pukalani selbst: kein SME-Schema, keine Schwelle (a)
+
+Zwei Befunde, die für einen **US-ansässigen** Anbieter unangenehm sind:
+
+- **Die EU-Kleinunternehmerregelung steht uns nicht offen.** Seit 01.01.2025
+  gibt es das grenzüberschreitende SME-Schema (100.000 € Unionsjahresumsatz,
+  EX-Nummer, eine Quartalsmeldung; national dazu § 19 UStG mit
+  25.000/100.000 €). **Nicht-EU-Unternehmen sind ausdrücklich ausgeschlossen.**
+- **Es gibt für uns keine 10.000-€-Bagatellschwelle.** Die Schwelle des
+  § 3c Abs. 4 UStG setzt Ansässigkeit in EINEM Mitgliedstaat voraus. Für einen
+  US-Betreiber besteht die Steuerpflicht **ab dem ersten Umsatz**.
+
+Der Weg dahin ist das **Non-Union-Scheme** (§ 18i UStG): Es deckt alle
+B2C-Dienstleistungen eines Nicht-EU-Betreibers an EU-Verbraucher ab, wird
+quartalsweise gemeldet, und der Mitgliedstaat der Registrierung ist frei
+wählbar (in DE das BZSt). **(c)** Die Rechnungsstellungspflichten unter OSS
+ließen sich nicht abschließend klären — Anwaltsfrage.
+
+Quelle: [EU-Kommission — Cross-border SME scheme](https://sme-vat-rules.ec.europa.eu/sme-scheme/cross-border-sme-scheme_en)
+
+**ViDA ändert daran nichts (a).** Die Richtlinie (EU) 2025/516 vom 11.03.2025
+führt eine Plattform-Säule ein (Art. 28a), die **nur Kurzzeitunterkunft (max.
+30 Nächte) und Personenbeförderung** erfasst — digitale Dienstleistungen
+ausdrücklich nicht. Das ist aber kein Entwarnungssignal, sondern schlicht
+gegenstandslos: für digitale Leistungen gilt Art. 9a bereits seit 2015. **(b)**
+Zum Plattform-Stichtag nennen Sekundärquellen 2028 optional / 2030
+verpflichtend, die EU-Kommission den 01.07.2028 als verbindlich; die
+Gesamtstaffel läuft 2027/2028/2030/2035.
+
+### 3.6 DAC7 / PStTG — wahrscheinlich nicht einschlägig, aber nicht sicher (a/b)
+
+Die Meldepflicht trifft **auch US-Plattformen** (§ 3 PStTG) **(a)**. Sie gilt
+aber nur für vier Tätigkeiten (§ 5 PStTG): Immobilien, persönliche
+Dienstleistungen, Warenverkauf, Verkehrsmittel.
+
+Ein **standardisiertes Community-Abo** ist nach dem Wortlaut wohl **keine**
+„persönliche Dienstleistung": Die setzt eine Leistung auf Anforderung des
+Nutzers und einen Aufgabenbezug voraus. **(b) Unsicher bleibt es trotzdem** —
+das BMF-Schreiben vom 02.02.2023 bezieht automatisierte Beratungsleistungen
+ein. **Enthält ein Abo individuelles Coaching oder Q&A-Sitzungen, rückt die
+Meldepflicht in Reichweite.** Das ist keine theoretische Sorge: Genau solche
+Angebote sind der typische Inhalt bezahlter Communities.
+
+Bagatellgrenze (§ 4 Abs. 5 PStTG): weniger als 30 Vorgänge **und** unter
+2.000 € je Anbieter. Meldefrist: 31. Januar (§ 13 PStTG). DAC8 betrifft nur
+Kryptowerte und ist nicht einschlägig.
+
+Quelle: [§ 5 PStTG](https://www.gesetze-im-internet.de/psttg/__5.html)
+
+### 3.7 Was daraus für den Bau folgt
+
+Nichts am Datenmodell (§ 5) und nichts an den Flüssen (§ 6) — Art. 9a ist eine
+Frage der Rechnungsstellung und der Registrierung, nicht der Architektur. Zwei
+Dinge gehören aber eingeplant, sobald Frage 1 beantwortet ist:
+
+1. **Eine OSS-Registrierung (Non-Union-Scheme) als Betriebsaufgabe**, nicht als
+   Restrisiko — mitsamt Quartalsmeldung.
+2. **Stripe Tax muss auf PUKALANIS Pflichten rechnen können**, nicht nur auf
+   die des Connected Accounts. Stripe trennt genau diese zwei Fälle („Tax for
+   platforms" vs. „Tax for marketplaces") — welcher gilt, entscheidet die
+   Antwort auf Art. 9a, und die Wahl ist im Aufbau nicht beiläufig
+   umzustellen.
+
+---
+
+## 4. Entitlements-Design — was eine bezahlte Mitgliedschaft im BESTEHENDEN Bau ist
+
+### 4.1 Die eine Frage, an der alles hängt: wie viele Publiken hat eine Community?
 
 Appwrite kennt nur ODER-Rollen. Das Lese-Publikum einer Community ist heute
 GENAU EIN Label: `read("label:<communityId>")`, vergeben an den, der eine
@@ -255,9 +432,9 @@ der communityId, nie gespeichert, vergeben und eingezogen von derselben
 Middleware. Ein `pay<communityId>` wäre 23 Zeichen und damit innerhalb der
 Appwrite-Grenze von 36 — technisch belegt, nicht spekuliert.
 
-V1 baut (a). Die Begründung steht in § 6.1, weil sie eine Abgrenzung ist.
+V1 baut (a). Die Begründung steht in § 7.1, weil sie eine Abgrenzung ist.
 
-### 3.2 Zahlung als weiterer Beitritts-Auslöser
+### 4.2 Zahlung als weiterer Beitritts-Auslöser
 
 `core/shared/communityJoin.ts` kennt heute `registration`, `contribution` und
 die Bestands-Übernahme `legacy`. Die bezahlte Mitgliedschaft fügt genau einen
@@ -272,7 +449,7 @@ Auslöser hinzu — `purchase` — und ändert sonst nichts:
   Begründung, mit der A5 die Rolle „member" abgelehnt hat. Ob jemand ZAHLT, ist
   keine Rollenfrage, sondern eine Vertragsfrage.
 
-### 3.3 Warum das Ende der Zahlung ohne neue Naht wirkt
+### 4.3 Warum das Ende der Zahlung ohne neue Naht wirkt
 
 Der Stripe-Webhook läuft auf `apps/control` — dem einzigen Deployment mit
 Stripe-Schlüssel (`apps/platform` bindet `packages/billing` bewusst nicht ein).
@@ -299,9 +476,9 @@ machte, ist hier bereits umschifft.
 **Der Preis, ehrlich benannt:** die Wirkung tritt nicht in der Sekunde des
 Webhooks ein, sondern beim nächsten Request auf dem Community-Host, plus 30 s
 Rollen-Cache. Für ein Abo, das zum Periodenende ausläuft, ist das folgenlos —
-für eine Rückerstattung, die sofort wirken soll, nicht (§ 5.4).
+für eine Rückerstattung, die sofort wirken soll, nicht (§ 6.4).
 
-### 3.4 Was M13 beisteuert — und was NICHT übernommen wird
+### 4.4 Was M13 beisteuert — und was NICHT übernommen wird
 
 M13 (`core/shared/communitySuspension.ts`) hat für den Zahlungsverzug EINER
 COMMUNITY die Antwort „nur-lesend statt Rauswurf" gefunden. Für ein zahlendes
@@ -316,7 +493,7 @@ FORM, nicht der Wert:
 - **Nicht übernommen:** der Lesemodus. Endet die Zahlung, endet die
   Mitgliedschaft — Inhalte bleiben liegen, der Zugang nicht.
 
-### 3.5 Was mit den Beiträgen eines ausgetretenen Zahlers passiert
+### 4.5 Was mit den Beiträgen eines ausgetretenen Zahlers passiert
 
 Nichts. `community_members` LÖSCHT nie (control-019): die Zeile bleibt als
 positive Tatsache stehen, Inhalte und Namen bleiben, und die Ansicht
@@ -326,9 +503,9 @@ kein einziger Anbieter eine dokumentierte Antwort (§ 1.4).
 
 ---
 
-## 4. Datenmodell
+## 5. Datenmodell
 
-### 4.1 Die Arbeitsteilung: Vertrag ≠ Zugang
+### 5.1 Die Arbeitsteilung: Vertrag ≠ Zugang
 
 Zwei Fragen, zwei Orte — dieselbe Trennung, die A6 zwischen den
 Abo-Zeilen und `communities.plan` schon zieht:
@@ -343,7 +520,7 @@ Heißpfad nichts**: keine zweite Abfrage bei der Rollen-Auflösung, kein neues
 Feld, das ein Leser vergessen könnte. Wer heute `hasCommunityAccess(status)`
 fragt, fragt morgen dasselbe.
 
-### 4.2 `community_members` — eine Tür, die schon offensteht
+### 5.2 `community_members` — eine Tür, die schon offensteht
 
 `COMMUNITY_MEMBER_STATUSES` enthält seit control-015 den Wert **`suspended`**,
 und er wird heute nirgends geschrieben. Er passt ohne eine einzige Änderung:
@@ -367,7 +544,7 @@ nicht.
 Mitgliedschaft, ein zweites Publikums-Label. Alle drei wären Wege, dieselbe
 Tatsache ein zweites Mal zu speichern.
 
-### 4.3 `member_subscriptions` (neu, Control Plane)
+### 5.3 `member_subscriptions` (neu, Control Plane)
 
 Warum eine eigene Tabelle und keine Spalten an `community_members`: eine
 Mitgliedschaft ist ein Zugang, ein Abo ist ein Vertrag mit eigener Lebensdauer.
@@ -399,7 +576,7 @@ aber die falsche Frage („welches Abo?" statt „zahlt diese Person hier?").
 und der Metadaten-Cache-Anstoß gehört in die Schnittstelle, nicht in die
 Disziplin.
 
-### 4.4 `communities` — zwei additive Spalten, kein drittes Geld-Feld
+### 5.4 `communities` — zwei additive Spalten, kein drittes Geld-Feld
 
 - `memberPriceAmount` (Ganzzahl, Cent) — `0` = die Community ist kostenlos.
   **Cent als Ganzzahl, nie Fließkomma im Geldpfad** (dieselbe Regel, mit der
@@ -420,9 +597,9 @@ muss VOR dem Code-Deploy laufen, sonst bricht das Anlegen einer Community.
 
 ---
 
-## 5. Die Flüsse
+## 6. Die Flüsse
 
-### 5.1 Kauf
+### 6.1 Kauf
 
 ```
 Mitglied auf kunde-a.pukalani.app
@@ -463,7 +640,7 @@ Allowlist `resolvePlanPrice`, die dort die Sicherung ist. Was hier an ihre
 Stelle tritt, ist `communities.memberPriceAmount`: der Betrag kommt aus der
 Community-Zeile, nie aus dem Request.
 
-### 5.2 Webhook → Zugang
+### 6.2 Webhook → Zugang
 
 Der Handler ist die Geschwister-Funktion zu
 `subscriptionUpdateToCommunityAction` — pure, unit-getestet, ohne Stripe und
@@ -496,7 +673,7 @@ Accounts tragen ein eigenes `account`-Feld und brauchen einen getrennten
 Endpunkt mit eigenem Signing-Secret. Beide in denselben Handler zu leiten wäre
 der Weg, auf dem ein fremdes Konto in Pukalanis eigenen Geldpfad schreibt.
 
-### 5.3 Kündigung
+### 6.3 Kündigung
 
 Der Käufer kündigt im Stripe-Kundenportal **des Connected Accounts** —
 `cancel_at_period_end`. Stripe hält den Status bis zum Periodenende auf
@@ -509,7 +686,7 @@ des Abrechnungszeitraums.
 Dass dieses Portal überhaupt existiert, ist eine direkte Folge der
 Kontotyp-Wahl aus § 2.2. Mit Express gäbe es hier nichts zu verlinken.
 
-### 5.4 Rückerstattung
+### 6.4 Rückerstattung
 
 Erstattet wird im Stripe-Dashboard des Owners — es ist sein Geld und sein
 Kunde. Zwei Dinge, die das Produkt trotzdem entscheiden muss (→ Frage 3):
@@ -518,7 +695,7 @@ beendet. **Von selbst tut sie das nicht:** eine Erstattung erzeugt
 `charge.refunded`, nicht `customer.subscription.deleted`. Wer „Geld zurück
 heißt Zugang weg" will, muss diesen Weg bauen.
 
-### 5.5 Was passiert, wenn die Community endet oder den Besitzer wechselt
+### 6.5 Was passiert, wenn die Community endet oder den Besitzer wechselt
 
 Die unangenehme Frage, und sie hat heute keine Antwort. Drei Wege führen
 dorthin, und alle drei sind bereits gebaut — nur kennen sie zahlende
@@ -543,16 +720,16 @@ Entscheidungsfrage 4 ist und nicht eine Zeile im Umsetzungsplan.
 
 ---
 
-## 6. Was V1 bewusst NICHT kann
+## 7. Was V1 bewusst NICHT kann
 
 Der Benchmark kann all das (§ 1.3). Es bleibt trotzdem draußen, und jede
 Auslassung hat einen eigenen Grund — nicht „später", sondern „nicht jetzt und
 deshalb".
 
-### 6.1 Keine Tiers, keine bezahlten Bereiche innerhalb einer Community
+### 7.1 Keine Tiers, keine bezahlten Bereiche innerhalb einer Community
 
 **Das ist die teuerste Auslassung.** Technisch wäre sie machbar: ein zweites
-abgeleitetes Label `pay<communityId>` (§ 3.1). Was sie kostet, ist nicht das
+abgeleitetes Label `pay<communityId>` (§ 4.1). Was sie kostet, ist nicht das
 Label, sondern die Frage dahinter — **jede Zeile jedes Produkt-Layers müsste ab
 dann entscheiden, welches Publikum sie trägt.** Beiträge, Kommentare, Termine,
 Kurse, Umfragen, Anwesenheit, Erwähnungen, Benachrichtigungen. Heute trifft
@@ -568,7 +745,7 @@ Herabstufen mit bereits geschriebenen Inhalten macht.
 ganz bezahlt. Wer erst hineinschauen und dann kaufen will, sieht die öffentliche
 Seite und sonst nichts. Skools „Freemium" kann mehr. → Frage 2.
 
-### 6.2 Kein Einzelverkauf von Kursen oder Beiträgen
+### 7.2 Kein Einzelverkauf von Kursen oder Beiträgen
 
 Das ist die Kurs-Hälfte aus F7-PAYMENTS-CONNECT § 3.5 (Etappe 3) und weiterhin
 unentworfen. Sie braucht ein community- UND nutzerbezogenes Entitlement-Objekt
@@ -578,22 +755,22 @@ beantwortet eine ANDERE Frage — sie ist die Lizenz einer INSTALLATION („welc
 Produkte darf dieses Deployment betreiben"). Sie dafür zu biegen wäre der
 Fehler, den dieses Konzept ausdrücklich nicht macht.
 
-### 6.3 Keine Gutscheine, keine Testphasen für Mitglieder
+### 7.3 Keine Gutscheine, keine Testphasen für Mitglieder
 
 Skool gibt Mitgliedern 7 Tage. Beides ist bei Stripe billig zu haben
 (`trial_period_days`, Promotion Codes) und bleibt trotzdem draußen: ein Trial
 verlangt eine Antwort darauf, was beim Nichtkauf mit den in der Testzeit
-geschriebenen Beiträgen passiert — dieselbe Frage wie § 6.1, nur zeitlich statt
+geschriebenen Beiträgen passiert — dieselbe Frage wie § 7.1, nur zeitlich statt
 räumlich.
 
-### 6.4 Keine Einmalzahlung als Eintritt
+### 7.4 Keine Einmalzahlung als Eintritt
 
 „Lebenslanger Zugang" klingt nach einem kleinen Feature und ist eine
 Verpflichtung ohne Ende: der Zugang müsste auch dann noch gelten, wenn der
-Owner sein Pukalani-Abo längst gekündigt hat. Das ist § 5.5 in seiner härtesten
+Owner sein Pukalani-Abo längst gekündigt hat. Das ist § 6.5 in seiner härtesten
 Form.
 
-### 6.5 Nur EUR, und ein Mindestbetrag
+### 7.5 Nur EUR, und ein Mindestbetrag
 
 EUR-only und mindestens 5 € — unverändert der Vorschlag aus
 F7-PAYMENTS-CONNECT § 5.4. Unter 5 € frisst die feste Stripe-Gebühr einen
@@ -601,7 +778,7 @@ zweistelligen Prozentsatz. Mehrwährung ist ein eigenes Thema (Anzeige,
 Umrechnung, Steuersatz) — Skools USD-only zeigt, dass man hier auch als
 Marktführer schwach sein darf.
 
-### 6.6 Kein zweiter Zahlungsdienst
+### 7.6 Kein zweiter Zahlungsdienst
 
 Die Anbieter-Naht (`SellerPaymentProvider`) ist in F7-PAYMENTS-CONNECT § 4
 skizziert und bleibt eine Skizze. Einen zweiten Anbieter vor dem ersten Verkauf
@@ -610,32 +787,53 @@ hat.
 
 ---
 
-## 7. Entscheidungen für David
+## 8. Entscheidungen für David
 
 Vier Fragen. Ohne sie entsteht kein Umsetzungsplan — und Frage 1 muss vor den
 anderen dreien fallen, weil sie deren Rahmen setzt.
 
-### 7.1 Frage 1 — Wer verkauft: der Owner oder Pukalani?
+### 8.1 Frage 1 — Wer verkauft: der Owner oder Pukalani?
 
 *Die OPEN-ITEMS-Zeile nennt als Messlatte Skools Merchant-of-Record-Modell
 inklusive EU-Umsatzsteuer. Deine D1-Entscheidung vom 2026-08-02 schließt
 „Betreiber als Verkäufer" aus. Beides gleichzeitig geht nicht.*
 
+> **Was sich durch Art. 9a geändert hat (§ 3):** Die Umsatzsteuer ist
+> **kein** Unterscheidungsmerkmal mehr zwischen A und B. Läuft der Checkout bei
+> uns, sind wir nach der unwiderlegbaren Vermutung sehr wahrscheinlich in beiden
+> Fällen Steuerschuldner — der EuGH hat das 2023 an einem fast identischen
+> Sachverhalt entschieden. Die Optionen unterscheiden sich weiterhin bei
+> Vertragspartnerschaft, Chargebacks, Widerruf, Auszahlung und Kosten.
+
 | Option | Beschreibung |
 |---|---|
-| **A — Owner verkauft (Empfehlung)** | Connect mit vollem Stripe-Dashboard, direct charges. Der Owner ist Verkäufer und schuldet die Umsatzsteuer; er verwaltet Abos und Steuer-Einstellungen selbst, seine Mitglieder bekommen Stripes Kundenportal. Connect kostet uns nichts. Hält D1 ein. Preis: der Owner legt ein eigenes Stripe-Konto an — die höchste Einstiegshürde im Feld, dieselbe wie bei Circle. Erreicht die Skool-Messlatte NICHT. |
-| **B — Pukalani verkauft** | Destination charges; laut Stripe ist damit die Plattform Merchant of Record. Erreicht die Skool-Messlatte, hebt D1 auf. Wir schulden die Umsatzsteuer in bis zu 27 Ländern, tragen Chargebacks und Widerruf, und unser Name steht auf jedem Beleg. Für ein Einzelunternehmen mit Sitz USA, dessen eigene Rechtstexte (A1) noch beim Anwalt liegen, ist das eine sehr große Zusage. **Und vermutlich technisch versperrt:** destination charges verlangen Plattform und Verkäufer in derselben Region (§ 2.1). Ein MoR-Modell führte dann über einen externen Anbieter (Paddle, Lemon Squeezy, Polar) — und genau dazu fehlt die Recherche noch (§ 8). |
+| **A — Owner verkauft (Empfehlung)** | Connect mit vollem Stripe-Dashboard, direct charges. Der Owner ist zivilrechtlich Verkäufer, trägt Chargebacks und Widerruf, verwaltet Abos selbst; seine Mitglieder bekommen Stripes Kundenportal, Stripe zahlt ihm aus. Connect kostet uns nichts. Hält D1 ein. **Umsatzsteuerlich sind dennoch vermutlich WIR der Leistende** — eine OSS-Registrierung ist einzuplanen (§ 3.3). Preis: der Owner legt ein eigenes Stripe-Konto an — die höchste Einstiegshürde im Feld, dieselbe wie bei Circle. |
+| **B — Pukalani verkauft** | Destination charges; laut Stripe ist damit die Plattform Merchant of Record. Erreicht die Skool-Messlatte, hebt D1 auf. Wir schulden die Umsatzsteuer in bis zu 27 Ländern, tragen Chargebacks und Widerruf, und unser Name steht auf jedem Beleg. Für ein Einzelunternehmen mit Sitz USA, dessen eigene Rechtstexte (A1) noch beim Anwalt liegen, ist das eine sehr große Zusage. **Und vermutlich technisch versperrt:** destination charges verlangen Plattform und Verkäufer in derselben Region (§ 2.1). Ein MoR-Modell führte dann über einen externen Anbieter (Paddle, Lemon Squeezy, Polar) — und genau dazu fehlt die Recherche noch (§ 9). |
 | **C — Owner verkauft, wir tragen mehr** | Express-Konten + direct charges (die Empfehlung vom 2026-08-01). Niedrigste Hürde für den Owner, D1 bleibt gewahrt — aber Stripe verlangt dann, dass WIR die Abos seiner Mitglieder verwalten und seine Steuer-Einstellungen per API pflegen. Ein zweites Produkt, ohne dass wir Verkäufer wären. |
 | **D — F7 weiter vertagen** | Erst Geldfluss 1 (A6) ankommen lassen. Kostet nichts und verschiebt alles. |
 
-**Empfehlung: A.** Es ist die einzige Option, in der wir weder Händler noch
-Abo-Verwalter für fremde Endkunden werden. Die Einstiegshürde ist real — aber
-sie trifft nur Owner, die tatsächlich verkaufen wollen, und die haben einen
-Grund, sie zu nehmen. **Wichtig: Der Dashboard-Typ eines Connected Accounts ist
-unveränderlich.** Ein späterer Wechsel von C nach A migriert jeden Verkäufer
-einzeln samt laufender Abos.
+**Empfehlung: A — mit OSS-Registrierung als eingeplanter Betriebsaufgabe.** Es
+ist die einzige Option, in der wir weder zivilrechtlicher Händler noch
+Abo-Verwalter für fremde Endkunden werden, und sie ist die mit Abstand
+billigste. Die Einstiegshürde ist real, trifft aber nur Owner, die tatsächlich
+verkaufen wollen.
 
-### 7.2 Frage 2 — Was genau kann man in V1 kaufen?
+**Die ehrliche Fassung dieser Empfehlung lautet: A verschafft uns keine
+Steuerfreiheit, sondern nur eine kleinere Rolle.** Wer B allein wegen der
+Umsatzsteuer verwirft, verwirft es aus einem Grund, den § 3 nicht mehr hergibt.
+Was gegen B spricht, sind Chargeback-Haftung, Widerrufsabwicklung, die Rolle
+als Vertragspartner in 27 Ländern, die Auszahlungslogistik samt ZAG-Frage — und
+die Regionen-Regel, die B über Connect vermutlich ohnehin versperrt.
+
+**Zwei Punkte, die vor dem Bau feststehen müssen:**
+- Der **Dashboard-Typ eines Connected Accounts ist unveränderlich.** Ein
+  späterer Wechsel von C nach A migriert jeden Verkäufer einzeln samt laufender
+  Abos.
+- Die **Stripe-Tax-Betriebsart** („Tax for platforms" vs. „Tax for
+  marketplaces") folgt der Art.-9a-Antwort und ist nachträglich nicht beiläufig
+  umzustellen (§ 3.7).
+
+### 8.2 Frage 2 — Was genau kann man in V1 kaufen?
 
 | Option | Beschreibung |
 |---|---|
@@ -644,10 +842,10 @@ einzeln samt laufender Abos.
 | **C — Mehrere Stufen (Tiers)** | Bronze/Silber/Gold. Alles aus B, plus Wechsel zwischen Stufen mit Proration und die Frage, was ein Herabstufen mit bereits geschriebenen Inhalten macht. |
 
 **Empfehlung: A**, mit offenem Auge: B ist der Punkt, an dem uns Skool im
-direkten Vergleich schlägt, und das Datenmodell dafür ist skizziert (§ 3.1) —
+direkten Vergleich schlägt, und das Datenmodell dafür ist skizziert (§ 4.1) —
 es ist eine Frage des Zeitpunkts, nicht der Machbarkeit.
 
-### 7.3 Frage 3 — Rückerstattungen
+### 8.3 Frage 3 — Rückerstattungen
 
 *Stripe lässt jede Variante zu; wir müssen uns für eine entscheiden, bevor der
 erste Fall eintritt.*
@@ -661,9 +859,9 @@ erste Fall eintritt.*
 **Empfehlung: A.** Der Bau ist überschaubar (ein Webhook-Zweig auf
 `charge.refunded`), und die Regel ist in einem Satz erklärbar.
 
-### 7.4 Frage 4 — Was passiert mit bezahlten Mitgliedschaften, wenn die Community endet?
+### 8.4 Frage 4 — Was passiert mit bezahlten Mitgliedschaften, wenn die Community endet?
 
-*Drei Wege führen dorthin (§ 5.5); der wichtigste ist: der Owner kündigt sein
+*Drei Wege führen dorthin (§ 6.5); der wichtigste ist: der Owner kündigt sein
 eigenes Pukalani-Abo, seine Community wird nur-lesend — und seine Mitglieder
 zahlen weiter.*
 
@@ -679,9 +877,9 @@ die Liste für den Anwaltstermin (A1).
 
 ---
 
-## 8. Was hier bewusst nicht steht
+## 9. Was hier bewusst nicht steht
 
-- **Kein Umsetzungsplan, keine Häkchen.** Der entsteht, wenn Abschnitt 7
+- **Kein Umsetzungsplan, keine Häkchen.** Der entsteht, wenn Abschnitt 8
   beantwortet ist.
 - **Keine zweite Rechts-Checkliste.** Die steht vollständig in
   F7-PAYMENTS-CONNECT § 6 und gilt unverändert — deemed supplier (Art. 9a
@@ -713,6 +911,21 @@ die Liste für den Anwaltstermin (A1).
      zwei Quellen lesen ihn auf die Händler bezogen. **Nicht selbst
      entscheiden**: davon hängt ab, ob wir von jedem verkaufenden Owner
      Ausweis, Registernummer und Selbstbescheinigung erheben müssen.
+
+  **Und die vier Fragen aus § 3, die in denselben Termin gehören:**
+
+  6. **Greift Art. 9a bei UNSERER konkreten Checkout- und AGB-Gestaltung?**
+     Das ist die teuerste offene Frage des ganzen Vorhabens — an ihr hängt,
+     ob Pukalani in bis zu 27 Mitgliedstaaten Umsatzsteuer schuldet. Falls ja:
+     Ist eine Gestaltung denkbar, die keinen der drei Tatbestände erfüllt?
+  7. **OSS-Rechnungsstellungspflichten** unter dem Non-Union-Scheme
+     (§ 18i UStG) — nicht auffindbar gewesen.
+  8. **PStTG-Einordnung von Abos mit Coaching- oder Q&A-Anteil** — ein reines
+     Inhalts-Abo ist wohl keine „persönliche Dienstleistung", ein Abo mit
+     individueller Betreuung möglicherweise doch.
+  9. **Wie ist der Owner zu behandeln, wenn Art. 9a greift?** Er leistet dann
+     an uns statt an die Endnutzer (§ 3.4) — das betrifft seine Rechnungen,
+     unsere Gutschriften und die Formulierung der Verkäufer-Bedingungen.
 - **Keine erfundenen Zahlen.** Wo die Recherche nichts hergab, steht das
   ausdrücklich — insbesondere bei den Kulanzfristen und dem Umgang mit
   Inhalten gekündigter Mitglieder, die im gesamten Wettbewerbsfeld
@@ -723,23 +936,21 @@ die Liste für den Anwaltstermin (A1).
   das für einen Kleinunternehmer der steuerlich richtige Zustand ist, ist eine
   Frage an den Steuerberater und keine ans Produkt.
 
-- **Vier Recherche-Lücken, offen benannt.** Sie sind für die EMPFEHLUNG (§ 2)
-  nicht nötig, wohl aber für Frage 1, falls David zu einem MoR-Modell neigt:
+- **Eine Recherche-Lücke, offen benannt.** **MoR-Anbieter mit
+  Marktplatz-Modell** — Paddle, Lemon Squeezy, Polar.sh, Creem, FastSpring:
+  bedienen sie überhaupt eine Plattform mit VIELEN Verkäufern unter einem MoR,
+  oder nur „ein Verkäufer je Konto"? Ohne diese Antwort ist Option B in Frage 1
+  nicht bewertbar — zumal destination charges für uns vermutlich ausfallen
+  (§ 2.1). Reine Marktrecherche, nachholbar, für die Empfehlung nicht nötig.
 
-  1. **MoR-Anbieter mit Marktplatz-Modell** — Paddle, Lemon Squeezy, Polar.sh,
-     Creem, FastSpring: bedienen sie überhaupt eine Plattform mit VIELEN
-     Verkäufern unter einem MoR, oder nur „ein Verkäufer je Konto"? Ohne diese
-     Antwort ist Option B in Frage 1 nicht bewertbar — zumal destination
-     charges für uns vermutlich ausfallen (§ 2.1).
-  2. **Deemed supplier** (Art. 9a MwSt-DVO / § 3 Abs. 11a UStG) — die Frage,
-     ob uns direct charges wirklich vor der Leistenden-Stellung schützen.
-  3. **ViDA, EU-Kleinunternehmerregelung ab 2025, OSS** — der Rahmen, in dem
-     ein verkaufender Owner steht.
-  4. **DAC7 / PStTG** — Meldepflichten über unsere Verkäufer.
+  *Die Umsatzsteuer-Fragen (deemed supplier, ViDA, SME, OSS, DAC7) waren
+  zunächst ebenfalls als Lücke geführt und sind seit dem 2026-08-15
+  recherchiert — sie stehen in § 3.*
 
-  Punkte 2–4 sind ohnehin Fragen an Anwalt und Steuerberater und keine, die
-  eine Web-Recherche abschließend beantwortet. Punkt 1 ist reine
-  Marktrecherche und nachholbar.
+- **Drei Primärquellen ließen sich nicht auslesen (c)** und sind vor einer
+  endgültigen steuerlichen Bewertung nachzuholen: das BMF-Schreiben vom
+  08.08.2025 zu Online-Veranstaltungen, die BZSt-FAQ zum PStTG und die
+  EU Explanatory Notes 2015 zu Art. 9a.
 
 ## Quellen (erhoben 2026-08-15)
 
@@ -752,6 +963,13 @@ die Liste für den Anwaltstermin (A1).
 - [Connect Pricing](https://stripe.com/connect/pricing) — „Stripe handles pricing" vs. „You handle pricing"
 - [Interactive platform guide](https://docs.stripe.com/connect/interactive-platform-guide) — Platform vs. Marketplace, **Cross-border-Einschränkung** bei destination charges, Managed Risk
 - [Express Dashboard](https://docs.stripe.com/connect/express-dashboard) · [Cross-border payouts](https://docs.stripe.com/connect/cross-border-payouts)
+
+**Umsatzsteuer (§ 3):**
+
+- [VO (EU) 1042/2013 — Art. 9a MwSt-DVO](https://eur-lex.europa.eu/legal-content/DE/TXT/HTML/?uri=CELEX:32013R1042) · [§ 3 UStG (dt. Umsetzung, Abs. 11a)](https://www.gesetze-im-internet.de/ustg_1980/__3.html)
+- [EuGH C-695/20 „Fenix/OnlyFans" (28.02.2023)](https://eur-lex.europa.eu/legal-content/DE/TXT/HTML/?uri=CELEX:62020CJ0695)
+- [EU-Kommission — Cross-border SME scheme](https://sme-vat-rules.ec.europa.eu/sme-scheme/cross-border-sme-scheme_en) — Nicht-EU-Unternehmen ausgeschlossen
+- [§ 5 PStTG (DAC7, meldepflichtige Tätigkeiten)](https://www.gesetze-im-internet.de/psttg/__5.html)
 
 **Aufsichts- und Plattformrecht:**
 
