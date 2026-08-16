@@ -76,6 +76,14 @@ export default defineEventHandler(async (event): Promise<ReactionToggleResponse>
 
   // Drossel: ein Mensch, eine Community, ein Fenster. Fail-open wie ueberall —
   // ein toter Redis darf das Reagieren nicht abschalten.
+  //
+  // SIE IST NICHT MEHR DIE ERSTE (AU2, 2026-08-15): `05.rate-limit.ts` deckelt
+  // die Route jetzt zusaetzlich je IP (Bucket `posts:reactions`, ebenfalls
+  // 60/min) — und zwar BEVOR `resolveReactionTarget` oben eine fremde Zeile
+  // ueber die Operator-Klinke liest. Diese Drossel hier bleibt die feinere
+  // (Mensch + Community statt IP) und im Normalfall die wirksame; die dort
+  // faengt den Ansturm ab, der sonst je abgewiesenem Versuch einen
+  // Appwrite-Abruf kostet.
   const tenant = useTenant(event)
   const communityId = tenant?.mode === 'pool' ? tenant.tenantId : ''
   const { store, prefix } = useRateLimitStore(event)

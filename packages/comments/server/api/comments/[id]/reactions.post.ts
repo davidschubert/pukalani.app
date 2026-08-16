@@ -96,6 +96,14 @@ export default defineEventHandler(async (event): Promise<CommentReactionToggleRe
   // ein toter Redis darf das Reagieren nicht abschalten. EIGENER Eimer neben
   // dem der Themen-Reaktionen: wer eine Diskussion durchliest und dabei Themen
   // UND Antworten mit Emojis versieht, soll sich nicht selbst aussperren.
+  //
+  // SIE IST NICHT MEHR DIE ERSTE (AU2, 2026-08-15): `05.rate-limit.ts` deckelt
+  // die Route jetzt zusaetzlich je IP (Bucket `comments:reactions`, ebenfalls
+  // 60/min) — und zwar BEVOR `resolveCommentReactionTarget` oben eine fremde
+  // Zeile ueber die Operator-Klinke liest. Diese Drossel hier bleibt die
+  // feinere (Mensch + Community statt IP) und im Normalfall die wirksame; die
+  // dort faengt den Ansturm ab, der sonst je abgewiesenem Versuch einen
+  // Appwrite-Abruf kostet.
   const tenant = useTenant(event)
   const communityId = tenant?.mode === 'pool' ? tenant.tenantId : ''
   const { store, prefix } = useRateLimitStore(event)

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { normalizeHandle } from '../../../core/shared/handles'
+import type { HandleSuggestion } from '../../../core/shared/types/handle'
 import { messageErrorReason, MESSAGE_RATE_CODE } from '../../shared/messageErrors'
 
 /**
@@ -25,9 +26,33 @@ const handle = ref('')
 const body = ref('')
 const pending = ref(false)
 
-/** Vorschläge aus der Handle-Suche des Cores — dieselbe Quelle wie im Editor. */
-const query = computed(() => normalizeHandle(handle.value))
-const { data: suggestions } = await useFetch<{ id: string, label: string }[]>('/api/handles/search', {
+/**
+ * Vorschläge aus der Handle-Suche des Cores — dieselbe Quelle wie im Editor.
+ *
+ * ENTPRELLT SEIT AU2 (2026-08-15), und das war hier keine Feinheit: an einer
+ * reaktiven `query` schickt `useFetch` bei JEDEM Tastendruck sofort eine
+ * Anfrage los. Das Erwähnungs-Menü der Schreibfläche wartet seit jeher
+ * 150 ms — dieses Feld tat es nicht, und ein ausgeschriebener Name kostete
+ * damit so viele Abfragen, wie er Zeichen hat. Seit die Route gedrosselt ist
+ * (`handles:search`, 120/min), ist das nicht mehr nur Verschwendung, sondern
+ * der schnellste Weg, sich das eigene Budget mitten im Tippen leerzuräumen.
+ *
+ * Derselbe Wert wie in `PostBodyEditor`: zwei Zahlen für dieselbe Geste
+ * laufen auseinander.
+ */
+const SEARCH_DEBOUNCE_MS = 150
+
+const query = ref('')
+let searchTimer: ReturnType<typeof setTimeout> | undefined
+watch(handle, (value) => {
+  clearTimeout(searchTimer)
+  searchTimer = setTimeout(() => {
+    query.value = normalizeHandle(value)
+  }, SEARCH_DEBOUNCE_MS)
+})
+onBeforeUnmount(() => clearTimeout(searchTimer))
+
+const { data: suggestions } = await useFetch<HandleSuggestion[]>('/api/handles/search', {
   query: { q: query },
   lazy: true,
   server: false,

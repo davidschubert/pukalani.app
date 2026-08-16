@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { EditorToolbarItem } from '@nuxt/ui'
 import Mention, { type MentionOptions } from '@tiptap/extension-mention'
+import type { HandleSuggestion } from '../../../core/shared/types/handle'
 import type { TopicLinkSuggestion } from '../../shared/types/post'
 import { POST_EMOJI_ITEMS } from '../utils/emojiMenuItems'
 
@@ -250,8 +251,13 @@ const MENTION_AS_PLAIN_TEXT = Mention.extend({
 })
 const extensions = [MENTION_AS_PLAIN_TEXT]
 
-/** Ein Treffer aus `/api/handles/search` — `id` und `label` sind derselbe Handle. */
-type HandleSuggestion = { id: string, label: string }
+/*
+ * Ein Treffer aus `/api/handles/search` (`HandleSuggestion`, oben importiert):
+ * `id` und `label` tragen denselben Handle. Der Typ kam bis AU2 (2026-08-15)
+ * aus einem lokalen `type` — jetzt aus `core/shared/types/handle.ts`, wo ihn
+ * auch der Handler nennt. Die Form der Antwort gehört an BEIDE Enden, nicht je
+ * Aufrufstelle neu behauptet.
+ */
 
 /** Ein Mensch tippt schneller, als eine Runde zum Server dauert. */
 const SEARCH_DEBOUNCE_MS = 150
