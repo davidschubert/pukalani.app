@@ -9,6 +9,15 @@ Entscheidungsvorlage, kein Umsetzungsplan · **Erstellt:** 2026-08-01
 > Offene Punkte gehören weiter ausschließlich in `docs/OPEN-ITEMS.md` (Zeile
 > F7) — nicht hierher.
 
+> **Nachfolger für die MITGLIEDSCHAFT (2026-08-15):**
+> [F7-PAID-COMMUNITIES-KONZEPT.md](F7-PAID-COMMUNITIES-KONZEPT.md) holt Etappe 4
+> (bezahlte Mitgliedschaft) nach, die hier als „XL, erst nach Etappe 3
+> diskutieren" vertagt ist. Es kommt an zwei Stellen zu einem ANDEREN Ergebnis
+> als diese Datei — die Mitgliedschaft ist architektonisch die EINFACHSTE der
+> drei Etappen, und die Empfehlung „Express + direct charges" (Abschnitt 2.1)
+> ist nach Stripes eigener Doku nicht haltbar. Wer an F7 arbeitet, liest beide;
+> für EINMALKÄUFE (Events, Kurse) bleibt DIESE Datei maßgeblich.
+
 ## Worum es geht
 
 Geldfluss 1 ist gebaut (A6): die **Community zahlt an Pukalani**. Geldfluss 2
