@@ -1,6 +1,6 @@
 # Offene Punkte
 
-**Stand: 2 offen · 3 geparkt/wartend · 13 bewusst zurückgestellt** (Zahlen bei JEDEM Umzug nach COMPLETE mitführen)
+**Stand: 2 offen · 2 geparkt/wartend · 13 bewusst zurückgestellt** (Zahlen bei JEDEM Umzug nach COMPLETE mitführen)
 
 Stand: **2026-08-12**. Hier steht **nur, was noch offen ist** — in der
 Reihenfolge, in der es abgearbeitet wird. Alles Erledigte (mit Begründung,
@@ -39,7 +39,6 @@ ist Wochen. (F3 ist am 2026-08-11 als AH-6 in die Hauptliste gezogen.)
 | --- | --- | --- | --- | --- | --- | --- |
 | U14 | 1 — Tage | **Anmelden mit Google.** Der CODE ist gebaut (Knopf auf Anmelden + Registrieren, erklärte Datenschutz-Zeile, Beitritt/Feed wie beim Passwort-Weg, gedrosselt, ohne Credentials unsichtbar). Offen sind nur noch **Klicks bei David**: Google-Console, Appwrite-Console, zwei Schalter. Die Circle-Falle trifft uns nicht — Google sieht nur die Appwrite-Adresse, nie einen Kunden-Host. | Mittel | S (Rest) | Ja: die Klicks | [Runbook GOOGLE-LOGIN.md](runbooks/GOOGLE-LOGIN.md) |
 | F7 | 3 — Wochen | **Bezahlte Communities** — der Owner nimmt Geld von seinen Mitgliedern. **Konzept steht, alle vier Entscheidungen GEFALLEN** (2026-08-15, DECISION-LOG): Owner verkauft (Connect, volles Dashboard, direct charges) · V1 = ganze Community · Erstattung nimmt Provision mit + Zugang endet sofort · Verkauf sperrt Endzustände. [F7-PAID-COMMUNITIES-KONZEPT.md](plans/F7-PAID-COMMUNITIES-KONZEPT.md). **Schluckt D1.** Offen nur noch: Anwaltsliste (§ 9, allen voran Art. 9a) + Bau nach A2. | Mittel | XL | Anwalt (§ 9) | A2 (Stripe live) |
-| F47 | 4 — Klicks | **Analytics v2, Rest = nur noch Plausible-UI-Klicks** (Adblock-Proxy live 2026-08-12; Kundenbereich-Messung ENTSCHIEDEN: Sammel-Site, Code live): (1) Goals der sieben Trichter-Ereignisse in der Sammel-Site WÖRTLICH anlegen (`funnel_cta_start` …, CE hat keine Goals-API), (2) E-Mail-Reports je Site aktivieren. | Niedrig | S | Ja: Plausible-UI | [ANALYTICS-V2.md](plans/ANALYTICS-V2.md) § 5 · DECISION-LOG 2026-08-12 |
 
 ---
 

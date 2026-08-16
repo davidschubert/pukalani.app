@@ -243,6 +243,44 @@ BEWEIS umbringen — `waitForMembership` pollt genau die Route, die AU1 gedeckel
 hat, 45-mal im Sekundentakt; ohne frische IP je Poll hätte der Beweis seine
 eigene Drossel gemessen und „die Rolle kommt nicht an" gemeldet.
 
+### F47 zu + Changelog eingefügt — und ein still leerer Betreiber-Changelog gefunden ✅ 2026-08-15
+
+Davids Dreierpaket abgearbeitet: (1) **Plausible** — die sieben
+Trichter-Goals wörtlich in der Sammel-Site `communities.pukalani.app`
+angelegt (`funnel_cta_start/_cta_plan/_register_done/_gate_no_code/
+_code_redeemed/_site_created/_request_submitted`), wöchentlicher
+E-Mail-Report auf ALLEN fünf Sites aktiviert (pukalani.app · comments ·
+communities · freelancer · portfolio; Plausible setzt Davids eigene
+Adresse automatisch als Empfänger). Damit ist **F47 zu**. (2) Die sechs
+kuratierten **Changelog-Einträge** aus dem Übergabezettel als ENTWÜRFE
+(`published:false`) angelegt — David prüft + veröffentlicht in der UI,
+Zettel gelöscht. (3) Die überholte F57-Doku-Session als erledigt
+gemeldet (Nachbarsitzung hatte 53717e12 schon gepusht).
+
+**Der Fund dabei:** Der Betreiber-Changelog auf admin.pukalani.app war
+seit dem control-Cutover **still leer** — die `changelog`-Tabelle wurde
+nie ins `control`-Projekt migriert (nur die Migrationen admin-001…003
+gegen control fehlten). `changelog.get.ts` fängt jeden Fehler ab und
+liefert `{total:0,entries:[]}`, also sah alles gesund aus (HTTP 200,
+leere Liste) — genau die Fail-soft-Klasse, die ein fehlendes Fundament
+unsichtbar macht. Die einzige `changelog`-Tabelle stand im `account`-
+Projekt (Waise aus der Zeit VOR F3, als comments eine eigene Instanz
+war; wird von keinem Live-Host mehr gelesen). Behoben: admin-001/002/003
+gegen control gefahren (idempotent, je mit Projekt-Kontrolle), dann die
+sechs Entwürfe dorthin — die öffentliche API liefert weiter leer, weil
+sie `published:false` sind (korrekt). Der `account`-Waise blieb
+unangetastet (Löschen wäre destruktiv, gelesen wird er nirgends).
+
+**Gelernt:** Ein `try/catch`, der bei JEDEM Fehler eine leere Liste
+zurückgibt, verwandelt „Tabelle fehlt" in „es gibt eben nichts Neues" —
+ununterscheidbar von der Wahrheit. Fail-soft am Leseweg braucht einen
+Wächter am Fundament (die Tabelle hätte in der Schema-Parität auffallen
+müssen, aber `ops:schema-parity` deckt nur `system`-Tabellen, nicht die
+des admin-Layers). Zweite Lehre: Wo eine Tabelle „nur einmal" existiert,
+lohnt VOR dem Schreiben die Frage, ob der LESER auch dorthin zeigt — die
+account-Waise hätte den Schreibvorgang klaglos geschluckt, sichtbar
+geworden wäre nichts.
+
 ### Autonome Runde 4 — frisches Audit über den Post-Wellen-Stand ✅ 2026-08-15
 
 Drei read-only Audit-Agenten über die Wellen-Schnitte (posts+comments /
