@@ -2,6 +2,35 @@
 import type { FormSubmitEvent } from '@nuxt/ui'
 import { createRegisterFormSchema, type RegisterFormInput } from '../../../schemas/auth'
 
+/**
+ * REGISTRIERUNG AUF EINLADUNG (Davids Entscheidung 2026-08-15) — die drei
+ * Angaben, mit denen die Einladungs-Seite dieses Formular benutzt.
+ *
+ * Bewusst hier und nicht als zweites Formular auf `/join`: Passwortregeln,
+ * AGB-Gate, Fehlermeldungen und der Trichter-Punkt leben an EINER Stelle. Eine
+ * Kopie daneben wäre die Stelle, an der eine Regel künftig fehlt.
+ */
+const props = defineProps<{
+  /**
+   * Öffnet die Registrierung auf einer Community mit geschlossener
+   * Anmeldung — der Server prüft ihn (`inviteOpensRegistrationFor`) und lässt
+   * ihn NUR für die eingeladene Adresse gelten.
+   */
+  inviteToken?: string
+  /**
+   * Die eingeladene Adresse. Sie steht fest, weil der Server ohnehin nur sie
+   * durchlässt: ein änderbares Feld böte hier eine Eingabe an, die garantiert
+   * abgelehnt würde.
+   */
+  lockedEmail?: string
+  /**
+   * Wohin nach der Anmeldung. Ohne Angabe gilt wie bisher `?redirect=` bzw.
+   * die Startseite — die Einladungs-Seite bleibt dagegen bei sich, dort wartet
+   * noch der Klick auf „Einladung annehmen".
+   */
+  redirectTo?: string
+}>()
+
 const { t } = useI18n()
 const { afterAuthTarget } = useAuthRedirect()
 const appConfig = useAppConfig()
@@ -32,7 +61,9 @@ const sharedEmail = useState('pukalani-auth-email', () => '')
 const sharedName = useState('pukalani-auth-name', () => '')
 const state = reactive<RegisterFormInput>({
   name: sharedName.value,
-  email: sharedEmail.value,
+  // Eine gebundene Einladung schlägt den gemerkten Wert: die Adresse ist hier
+  // keine Wahl, sondern eine Tatsache.
+  email: props.lockedEmail || sharedEmail.value,
   password: '',
   passwordConfirm: '',
   terms: false,
@@ -47,11 +78,18 @@ async function onSubmit(event: FormSubmitEvent<RegisterFormInput>) {
     // passwordConfirm/terms sind reine UI-Validierung — der Server bekommt sie nicht
     await $fetch('/api/auth/signup', {
       method: 'POST',
-      body: { name: event.data.name, email: event.data.email, password: event.data.password },
+      body: {
+        name: event.data.name,
+        email: event.data.email,
+        password: event.data.password,
+        // Nur gesetzt, wenn die Seite eine Einladung trägt. Der Server prüft
+        // ihn selbst; hier wird nichts entschieden, nur weitergereicht.
+        ...(props.inviteToken ? { inviteToken: props.inviteToken } : {}),
+      },
     })
     await auth.refresh()
     if (isControlCenter) trackFunnel('funnel_register_done')
-    await navigateTo(afterAuthTarget())
+    await navigateTo(props.redirectTo || afterAuthTarget())
   }
   catch (error) {
     // Server weg ≠ gesperrt ≠ Account existiert ≠ Registrierung zu — ehrliche
@@ -85,8 +123,20 @@ async function onSubmit(event: FormSubmitEvent<RegisterFormInput>) {
         <UInput v-model="state.name" size="lg" :placeholder="t('auth.fields.namePlaceholder')" class="w-full" />
       </UFormField>
 
-      <UFormField :label="t('auth.fields.email')" name="email" required>
-        <UInput v-model="state.email" type="email" size="lg" :placeholder="t('auth.fields.emailPlaceholder')" class="w-full" />
+      <UFormField
+        :label="t('auth.fields.email')"
+        name="email"
+        required
+        :description="lockedEmail ? t('auth.register.invitedEmailNote') : undefined"
+      >
+        <UInput
+          v-model="state.email"
+          type="email"
+          size="lg"
+          :readonly="Boolean(lockedEmail)"
+          :placeholder="t('auth.fields.emailPlaceholder')"
+          class="w-full"
+        />
       </UFormField>
 
       <UFormField :label="t('auth.fields.password')" name="password" required>

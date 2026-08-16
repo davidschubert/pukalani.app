@@ -1,6 +1,17 @@
 import { Account, AppwriteException, Client, ID, Query } from 'node-appwrite'
+import { z } from 'zod'
 import { createAdminClient, requestLocale, setSessionCookie } from '../../lib/appwrite'
 import { registerSchema } from '../../../schemas/auth'
+
+/**
+ * Der Token gehört NICHT ins geteilte `registerSchema`: das trägt auch das
+ * Formular, und dort hat er nichts zu suchen. Hier, an der einen Route, die ihn
+ * auswertet, ist er ausdrücklich — und in derselben Form geprüft wie überall
+ * sonst (64 Hex, wie ihn `community_invites` vergibt).
+ */
+const signupSchema = registerSchema.extend({
+  inviteToken: z.string().regex(/^[a-f0-9]{64}$/).optional(),
+})
 
 /**
  * Account + Session in einem Request (AdminClient: users.write + sessions.write).
@@ -11,12 +22,28 @@ export default defineEventHandler(async (event) => {
   if (!appConfig.registrationEnabled || appConfig.maintenanceMode) {
     throw createError({ status: 403, statusText: 'Registration is currently disabled' })
   }
-  // Zweite, MANDANTEN-Ebene (S1): app_config ist EINE Row pro Projekt — im Pool
-  // teilen sich alle Communities sie, der Schalter oben kann also nicht pro
-  // Community stehen. tenants.openRegistration kann es (control-018).
-  assertTenantRegistrationOpen(event)
 
-  const { email, password, name } = await readValidatedBody(event, registerSchema.parse)
+  const { email, password, name, inviteToken } = await readValidatedBody(event, signupSchema.parse)
+
+  /**
+   * Zweite, MANDANTEN-Ebene (S1): app_config ist EINE Row pro Projekt — im Pool
+   * teilen sich alle Communities sie, der Schalter oben kann also nicht pro
+   * Community stehen. tenants.openRegistration kann es (control-018).
+   *
+   * EINE EINLADUNG ÖFFNET DIE TÜR — für genau die eingeladene Adresse (Davids
+   * Entscheidung 2026-08-15). Ohne das war eine geschlossene Community für
+   * Eingeladene OHNE Pukalani-Konto gar nicht betretbar, obwohl der
+   * Einladungs-Dialog es zusagt. Die Adressbindung steckt in
+   * `inviteOpensRegistrationFor` und ist der Grund, warum ein weitergeleiteter
+   * Link kein Generalschlüssel ist.
+   *
+   * Die Reihenfolge ist Absicht: erst der billige Schalter, dann der Body, dann
+   * die Naht ins Control Plane. Wer ohne Token kommt, kostet keinen Netzaufruf.
+   */
+  if (!tenantRegistrationOpen(event) && !(await inviteOpensRegistrationFor(event, inviteToken, email))) {
+    throw createError({ status: 403, statusText: 'Registration is closed' })
+  }
+
   const { account } = createAdminClient(event)
 
   // Appwrite-Fehler kapseln: doppelte E-Mail (409) sauber melden, Rest generisch —

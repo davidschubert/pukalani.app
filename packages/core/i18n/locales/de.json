@@ -27,7 +27,8 @@
       "hasAccount": "Schon einen Account?",
       "loginLink": "Anmelden",
       "termsLabel": "Ich akzeptiere die AGB",
-      "termsLink": "AGB lesen"
+      "termsLink": "AGB lesen",
+      "invitedEmailNote": "Diese Adresse steht fest: An sie ging die Einladung."
     },
     "logout": "Abmelden",
     "oauth": {

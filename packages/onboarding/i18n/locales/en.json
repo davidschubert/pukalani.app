@@ -78,80 +78,80 @@
       "planNone": "No subscription"
     },
     "account": {
-    "home": {
-      "title": "Your account",
-      "navLabel": "Overview",
-      "greeting": "Hello, {name}",
-      "intro": "Manage your Pukalani account and your communities here.",
-      "communities": {
-        "title": "Your communities",
-        "description": "One community | {count} communities"
+      "home": {
+        "title": "Your account",
+        "navLabel": "Overview",
+        "greeting": "Hello, {name}",
+        "intro": "Manage your Pukalani account and your communities here.",
+        "communities": {
+          "title": "Your communities",
+          "description": "One community | {count} communities"
+        },
+        "profile": {
+          "title": "Profile",
+          "description": "Picture, name and how you appear."
+        },
+        "settings": {
+          "title": "Settings",
+          "description": "Password, sessions, notifications and data."
+        },
+        "create": {
+          "title": "Create a community",
+          "description": "Set up your first community — it takes about a minute."
+        }
       },
       "profile": {
         "title": "Profile",
-        "description": "Picture, name and how you appear."
+        "heading": "Your Pukalani ID",
+        "intro": "Who you are and what you have done — both apply across all your communities.",
+        "tabs": {
+          "profile": "Profile",
+          "activity": "Activity"
+        }
+      },
+      "activity": {
+        "title": "Activity",
+        "emptyTitle": "No activity yet",
+        "emptyText": "As soon as you write something, RSVP or enrol, it shows up here — from all of your communities.",
+        "emptyAction": "Go to your communities",
+        "unknownCommunity": "No longer reachable",
+        "truncated": "There is more than shown here. This list holds the most recent entries.",
+        "unavailable": "Part of your activity could not be loaded right now, so this list is incomplete.",
+        "errorTitle": "Activity not loaded",
+        "errorText": "Please reload the page.",
+        "kinds": {
+          "post": "Wrote a post",
+          "comment": "Wrote a comment",
+          "rsvp": "Said yes",
+          "enrollment": "Enrolled"
+        }
       },
       "settings": {
         "title": "Settings",
-        "description": "Password, sessions, notifications and data."
+        "heading": "Account settings",
+        "intro": "These settings apply to your account, not to a single community.",
+        "tabs": {
+          "security": "Security",
+          "sessions": "Sessions",
+          "notifications": "Notifications",
+          "data": "Data",
+          "billing": "Billing"
+        }
       },
-      "create": {
-        "title": "Create a community",
-        "description": "Set up your first community — it takes about a minute."
+      "billing": {
+        "title": "Billing",
+        "note": "You pay per community, in its own dashboard. This page only shows how each one stands.",
+        "emptyTitle": "Nothing to bill",
+        "emptyText": "You do not own a community. Taking part costs nothing.",
+        "stateActive": "Active",
+        "manage": "Manage plan",
+        "columns": {
+          "community": "Community",
+          "plan": "Plan",
+          "state": "State"
+        }
       }
     },
-    "profile": {
-      "title": "Profile",
-      "heading": "Your Pukalani ID",
-      "intro": "Who you are and what you have done — both apply across all your communities.",
-      "tabs": {
-        "profile": "Profile",
-        "activity": "Activity"
-      }
-    },
-    "activity": {
-      "title": "Activity",
-      "emptyTitle": "No activity yet",
-      "emptyText": "As soon as you write something, RSVP or enrol, it shows up here — from all of your communities.",
-      "emptyAction": "Go to your communities",
-      "unknownCommunity": "No longer reachable",
-      "truncated": "There is more than shown here. This list holds the most recent entries.",
-      "unavailable": "Part of your activity could not be loaded right now, so this list is incomplete.",
-      "errorTitle": "Activity not loaded",
-      "errorText": "Please reload the page.",
-      "kinds": {
-        "post": "Wrote a post",
-        "comment": "Wrote a comment",
-        "rsvp": "Said yes",
-        "enrollment": "Enrolled"
-      }
-    },
-    "settings": {
-      "title": "Settings",
-      "heading": "Account settings",
-      "intro": "These settings apply to your account, not to a single community.",
-      "tabs": {
-        "security": "Security",
-        "sessions": "Sessions",
-        "notifications": "Notifications",
-        "data": "Data",
-        "billing": "Billing"
-      }
-    },
-    "billing": {
-      "title": "Billing",
-      "note": "You pay per community, in its own dashboard. This page only shows how each one stands.",
-      "emptyTitle": "Nothing to bill",
-      "emptyText": "You do not own a community. Taking part costs nothing.",
-      "stateActive": "Active",
-      "manage": "Manage plan",
-      "columns": {
-        "community": "Community",
-        "plan": "Plan",
-        "state": "State"
-      }
-    }
-  },
     "domain": {
       "navLabel": "Custom domain",
       "title": "Custom domain",
@@ -345,22 +345,64 @@
       "addressUnknown": "We couldn't check just now — you can still continue."
     },
     "categories": {
-      "coaching": { "label": "Coaching & consulting", "hint": "Guidance, groups, sparring" },
-      "education": { "label": "Courses & education", "hint": "Learning, teaching, certificates" },
-      "creator": { "label": "Creator & audience", "hint": "Newsletter, video, podcast" },
-      "club": { "label": "Clubs & volunteering", "hint": "Members, dates, notices" },
-      "business": { "label": "Companies & teams", "hint": "Customers, partners, staff" },
-      "health": { "label": "Health & sport", "hint": "Training, nutrition, recovery" },
-      "craft": { "label": "Craft & hobby", "hint": "Making, collecting, repairing" },
-      "other": { "label": "Something else", "hint": "Tell us in the next step." }
+      "coaching": {
+        "label": "Coaching & consulting",
+        "hint": "Guidance, groups, sparring"
+      },
+      "education": {
+        "label": "Courses & education",
+        "hint": "Learning, teaching, certificates"
+      },
+      "creator": {
+        "label": "Creator & audience",
+        "hint": "Newsletter, video, podcast"
+      },
+      "club": {
+        "label": "Clubs & volunteering",
+        "hint": "Members, dates, notices"
+      },
+      "business": {
+        "label": "Companies & teams",
+        "hint": "Customers, partners, staff"
+      },
+      "health": {
+        "label": "Health & sport",
+        "hint": "Training, nutrition, recovery"
+      },
+      "craft": {
+        "label": "Craft & hobby",
+        "hint": "Making, collecting, repairing"
+      },
+      "other": {
+        "label": "Something else",
+        "hint": "Tell us in the next step."
+      }
     },
     "vibes": {
-      "calm": { "label": "Calm & clear", "hint": "Restrained, lots of air" },
-      "warm": { "label": "Warm & inviting", "hint": "Friendly, approachable" },
-      "fresh": { "label": "Fresh & lively", "hint": "Awake, in motion" },
-      "focused": { "label": "Deep & focused", "hint": "Serious, dependable" },
-      "bold": { "label": "Bold & strong", "hint": "Loud, with an attitude" },
-      "elegant": { "label": "Elegant & muted", "hint": "Sober, high-end" }
+      "calm": {
+        "label": "Calm & clear",
+        "hint": "Restrained, lots of air"
+      },
+      "warm": {
+        "label": "Warm & inviting",
+        "hint": "Friendly, approachable"
+      },
+      "fresh": {
+        "label": "Fresh & lively",
+        "hint": "Awake, in motion"
+      },
+      "focused": {
+        "label": "Deep & focused",
+        "hint": "Serious, dependable"
+      },
+      "bold": {
+        "label": "Bold & strong",
+        "hint": "Loud, with an attitude"
+      },
+      "elegant": {
+        "label": "Elegant & muted",
+        "hint": "Sober, high-end"
+      }
     },
     "summary": {
       "name": "Name",
@@ -768,6 +810,8 @@
     "wrongAccount": "This invitation was issued for a different email address. Sign in with the invited address.",
     "noneTitle": "No open invitation",
     "noneText": "There is no invitation here for this account. Check the link from your email — or ask the community team for a new one.",
-    "verifyFirst": "Please confirm your email address first"
+    "verifyFirst": "Please confirm your email address first",
+    "createAccountIntro": "Don't have a Pukalani account yet? Create one here — then you accept the invitation with one click.",
+    "noneTextAnonymous": "This invitation link is no longer valid. It has expired, been used already or been withdrawn — ask the community team for a new invitation."
   }
 }

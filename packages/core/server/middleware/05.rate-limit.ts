@@ -54,6 +54,9 @@ const FAILURE_LIMITED = new Set([
   'PUT /api/auth/verification',
   // Embed-Handoff-Einlösung (E2): session-los, Token = Beweis → Raten drosseln
   'POST /api/auth/embed-session',
+  // Einladungs-Vorschau: session-los, der Token IST der Beweis. Sie legt nichts
+  // an und verschickt nichts — geratene Token sollen trotzdem ins Budget laufen.
+  'POST /api/community/invites/preview',
   // Site-Handoff (O6): dito — der Token IST der Beweis, also nur Fehlversuche
   // zählen (ein erfolgreicher Sprung in die eigene Community kostet nichts).
   'GET /api/auth/site-session',

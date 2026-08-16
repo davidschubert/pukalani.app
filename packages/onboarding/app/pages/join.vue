@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { safeRedirectTarget } from '../../../core/shared/redirectTarget'
 /**
  * Einladung annehmen — die Landestelle des Mail-Links (`/join?token=…`) UND der
  * Glocken-Meldung (`/join` ohne Token).
@@ -19,12 +20,42 @@
  * einen Mandanten-Host (N7). Wer eingeladen wird, soll die COMMUNITY sehen, in
  * die er eintritt.
  */
-definePageMeta({ middleware: ['auth'] })
+/**
+ * MIT TOKEN OHNE ANMELDUNG (Davids Entscheidung 2026-08-15).
+ *
+ * Der `auth`-Guard schickte bisher JEDEN Nicht-Angemeldeten zur Anmeldung —
+ * für den Weg „ich habe schon ein Konto" genau richtig. Wer noch KEINS hat,
+ * kam auf einer geschlossenen Community aber nirgendwo an: die Register-Seite
+ * sagt dort „Nur auf Einladung … melde dich einfach an", und anmelden kann man
+ * sich ohne Konto nicht. Trägt die Adresse einen Token, bleibt die Person
+ * deshalb hier — die Seite bietet beides an.
+ *
+ * OHNE Token bleibt es beim alten Verhalten (der Weg aus der Glocke): dort
+ * IST die Anmeldung die Voraussetzung, denn gesucht wird nach der eigenen,
+ * geprüften Adresse. Die Umleitung ist wortgleich die des `auth`-Guards —
+ * inklusive `safeRedirectTarget`, damit daraus keine Weiterleitung nach aussen
+ * wird.
+ */
+definePageMeta({
+  middleware: [
+    (to) => {
+      const value = to.query.token
+      const hatToken = typeof value === 'string' && /^[a-f0-9]{64}$/.test(value)
+      if (hatToken || useAuthStore().isLoggedIn) return
+      const target = safeRedirectTarget(to.fullPath)
+      return navigateTo({
+        path: useLocalePath()('/login'),
+        ...(target ? { query: { redirect: target } } : {}),
+      })
+    },
+  ],
+})
 
 const { t } = useI18n()
 const route = useRoute()
 const localePath = useLocalePath()
 const toast = useToast()
+const auth = useAuthStore()
 
 // Öffentliche Seite auf dem Community-Host → Brand-Kette wie /login (C5).
 useBrandTitle(() => t('join.title'))
@@ -34,16 +65,57 @@ const token = computed(() => {
   return typeof value === 'string' && /^[a-f0-9]{64}$/.test(value) ? value : null
 })
 
-/** Ohne Token: gibt es eine offene Einladung an MEINE Adresse? */
+/**
+ * Ohne Token: gibt es eine offene Einladung an MEINE Adresse? Nur mit Konto —
+ * die Route setzt eine Sitzung voraus, und ohne Anmeldung gibt es keine
+ * „eigene Adresse", nach der man suchen könnte.
+ */
 const { data: mine } = await useFetch<{ invites: { id: string, role: string, expiresAt: string }[], siteName: string }>(
   '/api/community/invites/mine',
-  { default: () => ({ invites: [], siteName: '' }) },
+  { default: () => ({ invites: [], siteName: '' }), immediate: auth.isLoggedIn },
 )
+
+/**
+ * Wem gehört dieser Token? Beantwortet auch OHNE Konto — das ist der ganze
+ * Zweck: erst dadurch kann die Seite sagen, als was man eingeladen ist und an
+ * welche Adresse das Konto gehört.
+ */
+const { data: einladung } = await useFetch<{ ok: boolean, email: string, role: string }>(
+  '/api/community/invites/preview',
+  {
+    method: 'POST',
+    body: computed(() => ({ token: token.value })),
+    immediate: Boolean(token.value),
+    // Ein ungültiger Token ist keine Ausnahme, sondern eine Antwort.
+    default: () => ({ ok: false, email: '', role: '' }),
+  },
+)
+
+/** Angemeldet? Dann annehmen. Sonst: Konto anlegen — hier, auf dieser Seite. */
+const brauchtKonto = computed(() => !auth.isLoggedIn && Boolean(token.value) && Boolean(einladung.value?.ok))
 
 const pending = computed(() => mine.value?.invites?.[0] ?? null)
 const siteName = computed(() => mine.value?.siteName ?? '')
-/** Etwas anzunehmen gibt es nur mit Token ODER mit gefundener Einladung. */
-const hasSomething = computed(() => Boolean(token.value) || Boolean(pending.value))
+/**
+ * Etwas anzunehmen gibt es nur mit Token ODER mit gefundener Einladung — und
+ * ANGEMELDET.
+ *
+ * Die Anmelde-Bedingung kam mit dem Konto-Anlegen dazu: seit die Seite auch
+ * ohne Konto erreichbar ist, landet hier auch, wer einen ABGELAUFENEN oder
+ * erfundenen Token mitbringt. Ohne sie stünde dort ein „Einladung annehmen",
+ * das nur ein 401 liefern kann — ein Knopf, der nicht kann, was er verspricht.
+ * Jetzt sieht diese Person denselben ehrlichen Hinweis wie jede andere ohne
+ * gültige Einladung.
+ */
+const hasSomething = computed(() =>
+  auth.isLoggedIn && (Boolean(token.value) || Boolean(pending.value)))
+
+/**
+ * Die Rolle, die die Einladung vergibt — aus der Vorschau (ohne Konto) oder
+ * aus der eigenen Einladungs-Liste (mit Konto). Nur zur Anzeige; verbindlich
+ * wird sie beim Annehmen im Control Plane.
+ */
+const rolle = computed(() => einladung.value?.ok ? einladung.value.role : pending.value?.role ?? '')
 
 const busy = ref(false)
 const done = ref(false)
@@ -99,9 +171,36 @@ async function accept() {
       variant="subtle"
       class="mx-auto max-w-xl"
     >
-      <div v-if="hasSomething" class="space-y-4" data-join-accept-box>
-        <p v-if="pending" class="text-sm text-muted">
-          {{ t('join.roleNote', { role: t(`members.roles.${pending.role}`) }) }}
+      <!--
+        OHNE KONTO, MIT GÜLTIGEM TOKEN: hier entsteht das Konto. Ein Verweis auf
+        die Register-Seite hülfe nicht — auf einer geschlossenen Community sagt
+        die „Nur auf Einladung".
+      -->
+      <div v-if="brauchtKonto" class="space-y-4" data-join-register-box>
+        <p class="text-sm text-muted">
+          {{ t('join.roleNote', { role: t(`members.roles.${rolle}`) }) }}
+        </p>
+        <p class="text-sm text-muted">{{ t('join.createAccountIntro') }}</p>
+
+        <AuthRegisterForm
+          :invite-token="token ?? undefined"
+          :locked-email="einladung?.email"
+          :redirect-to="route.fullPath"
+        />
+
+        <USeparator />
+        <p class="text-center text-sm text-muted">
+          {{ t('auth.register.hasAccount') }}
+          <ULink
+            :to="{ path: localePath('/login'), query: { redirect: route.fullPath } }"
+            class="font-medium text-primary"
+          >{{ t('auth.register.loginLink') }}</ULink>
+        </p>
+      </div>
+
+      <div v-else-if="hasSomething" class="space-y-4" data-join-accept-box>
+        <p v-if="rolle" class="text-sm text-muted">
+          {{ t('join.roleNote', { role: t(`members.roles.${rolle}`) }) }}
         </p>
         <AuthEmailVerifyRequired v-if="needsVerification" :title="t('join.verifyFirst')" />
         <UButton :loading="busy" :disabled="done" icon="i-ph-check" data-join-accept @click="accept">
@@ -115,7 +214,7 @@ async function accept() {
         variant="subtle"
         icon="i-ph-info"
         :title="t('join.noneTitle')"
-        :description="t('join.noneText')"
+        :description="auth.isLoggedIn ? t('join.noneText') : t('join.noneTextAnonymous')"
       />
     </UPageCard>
   </UContainer>

@@ -27,7 +27,8 @@
       "hasAccount": "Already have an account?",
       "loginLink": "Sign in",
       "termsLabel": "I accept the Terms and Conditions",
-      "termsLink": "Read Terms and Conditions"
+      "termsLink": "Read Terms and Conditions",
+      "invitedEmailNote": "This address is fixed: the invitation was sent to it."
     },
     "logout": "Sign out",
     "oauth": {
