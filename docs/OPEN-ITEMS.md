@@ -1,6 +1,6 @@
 # Offene Punkte
 
-**Stand: 2 offen · 2 geparkt/wartend · 13 bewusst zurückgestellt** (Zahlen bei JEDEM Umzug nach COMPLETE mitführen)
+**Stand: 3 offen · 2 geparkt/wartend · 13 bewusst zurückgestellt** (Zahlen bei JEDEM Umzug nach COMPLETE mitführen)
 
 Stand: **2026-08-12**. Hier steht **nur, was noch offen ist** — in der
 Reihenfolge, in der es abgearbeitet wird. Alles Erledigte (mit Begründung,
@@ -27,6 +27,7 @@ demo-Ausbau, comments in den Pool. Entscheidungen: DECISION-LOG 2026-08-11.
 | --- | --- | --- | --- | --- | --- |
 | 2 · A1 | **Echte Rechtstexte** für Impressum, Datenschutz und AGB. **pukalani.studio ist fertig** (2026-08-12): Impressum + Datenschutz in de/en veröffentlicht, inkl. **ladungsfähiger Anschrift**; die Texte nennen nur Belegbares, Erfundenes wurde weggelassen. Dort noch offen und beim Anwalt: die Prüfung zu **Art. 27 DSGVO** (Vertreter in der Union — Sitz ausserhalb der EU bei DACH-Ansprache) samt Drittland-Grundlage, dazu die Angabe zur Verbraucherstreitbeilegung. Für **pukalani.app** stehen die Texte weiter aus. **Direkt danach `pukalani.auth.termsUrl` in `apps/platform` setzen** — die AGB-Checkbox fehlt heute genau dort, wo Kunden sich registrieren (Trichter M9). Schaltet Punkt 3 frei. | Hoch | S — Anwalt lesen lassen | Ja: nur David (ggf. Anwalt) | [Agenda: Studio](#a1-anwalt) · [Agenda: Plattform](#a1-plattform) |
 | 3 · A2 | **Stripe auf echtes Geld umstellen — über die F55-Seite.** Vorstufe A2a komplett grün, F55 selbst erledigt (beide 2026-08-08). Bei David bleiben: Bank-Aktivierung, Steuer-Registrierung, Live-Key ROTIERT eintragen (der erste ist teil-geleakt und rotiert), Portal-Konfiguration; alles andere klickt die F55-Seite. Braucht Punkt 2 (A1). | Hoch | S | Ja: Bank, Konto, Portal | [STRIPE-GO-LIVE-RUNBOOK.md](runbooks/STRIPE-GO-LIVE-RUNBOOK.md) |
+| 4 · AU4 | **Schema-Paritäts-Wächter auf Nicht-`system`-Tabellen ausweiten.** `ops:schema-parity` vergleicht heute NUR `system`-Tabellen über die Instanzen — deshalb blieb am 2026-08-15 monatelang unbemerkt, dass die `changelog`-Tabelle (admin-Layer) nach dem control-Cutover nie in `control` angelegt wurde (Betreiber-Changelog still leer, `changelog.get.ts` verschluckt das fail-soft). Wächter um die Tabellen der Produkt-/admin-Layer erweitern, die je Instanz existieren SOLLEN (Soll aus den Migrationen ableiten, nicht nur Ist-gegen-Ist — sonst meldet ein überall fehlendes Fundament nichts). Details: [COMPLETE-Eintrag F47+Changelog](OPEN-ITEMS-COMPLETE.md). | Mittel | S/M | Nein | — |
 
 ## ⏸️ Geparkt / wartet — in Arbeitsreihenfolge
 
