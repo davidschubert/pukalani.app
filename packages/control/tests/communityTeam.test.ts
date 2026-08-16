@@ -5,6 +5,7 @@ import {
   decideCommunityDeletion,
   hasCommunityAccess,
   decideInvite,
+  decideInviteDelivery,
   decideJoin,
   decideMembershipErasure,
   decideRemoval,
@@ -13,6 +14,7 @@ import {
   inviteReferenceErasure,
   type CommunityTeamMemberFacts,
 } from '../shared/communityTeam'
+import { memberInviteQuota } from '../shared/communityInviteQuota'
 
 /**
  * Die Schutzregeln der Mitglieder-Verwaltung (control-019).
@@ -179,6 +181,136 @@ describe('decideInvite', () => {
   it('weist unbekannte Rollen ab', () => {
     expect(decideInvite({ email: 'neu@example.test', role: 'superuser', members: team, activeEmails }))
       .toEqual({ ok: false, reason: 'invalid_role' })
+  })
+})
+
+/**
+ * AU1 — DAS MITGLIEDSCHAFTS-ORAKEL (Audit + Davids Entscheidung 2026-08-15).
+ *
+ * Seit F57 darf jedes Mitglied einladen. `already_member` war damit ein
+ * kostenloser Test „gehört diese Adresse hierher?" — für Adressen, deren
+ * Mitgliederliste der Fragende nicht lesen darf.
+ *
+ * Die Regel hier ist die einzige Stelle, an der „so tun als ob" steht. Sie ist
+ * pur, damit ihr Wegfall ROT wird: läge sie in der Route, antwortete die
+ * einfach wieder ehrlich, und kein Test würde davon etwas merken.
+ */
+describe('decideInviteDelivery', () => {
+  const ok = { ok: true } as const
+  const alreadyMember = { ok: false, reason: 'already_member' } as const
+
+  it('der gewöhnliche Weg: senden', () => {
+    for (const managesTeam of [true, false]) {
+      expect(decideInviteDelivery(ok, managesTeam), String(managesTeam))
+        .toEqual({ outcome: 'send' })
+    }
+  })
+
+  /**
+   * DIE ENTSCHEIDUNG: wer die Mitgliederliste nicht lesen darf, erfährt nichts.
+   * Nicht „später", nicht „unscharf" — gar nichts.
+   */
+  it('Mitglied + already_member ⇒ still, nicht abgelehnt', () => {
+    expect(decideInviteDelivery(alreadyMember, false))
+      .toEqual({ outcome: 'suppress', reason: 'already_member' })
+  })
+
+  /**
+   * DIE GEGENPROBE ZUR ENTSCHEIDUNG: Owner/Admin bekommen die Wahrheit. Sie
+   * sehen dieselbe Person zwei Zeilen weiter in ihrer eigenen Liste — ihnen
+   * etwas vorzumachen schützte niemanden und nähme ihnen den Hinweis, den sie
+   * brauchen („die Rolle änderst du direkt in der Liste").
+   */
+  it('Team + already_member ⇒ ehrliches 409', () => {
+    expect(decideInviteDelivery(alreadyMember, true))
+      .toEqual({ outcome: 'reject', reason: 'already_member' })
+  })
+
+  /**
+   * NUR `already_member` wird verschwiegen. Die anderen Ablehnungen sagen über
+   * eine fremde Adresse nichts aus — sie still zu machen, verwandelte einen
+   * Tippfehler in einen unsichtbaren Fehlschlag.
+   */
+  it('verschweigt sonst nichts', () => {
+    for (const reason of ['invalid_role', 'owner_protected', 'not_a_member', 'last_owner'] as const) {
+      for (const managesTeam of [true, false]) {
+        expect(decideInviteDelivery({ ok: false, reason }, managesTeam), `${reason}/${managesTeam}`)
+          .toEqual({ outcome: 'reject', reason })
+      }
+    }
+  })
+})
+
+/**
+ * AU1 — UNUNTERSCHEIDBAR, FELD FÜR FELD.
+ *
+ * Der stille Weg nützt nichts, wenn die Antwort ihn verrät. Die Route baut
+ * deshalb für BEIDE Wege dieselbe Antwort; hier wird nachgeprüft, dass sich
+ * das an den Zutaten auch durchhält — dieselben Schlüssel, dieselben Typen,
+ * und das Kontingent um EINS weiter (der Preis, der das Orakel schliesst).
+ *
+ * Die Zutaten sind absichtlich nachgebaut statt die Route zu importieren: sie
+ * ist ein Nitro-Handler mit Appwrite-Client. Was hier hängt, ist die FORM der
+ * Antwort — und genau die ist der Kanal.
+ */
+describe('AU1 — die Antwort verrät den stillen Weg nicht', () => {
+  /** Wörtlich die Felder, die invite.post.ts zurückgibt. */
+  function inviteResponse(suppressed: boolean, used: number) {
+    return {
+      ok: true,
+      delivered: !suppressed,
+      inviteId: 'row-1',
+      email: 'ada@example.test',
+      role: 'viewer',
+      expiresAt: '2026-08-22T12:00:00.000Z',
+      quota: memberInviteQuota({
+        managesTeam: false,
+        invitesEnabled: true,
+        emailVerified: true,
+        limit: 5,
+        used: used + 1,
+      }),
+    }
+  }
+
+  it('gleiche Schlüssel, gleiche Typen — bis auf `delivered`', () => {
+    const sent = inviteResponse(false, 1)
+    const silent = inviteResponse(true, 1)
+
+    expect(Object.keys(silent).sort()).toEqual(Object.keys(sent).sort())
+    expect(Object.keys(silent.quota).sort()).toEqual(Object.keys(sent.quota).sort())
+    // Alles ausser `delivered` ist WERTgleich — die Zahlen eingeschlossen.
+    const { delivered: _sentFlag, ...sentRest } = sent
+    const { delivered: _silentFlag, ...silentRest } = silent
+    expect(silentRest).toEqual(sentRest)
+  })
+
+  /**
+   * DER PREIS. Eine bloss gleich AUSSEHENDE Antwort liesse sich beliebig oft
+   * wiederholen — das Orakel wäre langsamer, nicht zu. Verbraucht wird deshalb
+   * auf BEIDEN Wegen, und das Kontingent, das zurückkommt, sagt es auch.
+   */
+  it('das Kontingent zählt auf beiden Wegen weiter', () => {
+    expect(inviteResponse(true, 1).quota.used).toBe(2)
+    expect(inviteResponse(true, 1).quota.remaining).toBe(3)
+    expect(inviteResponse(true, 4).quota).toEqual(inviteResponse(false, 4).quota)
+    // Die fünfte schliesst den Vorrat — auch wenn sie still war.
+    expect(inviteResponse(true, 4).quota.enabled).toBe(false)
+  })
+
+  /**
+   * GEGENPROBE: würde die Route den stillen Weg irgendwo durchscheinen lassen
+   * — ein leeres `inviteId`, ein anderes `expiresAt`, ein nicht gezähltes
+   * Kontingent —, fiele genau dieser Vergleich. Er ist hier ausgeschrieben,
+   * damit man sieht, was der Test oben ausschliesst.
+   */
+  it('ein durchscheinender Unterschied fiele auf', () => {
+    const sent = inviteResponse(false, 1)
+    const leaky = { ...inviteResponse(true, 1), inviteId: '' }
+    expect(leaky).not.toEqual(sent)
+
+    const notCharged = { ...inviteResponse(true, 1), quota: inviteResponse(false, 0).quota }
+    expect(notCharged.quota).not.toEqual(sent.quota)
   })
 })
 

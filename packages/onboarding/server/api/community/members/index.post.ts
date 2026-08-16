@@ -1,6 +1,7 @@
 import { Query } from 'node-appwrite'
 import { z } from 'zod'
 import { COMMUNITY_ROLES } from '../../../../../core/shared/communityAuthz'
+import type { CommunityInviteResponse } from '../../../../shared/communityInvite'
 import { callControlPlane } from '../../../utils/controlPlane'
 import { requireCommunityTeamGate } from '../../../utils/communityTeamGate'
 
@@ -38,24 +39,14 @@ const bodySchema = z.object({
   role: z.enum(COMMUNITY_ROLES),
 }).strict()
 
-/** Das Kontingent NACH dieser Einladung — die Oberfläche schreibt es fort. */
-interface InviteQuota {
-  unlimited: boolean
-  limit: number
-  used: number
-  remaining: number
-}
+/**
+ * Die Antwort DES CONTROL PLANE. `delivered` steht bewusst NUR hier und wird
+ * unten abgeschnitten (AU1) — die Begründung steht am `return` und im Typ
+ * `CommunityInviteResponse`.
+ */
+type InviteResult = Omit<CommunityInviteResponse, 'existingAccount'> & { delivered: boolean }
 
-interface InviteResult {
-  ok: boolean
-  inviteId: string
-  email: string
-  role: string
-  expiresAt: string
-  quota: InviteQuota
-}
-
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async (event): Promise<CommunityInviteResponse> => {
   const { communityId, jwt } = await requireCommunityTeamGate(event, 'members.invite')
   const body = await readValidatedBody(event, bodySchema.parse)
   const email = body.email.trim().toLowerCase()
@@ -64,7 +55,7 @@ export default defineEventHandler(async (event) => {
   // kennt niemand). Cookie statt Header: er trägt die bewusste Wahl.
   const locale = getCookie(event, 'i18n_redirected') === 'en' ? 'en' : 'de'
 
-  const result = await callControlPlane<InviteResult>(
+  const { delivered, ...result } = await callControlPlane<InviteResult>(
     event,
     '/api/control/community/members/invite',
     { jwt, communityId, email, role: body.role, locale },
@@ -78,6 +69,13 @@ export default defineEventHandler(async (event) => {
     const found = await admin.users.list({ queries: [Query.equal('email', email), Query.limit(1)] })
     const invitee = found.users[0]
     if (invitee) {
+      // AU1: die Konto-Frage wird IMMER gestellt, auch auf dem stillen Weg —
+      // `existingAccount` ist Teil der Antwort und darf sich zwischen den
+      // beiden Wegen nicht unterscheiden. Nur die BENACHRICHTIGUNG hängt an
+      // `delivered`: eine Glocke „Einladung zu X" an jemanden, der in X längst
+      // Mitglied ist, wäre eine Meldung ins Leere — und, fünfmal die Woche
+      // wiederholt, ein Belästigungs-Werkzeug für genau die Person, deren
+      // Mitgliedschaft gerade sondiert wurde.
       existingAccount = true
       const tenant = useTenant(event)
       // `title` ist der {name}-Platzhalter der Glocken-Meldung („Einladung zu
@@ -85,7 +83,7 @@ export default defineEventHandler(async (event) => {
       // Link führt auf /join OHNE Token: die Seite findet die offene Einladung
       // über die eigene, geprüfte Adresse. Das ist der „eine Klick".
       const siteName = (tenant?.name ?? '').trim()
-      if (siteName) {
+      if (siteName && delivered) {
         await notify(event, {
           // Einladung in EINE Community → scope 'tenant' (Pflichtfeld seit
           // C15). Ohne den Stempel läge die Meldung im mandantenlosen
@@ -107,5 +105,12 @@ export default defineEventHandler(async (event) => {
     // Glockensymbol darf daran nichts ändern.
   }
 
+  /**
+   * `delivered` ist oben WEGGESCHNITTEN und taucht hier nicht wieder auf
+   * (AU1). Es ist das einzige Feld, an dem sich eine stille Einladung von
+   * einer echten unterscheiden liesse — der Rückgabetyp
+   * `CommunityInviteResponse` kennt es nicht, ein `...result` mit dem Feld
+   * wäre also ein Typfehler und keine stille Regression.
+   */
   return { ...result, existingAccount }
 })

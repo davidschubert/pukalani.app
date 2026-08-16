@@ -3,6 +3,7 @@ import type { DropdownMenuItem, TableColumn } from '@nuxt/ui'
 import { COMMUNITY_ROLES, type CommunityRole } from '../../../../../core/shared/communityAuthz'
 import type { CommunityInviteView, CommunityMemberView, CommunityTeamResponse } from '../../../../../control/shared/communityTeam'
 import type { MemberInviteQuotaView } from '../../../../../control/shared/communityInviteQuota'
+import type { CommunityInviteResponse } from '../../../../shared/communityInvite'
 
 /**
  * Mitglieder-Verwaltung EINER Community (Audit-Befund S9: `team.manage` war eine
@@ -82,6 +83,18 @@ const { data: quota, refresh: refreshQuota } = await useFetch<MemberInviteQuotaV
 
 /** Der Knopf erscheint GENAU DANN, wenn die Route ihn auch bedient. */
 const canInvite = computed(() => quota.value?.enabled === true)
+/**
+ * WARUM der Knopf fehlt (AU1). Ohne den Grund stand hier immer derselbe Satz
+ * („in dieser Community gerade nicht möglich") — für jemanden mit unbestätigter
+ * Adresse war das schlicht falsch, und sein eigentlicher Handgriff (die
+ * Bestätigungs-Mail) blieb unsichtbar. Der Rückfall bleibt der alte Satz: ein
+ * unbekannter Grund darf nichts Erfundenes behaupten.
+ */
+const disabledReason = computed(() =>
+  quota.value?.reason === 'email_unverified'
+    ? t('members.invite.disabledUnverified')
+    : t('members.invite.disabled'),
+)
 /** „noch 3 von 5 diese Woche" — nur für Mitglieder mit Kontingent. */
 const showQuotaHint = computed(() => quota.value !== null && quota.value !== undefined && !quota.value.unlimited)
 
@@ -172,8 +185,13 @@ function ruleMessage(error: unknown): { title: string, description?: string } {
   // F57: die drei Gründe der Mitglieder-Mechanik. Sie sagen die WAHRHEIT über
   // das eigene Kontingent — kein Anti-Enumerations-Theater: dass MEIN Vorrat
   // leer ist, ist eine Tatsache über mich selbst.
+  // AU1: `email_unverified` gehört in dieselbe Reihe — auch das ist eine
+  // Tatsache über den Fragenden selbst, und der Satz nennt den einen Handgriff,
+  // der weiterhilft. `already_member` bleibt stehen: Owner/Admin bekommen ihn
+  // weiterhin (ein Mitglied sieht ihn seit AU1 nicht mehr, weil die Route ihn
+  // für es gar nicht mehr sendet).
   const known = ['self_demote', 'self_remove', 'last_owner', 'owner_protected', 'already_member', 'not_a_member', 'invalid_role', 'unchanged',
-    'invite_quota_exhausted', 'member_invites_disabled', 'invite_role_forbidden']
+    'invite_quota_exhausted', 'member_invites_disabled', 'invite_role_forbidden', 'email_unverified']
   // Die benannten Regeln sagen den nächsten Schritt schon im Satz. Nur der
   // Rückfall stand nackt da — der bekommt eine zweite Zeile (Audit-Befund C12).
   if (reason && known.includes(reason)) return { title: t(`members.errors.${reason}`) }
@@ -205,7 +223,7 @@ function openInvite() {
 async function sendInvite() {
   inviteBusy.value = true
   try {
-    const result = await $fetch<{ email: string, existingAccount: boolean, quota: MemberInviteQuotaView }>('/api/community/members', {
+    const result = await $fetch<CommunityInviteResponse>('/api/community/members', {
       method: 'POST',
       // Ein Mitglied schickt IMMER 'viewer' — nicht, weil das Feld fehlt,
       // sondern weil alles andere die Route mit 403 beantwortet.
@@ -377,7 +395,7 @@ function rowActions(member: CommunityMemberView): DropdownMenuItem[][] {
           {{ t('members.invite.quotaLeft', { remaining: quota?.remaining ?? 0, limit: quota?.limit ?? 0 }) }}
         </p>
         <p v-else-if="!canInvite" class="text-sm text-muted" data-invite-disabled>
-          {{ t('members.invite.disabled') }}
+          {{ disabledReason }}
         </p>
       </div>
     </UPageCard>

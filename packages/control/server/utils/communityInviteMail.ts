@@ -1,5 +1,6 @@
 import type { H3Event } from 'h3'
 import type { CommunityRole } from '../../../core/shared/communityAuthz'
+import { oneMailLine } from '../../shared/mailText'
 
 /**
  * Die Einladungs-Mail in EINE Kunden-Community (control-019).
@@ -30,6 +31,11 @@ export interface CommunityInviteMailInput {
   invitedByName: string
 }
 
+/** Anzeigename des Einladenden — reicht für jeden echten Namen. */
+const MAX_INVITED_BY = 80
+/** Community-Name; er steht auch im Betreff. */
+const MAX_SITE_NAME = 120
+
 const ROLE_LABELS: Record<CommunityRole, { de: string, en: string }> = {
   owner: { de: 'Inhaber/in', en: 'owner' },
   admin: { de: 'Administrator/in', en: 'administrator' },
@@ -46,17 +52,18 @@ export async function sendCommunityInviteMail(event: H3Event, input: CommunityIn
   const path = german ? '/de/join' : '/join'
   const link = `${scheme}://${input.host}${path}?token=${encodeURIComponent(input.token)}`
   const role = ROLE_LABELS[input.role][german ? 'de' : 'en']
-  const from = input.invitedByName.trim()
+  const from = oneMailLine(input.invitedByName, MAX_INVITED_BY)
+  const siteName = oneMailLine(input.siteName, MAX_SITE_NAME)
 
   const subject = german
-    ? `Einladung zu „${input.siteName}“`
-    : `Invitation to “${input.siteName}”`
+    ? `Einladung zu „${siteName}“`
+    : `Invitation to “${siteName}”`
 
   const text = german
     ? [
         from
-          ? `${from} lädt dich zu „${input.siteName}“ ein — als ${role}.`
-          : `Du bist zu „${input.siteName}“ eingeladen — als ${role}.`,
+          ? `${from} lädt dich zu „${siteName}“ ein — als ${role}.`
+          : `Du bist zu „${siteName}“ eingeladen — als ${role}.`,
         '',
         `Einladung annehmen (7 Tage gültig): ${link}`,
         '',
@@ -67,8 +74,8 @@ export async function sendCommunityInviteMail(event: H3Event, input: CommunityIn
       ].join('\n')
     : [
         from
-          ? `${from} invites you to “${input.siteName}” as ${role}.`
-          : `You have been invited to “${input.siteName}” as ${role}.`,
+          ? `${from} invites you to “${siteName}” as ${role}.`
+          : `You have been invited to “${siteName}” as ${role}.`,
         '',
         `Accept the invitation (valid for 7 days): ${link}`,
         '',

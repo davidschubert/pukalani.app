@@ -46,6 +46,14 @@ export const MEMBER_INVITES_PER_WEEK_DEFAULT = 5
 export type MemberInviteDenial =
   | 'member_invites_disabled'
   | 'invite_role_forbidden'
+  /**
+   * Die eigene Adresse ist nicht bestätigt (AU1, 2026-08-15).
+   *
+   * Auch das ist eine Tatsache über den Einladenden SELBST — sie verrät nichts
+   * über die eingeladene Adresse und gehört deshalb in dieselbe Liste wie das
+   * leere Kontingent.
+   */
+  | 'email_unverified'
   | 'invite_quota_exhausted'
 
 export interface MemberInviteFacts {
@@ -62,6 +70,16 @@ export interface MemberInviteFacts {
   role: CommunityRole
   /** Schalter der Community — schon durch `resolveTenantMemberInvitesEnabled`. */
   invitesEnabled: boolean
+  /**
+   * Hat der Einladende seine EIGENE Adresse bestätigt? (AU1, Audit 2026-08-15)
+   *
+   * `identity.emailVerified` wurde im Control Plane seit jeher aufgelöst und nie
+   * gelesen. Ohne diese Zeile legt ein Wegwerf-Konto auf einer Community mit
+   * offener Registrierung sofort los und schickt 5 Mails je Woche und Community
+   * aus dem Community-SMTP — mit einer Adresse, die niemandem gehört und über
+   * die niemand erreichbar ist.
+   */
+  emailVerified: boolean
   /** Kontingent je Fenster. `0` = Mechanik plattformweit aus. */
   limit: number
   /** Bereits im Fenster erzeugte Einladungen dieses Mitglieds. */
@@ -82,20 +100,36 @@ export type MemberInviteDecision =
  * Community nicht mehr voll besetzen kann, weil er den Schalter für seine
  * Mitglieder umgelegt hat, wäre ein Rückschritt.
  *
- * Die Reihenfolge der drei Prüfungen ist Absicht: erst die Frage, ob es die
- * Mechanik hier überhaupt gibt (Schalter/Config), dann die Rolle, dann die
- * Menge. So erfährt jemand bei abgeschalteter Mechanik „abgeschaltet" und
- * nicht „falsche Rolle" — die erste Antwort ist die wahre.
+ * Die Reihenfolge der VIER Prüfungen ist Absicht und läuft von aussen nach
+ * innen: gibt es die Mechanik HIER überhaupt (Schalter/Config) → darf DIESE
+ * PERSON sie benutzen (bestätigte Adresse) → ist DIESE ANFRAGE zulässig
+ * (Rolle) → ist noch etwas ÜBRIG (Menge). So erfährt jemand bei abgeschalteter
+ * Mechanik „abgeschaltet" und nicht „falsche Rolle" — die erste Antwort ist
+ * die wahre.
+ *
+ * `email_unverified` steht deshalb VOR der Rolle: dass die eigene Adresse
+ * unbestätigt ist, ändert sich durch eine andere Rollenwahl nicht, und die
+ * Person soll den einen Handgriff erfahren, der sie weiterbringt — nicht einen
+ * zweiten Fehlversuch mit `viewer`.
  *
  * 'owner' als Wunschrolle fällt hier NICHT durch: das lehnt `decideInvite`
  * ab, für JEDEN Einladenden. Diese Datei fügt nur hinzu, was für MITGLIEDER
  * zusätzlich gilt; die allgemeinen Regeln bleiben, wo sie sind.
+ *
+ * DASS DIE ADRESSPRÜFUNG NUR MITGLIEDER TRIFFT, ist Davids Zuschnitt (AU1):
+ * Owner/Admin haben diesen Weg seit control-019, und ein Owner, dessen
+ * Bestätigungs-Mail im Spam liegt, darf nicht aus seiner eigenen
+ * Mitgliederverwaltung ausgesperrt werden. Der Missbrauchsfall ist das frisch
+ * angelegte Wegwerf-Konto, und das wird nie Owner.
  */
 export function decideMemberInvite(facts: MemberInviteFacts): MemberInviteDecision {
   if (facts.managesTeam) return { ok: true }
 
   if (facts.limit <= 0 || !facts.invitesEnabled) {
     return { ok: false, reason: 'member_invites_disabled' }
+  }
+  if (!facts.emailVerified) {
+    return { ok: false, reason: 'email_unverified' }
   }
   if (facts.role !== 'viewer') {
     return { ok: false, reason: 'invite_role_forbidden' }
@@ -108,8 +142,18 @@ export function decideMemberInvite(facts: MemberInviteFacts): MemberInviteDecisi
 
 /** Was die Oberfläche über das eigene Kontingent anzeigt. */
 export interface MemberInviteQuotaView {
-  /** Darf ich hier überhaupt einladen? (Schalter + Config + Rolle) */
+  /** Darf ich hier überhaupt einladen? (Schalter + Config + Adresse + Rolle) */
   enabled: boolean
+  /**
+   * WARUM nicht — nur wenn `enabled: false` (sonst `null`).
+   *
+   * Ohne dieses Feld stünde unter dem fehlenden Knopf immer derselbe Satz
+   * („Einladen ist hier ausgeschaltet"), und für jemanden mit unbestätigter
+   * Adresse wäre das schlicht falsch: sein Handgriff ist ein anderer. Die
+   * Gründe sagen ausschliesslich etwas über den Fragenden selbst aus
+   * (MemberInviteDenial) — über eine eingeladene Adresse verrät keiner etwas.
+   */
+  reason: MemberInviteDenial | null
   /** Owner/Admin: kein Kontingent — die Oberfläche zeigt dann keine Zahlen. */
   unlimited: boolean
   limit: number
@@ -136,6 +180,7 @@ export function memberInviteQuota(
   const used = Math.max(0, Math.floor(facts.used))
   return {
     enabled: decision.ok,
+    reason: decision.ok ? null : decision.reason,
     unlimited: facts.managesTeam,
     limit,
     used,

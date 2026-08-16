@@ -34,13 +34,25 @@ import { verifyRuntimeIdentity, type RuntimeIdentity } from './onboardingService
  * und ALLE Mitgliedschaften der Site (die Owner-Zählung braucht sie).
  */
 
-export interface CommunityTeamContext {
+/**
+ * WER handelt, WO, und mit welcher Rolle — mehr nicht.
+ *
+ * Das ist der Vorraum, den die MEISTEN Routen tatsächlich brauchen: eine
+ * Autorisierung ist eine Frage über EINE Zeile (die eigene Mitgliedschaft),
+ * nicht über die Community. Die vollständige Mitgliederliste holt nur, wer sie
+ * auch liest — siehe `requireCommunityTeamContext`.
+ */
+export interface CommunityTeamRoleContext {
   identity: RuntimeIdentity
   tenant: TenantRow
   actor: CommunityMemberRow
   actorRole: CommunityRole
-  members: CommunityMemberRow[]
   databaseId: string
+}
+
+/** Derselbe Vorraum PLUS alle Mitgliedschaften (Owner-Zählung, Liste, Einladung). */
+export interface CommunityTeamContext extends CommunityTeamRoleContext {
+  members: CommunityMemberRow[]
 }
 
 /**
@@ -192,11 +204,29 @@ export function memberInviteLimit(): number {
   return memberInviteLimitFrom(appConfig.pukalani?.community?.memberInvitesPerWeek)
 }
 
-export async function requireCommunityTeamContext(
+/**
+ * DER VORRAUM OHNE DIE MITGLIEDERLISTE (AU1, Audit 2026-08-15).
+ *
+ * Die vier Prüfungen oben sind vollständig; was fehlt, ist NUR das
+ * Nachladen aller Mitgliedschaften. Das war bis heute nicht wählbar, und
+ * `GET /api/community/invites/quota` hat es bezahlt: die Route beantwortet
+ * FÜNF Zahlen über den Fragenden selbst und paginierte dafür bis zu zwanzig
+ * Listen-Abfragen durch die gesamte Community — bei jedem SSR-Aufbau der
+ * Mitglieder-Seite, die seit F57 jedem Mitglied offensteht. Die Kosten wuchsen
+ * also mit dem Erfolg der Community, an einer Antwort, die davon nicht abhängt.
+ *
+ * ZWEI FUNKTIONEN STATT EINES FLAGS: ein `withMembers: false` liesse
+ * `context.members` als leeres Array stehen, und ein leeres Array ist die
+ * gefährlichste Antwort, die es hier gibt — `countActiveOwners` läse daraus
+ * „kein Owner mehr", und `decideInvite` läse „diese Adresse ist noch nicht
+ * dabei". Der eigene Typ ohne das Feld macht daraus einen Typfehler statt
+ * einer falschen Entscheidung.
+ */
+export async function requireCommunityTeamRole(
   event: H3Event,
   body: { jwt: string, communityId: string },
   capability: Capability,
-): Promise<CommunityTeamContext> {
+): Promise<CommunityTeamRoleContext> {
   const identity = await verifyRuntimeIdentity(event, body.jwt)
   const config = useRuntimeConfig(event)
   const databaseId = config.public.appwriteDatabaseId
@@ -225,12 +255,22 @@ export async function requireCommunityTeamContext(
     throw createError({ status: 404, statusText: 'Site not found' })
   }
 
+  return { identity, tenant, actor, actorRole: role, databaseId }
+}
+
+export async function requireCommunityTeamContext(
+  event: H3Event,
+  body: { jwt: string, communityId: string },
+  capability: Capability,
+): Promise<CommunityTeamContext> {
+  const context = await requireCommunityTeamRole(event, body, capability)
+
   // ALLE Mitgliedschaften — die Regeln brauchen sie (Owner-Zählung) und die
   // Liste zeigt sie. Erst NACH der Autorisierung: wer nichts darf, soll auch
   // nichts lesen lassen.
-  const members = await listCommunityMembers(event, body.communityId, identity.projectId)
+  const members = await listCommunityMembers(event, body.communityId, context.identity.projectId)
 
-  return { identity, tenant, actor, actorRole: role, members, databaseId }
+  return { ...context, members }
 }
 
 /** Row → die Fakten, mit denen die PUREN Regeln arbeiten. */

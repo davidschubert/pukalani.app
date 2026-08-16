@@ -410,6 +410,73 @@ export function decideInvite(input: InviteInput): CommunityTeamDecision {
   return ALLOW
 }
 
+/**
+ * WAS MIT DIESER ENTSCHEIDUNG GESCHIEHT — die Regel gegen das
+ * Mitgliedschafts-ORAKEL (AU1, Davids Entscheidung 2026-08-15).
+ *
+ * ── DAS LECK ───────────────────────────────────────────────────────────────
+ * Seit F57 darf JEDES Mitglied einladen. `decideInvite` antwortet auf eine
+ * bereits vorhandene Adresse mit `already_member` → 409, und ein 409 kostete
+ * NICHTS: keine Mail, keinen Zähler, keine Zeile. Damit war die Route für
+ * jeden `viewer` ein unbegrenzt oft benutzbarer Test „ist diese Adresse hier
+ * Mitglied?" — für Adressen, deren Mitgliederliste er nicht lesen darf. Nur
+ * die 5/min-Drossel bremste, und die verhindert kein geduldiges Durchprobieren.
+ *
+ * ── DIE ENTSCHEIDUNG: UNUNTERSCHEIDBAR ANTWORTEN ───────────────────────────
+ * Wer die Mitgliederliste NICHT lesen darf, bekommt auf `already_member`
+ * dieselbe Antwort wie auf eine echte Einladung — und ZAHLT DENSELBEN PREIS:
+ * das Wochen-Kontingent wird verbraucht. Der Preis ist die eigentliche
+ * Sicherung; eine bloss gleich AUSSEHENDE Antwort liesse sich beliebig oft
+ * wiederholen, und das Orakel wäre nur langsamer, nicht zu.
+ * Verschickt wird dabei NICHTS — ein Mitglied bekommt keine Einladung in eine
+ * Community, in der es längst ist.
+ *
+ * WER DIE LISTE LESEN DARF, BEKOMMT DIE WAHRHEIT (`team.manage`): für
+ * Owner/Admin bleibt es beim ehrlichen 409 mit `already_member`. Ihnen etwas
+ * vorzumachen schützte niemanden — sie sehen dieselbe Person zwei Zeilen
+ * weiter in ihrer eigenen Mitgliederliste — und kostete sie den Hinweis, den
+ * sie brauchen („die Rolle änderst du direkt in der Liste").
+ *
+ * WARUM DIESE REGEL PUR IST: sie ist der einzige Ort, an dem „so tun als ob"
+ * steht. Läge sie in der Route, wäre sie beim nächsten Umbau eine Zeile, die
+ * man für eine Vereinfachung hält — und ihr Wegfall sähe in keinem Test rot
+ * aus, weil die Route dann einfach wieder ehrlich antwortet.
+ *
+ * NUR `already_member` WIRD VERSCHWIEGEN. Die anderen Ablehnungen sagen nichts
+ * über eine fremde Adresse aus (`invalid_role`, `owner_protected`) — sie
+ * ununterscheidbar zu machen hiesse, einen Tippfehler in einen stillen
+ * Fehlschlag zu verwandeln.
+ *
+ * WAS BEWUSST OFFEN BLEIBT: die LAUFZEIT. Der stille Weg verschickt keine Mail
+ * und zieht keine Vorgänger-Einladung zurück, ist also messbar schneller. Das
+ * wurde gesehen und nicht bekämpft: eine künstliche Verzögerung wäre eine
+ * Zahl, die bei jedem SMTP-Wetter falsch ist, und die Reichweite des Kanals ist
+ * ohnehin dieselbe wie die der Antwort — fünf Fragen je Woche, danach ist das
+ * Kontingent leer. Das Kontingent ist die Grenze, nicht die Stoppuhr.
+ */
+export type CommunityInviteDelivery =
+  /** Mail verschicken, Einladung anlegen — der gewöhnliche Weg. */
+  | { outcome: 'send' }
+  /**
+   * Nichts verschicken, Kontingent trotzdem verbrauchen, wie Erfolg antworten.
+   * Der Grund reist mit — fürs Log, nie für die Antwort.
+   */
+  | { outcome: 'suppress', reason: 'already_member' }
+  /** Ablehnen; `reason` geht als `data.code` an den Einladenden. */
+  | { outcome: 'reject', reason: CommunityTeamDenyReason }
+
+export function decideInviteDelivery(
+  decision: CommunityTeamDecision,
+  /** Hält der Einladende `team.manage`? (nicht die Rolle — die Capability) */
+  managesTeam: boolean,
+): CommunityInviteDelivery {
+  if (decision.ok) return { outcome: 'send' }
+  if (decision.reason === 'already_member' && !managesTeam) {
+    return { outcome: 'suppress', reason: 'already_member' }
+  }
+  return { outcome: 'reject', reason: decision.reason }
+}
+
 export interface JoinInput {
   /** Warum jemand beitreten möchte (core/shared/communityJoin.ts). */
   trigger: CommunityJoinTrigger

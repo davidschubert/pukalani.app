@@ -746,6 +746,7 @@
       "asViewer": "Deine Einladung macht die Person zu einer Leserin oder einem Leser.",
       "quotaLeft": "Noch {remaining} von {limit} Einladungen diese Woche.",
       "disabled": "Einladungen durch Mitglieder sind in dieser Community gerade nicht möglich.",
+      "disabledUnverified": "Bestätige zuerst deine eigene E-Mail-Adresse — dann kannst du einladen. Den Link findest du in deinem Posteingang.",
       "emailLabel": "E-Mail-Adresse",
       "emailHelp": "Hat die Person schon ein Pukalani-Konto, ist sie nach dem Anmelden mit einem Klick dabei. Sonst legt sie über den Link eins an.",
       "roleLabel": "Rolle",
@@ -795,6 +796,7 @@
       "invite_quota_exhausted": "Dein Kontingent für diese Woche ist aufgebraucht. In ein paar Tagen geht es weiter.",
       "member_invites_disabled": "In dieser Community lädt gerade nur das Team ein.",
       "invite_role_forbidden": "Als Mitglied kannst du nur als Leserin oder Leser einladen.",
+      "email_unverified": "Bestätige zuerst deine eigene E-Mail-Adresse — dann kannst du einladen. Den Link findest du in deinem Posteingang.",
       "failed": "Das hat gerade nicht geklappt. Versuch es noch einmal.",
       "failedHint": "An der Mitgliederliste hat sich nichts geändert. Lade die Seite neu und versuch es noch einmal."
     }

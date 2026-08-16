@@ -22,6 +22,15 @@
  *   8. Die Drossel greift ZUSÄTZLICH zum Kontingent (eigener Abschnitt, weil
  *      sie sonst die Kontingent-Prüfung maskieren würde — beide antworten 429).
  *
+ * ── AU1 (Audit + Davids Entscheidung 2026-08-15) ────────────────────────────
+ *   9. DAS MITGLIEDSCHAFTS-ORAKEL ist zu: ein Mitglied, das eine Adresse
+ *      anschreibt, die längst dabei ist, bekommt dieselbe Antwort wie bei
+ *      einer echten Einladung — verbraucht aber sein Kontingent, und es geht
+ *      KEINE Mail raus. Mit Gegenprobe: der Owner sieht weiter den ehrlichen
+ *      409, und die stille Zeile taucht in KEINER Ansicht auf.
+ *  10. Unbestätigte eigene Adresse ⇒ ein Mitglied darf nicht einladen
+ *      (403 `email_unverified`), Owner/Admin bleiben unberührt.
+ *
  * Räumt am Ende alles weg, was es angelegt hat.
  *
  *   POOL_KEY=… PLATFORM_PORT=3016 node --env-file=apps/control/.env \
@@ -115,6 +124,21 @@ function invite(host, cookie, email, role = 'viewer') {
   })
 }
 
+/**
+ * Das eigene Kontingent lesen — EBENFALLS mit frischer IP, seit AU1
+ * (2026-08-15) auch diese Route gedrosselt ist (`community:invite-quota`,
+ * 10/min und IP).
+ *
+ * Ohne diese Zeile misst der Beweis seine eigene Drossel statt der Mechanik:
+ * `waitForMembership` pollt die Route bis zu 45-mal im Sekundentakt, und
+ * schon der elfte Aufruf käme als 429 zurück — der Poller liefe in seine
+ * Zeitgrenze und meldete „die Rolle kommt nicht an". Dieselbe Falle wie bei
+ * den Einladungen selbst (siehe `freshIp`), nur eine Route weiter.
+ */
+function quotaOf(host, cookie) {
+  return call(host, '/api/community/invites/quota', { cookie, clientIp: freshIp() })
+}
+
 async function createPoolUser(tag, { verified = false } = {}) {
   const email = `f57-${tag}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}@example.test`
   const password = `Pw-${ID.unique()}`
@@ -195,7 +219,7 @@ async function createCommunity(cookie, slug, name) {
  */
 async function waitForMembership(host, cookie) {
   for (let i = 0; i < 45; i++) {
-    const res = await call(host, '/api/community/invites/quota', { cookie })
+    const res = await quotaOf(host, cookie)
     if (res.status === 200) return true
     await new Promise(resolve => setTimeout(resolve, 1000))
   }
@@ -310,7 +334,7 @@ try {
   check('die SECHSTE → 429 invite_quota_exhausted',
     sixth.status === 429 && reasonOf(sixth) === 'invite_quota_exhausted',
     `${sixth.status} ${reasonOf(sixth) || sixth.text.slice(0, 160)}`)
-  const quotaView = await call(a.host, '/api/community/invites/quota', { cookie: memberCookie })
+  const quotaView = await quotaOf(a.host, memberCookie)
   check('die Kontingent-Route sagt dasselbe (0 übrig, gesperrt)',
     quotaView.json?.remaining === 0 && quotaView.json?.used === 5 && quotaView.json?.enabled === false,
     JSON.stringify(quotaView.json))
@@ -324,7 +348,7 @@ try {
     else console.log(`      (Owner-Einladung ${i}: ${res.status} ${res.text.slice(0, 120)})`)
   }
   check('alle sechs Owner-Einladungen → 200', ownerOk === 6, `${ownerOk}/6`)
-  const ownerQuota = await call(a.host, '/api/community/invites/quota', { cookie: ownerCookie })
+  const ownerQuota = await quotaOf(a.host, ownerCookie)
   check('der Owner sieht „unbegrenzt"',
     ownerQuota.json?.unlimited === true && ownerQuota.json?.enabled === true,
     JSON.stringify(ownerQuota.json))
@@ -357,7 +381,7 @@ try {
     `${blocked.status} ${reasonOf(blocked) || blocked.text.slice(0, 160)}`)
   const ownerStill = await invite(a.host, ownerCookie, `f57-owner-still-${Date.now()}@example.test`)
   check('der Owner darf weiterhin → 200', ownerStill.status === 200, `${ownerStill.status} ${ownerStill.text.slice(0, 160)}`)
-  const blockedQuota = await call(a.host, '/api/community/invites/quota', { cookie: secondCookie })
+  const blockedQuota = await quotaOf(a.host, secondCookie)
   check('die Oberfläche würde den Knopf verstecken (enabled=false)',
     blockedQuota.json?.enabled === false, JSON.stringify(blockedQuota.json))
   const on = await call(a.host, '/api/community/member-invites', {
@@ -428,7 +452,7 @@ try {
     `${nobody.status} ${nobody.text.slice(0, 160)}`)
   const guest = await invite(a.host, undefined, `f57-guest-${Date.now()}@example.test`)
   check('Gast (ohne Session) → 401', guest.status === 401, `${guest.status} ${guest.text.slice(0, 160)}`)
-  const guestQuota = await call(a.host, '/api/community/invites/quota')
+  const guestQuota = await call(a.host, '/api/community/invites/quota', { clientIp: freshIp() })
   check('auch das Kontingent verrät einem Gast nichts → 401', guestQuota.status === 401, String(guestQuota.status))
 
   // ── 8. Die Drossel — ZUSÄTZLICH zum Kontingent ───────────────────────────
@@ -449,6 +473,131 @@ try {
   check('ein Ansturm läuft in 429', burst429 > 0, `${burst429} von 14`)
   check('und zwar NICHT über das Kontingent (der Owner hat keines)',
     burstReason !== 'invite_quota_exhausted', `reason: ${burstReason || '(leer)'}`)
+
+  // ── 9. AU1: das Mitgliedschafts-Orakel ───────────────────────────────────
+  /**
+   * Gemessen wird an `second`: es ist ein gewöhnliches Mitglied mit
+   * Kontingent (eine Einladung in Abschnitt 6 verbraucht, vier übrig). Der
+   * OWNER taugt hier nicht — er hält `team.manage` und bekommt genau deshalb
+   * die andere Antwort.
+   */
+  console.log('\n9. AU1 — „schon Mitglied?" ist für ein Mitglied nicht mehr ablesbar')
+  const probeTarget = memberAcc.email
+  const quotaBefore = await quotaOf(a.host, secondCookie)
+  const mailBefore = await mailpitCount(probeTarget)
+  const rowsBefore = await countInviteRows(a.communityId, second.userId)
+
+  // Eine ECHTE Einladung desselben Mitglieds als Vergleichsmass — erst danach
+  // die Sondierung, damit beide Antworten aus demselben Zustand kommen.
+  const realOne = await invite(a.host, secondCookie, `f57-au1-real-${Date.now()}@example.test`)
+  const silent = await invite(a.host, secondCookie, probeTarget)
+
+  check('die Sondierung antwortet 200 wie eine echte Einladung',
+    silent.status === 200 && realOne.status === 200,
+    `still ${silent.status}, echt ${realOne.status}`)
+  check('KEIN Ablehnungsgrund reist mit', reasonOf(silent) === '', reasonOf(silent))
+  check('dieselben Felder in derselben Antwort',
+    JSON.stringify(Object.keys(silent.json ?? {}).sort()) === JSON.stringify(Object.keys(realOne.json ?? {}).sort()),
+    `${Object.keys(silent.json ?? {}).sort().join(',')} vs ${Object.keys(realOne.json ?? {}).sort().join(',')}`)
+  // Beide Bedingungen, damit die Zeile nicht VERSEHENTLICH grün wird: eine
+  // 409-Fehlerantwort trägt naturgemäß auch kein `delivered`. Sie muss also
+  // erst eine Erfolgs-Antwort SEIN und dann das Feld nicht haben.
+  check('`delivered` steht NICHT in der Antwort an den Browser',
+    silent.status === 200 && !('delivered' in (silent.json ?? {})) && !('delivered' in (realOne.json ?? {})),
+    JSON.stringify(Object.keys(silent.json ?? {})))
+  check('eine Einladungs-Id kommt zurück (nicht leer)',
+    typeof silent.json?.inviteId === 'string' && silent.json.inviteId.length > 0,
+    String(silent.json?.inviteId))
+  check('auch `existingAccount` unterscheidet sich nicht in der FORM',
+    typeof silent.json?.existingAccount === 'boolean' && typeof realOne.json?.existingAccount === 'boolean',
+    `${silent.json?.existingAccount} / ${realOne.json?.existingAccount}`)
+
+  // DER PREIS: das Kontingent zählt beide Wege. Eine gleich aussehende, aber
+  // gratis wiederholbare Antwort wäre ein langsameres Orakel, kein
+  // geschlossenes.
+  check('das Kontingent ist um ZWEI gefallen (echte + stille Einladung)',
+    silent.json?.quota?.remaining === (quotaBefore.json?.remaining ?? 0) - 2,
+    `vorher ${quotaBefore.json?.remaining}, nachher ${silent.json?.quota?.remaining}`)
+  const quotaAfter = await quotaOf(a.host, secondCookie)
+  check('und die Kontingent-Route bestätigt es (kein Rechnen nur in der Antwort)',
+    quotaAfter.json?.used === (quotaBefore.json?.used ?? 0) + 2,
+    `${quotaBefore.json?.used} → ${quotaAfter.json?.used}`)
+  check('zwei Zeilen mehr auf dem Konto des Einladenden',
+    (await countInviteRows(a.communityId, second.userId)) === rowsBefore + 2,
+    `${rowsBefore} → ${await countInviteRows(a.communityId, second.userId)}`)
+
+  // KEINE MAIL an ein Mitglied, das längst dabei ist.
+  check('an die sondierte Adresse geht KEINE Mail',
+    (await mailpitCount(probeTarget)) === mailBefore,
+    `vorher ${mailBefore}, nachher ${await mailpitCount(probeTarget)}`)
+
+  // Die stille Zeile ist überall tot: sie entsteht `revoked`, taucht also in
+  // den offenen Einladungen des Teams nicht auf.
+  // Ohne Id GAR NICHT erst fragen: `getRow` wirft bei `undefined` einen
+  // Parameter-Fehler, und der riss beim Gegenprobe-Lauf (Regel absichtlich
+  // ausgehängt) den ganzen Rest des Beweises mit — Abschnitt 10 lief nie. Ein
+  // Beweis soll bei einer Regression BERICHTEN, nicht abbrechen.
+  const silentRow = silent.json?.inviteId
+    ? await control.getRow({
+        databaseId, tableId: 'community_invites', rowId: silent.json.inviteId,
+      }).catch(() => null)
+    : null
+  check('die stille Zeile ist sofort „revoked"', silentRow?.status === 'revoked', String(silentRow?.status))
+  const teamView = await call(a.host, '/api/community/members', { cookie: ownerCookie })
+  const openEmails = (teamView.json?.invites ?? []).map(row => String(row.email).toLowerCase())
+  check('sie steht in KEINER Liste offener Einladungen',
+    !openEmails.includes(probeTarget.toLowerCase()), openEmails.join(','))
+
+  /**
+   * DIE GEGENPROBE — ohne sie bewiese der Abschnitt nur, dass die Route
+   * irgendetwas mit 200 beantwortet. Wer die Mitgliederliste LESEN darf,
+   * bekommt weiterhin die Wahrheit; für ihn wäre eine Beschwichtigung nur ein
+   * verschwiegener Hinweis („die Rolle änderst du direkt in der Liste").
+   */
+  const ownerProbe = await invite(a.host, ownerCookie, probeTarget)
+  check('GEGENPROBE: der Owner sieht weiter 409 already_member',
+    ownerProbe.status === 409 && reasonOf(ownerProbe) === 'already_member',
+    `${ownerProbe.status} ${reasonOf(ownerProbe) || ownerProbe.text.slice(0, 160)}`)
+
+  /**
+   * Und die zweite Gegenprobe: eine Adresse, die NICHT Mitglied ist, verhält
+   * sich für dasselbe Mitglied genauso — nur dass diesmal wirklich eine Mail
+   * fliegt. Ohne diese Zeile könnte die Sondierung an einer ganz anderen
+   * Ursache 200 geben (etwa weil die Regel gar nicht mehr greift).
+   */
+  check('GEGENPROBE: die echte Einladung hat auch wirklich gemailt',
+    (await mailpitCount(realOne.json?.email)) >= 1, String(realOne.json?.email))
+
+  // ── 10. AU1: unbestätigte eigene Adresse ─────────────────────────────────
+  console.log('\n10. AU1 — wer seine eigene Adresse nicht bestätigt hat, lädt nicht ein')
+  await poolUsers.updateEmailVerification({ userId: second.userId, emailVerification: false })
+  const unverified = await invite(a.host, secondCookie, `f57-au1-unverified-${Date.now()}@example.test`)
+  check('Mitglied ohne bestätigte Adresse → 403 email_unverified',
+    unverified.status === 403 && reasonOf(unverified) === 'email_unverified',
+    `${unverified.status} ${reasonOf(unverified) || unverified.text.slice(0, 160)}`)
+  const unverifiedQuota = await quotaOf(a.host, secondCookie)
+  check('die Oberfläche versteckt den Knopf UND kennt den Grund',
+    unverifiedQuota.json?.enabled === false && unverifiedQuota.json?.reason === 'email_unverified',
+    JSON.stringify(unverifiedQuota.json))
+  check('der abgelehnte Versuch verbraucht nichts',
+    (await countInviteRows(a.communityId, second.userId)) === rowsBefore + 2,
+    String(await countInviteRows(a.communityId, second.userId)))
+
+  /**
+   * GEGENPROBE 1: der OWNER dieses Beweises hat seine Adresse nie bestätigt
+   * (`createPoolUser('owner')` ohne `verified`) — und lädt trotzdem ein. Genau
+   * das ist Davids Zuschnitt: die Regel fügt für MITGLIEDER etwas hinzu und
+   * nimmt dem Owner nichts.
+   */
+  const ownerUnverified = await invite(a.host, ownerCookie, `f57-au1-owner-${Date.now()}@example.test`)
+  check('GEGENPROBE: der Owner darf auch unbestätigt einladen → 200',
+    ownerUnverified.status === 200, `${ownerUnverified.status} ${ownerUnverified.text.slice(0, 160)}`)
+
+  /** GEGENPROBE 2: bestätigt man die Adresse, geht es sofort wieder. */
+  await poolUsers.updateEmailVerification({ userId: second.userId, emailVerification: true })
+  const backAgain = await invite(a.host, secondCookie, `f57-au1-back-${Date.now()}@example.test`)
+  check('GEGENPROBE: nach der Bestätigung wieder 200',
+    backAgain.status === 200, `${backAgain.status} ${backAgain.text.slice(0, 160)}`)
 }
 catch (error) {
   fail++

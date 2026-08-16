@@ -1,7 +1,7 @@
 import { ID } from 'node-appwrite'
 import { z } from 'zod'
-import { decideInvite } from '../../../../../shared/communityTeam'
-import { decideMemberInvite, memberInviteWindowStart } from '../../../../../shared/communityInviteQuota'
+import { decideInvite, decideInviteDelivery } from '../../../../../shared/communityTeam'
+import { decideMemberInvite, memberInviteQuota, memberInviteWindowStart } from '../../../../../shared/communityInviteQuota'
 import { COMMUNITY_INVITES_TABLE, COMMUNITY_INVITE_TTL_MS, type CommunityInviteRow } from '../../../../../shared/types/communityInvite'
 import { resolveTenantMemberInvitesEnabled } from '../../../../../shared/types/tenantRecord'
 import { COMMUNITY_ROLES, communityRoleHasCapability } from '../../../../../../core/shared/communityAuthz'
@@ -76,6 +76,9 @@ export default defineEventHandler(async (event) => {
     managesTeam,
     role: body.role,
     invitesEnabled: resolveTenantMemberInvitesEnabled(context.tenant.memberInvitesEnabled),
+    // AU1: die eigene Adresse muss bestätigt sein. Der Wert lag hier seit
+    // control-019 auf dem Tisch und wurde nie gelesen (Audit 2026-08-15).
+    emailVerified: context.identity.emailVerified,
     limit,
     used,
   })
@@ -89,10 +92,12 @@ export default defineEventHandler(async (event) => {
       limit,
     })
     /**
-     * 429 NUR fürs erschöpfte Kontingent — das ist die einzige der drei
+     * 429 NUR fürs erschöpfte Kontingent — das ist die einzige der VIER
      * Ablehnungen, die sich von selbst erledigt (in spätestens sieben Tagen).
-     * Abgeschaltete Mechanik und verbotene Rolle sind 403: daran ändert
-     * Warten nichts, und ein 429 lüde zum Wiederholen ein.
+     * Abgeschaltete Mechanik, unbestätigte Adresse und verbotene Rolle sind
+     * 403: daran ändert Warten nichts, und ein 429 lüde zum Wiederholen ein.
+     * Bei `email_unverified` ist der nächste Schritt zudem ein anderer — die
+     * Bestätigungs-Mail —, und den nennt der Text in der Oberfläche.
      *
      * `Retry-After` bleibt bewusst WEG. Ehrlich wäre „wenn deine älteste
      * Einladung sieben Tage alt ist" — dafür müsste die Route deren Datum
@@ -111,37 +116,81 @@ export default defineEventHandler(async (event) => {
     .filter(row => row.status === 'active')
     .map(row => row.email ?? '')
 
-  throwOnDenied(
+  /**
+   * AU1: aus der Regel-Entscheidung wird ein VERHALTEN — senden, stillschweigen
+   * oder ablehnen (`decideInviteDelivery`, pur und unit-getestet). Die
+   * Begründung, warum ein Mitglied auf `already_member` eine Erfolgs-Antwort
+   * bekommt, steht dort und wird hier bewusst nicht wiederholt.
+   */
+  const delivery = decideInviteDelivery(
     decideInvite({ email, role: body.role, members: context.members.map(memberFacts), activeEmails }),
-    { communityId: body.communityId, actor: context.identity.userId, role: body.role },
+    managesTeam,
   )
-
-  const { token, tokenHash } = createCommunityInviteToken()
-  const sent = await sendCommunityInviteMail(event, {
-    to: email,
-    siteName: context.tenant.name || context.tenant.host,
-    host: context.tenant.host,
-    token,
-    role: body.role,
-    locale: body.locale,
-    invitedByName: context.identity.name,
-  })
-  if (!sent) {
-    throw createError({ status: 503, statusText: 'Mailer not configured' })
+  if (delivery.outcome === 'reject') {
+    throwOnDenied(
+      { ok: false, reason: delivery.reason },
+      { communityId: body.communityId, actor: context.identity.userId, role: body.role },
+    )
   }
 
   const admin = createAdminClient(event)
-  // Vorherige offene Einladung derselben Adresse zurückziehen (nicht löschen —
-  // die Spur bleibt, aber der alte Link ist tot).
-  const previous = (await listCommunityInvites(event, body.communityId))
-    .filter(row => row.email.trim().toLowerCase() === email)
-  for (const invite of previous) {
-    await admin.tablesDB.updateRow({
-      databaseId: context.databaseId, tableId: COMMUNITY_INVITES_TABLE, rowId: invite.$id,
-      data: { status: 'revoked' },
-    }).catch(() => {})
+  const { token, tokenHash } = createCommunityInviteToken()
+  const expiresAt = new Date(Date.now() + COMMUNITY_INVITE_TTL_MS).toISOString()
+  // Nach dem Wurf oben bleiben genau zwei Wege. Der Grund wird HIER
+  // festgehalten, solange der Typ ihn noch trägt — weiter unten ist `delivery`
+  // nur noch die Frage „echt oder still?".
+  const suppressed = delivery.outcome === 'suppress'
+  const suppressedReason = delivery.outcome === 'suppress' ? delivery.reason : ''
+
+  if (!suppressed) {
+    const sent = await sendCommunityInviteMail(event, {
+      to: email,
+      siteName: context.tenant.name || context.tenant.host,
+      host: context.tenant.host,
+      token,
+      role: body.role,
+      locale: body.locale,
+      invitedByName: context.identity.name,
+    })
+    if (!sent) {
+      throw createError({ status: 503, statusText: 'Mailer not configured' })
+    }
+
+    // Vorherige offene Einladung derselben Adresse zurückziehen (nicht löschen —
+    // die Spur bleibt, aber der alte Link ist tot). NUR auf dem echten Weg: eine
+    // stillgelegte Einladung darf keine fremde, gültige mit sich reissen.
+    const previous = (await listCommunityInvites(event, body.communityId))
+      .filter(row => row.email.trim().toLowerCase() === email)
+    for (const invite of previous) {
+      await admin.tablesDB.updateRow({
+        databaseId: context.databaseId, tableId: COMMUNITY_INVITES_TABLE, rowId: invite.$id,
+        data: { status: 'revoked' },
+      }).catch(() => {})
+    }
   }
 
+  /**
+   * DIE ZEILE ENTSTEHT IN BEIDEN FÄLLEN — und genau das ist der Preis, der das
+   * Orakel schliesst (AU1).
+   *
+   * Das Kontingent zählt `community_invites`-Zeilen (countCommunityInvitesBy,
+   * bewusst OHNE `status`-Filter). Eine stillgelegte Einladung, die keine Zeile
+   * schriebe, wäre also gratis — und ein Orakel, das nichts kostet, ist ein
+   * offenes Orakel, egal wie die Antwort aussieht.
+   *
+   * SIE ENTSTEHT SOFORT `revoked`, nicht `pending`. Damit ist sie überall tot,
+   * wo eine Einladung lebt, ohne dass eine einzige Leseroute eine Ausnahme
+   * lernen muss: `listCommunityInvites` filtert auf `pending` (die offenen
+   * Einladungen des Teams bleiben also sauber), `preview` und `accept`
+   * verlangen `pending`. Ihr Token wurde nie verschickt und existiert nach
+   * diesem Request nirgends mehr.
+   *
+   * KEIN NEUER STATUS-WERT: `status` ist eine ENUM-Spalte (control-019/023).
+   * Ein vierter Wert wäre eine Migration, die VOR dem Code-Deploy laufen muss —
+   * sonst antwortet Appwrite 400 und ausgerechnet der Missbrauchs-Pfad wäre
+   * kaputt. Was hier passiert, ist ohnehin wörtlich „angelegt und sofort
+   * zurückgezogen"; das Warum steht im Log, nicht in der Spalte.
+   */
   const row = await admin.tablesDB.createRow<CommunityInviteRow>({
     databaseId: context.databaseId,
     tableId: COMMUNITY_INVITES_TABLE,
@@ -151,14 +200,14 @@ export default defineEventHandler(async (event) => {
       email,
       role: body.role,
       tokenHash,
-      status: 'pending',
-      expiresAt: new Date(Date.now() + COMMUNITY_INVITE_TTL_MS).toISOString(),
+      status: suppressed ? 'revoked' : 'pending',
+      expiresAt,
       invitedBy: context.identity.userId,
       acceptedBy: '',
     },
   }).catch((error) => { throw toH3Error(error, 'Could not create invitation') })
 
-  logEvent('info', 'site.member_invited', {
+  logEvent('info', suppressed ? 'community.member_invite_suppressed' : 'site.member_invited', {
     communityId: body.communityId,
     inviteId: row.$id,
     role: body.role,
@@ -167,19 +216,44 @@ export default defineEventHandler(async (event) => {
     // nicht unterscheiden, ob eine Einladungswelle vom Team oder aus der
     // Mitgliedschaft kam — genau die Frage, die man bei Missbrauch stellt.
     viaQuota: !managesTeam,
+    // AU1: der Grund steht NUR hier. Ein Betreiber, der eine Sondierungs-Welle
+    // sucht, findet sie an dieser Zeile; der Einladende erfährt sie nie.
+    ...(suppressedReason ? { reason: suppressedReason } : {}),
   })
 
   /**
+   * EINE ANTWORT, ZWEI WEGE — Feld für Feld dieselbe (AU1).
+   *
+   * `delivered` sagt der Runtime-Route, ob es etwas zu melden gibt (die
+   * Glocken-Benachrichtigung hängt daran). Sie reicht es NICHT an den Browser
+   * weiter — sonst wäre das Orakel nur eine Ebene höher gewandert. Der Beweis
+   * dafür liegt an der Naht: packages/onboarding/.../members/index.post.ts.
+   *
    * Das Kontingent NACH dieser Einladung reist mit — die Oberfläche schreibt
    * „noch 2 von 5" fort, ohne eine zweite Runde zum Server. `used + 1` ist
-   * hier keine Schätzung: die Zeile ist eine Anweisung weiter oben entstanden.
+   * hier keine Schätzung: die Zeile ist eine Anweisung weiter oben entstanden,
+   * auf BEIDEN Wegen.
+   *
+   * GERECHNET WIRD MIT `memberInviteQuota`, NICHT MIT DER HAND. Bis AU1 stand
+   * hier ein Vier-Felder-Auszug ohne `enabled` — die Oberfläche schreibt die
+   * Antwort direkt in ihren Kontingent-Zustand fort, und danach war `enabled`
+   * dort `undefined`, also der Einladen-Knopf bis zum nächsten Seitenaufbau
+   * verschwunden. Eine zweite Formulierung derselben Zahlen ist genau die
+   * Doppelung, gegen die die pure Regel gebaut wurde.
    */
   return {
     ok: true,
+    delivered: !suppressed,
     inviteId: row.$id,
     email,
     role: body.role,
     expiresAt: row.expiresAt,
-    quota: { unlimited: managesTeam, limit, used: used + 1, remaining: managesTeam ? limit : Math.max(0, limit - used - 1) },
+    quota: memberInviteQuota({
+      managesTeam,
+      invitesEnabled: resolveTenantMemberInvitesEnabled(context.tenant.memberInvitesEnabled),
+      emailVerified: context.identity.emailVerified,
+      limit,
+      used: used + 1,
+    }),
   }
 })

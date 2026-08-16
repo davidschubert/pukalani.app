@@ -30,6 +30,96 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### AU1 — Einladungs-Pfad gehärtet (vier Punkte) ✅ 2026-08-15
+
+Die vier Befunde aus [AUDIT-2026-08-15.md](archiv/audits/AUDIT-2026-08-15.md)
+Schnitt B, alle im seit F57 viewer-offenen Einladungs-Pfad.
+
+**1 · Das `already_member`-Orakel ist zu — „ununterscheidbar antworten"**
+(Davids Entscheidung 2026-08-15). Seit F57 darf jedes Mitglied einladen, und
+`already_member` kostete nichts: kein Zähler, keine Mail, keine Zeile. Damit
+war die Route ein beliebig oft benutzbarer Test „gehört diese Adresse hierher?"
+für Adressen, deren Mitgliederliste der Fragende nicht lesen darf. Jetzt
+entscheidet eine PURE Regel (`decideInviteDelivery` in
+`packages/control/shared/communityTeam.ts`), was mit einer Entscheidung
+geschieht: **senden · stillschweigen · ablehnen**. Wer `team.manage` hält,
+bekommt weiter den ehrlichen 409 (er sieht dieselbe Person zwei Zeilen weiter
+in seiner Liste); alle anderen bekommen die Erfolgs-Antwort.
+
+**Der Preis ist die eigentliche Sicherung, nicht die Antwort.** Die stille
+Einladung legt eine ECHTE `community_invites`-Zeile an — sofort mit `status:
+'revoked'` und einem Token, das nie verschickt wurde. Sie zählt damit gegen das
+Wochen-Kontingent (`countCommunityInvitesBy` filtert bewusst nicht nach Status),
+ist aber überall tot, wo eine Einladung lebt: die Listen der offenen
+Einladungen, `preview` und `accept` verlangen alle `pending`. Kein neuer
+ENUM-Wert, weil `status` eine Enum-Spalte ist — ein vierter Wert wäre eine
+Migration, die vor dem Code-Deploy laufen MUSS, sonst wäre ausgerechnet der
+Missbrauchs-Pfad 400.
+
+**Das Orakel wandert auch keine Ebene höher.** Das Control Plane meldet der
+Runtime mit einem `delivered`-Feld, ob wirklich etwas rausging (daran hängt nur
+die Glocken-Benachrichtigung — eine Meldung „Einladung zu X" an jemanden, der
+in X längst Mitglied ist, wäre fünfmal die Woche ein Belästigungs-Werkzeug).
+Die Naht schneidet das Feld ab, und der Rückgabetyp `CommunityInviteResponse`
+(`packages/onboarding/shared/communityInvite.ts`) kennt es nicht: wer es
+durchreichen will, muss zuerst den Typ ändern. Geprüft wurde ausserdem, was ein
+Nicht-Team-Einlader sonst noch sehen kann — `/api/community/members` und
+`/api/community/invites/[id]` sind `team.manage`, der Export ist
+`community.export`, `invites/mine` geht über die eigene geprüfte Adresse, und
+die neue `invites/preview` aus `ec79a04a` verlangt einen Token, den nur die Mail
+trägt. Bleibt die Kontingent-Route, und die zählt beide Wege gleich.
+
+**2 · `invitedByName` an der SENKE geklemmt.** `oneMailLine()`
+(`packages/control/shared/mailText.ts`, pur + unit-getestet) macht aus allen
+Steuer- und Formatzeichen Leerzeichen und kürzt — 80 Zeichen für den
+Anzeigenamen, 120 für den Community-Namen, der auch im BETREFF steht (dort wäre
+ein CR/LF eine Header-Injektion). An der Senke, nicht nur im Profil-Schema: ein
+strengeres Schema hilft erst ab seinem Einführungstag, die Bestands-Namen
+bleiben.
+
+**3 · Unbestätigte Adresse lädt nicht ein.** `identity.emailVerified` lag im
+Control Plane seit control-019 auf dem Tisch und wurde nie gelesen. Jetzt ist es
+eine Zutat von `decideMemberInvite` — 403 `email_unverified`, Reihenfolge
+Schalter → Adresse → Rolle → Menge. Owner/Admin bleiben unberührt (dieselbe
+Regel wie beim Kontingent: hinzufügen, nicht beschneiden). Die Kontingent-Ansicht
+trägt jetzt einen `reason` mit, damit unter dem fehlenden Knopf der wahre Satz
+steht statt „ist hier ausgeschaltet".
+
+**4 · Quota-Route entschlackt + gedrosselt.** `requireCommunityTeamRole()` neben
+`requireCommunityTeamContext()`: gleiche vier Prüfungen, ohne das Nachladen
+ALLER Mitgliedschaften. Zwei Funktionen statt eines Flags, weil ein leeres
+`members`-Array die gefährlichste Antwort wäre, die es hier gibt
+(`countActiveOwners` läse „kein Owner mehr"). `GET /api/community/invites/quota`
+steht jetzt in `WRITE_LIMITED` — eigener Bucket `community:invite-quota` mit
+`TOKEN_MAX`, nicht der der `onboarding:communities`-Geschwister: die Seite holt
+das Kontingent beim Aufbau UND nach jeder abgelehnten Einladung, und wer sich
+dabei den Community-Wechsler leerräumte, verlöre eine fremde Funktion.
+
+Nebenbei repariert: die Einladungs-Antwort trug ein Vier-Felder-Kontingent ohne
+`enabled`, und die Oberfläche schreibt sie direkt in ihren Zustand fort — nach
+jeder Einladung war der Einladen-Knopf bis zum nächsten Seitenaufbau weg. Jetzt
+rechnet auch sie mit `memberInviteQuota`.
+
+**Beweise:** `packages/onboarding/scripts/verify-member-invites.mjs` **61/61**
+live (zwei neue Abschnitte 9+10, gegen eigene Worktree-Server auf 3014/3016 mit
+echter Service-Naht), `pnpm -r test` grün inkl. neuer Fälle in
+`communityTeam.test.ts` (Ununterscheidbarkeit Feld für Feld + „ein
+durchscheinender Unterschied fiele auf"), `communityInviteQuota.test.ts` und
+`mailText.test.ts`. Alle sieben Gates grün.
+
+**Gelernt:** Eine ununterscheidbare Antwort ist nur die halbe Sicherung — was
+ein Orakel schliesst, ist der PREIS. Der erste Entwurf gab bloss eine
+Erfolgs-Antwort zurück, ohne Zeile und ohne Zähler; damit wäre die Frage
+gratis wiederholbar gewesen und das Orakel nur langsamer, nicht zu. Deshalb
+entsteht die Zeile auf beiden Wegen. Zweite Lehre, an derselben Stelle: die
+Ununterscheidbarkeit muss man bis zum BROWSER verfolgen, nicht bis zur ersten
+Route — das interne `delivered` hätte das Orakel eine Ebene höher wieder
+aufgemacht, und der Beweis prüft deshalb ausdrücklich, dass das Feld in der
+Antwort nicht mehr vorkommt. Dritte: ein neuer Drossel-Eintrag kann einen
+BEWEIS umbringen — `waitForMembership` pollt genau die Route, die AU1 gedeckelt
+hat, 45-mal im Sekundentakt; ohne frische IP je Poll hätte der Beweis seine
+eigene Drossel gemessen und „die Rolle kommt nicht an" gemeldet.
+
 ### Autonome Runde 4 — frisches Audit über den Post-Wellen-Stand ✅ 2026-08-15
 
 Drei read-only Audit-Agenten über die Wellen-Schnitte (posts+comments /

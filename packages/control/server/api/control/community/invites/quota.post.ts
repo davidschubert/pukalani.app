@@ -2,7 +2,7 @@ import { z } from 'zod'
 import { memberInviteQuota, memberInviteWindowStart } from '../../../../../shared/communityInviteQuota'
 import { resolveTenantMemberInvitesEnabled } from '../../../../../shared/types/tenantRecord'
 import { communityRoleHasCapability } from '../../../../../../core/shared/communityAuthz'
-import { countCommunityInvitesBy, memberInviteLimit, requireCommunityTeamContext } from '../../../../utils/communityTeam'
+import { countCommunityInvitesBy, memberInviteLimit, requireCommunityTeamRole } from '../../../../utils/communityTeam'
 
 /**
  * MEIN Einladungs-Kontingent in dieser Community (F57 Mechanik 2).
@@ -25,6 +25,14 @@ import { countCommunityInvitesBy, memberInviteLimit, requireCommunityTeamContext
  *
  * Capability `members.invite` — jedes Mitglied darf sein eigenes Kontingent
  * sehen. Über ANDERE verrät die Antwort nichts.
+ *
+ * ── WARUM `requireCommunityTeamRole` UND NICHT DER VOLLE KONTEXT (AU1) ─────
+ * Diese Route beantwortet fünf Zahlen über den FRAGENDEN. Bis zum Audit
+ * 2026-08-15 zog sie dafür die GESAMTE Mitgliederliste durch die Service-Naht
+ * (bis zu zwanzig Listen-Abfragen à 500 Zeilen) — und zwar bei jedem
+ * SSR-Aufbau der Mitglieder-Seite, die seit F57 jedem Mitglied offensteht.
+ * Gebraucht hat sie davon: nichts. Die Kosten wuchsen mit der Community, die
+ * Antwort nicht.
  */
 const bodySchema = z.object({
   jwt: z.string().min(1).max(4096),
@@ -34,7 +42,7 @@ const bodySchema = z.object({
 export default defineEventHandler(async (event) => {
   requireOnboardingCaller(event)
   const body = await readValidatedBody(event, bodySchema.parse)
-  const context = await requireCommunityTeamContext(event, body, 'members.invite')
+  const context = await requireCommunityTeamRole(event, body, 'members.invite')
 
   const managesTeam = communityRoleHasCapability(context.actorRole, 'team.manage')
   const limit = memberInviteLimit()
@@ -52,6 +60,9 @@ export default defineEventHandler(async (event) => {
   return memberInviteQuota({
     managesTeam,
     invitesEnabled: resolveTenantMemberInvitesEnabled(context.tenant.memberInvitesEnabled),
+    // AU1: dieselbe Zutat wie in der Einladungs-Route — sonst stünde hier ein
+    // Knopf, den die Route mit 403 beantwortet.
+    emailVerified: context.identity.emailVerified,
     limit,
     used,
   })

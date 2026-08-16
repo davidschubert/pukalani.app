@@ -20,6 +20,7 @@ const member = {
   managesTeam: false,
   role: 'viewer' as const,
   invitesEnabled: true,
+  emailVerified: true,
   limit: 5,
   used: 0,
 }
@@ -68,6 +69,35 @@ describe('decideMemberInvite — das Mitglied', () => {
     expect(decideMemberInvite({ ...member, role: 'admin', used: 99 }))
       .toEqual({ ok: false, reason: 'invite_role_forbidden' })
   })
+
+  /**
+   * AU1 (Audit 2026-08-15): die eigene Adresse muss bestätigt sein.
+   *
+   * `identity.emailVerified` lag im Control Plane seit control-019 auf dem
+   * Tisch und wurde NIE gelesen. Ohne diese Regel legt ein Wegwerf-Konto auf
+   * einer Community mit offener Registrierung sofort los und verschickt 5
+   * Mails je Woche und Community aus dem Community-SMTP — an frei wählbare
+   * fremde Adressen, unter einem Namen, den niemand zurückverfolgen kann.
+   */
+  it('sperrt ein Mitglied mit unbestätigter Adresse', () => {
+    expect(decideMemberInvite({ ...member, emailVerified: false }))
+      .toEqual({ ok: false, reason: 'email_unverified' })
+  })
+
+  /**
+   * Die Adress-Frage steht VOR der Rolle: an einer unbestätigten Adresse
+   * ändert eine andere Rollenwahl nichts, und die Person soll den einen
+   * Handgriff erfahren, der sie weiterbringt — nicht einen zweiten
+   * Fehlversuch mit `viewer`. Der SCHALTER bleibt trotzdem vorn: ist die
+   * Mechanik hier gar nicht vorgesehen, hilft auch eine bestätigte Adresse
+   * nicht.
+   */
+  it('ordnet die unbestätigte Adresse hinter den Schalter und vor die Rolle', () => {
+    expect(decideMemberInvite({ ...member, invitesEnabled: false, emailVerified: false }))
+      .toEqual({ ok: false, reason: 'member_invites_disabled' })
+    expect(decideMemberInvite({ ...member, emailVerified: false, role: 'admin', used: 99 }))
+      .toEqual({ ok: false, reason: 'email_unverified' })
+  })
 })
 
 describe('decideMemberInvite — Owner/Admin bleiben unberührt', () => {
@@ -87,6 +117,18 @@ describe('decideMemberInvite — Owner/Admin bleiben unberührt', () => {
   })
 
   /**
+   * AU1: auch die ADRESS-Prüfung ist Davids Zuschnitt „hinzufügen, nicht
+   * beschneiden". Owner/Admin haben diesen Weg seit control-019; ein Owner,
+   * dessen Bestätigungs-Mail im Spam liegt, darf nicht aus seiner eigenen
+   * Mitgliederverwaltung ausgesperrt werden. Der Missbrauchsfall ist das
+   * frisch angelegte Wegwerf-Konto, und das wird nie Owner.
+   */
+  it('auch ohne bestätigte Adresse', () => {
+    expect(decideMemberInvite({ ...member, managesTeam: true, emailVerified: false }))
+      .toEqual({ ok: true })
+  })
+
+  /**
    * 'owner' als Wunschrolle fällt NICHT hier durch, sondern in `decideInvite`
    * — für jeden Einladenden gleich. Diese Datei fügt nur hinzu, was für
    * MITGLIEDER zusätzlich gilt; würde sie 'owner' hier abfangen, gäbe es zwei
@@ -98,24 +140,39 @@ describe('decideMemberInvite — Owner/Admin bleiben unberührt', () => {
 })
 
 describe('memberInviteQuota — die Anzeige', () => {
+  const view = { managesTeam: false, invitesEnabled: true, emailVerified: true, limit: 5, used: 2 }
+
   it('rechnet den Rest für ein Mitglied', () => {
-    expect(memberInviteQuota({ managesTeam: false, invitesEnabled: true, limit: 5, used: 2 }))
-      .toEqual({ enabled: true, unlimited: false, limit: 5, used: 2, remaining: 3 })
+    expect(memberInviteQuota(view))
+      .toEqual({ enabled: true, reason: null, unlimited: false, limit: 5, used: 2, remaining: 3 })
   })
 
   it('fällt nie unter null', () => {
-    expect(memberInviteQuota({ managesTeam: false, invitesEnabled: true, limit: 5, used: 8 }).remaining).toBe(0)
+    expect(memberInviteQuota({ ...view, used: 8 }).remaining).toBe(0)
   })
 
   it('meldet Owner/Admin als unbegrenzt', () => {
-    const view = memberInviteQuota({ managesTeam: true, invitesEnabled: false, limit: 5, used: 0 })
-    expect(view.unlimited).toBe(true)
-    expect(view.enabled).toBe(true)
+    const owner = memberInviteQuota({ ...view, managesTeam: true, invitesEnabled: false, used: 0 })
+    expect(owner.unlimited).toBe(true)
+    expect(owner.enabled).toBe(true)
+    expect(owner.reason).toBe(null)
   })
 
   it('meldet abgeschaltet als nicht erlaubt', () => {
-    expect(memberInviteQuota({ managesTeam: false, invitesEnabled: false, limit: 5, used: 0 }).enabled).toBe(false)
-    expect(memberInviteQuota({ managesTeam: false, invitesEnabled: true, limit: 0, used: 0 }).enabled).toBe(false)
+    expect(memberInviteQuota({ ...view, invitesEnabled: false, used: 0 }).enabled).toBe(false)
+    expect(memberInviteQuota({ ...view, limit: 0, used: 0 }).enabled).toBe(false)
+  })
+
+  /**
+   * AU1: der GRUND reist mit, sonst stünde unter dem fehlenden Knopf immer
+   * derselbe Satz („in dieser Community gerade nicht möglich") — für jemanden
+   * mit unbestätigter Adresse schlicht falsch, und sein eigentlicher Handgriff
+   * (die Bestätigungs-Mail) bliebe unsichtbar.
+   */
+  it('nennt den Grund, wenn es nicht geht', () => {
+    expect(memberInviteQuota({ ...view, emailVerified: false }).reason).toBe('email_unverified')
+    expect(memberInviteQuota({ ...view, invitesEnabled: false }).reason).toBe('member_invites_disabled')
+    expect(memberInviteQuota({ ...view, used: 5 }).reason).toBe('invite_quota_exhausted')
   })
 
   /**
@@ -127,11 +184,18 @@ describe('memberInviteQuota — die Anzeige', () => {
   it('stimmt in JEDEM Fall mit der durchsetzenden Regel überein', () => {
     for (const managesTeam of [true, false]) {
       for (const invitesEnabled of [true, false]) {
-        for (const limit of [0, 1, 5]) {
-          for (const used of [0, 1, 5, 9]) {
-            const facts = { managesTeam, invitesEnabled, limit, used }
-            expect(memberInviteQuota(facts).enabled, JSON.stringify(facts))
-              .toBe(decideMemberInvite({ ...facts, role: 'viewer' }).ok)
+        for (const emailVerified of [true, false]) {
+          for (const limit of [0, 1, 5]) {
+            for (const used of [0, 1, 5, 9]) {
+              const facts = { managesTeam, invitesEnabled, emailVerified, limit, used }
+              const decision = decideMemberInvite({ ...facts, role: 'viewer' })
+              const shown = memberInviteQuota(facts)
+              expect(shown.enabled, JSON.stringify(facts)).toBe(decision.ok)
+              // Und der GRUND stimmt mit, nicht nur das Ja/Nein — sonst könnte
+              // der Satz unter dem fehlenden Knopf von der Regel abdriften.
+              expect(shown.reason, JSON.stringify(facts))
+                .toBe(decision.ok ? null : decision.reason)
+            }
           }
         }
       }

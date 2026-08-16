@@ -746,6 +746,7 @@
       "asViewer": "Your invitation makes this person a reader.",
       "quotaLeft": "{remaining} of {limit} invitations left this week.",
       "disabled": "Member invitations are currently switched off in this community.",
+      "disabledUnverified": "Confirm your own email address first — then you can invite people. The link is in your inbox.",
       "emailLabel": "Email address",
       "emailHelp": "If the person already has a Pukalani account, one click after signing in is enough. Otherwise they create one via the link.",
       "roleLabel": "Role",
@@ -795,6 +796,7 @@
       "invite_quota_exhausted": "You have used up this week's invitations. It resets in a few days.",
       "member_invites_disabled": "Only the team can invite people in this community right now.",
       "invite_role_forbidden": "As a member you can only invite people as readers.",
+      "email_unverified": "Confirm your own email address first — then you can invite people. The link is in your inbox.",
       "failed": "That didn't work just now. Please try again.",
       "failedHint": "Nothing in the member list changed. Reload the page and try again."
     }
