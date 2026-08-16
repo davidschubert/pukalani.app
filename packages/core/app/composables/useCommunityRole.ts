@@ -51,3 +51,25 @@ export function useCommunityCapability(capability: Capability) {
   const { capabilities } = useCommunityRole()
   return computed(() => capabilities.value.has(capability))
 }
+
+/**
+ * BEIDE Quellen zusammen — das UX-Gegenstück zu `requireCommunityPermission`
+ * auf dem Server: globales Operator-Label (authz.ts) ODER Rolle/Stufe in DIESER
+ * Community (communityAuthz.ts).
+ *
+ * Genau diese Rechnung machen das Dashboard-Layout (`can()`) und das Konto-Menü
+ * seit jeher von Hand; sie steht hier, weil sie ab F58 auch auf ÖFFENTLICHEN
+ * Produktseiten gebraucht wird (Kurs-/Termin-Verwaltung aus dem Produkt heraus).
+ *
+ * `useCommunityCapability` allein reicht dort NICHT: in einer Silo-App
+ * (apps/comments, Playground) gibt es überhaupt keine Community-Rolle — der
+ * Knopf wäre für den Betreiber unsichtbar, obwohl seine Route ihn durchlässt.
+ *
+ * Nur Sichtbarkeit. Die Autorität bleibt die Server-Route.
+ */
+export function useCapability(capability: Capability) {
+  const auth = useAuthStore()
+  const { capabilities } = useCommunityRole()
+  return computed(() =>
+    userHasCapability(auth.user, capability) || capabilities.value.has(capability))
+}
