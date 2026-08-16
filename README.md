@@ -1,6 +1,6 @@
 # 🏝️ Pukalani Monorepo
 
-Nuxt 4 Monorepo mit zentralem **Core Layer** und komponierbaren **Feature Layers** — die gemeinsame Basis für alle Pukalani-Projekte. Auth, Appwrite-Integration, Design-Fundament und Utilities werden einmal implementiert und per `extends` in beliebig viele Apps eingebunden.
+Nuxt 4 Monorepo hinter **Pukalani** — einer Community-Plattform, auf der jede Community unter eigener Adresse und eigenem Erscheinungsbild läuft. Zentraler **Core Layer** plus komponierbare **Produkt-Layer**: Auth, Appwrite-Integration, Design-Fundament und Utilities werden einmal implementiert und per `extends` in beliebig viele Apps eingebunden.
 
 > Vollständiges Konzept: [docs/CONCEPT.md](docs/CONCEPT.md) · Phasen-Roadmap: [docs/GOALS.md](docs/GOALS.md)
 
@@ -9,8 +9,12 @@ Nuxt 4 Monorepo mit zentralem **Core Layer** und komponierbaren **Feature Layers
 ```
 packages/core            ← Ebene 1: Fundament (besitzt KEINE Appwrite Tables!)
 packages/system          ← Fundament: Infra-Tabellen (audit_logs, app_config, notifications)
-packages/*               ← Ebene 2: Feature Layers (themes, comments, posts, events, activity, feedback, billing, courses, tickets, moderation, admin)
-apps/*                   ← Ebene 3: dünne Apps, komponieren Core + Features
+packages/moderation      ← Fundament: generisches Melde-/Report-System
+packages/blueprint       ← KOMPOSITION: der EINZIGE Layer, der mehrere Produkte kennen darf
+packages/*               ← Ebene 2: Produkt-Layer (comments, posts, pages, events, courses,
+                           messages, media, themes, analytics, domains, billing, admin,
+                           control, onboarding, activity, feedback, tickets)
+apps/*                   ← Ebene 3: dünne Apps, komponieren via extends
 ```
 
 ```ts
@@ -23,8 +27,14 @@ export default defineNuxtConfig({
 })
 ```
 
-- **`packages/core`** stellt ausschließlich Code bereit — keine Daten, keine Tables, kein Schema. Jede App nutzt ihre **eigene Appwrite-Instanz** (Config via `.env`).
-- **Feature Layers** bringen eigenes Datenmodell und/oder eigene UI-Welt mit. Sie extenden den Core nicht selbst — die App komponiert beides.
+- **`packages/core`** stellt ausschließlich Code bereit — keine Daten, keine Tables, kein Schema.
+- **Ein Deployment trägt viele Communities.** `apps/platform` ist die Mehr-Mandanten-App: alle
+  Kunden-Communities teilen sich EIN Appwrite-Projekt, getrennt durch die Datentür
+  (`tenantDb`) und Row-Permissions. Ein eigenes Projekt je Kunde ist die Ausnahme für
+  Enterprise (heute nur `portfolio`) — Isolation im CODE und im DEPLOYMENT sind zwei
+  Entscheidungen.
+- **Produkt-Layer** bringen eigenes Datenmodell und/oder eigene UI-Welt mit. Sie extenden den
+  Core nicht selbst — die App komponiert beides.
 - **Apps** bleiben dünn: nur Komposition, Branding und app-spezifische Pages. Die App überschreibt alles (Components, Layouts, `app.config.ts` wird tief gemergt).
 
 ## Stack
@@ -32,7 +42,7 @@ export default defineNuxtConfig({
 | Technologie | Rolle |
 |---|---|
 | Nuxt 4 (SSR) + Nuxt UI 4 | Framework + UI-Komponenten |
-| Appwrite (self-hosted ≥ 1.9.5, MariaDB, TablesDB) | Backend: Auth, Datenbank, Storage, Realtime, Presences |
+| Appwrite (self-hosted, aktuell 1.9.6, MariaDB, TablesDB) | Backend: Auth, Datenbank, Storage, Realtime, Presences |
 | node-appwrite / appwrite | Server SDK (CRUD via Server Routes) / Web SDK (Realtime + Presences API) |
 | Pinia · Zod · @nuxtjs/i18n (de+en) | State · Validierung · Internationalisierung |
 | Tailwind CSS 4 · TypeScript strict | Styling · Typsicherheit |
@@ -60,7 +70,14 @@ NUXT_PUBLIC_APPWRITE_DATABASE_ID="main"
 NUXT_PUBLIC_APPWRITE_AVATARS_BUCKET="avatars"
 NUXT_APPWRITE_KEY="<dein-api-key>"            # server-only, alle Scopes
 NUXT_APPWRITE_MIGRATIONS_KEY="<dein-api-key>" # für Migrationen (kann derselbe sein)
+NUXT_PUBLIC_APP_URL="http://localhost:3001"   # Basis für Verifizierungs- und Reset-Links;
+                                              # fehlt sie, antwortet /api/auth/verification 503
 ```
+
+Das ist das Minimum. Optionale Funktionen (SMTP, Stripe, KI, Analytics, die Naht zum Control
+Plane) bringen eigene Schlüssel mit — die vollständige Liste steht in
+[apps/comments/.env.example](apps/comments/.env.example). Fehlt eine davon, wird nichts rot:
+das Feature bleibt still aus (`pnpm ops:site-env` prüft die Server-.env gegen die Pflicht-Liste).
 
 **3. Bootstrap** — legt Datenbank + Avatars-Bucket + Web-Platform an und fährt **alle Migrationen** in Reihenfolge (system→comments→moderation→admin):
 ```bash
@@ -92,41 +109,52 @@ Demo-Login (nach `--seed`): `uma@demo.local` / `Demo-Passw0rd!` (regulär), `mod
 
 ```
 maui-monorepo/
-├── packages/
-│   ├── core/                  # Nuxt Layer: Fundament
-│   │   ├── app/               # Components, Composables, Stores, …
-│   │   └── .playground/       # isolierte Dev-Umgebung (Port 3000)
-│   ├── system/                # Fundament-Layer: Infra-Tabellen (Migrationen, kein UI)
-│   ├── comments/              # Feature Layer: Kommentarsystem (Threads, Votes, Reports-UI)
-│   │   ├── app/components/    # CommentThread, CommentForm, VoteButtons, ReportButton
-│   │   ├── server/api/        # GET/POST /api/comments (Thread-Pagination), Vote-Upsert
-│   │   └── scripts/migrations/ # idempotente Schema-Migrationen
-│   ├── posts/                 # Feature Layer: Community-Feed (Posts, Polls, Fragen)
-│   ├── events/                # Feature Layer: Event-Kalender (RSVP, ICS, Live-Teilnehmerzahl)
-│   ├── activity/              # Feature Layer: Activity-Feed (UI zum Core-Vertrag recordActivity)
-│   ├── feedback/              # Feature Layer: Feedback-Widget (Button unten links, Admin-Sichtung)
-│   ├── billing/               # Feature Layer: Stripe-Abos (Checkout, Webhook, Entitlements, Portal)
-│   ├── courses/               # Feature Layer: Async Course Builder / LMS (Lektionen, Fortschritt, paid via billing)
-│   ├── tickets/               # Feature Layer: Ticket-Board (Trello-Kanban für Betreiber, md-Export für Claude Code)
-│   ├── moderation/            # Fundament-Layer: generisches Melde-/Report-System (reports-Table)
-│   ├── admin/                 # Feature Layer: Dashboard, Moderation-Queue, Changelog, Audit, …
-│   └── themes/                # Feature Layer: Theming
-├── apps/
-│   ├── _template/             # Kopiervorlage für neue Apps (Port 3002, README mit Schritten)
-│   └── comments/       # dünne App: extends [themes, admin, comments, posts, events, feedback, billing, courses, tickets, activity, moderation, core, system] (Port 3001)
-│       └── scripts/           # bootstrap.ts (Fresh-Instance-Setup), seed-demo.ts (Demo-Daten)
-├── docs/
-│   ├── CONCEPT.md             # Architektur-Konzept (v2)
-│   ├── GOALS.md               # Phasen-Roadmap mit /goal-Texten
-│   ├── APPWRITE-1.9.5-UPGRADE.md # Upgrade-/Feature-Plan (Realtime/Presence/Email-Policies)
-│   ├── AUTH-FORMS.md          # UAuthForm-als-Vorlage-Entscheidung + Abweichungen
-│   ├── plans/                 # umsetzungsreife Pläne (GDPR, Phase 17, Billing, Themes, Embed, Changelog 2B)
-│   └── OPEN-ITEMS.md          # offene Punkte / erledigte Referenz
-├── pnpm-workspace.yaml        # Workspaces + Catalog
-└── CLAUDE.md                  # Claude Code Kontext
+├── packages/                     # 21 Layer — Fundament, Komposition, Produkte
+│   ├── core/                     # Fundament: Auth, i18n, SEO, Realtime, Datentür, Verträge
+│   │   └── .playground/          # isolierte Dev-Umgebung
+│   ├── system/                   # Fundament: Infra-Tabellen (Migrationen, kein UI)
+│   ├── moderation/               # Fundament: generisches Melde-/Report-System
+│   ├── blueprint/                # KOMPOSITION: der einzige Layer, der mehrere Produkte kennen darf
+│   ├── control/                  # Control Plane: Communities, Teams, Abos, Provisionierung
+│   ├── onboarding/               # Self-Service-Trichter: Wizard, Einladungen, Kundenbereich
+│   ├── admin/                    # Dashboard-Rahmen, Moderations-Queue, Changelog, Audit
+│   ├── themes/                   # 26 Farbwelten × 11 Abstufungen, eigene Themes + Schriften
+│   ├── comments/                 # Kommentare (Threads, Votes, Reports, Embed-Widget)
+│   ├── posts/                    # Beiträge, Umfragen, Fragen — und die Diskussionen
+│   ├── pages/                    # Inhaltsseiten (Startseite, Regeln, Rechtstexte)
+│   ├── events/                   # Termine (RSVP, Serien, ICS, Tickets)
+│   ├── courses/                  # Kurse (Lektionen, Fortschritt, bezahlter Zugang)
+│   ├── messages/                 # Private 1:1-Nachrichten
+│   ├── media/                    # Medien-Galerie
+│   ├── activity/                 # Activity-Feed (UI zum Core-Vertrag recordActivity)
+│   ├── analytics/                # Reichweitenmessung (Plausible, cookielos)
+│   ├── domains/                  # eigene Domain je Community (DNS, Zertifikat)
+│   ├── billing/                  # Stripe (Checkout, Webhook, Entitlements, Portal)
+│   ├── feedback/                 # Feedback-Widget
+│   └── tickets/                  # Ticket-Board für den Betrieb
+├── apps/                         # dünne Apps — komponieren nur via extends
+│   ├── platform/                 # DIE Mehr-Mandanten-App: alle Kunden-Communities + Kundenbereich
+│   ├── control/                  # Betreiber-Konsole (admin.pukalani.app) + interne Doku
+│   ├── marketing/                # pukalani.app — die Landingpage
+│   ├── help/                     # help.pukalani.app — Kunden-Hilfe (de + en)
+│   ├── portfolio/                # pukalani.studio — Davids eigene Site (einziges Silo)
+│   ├── comments/                 # E2E-Anker + Beweis der Studio-Form (kein Deployment mehr)
+│   ├── photos/                   # Klasse-A-Site (kein Deployment)
+│   └── _template/                # Kopiervorlage für neue Apps
+├── docs/                         # vier Sorten, jede mit genau EINEM Zuhause (docs/README.md)
+│   ├── OPEN-ITEMS.md             # DIE eine Liste — nur Offenes
+│   ├── OPEN-ITEMS-COMPLETE.md    # Lern-Gedächtnis: Erledigtes mit „Gelernt:"-Zeile
+│   ├── CONCEPT.md · GOALS.md · DECISION-LOG.md
+│   ├── referenz/                 # wie ist X gebaut (RBAC, Themes, Embed, Produkt-Bilanz …)
+│   ├── runbooks/                 # Betriebs-Anleitungen (Deployment, Stripe, Cutover)
+│   ├── archiv/                   # ausgeführte Pläne + Audits (Begründung, keine Arbeitsliste)
+│   ├── plans/                    # nur, was NOCH NICHT gebaut ist
+│   └── content/                  # interne Doku-Site (admin.pukalani.app/docs)
+├── pnpm-workspace.yaml           # Workspaces + Catalog (EINE Version je Kernabhängigkeit)
+└── CLAUDE.md                     # Regelwerk für Agenten (AGENTS.md zeigt nur darauf)
 ```
 
-Ports: Core Playground **3000** · comments **3001** · weitere Apps 3002+
+Ports: Core-Playground **3000** · comments **3001** · _template **3002** · photos **3003** · control **3004** · portfolio **3005** · platform **3006** · marketing **3007** · help **3008** · Docs-Site **4000**
 
 ## Status
 
@@ -199,8 +227,6 @@ Ports: Core Playground **3000** · comments **3001** · weitere Apps 3002+
 | 65 | **Baselines + hreflang**: (a) **Themes-Visual-Regression drift-fest** — neue deterministische `/visual`-Seite (Nachfolger /styleguide: Landing-Bausteine + Komponenten-Zoo, feste Werte, leerer Kommentar-Thread, noindex) als Screenshot-Ziel; Baselines neu, Immunität bewiesen (neuer Demo-Kommentar → 9/9 grün — vorher riss jede Datenänderung alle Baselines). (b) **SEO-Zweisprachigkeit** (redirectOn-'all'-Caveat gelöst): `useLocaleHead` in beiden App-Shells → hreflang-Alternates (x-default/de/en) + og:locale + canonical auf jeder Seite (absolute URLs via `NUXT_PUBLIC_I18N_BASE_URL`); `detectBrowserLanguage.fallbackLocale` entfernt — signal-lose Requests (Crawler) bekamen sonst auf `/de/*` EN-Content/-canonical, jetzt ist die URL-Locale Autorität; Redirect-Matrix (Cookie, Accept-Language, Deep-Links) live geprüft, Smoke/Auth/Embed 13/13 | ✅ 2026-07-10 |
 | 66 | **Prod-Generalprobe + Generator-Vorarbeit + Kosmetik**: (a) **Production-Build lokal bewiesen** (Phase-17-Risikoabbau) — `nuxi build` + node .output auf 3002: Boot sauber, CSP/hreflang/noindex korrekt, Microcaches aktiv, **14/14 funktionale E2E gegen den Prod-Build** (Smoke/Auth/Embed/Realtime; 1 Context-Setup-Flake im Re-Run grün). (b) **Themes-Katalog-Generator** (Vollausbau Schritt 3 als Vorarbeit, ohne E1–E7 anzutasten): `shared/themeGen.ts` + `theme.catalog.ts` (Platzhalter = 9 Bestands-Themes) + `pnpm --filter @pukalani/themes generate` → `.generated/`-Vorschau; Kontrast-Gate ≥3:1 mit Stufen-Shift, Determinismus byte-gleich bewiesen, 8 Tests; `--write` wartet auf visuelle Abnahme. (c) **PresenceAvatar auf UChip** (geparkter Kosmetik-Punkt) — Badge aus dem Chip-Theme, live mit Typing-Presence verifiziert. (d) CLAUDE.md/CONCEPT um alle neuen Core-Verträge nachgezogen | ✅ 2026-07-11 |
 | 67 | **Multi-Site-Plattform: Strategie + Gate S0 + M1 Feature-Manifeste**: (a) **Plattform-Strategie** ([docs/referenz/MULTI-SITE-PLATFORM-STRATEGIE.md](docs/referenz/MULTI-SITE-PLATFORM-STRATEGIE.md)) in 7 Review-Runden abgestimmt und freigegeben — drei Horizonte (eigene Sites → Agentur → SaaS), Control Plane hawaii.studio (Hybrid-Dashboard), Appwrite-**Projekt pro Site** auf geteiltem Server, zwei Site-Klassen, Feature-System F1–F7, Lücken L1–L8, Spikes S0–S4 als Decision Gates. (b) **Gate S0 bestanden** ([spikes/s0-multi-project](spikes/s0-multi-project/README.md), 12/12 Tests gegen echte Wegwerf-Appwrite): Host-Auflösung ohne Default-Fallback, Kontext ohne Runtime-Key, Session-/JWT-Projektbindung, Cross-Site-Isolation; Learnings: keyId global eindeutig, Login = System-Op, 401-Mapping. (c) **M1 umgesetzt**: `feature.manifest.ts` in allen 13 Layern + `site.manifest.ts` pro App (Single Source der Feature-Wahl) + `pnpm check:manifests` (CI/lint) — erzwingt Konsistenz von extends/package.json, requires-Schluss (comments/posts→moderation) und LAYER_ORDER-Drift; 4 Negativproben demonstriert | ✅ 2026-07-14 |
-
-Details und Nachweis-Kriterien pro Phase: [docs/GOALS.md](docs/GOALS.md) · Upgrade-Plan: [docs/archiv/APPWRITE-1.9.5-UPGRADE.md](docs/archiv/APPWRITE-1.9.5-UPGRADE.md) · Offene Punkte: [docs/OPEN-ITEMS.md](docs/OPEN-ITEMS.md)
 | 68 | **M2: Laufzeit-Feature-Gates + Feature-Katalog** — (a) **Layer-Rename feed → activity** (Verwechslung mit Community-Feed; F6: ein Begriff durch alle Ebenen — Ordner, @pukalani/activity, /api/activity, /activity, Capability activity.manage, i18n). (b) **F2 verallgemeinert**: registerFeatureManifest-Registry (13 Nitro-Plugins), `app_config.features` (system-018) + `getEffectiveFeatures`/`requireFeature`, zentrale feature-gate-Middleware (apiPrefixes → 404), `useFeature()` reaktiv über den Realtime-Config-Kanal. (c) **Feature-Seite** /dashboard/admin/features (Karten aus Manifesten, Grundgerüst nicht schaltbar, requires-Guards 409, Audit). Live bewiesen: Toggle aus → API 404 + Nav-Icon verschwindet OHNE Reload; an → alles zurück. Dazu: Moderations-Hide räumt Activity-Einträge auf (Inhalts-Leak-Fix, system-017, live bewiesen) | ✅ 2026-07-14 |
 | 69 | **M3: Migrations-Audit „additiv-sicher"** — alle 44 Migrationen in 3 parallelen Audit-Läufen klassifiziert: 43 additiv-sicher, **1 Fix (comments-002)**: DROP-Guard war per UND gekoppelt (halbes Zielschema hätte die gesunde befüllte Table mitgerissen) → jetzt DROP nur bei positiv erkanntem Alt-Schema (postId/text), comment_votes nur im Verbund, unvollständiges Ziel wird additiv repariert. Dauerhaft: `check:manifests` verlangt `destruktiv-ok:`-Marker für zerstörerische Migration-Aufrufe (Negativprobe rot). Abnahme: voller Re-Run auf befüllter Instanz grün, Datenbestand identisch — **Nach-Aktivierung per `pnpm migrate --layer` freigegeben (F4.8)**. Details: [docs/archiv/M3-MIGRATIONS-AUDIT.md](docs/archiv/M3-MIGRATIONS-AUDIT.md) | ✅ 2026-07-14 |
 | 70 | **M4: `pnpm create-site` + Gate G1** — neue Control-Site in EINEM Befehl: Scaffold aus _template (generierte package.json/nuxt.config/site.manifest, Port automatisch), requires-validierte Feature-Wahl, Appwrite-Provisionierung per Console-REST (Projekt `<name>-<shortid>` nach F6, global eindeutige Key-IDs, Platform, .env), Bootstrap mit **manifest-gefilterten Migrationen** (Site ohne courses bekommt keine courses-Tables), check:manifests als Schlussgate. **Gate G1/S1 läuft dauerhaft in der CI** (e2e.yml provisioniert bei jedem Push ein Projekt auf der echten Wegwerf-Appwrite). Provisioner-Learnings dokumentiert (408-Poll; halb initialisierte Projekte) | ✅ 2026-07-14 |
@@ -219,7 +245,6 @@ Details und Nachweis-Kriterien pro Phase: [docs/GOALS.md](docs/GOALS.md) · Upgr
 | 83 | **Zero-Downtime-Deploy Stufe 2 (A.10)** — Deploys frieren `.output` als Release unter `releases/comments/<sha>/` ein, atomarer `current`-Symlink-Flip, pm2 **Cluster-Mode** ([ops/ecosystem-comments.config.cjs](ops/ecosystem-comments.config.cjs)) mit `pm2 reload` statt Restart (ploi-Auto-Restart aus); .env-Parsing in der Ecosystem-Config, `pm2 save` + Release-Pruning (5 behalten) im Deploy-Script. **Beweis: curl-Loop auf /api/health (~0,3 s Takt) über einen kompletten Deploy — 0 Nicht-200** | ✅ 2026-07-19 |
 | 84 | **H2-Live: portfolio.pukalani.app + studio.pukalani.app auf Prod** — zweite+dritte ploi-Site auf app-prod (Ports 3002/3003, LE-Certs, Proxy-vHosts, ZDT-Releases + pm2-Cluster), Appwrite-Projekte `portfolio-prod`/`studio-prod` unter neuem **Provisioner-Console-Account** (Projekt-Muster „Console-Creds nur beim Runner": Keys per curl erstellt, Secrets file-to-file in die envs — nie im Chat; Classifier blockt Browser-Key-Harvesting zu Recht), `main`-DB + volle Migrationen (portfolio: system+admin; studio: 36 Tables inkl. workspaces/billing), Stripe-Prod-Webhook (6 Events, Signaturpflicht 400-bewiesen), deploy.yml als sequenzielle 3-Site-Kette (RAM-Regel: nie 2 Nuxt-Builds parallel — OOM 137). Smoke: beide Startseiten 200 SSR, /api/health ok, portfolio-Cases de/en, studio-Login. Offen: Betreiber-Account auf studio-prod (David registrieren → admin-Label), 2 ploi-Webhook-Secrets, UptimeRobot | ✅ 2026-07-19 |
 | 85 | **H3-Live: Multi-Tenant-Platform auf Prod + Wellen + Quota** — `platform.pukalani.app` als 4. ploi-Site (Port 3004, `server_name platform + *.pukalani.app`, **Wildcard-TLS** via DNS-Challenge, nginx/Deploy-Script per **ploi-API** statt Panel-Editor), Pool-Projekt `pool` (9 Tabellen), Deploy-Kette auf 4 Sites + `PLOI_DEPLOY_WEBHOOK_PLATFORM`; **demo.pukalani.app live als erster Pool-Tenant** (Studio-Klick → Host live ohne Build; Smoke: 200 + gescopte Kommentarliste, unbekannte Hosts 404). Prod-Learnings gefixt: platform-Build braucht 3584 MB Heap (Nitro-OOM bei 2560/3072); `/api/health` + `/_i18n/` sind host-freie Infra-Pfade (nuxt-i18n lädt Messages per internem self-fetch ohne Host — sonst rohe i18n-Keys); Microcaches tenant-aware (`tenantCacheScope`: changelog + features). **4.2 Wellen-Migrationen**: `tenants.wave` (control-012, Dev+Prod) + `pnpm migrate --wave internal|canary|stable --control-env …` (Silo-Projekte übers Control Plane, Key-Dateien je Projekt, fail-loud vor halber Welle; bewiesen inkl. echtem Canary-Lauf) + Control-UI. **4.3 Quota scharf**: `assertPoolWriteQuota` (Core, A14-sauber — der Layer nennt seine Tabelle), comments im Pool 1000/Tag (rollierende 24 h) + 50.000 gesamt → 429, lokal E2E bewiesen; Zahlen-Katalog zum Abnicken in OPEN-ITEMS | ✅ 2026-07-23 |
-
 | 86 | **Embed-Widget E2 + E3 (Kommentare auf Drittseiten)** ([Plan](docs/archiv/EMBED-WIDGET.md), [Doku](docs/referenz/EMBED.md)) — **E2 Schreiben im iframe:** „Anmelden" im Widget öffnet ein Popup (Top-Level, first-party Login), das die Session per verschlüsseltem 60-s-Handoff-Token (`core/server/utils/embedHandoff.ts`, stateless AES-256-GCM) ans cross-site iframe reicht; dieses setzt sie als **CHIPS-partitioniertes** Cookie (`SameSite=None; Secure; Partitioned`, nur Embed-Kontext — Haupt-App bleibt `strict`), `pukalani.security.csrfOriginCheck` scharf. Prod-cross-site bewiesen von **davidschubert.com** gegen comments.pukalani.app: Composer ohne Reload, `POST /api/comments → 201` persistiert, Cookie-Forensik zeigt `Strict`-unpartitioniert NEBEN `None; partitionKey=davidschubert.com`. **E3 Site-Registry:** Table `embed_sites` (comments-012) + Admin-UI `/dashboard/embed` speist die `frame-ancestors`-CSP (statt statischer `['*']`-Allowlist; Änderungen greifen sofort, Microcache write-invalidiert), unregistrierte Einbetter sehen eine freundliche Meldung; `GET /api/comments/count` (CORS, credential-frei) + `data-pukalani-count`-Loader für „N Kommentare"-Links. Beweise: 5 Token-Unit-Tests + 10 Registry-Unit-Tests, Admin-CRUD per API (Create/409/PATCH/DELETE), Embed-E2E (`embed-write.spec.ts`, Persistenz-Assertion) grün | ✅ 2026-07-23 |
 | 87 | **Embed E4 + Themes-Vollausbau 26×11** — **E4:** Gast-Kommentare ohne Account (Name+E-Mail, `POST /api/comments/guest`, Doppel-Gate `embed.guests` Default aus, Rate-Limit 5/min/IP + Tenant-Quota; **E-Mail nie auf der read(any)-Row** — Kontaktdaten in operator-lesbarer Tabelle `guest_authors`, comments-013), GuestCommentForm + „Gast"-Badge im Widget; Presence im Embed läuft out of the box (geteilter Realtime-Socket, live nachgewiesen); Web-Component `<pukalani-comments>` (Shadow DOM, sandboxed iframe — bewusst KEINE Inline-Render-Variante). **Themes:** kuratierter 26×11-Katalog ([theme.catalog.ts](packages/themes/theme.catalog.ts): 21 Hue-Kreis-Welten + 5 gedeckte Ausreißer, je Basis + 10 tonale Varianten = 286 Ramps), Generator mit Kontrast-Gate (Anker fest 500 — Bestands-500er byte-gleich), committete `themeRegistry.gen.ts` + CI-Gate `check:themes`, Grid-Modal-Picker (E7b). Beweise: Isolation 13/13 (inkl. pages-004-Unique-Index-Fix), 62 Themes-Unit-Tests + 26×11-Guard, SSR-Cookie-Beweis, Visual-Baselines 9/9 | ✅ 2026-07-24 |
 | 88 | **Community-Plattform G0+G1 — Produktvertrag + Sicherheits-Naht** ([G0](docs/referenz/G0-PRODUKTVERTRAG.md), [Roadmap](docs/archiv/SAAS-ROADMAP.md)) — **G0** (David entschieden): Nav/IA, 5-Rollen-Matrix, Tarif-Zuordnung, Early-Access-Scope; kanonische Kunden-Site = **der Tenant** (`site_members.siteId = tenants.$id`; `sites` bleibt Operator-/Infra-Register). **G1** (autonom gebaut, grün lokal+prod): (1) `control-015` — `tenants.workspaceId` + Table `site_members {siteId, runtimeProjectId, runtimeUserId, role, status}` (uq je Tripel); (2) core `tenantAuthz.ts` — 5 Site-Rollen owner/admin/moderator/editor/viewer + Cap-Matrix (Editor verfasst≠Moderator moderiert≠Admin Branding/Team≠Owner Übergabe/Löschung; KEINE Instanz-Rechte), 22 Unit-Tests; (3) `requireTenantPermission` — Cross-Projekt-Rollen-Read (read-only-Key, 30-s-Cache → Revoke ≤30 s), fail-closed, getrennt vom Operator-`requirePermission`; (4) **Naht 4** `tenantRowPermissionsFor` — harte Appwrite-Read-Grenze via `read(label(siteId))` (fail-closed ohne siteId), 11 Tests; (5) **Isolationsbeweis** gegen echte Appwrite (lokal+prod): selber User ≠ Rolle je Site, alle 5 Rollen, Pool/Silo-Parität, invited/suspended zählen nicht, Revoke, Owner-Übergabe, Break-glass-Trennung. 162/162 core + 58 studio grün | ✅ 2026-07-24 |
@@ -234,12 +259,14 @@ Details und Nachweis-Kriterien pro Phase: [docs/GOALS.md](docs/GOALS.md) · Upgr
 | 97 | **P10: Audit abgeschlossen + Kundenselbstverwaltung komplett** — N1 Site-Rollen in den Client gespiegelt (Owner erreichen ihr Dashboard mit gefilterter Nav, 30/30-E2E), N2 entitlements in app_secrets (leere Permissions, 2-Wege-Read; system-Migrationen wieder idempotent, system-020 auf allen 4 Instanzen; anonymer Leser live bestaetigt leer), N5a Events-Verwaltung via requireSitePermission (20/20+7/7), K2 Bildmarke je Community (Theme-Farbe+Initial — live #ffa05e auf demo), K3 pk-Head-Ids, K4 Bundling ehrlich vermessen. Dazu: apps/help (oeffentliche Hilfe-Site, freigegeben, Deploy-Kette offen) + control.pukalani.app/docs (interne Doku hinter Betreiber-Auth inkl. Content-API-Guard; docs/content triggert jetzt Deploys) + S7-Backfill auf Prod. Neue Befunde N6-N9 als Entscheidungen bei David | ✅ 2026-07-28 |
 | 98 | **P11: Produkt-Bilanz eingeloest + help.pukalani.app live** — Kurse durch die Datentuer (13 Routen, Migration courses-002 mit uq_tenant_slug — Slug ist mandanten-RELATIV, Row-Id-Uniques bleiben; 28/28 Pool-Isolation + 22/22 Silo-Gegenprobe; Prod-Migration auf Pool und comments). Damit laufen ALLE sechs Kundenprodukte (posts, comments, pages, moderation, events, courses) mandantensicher durch die eine Tuer. Dazu Davids Entscheidungen: Default-Theme heisst Sunrise (Label, kein Key), /changelog auf Tenant-Hosts gegated (Seite UND Route — die UI-Registry versteckt nur), Site-Owner waehlen Theme+Variante ihrer Community selbst (28/28, branding.manage). Und die sechste Site ist live: help.pukalani.app (ploi-Site 392668, Port 3006, TLS ueber die Zonen-Wildcard OHNE jede Zertifikatsaktion — die Lineage-Falle bewusst umgangen, Kundenhosts durchgehend 200) | ✅ 2026-07-28 |
 | 99 | **Mitgliedschaft wird ein Ereignis + geteilte Links tragen die Community** — **A5:** das Site-Label folgt jetzt einer `site_members`-Zeile mit Zugang statt der A4-Regel „wer eingeloggt einen Mandanten-Host benutzt, ist Mitglied“ — die war seit „Zugang entziehen“ (C16) eine Luege: die Rolle war weg, das Lese-Publikum blieb, die entfernte Person las weiter mit. Beitritt hat genau ZWEI Ausloeser (Kontoanlage auf dem Host · erster eigener Schreibvorgang, abgefangen in der DATENTUER statt in 20 Routen), gesteuert vom bestehenden `tenants.openRegistration`; ein Seitenaufruf loest bewusst nichts aus, sonst waere jeder Vorbeisurfer Mitglied und der Entzug wieder wirkungslos. Entzug nimmt BEIDES (Rolle im Control Plane, Label im Pool-Projekt) und der 30-s-Rollen-Cache kann es nicht zurueckgeben; Bestandsnutzer uebernehmen sich selbst beim naechsten Besuch statt per Backfill-Skript (die Wahrheit lebt im Runtime-Projekt, die Zeile im Control Plane). 97/97 Autorisierung (vorher 67) + 23/23 Presence-Grenze, beide gegen eigene Server nachgefahren. **B2:** og:image je Community (`/og/<key>.png`, 1200x630 aus Theme-Basisfarbe + Community-Name) — **PNG, weil FB/WhatsApp/LinkedIn kein SVG als og:image zeigen**, gerastert OHNE Laufzeit-Renderer: Chrome hat die Zeichen EINMAL in ein Deckungs-Atlas gebacken (85 KB committet, server-only), der Server setzt sie zusammen (~16 ms Event-Loop, Kompression im Threadpool) und legt das Bild je Community einmal ab; live in Morgenlichts echter Farbe, 19/19. **Dazu zwei Pfade, die seit dem Cutover ins Leere zeigten:** `migrate.mjs` setzte cwd auf das geloeschte `packages/studio` — JEDE Wellen-Migration brach vor dem ersten Schritt ab, unsichtbar weil ein fehlgeschlagener spawn weder Status noch stderr hat; `control-jobs.mjs` las `apps/studio/.env` und behauptete dann, `apps/control/.env` fehle. Die 19 Control-Plane-Migrationen heissen jetzt `control-NNN` (Labels sind reine Anzeige — es gibt kein Migrations-Register, Idempotenz kommt vom 409) | ✅ 2026-07-29 |
-
 | 100 | **Portfolio-Relaunch pukalani.studio** — Inhalte des alten Repos `nuxt4-portfolio` komplett ins Monorepo portiert (11-Sektionen-Homepage, /ux-audit, /nuxt-entwickler-freelancer, 2 Wissen-Guides; zweisprachig EN-Default, SEO/JSON-LD 1:1 im Syne-Design), Impressum/Datenschutz als pages-CMS mit Entwurfs-Vorlagen, danach Doppel-Review mit drei Fix-Paketen (Sicherheit: Sitemap-Origin gehärtet · Struktur: eine Quelle je Fakt, robots/llms generiert, Microcache · Tests: 22 E2E + Paritäts-Wächter). Details: OPEN-ITEMS-COMPLETE P13 | ✅ 2026-08-09 |
 | 101 | **Konten-Konsolidierung (AH-Welle)** — das geteilte Projekt heißt jetzt `account` (AH-1: Neuanlage + Voll-Migration aus `pool` — Schema, Nutzer MIT Passwort-Hashes, Rows, Buckets; `pool` eingefroren), `account.pukalani.app` = DER Kundenbereich (my./start. antworten 301), `admin.pukalani.app` = Betreiber-Konsole (AH-4, control. 301 — nur die ADRESSE, alle Infra-Anker behalten den Namen `control`), Handles kontoweit (AH-7: `account_handles`, global unique, Lese-Publikum als Label-Liste je Mitgliedschaft — inkl. Sicherheitsfix: Vergabe ohne Mitglieder-Gate stempelte fremde Community-Labels, Beweis 44/44 + Prod-Reparatur). Dazu F3: `comments` ist POOL-Community statt Silo-Deployment (einziges verbliebenes Silo: portfolio). Runbooks ACCOUNT-CUTOVER/ADMIN-CUTOVER | ✅ 2026-08-12 |
 | 102 | **U-Welle Kundensichtbarkeit + Community-Selbstverwaltung** — U15 komplett: Navigations-Editor (system-033), Sucheintrag/SEO (system-034), Weiterleitungen (system-035, MEDIUMTEXT), Zwei-Faktor (inkl. dreier dokumentierter Appwrite-Upstream-Bugs: recoveryCode-Case-Mismatch, leeres Challenge-Secret, OAuth-Bypass — ehrlich auf der Karte), Zeitzone; U20 Community-Export ohne Mitglieder-PII; U19 „Markt-Signal"-Betreiberseite; U14 Google-Login (Code-Teil, Klick-Runbook GOOGLE-LOGIN.md); F47 Adblock-Proxy + Trichter-Messung über die Sammel-Site; Copy-Ehrlichkeitswelle nach Davids Entscheidungen. Alle Tabellen least-privilege (`permissions: []`, server-only Reads) | ✅ 2026-08-13 |
 | 103 | **F57 Discussions-Mechaniken komplett** — badge-neutrale Reaktionen (8er-Emoji-Satz ohne 👍/❤️, Keys statt Glyphen; Beiträge, Antworten UND Kommentare — comments-019), Mitglieder-Einladungen 5/Woche (Zählung beim SENDEN, Widerruf zählt nicht zurück; control-037 VOR dem Deploy — createRow-Regel), Like-Tageslimit 50 als member_counters-Tageszähler (UTC, kein Rückerstatten) mit Trust-Staffel 50/50/75/100, Themen-Verlinkung `#<id>` als reiner Text (Parser unangetastet, „Verlinkt von"-Panel, posts-020), Campaigner/Champion über `invitedBy` (gutgeschrieben beim Stufen-Aufstieg des Eingeladenen, posts-021). Migrationen posts-017–021 nur gegen `account` | ✅ 2026-08-14 |
 | 104 | **TS2589-Strukturfix + Hygiene-Runde** — Nitros Routen-Typkarte AUS (`types:extend`-Hook leert `types.routes`): gemessen 7,5 Mio → 618k Typ-Instanziierungen (−92 %), Typecheck 10,7 s → 5,4 s; jeder gebundene `$fetch`/`useFetch` nennt seinen Antworttyp selbst (ESLint-Wächter, `$fetch<…, string>` verboten); als CLAUDE.md-Regel verankert. Dazu: 3 rohe NUL-Bytes in `badges.ts` als `\u0000`-Escapes geschrieben (Datei war für grep BINÄR — unsichtbar für jede Repo-Suche; Hash identisch, Bestands-Ids stabil) | ✅ 2026-08-15 |
+| 105 | **Kundenreise durchgespielt — elf Funde, öffentlich wie eingeloggt** ([Eintrag](docs/OPEN-ITEMS-COMPLETE.md)) — kein Audit über Code, sondern der Weg eines Kunden Station für Station im Browser: öffentlich auf der Produktion (Desktop + Handy, beide Sprachen), eingeloggt lokal gegen die Dev-Appwrite. Behoben: fehlende Symbole im Kundenbereich (Passwort-Prüfliste ohne Häkchen), Anwesenheits-404 für Gäste und im Kundenbereich (alle 20 s, pro Tab), überlappende Auth-Kopfzeile unter 768 px, Fehlerseiten ohne `lang`/`dir`, SSR-Abrufe die den Mandanten verloren (Events blieben leer — 4 Stellen, 2 fand erst der neue Wächter), Auth-Quer-Links ohne `?redirect=` (Einladungs-Rolle ging still verloren), Pro in der Testphase nicht kaufbar. Dazu die Hilfe auf **Englisch** (18 Seiten, `prefix_except_default`, Sprachwähler — den gab es nicht) und die Demo-Community gefüllt (4 Kategorien, 9 Themen, 15 Antworten, 3 Termine). Davids Entscheidung umgesetzt: der **Einladungs-Token öffnet die Registrierung** auf geschlossenen Communities — gebunden an die eingeladene Adresse (vier Angriffe belegt). **Gelernt:** fast jeder Fund war hinter einem `catch` versteckt — die Systeme liefen weiter, nur falsch | ✅ 2026-08-15 |
+
+Details und Nachweis-Kriterien pro Phase: [docs/GOALS.md](docs/GOALS.md) · Upgrade-Plan: [docs/archiv/APPWRITE-1.9.5-UPGRADE.md](docs/archiv/APPWRITE-1.9.5-UPGRADE.md) · Offene Punkte: [docs/OPEN-ITEMS.md](docs/OPEN-ITEMS.md)
 
 ## Konventionen
 
