@@ -146,10 +146,11 @@ Beweis 35/35, Mechanik-1-Regression 27/27, E2E 24/24, alle sieben Gates.
 - **Mechanik 3 — Tages-Limit für Likes** und **Mechanik 4 — Themen-Verlinkung
   mit Rückverweis** (`first-link`, posts-019/-020) sowie die **F57-Stufen**
   (Like-Staffel 50/50/75/100 nach Vertrauensstufe, `campaigner`/`champion`
-  über `invitedBy`, posts-021, 47/47) haben KEINEN eigenen Archiv-Eintrag
-  bekommen — sie sind im DECISION-LOG (2026-08-14) und im Baustand des
-  Discussions-Konzepts dokumentiert. Hier steht das, damit die Lücke nicht
-  später als „nie gebaut" gelesen wird.
+  über `invitedBy`, posts-021, 47/47): eigene Einträge stehen seit dem
+  2026-08-15 DIREKT UNTER DIESEM (nachgetragen beim Archivieren des
+  Discussions-Konzepts) — bis dahin waren sie nur im DECISION-LOG
+  (2026-08-14) und im Baustand des Konzepts dokumentiert, und diese Zeile
+  hielt die Lücke fest, damit sie nicht als „nie gebaut" gelesen wird.
 
 **Gelernt:** (1) **Auto-Import ist über Layer hinweg FLACH — und bei einer
 Kollision gewinnt lautlos einer.** `comments` und `posts` hatten beide
@@ -179,6 +180,170 @@ der Entwurf die günstigere Stellschraube. (4) Der C18-Publikums-Umzug hatte
 Beiträge zugemacht und die Emoji-Zeilen darunter offen gelassen. Beim Bau des
 Zwillings aufgefallen und in beiden Layern nachgetragen: wer eine Tabelle mit
 Veröffentlichungs-Permission anlegt, meldet sie im selben Commit an.
+
+### F57 Mechanik 3 — Tages-Limit für Likes ✅ 2026-08-14
+
+*(Eintrag am 2026-08-15 nachgetragen — gebaut und deployed am 2026-08-14; der
+F57-Sammeleintrag oben hatte die fehlende Archivierung ausdrücklich benannt.
+Quelle: DECISION-LOG 2026-08-14 + Baustand in
+`docs/archiv/DISCUSSIONS-KONZEPT.md`.)*
+
+**Davids Zuschnitt vom selben Tag: 50 Likes pro Tag je Mensch und Community**
+(Discourse-Standard — im Alltag unspürbar, beim Binge-Liken erreicht),
+Config-Wert, `0` = aus. Durchgesetzt in BEIDEN Aufstimm-Routen (Themen
+`posts/[id]/score`, Antworten `comments/[id]/vote`) VOR dem Schreiben;
+abgewiesen wird mit **429** und `reason: like_limit_reached`, die Oberfläche
+macht daraus einen eigenen Hinweis statt „Stimme kam nicht an".
+
+**„Tag" ist der UTC-Kalendertag**, ausdrücklich nicht `prefs.timezone` (die es
+seit U15 gäbe): ein Limit, das mit der Zonen-Wahl wandert, schenkt beim
+Umstellen ein zweites Kontingent am selben Abend — eine Sicherung darf nicht an
+einer Einstellung hängen, die der Betroffene selbst dreht. Preis: wer in UTC+13
+lebt, bekommt sein Kontingent mittags.
+
+**Die Rücknahme erstattet nichts**, und das ist die tragende Eigenschaft: eine
+Stimme lässt sich per Klick zurücknehmen, ein Limit mit Erstattung wäre also
+mit zwei Klicks je Like beliebig zu umgehen. Deshalb ist der Stand ein
+VERBRAUCH in `member_counters` (posts-019: `likeDay`, `likesToday`,
+`likeLimitDays`) und KEIN Zählen der heutigen Vote-Zeilen — die verschwinden
+beim Zurücknehmen, das Kontingent käme zurück. Der Tageswechsel ist ein
+Vergleich beim nächsten Like, kein nächtlicher Lauf. Downvotes kosten nichts,
+der Wechsel von Ab- auf Aufstimme schon — entschieden über dasselbe
+`upvoteDelta` wie die Abzeichen-Zähler, damit „was ist ein Like" nur EINE
+Antwort hat. Fail-**open** bei Störung: eine irrtümlich verweigerte Stimme
+trifft jemanden, der nichts falsch gemacht hat.
+
+**Regeln PURE in `packages/core/shared/likeAllowance.ts`** (dort, weil posts
+und comments sie beide brauchen und einander nicht kennen dürfen), Autorität im
+posts-Layer über den Core-Vertrag `registerLikeAllowanceAuthority` — ohne
+posts-Layer gibt es schlicht kein Limit (erlaubender No-Op).
+
+**Bringt `out-of-love` / `higher-love` / `crazy-in-love`** (1/5/20 Tage mit
+erreichtem Limit). Der Tag wird GENAU EINMAL gebucht — am atomaren Hochzählen,
+dessen Ergebnis exakt auf dem Limit landet (`crossesLikeLimit`, `=== limit`
+statt `>=`); sonst hieße „an 5 Tagen" nur „fünfmal dagegengelaufen". Der Zähler
+startet für alle bei 0 und wird nie geeicht: „an diesem Tag war das Kontingent
+aufgebraucht" lässt sich aus dem Bestand nicht einmal falsch rekonstruieren.
+
+**Beweis:** `packages/posts/scripts/verify-like-limit.mjs` — 28/28 gegen ein
+testweise auf 3 gesenktes Kontingent, 75/75 gegen die echten 50.
+
+**Gelernt:** Die naheliegende Umsetzung — die heutigen Vote-Zeilen zählen —
+ist hier FALSCH, und der Grund steht nicht im Datenmodell, sondern im
+Bedienweg: die Rücknahme löscht die Zeile. Ein Limit muss als VERBRAUCH
+gebucht werden, sobald die begrenzte Handlung rückgängig zu machen ist; sonst
+ist es keins.
+
+### F57 Mechanik 4 — Themen-Verlinkung mit Rückverweis ✅ 2026-08-14
+
+*(Eintrag am 2026-08-15 nachgetragen — gebaut und deployed am 2026-08-14 als
+das eigene Paket NACH den Mechaniken 2+3, so wie David die Reihenfolge gesetzt
+hatte. Quelle: DECISION-LOG 2026-08-14 + Baustand in
+`docs/archiv/DISCUSSIONS-KONZEPT.md`.)*
+
+**Im Editor öffnet `#` ein Menü über die Themen der eigenen Community; das
+Ziel-Thema zeigt darunter „Verlinkt von …".** Ein Verweis ist **gewöhnlicher
+Text** wie `@handle` — der Markdown-Parser (`core/shared/markdown.ts`) bleibt
+UNANGETASTET, es gibt keine neue Marke und keine Migration für
+Bestandsinhalte.
+
+**Er trägt die Row-Id, nicht den Slug** (`#<id>-<deko>`), und das war keine
+Geschmacksfrage: der Themen-Slug ist nirgends gespeichert (er wird je Aufruf
+aus Titel und Text abgeleitet), nicht eindeutig und vergeht beim Umbenennen —
+`#mein-thema` hätte einen Vollscan über alle Titel je Seitenaufbau gekostet
+und wäre trotzdem mehrdeutig geblieben. Dieselbe Arbeitsteilung wie in der
+URL: die Id ist die Wahrheit, die Deko steht für Menschen da und wird beim
+Auflösen ignoriert. Die Erkennungs-Regel ist FAIL-CLOSED
+(`shared/topicLinks.ts`): `#` + 16–36 rein alphanumerische Zeichen + optionale
+`-`-Deko, links kein Wortzeichen und kein `#` — damit sind `#42`,
+Überschriften, URL-Anker und Code-Spans draußen. Ids MIT Trennzeichen sind
+bewusst nicht verlinkbar (sonst zerfiele `#<id>-<deko>` nicht eindeutig);
+betroffen ist genau der Willkommens-Beitrag, und der ist nie ein Ziel.
+
+**Der Text ist die Wahrheit, die Tabelle ist der Index:** `discussion_links`
+(posts-020, je Paar EINE Zeile) wird NIE gelesen, um einen Beitrag zu rendern
+— die Verweise löst der Server beim Lesen aus dem TEXT auf (gebündelt, wie
+`mentionsForPosts`); die Tabelle beantwortet allein die Gegenrichtung („wer
+zeigt auf mich?"). Beim Bearbeiten wird sie ERSETZT, nicht ergänzt, sonst
+bliebe ein entfernter Verweis für immer am Ziel stehen. Sie trägt bewusst
+**kein `authorId`** (zwei Row-Ids sind nichts Personenbezogenes ⇒ kein
+GDPR-Contributor); der Preis ist ein nie eichbarer Zähler `linksMade` — das
+Abzeichen **`first-link`** zählt ab jetzt. Tote Verweise bleiben schlicht Text
+und melden nichts.
+
+**Zwei Türen:** die Index-Zeilen laufen über die Operator-Klinke (sie gehören
+keinem Menschen), die ZIELE über die Mitglieds-Tür — wer ein Thema nicht sehen
+darf, kann weder darauf verweisen noch als Verweis darauf erscheinen.
+
+**Beweis:** `packages/posts/scripts/verify-topic-links.mjs` (42/42).
+
+**Gelernt:** Eine Row OHNE `ownerUserId` bekommt von der Datentür nur
+Leserechte — das Entfernen der Index-Zeilen scheiterte im ersten Beweislauf
+genau daran, und zwar STILL. Zeilen, die keinem Menschen gehören, brauchen die
+Operator-Klinke; und ein Beweis, der auch die RÜCKNAHME einer Wirkung prüft,
+findet solche stillen Fehlschläge — einer, der nur das Anlegen prüft, nicht.
+
+### F57-Stufen — Like-Staffel + Campaigner/Champion ✅ 2026-08-14
+
+*(Eintrag am 2026-08-15 nachgetragen — gebaut und deployed am 2026-08-14.
+Quelle: DECISION-LOG „F57-Stufen" 2026-08-14 + Baustand in
+`docs/archiv/DISCUSSIONS-KONZEPT.md`.)*
+
+**Davids Entscheidungen (bindend):** (1) Das Tages-Like-Limit **staffelt mit
+der Vertrauensstufe** — TL0/TL1 = 50, TL2 = 75, TL3+ = 100. (2)
+`Campaigner`/`Champion` werden **konzepttreu** gebaut, nach der
+Katalog-Definition aus § 3.6 („3 Eingeladene wurden Basic" / „5 wurden
+Member"), NICHT als billige Umdeutung auf „3 bzw. 10 angenommene Einladungen"
+— das Abzeichen hieße sonst etwas anderes als das Konzept sagt, und niemand
+würde je nachlesen, warum.
+
+**Die Staffel ist EINE Liste**
+(`pukalani.discussions.likesPerDayByLevel: [50, 50, 75, 100]`, Index = Stufe,
+die ernannte Stufe 4 bekommt den letzten Eintrag), gelesen an EINER Stelle
+(`likeLimitForLevel` in `core/shared/likeAllowance.ts`). Vier einzelne
+Schlüssel wären die Einladung gewesen, einen zu setzen und drei zu vergessen —
+der Zustand, in dem eine höhere Stufe stillschweigend weniger darf. Der
+frühere Skalar `likesPerDay` ist ERSETZT, nicht ergänzt; aus = `[0,0,0,0]`.
+Die Galerie NENNT die Zahl statt „mehr Likes" zu versprechen (`likeLimit` in
+der Badges-Antwort, nie im Übersetzungs-Text).
+
+**Campaigner/Champion — der dritte Verleihungs-Pfad.** Das qualifizierende
+Ereignis ist der Stufen-Aufstieg eines ANDEREN Menschen, Wochen später, in
+einer fremden Zähler-Zeile. Verworfen: beim Aufstieg das Control Plane fragen
+(eine Naht über die Projektgrenze, mitten im Schreibpfad, für eine Antwort,
+die sich nie ändert) und die Einladungen des Einladenden durchzählen (N+1 über
+dieselbe Grenze). Gebaut ist die billigste Wahrheit: **die Annahme hinterlegt
+den Einladenden** an der Zähler-Zeile des Eingeladenen
+(`member_counters.invitedBy`, posts-021) — ein Schreibvorgang, einmal im Leben
+einer Mitgliedschaft, an der Stelle, die `invitedBy` ohnehin zurückbekommt
+(sie zählt dort `promoter`). Danach ist der Aufstiegs-Hook
+(`inviteesBasic`/`inviteesMember`) reine Runtime-Sache ohne Naht.
+
+**Drei Eigenschaften, die man nicht „vereinfachen" darf:** (a) Gezählt wird
+die DIFFERENZ `(vorher, nachher]` der ERARBEITETEN Stufe — je Eingeladenem und
+Stufe genau einmal, ohne irgendwo nachzusehen. (b) Die **Ernennung zu Stufe 4
+meldet nichts**: der Katalog sagt „wurden Basic/Member", und ein Owner könnte
+sonst die Abzeichen Dritter vergeben. (c) `invitedBy` wird nur gesetzt, wenn
+es LEER ist — die erste Einladung gewinnt, sonst wäre eine zweite Einladung
+ein Weg, eine bestehende Zuordnung umzuschreiben.
+
+**Ehrlicher Preis:** beide Zähler starten für alle bei 0 und werden nie
+geeicht (die Zuordnung liegt im Control Plane, die Stufen der Eingeladenen in
+deren Zeilen) — wie schon bei „Editor" und „Promoter".
+
+**Beweis:** `packages/posts/scripts/verify-trust-perks.mjs` (47/47, echter
+Aufstieg über eine zurückdatierte `community_members`-Zeile), Regressionen
+`verify-like-limit.mjs` 28/28 und `verify-member-invites.mjs` 42/42 (+2 neue
+Prüfungen auf den Stempel).
+
+**Gelernt:** Die Zusage „der Abzeichen-Tag wird genau EINMAL je Tag gebucht"
+hing daran, dass das Limit an einem Tag eine feste Zahl ist — die Staffel
+machte sie variabel: wer bei 50 aufräumt, auf TL2 steigt und bei 75 wieder die
+Gleichheit trifft, hätte an einem Nachmittag zwei „Tage" für „Out of
+Love"/„Higher Love" verbucht. Deshalb merkt sich die Zeile den gebuchten Tag
+(`member_counters.likeLimitDay`, posts-021) — die Sicherung gehört in die
+Daten, nicht in die Disziplin; eine Änderung, die eine Konstante zur Variablen
+macht, muss jede Zusage prüfen, die auf der Konstanz gebaut war.
 
 ### F57 Mechanik 2 — Einladungen durch Mitglieder ✅ 2026-08-14
 

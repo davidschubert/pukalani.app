@@ -18,7 +18,8 @@ Produkt-Gate `messages: 'personal'`, Owner-Schalter ab Werk AUS.
 Stufe 2 und 3 sind bewusst **keine** offenen Punkte: sie werden erst bei
 Bedarf welche (Beschluss im COMPLETE-Eintrag zu F1).
 
-Herkunft: Davids Rahmensetzung in `DISCUSSIONS-KONZEPT.md` Teil 4, wörtlich —
+Herkunft: Davids Rahmensetzung in `docs/archiv/DISCUSSIONS-KONZEPT.md` Teil 4,
+wörtlich —
 „eigenes Produkt mit eigener Missbrauchsfläche (Belästigung, Spam) und eigener
 Moderation. Bekommt ein EIGENES Konzept vor dem Bau … ein Nachrichtenweg ohne
 Meldeweg und Sperre ist ein Missbrauchskanal, den man hinterher nicht mehr
@@ -41,7 +42,8 @@ Ein **1:1-Nachrichtenweg zwischen zwei Mitgliedern derselben Community**. Eine
 Konversation, darin eine flache Liste von Nachrichten, gelesen/ungelesen,
 live nachlaufend. Mehr nicht.
 
-Der Katalog aus `DISCUSSIONS-KONZEPT.md` § 3.6 nennt private Nachrichten als
+Der Katalog aus `docs/archiv/DISCUSSIONS-KONZEPT.md` § 3.6 nennt private
+Nachrichten als
 **TL1-Grundrecht** („Basic: private Nachrichten, Melden, Wiki, mehrere
 Bilder/Links je Beitrag"). Das ist keine Randnotiz: `packages/core/shared/
 trustLevel.ts` trägt heute in `TRUST_LEVEL_CAPABILITIES` bei Stufe 1 und 2 leere

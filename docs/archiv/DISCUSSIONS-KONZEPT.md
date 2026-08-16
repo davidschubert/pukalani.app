@@ -22,8 +22,9 @@ hinterlegt (`invitedBy`), und dessen späterer Stufen-Aufstieg zählt bei ihm
 hoch. Im selben Paket staffelt das Tages-Like-Limit mit der Vertrauensstufe
 (50/50/75/100).
 
-**NICHTS IST MEHR OFFEN — die Datei ist reif fürs Archiv.** Der eine Grund,
-aus dem sie noch in `docs/plans/` lag, war Davids Frage, ob Reaktionen auch
+**NICHTS IST MEHR OFFEN — archiviert am 2026-08-15.** Diese Datei ist ab hier
+**Begründung und Rezept, keine Arbeitsliste**. Der eine Grund, aus dem sie
+zuletzt noch in `docs/plans/` lag, war Davids Frage, ob Reaktionen auch
 auf ANTWORTEN gehören. Sie ist am 2026-08-13 mit **„Ja, nachbauen"**
 beantwortet und am 2026-08-14 gebaut (eigenes Datenmodell im comments-Layer,
 `comment_reactions`/comments-019 — Begründung unten bei „Emoji-Reaktionen").
@@ -654,14 +655,17 @@ nach `docs/OPEN-ITEMS.md`.
   **BRINGT `promoter`** (erste ANGENOMMENE Einladung, Zähler
   `member_counters.invitesAccepted`, posts-018) — gezählt wird die ANNAHME, nie
   der Versand; ein Abzeichen fürs Anschreiben wäre eine Auszeichnung für Spam.
-  **CAMPAIGNER/CHAMPION FEHLEN WEITERHIN**, und die Begründung gehört hierher:
-  sie hängen laut Tabelle oben an der Vertrauensstufe DER EINGELADENEN („3
+  **CAMPAIGNER/CHAMPION fehlten an diesem Stand noch** (seit den F57-Stufen
+  vom 2026-08-14 — Eintrag oben — sind sie über genau den hier beschriebenen
+  dritten Pfad gebaut), und die Begründung bleibt lesenswert, weil sie den
+  Pfad erklärt: sie hängen laut Tabelle oben an der Vertrauensstufe DER
+  EINGELADENEN („3
   wurden Basic", „5 wurden Member"). Das ist keine Zahl auf der Zeile des
   Einladenden — sie entsteht Wochen später in einer FREMDEN
   `member_counters`-Zeile und fällt aus dem Zähl-Kreuzungs-Weg heraus, den alle
-  Abzeichen dieser Klasse benutzen. Nötig wäre ein dritter Verleihungs-Pfad
+  Abzeichen dieser Klasse benutzen. Nötig war ein dritter Verleihungs-Pfad
   (beim Aufstieg des Eingeladenen, mit Rückverweis auf den Einladenden) —
-  eigenes Paket, eigene Entscheidung.
+  eigenes Paket, eigene Entscheidung; beides kam am 2026-08-14 (F57-Stufen).
 
 - **Emoji-Reaktionen** (2026-08-13, Teil-4-Mechanik 3 — Davids Entscheidung
   vom 2026-08-10 „Reaktionen zuerst"). Ein kuratierter Satz von acht Emojis

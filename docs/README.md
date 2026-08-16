@@ -70,7 +70,6 @@ gehören dort hin.
 
 | Datei | Zustand |
 | --- | --- |
-| [plans/DISCUSSIONS-KONZEPT.md](plans/DISCUSSIONS-KONZEPT.md) | Stufen 1–4 + Teil 5 gebaut; **offen aus Teil 4:** Reaktionen, Mitglieder-Einladungen, Like-Limit, Themen-Verlinkung (F57) |
 | [plans/PRIVATE-NACHRICHTEN-KONZEPT.md](plans/PRIVATE-NACHRICHTEN-KONZEPT.md) | Stufe 1 gebaut + live; offen: Einstieg am Autorennamen (F56), Stufen 2/3 |
 | [plans/DASHBOARD-IA.md](plans/DASHBOARD-IA.md) | Schritt 3 + Community-Hub gebaut; **12 der 14 Schritt-4-Seiten fehlen** — als U15 jetzt in OPEN-ITEMS geführt |
 | [plans/ANALYTICS-V2.md](plans/ANALYTICS-V2.md) | Pakete 1–4 live; Rest = Optionales (F47) |
@@ -82,8 +81,9 @@ Reste nach `OPEN-ITEMS.md`. Ein Plan-Dokument ist nie eine To-do-Liste.
 
 ## Archiv — ausgeführt, nur noch Historie
 
-`archiv/` enthält 30 abgearbeitete Pläne (M1–M10, Phase 17, Themes-Vollausbau,
-Embed-Widget, Landingpage, SaaS-Roadmap, …) und `archiv/audits/` die sechs
+`archiv/` enthält 31 abgearbeitete Pläne (M1–M10, Phase 17, Themes-Vollausbau,
+Embed-Widget, Landingpage, SaaS-Roadmap, zuletzt das
+[Discussions-Konzept](archiv/DISCUSSIONS-KONZEPT.md), …) und `archiv/audits/` die sechs
 Audits (Gesamtaudit 05.07., Pool-Audit 27.07., Dashboard-Audit 28.07. sowie
 die drei Berichte vom 09.08.: [UX-Trichter](archiv/audits/2026-08-09-ux-trichter.md),
 [UX-Dashboard](archiv/audits/2026-08-09-ux-dashboard.md),

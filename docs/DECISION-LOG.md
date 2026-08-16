@@ -507,9 +507,9 @@ Abstieg; Besuchs-/Lese-Tracking bleibt draußen (Teil 4).
 
 ## 2026-08-04 — Gemeinsames Paket: TL-Architektur, Aufstieg, Mehrfach-Verleihung
 
-**Davids Entscheidungen** (strukturierte Fragen; Volltext: DISCUSSIONS-KONZEPT.md
-Teil 5): (1) **Trust Levels speisen das bestehende RBAC** — Stufe aus Zählern
-berechnet, Capabilities vergibt der vorhandene Resolver; ein paralleles
+**Davids Entscheidungen** (strukturierte Fragen; Volltext:
+docs/archiv/DISCUSSIONS-KONZEPT.md Teil 5): (1) **Trust Levels speisen das
+bestehende RBAC** — Stufe aus Zählern berechnet, Capabilities vergibt der vorhandene Resolver; ein paralleles
 TL-Prüfsystem ist abgelehnt (das „eigene Ja" aus § 3.6). (2) **TL1–TL3
 automatisch** über Schwellen, **TL4 nur von Hand**, kein Abstieg. (3)
 **Mehrfach-Verleihung für ALLE sinnvoll zählbaren Abzeichen** — bewusst gegen
@@ -518,7 +518,8 @@ einmal": auch der Jahrestag kommt jährlich neu.
 
 ## 2026-08-04 — Stufe 4: Badge-Zuschnitt, Tracking abgelehnt, vier soziale Mechaniken
 
-**Davids Entscheidungen** (Volltext: DISCUSSIONS-KONZEPT.md Teil 4): Stufe 4
+**Davids Entscheidungen** (Volltext: docs/archiv/DISCUSSIONS-KONZEPT.md
+Teil 4): Stufe 4
 baut **nur heute messbare Badges** · das **Tracking-Bündel entfällt dauerhaft**
 (Lese-Fortschritt, Besuchs-Streaks, Klick-Zählung — Widerspruch zu
 „Datenschutz-nativ"; kostet 9 Badges) · Schreib-Werkzeuge **Zitieren,
@@ -567,7 +568,7 @@ entscheidet — Löschen wäre unumkehrbar ohne aktuellen Nutzen.
 ## 2026-08-03 — Discussions: alle sieben Konzept-Entscheidungen gefallen
 
 **Davids Entscheidungen** (je der Empfehlung gefolgt; Volltext + Begründungen:
-docs/plans/DISCUSSIONS-KONZEPT.md § 3.8): **Weg B** (Kategorie als Dimension
+docs/archiv/DISCUSSIONS-KONZEPT.md § 3.8): **Weg B** (Kategorie als Dimension
 von `posts`, kein eigener Layer) · kategorisierte Beiträge **bleiben im Feed**
 · Produktname **Discussions**, der Landing-Kommentar-Baustein wird zu
 „Kommentare" · **Like = Upvote** (Downvotes bleiben, badge-neutral) · **Trust
