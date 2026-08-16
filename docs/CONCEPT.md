@@ -3,14 +3,15 @@
 > **Stand:** Konzept v2.1 (Juni 2026, Realitäts-Abgleich nach Phasen 1–10), in Teilen
 > nachgezogen am **2026-08-16**.
 >
-> **Was aktuell ist:** Stack & Katalog, Verzeichnisstruktur (21 Layer, 8 Apps),
-> Layer-Tabelle, A9 (Deployment), A10 (Migrations), A11–A13, Stolperfallen.
+> **Was aktuell ist:** die Ebenen-Darstellung (inkl. Kompositions-Layer `blueprint`),
+> Stack & Katalog, Verzeichnisstruktur (21 Layer, 8 Apps), Layer-Tabelle,
+> A9 (Deployment), A10 (Migrations), A11–A13, **A14 (Layer-Grenzen-Matrix, alle 21
+> Layer + Durchsetzung inkl. Datentür-Backstop)**, Stolperfallen.
 >
-> **Was noch den Stand von Juni 2026 beschreibt:** die Drei-Ebenen-Darstellung und
-> A14 (Layer-Grenzen-Matrix, 6 von 21 Layern) kennen den Kompositions-Layer
-> `blueprint` nicht, und die **Mandanten-Architektur fehlt ganz** — Datentür
-> (`tenantDb`), Pool/Silo, Sperr-Stufen. Dafür ist bis auf Weiteres die CLAUDE.md
-> im Repo-Root die Wahrheit.
+> **Was hier weiterhin fehlt:** die Mandanten-Architektur als eigenes Kapitel —
+> Pool vs. Silo, wie `tenantDb` scopet, die Sperr-Stufen, Hosts und Kontroll-Hosts.
+> A14 nennt die Datentür, erklärt sie aber nicht. Dafür ist die **CLAUDE.md** im
+> Repo-Root die Wahrheit.
 
 ## Projektbeschreibung
 
@@ -22,15 +23,25 @@ Das Pukalani-Monorepo (Ordner und GitHub-Repo heißen weiterhin `maui-monorepo`)
 
 ```
 packages/core            ← Ebene 1: Fundament (besitzt KEINE Appwrite Tables!)
-packages/themes          ← Ebene 2: Feature Layers (optional, eigenes Datenmodell
-packages/comments           und/oder eigene UI-Welt)
-packages/admin
-packages/billing
-apps/*                   ← Ebene 3: Apps komponieren Core + Feature Layers
+packages/system             system = Schema-Eigentümer der Infra-Tabellen
+packages/moderation         moderation = generisches Melde-System
+                            Fundament-Layer hängen NIE von Produkten ab.
+
+packages/blueprint       ← Ebene 2: KOMPOSITION („Bauplan")
+                            Der EINZIGE Layer, der mehrere Produkt-Layer kennen
+                            darf. Produkt-Kompositionen (Feed + Kommentare, …)
+                            existieren genau EINMAL hier — nie je App.
+
+packages/comments        ← Ebene 3: Produkt-Layer (eigenes Datenmodell
+packages/posts              und/oder eigene UI-Welt)
+packages/events
+…
+
+apps/*                   ← Ebene 4: dünne Apps, komponieren via extends
 ```
 
 ```ts
-// apps/comments/nuxt.config.ts
+// apps/comments/nuxt.config.ts — eine App mit EINEM Produkt
 export default defineNuxtConfig({
   extends: [
     '../../packages/comments',   // früher gelistet = höhere Priorität
@@ -38,6 +49,30 @@ export default defineNuxtConfig({
   ],
 })
 ```
+
+**`blueprint` gehört in `extends` VOR die Produkt-Layer** — sonst gewinnt die
+einzelne Produkt-Seite gegen die Komposition, und Pool und Silo zeigen
+unterschiedliches Produktverhalten. Die echte Reihenfolge einer Mehr-Produkt-App:
+
+```ts
+// apps/platform/nuxt.config.ts (gekürzt)
+extends: [
+  '../../packages/themes',
+  '../../packages/admin',
+  '../../packages/blueprint',    // ← vor allen Produkt-Layern
+  '../../packages/comments', '../../packages/posts', '../../packages/events',
+  '../../packages/media', '../../packages/courses', '../../packages/activity',
+  '../../packages/messages', '../../packages/pages', '../../packages/onboarding',
+  '../../packages/analytics', '../../packages/moderation',
+  '../../packages/core',
+  '../../packages/system',       // ← Fundament zuletzt = niedrigste Priorität
+]
+```
+
+Jeder Layer bringt ein `product.manifest.ts` mit, jede App ein `site.manifest.ts`
+(Single Source der Produkt-Wahl). `pnpm check:manifests` erzwingt, dass beide zu
+`extends`, `package.json` und der Migrations-Reihenfolge passen — neue Layer und
+Apps immer mit Manifest anlegen.
 
 **Kompositions-Regeln:**
 - In `extends` haben **früher gelistete Layer Vorrang** vor späteren; die App selbst überschreibt alles
@@ -575,14 +610,51 @@ Vertrag ihres Layers — Regeln stehen auf **Layer-Ebene**, nicht pro Component 
 veralten sie beim Verschieben). Eine Component in `themes/` ist „kein Appwrite" nicht weil
 in ihrer Datei eine Regel steht, sondern weil sie im Themes-Layer liegt.
 
+**Fundament** — hängt nie von einem Produkt ab:
+
 | Layer | darf besitzen | darf nie | hängt ab von |
 |---|---|---|---|
-| `core` | Auth, Client-Factories, RBAC-Matrix, SSR-Session, Base-UI, Shared-Utils | Feature-Domäne, eigene Tables | — |
-| `system` | `audit_logs`, `app_config`, `notifications`, `custom_themes`, `custom_fonts` (+ Bucket `fonts`) | Feature-Domäne, UI-Welt | core |
-| `moderation` | `reports`-Table, Melde-Erfassung + Queue + Lifecycle, generische Melde-UI | Domänen-Wissen, Konsequenz-Logik | core |
-| `themes` | Tokens, CSS, Theme-Switcher, Color-Mode | Appwrite, Auth, Business-Logik | — |
-| `comments` | `comments`/`comment_votes`, Comment-API/UI/Store | Admin-Logik, fremde Feature-Tables | core, (moderation) |
-| `admin` | `changelog`, Dashboard/Moderation-Queue | Feature-interne Imports, Feature-Domänen-Logik | core, (moderation, system) |
+| `core` | Auth, Client-Factories, RBAC-Matrix, SSR-Session, **Datentür `tenantDb`**, Registry-Verträge (`notify`, `sendMail`, `aiComplete`, GDPR-/Stats-/Join-/Host-Contributors), Base-UI, Shared-Utils | Produkt-Domäne, **eigene Tables** (A1) | — |
+| `system` | `audit_logs`, `app_config`, `app_secrets`, `notifications`, `activities`, `custom_themes`, `custom_fonts`, `community_branding`, `community_navigation`, `community_redirects`, `community_seo`, `account_handles`, `community_handles` (+ Bucket `fonts`) | Produkt-Domäne, UI-Welt | core |
+| `moderation` | `reports`, Melde-Erfassung + Queue + Lifecycle, generische Melde-UI | Domänen-Wissen, Konsequenz-Logik | core |
+
+**Komposition:**
+
+| Layer | darf besitzen | darf nie | hängt ab von |
+|---|---|---|---|
+| `blueprint` | Die Verdrahtung mehrerer Produkte (Layouts, Chrome, Kompositions-Seiten) — genau einmal, für Pool **und** Silo | Produkt-Logik, Tables, **`server/`** | posts, comments, events, courses (+ core) |
+
+**Plattform & Betrieb** — laufen nicht auf Mandanten-Hosts:
+
+| Layer | darf besitzen | darf nie | hängt ab von |
+|---|---|---|---|
+| `control` | `communities`, `community_members`, `community_invites`, `websites`, `entitlements`, `product_catalog`, `community_plans`, `invite_codes`, `invite_requests`, `provisioning_jobs`, `abuse_reports`, `customer_feedback*` | Auf einem Mandanten-Host laufen; Pool-Daten direkt lesen (kein Pool-Schlüssel) | core, system |
+| `onboarding` | Trichter/Wizard, `/join`, Mitglieder-Verwaltung, Community-Einstellungen — **und die Service-Naht zum Control Plane** | Eigene Tables (die Wahrheit liegt im Control Plane) | core, (control über die Naht) |
+
+**Produkt-Layer:**
+
+| Layer | darf besitzen | darf nie | hängt ab von |
+|---|---|---|---|
+| `themes` | Tokens, CSS, Theme-Studio, Ramp-Generator, Color-Mode | Appwrite-Tables (die gehören `system`), Auth, Business-Logik | core, system |
+| `admin` | `changelog`, Dashboard-Shell + Nav-Registry, Moderations-Queue-UI | Produkt-interne Imports, Produkt-Domänen-Logik | core, (moderation, system) |
+| `comments` | `comments`, `comment_votes`, `guest_authors`, `embed_sites` | Admin-Logik, fremde Produkt-Tables | core, moderation |
+| `posts` | `community_posts`, `post_votes`, `poll_votes` | — | core, moderation |
+| `events` | `events`, `event_rsvps`, `event_votes`, `event_tickets` | Stripe-Code (nur Vertrag + `lookup_key`) | core, (billing über den Vertrag) |
+| `courses` | `courses`, `lessons`, `enrollments`, `lesson_progress` | Stripe-Code (nur `registerCourseAccessGuard`) | core, (billing über den Vertrag) |
+| `messages` | `conversations`, `conversation_members`, `messages`, `message_blocks`, `message_settings` | — | core, moderation, posts |
+| `media` | `media_items` | — | core |
+| `pages` | `pages` | — | core |
+| `tickets` | `tickets`, `ticket_lists`, `ticket_files`, `ticket_watchers` | — | core, (comments über `operatorTargets`) |
+| `analytics` | `analytics_settings` | Eigenen Tracker bauen (nur Plausible-Script-Id) | core |
+| `billing` | `billing_customers`, `billing_subscriptions`, `stripe_settings` | Produkt-Wissen (Fulfillment nur über `registerCheckoutFulfillment`) | core |
+| `activity` | **keine eigene Table** — liest `activities` (system) über den Core-Vertrag `recordActivity()` | Eigenes Schema | core, system |
+| `feedback` | Widget + Admin-Sichtung + Naht — **keine eigene Table** (`customer_feedback*` liegen im Control Plane) | Eigenes Schema | core, (control über die Naht) |
+| `domains` | Oberfläche + Prüfweg — **keine eigene Table** (die Domain steht an `communities`/`websites`) | Eigenes Schema, TLS-Anforderung selbst auslösen | core, (control über die Naht) |
+
+> **Drei Layer besitzen bewusst keine Tabelle** (`activity`, `feedback`, `domains`) und
+> einer bewusst kein `server/` (`blueprint`). Das ist kein Rückstand, sondern die
+> Aussage der Matrix: ein Layer darf eine Oberfläche haben, ohne Schema-Eigentümer zu
+> sein — wer das „nachrüstet", bricht die Grenze.
 
 **Durchsetzung — zweistufig** (ausführlich: [MODERATION-AND-LAYER-BOUNDARIES.md](referenz/MODERATION-AND-LAYER-BOUNDARIES.md)):
 
@@ -612,9 +684,31 @@ in ihrer Datei eine Regel steht, sondern weil sie im Themes-Layer liegt.
    (authAudit) und `notifications` (notify) sowie liest `app_config` — bewusste
    Fundament→Fundament-Nutzung, system bleibt reiner Schema-Owner + GDPR/Stats-Anbieter.
 2. **ESLint `no-restricted-imports` (Backstop):** pro `files`-Scope in `eslint.config.mjs` —
-   themes verbietet `*appwrite*`/`@pukalani/*`, Feature-Layer verbieten andere `@pukalani/`-Feature-Layer,
-   Fundament-Layer (core/moderation) verbieten jeden Feature-Import. Fängt *künftige* explizite
-   Kopplung; die implizite löst Stufe 1.
+   themes verbietet `*appwrite*`/`@pukalani/*`, Produkt-Layer verbieten andere
+   `@pukalani/`-Produkt-Layer, Fundament-Layer (core/moderation) verbieten jeden
+   Produkt-Import. Fängt *künftige* explizite Kopplung; die implizite löst Stufe 1.
+
+3. **ESLint `no-restricted-syntax` — die harte Grenze (seit 2026-07-27):** in
+   `server/api/**` **und** `server/plugins/**` der gepoolten Layer ist rohes
+   `.tablesDB` verboten; Datenzugriff läuft über die Datentür `tenantDb(event)`.
+   Sie gilt heute für `comments`, `posts`, `pages`, `moderation`, `events`,
+   `courses`, `media`, `messages`, `activity`, `analytics` und `admin` — **neue
+   Pool-Layer gehören in die Liste**, sobald ihre Tabellen `communityId` tragen.
+   `server/plugins/**` kam nachträglich dazu: wer einen `H3Event` bekommt, bedient
+   einen Request und gehört hinter dieselbe Tür wie eine Route (ein Stats-Contributor
+   zählte sonst pool-weit in eine Kunden-Ansicht). Eventlose Sweeps brauchen eine
+   begründete `eslint-disable`-Zeile, keine Aufweichung der Regel.
+
+   **`admin` steht mit im Scope, obwohl der Layer keine mandantenfähige Tabelle
+   besitzt** — seine Routen LESEN fremde (die Nutzer-Detailseite zog `comments`
+   ungescopt pool-weit). Wer in einer host-gebundenen Ansicht fremde Zeilen liest,
+   gehört hinter dieselbe Tür wie ihr Eigentümer. Besitz ist hier also nicht das
+   Kriterium, sondern Zugriff.
+
+   Zweiter Wächter derselben Familie: rohes `tablesDB.createIndex` in
+   `packages/*/scripts/migrations/**` (A10). Er ist dort der **einzige** greifende —
+   Migrations-Scripts liegen in keiner tsconfig und werden von `pnpm -r typecheck`
+   nie gesehen.
 
 > **`system` und `moderation` existieren** (2026-06-27). Der `system`-Layer besitzt die
 > Infra-Tabellen, die core nutzt (Auth-Audit, Config, Notifications) — die frühere
@@ -819,8 +913,17 @@ Immer explizites `Query.limit(...)` setzen (Default 25 → stille Trunkierung).
   2026-07-23 die CI baut und nur `.output` rsynct. Dazu Stack + Katalog-Beispiel
   auf die echten Versionen, Verzeichnisstruktur auf 21 Layer und 8 Apps (`feed`
   hieß längst `activity`), Ports, A11–A13, und zwei Stolperfallen-Zeilen, die dem
-  eigenen A4 widersprachen. Bewusst **nicht** angefasst: A14 und die
-  Drei-Ebenen-Darstellung (s. Kopf).
+  eigenen A4 widersprachen.
+- **2026-08-16 (zweiter Durchgang):** **A14** auf alle 21 Layer erweitert —
+  Tabellenbesitz aus den Migrationen und Konstanten gegriffen, nicht geschätzt;
+  gruppiert nach Rolle (Fundament / Komposition / Plattform+Betrieb / Produkt).
+  Drei Layer besitzen bewusst keine Tabelle (`activity`, `feedback`, `domains`),
+  einer bewusst kein `server/` (`blueprint`) — das steht jetzt als Aussage da, damit
+  es niemand „nachrüstet". Durchsetzung um die **Datentür** ergänzt (ESLint
+  `no-restricted-syntax` auf `server/api/**` + `server/plugins/**` von 11 Layern,
+  dazu das `createIndex`-Verbot in Migrationen). Die Ebenen-Darstellung kennt jetzt
+  `blueprint` und die Regel, dass er in `extends` VOR den Produkt-Layern steht.
+  Weiterhin offen: die Mandanten-Architektur als eigenes Kapitel (s. Kopf).
 - **2026-06-10:** Konzept v2.1 — Realitäts-Abgleich nach Phasen 1–10: A4 korrigiert
   (SDK-Realtime-Protokoll + Query-Subscriptions sind Cloud-only → nativer
   WebSocket-Client im Core), Strukturfixes (app/app.config.ts, CoreErrorPage-Pattern,
