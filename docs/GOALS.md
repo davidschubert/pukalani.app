@@ -4,6 +4,32 @@
 > Der Evaluator sieht nur das Transcript — jede Bedingung muss prüfbaren Terminal-Output erzeugen.
 > `/goal` ohne Argument = Status (Turns, Tokens, letzte Evaluator-Begründung).
 
+## Was dieses Dokument ist — und was nicht (Stand 2026-08-15)
+
+**Eine abgeschlossene Chronik, keine Arbeitsliste.** Hier stehen die 27 `/goal`-Texte,
+mit denen dieses Projekt vom 9. Juni bis zum 8. Juli 2026 gesteuert wurde — in drei
+Wellen: Phasen 1–11, „Roadmap v2" ab Phase 12, „Roadmap v3 – Produkt-Arc" ab Phase 21.
+Alle 27 sind abgeschlossen. **Seit dem 9. Juli 2026 wird nicht mehr in `/goal`-Texten
+geplant**, und das Dokument bekommt seither keine neuen Phasen mehr.
+
+Wer wissen will, **was gerade ansteht**, liest [OPEN-ITEMS.md](OPEN-ITEMS.md) — die eine
+Liste offener Punkte. Wer wissen will, **was seither gebaut wurde und was dabei gelernt
+wurde**, liest [OPEN-ITEMS-COMPLETE.md](OPEN-ITEMS-COMPLETE.md); der Kurzüberblick steht
+in der Status-Tabelle der [README](../README.md).
+
+**Vorsicht bei den Nummern — es sind zwei verschiedene Zählungen.** Die README zählt
+inzwischen 105 Ausbaustufen, dieses Dokument 27 Phasen; dieselbe Zahl meint also in aller
+Regel Verschiedenes (README-Stufe 21 ist RBAC, GOALS-Phase 21 ist der Activity Feed). Wo
+die README wirklich auf eine Phase von hier verweist, schreibt sie das ausdrücklich hin
+(„GOALS-Phase 21" bis „GOALS-Phase 27", in den README-Stufen 41–58).
+
+Die Texte sind **unverändert im Original belassen**, samt Turn-Limits, Marker-Strings und
+Evaluator-Formeln. Sie taugen weiter als Vorlage dafür, wie ein Ziel prüfbar formuliert
+wird — nicht als Beschreibung des heutigen Codes. Wo eine Phase etwas beschreibt, das
+später umgebaut oder umbenannt wurde (`studio` → `control`, `feature` → `product`,
+`free/pro/business` → `basic/personal/pro`), gilt der Code und die CLAUDE.md, nicht dieser
+Text.
+
 ---
 
 ## Phase 1 – Monorepo Setup ✅ (abgeschlossen 2026-06-09)
@@ -767,7 +793,18 @@ eingeloggten Profil bleibt Backlog. Maximal 35 Turns.
 
 ---
 
-## Phase 17 – Production Deployment
+## Phase 17 – Production Deployment ✅ (abgeschlossen 2026-07-18)
+
+> Erfüllt und weit überschritten: Der Goal-Text unten beschreibt EINE Site
+> (apps/comments auf einer Domain). Live gegangen ist am 2026-07-18 die volle
+> Betriebsschicht — Auto-Deploy, Zero-Downtime Stufe 2, Backups, Monitoring,
+> TLS-Wächter —, und bis zum 2026-07-27 ist sie auf **7 Hosts** gewachsen.
+> Der Abschluss-Schritt „GOALS.md Phase 17 ✅" ist damals liegen geblieben und
+> wird hier nachgeholt; die README führt die Stufe seit dem 2026-07-18 als
+> erledigt. Betriebswissen dazu: [runbooks/](runbooks/) (Deployment,
+> Control-Cutover, Key-Swap) und die Host-/TLS-Absätze der CLAUDE.md —
+> insbesondere die Wildcard-Lineage-Falle, die dieser Text noch nicht kennt.
+> Historischer Goal-Text unten unverändert.
 
 > Voraussetzung: Hetzner-Server (Prod-Appwrite) und Domain sind
 > bereitgestellt — wenn nicht erreichbar: stoppen und melden statt
@@ -1584,25 +1621,34 @@ idempotent sein. Maximal 50 Turns.
 
 ---
 
-## Backlog (ohne Phase — bei Bedarf zu Goals schneiden)
+## Backlog der `/goal`-Ära — aufgelöst (Stand 2026-08-15)
 
-- **Themes-Vollausbau**: 26 Themes × 11 Farbvariationen, sobald die
-  Phase-15-Infrastruktur steht (Fleißarbeit, gut automatisierbar)
-- **packages/billing**: Stripe Checkout/Webhooks/Subscriptions —
-  ✂️ als **Phase 23** geschnitten (2026-07-06, Roadmap v3);
-  Plan: docs/archiv/BILLING-STRIPE.md
-- **Activity Feed / Events / Courses**: ✂️ als **Phasen 21/22/24**
-  geschnitten (2026-07-06, Roadmap v3 — Produkt-Arc Community-Plattform)
-- **E2E-Tests (Playwright)** pro App — Konzept A13 sagt "wenn Core
-  stabil"; der Core ist jetzt stabil, sinnvoll nach Phase 14
-- **CHANGELOG.md + Git-Tags** für den Core (Konzept A6 "mittelfristig")
-- **usePresence** — falls nicht schon in Phase 18 abgedeckt
-- **obsidian-community-concept**: Integration des comments-Layers in
-  die Community-Plattform (targetType space/note ist vorbereitet)
+Dieser Abschnitt sammelte, was noch zu keiner Phase geschnitten war. Er wird
+**nicht mehr gepflegt**: offene Punkte gehören ausschließlich in
+[OPEN-ITEMS.md](OPEN-ITEMS.md), sonst entsteht genau die zweite Liste, die die
+Doku-Ordnung verhindern soll. Was aus den Einträgen geworden ist:
+
+- ✅ **Themes-Vollausbau** (26 × 11) — fertig am 2026-07-24, und zwar generiert
+  statt getippt: `theme.catalog.ts` ist der einzige Input, `pnpm --filter
+  @pukalani/themes generate` erzeugt CSS + Registry, CI-Gate `check:themes`.
+- ✅ **packages/billing** — Phase 23 (2026-07-08). Plan:
+  [archiv/BILLING-STRIPE.md](archiv/BILLING-STRIPE.md).
+- ✅ **Activity Feed / Events / Courses** — Phasen 21/22/24. Der Feed heißt im
+  Code `packages/activity`, nicht `packages/feed` wie im Goal-Text.
+- ✅ **E2E-Tests (Playwright)** — seit 2026-07-01 in `apps/comments`,
+  heute 7 Specs; CI fährt sie gegen eine Wegwerf-Appwrite.
+- ✅ **CHANGELOG.md + Git-Tags** — release-please seit 2026-07-08, Tags bis
+  `v3.0.0`.
+- ✅ **usePresence** — Phase 18, Teil P2 (Presences-API, eine Presence je User).
+- ⛔️ **obsidian-community-concept** — nie zu einer Phase geschnitten und nie
+  gebaut; im Code gibt es weder `space` noch `note` als `targetType`. Der Punkt
+  ist damit **kein offener Rest, sondern eine unverfolgte Idee** aus dem Juni.
+  Soll er wieder aufleben, gehört er als Eintrag nach OPEN-ITEMS.md — nicht
+  hierher zurück.
 
 ---
 
-## Tipps
+## Tipps (aus der `/goal`-Ära — heute nicht mehr der Arbeitsmodus)
 
 - **Ein Goal pro Phase, nicht alles auf einmal** — kleinere, verifizierbare Einheiten = weniger Evaluator-Fehlschlüsse, weniger Token-Verschwendung.
 - Wenn ein Goal hängt: `/goal pause`, Zwischenstand anschauen, Bedingung präzisieren, neu setzen.
