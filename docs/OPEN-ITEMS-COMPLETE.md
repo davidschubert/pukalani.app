@@ -30,6 +30,49 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### AU2 — die Drossel-Lücken des Audits sind zu ✅ 2026-08-15
+
+`PATCH /api/account/handle` → WRITE_LIMITED 5/min (jeder Versuch zählt —
+strikt schärfer als eine FAILURE-Regel, die neben WRITE toter Code wäre:
+bei Doppel-Eintrag gewinnt WRITE Bucket und Zählweise). Handle-Suche →
+eigener Eimer 120/min statt der vorgeschlagenen 30 (Client entprellt
+150 ms, vier Erwähnungen à acht Zeichen sind ~30 Anfragen — 30/min hätte
+normales Schreiben abgewürgt; 120 = die gleich teure Themen-Suche).
+`POST /api/stats-event` 30/min wie telemetry/error. Reaktions-Toggles in
+WRITE_LIMITED, damit Überlimit-Anfragen nicht erst einen Operator-get
+kosten. `revokeAccountHandleAudience` räumt per Cursor ALLE Zeilen statt
+25 (Cursor statt Offset, weil die Schleife schreibt, während sie liest).
+Vier Rückgabe-Typen nachgezogen. Push `d2f9403b`, Deploy grün.
+
+**Gelernt:** Die eigentlich undebouncte Stelle war NICHT der Editor
+(längst 150 ms), sondern der Nachrichten-Dialog mit reaktiver
+useFetch-Query — wer eine Drossel nachrüstet, muss die AUFRUFER messen,
+nicht den prominentesten davon. Und: Rate-Limit-Listen sind
+Vorrang-Mengen — eine Route in zwei Listen ist kein doppelter Schutz,
+sondern eine tote Zeile.
+
+### AU3 — F57/Auth-Korrektheit: sechs Befunde behoben ✅ 2026-08-15
+
+`resolveTopics` stapelt jetzt zu 100 (Appwrite-Kappung; vorher
+degradierten ALLE `#`-Links einer Feed-Seite still zu Rohtext, der catch
+schluckte den 400 — jetzt fail-soft MIT logEvent). `reactionsGiven`:
+comments zählt `comment_reactions` mit (Variante „wahre Zahl" statt
+write-only — write-only hätte die Selbstheilung `counterFellBehind`
+genommen und denselben Verlust nur verlangsamt). „Verlinkt von" mit
+`localePath`. „Passwort vergessen" trägt das `?redirect=`-Ziel in beide
+Richtungen (Test 5→8, Gegenprobe: Link zurückgedreht ⇒ exakt 2 rot).
+`MfaChallengeForm` bindet `createMfaChallengeSchema(t)` (Tippfehler
+scheitern client-seitig statt gegen den 5/min-Eimer zu zählen).
+Migration 034 trägt den `updateTable → permissions: []`-Reparaturschritt
+wie 033/035 — **der Prod-Nachlauf steht noch aus** (auf allen 4
+Instanzen erneut fahren, damit der Schritt greift). Push `77626f85`,
+Deploy grün.
+
+**Gelernt:** Ein fail-soft-`catch` ohne Log ist ein Beweis-Vernichter —
+der 400 der Appwrite-Kappung war live nie sichtbar, weil genau die
+Stelle ihn schluckte, die ihn hätte melden müssen. Fail-soft heißt
+„Antwort degradiert", nie „Fehler verschwindet".
+
 ### AU1 — Einladungs-Pfad gehärtet (vier Punkte) ✅ 2026-08-15
 
 Die vier Befunde aus [AUDIT-2026-08-15.md](archiv/audits/AUDIT-2026-08-15.md)

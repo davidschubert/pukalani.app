@@ -1,6 +1,6 @@
 # Offene Punkte
 
-**Stand: 5 offen · 3 geparkt/wartend · 13 bewusst zurückgestellt** (Zahlen bei JEDEM Umzug nach COMPLETE mitführen)
+**Stand: 2 offen · 3 geparkt/wartend · 13 bewusst zurückgestellt** (Zahlen bei JEDEM Umzug nach COMPLETE mitführen)
 
 Stand: **2026-08-12**. Hier steht **nur, was noch offen ist** — in der
 Reihenfolge, in der es abgearbeitet wird. Alles Erledigte (mit Begründung,
@@ -27,8 +27,6 @@ demo-Ausbau, comments in den Pool. Entscheidungen: DECISION-LOG 2026-08-11.
 | --- | --- | --- | --- | --- | --- |
 | 2 · A1 | **Echte Rechtstexte** für Impressum, Datenschutz und AGB. **pukalani.studio ist fertig** (2026-08-12): Impressum + Datenschutz in de/en veröffentlicht, inkl. **ladungsfähiger Anschrift**; die Texte nennen nur Belegbares, Erfundenes wurde weggelassen. Dort noch offen und beim Anwalt: die Prüfung zu **Art. 27 DSGVO** (Vertreter in der Union — Sitz ausserhalb der EU bei DACH-Ansprache) samt Drittland-Grundlage, dazu die Angabe zur Verbraucherstreitbeilegung. Für **pukalani.app** stehen die Texte weiter aus. **Direkt danach `pukalani.auth.termsUrl` in `apps/platform` setzen** — die AGB-Checkbox fehlt heute genau dort, wo Kunden sich registrieren (Trichter M9). Schaltet Punkt 3 frei. | Hoch | S — Anwalt lesen lassen | Ja: nur David (ggf. Anwalt) | [Agenda: Studio](#a1-anwalt) · [Agenda: Plattform](#a1-plattform) |
 | 3 · A2 | **Stripe auf echtes Geld umstellen — über die F55-Seite.** Vorstufe A2a komplett grün, F55 selbst erledigt (beide 2026-08-08). Bei David bleiben: Bank-Aktivierung, Steuer-Registrierung, Live-Key ROTIERT eintragen (der erste ist teil-geleakt und rotiert), Portal-Konfiguration; alles andere klickt die F55-Seite. Braucht Punkt 2 (A1). | Hoch | S | Ja: Bank, Konto, Portal | [STRIPE-GO-LIVE-RUNBOOK.md](runbooks/STRIPE-GO-LIVE-RUNBOOK.md) |
-| 5 · AU2 | **Drossel-Lücken schließen**: `PATCH /api/account/handle` (globales Namens-Orakel über Admin-Client), `GET /api/handles/search` (im Quelltext selbst als Lücke markiert), `POST /api/stats-event` (gastoffener Ausgangs-fetch), Reaktions-Toggles in `WRITE_LIMITED`. Dazu die Betriebs-Frage, ob `repair-handle-audience.mjs` auf `account` je scharf lief. | Mittel | S | Nein | [AUDIT-2026-08-15.md](archiv/audits/AUDIT-2026-08-15.md) Schnitte A+C |
-| 6 · AU3 | **F57/Auth-Korrektheit**: `resolveTopics` chunken (heute degradieren ALLE `#`-Links einer Feed-Seite still ab 100 Ids), `reactionsGiven`-Zähler (comments zählt nicht mit ⇒ Galerie-Blick setzt auf 0 zurück), `TopicBacklinks` ohne `localePath`, „Passwort vergessen" verliert das `?redirect=`-Ziel (Einladungs-Rolle geht still verloren), `MfaChallengeForm` ohne Schema (Selbstaussperrung), 034-Reparaturschritt nachziehen. | Mittel | S/M | Nein | [AUDIT-2026-08-15.md](archiv/audits/AUDIT-2026-08-15.md) Schnitte A+C |
 
 ## ⏸️ Geparkt / wartet — in Arbeitsreihenfolge
 
