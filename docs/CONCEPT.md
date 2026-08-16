@@ -97,6 +97,8 @@ apps/       ← Vollständige, deploybare Nuxt-Applikationen
 | `packages/core` | ✅ Aktiv | Nuxt Layer: SSR-Auth, Appwrite-Fundament, RBAC, Design-Basis, Utils, GDPR-/Stats-Verträge |
 | `packages/system` | ✅ Aktiv | Fundament: Schema-Owner der Infra-Tabellen (audit_logs, app_config, notifications, custom_themes, custom_fonts) + GDPR-Contributor, öffentliche Read-Routen /api/themes + /api/fonts |
 | `packages/moderation` | ✅ Aktiv | Fundament: generisches Melde-/Report-System (reports-Table, Queue-Verträge, ReportButton) |
+| `packages/blueprint` | ✅ Aktiv | **Kompositions-Layer** („Bauplan"): der EINZIGE Layer, der mehrere Produkt-Layer kennen darf — Produkt-Kompositionen (Feed + Kommentare, …) existieren genau einmal hier, damit Pool und Silo identisch funktionieren. Keine Produkt-Logik, keine Tables, kein `server/`. In `extends` VOR den Produkt-Layern |
+| `packages/onboarding` | ✅ Aktiv | Fundament des Selbstbedienungs-Trichters: Wizard (`/start`), Einladungen + Beitritt (`/join`), Mitglieder-Verwaltung, Community-Einstellungen, Plan/Abo-Seiten. Besitzt die Service-Naht zum Control Plane |
 | `packages/themes` | ✅ Aktiv | Theme-Studio (Galerie + Editor), Built-in-Katalog 26 × 11 (286 generierte Varianten, Quelle `theme.catalog.ts`, CI-Gate `check:themes`) + Custom Themes (OKLCH-Ramp-Generator), 2 Schrift-Rollen inkl. WOFF2-Uploads, Live-Propagation — Konzept: docs/referenz/THEMES-CONCEPT-V2.md |
 | `packages/comments` | ✅ Aktiv | Kommentarsystem: targetId/targetType, Votes, Realtime — Spec: [[reddit-comment-system-setup]] |
 | `packages/admin` | ✅ Aktiv | Dashboard (RBAC-Capabilities), User-Verwaltung, Moderations-Queue, Changelog, Audit, GDPR-Exporte, Theme-/Font-Admin-Routen |
@@ -106,6 +108,13 @@ apps/       ← Vollständige, deploybare Nuxt-Applikationen
 | `packages/feedback` | ✅ Aktiv | Feedback-Widget: Button unten links, Popup (Gäste + Rate-Limit), Admin-Sichtung (`feedback.manage`) |
 | `packages/billing` | ✅ Aktiv | Stripe: hosted Checkout/Portal, Webhook (Signatur/Allowlist/Stale-Guard), Entitlements + `useBilling` (Realtime), Fulfillment-Vertrag `registerCheckoutFulfillment` — Plan: docs/archiv/BILLING-STRIPE.md |
 | `packages/courses` | ✅ Aktiv | LMS v1: Markdown-Lektionen, Enrollment + server-autoritativer Fortschritt, Builder mit Edit-Awareness, Zugang free/members/paid via `registerCourseAccessGuard` (billing-Entitlements) |
+| `packages/media` | ✅ Aktiv | Verwaltete Bild-Galerie: Upload, Bildunterschriften, Sortierung, Publish-Status — die Inhalts-Quelle für Foto- und Portfolio-Seiten |
+| `packages/messages` | ✅ Aktiv | Private 1:1-Nachrichten zwischen Mitgliedern derselben Community — mit Meldeweg, Sperre, Vertrauensstufen-Schwelle und Owner-Schalter (`requires: moderation, posts`) |
+| `packages/pages` | ✅ Aktiv | Editierbare Inhaltsseiten (Impressum, AGB, Datenschutz) mit Editor und Sprachversionen; `body` als MEDIUMTEXT (off-row, kein Zeilenbudget) |
+| `packages/tickets` | ✅ Aktiv | Support-Ticket-Board (Kanban): Listen + Karten mit DnD, Zuweisung, Checklisten, Anhänge, Kommentare via comments-Vertrag `operatorTargets`, Benachrichtigungen, optionale KI-Triage |
+| `packages/analytics` | ✅ Aktiv | Cookielose Besucherstatistik via Plausible: Script-Id der eigenen Site eintragen, die Seiten melden sich selbst |
+| `packages/domains` | ✅ Aktiv | Eigene Domain je Community: eintragen, DNS-Besitznachweis, Zertifikat bestellen, umschalten — die Pukalani-Adresse bleibt als Rückfall |
+| `packages/control` | ✅ Aktiv | **Control Plane** (nur auf der Betreiber-Site `admin.pukalani.app`): Register der Communities (`communities`, `community_members`, `community_invites`), Provisionierung, Health-Übersicht, Entitlements, Stripe-Webhook. Migrationen `control-NNN` |
 | `packages/appwrite-functions` | 🔜 Zukunft | Appwrite Functions (Webhooks, CRON, Events) — `functions/changelog-draft` existiert bereits standalone |
 
 > v2.1: `packages/types`, `packages/utils` und `packages/config` gestrichen — zehn
