@@ -168,6 +168,28 @@ await step('Table community_seo', () => tablesDB.createTable({
   rowSecurity: false,
 }))
 
+/**
+ * REPARATURSCHRITT für Bestands-Instanzen — dieselbe Zeile, die 033 am
+ * 2026-08-13 nachgetragen bekommen hat und die 035 von Anfang an trägt; hier
+ * fehlte sie als einziger der drei U15-Tabellen (Audit 2026-08-15, Schnitt B).
+ *
+ * WARUM SIE NÖTIG IST: `createTable` oben antwortet auf eine vorhandene Tabelle
+ * mit 409, und `step()` überspringt sie dann — die PERMISSIONS einer einmal
+ * falsch angelegten Tabelle heilt das nie. Ohne diesen Schritt wäre die
+ * least-privilege-Zusage nur auf frischen Instanzen wahr.
+ *
+ * IDEMPOTENT: derselbe Zustand noch einmal gesetzt ist ein No-op. Der Beweis
+ * eines Permissions-Fixes ist der GREP auf DIESE Zeile, nie die Commit-Meldung
+ * (Lehre vom 2026-08-13).
+ */
+await step('Table community_seo: permissions [] (Reparatur)', () => tablesDB.updateTable({
+  databaseId: db,
+  tableId: 'community_seo',
+  name: 'Community SEO (Suche)',
+  permissions: [],
+  rowSecurity: false,
+}))
+
 // Eigene Beschreibung der Startseite. '' ist ein gültiger Wert und heisst
 // „keine eigene Wahl" — deshalb nicht required. Der Leser
 // (`resolveCommunitySeo`) fällt dann auf den Anriss der Startseite zurück,
