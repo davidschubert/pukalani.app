@@ -103,7 +103,12 @@ const interval = computed<'monthly' | 'yearly'>(() => (yearly.value ? 'yearly' :
 /** Ein Knopf zur Zeit: 'personal' | 'pro' | 'portal' | '' */
 const busy = ref('')
 
-const isCurrent = (key: PlanKey) => currentPlan.value === key
+/**
+ * „Aktueller Plan" heisst: DAFÜR ZAHLST DU — nicht bloss „so steht der
+ * Schlüssel". Ohne Abo (Testphase, ausgelaufen, gekündigt) ist kein Plan
+ * „aktuell", und beide bleiben kaufbar.
+ */
+const isCurrent = (key: PlanKey) => currentPlan.value === key && hasSubscription.value
 
 function planName(key: string): string {
   // Ein unbekannter Plan-Key (Alt-Bestand) wird NICHT übersetzt erfunden,
@@ -126,11 +131,28 @@ function planPrice(key: PlanKey): string {
  * (dieselbe Behandlung wie in CommunityTrialNotice.global.vue). Nur im
  * Browser, weil die Tageszahl an `Date.now()` hängt.
  */
-const { data: trial } = await useFetch<{ trialEndsAt: string | null }>('/api/community/billing/trial', {
+const { data: trial } = await useFetch<{ trialEndsAt: string | null, billingStatus: string }>('/api/community/billing/trial', {
   lazy: true,
   server: false,
-  default: () => ({ trialEndsAt: null }),
+  default: () => ({ trialEndsAt: null, billingStatus: '' }),
 })
+
+/**
+ * ZAHLT DIESE COMMUNITY? Die Frage, die `plan` allein NICHT beantwortet.
+ *
+ * Eine Testphase setzt `plan: 'pro'`, ohne dass ein Abo besteht. Solange
+ * `isCurrent` nur den Plan-Schlüssel verglich, galt die Pro-Testphase als
+ * gekauftes Pro: die Pro-Karte trug „Aktueller Plan" und HATTE KEINEN
+ * KAUF-KNOPF. Wer in der Testphase auf Pro bleiben wollte — der
+ * wahrscheinlichste Kauf überhaupt — konnte hier nur Personal nehmen, also
+ * herabstufen, oder abwarten, bis die Testphase endet und die Community
+ * nur-lesend wird (M13). Gefunden beim Durchspielen der Kundenreise
+ * (2026-08-15).
+ *
+ * `past_due` zählt bewusst mit: ein Abo besteht, es ist nur die Zahlung offen.
+ * Dort ist die Antwort das Stripe-Portal, nicht ein zweiter Kauf.
+ */
+const hasSubscription = computed(() => ['active', 'past_due'].includes(trial.value?.billingStatus ?? ''))
 
 /** Erst im Browser gesetzt — SSR darf keine Tageszahl behaupten. */
 const now = ref(0)

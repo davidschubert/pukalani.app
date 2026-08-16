@@ -28,5 +28,22 @@ export default defineEventHandler(async (event) => {
     throw createError({ status: 404, statusText: 'Not found' })
   }
 
-  return { trialEndsAt: tenant.trialEndsAt ?? null }
+  /**
+   * `billingStatus` DANEBEN, aus demselben Kontext und unter derselben
+   * Capability — der Wert liegt bereits im Speicher, kostet also keinen
+   * zusätzlichen Zugriff (dieselbe Begründung wie oben für `trialEndsAt`).
+   *
+   * WOZU: „zahlt diese Community?" lässt sich aus `plan` allein NICHT
+   * beantworten. Eine Testphase setzt `plan: 'pro'`, ohne dass ein Abo
+   * besteht. Genau dafür wurde das Feld eingeführt (U4) — nur las es bis
+   * heute niemand, und die Plan-Seite hielt deshalb die Testphase für ein
+   * gekauftes Pro und bot es nicht mehr zum Kauf an.
+   *
+   * Roh durchgereicht ('' | 'active' | 'past_due' | 'canceled'); was daraus
+   * folgt, entscheidet die Seite.
+   */
+  return {
+    trialEndsAt: tenant.trialEndsAt ?? null,
+    billingStatus: tenant.billingStatus ?? '',
+  }
 })
