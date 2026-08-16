@@ -46,21 +46,28 @@ export default defineAppConfig({
     admin: { instanceTabs: true },
     /**
      * Plausible (self-hosted, plausible.hawaii.studio) — cookielos, deshalb
-     * kein Consent-Banner. v3-Snippet: die Site-Zuordnung zu
-     * comments.pukalani.app steckt in der Script-Id (pa-…); Outbound-Links/
-     * Downloads/Formulare sind serverseitig an der Id konfiguriert.
+     * kein Consent-Banner.
+     *
+     * KEINE FESTE SITE MEHR (2026-08-16). Bis hierher stand an dieser Stelle
+     * die Script-Id (`pa-…`) der eigenen Plausible-Site `comments.pukalani.app`.
+     * Mit dem F3-Cutover (2026-08-12) bedient `platform` diesen Host als
+     * Pool-Community, und diese App ist der E2E-Anker OHNE Deployment: die Id
+     * zeigte seither auf eine Site, in die nichts mehr floss — nachgemessen am
+     * 2026-08-16 (`/api/analytics/config` des Hosts meldet `enabled:false`,
+     * die Seite lädt kein Script). Stehen gelassen wäre sie eine Attrappe, die
+     * bei jedem lokalen Lauf ein totes Script anfragt.
+     *
+     * GEBLIEBEN IST DIE BASIS-ADRESSE, und das ist Absicht: `enabled` + `instance`
+     * ohne `src` heißt „Selbstbedienung an, von sich aus misst nichts" (wie in
+     * apps/platform). Eine unter /dashboard/community/analytics hinterlegte
+     * Script-Id wird also weiterhin geladen; ohne sie rendert der Head-Eintrag
+     * gar nichts (core/app/plugins/analytics.ts). `enabled: false` wäre hier
+     * falsch — es würde auch die selbst eingetragene Id verwerfen und die
+     * Eingabemaske zu einem Feld ohne Wirkung machen.
      */
     analytics: {
       enabled: true,
       provider: 'plausible' as const,
-      snippet: 'v3' as const,
-      src: 'https://plausible.hawaii.studio/js/pa-NFzv_HzyhC-TnVE577Kx6.js',
-      /**
-       * SELBSTBEDIENUNG (2026-08-04): mit der Basis-Adresse darf der Betreiber
-       * die Site unter /dashboard/community/analytics wechseln, ohne zu deployen — eine
-       * dort hinterlegte Script-Id schlägt das `src` oben. Solange nichts
-       * hinterlegt ist, bleibt es exakt beim Wert dieser Datei.
-       */
       instance: 'https://plausible.hawaii.studio',
     },
     /**
