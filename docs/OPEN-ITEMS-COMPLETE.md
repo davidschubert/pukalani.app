@@ -30,6 +30,56 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### F58 — Kurse und Termine sind aus dem Produkt heraus verwaltbar ✅ 2026-08-16
+
+Gemeldet als Rechte-Problem („eingeloggt, richtige Rolle, kann trotzdem keinen
+Kurs anlegen oder bearbeiten" — freelancer.supply/de/courses). Es war keines:
+auf `/courses`, `/courses/:slug` und `/events` gab es **für keine Rolle** einen
+Einstieg in die Verwaltung. Anlegen und Bearbeiten lebten ausschließlich unter
+`/dashboard/courses` bzw. `/dashboard/events`, und von der Seite, auf der man
+den Kurs SIEHT, führte kein Weg dorthin. Wer den Pfad nicht auswendig kannte,
+stand vor einer Galerie ohne Ausgang — genau das sieht aus wie ein fehlendes
+Recht. (Davids Leitprinzip: die Kernhandlung eines Produkts muss AUS DEM
+PRODUKT HERAUS erreichbar sein.)
+
+**Gebaut.** Je Produkt zwei Knöpfe in der Kopfzeile der öffentlichen Liste
+(„Neuer Kurs"/„Neues Event" + „Verwalten") und ein „Bearbeiten" auf der
+Detailseite, alle drei sichtbar nur mit der jeweiligen Capability. Zwei Knöpfe
+statt einem, weil sie zwei Fragen beantworten: **Entwürfe stehen nicht in der
+öffentlichen Liste** — wer gerade etwas angelegt hat, findet es dort nicht
+wieder, „Verwalten" ist der einzige Weg dahin. Die Ziele sind TIEF verlinkt
+(`?new=1` öffnet den Anlege-Dialog, `?edit=<id>` genau diesen Termin, Kurse
+haben mit `/dashboard/courses/:id` ohnehin eine eigene Adresse) — ohne das wäre
+die Beschriftung nur halb wahr.
+
+Neu dafür: `useCapability()` in core (Operator-Label **oder** Community-Rolle —
+dieselbe Rechnung wie `requireCommunityPermission` auf dem Server). Das
+vorhandene `useCommunityCapability` allein hätte in Silo-Apps und im Playground
+nichts gezeigt, weil es dort gar keine Community-Rolle gibt. Der
+Termin-Knopf sitzt in `EventDetail.vue`, nicht in der Seite: die Detailseite
+gibt es zweimal (events-Layer + Bauplan-Fassung), und eine Kopie ohne die
+andere wäre der Pool/Silo-Unterschied, den PRODUKT-BILANZ.md ausschließt.
+
+**Nebenbefund, behoben:** die Liste „Wiederholung" im Termin-Dialog stürzte bei
+JEDEM Klick ab (`A <SelectItem /> must have a value prop that is not an empty
+string`) — Serien-Termine waren über die Oberfläche nicht anzulegen. Ursache
+war `value: ''` für „Einmalig"; der leere String ist bei Reka für „Auswahl
+gelöscht" reserviert. Jetzt ein Sentinel (`'none'`) mit Übersetzung an genau
+einer Stelle; Formularfeld und Nutzlast führen weiter `''`.
+
+**Beweis:** `packages/courses/scripts/verify-manage-entrypoints.mjs` (14/14) und
+`packages/events/scripts/verify-manage-entrypoints.mjs` (15/15), beide **mit
+Gegenprobe** — ein gewöhnliches Mitglied und ein Gast sehen keinen der Knöpfe.
+Das Öffnen der Dialoge selbst ist im Browser nachgemessen (es rendert
+client-seitig, das SSR-HTML kann es nicht zeigen).
+
+**Gelernt:** Ein Absturz, der nur beim ÖFFNEN einer Auswahlliste passiert, ist
+unsichtbar, solange niemand die Liste öffnet — der Dialog ging auf, der Knopf
+zeigte „Einmalig", und das Formular sah heil aus. Aufgefallen ist er erst, weil
+der neue Tiefen-Link den Dialog schon beim Seitenaufbau öffnet und der Absturz
+dabei die GANZE Seite mitriss. Ein Beweis, der nur SSR-HTML liest, hätte das nie
+gefunden: was erst beim Klicken mountet, muss auch geklickt werden.
+
 ### Kundenreise 2026-08-15 — elf Funde beim Durchspielen, öffentlich wie eingeloggt ✅ 2026-08-15
 
 Kein Audit über Code, sondern der Weg eines Kunden von der Startseite bis zum
