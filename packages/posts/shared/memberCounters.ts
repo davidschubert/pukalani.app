@@ -40,7 +40,17 @@ export interface MemberCounterSeedInput {
   topicsCreated: number
   repliesCreated: number
   upvotesGiven: number
-  /** Abgegebene Emoji-Reaktionen (F57) — eine exakte `count`-Abfrage, wie `upvotesGiven`. */
+  /**
+   * Abgegebene Emoji-Reaktionen (F57) — exakt, wie `upvotesGiven`, und aus
+   * demselben Grund: JEDE Quelle zählt ihre eigenen Reaktions-Zeilen und der
+   * Core-Vertrag summiert sie (`mergeUserCounters`).
+   *
+   * DAS „JEDE" IST DIE GANZE ZUSAGE (Audit 2026-08-15, Schnitt A): solange nur
+   * `posts` meldete, war die Zahl der halbe Bestand — und weil der Seed die
+   * eichbaren Spalten ABSOLUT setzt, machte ein Blick in die Galerie aus der
+   * Untermeldung eine Rücksetzung. Eine neue Inhaltsart mit Reaktionen muss
+   * ihren Provider also mitzählen lassen, sonst schrumpft dieser Zähler wieder.
+   */
   reactionsGiven: number
 }
 
@@ -58,8 +68,9 @@ function whole(value: number | undefined): number {
  *  - `topicsCreated` / `repliesCreated` — eine `count`-Abfrage je Quelle, exakt.
  *  - `upvotesGiven` — der Zähler `likesGiven`, den die Quellen ohnehin melden.
  *  - `reactionsGiven` — dieselbe Bauart (F57): jede abgegebene Reaktion ist
- *    eine Zeile in `discussion_reactions`, also exakt zählbar. Anders als bei
- *    `upvotesReceived` gibt es hier nichts zu summieren.
+ *    eine Zeile (`discussion_reactions` in posts, `comment_reactions` in
+ *    comments), also exakt zählbar. Summiert wird nur über die QUELLEN, wie bei
+ *    `upvotesGiven` — nicht über eine Spalte wie bei `upvotesReceived`.
  *
  * Die anderen FÜNF STARTEN BEI 0, und jedes Mal ist das unvermeidlich:
  *  - `upvotesReceived` wäre die SUMME der `upvotes`-Spalte über alle eigenen
