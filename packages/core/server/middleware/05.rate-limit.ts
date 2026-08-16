@@ -325,6 +325,26 @@ const WRITE_LIMITED: { re: RegExp, bucket: string, max?: number }[] = [
    * Community-Wechsler verlieren.
    */
   { re: /^POST \/api\/community\/members$/, bucket: 'community:invite', max: 5 },
+  /**
+   * MEIN Kontingent lesen (F57) — Eintrag aus AU1, Audit 2026-08-15.
+   *
+   * Ein GET, aber die Kostenklasse der JWT-prägenden Geschwister weiter oben:
+   * jeder Aufruf prägt ein Appwrite-JWT und lässt das Control Plane die eigene
+   * Mitgliedschaft, die Community-Zeile und den Einladungs-Zähler lesen — vier
+   * Operationen über ZWEI Projekte. Seit F57 hängt er zusätzlich am SSR-Aufbau
+   * der Mitglieder-Seite, die jedem Mitglied offensteht; ungedrosselt war das
+   * der billigste Weg, die Service-Naht zum Control Plane zu beschäftigen.
+   * Deshalb derselbe Deckel wie `onboarding:communities` (TOKEN_MAX).
+   *
+   * EIGENER BUCKET, nicht der der Geschwister — aus demselben Grund, aus dem
+   * `community:invite` eine Zeile höher einen eigenen hat: die Mitglieder-Seite
+   * holt das Kontingent beim Aufbau UND nach jeder abgelehnten Einladung. Wer
+   * sich dabei den Community-Wechsler leerräumte, verlöre eine Funktion, die
+   * mit dem Einladen nichts zu tun hat. Und NICHT der Bucket von
+   * `community:invite` (max 5): fünf Einladungen plus deren
+   * Kontingent-Nachfragen sperrten sich sonst gegenseitig aus.
+   */
+  { re: /^GET \/api\/community\/invites\/quota$/, bucket: 'community:invite-quota', max: TOKEN_MAX },
   // Missbrauchsmeldung (M13): ebenfalls session-los, verschickt Mail UND weckt
   // jeden Betreiber per Glocke. Etwas großzügiger als die Early-Access-Anfrage
   // (5 statt 3), weil bei einem echten Vorfall mehrere Menschen gleichzeitig
