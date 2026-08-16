@@ -817,8 +817,8 @@ Vollständiges Konzept: docs/CONCEPT.md
   (`resolveHandleOwners`, Admin-Client) filtert dieselbe Zugehörigkeit im Code;
   ohne sie wäre ein Beitrag ein Fernzünder für Benachrichtigungen an fremde
   Konten. Beweis: `packages/core/scripts/verify-handle-search-boundary.mjs` —
-  nach dem AH-7-Umbau steht seine GEGENPROBE noch aus (Liste im Kopf der
-  Datei).
+  inkl. GEGENPROBE (Commit 3d074289: drei Mutationen, drei Rote — Gate,
+  Publikums-Filter und Auflösungs-Filter fallen je einzeln).
   `@tiptap/extension-mention` gehört EXAKT auf `3.27.1` gepinnt (Katalog, kein
   Caret): ungepinnt löst pnpm neu auf und der Lockfile bewegt sich um 1898
   Zeilen statt um 6. Messung, Optionen, Nebenbefunde:

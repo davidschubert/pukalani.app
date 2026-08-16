@@ -30,6 +30,34 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### Autonome Runde 4 — frisches Audit über den Post-Wellen-Stand ✅ 2026-08-15
+
+Drei read-only Audit-Agenten über die Wellen-Schnitte (posts+comments /
+onboarding+control+system / core), weil die Audits vom 2026-08-09 VOR
+der gesamten Welle lagen. Ergebnis: [AUDIT-2026-08-15.md](archiv/audits/AUDIT-2026-08-15.md)
+mit ~20 Befunden (kein Blocker; 8× Mittel, Rest Niedrig) → drei
+gebündelte Zeilen AU1–AU3 in OPEN-ITEMS. Die Top-Befunde: das
+`already_member`-Orakel im seit F57 viewer-offenen Einladungs-Pfad,
+Zeilen-Injektion über `invitedByName` in die Einladungs-Mail,
+ungedrosseltes globales Namens-Orakel auf `PATCH /api/account/handle`,
+`resolveTopics` ohne Chunking (ab 100 Ids degradieren ALLE `#`-Links
+einer Feed-Seite still), der `reactionsGiven`-Zähler-Rücksetzer und das
+verlorene `?redirect=`-Ziel über „Passwort vergessen". Die drei
+wichtigsten Behauptungen im Hauptloop nachverifiziert; die PASS-Listen
+(Datentür, M13/A5, least-privilege, Export-PII, MFA-Härtung,
+Open-Redirect-Schutz) stehen mit im Archiv-Dokument. Nebenbei: die
+CLAUDE.md-Zeile „Handle-Gegenprobe steht aus" war seit Commit
+`3d074289` überholt — nachgezogen.
+
+**Gelernt:** Ein Audit unmittelbar NACH einer Feature-Welle findet eine
+eigene Fehlerklasse: Invarianten, die eine ÄLTERE Annahme kodierten und
+von der Welle still entwertet wurden — das Mitgliedschafts-Orakel
+entstand nicht durch neuen Code, sondern dadurch, dass F57 die
+Einladen-Capability von team.manage auf members.invite weitete und die
+bestehende 409-Antwort damit ein neues Publikum bekam. Wer eine
+Capability weitet, muss die FEHLERPFADE der Route mit dem neuen
+Publikum lesen, nicht nur den Erfolgsfall.
+
 ### Autonome Runde 3 — F7-Konzept „Paid Communities" steht ✅ 2026-08-15
 
 `docs/plans/F7-PAID-COMMUNITIES-KONZEPT.md` (990 Zeilen): Marktbild

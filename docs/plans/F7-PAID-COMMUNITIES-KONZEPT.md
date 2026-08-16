@@ -789,6 +789,13 @@ hat.
 
 ## 8. Entscheidungen für David
 
+> **ENTSCHIEDEN am 2026-08-15** (DECISION-LOG): David ist allen vier
+> Empfehlungen gefolgt — Owner verkauft (8.1 Option A) · ganze Community
+> (8.2 Option A) · Provision zurück + Zugang endet sofort (8.3 Option A) ·
+> Verkauf sperrt die Endzustände (8.4 Option A). Die Fragen bleiben unten
+> mit allen Trade-offs stehen, damit nachlesbar ist, wogegen entschieden
+> wurde.
+
 Vier Fragen. Ohne sie entsteht kein Umsetzungsplan — und Frage 1 muss vor den
 anderen dreien fallen, weil sie deren Rahmen setzt.
 

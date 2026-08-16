@@ -7,6 +7,28 @@ die kleinen, verstreuten Beschlüsse.
 
 ---
 
+## 2026-08-15 — F7 Paid Communities: alle vier Konzept-Entscheidungen gefallen
+
+**Davids Entscheidungen** (strukturierte Fragen; Volltext + Trade-offs:
+docs/plans/F7-PAID-COMMUNITIES-KONZEPT.md § 8 — alle vier der Empfehlung
+gefolgt): (1) **Der OWNER verkauft** — Stripe Connect, volles Stripe-Dashboard,
+direct charges, Provision via `application_fee_percent`; hält D1 ein.
+Umsatzsteuerlich sind trotzdem sehr wahrscheinlich WIR die Leistenden (Art. 9a
+DVO 282/2011, EuGH C-695/20 „Fenix" — der Checkout in unserer Oberfläche
+erfüllt die unwiderlegbaren Tatbestände), die OSS-Registrierung ist damit
+eingeplante Betriebsaufgabe, keine Restunsicherheit. Der Dashboard-Typ eines
+Connected Accounts ist UNVERÄNDERLICH — diese Entscheidung ist praktisch eine
+Einbahnstraße. (2) **V1 verkauft die GANZE Community** (ein Preis, ein
+Publikum) — Freemium/Tiers bewusst später, weil ein zweites Lese-Publikum
+jede Inhaltsart jedes Produkt-Layers zur Publikumsentscheidung zwingt.
+(3) **Erstattung nimmt die Provision anteilig mit zurück, Zugang endet
+SOFORT** — der Sofort-Entzug ist Baurbeit (eine Erstattung beendet ein Abo
+nicht von selbst). (4) **Verkauf sperrt die Endzustände**: solange zahlende
+Mitglieder existieren, sind Stilllegung und Übergabe gesperrt; wer sein
+Pukalani-Abo kündigen will, beendet zuerst die Mitglieder-Abos. Offen bleibt
+NUR die Anwaltsliste (§ 9, allen voran: greift Art. 9a bei unserer konkreten
+Checkout-/AGB-Gestaltung) und der Bau nach A2.
+
 ## 2026-08-14 — Reaktionen auch auf Antworten (F57 ist damit komplett)
 
 **Entscheidung (David, 2026-08-13): „Ja, nachbauen."** Die offene Frage aus
