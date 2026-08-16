@@ -226,7 +226,13 @@ export function qualifiersByBadge(awarded: readonly AwardedBadge[]): Map<string,
  * benachrichtigt überhaupt.
  */
 export function badgeNotificationId(communityId: string, userId: string, badgeKey: string, qualifier: string): string {
-  const digest = createHash('sha256').update(`${communityId} ${userId} ${badgeKey} ${qualifier}`).digest('hex')
+  // \u0000 als Kollisions-Trenner (kein Bestandteil kann ihn enthalten) --
+  // als ESCAPE geschrieben, nicht als rohes Byte: drei rohe NUL-Bytes machten
+  // diese Datei fuer grep binaer und die zentrale Abzeichen-Verleihung in
+  // jeder Repo-Suche unsichtbar (2026-08-14 haette das fast eine falsche
+  // Annahme gekostet). Das erzeugte Zeichen ist identisch, der Hash bleibt
+  // stabil -- Bestands-Ids aendern sich NICHT.
+  const digest = createHash('sha256').update(`${communityId}\u0000${userId}\u0000${badgeKey}\u0000${qualifier}`).digest('hex')
   return `bdg${digest.slice(0, 32)}`
 }
 
