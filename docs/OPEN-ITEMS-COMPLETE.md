@@ -30,6 +30,86 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### Kundenreise 2026-08-15 — elf Funde beim Durchspielen, öffentlich wie eingeloggt ✅ 2026-08-15
+
+Kein Audit über Code, sondern der Weg eines Kunden von der Startseite bis zum
+Planwechsel, Station für Station im Browser. Öffentlich auf der Produktion
+(Desktop + Handy, beide Sprachen), eingeloggt lokal gegen die Dev-Appwrite
+(`seed-local-tester.mjs`, Konto und Community danach jedes Mal entfernt) — auf
+der Produktion geht der eingeloggte Teil nicht: die Anmeldung läuft über einen
+Code an eine E-Mail-Adresse, und ein Postfach hat der Agent nicht.
+
+**Öffentlich.** Auf `account.pukalani.app` fehlte JEDES Symbol, weil
+`/api/_nuxt_icon/` nicht in `controlApiPrefixes` stand — am deutlichsten an der
+Passwort-Prüfliste, die ihre Häkchen verlor und zur reinen Textliste wurde, auf
+der Seite, auf der jeder Kunde anfängt (`bd717033`). Gäste lasen Anwesenheit:
+`usePresence()` stieg bei SSR und abgeschaltetem Realtime aus, nicht aber ohne
+Anmeldung — 401 bei jedem Aufruf eines öffentlichen Mandanten-Hosts, dazu ein
+nachgeladenes Web-SDK und ein 20-s-Poll ins Leere (`bd717033`). Auf der
+Registrierung überlappte bis 768 px der Markenname den Zurück-Link: `p-8` gibt
+32 px, die feste Leiste reicht bis 48 px, und `justify-center` läuft bei zu
+hohem Inhalt nach BEIDEN Seiten über — die Anmeldung blieb heil, weil sie kurz
+genug ist (`19caed61`). Jede 404 kam ohne `lang`/`dir` heraus, weil
+`useLocaleSeoHead()` in app.vue sitzt und Nuxt bei einem Fehler `error.vue`
+STATT app.vue rendert (`9f737b58`).
+
+**Die Hilfe war halb englisch.** Sie schaltete ihre Oberfläche auf Englisch,
+sobald der Browser englisch war, liess aber jeden Artikel deutsch stehen — und
+schrieb `lang="en-US"` darüber. 18 Seiten übersetzt (~10.800 Wörter), Strategie
+auf `prefix_except_default` zurückgeführt (der Vermerk dafür stand seit jeher in
+der nuxt.config), je Sprache eine eigene Content-Sammlung, Sprachwähler
+ergänzt — den gab es nämlich gar nicht, die Treffer im Quelltext waren die
+i18n-Konfiguration (`c91e1168`, `ba91a009`, `6b611693`).
+
+**Eingeloggt.** Der Anwesenheits-Heartbeat feuerte im Kundenbereich alle 20
+Sekunden einen 404, pro Tab, für die ganze Sitzung — die Begründung dagegen
+stand längst im Plugin, nur für den Fehlerseiten-Fall (`aeed2de4`). Die Hilfe
+beschrieb sieben Wizard-Schritte, der Assistent hat seit U12 vier; drei
+beschriebene Schritte gab es nicht mehr, dazu ein „Entwurf aus dem Assistenten",
+den niemand mehr erzeugt (`aeed2de4`). Die Quer-Links zwischen Anmelden,
+Registrieren und den Code-Varianten verloren `?redirect=` (zehn Stellen in vier
+Dateien; der Audit fand danach eine elfte in „Passwort vergessen") — für Eingeladene ohne
+Konto hiess das: Einladung angeklickt, registriert, auf der Startseite gelandet,
+Einladung blieb `pending` und die vergebene ROLLE war still weg (`dba5b5b0`).
+Und in der Pro-Testphase hatte die Pro-Karte keinen Kauf-Knopf, weil `isCurrent`
+nur den Plan-Schlüssel verglich und eine Testphase `plan: 'pro'` setzt — kaufbar
+war nur die Herabstufung (`f8b1c8f8`).
+
+**Dazu eine Entscheidung.** Auf einer Community mit geschlossener Registrierung
+war eine Einladung für Menschen OHNE Pukalani-Konto wertlos: die Register-Seite
+sagt dort „Nur auf Einladung … melde dich einfach an". Davids Entscheidung: der
+Token öffnet die Registrierung — gebunden an die eingeladene Adresse, sonst wäre
+ein weitergeleiteter Link ein Generalschlüssel. Vertrag im Kern
+(`inviteOpensRegistrationFor`), Naht im onboarding-Layer, Vorschau-Route im
+Control Plane ohne JWT (es gibt noch keine Identität), Konto-Anlage auf der
+Einladungs-Seite selbst (`ec79a04a`). Angegriffen statt behauptet: ohne Token
+403, Token mit fremder Adresse 403, erfundener Token 403, missgebildeter 400.
+
+Nicht gefunden wurde bei erstem Inhalt und Moderation etwas — beides trägt.
+Markdown überlebt den Editor-Roundtrip ohne Maskierung und ohne Entities, und
+das Ausblenden hält seine Zusage wörtlich (`open` → `resolved`/`hidden`, Beitrag
+für Gäste weg, Wiederherstellen macht beides rückgängig).
+
+**Gelernt:** (1) **Fast jeder Fund war hinter einem `catch` oder einem
+Rückfallwert versteckt.** Die Systeme liefen weiter, nur eben falsch — kein
+Alarm, kein rotes Log, nur eine Seite, die etwas nicht tut. Eine Reise findet
+solche Fehler, ein Test-Lauf über bestehende Erwartungen nicht. (2) **Der
+teuerste Fund war jedes Mal eine Begriffs-Verwechslung zwischen zwei Dingen, die
+fast dasselbe bedeuten:** Plan-Schlüssel gegen „zahlt", Kontroll-Host gegen
+Mandant, Abschnitt gegen Sammlung, „aktuell gesetzt" gegen „gekauft". Der Code
+war nie kaputt, er beantwortete eine leicht andere Frage als die gestellte.
+(3) **Ein leeres Ergebnis ist von einem kaputten nicht zu unterscheiden,
+solange die Tabelle leer ist** — der SSR-Mandantenfehler (s. D7) wurde erst
+sichtbar, als die Demo Termine bekam; Schaufenster zu füllen ist auch eine
+Prüfmethode. (4) **Wächter über Quelltext müssen den RUMPF messen, nicht die
+Datei** — dreimal an einem Tag mass ein neuer Test den eigenen Kommentar mit und
+war rot, obwohl der Fix stimmte. (5) **Adressen nie raten, sondern aus der
+Oberfläche lesen**: `/de/preise`, `/discussions/categories`,
+`/dashboard/moderation` — dreimal als Fehler gemeldet, dreimal war es die
+falsche Adresse und nicht die Seite.
+
+---
+
 ### AU2 — die Drossel-Lücken des Audits sind zu ✅ 2026-08-15
 
 `PATCH /api/account/handle` → WRITE_LIMITED 5/min (jeder Versuch zählt —
