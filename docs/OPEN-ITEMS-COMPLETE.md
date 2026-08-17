@@ -80,6 +80,50 @@ der neue Tiefen-Link den Dialog schon beim Seitenaufbau öffnet und der Absturz
 dabei die GANZE Seite mitriss. Ein Beweis, der nur SSR-HTML liest, hätte das nie
 gefunden: was erst beim Klicken mountet, muss auch geklickt werden.
 
+**Nachtrag 2026-08-17 — der Dialog öffnet jetzt AUF DER SEITE (Davids
+Entscheidung).** Die oben beschriebenen TIEFEN LINKS sind ersetzt: „Neues
+Event"/„Neuer Kurs" und „Event bearbeiten" öffnen das Formular an Ort und
+Stelle. Der Link machte die Tür zwar sichtbar, ließ die Handlung aber weiterhin
+woanders stattfinden — jeder Termin kostete einen Kontextwechsel, und die
+Detailseite, auf der man gerade steht, verschwand dabei. Geteilt gehört der
+MECHANISMUS, nicht der Einstieg: das Formular liegt seither in
+`EventFormModal` bzw. `CourseFormModal` und wird von Dashboard, öffentlicher
+Liste und (bei Terminen) Detailseite benutzt. Serverseitig war nichts nötig.
+
+BEWUSST Link geblieben: „Verwalten" (beantwortet die andere Frage — Entwürfe
+und Archiviertes stehen nur in der Tabelle) und „Kurs bearbeiten" (ein Kurs
+wird in einer BUILDER-SEITE aufgebaut; das in einen Dialog zu zwingen wäre
+schlechter, nicht konsequenter). `?new=1`/`?edit=<id>` bleiben gültige Ziele
+für Lesezeichen. Neu auf der Termin-Detailseite: Zurückziehen (verlässt die
+Seite — der PATCH entzieht das Leserecht, die Seite antwortet danach 404) und
+Absagen (bleibt stehen, der Soft-Cancel behält das Leserecht). Vom öffentlichen
+Einstieg angelegte Termine werden SOFORT veröffentlicht (`publishOnCreate`) —
+ein Entwurf wäre dort im Moment des Anlegens unsichtbar; das Dashboard bleibt
+Entwurf-zuerst, weil dort die Entwurfsliste danebensteht. Beweise auf den
+Dialog nachgezogen, inkl. Gegenprobe „ist ein Knopf, kein Link": events 19/19,
+courses 14/14.
+
+**Gelernt (Nachtrag):** Ein FEHLENDES Boolean-Prop ist in Vue `false`, nicht
+`undefined` — Boolean-Casting. Damit war in `CourseFormModal` der Zweig
+„`paidAvailable` noch nicht bekannt" nie erreichbar, der Nachschlag lief nie,
+und in der Kurs-Galerie fehlte „Bezahlt" dauerhaft, obwohl der Server
+`paidAvailable: true` meldet. Kein Fehler, keine Warnung — nur eine Option
+weniger, und `access` ist NUR beim Anlegen setzbar (der Builder zeigt es bloß
+als Badge), der Kurs wäre also nie bezahlbar geworden. Kur:
+`withDefaults(…, { paidAvailable: undefined })`. Wer ein optionales Boolean-Prop
+als Dreizustand („ja/nein/weiß nicht") benutzt, MUSS den Default explizit auf
+`undefined` setzen.
+
+**Gelernt (Nachtrag 2) — parallele Sitzungen:** F58 wurde zweimal gebaut. Beide
+Sitzungen hatten `main` vor Arbeitsbeginn geprüft; die eine landete, während die
+andere noch baute. Die Regel „doppelte Arbeit ⇒ eigenen Commit fallen lassen"
+greift hier NICHT blind: die zwei Lösungen unterschieden sich in einer Frage,
+die David bereits entschieden hatte (Dialog statt Link). Deshalb wurde nicht
+gemergt und nicht stillschweigend verworfen, sondern die Kollision vorgelegt —
+und danach auf dem gemergten Stand NEU gebaut, statt zwei Wege nebeneinander
+stehen zu lassen. Aus der fremden Lösung übernommen: `useCapability` (core) und
+der Sentinel-Fix, beide besser als die eigene Fassung.
+
 ### Kundenreise 2026-08-15 — elf Funde beim Durchspielen, öffentlich wie eingeloggt ✅ 2026-08-15
 
 Kein Audit über Code, sondern der Weg eines Kunden von der Startseite bis zum
