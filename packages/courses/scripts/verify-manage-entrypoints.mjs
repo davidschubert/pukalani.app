@@ -13,8 +13,9 @@
  * SSR-Payload mit:
  *
  *   1. Mit `courses.manage` (hier: globales admin-Label) tragen Galerie und
- *      Detailseite die Einstiege — inklusive der TIEFEN Ziele (`?new=1`,
- *      `/dashboard/courses/<row-id>`), denn nur die machen die Beschriftungen
+ *      Detailseite die Einstiege. „Neuer Kurs" oeffnet seit Davids Entscheidung
+ *      den Dialog an Ort und Stelle; „Kurs bearbeiten" bleibt ein Link in den
+ *      Builder (`/dashboard/courses/<row-id>`), denn nur der macht die Beschriftungen
  *      wahr.
  *   2. GEGENPROBE: ein gewöhnliches Mitglied sieht KEINEN davon. Ohne diese
  *      Hälfte wäre der Beweis wertlos — ein immer sichtbarer Knopf bestünde
@@ -123,12 +124,16 @@ try {
   check('GET /courses → 200', galleryAdmin.status === 200, `Status ${galleryAdmin.status}`)
   check('Galerie trägt „Neuer Kurs"', galleryAdmin.text.includes('data-testid="courses-create"'))
   check('Galerie trägt „Verwalten"', galleryAdmin.text.includes('data-testid="courses-manage"'))
-  check('„Neuer Kurs" zielt auf ?new=1 (sonst wäre die Beschriftung halb wahr)',
-    /href="[^"]*\/dashboard\/courses\?new=1"/.test(galleryAdmin.text))
+  // Wie bei den Terminen: der Knopf OEFFNET den Dialog hier, er verlinkt nicht.
+  check('„Neuer Kurs" ist ein Knopf, kein Link ins Dashboard',
+    !/href="[^"]*\/dashboard\/courses\?new=1"/.test(galleryAdmin.text))
 
   const detailAdmin = await call(`/courses/${slug}`, { cookie: adminCookie })
   check('GET /courses/:slug → 200', detailAdmin.status === 200, `Status ${detailAdmin.status}`)
   check('Detailseite trägt „Kurs bearbeiten"', detailAdmin.text.includes('data-testid="course-edit"'))
+  // HIER BLEIBT ES EIN LINK, und das ist kein Rueckstand: ein Kurs wird in einer
+  // BUILDER-SEITE aufgebaut (Lektionen, Reihenfolge), das gehoert nicht in einen
+  // Dialog. Nur das ANLEGEN ist bei beiden Produkten derselbe Dialog.
   check('„Kurs bearbeiten" zielt auf die ROW-ID (der Builder adressiert per Id)',
     detailAdmin.text.includes(`/dashboard/courses/${courseId}"`))
 

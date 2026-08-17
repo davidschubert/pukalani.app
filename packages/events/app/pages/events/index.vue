@@ -16,11 +16,32 @@ useBrandTitle(() => t('events.list.title'))
  * Community) — dieselbe Rechnung, die `requireCommunityPermission` auf der
  * Route macht; in einer Silo-App gibt es keine Community-Rolle.
  *
- * „Verwalten" steht neben „Neuer Termin", weil die Liste hier nur zeigt, was
- * VERÖFFENTLICHT ist: Entwürfe und ausgeblendete Termine findet man nur im
- * Dashboard wieder.
+ * „Neuer Termin" ÖFFNET DEN DIALOG HIER (Davids Entscheidung zum ersten
+ * F58-Entwurf, der stattdessen nach /dashboard/events?new=1 verlinkte): geteilt
+ * gehört der Mechanismus — dasselbe `EventFormModal` wie im Dashboard —, nicht
+ * der Einstieg. Ein Link hätte die Tür zwar sichtbar gemacht, die Handlung aber
+ * weiterhin woanders stattfinden lassen.
+ *
+ * „Verwalten" BLEIBT ein Link, und zwar mit Absicht: es beantwortet eine andere
+ * Frage. Diese Liste zeigt nur VERÖFFENTLICHTES; Entwürfe, abgesagte und
+ * ausgeblendete Termine, „Serie beenden" und die Filter stehen in der Tabelle.
  */
 const canManage = useCapability('events.manage')
+
+const createOpen = ref(false)
+
+/**
+ * `refreshNuxtData` statt eines Emits: die Liste lädt in `EventList` über
+ * `useAsyncData('events:list')`, und dieser Schlüssel ist dort ein Literal.
+ * Ihn hier zu nennen ist die kleinere Kopplung als ein Ref durch zwei
+ * Komponenten — und der Kalender daneben zieht über seinen eigenen Ruf nach.
+ *
+ * Ohne `publish-on-create` (unten) wäre dieser Refresh übrigens sinnlos: ein
+ * Entwurf steht in dieser Liste nicht.
+ */
+function onCreated() {
+  void refreshNuxtData('events:list')
+}
 </script>
 
 <template>
@@ -42,10 +63,10 @@ const canManage = useCapability('events.manage')
           {{ t('events.list.manage') }}
         </UButton>
         <UButton
-          :to="localePath({ path: '/dashboard/events', query: { new: '1' } })"
           size="sm"
           icon="i-ph-plus"
           data-testid="events-create"
+          @click="() => { createOpen = true }"
         >
           {{ t('events.list.create') }}
         </UButton>
@@ -53,5 +74,9 @@ const canManage = useCapability('events.manage')
     </div>
 
     <EventList class="mt-6" />
+
+    <!-- publish-on-create: ein Entwurf wäre von dieser Seite aus im Moment des
+         Anlegens unsichtbar (Begründung im Kopf von EventFormModal). -->
+    <EventFormModal v-model:open="createOpen" publish-on-create @saved="onCreated" />
   </UContainer>
 </template>

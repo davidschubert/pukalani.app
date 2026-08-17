@@ -12,7 +12,15 @@ import { describe, expect, it } from 'vitest'
  * wenn jemand den i18n-Schlüssel umbenennt oder den Platzhalter vergisst.
  */
 const REPO = resolve(import.meta.dirname, '../../..')
-const PAGE = resolve(REPO, 'packages/events/app/pages/dashboard/events.vue')
+/**
+ * Das Formular lag bis zu Davids Entscheidung zu F58 in
+ * `app/pages/dashboard/events.vue`. Es ist seither `EventFormModal` und wird von
+ * DREI Einstiegen geteilt (Dashboard, öffentliche Liste, Detailseite) — die
+ * Prüfung zeigt deshalb auf die Komponente. Das ist der Sinn der Auslagerung:
+ * den Hinweis gibt es jetzt überall oder nirgends, nicht mehr nur an einem
+ * Einstieg.
+ */
+const PAGE = resolve(REPO, 'packages/events/app/components/EventFormModal.vue')
 
 describe('F21 — Hinweis am Preis-Schlüssel-Feld', () => {
   it('das Feld zeigt den berechneten Hilfetext, nicht den festen', () => {

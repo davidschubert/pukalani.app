@@ -2,7 +2,7 @@
 import type { EventDetailResponse, EventRow, EventVoteResponse, EventVoteValue, RsvpResponse, RsvpStatus } from '../../shared/types/event'
 import { effectiveAccess, effectiveLocationType, EVENTS_TABLE } from '../../shared/types/event'
 import { detectLiveProvider } from '../../shared/liveProvider'
-import { eventIsRedacted } from '../../shared/eventModerationPolicy'
+import { eventIsEditable, eventIsRedacted } from '../../shared/eventModerationPolicy'
 
 /**
  * Landing Page (Meetup-Muster): Zurück-Link, links Titel/Host/Details
@@ -192,12 +192,76 @@ async function share() {
  * zwischen Pool und Silo, den PRODUKT-BILANZ.md ausschließt. Beide rendern
  * `EventDetail`, also trägt sie den Knopf.
  *
- * `?edit=<id>` statt eines eigenen Builder-Pfades: die Verwaltung ist EINE
- * Seite mit Dialog (anders als bei Kursen), und der Parameter öffnet dort genau
- * diesen Termin. Ohne ihn landete „Bearbeiten" in einer Liste, in der man die
- * Zeile erst wiederfinden müsste.
+ * DER DIALOG ÖFFNET HIER (Davids Entscheidung zum ersten F58-Entwurf, der nach
+ * `/dashboard/events?edit=<id>` verlinkte). Ein Link hätte den Termin, den man
+ * gerade vor sich hat, gegen eine Tabelle eingetauscht — geteilt gehört das
+ * FORMULAR (`EventFormModal`, dasselbe wie im Dashboard), nicht der Einstieg.
+ *
+ * WELCHE STATUS HIER VORKOMMEN: nur 'published' und 'cancelled'. Ein Entwurf
+ * trägt kein Leserecht, ein ausgeblendeter Termin auch nicht — beide antworten
+ * auf dieser Route 404. Deshalb gibt es hier kein „Veröffentlichen": der Knopf
+ * könnte nie erscheinen. Der `eventIsEditable`-Guard bleibt trotzdem stehen, er
+ * ist dieselbe pure Regel, die die PATCH-Route durchsetzt.
  */
 const canManage = useCapability('events.manage')
+const confirm = useConfirm()
+const managing = ref(false)
+const editOpen = ref(false)
+
+const canEdit = computed(() => canManage.value && eventIsEditable(event.value.status))
+
+function onSaved(row: EventRow) {
+  event.value = { ...row }
+}
+
+/**
+ * ZURÜCKZIEHEN VERLÄSST DIE SEITE — kein Notbehelf, sondern die ehrliche Folge:
+ * der PATCH entzieht der Row das Leserecht (withoutPublishedRead), ab diesem
+ * Moment antwortet genau diese Seite 404. Wer hier bliebe, sähe eine intakte
+ * Seite, die beim ersten Neuladen verschwindet. Weiter geht es dort, wo
+ * zurückgezogene Termine sichtbar sind: im Dashboard.
+ */
+async function unpublish() {
+  managing.value = true
+  try {
+    await $fetch(`/api/events/${event.value.$id}`, { method: 'PATCH', body: { status: 'draft' } })
+    toast.add({
+      title: t('events.admin.unpublished'),
+      description: t('events.admin.unpublishedHint'),
+      color: 'success',
+    })
+    await navigateTo(localePath('/events'))
+  }
+  catch {
+    toast.add({ title: t('events.admin.actionFailed'), description: t('events.admin.actionFailedHint'), color: 'error' })
+  }
+  finally {
+    managing.value = false
+  }
+}
+
+/**
+ * Absagen lässt die Seite stehen: der Soft-Cancel BEHÄLT das Leserecht, damit
+ * die Zusagenden die Absage sehen ([id].delete.ts). Deshalb hier kein Weggehen,
+ * sondern nur der lokale Status — den Rest erledigt der `cancelled`-Zweig
+ * (durchgestrichener Titel + Alert).
+ */
+async function cancelEvent() {
+  try {
+    const ok = await confirm({
+      title: t('events.admin.confirmCancelTitle'),
+      description: t('events.admin.confirmCancelText', { title: event.value.title }),
+      confirmLabel: t('events.admin.cancel'),
+      action: () => $fetch(`/api/events/${event.value.$id}`, { method: 'DELETE' }),
+    })
+    if (!ok) return
+    event.value = { ...event.value, status: 'cancelled' }
+    toast.add({ title: t('events.admin.cancelled'), description: t('events.admin.cancelledHint'), color: 'success' })
+  }
+  catch {
+    toast.add({ title: t('events.admin.actionFailed'), description: t('events.admin.actionFailedHint'), color: 'error' })
+  }
+}
 
 /** Gäste: geblurte Platzhalter statt echter Teilnehmer */
 const placeholderCount = computed(() => Math.min(event.value.attendeeCount, 8))
@@ -218,17 +282,42 @@ const start = computed(() => new Date(event.value.startAt))
       >
         {{ t('events.detail.back') }}
       </UButton>
-      <UButton
-        v-if="canManage"
-        :to="localePath({ path: '/dashboard/events', query: { edit: event.$id } })"
-        color="neutral"
-        variant="subtle"
-        size="sm"
-        icon="i-ph-pencil-simple"
-        data-testid="event-edit"
-      >
-        {{ t('events.detail.edit') }}
-      </UButton>
+      <div v-if="canManage" class="flex flex-wrap items-center gap-2" data-testid="event-manage-actions">
+        <UButton
+          v-if="canEdit"
+          color="neutral"
+          variant="subtle"
+          size="sm"
+          icon="i-ph-pencil-simple"
+          data-testid="event-edit"
+          @click="() => { editOpen = true }"
+        >
+          {{ t('events.detail.edit') }}
+        </UButton>
+        <UButton
+          v-if="canEdit && event.status === 'published'"
+          color="neutral"
+          variant="ghost"
+          size="sm"
+          icon="i-ph-eye-slash"
+          :loading="managing"
+          data-testid="event-unpublish"
+          @click="unpublish"
+        >
+          {{ t('events.admin.unpublish') }}
+        </UButton>
+        <UButton
+          v-if="event.status !== 'cancelled'"
+          color="error"
+          variant="ghost"
+          size="sm"
+          icon="i-ph-calendar-x"
+          data-testid="event-cancel"
+          @click="cancelEvent"
+        >
+          {{ t('events.admin.cancel') }}
+        </UButton>
+      </div>
     </div>
 
     <UAlert
@@ -483,5 +572,9 @@ const start = computed(() => new Date(event.value.startAt))
         </div>
       </div>
     </div>
+
+    <!-- Dasselbe Formular wie im Dashboard; Titelbild inklusive, weil hier eine
+         Event-Id vorliegt (der Upload braucht sie). -->
+    <EventFormModal v-model:open="editOpen" :event="event" @saved="onSaved" />
   </article>
 </template>

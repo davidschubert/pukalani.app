@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { CourseListResponse } from '../../../shared/types/course'
+import type { CourseListResponse, CourseRow } from '../../../shared/types/course'
 
 definePageMeta({ middleware: ['auth'] })
 
@@ -22,12 +22,25 @@ const { data, status } = await useFetch<CourseListResponse>('/api/courses')
  * `useCapability` statt `useCommunityCapability`: im Silo/Playground gibt es
  * keine Community-Rolle, wohl aber Betreiber mit dem globalen Label.
  *
- * ZWEI Knöpfe, weil sie zwei verschiedene Fragen beantworten — und der zweite
- * ist der wichtigere: ENTWÜRFE stehen nicht in dieser Galerie (sie tragen
- * bewusst keine Read-Permission). Wer gerade einen Kurs angelegt hat, findet
- * ihn hier also nicht wieder; „Verwalten" ist der einzige Weg dorthin.
+ * „Neuer Kurs" ÖFFNET DEN DIALOG HIER (Davids Entscheidung zum ersten
+ * F58-Entwurf, der nach /dashboard/courses?new=1 verlinkte): geteilt gehört der
+ * Mechanismus — dasselbe `CourseFormModal` wie im Dashboard —, nicht der
+ * Einstieg. Danach geht es trotzdem in den Builder, denn ein Kurs ohne
+ * Lektionen ist eine leere Hülle; das ist der Unterschied zu einem Termin, der
+ * nach dem Formular fertig ist.
+ *
+ * „Verwalten" BLEIBT ein Link und beantwortet die andere Frage: ENTWÜRFE
+ * stehen nicht in dieser Galerie (sie tragen bewusst keine Read-Permission),
+ * archivierte Kurse ebenso wenig.
  */
 const canManage = useCapability('courses.manage')
+
+const createOpen = ref(false)
+
+/** Frisch angelegt = leere Hülle: weiter dorthin, wo Lektionen entstehen. */
+function onCreated(row: CourseRow) {
+  void navigateTo(localePath(`/dashboard/courses/${row.$id}`))
+}
 
 const accessColor = (access: string) =>
   access === 'paid' ? 'warning' as const : access === 'members' ? 'info' as const : 'success' as const
@@ -52,10 +65,10 @@ const accessColor = (access: string) =>
           {{ t('courses.list.manage') }}
         </UButton>
         <UButton
-          :to="localePath({ path: '/dashboard/courses', query: { new: '1' } })"
           size="sm"
           icon="i-ph-plus"
           data-testid="courses-create"
+          @click="() => { createOpen = true }"
         >
           {{ t('courses.list.create') }}
         </UButton>
@@ -100,5 +113,7 @@ const accessColor = (access: string) =>
         </p>
       </NuxtLink>
     </div>
+
+    <CourseFormModal v-model:open="createOpen" @created="onCreated" />
   </UContainer>
 </template>

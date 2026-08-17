@@ -100,6 +100,7 @@
       },
       "saved": "Event gespeichert.",
       "savedDraftHint": "Es steht als Entwurf in der Liste und ist für niemanden sichtbar. Veröffentlichen kannst du es über das Menü der Zeile.",
+      "savedLiveHint": "Es steht ab sofort in der Event-Liste, und Gäste können zusagen. Zurückziehen kannst du es auf der Event-Seite.",
       "saveFailed": "Event konnte nicht gespeichert werden.",
       "saveFailedHint": "Deine Eingaben sind nicht verloren — das Formular bleibt offen. Prüf die Verbindung und speichere noch einmal.",
       "published": "Event veröffentlicht.",

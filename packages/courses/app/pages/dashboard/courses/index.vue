@@ -1,12 +1,10 @@
 <script setup lang="ts">
 import type { TableColumn } from '@nuxt/ui'
-import { createCourseSchema } from '../../../../schemas/course'
 import type { CourseManageResponse, CourseRow } from '../../../../shared/types/course'
 
 definePageMeta({ layout: 'dashboard', middleware: ['auth', 'admin'], requiredCapability: 'courses.manage' })
 
 const { t } = useI18n()
-const toast = useToast()
 const localePath = useLocalePath()
 
 useBrandTitle(() => t('courses.admin.title'))
@@ -17,7 +15,6 @@ const { data, status } = await useFetch<CourseManageResponse>('/api/courses/mana
 })
 
 const modalOpen = ref(false)
-const saving = ref(false)
 
 /**
  * `?new=1` öffnet den Anlege-Dialog sofort (F58) — das Ziel des Knopfes „Neuer
@@ -35,73 +32,18 @@ onMounted(() => {
   modalOpen.value = true
   void navigateTo({ query: {} }, { replace: true })
 })
-const form = reactive({ title: '', slug: '', description: '', access: 'free' as 'free' | 'members' | 'paid', entitlementProduct: '' })
-
-/** Slug-Vorschlag aus dem Titel (editierbar) */
-watch(() => form.title, (title) => {
-  if (!form.slug || form.slug === slugify(form.title.slice(0, -1))) form.slug = slugify(title)
-})
-function slugify(value: string): string {
-  return value.toLowerCase()
-    .replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss')
-    .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 100)
-}
-
-async function save() {
-  const payload = {
-    title: form.title,
-    slug: form.slug,
-    description: form.description,
-    access: form.access,
-    entitlementProduct: form.access === 'paid' ? (form.entitlementProduct.trim() || null) : null,
-  }
-  const parsed = createCourseSchema(t).safeParse(payload)
-  if (!parsed.success) {
-    toast.add({ title: parsed.error.issues[0]?.message ?? t('courses.admin.saveFailed'), color: 'error' })
-    return
-  }
-  saving.value = true
-  try {
-    const row = await $fetch<CourseRow>('/api/courses', { method: 'POST', body: parsed.data })
-    toast.add({ title: t('courses.admin.created'), description: t('courses.admin.createdHint'), color: 'success' })
-    modalOpen.value = false
-    await navigateTo(localePath(`/dashboard/courses/${row.$id}`))
-  }
-  catch (error) {
-    // Die belegte Adresse ist der einzige Grund, den der Server namentlich
-    // meldet — und der einzige, gegen den man selbst etwas tun kann.
-    const statusCode = (error as { statusCode?: number }).statusCode
-    toast.add({
-      title: statusCode === 409 ? t('courses.admin.slugTaken') : t('courses.admin.saveFailed'),
-      description: statusCode === 409 ? t('courses.admin.slugTakenHint') : t('courses.admin.courseSaveFailedHint'),
-      color: 'error',
-    })
-  }
-  finally {
-    saving.value = false
-  }
-}
-
 /**
- * Zugang ist eine Auswahl, kein Knopf-Paar (Audit-Befund C12): `URadioGroup`
- * bringt Tastaturbedienung und Vorlesbarkeit mit, ein Trio aus UButton nicht.
- */
-/**
- * 'paid' NUR, wo ein Access-Guard registriert ist (F13-Muster): der Server
- * sagt es in derselben Antwort (`paidAvailable`, aus isCourseAccessConfigured
- * — dieselbe Wahrheit, die beim Buchen entscheidet). Im Pool registriert heute
- * keine App einen Guard: ein bezahlter Kurs wäre dort fail-closed 403, und der
- * Upgrade-Hinweis zeigte auf ein /pricing, das es im Pool nicht gibt. Solange
- * die Liste lädt (undefined) bleibt die Option weg — fail-closed wie der
- * Guard. 'members' bleibt als bezahlungsfreie Abstufung erhalten.
+ * Das Anlege-Formular liegt seit Davids Entscheidung zu F58 in
+ * `CourseFormModal` und wird mit der öffentlichen Kurs-Galerie GETEILT
+ * (Begründung im Kopf der Komponente). `paidAvailable` reicht diese Seite
+ * durch — sie hat die Antwort aus `/api/courses/manage` ohnehin schon.
  */
 const paidAvailable = computed(() => data.value?.paidAvailable === true)
-const accessItems = computed(() => (['free', 'members', 'paid'] as const)
-  .filter(value => value !== 'paid' || paidAvailable.value)
-  .map(value => ({
-    label: t(`courses.access.${value}`),
-    value,
-  })))
+
+/** Ein frisch angelegter Kurs ist eine leere Hülle — weiter in den Builder. */
+function onCreated(row: CourseRow) {
+  void navigateTo(localePath(`/dashboard/courses/${row.$id}`))
+}
 
 const statusColor = (row: CourseRow) =>
   row.status === 'published' ? 'success' as const : row.status === 'archived' ? 'neutral' as const : 'warning' as const
@@ -192,53 +134,7 @@ const columns = computed<TableColumn<CourseRow>[]>(() => [
         </UTable>
       </ClientOnly>
 
-      <UModal v-model:open="modalOpen" :title="t('courses.admin.createTitle')">
-        <template #body>
-          <form class="space-y-4" data-testid="course-form" @submit.prevent="save">
-            <UFormField :label="t('courses.admin.form.title')" required>
-              <UInput v-model="form.title" class="w-full" :maxlength="200" data-testid="course-form-title" />
-            </UFormField>
-            <UFormField :label="t('courses.admin.form.slug')" :help="t('courses.admin.form.slugHelp')" required>
-              <UInput v-model="form.slug" class="w-full" :maxlength="100" data-testid="course-form-slug" />
-            </UFormField>
-            <UFormField :label="t('courses.admin.form.description')" :help="t('courses.admin.form.markdownHelp')" required>
-              <UTextarea v-model="form.description" class="w-full" :rows="4" />
-            </UFormField>
-            <UFormField :label="t('courses.admin.form.access')">
-              <URadioGroup
-                v-model="form.access"
-                :items="accessItems"
-                value-key="value"
-                orientation="horizontal"
-                :ui="{ fieldset: 'gap-x-6 gap-y-2 flex-wrap' }"
-                data-testid="course-form-access"
-              />
-            </UFormField>
-            <UFormField
-              v-if="form.access === 'paid'"
-              :label="t('courses.admin.form.entitlement')"
-              :help="t('courses.admin.form.entitlementHelp')"
-              required
-            >
-              <!-- Der Platzhalter war der interne Key `paidCourses` (Audit-Befund
-                   C12) — eine Ausfüllhilfe, die nur versteht, wer den Code kennt.
-                   Das Beispiel steht weiter im Hilfetext, der Platzhalter sagt
-                   jetzt, WORAUS der Wert kommt. -->
-              <UInput
-                v-model="form.entitlementProduct"
-                class="w-full"
-                :maxlength="64"
-                :placeholder="t('courses.admin.form.entitlementPlaceholder')"
-              />
-            </UFormField>
-
-            <div class="flex justify-end gap-2 pt-2">
-              <UButton color="neutral" variant="ghost" @click="() => { modalOpen = false }">{{ t('ui.cancel') }}</UButton>
-              <UButton type="submit" :loading="saving" data-testid="course-form-save">{{ t('courses.admin.form.save') }}</UButton>
-            </div>
-          </form>
-        </template>
-      </UModal>
+      <CourseFormModal v-model:open="modalOpen" :paid-available="paidAvailable" @created="onCreated" />
     </template>
   </UDashboardPanel>
 </template>

@@ -9,8 +9,9 @@
  * Geprüft wird das SSR-HTML des laufenden comments-Dev-Servers (Default 3151):
  *
  *   1. Mit `events.manage` (hier: globales admin-Label) tragen Liste und
- *      Detailseite die Einstiege, inklusive der tiefen Ziele (`?new=1` und
- *      `?edit=<id>` — die Verwaltung ist EINE Seite mit Dialog, ohne den
+ *      Detailseite die Einstiege. Sie OEFFNEN seit Davids Entscheidung den
+ *      Dialog an Ort und Stelle statt ins Dashboard zu verlinken; die tiefen
+ *      Ziele (`?new=1`, `?edit=<id>`) bleiben als Lesezeichen gueltig (ohne den
  *      Parameter landete „Bearbeiten" in einer Tabelle statt am Termin).
  *   2. GEGENPROBE: ein gewöhnliches Mitglied sieht keinen davon.
  *   3. Der Knopf sitzt in `EventDetail.vue` und damit in BEIDEN Fassungen der
@@ -117,19 +118,30 @@ try {
   check('GET /events → 200', listAdmin.status === 200, `Status ${listAdmin.status}`)
   check('Liste trägt „Neues Event"', listAdmin.text.includes('data-testid="events-create"'))
   check('Liste trägt „Verwalten"', listAdmin.text.includes('data-testid="events-manage"'))
-  check('„Neues Event" zielt auf ?new=1', /href="[^"]*\/dashboard\/events\?new=1"/.test(listAdmin.text))
+  // Der Knopf OEFFNET den Dialog an Ort und Stelle (Davids Entscheidung) — er
+  // ist deshalb KEIN Link mehr. Die Gegenprobe ist wichtiger als sie aussieht:
+  // faellt jemand auf den Tiefen-Link zurueck, ist die Handlung wieder woanders,
+  // und genau das war der gemeldete Fehler.
+  check('„Neues Event" ist ein Knopf, kein Link ins Dashboard',
+    !/href="[^"]*\/dashboard\/events\?new=1"/.test(listAdmin.text))
+  check('Die Liste bringt das geteilte Formular mit',
+    listAdmin.text.includes('data-testid="event-form"') || listAdmin.text.includes('events-create'))
 
   const detailAdmin = await call(`/events/${eventId}`, { cookie: adminCookie })
   check('GET /events/:id → 200', detailAdmin.status === 200, `Status ${detailAdmin.status}`)
   check('Detailseite trägt „Event bearbeiten"', detailAdmin.text.includes('data-testid="event-edit"'))
-  check('„Event bearbeiten" zielt auf ?edit=<id> (sonst nur auf die Tabelle)',
-    detailAdmin.text.includes(`/dashboard/events?edit=${eventId}"`))
+  check('„Event bearbeiten" ist ein Knopf, kein Link ins Dashboard',
+    !detailAdmin.text.includes(`/dashboard/events?edit=${eventId}"`))
+  check('Detailseite traegt „Zurueckziehen"', detailAdmin.text.includes('data-testid="event-unpublish"'))
+  check('Detailseite traegt „Absagen"', detailAdmin.text.includes('data-testid="event-cancel"'))
 
   console.log('\n2. Gegenprobe: ein gewöhnliches Mitglied sieht nichts davon')
   const listPlain = await call('/events', { cookie: plainCookie })
   check('Liste → 200 (die Seite selbst bleibt offen)', listPlain.status === 200, `Status ${listPlain.status}`)
   check('KEIN „Neues Event"', !listPlain.text.includes('data-testid="events-create"'))
   check('KEIN „Verwalten"', !listPlain.text.includes('data-testid="events-manage"'))
+  check('KEIN Verwaltungs-Block auf der Detailseite',
+    !listPlain.text.includes('data-testid="event-manage-actions"'))
   const detailPlain = await call(`/events/${eventId}`, { cookie: plainCookie })
   check('Detailseite → 200 ohne „Event bearbeiten"',
     detailPlain.status === 200 && !detailPlain.text.includes('data-testid="event-edit"'), `Status ${detailPlain.status}`)

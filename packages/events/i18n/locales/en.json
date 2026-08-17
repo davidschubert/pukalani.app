@@ -100,6 +100,7 @@
       },
       "saved": "Event saved.",
       "savedDraftHint": "It sits in the list as a draft and nobody can see it yet. Publish it from the row menu.",
+      "savedLiveHint": "It is in the event list from now on, and guests can RSVP. You can unpublish it from the event page.",
       "saveFailed": "Could not save the event.",
       "saveFailedHint": "Nothing you typed is lost — the form stays open. Check your connection and save again.",
       "published": "Event published.",
