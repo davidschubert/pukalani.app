@@ -1,9 +1,18 @@
 # G0 — Produktvertrag (Entscheidungsvorlage für den Check-in)
 
-> **Status:** Entwurf (2026-07-24) für den gemeinsamen G0-Check-in aus
-> [SAAS-ROADMAP.md](../archiv/SAAS-ROADMAP.md). **Kein Bau** — reine Entscheidungen.
-> Nach Abnahme startet G1 (Tenant-Autorisierung + Row-Permission-Naht +
-> Isolationsbeweis). Querbezug: [PUKALANI-LANDINGPAGE.md](../archiv/PUKALANI-LANDINGPAGE.md)
+> **Status:** **Abgenommen** — die Entscheidungen unten sind getroffen (David,
+> 2026-07-24) und gebaut; G1 (Tenant-Autorisierung + Row-Permission-Naht +
+> Isolationsbeweis) ist durch. Das Dokument ist damit **der Produktvertrag**, nicht
+> mehr die Entscheidungsvorlage, die es ursprünglich war.
+>
+> Die zitierten Check-in-Entscheidungen bleiben im **Wortlaut vom 2026-07-24**
+> stehen — sie sind ein Protokoll. Wo die Umsetzung später abgewichen ist, steht
+> ein datierter Nachtrag daneben (Hosts, Workspace-Wegfall). Für den heutigen
+> Betriebsstand gilt die **CLAUDE.md**, für die Architektur
+> [CONCEPT.md A15](../CONCEPT.md).
+>
+> Herkunft: [SAAS-ROADMAP.md](../archiv/SAAS-ROADMAP.md). Querbezug:
+> [PUKALANI-LANDINGPAGE.md](../archiv/PUKALANI-LANDINGPAGE.md)
 > §2.4 (Claim-Gates), [HORIZONT-3-POOL-SILO-BLUEPRINT.md](HORIZONT-3-POOL-SILO-BLUEPRINT.md).
 >
 > Dieses Dokument liefert die vier G0-Artefakte als **Vorschlag mit Empfehlung**.
@@ -30,9 +39,10 @@ Verbindliche Trennung nach Zielgruppe + Vertrauensgrenze (Roadmap §A). Drei
 Oberflächen, nie vermischt:
 
 ### 1.1 Kundenbereich / Control Center
-*Zielgruppe:* Owner + Kunden-Admins. *Wo:* **`my.pukalani.app`** (umbenannt am
-2026-07-25, vorher `app.pukalani.app` — der Altname ist am 2026-07-27 entfernt).
-*Zweck:* das Geschäftliche — Sites, Abrechnung, Team, Nutzung.
+*Zielgruppe:* Owner + Kunden-Admins. *Wo:* **`account.pukalani.app`** (AH-1,
+2026-08-11 — davor `my.pukalani.app`, davor `app.pukalani.app`; `my.` und `start.`
+antworten 301, weil sie beworben wurden, `app.` ist entfernt).
+*Zweck:* das Geschäftliche — Communities, Abrechnung, Team, Nutzung.
 
 > **Stand 2026-08-01, damit der Baum unten nicht wie gebaut aussieht:** der
 > G-Schritt „Migration von `/workspace`" ist **erledigt, aber anders als hier
@@ -41,9 +51,13 @@ Oberflächen, nie vermischt:
 > selbst. Damit ist auch `/workspace` weg, und die Punkte „Plan & Rechnungen",
 > „Team" und „Branding" leben seither **im Dashboard der jeweiligen Community**
 > (`/dashboard/settings/subscription`, `/dashboard/members`,
-> `/dashboard/branding`) statt in einer Ebene darüber. `my.pukalani.app` trägt
-> heute nur den Trichter (`/start`); eine **Übersicht „meine Communities" gibt es
-> dort noch nicht** (OPEN-ITEMS, M13-Rest).
+> `/dashboard/branding`) statt in einer Ebene darüber.
+>
+> **Nachtrag 2026-08-16:** Der Kundenbereich heißt seit AH-1 (2026-08-11)
+> `account.pukalani.app`, und die **Übersicht „meine Communities" gibt es dort
+> inzwischen** ([communities.vue](../../packages/onboarding/app/pages/communities.vue)):
+> `/` zeigt sie, wer keine Community hat, wird von ihr in den Wizard geschickt.
+> Der Satz „trägt heute nur den Trichter (`/start`)" galt bis dahin.
 
 ```
 Kundenbereich (Control Center)
@@ -368,3 +382,11 @@ im Kern abgeschlossen und **G1 kann starten**:
 Der Kundenbereich-Umzug nach `app.pukalani.app` ist ein eigener Infra-Schritt
 (neuer ploi-Host + Route), der parallel zu G1 vorbereitet, aber erst mit dem
 Kaufpfad (G3) scharf geschaltet wird.
+
+> **Erledigt, und anders gelaufen (Nachtrag 2026-08-16):** Der Umzug brauchte
+> weder ploi-Site noch DNS-Eintrag — das Wildcard `*.pukalani.app` zeigt bereits
+> auf die Platform-App, der Kundenbereich ist also nur ein weiterer
+> **Kontroll-Host** derselben App. Der Name wanderte zweimal: `app.` →
+> `my.` (2026-07-25) → **`account.`** (AH-1, 2026-08-11). `app.` ist entfernt,
+> `my.` und `start.` antworten 301, weil sie beworben wurden und
+> Einladungs-Mails ihren `?code=` sieben Tage tragen.

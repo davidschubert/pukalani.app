@@ -1,5 +1,14 @@
 # Horizont 3 — Pool + Silo: Zwei-Tier-Mandantentrennung (Blueprint)
 
+> **Stand 2026-08-16 — dieser Blueprint ist AUSGEFÜHRT.** Pool und Silo laufen
+> seit Monaten; was hier als Plan steht (Nähte, Spike, Meilensteine), ist gebaut.
+> Zwei Namen sind seither gewandert und im Text unten noch alt: die Scope-**Spalte**
+> heißt seit E8-3 **`communityId`** (der Kontext-Wert blieb `tenant.tenantId`), und
+> die Tabelle `tenants` heißt seit control-029 `communities`.
+> Wie es heute wirklich aussieht: [CONCEPT.md A15](../CONCEPT.md) — dort steht die
+> Datentür `tenantDb`, die es zum Zeitpunkt dieses Dokuments noch nicht gab.
+> Der Text darunter bleibt als **Begründung** stehen, nicht als Anleitung.
+
 Stand: 2026-07-20. **Entscheidung getroffen (David):** Pukalani fährt Horizont 3 als
 **zweistufiges Mandanten-Modell** — nicht „entweder/oder", sondern beides:
 

@@ -657,7 +657,9 @@ in ihrer Datei eine Regel steht, sondern weil sie im Themes-Layer liegt.
 > Aussage der Matrix: ein Layer darf eine Oberfläche haben, ohne Schema-Eigentümer zu
 > sein — wer das „nachrüstet", bricht die Grenze.
 
-**Durchsetzung — zweistufig** (ausführlich: [MODERATION-AND-LAYER-BOUNDARIES.md](referenz/MODERATION-AND-LAYER-BOUNDARIES.md)):
+**Durchsetzung — dreistufig** (Stufen 1–2 ausführlich:
+[MODERATION-AND-LAYER-BOUNDARIES.md](referenz/MODERATION-AND-LAYER-BOUNDARIES.md);
+Stufe 3 kam 2026-07-27 dazu und steht dort noch nicht):
 
 1. **Architektonisch (primär):** Cross-Layer-Kopplung läuft heute implizit über Auto-Import
    bzw. String (`tableId: 'comments'`). Neue Abhängigkeiten werden als **explizite, typisierte
