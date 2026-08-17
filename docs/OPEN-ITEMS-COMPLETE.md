@@ -337,6 +337,49 @@ BEWEIS umbringen — `waitForMembership` pollt genau die Route, die AU1 gedeckel
 hat, 45-mal im Sekundentakt; ohne frische IP je Poll hätte der Beweis seine
 eigene Drossel gemessen und „die Rolle kommt nicht an" gemeldet.
 
+### Audit-Runde 5 — die ungeprüften Layer (billing/messages/events/courses/media/pages/tickets/analytics) ✅ 2026-08-16
+
+Der Audit vom 2026-08-15 (AU1–AU3) deckte nur posts/comments/onboarding/
+control/system/core ab. Runde 5 (drei read-only audit-worker) fuhr die
+sensibelsten Rest-Layer. **Ergebnis: die Fläche ist sehr solide** — keine
+Vertraulichkeits- oder Geld-Korrektheits-Lücke. Insbesondere PASS:
+Privatnachrichten (Nicht-Teilnehmer sperren vor jedem `get`, Blockieren
+fail-closed + bidirektional, PN im GDPR-Export/Löschung, Moderation sieht nur
+den gemeldeten Ausschnitt), Stripe-Webhook (Signatur/Idempotenz/transiente-
+Fehler-werfen, M13/F49-Sperrlogik, Keys AES-verschlüsselt), Datentür + actor
+in events/courses/media, Upload-Härtung (Magic-Bytes/Größe/fileSecurity),
+Event-Ticket-Kapazität (atomarer increment, overbook-safe), pages-CMS
+(kein Draft-Leak, Slug tenant-relativ), analytics (kein Cross-Tenant, keine
+PII/Keys).
+
+**Zwei verifizierte Befunde behoben** (beide etablierte Klassen): (1)
+**Drossel-Lücken** — RSVP, Event-Score, Event-Cover, Kurs-Einschreibung,
+Lektions-Abschluss, `billing/checkout`+`portal`, `tickets/files` standen als
+einzige ihrer Art NICHT in `WRITE_LIMITED` (AU2-Klasse). Nachgetragen mit
+passenden Deckeln (Content 60/min, Uploads 30/min wie media, checkout eng bei
+10 weil es zwei Stripe-Objekte je Ruf anlegt — besonders relevant, sobald A2
+live ist). Der Routen-Test `rateLimitRoutes.test.ts` nagelt sie fest (5→8
+Fälle). (2) **courses GDPR-Delete verschluckte List-Fehler** — `.catch(() =>
+[])` auf lesson_progress/enrollments/authored ließ bei transientem Fehler 0
+löschen, und `deleteUserCompletely` (gated auf Voll-Erfolg) lief danach in
+`users.delete` → verwaiste Verhaltens-Zeilen eines gelöschten Kontos. Strikt
+gemacht (Muster events); die wirkungslose Swallow im Export-Pfad gleich mit.
+
+**Ein Fehlalarm entschärft:** courses gibt veröffentlichten Kursen
+`read(Role.users())` statt `read(label:<communityId>)` wie events/media (C18).
+Verifiziert: es gibt KEINE Realtime/Direktzugriffe auf Kurs-Rows — sie laufen
+immer durch die tür-gescopte list/get, die den Mandanten belegt. Das
+`read(users)` ist nur ein Publikums-Gate (eingeloggt vs. Gast), bewusst
+dokumentiert (Katalog soll VOR Beitritt sichtbar sein). Kein Leck, kein Fix.
+
+**Gelernt:** Ein Audit unmittelbar VOR dem Geld-Go-Live (A2) zahlt sich am
+billing-Layer aus — die checkout-Drossel-Lücke wäre erst mit echtem Geld
+schmerzhaft geworden (unbegrenzte Stripe-Customer-Rows). Und: die
+Verifikation hat wieder einen Agenten-Befund als Fehlalarm entlarvt
+(courses read(users)) — ohne die Frage „gibt es überhaupt einen
+Zugriffspfad, der die Tür umgeht?" hätte ein „Fix" den dokumentierten
+Katalog-Vor-Beitritt-Sinn zerstört.
+
 ### AU4 — Schema-Paritäts-Wächter prüft jetzt Soll pro Instanz über alle Layer ✅ 2026-08-16
 
 `scripts/ops/verify-schema-parity.mjs` prüfte bisher NUR `system`-Tabellen
