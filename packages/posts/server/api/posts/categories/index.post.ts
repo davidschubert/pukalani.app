@@ -1,6 +1,6 @@
 import { Query } from 'node-appwrite'
 import { categorySchema } from '../../../../schemas/postCategory'
-import { POST_CATEGORIES_TABLE, type PostCategory } from '../../../../shared/types/post'
+import { MAX_CATEGORY_SORT_ORDER, POST_CATEGORIES_TABLE, type PostCategory } from '../../../../shared/types/post'
 
 /**
  * Kategorie anlegen — Struktur ist Admin-Sache (Davids Konzept Teil 1:
@@ -45,11 +45,25 @@ export default defineEventHandler(async (event) => {
     throw createError({ status: 409, statusText: 'Slug already in use', data: { code: 'slug_taken' } })
   }
 
+  /**
+   * OHNE ANGABE HINTEN ANHÄNGEN, nicht auf 0 setzen.
+   *
+   * Seit die Reihenfolge gezogen wird (`PATCH /categories/order`), gibt das
+   * Formular keine Zahl mehr mit — und `?? 0` hieße: jede neue Kategorie
+   * springt an die SPITZE der Liste, vor die Ordnung, die der Owner gerade von
+   * Hand gelegt hat. Neues gehört ans Ende; von dort zieht man es in zwei
+   * Sekunden dorthin, wo es hin soll.
+   *
+   * Eine Zahl im Body gewinnt weiterhin (API-Verträglichkeit); die Liste
+   * kostet eine Abfrage, und Kategorien werden selten angelegt.
+   */
+  const sortOrder = body.sortOrder ?? await nextCategorySortOrder(db)
+
   const row = await db.create<PostCategory>(POST_CATEGORIES_TABLE, {
     name: body.name,
     slug: body.slug,
     description: body.description ?? '',
-    sortOrder: body.sortOrder ?? 0,
+    sortOrder,
     active: body.active ?? true,
   }, {
     // Die Struktur ist so öffentlich wie die Inhalte darin: 'public' heißt in
@@ -63,3 +77,11 @@ export default defineEventHandler(async (event) => {
   setResponseStatus(event, 201)
   return row
 })
+
+/** Die nächste freie Position: hinter der letzten vergebenen (0, wenn es noch
+ *  keine gibt), gedeckelt auf den Wertebereich der Spalte. */
+async function nextCategorySortOrder(db: ReturnType<typeof tenantDb>): Promise<number> {
+  const existing = await listCategories(db).catch(() => [] as PostCategory[])
+  const highest = existing.reduce((max, category) => Math.max(max, category.sortOrder), -1)
+  return Math.min(highest + 1, MAX_CATEGORY_SORT_ORDER)
+}

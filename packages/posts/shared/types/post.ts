@@ -2,6 +2,7 @@ import type { Models } from 'node-appwrite'
 import type { BadgeFacts, BadgeGroup } from '../badges'
 import type { ReactionCount, ReactionKey, ReactionSummary } from '../../../core/shared/reactions'
 import type { TrustLevelProgress } from '../trustLevels'
+import type { CategoryOrderEntry } from '../categoryOrder'
 
 export const POSTS_TABLE = 'community_posts'
 export const POLL_VOTES_TABLE = 'poll_votes'
@@ -76,6 +77,24 @@ export const MAX_POLL_OPTIONS = 6
 export const MAX_POLL_OPTION_LENGTH = 100
 export const MAX_POST_BODY = 10_000
 export const MAX_POST_TITLE = 200
+
+/**
+ * Obergrenze der Kategorien je Community.
+ *
+ * 100 ist keine Produkt-Entscheidung, sondern die Grenze von `Query.equal`
+ * (100 Werte) und die Zahl der Count-Abfragen, die die Kategorien-Ansicht
+ * höchstens auslöst. Eine Community mit mehr als hundert Kategorien hat kein
+ * Struktur-, sondern ein Ordnungsproblem — und würde es hier bemerken.
+ *
+ * Steht hier und nicht mehr in `server/utils/discussions.ts`, seit auch das
+ * Zod-Schema der Reihenfolge sie braucht: ein Schema darf nicht in den
+ * Server-Unterbau greifen.
+ */
+export const MAX_CATEGORIES = 100
+
+/** Obergrenze der Positionszahl — die Reihenfolge ist eine Handvoll
+ *  Kategorien, keine Sortier-Engine. */
+export const MAX_CATEGORY_SORT_ORDER = 9999
 
 export const MAX_CATEGORY_NAME = 80
 export const MAX_CATEGORY_SLUG = 64
@@ -384,6 +403,17 @@ export interface CategoryWithCount {
 
 export interface CategoryListResponse {
   rows: CategoryWithCount[]
+}
+
+/**
+ * Antwort auf das Speichern der Reihenfolge: die GANZE Ordnung, nicht nur die
+ * geschriebenen Zeilen. Die Oberfläche übernimmt daraus ihren Stand (Muster
+ * `PATCH /api/pages/navigation`), statt ihn sich aus dem eigenen Entwurf
+ * zusammenzureimen — dann steht dort auch nach einem Zug, den der Server
+ * anders vergeben hat, dasselbe wie in der Datenbank.
+ */
+export interface CategoryOrderResponse {
+  order: CategoryOrderEntry[]
 }
 
 /**

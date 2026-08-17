@@ -29,7 +29,7 @@ Protokoll in [`docs/archiv/PRODUKT-BILANZ-2026-07-27.md`](../archiv/PRODUKT-BILA
 | **messages** | ✅ | comments | 0/13 über `tenantDb` | ✅ | personal |
 | **moderation** | ✅ | _template, comments | 3/4 über `tenantDb` | ✅ | — |
 | **pages** | ✅ | control, portfolio | 7/11 über `tenantDb` | ✅ | — |
-| **posts** | ✅ | _template, comments | 25/29 über `tenantDb` | ✅ | personal |
+| **posts** | ✅ | _template, comments | 26/30 über `tenantDb` | ✅ | personal |
 | **tickets** | — | control | 0/21 über `tenantDb` · 18 roh | — | — |
 
 Lesehilfe: „Datentür" zählt die Route-Dateien, die `tenantDb(event)` nutzen —

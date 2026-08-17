@@ -199,7 +199,9 @@
       "categorySlugReserved": "This address is reserved.",
       "categoryDescriptionMax": "Description is too long.",
       "reactionInvalid": "That reaction does not exist.",
-      "reactionTargetInvalid": "You cannot react to this content."
+      "reactionTargetInvalid": "You cannot react to this content.",
+      "categoryOrderRequired": "There are no categories to sort.",
+      "categoryOrderMax": "Too many categories at once."
     },
     "discussions": {
       "title": "Discussions",
@@ -424,8 +426,6 @@
       "slugLocked": "The address is fixed since the category was created.",
       "descriptionLabel": "Description",
       "descriptionPlaceholder": "One sentence about this category (optional)",
-      "sortOrder": "Order",
-      "sortOrderHint": "Lower numbers come first.",
       "active": "Visible",
       "activeHint": "Retired categories take no new topics. Existing ones stay readable.",
       "col": {
@@ -453,7 +453,16 @@
       "saveFailed": "Category could not be saved.",
       "saveFailedHint": "Your input is still in the form. Please try again.",
       "deleteFailed": "Category could not be deleted.",
-      "deleteFailedHint": "Nothing changed. Reload the page and try again."
+      "deleteFailedHint": "Nothing changed. Reload the page and try again.",
+      "dragHandle": "Drag to reorder",
+      "moveUp": "Move up one position",
+      "moveDown": "Move down one position",
+      "orderSaving": "Saving order …",
+      "orderSaved": "Order saved",
+      "orderFilteredHint": "You can’t reorder while searching. Clear the search field to sort.",
+      "orderFailed": "Could not save the order.",
+      "orderFailedHint": "The list has been reloaded. Please try again.",
+      "orderStaleHint": "The categories changed in the meantime. The list has been reloaded — please sort again."
     },
     "nav": {
       "categories": "Categories",

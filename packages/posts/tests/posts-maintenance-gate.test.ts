@@ -55,11 +55,16 @@ const MODERATION_ROUTES = new Set(['[id]/hide.post.ts', '[id]/restore.post.ts', 
  * Die ZUSAGE dieses Tests bleibt damit unangetastet — sie lautet „jeder
  * MITGLIEDER-Schreibweg prüft den Schalter", und die Themen-Anlage
  * (index.post.ts) tut das weiterhin.
+ *
+ * `order.patch.ts` (die gezogene Reihenfolge) kam später dazu und gehört
+ * derselben Familie an: hinter `posts.manage`, `actor: 'operator'`, und was
+ * sie schreibt, ist die Struktur — nicht der Inhalt darin.
  */
 const CATEGORY_ADMIN_ROUTES = new Set([
   'categories/index.post.ts',
   'categories/[id].patch.ts',
   'categories/[id].delete.ts',
+  'categories/order.patch.ts',
 ])
 
 /**

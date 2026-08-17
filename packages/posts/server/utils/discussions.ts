@@ -2,6 +2,7 @@ import { Query } from 'node-appwrite'
 import { topicActivityAt } from '../../shared/discussionActivity'
 import { discussionTopicPath, topicSlug } from '../../shared/discussionUrl'
 import {
+  MAX_CATEGORIES,
   POST_CATEGORIES_TABLE,
   POSTS_TABLE,
   type CommunityPost,
@@ -24,16 +25,6 @@ import {
  *     Beitritt — Entscheidungen, die dort getroffen gehören, wo man weiß, wer
  *     handelt.
  */
-
-/**
- * Obergrenze der Kategorien je Community.
- *
- * 100 ist keine Produkt-Entscheidung, sondern die Grenze von `Query.equal`
- * (100 Werte) und die Zahl der Count-Abfragen, die die Kategorien-Ansicht
- * höchstens auslöst. Eine Community mit mehr als hundert Kategorien hat kein
- * Struktur-, sondern ein Ordnungsproblem — und würde es hier bemerken.
- */
-export const MAX_CATEGORIES = 100
 
 /**
  * Die gewählte Kategorie prüfen und ihre Row-Id zurückgeben ('' = keine).

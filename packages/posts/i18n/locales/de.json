@@ -199,7 +199,9 @@
       "categorySlugReserved": "Diese Adresse ist reserviert.",
       "categoryDescriptionMax": "Beschreibung ist zu lang.",
       "reactionInvalid": "Diese Reaktion gibt es nicht.",
-      "reactionTargetInvalid": "Auf diesen Inhalt kann nicht reagiert werden."
+      "reactionTargetInvalid": "Auf diesen Inhalt kann nicht reagiert werden.",
+      "categoryOrderRequired": "Es gibt keine Kategorien zu sortieren.",
+      "categoryOrderMax": "Zu viele Kategorien auf einmal."
     },
     "discussions": {
       "title": "Diskussionen",
@@ -424,8 +426,6 @@
       "slugLocked": "Die Adresse steht fest, seit die Kategorie angelegt wurde.",
       "descriptionLabel": "Beschreibung",
       "descriptionPlaceholder": "Ein Satz, worum es hier geht (optional)",
-      "sortOrder": "Reihenfolge",
-      "sortOrderHint": "Kleinere Zahl steht weiter oben.",
       "active": "Sichtbar",
       "activeHint": "Stillgelegte Kategorien nehmen keine neuen Themen mehr auf. Bestehende bleiben lesbar.",
       "col": {
@@ -453,7 +453,16 @@
       "saveFailed": "Kategorie konnte nicht gespeichert werden.",
       "saveFailedHint": "Deine Eingaben stehen noch im Formular. Versuch es noch einmal.",
       "deleteFailed": "Kategorie konnte nicht gelöscht werden.",
-      "deleteFailedHint": "An der Kategorie hat sich nichts geändert. Lade die Seite neu und versuch es noch einmal."
+      "deleteFailedHint": "An der Kategorie hat sich nichts geändert. Lade die Seite neu und versuch es noch einmal.",
+      "dragHandle": "Zum Sortieren ziehen",
+      "moveUp": "Eine Position nach oben",
+      "moveDown": "Eine Position nach unten",
+      "orderSaving": "Reihenfolge wird gespeichert …",
+      "orderSaved": "Reihenfolge gespeichert",
+      "orderFilteredHint": "Solange du suchst, lässt sich die Reihenfolge nicht ändern. Leer das Suchfeld, um zu sortieren.",
+      "orderFailed": "Reihenfolge konnte nicht gespeichert werden.",
+      "orderFailedHint": "Die Liste wurde neu geladen. Versuch es noch einmal.",
+      "orderStaleHint": "Die Kategorien haben sich inzwischen geändert. Die Liste wurde neu geladen — sortier noch einmal."
     },
     "nav": {
       "categories": "Kategorien",

@@ -1,5 +1,11 @@
 import { z } from 'zod'
-import { MAX_CATEGORY_DESCRIPTION, MAX_CATEGORY_NAME, MAX_CATEGORY_SLUG } from '../shared/types/post'
+import {
+  MAX_CATEGORIES,
+  MAX_CATEGORY_DESCRIPTION,
+  MAX_CATEGORY_NAME,
+  MAX_CATEGORY_SLUG,
+  MAX_CATEGORY_SORT_ORDER,
+} from '../shared/types/post'
 
 /**
  * Kategorien der Discussions (F1 Stufe 1). Factory-Muster wie alle Schemas des
@@ -42,8 +48,9 @@ const descriptionField = (t: TranslateFn) => z.string().trim()
   .max(MAX_CATEGORY_DESCRIPTION, t('posts.validation.categoryDescriptionMax'))
   .optional()
 
-// 0–9999: die Reihenfolge ist eine Handvoll Kategorien, keine Sortier-Engine.
-const sortOrderField = () => z.number().int().min(0).max(9999).optional()
+// Die Reihenfolge kommt seit dem Ziehen aus `PATCH /categories/order`; das
+// Feld bleibt hier für Aufrufer, die eine Position ausdrücklich mitgeben.
+const sortOrderField = () => z.number().int().min(0).max(MAX_CATEGORY_SORT_ORDER).optional()
 
 export function createCategorySchema(t: TranslateFn = identity) {
   return z.object({
@@ -72,6 +79,26 @@ export function createCategoryEditSchema(t: TranslateFn = identity) {
   })
 }
 
+/**
+ * Die Reihenfolge speichern: die VOLLSTÄNDIGE Liste der Kategorie-Ids, von
+ * oben nach unten.
+ *
+ * Nur Ids — bewusst keine Zahlen vom Aufrufer: die Positionen rechnet der
+ * Server (`planCategoryOrder`), sonst gäbe es zwei Stellen, an denen eine
+ * Reihenfolge entsteht, und die Oberfläche könnte Lücken oder Doppelungen
+ * festschreiben. `min(1)` statt `min(0)`: eine leere Liste wäre entweder ein
+ * Fehler der Oberfläche oder eine Community ohne Kategorien — in beiden
+ * Fällen gibt es nichts zu sortieren.
+ */
+export function createCategoryOrderSchema(t: TranslateFn = identity) {
+  return z.object({
+    ids: z.array(z.string().trim().min(1))
+      .min(1, t('posts.validation.categoryOrderRequired'))
+      .max(MAX_CATEGORIES, t('posts.validation.categoryOrderMax')),
+  })
+}
+
 // Server-seitige Instanzen (Fehlertexte = Keys; die UI validiert mit t())
 export const categorySchema = createCategorySchema()
 export const categoryEditSchema = createCategoryEditSchema()
+export const categoryOrderSchema = createCategoryOrderSchema()
