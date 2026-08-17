@@ -214,7 +214,7 @@ schwächeren, außer wo bewusst getrennt):
 | **owner** | „darf alles auf der Site, inkl. Team & Übergabe" | wie admin **+** Owner-Transfer, Site löschen |
 | **admin** | „verwaltet Site, Inhalte, Design & Team; keine Abrechnung" | `dashboard.access`, `pages.manage`, `media.manage`, `events.manage`, `courses.manage`, `activity.manage`, `comments.moderate`, `reports.moderate`, `posts.moderate` **+ Team** (Mitglieder einladen/blockieren, Rollen bis `admin` vergeben), **+ Branding/Themes** |
 | **moderator** | „bearbeitet Meldungen & blendet Kommentare/Beiträge aus" | `dashboard.access`, `comments.moderate`, `reports.moderate`, `posts.moderate` |
-| **editor** | „schreibt & pflegt Seiten und Beiträge; keine Moderation, kein Design" | `dashboard.access`, `pages.manage`, `posts.write`\*, `events.manage`\*, `media.manage` — **kein** `*.moderate`, **kein** Branding, **kein** Team |
+| **editor** | „schreibt & pflegt Seiten, Beiträge, Termine und Kurse; keine Moderation, kein Design" | `dashboard.access`, `pages.manage`, `posts.write`\*, `events.manage`\*, `courses.manage`\*, `media.manage` — **kein** `*.moderate`, **kein** Branding, **kein** Team |
 | **viewer** | „sieht Inhalte und darf kommentieren" | `dashboard.access` (nur lesend) + normales Kommentieren als eingeloggtes Mitglied — **keine** Verwaltungs-Caps |
 
 \* **Neue Capabilities nötig:** das heutige `authz.ts` kennt nur `*.manage`/

@@ -112,9 +112,9 @@ Stufe enthält die darunter — außer beim Moderator, der bewusst **kein** Auto
 | Rolle | Capabilities (zusätzlich zur Stufe darunter) |
 |---|---|
 | `viewer` | `dashboard.access`, `members.invite` |
-| `editor` | + `posts.write`, `pages.manage`, `media.manage`, `events.manage`, `messages.write` |
+| `editor` | + `posts.write`, `pages.manage`, `media.manage`, `events.manage`, `courses.manage`, `messages.write` |
 | `moderator` | (auf `viewer`, **nicht** auf `editor`) + `comments.moderate`, `reports.moderate`, `posts.moderate`, `events.moderate`, `posts.curate`, `posts.arrange`, `messages.write` |
-| `admin` | `editor` ∪ `moderator` + `posts.manage`, `posts.revise`, `courses.manage`, `activity.manage`, `branding.manage`, `team.manage` |
+| `admin` | `editor` ∪ `moderator` + `posts.manage`, `posts.revise`, `activity.manage`, `branding.manage`, `team.manage` |
 | `owner` | + `community.transfer`, `community.delete`, `community.billing`, `community.domain`, `community.embed`, `community.analytics`, `community.export`, `posts.appoint`, `messages.manage` |
 
 > Der `moderator` erbt vom `viewer`, nicht vom `editor` — er urteilt über fremde

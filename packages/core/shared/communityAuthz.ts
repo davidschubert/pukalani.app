@@ -53,13 +53,30 @@ const VIEWER: readonly Capability[] = [
   'members.invite',
 ]
 
-/** Editor: verfasst Inhalte (Beiträge, Seiten, Events, Medien) — moderiert NICHT. */
+/** Editor: verfasst Inhalte (Beiträge, Seiten, Events, Kurse, Medien) — moderiert NICHT. */
 const EDITOR: readonly Capability[] = [
   ...VIEWER,
   'posts.write',
   'pages.manage',
   'media.manage',
   'events.manage',
+  /**
+   * KURSE SIND INHALT (Davids Entscheidung 2026-08-17, F58-Nachtrag).
+   *
+   * Sie stand bis hierher im ADMIN-Block, zwischen `branding.manage` und
+   * `team.manage` — also bei den VERWALTUNGS-Rechten. Damit durfte ein
+   * Redakteur Termine, Seiten, Medien und Beiträge anlegen, aber keinen Kurs;
+   * eine Asymmetrie, die niemand entschieden hatte und die sich von außen
+   * exakt wie ein Fehler anfühlt („ich habe doch die richtige Rolle").
+   * Aufgefallen auf freelancer.supply: Menüpunkt „Events" da, „Kurse" nicht.
+   *
+   * Ein Kurs ist verfasster Inhalt wie ein Termin — wer das eine darf, darf
+   * das andere. MODERIERT wird er weiterhin nicht: eine eigene Kurs-Moderation
+   * gibt es nicht, und der Moderator bekommt die Fähigkeit ausdrücklich nicht
+   * (Editor und Moderator bleiben Geschwister). Admin und Owner erben sie
+   * unverändert über EDITOR.
+   */
+  'courses.manage',
   /**
    * Private Nachrichten eröffnen (2026-08-05, PN-Konzept § 2.4).
    *
@@ -136,7 +153,9 @@ const ADMIN: readonly Capability[] = [
      * mindestens so viel dürfen wie die Stufe 4, die sein Owner ernennt.
      */
     'posts.revise',
-    'courses.manage',
+    // `courses.manage` stand hier bis zum 2026-08-17 — sie ist jetzt im
+    // EDITOR-Block (Kurse sind Inhalt, nicht Verwaltung) und wird von dort
+    // geerbt. Die Begründung steht dort.
     'activity.manage',
     'branding.manage',
     'team.manage',

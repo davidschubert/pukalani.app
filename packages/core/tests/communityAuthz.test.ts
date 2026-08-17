@@ -99,6 +99,11 @@ describe('Rollen-Trennung (die harten Grenzen)', () => {
   it('editor verfasst, moderiert aber NICHT', () => {
     expect(communityRoleHasCapability('editor', 'posts.write')).toBe(true)
     expect(communityRoleHasCapability('editor', 'pages.manage')).toBe(true)
+    // Kurse sind Inhalt wie Termine (Davids Entscheidung 2026-08-17): wer das
+    // eine verfassen darf, darf das andere. Bis dahin stand courses.manage im
+    // ADMIN-Block, und ein Redakteur sah den Menüpunkt „Kurse" nicht.
+    expect(communityRoleHasCapability('editor', 'events.manage')).toBe(true)
+    expect(communityRoleHasCapability('editor', 'courses.manage')).toBe(true)
     const forbidden: Capability[] = [
       'comments.moderate', 'reports.moderate', 'posts.moderate',
       // F1: die Kategorien-STRUKTUR gehört dem Admin — ein Editor verfasst
@@ -119,6 +124,10 @@ describe('Rollen-Trennung (die harten Grenzen)', () => {
       // Inhalte, der Rahmen ist eine Entscheidung des Admins/Owners.
       'posts.write', 'posts.manage', 'pages.manage', 'branding.manage', 'team.manage',
       'billing.manage', 'community.delete',
+      // Der Umzug von courses.manage (2026-08-17) darf die Geschwister-Regel
+      // nicht aufweichen: Kurse verfassen ist Redaktion, nicht Moderation —
+      // sonst wäre `editor ⊄ moderator` nur noch zufällig wahr.
+      'events.manage', 'courses.manage',
     ]
     for (const cap of forbidden) expect(communityRoleHasCapability('moderator', cap)).toBe(false)
   })
