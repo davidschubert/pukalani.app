@@ -337,6 +337,35 @@ BEWEIS umbringen — `waitForMembership` pollt genau die Route, die AU1 gedeckel
 hat, 45-mal im Sekundentakt; ohne frische IP je Poll hätte der Beweis seine
 eigene Drossel gemessen und „die Rolle kommt nicht an" gemeldet.
 
+### Audit-Runde 6 — die letzten Layer (admin/moderation/themes/feedback/domains): Produkt vollständig geauditet ✅ 2026-08-16
+
+Zwei read-only audit-worker über die restlichen sicherheitsrelevanten Layer —
+**damit ist das gesamte Produkt einmal systematisch durchgeaudited** (AU1–3 am
+2026-08-15, Runde 5 + 6 am 2026-08-16). Ergebnis dieser Runde: **keine zu
+behebenden Defekte**. Details + PASS-Listen: [AUDIT-2026-08-16.md](archiv/audits/AUDIT-2026-08-16.md)
+Schnitte D+E.
+
+Die höchste Rechte-Fläche (Betreiber-Konsole) ist sauber: alle 40 admin-Routen
+gegatet, `requirePermission` server-seitig label-only (kein Site-Owner erreicht
+eine admin-Daten-API — selbst verifiziert), Rollen-Route ohne
+Privilege-Escalation (`actorCaps ⊇ role.caps`, nur admin/moderator zuweisbar,
+kein Selbst-Entzug, `assertNotLastAdmin` — selbst verifiziert), kein
+Secret-/Config-Leak, Moderation mandanten-isoliert über die Operator-Tür. Die
+am meisten verdächtigte Fläche — die injizierten, unlayered Theme-Styles — ist
+**fail-closed am Render-Punkt** (Hex-only-Farben, Allowlists für
+Font-Name/Id/Varianten/attr, ein `</style><script>` ergibt `return ''`).
+feedback/domains sind dünne, korrekt gegatete Control-Plane-Proxys.
+
+Zwei Nicht-Defekte notiert (keine Fixe): eine harmlose admin-Middleware-
+Asymmetrie (leerer Operator-Screen für Site-Rollen, Server 403) und die bekannte
+admin→comments-String-Drift (mandanten-gescopt, wartet auf einen A14-Vertrag).
+
+**Gelernt:** Ein vollständiger Audit-Bogen lohnt sich gerade an den Layern, die
+man für „offensichtlich sicher" hält — die Betreiber-Konsole und die
+Theme-Injektion waren die gruseligsten Verdachtsflächen und beide vorbildlich
+fail-closed; der Beleg dafür ist so wertvoll wie ein Fund. Die substanziellen
+Fixe kamen aus AU1–3 und Runde 5; die zuletzt geprüften Layer waren schon rund.
+
 ### Audit-Runde 5 — die ungeprüften Layer (billing/messages/events/courses/media/pages/tickets/analytics) ✅ 2026-08-16
 
 Der Audit vom 2026-08-15 (AU1–AU3) deckte nur posts/comments/onboarding/
