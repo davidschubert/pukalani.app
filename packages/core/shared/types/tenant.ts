@@ -2,18 +2,31 @@ import type { CommunitySuspension } from '../communitySuspension'
 
 /**
  * Horizont-3 (Pool+Silo) — Mandanten-Kontext pro Request.
- * Siehe docs/referenz/HORIZONT-3-POOL-SILO-BLUEPRINT.md (Naht 1).
+ * Siehe CONCEPT.md A15 und docs/referenz/HORIZONT-3-POOL-SILO-BLUEPRINT.md (Naht 1).
  *
- * RUHEND: Heute setzt NICHTS `event.context.tenant` — ohne Kontext läuft alles
- * wie bisher (Single-Tenant pro Deployment). Der Typ + die Helfer stehen als
- * getestetes Fundament bereit; die Verdrahtung in die Client-Factories +
- * Auflösungs-Middleware kommt als eigener, bewusster Schritt.
+ * GESETZT wird er von `core/server/middleware/00.tenant.ts`, aufgelöst aus dem
+ * HOST über den registrierten Resolver (`registerTenantResolver`; die Autorität
+ * ist `packages/control/server/utils/tenantsResolver.ts`). Ob überhaupt aufgelöst
+ * wird, entscheidet das Config-Gate `pukalani.tenancy.enabled` (Core-Default AUS).
+ * Mit Gate: bekannter Host → Kontext, unbekannter Host → 404, Resolver-Fehler →
+ * 500 (nie still aufs Default-Projekt fallen).
+ *
+ * `null` heißt „Single-Tenant" (Playground, help, marketing) — NICHT „Feature
+ * noch nicht gebaut". Dieser Kontext trägt den gesamten Pool-Betrieb: an ihm
+ * hängen die Datentür (`tenantDb`), die Row-Permissions, die Sperr-Stufen und
+ * der Microcache-Schlüssel.
  */
 /**
- * `communityId` (G1): die kanonische Kunden-Site = tenants.$id (G0-Entscheidung
- * „der Tenant IST die Site"). Additiv/optional, weil Bestands-Fixtures +
- * Playground den Kontext ohne bauen; der reale tenants-Resolver setzt ihn aus
- * row.$id. requireCommunityPermission verlangt ihn (fehlt er → fail-closed).
+ * `communityId` (G1): die kanonische Kunden-Site = `communities.$id`
+ * (G0-Entscheidung „der Tenant IST die Site"; die TABELLE hieß bis control-029
+ * `tenants`). Additiv/optional, weil Bestands-Fixtures + Playground den Kontext
+ * ohne bauen; der Resolver setzt ihn aus `row.$id`. requireCommunityPermission
+ * verlangt ihn (fehlt er → fail-closed).
+ *
+ * NICHT ZU VERWECHSELN mit `tenantId` weiter unten: `communityId` trägt das
+ * Lese-Publikum (`read(label:<communityId>)`), `tenantId` ist der Wert, den
+ * `scopeRowFor()` in die SPALTE `communityId` stempelt (seit E8-3 heißt die
+ * Spalte so, der Kontext-Wert blieb `tenantId`). Sieht falsch aus, ist es nicht.
  */
 /**
  * Branding des Mandanten (O5): das im Onboarding gewählte Built-in-Theme-Paar.
