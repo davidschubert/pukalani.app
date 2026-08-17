@@ -13,11 +13,8 @@ export async function coursesExportUserData(event: H3Event, userId: string) {
   const databaseId = config.public.appwriteDatabaseId
 
   const enrollments = await listAllRows<EnrollmentRow>(tablesDB, databaseId, ENROLLMENTS_TABLE, [Query.equal('userId', userId)])
-    .catch(() => [] as EnrollmentRow[])
   const progress = await listAllRows<LessonProgressRow>(tablesDB, databaseId, LESSON_PROGRESS_TABLE, [Query.equal('userId', userId)])
-    .catch(() => [] as LessonProgressRow[])
   const authored = await listAllRows<CourseRow>(tablesDB, databaseId, COURSES_TABLE, [Query.equal('authorId', userId)])
-    .catch(() => [] as CourseRow[])
 
   return {
     enrollments: enrollments.map(e => ({ courseId: e.courseId, completedAt: e.completedAt, createdAt: e.$createdAt })),
@@ -33,22 +30,24 @@ export async function coursesDeleteUserData(event: H3Event, userId: string): Pro
   let deleted = 0
   let anonymized = 0
 
+  // STRIKT — kein `.catch(() => [])` (Muster events/eventsUserData.ts): ein
+  // geschluckter List-Fehler löschte 0 Zeilen, und `deleteUserCompletely`
+  // (gated auf Voll-Erfolg) liefe danach in `users.delete` — es blieben
+  // verwaiste Verhaltens-Zeilen eines gelöschten Kontos zurück (GDPR-Lücke,
+  // Audit-Runde 5 2026-08-16). Ein Fehler MUSS die ganze Löschung abbrechen.
   const progress = await listAllRows<LessonProgressRow>(tablesDB, databaseId, LESSON_PROGRESS_TABLE, [Query.equal('userId', userId)])
-    .catch(() => [] as LessonProgressRow[])
   for (const row of progress) {
     await tablesDB.deleteRow({ databaseId, tableId: LESSON_PROGRESS_TABLE, rowId: row.$id })
     deleted++
   }
 
   const enrollments = await listAllRows<EnrollmentRow>(tablesDB, databaseId, ENROLLMENTS_TABLE, [Query.equal('userId', userId)])
-    .catch(() => [] as EnrollmentRow[])
   for (const row of enrollments) {
     await tablesDB.deleteRow({ databaseId, tableId: ENROLLMENTS_TABLE, rowId: row.$id })
     deleted++
   }
 
   const authored = await listAllRows<CourseRow>(tablesDB, databaseId, COURSES_TABLE, [Query.equal('authorId', userId)])
-    .catch(() => [] as CourseRow[])
   for (const row of authored) {
     if (row.authorName === '') continue
     await tablesDB.updateRow({ databaseId, tableId: COURSES_TABLE, rowId: row.$id, data: { authorName: '' } })

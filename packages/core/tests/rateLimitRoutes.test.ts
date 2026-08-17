@@ -101,4 +101,44 @@ describe('Drossel-Liste in 05.rate-limit.ts', () => {
     // soll sich mit Antwort-Reaktionen nicht die Themen-Reaktionen sperren.
     expect(kommentare?.bucket).not.toBe(themen?.bucket)
   })
+
+  // Audit-Runde 5 (2026-08-16): die Schreibwege von events/courses/billing/
+  // tickets waren als einzige ihrer jeweiligen Klasse ohne Backstop.
+  it('deckelt die member-led Aktionen von events und kursen (Standard-Schreibdeckel)', () => {
+    for (const [pfad, name] of [
+      ['POST \\/api\\/events\\/[^/]+\\/rsvp', 'events rsvp'],
+      ['POST \\/api\\/events\\/[^/]+\\/score', 'events score'],
+      ['POST \\/api\\/courses\\/[^/]+\\/enroll', 'courses enroll'],
+      ['POST \\/api\\/lessons\\/[^/]+\\/complete', 'lessons complete'],
+    ] as const) {
+      const treffer = eintrag(pfad)
+      expect(treffer, `${name} fehlt in WRITE_LIMITED`).not.toBeNull()
+      // Ohne eigenen `max` = Standard-Schreibdeckel (60/min), wie posts:vote.
+      expect(treffer?.max, `${name} sollte den Standard-Deckel tragen`).toBeNull()
+    }
+  })
+
+  it('deckelt die Binär-Uploads von event-cover und ticket-anhang wie /api/media', () => {
+    const media = eintrag('POST \\/api\\/media')
+    for (const [pfad, name] of [
+      ['POST \\/api\\/events\\/[^/]+\\/cover', 'events cover'],
+      ['POST \\/api\\/tickets\\/[^/]+\\/files', 'tickets files'],
+    ] as const) {
+      const treffer = eintrag(pfad)
+      expect(treffer, `${name} fehlt in WRITE_LIMITED`).not.toBeNull()
+      // Dieselbe Binär-auf-die-Platte-Klasse ⇒ dieselbe Zahl wie /api/media.
+      expect(treffer?.max, `${name} sollte den media-Deckel tragen`).toBe(media?.max)
+    }
+  })
+
+  it('deckelt die Stripe-Anlege-Routen — checkout enger als portal', () => {
+    const checkout = eintrag('POST \\/api\\/billing\\/checkout')
+    const portal = eintrag('POST \\/api\\/billing\\/portal')
+    expect(checkout, 'POST /api/billing/checkout fehlt in WRITE_LIMITED').not.toBeNull()
+    expect(portal, 'POST /api/billing/portal fehlt in WRITE_LIMITED').not.toBeNull()
+    // checkout legt ZWEI Stripe-Objekte je Ruf an (Customer + Session), portal
+    // nur eine Session — deshalb ist checkout der engere Eimer.
+    expect(checkout?.max ?? Infinity).toBeLessThanOrEqual(portal?.max ?? Infinity)
+    expect(checkout?.bucket).not.toBe(portal?.bucket)
+  })
 })

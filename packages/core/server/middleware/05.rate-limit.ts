@@ -111,6 +111,15 @@ const WRITE_LIMITED: { re: RegExp, bucket: string, max?: number }[] = [
   { re: /^POST \/api\/posts$/, bucket: 'posts:create' },
   { re: /^PATCH \/api\/posts\/[^/]+$/, bucket: 'posts:edit' },
   { re: /^POST \/api\/posts\/[^/]+\/(vote|score)$/, bucket: 'posts:vote' },
+  // Events + Kurse (Audit-Runde 5, 2026-08-16): dieselbe Spam-/Amplifikations-
+  // Klasse wie posts/comments:vote — die Zu-/Absage, das Aufstimmen (verdoppelt:
+  // 2× count + Zähler-Update je Ruf), die Einschreibung und der Lektions-
+  // Abschluss sind member-led und waren als einzige ihrer Art OHNE Backstop.
+  // Session-gated, Standard-Schreibdeckel (60/min/IP), eigene Buckets je Zweck.
+  { re: /^POST \/api\/events\/[^/]+\/rsvp$/, bucket: 'events:rsvp' },
+  { re: /^POST \/api\/events\/[^/]+\/score$/, bucket: 'events:vote' },
+  { re: /^POST \/api\/courses\/[^/]+\/enroll$/, bucket: 'courses:enroll' },
+  { re: /^POST \/api\/lessons\/[^/]+\/complete$/, bucket: 'courses:lesson' },
   // Presence-Schreibwege (Admin-Client-Amplifikation) + JWT-Mint: session-
   // gated, aber ein Skript/XSS soll den Server nicht ungedrosselt Appwrite-
   // Writes/JWTs erzeugen lassen. heartbeat+leave teilen EIN Budget.
@@ -268,6 +277,20 @@ const WRITE_LIMITED: { re: RegExp, bucket: string, max?: number }[] = [
   // dieselbe Ressource angreift. Der Bucket bleibt eigen: ein Redakteur, der
   // eine Galerie füllt, soll sich nicht selbst am Profilbild aussperren.
   { re: /^POST \/api\/storage\/[^/]+$/, bucket: 'storage:upload', max: 30 },
+  // Event-Cover + Ticket-Anhang (Audit-Runde 5, 2026-08-16): dieselbe
+  // Binär-auf-die-Platte-Klasse wie /api/media — Cover bis Bildgröße,
+  // Ticket-Anhang bis 10 MB. Ticket ist operator-gated, aber eine durchdrehende
+  // Betreiber-Sitzung schreibt sonst ungebremst Gigabyte. Deckel 30/min wie media.
+  { re: /^POST \/api\/events\/[^/]+\/cover$/, bucket: 'events:cover', max: 30 },
+  { re: /^POST \/api\/tickets\/[^/]+\/files$/, bucket: 'tickets:files', max: 30 },
+  // Stripe-Anlege-Routen (Audit-Runde 5, 2026-08-16): jeder Ruf legt bei Stripe
+  // an — checkout: Customer + Checkout-Session, portal: Portal-Session. Session-
+  // gated, aber ohne Deckel könnte ein eingeloggter Nutzer unbegrenzt
+  // Stripe-Objekte/-Last erzeugen (besonders heikel, sobald A2 live ist). Der
+  // Webhook bleibt bewusst frei (signiert, weiter unten begründet). checkout
+  // enger (10), weil es zwei Stripe-Objekte je Ruf anlegt.
+  { re: /^POST \/api\/billing\/checkout$/, bucket: 'billing:checkout', max: 10 },
+  { re: /^POST \/api\/billing\/portal$/, bucket: 'billing:portal', max: 30 },
   // Client-Error-Inbox (Observability-Gate): der Client dedupliziert/kappt
   // selbst (10/Session) — das Limit hier stoppt Scripting/kaputte Clients.
   { re: /^POST \/api\/telemetry\/error$/, bucket: 'telemetry:error', max: 30 },
