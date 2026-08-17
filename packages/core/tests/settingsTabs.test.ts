@@ -53,6 +53,29 @@ describe('resolveSettingsTabs', () => {
     expect(resolveSettingsTabs([], { place: 'community', ...owner })).toEqual([])
   })
 
+  it('ein Reiter OHNE Ziel fällt heraus — der Geister-Reiter (2026-08-14 bis -17)', () => {
+    /**
+     * Echter Vorfall: beim F57-Umbau (Commit f781655a) ersetzte ein
+     * Kommentarblock die `to`-Zeile des Mitglieder-Reiters. Er verschwand
+     * dadurch NICHT — `localePath(undefined)` ergibt den aktuellen Pfad, also
+     * stand „Mitglieder" auf jeder Seite der Hülle als aktiv hervorgehoben da
+     * und der Klick führte zurück auf dieselbe Seite. Sichtbar für JEDES
+     * Mitglied, weil der Reiter seit F57 nur `members.invite` verlangt.
+     *
+     * Die app.config wird gegen `PukalaniSettingsTab` nicht typgeprüft, das
+     * Pflichtfeld allein schützt also nicht. Beide kaputten Formen fallen
+     * heraus; die Gegenprobe darunter zeigt, dass der Filter nicht einfach
+     * alles wegwirft.
+     */
+    const ohneZiel = { ...COMMUNITY_TAB, id: 'members', to: undefined } as unknown as PukalaniSettingsTab
+    const leeresZiel: PukalaniSettingsTab = { ...COMMUNITY_TAB, id: 'members', to: '' }
+    expect(resolveSettingsTabs([ohneZiel], { place: 'community', ...owner })).toEqual([])
+    expect(resolveSettingsTabs([leeresZiel], { place: 'community', ...owner })).toEqual([])
+    // Gegenprobe: derselbe Reiter MIT Ziel bleibt drin.
+    expect(resolveSettingsTabs([{ ...ohneZiel, to: '/dashboard/community/members' }], { place: 'community', ...owner })
+      .map(t => t.id)).toEqual(['members'])
+  })
+
   it('zeigt den Community-Reiter dem Team auf dem Mandanten-Host', () => {
     expect(resolveSettingsTabs([COMMUNITY_TAB], { place: 'community', ...owner }).map(t => t.id))
       .toEqual(['community'])

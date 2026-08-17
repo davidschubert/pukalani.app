@@ -139,6 +139,17 @@ export default defineAppConfig({
           labelKey: 'admin.nav.members',
           icon: 'i-ph-users-three',
           /**
+           * DIESE ZEILE HAT GEFEHLT (2026-08-14 bis 2026-08-17, Commit
+           * f781655a): der Kommentarblock darunter hat sie beim F57-Umbau
+           * ersetzt. Folge war ein Reiter OHNE Ziel — `localePath(undefined)`
+           * ergab den aktuellen Pfad, also stand „Mitglieder" auf JEDER Seite
+           * der Hülle als aktiv hervorgehoben da, und ein Klick führte auf die
+           * Seite zurück, auf der man schon war. Gemeldet von David auf
+           * freelancer.supply; sichtbar war es für JEDES Mitglied, weil der
+           * Reiter seit F57 nur noch `members.invite` verlangt.
+           */
+          to: '/dashboard/community/members',
+          /**
            * SEIT F57 `members.invite` STATT `team.manage` (2026-08-14): jedes
            * Mitglied darf einladen, und der Einstieg dafür ist diese Seite.
            *

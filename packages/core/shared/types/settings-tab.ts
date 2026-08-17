@@ -98,6 +98,26 @@ export interface PukalaniSettingsTab {
  * NUR UX. Die Autorität bleibt `requiredCapability` in der Page-Meta und
  * `requireCommunityPermission` auf den Routen.
  */
+/**
+ * Hat der Reiter überhaupt ein Ziel? — das Netz unter dem Pflichtfeld `to`,
+ * aus demselben Grund wie `isDashboardScope` beim `scope`: `app.config.ts`
+ * wird NICHT gegen `PukalaniSettingsTab` typgeprüft (die Hülle castet erst
+ * beim Lesen), ein vergessenes `to` wäre also nur ein Kommentar-Fehler.
+ *
+ * ER IST EINMAL PASSIERT (2026-08-14, Commit f781655a): beim F57-Umbau
+ * ersetzte ein Kommentarblock die `to`-Zeile des Mitglieder-Reiters. Ein
+ * Reiter ohne Ziel verschwindet nicht — `localePath(undefined)` ergibt den
+ * AKTUELLEN Pfad, also stand er auf jeder Seite der Hülle als aktiv
+ * hervorgehoben da und der Klick führte dorthin zurück, wo man schon war. Drei
+ * Tage lang, für jedes Mitglied.
+ *
+ * Fail-closed wie überall hier: ein fehlender Reiter fällt beim ersten Blick
+ * auf, ein Geister-Reiter sieht aus wie ein Bedienfehler.
+ */
+function hasTabTarget(tab: PukalaniSettingsTab): boolean {
+  return typeof tab.to === 'string' && tab.to.length > 0
+}
+
 export function resolveSettingsTabs(
   tabs: readonly PukalaniSettingsTab[] | undefined,
   filter: {
@@ -117,7 +137,8 @@ export function resolveSettingsTabs(
   const configOn = filter.configOn ?? (() => true)
   return (tabs ?? [])
     .filter(tab =>
-      isDashboardScope(tab.scope)
+      hasTabTarget(tab)
+      && isDashboardScope(tab.scope)
       && scopeVisibleAt(tab.scope, filter.place)
       && moduleAllowedFor(tab, filter)
       && productOn(tab.productKey)
