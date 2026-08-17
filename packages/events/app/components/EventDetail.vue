@@ -27,7 +27,7 @@ const { t, locale } = useI18n()
 const toast = useToast()
 const localePath = useLocalePath()
 const config = useRuntimeConfig()
-const { formatDateTime, formatTime, formatMonthShort, formatDateSpan, isMultiDay, sameDay } = useEventDateFormat()
+const { formatDateTime, formatTime, formatMonthShort, formatDayNumber, formatDateSpan, isMultiDay, sameDay } = useEventDateFormat()
 const { formatRelativeTime } = useFormatRelativeTime()
 const { coverSource } = useEventCover()
 const { isLoggedIn } = useCurrentUser()
@@ -266,7 +266,8 @@ async function cancelEvent() {
 /** Gäste: geblurte Platzhalter statt echter Teilnehmer */
 const placeholderCount = computed(() => Math.min(event.value.attendeeCount, 8))
 
-const start = computed(() => new Date(event.value.startAt))
+/** Tages-Zahl in der Anzeigezone (Monat daneben kommt aus derselben Quelle). */
+const startDayNumber = computed(() => formatDayNumber(event.value.startAt))
 </script>
 
 <template>
@@ -355,7 +356,7 @@ const start = computed(() => new Date(event.value.startAt))
               data-testid="event-cover-fallback"
             >
               <div class="flex h-16 w-16 flex-col items-center justify-center rounded-xl bg-default/80 text-center shadow-sm">
-                <span class="text-xl leading-tight font-bold">{{ start.getDate() }}</span>
+                <span class="text-xl leading-tight font-bold">{{ startDayNumber }}</span>
                 <span class="text-xs text-muted uppercase">{{ formatMonthShort(event.startAt) }}</span>
               </div>
             </div>

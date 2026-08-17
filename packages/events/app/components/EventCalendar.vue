@@ -16,6 +16,7 @@ const emit = defineEmits<{ hover: [eventId: string | null] }>()
 
 const { t, locale, locales } = useI18n()
 const localePath = useLocalePath()
+const { calendarDay } = useEventDateFormat()
 
 const language = computed(() => {
   const entries = locales.value as Array<{ code: string, language?: string }>
@@ -50,10 +51,26 @@ interface CalendarDay {
   events: EventWithRsvp[]
 }
 
-/** Kalendertag-Schlüssel in LOKALER Zeit (Datumsgrenzen = Nutzer-Sicht) */
+/**
+ * Kalendertag-Schlüssel eines GRID-Datums. Diese Datums-Objekte sind reine
+ * Kalender-Koordinaten (1. des Monats + n Tage) und tragen keine Uhrzeit, die
+ * eine Zone bräuchte — sie werden lokal konstruiert und lokal gelesen.
+ *
+ * Für EVENTS gilt das NICHT: dort entscheidet die Anzeigezone, auf welchen Tag
+ * ein Zeitpunkt fällt. Dafür kommt `calendarDay()` aus useEventDateFormat
+ * (2026-08-17) — sonst zeigte die Karte „Di., 25.08." und der Kalender daneben
+ * setzte die Pille auf den 24., sobald Konto-Zone und Geräte-Zone auseinander
+ * liegen.
+ */
 function dayKey(d: Date): string {
   const pad = (n: number) => String(n).padStart(2, '0')
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+}
+
+/** Grid-Datum aus einem `YYYY-MM-DD`-Schlüssel (für die Mehrtages-Schleife). */
+function dayKeyToDate(key: string): Date {
+  const [y, m, d] = key.split('-').map(Number)
+  return new Date(y!, m! - 1, d!)
 }
 
 const days = computed<CalendarDay[]>(() => {
@@ -65,17 +82,22 @@ const days = computed<CalendarDay[]>(() => {
   // Events je Tag: mehrtägig ⇒ jeder Tag zwischen startAt und endAt
   const byDay = new Map<string, EventWithRsvp[]>()
   for (const ev of rows.value) {
-    const start = new Date(ev.startAt)
-    const end = ev.endAt ? new Date(ev.endAt) : start
-    const cursor = new Date(start.getFullYear(), start.getMonth(), start.getDate())
-    for (let i = 0; i < 62 && cursor.getTime() <= end.getTime(); i++) {
+    // Start- und Endtag IN DER ANZEIGEZONE bestimmen, dann in Kalender-Tagen
+    // weiterzählen — der Vergleich läuft über die Schlüssel, nicht über
+    // Zeitstempel (ein `<=` auf Millisekunden hätte den letzten Tag je nach
+    // Uhrzeit verschluckt).
+    const startKey = calendarDay(ev.startAt)
+    const endKey = ev.endAt ? calendarDay(ev.endAt) : startKey
+    const cursor = dayKeyToDate(startKey)
+    for (let i = 0; i < 62; i++) {
       const key = dayKey(cursor)
       byDay.set(key, [...(byDay.get(key) ?? []), ev])
+      if (key >= endKey) break
       cursor.setDate(cursor.getDate() + 1)
     }
   }
 
-  const todayKey = dayKey(new Date())
+  const todayKey = calendarDay(new Date().toISOString())
   return Array.from({ length: 42 }, (_, i) => {
     const date = new Date(gridStart)
     date.setDate(gridStart.getDate() + i)

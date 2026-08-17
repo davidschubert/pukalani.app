@@ -16,7 +16,7 @@ const emit = defineEmits<{ updated: [event: EventWithRsvp] }>()
 const { t } = useI18n()
 const toast = useToast()
 const localePath = useLocalePath()
-const { formatDateSpan, formatMonthShort, isMultiDay } = useEventDateFormat()
+const { formatDateSpan, formatMonthShort, formatDayNumber, isMultiDay } = useEventDateFormat()
 const { coverSource } = useEventCover()
 const { isLoggedIn } = useCurrentUser()
 const { formatCurrency } = useFormatCurrency()
@@ -29,7 +29,9 @@ const priceLabel = computed(() => {
     : t('events.card.paid')
 })
 
-const day = computed(() => new Date(props.event.startAt).getDate())
+// Tages-Zahl aus derselben Zone wie der Monat daneben — `getDate()` las die
+// Laufzeit-Zone und hätte mit `formatMonthShort` streiten können.
+const day = computed(() => formatDayNumber(props.event.startAt))
 
 const isFull = computed(() =>
   props.event.capacity !== null && props.event.attendeeCount >= props.event.capacity,
