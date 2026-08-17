@@ -58,6 +58,8 @@ export default defineEventHandler(async (event) => {
     access: body.access ?? null,
     priceAmount: body.priceAmount ?? null,
     priceLookupKey: body.priceLookupKey ?? null,
+    // Zone des Termins (events-012) — Grundlage der Serien-Expansion.
+    timezone: body.timezone ?? null,
     // Serie (§7e) setzt der Nachgang unten — der Master braucht die eigene Id
     recurrence: '',
     seriesId: '',

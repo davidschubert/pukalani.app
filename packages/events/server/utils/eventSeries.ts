@@ -4,6 +4,7 @@ import type { H3Event } from 'h3'
 import type { TenantDb } from '../../../core/server/utils/tenantDb'
 import { memberWritesAllowedFor } from '../../../core/shared/communitySuspension'
 import { EVENTS_TABLE, type EventRecurrence, type EventRow } from '../../shared/types/event'
+import { nextOccurrenceIn } from '../../shared/eventRecurrence'
 
 /**
  * Event-Serien (Plan EVENTS-V2 §7e): Master + MATERIALISIERTE Instanzen.
@@ -67,19 +68,17 @@ export async function listSeriesInstances(
 }
 
 /** Nächster Termin nach der Regel; Monatsregel klemmt auf den Monatsletzten */
-export function nextOccurrence(startIso: string, rule: EventRecurrence): string {
-  const start = new Date(startIso)
-  if (rule === 'weekly' || rule === 'biweekly') {
-    return new Date(start.getTime() + (rule === 'weekly' ? 7 : 14) * 86_400_000).toISOString()
-  }
-  // monthly: gleicher Monatstag, bei kürzeren Monaten der letzte Tag
-  const next = new Date(start)
-  const day = start.getUTCDate()
-  next.setUTCDate(1)
-  next.setUTCMonth(next.getUTCMonth() + 1)
-  const daysInMonth = new Date(Date.UTC(next.getUTCFullYear(), next.getUTCMonth() + 1, 0)).getUTCDate()
-  next.setUTCDate(Math.min(day, daysInMonth))
-  return next.toISOString()
+/**
+ * Nächster Termin — rechnet seit 2026-08-17 auf der WANDUHR der Termin-Zone
+ * statt in festen UTC-Abständen. Die Regel (samt Begründung und der gemessenen
+ * Drift, die sie behebt) steht pur in `shared/eventRecurrence.ts`; hier bleibt
+ * nur die Weitergabe der Zone.
+ *
+ * `timezone` leer ⇒ UTC, also stabil ohne Ortsbezug — Bestandsserien von vor
+ * events-012 verhalten sich damit unverändert.
+ */
+export function nextOccurrence(startIso: string, rule: EventRecurrence, timezone: string = ''): string {
+  return nextOccurrenceIn(startIso, rule, timezone)
 }
 
 /** Instanz-Daten aus dem Master kopieren (Zähler/Reminder frisch) */
@@ -108,6 +107,9 @@ function instanceData(master: EventRow, startAt: string, endAt: string | null, i
     access: master.access,
     priceAmount: master.priceAmount,
     priceLookupKey: master.priceLookupKey,
+    // Die Zone erbt jede Instanz vom Master — sie ist die Grundlage, auf der
+    // der nächste Schritt gerechnet wurde, und muss zur Instanz passen.
+    timezone: master.timezone,
     recurrence: '',
     seriesId: master.$id,
     seriesIndex: index,
@@ -203,7 +205,7 @@ export async function expandSeries(event: H3Event, master: EventRow): Promise<nu
   let cursorStart = last.startAt
   let index = (last.seriesIndex ?? 0)
   while (created < SERIES_MAX_PER_RUN) {
-    cursorStart = nextOccurrence(cursorStart, master.recurrence)
+    cursorStart = nextOccurrence(cursorStart, master.recurrence, master.timezone ?? '')
     const startMs = Date.parse(cursorStart)
     if (startMs > windowEnd || startMs > hardEnd) break
     // Kontingent VOR dem Anlegen — wirft 429, wenn die Grenze erreicht ist.

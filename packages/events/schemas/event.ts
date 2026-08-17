@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { isSupportedTimezone } from '../../core/shared/timezone'
 import {
   EVENT_RECURRENCES,
   MAX_EVENT_CAPACITY,
@@ -32,6 +33,15 @@ const fields = (t: TranslateFn) => ({
   access: z.enum(['free', 'paid']).nullish(),
   priceAmount: z.number().int().min(0).max(10_000_000).nullish(),
   priceLookupKey: z.string().trim().max(64).nullish(),
+  /**
+   * Zeitzone des Termins (events-012). Geprüft wird gegen die Zonenliste der
+   * Laufzeit — dieselbe Härte wie bei `prefs.timezone` (core/shared/timezone.ts):
+   * ein Tippfehler hier ließe `Intl` bei JEDER späteren Anzeige werfen.
+   * '' ist erlaubt und heißt „keine hinterlegt".
+   */
+  timezone: z.string().trim().max(64)
+    .refine(value => value === '' || isSupportedTimezone(value), t('events.validation.timezoneInvalid'))
+    .nullish(),
 })
 
 /** access 'paid' verlangt die Stripe-Preis-Referenz (lookup_key) */
@@ -83,6 +93,7 @@ export function createEventEditSchema(t: TranslateFn = identity) {
     access: f.access,
     priceAmount: f.priceAmount,
     priceLookupKey: f.priceLookupKey,
+    timezone: f.timezone,
     status: z.enum(['draft', 'published']).optional(),
   }).refine(endAfterStart, {
     message: t('events.validation.endBeforeStart'),

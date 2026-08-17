@@ -76,6 +76,15 @@ export interface EventRow extends Models.Row {
   priceAmount: number | null
   /** Stripe-Price-Referenz (lookup_key, Muster BILLING-STRIPE B5) */
   priceLookupKey: string | null
+  /**
+   * IANA-Zone des Termins (events-012) — '' / null = keine hinterlegt.
+   *
+   * Für einen EINZELNEN Termin ist sie Beiwerk (`startAt` ist absolut); für
+   * eine SERIE ist sie die Datengrundlage: „jeden Dienstag 08:30" ist eine
+   * Aussage über die Wanduhr eines Ortes und hat keinen festen UTC-Abstand.
+   * Ohne sie driftete die Expansion an der Zeitumstellung (shared/eventRecurrence.ts).
+   */
+  timezone: string | null
   /** Serien-Regel — NUR der Master trägt sie ('' / null = Einzeltermin) */
   recurrence: EventRecurrence | '' | null
   /** Serien-Zugehörigkeit: Master-Id (Master zeigt auf sich selbst); '' / null = keine Serie */

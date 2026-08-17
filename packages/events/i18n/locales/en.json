@@ -191,7 +191,8 @@
       "rsvpInvalid": "Invalid RSVP status.",
       "notesMax": "Notes are too long (max. 1,000 characters).",
       "voteInvalid": "Invalid vote.",
-      "paidNeedsLookupKey": "Paid events need a Stripe lookup_key."
+      "paidNeedsLookupKey": "Paid events need a Stripe lookup_key.",
+      "timezoneInvalid": "The system does not know this timezone. Pick one from the list."
     },
     "calendar": {
       "prev": "Previous month",

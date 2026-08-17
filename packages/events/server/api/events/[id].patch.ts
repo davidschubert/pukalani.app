@@ -87,6 +87,7 @@ export default defineEventHandler(async (event) => {
   if (body.replayUrl !== undefined) data.replayUrl = body.replayUrl
   if (body.address !== undefined) data.address = body.address
   if (body.locationNotes !== undefined) data.locationNotes = body.locationNotes
+  if (body.timezone !== undefined) data.timezone = body.timezone
   if (body.status !== undefined) data.status = body.status
 
   // Replay-Announce nur beim ERSTEN Setzen auf einem sichtbaren Event
