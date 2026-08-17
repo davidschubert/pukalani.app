@@ -30,6 +30,46 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### F58-Nachtrag — der fehlende Menüpunkt „Kurse", und ein Reiter ohne Ziel ✅ 2026-08-17
+
+Nach F58 fehlte auf freelancer.supply weiterhin der Menüpunkt „Kurse" im
+Dashboard. Der Live-Payload schloss drei der vier Tore aus (`plan: "pro"`,
+`products: {}`, Mandanten-Host), übrig blieb die Capability — und dort lag eine
+Asymmetrie, die niemand entschieden hatte: **`events.manage` saß beim
+Redakteur, `courses.manage` beim Admin**, zwischen `branding.manage` und
+`team.manage`. Ein Redakteur durfte also Beiträge, Seiten, Medien und Termine
+anlegen, aber keinen Kurs. Von außen sieht das exakt aus wie ein Fehler („ich
+habe doch die richtige Rolle").
+
+**Davids Entscheidung 2026-08-17: Kurse sind Inhalt.** `courses.manage` steht
+jetzt im EDITOR-Block; Admin und Owner erben sie unverändert. Der Moderator
+bekommt sie ausdrücklich NICHT — Editor und Moderator bleiben Geschwister, und
+der Test nagelt beide Richtungen fest. Die Matrix ist pur und wird von Server
+(`decideCommunityAccess` → `requireCommunityPermission`) und Client (Menü)
+gelesen, die Route öffnet sich also mit dem Menüpunkt zusammen. RBAC-CONCEPT.md
+und G0-PRODUKTVERTRAG.md nachgezogen.
+
+**Zweiter Befund beim selben Hinsehen: der Reiter „Mitglieder" hatte kein
+Ziel.** Beim F57-Umbau (2026-08-14, Commit `f781655a`) hat ein Kommentarblock
+die `to`-Zeile in `communityTabs` ersetzt. Ein Reiter ohne Ziel verschwindet
+aber nicht: `localePath(undefined)` ergibt den AKTUELLEN Pfad, also stand
+„Mitglieder" auf jeder Seite der Hülle als aktiv hervorgehoben da — auch auf
+„Allgemein" — und ein Klick führte zurück auf dieselbe Seite. Drei Tage lang,
+sichtbar für JEDES Mitglied, weil der Reiter seit F57 nur noch
+`members.invite` verlangt. `to` wiederhergestellt; dazu ein fail-closed
+Wächter in `resolveSettingsTabs` (kein Ziel ⇒ kein Reiter), Test mit
+Gegenprobe. Ein Abgleich über alle `app.config.ts` zeigt: das war die einzige
+betroffene Stelle.
+
+**Gelernt:** Ein Pflichtfeld im TypeScript-Typ schützt eine `app.config.ts`
+NICHT — sie wird gegen den Registry-Typ nie geprüft (dieselbe Lücke, die
+`isDashboardScope` beim `scope` schon schließt). Und die gefährlichere Hälfte:
+ein fehlendes Feld muss zum VERSCHWINDEN führen, nicht zu einem plausibel
+aussehenden Ersatzwert. `undefined` wurde hier still zu „die Seite, auf der du
+gerade bist" — das sah aus wie ein Bedienfehler des Nutzers, nicht wie ein
+Fehler im Menü. Beim nächsten neuen Registry-Feld gehört der fail-closed Filter
+gleich mit dazu.
+
 ### F58 — Kurse und Termine sind aus dem Produkt heraus verwaltbar ✅ 2026-08-16
 
 Gemeldet als Rechte-Problem („eingeloggt, richtige Rolle, kann trotzdem keinen
