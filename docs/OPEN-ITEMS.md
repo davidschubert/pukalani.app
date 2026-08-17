@@ -350,8 +350,22 @@ Davids Rechner, und ein Aufruf `--env-file=apps/control/.env.production` würde
 gegen ein nicht existierendes Projekt laufen. Der richtige Pfad ist
 `~/.appwrite-secrets/migrations/control.env`. **Löschen ist Davids Klick**
 (Datei mit Schlüsselmaterial) — **zugesagt für zeitnah (2026-08-07, 4. Runde;
-E3 und E4 wurden dabei bewusst NICHT gewählt und bleiben liegen).** Die anderen drei `.env.production`
-(platform → `pool`, comments, portfolio) sind korrekt.
+E3 und E4 wurden dabei bewusst NICHT gewählt und bleiben liegen).**
+
+**E1b — es ist nicht mehr nur `control` (2026-08-17).** Der Satz „die anderen
+drei sind korrekt" stimmt seit AH-1 nicht mehr: `apps/platform/.env.production`
+ist vom **22. Juli** und zeigt auf **`pool`** — das Projekt, das der
+Account-Cutover am 2026-08-11 EINGEFROREN hat. Gemessen beim Versuch, für
+freelancer.supply (Scope `t-6a7bc358…`) eine Kategorie anzulegen: `pages`,
+`post_categories` und `community_posts` melden dort jeweils `total=0`. **Das ist
+die gefährliche Sorte Altlast — sie ist nicht tot, sie ist LEISE:** ein
+`--env-file`-Lauf gegen `pool` wirft keinen Fehler, er schreibt nur ins Leere,
+und man hält das Ergebnis für den Prod-Stand. `comments` und `portfolio` sind
+weiterhin korrekt. Der gültige `account`-Schlüssel liegt NUR in der `.env` auf
+dem Server. **Ein billiger Wächter wäre möglich:** `pnpm ops:site-env` liest
+ohnehin schon je Site über ssh — es müsste nur zusätzlich die (nicht geheime)
+`NUXT_PUBLIC_APPWRITE_PROJECT_ID` vergleichen und anschlagen, wenn die lokale
+Datei ein anderes Projekt nennt als der Server. [Claude, S]
 
 **E3 — Hetzner-Rescale** prüfen (CX33 knapp bei sechs Apps + Builds). [David]
 
