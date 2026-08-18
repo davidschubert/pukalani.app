@@ -489,7 +489,14 @@ export default defineAppConfig({
       // passieren, sonst 404t die Messung dort still (lokal erwischt, BEVOR
       // es deployt war). Bewusst der exakte config-Pfad, nicht '/api/analytics/'
       // — settings.patch und stats.get bleiben Mandanten-Routen.
-      controlApiPrefixes: ['/api/auth/', '/api/onboarding/', '/api/health', '/api/telemetry/', '/api/notifications', '/api/feedback', '/api/abuse', '/api/account/activity', '/api/account/handle', '/api/analytics/config', '/api/stats-script.js', '/api/stats-event', '/api/_nuxt_icon/'] as string[],
+      // '/api/storage/' seit 2026-08-18: die Profilseite lebt seit AH-1 im
+      // Kundenbereich (account.*), ihr Foto-Upload und die Avatar-Anzeige
+      // laufen über /api/storage/avatars — ohne den Eintrag 404te der Upload
+      // auf dem Kontroll-Host (auf freelancer.supply ging er; live erwischt).
+      // Gefahrlos ohne Mandanten-Kontext: die POST-Route lässt NUR den
+      // Avatars-Bucket zu, GET/DELETE laufen über den Session-Client und
+      // damit über Datei-Permissions — nichts davon ist tenant-gescopt.
+      controlApiPrefixes: ['/api/auth/', '/api/storage/', '/api/onboarding/', '/api/health', '/api/telemetry/', '/api/notifications', '/api/feedback', '/api/abuse', '/api/account/activity', '/api/account/handle', '/api/analytics/config', '/api/stats-script.js', '/api/stats-event', '/api/_nuxt_icon/'] as string[],
     },
     /**
      * Realtime-Gate (F14, 2026-08-01) — der EINE Schalter, mit dem eine App

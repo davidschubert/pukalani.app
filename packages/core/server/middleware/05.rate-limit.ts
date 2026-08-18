@@ -310,6 +310,27 @@ const WRITE_LIMITED: { re: RegExp, bucket: string, max?: number }[] = [
   { re: /^POST \/api\/stats-event$/, bucket: 'stats:event', max: 30 },
   // Feedback-Widget: auch Gäste dürfen senden → enges Budget gegen Spam
   { re: /^POST \/api\/feedback$/, bucket: 'feedback:create', max: 5 },
+  /**
+   * DER CLAIM-POLL DES AI-RUNNERS (docs/plans/AI-RUNNER.md § 5).
+   *
+   * Kein Spam-Schutz, sondern SELBST-DoS-SCHUTZ: der Runner fragt alle paar
+   * Sekunden „hast du was für mich?", und ein Poll-Loop, der in einen Fehler
+   * läuft und sofort neu fragt, hämmert die eigene Betreiber-Konsole — mit
+   * einem gültigen Bearer-Secret, also an jeder anderen Bremse vorbei. Genau
+   * dieser Fall steht im Konzept.
+   *
+   * GROSSZÜGIG (30/min), weil der legitime Aufrufer EIN Rechner ist, der im
+   * Sekundentakt fragen darf: 30 lässt einen Poll alle zwei Sekunden zu und
+   * stoppt trotzdem die Endlosschleife. Der Bucket zählt je IP — mehrere
+   * Runner hinter DERSELBEN Adresse teilen ihn sich; heute ist das einer, und
+   * wenn es je zwei werden, ist die Zahl zu erhöhen, nicht der Schutz zu
+   * entfernen.
+   *
+   * Die übrigen Runner-Routen stehen bewusst NICHT hier: `events`, `finish`
+   * und `transcript` laufen nur, solange ein echter Lauf existiert, und der
+   * Claim davor ist bereits gedeckelt.
+   */
+  { re: /^POST \/api\/runner\/runs\/claim$/, bucket: 'runner:claim', max: 30 },
   // E10, Davids Entscheidung 8 („volle Notbremse in Fassung 1"): Wählen und
   // Kommentieren sind session-gated, aber sie schreiben ins BETREIBER-System
   // eines anderen Projekts — ein Skript soll daraus keinen Hebel machen.

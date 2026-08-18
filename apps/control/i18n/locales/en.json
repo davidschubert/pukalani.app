@@ -114,6 +114,10 @@
         "errorSecretNotStored": "Endpoint created, secret NOT stored — delete it at Stripe and create it again",
         "errorNoStorage": "Without NUXT_BILLING_SETTINGS_KEY the secret cannot be stored — nothing was created"
       }
+    },
+    "ticketRunner": {
+      "title": "Run",
+      "hint": "The job is built from the title, the description and the open checklist items."
     }
   }
 }

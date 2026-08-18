@@ -1,0 +1,26 @@
+{
+  // Eigenständiges Paket, KEIN Nuxt-Layer: der Daemon läuft mit
+  // `node --experimental-strip-types` direkt auf den .ts-Dateien. Deshalb
+  // `noEmit` + `allowImportingTsExtensions` (die Importe tragen `.ts`, weil
+  // Node beim Type-Stripping nichts auflöst, was es nicht sieht) und
+  // `erasableSyntaxOnly` (Enums, Namespaces und Parameter-Properties bräuchten
+  // einen Transformer — sie sind hier schlicht verboten statt später ein
+  // rätselhafter Laufzeitfehler).
+  "compilerOptions": {
+    "target": "ES2023",
+    "lib": ["ES2023"],
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "types": ["node"],
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "verbatimModuleSyntax": true,
+    "erasableSyntaxOnly": true,
+    "allowImportingTsExtensions": true,
+    "skipLibCheck": true,
+    "noEmit": true
+  },
+  "include": ["src/**/*.ts"]
+}

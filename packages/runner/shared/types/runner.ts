@@ -22,14 +22,28 @@ export const RUNNER_FILES_BUCKET = 'runner-files'
 /**
  * Der Zustandsautomat eines Laufs (§ 4):
  *
- *   queued → claimed → running → ┬→ succeeded
- *                                ├→ needs_input  (Rückfrage, per --resume weiter)
- *                                ├→ failed
- *                                └→ cancelled
+ *   draft → queued → claimed → running → ┬→ succeeded
+ *                                        ├→ needs_input  (Rückfrage, per --resume weiter)
+ *                                        ├→ failed
+ *                                        └→ cancelled
  *
  * `queued → cancelled` muss auch VOR dem Claim gehen (Knopf „Abbrechen").
+ *
+ * `draft` IST DIE ANTWORT AUF EIN WETTRENNEN (Paket 3): ein Anhang braucht
+ * eine `runId`, existiert also erst NACH dem Anlegen — und ein `queued`-Lauf
+ * kann binnen Sekunden geclaimt sein, während der Browser noch die zweite
+ * Datei hochlädt. Der Runner bekäme dann einen Auftrag, dessen Material erst
+ * halb da ist, und weil er die Anhänge einmal am Anfang zieht (§ 7.2 Schritt
+ * 4), fiele der Rest still unter den Tisch. Deshalb legt das Board IMMER
+ * `draft` an, lädt hoch und schaltet mit `runs/:id/queue` frei. Ab dann ist
+ * der Auftrag VERSIEGELT: die Upload-Route antwortet 409.
+ *
+ * `draft` ist NICHT terminal (es geht ja weiter) und für den RUNNER nicht
+ * sichtbar — `claim` filtert auf `queued`, und die Zustandstabelle gibt dem
+ * Runner keinen Übergang aus `draft` (tests/runGuards.test.ts prüft genau das).
  */
 export const RUN_STATUSES = [
+  'draft',
   'queued',
   'claimed',
   'running',
@@ -123,6 +137,21 @@ export interface RunRow extends Models.Row {
   promptTrusted: boolean
   /** JSON string[], z. B. ["pnpm lint","pnpm -r test"]; '' = keine */
   testCommands: string
+  /**
+   * JSON `RunAttachment[]` (Migration `runner-002`); '' = keine.
+   *
+   * EINE KOPIE, kein Verweis (§ 6): die Datei liegt im Bucket `runner-files`
+   * dieses Layers, nicht im `ticket-files`-Bucket eines fremden Produkts —
+   * `runner` kennt `tickets` nicht (A14), und der Runner hat für dessen
+   * Session-Routen ohnehin kein Passierschein. Der Preis ist doppelter
+   * Speicher; der Gegenwert ist ein Auftrag, der sich nicht mehr ändert,
+   * nachdem er abgeschickt wurde.
+   *
+   * Die LISTE ist zugleich die Erlaubnis: `runs/:id/files/:fileId` liefert nur
+   * aus, was hier steht — sonst wäre die Route ein freier Bucket-Zugriff über
+   * geratene Ids.
+   */
+  attachmentsJson: string
   /** Kosten-Deckel in USD; 0 = kein eigener — der Runner kappt ohnehin gegen seinen */
   maxBudgetUsd: number
   /**
@@ -154,4 +183,158 @@ export interface RunEventRow extends Models.Row {
   kind: 'status' | 'tool' | 'text' | 'error'
   message: string
   at: string
+}
+
+/**
+ * Ein Runner, wie ihn das Board zu sehen bekommt: OHNE `secretHash`.
+ *
+ * Ein Hash ist kein Klartext — aber im Browser hat er trotzdem nichts
+ * verloren. Er ist ein unsalted SHA-256; wer ihn hat, kann offline gegen ein
+ * kurzes oder erratbares Secret rechnen, ohne dass eine einzige Anfrage im
+ * Rate-Limit auftaucht. Die Zeile ist ohnehin nur für `admin` lesbar (§ 4) —
+ * das hier ist die zweite Schicht, nicht die einzige.
+ */
+export type RunnerPublic = Omit<RunnerRow, 'secretHash'>
+
+/** GET /api/runner/runs?subjectType=…&subjectId=… */
+export interface RunsListResponse {
+  runs: RunRow[]
+}
+
+/** GET /api/runner/runners */
+export interface RunnersListResponse {
+  runners: RunnerPublic[]
+}
+
+/**
+ * POST /api/runner/runners — die Registrierung.
+ *
+ * `token` erscheint GENAU EINMAL, nämlich hier. Danach existiert im System nur
+ * noch sein Hash; wer ihn verliert, registriert einen neuen Runner (oder
+ * bekommt später ein Rotieren). Das ist dasselbe Versprechen wie beim
+ * Einladungs-Token (M9-Muster) und der Grund, warum die Antwort nicht
+ * wiederholbar ist.
+ */
+export interface RunnerCreatedResponse {
+  runner: RunnerPublic
+  token: string
+}
+
+/**
+ * POST /api/runner/runs/claim — höchstens EIN Lauf, `null` = nichts zu tun.
+ * `null` ist der Normalfall: der Runner fragt alle paar Sekunden.
+ */
+export interface ClaimResponse {
+  run: RunRow | null
+}
+
+/**
+ * POST /api/runner/runs/:id/events — die Quittung.
+ *
+ * `status` ist der GRUND, warum diese Route überhaupt etwas zurückgibt: der
+ * Runner erfährt hier (und nur hier), dass das Board seinen Lauf abgebrochen
+ * hat (§ 9). `accepted` sagt, wie viele Zeilen wirklich geschrieben wurden —
+ * ein Wiederholungsversuch nach Netzabbruch liefert 0, ohne dass etwas
+ * doppelt in der Zeitleiste steht.
+ */
+export interface EventsAckResponse {
+  status: RunStatus
+  accepted: number
+}
+
+/** POST /api/runner/runs/:id/finish */
+export interface RunFinishResponse {
+  run: RunRow
+}
+
+/** POST /api/runner/runs/:id/transcript */
+export interface TranscriptUploadResponse {
+  fileId: string
+}
+
+/** POST /api/runner/runners/heartbeat */
+export interface HeartbeatResponse {
+  ok: true
+  lastSeenAt: string
+}
+
+/**
+ * Ein Anhang eines Laufs — die Kopie im Bucket `runner-files` (§ 6).
+ *
+ * `fileId` ist die Bucket-Id, `name` der Anzeige- und Dateiname beim Runner.
+ * `mimeType` kommt aus der Magic-Bytes-Erkennung des Servers, NIE aus dem
+ * Client (die Client-Mime ist Angreifer-Eingabe).
+ */
+export interface RunAttachment {
+  fileId: string
+  name: string
+  mimeType: string
+  size: number
+}
+
+/** Höchstens so viele Anhänge je Lauf — darüber 409 `too_many_files`. */
+export const MAX_RUN_ATTACHMENTS = 10
+
+/** GET /api/runner/runs/:id/files (Runner-Naht) */
+export interface RunAttachmentsResponse {
+  attachments: RunAttachment[]
+}
+
+/** POST /api/runner/runs/:id/files (Board) — der Stand NACH dem Hochladen */
+export interface RunAttachmentAddedResponse {
+  attachment: RunAttachment
+  attachments: RunAttachment[]
+}
+
+/**
+ * GET /api/runner/runs/:id/events (Board) — der ERSTE Stand der Zeitleiste.
+ *
+ * Danach übernimmt Realtime (`run_events` trägt Table-Read für `admin`, § 4).
+ * Bewusst getrennt: ein Fenster, das mitten im Lauf geöffnet wird, hat sonst
+ * nur die Zeilen, die NACH dem Öffnen entstanden sind.
+ */
+export interface RunEventsListResponse {
+  events: RunEventRow[]
+}
+
+/** GET /api/runner/runs/recent (Board) — über ALLE Subjekte, neueste zuerst */
+export interface RecentRunsResponse {
+  runs: RunRow[]
+}
+
+/** PATCH /api/runner/runners/:id (Board) — stilllegen/aktivieren, umbenennen */
+export interface RunnerUpdatedResponse {
+  runner: RunnerPublic
+}
+
+/**
+ * Was das Start-Formular an den Lauf-Bereich meldet (Paket 3, UI-Vertrag).
+ *
+ * BEWUSST OHNE `promptSource`/`promptTrusted`/`subject*`: die kommen von dem,
+ * der den Bereich einbindet (das Ticket-Modal), nicht aus dem Formular. Wer
+ * den Auftrag WÄHLT und wer ihn STELLT, sind zwei verschiedene Rollen — und
+ * `promptTrusted` aus einem Formular entgegenzunehmen wäre § 8.2 verkehrt
+ * herum (der Server prüft es ohnehin noch einmal).
+ */
+export interface RunStartOptions {
+  runnerId: string
+  model: string
+  permissionMode: PermissionMode
+  repoKey: string
+  maxBudgetUsd: number
+  testCommands: string[]
+}
+
+/**
+ * Eine Anhang-QUELLE für den Lauf-Bereich (Paket 3, UI-Vertrag) — bewusst
+ * LAZY: `blob()` wird erst gerufen, wenn ein Lauf tatsächlich startet.
+ *
+ * Der Grund ist der Ort: der Bereich hängt im Ticket-Modal, das JEDE geöffnete
+ * Karte rendert. Würde er die Dateien beim Anzeigen laden, zöge jedes Öffnen
+ * einer Karte mit drei Screenshots drei Downloads nach sich — für einen Knopf,
+ * den man selten drückt.
+ */
+export interface RunAttachmentSource {
+  name: string
+  blob: () => Promise<Blob>
 }
