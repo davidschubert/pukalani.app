@@ -10,7 +10,7 @@ import type { RunnerConfig } from './config.ts'
 import { EventPump, FLUSH_AT_EVENTS } from './events.ts'
 import { buildPromptFile, downloadAttachments } from './files.ts'
 import { buildCommitMessage, commitWorktree, currentBranch } from './git.ts'
-import { hasShellSyntax, lastLines, runCommand, splitCommand } from './exec.ts'
+import { childEnv, hasShellSyntax, lastLines, runCommand, splitCommand } from './exec.ts'
 import { log } from './log.ts'
 import { parseTestCommands, type RunFinalStatus, type RunPayload } from './protocol.ts'
 import { buildResultJson, type RunReport, type TestOutcome } from './result.ts'
@@ -219,6 +219,10 @@ async function performRun(
   const child = spawn(ctx.config.claudeBin, args, {
     cwd: repo.path,
     stdio: ['pipe', 'pipe', 'pipe'],
+    // claude startet selbst Kinder (node, git, Bash-Werkzeug) — unter launchd
+    // erben die sonst denselben kargen PATH, an dem die Testbefehle des
+    // ersten Prod-Laufs gescheitert sind (childEnv in exec.ts).
+    env: childEnv(runPathPrefix(ctx.config)),
   })
 
   /**
@@ -419,7 +423,7 @@ async function performRun(
   // Testbefehle. Ein Fehlschlag bricht die Kette NICHT ab — der Bericht soll
   // alle Ergebnisse zeigen, nicht nur bis zum ersten Roten.
   const tests = existsSync(worktree) && !state.timedOut
-    ? await runTestCommands(run, worktree, ctx.config.maxRunMinutes, pump)
+    ? await runTestCommands(run, worktree, ctx.config, pump)
     : []
 
   // SCHRITT 9: Transkript hochladen, dann `finish`.
@@ -458,7 +462,13 @@ function emptyReport(durationMs: number, summary: ResultSummary | null): RunRepo
   }
 }
 
-async function runTestCommands(run: RunPayload, worktree: string, maxRunMinutes: number, pump: EventPump): Promise<TestOutcome[]> {
+/** claudeBin-Verzeichnis + konfigurierte Extra-Verzeichnisse — EIN Ort für die Regel. */
+function runPathPrefix(config: RunnerConfig): string[] {
+  const binDir = config.claudeBin.includes('/') ? config.claudeBin.slice(0, config.claudeBin.lastIndexOf('/')) : ''
+  return [...(binDir ? [binDir] : []), ...config.extraPath]
+}
+
+async function runTestCommands(run: RunPayload, worktree: string, config: RunnerConfig, pump: EventPump): Promise<TestOutcome[]> {
   const outcomes: TestOutcome[] = []
   for (const command of parseTestCommands(run.testCommands)) {
     /**
@@ -479,7 +489,8 @@ async function runTestCommands(run: RunPayload, worktree: string, maxRunMinutes:
     pump.status(`Test läuft: ${command}`)
     const result = await runCommand(bin, parts.slice(1), {
       cwd: worktree,
-      timeoutMs: maxRunMinutes * 60_000,
+      timeoutMs: config.maxRunMinutes * 60_000,
+      pathPrefix: runPathPrefix(config),
     })
     const exit = result.timedOut ? -2 : result.code
     outcomes.push({ cmd: command, exit, tail: lastLines(result.output, 20) })

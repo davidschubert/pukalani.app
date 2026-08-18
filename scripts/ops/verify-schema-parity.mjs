@@ -235,6 +235,15 @@ const CONTROL_SOLL = [
   ...CUSTOMER_FEEDBACK_TABLES,
   ...CONTROL_TABLES,
   ...RUNNER_TABLES,
+  /**
+   * Mit E10 (2026-07-30) sind feedback UND tickets in apps/control
+   * eingezogen — die Soll-Liste hat den Umzug nicht mitgemacht, und genau
+   * deshalb blieb UNBEMERKT, dass die tickets-Migrationen auf Prod-control
+   * NIE gefahren waren: das Aufgaben-Board war dort seit dem Einzug kaputt
+   * (Befund 2026-08-18, beim ersten echten AI-Runner-Lauf). Kuratiert heißt
+   * gepflegt: neuer Layer in einer Site ⇒ HIER nachziehen.
+   */
+  ...TICKETS_TABLES,
 ]
 
 /**

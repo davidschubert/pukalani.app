@@ -44,6 +44,15 @@ export interface RunnerConfig {
   stateDir: string
   /** Ausführbare Datei der Claude-Code-CLI (launchd hat einen kargen PATH) */
   claudeBin: string
+  /**
+   * Verzeichnisse, die dem PATH der KIND-Prozesse vorangestellt werden.
+   * launchd startet den Daemon mit kargem PATH (/usr/bin:/bin) — `claude`
+   * rettet `claudeBin` (absolut), aber die TESTBEFEHLE eines Laufs fanden ihr
+   * `pnpm` nicht (Exit 127 im ersten Prod-Lauf, 2026-08-18: pnpm liegt in
+   * /opt/homebrew/bin). Konfiguration statt Hardcode, weil der Ort je
+   * Maschine anders ist (Homebrew, corepack, nvm).
+   */
+  extraPath: string[]
   repos: Record<string, RepoRule>
 }
 
@@ -136,6 +145,9 @@ export function parseRunnerConfig(raw: unknown, home: string): RunnerConfig {
   }
 
   const claudeBin = typeof root.claudeBin === 'string' && root.claudeBin.trim() ? root.claudeBin.trim() : 'claude'
+  const extraPath = Array.isArray(root.extraPath)
+    ? root.extraPath.filter((entry): entry is string => typeof entry === 'string' && entry.startsWith('/'))
+    : []
 
   const reposRaw = asRecord(root.repos, 'config.json.repos')
   const keys = Object.keys(reposRaw)
@@ -181,7 +193,7 @@ export function parseRunnerConfig(raw: unknown, home: string): RunnerConfig {
     }
   }
 
-  return { endpoint, secretFile, pollSeconds, heartbeatSeconds, maxRunMinutes, stateDir, claudeBin, repos }
+  return { endpoint, secretFile, pollSeconds, heartbeatSeconds, maxRunMinutes, stateDir, claudeBin, extraPath, repos }
 }
 
 /**

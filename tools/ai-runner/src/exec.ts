@@ -22,6 +22,21 @@ export interface CommandOptions {
   timeoutMs?: number
   /** Ringpuffer-Grenze: ein Testlauf kann Megabytes ausgeben, uns interessiert das Ende */
   maxOutputChars?: number
+  /** Verzeichnisse VOR dem geerbten PATH — siehe childEnv() */
+  pathPrefix?: string[]
+}
+
+/**
+ * Umgebung für Kind-Prozesse: der geerbte PATH, davor die konfigurierten
+ * Verzeichnisse. Unter launchd erbt der Daemon nur /usr/bin:/bin — ohne
+ * diesen Vorbau enden Testbefehle wie `pnpm lint` als Exit 127, obwohl
+ * dieselbe Config im Terminal funktioniert (erster Prod-Lauf, 2026-08-18).
+ */
+export function childEnv(pathPrefix: readonly string[] | undefined): NodeJS.ProcessEnv {
+  if (!pathPrefix?.length) return process.env
+  const inherited = process.env.PATH ?? ''
+  const merged = [...pathPrefix, ...(inherited ? [inherited] : [])].join(':')
+  return { ...process.env, PATH: merged }
 }
 
 const DEFAULT_TIMEOUT_MS = 10 * 60_000
@@ -29,7 +44,7 @@ const DEFAULT_MAX_OUTPUT = 200_000
 
 export function runCommand(bin: string, args: string[], options: CommandOptions): Promise<CommandResult> {
   return new Promise((resolve) => {
-    const child = spawn(bin, args, { cwd: options.cwd, stdio: ['ignore', 'pipe', 'pipe'] })
+    const child = spawn(bin, args, { cwd: options.cwd, stdio: ['ignore', 'pipe', 'pipe'], env: childEnv(options.pathPrefix) })
     const limit = options.maxOutputChars ?? DEFAULT_MAX_OUTPUT
     let output = ''
     let timedOut = false
