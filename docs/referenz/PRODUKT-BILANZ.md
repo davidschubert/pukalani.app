@@ -30,6 +30,7 @@ Protokoll in [`docs/archiv/PRODUKT-BILANZ-2026-07-27.md`](../archiv/PRODUKT-BILA
 | **moderation** | ✅ | _template, comments | 3/4 über `tenantDb` | ✅ | — |
 | **pages** | ✅ | control, portfolio | 7/11 über `tenantDb` | ✅ | — |
 | **posts** | ✅ | _template, comments | 26/31 über `tenantDb` | ✅ | personal |
+| **runner** | — | control | keine eigenen Routen | — | — |
 | **tickets** | — | control | 0/21 über `tenantDb` · 18 roh | — | — |
 
 Lesehilfe: „Datentür" zählt die Route-Dateien, die `tenantDb(event)` nutzen —
@@ -63,6 +64,7 @@ holt seine Daten über die Naht eines anderen Layers.
 | `onboarding` | — | — | — | — | ✅ | — |
 | `pages` | — | — | ✅ | — | ✅ | ✅ |
 | `posts` | ✅ | ✅ | — | — | ✅ | — |
+| `runner` | — | — | ✅ | — | — | — |
 | `themes` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | `tickets` | — | — | ✅ | — | — | — |
 
