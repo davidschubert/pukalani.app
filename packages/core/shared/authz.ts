@@ -27,6 +27,9 @@ export const ALL_CAPABILITIES: readonly Capability[] = [
   'billing.manage',
   'courses.manage',
   'tickets.manage',
+  // AI-Runner (docs/plans/AI-RUNNER.md § 4): nur admin — bewusst NICHT in der
+  // moderator-Liste unten, anders als das Geschwister `tickets.manage`.
+  'runner.manage',
   'pages.manage',
   // G1 — Community-Caps (communityAuthz.ts). Im Wildcard, damit der Operator-
   // Admin sie ebenfalls hält; die Rollen-Verteilung lebt in communityAuthz.ts.

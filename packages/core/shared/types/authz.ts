@@ -35,6 +35,18 @@ export type Capability =
   | 'billing.manage'
   | 'courses.manage'
   | 'tickets.manage'
+  /**
+   * Läufe des AI-Runners anlegen, abbrechen und lesen (docs/plans/AI-RUNNER.md
+   * § 4) — Betreiber-Werkzeug, ausschließlich in `apps/control`.
+   *
+   * BEWUSST ENGER ALS DAS GESCHWISTER `tickets.manage`: die trägt auch der
+   * Moderator (Karten-Mitglieder sind Admins UND Mods). Ein Lauf trägt
+   * dagegen Repo-Schlüssel, Branch-Namen und Kostendaten eines fremden
+   * Rechners, und ein Auftrag daran ist Code-Ausführung auf ebendiesem
+   * Rechner. Das ist keine Moderations-Sache — deshalb steht sie NICHT in
+   * ROLE_CAPABILITIES.moderator, nur im Admin-Wildcard.
+   */
+  | 'runner.manage'
   | 'pages.manage'
   // G1 — Community-Rollen (communityAuthz.ts): feinere Caps, die die 5 Rollen
   // sauber trennen (Autor ≠ Moderator ≠ Admin ≠ Owner). Die drei mit dem
