@@ -63,6 +63,13 @@ Länge (die Stimme hängt am Index; ein verschobenes Array ließe jemanden auf
 „Ja" klicken und für „Nein" stimmen), sonst bleiben die Beschriftungen
 Original und Titel/Text trotzdem übersetzt. Live auf demo bewiesen, auch
 gemischtsprachig (DE/EN-Optionen kollabieren sauber in die Zielsprache).
+Auch der GANZE Umfrage-Thread ist live bewiesen (demo, „Wann passt euch die
+nächste Live-Session…"): Umfrage samt 4 Optionen UND beide Kommentare des
+Threads nach EN übersetzt, Cache-Gegenprobe je Stück `cached:true` — jedes
+Stück hat seinen eigenen Knopf und Cache-Eintrag. Eine Umfrage IN einem
+Kommentar gibt es im Datenmodell nicht (Umfragen sind Beiträge, Kommentare
+reiner Text) — die Frage kam von David und gehört hierher, damit sie nicht
+wieder gestellt wird.
 
 Beweise: `packages/core/scripts/verify-ugc-translation.mjs` **16/16** gegen
 echte Routen + KI (cached:false → cached:true zeichengleich, Zeile trägt die
