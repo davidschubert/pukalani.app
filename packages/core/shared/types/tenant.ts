@@ -2,7 +2,7 @@ import type { CommunitySuspension } from '../communitySuspension'
 
 /**
  * Horizont-3 (Pool+Silo) — Mandanten-Kontext pro Request.
- * Siehe CONCEPT.md A15 und docs/referenz/HORIZONT-3-POOL-SILO-BLUEPRINT.md (Naht 1).
+ * Siehe CONCEPT.md A15 und docs/archiv/HORIZONT-3-POOL-SILO-BLUEPRINT.md (Naht 1).
  *
  * GESETZT wird er von `core/server/middleware/00.tenant.ts`, aufgelöst aus dem
  * HOST über den registrierten Resolver (`registerTenantResolver`; die Autorität

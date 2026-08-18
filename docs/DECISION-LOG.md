@@ -1082,7 +1082,7 @@ ist zu **„A und B"** aufgelöst: gepoolte Standard-Kunden (shared-DB + `tenant
 agnostischen Datenzugriffs-Schicht. Idee von David: Spezialprojekte bauen →
 Features in den Pool „fließen" lassen. Bewertung: trägt (Standardmuster „Pool +
 Silo"). Blueprint + bestandener Isolations-Spike:
-[HORIZONT-3-POOL-SILO-BLUEPRINT.md](referenz/HORIZONT-3-POOL-SILO-BLUEPRINT.md),
+[HORIZONT-3-POOL-SILO-BLUEPRINT.md](archiv/HORIZONT-3-POOL-SILO-BLUEPRINT.md),
 `spikes/s5-pool-silo` (15/15, inkl. Defense-in-Depth-Beweis).
 
 ### Korrektur: vue-tsc 3.3.7 deckt echten latenten Typfehler auf (nicht Flake)

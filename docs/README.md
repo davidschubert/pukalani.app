@@ -24,7 +24,7 @@ niemand weiß, ob ein Häkchen noch Arbeit bedeutet.
 | **[OPEN-ITEMS-COMPLETE.md](OPEN-ITEMS-COMPLETE.md)** | **Finales Archiv der erledigten Punkte = unser Lern-Gedächtnis.** Jeder Eintrag vollständig, mit Datum und einer Zeile **Gelernt:**, wo etwas nicht auf Anhieb ging. Ausdrücklich KEINE Arbeitsliste — hier wird nachgelesen, nicht abgearbeitet. |
 | [GOALS.md](GOALS.md) | **Abgeschlossene Chronik** der `/goal`-Ära (Phasen 1–27, 09.06.–08.07.2026). Keine Arbeitsliste, keine neuen Phasen — was ansteht, steht in OPEN-ITEMS.md |
 | [DECISION-LOG.md](DECISION-LOG.md) | Beschluss-Protokoll: welche Entscheidung wann, mit Begründung |
-| [CONCEPT.md](CONCEPT.md) | Architektur-Bibel A1–A14 (Layer-Grenzen, Verträge, Invarianten) |
+| [CONCEPT.md](CONCEPT.md) | Architektur-Bibel A1–A15 (Layer-Grenzen, Verträge, Invarianten, Mandanten-Architektur) |
 
 Dazu im Repo-Wurzelverzeichnis: [../README.md](../README.md) (Einstieg +
 Phasen-Statustabelle), [../CLAUDE.md](../CLAUDE.md) (die Regeln für
@@ -36,7 +36,6 @@ gepflegt).
 
 | Datei | Thema |
 | --- | --- |
-| [referenz/HORIZONT-3-POOL-SILO-BLUEPRINT.md](referenz/HORIZONT-3-POOL-SILO-BLUEPRINT.md) | Pool vs. Silo — das Mandanten-Modell |
 | [referenz/MULTI-SITE-PLATFORM-STRATEGIE.md](referenz/MULTI-SITE-PLATFORM-STRATEGIE.md) | Produkt-Manifeste, Layer/App-Komposition |
 | [referenz/PRODUKT-BILANZ.md](referenz/PRODUKT-BILANZ.md) | „Ein Konzept pro Produkt" — welche App welches Produkt montiert, wer durch die Datentür geht (ERZEUGT: `node scripts/produkt-bilanz.mjs`) |
 | [referenz/G0-PRODUKTVERTRAG.md](referenz/G0-PRODUKTVERTRAG.md) | Produktvertrag: Rollen, Tarif, Umfang |
@@ -81,9 +80,9 @@ Reste nach `OPEN-ITEMS.md`. Ein Plan-Dokument ist nie eine To-do-Liste.
 
 ## Archiv — ausgeführt, nur noch Historie
 
-`archiv/` enthält 31 abgearbeitete Pläne (M1–M10, Phase 17, Themes-Vollausbau,
+`archiv/` enthält 33 abgearbeitete Pläne (M1–M10, Phase 17, Themes-Vollausbau,
 Embed-Widget, Landingpage, SaaS-Roadmap, zuletzt das
-[Discussions-Konzept](archiv/DISCUSSIONS-KONZEPT.md), …) und `archiv/audits/` die sechs
+[Discussions-Konzept](archiv/DISCUSSIONS-KONZEPT.md) und den [Pool/Silo-Blueprint](archiv/HORIZONT-3-POOL-SILO-BLUEPRINT.md), …) und `archiv/audits/` die sechs
 Audits (Gesamtaudit 05.07., Pool-Audit 27.07., Dashboard-Audit 28.07. sowie
 die drei Berichte vom 09.08.: [UX-Trichter](archiv/audits/2026-08-09-ux-trichter.md),
 [UX-Dashboard](archiv/audits/2026-08-09-ux-dashboard.md),

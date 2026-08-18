@@ -5,7 +5,7 @@
 > trennt Zielbild, Launch-Gates und spätere Wachstumsfeatures. Querbezug:
 > [PUKALANI-LANDINGPAGE.md](PUKALANI-LANDINGPAGE.md) ·
 > [MULTI-SITE-PLATFORM-STRATEGIE.md](../referenz/MULTI-SITE-PLATFORM-STRATEGIE.md) ·
-> [HORIZONT-3-POOL-SILO-BLUEPRINT.md](../referenz/HORIZONT-3-POOL-SILO-BLUEPRINT.md) ·
+> [HORIZONT-3-POOL-SILO-BLUEPRINT.md](HORIZONT-3-POOL-SILO-BLUEPRINT.md) ·
 > [OPEN-ITEMS.md](../OPEN-ITEMS.md).
 
 ## Nordstern

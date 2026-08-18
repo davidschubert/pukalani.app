@@ -13,7 +13,7 @@
 >
 > Herkunft: [SAAS-ROADMAP.md](../archiv/SAAS-ROADMAP.md). Querbezug:
 > [PUKALANI-LANDINGPAGE.md](../archiv/PUKALANI-LANDINGPAGE.md)
-> §2.4 (Claim-Gates), [HORIZONT-3-POOL-SILO-BLUEPRINT.md](HORIZONT-3-POOL-SILO-BLUEPRINT.md).
+> §2.4 (Claim-Gates), [HORIZONT-3-POOL-SILO-BLUEPRINT.md](../archiv/HORIZONT-3-POOL-SILO-BLUEPRINT.md).
 >
 > Dieses Dokument liefert die vier G0-Artefakte als **Vorschlag mit Empfehlung**.
 > Jede offene Entscheidung ist am Ende (§5) gesammelt.
