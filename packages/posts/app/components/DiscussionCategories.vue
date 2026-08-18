@@ -120,23 +120,44 @@ const canManageCategories = computed(() =>
     </div>
 
     <UTable v-else :data="rows" :columns="columns" data-discussion-categories>
-      <!-- `truncate` ist hier PFLICHT und keine Kosmetik: Nuxt UIs Tabellenzelle
-           bringt `whitespace-nowrap` mit, eine lange Beschreibung wird also
-           nicht umbrochen — sie lief bisher aus dem `max-w-lg`-Kasten heraus,
-           quer durch die Themen-Spalte bis an den Rand (auf freelancer.supply
-           am 2026-08-18 gemessen: 790 px Text in einem 512-px-Kasten). Am
-           Link ebenfalls, dort zusätzlich `block`: an einem inline-Element
-           greift `overflow: hidden` nicht. Die Dashboard-Liste macht es seit
-           jeher so, deshalb ist es dort nie aufgefallen. -->
+      <!-- DIE BESCHREIBUNG MUSS GEBÄNDIGT WERDEN, und zwar je nach Schirm
+           anders (Davids Wahl vom 2026-08-18).
+           
+           Nuxt UIs Tabellenzelle bringt `whitespace-nowrap` mit. Ohne
+           Gegenmaßnahme lief eine lange Beschreibung deshalb aus dem
+           `max-w-lg`-Kasten heraus, quer durch die Themen-Spalte bis an den
+           Rand (auf freelancer.supply gemessen: 790 px Text in 512 px Kasten).
+           
+           · AB `sm` bleibt es bei EINER Zeile mit Auslassungspunkten. Die
+             Tabelle behält damit gleich hohe Zeilen, und der Blick läuft die
+             Namen entlang statt über Fließtext.
+           · DARUNTER wird UMBROCHEN (`whitespace-normal`) und nach zwei
+             Zeilen abgeschnitten. Auf einem Telefon ist die Zelle sonst
+             breiter als der Schirm: die Tabelle scrollt zwar seitwärts
+             (Nuxt UIs Umschlag hat `overflow-auto`), aber niemand scrollt
+             eine Tabelle horizontal, um einen Beschreibungstext zu Ende zu
+             lesen. Der schmalere Kasten (`60vw`) sorgt zusätzlich dafür,
+             dass die Zeile überhaupt auf den Schirm passt.
+           
+           `line-clamp-1` statt `truncate` ab `sm`: beide zeigen eine Zeile
+           mit „…", aber line-clamp bleibt im selben Mechanismus wie die zwei
+           Zeilen darunter — ein Wechsel zwischen `-webkit-box` und
+           `overflow/text-overflow` über einen Haltepunkt hinweg ist die
+           Sorte Detail, die irgendwann in einem Browser anders ausgeht.
+           Der LINK bleibt einzeilig (`block truncate`): ein Kategorie-Name
+           ist die Kennung der Zeile, kein Fließtext. -->
       <template #category-cell="{ row }">
-        <div class="max-w-lg">
+        <div class="max-w-[60vw] sm:max-w-lg">
           <NuxtLink
             :to="localePath(`/discussions/${row.original.category.slug}`)"
             class="block truncate font-medium text-default hover:text-primary hover:underline"
           >
             {{ categoryName(row.original.category) }}
           </NuxtLink>
-          <p v-if="categoryDescription(row.original.category)" class="truncate text-sm text-muted">
+          <p
+            v-if="categoryDescription(row.original.category)"
+            class="line-clamp-2 text-sm whitespace-normal text-muted sm:line-clamp-1"
+          >
             {{ categoryDescription(row.original.category) }}
           </p>
         </div>
