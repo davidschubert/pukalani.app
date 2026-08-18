@@ -30,6 +30,54 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### KI-Übersetzung für User-Content — einer übersetzt für alle ✅ 2026-08-18
+
+Davids Auftrag (2026-08-17, aus der Airbnb-Recherche heraus): Beiträge und
+Kommentare über `aiComplete()` übersetzen, gecacht nach dem posts-022-Muster.
+Vier Entscheidungen vorab eingeholt: **Beiträge + Kommentare** · **Knopf je
+Inhalt, keine Automatik** · Gate ist das **INHALTS-Produkt, bewusst nicht
+`ai`** (eine personal-Community soll ihre eigenen Texte lesen können) · **nur
+Eingeloggte, gedrosselt**; nachgereicht: **Tages-Limit 100/24 h je Konto**.
+
+Bauform: EINE pure fail-softe Regel `core/shared/ugcTranslations.ts` (Muster
+`categoryI18n`, geteilt wie `reactions.ts`, weil comments nie aus posts
+importieren darf), JSON-Spalte `translations` als **MEDIUMTEXT** auf
+`community_posts` (posts-023) und `comments` (comments-020) — Varchar wie bei
+den Kategorien ginge nicht, body 10000 × Sprachen sprengt das
+utf8mb4-Zeilenbudget. Routen `POST /api/posts/:id/translate` +
+`/api/comments/:id/translate`: Lesen über die **Mitglieder-Klinke**
+(Row-Permissions = Sichtbarkeitsprüfung, sonst läse ein Nicht-Mitleser fremde
+Texte über den Umweg Übersetzung), Cache-Schreiben als
+`operator`/`actor:'operator'` (abgeleiteter Inhalt — weder M13-Sperre noch
+A5-Beitritt dürfen ziehen). **Cache-Treffer VOR jeder Drossel** (was nichts
+kostet, kostet kein Kontingent), dann Burst 10/10 min je Mensch+Community,
+Tages-Eimer `ugc-translate-day:<userId>` (EIN Deckel über beide Inhaltsarten),
+IP-Buckets in `05.rate-limit.ts`. Echte Bearbeitung leert den Cache
+(`[id].patch.ts`), No-op-Speichern nicht; neu übersetzt wird erst bei erneuter
+Nachfrage — Dauer-Editieren erzeugt also keine KI-Kosten. UI: EIN Composable
+`useUgcTranslation` (core), Knöpfe in `PostCard` und `CommentItem`, gleicher
+Renderpfad für beide Fassungen, „Automatisch übersetzt · Original anzeigen".
+
+Beweise: `packages/core/scripts/verify-ugc-translation.mjs` **16/16** gegen
+echte Routen + KI (cached:false → cached:true zeichengleich, Zeile trägt die
+Fassung, Edit leert, No-op lässt stehen, Gast 401, Sprachcode-Müll 400),
+Browser-Klickprobe (Code-Span `headlamp` blieb stehen), Prod-Livetest auf
+demo.pukalani.app (DE→EN, Cache-Hit, 401). Migrationen VOR dem Code-Deploy auf
+`account` + `comments` gefahren; `NUXT_AI_KEY` auf platform gesetzt (fehlte —
+F44-Klasse: Gate an, Schlüssel weg, Feature wäre still tot gewesen).
+
+**Gelernt:** Die Create-Routen antworten **201**, nicht 200 — der erste
+Beweis-Lauf hatte drei Skript-Rote, die Feature-Grüne daneben waren echt;
+Statuscodes im Beweis immer von der Route ablesen, nicht raten.
+**Gelernt:** Während des Abschlusses hat die Nachbar-Sitzung die ploi-Site auf
+`admin.pukalani.app` umbenannt (AH-4b) — Deploy-rsync und `check:doc-links`
+brachen mid-flight. Bei parallelen Sitzungen gehört VOR dem Prod-Flip ein
+frischer Blick auf `main` UND auf die laufenden CI-Runs; tote Runbook-Verweise
+nach fremden Renames darf man minimal heilen und meldet es der Sitzung
+(SendMessage), statt zu warten oder doppelt zu bauen.
+
+---
+
 ### Demo-Spielwiesen — drei Pool-Communities mit Leben gefüllt ✅ 2026-08-18
 
 Davids Auftrag (2026-08-17): freelancer.supply als Spielwiese mit Demo-Daten
