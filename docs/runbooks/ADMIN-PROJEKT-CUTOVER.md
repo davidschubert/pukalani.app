@@ -180,20 +180,46 @@ dem Runner-Stopp; Werkzeug: `--phase inventory`.
 - [ ] Eine Community anlegen/ändern über den Wizard-Weg (Service-Naht
       platform→control schreibt jetzt in `admin`).
 
-## 6 · Aufräumen (frühestens nach der Beobachtungszeit)
+## 6 · Aufräumen (Schlüssel-Teil am 2026-08-18 vorgezogen — Davids Auftrag „Keys entfernen, Rechte anpassen")
+
+- [x] **Projekt `control`: `migrations-prod` GELÖSCHT** (Konsolen-UI über
+      Davids Chrome-Session; Probe 401). Befund dabei: einen separaten
+      Transfer-Key gab es nie — Davids „Transfer-Key" war das Secret des
+      bestehenden `migrations-prod`, den „Scopes ergänzt" per Select-all auf
+      84 Scopes gehoben hatte. Eine Löschung erledigte damit Transfer-Widerruf
+      UND den F42-Breitkey. Es bleiben GENAU die zwei Rückweg-Keys:
+      `nuxt-ssr-prod` (Probe 200) und `platform read-only` (alt).
+- [x] **Projekt `admin`: beide Keys von 84 Scopes verengt** (auch hier hatte
+      „Select all" alles angehakt): Runtime auf die bewährte 10er-Liste
+      (von controls `nuxt-ssr-prod` abgelesen, inkl. health.read) — Gegenprobe
+      users/presences/health/rows je 200, `tables.list` 401; Migrations auf
+      die 12er-Liste — Gegenprobe tables/buckets/rows 200, users/teams/files
+      je 401 (die Transfer-Sonderscopes sind wieder weg).
+- [x] **Dedizierter `platform read-only (tenants/site_members)`-Key im Projekt
+      `admin` angelegt** (nur rows.read; Probe rows 200 / users 401) und in
+      der platform-Env eingesetzt — das Interim „Runtime-Key als Naht-Key" ist
+      beendet. Mandanten-Hosts nach dem Reload 3×200 (demo, comments,
+      freelancer.supply).
+- [x] **`app_secrets` geprüft — Rotation NICHT nötig:** die Tabelle trägt das
+      signierte Entitlements-Dokument (system-020); der private
+      Signierschlüssel (`NUXT_ENTITLEMENTS_PRIVATE_KEY`) lebt in der Site-Env
+      und ist nie umgezogen. Es wanderte kein Geheimnis, nur ein signiertes
+      Dokument.
+- [x] Lokale Arbeitsdateien mit totem/überholtem Key entfernt; es bleiben:
+      `migrations/admin.env`, `admin-runtime.key`,
+      `ah4c/platform-readonly-admin.key.env`, `ah4c/backups/*` (Rückweg),
+      `migrations/control.env.ah4c-eingefroren`.
+
+### Rest nach der Beobachtungszeit (~2026-09-01)
 
 - [ ] Beobachtungszeit vereinbart: ______ (Vorschlag 14 Tage — und diesmal
       die Kästchen erst NACH der Tat abhaken; die F3-Lektion vom 2026-08-18).
-- [ ] Projekt `control` **einfrieren**: Transfer-Key sofort widerrufen, die
-      zwei Alt-Keys nach der Beobachtung (der Bestands-Key in
-      `migrations/control.env` ist ohnehin zu breit — F42); Anzeigename in
-      der Konsole auf „control [eingefroren, AH-4c]" — löschen erst viel
-      später und mit dem Delete-500-Rezept griffbereit.
-- [ ] **`app_secrets` prüfen/rotieren:** anders als bei F3 wandert diese
-      Tabelle beim 1:1-Umzug MIT — die Kopie trägt also die Geheimnisse des
-      alten Projekts. Nach dem Schnitt sichten und rotieren, was rotierbar
-      ist; dasselbe gilt sinngemäß für kopierte `audit_logs` (Protokoll,
-      bleibt) und `app_config` (gewollt).
+- [ ] Projekt `control`: die zwei verbliebenen Rückweg-Keys widerrufen
+      (`nuxt-ssr-prod`, `platform read-only`) und die Backups unter
+      `~/.appwrite-secrets/ah4c/backups/` + `control.env.ah4c-eingefroren`
+      löschen; Anzeigename in der Konsole auf „control [eingefroren, AH-4c]" —
+      Projekt-Löschung erst viel später und mit dem Delete-500-Rezept
+      griffbereit.
 - [ ] Alte Keys aus allen Server-`.env` und `.ah4c-backup`-Dateien entfernt.
 - [ ] `~/.appwrite-secrets/migrations/control.env` → durch `admin.env`
       ersetzt; Wave-/Runner-Aufrufe (`pnpm migrate --app control`) zeigen auf
