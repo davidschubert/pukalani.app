@@ -66,6 +66,32 @@ const canTransfer = useCommunityCapability('community.transfer')
  */
 const canManageTeam = useCommunityCapability('team.manage')
 
+/**
+ * WELCHE ROLLEN GIBT ES HIER, UND WELCHE HABE ICH? (Davids Frage 2026-08-17,
+ * seine Wahl: auf dieser Seite.)
+ *
+ * Die Erklärtexte (`members.roleHelp.*`) gab es längst — sie standen aber NUR
+ * als Hilfetext unter der Rollen-Wahl im Einladen-Dialog, den nur sieht, wer
+ * `team.manage` hat. Wer wissen wollte, was seine eigene Rolle darf, war damit
+ * ausgerechnet von der Erklärung ausgeschlossen. Diese Seite steht seit F57
+ * jedem Mitglied offen und ist der thematisch richtige Ort.
+ *
+ * ALLE FÜNF, nicht nur die eigene: „welche Rolle habe ich" beantwortet das
+ * Konto-Menü (useRoleLabel), hier geht es um die Einordnung — was kann ich
+ * nicht, was könnte jemand anderes, und wonach frage ich, wenn mir etwas fehlt.
+ *
+ * Die Reihenfolge kommt aus COMMUNITY_ROLES (core) und ist damit dieselbe wie
+ * in der Rechte-Matrix: absteigend vom Owner. Eine zweite Liste hier würde
+ * auseinanderlaufen, sobald eine Rolle dazukommt.
+ */
+const { role: myRole } = useCommunityRole()
+const roleGuide = computed(() => COMMUNITY_ROLES.map(role => ({
+  role,
+  label: t(`members.roles.${role}`),
+  help: t(`members.roleHelp.${role}`),
+  isMine: myRole.value === role,
+})))
+
 // `immediate` statt `v-if` am Markup: ein Leser darf diese Route nicht rufen
 // (403), und ein Fehler im Nuxt-Payload färbt die ganze Seite rot, obwohl für
 // ihn alles in Ordnung ist.
@@ -556,6 +582,34 @@ function rowActions(member: CommunityMemberView): DropdownMenuItem[][] {
         />
       </template>
     </UTable>
+
+    <!-- ROLLEN-ÜBERSICHT (Davids Wahl 2026-08-17). Am ENDE der Seite und für
+         JEDE Rolle sichtbar: sie ist Nachschlagewerk, nicht Handlung — oben
+         steht, was man hier TUN kann. Für ein Mitglied ohne Verwaltungsrechte
+         ist die Seite kurz, der Block steht ihm damit trotzdem sofort vor
+         Augen. Die eigene Rolle ist markiert; das beantwortet „wo stehe ich"
+         und „was gibt es sonst" in einem Blick. -->
+    <section class="mt-8" data-role-guide>
+      <h2 class="text-sm font-semibold">{{ t('members.roleGuide.title') }}</h2>
+      <p class="mt-1 max-w-2xl text-sm text-muted">{{ t('members.roleGuide.description') }}</p>
+      <dl class="mt-3 divide-y divide-default rounded-lg border border-default">
+        <div
+          v-for="entry in roleGuide"
+          :key="entry.role"
+          class="flex flex-col gap-1 p-3 sm:flex-row sm:items-baseline sm:gap-4"
+          :class="entry.isMine ? 'bg-elevated/50' : undefined"
+          :data-role-row="entry.role"
+        >
+          <dt class="flex shrink-0 items-center gap-2 sm:w-44">
+            <span class="text-sm font-medium">{{ entry.label }}</span>
+            <UBadge v-if="entry.isMine" color="primary" variant="subtle" size="sm" data-role-mine>
+              {{ t('members.roleGuide.yours') }}
+            </UBadge>
+          </dt>
+          <dd class="text-sm text-muted">{{ entry.help }}</dd>
+        </div>
+      </dl>
+    </section>
 
     <UModal v-model:open="inviteOpen" :title="t('members.invite.title')" :description="t('members.invite.description')">
       <template #body>

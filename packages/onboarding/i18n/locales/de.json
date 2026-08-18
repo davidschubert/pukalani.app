@@ -736,6 +736,11 @@
       "editor": "Darf Beiträge, Seiten, Termine und Medien pflegen — moderiert nicht.",
       "viewer": "Liest mit und schreibt Kommentare. Kein Zugriff auf die Verwaltung."
     },
+    "roleGuide": {
+      "title": "Rollen in dieser Community",
+      "description": "Was jede Rolle darf. Deine ist hervorgehoben — für eine andere wende dich an die Leitung der Community.",
+      "yours": "Deine Rolle"
+    },
     "actions": {
       "changeRole": "Rolle ändern",
       "transfer": "Besitz übertragen",

@@ -736,6 +736,11 @@
       "editor": "Maintains posts, pages, events and media — does not moderate.",
       "viewer": "Reads along and writes comments. No access to management."
     },
+    "roleGuide": {
+      "title": "Roles in this community",
+      "description": "What each role may do. Yours is highlighted — for a different one, ask the community's owners.",
+      "yours": "Your role"
+    },
     "actions": {
       "changeRole": "Change role",
       "transfer": "Transfer ownership",
