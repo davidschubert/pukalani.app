@@ -150,7 +150,7 @@ Ein Auftrag. Der Zustandsautomat lebt hier.
 | `model` | varchar | `fable`/`opus`/`sonnet` oder voller Modellname |
 | `permissionMode` | varchar | `default\|auto\|plan\|acceptEdits\|dontAsk\|bypassPermissions` |
 | `interactive` | boolean | false = headless (MVP), true = Terminal öffnen |
-| `promptSource` | text | der zusammengesetzte Auftrag, wie er abgeschickt wurde |
+| `promptSource` | mediumtext | der zusammengesetzte Auftrag, wie er abgeschickt wurde — als Mediumtext (off-row), NICHT varchar: mit Beschreibung + Checkliste + zitiertem Feedback sprengt eine große Karte sonst das ~65-KB-Zeilenbudget von MariaDB (pages-002-Lektion) |
 | `promptTrusted` | boolean | false, wenn Text aus Gast-Feedback stammt (§8.2) |
 | `testCommands` | text | JSON `string[]`, z. B. `["pnpm lint","pnpm -r test"]` |
 | `maxBudgetUsd` | float | Deckel, wird vom Runner gegen seinen eigenen gekappt |
@@ -185,8 +185,12 @@ Eine Zeile Fortschritt. Das ist die Live-Anzeige.
 
 **Nicht** das komplette `stream-json` hier ablegen. Der Runner verdichtet:
 Statuszeilen, Werkzeugaufrufe mit Ziel, Fehler. Das volle Transkript bleibt
-auf dem Mac und wird am Ende als Datei ans Ticket gehängt (der Bucket
-`ticket-files` existiert).
+auf dem Mac und geht am Ende in einen EIGENEN Bucket des agents-Layers
+(`agent-run-files`), hochgeladen über die Runner-Naht (§5). NICHT in den
+Bucket `ticket-files`: dessen Upload-Route verlangt Session +
+`tickets.manage` — der Runner hat nur sein Bearer-Secret —, und `agents`
+kennt `tickets` nicht (A14). Der Lauf-Bericht (§3.4) verlinkt die Datei;
+im Ticket-Modal ist das derselbe Ort.
 
 ---
 
@@ -208,6 +212,8 @@ Zwei Publikums-Klassen, streng getrennt:
   `queued → claimed`, gibt höchstens einen Lauf zurück
 - `POST /api/agents/runs/:id/events` — Fortschritt, gebündelt (nicht je Zeile)
 - `POST /api/agents/runs/:id/finish` — Endzustand + `resultJson`
+- `POST /api/agents/runs/:id/transcript` — Transkript-Datei (multipart) in
+  den Bucket `agent-run-files`; Größe gedeckelt, nur für den claimenden Runner
 - `POST /api/agents/runners/heartbeat` — `lastSeenAt` + gemeldete Fähigkeiten
 
 Regeln für die Runner-Endpunkte:
@@ -217,8 +223,21 @@ Regeln für die Runner-Endpunkte:
 - **Rate-Limit auf `claim`.** Ein Poll-Loop mit Fehler ist eine
   Selbst-DoS gegen die eigene Konsole.
 - Ein Runner darf nur Läufe bewegen, die auf **ihn** geclaimt sind.
-- Alle diese Pfade in `controlApiPrefixes` prüfen — sie laufen auf der
-  Betreiber-Konsole, nicht auf einem Mandanten-Host.
+- `controlApiPrefixes` ist hier NICHT nötig — und das ist nachgelesen, nicht
+  geraten: `01.control-center.ts` greift nur, wenn `00.tenant.ts`
+  `event.context.controlCenter` gesetzt hat, also auf den Kontroll-Hosts der
+  PLATFORM-App (`account.pukalani.app`). `apps/control` hat keinen
+  Tenant-Gate; dort läuft die Middleware als No-op. Merkposten statt Regel:
+  wandert der Layer je in die Platform-App, MUSS `/api/agents/` dort in die
+  Präfix-Liste — sonst antwortet der Kundenbereich 404 auf jeden Claim.
+- Der Claim `queued → claimed` ist mit Appwrite NICHT atomar zu haben —
+  `updateRow` kennt kein Compare-and-swap. Reicht trotzdem, wenn man es
+  ehrlich baut: die Konsole läuft als EIN Nitro-Prozess (pm2, Port 3003),
+  also serialisiert ein In-Prozess-Mutex um den Claim-Handler alle Runner;
+  zusätzlich prüft jede Folge-Route (`events`, `finish`), dass `runnerId`
+  wirklich der Aufrufer ist. Wird die Konsole je mehr-instanzig, bricht
+  diese Annahme — der Mutex gehört deshalb mit einem Kommentar an die
+  Stelle geschrieben.
 
 ---
 
@@ -235,9 +254,15 @@ Der Runner lädt sich den fertigen Auftrag, er baut ihn nicht selbst:
     └── fehler-log.pdf
 ```
 
-`prompt.md` nennt die Anhänge mit relativem Pfad, damit der Agent sie lesen
-kann. Der Rück-Link auf das Ticket geht per `--append-system-prompt`, nicht in
-den Prompt — er ist Kontext, nicht Auftrag.
+Der Ordner liegt beim Runner (z. B. `~/.local/state/pukalani-runner/`),
+NICHT im Repo. Weil die CLI den Worktree selbst anlegt, startet der Agent mit
+cwd IM Worktree — ein relativer Pfad auf `.ai-runs/…` zeigt dort ins Leere,
+und Lesen außerhalb des Arbeitsverzeichnisses ist ohne Freigabe gesperrt.
+Deshalb: `prompt.md` nennt die Anhänge mit ABSOLUTEM Pfad, und der Start
+bekommt `--add-dir` auf den `files/`-Ordner des Laufs (nur diesen einen —
+nicht den ganzen State-Ordner, sonst liest ein Lauf die Anhänge fremder
+Läufe). Der Rück-Link auf das Ticket geht per `--append-system-prompt`,
+nicht in den Prompt — er ist Kontext, nicht Auftrag.
 
 ---
 
@@ -284,6 +309,7 @@ Das ist die **wichtigste Einzelregel des ganzen Systems** (§8.1).
      --model "$MODEL" \
      --permission-mode "$MODE" \
      --worktree "ai-$RUN_ID" \
+     --add-dir "$RUN_DIR/files" \
      --max-budget-usd "$BUDGET" \
      --append-system-prompt "Ticket: https://admin.pukalani.app/dashboard/tickets?ticket=$TICKET_ID" \
      --output-format stream-json --verbose \
@@ -295,7 +321,9 @@ Das ist die **wichtigste Einzelregel des ganzen Systems** (§8.1).
 7. Testbefehle im Worktree fahren, Ergebnis einsammeln.
 8. `git` befragen: Branch, Commit, `--shortstat`. **Kein automatisches
    Pushen.**
-9. `finish` mit `resultJson`, Transkript als Ticket-Anhang.
+9. `finish` mit `resultJson`, Transkript über
+   `POST /api/agents/runs/:id/transcript` (eigener Bucket, §4 — nie über die
+   tickets-Upload-Route, die verlangt eine Session).
 
 ### 7.3 Interaktiv (nach dem MVP)
 
@@ -377,7 +405,7 @@ hier ist eine Zeitleiste richtig.
    `agents.run` in core (admin-only). `pnpm check:manifests` muss grün sein.
 2. Migration `agents-001` — drei Tabellen, Indizes über
    `createIndexSteps`/`indexStep` (nie rohes `createIndex`).
-3. Routen: die vier Board-Routen + die vier Runner-Routen.
+3. Routen: die vier Board-Routen + die fünf Runner-Routen.
 4. UI: Bereich „Ausführen" im Ticket-Modal, verdrahtet in `apps/control`.
 5. `tools/ai-runner`: Claim-Loop, lokale Allowlist, headless Start,
    Ereignis-Bündelung, Abschlussbericht.
@@ -397,7 +425,11 @@ Erst danach: interaktiver Modus, SSH-Runner, comments-Verdrahtung in
 - **`--max-turns` gibt es nicht** (gegen die installierte CLI geprüft).
   Budget läuft über `--max-budget-usd`, und das wirkt nur mit `--print`.
 - Die CLI kann Worktrees selbst (`-w/--worktree`). Baut der Runner sie
-  zusätzlich, hat man zwei Wahrheiten.
+  zusätzlich, hat man zwei Wahrheiten. **Ungetestet ist die Kombination
+  `-w` MIT `-p`** — die Hilfe verbietet sie nicht, aber das ist eine
+  Abwesenheit, kein Beweis. Vor dem Bau des Runners einmal nachmessen;
+  falls sie nicht trägt, baut der Runner den Worktree doch selbst
+  (`git worktree add`) und startet die CLI darin OHNE `-w`.
 - `--output-format stream-json` braucht `--verbose`, sonst fehlen Zeilen.
 - Ein Worktree hat weder `node_modules` noch `.env`. Wer im Lauf `pnpm test`
   fährt, braucht ein `pnpm install` davor — und muss wissen, dass das Minuten
