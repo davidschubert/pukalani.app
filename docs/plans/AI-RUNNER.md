@@ -215,6 +215,14 @@ Zwei Publikums-Klassen, streng getrennt:
 - `POST /api/runner/runs/:id/cancel`
 - `GET /api/runner/runs?subjectId=…`
 - `GET /api/runner/runners`
+- `POST /api/runner/runners` — einen Rechner registrieren; die Antwort trägt
+  das Bearer-Token **genau einmal**, gespeichert wird nur sein Hash. Nachgetragen
+  am 2026-08-17 beim Bau der Routen: dieser Abschnitt beschreibt die NAHT — wie
+  der erste Runner zu seinem Secret kommt, war darin schlicht nicht gestellt,
+  und „Zeile von Hand anlegen und den Hash selbst ausrechnen" ist ein
+  Betriebsschritt, den man irgendwann falsch macht (die Naht antwortet auf
+  JEDEN Fehlweg 401 — ein Tippfehler ist von einem Angriff nicht zu
+  unterscheiden).
 
 **Vom Runner (Bearer-Secret, keine Session):**
 
@@ -424,7 +432,7 @@ hier ist eine Zeitleiste richtig.
    `runner.manage` in core (admin-only). `pnpm check:manifests` muss grün sein.
 2. Migration `runner-001` — drei Tabellen, Indizes über
    `createIndexSteps`/`indexStep` (nie rohes `createIndex`).
-3. Routen: die vier Board-Routen + die fünf Runner-Routen.
+3. Routen: die fünf Board-Routen + die fünf Runner-Routen.
 4. UI: Bereich „Ausführen" im Ticket-Modal, verdrahtet in `apps/control`.
 5. `tools/ai-runner`: Claim-Loop, lokale Allowlist, headless Start,
    Ereignis-Bündelung, Abschlussbericht.

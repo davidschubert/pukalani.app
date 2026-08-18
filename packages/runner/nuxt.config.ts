@@ -11,6 +11,14 @@
  * `ticketId`; verdrahtet wird beides in der App. Sonst wäre der spätere
  * Auslöser „Roadmap-Eintrag" oder „GitHub-Issue" eine Migration.
  *
+ * RATE-LIMIT: der Claim-Poll hat einen eigenen Bucket `runner:claim`
+ * (30/min), deklariert — wie jeder andere — in der ZENTRALEN Tabelle
+ * `packages/core/server/middleware/05.rate-limit.ts`; ein Layer deklariert
+ * seine Buckets NICHT in der eigenen `nuxt.config` (dasselbe Muster wie
+ * `feedback:create`, siehe Kopf von packages/feedback/nuxt.config.ts). Der
+ * Grund dort ist Selbst-DoS-Schutz und nicht Spam (§ 5): ein Poll-Loop mit
+ * Fehler hämmert die eigene Betreiber-Konsole, und zwar mit gültigem Secret.
+ *
  * BEWUSST LEER GELASSEN:
  *  - kein i18n-Block — die Layer-Strings kommen mit der UI (Paket 3).
  *  - kein runtimeConfig — das Bearer-Secret des Runners liegt GEHASHT in

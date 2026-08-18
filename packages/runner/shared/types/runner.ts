@@ -155,3 +155,76 @@ export interface RunEventRow extends Models.Row {
   message: string
   at: string
 }
+
+/**
+ * Ein Runner, wie ihn das Board zu sehen bekommt: OHNE `secretHash`.
+ *
+ * Ein Hash ist kein Klartext — aber im Browser hat er trotzdem nichts
+ * verloren. Er ist ein unsalted SHA-256; wer ihn hat, kann offline gegen ein
+ * kurzes oder erratbares Secret rechnen, ohne dass eine einzige Anfrage im
+ * Rate-Limit auftaucht. Die Zeile ist ohnehin nur für `admin` lesbar (§ 4) —
+ * das hier ist die zweite Schicht, nicht die einzige.
+ */
+export type RunnerPublic = Omit<RunnerRow, 'secretHash'>
+
+/** GET /api/runner/runs?subjectType=…&subjectId=… */
+export interface RunsListResponse {
+  runs: RunRow[]
+}
+
+/** GET /api/runner/runners */
+export interface RunnersListResponse {
+  runners: RunnerPublic[]
+}
+
+/**
+ * POST /api/runner/runners — die Registrierung.
+ *
+ * `token` erscheint GENAU EINMAL, nämlich hier. Danach existiert im System nur
+ * noch sein Hash; wer ihn verliert, registriert einen neuen Runner (oder
+ * bekommt später ein Rotieren). Das ist dasselbe Versprechen wie beim
+ * Einladungs-Token (M9-Muster) und der Grund, warum die Antwort nicht
+ * wiederholbar ist.
+ */
+export interface RunnerCreatedResponse {
+  runner: RunnerPublic
+  token: string
+}
+
+/**
+ * POST /api/runner/runs/claim — höchstens EIN Lauf, `null` = nichts zu tun.
+ * `null` ist der Normalfall: der Runner fragt alle paar Sekunden.
+ */
+export interface ClaimResponse {
+  run: RunRow | null
+}
+
+/**
+ * POST /api/runner/runs/:id/events — die Quittung.
+ *
+ * `status` ist der GRUND, warum diese Route überhaupt etwas zurückgibt: der
+ * Runner erfährt hier (und nur hier), dass das Board seinen Lauf abgebrochen
+ * hat (§ 9). `accepted` sagt, wie viele Zeilen wirklich geschrieben wurden —
+ * ein Wiederholungsversuch nach Netzabbruch liefert 0, ohne dass etwas
+ * doppelt in der Zeitleiste steht.
+ */
+export interface EventsAckResponse {
+  status: RunStatus
+  accepted: number
+}
+
+/** POST /api/runner/runs/:id/finish */
+export interface RunFinishResponse {
+  run: RunRow
+}
+
+/** POST /api/runner/runs/:id/transcript */
+export interface TranscriptUploadResponse {
+  fileId: string
+}
+
+/** POST /api/runner/runners/heartbeat */
+export interface HeartbeatResponse {
+  ok: true
+  lastSeenAt: string
+}

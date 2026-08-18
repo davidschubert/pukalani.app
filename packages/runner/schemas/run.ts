@@ -1,0 +1,111 @@
+import { z } from 'zod'
+import { PERMISSION_MODES } from '../shared/types/runner'
+
+/**
+ * Server-Validierung der Runner-Routen (docs/plans/AI-RUNNER.md § 5).
+ *
+ * Bewusst ohne t()-Factory: Betreiber-API, die Fehlertexte sind nicht
+ * user-facing — dasselbe Muster wie `packages/tickets/schemas/ticket.ts`.
+ * Die Obergrenzen sind KEIN Geschmack, sondern die Spalten-Budgets aus
+ * `runner-001`: was hier durchrutscht, wirft Appwrite später mit einer
+ * Meldung ab, die niemandem hilft.
+ */
+
+/**
+ * Heute NUR `'ticket'`. Die Spalte ist neutral (§ 3.1) — die ERLAUBNIS ist es
+ * nicht: ein neuer Subjekt-Typ ist eine bewusste Entscheidung (wer darf ihn
+ * auslösen, wie sieht sein Prompt aus, wer verdrahtet die Anzeige?), keine
+ * Nebenwirkung eines freien Textfeldes.
+ */
+export const RUN_SUBJECT_TYPES = ['ticket'] as const
+
+/**
+ * Der Auftrags-Text. 200 000 Zeichen wie der `pages`-Rumpf — die Spalte ist
+ * MEDIUMTEXT (off-row), das Zeilenbudget von MariaDB begrenzt hier also
+ * nichts. Was begrenzt: ein Prompt, der größer ist als das, ist kein Auftrag
+ * mehr, sondern ein Datenleck aus einer Schleife.
+ */
+const MAX_PROMPT_CHARS = 200_000
+
+export const createRunSchema = z.object({
+  subjectType: z.enum(RUN_SUBJECT_TYPES),
+  subjectId: z.string().trim().min(1).max(36),
+  /** '' = beliebiger Runner (der erste, der fragt) */
+  runnerId: z.string().trim().max(36).optional().default(''),
+  /**
+   * SCHLÜSSEL aus der lokalen Allowlist des Runners, NIE ein Pfad (§ 8.1).
+   * Der Server kennt die Allowlist nicht und kann den Wert deshalb nicht
+   * prüfen — genau so ist es gewollt: ein unbekannter Schlüssel lässt den
+   * Lauf beim RUNNER scheitern (§ 7.2 Schritt 2), auf einem Rechner, der
+   * seine eigenen Grenzen kennt.
+   */
+  repoKey: z.string().trim().min(1).max(64),
+  model: z.string().trim().min(1).max(64),
+  permissionMode: z.enum(PERMISSION_MODES),
+  promptSource: z.string().min(1).max(MAX_PROMPT_CHARS),
+  /**
+   * KEIN Default. Wer einen Lauf anlegt, muss sagen, woher der Text kommt —
+   * ein geratenes `true` wäre genau die stille Aufweichung, gegen die § 8.2
+   * geschrieben ist. (Die SPALTE hat trotzdem den Default `false`: fällt das
+   * Feld später einmal aus, ist der vorsichtige Fall der eingestellte.)
+   */
+  promptTrusted: z.boolean(),
+  /** Wird als JSON in `runs.testCommands` (1000 Zeichen) gespeichert */
+  testCommands: z.array(z.string().trim().min(1).max(200)).max(10).optional().default([]),
+  /** 0 = kein eigener Deckel; der Runner kappt ohnehin gegen seinen (§ 7.2) */
+  maxBudgetUsd: z.number().nonnegative().max(100).optional().default(0),
+  baseBranch: z.string().trim().max(255).optional().default(''),
+})
+
+/**
+ * Ein Bündel Fortschritt (§ 7.2 Schritt 6: „alle 2 s oder alle 20 Zeilen —
+ * nicht je Zeile"). 50 ist der Deckel für ein Bündel, das nach einem
+ * Netzabbruch nachgereicht wird.
+ */
+export const runEventsSchema = z.object({
+  events: z.array(z.object({
+    /** Monoton je Lauf — der Runner zählt, der Server verwirft Gesehenes */
+    seq: z.number().int().nonnegative(),
+    kind: z.enum(['status', 'tool', 'text', 'error']),
+    message: z.string().max(4000),
+    at: z.string().datetime({ offset: true }),
+  })).min(1).max(50),
+  /**
+   * Beide ERST-WERT-Felder (§ 7.2 Schritt 1): der Runner meldet die vorab
+   * gewürfelte Session-Id mit dem ersten Bündel, den Branch-Namen sobald die
+   * CLI ihn vergeben hat. Optional, weil sie nur einmal mitreisen.
+   */
+  sessionId: z.string().uuid().optional(),
+  workBranch: z.string().trim().max(255).optional(),
+})
+
+/**
+ * Der Abschluss. Die vier Endzustände — `queued`/`claimed`/`running` stehen
+ * hier bewusst NICHT: „fertig" ist ein Ende, keine Rückspulung.
+ */
+export const runFinishSchema = z.object({
+  status: z.enum(['succeeded', 'needs_input', 'failed', 'cancelled']),
+  /** JSON-Bericht: Commit, Diffstat, Tests, Kosten, Dauer (Spalte 6000) */
+  resultJson: z.string().max(6000).optional().default(''),
+  /** Klartext-Grund bei `failed` (Spalte 2000) */
+  error: z.string().max(2000).optional().default(''),
+  sessionId: z.string().uuid().optional(),
+  workBranch: z.string().trim().max(255).optional(),
+})
+
+/**
+ * Der Heartbeat. `capabilities` ist ein freies Objekt, weil es eine
+ * ANZEIGE-KOPIE ist (§ 8.1) und keine Wahrheit: was der Runner wirklich
+ * erlaubt, steht in seiner lokalen Config. Deshalb wird hier auch keine
+ * Struktur erzwungen — nur die Größe, gemessen NACH dem Serialisieren
+ * (die Spalte fasst 4000 Zeichen, und ein Objekt hat keine Länge).
+ */
+export const runnerHeartbeatSchema = z.object({
+  capabilities: z.record(z.string(), z.unknown()).optional().default({}),
+})
+
+/** Registrierung eines Rechners (§ 5-Nachtrag, siehe Route) */
+export const runnerCreateSchema = z.object({
+  name: z.string().trim().min(1).max(120),
+  kind: z.enum(['local', 'ssh']).optional().default('local'),
+})
