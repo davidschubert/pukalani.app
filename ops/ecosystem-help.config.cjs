@@ -1,4 +1,4 @@
-// Zero-Downtime-Deploy (A.10-Muster, s. ecosystem-comments.config.cjs):
+// Zero-Downtime-Deploy (A.10-Muster, s. ecosystem-portfolio.config.cjs):
 // pm2-Cluster fuer help.pukalani.app (oeffentliche Hilfe-Site, apps/help) auf
 // Port 3006; Script zeigt auf den current-Symlink, die Server-.env wird beim
 // (Re-)Load geparst.

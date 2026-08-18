@@ -17,6 +17,22 @@ set -eu
 
 NAME="$1"
 
+# UMBENANNTE VORGAENGER (Site-Rename 2026-08-18): pm2 startOrReload findet
+# Prozesse ueber den NAMEN — nach einer Umbenennung startet es also DANEBEN
+# statt zu ersetzen (zwei Prozesse, ein Port, gemischte Builds; beim
+# studio→control-Rename gemessen). Der Heiler raeumt deshalb den Altnamen
+# weg, BEVOR startOrReload laeuft. Idempotent: existiert der Altname nicht
+# (Normalfall ab dem zweiten Deploy), passiert nichts. Der Eintrag darf
+# bleiben, bis der Altname sicher aus jedem pm2-Dump verschwunden ist.
+LEGACY=""
+case "$NAME" in
+  adminpukalaniapp) LEGACY="controlpukalaniapp" ;;
+esac
+if [ -n "$LEGACY" ] && pm2 describe "$LEGACY" >/dev/null 2>&1; then
+  echo "[$NAME] Vorgaenger $LEGACY gefunden — wird geloescht (Site-Rename), startOrReload uebernimmt den Port"
+  pm2 delete "$LEGACY"
+fi
+
 INFO=$(pm2 jlist 2>/dev/null | node -e '
 let raw = ""
 process.stdin.on("data", chunk => raw += chunk).on("end", () => {

@@ -93,7 +93,10 @@ const SITES = [
     ],
   },
   {
-    dir: 'control.pukalani.app',
+    // Seit AH-4b (2026-08-18) heißt die ploi-Site — und damit das Server-
+    // Verzeichnis — wirklich `admin.pukalani.app`; nur Release-Slot und
+    // Appwrite-Projekt behalten den Namen `control`.
+    dir: 'admin.pukalani.app',
     name: 'control',
     note: 'Betreiber-Oberfläche — Stripe-Webhook, Einladungen, Missbrauchsmeldungen',
     // Die `.env.production` steht hier bewusst MIT drin, obwohl sie als tot

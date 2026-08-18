@@ -7,6 +7,32 @@ die kleinen, verstreuten Beschlüsse.
 
 ---
 
+## 2026-08-18 — AH-4b: Konsolen-Site wirklich umbenannt, 301 des Altnamens aufgegeben; comments-Site-Löschung vorgezogen
+
+**Auslöser:** David hat die ploi-Site der Betreiber-Konsole im Panel von
+`control.pukalani.app` auf `admin.pukalani.app` umbenannt und ein neues
+Zertifikat (nur `admin`) angefordert — entgegen der AH-4-Annahme „nur die
+Adresse ändert sich". Nebenwirkungen, live gemessen: 301 des Altnamens tot
+(Host fiel in die Wildcard-Site → 404), `ENV_FILE`-Pfad der Ecosystem-Datei
+zeigte ins gelöschte Verzeichnis, deploy.yml rsync-te auf den alten Pfad,
+und die acme.sh-Automatik hätte das neue Zertifikat später überschrieben.
+
+**Davids Entscheidungen (strukturierte Fragen):** (1) **Die 301 wird NICHT
+wiederhergestellt** — der Altname war rein betreiber-intern, Stripe zeigt seit
+AH-4 auf `admin`; `control.` antwortet bewusst 404, bleibt reserviert und im
+TLS-Wächter. Middleware `00.legacy-console-hosts.ts` + `adminConsole`-Config
+entfernt. (2) **Deploy-Kette komplett nachgezogen** — `SITE[control]=admin`,
+pm2-Prozess `adminpukalaniapp`, `pm2-heal.sh` räumt den Vorgänger einmalig.
+(3) **comments-Site 389772 wird SOFORT gelöscht** statt die 14-Tage-
+Beobachtung des F3-Runbooks abzuwarten (5 Tage störungsfrei, Serien-Proben
+3/3); Abschnitt 10 des Runbooks war verfrüht abgehakt (Server-`.env` lag noch
+da, Runtime-Key antwortete 200, `commentspukalaniapp` lief noch in pm2) und
+ist jetzt ehrlich — offen bleiben Davids zwei Klicks: Site-Löschung im Panel,
+Key-Widerruf in der Appwrite-Konsole. Details: Nachtrag AH-4b in
+docs/runbooks/ADMIN-CUTOVER.md, Korrektur in docs/runbooks/F3-CUTOVER.md.
+
+---
+
 ## 2026-08-16 — Drei Audit-Nachfragen (Runde 5/6) entschieden
 
 **Davids Entscheidungen** (strukturierte Fragen, je der Empfehlung gefolgt):

@@ -45,24 +45,6 @@ export default defineNuxtConfig({
     port: 3004,
   },
 
-  runtimeConfig: {
-    public: {
-      /**
-       * AH-4 — Laufzeit-Override der Host-Namen dieser Konsole (Muster wie
-       * `controlPoolProject`: app.config = Build-Default, Env = Umgebung).
-       *
-       * Beide leer = die app.config-Werte gelten (Prod: admin. ← control.).
-       * Lokal bleibt `controlLegacyHosts` leer, dann ist die Weiterleitungs-
-       * Middleware ein sofortiger No-Op.
-       *
-       * Env: NUXT_PUBLIC_CONTROL_CANONICAL_HOST (ein Host) ·
-       *      NUXT_PUBLIC_CONTROL_LEGACY_HOSTS (kommagetrennt).
-       */
-      controlCanonicalHost: '',
-      controlLegacyHosts: '',
-    },
-  },
-
   // Eigene Keys der App — werden mit den Core-Locales gemergt (gleicher code)
   i18n: {
     locales: [

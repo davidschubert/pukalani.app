@@ -1,11 +1,14 @@
-// Zero-Downtime-Deploy (A.10-Muster, s. ecosystem-comments.config.cjs):
-// pm2-Cluster des Control Plane auf Port 3003; Script zeigt auf den
-// current-Symlink, die Server-.env wird beim (Re-)Load geparst.
-// Seit dem Cutover 2026-07-26 heisst auch die Maschine control
-// (ploi-Site 392163, Appwrite-Projekt control).
+// Zero-Downtime-Deploy (A.10-Muster): pm2-Cluster des Control Plane auf
+// Port 3003; Script zeigt auf den current-Symlink, die Server-.env wird
+// beim (Re-)Load geparst.
+// Seit 2026-08-18 heisst auch die ploi-Site `admin.pukalani.app` (Davids
+// Panel-Umbenennung; ploi hat dabei das Server-VERZEICHNIS mit umbenannt,
+// deshalb zeigt ENV_FILE hierher). Der Release-Slot und das Appwrite-
+// Projekt behalten den Namen `control` — Slots wechseln beim Rename nicht
+// mit, und Projekt-Ids sind unveraenderlich.
 const fs = require('node:fs')
 
-const ENV_FILE = '/home/ploi/control.pukalani.app/.env'
+const ENV_FILE = '/home/ploi/admin.pukalani.app/.env'
 const CURRENT = '/home/ploi/releases/control/current'
 
 function parseEnvFile(path) {
@@ -25,7 +28,11 @@ function parseEnvFile(path) {
 module.exports = {
   apps: [
     {
-      name: 'controlpukalaniapp',
+      // Name = Site ohne Punkte (deploy.yml leitet den Heal-Namen daraus ab).
+      // Seit dem Site-Rename 2026-08-18 also adminpukalaniapp; den alten
+      // Prozess `controlpukalaniapp` raeumt pm2-heal.sh einmalig weg, sonst
+      // starteten hier ZWEI Prozesse auf Port 3003 (studio→control-Falle).
+      name: 'adminpukalaniapp',
       script: `${CURRENT}/server/index.mjs`,
       // cwd EXPLIZIT (3. pm2-Falle, 2026-07-26): ohne cwd friert pm2 das
       // Shell-cwd des ERSTSTARTS ein — als das Verzeichnis der alten

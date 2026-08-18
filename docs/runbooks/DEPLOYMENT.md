@@ -6,27 +6,37 @@ A11 Env, A3 Session-Cookie) und
 [plans/PHASE-17-PRODUCTION.md](../archiv/PHASE-17-PRODUCTION.md) (Checkliste +
 alle Go-Live-Learnings im Detail).
 
-> **Ist-Stand (pukalani.app), EIN App-Server (app-prod, 49.13.211.173) mit
-> VIER ploi-Sites:** `comments.pukalani.app` (Site 389772, Port **3001**) ·
-> `portfolio.pukalani.app` (Site 390041, Port **3002**) ·
-> `control.pukalani.app` (Site 392163, Port **3003** — beim Cutover
-> 2026-07-26 NEU angelegt, die alte studio-Site 390042 ist gelöscht;
-> öffentlich erreichbar seit dem AH-4-Cutover unter **`admin.pukalani.app`**,
-> ploi-Site und Server-Verzeichnis behalten bewusst den Namen
-> `control.pukalani.app`, der Altname antwortet 301) ·
+> **Ist-Stand (pukalani.app), EIN App-Server (app-prod, 49.13.211.173):**
+> `portfolio.pukalani.app` (Site 390041, Port **3002** — das letzte
+> Silo-Deployment) ·
+> `admin.pukalani.app` (Site 392163, Port **3003** — die Betreiber-Konsole;
+> beim Cutover 2026-07-26 als `control.pukalani.app` NEU angelegt, die alte
+> studio-Site 390042 ist gelöscht. Seit **AH-4b (2026-08-18)** ist die
+> ploi-Site samt Server-Verzeichnis WIRKLICH auf `admin.pukalani.app`
+> umbenannt (Davids Panel-Klick, eigenes Zertifikat nur für admin); der
+> Altname `control.` antwortet seither bewusst **404** über die
+> Wildcard-Site, Release-Slot `releases/control`, pm2 `adminpukalaniapp`,
+> Appwrite-Projekt `control` — Ids/Slots wechseln beim Rename nicht mit) ·
 > `platform.pukalani.app` (Site 391312, Port **3004**, seit H3-Rollout
 > 2026-07-23 — Multi-Tenant-App: `server_name platform.pukalani.app
 > *.pukalani.app` + ploi-verwaltetes **Wildcard-TLS** `*.pukalani.app`
 > via DNS-Challenge; jede Kunden-Subdomain landet hier und wird über das
-> tenants-Register des studio-Control-Plane aufgelöst,
-> NUXT_PLATFORM_CONTROL_*-Env). Appwrite
+> tenants-Register des Control-Plane aufgelöst) ·
+> dazu `pukalani.app` (Marketing, Apex — proxied über Cloudflare) und
+> `help.pukalani.app` (Hilfe-Site, Wildcard).
+> `comments.pukalani.app` ist seit F3 (2026-08-12) eine POOL-COMMUNITY —
+> ihre ploi-Site 389772 (Port 3001) ist am 2026-08-18 gelöscht, der Host
+> läuft wie jeder Mandant über die platform-Site. Appwrite
 > `api.pukalani.app` (appwrite-prod, 188.245.61.155, 1.9.6) mit **einem
-> Projekt je Site** (`comments`, `portfolio`, `studio` — F6-Muster
-> Projekt-pro-Site, je eigene nuxt-ssr-prod/migrations-prod-Keys +
-> Web-Platform) **plus** dem geteilten Pool-Projekt `pool` (H3: eine
-> Appwrite-Instanz/DB für alle Pool-Tenants, Zeilen-Scope per tenantId). Cloudflare DNS „DNS only" · Resend-SMTP (nur comments +
-> studio) · UptimeRobot · Storage Box `pukalani-backup` (Offsite-Backups; die
-> MariaDB-Dumps decken alle Projekte ab).
+> Projekt je Silo-Site** (F6-Muster, je eigene nuxt-ssr-prod/migrations-
+> prod-Keys + Web-Platform) **plus** dem geteilten Projekt `account`
+> (Pool-Communities + Konten; Vorgänger `pool` und `comments` eingefroren).
+> Cloudflare DNS „DNS only" (nur Apex proxied) · Resend-SMTP · UptimeRobot ·
+> Storage Box `pukalani-backup` (Offsite-Backups; die MariaDB-Dumps decken
+> alle Projekte ab).
+> Die comments-Beispiele weiter unten in diesem Runbook sind das HISTORISCHE
+> Silo-Anlege-Rezept — das Muster gilt weiter (heute: portfolio), die
+> konkrete Site gibt es nicht mehr.
 > Bewährte Abweichungen vom ursprünglichen Plan: **pm2 Cluster-Mode über
 > `ops/ecosystem-<app>.config.cjs`** (seit A.10 Stufe 2 — parst die
 > Site-`.env`, Nitro liest zur Laufzeit KEINE .env), **corepack pnpm**,

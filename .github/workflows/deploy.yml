@@ -298,21 +298,22 @@ jobs:
           #         und Quelle des pm2-Prozessnamens.
           # SLOT  = Release-Verzeichnis unter /home/ploi/releases.
           # PROBE = der HOST, unter dem die App oeffentlich antwortet.
-          # Seit dem Cutover (2026-07-26) heisst auch die Maschine control:
-          # eigene ploi-Site 392163, Release-Slot releases/control.
           #
-          # WARUM SITE UND PROBE AUSEINANDERFALLEN (AH-4, 2026-08-11): die
-          # Betreiber-Konsole heisst seither `admin.pukalani.app`, ihre ploi-Site
-          # und ihr Verzeichnis behalten aber bewusst den Namen
-          # `control.pukalani.app`. Eine Site-Umbenennung war beim
-          # studio→control-Umzug die teuerste Falle (pm2 findet den Prozess ueber
-          # den NAMEN und startet bei einer Umbenennung DANEBEN statt zu
-          # ersetzen: zwei Prozesse, ein Port, gemischte Builds). Der Site-Name
-          # ist damit ein reiner Infra-Anker wie `platform.pukalani.app`, und die
-          # Probe muss den Namen fragen, den die Aussenwelt benutzt — gegen den
-          # Altnamen gefragt bekaeme sie eine 301 und `jq` saehe nie ein
-          # `.build`. Fuer alle anderen Apps sind beide Namen identisch.
-          declare -A SITE=( [portfolio]=portfolio.pukalani.app [control]=control.pukalani.app [platform]=platform.pukalani.app [marketing]=pukalani.app [help]=help.pukalani.app )
+          # CONTROL heisst seit 2026-08-18 auch als ploi-SITE `admin.pukalani.app`
+          # (Davids Panel-Umbenennung; ploi benennt dabei das Server-Verzeichnis
+          # mit um) — SITE und PROBE sind damit wieder fuer ALLE Apps identisch.
+          # Der SLOT bleibt `control` (Release-Verzeichnisse wechseln beim Rename
+          # nicht mit), ebenso das Appwrite-Projekt. Den pm2-Prozess hat der
+          # Rename mitgezogen (Name = Site ohne Punkte): die Ecosystem-Datei
+          # heisst jetzt `adminpukalaniapp`, und pm2-heal.sh loescht den
+          # Vorgaenger `controlpukalaniapp` EINMALIG vor dem startOrReload —
+          # ohne das starteten zwei Prozesse auf einem Port (studio→control-
+          # Falle, gemessen 6:4 bei 10 Aufrufen; die Serien-Probe unten ist
+          # dafuer der Beweis). Der 301-Altname `control.pukalani.app` ist seit
+          # demselben Tag BEWUSST aufgegeben: der Host faellt in die Wildcard-
+          # Site platform und antwortet 404 (Davids Entscheidung, s. CLAUDE.md
+          # AH-4b und DECISION-LOG).
+          declare -A SITE=( [portfolio]=portfolio.pukalani.app [control]=admin.pukalani.app [platform]=platform.pukalani.app [marketing]=pukalani.app [help]=help.pukalani.app )
           declare -A SLOT=( [portfolio]=portfolio [control]=control [platform]=platform [marketing]=marketing [help]=help )
           declare -A PROBE=( [portfolio]=portfolio.pukalani.app [control]=admin.pukalani.app [platform]=platform.pukalani.app [marketing]=pukalani.app [help]=help.pukalani.app )
           for app in portfolio control platform marketing help; do

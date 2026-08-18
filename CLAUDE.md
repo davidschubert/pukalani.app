@@ -295,22 +295,25 @@ Vollständiges Konzept: docs/CONCEPT.md
 
 ## Hosts (Umbenennung 2026-07-25, Cutover 2026-07-26 — Davids Entscheidung)
 - `admin.pukalani.app` = Betreiber-Oberfläche (AH-4, Davids Entscheidung
-  2026-08-11 — davor `control.pukalani.app`, das jetzt 301 hierher antwortet:
-  `apps/control/server/middleware/00.legacy-console-hosts.ts`, Runbook
-  docs/runbooks/ADMIN-CUTOVER.md). NUR DIE ADRESSE HAT SICH GEÄNDERT: ploi-Site,
-  Verzeichnis `/home/ploi/control.pukalani.app/`, Release-Slot, pm2-Prozessname,
-  certbot-Lineage und das Appwrite-Projekt heißen weiter `control` — eine
-  Site-Umbenennung war beim studio→control-Umzug die teuerste Falle (pm2 findet
-  den Prozess über den NAMEN und startet bei einer Umbenennung DANEBEN), der
-  Name ist seither ein reiner Infra-Anker wie `platform.pukalani.app`. In
-  deploy.yml fallen deshalb SITE (Verzeichnis) und PROBE (Health-Host)
-  auseinander. Das Zertifikat der Site muss BEIDE Namen tragen, weil die 301
-  erst nach dem Handshake gesprochen wird; der Stripe-Webhook wurde von Hand
-  umgehängt, denn Stripe folgt keiner Weiterleitung. Die Weiterleitung läuft
-  BEWUSST nicht über `pukalani.tenancy.legacyControlHosts`: deren Ziel-Liste
-  `controlHosts` beantwortet anderswo die Frage „ist das der KUNDENBEREICH?"
-  (Konto-Menü, Glocken-Publikum, Trichter-Ereignisse) — die Begründung steht im
-  Kopf der Middleware.
+  2026-08-11; Runbook docs/runbooks/ADMIN-CUTOVER.md). Seit **AH-4b
+  (2026-08-18, Davids Panel-Klick)** ist auch die INFRA wirklich umbenannt:
+  ploi-Site 392163, Server-Verzeichnis `/home/ploi/admin.pukalani.app/` (ploi
+  benennt das Verzeichnis mit) und die certbot-Lineage heißen `admin` — SITE
+  und PROBE in deploy.yml sind damit wieder identisch, der pm2-Prozess heißt
+  `adminpukalaniapp` (den Vorgänger `controlpukalaniapp` räumt ops/pm2-heal.sh
+  einmalig weg — pm2 findet Prozesse über den NAMEN und startet nach einem
+  Rename sonst DANEBEN, die studio→control-Falle). NUR Release-Slot
+  (`releases/control`) und Appwrite-Projekt (`control`, Cookie
+  `a_session_control`) behalten den Namen: Slots wechseln beim Rename nicht
+  mit, Projekt-Ids sind unveränderlich, und die Ecosystem-Datei heißt weiter
+  `ecosystem-control.config.cjs` (Dateinamen bleiben). Der ALTNAME
+  `control.pukalani.app` ist seit AH-4b BEWUSST tot — Davids Entscheidung
+  gegen eine 301: der Host war rein betreiber-intern, der Stripe-Webhook zeigt
+  seit AH-4 auf admin. Er fällt in die Wildcard-Site `platform` und antwortet
+  404 wie `studio.`/`app.`; die 301-Middleware
+  (00.legacy-console-hosts.ts) und ihre adminConsole-Config sind entfernt,
+  der Name bleibt in RESERVED_SUBDOMAINS gesperrt und der TLS-Wächter
+  beobachtet ihn weiter (Wildcard-Deckung).
 - Was der Cutover 2026-07-26 gebracht hat und weiterhin gilt: eigene ploi-Site
   392163 (nginx → Port 3003), Release-Slot `releases/control`, Appwrite-Projekt
   `control` (Session-Cookie a_session_control). Der Alias
@@ -320,12 +323,11 @@ Vollständiges Konzept: docs/CONCEPT.md
   Aufgabe mehr — und „Studio" meint seit Davids Namensentscheidung das
   KUNDENANGEBOT, ein Kunde hätte sonst die Betreiber-Konsole vor sich. Der Host
   fällt jetzt in die Wildcard-Site `platform` und antwortet 404, wie
-  `app.pukalani.app`. Zwei Dinge zum Nachlesen: control behält den
-  überzähligen SAN `studio` bis zur nächsten Erneuerung (harmlos, es wurde
-  BEWUSST kein Zertifikat neu angefordert), und `pm2 jlist` war vorher auf ein
+  `app.pukalani.app`. Zum Nachlesen: `pm2 jlist` war vorher auf ein
   cwd unter `/home/ploi/studio.pukalani.app` zu prüfen — genau daran starb
   portfolio beim Cutover-Aufräumen (ops/pm2-heal.sh); hier hing nichts.
-  Die control-Site hat BEWUSST kein Repository: die CI rsynct .output UND
+  (Der damals überzählige SAN `studio` ist seit dem AH-4b-Zertifikat weg.)
+  Die Site hat BEWUSST kein Repository: die CI rsynct .output UND
   ops/-Configs; ploi-Fallback-Deploy gibt es für control nicht (Fallback =
   Runbook docs/runbooks/CONTROL-CUTOVER.md).
 - `account.pukalani.app` = DER Kundenbereich (AH-1, Davids Entscheidung
@@ -355,11 +357,10 @@ Vollständiges Konzept: docs/CONCEPT.md
   konfigurierte Hosts — die HTTP-Prüfung von Let's Encrypt scheitert für
   Aliase/Wildcards, deshalb IMMER DNS-01 über Cloudflare. (2) ploi benennt die
   certbot-Lineage nach der Root-Domain DER SITE — es gibt also mehrere
-  (am 2026-07-30 nachgemessen: `comments.pukalani.app`, `control.pukalani.app`,
-  `portfolio.pukalani.app` je eigen). Die Lineage `control.pukalani.app` heißt
-  seit AH-4 nicht mehr wie ihr Haupt-Host: sie trägt `admin.pukalani.app` UND
-  den Altnamen `control.pukalani.app` — die Lineage folgt der SITE, und die
-  behält ihren Namen. GETEILT ist nur `pukalani.app`, und darin
+  (Stand AH-4b/F3: `admin.pukalani.app` und `portfolio.pukalani.app` je
+  eigen; die Lineages `control.pukalani.app` und `comments.pukalani.app`
+  sind mit Site-Umbenennung bzw. Site-Löschung Geschichte, beide Altnamen
+  leben von der Wildcard). GETEILT ist nur `pukalani.app`, und darin
   liegt das **Wildcard** `*.pukalani.app`: die Sites `pukalani.app` UND
   `platform.pukalani.app` binden dieselbe Lineage ein, und daran hängen platform,
   demo, help und JEDER Mandanten-Host. Eine Anforderung dort überschreibt sie

@@ -1,4 +1,4 @@
-// Zero-Downtime-Deploy (A.10-Muster, s. ecosystem-comments.config.cjs):
+// Zero-Downtime-Deploy (A.10-Muster):
 // pm2-Cluster fuer portfolio.pukalani.app auf Port 3002; Script zeigt auf den
 // current-Symlink, die Server-.env wird beim (Re-)Load geparst.
 const fs = require('node:fs')

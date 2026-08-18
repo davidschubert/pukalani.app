@@ -162,6 +162,8 @@ Der Geldweg. Stripe folgt **keiner** 301.
 - [x] Den Altnamen NICHT abschalten. Er bleibt als 301 stehen und in
       `RESERVED_SUBDOMAINS` gesperrt — ein zurückgegebener Plattform-Name ist
       der beste Phishing-Köder, den es gibt.
+      *(Überholt durch AH-4b, s. Nachtrag unten: seit 2026-08-18 antwortet der
+      Altname bewusst 404; gesperrt bleibt er weiterhin.)*
 
 
 ---
@@ -181,3 +183,46 @@ Der Geldweg. Stripe folgt **keiner** 301.
   der Doppel-Laeufe; der zweite deployte), Stripe-Webhook per API auf
   admin.…/api/stripe/webhook umgehaengt (enabled).
 - Serien-Probe 3/3: admin/login 200 · control → 301 mit Pfad+Query · TLS-Waechter gruen.
+
+---
+
+## Nachtrag AH-4b — echte Site-Umbenennung + 301-Verzicht (2026-08-18)
+
+David hat die ploi-Site 392163 im Panel von `control.pukalani.app` auf
+`admin.pukalani.app` umbenannt und ein neues Let's-Encrypt-Zertifikat (nur
+`admin`) angefordert. Damit ist die AH-4-Grundannahme „nur die Adresse ändert
+sich, die Infra behält den Namen" ÜBERHOLT — und die 301 des Altnamens war
+tot (der Host fiel in die Wildcard-Site `platform` → 404), ohne dass ein
+Wächter es sah: der TLS-Wächter prüft SAN-Deckung, und die Wildcard deckt.
+
+**Davids Entscheidung (2026-08-18): die 301 wird NICHT wiederhergestellt.**
+Der Altname war rein betreiber-intern, der Stripe-Webhook zeigt seit AH-4 auf
+`admin`. `control.pukalani.app` antwortet seither bewusst 404 und bleibt in
+`RESERVED_SUBDOMAINS` gesperrt sowie im TLS-Wächter beobachtet.
+
+Nachgezogen wurde am selben Tag:
+
+- `ops/ecosystem-control.config.cjs`: `ENV_FILE` → `/home/ploi/admin.pukalani.app/.env`
+  (ploi benennt das Server-Verzeichnis beim Site-Rename MIT — der alte Pfad
+  existiert nicht mehr; ohne den Fix wäre der nächste `pm2 startOrReload` an
+  ENOENT gestorben) und pm2-Name → `adminpukalaniapp`.
+- `ops/pm2-heal.sh`: räumt den Vorgänger-Prozess `controlpukalaniapp` einmalig
+  weg, bevor `startOrReload` läuft (sonst zwei Prozesse auf Port 3003 — die
+  studio→control-Falle).
+- `deploy.yml`: `SITE[control]=admin.pukalani.app` — SITE und PROBE sind
+  wieder für alle Apps identisch.
+- Die 301-Middleware `00.legacy-console-hosts.ts`, ihre `adminConsole`-Config
+  und die `NUXT_PUBLIC_CONTROL_*`-Runtime-Keys sind entfernt.
+- Die acme.sh-Automatik dieses Runbooks (Cron + `renew-control-cert.sh`,
+  Zertifikat `control+admin`) ist vom Server entfernt — sie hätte Davids neues
+  Panel-Zertifikat bei der nächsten Erneuerung still überschrieben. Die
+  Verlängerung macht jetzt wieder ploi (Standard-LE der Site).
+- Wächter/Doku: `verify-tls.mjs` (control-Eintrag = „bewusst 404"),
+  `verify-site-env.mjs` (`dir: admin.pukalani.app`), CLAUDE.md, DEPLOYMENT.md,
+  hosts-und-ports.
+
+**Gelernt:** Ein Panel-Rename in ploi benennt Site, Verzeichnis UND
+Deploy-Script um, lässt aber alles außerhalb ploi's Sicht zurück: CI-Pfade,
+pm2-Prozessnamen, `ENV_FILE`-Pfade in Ecosystem-Dateien, Fremd-Automatiken
+(acme.sh) — und eine 301, die in der App des alten Hosts wohnt, stirbt still,
+weil der Host die App nie mehr erreicht.

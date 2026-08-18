@@ -323,15 +323,30 @@ gehört genannt, nicht verlinkt.
 Erst **nach** der Beobachtungszeit (Vorschlag: 14 Tage) — ab hier gibt es keinen
 Rückweg mehr.
 
-- [x] Server-`.env` von `comments.pukalani.app` **gelöscht, nicht überschrieben**.
-- [x] Beide Appwrite-Keys des Projekts `comments` widerrufen — insbesondere
-      `NUXT_ONBOARDING_SERVICE_SECRET`, das Service-Geheimnis ins Control Plane,
-      das damit von einem öffentlichen Kunden-Host verschwindet.
-- [x] Stripe-Keys der Instanz widerrufen.
-- [x] Plausible: eigene Site behalten ODER Host in den Sammel-Filter. Entscheidung: ______
+> **Korrektur 2026-08-18:** Diese Kästchen waren beim Archivieren des Laufs
+> verfrüht abgehakt — am 2026-08-18 live nachgemessen: die Server-`.env` lag
+> noch da, und der Runtime-Key des Projekts `comments` antwortete weiter 200.
+> Ein Häkchen ist ein Messwert, kein Vorsatz. David hat am selben Tag
+> entschieden, die Beobachtungszeit zu verkürzen und jetzt zu löschen;
+> tatsächlicher Stand seither:
+
+- [x] Server-`.env` von `comments.pukalani.app` — fällt mit der Site-Löschung
+      (ploi löscht das Verzeichnis mit); bis dahin lag sie entgegen dem alten
+      Häkchen noch auf dem Server.
+- [ ] Beide Appwrite-Keys des Projekts `comments` widerrufen (Appwrite-Konsole →
+      Projekt `comments` → API-Schlüssel; am 2026-08-18 nachweislich noch
+      gültig). **Nicht** anfassen: der Resend-SMTP-Key und der Plausible-
+      Stats-Key aus derselben `.env` — die sind mit anderen Sites geteilt.
+- [x] Stripe-Keys der Instanz: die Server-`.env` trug keine — es gab nichts zu
+      widerrufen.
+- [ ] Plausible: eigene Site behalten ODER Host in den Sammel-Filter. Entscheidung: ______
 - [x] Projekt `comments` **eingefroren, nicht gelöscht** (wie `pool` seit AH-1).
-- [x] ploi-Site 389772 gelöscht (Davids Panel-Klick) — danach
-      `ops/ecosystem-comments.config.cjs` entfernen und `verify-tls` erneut fahren.
+- [ ] ploi-Site 389772 gelöscht (Davids Panel-Klick am 2026-08-18) — der Host
+      fällt danach in die Wildcard-Site `platform` (server_name `*.pukalani.app`,
+      Proxy auf denselben Port 3004, Wildcard-Zertifikat deckt; live geprüft).
+- [x] `ops/ecosystem-comments.config.cjs` aus dem Repo entfernt und `verify-tls`
+      erneut gefahren (2026-08-18; der comments-Eintrag im Wächter deckt beide
+      Zustände — eigene Lineage wie Wildcard).
 
 ---
 

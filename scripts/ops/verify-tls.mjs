@@ -33,16 +33,18 @@ import tls from 'node:tls'
 const HOSTS = [
   { host: 'pukalani.app', note: 'Landing (Apex — proxied über Cloudflare; am Ursprung seit D4 ein Cloudflare-Origin-Zertifikat, NICHT browservertraut und deshalb hier nur über die Kante geprüft)' },
   { host: 'www.pukalani.app', ip: '49.13.211.173', note: 'Landing am Ursprung (von der Wildcard gedeckt)' },
-  { host: 'admin.pukalani.app', ip: '49.13.211.173', note: 'Betreiber-Konsole (AH-4)' },
-  // Der Altname der Konsole (AH-4, 2026-08-11) — er BLEIBT hier stehen, aus
-  // demselben Grund wie my./start. weiter unten: die 301 wird erst NACH dem
-  // Handshake gesprochen. Ein abgelaufenes Zertifikat hier bricht jedes
-  // Lesezeichen und jeden Dienst, der noch auf den Altnamen zeigt, ohne dass
-  // die neue Adresse etwas davon merkt. Beide Namen hängen an EINER Lineage
-  // (`control.pukalani.app` — ploi benennt sie nach der SITE, und die behält
-  // ihren Namen); ein Zertifikat, das nur einen der beiden trägt, macht den
-  // anderen sofort unerreichbar.
-  { host: 'control.pukalani.app', ip: '49.13.211.173', note: 'Altname → 301 auf admin (AH-4); zugleich Name der certbot-Lineage beider Hosts' },
+  // Seit AH-4b (2026-08-18) hat die Konsole ihr EIGENES Zertifikat nur für
+  // diesen einen Namen: David hat die ploi-Site im Panel wirklich auf
+  // `admin.pukalani.app` umbenannt und neu angefordert (Lineage folgt der
+  // Site und heißt jetzt ebenso).
+  { host: 'admin.pukalani.app', ip: '49.13.211.173', note: 'Betreiber-Konsole (AH-4; Site + Lineage seit AH-4b wirklich admin)' },
+  // Der Altname der Konsole ist seit AH-4b (2026-08-18, Davids Entscheidung)
+  // BEWUSST tot: keine 301 mehr, der Host fällt in die Wildcard-Site platform
+  // und antwortet dort 404 (rein betreiber-interner Name, der Stripe-Webhook
+  // zeigt seit AH-4 auf admin). Der Eintrag BLEIBT trotzdem stehen: er prüft
+  // die Wildcard-Gesundheit aus Sicht dieses Hosts, und ein stilles TLS-Loch
+  // auf einem reservierten Namen bliebe sonst unbeobachtet.
+  { host: 'control.pukalani.app', ip: '49.13.211.173', note: 'Altname der Konsole — seit AH-4b bewusst 404, von der Wildcard gedeckt' },
   // POOL-COMMUNITY seit F3 (2026-08-12) — vorher ein Silo-Kunde mit eigener
   // ploi-Site und eigener certbot-Lineage.
   //
