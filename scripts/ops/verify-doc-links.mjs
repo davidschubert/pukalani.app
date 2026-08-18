@@ -56,6 +56,19 @@
  * Protokollen wie eine Pfad-Angabe behandelt. `--strict` macht auch die
  * weichen Treffer zu Fehlern — für eine bewusste Durchsicht.
  *
+ * `docs/plans/**` GEHÖRT SEIT 2026-08-18 IN DIESELBE MILDE KATEGORIE, aus dem
+ * SPIEGELBILDLICHEN Grund: dort steht, was NOCH NICHT gebaut ist (CLAUDE.md,
+ * Doku-Ordnung: „docs/plans/ enthält nur, was NOCH NICHT gebaut ist"). Ein
+ * Plan, der die Datei benennt, die er anlegen wird, ist genau richtig
+ * geschrieben — für den Wächter sieht das aber wie ein toter Verweis aus.
+ * Am 2026-08-18 ist das Gate deshalb auf `main` rot geworden: ein frisch
+ * geschriebenes Konzept nannte `packages/agents/scripts/verify-runner-
+ * boundary.mjs`, also die Prüfung, die es selbst vorschlägt. Die Alternative
+ * — Pfade in Plänen zu umschreiben, damit ein Skript ruhig bleibt — macht
+ * Pläne schlechter lesbar und hätte genau EINEN Zweck: den Wächter zu
+ * beruhigen. Ein Link auf ein DOKUMENT bleibt auch hier hart, denn ein Plan
+ * verlinkt nur, was es schon gibt.
+ *
  * Lauf: `node scripts/ops/verify-doc-links.mjs [--strict] [--json]`
  * Exit 0 = keine toten Verweise (außerhalb der Allowlist), sonst 1.
  */
@@ -68,8 +81,19 @@ const args = new Set(process.argv.slice(2))
 const STRICT = args.has('--strict')
 const AS_JSON = args.has('--json')
 
-/** Dokumente, die einen Stand von damals festhalten — siehe Kopf. */
-const PROTOCOL = [/^docs\/archiv\//, /^docs\/OPEN-ITEMS-COMPLETE\.md$/, /^README\.md$/, /^CHANGELOG\.md$/]
+/**
+ * Dokumente, deren PFAD-Angaben nicht den heutigen Stand meinen — siehe Kopf.
+ * Protokolle blicken zurück (`archiv/`, COMPLETE, README, CHANGELOG), Pläne
+ * nach vorn (`docs/plans/`); für einen Pfad-Prüfer ist beides dasselbe: er
+ * kann nicht wissen, ob eine Datei einmal existierte oder erst entstehen soll.
+ */
+const PROTOCOL = [
+  /^docs\/archiv\//,
+  /^docs\/OPEN-ITEMS-COMPLETE\.md$/,
+  /^README\.md$/,
+  /^CHANGELOG\.md$/,
+  /^docs\/plans\//,
+]
 const isProtocol = file => PROTOCOL.some(pattern => pattern.test(file))
 
 /**
