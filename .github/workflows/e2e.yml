@@ -174,28 +174,36 @@ jobs:
       # des Workers und hängten die lokale Suite. Preis: der Browser ist auf
       # ubuntu-latest NICHT vorinstalliert und braucht diesen Schritt.
       #
-      # ── WARUM DER SCHRITT SEIT 2026-08-18 GEPANZERT IST ──────────────────
-      # In der Nacht auf den 18. hing genau er 30 Minuten lang und riss den
-      # ganzen Job in `timeout-minutes: 30` („exceeded the maximum execution
-      # time"). Der Lauf war rot, obwohl kein einziger Test gelaufen war — und
-      # weil der Deploy auf den Abschluss der CI wartet, hing er mit.
-      # Der Download ist die einzige Stelle dieses Jobs, die an einem fremden
-      # CDN hängt; alles andere kommt aus dem Compose-Stack oder aus pnpm.
+      # ── WARUM DER SCHRITT SEIT 2026-08-18 GETEILT UND GEPANZERT IST ──────
+      # In der Nacht auf den 18. hing er 30 Minuten und riss den ganzen Job in
+      # `timeout-minutes: 30` („exceeded the maximum execution time"): rot,
+      # ohne dass ein einziger Test gelaufen war, und der Deploy wartete mit.
       #
-      # Drei Sicherungen, jede gegen einen anderen Ausgang:
-      #  1. CACHE — bei einem Treffer lädt Playwright gar nichts erst herunter
-      #     (es sieht den Browser in ~/.cache/ms-playwright und überspringt
-      #     ihn). Schlüssel ist die Playwright-VERSION: ein Bump im Katalog
-      #     erzeugt automatisch einen neuen Eintrag, ein alter Browser wird nie
-      #     stillschweigend weiterbenutzt.
-      #  2. `timeout 300` JE VERSUCH — gegen den Ausgang von heute Nacht.
-      #     Ein Hänger ist kein Fehlschlag: ohne diese Uhr läuft er, bis das
-      #     JOB-Budget alle ist, und der Schritt-Timeout allein könnte den
-      #     zweiten Versuch nicht mehr starten.
-      #  3. ZWEITER VERSUCH — ein abgerissener Download ist die häufigste
-      #     Sorte Fehler hier und beim zweiten Mal fast immer weg.
-      # Bleibt es nach beiden Versuchen rot, ist es rot: kein `continue-on-
-      # error`, denn ohne Browser ist die Suite keine Aussage.
+      # `install --with-deps` macht ZWEI sehr verschiedene Dinge, und genau das
+      # war die Falle. Der erste Panzerungs-Versuch (ein `timeout` + zweiter
+      # Anlauf um beides herum) hat es am selben Abend SCHLIMMER gemacht:
+      # `apt-get` hing auf dem Azure-Spiegel, `timeout` killte den direkten
+      # Kindprozess — aber das von Playwright als ROOT gestartete `apt-get`
+      # überlebte und hielt `/var/lib/apt/lists/lock` weiter. Versuch 2 war
+      # damit chancenlos („Could not get lock … held by process 7406"). Aus
+      # einem langsamen Schritt wurden zwei sichere Fehlschläge.
+      #
+      # Wiederholt wird deshalb nur, was sich wiederholen LÄSST:
+      #
+      #  · SYSTEMPAKETE (apt) — EIN Versuch, kein innerer `timeout`. Ein
+      #    abgebrochener apt-Lauf hinterlässt eine gesperrte Datei, und der
+      #    nächste Versuch scheitert an der Sperre des vorigen. Backstop ist
+      #    allein der Schritt-Timeout: dann ist der Job rot, aber ehrlich.
+      #  · BROWSER (Download) — gecacht und zweimal versucht. Ein abgebrochener
+      #    Download hinterlässt nichts als eine halbe Datei, die Playwright
+      #    selbst verwirft; hier ist ein zweiter Anlauf gratis und hilft, weil
+      #    ein abgerissener Download die häufigste Störung ist.
+      #
+      # Der CACHE deckt nur den Browser ab (~/.cache/ms-playwright), niemals
+      # apt — Schlüssel ist die Playwright-VERSION, ein Bump im Katalog erzeugt
+      # also automatisch einen neuen Eintrag statt einen alten Browser
+      # weiterzubenutzen. Kein `continue-on-error`: ohne Browser ist die Suite
+      # keine Aussage.
       - name: Playwright-Version bestimmen (Cache-Schlüssel)
         id: playwright-version
         run: |
@@ -203,10 +211,8 @@ jobs:
             "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
 
       # v6 und nicht v4: der Runner meldet für v4 „Node.js 20 is deprecated …
-      # forced to run on Node.js 24". Die Warnung ist heute harmlos, aber sie
-      # ist die Vorstufe zum Abschalten — und die restlichen Actions dieses
-      # Repos stehen ohnehin auf der aktuellen Generation (checkout@v7,
-      # setup-node@v7, upload-artifact@v7).
+      # forced to run on Node.js 24". Die übrigen Actions dieses Repos stehen
+      # ohnehin auf der aktuellen Generation (checkout@v7, setup-node@v7).
       - name: Playwright-Browser aus dem Cache
         id: playwright-cache
         uses: actions/cache@v6
@@ -214,17 +220,21 @@ jobs:
           path: ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-${{ steps.playwright-version.outputs.version }}
 
-      - name: Playwright-Browser (Chromium)
-        timeout-minutes: 12
+      - name: Playwright — Systempakete (apt, EIN Versuch)
+        timeout-minutes: 8
+        run: pnpm --filter comments exec playwright install-deps chromium
+
+      - name: Playwright — Chromium (Download, gecacht, zwei Versuche)
+        timeout-minutes: 8
         run: |
           for attempt in 1 2; do
-            if timeout 300 pnpm --filter comments exec playwright install --with-deps chromium; then
+            if timeout 240 pnpm --filter comments exec playwright install chromium; then
               exit 0
             fi
-            echo "::warning::Chromium-Installation: Versuch $attempt fehlgeschlagen oder hing (300 s) — neuer Versuch"
-            sleep 15
+            echo "::warning::Chromium-Download: Versuch $attempt fehlgeschlagen oder hing (240 s) — neuer Versuch"
+            sleep 10
           done
-          echo "::error::Chromium liess sich in zwei Versuchen nicht installieren."
+          echo "::error::Chromium liess sich in zwei Versuchen nicht herunterladen."
           exit 1
 
       - name: Playwright-E2E (inkl. Realtime gegen echte Instanz)
