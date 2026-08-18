@@ -24,6 +24,14 @@ export default defineAppConfig({
     // plans bleibt leer — das Control verkauft keine Site-Abos an Endnutzer;
     // die Pläne leben in pukalani.control.plans (lookup_keys).
     billing: { enabled: true },
+    // KI-Triage des Ticket-Boards (P3, Davids Entscheidung 2026-08-18):
+    // Layer-Default ist AUS, die App schaltet explizit ein. Modell/baseUrl
+    // kommen per tiefem Merge aus dem tickets-Layer (OpenRouter, haiku);
+    // die Laufzeit-Übersteuerung bleibt app_config.ticketsAiModel
+    // (Board-Einstellungen). Ohne NUXT_TICKETS_AI_KEY in der Server-.env
+    // bleibt isAiAvailable() trotzdem false — der Key ist die zweite Hälfte
+    // (Pflicht-Eintrag in scripts/ops/verify-site-env.mjs, F44-Netz).
+    tickets: { ai: { enabled: true } },
     // Interne Projekt-Doku (/docs) in der Betreiber-Nav. Kein productKey —
     // die Doku gehört keinem Produkt-Layer, sie ist Teil DIESER App; die
     // Autorität bleibt server/middleware/docs-guard.ts.

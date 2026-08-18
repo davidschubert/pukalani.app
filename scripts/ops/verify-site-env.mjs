@@ -104,8 +104,9 @@ const SITES = [
        * ein bezahltes Produkt fehlt. Gefunden, als der Übersetzungs-Knopf auf
        * freelancer.supply (Plan: pro) nicht erschien.
        *
-       * NUR HIER Pflicht: `control` schaltet `pukalani.ai` nicht ein (auch
-       * `tickets.ai` steht auf false), `portfolio` erst recht nicht.
+       * NUR HIER Pflicht: `control` schaltet `pukalani.ai` nicht ein
+       * (seine Ticket-Triage fährt über den EIGENEN Key NUXT_TICKETS_AI_KEY,
+       * s. u.), `portfolio` erst recht nicht.
        */
       'NUXT_AI_KEY',
     ],
@@ -150,6 +151,14 @@ const SITES = [
        * dem nächsten Server-Umzug niemand mehr weiß, dass es sie gab.
        */
       'NUXT_BILLING_SETTINGS_KEY',
+      /**
+       * KI-Triage des Ticket-Boards (P3) — seit 2026-08-18 ist das Gate
+       * `pukalani.tickets.ai.enabled` in apps/control offen (Davids
+       * Entscheidung). Der OpenRouter-Key ist die zweite Hälfte: fehlt er,
+       * ist die Triage still aus (isAiAvailable() false) und die App läuft
+       * trotzdem — exakt der F44-Fall, den diese Liste fangen soll.
+       */
+      'NUXT_TICKETS_AI_KEY',
     ],
   },
   {
