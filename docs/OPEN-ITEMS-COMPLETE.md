@@ -30,6 +30,44 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### Online-Zähler stand seit AH-1 überall auf 0 — Runtime-Key ohne Presences-Scopes ✅ 2026-08-18
+
+Davids Fund (Screenshots von freelancer.supply und comments.pukalani.app):
+„0 online", obwohl er selbst eingeloggt im Dashboard stand. Kein Code-Fehler —
+der beim AH-1-Cutover (2026-08-11) neu angelegte **Runtime-Key des Projekts
+`account`** folgte der damaligen Runbook-Kurzform „sessions/users/rows/health"
+und kam damit OHNE `presences.read`/`presences.write` (DEPLOYMENT.md verlangt
+die volle 10-Scope-Liste; `control` und `portfolio` haben sie). Folge auf
+JEDER Pool-Community, eine Woche lang: Heartbeat, leave und Zähler liefen in
+ein 401 `general_unauthorized_scope`, das drei best-effort-`catch`-Blöcke
+lautlos verschluckten — keine einzige Logzeile. Diagnose-Weg, der trug: erst
+Code-Kette lesen (unauffällig), dann die öffentliche Zähler-Route auf zwei
+Hosts proben (beide 0 ⇒ global, nicht Custom-Domain), dann `/v1/presences`
+direkt mit dem Runtime-Key VOM SERVER aus rufen (Key verlässt den Server nie)
+— die 401-Antwort nannte den fehlenden Scope beim Namen.
+
+Repariert in zwei Hälften: (1) **Scopes ergänzt** in der Console (Davids
+Freigabe, per Chrome-Session) — wirkte sofort, `count: 1` auf
+freelancer.supply, und die frisch geschriebene Presence trug korrekt
+`read(label:<communityId>)` (A4-Grenze intakt). (2) **Härtung** (c2a5e411,
+deployt und am Live-Build-SHA verifiziert): `warnPresenceScopeMissingOnce()`
+in `core/server/utils/presence.ts` meldet GENAU den Scope-Fehler einmal pro
+Prozess als strukturiertes `presence.scope_missing` (F44-Muster; transiente
+Fehler bleiben still, verbrauchen den Merker nicht), verdrahtet in Heartbeat,
+Leave und `listOnlinePresences`. Dazu prüft `probe-key-scopes.mjs` jetzt auch
+`/presences`, und ACCOUNT-CUTOVER.md nennt in der Key-Zeile die volle
+Scope-Liste samt Probe. Beweis: neuer Test 3/3, core 1250/1255, Lint/Typecheck
+grün.
+
+**Gelernt:** Ein Runbook, das eine Scope-Liste ABKÜRZT („sessions/users/rows/
+health"), wird beim nächsten Cutover wörtlich ausgeführt — Aufzählungen in
+Runbooks entweder vollständig schreiben oder auf die maßgebliche Liste
+verweisen, nie paraphrasieren. Und: ein best-effort-`catch` um eine
+Zusatzschicht ist richtig, braucht aber eine Ausnahme für Fehler, die sicher
+Konfiguration sind und nie von selbst heilen — sonst sieht „Feature bewusst
+degradiert" eine Woche lang exakt aus wie „Feature kaputt" (dieselbe Lektion
+wie F44/Mailer, nur an der nächsten Stelle).
+
 ### KI-Übersetzung für User-Content — einer übersetzt für alle ✅ 2026-08-18
 
 Davids Auftrag (2026-08-17, aus der Airbnb-Recherche heraus): Beiträge und
