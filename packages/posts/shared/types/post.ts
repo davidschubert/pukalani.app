@@ -198,6 +198,23 @@ export interface CommunityPost extends Models.Row {
    * Deploy laufen.
    */
   editedAt: string | null
+  /**
+   * ÜBERSETZUNGEN VON TITEL UND TEXT als JSON, Sprachcode → Fassung —
+   * `''`/fehlend = nichts übersetzt (Migration posts-023).
+   *
+   * OPTIONAL im Typ, und das ist bewusst die GEGENENTSCHEIDUNG zu `categoryId`,
+   * `pinned` und `editedAt` darüber: dort erzwingt die Pflicht, dass jede
+   * Anlegestelle sich entscheidet. Hier gibt es nichts zu entscheiden — ein
+   * frischer Beitrag ist nie übersetzt, und ein `translations: ''` in jedem
+   * `create` wäre Zeremonie ohne Aussage. Sie fehlt zudem bei jeder Zeile aus
+   * der Zeit vor der Migration.
+   *
+   * Gelesen wird sie AUSSCHLIESSLICH über `core/shared/ugcTranslations.ts`
+   * (pur, fail-soft) und aufgelöst im Browser. Der Inhalt ist ein CACHE, kein
+   * Inhalt des Autors: `[id].patch.ts` leert ihn, sobald sich Titel oder Text
+   * wirklich ändern.
+   */
+  translations?: string
 }
 
 /**
@@ -435,6 +452,27 @@ export interface CategoryManageResponse extends CategoryListResponse {
  */
 export interface CategoryOrderResponse {
   order: CategoryOrderEntry[]
+}
+
+/**
+ * Antwort von `POST /api/posts/:id/translate` — die Fassung EINES Beitrags in
+ * EINER Sprache.
+ *
+ * `title` ist `null`, wenn das Original keinen hat (Fragen und Umfragen tragen
+ * ihn oft nur im Text) — nie `''`: die Oberfläche soll „kein Titel" nicht von
+ * „leerer Titel" unterscheiden müssen.
+ *
+ * `cached` sagt, ob dafür gerade ein KI-Aufruf bezahlt wurde (`false`) oder ob
+ * die Fassung schon auf der Zeile lag (`true`) — die Oberfläche kann daran den
+ * Unterschied zwischen „sofort da" und „hat eben gerechnet" zeigen, und ein
+ * Beweis-Skript ohne dieses Feld könnte nicht prüfen, dass ein zweiter Klick
+ * nichts mehr kostet.
+ */
+export interface PostTranslateResponse {
+  locale: string
+  title: string | null
+  body: string
+  cached: boolean
 }
 
 /** Vorschlag der KI für EINE Zielsprache — advisory, der Mensch speichert. */

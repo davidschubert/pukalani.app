@@ -93,10 +93,21 @@ const memberWriteRoutes = routeFiles(apiDir).filter(file =>
   && !TRUST_LEVEL_ADMIN_ROUTES.has(file))
 
 describe('Wartungsmodus: jede schreibende Mitglieder-Route prüft ihn', () => {
-  it('findet genau die sieben Mitglieder-Schreibwege', () => {
+  it('findet genau die acht Mitglieder-Schreibwege', () => {
     expect([...memberWriteRoutes].sort()).toEqual([
       '[id].delete.ts',
       '[id].patch.ts',
+      /**
+       * Beitrag übersetzen (2026-08-17): sie steht in dieser Liste, obwohl sie
+       * KEINEN Inhalt schreibt — sie schreibt einen abgeleiteten Cache über die
+       * Operator-Klinke. Der Schalter gehört trotzdem geprüft, und zwar aus dem
+       * zweiten Grund, den die Route selbst nennt: sie ruft den KI-Anbieter
+       * (kostet Geld) und schreibt dabei auf `community_posts` — genau die
+       * Tabelle, an der der Betreiber im Wartungsmodus womöglich arbeitet. Die
+       * Prüfung sitzt hinter dem Cache-Treffer: eine schon vorhandene Fassung
+       * herauszugeben ist reines Lesen und bleibt offen.
+       */
+      '[id]/translate.post.ts',
       /**
        * F1 Stufe 3 — die erste Route, die BEIDES ist: ein Moderator heftet an
        * und schließt (das wäre eine Moderations-Route und damit ausgenommen),

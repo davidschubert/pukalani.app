@@ -2,7 +2,7 @@
 import { bodyToSave as decideBodyToSave } from '../../../core/shared/editorBody'
 import { decidePostAuthorAction } from '../../shared/postAuthorPolicy'
 import { mayEditPost, mayEditPostField } from '../../shared/postEditRights'
-import type { FeedPost, PollState } from '../../shared/types/post'
+import type { FeedPost, PollState, PostTranslateResponse } from '../../shared/types/post'
 
 /**
  * Eine Feed-Karte (Post/Umfrage/Frage). Kommentare kommen über den
@@ -230,6 +230,49 @@ const menuItems = computed<MenuItem[]>(() => {
   return items
 })
 
+/**
+ * ÜBERSETZEN (Paket 3, Davids Entscheidungen 2026-08-17: ein Knopf je Inhalt,
+ * nur Eingeloggte). Die Regel liegt im Core-Composable — hier steht nur, WAS
+ * dieses Produkt übersetzt (Titel UND Text) und welche Route das tut.
+ *
+ * Die Karte ist die EINZIGE Anlegestelle: die Themen-Seite des blueprint-Layers
+ * rendert denselben Beitrag durch genau diese Komponente. Ein Knopf dort wäre
+ * Produkt-Logik im Kompositions-Layer (A14) und die zweite Stelle, an der ein
+ * übersetzter Beitrag gebaut wird.
+ */
+const {
+  canTranslate,
+  showing: translationShowing,
+  busy: translationBusy,
+  entry: translation,
+  show: showTranslation,
+  showOriginal: showPostOriginal,
+} = useUgcTranslation({
+  translations: () => props.post.translations,
+  body: () => props.post.body,
+  translate: async (locale) => {
+    const result = await $fetch<PostTranslateResponse>(`/api/posts/${props.post.$id}/translate`, {
+      method: 'POST',
+      body: { locale },
+    })
+    // `null` heißt „das Original hat keinen Titel" — der Eintrag trägt das Feld
+    // dann gar nicht, und die Anzeige unten fällt auf `post.title` zurück.
+    return { ...(result.title ? { title: result.title } : {}), body: result.body }
+  },
+})
+
+/**
+ * Was tatsächlich dasteht. Der Rückfall auf die Grundfassung ist kein
+ * Sicherheitsgurt für einen unmöglichen Fall: ein Beitrag darf einen Titel
+ * haben, dessen Übersetzung fehlt (die Route liefert `title: null`, wenn das
+ * Original keinen hat) — dann bleibt der Originaltitel stehen, statt zu
+ * verschwinden.
+ */
+const shownTitle = computed(() =>
+  translationShowing.value ? (translation.value?.title ?? props.post.title) : props.post.title)
+const shownBody = computed(() =>
+  translationShowing.value ? (translation.value?.body ?? props.post.body) : props.post.body)
+
 function onPollUpdated(poll: PollState) {
   emit('updated', { ...props.post, poll })
 }
@@ -272,7 +315,7 @@ const showTooltip = computed(() => (props.replyCount ?? 0) > 0)
     </div>
 
     <div class="mt-3 space-y-3">
-      <h3 v-if="post.title && !editing" class="font-semibold" :class="post.type === 'question' ? 'text-lg' : ''">{{ post.title }}</h3>
+      <h3 v-if="shownTitle && !editing" class="font-semibold" :class="post.type === 'question' ? 'text-lg' : ''">{{ shownTitle }}</h3>
 
       <template v-if="editing">
         <UInput
@@ -307,15 +350,46 @@ const showTooltip = computed(() => (props.replyCount ?? 0) > 0)
           <UButton size="xs" :loading="busy" @click="saveEdit">{{ t('posts.card.save') }}</UButton>
         </div>
       </template>
-      <ContentClamp v-else :lines="6" :text="post.body">
+      <!-- DERSELBE Renderpfad für Grundfassung und Übersetzung (nur die Quelle
+           wechselt): ein zweiter wäre die Stelle, an der beide Fassungen
+           auseinanderlaufen. `mentions`/`topicLinks` bleiben dieselben — der
+           Prompt der Route lässt @-Namen und #-Verweise unangetastet stehen. -->
+      <ContentClamp v-else :lines="6" :text="shownBody">
         <MarkdownContent
-          :source="post.body"
+          :source="shownBody"
           :mentions="post.mentions"
           :links="post.topicLinks"
           class="text-default"
-          :class="post.type === 'question' && !post.title ? 'text-lg font-medium' : 'text-sm'"
+          :class="post.type === 'question' && !shownTitle ? 'text-lg font-medium' : 'text-sm'"
         />
       </ContentClamp>
+
+      <!-- Übersetzen: dezent unter dem Text, kein Bedienelement der Karte
+           (deshalb NICHT in der Aktionszeile neben Stimmen und Kommentaren) —
+           es beantwortet eine Frage an DIESEN Text. -->
+      <div v-if="!editing && canTranslate" class="flex flex-wrap items-center gap-1 text-xs text-dimmed">
+        <template v-if="translationShowing">
+          <UIcon name="i-ph-translate" class="size-3.5 shrink-0" />
+          <span>{{ t('translation.notice') }}</span>
+          <span aria-hidden="true">·</span>
+          <UButton color="neutral" variant="link" size="xs" class="p-0" data-post-translate-original @click="showPostOriginal">
+            {{ t('translation.showOriginal') }}
+          </UButton>
+        </template>
+        <UButton
+          v-else
+          color="neutral"
+          variant="link"
+          size="xs"
+          class="-ms-1 p-0"
+          icon="i-ph-translate"
+          :loading="translationBusy"
+          data-post-translate
+          @click="showTranslation"
+        >
+          {{ t('translation.action') }}
+        </UButton>
+      </div>
 
       <PollBlock v-if="post.type === 'poll' && post.poll" :post-id="post.$id" :poll="post.poll" @updated="onPollUpdated" />
     </div>

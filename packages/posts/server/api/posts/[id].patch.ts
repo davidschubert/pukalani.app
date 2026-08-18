@@ -205,7 +205,9 @@ export default defineEventHandler(async (event) => {
     title: input.title || null,
     body: input.body,
     ...categoryChange,
-    ...(contentEdited ? { editedAt: new Date().toISOString() } : {}),
+    // Der Übersetzungs-Cache (posts-023) gilt für den ALTEN Text — eine
+    // stehengelassene Fassung wäre eine stille Lüge in einer anderen Sprache.
+    ...(contentEdited ? { editedAt: new Date().toISOString(), translations: '' } : {}),
   }).catch((error) => { throw toH3Error(error, 'Could not update post') })
 
   /**
