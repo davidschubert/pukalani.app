@@ -45,6 +45,15 @@ export interface RunnerConfig {
   /** Ausführbare Datei der Claude-Code-CLI (launchd hat einen kargen PATH) */
   claudeBin: string
   /**
+   * Datei mit einem langlebigen CLI-Token (`claude setup-token`), das dem
+   * claude-Prozess als CLAUDE_CODE_OAUTH_TOKEN mitgegeben wird. NÖTIG für den
+   * Daemon-Betrieb: das normale OAuth-Login der CLI läuft ab, und headless
+   * kann sie sich nicht re-authentifizieren — der erste Feature-Lauf starb
+   * am 2026-08-18 genau daran (401 bei \$0.00/1 Turn). '' = kein Token-File,
+   * die CLI nutzt ihre eigene gespeicherte Anmeldung.
+   */
+  claudeTokenFile: string
+  /**
    * Verzeichnisse, die dem PATH der KIND-Prozesse vorangestellt werden.
    * launchd startet den Daemon mit kargem PATH (/usr/bin:/bin) — `claude`
    * rettet `claudeBin` (absolut), aber die TESTBEFEHLE eines Laufs fanden ihr
@@ -145,6 +154,7 @@ export function parseRunnerConfig(raw: unknown, home: string): RunnerConfig {
   }
 
   const claudeBin = typeof root.claudeBin === 'string' && root.claudeBin.trim() ? root.claudeBin.trim() : 'claude'
+  const claudeTokenFile = typeof root.claudeTokenFile === 'string' ? expandHome(root.claudeTokenFile.trim(), home) : ''
   const extraPath = Array.isArray(root.extraPath)
     ? root.extraPath.filter((entry): entry is string => typeof entry === 'string' && entry.startsWith('/'))
     : []
@@ -193,7 +203,7 @@ export function parseRunnerConfig(raw: unknown, home: string): RunnerConfig {
     }
   }
 
-  return { endpoint, secretFile, pollSeconds, heartbeatSeconds, maxRunMinutes, stateDir, claudeBin, extraPath, repos }
+  return { endpoint, secretFile, pollSeconds, heartbeatSeconds, maxRunMinutes, stateDir, claudeBin, claudeTokenFile, extraPath, repos }
 }
 
 /**

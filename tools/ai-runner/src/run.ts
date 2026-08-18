@@ -1,6 +1,6 @@
 import { spawn } from 'node:child_process'
 import { randomUUID } from 'node:crypto'
-import { createWriteStream, existsSync } from 'node:fs'
+import { createWriteStream, existsSync, readFileSync } from 'node:fs'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { createInterface } from 'node:readline'
@@ -222,7 +222,7 @@ async function performRun(
     // claude startet selbst Kinder (node, git, Bash-Werkzeug) — unter launchd
     // erben die sonst denselben kargen PATH, an dem die Testbefehle des
     // ersten Prod-Laufs gescheitert sind (childEnv in exec.ts).
-    env: childEnv(runPathPrefix(ctx.config)),
+    env: withClaudeToken(childEnv(runPathPrefix(ctx.config)), ctx.config.claudeTokenFile),
   })
 
   /**
@@ -459,6 +459,25 @@ function emptyReport(durationMs: number, summary: ResultSummary | null): RunRepo
     model: '',
     transcriptFileId: '',
     workBranch: '',
+  }
+}
+
+/**
+ * CLAUDE_CODE_OAUTH_TOKEN aus der Token-Datei — JE LAUF frisch gelesen, damit
+ * ein rotiertes Token ohne Daemon-Neustart greift. Das Token wird NIE geloggt;
+ * eine fehlende/leere Datei ist kein Fehler (dann gilt die gespeicherte
+ * CLI-Anmeldung), aber eine Warnzeile hilft der Diagnose.
+ */
+function withClaudeToken(env: NodeJS.ProcessEnv, tokenFile: string): NodeJS.ProcessEnv {
+  if (!tokenFile) return env
+  try {
+    const token = readFileSync(tokenFile, 'utf8').trim()
+    if (!token) return env
+    return { ...env, CLAUDE_CODE_OAUTH_TOKEN: token }
+  }
+  catch {
+    log.warn(`Token-Datei ${tokenFile} nicht lesbar — claude nutzt seine gespeicherte Anmeldung`)
+    return env
   }
 }
 
