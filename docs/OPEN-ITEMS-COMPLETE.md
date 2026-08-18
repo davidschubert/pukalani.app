@@ -30,6 +30,58 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### Presence-Vorfahrt: sichtbarer Tab schlägt away-Tab fremder Mandanten ✅ 2026-08-18
+
+Die Beobachtung stammt aus der Nachmessung des Scope-Vorfalls (Eintrag
+darunter): die Plattform führt bewusst EINE Presence pro User (presenceId =
+userId). Hat jemand die Dashboards ZWEIER Communities gleichzeitig offen, sind
+das zwei Origins ohne Koordinationsmöglichkeit im Browser — und beide Tabs
+schreiben dieselbe Zeile. Der versteckte Tab (`metadata.away=true`, von der
+Browser-Drossel auf ~1×/min gebremst) stahl dem sichtbaren Tab (20-s-Takt)
+regelmäßig den `metadata.tenantId`-Stempel; weil beide Leser fail-closed auf
+genau diesen Stempel filtern, flackerte der Online-Zähler BEIDER Communities
+zwischen 0 und 1 (gemessen: Davids Presence wechselte binnen 30 s zwischen
+freelancer.supply und comments.pukalani.app). Alt-Design, kein Fehler des
+Scope-Fixes — aber sichtbar für jeden Kunden mit zwei Tabs.
+
+Entwurf (Davids Entscheidung: „Voll inkl. Leave-Guard"): der Server ist der
+EINE Schiedsrichter. Pure Regel `core/shared/presencePriority.ts` — ein
+away-Schreiber weicht einer FRISCHEN (<60 s = drei verpasste Heartbeats),
+SICHTBAREN Presence eines FREMDEN Mandanten; alles andere bleibt bewusst
+Letzter-gewinnt (away-über-away: sonst stürbe die Presence, niemand verlängerte
+die Expiry; gleicher Mandant: sonst käme die away-Meldung des EINZIGEN Tabs nie
+durch, seine eigene letzte Presence trägt denselben Stempel). Konstanten-Kette
+per Test genagelt: 60 s Vorrang < 180 s Leser-Frische < 240 s Expiry. Drei
+Anbauten: Heartbeat prüft NUR im away-Fall (kein Zusatz-GET im 20-s-Normalfall),
+der Leave-Beacon löscht nicht mehr mandantenblind (das Schließen eines
+Hintergrund-Tabs radierte den sichtbaren sonst für ~20 s aus), und away-Tabs
+upserten NICHT mehr per WS — der liefe direkt an der Server-Regel vorbei, und
+genau das war die offene Entwurfsfrage („der away-Client weiß nicht, ob er der
+einzige Schreiber ist"): er muss es nicht wissen, er schreibt nur noch über den
+HTTP-Heartbeat, und der Server sieht nach. Preis: der „im anderen Tab"-Badge
+erreicht andere per 20-s-Poll statt ~280 ms — für einen versteckten Tab egal.
+
+Beweis (Commit 540a6fc5, live als Build 4c758498 auf allen fünf Hosts):
+13 Unit-Tests der puren Regel; neuer `packages/core/scripts/
+verify-presence-away-priority.mjs` 12/12 über den ECHTEN Pfad (zwei lokale
+Mandanten-Hosts, ein Nutzer, Stempel bleibt beim sichtbaren Tab; Gegenproben:
+gleicher Mandant kommt durch, away-über-away wechselt, leave über den eigenen
+Host löscht weiterhin); `verify-presence-boundary.mjs` 23/23 als
+Regressions-Netz. Die Mandanten-Stempel ermittelt das neue Skript EMPIRISCH aus
+der geschriebenen Presence statt aus einer Tabelle — `communities` lebt im
+Control Plane, dafür hat es keinen Schlüssel.
+
+**Gelernt:** Zweierlei. (1) Der Regressions-Beweis war zuerst 16/23 rot — nicht
+wegen des Codes, sondern weil die Control-Naht (`NUXT_ONBOARDING_CONTROL_URL`
+→ :3004) ins Leere zeigte und die A5-Label-Vergabe deshalb scheiterte. Die
+CLAUDE.md-Regel „ein Beweis über Prozessgrenzen ist so ehrlich wie sein
+ENTFERNTESTER Dienst" gilt auch für REGRESSIONS-Beweise: Control-Server im
+Worktree auf 3014 hochfahren, Platform mit Env-Override starten ⇒ 23/23.
+(2) Eine Prüfung, die ihren Erwartungswert aus DERSELBEN Antwort ableitet, die
+sie prüft, ist immer grün (der Aufwärm-Schritt verglich `warmB.tenantId` mit
+dem daraus gebauten `TENANT_B`) — Erwartungswerte müssen aus einer ANDEREN
+Quelle stammen, hier: „ungleich dem Stempel von A".
+
 ### Online-Zähler stand seit AH-1 überall auf 0 — Runtime-Key ohne Presences-Scopes ✅ 2026-08-18
 
 Davids Fund (Screenshots von freelancer.supply und comments.pukalani.app):
