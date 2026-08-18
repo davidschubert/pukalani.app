@@ -7,6 +7,21 @@ die kleinen, verstreuten Beschlüsse.
 
 ---
 
+## 2026-08-18 — AH-4c beschlossen: Appwrite-Projekt `control` zieht nach `admin` um
+
+**Davids Entscheidung** (strukturierte Frage, GEGEN die Empfehlung „nur
+Anzeige-Name ändern"): das Projekt wird per AH-1-Muster umgezogen — neues
+Projekt `admin`, Daten + Nutzer mit Hashes, NEUE Keys (Secrets sind nicht
+kopierbar), Env-Schnitt auf admin- und platform-Site, Wartungsfenster.
+Begründung: konsistente Namenswelt nach AH-4b; die Gegenargumente (rein
+interne Kosmetik, kundenwirksames Risikofenster an der platform-Naht) sind
+bekannt und akzeptiert. Am selben Tag außerdem: **Projekt `comments` in der
+Konsole GELÖSCHT** (war eingefroren; Rückweg nur noch Offsite-Dumps) —
+sauber durchgelaufen, 404-Gegenprobe. Runbook:
+docs/runbooks/ADMIN-PROJEKT-CUTOVER.md · OPEN-ITEMS Punkt 5 (AH-4c).
+
+---
+
 ## 2026-08-18 — AH-4b: Konsolen-Site wirklich umbenannt, 301 des Altnamens aufgegeben; comments-Site-Löschung vorgezogen
 
 **Auslöser:** David hat die ploi-Site der Betreiber-Konsole im Panel von
