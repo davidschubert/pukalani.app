@@ -119,6 +119,17 @@ und **die Schwärzung leert den Cache mit** (`redact.post.ts` — sonst gäbe
 der Knopf den geschwärzten Text als Cache-Treffer wortgleich wieder heraus).
 Beweis jetzt 32/32 über alle fünf Inhaltsarten; live auf demo: Event, Kurs
 und Lektion DE→EN je mit Cache-Gegenprobe.
+KOSTEN-SCHÄTZUNG (2026-08-18, nachgemessen: kein `app_config.aiModel`-
+Override ⇒ Default Claude Haiku 4.5 via OpenRouter, ~1 $/Mio. Input- und
+~5 $/Mio. Output-Token): Kommentar ~0,1 Cent, Beitrag/Event ~0,3–0,5 Cent,
+Maximaltexte (10k/15k Zeichen) ~2–3 Cent je Übersetzung. Monatlich damit:
+heutige Nutzung < 1–2 €, eine lebhafte zweisprachige Community ~10–25 €;
+harte Obergrenze je Konto ist der Tages-Eimer (100 × Worst-Case-2-Cent ≈
+60 €/Monat bei täglich ausgereiztem Limit mit Maximaltexten, realistisch
+~10 €). Die Kurve ist DEGRESSIV: jedes Inhalt-Sprache-Paar kostet genau
+einmal, populäre Inhalte sind am schnellsten dauerhaft im Cache. Hebel ohne
+Deploy, falls es je spürbar wird: `app_config.aiModel` (günstigeres Modell)
+und das Tages-Limit.
 
 Beweise: `packages/core/scripts/verify-ugc-translation.mjs` **16/16** gegen
 echte Routen + KI (cached:false → cached:true zeichengleich, Zeile trägt die
