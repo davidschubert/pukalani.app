@@ -85,6 +85,11 @@ export interface TicketWatchingResponse {
   tickets: (TicketRow & { listTitle: string })[]
 }
 
+/** Antwort von GET /api/tickets/:id/files */
+export interface TicketFilesResponse {
+  files: TicketFileRow[]
+}
+
 /** Antwort von GET /api/tickets/board */
 export interface TicketBoardResponse {
   lists: TicketListRow[]

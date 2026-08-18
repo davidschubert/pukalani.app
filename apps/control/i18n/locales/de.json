@@ -114,6 +114,10 @@
         "errorSecretNotStored": "Endpunkt angelegt, Geheimnis NICHT gespeichert — bei Stripe löschen und neu anlegen",
         "errorNoStorage": "Ohne NUXT_BILLING_SETTINGS_KEY kann das Geheimnis nicht abgelegt werden — nichts angelegt"
       }
+    },
+    "ticketRunner": {
+      "title": "Ausführen",
+      "hint": "Der Auftrag entsteht aus Titel, Beschreibung und den offenen Punkten der Checkliste."
     }
   }
 }

@@ -152,7 +152,7 @@ async function makeQueuedRun(subjectId) {
       status: 'queued', repoKey: 'maui-monorepo', baseBranch: 'main', workBranch: '',
       model: 'sonnet', permissionMode: 'plan', interactive: false,
       promptSource: 'Beweislauf — wird nie ausgeführt.', promptTrusted: true,
-      testCommands: '', maxBudgetUsd: 0, sessionId: '',
+      testCommands: '', attachmentsJson: '', maxBudgetUsd: 0, sessionId: '',
       claimedAt: null, startedAt: null, finishedAt: null,
       resultJson: '', error: '', createdBy: 'verify-script',
     },

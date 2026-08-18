@@ -109,3 +109,18 @@ export const runnerCreateSchema = z.object({
   name: z.string().trim().min(1).max(120),
   kind: z.enum(['local', 'ssh']).optional().default('local'),
 })
+
+/**
+ * Einen Rechner ändern (Board). BEIDE Felder optional, und zwar mit
+ * `.refine`-Netz: ein leerer Body wäre ein Schreibvorgang ohne Inhalt.
+ *
+ * `secretHash` steht hier bewusst NICHT — ein Secret rotiert man nicht per
+ * PATCH, sondern über eine Route, deren Antwort das neue Token genau einmal
+ * zeigt (wie die Registrierung).
+ */
+export const runnerUpdateSchema = z.object({
+  status: z.enum(['active', 'disabled']).optional(),
+  name: z.string().trim().min(1).max(120).optional(),
+}).refine(body => body.status !== undefined || body.name !== undefined, {
+  message: 'Nothing to update',
+})

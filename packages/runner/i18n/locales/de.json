@@ -1,0 +1,159 @@
+{
+  "admin": {
+    "nav": {
+      "runner": "AI-Runner"
+    }
+  },
+  "runner": {
+    "page": {
+      "title": "AI-Runner",
+      "subtitle": "Rechner verwalten und Läufe verfolgen. Gestartet wird ein Lauf am Ticket, nicht hier.",
+      "loadFailed": "Die Daten konnten nicht geladen werden — möglicherweise ist deine Sitzung abgelaufen.",
+      "retry": "Erneut versuchen"
+    },
+    "runners": {
+      "title": "Rechner",
+      "register": "Runner registrieren",
+      "never": "Noch nie",
+      "disable": "Stilllegen",
+      "enable": "Aktivieren",
+      "updated": "Rechner aktualisiert.",
+      "updateFailed": "Der Rechner wurde nicht geändert.",
+      "updateFailedHint": "Es gilt weiter der bisherige Stand — probier es gleich noch einmal.",
+      "emptyTitle": "Noch kein Rechner",
+      "empty": "Ein Runner ist ein Rechner, der die Läufe ausführt. Beim Registrieren bekommst du sein Token — einmalig.",
+      "col": {
+        "name": "Name",
+        "kind": "Art",
+        "status": "Status",
+        "lastSeen": "Zuletzt gesehen"
+      },
+      "kind": {
+        "local": "Lokal",
+        "ssh": "Über SSH"
+      },
+      "status": {
+        "active": "Aktiv",
+        "disabled": "Stillgelegt"
+      }
+    },
+    "register": {
+      "title": "Runner registrieren",
+      "description": "Ein Rechner, der Läufe ausführt.",
+      "name": "Name",
+      "namePlaceholder": "MacBook Pro (David)",
+      "kind": "Art",
+      "kindHelp": "Nur zur Anzeige — wie er arbeitet, entscheidet der Rechner selbst.",
+      "submit": "Registrieren",
+      "tokenTitle": "Das Token — nur jetzt sichtbar",
+      "tokenText": "Kopier es in die Konfiguration des Rechners. Gespeichert wird nur sein Fingerabdruck; noch einmal anzeigen geht nicht.",
+      "copy": "Kopieren",
+      "copied": "Token in der Zwischenablage.",
+      "done": "Fertig",
+      "failed": "Der Rechner wurde nicht registriert.",
+      "failedHint": "Dein Name steht noch im Feld — probier es gleich noch einmal."
+    },
+    "runs": {
+      "title": "Letzte Läufe",
+      "emptyTitle": "Noch kein Lauf",
+      "empty": "Öffne ein Ticket und starte dort einen Lauf — danach steht er hier.",
+      "col": {
+        "subject": "Auftrag",
+        "status": "Status",
+        "model": "Modell",
+        "created": "Angelegt",
+        "duration": "Dauer"
+      }
+    },
+    "status": {
+      "draft": "Entwurf",
+      "queued": "Wartet",
+      "claimed": "Übernommen",
+      "running": "Läuft",
+      "succeeded": "Fertig",
+      "needs_input": "Rückfrage",
+      "failed": "Fehlgeschlagen",
+      "cancelled": "Abgebrochen"
+    },
+    "modes": {
+      "default": "Standard (jedes Mal fragen)",
+      "auto": "Automatisch",
+      "plan": "Nur planen (schreibt nichts)",
+      "acceptEdits": "Dateien ändern",
+      "dontAsk": "Nicht nachfragen",
+      "bypassPermissions": "Alle Rechte"
+    },
+    "form": {
+      "runner": "Rechner",
+      "runnerPlaceholder": "Rechner wählen …",
+      "repo": "Projekt",
+      "repoHelp": "Nur der Schlüssel reist — welcher Ordner dahinter liegt, weiß der Rechner.",
+      "model": "Modell",
+      "mode": "Berechtigungen",
+      "budget": "Budget (USD)",
+      "budgetHelp": "Leer lassen = der Rechner nimmt seinen eigenen Deckel.",
+      "tests": "Testbefehle",
+      "testsHelp": "Ein Befehl je Zeile, höchstens zehn. Sie laufen nach der Arbeit im Worktree.",
+      "testsPlaceholder": "pnpm lint",
+      "start": "Lauf starten",
+      "attachments": "{count} Anhang/Anhänge werden mitgeschickt",
+      "untrustedTitle": "Text aus Gast-Feedback",
+      "untrustedText": "In diesem Auftrag steckt fremder Text. Deshalb stehen nur die beiden vorsichtigen Modi zur Wahl — der Server lässt die anderen ohnehin nicht durch.",
+      "noRunnersTitle": "Kein aktiver Rechner",
+      "noRunnersText": "Ein Lauf braucht einen Rechner, der ihn abholt. Registrier zuerst einen.",
+      "noRunnersAction": "Zu den Rechnern",
+      "runnersFailed": "Die Rechner konnten nicht geladen werden — möglicherweise ist deine Sitzung abgelaufen.",
+      "errors": {
+        "runner": "Wähl einen Rechner.",
+        "model": "Wähl ein Modell.",
+        "mode": "Dieser Modus ist für einen Auftrag mit fremdem Text gesperrt.",
+        "repo": "Wähl ein Projekt.",
+        "budget": "Eine Zahl zwischen 0 und 100.",
+        "tests": "Zu viele Testbefehle — kürz die Liste."
+      }
+    },
+    "panel": {
+      "loadFailed": "Die Läufe konnten nicht geladen werden — möglicherweise ist deine Sitzung abgelaufen.",
+      "retry": "Erneut versuchen",
+      "started": "Lauf gestartet.",
+      "startedHint": "Der nächste Rechner, der fragt, übernimmt ihn — der Fortschritt erscheint hier.",
+      "cancel": "Abbrechen",
+      "cancelTitle": "Lauf abbrechen?",
+      "cancelText": "Der Lauf wird abgebrochen. Ein Rechner, der gerade daran arbeitet, erfährt es bei seiner nächsten Meldung und hört dann auf.",
+      "cancelConfirm": "Lauf abbrechen",
+      "cancelled": "Lauf abgebrochen.",
+      "cancelledHint": "Angefangene Arbeit bleibt im Worktree auf dem Rechner liegen.",
+      "newRun": "Neuen Lauf starten",
+      "history": "Frühere Läufe",
+      "errors": {
+        "start": "Der Lauf wurde nicht gestartet.",
+        "startHint": "Es wurde nichts angelegt — deine Eingaben stehen noch im Formular.",
+        "mode": "Dieser Modus ist für einen Auftrag mit fremdem Text gesperrt.",
+        "runner": "Der gewählte Rechner steht nicht bereit.",
+        "tooManyFiles": "Zu viele Anhänge für einen Lauf.",
+        "fileType": "Ein Anhang hat ein Format, das nicht mitgeschickt werden kann.",
+        "cancel": "Der Lauf wurde nicht abgebrochen — er steht weiter auf dem bisherigen Stand."
+      }
+    },
+    "report": {
+      "branch": "Branch",
+      "commit": "Commit",
+      "diffstat": "Änderungen",
+      "tests": "Tests",
+      "duration": "Dauer",
+      "cost": "Kosten",
+      "model": "Modell",
+      "repo": "Projekt",
+      "session": "Sitzung",
+      "failed": "Der Lauf ist gescheitert",
+      "needsInputTitle": "Der Lauf hat eine Rückfrage",
+      "needsInputText": "Antworten und fortsetzen kommt mit dem Rechner-Dienst. Bis dahin: Rückfrage lesen und einen neuen Lauf starten.",
+      "raw": "Der Bericht ließ sich nicht lesen — hier steht er roh:",
+      "none": "Kein Bericht."
+    },
+    "timeline": {
+      "waiting": "Noch keine Meldung — der Lauf wartet auf einen Rechner.",
+      "empty": "Für diesen Lauf gibt es keine Meldungen."
+    }
+  }
+}

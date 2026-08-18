@@ -1,0 +1,159 @@
+{
+  "admin": {
+    "nav": {
+      "runner": "AI-Runner"
+    }
+  },
+  "runner": {
+    "page": {
+      "title": "AI-Runner",
+      "subtitle": "Manage machines and follow runs. A run is started on the ticket, not here.",
+      "loadFailed": "The data could not be loaded — your session may have expired.",
+      "retry": "Retry"
+    },
+    "runners": {
+      "title": "Machines",
+      "register": "Register runner",
+      "never": "Never",
+      "disable": "Disable",
+      "enable": "Enable",
+      "updated": "Runner updated.",
+      "updateFailed": "The runner was not changed.",
+      "updateFailedHint": "The previous state still applies — try again in a moment.",
+      "emptyTitle": "No machine yet",
+      "empty": "A runner is a machine that carries out the runs. Registering shows you its token — once.",
+      "col": {
+        "name": "Name",
+        "kind": "Kind",
+        "status": "Status",
+        "lastSeen": "Last seen"
+      },
+      "kind": {
+        "local": "Local",
+        "ssh": "Over SSH"
+      },
+      "status": {
+        "active": "Active",
+        "disabled": "Disabled"
+      }
+    },
+    "register": {
+      "title": "Register runner",
+      "description": "A machine that carries out runs.",
+      "name": "Name",
+      "namePlaceholder": "MacBook Pro (David)",
+      "kind": "Kind",
+      "kindHelp": "Display only — how it works is the machine's own decision.",
+      "submit": "Register",
+      "tokenTitle": "The token — visible only now",
+      "tokenText": "Copy it into the machine's configuration. Only its fingerprint is stored; there is no way to show it again.",
+      "copy": "Copy",
+      "copied": "Token copied to clipboard.",
+      "done": "Done",
+      "failed": "The runner was not registered.",
+      "failedHint": "Your name is still in the field — try again in a moment."
+    },
+    "runs": {
+      "title": "Recent runs",
+      "emptyTitle": "No run yet",
+      "empty": "Open a ticket and start a run there — it shows up here afterwards.",
+      "col": {
+        "subject": "Subject",
+        "status": "Status",
+        "model": "Model",
+        "created": "Created",
+        "duration": "Duration"
+      }
+    },
+    "status": {
+      "draft": "Draft",
+      "queued": "Waiting",
+      "claimed": "Claimed",
+      "running": "Running",
+      "succeeded": "Done",
+      "needs_input": "Needs input",
+      "failed": "Failed",
+      "cancelled": "Cancelled"
+    },
+    "modes": {
+      "default": "Default (ask every time)",
+      "auto": "Automatic",
+      "plan": "Plan only (writes nothing)",
+      "acceptEdits": "Edit files",
+      "dontAsk": "Don't ask",
+      "bypassPermissions": "All permissions"
+    },
+    "form": {
+      "runner": "Machine",
+      "runnerPlaceholder": "Pick a machine …",
+      "repo": "Project",
+      "repoHelp": "Only the key travels — which folder is behind it, the machine knows.",
+      "model": "Model",
+      "mode": "Permissions",
+      "budget": "Budget (USD)",
+      "budgetHelp": "Leave empty = the machine uses its own cap.",
+      "tests": "Test commands",
+      "testsHelp": "One command per line, ten at most. They run in the worktree after the work.",
+      "testsPlaceholder": "pnpm lint",
+      "start": "Start run",
+      "attachments": "{count} attachment(s) will be sent along",
+      "untrustedTitle": "Text from guest feedback",
+      "untrustedText": "This job contains text from someone else. That is why only the two careful modes are offered — the server would not accept the others anyway.",
+      "noRunnersTitle": "No active machine",
+      "noRunnersText": "A run needs a machine to pick it up. Register one first.",
+      "noRunnersAction": "Go to machines",
+      "runnersFailed": "The machines could not be loaded — your session may have expired.",
+      "errors": {
+        "runner": "Pick a machine.",
+        "model": "Pick a model.",
+        "mode": "This mode is blocked for a job containing foreign text.",
+        "repo": "Pick a project.",
+        "budget": "A number between 0 and 100.",
+        "tests": "Too many test commands — shorten the list."
+      }
+    },
+    "panel": {
+      "loadFailed": "The runs could not be loaded — your session may have expired.",
+      "retry": "Retry",
+      "started": "Run started.",
+      "startedHint": "The next machine that asks will take it — progress shows up here.",
+      "cancel": "Cancel",
+      "cancelTitle": "Cancel run?",
+      "cancelText": "The run will be cancelled. A machine already working on it finds out with its next report and stops then.",
+      "cancelConfirm": "Cancel run",
+      "cancelled": "Run cancelled.",
+      "cancelledHint": "Work already done stays in the worktree on the machine.",
+      "newRun": "Start a new run",
+      "history": "Earlier runs",
+      "errors": {
+        "start": "The run was not started.",
+        "startHint": "Nothing was created — your entries are still in the form.",
+        "mode": "This mode is blocked for a job containing foreign text.",
+        "runner": "The chosen machine is not available.",
+        "tooManyFiles": "Too many attachments for one run.",
+        "fileType": "One attachment has a format that cannot be sent along.",
+        "cancel": "The run was not cancelled — it stays as it was."
+      }
+    },
+    "report": {
+      "branch": "Branch",
+      "commit": "Commit",
+      "diffstat": "Changes",
+      "tests": "Tests",
+      "duration": "Duration",
+      "cost": "Cost",
+      "model": "Model",
+      "repo": "Project",
+      "session": "Session",
+      "failed": "The run failed",
+      "needsInputTitle": "The run has a question",
+      "needsInputText": "Answering and resuming comes with the machine service. Until then: read the question and start a new run.",
+      "raw": "The report could not be read — here it is raw:",
+      "none": "No report."
+    },
+    "timeline": {
+      "waiting": "No report yet — the run is waiting for a machine.",
+      "empty": "There are no reports for this run."
+    }
+  }
+}
