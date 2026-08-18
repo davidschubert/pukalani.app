@@ -7,10 +7,18 @@ const auth = useAuthStore()
 const { logout } = useLogout()
 const canSiteDashboard = useCommunityCapability('dashboard.access')
 
+/**
+ * Die Rolle steht unter dem Namen (Davids Vorgabe 2026-08-17, Screenshot 2) —
+ * dieselbe Zeile wie im Dashboard-Konto-Menü, damit beide Orte dasselbe sagen.
+ * Ohne nennbare Rolle bleibt sie weg statt etwas zu behaupten.
+ */
+const roleLabel = useRoleLabel()
+
 const items = computed<DropdownMenuItem[]>(() => [
   {
     label: auth.user?.name || t('ui.account'),
     avatar: { alt: auth.user?.name || t('ui.account') },
+    ...(roleLabel.value ? { description: roleLabel.value } : {}),
     type: 'label',
   },
   { type: 'separator' },

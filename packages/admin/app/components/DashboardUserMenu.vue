@@ -20,6 +20,8 @@ const { planAllows } = useTenantPlan()
 const { themes, theme, variant, setTheme, setVariant, neutrals, neutral, setNeutral, canChooseTheme, canChooseNeutral } = useTheme()
 const localeOptions = useLocaleOptions()
 const { capabilities: siteCaps } = useCommunityRole()
+/** Rolle unter dem Namen — die EINE Regel dafür liegt in core (useRoleLabel). */
+const roleLabel = useRoleLabel()
 
 // Dieselbe Ebenen-Regel wie in der Sidebar (E9, core/shared/dashboardNav.ts):
 // das Account-Menü ist ein zweiter Ausgang der GLEICHEN Registry — ohne den
@@ -153,7 +155,15 @@ const items = computed<SwatchItem[][]>(() => {
   ).map(m => ({ label: t(m.labelKey), icon: m.icon, to: localePath(m.to) }))
 
   return [
-    [{ type: 'label', label: displayName.value, avatar: avatar.value }],
+    // Die Rolle unter dem Namen (Davids Vorgabe 2026-08-17, Screenshot 1) —
+    // wortgleich mit dem öffentlichen Konto-Menü (core/UserMenu.vue), weil
+    // beide dieselbe Frage beantworten. Ohne nennbare Rolle fehlt die Zeile.
+    [{
+      type: 'label',
+      label: displayName.value,
+      avatar: avatar.value,
+      ...(roleLabel.value ? { description: roleLabel.value } : {}),
+    }],
     [
       ...userMenuModules,
       /**

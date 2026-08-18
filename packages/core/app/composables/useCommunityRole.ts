@@ -1,5 +1,6 @@
 import type { Capability } from '../../shared/types/authz'
 import { communityCapabilitiesFor, type CommunityRole } from '../../shared/communityAuthz'
+import { roleLabelKey } from '../../shared/roleLabel'
 import { trustLevelCapabilitiesFor, type TrustLevel } from '../../shared/trustLevel'
 
 /**
@@ -72,4 +73,44 @@ export function useCapability(capability: Capability) {
   const { capabilities } = useCommunityRole()
   return computed(() =>
     userHasCapability(auth.user, capability) || capabilities.value.has(capability))
+}
+
+/**
+ * WELCHE ROLLE HABE ICH HIER? (Davids Frage 2026-08-17) — der Text, der in
+ * beiden Konto-Menüs unter dem Namen steht (öffentliche Kopfzeile und
+ * Dashboard-Seitenleiste).
+ *
+ * Sie war nirgends ablesbar: die Rolle entscheidet über jeden Menüpunkt, stand
+ * aber an keiner Stelle der Oberfläche — man merkte sie nur daran, was FEHLT.
+ * Das ist die schlechteste Art, eine Rechte-Frage zu beantworten, und genau der
+ * Grund, warum ein fehlender Menüpunkt („Kurse") wie ein Fehler aussah.
+ *
+ * ZWEI QUELLEN, EINE ZEILE — und die Reihenfolge ist die Aussage: auf einem
+ * Mandanten-Host zählt die COMMUNITY-Rolle, denn das ist die Rolle, an der hier
+ * jede Sichtbarkeit hängt. Nur wo es keine gibt (Kontroll-Host, Silo,
+ * Playground), tritt das globale Operator-Label an ihre Stelle — dort ist es
+ * die einzige Rolle, die es überhaupt gibt.
+ *
+ * Ein Betreiber MIT Community-Rolle sieht bewusst nur diese: sein Label ändert
+ * an dem, was ihm diese Community zeigt, nichts (der Break-Glass ist die
+ * Ausnahme, nicht sein Alltag) — zwei Rollen nebeneinander wären zwei Antworten
+ * auf eine Frage.
+ *
+ * `null` = keine Rolle nennbar; die Menüs lassen die Zeile dann weg, statt
+ * „Mitglied" zu behaupten. Die Vertrauensstufe steht bewusst NICHT hier: sie
+ * ist keine Rolle, sondern etwas Verdientes, und hätte im selben Satz nur
+ * verwirrt.
+ *
+ * Die REGEL selbst ist pur und getestet (`roleLabelKey`, shared/roleLabel.ts) —
+ * hier bleibt nur das Übersetzen, damit „beide Menüs sagen dasselbe" eine
+ * geprüfte Tatsache ist und nicht eine Beobachtung an zwei Stellen.
+ */
+export function useRoleLabel() {
+  const { t } = useI18n()
+  const auth = useAuthStore()
+  const { role } = useCommunityRole()
+  return computed<string | null>(() => {
+    const key = roleLabelKey(role.value, auth.user?.labels)
+    return key ? t(key) : null
+  })
 }

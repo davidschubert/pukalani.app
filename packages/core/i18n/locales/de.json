@@ -204,6 +204,19 @@
     "avatarLabel": "Avatar-URL",
     "avatarPlaceholder": "https://…"
   },
+  "community": {
+    "roles": {
+      "owner": "Inhaber/in",
+      "admin": "Administrator/in",
+      "moderator": "Moderator/in",
+      "editor": "Redakteur/in",
+      "viewer": "Leser/in"
+    },
+    "operatorRoles": {
+      "admin": "Betreiber-Admin",
+      "moderator": "Betreiber-Moderator"
+    }
+  },
   "account": {
     "nav": {
       "profile": "Profil"
