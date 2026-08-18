@@ -400,5 +400,18 @@
       "thanks": "Danke",
       "idea": "Hilfreich"
     }
+  },
+  "translation": {
+    "action": "Übersetzen",
+    "notice": "Automatisch übersetzt",
+    "showOriginal": "Original anzeigen",
+    "unavailable": "Übersetzung nicht verfügbar",
+    "unavailableHint": "Hier ist die automatische Übersetzung nicht eingerichtet.",
+    "rateLimited": "Zu viele Übersetzungen",
+    "rateLimitedHint": "Bitte versuche es in ein paar Minuten noch einmal.",
+      "dailyLimit": "Tagesgrenze erreicht",
+      "dailyLimitHint": "Du hast heute schon viel übersetzt. Morgen geht es weiter.",
+    "failed": "Übersetzung nicht möglich",
+    "failedHint": "Bitte versuche es noch einmal."
   }
 }

@@ -325,6 +325,22 @@ const WRITE_LIMITED: { re: RegExp, bucket: string, max?: number }[] = [
   { re: /^POST \/api\/onboarding\/precheck$/, bucket: 'onboarding:precheck', max: 30 },
   // KI-Vorschlag: jeder Klick kostet echtes Geld beim Anbieter.
   { re: /^POST \/api\/onboarding\/suggest$/, bucket: 'onboarding:suggest', max: 10 },
+  /**
+   * INHALTE ÜBERSETZEN (2026-08-17) — dieselbe Kostenklasse wie eine Zeile
+   * darüber, nur häufiger erreichbar: jeder Klick schickt bis zu 10.000 Zeichen
+   * an den KI-Anbieter und bezahlt die Antwort. Beide Routen haben SCHON eine
+   * feinere Drossel (10 je Mensch, Community und zehn Minuten, gezählt IN der
+   * Route); die Zeilen hier zählen je IP und DAVOR — bevor eine Zeile gelesen
+   * wird. Ein Deckel, der erst nach der Arbeit greift, schützt den Server
+   * nicht (dieselbe Begründung wie bei den Emoji-Reaktionen oben).
+   *
+   * EIGENE BUCKETS je Layer, wie bei Stimmen und Reaktionen: wer eine
+   * Diskussion liest und dabei das Thema UND die Antworten übersetzt, soll sich
+   * nicht selbst aussperren. `TOKEN_MAX` (10/min) liegt bewusst über der
+   * Routen-Drossel — die feinere Grenze bleibt im Normalfall die wirksame.
+   */
+  { re: /^POST \/api\/posts\/[^/]+\/translate$/, bucket: 'posts:translate', max: TOKEN_MAX },
+  { re: /^POST \/api\/comments\/[^/]+\/translate$/, bucket: 'comments:translate', max: TOKEN_MAX },
   // Early-Access-Anfrage: die EINZIGE session-lose Schreibroute des Trichters,
   // und sie verschickt Mail an den Betreiber → engstes Budget.
   { re: /^POST \/api\/onboarding\/request$/, bucket: 'onboarding:request', max: 3 },

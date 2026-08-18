@@ -400,5 +400,18 @@
       "thanks": "Thanks",
       "idea": "Helpful"
     }
+  },
+  "translation": {
+    "action": "Translate",
+    "notice": "Automatically translated",
+    "showOriginal": "Show original",
+    "unavailable": "Translation unavailable",
+    "unavailableHint": "Automatic translation is not set up here.",
+    "rateLimited": "Too many translations",
+    "rateLimitedHint": "Please try again in a few minutes.",
+      "dailyLimit": "Daily limit reached",
+      "dailyLimitHint": "You have translated a lot today. It continues tomorrow.",
+    "failed": "Translation failed",
+    "failedHint": "Please try again."
   }
 }
