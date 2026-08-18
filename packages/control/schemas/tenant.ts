@@ -28,6 +28,16 @@ export const OPERATOR_APEX = 'pukalani.app'
 export const RESERVED_SUBDOMAINS = new Set([
   'www', 'api', 'app', 'mail', 'smtp', 'admin', 'console', 'status',
   'comments', 'portfolio', 'studio', 'platform', 'changelog', 'functions', 'send',
+  // `communities` ist KEIN Deployment, sondern das Etikett der Plausible-
+  // SAMMEL-SITE, in die alle Pool-Communities messen (`analytics.shared.siteId`
+  // in apps/platform). Plausible verlangt für eine Site einen domain-förmigen
+  // Schlüssel, deshalb sieht der Name aus wie ein Host; unter ihm lief nie
+  // etwas, er antwortet 404 wie jeder unbekannte Host. Gesperrt trotzdem, und
+  // zwar aus demselben Grund wie `platform`: der Name steht in unserer
+  // Betriebssprache, und in Kundenhand wäre er eine Verwechslungs-Falle mit
+  // unserem Namen und gültigem Zertifikat. (Ein Datenleck wäre er nicht — die
+  // Sammel-Site trennt über `event:hostname`, nicht über den Site-Namen.)
+  'communities',
   // Die Plattform-Hosts — dieselbe Phishing-Logik wie unten: in fremder Hand
   // wären das Anmeldedaten-Fallen mit unserem Namen und gültigem Zertifikat.
   //

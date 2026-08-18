@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { RESERVED_SUBDOMAINS } from '../schemas/tenant'
+import { isReservedHost, RESERVED_SUBDOMAINS } from '../schemas/tenant'
 import { decideReservedNameCreate, RESERVED_NAME_MAX } from '../shared/reservedNames'
 
 /**
@@ -55,5 +55,43 @@ describe('decideReservedNameCreate', () => {
     const eigene = new Set(['presse'])
     expect(decideReservedNameCreate('presse', eigene)).toEqual({ ok: false, reason: 'system' })
     expect(decideReservedNameCreate('login', eigene)).toEqual({ ok: true, name: 'login' })
+  })
+})
+
+/**
+ * Die Basisliste wirkt über `isReservedHost` — das ist die Stelle, an der ein
+ * Selbstbedienungs-Kunde abprallt. Geprüft werden hier die Namen, die NICHT
+ * für ein Deployment stehen und deshalb am ehesten durchrutschen: unter
+ * `platform` und `communities` läuft keine Seite (beide antworten 404), sie
+ * sind Infrastruktur- bzw. Auswertungs-Namen. Genau deshalb muss die Sperre
+ * ausdrücklich getestet sein: ein „ist doch frei" ist hier nachweisbar falsch.
+ */
+describe('isReservedHost', () => {
+  it('sperrt Infrastruktur- und Auswertungs-Namen unter der Betreiber-Domain', () => {
+    for (const host of [
+      'platform.pukalani.app',
+      'communities.pukalani.app',
+      'control.pukalani.app',
+      'admin.pukalani.app',
+      // erste Ebene entscheidet — auch tiefer gestaffelt bleibt es gesperrt
+      'foo.functions.pukalani.app',
+      // der Apex selbst
+      'pukalani.app',
+    ]) {
+      expect(isReservedHost(host), host).toBe(true)
+    }
+  })
+
+  it('lässt gewöhnliche Community-Hosts und fremde Domains durch', () => {
+    for (const host of [
+      'freelancer.pukalani.app',
+      'kunde.pukalani.app',
+      // Kundendomains liegen nicht unter dem Apex — dort hat die Liste nichts
+      // zu sagen, auch wenn das Label zufällig gesperrt klingt
+      'freelancer.supply',
+      'platform.kunde.de',
+    ]) {
+      expect(isReservedHost(host), host).toBe(false)
+    }
   })
 })
