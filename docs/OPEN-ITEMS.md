@@ -1,6 +1,6 @@
 # Offene Punkte
 
-**Stand: 2 offen · 3 geparkt/wartend · 13 bewusst zurückgestellt** (Zahlen bei JEDEM Umzug nach COMPLETE mitführen)
+**Stand: 2 offen · 4 geparkt/wartend · 13 bewusst zurückgestellt** (Zahlen bei JEDEM Umzug nach COMPLETE mitführen)
 
 Stand: **2026-08-12**. Hier steht **nur, was noch offen ist** — in der
 Reihenfolge, in der es abgearbeitet wird. Alles Erledigte (mit Begründung,
@@ -342,46 +342,6 @@ Ablauf-Erinnerung · Kundenbereich-Umzug `/workspace` → `my.*` ·
 Abuse-/Suspend-Pfad · 301 von den Altnamen (bewusst später: Deploy-Verify und
 Stripe-Webhook hingen an `studio.*`) · Statusseite bei UptimeRobot.
 Details: [SAAS-ROADMAP #1](archiv/SAAS-ROADMAP.md).
-
-**E1 — tote Schlüsseldatei.** `apps/control/.env.production` zeigt noch auf das
-gelöschte Projekt `studio` (Cutover-Altlast) — die Datei ist tot: die Keys darin
-gehören einem Projekt, das es nicht mehr gibt. **Sie liegt NICHT im Repo**
-(gitignored, kein Skript und kein Workflow verweist darauf; die frühere
-Formulierung „die Datei im Repo" war falsch) — es ist eine lokale Altlast auf
-Davids Rechner, und ein Aufruf `--env-file=apps/control/.env.production` würde
-gegen ein nicht existierendes Projekt laufen. Der richtige Pfad ist
-`~/.appwrite-secrets/migrations/control.env`. **Löschen ist Davids Klick**
-(Datei mit Schlüsselmaterial) — **zugesagt für zeitnah (2026-08-07, 4. Runde;
-E3 und E4 wurden dabei bewusst NICHT gewählt und bleiben liegen).**
-
-**E1b — es ist nicht mehr nur `control` (2026-08-17).** Der Satz „die anderen
-drei sind korrekt" stimmt seit AH-1 nicht mehr: `apps/platform/.env.production`
-ist vom **22. Juli** und zeigt auf **`pool`** — das Projekt, das der
-Account-Cutover am 2026-08-11 EINGEFROREN hat. Gemessen beim Versuch, für
-freelancer.supply (Scope `t-6a7bc358…`) eine Kategorie anzulegen: `pages`,
-`post_categories` und `community_posts` melden dort jeweils `total=0`. **Das ist
-die gefährliche Sorte Altlast — sie ist nicht tot, sie ist LEISE:** ein
-`--env-file`-Lauf gegen `pool` wirft keinen Fehler, er schreibt nur ins Leere,
-und man hält das Ergebnis für den Prod-Stand. `comments` und `portfolio` sind
-weiterhin korrekt. Der gültige `account`-Schlüssel liegt NUR in der `.env` auf
-dem Server.
-
-**Der Wächter ist gebaut (2026-08-18).** `pnpm ops:site-env` vergleicht jetzt
-zusätzlich die (nicht geheime, weil in jeder ausgelieferten Seite stehende)
-`NUXT_PUBLIC_APPWRITE_PROJECT_ID` des Servers mit dem, was die lokalen Dateien
-behaupten — `apps/*/.env.production` UND `~/.appwrite-secrets/migrations/*.env`
-—, nennt bei bekannten Altprojekten (`pool`, `studio`) den Grund und beendet
-sich mit Exit 1. Erster Lauf schlägt sofort an: `apps/platform/.env.production`
-→ `pool`, Server → `account`. Zwei Dinge dabei gelernt: aus einem **Worktree**
-gäbe es einen falschen Freispruch (die Dateien sind gitignored und liegen nur
-im Haupt-Checkout — der Wächter löst sie deshalb über `git rev-parse
---git-common-dir` auf), und `apps/control/.env.production` aus **E1** ist auf
-Davids Rechner **nicht mehr vorhanden**.
-
-**Offen bleibt genau ein Handgriff:** `apps/platform/.env.production` löschen —
-sie ist überflüssig (migriert wird über `~/.appwrite-secrets/migrations/
-account.env`, damit lief posts-022 am 2026-08-18) und als einzige Datei im
-Haus gefährlich. **Datei mit Schlüsselmaterial ⇒ Davids Klick.** [David, S]
 
 **E3 — Hetzner-Rescale** prüfen (CX33 knapp bei sechs Apps + Builds). [David]
 

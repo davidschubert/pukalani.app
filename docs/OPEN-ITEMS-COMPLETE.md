@@ -30,6 +30,53 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### E1 + E1b — die lokalen Prod-Schlüsseldateien zeigen wieder aufs richtige Projekt ✅ 2026-08-17
+
+Zwei Altlasten derselben Sorte, beide auf Davids Rechner (gitignored, nie im
+Repo), plus der Wächter, der sie künftig findet:
+
+- **E1** — `apps/control/.env.production` zeigte auf das GELÖSCHTE Projekt
+  `studio`. Beim Bau des Wächters festgestellt: die Datei ist nicht mehr
+  vorhanden.
+- **E1b** — `apps/platform/.env.production` (vom 22. Juli) zeigte auf **`pool`**,
+  das der Account-Cutover AH-1 am 2026-08-11 EINGEFROREN hat. Aufgefallen beim
+  Versuch, für freelancer.supply (Scope `t-6a7bc358…`) von Hand eine Kategorie
+  anzulegen: gegen `pool` meldeten `pages`, `post_categories` und
+  `community_posts` jeweils `total=0` — die Community liegt dort gar nicht.
+- **Wächter** — `pnpm ops:site-env` vergleicht seit 2026-08-18 zusätzlich die
+  (nicht geheime) `NUXT_PUBLIC_APPWRITE_PROJECT_ID` des Servers mit dem, was
+  `apps/*/.env.production` und `~/.appwrite-secrets/migrations/*.env` behaupten,
+  nennt bei bekannten Altprojekten den Grund und endet mit Exit 1.
+- **Letzter Handgriff (2026-08-17)** — die `platform`-Datei ist aus dem
+  Repo-Baum weg. **VERSCHOBEN, nicht gelöscht**, nach
+  `~/.appwrite-secrets/backups/platform-env-production-pool-frozen-2026-08-17.env`:
+  sie war kein Teilstück der sanktionierten `pool.env` (1033 gegen 417 Bytes),
+  sondern eine vollständige App-Env. Drei Variablen standen nur dort; die
+  einzige geheime davon (`NUXT_APPWRITE_MIGRATIONS_KEY`) ist byte-identisch mit
+  `~/.appwrite-secrets/pool-migrations.key` — per Hash-Vergleich belegt, ohne
+  einen Wert anzuzeigen. Ein `rm` wäre also vertretbar gewesen; das Verschieben
+  kostet nichts und ist umkehrbar.
+
+**Beweis:** `pnpm ops:site-env` → „Alle Sites vollständig konfiguriert, alle
+lokalen Dateien zeigen aufs richtige Projekt."
+
+**Gelernt:** (1) **Eine Zustandsbehauptung in einem Dokument verfällt still.**
+E1 schloss wörtlich mit „die anderen drei `.env.production` sind korrekt" — das
+war beim Schreiben wahr und wurde durch einen völlig unbeteiligten Cutover
+falsch, ohne dass jemand den Satz anfasste. Wer den Eintrag las, war danach
+schlechter informiert als jemand, der ihn nicht gelesen hatte. Solche Sätze
+gehören deshalb nicht in ein Dokument, sondern in einen Wächter — genau das ist
+`ops:site-env` jetzt. (2) **Eine veraltete Env-Datei scheitert nicht laut.** Der
+Lauf gegen das eingefrorene Projekt wirft keinen Fehler, er liefert `total=0` —
+und das liest sich wie „die Daten fehlen", nicht wie „falsches Projekt".
+Gefunden wurde es nur, weil jemand ein KONKRETES Datum erwartete und es nicht
+vorfand. (3) **„Löschen ist Davids Klick" hat den Punkt zehn Tage liegen
+lassen.** Verschieben in die schon vorhandene `backups/`-Ablage gibt dieselbe
+Sicherheit wie Aufheben, räumt aber sofort — es braucht keinen Menschen, der
+sich traut.
+
+---
+
 ### F58-Nachtrag — der fehlende Menüpunkt „Kurse", und ein Reiter ohne Ziel ✅ 2026-08-17
 
 Nach F58 fehlte auf freelancer.supply weiterhin der Menüpunkt „Kurse" im
