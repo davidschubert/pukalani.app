@@ -44,18 +44,23 @@ dem Runner-Stopp; Werkzeug: `--phase inventory`.
       Phasen: inventory → users (inkl. Teams) → rows → files → verify;
       Delta-Semantik: vorhandene, abweichende Rows werden mit `--execute`
       aktualisiert.
-- [ ] **Quell-Key**: David hat einen Transfer-Key auf `control` angelegt
-      (2026-08-18). Befund dazu: der BESTEHENDE Key in
-      `migrations/control.env` konnte ohnehin schon 10 von 11 Lese-Scopes
-      (F42-Muster „breiter Schlüssel") — nach AH-4c gehören BEIDE widerrufen
-      bzw. verengt (Schritt 6). Gegenprobe je Env-Datei:
-      `node scripts/ops/probe-key-scopes.mjs <env-datei>`.
-- [ ] **Ziel-Key-Scopes nachziehen (WICHTIG, sonst stirbt Phase users/files
-      beim ersten Schreibversuch):** der Migrations-Key des NEUEN Projekts
-      braucht über databases/tables/columns/indexes + buckets + rows hinaus
-      auch `users.read/users.write`, `teams.read/teams.write`,
-      `files.read/files.write` — in der Konsole am bestehenden Key
-      nachtragen (Keys sind editierbar, kein neuer nötig).
+- [x] **Quell-Key** (2026-08-18): Transfer-Key auf `control` angelegt und
+      grün geprobt (tables/users/teams/files je 200), Ablage
+      `~/.appwrite-secrets/ah4c-transfer-control.env`. Befund: der
+      BESTEHENDE Key in `migrations/control.env` konnte ohnehin schon 10
+      von 11 Lese-Scopes (F42-Muster „breiter Schlüssel") — nach AH-4c
+      gehören BEIDE widerrufen bzw. verengt (Schritt 6).
+      Schlüssel-Ablage-Falle aus diesem Lauf: beim `pbpaste`-Rezept muss das
+      SECRET der LETZTE Kopiervorgang sein — wer den Befehl selbst kopiert,
+      trägt den Befehlstext als Key ein (zweimal passiert; die Befehle
+      prüfen seither das `standard_`-Präfix).
+- [x] **Ziel-Keys** (2026-08-18): Migrations-Key des neuen Projekts um
+      `users.read/write`, `teams.read/write`, `files.read/write` ergänzt
+      (ohne sie stirbt Phase users/files beim ersten Schreibversuch) und
+      grün geprobt; Ablage `~/.appwrite-secrets/migrations/admin.env`.
+      Runtime-Key grün inkl. Presences- und `/health`-Probe; Ablage
+      `~/.appwrite-secrets/admin-runtime.key` (kommt beim Env-Schnitt in
+      die Site-`.env`).
 - [x] Nutzer-/Team-/Datei-Zahlen: Users **1** · Teams **0** · Dateien nur
       `runner-files` (4), übrige Buckets leer (2026-08-18).
 - [x] Hash-Verfahren geprüft: das eine Konto ist OTP-only, kein Hash —
@@ -94,17 +99,31 @@ dem Runner-Stopp; Werkzeug: `--phase inventory`.
       (databases/tables/columns/indexes + buckets + rows).
 - [ ] TablesDB `main` angelegt.
 
-## 2 · Schema
+## 2 · Schema (✅ VOR dem Fenster erledigt, 2026-08-18 — das Ziel ist leer und unbenutzt)
 
-- [ ] Voller Migrations-Lauf über den zentralen Runner gegen das neue Projekt:
-      `pnpm migrate --app control` mit einer neuen
-      `~/.appwrite-secrets/migrations/admin.env`. (Die DATEINAMEN der
-      Migrationen bleiben `control-NNN` — Protokoll, kein Nachschlagewerk.)
-- [ ] `pnpm ops:schema-parity` gegen `admin` — deckt das kuratierte SOLL aller
-      Layer der Konsole. Abweichungen: ______
-- [ ] Buckets vollständig? `fonts`, `avatars`, `gdpr-exports`, `runner-files`,
-      `ticket-files` — die AH-1-Lücke (avatars/gdpr nur von Hand angelegt)
-      hier explizit gegenprüfen. Ergebnis: ______
+- [x] Projekt-Grundlagen von David angelegt und per Probe bestätigt: Id
+      `admin`, Web-Platform `admin.pukalani.app` (Origin-Probe 401 =
+      akzeptiert), drei Keys grün (Transfer-Key liest alles; Runtime-Key
+      besteht die Presences-Probe UND `/health` — Achtung: `/health/version`
+      ist konsolen-intern und antwortet JEDEM Server-Key 401, nicht als
+      fehlenden Scope deuten). TablesDB `main` per API angelegt.
+- [x] Voller Migrations-Lauf über den zentralen Runner (Layer-Satz =
+      control-Manifest ∩ LAYER_ORDER + system, explizit übergeben — bei
+      `--env-file` OHNE `--app` greift der Manifest-Filter nicht und es
+      migrierten ALLE Layer):
+      `pnpm migrate --env-file ~/.appwrite-secrets/migrations/admin.env
+      --layer system --layer billing --layer pages --layer tickets
+      --layer runner --layer control --layer admin` — alle grün.
+- [x] Alle 41 Quell-Tabellen existieren im Ziel; alle 5 Buckets ebenfalls —
+      die AH-1-Bucket-Lücke ist von den heutigen Migrationen selbst
+      geschlossen (Werkzeug-Inventar Quelle↔Ziel).
+- [x] **Ziel-SEEDS geprüft** (Migrationen seeden Rows — beim 1:1-Umzug sind
+      das potenzielle Duplikate): `app_config`/`app_secrets` (je Id `global`)
+      und `community_plans` (Plan-Key-Ids) sind deterministisch — die
+      Delta-Semantik der rows-Phase ERSETZT sie durch die Quelle. Nur
+      `ticket_lists` seedet mit Zufalls-Ids: die 6 Ziel-Seeds sind gelöscht
+      (6×204, Ziel steht auf 0). Bei einem WIEDERHOLTEN Schema-Lauf diesen
+      Punkt erneut prüfen.
 
 ## 3 · Daten und Nutzer (AI-Runner ist ab hier PAUSIERT)
 
