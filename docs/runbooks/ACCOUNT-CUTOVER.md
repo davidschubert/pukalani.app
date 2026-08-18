@@ -38,9 +38,18 @@ steht, gehört sie eingetragen — ein Häkchen ohne Messwert ist eine Behauptun
       Mandanten-Host jede Realtime tot, und zwar lautlos (F45).
       Probe: `curl -H "Origin: https://demo.pukalani.app" https://api.pukalani.app/v1/account`
       → erwartet **401** (akzeptiert), NICHT `403 general_unknown_origin`. Ergebnis: ______
-- [x] Zwei API-Keys erzeugt: Runtime (sessions/users/rows/health) und
+- [x] Zwei API-Keys erzeugt: Runtime (**volle 10-Scope-Liste aus
+      docs/runbooks/DEPLOYMENT.md** — sessions/users/rows/health PLUS
+      files.read/files.write UND presences.read/presences.write) und
       Migrations (databases/tables/columns/indexes). Ablage wie gehabt als
       Dateien, nie im Repo.
+      ⚠ Genau hier ist der AH-1-Lauf gestolpert: der Key wurde nach der
+      damaligen Kurzform dieser Zeile angelegt, ohne die Presences-Scopes —
+      eine Woche lang stand auf jeder Pool-Community „0 online", lautlos
+      (die best-effort-catches verschluckten das 401). Seit 2026-08-18 warnt
+      `presence.scope_missing` im Log; Probe:
+      `curl -s .../v1/presences -H "X-Appwrite-Project: <id>" -H "X-Appwrite-Key: <key>"`
+      → erwartet eine Liste, NICHT `401 general_unauthorized_scope`.
 - [x] Datenbank `main` angelegt.
 
 ## 2 · Schema

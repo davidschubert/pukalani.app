@@ -10,8 +10,10 @@ export default defineEventHandler(async (event) => {
     const { presences } = createAdminClient(event)
     await presences.delete({ presenceId: user.$id })
   }
-  catch {
-    // schon weg / abgelaufen → egal
+  catch (error) {
+    // schon weg / abgelaufen → egal; nur der Scope-Fehler ist ein
+    // Konfigurationsfehler und wird einmal gemeldet (siehe utils/presence.ts)
+    warnPresenceScopeMissingOnce(error, 'presence.leave')
   }
   return { ok: true }
 })

@@ -33,6 +33,10 @@ const PROBES = [
   { path: '/databases', label: 'databases.read', note: 'Migrationen' },
   { path: '/storage/buckets', label: 'buckets.read', note: 'Migrationen (Dateien)' },
   { path: '/users', label: 'users.read', note: 'Laufzeit' },
+  // AH-1 live erwischt: der account-Runtime-Key kam ohne Presences-Scopes aus
+  // dem Cutover — „0 online" auf jeder Pool-Community, lautlos. Runtime-Keys
+  // BRAUCHEN presences.read/write (docs/runbooks/DEPLOYMENT.md, 10 Scopes).
+  { path: '/presences', label: 'presences.read', note: 'Laufzeit (Online-Zähler/Anwesenheit)' },
   { path: '/teams', label: 'teams.read', note: '—' },
   { path: '/functions', label: 'functions.read', note: '—' },
   { path: '/messaging/topics', label: 'topics.read', note: '—' },

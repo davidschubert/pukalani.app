@@ -72,8 +72,11 @@ export default defineEventHandler(async (event) => {
       metadata,
     })
   }
-  catch {
-    // best effort — Presence ist eine flüchtige Zusatzschicht, kein Kernpfad
+  catch (error) {
+    // best effort — Presence ist eine flüchtige Zusatzschicht, kein Kernpfad.
+    // AUSSER beim Scope-Fehler: der ist ein Konfigurationsfehler des Keys und
+    // wird EINMAL gemeldet (AH-1 live erwischt — sonst „0 online" ohne Spur).
+    warnPresenceScopeMissingOnce(error, 'presence.heartbeat')
   }
 
   return { ok: true }
