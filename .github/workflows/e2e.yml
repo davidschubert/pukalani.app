@@ -58,13 +58,31 @@ jobs:
         working-directory: ci/appwrite
         run: printf '\n_APP_OPENSSL_KEY_V1=%s\n' "$(openssl rand -hex 16)" >> ci.env
 
-      - name: Appwrite-Stack starten
+      # IM HINTERGRUND, und das ist der ganze Punkt: von den 40 s dieses
+      # Schrittes waren ~33 s reines Herunterladen der Images (gemessen am
+      # Zeilenprotokoll eines echten Laufs — die Pulls laufen bereits parallel
+      # zueinander, das grosse `appwrite`-Image ist der kritische Pfad). Node,
+      # pnpm und `pnpm install` brauchen zusammen ~15 s und haengen von der
+      # Instanz NICHT ab; sie standen bisher trotzdem hinter dem Download an.
+      #
+      # Der Rueckgabewert wandert in eine Datei, weil ein `wait` ueber
+      # Schritt-Grenzen hinweg nicht geht (jeder Schritt ist eine eigene
+      # Shell). „Auf Appwrite warten" liest sie und ist damit der EINE
+      # Synchronisationspunkt: erst wenn compose sauber durch ist, wird auf
+      # Gesundheit gepollt. Bricht der Start ab, steht das Protokoll im Log und
+      # der Job stirbt dort — nicht 450 s spaeter an einem Zeitablauf, dessen
+      # Ursache man dann suchen muesste.
+      - name: Appwrite-Stack starten (im Hintergrund)
         working-directory: ci/appwrite
         run: |
-          docker compose --env-file ci.env --project-name appwrite-ci up -d \
-            traefik appwrite appwrite-realtime \
-            appwrite-worker-databases appwrite-worker-deletes \
-            mariadb redis
+          (
+            docker compose --env-file ci.env --project-name appwrite-ci up -d \
+              traefik appwrite appwrite-realtime \
+              appwrite-worker-databases appwrite-worker-deletes \
+              mariadb redis
+            echo $? > "$RUNNER_TEMP/stack.rc"
+          ) > "$RUNNER_TEMP/stack.log" 2>&1 &
+          echo "Stack-Start laeuft im Hintergrund — Node-Setup und Install ziehen vor."
 
       - uses: pnpm/action-setup@v6
 
@@ -75,15 +93,34 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      # ZWEI Wartezeiten hintereinander, mit verschiedenen Gruenden:
+      #  1. Ist `compose up` ueberhaupt fertig? (laeuft seit dem Schritt oben)
+      #  2. Antwortet Appwrite? — jetzt im Sekundentakt statt alle 5 s. Der
+      #     Zeitrahmen bleibt bei 450 s, nur das Raster wird feiner: Appwrite
+      #     ist irgendwann INNERHALB eines Fensters bereit, und bei 5 s
+      #     verschenkte man im Schnitt 2,5 s davon. Dieselbe Rechnung wie beim
+      #     Spalten-Pollen der Migrationen.
       - name: Auf Appwrite warten
         run: |
-          for i in $(seq 1 90); do
+          for i in $(seq 1 600); do
+            if [ -f "$RUNNER_TEMP/stack.rc" ]; then break; fi
+            sleep 0.5
+          done
+          rc=$(cat "$RUNNER_TEMP/stack.rc" 2>/dev/null || echo 'timeout')
+          if [ "$rc" != "0" ]; then
+            echo '::error::Stack-Start fehlgeschlagen (Rueckgabe '"$rc"')'
+            cat "$RUNNER_TEMP/stack.log" || true
+            exit 1
+          fi
+          tail -5 "$RUNNER_TEMP/stack.log" || true
+
+          for i in $(seq 1 450); do
             code=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/v1/health/version || true)
             if [ "$code" = "200" ]; then
               echo "Appwrite bereit: $(curl -s http://localhost:8080/v1/health/version)"
               exit 0
             fi
-            sleep 5
+            sleep 1
           done
           echo '::error::Appwrite nach 450s nicht erreichbar'
           docker compose --env-file ci/appwrite/ci.env --project-name appwrite-ci -f ci/appwrite/docker-compose.yml logs --tail 80 appwrite mariadb
