@@ -108,6 +108,17 @@ Stück hat seinen eigenen Knopf und Cache-Eintrag. Eine Umfrage IN einem
 Kommentar gibt es im Datenmodell nicht (Umfragen sind Beiträge, Kommentare
 reiner Text) — die Frage kam von David und gehört hierher, damit sie nicht
 wieder gestellt wird.
+Zweiter Nachtrag gleichentags (Davids Entscheidung): **Events und Kurse
+ziehen nach** — events-013 (`events.translations`) und courses-007
+(`courses.translations` + `lessons.translations`), drei Routen mit dem
+jeweiligen Inhalts-Produkt als Gate und demselben Tages-Eimer. Zwei Regeln
+daraus: **Übersetzen zeigt nie mehr als Lesen** (die Lesson-Route übernimmt
+alle fünf Vorprüfungen ihrer GET-Route — Entwurf, unveröffentlichter Kurs,
+fehlende Einschreibung, paid-Gate; live bewiesen: ohne Einschreibung 403)
+und **die Schwärzung leert den Cache mit** (`redact.post.ts` — sonst gäbe
+der Knopf den geschwärzten Text als Cache-Treffer wortgleich wieder heraus).
+Beweis jetzt 32/32 über alle fünf Inhaltsarten; live auf demo: Event, Kurs
+und Lektion DE→EN je mit Cache-Gegenprobe.
 
 Beweise: `packages/core/scripts/verify-ugc-translation.mjs` **16/16** gegen
 echte Routen + KI (cached:false → cached:true zeichengleich, Zeile trägt die
