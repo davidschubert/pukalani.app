@@ -20,6 +20,12 @@
  *      Stimme, eine verschobene Liste wäre schlimmer als gar keine Übersetzung)
  *      und jede vom Original verschieden. Der zweite Abruf kommt aus der Spalte
  *      und trägt dieselben Optionen.
+ *   3c. DIESELBE MECHANIK AUF EVENTS UND KURSEN (Davids Entscheidung
+ *      2026-08-18, Migrationen events-013 / courses-007): ein Termin, ein Kurs
+ *      und eine Lektion werden übersetzt und beim zweiten Abruf aus der Spalte
+ *      geliefert. Die Lektion ist der schärfste der drei Fälle — ihre Route
+ *      trägt dieselben fünf Vorprüfungen wie das Lesen (Einschreibung inklusive),
+ *      und der Beweis geht deshalb durch die echte Einschreibung.
  *   4. BEARBEITEN LEERT DEN CACHE: nach `PATCH` mit neuem Text steht die
  *      `translations`-Spalte der Zeile auf '' — die alte Fassung wäre eine
  *      stille Lüge gewesen.
@@ -42,7 +48,7 @@
  * (auch im Fehlerfall).
  */
 import { request as httpRequest } from 'node:http'
-import { Client, TablesDB, Users } from 'node-appwrite'
+import { Client, Query, TablesDB, Users } from 'node-appwrite'
 
 const PORT = Number(process.env.COMMENTS_PORT || 3021)
 const ORIGIN = `http://localhost:${PORT}`
@@ -104,6 +110,9 @@ let userId = null
 let postId = null
 let pollId = null
 let commentId = null
+let eventId = null
+let courseId = null
+let lessonId = null
 
 const POST_TITLE = 'A quiet morning on the mountain'
 const POST_BODY = 'We watched the **sunrise** from the summit. Bring warm clothes — the wind up there is `cold` and relentless.'
@@ -111,6 +120,12 @@ const COMMENT_BODY = 'Thanks for sharing this! I visited last year and the trail
 const POLL_TITLE = 'Which trail should we take next weekend?'
 const POLL_BODY = 'Both routes end at the same hut, but they are very different in effort.'
 const POLL_OPTIONS = ['The short but steep one', 'The long ridge walk', 'Stay in the valley']
+const EVENT_TITLE = 'Sunrise hike for beginners'
+const EVENT_DESCRIPTION = 'We start before dawn and walk up slowly. Bring a headlamp and something warm to drink.'
+const COURSE_TITLE = 'Reading the weather in the mountains'
+const COURSE_DESCRIPTION = 'A short course about clouds, wind and the small signs that tell you to turn around.'
+const LESSON_TITLE = 'Clouds that mean trouble'
+const LESSON_CONTENT = 'Lenticular clouds sit still while everything else moves. They are a sign of strong wind aloft.'
 
 try {
   console.log(`\nBeweis UGC-Übersetzung gegen ${ORIGIN} (Projekt ${projectId})\n`)
@@ -186,6 +201,85 @@ try {
   const p2 = await call('POST', `/api/posts/${pollId}/translate`, { cookie, body: { locale: 'de' } })
   check('Umfrage 2. Abruf: cached:true + identische Optionen', p2.status === 200 && p2.json?.cached === true && JSON.stringify(p2.json?.options) === JSON.stringify(p1Options), `Status ${p2.status}: ${JSON.stringify(p2.json?.options)?.slice(0, 200)}`)
 
+  // ── Termin, Kurs, Lektion: dieselbe Mechanik in zwei weiteren Layern ─────
+  /**
+   * ANLEGEN BRAUCHT EINE ROLLE, ÜBERSETZEN NICHT — und genau deshalb wird sie
+   * hier VERLIEHEN und nicht umgangen: Termine und Kurse legt nur an, wer
+   * `events.manage`/`courses.manage` trägt (im Silo über das globale Label).
+   * Die Zeilen von Hand über den Admin-Client zu schreiben, würde am Schema
+   * vorbei ein Testobjekt bauen, das es in der Wirklichkeit nicht gibt — also
+   * bekommt der Prüf-Nutzer kurz das Label und legt alles über die ECHTEN
+   * Routen an. Die Übersetzungs-Routen selbst verlangen keine Rolle; das prüft
+   * dieser Beweis nicht extra, es steht in `verify-site-authz.mjs`.
+   */
+  await users.updateLabels({ userId, labels: ['admin'] })
+
+  const eventStart = new Date(Date.now() + 7 * 24 * 3600_000).toISOString()
+  const createdEvent = await call('POST', '/api/events', {
+    cookie,
+    body: { title: EVENT_TITLE, description: EVENT_DESCRIPTION, startAt: eventStart, status: 'published' },
+  })
+  eventId = createdEvent.json?.$id ?? null
+  check('Termin angelegt (veröffentlicht)', createdEvent.status === 201 && Boolean(eventId), `Status ${createdEvent.status}: ${createdEvent.text?.slice(0, 160)}`)
+
+  const e1 = await call('POST', `/api/events/${eventId}/translate`, { cookie, body: { locale: 'de' } })
+  check('Termin 1. Übersetzung: 200 + cached:false + Titel und Text ≠ Original',
+    e1.status === 200 && e1.json?.cached === false
+    && Boolean(e1.json?.body) && e1.json.body !== EVENT_DESCRIPTION
+    && Boolean(e1.json?.title) && e1.json.title !== EVENT_TITLE,
+    `Status ${e1.status}: ${e1.text?.slice(0, 200)}`)
+  const e2 = await call('POST', `/api/events/${eventId}/translate`, { cookie, body: { locale: 'de' } })
+  check('Termin 2. Abruf: cached:true + zeichengleich',
+    e2.status === 200 && e2.json?.cached === true && e2.json?.body === e1.json?.body && e2.json?.title === e1.json?.title,
+    `Status ${e2.status}`)
+
+  const courseSlug = `verify-ugc-${stamp}`
+  const createdCourse = await call('POST', '/api/courses', {
+    cookie,
+    body: { title: COURSE_TITLE, slug: courseSlug, description: COURSE_DESCRIPTION, access: 'free', status: 'published' },
+  })
+  courseId = createdCourse.json?.$id ?? null
+  check('Kurs angelegt (veröffentlicht, frei)', createdCourse.status === 201 && Boolean(courseId), `Status ${createdCourse.status}: ${createdCourse.text?.slice(0, 160)}`)
+
+  // Das [slug]-Segment der BUILDER-Routen ist die Row-Id (die Lese-Routen
+  // nehmen den Slug) — hier also bewusst die Id.
+  const createdLesson = await call('POST', `/api/courses/${courseId}/lessons`, {
+    cookie,
+    body: { title: LESSON_TITLE, content: LESSON_CONTENT, status: 'published' },
+  })
+  lessonId = createdLesson.json?.$id ?? null
+  check('Lektion angelegt (veröffentlicht)', createdLesson.status === 201 && Boolean(lessonId), `Status ${createdLesson.status}: ${createdLesson.text?.slice(0, 160)}`)
+
+  const k1 = await call('POST', `/api/courses/${courseSlug}/translate`, { cookie, body: { locale: 'de' } })
+  check('Kurs 1. Übersetzung: 200 + cached:false + Titel und Text ≠ Original',
+    k1.status === 200 && k1.json?.cached === false
+    && Boolean(k1.json?.body) && k1.json.body !== COURSE_DESCRIPTION
+    && Boolean(k1.json?.title) && k1.json.title !== COURSE_TITLE,
+    `Status ${k1.status}: ${k1.text?.slice(0, 200)}`)
+  const k2 = await call('POST', `/api/courses/${courseSlug}/translate`, { cookie, body: { locale: 'de' } })
+  check('Kurs 2. Abruf: cached:true + zeichengleich', k2.status === 200 && k2.json?.cached === true && k2.json?.body === k1.json?.body, `Status ${k2.status}`)
+
+  /**
+   * DIE LEKTION LIEGT HINTER DER EINSCHREIBUNG — erst die Gegenprobe, dann der
+   * Beweis. Ohne Einschreibung muss die Übersetzungs-Route 403 antworten, wie
+   * die Leseroute: sonst wäre sie die Hintertür in den bezahlten Inhalt (der
+   * Text steht in der ANTWORT).
+   */
+  const lockedLesson = await call('POST', `/api/lessons/${lessonId}/translate`, { cookie, body: { locale: 'de' } })
+  check('Lektion ohne Einschreibung: 403 (kein Weg am Tor vorbei)', lockedLesson.status === 403, `Status ${lockedLesson.status}: ${lockedLesson.text?.slice(0, 160)}`)
+
+  const enrolled = await call('POST', `/api/courses/${courseSlug}/enroll`, { cookie })
+  check('Eingeschrieben', enrolled.status === 200 || enrolled.status === 201, `Status ${enrolled.status}: ${enrolled.text?.slice(0, 160)}`)
+
+  const l1 = await call('POST', `/api/lessons/${lessonId}/translate`, { cookie, body: { locale: 'de' } })
+  check('Lektion 1. Übersetzung: 200 + cached:false + Titel und Text ≠ Original',
+    l1.status === 200 && l1.json?.cached === false
+    && Boolean(l1.json?.body) && l1.json.body !== LESSON_CONTENT
+    && Boolean(l1.json?.title) && l1.json.title !== LESSON_TITLE,
+    `Status ${l1.status}: ${l1.text?.slice(0, 200)}`)
+  const l2 = await call('POST', `/api/lessons/${lessonId}/translate`, { cookie, body: { locale: 'de' } })
+  check('Lektion 2. Abruf: cached:true + zeichengleich', l2.status === 200 && l2.json?.cached === true && l2.json?.body === l1.json?.body, `Status ${l2.status}`)
+
   // ── Gegenproben ──────────────────────────────────────────────────────────
   const guest = await call('POST', `/api/posts/${postId}/translate`, { body: { locale: 'de' } })
   check('Ohne Session: 401 (kein Gast kostet Geld)', guest.status === 401, `Status ${guest.status}`)
@@ -201,6 +295,17 @@ finally {
   if (postId) await tablesDB.deleteRow({ databaseId, tableId: 'community_posts', rowId: postId }).catch(() => {})
   if (pollId) await tablesDB.deleteRow({ databaseId, tableId: 'community_posts', rowId: pollId }).catch(() => {})
   if (commentId) await tablesDB.deleteRow({ databaseId, tableId: 'comments', rowId: commentId }).catch(() => {})
+  if (lessonId) await tablesDB.deleteRow({ databaseId, tableId: 'lessons', rowId: lessonId }).catch(() => {})
+  if (courseId) await tablesDB.deleteRow({ databaseId, tableId: 'courses', rowId: courseId }).catch(() => {})
+  if (eventId) await tablesDB.deleteRow({ databaseId, tableId: 'events', rowId: eventId }).catch(() => {})
+  // Die Einschreibung hängt am Nutzer, nicht am Kurs — sie muss eigens weg,
+  // sonst bleibt eine Zeile ohne Konto zurück.
+  if (userId) {
+    await tablesDB.listRows({ databaseId, tableId: 'enrollments', queries: [Query.equal('userId', userId), Query.limit(25)] })
+      .then(({ rows }) => Promise.all(rows.map(row =>
+        tablesDB.deleteRow({ databaseId, tableId: 'enrollments', rowId: row.$id }).catch(() => {}))))
+      .catch(() => {})
+  }
   if (userId) await users.delete({ userId }).catch(() => {})
 }
 

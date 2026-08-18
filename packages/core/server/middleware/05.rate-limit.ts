@@ -362,6 +362,19 @@ const WRITE_LIMITED: { re: RegExp, bucket: string, max?: number }[] = [
    */
   { re: /^POST \/api\/posts\/[^/]+\/translate$/, bucket: 'posts:translate', max: TOKEN_MAX },
   { re: /^POST \/api\/comments\/[^/]+\/translate$/, bucket: 'comments:translate', max: TOKEN_MAX },
+  /**
+   * Dieselbe Klasse für die zwei weiteren Inhalts-Produkte (2026-08-18,
+   * Davids Ausweitung auf Events und Kurse). Eigene Buckets je Produkt aus dem
+   * Grund eine Zeile höher; die LEKTION bekommt einen eigenen neben dem Kurs,
+   * weil beide in derselben Lernsitzung angeklickt werden.
+   *
+   * Der Tages-Deckel je KONTO ist davon unberührt und ausdrücklich GETEILT —
+   * er lebt in den Routen (`ugcTranslationDayKey`), nicht hier: diese Datei
+   * zählt je IP, und eine IP ist kein Konto.
+   */
+  { re: /^POST \/api\/events\/[^/]+\/translate$/, bucket: 'events:translate', max: TOKEN_MAX },
+  { re: /^POST \/api\/courses\/[^/]+\/translate$/, bucket: 'courses:translate', max: TOKEN_MAX },
+  { re: /^POST \/api\/lessons\/[^/]+\/translate$/, bucket: 'courses:lesson-translate', max: TOKEN_MAX },
   // Early-Access-Anfrage: die EINZIGE session-lose Schreibroute des Trichters,
   // und sie verschickt Mail an den Betreiber → engstes Budget.
   { re: /^POST \/api\/onboarding\/request$/, bucket: 'onboarding:request', max: 3 },
