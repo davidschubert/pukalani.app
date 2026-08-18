@@ -1,3 +1,16 @@
+// Diese App ist die BETREIBER-KONSOLE und antwortet seit AH-4 (2026-08-11) auf
+// admin.pukalani.app. Der ALTNAME control.pukalani.app fällt seit AH-4b
+// (2026-08-18) in die Wildcard-Site platform und antwortet 404.
+// WARUM HEISST HIER TROTZDEM ALLES `control`? Ordner (apps/control), Workspace-
+// Paketname (control), ploi-Site, Release-Slot, pm2-Prozess und Appwrite-Projekt
+// behalten den Namen BEWUSST — ein INFRA-ANKER, keine Nachlässigkeit: beim
+// studio-zu-control-Umzug war die Site-Umbenennung die teuerste Falle, und pm2
+// findet seinen Prozess über den NAMEN (ein Rename startet sonst DANEBEN).
+// Eine Umbenennung des Ordners nach apps/admin wurde am 2026-08-17 geprüft und
+// VERWORFEN: `admin` ist als geteilter Dashboard-Layer packages/admin vergeben,
+// und deploy.yml trennt SITE (Verzeichnis control.pukalani.app) und PROBE
+// (admin.pukalani.app) genau wegen dieses Ankers.
+// Details: CLAUDE.md Abschnitt „Hosts" und docs/runbooks/ADMIN-CUTOVER.md.
 export default defineNuxtConfig({
   // früher gelistet = höhere Priorität — Produkt Layer vor dem Core.
   // Nicht benötigte Layer einfach entfernen (und aus package.json streichen);
