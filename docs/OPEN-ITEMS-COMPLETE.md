@@ -170,7 +170,12 @@ fehlende Einschreibung, paid-Gate; live bewiesen: ohne Einschreibung 403;
 das BEZAHL-Tor zusätzlich lokal in beiden Hälften bewiesen — paid-Kurs mit
 `entitlementProduct 'paidCourses'`: ohne Abo sind Einschreiben UND Übersetzen
 403, mit simuliertem aktivem Abo (`billing_subscriptions` planId `pro`) läuft
-beides und der zweite Abruf kommt aus dem Cache, 8/8)
+beides und der zweite Abruf kommt aus dem Cache, 8/8). Auch das
+EMBED-Widget ist geprüft (lokal, /embed mit demselben CommentItem): der GAST
+sieht den Kommentar, aber KEINEN Übersetzen-Knopf (der Composable gate-t auf
+die Session — kein anonymer KI-Kostenweg im iframe), der EINGELOGGTE sieht
+ihn, und ein Klick übersetzte den deutschen Kommentar im Widget nach Englisch
+samt „Automatically translated · Show original"-Zeile
 und **die Schwärzung leert den Cache mit** (`redact.post.ts` — sonst gäbe
 der Knopf den geschwärzten Text als Cache-Treffer wortgleich wieder heraus).
 Beweis jetzt 32/32 über alle fünf Inhaltsarten; live auf demo: Event, Kurs
