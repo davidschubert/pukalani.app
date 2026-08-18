@@ -333,17 +333,16 @@ Rückweg mehr.
 - [x] Server-`.env` von `comments.pukalani.app` — fällt mit der Site-Löschung
       (ploi löscht das Verzeichnis mit); bis dahin lag sie entgegen dem alten
       Häkchen noch auf dem Server.
-- [ ] Beide Appwrite-Keys des Projekts `comments` widerrufen (Appwrite-Konsole →
-      Projekt `comments` → API-Schlüssel; am 2026-08-18 nachweislich noch
-      gültig). **Nicht** anfassen: der Resend-SMTP-Key und der Plausible-
-      Stats-Key aus derselben `.env` — die sind mit anderen Sites geteilt.
+- [x] Beide Appwrite-Keys des Projekts `comments` widerrufen (Davids Klick am
+      2026-08-18; Gegenprobe: Runtime-Key antwortet 401). Resend-SMTP- und
+      Plausible-Stats-Key blieben unangetastet (mit anderen Sites geteilt).
 - [x] Stripe-Keys der Instanz: die Server-`.env` trug keine — es gab nichts zu
       widerrufen.
 - [ ] Plausible: eigene Site behalten ODER Host in den Sammel-Filter. Entscheidung: ______
 - [x] Projekt `comments` **eingefroren, nicht gelöscht** (wie `pool` seit AH-1).
-- [ ] ploi-Site 389772 gelöscht (Davids Panel-Klick am 2026-08-18) — der Host
-      fällt danach in die Wildcard-Site `platform` (server_name `*.pukalani.app`,
-      Proxy auf denselben Port 3004, Wildcard-Zertifikat deckt; live geprüft).
+- [x] ploi-Site 389772 gelöscht (Davids Panel-Klick am 2026-08-18). Gegenprobe:
+      der Host antwortet 200 über die Wildcard-Site `platform` mit dem
+      `*.pukalani.app`-Zertifikat, ploi listet noch 5 Sites.
 - [x] Die comments-Ecosystem-Config aus dem Repo entfernt und `verify-tls`
       erneut gefahren (2026-08-18; der comments-Eintrag im Wächter deckt beide
       Zustände — eigene Lineage wie Wildcard).
