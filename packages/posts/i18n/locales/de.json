@@ -414,6 +414,11 @@
       },
       "backlinks": {
         "title": "Verlinkt von"
+      },
+      "view": {
+        "recommended": "Empfohlen",
+        "active": "Aktivste",
+        "az": "A–Z"
       }
     },
     "categories": {

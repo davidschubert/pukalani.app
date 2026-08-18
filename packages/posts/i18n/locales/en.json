@@ -414,6 +414,11 @@
       },
       "backlinks": {
         "title": "Linked from"
+      },
+      "view": {
+        "recommended": "Recommended",
+        "active": "Most active",
+        "az": "A–Z"
       }
     },
     "categories": {

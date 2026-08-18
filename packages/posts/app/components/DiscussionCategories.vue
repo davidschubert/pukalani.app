@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { TableColumn } from '@nuxt/ui'
+import { normalizeCategoryView, sortCategoriesForView, type CategoryView } from '../../shared/categoryView'
 import type { CategoryListResponse, CategoryWithCount } from '../../shared/types/post'
 
 /**
@@ -12,6 +13,20 @@ import type { CategoryListResponse, CategoryWithCount } from '../../shared/types
  * eine Server-Runde je Tastendruck für ein `includes()` wäre Aufwand ohne
  * Gegenwert. Die TOPIC-Suche läuft dagegen über den Server — dort ist der
  * Bestand unbegrenzt.
+ *
+ * ── DREI ANSICHTEN, EINE WAHRHEIT (2026-08-18) ────────────────────────────
+ * Die Voreinstellung ist die Reihenfolge des OWNERS (im Dashboard gezogen);
+ * „Aktivste" und „A–Z" sind Blickwinkel darauf. Die Regel ist pur und
+ * getestet (shared/categoryView.ts), sortiert wird HIER und nicht in der
+ * Route: so bekommt jeder Crawler und jeder Besucher ohne JavaScript die
+ * kuratierte Reihenfolge, und ein Klick kostet keinen Server-Weg.
+ *
+ * Die Wahl lebt in einem COOKIE und nicht im Konto — dieselbe Reichweite wie
+ * Hell/Dunkel (`pukalani-color-mode`), und derselbe Grund: eine
+ * Navigationsliste, die je Konto anders steht, nimmt den Mitgliedern das
+ * Ortsgedächtnis. Ein Cookie statt localStorage, damit der Server schon beim
+ * ersten Rendern dieselbe Reihenfolge kennt — sonst springt die Liste nach
+ * der Hydration.
  */
 const { t } = useI18n()
 const localePath = useLocalePath()
@@ -21,17 +36,41 @@ const { data, status } = await useFetch<CategoryListResponse>('/api/posts/catego
 })
 
 const { categoryName, categoryDescription } = useCategoryText()
+const { locale } = useI18n()
+
+const viewCookie = useCookie<string>('pukalani-category-view', {
+  default: () => 'recommended',
+  maxAge: 60 * 60 * 24 * 365,
+  sameSite: 'lax',
+  path: '/',
+})
+// Über eine `computed` und nicht direkt am Cookie: ein alter oder von Hand
+// gesetzter Wert darf die Liste nicht leeren, sondern fällt auf „Empfohlen".
+const view = computed<CategoryView>({
+  get: () => normalizeCategoryView(viewCookie.value),
+  set: (value) => { viewCookie.value = value },
+})
+
+const viewItems = computed(() => [
+  { value: 'recommended', label: t('posts.discussions.view.recommended'), icon: 'i-ph-list-dashes' },
+  { value: 'active', label: t('posts.discussions.view.active'), icon: 'i-ph-chats-circle' },
+  { value: 'az', label: t('posts.discussions.view.az'), icon: 'i-ph-sort-ascending' },
+])
 
 const search = ref('')
 const rows = computed(() => {
   const all = data.value?.rows ?? []
   const needle = search.value.trim().toLowerCase()
-  if (!needle) return all
   // Gesucht wird in DER ANGEZEIGTEN Sprache: wer „Allgemein" liest, tippt
   // „allgemein" — nicht den Namen der Grundfassung.
-  return all.filter(entry =>
-    categoryName(entry.category).toLowerCase().includes(needle)
-    || categoryDescription(entry.category).toLowerCase().includes(needle))
+  const gefunden = !needle
+    ? all
+    : all.filter(entry =>
+        categoryName(entry.category).toLowerCase().includes(needle)
+        || categoryDescription(entry.category).toLowerCase().includes(needle))
+  // Erst filtern, dann sortieren: umgekehrt sortierte man Zeilen, die gleich
+  // wieder herausfallen.
+  return sortCategoriesForView(gefunden, view.value, entry => categoryName(entry.category), locale.value)
 })
 
 const columns = computed<TableColumn<CategoryWithCount>[]>(() => [
@@ -58,14 +97,23 @@ const canManageCategories = computed(() =>
 
 <template>
   <div class="space-y-4">
-    <UInput
-      v-model="search"
-      icon="i-ph-magnifying-glass"
-      size="sm"
-      :placeholder="t('posts.discussions.searchCategories')"
-      class="max-w-56"
-      data-categories-search
-    />
+    <div class="flex flex-wrap items-center gap-2">
+      <UTabs
+        v-model="view"
+        :items="viewItems"
+        :content="false"
+        size="sm"
+        data-categories-view
+      />
+      <UInput
+        v-model="search"
+        icon="i-ph-magnifying-glass"
+        size="sm"
+        :placeholder="t('posts.discussions.searchCategories')"
+        class="max-w-56"
+        data-categories-search
+      />
+    </div>
 
     <div v-if="status === 'pending' && !data" class="flex justify-center py-16">
       <UIcon name="i-ph-spinner" class="size-6 animate-spin text-muted" />
