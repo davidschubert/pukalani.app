@@ -90,6 +90,24 @@ const SITES = [
       // Kunde sieht auf /dashboard/community/analytics „Statistik gerade nicht
       // erreichbar" — dieselbe Sorte stiller Ausfall wie das fehlende SMTP.
       'NUXT_ANALYTICS_STATS_API_KEY',
+      /**
+       * KI (2026-08-18 aufgeschlagen): `apps/platform` erklärt
+       * `pukalani.ai.enabled: true` UND verkauft `ai` ab dem PRO-Tarif
+       * (`tenancy.products`, 149 €). Ohne diesen Schlüssel ist
+       * `isAiAvailable()` trotzdem false, und alle drei Verbraucher sind
+       * dunkel: der Moderations-Assist für Kommentare, der für Beiträge und
+       * der Übersetzungs-Vorschlag der Kategorien.
+       *
+       * DIESELBE SORTE LOCH WIE F44, nur teurer: nichts wird rot, die Knöpfe
+       * erscheinen einfach nicht — die Oberfläche ist ehrlich („kein
+       * Schlüssel ⇒ kein Knopf"), und genau deshalb fällt niemandem auf, dass
+       * ein bezahltes Produkt fehlt. Gefunden, als der Übersetzungs-Knopf auf
+       * freelancer.supply (Plan: pro) nicht erschien.
+       *
+       * NUR HIER Pflicht: `control` schaltet `pukalani.ai` nicht ein (auch
+       * `tickets.ai` steht auf false), `portfolio` erst recht nicht.
+       */
+      'NUXT_AI_KEY',
     ],
   },
   {
