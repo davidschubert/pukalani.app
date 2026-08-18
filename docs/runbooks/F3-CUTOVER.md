@@ -339,7 +339,11 @@ Rückweg mehr.
 - [x] Stripe-Keys der Instanz: die Server-`.env` trug keine — es gab nichts zu
       widerrufen.
 - [ ] Plausible: eigene Site behalten ODER Host in den Sammel-Filter. Entscheidung: ______
-- [x] Projekt `comments` **eingefroren, nicht gelöscht** (wie `pool` seit AH-1).
+- [x] Projekt `comments` — zunächst eingefroren, am **2026-08-18 von David in
+      der Konsole GELÖSCHT** (Gegenprobe: `404 project_not_found`, kein
+      Delete-500 diesmal; `account`-Projekt und Community-Host unberührt).
+      Damit ist der Vor-Migration-Stand nur noch über die Offsite-MariaDB-Dumps
+      (Storage Box `pukalani-backup`) erreichbar. `pool` bleibt eingefroren.
 - [x] ploi-Site 389772 gelöscht (Davids Panel-Klick am 2026-08-18). Gegenprobe:
       der Host antwortet 200 über die Wildcard-Site `platform` mit dem
       `*.pukalani.app`-Zertifikat, ploi listet noch 5 Sites.
