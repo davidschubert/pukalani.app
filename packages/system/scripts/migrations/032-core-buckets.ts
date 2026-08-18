@@ -9,10 +9,13 @@
  * auf jeder Instanz laufen — deshalb liegt die Migration im system-Layer.
  *
  * Die Einstellungen sind am 2026-08-12 aus der Prod-Instanz `account`
- * ABGELESEN, nicht erfunden: beide fileSecurity (Row-Permissions je Datei —
- * ein GDPR-Snapshot gehört genau einem Konto, ein Avatar seinem Besitzer),
- * keine Table-Permissions (Zugriff nur über Server-Routen), 30 MB,
- * keine Extension-Liste (Magic-Bytes prüft die Route), Encryption+Antivirus an.
+ * ABGELESEN — mit EINEM Fehler, der dabei mitkopiert wurde: `avatars` stand
+ * dort ohne `create("users")`, womit jeder Profilbild-Upload scheiterte
+ * (2026-08-17 live erwischt, Details am avatars-Schritt unten). Der Rest
+ * stimmt: beide fileSecurity (Row-Permissions je Datei — ein GDPR-Snapshot
+ * gehört genau einem Konto, ein Avatar seinem Besitzer), 30 MB, keine
+ * Extension-Liste (Magic-Bytes prüft die Route), Encryption+Antivirus an.
+ * `gdpr-exports` bleibt ohne Bucket-Permissions (schreibt nur der Server).
  *
  *   node --experimental-strip-types --env-file=apps/<app>/.env \
  *     packages/system/scripts/migrations/032-core-buckets.ts
@@ -56,15 +59,34 @@ async function step(label: string, run: () => Promise<unknown>) {
 
 console.log(`Migration system-032 gegen ${endpoint} / Projekt ${projectId}`)
 
-await step(`Bucket 'avatars'`, () => storage.createBucket({
-  bucketId: 'avatars',
+/**
+ * `create("users")` ist PFLICHT: die Upload-Route (core/server/api/storage/
+ * [bucket]/index.post.ts) läuft mit dem SESSION-Client — ohne Bucket-Create-
+ * Recht scheitert JEDER Profilbild-Upload (Appwrite-401 → generisches 500 an
+ * der Route, 2026-08-17 auf allen drei Prod-Instanzen live erwischt). Die
+ * ursprüngliche Fassung hatte `permissions: []` von der Prod-Instanz
+ * ABGELESEN — und damit deren Fehlstand kopiert. Datei-Rechte bleiben pro
+ * Datei beim Besitzer (fileSecurity, die Route setzt read(any) +
+ * update/delete(user)). Der 409-Zweig zieht BESTEHENDE Buckets nach, sonst
+ * bliebe jede schon migrierte Instanz kaputt.
+ */
+const avatarsSettings = {
   name: 'avatars',
-  permissions: [],
+  permissions: ['create("users")'],
   fileSecurity: true,
   maximumFileSize: 30_000_000,
   encryption: true,
   antivirus: true,
-}))
+}
+try {
+  await storage.createBucket({ bucketId: 'avatars', ...avatarsSettings })
+  console.log(`✔ Bucket 'avatars'`)
+}
+catch (error) {
+  if (!hasCode(error, 409)) throw error
+  await storage.updateBucket({ bucketId: 'avatars', enabled: true, ...avatarsSettings })
+  console.log(`↷ Bucket 'avatars' (existierte — Permissions nachgezogen)`)
+}
 
 await step(`Bucket 'gdpr-exports'`, () => storage.createBucket({
   bucketId: 'gdpr-exports',
