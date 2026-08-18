@@ -66,38 +66,29 @@ dem Runner-Stopp; Werkzeug: `--phase inventory`.
 - [x] Hash-Verfahren geprüft: das eine Konto ist OTP-only, kein Hash —
       Übernahme als `users.create` ohne Passwort (Betreiber-Konto per H2
       bewusst passwortlos).
-- [ ] **AI-Runner pausiert einplanen**: der Mac-Daemon (tools/ai-runner)
-      schreibt in `runners`/`runs`/`run_events` DIESES Projekts. Vor der
-      Daten-Phase LaunchAgent stoppen, nach dem Schnitt mit neuem Projekt/Key
-      wieder starten (seine Config zeigt auf die Konsole — Pfade im Memory
-      „AI-Runner produktiv auf dem Mac").
-- [ ] `pnpm ops:site-env` gelaufen — Env-Schlüssel-Listen je Server liegen vor
-      (F44: eine fehlende Variable wird nicht rot).
-- [ ] Wartungsfenster mit David abgestimmt: ______ (Datum/Uhrzeit; Bedarf
-      grob 1–2 h, Kunden merken im Normalfall nichts)
-- [ ] Stripe: Testmodus bestätigt (heute sk_test in der Site-Env,
-      `stripe_settings` ist leer) — im Testmodus ist der Webhook-Teil
-      risikoarm; NACH Stripe-Go-Live (A2) würde dieses Runbook einen eigenen
-      Stripe-Abschnitt brauchen. Stand: ______
+- [x] **AI-Runner pausiert** (12:37 UTC, `launchctl bootout`; ein laufender
+      Auftrag wurde als Fehlschlag beendet — einkalkuliert). Erkenntnis: der
+      Runner spricht NUR HTTP mit der Konsole und authentifiziert über seine
+      `runners`-Zeile — die wandert mit, KEINE Config-Änderung nötig.
+- [x] Env-Stände beider Sites als `.ah4c-backup` gesichert
+      (`~/.appwrite-secrets/ah4c/backups/`); dabei NEBENBEFUND: die
+      platform-Env trug eine korrupte Zeile (`NUXT_AI_KEY` ohne Zeilenumbruch
+      an `NUXT_ANALYTICS_STATS_API_KEY` angehängt — Analytics-Statistik war
+      seit dem A0-Fix tot) — beim Schnitt mitgeheilt.
+- [x] Wartungsfenster: Davids „jetzt", 2026-08-18 ~12:35–12:50 UTC —
+      tatsächliche Dauer ~15 min.
+- [x] Stripe: Testmodus bestätigt (sk_test in der Site-Env,
+      `stripe_settings` leer) — Webhook-Teil risikoarm; Testereignis nach dem
+      Fenster steht bei David (Schritt 5).
 
 ## 1 · Projekt `admin` anlegen (Konsolen-Klicks: David — oder Wegwerf-Provisioner)
 
-- [ ] Projekt angelegt, Id **exakt** `admin`, Team „Pukalani App",
-      Anzeigename „Admin (Control Plane)". (Tippfehler in der Id kostet den
-      ganzen Durchlauf — Ids sind unveränderlich.)
-- [ ] **Web-Platform `admin.pukalani.app` eingetragen.** Ohne sie ist in der
-      Konsole jede Realtime lautlos tot — Sofort-Abmeldung, Glocke, Live-Theme
-      (F45, im Projekt `control` live erwischt).
-      Probe: `curl -H "Origin: https://admin.pukalani.app" https://api.pukalani.app/v1/account`
-      mit `X-Appwrite-Project: admin` → **401** (akzeptiert), nicht
-      `403 general_unknown_origin`. Ergebnis: ______
-- [ ] Zwei API-Keys erzeugt (Ablage als Dateien unter `~/.appwrite-secrets/`):
-      **Runtime** mit der vollen 10-Scope-Liste aus DEPLOYMENT.md —
-      sessions/users/rows/health **plus** files.read/files.write **plus**
-      presences.read/presences.write (genau an den Presences-Scopes ist AH-1
-      gestolpert: eine Woche „0 online", lautlos) — und **Migrations**
-      (databases/tables/columns/indexes + buckets + rows).
-- [ ] TablesDB `main` angelegt.
+- [x] Projekt angelegt (David, 2026-08-18), Id exakt `admin`.
+- [x] Web-Platform `admin.pukalani.app` eingetragen — Origin-Probe **401**
+      (akzeptiert; F45-Falle damit ausgeschlossen).
+- [x] Zwei API-Keys erzeugt und geprobt (Details in Schritt 0 „Ziel-Keys" —
+      inkl. der nachgetragenen users/teams/files-Scopes am Migrations-Key).
+- [x] TablesDB `main` per API angelegt (fehlte nach der Projekt-Anlage).
 
 ## 2 · Schema (✅ VOR dem Fenster erledigt, 2026-08-18 — das Ziel ist leer und unbenutzt)
 
@@ -125,59 +116,65 @@ dem Runner-Stopp; Werkzeug: `--phase inventory`.
       (6×204, Ziel steht auf 0). Bei einem WIEDERHOLTEN Schema-Lauf diesen
       Punkt erneut prüfen.
 
-## 3 · Daten und Nutzer (AI-Runner ist ab hier PAUSIERT)
+## 3 · Daten und Nutzer (✅ 2026-08-18, ~12:38–12:43 UTC — Runner pausiert)
 
 > Reihenfolge zählt: erst Nutzer, dann Rows — Row-Permissions verweisen auf
 > User-Ids; eine Row mit `read(user:…)` ins Leere ist unsichtbar.
 
-- [ ] **Nutzer** übernommen (Users-API, Hashes/prefs/Labels/Verifikation,
-      Ids erhalten). Übernommen: ______ von ______
-- [ ] **Teams samt Mitgliedschaften** übernommen (per userId, ohne
-      Einladungs-Mail; heute 0 — der Zweig läuft trotzdem mit, weil er zum
-      1:1-Umzug gehört). Übernommen: ______
-- [ ] **Rows** aller 41 Tabellen kopiert (Ids + Permissions erhalten,
-      `Query.limit`-Paginierung). Rows: ______ von ______ (FRISCH gemessen
-      nach Runner-Stopp; die 248 vom 2026-08-18 sind ein Momentwert)
-- [ ] **Buckets + Dateien** kopiert — per REST, nicht über SDK
-      `getFileDownload` (liefert keinen Buffer-tauglichen Typ, AH-1-Lektion).
-      Dateien: ______
-- [ ] Stichproben mit denselben Ids sichtbar: eine Community-Row, ein Ticket,
-      ein `run_events`-Eintrag, eine Changelog-Zeile, eine Datei. ______
+- [x] **Nutzer** übernommen: **1 von 1** (OTP-only, Id erhalten).
+- [x] **Teams**: 0 vorhanden, 0 übernommen (Zweig lief mit).
+- [x] **Rows**: **249 von 249** (frisch nach Runner-Stopp gemessen) —
+      244 angelegt, 1 Seed aktualisiert, 4 Seeds byte-identisch.
+- [x] **Dateien**: **4 von 4** (runner-files; übrige Buckets leer), per REST.
+- [x] `--phase verify` grün: Zählstände 41/41 Tabellen deckungsgleich,
+      10 Row-Stichproben deep-equal inkl. Permissions, 2 Datei-Stichproben
+      per Byte-Länge.
 
-## 4 · Env-Schnitt (der eigentliche Cutover, EIN Handgriff je Site)
+## 4 · Env-Schnitt (✅ 2026-08-18 ~12:44 UTC — Muster Datei-runter→patchen→scp-hoch)
 
-- [ ] **admin-Site** (`/home/ploi/admin.pukalani.app/.env`):
-      `NUXT_PUBLIC_APPWRITE_PROJECT_ID=admin` + neuer Runtime-Key.
-      Alles andere bleibt (`NUXT_PUBLIC_CONTROL_POOL_PROJECT=account`,
-      Onboarding-Secret, Stripe-Envs, ploi-Token).
-- [ ] **platform-Site**: `NUXT_PLATFORM_CONTROL_PROJECT_ID=admin` + neuer
-      Read-only-Key (nur `rows.read`, wie `platform-control-readonly` heute).
-      `NUXT_ONBOARDING_CONTROL_URL` bleibt — die Naht spricht den HOST, nicht
-      das Projekt. **Das ist die kundenwirksame Zeile dieses Runbooks.**
-- [ ] Delta-Lauf der Daten-Phase direkt vor dem Flip (was seit Phase 3
-      dazukam). Delta: ______
-- [ ] `pm2 reload` beider Sites (Deploy oder `--update-env`-Reload); Backups
-      der alten `.env`-Stände als `.ah4c-backup` daneben.
-- [ ] Gegenprobe `pnpm ops:site-env`: keine Pflicht-Variable fehlt — **ein
-      Env-Häkchen gilt erst nach dieser Gegenprobe gegen die LIVE-Datei**
-      (die AH-4-Lektion: zwei Sites trugen den Altwert, abgehakt war es
-      trotzdem). Ergebnis: ______
+- [x] **admin-Site**: `NUXT_PUBLIC_APPWRITE_PROJECT_ID=admin` + neuer
+      Runtime-Key; alles andere unverändert (Diff auf Schlüssel-NAMEN geprüft:
+      exakt 2 Zeilen).
+- [x] **platform-Site**: `NUXT_PLATFORM_CONTROL_PROJECT_ID=admin` +
+      **INTERIM der admin-Runtime-Key** statt eines dedizierten
+      rows.read-Keys — bewusst dasselbe Muster wie beim control-Cutover
+      („gleiche Vertrauenszone, TODO read-only"); der dedizierte Key steht in
+      Schritt 6. NEBENBEI GEHEILT: die korrupte
+      `NUXT_ANALYTICS_STATS_API_KEY`-Zeile (angehängtes `NUXT_AI_KEY` ohne
+      Zeilenumbruch — Analytics war seitdem tot).
+- [x] Delta: **3 Rows** (2× `websites` — Intervall-Sweep der Alt-App, 1×
+      `tickets` — SIGTERM-Fehlschlagbericht des Runners), GEZIELT per PATCH
+      nachgezogen statt eines vollen rows-Laufs — der hätte inzwischen im
+      Ziel gewachsene Werte (runners.lastSeenAt) rückwärts überschrieben.
+      MERKE für künftige Läufe: nach dem Schnitt ist die rows-Phase nicht
+      mehr idempotent-sicher, weil das Ziel lebt.
+- [x] `pm2 startOrReload --update-env` beider Sites (admin 12:44:0x, platform
+      direkt danach); Backups unter `~/.appwrite-secrets/ah4c/backups/`.
+- [x] Gegenprobe `pnpm ops:site-env`: grün bis auf den VORBESTAND
+      `NUXT_TICKETS_AI_KEY` fehlt auf control (war vor dem Schnitt schon so —
+      Davids OpenRouter-Key, eigener Punkt). Der Wächter fing dabei korrekt
+      die stale `migrations/control.env` → eingefroren als
+      `control.env.ah4c-eingefroren`, Wächter-Mapping auf `admin.env`
+      umgestellt.
 
 ## 5 · Verifikation (nichts davon ist optional, dreimal statt einmal)
 
 - [ ] Betreiber-Login auf `admin.pukalani.app` (OTP) — neues Cookie
       `a_session_admin`, Dashboard vollständig (Communities-Liste = 8 Rows).
-- [ ] `demo.pukalani.app` → 200 und richtige Community; ein zweiter
-      Mandanten-Host ebenso; `comments.pukalani.app` → 200. (Das prüft die
-      platform→admin-Naht — DIE Risiko-Stelle.)
+- [x] Mandanten-Auflösung über das NEUE Projekt: `demo.pukalani.app`,
+      `comments.pukalani.app` UND `freelancer.supply` (Kundendomain) → je
+      200; Health beider Sites 3× in Folge ok. (DIE Risiko-Stelle — grün.)
 - [ ] Realtime in der Konsole lebt: Glocke/Live-Theme reagiert (sonst
       Web-Platform aus Schritt 1 prüfen, F45).
-- [ ] Presence-Probe gegen den neuen Runtime-Key (AH-1-Stolperstein):
-      `curl -s .../v1/presences` → Liste, nicht 401. Ergebnis: ______
+- [x] Presence-Probe gegen den neuen Runtime-Key: Liste, kein 401
+      (AH-1-Stolperstein ausgeschlossen).
 - [ ] Stripe-Testereignis an `https://admin.pukalani.app/api/stripe/webhook`
       → 200 (URL unverändert, aber der Handler liest jetzt aus `admin`).
-- [ ] AI-Runner mit neuem Projekt/Key gestartet; `runs`-Smoke aus
-      tools/ai-runner grün. Ergebnis: ______
+- [x] AI-Runner neu gestartet (12:44:06, KEINE Config-Änderung nötig — er
+      spricht HTTP mit der Konsole, seine `runners`-Zeile wanderte mit) —
+      Heartbeat `lastSeenAt` landet im Projekt `admin` (12:44:07): der
+      authentifizierte Schreibpfad Konsole→admin ist damit Ende-zu-Ende
+      bewiesen.
 - [ ] `packages/control/scripts/verify-onboarding.mjs` und
       `packages/onboarding/scripts/verify-control-exit.mjs`: ______ / ______
 - [ ] Eine Community anlegen/ändern über den Wizard-Weg (Service-Naht

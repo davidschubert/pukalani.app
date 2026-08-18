@@ -15,8 +15,9 @@ alle Go-Live-Learnings im Detail).
 > ploi-Site samt Server-Verzeichnis WIRKLICH auf `admin.pukalani.app`
 > umbenannt (Davids Panel-Klick, eigenes Zertifikat nur für admin); der
 > Altname `control.` antwortet seither bewusst **404** über die
-> Wildcard-Site, Release-Slot `releases/control`, pm2 `adminpukalaniapp`,
-> Appwrite-Projekt `control` — Ids/Slots wechseln beim Rename nicht mit) ·
+> Wildcard-Site, Release-Slot `releases/control`, pm2 `adminpukalaniapp`;
+> seit AH-4c am selben Tag auch Appwrite-Projekt `admin` — das Alt-Projekt
+> `control` liegt eingefroren als Rückweg) ·
 > `platform.pukalani.app` (Site 391312, Port **3004**, seit H3-Rollout
 > 2026-07-23 — Multi-Tenant-App: `server_name platform.pukalani.app
 > *.pukalani.app` + ploi-verwaltetes **Wildcard-TLS** `*.pukalani.app`

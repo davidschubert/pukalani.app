@@ -122,7 +122,10 @@ const SITES = [
     // bekannt ist (E1, Projekt `studio` gelöscht): der Wächter soll sie
     // anschlagen, solange sie auf Davids Rechner liegt — sonst ist „bekannt"
     // nur ein Satz in einer Liste, den man beim nächsten Mal nicht liest.
-    localProjectFiles: ['apps/control/.env.production', '~/.appwrite-secrets/migrations/control.env'],
+    // Seit AH-4c (2026-08-18) läuft die Konsole auf dem Appwrite-Projekt
+    // `admin` — die Migrations-Env heißt entsprechend; die alte control.env
+    // liegt eingefroren daneben (`control.env.ah4c-eingefroren`).
+    localProjectFiles: ['apps/control/.env.production', '~/.appwrite-secrets/migrations/admin.env'],
     required: [
       'NUXT_APPWRITE_KEY',
       'NUXT_PUBLIC_APPWRITE_ENDPOINT',

@@ -302,11 +302,15 @@ Vollständiges Konzept: docs/CONCEPT.md
   und PROBE in deploy.yml sind damit wieder identisch, der pm2-Prozess heißt
   `adminpukalaniapp` (den Vorgänger `controlpukalaniapp` räumt ops/pm2-heal.sh
   einmalig weg — pm2 findet Prozesse über den NAMEN und startet nach einem
-  Rename sonst DANEBEN, die studio→control-Falle). NUR Release-Slot
-  (`releases/control`) und Appwrite-Projekt (`control`, Cookie
-  `a_session_control`) behalten den Namen: Slots wechseln beim Rename nicht
-  mit, Projekt-Ids sind unveränderlich, und die Ecosystem-Datei heißt weiter
-  `ecosystem-control.config.cjs` (Dateinamen bleiben). Der ALTNAME
+  Rename sonst DANEBEN, die studio→control-Falle). Seit **AH-4c (2026-08-18,
+  Davids Entscheidung)** läuft auch das APPWRITE-PROJEKT als `admin` (Cookie
+  `a_session_admin`): Projekt-Ids sind unveränderlich, also Neuanlage +
+  1:1-Umzug per `scripts/ops/ah4c-project-transfer.mjs` (Runbook
+  docs/runbooks/ADMIN-PROJEKT-CUTOVER.md); das Alt-Projekt `control` liegt
+  EINGEFROREN als Rückweg bis zum Ende der Beobachtung. Den Namen `control`
+  behalten NUR noch: Ordner apps/control, Workspace-Paketname, Release-Slot
+  `releases/control` und die Ecosystem-DATEI `ecosystem-control.config.cjs`
+  (Dateinamen bleiben; `admin` ist als Layer-Name packages/admin vergeben). Der ALTNAME
   `control.pukalani.app` ist seit AH-4b BEWUSST tot — Davids Entscheidung
   gegen eine 301: der Host war rein betreiber-intern, der Stripe-Webhook zeigt
   seit AH-4 auf admin. Er fällt in die Wildcard-Site `platform` und antwortet
