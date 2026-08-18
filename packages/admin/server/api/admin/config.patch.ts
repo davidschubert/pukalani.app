@@ -11,13 +11,24 @@ const configSchema = z.object({
   aiModel: z.string().trim().max(100)
     .regex(/^$|^[\w.-]+\/[\w.:-]+$/, 'Erwartet vendor/model oder leer')
     .optional(),
+  /**
+   * KI-Schlüssel (2026-08-18). NUR SCHREIBEN: der Wert wandert verschlüsselt
+   * in `instance_secrets` (system-036) und kommt nie zurück. Leerer String =
+   * ENTFERNEN (dann gilt wieder die Env, falls gesetzt); weggelassen =
+   * unverändert. Dieselbe Regel wie überall im Haus — ein PATCH, der
+   * ungenannte Felder zurücksetzt, ist ein PUT mit falschem Namen.
+   */
+  aiKey: z.string().trim().max(400).optional(),
 })
 
 /** Produkt-Flags setzen (Upsert der app_config/global-Zeile) + Audit. */
 export default defineEventHandler(async (event) => {
   requirePermission(event, 'system.manage')
 
-  const data = await readValidatedBody(event, configSchema.parse)
+  const body = await readValidatedBody(event, configSchema.parse)
+  // Der Schlüssel gehört NICHT in die app_config-Zeile: die Tabelle ist
+  // `read(any)` (system-005) und damit für jeden Besucher lesbar.
+  const { aiKey, ...data } = body
   const config = useRuntimeConfig(event)
   const admin = createAdminClient(event)
   const databaseId = config.public.appwriteDatabaseId
@@ -35,6 +46,17 @@ export default defineEventHandler(async (event) => {
     else {
       throw toH3Error(error, 'Could not save configuration')
     }
+  }
+
+  if (aiKey !== undefined) {
+    await writeInstanceSecret(event, 'ai', aiKey, event.context.user?.$id ?? '')
+    // Im Protokoll steht NUR die Tatsache, nie der Wert — auch nicht gekürzt:
+    // die ersten Zeichen eines Schlüssels sind bereits eine Auskunft.
+    await recordAudit(event, {
+      action: aiKey ? 'config.ai_key_set' : 'config.ai_key_cleared',
+      targetType: 'config',
+      targetId: 'ai',
+    })
   }
 
   await recordAudit(event, { action: 'config.updated', targetType: 'config', targetId: 'global', metadata: data })

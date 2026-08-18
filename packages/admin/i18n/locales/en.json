@@ -40,7 +40,19 @@
       "aiModel": "AI model (runtime override)",
       "aiModelDesc": "Model for the built-in AI (moderation assist). Empty = build default {model}. Format: vendor/model (OpenRouter).",
       "save": "Save",
-      "saved": "Configuration saved."
+      "saved": "Configuration saved.",
+      "aiKey": "AI key",
+      "aiKeyDesc": "The API key of your AI provider (e.g. OpenRouter). Stored encrypted and never shown again.",
+      "aiKeyPlaceholder": "Enter a new key — leaving this empty changes nothing",
+      "aiKeyClear": "Remove key",
+      "aiKeyClearTitle": "Remove the AI key?",
+      "aiKeyClearText": "After this, AI features only work if NUXT_AI_KEY is set on the server.",
+      "aiKeyNotEditable": "You can enter a key here once NUXT_INSTANCE_SECRETS_KEY is set on the server (openssl rand -hex 32). Until then only NUXT_AI_KEY applies.",
+      "aiKeySource": {
+        "settings": "stored here",
+        "env": "from the server environment",
+        "none": "no key — AI features are off"
+      }
     },
     "storage": {
       "title": "Storage",

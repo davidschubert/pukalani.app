@@ -84,7 +84,7 @@ export default defineAppConfig({
      */
     pages: { guidelinesFallback: true },
     // KI-Assist (Moderation) ist als Gate AN — wirksam wird es erst, wenn
-    // NUXT_AI_KEY auf dem Server liegt (isAiAvailable prüft beides). Demo-
+    // ein Schlüssel hinterlegt ist (isAiConfigured prüft beides: Konsole oder NUXT_AI_KEY). Demo-
     // Entscheidung „alle Produkte an" (David, 2026-07-26).
     ai: { enabled: true },
     // Strukturierte 5xx-Logs + Client-Error-Inbox — auf der Multi-Tenant-App

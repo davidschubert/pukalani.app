@@ -91,24 +91,30 @@ const SITES = [
       // erreichbar" — dieselbe Sorte stiller Ausfall wie das fehlende SMTP.
       'NUXT_ANALYTICS_STATS_API_KEY',
       /**
-       * KI (2026-08-18 aufgeschlagen): `apps/platform` erklärt
-       * `pukalani.ai.enabled: true` UND verkauft `ai` ab dem PRO-Tarif
-       * (`tenancy.products`, 149 €). Ohne diesen Schlüssel ist
-       * `isAiAvailable()` trotzdem false, und alle drei Verbraucher sind
-       * dunkel: der Moderations-Assist für Kommentare, der für Beiträge und
-       * der Übersetzungs-Vorschlag der Kategorien.
+       * KI (2026-08-18). `apps/platform` erklärt `pukalani.ai.enabled: true`
+       * und verkauft `ai` ab dem PRO-Tarif (`tenancy.products`, 149 €) — ohne
+       * Schlüssel sind alle Verbraucher dunkel: die zwei
+       * Moderations-Assistenten, die Übersetzungs-Vorschläge und der
+       * Kategorie-Übersetzer. Dieselbe Sorte Loch wie F44, nur teurer: nichts
+       * wird rot, die Knöpfe erscheinen einfach nicht — die Oberfläche ist
+       * ehrlich („kein Schlüssel ⇒ kein Knopf"), und genau deshalb fällt
+       * niemandem auf, dass ein bezahltes Produkt fehlt. Gefunden, als der
+       * Übersetzungs-Knopf auf freelancer.supply (Plan: pro) nicht erschien.
        *
-       * DIESELBE SORTE LOCH WIE F44, nur teurer: nichts wird rot, die Knöpfe
-       * erscheinen einfach nicht — die Oberfläche ist ehrlich („kein
-       * Schlüssel ⇒ kein Knopf"), und genau deshalb fällt niemandem auf, dass
-       * ein bezahltes Produkt fehlt. Gefunden, als der Übersetzungs-Knopf auf
-       * freelancer.supply (Plan: pro) nicht erschien.
+       * PFLICHT IST HIER DER UMSCHLAG, NICHT DER SCHLÜSSEL SELBST: seit
+       * system-036 trägt der Betreiber den KI-Schlüssel über die Konsole ein
+       * (`instance_secrets`, verschlüsselt). Damit das Feld dort aufgeht, muss
+       * `NUXT_INSTANCE_SECRETS_KEY` gesetzt sein. `NUXT_AI_KEY` steht bewusst
+       * NICHT in dieser Liste: er ist seither der ZWEITE Weg, und ein Wächter,
+       * der einen von zwei gleichwertigen Wegen anmahnt, erzieht zum
+       * Weglesen. Ob überhaupt ein Schlüssel da ist, sagt jetzt die Konsole
+       * selbst (`aiKeySource`).
        *
-       * NUR HIER Pflicht: `control` schaltet `pukalani.ai` nicht ein
-       * (seine Ticket-Triage fährt über den EIGENEN Key NUXT_TICKETS_AI_KEY,
-       * s. u.), `portfolio` erst recht nicht.
+       * NUR HIER Pflicht: `control` schaltet `pukalani.ai` nicht ein (seine
+       * Ticket-Triage fährt über den EIGENEN Key NUXT_TICKETS_AI_KEY, s. u.),
+       * `portfolio` erst recht nicht.
        */
-      'NUXT_AI_KEY',
+      'NUXT_INSTANCE_SECRETS_KEY',
     ],
   },
   {
@@ -122,7 +128,10 @@ const SITES = [
     // bekannt ist (E1, Projekt `studio` gelöscht): der Wächter soll sie
     // anschlagen, solange sie auf Davids Rechner liegt — sonst ist „bekannt"
     // nur ein Satz in einer Liste, den man beim nächsten Mal nicht liest.
-    localProjectFiles: ['apps/control/.env.production', '~/.appwrite-secrets/migrations/control.env'],
+    // Seit AH-4c (2026-08-18) läuft die Konsole auf dem Appwrite-Projekt
+    // `admin` — die Migrations-Env heißt entsprechend; die alte control.env
+    // liegt eingefroren daneben (`control.env.ah4c-eingefroren`).
+    localProjectFiles: ['apps/control/.env.production', '~/.appwrite-secrets/migrations/admin.env'],
     required: [
       'NUXT_APPWRITE_KEY',
       'NUXT_PUBLIC_APPWRITE_ENDPOINT',

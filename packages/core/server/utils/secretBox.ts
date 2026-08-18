@@ -5,6 +5,16 @@ import { createCipheriv, createDecipheriv, createHash, randomBytes, timingSafeEq
  * (F55 — Davids Entscheidung 2026-08-08: Stripe-Keys wandern in die DB, der
  * ENTSCHLÜSSELUNGS-Schlüssel bleibt Server-Env).
  *
+ * SEIT 2026-08-18 IM CORE, nicht mehr im billing-Layer: der KI-Schlüssel geht
+ * denselben Weg (Davids Entscheidung — Eintrag über die Betreiber-Konsole
+ * statt ssh), und ein Fundament-Layer darf nicht von einem Produkt abhängen
+ * (A14). Die Datei ist reine Krypto ohne Tabelle und ohne Appwrite — sie
+ * passt damit genau hierher. `parseSecretBoxKey` nimmt den Env-NAMEN als
+ * Argument, weil jede Ablage ihren eigenen Umschlag-Schlüssel mitbringt:
+ * billing bleibt bei `NUXT_BILLING_SETTINGS_KEY` (seine Zeilen sind damit
+ * versiegelt, ein Wechsel wäre eine Neuverschlüsselung), alles Neue nimmt
+ * `NUXT_INSTANCE_SECRETS_KEY`.
+ *
  * WOGEGEN DAS SCHÜTZT — UND WOGEGEN NICHT (präzisiert 2026-08-08, Audit-Befund
  * NOTE 9; die frühere Fassung behauptete „man braucht BEIDES" und war damit
  * eine Beruhigung, die nicht trägt):

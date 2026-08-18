@@ -33,6 +33,6 @@ export default defineEventHandler(async (event): Promise<CategoryManageResponse>
      * ('ai') prüft die Oberfläche zusätzlich selbst (planAllows) — die Route
      * `translate.post.ts` setzt beides ohnehin durch.
      */
-    aiTranslate: isAiAvailable(event),
+    aiTranslate: await isAiConfigured(event),
   }
 })

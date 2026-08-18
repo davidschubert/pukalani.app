@@ -1,15 +1,14 @@
 // Diese App ist die BETREIBER-KONSOLE und antwortet seit AH-4 (2026-08-11) auf
 // admin.pukalani.app. Der ALTNAME control.pukalani.app fällt seit AH-4b
 // (2026-08-18) in die Wildcard-Site platform und antwortet 404.
-// NAMENS-LAGE seit AH-4b: ploi-Site, Server-Verzeichnis, Zertifikat und
-// pm2-Prozess (adminpukalaniapp) heißen wirklich `admin` — SITE und PROBE in
-// deploy.yml sind wieder identisch. Den Namen `control` behalten NUR noch:
-// Ordner (apps/control), Workspace-Paketname, Release-Slot (releases/control)
-// und das Appwrite-Projekt (Projekt-Ids sind unveränderlich). Eine Umbenennung
+// NAMENS-LAGE seit AH-4b/AH-4c (beide 2026-08-18): ploi-Site, Verzeichnis,
+// Zertifikat, pm2-Prozess (adminpukalaniapp) UND das Appwrite-Projekt heißen
+// wirklich `admin` (Cookie a_session_admin; Projekt-Umzug per
+// docs/runbooks/ADMIN-PROJEKT-CUTOVER.md, Alt-Projekt `control` eingefroren).
+// Den Namen `control` behalten NUR noch: Ordner (apps/control),
+// Workspace-Paketname und Release-Slot (releases/control). Eine Umbenennung
 // des Ordners nach apps/admin wurde am 2026-08-17 geprüft und VERWORFEN:
 // `admin` ist als geteilter Dashboard-Layer packages/admin vergeben.
-// Details: CLAUDE.md Abschnitt „Hosts" und docs/runbooks/ADMIN-CUTOVER.md
-// (Nachtrag AH-4b).
 export default defineNuxtConfig({
   // früher gelistet = höhere Priorität — Produkt Layer vor dem Core.
   // Nicht benötigte Layer einfach entfernen (und aus package.json streichen);
