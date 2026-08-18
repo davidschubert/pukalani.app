@@ -60,10 +60,21 @@ const memberWriteRoutes = routeFiles(apiDir).filter(file =>
   !file.endsWith('.get.ts') && !OPERATOR_ROUTES.has(file))
 
 describe('Wartungsmodus: jede schreibende Mitglieder-Route prüft ihn', () => {
-  it('findet genau die acht Mitglieder-Schreibwege', () => {
+  it('findet genau die neun Mitglieder-Schreibwege', () => {
     expect([...memberWriteRoutes].sort()).toEqual([
       '[id].delete.ts',
       '[id].patch.ts',
+      /**
+       * Termin übersetzen (2026-08-18): sie steht in dieser Liste, obwohl sie
+       * KEINEN Inhalt schreibt — sie schreibt einen abgeleiteten Cache über die
+       * Operator-Klinke. Der Schalter gehört trotzdem geprüft, und zwar aus dem
+       * zweiten Grund, den die Route selbst nennt: sie ruft den KI-Anbieter
+       * (kostet Geld) und schreibt dabei auf `events` — genau die Tabelle, an
+       * der der Betreiber im Wartungsmodus womöglich arbeitet. Die Prüfung sitzt
+       * hinter dem Cache-Treffer: eine schon vorhandene Fassung herauszugeben
+       * ist reines Lesen und bleibt offen (Muster posts).
+       */
+      '[id]/translate.post.ts',
       '[id]/cover.delete.ts',
       '[id]/cover.post.ts',
       '[id]/rsvp.post.ts',

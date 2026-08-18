@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { EventDetailResponse, EventRow, EventVoteResponse, EventVoteValue, RsvpResponse, RsvpStatus } from '../../shared/types/event'
+import type { EventDetailResponse, EventRow, EventTranslateResponse, EventVoteResponse, EventVoteValue, RsvpResponse, RsvpStatus } from '../../shared/types/event'
 import { effectiveAccess, effectiveLocationType, EVENTS_TABLE } from '../../shared/types/event'
 import { detectLiveProvider } from '../../shared/liveProvider'
 import { eventIsEditable, eventIsRedacted } from '../../shared/eventModerationPolicy'
@@ -203,6 +203,48 @@ async function share() {
  * könnte nie erscheinen. Der `eventIsEditable`-Guard bleibt trotzdem stehen, er
  * ist dieselbe pure Regel, die die PATCH-Route durchsetzt.
  */
+/**
+ * ÜBERSETZEN (Davids Entscheidung 2026-08-18: die KI-Übersetzung gilt jetzt
+ * auch für Events und Kurse). Die Regel liegt im Core-Composable — hier steht
+ * nur, WAS dieses Produkt übersetzt (Titel UND Beschreibung) und welche Route
+ * das tut.
+ *
+ * Diese Komponente ist die EINZIGE Anlegestelle: die Bauplan-Seite reicht nur
+ * den Kommentar- und den Melden-Slot durch (A14). Ein Knopf dort wäre
+ * Produkt-Logik im Kompositions-Layer.
+ *
+ * GESCHWÄRZT (F46) ⇒ kein Knopf: `body` ist dann leer, und das Composable
+ * blendet ihn ohne Text von selbst aus — dieselbe Regel, aus der ein
+ * beschreibungsloser Termin keinen bekommt. Die Route würde es sonst mit 400
+ * beantworten; hier gar nicht erst zu fragen ist die ehrlichere Fläche.
+ */
+const {
+  canTranslate,
+  showing: translationShowing,
+  busy: translationBusy,
+  entry: translation,
+  show: showTranslation,
+  showOriginal: showEventOriginal,
+} = useUgcTranslation({
+  translations: () => event.value.translations,
+  body: () => event.value.description,
+  translate: async (targetLocale) => {
+    const result = await $fetch<EventTranslateResponse>(`/api/events/${event.value.$id}/translate`, {
+      method: 'POST',
+      body: { locale: targetLocale },
+    })
+    // `null` heißt „das Original hat keinen Titel" — der Eintrag trägt das Feld
+    // dann gar nicht, und die Anzeige unten fällt auf `event.title` zurück.
+    return { ...(result.title ? { title: result.title } : {}), body: result.body }
+  },
+})
+
+/** Was tatsächlich dasteht — mit Rückfall auf die Grundfassung je Feld. */
+const shownTitle = computed(() =>
+  translationShowing.value ? (translation.value?.title ?? event.value.title) : event.value.title)
+const shownDescription = computed(() =>
+  translationShowing.value ? (translation.value?.body ?? event.value.description) : event.value.description)
+
 const canManage = useCapability('events.manage')
 const confirm = useConfirm()
 const managing = ref(false)
@@ -509,7 +551,7 @@ const startDayNumber = computed(() => formatDayNumber(event.value.startAt))
           {{ t('events.redacted.title') }}
         </h1>
         <h1 v-else class="text-2xl font-bold" :class="{ 'line-through opacity-60': event.status === 'cancelled' }">
-          {{ event.title }}
+          {{ shownTitle }}
         </h1>
         <div v-if="event.organizerName" class="mt-2 flex items-center gap-2 text-sm text-muted">
           <UAvatar :src="initial.organizerAvatarUrl ?? undefined" :alt="event.organizerName" :text="avatarInitials(event.organizerName)" size="xs" />
@@ -536,9 +578,35 @@ const startDayNumber = computed(() => formatDayNumber(event.value.startAt))
           data-testid="event-redacted"
         />
         <!-- Markdown (Listen, fett, …) ohne Raw-HTML; lange Texte geklappt -->
-        <ContentClamp v-else :lines="10" :text="event.description">
-          <MarkdownContent :source="event.description" class="text-sm leading-relaxed" data-testid="event-description" />
+        <ContentClamp v-else :lines="10" :text="shownDescription">
+          <MarkdownContent :source="shownDescription" class="text-sm leading-relaxed" data-testid="event-description" />
         </ContentClamp>
+
+        <!-- Übersetzen: dezent unter dem Text, kein Bedienelement der Karte —
+             es beantwortet eine Frage an DIESEN Text (Muster PostCard). -->
+        <div v-if="!isRedacted && canTranslate" class="mt-2 flex flex-wrap items-center gap-1 text-xs text-dimmed">
+          <template v-if="translationShowing">
+            <UIcon name="i-ph-translate" class="size-3.5 shrink-0" />
+            <span>{{ t('translation.notice') }}</span>
+            <span aria-hidden="true">·</span>
+            <UButton color="neutral" variant="link" size="xs" class="p-0" data-testid="event-translate-original" @click="showEventOriginal">
+              {{ t('translation.showOriginal') }}
+            </UButton>
+          </template>
+          <UButton
+            v-else
+            color="neutral"
+            variant="link"
+            size="xs"
+            class="-ms-1 p-0"
+            icon="i-ph-translate"
+            :loading="translationBusy"
+            data-testid="event-translate"
+            @click="showTranslation"
+          >
+            {{ t('translation.action') }}
+          </UButton>
+        </div>
 
         <div v-if="event.locationNotes && locationType === 'venue'" class="mt-6 rounded-lg bg-elevated/60 p-3 text-sm" data-testid="event-location-notes">
           <p class="mb-1 font-medium">{{ t('events.detail.findUs') }}</p>

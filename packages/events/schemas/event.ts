@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { isSupportedTimezone } from '../../core/shared/timezone'
+import { LOCALE_CODE_PATTERN } from '../../core/shared/ugcTranslations'
 import {
   EVENT_RECURRENCES,
   MAX_EVENT_CAPACITY,
@@ -116,8 +117,24 @@ export function createEventVoteSchema(t: TranslateFn = identity) {
   })
 }
 
+/**
+ * „Übersetze DIESEN Termin in DIESE Sprache" — der ganze Rumpf ist EIN
+ * Sprachcode.
+ *
+ * Kein Text im Rumpf: übersetzt wird, was auf der Zeile steht. Käme er vom
+ * Aufrufer, wäre die Route ein bezahlter Übersetzungsdienst für beliebigen
+ * Fremdtext, und der Cache auf der Zeile trüge etwas, das dort nie stand.
+ * Dieselbe Bauform wie in posts und comments.
+ */
+export function createEventTranslateSchema(t: TranslateFn = identity) {
+  return z.object({
+    locale: z.string().trim().regex(LOCALE_CODE_PATTERN, t('events.validation.translateLocaleInvalid')),
+  })
+}
+
 // Server-seitige Instanzen (Fehlertexte = Keys; die UI validiert mit t())
 export const eventSchema = createEventSchema()
 export const eventEditSchema = createEventEditSchema()
 export const rsvpSchema = createRsvpSchema()
 export const eventVoteSchema = createEventVoteSchema()
+export const eventTranslateSchema = createEventTranslateSchema()

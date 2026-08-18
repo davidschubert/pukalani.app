@@ -193,7 +193,8 @@
       "notesMax": "Notes are too long (max. 1,000 characters).",
       "voteInvalid": "Invalid vote.",
       "paidNeedsLookupKey": "Paid events need a Stripe lookup_key.",
-      "timezoneInvalid": "The system does not know this timezone. Pick one from the list."
+      "timezoneInvalid": "The system does not know this timezone. Pick one from the list.",
+      "translateLocaleInvalid": "That is not a valid language code."
     },
     "calendar": {
       "prev": "Previous month",

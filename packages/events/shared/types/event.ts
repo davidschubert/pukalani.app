@@ -109,6 +109,23 @@ export interface EventRow extends Models.Row {
    * KEIN Zod-Wert, kein Formularfeld — wie `status: 'hidden'`.
    */
   redactedAt: string | null
+  /**
+   * ÜBERSETZUNGEN VON TITEL UND BESCHREIBUNG als JSON, Sprachcode → Fassung —
+   * `''`/fehlend = nichts übersetzt (Migration events-013).
+   *
+   * OPTIONAL im Typ: sie fehlt bei jeder Zeile aus der Zeit vor der Migration,
+   * und eine Anlegestelle hat hier nichts zu entscheiden — ein frischer Termin
+   * ist nie übersetzt. Gelesen wird sie AUSSCHLIESSLICH über
+   * `core/shared/ugcTranslations.ts` (pur, fail-soft), aufgelöst im Browser;
+   * das JSON-Feld heißt dort `body`, nicht `description` (EINE Regel für alle
+   * vier Inhaltsarten).
+   *
+   * Der Inhalt ist ein CACHE, kein Inhalt des Verfassers. Er wird an ZWEI
+   * Stellen geleert: beim Bearbeiten von Titel/Beschreibung (`[id].patch.ts`)
+   * und beim SCHWÄRZEN (`[id]/redact.post.ts`) — eine geschwärzte Beschreibung,
+   * die in der Übersetzung weiterlebt, wäre keine Schwärzung.
+   */
+  translations?: string
 }
 
 export const EVENT_RECURRENCES = ['weekly', 'biweekly', 'monthly'] as const
@@ -240,6 +257,26 @@ export interface EventListResponse {
 export interface RsvpResponse {
   event: EventRow
   myRsvp: RsvpStatus | null
+}
+
+/**
+ * Antwort von `POST /api/events/:id/translate` — die Fassung EINES Termins in
+ * EINER Sprache (Davids Entscheidung 2026-08-18).
+ *
+ * `title` ist `null`, wenn das Original keinen trägt (geschwärzte Termine
+ * werden gar nicht erst übersetzt, siehe Route) — nie `''`: die Oberfläche soll
+ * „kein Titel" nicht von „leerer Titel" unterscheiden müssen. `body` ist die
+ * übersetzte BESCHREIBUNG; der Name folgt der geteilten Regel
+ * (`core/shared/ugcTranslations.ts`), nicht dem Spaltennamen.
+ *
+ * `cached` sagt, ob dafür gerade ein KI-Aufruf bezahlt wurde (`false`) oder ob
+ * die Fassung schon auf der Zeile lag (`true`).
+ */
+export interface EventTranslateResponse {
+  locale: string
+  title: string | null
+  body: string
+  cached: boolean
 }
 
 /**

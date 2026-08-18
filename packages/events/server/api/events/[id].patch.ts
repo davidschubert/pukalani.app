@@ -90,6 +90,19 @@ export default defineEventHandler(async (event) => {
   if (body.timezone !== undefined) data.timezone = body.timezone
   if (body.status !== undefined) data.status = body.status
 
+  /**
+   * Der Übersetzungs-Cache (events-013) gilt für den ALTEN Text — eine
+   * stehengelassene Fassung wäre eine stille Lüge in einer anderen Sprache.
+   *
+   * Gegen die ECHTE Änderung geprüft, nicht gegen den Umfang des Formulars:
+   * das Bearbeiten-Formular schickt Titel und Beschreibung bei jedem Speichern
+   * mit, und wer nur den Ort korrigiert, soll dafür keine bezahlte Übersetzung
+   * verlieren (dieselbe Überlegung wie beim „bearbeitet"-Stempel in posts).
+   */
+  const textChanged = (body.title !== undefined && body.title !== row.title)
+    || (body.description !== undefined && body.description !== row.description)
+  if (textChanged) data.translations = ''
+
   // Replay-Announce nur beim ERSTEN Setzen auf einem sichtbaren Event
   const replayPublishing = typeof body.replayUrl === 'string' && body.replayUrl.length > 0
     && !row.replayUrl && (row.status === 'published' || publishing)

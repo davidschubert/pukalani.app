@@ -130,6 +130,16 @@ export default defineEventHandler(async (event) => {
     url: null,
     replayUrl: null,
     coverFileId: null,
+    /**
+     * DER ÜBERSETZUNGS-CACHE GEHÖRT ZUM TEXT (events-013, 2026-08-18).
+     *
+     * Er trägt Titel und Beschreibung wortgleich in bis zu sechs Sprachen. Ihn
+     * hier stehen zu lassen wäre keine Schwärzung, sondern eine Schwärzung mit
+     * Kopie daneben: der Knopf „Übersetzen" gäbe den geschwärzten Text als
+     * Cache-Treffer sofort und ohne KI-Aufruf wieder heraus. Wer diese Zeile
+     * entfernt, hebt F46 auf.
+     */
+    translations: '',
     redactedAt: new Date().toISOString(),
   }).catch((error) => { throw toH3Error(error, 'Could not redact event') })
 

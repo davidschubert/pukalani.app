@@ -193,7 +193,8 @@
       "notesMax": "Hinweise sind zu lang (max. 1.000 Zeichen).",
       "voteInvalid": "Ungültige Stimme.",
       "paidNeedsLookupKey": "Kostenpflichtige Events brauchen einen Stripe lookup_key.",
-      "timezoneInvalid": "Diese Zeitzone kennt das System nicht. Wähl eine aus der Liste."
+      "timezoneInvalid": "Diese Zeitzone kennt das System nicht. Wähl eine aus der Liste.",
+      "translateLocaleInvalid": "Das ist kein gültiger Sprachcode."
     },
     "calendar": {
       "prev": "Voriger Monat",
