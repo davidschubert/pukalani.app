@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { LOCALE_CODE_PATTERN } from '../../core/shared/ugcTranslations'
 import { MAX_POLL_OPTION_LENGTH, MAX_POLL_OPTIONS, MAX_POST_BODY, MAX_POST_TITLE } from '../shared/types/post'
 import { textLength } from '../shared/postBody'
 
@@ -102,8 +103,26 @@ export function createScoreVoteSchema(t: TranslateFn = identity) {
   })
 }
 
+/**
+ * „Übersetze DIESEN Beitrag in DIESE Sprache" — der ganze Rumpf ist EIN
+ * Sprachcode.
+ *
+ * KEIN TEXT IM RUMPF, anders als beim Kategorie-Vorschlag
+ * (`createCategoryTranslateSchema`): dort übersetzt der Verwalter, was gerade
+ * im Formular steht — auch beim ANLEGEN, also bevor es die Zeile gibt. Hier
+ * übersetzt ein LESER, was schon veröffentlicht ist. Käme der Text vom
+ * Aufrufer, wäre die Route ein bezahlter Übersetzungsdienst für beliebigen
+ * Fremdtext, und der Cache auf der Zeile trüge etwas, das dort nie stand.
+ */
+export function createPostTranslateSchema(t: TranslateFn = identity) {
+  return z.object({
+    locale: z.string().trim().regex(LOCALE_CODE_PATTERN, t('posts.validation.translateLocaleInvalid')),
+  })
+}
+
 // Server-seitige Instanzen (Fehlertexte = Keys; die UI validiert mit t())
 export const postSchema = createPostSchema()
 export const postEditSchema = createPostEditSchema()
 export const voteSchema = createVoteSchema()
 export const scoreVoteSchema = createScoreVoteSchema()
+export const postTranslateSchema = createPostTranslateSchema()

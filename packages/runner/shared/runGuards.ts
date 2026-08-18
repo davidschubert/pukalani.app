@@ -26,6 +26,15 @@ export type RunActor = 'board' | 'runner'
  */
 export const TERMINAL_RUN_STATUSES = ['succeeded', 'needs_input', 'failed', 'cancelled'] as const
 
+/**
+ * Zustände, in denen ein Lauf noch NICHT beim Runner ist und die Oberfläche
+ * das Formular bzw. die Zeitleiste zeigt — die Gegenmenge zu den Endzuständen.
+ * `draft` gehört dazu: er ist angelegt, aber noch nicht freigegeben.
+ */
+export function isActiveRunStatus(status: RunStatus): boolean {
+  return !isTerminalRunStatus(status)
+}
+
 export function isTerminalRunStatus(status: RunStatus): boolean {
   return (TERMINAL_RUN_STATUSES as readonly RunStatus[]).includes(status)
 }
@@ -58,12 +67,12 @@ export function permissionModeAllowed(mode: PermissionMode, promptTrusted: boole
 /**
  * Der Zustandsautomat aus § 4, als Tabelle statt als verstreute if-Ketten:
  *
- *   queued → claimed → running → ┬→ succeeded
- *                                ├→ needs_input
- *                                ├→ failed
- *                                └→ cancelled
+ *   draft → queued → claimed → running → ┬→ succeeded
+ *                                        ├→ needs_input
+ *                                        ├→ failed
+ *                                        └→ cancelled
  *
- * Zwei Dinge, die die Tabelle über das Bild hinaus festhält:
+ * Drei Dinge, die die Tabelle über das Bild hinaus festhält:
  *
  *  1. `queued → cancelled` muss auch VOR dem Claim gehen (Knopf „Abbrechen",
  *     § 4) — deshalb steht `queued` beim Board.
@@ -71,6 +80,13 @@ export function permissionModeAllowed(mode: PermissionMode, promptTrusted: boole
  *     Ein Lauf, der schon beim Auflösen des `repoKey` scheitert (§ 7.2
  *     Schritt 2), hat nie gestartet — ihn erst künstlich auf `running` zu
  *     heben, wäre eine erfundene Startzeit im Bericht.
+ *  3. `draft` STEHT NUR BEIM BOARD, und das ist die eigentliche Sicherung des
+ *     Anhänge-Wettrennens: der Runner hat aus `draft` KEINEN Übergang, kann
+ *     einen halb bestückten Auftrag also nicht einmal dann greifen, wenn ein
+ *     künftiger Filter in `claim` ihn versehentlich mitliefert. Die zwei Wege
+ *     hinaus gehören dem Board — freigeben (`queue`) oder wegwerfen
+ *     (`cancelled`, für den Fall, dass ein Upload scheitert und niemand mehr
+ *     freigibt).
  *
  * `queued → claimed` steht zwar hier, passiert aber AUSSCHLIESSLICH in
  * `runs/claim.post.ts` (serialisiert, § 5): ein Runner kann sich keinen
@@ -78,6 +94,7 @@ export function permissionModeAllowed(mode: PermissionMode, promptTrusted: boole
  */
 const RUN_TRANSITIONS: Record<RunActor, Partial<Record<RunStatus, readonly RunStatus[]>>> = {
   board: {
+    draft: ['queued', 'cancelled'],
     queued: ['cancelled'],
     claimed: ['cancelled'],
     running: ['cancelled'],

@@ -20,10 +20,20 @@
  * Fehler hämmert die eigene Betreiber-Konsole, und zwar mit gültigem Secret.
  *
  * BEWUSST LEER GELASSEN:
- *  - kein i18n-Block — die Layer-Strings kommen mit der UI (Paket 3).
  *  - kein runtimeConfig — das Bearer-Secret des Runners liegt GEHASHT in
  *    `runners.secretHash` (M9-Muster wie `community_invites`), nicht in der
  *    Env: es gibt je Rechner eines, und ein Env-Wert wäre weder rotierbar
  *    noch mehrfach vergebbar.
  */
-export default defineNuxtConfig({})
+export default defineNuxtConfig({
+  // Eigene Layer-Strings — mergen mit Core- und App-Locales (gleiche codes).
+  // `admin.nav.runner` MUSS in BEIDEN Dateien stehen: der Menüpunkt wird vom
+  // admin-Layout gerendert, und vue-i18n gibt bei fehlender Übersetzung den
+  // SCHLÜSSEL aus (Wächter `pnpm check:i18n-keys`).
+  i18n: {
+    locales: [
+      { code: 'de', language: 'de-DE', name: 'Deutsch', file: 'de.json' },
+      { code: 'en', language: 'en-US', name: 'English', file: 'en.json' },
+    ],
+  },
+})

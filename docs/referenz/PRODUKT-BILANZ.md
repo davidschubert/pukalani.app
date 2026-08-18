@@ -19,7 +19,7 @@ Protokoll in [`docs/archiv/PRODUKT-BILANZ-2026-07-27.md`](../archiv/PRODUKT-BILA
 | --- | --- | --- | --- | --- | --- |
 | **activity** | ✅ | comments | 2/2 über `tenantDb` | — | basic |
 | **analytics** | ✅ | comments, portfolio | 3/3 über `tenantDb` | ✅ | personal |
-| **comments** | ✅ | _template, comments | 17/18 über `tenantDb` | ✅ | — |
+| **comments** | ✅ | _template, comments | 18/19 über `tenantDb` | ✅ | — |
 | **control** | — | control | 0/84 über `tenantDb` · 61 roh | ✅ | — |
 | **courses** | ✅ | _template, comments | 12/13 über `tenantDb` | ✅ | pro |
 | **domains** | — | comments, portfolio | 0/5 über `tenantDb` | — | — |
@@ -29,8 +29,8 @@ Protokoll in [`docs/archiv/PRODUKT-BILANZ-2026-07-27.md`](../archiv/PRODUKT-BILA
 | **messages** | ✅ | comments | 0/13 über `tenantDb` | ✅ | personal |
 | **moderation** | ✅ | _template, comments | 3/4 über `tenantDb` | ✅ | — |
 | **pages** | ✅ | control, portfolio | 7/11 über `tenantDb` | ✅ | — |
-| **posts** | ✅ | _template, comments | 26/31 über `tenantDb` | ✅ | personal |
-| **runner** | — | control | 0/10 über `tenantDb` · 10 roh | — | — |
+| **posts** | ✅ | _template, comments | 27/32 über `tenantDb` | ✅ | personal |
+| **runner** | — | control | 0/17 über `tenantDb` · 17 roh | — | — |
 | **tickets** | — | control | 0/21 über `tenantDb` · 18 roh | — | — |
 
 Lesehilfe: „Datentür" zählt die Route-Dateien, die `tenantDb(event)` nutzen —

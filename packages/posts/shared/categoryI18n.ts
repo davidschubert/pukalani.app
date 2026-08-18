@@ -41,6 +41,8 @@
  * vergessen KANN — und dann still die falsche Sprache zeigt.
  */
 
+import { LOCALE_CODE_PATTERN } from '../../core/shared/ugcTranslations'
+
 export interface CategoryTranslation {
   name?: string
   description?: string
@@ -56,9 +58,17 @@ export type CategoryTranslations = Record<string, CategoryTranslation>
  */
 export const MAX_CATEGORY_TRANSLATIONS_JSON = 4000
 
-/** Ein plausibler Sprachcode ('de', 'en', 'pt-BR') — keine Liste, weil neue
- *  App-Sprachen hier nichts zu ändern haben sollen. */
-export const LOCALE_CODE_PATTERN = /^[a-z]{2,3}(-[A-Za-z]{2,4})?$/
+/**
+ * Ein plausibler Sprachcode ('de', 'en', 'pt-BR') — keine Liste, weil neue
+ * App-Sprachen hier nichts zu ändern haben sollen.
+ *
+ * SEIT DEN UGC-ÜBERSETZUNGEN (2026-08-17) STEHT ER IN CORE und wird hier nur
+ * weitergereicht: `comments` braucht dieselbe Form und darf `posts` nicht
+ * kennen (A14). Zwei gleichlautende reguläre Ausdrücke wären genau die zweite
+ * Wahrheit, die beim ersten Sprachcode mit drei Buchstaben auseinanderläuft.
+ * Die bestehenden Aufrufstellen (Schemas, Formulare) holen ihn weiter von hier.
+ */
+export { LOCALE_CODE_PATTERN }
 
 /**
  * JSON von der Zeile lesen. FAIL-SOFT: was sich nicht lesen lässt, gilt als

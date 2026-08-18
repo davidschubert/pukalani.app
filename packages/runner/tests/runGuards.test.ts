@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { PERMISSION_MODES, RUN_STATUSES, type PermissionMode, type RunStatus } from '../shared/types/runner'
-import { isTerminalRunStatus, permissionModeAllowed, runTransitionAllowed, type RunActor } from '../shared/runGuards'
+import { MAX_RUN_ATTACHMENTS, PERMISSION_MODES, RUN_STATUSES, type PermissionMode, type RunStatus } from '../shared/types/runner'
+import { parseRunAttachments, runAttachmentsFull, serializeRunAttachments } from '../shared/runAttachments'
+import { isActiveRunStatus, isTerminalRunStatus, permissionModeAllowed, runTransitionAllowed, type RunActor } from '../shared/runGuards'
 
 /**
  * Die zwei Sicherungen des AI-Runners, einzeln gemessen —
@@ -58,6 +59,11 @@ describe('runTransitionAllowed (§ 4)', () => {
     ['queued', 'claimed', 'board', false, 'Board claimt nicht'],
     ['running', 'succeeded', 'board', false, 'Board erklärt keinen Erfolg'],
     ['queued', 'running', 'board', false, 'Board startet nichts'],
+    // `draft` (Paket 3): die Schleuse gegen das Anhänge-Wettrennen.
+    ['draft', 'queued', 'board', true, 'Board gibt frei, wenn die Anhänge liegen'],
+    ['draft', 'cancelled', 'board', true, 'Entwurf wegwerfen (Upload gescheitert)'],
+    ['draft', 'claimed', 'board', false, 'Board claimt auch einen Entwurf nicht'],
+    ['queued', 'draft', 'board', false, 'kein Zurück in den Entwurf'],
     // Der Runner bewegt den Lauf vorwärts.
     ['queued', 'claimed', 'runner', true, 'Claim'],
     ['claimed', 'running', 'runner', true, 'erstes Lebenszeichen'],
@@ -67,6 +73,14 @@ describe('runTransitionAllowed (§ 4)', () => {
     ['running', 'failed', 'runner', true, 'Fehler'],
     ['running', 'cancelled', 'runner', true, 'Runner bestätigt den Abbruch'],
     ['queued', 'running', 'runner', false, 'kein Start ohne Claim'],
+    /**
+     * DIE GEGENPROBE ZUM WETTRENNEN (Paket 3). Ein Entwurf hat womöglich erst
+     * die halben Anhänge; der Runner zieht sie EINMAL am Anfang (§ 7.2 Schritt
+     * 4) und merkt nie, dass etwas fehlte. `claim` filtert zwar auf `queued` —
+     * aber diese Zeile hält auch dann noch, wenn jemand den Filter „aufräumt".
+     */
+    ['draft', 'claimed', 'runner', false, 'Runner greift KEINEN Entwurf'],
+    ['draft', 'running', 'runner', false, 'Runner startet KEINEN Entwurf'],
     ['running', 'claimed', 'runner', false, 'kein Rückwärts'],
     ['running', 'queued', 'runner', false, 'kein Zurück in die Schlange'],
     // GEGENPROBEN: terminal bleibt terminal, für JEDEN Handelnden.
@@ -101,5 +115,57 @@ describe('runTransitionAllowed (§ 4)', () => {
 
   it('kennt genau vier Endzustände', () => {
     expect(RUN_STATUSES.filter(isTerminalRunStatus)).toEqual(['succeeded', 'needs_input', 'failed', 'cancelled'])
+  })
+
+  /**
+   * `draft` ist der EINZIGE Zustand, aus dem der Runner nirgendwohin darf,
+   * ohne selbst ein Ende zu sein. Als Menge geprüft statt an zwei Stichproben:
+   * käme morgen ein Ziel dazu, fiele diese Zeile.
+   */
+  it('gibt dem Runner aus „draft" keinen einzigen Übergang', () => {
+    const reachable = RUN_STATUSES.filter(to => runTransitionAllowed('draft', to, 'runner'))
+    expect(reachable).toEqual([])
+  })
+
+  it('hält „draft" für einen ARBEITS-Zustand, nicht für ein Ende', () => {
+    expect(isTerminalRunStatus('draft')).toBe(false)
+    expect(isActiveRunStatus('draft')).toBe(true)
+    expect(isActiveRunStatus('cancelled')).toBe(false)
+  })
+})
+
+/**
+ * Die Anhang-Spalte ist ein JSON-Text in einer Datenbank — also alles, was
+ * dort landen kann, und nicht nur das, was wir hineinschreiben. Sie ist
+ * zugleich die ERLAUBNISLISTE für `runs/:id/files/:fileId`: was hier
+ * herausfällt, wird nicht ausgeliefert.
+ */
+describe('parseRunAttachments (§ 6)', () => {
+  it('liest, was der Upload geschrieben hat', () => {
+    const raw = JSON.stringify([{ fileId: 'f1', name: 'bild.png', mimeType: 'image/png', size: 12 }])
+    expect(parseRunAttachments(raw)).toEqual([{ fileId: 'f1', name: 'bild.png', mimeType: 'image/png', size: 12 }])
+  })
+
+  it.each([
+    ['', 'leere Spalte (Default)'],
+    ['{}', 'Objekt statt Liste'],
+    ['[', 'abgeschnittenes JSON'],
+    ['null', 'null'],
+  ])('macht aus %s eine leere Liste — %s', (raw) => {
+    expect(parseRunAttachments(raw)).toEqual([])
+  })
+
+  it('wirft Einträge ohne fileId weg — sie wären nicht auslieferbar', () => {
+    expect(parseRunAttachments(JSON.stringify([{ name: 'ohne-id' }, 'text', 42]))).toEqual([])
+  })
+
+  it('serialisiert leer als "" (Spalten-Default), nicht als "[]"', () => {
+    expect(serializeRunAttachments([])).toBe('')
+  })
+
+  it('ist bei MAX_RUN_ATTACHMENTS voll', () => {
+    const many = Array.from({ length: MAX_RUN_ATTACHMENTS }, (_, i) => ({ fileId: `f${i}`, name: 'x', mimeType: 'text/plain', size: 1 }))
+    expect(runAttachmentsFull(many)).toBe(true)
+    expect(runAttachmentsFull(many.slice(1))).toBe(false)
   })
 })

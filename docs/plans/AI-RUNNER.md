@@ -1,6 +1,7 @@
 # AI-Runner — Tickets, die sich selbst umsetzen
 
-**Status:** Konzept, noch nicht gebaut · **Angelegt:** 2026-08-17 ·
+**Status:** Pakete 1–3 gebaut (Layer, Naht, Oberfläche); offen ist der
+Mac-Dienst `tools/ai-runner` (Paket 4) · **Angelegt:** 2026-08-17 ·
 **Entscheider:** David
 
 Ein Ticket auf `admin.pukalani.app` bekommt einen Knopf. Ein Klick, und auf
@@ -119,7 +120,7 @@ einen Layer mit eigenen Tabellen und einer Migration in die Betreiber-Konsole.
 
 ---
 
-## 4. Datenmodell (Migration `runner-001`)
+## 4. Datenmodell (Migrationen `runner-001`, `runner-002`)
 
 Alle drei Tabellen: `rowSecurity: false`, Schreiben **ausschließlich** über
 Server-Routen mit dem Admin-Client.
@@ -163,6 +164,7 @@ Ein Auftrag. Der Zustandsautomat lebt hier.
 | `promptSource` | mediumtext | der zusammengesetzte Auftrag, wie er abgeschickt wurde — als Mediumtext (off-row), NICHT varchar: mit Beschreibung + Checkliste + zitiertem Feedback sprengt eine große Karte sonst das ~65-KB-Zeilenbudget von MariaDB (pages-002-Lektion) |
 | `promptTrusted` | boolean | false, wenn Text aus Gast-Feedback stammt (§8.2) |
 | `testCommands` | text | JSON `string[]`, z. B. `["pnpm lint","pnpm -r test"]` |
+| `attachmentsJson` | varchar(4000) | JSON `RunAttachment[]` — die KOPIE der Anhänge im Bucket `runner-files` (Migration `runner-002`, § 6). Die Liste ist zugleich die ERLAUBNIS: `runs/:id/files/:fileId` liefert nur aus, was hier steht |
 | `maxBudgetUsd` | float | Deckel, wird vom Runner gegen seinen eigenen gekappt |
 | `sessionId` | varchar | UUID, **vor** dem Start vergeben (§7.2) |
 | `claimedAt`/`startedAt`/`finishedAt` | datetime | |
@@ -173,13 +175,30 @@ Ein Auftrag. Der Zustandsautomat lebt hier.
 Zustände:
 
 ```
-queued → claimed → running → ┬→ succeeded
-                             ├→ needs_input   (Rückfrage, per --resume fortsetzbar)
-                             ├→ failed
-                             └→ cancelled
+draft → queued → claimed → running → ┬→ succeeded
+                                     ├→ needs_input   (Rückfrage, per --resume fortsetzbar)
+                                     ├→ failed
+                                     └→ cancelled
 ```
 
 `queued → cancelled` muss auch **vor** dem Claim gehen (Knopf „Abbrechen").
+
+**`draft` ist beim Bau der Oberfläche dazugekommen (2026-08-17) und löst ein
+Wettrennen, das die erste Fassung nicht gesehen hat.** Ein Anhang braucht eine
+`runId` — er kann also erst hochgeladen werden, NACHDEM der Lauf existiert. Ein
+`queued`-Lauf ist aber binnen Sekunden geclaimt, und der Runner zieht sein
+Material genau einmal (§ 7.2 Schritt 4): der Auftrag liefe mit halben Anhängen
+los, und zwar ohne dass irgendwo ein Fehler stünde. Deshalb legt das Board
+IMMER `draft` an, lädt hoch und gibt mit `runs/:id/queue` frei. Ab da ist der
+Auftrag **versiegelt** — die Upload-Route antwortet 409.
+
+Zwei Eigenschaften, die dazugehören und die die Zustandstabelle in
+[runGuards.ts](../../packages/runner/shared/runGuards.ts) festhält: `draft` ist
+NICHT terminal, und der RUNNER hat aus `draft` keinen einzigen Übergang. Der
+Claim filtert ohnehin auf `queued` — aber die Tabelle hält auch dann, wenn
+jemand diesen Filter eines Tages „aufräumt". Das Board darf aus `draft` heraus
+zweierlei: freigeben oder wegwerfen (`cancelled`, für den Fall, dass ein Upload
+scheitert und niemand mehr freigibt).
 
 ### `run_events`
 
@@ -211,10 +230,25 @@ Zwei Publikums-Klassen, streng getrennt:
 
 **Vom Board (Session, Capability `runner.manage`):**
 
-- `POST /api/runner/runs` — Lauf anlegen (`queued`)
+- `POST /api/runner/runs` — Lauf anlegen (als **`draft`**, § 4)
+- `POST /api/runner/runs/:id/files` — einen Anhang an den Entwurf hängen
+  (multipart, Magic-Bytes-Prüfung, max 10 Dateien); **nur solange `draft`**,
+  danach 409 `run_sealed`
+- `POST /api/runner/runs/:id/queue` — freigeben: `draft → queued`. Ab hier ist
+  der Auftrag versiegelt
 - `POST /api/runner/runs/:id/cancel`
 - `GET /api/runner/runs?subjectId=…`
+- `GET /api/runner/runs/:id/events` — der erste Stand der Zeitleiste (danach
+  Realtime); nach `seq` sortiert, nicht nach `$createdAt`
+- `GET /api/runner/runs/recent` — die letzten 25 Läufe über ALLE Subjekte, für
+  die Seite `/dashboard/runner`. Bewusst eine eigene Route und kein optionaler
+  Filter an der Subjekt-Liste: ein Filter, den man weglassen darf, macht aus
+  einer gescopten Liste versehentlich einen Vollabzug
 - `GET /api/runner/runners`
+- `PATCH /api/runner/runners/:id` — stilllegen/aktivieren, umbenennen. Gelöscht
+  wird bewusst nicht (alte Läufe verlören die Herkunft ihrer `runnerId`), und
+  `secretHash` steht in keinem Zweig — ein Rotieren wäre eine eigene Route mit
+  einmaliger Antwort
 - `POST /api/runner/runners` — einen Rechner registrieren; die Antwort trägt
   das Bearer-Token **genau einmal**, gespeichert wird nur sein Hash. Nachgetragen
   am 2026-08-17 beim Bau der Routen: dieser Abschnitt beschreibt die NAHT — wie
@@ -228,6 +262,12 @@ Zwei Publikums-Klassen, streng getrennt:
 
 - `POST /api/runner/runs/claim` — „hast du was für mich?"; setzt atomar
   `queued → claimed`, gibt höchstens einen Lauf zurück
+- `GET /api/runner/runs/:id/files` — die Anhang-Liste des EIGENEN Laufs
+- `GET /api/runner/runs/:id/files/:fileId` — eine Anhang-Datei. **404, wenn die
+  Id nicht in `attachmentsJson` dieses Laufs steht** — die Liste ist die
+  Erlaubnis, nicht nur ein Inhaltsverzeichnis: im selben Bucket liegen die
+  Transkripte aller Läufe (Datei-Id = Run-Id), und eine Run-Id steht in jeder
+  Claim-Antwort
 - `POST /api/runner/runs/:id/events` — Fortschritt, gebündelt (nicht je Zeile)
 - `POST /api/runner/runs/:id/finish` — Endzustand + `resultJson`
 - `POST /api/runner/runs/:id/transcript` — Transkript-Datei (multipart) in
@@ -271,6 +311,13 @@ Der Runner lädt sich den fertigen Auftrag, er baut ihn nicht selbst:
     ├── screenshot-mobile.png
     └── fehler-log.pdf
 ```
+
+Die Dateien holt der Runner über die zwei Routen aus § 5
+(`GET runs/:id/files`, dann je Datei `GET runs/:id/files/:fileId`) — NICHT aus
+dem `ticket-files`-Bucket: der gehört einem Produkt, das dieser Layer nicht
+kennt (A14), und seine Ausliefer-Route verlangt eine Session. Der Lauf trägt
+deshalb eine KOPIE in `runner-files`, festgehalten in `runs.attachmentsJson`
+(§ 4).
 
 Der Ordner liegt beim Runner (z. B. `~/.local/state/pukalani-runner/`),
 NICHT im Repo. Weil die CLI den Worktree selbst anlegt, startet der Agent mit
@@ -406,21 +453,60 @@ Regel: Läufe zu einem Ticket mit `feedbackId !== ''` bekommen
 
 ---
 
-## 9. UI im Board
+## 9. UI im Board (gebaut 2026-08-17, Paket 3)
 
-Im Ticket-Modal ein Bereich „Ausführen":
+Zwei Orte, und die Trennung ist die A14-Grenze: der LAUF-BEREICH lebt im
+runner-Layer und kennt kein Ticket, die VERDRAHTUNG lebt in `apps/control`.
 
-- **Vor dem Lauf:** Runner, Repo, Basis-Branch, Modell, Modus, Testbefehle,
-  Budget. Vorbelegt aus der zuletzt benutzten Wahl. Ein Knopf.
-- **Während des Laufs:** die Ereigniszeilen live (Realtime auf
-  `run_events`), plus Abbrechen.
-- **Danach:** der Bericht — Branch, Commit, Diffstat, Testergebnis, Dauer,
-  Kosten, Session-Id, Transkript-Anhang. Bei `needs_input` ein Feld
-  „Antworten" (`--resume`).
+**`RunnerRunPanel`** (`packages/runner/app/components/`) — das generische
+Herzstück. Props: `subjectType`, `subjectId`, `promptSource`, `promptTrusted`
+und optional `attachments` (LAZY: `blob()` läuft erst beim Start, nicht beim
+Anzeigen — sonst zöge jedes Öffnen einer Karte ihre Anhänge nach). Drei
+Zustände, und der Lauf entscheidet, welcher gilt:
 
-Auf der Karte selbst genügt ein kleines Zeichen mit dem Lauf-Zustand.
-Datenlisten sind `UTable` (B6), aber ein Lauf-Verlauf ist keine Datenliste —
-hier ist eine Zeitleiste richtig.
+- **Formular** (kein aktiver Lauf): Rechner, Projekt, Modell, Modus, Budget,
+  Testbefehle. Modelle und Repo-Schlüssel kommen aus `pukalani.runner.models` /
+  `pukalani.runner.repos` in der `app.config` — eine neue Modell-Generation
+  soll eine Config-Zeile sein und kein Komponenten-Umbau. Bei
+  `promptTrusted: false` stehen nur `plan` und `acceptEdits` zur Wahl, mit
+  einem Hinweis, warum (§ 8.2). Vorbelegt ist `plan`: die vorsichtigste Wahl,
+  wenn ein Klick Code auf einem echten Rechner ausführt.
+- **Lauf aktiv** (`draft`/`queued`/`claimed`/`running`): Status-Pille,
+  Abbrechen und die Zeitleiste der `run_events` — einmal per `GET
+  runs/:id/events` geholt, danach live über `useRealtimeRows`. Beides, weil
+  eins allein nicht reicht: wer das Fenster mitten im Lauf öffnet, sähe per
+  Realtime nur die Zeilen ab dem Öffnen. Der Lauf selbst wird ebenfalls
+  abonniert, so kommen Statuswechsel ohne Poll an.
+- **Bericht** (Endzustand): Branch, Commit, Diffstat, Tests, Dauer, Kosten,
+  Modell, Projekt, Session-Id als Beschreibungsliste; bei `failed` der Grund
+  zuoberst, bei `needs_input` der Hinweis, dass Fortsetzen mit dem
+  Rechner-Dienst kommt. `resultJson` wird DEFENSIV gelesen — lässt es sich
+  nicht parsen, zeigt der Bericht den Rohtext, statt leer zu bleiben.
+
+Darunter die früheren Läufe desselben Subjekts; ein Klick öffnet ihren Bericht.
+
+Der **Start ist zweistufig** (§ 4): `runs` → Anhänge sequenziell (sie landen in
+EINER Spalte, parallel würden sie sich überschreiben) → `queue`. Scheitert
+etwas dazwischen, wird der Entwurf abgebrochen statt liegen gelassen.
+
+**`/dashboard/runner`** (Menüpunkt `admin.nav.runner`, Gruppe „management"
+hinter dem Board): zwei `UTable` (B6) — die registrierten Rechner (Name, Art,
+Status, zuletzt gesehen, stilllegen/aktivieren) und die letzten 25 Läufe über
+alle Subjekte. Beide mit `CoreEmptyState`. „Runner registrieren" zeigt das
+Bearer-Token **genau einmal** in einem Dialog, der dafür offen bleibt: ein Toast
+verschwindet nach vier Sekunden, und dann ist der Rechner nutzlos registriert.
+
+Die **Ereigniszeilen sind bewusst KEINE `UTable`** — die begründete Ausnahme von
+B6: eine Datenliste beantwortet „welche Zeile suche ich?", ein Verlauf „was ist
+passiert?". Er hat genau eine richtige Reihenfolge (den `seq`-Zähler des
+Runners), und eine sortierbare Kopfzeile wäre die Einladung, sie zu zerstören.
+
+Auf der Karte selbst genügt später ein kleines Zeichen mit dem Lauf-Zustand —
+das ist noch nicht gebaut.
+
+Noch nicht gebaut (bewusst, Paket 4 und später): das Feld „Antworten" bei
+`needs_input` (`--resume` braucht den Rechner-Dienst), ein Download-Weg für das
+Transkript aus dem Board heraus, und das Zustands-Zeichen auf der Board-Karte.
 
 ---
 

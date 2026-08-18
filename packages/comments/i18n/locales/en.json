@@ -147,7 +147,8 @@
       "contentMax": "At most 10,000 characters",
       "guestNameRequired": "Please enter a name (at least 2 characters)",
       "guestNameMax": "At most 60 characters",
-      "reactionInvalid": "That reaction does not exist."
+      "reactionInvalid": "That reaction does not exist.",
+      "translateLocaleInvalid": "That is not a valid language code."
     },
     "stats": {
       "total": "Comments",

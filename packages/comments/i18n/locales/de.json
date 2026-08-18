@@ -147,7 +147,8 @@
       "contentMax": "Maximal 10.000 Zeichen",
       "guestNameRequired": "Bitte gib einen Namen an (mind. 2 Zeichen)",
       "guestNameMax": "Maximal 60 Zeichen",
-      "reactionInvalid": "Diese Reaktion gibt es nicht."
+      "reactionInvalid": "Diese Reaktion gibt es nicht.",
+      "translateLocaleInvalid": "Das ist kein gültiger Sprachcode."
     },
     "stats": {
       "total": "Kommentare",

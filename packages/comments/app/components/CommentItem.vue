@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { DropdownMenuItem } from '@nuxt/ui'
-import type { Comment } from '../../shared/types/comment'
+import type { Comment, CommentTranslateResponse } from '../../shared/types/comment'
 
 const props = withDefaults(defineProps<{
   comment: Comment
@@ -87,6 +87,38 @@ const canReport = computed(() =>
   && props.comment.status === 'active',
 )
 
+/**
+ * ÜBERSETZEN (Paket 3, Davids Entscheidungen 2026-08-17: ein Knopf je Inhalt,
+ * nur Eingeloggte). Das Zwillingsstück zur `PostCard`, bis auf das eine Feld:
+ * eine Antwort hat keinen Titel. Die Regel liegt im Core-Composable.
+ *
+ * Ein GELÖSCHTER Kommentar zeigt nur einen Platzhalter — `body` ist dann leer,
+ * und `canTranslate` schaltet den Knopf schon deshalb ab (die Route weist ihn
+ * zusätzlich mit 400 ab). Im Embed sind Gäste nicht eingeloggt und sehen ihn
+ * ebenfalls nicht; das ist so gewollt, denn die Route antwortet ihnen 401.
+ */
+const {
+  canTranslate,
+  showing: translationShowing,
+  busy: translationBusy,
+  entry: translation,
+  show: showTranslation,
+  showOriginal: showCommentOriginal,
+} = useUgcTranslation({
+  translations: () => props.comment.translations,
+  body: () => (isDeleted.value ? '' : props.comment.content),
+  translate: async (locale) => {
+    const result = await $fetch<CommentTranslateResponse>(`/api/comments/${props.comment.$id}/translate`, {
+      method: 'POST',
+      body: { locale },
+    })
+    return { body: result.body }
+  },
+})
+
+const shownContent = computed(() =>
+  translationShowing.value ? (translation.value?.body ?? props.comment.content) : props.comment.content)
+
 // Reason-Katalog liefert der Konsument (comments) lokalisiert — Moderation bleibt agnostisch
 const reportReasons = computed(() => [
   { value: 'spam', label: t('comments.report.reasons.spam') },
@@ -160,9 +192,37 @@ const reportReasons = computed(() => [
     <!-- Markdown-Subset (fett/kursiv/code/Links/Listen/Zitate) — sicheres
          vnode-Rendering ohne v-html; lange Kommentare klappen auf 5 Zeilen
          zusammen („Mehr erfahren", YouTube-Muster) -->
-    <ContentClamp v-else :lines="5" :text="comment.content" class="mt-2">
-      <MarkdownContent :source="comment.content" class="text-default" />
+    <!-- DERSELBE Renderpfad für Grundfassung und Übersetzung (nur die Quelle
+         wechselt) — ein zweiter wäre die Stelle, an der beide auseinanderlaufen. -->
+    <ContentClamp v-else :lines="5" :text="shownContent" class="mt-2">
+      <MarkdownContent :source="shownContent" class="text-default" />
     </ContentClamp>
+
+    <!-- Übersetzen: dezent unter dem Text, nicht in der Aktionszeile darunter —
+         es beantwortet eine Frage an DIESEN Text, es bedient nicht die Antwort. -->
+    <div v-if="!editing && !isDeleted && canTranslate" class="mt-1.5 flex flex-wrap items-center gap-1 text-xs text-dimmed">
+      <template v-if="translationShowing">
+        <UIcon name="i-ph-translate" class="size-3.5 shrink-0" />
+        <span>{{ t('translation.notice') }}</span>
+        <span aria-hidden="true">·</span>
+        <UButton color="neutral" variant="link" size="xs" class="p-0" data-comment-translate-original @click="showCommentOriginal">
+          {{ t('translation.showOriginal') }}
+        </UButton>
+      </template>
+      <UButton
+        v-else
+        color="neutral"
+        variant="link"
+        size="xs"
+        class="-ms-1 p-0"
+        icon="i-ph-translate"
+        :loading="translationBusy"
+        data-comment-translate
+        @click="showTranslation"
+      >
+        {{ t('translation.action') }}
+      </UButton>
+    </div>
 
     <!-- Antwort-Presence: jemand tippt gerade eine Antwort auf DIESEN Kommentar -->
     <p v-if="replyingText" class="mt-1.5 flex items-center gap-1 text-xs text-info">

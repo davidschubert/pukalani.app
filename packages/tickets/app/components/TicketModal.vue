@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { EditorToolbarItem } from '@nuxt/ui'
-import type { TicketChecklistItem, TicketFileRow, TicketListRow, TicketMember, TicketRow } from '../../shared/types/ticket'
+import type { TicketChecklistItem, TicketFileRow, TicketFilesResponse, TicketListRow, TicketMember, TicketRow } from '../../shared/types/ticket'
 import { TICKET_EFFORTS, TICKET_LABELS, TICKET_PRIORITIES } from '../../shared/types/ticket'
 import { composeTicketMarkdown, parseTicketChecklist, parseTicketMembers } from '../utils/ticketMarkdown'
 import { TICKET_EFFORT_META, TICKET_LABEL_META, TICKET_PRIORITY_META } from '../utils/ticketMeta'
@@ -123,7 +123,7 @@ const fileInput = ref<HTMLInputElement | null>(null)
 async function loadFiles() {
   if (!props.ticket) return
   try {
-    const res = await $fetch<{ files: TicketFileRow[] }>(`/api/tickets/${props.ticket.$id}/files`)
+    const res = await $fetch<TicketFilesResponse>(`/api/tickets/${props.ticket.$id}/files`)
     files.value = res.files
   }
   catch {
@@ -675,6 +675,16 @@ const createdAtText = computed(() =>
           </ul>
           <p v-else class="mt-2 text-xs text-muted">{{ t('tickets.files.empty') }}</p>
         </div>
+
+        <!-- Ausführen (AI-Runner) — die APP füllt TicketModalRunner per
+             Komponenten-Override (A14); ohne Override rendert er NICHTS.
+             LINKE Spalte und nicht in die Seitenleiste: der Bereich zeigt ein
+             Formular mit vier Auswahlfeldern nebeneinander und danach eine
+             Zeitleiste — in den 280–340 px der rechten Spalte stünde beides
+             übereinandergestapelt. Er gehört ausserdem inhaltlich hierhin:
+             der Auftrag wird aus Titel, Beschreibung, Checkliste und Anhängen
+             gebaut, und die stehen genau darüber. -->
+        <TicketModalRunner :ticket="ticket" class="mt-5" />
 
         <!-- Kein Speichern-Button — Änderungen sichern sich selbst (Autosave);
              nur die Beschreibung hat ihren eigenen Speichern-Zyklus -->

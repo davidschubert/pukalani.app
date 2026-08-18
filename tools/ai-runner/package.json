@@ -1,0 +1,19 @@
+{
+  "name": "ai-runner",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Mac-Daemon des AI-Runners — holt Läufe bei admin.pukalani.app ab und fährt sie mit der Claude-Code-CLI",
+  "scripts": {
+    "start": "node --experimental-strip-types src/main.ts",
+    "typecheck": "tsc --noEmit",
+    "smoke": "node scripts/smoke.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  },
+  "engines": {
+    "node": ">=22.6"
+  }
+}

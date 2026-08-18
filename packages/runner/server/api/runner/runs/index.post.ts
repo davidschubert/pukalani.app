@@ -4,11 +4,19 @@ import { permissionModeAllowed } from '../../../../shared/runGuards'
 import { RUNNERS_TABLE, RUNS_TABLE, type RunRow, type RunnerRow } from '../../../../shared/types/runner'
 
 /**
- * Einen Lauf anlegen (`queued`) — docs/plans/AI-RUNNER.md § 5, Board-Seite.
+ * Einen Lauf anlegen — docs/plans/AI-RUNNER.md § 5, Board-Seite.
  *
  * Der Lauf wird hier nur HINGELEGT; abgeholt wird er vom Runner
  * (`runs/claim`). Es gibt bewusst keinen Weg, einem Rechner einen Lauf
  * aufzudrängen: der Rechner entscheidet, wann er arbeitet.
+ *
+ * ER ENTSTEHT ALS `draft`, NICHT ALS `queued` (Paket 3, Änderung gegenüber
+ * dem ursprünglichen § 5). Grund ist ein Wettrennen, das man nur EINMAL
+ * beobachtet: Anhänge brauchen eine `runId` und können erst NACH dieser Zeile
+ * hochgeladen werden — ein `queued`-Lauf ist aber binnen Sekunden geclaimt,
+ * und der Runner zieht sein Material genau einmal (§ 7.2 Schritt 4). Der
+ * Auftrag liefe dann mit halben Anhängen los, ohne dass irgendwo ein Fehler
+ * stünde. Freigegeben wird deshalb ausdrücklich, mit `runs/:id/queue`.
  */
 export default defineEventHandler(async (event): Promise<RunRow> => {
   const user = requirePermission(event, 'runner.manage')
@@ -59,7 +67,8 @@ export default defineEventHandler(async (event): Promise<RunRow> => {
       runnerId: body.runnerId,
       // Heute immer 'claude-code' (§ 2) — die Spalte spart später eine Migration.
       executor: 'claude-code',
-      status: 'queued',
+      // Siehe Kopf: freigegeben wird mit `runs/:id/queue`, wenn die Anhänge liegen.
+      status: 'draft',
       repoKey: body.repoKey,
       baseBranch: body.baseBranch,
       // Kommt vom RUNNER, sobald die CLI ihn vergeben hat (§ 7.2) — nie von hier.
@@ -71,6 +80,8 @@ export default defineEventHandler(async (event): Promise<RunRow> => {
       promptSource: body.promptSource,
       promptTrusted: body.promptTrusted,
       testCommands: body.testCommands.length ? JSON.stringify(body.testCommands) : '',
+      // Füllt `runs/:id/files` — solange der Lauf `draft` ist (§ 6).
+      attachmentsJson: '',
       maxBudgetUsd: body.maxBudgetUsd,
       // Die Session-Id würfelt der RUNNER vor dem Start und meldet sie sofort
       // (§ 7.2 Schritt 1) — hier steht sie noch nicht fest.

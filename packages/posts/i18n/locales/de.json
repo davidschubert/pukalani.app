@@ -203,7 +203,8 @@
       "categoryOrderRequired": "Es gibt keine Kategorien zu sortieren.",
       "categoryOrderMax": "Zu viele Kategorien auf einmal.",
       "categoryLocaleInvalid": "Das ist kein gültiger Sprachcode.",
-      "categoryTranslationsMax": "Zu viele Sprachen auf einmal."
+      "categoryTranslationsMax": "Zu viele Sprachen auf einmal.",
+      "translateLocaleInvalid": "Das ist kein gültiger Sprachcode."
     },
     "discussions": {
       "title": "Diskussionen",

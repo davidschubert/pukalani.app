@@ -1,8 +1,8 @@
 import { Query } from 'node-appwrite'
-import { TICKET_FILES_TABLE, type TicketFileRow } from '../../../../shared/types/ticket'
+import { TICKET_FILES_TABLE, type TicketFileRow, type TicketFilesResponse } from '../../../../shared/types/ticket'
 
 /** Anhänge eines Tickets. */
-export default defineEventHandler(async (event): Promise<{ files: TicketFileRow[] }> => {
+export default defineEventHandler(async (event): Promise<TicketFilesResponse> => {
   requirePermission(event, 'tickets.manage')
   const id = getRouterParam(event, 'id')
   if (!id) throw createError({ status: 400, statusText: 'Missing id' })
