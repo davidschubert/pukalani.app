@@ -110,7 +110,10 @@ Silo je Site) mit `www.pukalani.studio` als erstem echten Fall — Rest siehe
 Punkt 1 —, **private Nachrichten** (Layer `messages`, ab Personal, ab Werk
 ausgeschaltet), **Vertrauensstufen + 22 Abzeichen** in den Diskussionen,
 **Handles/Erwähnungen** und die **Stripe-Verwaltung im Control-Dashboard**
-(F55).
+(F55). **Seit 2026-08-18 sind freelancer.supply, Morgenlicht und Comments
+Demo-Spielwiesen** — 8 Demo-Konten mit Rollen und Inhalte über alle Produkte,
+alles über die echten Routen (Werkzeug in `~/.appwrite-secrets/freelancer-demo/`,
+Protokoll in [OPEN-ITEMS-COMPLETE.md](OPEN-ITEMS-COMPLETE.md)).
 **Als Betriebssystem für eigene Sites: ~98 %. Als verkaufbares SaaS: ~85 %.**
 
 ### Einzelheiten zu den offenen Punkten
