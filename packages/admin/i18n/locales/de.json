@@ -40,7 +40,19 @@
       "aiModel": "KI-Modell (Laufzeit-Override)",
       "aiModelDesc": "Modell für die eingebaute KI (Moderations-Assist). Leer = Build-Default {model}. Format: vendor/model (OpenRouter).",
       "save": "Speichern",
-      "saved": "Konfiguration gespeichert."
+      "saved": "Konfiguration gespeichert.",
+      "aiKey": "KI-Schlüssel",
+      "aiKeyDesc": "Der API-Schlüssel des KI-Anbieters (z. B. OpenRouter). Er wird verschlüsselt gespeichert und nie wieder angezeigt.",
+      "aiKeyPlaceholder": "Neuen Schlüssel eintragen — leer lassen ändert nichts",
+      "aiKeyClear": "Schlüssel entfernen",
+      "aiKeyClearTitle": "KI-Schlüssel entfernen?",
+      "aiKeyClearText": "Danach laufen alle KI-Funktionen nur noch, wenn auf dem Server NUXT_AI_KEY gesetzt ist.",
+      "aiKeyNotEditable": "Eintragen ist hier erst möglich, wenn NUXT_INSTANCE_SECRETS_KEY auf dem Server gesetzt ist (openssl rand -hex 32). Bis dahin gilt allein NUXT_AI_KEY.",
+      "aiKeySource": {
+        "settings": "hier hinterlegt",
+        "env": "aus der Server-Umgebung",
+        "none": "kein Schlüssel — KI-Funktionen sind aus"
+      }
     },
     "storage": {
       "title": "Speicher",

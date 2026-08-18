@@ -39,7 +39,7 @@ import { ugcTranslationErrorKey, ugcTranslationFor, type UgcTranslationEntry } f
  * Merker weg (sie ist die Wahrheit, er war nur die Überbrückung).
  *
  * ── WARUM ES KEIN „IST KI VERFÜGBAR?"-FLAG GIBT ───────────────────────────
- * Gesucht, nicht gefunden: `isAiAvailable()` ist eine SERVER-Auskunft aus Env
+ * Gesucht, nicht gefunden: `isAiConfigured()` ist eine SERVER-Auskunft aus Env/DB
  * (`NUXT_AI_KEY`) und Build-Config, kein Feld der `app_config`-Zeile — die
  * einzigen Träger, die sie heute an einen Client geben, sind
  * `posts/moderation.get` (`aiAssist`) und `posts/categories/manage.get`

@@ -122,6 +122,16 @@ export function usePresenceState() {
   function upsertWs() {
     const user = auth.user
     if (!user) return
+    // AWAY LÄUFT NUR ÜBER DEN HTTP-HEARTBEAT (2026-08-18): der WS-Upsert ersetzt
+    // die metadata DIREKT in Appwrite und liefe damit an der Vorfahrts-Regel des
+    // Servers vorbei (shared/presencePriority.ts). Ein versteckter Tab kann
+    // nicht wissen, ob gerade ein sichtbarer Tab EINER ANDEREN Community
+    // dieselbe Presence schreibt — der Server kann nachsehen, also entscheidet
+    // er allein. Preis: die „im anderen Tab"-Meldung erreicht andere über den
+    // 20-s-Poll statt in ~280 ms; für einen Tab, den niemand ansieht, ist das
+    // unerheblich. Zurück auf sichtbar (away = false) upsertet sofort wieder
+    // per WS, inklusive Sofort-Ereignis.
+    if (myMeta.value.away === true) return
     // Das Web-SDK kommt erst hier (B4) — für einen GAST wird es nie geladen:
     // upsertWs kehrt oben ohne user zurück, und der Heartbeat-Plugin-Aufruf
     // von usePresenceState() allein zieht nichts nach.

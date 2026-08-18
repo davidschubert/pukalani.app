@@ -1,7 +1,7 @@
 import type { H3Event } from 'h3'
 import type { Models } from 'node-appwrite'
 import type { StripeSecretSource } from '../../shared/stripeKeys'
-import { decryptSecretWithKeys, encryptSecret, parseSecretBoxKey } from './secretBox'
+import { decryptSecretWithKeys, encryptSecret, parseSecretBoxKey } from '../../../core/server/utils/secretBox'
 
 /**
  * WO KOMMEN DIE STRIPE-GEHEIMNISSE HER? (F55, Davids Entscheidung 2026-08-08)

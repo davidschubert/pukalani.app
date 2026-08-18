@@ -143,6 +143,15 @@ Vollständiges Konzept: docs/CONCEPT.md
   replyingTo + near), useModerationPresence (action reviewing:*), useEditAwareness
   (action editing:*), useViewingPresence (page → DashboardViewers „N sehen diese
   Seite"). PresenceAvatar (core): Avatar + Icon-Badge in der Ecke (tippt/antwortet)
+- VORFAHRT „sichtbar schlägt away" (seit 2026-08-18): zwei offene Dashboards
+  VERSCHIEDENER Communities teilen sich die EINE Presence — der gedrosselte
+  Hintergrund-Tab stahl dem sichtbaren den tenantId-Stempel (Zähler flackerte
+  0↔1). Regel in `core/shared/presencePriority.ts`: ein away-Schreiber weicht
+  einer frischen (<60 s) SICHTBAREN Presence eines FREMDEN Mandanten — geprüft
+  im Heartbeat und als Leave-Guard; away-Tabs upserten deshalb NICHT mehr per WS
+  (der Server ist der einzige Schiedsrichter). away-über-away und gleicher
+  Mandant bleiben bewusst Letzter-gewinnt. Beweis:
+  `packages/core/scripts/verify-presence-away-priority.mjs`.
 - PRESENCE-GRENZE (A4, seit 2026-07-29 — vorher `read("users")`, also im Pool
   JEDER eingeloggte User ALLER Communities): die Presence trägt jetzt dieselben
   Rechte wie jede andere Zeile — `tenantRowPermissionsFor` ⇒ Pool

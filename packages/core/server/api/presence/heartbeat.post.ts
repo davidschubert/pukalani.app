@@ -1,4 +1,6 @@
+import type { H3Event } from 'h3'
 import { presenceHeartbeatSchema } from '../../../schemas/presence'
+import { type PresencePrioritySnapshot, yieldsToForeignVisiblePresence } from '../../../shared/presencePriority'
 
 /**
  * Presence-Heartbeat (SSR-Cookie-Architektur): Der Browser kann seine eigene
@@ -14,6 +16,32 @@ import { presenceHeartbeatSchema } from '../../../schemas/presence'
 // abgelaufen sein, sonst würde sie zwischen zwei gedrosselten Heartbeats server-
 // seitig verschwinden (Flackern). 240s hält Puffer über die Drossel-Lücke.
 const PRESENCE_TTL_MS = 240_000
+
+/**
+ * Der aktuell gespeicherte Zustand der eigenen Presence — für die Vorfahrts-
+ * Regel (shared/presencePriority.ts). NUR im away-Fall gerufen, also ~1×/Minute
+ * je verstecktem Tab; der 20-s-Normalfall bekommt KEIN zusätzliches GET.
+ *
+ * Beide Ausgänge enden in `null` und damit im Alt-Verhalten (normal schreiben):
+ * „gibt es noch nicht" (404) und „Abfrage fehlgeschlagen". Das ist Absicht —
+ * die Dämpfung ist eine Zusatzschicht, sie darf nie der Grund sein, dass ein
+ * Heartbeat ausfällt.
+ */
+async function readPresenceSnapshot(event: H3Event, userId: string): Promise<PresencePrioritySnapshot | null> {
+  try {
+    const { presences } = createAdminClient(event)
+    const existing = await presences.get({ presenceId: userId })
+    const metadata = (existing.metadata ?? {}) as Record<string, unknown>
+    return {
+      updatedAt: existing.$updatedAt,
+      away: metadata.away === true,
+      tenantId: typeof metadata.tenantId === 'string' ? metadata.tenantId : '',
+    }
+  }
+  catch {
+    return null
+  }
+}
 
 export default defineEventHandler(async (event) => {
   const user = event.context.user
@@ -40,6 +68,19 @@ export default defineEventHandler(async (event) => {
   if (body.replyingTo) metadata.replyingTo = body.replyingTo
   if (body.near) metadata.near = body.near
   if (body.away === true) metadata.away = true
+
+  // VORFAHRT (2026-08-18): ein Tab im Hintergrund überschreibt keine frische,
+  // SICHTBARE Presence eines ANDEREN Mandanten. Zwei Dashboards verschiedener
+  // Communities sind zwei Origins — im Browser koordinieren sie sich nie, hier
+  // auf dem Server ist die Frage in einem GET beantwortet. Begründung jeder
+  // Bedingung: shared/presencePriority.ts.
+  if (body.away === true) {
+    const existing = await readPresenceSnapshot(event, user.$id)
+    const writerTenantId = tenant?.mode === 'pool' ? tenant.tenantId : ''
+    // Nicht schreiben — und auch nichts verlängern: der sichtbare Tab des
+    // anderen Mandanten erneuert die Expiry ohnehin alle 20 s selbst.
+    if (yieldsToForeignVisiblePresence(existing, writerTenantId, Date.now())) return { ok: true }
+  }
 
   try {
     const { presences } = createAdminClient(event)
