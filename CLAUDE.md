@@ -1008,6 +1008,12 @@ läuft, ist nur so ehrlich wie sein ENTFERNTESTER Dienst; ein Worktree hat
 außerdem weder `node_modules` noch `.env` (installieren, `.env` aus dem
 Haupt-Checkout kopieren, danach wieder löschen).
 
+ZWEI BEWEIS-REGELN (2026-08-18 erwischt): (1) Erwartungswerte NIE aus derselben
+Antwort ableiten, die geprüft wird — eine solche Prüfung ist IMMER grün
+(Tautologie im Aufwärm-Schritt von verify-presence-away-priority). (2) Auch
+REGRESSIONS-Beweise brauchen die volle Dienst-Kette: verify-presence-boundary
+war 16/23 rot, weil nur die Control-Naht (:3004) tot war, nicht der Code.
+
 pnpm -r test (Unit) · Playwright-E2E in apps/comments (Base-URL per
 PW_BASE_URL überschreibbar — parallele Dev-Sessions) · themes-visual zielt
 auf die deterministische /visual-Seite (NIE Live-Daten screenshotten) ·
@@ -1075,6 +1081,12 @@ mit besserem Zuschnitt. Ist die Arbeit doppelt, wird der EIGENE Commit fallen
 gelassen, nicht gegen die fremde Lösung gemergt: zwei Wege für dieselbe Sache
 kosten dauerhaft mehr als eine verlorene Stunde. Was der Nachbar uncommittet
 offen hat, wird NIE angefasst (kein stash, kein reset) — notfalls warten.
+
+NACH JEDEM main-PUSH: vier Checks (Test/Lint/Typecheck/E2E); der Deploy feuert
+per workflow_run auf Test UND E2E, startet also ZWEIMAL — einer der Läufe endet
+per Concurrency „cancelled", das ist KEIN Fehler. Der einzige Prod-Beweis ist
+der Live-Build-SHA: `curl https://<host>/api/health` → `.build`. Ein späterer
+Deploy ohne App-Änderung überspringt und lässt den SHA des Vorgängers stehen.
 
 ## Doku-Ordnung (seit 2026-07-28) — Karte: docs/README.md
 Vier Sorten, jede mit genau EINEM Zuhause. Wer eine neue Datei anlegt,
