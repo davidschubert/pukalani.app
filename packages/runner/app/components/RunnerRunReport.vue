@@ -26,6 +26,8 @@ interface RunResult {
   costUsd?: number
   durationMs?: number
   branch?: string
+  /** Das effektiv gefahrene Modell (nach dem Kappen); fehlt bei Alt-Läufen */
+  model?: string
 }
 
 const parsed = computed<{ result: RunResult | null, raw: string }>(() => {
@@ -66,7 +68,10 @@ const rows = computed(() => {
     { key: 'tests', label: t('runner.report.tests'), value: text(result?.tests), mono: false },
     { key: 'duration', label: t('runner.report.duration'), value: durationText.value, mono: false },
     { key: 'cost', label: t('runner.report.cost'), value: typeof result?.costUsd === 'number' ? `$${result.costUsd.toFixed(2)}` : '', mono: false },
-    { key: 'model', label: t('runner.report.model'), value: props.run.model, mono: false },
+    // Das EFFEKTIVE Modell aus dem Bericht des Runners (nach dem Kappen,
+    // § 7.2 Schritt 3) — `run.model` ist nur der Wunsch. Rückfall für Läufe
+    // von vor diesem Feld.
+    { key: 'model', label: t('runner.report.model'), value: typeof result?.model === 'string' && result.model ? result.model : props.run.model, mono: false },
     { key: 'repo', label: t('runner.report.repo'), value: props.run.repoKey, mono: true },
     { key: 'session', label: t('runner.report.session'), value: props.run.sessionId, mono: true },
   ].filter(row => row.value)

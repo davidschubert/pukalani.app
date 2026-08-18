@@ -21,6 +21,12 @@ import type {
  * auf; `ApiError` trägt Status, Pfad und den (gekürzten) Antworttext.
  */
 
+/**
+ * `BodyInit` gibt es in @types/node nicht als globalen Namen (nur `RequestInit`
+ * ist global deklariert) — deshalb hier abgeleitet statt geraten.
+ */
+type RequestBody = NonNullable<RequestInit['body']>
+
 export class ApiError extends Error {
   override name = 'ApiError'
   status: number
@@ -50,7 +56,7 @@ export class RunnerApi {
     this.#token = token
   }
 
-  async #request(path: string, init: { method: string, body?: BodyInit, json?: unknown, timeoutMs?: number }): Promise<Response> {
+  async #request(path: string, init: { method: string, body?: RequestBody, json?: unknown, timeoutMs?: number }): Promise<Response> {
     const headers: Record<string, string> = { authorization: `Bearer ${this.#token}` }
     let body = init.body
     if (init.json !== undefined) {
@@ -80,7 +86,7 @@ export class RunnerApi {
     return response
   }
 
-  async #json<T>(path: string, init: { method: string, body?: BodyInit, json?: unknown, timeoutMs?: number }): Promise<T> {
+  async #json<T>(path: string, init: { method: string, body?: RequestBody, json?: unknown, timeoutMs?: number }): Promise<T> {
     const response = await this.#request(path, init)
     return await response.json() as T
   }

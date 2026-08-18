@@ -150,6 +150,23 @@ async function performRun(
     throw new RunFailure('unknown_repo_key')
   }
 
+  /**
+   * Die Spalte `executor` trägt heute nur `'claude-code'` (§ 2) — sie existiert,
+   * damit ein zweiter Agent später keine Migration kostet. Ein FREMDER Wert
+   * darf hier trotzdem nicht durchrutschen: dieser Daemon kann genau eine CLI
+   * starten, und still die falsche zu nehmen wäre schlimmer als ein Fehlschlag.
+   */
+  if (run.executor && run.executor !== 'claude-code') {
+    pump.error(`Dieser Runner kann nur „claude-code" ausführen, verlangt war „${run.executor}"`)
+    throw new RunFailure('unsupported_executor')
+  }
+
+  // § 7.3 ist nach dem MVP dran; bis dahin läuft auch ein „interaktiv"
+  // gewünschter Lauf headless — sichtbar in der Zeitleiste, nicht heimlich.
+  if (run.interactive) {
+    pump.status('Interaktiver Modus ist noch nicht gebaut — der Lauf läuft headless')
+  }
+
   // SCHRITT 3: kappen. Stilles Herunterstufen mit je einer Ereigniszeile.
   const decision = clampRun({
     requestedMode: run.permissionMode,
@@ -218,26 +235,48 @@ async function performRun(
   const transcriptPath = join(runDir, 'transcript.jsonl')
   const transcript = createWriteStream(transcriptPath, { flags: 'w' })
 
-  let summary: ResultSummary | null = null
-  let blocked = false
-  let brokenLines = 0
-  let stderrEvents = 0
-  let stderrTail = ''
-  let timedOut = false
-  let cancelled = false
-  let shutdown = false
-  let killing = false
+  /**
+   * Der veränderliche Zustand des Mitlesens — BEWUSST EIN OBJEKT und keine
+   * losen `let`-Variablen. Grund ist die Fluss-Analyse von TypeScript: ein
+   * `let x: T | null = null`, das nur in einem Callback beschrieben wird, gilt
+   * an der Leseseite weiter als `null` (bekannte Grenze, gemessen: „Property
+   * 'costUsd' does not exist on type 'never'"). Der Bericht hätte dann nie
+   * Kosten, Turns oder Verweigerungen gesehen — und zwar ohne dass irgendwo
+   * ein Fehler stünde. Ein Feld eines annotierten Objekts behält seinen
+   * deklarierten Typ.
+   */
+  const state: {
+    summary: ResultSummary | null
+    blocked: boolean
+    brokenLines: number
+    stderrEvents: number
+    stderrTail: string
+    timedOut: boolean
+    cancelled: boolean
+    shutdown: boolean
+    killing: boolean
+  } = {
+    summary: null,
+    blocked: false,
+    brokenLines: 0,
+    stderrEvents: 0,
+    stderrTail: '',
+    timedOut: false,
+    cancelled: false,
+    shutdown: false,
+    killing: false,
+  }
 
   const kill = () => {
-    if (killing) return
-    killing = true
+    if (state.killing) return
+    state.killing = true
     child.kill('SIGTERM')
     setTimeout(() => child.kill('SIGKILL'), KILL_GRACE_MS).unref?.()
   }
 
   const timeoutMs = ctx.config.maxRunMinutes * 60_000
   const timeoutTimer = setTimeout(() => {
-    timedOut = true
+    state.timedOut = true
     pump.error(`Zeitüberschreitung nach ${ctx.config.maxRunMinutes} min — der Lauf wird beendet`)
     kill()
   }, timeoutMs)
@@ -246,15 +285,15 @@ async function performRun(
   // Die Wache: sie liest den Rückkanal des Boards (§ 9) und das
   // Herunterfahren des Daemons. Beides endet in demselben SIGTERM/SIGKILL.
   const watchdog = setInterval(() => {
-    if (killing) return
+    if (state.killing) return
     if (pump.cancelled) {
-      cancelled = true
+      state.cancelled = true
       pump.status('Vom Board abgebrochen — der Agent wird beendet')
       kill()
       return
     }
     if (ctx.shutdownRequested()) {
-      shutdown = true
+      state.shutdown = true
       kill()
     }
   }, WATCHDOG_MS)
@@ -271,15 +310,15 @@ async function performRun(
       }
       catch {
         // Kaputte Zeile: zählen, nicht daran sterben. Sie steht im Transkript.
-        brokenLines++
+        state.brokenLines++
         continue
       }
 
       const result = readResultLine(value)
-      if (result) summary = result
+      if (result) state.summary = result
       // § 11: `status_category: 'blocked'` ist die EINE Quelle, die ein
       // freundliches „success" als das entlarvt, was es ist.
-      if (isPostTurnSummary(value) && summaryStatusCategory(value) === 'blocked') blocked = true
+      if (isPostTurnSummary(value) && summaryStatusCategory(value) === 'blocked') state.blocked = true
 
       for (const draft of condenseStreamLine(value)) pump.push(draft)
       if (pump.pending >= FLUSH_AT_EVENTS) void pump.flush()
@@ -290,9 +329,9 @@ async function performRun(
     for await (const line of createInterface({ input: child.stderr, crlfDelay: Infinity })) {
       if (!line.trim()) continue
       transcript.write(`${JSON.stringify({ type: 'runner_stderr', line })}\n`)
-      stderrTail = `${stderrTail}${line}\n`.slice(-4000)
-      if (stderrEvents < MAX_STDERR_EVENTS) {
-        stderrEvents++
+      state.stderrTail = `${state.stderrTail}${line}\n`.slice(-4000)
+      if (state.stderrEvents < MAX_STDERR_EVENTS) {
+        state.stderrEvents++
         pump.error(truncate(line, 4000))
       }
     }
@@ -312,21 +351,21 @@ async function performRun(
     pump.error(`Agent konnte nicht gestartet werden: ${exit.spawnError}`)
     throw new RunFailure('spawn_failed', exit.spawnError)
   }
-  if (brokenLines) pump.status(`${brokenLines} unlesbare Protokollzeilen übersprungen`)
+  if (state.brokenLines) pump.status(`${state.brokenLines} unlesbare Protokollzeilen übersprungen`)
 
   // SIGINT/SIGTERM am Daemon: der Lauf wird als Fehlschlag geschlossen,
   // damit er nicht als „läuft" zurückbleibt.
-  if (shutdown) throw new RunFailure('runner_shutdown')
+  if (state.shutdown) throw new RunFailure('runner_shutdown')
 
   const durationMs = Date.now() - startedAt
   const outcome = deriveFinalStatus({
-    timedOut,
-    cancelled,
-    sawResult: summary !== null,
-    isError: summary?.isError ?? false,
+    timedOut: state.timedOut,
+    cancelled: state.cancelled,
+    sawResult: state.summary !== null,
+    isError: state.summary?.isError ?? false,
     exitCode: exit.code,
-    denials: summary?.denials ?? [],
-    blocked,
+    denials: state.summary?.denials ?? [],
+    blocked: state.blocked,
   })
 
   /**
@@ -335,7 +374,7 @@ async function performRun(
    * und kann von Hand angesehen werden.
    */
   if (outcome.status === 'cancelled') {
-    await hooks.finish('cancelled', '', buildResultJson(emptyReport(durationMs, summary)))
+    await hooks.finish('cancelled', '', buildResultJson(emptyReport(durationMs, state.summary)))
     return
   }
 
@@ -379,7 +418,7 @@ async function performRun(
   // SCHRITT 7 (nach dem Commit, damit die Tests den committeten Stand sehen):
   // Testbefehle. Ein Fehlschlag bricht die Kette NICHT ab — der Bericht soll
   // alle Ergebnisse zeigen, nicht nur bis zum ersten Roten.
-  const tests = existsSync(worktree) && !timedOut
+  const tests = existsSync(worktree) && !state.timedOut
     ? await runTestCommands(run, worktree, ctx.config.maxRunMinutes, pump)
     : []
 
@@ -392,13 +431,15 @@ async function performRun(
     diffstat,
     tests,
     durationMs: Date.now() - startedAt,
-    costUsd: summary?.costUsd ?? 0,
-    numTurns: summary?.numTurns ?? 0,
+    costUsd: state.summary?.costUsd ?? 0,
+    numTurns: state.summary?.numTurns ?? 0,
+    // Das GEKLEMMTE Modell, nicht run.model (siehe RunReport.model).
+    model: decision.model,
     transcriptFileId,
     workBranch: branch,
   }
 
-  const error = outcome.error || (stderrTail && outcome.status === 'failed' ? lastLines(stderrTail, 5) : '')
+  const error = outcome.error || (state.stderrTail && outcome.status === 'failed' ? lastLines(state.stderrTail, 5) : '')
   await hooks.finish(outcome.status, error, buildResultJson(report))
 }
 
@@ -411,6 +452,7 @@ function emptyReport(durationMs: number, summary: ResultSummary | null): RunRepo
     durationMs,
     costUsd: summary?.costUsd ?? 0,
     numTurns: summary?.numTurns ?? 0,
+    model: '',
     transcriptFileId: '',
     workBranch: '',
   }

@@ -30,6 +30,39 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### U21 — Tickets, die sich selbst umsetzen (AI-Runner) ✅ 2026-08-18
+
+Ein Ticket auf admin.pukalani.app hat jetzt einen „Ausführen"-Bereich: ein
+Klick, und auf Davids Mac claimt der Daemon `tools/ai-runner` den Auftrag,
+startet Claude Code in einem CLI-Worktree des Zielrepos, streamt den
+Fortschritt live ins Board (geteilte JWT-Realtime auf `run_events`) und
+schreibt am Ende Branch, Commit, Diffstat, Tests, Dauer, Kosten und
+Session-Id als Bericht ins Ticket — Transkript als Datei im Bucket
+`runner-files`. Gebaut in vier Paketen (Konzept + Messläufe →
+[AI-RUNNER.md](plans/AI-RUNNER.md)): Layer `packages/runner` + Migrationen
+runner-001/002 · die Naht (5 Board- + 5 Runner-Routen, Bearer-Secret,
+Claim-Mutex, `draft`-Status gegen das Anhänge-Wettrennen) · Board-UI
+(Einmal-Token-Registrierung, RunnerRunPanel, A14-Verdrahtung ins
+Ticket-Modal, `promptTrusted` aus `feedbackId`) · Mac-Daemon (deps-frei,
+Allowlist lokal, klemmt Modus/Modell/Budget sichtbar, committet selbst, nie
+push). End-zu-End bewiesen: echtes Ticket → geklemmtes Modell (fable→haiku
+als Ereigniszeile) → richtiger Ein-Zeilen-Fix im Worktree-Commit mit
+Ticket-/Lauf-/Session-Id → Bericht im Board; 23 s, $0.04, `main` des
+Zielrepos unberührt. Sicherheits-Beweise mit Gegenprobe:
+`verify-runner-boundary.mjs` (24; requireOwnRun neutralisiert ⇒ exakt 2
+rot), `smoke.mjs` (46), Unit-Tests 55.
+
+**Gelernt:** Dem Exit-Code eines headless Claude-Laufs darf man NIE glauben —
+ein komplett blockierter Lauf endet als `success`/`is_error:false`, die
+Wahrheit steht nur in `permission_denials` und `post_turn_summary`
+(nachgemessen, bevor der Daemon gebaut wurde: drei Testläufe für ~4 Cent
+haben drei Konzept-Annahmen bestätigt und zwei Fallen gefunden — Messen vor
+Bauen hat sich hier doppelt bezahlt). Und: `git add -A` in einer Sitzung,
+in der parallel ein zweiter Agent Dateien schreibt, sammelt dessen
+halbfertigen Stand mit ein — Paket-4-Dateien landeten so im
+Paket-3-Commit; seither bekommen parallele Agenten harte Dateigrenzen und
+der Commit nennt Pfade statt `-A`.
+
 ### E1 + E1b — die lokalen Prod-Schlüsseldateien zeigen wieder aufs richtige Projekt ✅ 2026-08-17
 
 Zwei Altlasten derselben Sorte, beide auf Davids Rechner (gitignored, nie im
@@ -4810,6 +4843,7 @@ Zeilen-Sicherheit einer Tabelle abgeschaltet. Aufgefallen ist das nur, weil vor
 dem Einbau die Parameter-Semantik im Quellcode gelesen wurde; der Test trägt
 die Gegenprobe seitdem fest. (3) **Ein Beweis ohne Gegenprobe ist keiner** —
 beide Beweisskripte zeigen zuerst, dass der Fehler ohne die Kur auftritt.
+
 
 ## 📌 Master-To-do — erledigte Brocken
 

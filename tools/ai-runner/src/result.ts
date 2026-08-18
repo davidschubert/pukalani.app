@@ -25,6 +25,13 @@ export interface RunReport {
   durationMs: number
   costUsd: number
   numTurns: number
+  /**
+   * Das EFFEKTIV gefahrene Modell (nach dem Kappen, § 7.2 Schritt 3) — nicht
+   * der Wunsch aus der Zeile: im ersten End-zu-End-Beweis (2026-08-18) stand
+   * im Bericht „fable", gelaufen war das geklemmte „haiku". Der Bericht soll
+   * sagen, was WAR.
+   */
+  model: string
   transcriptFileId: string
   workBranch: string
 }

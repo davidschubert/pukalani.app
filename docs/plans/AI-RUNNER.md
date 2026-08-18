@@ -1,8 +1,7 @@
 # AI-Runner — Tickets, die sich selbst umsetzen
 
-**Status:** Pakete 1–3 gebaut (Layer, Naht, Oberfläche); offen ist der
-Mac-Dienst `tools/ai-runner` (Paket 4) · **Angelegt:** 2026-08-17 ·
-**Entscheider:** David
+**Status:** GEBAUT — MVP komplett (Pakete 1–4), End-zu-End bewiesen
+2026-08-18 · **Angelegt:** 2026-08-17 · **Entscheider:** David
 
 Ein Ticket auf `admin.pukalani.app` bekommt einen Knopf. Ein Klick, und auf
 Davids Mac läuft Claude Code in einem eigenen Worktree gegen genau dieses
@@ -406,6 +405,31 @@ Das ist die **wichtigste Einzelregel des ganzen Systems** (§8.1).
 das erscheint im `/resume`-Picker und im Fenstertitel). Der Rückkanal läuft
 dann über **Hooks** (`SessionEnd`), weil kein Elternprozess mitliest.
 `--tmux` ist optional und lohnt erst bei mehreren gleichzeitigen Läufen.
+
+
+**Gebaut 2026-08-18 (Paket 4).** `tools/ai-runner` ist ein abhängigkeitsfreies
+Node-Paket (nur `node:`-Builtins + globales `fetch`), das mit
+`node --experimental-strip-types` direkt auf den .ts-Dateien läuft. Die
+Naht-Typen liegen dort als bewusste KOPIE (`src/protocol.ts`): die Layer-Typen
+hängen an `node-appwrite`, und das SDK hat auf einem Rechner mit
+Dateisystem-Zugriff nichts zu suchen. Der Beweis ist `scripts/smoke.mjs`
+(46 Prüfungen, ohne Netz/Agent/Commit) — er lädt jede Datei UND prüft die
+puren Sicherungen einzeln: Kappen gegen die lokale Allowlist,
+`needs_input`-Ableitung, Zerlegen der Testbefehle, Säubern der Anhang-Namen,
+Schrumpfen des Berichts auf das 6000er-Spaltenbudget. Zwei Fallen, die dabei
+aufgefallen sind: `BodyInit` ist in `@types/node` kein globaler Name (nur
+`RequestInit`), und TypeScript verengt ein nur im Callback beschriebenes
+`let x: T | null = null` an der Leseseite auf `never` — der Abschlussbericht
+hätte Kosten, Turns und `permission_denials` nie gelesen, ohne dass ein
+Fehler entstanden wäre. Der Lauf-Zustand liegt deshalb in einem annotierten
+Objekt.
+
+**End-zu-End bewiesen (2026-08-18, lokal):** Ticket über die Board-UI →
+Runner-Registrierung mit Einmal-Token → Daemon claimt, klemmt das Modell
+sichtbar (`fable` → `haiku`, Ereigniszeile), Claude Code fixt den Bug im
+CLI-Worktree, der Runner committet (Ticket-, Lauf- und Session-Id in der
+Message), Transkript in den Bucket, Bericht mit Branch/Commit/Diffstat/
+Dauer/Kosten im Ticket — `main` des Zielrepos unberührt, 23 s, $0.04.
 
 ---
 

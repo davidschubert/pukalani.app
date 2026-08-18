@@ -136,6 +136,11 @@ export function condenseStreamLine(value: unknown): StreamEventDraft[] {
   }
 
   if (type === 'system') {
+    // Zähl-Ticks sind kein Fortschritt: `thinking_tokens` feuert im Sekundentakt
+    // und hat die Zeitleiste im ersten End-zu-End-Beweis (2026-08-18) mit
+    // Dutzenden gleichlautenden Zeilen geflutet. Was der Leser braucht, ist
+    // „init — Modell X" und der Abschluss, nicht der Tacho.
+    if (subtype === 'thinking_tokens') return []
     const model = readString(record, 'model')
     const parts = [subtype || 'system', model && `Modell ${model}`].filter(Boolean)
     return [{ kind: 'status', message: truncate(parts.join(' — '), MAX_MESSAGE_CHARS) }]

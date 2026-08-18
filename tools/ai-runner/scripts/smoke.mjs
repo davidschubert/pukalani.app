@@ -1,0 +1,360 @@
+/**
+ * Der Beweis des Runners — ohne Netz, ohne Agent, ohne Commit.
+ *
+ * Er tut zwei Dinge:
+ *
+ *  1. Er IMPORTIERT jede Datei aus `src/`. Das ist mehr als es klingt: der
+ *     Daemon läuft mit `node --experimental-strip-types` direkt auf den
+ *     .ts-Dateien, und Type-Stripping verzeiht keine nicht-löschbare Syntax
+ *     (Enums, Namespaces, Parameter-Properties). Ein Import beweist, dass
+ *     jede Datei auf diesem Node auch wirklich lädt.
+ *  2. Er prüft die PUREN Sicherungen einzeln: das Kappen gegen die lokale
+ *     Allowlist (§ 8.1/§ 8.2), die `needs_input`-Ableitung (§ 11), das
+ *     Zerlegen der Testbefehle, das Säubern der Anhang-Namen und das
+ *     Schrumpfen des Berichts.
+ *
+ * Aufruf: `node --experimental-strip-types scripts/smoke.mjs`
+ */
+
+import assert from 'node:assert/strict'
+import { readdirSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
+import { dirname, join } from 'node:path'
+
+const here = dirname(fileURLToPath(import.meta.url))
+const srcDir = join(here, '..', 'src')
+
+let checks = 0
+function check(name, fn) {
+  fn()
+  checks++
+  process.stdout.write(`  ok  ${name}\n`)
+}
+
+// ---------------------------------------------------------------------------
+// 1. Jede Datei lädt
+// ---------------------------------------------------------------------------
+const files = readdirSync(srcDir).filter(name => name.endsWith('.ts')).sort()
+assert.ok(files.length >= 8, 'src/ sollte alle Module enthalten')
+const modules = {}
+for (const file of files) {
+  // main.ts NICHT importieren: es hat einen Top-Level-Aufruf (der Daemon
+  // startet beim Import). Sein Flag-Parser wird unten separat geprüft, indem
+  // die Datei GELESEN, nicht ausgeführt wird.
+  if (file === 'main.ts') continue
+  modules[file] = await import(join(srcDir, file))
+  process.stdout.write(`  ok  Import ${file}\n`)
+  checks++
+}
+
+const { clampRun, allowedModesFor } = modules['clamp.ts']
+const { deriveFinalStatus, condenseStreamLine, truncate, permissionDenials, summaryStatusCategory, readResultLine } = modules['stream.ts']
+const { splitCommand, hasShellSyntax, lastLines } = modules['exec.ts']
+const { sanitizeAttachmentName, uniqueAttachmentName, buildPromptFile } = modules['files.ts']
+const { buildResultJson } = modules['result.ts']
+const { parseRunnerConfig, parseRunnerToken, expandHome, resolveConfigPath, MIN_POLL_SECONDS, capabilitiesOf } = modules['config.ts']
+const { parseTestCommands } = modules['protocol.ts']
+const { nextBackoffSeconds } = modules['api.ts']
+const { buildCommitMessage } = modules['git.ts']
+
+// ---------------------------------------------------------------------------
+// 2. Config (§ 7.1/§ 8.1)
+// ---------------------------------------------------------------------------
+const home = '/Users/test'
+const rawConfig = {
+  endpoint: 'https://admin.pukalani.app/',
+  secretFile: '~/.config/pukalani-runner/secret',
+  pollSeconds: 0.1,
+  repos: {
+    'maui-monorepo': {
+      path: '~/Developer/maui',
+      allowedModes: ['plan', 'acceptEdits'],
+      maxBudgetUsd: 5,
+    },
+  },
+}
+
+check('expandHome löst ~ auf', () => {
+  assert.equal(expandHome('~/x', home), '/Users/test/x')
+  assert.equal(expandHome('/abs', home), '/abs')
+})
+
+check('resolveConfigPath: Env schlägt Vorgabe', () => {
+  assert.equal(resolveConfigPath({}, home), '/Users/test/.config/pukalani-runner/config.json')
+  assert.equal(resolveConfigPath({ PUKALANI_RUNNER_CONFIG: '~/eigen.json' }, home), '/Users/test/eigen.json')
+})
+
+const config = parseRunnerConfig(rawConfig, home)
+
+check('Config: Poll-Abstand wird geklemmt (Selbst-DoS, § 5)', () => {
+  assert.equal(config.pollSeconds, MIN_POLL_SECONDS)
+})
+
+check('Config: Vorgaben und ~-Auflösung', () => {
+  assert.equal(config.endpoint, 'https://admin.pukalani.app')
+  assert.equal(config.repos['maui-monorepo'].path, '/Users/test/Developer/maui')
+  assert.deepEqual(config.repos['maui-monorepo'].protectedBranches, ['main'])
+  assert.equal(config.repos['maui-monorepo'].allowedModels, null)
+  assert.equal(config.stateDir, '/Users/test/.local/state/pukalani-runner')
+  assert.equal(config.claudeBin, 'claude')
+})
+
+check('Config: unsinnige Werte werfen mit Klartext', () => {
+  assert.throws(() => parseRunnerConfig({ ...rawConfig, endpoint: 'admin.pukalani.app' }, home), /http/)
+  assert.throws(() => parseRunnerConfig({ ...rawConfig, repos: {} }, home), /leer/)
+  assert.throws(() => parseRunnerConfig({
+    ...rawConfig,
+    repos: { x: { path: '/a', allowedModes: ['turbo'], maxBudgetUsd: 1 } },
+  }, home), /kein Modus/)
+  assert.throws(() => parseRunnerConfig({
+    ...rawConfig,
+    repos: { x: { path: '/a', allowedModes: ['plan'] } },
+  }, home), /maxBudgetUsd/)
+})
+
+check('Token-Form <runnerId>.<secret>', () => {
+  assert.equal(parseRunnerToken('abc.def\n'), 'abc.def')
+  assert.throws(() => parseRunnerToken(''), /leer/)
+  assert.throws(() => parseRunnerToken('ohnepunkt'), /runnerId/)
+  assert.throws(() => parseRunnerToken('.nurpunkt'), /runnerId/)
+})
+
+check('capabilitiesOf meldet Repos, Modi, Version', () => {
+  const capabilities = capabilitiesOf(config, '9.9.9')
+  assert.deepEqual(capabilities.repos, ['maui-monorepo'])
+  assert.deepEqual(capabilities.modes, ['plan', 'acceptEdits'])
+  assert.equal(capabilities.version, '9.9.9')
+})
+
+// ---------------------------------------------------------------------------
+// 3. Kappen — die wichtigste Einzelregel (§ 8.1/§ 8.2)
+// ---------------------------------------------------------------------------
+const repo = {
+  key: 'maui',
+  path: '/repo',
+  protectedBranches: ['main'],
+  allowedModes: ['plan', 'acceptEdits', 'auto'],
+  allowedModels: ['opus', 'sonnet'],
+  maxBudgetUsd: 5,
+}
+
+check('Kappen: erlaubter Wunsch bleibt unangetastet', () => {
+  const decision = clampRun({ requestedMode: 'auto', requestedModel: 'opus', requestedBudgetUsd: 3, promptTrusted: true }, repo)
+  assert.equal(decision.mode, 'auto')
+  assert.equal(decision.model, 'opus')
+  assert.equal(decision.budgetUsd, 3)
+  assert.deepEqual(decision.notes, [])
+  assert.equal(decision.rejection, null)
+})
+
+check('Kappen: gesperrter Modus fällt auf das VORSICHTIGSTE zurück', () => {
+  const decision = clampRun({ requestedMode: 'bypassPermissions', requestedModel: 'opus', requestedBudgetUsd: 3, promptTrusted: true }, repo)
+  assert.equal(decision.mode, 'plan')
+  assert.equal(decision.notes.length, 1)
+  assert.match(decision.notes[0], /plan/)
+})
+
+check('Kappen: ungeprüfter Auftrag ⇒ nur plan/acceptEdits (§ 8.2)', () => {
+  assert.deepEqual(allowedModesFor(repo, false), ['plan', 'acceptEdits'])
+  const decision = clampRun({ requestedMode: 'auto', requestedModel: 'opus', requestedBudgetUsd: 3, promptTrusted: false }, repo)
+  assert.equal(decision.mode, 'plan')
+  assert.match(decision.notes[0], /8\.2/)
+})
+
+check('Kappen: ungeprüfter Auftrag in einem Repo ohne plan/acceptEdits ⇒ Fehlschlag', () => {
+  const strict = { ...repo, allowedModes: ['bypassPermissions'] }
+  const decision = clampRun({ requestedMode: 'bypassPermissions', requestedModel: 'opus', requestedBudgetUsd: 1, promptTrusted: false }, strict)
+  assert.equal(decision.rejection?.code, 'mode_not_allowed')
+})
+
+check('Kappen: fremdes Modell wird ersetzt, Budget gedeckelt', () => {
+  const decision = clampRun({ requestedMode: 'plan', requestedModel: 'fable', requestedBudgetUsd: 50, promptTrusted: true }, repo)
+  assert.equal(decision.model, 'opus')
+  assert.equal(decision.budgetUsd, 5)
+  assert.equal(decision.notes.length, 2)
+})
+
+check('Kappen: Lauf ohne eigenen Deckel erbt den des Repos', () => {
+  const decision = clampRun({ requestedMode: 'plan', requestedModel: 'opus', requestedBudgetUsd: 0, promptTrusted: true }, repo)
+  assert.equal(decision.budgetUsd, 5)
+})
+
+// ---------------------------------------------------------------------------
+// 4. needs_input — dem Exit-Code nie glauben (§ 11)
+// ---------------------------------------------------------------------------
+const base = { timedOut: false, cancelled: false, sawResult: true, isError: false, exitCode: 0, denials: [], blocked: false }
+
+check('Abschluss: sauberer Lauf ⇒ succeeded', () => {
+  assert.equal(deriveFinalStatus(base).status, 'succeeded')
+})
+
+check('Abschluss: blockierter Lauf endet als success ⇒ needs_input (§ 11)', () => {
+  assert.equal(deriveFinalStatus({ ...base, blocked: true }).status, 'needs_input')
+  assert.equal(deriveFinalStatus({ ...base, denials: ['Edit'] }).status, 'needs_input')
+})
+
+check('Abschluss: Fehler und Zeitüberschreitung schlagen die Rückfrage', () => {
+  assert.equal(deriveFinalStatus({ ...base, isError: true, blocked: true }).status, 'failed')
+  assert.equal(deriveFinalStatus({ ...base, timedOut: true }).error, 'timeout')
+  assert.equal(deriveFinalStatus({ ...base, cancelled: true, blocked: true }).status, 'cancelled')
+  assert.equal(deriveFinalStatus({ ...base, sawResult: false, exitCode: 1 }).status, 'failed')
+})
+
+check('Abschluss: Exit ≠ 0 MIT Abschlusszeile ist kein Absturz', () => {
+  assert.equal(deriveFinalStatus({ ...base, exitCode: 1 }).status, 'succeeded')
+})
+
+// ---------------------------------------------------------------------------
+// 5. stream-json verdichten (§ 4)
+// ---------------------------------------------------------------------------
+check('Verdichten: Werkzeugaufruf mit Ziel', () => {
+  const drafts = condenseStreamLine({
+    type: 'assistant',
+    message: { content: [{ type: 'tool_use', name: 'Edit', input: { file_path: '/repo/src/api.ts' } }] },
+  })
+  assert.deepEqual(drafts, [{ kind: 'tool', message: 'Edit: /repo/src/api.ts' }])
+})
+
+check('Verdichten: Text wird auf 500 Zeichen gekürzt', () => {
+  const drafts = condenseStreamLine({ type: 'assistant', message: { content: [{ type: 'text', text: 'x'.repeat(900) }] } })
+  assert.equal(drafts[0].kind, 'text')
+  assert.equal(drafts[0].message.length, 500)
+})
+
+check('Verdichten: unbekannte und kaputte Zeilen ergeben nichts', () => {
+  assert.deepEqual(condenseStreamLine({ type: 'user' }), [])
+  assert.deepEqual(condenseStreamLine(null), [])
+  assert.deepEqual(condenseStreamLine('kaputt'), [])
+})
+
+check('Verdichten: system und result ⇒ status', () => {
+  assert.equal(condenseStreamLine({ type: 'system', subtype: 'init', model: 'opus' })[0].kind, 'status')
+  assert.equal(condenseStreamLine({ type: 'result', subtype: 'success', total_cost_usd: 0.5 })[0].kind, 'status')
+})
+
+check('post_turn_summary: blocked wird an drei Orten gefunden', () => {
+  assert.equal(summaryStatusCategory({ status_category: 'blocked' }), 'blocked')
+  assert.equal(summaryStatusCategory({ summary: { status_category: 'blocked' } }), 'blocked')
+  assert.equal(summaryStatusCategory({ post_turn_summary: { status_category: 'blocked' } }), 'blocked')
+  assert.equal(summaryStatusCategory({ type: 'result' }), '')
+})
+
+check('Abschluss-Zeile: Kosten, Turns, permission_denials', () => {
+  const summary = readResultLine({
+    type: 'result',
+    subtype: 'success',
+    is_error: false,
+    total_cost_usd: 1.25,
+    num_turns: 7,
+    permission_denials: [{ tool_name: 'Bash' }],
+  })
+  assert.equal(summary.costUsd, 1.25)
+  assert.equal(summary.numTurns, 7)
+  assert.deepEqual(summary.denials, ['Bash'])
+  assert.equal(readResultLine({ type: 'assistant' }), null)
+  assert.deepEqual(permissionDenials({ permission_denials: 'kaputt' }), [])
+})
+
+check('truncate macht aus mehrzeiligem Text eine Zeile', () => {
+  assert.equal(truncate('a\n  b\t c ', 100), 'a b c')
+  assert.equal(truncate('abcdef', 3).length, 3)
+})
+
+// ---------------------------------------------------------------------------
+// 6. Testbefehle: kein Shell, und das sichtbar (§ 7.2 Schritt 7)
+// ---------------------------------------------------------------------------
+check('splitCommand zerlegt an Leerzeichen', () => {
+  assert.deepEqual(splitCommand('  pnpm  -r   test '), ['pnpm', '-r', 'test'])
+  assert.deepEqual(splitCommand(''), [])
+})
+
+check('hasShellSyntax erkennt, was ohne Shell nicht geht', () => {
+  assert.equal(hasShellSyntax('pnpm -r test'), false)
+  assert.equal(hasShellSyntax('pnpm test | tail -5'), true)
+  assert.equal(hasShellSyntax('rm -rf ~; echo x'), true)
+  assert.equal(hasShellSyntax('echo $HOME'), true)
+})
+
+check('parseTestCommands ist defensiv', () => {
+  assert.deepEqual(parseTestCommands('["pnpm lint"," pnpm test "]'), ['pnpm lint', 'pnpm test'])
+  assert.deepEqual(parseTestCommands(''), [])
+  assert.deepEqual(parseTestCommands('{'), [])
+  assert.deepEqual(parseTestCommands('[1,"",  "ok"]'), ['ok'])
+})
+
+check('lastLines nimmt das Ende', () => {
+  assert.equal(lastLines('a\nb\nc\n', 2), 'b\nc')
+})
+
+// ---------------------------------------------------------------------------
+// 7. Anhänge: Namen sind Eingabe (§ 6)
+// ---------------------------------------------------------------------------
+check('sanitizeAttachmentName wehrt Pfade und Sonderzeichen ab', () => {
+  assert.equal(sanitizeAttachmentName('../../.ssh/authorized_keys'), 'authorized_keys')
+  assert.equal(sanitizeAttachmentName('Bild mit Leerzeichen.png'), 'Bild-mit-Leerzeichen.png')
+  assert.equal(sanitizeAttachmentName('.env'), 'env')
+  assert.equal(sanitizeAttachmentName('///'), 'anhang')
+  assert.ok(sanitizeAttachmentName('a'.repeat(300)).length <= 100)
+})
+
+check('uniqueAttachmentName nummeriert statt zu überschreiben', () => {
+  const taken = new Set()
+  assert.equal(uniqueAttachmentName('b.png', taken), 'b.png')
+  assert.equal(uniqueAttachmentName('b.png', taken), 'b-2.png')
+  assert.equal(uniqueAttachmentName('b.png', taken), 'b-3.png')
+})
+
+check('buildPromptFile hängt ABSOLUTE Pfade an', () => {
+  assert.equal(buildPromptFile('Auftrag', []), 'Auftrag')
+  const withFiles = buildPromptFile('Auftrag', ['/state/runs/r1/files/a.png'])
+  assert.match(withFiles, /Anhänge \(absolute Pfade\)/)
+  assert.match(withFiles, /- \/state\/runs\/r1\/files\/a\.png/)
+})
+
+// ---------------------------------------------------------------------------
+// 8. Bericht: schrumpfen statt scheitern (Spalte 6000)
+// ---------------------------------------------------------------------------
+check('buildResultJson bleibt im Spalten-Budget', () => {
+  const report = {
+    branch: 'worktree-ai-r1',
+    commit: 'abc123',
+    diffstat: ' 3 files changed',
+    tests: [
+      { cmd: 'pnpm lint', exit: 0, tail: 'x'.repeat(9000) },
+      { cmd: 'pnpm -r test', exit: 1, tail: 'y'.repeat(9000) },
+    ],
+    durationMs: 1234,
+    costUsd: 0.42,
+    numTurns: 5,
+    transcriptFileId: 'file1',
+    workBranch: 'worktree-ai-r1',
+  }
+  const json = buildResultJson(report)
+  assert.ok(json.length <= 6000, `Bericht zu lang: ${json.length}`)
+  const parsed = JSON.parse(json)
+  assert.equal(parsed.commit, 'abc123')
+  assert.equal(parsed.tests.length, 2)
+  assert.equal(parsed.tests[1].exit, 1)
+  // Kleiner Bericht bleibt vollständig
+  const small = JSON.parse(buildResultJson({ ...report, tests: [{ cmd: 'pnpm lint', exit: 0, tail: 'ok' }] }))
+  assert.equal(small.tests[0].tail, 'ok')
+})
+
+// ---------------------------------------------------------------------------
+// 9. Kleinkram mit Gedächtnis
+// ---------------------------------------------------------------------------
+check('Backoff verdoppelt bis 60 s (§ 5)', () => {
+  assert.equal(nextBackoffSeconds(0, 3), 3)
+  assert.equal(nextBackoffSeconds(3, 3), 6)
+  assert.equal(nextBackoffSeconds(48, 3), 60)
+  assert.equal(nextBackoffSeconds(60, 3), 60)
+})
+
+check('Commit-Nachricht trägt Subjekt und Session', () => {
+  const message = buildCommitMessage({ subjectType: 'ticket', subjectId: 't1', runId: 'r1', sessionId: 's1' })
+  assert.match(message, /^ai\(ticket t1\): Lauf r1\n/)
+  assert.match(message, /Session: s1/)
+  assert.match(message, /Co-Authored-By: Claude <noreply@anthropic\.com>/)
+})
+
+process.stdout.write(`\n${checks} Prüfungen grün.\n`)
