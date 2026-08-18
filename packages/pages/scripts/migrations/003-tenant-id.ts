@@ -45,11 +45,11 @@ async function step(label: string, run: () => Promise<unknown>) {
   }
 }
 async function waitForColumn(key: string) {
-  for (let i = 0; i < 30; i++) {
+  for (let i = 0; i < 300; i++) {
     const { columns } = await tablesDB.listColumns({ databaseId: databaseId!, tableId: 'pages' })
     const column = (columns as unknown as { key: string, status: string }[]).find(c => c.key === key)
     if (column?.status === 'available') return
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    await new Promise(resolve => setTimeout(resolve, 100))
   }
   throw new Error(`Spalte "${key}" wurde nicht verfügbar`)
 }

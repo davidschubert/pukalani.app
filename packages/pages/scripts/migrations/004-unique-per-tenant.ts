@@ -36,11 +36,11 @@ async function indexExists(key: string): Promise<boolean> {
   return (indexes as unknown as { key: string }[]).some(i => i.key === key)
 }
 async function waitForIndex(key: string) {
-  for (let i = 0; i < 30; i++) {
+  for (let i = 0; i < 300; i++) {
     const { indexes } = await tablesDB.listIndexes({ databaseId: databaseId!, tableId: 'pages' })
     const idx = (indexes as unknown as { key: string, status: string }[]).find(i => i.key === key)
     if (idx?.status === 'available') return
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    await new Promise(resolve => setTimeout(resolve, 100))
   }
   throw new Error(`Index ${key} wurde nicht 'available'`)
 }

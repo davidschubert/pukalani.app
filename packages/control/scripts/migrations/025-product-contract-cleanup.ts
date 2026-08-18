@@ -62,12 +62,12 @@ async function step(label: string, run: () => Promise<unknown>, skipCodes: numbe
 }
 
 async function waitForIndex(tableId: string, key: string) {
-  for (let i = 0; i < 30; i++) {
+  for (let i = 0; i < 300; i++) {
     const { indexes } = await tablesDB.listIndexes({ databaseId: db, tableId })
     const index = indexes.find(i => i.key === key)
     if (index && index.status === 'available') return
     if (!index) return // 409-Skip: Index existierte schon vorher als available oder Tabelle kennt ihn nicht
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    await new Promise(resolve => setTimeout(resolve, 100))
   }
   throw new Error(`Index "${tableId}.${key}" wurde nicht verfügbar`)
 }

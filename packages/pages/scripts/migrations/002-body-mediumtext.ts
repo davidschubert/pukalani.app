@@ -49,18 +49,18 @@ function isMediumtext(col: ColumnInfo): boolean {
   return col.type === 'mediumtext' || (col.type !== 'varchar' && col.size === undefined)
 }
 async function waitAvailable(key: string) {
-  for (let i = 0; i < 60; i++) {
+  for (let i = 0; i < 600; i++) {
     const col = findCol(await getColumns(), key)
     if (col?.status === 'available') return
     if (col?.status === 'failed' || col?.status === 'stuck') throw new Error(`Spalte ${key}: Status ${col.status}`)
-    await new Promise(r => setTimeout(r, 1000))
+    await new Promise(r => setTimeout(r, 100))
   }
   throw new Error(`Spalte ${key} wurde nicht verfügbar`)
 }
 async function waitGone(key: string) {
-  for (let i = 0; i < 60; i++) {
+  for (let i = 0; i < 600; i++) {
     if (!findCol(await getColumns(), key)) return
-    await new Promise(r => setTimeout(r, 1000))
+    await new Promise(r => setTimeout(r, 100))
   }
   throw new Error(`Spalte ${key} wurde nicht gelöscht`)
 }

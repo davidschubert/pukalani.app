@@ -82,23 +82,23 @@ async function step(label: string, run: () => Promise<unknown>) {
   }
 }
 async function waitForColumn(tableId: string, key: string) {
-  for (let i = 0; i < 30; i++) {
+  for (let i = 0; i < 300; i++) {
     // Query.limit ist hier PFLICHT (Falle aus events-006): sobald eine Tabelle
     // >25 Spalten trägt, würde der listColumns-Default (25) die neue Spalte nie
     // zeigen — der Poll liefe in den Timeout, obwohl sie längst 'available' ist.
     const { columns } = await tablesDB.listColumns({ databaseId: databaseId!, tableId, queries: [Query.limit(200)] })
     const column = (columns as unknown as { key: string, status: string }[]).find(c => c.key === key)
     if (column?.status === 'available') return
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    await new Promise(resolve => setTimeout(resolve, 100))
   }
   throw new Error(`Spalte "${tableId}.${key}" wurde nicht verfügbar`)
 }
 async function waitForIndex(tableId: string, key: string) {
-  for (let i = 0; i < 30; i++) {
+  for (let i = 0; i < 300; i++) {
     const { indexes } = await tablesDB.listIndexes({ databaseId: databaseId!, tableId, queries: [Query.limit(200)] })
     const index = (indexes as unknown as { key: string, status: string }[]).find(i => i.key === key)
     if (index?.status === 'available') return
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    await new Promise(resolve => setTimeout(resolve, 100))
   }
   throw new Error(`Index "${tableId}.${key}" wurde nicht 'available'`)
 }

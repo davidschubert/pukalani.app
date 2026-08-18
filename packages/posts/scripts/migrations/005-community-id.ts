@@ -59,11 +59,11 @@ async function step(label: string, run: () => Promise<unknown>) {
 }
 
 async function waitAvailable(tableId: string) {
-  for (let i = 0; i < 60; i++) {
+  for (let i = 0; i < 600; i++) {
     const { columns } = await tablesDB.listColumns({ databaseId: db, tableId, queries: [Query.limit(200)] })
     const { indexes } = await tablesDB.listIndexes({ databaseId: db, tableId })
     if (columns.every(c => c.status === 'available') && indexes.every(x => x.status === 'available')) return
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    await new Promise(resolve => setTimeout(resolve, 100))
   }
   throw new Error(`"${tableId}" wurde nicht vollständig verfügbar`)
 }

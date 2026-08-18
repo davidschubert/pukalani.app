@@ -109,10 +109,10 @@ async function columnStep(label: string, key: string, existing: Set<string>, run
   await step(label, run)
 }
 async function waitForColumns(tableId: string) {
-  for (let i = 0; i < 30; i++) {
+  for (let i = 0; i < 300; i++) {
     const { columns } = await tablesDB.listColumns({ databaseId: databaseId!, tableId })
     if (columns.length > 0 && columns.every(c => c.status === 'available')) return
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    await new Promise(resolve => setTimeout(resolve, 100))
   }
   throw new Error(`Columns von "${tableId}" wurden nicht verfügbar`)
 }

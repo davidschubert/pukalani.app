@@ -39,10 +39,10 @@ await step('Column changelog.date', () => tablesDB.createDatetimeColumn({
 // Auf 'available' pollen — bei Timeout WERFEN statt still weiterlaufen
 // (createIndex gegen eine nicht verfügbare Spalte schlüge sonst diffus fehl).
 let dateAvailable = false
-for (let i = 0; i < 30; i++) {
+for (let i = 0; i < 300; i++) {
   const { columns } = await tablesDB.listColumns({ databaseId, tableId: 'changelog' })
   if (columns.find(c => c.key === 'date')?.status === 'available') { dateAvailable = true; break }
-  await new Promise(r => setTimeout(r, 1000))
+  await new Promise(r => setTimeout(r, 100))
 }
 if (!dateAvailable) throw new Error('Column changelog.date wurde nicht verfügbar (Timeout)')
 

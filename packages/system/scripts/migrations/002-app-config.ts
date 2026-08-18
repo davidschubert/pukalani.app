@@ -74,7 +74,7 @@ async function ensureColumn(tableId: string, key: string, create: () => Promise<
   await step(`Column ${tableId}.${key}`, create)
 }
 async function waitForColumns(tableId: string) {
-  for (let i = 0; i < 30; i++) {
+  for (let i = 0; i < 300; i++) {
     // Query.limit ist PFLICHT (Falle aus events-006, nachgezogen 2026-08-02):
     // ohne explizites Limit liefert listColumns 25 Spalten, und app_config
     // wächst mit jedem Flag. Eine abgeschnittene Liste meldet "Spalte fehlt" —
@@ -82,7 +82,7 @@ async function waitForColumns(tableId: string) {
     // genau die 409-Abkürzung ist die Idempotenz dieser Migration.
     const { columns } = await tablesDB.listColumns({ databaseId: databaseId!, tableId, queries: [Query.limit(200)] })
     if (columns.length > 0 && columns.every(c => c.status === 'available')) return
-    await new Promise(r => setTimeout(r, 1000))
+    await new Promise(r => setTimeout(r, 100))
   }
   throw new Error(`Columns von "${tableId}" wurden nicht verfügbar`)
 }

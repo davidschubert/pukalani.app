@@ -53,7 +53,7 @@ async function step(label: string, run: () => Promise<unknown>) {
 }
 
 async function waitForColumns(tableId: string) {
-  for (let i = 0; i < 30; i++) {
+  for (let i = 0; i < 300; i++) {
     const { columns } = await tablesDB.listColumns({ databaseId: databaseId!, tableId })
     // `columns.length > 0` ist der eigentliche Wächter (nachgezogen 2026-08-02;
     // 001/003/014/020/028 hatten ihn, diese Datei nicht): `.every()` ist auf
@@ -61,7 +61,7 @@ async function waitForColumns(tableId: string) {
     // Antwort hätte hier also sofort „verfügbar" gemeldet — und damit genau
     // das Pollen abgeschaltet, dessentwegen die Funktion existiert.
     if (columns.length > 0 && columns.every(column => column.status === 'available')) return
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    await new Promise(resolve => setTimeout(resolve, 100))
   }
   throw new Error(`Columns von "${tableId}" wurden nicht verfügbar`)
 }

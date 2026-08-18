@@ -84,13 +84,13 @@ async function step(label: string, run: () => Promise<unknown>) {
 }
 
 async function waitForColumn(tableId: string, key: string) {
-  for (let i = 0; i < 30; i++) {
+  for (let i = 0; i < 300; i++) {
     // Query.limit ist PFLICHT (Falle aus events-006): der listColumns-Default
     // (25) würde die neue Spalte auf breiten Tabellen nie zeigen.
     const { columns } = await tablesDB.listColumns({ databaseId: databaseId!, tableId, queries: [Query.limit(200)] })
     const column = (columns as unknown as { key: string, status: string }[]).find(c => c.key === key)
     if (column?.status === 'available') return
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    await new Promise(resolve => setTimeout(resolve, 100))
   }
   throw new Error(`Spalte "${tableId}.${key}" wurde nicht verfügbar`)
 }

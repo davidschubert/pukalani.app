@@ -92,20 +92,20 @@ async function columnStep(label: string, key: string, existing: Set<string>, run
 }
 
 async function waitForColumns(tableId: string, keys: string[]) {
-  for (let i = 0; i < 30; i++) {
+  for (let i = 0; i < 300; i++) {
     const { columns } = await tablesDB.listColumns({ databaseId: db, tableId, queries: [Query.limit(200)] })
     const wanted = columns.filter(column => keys.includes(column.key))
     if (wanted.length === keys.length && wanted.every(column => column.status === 'available')) return
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    await new Promise(resolve => setTimeout(resolve, 100))
   }
   throw new Error(`Columns ${keys.join(', ')} von "${tableId}" wurden nicht verfügbar`)
 }
 
 async function waitForAllColumns(tableId: string) {
-  for (let i = 0; i < 30; i++) {
+  for (let i = 0; i < 300; i++) {
     const { columns } = await tablesDB.listColumns({ databaseId: db, tableId, queries: [Query.limit(200)] })
     if (columns.length > 0 && columns.every(column => column.status === 'available')) return
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    await new Promise(resolve => setTimeout(resolve, 100))
   }
   throw new Error(`Columns von "${tableId}" wurden nicht verfügbar`)
 }

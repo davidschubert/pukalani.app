@@ -46,11 +46,11 @@ async function step(label: string, run: () => Promise<unknown>) {
   }
 }
 async function waitForColumn(key: string) {
-  for (let i = 0; i < 30; i++) {
+  for (let i = 0; i < 300; i++) {
     const { columns } = await tablesDB.listColumns({ databaseId: databaseId!, tableId: 'tenant_plans' })
     const column = columns.find(c => (c as { key?: string }).key === key)
     if (column && (column as { status?: string }).status === 'available') return
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    await new Promise(resolve => setTimeout(resolve, 100))
   }
   throw new Error(`Column tenant_plans.${key} wurde nicht 'available'`)
 }

@@ -144,10 +144,10 @@ async function ensureColumn(tableId: string, key: string, create: () => Promise<
 }
 
 async function waitForColumns(tableId: string) {
-  for (let i = 0; i < 60; i++) {
+  for (let i = 0; i < 600; i++) {
     const { columns } = await tablesDB.listColumns({ databaseId: db, tableId })
     if (columns.length > 0 && columns.every(column => column.status === 'available')) return
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    await new Promise(resolve => setTimeout(resolve, 100))
   }
   throw new Error(`Columns von "${tableId}" wurden nicht verfügbar`)
 }
