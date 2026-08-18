@@ -390,7 +390,13 @@ Das ist die **wichtigste Einzelregel des ganzen Systems** (§8.1).
    **`needs_input` kommt aus zwei Quellen, nicht aus dem Exit-Code:** dem
    `post_turn_summary`-Ereignis (`status_category: 'blocked'` samt
    `needs_action`-Text) und dem `permission_denials`-Array im Abschluss-JSON.
-   Der Exit-Code lügt hier — siehe §11.
+   Die zwei Quellen wiegen aber NICHT gleich (Verfeinerung 2026-08-18): eine
+   `blocked`-Summary ruft IMMER einen Menschen; ein `permission_denials`-Eintrag
+   OHNE `blocked`-Summary tut das nur, wenn der Lauf KEIN Ergebnis erreichte
+   (keine Abschluss-Zeile). Kam er trotz der Verweigerung zu einem Ergebnis
+   (Commit, Bericht, Tests), ist er `succeeded` — die Verweigerung wird nur
+   NOTIERT (Ereigniszeile + `permissionDenials`-Zahl im `resultJson`), nicht zur
+   Rückfrage. Der Exit-Code lügt hier — siehe §11.
 7. Testbefehle im Worktree fahren, Ergebnis einsammeln.
 8. **Der Runner committet selbst** im Worktree (`git add -A && git commit`)
    und liest danach Branch, Commit-Hash und `--shortstat`. Nicht der Agent:
@@ -418,7 +424,7 @@ Node-Paket (nur `node:`-Builtins + globales `fetch`), das mit
 Naht-Typen liegen dort als bewusste KOPIE (`src/protocol.ts`): die Layer-Typen
 hängen an `node-appwrite`, und das SDK hat auf einem Rechner mit
 Dateisystem-Zugriff nichts zu suchen. Der Beweis ist `scripts/smoke.mjs`
-(46 Prüfungen, ohne Netz/Agent/Commit) — er lädt jede Datei UND prüft die
+(48 Prüfungen, ohne Netz/Agent/Commit) — er lädt jede Datei UND prüft die
 puren Sicherungen einzeln: Kappen gegen die lokale Allowlist,
 `needs_input`-Ableitung, Zerlegen der Testbefehle, Säubern der Anhang-Namen,
 Schrumpfen des Berichts auf das 6000er-Spaltenbudget. Zwei Fallen, die dabei
@@ -588,6 +594,22 @@ Erst danach: interaktiver Modus, SSH-Runner, comments-Verdrahtung in
   'blocked'`). Ein Runner, der nur auf Exit-Code und `is_error` schaut,
   meldet Erfolge, die keine sind — genau daraus wird `needs_input`
   abgeleitet (§7.2).
+  - **VERFEINERT 2026-08-18: die zwei Quellen wiegen nicht gleich.** Die
+    ursprüngliche Regel rief einen Menschen bei JEDER verweigerten Berechtigung
+    — auch wenn der Agent danach fertig wurde. Beleg: Lauf 6a844a1c
+    (Transkript-Download) endete `needs_input` wegen EINER verweigerten
+    Bash-Berechtigung, obwohl Commit, Bericht und grüne Tests vorlagen; das
+    Werkstück ging unverändert nach `main` (984d7bba). Der Status war
+    übervorsichtig, nicht falsch — aber er ruft, wo niemand gebraucht wird.
+    Jetzt (`deriveFinalStatus` in `src/stream.ts`): eine `blocked`-Summary
+    bleibt `needs_input` (der gemessene Fall bleibt Gesetz); ein
+    `permission_denials`-Eintrag OHNE `blocked`-Summary wird `succeeded`, SOBALD
+    ein Ergebnis vorliegt (Abschluss-Zeile gesehen) — mit einer Ereigniszeile
+    („N Berechtigungen verweigert — trotzdem fertig geworden") und der Zahl im
+    Bericht (`RunReport.permissionDenials`), damit die Information nicht
+    verschwindet, sondern nur nicht mehr blockiert. Ohne Ergebnis bleibt es
+    `needs_input`. Drei Smoke-Gegenproben in `scripts/smoke.mjs` nageln das fest
+    (blocked bleibt / Denial+fertig / Denial+leer).
 - **`acceptEdits` erlaubt kein `git commit` (gemessen).** Dateien schreiben
   ja, committen nein. Deshalb committet der RUNNER (§7.2 Schritt 8) — dem
   Agenten `Bash(git *)` freizugeben wäre die falsche Antwort.

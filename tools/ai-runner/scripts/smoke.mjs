@@ -188,9 +188,35 @@ check('Abschluss: sauberer Lauf ⇒ succeeded', () => {
   assert.equal(deriveFinalStatus(base).status, 'succeeded')
 })
 
-check('Abschluss: blockierter Lauf endet als success ⇒ needs_input (§ 11)', () => {
+// (a) Eine blocked-Summary bleibt IMMER needs_input — wer die Regel streicht,
+// wird hier rot (§ 11, der gemessene Fall: blockiert, aber als success beendet).
+check('Abschluss: blocked-Summary ⇒ needs_input, schlägt auch eine Verweigerung (§ 11)', () => {
   assert.equal(deriveFinalStatus({ ...base, blocked: true }).status, 'needs_input')
-  assert.equal(deriveFinalStatus({ ...base, denials: ['Edit'] }).status, 'needs_input')
+  // blocked schlägt die Verweigerungs-Verrechnung, selbst mit Ergebnis:
+  assert.equal(deriveFinalStatus({ ...base, blocked: true, denials: ['Edit'] }).status, 'needs_input')
+})
+
+// (b) Verweigerung OHNE blocked-Summary, aber MIT Ergebnis ⇒ succeeded mit Notiz.
+// Die Notiz (Zahl) reist im Bericht (`permissionDenials`); die Ereigniszeile
+// setzt run.ts. Hier zählt: der Status blockiert NICHT mehr.
+check('Abschluss: Verweigerung + Ergebnis ⇒ succeeded (Verfeinerung 2026-08-18)', () => {
+  const decision = deriveFinalStatus({ ...base, denials: ['Bash'] })
+  assert.equal(decision.status, 'succeeded')
+  assert.equal(decision.error, '')
+  const report = {
+    branch: 'worktree-ai-r1', commit: 'abc123', diffstat: ' 1 file changed', tests: [],
+    durationMs: 10, costUsd: 0.1, numTurns: 2, model: 'haiku', transcriptFileId: 'f1',
+    workBranch: 'worktree-ai-r1', permissionDenials: 1,
+  }
+  assert.equal(JSON.parse(buildResultJson(report)).permissionDenials, 1)
+})
+
+// (c) Verweigerung OHNE Ergebnis (keine Abschluss-Zeile) bleibt needs_input:
+// ohne Ergebnis fehlt der Beweis, dass der Lauf trotzdem durchkam.
+check('Abschluss: Verweigerung ohne Ergebnis ⇒ needs_input', () => {
+  const decision = deriveFinalStatus({ ...base, denials: ['Bash'], sawResult: false })
+  assert.equal(decision.status, 'needs_input')
+  assert.match(decision.error, /Bash/)
 })
 
 check('Abschluss: Fehler und Zeitüberschreitung schlagen die Rückfrage', () => {
@@ -328,6 +354,7 @@ check('buildResultJson bleibt im Spalten-Budget', () => {
     numTurns: 5,
     transcriptFileId: 'file1',
     workBranch: 'worktree-ai-r1',
+    permissionDenials: 0,
   }
   const json = buildResultJson(report)
   assert.ok(json.length <= 6000, `Bericht zu lang: ${json.length}`)

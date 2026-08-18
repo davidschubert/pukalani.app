@@ -203,7 +203,20 @@ export interface FinalStatusDecision {
  *  2. Zeitüberschreitung ist ein Fehlschlag mit eigenem Grund.
  *  3. ECHTE Fehler (`is_error`, oder ein Exit ≠ 0 OHNE Abschluss-Zeile) vor
  *     `needs_input`: ein gerissenes Budget ist keine Rückfrage.
- *  4. Erst dann `needs_input` aus den zwei Quellen aus § 7.2.
+ *  4. Erst dann `needs_input` — aus den zwei Quellen aus § 7.2, aber FEIN
+ *     unterschieden (Verfeinerung 2026-08-18):
+ *     - Eine `blocked`-Summary ruft IMMER einen Menschen (der gemessene Fall:
+ *       ein komplett blockierter Lauf endet als success/is_error:false). Sie
+ *       schlägt jede Verweigerungs-Verrechnung.
+ *     - Verweigerte Berechtigungen (`permission_denials`) OHNE `blocked`-Summary
+ *       sind KEINE Blockade, solange der Lauf zu einem ERGEBNIS kam (Abschluss-
+ *       Zeile gesehen): dann ist er trotz der Verweigerung fertig geworden. Der
+ *       Beleg dafür (Lauf 6a844a1c, 2026-08-18): eine verweigerte Bash-
+ *       Berechtigung meldete `needs_input`, obwohl Commit, Bericht und grüne
+ *       Tests vorlagen. Die Verweigerung wird dann NUR notiert (run.ts:
+ *       Ereigniszeile + Zahl im Bericht), nicht zur Rückfrage. FEHLT das
+ *       Ergebnis, fehlt der Beweis, dass der Lauf trotzdem durchkam — dann
+ *       bleibt es `needs_input`.
  */
 export function deriveFinalStatus(input: FinalStatusInput): FinalStatusDecision {
   if (input.cancelled) return { status: 'cancelled', error: '' }
@@ -212,11 +225,11 @@ export function deriveFinalStatus(input: FinalStatusInput): FinalStatusDecision 
   if (!input.sawResult && input.exitCode !== 0) {
     return { status: 'failed', error: `Der Agent endete mit Exit-Code ${input.exitCode} ohne Abschluss-Meldung` }
   }
-  if (input.denials.length) {
-    return { status: 'needs_input', error: `Berechtigung verweigert: ${[...new Set(input.denials)].join(', ')}` }
-  }
   if (input.blocked) {
     return { status: 'needs_input', error: 'Der Agent meldet sich als blockiert (post_turn_summary)' }
+  }
+  if (input.denials.length && !input.sawResult) {
+    return { status: 'needs_input', error: `Berechtigung verweigert: ${[...new Set(input.denials)].join(', ')}` }
   }
   return { status: 'succeeded', error: '' }
 }

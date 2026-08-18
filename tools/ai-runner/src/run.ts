@@ -382,6 +382,15 @@ async function performRun(
     return
   }
 
+  // Verweigerte Berechtigungen, aber trotzdem fertig geworden (§ 11, Verfeinerung
+  // 2026-08-18): deriveFinalStatus hat NICHT blockiert. Die Information darf
+  // trotzdem nicht verschwinden — eine Ereigniszeile in der Zeitleiste, die Zahl
+  // steht zusätzlich im Bericht (`permissionDenials`).
+  const denialCount = state.summary?.denials.length ?? 0
+  if (outcome.status === 'succeeded' && denialCount) {
+    pump.status(`${denialCount} Berechtigung${denialCount === 1 ? '' : 'en'} verweigert — trotzdem fertig geworden`)
+  }
+
   // SCHRITT 8: der Runner committet selbst (§ 11 — `acceptEdits` erlaubt kein
   // `git commit`).
   const worktree = join(repo.path, '.claude', 'worktrees', worktreeName)
@@ -441,6 +450,7 @@ async function performRun(
     model: decision.model,
     transcriptFileId,
     workBranch: branch,
+    permissionDenials: denialCount,
   }
 
   const error = outcome.error || (state.stderrTail && outcome.status === 'failed' ? lastLines(state.stderrTail, 5) : '')
@@ -459,6 +469,7 @@ function emptyReport(durationMs: number, summary: ResultSummary | null): RunRepo
     model: '',
     transcriptFileId: '',
     workBranch: '',
+    permissionDenials: summary?.denials.length ?? 0,
   }
 }
 

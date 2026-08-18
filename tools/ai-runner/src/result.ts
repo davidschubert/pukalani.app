@@ -34,6 +34,14 @@ export interface RunReport {
   model: string
   transcriptFileId: string
   workBranch: string
+  /**
+   * Wie viele Berechtigungen der Lauf verweigert bekam (`permission_denials`).
+   * Steht seit der Verfeinerung 2026-08-18 IMMER im Bericht — auch (und gerade)
+   * wenn der Lauf trotzdem `succeeded` ist: die Zahl darf nicht verschwinden,
+   * nur weil sie nicht mehr blockiert (deriveFinalStatus in stream.ts). Die
+   * Oberfläche liest `resultJson` generisch, ein Feld genügt.
+   */
+  permissionDenials: number
 }
 
 /** Spalten-Budget von `runs.resultJson`. */
