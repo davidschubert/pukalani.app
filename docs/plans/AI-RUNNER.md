@@ -239,6 +239,11 @@ Zwei Publikums-Klassen, streng getrennt:
 - `GET /api/runner/runs?subjectId=…`
 - `GET /api/runner/runs/:id/events` — der erste Stand der Zeitleiste (danach
   Realtime); nach `seq` sortiert, nicht nach `$createdAt`
+- `GET /api/runner/runs/:id/transcript` — das volle Transkript herunterladen
+  (`Content-Disposition: attachment`, `transcript-<runId>.jsonl`). Die Datei-Id
+  kommt aus `resultJson.transcriptFileId`, nicht aus einer geratenen Run-Id;
+  fehlt sie, 404. Gegenstück zum Runner-`POST` desselben Pfads — hier LIEST das
+  Board (Session), dort SCHREIBT der Runner (Bearer)
 - `GET /api/runner/runs/recent` — die letzten 25 Läufe über ALLE Subjekte, für
   die Seite `/dashboard/runner`. Bewusst eine eigene Route und kein optionaler
   Filter an der Subjekt-Liste: ein Filter, den man weglassen darf, macht aus
@@ -505,7 +510,10 @@ Zustände, und der Lauf entscheidet, welcher gilt:
   Modell, Projekt, Session-Id als Beschreibungsliste; bei `failed` der Grund
   zuoberst, bei `needs_input` der Hinweis, dass Fortsetzen mit dem
   Rechner-Dienst kommt. `resultJson` wird DEFENSIV gelesen — lässt es sich
-  nicht parsen, zeigt der Bericht den Rohtext, statt leer zu bleiben.
+  nicht parsen, zeigt der Bericht den Rohtext, statt leer zu bleiben. Trägt der
+  Bericht eine `transcriptFileId`, erscheint ein Download-Link auf `GET
+  runs/:id/transcript` (§ 5) — ein gewöhnlicher `<a download>`, weil die Route
+  die Datei als Anhang liefert.
 
 Darunter die früheren Läufe desselben Subjekts; ein Klick öffnet ihren Bericht.
 
@@ -528,9 +536,13 @@ Runners), und eine sortierbare Kopfzeile wäre die Einladung, sie zu zerstören.
 Auf der Karte selbst genügt später ein kleines Zeichen mit dem Lauf-Zustand —
 das ist noch nicht gebaut.
 
+Der **Transkript-Download** ist seit Paket 3 (nachgezogen 2026-08-18) gebaut:
+`GET runs/:id/transcript` streamt die Datei aus `runner-files`, der Bericht
+verlinkt sie, wenn `resultJson.transcriptFileId` gesetzt ist.
+
 Noch nicht gebaut (bewusst, Paket 4 und später): das Feld „Antworten" bei
-`needs_input` (`--resume` braucht den Rechner-Dienst), ein Download-Weg für das
-Transkript aus dem Board heraus, und das Zustands-Zeichen auf der Board-Karte.
+`needs_input` (`--resume` braucht den Rechner-Dienst) und das Zustands-Zeichen
+auf der Board-Karte.
 
 ---
 
@@ -542,7 +554,7 @@ Transkript aus dem Board heraus, und das Zustands-Zeichen auf der Board-Karte.
    `runner.manage` in core (admin-only). `pnpm check:manifests` muss grün sein.
 2. Migration `runner-001` — drei Tabellen, Indizes über
    `createIndexSteps`/`indexStep` (nie rohes `createIndex`).
-3. Routen: die fünf Board-Routen + die fünf Runner-Routen.
+3. Routen: die Board-Routen + die fünf Runner-Routen.
 4. UI: Bereich „Ausführen" im Ticket-Modal, verdrahtet in `apps/control`.
 5. `tools/ai-runner`: Claim-Loop, lokale Allowlist, headless Start,
    Ereignis-Bündelung, Abschlussbericht.

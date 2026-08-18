@@ -149,7 +149,8 @@
       "needsInputTitle": "The run has a question",
       "needsInputText": "Answering and resuming comes with the machine service. Until then: read the question and start a new run.",
       "raw": "The report could not be read — here it is raw:",
-      "none": "No report."
+      "none": "No report.",
+      "transcript": "Download transcript"
     },
     "timeline": {
       "waiting": "No report yet — the run is waiting for a machine.",

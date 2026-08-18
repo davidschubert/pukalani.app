@@ -28,6 +28,8 @@ interface RunResult {
   branch?: string
   /** Das effektiv gefahrene Modell (nach dem Kappen); fehlt bei Alt-Läufen */
   model?: string
+  /** Datei-Id des vollen Transkripts im Bucket `runner-files`; fehlt bei Alt-Läufen */
+  transcriptFileId?: string
 }
 
 const parsed = computed<{ result: RunResult | null, raw: string }>(() => {
@@ -76,6 +78,16 @@ const rows = computed(() => {
     { key: 'session', label: t('runner.report.session'), value: props.run.sessionId, mono: true },
   ].filter(row => row.value)
 })
+
+/**
+ * Der Download-Link erscheint NUR, wenn der Bericht eine Transkript-Id trägt —
+ * sonst läuft die Route ohnehin in ein 404 (§ 5/§ 9). Ein gewöhnlicher
+ * `<a download>` genügt: die Board-Route liefert die Datei als Anhang, es gibt
+ * keine getippte Antwort zu binden.
+ */
+const transcriptHref = computed(() =>
+  parsed.value.result?.transcriptFileId ? `/api/runner/runs/${props.run.$id}/transcript` : '',
+)
 </script>
 
 <template>
@@ -104,6 +116,19 @@ const rows = computed(() => {
         <dd class="min-w-0 break-words text-sm" :class="row.mono ? 'font-mono text-xs' : ''">{{ row.value }}</dd>
       </template>
     </dl>
+
+    <!-- Volles Transkript herunterladen — nur wenn der Runner eins abgelegt hat -->
+    <UButton
+      v-if="transcriptHref"
+      :to="transcriptHref"
+      external
+      download
+      color="neutral"
+      variant="subtle"
+      size="sm"
+      icon="i-ph-download-simple"
+      :label="t('runner.report.transcript')"
+    />
 
     <!-- Unlesbares JSON: lieber roh zeigen als schweigen (siehe Kopf) -->
     <div v-if="parsed.raw && !parsed.result">

@@ -149,7 +149,8 @@
       "needsInputTitle": "Der Lauf hat eine Rückfrage",
       "needsInputText": "Antworten und fortsetzen kommt mit dem Rechner-Dienst. Bis dahin: Rückfrage lesen und einen neuen Lauf starten.",
       "raw": "Der Bericht ließ sich nicht lesen — hier steht er roh:",
-      "none": "Kein Bericht."
+      "none": "Kein Bericht.",
+      "transcript": "Transkript herunterladen"
     },
     "timeline": {
       "waiting": "Noch keine Meldung — der Lauf wartet auf einen Rechner.",
