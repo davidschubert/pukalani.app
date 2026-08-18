@@ -155,8 +155,54 @@ jobs:
       # config): auf macOS erbten GoogleUpdater/crashpad das stdout-Socketpair
       # des Workers und hängten die lokale Suite. Preis: der Browser ist auf
       # ubuntu-latest NICHT vorinstalliert und braucht diesen Schritt.
+      #
+      # ── WARUM DER SCHRITT SEIT 2026-08-18 GEPANZERT IST ──────────────────
+      # In der Nacht auf den 18. hing genau er 30 Minuten lang und riss den
+      # ganzen Job in `timeout-minutes: 30` („exceeded the maximum execution
+      # time"). Der Lauf war rot, obwohl kein einziger Test gelaufen war — und
+      # weil der Deploy auf den Abschluss der CI wartet, hing er mit.
+      # Der Download ist die einzige Stelle dieses Jobs, die an einem fremden
+      # CDN hängt; alles andere kommt aus dem Compose-Stack oder aus pnpm.
+      #
+      # Drei Sicherungen, jede gegen einen anderen Ausgang:
+      #  1. CACHE — bei einem Treffer lädt Playwright gar nichts erst herunter
+      #     (es sieht den Browser in ~/.cache/ms-playwright und überspringt
+      #     ihn). Schlüssel ist die Playwright-VERSION: ein Bump im Katalog
+      #     erzeugt automatisch einen neuen Eintrag, ein alter Browser wird nie
+      #     stillschweigend weiterbenutzt.
+      #  2. `timeout 300` JE VERSUCH — gegen den Ausgang von heute Nacht.
+      #     Ein Hänger ist kein Fehlschlag: ohne diese Uhr läuft er, bis das
+      #     JOB-Budget alle ist, und der Schritt-Timeout allein könnte den
+      #     zweiten Versuch nicht mehr starten.
+      #  3. ZWEITER VERSUCH — ein abgerissener Download ist die häufigste
+      #     Sorte Fehler hier und beim zweiten Mal fast immer weg.
+      # Bleibt es nach beiden Versuchen rot, ist es rot: kein `continue-on-
+      # error`, denn ohne Browser ist die Suite keine Aussage.
+      - name: Playwright-Version bestimmen (Cache-Schlüssel)
+        id: playwright-version
+        run: |
+          echo "version=$(pnpm --filter comments exec node -p \
+            "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Playwright-Browser aus dem Cache
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ steps.playwright-version.outputs.version }}
+
       - name: Playwright-Browser (Chromium)
-        run: pnpm --filter comments exec playwright install --with-deps chromium
+        timeout-minutes: 12
+        run: |
+          for attempt in 1 2; do
+            if timeout 300 pnpm --filter comments exec playwright install --with-deps chromium; then
+              exit 0
+            fi
+            echo "::warning::Chromium-Installation: Versuch $attempt fehlgeschlagen oder hing (300 s) — neuer Versuch"
+            sleep 15
+          done
+          echo "::error::Chromium liess sich in zwei Versuchen nicht installieren."
+          exit 1
 
       - name: Playwright-E2E (inkl. Realtime gegen echte Instanz)
         run: pnpm --filter comments exec playwright test
