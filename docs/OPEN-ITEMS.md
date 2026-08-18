@@ -364,10 +364,24 @@ die gefährliche Sorte Altlast — sie ist nicht tot, sie ist LEISE:** ein
 `--env-file`-Lauf gegen `pool` wirft keinen Fehler, er schreibt nur ins Leere,
 und man hält das Ergebnis für den Prod-Stand. `comments` und `portfolio` sind
 weiterhin korrekt. Der gültige `account`-Schlüssel liegt NUR in der `.env` auf
-dem Server. **Ein billiger Wächter wäre möglich:** `pnpm ops:site-env` liest
-ohnehin schon je Site über ssh — es müsste nur zusätzlich die (nicht geheime)
-`NUXT_PUBLIC_APPWRITE_PROJECT_ID` vergleichen und anschlagen, wenn die lokale
-Datei ein anderes Projekt nennt als der Server. [Claude, S]
+dem Server.
+
+**Der Wächter ist gebaut (2026-08-18).** `pnpm ops:site-env` vergleicht jetzt
+zusätzlich die (nicht geheime, weil in jeder ausgelieferten Seite stehende)
+`NUXT_PUBLIC_APPWRITE_PROJECT_ID` des Servers mit dem, was die lokalen Dateien
+behaupten — `apps/*/.env.production` UND `~/.appwrite-secrets/migrations/*.env`
+—, nennt bei bekannten Altprojekten (`pool`, `studio`) den Grund und beendet
+sich mit Exit 1. Erster Lauf schlägt sofort an: `apps/platform/.env.production`
+→ `pool`, Server → `account`. Zwei Dinge dabei gelernt: aus einem **Worktree**
+gäbe es einen falschen Freispruch (die Dateien sind gitignored und liegen nur
+im Haupt-Checkout — der Wächter löst sie deshalb über `git rev-parse
+--git-common-dir` auf), und `apps/control/.env.production` aus **E1** ist auf
+Davids Rechner **nicht mehr vorhanden**.
+
+**Offen bleibt genau ein Handgriff:** `apps/platform/.env.production` löschen —
+sie ist überflüssig (migriert wird über `~/.appwrite-secrets/migrations/
+account.env`, damit lief posts-022 am 2026-08-18) und als einzige Datei im
+Haus gefährlich. **Datei mit Schlüsselmaterial ⇒ Davids Klick.** [David, S]
 
 **E3 — Hetzner-Rescale** prüfen (CX33 knapp bei sechs Apps + Builds). [David]
 
