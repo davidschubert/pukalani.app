@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { COMMUNITY_SUSPENDED_CODE } from '../../../../../core/shared/communitySuspension'
-import { COURSE_PAID_UNAVAILABLE_CODE, COURSE_UPGRADE_REQUIRED_CODE, type CourseDetailResponse } from '../../../../shared/types/course'
+import { COURSE_PAID_UNAVAILABLE_CODE, COURSE_UPGRADE_REQUIRED_CODE, type CourseDetailResponse, type CourseTranslateResponse } from '../../../../shared/types/course'
 
 definePageMeta({ middleware: ['auth'] })
 
@@ -48,6 +48,44 @@ useBrandTitle(() => course.value?.title ?? '')
  * (`CourseDetailResponse extends CourseRow`) — kein zweiter Abruf nötig.
  */
 const canManage = useCapability('courses.manage')
+
+/**
+ * ÜBERSETZEN (Davids Entscheidung 2026-08-18) — Titel und Beschreibung DIESES
+ * Kurses. Die Regel liegt im Core-Composable; hier steht nur, was dieses
+ * Produkt übersetzt und welche Route das tut.
+ *
+ * DIE SEITE IST DIE ANLEGESTELLE, nicht die Lektions-Liste darunter: jede
+ * Lektion hat ihre eigene Route und ihren eigenen Knopf (in `LessonView`).
+ * Ein Knopf hier, der dreißig Lektionen mitübersetzt, wäre ein Klick mit
+ * dreißig bezahlten KI-Aufrufen — und mit dreißig Fassungen, die niemand
+ * angefordert hat.
+ */
+const {
+  canTranslate,
+  showing: translationShowing,
+  busy: translationBusy,
+  entry: translation,
+  show: showTranslation,
+  showOriginal: showCourseOriginal,
+} = useUgcTranslation({
+  translations: () => course.value?.translations,
+  body: () => course.value?.description ?? '',
+  translate: async (targetLocale) => {
+    const result = await $fetch<CourseTranslateResponse>(`/api/courses/${route.params.slug}/translate`, {
+      method: 'POST',
+      body: { locale: targetLocale },
+    })
+    // `null` heißt „das Original hat keinen Titel" — der Eintrag trägt das Feld
+    // dann gar nicht, und die Anzeige fällt auf den Originaltitel zurück.
+    return { ...(result.title ? { title: result.title } : {}), body: result.body }
+  },
+})
+
+/** Was tatsächlich dasteht — mit Rückfall auf die Grundfassung je Feld. */
+const shownTitle = computed(() =>
+  translationShowing.value ? (translation.value?.title ?? course.value!.title) : course.value!.title)
+const shownDescription = computed(() =>
+  translationShowing.value ? (translation.value?.body ?? course.value!.description) : course.value!.description)
 
 const progressPercent = computed(() => {
   const c = course.value
@@ -111,7 +149,7 @@ async function enroll() {
 
     <div class="flex flex-wrap items-start justify-between gap-3">
       <div class="min-w-0">
-        <h1 class="text-2xl font-bold">{{ course!.title }}</h1>
+        <h1 class="text-2xl font-bold">{{ shownTitle }}</h1>
         <p v-if="course!.authorName" class="mt-1 text-sm text-muted">{{ t('courses.detail.by', { name: course!.authorName }) }}</p>
       </div>
       <UBadge :color="course!.access === 'paid' ? 'warning' : 'success'" variant="subtle">
@@ -119,7 +157,32 @@ async function enroll() {
       </UBadge>
     </div>
 
-    <MarkdownContent :source="course!.description" class="mt-4 text-sm leading-relaxed" data-testid="course-description" />
+    <MarkdownContent :source="shownDescription" class="mt-4 text-sm leading-relaxed" data-testid="course-description" />
+
+    <!-- Übersetzen: dezent unter dem Text (Muster PostCard/EventDetail) -->
+    <div v-if="canTranslate" class="mt-2 flex flex-wrap items-center gap-1 text-xs text-dimmed">
+      <template v-if="translationShowing">
+        <UIcon name="i-ph-translate" class="size-3.5 shrink-0" />
+        <span>{{ t('translation.notice') }}</span>
+        <span aria-hidden="true">·</span>
+        <UButton color="neutral" variant="link" size="xs" class="p-0" data-testid="course-translate-original" @click="showCourseOriginal">
+          {{ t('translation.showOriginal') }}
+        </UButton>
+      </template>
+      <UButton
+        v-else
+        color="neutral"
+        variant="link"
+        size="xs"
+        class="-ms-1 p-0"
+        icon="i-ph-translate"
+        :loading="translationBusy"
+        data-testid="course-translate"
+        @click="showTranslation"
+      >
+        {{ t('translation.action') }}
+      </UButton>
+    </div>
 
     <!-- Enroll / Fortschritt -->
     <div class="mt-6 rounded-xl border border-default p-4" data-testid="course-cta">

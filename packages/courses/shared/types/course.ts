@@ -57,6 +57,19 @@ export interface CourseRow extends Models.Row {
   authorName: string
   /** denormalisiert: Anzahl PUBLISHED Lektionen (Server-Recount) */
   lessonCount: number
+  /**
+   * ÜBERSETZUNGEN VON TITEL UND BESCHREIBUNG als JSON, Sprachcode → Fassung —
+   * `''`/fehlend = nichts übersetzt (Migration courses-007).
+   *
+   * OPTIONAL im Typ: sie fehlt bei jeder Zeile aus der Zeit vor der Migration,
+   * und eine Anlegestelle hat hier nichts zu entscheiden — ein frischer Kurs
+   * ist nie übersetzt. Gelesen AUSSCHLIESSLICH über
+   * `core/shared/ugcTranslations.ts` (pur, fail-soft), aufgelöst im Browser;
+   * das JSON-Feld heißt dort `body`, nicht `description` (EINE Regel für alle
+   * vier Inhaltsarten). Der Inhalt ist ein CACHE: `[slug]/index.patch.ts` leert
+   * ihn, sobald sich Titel oder Beschreibung wirklich ändern.
+   */
+  translations?: string
 }
 
 export interface LessonRow extends Models.Row {
@@ -67,6 +80,14 @@ export interface LessonRow extends Models.Row {
   content: string
   videoUrl: string | null
   status: LessonStatus
+  /**
+   * ÜBERSETZUNGEN VON TITEL UND INHALT als JSON, Sprachcode → Fassung —
+   * `''`/fehlend = nichts übersetzt (Migration courses-007). Optional aus
+   * demselben Grund wie bei `CourseRow`; das JSON-Feld heißt `body`, nicht
+   * `content`. Der Inhalt ist ein CACHE: `lessons/[id].patch.ts` leert ihn,
+   * sobald sich Titel oder Inhalt wirklich ändern.
+   */
+  translations?: string
 }
 
 export interface EnrollmentRow extends Models.Row {
@@ -95,6 +116,38 @@ export interface CourseDetailResponse extends CourseRow {
   enrolled: boolean
   completedLessonIds: string[]
   completedAt: string | null
+}
+
+/**
+ * Antwort von `POST /api/courses/:slug/translate` bzw.
+ * `POST /api/lessons/:id/translate` (Davids Entscheidung 2026-08-18) — die
+ * Fassung EINES Kurses bzw. EINER Lektion in EINER Sprache.
+ *
+ * ZWEI NAMEN FÜR DIESELBE FORM, und das ist Absicht: die Aufrufstellen sind
+ * verschiedene Routen mit verschiedenen Zukünften (eine Lektion könnte einmal
+ * Kapitel-Überschriften mitliefern, ein Kurs nie). Ein gemeinsamer Typ wäre
+ * heute kürzer und beim ersten zusätzlichen Feld die falsche Verwandtschaft —
+ * dieselbe Überlegung, aus der `CommentTranslateResponse` neben
+ * `PostTranslateResponse` steht.
+ *
+ * `body` ist die übersetzte BESCHREIBUNG bzw. der übersetzte INHALT; der Name
+ * folgt der geteilten Regel (`core/shared/ugcTranslations.ts`), nicht dem
+ * Spaltennamen. `cached: true` heißt: die Fassung lag schon auf der Zeile,
+ * es wurde kein KI-Aufruf bezahlt.
+ */
+export interface CourseTranslateResponse {
+  locale: string
+  title: string | null
+  body: string
+  cached: boolean
+}
+
+/** Dasselbe für eine Lektion (`title` + `content`). */
+export interface LessonTranslateResponse {
+  locale: string
+  title: string | null
+  body: string
+  cached: boolean
 }
 
 export interface CourseListResponse {

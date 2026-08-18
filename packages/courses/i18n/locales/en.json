@@ -131,7 +131,8 @@
       "contentMax": "Content is too long (max. 15,000 characters).",
       "urlInvalid": "Not a valid URL.",
       "paidNeedsProduct": "Paid courses need an unlock key.",
-      "orderRequired": "Missing order."
+      "orderRequired": "Missing order.",
+      "translateLocaleInvalid": "That is not a valid language code."
     },
     "stats": {
       "total": "Courses"

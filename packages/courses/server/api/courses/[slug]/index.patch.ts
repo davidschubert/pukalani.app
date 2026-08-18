@@ -53,6 +53,16 @@ export default defineEventHandler(async (event) => {
   if (body.entitlementProduct !== undefined) data.entitlementProduct = mergedAccess === 'paid' ? body.entitlementProduct : null
   if (body.status !== undefined) data.status = body.status
 
+  /**
+   * Der Übersetzungs-Cache (courses-007) gilt für den ALTEN Text — eine
+   * stehengelassene Fassung wäre eine stille Lüge in einer anderen Sprache.
+   * Gegen die ECHTE Änderung geprüft, nicht gegen den Umfang des Formulars:
+   * wer nur den Zugang umstellt, soll keine bezahlte Übersetzung verlieren.
+   */
+  const textChanged = (body.title !== undefined && body.title !== row.title)
+    || (body.description !== undefined && body.description !== row.description)
+  if (textChanged) data.translations = ''
+
   const updated = await db.update<CourseRow>(COURSES_TABLE, id, data, 'Course not found').catch((error) => {
     throw toH3Error(error, 'Could not update course')
   })

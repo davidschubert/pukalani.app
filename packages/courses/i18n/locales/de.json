@@ -131,7 +131,8 @@
       "contentMax": "Inhalt ist zu lang (max. 15.000 Zeichen).",
       "urlInvalid": "Keine gültige URL.",
       "paidNeedsProduct": "Pro-Kurse brauchen einen Freischalt-Schlüssel.",
-      "orderRequired": "Reihenfolge fehlt."
+      "orderRequired": "Reihenfolge fehlt.",
+      "translateLocaleInvalid": "Das ist kein gültiger Sprachcode."
     },
     "stats": {
       "total": "Kurse"

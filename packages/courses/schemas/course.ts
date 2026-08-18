@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { LOCALE_CODE_PATTERN } from '../../core/shared/ugcTranslations'
 import { COURSE_ACCESS, MAX_COURSE_DESCRIPTION, MAX_COURSE_TITLE, MAX_LESSON_CONTENT } from '../shared/types/course'
 
 type TranslateFn = (key: string) => string
@@ -68,9 +69,28 @@ export function createReorderSchema(t: TranslateFn = identity) {
   })
 }
 
+/**
+ * „Übersetze DAS HIER in DIESE Sprache" — der ganze Rumpf ist EIN Sprachcode.
+ *
+ * EIN Schema für Kurs UND Lektion, und das ist keine Sparsamkeit: beide Routen
+ * fragen dasselbe, nämlich die Zielsprache. Der zu übersetzende Text steht auf
+ * der Zeile, das Ziel im Pfad — zwei gleichlautende Schemas nebeneinander wären
+ * zwei Orte, an denen dieselbe Regel altern kann.
+ *
+ * Kein Text im Rumpf: käme er vom Aufrufer, wäre die Route ein bezahlter
+ * Übersetzungsdienst für beliebigen Fremdtext, und der Cache auf der Zeile
+ * trüge etwas, das dort nie stand.
+ */
+export function createCourseTranslateSchema(t: TranslateFn = identity) {
+  return z.object({
+    locale: z.string().trim().regex(LOCALE_CODE_PATTERN, t('courses.validation.translateLocaleInvalid')),
+  })
+}
+
 // Server-seitige Instanzen (Fehlertexte = Keys; die UI validiert mit t())
 export const courseSchema = createCourseSchema()
 export const courseEditSchema = createCourseEditSchema()
 export const lessonSchema = createLessonSchema()
 export const lessonEditSchema = createLessonEditSchema()
 export const reorderSchema = createReorderSchema()
+export const courseTranslateSchema = createCourseTranslateSchema()

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { CourseDetailResponse, LessonRow } from '../../shared/types/course'
+import type { CourseDetailResponse, LessonRow, LessonTranslateResponse } from '../../shared/types/course'
 
 /**
  * LessonView: Markdown XSS-sicher (Core-Sink), optionaler Video-Link
@@ -35,6 +35,47 @@ const progressPercent = computed(() => {
   return c.lessons.length === 0 ? 0 : Math.round((c.completedLessonIds.length / c.lessons.length) * 100)
 })
 
+/**
+ * ÜBERSETZEN (Davids Entscheidung 2026-08-18) — Titel und Inhalt DIESER
+ * Lektion. Die Regel liegt im Core-Composable; hier steht nur, was dieses
+ * Produkt übersetzt und welche Route das tut.
+ *
+ * JE LEKTION EINZELN, und das ist der Grund, warum der Knopf hier steht und
+ * nicht auf der Kurs-Übersicht: ein Kurs mit dreißig Lektionen wäre sonst EIN
+ * Klick mit dreißig bezahlten KI-Aufrufen, von denen der Leser vielleicht zwei
+ * gebraucht hätte. Die Route hängt zudem an denselben Vorprüfungen wie das
+ * Lesen (Einschreibung, Zugang) — übersetzt wird nur, was man ohnehin sehen darf.
+ *
+ * Diese Komponente ist die EINZIGE Anlegestelle: die Bauplan-Seite reicht nur
+ * den Kommentar-Slot durch (A14).
+ */
+const {
+  canTranslate,
+  showing: translationShowing,
+  busy: translationBusy,
+  entry: translation,
+  show: showTranslation,
+  showOriginal: showLessonOriginal,
+} = useUgcTranslation({
+  translations: () => lesson.value?.translations,
+  body: () => lesson.value?.content ?? '',
+  translate: async (targetLocale) => {
+    const result = await $fetch<LessonTranslateResponse>(`/api/lessons/${lesson.value!.$id}/translate`, {
+      method: 'POST',
+      body: { locale: targetLocale },
+    })
+    // `null` heißt „das Original hat keinen Titel" — der Eintrag trägt das Feld
+    // dann gar nicht, und die Anzeige fällt auf den Originaltitel zurück.
+    return { ...(result.title ? { title: result.title } : {}), body: result.body }
+  },
+})
+
+/** Was tatsächlich dasteht — mit Rückfall auf die Grundfassung je Feld. */
+const shownTitle = computed(() =>
+  translationShowing.value ? (translation.value?.title ?? lesson.value!.title) : lesson.value!.title)
+const shownContent = computed(() =>
+  translationShowing.value ? (translation.value?.body ?? lesson.value!.content) : lesson.value!.content)
+
 const completing = ref(false)
 async function complete() {
   completing.value = true
@@ -69,7 +110,7 @@ async function complete() {
       <span class="shrink-0 text-xs text-muted" data-testid="lesson-progress">{{ progressPercent }}%</span>
     </div>
 
-    <h1 class="text-2xl font-bold">{{ lesson!.title }}</h1>
+    <h1 class="text-2xl font-bold">{{ shownTitle }}</h1>
 
     <UButton
       v-if="lesson!.videoUrl"
@@ -81,7 +122,32 @@ async function complete() {
     </UButton>
 
     <!-- Markdown ohne Raw-HTML (Core-Sink — Lehre aus dem CSS-Sink-Audit) -->
-    <MarkdownContent :source="lesson!.content" class="mt-6 text-sm leading-relaxed" data-testid="lesson-content" />
+    <MarkdownContent :source="shownContent" class="mt-6 text-sm leading-relaxed" data-testid="lesson-content" />
+
+    <!-- Übersetzen: dezent unter dem Inhalt (Muster PostCard/EventDetail) -->
+    <div v-if="canTranslate" class="mt-2 flex flex-wrap items-center gap-1 text-xs text-dimmed">
+      <template v-if="translationShowing">
+        <UIcon name="i-ph-translate" class="size-3.5 shrink-0" />
+        <span>{{ t('translation.notice') }}</span>
+        <span aria-hidden="true">·</span>
+        <UButton color="neutral" variant="link" size="xs" class="p-0" data-testid="lesson-translate-original" @click="showLessonOriginal">
+          {{ t('translation.showOriginal') }}
+        </UButton>
+      </template>
+      <UButton
+        v-else
+        color="neutral"
+        variant="link"
+        size="xs"
+        class="-ms-1 p-0"
+        icon="i-ph-translate"
+        :loading="translationBusy"
+        data-testid="lesson-translate"
+        @click="showTranslation"
+      >
+        {{ t('translation.action') }}
+      </UButton>
+    </div>
 
     <div class="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-default pt-4">
       <UButton
