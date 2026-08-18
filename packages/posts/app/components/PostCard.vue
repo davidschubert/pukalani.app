@@ -257,7 +257,13 @@ const {
     })
     // `null` heißt „das Original hat keinen Titel" — der Eintrag trägt das Feld
     // dann gar nicht, und die Anzeige unten fällt auf `post.title` zurück.
-    return { ...(result.title ? { title: result.title } : {}), body: result.body }
+    // Dasselbe für die Umfrage-Optionen: `null` heißt „nimm die Originale"
+    // (keine Umfrage, alter Cache, oder die KI hat die Anzahl verfehlt).
+    return {
+      ...(result.title ? { title: result.title } : {}),
+      body: result.body,
+      ...(result.options ? { options: result.options } : {}),
+    }
   },
 })
 
@@ -272,6 +278,29 @@ const shownTitle = computed(() =>
   translationShowing.value ? (translation.value?.title ?? props.post.title) : props.post.title)
 const shownBody = computed(() =>
   translationShowing.value ? (translation.value?.body ?? props.post.body) : props.post.body)
+
+/**
+ * DIE UMFRAGE, WIE SIE DASTEHT (Davids Entscheidung 2026-08-18).
+ *
+ * KEIN zweiter Renderpfad: `PollBlock` bekommt denselben `PollState` wie immer,
+ * nur mit umbeschrifteten `options`. Alles andere — Zähler, eigene Stimme,
+ * Prozente, Ende — bleibt Wort für Wort der Zustand vom Server, und der EMIT
+ * beim Stimmen trägt ohnehin dessen frische Antwort (mit den Originalen).
+ *
+ * DER ANZAHL-WÄCHTER STEHT HIER EIN ZWEITES MAL, obwohl die Route ihn schon
+ * hat: zwischen dem Übersetzen und diesem Aufbau kann der Autor seine Umfrage
+ * geändert haben — die Zeile kommt dann per Realtime mit einer anderen Zahl von
+ * Optionen herein, die zwischengespeicherte Fassung wäre einen Wimpernschlag
+ * lang die falsche. Die Stimme hängt am INDEX, also entscheidet hier die Länge
+ * und nicht das Wohlwollen. Passt sie nicht, stehen die Originale da.
+ */
+const shownPoll = computed<PollState | undefined>(() => {
+  const poll = props.post.poll
+  if (!poll) return undefined
+  const translated = translationShowing.value ? translation.value?.options : undefined
+  if (!translated || translated.length !== poll.options.length) return poll
+  return { ...poll, options: translated }
+})
 
 function onPollUpdated(poll: PollState) {
   emit('updated', { ...props.post, poll })
@@ -391,7 +420,7 @@ const showTooltip = computed(() => (props.replyCount ?? 0) > 0)
         </UButton>
       </div>
 
-      <PollBlock v-if="post.type === 'poll' && post.poll" :post-id="post.$id" :poll="post.poll" @updated="onPollUpdated" />
+      <PollBlock v-if="post.type === 'poll' && shownPoll" :post-id="post.$id" :poll="shownPoll" @updated="onPollUpdated" />
     </div>
 
     <!--

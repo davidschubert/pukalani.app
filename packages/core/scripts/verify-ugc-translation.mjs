@@ -14,6 +14,12 @@
  *      und ZEICHENGLEICH zum ersten — kein zweiter KI-Aufruf (der Beweis liest
  *      die Zeile zusätzlich direkt und sieht die Fassung dort liegen).
  *   3. Dasselbe für einen Kommentar (`content`, ohne Titel).
+ *   3b. UMFRAGEN ÜBERSETZEN IHRE OPTIONEN MIT (Davids Entscheidung 2026-08-18):
+ *      eine Umfrage mit drei englischen Wahlmöglichkeiten liefert drei
+ *      übersetzte zurück — EXAKT so viele wie das Original (der Index trägt die
+ *      Stimme, eine verschobene Liste wäre schlimmer als gar keine Übersetzung)
+ *      und jede vom Original verschieden. Der zweite Abruf kommt aus der Spalte
+ *      und trägt dieselben Optionen.
  *   4. BEARBEITEN LEERT DEN CACHE: nach `PATCH` mit neuem Text steht die
  *      `translations`-Spalte der Zeile auf '' — die alte Fassung wäre eine
  *      stille Lüge gewesen.
@@ -96,11 +102,15 @@ const stamp = Date.now().toString(36)
 const email = `verify-ugc-${stamp}@pukalani.test`
 let userId = null
 let postId = null
+let pollId = null
 let commentId = null
 
 const POST_TITLE = 'A quiet morning on the mountain'
 const POST_BODY = 'We watched the **sunrise** from the summit. Bring warm clothes — the wind up there is `cold` and relentless.'
 const COMMENT_BODY = 'Thanks for sharing this! I visited last year and the trail was much harder than expected.'
+const POLL_TITLE = 'Which trail should we take next weekend?'
+const POLL_BODY = 'Both routes end at the same hut, but they are very different in effort.'
+const POLL_OPTIONS = ['The short but steep one', 'The long ridge walk', 'Stay in the valley']
 
 try {
   console.log(`\nBeweis UGC-Übersetzung gegen ${ORIGIN} (Projekt ${projectId})\n`)
@@ -157,6 +167,25 @@ try {
   const c2 = await call('POST', `/api/comments/${commentId}/translate`, { cookie, body: { locale: 'de' } })
   check('Kommentar 2. Abruf: cached:true + zeichengleich', c2.status === 200 && c2.json?.cached === true && c2.json?.body === c1.json?.body)
 
+  // ── Umfrage: die Wahlmöglichkeiten reisen mit ────────────────────────────
+  const poll = await call('POST', '/api/posts', {
+    cookie,
+    body: { type: 'poll', title: POLL_TITLE, body: POLL_BODY, pollOptions: POLL_OPTIONS },
+  })
+  pollId = poll.json?.post?.$id ?? poll.json?.$id ?? null
+  check('Umfrage angelegt (3 Optionen)', poll.status === 201 && Boolean(pollId), `Status ${poll.status}: ${poll.text?.slice(0, 160)}`)
+
+  const p1 = await call('POST', `/api/posts/${pollId}/translate`, { cookie, body: { locale: 'de' } })
+  const p1Options = p1.json?.options
+  check('Umfrage 1. Übersetzung: 200 + cached:false', p1.status === 200 && p1.json?.cached === false, `Status ${p1.status}: ${p1.text?.slice(0, 200)}`)
+  // EXAKT drei: der Index trägt die Stimme, eine verschobene Liste ließe
+  // jemanden auf „Ja" klicken und für „Nein" stimmen (translatedPollOptions).
+  check('Umfrage: EXAKT so viele Optionen wie das Original', Array.isArray(p1Options) && p1Options.length === POLL_OPTIONS.length, `options=${JSON.stringify(p1Options)?.slice(0, 200)}`)
+  check('Umfrage: jede Option übersetzt (≠ Original)', Array.isArray(p1Options) && p1Options.every((option, index) => option && option !== POLL_OPTIONS[index]), `options=${JSON.stringify(p1Options)?.slice(0, 200)}`)
+
+  const p2 = await call('POST', `/api/posts/${pollId}/translate`, { cookie, body: { locale: 'de' } })
+  check('Umfrage 2. Abruf: cached:true + identische Optionen', p2.status === 200 && p2.json?.cached === true && JSON.stringify(p2.json?.options) === JSON.stringify(p1Options), `Status ${p2.status}: ${JSON.stringify(p2.json?.options)?.slice(0, 200)}`)
+
   // ── Gegenproben ──────────────────────────────────────────────────────────
   const guest = await call('POST', `/api/posts/${postId}/translate`, { body: { locale: 'de' } })
   check('Ohne Session: 401 (kein Gast kostet Geld)', guest.status === 401, `Status ${guest.status}`)
@@ -170,6 +199,7 @@ catch (error) {
 finally {
   // Aufräumen — auch im Fehlerfall; ein halber Beweis darf keine Reste lassen.
   if (postId) await tablesDB.deleteRow({ databaseId, tableId: 'community_posts', rowId: postId }).catch(() => {})
+  if (pollId) await tablesDB.deleteRow({ databaseId, tableId: 'community_posts', rowId: pollId }).catch(() => {})
   if (commentId) await tablesDB.deleteRow({ databaseId, tableId: 'comments', rowId: commentId }).catch(() => {})
   if (userId) await users.delete({ userId }).catch(() => {})
 }

@@ -5,10 +5,12 @@ import {
   mayAddUgcTranslationLocale,
   parseUgcTranslations,
   serializeUgcTranslations,
+  translatedPollOptions,
   ugcTranslationDayKey,
 } from '../../../../../core/shared/ugcTranslations'
 import { postTranslateSchema } from '../../../../schemas/post'
 import {
+  MAX_POLL_OPTION_LENGTH,
   MAX_POST_BODY,
   MAX_POST_TITLE,
   POSTS_TABLE,
@@ -59,13 +61,25 @@ import {
  * Der letzte Schreiber gewinnt. Eine Sperre (Reservierungszeile, Lock-Spalte)
  * kostete einen Schreibvorgang JE Übersetzung, um in einem seltenen Rennen
  * einen KI-Aufruf zu sparen, dessen Ergebnis ohnehin dasselbe ist.
+ *
+ * ── UMFRAGEN ÜBERSETZEN IHRE OPTIONEN MIT (Davids Entscheidung 2026-08-18) ─
+ * Bis dahin bekam der Leser eine übersetzte FRAGE mit fremdsprachigen
+ * Wahlmöglichkeiten — halb übersetzt ist hier schlechter als gar nicht, weil
+ * die Frage vorgibt, verstanden worden zu sein. Die Optionen reisen deshalb
+ * nummeriert in den Prompt und kommen als Array zurück. Was sie NICHT
+ * verändern, ist die Stimme: die hängt am INDEX (`poll_votes.optionIndex`).
+ * Der Anzahl-Wächter (`translatedPollOptions`) ist trotzdem Pflicht — die
+ * Reihenfolge verspricht hier nur der Prompt, und ein verschobenes Array
+ * ließe jemanden auf „Ja" klicken und für „Nein" stimmen. Passt sie nicht,
+ * wird der Eintrag OHNE Optionen gespeichert: Titel und Text bleiben nutzbar,
+ * die Optionen bleiben im Original.
  */
 
 /** Zehn Übersetzungen je Mensch, Community und zehn Minuten. */
 const TRANSLATE_LIMIT = 10
 const TRANSLATE_WINDOW_MS = 10 * 60_000
 
-function buildPrompt(post: CommunityPost, locale: string): string {
+function buildPrompt(post: CommunityPost, options: string[], locale: string): string {
   return [
     'Du übersetzt einen Beitrag aus einem Community-Forum für einen Leser.',
     '',
@@ -76,6 +90,15 @@ function buildPrompt(post: CommunityPost, locale: string): string {
     '"""',
     post.body,
     '"""',
+    ...(options.length
+      ? [
+          '',
+          'Wahlmöglichkeiten der Umfrage (nummeriert, die Nummer ist die Reihenfolge):',
+          '"""',
+          ...options.map((option, index) => `${index + 1}. ${option}`),
+          '"""',
+        ]
+      : []),
     '',
     'Regeln:',
     '- Übersetze den Inhalt, ändere ihn nicht: nichts hinzufügen, nichts weglassen, nichts zusammenfassen, nichts kommentieren.',
@@ -84,11 +107,18 @@ function buildPrompt(post: CommunityPost, locale: string): string {
     '- Erwähnungen (@name), Themen-Verweise (#id) und URLs bleiben UNVERÄNDERT stehen.',
     '- Eigennamen, Produktnamen und Fachbegriffe, die auch in der Zielsprache unübersetzt benutzt werden, bleiben stehen.',
     '- Ist der Text schon in der Zielsprache, gib ihn unverändert zurück.',
+    ...(options.length
+      ? [
+          `- Übersetze JEDE Wahlmöglichkeit und gib EXAKT ${options.length} zurück, in DERSELBEN Reihenfolge wie oben — keine zusammenfassen, keine weglassen, keine hinzufügen. Die Nummern selbst gehören nicht in die Ausgabe.`,
+          '- Eine Wahlmöglichkeit ist eine Beschriftung: kurz, ohne Satzzeichen am Ende.',
+        ]
+      : []),
     '',
     'Antworte NUR mit einem JSON-Objekt (kein Markdown, keine Erklärung außenrum):',
     '{',
     ...(post.title ? ['  "title": "<der übersetzte Titel>",'] : []),
-    '  "body": "<der übersetzte Text>"',
+    `  "body": "<der übersetzte Text>"${options.length ? ',' : ''}`,
+    ...(options.length ? [`  "options": [<${options.length} übersetzte Wahlmöglichkeiten in der Reihenfolge oben>]`] : []),
     '}',
     ...(post.title ? [] : ['Der Beitrag hat keinen Titel — gib das Feld "title" nicht aus.']),
   ].join('\n')
@@ -126,6 +156,14 @@ export default defineEventHandler(async (event): Promise<PostTranslateResponse> 
     throw createError({ status: 400, statusText: 'Post is not translatable', data: { code: 'post_not_published' } })
   }
 
+  /**
+   * Die Wahlmöglichkeiten — leer bei allem, was keine Umfrage ist. Gelesen mit
+   * demselben Helfer wie überall im Layer (`parsePollOptions`, fail-soft): eine
+   * kaputte JSON-Spalte heißt hier „keine Optionen" und übersetzt still nur
+   * Titel und Text, statt den Beitrag unübersetzbar zu machen.
+   */
+  const pollOptions = post.type === 'poll' ? parsePollOptions(post) : []
+
   const existing = parseUgcTranslations(post.translations)
 
   /**
@@ -137,7 +175,10 @@ export default defineEventHandler(async (event): Promise<PostTranslateResponse> 
    */
   const cached = existing[locale]
   if (cached) {
-    return { locale, title: cached.title ?? null, body: cached.body, cached: true }
+    // `options` fehlt bei jedem Cache aus der Zeit vor dem 2026-08-18 und bei
+    // jedem Beitrag, der keine Umfrage ist — `null` heißt hier wie überall
+    // „nimm die Originale".
+    return { locale, title: cached.title ?? null, body: cached.body, options: cached.options ?? null, cached: true }
   }
 
   if (!mayAddUgcTranslationLocale(existing, locale)) {
@@ -208,9 +249,9 @@ export default defineEventHandler(async (event): Promise<PostTranslateResponse> 
 
   // Laufzeit-Override vor Build-Default (getEffectiveAiConfig, system-016).
   const aiConfig = await getEffectiveAiConfig(event)
-  const parsed = await aiCompleteJson<{ title?: unknown, body?: unknown }>(
+  const parsed = await aiCompleteJson<{ title?: unknown, body?: unknown, options?: unknown }>(
     event,
-    buildPrompt(post, locale),
+    buildPrompt(post, pollOptions, locale),
     { model: aiConfig.model, maxTokens: 8000, label: 'posts' },
   )
 
@@ -223,10 +264,20 @@ export default defineEventHandler(async (event): Promise<PostTranslateResponse> 
     // wo der Anbieter etwas Unbrauchbares geliefert hat.
     throw createError({ status: 502, statusText: 'AI returned no translation' })
   }
+  /**
+   * Die Optionen sind das Gegenteil des Textes: hier gilt ALLES ODER NICHTS.
+   * `null` (falsche Anzahl, kein Array, ein leeres Element) ist KEIN Fehler
+   * nach außen — der Beitrag bleibt übersetzt, nur die Beschriftungen bleiben
+   * im Original. Ein 502 wäre die schlechtere Antwort: sie würfe eine
+   * brauchbare Übersetzung weg, die schon bezahlt ist.
+   */
+  const options = pollOptions.length
+    ? translatedPollOptions(pollOptions, parsed.options, MAX_POLL_OPTION_LENGTH)
+    : null
 
   const translations = serializeUgcTranslations({
     ...existing,
-    [locale]: { ...(title ? { title } : {}), body },
+    [locale]: { ...(title ? { title } : {}), body, ...(options ? { options } : {}) },
   })
 
   /**
@@ -243,5 +294,5 @@ export default defineEventHandler(async (event): Promise<PostTranslateResponse> 
       console.error('[posts] Übersetzungs-Cache nicht geschrieben:', error)
     })
 
-  return { locale, title: title || null, body, cached: false }
+  return { locale, title: title || null, body, options, cached: false }
 })

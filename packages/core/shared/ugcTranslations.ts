@@ -63,6 +63,21 @@ export const LOCALE_CODE_PATTERN = /^[a-z]{2,3}(-[A-Za-z]{2,4})?$/
 export interface UgcTranslationEntry {
   title?: string
   body: string
+  /**
+   * Die übersetzten UMFRAGE-OPTIONEN, in der Reihenfolge des Originals
+   * (Davids Entscheidung 2026-08-18) — nur bei `type: 'poll'`, sonst gar nicht.
+   *
+   * ADDITIV UND OPTIONAL, und das ist der Grund, warum die Spalte keine
+   * Migration braucht: ein Bestands-Cache aus der Zeit davor trägt das Feld
+   * nicht, ist aber weiterhin vollständig gültig (Titel und Text bleiben
+   * nutzbar). Dasselbe gilt in der anderen Richtung — liefert die KI keine
+   * brauchbare Liste, wird der Eintrag OHNE `options` gespeichert.
+   *
+   * Der INDEX trägt die Stimme (`poll_votes.optionIndex`), nicht der Text: eine
+   * Übersetzung kann deshalb kein Votum verfälschen — solange die Reihenfolge
+   * und die ANZAHL stimmen. Genau dafür gibt es `translatedPollOptions`.
+   */
+  options?: string[]
 }
 
 /** Sprachcode → Fassung. Sprachcodes wie in @nuxtjs/i18n ('de', 'en'). */
@@ -104,6 +119,19 @@ export function normalizeUgcTranslations(input: unknown): UgcTranslations {
     // Ein leerer Titel ist KEIN Titel — sonst stünde über einem übersetzten
     // Beitrag eine leere Überschrift statt der Grundfassung.
     if (typeof title === 'string' && title.trim()) entry.title = title.trim()
+    /**
+     * Umfrage-Optionen: ENTWEDER GANZ ODER GAR NICHT.
+     *
+     * Ein einzelnes unbrauchbares Element lässt die ganze Liste fallen, statt
+     * sie zu filtern — ein gefiltertes Array wäre um eins kürzer, und damit
+     * zeigte die Anzeige jede Option auf der falschen Position. Der Eintrag
+     * bleibt ohne `options` gültig: Titel und Text sind davon unberührt.
+     */
+    const { options } = value as { options?: unknown }
+    if (Array.isArray(options) && options.length > 0
+      && options.every(option => typeof option === 'string' && option.trim())) {
+      entry.options = (options as string[]).map(option => option.trim())
+    }
     out[locale] = entry
   }
   return out
@@ -140,6 +168,47 @@ export function ugcTranslationFor(
   locale: string,
 ): UgcTranslationEntry | null {
   return parseUgcTranslations(raw)[locale] ?? null
+}
+
+/**
+ * DIE ÜBERSETZTEN UMFRAGE-OPTIONEN — oder `null` (Davids Entscheidung
+ * 2026-08-18).
+ *
+ * `null` heißt „nimm die Originale", nie „leere Liste". Zurückgegeben wird nur,
+ * was EXAKT so viele Elemente hat wie das Original und in dem jedes Element ein
+ * nicht-leerer String ist.
+ *
+ * ── WARUM DER ANZAHL-WÄCHTER DIE GANZE FUNKTION IST ───────────────────────
+ * Die Stimme einer Umfrage ist ein INDEX (`poll_votes.optionIndex`), kein Text.
+ * Solange Reihenfolge und Anzahl stimmen, kann eine Übersetzung deshalb kein
+ * Votum verfälschen — sie beschriftet nur um. Fehlt aber eine Option oder
+ * kommt eine dazu, verschiebt sich ab dort ALLES: der Leser klickt auf „Ja"
+ * und stimmt für „Nein". Und die Reihenfolge verspricht hier niemand außer dem
+ * PROMPT, also ein Modell — das ist die schwächste Zusage im ganzen Haus, und
+ * sie braucht eine Prüfung, die nicht auf Wohlwollen baut.
+ *
+ * Eine Umfrage mit verschobenen oder fehlenden Optionen wäre schlimmer als
+ * eine unübersetzte: die unübersetzte sieht man, die verschobene nicht.
+ * Deshalb ist der Rückfall vollständig — entweder alle Optionen übersetzt oder
+ * keine.
+ *
+ * `maxLength` klemmt jedes Element (die Grenze des Originals, im posts-Layer
+ * `MAX_POLL_OPTION_LENGTH`) — geklemmt wird NACH der Anzahl-Prüfung, denn eine
+ * zu lange Antwort ist ein Darstellungsproblem, kein Zuordnungsproblem.
+ */
+export function translatedPollOptions(
+  original: string[],
+  returned: unknown,
+  maxLength: number,
+): string[] | null {
+  if (original.length === 0) return null
+  if (!Array.isArray(returned) || returned.length !== original.length) return null
+  const out: string[] = []
+  for (const option of returned) {
+    if (typeof option !== 'string' || !option.trim()) return null
+    out.push(option.trim().slice(0, maxLength))
+  }
+  return out
 }
 
 /**

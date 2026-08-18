@@ -8,6 +8,7 @@ import {
   normalizeUgcTranslations,
   parseUgcTranslations,
   serializeUgcTranslations,
+  translatedPollOptions,
   ugcTranslationDayKey,
   ugcTranslationErrorKey,
   ugcTranslationFor,
@@ -103,6 +104,63 @@ describe('mayAddUgcTranslationLocale — der Deckel', () => {
   it('lässt eine VORHANDENE Sprache auch am Deckel noch schreiben', () => {
     // Sonst wäre eine Zeile mit sechs Fassungen für immer eingefroren.
     expect(mayAddUgcTranslationLocale(full, 'en')).toBe(true)
+  })
+})
+
+describe('Umfrage-Optionen in der Spalte', () => {
+  it('nimmt ein Array nicht-leerer Strings — getrimmt', () => {
+    const raw = JSON.stringify({ en: { body: 'Text', options: [' Yes ', 'No'] } })
+    expect(parseUgcTranslations(raw)).toEqual({ en: { body: 'Text', options: ['Yes', 'No'] } })
+  })
+
+  it('lässt die GANZE Liste fallen, wenn ein Element unbrauchbar ist', () => {
+    // Filtern wäre hier der Fehler: eine um eins kürzere Liste zeigt jede
+    // Option auf der falschen Position. Der Eintrag bleibt ohne options gültig.
+    for (const options of [['Yes', '  '], ['Yes', 42], [], 'Yes,No', { 0: 'Yes' }]) {
+      const raw = JSON.stringify({ en: { body: 'Text', options } })
+      expect(parseUgcTranslations(raw)).toEqual({ en: { body: 'Text' } })
+    }
+  })
+
+  it('liest Bestands-Caches ohne options unverändert (rein additiv)', () => {
+    const raw = JSON.stringify({ en: { title: 'A title', body: 'Text' } })
+    expect(parseUgcTranslations(raw)).toEqual({ en: { title: 'A title', body: 'Text' } })
+  })
+
+  it('überlebt serialize → parse', () => {
+    const raw = serializeUgcTranslations({ en: { body: 'Text', options: ['Yes', 'No'] } })
+    expect(parseUgcTranslations(raw).en?.options).toEqual(['Yes', 'No'])
+  })
+})
+
+describe('translatedPollOptions — der Anzahl-Wächter', () => {
+  const original = ['Yes', 'No', 'Maybe']
+
+  it('übernimmt eine Liste GLEICHER Länge, getrimmt und geklemmt', () => {
+    expect(translatedPollOptions(original, [' Ja ', 'Nein', 'Vielleicht'], 100))
+      .toEqual(['Ja', 'Nein', 'Vielleicht'])
+    expect(translatedPollOptions(['A'], ['viel zu lang'], 4)).toEqual(['viel'])
+  })
+
+  it('gibt null, sobald die ANZAHL nicht stimmt', () => {
+    // Der eine Fall, für den die Funktion existiert: eine fehlende Option
+    // verschiebt ab dort alles, und der Index trägt die Stimme — der Leser
+    // klickte auf „Ja" und stimmte für „Nein".
+    expect(translatedPollOptions(original, ['Ja', 'Nein'], 100)).toBeNull()
+    expect(translatedPollOptions(original, ['Ja', 'Nein', 'Vielleicht', 'Weiß nicht'], 100)).toBeNull()
+  })
+
+  it('gibt null bei allem, was kein sauberes String-Array ist', () => {
+    expect(translatedPollOptions(original, undefined, 100)).toBeNull()
+    expect(translatedPollOptions(original, 'Ja, Nein, Vielleicht', 100)).toBeNull()
+    expect(translatedPollOptions(original, ['Ja', 'Nein', '   '], 100)).toBeNull()
+    expect(translatedPollOptions(original, ['Ja', 'Nein', 3], 100)).toBeNull()
+  })
+
+  it('gibt null, wenn es gar keine Optionen zu übersetzen gab', () => {
+    // Ein Beitrag ohne Umfrage bekommt nie ein leeres Array untergeschoben.
+    expect(translatedPollOptions([], [], 100)).toBeNull()
+    expect(translatedPollOptions([], ['Ja'], 100)).toBeNull()
   })
 })
 

@@ -472,6 +472,17 @@ export interface PostTranslateResponse {
   locale: string
   title: string | null
   body: string
+  /**
+   * Die übersetzten Umfrage-Optionen in der Reihenfolge des Originals — `null`
+   * bei allem, was keine Umfrage ist, bei Bestands-Caches von vor dem
+   * 2026-08-18 UND immer dann, wenn die Antwort der KI die Anzahl der Optionen
+   * verfehlt hat (`translatedPollOptions`).
+   *
+   * `null` heißt IMMER „nimm die Originale", nie „keine Optionen". Die Anzeige
+   * prüft die Anzahl trotzdem ein zweites Mal: zwischen Übersetzung und
+   * Darstellung kann der Autor seine Umfrage geändert haben.
+   */
+  options: string[] | null
   cached: boolean
 }
 
