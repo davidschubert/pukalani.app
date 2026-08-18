@@ -60,12 +60,22 @@ Nicht-Ziele (bewusst, nicht vergessen):
 
 ## 3. Entscheidungen (David, 2026-08-17)
 
-### 3.1 Eigener Layer `packages/agents`
+### 3.1 Eigener Layer `packages/runner` (Name entschieden 2026-08-17)
+
+**Der Name ist `runner`, Produkt-Titel „AI-Runner"** (de = en, wie das
+Konzeptdokument und der Mac-Daemon `tools/ai-runner`). Verworfen wurden:
+`agents` (kollidiert mit Claude-Code-Vokabular im eigenen Haus —
+`.claude/agents/`, `claude agents`, `--agents` — und ist zu breit, KI steckt
+auch in core/tickets/moderation) sowie `ticket-runner`/`board-runner`/
+`roadmap-runner` (Davids Kandidaten — ein Subjekt im Namen bäckt genau die
+Kopplung ein, die dieser Abschnitt herausschneidet, und wäre der erste
+Bindestrich-Layer neben 21 Einwort-Layern). Der sprechende Teil lebt im
+Manifest-Titel, wo er nichts falsch verspricht.
 
 Nicht in `tickets` hinein. Begründung: Prozess-Steuerung, Runner-Registrierung
 und Ausführungs-Secrets haben in einem Board-Produkt nichts verloren, und der
 Auslöser soll später auch ein Roadmap-Eintrag oder ein GitHub-Issue sein
-können. `agents` kennt `tickets` **nicht** — die App verdrahtet (A14), so wie
+können. `runner` kennt `tickets` **nicht** — die App verdrahtet (A14), so wie
 `tickets` den `feedback`-Layer nicht kennt.
 
 Der Bezug läuft über zwei neutrale Spalten `subjectType` / `subjectId`
@@ -76,14 +86,14 @@ Der Bezug läuft über zwei neutrale Spalten `subjectType` / `subjectId`
 Appwrite Realtime authentifiziert per Session-Cookie oder JWT, **nicht per
 API-Key**. Ein Hintergrunddienst müsste sich als Dienst-Nutzer anmelden und
 sein JWT alle 15 Minuten erneuern. Für einen Ein-Mann-Dienst, der Standby,
-Netzwechsel und VPN überleben soll, ist ein `POST /api/agents/runs/claim`
+Netzwechsel und VPN überleben soll, ist ein `POST /api/runner/runs/claim`
 alle paar Sekunden schlicht robuster.
 
 Folge: **der Runner braucht kein Appwrite-SDK.** Er spricht ausschließlich
 HTTPS mit `admin.pukalani.app`. Eine Naht, ein Secret.
 
 Die *Anzeige* im Board läuft weiterhin über die bestehende geteilte
-JWT-Realtime — `agent_run_events` mit `rowSecurity: false` und
+JWT-Realtime — `run_events` mit `rowSecurity: false` und
 Operator-Read, genau das Muster aus
 [001-tickets-tables.ts](../../packages/tickets/scripts/migrations/001-tickets-tables.ts).
 
@@ -97,7 +107,7 @@ gibt es keinen mitlesenden Elternprozess mehr.
 ### 3.4 Ergebnis-Darstellung: eigener Bericht, kein Kommentar (MVP)
 
 Weil der Kommentarbereich am Ticket ein Platzhalter ist (§1), rendert der
-`agents`-Layer seinen **eigenen Lauf-Bericht** im Ticket-Modal. Das ist
+`runner`-Layer seinen **eigenen Lauf-Bericht** im Ticket-Modal. Das ist
 ohnehin die bessere Form: Branch, Commit, Diffstat, Tests, Kosten und
 Session-Id sind strukturierte Daten und keine Fließtext-Nachricht.
 
@@ -109,7 +119,7 @@ einen Layer mit eigenen Tabellen und einer Migration in die Betreiber-Konsole.
 
 ---
 
-## 4. Datenmodell (Migration `agents-001`)
+## 4. Datenmodell (Migration `runner-001`)
 
 Alle drei Tabellen: `rowSecurity: false`, Schreiben **ausschließlich** über
 Server-Routen mit dem Admin-Client.
@@ -117,11 +127,11 @@ Server-Routen mit dem Admin-Client.
 **Lese-Publikum bewusst enger als bei `tickets`:** dort lesen `admin` UND
 `moderator`. Hier nur `read(label:admin)`. Ein Lauf trägt Repo-Pfade,
 Branch-Namen und Kostendaten von Davids Rechner; das ist keine
-Moderations-Sache. Entsprechend ist die neue Capability `agents.run` in
+Moderations-Sache. Entsprechend ist die neue Capability `runner.manage` in
 [authz.ts](../../packages/core/shared/authz.ts) **nur** in der Admin-Rolle,
 nicht in `moderator` — anders als `tickets.manage`.
 
-### `agent_runners`
+### `runners`
 
 Ein registrierter Runner. Ein Eintrag je Rechner.
 
@@ -134,7 +144,7 @@ Ein registrierter Runner. Ein Eintrag je Rechner.
 | `lastSeenAt` | datetime | letzter Claim-Poll |
 | `status` | varchar | `'active' \| 'disabled'` |
 
-### `agent_runs`
+### `runs`
 
 Ein Auftrag. Der Zustandsautomat lebt hier.
 
@@ -171,7 +181,7 @@ queued → claimed → running → ┬→ succeeded
 
 `queued → cancelled` muss auch **vor** dem Claim gehen (Knopf „Abbrechen").
 
-### `agent_run_events`
+### `run_events`
 
 Eine Zeile Fortschritt. Das ist die Live-Anzeige.
 
@@ -185,10 +195,10 @@ Eine Zeile Fortschritt. Das ist die Live-Anzeige.
 
 **Nicht** das komplette `stream-json` hier ablegen. Der Runner verdichtet:
 Statuszeilen, Werkzeugaufrufe mit Ziel, Fehler. Das volle Transkript bleibt
-auf dem Mac und geht am Ende in einen EIGENEN Bucket des agents-Layers
-(`agent-run-files`), hochgeladen über die Runner-Naht (§5). NICHT in den
+auf dem Mac und geht am Ende in einen EIGENEN Bucket des runner-Layers
+(`runner-files`), hochgeladen über die Runner-Naht (§5). NICHT in den
 Bucket `ticket-files`: dessen Upload-Route verlangt Session +
-`tickets.manage` — der Runner hat nur sein Bearer-Secret —, und `agents`
+`tickets.manage` — der Runner hat nur sein Bearer-Secret —, und `runner`
 kennt `tickets` nicht (A14). Der Lauf-Bericht (§3.4) verlinkt die Datei;
 im Ticket-Modal ist das derselbe Ort.
 
@@ -196,25 +206,25 @@ im Ticket-Modal ist das derselbe Ort.
 
 ## 5. Die Naht Website ↔ Runner
 
-Alle Endpunkte unter `/api/agents/*`, Manifest-`apiPrefixes` entsprechend.
+Alle Endpunkte unter `/api/runner/*`, Manifest-`apiPrefixes` entsprechend.
 Zwei Publikums-Klassen, streng getrennt:
 
-**Vom Board (Session, Capability `agents.run`):**
+**Vom Board (Session, Capability `runner.manage`):**
 
-- `POST /api/agents/runs` — Lauf anlegen (`queued`)
-- `POST /api/agents/runs/:id/cancel`
-- `GET /api/agents/runs?subjectId=…`
-- `GET /api/agents/runners`
+- `POST /api/runner/runs` — Lauf anlegen (`queued`)
+- `POST /api/runner/runs/:id/cancel`
+- `GET /api/runner/runs?subjectId=…`
+- `GET /api/runner/runners`
 
 **Vom Runner (Bearer-Secret, keine Session):**
 
-- `POST /api/agents/runs/claim` — „hast du was für mich?"; setzt atomar
+- `POST /api/runner/runs/claim` — „hast du was für mich?"; setzt atomar
   `queued → claimed`, gibt höchstens einen Lauf zurück
-- `POST /api/agents/runs/:id/events` — Fortschritt, gebündelt (nicht je Zeile)
-- `POST /api/agents/runs/:id/finish` — Endzustand + `resultJson`
-- `POST /api/agents/runs/:id/transcript` — Transkript-Datei (multipart) in
-  den Bucket `agent-run-files`; Größe gedeckelt, nur für den claimenden Runner
-- `POST /api/agents/runners/heartbeat` — `lastSeenAt` + gemeldete Fähigkeiten
+- `POST /api/runner/runs/:id/events` — Fortschritt, gebündelt (nicht je Zeile)
+- `POST /api/runner/runs/:id/finish` — Endzustand + `resultJson`
+- `POST /api/runner/runs/:id/transcript` — Transkript-Datei (multipart) in
+  den Bucket `runner-files`; Größe gedeckelt, nur für den claimenden Runner
+- `POST /api/runner/runners/heartbeat` — `lastSeenAt` + gemeldete Fähigkeiten
 
 Regeln für die Runner-Endpunkte:
 
@@ -228,7 +238,7 @@ Regeln für die Runner-Endpunkte:
   `event.context.controlCenter` gesetzt hat, also auf den Kontroll-Hosts der
   PLATFORM-App (`account.pukalani.app`). `apps/control` hat keinen
   Tenant-Gate; dort läuft die Middleware als No-op. Merkposten statt Regel:
-  wandert der Layer je in die Platform-App, MUSS `/api/agents/` dort in die
+  wandert der Layer je in die Platform-App, MUSS `/api/runner/` dort in die
   Präfix-Liste — sonst antwortet der Kundenbereich 404 auf jeden Claim.
 - Der Claim `queued → claimed` ist mit Appwrite NICHT atomar zu haben —
   `updateRow` kennt kein Compare-and-swap. Reicht trotzdem, wenn man es
@@ -331,7 +341,7 @@ Das ist die **wichtigste Einzelregel des ganzen Systems** (§8.1).
    die Commit-Message deterministisch und trägt Ticket-Id + Session-Id.
    **Kein automatisches Pushen.**
 9. `finish` mit `resultJson`, Transkript über
-   `POST /api/agents/runs/:id/transcript` (eigener Bucket, §4 — nie über die
+   `POST /api/runner/runs/:id/transcript` (eigener Bucket, §4 — nie über die
    tickets-Upload-Route, die verlangt eine Session).
 
 ### 7.3 Interaktiv (nach dem MVP)
@@ -395,7 +405,7 @@ Im Ticket-Modal ein Bereich „Ausführen":
 - **Vor dem Lauf:** Runner, Repo, Basis-Branch, Modell, Modus, Testbefehle,
   Budget. Vorbelegt aus der zuletzt benutzten Wahl. Ein Knopf.
 - **Während des Laufs:** die Ereigniszeilen live (Realtime auf
-  `agent_run_events`), plus Abbrechen.
+  `run_events`), plus Abbrechen.
 - **Danach:** der Bericht — Branch, Commit, Diffstat, Testergebnis, Dauer,
   Kosten, Session-Id, Transkript-Anhang. Bei `needs_input` ein Feld
   „Antworten" (`--resume`).
@@ -408,17 +418,17 @@ hier ist eine Zeitleiste richtig.
 
 ## 10. MVP-Schnitt
 
-1. Layer `agents` anlegen: `product.manifest.ts`, `nuxt.config.ts`,
+1. Layer `runner` anlegen: `product.manifest.ts`, `nuxt.config.ts`,
    `app.config.ts`, in `apps/control` extends + `site.manifest.ts`, in
    `LAYER_ORDER` von [migrate.mjs](../../scripts/migrate.mjs). Capability
-   `agents.run` in core (admin-only). `pnpm check:manifests` muss grün sein.
-2. Migration `agents-001` — drei Tabellen, Indizes über
+   `runner.manage` in core (admin-only). `pnpm check:manifests` muss grün sein.
+2. Migration `runner-001` — drei Tabellen, Indizes über
    `createIndexSteps`/`indexStep` (nie rohes `createIndex`).
 3. Routen: die vier Board-Routen + die fünf Runner-Routen.
 4. UI: Bereich „Ausführen" im Ticket-Modal, verdrahtet in `apps/control`.
 5. `tools/ai-runner`: Claim-Loop, lokale Allowlist, headless Start,
    Ereignis-Bündelung, Abschlussbericht.
-6. Beweis: `packages/agents/scripts/verify-runner-boundary.mjs` — ein
+6. Beweis: `packages/runner/scripts/verify-runner-boundary.mjs` — ein
    erfundener `repoKey`, ein gesperrter Modus und ein `promptTrusted:false`-Lauf
    mit `bypassPermissions` müssen **einzeln** rot werden. Gegenprobe wie bei
    `verify-handle-search-boundary.mjs`: die Prüfung ist erst etwas wert, wenn
