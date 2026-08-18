@@ -146,7 +146,7 @@ Ein Auftrag. Der Zustandsautomat lebt hier.
 | `status` | varchar | siehe unten |
 | `repoKey` | varchar | **Schlüssel** aus der Runner-Allowlist, NIE ein Pfad (§8.1) |
 | `baseBranch` | varchar | z. B. `main` |
-| `workBranch` | varchar | vom Runner gesetzt: `ai/T-0142-mobile-navigation` |
+| `workBranch` | varchar | vom Runner AUSGELESEN, nicht erfunden: mit CLI-Worktree vergibt die CLI den Namen (`worktree-<name>`, gemessen 2026-08-17) |
 | `model` | varchar | `fable`/`opus`/`sonnet` oder voller Modellname |
 | `permissionMode` | varchar | `default\|auto\|plan\|acceptEdits\|dontAsk\|bypassPermissions` |
 | `interactive` | boolean | false = headless (MVP), true = Terminal öffnen |
@@ -318,9 +318,18 @@ Das ist die **wichtigste Einzelregel des ganzen Systems** (§8.1).
 
 6. `stream-json` zeilenweise lesen, verdichten, gebündelt als Ereignisse
    schicken (etwa alle 2 s oder alle 20 Zeilen — nicht je Zeile).
+   **`needs_input` kommt aus zwei Quellen, nicht aus dem Exit-Code:** dem
+   `post_turn_summary`-Ereignis (`status_category: 'blocked'` samt
+   `needs_action`-Text) und dem `permission_denials`-Array im Abschluss-JSON.
+   Der Exit-Code lügt hier — siehe §11.
 7. Testbefehle im Worktree fahren, Ergebnis einsammeln.
-8. `git` befragen: Branch, Commit, `--shortstat`. **Kein automatisches
-   Pushen.**
+8. **Der Runner committet selbst** im Worktree (`git add -A && git commit`)
+   und liest danach Branch, Commit-Hash und `--shortstat`. Nicht der Agent:
+   `acceptEdits` erlaubt Dateiänderungen, aber kein `git commit` (gemessen
+   2026-08-17 — der Commit-Versuch des Agenten wurde verweigert), und
+   `Bash(git *)` freizugeben wäre mehr Rechte für weniger Kontrolle. So ist
+   die Commit-Message deterministisch und trägt Ticket-Id + Session-Id.
+   **Kein automatisches Pushen.**
 9. `finish` mit `resultJson`, Transkript über
    `POST /api/agents/runs/:id/transcript` (eigener Bucket, §4 — nie über die
    tickets-Upload-Route, die verlangt eine Session).
@@ -425,11 +434,23 @@ Erst danach: interaktiver Modus, SSH-Runner, comments-Verdrahtung in
 - **`--max-turns` gibt es nicht** (gegen die installierte CLI geprüft).
   Budget läuft über `--max-budget-usd`, und das wirkt nur mit `--print`.
 - Die CLI kann Worktrees selbst (`-w/--worktree`). Baut der Runner sie
-  zusätzlich, hat man zwei Wahrheiten. **Ungetestet ist die Kombination
-  `-w` MIT `-p`** — die Hilfe verbietet sie nicht, aber das ist eine
-  Abwesenheit, kein Beweis. Vor dem Bau des Runners einmal nachmessen;
-  falls sie nicht trägt, baut der Runner den Worktree doch selbst
-  (`git worktree add`) und startet die CLI darin OHNE `-w`.
+  zusätzlich, hat man zwei Wahrheiten. **Die Kombination `-w` MIT `-p` ist
+  GEMESSEN und trägt** (2026-08-17, drei Testläufe im Scratch-Repo):
+  Worktree entsteht unter `.claude/worktrees/<name>`, der Agent arbeitet
+  nachweislich darin, `--session-id` mit vorab gewürfelter UUID kommt im
+  Abschluss-JSON identisch zurück. Der Fallback (`git worktree add` von
+  Hand) ist NICHT nötig.
+- **Ein blockierter Lauf endet als „success" (gemessen).** Ohne passenden
+  Permission-Mode verweigert die CLI headless jede Schreibaktion, beendet
+  den Lauf aber mit `subtype: 'success'`, `is_error: false` — das Ergebnis
+  ist dann nur die höfliche Bitte um Berechtigung. Die Wahrheit steht in
+  `permission_denials` und im `post_turn_summary` (`status_category:
+  'blocked'`). Ein Runner, der nur auf Exit-Code und `is_error` schaut,
+  meldet Erfolge, die keine sind — genau daraus wird `needs_input`
+  abgeleitet (§7.2).
+- **`acceptEdits` erlaubt kein `git commit` (gemessen).** Dateien schreiben
+  ja, committen nein. Deshalb committet der RUNNER (§7.2 Schritt 8) — dem
+  Agenten `Bash(git *)` freizugeben wäre die falsche Antwort.
 - `--output-format stream-json` braucht `--verbose`, sonst fehlen Zeilen.
 - Ein Worktree hat weder `node_modules` noch `.env`. Wer im Lauf `pnpm test`
   fährt, braucht ein `pnpm install` davor — und muss wissen, dass das Minuten
