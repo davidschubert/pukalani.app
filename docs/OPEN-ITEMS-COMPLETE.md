@@ -114,7 +114,11 @@ ziehen nach** — events-013 (`events.translations`) und courses-007
 jeweiligen Inhalts-Produkt als Gate und demselben Tages-Eimer. Zwei Regeln
 daraus: **Übersetzen zeigt nie mehr als Lesen** (die Lesson-Route übernimmt
 alle fünf Vorprüfungen ihrer GET-Route — Entwurf, unveröffentlichter Kurs,
-fehlende Einschreibung, paid-Gate; live bewiesen: ohne Einschreibung 403)
+fehlende Einschreibung, paid-Gate; live bewiesen: ohne Einschreibung 403;
+das BEZAHL-Tor zusätzlich lokal in beiden Hälften bewiesen — paid-Kurs mit
+`entitlementProduct 'paidCourses'`: ohne Abo sind Einschreiben UND Übersetzen
+403, mit simuliertem aktivem Abo (`billing_subscriptions` planId `pro`) läuft
+beides und der zweite Abruf kommt aus dem Cache, 8/8)
 und **die Schwärzung leert den Cache mit** (`redact.post.ts` — sonst gäbe
 der Knopf den geschwärzten Text als Cache-Treffer wortgleich wieder heraus).
 Beweis jetzt 32/32 über alle fünf Inhaltsarten; live auf demo: Event, Kurs
