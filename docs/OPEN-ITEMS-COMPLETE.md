@@ -30,6 +30,54 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### Demo-Spielwiesen — drei Pool-Communities mit Leben gefüllt ✅ 2026-08-18
+
+Davids Auftrag (2026-08-17): freelancer.supply als Spielwiese mit Demo-Daten
+füllen — User mit Rollen, Inhalte für alle Produkte, gegenseitige
+Nachrichten —, um UI/UX und Sicherheit am lebenden Objekt prüfen zu können.
+Am 2026-08-18 auf **Morgenlicht** (demo, zweisprachig im Yoga-Ton) und
+**Comments** (Blog-&-Web-Ton) ausgeweitet; **portfolio bewusst NICHT**
+(Silo ohne Community-Produkte, echte Geschäfts-Site — Davids Entscheidung).
+
+Acht Demo-Konten (`mail+fs-*@davidschubert.com`, anna=admin, jonas=moderator,
+miriam=editor, Rest viewer) — EINMAL im Projekt `account` angelegt, als
+Mitglieder in allen drei Communities, mit Profilbildern (randomuser-Portraits)
+und Bios. Der Weg ist der Punkt: fast alles lief über die **echten
+HTTP-Routen mit Session-Cookies** (Signup → A5-Registration-Join, Posts,
+Kommentare, Votes, RSVPs, Einschreibungen, DMs) statt direkt in die DB —
+dadurch sind die Produktionspfade gleich mitgetestet. Nur drei Handgriffe
+direkt: Rollen (`community_members`-Patch im Control Plane),
+`message_settings.enabled` (Owner-only-Route) und Davids eigenes Profilbild
+(per ssh AUF dem Server mit dessen Runtime-Key — Werte verlassen den Server
+nie). Umfang gesamt: ~600 Objekte (22 Discussion-Themen mit 109 Antworten,
+21 Feed-Beiträge + 5 Umfragen, 6 Events mit 49 RSVPs, 3 Kurse, 15
+DM-Konversationen mit 73 Nachrichten, 14 Galerie-Bilder). Werkzeug + Läufe +
+Zugangsdaten: `~/.appwrite-secrets/freelancer-demo/` (idempotent über Titel,
+--dry-run/--only; NICHT im öffentlichen Repo).
+
+Nebenbei bewiesen, dass die Grenzen halten: Signup-Drossel nach 5 Konten,
+fremde DM-Konversation → 404 (kein Existenz-Leak), Viewer-Kategorie → 403,
+Gast-DMs → 401, Kommentar auf geschlossenes Thema → 403 `topic_closed`.
+Zwei ECHTE Bugs aufgeflogen und behoben (Davids „Profilbild geht nicht"):
+(1) `avatars`-Bucket ohne `create("users")` auf ALLEN drei Prod-Instanzen —
+Session-Upload starb als generisches 500; Buckets direkt gefixt, Migration
+system-032 zieht Bestand seither im 409-Zweig nach (`eeb67cd8`).
+(2) `/api/storage/` fehlte in `controlApiPrefixes` — die Profilseite lebt
+seit AH-1 auf account.pukalani.app, ihr Foto-Upload 404te dort (`3a9f5460`,
+deployt, auf dem Kontroll-Host nachgemessen 404 → 201).
+
+**Gelernt:** Eine Migration, die ihre Einstellungen aus der Prod-Instanz
+ABLIEST, kopiert auch deren Fehlstand — system-032 hatte die leeren
+Bucket-Permissions als „ist so gewollt" übernommen, und der Fehler wäre auf
+jede frische Instanz gewandert. Abgelesene Werte gehören gegen den KONSUMENTEN
+geprüft (die Upload-Route sagt klar: Session-Client braucht Bucket-Create).
+Und: ein Feature, das auf den Kontroll-Host umzieht (AH-1: Profilseite),
+braucht seine API-Präfixe in `controlApiPrefixes` MIT — der 404 sieht dort
+wie ein Server-Fehler aus, und auf Mandanten-Hosts funktioniert derselbe
+Pfad, was die Diagnose in die falsche Richtung schickt. Drittens, klein aber
+zweimal gestolpert: Listen-Routen antworten uneinheitlich (`rows` vs.
+`items`) — wer Beweise per API zählt, liest erst die Rohantwort.
+
 ### U21 — Tickets, die sich selbst umsetzen (AI-Runner) ✅ 2026-08-18
 
 Ein Ticket auf admin.pukalani.app hat jetzt einen „Ausführen"-Bereich: ein
