@@ -49,7 +49,16 @@ export default defineEventHandler(async (event) => {
     const updated = await db.update<Comment>(
       COMMENTS_TABLE,
       commentId,
-      { content, editedAt: new Date().toISOString() },
+      {
+        content,
+        editedAt: new Date().toISOString(),
+        // Der Übersetzungs-Cache (comments-020) gilt für den ALTEN Text — eine
+        // stehengelassene Fassung wäre eine stille Lüge in einer anderen
+        // Sprache. Nur bei ECHTER Änderung, anders als `editedAt` darüber:
+        // zweimal „Speichern" ohne Änderung soll keine bezahlte Übersetzung
+        // wegwerfen.
+        ...(contentEdited ? { translations: '' } : {}),
+      },
       'Comment not found',
     )
 

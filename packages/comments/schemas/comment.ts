@@ -1,4 +1,6 @@
 import { z } from 'zod'
+import { LOCALE_CODE_PATTERN } from '../../core/shared/ugcTranslations'
+import { MAX_COMMENT_CONTENT } from '../shared/types/comment'
 
 type TranslateFn = (key: string) => string
 const identity: TranslateFn = key => key
@@ -12,7 +14,7 @@ export function createCommentSchema(t: TranslateFn = identity) {
     content: z
       .string()
       .min(1, t('comments.validation.contentRequired'))
-      .max(10_000, t('comments.validation.contentMax')),
+      .max(MAX_COMMENT_CONTENT, t('comments.validation.contentMax')),
     parentId: z.string().min(1).optional(),
     // Seiten-URL für die Reply-Notification. Sicherheits-Guard: nur INTERNE
     // absolute Pfade. Genau EIN führender "/", danach KEIN /, \ oder % — sonst
@@ -62,13 +64,28 @@ export function createCommentUpdateSchema(t: TranslateFn = identity) {
     content: z
       .string()
       .min(1, t('comments.validation.contentRequired'))
-      .max(10_000, t('comments.validation.contentMax')),
+      .max(MAX_COMMENT_CONTENT, t('comments.validation.contentMax')),
+  })
+}
+
+/**
+ * „Übersetze DIESEN Kommentar in DIESE Sprache" — der ganze Rumpf ist EIN
+ * Sprachcode.
+ *
+ * Kein Text im Rumpf: übersetzt wird, was auf der Zeile steht. Käme er vom
+ * Aufrufer, wäre die Route ein bezahlter Übersetzungsdienst für beliebigen
+ * Fremdtext, und der Cache auf der Zeile trüge etwas, das dort nie stand.
+ */
+export function createCommentTranslateSchema(t: TranslateFn = identity) {
+  return z.object({
+    locale: z.string().trim().regex(LOCALE_CODE_PATTERN, t('comments.validation.translateLocaleInvalid')),
   })
 }
 
 export const commentSchema = createCommentSchema()
 export const guestCommentSchema = createGuestCommentSchema()
 export const commentUpdateSchema = createCommentUpdateSchema()
+export const commentTranslateSchema = createCommentTranslateSchema()
 export type CommentInput = z.infer<typeof commentSchema>
 export type GuestCommentInput = z.infer<typeof guestCommentSchema>
 

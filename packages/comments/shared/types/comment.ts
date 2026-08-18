@@ -29,6 +29,17 @@ export const GUEST_AUTHORS_TABLE = 'guest_authors'
 export const MAX_COMMENT_DEPTH = 8
 
 /**
+ * Längengrenze eines Kommentartextes.
+ *
+ * Stand bis 2026-08-17 zweimal als nackte `10_000` im Zod-Schema und wurde mit
+ * der Übersetzungs-Route zur dritten Stelle, die dieselbe Zahl klemmen muss
+ * (eine KI-Antwort ist eine Behauptung und wird beschnitten, bevor sie in die
+ * Spalte geht). Drei Literale für eine Grenze sind zwei zu viel — Muster
+ * `MAX_POST_BODY` im posts-Layer.
+ */
+export const MAX_COMMENT_CONTENT = 10_000
+
+/**
  * Sichtbarkeits-Status (Soft-Delete + Moderation):
  * active → normal · hidden → von Moderation ausgeblendet ·
  * deleted → Soft-Delete ([gelöscht]-Platzhalter).
@@ -91,6 +102,20 @@ export interface Comment extends Models.Row {
   downvotes: number
   score: number
   status: CommentStatus
+  /**
+   * ÜBERSETZUNGEN DES TEXTES als JSON, Sprachcode → Fassung — `''`/fehlend =
+   * nichts übersetzt (Migration comments-020).
+   *
+   * OPTIONAL im Typ, anders als die Pflichtfelder daneben: sie fehlt bei jeder
+   * Zeile aus der Zeit vor der Migration, und eine Anlegestelle hat hier nichts
+   * zu entscheiden — ein frischer Kommentar ist nie übersetzt. Gelesen wird sie
+   * AUSSCHLIESSLICH über `core/shared/ugcTranslations.ts` (pur, fail-soft) und
+   * aufgelöst im Browser.
+   *
+   * Der Inhalt ist ein CACHE, kein Inhalt des Autors: `[id].patch.ts` leert ihn,
+   * sobald sich der Text wirklich ändert.
+   */
+  translations?: string
   /**
    * KEIN `tenantId` mehr (F29, 2026-08-02): die Spalte ist mit comments-017
    * gefallen, der Mandant heißt überall `communityId` (E8-3). Das Feld stand
@@ -162,6 +187,22 @@ export interface CommentReaction extends Models.Row {
   userId: string
   /** Schlüssel aus `REACTION_KEYS`, z. B. 'tada'. */
   reaction: string
+}
+
+/**
+ * Antwort von `POST /api/comments/:id/translate` — die Fassung in EINER
+ * Sprache.
+ *
+ * `cached` sagt, ob dafür gerade ein KI-Aufruf bezahlt wurde (`false`) oder ob
+ * die Fassung schon auf der Zeile lag (`true`). Es steht hier, weil die
+ * Oberfläche daran den Unterschied zwischen „sofort da" und „hat eben gerechnet"
+ * zeigen kann — und weil ein Beweis-Skript ohne dieses Feld nicht prüfen
+ * könnte, dass ein zweiter Klick nichts mehr kostet.
+ */
+export interface CommentTranslateResponse {
+  locale: string
+  body: string
+  cached: boolean
 }
 
 /** POST /api/comments/:id/reactions: der neue Stand GENAU dieses Kommentars. */
