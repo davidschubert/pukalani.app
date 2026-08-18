@@ -136,8 +136,13 @@ const canManageCategories = computed(() =>
              breiter als der Schirm: die Tabelle scrollt zwar seitwärts
              (Nuxt UIs Umschlag hat `overflow-auto`), aber niemand scrollt
              eine Tabelle horizontal, um einen Beschreibungstext zu Ende zu
-             lesen. Der schmalere Kasten (`60vw`) sorgt zusätzlich dafür,
-             dass die Zeile überhaupt auf den Schirm passt.
+             lesen.
+           
+           `50vw` ist GEMESSEN, nicht geschätzt: an der Live-Liste bei 375 px
+           durchprobiert (Kasten + Zellenrand + Themen-Spalte gegen die
+           sichtbaren 311 px). 60vw liess 21 px überstehen und schnitt die
+           Kopfzeile „Themen" an, 55vw noch 12 px — ab 50vw ist der Überstand
+           0. Enger bringt nichts ausser kürzeren Zeilen.
            
            `line-clamp-1` statt `truncate` ab `sm`: beide zeigen eine Zeile
            mit „…", aber line-clamp bleibt im selben Mechanismus wie die zwei
@@ -147,7 +152,7 @@ const canManageCategories = computed(() =>
            Der LINK bleibt einzeilig (`block truncate`): ein Kategorie-Name
            ist die Kennung der Zeile, kein Fließtext. -->
       <template #category-cell="{ row }">
-        <div class="max-w-[60vw] sm:max-w-lg">
+        <div class="max-w-[50vw] sm:max-w-lg">
           <NuxtLink
             :to="localePath(`/discussions/${row.original.category.slug}`)"
             class="block truncate font-medium text-default hover:text-primary hover:underline"
