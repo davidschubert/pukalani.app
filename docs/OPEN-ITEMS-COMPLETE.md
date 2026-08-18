@@ -57,6 +57,12 @@ IP-Buckets in `05.rate-limit.ts`. Echte Bearbeitung leert den Cache
 Nachfrage — Dauer-Editieren erzeugt also keine KI-Kosten. UI: EIN Composable
 `useUgcTranslation` (core), Knöpfe in `PostCard` und `CommentItem`, gleicher
 Renderpfad für beide Fassungen, „Automatisch übersetzt · Original anzeigen".
+Nachtrag gleichentags: **Umfrage-Optionen übersetzen mit** (im selben
+KI-Aufruf) — `translatedPollOptions` übernimmt nur ein Array EXAKT gleicher
+Länge (die Stimme hängt am Index; ein verschobenes Array ließe jemanden auf
+„Ja" klicken und für „Nein" stimmen), sonst bleiben die Beschriftungen
+Original und Titel/Text trotzdem übersetzt. Live auf demo bewiesen, auch
+gemischtsprachig (DE/EN-Optionen kollabieren sauber in die Zielsprache).
 
 Beweise: `packages/core/scripts/verify-ugc-translation.mjs` **16/16** gegen
 echte Routen + KI (cached:false → cached:true zeichengleich, Zeile trägt die
