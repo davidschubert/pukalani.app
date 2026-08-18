@@ -251,9 +251,13 @@ Vollständiges Konzept: docs/CONCEPT.md
   den Socket mitlesen will, braucht `--http1.1` (über HTTP/2 scheitert der
   Upgrade mit 400 und man misst sein eigenes Werkzeug).
 - `createRow<TenantRow>` verlangt ALLE Spalten explizit (bewusst) — eine neue
-  communities-Spalte erzwingt eine Entscheidung an BEIDEN Anlegestellen
-  (control/tenants/index.post.ts + onboardingProvision.ts — der DATEIname blieb). Folge: die Migration MUSS
-  vor dem Code-Deploy laufen, sonst bricht das Anlegen einer Community.
+  communities-Spalte erzwingt eine Entscheidung an DREI Anlegestellen:
+  control/tenants/index.post.ts + onboardingProvision.ts (der DATEIname blieb)
+  + `scripts/ops/f3-lib/rules.mts` (`communityRowData`, das F3-Werkzeug — hier
+  stand bis 2026-08-17 „BEIDEN", und die dritte Stelle fand nur der Wächter
+  `packages/control/tests/f3CommentsToPool.test.ts`, der genau diese Liste
+  gegen die Route nagelt). Folge: die Migration MUSS vor dem Code-Deploy
+  laufen, sonst bricht das Anlegen einer Community.
 - Schriften, 2 Rollen (Text + Überschriften, + fixe Mono — nie mehr als 3):
   Registry-Einzelfamilien in app/assets/css/fonts.css (build-prozessiert →
   @nuxt/fonts self-hostet; NIE nach public/) + WOFF2-Uploads (Bucket 'fonts',
