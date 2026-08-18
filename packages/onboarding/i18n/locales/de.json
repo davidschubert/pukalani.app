@@ -733,7 +733,7 @@
       "owner": "Volle Rechte inklusive Übergabe des Besitzes.",
       "admin": "Darf alles verwalten: Inhalte, Moderation, Gestaltung, Mitglieder.",
       "moderator": "Darf Meldungen und Beiträge moderieren — schreibt selbst keine Inhalte.",
-      "editor": "Darf Beiträge, Seiten, Termine und Medien pflegen — moderiert nicht.",
+      "editor": "Darf Beiträge, Seiten, Termine, Kurse und Medien pflegen — moderiert nicht.",
       "viewer": "Liest mit und schreibt Kommentare. Kein Zugriff auf die Verwaltung."
     },
     "roleGuide": {

@@ -733,7 +733,7 @@
       "owner": "Full rights, including transferring ownership.",
       "admin": "Manages everything: content, moderation, appearance, members.",
       "moderator": "Moderates reports and posts — does not write content.",
-      "editor": "Maintains posts, pages, events and media — does not moderate.",
+      "editor": "Maintains posts, pages, events, courses and media — does not moderate.",
       "viewer": "Reads along and writes comments. No access to management."
     },
     "roleGuide": {
