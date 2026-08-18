@@ -28,7 +28,7 @@ const FOUNDATION_ALWAYS = ['core', 'system']
 // Muss der EXTENDS_ORDER in check-manifests.mjs entsprechen
 const EXTENDS_ORDER = [
   'themes', 'admin', 'control', 'comments', 'posts', 'events', 'media', 'feedback',
-  'billing', 'courses', 'tickets', 'activity', 'moderation',
+  'billing', 'courses', 'tickets', 'runner', 'activity', 'moderation',
 ]
 const DEFAULT_PRODUCTS = ['themes', 'admin', 'comments', 'moderation']
 

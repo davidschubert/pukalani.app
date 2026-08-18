@@ -5,7 +5,7 @@ export default defineNuxtConfig({
   // feedback + tickets sind mit E10 (Davids Entscheidung 7, 2026-07-30) HIER
   // eingezogen und in apps/comments ausgezogen: die Rückmeldungen aller
   // Communities laufen beim Betreiber auf, nicht in einer Kunden-Silo-App.
-  extends: ['../../packages/themes', '../../packages/admin', '../../packages/control', '../../packages/feedback', '../../packages/billing', '../../packages/tickets', '../../packages/pages', '../../packages/core', '../../packages/system'],
+  extends: ['../../packages/themes', '../../packages/admin', '../../packages/control', '../../packages/feedback', '../../packages/billing', '../../packages/tickets', '../../packages/runner', '../../packages/pages', '../../packages/core', '../../packages/system'],
 
   modules: [
     // Interne Projekt-Doku (/docs) — Quelle ist docs/content/** (content.config.ts).

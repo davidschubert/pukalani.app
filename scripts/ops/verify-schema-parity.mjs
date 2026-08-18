@@ -191,6 +191,18 @@ const MODERATION_TABLES = ['reports']
 /** `tickets`-Layer — Tickets + Anhänge + Listen + Beobachter. */
 const TICKETS_TABLES = ['tickets', 'ticket_files', 'ticket_lists', 'ticket_watchers']
 
+/**
+ * `runner`-Layer — der AI-Runner (docs/plans/AI-RUNNER.md), angelegt von
+ * `runner-001`. NUR `control`: das ist ein Betreiber-Werkzeug, es läuft
+ * ausschließlich in `apps/control` und gehört auf keine Kunden-Instanz.
+ *
+ * Solange `runner-001` auf `control` noch nicht gefahren ist, meldet dieser
+ * Lauf hier drei fehlende Tabellen — das ist genau der Zweck der kuratierten
+ * Soll-Liste (die Migration muss VOR dem Code-Deploy laufen) und kein Fehler
+ * der Liste. Kur: `pnpm migrate --app control --layer runner`.
+ */
+const RUNNER_TABLES = ['runners', 'runs', 'run_events']
+
 /* ────────────────────────────────────────────────────────────────────────────
  * INSTANZ-SOLLS — je Instanz die Vereinigung ihrer Layer-Blöcke.
  * ──────────────────────────────────────────────────────────────────────────── */
@@ -222,6 +234,7 @@ const CONTROL_SOLL = [
   ...BILLING_TABLES,
   ...CUSTOMER_FEEDBACK_TABLES,
   ...CONTROL_TABLES,
+  ...RUNNER_TABLES,
 ]
 
 /**

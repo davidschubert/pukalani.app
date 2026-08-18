@@ -20,6 +20,7 @@
     "@pukalani/core": "workspace:*",
     "@pukalani/feedback": "workspace:*",
     "@pukalani/pages": "workspace:*",
+    "@pukalani/runner": "workspace:*",
     "@pukalani/control": "workspace:*",
     "@pukalani/system": "workspace:*",
     "@pukalani/themes": "workspace:*",

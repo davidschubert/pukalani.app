@@ -1,0 +1,21 @@
+/**
+ * Produkt-Layer: AI-Runner — Konzept docs/plans/AI-RUNNER.md.
+ *
+ * BETREIBER-WERKZEUG, kein Kundenprodukt: der Layer läuft ausschließlich in
+ * `apps/control`, alles darin ist operator-only (Capability `runner.manage`,
+ * admin — bewusst OHNE moderator, § 4). Kein Mandanten-Thema, keine Datentür.
+ *
+ * ER KENNT `tickets` NICHT (A14) — so wie `tickets` den `feedback`-Layer nicht
+ * kennt. Der Bezug auf das auslösende Objekt läuft über die zwei neutralen
+ * Spalten `subjectType`/`subjectId` (heute nur `'ticket'`), NICHT über eine
+ * `ticketId`; verdrahtet wird beides in der App. Sonst wäre der spätere
+ * Auslöser „Roadmap-Eintrag" oder „GitHub-Issue" eine Migration.
+ *
+ * BEWUSST LEER GELASSEN:
+ *  - kein i18n-Block — die Layer-Strings kommen mit der UI (Paket 3).
+ *  - kein runtimeConfig — das Bearer-Secret des Runners liegt GEHASHT in
+ *    `runners.secretHash` (M9-Muster wie `community_invites`), nicht in der
+ *    Env: es gibt je Rechner eines, und ein Env-Wert wäre weder rotierbar
+ *    noch mehrfach vergebbar.
+ */
+export default defineNuxtConfig({})

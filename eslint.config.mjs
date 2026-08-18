@@ -36,7 +36,7 @@ const FOUNDATION = ['core', 'system', 'moderation', 'admin', 'billing', 'themes'
 // unten — enger als onboarding/control, weil er in Apps läuft, die den
 // control-Layer gar nicht mitliefern und ihn deshalb auch nicht kennen dürfen.
 const SEAM = ['blueprint', 'onboarding', 'control', 'domains']
-const PRODUCTS = ['comments', 'posts', 'events', 'courses', 'tickets', 'feedback', 'media', 'activity', 'pages', 'analytics', 'messages']
+const PRODUCTS = ['comments', 'posts', 'events', 'courses', 'tickets', 'runner', 'feedback', 'media', 'activity', 'pages', 'analytics', 'messages']
 
 // Stimmt die Aufteilung noch mit dem Dateisystem überein? Ein neuer Layer ohne
 // Topf soll den Lint SOFORT brechen — sonst wächst wieder eine stille Lücke.
