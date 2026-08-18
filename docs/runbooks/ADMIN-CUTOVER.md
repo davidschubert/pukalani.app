@@ -34,7 +34,7 @@ antwortet 301 — Pfad und Query unverändert.
 ## Vorher prüfen
 
 - [x] Code-Paket ist auf `main` und deployt (Branch `ah4-admin`): Middleware
-      `apps/control/server/middleware/00.legacy-console-hosts.ts`, `PROBE`-Map in
+      `00.legacy-console-hosts.ts` (seit AH-4b wieder entfernt, s. u.), `PROBE`-Map in
       `.github/workflows/deploy.yml`, `admin.pukalani.app` in
       `scripts/ops/verify-tls.mjs`.
 - [x] `admin` steht in `RESERVED_SUBDOMAINS`

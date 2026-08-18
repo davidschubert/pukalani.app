@@ -179,13 +179,13 @@ pnpm migrate --wave stable   --control-env ~/.appwrite-secrets/migrations/contro
 | Feld | Wert (pukalani-Ist-Stand) |
 |---|---|
 | Site-Typ | NodeJS — ploi vergibt den Port (hier **3001**); nginx-vHost proxied NICHT automatisch → `location /` manuell auf `proxy_pass http://127.0.0.1:3001` + WebSocket-Header umstellen. **Robuster Weg (Learning 2026-07-23): die ploi-API statt des Panel-Editors** — `GET/PATCH /api/servers/{srv}/sites/{site}/nginx-configuration` (JSON `{"content": …}`) + `POST /api/servers/{srv}/services/nginx/restart`; der Monaco-Editor im Panel lässt sich nicht zuverlässig automatisiert befüllen. Auch Deploy-Script (`…/deploy/script`) und Deploy-Trigger (`POST …/deploy`) gehen per API |
-| NodeJS-Service | pm2 **Cluster-Mode** via [`ops/ecosystem-comments.config.cjs`](../../ops/ecosystem-comments.config.cjs) (seit 2026-07-19, Zero-Downtime Stufe 2). „Restart process after deployment" **AUS** — den Prozesswechsel macht `pm2 reload` im Deploy-Script. ploi-Start-command `bash start-prod.sh` ist nur noch historischer Rest (ploi startet nichts mehr) |
+| NodeJS-Service | pm2 **Cluster-Mode** via [`ops/ecosystem-platform.config.cjs`](../../ops/ecosystem-platform.config.cjs) (je App eine gleichnamige Config; das comments-Exemplar fiel mit F3, das Muster ist unverändert; seit 2026-07-19, Zero-Downtime Stufe 2). „Restart process after deployment" **AUS** — den Prozesswechsel macht `pm2 reload` im Deploy-Script. ploi-Start-command `bash start-prod.sh` ist nur noch historischer Rest (ploi startet nichts mehr) |
 | Deploy-Script | `git pull` → corepack-Install/Build wie gehabt → **dann Release-Flow**: `.output` nach `/home/ploi/releases/comments/<sha>/` kopieren, `current`-Symlink atomar flippen (`ln -s` + `mv -Tf`), `pm2 startOrReload ops/ecosystem-comments.config.cjs --update-env`, `pm2 save`, alte Releases auf 5 stutzen. Der alte Worker serviert bis der neue `listening` ist → **kein 502**, und der laufende Prozess liest nie aus einem halb überschriebenen `.output` |
 | Reboot-Festigkeit | `pm2 save` macht das Deploy-Script; `@reboot pm2 resurrect` im ploi-Crontab (kein sudo nötig) |
 | HSTS | eigene Include-Datei `server/hsts.conf` mit `add_header Strict-Transport-Security "max-age=15768000" always;` |
 
 **Runtime-Env** liegt in `/home/ploi/<site>/.env` (chmod 600) und wird von
-`ops/ecosystem-comments.config.cjs` beim `pm2 startOrReload … --update-env`
+`ops/ecosystem-platform.config.cjs` beim `pm2 startOrReload … --update-env`
 geparst und in die Prozess-Umgebung gehoben — Nitro liest zur Laufzeit keine
 .env-Datei:
 ```

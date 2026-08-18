@@ -242,7 +242,7 @@ mit, die Dateien dahinter nicht.
 - [x] `pm2` `commentspukalaniapp` gestoppt **und aus `pm2 save` entfernt** —
       sonst holt `@reboot pm2 resurrect` den toten Prozess zurück und er belegt
       Port 3001 (dieselbe Falle, die beim Control-Cutover `portfolio` erwischt hat).
-- [x] `ops/ecosystem-comments.config.cjs` bleibt im Repo, **bis die Site gelöscht
+- [x] Die comments-Ecosystem-Config bleibt im Repo, **bis die Site gelöscht
       ist** — sie ist der Rückweg dieses Schritts.
 - [x] **DNS: nichts zu tun.** Der Host zeigt schon auf dieselbe IP.
 - [x] **TLS: NICHTS anfordern.** Die Lineage-Falle gilt unverändert; ein Antrag
@@ -344,7 +344,7 @@ Rückweg mehr.
 - [ ] ploi-Site 389772 gelöscht (Davids Panel-Klick am 2026-08-18) — der Host
       fällt danach in die Wildcard-Site `platform` (server_name `*.pukalani.app`,
       Proxy auf denselben Port 3004, Wildcard-Zertifikat deckt; live geprüft).
-- [x] `ops/ecosystem-comments.config.cjs` aus dem Repo entfernt und `verify-tls`
+- [x] Die comments-Ecosystem-Config aus dem Repo entfernt und `verify-tls`
       erneut gefahren (2026-08-18; der comments-Eintrag im Wächter deckt beide
       Zustände — eigene Lineage wie Wildcard).
 
