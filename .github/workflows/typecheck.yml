@@ -10,7 +10,10 @@ permissions:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  # Auf `main` nicht abbrechen — Begründung steht in e2e.yml (dort ist es am
+  # 2026-08-18 aufgeschlagen: fünf abgeräumte Läufe hintereinander, das Gate
+  # war nicht rot, sondern stumm).
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
   typecheck:

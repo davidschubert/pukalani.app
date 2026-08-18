@@ -18,7 +18,25 @@ permissions:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  # ── AUF `main` WIRD NICHT ABGEBROCHEN (2026-08-18) ───────────────────────
+  # Auf einem Zweig ist Abbrechen richtig: ein überholter Stand muss nicht zu
+  # Ende geprüft werden. Auf `main` ist es das Gegenteil — dort ist jeder
+  # Commit ein AUSGELIEFERTER Stand, und sein Prüfergebnis ist die einzige
+  # Aussage darüber, ob er trägt.
+  #
+  # In der Nacht auf den 18. hat das gebissen: mehrere Sitzungen schoben im
+  # Minutentakt auf `main`, und FÜNF E2E-Läufe hintereinander wurden vom
+  # jeweils nächsten Push abgeräumt („Canceling since a higher priority
+  # waiting request … exists"). Ergebnis: stundenlang KEIN abgeschlossener
+  # E2E-Lauf auf dem Zweig, der deployt wird — das Gate war nicht rot, es war
+  # stumm, und das ist schlechter. Die kurzen Gates (Lint/Test/Typecheck,
+  # 1–3 min) trifft es seltener, aber aus demselben Grund gilt hier dieselbe
+  # Regel.
+  #
+  # Preis: bei schneller Folge laufen mehrere Prüfungen parallel. Für ein
+  # ÖFFENTLICHES Repo sind die Minuten frei — und Gewissheit über einen
+  # ausgelieferten Stand ist billiger als jede gesparte Minute.
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
   e2e:
