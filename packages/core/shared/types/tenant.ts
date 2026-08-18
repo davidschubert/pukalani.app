@@ -46,6 +46,25 @@ export interface CommunitySettings {
    * dann gilt die Voreinstellung der Instanz (heutiges Verhalten).
    */
   neutral?: string
+  /**
+   * Heimat-Zeitzone der Community (control-038, IANA-Name) — fehlend/'' heißt
+   * „keine eigene Wahl".
+   *
+   * DIE EBENE ÜBER DEM GERÄT: sie sagt, in welcher Zone diese Community PLANT.
+   * Ohne sie kam die Vorgabe im Termin-Formular aus dem Browser dessen, der es
+   * ausfüllt — und ein Betreiber in Honolulu legte den Hamburger Stammtisch
+   * damit auf 07:00 morgens (live erlebt am 2026-08-17). Dasselbe Modell wie
+   * bei Meetup: der Organisator tippt „19:00" und meint Gruppen-Zeit.
+   *
+   * NICHT `prefs.timezone` (U15 Teil 5): das sagt, wie ein EINZELNER Mensch
+   * Zeiten ANGEZEIGT bekommt. Zwei verschiedene Fragen, zwei Werte — wer sie
+   * zusammenlegt, kann „ich lese in meiner Zone" und „wir planen in unserer"
+   * nicht mehr auseinanderhalten.
+   *
+   * Der Resolver prüft gegen die Zonenliste der Laufzeit (fail-closed) — hier
+   * kommt also nie ein Wert an, an dem `Intl` später werfen könnte.
+   */
+  timezone?: string
   /** Anzeigename des Mandanten (tenants.name) — trägt den öffentlichen
    *  Header der Community-Hosts („Morgenlicht" statt App-Brand). Reiner
    *  Text, wird NIE als Attribut/HTML interpoliert. */

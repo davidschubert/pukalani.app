@@ -67,7 +67,11 @@ export default defineNuxtPlugin(() => {
         // Nichts zu tun: die Wahrheit liegt im Control Plane, der nächste
         // Seitenaufbau bringt sie.
         if (event.type === 'delete') return
-        branding.value = mirrorRowToBranding(event.payload)
+        // MERGEN, NICHT ERSETZEN: der Spiegel kennt nur die drei Farb-Werte.
+        // Ein `=` würde `timezone` bei jeder Farbänderung aus dem State
+        // wischen — und das Termin-Formular fiele danach still auf die
+        // Geräte-Zone zurück, bis jemand neu lädt.
+        branding.value = { ...(branding.value ?? { timezone: '' }), ...mirrorRowToBranding(event.payload) }
       },
       {
         rowId: communityId,

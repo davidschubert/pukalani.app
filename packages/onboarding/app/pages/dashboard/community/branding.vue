@@ -118,7 +118,12 @@ async function saveBranding(next: { theme: string, variant: string, neutral: str
     // Platform-App hält den alten Stand noch bis zu 30 s — die öffentliche
     // Community färbt sich also gleich um, aber nicht in derselben Sekunde.
     // Genau das sagt der Hinweis auf der Karte.
-    branding.value = { theme: result.theme, variant: result.variant, neutral: result.neutral }
+    // MERGEN, NICHT ERSETZEN: dieser State trägt seit 2026-08-17 auch die
+    // Heimat-Zeitzone (CommunitySettings). Ein `=` mit nur den drei Farb-Werten
+    // wischte sie bei jedem Umfärben weg, und das Termin-Formular fiele danach
+    // still auf die Geräte-Zone zurück. Denselben Riegel hat
+    // realtime-branding.client.ts.
+    branding.value = { ...(branding.value ?? { timezone: '' }), theme: result.theme, variant: result.variant, neutral: result.neutral }
     toast.add({
       title: t('dashboard.community.appearance.saved'),
       description: t('dashboard.community.appearance.savedDesc'),

@@ -55,6 +55,10 @@ export default defineEventHandler(async (event) => {
       // Neutral-Palette (control-020, Rest von B5): '' = keine eigene Wahl, es
       // gilt die Voreinstellung der Instanz. Wie theme/variant.
       neutral: '',
+      // Heimat-Zeitzone (control-038) — leer heisst „keine eigene Wahl", der
+      // Owner setzt sie unter /dashboard/community. Bewusst nicht geraten:
+      // eine falsche Zone verschiebt jeden Termin, eine leere nur die Vorgabe.
+      timezone: '',
       // ÖFFENTLICH als Default (C18, 2026-07-30) — gleiche Entscheidung wie im
       // Self-Service-Weg (onboardingProvision.ts), dieselbe Begründung. Der
       // Betreiber-Weg legt sonst Communities an, die sich anders verhalten als

@@ -131,6 +131,15 @@ export interface TenantRow extends Models.Row {
    *  Rows von VOR der Migration (Appwrite backfillt Defaults nicht) — bedeutet
    *  dasselbe wie ''. */
   neutral: string | null
+  /**
+   * Heimat-Zeitzone der Community (control-038) — IANA-Name, '' = keine Wahl.
+   *
+   * Sie sagt, in welcher Zone die Community PLANT (Meetup-Modell: der
+   * Organisator tippt „19:00" und meint immer Community-Zeit). NICHT zu
+   * verwechseln mit `prefs.timezone` am Konto — das sagt, wie ein EINZELNER
+   * Mensch Zeiten angezeigt bekommt.
+   */
+  timezone: string | null
   /** Lese-Publikum. `null` bei Rows, die VOR control-016 entstanden sind:
    *  Appwrite backfillt Spalten-Defaults nicht (verifiziert auf Dev + Prod,
    *  gleiches Verhalten wie bei `plan` aus control-013). IMMER über

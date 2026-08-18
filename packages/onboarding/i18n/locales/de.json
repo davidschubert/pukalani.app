@@ -17,6 +17,9 @@
       "openRegistrationDesc": "Ist der Schalter an, kann sich jeder ein Konto anlegen und wird damit Mitglied deiner Community — ebenso, wer schon ein Konto hat und hier den ersten Beitrag oder Kommentar schreibt. Aus heißt: Mitglied wird man nur auf Einladung. Wem du den Zugang entzogen hast, kommt in beiden Fällen nicht von selbst zurück.",
       "memberInvites": "Mitglieder dürfen einladen",
       "memberInvitesDesc": "Jedes Mitglied kann fünf Menschen pro Woche dazuholen — immer als Leserin oder Leser. Aus: nur du und deine Admins laden ein.",
+      "timezone": "Zeitzone",
+      "timezoneDesc": "In dieser Zone plant ihr eure Termine. Wer einen Termin anlegt, tippt dann eure Uhrzeit — egal, wo er selbst gerade sitzt.",
+      "timezoneAutomatic": "Automatisch (Zeitzone des Geräts)",
       "audience": {
         "title": "Sichtbarkeit",
         "description": "Wer eure Beiträge, Kommentare, Termine, Medien und Seiten lesen darf.",

@@ -2,6 +2,7 @@
 import { createEventSchema } from '../../schemas/event'
 import type { EventRow } from '../../shared/types/event'
 import { effectiveLocationType, paidAccessChoosable } from '../../shared/types/event'
+import { isoFromWallClock, wallClockIn } from '../../shared/eventRecurrence'
 
 /**
  * DAS Event-Formular — Anlegen und Bearbeiten, EINE Fassung fuer ALLE Einstiege.
@@ -42,6 +43,30 @@ const open = defineModel<boolean>('open', { required: true })
 
 const { t } = useI18n()
 const toast = useToast()
+
+/**
+ * IN WELCHER ZONE IST DIE UHRZEIT GEMEINT? (control-038, Davids Entscheidung
+ * 2026-08-17 — Meetup-Modell.)
+ *
+ * `datetime-local` liefert immer die Wanduhr DESSEN, DER TIPPT. Ohne diese
+ * Ebene wurde daraus die Zone seines Geräts: am 2026-08-17 legte ein Betreiber
+ * in Honolulu den „Freelancer-Stammtisch Hamburg" für 19:00 an, gespeichert
+ * wurden 05:00 UTC — in Hamburg **07:00 morgens**. Das Feld war nicht kaputt,
+ * es fehlte die Aussage, WESSEN Zeit gilt.
+ *
+ * Vorrang: Heimat-Zone der Community, sonst leer = Gerät (bisheriges
+ * Verhalten). Die ORT-Verfeinerung (Eventbrite-Modell: Adresse in einem anderen
+ * Land ⇒ Vorschlag) ist bewusst noch nicht gebaut — sie kommt als VORSCHLAG,
+ * nicht als stille Ableitung, und braucht kein Geocoding.
+ */
+const { branding: communitySettings } = useCommunitySettings()
+const eventTimezone = computed(() => communitySettings.value?.timezone ?? '')
+
+/** Label der Zeit-Felder — nennt die Zone, sobald sie NICHT die des Geräts ist. */
+const timezoneNote = computed(() => {
+  if (!eventTimezone.value) return ''
+  return t('events.admin.form.timezoneNote', { zone: eventTimezone.value })
+})
 
 interface EventForm {
   title: string
@@ -164,16 +189,35 @@ async function reloadSaved() {
   }
 }
 
-/** ISO → Wert fürs datetime-local-Input (lokale Zeit, Minuten-Präzision) */
+/**
+ * ISO → Wert fürs datetime-local-Input, gerechnet in der TERMIN-Zone.
+ *
+ * Ohne Community-Zone (`''`) fällt beides auf die Gerätezone zurück und
+ * verhält sich damit exakt wie vorher — das ist der Zustand jeder Community,
+ * die noch keine Zone gesetzt hat.
+ */
 function toLocalInput(iso: string | null): string {
   if (!iso) return ''
-  const d = new Date(iso)
   const pad = (n: number) => String(n).padStart(2, '0')
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
+  if (!eventTimezone.value) {
+    const d = new Date(iso)
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
+  }
+  const w = wallClockIn(iso, eventTimezone.value)
+  return `${w.year}-${pad(w.month)}-${pad(w.day)}T${pad(w.hour)}:${pad(w.minute)}`
 }
-/** datetime-local → ISO (UTC) — leer bleibt leer */
+
+/** datetime-local → ISO (UTC), gelesen als Wanduhr der TERMIN-Zone. */
 function toIso(local: string): string | null {
-  return local ? new Date(local).toISOString() : null
+  if (!local) return null
+  if (!eventTimezone.value) return new Date(local).toISOString()
+  const [date, time] = local.split('T')
+  const [year, month, day] = date!.split('-').map(Number)
+  const [hour, minute] = time!.split(':').map(Number)
+  return isoFromWallClock(
+    { year: year!, month: month!, day: day!, hour: hour!, minute: minute!, second: 0 },
+    eventTimezone.value,
+  )
 }
 
 // ---- Cover (nur im Bearbeiten-Modus — der Upload braucht die Event-Id) ----
@@ -256,6 +300,9 @@ async function save() {
     access: form.access,
     priceAmount: form.access === 'paid' && form.priceEur !== null ? Math.round(form.priceEur * 100) : null,
     priceLookupKey: form.access === 'paid' ? (form.priceLookupKey.trim() || null) : null,
+    // Die Zone reist MIT der Zeile — nur so kann die Serien-Expansion später
+    // auf der richtigen Wanduhr rechnen (shared/eventRecurrence.ts).
+    timezone: eventTimezone.value || null,
     // Serie nur beim ANLEGEN — danach gibt es „Serie beenden" (PATCH strippt die Felder eh)
     ...(editingId.value
       ? {}
@@ -359,7 +406,7 @@ const recurrenceChoice = computed({
           <UTextarea v-model="form.description" class="w-full" :rows="5" data-testid="event-form-description" />
         </UFormField>
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <UFormField :label="t('events.admin.form.startAt')" required>
+          <UFormField :label="t('events.admin.form.startAt')" :help="timezoneNote || undefined" required>
             <UInput v-model="form.startAt" type="datetime-local" class="w-full" data-testid="event-form-start" />
           </UFormField>
           <UFormField :label="t('events.admin.form.endAt')">

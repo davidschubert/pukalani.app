@@ -131,8 +131,14 @@ export default defineNuxtPlugin(() => {
   // „nichts gewählt, Instanz-Einstellung gilt" und muss im Dashboard als solches
   // erkennbar bleiben. `?? ''` fängt zugleich Bestands-Rows, die die Spalte noch
   // nicht tragen (Appwrite backfillt Defaults nicht). null = kein Tenant-Host.
-  useState<{ theme: string, variant: string, neutral: string } | null>('pukalani-community-settings', () => (
-    tenant ? { theme: tenant.theme ?? '', variant: tenant.variant ?? '', neutral: tenant.neutral ?? '' } : null
+  // `timezone` (control-038) reist hier MIT, obwohl es keine Optik ist: es ist
+  // eine Wahl der Community, die das Termin-Formular beim Öffnen braucht, und
+  // der Resolver liest die Row ohnehin. Ein eigener Kanal dafür wäre ein
+  // zweites Spiegel-Muster für ein einzelnes Feld.
+  useState<{ theme: string, variant: string, neutral: string, timezone: string } | null>('pukalani-community-settings', () => (
+    tenant
+      ? { theme: tenant.theme ?? '', variant: tenant.variant ?? '', neutral: tenant.neutral ?? '', timezone: tenant.timezone ?? '' }
+      : null
   ))
   // Site-Rolle des eingeloggten Users (N1): EXPLIZITE Zuweisung statt
   // Init-Funktion — der Auth-Store (läuft früher) initialisiert denselben

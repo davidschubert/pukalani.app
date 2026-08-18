@@ -17,6 +17,9 @@
       "openRegistrationDesc": "When this is on, anyone can create an account and thereby becomes a member of your community — and so does anyone who already has an account and writes their first post or comment here. When it's off, people become members by invitation only. Either way, someone whose access you revoked never comes back on their own.",
       "memberInvites": "Members can invite",
       "memberInvitesDesc": "Every member can bring in five people per week — always as readers. Off: only you and your admins invite.",
+      "timezone": "Timezone",
+      "timezoneDesc": "The zone your events are planned in. Whoever creates an event types your local time — no matter where they are.",
+      "timezoneAutomatic": "Automatic (device timezone)",
       "audience": {
         "title": "Visibility",
         "description": "Who is allowed to read your posts, comments, events, media and pages.",

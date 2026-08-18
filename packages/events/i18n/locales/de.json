@@ -124,6 +124,7 @@
         "title": "Titel",
         "description": "Beschreibung",
         "startAt": "Beginn",
+        "timezoneNote": "Uhrzeit in {zone} — der Zeitzone eurer Community.",
         "endAt": "Ende (optional)",
         "location": "Ort (optional)",
         "url": "Link (optional)",

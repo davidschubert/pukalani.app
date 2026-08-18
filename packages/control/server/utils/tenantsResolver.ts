@@ -3,6 +3,7 @@ import { createMicrocache } from '../../../core/server/utils/microcache'
 import type { TenantResolver } from '../../../core/server/utils/tenantResolver'
 import type { TenantContext } from '../../../core/shared/types/tenant'
 import { communityIsOffline, resolveCommunitySuspension } from '../../../core/shared/communitySuspension'
+import { isSupportedTimezone } from '../../../core/shared/timezone'
 import { DEFAULT_TENANT_PLAN, COMMUNITY_PLANS_TABLE, COMMUNITIES_TABLE, normalizeTenantPlan, parseTenantPlanLimits, resolveTenantAudience, resolveTenantMemberInvitesEnabled, resolveTenantOpenRegistration, type TenantPlanLimits, type TenantPlanRow, type TenantRow } from '../../shared/types/tenantRecord'
 import { isSafeThemeToken, parseSiteProfile } from '../../shared/onboarding'
 import { canonicalHostFor, customDomainCandidates } from '../../shared/customDomain'
@@ -27,7 +28,7 @@ import { canonicalHostFor, customDomainCandidates } from '../../shared/customDom
  *  gesetzt, wenn die Row eine $id trägt (der reale Read immer; Test-Fixtures
  *  optional). Trägt die Site-Rollen-Auflösung (requireCommunityPermission). */
 export function mapTenantRowToContext(
-  row: (Pick<TenantRow, 'mode' | 'projectId' | 'tenantId' | 'status' | 'plan'> & { $id?: string, host?: string | null, theme?: string | null, variant?: string | null, neutral?: string | null, name?: string | null, profile?: string | null, openRegistration?: boolean | null, memberInvitesEnabled?: boolean | null, audience?: string | null, trialEndsAt?: string | null, billingStatus?: string | null, suspension?: string | null, customDomain?: string | null, customDomainStatus?: string | null }) | null,
+  row: (Pick<TenantRow, 'mode' | 'projectId' | 'tenantId' | 'status' | 'plan'> & { $id?: string, host?: string | null, theme?: string | null, variant?: string | null, neutral?: string | null, timezone?: string | null, name?: string | null, profile?: string | null, openRegistration?: boolean | null, memberInvitesEnabled?: boolean | null, audience?: string | null, trialEndsAt?: string | null, billingStatus?: string | null, suspension?: string | null, customDomain?: string | null, customDomainStatus?: string | null }) | null,
   planCatalog?: Record<string, Record<string, TenantPlanLimits>>,
 ): TenantContext | null {
   if (!row || row.status !== 'active') return null
@@ -103,6 +104,13 @@ export function mapTenantRowToContext(
     ...(row.variant && isSafeThemeToken(row.variant) ? { variant: row.variant } : {}),
     ...(row.neutral && isSafeThemeToken(row.neutral) ? { neutral: row.neutral } : {}),
     ...(row.name ? { name: row.name } : {}),
+    /**
+     * Heimat-Zeitzone (control-038). Geprüft wird gegen die Zonenliste der
+     * Laufzeit — derselbe fail-closed Riegel wie bei `prefs.timezone`: ein
+     * kaputter Wert ließe `Intl` bei JEDER späteren Anzeige werfen. Fehlender
+     * oder unbekannter Wert lässt das Feld weg und heißt „keine eigene Wahl".
+     */
+    ...(row.timezone && isSupportedTimezone(row.timezone) ? { timezone: row.timezone } : {}),
     /**
      * Die Selbstbeschreibung (U5) — aus dem `profile`-JSON, nicht aus einer
      * eigenen Spalte. Ungefiltert wie `name` und aus demselben Grund: reiner

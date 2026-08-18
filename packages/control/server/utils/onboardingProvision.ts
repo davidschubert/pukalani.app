@@ -191,6 +191,10 @@ export async function provisionCommunity(
       // „keine eigene Wahl", die Owner-Rolle kann sie später unter
       // /dashboard/community setzen.
       neutral: '',
+      // Heimat-Zeitzone (control-038) — leer heisst „keine eigene Wahl", der
+      // Owner setzt sie unter /dashboard/community. Bewusst nicht geraten:
+      // eine falsche Zone verschiebt jeden Termin, eine leere nur die Vorgabe.
+      timezone: '',
       // ÖFFENTLICH als Default (C18, Davids Entscheidung vom 2026-07-30) — die
       // bewusste KEHRTWENDE zur G0-Entscheidung 7 („privat als Default",
       // 2026-07-24). Begründung: eine frische Community, die niemand finden

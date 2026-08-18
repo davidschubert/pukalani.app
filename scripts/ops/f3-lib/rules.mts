@@ -525,6 +525,11 @@ export function communityRowData(input: CommunityRowInput): Record<string, unkno
     theme: input.theme,
     variant: input.variant,
     neutral: input.neutral,
+    // Heimat-Zeitzone (control-038) — leer heisst „keine eigene Wahl", die
+    // Vorgabe im Termin-Formular kommt dann wie bisher vom Geraet. Bewusst
+    // nicht geraten: dieser Weg legt Zeilen an, die kein Owner je durch ein
+    // Formular geschickt hat, und eine falsche Zone verschoebe jeden Termin.
+    timezone: '',
     // Entscheidung (7): das heutige Verhalten des Silos. `members` bräche das
     // Embed-Produkt (Gäste sähen keine Kommentare mehr).
     audience: 'public',

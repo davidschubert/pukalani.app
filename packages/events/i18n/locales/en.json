@@ -124,6 +124,7 @@
         "title": "Title",
         "description": "Description",
         "startAt": "Starts",
+        "timezoneNote": "Time in {zone} — your community’s timezone.",
         "endAt": "Ends (optional)",
         "location": "Location (optional)",
         "url": "Link (optional)",

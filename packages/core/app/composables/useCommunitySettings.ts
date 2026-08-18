@@ -64,6 +64,23 @@ export interface CommunitySettingsSelection {
   variant: string
   /** Neutral-Palette (NEUTRAL_REGISTRY-Id) oder '' = Instanz-Voreinstellung. */
   neutral: string
+  /**
+   * Heimat-Zeitzone der Community (IANA) oder '' = keine eigene Wahl.
+   *
+   * KEINE OPTIK — und damit der Wert, dem dieser Typ seinen neuen Namen
+   * verdankt. Gelesen wird er, wenn das Termin-Formular aufgeht, damit die
+   * Uhrzeit in der Zone der COMMUNITY gemeint ist und nicht in der des Geräts.
+   *
+   * NICHT IM D6-SPIEGEL, bewusst: der Spiegel (`community_branding`) existiert,
+   * damit eine Farbänderung offene Fenster ohne Reload morpht. Für eine
+   * Zeitzone gibt es dieses Bedürfnis nicht — sie wird EINMAL beim Öffnen des
+   * Dialogs gebraucht, und eine Änderung greift beim nächsten Seitenaufbau
+   * (≤30 s Resolver-Cache). Sie dafür in die Spiegel-Tabelle aufzunehmen
+   * kostete eine Migration auf JEDER Instanz für einen Leser, den es nicht
+   * gibt. Folge, die man kennen muss: ein Spiegel-Event trägt diesen Wert
+   * nicht — `realtime-branding.client.ts` MERGED deshalb, statt zu ersetzen.
+   */
+  timezone: string
 }
 
 export function useCommunitySettings() {

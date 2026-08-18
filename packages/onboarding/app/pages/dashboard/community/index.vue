@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { groupTimezonesByRegion, supportedTimezones } from '../../../../../core/shared/timezone'
 import { createCommunityProfileSchema } from '../../../../../control/schemas/communityProfile'
 
 /**
@@ -174,6 +175,87 @@ watch(openRegistration, next => { value.value = next !== false })
 const { memberInvitesEnabled } = useTenantMemberInvites()
 const memberInvites = ref(memberInvitesEnabled.value !== false)
 watch(memberInvitesEnabled, next => { memberInvites.value = next !== false })
+
+/**
+ * HEIMAT-ZEITZONE (control-038, Davids Entscheidung 2026-08-17).
+ *
+ * Sie steht in DIESER Karte und nicht unter „Erscheinungsbild", weil sie keine
+ * Optik ist: sie sagt, in welcher Zone die Community PLANT. Der Organisator
+ * tippt „19:00" und meint Gruppen-Zeit — egal, wo er selbst sitzt (Meetup-Modell).
+ *
+ * WARUM ES DIE EINSTELLUNG GIBT: ohne sie kam die Vorgabe im Termin-Formular
+ * aus dem BROWSER des Ausfüllenden. Am 2026-08-17 wurde so der „Freelancer-
+ * Stammtisch Hamburg" von einem Gerät in Honolulu auf 07:00 morgens gelegt.
+ *
+ * '' = keine eigene Wahl (dann bleibt es beim Geräte-Verhalten, sichtbar
+ * beschriftet). Der Leerwert darf NICHT in ein `USelectItem` (Reka verbietet
+ * ihn, s. CLAUDE.md) — deshalb der Sentinel `AUTOMATIC` wie im Konto-Picker.
+ */
+const AUTOMATIC_TZ = '__automatic__'
+const { branding: communitySettings } = useCommunitySettings()
+const communityTimezone = ref(communitySettings.value?.timezone || AUTOMATIC_TZ)
+watch(() => communitySettings.value?.timezone, (next) => {
+  communityTimezone.value = next || AUTOMATIC_TZ
+})
+
+/**
+ * Dieselbe Bauart wie der Konto-Picker (`UserTimezoneSettings.vue`) — inklusive
+ * der dort gelernten Eigenheit: WÄHREND EINER SUCHE FALLEN DIE ÜBERSCHRIFTEN
+ * WEG. Nuxt UI behandelt `type: 'label'` als STRUKTUR und filtert sie nie mit;
+ * die Suche nach „Berlin" zeigte sonst leere Regions-Zeilen über dem Treffer.
+ */
+const timezoneSearch = ref('')
+const timezoneItems = computed(() => {
+  const entries: Array<{ label: string, value?: string, type?: 'label' }> = [
+    { label: t('dashboard.community.timezoneAutomatic'), value: AUTOMATIC_TZ },
+  ]
+  const searching = timezoneSearch.value.trim().length > 0
+  for (const group of groupTimezonesByRegion(supportedTimezones())) {
+    if (!searching) entries.push({ label: group.region, type: 'label' })
+    for (const zone of group.zones) entries.push({ label: zone.replace(/_/g, ' '), value: zone })
+  }
+  return entries
+})
+
+const savingTimezone = ref(false)
+/**
+ * Gespeichert wird bei ÄNDERUNG, nicht über `@update:model-value`: der
+ * Item-Union des Menüs (Zonen + Überschriften) trägt dort keinen sauberen
+ * String-Typ. Der Vergleich mit dem gespeicherten Wert verhindert zugleich ein
+ * Speichern beim bloßen Befüllen — sonst schriebe jeder Seitenaufbau.
+ */
+watch(communityTimezone, (next) => {
+  const stored = communitySettings.value?.timezone || AUTOMATIC_TZ
+  if (next === stored) return
+  void saveTimezone(next)
+})
+
+async function saveTimezone(next: string) {
+  savingTimezone.value = true
+  const value = next === AUTOMATIC_TZ ? '' : next
+  try {
+    const result = await $fetch<{ timezone: string }>('/api/community/timezone', {
+      method: 'PATCH',
+      body: { timezone: value },
+    })
+    // Aus der ANTWORT übernehmen, wie bei den Schaltern darüber: der SSR-Wert
+    // stammt aus dem Resolver-Cache (≤30 s) und wäre sonst 30 s lang veraltet.
+    if (communitySettings.value) communitySettings.value = { ...communitySettings.value, timezone: result.timezone }
+    communityTimezone.value = result.timezone || AUTOMATIC_TZ
+    toast.add({ title: t('dashboard.community.saved'), color: 'success' })
+  }
+  catch {
+    communityTimezone.value = communitySettings.value?.timezone || AUTOMATIC_TZ
+    toast.add({
+      title: t('dashboard.community.saveFailed'),
+      description: t('dashboard.community.saveFailedDesc'),
+      color: 'error',
+    })
+  }
+  finally {
+    savingTimezone.value = false
+  }
+}
 
 const savingMemberInvites = ref(false)
 async function saveMemberInvites(next: boolean) {
@@ -459,6 +541,29 @@ async function deleteCommunity() {
         :disabled="savingMemberInvites"
         :aria-label="t('dashboard.community.memberInvites')"
         @update:model-value="(next: boolean) => saveMemberInvites(next)"
+      />
+    </div>
+
+    <!-- Heimat-Zeitzone: KEINE Zugangsregel, sondern die Wahl, in welcher Zone
+         diese Community plant. Steht hier, weil sie die ganze Community betrifft
+         und nicht ein einzelnes Produkt. -->
+    <div v-if="isTenantHost" class="flex flex-col gap-3 border-t border-default pt-4" data-community-timezone>
+      <div class="flex items-start gap-3">
+        <UIcon name="i-ph-clock" class="mt-0.5 size-5 shrink-0 text-muted" />
+        <div class="min-w-0">
+          <p class="text-sm font-medium">{{ t('dashboard.community.timezone') }}</p>
+          <p class="text-sm text-muted">{{ t('dashboard.community.timezoneDesc') }}</p>
+        </div>
+      </div>
+      <USelectMenu
+        v-model="communityTimezone"
+        v-model:search-term="timezoneSearch"
+        :items="timezoneItems"
+        value-key="value"
+        :disabled="savingTimezone"
+        class="w-full sm:max-w-sm"
+        :aria-label="t('dashboard.community.timezone')"
+        data-community-timezone-select
       />
     </div>
 
