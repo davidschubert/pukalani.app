@@ -24,7 +24,7 @@ export interface AiCompleteOptions {
   model?: string
   /** Endpoint-Override (ohne trailing Slash nötig) — Default: pukalani.ai.baseUrl */
   baseUrl?: string
-  /** Layer-eigener Key — Default: runtimeConfig.aiKey (NUXT_AI_KEY) */
+  /** Layer-eigener Key — Default: `resolveAiKey()` (Konsole vor NUXT_AI_KEY) */
   apiKey?: string
   system?: string
   temperature?: number
@@ -45,9 +45,39 @@ export function getAiConfig(): AiConfig {
   }
 }
 
-/** Ist der Core-KI-Pfad nutzbar (Gate an UND Key vorhanden)? Für UI-Flags. */
-export function isAiAvailable(event: H3Event): boolean {
-  return getAiConfig().enabled && Boolean(useRuntimeConfig(event).aiKey)
+/**
+ * WOHER DER KI-SCHLÜSSEL KOMMT — zwei Quellen, feste Rangfolge: **DB schlägt
+ * Env** (Davids Entscheidung 2026-08-18, Muster von F55/Stripe).
+ *
+ * Die DB-Zeile trägt der Betreiber über die Konsole ein
+ * (`instance_secrets`, system-036), die Env bleibt der Weg für alles ohne
+ * Oberfläche: CI, lokale Entwicklung, Notfall-Rückfall nach einem
+ * Fehleintrag. Stünde die Env vorn, hätte ein Eintrag über die Konsole auf
+ * einer Instanz mit gesetzter Env keinerlei Wirkung — die vollständige
+ * Begründung steht in `instanceSecrets.ts`.
+ *
+ * Fail-soft: fehlt die Tabelle oder der Umschlag-Schlüssel, gilt die Env.
+ */
+export async function resolveAiKey(event: H3Event): Promise<string> {
+  const stored = await readInstanceSecret(event, 'ai')
+  if (stored) return stored
+  return useRuntimeConfig(event).aiKey || ''
+}
+
+/**
+ * Ist der Core-KI-Pfad nutzbar (Gate an UND Schlüssel vorhanden)? Für UI-Flags
+ * und als Netz in den Routen.
+ *
+ * HIESS BIS 2026-08-18 `isAiAvailable` UND WAR SYNCHRON. Die Umbenennung ist
+ * die eigentliche Sicherung: seit der Schlüssel auch aus der Datenbank kommen
+ * kann, muss die Antwort erwartet werden — und ein vergessenes `await` an
+ * einem `if (!isAiAvailable(event))` wäre KEIN Typfehler gewesen (ein Promise
+ * ist immer truthy), sondern ein still fail-open geöffnetes Gate. Mit dem
+ * neuen Namen bricht jede nicht umgestellte Aufrufstelle beim Übersetzen.
+ */
+export async function isAiConfigured(event: H3Event): Promise<boolean> {
+  if (!getAiConfig().enabled) return false
+  return Boolean(await resolveAiKey(event))
 }
 
 export interface EffectiveAiConfig extends AiConfig {
@@ -86,7 +116,7 @@ export async function aiComplete(event: H3Event, prompt: string, options: AiComp
   const label = options.label ?? 'core'
   const model = options.model ?? defaults.model
   const baseUrl = (options.baseUrl ?? defaults.baseUrl).replace(/\/$/, '')
-  const apiKey = options.apiKey || useRuntimeConfig(event).aiKey
+  const apiKey = options.apiKey || await resolveAiKey(event)
   if (!apiKey) {
     throw createError({ status: 503, statusText: 'AI not configured' })
   }

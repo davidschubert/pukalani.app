@@ -101,7 +101,7 @@ export default defineEventHandler(async (event): Promise<LessonTranslateResponse
     throw createError({ status: 400, statusText: 'Missing lesson id' })
   }
 
-  if (!isAiAvailable(event)) {
+  if (!await isAiConfigured(event)) {
     // 503 wie beim Moderations-Assist: das Produkt ist da, der Schlüssel fehlt.
     // Die Oberfläche zeigt den Knopf dann gar nicht erst an — dies ist das Netz.
     throw createError({ status: 503, statusText: 'AI translation not configured' })

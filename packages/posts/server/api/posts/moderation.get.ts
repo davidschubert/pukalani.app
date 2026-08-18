@@ -35,6 +35,6 @@ export default defineEventHandler(async (event): Promise<PostModerationResponse>
     rows: res.rows,
     reportCounts: Object.fromEntries(reports.counts),
     // UI zeigt den KI-Assist-Button nur, wenn der Core-KI-Pfad nutzbar ist
-    aiAssist: isAiAvailable(event),
+    aiAssist: await isAiConfigured(event),
   }
 })

@@ -253,8 +253,15 @@ export default defineNuxtConfig({
   runtimeConfig: {
     appwriteKey: '',
     // server-only! Env-Mapping: NUXT_AI_KEY — API-Key für aiComplete()
-    // (OpenRouter- oder anderer OpenAI-kompatibler Anbieter, Gate: pukalani.ai)
+    // (OpenRouter- oder anderer OpenAI-kompatibler Anbieter, Gate: pukalani.ai).
+    // SEIT 2026-08-18 der ZWEITE Weg: der erste ist der Eintrag über die
+    // Betreiber-Konsole (instance_secrets, system-036). DB schlägt Env —
+    // Begründung in server/utils/instanceSecrets.ts.
     aiKey: '',
+    // server-only! Umschlag-Schlüssel für `instance_secrets` (64 Hex-Zeichen,
+    // `openssl rand -hex 32`). Ohne ihn bleibt das Schlüssel-Feld in der
+    // Konsole zu und es gilt allein die Env — die Oberfläche sagt das auch.
+    instanceSecretsKey: '',
     // server-only! SMTP für E-Mail-Notifications (server/utils/mailer.ts) —
     // leerer Host = Mail-Versand aus. Env: NUXT_SMTP_HOST/PORT/USER/PASS/FROM
     // (lokal: Mailpit localhost:1025 ohne Auth).

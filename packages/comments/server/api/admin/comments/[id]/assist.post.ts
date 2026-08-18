@@ -41,7 +41,7 @@ export default defineEventHandler(async (event): Promise<ModerationAssist> => {
   requirePlanProduct(event, 'ai')
   await requireCommunityPermission(event, 'comments.moderate')
 
-  if (!isAiAvailable(event)) {
+  if (!await isAiConfigured(event)) {
     throw createError({ status: 503, statusText: 'AI assist not configured' })
   }
 
