@@ -7,6 +7,25 @@ die kleinen, verstreuten Beschlüsse.
 
 ---
 
+## 2026-08-16 — Drei Audit-Nachfragen (Runde 5/6) entschieden
+
+**Davids Entscheidungen** (strukturierte Fragen, je der Empfehlung gefolgt):
+(1) **Medien im Community-Export (U20): Metadaten JA, Binärdateien NEIN.**
+`packages/media` bekommt einen Export-Contributor wie events/courses, der
+Titel/Untertitel/Alt-Text/`fileId`-Verweis/Layout/Reihenfolge ausgibt — nicht
+die Bilddateien. Grund: ein JSON-Export soll Inhalt + Struktur tragen, nicht
+Megabytes; ein referenziertes Bild hat so seinen Kontext, die Datei holt man
+über die `fileId` aus dem Bucket. (`media_items` trägt keine `userId`, also
+kein per-User-GDPR-Thema.) (2) **messages: Block per roher `userId` BLEIBT** —
+die Asymmetrie zur handle-only Sende-Route ist inhaltlich begründet: ein Handle
+kann sich ändern, die `userId` ist stabil, man blockiert die Person nicht den
+Namen; kein Vertraulichkeitsloch. (3) **admin→comments String-Kopplung BLEIBT
+dokumentierte Drift** — alle Stellen mandanten-gescopt (kein Isolationsrisiko),
+ein expliziter A14-Vertrag brächte keinen funktionalen Gewinn; läuft irgendwann
+mit, kein eigener Punkt.
+
+---
+
 ## 2026-08-15 — F7 Paid Communities: alle vier Konzept-Entscheidungen gefallen
 
 **Davids Entscheidungen** (strukturierte Fragen; Volltext + Trade-offs:

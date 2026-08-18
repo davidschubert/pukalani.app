@@ -424,6 +424,20 @@ BEWEIS umbringen — `waitForMembership` pollt genau die Route, die AU1 gedeckel
 hat, 45-mal im Sekundentakt; ohne frische IP je Poll hätte der Beweis seine
 eigene Drossel gemessen und „die Rolle kommt nicht an" gemeldet.
 
+### Medien im Community-Export + drei Audit-Nachfragen entschieden ✅ 2026-08-16
+
+Davids drei Audit-Nachfragen (Runde 5/6) beantwortet (DECISION-LOG). Zwei
+„so lassen" (messages Block per userId — inhaltlich begründet; admin→comments-
+Drift — kein Isolationsrisiko), eine gebaut: **`packages/media` bekommt einen
+Community-Export-Contributor** (Vertrag A14, Muster events/courses) — Titel/
+Untertitel/Alt-Text/`fileId`-Verweis/Layout/Reihenfolge der Galerie, aber
+NICHT die Bilddateien (JSON soll Inhalt tragen, nicht Megabytes; die Datei holt
+man über die `fileId`). Betreiber-Klinke wie bei events, damit unveröffentlichte
+Medien nicht lautlos aus dem Bündel des Owners fallen; kein per-User-GDPR-Thema
+(`media_items` trägt keine `userId`). Damit ist die U20-Export-Lücke, die
+Runde 5 fand, geschlossen — die Galerie war das einzige Produkt, das im Export
+fehlte.
+
 ### Audit-Runde 6 — die letzten Layer (admin/moderation/themes/feedback/domains): Produkt vollständig geauditet ✅ 2026-08-16
 
 Zwei read-only audit-worker über die restlichen sicherheitsrelevanten Layer —
