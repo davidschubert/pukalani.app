@@ -120,15 +120,23 @@ const canManageCategories = computed(() =>
     </div>
 
     <UTable v-else :data="rows" :columns="columns" data-discussion-categories>
+      <!-- `truncate` ist hier PFLICHT und keine Kosmetik: Nuxt UIs Tabellenzelle
+           bringt `whitespace-nowrap` mit, eine lange Beschreibung wird also
+           nicht umbrochen — sie lief bisher aus dem `max-w-lg`-Kasten heraus,
+           quer durch die Themen-Spalte bis an den Rand (auf freelancer.supply
+           am 2026-08-18 gemessen: 790 px Text in einem 512-px-Kasten). Am
+           Link ebenfalls, dort zusätzlich `block`: an einem inline-Element
+           greift `overflow: hidden` nicht. Die Dashboard-Liste macht es seit
+           jeher so, deshalb ist es dort nie aufgefallen. -->
       <template #category-cell="{ row }">
         <div class="max-w-lg">
           <NuxtLink
             :to="localePath(`/discussions/${row.original.category.slug}`)"
-            class="font-medium text-default hover:text-primary hover:underline"
+            class="block truncate font-medium text-default hover:text-primary hover:underline"
           >
             {{ categoryName(row.original.category) }}
           </NuxtLink>
-          <p v-if="categoryDescription(row.original.category)" class="text-sm text-muted">
+          <p v-if="categoryDescription(row.original.category)" class="truncate text-sm text-muted">
             {{ categoryDescription(row.original.category) }}
           </p>
         </div>
