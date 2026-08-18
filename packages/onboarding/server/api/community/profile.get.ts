@@ -14,7 +14,7 @@ import type { CommunityProfileResult } from '../../../../control/schemas/communi
  * ── WARUM ES DIE ROUTE TROTZDEM BRAUCHT ─────────────────────────────────
  * Der Name steht dem Browser über `useBrandName()` ohnehin zur Verfügung; die
  * BESCHREIBUNG bewusst nicht (sie ist kein SSR-Payload-Feld — Begründung an
- * `TenantBranding.description`). Genau dafür ist das hier die eine Tür, und
+ * `CommunitySettings.description`). Genau dafür ist das hier die eine Tür, und
  * sie ist capability-gegated: `team.manage`, dieselbe Capability wie der
  * Reiter und wie der PATCH. Ein beliebiges Mitglied bekommt die
  * Wizard-Antworten seiner Community nicht zu sehen.

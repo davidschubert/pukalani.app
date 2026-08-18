@@ -38,7 +38,7 @@ describe('Mandanten-Host: die Community gewinnt', () => {
   })
 
   it('fällt OHNE eigene Wahl der Community auf die Instanz-Einstellung — nicht auf das Cookie', () => {
-    // Der dritte Zustand von useTenantBranding: Mandanten-Host, aber
+    // Der dritte Zustand von useCommunitySettings: Mandanten-Host, aber
     // { theme: '', variant: '' }. Dort ist die Instanz-Einstellung faktisch
     // die Farbe der Community — sie muss für ALLE Besucher gleich sein.
     expect(resolveThemeSelection({
@@ -208,7 +208,7 @@ describe('Die zwei Achsen bleiben unabhängig', () => {
 /**
  * D6 (2026-08-01): die Farbwahl der Community erreicht offene Fenster jetzt
  * LIVE — über eine Spiegel-Row im Runtime-Projekt, die
- * `realtime-branding.client.ts` in `useTenantBranding()` schreibt. Der Spiegel
+ * `realtime-branding.client.ts` in `useCommunitySettings()` schreibt. Der Spiegel
  * ist nur ein anderer WEG zu demselben Zustand; die Vorrangregel bleibt die
  * EINE Regel. Genau das steht hier: was aus einer Spiegel-Row herausfällt,
  * geht unverändert durch dieselbe Rechnung wie der SSR-Wert.

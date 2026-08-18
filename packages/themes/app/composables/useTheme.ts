@@ -45,7 +45,7 @@ export function useTheme() {
   const customThemes = useCustomThemesState()
   const settings = useThemeSettingsState()
   // Wahl DIESER Community (core, SSR-gespiegelt): null = kein Mandanten-Host.
-  const { branding } = useTenantBranding()
+  const { branding } = useCommunitySettings()
 
   const themes = computed<PukalaniTheme[]>(() => {
     // Built-ins mit Instanz-Overrides (umbenennen/ausblenden/umsortieren)

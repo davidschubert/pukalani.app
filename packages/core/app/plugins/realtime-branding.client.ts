@@ -20,7 +20,7 @@ type CommunityBrandingRow = AppwriteRow & {
  * PATCH-Route den bestätigten Zustand in die Runtime-Tabelle
  * `community_branding` (Vertrag + Begründung: core/shared/communityBranding.ts).
  * Dieses Plugin abonniert GENAU DIE EINE Row dieses Hosts und schreibt sie in
- * `useTenantBranding()`. Alles Weitere passiert von selbst: `useTheme()`
+ * `useCommunitySettings()`. Alles Weitere passiert von selbst: `useTheme()`
  * rechnet die Vorrangregel neu (`resolveThemeSelection`/`resolveNeutralSelection`,
  * B5 — auf einem Mandanten-Host gewinnt die Community), der Head-Getter im
  * theme-Plugin zieht `data-theme`/`data-variant`/`data-neutral` und die
@@ -50,7 +50,7 @@ export default defineNuxtPlugin(() => {
   const communityId = useSiteId().value
   if (!communityId) return
 
-  const { branding } = useTenantBranding()
+  const { branding } = useCommunitySettings()
   // Kein Mandanten-Branding im Payload = kein Mandanten-Host: dort ist die
   // Farbwelt Sache der Instanz/des Besuchers, und ein Spiegel-Event hätte
   // keinen Platz, an den es gehört.

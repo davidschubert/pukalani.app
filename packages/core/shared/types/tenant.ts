@@ -36,7 +36,7 @@ import type { CommunitySuspension } from '../communitySuspension'
  * Schreiber hätte also alle anderen mit umgefärbt. Leer/fehlend = die
  * Instanz-Einstellung gilt weiter (heutiges Verhalten).
  */
-export interface TenantBranding {
+export interface CommunitySettings {
   theme?: string
   variant?: string
   /**
@@ -70,7 +70,7 @@ export interface TenantBranding {
 /**
  * Produkt-Schalter des Mandanten (S1, Davids Entscheidung 4 vom 2026-07-27).
  *
- * Getrennt von TenantBranding, weil hier keine Optik hängt, sondern eine
+ * Getrennt von CommunitySettings, weil hier keine Optik hängt, sondern eine
  * Zugangsregel: die Autorität ist der Server (assertTenantRegistrationOpen an
  * den Auth-Routen), das UI spiegelt sie nur.
  *
@@ -190,7 +190,7 @@ export interface TenantProfileSignal {
 
 export type TenantContext =
   /** Eigenes Appwrite-Projekt (Isolation am Projekt) — Spezial-/Enterprise-Kunde. */
-  | ({ mode: 'silo', projectId: string, communityId?: string } & TenantBranding & TenantPolicy & TenantAddress)
+  | ({ mode: 'silo', projectId: string, communityId?: string } & CommunitySettings & TenantPolicy & TenantAddress)
   /**
    * Geteiltes Projekt, Zeilen-Scope über tenantId — Standard-SaaS-Kunde.
    * `plan` (free/pro/business, Default free) staffelt die Quota — core bleibt
@@ -229,4 +229,4 @@ export type TenantContext =
    * einer Pool-Community; ein Silo-Kunde ist ein Enterprise-Vertrag, dessen
    * Markt David persönlich kennt. Fehlend = keine einzige Antwort gegeben.
    */
-  | ({ mode: 'pool', projectId: string, tenantId: string, plan?: string, limits?: Record<string, { perDay?: number, total?: number }>, communityId?: string, trialEndsAt?: string | null, billingStatus?: string, profileSignal?: TenantProfileSignal } & TenantBranding & TenantPolicy & TenantAddress)
+  | ({ mode: 'pool', projectId: string, tenantId: string, plan?: string, limits?: Record<string, { perDay?: number, total?: number }>, communityId?: string, trialEndsAt?: string | null, billingStatus?: string, profileSignal?: TenantProfileSignal } & CommunitySettings & TenantPolicy & TenantAddress)

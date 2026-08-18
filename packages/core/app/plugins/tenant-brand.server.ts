@@ -30,7 +30,7 @@
  *     /dashboard/community zeigt den gesetzten Zustand. Kein
  *     Geheimnis: ob eine Community öffentlich lesbar ist, beantwortet jeder
  *     Gast-Abruf ihrer Startseite ohnehin.
- *   - `theme`/`variant`/`neutral` → useTenantBranding() (Entscheidung 12, 2026-07-28;
+ *   - `theme`/`variant`/`neutral` → useCommunitySettings() (Entscheidung 12, 2026-07-28;
  *     `neutral` seit 2026-07-29, Rest von B5):
  *     die Seite /dashboard/community/branding (seit F5 eine eigene Fläche,
  *     davor eine Karte in den Community-Einstellungen) zeigt
@@ -131,7 +131,7 @@ export default defineNuxtPlugin(() => {
   // „nichts gewählt, Instanz-Einstellung gilt" und muss im Dashboard als solches
   // erkennbar bleiben. `?? ''` fängt zugleich Bestands-Rows, die die Spalte noch
   // nicht tragen (Appwrite backfillt Defaults nicht). null = kein Tenant-Host.
-  useState<{ theme: string, variant: string, neutral: string } | null>('pukalani-tenant-branding', () => (
+  useState<{ theme: string, variant: string, neutral: string } | null>('pukalani-community-settings', () => (
     tenant ? { theme: tenant.theme ?? '', variant: tenant.variant ?? '', neutral: tenant.neutral ?? '' } : null
   ))
   // Site-Rolle des eingeloggten Users (N1): EXPLIZITE Zuweisung statt

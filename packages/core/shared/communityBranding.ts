@@ -15,7 +15,7 @@
  * geschrieben ausschliesslich server-seitig, direkt nachdem das Control Plane
  * den Schreibvorgang bestätigt hat. Der Client abonniert GENAU SEINE Row
  * (`Channel…row(<communityId>)`) und schreibt das Ergebnis in
- * `useTenantBranding()`; die Vorrangregel (`resolveThemeSelection`) und die
+ * `useCommunitySettings()`; die Vorrangregel (`resolveThemeSelection`) und die
  * Head-Mechanik bleiben unangetastet.
  *
  * WARUM NICHT `app_config`: die Tabelle ist per Vertrag EINE Row pro PROJEKT

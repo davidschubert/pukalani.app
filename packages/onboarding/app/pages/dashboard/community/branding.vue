@@ -58,7 +58,7 @@ useBrandTitle(() => t('dashboard.community.appearance.title'))
 
 /** `isTenantHost` = false heißt: kein Mandanten-Host, hier gibt es keine
  *  Community-Farbwelt (die Optik gehört dann der Instanz). */
-const { branding, isTenantHost } = useTenantBranding()
+const { branding, isTenantHost } = useCommunitySettings()
 
 // Namen + Farbe der Auswahl kommen aus der Theme-Registry des themes-Layers
 // (Auto-Import wie im DashboardUserMenu) — nicht aus einer zweiten Liste hier.

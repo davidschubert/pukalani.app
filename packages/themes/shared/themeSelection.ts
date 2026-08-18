@@ -17,7 +17,7 @@
  *                                            Kontroll-Host, Playground): dort
  *                                            gehört die Optik der Instanz und
  *                                            der Besucher darf weiter wählen.
- * (Die drei Zustände kommen unverändert aus `useTenantBranding()`, core.)
+ * (Die drei Zustände kommen unverändert aus `useCommunitySettings()`, core.)
  *
  * DIE NEUTRAL-PALETTE FOLGT SEIT DEM 2026-07-29 DERSELBEN REGEL (Davids
  * Entscheidung, Rest von B5): `data-neutral` ist eine EIGENE Achse (die gedeckte
@@ -40,7 +40,7 @@
  * Registry-Validierung darum.
  */
 
-/** Wahl der Community, wie `useTenantBranding()` sie liefert. */
+/** Wahl der Community, wie `useCommunitySettings()` sie liefert. */
 export interface CommunityBranding {
   /** Built-in-Theme-Id oder '' = Instanz-Einstellung. */
   theme: string
