@@ -31,12 +31,18 @@ const { data } = await useFetch<CategoryListResponse>('/api/posts/categories', {
 })
 const category = computed(() => data.value?.rows.find(entry => entry.category.slug === slug.value)?.category ?? null)
 
+// Name und Beschreibung in der Sprache dieser Seite — die ADRESSE bleibt
+// bewusst einsprachig (Begründung: posts/shared/categoryI18n.ts).
+const { categoryName, categoryDescription } = useCategoryText()
+const title = computed(() => (category.value ? categoryName(category.value) : ''))
+const description = computed(() => (category.value ? categoryDescription(category.value) : ''))
+
 if (!category.value) {
   throw createError({ status: 404, statusText: 'Category not found' })
 }
 
-useBrandTitle(() => category.value?.name ?? t('posts.discussions.title'), {
-  description: () => category.value?.description || t('posts.discussions.description'),
+useBrandTitle(() => title.value || t('posts.discussions.title'), {
+  description: () => description.value || t('posts.discussions.description'),
 })
 
 const { replyCounts, loadCounts } = useDiscussionReplyCounts()
@@ -63,8 +69,8 @@ const composerOpen = ref(false)
          eröffnet, meint hier — die Auswahl bleibt trotzdem änderbar. -->
     <div class="flex flex-wrap items-start justify-between gap-3">
       <div class="min-w-0">
-        <h1 class="text-2xl font-bold">{{ category?.name }}</h1>
-        <p v-if="category?.description" class="mt-1 text-sm text-muted">{{ category.description }}</p>
+        <h1 class="text-2xl font-bold">{{ title }}</h1>
+        <p v-if="description" class="mt-1 text-sm text-muted">{{ description }}</p>
       </div>
       <DiscussionNewTopic v-model:open="composerOpen" :category-slug="slug" />
     </div>

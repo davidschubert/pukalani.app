@@ -201,7 +201,9 @@
       "reactionInvalid": "Diese Reaktion gibt es nicht.",
       "reactionTargetInvalid": "Auf diesen Inhalt kann nicht reagiert werden.",
       "categoryOrderRequired": "Es gibt keine Kategorien zu sortieren.",
-      "categoryOrderMax": "Zu viele Kategorien auf einmal."
+      "categoryOrderMax": "Zu viele Kategorien auf einmal.",
+      "categoryLocaleInvalid": "Das ist kein gültiger Sprachcode.",
+      "categoryTranslationsMax": "Zu viele Sprachen auf einmal."
     },
     "discussions": {
       "title": "Diskussionen",
@@ -462,7 +464,12 @@
       "orderFilteredHint": "Solange du suchst, lässt sich die Reihenfolge nicht ändern. Leer das Suchfeld, um zu sortieren.",
       "orderFailed": "Reihenfolge konnte nicht gespeichert werden.",
       "orderFailedHint": "Die Liste wurde neu geladen. Versuch es noch einmal.",
-      "orderStaleHint": "Die Kategorien haben sich inzwischen geändert. Die Liste wurde neu geladen — sortier noch einmal."
+      "orderStaleHint": "Die Kategorien haben sich inzwischen geändert. Die Liste wurde neu geladen — sortier noch einmal.",
+      "translations": "Übersetzungen",
+      "translationsHint": "Name und Beschreibung je Sprache. Leer lassen heißt: es gilt die Fassung von oben. Die Adresse bleibt in allen Sprachen dieselbe.",
+      "translateWithAi": "Mit KI übersetzen",
+      "translateFailed": "Übersetzung hat nicht geklappt.",
+      "translateFailedHint": "Deine Eingaben stehen noch im Formular. Versuch es noch einmal oder schreib den Text selbst."
     },
     "nav": {
       "categories": "Kategorien",

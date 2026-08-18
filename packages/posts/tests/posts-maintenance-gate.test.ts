@@ -59,12 +59,18 @@ const MODERATION_ROUTES = new Set(['[id]/hide.post.ts', '[id]/restore.post.ts', 
  * `order.patch.ts` (die gezogene Reihenfolge) kam später dazu und gehört
  * derselben Familie an: hinter `posts.manage`, `actor: 'operator'`, und was
  * sie schreibt, ist die Struktur — nicht der Inhalt darin.
+ *
+ * `translate.post.ts` steht aus einem STÄRKEREN Grund hier: sie schreibt
+ * überhaupt nichts. Sie ist ein POST, weil ein Text im Body reist, und gibt
+ * einen KI-Vorschlag zurück, den erst ein Mensch speichert. Der Wartungsmodus
+ * hat an einem Vorschlag nichts einzufrieren.
  */
 const CATEGORY_ADMIN_ROUTES = new Set([
   'categories/index.post.ts',
   'categories/[id].patch.ts',
   'categories/[id].delete.ts',
   'categories/order.patch.ts',
+  'categories/translate.post.ts',
 ])
 
 /**

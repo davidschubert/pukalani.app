@@ -201,7 +201,9 @@
       "reactionInvalid": "That reaction does not exist.",
       "reactionTargetInvalid": "You cannot react to this content.",
       "categoryOrderRequired": "There are no categories to sort.",
-      "categoryOrderMax": "Too many categories at once."
+      "categoryOrderMax": "Too many categories at once.",
+      "categoryLocaleInvalid": "That is not a valid language code.",
+      "categoryTranslationsMax": "Too many languages at once."
     },
     "discussions": {
       "title": "Discussions",
@@ -462,7 +464,12 @@
       "orderFilteredHint": "You can’t reorder while searching. Clear the search field to sort.",
       "orderFailed": "Could not save the order.",
       "orderFailedHint": "The list has been reloaded. Please try again.",
-      "orderStaleHint": "The categories changed in the meantime. The list has been reloaded — please sort again."
+      "orderStaleHint": "The categories changed in the meantime. The list has been reloaded — please sort again.",
+      "translations": "Translations",
+      "translationsHint": "Name and description per language. Leave empty to use the version above. The address stays the same in every language.",
+      "translateWithAi": "Translate with AI",
+      "translateFailed": "Translation failed.",
+      "translateFailedHint": "Your input is still in the form. Try again or write the text yourself."
     },
     "nav": {
       "categories": "Categories",

@@ -65,12 +65,14 @@ const { data: categoryData } = useFetch<CategoryListResponse>('/api/posts/catego
   lazy: true,
   server: false,
 })
+const { categoryName } = useCategoryText()
+
 const categoryItems = computed(() => [
   // Unter Discussions gibt es „keine Kategorie" nicht — siehe Kopf.
   ...(props.mode === 'topic' ? [] : [{ value: NO_CATEGORY, label: t('posts.composer.categoryNone') }]),
   ...(categoryData.value?.rows ?? []).map(entry => ({
     value: entry.category.$id,
-    label: entry.category.name,
+    label: categoryName(entry.category),
   })),
 ])
 // Ohne angelegte Kategorien gibt es nichts zu wählen — dann bleibt der

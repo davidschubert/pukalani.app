@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { LOCALE_CODE_PATTERN } from '../shared/categoryI18n'
 import {
   MAX_CATEGORIES,
   MAX_CATEGORY_DESCRIPTION,
@@ -52,6 +53,28 @@ const descriptionField = (t: TranslateFn) => z.string().trim()
 // Feld bleibt hier für Aufrufer, die eine Position ausdrücklich mitgeben.
 const sortOrderField = () => z.number().int().min(0).max(MAX_CATEGORY_SORT_ORDER).optional()
 
+/**
+ * Übersetzungen: Sprachcode → Name/Beschreibung, beide OPTIONAL und beide
+ * derselben Längengrenze unterworfen wie die Grundfassung (ein übersetzter
+ * Name, der länger sein darf als der Originalname, wäre eine zweite Regel für
+ * dieselbe Sache).
+ *
+ * `.catchall(z.never())` gibt es hier bewusst NICHT: der Schlüssel ist ein
+ * Sprachcode, also ein offener Wertebereich — geprüft wird seine FORM. Alles
+ * andere räumt `normalizeCategoryTranslations` beim Serialisieren weg, und
+ * leere Felder fallen dabei ganz heraus („leer heißt nicht übersetzt").
+ *
+ * Höchstens 20 Sprachen — kein Produkt-Limit, sondern ein Riegel gegen einen
+ * aufgeblähten Body, der die 4000 Zeichen der Spalte sprengen würde.
+ */
+const translationsField = (t: TranslateFn) => z.record(
+  z.string().regex(LOCALE_CODE_PATTERN, t('posts.validation.categoryLocaleInvalid')),
+  z.object({
+    name: z.string().trim().max(MAX_CATEGORY_NAME, t('posts.validation.categoryNameMax')).optional(),
+    description: z.string().trim().max(MAX_CATEGORY_DESCRIPTION, t('posts.validation.categoryDescriptionMax')).optional(),
+  }),
+).refine(value => Object.keys(value).length <= 20, t('posts.validation.categoryTranslationsMax')).optional()
+
 export function createCategorySchema(t: TranslateFn = identity) {
   return z.object({
     name: nameField(t),
@@ -66,6 +89,7 @@ export function createCategorySchema(t: TranslateFn = identity) {
     description: descriptionField(t),
     sortOrder: sortOrderField(),
     active: z.boolean().optional(),
+    translations: translationsField(t),
   })
 }
 
@@ -76,6 +100,7 @@ export function createCategoryEditSchema(t: TranslateFn = identity) {
     description: descriptionField(t),
     sortOrder: sortOrderField(),
     active: z.boolean().optional(),
+    translations: translationsField(t),
   })
 }
 
@@ -98,7 +123,23 @@ export function createCategoryOrderSchema(t: TranslateFn = identity) {
   })
 }
 
+/**
+ * Der KI-Auftrag: „übersetze DIESEN Text in DIESE Sprache".
+ *
+ * Name und Beschreibung kommen aus dem FORMULAR und nicht aus der Datenbank —
+ * sonst könnte man nur übersetzen, was schon gespeichert ist, und der Vorschlag
+ * käme beim Anlegen einer neuen Kategorie zu spät.
+ */
+export function createCategoryTranslateSchema(t: TranslateFn = identity) {
+  return z.object({
+    locale: z.string().trim().regex(LOCALE_CODE_PATTERN, t('posts.validation.categoryLocaleInvalid')),
+    name: nameField(t),
+    description: z.string().trim().max(MAX_CATEGORY_DESCRIPTION, t('posts.validation.categoryDescriptionMax')).default(''),
+  })
+}
+
 // Server-seitige Instanzen (Fehlertexte = Keys; die UI validiert mit t())
 export const categorySchema = createCategorySchema()
 export const categoryEditSchema = createCategoryEditSchema()
 export const categoryOrderSchema = createCategoryOrderSchema()
+export const categoryTranslateSchema = createCategoryTranslateSchema()

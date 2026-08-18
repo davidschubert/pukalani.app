@@ -47,9 +47,14 @@ if (!decision.ok) {
 
 const topic = computed(() => data.value!)
 
+// Rücksprung-Knopf und Meta-Beschreibung tragen den Kategorie-Namen — beide in
+// der Sprache dieser Seite, die Adresse darunter unverändert.
+const { categoryName } = useCategoryText()
+const topicCategoryLabel = computed(() => categoryName(topic.value.category))
+
 useBrandTitle(
   () => topic.value.post.title || t('posts.discussions.title'),
-  { description: () => t('posts.discussions.inCategory', { category: topic.value.category.name }) },
+  { description: () => t('posts.discussions.inCategory', { category: topicCategoryLabel.value }) },
 )
 
 const post = ref(topic.value.post)
@@ -66,7 +71,7 @@ const post = ref(topic.value.post)
       class="-ms-2 mb-3"
       data-topic-back
     >
-      {{ t('posts.discussions.backToCategory', { category: topic.category.name }) }}
+      {{ t('posts.discussions.backToCategory', { category: topicCategoryLabel }) }}
     </UButton>
 
     <!-- Zustände + ihre Schalter stehen ÜBER der Karte, nicht darin: die

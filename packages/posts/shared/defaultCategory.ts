@@ -54,9 +54,12 @@ export function defaultCategoryRowId(tenantId: string): string {
 
 export interface DefaultCategorySeed {
   name: string
-  /** URL-Segment — nach der Anlage FEST. */
+  /** URL-Segment — nach der Anlage FEST, und bewusst NICHT übersetzt
+   *  (Begründung: shared/categoryI18n.ts). */
   slug: string
   description: string
+  /** Spaltenwert für `post_categories.translations` (JSON, siehe unten). */
+  translations: string
 }
 
 /**
@@ -67,17 +70,30 @@ export interface DefaultCategorySeed {
  * ist Aufräumarbeit für den Owner. Gebraucht wird genau so viel Struktur, dass
  * der erste Knopf erscheint — den Rest baut, wer seine Community kennt.
  */
+const CATEGORY_TEXTS = {
+  de: { name: 'Allgemein', slug: 'allgemein', description: 'Alles, was noch keine eigene Kategorie hat.' },
+  en: { name: 'General', slug: 'general', description: 'Everything that does not have its own category yet.' },
+} as const
+
 export function defaultCategoryFor(locale: string): DefaultCategorySeed {
-  if (locale === 'de') {
-    return {
-      name: 'Allgemein',
-      slug: 'allgemein',
-      description: 'Alles, was noch keine eigene Kategorie hat.',
-    }
-  }
+  const base = locale === 'de' ? CATEGORY_TEXTS.de : CATEGORY_TEXTS.en
+  const other = locale === 'de' ? CATEGORY_TEXTS.en : CATEGORY_TEXTS.de
+  const otherCode = locale === 'de' ? 'en' : 'de'
   return {
-    name: 'General',
-    slug: 'general',
-    description: 'Everything that does not have its own category yet.',
+    name: base.name,
+    slug: base.slug,
+    description: base.description,
+    /**
+     * DIE ANDERE SPRACHE KOMMT GRATIS MIT (seit posts-022): beide Fassungen
+     * stehen hier ohnehin als Konstanten, und eine frische Community ist damit
+     * ab Minute eins in beiden Sprachen richtig beschriftet — statt einer
+     * deutschen Kategorie in einer englischen Oberfläche.
+     *
+     * Der SLUG folgt weiterhin allein der Wizard-Sprache: er ist die Adresse,
+     * und die bleibt in allen Sprachen dieselbe.
+     */
+    translations: JSON.stringify({
+      [otherCode]: { name: other.name, description: other.description },
+    }),
   }
 }

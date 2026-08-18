@@ -50,9 +50,11 @@ const { data: categoryData } = props.categoryFixed
   ? { data: ref<CategoryListResponse | null>(null) }
   : await useFetch<CategoryListResponse>('/api/posts/categories', { query: { all: '1' } })
 
+const { categoryName } = useCategoryText()
+
 const categoryItems = computed(() => [
   { value: '', label: t('posts.discussions.filters.allCategories') },
-  ...(categoryData.value?.rows ?? []).map(row => ({ value: row.category.slug, label: row.category.name })),
+  ...(categoryData.value?.rows ?? []).map(row => ({ value: row.category.slug, label: categoryName(row.category) })),
 ])
 
 const stateItems = computed(() => TOPIC_STATE_FILTERS.map(value => ({

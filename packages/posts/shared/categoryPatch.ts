@@ -14,11 +14,15 @@
  * false beim Schalter) sind dagegen echte Ansagen und werden geschrieben.
  */
 
+import { serializeCategoryTranslations } from './categoryI18n'
+
 export interface CategoryPatchInput {
   name: string
   description?: string
   sortOrder?: number
   active?: boolean
+  /** Sprachcode → Überschreibung; weggelassen heißt auch hier UNVERÄNDERT. */
+  translations?: unknown
 }
 
 export function categoryUpdateData(input: CategoryPatchInput): Record<string, unknown> {
@@ -28,5 +32,10 @@ export function categoryUpdateData(input: CategoryPatchInput): Record<string, un
   if (input.description !== undefined) data.description = input.description
   if (input.sortOrder !== undefined) data.sortOrder = input.sortOrder
   if (input.active !== undefined) data.active = input.active
+  // Mitgeschickt heißt: DAS ist ab jetzt der ganze Satz Übersetzungen — eine
+  // entfernte Sprache verschwindet also wirklich. Das ist kein Widerspruch zur
+  // Regel oben: das Formular schickt immer alle Sprachen mit, die es anbietet,
+  // und `serializeCategoryTranslations` wirft leere Felder ohnehin weg.
+  if (input.translations !== undefined) data.translations = serializeCategoryTranslations(input.translations)
   return data
 }

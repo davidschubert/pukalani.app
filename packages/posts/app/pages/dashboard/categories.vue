@@ -1,8 +1,16 @@
 <script setup lang="ts">
 import type { TableColumn } from '@nuxt/ui'
 import { createCategoryEditSchema, createCategorySchema } from '../../../schemas/postCategory'
+import { categorySearchHaystack, parseCategoryTranslations, type CategoryTranslations } from '../../../shared/categoryI18n'
 import { slugify } from '../../../shared/discussionUrl'
-import type { CategoryListResponse, CategoryOrderResponse, CategoryWithCount, PostCategory } from '../../../shared/types/post'
+import { MAX_CATEGORY_DESCRIPTION, MAX_CATEGORY_NAME } from '../../../shared/types/post'
+import type {
+  CategoryManageResponse,
+  CategoryOrderResponse,
+  CategoryTranslateResponse,
+  CategoryWithCount,
+  PostCategory,
+} from '../../../shared/types/post'
 
 /**
  * Kategorien der Discussions verwalten (F1 Stufe 1).
@@ -50,12 +58,13 @@ import type { CategoryListResponse, CategoryOrderResponse, CategoryWithCount, Po
  */
 definePageMeta({ layout: 'dashboard', middleware: ['auth', 'admin'], requiredCapability: 'posts.manage' })
 
-const { t } = useI18n()
+const { t, locales } = useI18n()
 const toast = useToast()
 const confirm = useConfirm()
+const { planAllows } = useTenantPlan()
 useBrandTitle(() => t('posts.categories.title'))
 
-const { data, status, refresh } = await useFetch<CategoryListResponse>('/api/posts/categories/manage', {
+const { data, status, refresh } = await useFetch<CategoryManageResponse>('/api/posts/categories/manage', {
   lazy: true,
   server: false,
 })
@@ -73,8 +82,10 @@ const search = ref('')
 const filtered = computed(() => {
   const needle = search.value.trim().toLowerCase()
   if (!needle) return rows.value
+  // Über ALLE Sprachfassungen (categorySearchHaystack): wer „General" liest,
+  // soll die Kategorie finden, die in der Grundfassung „Allgemein" heißt.
   return rows.value.filter(entry =>
-    entry.category.name.toLowerCase().includes(needle)
+    categorySearchHaystack(entry.category).includes(needle)
     || entry.category.slug.includes(needle))
 })
 
@@ -199,8 +210,48 @@ function onDragEnd() {
  * heißt unverändert, shared/categoryPatch.ts); eine neue Kategorie hängt der
  * Server hinten an.
  */
-interface Form { name: string, slug: string, description: string, active: boolean }
-const emptyForm = (): Form => ({ name: '', slug: '', description: '', active: true })
+interface Form {
+  name: string
+  slug: string
+  description: string
+  active: boolean
+  /**
+   * Sprachcode → Überschreibung. Das Formular hält IMMER einen Eintrag je
+   * angebotener Sprache (auch leere), damit `v-model` ein Ziel hat; leere
+   * Felder wirft der Server beim Speichern weg — „leer heißt nicht übersetzt"
+   * (shared/categoryI18n.ts).
+   */
+  translations: Record<string, { name: string, description: string }>
+}
+
+/**
+ * Die angebotenen Sprachen sind die der APP, nicht eine Liste im Code: kommt
+ * eine dazu, steht sie hier ohne Migration und ohne Codeänderung.
+ *
+ * BEWUSST OHNE „Ausgangssprache": die Grundfassung oben ist der Text, den
+ * jemand eingetippt hat — in welcher Sprache, sagt niemand. Jede Sprache
+ * bekommt deshalb ihr eigenes Feld mit der Grundfassung als Platzhalter.
+ */
+const formLocales = computed(() => locales.value.map(entry => ({
+  code: entry.code,
+  label: entry.name ?? entry.code,
+})))
+
+const emptyTranslations = (): Record<string, { name: string, description: string }> =>
+  Object.fromEntries(formLocales.value.map(l => [l.code, { name: '', description: '' }]))
+
+const emptyForm = (): Form => ({
+  name: '', slug: '', description: '', active: true, translations: emptyTranslations(),
+})
+
+/** Gespeicherte Übersetzungen ⇒ Formular-Felder (fehlende Sprache = leer). */
+function formTranslations(saved: CategoryTranslations): Form['translations'] {
+  const out = emptyTranslations()
+  for (const [code, entry] of Object.entries(saved)) {
+    out[code] = { name: entry.name ?? '', description: entry.description ?? '' }
+  }
+  return out
+}
 
 const form = reactive<Form>(emptyForm())
 const editingId = ref<string | null>(null)
@@ -231,6 +282,7 @@ function startEdit(entry: CategoryWithCount) {
     slug: entry.category.slug,
     description: entry.category.description,
     active: entry.category.active,
+    translations: formTranslations(parseCategoryTranslations(entry.category.translations)),
   })
   editingId.value = entry.category.$id
   isNew.value = false
@@ -256,6 +308,9 @@ async function save() {
     name: form.name.trim(),
     description: form.description.trim(),
     active: form.active,
+    // IMMER mitgeschickt, auch wenn alles leer ist: nur so lässt sich eine
+    // Übersetzung auch wieder ENTFERNEN (dieselbe Regel wie bei `description`).
+    translations: form.translations,
     ...(isNew.value ? { slug: form.slug.trim() } : {}),
   }
   const parsed = schema.value.safeParse(payload)
@@ -333,6 +388,46 @@ async function toggleActive(entry: CategoryWithCount) {
   }
   catch {
     toast.add({ title: t('posts.categories.saveFailed'), description: t('posts.categories.saveFailedHint'), color: 'error' })
+  }
+}
+
+// ── KI-Vorschlag ───────────────────────────────────────────────────────────
+/**
+ * Der Knopf erscheint nur, wenn BEIDES stimmt: der Server meldet einen
+ * hinterlegten KI-Schlüssel (`aiTranslate`) und der Tarif enthält das Produkt
+ * (`planAllows('ai')`). Ein Knopf, der beim Drücken 402 oder 503 antwortet,
+ * wäre ein Versprechen, das die Seite nicht halten kann — die Route prüft
+ * beides trotzdem selbst, sie ist die Grenze, dies hier nur die Höflichkeit.
+ */
+const aiTranslateAvailable = computed(() => !!data.value?.aiTranslate && planAllows('ai'))
+const translatingLocale = ref('')
+
+async function translateWithAi(locale: string) {
+  if (translatingLocale.value || !form.name.trim()) return
+  translatingLocale.value = locale
+  try {
+    const suggestion = await $fetch<CategoryTranslateResponse>('/api/posts/categories/translate', {
+      method: 'POST',
+      // Aus dem FORMULAR, nicht aus der Datenbank: sonst ließe sich beim
+      // Anlegen nichts übersetzen (da gibt es noch keine Zeile).
+      body: { locale, name: form.name.trim(), description: form.description.trim() },
+    })
+    const target = form.translations[locale]
+    if (!target) return
+    // Ein leerer Vorschlag lässt das Feld in Ruhe — sonst löschte ein
+    // misslungener Versuch, was jemand von Hand geschrieben hat.
+    if (suggestion.name) target.name = suggestion.name
+    if (suggestion.description) target.description = suggestion.description
+  }
+  catch {
+    toast.add({
+      title: t('posts.categories.translateFailed'),
+      description: t('posts.categories.translateFailedHint'),
+      color: 'error',
+    })
+  }
+  finally {
+    translatingLocale.value = ''
   }
 }
 
@@ -566,6 +661,61 @@ function categoryPath(category: PostCategory): string {
             class="w-full"
           />
         </UFormField>
+
+        <!-- ÜBERSETZUNGEN. Ein Block je Sprache der App, Platzhalter = die
+             Grundfassung darüber: leer lassen heißt „gilt die Grundfassung",
+             nicht „hat keinen Namen". Die ADRESSE steht bewusst nicht hier —
+             warum, steht in shared/categoryI18n.ts. -->
+        <div class="space-y-3 pt-2">
+          <div>
+            <h3 class="text-sm font-semibold">{{ t('posts.categories.translations') }}</h3>
+            <p class="mt-1 text-sm text-muted">{{ t('posts.categories.translationsHint') }}</p>
+          </div>
+
+          <div
+            v-for="entry in formLocales"
+            :key="entry.code"
+            class="space-y-2 rounded-lg border border-default p-3"
+            :data-category-translation="entry.code"
+          >
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-sm font-medium">{{ entry.label }}</span>
+              <UButton
+                v-if="aiTranslateAvailable"
+                icon="i-ph-sparkle"
+                color="neutral"
+                variant="ghost"
+                size="xs"
+                :loading="translatingLocale === entry.code"
+                :disabled="!form.name.trim() || !!translatingLocale"
+                :data-category-translate="entry.code"
+                @click="translateWithAi(entry.code)"
+              >
+                {{ t('posts.categories.translateWithAi') }}
+              </UButton>
+            </div>
+            <UInput
+              v-if="form.translations[entry.code]"
+              v-model="form.translations[entry.code]!.name"
+              size="sm"
+              :maxlength="MAX_CATEGORY_NAME"
+              :placeholder="form.name || t('posts.categories.namePlaceholder')"
+              :aria-label="t('posts.categories.name')"
+              class="w-full"
+            />
+            <UTextarea
+              v-if="form.translations[entry.code]"
+              v-model="form.translations[entry.code]!.description"
+              size="sm"
+              :rows="2"
+              autoresize
+              :maxlength="MAX_CATEGORY_DESCRIPTION"
+              :placeholder="form.description || t('posts.categories.descriptionPlaceholder')"
+              :aria-label="t('posts.categories.descriptionLabel')"
+              class="w-full"
+            />
+          </div>
+        </div>
 
         <UFormField :label="t('posts.categories.active')" :help="t('posts.categories.activeHint')">
           <USwitch v-model="form.active" data-category-active />

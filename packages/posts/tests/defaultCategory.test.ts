@@ -59,3 +59,28 @@ describe('defaultCategoryFor', () => {
     }
   })
 })
+
+describe('defaultCategoryFor — die andere Sprache kommt mit', () => {
+  it('legt zur deutschen Grundfassung die englische Übersetzung', () => {
+    const seed = defaultCategoryFor('de')
+    expect(seed.name).toBe('Allgemein')
+    expect(seed.slug).toBe('allgemein')
+    expect(JSON.parse(seed.translations)).toEqual({
+      en: { name: 'General', description: 'Everything that does not have its own category yet.' },
+    })
+  })
+
+  it('und umgekehrt — der SLUG folgt aber allein der Wizard-Sprache', () => {
+    const seed = defaultCategoryFor('en')
+    expect(seed.slug).toBe('general')
+    expect(JSON.parse(seed.translations).de.name).toBe('Allgemein')
+    // Kein Slug in den Übersetzungen: die Adresse ist in allen Sprachen dieselbe.
+    expect(JSON.parse(seed.translations).de.slug).toBeUndefined()
+  })
+
+  it('Unbekanntes fällt auf Englisch zurück — mit deutscher Übersetzung', () => {
+    const seed = defaultCategoryFor('fr')
+    expect(seed.name).toBe('General')
+    expect(JSON.parse(seed.translations)).toHaveProperty('de')
+  })
+})

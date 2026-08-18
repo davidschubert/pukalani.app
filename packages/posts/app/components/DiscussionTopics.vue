@@ -148,6 +148,8 @@ const requestQuery = computed(() => {
  * aus nicht benennbar. Es gibt genau EINE Liste je Seite, also kollidiert
  * nichts.
  */
+const { topicCategoryName } = useCategoryText()
+
 const { data, status } = await useFetch<DiscussionListResponse>('/api/posts/discussions', {
   key: DISCUSSION_TOPICS_KEY,
   query: requestQuery,
@@ -359,7 +361,7 @@ function resetSearch() {
             :to="localePath(`/discussions/${row.original.categorySlug}`)"
             class="text-xs text-muted hover:text-primary hover:underline"
           >
-            {{ row.original.categoryName }}
+            {{ topicCategoryName(row.original) }}
           </NuxtLink>
         </div>
       </template>

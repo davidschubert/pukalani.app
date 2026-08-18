@@ -215,6 +215,13 @@ export interface PostCategory extends Models.Row {
   sortOrder: number
   /** false = aus der öffentlichen Auswahl genommen, Bestand bleibt lesbar. */
   active: boolean
+  /**
+   * Name/Beschreibung je Sprache als JSON ('' = nichts übersetzt, dann gilt
+   * überall die Grundfassung oben). Gelesen wird sie NUR über
+   * `shared/categoryI18n.ts` — dort steht auch, warum die ADRESSE bewusst
+   * nicht mitübersetzt wird. Fehlt bei Zeilen aus der Zeit vor posts-022.
+   */
+  translations: string
 }
 
 /**
@@ -346,6 +353,15 @@ export interface DiscussionTopic {
   authorAvatarUrl?: string
   categoryId: string
   categoryName: string
+  /**
+   * Derselbe Name je Sprache ('de' → 'Allgemein'), nur wo übersetzt.
+   *
+   * Die Themen-Liste zeigt den Kategorie-Namen, holt aber keine Kategorien —
+   * ohne diese Karte müsste sie es tun (ein zweiter Abruf je Liste) oder in
+   * einer Sprache den falschen Namen zeigen. Nur NAMEN, keine Beschreibungen:
+   * die stehen in keiner Liste, und die Antwort soll klein bleiben.
+   */
+  categoryNames?: Record<string, string>
   categorySlug: string
   score: number
   publishedAt: string | null
@@ -405,6 +421,11 @@ export interface CategoryListResponse {
   rows: CategoryWithCount[]
 }
 
+/** Dasselbe für die VERWALTUNG, plus die Frage, ob der KI-Knopf erscheinen darf. */
+export interface CategoryManageResponse extends CategoryListResponse {
+  aiTranslate: boolean
+}
+
 /**
  * Antwort auf das Speichern der Reihenfolge: die GANZE Ordnung, nicht nur die
  * geschriebenen Zeilen. Die Oberfläche übernimmt daraus ihren Stand (Muster
@@ -414,6 +435,15 @@ export interface CategoryListResponse {
  */
 export interface CategoryOrderResponse {
   order: CategoryOrderEntry[]
+}
+
+/** Vorschlag der KI für EINE Zielsprache — advisory, der Mensch speichert. */
+export interface CategoryTranslateResponse {
+  locale: string
+  name: string
+  description: string
+  /** Welches Modell geantwortet hat — dieselbe Offenlegung wie beim Moderations-Assist. */
+  model: string
 }
 
 /**

@@ -1,4 +1,5 @@
 import { Query } from 'node-appwrite'
+import { categoryNamesByLocale } from '../../shared/categoryI18n'
 import { topicActivityAt } from '../../shared/discussionActivity'
 import { discussionTopicPath, topicSlug } from '../../shared/discussionUrl'
 import {
@@ -116,6 +117,7 @@ export function toDiscussionTopic(
   views = 0,
 ): DiscussionTopic {
   const slug = topicSlug(row.title, row.body)
+  const categoryNames = categoryNamesByLocale(category)
   return {
     $id: row.$id,
     title: topicTitle(row),
@@ -126,6 +128,11 @@ export function toDiscussionTopic(
     authorAvatarUrl: avatarUrl,
     categoryId: category.$id,
     categoryName: category.name,
+    // Nur wo übersetzt: eine leere Karte fällt ganz weg, und die Themen-Liste
+    // bleibt dann bei `categoryName` (localizedNameFrom). 25 Themen × ein
+    // leeres Objekt wäre Ballast in jeder Antwort einer einsprachigen
+    // Community — also in fast jeder.
+    ...(Object.keys(categoryNames).length ? { categoryNames } : {}),
     categorySlug: category.slug,
     score: row.score,
     publishedAt: row.publishedAt,

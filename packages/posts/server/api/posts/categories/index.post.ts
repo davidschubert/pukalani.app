@@ -1,5 +1,6 @@
 import { Query } from 'node-appwrite'
 import { categorySchema } from '../../../../schemas/postCategory'
+import { serializeCategoryTranslations } from '../../../../shared/categoryI18n'
 import { MAX_CATEGORY_SORT_ORDER, POST_CATEGORIES_TABLE, type PostCategory } from '../../../../shared/types/post'
 
 /**
@@ -65,6 +66,9 @@ export default defineEventHandler(async (event) => {
     description: body.description ?? '',
     sortOrder,
     active: body.active ?? true,
+    // '' = nichts übersetzt (dann gilt überall die Grundfassung). Leere Felder
+    // wirft der Serialisierer weg — siehe shared/categoryI18n.ts.
+    translations: serializeCategoryTranslations(body.translations),
   }, {
     // Die Struktur ist so öffentlich wie die Inhalte darin: 'public' heißt in
     // einer geschlossenen Community `read(label:<communityId>)` (C18), nicht

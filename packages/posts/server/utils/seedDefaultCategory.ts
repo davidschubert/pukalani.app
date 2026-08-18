@@ -79,6 +79,9 @@ export async function seedDefaultCategory(
         description: seed.description,
         sortOrder: 0,
         active: true,
+        // Die jeweils andere Sprache kommt aus `defaultCategoryFor` mit —
+        // beide Fassungen stehen dort ohnehin als Konstanten.
+        translations: seed.translations,
         communityId: input.tenantId,
       },
       permissions: [Permission.read(Role.any())],

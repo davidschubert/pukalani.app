@@ -14,6 +14,8 @@ const { t } = useI18n()
 const route = useRoute()
 const localePath = useLocalePath()
 
+const { categoryName } = useCategoryText()
+
 const { data } = await useFetch<DiscussionSidebarResponse>('/api/posts/discussions/sidebar')
 
 const rows = computed(() => data.value?.rows ?? [])
@@ -36,7 +38,7 @@ const activeSlug = computed(() => {
       class="block truncate rounded-md px-2 py-1.5 text-sm hover:bg-elevated"
       :class="activeSlug === category.slug ? 'bg-elevated font-medium text-default' : 'text-muted'"
     >
-      {{ category.name }}
+      {{ categoryName(category) }}
     </NuxtLink>
     <NuxtLink
       :to="localePath('/discussions?order=categories')"

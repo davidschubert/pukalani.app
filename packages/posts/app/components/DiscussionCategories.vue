@@ -20,14 +20,18 @@ const { data, status } = await useFetch<CategoryListResponse>('/api/posts/catego
   query: { counts: '1' },
 })
 
+const { categoryName, categoryDescription } = useCategoryText()
+
 const search = ref('')
 const rows = computed(() => {
   const all = data.value?.rows ?? []
   const needle = search.value.trim().toLowerCase()
   if (!needle) return all
+  // Gesucht wird in DER ANGEZEIGTEN Sprache: wer „Allgemein" liest, tippt
+  // „allgemein" — nicht den Namen der Grundfassung.
   return all.filter(entry =>
-    entry.category.name.toLowerCase().includes(needle)
-    || entry.category.description.toLowerCase().includes(needle))
+    categoryName(entry.category).toLowerCase().includes(needle)
+    || categoryDescription(entry.category).toLowerCase().includes(needle))
 })
 
 const columns = computed<TableColumn<CategoryWithCount>[]>(() => [
@@ -74,10 +78,10 @@ const canManageCategories = computed(() =>
             :to="localePath(`/discussions/${row.original.category.slug}`)"
             class="font-medium text-default hover:text-primary hover:underline"
           >
-            {{ row.original.category.name }}
+            {{ categoryName(row.original.category) }}
           </NuxtLink>
-          <p v-if="row.original.category.description" class="text-sm text-muted">
-            {{ row.original.category.description }}
+          <p v-if="categoryDescription(row.original.category)" class="text-sm text-muted">
+            {{ categoryDescription(row.original.category) }}
           </p>
         </div>
       </template>
