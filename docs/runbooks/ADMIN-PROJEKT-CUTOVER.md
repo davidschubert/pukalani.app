@@ -22,29 +22,45 @@ steht, gehört sie eingetragen — ein Häkchen ohne Messwert ist eine Behauptun
 
 ---
 
-## Inventar (Stand 2026-08-18, read-only erhoben)
+## Inventar (Momentwerte! — vor dem Fenster FRISCH messen)
 
-**41 Tabellen · 178 Rows · 5 Buckets** (fonts, avatars, gdpr-exports,
-runner-files, ticket-files). Größte Tabellen: run_events 35 ·
-community_members 31 · product_catalog 19 · invite_codes 18. Nutzer-/Team-Zahl
-und Datei-Zahlen stehen noch aus — der heutige Migrations-Key trägt weder
-`users`- noch `files`-Scope (Vorbedingung unten).
+Stand 2026-08-18: **41 Tabellen · ~248 Rows · 5 Buckets** (nur `runner-files`
+trägt Dateien: 4; die übrigen vier sind leer) · **1 Nutzer (OTP-only, ohne
+Passwort-Hash) · 0 Teams**. Die Row-Zahl ist ein MOMENTWERT: `run_events` ist
+zwischen zwei Messungen am selben Tag von 35 auf 104 gewachsen — der
+AI-Runner schreibt laufend. Deshalb zählt für Phase 3 nur die Messung NACH
+dem Runner-Stopp; Werkzeug: `--phase inventory`.
 
 ---
 
 ## 0 · Vorbedingungen (VOR dem Fenster, ohne Wirkung nach außen)
 
-- [ ] **Transfer-Werkzeug bereit** — AH-1-Muster (Users mit Hashes → Rows mit
-      Ids+Permissions → Buckets/Dateien per REST), generalisiert aus
-      `scripts/ops/f3-lib/`. Trockenlauf ist der Default; `--execute` schreibt.
-- [ ] **Transfer-Key auf `control`** mit `users.read`, `teams.read`,
-      `files.read` zusätzlich zu den Migrations-Scopes (der bestehende
-      Migrations-Key kann beides nicht — Inventar oben). Ablage als Datei,
-      nie im Repo; nach dem Lauf widerrufen.
-- [ ] Nutzer-/Team-/Datei-Zahlen nachgetragen: Users ______ · Teams ______ ·
-      Dateien je Bucket ______
-- [ ] Hash-Verfahren der Bestandskonten geprüft (OTP-only-Konten haben keins —
-      Betreiber-Konto ist per H2 ohne Passwort angelegt). Ergebnis: ______
+- [x] **Transfer-Werkzeug bereit** (2026-08-18):
+      `scripts/ops/ah4c-project-transfer.mjs` + pure Regeln in
+      `scripts/ops/ah4c-lib/rules.mts` (nutzt `hashPlanFor` aus f3-lib).
+      Selbsttest 30/30 · vitest 54/54
+      (`packages/control/tests/ah4cProjectTransfer.test.ts`) · Inventar-Lauf
+      read-only bewiesen (schreibt im Trockenlauf wirklich nichts).
+      Phasen: inventory → users (inkl. Teams) → rows → files → verify;
+      Delta-Semantik: vorhandene, abweichende Rows werden mit `--execute`
+      aktualisiert.
+- [ ] **Quell-Key**: David hat einen Transfer-Key auf `control` angelegt
+      (2026-08-18). Befund dazu: der BESTEHENDE Key in
+      `migrations/control.env` konnte ohnehin schon 10 von 11 Lese-Scopes
+      (F42-Muster „breiter Schlüssel") — nach AH-4c gehören BEIDE widerrufen
+      bzw. verengt (Schritt 6). Gegenprobe je Env-Datei:
+      `node scripts/ops/probe-key-scopes.mjs <env-datei>`.
+- [ ] **Ziel-Key-Scopes nachziehen (WICHTIG, sonst stirbt Phase users/files
+      beim ersten Schreibversuch):** der Migrations-Key des NEUEN Projekts
+      braucht über databases/tables/columns/indexes + buckets + rows hinaus
+      auch `users.read/users.write`, `teams.read/teams.write`,
+      `files.read/files.write` — in der Konsole am bestehenden Key
+      nachtragen (Keys sind editierbar, kein neuer nötig).
+- [x] Nutzer-/Team-/Datei-Zahlen: Users **1** · Teams **0** · Dateien nur
+      `runner-files` (4), übrige Buckets leer (2026-08-18).
+- [x] Hash-Verfahren geprüft: das eine Konto ist OTP-only, kein Hash —
+      Übernahme als `users.create` ohne Passwort (Betreiber-Konto per H2
+      bewusst passwortlos).
 - [ ] **AI-Runner pausiert einplanen**: der Mac-Daemon (tools/ai-runner)
       schreibt in `runners`/`runs`/`run_events` DIESES Projekts. Vor der
       Daten-Phase LaunchAgent stoppen, nach dem Schnitt mit neuem Projekt/Key
@@ -97,8 +113,12 @@ und Datei-Zahlen stehen noch aus — der heutige Migrations-Key trägt weder
 
 - [ ] **Nutzer** übernommen (Users-API, Hashes/prefs/Labels/Verifikation,
       Ids erhalten). Übernommen: ______ von ______
+- [ ] **Teams samt Mitgliedschaften** übernommen (per userId, ohne
+      Einladungs-Mail; heute 0 — der Zweig läuft trotzdem mit, weil er zum
+      1:1-Umzug gehört). Übernommen: ______
 - [ ] **Rows** aller 41 Tabellen kopiert (Ids + Permissions erhalten,
-      `Query.limit`-Paginierung). Rows: ______ von 178 (+ Delta)
+      `Query.limit`-Paginierung). Rows: ______ von ______ (FRISCH gemessen
+      nach Runner-Stopp; die 248 vom 2026-08-18 sind ein Momentwert)
 - [ ] **Buckets + Dateien** kopiert — per REST, nicht über SDK
       `getFileDownload` (liefert keinen Buffer-tauglichen Typ, AH-1-Lektion).
       Dateien: ______
@@ -149,9 +169,15 @@ und Datei-Zahlen stehen noch aus — der heutige Migrations-Key trägt weder
 - [ ] Beobachtungszeit vereinbart: ______ (Vorschlag 14 Tage — und diesmal
       die Kästchen erst NACH der Tat abhaken; die F3-Lektion vom 2026-08-18).
 - [ ] Projekt `control` **einfrieren**: Transfer-Key sofort widerrufen, die
-      zwei Alt-Keys nach der Beobachtung; Anzeigename in der Konsole auf
-      „control [eingefroren, AH-4c]" — löschen erst viel später und mit dem
-      Delete-500-Rezept griffbereit.
+      zwei Alt-Keys nach der Beobachtung (der Bestands-Key in
+      `migrations/control.env` ist ohnehin zu breit — F42); Anzeigename in
+      der Konsole auf „control [eingefroren, AH-4c]" — löschen erst viel
+      später und mit dem Delete-500-Rezept griffbereit.
+- [ ] **`app_secrets` prüfen/rotieren:** anders als bei F3 wandert diese
+      Tabelle beim 1:1-Umzug MIT — die Kopie trägt also die Geheimnisse des
+      alten Projekts. Nach dem Schnitt sichten und rotieren, was rotierbar
+      ist; dasselbe gilt sinngemäß für kopierte `audit_logs` (Protokoll,
+      bleibt) und `app_config` (gewollt).
 - [ ] Alte Keys aus allen Server-`.env` und `.ah4c-backup`-Dateien entfernt.
 - [ ] `~/.appwrite-secrets/migrations/control.env` → durch `admin.env`
       ersetzt; Wave-/Runner-Aufrufe (`pnpm migrate --app control`) zeigen auf
