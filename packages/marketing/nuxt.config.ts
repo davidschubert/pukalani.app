@@ -32,6 +32,32 @@ export default defineNuxtConfig({
     join(currentDir, './app/assets/css/marketing.css'),
   ],
 
+  /**
+   * DIE BILDMARKE IM TAB (Davids Befund 2026-08-19): beide Marken-Sites
+   * beantworteten /favicon.ico mit 404 — der Browser-Tab blieb ohne Zeichen.
+   * Die Dateien liegen im public/ DIESES Layers (Layer-public wird von den
+   * erbenden Apps ausgeliefert, dasselbe Muster wie public/themes/* im
+   * themes-Layer) und sind aus der puka in PukaMark.vue abgeleitet:
+   * favicon.svg (Original, skaliert verlustfrei), favicon.ico (32er-PNG im
+   * ICO-Mantel für Alt-Konsumenten), apple-touch-icon.png (iOS nimmt NUR
+   * Bitmaps, mit hellem Grund — dieselbe Begründung wie in
+   * packages/themes/shared/brandIcon.ts).
+   *
+   * Die Links stehen EXPLIZIT im Kopf, damit nicht der Browser-Fallback
+   * entscheidet (der fragte auf help unter /de/… relativ an und lief ins
+   * 404). Das Mandanten-Favicon-Gate (`pukalani.seo.tenantFavicon`, themes)
+   * ist davon unberührt — diese Apps erben den themes-Layer nicht.
+   */
+  app: {
+    head: {
+      link: [
+        { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
+        { rel: 'icon', type: 'image/x-icon', sizes: '32x32', href: '/favicon.ico' },
+        { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' },
+      ],
+    },
+  },
+
   // Layer-Keys mergen mit den Locales der App (gleicher code). Der Layer
   // bringt AUSSCHLIESSLICH die Schlüssel mit, die seine eigenen Bauteile
   // rendern (marketing.nav.* + marketing.footer.*) — was er nicht mitbringt,
