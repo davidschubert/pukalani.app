@@ -93,7 +93,15 @@ F44-Klasse: Terminerinnerungen feuerten in Prod nie). Key erzeugt
 (Konsole + platform-.env), stündlicher Cron eingerichtet (ploi-Job 326870;
 weil ploi nach 10 min nicht in den Crontab synct, identische Zeile direkt im
 ploi-Crontab, Log `/home/ploi/events-sweep.log`) — erster echter Lauf
-2026-08-19T10:00:01Z → 200.
+2026-08-19T10:00:01Z → 200. AUCH ROTIERT (Probe, gleiche Sitzung):
+Konsole → .env → pm2 in der A0-Reihenfolge, Endzustand gemessen — neuer
+Key 200, alter Key 401, ohne Key 401; der Cron liest die .env je Lauf und
+fährt nahtlos weiter.
+**Gelernt:** Die eigene Sonde ist auch ein Messgerät: fünfmal 404 in der
+Rotations-Probe hieß „kaputte Sonde" (Node-`fetch` verwirft den eigenen
+Host-Header — die dokumentierte Falle, gegen die die Beweis-Skripte
+`node:http` nutzen), nicht „kaputte Rotation". Erst die curl-Gegenmessung
+trennte beides.
 **Gelernt:** `%` ist in crontab ein Sonderzeichen — ein `curl -w
 "%{http_code}"` wird ohne Maskierung still zum Zeilenumbruch; jede
 Prozent-Stelle der Zeile maskieren, nicht nur die des Datums.
