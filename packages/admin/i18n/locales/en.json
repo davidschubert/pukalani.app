@@ -527,12 +527,23 @@
       "service": {
         "ai": "AI (OpenRouter)",
         "analytics": "Analytics (Plausible)",
-        "tickets-ai": "Console AI (ticket triage)"
+        "tickets-ai": "Console AI (ticket triage)",
+        "smtp": "Mail delivery (SMTP)"
       },
       "serviceDesc": {
         "ai": "Powers moderation assistants and translation suggestions across all communities.",
         "analytics": "Reads visitor numbers for the analytics pages.",
-        "tickets-ai": "A separate budget for ticket triage. Without its own key the general AI access applies."
+        "tickets-ai": "A separate budget for ticket triage. Without its own key the general AI access applies.",
+        "smtp": "Sends notifications, invitations and the daily digest."
+      },
+      "smtp": {
+        "host": "Server",
+        "port": "Port",
+        "user": "User",
+        "pass": "Password",
+        "from": "Sender",
+        "passKept": "Leaving this empty keeps the stored password.",
+        "clearHint": "Clear the server field and save to remove this access — the server environment applies again."
       }
     }
   },

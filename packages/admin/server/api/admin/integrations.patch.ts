@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { INTEGRATION_IDS } from '../../../shared/types/integrations'
+import { mergeMailerSettings, parseMailerSettings } from '../../../../core/shared/mailerSettings'
 
 /**
  * EINEN Zugang setzen oder entfernen.
@@ -16,16 +16,63 @@ import { INTEGRATION_IDS } from '../../../shared/types/integrations'
  * Das Protokoll hält die TATSACHE fest, nie den Wert — auch nicht gekürzt:
  * die ersten Zeichen eines Schlüssels sind bereits eine Auskunft.
  */
-const bodySchema = z.object({
-  id: z.enum(INTEGRATION_IDS),
-  value: z.string().trim().max(400),
-})
+/**
+ * ZWEI FORMEN, weil es zwei Sorten Zugang gibt: ein einzelner Schlüssel — und
+ * SMTP, das ein BLOCK ist (Host, Port, Benutzer, Passwort, Absender gehören
+ * zusammen).
+ */
+const bodySchema = z.union([
+  z.object({
+    // Die Einzel-Schlüssel: ausdrücklich aufgezählt statt aus INTEGRATION_IDS
+    // gefiltert — nur so bleibt es eine unterscheidbare Union, und der
+    // Compiler kann `body.smtp` von `body.value` trennen.
+    id: z.enum(['ai', 'analytics', 'tickets-ai']),
+    value: z.string().trim().max(400),
+  }),
+  z.object({
+    id: z.literal('smtp'),
+    smtp: z.object({
+      // Leerer Host = diesen Zugang gibt es nicht mehr (siehe unten).
+      host: z.string().trim().max(200),
+      port: z.string().trim().max(6),
+      user: z.string().trim().max(200),
+      // Leeres Passwort heisst UNVERÄNDERT — nicht „löschen".
+      pass: z.string().max(200),
+      from: z.string().trim().max(200),
+    }),
+  }),
+])
 
 export default defineEventHandler(async (event) => {
   requirePermission(event, 'system.manage')
 
-  const { id, value } = await readValidatedBody(event, bodySchema.parse)
+  const body = await readValidatedBody(event, bodySchema.parse)
 
+  if (body.id === 'smtp') {
+    /**
+     * DAS PASSWORT DARF NICHT VERSEHENTLICH VERSCHWINDEN. Wer nur den Absender
+     * ändert, tippt es nicht neu — das Feld kommt leer zurück. Der bisherige
+     * Stand wird deshalb gelesen und zusammengeführt (`mergeMailerSettings`,
+     * pur und getestet). Ohne diese Regel nimmt die erste harmlose Korrektur
+     * den Versand mit, und zwar STILL.
+     */
+    const previous = parseMailerSettings(await readInstanceSecret(event, 'smtp'))
+    const merged = mergeMailerSettings(previous, body.smtp)
+    // Leerer Host = entfernen: das ist die Handlung „diesen Zugang gibt es
+    // nicht mehr", und sie sieht anders aus als ein leeres Passwort-Feld.
+    await writeInstanceSecret(event, 'smtp', merged.host ? JSON.stringify(merged) : '', event.context.user?.$id ?? '')
+    // Der Puffer im Mailer (30 s) würde sonst weiter den alten Zugang liefern
+    // — nach einem bewussten Speichern ist das eine Wartezeit ohne Grund.
+    __resetMailerSettingsCache()
+    await recordAudit(event, {
+      action: merged.host ? 'integration.key_set' : 'integration.key_cleared',
+      targetType: 'integration',
+      targetId: 'smtp',
+    })
+    return { ok: true, id: 'smtp' as const, source: merged.host ? 'settings' as const : 'none' as const }
+  }
+
+  const { id, value } = body
   await writeInstanceSecret(event, id, value, event.context.user?.$id ?? '')
 
   await recordAudit(event, {

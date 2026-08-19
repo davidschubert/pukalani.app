@@ -10,8 +10,8 @@ import { runEmailDigestSweep } from '../utils/emailDigest'
  */
 const SWEEP_INTERVAL_MS = 30 * 60 * 1000
 
-export default defineNitroPlugin(() => {
-  if (!isMailerConfigured(undefined)) return
+export default defineNitroPlugin(async () => {
+  if (!await mailerConfigured()) return
   const timer = setInterval(() => {
     void runEmailDigestSweep().then((result) => {
       if (result.sent || result.errors) {

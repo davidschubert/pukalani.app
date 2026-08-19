@@ -527,12 +527,23 @@
       "service": {
         "ai": "KI (OpenRouter)",
         "analytics": "Statistik (Plausible)",
-        "tickets-ai": "KI der Konsole (Ticket-Triage)"
+        "tickets-ai": "KI der Konsole (Ticket-Triage)",
+        "smtp": "Mailversand (SMTP)"
       },
       "serviceDesc": {
         "ai": "Treibt Moderations-Assistenten und Übersetzungs-Vorschläge in allen Communities.",
         "analytics": "Liest die Besuchszahlen für die Statistik-Seiten.",
-        "tickets-ai": "Eigenes Kontingent für die Ticket-Triage. Ohne eigenen Schlüssel gilt der allgemeine KI-Zugang."
+        "tickets-ai": "Eigenes Kontingent für die Ticket-Triage. Ohne eigenen Schlüssel gilt der allgemeine KI-Zugang.",
+        "smtp": "Verschickt Benachrichtigungen, Einladungen und die Tageszusammenfassung."
+      },
+      "smtp": {
+        "host": "Server",
+        "port": "Port",
+        "user": "Benutzer",
+        "pass": "Passwort",
+        "from": "Absender",
+        "passKept": "Leer lassen behält das gespeicherte Passwort.",
+        "clearHint": "Server-Feld leeren und speichern entfernt den Zugang — dann gilt wieder die Server-Umgebung."
       }
     }
   },

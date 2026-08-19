@@ -68,6 +68,37 @@ async function clear(id: IntegrationId) {
 }
 
 const envName = (id: IntegrationId) => data.value?.items.find(i => i.id === id)?.envName ?? ''
+
+// ── SMTP: ein Block statt eines Feldes ─────────────────────────────────────
+/** Das Passwort steht bewusst LEER im Formular — der Server gibt keines heraus,
+ *  und leer heisst beim Speichern „unverändert" (mergeMailerSettings). */
+const smtp = reactive({ host: '', port: '', user: '', pass: '', from: '' })
+const smtpBusy = ref(false)
+watchEffect(() => {
+  const s = data.value?.smtp
+  if (!s) return
+  smtp.host = s.host
+  smtp.port = s.port
+  smtp.user = s.user
+  smtp.from = s.from
+})
+
+async function saveSmtp() {
+  if (smtpBusy.value) return
+  smtpBusy.value = true
+  try {
+    await $fetch('/api/admin/integrations', { method: 'PATCH', body: { id: 'smtp', smtp: { ...smtp } } })
+    smtp.pass = ''
+    await refresh()
+    toast.add({ title: t('admin.integrations.saved'), color: 'success' })
+  }
+  catch {
+    toast.add({ title: t('admin.integrations.saveFailed'), description: t('admin.integrations.saveFailedHint'), color: 'error' })
+  }
+  finally {
+    smtpBusy.value = false
+  }
+}
 const badgeColor = (source: string) => (source === 'none' ? 'warning' : 'success')
 </script>
 
@@ -146,6 +177,46 @@ const badgeColor = (source: string) => (source === 'none' ? 'warning' : 'success
               <span class="text-xs text-dimmed">{{ t('admin.integrations.envHint', { env: item.envName }) }}</span>
             </div>
           </template>
+        </UCard>
+
+        <!-- SMTP. Kein einzelner Schlüssel, sondern ein Block — deshalb ein
+             kleines Formular statt einer Zeile. Das Passwort-Feld bleibt beim
+             Laden LEER: der Server gibt keines heraus, und leer heisst beim
+             Speichern „unverändert". Entfernen geht über einen leeren Host,
+             weil das die andere Absicht ist. -->
+        <UCard v-if="data?.editable" data-integration="smtp">
+          <div class="flex flex-wrap items-center gap-2">
+            <h3 class="font-semibold">{{ t('admin.integrations.service.smtp') }}</h3>
+            <UBadge :color="badgeColor(data.smtp.source)" variant="subtle" size="sm">
+              {{ t(`admin.integrations.source.${data.smtp.source}`) }}
+            </UBadge>
+          </div>
+          <p class="mt-1 text-sm text-muted">{{ t('admin.integrations.serviceDesc.smtp') }}</p>
+
+          <div class="mt-3 grid gap-2 sm:grid-cols-2">
+            <UFormField :label="t('admin.integrations.smtp.host')">
+              <UInput v-model="smtp.host" class="w-full" placeholder="smtp.example.com" data-smtp-host />
+            </UFormField>
+            <UFormField :label="t('admin.integrations.smtp.port')">
+              <UInput v-model="smtp.port" class="w-full" placeholder="587" />
+            </UFormField>
+            <UFormField :label="t('admin.integrations.smtp.user')">
+              <UInput v-model="smtp.user" class="w-full" autocomplete="off" />
+            </UFormField>
+            <UFormField :label="t('admin.integrations.smtp.pass')" :help="data.smtp.hasPassword ? t('admin.integrations.smtp.passKept') : undefined">
+              <UInput v-model="smtp.pass" type="password" class="w-full" autocomplete="off" data-smtp-pass />
+            </UFormField>
+            <UFormField :label="t('admin.integrations.smtp.from')" class="sm:col-span-2">
+              <UInput v-model="smtp.from" class="w-full" placeholder="noreply@example.com" />
+            </UFormField>
+          </div>
+
+          <div class="mt-3 flex flex-wrap items-center gap-2">
+            <UButton size="xs" :loading="smtpBusy" data-smtp-save @click="saveSmtp">
+              {{ t('admin.integrations.save') }}
+            </UButton>
+            <span class="text-xs text-dimmed">{{ t('admin.integrations.smtp.clearHint') }}</span>
+          </div>
         </UCard>
 
         <!-- Die Unbeweglichen: genannt, damit niemand sie hier sucht. -->

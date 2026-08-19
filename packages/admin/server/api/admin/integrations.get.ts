@@ -1,3 +1,4 @@
+import { parseMailerSettings, toMailerView } from '../../../../core/shared/mailerSettings'
 import type { IntegrationsResponse, IntegrationState } from '../../../shared/types/integrations'
 import { BOOTSTRAP_SECRETS, integrationSource } from '../../../shared/types/integrations'
 
@@ -67,8 +68,22 @@ export default defineEventHandler(async (event): Promise<IntegrationsResponse> =
     })
   }
 
+  // ── SMTP: EIN Block, und das Passwort bleibt hier ───────────────────────
+  const storedSmtp = parseMailerSettings(await readInstanceSecret(event, 'smtp'))
+  const smtpView = toMailerView(storedSmtp ?? {
+    host: runtime.smtpHost ?? '',
+    port: String(runtime.smtpPort ?? ''),
+    user: runtime.smtpUser ?? '',
+    pass: runtime.smtpPass ?? '',
+    from: runtime.smtpFrom ?? '',
+  })
+
   return {
     items,
+    smtp: {
+      ...smtpView,
+      source: storedSmtp ? 'settings' : (runtime.smtpHost ? 'env' : 'none'),
+    },
     // Ohne Umschlag bleibt jedes Feld zu — die Seite sagt dann warum.
     editable: instanceSecretsConfigured(event),
     /** Nur die NAMEN, nie ein Wert: was hier steht, gehört in die Server-Env. */

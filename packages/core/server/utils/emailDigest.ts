@@ -68,7 +68,7 @@ export async function runEmailDigestSweep(): Promise<DigestSweepResult> {
   const result: DigestSweepResult = { candidates: 0, sent: 0, skipped: 0, errors: 0 }
   // Reentranz-Guard (Single-Instanz, wie rate-limit dokumentiert): Plugin-
   // Intervall und manuelle Route dürfen sich nicht überlappen.
-  if (sweepRunning || !isMailerConfigured(undefined)) return result
+  if (sweepRunning || !await mailerConfigured()) return result
   sweepRunning = true
   try {
     const config = useRuntimeConfig()

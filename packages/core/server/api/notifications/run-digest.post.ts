@@ -7,7 +7,7 @@ import { runEmailDigestSweep } from '../../utils/emailDigest'
  */
 export default defineEventHandler(async (event) => {
   requirePermission(event, 'system.manage')
-  if (!isMailerConfigured(event)) {
+  if (!await mailerConfigured(event)) {
     throw createError({ status: 503, statusText: 'SMTP not configured' })
   }
   return await runEmailDigestSweep()

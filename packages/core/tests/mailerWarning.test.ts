@@ -8,14 +8,19 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
  *
  * Zwei Dinge sind hier festgenagelt, und beide sind der eigentliche Entwurf:
  * die Warnung fällt genau einmal (eine je Mail wäre Lärm, den man wegfiltert,
- * und damit wieder still), und `isMailerConfigured()` bleibt STUMM. Diese Frage
+ * und damit wieder still), und `mailerConfigured()` bleibt STUMM. Diese Frage
  * stellt auch der Digest-Sweep beim Start jeder App; help, marketing und
  * portfolio verschicken bewusst nichts und dürfen nicht gewarnt werden.
+ *
+ * Seit 2026-08-18 kommt der Zugang auch aus der ABLAGE (Instanz →
+ * Integrationen). Hier wird sie leer gestubbt: geprüft wird der Env-Zweig,
+ * und dass eine nicht lesbare Ablage den Versand NICHT kippt.
  */
 const config = { smtpHost: '', smtpPort: '587', smtpUser: '', smtpPass: '', smtpFrom: '' }
 vi.stubGlobal('useRuntimeConfig', () => config)
+vi.stubGlobal('readInstanceSecret', async () => '')
 
-const { __resetMailerWarnings, isMailerConfigured, sendMail, warnMailerMissingOnce } = await import('../server/utils/mailer')
+const { __resetMailerWarnings, mailerConfigured, sendMail, warnMailerMissingOnce } = await import('../server/utils/mailer')
 
 describe('Mailer-Warnung', () => {
   beforeEach(() => {
@@ -42,17 +47,17 @@ describe('Mailer-Warnung', () => {
     warn.mockRestore()
   })
 
-  it('isMailerConfigured() warnt NICHT — sonst meldet sich jede mail-lose App beim Start', () => {
+  it('mailerConfigured() warnt NICHT — sonst meldet sich jede mail-lose App beim Start', async () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
-    expect(isMailerConfigured()).toBe(false)
+    expect(await mailerConfigured()).toBe(false)
     expect(warn).not.toHaveBeenCalled()
     warn.mockRestore()
   })
 
-  it('schweigt vollständig, wenn ein Host gesetzt ist', () => {
+  it('schweigt vollständig, wenn ein Host gesetzt ist', async () => {
     config.smtpHost = 'smtp.example.test'
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
-    expect(isMailerConfigured()).toBe(true)
+    expect(await mailerConfigured()).toBe(true)
     expect(warn).not.toHaveBeenCalled()
     warn.mockRestore()
   })

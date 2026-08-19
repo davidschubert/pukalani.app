@@ -21,8 +21,23 @@ export interface IntegrationState {
   source: IntegrationSource
 }
 
+/**
+ * SMTP ist kein einzelner Schlüssel, sondern ein BLOCK — Host, Port, Benutzer,
+ * Passwort, Absender gehören zusammen. Die Antwort zeigt alles ausser dem
+ * Passwort; von dem gibt es nur die Auskunft, DASS eines hinterlegt ist.
+ */
+export interface SmtpIntegrationState {
+  source: IntegrationSource
+  host: string
+  port: string
+  user: string
+  from: string
+  hasPassword: boolean
+}
+
 export interface IntegrationsResponse {
   items: IntegrationState[]
+  smtp: SmtpIntegrationState
   /** Ist `NUXT_INSTANCE_SECRETS_KEY` gesetzt? Ohne ihn kein Eingabefeld. */
   editable: boolean
   bootstrap: readonly string[]

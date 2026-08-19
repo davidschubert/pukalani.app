@@ -61,11 +61,13 @@ export const INSTANCE_SECRETS_TABLE = 'instance_secrets'
  * reisst die Naht in dem Moment, in dem jemand dreht. Das braucht eine
  * Übergangsstufe, in der beide Seiten alten UND neuen Wert annehmen.
  *
- * UND NICHT `smtpPass`: der Digest-Versand läuft in einem Sweep OHNE Request,
- * `readInstanceSecret` verlangt aber ein `H3Event`. Lösbar, aber ein Fehler
- * dort heisst „es geht still keine Mail mehr raus" — eigenes Paket.
+ * SMTP kam am 2026-08-18 dazu — als EIN Block (`smtp`), nicht als einzelnes
+ * Passwort: Host, Port, Benutzer, Passwort und Absender gehören zusammen, und
+ * ein halb umgezogener Block wäre eine Konfiguration, die niemand mehr
+ * erklären kann. Dafür musste diese Datei eventlos lesbar werden — der
+ * Digest-Versand läuft in einem Sweep OHNE Request.
  */
-export const INSTANCE_SECRET_KINDS = ['ai', 'analytics', 'tickets-ai'] as const
+export const INSTANCE_SECRET_KINDS = ['ai', 'analytics', 'tickets-ai', 'smtp'] as const
 export type InstanceSecretKind = typeof INSTANCE_SECRET_KINDS[number]
 
 export interface InstanceSecretRow extends Models.Row {
@@ -78,7 +80,7 @@ export interface InstanceSecretRow extends Models.Row {
 /** Woher der benutzte Wert stammt — für die Anzeige in der Konsole. */
 export type InstanceSecretSource = 'settings' | 'env' | 'none'
 
-function envKey(event: H3Event): Buffer | null {
+function envKey(event?: H3Event): Buffer | null {
   // Wirft bei falscher Form (nicht 64 Hex) — das ist Absicht: ein halb
   // gesetzter Umschlag-Schlüssel soll auffallen, nicht stillschweigend
   // „nichts gespeichert" bedeuten.
@@ -86,7 +88,7 @@ function envKey(event: H3Event): Buffer | null {
 }
 
 /** Ist der Umschlag überhaupt einsatzbereit? Ohne ihn gibt es kein Feld. */
-export function instanceSecretsConfigured(event: H3Event): boolean {
+export function instanceSecretsConfigured(event?: H3Event): boolean {
   try {
     return envKey(event) !== null
   }
@@ -101,8 +103,13 @@ export function instanceSecretsConfigured(event: H3Event): boolean {
  * Bewusst OHNE die Datentür: `instance_secrets` gehört der INSTANZ, nicht
  * einem Mandanten (dieselbe Ebene wie `app_config`). Der Admin-Client ist
  * hier die einzige Zugangsart, die Tabelle trägt keine Client-Rechte.
+ *
+ * `event` ist OPTIONAL, und das ist kein Komfort: Sweeps laufen ohne Request
+ * (Digest-Versand, Health-Sweep). `useRuntimeConfig()` und
+ * `createAdminClient()` kommen beide ohne aus — ohne diese Freiheit wäre der
+ * Mailversand nicht umziehbar gewesen.
  */
-export async function readInstanceSecret(event: H3Event, kind: InstanceSecretKind): Promise<string> {
+export async function readInstanceSecret(event: H3Event | undefined, kind: InstanceSecretKind): Promise<string> {
   let key: Buffer | null
   try {
     key = envKey(event)

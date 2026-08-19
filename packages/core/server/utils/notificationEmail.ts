@@ -155,12 +155,12 @@ export function buildDigestEmail(links: NotificationLinkContext, locale: EmailLo
  *
  * OHNE `H3Event` aufrufbar, weil notify() es seit der Community-Zahlungswarnung
  * ist: die entsteht in einem Intervall-Plugin. Alles, was hier gebraucht wird,
- * kennt diesen Fall schon (`isMailerConfigured`, `createAdminClient`,
+ * kennt diesen Fall schon (`mailerConfigured`, `createAdminClient`,
  * `useRuntimeConfig`, `sendMail` nehmen `undefined`).
  */
 export async function maybeSendInstantEmail(event: H3Event | undefined, input: NotifyInput, communityId: string): Promise<void> {
   try {
-    if (!isMailerConfigured(event)) {
+    if (!await mailerConfigured(event)) {
       warnMailerMissingOnce('eine Sofort-Benachrichtigung')
       return
     }
