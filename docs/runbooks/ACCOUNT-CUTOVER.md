@@ -144,8 +144,11 @@ steht, gehört sie eingetragen — ein Häkchen ohne Messwert ist eine Behauptun
 - [x] Beobachtungszeit vereinbart: ______ (Vorschlag: bis alle
       Einladungs-Codes abgelaufen sind, also mindestens 7 Tage; die 301 selbst
       darf länger stehen bleiben — sie kostet nichts).
-- [x] Projekt `pool` bleibt **eingefroren**, nicht gelöscht: keine neuen Rows,
-      keine Keys im Umlauf. Runtime-Key von `pool` widerrufen: ______
+- [x] Projekt `pool` blieb zunächst **eingefroren**; am **2026-08-19 auf
+      Davids Entscheidung GELÖSCHT** (sauber, kein Delete-500; 404-Gegenprobe).
+      Begründung: `account` war eine Woche unter Kundenlast weitergewachsen —
+      die Kopie versicherte nichts mehr und war datenschutzrechtlich nur noch
+      Ballast; Alt-Stände decken die Offsite-Dumps.
 - [x] Alte Keys aus allen Server-`.env` entfernt (nicht nur überschrieben).
 - [x] `my.`/`start.` bleiben in `RESERVED_SUBDOMAINS` — **nie** freigeben.
 - [x] Plausible-Site für die Kontroll-Hosts anlegen (U18) — jetzt erst, damit

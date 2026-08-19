@@ -6,27 +6,34 @@ import {
 } from '../server/utils/sharedSeamSecret'
 
 /**
- * WARUM ES DIESEN TEST GIBT
+ * WER SPRICHT HIER EIGENTLICH MIT WEM — gemessen, nicht angenommen
+ * (2026-08-19; die erste Fassung dieses Tests hat sich genau hier geirrt).
  *
- * Die Rotations-Zusage lautet „Empfänger nimmt die Menge {Konsole, Env} an,
- * Sender schickt einen Wert — also erst beim Empfänger eintragen, dann beim
- * Sender, und niemand merkt etwas". Für eine EINSEITIGE Naht stimmt das
- * (`events-sweep`: der Cron sendet, der Sweep empfängt).
+ * `onboarding-service` liegt auf DREI Deployments mit demselben Wert, und die
+ * Rollen sind NICHT symmetrisch. Sie ergeben sich daraus, welcher Layer wo
+ * montiert ist:
  *
- * Für die ZWEISEITIGE Naht `onboarding-service` stimmt es NICHT, und das ist
- * kein Fehler in der Regel, sondern eine Eigenschaft der Lage: dort ist jede
- * Seite Empfänger UND Sender über DIESELBE Sorte. Ein Konsolen-Eintrag ändert
- * deshalb beides auf einmal — was die Seite annimmt (gut) und was sie sendet
- * (zu früh). Zwischen den zwei Einträgen ist genau EINE Richtung tot.
+ *   platform   sendet an admin (49 Service-Routen: Community anlegen, Team,
+ *              Switcher-Handoff). Sie EMPFÄNGT NIE — der einzige Empfänger
+ *              `requireControlCaller` lebt im `domains`-Layer, und den zieht
+ *              apps/platform nicht.
+ *   admin      empfängt von platform UND von portfolio, und sendet an
+ *              portfolio (Domain-Settle). Hier — und NUR hier — ist dieselbe
+ *              Ablage-Zeile gleichzeitig Annahme- und Sende-Wert.
+ *   portfolio  empfängt von admin und sendet im selben Handler zurück
+ *              (`settle.post.ts` ruft `/api/control/site/domain/host`). Es ist
+ *              das letzte verbliebene Silo-Deployment.
  *
- * Das ist auszuhalten, solange man weiss, WELCHE. Die Karte schickt den
- * Betreiber deshalb zuerst auf die Betreiber-Konsole: dann fällt in der Lücke
- * `control→site` aus (Domain freischalten, eine Handlung, die der Betreiber
- * in genau diesem Moment selbst nicht auslöst) statt `platform→control`
- * (Community anlegen, Team, Switcher — neun Aufrufer, alle kundenseitig).
+ * FOLGE FÜR DIE ROTATION: für das Paar platform→admin ist die Zusage
+ * „erst Empfänger, dann Sender" vollständig richtig und fensterlos. Das
+ * Fenster entsteht ausschliesslich an der Kante admin→portfolio, weil ein
+ * Eintrag in der Ablage von admin dort zugleich den GESENDETEN Wert umstellt.
  *
- * Dieser Test nagelt die Aussage fest, damit niemand die Karte später auf
- * „erst Empfänger" zurückkürzt, weil die kürzere Fassung eleganter klingt.
+ * Und es lässt sich dort auch nicht wegsortieren: portfolio hat keinen
+ * `NUXT_INSTANCE_SECRETS_KEY`, also keine Ablage, also genau EINEN gültigen
+ * Wert aus der Env. Wer zuerst portfolio umstellt, bricht admin→portfolio von
+ * der anderen Seite. Solange dort keine Ablage existiert, ist die Kante nur
+ * mit einem kurzen, bewusst gelegten Fenster zu drehen — nicht ohne.
  */
 
 /** Trägt die Naht in DIESER Richtung? Sender schickt seinen einen Wert, der
@@ -42,51 +49,63 @@ function nahtTraegt(
 const ALT = 'wert-vor-der-rotation'
 const NEU = 'wert-nach-der-rotation'
 
-describe('einseitige Naht (events-sweep) — fensterlos, wie zugesagt', () => {
-  it('Empfänger zuerst: der alte Sender kommt weiter durch', () => {
-    const cron = { env: ALT }
-    const sweep = { konsole: NEU, env: ALT }
-    expect(nahtTraegt(cron, sweep)).toBe(true)
+describe('platform → admin: reiner Sender auf reinen Empfänger, fensterlos', () => {
+  it('Empfänger zuerst: der noch nicht umgestellte Sender kommt weiter durch', () => {
+    const platform = { env: ALT }
+    const admin = { konsole: NEU, env: ALT }
+    expect(nahtTraegt(platform, admin)).toBe(true)
   })
 
-  it('nach beiden Schritten trägt sie ebenfalls', () => {
+  it('und nach dem zweiten Schritt ebenso', () => {
     expect(nahtTraegt({ konsole: NEU, env: ALT }, { konsole: NEU, env: ALT })).toBe(true)
+  })
+
+  it('umgekehrt begonnen bräche sie — deshalb steht die Reihenfolge auf der Karte', () => {
+    expect(nahtTraegt({ konsole: NEU, env: ALT }, { env: ALT })).toBe(false)
   })
 })
 
-describe('zweiseitige Naht (onboarding-service) — das Fenster ist echt', () => {
-  it('Ausgangslage: beide Richtungen tragen', () => {
-    const platform = { env: ALT }
+describe('admin ↔ portfolio: hier sitzt das Fenster, und zwar unvermeidlich', () => {
+  it('Ausgangslage: beide Kanten tragen', () => {
     const admin = { env: ALT }
-    expect(nahtTraegt(platform, admin)).toBe(true)
-    expect(nahtTraegt(admin, platform)).toBe(true)
+    const portfolio = { env: ALT }
+    expect(nahtTraegt(admin, portfolio)).toBe(true)
+    expect(nahtTraegt(portfolio, admin)).toBe(true)
   })
 
-  it('nur auf der Betreiber-Konsole eingetragen: control→site fällt aus, platform→control hält', () => {
-    const platform = { env: ALT }
+  it('admin umgestellt: der Rückweg hält, der Hinweg fällt aus', () => {
     const admin = { konsole: NEU, env: ALT }
-    // Kundenseitig (Community anlegen, Switcher, Team) — MUSS halten:
-    expect(nahtTraegt(platform, admin)).toBe(true)
-    // Betreiberseitig (Domain freischalten) — fällt für die Dauer der Lücke aus:
-    expect(nahtTraegt(admin, platform)).toBe(false)
+    const portfolio = { env: ALT }
+    // portfolio → admin (der geschachtelte Rückruf) — hält, weil admin beide annimmt:
+    expect(nahtTraegt(portfolio, admin)).toBe(true)
+    // admin → portfolio (Domain-Settle) — fällt aus, bis portfolio nachzieht:
+    expect(nahtTraegt(admin, portfolio)).toBe(false)
   })
 
-  it('umgekehrt begonnen träfe die Lücke die KUNDEN — deshalb steht die Reihenfolge auf der Karte', () => {
-    const platform = { konsole: NEU, env: ALT }
+  it('portfolio zuerst umgestellt bräche dieselbe Kante von der anderen Seite', () => {
     const admin = { env: ALT }
-    expect(nahtTraegt(platform, admin)).toBe(false)
-    expect(nahtTraegt(admin, platform)).toBe(true)
+    const portfolio = { env: NEU }
+    expect(nahtTraegt(admin, portfolio)).toBe(false)
   })
 
-  it('nach BEIDEN Einträgen tragen wieder beide Richtungen', () => {
-    const beide = { konsole: NEU, env: ALT }
-    expect(nahtTraegt(beide, beide)).toBe(true)
+  it('weil portfolio ohne Ablage nur EINEN Wert kennt — daher rührt die Unvermeidbarkeit', () => {
+    const ohneAblage = { env: ALT }
+    expect(seamSecretCandidates(ohneAblage.konsole, ohneAblage.env)).toHaveLength(1)
+    const mitAblage = { konsole: NEU, env: ALT }
+    expect(seamSecretCandidates(mitAblage.konsole, mitAblage.env)).toHaveLength(2)
   })
 
-  it('und der alte Wert bleibt gültig, bis die Env geräumt ist', () => {
-    const beide = { konsole: NEU, env: ALT }
-    expect(seamSecretMatches(ALT, seamSecretCandidates(beide.konsole, beide.env))).toBe(true)
-    const geraeumt = { konsole: NEU }
-    expect(seamSecretMatches(ALT, seamSecretCandidates(geraeumt.konsole, undefined))).toBe(false)
+  it('nach beiden Schritten tragen wieder beide Kanten', () => {
+    const admin = { konsole: NEU, env: ALT }
+    const portfolio = { env: NEU }
+    expect(nahtTraegt(admin, portfolio)).toBe(true)
+    expect(nahtTraegt(portfolio, admin)).toBe(true)
+  })
+})
+
+describe('der alte Wert bleibt gültig, bis die Env geräumt ist', () => {
+  it('mit Env-Rückfall angenommen, ohne ihn nicht mehr', () => {
+    expect(seamSecretMatches(ALT, seamSecretCandidates(NEU, ALT))).toBe(true)
+    expect(seamSecretMatches(ALT, seamSecretCandidates(NEU, undefined))).toBe(false)
   })
 })
