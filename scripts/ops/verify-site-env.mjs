@@ -78,18 +78,26 @@ const SITES = [
       'NUXT_PUBLIC_APPWRITE_PROJECT_ID',
       'NUXT_PLATFORM_CONTROL_KEY',
       'NUXT_ONBOARDING_SERVICE_SECRET',
-      // F44: ohne diese fünf verschickt der Pool NICHTS.
-      'NUXT_SMTP_HOST',
-      'NUXT_SMTP_PORT',
-      'NUXT_SMTP_USER',
-      'NUXT_SMTP_PASS',
-      'NUXT_SMTP_FROM',
-      // Link-Basis für Mails ohne Community-Bezug (D5-Rückfall).
-      'NUXT_PUBLIC_APP_URL',
-      // Analytics v2: ohne den Schlüssel misst die Plattform weiter, aber JEDER
-      // Kunde sieht auf /dashboard/community/analytics „Statistik gerade nicht
-      // erreichbar" — dieselbe Sorte stiller Ausfall wie das fehlende SMTP.
-      'NUXT_ANALYTICS_STATS_API_KEY',
+      /**
+       * F44 (SMTP) und Analytics standen hier jahrelang als PFLICHT — seit dem
+       * 2026-08-19 stehen sie es NICHT mehr, und das ist eine Entscheidung mit
+       * Begründung, kein Vergessen:
+       *
+       * Beide Zugänge sind an diesem Tag in die verschlüsselte Ablage gezogen
+       * (Instanz → Integrationen, `instance_secrets`), und die ABLAGE SCHLÄGT
+       * DIE ENV. Ein Wächter, der jetzt `NUXT_SMTP_*` anmahnt, meldet einen
+       * Fehler, wo alles in Ordnung ist — und ein Wächter, der falsch schlägt,
+       * wird weggelesen. Genau das wollte F44 verhindern.
+       *
+       * WER PASST JETZT AUF? Die Konsole selbst: der Reiter zeigt je Dienst
+       * „hier hinterlegt / aus der Server-Umgebung / kein Schlüssel — Dienst
+       * ist aus". Der letzte Zustand ist der F44-Fall, und er steht dort in
+       * roter Farbe an der Stelle, an der ein Betreiber ohnehin nachsieht.
+       *
+       * Bleibt Pflicht: der Umschlag (`NUXT_INSTANCE_SECRETS_KEY`) — ohne ihn
+       * ist die Ablage weder les- noch beschreibbar, und DANN wäre alles still
+       * aus.
+       */
       /**
        * KI (2026-08-18). `apps/platform` erklärt `pukalani.ai.enabled: true`
        * und verkauft `ai` ab dem PRO-Tarif (`tenancy.products`, 149 €) — ohne
