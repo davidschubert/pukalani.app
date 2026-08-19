@@ -5169,6 +5169,33 @@ die Gegenprobe seitdem fest. (3) **Ein Beweis ohne Gegenprobe ist keiner** —
 beide Beweisskripte zeigen zuerst, dass der Fehler ohne die Kur auftritt.
 
 
+## AH-4c — Appwrite-Projekt `control` → `admin` (2026-08-18/19, KOMPLETT)
+
+Davids Entscheidung gegen die Empfehlung „nur Anzeige-Name": echtes neues
+Projekt `admin` + 1:1-Umzug per eigenem Werkzeug
+(`scripts/ops/ah4c-project-transfer.mjs`, Selbsttest 30/30, vitest 54/54).
+Wartungsfenster ~15 min: 1 Nutzer + 249/249 Rows + 4/4 Dateien, verify
+deep-equal grün; Delta (3 Rows) gezielt nachgezogen; Env-Schnitt
+admin+platform; Serien-Proben grün (Mandanten-Hosts 3×200,
+Runner-Heartbeat im neuen Projekt). Danach Schlüssel-Hygiene: alle Keys
+least-privilege (Runtime 84→10, Migrations 84→12, dedizierter
+rows.read-Naht-Key), F42-Breitkey gelöscht. Beobachtung von David am
+2026-08-19 bewusst verkürzt: beide Rückweg-Keys widerrufen (Gegenprobe
+2×401), Projekt `control` eingefroren mit 0 Keys, Backups gelöscht —
+langsamer Rückweg (neue Keys + Env-Tausch) bleibt, solange das Projekt
+existiert. Runbook: docs/runbooks/ADMIN-PROJEKT-CUTOVER.md.
+
+**Gelernt:** (1) „Scopes ergänzt" heißt beim Menschen oft „Select all" —
+nach jedem Konsolen-Klick-Auftrag die Scope-ZAHL nachmessen, nicht die
+Aussage. (2) Beim pbpaste-Rezept muss das Secret der LETZTE Kopiervorgang
+sein, sonst landet der Befehlstext als Key in der Datei — die Befehle
+prüfen seither das Präfix. (3) Nach dem Schnitt ist die rows-Phase eines
+Transfer-Werkzeugs nicht mehr idempotent-sicher (das Ziel lebt und wächst)
+— Deltas gezielt nachziehen statt Volllauf. (4) `/health/version` ist
+konsolen-intern und antwortet JEDEM Server-Key 401 — kein Scope-Fehler.
+
+---
+
 ## 📌 Master-To-do — erledigte Brocken
 
 Legende Wer: **[David]** nur David · **[Claude]** autonom machbar ·
