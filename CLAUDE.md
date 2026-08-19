@@ -260,6 +260,22 @@ Vollständiges Konzept: docs/CONCEPT.md
   general_unknown_origin` = Host unbekannt, `401` = akzeptiert. Wer stattdessen
   den Socket mitlesen will, braucht `--http1.1` (über HTTP/2 scheitert der
   Upgrade mit 400 und man misst sein eigenes Werkzeug).
+- COMMUNITY-FAVICON-UPLOAD (2026-08-18, Davids Zuschnitt): eine Pool-Community
+  lädt unter /dashboard/community/branding ein eigenes PNG-Favicon hoch (nur
+  PNG, 32–512 px Kante, ≤ 1 MB, Magic-Bytes statt MIME) — gilt im Tab UND als
+  App-Icon; og:image bleibt generiert, ohne Upload gilt das Initial-SVG. Die
+  WAHRHEIT ist die DATEI selbst: Bucket `favicons` (system-037, permissions
+  [], Server-only), fileId = communityId, Existenz + `$updatedAt` ersetzen
+  jede communities-Spalte und jedes Spiegel-Feld (`community_branding` bleibt
+  bei drei Farb-Feldern!); `$updatedAt` bricht als Teil von
+  `uploadedBrandIconKey` die immutable `/icon/<key>.png`-URLs. SSR-Kopf über
+  die U15-Kette (core: communityFaviconStore → 10.community-favicon →
+  Payload-Plugin → useCommunityFavicon; themes/theme.ts unterdrückt bei Upload
+  den favicon.svg-Link). Routen im onboarding-Layer
+  (/api/community/branding/favicon, branding.manage); Auslieferung durch die
+  BESTEHENDE Icon-Route (getFilePreview Center-Crop, getFileView-Fallback).
+  Bewusst KEINE Live-Propagation (wie themeSettings.defaultThemeId). Beweis:
+  `packages/onboarding/scripts/verify-community-favicon.mjs` (14, Gegenproben).
 - `createRow<TenantRow>` verlangt ALLE Spalten explizit (bewusst) — eine neue
   communities-Spalte erzwingt eine Entscheidung an DREI Anlegestellen:
   control/tenants/index.post.ts + onboardingProvision.ts (der DATEIname blieb)
