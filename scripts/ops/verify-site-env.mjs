@@ -163,11 +163,17 @@ const SITES = [
       /**
        * KI-Triage des Ticket-Boards (P3) — seit 2026-08-18 ist das Gate
        * `pukalani.tickets.ai.enabled` in apps/control offen (Davids
-       * Entscheidung). Der OpenRouter-Key ist die zweite Hälfte: fehlt er,
-       * ist die Triage still aus (isAiAvailable() false) und die App läuft
-       * trotzdem — exakt der F44-Fall, den diese Liste fangen soll.
+       * Entscheidung). PFLICHT IST DER UMSCHLAG, NICHT DER SCHLÜSSEL SELBST —
+       * dieselbe Regel wie bei platform oben: seit die Konsole den
+       * OpenRouter-Key selbst trägt (`instance_secrets` Row `tickets-ai`,
+       * `ticketTriage.ts` liest sie ZUERST, `NUXT_TICKETS_AI_KEY` ist nur
+       * noch der Rückfall), würde eine Pflicht auf den Env-Key dauerhaft rot
+       * mahnen, obwohl alles läuft — ein Wächter, der einen von zwei
+       * gleichwertigen Wegen anmahnt, erzieht zum Weglesen. (Umgestellt
+       * 2026-08-18, nachdem David den Key über Integrationen hinterlegt und
+       * der Env-Wächter genau so rot weiterlief.)
        */
-      'NUXT_TICKETS_AI_KEY',
+      'NUXT_INSTANCE_SECRETS_KEY',
     ],
   },
   {
