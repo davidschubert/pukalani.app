@@ -30,6 +30,30 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### S1 — Alter Sicherungsordner mit lebenden Geheimnissen gelöscht ✅ 2026-08-19
+
+Beim Aufräumen nach der Naht-Rotation gefunden: `/home/ploi/.env-backups/` lag
+seit dem Control-Cutover (26. Juli) mit fünf Dateien auf dem Server — darunter
+`NUXT_STRIPE_SECRET_KEY`, `NUXT_ENTITLEMENTS_PRIVATE_KEY` und `NUXT_SMTP_PASS`,
+allesamt noch GÜLTIG. Vor dem Löschen wurde jeder einzelne Schlüssel gegen die
+lebende `.env` gehalten: identisch (Sicherung überflüssig) oder abweichend
+(Altwert aus der Studio-Zeit) — kein Wert existierte nur dort. Danach
+`shred -u` je Datei statt `rm`, Ordner entfernt, Gegenprobe über
+`/home/ploi` ohne Treffer, alle sechs Hosts weiter 200.
+
+**Gelernt:** Eine Löschung wird billig, sobald man sie vorher unumkehrbar-frei
+macht. Die Frage ist nicht „traue ich mich?", sondern „gibt es hier einen Wert,
+den es nirgends sonst gibt?" — die lässt sich mechanisch beantworten (Wert je
+Schlüssel gegen die lebende Datei), und danach ist Löschen kein Risiko mehr,
+sondern Buchhaltung.
+**Gelernt:** Sicherungen sterben nicht von selbst. Diese entstand als
+verantwortungsvoller Zwischenschritt eines Cutovers und wurde genau dadurch zum
+Problem: 24 Tage später kannte sie niemand mehr, und sie trug denselben Stripe-
+Schlüssel wie die Produktion. Wer eine `.env` sichert, setzt im selben Atemzug
+das Ende — sonst ist die Sicherung die Kopie, die niemand rotiert.
+
+---
+
 ### A0 — Naht-Geheimnisse: alle Zugänge über die Konsole, Rotation ohne Deployment ✅ 2026-08-19
 
 Der Abschluss von A0 in zwei Etappen. ETAPPE 1 (2026-08-18, Nachbar-Sitzung +
@@ -59,6 +83,20 @@ dem Sender). Live geprobt nach dem Flip: Service-Route ohne Header und mit
 falschem Secret → 401, Naht über den Deploy hinweg ununterbrochen (alter
 Sender sendet Env, neuer Empfänger nimmt sie an).
 
+NACHTRAG (2026-08-19, gleiche Sitzung): beide Werte sind in den Konsolen
+HINTERLEGT — server-seitig verschlüsselt und geschrieben (Werte verließen den
+Server nie), Rundreise-Beweis 3/3 (Zeile lesen → entschlüsseln → Hash gegen
+Env). Dabei zwei Funde: der geteilte Onboarding-Wert war beidseitig identisch
+(per Hash geprüft), und `NUXT_EVENTS_SWEEP_KEY` EXISTIERTE GAR NICHT — der
+Erinnerungs-Sweep hatte seit jeher KEINEN Aufrufer (kein Cron, kein Plugin;
+F44-Klasse: Terminerinnerungen feuerten in Prod nie). Key erzeugt
+(Konsole + platform-.env), stündlicher Cron eingerichtet (ploi-Job 326870;
+weil ploi nach 10 min nicht in den Crontab synct, identische Zeile direkt im
+ploi-Crontab, Log `/home/ploi/events-sweep.log`) — erster echter Lauf
+2026-08-19T10:00:01Z → 200.
+**Gelernt:** `%` ist in crontab ein Sonderzeichen — ein `curl -w
+"%{http_code}"` wird ohne Maskierung still zum Zeilenumbruch; jede
+Prozent-Stelle der Zeile maskieren, nicht nur die des Datums.
 **Gelernt:** Ein geteiltes Geheimnis braucht keine Code-Stufe, wenn der
 Empfänger eine MENGE annimmt und der Sender EINEN Wert schickt — die Zusage
 wird choreographisch statt technisch.

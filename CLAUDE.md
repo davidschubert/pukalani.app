@@ -332,8 +332,9 @@ Vollständiges Konzept: docs/CONCEPT.md
   Davids Entscheidung)** läuft auch das APPWRITE-PROJEKT als `admin` (Cookie
   `a_session_admin`): Projekt-Ids sind unveränderlich, also Neuanlage +
   1:1-Umzug per `scripts/ops/ah4c-project-transfer.mjs` (Runbook
-  docs/runbooks/ADMIN-PROJEKT-CUTOVER.md); das Alt-Projekt `control` liegt
-  EINGEFROREN als Rückweg bis zum Ende der Beobachtung. Den Namen `control`
+  docs/runbooks/ADMIN-PROJEKT-CUTOVER.md); das Alt-Projekt `control` ist —
+  wie `pool` — am 2026-08-19 GELÖSCHT (Davids Entscheidung; Alt-Stände nur
+  noch in den Offsite-Dumps). Den Namen `control`
   behalten NUR noch: Ordner apps/control, Workspace-Paketname, Release-Slot
   `releases/control` und die Ecosystem-DATEI `ecosystem-control.config.cjs`
   (Dateinamen bleiben; `admin` ist als Layer-Name packages/admin vergeben). Der ALTNAME

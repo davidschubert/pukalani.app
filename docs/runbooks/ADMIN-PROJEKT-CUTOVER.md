@@ -218,9 +218,9 @@ dem Runner-Stopp; Werkzeug: `--phase inventory`.
       samt Daten existiert weiter — im Notfall neue Keys anlegen + Envs
       tauschen (~20 min statt 5).
 - [x] Beide Rückweg-Keys GELÖSCHT (2026-08-19, Konsolen-UI; Gegenprobe je
-      401) — das Projekt `control` hat jetzt NULL Keys. Anzeigename:
-      „control [eingefroren, AH-4c]". Projekt-Löschung bewusst NICHT
-      (Delete-500-Rezept, und die Daten sind der letzte Rückweg).
+      401). Noch am selben Tag hat David auch das PROJEKT gelöscht (sauber,
+      kein Delete-500; 404-Gegenprobe, Konsole/Hosts unberührt) — der letzte
+      Rückweg sind seither die Offsite-Dumps, wie bei `pool`.
 - [x] Backups gelöscht: `~/.appwrite-secrets/ah4c/backups/` +
       `migrations/control.env.ah4c-eingefroren` + die tote
       `migrations/comments.env` (Projekt seit 2026-08-18 gelöscht);
