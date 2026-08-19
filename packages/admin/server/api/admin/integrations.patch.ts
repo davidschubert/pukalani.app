@@ -57,7 +57,10 @@ export default defineEventHandler(async (event) => {
      * den Versand mit, und zwar STILL.
      */
     const previous = parseMailerSettings(await readInstanceSecret(event, 'smtp'))
-    const merged = mergeMailerSettings(previous, body.smtp)
+    // Dritte Quelle: das Passwort aus der Env. Das Formular ist mit den
+    // Env-Werten vorausgefüllt, das Passwort-Feld aber leer — ohne diese
+    // Stufe würde „einfach speichern" den Versand still kappen.
+    const merged = mergeMailerSettings(previous, body.smtp, useRuntimeConfig(event).smtpPass ?? '')
     // Leerer Host = entfernen: das ist die Handlung „diesen Zugang gibt es
     // nicht mehr", und sie sieht anders aus als ein leeres Passwort-Feld.
     await writeInstanceSecret(event, 'smtp', merged.host ? JSON.stringify(merged) : '', event.context.user?.$id ?? '')

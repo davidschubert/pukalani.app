@@ -65,17 +65,32 @@ export function parseMailerSettings(raw: string | null | undefined): MailerSetti
 /**
  * Eingabe aus dem Formular + bisheriger Stand ⇒ was gespeichert wird.
  *
- * Das leere Passwort-Feld behält das alte Passwort (siehe Kopf, Punkt 2).
+ * DREI QUELLEN FÜRS PASSWORT, in dieser Reihenfolge: was getippt wurde, sonst
+ * das bereits gespeicherte, sonst das aus der Env.
+ *
+ * Die DRITTE ist am 2026-08-18 dazugekommen, und zwar an einer Falle, die
+ * beim ersten Draufschauen aufgefallen ist: das Formular ist mit den
+ * ENV-Werten vorausgefüllt (Host, Port, Benutzer, Absender), nur das
+ * Passwort-Feld bleibt leer — der Server gibt keines heraus. Wer diesen Stand
+ * einfach speichert, hätte ohne diese Stufe einen Block OHNE Passwort in der
+ * Ablage. Und weil die Ablage die Env schlägt, wäre der Mailversand ab diesem
+ * Klick kaputt: die Anmeldung am Server scheitert, und zwar STILL. Genau der
+ * Ausfall, gegen den dieser ganze Umzug abgesichert ist.
+ *
  * ENTFERNEN geht ausdrücklich über einen leeren HOST — das ist die Handlung
  * „diesen Zugang gibt es nicht mehr", und sie sieht anders aus als „ich habe
  * das Passwort nur nicht wieder eingetippt".
  */
-export function mergeMailerSettings(previous: MailerSettings | null, incoming: MailerSettings): MailerSettings {
+export function mergeMailerSettings(
+  previous: MailerSettings | null,
+  incoming: MailerSettings,
+  envPass = '',
+): MailerSettings {
   return {
     host: incoming.host.trim(),
     port: incoming.port.trim(),
     user: incoming.user.trim(),
-    pass: incoming.pass ? incoming.pass : (previous?.pass ?? ''),
+    pass: incoming.pass || previous?.pass || envPass,
     from: incoming.from.trim(),
   }
 }

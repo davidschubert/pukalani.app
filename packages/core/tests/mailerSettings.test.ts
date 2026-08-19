@@ -25,6 +25,22 @@ describe('mergeMailerSettings — das Passwort darf nicht verschwinden', () => {
     expect(mergeMailerSettings(null, { ...EMPTY_MAILER_SETTINGS, host: 'h' }).pass).toBe('')
   })
 
+  it('nimmt beim ERSTEN Eintrag das Passwort aus der Env', () => {
+    // Die Falle, an der dieser Umzug gestorben wäre: das Formular ist mit den
+    // Env-Werten vorausgefüllt, nur das Passwort-Feld ist leer. Wer das so
+    // speichert, hätte sonst einen Block OHNE Passwort — und weil die Ablage
+    // die Env schlägt, wäre der Versand ab diesem Klick still kaputt.
+    const neu = mergeMailerSettings(null, { host: 'smtp.env', port: '587', user: 'u', pass: '', from: 'f' }, 'env-passwort')
+    expect(neu.pass).toBe('env-passwort')
+  })
+
+  it('Reihenfolge: getippt schlägt gespeichert schlägt Env', () => {
+    const getippt = mergeMailerSettings(gespeichert, { ...gespeichert, pass: 'neu' }, 'env-passwort')
+    expect(getippt.pass).toBe('neu')
+    const gespeichertGewinnt = mergeMailerSettings(gespeichert, { ...gespeichert, pass: '' }, 'env-passwort')
+    expect(gespeichertGewinnt.pass).toBe('geheim')
+  })
+
   it('trimmt alles ausser dem Passwort', () => {
     // Ein Passwort DARF vorne oder hinten ein Leerzeichen haben — trimmen
     // würde eine gültige Anmeldung stillschweigend kaputtmachen.
