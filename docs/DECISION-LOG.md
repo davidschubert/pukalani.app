@@ -45,8 +45,10 @@ GELÖSCHT**: `account` war seit AH-1 eine Woche unter Kundenlast
 weitergewachsen, ein Rückfall hätte Kundendaten verworfen — die Kopie
 versicherte nichts mehr und war als veraltete Vollkopie von Nutzerdaten nur
 noch Datenschutz-Ballast. Löschung sauber (kein Delete-500), Alt-Stände in
-den Offsite-Dumps. Verbleibende Projekte: admin, account, portfolio,
-control [eingefroren, 0 Keys].
+den Offsite-Dumps. Noch am selben Tag fiel auch (3): das
+eingefrorene `control` selbst — David hat nach Abwägung (frische Kopie mit
+Rest-Versicherungswert vs. Endzustand) die sofortige Löschung gewählt; sauber,
+404-Gegenprobe. **Verbleibende Projekte: admin, account, portfolio.**
 
 ---
 
