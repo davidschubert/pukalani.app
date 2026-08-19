@@ -46,6 +46,20 @@
  * `PATCH /api/account/handle` mit dem Admin-Client.
  */
 
+/**
+ * Taugt diese Id als Appwrite-LABEL? Appwrite erlaubt in `Role.label(…)` nur
+ * `[a-zA-Z0-9]` (max. 36 Zeichen) — eine `tenantId` (`t-…`) fällt am
+ * Bindestrich durch, und der Fehler kommt als 400 VOR der Unique-Prüfung:
+ * selbst ein idempotenter Wiederholungslauf stirbt dann am ungültigen Label
+ * statt im harmlosen 409 zu enden (S2, live erwischt 2026-08-19: EINE
+ * Alt-Zeile mit tenantId in `community_handles.communityId` blockierte die
+ * gesamte system-Kette auf `account`). Wer aus DATEN eine Label-Rolle baut,
+ * prüft vorher hiermit — und überspringt mit Meldung statt zu werfen.
+ */
+export function labelSafeCommunityId(communityId: string): boolean {
+  return /^[a-zA-Z0-9]{1,36}$/.test(communityId)
+}
+
 /** Die Lese-Rolle EINER Community — der Baustein des Publikums. */
 export function communityHandleReadRole(communityId: string): string {
   return `read("label:${communityId}")`

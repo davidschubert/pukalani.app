@@ -6,6 +6,7 @@ import {
   handleAudienceIncludes,
   handleAudienceWith,
   handleAudienceWithout,
+  labelSafeCommunityId,
   ownerHandleReadRole,
 } from '../shared/accountHandleAudience'
 import { tenantRowPermissionsFor } from '../server/utils/tenantRowPermissions'
@@ -130,5 +131,33 @@ describe('handleAudienceWithout', () => {
   it('lässt den Besitzer-Read niemals fallen', () => {
     const result = handleAudienceWithout(accountHandlePermissions(true, COMMUNITY, USER), COMMUNITY)
     expect(result).toEqual([Permission.read(Role.user(USER))])
+  })
+})
+
+describe('labelSafeCommunityId', () => {
+  /**
+   * S2 (2026-08-19): Appwrite prüft Permissions VOR dem Unique-Index — ein
+   * ungültiges Label macht aus jedem idempotenten Wiederholungslauf ein 400.
+   * Die Regel hier ist die Sperre davor; sie muss exakt das erlauben, was
+   * `Role.label(...)` annimmt, und keinen Deut mehr.
+   */
+  it('nimmt eine echte Row-Id an', () => {
+    expect(labelSafeCommunityId('6a7bf2ca7414bcc0d182')).toBe(true)
+    expect(labelSafeCommunityId(COMMUNITY)).toBe(true)
+  })
+
+  it('weist die tenantId ab, die die system-Kette auf account blockierte', () => {
+    expect(labelSafeCommunityId('t-mspkq1xd44lixo8oh2')).toBe(false)
+  })
+
+  it('weist leer, Unterstrich, Punkt und Überlänge ab', () => {
+    expect(labelSafeCommunityId('')).toBe(false)
+    expect(labelSafeCommunityId('a_b')).toBe(false)
+    expect(labelSafeCommunityId('a.b')).toBe(false)
+    expect(labelSafeCommunityId('x'.repeat(37))).toBe(false)
+  })
+
+  it('nimmt genau 36 Zeichen noch an (Appwrite-Id-Länge)', () => {
+    expect(labelSafeCommunityId('x'.repeat(36))).toBe(true)
   })
 })

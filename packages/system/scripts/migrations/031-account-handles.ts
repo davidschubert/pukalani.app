@@ -59,7 +59,7 @@ import { Client, Query, TablesDB, TablesDBIndexType } from 'node-appwrite'
 import type { Models } from 'node-appwrite'
 import { createIndexSteps } from '../../../../scripts/migrations-lib/indexRetry.mts'
 import { planHandleAdoption } from '../../../core/shared/handleAdoption.ts'
-import { accountHandlePermissions, communityHandleReadRole } from '../../../core/shared/accountHandleAudience.ts'
+import { accountHandlePermissions, communityHandleReadRole, labelSafeCommunityId } from '../../../core/shared/accountHandleAudience.ts'
 
 const endpoint = process.env.NUXT_PUBLIC_APPWRITE_ENDPOINT
 const projectId = process.env.NUXT_PUBLIC_APPWRITE_PROJECT_ID
@@ -263,10 +263,22 @@ else {
   let adopted = 0
   let skipped = 0
   for (const candidate of plan.candidates) {
-    const permissions = candidate.communityIds.length > 0
+    // NUR label-taugliche Ids werden zu Rollen (S2, 2026-08-19): eine
+    // tenantId (`t-…`) in einer Alt-Zeile ergäbe `read("label:t-…")`, und
+    // Appwrite prüft Permissions VOR dem Unique-Index — der Lauf stürbe mit
+    // 400 statt im idempotenten 409, und zwar bei JEDER Wiederholung. Eine
+    // übersprungene Rolle ist nur ein engeres Publikum (der Runtime-Nachtrag
+    // `ensureAccountHandleAudience` heilt es beim nächsten Besuch); ein
+    // Abbruch blockiert dagegen die gesamte system-Kette der Instanz.
+    const labelSafe = candidate.communityIds.filter(labelSafeCommunityId)
+    const dropped = candidate.communityIds.filter(id => !labelSafeCommunityId(id))
+    for (const id of dropped) {
+      console.warn(`⚠ Übernahme: communityId "${id}" ist kein gültiges Label (Konto ${candidate.userId}) — Rolle übersprungen, Zeile in ${LEGACY_TABLE} gehört korrigiert`)
+    }
+    const permissions = labelSafe.length > 0
       ? [
           ...accountHandlePermissions(true, null, candidate.userId),
-          ...candidate.communityIds.map(communityHandleReadRole),
+          ...labelSafe.map(communityHandleReadRole),
         ]
       : accountHandlePermissions(pool, null, candidate.userId)
 
