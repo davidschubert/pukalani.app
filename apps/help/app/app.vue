@@ -50,13 +50,26 @@ useLocaleSeoHead()
 useSeoMeta({
   ogSiteName: () => t('docs.siteName'),
 })
+
+// DIE CHROME IST DIE DER MARKE (Davids Entscheidung 2026-08-18): Kopf und Fuß
+// kommen aus packages/marketing, die Hilfe-eigene Navigation sitzt als
+// Subnav darunter (DocsSubnav). `body.marketing-site` ist dabei Pflicht,
+// keine Zierde: marketing.css ist auf diese Klasse gescopet, und
+// puka-theme.css setzt erst unter ihr `--ui-primary` auf die Sonne sowie die
+// --puka-*-Tokens, aus denen Kopf- und Fußzeile ihre Flächen bauen — ohne die
+// Klasse stünde der Kopf durchsichtig auf falschen Farben (dieselbe Zeile
+// setzt auf pukalani.app das Layout site.vue).
+useHead({
+  bodyAttrs: { class: 'marketing-site' },
+})
 </script>
 
 <template>
   <UApp>
     <NuxtLoadingIndicator />
 
-    <DocsHeader />
+    <MarketingHeader />
+    <DocsSubnav />
 
     <UMain>
       <NuxtLayout>
@@ -64,7 +77,7 @@ useSeoMeta({
       </NuxtLayout>
     </UMain>
 
-    <DocsFooter />
+    <MarketingFooter />
 
     <ClientOnly>
       <LazyUContentSearch

@@ -16,5 +16,22 @@ export default defineAppConfig({
      */
     realtime: { enabled: false },
   },
-  ui: {},
+  ui: {
+    button: {
+      compoundVariants: [
+        {
+          // DER GEFÜLLTE CTA trägt dunkle Tinte statt Weiß — derselbe Vertrag
+          // wie auf pukalani.app (apps/marketing/app/app.config.ts, dort die
+          // volle Begründung): Weiß auf der Sonne misst 1,81:1 und verfehlt
+          // AA. Der Wert --puka-cta-label kommt aus puka-theme.css (marketing-
+          // Layer) und gilt unter `body.marketing-site`, das diese App in
+          // app.vue setzt. Hier betrifft das die Landing-Knöpfe („Zur
+          // Anleitung") und alle `links` aus dem Seiten-Frontmatter.
+          color: 'primary',
+          variant: 'solid',
+          class: 'text-(--puka-cta-label)',
+        },
+      ],
+    },
+  },
 })

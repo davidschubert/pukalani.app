@@ -30,5 +30,10 @@ import type { SiteManifest } from '../../packages/core/shared/types/manifest'
  */
 export default {
   siteId: 'help',
-  products: [],
+  // `marketing` ist der Chrome-Layer der Marke (tier 'foundation', keine
+  // Tables): er liefert MarketingHeader/-Footer und die puka-Farbwelt, damit
+  // pukalani.app und diese Hilfe EINE Kopf-/Fußzeile teilen (Davids
+  // Entscheidung 2026-08-18). Produkt-Layer mit Datenmodell bleiben bewusst
+  // draußen — die Seite liest nichts aus Appwrite.
+  products: ['marketing'],
 } satisfies SiteManifest

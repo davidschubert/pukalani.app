@@ -1,11 +1,15 @@
 export default defineNuxtConfig({
   // Öffentliche Hilfe-Site für Community-Betreiber (Ziel-Host
   // help.pukalani.app — Annahme, siehe site.manifest.ts; heute Dev-only).
-  // Bewusst NUR das Fundament (core + system) — kein admin/themes/comments:
-  // die Seite ist öffentlich, liest nichts aus Appwrite und rendert
-  // ausschließlich Markdown aus `content/`. Das Fundament liefert trotzdem
-  // Fehlerseite (CoreErrorPage), Security-Header, Rate-Limits und i18n.
-  extends: ['../../packages/core', '../../packages/system'],
+  // Bewusst KEIN admin/themes/comments: die Seite ist öffentlich, liest
+  // nichts aus Appwrite und rendert ausschließlich Markdown aus `content/`.
+  // Das Fundament (core + system) liefert Fehlerseite (CoreErrorPage),
+  // Security-Header, Rate-Limits und i18n; der marketing-Layer (Davids
+  // Entscheidung 2026-08-18) liefert die Marken-Chrome — MarketingHeader
+  // (inkl. Resources-Menü), MarketingFooter und die puka-Farbwelt. Seine
+  // Links lösen hier über den Layer-Default `pukalani.marketing.home: false`
+  // als absolute URLs auf pukalani.app auf.
+  extends: ['../../packages/marketing', '../../packages/core', '../../packages/system'],
 
   // @nuxt/ui, @pinia/nuxt und @nuxtjs/i18n kommen aus dem Core-Layer.
   modules: ['@nuxt/content'],
