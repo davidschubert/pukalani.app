@@ -716,6 +716,7 @@
           "events": "Events with sign-up",
           "courses": "Courses with lessons and progress",
           "ai": "AI assistant for moderation",
+          "translations": "AI translation of content into the reader's language",
           "customDomain": "Custom domain",
           "commentsPerDay": "Comments per day",
           "mediaFiles": "Images in the gallery"
@@ -725,7 +726,7 @@
         "personal": {
           "name": "Personal",
           "tag": "01 · Popular",
-          "desc": "For coaches and creators – posting feed with polls, custom themes and fonts, embed widget, cookieless visitor statistics, email notifications, higher limits.",
+          "desc": "For coaches and creators – posting feed with polls, AI translation of content, custom themes and fonts, embed widget, cookieless visitor statistics, email notifications, higher limits.",
           "cta": "Get Personal"
         },
         "pro": {
@@ -765,7 +766,7 @@
         },
         {
           "q": "Which languages are supported?",
-          "a": "Starting with German and English; more languages will follow."
+          "a": "Starting with German and English; more languages will follow. And your members' content gets translated into the reader's language with one click – translated once, stored for everyone."
         },
         {
           "q": "Do I have to use all products?",

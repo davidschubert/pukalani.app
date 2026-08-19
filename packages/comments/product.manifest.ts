@@ -8,8 +8,8 @@ export default {
   apiPrefixes: ['/api/comments'],
   title: { en: 'Comments', de: 'Kommentare' },
   description: {
-    en: 'Threaded comments with realtime updates, votes, mentions, markdown, guest reading and an embeddable widget.',
-    de: 'Verschachtelte Kommentare mit Realtime, Votes, @-Mentions, Markdown, Gast-Lesezugriff und Embed-Widget.',
+    en: 'Threaded comments with realtime updates, votes, mentions, markdown, guest reading, AI translation and an embeddable widget.',
+    de: 'Verschachtelte Kommentare mit Realtime, Votes, @-Mentions, Markdown, Gast-Lesezugriff, KI-Übersetzung und Embed-Widget.',
   },
   icon: 'i-ph-chat-circle',
 } satisfies ProductManifest

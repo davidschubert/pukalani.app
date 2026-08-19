@@ -716,6 +716,7 @@
           "events": "Events mit Anmeldung",
           "courses": "Kurse mit Lektionen und Fortschritt",
           "ai": "KI-Assistent für die Moderation",
+          "translations": "KI-Übersetzung der Inhalte in die Sprache des Lesers",
           "customDomain": "Eigene Domain",
           "commentsPerDay": "Kommentare pro Tag",
           "mediaFiles": "Bilder in der Galerie"
@@ -725,7 +726,7 @@
         "personal": {
           "name": "Personal",
           "tag": "01 · Beliebt",
-          "desc": "Für Coaches und Creator – Posting-Feed mit Umfragen, eigene Themes und Schriften, Embed-Widget, Besucherstatistik ohne Cookies, E-Mail-Benachrichtigungen, höhere Limits.",
+          "desc": "Für Coaches und Creator – Posting-Feed mit Umfragen, KI-Übersetzung der Inhalte, eigene Themes und Schriften, Embed-Widget, Besucherstatistik ohne Cookies, E-Mail-Benachrichtigungen, höhere Limits.",
           "cta": "Personal holen"
         },
         "pro": {
@@ -765,7 +766,7 @@
         },
         {
           "q": "In welchen Sprachen gibt es die Plattform?",
-          "a": "Start mit Deutsch und Englisch; weitere Sprachen folgen."
+          "a": "Start mit Deutsch und Englisch; weitere Sprachen folgen. Und die Inhalte deiner Mitglieder übersetzt die Plattform auf Klick automatisch in die Sprache des Lesers – einmal übersetzt, für alle gespeichert."
         },
         {
           "q": "Muss ich alle Produkte nutzen?",

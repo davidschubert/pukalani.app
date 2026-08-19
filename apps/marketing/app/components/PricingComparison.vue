@@ -63,6 +63,14 @@ const ROWS: readonly CompareRow[] = [
   { key: 'courses', personal: false, pro: true, source: 'tenancy.products.courses = pro' },
   { key: 'ai', personal: false, pro: true, source: 'tenancy.products.ai = pro' },
   /**
+   * BEWUSST in beiden Plänen: das Gate der translate-Routen ist das jeweilige
+   * INHALTS-Produkt, nicht 'ai' (Davids Entscheidung 2026-08-17) — wer den
+   * Inhalt hat, kann ihn übersetzen. In Personal betrifft das Diskussionen,
+   * Kommentare und den Feed; Events und Kurse übersetzen dort mit, wo sie
+   * enthalten sind (Pro).
+   */
+  { key: 'translations', personal: true, pro: true, source: 'translate-Routen gaten auf das Inhalts-Produkt (posts/comments/events/courses), nicht auf ai' },
+  /**
    * Die Zeile, um die es U13 ging (Davids Entscheidung 2026-08-10: bleibt
    * Pro-only). Sie steht hier ohne Beschönigung — sie ist das stärkste
    * Verkaufsargument von Pro UND die härteste Sperre im Vergleichsfeld;
