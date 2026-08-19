@@ -59,6 +59,20 @@ dem Sender). Live geprobt nach dem Flip: Service-Route ohne Header und mit
 falschem Secret → 401, Naht über den Deploy hinweg ununterbrochen (alter
 Sender sendet Env, neuer Empfänger nimmt sie an).
 
+NACHTRAG (2026-08-19, gleiche Sitzung): beide Werte sind in den Konsolen
+HINTERLEGT — server-seitig verschlüsselt und geschrieben (Werte verließen den
+Server nie), Rundreise-Beweis 3/3 (Zeile lesen → entschlüsseln → Hash gegen
+Env). Dabei zwei Funde: der geteilte Onboarding-Wert war beidseitig identisch
+(per Hash geprüft), und `NUXT_EVENTS_SWEEP_KEY` EXISTIERTE GAR NICHT — der
+Erinnerungs-Sweep hatte seit jeher KEINEN Aufrufer (kein Cron, kein Plugin;
+F44-Klasse: Terminerinnerungen feuerten in Prod nie). Key erzeugt
+(Konsole + platform-.env), stündlicher Cron eingerichtet (ploi-Job 326870;
+weil ploi nach 10 min nicht in den Crontab synct, identische Zeile direkt im
+ploi-Crontab, Log `/home/ploi/events-sweep.log`) — erster echter Lauf
+2026-08-19T10:00:01Z → 200.
+**Gelernt:** `%` ist in crontab ein Sonderzeichen — ein `curl -w
+"%{http_code}"` wird ohne Maskierung still zum Zeilenumbruch; jede
+Prozent-Stelle der Zeile maskieren, nicht nur die des Datums.
 **Gelernt:** Ein geteiltes Geheimnis braucht keine Code-Stufe, wenn der
 Empfänger eine MENGE annimmt und der Sender EINEN Wert schickt — die Zusage
 wird choreographisch statt technisch.
