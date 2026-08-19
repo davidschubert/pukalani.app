@@ -1,0 +1,199 @@
+#!/usr/bin/env node
+/**
+ * Zugangs-Wächter: findet Schlüssel und Env-Dateien, deren Projekt es NICHT
+ * MEHR GIBT — die also nur noch Angriffsfläche sind und keine Aufgabe haben.
+ *
+ *   node scripts/ops/verify-stale-keys.mjs            # nur berichten
+ *   node scripts/ops/verify-stale-keys.mjs --dir ~/x  # anderer Ordner
+ *
+ * WARUM ES DAS GIBT (2026-08-19): an EINEM Tag tauchten Zugänge zu längst
+ * gelöschten Projekten an DREI Orten auf — `/home/ploi/.env-backups/` auf dem
+ * Server (fünf Dateien, darunter derselbe Stripe-Schlüssel wie in der
+ * Produktion), vier `.key`-Dateien im lokalen Geheimnis-Ordner und eine
+ * eingefrorene `.env`-Sicherung. Alle drei entstanden als verantwortungsvoller
+ * Zwischenschritt eines Umzugs (`studio`→`control`→`admin`, `pool`→`account`)
+ * und wurden genau dadurch zum Problem: Wochen später kannte sie niemand mehr.
+ * Ein Umzug benennt Dinge um; die Schlüssel dazu bleiben liegen, wo sie
+ * gebraucht wurden.
+ *
+ * ── DIE EINE REGEL, DIE DIESES SKRIPT DURCHSETZT ──────────────────────────
+ * NUR **404** BEWEIST „TOT". Ein 404 heisst: dieses Projekt existiert auf der
+ * Instanz nicht mehr — und das ist unabhängig davon, welche Rechte der
+ * Schlüssel hat. Ein **401** beweist dagegen GAR NICHTS: es kann „ungültig"
+ * heissen, aber genauso „gültig, nur nicht für den Bereich, den du gefragt
+ * hast".
+ *
+ * Das ist kein theoretischer Unterschied. Beim ersten Durchgang meldete eine
+ * naive Probe `migrations/account.env` und `migrations/admin.env` als tot,
+ * weil sie gegen `/v1/users` lief — die Schlüssel tragen aber bewusst nur
+ * `databases/tables/columns/indexes`. Ein Aufräumen auf dieser Grundlage hätte
+ * zwei täglich gebrauchte Schlüssel vernichtet.
+ *
+ * ── UND DEN BEREICH RÄT MAN AUCH NICHT AM NAMEN AB ────────────────────────
+ * Der zweite Anlauf schloss vom Variablen-NAMEN auf den Umfang
+ * (`NUXT_APPWRITE_MIGRATIONS_KEY` ⇒ Tabellen, sonst Nutzer) und lag wieder
+ * daneben: `migrations/account.env` liegt im Ordner `migrations/`, hält seinen
+ * Schlüssel aber unter `NUXT_APPWRITE_KEY`. Ein Name ist eine Absicht, kein
+ * Befund — dieselbe Falle wie bei den Naht-Richtungen, die man aus Env-Namen
+ * statt aus den montierten Layern gelesen hatte.
+ *
+ * Deshalb wird GAR NICHT geraten: jeder Schlüssel wird gegen BEIDE Bereiche
+ * gehalten und die Antworten werden verrechnet — irgendein 404 heisst tot
+ * (das Projekt fehlt, unabhängig von Rechten), irgendein 200 heisst lebt, und
+ * erst wenn beide Bereiche mauern, steht „unklar" da. Das kostet einen
+ * zweiten Aufruf und erspart die ganze Ratekette.
+ *
+ * ── ES LÖSCHT BEWUSST NICHTS ──────────────────────────────────────────────
+ * Eine Löschung ist unumkehrbar, dieses Skript kennt aber nur die halbe
+ * Wahrheit: es sieht, dass ein Projekt weg ist, nicht, ob die Datei daneben
+ * noch etwas enthält, das es nirgends sonst gibt. Diese zweite Frage gehört
+ * an einen Menschen. Der Bericht nennt darum den Handgriff (`shred -u` bzw.
+ * `rm -P`), führt ihn aber nie aus.
+ *
+ * WERTE ERSCHEINEN NIRGENDS. Gelesen wird der Schlüssel nur, um ihn als
+ * Kopfzeile zu schicken; ausgegeben werden Dateiname, Projekt und Status.
+ */
+import { readdirSync, readFileSync } from 'node:fs'
+import { homedir } from 'node:os'
+import { join, relative } from 'node:path'
+
+const ENDPUNKT = process.env.PUKALANI_APPWRITE_ENDPOINT || 'https://api.pukalani.app/v1'
+const argDir = process.argv.indexOf('--dir')
+const ORDNER = argDir !== -1 && process.argv[argDir + 1]
+  ? process.argv[argDir + 1].replace(/^~/, homedir())
+  : join(homedir(), '.appwrite-secrets')
+
+/** Alle Dateien unterhalb von `wurzel`, flach ausgerollt. */
+function dateien(wurzel) {
+  const out = []
+  const lauf = (d) => {
+    let eintraege
+    try { eintraege = readdirSync(d, { withFileTypes: true }) }
+    catch { return }
+    for (const e of eintraege) {
+      const p = join(d, e.name)
+      if (e.isDirectory()) lauf(p)
+      else if (e.isFile()) out.push(p)
+    }
+  }
+  lauf(wurzel)
+  return out.sort()
+}
+
+/**
+ * Was steckt in dieser Datei? Zwei Formen, beide im Bestand:
+ *  - eine `.env` mit NUXT_PUBLIC_APPWRITE_PROJECT_ID + NUXT_APPWRITE_*KEY
+ *  - eine nackte `<projekt>-<art>.key` (Name trägt das Projekt)
+ * Alles andere (JSON-Dumps, Bilder, Skripte) ist kein Zugang und fällt raus.
+ */
+function zugangAus(pfad) {
+  const name = pfad.split('/').pop()
+  if (/\.(json|png|jpe?g|log|md|mjs|ts)$/i.test(name)) return null
+
+  let inhalt = ''
+  try { inhalt = readFileSync(pfad, 'utf8') }
+  catch { return null }
+
+  const feld = (k) => (inhalt.match(new RegExp(`^${k}=(.*)$`, 'm'))?.[1] || '').replace(/^["']|["']$/g, '').trim()
+  const projekt = feld('NUXT_PUBLIC_APPWRITE_PROJECT_ID')
+  const datenbank = feld('NUXT_PUBLIC_APPWRITE_DATABASE_ID')
+  const migrationsKey = feld('NUXT_APPWRITE_MIGRATIONS_KEY')
+  const laufzeitKey = feld('NUXT_APPWRITE_KEY')
+
+  if (projekt && (migrationsKey || laufzeitKey)) {
+    // `art` ist reine ANZEIGE — welchen Bereich der Schlüssel wirklich hat,
+    // wird gemessen, nicht aus diesem Feld geschlossen (s. Kopf).
+    return migrationsKey
+      ? { pfad, projekt, datenbank, schluessel: migrationsKey, art: 'migrations' }
+      : { pfad, projekt, datenbank, schluessel: laufzeitKey, art: 'runtime' }
+  }
+
+  // Nackte Schlüsseldatei: `<projekt>-<art>.key`
+  const m = name.match(/^([a-z0-9-]+?)-(runtime|migrations)\.key$/)
+  if (m && /^[A-Za-z0-9_.-]{20,}$/.test(inhalt.trim())) {
+    return { pfad, projekt: m[1], datenbank: '', schluessel: inhalt.trim(), art: m[2] }
+  }
+  return null
+}
+
+/**
+ * Hält den Schlüssel gegen BEIDE Bereiche und verrechnet die Antworten
+ * (Begründung im Kopf: der Umfang ist weder am Datei- noch am Variablen-Namen
+ * ablesbar). Kurzschluss beim ersten eindeutigen Ergebnis — ein 404 oder 200
+ * beantwortet die Frage schon, dann kostet es keinen zweiten Aufruf.
+ */
+async function pruefen(z) {
+  const limit = encodeURIComponent(JSON.stringify({ method: 'limit', values: [1] }))
+  const bereiche = [
+    ['Nutzer', `${ENDPUNKT}/users?queries[]=${limit}`],
+    ...(z.datenbank ? [['Tabellen', `${ENDPUNKT}/tablesdb/${z.datenbank}/tables?queries[]=${limit}`]] : []),
+  ]
+
+  const gesehen = []
+  for (const [bereich, url] of bereiche) {
+    let status
+    try {
+      const r = await fetch(url, {
+        headers: { 'x-appwrite-project': z.projekt, 'x-appwrite-key': z.schluessel },
+        signal: AbortSignal.timeout(20_000),
+      })
+      status = r.status
+    }
+    catch (fehler) {
+      gesehen.push(`${bereich}: nicht erreichbar (${(fehler && fehler.message) || fehler})`)
+      continue
+    }
+    // 404 = das PROJEKT fehlt. Das gilt unabhängig vom Rechteumfang und ist
+    // damit das einzige Ergebnis, das „tot" beweisen darf.
+    if (status === 404) return { lage: 'tot', text: 'Projekt existiert nicht mehr' }
+    if (status === 200) return { lage: 'lebt', text: `gültig (Bereich ${bereich})` }
+    gesehen.push(`${bereich}: HTTP ${status}`)
+  }
+  return { lage: 'unklar', text: `kein Bereich antwortete — ${gesehen.join(', ')}` }
+}
+
+const gefunden = dateien(ORDNER).map(zugangAus).filter(Boolean)
+if (!gefunden.length) {
+  console.log(`Keine Zugangs-Dateien unter ${ORDNER} — nichts zu prüfen.`)
+  process.exit(0)
+}
+
+console.log(`Zugangs-Wächter — ${gefunden.length} Datei(en) unter ${ORDNER}, Instanz ${ENDPUNKT}\n`)
+
+const ergebnisse = []
+for (const z of gefunden) {
+  const e = await pruefen(z)
+  ergebnisse.push({ ...z, ...e })
+  const zeichen = e.lage === 'tot' ? '✖' : e.lage === 'lebt' ? '✔' : '?'
+  const kurz = relative(ORDNER, z.pfad)
+  console.log(`${zeichen} ${kurz.padEnd(46)} ${z.projekt.padEnd(12)} ${z.art.padEnd(10)} ${e.text}`)
+}
+
+const tot = ergebnisse.filter(e => e.lage === 'tot')
+const unklar = ergebnisse.filter(e => e.lage === 'unklar')
+
+console.log()
+if (tot.length) {
+  console.log(`${tot.length} Zugang/Zugänge zeigen auf ein GELÖSCHTES Projekt:\n`)
+  for (const e of tot) console.log(`  ${relative(ORDNER, e.pfad)}  (Projekt ${e.projekt})`)
+  console.log(`
+Vor dem Löschen die zweite Frage beantworten, die dieses Skript NICHT kann:
+steht in der Datei ein Wert, den es nirgends sonst gibt? Jeden Schlüssel gegen
+die lebende .env halten — identisch oder Altwert heisst, es geht nichts
+verloren. Danach überschreibend löschen, nicht nur aushängen:
+
+  rm -P <datei>      # macOS
+  shred -u <datei>   # Linux
+`)
+}
+else {
+  console.log('Kein Zugang zeigt auf ein gelöschtes Projekt.')
+}
+
+if (unklar.length) {
+  console.log(`${unklar.length} unklar — das ist KEIN Befund und KEIN Löschgrund (siehe Kopf).`)
+}
+
+// Absichtlich immer 0: das hier ist eine Inventur für Menschen, kein CI-Gate.
+// Es braucht Netz und lokale Geheimnisse und liefe in der CI nie ehrlich.
+process.exit(0)

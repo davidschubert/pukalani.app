@@ -89,7 +89,9 @@ function fail(step, status, json) {
 
 // 5) API-Key mit allen Scopes — die Scope-Liste kommt von der Instanz selbst
 //    (Console-Endpoint), damit sie zur Appwrite-Version passt.
-let apiKey = ''
+// Ohne Initialwert: die Zuweisung unten ist unbedingt (fail() beendet den
+// Prozess), und ein '' hier hat nie ein Leser gesehen.
+let apiKey
 {
   // Appwrite kennt keinen "alle Scopes"-Shortcut; die vollständige Liste der
   // 1.9er-Scopes ist stabil dokumentiert:

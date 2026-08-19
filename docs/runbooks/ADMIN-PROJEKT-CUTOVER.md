@@ -1,5 +1,9 @@
 # Runbook: Appwrite-Projekt `control` → `admin` (AH-4c)
 
+> **Nach dem Cutover:** die Schlüssel des Alt-Projekts liegen jetzt an mehreren
+> Orten und zeigen ins Leere. Aufräumen nach
+> [ZUGAENGE-AUFRAEUMEN.md](ZUGAENGE-AUFRAEUMEN.md) (`pnpm ops:stale-keys`).
+
 **Was passiert hier:** das Appwrite-Projekt der Betreiber-Konsole zieht von
 `control` nach `admin` um — neues Projekt (Ids sind unveränderlich, ein
 „Umbenennen" gibt es nicht), alle Daten und Nutzer mit, danach Env-Schnitt.

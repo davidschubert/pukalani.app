@@ -63,3 +63,8 @@ jobs:
       - run: pnpm --filter @pukalani/themes check:themes
 
       - run: pnpm -r lint
+      # `pnpm -r lint` läuft NUR über die Workspace-Pakete — die 23 Dateien in
+      # scripts/ (Migrations-Runner, ops-Wächter, CI-Aufbau) sah bis 2026-08-19
+      # kein Linter. Genau dort liegt aber der Code, der Produktionsdaten
+      # anfasst. Kostet nichts: beim Einführen war ein einziger Fehler drin.
+      - run: pnpm lint:scripts
