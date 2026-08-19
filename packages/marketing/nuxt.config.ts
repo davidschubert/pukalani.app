@@ -41,6 +41,39 @@ export default defineNuxtConfig({
       { code: 'de', language: 'de-DE', name: 'Deutsch', file: 'de.json' },
       { code: 'en', language: 'en-US', name: 'English', file: 'en.json' },
     ],
+
+    /**
+     * EIN SPRACH-MERKER FÜR DIE MARKEN-SITES (Davids Befund 2026-08-19):
+     * pukalani.app und help.pukalani.app sind zwei Hosts, und der Core-Cookie
+     * `i18n_redirected` gilt pro Host — wer auf der Hilfe auf Deutsch
+     * wechselte, kam auf eine englische Marketing-Seite zurück, und wegen
+     * `redirectOn: 'all'` schlug deren eigener (englischer) Merker sogar den
+     * `/de`-Link aus dem Hilfe-Chrome. Deshalb teilen sich die Sites, die
+     * diesen Layer erben, EINEN Domain-Cookie (`Domain=.pukalani.app`).
+     *
+     * ZWEI DINGE DARAN SIND PFLICHT, nicht Geschmack:
+     *  - EIGENER NAME (`pukalani-lang`) statt `i18n_redirected`: auf beiden
+     *    Hosts liegen bereits Host-Cookies mit dem alten Namen. Host- und
+     *    Domain-Cookie gleichen Namens reisen BEIDE im Request, und welcher
+     *    zuerst steht, entscheidet der Browser — der Server läse mal den
+     *    alten, mal den neuen Wert. Der neue Name lässt die Altlast einfach
+     *    ungelesen liegen (dasselbe Muster wie `pukalani-appearance`, F53).
+     *  - NUR IM PROD-BUILD (`NODE_ENV`): auf localhost wird ein Cookie mit
+     *    `Domain=.pukalani.app` vom Browser VERWORFEN — die Sprachwahl
+     *    hielte im Dev keinen Seitenwechsel. Lokal reicht der Host-Cookie
+     *    ohnehin: alle Dev-Server teilen sich `localhost`, Ports zählen für
+     *    Cookies nicht.
+     *
+     * BEWUSST NUR DIE MARKEN-SITES: Mandanten-Communities, account.* und
+     * demo.* erben diesen Layer nicht und behalten ihre Wahl pro Host — eine
+     * Community darf deutsch bleiben, während www englisch ist. Der
+     * Domain-Cookie reist zwar auch zu diesen Hosts mit, wird dort aber nie
+     * gelesen (anderer cookieKey).
+     */
+    detectBrowserLanguage: {
+      cookieKey: 'pukalani-lang',
+      cookieDomain: process.env.NODE_ENV === 'production' ? '.pukalani.app' : undefined,
+    },
   },
 
   // Ziel-Links der Marketing-CTAs (useProductLinks). Die Werte sind die
