@@ -221,7 +221,14 @@ EMBED-Widget ist geprüft (lokal, /embed mit demselben CommentItem): der GAST
 sieht den Kommentar, aber KEINEN Übersetzen-Knopf (der Composable gate-t auf
 die Session — kein anonymer KI-Kostenweg im iframe), der EINGELOGGTE sieht
 ihn, und ein Klick übersetzte den deutschen Kommentar im Widget nach Englisch
-samt „Automatically translated · Show original"-Zeile
+samt „Automatically translated · Show original"-Zeile.
+SEITEN (pages-Layer) bleiben BEWUSST draußen (geprüft 2026-08-18, Route
+existiert nicht): sie sind Betreiber-CMS, kein UGC — Rechtstexte (Impressum,
+AGB, Datenschutz) dürfen nicht auf Leser-Klick maschinell abweichen, ein
+200k-Body sprengt das Output-Budget eines KI-Aufrufs, und das richtige
+Modell wäre ohnehin das der Kategorie-Übersetzungen: der OWNER pflegt je
+Sprache eine Fassung (ggf. mit KI-Vorschlag im Dashboard) — das wäre ein
+eigenes Feature, kein Anbau an dieses
 und **die Schwärzung leert den Cache mit** (`redact.post.ts` — sonst gäbe
 der Knopf den geschwärzten Text als Cache-Treffer wortgleich wieder heraus).
 Beweis jetzt 32/32 über alle fünf Inhaltsarten; live auf demo: Event, Kurs
