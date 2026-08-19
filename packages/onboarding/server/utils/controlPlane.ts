@@ -23,8 +23,8 @@ import type { ControlServiceConfig } from '../../../core/server/utils/controlSer
 
 export type ControlPlaneConfig = ControlServiceConfig
 
-export function controlPlaneConfig(event: H3Event): ControlPlaneConfig {
-  return controlServiceConfig(event)
+export async function controlPlaneConfig(event: H3Event): Promise<ControlPlaneConfig> {
+  return await controlServiceConfig(event)
 }
 
 /**

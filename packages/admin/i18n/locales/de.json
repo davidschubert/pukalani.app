@@ -514,6 +514,7 @@
       "clearTitle": "Zugang entfernen?",
       "clearText": "Danach gilt wieder {env} aus der Server-Umgebung — ist dort nichts gesetzt, ist der Dienst aus.",
       "envHint": "Rückfall: {env}",
+      "rotationHint": "Geteiltes Geheimnis: derselbe Wert muss auf beiden Seiten stehen. Trage ihn ZUERST beim Empfänger ein — der nimmt dann alten und neuen Wert an —, danach beim Sender. Der alte Wert bleibt gültig, bis er aus der Server-Umgebung entfernt wird.",
       "notEditable": "Eintragen ist erst möglich, wenn NUXT_INSTANCE_SECRETS_KEY auf dem Server gesetzt ist (openssl rand -hex 32). Bis dahin gelten allein die Server-Variablen.",
       "emptyTitle": "Keine Dienste eingeschaltet",
       "emptyText": "Diese Instanz benutzt keinen Dienst, dessen Zugang hier gepflegt werden kann.",
@@ -528,13 +529,17 @@
         "ai": "KI (OpenRouter)",
         "analytics": "Statistik (Plausible)",
         "tickets-ai": "KI der Konsole (Ticket-Triage)",
-        "smtp": "Mailversand (SMTP)"
+        "smtp": "Mailversand (SMTP)",
+        "onboarding-service": "Naht zum Control Plane (Service-Secret)",
+        "events-sweep": "Termin-Erinnerungen (Sweep-Schlüssel)"
       },
       "serviceDesc": {
         "ai": "Treibt Moderations-Assistenten und Übersetzungs-Vorschläge in allen Communities.",
         "analytics": "Liest die Besuchszahlen für die Statistik-Seiten.",
         "tickets-ai": "Eigenes Kontingent für die Ticket-Triage. Ohne eigenen Schlüssel gilt der allgemeine KI-Zugang.",
-        "smtp": "Verschickt Benachrichtigungen, Einladungen und die Tageszusammenfassung."
+        "smtp": "Verschickt Benachrichtigungen, Einladungen und die Tageszusammenfassung.",
+        "onboarding-service": "Das gemeinsame Wort, mit dem sich diese Instanz und die Betreiber-Konsole gegenseitig erkennen — Communities anlegen, Mitglieder verwalten, Domains freischalten.",
+        "events-sweep": "Der Schlüssel, mit dem ein Cron den Versand der Termin-Erinnerungen anstößt."
       },
       "smtp": {
         "host": "Server",

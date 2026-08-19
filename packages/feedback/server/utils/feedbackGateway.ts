@@ -56,8 +56,8 @@ export function requireLocalFeedbackBackend(): void {
   }
 }
 
-export function feedbackServiceReachable(event: H3Event): boolean {
-  return hasLocalFeedbackBackend() || controlServiceAvailable(event)
+export async function feedbackServiceReachable(event: H3Event): Promise<boolean> {
+  return hasLocalFeedbackBackend() || await controlServiceAvailable(event)
 }
 
 export async function callFeedbackService<T>(

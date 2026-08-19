@@ -16,6 +16,6 @@ import { requireOnboardingCaller } from '../../../utils/onboardingService'
  * spricht.
  */
 export default defineEventHandler(async (event) => {
-  requireOnboardingCaller(event)
+  await requireOnboardingCaller(event)
   return await readOnboardingGate(event)
 })

@@ -7,7 +7,7 @@ export default defineEventHandler(async (event): Promise<{ comments: FeedbackCom
 
   const id = getRouterParam(event, 'id')
   if (!id) throw createError({ status: 400, statusText: 'Missing feedback id' })
-  if (!feedbackServiceReachable(event)) return { comments: [] }
+  if (!await feedbackServiceReachable(event)) return { comments: [] }
 
   const envelope = await feedbackEnvelope(event)
   return await callFeedbackService<{ comments: FeedbackComment[] }>(

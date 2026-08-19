@@ -514,6 +514,7 @@
       "clearTitle": "Remove this access?",
       "clearText": "After this, {env} from the server environment applies again — if nothing is set there, the service is off.",
       "envHint": "Fallback: {env}",
+      "rotationHint": "Shared secret: the same value must be set on both sides. Enter it on the RECEIVER first — it then accepts both the old and the new value — and on the sender afterwards. The old value stays valid until it is removed from the server environment.",
       "notEditable": "You can enter keys once NUXT_INSTANCE_SECRETS_KEY is set on the server (openssl rand -hex 32). Until then only the server variables apply.",
       "emptyTitle": "No services enabled",
       "emptyText": "This instance uses no service whose access could be managed here.",
@@ -528,13 +529,17 @@
         "ai": "AI (OpenRouter)",
         "analytics": "Analytics (Plausible)",
         "tickets-ai": "Console AI (ticket triage)",
-        "smtp": "Mail delivery (SMTP)"
+        "smtp": "Mail delivery (SMTP)",
+        "onboarding-service": "Control plane link (service secret)",
+        "events-sweep": "Event reminders (sweep key)"
       },
       "serviceDesc": {
         "ai": "Powers moderation assistants and translation suggestions across all communities.",
         "analytics": "Reads visitor numbers for the analytics pages.",
         "tickets-ai": "A separate budget for ticket triage. Without its own key the general AI access applies.",
-        "smtp": "Sends notifications, invitations and the daily digest."
+        "smtp": "Sends notifications, invitations and the daily digest.",
+        "onboarding-service": "The shared word this instance and the operator console recognise each other by — creating communities, managing members, activating domains.",
+        "events-sweep": "The key a cron job uses to trigger the event reminder sweep."
       },
       "smtp": {
         "host": "Server",

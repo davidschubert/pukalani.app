@@ -17,7 +17,7 @@ const bodySchema = z.object({
 }).strict()
 
 export default defineEventHandler(async (event) => {
-  requireOnboardingCaller(event)
+  await requireOnboardingCaller(event)
   const body = await readValidatedBody(event, bodySchema.parse)
   const result = await eraseFeedbackUserData(event, body.projectId, body.userId)
   logEvent('info', 'feedback.user_erased', { projectId: body.projectId, userId: body.userId, ...result })

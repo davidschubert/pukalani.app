@@ -68,6 +68,61 @@ export default defineEventHandler(async (event): Promise<IntegrationsResponse> =
     })
   }
 
+  /**
+   * ── DIE GETEILTEN NAHT-GEHEIMNISSE (A0, 2026-08-18) ─────────────────────
+   *
+   * Anwesenheit im `runtimeConfig` IST die Prüfung, ob diese Instanz an der
+   * Naht überhaupt hängt — dasselbe Muster wie `ticketsAiKey` darüber. Und sie
+   * entscheidet zugleich, WELCHER Env-Name auf der Karte steht: dieselbe Naht
+   * heißt auf der Runtime-Seite `NUXT_ONBOARDING_SERVICE_SECRET` und im Control
+   * Plane `NUXT_CONTROL_ONBOARDING_SECRET`. Der WERT ist derselbe, der Name
+   * nicht — ein falscher Name auf der Karte schickt beim nächsten Suchen in die
+   * Irre.
+   *
+   * Die Ablage-Sorte ist auf BEIDEN Seiten `onboarding-service`: jede Instanz
+   * hat ihre eigene Zeile in ihrem eigenen Projekt, und dass beide denselben
+   * Inhalt tragen sollen, ist die Aussage der Naht — nicht die einer Tabelle.
+   */
+  /**
+   * GELESEN ÜBER EINEN CAST, und das ist kein Schludern: `in` VERENGT den Typ,
+   * und weil jede App nur EINEN der beiden Schlüssel deklariert, wird der
+   * andere Zweig zu `never` — der Compiler weiß hier mehr über die konkrete
+   * App, als diese generische Datei wissen darf (sie läuft in beiden).
+   */
+  const seamRuntime = runtime as unknown as {
+    controlOnboardingSecret?: string
+    onboardingServiceSecret?: string
+  }
+  const seamEnvName = 'controlOnboardingSecret' in runtime
+    ? 'NUXT_CONTROL_ONBOARDING_SECRET'
+    : ('onboardingServiceSecret' in runtime ? 'NUXT_ONBOARDING_SERVICE_SECRET' : '')
+  if (seamEnvName) {
+    const envSecret = seamEnvName === 'NUXT_CONTROL_ONBOARDING_SECRET'
+      ? seamRuntime.controlOnboardingSecret
+      : seamRuntime.onboardingServiceSecret
+    items.push({
+      id: 'onboarding-service',
+      envName: seamEnvName,
+      source: integrationSource(await readInstanceSecret(event, 'onboarding-service'), envSecret),
+      shared: true,
+    })
+  }
+
+  // Der Sweep-Schlüssel existiert im runtimeConfig nur, wo der events-Layer
+  // montiert ist. Sein „Sender" ist kein Deployment dieses Repos, sondern ein
+  // Cron — die Reihenfolge bleibt trotzdem dieselbe (erst hier, dann dort).
+  if ('eventsSweepKey' in runtime) {
+    items.push({
+      id: 'events-sweep',
+      envName: 'NUXT_EVENTS_SWEEP_KEY',
+      source: integrationSource(
+        await readInstanceSecret(event, 'events-sweep'),
+        runtime.eventsSweepKey as string,
+      ),
+      shared: true,
+    })
+  }
+
   // ── SMTP: EIN Block, und das Passwort bleibt hier ───────────────────────
   const storedSmtp = parseMailerSettings(await readInstanceSecret(event, 'smtp'))
   const smtpView = toMailerView(storedSmtp ?? {

@@ -60,7 +60,7 @@ export function invalidateSiteDomainAddress(): void {
 async function fetchAddress(event: H3Event): Promise<SiteDomainAddress | null> {
   const projectId = siteProjectId(event)
   if (!projectId) return null
-  if (!controlServiceAvailable(event)) return null
+  if (!await controlServiceAvailable(event)) return null
   try {
     return await callControlService<SiteDomainAddress>(event, '/api/control/site/domain/host', { projectId })
   }

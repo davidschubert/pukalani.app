@@ -65,7 +65,7 @@ async function erasureIdentity(event: H3Event, userId: string): Promise<{
 }
 
 export async function communityExportUserData(event: H3Event, userId: string): Promise<CommunityUserDataExport | Record<string, never>> {
-  if (!controlServiceAvailable(event)) return {}
+  if (!await controlServiceAvailable(event)) return {}
   const identity = await erasureIdentity(event, userId)
   return await callControlPlane<CommunityUserDataExport>(event, USER_DATA_PATH, identity).catch(() => ({}))
 }
