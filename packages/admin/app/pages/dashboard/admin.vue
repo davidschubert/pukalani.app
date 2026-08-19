@@ -27,6 +27,9 @@ const links = computed<NavigationMenuItem[]>(() => {
   // Weg mehr zu ihrem eigenen Changelog.
   if (userHasCapability(u, 'changelog.manage')) items.push({ label: t('admin.changelog.title'), icon: 'i-ph-megaphone', to: localePath('/dashboard/admin/changelog') })
   if (userHasCapability(u, 'system.manage')) items.push({ label: t('admin.config.title'), icon: 'i-ph-toggle-left', to: localePath('/dashboard/admin/config') })
+  // Direkt hinter „Konfiguration", weil beides Betrieb ist: dort steht die
+  // EINSTELLUNG (KI-Modell), hier der ZUGANG (der Schlüssel dazu).
+  if (userHasCapability(u, 'system.manage')) items.push({ label: t('admin.integrations.title'), icon: 'i-ph-plugs-connected', to: localePath('/dashboard/admin/integrations') })
   if (userHasCapability(u, 'system.manage')) items.push({ label: t('admin.products.title'), icon: 'i-ph-puzzle-piece', to: localePath('/dashboard/admin/products') })
   if (userHasCapability(u, 'users.manage')) items.push({ label: t('admin.gdprExports.title'), icon: 'i-ph-file-lock', to: localePath('/dashboard/admin/gdpr-exports') })
   return items

@@ -139,9 +139,21 @@ export async function triageTicket(event: H3Event, ticketId: string): Promise<Ti
   requirePermission(event, 'tickets.manage')
 
   const config = await getEffectiveTicketsAiConfig(event)
-  // Layer-eigener Key schlägt den Core-Key (NUXT_TICKETS_AI_KEY vor NUXT_AI_KEY)
+  /**
+   * VIER Quellen, feste Rangfolge — der Layer schlägt den Core, die ABLAGE
+   * schlägt die Env:
+   *   1. instance_secrets 'tickets-ai'   (Instanz → Integrationen)
+   *   2. NUXT_TICKETS_AI_KEY
+   *   3. instance_secrets 'ai'           (der allgemeine KI-Schlüssel)
+   *   4. NUXT_AI_KEY
+   * Der Layer-Vorrang war schon vorher da (eigenes Kontingent für die
+   * Ticket-Triage); neu ist nur, dass jede Stufe auch aus der Ablage kommen
+   * kann. `resolveAiKey` deckt die Stufen 3+4 in derselben Reihenfolge ab.
+   */
   const runtime = useRuntimeConfig(event)
-  const apiKey = runtime.ticketsAiKey || runtime.aiKey
+  const apiKey = await readInstanceSecret(event, 'tickets-ai')
+    || runtime.ticketsAiKey
+    || await resolveAiKey(event)
   if (!config.enabled || !apiKey) {
     throw createError({ status: 503, statusText: 'AI triage not configured' })
   }

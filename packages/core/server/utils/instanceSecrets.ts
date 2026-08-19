@@ -48,8 +48,24 @@ export const INSTANCE_SECRETS_TABLE = 'instance_secrets'
  * Welche Geheimnisse es gibt. Die Zeilen-Id IST die Sorte — eine
  * `ID.unique()`-Zeile bräuchte eine Abfrage, einen Index und die Frage
  * „welche gilt, wenn zwei da sind"; die feste Id lässt sie nicht entstehen.
+ *
+ * WAS HIER NICHT STEHEN DARF (Davids Zuschnitt vom 2026-08-18): Geheimnisse,
+ * die man BRAUCHT, um an diese Zeile heranzukommen — `NUXT_APPWRITE_KEY`
+ * (öffnet die Datenbank), `NUXT_INSTANCE_SECRETS_KEY` (öffnet den Umschlag),
+ * der Control-Plane-Schlüssel, die Redis-Adresse. Henne und Ei: läge einer
+ * davon hier, käme niemand mehr an ihn heran.
+ *
+ * EBENFALLS NICHT (vorerst): die GETEILTEN Geheimnisse zwischen zwei
+ * Deployments (`onboardingServiceSecret`, `eventsSweepKey`). Sie müssen auf
+ * beiden Seiten gleich sein — legt man sie in die Ablage EINER Instanz,
+ * reisst die Naht in dem Moment, in dem jemand dreht. Das braucht eine
+ * Übergangsstufe, in der beide Seiten alten UND neuen Wert annehmen.
+ *
+ * UND NICHT `smtpPass`: der Digest-Versand läuft in einem Sweep OHNE Request,
+ * `readInstanceSecret` verlangt aber ein `H3Event`. Lösbar, aber ein Fehler
+ * dort heisst „es geht still keine Mail mehr raus" — eigenes Paket.
  */
-export const INSTANCE_SECRET_KINDS = ['ai'] as const
+export const INSTANCE_SECRET_KINDS = ['ai', 'analytics', 'tickets-ai'] as const
 export type InstanceSecretKind = typeof INSTANCE_SECRET_KINDS[number]
 
 export interface InstanceSecretRow extends Models.Row {

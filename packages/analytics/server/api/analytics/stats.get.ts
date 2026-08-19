@@ -138,7 +138,11 @@ export default defineEventHandler(async (event): Promise<AnalyticsStatsResponse>
   if (target.state === 'unavailable') return UNAVAILABLE
 
   const baseUrl = (analytics.instance ?? '').replace(/\/+$/, '')
-  const apiKey = useRuntimeConfig(event).analyticsStatsApiKey
+  // Ablage vor Env (Muster wie beim KI-Schlüssel, F55): der Betreiber trägt
+  // den Statistik-Schlüssel unter Instanz → Integrationen ein, die Env bleibt
+  // der Weg für alles ohne Oberfläche. Stünde die Env vorn, hätte der
+  // Eintrag auf einer Instanz mit gesetzter Env keine Wirkung.
+  const apiKey = await readInstanceSecret(event, 'analytics') || useRuntimeConfig(event).analyticsStatsApiKey
   if (!baseUrl || !apiKey) return UNAVAILABLE
 
   /**

@@ -26,7 +26,8 @@
         "branding": "Design",
         "settings": "Settings",
         "account": "Your account"
-      }
+      },
+      "integrations": "Integrations"
     },
     "config": {
       "title": "Configuration",
@@ -41,18 +42,7 @@
       "aiModelDesc": "Model for the built-in AI (moderation assist). Empty = build default {model}. Format: vendor/model (OpenRouter).",
       "save": "Save",
       "saved": "Configuration saved.",
-      "aiKey": "AI key",
-      "aiKeyDesc": "The API key of your AI provider (e.g. OpenRouter). Stored encrypted and never shown again.",
-      "aiKeyPlaceholder": "Enter a new key — leaving this empty changes nothing",
-      "aiKeyClear": "Remove key",
-      "aiKeyClearTitle": "Remove the AI key?",
-      "aiKeyClearText": "After this, AI features only work if NUXT_AI_KEY is set on the server.",
-      "aiKeyNotEditable": "You can enter a key here once NUXT_INSTANCE_SECRETS_KEY is set on the server (openssl rand -hex 32). Until then only NUXT_AI_KEY applies.",
-      "aiKeySource": {
-        "settings": "stored here",
-        "env": "from the server environment",
-        "none": "no key — AI features are off"
-      }
+      "aiKeyMoved": "The key now lives under"
     },
     "storage": {
       "title": "Storage",
@@ -511,6 +501,39 @@
       "alwaysOn": "Always on",
       "emptyTitle": "No products found",
       "empty": "This site is not reporting any products right now. Reload the page — if it stays empty, the product layers are missing from the deploy."
+    },
+    "integrations": {
+      "title": "Integrations",
+      "description": "This instance's access to third-party services. Keys you enter are stored encrypted and never shown again.",
+      "placeholder": "Enter a new key — leaving this empty changes nothing",
+      "save": "Save",
+      "saved": "Access saved.",
+      "saveFailed": "Could not save the access.",
+      "saveFailedHint": "Your input is still in the field. Try again.",
+      "clear": "Remove",
+      "clearTitle": "Remove this access?",
+      "clearText": "After this, {env} from the server environment applies again — if nothing is set there, the service is off.",
+      "envHint": "Fallback: {env}",
+      "notEditable": "You can enter keys once NUXT_INSTANCE_SECRETS_KEY is set on the server (openssl rand -hex 32). Until then only the server variables apply.",
+      "emptyTitle": "No services enabled",
+      "emptyText": "This instance uses no service whose access could be managed here.",
+      "bootstrapTitle": "Belongs in the server environment",
+      "bootstrapText": "These cannot live here: they are needed to reach the encrypted store in the first place.",
+      "source": {
+        "settings": "stored here",
+        "env": "from the server environment",
+        "none": "no key — service is off"
+      },
+      "service": {
+        "ai": "AI (OpenRouter)",
+        "analytics": "Analytics (Plausible)",
+        "tickets-ai": "Console AI (ticket triage)"
+      },
+      "serviceDesc": {
+        "ai": "Powers moderation assistants and translation suggestions across all communities.",
+        "analytics": "Reads visitor numbers for the analytics pages.",
+        "tickets-ai": "A separate budget for ticket triage. Without its own key the general AI access applies."
+      }
     }
   },
   "whatsNew": {
