@@ -30,6 +30,30 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### S1 — Alter Sicherungsordner mit lebenden Geheimnissen gelöscht ✅ 2026-08-19
+
+Beim Aufräumen nach der Naht-Rotation gefunden: `/home/ploi/.env-backups/` lag
+seit dem Control-Cutover (26. Juli) mit fünf Dateien auf dem Server — darunter
+`NUXT_STRIPE_SECRET_KEY`, `NUXT_ENTITLEMENTS_PRIVATE_KEY` und `NUXT_SMTP_PASS`,
+allesamt noch GÜLTIG. Vor dem Löschen wurde jeder einzelne Schlüssel gegen die
+lebende `.env` gehalten: identisch (Sicherung überflüssig) oder abweichend
+(Altwert aus der Studio-Zeit) — kein Wert existierte nur dort. Danach
+`shred -u` je Datei statt `rm`, Ordner entfernt, Gegenprobe über
+`/home/ploi` ohne Treffer, alle sechs Hosts weiter 200.
+
+**Gelernt:** Eine Löschung wird billig, sobald man sie vorher unumkehrbar-frei
+macht. Die Frage ist nicht „traue ich mich?", sondern „gibt es hier einen Wert,
+den es nirgends sonst gibt?" — die lässt sich mechanisch beantworten (Wert je
+Schlüssel gegen die lebende Datei), und danach ist Löschen kein Risiko mehr,
+sondern Buchhaltung.
+**Gelernt:** Sicherungen sterben nicht von selbst. Diese entstand als
+verantwortungsvoller Zwischenschritt eines Cutovers und wurde genau dadurch zum
+Problem: 24 Tage später kannte sie niemand mehr, und sie trug denselben Stripe-
+Schlüssel wie die Produktion. Wer eine `.env` sichert, setzt im selben Atemzug
+das Ende — sonst ist die Sicherung die Kopie, die niemand rotiert.
+
+---
+
 ### A0 — Naht-Geheimnisse: alle Zugänge über die Konsole, Rotation ohne Deployment ✅ 2026-08-19
 
 Der Abschluss von A0 in zwei Etappen. ETAPPE 1 (2026-08-18, Nachbar-Sitzung +
