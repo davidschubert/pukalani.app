@@ -64,6 +64,15 @@ export class EventPump {
     this.#workBranch = branch
   }
 
+  /**
+   * Die Session-Id nachtragen. Ein `--resume`-Lauf (§ 9) kennt seine NEUE
+   * Session erst aus dem Abschluss-JSON — bis dahin bleibt sie '' und reist
+   * nicht mit; danach stempelt sie der Server als Erst-Wert.
+   */
+  setSessionId(sessionId: string): void {
+    this.#sessionId = sessionId
+  }
+
   push(draft: StreamEventDraft): void {
     if (this.#queue.length >= MAX_QUEUE) {
       this.#dropped++
@@ -116,8 +125,11 @@ export class EventPump {
             events: batch,
             // Idempotent: der Server stempelt nur den ERSTEN Wert (§ 7.2
             // Schritt 1), Wiederholen kostet nichts und schützt gegen ein
-            // verlorenes erstes Bündel.
-            sessionId: this.#sessionId,
+            // verlorenes erstes Bündel. Bei einer Fortsetzung ist sie anfangs
+            // '' (die neue Session kennt erst das Abschluss-JSON, § 9) und
+            // reist dann NICHT mit — ein leerer Wert fiele durch die
+            // uuid-Prüfung des Servers.
+            ...(this.#sessionId ? { sessionId: this.#sessionId } : {}),
             ...(this.#workBranch ? { workBranch: this.#workBranch } : {}),
           })
           this.#queue.splice(0, batch.length)

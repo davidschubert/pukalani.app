@@ -58,6 +58,18 @@ export const createRunSchema = z.object({
 })
 
 /**
+ * Eine Antwort auf eine `needs_input`-Rückfrage (§ 9). NUR der Antworttext —
+ * alles andere (Rechner, Repo, Modell, Modus, Budget, Testbefehle UND
+ * `promptTrusted`) erbt die Fortsetzungs-Route aus dem Vorgänger-Lauf, nie aus
+ * diesem Body (§ 8.2: eine Fortsetzung wäscht die Herkunft nicht rein). Der
+ * Vorgänger steckt in der Route (`:id`), nicht im Body — man kann sich keinen
+ * fremden Lauf als Anker unterschieben.
+ */
+export const resumeRunSchema = z.object({
+  answer: z.string().min(1).max(MAX_PROMPT_CHARS),
+})
+
+/**
  * Ein Bündel Fortschritt (§ 7.2 Schritt 6: „alle 2 s oder alle 20 Zeilen —
  * nicht je Zeile"). 50 ist der Deckel für ein Bündel, das nach einem
  * Netzabbruch nachgereicht wird.

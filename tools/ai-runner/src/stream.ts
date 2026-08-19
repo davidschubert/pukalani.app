@@ -161,6 +161,13 @@ export interface ResultSummary {
   numTurns: number
   denials: string[]
   subtype: string
+  /**
+   * Die Session-Id, die die CLI selbst geführt hat (`session_id`). Bei einem
+   * `--resume`-Lauf (§ 9) ist das die NEUE Session — der einzige Ort, an dem
+   * der Runner sie erfährt, weil er sie nicht selbst gewürfelt hat. '' wenn die
+   * Abschluss-Zeile keine trägt.
+   */
+  sessionId: string
 }
 
 export function readResultLine(value: unknown): ResultSummary | null {
@@ -172,6 +179,7 @@ export function readResultLine(value: unknown): ResultSummary | null {
     numTurns: typeof record.num_turns === 'number' ? record.num_turns : 0,
     denials: permissionDenials(record),
     subtype: readString(record, 'subtype'),
+    sessionId: readString(record, 'session_id'),
   }
 }
 
