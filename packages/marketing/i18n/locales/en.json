@@ -1,0 +1,115 @@
+{
+  "marketing": {
+    "nav": {
+      "pricing": "Pricing",
+      "story": "Story",
+      "request": "Request access",
+      "hasCode": "I have a code",
+      "signIn": "Sign in",
+      "start": "Start free",
+      "menu": "Open menu",
+      "menuClose": "Close menu",
+      "aria": {
+        "main": "Main navigation"
+      },
+      "products": {
+        "label": "Products",
+        "overview": "All products at a glance",
+        "items": {
+          "diskussionen": {
+            "title": "Comments",
+            "text": "Threads, votes, mentions and live presence – under any content."
+          },
+          "moderation": {
+            "title": "Moderation",
+            "text": "Reports, two-phase hiding, an AI second opinion – a human decides."
+          },
+          "branding": {
+            "title": "Pages & branding",
+            "text": "26 colour worlds, custom fonts, your own pages – your community looks like you."
+          },
+          "beitraege": {
+            "title": "Posts & feed",
+            "text": "Member posts in markdown, polls and a chronological feed."
+          },
+          "kurse": {
+            "title": "Courses",
+            "text": "Lessons with progress and paid access – right where the discussion happens."
+          },
+          "events": {
+            "title": "Events",
+            "text": "Online or in person, with RSVPs and tickets – even embeddable."
+          },
+          "analytics": {
+            "title": "Analytics",
+            "text": "Visitors, page views and sources – measured without cookies, right in your dashboard."
+          }
+        }
+      },
+      "earlyAccess": "Early access",
+      "faq": "Common questions",
+      "resources": {
+        "label": "Resources",
+        "items": {
+          "help": {
+            "title": "Help",
+            "text": "Guides for owners and developer docs."
+          },
+          "changelog": {
+            "title": "Changelog",
+            "text": "What's new in Pukalani?"
+          }
+        }
+      }
+    },
+    "footer": {
+      "tagline": "Your own community platform — lean, privacy-first, hosted in Germany.",
+      "refrain": "“Where the sun breaks through.”",
+      "aria": {
+        "product": "Product",
+        "compare": "Compare",
+        "useCases": "Use cases",
+        "company": "About",
+        "legal": "Legal",
+        "language": "Choose language",
+        "appearance": "Choose appearance"
+      },
+      "appearance": {
+        "light": "Light",
+        "dark": "Dark",
+        "system": "System"
+      },
+      "colProduct": "Product",
+      "colCompany": "About",
+      "colLegal": "Legal",
+      "start": "Start free",
+      "demo": "Live demo",
+      "help": "Help",
+      "changelog": "Changelog",
+      "status": "Status",
+      "story": "Our story",
+      "privacy": "Privacy",
+      "imprint": "Imprint",
+      "terms": "Terms",
+      "rights": "All rights reserved.",
+      "madeIn": "Built with aloha. Hosted in Germany.",
+      "colCompare": "Compare",
+      "colUseCases": "Use cases",
+      "featDiscussions": "Comments",
+      "featBranding": "Branding",
+      "glossary": "Glossary",
+      "vsCircle": "vs Circle",
+      "vsSkool": "vs Skool",
+      "vsMighty": "vs Mighty Networks",
+      "switchPage": "Switching",
+      "privacyHow": "How we do privacy",
+      "forCoaches": "For coaches",
+      "forCourses": "For course creators",
+      "forCreator": "For creators",
+      "forClubs": "For clubs",
+      "featCourses": "Courses",
+      "featEvents": "Events",
+      "faq": "FAQ"
+    }
+  }
+}

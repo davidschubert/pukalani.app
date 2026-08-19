@@ -1,21 +1,20 @@
 export default defineNuxtConfig({
   // Marketing-Startseite von pukalani.app (Wurzel). Bewusst NUR das Fundament
-  // (core + system) — kein admin/themes/comments: die Seite ist öffentlich +
-  // statisch, das Licht-Motiv ist eigenständiges CSS, und die Farbwelten-
-  // Vorschau liest später die statische Theme-Registry direkt (kein
+  // (marketing-Chrome + core + system) — kein admin/themes/comments: die Seite
+  // ist öffentlich + statisch, das Licht-Motiv ist eigenständiges CSS, und die
+  // Farbwelten-Vorschau liest später die statische Theme-Registry direkt (kein
   // Dashboard-Layer nötig).
-  extends: ['../../packages/core', '../../packages/system'],
+  //
+  // `marketing` ist der CHROME-Layer (Kopf, Fuß, Marken-CSS, ihre i18n-Keys)
+  // — er liegt VOR core, weil seine Bauteile die Marken-Optik setzen. Er
+  // bringt auch die beiden CSS-Dateien mit (puka-theme.css vor marketing.css),
+  // deshalb steht hier kein `css:`-Array mehr.
+  extends: ['../../packages/marketing', '../../packages/core', '../../packages/system'],
 
   // Port pro App eindeutig (3001 comments · 3004 platform · 3005 portfolio · 3007 marketing)
   devServer: {
     port: 3007,
   },
-
-  // puka-theme.css = Theme-Brücke (eigene `puka`-Palette + --ui-primary), MUSS
-  // vor marketing.css stehen; marketing.css = Licht-Dramaturgie (§6.3 des
-  // Konzepts), gescopet auf body.marketing-site, damit sie nicht in
-  // Login/Dashboard-Layouts der Layer blutet.
-  css: ['~/assets/css/puka-theme.css', '~/assets/css/marketing.css'],
 
   app: {
     pageTransition: { name: 'page', mode: 'out-in' },
@@ -76,64 +75,14 @@ export default defineNuxtConfig({
     '/use-cases/vereine': { redirect: { to: '/use-cases/clubs', statusCode: 301 } },
   },
 
-  // Ziel-Links der Marketing-CTAs (useProductLinks). Die Werte sind die
-  // PROD-Hosts; lokal/Staging per Env überschreibbar — ohne Skeleton-Key
-  // mappt die Env-Var ins Leere (gleiches Muster wie appUrl im Core).
-  // Env: NUXT_PUBLIC_MARKETING_START_URL / _SIGN_IN_URL / _DEMO_URL /
-  //      _REQUEST_URL
-  runtimeConfig: {
-    public: {
-      // Kundenbereich. Seit AH-1 (2026-08-11) EIN Name: account.pukalani.app
-      // (vorher my.pukalani.app, davor app.pukalani.app). Die Altnamen leiten
-      // 301 weiter — hier steht trotzdem der heutige, damit eine beworbene URL
-      // nicht dauerhaft über einen Umweg läuft.
-      marketingStartUrl: 'https://account.pukalani.app/register',
-      marketingSignInUrl: 'https://account.pukalani.app/login',
-      marketingDemoUrl: 'https://demo.pukalani.app',
-      /**
-       * Zugang anfragen (U3, 2026-08-10) — das Ziel für jede Absicht, die
-       * KEIN Selbstbedienungs-Kauf ist (Early Access). Vorher zeigten diese
-       * Knöpfe auf `/login`: der Besucher wollte etwas hinterlassen und bekam
-       * ein Passwortfeld.
-       *
-       * `/request-access` IN BEIDEN SPRACHEN: der Kundenbereich lokalisiert
-       * seine Adressen seit U8 (Trichter-Befund M5, 2026-08-11) nicht mehr —
-       * nur die Marketing-Seite tut das (`/produkte` ↔ `/products`). Die Seite
-       * trägt `defineI18nRoute({ paths: { de: '/request-access', en:
-       * '/request-access' } })` (packages/onboarding/app/pages/anfragen.vue —
-       * der DATEIname bleibt, weil an ihm der Routen-Name hängt, über den die
-       * internen Links laufen). Die App steht auf `prefix_except_default` mit
-       * `en` als Vorgabe: ein deutschsprachiger Besucher wird von
-       * `detectBrowserLanguage` (`redirectOn: 'all'`) von hier auf
-       * `/de/request-access` weitergeleitet, genau wie bei `/register` oben.
-       * Die alte `/de/anfragen` bleibt als 301 erhalten.
-       */
-      marketingRequestUrl: 'https://account.pukalani.app/request-access',
-      /**
-       * ZUSTAND DES EARLY-ACCESS-TORS (U2, Davids Entscheidung 8 vom
-       * 2026-08-10): braucht eine eigene Community gerade einen
-       * Einladungs-Code? Die Landing beschriftet ihre Haupt-CTAs danach —
-       * dynamisch, damit das Umlegen des Schalters im Betreiber-Dashboard kein
-       * Text-Deploy hier ist.
-       *
-       * Gelesen wird AUSSCHLIESSLICH serverseitig (server/api/gate.get.ts) —
-       * dass der Wert unter `public` steht, ist nur der Skeleton-Mechanismus
-       * für die Env-Var. Es gibt hier nichts zu verbergen: die Antwort ist ein
-       * Ja/Nein, das anschließend auf der Startseite steht.
-       *
-       * Env: NUXT_PUBLIC_MARKETING_GATE_URL
-       */
-      marketingGateUrl: 'https://account.pukalani.app/api/onboarding/gate',
-    },
-  },
-
   // DIE HELL-KLEMME IST WEG (Davids Entscheidung B7, 2026-08-01).
   //
   // Sie bestand aus DREI Teilen, und alle drei mussten fallen: (1) `preference:
   // 'light'`, (2) ein `pages:extend`-Hook, der JEDER Seite `meta.colorMode =
   // 'light'` gab (color-mode 4 → `forced`, schlug im Inline-Skript sogar den
   // gespeicherten localStorage-Wert), und (3) das Fehlen eines `.dark`-Zweiges
-  // in app/assets/css/marketing.css. Teil 3 war der eigentliche Grund: ohne ihn
+  // in marketing.css (seit 2026-08-18 im Chrome-Layer:
+  // packages/marketing/app/assets/css/). Teil 3 war der eigentliche Grund: ohne ihn
   // mischten sich dunkle Nuxt-UI-Elemente in die festen Licht-Töne der
   // Licht-Dramaturgie. Der Zweig steht jetzt (dort auch die Farbwerte), damit
   // darf die Wahl wieder dem Besucher gehören.

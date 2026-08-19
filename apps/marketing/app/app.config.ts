@@ -4,6 +4,23 @@ export default defineAppConfig({
   // deshalb auch kein Consent-Banner nötig), kein Auth.
   pukalani: {
     /**
+     * DIESE APP IST pukalani.app — der Chrome-Layer (packages/marketing) löst
+     * seine internen Ziele deshalb INTERN auf, über die Route-Namen dieser App
+     * (`faq`, `produkte-slug`, `vs-slug`, …), inklusive der lokalisierten
+     * Segmente und Slugs.
+     *
+     * ÜBERALL SONST (help.pukalani.app) steht der Layer-Default `home: false`,
+     * und dieselben Menüpunkte werden zu absoluten URLs auf `siteUrl`. Die
+     * Route-Namen gibt es dort nämlich gar nicht — `localePath({ name: 'faq' })`
+     * liefert nichts, und vue-router meldet das nur in der Entwicklung.
+     *
+     * Die übrigen Felder (siteUrl/helpUrl/changelogUrl/statusUrl) stehen im
+     * Layer und werden hier bewusst NICHT wiederholt.
+     */
+    marketing: {
+      home: true,
+    },
+    /**
      * Plausible (self-hosted, plausible.hawaii.studio) — cookieloses
      * Tracking, daher bleibt `pukalani.consent` bewusst AUS (kein Banner).
      * v3-Snippet: die Site-Zuordnung zu pukalani.app steckt in der
@@ -32,31 +49,10 @@ export default defineAppConfig({
     realtime: { enabled: false },
   },
   ui: {
-    colors: {
-      // Die Marke ist die Sonne, nicht eine Statusfarbe: `puka` ist die eigene
-      // 11-stufige Palette aus app/assets/css/puka-theme.css. Damit malt
-      // color="primary" den CTA-Ton, und die Seite muss die Statusfarbe
-      // `warning` nicht länger als Markenfarbe zweckentfremden.
-      primary: 'puka',
-      // `neutral` bleibt BEWUSST auf dem Core-Wert `mist`: die Neutral-Ramp
-      // färbt Text, Ränder und Flächen JEDER Nuxt-UI-Komponente. Ein Wechsel
-      // auf einen --puka-ink-nahen Ton wäre eine sichtbare Änderung an der
-      // ganzen Seite — die gehört in ein eigenes Paket, nicht in die
-      // Theme-Brücke.
-    },
-    /**
-     * DAS BURGER-ZEICHEN (Paket 5). `UHeader` nimmt sein Umschalt-Zeichen aus
-     * `ui.icons.menu`/`.close` und wechselt es je nach Zustand — es lässt sich
-     * deshalb NICHT als Eigenschaft am Knopf setzen, ohne den Wechsel zu
-     * verlieren. Der Core stellt `i-ph-list`, der Bestand dieser Seite die
-     * fette Schnittvariante; die eine Zeile hier hält sie.
-     * `close` bleibt bewusst der Core-Wert: das Kreuz kommt im Bestand gar
-     * nicht vor (der <details>-Ausklapper hatte keinen Schließ-Zustand).
-     */
-    icons: {
-      menu: 'i-ph-list-bold',
-    },
-
+    // `colors.primary: 'puka'` und `icons.menu` liegen seit der
+    // Chrome-Extraktion im LAYER (packages/marketing/app/app.config.ts, dort
+    // die Begründung): Palette und Kopfzeile wohnen dort, die Zuordnung folgt
+    // ihnen — sonst trüge der Chrome die Marke nur auf dieser einen App.
     button: {
       compoundVariants: [
         {

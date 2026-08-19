@@ -2,23 +2,23 @@
 /**
  * Fußbereich der Marketing-Seite — `UFooter` + `UFooterColumns` (Paket 5).
  *
- * ══ REGEL FÜR ALLE INTERNEN LINKS DIESER APP ═══════════════════════════════
- * localePath IMMER mit dem Route-NAMEN aufrufen, nie mit einem rohen
- * Pfad-String. Fast jede Seite trägt je Sprache einen eigenen Pfad
- * (defineI18nRoute: /agb↔/terms, /dsgvo↔/gdpr, /produkte/*↔/products/* …).
- * Ein roher Pfad bekommt nur den Locale-Präfix davor, das Segment bleibt
- * deutsch — auf EN stünde dann /datenschutz im HTML, und das ist dort ein 404
- * (der Dev-Server meldet es als „No match found for location"). Auch bei
- * Seiten OHNE eigene Pfade (faq, vs/*, use-cases/*) den Namen nehmen: sonst
- * reißt die nächste defineI18nRoute-Ergänzung das Loch wieder auf.
- * EINZIGE Ausnahme: localePath('/') für die Startseite. ════════════════════
+ * ══ REGEL FÜR ALLE INTERNEN LINKS DES CHROME ═══════════════════════════════
+ * KEIN `localePath` im Bauteil — jedes interne Ziel läuft über
+ * `useMarketingSite()`. Auf pukalani.app rechnet es weiterhin über den
+ * Route-NAMEN (nie über einen rohen Pfad-String: fast jede Seite trägt je
+ * Sprache einen eigenen Pfad — /agb↔/terms, /dsgvo↔/gdpr,
+ * /produkte/*↔/products/* —, und ein roher Pfad bekäme nur den Locale-Präfix
+ * davor, das Segment bliebe deutsch und wäre auf EN ein 404). Auf jeder
+ * anderen App, die diesen Layer einbindet, gibt es diese Routen gar nicht;
+ * dort liefert dasselbe Composable absolute URLs auf pukalani.app.
+ * ═════════════════════════════════════════════════════════════════════════
  */
-import { type AudienceKey, audienceSlugForLocale, type MarketingLocale, type ProductKey, slugForLocale } from '#shared/marketing'
+import type { AudienceKey, MarketingLocale, MarketingPageName, ProductKey, VsSlug } from '../../shared/marketing'
 
 const { t, locale } = useI18n()
-const localePath = useLocalePath()
 const switchLocalePath = useSwitchLocalePath()
 const { start, demo } = useProductLinks()
+const site = useMarketingSite()
 const year = 2026 // statisch: Date.now() steht im Build nicht zur Verfügung
 
 // Siehe MarketingHeader.vue für die Begründung beider Eigenschaften:
@@ -27,8 +27,8 @@ const year = 2026 // statisch: Date.now() steht im Build nicht zur Verfügung
 // `ULink` das zweite Durchreichen eines schon aufgelösten Pfades.
 const LINK_DEFAULTS = { active: false, locale: false } as const
 
-function page(name: string, label: string) {
-  return { ...LINK_DEFAULTS, label, to: localePath({ name }) }
+function page(name: MarketingPageName, label: string) {
+  return { ...LINK_DEFAULTS, label, to: site.page(name) }
 }
 /**
  * Produkt-Link am KANONISCHEN Schlüssel — der Slug in der Adresse ist seit
@@ -37,11 +37,7 @@ function page(name: string, label: string) {
  * an `locale` hängt: der Fuß rechnet die Ziele beim Sprachwechsel neu.
  */
 function product(key: ProductKey, label: string) {
-  return {
-    ...LINK_DEFAULTS,
-    label,
-    to: localePath({ name: 'produkte-slug', params: { slug: slugForLocale(key, locale.value) } }),
-  }
+  return { ...LINK_DEFAULTS, label, to: site.product(key) }
 }
 /**
  * Anwendungsfall-Link, gleiche Bauart wie `product()`: der Slug ist seit
@@ -50,11 +46,11 @@ function product(key: ProductKey, label: string) {
  * `/use-cases` gilt für beide Sprachen.
  */
 function audience(key: AudienceKey, label: string) {
-  return {
-    ...LINK_DEFAULTS,
-    label,
-    to: localePath({ name: 'use-cases-slug', params: { slug: audienceSlugForLocale(key, locale.value) } }),
-  }
+  return { ...LINK_DEFAULTS, label, to: site.audience(key) }
+}
+/** Vergleichsseite — der Slug ist ein Eigenname und in beiden Sprachen gleich. */
+function vs(slug: VsSlug, label: string) {
+  return { ...LINK_DEFAULTS, label, to: site.vs(slug) }
 }
 
 /**
@@ -200,9 +196,9 @@ const columns = computed(() => [
     aria: t('marketing.footer.aria.compare'),
     label: t('marketing.footer.colCompare'),
     children: [
-      { ...LINK_DEFAULTS, label: t('marketing.footer.vsCircle'), to: localePath({ name: 'vs-slug', params: { slug: 'circle' } }) },
-      { ...LINK_DEFAULTS, label: t('marketing.footer.vsSkool'), to: localePath({ name: 'vs-slug', params: { slug: 'skool' } }) },
-      { ...LINK_DEFAULTS, label: t('marketing.footer.vsMighty'), to: localePath({ name: 'vs-slug', params: { slug: 'mighty-networks' } }) },
+      vs('circle', t('marketing.footer.vsCircle')),
+      vs('skool', t('marketing.footer.vsSkool')),
+      vs('mighty-networks', t('marketing.footer.vsMighty')),
       page('wechseln', t('marketing.footer.switchPage')),
     ],
   },
@@ -225,12 +221,18 @@ const columns = computed(() => [
       // Ohne den Anker landete derselbe Beschriftungstext eine Bildschirmhöhe
       // vom Versprochenen entfernt, und wer schon auf `/` steht, sah gar
       // keine Bewegung — der Link las sich als tot (Audit-Befund M6).
-      { ...LINK_DEFAULTS, label: t('marketing.footer.story'), to: { path: localePath('/'), hash: '#geschichte' } },
+      { ...LINK_DEFAULTS, label: t('marketing.footer.story'), to: site.home('#geschichte') },
       page('dsgvo', t('marketing.footer.privacyHow')),
-      { ...LINK_DEFAULTS, label: t('marketing.footer.changelog'), to: 'https://changelog.pukalani.app' },
+      // Die Hilfe steht VOR dem Changelog: „Wie geht das?" ist die häufigere
+      // Frage als „Was ist neu?". Beide Adressen kommen aus
+      // `pukalani.marketing` (app.config.ts) statt als Literal — der Layer
+      // läuft auch AUF help.pukalani.app, und dort ist der eigene Host keine
+      // Zeichenkette im Markup wert.
+      { ...LINK_DEFAULTS, label: t('marketing.footer.help'), to: site.helpUrl.value },
+      { ...LINK_DEFAULTS, label: t('marketing.footer.changelog'), to: site.changelogUrl },
       // Die Statusseite liegt bewusst NICHT bei uns: sie muss antworten, wenn
       // unser Server es nicht tut.
-      { ...LINK_DEFAULTS, label: t('marketing.footer.status'), to: 'https://status.pukalani.app', rel: 'noopener' },
+      { ...LINK_DEFAULTS, label: t('marketing.footer.status'), to: site.statusUrl, rel: 'noopener' },
     ],
   },
   {
@@ -357,7 +359,16 @@ const FOOTER_UI = {
       <span>{{ t('marketing.footer.madeIn') }}</span>
 
       <!-- Hell/Dunkel/System. Steht VOR dem Sprachwähler, damit der (mit Text)
-           der äußere bleibt und die Zeile beim Umbrechen nicht springt. -->
+           der äußere bleibt und die Zeile beim Umbrechen nicht springt.
+           DIE INVERTED-KLASSEN STEHEN EXPLIZIT AN BEIDEN KNÖPFEN: auf
+           pukalani.app liefert der ghost+neutral-CompoundVariant der App
+           (apps/marketing/app/app.config.ts) exakt dieselben Klassen — dort
+           sind sie idempotent. Der Layer darf sich auf diesen APP-Vertrag
+           aber nicht verlassen: auf help.pukalani.app gibt es ihn nicht, und
+           ghost+neutral wäre auf dem dunklen tone-ink-Band `text-muted`
+           (neutral-500) — praktisch unsichtbar. App-weit gehört der Vertrag
+           NICHT in den Layer: er würde jeden ghost-Knopf der erbenden App
+           auf hellem Grund weiß färben. -->
       <UDropdownMenu
         :items="appearanceItems"
         :content="{ side: 'top', align: 'end', sideOffset: 8 }"
@@ -366,7 +377,7 @@ const FOOTER_UI = {
           color="neutral" variant="ghost" size="sm"
           icon="i-ph-sun-horizon-bold"
           :aria-label="t('marketing.footer.aria.appearance')"
-          class="px-2"
+          class="px-2 text-inverted hover:bg-inverted/10 hover:text-inverted active:bg-inverted/10"
         />
       </UDropdownMenu>
 
@@ -379,7 +390,7 @@ const FOOTER_UI = {
           color="neutral" variant="ghost" size="sm"
           trailing-icon="i-ph-caret-down-bold"
           :aria-label="t('marketing.footer.aria.language')"
-          class="gap-1.5 px-2 text-[0.85rem] font-semibold"
+          class="gap-1.5 px-2 text-[0.85rem] font-semibold text-inverted hover:bg-inverted/10 hover:text-inverted active:bg-inverted/10"
         >
           <!-- Die Flagge ist Zierde, kein Inhalt: sie wiederholt nur, was
                direkt daneben steht. Ein Screenreader soll „Deutsch" sagen und

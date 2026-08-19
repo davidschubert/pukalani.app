@@ -1,4 +1,4 @@
-import { resolveOnboardingGate } from '../../../../packages/core/shared/onboardingGate'
+import { resolveOnboardingGate } from '../../../core/shared/onboardingGate'
 
 /**
  * Den Zustand des Early-Access-Tors einmal pro Seitenaufbau in den Payload

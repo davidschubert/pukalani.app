@@ -1,11 +1,13 @@
 import type { SiteManifest } from '../../packages/core/shared/types/manifest'
 
 /**
- * Produkt-Wahl der Marketing-Startseite (pukalani.app). Nur das Fundament
- * (core + system, implizit) — keine Produkt-Layer: die Seite ist öffentlich +
- * statisch. `pnpm check:manifests` hält extends + package.json konsistent.
+ * Produkt-Wahl der Marketing-Startseite (pukalani.app). Keine KUNDEN-Produkte
+ * (die Seite ist öffentlich + statisch), aber der Chrome-Layer `marketing`:
+ * Kopf, Fuß, Marken-CSS und ihre i18n-Schlüssel liegen dort, damit
+ * help.pukalani.app dasselbe Erscheinungsbild bekommt, ohne es zu kopieren.
+ * `pnpm check:manifests` hält extends + package.json konsistent.
  */
 export default {
   siteId: 'marketing',
-  products: [],
+  products: ['marketing'],
 } satisfies SiteManifest

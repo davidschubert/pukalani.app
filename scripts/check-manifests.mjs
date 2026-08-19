@@ -32,8 +32,12 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 // blueprint (Kompositions-Layer) steht VOR den Produkt-Layern — seine
 // Seiten-Kompositionen (Feed+Kommentare, …) müssen die „nackten"
 // Produkt-Seiten überlagern (früher gelistet = höhere Priorität).
+// `marketing` steht GANZ VORN: es ist der Chrome-Layer (Kopf/Fuß der
+// öffentlichen Seiten, Marken-CSS). Er besitzt keine Daten und keine
+// Produkt-Logik — seine Optik soll aber jede andere überlagern, und seine
+// CSS-Dateien müssen früh in der Kette stehen.
 const EXTENDS_ORDER = [
-  'themes', 'admin', 'control', 'blueprint', 'comments', 'posts', 'events', 'media', 'feedback',
+  'marketing', 'themes', 'admin', 'control', 'blueprint', 'comments', 'posts', 'events', 'media', 'feedback',
   'billing', 'courses', 'tickets', 'runner', 'activity', 'messages', 'moderation',
 ]
 const FOUNDATION_ALWAYS = ['core', 'system']

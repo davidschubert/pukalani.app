@@ -15,6 +15,7 @@
   "dependencies": {
     "@iconify-json/ph": "catalog:",
     "@pukalani/core": "workspace:*",
+    "@pukalani/marketing": "workspace:*",
     "@pukalani/system": "workspace:*",
     "@nuxt/image": "catalog:",
     "@nuxt/ui": "catalog:",

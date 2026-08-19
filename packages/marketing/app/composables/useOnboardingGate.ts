@@ -1,4 +1,4 @@
-import { FAILSAFE_ONBOARDING_GATE, type OnboardingGateState } from '../../../../packages/core/shared/onboardingGate'
+import { FAILSAFE_ONBOARDING_GATE, type OnboardingGateState } from '../../../core/shared/onboardingGate'
 
 /**
  * Steht das Early-Access-Tor offen? — für die CTAs der Landing (U2, Davids

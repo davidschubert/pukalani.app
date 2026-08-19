@@ -11,12 +11,20 @@
  * Fokus-Rückgabe) statt eines Ausklappers, den ein Screenreader als
  * Verschachtelung von Links liest — und EIN Vokabular für die ganze Seite.
  */
-import { type ProductKey, slugForLocale } from '#shared/marketing'
+import type { ProductKey } from '../../shared/marketing'
 
-const { t, locale } = useI18n()
-const localePath = useLocalePath()
+const { t } = useI18n()
 const { start, signIn, request } = useProductLinks()
 const { trackFunnel } = useFunnelEvent()
+
+/**
+ * ALLE INTERNEN ZIELE LAUFEN ÜBER DIESES COMPOSABLE (siehe
+ * composables/useMarketingSite.ts). Auf pukalani.app rechnet es wie bisher
+ * über Route-Namen; auf jeder anderen App, die diesen Layer einbindet
+ * (help.pukalani.app), liefert es absolute URLs auf pukalani.app. Ein
+ * `localePath({ name: … })` hier im Bauteil wäre dort ein stiller Blindgänger.
+ */
+const site = useMarketingSite()
 
 /**
  * Die Kopfleiste folgt dem Hero (U2): bei geschlossenem Tor heißt der
@@ -46,28 +54,25 @@ const PRODUCTS = [
 
 /**
  * Alle Anker-Ziele der Navigation liegen auf der STARTSEITE — der Header hängt
- * über layouts/site.vue aber an jeder Seite. Ein rohes href="#preise" zeigt auf
- * /faq oder /produkte/* deshalb ins Leere; als { path, hash } navigiert der Link
- * erst nach Hause und springt dort zum Abschnitt. localePath, damit der
- * Locale-Präfix (/de/…) nicht verloren geht.
+ * über das Layout aber an jeder Seite. Ein rohes href="#preise" zeigt auf
+ * /faq oder /produkte/* deshalb ins Leere; im internen Modus navigiert der Link
+ * als { path, hash } erst nach Hause und springt dort zum Abschnitt. Die
+ * Rechnung (inkl. Locale-Präfix bzw. absoluter URL) macht `site.home()`.
  */
 function homeSection(hash: string) {
-  return computed(() => ({ path: localePath('/'), hash }))
+  return computed(() => site.home(hash))
 }
 const blocksTarget = homeSection('#bausteine')
 const pricingTarget = homeSection('#preise')
 const storyTarget = homeSection('#geschichte')
 
 /**
- * Ziel einer Produkt-Seite. ZWEI Übersetzungen stecken darin, und beide sind
- * Pflicht: `localePath` setzt das Segment (`/produkte` ↔ `/products`),
- * `slugForLocale` den Slug (`kurse` ↔ `courses`). Ohne die zweite stünde auf
- * der englischen Seite `/products/kurse` — seit 2026-07-31 eine 301.
- * Bewusst nicht memoisiert: der Aufruf steht in `computed`s, die ohnehin an
- * `locale` hängen.
+ * Ziel einer Produkt-Seite — Segment UND Slug sind übersetzt; die Rechnung
+ * steht in useMarketingSite(). Bewusst nicht memoisiert: der Aufruf steht in
+ * `computed`s, die ohnehin an `locale` hängen.
  */
 function productTo(key: ProductKey) {
-  return localePath({ name: 'produkte-slug', params: { slug: slugForLocale(key, locale.value) } })
+  return site.product(key)
 }
 
 /**
@@ -103,6 +108,44 @@ const desktopItems = computed(() => [
   { label: t('marketing.nav.products.label'), value: 'products', slot: 'products' as const },
   { ...LINK_DEFAULTS, label: t('marketing.nav.pricing'), to: pricingTarget.value },
   { ...LINK_DEFAULTS, label: t('marketing.nav.story'), to: storyTarget.value },
+  /**
+   * „Ressourcen" (Davids Wunsch 2026-08-18) — der Weg zu allem, was ERKLÄRT
+   * statt verkauft: die Hilfe und der Changelog.
+   *
+   * HIER ALS GEWÖHNLICHE `children`, NICHT über einen Slot wie die Produkte.
+   * Der Produkte-Ausklapper braucht seinen Slot nur wegen der
+   * Early-Access-Pillen (Begründung unten im Template); ohne Pille rendert
+   * `UNavigationMenu` Icon, Titel und Beschreibung selbst — und das ist genau
+   * das Bild, das dort stehen soll. Ein zweiter handgebauter Ausklapper wäre
+   * dieselbe Optik in Handarbeit und liefe beim nächsten Nuxt-UI-Bump
+   * auseinander.
+   *
+   * Beide Ziele verlassen diese App IMMER: die Hilfe liegt auf
+   * help.pukalani.app (locale-bewusst, siehe useMarketingSite), der Changelog
+   * auf changelog.pukalani.app. `LINK_DEFAULTS` gilt trotzdem — `active:
+   * false` hält den Eintrag frei von der Einfärbung, `locale: false` verbietet
+   * `ULink` das Durchreichen einer absoluten URL durch `localePath()`.
+   */
+  {
+    label: t('marketing.nav.resources.label'),
+    value: 'resources',
+    children: [
+      {
+        ...LINK_DEFAULTS,
+        label: t('marketing.nav.resources.items.help.title'),
+        description: t('marketing.nav.resources.items.help.text'),
+        icon: 'i-ph-lifebuoy-bold',
+        to: site.helpUrl.value,
+      },
+      {
+        ...LINK_DEFAULTS,
+        label: t('marketing.nav.resources.items.changelog.title'),
+        description: t('marketing.nav.resources.items.changelog.text'),
+        icon: 'i-ph-megaphone-bold',
+        to: site.changelogUrl,
+      },
+    ],
+  },
 ])
 
 // Zwei Listen = ein Trenner dazwischen (`UNavigationMenu` rendert ihn
@@ -121,7 +164,17 @@ const mobileItems = computed(() => [
     { ...LINK_DEFAULTS, label: t('marketing.nav.story'), to: storyTarget.value },
     // FAQ hat eine EIGENE Seite (mit eigenem JSON-LD/OG) — die gewinnt gegen
     // den Anker auf der Startseite, so wie im Footer.
-    { ...LINK_DEFAULTS, label: t('marketing.faq.kicker'), to: localePath({ name: 'faq' }) },
+    //
+    // DER SCHLÜSSEL IST EIN LAYER-EIGENER (`marketing.nav.faq`, nicht mehr
+    // `marketing.faq.kicker`): dieser Layer rendert auch auf Apps, die den
+    // FAQ-Teilbaum der Marketing-App gar nicht haben — vue-i18n gäbe dort den
+    // ROHEN SCHLÜSSEL aus (der `legal.imprint`-Vorfall aus CLAUDE.md). Ein
+    // Bauteil darf nur Schlüssel rendern, die sein eigener Layer mitbringt.
+    { ...LINK_DEFAULTS, label: t('marketing.nav.faq'), to: site.page('faq') },
+    // Dieselben zwei Ziele wie der „Ressourcen"-Ausklapper oben — hier flach,
+    // weil das Mobil-Menü bewusst kein zweites Menü im Menü öffnet.
+    { ...LINK_DEFAULTS, label: t('marketing.nav.resources.items.help.title'), icon: 'i-ph-lifebuoy-bold', to: site.helpUrl.value },
+    { ...LINK_DEFAULTS, label: t('marketing.nav.resources.items.changelog.title'), icon: 'i-ph-megaphone-bold', to: site.changelogUrl },
   ],
   // Der Ausgang für Bestandskunden (U3) — eigene Liste, damit `UNavigationMenu`
   // einen Trenner davor zieht: „Anmelden" verlässt diese Seite, alles darüber
@@ -270,7 +323,7 @@ const MOBILE_NAV_UI = {
 <template>
   <UHeader
     v-model:open="mobileOpen"
-    :to="localePath('/')"
+    :to="site.home()"
     :toggle="TOGGLE_PROPS"
     :ui="HEADER_UI"
   >
@@ -316,11 +369,17 @@ const MOBILE_NAV_UI = {
               <span :class="ui.childLinkWrapper()">
                 <span :class="ui.childLinkLabel({ active: false, class: 'flex items-center gap-1.5 whitespace-normal font-bold text-[0.92rem] text-highlighted' })">
                   {{ t(`marketing.nav.products.items.${product.key}.title`) }}
+                  <!-- LAYER-EIGENER SCHLÜSSEL (`marketing.nav.earlyAccess`,
+                       nicht mehr `marketing.blocks.earlyAccess`): der
+                       `blocks`-Teilbaum gehört der Marketing-App, dieser Layer
+                       läuft aber auch anderswo. Ein Bauteil darf nur Schlüssel
+                       rendern, die sein eigener Layer mitbringt — sonst steht
+                       dort der ROHE Schlüssel (CLAUDE.md, `legal.imprint`). -->
                   <UBadge
                     v-if="product.ea"
                     color="primary" variant="subtle" size="sm"
                     class="rounded-[0.35rem] px-1.5 py-0 text-[0.62rem] font-extrabold uppercase tracking-[0.03em]"
-                    :label="t('marketing.blocks.earlyAccess')"
+                    :label="t('marketing.nav.earlyAccess')"
                   />
                 </span>
                 <span :class="ui.childLinkDescription({ active: false, class: 'block text-[0.8rem]/[1.4] text-toned' })">
@@ -374,12 +433,20 @@ const MOBILE_NAV_UI = {
       </UButton>
       <!-- Derselbe Trichter-Punkt wie im Hero (U18): gezählt wird der
            EINSTIEG, nicht die Stelle. Die Eigenschaft `gate` hält fest, welche
-           Beschriftung dabei gerade stand. -->
+           Beschriftung dabei gerade stand.
+           `text-(--puka-cta-label)` STEHT EXPLIZIT HIER, obwohl der
+           primary+solid-CompoundVariant der App (apps/marketing/app/
+           app.config.ts) dieselbe Klasse setzt: der Layer darf sich auf den
+           APP-Vertrag nicht verlassen — auf help.pukalani.app gibt es ihn
+           nicht, und der CTA stünde dort weiß auf der Sonne (1,81:1, unter AA;
+           die Kontrast-Rechnung steht bei --puka-cta-label in
+           puka-theme.css). Auf pukalani.app ist die Klasse idempotent. -->
       <UButton
         v-if="gate.inviteRequired"
         :to="request"
         color="primary"
         size="sm"
+        class="text-(--puka-cta-label)"
         @click="trackFunnel('funnel_cta_start', { gate: 'on', cta: 'request' })"
       >
         {{ t('marketing.nav.request') }}
@@ -389,6 +456,7 @@ const MOBILE_NAV_UI = {
         :to="start"
         color="primary"
         size="sm"
+        class="text-(--puka-cta-label)"
         @click="trackFunnel('funnel_cta_start', { gate: 'off', cta: 'start' })"
       >
         {{ t('marketing.nav.start') }}

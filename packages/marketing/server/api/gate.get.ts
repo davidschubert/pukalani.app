@@ -2,7 +2,7 @@ import {
   FAILSAFE_ONBOARDING_GATE,
   resolveOnboardingGate,
   type OnboardingGateState,
-} from '../../../../packages/core/shared/onboardingGate'
+} from '../../../core/shared/onboardingGate'
 
 /**
  * Braucht eine eigene Community gerade einen Einladungs-Code? (U2, Davids

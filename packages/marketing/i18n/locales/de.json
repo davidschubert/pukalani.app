@@ -1,0 +1,115 @@
+{
+  "marketing": {
+    "nav": {
+      "pricing": "Preise",
+      "story": "Geschichte",
+      "request": "Zugang anfragen",
+      "hasCode": "Ich habe einen Code",
+      "signIn": "Anmelden",
+      "start": "Kostenlos starten",
+      "menu": "Menü öffnen",
+      "menuClose": "Menü schließen",
+      "aria": {
+        "main": "Hauptnavigation"
+      },
+      "products": {
+        "label": "Produkte",
+        "overview": "Alle Produkte im Überblick",
+        "items": {
+          "diskussionen": {
+            "title": "Kommentare",
+            "text": "Threads, Votes, Erwähnungen und Live-Präsenz – unter jedem Inhalt."
+          },
+          "moderation": {
+            "title": "Moderation",
+            "text": "Melde-System, zweiphasiges Ausblenden, KI-Zweitmeinung – der Mensch entscheidet."
+          },
+          "branding": {
+            "title": "Seiten & Branding",
+            "text": "26 Farbwelten, eigene Schriften, eigene Seiten – deine Community sieht aus wie du."
+          },
+          "beitraege": {
+            "title": "Beiträge & Feed",
+            "text": "Nutzer-Beiträge in Markdown, Umfragen und ein chronologischer Feed."
+          },
+          "kurse": {
+            "title": "Kurse",
+            "text": "Lektionen mit Fortschritt und Bezahl-Zugang – direkt neben der Diskussion."
+          },
+          "events": {
+            "title": "Events",
+            "text": "Online oder vor Ort, mit Zusagen und Tickets – sogar einbettbar."
+          },
+          "analytics": {
+            "title": "Analytics",
+            "text": "Besucher, Seitenaufrufe und Quellen – cookielos gemessen, direkt im Dashboard."
+          }
+        }
+      },
+      "earlyAccess": "Early Access",
+      "faq": "Häufige Fragen",
+      "resources": {
+        "label": "Ressourcen",
+        "items": {
+          "help": {
+            "title": "Hilfe",
+            "text": "Anleitungen für Betreiber und Entwickler-Doku."
+          },
+          "changelog": {
+            "title": "Changelog",
+            "text": "Was ist neu bei Pukalani?"
+          }
+        }
+      }
+    },
+    "footer": {
+      "tagline": "Deine eigene Community-Plattform — schlank, DSGVO-nativ, in Deutschland gehostet.",
+      "refrain": "„Wo die Sonne durchbricht.“",
+      "aria": {
+        "product": "Produkt",
+        "compare": "Vergleich",
+        "useCases": "Anwendungsfälle",
+        "company": "Über",
+        "legal": "Rechtliches",
+        "language": "Sprache wählen",
+        "appearance": "Darstellung wählen"
+      },
+      "appearance": {
+        "light": "Hell",
+        "dark": "Dunkel",
+        "system": "System"
+      },
+      "colProduct": "Produkt",
+      "colCompany": "Über",
+      "colLegal": "Rechtliches",
+      "start": "Kostenlos starten",
+      "demo": "Live-Demo",
+      "help": "Hilfe",
+      "changelog": "Changelog",
+      "status": "Status",
+      "story": "Unsere Geschichte",
+      "privacy": "Datenschutz",
+      "imprint": "Impressum",
+      "terms": "AGB",
+      "rights": "Alle Rechte vorbehalten.",
+      "madeIn": "Mit Aloha gebaut. Gehostet in Deutschland.",
+      "colCompare": "Vergleich",
+      "colUseCases": "Anwendungsfälle",
+      "featDiscussions": "Kommentare",
+      "featBranding": "Branding",
+      "glossary": "Glossar",
+      "vsCircle": "vs Circle",
+      "vsSkool": "vs Skool",
+      "vsMighty": "vs Mighty Networks",
+      "switchPage": "Wechseln",
+      "privacyHow": "Wie wir Datenschutz umsetzen",
+      "forCoaches": "Für Coaches",
+      "forCourses": "Für Kurs-Ersteller",
+      "forCreator": "Für Creator",
+      "forClubs": "Für Vereine",
+      "featCourses": "Kurse",
+      "featEvents": "Events",
+      "faq": "Häufige Fragen"
+    }
+  }
+}

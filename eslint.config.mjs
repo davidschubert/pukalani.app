@@ -19,7 +19,11 @@ const pkg = name => [`@pukalani/${name}`, `@pukalani/${name}/**`]
  * Die A14-Matrix in drei Töpfen — wer wen kennen darf.
  *
  *  - FOUNDATION: Fundament. Hängt NIE von einem Produkt ab. `themes` steht
- *    hier, weil es rein visuell ist (eigener, schärferer Block weiter unten).
+ *    hier, weil es rein visuell ist (eigener, schärferer Block weiter unten);
+ *    `marketing` aus demselben Grund — es ist der Chrome der öffentlichen
+ *    Seiten (Kopf, Fuß, Marken-CSS), besitzt keine Tabellen und darf von
+ *    keinem Produkt- oder Naht-Layer abhängen. Ein Chrome, der ein Produkt
+ *    voraussetzt, wäre in der ersten App ohne dieses Produkt ein Loch.
  *  - PRODUCTS: Produkt-Layer. Kennen einander nicht; Fundament nutzen sie über
  *    Auto-Import, nicht über `@pukalani/*`.
  *  - SEAM: Naht-Layer. Sie DÜRFEN mehrere andere kennen, weil genau das ihre
@@ -29,7 +33,7 @@ const pkg = name => [`@pukalani/${name}`, `@pukalani/${name}/**`]
  *    Produkt-Sperre ausgenommen — aber NICHT von allem: was sie trotzdem nicht
  *    dürfen, steht in ihren eigenen Blöcken.
  */
-const FOUNDATION = ['core', 'system', 'moderation', 'admin', 'billing', 'themes']
+const FOUNDATION = ['core', 'system', 'moderation', 'admin', 'billing', 'themes', 'marketing']
 // `domains` ist eine NAHT und kein Produkt: die eigene Domain einer Silo-Site
 // lebt im Control Plane, dieser Layer ist nur ihre Oberfläche und ihr Ruf
 // dorthin (control-036). Er bekommt trotzdem seinen EIGENEN Block weiter
@@ -270,7 +274,7 @@ export default createConfigForNuxt({
     'no-restricted-imports': ['error', {
       patterns: [
         { group: [...featureLayers, ...SEAM.flatMap(pkg)],
-          message: 'Fundament-Layer (core/system/moderation/admin/billing) dürfen nicht von Produkt- oder Naht-Layern abhängen (CONCEPT.md A14).' },
+          message: 'Fundament-Layer (core/system/moderation/admin/billing/marketing) dürfen nicht von Produkt- oder Naht-Layern abhängen (CONCEPT.md A14).' },
       ],
     }],
     // Untereinander dürfen Fundament-Layer sich kennen (heute real: ein
@@ -278,7 +282,7 @@ export default createConfigForNuxt({
     // ist die Abhängigkeit NACH UNTEN auf Produkte und Nähte.
     'pukalani/no-cross-layer-relative': ['error', {
       allow: FOUNDATION,
-      hint: 'Fundament-Layer (core/system/moderation/admin/billing) dürfen nicht von Produkt- oder Naht-Layern abhängen (CONCEPT.md A14).',
+      hint: 'Fundament-Layer (core/system/moderation/admin/billing/marketing) dürfen nicht von Produkt- oder Naht-Layern abhängen (CONCEPT.md A14).',
     }],
   },
 }).append({
