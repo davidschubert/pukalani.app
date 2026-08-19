@@ -144,6 +144,16 @@ Control Plane trug; 401 = abgewiesen) und auf `/api/control/community/audience`
 (400 = angenommen). Schlussstand: neuer Wert überall 409/400, ALTER WERT
 ÜBERALL 401, alle vier Hosts 200.
 
+UNABHÄNGIG GEGENVERIFIZIERT (2026-08-19, zweite Sitzung — auf Davids Wunsch
+„rotiere die control→silo-Richtung auch noch", die sich damit als schon
+erledigt erwies): beide Richtungen sprechen DASSELBE Wort, es gibt keine
+richtungs-eigenen Keys. Alle vier Ablage-Punkte (platform-Env, admin-Env,
+beide Konsolen-Zeilen entschlüsselt) tragen denselben Hash; der
+Settle-Empfänger der Silo-Kante (portfolio → kanonisch pukalani.studio)
+weist einen falschen Wert mit 401 ab, auf Pool-Mandanten ist die Route zu
+(404). Eine zweite Rotation wurde bewusst NICHT gefahren — fertige fremde
+Arbeit wird verifiziert, nicht wiederholt.
+
 **Gelernt:** Ein Zyklus lässt sich mit „erst Empfänger, dann Sender" NICHT
 drehen — beide Knoten stellen mit einem Eintrag zugleich Annahme und Senden um.
 Der Ausweg steckt in der Rangfolge selbst: Ablage=ALT + Env=NEU ist der
