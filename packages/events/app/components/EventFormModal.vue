@@ -3,6 +3,7 @@ import { createEventSchema } from '../../schemas/event'
 import type { EventRow } from '../../shared/types/event'
 import { effectiveLocationType, paidAccessChoosable } from '../../shared/types/event'
 import { isoFromWallClock, wallClockIn } from '../../shared/eventRecurrence'
+import { suggestTimezoneForAddress } from '../../shared/addressTimezone'
 
 /**
  * DAS Event-Formular — Anlegen und Bearbeiten, EINE Fassung fuer ALLE Einstiege.
@@ -41,7 +42,7 @@ const emit = defineEmits<{ saved: [event: EventRow] }>()
 
 const open = defineModel<boolean>('open', { required: true })
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const toast = useToast()
 
 /**
@@ -55,17 +56,38 @@ const toast = useToast()
  * es fehlte die Aussage, WESSEN Zeit gilt.
  *
  * Vorrang: Heimat-Zone der Community, sonst leer = Gerät (bisheriges
- * Verhalten). Die ORT-Verfeinerung (Eventbrite-Modell: Adresse in einem anderen
- * Land ⇒ Vorschlag) ist bewusst noch nicht gebaut — sie kommt als VORSCHLAG,
- * nicht als stille Ableitung, und braucht kein Geocoding.
+ * Verhalten) — und seit F59 darf der Organisator davon ABWEICHEN
+ * (`timezoneOverride`).
  */
 const { branding: communitySettings } = useCommunitySettings()
 const eventTimezone = computed(() => communitySettings.value?.timezone ?? '')
 
-/** Label der Zeit-Felder — nennt die Zone, sobald sie NICHT die des Geräts ist. */
+/**
+ * ABWEICHENDE ZONE FÜR DIESEN EINEN TERMIN (F59, Davids Entscheidung
+ * 2026-08-17). `''` = keine Abweichung, es gilt die Community-Zone.
+ *
+ * Gesetzt wird sie NUR durch einen Klick — auf den Vorschlag aus der Adresse
+ * (shared/addressTimezone.ts) oder beim Bearbeiten aus der gespeicherten Zeile.
+ * Nichts leitet hier still ab; die Begründung steht im Kopf der Regel.
+ */
+const timezoneOverride = ref('')
+
+/** Die Zone, in der dieses Formular rechnet, anzeigt und speichert. */
+const effectiveTimezone = computed(() => timezoneOverride.value || eventTimezone.value)
+
+/**
+ * Label der Zeit-Felder — nennt die Zone, sobald sie NICHT die des Geräts ist.
+ *
+ * Drei Fälle statt zwei: eine Abweichung OHNE Community-Zone gibt es wirklich
+ * (die Community hat keine gesetzt, der Vorschlag greift trotzdem) — dort wäre
+ * „abweichend von der Zeitzone eurer Community" eine Auskunft über etwas, das
+ * es nicht gibt.
+ */
 const timezoneNote = computed(() => {
-  if (!eventTimezone.value) return ''
-  return t('events.admin.form.timezoneNote', { zone: eventTimezone.value })
+  if (!effectiveTimezone.value) return ''
+  if (!timezoneOverride.value) return t('events.admin.form.timezoneNote', { zone: effectiveTimezone.value })
+  if (eventTimezone.value) return t('events.admin.form.timezoneNoteCustom', { zone: effectiveTimezone.value })
+  return t('events.admin.form.timezoneNoteEvent', { zone: effectiveTimezone.value })
 })
 
 interface EventForm {
@@ -150,8 +172,22 @@ watch(open, (isOpen) => {
   editingId.value = row?.$id ?? null
   editingCoverFileId.value = row?.coverFileId ?? null
   paidChoosable.value = paidAccessChoosable(ticketCheckoutPath.value, row?.access)
+  timezoneOverride.value = ''
   Object.assign(form, emptyForm())
   if (!row) return
+  /**
+   * EINE ABWEICHENDE TERMIN-ZONE ÜBERLEBT DAS BEARBEITEN (F59).
+   *
+   * Vorher las das Formular `row.timezone` gar nicht: es rechnete die Wanduhr
+   * in der Community-Zone und schrieb sie beim Speichern auch wieder dorthin —
+   * ein Termin in Tokio verschob sich also, sobald jemand nur den Titel
+   * korrigierte, und zwar ohne dass irgendwo etwas danach aussah.
+   *
+   * MUSS VOR `toLocalInput` stehen: die Umrechnung liest `effectiveTimezone`,
+   * und mit der falschen Zone stünde schon beim Öffnen die falsche Uhrzeit im
+   * Feld — die dann beim nächsten Speichern echt würde.
+   */
+  if (row.timezone && row.timezone !== eventTimezone.value) timezoneOverride.value = row.timezone
   Object.assign(form, {
     title: row.title,
     description: row.description,
@@ -199,25 +235,56 @@ async function reloadSaved() {
 function toLocalInput(iso: string | null): string {
   if (!iso) return ''
   const pad = (n: number) => String(n).padStart(2, '0')
-  if (!eventTimezone.value) {
+  if (!effectiveTimezone.value) {
     const d = new Date(iso)
     return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
   }
-  const w = wallClockIn(iso, eventTimezone.value)
+  const w = wallClockIn(iso, effectiveTimezone.value)
   return `${w.year}-${pad(w.month)}-${pad(w.day)}T${pad(w.hour)}:${pad(w.minute)}`
 }
 
 /** datetime-local → ISO (UTC), gelesen als Wanduhr der TERMIN-Zone. */
 function toIso(local: string): string | null {
   if (!local) return null
-  if (!eventTimezone.value) return new Date(local).toISOString()
+  if (!effectiveTimezone.value) return new Date(local).toISOString()
   const [date, time] = local.split('T')
   const [year, month, day] = date!.split('-').map(Number)
   const [hour, minute] = time!.split(':').map(Number)
   return isoFromWallClock(
     { year: year!, month: month!, day: day!, hour: hour!, minute: minute!, second: 0 },
-    eventTimezone.value,
+    effectiveTimezone.value,
   )
+}
+
+/**
+ * ZEIGT DIE ADRESSE IN EIN ANDERES LAND? (F59)
+ *
+ * Nur bei „Vor Ort" — für einen Online-Termin gibt es keinen Ort, dessen Zone
+ * gemeint sein könnte. Zeigt die Adresse ins EIGENE Land (Zone = die, in der
+ * das Formular ohnehin rechnet), gibt es nichts vorzuschlagen; ein Vorschlag,
+ * der nichts ändert, ist nur Lärm.
+ */
+const timezoneSuggestion = computed(() => {
+  if (form.locationType !== 'venue') return null
+  const hit = suggestTimezoneForAddress(form.address)
+  return hit && hit.zone !== effectiveTimezone.value ? hit : null
+})
+
+/** Ländername in der Sprache der Oberfläche — die Regel liefert beide. */
+const suggestionCountry = computed(() => {
+  const hit = timezoneSuggestion.value
+  if (!hit) return ''
+  return locale.value.startsWith('de') ? hit.country.de : hit.country.en
+})
+
+/**
+ * Übernehmen tauscht NUR die Bedeutung, nicht die getippte Zahl: 19:00 bleibt
+ * 19:00 und heißt jetzt 19:00 in Tokio. Würden wir die Wanduhr umrechnen,
+ * stünde nach einem Klick eine Uhrzeit im Feld, die niemand eingegeben hat.
+ */
+function applySuggestedTimezone() {
+  const hit = timezoneSuggestion.value
+  if (hit) timezoneOverride.value = hit.zone
 }
 
 // ---- Cover (nur im Bearbeiten-Modus — der Upload braucht die Event-Id) ----
@@ -302,7 +369,7 @@ async function save() {
     priceLookupKey: form.access === 'paid' ? (form.priceLookupKey.trim() || null) : null,
     // Die Zone reist MIT der Zeile — nur so kann die Serien-Expansion später
     // auf der richtigen Wanduhr rechnen (shared/eventRecurrence.ts).
-    timezone: eventTimezone.value || null,
+    timezone: effectiveTimezone.value || null,
     // Serie nur beim ANLEGEN — danach gibt es „Serie beenden" (PATCH strippt die Felder eh)
     ...(editingId.value
       ? {}
@@ -442,6 +509,55 @@ const recurrenceChoice = computed({
         >
           <UInput v-model="form.address" class="w-full" :maxlength="255" data-testid="event-form-address" />
         </UFormField>
+
+        <!-- F59: Vorschlag und Rückweg stehen beim ORT, nicht bei der Uhrzeit —
+             ausgelöst hat ihn die Adresse, und dort schaut man beim Prüfen hin.
+             Beide Zeilen sind BEWUSST unabhängig (kein v-else): zeigt die
+             Adresse nach dem Übernehmen in ein DRITTES Land, gibt es sonst
+             einen Vorschlag ohne Rückweg. -->
+        <div v-if="timezoneSuggestion || timezoneOverride" class="space-y-2">
+          <UAlert
+            v-if="timezoneSuggestion"
+            color="neutral"
+            variant="soft"
+            icon="i-ph-clock"
+            :title="t('events.admin.form.tzSuggestion', { country: suggestionCountry, zone: timezoneSuggestion.zone })"
+            data-testid="event-form-tz-suggestion"
+          >
+            <template #actions>
+              <UButton
+                color="primary"
+                variant="soft"
+                size="xs"
+                data-testid="event-form-tz-apply"
+                @click="applySuggestedTimezone"
+              >
+                {{ t('events.admin.form.tzSuggestionApply') }}
+              </UButton>
+            </template>
+          </UAlert>
+          <UAlert
+            v-if="timezoneOverride"
+            color="neutral"
+            variant="soft"
+            icon="i-ph-globe-hemisphere-west"
+            :title="t('events.admin.form.tzActive', { zone: timezoneOverride })"
+            data-testid="event-form-tz-active"
+          >
+            <template #actions>
+              <UButton
+                color="neutral"
+                variant="ghost"
+                size="xs"
+                data-testid="event-form-tz-reset"
+                @click="timezoneOverride = ''"
+              >
+                {{ eventTimezone ? t('events.admin.form.tzResetCommunity') : t('events.admin.form.tzResetDevice') }}
+              </UButton>
+            </template>
+          </UAlert>
+        </div>
+
         <UFormField
           v-if="form.locationType === 'venue'"
           :label="t('events.admin.form.locationNotes')"
