@@ -1,6 +1,6 @@
 # Offene Punkte
 
-**Stand: 5 offen · 3 geparkt/wartend · 13 bewusst zurückgestellt** (Zahlen bei JEDEM Umzug nach COMPLETE mitführen)
+**Stand: 4 offen · 3 geparkt/wartend · 13 bewusst zurückgestellt** (Zahlen bei JEDEM Umzug nach COMPLETE mitführen)
 
 Stand: **2026-08-18**. Hier steht **nur, was noch offen ist** — in der
 Reihenfolge, in der es abgearbeitet wird. Alles Erledigte (mit Begründung,
@@ -28,7 +28,6 @@ demo-Ausbau, comments in den Pool. Entscheidungen: DECISION-LOG 2026-08-11.
 | 1 · A0 | **KI in Betrieb nehmen — ein Handgriff je Server.** Das Feld ist gebaut (system-036, verschlüsselt in `instance_secrets`, Eintrag über admin → Instanz → Konfiguration). Damit es aufgeht, braucht jede Instanz einmalig `NUXT_INSTANCE_SECRETS_KEY` (`openssl rand -hex 32`) — danach trägst du den OpenRouter-Schlüssel in der Konsole ein, ohne ssh. Bis dahin ist `ai` (Pro, 149 €) auf jeder Kunden-Community dunkel: zwei Moderations-Assistenten, Übersetzungs-Vorschläge, Kategorie-Übersetzer. `pnpm ops:site-env platform` mahnt den Umschlag an. | Hoch | S | Ja: eine Env-Variable je Server, dann Klick | [instanceSecrets.ts](../packages/core/server/utils/instanceSecrets.ts) |
 | 2 · A1 | **Echte Rechtstexte** für Impressum, Datenschutz und AGB. **pukalani.studio ist fertig** (2026-08-12): Impressum + Datenschutz in de/en veröffentlicht, inkl. **ladungsfähiger Anschrift**; die Texte nennen nur Belegbares, Erfundenes wurde weggelassen. Dort noch offen und beim Anwalt: die Prüfung zu **Art. 27 DSGVO** (Vertreter in der Union — Sitz ausserhalb der EU bei DACH-Ansprache) samt Drittland-Grundlage, dazu die Angabe zur Verbraucherstreitbeilegung. Für **pukalani.app** stehen die Texte weiter aus. **Direkt danach `pukalani.auth.termsUrl` in `apps/platform` setzen** — die AGB-Checkbox fehlt heute genau dort, wo Kunden sich registrieren (Trichter M9). Schaltet Punkt 3 frei. | Hoch | S — Anwalt lesen lassen | Ja: nur David (ggf. Anwalt) | [Agenda: Studio](#a1-anwalt) · [Agenda: Plattform](#a1-plattform) |
 | 3 · A2 | **Stripe auf echtes Geld umstellen — über die F55-Seite.** Vorstufe A2a komplett grün, F55 selbst erledigt (beide 2026-08-08). Bei David bleiben: Bank-Aktivierung, Steuer-Registrierung, Live-Key ROTIERT eintragen (der erste ist teil-geleakt und rotiert), Portal-Konfiguration; alles andere klickt die F55-Seite. Braucht Punkt 2 (A1). | Hoch | S | Ja: Bank, Konto, Portal | [STRIPE-GO-LIVE-RUNBOOK.md](runbooks/STRIPE-GO-LIVE-RUNBOOK.md) |
-| 4 · F59 | **Zeitzone aus dem Ort vorschlagen.** Die Heimat-Zone der Community steht (2026-08-17) und deckt den Normalfall. Offen ist der Termin, der WOANDERS stattfindet: zeigt die Adresse erkennbar in ein anderes Land, soll die Zone als **Vorschlag** angeboten werden — kein stilles Ableiten, kein Geocoding (Davids Entscheidung 2026-08-17). Heute trägt man die fremde Zone von Hand ein. | Niedrig | S | Nein (entschieden) | [Einzelheiten](#f59-zone-aus-ort) |
 | 5 · AH-4c | **Appwrite-Projekt `control` → `admin`: Umzug UND Schlüssel-Aufräumen fertig (2026-08-18).** Alle Keys least-privilege verengt und geprobt, platform-Naht auf dediziertem rows.read-Key, F42-Breitkey gelöscht, `app_secrets` geprüft (nichts zu rotieren). Rest nach Beobachtung (~01.09.): die zwei Rückweg-Keys im eingefrorenen `control` widerrufen + Backups löschen. Vorbestand separat: `NUXT_TICKETS_AI_KEY` fehlt auf der admin-Site (Davids OpenRouter-Key). | Niedrig | S (Rest) | Ja: 2 Klicks am 01.09. | [ADMIN-PROJEKT-CUTOVER.md](runbooks/ADMIN-PROJEKT-CUTOVER.md) Schritt 6 |
 
 ## ⏸️ Geparkt / wartet — in Arbeitsreihenfolge
@@ -118,36 +117,6 @@ Protokoll in [OPEN-ITEMS-COMPLETE.md](OPEN-ITEMS-COMPLETE.md)).
 **Als Betriebssystem für eigene Sites: ~98 %. Als verkaufbares SaaS: ~85 %.**
 
 ### Einzelheiten zu den offenen Punkten
-
-<a id="f59-zone-aus-ort"></a>
-
-**F59 — Zeitzone aus dem Ort vorschlagen.** Am 2026-08-17 sind drei Ebenen
-gebaut worden: die **Konto-Zone** wirkt endlich auch auf Event-Seiten
-(`useEventDateFormat` las sie nicht), Serien **driften nicht mehr an der
-Zeitumstellung** (`events.timezone` + Rechnen auf der Wanduhr statt in festen
-UTC-Wochen), und die **Community hat eine Heimat-Zone** (`communities.timezone`,
-control-038). Damit gilt: geplant wird in der Zone der Community, angezeigt in
-der des Lesers.
-
-Der Anlass war echt: ein Betreiber in Honolulu legte den „Freelancer-Stammtisch
-Hamburg" für 19:00 an — gespeichert wurden 05:00 UTC, in Hamburg also **07:00
-morgens**. `datetime-local` meint immer die Zeit des Tippenden; es fehlte die
-Ebene, die sagt, WESSEN Zeit gilt.
-
-Was fehlt, ist die Verfeinerung nach dem Eventbrite-Modell: ein Termin, der
-NICHT in der Heimat-Zone stattfindet. Eventbrite leitet die Zone aus der Adresse
-ab, kann das aber nur, weil sein Adressfeld ein strukturierter Ortspicker ist
-(Autocomplete → Koordinaten → Zone). Unser `address` ist Freitext, und Geocoding
-hiesse: externer Dienst, Key, Kosten, Adressen verlassen die Instanz, plus ein
-definiertes Verhalten bei Ausfall.
-
-**Davids Entscheidung (2026-08-17): vorschlagen statt geokodieren.** Das Feld
-bleibt sichtbar und mit der Community-Zone vorbelegt; eine Korrektur wird nur
-ANGEBOTEN, wenn die Adresse erkennbar in ein anderes Land zeigt. Kein externer
-Dienst, kein stiller Fehler — und der Organisator entscheidet. Der Normalfall
-(Termin in der Heimatzone) ist damit ohnehin schon vollständig abgedeckt, was
-diesen Punkt klein und unkritisch macht.
-
 
 <a id="ux-herkunft"></a>
 

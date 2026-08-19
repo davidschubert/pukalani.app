@@ -158,8 +158,23 @@ export interface RunRow extends Models.Row {
    * UUID, VOR dem Start vergeben (§ 7.2): so kennt das Ticket seine Session ab
    * Sekunde null und `--resume` trägt auch dann noch, wenn der Runner
    * zwischendurch abstürzt.
+   *
+   * BEI EINER FORTSETZUNG (`resumeSessionId` gesetzt) steht sie erst am ENDE
+   * fest — dann startet der Runner mit `--resume` statt `--session-id` und liest
+   * die NEUE Session-Id aus dem Abschluss-JSON (§ 9). Bis dahin '' .
    */
   sessionId: string
+  /**
+   * Die `sessionId` des VORGÄNGER-Laufs, wenn dieser Lauf eine Antwort auf eine
+   * `needs_input`-Rückfrage ist (Migration `runner-003`); '' = gewöhnlicher
+   * Lauf. Ist sie gesetzt, startet der Runner `claude --resume <sessionId>`
+   * statt `--session-id` (§ 9).
+   *
+   * SIE KOMMT AUS DEM VORGÄNGER, NIE VOM AUFRUFER: die Fortsetzungs-Route liest
+   * sie aus dem `needs_input`-Lauf und vererbt zugleich dessen `promptTrusted`
+   * (§ 8.2 — eine Fortsetzung wäscht die Herkunft nicht rein).
+   */
+  resumeSessionId: string
   claimedAt: string | null
   startedAt: string | null
   finishedAt: string | null

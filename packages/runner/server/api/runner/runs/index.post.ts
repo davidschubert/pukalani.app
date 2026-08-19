@@ -86,6 +86,9 @@ export default defineEventHandler(async (event): Promise<RunRow> => {
       // Die Session-Id würfelt der RUNNER vor dem Start und meldet sie sofort
       // (§ 7.2 Schritt 1) — hier steht sie noch nicht fest.
       sessionId: '',
+      // Ein frischer Lauf knüpft an nichts an — Fortsetzungen entstehen NUR
+      // über `runs/:id/resume` (§ 9), nie hier.
+      resumeSessionId: '',
       claimedAt: null,
       startedAt: null,
       finishedAt: null,

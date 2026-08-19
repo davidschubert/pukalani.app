@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { MAX_RUN_ATTACHMENTS, PERMISSION_MODES, RUN_STATUSES, type PermissionMode, type RunStatus } from '../shared/types/runner'
 import { parseRunAttachments, runAttachmentsFull, serializeRunAttachments } from '../shared/runAttachments'
-import { isActiveRunStatus, isTerminalRunStatus, permissionModeAllowed, runTransitionAllowed, type RunActor } from '../shared/runGuards'
+import { buildResumeRunFields, isActiveRunStatus, isTerminalRunStatus, permissionModeAllowed, runResumeAllowed, runTransitionAllowed, type ResumePredecessor, type RunActor } from '../shared/runGuards'
 
 /**
  * Die zwei Sicherungen des AI-Runners, einzeln gemessen —
@@ -131,6 +131,78 @@ describe('runTransitionAllowed (§ 4)', () => {
     expect(isTerminalRunStatus('draft')).toBe(false)
     expect(isActiveRunStatus('draft')).toBe(true)
     expect(isActiveRunStatus('cancelled')).toBe(false)
+  })
+})
+
+/**
+ * Die Fortsetzung einer `needs_input`-Rückfrage (§ 4 / § 9). Zwei Regeln, beide
+ * mit Gegenprobe: WANN darf man fortsetzen (`runResumeAllowed`) und WAS erbt der
+ * neue Lauf (`buildResumeRunFields`, die Vererbung von `promptTrusted` aus § 8.2).
+ */
+describe('runResumeAllowed (§ 4 / § 9)', () => {
+  const cases: Array<[RunStatus, string, boolean, string]> = [
+    ['needs_input', 's-1', true, 'Rückfrage mit Session ⇒ fortsetzbar'],
+    // GEGENPROBEN — der eigentliche Wert: jeder andere Zustand ist ein 409.
+    ['needs_input', '', false, 'Rückfrage OHNE Session ⇒ nichts zum Anknüpfen'],
+    ['succeeded', 's-1', false, 'fertig ist keine offene Frage'],
+    ['failed', 's-1', false, 'gescheitert ist keine offene Frage'],
+    ['cancelled', 's-1', false, 'abgebrochen ist keine offene Frage'],
+    ['running', 's-1', false, 'läuft noch — nichts fortzusetzen'],
+    ['queued', 's-1', false, 'wartet noch — nichts fortzusetzen'],
+    ['draft', 's-1', false, 'Entwurf — nichts fortzusetzen'],
+  ]
+
+  it.each(cases)('%s (session=%s) ⇒ %s — %s', (status, sessionId, expected) => {
+    expect(runResumeAllowed({ status, sessionId })).toBe(expected)
+  })
+})
+
+describe('buildResumeRunFields (§ 8.2-Vererbung)', () => {
+  const predecessor: ResumePredecessor = {
+    status: 'needs_input',
+    sessionId: 'sess-abc',
+    subjectType: 'ticket',
+    subjectId: 't-1',
+    runnerId: 'r-1',
+    repoKey: 'maui-monorepo',
+    baseBranch: 'main',
+    model: 'opus',
+    permissionMode: 'plan',
+    promptTrusted: false,
+    testCommands: '["pnpm lint"]',
+    maxBudgetUsd: 5,
+  }
+
+  it('erbt alle Ausführungs-Felder aus dem Vorgänger, NUR der Text ist neu', () => {
+    const fields = buildResumeRunFields(predecessor, 'Ja, bitte fortfahren.')
+    expect(fields.subjectType).toBe('ticket')
+    expect(fields.subjectId).toBe('t-1')
+    expect(fields.runnerId).toBe('r-1')
+    expect(fields.repoKey).toBe('maui-monorepo')
+    expect(fields.model).toBe('opus')
+    expect(fields.permissionMode).toBe('plan')
+    expect(fields.testCommands).toBe('["pnpm lint"]')
+    expect(fields.maxBudgetUsd).toBe(5)
+    expect(fields.promptSource).toBe('Ja, bitte fortfahren.')
+    expect(fields.resumeSessionId).toBe('sess-abc')
+  })
+
+  /**
+   * DIE ZEILE, DIE DEN ABSCHNITT TRÄGT (§ 8.2): eine Fortsetzung eines
+   * ungeprüften Laufs bleibt ungeprüft. Würde `buildResumeRunFields` hier `true`
+   * einsetzen (oder den Wert aus einem Body nehmen), wäre die Antwort ein Weg,
+   * die Modus-Sperre zu umgehen. Wer die Vererbung „vereinfacht", wird hier rot.
+   */
+  it('vererbt promptTrusted=false und wäscht die Herkunft NICHT rein', () => {
+    expect(buildResumeRunFields(predecessor, 'x').promptTrusted).toBe(false)
+    expect(buildResumeRunFields({ ...predecessor, promptTrusted: true }, 'x').promptTrusted).toBe(true)
+  })
+
+  it('lässt einen ungeprüften Vorgänger nur harmlose Modi weitertragen (§ 8.2)', () => {
+    // Ein ungeprüfter Lauf hätte nie `bypassPermissions` bekommen; wäre er es
+    // doch (Alt-Daten), fiele die Fortsetzung an derselben Sperre.
+    const fields = buildResumeRunFields({ ...predecessor, permissionMode: 'bypassPermissions' }, 'x')
+    expect(permissionModeAllowed(fields.permissionMode, fields.promptTrusted)).toBe(false)
   })
 })
 

@@ -67,6 +67,12 @@ export interface RunPayload {
   testCommands: string
   maxBudgetUsd: number
   sessionId: string
+  /**
+   * '' = gewöhnlicher Lauf. Gesetzt ⇒ dieser Lauf ist eine Antwort auf eine
+   * `needs_input`-Rückfrage: der Runner startet `claude --resume <sessionId>`
+   * statt `--session-id` (§ 9) und liest die NEUE Session aus dem Abschluss-JSON.
+   */
+  resumeSessionId: string
 }
 
 export interface ClaimResponse {

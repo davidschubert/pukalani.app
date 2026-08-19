@@ -30,6 +30,52 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### F59 — Zeitzone aus dem Ort vorschlagen ✅ 2026-08-18
+
+**Die letzte Ebene des Zeitzonen-Pakets vom 2026-08-17** (Konto-Zone auf
+Event-Seiten, drift-freie Serien, Heimat-Zone der Community): der Termin, der
+WOANDERS stattfindet. Davids Entscheidung (2026-08-17) wörtlich umgesetzt —
+**vorschlagen statt geokodieren**: zeigt die Freitext-Adresse eines
+Vor-Ort-Termins erkennbar in ein anderes Land, bietet das Formular die Zone
+als Klick an; nichts wird still abgeleitet, kein externer Dienst, keine
+Adresse verlässt die Instanz.
+
+**Die Regel ist PURE und fail-closed**
+(`packages/events/shared/addressTimezone.ts`): kuratierte Tabelle mit 48
+Ländern (deutsch/englisch/Eigennamen), Diakritika-Normalisierung mit
+ß→ss VOR der NFD-Zerlegung, Wortgrenzen SELBST geprüft (`\b` greift bei
+Unicode nicht — „Chinatown" darf nicht China treffen). Bewusst NICHT drin:
+Mehr-Zonen-Länder (aus „USA" folgt keine Zone), mehrdeutige Namen (kein
+„Georgia", kein deutsches „Island" — normalisiert träfe es „Long Island" —,
+kein „England"/„Wales", kein „Korea" allein), Zwei-Buchstaben-Codes, Städte.
+Matchen zwei VERSCHIEDENE Länder ⇒ kein Vorschlag.
+
+**Im Formular** (`EventFormModal.vue`): `timezoneOverride` + effektive Zone —
+Wanduhr-Umrechnung, Hinweistext und Payload rechnen ab jetzt die effektive
+Zone; Vorschlag und Rückweg stehen als zwei unabhängige Zeilen beim
+ADRESSFELD (kein `v-else` — zeigt die Adresse nach dem Übernehmen in ein
+drittes Land, gäbe es sonst einen Vorschlag ohne Rückweg). Übernehmen tauscht
+nur die BEDEUTUNG der getippten Zeit, nie die Zahl. **Nebenbei einen echten
+Fehler behoben:** das Bearbeiten las `row.timezone` nie und stempelte beim
+Speichern die Community-Zone zurück — ein Termin in Tokio verschob sich um
+Stunden, sobald jemand nur den Titel korrigierte.
+
+**Beweis:** 21 neue Unit-Tests (Treffer, Fail-closed-Gegenproben,
+Tabellen-Invarianten), events gesamt 208/208, eslint sauber,
+`check:i18n-keys` grün, platform-Typecheck 0 Fehler.
+
+**Gelernt:** (1) **IANA-Zonen-Namen wandern, und `Intl.supportedValuesOf`
+nennt je Laufzeit nur EINE Schreibweise** — Node 22 (ICU 77) kennt nur
+`Europe/Kiev`/`Asia/Calcutta`/`Asia/Saigon`/`America/Buenos_Aires`, aktuelle
+Browser dieselben Zonen als `Europe/Kyiv`/`Asia/Kolkata`/… Da BEIDE Enden
+gegen `isSupportedTimezone` validieren, hätte jede Schreibweise eine Seite
+gegen sich gehabt: der Klick auf „Übernehmen" wäre im 400 gelandet. Ukraine,
+Indien, Vietnam und Argentinien sind deshalb draußen; der Invariantentest
+nagelt jede Tabellen-Zone an die Laufzeit-Prüfung. Ein Vorschlag, den man
+nicht speichern kann, ist schlimmer als keiner. (2) Der Invariantentest hat
+das VOR dem ersten manuellen Test gefangen — Tabellen-Daten verdienen
+dieselben Gegenproben wie Code.
+
 ### Presence-Vorfahrt: sichtbarer Tab schlägt away-Tab fremder Mandanten ✅ 2026-08-18
 
 Die Beobachtung stammt aus der Nachmessung des Scope-Vorfalls (Eintrag

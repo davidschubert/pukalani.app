@@ -118,3 +118,90 @@ const RUN_TRANSITIONS: Record<RunActor, Partial<Record<RunStatus, readonly RunSt
 export function runTransitionAllowed(from: RunStatus, to: RunStatus, actor: RunActor): boolean {
   return (RUN_TRANSITIONS[actor][from] ?? []).includes(to)
 }
+
+/**
+ * Die Felder eines Vorgänger-Laufs, die eine Fortsetzung erbt — docs/plans/
+ * AI-RUNNER.md § 4 / § 9. Bewusst eine EIGENE Schnittstelle statt `RunRow`:
+ * die Regel ist pur und soll ohne `node-appwrite` prüfbar sein (die
+ * Layer-Row hängt an `Models.Row`).
+ */
+export interface ResumePredecessor {
+  status: RunStatus
+  /** Die Session, an die `--resume` anknüpft. Leer ⇒ es gibt nichts fortzusetzen. */
+  sessionId: string
+  subjectType: string
+  subjectId: string
+  runnerId: string
+  repoKey: string
+  baseBranch: string
+  model: string
+  permissionMode: PermissionMode
+  /** WIRD VERERBT (§ 8.2) — nie neu aus einem Body gelesen. */
+  promptTrusted: boolean
+  testCommands: string
+  maxBudgetUsd: number
+}
+
+/**
+ * Die Felder eines Fortsetzungs-Laufs — das, was `buildResumeRunFields`
+ * zusammenstellt. Genau die Spalten, die ein neuer Lauf zum Anknüpfen braucht;
+ * `sessionId`, `claimedAt` u. Ä. bleiben leer und werden erst im Lauf gesetzt.
+ */
+export interface ResumeRunFields {
+  subjectType: string
+  subjectId: string
+  runnerId: string
+  repoKey: string
+  baseBranch: string
+  model: string
+  permissionMode: PermissionMode
+  promptTrusted: boolean
+  promptSource: string
+  testCommands: string
+  maxBudgetUsd: number
+  resumeSessionId: string
+}
+
+/**
+ * Darf dieser Lauf fortgesetzt werden? (§ 4 / § 9)
+ *
+ * Genau dann, wenn er eine RÜCKFRAGE ist (`needs_input`) UND eine Session hat,
+ * an die man anknüpfen kann. Jeder andere Endzustand ist keine offene Frage,
+ * und ein `needs_input` OHNE Session (der Lauf brach vor dem ersten
+ * Lebenszeichen ab) hat nichts, worauf `--resume` zeigen könnte — beides ergibt
+ * an der Route ein 409. Die Regel ist der eine Wächter der Fortsetzungs-Route
+ * und wird einzeln gegengeprüft (tests/runGuards.test.ts).
+ */
+export function runResumeAllowed(predecessor: Pick<ResumePredecessor, 'status' | 'sessionId'>): boolean {
+  return predecessor.status === 'needs_input' && predecessor.sessionId.length > 0
+}
+
+/**
+ * Die Felder des Fortsetzungs-Laufs aus dem Vorgänger + der Antwort (§ 9).
+ *
+ * DIE VERERBUNGS-REGEL, an einer Stelle: alles kommt aus dem VORGÄNGER —
+ * Subjekt, Ziel-Rechner (der Session-File liegt genau dort), Repo, Modell,
+ * Modus, Testbefehle, Budget. NUR der Auftragstext ist neu (die Antwort), und
+ * `resumeSessionId` verweist auf die Vorgänger-Session.
+ *
+ * `promptTrusted` WIRD VERERBT, nicht neu bestimmt (§ 8.2): war der Ursprung
+ * ungeprüftes Gast-Feedback, bleibt die Fortsetzung ungeprüft — sonst wäre die
+ * Antwort ein Weg, die Modus-Sperre zu umgehen. Deshalb nimmt diese Funktion
+ * `promptTrusted` aus dem Vorgänger und NIE aus einem Aufrufer-Body.
+ */
+export function buildResumeRunFields(predecessor: ResumePredecessor, answer: string): ResumeRunFields {
+  return {
+    subjectType: predecessor.subjectType,
+    subjectId: predecessor.subjectId,
+    runnerId: predecessor.runnerId,
+    repoKey: predecessor.repoKey,
+    baseBranch: predecessor.baseBranch,
+    model: predecessor.model,
+    permissionMode: predecessor.permissionMode,
+    promptTrusted: predecessor.promptTrusted,
+    promptSource: answer,
+    testCommands: predecessor.testCommands,
+    maxBudgetUsd: predecessor.maxBudgetUsd,
+    resumeSessionId: predecessor.sessionId,
+  }
+}

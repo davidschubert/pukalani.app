@@ -67,8 +67,13 @@ export async function executeRun(ctx: RunContext, run: RunPayload): Promise<void
    * SCHRITT 1 (§ 7.2): die Session-Id wird VOR dem Start gewürfelt und SOFORT
    * gemeldet. Damit kennt das Ticket seine Session ab Sekunde null, und
    * `--resume` trägt auch dann noch, wenn der Runner mittendrin abstürzt.
+   *
+   * AUSNAHME FORTSETZUNG (§ 9): ein `--resume`-Lauf würfelt NICHTS — er knüpft
+   * an `run.resumeSessionId` an, und seine eigene (neue) Session kennt erst das
+   * Abschluss-JSON. Bis dahin bleibt `sessionId` '' und reist nicht mit; danach
+   * setzt `performRun` sie über den `setSessionId`-Haken nach.
    */
-  const sessionId = randomUUID()
+  let sessionId = run.resumeSessionId ? '' : randomUUID()
   const startedAt = Date.now()
   const pump = new EventPump(ctx.api, run.$id, sessionId)
   let workBranch = ''
@@ -83,7 +88,9 @@ export async function executeRun(ctx: RunContext, run: RunPayload): Promise<void
         status,
         error: truncate(error, 2000),
         resultJson,
-        sessionId,
+        // Bei einer Fortsetzung erst am Ende bekannt (§ 9); ein leerer Wert
+        // reist nicht mit (er fiele durch die uuid-Prüfung des Servers).
+        ...(sessionId ? { sessionId } : {}),
         ...(workBranch ? { workBranch } : {}),
       })
       log.info(`Lauf ${run.$id} beendet: ${status}${error ? ` (${error})` : ''}`)
@@ -108,6 +115,12 @@ export async function executeRun(ctx: RunContext, run: RunPayload): Promise<void
         workBranch = branch
         pump.setWorkBranch(branch)
       },
+      // Die NEUE Session einer Fortsetzung (§ 9): sie fließt in den `finish`
+      // (der Server stempelt sie als Erst-Wert) und in spätere Ereignis-Bündel.
+      setSessionId: (id) => {
+        sessionId = id
+        pump.setSessionId(id)
+      },
       finish,
     })
   }
@@ -129,6 +142,7 @@ export async function executeRun(ctx: RunContext, run: RunPayload): Promise<void
 
 interface RunHooks {
   setWorkBranch: (branch: string) => void
+  setSessionId: (sessionId: string) => void
   finish: (status: RunFinalStatus, error: string, resultJson: string) => Promise<void>
 }
 
@@ -197,23 +211,17 @@ async function performRun(
 
   // SCHRITT 5: starten. Der Worktree kommt von der CLI, nicht von uns (§ 11).
   const worktreeName = `ai-${run.$id}`
-  const args = ['-p', '--session-id', sessionId]
-  if (decision.model) args.push('--model', decision.model)
-  args.push(
-    '--permission-mode', decision.mode,
-    '--worktree', worktreeName,
-    // NUR der files-Ordner DIESES Laufs — nicht der State-Ordner (§ 6),
-    // sonst läse ein Lauf die Anhänge aller anderen.
-    '--add-dir', filesDir,
-  )
-  if (Number.isFinite(decision.budgetUsd)) args.push('--max-budget-usd', String(decision.budgetUsd))
-  args.push(
-    '--append-system-prompt',
-    `Referenz: Lauf ${run.$id} zu ${run.subjectType} ${run.subjectId}. Ticket-Bezug siehe prompt.`,
-    // `stream-json` OHNE `--verbose` lehnt die CLI ab (§ 11, gemessen).
-    '--output-format', 'stream-json',
-    '--verbose',
-  )
+  if (run.resumeSessionId) pump.status(`Fortsetzung von Session ${run.resumeSessionId} (--resume)`)
+  const args = buildAgentArgs({
+    resumeSessionId: run.resumeSessionId,
+    sessionId,
+    model: decision.model,
+    mode: decision.mode,
+    worktreeName,
+    filesDir,
+    budgetUsd: decision.budgetUsd,
+    reference: `Referenz: Lauf ${run.$id} zu ${run.subjectType} ${run.subjectId}. Ticket-Bezug siehe prompt.`,
+  })
 
   log.info(`Starte ${ctx.config.claudeBin} für Lauf ${run.$id} in ${repo.path}`)
   const child = spawn(ctx.config.claudeBin, args, {
@@ -361,6 +369,19 @@ async function performRun(
   // damit er nicht als „läuft" zurückbleibt.
   if (state.shutdown) throw new RunFailure('runner_shutdown')
 
+  /**
+   * § 9: eine Fortsetzung (`--resume`) hat keine vorab gewürfelte Session — sie
+   * erfährt ihre NEUE Session erst JETZT, aus dem Abschluss-JSON. Ab hier kennt
+   * der Lauf sie: für die Commit-Nachricht, den `finish` (Server stempelt sie)
+   * und spätere Ereignis-Bündel. Kam keine (kaputte Abschluss-Zeile), bleibt es
+   * bei '' — der Bericht trägt dann keine Session, aber der Lauf schließt sauber.
+   */
+  let effectiveSessionId = sessionId
+  if (run.resumeSessionId && state.summary?.sessionId) {
+    effectiveSessionId = state.summary.sessionId
+    hooks.setSessionId(effectiveSessionId)
+  }
+
   const durationMs = Date.now() - startedAt
   const outcome = deriveFinalStatus({
     timedOut: state.timedOut,
@@ -416,7 +437,7 @@ async function performRun(
       subjectType: run.subjectType,
       subjectId: run.subjectId,
       runId: run.$id,
-      sessionId,
+      sessionId: effectiveSessionId,
     }))
     commit = facts.commit
     diffstat = facts.diffstat
@@ -455,6 +476,52 @@ async function performRun(
 
   const error = outcome.error || (state.stderrTail && outcome.status === 'failed' ? lastLines(state.stderrTail, 5) : '')
   await hooks.finish(outcome.status, error, buildResultJson(report))
+}
+
+export interface AgentArgsInput {
+  /** Gesetzt ⇒ `--resume <id>` statt `--session-id` (§ 9) */
+  resumeSessionId: string
+  /** Die vorab gewürfelte Session eines gewöhnlichen Laufs; bei Fortsetzung '' */
+  sessionId: string
+  /** Das GEKLEMMTE Modell (§ 7.2 Schritt 3); '' = die Vorgabe der CLI */
+  model: string
+  mode: string
+  worktreeName: string
+  filesDir: string
+  budgetUsd: number
+  reference: string
+}
+
+/**
+ * Die Argumentliste für `claude` — PUR, damit die eine Verzweigung, auf die es
+ * ankommt, ohne Prozessstart prüfbar ist (§ 9, smoke.mjs).
+ *
+ * DIE VERZWEIGUNG: ein Lauf mit `resumeSessionId` knüpft mit `--resume` an die
+ * Vorgänger-Session an und vergibt KEINE neue `--session-id` (die neue kommt aus
+ * dem Abschluss-JSON) — die beiden Flags schließen sich aus. Alles andere ist
+ * für beide Wege gleich.
+ */
+export function buildAgentArgs(input: AgentArgsInput): string[] {
+  const args = ['-p']
+  if (input.resumeSessionId) args.push('--resume', input.resumeSessionId)
+  else args.push('--session-id', input.sessionId)
+  if (input.model) args.push('--model', input.model)
+  args.push(
+    '--permission-mode', input.mode,
+    '--worktree', input.worktreeName,
+    // NUR der files-Ordner DIESES Laufs — nicht der State-Ordner (§ 6),
+    // sonst läse ein Lauf die Anhänge aller anderen.
+    '--add-dir', input.filesDir,
+  )
+  if (Number.isFinite(input.budgetUsd)) args.push('--max-budget-usd', String(input.budgetUsd))
+  args.push(
+    // Kontext, nicht Auftrag (§ 6): der Rück-Bezug reist im System-Prompt.
+    '--append-system-prompt', input.reference,
+    // `stream-json` OHNE `--verbose` lehnt die CLI ab (§ 11, gemessen).
+    '--output-format', 'stream-json',
+    '--verbose',
+  )
+  return args
 }
 
 function emptyReport(durationMs: number, summary: ResultSummary | null): RunReport {

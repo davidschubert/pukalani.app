@@ -56,6 +56,7 @@ const { parseRunnerConfig, parseRunnerToken, expandHome, resolveConfigPath, MIN_
 const { parseTestCommands } = modules['protocol.ts']
 const { nextBackoffSeconds } = modules['api.ts']
 const { buildCommitMessage } = modules['git.ts']
+const { buildAgentArgs } = modules['run.ts']
 
 // ---------------------------------------------------------------------------
 // 2. Config (§ 7.1/§ 8.1)
@@ -279,6 +280,34 @@ check('Abschluss-Zeile: Kosten, Turns, permission_denials', () => {
   assert.deepEqual(summary.denials, ['Bash'])
   assert.equal(readResultLine({ type: 'assistant' }), null)
   assert.deepEqual(permissionDenials({ permission_denials: 'kaputt' }), [])
+})
+
+check('Abschluss-Zeile trägt die (neue) Session-Id (§ 9)', () => {
+  const summary = readResultLine({ type: 'result', subtype: 'success', session_id: 'neu-123' })
+  assert.equal(summary.sessionId, 'neu-123')
+  // Fehlt sie, ist es '' und kein Fehler — der Lauf schließt trotzdem.
+  assert.equal(readResultLine({ type: 'result', subtype: 'success' }).sessionId, '')
+})
+
+// ---------------------------------------------------------------------------
+// 4b. Fortsetzung: --resume statt --session-id (§ 9)
+// ---------------------------------------------------------------------------
+const argsBase = { model: 'opus', mode: 'plan', worktreeName: 'ai-r1', filesDir: '/state/r1/files', budgetUsd: 5, reference: 'Referenz: Lauf r1' }
+
+check('Fortsetzung: --resume <id>, KEIN --session-id (§ 9)', () => {
+  const args = buildAgentArgs({ ...argsBase, resumeSessionId: 'alt-sess', sessionId: '' })
+  assert.ok(args.includes('--resume'), 'muss --resume tragen')
+  assert.equal(args[args.indexOf('--resume') + 1], 'alt-sess')
+  assert.ok(!args.includes('--session-id'), '--resume und --session-id schließen sich aus')
+})
+
+check('Gewöhnlicher Lauf: --session-id, KEIN --resume', () => {
+  const args = buildAgentArgs({ ...argsBase, resumeSessionId: '', sessionId: 'frisch-uuid' })
+  assert.ok(args.includes('--session-id'))
+  assert.equal(args[args.indexOf('--session-id') + 1], 'frisch-uuid')
+  assert.ok(!args.includes('--resume'))
+  // Beide Wege tragen dieselben Rahmen-Flags.
+  assert.ok(args.includes('--output-format') && args.includes('--verbose') && args.includes('--worktree'))
 })
 
 check('truncate macht aus mehrzeiligem Text eine Zeile', () => {
