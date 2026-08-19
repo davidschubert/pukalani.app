@@ -35,6 +35,21 @@ Kontroll-Host behält die Seiten, unbekannter Host 404 wie zuvor).
 
 ---
 
+## 2026-08-19 — Alt-Projekte endgültig weg: `pool` gelöscht, AH-4c-Beobachtung vorgezogen beendet
+
+**Davids Entscheidungen** (je strukturierte Frage bzw. expliziter Auftrag nach
+Erklärung): (1) AH-4c-Beobachtung nach einem Tag störungsfreiem Betrieb
+beendet — beide Rückweg-Keys des eingefrorenen `control` widerrufen (2×401),
+Projekt bleibt mit 0 Keys als Daten-Rückweg stehen. (2) Projekt **`pool`
+GELÖSCHT**: `account` war seit AH-1 eine Woche unter Kundenlast
+weitergewachsen, ein Rückfall hätte Kundendaten verworfen — die Kopie
+versicherte nichts mehr und war als veraltete Vollkopie von Nutzerdaten nur
+noch Datenschutz-Ballast. Löschung sauber (kein Delete-500), Alt-Stände in
+den Offsite-Dumps. Verbleibende Projekte: admin, account, portfolio,
+control [eingefroren, 0 Keys].
+
+---
+
 ## 2026-08-18 — AH-4c beschlossen: Appwrite-Projekt `control` zieht nach `admin` um
 
 **Davids Entscheidung** (strukturierte Frage, GEGEN die Empfehlung „nur

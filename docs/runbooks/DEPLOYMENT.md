@@ -31,9 +31,8 @@ alle Go-Live-Learnings im Detail).
 > `api.pukalani.app` (appwrite-prod, 188.245.61.155, 1.9.6) mit **einem
 > Projekt je Silo-Site** (F6-Muster, je eigene nuxt-ssr-prod/migrations-
 > prod-Keys + Web-Platform) **plus** dem geteilten Projekt `account`
-> (Pool-Communities + Konten; Vorgänger `pool` eingefroren, das Projekt
-> `comments` ist am 2026-08-18 gelöscht — Vor-Migration-Stand nur noch in
-> den Offsite-Dumps).
+> (Pool-Communities + Konten; die Vorgänger-Projekte `pool` und `comments`
+> sind gelöscht (2026-08-18/19) — Alt-Stände nur noch in den Offsite-Dumps).
 > Cloudflare DNS „DNS only" (nur Apex proxied) · Resend-SMTP · UptimeRobot ·
 > Storage Box `pukalani-backup` (Offsite-Backups; die MariaDB-Dumps decken
 > alle Projekte ab).

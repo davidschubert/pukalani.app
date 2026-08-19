@@ -65,7 +65,8 @@ Vollständiges Konzept: docs/CONCEPT.md
   Appwrite-Endpoint als Subdomain derselben Root-Domain
 - Das geteilte Projekt aller Pool-Communities und aller Konten heißt seit AH-1
   (2026-08-11) **`account`** (Session-Cookie `a_session_account`); der Vorgänger
-  `pool` ist nach dem Datenumzug EINGEFROREN. Projekt-Ids sind unveränderlich —
+  `pool` ist nach der Beobachtungszeit GELÖSCHT (2026-08-19, Davids
+  Entscheidung — Alt-Stand nur noch in den Offsite-Dumps). Projekt-Ids sind unveränderlich —
   „umbenennen" war Neuanlage + Migration (Schema, Nutzer MIT Passwort-Hashes,
   Rows, Buckets) und braucht eine EIGENE Web-Platform `*.pukalani.app`, sonst
   ist dort jede Realtime tot (F45). Code-Default neuer Communities:
