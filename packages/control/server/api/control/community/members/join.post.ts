@@ -53,7 +53,7 @@ interface JoinResponse {
 }
 
 export default defineEventHandler(async (event): Promise<JoinResponse> => {
-  requireOnboardingCaller(event)
+  await requireOnboardingCaller(event)
   const body = await readValidatedBody(event, bodySchema.parse)
   const identity = await verifyRuntimeIdentity(event, body.jwt)
 

@@ -1,3 +1,5 @@
+import { seamSecretMatches, seamSecretsFor } from '../../../../core/server/utils/sharedSeamSecret'
+
 /**
  * Interner Sweep-Endpoint (E3) — Andockpunkt für eine scheduled Appwrite
  * Function (Scaffold Track 2B), die den Reminder-Sweep auch OHNE Seiten-
@@ -20,11 +22,25 @@
  */
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig(event)
-  const key = config.eventsSweepKey
-  if (!key) {
+  /**
+   * ZWEI GÜLTIGE SCHLÜSSEL (A0, 2026-08-18): angenommen wird jeder Wert aus
+   * {Betreiber-Konsole dieser Instanz, `NUXT_EVENTS_SWEEP_KEY`}. Der SENDER ist
+   * hier kein Deployment dieses Repos, sondern ein Cron/eine Appwrite-Function
+   * — rotiert wird trotzdem in derselben Reihenfolge: erst den neuen Wert HIER
+   * in der Konsole hinterlegen (dann gelten alt und neu), dann den Cron
+   * umstellen, danach den alten aus der `.env` nehmen. Umgekehrt schickte der
+   * Cron einen Wert, den diese Seite noch nicht kennt.
+   *
+   * Der Vergleich läuft jetzt in KONSTANTER ZEIT (`seamSecretMatches`) — das
+   * vorherige `!==` auf Zeichenketten verglich zeichenweise mit Abbruch und war
+   * damit ein (kleiner, aber unnötiger) Seitenkanal.
+   */
+  const accepted = await seamSecretsFor(event, 'events-sweep', config.eventsSweepKey)
+  if (accepted.length === 0) {
+    // Ohne Schlüssel gibt es den Endpunkt nicht — kein Orakel für Unbefugte.
     throw createError({ status: 404, statusText: 'Not found' })
   }
-  if (getHeader(event, 'x-sweep-key') !== key) {
+  if (!seamSecretMatches(getHeader(event, 'x-sweep-key') || '', accepted)) {
     throw createError({ status: 401, statusText: 'Unauthorized' })
   }
 

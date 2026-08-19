@@ -141,6 +141,14 @@ const badgeColor = (source: string) => (source === 'none' ? 'warning' : 'success
                 </UBadge>
               </div>
               <p class="mt-1 text-sm text-muted">{{ t(`admin.integrations.serviceDesc.${item.id}`) }}</p>
+              <!-- GETEILTES Naht-Geheimnis: hier steht die Reihenfolge, ohne
+                   die ein Wechsel die Naht reißt (erst Empfänger, dann
+                   Sender). Sie steht auf der KARTE und nicht im Handbuch,
+                   weil sie genau in dem Moment gebraucht wird, in dem jemand
+                   das Feld ausfüllt. -->
+              <p v-if="item.shared" class="mt-1 text-xs text-dimmed" :data-integration-rotation="item.id">
+                {{ t('admin.integrations.rotationHint') }}
+              </p>
             </div>
           </div>
 

@@ -37,7 +37,7 @@ const bodySchema = z.object({
 }).strict().refine(body => body.code !== undefined || body.slug !== undefined, 'empty precheck')
 
 export default defineEventHandler(async (event) => {
-  requireOnboardingCaller(event)
+  await requireOnboardingCaller(event)
   const body = await readValidatedBody(event, bodySchema.parse)
 
   const result: { codeValid?: boolean, slugAvailable?: boolean, codeReason?: 'email_unverified' } = {}

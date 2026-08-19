@@ -34,7 +34,7 @@ const bodySchema = z.object({
 }).strict()
 
 export default defineEventHandler(async (event) => {
-  requireOnboardingCaller(event)
+  await requireOnboardingCaller(event)
   const body = await readValidatedBody(event, bodySchema.parse)
   const runtimeProjectId = assertOnboardingRuntimeProject(event, body.runtimeProjectId)
 

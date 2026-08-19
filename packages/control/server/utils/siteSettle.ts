@@ -24,6 +24,7 @@
  * Silo-Dashboard bleibt daneben offen und tut dasselbe.
  */
 import type { H3Event } from 'h3'
+import { seamSecretToSend } from '../../../core/server/utils/sharedSeamSecret'
 
 const SERVICE_HEADER = 'x-pukalani-onboarding-secret'
 
@@ -43,7 +44,11 @@ export interface SiteSettleResult {
  */
 export async function callSiteSettle(event: H3Event, appUrl: string): Promise<SiteSettleResult> {
   const config = useRuntimeConfig(event) as { controlOnboardingSecret?: string }
-  const secret = (config.controlOnboardingSecret || '').trim()
+  // Ablage vor Env (A0, 2026-08-18): dieselbe Rangfolge wie bei jedem anderen
+  // Zugang. Diese Seite ist hier der SENDER und schickt deshalb genau EINEN
+  // Wert — der Empfänger (die Silo-App) nimmt alt UND neu an, damit ein
+  // Wechsel ohne Deployment möglich ist. Reihenfolge: `sharedSeamSecret.ts`.
+  const secret = await seamSecretToSend(event, 'onboarding-service', config.controlOnboardingSecret)
   const base = (appUrl || '').trim().replace(/\/+$/, '')
   if (!secret) return { ok: false, message: 'Service-Secret ist nicht konfiguriert.', added: [] }
   if (!base) return { ok: false, message: 'Für diese Website ist keine Adresse (appUrl) hinterlegt.', added: [] }

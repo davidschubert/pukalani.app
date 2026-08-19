@@ -1,6 +1,6 @@
-import { createHash, timingSafeEqual } from 'node:crypto'
 import { Account, Client } from 'node-appwrite'
 import type { H3Event } from 'h3'
+import { seamSecretMatches, seamSecretsFor } from '../../../core/server/utils/sharedSeamSecret'
 
 /**
  * Die Vertrauensnaht des Self-Service-Onboardings.
@@ -38,34 +38,42 @@ export interface RuntimeIdentity {
 
 const SERVICE_HEADER = 'x-pukalani-onboarding-secret'
 
-/** Konfiguriertes Secret; '' = Produkt aus. */
-function configuredSecret(event: H3Event): string {
-  const config = useRuntimeConfig(event) as { controlOnboardingSecret?: string }
-  return (config.controlOnboardingSecret || '').trim()
-}
-
-/**
- * Vergleich in konstanter Zeit. Beide Seiten werden zuerst gehasht: sonst
- * verrät schon die Länge etwas, und timingSafeEqual verlangt gleich lange
- * Puffer (ein Längen-Check davor wäre selbst ein Seitenkanal).
- */
-function secretsMatch(a: string, b: string): boolean {
-  const ha = createHash('sha256').update(a, 'utf8').digest()
-  const hb = createHash('sha256').update(b, 'utf8').digest()
-  return timingSafeEqual(ha, hb)
-}
-
 /**
  * Gate + Aufrufer-Prüfung. 404 wenn das Produkt aus ist (die Route soll für
  * Fremde nicht einmal existieren), 401 bei falschem Secret.
+ *
+ * ── ZWEI GÜLTIGE WERTE, UND DARAN HÄNGT DIE ROTATION (A0, 2026-08-18) ─────
+ * Angenommen wird jeder Wert aus der Menge {Betreiber-Konsole, Server-Env} —
+ * `seamSecretAccepted` prüft gegen alle, in konstanter Zeit und ohne
+ * vorzeitigen Ausstieg. Damit ist ein Schlüsselwechsel eine REIHENFOLGE statt
+ * einer Code-Stufe:
+ *
+ *   1. Neuen Wert HIER (Empfänger, `admin.pukalani.app` → Integrationen)
+ *      eintragen — ab sofort gelten alt und neu.
+ *   2. Denselben Wert beim SENDER (platform → Integrationen) eintragen — ab
+ *      dem nächsten Ruf reist der neue.
+ *   3. Später den alten Wert aus beiden `.env` nehmen; erst damit ist er tot.
+ *
+ * WER DIE REIHENFOLGE UMDREHT, REISST DIE NAHT: der Sender schickte dann einen
+ * Wert, den diese Seite noch nicht kennt. Deshalb steht sie hier, auf der Karte
+ * in der Konsole und im Kopf von `sharedSeamSecret.ts`.
+ *
+ * ── SEITHER ASYNC — UND DAS `await` IST PFLICHT ───────────────────────────
+ * Die Konsolen-Ablage zu lesen ist ein Appwrite-Ruf. Ein vergessenes `await`
+ * an einer der ~50 Aufrufstellen wäre kein Typfehler, sondern ein FAIL-OPEN
+ * (ein Promise ist truthy, geworfen wird erst später ins Leere) — genau die
+ * Falle, vor der CLAUDE.md bei `requireCommunityPermission` warnt. Deshalb
+ * nagelt `packages/control/tests/onboardingCallerAwait.test.ts` jede
+ * Aufrufstelle strukturell auf `await` fest.
  */
-export function requireOnboardingCaller(event: H3Event): void {
-  const expected = configuredSecret(event)
-  if (!expected) {
+export async function requireOnboardingCaller(event: H3Event): Promise<void> {
+  const config = useRuntimeConfig(event) as { controlOnboardingSecret?: string }
+  const accepted = await seamSecretsFor(event, 'onboarding-service', config.controlOnboardingSecret)
+  if (accepted.length === 0) {
     throw createError({ status: 404, statusText: 'Not found' })
   }
   const provided = getHeader(event, SERVICE_HEADER) || ''
-  if (!provided || !secretsMatch(provided, expected)) {
+  if (!seamSecretMatches(provided, accepted)) {
     throw createError({ status: 401, statusText: 'Unauthorized' })
   }
 }

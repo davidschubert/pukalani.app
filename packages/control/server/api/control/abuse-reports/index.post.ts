@@ -26,7 +26,7 @@ const bodySchema = z.object({
 }).strict()
 
 export default defineEventHandler(async (event) => {
-  requireOnboardingCaller(event)
+  await requireOnboardingCaller(event)
   const body = await readValidatedBody(event, bodySchema.parse)
 
   // Host UND Link werden HIER noch einmal normalisiert, obwohl die öffentliche

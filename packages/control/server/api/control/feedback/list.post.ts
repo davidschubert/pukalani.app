@@ -24,7 +24,7 @@ const bodySchema = feedbackActorSchema.extend({
 }).strict()
 
 export default defineEventHandler(async (event): Promise<FeedbackListResult> => {
-  requireOnboardingCaller(event)
+  await requireOnboardingCaller(event)
   const body = await readValidatedBody(event, bodySchema.parse)
   const actor = await feedbackActorFromService(event, body)
   return await listFeedback(event, actor, body.query ?? {})

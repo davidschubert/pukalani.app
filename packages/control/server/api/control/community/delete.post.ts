@@ -51,7 +51,7 @@ const bodySchema = z.object({
 const MEMBER_WRITE_BUDGET_MS = 8_000
 
 export default defineEventHandler(async (event) => {
-  requireOnboardingCaller(event)
+  await requireOnboardingCaller(event)
   const body = await readValidatedBody(event, bodySchema.parse)
   const context = await requireCommunityTeamContext(event, body, 'community.delete')
 

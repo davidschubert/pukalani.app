@@ -7,8 +7,17 @@
  * __NUXT__-Payload der Seite und die Verschlüsselung wäre eine Verkleidung.
  */
 
-/** Die Dienste, deren Schlüssel über die Oberfläche gepflegt werden können. */
-export const INTEGRATION_IDS = ['ai', 'analytics', 'tickets-ai'] as const
+/**
+ * Die Dienste, deren Schlüssel über die Oberfläche gepflegt werden können.
+ *
+ * Die letzten beiden sind keine fremden Dienste, sondern die GETEILTEN
+ * Geheimnisse unserer eigenen Nähte (A0, 2026-08-18): dasselbe Wort muss auf
+ * ZWEI Deployments stehen. Sie stehen hier, weil sie dieselbe Frage
+ * beantworten („woher kommt dieser Zugang, und wie ändere ich ihn ohne ssh") —
+ * mit EINEM Unterschied, der auf der Karte steht: rotiert wird in einer
+ * Reihenfolge, erst beim Empfänger. Warum das reicht: `sharedSeamSecret.ts`.
+ */
+export const INTEGRATION_IDS = ['ai', 'analytics', 'tickets-ai', 'onboarding-service', 'events-sweep'] as const
 export type IntegrationId = typeof INTEGRATION_IDS[number]
 
 /** Woher der benutzte Wert stammt. Ablage schlägt Env — überall gleich. */
@@ -19,6 +28,14 @@ export interface IntegrationState {
   /** Der Env-Name als Rückfall — die Oberfläche nennt ihn im Hinweistext. */
   envName: string
   source: IntegrationSource
+  /**
+   * Ist das ein GETEILTES Naht-Geheimnis (dieselbe Zeichenkette auf zwei
+   * Deployments)? Dann zeigt die Karte zusätzlich die Rotations-Reihenfolge —
+   * „zuerst beim Empfänger eintragen". Ohne diesen Satz wäre die Karte eine
+   * Falle: wer hier zuerst dreht und drüben später, reißt die Naht für die
+   * Zeit dazwischen.
+   */
+  shared?: boolean
 }
 
 /**

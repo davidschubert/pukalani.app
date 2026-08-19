@@ -29,7 +29,7 @@ import type { SiteDomainAddress } from '../../../../../core/shared/types/siteDom
  * das tut die Konsole mit ihrer eigenen Berechtigung.
  */
 export default defineEventHandler(async (event) => {
-  requireControlCaller(event)
+  await requireControlCaller(event)
 
   const projectId = siteProjectId(event)
   // FRISCH gelesen, nicht aus dem 30-s-Zwischenspeicher: der Zustand hat sich

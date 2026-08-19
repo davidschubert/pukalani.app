@@ -46,7 +46,7 @@ const bodySchema = z.object({
 }).strict()
 
 export default defineEventHandler(async (event): Promise<CommunityProfileSignalResult> => {
-  requireOnboardingCaller(event)
+  await requireOnboardingCaller(event)
   const body = await readValidatedBody(event, bodySchema.parse)
   const identity = await verifyRuntimeIdentity(event, body.jwt)
 

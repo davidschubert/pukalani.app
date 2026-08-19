@@ -1,6 +1,6 @@
 export default defineNuxtConfig({
-  // Öffentliche Hilfe-Site für Community-Betreiber (Ziel-Host
-  // help.pukalani.app — Annahme, siehe site.manifest.ts; heute Dev-only).
+  // Öffentliche Hilfe-Site für Community-Betreiber — LIVE auf
+  // help.pukalani.app (seit 2026-07-27, Deploy-Kette s. site.manifest.ts).
   // Bewusst KEIN admin/themes/comments: die Seite ist öffentlich, liest
   // nichts aus Appwrite und rendert ausschließlich Markdown aus `content/`.
   // Das Fundament (core + system) liefert Fehlerseite (CoreErrorPage),

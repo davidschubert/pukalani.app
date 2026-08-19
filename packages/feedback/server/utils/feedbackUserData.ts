@@ -28,7 +28,7 @@ function runtimeProjectId(event: H3Event): string {
 }
 
 export async function feedbackExportUserData(event: H3Event, userId: string) {
-  if (!feedbackServiceReachable(event)) return {}
+  if (!await feedbackServiceReachable(event)) return {}
   return await callFeedbackService<Record<string, unknown>>(event, FEEDBACK_SERVICE_PATHS.userData, {
     projectId: runtimeProjectId(event),
     userId,

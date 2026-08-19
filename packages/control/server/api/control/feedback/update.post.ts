@@ -19,7 +19,7 @@ const bodySchema = feedbackActorSchema.extend({
 }).strict()
 
 export default defineEventHandler(async (event) => {
-  requireOnboardingCaller(event)
+  await requireOnboardingCaller(event)
   const body = await readValidatedBody(event, bodySchema.parse)
   const actor = await feedbackActorFromService(event, body)
   return await updateFeedback(event, actor, body.feedbackId, body.patch)

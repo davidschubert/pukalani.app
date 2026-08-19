@@ -34,32 +34,35 @@
  * Hostnamen holt die Route deshalb selbst beim Control Plane ab, aus der
  * `websites`-Zeile. Der Aufruf sagt nur „schau nach", nicht „nimm das".
  */
-import { createHash, timingSafeEqual } from 'node:crypto'
 import type { H3Event } from 'h3'
+import { seamSecretMatches, seamSecretsFor } from '../../../core/server/utils/sharedSeamSecret'
 
 const SERVICE_HEADER = 'x-pukalani-onboarding-secret'
-
-/** Beide Seiten gehasht — sonst verrät schon die Länge etwas, und
- *  `timingSafeEqual` verlangt gleich lange Puffer. */
-function secretsMatch(a: string, b: string): boolean {
-  const ha = createHash('sha256').update(a, 'utf8').digest()
-  const hb = createHash('sha256').update(b, 'utf8').digest()
-  return timingSafeEqual(ha, hb)
-}
 
 /**
  * Gate + Aufrufer-Prüfung, spiegelbildlich zu `requireOnboardingCaller` im
  * Control Plane: 404 wenn die Naht nicht konfiguriert ist (die Route soll für
  * Fremde nicht einmal existieren), 401 bei falschem Secret.
+ *
+ * ── ZWEI GÜLTIGE WERTE, WIE DRÜBEN (A0, 2026-08-18) ───────────────────────
+ * Angenommen wird jeder Wert aus {Betreiber-Konsole dieser Instanz,
+ * Server-Env}. Rotiert wird deshalb in dieser Reihenfolge: erst beim
+ * EMPFÄNGER eintragen (hier — also in der Konsole DIESER Site), dann beim
+ * SENDER (Control Plane). Umgekehrt schickte das Control Plane einen Wert,
+ * den diese Seite noch nicht kennt. Vollständig: `sharedSeamSecret.ts`.
+ *
+ * SEITHER ASYNC: die Ablage zu lesen ist ein Appwrite-Ruf. Das `await` an der
+ * einen Aufrufstelle (`api/site/domain/settle.post.ts`) ist Pflicht — ohne es
+ * wäre das Gate fail-open.
  */
-export function requireControlCaller(event: H3Event): void {
+export async function requireControlCaller(event: H3Event): Promise<void> {
   const config = useRuntimeConfig(event) as { onboardingServiceSecret?: string }
-  const expected = (config.onboardingServiceSecret || '').trim()
-  if (!expected) {
+  const accepted = await seamSecretsFor(event, 'onboarding-service', config.onboardingServiceSecret)
+  if (accepted.length === 0) {
     throw createError({ status: 404, statusText: 'Not found' })
   }
   const provided = getHeader(event, SERVICE_HEADER) || ''
-  if (!provided || !secretsMatch(provided, expected)) {
+  if (!seamSecretMatches(provided, accepted)) {
     throw createError({ status: 401, statusText: 'Unauthorized' })
   }
 }

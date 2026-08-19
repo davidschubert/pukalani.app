@@ -19,7 +19,7 @@ export default defineEventHandler(async (event): Promise<FeedbackListResult & { 
   requirePermission(event, 'dashboard.access')
 
   const empty = { total: 0, entries: [], operator: false, available: false }
-  if (!feedbackServiceReachable(event)) return empty
+  if (!await feedbackServiceReachable(event)) return empty
 
   const query = getQuery(event)
   const envelope = await feedbackEnvelope(event)

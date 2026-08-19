@@ -3,20 +3,22 @@ import type { SiteManifest } from '../../packages/core/shared/types/manifest'
 /**
  * Produkt-Wahl der öffentlichen Hilfe-Site.
  *
- * Ziel-Host: **help.pukalani.app** — ANNAHME, von David noch zu bestätigen.
+ * Host: **help.pukalani.app** — LIVE seit 2026-07-27. Die Deploy-Kette läuft
+ * vollständig mit: pm2-Slot `helppukalaniapp` (ops/ecosystem-help.config.cjs,
+ * Port 3006), Release-Slot `releases/help`, beide App-Schleifen in
+ * .github/workflows/deploy.yml, DNS/TLS über das Wildcard `*.pukalani.app`
+ * (kein eigenes Zertifikat — Lineage-Falle). Details:
+ * docs/content/2.architektur/6.hosts-und-ports.md, Go-Live-Protokoll:
+ * docs/archiv/HELP-GO-LIVE.md.
+ *
  * Der Ordner heißt `help` (nicht `docs`), weil `docs/` am Repo-Rand schon die
  * INTERNE Entwickler-Doku ist (Port 4000, kein Layer, keine App). Zwei „docs"
  * im selben Baum haben in der Merge-Review sofort verwirrt.
  *
- * Stand: die Site läuft heute NUR im Dev (Port 3008). Die Deploy-Kette
- * (ecosystem-Eintrag, deploy.yml-Slot, ploi-Site, DNS über das Wildcard
- * `*.pukalani.app`) fehlt BEWUSST noch und kommt als eigener Schritt —
- * siehe docs/content/2.architektur/6.hosts-und-ports.md.
- *
- * KEINE Produkt-Layer: die Seite ist öffentlich, statisch und schreibt nichts —
- * ihre Inhalte liegen als Markdown in `content/` und werden von @nuxt/content
- * gerendert. core + system sind implizit immer dabei (Fundament), deshalb
- * bleibt `products` leer.
+ * KEINE Produkt-Layer mit Datenmodell: die Seite ist öffentlich, statisch und
+ * schreibt nichts — ihre Inhalte liegen als Markdown in `content/` und werden
+ * von @nuxt/content gerendert. core + system sind implizit immer dabei
+ * (Fundament); einziger Eintrag ist der Chrome-Layer `marketing` (s. unten).
  *
  * Warum überhaupt ein Manifest (und damit core + system), wo die interne
  * Entwickler-Doku unter `docs/` bewusst OHNE Layer auskommt: `check-manifests`
@@ -25,7 +27,7 @@ import type { SiteManifest } from '../../packages/core/shared/types/manifest'
  * „reine Content-App" unter apps/ ist damit nicht vorgesehen — entweder
  * außerhalb von apps/ (wie `docs/`, Port 4000) oder als reguläre App wie hier.
  * Die Entscheidung fiel auf „reguläre App", weil die Hilfe ein öffentlicher
- * Prod-Host werden soll und dieselbe Behandlung wie die anderen Sites bekommt
+ * Prod-Host ist und dieselbe Behandlung wie die anderen Sites bekommt
  * (Fehlerseite, Security-Header, i18n-Fundament, /api/health).
  */
 export default {
