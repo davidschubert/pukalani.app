@@ -1,0 +1,25 @@
+<!-- Das Marken-Zeichen als Favicon — dieselbe puka wie in PukaMark.vue
+     (app/components/PukaMark.vue), mit ZWEI bewussten Abweichungen:
+     (1) Der Wolkenring ist dort `currentColor` — in einer eigenständigen
+         Datei gibt es kein umgebendes Element, das die Farbe stellt; hier
+         steht ein mittleres Grau, das auf hellen UND dunklen Tab-Leisten
+         sichtbar bleibt.
+     (2) Keine `class`/keine Props — die Datei wird direkt ausgeliefert
+         (public/ des Layers, beide Marken-Sites erben sie). -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <defs>
+    <radialGradient id="pukaSun" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="hsl(40 98% 66%)"/>
+      <stop offset="70%" stop-color="hsl(32 94% 54%)"/>
+      <stop offset="100%" stop-color="hsl(26 90% 48%)"/>
+    </radialGradient>
+  </defs>
+  <circle cx="16" cy="16" r="14" stroke="#94a0b8" stroke-opacity="0.55" stroke-width="2"/>
+  <circle cx="16" cy="16" r="7.5" fill="url(#pukaSun)"/>
+  <g stroke="url(#pukaSun)" stroke-width="2" stroke-linecap="round" opacity="0.9">
+    <line x1="16" y1="1.5" x2="16" y2="5"/>
+    <line x1="16" y1="27" x2="16" y2="30.5"/>
+    <line x1="1.5" y1="16" x2="5" y2="16"/>
+    <line x1="27" y1="16" x2="30.5" y2="16"/>
+  </g>
+</svg>
