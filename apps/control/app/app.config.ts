@@ -78,6 +78,11 @@ export default defineAppConfig({
         },
       ],
     },
+    // AI-Runner: der Link einer Lauf-Ende-Meldung führt aufs zugehörige Ticket.
+    // Das Mapping gehört HIERHER und nicht in den runner-Layer (A14): nur DIESE
+    // App komponiert runner UND tickets, der Layer kennt tickets nicht. Der
+    // Absender (finish.post.ts) hängt die subjectId ans Präfix.
+    runner: { subjectLinks: { ticket: '/dashboard/tickets?ticket=' } },
     // C17: DIESE App ist der Leser der kontobezogenen Meldungen. Beide
     // `scope: 'account'`-Absender leben hier (Stripe-Webhook im billing-Layer,
     // Early-Access-Anfragen im control-Layer) und schreiben in DIESES

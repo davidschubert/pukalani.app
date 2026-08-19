@@ -356,6 +356,9 @@
     "abuseReport": "Missbrauchsmeldung zu {name}",
     "badgeAwarded": "Abzeichen erhalten: {name}",
     "messageReceived": "{name} hat dir eine Nachricht geschickt",
+    "runSucceeded": "Lauf fertig: {name}",
+    "runNeedsInput": "Lauf braucht deine Antwort: {name}",
+    "runFailed": "Lauf fehlgeschlagen: {name}",
     "email": {
       "title": "E-Mail-Benachrichtigungen",
       "description": "Bell-Benachrichtigungen (Antworten, Erwähnungen, Erinnerungen) zusätzlich per E-Mail erhalten.",

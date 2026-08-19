@@ -61,6 +61,18 @@ export default defineAppConfig({
        * Formular, keine Sicherung.
        */
       repos: ['maui-monorepo'],
+      /**
+       * subjectType → PFAD-PRÄFIX für den Link einer Lauf-Ende-Meldung.
+       *
+       * DEFAULT LEER, und das ist Absicht (A14): der `runner`-Layer kennt
+       * `tickets` NICHT und darf ihren Dashboard-Pfad nicht hart verdrahten. Die
+       * App, die runner UND tickets komponiert (apps/control), trägt das Mapping
+       * ein — `{ ticket: '/dashboard/tickets?ticket=' }`, an das der Absender die
+       * `subjectId` hängt. Ohne Eintrag zeigt die Meldung auf `/dashboard/runner`
+       * (finish.post.ts). Objekt, kein Array — defu MERGED es tief, statt zu
+       * konkatenieren.
+       */
+      subjectLinks: {} as Record<string, string>,
     },
   },
 })

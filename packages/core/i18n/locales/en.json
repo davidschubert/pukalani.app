@@ -356,6 +356,9 @@
     "abuseReport": "Abuse report for {name}",
     "badgeAwarded": "Badge earned: {name}",
     "messageReceived": "{name} sent you a message",
+    "runSucceeded": "Run finished: {name}",
+    "runNeedsInput": "Run needs your reply: {name}",
+    "runFailed": "Run failed: {name}",
     "email": {
       "title": "Email notifications",
       "description": "Also receive bell notifications (replies, mentions, reminders) by email.",

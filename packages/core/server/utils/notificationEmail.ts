@@ -34,7 +34,7 @@ const COPY: Record<EmailLocale, {
   de: {
     // 'badge.awarded': der Titel IST der Abzeichen-Name (als Schlüssel
     // gespeichert, oben übersetzt) — das Label sagt nur, worum es geht.
-    types: { reply: 'hat auf deinen Kommentar geantwortet', mention: 'hat dich erwähnt', 'post.mention': 'hat dich in einem Beitrag erwähnt', reminder: 'Erinnerung', ticket: '— Ticket-Update', billing: '— Zahlungsproblem', 'badge.awarded': '— Abzeichen erhalten' },
+    types: { reply: 'hat auf deinen Kommentar geantwortet', mention: 'hat dich erwähnt', 'post.mention': 'hat dich in einem Beitrag erwähnt', reminder: 'Erinnerung', ticket: '— Ticket-Update', billing: '— Zahlungsproblem', 'badge.awarded': '— Abzeichen erhalten', 'run.succeeded': '— Lauf fertig', 'run.needs_input': '— Lauf braucht deine Antwort', 'run.failed': '— Lauf fehlgeschlagen' },
     fallbackType: 'Neue Benachrichtigung',
     openLink: 'Ansehen',
     digestSubject: count => `${count} neue Benachrichtigung${count === 1 ? '' : 'en'}`,
@@ -42,7 +42,7 @@ const COPY: Record<EmailLocale, {
     footer: 'Du erhältst diese Mail, weil E-Mail-Benachrichtigungen in deinen Einstellungen aktiv sind. Abstellen: Dashboard → Einstellungen → Benachrichtigungen.',
   },
   en: {
-    types: { reply: 'replied to your comment', mention: 'mentioned you', 'post.mention': 'mentioned you in a post', reminder: 'Reminder', ticket: '— ticket update', billing: '— payment issue', 'badge.awarded': '— badge earned' },
+    types: { reply: 'replied to your comment', mention: 'mentioned you', 'post.mention': 'mentioned you in a post', reminder: 'Reminder', ticket: '— ticket update', billing: '— payment issue', 'badge.awarded': '— badge earned', 'run.succeeded': '— run finished', 'run.needs_input': '— run needs your reply', 'run.failed': '— run failed' },
     fallbackType: 'New notification',
     openLink: 'View',
     digestSubject: count => `${count} new notification${count === 1 ? '' : 's'}`,

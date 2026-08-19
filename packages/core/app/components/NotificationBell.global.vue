@@ -138,6 +138,13 @@ function messageKey(type: string): string {
   // den Text will, klickt — der Link führt in den Posteingang mit
   // vorgewählter Konversation.
   if (type === 'message.received') return 'notifications.messageReceived'
+  // AI-Runner (Board): ein Lauf ist zu Ende. DREI Typen, DREI Texte, je ein
+  // Endzustand — 'run.needs_input' muss nach Handeln klingen (Rückfrage), nicht
+  // nach Erledigung. Absender: packages/runner/server/api/runner/runs/[id]/
+  // finish.post.ts; der Link führt über pukalani.runner.subjectLinks aufs Ticket.
+  if (type === 'run.succeeded') return 'notifications.runSucceeded'
+  if (type === 'run.needs_input') return 'notifications.runNeedsInput'
+  if (type === 'run.failed') return 'notifications.runFailed'
   return 'notifications.replied'
 }
 
