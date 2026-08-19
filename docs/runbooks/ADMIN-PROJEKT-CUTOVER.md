@@ -210,27 +210,31 @@ dem Runner-Stopp; Werkzeug: `--phase inventory`.
       `ah4c/platform-readonly-admin.key.env`, `ah4c/backups/*` (Rückweg),
       `migrations/control.env.ah4c-eingefroren`.
 
-### Rest nach der Beobachtungszeit (~2026-09-01)
+### Rest nach der Beobachtungszeit (VORGEZOGEN auf 2026-08-19 — Davids Entscheidung, Beobachtung nach ~1 Tag störungsfreiem Betrieb beendet)
 
-- [ ] Beobachtungszeit vereinbart: ______ (Vorschlag 14 Tage — und diesmal
-      die Kästchen erst NACH der Tat abhaken; die F3-Lektion vom 2026-08-18).
-- [ ] Projekt `control`: die zwei verbliebenen Rückweg-Keys widerrufen
-      (`nuxt-ssr-prod`, `platform read-only`) und die Backups unter
-      `~/.appwrite-secrets/ah4c/backups/` + `control.env.ah4c-eingefroren`
-      löschen; Anzeigename in der Konsole auf „control [eingefroren, AH-4c]" —
-      Projekt-Löschung erst viel später und mit dem Delete-500-Rezept
-      griffbereit.
-- [ ] Alte Keys aus allen Server-`.env` und `.ah4c-backup`-Dateien entfernt.
-- [ ] `~/.appwrite-secrets/migrations/control.env` → durch `admin.env`
-      ersetzt; Wave-/Runner-Aufrufe (`pnpm migrate --app control`) zeigen auf
-      die neue Env.
-- [ ] Doku nachgezogen: CLAUDE.md (Projekt `control`/Cookie
-      `a_session_control` → `admin`), DEPLOYMENT.md, hosts-und-ports,
-      Memory `control-cutover-2026-07-26`; danach sagt die Namenswelt überall
-      dasselbe — nur Ordner `apps/control`, Paketname und Release-Slot
-      bleiben als Code-Anker (Davids geprüfte Ausnahme: `admin` ist als
-      Layer-Name packages/admin vergeben).
-- [ ] Eintrag in `docs/OPEN-ITEMS-COMPLETE.md` mit **Gelernt:**-Zeile.
+- [x] Beobachtungszeit: von David am 2026-08-19 bewusst verkürzt (Transfer
+      tief verifiziert, ein Tag echte Last, Konsole/Runner/Mandanten-Hosts
+      störungsfrei). Der LANGSAME Rückweg bleibt: das eingefrorene Projekt
+      samt Daten existiert weiter — im Notfall neue Keys anlegen + Envs
+      tauschen (~20 min statt 5).
+- [x] Beide Rückweg-Keys GELÖSCHT (2026-08-19, Konsolen-UI; Gegenprobe je
+      401) — das Projekt `control` hat jetzt NULL Keys. Anzeigename:
+      „control [eingefroren, AH-4c]". Projekt-Löschung bewusst NICHT
+      (Delete-500-Rezept, und die Daten sind der letzte Rückweg).
+- [x] Backups gelöscht: `~/.appwrite-secrets/ah4c/backups/` +
+      `migrations/control.env.ah4c-eingefroren` + die tote
+      `migrations/comments.env` (Projekt seit 2026-08-18 gelöscht);
+      `pool.env` bleibt (AH-1-Rückweg). Auf den Servern lag kein Alt-Key
+      mehr (Env-Schnitt hatte sie ersetzt).
+- [x] `migrations/admin.env` ist die einzige Konsolen-Migrations-Env
+      (Wächter-Mapping seit dem Schnitt umgestellt).
+- [x] Doku nachgezogen (bereits am 2026-08-18): CLAUDE.md, DEPLOYMENT.md,
+      hosts-und-ports, Memory — die Namenswelt sagt überall dasselbe; nur
+      Ordner `apps/control`, Paketname und Release-Slot bleiben als
+      Code-Anker (Davids geprüfte Ausnahme: `admin` ist als Layer-Name
+      packages/admin vergeben).
+- [x] Eintrag in `docs/OPEN-ITEMS-COMPLETE.md` mit **Gelernt:**-Zeile
+      (2026-08-19) — AH-4c ist damit KOMPLETT geschlossen.
 
 ---
 
