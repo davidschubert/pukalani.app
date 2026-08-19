@@ -1,8 +1,8 @@
 # Offene Punkte
 
-**Stand: 4 offen · 4 geparkt/wartend · 13 bewusst zurückgestellt** (Zahlen bei JEDEM Umzug nach COMPLETE mitführen)
+**Stand: 3 offen · 4 geparkt/wartend · 13 bewusst zurückgestellt** (Zahlen bei JEDEM Umzug nach COMPLETE mitführen)
 
-Stand: **2026-08-18**. Hier steht **nur, was noch offen ist** — in der
+Stand: **2026-08-19**. Hier steht **nur, was noch offen ist** — in der
 Reihenfolge, in der es abgearbeitet wird. Alles Erledigte (mit Begründung,
 Beweis und den gelernten Lektionen) steht final in
 **[OPEN-ITEMS-COMPLETE.md](OPEN-ITEMS-COMPLETE.md)**.
@@ -25,7 +25,6 @@ demo-Ausbau, comments in den Pool. Entscheidungen: DECISION-LOG 2026-08-11.
 
 | # | Was (einfach erklärt) | Prio | Aufwand | Braucht David? | Details |
 | --- | --- | --- | --- | --- | --- |
-| 1 · A0 | **Naht-Geheimnisse — der Rest der Zugänge.** Die Eintrag-Seite läuft und ist IN BENUTZUNG (2026-08-18: David hat beide KI-Schlüssel über Integrationen hinterlegt — `ai` im account-, `tickets-ai` im admin-Projekt; Umschlag-Schlüssel auf beiden Sites gesetzt, `ops:site-env` verlangt ihn statt der Env-Keys). Offen bleiben NUR die GETEILTEN Geheimnisse zwischen platform und admin (`onboardingServiceSecret`, `eventsSweepKey`): beide Seiten müssen gleich sein, ein Umzug braucht eine Stufe, die alten UND neuen Wert annimmt. Nicht dringend — über die Env läuft alles weiter. | Niedrig | M | Nein | [instanceSecrets.ts](../packages/core/server/utils/instanceSecrets.ts) |
 | 2 · A1 | **Echte Rechtstexte** für Impressum, Datenschutz und AGB. **pukalani.studio ist fertig** (2026-08-12): Impressum + Datenschutz in de/en veröffentlicht, inkl. **ladungsfähiger Anschrift**; die Texte nennen nur Belegbares, Erfundenes wurde weggelassen. Dort noch offen und beim Anwalt: die Prüfung zu **Art. 27 DSGVO** (Vertreter in der Union — Sitz ausserhalb der EU bei DACH-Ansprache) samt Drittland-Grundlage, dazu die Angabe zur Verbraucherstreitbeilegung. Für **pukalani.app** stehen die Texte weiter aus. **Direkt danach `pukalani.auth.termsUrl` in `apps/platform` setzen** — die AGB-Checkbox fehlt heute genau dort, wo Kunden sich registrieren (Trichter M9). Schaltet Punkt 3 frei. | Hoch | S — Anwalt lesen lassen | Ja: nur David (ggf. Anwalt) | [Agenda: Studio](#a1-anwalt) · [Agenda: Plattform](#a1-plattform) |
 | 3 · A2 | **Stripe auf echtes Geld umstellen — über die F55-Seite.** Vorstufe A2a komplett grün, F55 selbst erledigt (beide 2026-08-08). Bei David bleiben: Bank-Aktivierung, Steuer-Registrierung, Live-Key ROTIERT eintragen (der erste ist teil-geleakt und rotiert), Portal-Konfiguration; alles andere klickt die F55-Seite. Braucht Punkt 2 (A1). | Hoch | S | Ja: Bank, Konto, Portal | [STRIPE-GO-LIVE-RUNBOOK.md](runbooks/STRIPE-GO-LIVE-RUNBOOK.md) |
 | 5 · AH-4c | **Appwrite-Projekt `control` → `admin`: Umzug UND Schlüssel-Aufräumen fertig (2026-08-18).** Alle Keys least-privilege verengt und geprobt, platform-Naht auf dediziertem rows.read-Key, F42-Breitkey gelöscht, `app_secrets` geprüft (nichts zu rotieren). Rest nach Beobachtung (~01.09.): die zwei Rückweg-Keys im eingefrorenen `control` widerrufen + Backups löschen. (Der Vorbestand `NUXT_TICKETS_AI_KEY` ist erledigt: Key seit 2026-08-18 über die Konsole hinterlegt, Wächter auf den Umschlag-Schlüssel umgestellt.) | Niedrig | S (Rest) | Ja: 2 Klicks am 01.09. | [ADMIN-PROJEKT-CUTOVER.md](runbooks/ADMIN-PROJEKT-CUTOVER.md) Schritt 6 |

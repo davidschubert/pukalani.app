@@ -30,6 +30,47 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### A0 — Naht-Geheimnisse: alle Zugänge über die Konsole, Rotation ohne Deployment ✅ 2026-08-19
+
+Der Abschluss von A0 in zwei Etappen. ETAPPE 1 (2026-08-18, Nachbar-Sitzung +
+David): KI, Statistik, Konsolen-KI und SMTP wandern in die verschlüsselte
+Ablage `instance_secrets` (system-036, Umschlag `NUXT_INSTANCE_SECRETS_KEY`,
+DB schlägt Env), David hinterlegt beide KI-Schlüssel über Instanz →
+Integrationen; `ops:site-env` verlangt seither den UMSCHLAG statt der
+Einzel-Keys (ein Wächter, der einen von zwei gleichwertigen Wegen anmahnt,
+erzieht zum Weglesen).
+
+ETAPPE 2 (2026-08-19): die GETEILTEN Naht-Geheimnisse — `onboarding-service`
+(Header `x-pukalani-onboarding-secret`, in BEIDE Richtungen: platform→control
+beim Onboarding über 49 Service-Routen, control→silo beim Domain-Settle) und
+`events-sweep` (`x-sweep-key`, Empfänger reminder-sweep; einen Repo-Sender
+gibt es nicht, der Cron trägt den Wert selbst). Die Regel, die die im
+instanceSecrets-Kopf geforderte „Übergangsstufe" DAUERHAFT einbaut
+(`core/server/utils/sharedSeamSecret.ts`, pur + 17 Tests): der SENDER schickt
+genau EINEN Wert (Konsole zuerst, Env-Rückfall), der EMPFÄNGER nimmt die
+MENGE {Konsole, Env} an — timing-sicher, ohne vorzeitigen Ausstieg (ein
+früher Treffer verriete, ob schon rotiert wurde). Rotation ist damit reine
+REIHENFOLGE: (1) neuen Wert in der Konsole des Empfängers, (2) in der des
+Senders, (3) irgendwann den alten aus beiden `.env` nehmen — kein Deployment,
+kein Riss, und die Reihenfolge steht an der Prüfstelle UND auf den
+Konsolen-Karten. Kein Cache am Gate (ein TTL verzögerte genau die Rotation,
+für die alles gebaut ist); leere Menge bleibt 404 wie zuvor (403/503 gehören
+dem Sender). Live geprobt nach dem Flip: Service-Route ohne Header und mit
+falschem Secret → 401, Naht über den Deploy hinweg ununterbrochen (alter
+Sender sendet Env, neuer Empfänger nimmt sie an).
+
+**Gelernt:** Ein geteiltes Geheimnis braucht keine Code-Stufe, wenn der
+Empfänger eine MENGE annimmt und der Sender EINEN Wert schickt — die Zusage
+wird choreographisch statt technisch.
+**Gelernt:** Ein Auth-Gate von synchron auf asynchron umzustellen ist bei 49
+Aufrufstellen kein Refactoring, sondern ein Sicherheits-Eingriff: ein
+vergessenes `await` wäre FAIL-OPEN (ein Promise ist truthy). Der strukturelle
+Wächter (`onboardingCallerAwait.test.ts`), der jede Aufrufstelle auf `await`
+nagelt und prüft, dass er überhaupt Aufrufstellen findet, gehört in denselben
+Commit wie der Umbau.
+
+---
+
 ### F59 — Zeitzone aus dem Ort vorschlagen ✅ 2026-08-18
 
 **Die letzte Ebene des Zeitzonen-Pakets vom 2026-08-17** (Konto-Zone auf
