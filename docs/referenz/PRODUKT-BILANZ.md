@@ -41,32 +41,33 @@ holt seine Daten über die Naht eines anderen Layers.
 
 ## Fundament (kein Kundenprodukt)
 
-`admin` · `billing` · `blueprint` · `core` · `onboarding` · `system` · `themes`
+`admin` · `billing` · `blueprint` · `core` · `marketing` · `onboarding` · `system` · `themes`
 
 ## Welche App montiert was
 
-| Produkt | _template | comments | control | photos | platform | portfolio |
-| --- | --- | --- | --- | --- | --- | --- |
-| `activity` | — | ✅ | — | — | ✅ | — |
-| `admin` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `analytics` | — | ✅ | — | — | ✅ | ✅ |
-| `billing` | — | ✅ | ✅ | — | — | — |
-| `blueprint` | ✅ | ✅ | — | — | ✅ | — |
-| `comments` | ✅ | ✅ | — | — | ✅ | — |
-| `control` | — | — | ✅ | — | — | — |
-| `courses` | ✅ | ✅ | — | — | ✅ | — |
-| `domains` | — | ✅ | — | — | — | ✅ |
-| `events` | ✅ | ✅ | — | — | ✅ | — |
-| `feedback` | — | — | ✅ | — | ✅ | — |
-| `media` | — | ✅ | — | ✅ | ✅ | — |
-| `messages` | — | ✅ | — | — | ✅ | — |
-| `moderation` | ✅ | ✅ | — | — | ✅ | — |
-| `onboarding` | — | — | — | — | ✅ | — |
-| `pages` | — | — | ✅ | — | ✅ | ✅ |
-| `posts` | ✅ | ✅ | — | — | ✅ | — |
-| `runner` | — | — | ✅ | — | — | — |
-| `themes` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `tickets` | — | — | ✅ | — | — | — |
+| Produkt | _template | comments | control | help | marketing | photos | platform | portfolio |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `activity` | — | ✅ | — | — | — | — | ✅ | — |
+| `admin` | ✅ | ✅ | ✅ | — | — | ✅ | ✅ | ✅ |
+| `analytics` | — | ✅ | — | — | — | — | ✅ | ✅ |
+| `billing` | — | ✅ | ✅ | — | — | — | — | — |
+| `blueprint` | ✅ | ✅ | — | — | — | — | ✅ | — |
+| `comments` | ✅ | ✅ | — | — | — | — | ✅ | — |
+| `control` | — | — | ✅ | — | — | — | — | — |
+| `courses` | ✅ | ✅ | — | — | — | — | ✅ | — |
+| `domains` | — | ✅ | — | — | — | — | — | ✅ |
+| `events` | ✅ | ✅ | — | — | — | — | ✅ | — |
+| `feedback` | — | — | ✅ | — | — | — | ✅ | — |
+| `marketing` | — | — | — | ✅ | ✅ | — | — | — |
+| `media` | — | ✅ | — | — | — | ✅ | ✅ | — |
+| `messages` | — | ✅ | — | — | — | — | ✅ | — |
+| `moderation` | ✅ | ✅ | — | — | — | — | ✅ | — |
+| `onboarding` | — | — | — | — | — | — | ✅ | — |
+| `pages` | — | — | ✅ | — | — | — | ✅ | ✅ |
+| `posts` | ✅ | ✅ | — | — | — | — | ✅ | — |
+| `runner` | — | — | ✅ | — | — | — | — | — |
+| `themes` | ✅ | ✅ | ✅ | — | — | ✅ | ✅ | ✅ |
+| `tickets` | — | — | ✅ | — | — | — | — | — |
 
 ## Der Bauplan: wo Pool und Silo dasselbe zeigen
 
