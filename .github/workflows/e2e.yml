@@ -257,6 +257,24 @@ jobs:
           path: ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-${{ steps.playwright-version.outputs.version }}
 
+      # DER AZURE-SPIEGEL FLIEGT VOR DEM APT-LAUF RAUS (2026-08-19, zweimal in
+      # einer Nacht erwischt): die ubuntu-Runner lesen ihre Quellen aus einer
+      # Spiegel-LISTE (/etc/apt/apt-mirrors.txt), und deren erster Eintrag
+      # `azure.archive.ubuntu.com` war nicht erreichbar. apt probiert ihn für
+      # JEDE Quelle mehrfach durch (~7 min „Ign:"-Spam), fällt dann zwar auf
+      # archive.ubuntu.com zurück, aber das 8-Minuten-Budget ist da schon
+      # verbrannt — der Schritt stirbt am eigenen Timeout, nicht an apt. Die
+      # Liste vorher auf den Haupt-Spiegel zu drehen kostet im Normalfall
+      # nichts (derselbe Inhalt) und macht den Ausfall des Azure-Spiegels
+      # unsichtbar. `EIN Versuch` bleibt richtig: apt selbst ist ohne den
+      # toten Spiegel zuverlässig (CI-Härtung 2026-08-18).
+      - name: apt-Spiegel härten (Azure-Mirror raus)
+        run: |
+          if [ -f /etc/apt/apt-mirrors.txt ]; then
+            sudo sed -i 's|http://azure.archive.ubuntu.com/ubuntu|https://archive.ubuntu.com/ubuntu|g' /etc/apt/apt-mirrors.txt
+            cat /etc/apt/apt-mirrors.txt
+          fi
+
       - name: Playwright — Systempakete (apt, EIN Versuch)
         timeout-minutes: 8
         run: pnpm --filter comments exec playwright install-deps chromium
