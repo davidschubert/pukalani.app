@@ -147,10 +147,23 @@
       "session": "Session",
       "failed": "The run failed",
       "needsInputTitle": "The run has a question",
-      "needsInputText": "Answering and resuming comes with the machine service. Until then: read the question and start a new run.",
+      "needsInputText": "Answer below — your answer starts a new run that picks up the same session.",
+      "needsInputNoSession": "This question cannot be resumed — the run has no session. Read it and start a new run.",
+      "answerLabel": "Answer",
+      "answerPlaceholder": "Answer to the question …",
+      "answerSubmit": "Answer & resume",
+      "resumed": "Continuation started.",
+      "resumedHint": "A new run picks up the session — its progress shows up here.",
       "raw": "The report could not be read — here it is raw:",
       "none": "No report.",
-      "transcript": "Download transcript"
+      "transcript": "Download transcript",
+      "errors": {
+        "resume": "The continuation was not started.",
+        "resumeHint": "Nothing was created — your answer is still in the field.",
+        "notResumable": "This run can no longer be resumed.",
+        "mode": "The inherited mode is blocked for a job containing foreign text.",
+        "runner": "The predecessor's machine is not available."
+      }
     },
     "timeline": {
       "waiting": "No report yet — the run is waiting for a machine.",

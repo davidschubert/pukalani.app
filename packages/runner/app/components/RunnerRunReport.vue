@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { runResumeAllowed } from '../../shared/runGuards'
 import type { RunRow } from '../../shared/types/runner'
 
 /**
@@ -16,7 +17,16 @@ import type { RunRow } from '../../shared/types/runner'
  */
 const props = defineProps<{ run: RunRow }>()
 
+/**
+ * Eine beantwortete Rückfrage erzeugt einen NEUEN Lauf (§ 4 / § 9) — der
+ * Bericht besitzt aber weder die Lauf-Liste noch die Auswahl (die liegen im
+ * Panel). Deshalb reicht er den frisch angelegten Lauf nur nach oben; das
+ * Panel hängt ihn ein und wählt ihn aus (bestehender `select`-Mechanismus).
+ */
+const emit = defineEmits<{ resumed: [run: RunRow] }>()
+
 const { t } = useI18n()
+const toast = useToast()
 
 /** Was wir zu lesen versuchen. Alles optional — der Runner darf wachsen. */
 interface RunResult {
@@ -88,6 +98,56 @@ const rows = computed(() => {
 const transcriptHref = computed(() =>
   parsed.value.result?.transcriptFileId ? `/api/runner/runs/${props.run.$id}/transcript` : '',
 )
+
+/**
+ * FORTSETZEN — die Antwort auf eine `needs_input`-Rückfrage (§ 9).
+ *
+ * Das Feld erscheint NUR, wenn der Lauf wirklich fortsetzbar ist: `needs_input`
+ * MIT Session. Dieselbe pure Regel, die auch die Route bewacht
+ * (`runResumeAllowed`) — ein `needs_input` ohne Session (Abbruch vor dem ersten
+ * Lebenszeichen) hätte nichts, worauf `--resume` zeigen könnte, und bekäme an
+ * der Route ein 409; dann führt nur ein neuer Lauf weiter.
+ */
+const canResume = computed(() => runResumeAllowed(props.run))
+
+const answer = ref('')
+const submitting = ref(false)
+
+/** Der fachliche Grund aus dem Envelope (`{ok,code,message,reason}`). */
+function reasonOf(error: unknown): string {
+  return (error as { data?: { reason?: string } })?.data?.reason ?? ''
+}
+
+async function submitAnswer() {
+  const text = answer.value.trim()
+  if (!text || submitting.value) return
+  submitting.value = true
+  try {
+    // Die Route erwartet NUR `{ answer }` (resumeRunSchema) und gibt den neuen
+    // `RunRow` zurück (201) — alles Übrige erbt sie aus dem Vorgänger (§ 8.2).
+    const run = await $fetch<RunRow>(`/api/runner/runs/${props.run.$id}/resume`, {
+      method: 'POST',
+      body: { answer: text },
+    })
+    answer.value = ''
+    emit('resumed', run)
+    toast.add({ title: t('runner.report.resumed'), description: t('runner.report.resumedHint'), color: 'success', icon: 'i-ph-rocket-launch' })
+  }
+  catch (error) {
+    const reason = reasonOf(error)
+    const key = reason === 'not_resumable'
+      ? 'runner.report.errors.notResumable'
+      : reason === 'mode_not_allowed_untrusted'
+        ? 'runner.report.errors.mode'
+        : reason === 'runner_unavailable'
+          ? 'runner.report.errors.runner'
+          : 'runner.report.errors.resume'
+    toast.add({ title: t(key), description: t('runner.report.errors.resumeHint'), color: 'error' })
+  }
+  finally {
+    submitting.value = false
+  }
+}
 </script>
 
 <template>
@@ -107,8 +167,37 @@ const transcriptHref = computed(() =>
       variant="subtle"
       icon="i-ph-question"
       :title="t('runner.report.needsInputTitle')"
-      :description="t('runner.report.needsInputText')"
+      :description="canResume ? t('runner.report.needsInputText') : t('runner.report.needsInputNoSession')"
     />
+
+    <!-- Antwort auf die Rückfrage: ein Feld + Knopf, kein volles Formular —
+         die Fortsetzung erbt alles Übrige aus dem Vorgänger (§ 9). Nur bei
+         fortsetzbarem Lauf (needs_input MIT Session), sonst führt allein ein
+         neuer Lauf weiter. -->
+    <form v-if="canResume" class="space-y-2" data-runner-resume @submit.prevent="submitAnswer">
+      <UFormField :label="t('runner.report.answerLabel')">
+        <UTextarea
+          v-model="answer"
+          :rows="3"
+          size="sm"
+          autoresize
+          :placeholder="t('runner.report.answerPlaceholder')"
+          :disabled="submitting"
+          class="w-full"
+          data-runner-answer
+        />
+      </UFormField>
+      <div class="flex justify-end">
+        <UButton
+          type="submit"
+          icon="i-ph-paper-plane-tilt"
+          size="sm"
+          :loading="submitting"
+          :disabled="!answer.trim()"
+          :label="t('runner.report.answerSubmit')"
+        />
+      </div>
+    </form>
 
     <dl v-if="rows.length" class="grid gap-x-4 gap-y-2 sm:grid-cols-[10rem_minmax(0,1fr)]">
       <template v-for="row in rows" :key="row.key">

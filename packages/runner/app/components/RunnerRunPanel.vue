@@ -226,6 +226,17 @@ function select(run: RunRow) {
   forceForm.value = false
   selectedId.value = run.$id
 }
+
+/**
+ * Eine beantwortete Rückfrage: der Bericht hat den NEUEN Lauf angelegt und
+ * reicht ihn hoch. Einhängen und auswählen wie ein frisch gestarteter Lauf —
+ * derselbe Weg wie am Ende von `start()`. Realtime pflegt ihn danach fort.
+ */
+function onResumed(run: RunRow) {
+  upsertRun(run)
+  selectedId.value = run.$id
+  forceForm.value = false
+}
 </script>
 
 <template>
@@ -278,7 +289,7 @@ function select(run: RunRow) {
         </UButton>
       </div>
 
-      <RunnerRunReport v-if="view === 'report'" :run="current" />
+      <RunnerRunReport v-if="view === 'report'" :run="current" @resumed="onResumed" />
 
       <RunnerRunTimeline
         v-if="view === 'live' || events.length"

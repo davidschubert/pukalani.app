@@ -147,10 +147,23 @@
       "session": "Sitzung",
       "failed": "Der Lauf ist gescheitert",
       "needsInputTitle": "Der Lauf hat eine Rückfrage",
-      "needsInputText": "Antworten und fortsetzen kommt mit dem Rechner-Dienst. Bis dahin: Rückfrage lesen und einen neuen Lauf starten.",
+      "needsInputText": "Antworte unten — die Antwort startet einen neuen Lauf, der an dieselbe Sitzung anknüpft.",
+      "needsInputNoSession": "Diese Rückfrage lässt sich nicht fortsetzen — der Lauf hat keine Sitzung. Lies sie und starte einen neuen Lauf.",
+      "answerLabel": "Antwort",
+      "answerPlaceholder": "Antwort auf die Rückfrage …",
+      "answerSubmit": "Antworten & fortsetzen",
+      "resumed": "Fortsetzung gestartet.",
+      "resumedHint": "Ein neuer Lauf knüpft an die Sitzung an — sein Fortschritt erscheint hier.",
       "raw": "Der Bericht ließ sich nicht lesen — hier steht er roh:",
       "none": "Kein Bericht.",
-      "transcript": "Transkript herunterladen"
+      "transcript": "Transkript herunterladen",
+      "errors": {
+        "resume": "Die Fortsetzung wurde nicht gestartet.",
+        "resumeHint": "Es wurde nichts angelegt — deine Antwort steht noch im Feld.",
+        "notResumable": "Dieser Lauf lässt sich nicht mehr fortsetzen.",
+        "mode": "Der geerbte Modus ist für einen Auftrag mit fremdem Text gesperrt.",
+        "runner": "Der Rechner des Vorgängers steht nicht bereit."
+      }
     },
     "timeline": {
       "waiting": "Noch keine Meldung — der Lauf wartet auf einen Rechner.",

@@ -442,6 +442,13 @@ CLI-Worktree, der Runner committet (Ticket-, Lauf- und Session-Id in der
 Message), Transkript in den Bucket, Bericht mit Branch/Commit/Diffstat/
 Dauer/Kosten im Ticket — `main` des Zielrepos unberührt, 23 s, $0.04.
 
+**Fortsetzen per `--resume` ist gebaut (2026-08-18).** Der Backend-Teil
+(`POST runs/:id/resume` → Fortsetzungs-Lauf mit `resumeSessionId`, Regel
+`buildResumeRunFields`) und der Daemon (startet den neuen Lauf mit
+`--resume <sessionId>` an der Session des Vorgängers) sind gemergt; das
+Antwort-Feld der Oberfläche (§ 9) füttert sie. Damit ist der in § 4 skizzierte
+Weg aus `needs_input` heraus vollständig — kein offener Punkt mehr.
+
 ---
 
 ## 8. Sicherheit
@@ -514,10 +521,16 @@ Zustände, und der Lauf entscheidet, welcher gilt:
   abonniert, so kommen Statuswechsel ohne Poll an.
 - **Bericht** (Endzustand): Branch, Commit, Diffstat, Tests, Dauer, Kosten,
   Modell, Projekt, Session-Id als Beschreibungsliste; bei `failed` der Grund
-  zuoberst, bei `needs_input` der Hinweis, dass Fortsetzen mit dem
-  Rechner-Dienst kommt. `resultJson` wird DEFENSIV gelesen — lässt es sich
-  nicht parsen, zeigt der Bericht den Rohtext, statt leer zu bleiben. Trägt der
-  Bericht eine `transcriptFileId`, erscheint ein Download-Link auf `GET
+  zuoberst, bei `needs_input` ein **Antwort-Feld** (`UTextarea` + Knopf), das
+  `POST runs/:id/resume` mit `{ answer }` ruft und den neuen Lauf zurückbekommt.
+  Es erscheint NUR, wenn der Lauf wirklich fortsetzbar ist (`needs_input` MIT
+  Session — dieselbe pure Regel `runResumeAllowed`, die die Route bewacht);
+  ohne Session steht dort der Hinweis, dass nur ein neuer Lauf weiterführt. Den
+  frisch angelegten Lauf reicht der Bericht per `@resumed`-Ereignis hoch — das
+  Panel hängt ihn ein und wählt ihn aus (bestehender `select`-Mechanismus),
+  Realtime pflegt ihn danach fort. `resultJson` wird DEFENSIV gelesen — lässt es
+  sich nicht parsen, zeigt der Bericht den Rohtext, statt leer zu bleiben. Trägt
+  der Bericht eine `transcriptFileId`, erscheint ein Download-Link auf `GET
   runs/:id/transcript` (§ 5) — ein gewöhnlicher `<a download>`, weil die Route
   die Datei als Anhang liefert.
 
@@ -546,9 +559,12 @@ Der **Transkript-Download** ist seit Paket 3 (nachgezogen 2026-08-18) gebaut:
 `GET runs/:id/transcript` streamt die Datei aus `runner-files`, der Bericht
 verlinkt sie, wenn `resultJson.transcriptFileId` gesetzt ist.
 
-Noch nicht gebaut (bewusst, Paket 4 und später): das Feld „Antworten" bei
-`needs_input` (`--resume` braucht den Rechner-Dienst) und das Zustands-Zeichen
-auf der Board-Karte.
+Das **Antwort-Feld bei `needs_input` ist gebaut** (2026-08-18): `RunnerRunReport`
+zeigt es bei fortsetzbarem Lauf, `POST runs/:id/resume` legt den Fortsetzungs-Lauf
+an, das Panel wählt ihn aus (oben beim Bericht beschrieben). Der Rechner-Dienst
+setzt die Session per `--resume <sessionId>` fort (Backend + Daemon fertig, § 7.3).
+
+Noch nicht gebaut (bewusst, später): das Zustands-Zeichen auf der Board-Karte.
 
 ---
 
