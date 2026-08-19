@@ -62,6 +62,21 @@ Sender sendet Env, neuer Empfänger nimmt sie an).
 **Gelernt:** Ein geteiltes Geheimnis braucht keine Code-Stufe, wenn der
 Empfänger eine MENGE annimmt und der Sender EINEN Wert schickt — die Zusage
 wird choreographisch statt technisch.
+**Gelernt (Nachtrag 2026-08-19, Nachbar-Sitzung):** Die Zusage „kein Riss"
+gilt nur, solange Empfänger und Sender ZWEI Seiten sind. `events-sweep` ist
+so gebaut, `onboarding-service` nicht: dort senden und empfangen BEIDE
+Deployments über dieselbe Sorte, jede Seite ist also Empfänger, und weil
+`preferredSeamSecret` die Konsole zuerst nimmt, ändert ein Eintrag immer
+zugleich das SENDEN. Zwischen den zwei Einträgen ist deshalb genau eine
+Richtung tot — mit Konsolen-Mitteln nicht wegzubekommen („annehmen, aber noch
+nicht senden" ginge nur über die Env, also über den Neustart, den die Regel
+abschaffen sollte). Also wird das Fenster nicht bestritten, sondern GERICHTET:
+erst die Betreiber-Konsole, dann die Kunden-Instanz — dann fällt `control→site`
+aus (Domain freischalten, ein Aufrufer, Betreiber-Handlung) statt
+`platform→control` (neun Aufrufer, alle kundenseitig). Festgenagelt in
+`packages/core/tests/seamRotationOrder.test.ts`, und die Konsolen-Karte trägt
+seither zwei Texte statt einem. Die eigentliche ROTATION der Werte steht damit
+noch aus — A0 hat den Mechanismus geliefert, nicht den Handgriff.
 **Gelernt:** Ein Auth-Gate von synchron auf asynchron umzustellen ist bei 49
 Aufrufstellen kein Refactoring, sondern ein Sicherheits-Eingriff: ein
 vergessenes `await` wäre FAIL-OPEN (ein Promise ist truthy). Der strukturelle

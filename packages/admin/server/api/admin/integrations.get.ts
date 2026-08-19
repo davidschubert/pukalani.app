@@ -104,13 +104,20 @@ export default defineEventHandler(async (event): Promise<IntegrationsResponse> =
       id: 'onboarding-service',
       envName: seamEnvName,
       source: integrationSource(await readInstanceSecret(event, 'onboarding-service'), envSecret),
-      shared: true,
+      // ZWEISEITIG: dieselbe Sorte trägt platform→control (Onboarding) UND
+      // control→site (Domain-Settle). Ein Konsolen-Eintrag auf einer Seite
+      // ändert beides — was sie annimmt und was sie sendet —, deshalb ist
+      // zwischen den zwei Einträgen eine Richtung tot. Die Karte sagt, welche
+      // Seite zuerst drankommt, damit das Fenster den Betreiber trifft und
+      // nicht den Kunden.
+      shared: 'two-way',
     })
   }
 
   // Der Sweep-Schlüssel existiert im runtimeConfig nur, wo der events-Layer
   // montiert ist. Sein „Sender" ist kein Deployment dieses Repos, sondern ein
-  // Cron — die Reihenfolge bleibt trotzdem dieselbe (erst hier, dann dort).
+  // Cron — und weil hier NUR empfangen wird, ist die Rotation fensterlos:
+  // erst hier eintragen (nimmt ab da alt und neu an), dann im Cron.
   if ('eventsSweepKey' in runtime) {
     items.push({
       id: 'events-sweep',
@@ -119,7 +126,7 @@ export default defineEventHandler(async (event): Promise<IntegrationsResponse> =
         await readInstanceSecret(event, 'events-sweep'),
         runtime.eventsSweepKey as string,
       ),
-      shared: true,
+      shared: 'one-way',
     })
   }
 

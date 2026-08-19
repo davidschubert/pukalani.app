@@ -37,10 +37,34 @@ import { readInstanceSecret, type InstanceSecretKind } from './instanceSecrets'
  *      neu starten. Erst DAMIT ist der alte Wert ungültig — vorher bleibt er
  *      gültig, und genau das ist der Sinn.
  *
- * Kein Deployment, keine Code-Änderung, kein Zeitfenster, in dem die Naht
- * reißt. Wer die Reihenfolge umdreht (erst Sender), schickt einen Wert, den
- * die Gegenseite noch nicht kennt — deshalb steht sie auch an der
- * Empfänger-Prüfung und auf der Karte in der Konsole.
+ * Kein Deployment und keine Code-Änderung. Wer die Reihenfolge umdreht (erst
+ * Sender), schickt einen Wert, den die Gegenseite noch nicht kennt — deshalb
+ * steht sie auch an der Empfänger-Prüfung und auf der Karte in der Konsole.
+ *
+ * ── UND WO DIESE DREI SCHRITTE NICHT REICHEN ──────────────────────────────
+ * Sie setzen voraus, dass „Empfänger" und „Sender" ZWEI verschiedene Seiten
+ * sind. Das gilt für `events-sweep` (der Cron sendet, der Sweep empfängt) —
+ * dort ist die Rotation wirklich fensterlos.
+ *
+ * `onboarding-service` ist NICHT so gebaut: beide Deployments senden UND
+ * empfangen über dieselbe Sorte (platform→control beim Onboarding,
+ * control→site beim Domain-Settle). Jede Seite ist damit Empfänger, und der
+ * Konsolen-Eintrag ändert unvermeidlich beides auf einmal — die angenommene
+ * MENGE (gewollt) und den GESENDETEN Wert (zu früh, denn die Gegenseite kennt
+ * ihn noch nicht). Zwischen den zwei Einträgen ist deshalb genau EINE
+ * Richtung tot, und daran ist mit Konsolen-Mitteln allein nichts zu ändern:
+ * „annehmen, aber noch nicht senden" liesse sich nur über die Env ausdrücken
+ * (Konsole = alter Wert, Env = neuer) — also mit genau dem Neustart, den
+ * diese Datei abschaffen sollte.
+ *
+ * Also wird das Fenster nicht wegdefiniert, sondern GERICHTET: zuerst die
+ * BETREIBER-Konsole, dann die Kunden-Instanz. Dann fällt in der Lücke
+ * `control→site` aus — das Freischalten einer Domain, eine Handlung, die
+ * derselbe Mensch in derselben Minute nicht auslöst — statt
+ * `platform→control`, an dem neun kundenseitige Aufrufer hängen (Community
+ * anlegen, Team, Switcher-Handoff). Festgenagelt in
+ * `packages/core/tests/seamRotationOrder.test.ts`; die Konsolen-Karte trägt
+ * für die beiden Lagen deshalb zwei verschiedene Texte.
  *
  * ── WAS DAS NICHT IST ─────────────────────────────────────────────────────
  * Kein Ersatz für die Env: die Env bleibt der Rückfall und der einzige Weg,

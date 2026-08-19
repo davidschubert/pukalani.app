@@ -142,12 +142,19 @@ const badgeColor = (source: string) => (source === 'none' ? 'warning' : 'success
               </div>
               <p class="mt-1 text-sm text-muted">{{ t(`admin.integrations.serviceDesc.${item.id}`) }}</p>
               <!-- GETEILTES Naht-Geheimnis: hier steht die Reihenfolge, ohne
-                   die ein Wechsel die Naht reißt (erst Empfänger, dann
-                   Sender). Sie steht auf der KARTE und nicht im Handbuch,
-                   weil sie genau in dem Moment gebraucht wird, in dem jemand
-                   das Feld ausfüllt. -->
+                   die ein Wechsel die Naht reißt. Sie steht auf der KARTE und
+                   nicht im Handbuch, weil sie genau in dem Moment gebraucht
+                   wird, in dem jemand das Feld ausfüllt.
+                   ZWEI TEXTE, weil es zwei Lagen sind: bei einer EINSEITIGEN
+                   Naht genügt „erst Empfänger, dann Sender" und es gibt kein
+                   Fenster; bei einer ZWEISEITIGEN ist jede Seite Empfänger,
+                   der Eintrag ändert immer auch das SENDEN, und zwischen den
+                   zwei Einträgen ist eine Richtung tot. Ein Text für beides
+                   wäre für die zweite Lage schlicht falsch. -->
               <p v-if="item.shared" class="mt-1 text-xs text-dimmed" :data-integration-rotation="item.id">
-                {{ t('admin.integrations.rotationHint') }}
+                {{ t(item.shared === 'two-way'
+                  ? 'admin.integrations.rotationHintTwoWay'
+                  : 'admin.integrations.rotationHint') }}
               </p>
             </div>
           </div>
