@@ -145,8 +145,11 @@ mit `status_category: 'blocked'`.
   sehen.
 - **Abgebrochene Läufe werden nicht committet.** Die Arbeit liegt im Worktree
   und kann von Hand angesehen werden.
-- Ein Lauf mit `interactive: true` läuft heute trotzdem headless (§ 7.3 ist
-  nach dem MVP dran) und sagt das in der Zeitleiste.
+- Ein Lauf mit `interactive: true` (§ 7.3) öffnet stattdessen **Terminal.app**
+  mit dem fertigen `claude`-Befehl ohne `-p` (zum Zuschauen und Genehmigen). Das
+  Ende meldet ein **SessionEnd-Hook** an `POST …/session-end`; committet, getestet
+  und abgeschlossen wird danach wie sonst. „Abbrechen" vom Board beendet das
+  offene Terminal **nicht** — es hängt an keinem Prozess, den der Runner hält.
 
 ## Ablage
 

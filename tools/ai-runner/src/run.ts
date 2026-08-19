@@ -5,12 +5,19 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { createInterface } from 'node:readline'
 import type { RunnerApi } from './api.ts'
-import { clampRun } from './clamp.ts'
-import type { RunnerConfig } from './config.ts'
+import { clampRun, type ClampDecision } from './clamp.ts'
+import type { RepoRule, RunnerConfig } from './config.ts'
 import { EventPump, FLUSH_AT_EVENTS } from './events.ts'
 import { buildPromptFile, downloadAttachments } from './files.ts'
 import { buildCommitMessage, commitWorktree, currentBranch } from './git.ts'
 import { childEnv, hasShellSyntax, lastLines, runCommand, splitCommand } from './exec.ts'
+import {
+  buildHookScript,
+  buildHookSettings,
+  buildInteractiveArgs,
+  buildWrapperScript,
+  interactiveRunName,
+} from './interactive.ts'
 import { log } from './log.ts'
 import { parseTestCommands, type RunFinalStatus, type RunPayload } from './protocol.ts'
 import { buildResultJson, type RunReport, type TestOutcome } from './result.ts'
@@ -175,12 +182,6 @@ async function performRun(
     throw new RunFailure('unsupported_executor')
   }
 
-  // § 7.3 ist nach dem MVP dran; bis dahin läuft auch ein „interaktiv"
-  // gewünschter Lauf headless — sichtbar in der Zeitleiste, nicht heimlich.
-  if (run.interactive) {
-    pump.status('Interaktiver Modus ist noch nicht gebaut — der Lauf läuft headless')
-  }
-
   // SCHRITT 3: kappen. Stilles Herunterstufen mit je einer Ereigniszeile.
   const decision = clampRun({
     requestedMode: run.permissionMode,
@@ -211,6 +212,21 @@ async function performRun(
 
   // SCHRITT 5: starten. Der Worktree kommt von der CLI, nicht von uns (§ 11).
   const worktreeName = `ai-${run.$id}`
+
+  /**
+   * § 7.3: ein interaktiver Lauf geht einen ganz anderen Weg — Terminal.app
+   * statt headless-Pipe. Er verzweigt HIER, nachdem Material und Kappung stehen
+   * (die gelten für beide Wege gleich), und kehrt danach zurück. Eine
+   * Fortsetzung (`--resume`) ist nie interaktiv (die Route setzt interactive
+   * false), die beiden Zweige schließen sich also aus.
+   */
+  if (run.interactive) {
+    await performInteractiveRun(ctx, run, pump, {
+      sessionId, startedAt, decision, promptPath, filesDir, worktreeName, runDir, repo, hooks,
+    })
+    return
+  }
+
   if (run.resumeSessionId) pump.status(`Fortsetzung von Session ${run.resumeSessionId} (--resume)`)
   const args = buildAgentArgs({
     resumeSessionId: run.resumeSessionId,
@@ -476,6 +492,188 @@ async function performRun(
 
   const error = outcome.error || (state.stderrTail && outcome.status === 'failed' ? lastLines(state.stderrTail, 5) : '')
   await hooks.finish(outcome.status, error, buildResultJson(report))
+}
+
+/**
+ * Sicherheitsnetz gegen einen für immer wartenden Daemon (§ 7.3): fällt der
+ * SessionEnd-Hook aus (David schließt das Fenster hart, statt die Sitzung zu
+ * beenden), pollt der Runner nicht endlos. Grosszügig, weil eine beobachtete
+ * Sitzung lange dauern darf — aber nicht unbegrenzt.
+ */
+const INTERACTIVE_MAX_MS = 8 * 60 * 60_000
+
+function delay(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+interface InteractiveContext {
+  sessionId: string
+  startedAt: number
+  decision: ClampDecision
+  promptPath: string
+  filesDir: string
+  worktreeName: string
+  runDir: string
+  repo: RepoRule
+  hooks: RunHooks
+}
+
+/**
+ * Der INTERAKTIVE Lauf (§ 7.3) — Terminal.app statt headless-Pipe.
+ *
+ * Der Runner baut Hook, Settings und Wrapper (alle drei PUR gebaut, hier nur
+ * geschrieben), öffnet mit `open -a Terminal` ein Fenster mit dem fertigen
+ * `claude`-Befehl OHNE `-p` und hebt den Lauf sofort auf `running`. Danach
+ * WARTET er: kein Elternprozess liest mit, also erfährt er das Ende über den
+ * SessionEnd-Hook (→ `POST …/session-end`), den er per Poll abfragt. Commit,
+ * Tests und Abschluss macht der Daemon danach — genau wie im headless Fall.
+ *
+ * GRENZE, EHRLICH (§ 7.3): „Abbrechen" vom Board beendet das offene Terminal
+ * NICHT (es hängt an keinem Prozess, den der Runner hält). Der Poll erkennt den
+ * Abbruch am Status und HÖRT AUF zu warten — committet dann aber nichts.
+ */
+async function performInteractiveRun(ctx: RunContext, run: RunPayload, pump: EventPump, ictx: InteractiveContext): Promise<void> {
+  const { sessionId, startedAt, decision, promptPath, filesDir, worktreeName, runDir, repo, hooks } = ictx
+
+  // Hook, Settings, Wrapper schreiben (Bau ist pur — interactive.ts).
+  const hookPath = join(runDir, 'session-end-hook.sh')
+  const settingsPath = join(runDir, 'settings.json')
+  const wrapperPath = join(runDir, 'interactive.sh')
+
+  await writeFile(hookPath, buildHookScript({
+    endpoint: ctx.config.endpoint,
+    runId: run.$id,
+    secretFile: ctx.config.secretFile,
+  }), { mode: 0o700 })
+  await writeFile(settingsPath, JSON.stringify(buildHookSettings(hookPath), null, 2), 'utf8')
+
+  const agentArgs = buildInteractiveArgs({
+    sessionId,
+    model: decision.model,
+    mode: decision.mode,
+    worktreeName,
+    filesDir,
+    budgetUsd: decision.budgetUsd,
+    reference: `Referenz: Lauf ${run.$id} zu ${run.subjectType} ${run.subjectId}. Ticket-Bezug siehe prompt.`,
+    name: interactiveRunName(run.subjectType, run.subjectId),
+    settingsPath,
+  })
+  await writeFile(wrapperPath, buildWrapperScript({
+    claudeBin: ctx.config.claudeBin,
+    cwd: repo.path,
+    args: agentArgs,
+    promptPath,
+  }), { mode: 0o700 })
+
+  // Terminal öffnen. `open -a Terminal <skript>` führt das Wrapper-Skript im
+  // Vordergrund aus — die Startzeit steht damit auch im Bericht.
+  pump.status('Interaktiver Modus: Terminal wird geöffnet — Claude Code läuft im Vordergrund')
+  await pump.flush()
+  const launch = await runCommand('open', ['-a', 'Terminal', wrapperPath], { cwd: repo.path, timeoutMs: 20_000 })
+  if (launch.code !== 0) {
+    pump.error(`Terminal konnte nicht geöffnet werden (Exit ${launch.code}): ${lastLines(launch.output, 3) || 'keine Ausgabe'}`)
+    throw new RunFailure('terminal_launch_failed', lastLines(launch.output, 3))
+  }
+  pump.status('Terminal geöffnet — der Runner wartet auf das Ende der Sitzung (SessionEnd-Hook)')
+  await pump.flush()
+
+  // Auf das Ende warten. Zwei Netze: das Herunterfahren des Daemons und die
+  // Höchstdauer. Netzfehler des Polls werden ignoriert — der nächste Versuch
+  // kommt gleich.
+  const deadline = startedAt + INTERACTIVE_MAX_MS
+  let markerSeq = -1
+  for (;;) {
+    if (ctx.shutdownRequested()) throw new RunFailure('runner_shutdown')
+
+    let state: Awaited<ReturnType<typeof ctx.api.sessionEnded>> | null = null
+    try {
+      state = await ctx.api.sessionEnded(run.$id)
+    }
+    catch (error) {
+      log.warn(`Poll auf das Sitzungs-Ende schlug fehl: ${(error as Error).message}`)
+    }
+
+    if (state?.ended) {
+      markerSeq = state.seq
+      break
+    }
+    // Vom Board abgebrochen (der EINZIGE Weg, auf dem ein interaktiver Lauf das
+    // erfährt): aufhören zu warten, aber nichts committen — niemand will das
+    // Ergebnis mehr, und das offene Terminal läuft ggf. weiter.
+    if (state && state.status === 'cancelled') {
+      pump.status('Lauf wurde vom Board abgebrochen — der Runner hört auf zu warten. Das offene Terminal läuft ggf. weiter.')
+      await pump.flush()
+      return
+    }
+    if (Date.now() > deadline) {
+      pump.error('Interaktive Sitzung überschritt die Höchstdauer — der Lauf wird als Fehlschlag geschlossen. Das offene Terminal läuft ggf. weiter.')
+      await hooks.finish('failed', 'interactive_timeout', buildResultJson(emptyReport(Date.now() - startedAt, null)))
+      return
+    }
+    await delay(ctx.config.pollSeconds * 1000)
+  }
+
+  // Sitzung beendet. Den Ereigniszähler hinter die Ende-Markierung heben (§ 7.3),
+  // damit die folgenden Zeilen nicht der Retry-Dedupe zum Opfer fallen.
+  if (markerSeq >= 0) pump.resumeAfter(markerSeq)
+  pump.status('Interaktive Sitzung beendet — der Runner committet und schließt ab')
+
+  // SCHRITT 8: der Runner committet selbst (§ 11) — wie headless.
+  const worktree = join(repo.path, '.claude', 'worktrees', worktreeName)
+  let branch = ''
+  let commit = ''
+  let diffstat = ''
+
+  if (existsSync(worktree)) {
+    branch = await currentBranch(worktree)
+    if (branch && repo.protectedBranches.includes(branch)) {
+      pump.error(`Worktree steht auf geschütztem Branch „${branch}" — es wird nichts committet`)
+      throw new RunFailure('protected_branch')
+    }
+    hooks.setWorkBranch(branch)
+
+    const facts = await commitWorktree(worktree, buildCommitMessage({
+      subjectType: run.subjectType,
+      subjectId: run.subjectId,
+      runId: run.$id,
+      sessionId,
+    }))
+    commit = facts.commit
+    diffstat = facts.diffstat
+    pump.status(facts.committed
+      ? `Committet auf ${facts.branch}: ${facts.diffstat || 'ohne Statistik'}`
+      : 'Keine Änderungen im Worktree — nichts committet')
+  }
+  else {
+    pump.status('Kein Worktree angelegt — nichts zu committen')
+  }
+
+  // SCHRITT 7: Testbefehle im committeten Stand.
+  const tests = existsSync(worktree)
+    ? await runTestCommands(run, worktree, ctx.config, pump)
+    : []
+
+  /**
+   * KEIN Transkript und KEINE Kosten/Turns: der interaktive Lauf schreibt kein
+   * `stream-json` (die CLI zeigt ihre eigene Oberfläche), also gibt es nichts
+   * zu verdichten und nichts hochzuladen. Der Abschluss ist `succeeded` — das
+   * Ergebnis ist, was der Mensch in der Sitzung getan und der Runner committet
+   * hat.
+   */
+  const report: RunReport = {
+    branch,
+    commit,
+    diffstat,
+    tests,
+    durationMs: Date.now() - startedAt,
+    costUsd: 0,
+    numTurns: 0,
+    model: decision.model,
+    transcriptFileId: '',
+    workBranch: branch,
+    permissionDenials: 0,
+  }
+  await hooks.finish('succeeded', '', buildResultJson(report))
 }
 
 export interface AgentArgsInput {

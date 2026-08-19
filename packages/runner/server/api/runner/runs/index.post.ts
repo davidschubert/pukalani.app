@@ -75,8 +75,9 @@ export default defineEventHandler(async (event): Promise<RunRow> => {
       workBranch: '',
       model: body.model,
       permissionMode: body.permissionMode,
-      // headless (MVP, § 3.3); der interaktive Weg kommt nach dem MVP (§ 7.3).
-      interactive: false,
+      // headless oder interaktiv (§ 7.3) — die Wahl trifft das Formular; der
+      // Runner öffnet bei true ein Terminal statt der headless-Pipe.
+      interactive: body.interactive,
       promptSource: body.promptSource,
       promptTrusted: body.promptTrusted,
       testCommands: body.testCommands.length ? JSON.stringify(body.testCommands) : '',

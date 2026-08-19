@@ -73,6 +73,18 @@ export class EventPump {
     this.#sessionId = sessionId
   }
 
+  /**
+   * Den Ereigniszähler hinter eine SEQUENZ heben, die der Server bereits
+   * vergeben hat (§ 7.3): der SessionEnd-Hook schreibt seine Ende-Markierung
+   * direkt in `run_events` und bewegt damit den serverseitigen Höchststand.
+   * Ohne diese Angleichung fiele die ERSTE Zeile, die der Runner danach meldet
+   * („Committet …"), der Retry-Dedupe zum Opfer (seq ≤ Höchststand). Nur nach
+   * oben — ein bereits höherer Zähler bleibt.
+   */
+  resumeAfter(seq: number): void {
+    if (this.#seq <= seq) this.#seq = seq + 1
+  }
+
   push(draft: StreamEventDraft): void {
     if (this.#queue.length >= MAX_QUEUE) {
       this.#dropped++

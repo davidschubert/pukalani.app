@@ -57,6 +57,7 @@ const { parseTestCommands } = modules['protocol.ts']
 const { nextBackoffSeconds } = modules['api.ts']
 const { buildCommitMessage } = modules['git.ts']
 const { buildAgentArgs } = modules['run.ts']
+const { shellQuote, interactiveRunName, buildInteractiveArgs, buildWrapperScript, buildHookSettings, buildHookScript } = modules['interactive.ts']
 
 // ---------------------------------------------------------------------------
 // 2. Config (§ 7.1/§ 8.1)
@@ -404,6 +405,64 @@ check('Backoff verdoppelt bis 60 s (§ 5)', () => {
   assert.equal(nextBackoffSeconds(3, 3), 6)
   assert.equal(nextBackoffSeconds(48, 3), 60)
   assert.equal(nextBackoffSeconds(60, 3), 60)
+})
+
+// ---------------------------------------------------------------------------
+// 10. Interaktiver Modus (§ 7.3) — der Bau, nie die Ausführung
+// ---------------------------------------------------------------------------
+check('shellQuote packt sicher ein, auch mit Anführungszeichen', () => {
+  assert.equal(shellQuote('/opt/homebrew/bin/claude'), `'/opt/homebrew/bin/claude'`)
+  assert.equal(shellQuote(`a'b`), `'a'\\''b'`)
+})
+
+check('interactiveRunName trägt Subjekt-Typ und -Id (für -n)', () => {
+  assert.equal(interactiveRunName('ticket', 't-42'), 'ticket t-42')
+})
+
+check('buildInteractiveArgs: -n und --session-id, KEIN -p, KEIN stream-json', () => {
+  const args = buildInteractiveArgs({
+    sessionId: 'sess-1', model: 'opus', mode: 'plan', worktreeName: 'ai-r1',
+    filesDir: '/state/r1/files', budgetUsd: 5, reference: 'Referenz: Lauf r1',
+    name: 'ticket t-42', settingsPath: '/state/r1/settings.json',
+  })
+  assert.ok(!args.includes('-p'), 'interaktiv läuft im Vordergrund, ohne -p')
+  assert.ok(!args.includes('--output-format') && !args.includes('--verbose'), 'kein stream-json interaktiv')
+  assert.ok(args.includes('--session-id') && args[args.indexOf('--session-id') + 1] === 'sess-1')
+  assert.ok(args.includes('-n') && args[args.indexOf('-n') + 1] === 'ticket t-42')
+  assert.ok(args.includes('--settings') && args[args.indexOf('--settings') + 1] === '/state/r1/settings.json')
+  assert.ok(args.includes('--worktree') && args.includes('--add-dir') && args.includes('--max-budget-usd'))
+})
+
+check('buildWrapperScript: cd ins Repo, exec claude, Prompt via $(cat …)', () => {
+  const script = buildWrapperScript({
+    claudeBin: '/opt/homebrew/bin/claude', cwd: '/repo',
+    args: ['--session-id', 'sess-1', '-n', 'ticket t-42'], promptPath: '/state/r1/prompt.md',
+  })
+  assert.match(script, /^#!\/bin\/bash/)
+  assert.match(script, /cd '\/repo'/)
+  assert.match(script, /exec '\/opt\/homebrew\/bin\/claude' '--session-id' 'sess-1' '-n' 'ticket t-42' "\$\(cat '\/state\/r1\/prompt\.md'\)"/)
+})
+
+check('buildHookSettings registriert den SessionEnd-Hook', () => {
+  const settings = buildHookSettings('/state/r1/hook.sh')
+  assert.equal(settings.hooks.SessionEnd[0].hooks[0].type, 'command')
+  assert.equal(settings.hooks.SessionEnd[0].hooks[0].command, '/state/r1/hook.sh')
+})
+
+check('buildHookScript: URL + -H @datei, Secret nie im Argument', () => {
+  const script = buildHookScript({
+    endpoint: 'https://admin.pukalani.app/', runId: 'r1',
+    secretFile: '/Users/test/.config/pukalani-runner/secret',
+  })
+  // Endpunkt normalisiert (kein doppelter Schrägstrich), Run-Id im Pfad
+  assert.match(script, /https:\/\/admin\.pukalani\.app\/api\/runner\/runs\/r1\/session-end/)
+  // Das Secret reist als Header-DATEI, nie als curl-Argument
+  assert.match(script, /-H @"\$HDR"/)
+  assert.match(script, /SECRET_FILE='\/Users\/test\/\.config\/pukalani-runner\/secret'/)
+  // printf ist ein bash-Builtin (kein eigener Prozess mit dem Secret im argv)
+  assert.match(script, /printf "Authorization: Bearer %s/)
+  // Der Header wird wieder gelöscht
+  assert.match(script, /rm -f "\$HDR"/)
 })
 
 check('Commit-Nachricht trägt Subjekt und Session', () => {

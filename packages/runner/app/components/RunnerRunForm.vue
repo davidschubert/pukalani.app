@@ -98,12 +98,25 @@ const state = reactive<FormInput>({
   repoKey: repoItems.value[0]?.value ?? '',
   maxBudgetText: '',
   testCommandsText: '',
+  // headless ist die Vorgabe; interaktiv (Terminal, § 7.3) wählt man bewusst.
+  interactive: false,
 })
 
 // Genau EIN Rechner? Dann ist die Wahl keine Wahl — vorbelegen.
 watch(runnerItems, (items) => {
   if (!state.runnerId && items.length === 1) state.runnerId = items[0]!.value
 }, { immediate: true })
+
+/**
+ * Interaktiv geht NUR auf einem lokalen Rechner (er öffnet ein Terminal-Fenster;
+ * ein SSH-Runner kann das nicht). Wechselt die Wahl auf einen nicht-lokalen
+ * Rechner, fällt der Schalter zurück — sonst stünde ein Wunsch im Body, den der
+ * Runner gar nicht erfüllen kann.
+ */
+const selectedRunner = computed<RunnerPublic | null>(() =>
+  activeRunners.value.find(runner => runner.$id === state.runnerId) ?? null)
+const interactiveAvailable = computed(() => selectedRunner.value?.kind === 'local')
+watch(interactiveAvailable, (ok) => { if (!ok) state.interactive = false })
 
 function onSubmit(event: FormSubmitEvent<FormInput>) {
   emit('start', {
@@ -115,6 +128,8 @@ function onSubmit(event: FormSubmitEvent<FormInput>) {
     // Eine Zeile je Befehl; Leerzeilen fallen weg, der Deckel steht im
     // Routen-Schema (10 Einträge à 200 Zeichen).
     testCommands: event.data.testCommandsText.split('\n').map(line => line.trim()).filter(Boolean).slice(0, 10),
+    // Nur echt interaktiv, wenn der Rechner es auch kann.
+    interactive: event.data.interactive && interactiveAvailable.value,
   })
 }
 </script>
@@ -177,6 +192,19 @@ function onSubmit(event: FormSubmitEvent<FormInput>) {
 
       <UFormField name="testCommandsText" :label="t('runner.form.tests')" :help="t('runner.form.testsHelp')">
         <UTextarea v-model="state.testCommandsText" :rows="2" size="sm" class="w-full" :placeholder="t('runner.form.testsPlaceholder')" />
+      </UFormField>
+
+      <!-- § 7.3: interaktiv öffnet der Runner ein Terminal zum Zuschauen und
+           Genehmigen. Nur auf einem lokalen Rechner — sonst gesperrt, mit
+           Begründung statt eines wirkungslosen Schalters. -->
+      <UFormField name="interactive" :help="interactiveAvailable ? t('runner.form.interactiveHelp') : t('runner.form.interactiveRemote')">
+        <USwitch
+          v-model="state.interactive"
+          :disabled="!interactiveAvailable"
+          size="sm"
+          :label="t('runner.form.interactive')"
+          data-runner-interactive
+        />
       </UFormField>
 
       <div class="flex items-center justify-between gap-2">

@@ -106,6 +106,20 @@ export interface EventsAckResponse {
   accepted: number
 }
 
+/**
+ * Der Zustand eines interaktiven Laufs, wie ihn `GET …/session-end` liefert
+ * (§ 7.3). `ended` wird true, sobald der SessionEnd-Hook das Ende gemeldet hat;
+ * `status` verrät zusätzlich einen Abbruch vom Board (`cancelled`), den ein
+ * interaktiver Lauf sonst nirgends erführe (kein Elternprozess liest mit).
+ * `seq` ist die Sequenz der Ende-Markierung — der Runner richtet seinen
+ * Ereigniszähler daran aus, bevor er den Abschluss meldet.
+ */
+export interface SessionEndState {
+  ended: boolean
+  status: RunStatus
+  seq: number
+}
+
 export interface TranscriptUploadResponse {
   fileId: string
 }

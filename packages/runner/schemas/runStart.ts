@@ -40,5 +40,7 @@ export function createRunStartSchema(t: TranslateFn = identity, options: { promp
     ),
     /** Eine Zeile je Befehl — der Bereich macht daraus `string[]` */
     testCommandsText: z.string().max(2000, t('runner.form.errors.tests')),
+    /** true ⇒ interaktiver Lauf: der Runner öffnet ein Terminal (§ 7.3) */
+    interactive: z.boolean(),
   })
 }

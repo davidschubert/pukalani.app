@@ -12,6 +12,16 @@ import type { Models } from 'node-appwrite'
 export const RUNNERS_TABLE = 'runners'
 export const RUNS_TABLE = 'runs'
 export const RUN_EVENTS_TABLE = 'run_events'
+
+/**
+ * Die Ende-Markierung eines interaktiven Laufs (§ 7.3). Der SessionEnd-Hook
+ * meldet das Ende an `POST …/session-end`; die Route legt GENAU diese Zeile in
+ * `run_events` ab. Zwei Aufgaben in einer: sie macht das Ende in der Zeitleiste
+ * sichtbar UND ist der migrationsfreie Speicher, an dem `GET …/session-end` das
+ * Ende erkennt (es gibt keine eigene Spalte dafür). Der Text ist deshalb Marke
+ * UND Anzeige — beide Routen vergleichen ihn wörtlich.
+ */
+export const INTERACTIVE_SESSION_END_MARKER = 'Interaktive Sitzung beendet.'
 /**
  * EIGENER Bucket, bewusst NICHT `ticket-files` (§ 4): dessen Upload-Route
  * verlangt Session + `tickets.manage` — der Runner hat nur sein
@@ -338,6 +348,31 @@ export interface RunStartOptions {
   repoKey: string
   maxBudgetUsd: number
   testCommands: string[]
+  /**
+   * true ⇒ der Runner öffnet ein Terminal-Fenster und lässt Claude Code im
+   * Vordergrund laufen (§ 7.3) — zum Zuschauen und Genehmigen. Nur sinnvoll auf
+   * einem lokalen Rechner; ein SSH-Runner kann kein Fenster öffnen.
+   */
+  interactive: boolean
+}
+
+/**
+ * GET /api/runner/runs/:id/session-end (Runner-Naht, § 7.3) — der Poll, mit dem
+ * der Daemon eines interaktiven Laufs auf das Ende der Sitzung wartet. `ended`
+ * wird true, sobald der SessionEnd-Hook die Markierung geschrieben hat; `seq`
+ * ist ihre Sequenz (der Runner richtet seinen Zähler daran aus), `status` deckt
+ * einen Board-Abbruch auf.
+ */
+export interface SessionEndStateResponse {
+  ended: boolean
+  status: RunStatus
+  seq: number
+}
+
+/** POST /api/runner/runs/:id/session-end (Runner-Naht, § 7.3) — die Quittung des Hooks. */
+export interface SessionEndReportResponse {
+  ok: true
+  seq: number
 }
 
 /**

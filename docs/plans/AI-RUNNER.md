@@ -409,13 +409,57 @@ Das ist die **wichtigste Einzelregel des ganzen Systems** (§8.1).
    `POST /api/runner/runs/:id/transcript` (eigener Bucket, §4 — nie über die
    tickets-Upload-Route, die verlangt eine Session).
 
-### 7.3 Interaktiv (nach dem MVP)
+### 7.3 Interaktiv (gebaut 2026-08-19)
 
-`interactive: true` ⇒ der Runner öffnet ein Terminal mit demselben Befehl ohne
-`-p` und mit `-n "T-0142 Mobile Navigation"` (die CLI kennt `-n/--name`,
-das erscheint im `/resume`-Picker und im Fenstertitel). Der Rückkanal läuft
-dann über **Hooks** (`SessionEnd`), weil kein Elternprozess mitliest.
-`--tmux` ist optional und lohnt erst bei mehreren gleichzeitigen Läufen.
+`interactive: true` ⇒ der Runner läuft NICHT headless, sondern öffnet ein
+Terminal-Fenster zum Zuschauen und Genehmigen. Der Weg im Detail:
+
+1. **Formular.** Ein Schalter „Interaktiv" (`RunnerRunForm`, Feld `interactive`
+   in `createRunSchema`/`RunStartOptions`) trägt die Wahl in den Lauf. Er ist
+   NUR auf einem `local`-Rechner wählbar (ein SSH-Runner kann kein Fenster
+   öffnen) — die UI sperrt ihn sonst mit Begründung, und die Route/der Runner
+   nehmen `interactive` nur, wenn der Rechner es kann.
+2. **Terminal.app.** Der Daemon baut drei Dateien in `<runDir>/` (alle drei PUR
+   gebaut in `src/interactive.ts`, hier nur geschrieben): ein Wrapper-Skript
+   (`cd` ins Repo, `exec claude <flags> "$(cat prompt.md)"`), einen
+   Settings-Block mit dem `SessionEnd`-Hook und das Hook-Skript. Dann
+   `open -a Terminal <wrapper>` — Terminal.app, **kein iTerm-, kein tmux-Pfad**
+   (Davids Entscheidung 2026-08-19). Der `claude`-Befehl ist derselbe wie
+   headless, aber **ohne `-p`** und **ohne `--output-format stream-json
+   --verbose`** (die Vordergrund-CLI zeigt ihre eigene Oberfläche), dafür mit
+   `-n "<subjectType subjectId>"` (Fenstertitel + `/resume`-Picker) und der
+   vorab gewürfelten `--session-id`. Der Lauf geht sofort auf `running` (die
+   erste Ereignis-Runde hebt ihn wie sonst).
+3. **Rückkanal über den `SessionEnd`-Hook.** Kein Elternprozess liest mit, also
+   meldet der Hook das Ende selbst an `POST /api/runner/runs/:id/session-end`
+   (Bearer + `requireOwnRun`). Das Hook-Skript liest das Runner-Secret **zur
+   Laufzeit aus der Config-Datei** (es läuft als Davids Nutzer) und gibt es
+   `curl` als **0600-Header-Datei** (`-H @datei`) — **nie** als Argument oder in
+   ein Log. Die Route legt EINE Ende-Markierung (`run_events`,
+   `INTERACTIVE_SESSION_END_MARKER`) ab — sichtbar in der Zeitleiste UND der
+   migrationsfreie Speicher, an dem der Daemon das Ende erkennt (es gibt keine
+   eigene Spalte; `runs.interactive` existiert seit `runner-001`, sonst KEINE
+   Migration).
+4. **Der Daemon wartet und schließt ab.** Nach `open` pollt er
+   `GET …/session-end`; bei `ended` richtet er seinen Ereigniszähler an der
+   Markierung aus (`EventPump.resumeAfter`, sonst fiele die erste Folge-Zeile
+   der Retry-Dedupe zum Opfer) und macht **Commit, Diffstat und Tests wie im
+   headless Fall**. KEIN Transkript, KEINE Kosten/Turns (es gibt kein
+   `stream-json`); der Abschluss ist `succeeded`. Während eines interaktiven
+   Laufs claimt der Daemon **nichts weiter** (die Ein-Lauf-Regel bleibt, weil
+   `executeRun` bis zum Ende blockiert).
+
+**Ehrliche Grenzen.** „Abbrechen" vom Board erreicht das offene Terminal NICHT
+über die events-Antwort — es hängt an keinem Prozess, den der Runner hält. Der
+Poll erkennt den Abbruch am `status` (`cancelled`) und HÖRT AUF zu warten,
+committet dann aber nichts; das Fenster läuft ggf. weiter, und David schließt es
+selbst. Fällt der `SessionEnd`-Hook ganz aus (Fenster hart geschlossen), wartet
+der Daemon nicht endlos: nach einer grosszügigen Höchstdauer (8 h) schließt er
+den Lauf als `failed` (`interactive_timeout`). `--tmux` ist bewusst nicht gebaut
+und lohnt erst bei mehreren gleichzeitigen Läufen.
+
+Beweis der puren Teile: `tools/ai-runner/scripts/smoke.mjs` (Wrapper-, Hook- und
+Args-Bau, ohne Terminal je zu starten).
 
 
 **Gebaut 2026-08-18 (Paket 4).** `tools/ai-runner` ist ein abhängigkeitsfreies

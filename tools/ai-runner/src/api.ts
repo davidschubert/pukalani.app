@@ -5,6 +5,7 @@ import type {
   RunAttachmentsResponse,
   RunEventPayload,
   RunFinalStatus,
+  SessionEndState,
   TranscriptUploadResponse,
 } from './protocol.ts'
 
@@ -119,6 +120,15 @@ export class RunnerApi {
 
   async finish(runId: string, body: { status: RunFinalStatus, resultJson?: string, error?: string, sessionId?: string, workBranch?: string }): Promise<void> {
     await this.#request(`/api/runner/runs/${runId}/finish`, { method: 'POST', json: body })
+  }
+
+  /**
+   * Der Poll für einen interaktiven Lauf (§ 7.3): „ist die Sitzung vorbei?".
+   * Der Daemon fragt das, während das Terminal im Vordergrund läuft — es gibt
+   * keinen Elternprozess, der den Ausgang mitläse.
+   */
+  async sessionEnded(runId: string): Promise<SessionEndState> {
+    return await this.#json<SessionEndState>(`/api/runner/runs/${runId}/session-end`, { method: 'GET' })
   }
 
   /**

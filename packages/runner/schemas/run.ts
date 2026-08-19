@@ -50,6 +50,12 @@ export const createRunSchema = z.object({
    * Feld später einmal aus, ist der vorsichtige Fall der eingestellte.)
    */
   promptTrusted: z.boolean(),
+  /**
+   * true ⇒ interaktiver Lauf: der Runner öffnet ein Terminal (§ 7.3). Optional
+   * mit Default `false` (die SPALTE hat denselben Default) — fällt das Feld
+   * einmal aus, ist der vorsichtige, headless Fall der eingestellte.
+   */
+  interactive: z.boolean().optional().default(false),
   /** Wird als JSON in `runs.testCommands` (1000 Zeichen) gespeichert */
   testCommands: z.array(z.string().trim().min(1).max(200)).max(10).optional().default([]),
   /** 0 = kein eigener Deckel; der Runner kappt ohnehin gegen seinen (§ 7.2) */
