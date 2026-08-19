@@ -2,7 +2,7 @@
 import type { TableColumn } from '@nuxt/ui'
 import type { StorageBucketOverview, StorageFileEntry, StorageOverview } from '../../../shared/types/admin'
 
-definePageMeta({ layout: 'dashboard', middleware: ['auth', 'admin'], requiredCapability: 'storage.manage' })
+definePageMeta({ layout: 'dashboard', middleware: ['auth', 'admin'], requiredCapability: 'storage.manage', dashboardScope: 'operator' })
 
 const { t } = useI18n()
 const toast = useToast()

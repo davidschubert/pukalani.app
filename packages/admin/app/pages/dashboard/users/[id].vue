@@ -3,7 +3,7 @@ import type { TableColumn } from '@nuxt/ui'
 import type { AdminUserActivity, AdminUserComment, AdminUserDetailResponse } from '../../../../shared/types/admin'
 import { userActionErrorCode, userActionErrorKeys } from '../../../../shared/userActionErrors'
 
-definePageMeta({ layout: 'dashboard', middleware: ['auth', 'admin'], requiredCapability: 'users.manage' })
+definePageMeta({ layout: 'dashboard', middleware: ['auth', 'admin'], requiredCapability: 'users.manage', dashboardScope: 'operator' })
 
 const route = useRoute()
 const { t, te, locale } = useI18n()

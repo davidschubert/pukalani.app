@@ -24,7 +24,7 @@ import type { IntegrationId, IntegrationsResponse } from '../../../../shared/typ
  * genannt — eine Übersicht, die „alle Zugänge" verspricht und die Hälfte
  * verschweigt, schickt beim nächsten Suchen in die Irre.
  */
-definePageMeta({ layout: 'dashboard', middleware: ['auth', 'admin'], requiredCapability: 'system.manage' })
+definePageMeta({ layout: 'dashboard', middleware: ['auth', 'admin'], requiredCapability: 'system.manage', dashboardScope: 'operator' })
 
 const { t } = useI18n()
 const toast = useToast()

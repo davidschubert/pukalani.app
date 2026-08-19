@@ -9,7 +9,7 @@
 import type { DropdownMenuItem, TableColumn } from '@nuxt/ui'
 import type { CustomFontDto } from '../../../../shared/fonts'
 
-definePageMeta({ layout: 'dashboard', middleware: ['auth', 'admin'], requiredCapability: 'system.manage' })
+definePageMeta({ layout: 'dashboard', middleware: ['auth', 'admin'], requiredCapability: 'system.manage', dashboardScope: 'operator' })
 
 const { t } = useI18n()
 const toast = useToast()

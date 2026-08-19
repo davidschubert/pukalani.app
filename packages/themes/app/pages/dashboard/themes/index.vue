@@ -10,7 +10,7 @@ import type { CustomThemeDto, ThemeSettings } from '../../../../shared/ramp'
 import { THEME_REGISTRY } from '../../../utils/themeRegistry'
 import { customThemeAttr, customThemeCss, THEME_CONFIG_KEYS } from '../../../../shared/ramp'
 
-definePageMeta({ layout: 'dashboard', middleware: ['auth', 'admin'], requiredCapability: 'system.manage' })
+definePageMeta({ layout: 'dashboard', middleware: ['auth', 'admin'], requiredCapability: 'system.manage', dashboardScope: 'operator' })
 
 const { t } = useI18n()
 const toast = useToast()

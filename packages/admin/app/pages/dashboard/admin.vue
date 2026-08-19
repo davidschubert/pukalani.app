@@ -2,7 +2,7 @@
 // Admin-Bereich: bündelt Aktivitätsprotokoll + Konfiguration als Tabs (wie Settings).
 import type { NavigationMenuItem } from '@nuxt/ui'
 
-definePageMeta({ layout: 'dashboard', middleware: ['auth', 'admin'] })
+definePageMeta({ layout: 'dashboard', middleware: ['auth', 'admin'], dashboardScope: 'operator' })
 
 const { t } = useI18n()
 const localePath = useLocalePath()

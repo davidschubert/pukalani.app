@@ -3,7 +3,7 @@ import type { Models } from 'node-appwrite'
 import type { TableColumn } from '@nuxt/ui'
 import type { AuditLogEntry, AuditLogListResponse } from '../../../../shared/types/admin'
 
-definePageMeta({ layout: 'dashboard', middleware: ['auth', 'admin'], requiredCapability: 'audit.read' })
+definePageMeta({ layout: 'dashboard', middleware: ['auth', 'admin'], requiredCapability: 'audit.read', dashboardScope: 'operator' })
 
 const { t, te, locale } = useI18n()
 const localePath = useLocalePath()

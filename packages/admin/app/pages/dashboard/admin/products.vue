@@ -5,7 +5,7 @@
 // beim Abschalten IMMER erhalten.
 import type { AdminProductEntry } from '../../../../server/api/admin/products/index.get'
 
-definePageMeta({ layout: 'dashboard', middleware: ['auth', 'admin'], requiredCapability: 'system.manage' })
+definePageMeta({ layout: 'dashboard', middleware: ['auth', 'admin'], requiredCapability: 'system.manage', dashboardScope: 'operator' })
 
 const { t, locale } = useI18n()
 const toast = useToast()

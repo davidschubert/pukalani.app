@@ -4,7 +4,7 @@
 // Tagen automatisch (Lazy-Cleanup beim Listen/Snapshotten).
 import type { TableColumn } from '@nuxt/ui'
 
-definePageMeta({ layout: 'dashboard', middleware: ['auth', 'admin'], requiredCapability: 'users.manage' })
+definePageMeta({ layout: 'dashboard', middleware: ['auth', 'admin'], requiredCapability: 'users.manage', dashboardScope: 'operator' })
 
 interface GdprExportFile {
   $id: string

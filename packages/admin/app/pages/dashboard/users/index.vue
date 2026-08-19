@@ -3,7 +3,7 @@ import type { DropdownMenuItem, TableColumn } from '@nuxt/ui'
 import type { AdminUserListResponse, AdminUserRow } from '../../../../shared/types/admin'
 import { userActionErrorCode, userActionErrorKeys } from '../../../../shared/userActionErrors'
 
-definePageMeta({ layout: 'dashboard', middleware: ['auth', 'admin'], requiredCapability: 'users.manage' })
+definePageMeta({ layout: 'dashboard', middleware: ['auth', 'admin'], requiredCapability: 'users.manage', dashboardScope: 'operator' })
 
 const { t, te } = useI18n()
 const { formatRelativeTime } = useFormatRelativeTime()

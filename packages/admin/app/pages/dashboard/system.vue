@@ -2,7 +2,7 @@
 import type { TableColumn } from '@nuxt/ui'
 import type { SystemInfo } from '../../../shared/types/system'
 
-definePageMeta({ layout: 'dashboard', middleware: ['auth', 'admin'], requiredCapability: 'system.manage' })
+definePageMeta({ layout: 'dashboard', middleware: ['auth', 'admin'], requiredCapability: 'system.manage', dashboardScope: 'operator' })
 
 const { t, locale } = useI18n()
 const toast = useToast()

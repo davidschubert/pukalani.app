@@ -7,6 +7,34 @@ die kleinen, verstreuten Beschlüsse.
 
 ---
 
+## 2026-08-18 — Instanz-Seiten existieren auf Mandanten-Hosts nicht (404)
+
+**Auslöser:** David fragte, warum der Owner von freelancer.supply den
+Menüpunkt „Instance" (/dashboard/admin) nicht sieht. Die Antwort (E9: das Menü
+versteckt Betreiber-Einträge auf Mandanten-Hosts, F51: „System entfällt im
+Pool") führte zur schärferen **Entscheidung: solche Seiten sollen dort gar
+nicht ERREICHBAR sein — sie gehören auf admin.pukalani.app.** Bis dahin
+versteckte nur das Menü sie: die Hülle /dashboard/admin war jedem
+Dashboard-Berechtigten als leere Fläche zugänglich, und ein
+Operator-Break-Glass hätte Instanz-Seiten auf einem Kunden-Host sogar
+funktionsfähig geöffnet.
+
+**Umsetzung:** Seiten erklären ihre Ebene per `definePageMeta({
+dashboardScope })`; die neue globale Middleware
+`packages/admin/app/middleware/dashboard-scope.global.ts` wirft 404, wenn
+`scopeVisibleAt(scope, place)` das Menü dort verböte — dieselbe pure
+E9-Regel, 404 wie N7 (kein 403: das wäre die Auskunft, dass es hier etwas
+gäbe). GLOBAL, weil die benannte `admin`-Middleware NACH `auth` läuft und der
+Login-Redirect einem Anonymen sonst die Existenz verriete. Zweite Härtung in
+`admin.ts`: bei `dashboardScope: 'operator'` zählt als Rechte-Quelle nur noch
+das Operator-Label, nie die Site-Rolle (spiegelt `moduleAllowedFor`).
+Gestempelt: elf admin-Layer-Seiten + die vier /dashboard/themes-Seiten
+(gleicher operator-Nav-Eintrag, beim Bau als Lücke gefunden). Beweis am
+Worktree-Dev-Server 8/8 inkl. Gegenproben (Community-Dashboard bleibt,
+Kontroll-Host behält die Seiten, unbekannter Host 404 wie zuvor).
+
+---
+
 ## 2026-08-18 — AH-4c beschlossen: Appwrite-Projekt `control` zieht nach `admin` um
 
 **Davids Entscheidung** (strukturierte Frage, GEGEN die Empfehlung „nur
