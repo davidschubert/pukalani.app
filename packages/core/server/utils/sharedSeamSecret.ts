@@ -43,34 +43,31 @@ import { readInstanceSecret, type InstanceSecretKind } from './instanceSecrets'
  *
  * ── UND WO DIESE DREI SCHRITTE NICHT REICHEN ──────────────────────────────
  * Sie setzen voraus, dass „Empfänger" und „Sender" ZWEI verschiedene Seiten
- * sind. Das gilt für `events-sweep` (der Cron sendet, der Sweep empfängt) —
- * dort ist die Rotation wirklich fensterlos.
+ * sind. Ob das stimmt, entscheiden nicht die Env-Namen, sondern die montierten
+ * LAYER — eine Route existiert nur auf dem Deployment, dessen `extends` sie
+ * mitbringt. Gemessen (2026-08-19) sieht `onboarding-service` so aus:
  *
- * `onboarding-service` ist NICHT so gebaut: beide Deployments senden UND
- * empfangen über dieselbe Sorte (platform→control beim Onboarding,
- * control→site beim Domain-Settle). Jede Seite ist damit Empfänger, und der
- * Konsolen-Eintrag ändert unvermeidlich beides auf einmal — die angenommene
- * MENGE (gewollt) und den GESENDETEN Wert (zu früh, denn die Gegenseite kennt
- * ihn noch nicht). Zwischen den zwei Einträgen ist deshalb genau EINE
- * Richtung tot, und daran ist mit Konsolen-Mitteln allein nichts zu ändern:
- * „annehmen, aber noch nicht senden" liesse sich nur über die Env ausdrücken
- * (Konsole = alter Wert, Env = neuer) — also mit genau dem Neustart, den
- * diese Datei abschaffen sollte.
+ *   platform  → admin        nur senden; der Empfänger `requireControlCaller`
+ *                            steckt im `domains`-Layer, den apps/platform
+ *                            nicht zieht. Fensterlos rotierbar.
+ *   admin     ↔ portfolio    admin nimmt an UND sendet (Domain-Settle),
+ *                            portfolio nimmt an und ruft im selben Handler
+ *                            zurück. HIER sitzt das Fenster.
  *
- * Also wird das Fenster nicht wegdefiniert, sondern GERICHTET: zuerst die
- * BETREIBER-Konsole, dann die Kunden-Instanz. Dann fällt in der Lücke
- * `control→site` aus — das Freischalten einer Domain, eine Handlung, die
- * derselbe Mensch in derselben Minute nicht auslöst — statt
- * `platform→control`, an dem neun kundenseitige Aufrufer hängen (Community
- * anlegen, Team, Switcher-Handoff). Festgenagelt in
- * `packages/core/tests/seamRotationOrder.test.ts`; die Konsolen-Karte trägt
- * für die beiden Lagen deshalb zwei verschiedene Texte.
+ * An dieser einen Kante ist es auch nicht wegzusortieren: portfolio hat keinen
+ * `NUXT_INSTANCE_SECRETS_KEY`, also keine Ablage, also genau EINEN gültigen
+ * Wert. Wer zuerst admin dreht, bricht admin→portfolio; wer zuerst portfolio
+ * dreht, bricht dieselbe Kante von der anderen Seite. Ein fensterloser Weg
+ * entstünde erst, wenn portfolio ebenfalls eine Ablage bekäme — dann wäre die
+ * Kette linear von hinten nach vorn drehbar.
  *
- * ── WAS DAS NICHT IST ─────────────────────────────────────────────────────
- * Kein Ersatz für die Env: die Env bleibt der Rückfall und der einzige Weg,
- * eine Instanz OHNE Umschlag-Schlüssel (`NUXT_INSTANCE_SECRETS_KEY`) zu
- * betreiben. Und keine Schlüssel-Verwaltung: es gibt weiterhin genau zwei
- * gültige Werte je Naht und Seite, nicht beliebig viele Generationen.
+ * Bis dahin wird das Fenster nicht wegdefiniert, sondern GERICHTET: es trifft
+ * ausschliesslich `admin→portfolio`, also das Freischalten einer Domain für
+ * das letzte Silo — eine Betreiber-Handlung, die in derselben Minute niemand
+ * auslöst. `platform→admin` (Community anlegen, Team, Switcher-Handoff, 49
+ * Routen) bleibt durchgehend offen. Festgenagelt in
+ * `packages/core/tests/seamRotationOrder.test.ts`; die Konsolen-Karte wählt
+ * ihren Hinweistext deshalb nach der INSTANZ, nicht nach der Sorte.
  */
 
 /**

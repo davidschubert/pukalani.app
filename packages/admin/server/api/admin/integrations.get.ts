@@ -104,13 +104,20 @@ export default defineEventHandler(async (event): Promise<IntegrationsResponse> =
       id: 'onboarding-service',
       envName: seamEnvName,
       source: integrationSource(await readInstanceSecret(event, 'onboarding-service'), envSecret),
-      // ZWEISEITIG: dieselbe Sorte trägt platform→control (Onboarding) UND
-      // control→site (Domain-Settle). Ein Konsolen-Eintrag auf einer Seite
-      // ändert beides — was sie annimmt und was sie sendet —, deshalb ist
-      // zwischen den zwei Einträgen eine Richtung tot. Die Karte sagt, welche
-      // Seite zuerst drankommt, damit das Fenster den Betreiber trifft und
-      // nicht den Kunden.
-      shared: 'two-way',
+      // DIESELBE SORTE, ZWEI ROLLEN — je nachdem, WO diese Karte gerendert
+      // wird (2026-08-19 gemessen, nicht angenommen):
+      //
+      // Auf der BETREIBER-Instanz (`NUXT_CONTROL_ONBOARDING_SECRET`) ist die
+      // Zeile beides: Annahme-Wert für platform und portfolio UND Sende-Wert
+      // an portfolio (Domain-Settle). Ein Eintrag stellt hier zwangsläufig
+      // auch das Senden um, und portfolio hat keine Ablage, kann also nicht
+      // zwei Werte annehmen — dort entsteht das Fenster.
+      //
+      // Auf jeder anderen Instanz (`NUXT_ONBOARDING_SERVICE_SECRET`) wird mit
+      // dieser Zeile NUR gesendet: der Empfänger `requireControlCaller` lebt
+      // im `domains`-Layer, den apps/platform nicht zieht. Für sie gilt die
+      // einfache, fensterlose Reihenfolge.
+      shared: seamEnvName === 'NUXT_CONTROL_ONBOARDING_SECRET' ? 'two-way' : 'one-way',
     })
   }
 

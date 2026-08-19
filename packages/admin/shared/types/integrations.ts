@@ -39,14 +39,12 @@ export interface IntegrationState {
    *   beim Empfänger eintragen, der nimmt ab da alt UND neu an, danach beim
    *   Sender. Niemand merkt etwas.
    *
-   * `'two-way'` — BEIDE Seiten senden und empfangen über dieselbe Sorte
-   *   (`onboarding-service`: platform→control beim Onboarding,
-   *   control→site beim Domain-Settle). Hier gibt es das Fenster SEHR WOHL,
-   *   und „erst beim Empfänger" ist keine brauchbare Anweisung, weil jede
-   *   Seite Empfänger IST: ein Konsolen-Eintrag ändert immer beides auf
-   *   einmal — was die Seite annimmt UND was sie sendet (`preferredSeamSecret`
-   *   nimmt die Konsole zuerst). Zwischen den zwei Einträgen ist deshalb
-   *   genau EINE Richtung tot. Bewiesen in
+   * `'two-way'` — DIESE Instanz nimmt mit der Zeile an UND sendet mit ihr
+   *   (nur die Betreiber-Konsole: sie empfängt von platform und portfolio und
+   *   sendet an portfolio beim Domain-Settle). Ein Eintrag stellt hier
+   *   zwangsläufig beides zugleich um, und die Gegenseite portfolio hat keine
+   *   Ablage — also nur EINEN gültigen Wert. Dort ist ein kurzes Fenster
+   *   unvermeidlich, solange das so bleibt. Bewiesen in
    *   `packages/core/tests/seamRotationOrder.test.ts`.
    *
    * Ein einzelnes Boolean könnte das nicht sagen — und weil die falsche

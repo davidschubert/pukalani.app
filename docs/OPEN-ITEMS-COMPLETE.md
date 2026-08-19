@@ -62,27 +62,28 @@ Sender sendet Env, neuer Empfänger nimmt sie an).
 **Gelernt:** Ein geteiltes Geheimnis braucht keine Code-Stufe, wenn der
 Empfänger eine MENGE annimmt und der Sender EINEN Wert schickt — die Zusage
 wird choreographisch statt technisch.
-**Gelernt (Nachtrag 2026-08-19, Nachbar-Sitzung):** Die Zusage „kein Riss"
-gilt nur, solange Empfänger und Sender ZWEI Seiten sind. `events-sweep` ist
-so gebaut, `onboarding-service` nicht: dort senden und empfangen BEIDE
-Deployments über dieselbe Sorte, jede Seite ist also Empfänger, und weil
-`preferredSeamSecret` die Konsole zuerst nimmt, ändert ein Eintrag immer
-zugleich das SENDEN. Zwischen den zwei Einträgen ist deshalb genau eine
-Richtung tot — mit Konsolen-Mitteln nicht wegzubekommen („annehmen, aber noch
-nicht senden" ginge nur über die Env, also über den Neustart, den die Regel
-abschaffen sollte). Also wird das Fenster nicht bestritten, sondern GERICHTET:
-erst die Betreiber-Konsole, dann die Kunden-Instanz — dann fällt `control→site`
-aus (Domain freischalten, ein Aufrufer, Betreiber-Handlung) statt
-`platform→control` (neun Aufrufer, alle kundenseitig). Festgenagelt in
-`packages/core/tests/seamRotationOrder.test.ts`, und die Konsolen-Karte trägt
-seither zwei Texte statt einem. Die eigentliche ROTATION der Werte steht damit
-noch aus — A0 hat den Mechanismus geliefert, nicht den Handgriff.
-**Gelernt:** Ein Auth-Gate von synchron auf asynchron umzustellen ist bei 49
-Aufrufstellen kein Refactoring, sondern ein Sicherheits-Eingriff: ein
-vergessenes `await` wäre FAIL-OPEN (ein Promise ist truthy). Der strukturelle
-Wächter (`onboardingCallerAwait.test.ts`), der jede Aufrufstelle auf `await`
-nagelt und prüft, dass er überhaupt Aufrufstellen findet, gehört in denselben
-Commit wie der Umbau.
+**Gelernt (Nachtrag 2026-08-19):** Die Zusage „kein Riss" gilt fast überall —
+aber wer sie prüft, muss vorher die KETTE messen statt sie zu vermuten. Hier
+liegt `onboarding-service` auf DREI Deployments: platform sendet nur (den
+Empfänger `requireControlCaller` bringt der `domains`-Layer mit, den
+apps/platform gar nicht zieht), admin empfängt von beiden UND sendet an
+portfolio, portfolio empfängt und ruft im selben Handler zurück. Für das Paar
+platform→admin ist die Reihenfolge damit vollständig richtig und fensterlos.
+Das Fenster sitzt allein an der Kante admin→portfolio, und es ist dort auch
+nicht wegzusortieren: portfolio hat keinen `NUXT_INSTANCE_SECRETS_KEY`, also
+keine Ablage, also genau EINEN gültigen Wert — wer zuerst dort dreht, bricht
+dieselbe Kante von der anderen Seite. Solange das so bleibt, kostet eine
+Rotation dort ein kurzes, bewusst gelegtes Fenster für genau eine
+Betreiber-Handlung (Domain freischalten). Festgenagelt in
+`packages/core/tests/seamRotationOrder.test.ts`; die Konsolen-Karte entscheidet
+den Hinweistext seither nach der INSTANZ, nicht nach der Sorte.
+**Gelernt:** Die erste Fassung dieses Nachtrags hat die Kette falsch gezeichnet
+(sie hielt platform für einen Empfänger) und war zwei Stunden lang live. Der
+Fehler kam davon, die Richtungen aus den Env-NAMEN zu erschliessen statt aus
+den montierten Layern. Ein `extends` ist die Wahrheit darüber, welche Route auf
+welchem Deployment überhaupt existiert — Namen sind es nicht.
+Die eigentliche ROTATION der Werte steht weiterhin aus: A0 hat den Mechanismus
+geliefert, nicht den Handgriff.
 
 ---
 
