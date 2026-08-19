@@ -484,6 +484,26 @@ Vollständiges Konzept: docs/CONCEPT.md
   pukalani.ai. Konsumenten: Ticket-Triage, Moderations-Assist (Kommentare
   /api/admin/comments/:id/assist + Posts /api/posts/:id/assist — advisory,
   Mensch entscheidet; UI-Flag isAiAvailable()).
+- UGC-ÜBERSETZUNG (2026-08-18, Davids Entscheidungen): Knopf statt Automatik,
+  Gate = das jeweilige INHALTS-Produkt (bewusst NICHT 'ai'), nur Eingeloggte.
+  Alle fünf Inhaltsarten (posts, comments inkl. Umfrage-Optionen, events,
+  courses+lessons): `translations`-MEDIUMTEXT-Spalte je Zeile (posts-023,
+  comments-020, events-013, courses-007), pure Regel
+  `core/shared/ugcTranslations.ts` (Browser-Auflösung wie categoryI18n, KEINE
+  gespeicherte Ausgangssprache), Composable `useUgcTranslation`. Regeln, die
+  man nicht „vereinfachen" darf: (1) Cache-Treffer VOR jeder Drossel (was
+  nichts kostet, kostet kein Kontingent); (2) `translatedPollOptions` nimmt
+  nur ein Array EXAKT gleicher Länge — die Stimme hängt am Index; (3) Lesen
+  über die Session-Klinke (Row-Permissions = Sichtbarkeit), Cache-Schreiben
+  als operator/actor:'operator' (kein M13, kein A5-Beitritt); (4) Übersetzen
+  zeigt nie mehr als Lesen — die Lesson-Route trägt ALLE Vorprüfungen ihrer
+  GET-Route, die Event-Schwärzung LEERT den Cache mit; (5) echte Bearbeitung
+  leert, No-op-Speichern nicht. Drosseln: 10/10 min je Mensch+Community,
+  geteilter Tages-Eimer `ugcTranslationDayKey` (100/24 h, EIN Deckel über
+  alle Arten), IP-Buckets in 05.rate-limit.ts. `NUXT_AI_KEY` ist auf platform
+  Pflicht (ops:site-env). Beweis: `packages/core/scripts/
+  verify-ugc-translation.mjs` (32/32, braucht Dev-Server + lokale Appwrite +
+  Key, bezahlt echte KI-Aufrufe).
 - E-Mail: sendMail() (core mailer.ts, nodemailer, NUXT_SMTP_* — leerer Host =
   aus, lokal Mailpit localhost:1025). notify() hat einen Opt-in-E-Mail-Zweig:
   prefs.emailNotifications off|instant|digest (Default off, Settings →
