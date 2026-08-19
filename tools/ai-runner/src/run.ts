@@ -19,6 +19,7 @@ import {
   interactiveRunName,
 } from './interactive.ts'
 import { log } from './log.ts'
+import { buildNotificationArgs, showNotification } from './notify.ts'
 import { parseTestCommands, type RunFinalStatus, type RunPayload } from './protocol.ts'
 import { buildResultJson, type RunReport, type TestOutcome } from './result.ts'
 import {
@@ -107,6 +108,22 @@ export async function executeRun(ctx: RunContext, run: RunPayload): Promise<void
       // Naht ist weg. Das Board zeigt ihn weiter als laufend, bis jemand
       // abbricht — genau die Grenze, die im README steht.
       log.error(`Abschluss für ${run.$id} konnte nicht gemeldet werden: ${(apiError as Error).message}`)
+    }
+
+    /**
+     * Native macOS-Mitteilung (opt-out via config). Sie hängt NICHT am Erfolg
+     * der Naht oben — der Mensch am Mac soll es auch dann erfahren, wenn der
+     * `finish`-Call scheiterte. `buildNotificationArgs` gibt für `cancelled`
+     * bewusst `null` (der Abbrechende weiß es schon).
+     */
+    if (ctx.config.macosNotifications) {
+      const args = buildNotificationArgs({
+        status,
+        promptSource: run.promptSource,
+        subjectType: run.subjectType,
+        subjectId: run.subjectId,
+      })
+      if (args) showNotification(args)
     }
   }
 

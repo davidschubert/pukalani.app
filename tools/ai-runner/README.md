@@ -41,6 +41,7 @@ chmod 600 ~/.config/pukalani-runner/secret
   "maxRunMinutes": 30,       // optional — harte Obergrenze je Lauf
   "stateDir": "~/.local/state/pukalani-runner",  // optional
   "claudeBin": "claude",     // optional — voller Pfad, wenn PATH karg ist (launchd!)
+  "macosNotifications": true, // optional, Vorgabe true — native Mitteilung am Lauf-Ende
   "repos": {
     "maui-monorepo": {
       "path": "/Users/davidschubert/Developer/Projects/nuxt/maui-monorepo",
@@ -145,6 +146,13 @@ mit `status_category: 'blocked'`.
   sehen.
 - **Abgebrochene Läufe werden nicht committet.** Die Arbeit liegt im Worktree
   und kann von Hand angesehen werden.
+- **Native Mitteilung am Lauf-Ende.** Endet ein Lauf als `succeeded`,
+  `needs_input` oder `failed`, zeigt der Daemon eine macOS-Mitteilung
+  (`osascript`, ohne Shell): Titel ist die erste `# …`-Zeile des Auftrags
+  (sonst `<subjectType> <subjectId>`), Text der Endzustand auf Deutsch
+  (*Fertig* / *Rückfrage nötig — antworte im Board* / *Fehlgeschlagen*). Bei
+  `cancelled` bewusst nicht — wer abbricht, weiß es schon. Abschalten mit
+  `"macosNotifications": false` in der Config.
 - Ein Lauf mit `interactive: true` (§ 7.3) öffnet stattdessen **Terminal.app**
   mit dem fertigen `claude`-Befehl ohne `-p` (zum Zuschauen und Genehmigen). Das
   Ende meldet ein **SessionEnd-Hook** an `POST …/session-end`; committet, getestet

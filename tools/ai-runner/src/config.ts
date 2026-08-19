@@ -62,6 +62,12 @@ export interface RunnerConfig {
    * Maschine anders ist (Homebrew, corepack, nvm).
    */
   extraPath: string[]
+  /**
+   * Native macOS-Mitteilung bei succeeded/needs_input/failed (notify.ts).
+   * Vorgabe `true`; `false` schaltet sie ab. cancelled meldet nie (der
+   * Abbrechende weiß es schon).
+   */
+  macosNotifications: boolean
   repos: Record<string, RepoRule>
 }
 
@@ -158,6 +164,11 @@ export function parseRunnerConfig(raw: unknown, home: string): RunnerConfig {
   const extraPath = Array.isArray(root.extraPath)
     ? root.extraPath.filter((entry): entry is string => typeof entry === 'string' && entry.startsWith('/'))
     : []
+  // Vorgabe AN: nur ein ausdrückliches `false` schaltet die Mitteilung ab.
+  const macosNotifications = root.macosNotifications === undefined ? true : root.macosNotifications
+  if (typeof macosNotifications !== 'boolean') {
+    throw new ConfigError('config.json.macosNotifications: erwartet true oder false')
+  }
 
   const reposRaw = asRecord(root.repos, 'config.json.repos')
   const keys = Object.keys(reposRaw)
@@ -203,7 +214,7 @@ export function parseRunnerConfig(raw: unknown, home: string): RunnerConfig {
     }
   }
 
-  return { endpoint, secretFile, pollSeconds, heartbeatSeconds, maxRunMinutes, stateDir, claudeBin, claudeTokenFile, extraPath, repos }
+  return { endpoint, secretFile, pollSeconds, heartbeatSeconds, maxRunMinutes, stateDir, claudeBin, claudeTokenFile, extraPath, macosNotifications, repos }
 }
 
 /**
@@ -279,6 +290,7 @@ export function describeConfig(config: RunnerConfig, configPath: string): string
     `Laufzeit max:  ${config.maxRunMinutes} min`,
     `Ablage:        ${config.stateDir}`,
     `CLI:           ${config.claudeBin}`,
+    `Mitteilungen:  ${config.macosNotifications ? 'an' : 'aus'} (macOS)`,
     'Repos:',
   ]
   for (const repo of Object.values(config.repos)) {

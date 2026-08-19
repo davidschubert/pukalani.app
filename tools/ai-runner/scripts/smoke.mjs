@@ -58,6 +58,7 @@ const { nextBackoffSeconds } = modules['api.ts']
 const { buildCommitMessage } = modules['git.ts']
 const { buildAgentArgs } = modules['run.ts']
 const { shellQuote, interactiveRunName, buildInteractiveArgs, buildWrapperScript, buildHookSettings, buildHookScript } = modules['interactive.ts']
+const { buildNotificationArgs, notificationTitle, appleScriptString, NOTIFICATION_STATUS_TEXT } = modules['notify.ts']
 
 // ---------------------------------------------------------------------------
 // 2. Config (§ 7.1/§ 8.1)
@@ -99,6 +100,10 @@ check('Config: Vorgaben und ~-Auflösung', () => {
   assert.equal(config.repos['maui-monorepo'].allowedModels, null)
   assert.equal(config.stateDir, '/Users/test/.local/state/pukalani-runner')
   assert.equal(config.claudeBin, 'claude')
+  // macOS-Mitteilungen: Vorgabe AN, nur ausdrückliches false schaltet sie ab.
+  assert.equal(config.macosNotifications, true)
+  assert.equal(parseRunnerConfig({ ...rawConfig, macosNotifications: false }, home).macosNotifications, false)
+  assert.throws(() => parseRunnerConfig({ ...rawConfig, macosNotifications: 'ja' }, home), /macosNotifications/)
 })
 
 check('Config: unsinnige Werte werfen mit Klartext', () => {
@@ -470,6 +475,39 @@ check('Commit-Nachricht trägt Subjekt und Session', () => {
   assert.match(message, /^ai\(ticket t1\): Lauf r1\n/)
   assert.match(message, /Session: s1/)
   assert.match(message, /Co-Authored-By: Claude <noreply@anthropic\.com>/)
+})
+
+// ---------------------------------------------------------------------------
+// 11. End-Mitteilung (macOS) — der BAU, nie die Ausführung (§ 7.2)
+// ---------------------------------------------------------------------------
+check('appleScriptString maskiert Backslash und Anführungszeichen', () => {
+  assert.equal(appleScriptString('rein'), '"rein"')
+  assert.equal(appleScriptString('a"b'), '"a\\"b"')
+  assert.equal(appleScriptString('a\\b'), '"a\\\\b"')
+})
+
+check('notificationTitle nimmt die erste H1, sonst Subjekt-Typ + -Id', () => {
+  assert.equal(notificationTitle('# Der Titel\n\nRumpf', 'ticket', 't-42'), 'Der Titel')
+  // H2 zählt nicht, führender Text auch nicht — Fallback greift.
+  assert.equal(notificationTitle('## keine H1\nText', 'ticket', 't-42'), 'ticket t-42')
+  assert.equal(notificationTitle('kein Header', 'ticket', 't-42'), 'ticket t-42')
+  // Die ERSTE H1 gewinnt, Rand-Leerraum fällt weg.
+  assert.equal(notificationTitle('#   Erste   \n# Zweite', 'ticket', 't-42'), 'Erste')
+})
+
+check('buildNotificationArgs: display notification mit Text + Titel', () => {
+  const args = buildNotificationArgs({ status: 'succeeded', promptSource: '# Mach X', subjectType: 'ticket', subjectId: 't-42' })
+  assert.deepEqual(args, ['-e', 'display notification "Fertig" with title "Mach X"'])
+  assert.equal(buildNotificationArgs({ status: 'needs_input', promptSource: '', subjectType: 'ticket', subjectId: 't-9' })[1],
+    'display notification "Rückfrage nötig — antworte im Board" with title "ticket t-9"')
+  assert.match(buildNotificationArgs({ status: 'failed', promptSource: 'x', subjectType: 'ticket', subjectId: 't-9' })[1],
+    /"Fehlgeschlagen"/)
+})
+
+check('buildNotificationArgs: cancelled meldet nichts (null)', () => {
+  assert.equal(buildNotificationArgs({ status: 'cancelled', promptSource: '# T', subjectType: 'ticket', subjectId: 't-1' }), null)
+  // cancelled hat auch keinen Text-Eintrag.
+  assert.equal(NOTIFICATION_STATUS_TEXT.cancelled, undefined)
 })
 
 process.stdout.write(`\n${checks} Prüfungen grün.\n`)
