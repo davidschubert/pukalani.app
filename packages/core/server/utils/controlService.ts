@@ -1,5 +1,6 @@
 import { Account, Client } from 'node-appwrite'
 import type { H3Event } from 'h3'
+import { seamSecretToSend } from './sharedSeamSecret'
 
 /**
  * Der Ruf ins Control Plane — als GENERISCHER Transport im Fundament.
@@ -33,13 +34,28 @@ export interface ControlServiceConfig {
 
 const SERVICE_HEADER = 'x-pukalani-onboarding-secret'
 
-export function controlServiceConfig(event: H3Event): ControlServiceConfig {
+/**
+ * SEIT DEM 2026-08-18 ASYNC (A0-Rest): das Service-Secret kann jetzt auch aus
+ * der Betreiber-Konsole kommen (`instance_secrets`, Sorte `onboarding-service`),
+ * und die Ablage zu lesen ist ein Appwrite-Ruf.
+ *
+ * DER UMBAU WAR VERTRETBAR, weil es genau ZWEI Aufrufstellen gibt und beide
+ * ohnehin in async-Funktionen sitzen: `callControlService` hier unten und der
+ * Namens-Wrapper `controlPlaneConfig` im onboarding-Layer. Kein Vergleich zum
+ * Empfänger-Gate im Control Plane, das 50 Routen aufrufen — dort hängt am
+ * vergessenen `await` ein FAIL-OPEN, hier nur ein Typfehler (die Antwort wäre
+ * ein Promise ohne `url`).
+ *
+ * Rangfolge Konsole → Env: dieselbe wie bei jedem anderen Zugang. Begründung
+ * und die Rotations-Reihenfolge: `sharedSeamSecret.ts`.
+ */
+export async function controlServiceConfig(event: H3Event): Promise<ControlServiceConfig> {
   const config = useRuntimeConfig(event) as {
     onboardingControlUrl?: string
     onboardingServiceSecret?: string
   }
   const url = (config.onboardingControlUrl || '').replace(/\/+$/, '')
-  const secret = config.onboardingServiceSecret || ''
+  const secret = await seamSecretToSend(event, 'onboarding-service', config.onboardingServiceSecret)
   if (!url || !secret) {
     // 503 statt 404: hier ist etwas FALSCH KONFIGURIERT, nicht abwesend — der
     // Unterschied entscheidet, ob jemand danach sucht.
@@ -49,15 +65,23 @@ export function controlServiceConfig(event: H3Event): ControlServiceConfig {
   return { url, secret }
 }
 
-/** Ist die Naht überhaupt konfiguriert? (Für Aufrufer, die sauber degradieren
- *  müssen, statt einen 503 zu werfen — z. B. ein Dashboard-Bereich, der das
- *  restliche Dashboard nicht mitreißen darf.) */
-export function controlServiceAvailable(event: H3Event): boolean {
+/**
+ * Ist die Naht überhaupt konfiguriert? (Für Aufrufer, die sauber degradieren
+ * müssen, statt einen 503 zu werfen — z. B. ein Dashboard-Bereich, der das
+ * restliche Dashboard nicht mitreißen darf.)
+ *
+ * EBENFALLS ASYNC seit dem 2026-08-18, und zwar zwingend: sonst meldete eine
+ * Instanz, deren Secret NUR in der Konsole steht, „nicht konfiguriert" — und
+ * die Aufrufer degradierten still, obwohl die Naht steht. Genau die Sorte
+ * Wirkungslosigkeit, gegen die die Konsolen-Ablage gebaut ist.
+ */
+export async function controlServiceAvailable(event: H3Event): Promise<boolean> {
   const config = useRuntimeConfig(event) as {
     onboardingControlUrl?: string
     onboardingServiceSecret?: string
   }
-  return Boolean((config.onboardingControlUrl || '') && (config.onboardingServiceSecret || ''))
+  if (!(config.onboardingControlUrl || '')) return false
+  return Boolean(await seamSecretToSend(event, 'onboarding-service', config.onboardingServiceSecret))
 }
 
 /**
@@ -97,7 +121,7 @@ export async function mintServiceJwtIfPossible(event: H3Event): Promise<string |
 }
 
 export async function callControlService<T>(event: H3Event, path: string, body: Record<string, unknown>): Promise<T> {
-  const { url, secret } = controlServiceConfig(event)
+  const { url, secret } = await controlServiceConfig(event)
   try {
     // Cast: $fetch typisiert die Antwort über NitroFetchRequest (die Route liegt
     // in einer ANDEREN App, also gibt es hier keine abgeleiteten Route-Typen).
