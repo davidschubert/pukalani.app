@@ -42,7 +42,7 @@ export default defineEventHandler(async (event) => {
   // Honeypot gefüllt → Bot: still schlucken (kein Signal nach außen)
   if (body.website) return { ok: true }
 
-  if (!isMailerConfigured(event)) {
+  if (!await mailerConfigured(event)) {
     throw createError({ status: 503, statusText: 'Contact mail is not configured' })
   }
 
