@@ -49,6 +49,17 @@
  *
  * NICHT hier und bewusst Besucher-Wahl: Hell/Dunkel, Seitenleiste, Sprache.
  */
+import {
+  MAX_FAVICON_BYTES,
+  MAX_FAVICON_DIM,
+  MIN_FAVICON_DIM,
+  isPngMagic,
+  pngDimensions,
+} from '../../../../../core/shared/communityFavicon'
+import { uploadedBrandIconKey, brandIconKey } from '../../../../../themes/shared/brandIcon'
+import { resolveBrandColor } from '../../../../../themes/shared/brandMark'
+import type { CommunityFaviconResponse } from '../../../../shared/types/communityFavicon'
+
 definePageMeta({ layout: 'dashboard', middleware: ['auth', 'admin'], requiredCapability: 'branding.manage' })
 
 const { t } = useI18n()
@@ -98,6 +109,90 @@ const pickerOpen = ref(false)
 // ein offenes Modal per v-if zu entfernen ist die bekannte Reka-Falle.
 const pickerMounted = ref(false)
 watch(pickerOpen, (open) => { if (open) pickerMounted.value = true })
+
+/**
+ * ── FAVICON & APP-ICON (Community-Favicon-Upload) ──────────────────────────
+ * Der SSR-gespiegelte Zustand sagt, ob die Community ein eigenes Favicon hat
+ * (uploadedBrandIconKey aus dem `$updatedAt`); sonst zeigt die Vorschau das
+ * generierte Icon (brandIconKey aus Farbe + Name, wie das theme-Plugin). Nach
+ * Upload/Entfernen setzen wir den State aus der Routen-Antwort — die Vorschau
+ * ist damit sofort frisch, ohne Seitenaufbau.
+ */
+const communityFavicon = useCommunityFavicon()
+const themeSettings = useThemeSettingsState()
+const brandName = useBrandName()
+const generatedIconKey = computed(() => brandIconKey(
+  resolveBrandColor(themes.value, themeSettings.value.defaultThemeId, themeSettings.value.defaultVariantId),
+  brandName.value,
+))
+/** Der Schlüssel, aus dem die Vorschau-URL entsteht: Upload schlägt generiert. */
+const faviconIconKey = computed(() => (communityFavicon.value
+  ? uploadedBrandIconKey(communityFavicon.value.updatedAt)
+  : generatedIconKey.value))
+const hasUploadedFavicon = computed(() => communityFavicon.value !== null)
+const faviconBusy = ref(false)
+/** Grenzen für den Client-Hinweis — die Route ist die Autorität, das ist Komfort. */
+const faviconMaxKb = Math.round(MAX_FAVICON_BYTES / 1000)
+
+async function uploadFavicon(event: Event) {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  input.value = ''
+  if (!file || faviconBusy.value) return
+
+  // CLIENT-VORPRÜFUNG (freundlicher Fehler ohne Rundreise) — die Route prüft
+  // dasselbe verbindlich und ist die einzige Autorität.
+  const bytes = new Uint8Array(await file.arrayBuffer())
+  if (file.size > MAX_FAVICON_BYTES) {
+    toast.add({ title: t('favicon.errorTooLarge'), color: 'error' })
+    return
+  }
+  if (!isPngMagic(bytes)) {
+    toast.add({ title: t('favicon.errorNotPng'), color: 'error' })
+    return
+  }
+  const dims = pngDimensions(bytes)
+  if (!dims || dims.width < MIN_FAVICON_DIM || dims.width > MAX_FAVICON_DIM
+    || dims.height < MIN_FAVICON_DIM || dims.height > MAX_FAVICON_DIM) {
+    toast.add({ title: t('favicon.errorDimensions'), color: 'error' })
+    return
+  }
+
+  faviconBusy.value = true
+  try {
+    const form = new FormData()
+    form.append('file', file)
+    const result = await $fetch<CommunityFaviconResponse>('/api/community/branding/favicon', {
+      method: 'POST',
+      body: form,
+    })
+    // Aus der Antwort — die Vorschau ist sofort frisch (immutable URL wandert).
+    communityFavicon.value = { updatedAt: result.updatedAt }
+    toast.add({ title: t('favicon.uploaded'), description: t('favicon.uploadedDesc'), color: 'success' })
+  }
+  catch {
+    toast.add({ title: t('favicon.uploadFailed'), color: 'error' })
+  }
+  finally {
+    faviconBusy.value = false
+  }
+}
+
+async function removeFavicon() {
+  if (faviconBusy.value) return
+  faviconBusy.value = true
+  try {
+    await $fetch('/api/community/branding/favicon', { method: 'DELETE' })
+    communityFavicon.value = null
+    toast.add({ title: t('favicon.removed'), color: 'success' })
+  }
+  catch {
+    toast.add({ title: t('favicon.removeFailed'), color: 'error' })
+  }
+  finally {
+    faviconBusy.value = false
+  }
+}
 
 const savingBranding = ref(false)
 /**
@@ -242,6 +337,69 @@ async function saveBranding(next: { theme: string, variant: string, neutral: str
         :title="t('dashboard.community.appearance.pickerTitle')"
         @select="(next: { theme: string, variant: string }) => saveBranding({ ...next, neutral: selection.neutral })"
       />
+    </UPageCard>
+
+    <!-- Favicon & App-Icon (Community-Favicon-Upload): eigenes Logo im Tab und
+         auf dem Home-Bildschirm. Ohne Upload gilt das generierte Initial-Icon.
+         Nur auf Mandanten-Hosts sinnvoll (dieselbe Bedingung wie oben). -->
+    <UPageCard
+      v-if="isTenantHost"
+      :title="t('favicon.title')"
+      :description="t('favicon.description')"
+      variant="subtle"
+    >
+      <div class="flex flex-col gap-4" data-community-favicon>
+        <div class="flex items-center gap-4">
+          <!-- Vorschau in zwei Größen: der Schlüssel wandert bei Upload/Entfernen,
+               also lädt der Browser das Bild frisch (kein manueller Cache-Bruch). -->
+          <div class="flex items-end gap-3">
+            <img
+              :src="`/icon/${faviconIconKey}.png?size=180`"
+              width="32"
+              height="32"
+              class="size-8 rounded-md ring-1 ring-default"
+              :alt="t('favicon.previewAlt')"
+              data-favicon-preview-sm
+            >
+            <img
+              :src="`/icon/${faviconIconKey}.png?size=180`"
+              width="64"
+              height="64"
+              class="size-16 rounded-lg ring-1 ring-default"
+              :alt="t('favicon.previewAlt')"
+              data-favicon-preview-lg
+            >
+          </div>
+          <p class="text-sm text-muted">
+            {{ hasUploadedFavicon ? t('favicon.stateUploaded') : t('favicon.stateGenerated') }}
+          </p>
+        </div>
+
+        <p class="text-sm text-muted">{{ t('favicon.hint', { min: MIN_FAVICON_DIM, max: MAX_FAVICON_DIM, kb: faviconMaxKb }) }}</p>
+
+        <div class="flex flex-wrap gap-2">
+          <label>
+            <span
+              class="inline-flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm font-medium ring-1 ring-default transition hover:ring-accented"
+              :class="faviconBusy ? 'pointer-events-none opacity-60' : ''"
+            >
+              <UIcon :name="faviconBusy ? 'i-ph-circle-notch' : 'i-ph-upload-simple'" class="size-4" :class="faviconBusy ? 'animate-spin' : ''" />
+              {{ t('favicon.choose') }}
+            </span>
+            <input type="file" accept="image/png" class="sr-only" :disabled="faviconBusy" @change="uploadFavicon">
+          </label>
+          <UButton
+            v-if="hasUploadedFavicon"
+            color="neutral"
+            variant="ghost"
+            icon="i-ph-trash"
+            :loading="faviconBusy"
+            @click="removeFavicon"
+          >
+            {{ t('favicon.remove') }}
+          </UButton>
+        </div>
+      </div>
     </UPageCard>
   </div>
 </template>

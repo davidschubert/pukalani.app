@@ -82,6 +82,28 @@ export function brandIconKey(color: string, name: string): string {
   return brandMarkKey('icon', BRAND_ICON_VERSION, color, name)
 }
 
+/**
+ * Cache-Schlüssel für ein HOCHGELADENES Favicon (Community-Favicon-Upload).
+ *
+ * Dieselbe Aufgabe wie `brandIconKey`, nur eine andere Quelle: das gezeichnete
+ * Icon hängt an Farbe + Name, das hochgeladene an seinem Änderungszeitpunkt
+ * (`storage.getFile().$updatedAt`). Lädt der Owner ein neues Bild hoch, wandert
+ * `$updatedAt` und damit die URL — Geräte und Zwischenspeicher holen frisch;
+ * bleibt das Bild gleich, bleibt die URL und der Treffer.
+ *
+ * DER `updatedAt`-WERT FLIESST IN DEN HASH, NICHT ROH IN DEN PFAD — genau wie
+ * bei `brandIconKey` (dort Farbe/Name). Der ISO-Zeitstempel enthält `:` und
+ * `.`, die das `BRAND_ICON_KEY_PATTERN` (`/^[0-9a-z]{5,12}$/`) nie durchließe;
+ * durch den FNV-Hash von `brandMarkKey` wird daraus wieder eine kurze
+ * Base-36-Zeichenkette, die das Muster erfüllt. Der erste Teil `'icon-upload'`
+ * trennt den Schlüssel-Raum vom generierten Icon (`'icon'`) und von der
+ * Vorschau-Karte — sonst könnte ein Upload zufällig dieselbe URL treffen wie
+ * ein generiertes Icon und dessen gemerktes Bild verdrängen.
+ */
+export function uploadedBrandIconKey(updatedAt: string): string {
+  return brandMarkKey('icon-upload', BRAND_ICON_VERSION, updatedAt)
+}
+
 /** Pfad des Icons auf DIESEM Host (relativ — der Kopf verlinkt ihn so). */
 export function brandIconPath(key: string, size: BrandIconSize = BRAND_ICON_DEFAULT_SIZE): string {
   return size === BRAND_ICON_DEFAULT_SIZE ? `/icon/${key}.png` : `/icon/${key}.png?size=${size}`

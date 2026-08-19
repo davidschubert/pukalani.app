@@ -42,6 +42,17 @@ declare module 'h3' {
      */
     communitySeo?: CommunitySeoSettings | null
     /**
+     * Hochgeladenes Favicon dieser Community (Community-Favicon-Upload) —
+     * gesetzt von server/middleware/10.community-favicon.ts, NUR für Seiten-SSR
+     * (kein /api/-Pfad; der Kopf entsteht nur dort).
+     *
+     * undefined = nicht aufgelöst (kein Mandant, API-Pfad); null = aufgelöst,
+     * aber KEIN eigenes Favicon (der Normalfall — das generierte Icon gilt).
+     * `updatedAt` ist der `$updatedAt` der Datei und zugleich der Cache-Brecher
+     * für die immutable Icon-URL (`uploadedBrandIconKey`).
+     */
+    communityFavicon?: { updatedAt: string } | null
+    /**
      * Der Request lief auf einem KONTROLL-Host (Kundenbereich, z. B.
      * app.pukalani.app) — gesetzt von server/middleware/00.tenant.ts.
      *

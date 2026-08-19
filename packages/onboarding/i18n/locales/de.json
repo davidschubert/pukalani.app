@@ -701,6 +701,24 @@
     "navLabel": "Erscheinungsbild",
     "noTenantText": "Diese Seite stellt die Farbwelt EINER Community ein. Auf dieser Instanz gehört die Optik dem Betreiber — sie wird unter „Themes\" gesetzt."
   },
+  "favicon": {
+    "title": "Favicon & App-Icon",
+    "description": "Dein eigenes Logo im Browser-Tab und auf dem Home-Bildschirm. Ohne Upload zeigen wir ein Symbol aus deiner Community-Farbe und dem Anfangsbuchstaben.",
+    "previewAlt": "Vorschau des Favicons",
+    "stateUploaded": "Dein hochgeladenes Logo",
+    "stateGenerated": "Automatisch erzeugt",
+    "hint": "PNG, quadratisch empfohlen, {min}–{max} px Kante, max {kb} KB. Die öffentliche Seite folgt in bis zu 30 Sekunden.",
+    "choose": "PNG auswählen",
+    "remove": "Entfernen",
+    "uploaded": "Favicon gespeichert",
+    "uploadedDesc": "Dein Logo erscheint im Tab und auf dem Home-Bildschirm — die öffentliche Seite folgt in bis zu 30 Sekunden.",
+    "uploadFailed": "Das Favicon konnte nicht gespeichert werden.",
+    "removed": "Favicon entfernt",
+    "removeFailed": "Das Favicon konnte nicht entfernt werden.",
+    "errorTooLarge": "Die Datei ist zu groß.",
+    "errorNotPng": "Bitte eine PNG-Datei wählen.",
+    "errorDimensions": "Die Kantenlänge muss zwischen 32 und 512 Pixeln liegen."
+  },
   "members": {
     "title": "Mitglieder",
     "memberDescription": "Hol Menschen dazu, die hierher passen. Deine Einladung macht sie zu Leserinnen und Lesern.",

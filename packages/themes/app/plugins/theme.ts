@@ -7,6 +7,7 @@ import {
   BRAND_ICON_TOUCH_SIZE,
   brandIconKey,
   brandIconPath,
+  uploadedBrandIconKey,
 } from '../../shared/brandIcon'
 
 /**
@@ -85,7 +86,37 @@ export default defineNuxtPlugin(async () => {
    * dort weglässt (C18).
    */
   const brandAppIcon = appConfig.pukalani?.seo?.tenantAppIcon === true
-  const appIconKey = computed(() => (brandAppIcon ? brandIconKey(brandColor.value, brandName.value) : ''))
+
+  /**
+   * HOCHGELADENES FAVICON DER COMMUNITY (Community-Favicon-Upload).
+   *
+   * Hat die Community ein eigenes Favicon hochgeladen, gilt ES überall statt des
+   * generierten — im Tab UND auf dem Home-Bildschirm. Der Schlüssel hängt am
+   * `$updatedAt` der Datei (uploadedBrandIconKey): ein neuer Upload wandert die
+   * URL, Geräte holen frisch; die Auslieferung (/icon/<key>.png) zeichnet
+   * ohnehin immer den aktuellen Stand.
+   *
+   * WELCHES GATE? Bewusst BEIDE: der Upload wirkt, sobald `tenantFavicon` ODER
+   * `tenantAppIcon` an ist. Grund: der Owner hat eine EINE Datei hochgeladen,
+   * um sein Logo zu zeigen — es an zwei Gates aufzuteilen (Tab hier, Icon dort)
+   * wäre eine Trennung ohne Nutzen. Auf `platform` (die einzige App mit
+   * onboarding und damit die einzige mit der Upload-Route) sind ohnehin beide
+   * an; das `||` hält die Logik nur ehrlich für den Fall, dass eine App nur
+   * eines setzt.
+   */
+  const communityFavicon = useCommunityFavicon()
+  const uploadedFaviconKey = computed(() =>
+    ((brandFavicon || brandAppIcon) && communityFavicon.value)
+      ? uploadedBrandIconKey(communityFavicon.value.updatedAt)
+      : '',
+  )
+
+  // Bei eigenem Favicon zeigt das App-Icon dieselbe Datei; sonst das generierte
+  // Icon (sofern das App-Icon-Gate an ist).
+  const appIconKey = computed(() =>
+    uploadedFaviconKey.value
+    || (brandAppIcon ? brandIconKey(brandColor.value, brandName.value) : ''),
+  )
 
   /**
    * Vorschaubild für geteilte Links (og:image, Gate `pukalani.seo.tenantOgImage`,
@@ -136,7 +167,11 @@ export default defineNuxtPlugin(async () => {
     // Array-Literal den Kontext-Typ nehmen. Das ist reine Typ-Verengung auf
     // den Wert, der ohnehin dasteht — am gerenderten Head ändert sich nichts.
     link: () => [
-      ...(brandFavicon ? [{ rel: 'icon' as const, type: 'image/svg+xml', href: '/favicon.svg' }] : []),
+      // Das generierte SVG-Favicon nur, solange KEIN eigenes hochgeladen wurde.
+      // Sonst bevorzugte der Browser das schärfere SVG im Tab und das
+      // hochgeladene Logo bliebe unsichtbar — der bestehende Kommentar „SVG
+      // bleibt daneben" gilt allein für den generierten Fall.
+      ...((brandFavicon && !uploadedFaviconKey.value) ? [{ rel: 'icon' as const, type: 'image/svg+xml', href: '/favicon.svg' }] : []),
       ...(appIconKey.value
         ? [
             { rel: 'apple-touch-icon' as const, href: brandIconPath(appIconKey.value, BRAND_ICON_TOUCH_SIZE) },

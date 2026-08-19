@@ -701,6 +701,24 @@
     "navLabel": "Appearance",
     "noTenantText": "This page sets the colour world of ONE community. On this instance the look belongs to the operator — it is set under \"Themes\"."
   },
+  "favicon": {
+    "title": "Favicon & app icon",
+    "description": "Your own logo in the browser tab and on the home screen. Without an upload we show a symbol built from your community colour and its initial.",
+    "previewAlt": "Favicon preview",
+    "stateUploaded": "Your uploaded logo",
+    "stateGenerated": "Generated automatically",
+    "hint": "PNG, square recommended, {min}–{max} px per side, max {kb} KB. The public site follows within 30 seconds.",
+    "choose": "Choose PNG",
+    "remove": "Remove",
+    "uploaded": "Favicon saved",
+    "uploadedDesc": "Your logo appears in the tab and on the home screen — the public site follows within 30 seconds.",
+    "uploadFailed": "The favicon could not be saved.",
+    "removed": "Favicon removed",
+    "removeFailed": "The favicon could not be removed.",
+    "errorTooLarge": "The file is too large.",
+    "errorNotPng": "Please choose a PNG file.",
+    "errorDimensions": "Each side must be between 32 and 512 pixels."
+  },
   "members": {
     "title": "Members",
     "memberDescription": "Bring in people who belong here. Your invitation makes them readers.",
