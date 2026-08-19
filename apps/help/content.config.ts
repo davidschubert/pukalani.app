@@ -9,9 +9,13 @@ import { defineContentConfig, defineCollection, z } from '@nuxt/content'
  * Getrennte Sammlungen statt einer mit Ordner-Konvention: so hat jeder
  * Abschnitt seine eigene Navigation UND seinen eigenen Suchindex — die
  * Kopfzeile schaltet zwischen beiden um. Der `prefix` hält Route und
- * Content-Pfad deckungsgleich (`/anleitung/...`, `/en/anleitung/...`), weshalb
+ * Content-Pfad deckungsgleich (`/anleitung/...`, `/de/anleitung/...`), weshalb
  * die Seiten-Abfrage weiterhin schlicht `queryCollection(x).path(route.path)`
- * lautet — auch nach der Umstellung auf Locale-Prefixe.
+ * lautet — auch nach dem Sprach-Tausch vom 2026-08-18.
+ *
+ * SPRACHROLLEN seit 2026-08-18 (Davids Entscheidung, Begründung in
+ * nuxt.config.ts): ENGLISCH ist die Vorgabe und liegt an der Content-Wurzel,
+ * DEUTSCH liegt unter `de/`. Vorher war es umgekehrt.
  *
  * WARUM JE SPRACHE EINE EIGENE SAMMLUNG und nicht ein `locale`-Feld im
  * Frontmatter: Navigation und Suchindex werden PRO Sammlung gebaut. Mit einem
@@ -19,8 +23,8 @@ import { defineContentConfig, defineCollection, z } from '@nuxt/content'
  * mischt dem Leser die andere Sprache in Seitenleiste oder Suchtreffer. Die
  * Sammlungsgrenze macht das unmöglich statt unwahrscheinlich.
  *
- * Die deutschen Sammlungen greifen bewusst NICHT nach `en/**` (ihr `include`
- * beginnt bei `anleitung/`), die englischen nur dort — es gibt keine
+ * Die englischen Sammlungen greifen bewusst NICHT nach `de/**` (ihr `include`
+ * beginnt bei `anleitung/`), die deutschen nur dort — es gibt keine
  * Überschneidung.
  */
 
@@ -52,22 +56,23 @@ export default defineContentConfig({
     }),
 
     // BEWUSST OHNE `prefix`: der Prefix wird auf den Pfad ADDIERT, der sich
-    // aus dem Dateinamen ergibt — und der lautet hier bereits `/en`. Mit
-    // `prefix: '/en'` landete die Startseite auf `/en/en` (beim Bau gemessen).
+    // aus dem Dateinamen ergibt — und der lautet hier bereits `/de`. Mit
+    // `prefix: '/de'` landete die Startseite auf `/de/de` (beim Bau gemessen,
+    // damals mit vertauschten Sprachen und `en/index.md`).
     // Bei den Abschnitts-Sammlungen ist der Prefix dagegen nötig, weil ihr
     // `include` mit `**` endet und der Pfad dort RELATIV zum Ordner entsteht.
-    landingEn: defineCollection({
+    landingDe: defineCollection({
       type: 'page',
-      source: { include: 'en/index.md' },
+      source: { include: 'de/index.md' },
     }),
-    anleitungEn: defineCollection({
+    anleitungDe: defineCollection({
       type: 'page',
-      source: { include: 'en/anleitung/**', prefix: '/en/anleitung' },
+      source: { include: 'de/anleitung/**', prefix: '/de/anleitung' },
       schema: seitenSchema,
     }),
-    entwicklerEn: defineCollection({
+    entwicklerDe: defineCollection({
       type: 'page',
-      source: { include: 'en/entwickler/**', prefix: '/en/entwickler' },
+      source: { include: 'de/entwickler/**', prefix: '/de/entwickler' },
       schema: seitenSchema,
     }),
   },

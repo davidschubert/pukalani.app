@@ -19,17 +19,23 @@ export const DOCS_SECTIONS = [
 export const docsNavigationKey = Symbol('docs-navigation') as InjectionKey<Ref<DocsNavigation | null | undefined>>
 
 /**
- * Schneidet ein führendes `/en` ab — aber NUR, wenn danach ein `/` folgt oder
+ * Schneidet ein führendes `/de` ab — aber NUR, wenn danach ein `/` folgt oder
  * der Pfad endet.
  *
- * Der Lookahead ist kein Zierrat: der deutsche Abschnitt heißt `/entwickler`
- * und beginnt selbst mit den Zeichen `/en`. Ein schlichtes
- * `path.replace(/^\/en/, '')` machte daraus `twickler`, und der
- * Entwickler-Bereich fiele auf Deutsch stillschweigend in die Anleitung
- * zurück — Seitenleiste und Suche zeigten dann die falsche Sammlung, ohne
- * dass irgendwo ein Fehler entstünde.
+ * Der Lookahead ist kein Zierrat, sondern die Vorkehrung gegen eine Falle, die
+ * hier schon EINMAL live zugeschlagen hat: Solange `/en` das Sprach-Prefix war,
+ * begann der Abschnitt `/entwickler` selbst mit genau diesen Zeichen. Ein
+ * schlichtes `path.replace(/^\/en/, '')` machte daraus `twickler`, und der
+ * Entwickler-Bereich fiel stillschweigend in die Anleitung zurück —
+ * Seitenleiste und Suche zeigten die falsche Sammlung, ohne dass irgendwo ein
+ * Fehler entstand.
+ *
+ * Der Sprach-Tausch vom 2026-08-18 (`/en` → `/de`) entschärft diesen EINEN
+ * Fall, nicht die Fallenklasse: heute beginnt kein Abschnitt mit `de`, aber ein
+ * künftiger Pfad, der zufällig so weitergeht (`/design`, `/developers`), fiele
+ * ohne die Grenzregel genauso lautlos um. Die Regel bleibt deshalb stehen.
  */
-const SPRACH_PREFIX = /^\/en(?=\/|$)/
+const SPRACH_PREFIX = /^\/de(?=\/|$)/
 
 /** Pfad → Abschnitt, gleich in welcher Sprache. Alles außerhalb von `/entwickler` ist Anleitung. */
 export function resolveDocsSection(path: string): DocsSectionKey {
@@ -37,44 +43,48 @@ export function resolveDocsSection(path: string): DocsSectionKey {
   return ohneSprache.startsWith('/entwickler') ? 'entwickler' : 'anleitung'
 }
 
-/** Ist das eine englische Route? Dieselbe Grenzregel wie oben. */
-export function isEnglishDocsPath(path: string): boolean {
+/** Ist das eine deutsche Route? Dieselbe Grenzregel wie oben. */
+export function isGermanDocsPath(path: string): boolean {
   return SPRACH_PREFIX.test(path)
 }
 
 /**
  * Abschnitt + Sprache → Sammlungsname (content.config.ts). Die einzige Stelle,
  * an der die vier Sammlungsnamen stehen; alles andere denkt in Abschnitten.
+ *
+ * Die Vorgabe-Sprache (Englisch) trägt den nackten Abschnittsnamen, weil ihre
+ * Sammlung an der Content-Wurzel liegt — nur Deutsch bekommt die Endung.
  */
 export function docsCollection(section: DocsSectionKey, locale: string): DocsCollectionKey {
-  if (!locale.startsWith('en')) return section
-  return section === 'entwickler' ? 'entwicklerEn' : 'anleitungEn'
+  if (!locale.startsWith('de')) return section
+  return section === 'entwickler' ? 'entwicklerDe' : 'anleitungDe'
 }
 
 /** Startseiten-Sammlung je Sprache. */
-export function docsLandingCollection(locale: string): 'landing' | 'landingEn' {
-  return locale.startsWith('en') ? 'landingEn' : 'landing'
+export function docsLandingCollection(locale: string): 'landing' | 'landingDe' {
+  return locale.startsWith('de') ? 'landingDe' : 'landing'
 }
 
 /** Pfad-Prefix eines Abschnitts inklusive Sprache — so wie ihn die Sammlung trägt. */
 export function docsSectionPrefix(section: DocsSectionKey, locale: string): string {
   const prefix = DOCS_SECTIONS.find(entry => entry.key === section)?.prefix ?? '/anleitung'
-  return locale.startsWith('en') ? `/en${prefix}` : prefix
+  return locale.startsWith('de') ? `/de${prefix}` : prefix
 }
 
 /**
  * Sucht den Knoten mit genau diesem Pfad — auch TIEFER als auf der obersten
  * Ebene.
  *
- * Die Tiefe ist kein Vorratsdenken: die englischen Sammlungen liegen unter
- * `content/en/…`, ihr Navigationsbaum trägt deshalb `/en` als Wurzel und den
- * Abschnitt erst als dessen Kind. Ein `items.find(…)` auf der obersten Ebene
- * ging dort ins Leere und fiel auf den GANZEN Baum zurück — sichtbar wurde das
- * als Abschnitts-Zeile „En" über der Überschrift von `/en/anleitung` und
- * `/en/entwickler`: der Leser bekam den Ordnernamen zu sehen statt „Guide"
- * (2026-08-15 live gemessen). Deutsch war nicht betroffen, weil dort kein
- * Sprachordner dazwischenliegt — ein Fehler, den man also nur auf EINER der
- * beiden Sprachen sieht.
+ * Die Tiefe ist kein Vorratsdenken: die Sammlungen der NICHT-Vorgabe-Sprache
+ * liegen in einem Sprachordner, ihr Navigationsbaum trägt deshalb dessen Pfad
+ * als Wurzel und den Abschnitt erst als dessen Kind. Ein `items.find(…)` auf
+ * der obersten Ebene ging dort ins Leere und fiel auf den GANZEN Baum zurück —
+ * sichtbar wurde das als Abschnitts-Zeile mit dem blossen Ordnernamen über der
+ * Überschrift des Abschnitts, statt „Anleitung"/„Guide" (2026-08-15 live
+ * gemessen, damals mit `content/en/…`). Die Vorgabe-Sprache ist nie betroffen,
+ * weil bei ihr kein Sprachordner dazwischenliegt — ein Fehler, den man also
+ * immer nur auf EINER der beiden Sprachen sieht. Seit dem Sprach-Tausch vom
+ * 2026-08-18 ist das die DEUTSCHE Seite (`content/de/…`, Wurzel `/de`).
  */
 function findeKnoten(
   items: ContentNavigationItem[],
@@ -90,7 +100,7 @@ function findeKnoten(
 
 /**
  * Prefix-Sammlungen liefern EINEN Wurzelknoten (`/anleitung` bzw.
- * `/en/anleitung`) mit den Seiten als Kinder. Die Seitenleiste zeigt die
+ * `/de/anleitung`) mit den Seiten als Kinder. Die Seitenleiste zeigt die
  * Kinder, weil der Abschnitt schon in der Kopfzeile gewählt wird — sonst
  * stünde er doppelt da.
  */

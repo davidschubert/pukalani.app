@@ -16,10 +16,14 @@ import type { ContentNavigationItem } from '@nuxt/content'
  */
 export type DocsSectionKey = 'anleitung' | 'entwickler'
 
-/** Die tatsächlichen Sammlungsnamen aus content.config.ts. */
+/**
+ * Die tatsächlichen Sammlungsnamen aus content.config.ts. Die Namen OHNE
+ * Sprach-Endung sind die ENGLISCHEN — Englisch ist seit 2026-08-18 die Vorgabe
+ * und liegt deshalb an der Content-Wurzel, Deutsch trägt das `De`.
+ */
 export type DocsCollectionKey
   = | 'anleitung' | 'entwickler'
-    | 'anleitungEn' | 'entwicklerEn'
+    | 'anleitungDe' | 'entwicklerDe'
 
 /** Navigation je Abschnitt — in der Sprache der aktuellen Seite. */
 export type DocsNavigation = Record<DocsSectionKey, ContentNavigationItem[]>
@@ -29,7 +33,7 @@ export interface DocsSection {
   key: DocsSectionKey
   /**
    * Pfad-Prefix OHNE Sprache. Die Kopfzeile schickt ihn durch `localePath()`,
-   * die Sammlungen tragen ihn (`/anleitung`, `/en/anleitung`) — so bleiben
+   * die Sammlungen tragen ihn (`/anleitung`, `/de/anleitung`) — so bleiben
    * Route und Content-Pfad deckungsgleich.
    */
   prefix: string

@@ -1,7 +1,7 @@
 ---
 seo:
-  title: Pukalani Hilfe
-  description: Anleitungen für Community-Betreiber und Entwickler-Doku zu Pukalani — von den ersten Schritten über Produkte, Rollen und Abrechnung bis zum Embed-Widget.
+  title: Pukalani Help
+  description: Guides for community owners and developer documentation for Pukalani — from your first steps through products, roles and billing to the embed widget.
 ---
 
 ::u-page-hero
@@ -9,10 +9,10 @@ seo:
 orientation: horizontal
 ---
 #title
-Deine Community, [erklärt]{.text-primary}.
+Your community, [explained]{.text-primary}.
 
 #description
-Diese Seite ist das Handbuch zu Pukalani. Links findest du die **Anleitung** für alle, die eine Community betreiben — rechts die **Entwickler**-Doku für alle, die das Kommentar-Widget einbinden oder die API ansprechen.
+This is the Pukalani handbook. On the left you'll find the **Guide** for everyone running a community — on the right the **Developer** docs for everyone embedding the comment widget or working with the API.
 
 #links
   :::u-button
@@ -21,7 +21,7 @@ Diese Seite ist das Handbuch zu Pukalani. Links findest du die **Anleitung** fü
   size: xl
   trailing-icon: i-ph-arrow-right
   ---
-  Zur Anleitung
+  Read the guide
   :::
 
   :::u-button
@@ -32,84 +32,84 @@ Diese Seite ist das Handbuch zu Pukalani. Links findest du die **Anleitung** fü
   size: xl
   icon: i-ph-code
   ---
-  Für Entwickler
+  For developers
   :::
 ::
 
 ::u-page-section
 #title
-Wo willst du hin?
+Where do you want to go?
 
-#products
-  :::u-page-product
+#features
+  :::u-page-feature
   ---
   icon: i-ph-rocket-launch
   to: /anleitung/erste-schritte
   ---
   #title
-  Erste Schritte
+  First steps
 
   #description
-  Vom Einladungs-Code bis zur fertigen Community: was der Einrichtungs-Assistent von dir wissen will und was danach passiert.
+  From invitation code to finished community: what the setup assistant asks you and what happens afterwards.
   :::
 
-  :::u-page-product
+  :::u-page-feature
   ---
   icon: i-ph-squares-four
   to: /anleitung/produkte
   ---
   #title
-  Produkte
+  Products
 
   #description
-  Kommentare, Beiträge, Seiten, Design und Moderation — was jedes Produkt kann und ab welchem Plan es verfügbar ist.
+  Comments, posts, pages, design and moderation — what each product does and which plan it needs.
   :::
 
-  :::u-page-product
+  :::u-page-feature
   ---
   icon: i-ph-users-three
   to: /anleitung/mitglieder-und-rollen
   ---
   #title
-  Mitglieder & Rollen
+  Members & roles
 
   #description
-  Fünf Rollen von Viewer bis Owner — wer darf lesen, schreiben, moderieren und das Team verwalten.
+  Five roles from viewer to owner — who may read, write, moderate and manage the team.
   :::
 
-  :::u-page-product
+  :::u-page-feature
   ---
   icon: i-ph-credit-card
   to: /anleitung/abrechnung
   ---
   #title
-  Abrechnung
+  Billing
 
   #description
-  Personal, Pro und Enterprise: Preise, Testphase, Kontingente und wie du den Plan wechselst.
+  Personal, Pro and Enterprise: prices, trial period, quotas and how to switch plans.
   :::
 
-  :::u-page-product
+  :::u-page-feature
   ---
   icon: i-ph-plug
   to: /entwickler/embed-widget
   ---
   #title
-  Embed-Widget
+  Embed widget
 
   #description
-  Kommentare in eine fremde Website einbetten — Script-Tag oder Web-Component, ohne CORS und ohne Tracking.
+  Put comments on someone else's website — script tag or web component, without CORS and without tracking.
   :::
 
-  :::u-page-product
+  :::u-page-feature
   ---
   icon: i-ph-brackets-curly
   to: /entwickler/api-grundlagen
   ---
   #title
-  API-Grundlagen
+  API basics
 
   #description
-  Wie die HTTP-API aufgebaut ist: Authentifizierung über Session-Cookie, stabiles Fehler-Format, Rate-Limits.
+  How the HTTP API is built: authentication via session cookie, a stable error format, rate limits.
   :::
 ::

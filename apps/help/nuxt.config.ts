@@ -35,6 +35,14 @@ export default defineNuxtConfig({
    * unter der seither ein anderes Produkt erklärt wird, wäre die schlechtere
    * Lüge.
    */
+  routeRules: {
+    // Die englischen Adressen `/en/...` waren vom 2026-08-15 bis zum
+    // Sprach-Tausch am 2026-08-18 öffentlich, beworben und indexiert. Seit dem
+    // Tausch liegt Englisch an der Wurzel — die alten Adressen bekommen
+    // deshalb einen 301 dorthin, statt ins Leere zu laufen.
+    '/en': { redirect: { to: '/', statusCode: 301 } },
+    '/en/**': { redirect: { to: '/**', statusCode: 301 } },
+  },
 
   content: {
     build: {
@@ -49,40 +57,51 @@ export default defineNuxtConfig({
   },
 
   /**
-   * Hausmuster 'prefix_except_default' — seit 2026-08-15, mit ÜBERSETZTEN
-   * Inhalten. Vorher stand hier `no_prefix` mit der Begründung, es gebe die
-   * Hilfe nur auf Deutsch, und mit dem ausdrücklichen Vermerk: „Sobald echte
-   * englische Inhalte dazukommen, MUSS diese Site auf 'prefix_except_default'
-   * zurückgeführt werden (sonst wäre EN unsichtbar für Suchmaschinen)." Genau
-   * das ist jetzt der Fall.
+   * Hausmuster 'prefix_except_default' MIT ENGLISCHER VORGABE — genau wie im
+   * übrigen Monorepo. Deutsch liegt unter `/de/*`.
    *
-   * WARUM DIE UMSTELLUNG NÖTIG WAR, nicht nur schöner: mit `no_prefix` trägt
-   * jede Sprache dieselbe URL. Der Leser bekam die Oberfläche in seiner
-   * Browsersprache, den INHALT aber immer auf Deutsch — und `<html lang>`
-   * stand auf `en-US` über deutschem Text (2026-08-14 auf help.pukalani.app
-   * gemessen: englische Kopfzeile, deutsche Seitenleiste, deutscher Artikel).
-   * Das ist nicht nur unschön: Screenreader sprechen den Text dann mit
-   * englischer Aussprache, und Übersetzungsdienste lassen ihn in Ruhe, weil
-   * die Seite behauptet, er sei schon englisch.
+   * Bis zum 2026-08-18 stand hier `defaultLocale: 'de'`, begründet mit
+   * Bestandsschutz: die deutschen Seiten lagen seit Monaten unter
+   * `/anleitung/...` und waren verlinkt und indexiert. DAVIDS ENTSCHEIDUNG
+   * 2026-08-18 kehrt das um — Einheitlichkeit im Monorepo schlägt
+   * URL-Stabilität. Eine Site, die als einzige ihre Vorgabe-Sprache anders
+   * herum führt, ist eine Sonderregel, an die sich jeder erinnern muss; das
+   * kostet auf Dauer mehr als der einmalige Adress-Bruch.
    *
-   * `defaultLocale: 'de'` BLEIBT — anders als im übrigen Monorepo, wo Englisch
-   * die Vorgabe ist. Grund ist hier kein Geschmack, sondern Bestand: die
-   * deutschen Seiten liegen seit Monaten unter `/anleitung/...`, sind
-   * verlinkt und indexiert. Mit englischer Vorgabe zögen sie nach
-   * `/de/anleitung/...` und jede bestehende Adresse wäre eine Weiterleitung.
-   * So bleibt jede deutsche URL unverändert, Englisch kommt unter `/en/...`
-   * dazu.
+   * DER PREIS, BEWUSST BEZAHLT: die alten deutschen Adressen `/anleitung/...`
+   * bleiben erreichbar, tragen künftig aber den ENGLISCHEN Inhalt. Das ist
+   * keine Nachlässigkeit, sondern eine Folge davon, dass die Slugs in beiden
+   * Sprachen dieselben deutschen Wörter sind (`erste-schritte`,
+   * `mitglieder-und-rollen`) — die Adresse allein verrät die Sprache nicht,
+   * ein pauschaler 301 nach `/de/...` wäre also gar nicht von den echten
+   * englischen Adressen zu unterscheiden. Aufgefangen wird das durch
+   * `detectBrowserLanguage` (redirectOn: 'all', Cookie `i18n_redirected`, aus
+   * dem Core-Layer): wer mit deutschem Browser oder deutscher Vorwahl im
+   * Cookie hereinkommt, landet auf `/de/...`.
+   *
+   * Die `/en/*`-Adressen aus der Zwischenzeit (2026-08-15 bis 2026-08-18)
+   * antworten mit 301 auf die Wurzel — siehe `routeRules` oben.
+   *
+   * WARUM ÜBERHAUPT PREFIXE (gilt unverändert seit 2026-08-15): mit
+   * `no_prefix` trägt jede Sprache dieselbe URL. Der Leser bekam die
+   * Oberfläche in seiner Browsersprache, den INHALT aber immer auf Deutsch —
+   * und `<html lang>` stand auf `en-US` über deutschem Text (2026-08-14 auf
+   * help.pukalani.app gemessen). Das ist nicht nur unschön: Screenreader
+   * sprechen den Text dann mit englischer Aussprache, und
+   * Übersetzungsdienste lassen ihn in Ruhe, weil die Seite behauptet, er sei
+   * schon englisch. Ohne Prefixe wäre die jeweils zweite Sprache ausserdem
+   * für Suchmaschinen unsichtbar.
    *
    * Route und Content-Pfad bleiben deckungsgleich: die Sammlungen tragen die
-   * Prefixe `/anleitung` bzw. `/en/anleitung` (content.config.ts), die
+   * Prefixe `/anleitung` bzw. `/de/anleitung` (content.config.ts), die
    * Seiten-Abfrage bleibt `queryCollection(x).path(route.path)`.
    */
   i18n: {
     strategy: 'prefix_except_default',
-    defaultLocale: 'de',
+    defaultLocale: 'en',
     locales: [
-      { code: 'de', language: 'de-DE', name: 'Deutsch', file: 'de.json' },
       { code: 'en', language: 'en-US', name: 'English', file: 'en.json' },
+      { code: 'de', language: 'de-DE', name: 'Deutsch', file: 'de.json' },
     ],
   },
 })
