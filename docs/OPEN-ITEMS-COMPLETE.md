@@ -82,8 +82,33 @@ den Hinweistext seither nach der INSTANZ, nicht nach der Sorte.
 Fehler kam davon, die Richtungen aus den Env-NAMEN zu erschliessen statt aus
 den montierten Layern. Ein `extends` ist die Wahrheit darüber, welche Route auf
 welchem Deployment überhaupt existiert — Namen sind es nicht.
-Die eigentliche ROTATION der Werte steht weiterhin aus: A0 hat den Mechanismus
-geliefert, nicht den Handgriff.
+**ETAPPE 3 (2026-08-19): die Rotation ist GEFAHREN** — und zwar fensterlos,
+nachdem der Weg dafür erst gebaut werden musste. `portfolio` hatte keinen
+`NUXT_INSTANCE_SECRETS_KEY`, konnte also nur EINEN Wert kennen; damit war die
+Kante admin↔portfolio nicht ohne Lücke drehbar. Also zuerst dort eine Ablage
+angelegt (die Tabelle stand längst — der `system`-Layer läuft überall mit) und
+in EINEM Neustart der Umschlag-Schlüssel ergänzt UND die Env auf den NEUEN Wert
+gesetzt, während die Ablage-Zeile den ALTEN trug. Das ist der Kniff: `send`
+nimmt die Ablage zuerst, `accept` nimmt beide — portfolio sendete also weiter
+alt und nahm ab sofort beides an, ohne dass eine Kante fiel. Danach der Reihe
+nach admin, platform, portfolio auf den neuen Wert, zuletzt beide Env-Werte
+nachgezogen. Gemessen wurde an ECHTEN Kanten statt an Vermutungen: POST auf
+`/api/site/domain/settle` (409 = angenommen UND der geschachtelte Rückruf ans
+Control Plane trug; 401 = abgewiesen) und auf `/api/control/community/audience`
+(400 = angenommen). Schlussstand: neuer Wert überall 409/400, ALTER WERT
+ÜBERALL 401, alle vier Hosts 200.
+
+**Gelernt:** Ein Zyklus lässt sich mit „erst Empfänger, dann Sender" NICHT
+drehen — beide Knoten stellen mit einem Eintrag zugleich Annahme und Senden um.
+Der Ausweg steckt in der Rangfolge selbst: Ablage=ALT + Env=NEU ist der
+Zustand „nimm schon beides an, sende aber noch alt". Damit wird aus einem
+Zyklus wieder eine Kette. Wer nur die Konsole benutzt, kann diesen Zustand
+nicht herstellen — er braucht genau einen Neustart, und den hatten wir für den
+Umschlag-Schlüssel ohnehin.
+**Gelernt:** Beweise gehören an die Kante, nicht an die Konfiguration. Dass
+drei `.env` denselben String tragen, sagt nichts darüber, ob die Naht trägt;
+ein 409 auf der Settle-Route sagt es für BEIDE Richtungen auf einmal, weil der
+Handler nach der Prüfung selbst zurückruft.
 
 ---
 
