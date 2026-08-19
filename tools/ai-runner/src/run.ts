@@ -581,7 +581,10 @@ async function performInteractiveRun(ctx: RunContext, run: RunPayload, pump: Eve
   // Höchstdauer. Netzfehler des Polls werden ignoriert — der nächste Versuch
   // kommt gleich.
   const deadline = startedAt + INTERACTIVE_MAX_MS
-  let markerSeq = -1
+  // Ohne Initialwert: der einzige Weg aus der Schleife (break) kommt NACH der
+  // Zuweisung — TypeScripts Zuweisungs-Analyse beweist das, ein Platzhalter
+  // wäre nie lesbar (CI-Lint no-useless-assignment, 2026-08-19).
+  let markerSeq: number
   for (;;) {
     if (ctx.shutdownRequested()) throw new RunFailure('runner_shutdown')
 
@@ -615,7 +618,7 @@ async function performInteractiveRun(ctx: RunContext, run: RunPayload, pump: Eve
 
   // Sitzung beendet. Den Ereigniszähler hinter die Ende-Markierung heben (§ 7.3),
   // damit die folgenden Zeilen nicht der Retry-Dedupe zum Opfer fallen.
-  if (markerSeq >= 0) pump.resumeAfter(markerSeq)
+  pump.resumeAfter(markerSeq)
   pump.status('Interaktive Sitzung beendet — der Runner committet und schließt ab')
 
   // SCHRITT 8: der Runner committet selbst (§ 11) — wie headless.
