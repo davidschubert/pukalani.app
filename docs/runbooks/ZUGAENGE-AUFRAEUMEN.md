@@ -27,11 +27,24 @@ Prüft jede Zugangs-Datei unter `~/.appwrite-secrets` (rekursiv, auch nackte
 `<projekt>-<art>.key`) gegen die Instanz. Anderer Ordner: `--dir <pfad>`.
 Werte erscheinen nirgends — nur Dateiname, Projekt und Zustand.
 
-Auf dem Server zusätzlich:
+Und dasselbe auf dem Server:
 
 ```bash
-ssh ploi@49.13.211.173 'find /home/ploi -maxdepth 3 \( -name ".env.*" -o -name "*.env.bak" \) | grep -v node_modules'
+pnpm ops:stale-keys -- --ssh
 ```
+
+Das Skript kopiert sich dorthin und läuft DORT (`/home/ploi`), damit kein
+Schlüssel über die Leitung zurückkommt. Anderer Server: `PUKALANI_OPS_SSH`.
+
+Dort stehen nicht nur Reste, sondern die **aktiven** `.env` der Sites. Ein ✖ auf
+einer laufenden Site ist deshalb kein Aufräum-Hinweis, sondern ein
+Betriebs-Alarm — genau der Fall E1b, als `apps/platform/.env.production` nach
+dem Account-Cutover noch auf das eingefrorene `pool` zeigte.
+
+Die Kopfzeile nennt immer **geprüfte von gesehenen** Dateien, und ganz unten
+stehen die, die ein Projekt nennen, aber keinen Schlüssel tragen (z. B. die
+Marketing-Site). Diese Zeilen sind Absicht: eine Abdeckung, die man nicht
+sieht, liest sich wie „alles geprüft".
 
 ## 2 · Den Befund lesen
 

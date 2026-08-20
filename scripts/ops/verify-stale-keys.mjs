@@ -3,8 +3,9 @@
  * Zugangs-Wächter: findet Schlüssel und Env-Dateien, deren Projekt es NICHT
  * MEHR GIBT — die also nur noch Angriffsfläche sind und keine Aufgabe haben.
  *
- *   node scripts/ops/verify-stale-keys.mjs            # nur berichten
+ *   node scripts/ops/verify-stale-keys.mjs            # dieser Rechner
  *   node scripts/ops/verify-stale-keys.mjs --dir ~/x  # anderer Ordner
+ *   node scripts/ops/verify-stale-keys.mjs --ssh      # der Server
  *
  * WARUM ES DAS GIBT (2026-08-19): an EINEM Tag tauchten Zugänge zu längst
  * gelöschten Projekten an DREI Orten auf — `/home/ploi/.env-backups/` auf dem
@@ -50,9 +51,23 @@
  * an einen Menschen. Der Bericht nennt darum den Handgriff (`shred -u` bzw.
  * `rm -P`), führt ihn aber nie aus.
  *
+ * ── `--ssh`: DERSELBE TEST AUF DEM SERVER ─────────────────────────────────
+ * Dort liegen nicht nur Reste, sondern die AKTIVEN `.env` der Sites — und auch
+ * die können auf ein totes Projekt zeigen. Genau das war E1b:
+ * `apps/platform/.env.production` verwies nach dem Account-Cutover noch auf
+ * `pool`, das der Cutover eingefroren hatte. Ein ✖ auf einer LEBENDEN Site ist
+ * deshalb kein Aufräum-Hinweis, sondern ein Betriebs-Alarm.
+ *
+ * Das Skript kopiert sich dafür selbst auf den Server und läuft DORT — die
+ * Schlüssel verlassen ihn nie, zurück kommt nur der Bericht (Dateiname,
+ * Projekt, Status). Dieselbe Zusage wie bei `verify-site-env.mjs`, nur mit dem
+ * Unterschied, dass hier tatsächlich geprüft werden muss, ob ein Schlüssel
+ * WIRKT — und das geht nicht, ohne ihn zu benutzen.
+ *
  * WERTE ERSCHEINEN NIRGENDS. Gelesen wird der Schlüssel nur, um ihn als
  * Kopfzeile zu schicken; ausgegeben werden Dateiname, Projekt und Status.
  */
+import { execFileSync } from 'node:child_process'
 import { readdirSync, readFileSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { join, relative } from 'node:path'
@@ -63,21 +78,76 @@ const ORDNER = argDir !== -1 && process.argv[argDir + 1]
   ? process.argv[argDir + 1].replace(/^~/, homedir())
   : join(homedir(), '.appwrite-secrets')
 
+const SERVER = process.env.PUKALANI_OPS_SSH || 'ploi@49.13.211.173'
+/** Verzeichnis auf dem Server, unter dem Sites und Reste liegen. */
+const SERVER_ORDNER = '/home/ploi'
+
+/**
+ * `--ssh`: sich selbst hinüberkopieren und dort laufen lassen. Der Umweg
+ * existiert, damit kein Schlüssel über die Leitung zurückkommt — geprüft wird
+ * am Ort, zurück kommt nur der Bericht.
+ */
+if (process.argv.includes('--ssh')) {
+  const ziel = '/tmp/pukalani-stale-keys.mjs'
+  const quelle = new URL(import.meta.url).pathname
+  try {
+    execFileSync('scp', ['-q', '-o', 'BatchMode=yes', '-o', 'ConnectTimeout=20', quelle, `${SERVER}:${ziel}`], { stdio: 'inherit' })
+    execFileSync('ssh', [
+      '-o', 'BatchMode=yes', '-o', 'ConnectTimeout=20', SERVER,
+      `node ${ziel} --dir ${SERVER_ORDNER}; rm -f ${ziel}`,
+    ], { stdio: 'inherit' })
+  }
+  catch (fehler) {
+    console.error(`ssh/scp fehlgeschlagen — ${(fehler && fehler.message) || fehler}`)
+    process.exit(1)
+  }
+  process.exit(0)
+}
+
+/**
+ * Ordner, die nie einen Zugang enthalten, aber Zehntausende Dateien — ohne
+ * diese Liste läuft `--ssh` in den `node_modules` unter `releases` fest.
+ * (Kein Glob-Stern im Kommentar: die Folge Stern-Schrägstrich beendet ihn.)
+ */
+const UEBERSPRINGEN = new Set(['node_modules', '.git', '.pnpm', 'dist', '.output', '.nuxt', 'img'])
+/** Tiefe reicht für `/home/ploi/<site>/.env` und `~/.appwrite-secrets/<x>/y`. */
+const MAX_TIEFE = 3
+
 /** Alle Dateien unterhalb von `wurzel`, flach ausgerollt. */
 function dateien(wurzel) {
   const out = []
-  const lauf = (d) => {
+  const lauf = (d, tiefe) => {
+    if (tiefe > MAX_TIEFE) return
     let eintraege
     try { eintraege = readdirSync(d, { withFileTypes: true }) }
     catch { return }
     for (const e of eintraege) {
       const p = join(d, e.name)
-      if (e.isDirectory()) lauf(p)
+      if (e.isDirectory()) {
+        if (!UEBERSPRINGEN.has(e.name)) lauf(p, tiefe + 1)
+      }
       else if (e.isFile()) out.push(p)
     }
   }
-  lauf(wurzel)
+  lauf(wurzel, 0)
   return out.sort()
+}
+
+/**
+ * Kommt diese Datei überhaupt als Zugang in Frage? EINE Stelle entscheidet das,
+ * damit die Prüfung und die Abdeckungs-Meldung unten nie auseinanderlaufen —
+ * sonst zählt der Bericht Dateien als „nicht prüfbar", die nie gemeint waren
+ * (README, Migrations-Skripte), und die Zahl wird wertlos.
+ *
+ * Vorlagen fliegen ausdrücklich raus: heute stehen dort leere Werte und sie
+ * fielen ohnehin durch, aber füllt sie jemand mit einem Beispiel-Projekt,
+ * meldete der Wächter einen Fehlalarm „tot" für etwas, das nie ein Zugang war.
+ */
+function istKandidat(pfad) {
+  const name = pfad.split('/').pop()
+  if (/\.(json|png|jpe?g|log|md|mjs|mts|ts|cjs|sh|yml|yaml)$/i.test(name)) return false
+  if (/(example|sample|template)$/i.test(name)) return false
+  return true
 }
 
 /**
@@ -87,8 +157,8 @@ function dateien(wurzel) {
  * Alles andere (JSON-Dumps, Bilder, Skripte) ist kein Zugang und fällt raus.
  */
 function zugangAus(pfad) {
+  if (!istKandidat(pfad)) return null
   const name = pfad.split('/').pop()
-  if (/\.(json|png|jpe?g|log|md|mjs|ts)$/i.test(name)) return null
 
   let inhalt = ''
   try { inhalt = readFileSync(pfad, 'utf8') }
@@ -152,13 +222,27 @@ async function pruefen(z) {
   return { lage: 'unklar', text: `kein Bereich antwortete — ${gesehen.join(', ')}` }
 }
 
-const gefunden = dateien(ORDNER).map(zugangAus).filter(Boolean)
+const alle = dateien(ORDNER)
+const gefunden = alle.map(zugangAus).filter(Boolean)
+/**
+ * Dateien, die WIE ein Zugang aussehen (nennen ein Projekt), aber keinen
+ * benutzbaren Schlüssel tragen. Sie werden nicht geprüft — das ist richtig,
+ * darf aber nicht unsichtbar bleiben: eine Abdeckung, die man nicht sieht,
+ * liest sich wie „alles geprüft". `pukalani.app/.env` ist so ein Fall (die
+ * Marketing-Site nennt ihr Projekt, braucht aber bewusst keinen Schlüssel).
+ */
+const ohneSchluessel = alle.filter((pfad) => {
+  if (!istKandidat(pfad) || zugangAus(pfad)) return false
+  try { return /^NUXT_PUBLIC_APPWRITE_PROJECT_ID=.+$/m.test(readFileSync(pfad, 'utf8')) }
+  catch { return false }
+})
+
 if (!gefunden.length) {
   console.log(`Keine Zugangs-Dateien unter ${ORDNER} — nichts zu prüfen.`)
   process.exit(0)
 }
 
-console.log(`Zugangs-Wächter — ${gefunden.length} Datei(en) unter ${ORDNER}, Instanz ${ENDPUNKT}\n`)
+console.log(`Zugangs-Wächter — ${gefunden.length} prüfbare(r) Zugang/Zugänge von ${alle.length} Dateien unter ${ORDNER}, Instanz ${ENDPUNKT}\n`)
 
 const ergebnisse = []
 for (const z of gefunden) {
@@ -192,6 +276,12 @@ else {
 
 if (unklar.length) {
   console.log(`${unklar.length} unklar — das ist KEIN Befund und KEIN Löschgrund (siehe Kopf).`)
+}
+
+if (ohneSchluessel.length) {
+  console.log(`\n${ohneSchluessel.length} Datei(en) nennen ein Projekt, tragen aber keinen Schlüssel — nicht prüfbar:`)
+  for (const pfad of ohneSchluessel) console.log(`  ${relative(ORDNER, pfad)}`)
+  console.log('  (erwartet z. B. bei Sites ohne Appwrite-Zugriff — hier steht es, damit die Abdeckung sichtbar bleibt)')
 }
 
 // Absichtlich immer 0: das hier ist eine Inventur für Menschen, kein CI-Gate.
