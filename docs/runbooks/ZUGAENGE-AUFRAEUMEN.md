@@ -36,10 +36,12 @@ pnpm ops:stale-keys -- --ssh
 Das Skript kopiert sich dorthin und läuft DORT (`/home/ploi`), damit kein
 Schlüssel über die Leitung zurückkommt. Anderer Server: `PUKALANI_OPS_SSH`.
 
-**Das läuft auch von selbst:** der Workflow „Zugangs-Wächter"
-(`.github/workflows/keys-watch.yml`) macht genau diesen Lauf täglich um 04:17
-UTC mit `--strict` — ein toter Zugang wird damit rot und schickt die übliche
-Fehlermail. „Unklar" bleibt bewusst grün: ein Wächter, der bei jedem
+**Das läuft auch von selbst:** der Workflow „Server-Wächter"
+(`.github/workflows/server-watch.yml`) macht täglich um 04:17 UTC zwei Blicke
+auf den Server — erst `ops:site-env` (fehlende Variablen, F44), dann diesen
+Lauf mit `--strict`. Beide laufen immer, auch wenn der erste rot wird, sonst
+verdeckt ein Befund den anderen. Ein toter Zugang wird damit rot und schickt
+die übliche Fehlermail. „Unklar" bleibt bewusst grün: ein Wächter, der bei jedem
 Netz-Aussetzer schreit, wird nach der dritten Fehlmeldung ignoriert. Von Hand
 auslösen: Actions → Zugangs-Wächter → Run workflow.
 

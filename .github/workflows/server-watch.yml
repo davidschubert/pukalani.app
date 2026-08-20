@@ -1,5 +1,23 @@
-# Zugangs-Wächter: prüft täglich, ob auf dem Server ein Appwrite-Schlüssel
-# liegt, dessen PROJEKT es nicht mehr gibt.
+# Server-Wächter: zwei tägliche Blicke auf den Produktionsserver, die beide
+# dieselbe blinde Stelle abdecken — eine Konfiguration ist falsch, aber nichts
+# wird rot.
+#
+#   1. FEHLENDE VARIABLEN (`verify-site-env.mjs`). `platform.pukalani.app`
+#      hatte kein `NUXT_SMTP_*`; damit ging für JEDE Kunden-Community nie eine
+#      Benachrichtigungs-Mail raus. Die App lief, die Seiten antworteten, nur
+#      die Mail blieb aus — das sieht aus wie ein bewusst abgeschaltetes
+#      Produkt (F44). Prüft zusätzlich, ob die lokalen Migrations-Dateien aufs
+#      richtige Projekt zeigen; in der CI fehlen die und werden übersprungen,
+#      ohne als Befund zu zählen.
+#
+#   2. TOTE ZUGÄNGE (`verify-stale-keys.mjs --strict`, s. u.).
+#
+# Beide laufen IMMER, auch wenn der erste rot wird (`if: always()`) — sonst
+# verdeckt ein Befund den anderen und man repariert zweimal hintereinander.
+#
+# ── ZU 2: TOTE ZUGÄNGE ────────────────────────────────────────────────────
+# Prüft, ob auf dem Server ein Appwrite-Schlüssel liegt, dessen PROJEKT es
+# nicht mehr gibt.
 #
 # WARUM (2026-08-19): ein Umzug benennt Dinge um, die Schlüssel dazu bleiben
 # liegen. An EINEM Tag tauchten Zugänge zu gelöschten Projekten an drei Orten
@@ -23,7 +41,7 @@
 # gerade nicht erreichbar) bleibt grün — ein Wächter, der bei jedem Aussetzer
 # schreit, wird nach der dritten Fehlmeldung ignoriert.
 
-name: Zugangs-Wächter
+name: Server-Wächter
 
 on:
   schedule:
@@ -36,7 +54,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: keys-watch
+  group: server-watch
   cancel-in-progress: true
 
 jobs:
@@ -64,7 +82,7 @@ jobs:
         run: |
           set -u
           if [ -z "$SSH_KEY" ]; then
-            echo "::error::Secret PLOI_SSH_KEY fehlt — der Zugangs-Wächter kann den Server nicht erreichen."
+            echo "::error::Secret PLOI_SSH_KEY fehlt — der Server-Wächter kann den Server nicht erreichen."
             exit 1
           fi
           mkdir -p ~/.ssh
@@ -73,7 +91,14 @@ jobs:
           printf '%s\n' "$SERVER_HOSTKEY" > ~/.ssh/known_hosts
           printf 'IdentityFile ~/.ssh/ops_key\nIdentitiesOnly yes\n' >> ~/.ssh/config
 
-      - name: Zugänge prüfen
+      - name: Env-Variablen der Sites prüfen
+        env:
+          PUKALANI_OPS_SSH: ploi@49.13.211.173
+        run: node scripts/ops/verify-site-env.mjs
+
+      # `always()`: ein Befund oben darf den zweiten Blick nicht verdecken.
+      - name: Zugänge auf gelöschte Projekte prüfen
+        if: always()
         env:
           PUKALANI_OPS_SSH: ploi@49.13.211.173
         run: node scripts/ops/verify-stale-keys.mjs --ssh --strict
