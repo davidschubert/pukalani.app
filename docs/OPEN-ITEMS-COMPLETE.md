@@ -103,6 +103,21 @@ das Ende — sonst ist die Sicherung die Kopie, die niemand rotiert.
 
 ---
 
+### U16 — Adressen: Slug oder Id? Entschieden: so lassen (Weg A) ✅ 2026-08-20
+
+Davids Entscheidung per strukturierter Frage (Empfehlung der Analyse
+angenommen): Kategorien und Kurse behalten den festen, sprechenden Slug;
+Themen und Events die Id — die beiden Muster laufen bewusst weiter parallel,
+weil sie verschiedene Fragen beantworten. Kein Alt-Slug-Gedächtnis (Weg B war
+bei Themen schon verworfen — die Id liefert dasselbe billiger), kein Umbau des
+URL-Raums (Weg C nur, falls Umbenennen je echter Bedarf wird — dann ist er die
+vorgezeichnete Lösung). Analyse mit allen drei Wegen und Kosten:
+[ADRESS-MUSTER-KATEGORIEN.md](archiv/ADRESS-MUSTER-KATEGORIEN.md);
+DECISION-LOG 2026-08-20. Nichts gebaut, nichts zu bauen — der Preis des
+Zustands (Slug nach Anlage fest) ist benannt und akzeptiert.
+
+---
+
 ### A0 — Naht-Geheimnisse: alle Zugänge über die Konsole, Rotation ohne Deployment ✅ 2026-08-19
 
 Der Abschluss von A0 in zwei Etappen. ETAPPE 1 (2026-08-18, Nachbar-Sitzung +

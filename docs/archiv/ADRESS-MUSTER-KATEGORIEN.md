@@ -1,6 +1,7 @@
 # Wer trägt die Identität einer Adresse — der Slug oder die Id?
 
-**Stand: 2026-08-18. Analyse, nichts gebaut.** Ausgelöst von Davids Frage beim
+**Stand: 2026-08-20 — ENTSCHIEDEN (Weg A, so lassen; DECISION-LOG) und
+archiviert. Analyse, nichts gebaut — und bewusst nichts zu bauen.** Ausgelöst von Davids Frage beim
 Bau der Kategorie-Übersetzungen: „Wenn Discourse die Id in der URL trägt und
 der Slug bloß Kosmetik ist — ist das nicht SEO-, UX- und sicherheitsseitig
 besser? Und gilt das nicht für Kategorien, Themen, Feed, Events und Kurse

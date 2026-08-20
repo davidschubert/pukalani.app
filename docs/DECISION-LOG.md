@@ -1420,3 +1420,12 @@ beide Formen aktiv, eine leitet um.
 **Bekannte Grenze (vorab benannt):** der Konto-WS (Sofort-Abmeldung) ist
 Cookie-nativ und greift von fremder Root-Domain nicht — auf Kundendomains
 degradiert Session-Widerruf auf den 30-s-Poll. Bewusst akzeptiert.
+
+## 2026-08-20 — U16: Adressen bleiben, wie sie sind (Weg A)
+
+Davids Entscheidung (strukturierte Frage, Empfehlung angenommen): Kategorien
+und Kurse behalten den festen Slug, Themen und Events die Id — **kein Umbau,
+kein Alt-Slug-Gedächtnis**. Der einzige echte Druckpunkt (Umbenennen) ist
+heute kein Bedarf; wird er einer, ist Weg C (Id-Muster überall) die
+vorgezeichnete Lösung, nie Weg B (bei Themen bereits bewusst verworfen).
+Analyse: docs/archiv/ADRESS-MUSTER-KATEGORIEN.md.
