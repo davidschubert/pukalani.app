@@ -36,6 +36,13 @@ pnpm ops:stale-keys -- --ssh
 Das Skript kopiert sich dorthin und läuft DORT (`/home/ploi`), damit kein
 Schlüssel über die Leitung zurückkommt. Anderer Server: `PUKALANI_OPS_SSH`.
 
+**Das läuft auch von selbst:** der Workflow „Zugangs-Wächter"
+(`.github/workflows/keys-watch.yml`) macht genau diesen Lauf täglich um 04:17
+UTC mit `--strict` — ein toter Zugang wird damit rot und schickt die übliche
+Fehlermail. „Unklar" bleibt bewusst grün: ein Wächter, der bei jedem
+Netz-Aussetzer schreit, wird nach der dritten Fehlmeldung ignoriert. Von Hand
+auslösen: Actions → Zugangs-Wächter → Run workflow.
+
 Dort stehen nicht nur Reste, sondern die **aktiven** `.env` der Sites. Ein ✖ auf
 einer laufenden Site ist deshalb kein Aufräum-Hinweis, sondern ein
 Betriebs-Alarm — genau der Fall E1b, als `apps/platform/.env.production` nach

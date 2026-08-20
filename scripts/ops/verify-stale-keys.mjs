@@ -6,6 +6,7 @@
  *   node scripts/ops/verify-stale-keys.mjs            # dieser Rechner
  *   node scripts/ops/verify-stale-keys.mjs --dir ~/x  # anderer Ordner
  *   node scripts/ops/verify-stale-keys.mjs --ssh      # der Server
+ *   node scripts/ops/verify-stale-keys.mjs --ssh --strict   # CI: Fund = rot
  *
  * WARUM ES DAS GIBT (2026-08-19): an EINEM Tag tauchten Zugänge zu längst
  * gelöschten Projekten an DREI Orten auf — `/home/ploi/.env-backups/` auf dem
@@ -67,7 +68,7 @@
  * WERTE ERSCHEINEN NIRGENDS. Gelesen wird der Schlüssel nur, um ihn als
  * Kopfzeile zu schicken; ausgegeben werden Dateiname, Projekt und Status.
  */
-import { execFileSync } from 'node:child_process'
+import { execFileSync, spawnSync } from 'node:child_process'
 import { readdirSync, readFileSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { join, relative } from 'node:path'
@@ -77,6 +78,14 @@ const argDir = process.argv.indexOf('--dir')
 const ORDNER = argDir !== -1 && process.argv[argDir + 1]
   ? process.argv[argDir + 1].replace(/^~/, homedir())
   : join(homedir(), '.appwrite-secrets')
+
+/**
+ * `--strict` macht aus der Inventur ein Tor: ein Zugang auf ein GELÖSCHTES
+ * Projekt beendet den Lauf mit 1. Bewusst NUR dieser Fall — „unklar" bleibt
+ * grün, sonst wäre ein Netz-Aussetzer ein Alarm und der Wächter würde nach
+ * der dritten Fehlmeldung ignoriert.
+ */
+const STRIKT = process.argv.includes('--strict')
 
 const SERVER = process.env.PUKALANI_OPS_SSH || 'ploi@49.13.211.173'
 /** Verzeichnis auf dem Server, unter dem Sites und Reste liegen. */
@@ -90,18 +99,29 @@ const SERVER_ORDNER = '/home/ploi'
 if (process.argv.includes('--ssh')) {
   const ziel = '/tmp/pukalani-stale-keys.mjs'
   const quelle = new URL(import.meta.url).pathname
+
   try {
     execFileSync('scp', ['-q', '-o', 'BatchMode=yes', '-o', 'ConnectTimeout=20', quelle, `${SERVER}:${ziel}`], { stdio: 'inherit' })
-    execFileSync('ssh', [
-      '-o', 'BatchMode=yes', '-o', 'ConnectTimeout=20', SERVER,
-      `node ${ziel} --dir ${SERVER_ORDNER}; rm -f ${ziel}`,
-    ], { stdio: 'inherit' })
   }
   catch (fehler) {
-    console.error(`ssh/scp fehlgeschlagen — ${(fehler && fehler.message) || fehler}`)
-    process.exit(1)
+    console.error(`scp fehlgeschlagen — ${(fehler && fehler.message) || fehler}`)
+    process.exit(2)
   }
-  process.exit(0)
+
+  // Die Ferne entscheidet über den Ausgang, nicht diese Hülle. `rm` läuft
+  // getrennt, damit der Exit-Code des Laufs erhalten bleibt (ein `;` dahinter
+  // würde ihn durch den des Aufräumens ersetzen — der Wächter wäre dann
+  // IMMER grün, und das ist die Sorte Fehler, die man nie bemerkt).
+  const fern = `node ${ziel} --dir ${SERVER_ORDNER}${STRIKT ? ' --strict' : ''}; ergebnis=$?; rm -f ${ziel}; exit $ergebnis`
+  const lauf = spawnSync('ssh', ['-o', 'BatchMode=yes', '-o', 'ConnectTimeout=20', SERVER, fern], { stdio: 'inherit' })
+
+  // spawnSync meldet einen START-Fehler in `error`, nicht in `status` — das
+  // zuerst prüfen, sonst liest man `null` als Erfolg.
+  if (lauf.error) {
+    console.error(`ssh fehlgeschlagen — ${lauf.error.message}`)
+    process.exit(2)
+  }
+  process.exit(lauf.status ?? 2)
 }
 
 /**
@@ -284,6 +304,12 @@ if (ohneSchluessel.length) {
   console.log('  (erwartet z. B. bei Sites ohne Appwrite-Zugriff — hier steht es, damit die Abdeckung sichtbar bleibt)')
 }
 
-// Absichtlich immer 0: das hier ist eine Inventur für Menschen, kein CI-Gate.
-// Es braucht Netz und lokale Geheimnisse und liefe in der CI nie ehrlich.
+// Ohne `--strict` immer 0: von Hand aufgerufen ist das eine Inventur, und ein
+// roter Ausgang für „ich habe etwas gefunden" wäre da nur im Weg. Mit
+// `--strict` (der geplante Lauf) ist ein toter Zugang ein Befund und muss
+// auffallen — grün darf er dann nicht mehr sein.
+if (STRIKT && tot.length) {
+  console.error(`\n::error::${tot.length} Zugang/Zugänge zeigen auf ein gelöschtes Projekt.`)
+  process.exit(1)
+}
 process.exit(0)
