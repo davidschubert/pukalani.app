@@ -30,6 +30,55 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### S2 — system-Kette auf `account` entblockt: eine tenantId als Label ✅ 2026-08-19
+
+**Der Befund** (Favicon-Sitzung, 2026-08-19): `system-031` starb auf `account`
+bei JEDEM Wiederholungslauf mit 400 — die einzige `community_handles`-Zeile
+der Instanz (Alt-Autor `@davidschubert` aus der Comments-Silo-Zeit, F3) trug
+`communityId = "t-mspkq1xd44lixo8oh2"`, eine **tenantId** statt der
+`communities.$id`. Die Übernahme baute daraus `read("label:t-…")`, und
+Appwrite **validiert Row-Permissions VOR dem Unique-Index**: das ungültige
+Label gewinnt gegen das idempotente 409, obwohl die Zeile längst existierte.
+Die gesamte system-Kette der Instanz war damit zu; `system-037` musste als
+Einzeldatei vorbeifahren.
+
+**Drei Reparaturen:**
+1. **Daten:** `community_handles.communityId` → `6a7bf2ca7414bcc0d182` (die
+   Comments-Community) — damit lösen alte `@davidschubert`-Erwähnungen dort
+   wieder auf. Beim Beweis-Lauf war die Zeile bereits korrigiert (parallele
+   Session); das Fix-Skript hat den Endzustand verifiziert statt blind zu
+   schreiben (IST-Prüfung vor jedem Write).
+2. **Nebenbefund gleich mit:** die `account_handles`-Zeile desselben Kontos
+   hatte **leere Permissions** — nicht einmal den Besitzer-Read, den
+   CLAUDE.md als „steht IMMER mit drin" zusagt; die Zeile war für ihren
+   eigenen Besitzer unsichtbar. Repariert auf `read("user:…")`; Labels kommen
+   keine, das Konto ist nirgends Mitglied (Vor-A5-Autor), der
+   Runtime-Nachtrag `ensureAccountHandleAudience` ergänzt sie bei Bedarf.
+3. **Härtung:** neue pure Regel `labelSafeCommunityId`
+   (`core/shared/accountHandleAudience.ts`, exakt der `Role.label`-Zeichensatz
+   `[a-zA-Z0-9]{1,36}`, 5 Tests) — die 031-Übernahme filtert Rollen jetzt
+   fail-soft mit Warnung samt Korrektur-Hinweis. Ein engeres Publikum heilt
+   der Runtime-Nachtrag; ein Abbruch blockierte die ganze Instanz.
+
+**Beweis** (Davids Lauf, 2026-08-19): `pnpm migrate --env-file
+~/.appwrite-secrets/migrations/account.env --layer system` — **alle 37
+Migrationen grün**, `system-031` endet in „0 übernommen, 1 übersprungen
+(bereits vergeben)". Der Lauf zeigte nebenbei, dass die Kette auf `account`
+**nie vollständig gelaufen war**: 018/021/022 legten Spalten frisch an, die
+024/026 planmäßig wieder entfernten (der Cutover hatte das Schema im
+End-Zustand kopiert), und 032–035 zogen Bucket- und Tabellen-Permissions
+nach. Genau deshalb ist eine blockierte Kette teurer als sie aussieht — sie
+versteckt auch alle Reparaturen, die hinter ihr warten.
+
+**Gelernt:** (1) **Appwrite prüft Row-Permissions VOR dem Unique-Index** —
+die 409-Idempotenz einer Migration ist wertlos, sobald irgendeine Permission
+ungültig ist: der Wiederholungslauf stirbt dann VOR dem Konflikt, jedes Mal.
+Wer Rollen aus DATEN baut, validiert sie vorher und überspringt fail-soft —
+die Sicherung gehört in den Code, nicht in die Datenhygiene. (2) Ein
+Fix-Skript für Prod-Daten prüft den IST-Zustand vor jedem Write und druckt
+den NACHHER-Zustand — so wurde aus dem Doppel-Fix zweier paralleler Sessions
+ein „nichts zu tun" statt eines Konflikts.
+
 ### S1 — Alter Sicherungsordner mit lebenden Geheimnissen gelöscht ✅ 2026-08-19
 
 Beim Aufräumen nach der Naht-Rotation gefunden: `/home/ploi/.env-backups/` lag
