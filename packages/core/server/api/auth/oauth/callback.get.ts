@@ -45,6 +45,9 @@ import {
 const NEW_ACCOUNT_WINDOW_MS = 120_000
 
 export default defineEventHandler(async (event) => {
+  // Die Adresse trägt ein Einmal-Secret (?secret=…) — diese Antwort hat in
+  // KEINEM Cache etwas verloren, auch nicht revalidierbar.
+  setHeader(event, 'Cache-Control', 'no-store')
   const locale = getCookie(event, 'i18n_redirected')
   const prefix = oauthLocalePrefix(locale)
   const failure = oauthFailureTarget(locale)
