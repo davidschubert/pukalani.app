@@ -19,7 +19,7 @@ useBrandTitle(() => t('posts.discussions.badges.title'), { description: () => t(
 </script>
 
 <template>
-  <UContainer class="max-w-5xl py-8">
+  <UContainer class="py-8">
     <div class="flex flex-col gap-6 md:flex-row">
       <aside class="md:w-48 md:shrink-0">
         <DiscussionSidebar />

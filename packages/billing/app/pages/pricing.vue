@@ -10,7 +10,7 @@ useBrandTitle(() => t('billing.pricing.title'))
 </script>
 
 <template>
-  <UContainer class="max-w-5xl py-12">
+  <UContainer class="py-12">
     <div class="mb-10 text-center">
       <h1 class="text-4xl font-bold tracking-tight">{{ t('billing.pricing.title') }}</h1>
       <p class="mt-3 text-lg text-muted">{{ t('billing.pricing.subtitle') }}</p>

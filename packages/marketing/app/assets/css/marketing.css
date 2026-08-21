@@ -158,7 +158,9 @@
   overflow: clip;
 }
 .marketing-site .mkt-inner {
-  max-width: 68rem;
+  /* 77rem = --ui-container (80rem, puka-theme.css) − 2 × 1,5rem Sektionsrand —
+     die beiden Werte nur im Paar ändern, Rechnung steht bei der Variable. */
+  max-width: 77rem;
   margin: 0 auto;
 }
 .marketing-site .mkt-narrow { max-width: 46rem; }

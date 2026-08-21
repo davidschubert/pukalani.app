@@ -21,7 +21,7 @@ const brand = useBrandName()
   <div class="flex min-h-screen flex-col">
     <AuthEmailVerifyBanner />
     <header class="border-b border-default">
-      <nav data-testid="main-nav" class="mx-auto flex w-full max-w-5xl items-center justify-between p-4">
+      <nav data-testid="main-nav" class="mx-auto flex w-full max-w-(--ui-container) items-center justify-between p-4">
         <NuxtLink :to="localePath('/')" class="font-bold tracking-tight">{{ brand }}</NuxtLink>
         <div class="flex items-center gap-2">
           <CoreLocaleSwitcher />
@@ -32,12 +32,12 @@ const brand = useBrandName()
       </nav>
     </header>
 
-    <main class="mx-auto w-full max-w-5xl flex-1 p-4">
+    <main class="mx-auto w-full max-w-(--ui-container) flex-1 p-4">
       <slot />
     </main>
 
     <footer class="border-t border-default">
-      <div class="mx-auto flex w-full max-w-5xl flex-col gap-2 p-4 text-sm text-muted sm:flex-row sm:items-center sm:justify-between">
+      <div class="mx-auto flex w-full max-w-(--ui-container) flex-col gap-2 p-4 text-sm text-muted sm:flex-row sm:items-center sm:justify-between">
         <span>{{ brand }}</span>
         <nav v-if="legalLinks.length" class="flex flex-wrap gap-x-4 gap-y-1">
           <NuxtLink

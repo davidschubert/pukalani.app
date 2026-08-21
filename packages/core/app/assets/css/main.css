@@ -31,6 +31,14 @@
 :root {
   --ui-radius: 0.5rem;
   --ui-primary: black;
+
+  /* DIE Seitenbreite aller Apps (Davids Entscheidung 2026-08-20, Vorbild
+     ui.nuxt.com): 90rem statt der Nuxt-UI-Vorgabe 80rem. Jeder UContainer
+     liest die Variable von Haus aus; die Layout-Hüllen (core/blueprint) und
+     die Dashboard-Deckel nutzen `max-w-(--ui-container)`, damit ALLES an
+     dieser einen Stelle hängt. Marketing überschreibt sie bewusst NICHT mehr
+     (puka-theme.css erklärt dort nur noch die .mkt-inner-Paar-Rechnung). */
+  --ui-container: 90rem;
 }
 
 .dark {

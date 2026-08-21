@@ -4,7 +4,7 @@
  * 2026-07-27): ersetzt die App-Overrides von comments und platform — beide
  * Apps extenden blueprint und bekommen exakt dieselbe Hülle. Aufbau:
  *
- *  - core-Hülle (max-w-5xl) + CoreDemoBanner (config-gated, pukalani.demo) +
+ *  - core-Hülle (max-w-7xl) + CoreDemoBanner (config-gated, pukalani.demo) +
  *    AuthEmailVerifyBanner
  *  - Header: Brand (useBrandName-Kette: Tenant vor App-Brand) · Inline-Nav
  *    mit Überlauf (ab >5 Einträgen wandert der Rest in ein „Mehr"-Dropdown,
@@ -183,7 +183,7 @@ const showChangelog = computed(() => chrome.value.changelogLink === true)
     <CoreDemoBanner />
     <AuthEmailVerifyBanner />
     <header class="border-b border-default">
-      <nav data-testid="main-nav" class="mx-auto flex w-full max-w-5xl items-center justify-between gap-4 p-4">
+      <nav data-testid="main-nav" class="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 p-4">
         <div class="flex min-w-0 items-center gap-6">
           <NuxtLink :to="localePath('/')" class="shrink-0 font-bold tracking-tight">{{ brand }}</NuxtLink>
           <div data-testid="chrome-nav" class="flex items-center gap-4 overflow-x-auto text-sm">
@@ -231,12 +231,12 @@ const showChangelog = computed(() => chrome.value.changelogLink === true)
       </nav>
     </header>
 
-    <main class="mx-auto w-full max-w-5xl flex-1 p-4">
+    <main class="mx-auto w-full max-w-7xl flex-1 p-4">
       <slot />
     </main>
 
     <footer class="border-t border-default">
-      <div class="mx-auto flex w-full max-w-5xl flex-col gap-2 p-4 text-sm text-muted sm:flex-row sm:items-center sm:justify-between">
+      <div class="mx-auto flex w-full max-w-7xl flex-col gap-2 p-4 text-sm text-muted sm:flex-row sm:items-center sm:justify-between">
         <span>{{ brand }}</span>
         <nav v-if="footerLegal.length || showChangelog" class="flex flex-wrap gap-x-4 gap-y-1">
           <NuxtLink

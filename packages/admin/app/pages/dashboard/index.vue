@@ -301,7 +301,7 @@ onScopeDispose(() => {
     </template>
 
     <template #body>
-      <div class="mx-auto flex w-full flex-col gap-4 sm:gap-6 lg:max-w-5xl">
+      <div class="mx-auto flex w-full flex-col gap-4 sm:gap-6 lg:max-w-7xl">
         <!-- Begrüßung -->
         <div>
           <h1 class="text-xl font-semibold">{{ greeting }}</h1>

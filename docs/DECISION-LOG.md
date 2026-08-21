@@ -7,7 +7,23 @@ die kleinen, verstreuten Beschlüsse.
 
 ---
 
-## 2026-08-18 — Instanz-Seiten existieren auf Mandanten-Hosts nicht (404)
+## 2026-08-20 — Original-Tailwind-Maße überall: Seitenbreite 80rem
+
+**Auslöser:** David empfand alle Seiten auf seinem 27-Zoll-Monitor als zu
+schmal (Marketing 71rem, Community-Hülle max-w-5xl = 64rem) und entschied:
+**immer die Original-Breakpoints/-Maße von Tailwind nutzen, für alle Seiten.**
+
+**Umsetzung:** Die EINE Schranke ist die Nuxt-UI-/Tailwind-Vorgabe 80rem
+(1280px). Marketing: `--ui-container: 80rem` (puka-theme.css), `.mkt-inner`
+77rem (Paar-Rechnung ±3rem steht bei der Variable), Kopf/Fuß ohne eigene
+`max-w-[72/75rem]`-Deckel. Community-Hülle (core- + blueprint-Layout):
+`max-w-5xl` → `max-w-7xl`; Listen-Seiten, die den alten Hüllen-Deckel
+spiegelten (Discussions, Events, Pricing, Badges), verlieren ihren eigenen
+`max-w`-Zusatz und folgen der Hülle. Dashboard-Übersicht/Nutzer-Detail/
+Mitgliederliste ebenso 7xl. **Bewusst schmal bleiben** Lesebreiten und
+Formulare (Feed/Threads 2xl, Artikel/Settings 3xl, Kurs-Katalog 4xl,
+`.mkt-narrow` 46rem) — das sind Original-Tailwind-Stufen, keine eigenen Maße.
+Eigene Breakpoints gab es nie; es ging um die `max-width`-Deckel.
 
 **Auslöser:** David fragte, warum der Owner von freelancer.supply den
 Menüpunkt „Instance" (/dashboard/admin) nicht sieht. Die Antwort (E9: das Menü

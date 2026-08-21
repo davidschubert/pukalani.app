@@ -284,10 +284,10 @@ const FOOTER_UI = {
   // unpräfixierte Klasse räumt nur die unpräfixierte weg (gemessen: der Fuß
   // trug ab 1024px 96px Luft, die der Bestand nicht hat).
   top: 'py-0 lg:py-0',
-  // Die Basiszeile: 72rem Inhalt + 1,5rem Rand, Trennlinie darüber
-  // (Bestand `.mkt-footer-base`).
+  // Die Basiszeile: Breite kommt seit 2026-08-20 aus `--ui-container` (80rem,
+  // puka-theme.css) — Kopf, Fuß und Sektionen teilen sich EINE Schranke.
   container: [
-    'max-w-[75rem] mt-10 py-0 pt-6 lg:py-0 lg:pt-6',
+    'mt-10 py-0 pt-6 lg:py-0 lg:pt-6',
     'flex flex-wrap items-center justify-between gap-x-6 gap-y-2 lg:gap-x-6',
     'border-t border-white/12 text-[0.85rem] text-inverted/60',
   ].join(' '),
@@ -307,9 +307,9 @@ const FOOTER_UI = {
   <UFooter class="tone-ink" :ui="FOOTER_UI">
     <!-- Der obere Block trägt seinen Breiten-Container selbst: `UFooter` legt
          nur um die BASISZEILE einen `UContainer`, der `#top`-Slot bekommt
-         keinen. 75rem = 72rem Inhalt + die 1,5rem Seitenrand des Bestands. -->
+         keinen. Breite = `--ui-container` (80rem), wie überall seit 2026-08-20. -->
     <template #top>
-      <UContainer class="max-w-[75rem]">
+      <UContainer>
         <!-- ALLE STUFEN ARBITRÄR (`min-[…]`), KEINE EINZIGE BENANNTE — und das
              ist keine Marotte: Tailwind stellt in seiner Ausgabe sämtliche
              arbiträren Breiten-Regeln VOR die benannten (`sm:`, `md:`, `lg:`),

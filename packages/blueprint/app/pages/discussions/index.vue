@@ -34,7 +34,7 @@ const composerOpen = ref(false)
 </script>
 
 <template>
-  <UContainer class="max-w-5xl py-8">
+  <UContainer class="py-8">
     <div class="flex flex-wrap items-start justify-between gap-3">
       <div class="min-w-0">
         <h1 class="text-2xl font-bold">{{ t('posts.discussions.title') }}</h1>

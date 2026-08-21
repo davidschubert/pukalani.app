@@ -228,9 +228,11 @@ const HEADER_UI = {
     'bg-(--puka-header-surface) border-[color:var(--puka-header-edge)]',
     'backdrop-blur-[10px] backdrop-saturate-[1.4]',
   ].join(' '),
-  // 72rem inklusive der 1,5rem-Polsterung — so weit war `.mkt-header-inner`
-  // (gemessen: 1152px Kasten, 1104px Inhalt). Der app.config-Vertrag setzt
-  // 71rem für die SEKTIONEN; Kopf und Fuß standen im Bestand breiter.
+  // KEINE eigene Breite mehr: seit 2026-08-20 (Davids Entscheidung, Original-
+  // Tailwind-Maße überall) gilt für Kopf, Fuß und Sektionen dieselbe
+  // `--ui-container`-Schranke (80rem, puka-theme.css) — das frühere
+  // max-w-[72rem] („breiter als die 71rem-Sektionen") wäre jetzt SCHMALER
+  // als der Inhalt und kippte die Hierarchie.
   //
   // DIE SENKRECHTE LUFT WECHSELT DEN BESITZER, sobald das Menü sichtbar wird.
   // Ab 768px steckt sie schon im Menü-Eintrag (`item: py-2`) und gehört auch
@@ -240,7 +242,7 @@ const HEADER_UI = {
   // gibt es kein Menü, dort muss der Container polstern, sonst klebte der
   // zweizeilige CTA an beiden Kanten.
   // Gemessen: 53px ab 768px, 69px auf 375px — beides exakt der Bestand.
-  container: 'max-w-[72rem] h-auto py-3 md:py-1 gap-6',
+  container: 'h-auto py-3 md:py-1 gap-6',
   // Die Vorgabe teilt Schreibtisch und Handy bei 1024px, der Bestand bei
   // 768px. Ohne diese vier Zeilen bekämen Tablets ab 768px plötzlich das
   // Burger-Menü statt der Navigation.

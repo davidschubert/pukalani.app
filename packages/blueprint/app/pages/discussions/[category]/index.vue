@@ -53,7 +53,7 @@ const composerOpen = ref(false)
 </script>
 
 <template>
-  <UContainer class="max-w-5xl py-8">
+  <UContainer class="py-8">
     <UButton
       :to="localePath('/discussions')"
       icon="i-ph-arrow-left"

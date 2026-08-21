@@ -80,15 +80,20 @@
    * für handgeschriebene Blöcke erreichbar ist und exakt so weit gilt wie die
    * Licht-Dramaturgie: `.marketing-site`.
    *
-   * WARUM 71rem UND NICHT 68rem: die beiden Maße messen NICHT dasselbe. Im
-   * Bestand saß die Polsterung von 1,5rem an der SEKTION und `.mkt-inner`
-   * begrenzte den INHALT darin auf 68rem. `--ui-container` begrenzt dagegen
-   * die Kiste INKLUSIVE ihrer eigenen Polsterung. 68rem hätte den Inhalt also
-   * auf 65rem geschnitten — gemessen: der Textblock rückte um 24px nach innen.
-   * 68rem + 2 × 1,5rem = 71rem stellt den Bestand exakt wieder her, und der
-   * 1,5rem-Rand bleibt auf schmalen Fenstern erhalten.
+   * 80rem = die ORIGINALE Nuxt-UI-/Tailwind-Containerbreite (Davids
+   * Entscheidung 2026-08-20: überall die Original-Maße von Tailwind, die
+   * früheren 71rem wirkten auf großen Monitoren zu schmal). Die Zeile bleibt
+   * trotzdem explizit stehen, damit die Breite hier dokumentiert und ohne
+   * Suche änderbar ist.
+   *
+   * MASS-FALLE (aus der 71rem-Zeit, gilt weiter): `--ui-container` begrenzt
+   * die Kiste INKLUSIVE ihrer eigenen Polsterung, `.mkt-inner` (marketing.css)
+   * begrenzt den INHALT einer 1,5rem-gepolsterten Sektion. Beide Maße müssen
+   * deshalb im Abstand 2 × 1,5rem = 3rem gepflegt werden: 80rem hier ⇔ 77rem
+   * dort — sonst springen UContainer-Sektionen und .mkt-inner-Sektionen um
+   * 24px+ gegeneinander.
    */
-  --ui-container: 71rem;
+  --ui-container: 80rem;
 
   /*
    * DER SCHNITT-RHYTHMUS DER KOPF- UND SCHLUSSBLÖCKE (Paket 3).
