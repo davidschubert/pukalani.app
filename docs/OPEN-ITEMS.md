@@ -1,6 +1,6 @@
 # Offene Punkte
 
-**Stand: 2 offen · 3 geparkt/wartend · 13 bewusst zurückgestellt** (Zahlen bei JEDEM Umzug nach COMPLETE mitführen)
+**Stand: 2 offen · 2 geparkt/wartend · 13 bewusst zurückgestellt** (Zahlen bei JEDEM Umzug nach COMPLETE mitführen)
 
 Stand: **2026-08-19**. Hier steht **nur, was noch offen ist** — in der
 Reihenfolge, in der es abgearbeitet wird. Alles Erledigte (mit Begründung,
@@ -37,7 +37,6 @@ ist Wochen. (F3 ist am 2026-08-11 als AH-6 in die Hauptliste gezogen.)
 
 | # | Reihenfolge | Was (einfach erklärt) | Prio | Aufwand | Braucht David? | Wartet auf … |
 | --- | --- | --- | --- | --- | --- | --- |
-| U14 | 1 — Tage | **Anmelden mit Google.** Der CODE ist gebaut (Knopf auf Anmelden + Registrieren, erklärte Datenschutz-Zeile, Beitritt/Feed wie beim Passwort-Weg, gedrosselt, ohne Credentials unsichtbar). Offen sind nur noch **Klicks bei David**: Google-Console, Appwrite-Console, zwei Schalter. Die Circle-Falle trifft uns nicht — Google sieht nur die Appwrite-Adresse, nie einen Kunden-Host. | Mittel | S (Rest) | Ja: die Klicks | [Runbook GOOGLE-LOGIN.md](runbooks/GOOGLE-LOGIN.md) |
 | F7 | 3 — Wochen | **Bezahlte Communities** — der Owner nimmt Geld von seinen Mitgliedern. **Konzept steht, alle vier Entscheidungen GEFALLEN** (2026-08-15, DECISION-LOG): Owner verkauft (Connect, volles Dashboard, direct charges) · V1 = ganze Community · Erstattung nimmt Provision mit + Zugang endet sofort · Verkauf sperrt Endzustände. [F7-PAID-COMMUNITIES-KONZEPT.md](plans/F7-PAID-COMMUNITIES-KONZEPT.md). **Schluckt D1.** Offen nur noch: Anwaltsliste (§ 9, allen voran Art. 9a) + Bau nach A2. | Mittel | XL | Anwalt (§ 9) | A2 (Stripe live) |
 | F60 | 4 — Tage | **Mehrsprachige Betreiber-Seiten.** Der Owner pflegt je Sprache eine Fassung seiner Seiten (Muster Kategorie-Übersetzungen: Fassung ÜBERSCHREIBT, Adresse bleibt einsprachig) — optional mit KI-Vorschlag im Dashboard, der Mensch veröffentlicht. Bewusst KEINE Leser-Auto-Übersetzung (Rechtstexte, 200k-Body; Begründung im COMPLETE-Eintrag „KI-Übersetzung"). | Niedrig | M | Ja: 2–3 Zuschnitts-Entscheidungen bei Baubeginn | Bedarf (erste mehrsprachige Kunden-Community) |
 

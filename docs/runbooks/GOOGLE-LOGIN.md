@@ -1,5 +1,15 @@
 # Runbook: „Anmelden mit Google" einschalten (U14)
 
+**EINGESCHALTET am 2026-08-21** (Google-Projekt „Pukalani",
+`silver-area-506109-a4`, Appwrite-Projekt `account`; end-to-end bewiesen —
+COMPLETE-Eintrag U14). Dieses Runbook bleibt das Rezept für WEITERE Projekte
+(z. B. `admin`: gleiche Credentials, Redirect-URI endet auf `/control`).
+Zwei Fallen, die beim Einschalten live gefunden wurden und im Code verdrahtet
+sind: SSR-Seiten brauchen `Cache-Control: no-cache` (core-Plugin
+`html-no-cache.ts`), und das Session-Cookie MUSS `sameSite: 'lax'` sein —
+`strict` wird auf dem extern begonnenen OAuth-Rückweg nicht mitgeschickt und
+sieht aus wie „erst nach Reload eingeloggt".
+
 Der CODE ist gebaut und ausgeliefert. Solange die zwei Schalter unten aus
 sind, erscheint **kein Knopf** und es ändert sich nichts — das ist Absicht:
 der Bau konnte deshalb ohne Credentials live gehen.

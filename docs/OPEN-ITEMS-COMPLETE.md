@@ -103,6 +103,41 @@ das Ende — sonst ist die Sicherung die Kopie, die niemand rotiert.
 
 ---
 
+### U14 — Anmelden mit Google: eingeschaltet und end-to-end bewiesen ✅ 2026-08-21
+
+Der Code war seit dem 2026-08-12 gebaut und unsichtbar; heute kamen die
+Klicks und zwei Live-Funde. EINGESCHALTET: frisches Google-Projekt
+**„Pukalani"** (`silver-area-506109-a4`) mit produktiv veröffentlichtem
+Consent (extern, nur Basis-Scopes, Domain pukalani.app), OAuth-Client
+„Pukalani Appwrite" mit GENAU EINER Redirect-URI auf den Appwrite-Callback
+des `account`-Projekts; Provider in der Appwrite-Console mit neuer Client-ID
++ Secret (Davids alter Anlauf „Pukalani App", `pukalani-app` — erkennbar an
+der Projektnummer 448117866990 in der vorher hinterlegten Client-ID — ist
+damit abgelöst und kann nach einer Credentials-Durchsicht weg). App-Schalter:
+`providers: ['google']` in apps/platform + `NUXT_PUBLIC_AUTH_OAUTH_PROVIDERS`
+in der Server-.env. End-to-end im echten Chrome bewiesen: Knopf auf /login
+und /register, Konto-Wahl „Weiter zu pukalani.app", nach der Rückkehr SOFORT
+eingeloggt (`/api/auth/me` → David Schubert, kein Anmelden-Knopf, kein
+Reload).
+
+**Gelernt:** „Erst nach Hand-Reload eingeloggt" nach einem OAuth-Rückweg hat
+ZWEI Klassiker-Ursachen, die sich stapeln können — beide hier gefunden:
+(1) SSR-Seiten ohne `Cache-Control` darf der Browser HEURISTISCH cachen und
+zeigt dem frisch Angemeldeten die Gast-Fassung aus dem Cache (Fix: der
+`render:response`-Hook stempelt jetzt jede SSR-Seite `no-cache`; der
+Callback selbst `no-store`, seine Adresse trägt ein Einmal-Secret).
+(2) Die WURZEL: ein `SameSite=Strict`-Session-Cookie wird auf einer
+Navigation, deren Redirect-Kette extern (bei Google) begann, NICHT
+mitgeschickt — die erste Seite kam ohne Session an. `lax` ist die
+Standardwahl für Session-Cookies aus genau diesem Grund; Cross-Site-POSTs
+tragen auch Lax nicht, alle Mutationen sind Nicht-GET, csrf-origin bleibt
+das zweite Netz. Warnschild steht an der Stelle (setSessionCookie).
+**Gelernt:** Ein „es geht immer noch nicht" IMMER erst gegen den
+Live-Build-SHA halten — Davids zweiter Fehlversuch lief gegen den Stand vor
+dem eigentlichen Fix und hätte fast eine dritte Fehlersuche gestartet.
+
+---
+
 ### U16 — Adressen: Slug oder Id? Entschieden: so lassen (Weg A) ✅ 2026-08-20
 
 Davids Entscheidung per strukturierter Frage (Empfehlung der Analyse
