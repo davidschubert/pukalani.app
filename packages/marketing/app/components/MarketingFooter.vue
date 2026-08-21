@@ -284,8 +284,8 @@ const FOOTER_UI = {
   // unpräfixierte Klasse räumt nur die unpräfixierte weg (gemessen: der Fuß
   // trug ab 1024px 96px Luft, die der Bestand nicht hat).
   top: 'py-0 lg:py-0',
-  // Die Basiszeile: Breite kommt seit 2026-08-20 aus `--ui-container` (80rem,
-  // puka-theme.css) — Kopf, Fuß und Sektionen teilen sich EINE Schranke.
+  // Die Basiszeile: Breite kommt seit 2026-08-20 aus `--ui-container` (90rem,
+  // core main.css) — Kopf, Fuß und Sektionen teilen sich EINE Schranke.
   container: [
     'mt-10 py-0 pt-6 lg:py-0 lg:pt-6',
     'flex flex-wrap items-center justify-between gap-x-6 gap-y-2 lg:gap-x-6',
@@ -307,7 +307,7 @@ const FOOTER_UI = {
   <UFooter class="tone-ink" :ui="FOOTER_UI">
     <!-- Der obere Block trägt seinen Breiten-Container selbst: `UFooter` legt
          nur um die BASISZEILE einen `UContainer`, der `#top`-Slot bekommt
-         keinen. Breite = `--ui-container` (80rem), wie überall seit 2026-08-20. -->
+         keinen. Breite = `--ui-container` (90rem, core main.css), wie überall seit 2026-08-20. -->
     <template #top>
       <UContainer>
         <!-- ALLE STUFEN ARBITRÄR (`min-[…]`), KEINE EINZIGE BENANNTE — und das

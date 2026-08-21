@@ -230,7 +230,7 @@ const HEADER_UI = {
   ].join(' '),
   // KEINE eigene Breite mehr: seit 2026-08-20 (Davids Entscheidung, Original-
   // Tailwind-Maße überall) gilt für Kopf, Fuß und Sektionen dieselbe
-  // `--ui-container`-Schranke (80rem, puka-theme.css) — das frühere
+  // `--ui-container`-Schranke (90rem, core main.css) — das frühere
   // max-w-[72rem] („breiter als die 71rem-Sektionen") wäre jetzt SCHMALER
   // als der Inhalt und kippte die Hierarchie.
   //

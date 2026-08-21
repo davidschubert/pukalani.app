@@ -132,7 +132,7 @@ const links = computed<NavigationMenuItem[]>(() => tabs.value.map(tab => ({
  */
 const containerWidth = computed(() => {
   if (route.path.endsWith('/community/statistics')) return 'lg:max-w-6xl'
-  return route.path.endsWith('/community/members') ? 'lg:max-w-7xl' : 'lg:max-w-3xl'
+  return route.path.endsWith('/community/members') ? 'lg:max-w-(--ui-container)' : 'lg:max-w-3xl'
 })
 </script>
 

@@ -7,23 +7,29 @@ die kleinen, verstreuten Beschlüsse.
 
 ---
 
-## 2026-08-20 — Original-Tailwind-Maße überall: Seitenbreite 80rem
+## 2026-08-20 — Seitenbreite überall 90rem, Vorbild ui.nuxt.com
 
 **Auslöser:** David empfand alle Seiten auf seinem 27-Zoll-Monitor als zu
-schmal (Marketing 71rem, Community-Hülle max-w-5xl = 64rem) und entschied:
-**immer die Original-Breakpoints/-Maße von Tailwind nutzen, für alle Seiten.**
+schmal (Marketing 71rem, Community-Hülle max-w-5xl = 64rem). Erst „immer die
+Original-Breakpoints/-Maße von Tailwind", dann präzisiert: **die Breite von
+ui.nuxt.com ist das Optimum auf dem Desktop** — dort gemessen:
+`--ui-container: 90rem` (1440px), also BREITER als die Nuxt-UI-Vorgabe 80rem.
 
-**Umsetzung:** Die EINE Schranke ist die Nuxt-UI-/Tailwind-Vorgabe 80rem
-(1280px). Marketing: `--ui-container: 80rem` (puka-theme.css), `.mkt-inner`
-77rem (Paar-Rechnung ±3rem steht bei der Variable), Kopf/Fuß ohne eigene
-`max-w-[72/75rem]`-Deckel. Community-Hülle (core- + blueprint-Layout):
-`max-w-5xl` → `max-w-7xl`; Listen-Seiten, die den alten Hüllen-Deckel
-spiegelten (Discussions, Events, Pricing, Badges), verlieren ihren eigenen
-`max-w`-Zusatz und folgen der Hülle. Dashboard-Übersicht/Nutzer-Detail/
-Mitgliederliste ebenso 7xl. **Bewusst schmal bleiben** Lesebreiten und
-Formulare (Feed/Threads 2xl, Artikel/Settings 3xl, Kurs-Katalog 4xl,
-`.mkt-narrow` 46rem) — das sind Original-Tailwind-Stufen, keine eigenen Maße.
-Eigene Breakpoints gab es nie; es ging um die `max-width`-Deckel.
+**Umsetzung:** EINE Variable regiert alles — `:root { --ui-container: 90rem }`
+in core/app/assets/css/main.css; jeder `UContainer` liest sie ohnehin, und die
+Layout-Hüllen (core- + blueprint-Layout) sowie die Dashboard-Deckel
+(Übersicht, Nutzer-Detail, Mitgliederliste) nutzen jetzt
+`max-w-(--ui-container)` statt fester `max-w-5xl`-Klassen (exakt das Muster
+der Nuxt-UI-Site). Marketing überschreibt die Variable NICHT mehr
+(puka-theme.css erklärt nur noch die Paar-Rechnung `.mkt-inner` = 90 − 3 =
+87rem); Kopf/Fuß verlieren ihre eigenen `max-w-[72/75rem]`-Deckel.
+Listen-Seiten, die den alten Hüllen-Deckel spiegelten (Discussions, Events,
+Pricing, Badges), verlieren ihren `max-w`-Zusatz und folgen der Hülle.
+**Bewusst schmal bleiben** Lesebreiten und Formulare (Feed/Threads 2xl,
+Artikel/Settings 3xl, Kurs-Katalog 4xl, `.mkt-narrow` 46rem) — benannte
+Tailwind-Stufen. Eigene Breakpoints gab es nie; es ging um die
+`max-width`-Deckel. Browser-Beweis: Kopf, Sektionen, Fuß, Hülle und Listen
+alle 1440px — deckungsgleich mit ui.nuxt.com.
 
 **Auslöser:** David fragte, warum der Owner von freelancer.supply den
 Menüpunkt „Instance" (/dashboard/admin) nicht sieht. Die Antwort (E9: das Menü
