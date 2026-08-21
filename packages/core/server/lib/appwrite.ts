@@ -40,7 +40,21 @@ export function setSessionCookie(event: H3Event, secret: string, expire: string,
     path: '/',
     httpOnly: true,
     secure: partitioned ? true : !import.meta.dev,
-    sameSite: partitioned ? 'none' : 'strict',
+    /**
+     * `lax`, NICHT `strict` (U14-Livefund, 2026-08-20): ein Strict-Cookie
+     * wird auf einer Top-Level-Navigation, deren Redirect-Kette EXTERN begann,
+     * nicht mitgeschickt. Genau das ist der Google-Login: accounts.google.com
+     * → Appwrite-Callback → unser Callback → 302 auf `/` — die erste Seite
+     * nach der Anmeldung kam damit OHNE Session an und zeigte dem frisch
+     * angemeldeten Menschen den „Anmelden"-Knopf, bis er von Hand neu lud.
+     * `lax` ist die Standardwahl für Session-Cookies aus genau diesem Grund:
+     * Cross-Site-POSTs (CSRF-Fläche) tragen es weiterhin NICHT, und alle
+     * Mutationen dieses Hauses sind POST/PATCH/DELETE; als zweites Netz steht
+     * `03.csrf-origin.ts` bereit. Wer hier zurück auf `strict` dreht, bricht
+     * jeden OAuth-Rückweg — und sieht es nur als „komisch, erst nach Reload
+     * eingeloggt".
+     */
+    sameSite: partitioned ? 'none' : 'lax',
     partitioned,
   })
 }
