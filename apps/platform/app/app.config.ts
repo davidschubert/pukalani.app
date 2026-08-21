@@ -105,7 +105,14 @@ export default defineAppConfig({
      * kommentieren kann (CHIPS-partitioniertes Cookie). Gehört zwingend zum
      * Embed-Produkt unten — und zwingend zu `security.csrfOriginCheck`.
      */
-    auth: { otp: true, embedSession: true },
+    /**
+     * `providers: ['google']` sagt nur „diese App BIETET Google an" — wirksam
+     * wird der Knopf erst, wenn die Instanz auch die Credentials hat
+     * (NUXT_PUBLIC_AUTH_OAUTH_PROVIDERS=google in der Server-.env, U14).
+     * Beides muss stehen; so bleibt der Knopf auf Dev/CI/Playground, die
+     * diese Config erben, ohne Env-Schalter unsichtbar statt tot.
+     */
+    auth: { otp: true, embedSession: true, providers: ['google'] },
     /**
      * PFLICHT, sobald `auth.embedSession` an ist: das partitionierte Cookie
      * ist `SameSite=None`, sameSite schützt also nicht mehr vor fremden
