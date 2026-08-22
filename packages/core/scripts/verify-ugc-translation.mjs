@@ -26,6 +26,13 @@
  *      geliefert. Die Lektion ist der schärfste der drei Fälle — ihre Route
  *      trägt dieselben fünf Vorprüfungen wie das Lesen (Einschreibung inklusive),
  *      und der Beweis geht deshalb durch die echte Einschreibung.
+ *   3d. SCHON IN DER ZIELSPRACHE (Davids Entscheidung 2026-08-21): derselbe
+ *      englische Beitrag, nach 'en' „übersetzt" — das Modell antwortet mit dem
+ *      Marker statt mit einem bezahlten Echo, die Route cacht die GRUNDFASSUNG,
+ *      und der zweite Abruf ist deshalb ein Cache-Treffer (ein verworfener
+ *      Same-Fall bezahlte bei jedem Klick aufs Neue dafür, nichts zu tun).
+ *      GEGENPROBE: der Marker ist kein Freibrief — dieselbe Zeile trägt daneben
+ *      eine echte deutsche Fassung, die vom Original verschieden ist.
  *   4. BEARBEITEN LEERT DEN CACHE: nach `PATCH` mit neuem Text steht die
  *      `translations`-Spalte der Zeile auf '' — die alte Fassung wäre eine
  *      stille Lüge gewesen.
@@ -160,6 +167,35 @@ try {
   const rowAfter = await tablesDB.getRow({ databaseId, tableId: 'community_posts', rowId: postId })
   const stored = JSON.parse(rowAfter.translations || '{}')
   check('Fassung liegt in der Zeile (translations.de)', stored?.de?.body === t1.json?.body)
+
+  // ── Schon in der Zielsprache: Marker statt Echo, aber GECACHT ────────────
+  /**
+   * Derselbe ENGLISCHE Beitrag, diesmal nach 'en'. Das Modell soll nicht
+   * übersetzen, sondern `{"same": true}` antworten; die Route legt daraufhin die
+   * GRUNDFASSUNG in die Spalte. Beides wird hier gemessen — der Body IST das
+   * Original, und der zweite Abruf ist ein Cache-Treffer. Ein verworfener
+   * Same-Fall sähe im ersten Aufruf genauso aus und bezahlte trotzdem jeden
+   * weiteren Klick.
+   */
+  const s1 = await call('POST', `/api/posts/${postId}/translate`, { cookie, body: { locale: 'en' } })
+  check('Gleiche Sprache: 200 + Antwort-Body IST das Original',
+    s1.status === 200 && s1.json?.body === POST_BODY,
+    `Status ${s1.status}: ${s1.text?.slice(0, 200)}`)
+  const s2 = await call('POST', `/api/posts/${postId}/translate`, { cookie, body: { locale: 'en' } })
+  check('Gleiche Sprache: 2. Abruf cached:true (der Same-Fall wurde GECACHT, nicht verworfen)',
+    s2.status === 200 && s2.json?.cached === true && s2.json?.body === POST_BODY,
+    `Status ${s2.status}: ${s2.text?.slice(0, 200)}`)
+
+  /**
+   * GEGENPROBE: der Marker darf kein Freibrief sein. Dieselbe Zeile trägt
+   * daneben die deutsche Fassung von oben — wäre der Zweig „gib immer das
+   * Original zurück", stünde dort derselbe englische Text.
+   */
+  const rowBothLocales = await tablesDB.getRow({ databaseId, tableId: 'community_posts', rowId: postId })
+  const both = JSON.parse(rowBothLocales.translations || '{}')
+  check('Gegenprobe: en = Original, de = echte Übersetzung (beides nebeneinander in der Spalte)',
+    both?.en?.body === POST_BODY && Boolean(both?.de?.body) && both.de.body !== POST_BODY,
+    `translations=${JSON.stringify(both)?.slice(0, 240)}`)
 
   // ── Bearbeiten: echter Edit leert, No-op-Edit lässt stehen ───────────────
   const noop = await call('PATCH', `/api/posts/${postId}`, { cookie, body: { title: POST_TITLE, body: POST_BODY } })

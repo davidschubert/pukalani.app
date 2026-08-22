@@ -1,4 +1,9 @@
-import { ugcTranslationErrorKey, ugcTranslationFor, type UgcTranslationEntry } from '../../shared/ugcTranslations'
+import {
+  ugcTranslationErrorKey,
+  ugcTranslationFor,
+  ugcTranslationIsOriginal,
+  type UgcTranslationEntry,
+} from '../../shared/ugcTranslations'
 
 /**
  * DER KNOPF „ÜBERSETZEN" AN EINEM INHALT (Paket 3 zu Davids Entscheidungen
@@ -37,6 +42,17 @@ import { ugcTranslationErrorKey, ugcTranslationFor, type UgcTranslationEntry } f
  * Seitenwechsel). Deshalb gibt es `fetched` neben der Spalte — die Spalte
  * gewinnt, sobald sie etwas sagt, und jede Änderung an ihr wirft den eigenen
  * Merker weg (sie ist die Wahrheit, er war nur die Überbrückung).
+ *
+ * ── SCHON IN DER ZIELSPRACHE (Davids Entscheidung 2026-08-21) ─────────────
+ * Wer einen englischen Text bei englischer Spracheinstellung übersetzen lässt,
+ * bekam bis dahin ein bezahltes Echo und einen Umschalter zwischen zwei
+ * identischen Fassungen. Jetzt setzt das Modell einen Marker, die Route cacht
+ * die GRUNDFASSUNG (damit der zweite Klick nichts mehr kostet) — und hier fällt
+ * die Anzeige-Entscheidung: `showing` bleibt AUS, stattdessen ein neutraler
+ * Hinweis. Erkannt wird der Fall per GLEICHHEITS-VERGLEICH
+ * (`ugcTranslationIsOriginal`), nicht an einem Flag in der Antwort: der Cache
+ * reist in jeder Listen-Antwort mit und wird von späteren Lesern aufgeschlagen,
+ * die nie eine Route gerufen haben — ein Antwort-Flag sähen die nie.
  *
  * ── WARUM ES KEIN „IST KI VERFÜGBAR?"-FLAG GIBT ───────────────────────────
  * Gesucht, nicht gefunden: `isAiConfigured()` ist eine SERVER-Auskunft aus Env/DB
@@ -95,11 +111,32 @@ export function useUgcTranslation(source: UgcTranslationSource) {
    */
   const canTranslate = computed(() => isLoggedIn.value && source.body().trim().length > 0)
 
+  /**
+   * Die vorliegende Fassung IST die Grundfassung — es gibt nichts umzuschalten
+   * (siehe Kopf). Gilt für beide Quellen: die Spalte und den eigenen Merker.
+   */
+  const sameLanguage = computed(() => ugcTranslationIsOriginal(entry.value, source.body()))
+
+  /** Der Hinweis statt des sinnlosen Umschalters — neutral, kein Fehler. */
+  function noticeSameLanguage() {
+    toast.add({
+      title: t('translation.sameLanguage'),
+      description: t('translation.sameLanguageHint'),
+      color: 'info',
+    })
+  }
+
   async function show() {
     if (busy.value) return
     // Schon da (aus der Spalte oder vom letzten Klick): sofort tauschen, kein
     // Abruf. Genau dafür reist die Spalte in den Listen-Antworten mit.
     if (entry.value) {
+      // …es sei denn, die „Übersetzung" ist der Originaltext: dann wäre der
+      // Umschalter eine Lüge über zwei identische Fassungen.
+      if (sameLanguage.value) {
+        noticeSameLanguage()
+        return
+      }
       showing.value = true
       return
     }
@@ -109,8 +146,19 @@ export function useUgcTranslation(source: UgcTranslationSource) {
     busy.value = true
     try {
       const result = await source.translate(target)
+      /**
+       * Der Merker wird AUCH im Gleichheits-Fall gesetzt: er ist die
+       * Überbrückung, bis die Zeile den Cache trägt, und macht den nächsten
+       * Klick abruffrei — der landet dann oben im Treffer-Zweig und zeigt
+       * denselben Hinweis, ohne die Route noch einmal zu rufen.
+       */
       fetched.value = { locale: target, entry: result }
-      if (locale.value === target) showing.value = true
+      if (locale.value !== target) return
+      if (ugcTranslationIsOriginal(result, source.body())) {
+        noticeSameLanguage()
+        return
+      }
+      showing.value = true
     }
     catch (error) {
       const status = (error as { status?: number, statusCode?: number } | null)?.status
@@ -140,6 +188,10 @@ export function useUgcTranslation(source: UgcTranslationSource) {
     canTranslate,
     /** Steht gerade die Übersetzung da? */
     showing,
+    /** Ist die vorliegende Fassung in Wahrheit die Grundfassung? Dann gibt es
+     *  nichts umzuschalten — die Oberfläche zeigt einen Hinweis statt zweier
+     *  identischer Fassungen. */
+    sameLanguage,
     busy,
     /** Die anzuzeigende Fassung — `null` heißt „es gibt keine". */
     entry,

@@ -415,6 +415,8 @@
       "dailyLimit": "Daily limit reached",
       "dailyLimitHint": "You have translated a lot today. It continues tomorrow.",
     "failed": "Translation failed",
-    "failedHint": "Please try again."
+    "failedHint": "Please try again.",
+    "sameLanguage": "Already in your language",
+    "sameLanguageHint": "This text is already written in your language."
   }
 }

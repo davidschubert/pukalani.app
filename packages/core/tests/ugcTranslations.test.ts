@@ -12,6 +12,7 @@ import {
   ugcTranslationDayKey,
   ugcTranslationErrorKey,
   ugcTranslationFor,
+  ugcTranslationIsOriginal,
 } from '../shared/ugcTranslations'
 
 const withEn = JSON.stringify({ en: { title: 'A title', body: 'The text.' } })
@@ -30,6 +31,40 @@ describe('ugcTranslationFor — welche Fassung in welcher Sprache', () => {
   it('lässt den Titel weg, wo das Original keinen hat', () => {
     const raw = JSON.stringify({ en: { body: 'Just text.' } })
     expect(ugcTranslationFor(raw, 'en')).toEqual({ body: 'Just text.' })
+  })
+})
+
+describe('ugcTranslationIsOriginal — „schon in deiner Sprache"', () => {
+  const original = 'The text.'
+
+  it('erkennt die wörtlich gecachte Grundfassung', () => {
+    // Genau das legt die Route ab, wenn das Modell `{"same": true}` antwortet:
+    // die Grundfassung — damit der zweite Klick ein Cache-Treffer bleibt.
+    expect(ugcTranslationIsOriginal({ body: original }, original)).toBe(true)
+  })
+
+  it('erkennt sie auch mit anderen Rändern (Whitespace zählt nicht)', () => {
+    // Der Spalten-Cache wird beim Normalisieren getrimmt, der Originaltext auf
+    // der Zeile nicht — sonst hinge die Erkennung an einem Zeilenumbruch.
+    expect(ugcTranslationIsOriginal({ body: original }, `\n  ${original}  `)).toBe(true)
+    expect(ugcTranslationIsOriginal({ body: `  ${original} ` }, original)).toBe(true)
+  })
+
+  it('lässt einen abweichenden Titel unberücksichtigt', () => {
+    // Bewusst nur der Body: der comments-Konsument hat keinen Titel, und ein
+    // Modell-Echo eines gleichsprachigen Texts ist am Body erkennbar.
+    expect(ugcTranslationIsOriginal({ title: 'Anderer Titel', body: original }, original)).toBe(true)
+  })
+
+  it('sagt Nein bei einer echten Übersetzung', () => {
+    expect(ugcTranslationIsOriginal({ body: 'Der Text.' }, original)).toBe(false)
+    expect(ugcTranslationIsOriginal({ body: `${original} Und mehr.` }, original)).toBe(false)
+  })
+
+  it('sagt Nein, wenn es gar keine Fassung gibt', () => {
+    // `null` heißt „nicht übersetzt" — das ist das FEHLEN der Grundfassung,
+    // nicht sie selbst. Dort steht der gewöhnliche Knopf, kein Hinweis.
+    expect(ugcTranslationIsOriginal(null, original)).toBe(false)
   })
 })
 
