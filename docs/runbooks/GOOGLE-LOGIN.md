@@ -3,7 +3,7 @@
 **EINGESCHALTET am 2026-08-21** (Google-Projekt „Pukalani",
 `silver-area-506109-a4`, Appwrite-Projekt `account`; end-to-end bewiesen —
 COMPLETE-Eintrag U14). Dieses Runbook bleibt das Rezept für WEITERE Projekte
-(z. B. `admin`: gleiche Credentials, Redirect-URI endet auf `/control`).
+(z. B. die Betreiber-Konsole: eigener Client, Redirect-URI endet auf `/admin`).
 Zwei Fallen, die beim Einschalten live gefunden wurden und im Code verdrahtet
 sind: SSR-Seiten brauchen `Cache-Control: no-cache` (core-Plugin
 `html-no-cache.ts`), und das Session-Cookie MUSS `sameSite: 'lax'` sein —
@@ -70,9 +70,11 @@ unterscheiden — es ist dieselbe `setSessionCookie()` wie in `login.post.ts`.
      https://api.pukalani.app/v1/account/sessions/oauth2/callback/google/account
      ```
 
-     (`account` ist die Projekt-Id; für die Betreiber-Konsole hieße sie
-     `control`, lokal `pool`. Appwrite zeigt die fertige Zeile in Schritt 2
-     unten selbst an — von dort kopieren ist sicherer als tippen.)
+     (`account` ist die Projekt-Id; für die Betreiber-Konsole heisst sie
+     **`admin`**, lokal `pool`. NICHT `control` — dieses Projekt ist seit dem
+     2026-08-19 gelöscht, eine Redirect-URI darauf schickt den Anmeldeversuch
+     ins Leere. Appwrite zeigt die fertige Zeile in Schritt 2 unten selbst an
+     — von dort kopieren ist sicherer als tippen.)
    - **Authorized JavaScript origins** bleibt leer (wir starten den Flow
      serverseitig, nicht aus dem Browser).
 4. **Client ID** und **Client secret** notieren.
@@ -87,8 +89,10 @@ unterscheiden — es ist dieselbe `setSessionCookie()` wie in `login.post.ts`.
 
 ## 2 · Appwrite Console (je Projekt, das Google anbieten soll)
 
-Für jedes Projekt einzeln: `account` (Kundenbereich + alle Pool-Communities),
-optional `control` (Betreiber-Konsole).
+Für jedes Projekt einzeln: `account` (Kundenbereich + alle Pool-Communities)
+und `admin` (Betreiber-Konsole). Jedes Appwrite-Projekt braucht einen EIGENEN
+OAuth-Client in der Google Cloud, weil die Redirect-URI die Projekt-Id trägt —
+der Client von `account` gilt für `admin` nicht.
 
 1. Console → Projekt wählen → **Auth → Settings**
 2. In der Liste **Google** öffnen
