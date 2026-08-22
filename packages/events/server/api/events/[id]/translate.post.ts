@@ -82,13 +82,14 @@ function buildPrompt(row: EventRow, locale: string): string {
     '- Inhalte von Code-Spans und Codeblöcken bleiben UNVERÄNDERT stehen, auch wenn dort Wörter der Ausgangssprache vorkommen.',
     '- Erwähnungen (@name), URLs, Datums- und Zeitangaben, Ortsnamen und Anschriften bleiben UNVERÄNDERT stehen.',
     '- Eigennamen, Produktnamen und Fachbegriffe, die auch in der Zielsprache unübersetzt benutzt werden, bleiben stehen.',
-    '- Ist der Text schon in der Zielsprache, gib ihn unverändert zurück.',
+    '- Ist der Text bereits vollständig in der Zielsprache, übersetze NICHT: Antworte stattdessen NUR mit {"same": true} und wiederhole den Text nicht.',
     '',
     'Antworte NUR mit einem JSON-Objekt (kein Markdown, keine Erklärung außenrum):',
     '{',
     '  "title": "<der übersetzte Titel>",',
     '  "body": "<die übersetzte Beschreibung>"',
     '}',
+    'Oder, wenn der Text bereits in der Zielsprache ist: {"same": true}',
   ].join('\n')
 }
 
@@ -212,20 +213,47 @@ export default defineEventHandler(async (event): Promise<EventTranslateResponse>
 
   // Laufzeit-Override vor Build-Default (getEffectiveAiConfig, system-016).
   const aiConfig = await getEffectiveAiConfig(event)
-  const parsed = await aiCompleteJson<{ title?: unknown, body?: unknown }>(
+  const parsed = await aiCompleteJson<{ title?: unknown, body?: unknown, same?: unknown }>(
     event,
     buildPrompt(row, locale),
     { model: aiConfig.model, maxTokens: 8000, label: 'events' },
   )
 
-  // Klemmen statt vertrauen — die Antwort ist eine Behauptung, und sie geht in
-  // eine Spalte, deren Grenzen die des Originals sind.
-  const title = String(parsed.title ?? '').trim().slice(0, MAX_EVENT_TITLE)
-  const body = String(parsed.body ?? '').trim().slice(0, MAX_EVENT_DESCRIPTION)
-  if (!body) {
-    // Ohne Text gibt es nichts zu zeigen und nichts zu merken. 502 wie überall,
-    // wo der Anbieter etwas Unbrauchbares geliefert hat.
-    throw createError({ status: 502, statusText: 'AI returned no translation' })
+  let title: string
+  let body: string
+  if (parsed.same === true) {
+    /**
+     * SCHON IN DER ZIELSPRACHE (Davids Entscheidung 2026-08-21).
+     *
+     * Das Modell hat den Marker gesetzt, statt die Ankündigung Wort für Wort
+     * zurückzuechoen — die halbe Rechnung gespart. Gecacht wird trotzdem, und
+     * zwar die GRUNDFASSUNG wörtlich: genau das macht jeden weiteren Klick
+     * kostenlos (er trifft ab jetzt den Cache-Zweig ganz oben). Ein verworfener
+     * `same`-Fall wäre der teuerste von allen — er bezahlte bei jedem Klick
+     * aufs Neue dafür, nichts zu tun.
+     *
+     * Die Antwort trägt KEIN Flag: der Client erkennt die Gleichheit selbst
+     * (`ugcTranslationIsOriginal`) und zeigt statt des sinnlosen Umschalters
+     * einen Hinweis. Ein Flag wüsste nur dieser eine Aufruf — spätere Leser
+     * sehen den Cache aus der Spalte und hätten nichts davon.
+     *
+     * Weder klemmen noch die 502-Prüfung: beides kommt aus der ZEILE, nicht vom
+     * Anbieter — es steht längst in seinen Grenzen, und die leere Beschreibung
+     * hat die Vorprüfung oben bereits abgewiesen.
+     */
+    title = row.title
+    body = row.description
+  }
+  else {
+    // Klemmen statt vertrauen — die Antwort ist eine Behauptung, und sie geht in
+    // eine Spalte, deren Grenzen die des Originals sind.
+    title = String(parsed.title ?? '').trim().slice(0, MAX_EVENT_TITLE)
+    body = String(parsed.body ?? '').trim().slice(0, MAX_EVENT_DESCRIPTION)
+    if (!body) {
+      // Ohne Text gibt es nichts zu zeigen und nichts zu merken. 502 wie überall,
+      // wo der Anbieter etwas Unbrauchbares geliefert hat.
+      throw createError({ status: 502, statusText: 'AI returned no translation' })
+    }
   }
 
   // Ein leerer Titel ist KEIN Titel: der Eintrag trägt das Feld dann nicht, und

@@ -79,12 +79,13 @@ function buildPrompt(content: string, locale: string): string {
     '- Inhalte von Code-Spans und Codeblöcken bleiben UNVERÄNDERT stehen, auch wenn dort Wörter der Ausgangssprache vorkommen.',
     '- Erwähnungen (@name), Themen-Verweise (#id) und URLs bleiben UNVERÄNDERT stehen.',
     '- Eigennamen, Produktnamen und Fachbegriffe, die auch in der Zielsprache unübersetzt benutzt werden, bleiben stehen.',
-    '- Ist der Text schon in der Zielsprache, gib ihn unverändert zurück.',
+    '- Ist der Text bereits vollständig in der Zielsprache, übersetze NICHT: Antworte stattdessen NUR mit {"same": true} und wiederhole den Text nicht.',
     '',
     'Antworte NUR mit einem JSON-Objekt (kein Markdown, keine Erklärung außenrum):',
     '{',
     '  "body": "<der übersetzte Text>"',
     '}',
+    'Oder, wenn der Text bereits in der Zielsprache ist: {"same": true}',
   ].join('\n')
 }
 
@@ -198,17 +199,41 @@ export default defineEventHandler(async (event): Promise<CommentTranslateRespons
 
   // Laufzeit-Override vor Build-Default (getEffectiveAiConfig, system-016).
   const aiConfig = await getEffectiveAiConfig(event)
-  const parsed = await aiCompleteJson<{ body?: unknown }>(
+  const parsed = await aiCompleteJson<{ body?: unknown, same?: unknown }>(
     event,
     buildPrompt(comment.content, locale),
     { model: aiConfig.model, maxTokens: 8000, label: 'comments' },
   )
 
-  // Klemmen statt vertrauen — die Antwort ist eine Behauptung, und sie geht in
-  // eine Spalte, deren Grenze die des Originals ist.
-  const body = String(parsed.body ?? '').trim().slice(0, MAX_COMMENT_CONTENT)
-  if (!body) {
-    throw createError({ status: 502, statusText: 'AI returned no translation' })
+  let body: string
+  if (parsed.same === true) {
+    /**
+     * SCHON IN DER ZIELSPRACHE (Davids Entscheidung 2026-08-21).
+     *
+     * Das Modell hat den Marker gesetzt, statt die Antwort Wort für Wort
+     * zurückzuechoen — die halbe Rechnung gespart. Gecacht wird trotzdem, und
+     * zwar die GRUNDFASSUNG wörtlich: genau das macht jeden weiteren Klick
+     * kostenlos (er trifft ab jetzt den Cache-Zweig ganz oben). Ein verworfener
+     * `same`-Fall wäre der teuerste von allen — er bezahlte bei jedem Klick
+     * aufs Neue dafür, nichts zu tun.
+     *
+     * Die Antwort trägt KEIN Flag: der Client erkennt die Gleichheit selbst
+     * (`ugcTranslationIsOriginal`) und zeigt statt des sinnlosen Umschalters
+     * einen Hinweis. Ein Flag wüsste nur dieser eine Aufruf — spätere Leser
+     * sehen den Cache aus der Spalte und hätten nichts davon.
+     *
+     * Weder klemmen noch die 502-Prüfung: der Text kommt aus der ZEILE, nicht
+     * vom Anbieter — er steht längst in seinen Grenzen und ist nie leer.
+     */
+    body = comment.content
+  }
+  else {
+    // Klemmen statt vertrauen — die Antwort ist eine Behauptung, und sie geht in
+    // eine Spalte, deren Grenze die des Originals ist.
+    body = String(parsed.body ?? '').trim().slice(0, MAX_COMMENT_CONTENT)
+    if (!body) {
+      throw createError({ status: 502, statusText: 'AI returned no translation' })
+    }
   }
 
   const translations = serializeUgcTranslations({ ...existing, [locale]: { body } })
