@@ -315,7 +315,7 @@ usePortfolioSeo({
       </div>
     </section>
 
-    <!-- ÜBER MICH -------------------------------------------------------- -->
+    <!-- DAS STUDIO (Anker `ueber-mich` bleibt: verlinkt aus Nav, Fuß, Guides) -->
     <section id="ueber-mich" class="section section--line" aria-labelledby="ueber-mich-title">
       <div class="container">
         <h2 id="ueber-mich-title" class="section-title">{{ SECTIONS.about.title[lang] }}</h2>
@@ -690,7 +690,7 @@ usePortfolioSeo({
   transform: translateX(4px);
 }
 
-/* ÜBER MICH ------------------------------------------------------------ */
+/* DAS STUDIO ----------------------------------------------------------- */
 .about {
   display: grid;
   grid-template-columns: 1fr 1fr;

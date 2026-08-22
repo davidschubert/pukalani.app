@@ -5,9 +5,15 @@ import type { TocItem } from './wissenKosten'
  * Inhalte des Guides „Freelancer oder Agentur?"
  * (/wissen/freelancer-oder-agentur · /de/wissen/freelancer-oder-agentur).
  *
- * Der Transparenz-Hinweis bleibt in beiden Sprachen stehen: der Autor IST
- * Freelancer, und ein Vergleich, der das verschweigt, ist Werbung mit
- * Tabellen-Optik.
+ * Der Transparenz-Hinweis bleibt in beiden Sprachen stehen: der Absender ist
+ * selbst Anbieter in diesem Markt, und ein Vergleich, der das verschweigt, ist
+ * Werbung mit Tabellen-Optik.
+ *
+ * DER ARTIKEL BLEIBT RATGEBER, nicht Verkaufstext: die Tabelle vergleicht
+ * weiterhin „Senior-Freelancer" und „Agentur" als MODELLE. Pukalani Studio
+ * steht dazwischen und sagt das genau einmal — im Abschnitt „Wann Agentur?"
+ * als Mittelweg (Senior-Verantwortung und direkter Draht wie beim Freelancer,
+ * Verlässlichkeit und Bandbreite über ein Partnernetz, ohne Agentur-Overhead).
  */
 
 export interface ComparisonRow {
@@ -27,13 +33,13 @@ export const AGENTUR_HERO = {
     en: 'Short answer: a senior freelancer is the better choice for clearly defined design and web projects up to roughly €75,000 — direct contact, 30–50% lower cost, faster decisions. An agency pays off when you need many disciplines at once, very large capacity or long-term support with guaranteed cover.',
   } satisfies Localized,
   bylineRole: {
-    de: '– Senior UI/UX Designer & Creative Technologist, 25+ Jahre Erfahrung (Agentur- und Freelancer-Seite)',
-    en: '— senior UI/UX designer & creative technologist, 25+ years of experience (on both the agency and the freelance side)',
+    de: '– Pukalani Studio · Senior UI/UX Designer & Creative Technologist, 25+ Jahre Erfahrung (Agentur- und Freelancer-Seite)',
+    en: '— Pukalani Studio · senior UI/UX designer & creative technologist, 25+ years of experience (on both the agency and the freelance side)',
   } satisfies Localized,
   disclosureLabel: { de: 'Transparenz:', en: 'Disclosure:' } satisfies Localized,
   disclosure: {
-    de: 'Ich bin selbst Freelancer – dieser Vergleich nennt deshalb bewusst auch die Fälle, in denen eine Agentur die bessere Wahl ist.',
-    en: 'I am a freelancer myself — which is why this comparison deliberately names the cases where an agency is the better choice.',
+    de: 'Wir sind selbst Anbieter in diesem Markt: Pukalani Studio arbeitet als kleines Senior-Studio und damit näher am Freelancer-Modell als an der Agentur. Dieser Vergleich nennt deshalb bewusst auch die Fälle, in denen eine Agentur die bessere Wahl ist.',
+    en: 'We are a provider in this market ourselves: Pukalani Studio works as a small senior studio, and that puts us closer to the freelance model than to the agency one. Which is why this comparison deliberately names the cases where an agency is the better choice.',
   } satisfies Localized,
 }
 
@@ -154,8 +160,8 @@ export const AGENTUR_COSTS = {
   } satisfies Localized,
   paragraph2Emphasis: { de: 'wirksame', en: 'effective' } satisfies Localized,
   paragraph2Middle: {
-    de: 'Senior-Zeit: In Agenturen arbeiten nach dem Verkaufsgespräch oft Junior- und Mid-Level-Designer am Projekt, während der Senior-Anteil in Reviews steckt. Beim Freelancer ist jede bezahlte Stunde Senior-Zeit. Ich selbst arbeite deshalb mit',
-    en: 'senior time: in agencies, junior and mid-level designers often work on the project after the sales meeting, while the senior share sits in reviews. With a freelancer every paid hour is senior time. That is why I work with',
+    de: 'Senior-Zeit: In Agenturen arbeiten nach dem Verkaufsgespräch oft Junior- und Mid-Level-Designer am Projekt, während der Senior-Anteil in Reviews steckt. Beim Freelancer ist jede bezahlte Stunde Senior-Zeit. Wir arbeiten deshalb mit',
+    en: 'senior time: in agencies, junior and mid-level designers often work on the project after the sales meeting, while the senior share sits in reviews. With a freelancer every paid hour is senior time. That is why we work with',
   } satisfies Localized,
   paragraph2LinkLabel: {
     de: 'festen Projektpreisen statt Stundensätzen',
@@ -218,8 +224,8 @@ export const AGENTUR_AGENCY_FIT = {
     ],
   } satisfies Localized<string[]>,
   note: {
-    de: 'Ein Mittelweg: Viele Senior-Freelancer – ich eingeschlossen – arbeiten mit einem Netzwerk aus spezialisierten Partnern (Entwicklung, Content, Fotografie). Sie bekommen dann Freelancer-Konditionen mit erweiterter Kapazität, aber weiterhin einem einzigen Ansprechpartner.',
-    en: 'A middle path: many senior freelancers — myself included — work with a network of specialised partners (development, content, photography). You then get freelance terms with extended capacity, but still a single point of contact.',
+    de: 'Es gibt einen Mittelweg – und dort arbeiten wir: Ein kleines Senior-Studio wie Pukalani Studio gibt Ihnen die Senior-Verantwortung und den direkten Draht des Freelancers, holt für Spezialdisziplinen (Entwicklung, Content, Fotografie) aber feste Partner dazu. Sie bekommen Verlässlichkeit und Bandbreite in Richtung Agentur, ohne deren Wasserkopf zu bezahlen – und behalten einen einzigen Ansprechpartner.',
+    en: 'There is a middle path — and that is where we work: a small senior studio like Pukalani Studio gives you the senior accountability and the direct line of a freelancer, but brings in established partners for specialist disciplines (development, content, photography). You get reliability and breadth closer to an agency without paying for its overhead — and you keep a single point of contact.',
   } satisfies Localized,
 }
 
@@ -289,8 +295,8 @@ export const AGENTUR_FAQS: LocalizedFaq[] = [
       en: 'Found a freelancer — how do I start with low risk?',
     },
     answer: {
-      de: 'Mit einem kleinen, klar definierten Einstiegsprojekt: Ein UX-Audit (bei mir €2.500–5.000, ein bis zwei Wochen) zeigt Arbeitsweise, Kommunikationsstil und Qualität, bevor Sie ein großes Redesign beauftragen. Gute Freelancer rechnen die Audit-Kosten bei Folgeprojekten teilweise an.',
-      en: 'With a small, clearly defined entry project: a UX audit (€2,500–5,000 with me, one to two weeks) shows how I work, how I communicate and the quality I deliver before you commission a large redesign. Good freelancers credit part of the audit fee against follow-up projects.',
+      de: 'Mit einem kleinen, klar definierten Einstiegsprojekt: Ein UX-Audit (bei uns €2.500–5.000, ein bis zwei Wochen) zeigt Arbeitsweise, Kommunikationsstil und Qualität, bevor Sie ein großes Redesign beauftragen. Gute Anbieter rechnen die Audit-Kosten bei Folgeprojekten teilweise an.',
+      en: 'With a small, clearly defined entry project: a UX audit (€2,500–5,000 with us, one to two weeks) shows how a provider works, communicates and delivers before you commission a large redesign. Good providers credit part of the audit fee against follow-up projects.',
     },
   },
 ]
@@ -298,8 +304,8 @@ export const AGENTUR_FAQS: LocalizedFaq[] = [
 export const AGENTUR_CONCLUSION = {
   title: { de: 'Fazit', en: 'Conclusion' } satisfies Localized,
   text: {
-    de: 'Für die meisten Design- und Web-Projekte im Mittelstand und bei SaaS-Unternehmen liefert ein Senior-Freelancer das bessere Preis-Leistungs-Verhältnis: Sie zahlen ausschließlich für Senior-Arbeit, entscheiden schneller und bleiben flexibler. Eine Agentur ist die richtige Wahl bei sehr großen, multidisziplinären Vorhaben mit hohem Kapazitätsbedarf. Prüfen Sie in beiden Fällen dasselbe: nachweisbare Ergebnisse, klare Prozesse und wer konkret an Ihrem Projekt arbeitet.',
-    en: 'For most design and web projects in the German Mittelstand and at SaaS businesses, a senior freelancer delivers the better value: you pay exclusively for senior work, decide faster and stay more flexible. An agency is the right choice for very large, multidisciplinary undertakings with high capacity requirements. In both cases check the same things: demonstrable results, clear processes and who exactly will work on your project.',
+    de: 'Für die meisten Design- und Web-Projekte im Mittelstand und bei SaaS-Unternehmen liefert ein Senior-Freelancer – oder ein kleines Senior-Studio – das bessere Preis-Leistungs-Verhältnis: Sie zahlen ausschließlich für Senior-Arbeit, entscheiden schneller und bleiben flexibler. Eine Agentur ist die richtige Wahl bei sehr großen, multidisziplinären Vorhaben mit hohem Kapazitätsbedarf. Prüfen Sie in beiden Fällen dasselbe: nachweisbare Ergebnisse, klare Prozesse und wer konkret an Ihrem Projekt arbeitet.',
+    en: 'For most design and web projects in the German Mittelstand and at SaaS businesses, a senior freelancer — or a small senior studio — delivers the better value: you pay exclusively for senior work, decide faster and stay more flexible. An agency is the right choice for very large, multidisciplinary undertakings with high capacity requirements. In both cases check the same things: demonstrable results, clear processes and who exactly will work on your project.',
   } satisfies Localized,
 }
 
@@ -309,8 +315,8 @@ export const AGENTUR_CTA = {
     en: 'Talk to a senior directly',
   } satisfies Localized,
   text: {
-    de: 'Sie möchten wissen, ob Ihr Projekt zu einem Freelancer passt? Buchen Sie ein kostenloses Erstgespräch – ich sage Ihnen auch ehrlich, wenn eine Agentur die bessere Wahl ist.',
-    en: 'Want to know whether your project suits a freelancer? Book a free intro call — I will also tell you honestly when an agency is the better choice.',
+    de: 'Sie möchten wissen, welches Modell zu Ihrem Projekt passt? Buchen Sie ein kostenloses Erstgespräch – wir sagen Ihnen auch ehrlich, wenn eine Agentur die bessere Wahl ist.',
+    en: 'Want to know which model suits your project? Book a free intro call — we will also tell you honestly when an agency is the better choice.',
   } satisfies Localized,
 }
 

@@ -8,6 +8,11 @@ import type { Localized, LocalizedFaq } from './localized'
  * verlinkte und indexierte Adresse aus dem alten Repo — ein übersetzter Slug
  * hätte einen zweiten Redirect-Fall erzeugt, ohne dass jemand danach sucht
  * („Nuxt Entwickler Freelancer" IST das gesuchte Keyword).
+ *
+ * ABSENDER IST DAS STUDIO, das KEYWORD bleibt: „Freelancer" beschreibt hier
+ * die BUCHUNGSFORM (flexibel, direkt, ohne Rahmenvertrag), nicht mehr den
+ * Absender. Titel, H1 und Brotkrume tragen das gesuchte Wort deshalb weiter,
+ * der Fließtext spricht als „wir".
  */
 
 export interface NuxtBenefit {
@@ -33,12 +38,12 @@ export const NUXT_HERO = {
     en: 'Freelance Nuxt developer',
   } satisfies Localized,
   title: {
-    de: 'Nuxt Entwickler Freelancer: Nuxt 4, Vue 3 & TypeScript',
-    en: 'Freelance Nuxt developer: Nuxt 4, Vue 3 & TypeScript',
+    de: 'Nuxt Entwickler Freelancer: Nuxt 4, Vue 3 & TypeScript aus dem Pukalani Studio',
+    en: 'Freelance Nuxt developer: Nuxt 4, Vue 3 & TypeScript from Pukalani Studio',
   } satisfies Localized,
   intro: {
-    de: 'David Schubert ist Freelance Nuxt-Entwickler und Senior UI/UX Designer mit über 25 Jahren Web-Erfahrung. Er entwickelt SaaS-Frontends, Corporate Websites und Landingpages mit Nuxt 4, Vue 3, TypeScript und Tailwind CSS 4 – remote für Teams in Deutschland, Österreich und der Schweiz, zu festen Projektpreisen. Die Besonderheit: Design und Entwicklung kommen aus einer Hand.',
-    en: 'David Schubert is a freelance Nuxt developer and senior UI/UX designer with more than 25 years of web experience. He builds SaaS frontends, corporate websites and landing pages with Nuxt 4, Vue 3, TypeScript and Tailwind CSS 4 — remote for teams in Germany, Austria and Switzerland, at fixed project prices. What makes it different: design and development come from the same pair of hands.',
+    de: 'Nuxt-Entwicklung auf Senior-Niveau aus dem Pukalani Studio – flexibel buchbar wie ein Freelancer. Wir entwickeln SaaS-Frontends, Corporate Websites und Landingpages mit Nuxt 4, Vue 3, TypeScript und Tailwind CSS 4 – remote für Teams in Deutschland, Österreich und der Schweiz, zu festen Projektpreisen. Hinter dem Studio steht David Schubert, Senior UI/UX Designer und Creative Technologist mit über 25 Jahren Web-Erfahrung. Die Besonderheit: Design und Entwicklung kommen aus einer Hand.',
+    en: 'Senior-level Nuxt development from Pukalani Studio — bookable as flexibly as a freelancer. We build SaaS frontends, corporate websites and landing pages with Nuxt 4, Vue 3, TypeScript and Tailwind CSS 4 — remote for teams in Germany, Austria and Switzerland, at fixed project prices. Behind the studio is David Schubert, senior UI/UX designer and creative technologist with more than 25 years of web experience. What makes it different: design and development come from the same pair of hands.',
   } satisfies Localized,
   ctaPrimary: {
     de: 'Kostenloses Erstgespräch (30 Min)',
@@ -105,8 +110,8 @@ export const NUXT_BENEFITS: NuxtBenefit[] = [
 export const NUXT_SERVICES_HEADING = {
   title: { de: 'Nuxt-Entwicklung: Leistungen', en: 'Nuxt development: services' } satisfies Localized,
   lead: {
-    de: 'Von der Landingpage bis zur Web-App mit Backend: Ich klassifiziere jedes Projekt als Erlebnis-Website, App oder Hybrid – daraus ergibt sich der passende technische Zuschnitt.',
-    en: 'From the landing page to a web app with a backend: I classify every project as an experience website, an app or a hybrid — and that determines the right technical setup.',
+    de: 'Von der Landingpage bis zur Web-App mit Backend: Wir klassifizieren jedes Projekt als Erlebnis-Website, App oder Hybrid – daraus ergibt sich der passende technische Zuschnitt.',
+    en: 'From the landing page to a web app with a backend: we classify every project as an experience website, an app or a hybrid — and that determines the right technical setup.',
   } satisfies Localized,
 }
 
@@ -162,14 +167,14 @@ export const NUXT_SERVICES: NuxtService[] = [
 ]
 
 export const NUXT_STACK_HEADING = {
-  title: { de: 'Mein Nuxt-Stack im Detail', en: 'My Nuxt stack in detail' } satisfies Localized,
+  title: { de: 'Unser Nuxt-Stack im Detail', en: 'Our Nuxt stack in detail' } satisfies Localized,
   lead: {
     de: 'Ein bewusst schlanker, moderner Stack – konsequent TypeScript, Composition API und CSS-first. Keine Legacy-Patterns, keine Options API.',
     en: 'A deliberately lean, modern stack — TypeScript throughout, Composition API and CSS-first. No legacy patterns, no Options API.',
   } satisfies Localized,
   note: {
-    de: 'Als Senior UI/UX Designer entwerfe ich die Interfaces, die ich entwickle – Sie brauchen keine Übergabe zwischen Designer und Entwickler. Das spart Abstimmung, Zeit und Budget.',
-    en: 'As a senior UI/UX designer I design the interfaces I build — there is no design handoff between designer and developer. That cuts coordination overhead and saves time and budget.',
+    de: 'Wir entwerfen die Interfaces, die wir entwickeln – Design und Code liegen in derselben Senior-Hand. Sie brauchen keine Übergabe zwischen Designer und Entwickler. Das spart Abstimmung, Zeit und Budget.',
+    en: 'We design the interfaces we build — design and code stay in the same senior hands. There is no handoff between designer and developer. That cuts coordination overhead and saves time and budget.',
   } satisfies Localized,
   noteLabel: { de: 'Design + Code:', en: 'Design + code:' } satisfies Localized,
 }
@@ -231,8 +236,8 @@ export const NUXT_FAQS: LocalizedFaq[] = [
       en: 'What does a freelance Nuxt developer cost?',
     },
     answer: {
-      de: 'Ich arbeite mit festen Projektpreisen statt Stundensätzen: Landingpages ab €5.000, Corporate Websites €15.000–35.000, SaaS-Frontends ab €25.000, Audits und Migrationen ab €2.500. Sie erhalten nach dem kostenlosen Erstgespräch innerhalb von 48 Stunden ein Festpreis-Angebot mit definiertem Umfang.',
-      en: 'I work with fixed project prices instead of hourly rates: landing pages from €5,000, corporate websites €15,000–35,000, SaaS frontends from €25,000, audits and migrations from €2,500. After the free intro call you get a fixed-price quote with a defined scope within 48 hours.',
+      de: 'Wir arbeiten mit festen Projektpreisen statt Stundensätzen: Landingpages ab €5.000, Corporate Websites €15.000–35.000, SaaS-Frontends ab €25.000, Audits und Migrationen ab €2.500. Sie erhalten nach dem kostenlosen Erstgespräch innerhalb von 48 Stunden ein Festpreis-Angebot mit definiertem Umfang.',
+      en: 'We work with fixed project prices instead of hourly rates: landing pages from €5,000, corporate websites €15,000–35,000, SaaS frontends from €25,000, audits and migrations from €2,500. After the free intro call you get a fixed-price quote with a defined scope within 48 hours.',
     },
   },
   {
@@ -251,15 +256,15 @@ export const NUXT_FAQS: LocalizedFaq[] = [
       en: 'Do you take over existing Nuxt or Vue projects?',
     },
     answer: {
-      de: 'Ja. Ich übernehme bestehende Codebasen, führe zunächst ein technisches Audit durch (Struktur, Performance, Abhängigkeiten) und mache dann ein Festpreis-Angebot für Weiterentwicklung, Refactoring oder Migration auf Nuxt 4.',
-      en: 'Yes. I take over existing codebases, start with a technical audit (structure, performance, dependencies) and then quote a fixed price for further development, refactoring or migration to Nuxt 4.',
+      de: 'Ja. Wir übernehmen bestehende Codebasen, führen zunächst ein technisches Audit durch (Struktur, Performance, Abhängigkeiten) und machen dann ein Festpreis-Angebot für Weiterentwicklung, Refactoring oder Migration auf Nuxt 4.',
+      en: 'Yes. We take over existing codebases, start with a technical audit (structure, performance, dependencies) and then quote a fixed price for further development, refactoring or migration to Nuxt 4.',
     },
   },
   {
     question: { de: 'Machen Sie auch das Design?', en: 'Do you do the design as well?' },
     answer: {
-      de: 'Ja – das ist mein Alleinstellungsmerkmal: Als Senior UI/UX Designer und Entwickler liefere ich Design und Umsetzung aus einer Hand. Kein Reibungsverlust zwischen Figma und Code, keine doppelten Abstimmungsschleifen. Auf Wunsch arbeite ich auch mit Ihrem bestehenden Design-Team und setze deren Figma-Designs um.',
-      en: 'Yes — that is what sets me apart: as a senior UI/UX designer and developer I deliver design and implementation from the same pair of hands. No friction between Figma and code, no duplicated review loops. On request I also work with your existing design team and implement their Figma designs.',
+      de: 'Ja – das ist unser Alleinstellungsmerkmal: Design und Umsetzung kommen aus einer Hand, beides auf Senior-Niveau. Kein Reibungsverlust zwischen Figma und Code, keine doppelten Abstimmungsschleifen. Auf Wunsch arbeiten wir auch mit Ihrem bestehenden Design-Team und setzen dessen Figma-Designs um.',
+      en: 'Yes — that is what sets us apart: design and implementation come from the same pair of hands, both at senior level. No friction between Figma and code, no duplicated review loops. On request we also work with your existing design team and implement their Figma designs.',
     },
   },
   {
@@ -268,8 +273,8 @@ export const NUXT_FAQS: LocalizedFaq[] = [
       en: 'Do you also work inside our development team?',
     },
     answer: {
-      de: 'Ja. Ich integriere mich in bestehende Teams (Git-Workflow, Code-Reviews, Slack/Linear) oder arbeite eigenständig mit regelmäßigen Reviews. Die Zusammenarbeit läuft remote und asynchron dokumentiert – Video-Calls lege ich auf den DACH-Abend.',
-      en: 'Yes. I integrate into existing teams (Git workflow, code reviews, Slack/Linear) or work independently with regular reviews. Collaboration is remote and documented asynchronously — I schedule video calls for the CET evening.',
+      de: 'Ja. Wir integrieren uns in bestehende Teams (Git-Workflow, Code-Reviews, Slack/Linear) oder arbeiten eigenständig mit regelmäßigen Reviews. Die Zusammenarbeit läuft remote und asynchron dokumentiert – Video-Calls legen wir auf den DACH-Abend.',
+      en: 'Yes. We integrate into existing teams (Git workflow, code reviews, Slack/Linear) or work independently with regular reviews. Collaboration is remote and documented asynchronously — we schedule video calls for the CET evening.',
     },
   },
   {
@@ -294,12 +299,12 @@ export const NUXT_CTA = {
 
 export const NUXT_META = {
   title: {
-    de: 'Nuxt Entwickler Freelancer – Nuxt 4, Vue 3, TypeScript | David Schubert',
-    en: 'Freelance Nuxt developer — Nuxt 4, Vue 3, TypeScript | David Schubert',
+    de: 'Nuxt Entwickler Freelancer – Nuxt 4, Vue 3, TypeScript | Pukalani Studio',
+    en: 'Freelance Nuxt developer — Nuxt 4, Vue 3, TypeScript | Pukalani Studio',
   } satisfies Localized,
   description: {
-    de: 'Freelance Nuxt-Entwickler für DACH: SaaS-Frontends, Corporate Websites & Landingpages mit Nuxt 4, Vue 3, TypeScript, Tailwind CSS 4 und Appwrite. Design + Code aus einer Hand, Festpreise.',
-    en: 'Freelance Nuxt developer for the DACH region: SaaS frontends, corporate websites & landing pages with Nuxt 4, Vue 3, TypeScript, Tailwind CSS 4 and Appwrite. Design + code from the same pair of hands, fixed prices.',
+    de: 'Nuxt-Entwicklung auf Senior-Niveau für DACH, flexibel buchbar wie ein Freelancer: SaaS-Frontends, Corporate Websites & Landingpages mit Nuxt 4, Vue 3, TypeScript, Tailwind CSS 4 und Appwrite. Design + Code aus einer Hand, Festpreise.',
+    en: 'Senior-level Nuxt development for the DACH region, bookable as flexibly as a freelancer: SaaS frontends, corporate websites & landing pages with Nuxt 4, Vue 3, TypeScript, Tailwind CSS 4 and Appwrite. Design + code from the same pair of hands, fixed prices.',
   } satisfies Localized,
   serviceName: {
     de: 'Nuxt-Entwicklung (Freelance)',

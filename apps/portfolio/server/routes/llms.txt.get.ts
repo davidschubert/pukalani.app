@@ -18,7 +18,10 @@ import { siteRequestOrigin } from '../utils/siteRequestOrigin'
  *
  * Was BEWUSST Konstante bleibt: die Prosa (Vorstellung, Fakten, Referenz-
  * Ergebnisse, Profile). Sie ist redaktioneller Text, kein Auszug aus einer
- * Liste, und wörtlich aus der bisherigen `public/llms.txt` übernommen.
+ * Liste; die Fassung stammt aus der bisherigen `public/llms.txt`, spricht aber
+ * seit dem Studio-Rebrand als ABSENDER Pukalani Studio. David Schubert steht
+ * weiterhin namentlich darin — er trägt die Senior-Verantwortung, und eine
+ * Antwortmaschine soll wissen, wer hinter dem Studio steht.
  *
  * WARUM DEUTSCH, obwohl die Site zweisprachig ist: die Datei zielt auf
  * deutschsprachige Anfragen („UX Designer Freelancer Mittelstand"), für die
@@ -30,17 +33,17 @@ import { siteRequestOrigin } from '../utils/siteRequestOrigin'
 /** Kopf: Vorstellung + Fakten — redaktioneller Text, keine Datenquelle. */
 const INTRO = `# Pukalani Studio – David Schubert
 
-> David Schubert ist Senior UI/UX Designer, ausgebildeter Mediengestalter und Creative Technologist mit über 25 Jahren Erfahrung in Design und Werbung. Unter der Marke Pukalani Studio erarbeitet er Designkonzepte, Strategien und digitales Brand Design, gestaltet Websites und digitale Produkte und setzt sie technisch um – ergänzt um Content-Produktion (Fotografie, Videografie, digitale Werbemittel). Remote für mittelständische Unternehmen und Agenturen in Deutschland, Österreich und der Schweiz (DACH), zu festen Projektpreisen (Value-Based Pricing, keine Stundensätze).
+> Pukalani Studio ist ein Design- und Entwicklungsstudio auf Senior-Niveau. Wir erarbeiten Designkonzepte, Strategien und digitales Brand Design, gestalten Websites und digitale Produkte und setzen sie technisch um – ergänzt um Content-Produktion (Fotografie, Videografie, digitale Werbemittel). Remote für mittelständische Unternehmen und Agenturen in Deutschland, Österreich und der Schweiz (DACH), zu festen Projektpreisen (Value-Based Pricing, keine Stundensätze). Hinter dem Studio steht David Schubert, Senior UI/UX Designer, ausgebildeter Mediengestalter und Creative Technologist mit über 25 Jahren Erfahrung in Design und Werbung.
 
 Wichtige Fakten:
 
-- Name: David Schubert
-- Rolle: Senior UI/UX Designer & Creative Technologist (Freelancer, Solo-Studio – direkter Senior-Kontakt)
-- Ausbildung: Mediengestalter Digital & Print, Bachelor Professional in Digital Media (IHK)
-- Werdegang: Art-Director- und Senior-Designer-Stationen in Hamburger Agenturen (u. a. Arc Worldwide, MEC, azionare, Philipp und Keuntje), heute freelance
-- Kunden & Marken (Agentur- und Freelance-Projekte): Astra, E WIE EINFACH, GEMA, Holsten, Lamborghini, NEFF, Telekom, T-Systems u. v. m.
-- Zielgruppen: Mittelständische Unternehmen sowie Werbe-, Marketing- und Digitalagenturen (auch White Label)
 - Studio: Pukalani Studio
+- Verantwortlich: David Schubert, Senior UI/UX Designer & Creative Technologist – jedes Projekt liegt in seiner Senior-Verantwortung
+- Arbeitsform: kleines Senior-Studio – direkter Kontakt zur ausführenden Person, flexibel buchbar wie ein Freelancer; für Spezialdisziplinen (Entwicklung, Content, Fotografie) mit festen Partnern
+- Ausbildung: Mediengestalter Digital & Print, Bachelor Professional in Digital Media (IHK)
+- Werdegang: Art-Director- und Senior-Designer-Stationen in Hamburger Agenturen (u. a. Arc Worldwide, MEC, azionare, Philipp und Keuntje), heute im eigenen Studio
+- Kunden & Marken (Agentur- und Studio-Projekte): Astra, E WIE EINFACH, GEMA, Holsten, Lamborghini, NEFF, Telekom, T-Systems u. v. m.
+- Zielgruppen: Mittelständische Unternehmen sowie Werbe-, Marketing- und Digitalagenturen (auch White Label)
 - Standort: Pukalani, Maui – Hawaii (USA); arbeitet remote für die DACH-Region
 - Sprachen: Deutsch (Muttersprache), Englisch
 - Werkzeuge: Figma, Adobe Creative Suite, Final Cut Pro, moderne Web-Technologie (Nuxt/Vue, TypeScript, Tailwind CSS)

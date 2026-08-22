@@ -12,7 +12,9 @@ test.describe('Landing', () => {
   // stabilere Zusage.
   test('rendert Hero + Referenzen + eigene Cases (englisch, Default ohne Prefix)', async ({ page }) => {
     await page.goto('/')
-    await expect(page).toHaveTitle(/David Schubert/i)
+    // Der Titel kommt aus `HOME_META.title` (app/data/home.ts) und trägt seit
+    // dem Studio-Rebrand die MARKE, nicht mehr den Personennamen.
+    await expect(page).toHaveTitle(/Pukalani Studio/i)
     await expect(page.locator('h1')).toBeVisible()
     await expect(page.locator('#referenzen-title')).toBeVisible()
     await expect(page.locator('[data-cases]')).toBeVisible()

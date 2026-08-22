@@ -3,9 +3,11 @@ import type { Localized, LocalizedFaq } from './localized'
 /**
  * Inhalte der Leistungsseite „UX-Audit" (/ux-audit · /de/ux-audit).
  *
- * Die deutsche Fassung ist 1:1 aus dem alten Portfolio-Repo übernommen; die
- * englische ist eine gleichwertige Übersetzung — die Seite verkauft dasselbe
- * Angebot an denselben DACH-Markt, nur in der anderen Sprache.
+ * Die deutsche Fassung stammt aus dem alten Portfolio-Repo, ist aber auf die
+ * Studio-Stimme umgeschrieben („wir"); die englische ist eine gleichwertige
+ * Übersetzung — die Seite verkauft dasselbe Angebot an denselben DACH-Markt,
+ * nur in der anderen Sprache. Absender ist Pukalani Studio; David Schubert
+ * wird genannt, wo es um die Person hinter dem Studio geht.
  */
 
 export interface AuditArea {
@@ -38,8 +40,8 @@ export const UX_AUDIT_HERO = {
     en: 'Fixed-price UX audit: from €2,500, results in 1–2 weeks',
   } satisfies Localized,
   intro: {
-    de: 'Ein UX-Audit ist eine strukturierte Analyse Ihrer Website oder Web-App durch einen erfahrenen UX-Experten. Bei Pukalani Studio kostet ein UX-Audit €2.500 bis €5.000 als Festpreis, dauert ein bis zwei Wochen und liefert eine priorisierte Maßnahmenliste – von Quick Wins bis zur Conversion-Roadmap. Durchgeführt von David Schubert, Senior UI/UX Designer und Creative Technologist mit über 25 Jahren Erfahrung.',
-    en: 'A UX audit is a structured analysis of your website or web app by an experienced UX practitioner. At Pukalani Studio a fixed-price UX audit costs between €2,500 and €5,000, takes one to two weeks and delivers a prioritised action list — from quick wins to a conversion roadmap. Carried out by David Schubert, senior UI/UX designer and creative technologist with more than 25 years of experience.',
+    de: 'Ein UX-Audit ist eine strukturierte Analyse Ihrer Website oder Web-App auf Senior-Niveau. Bei Pukalani Studio kostet ein UX-Audit €2.500 bis €5.000 als Festpreis, dauert ein bis zwei Wochen und liefert eine priorisierte Maßnahmenliste – von Quick Wins bis zur Conversion-Roadmap. Hinter dem Studio steht David Schubert, Senior UI/UX Designer und Creative Technologist mit über 25 Jahren Erfahrung – er führt jedes Audit selbst durch.',
+    en: 'A UX audit is a structured, senior-level analysis of your website or web app. At Pukalani Studio a fixed-price UX audit costs between €2,500 and €5,000, takes one to two weeks and delivers a prioritised action list — from quick wins to a conversion roadmap. Behind the studio is David Schubert, senior UI/UX designer and creative technologist with more than 25 years of experience — he runs every audit himself.',
   } satisfies Localized,
   ctaPrimary: { de: 'Audit-Erstgespräch buchen', en: 'Book an audit intro call' } satisfies Localized,
   ctaSecondary: { de: 'Pakete & Preise ansehen', en: 'See packages & prices' } satisfies Localized,
@@ -216,8 +218,8 @@ export const AUDIT_STEPS: AuditStep[] = [
   {
     title: { de: 'Briefing & Zugänge', en: 'Briefing & access' },
     description: {
-      de: 'Ein Briefing-Call (60 Min) plus Zugang zu Analytics und ggf. Testumgebung. Mehr brauche ich von Ihnen nicht – Ihr Team bleibt entlastet.',
-      en: 'One briefing call (60 min) plus access to analytics and, if available, a staging environment. That is all I need from you — it keeps the workload off your team.',
+      de: 'Ein Briefing-Call (60 Min) plus Zugang zu Analytics und ggf. Testumgebung. Mehr brauchen wir von Ihnen nicht – Ihr Team bleibt entlastet.',
+      en: 'One briefing call (60 min) plus access to analytics and, if available, a staging environment. That is all we need from you — it keeps the workload off your team.',
     },
   },
   {
@@ -242,8 +244,8 @@ export const AUDIT_QUOTE: Localized = {
 }
 
 export const AUDIT_QUOTE_SOURCE: Localized = {
-  de: 'David Schubert, Senior UI/UX Designer & Web Developer',
-  en: 'David Schubert, senior UI/UX designer & web developer',
+  de: 'David Schubert, Senior UI/UX Designer & Web Developer, Pukalani Studio',
+  en: 'David Schubert, senior UI/UX designer & web developer, Pukalani Studio',
 }
 
 export const AUDIT_FAQ_HEADING: Localized = {
@@ -276,8 +278,8 @@ export const AUDIT_FAQS: LocalizedFaq[] = [
   {
     question: { de: 'Was brauchen Sie von mir?', en: 'What do you need from me?' },
     answer: {
-      de: 'Wenig: ein Briefing-Gespräch (60 Minuten), Zugang zu Ihren Analytics-Daten (z. B. GA4, Plausible oder Matomo) und – falls vorhanden – eine Testumgebung. Alles Weitere übernehme ich.',
-      en: 'Very little: a briefing call (60 minutes), access to your analytics data (for example GA4, Plausible or Matomo) and — if you have one — a staging environment. I take care of the rest.',
+      de: 'Wenig: ein Briefing-Gespräch (60 Minuten), Zugang zu Ihren Analytics-Daten (z. B. GA4, Plausible oder Matomo) und – falls vorhanden – eine Testumgebung. Alles Weitere übernehmen wir.',
+      en: 'Very little: a briefing call (60 minutes), access to your analytics data (for example GA4, Plausible or Matomo) and — if you have one — a staging environment. We take care of the rest.',
     },
   },
   {
@@ -290,8 +292,8 @@ export const AUDIT_FAQS: LocalizedFaq[] = [
   {
     question: { de: 'Setzen Sie die Maßnahmen auch um?', en: 'Do you implement the recommendations too?' },
     answer: {
-      de: 'Ja, auf Wunsch. Als Designer und Nuxt-Entwickler kann ich die Empfehlungen direkt umsetzen – vom Quick Win bis zum Redesign. 50 % der Audit-Kosten werden dabei angerechnet. Alternativ arbeitet Ihr Team mit dem Report; er ist bewusst so geschrieben, dass Entwickler damit arbeiten können.',
-      en: 'Yes, on request. As a designer and Nuxt developer I can implement the recommendations directly — from quick win to redesign, with 50% of the audit fee credited. Alternatively, your team works from the report; it is deliberately written so that developers can act on it.',
+      de: 'Ja, auf Wunsch. Design und Nuxt-Entwicklung kommen bei uns aus einer Hand – wir setzen die Empfehlungen direkt um, vom Quick Win bis zum Redesign. 50 % der Audit-Kosten werden dabei angerechnet. Alternativ arbeitet Ihr Team mit dem Report; er ist bewusst so geschrieben, dass Entwickler damit arbeiten können.',
+      en: 'Yes, on request. Design and Nuxt development come from the same place here — we implement the recommendations directly, from quick win to redesign, with 50% of the audit fee credited. Alternatively, your team works from the report; it is deliberately written so that developers can act on it.',
     },
   },
 ]
@@ -315,12 +317,12 @@ export const AUDIT_CTA = {
 
 export const AUDIT_META = {
   title: {
-    de: 'UX-Audit ab €2.500 – Festpreis-Pakete | David Schubert',
-    en: 'UX audit from €2,500 — fixed-price packages | David Schubert',
+    de: 'UX-Audit ab €2.500 – Festpreis-Pakete | Pukalani Studio',
+    en: 'UX audit from €2,500 — fixed-price packages | Pukalani Studio',
   } satisfies Localized,
   description: {
-    de: 'UX-Audit zum Festpreis: €2.500–5.000, Ergebnisse in 1–2 Wochen. Usability, Conversion, Core Web Vitals & WCAG 2.1 AA – mit priorisierter Maßnahmenliste. Von Senior UX Designer David Schubert.',
-    en: 'UX audit at a fixed price: €2,500–5,000, results in 1–2 weeks. Usability, conversion, Core Web Vitals & WCAG 2.1 AA — with a prioritised action list. By senior UX designer David Schubert.',
+    de: 'UX-Audit zum Festpreis: €2.500–5.000, Ergebnisse in 1–2 Wochen. Usability, Conversion, Core Web Vitals & WCAG 2.1 AA – mit priorisierter Maßnahmenliste. Aus dem Pukalani Studio, durchgeführt von David Schubert.',
+    en: 'UX audit at a fixed price: €2,500–5,000, results in 1–2 weeks. Usability, conversion, Core Web Vitals & WCAG 2.1 AA — with a prioritised action list. From Pukalani Studio, run by David Schubert.',
   } satisfies Localized,
   serviceName: { de: 'UX-Audit', en: 'UX audit' } satisfies Localized,
   serviceType: {

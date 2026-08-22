@@ -56,8 +56,8 @@ export const KOSTEN_HERO = {
   } satisfies Localized,
   bylineLead: { de: 'Von', en: 'By' } satisfies Localized,
   bylineRole: {
-    de: '– Senior UI/UX Designer & Creative Technologist, 25+ Jahre Erfahrung',
-    en: '— senior UI/UX designer & creative technologist, 25+ years of experience',
+    de: '– Pukalani Studio · Senior UI/UX Designer & Creative Technologist, 25+ Jahre Erfahrung',
+    en: '— Pukalani Studio · senior UI/UX designer & creative technologist, 25+ years of experience',
   } satisfies Localized,
   updatedNote: {
     de: '· wird quartalsweise aktualisiert',
@@ -187,8 +187,8 @@ export const KOSTEN_PROJECTS = {
     en: 'What does which project cost? Price examples for 2026',
   } satisfies Localized,
   lead: {
-    de: 'Stundensätze sagen wenig über Ihr Budget – Projektpreise schon. Die folgende Tabelle zeigt marktübliche Spannen für Freelancer und kleine Agenturen in Deutschland sowie meine eigenen Festpreise zum Vergleich (transparent, netto):',
-    en: 'Hourly rates say little about your budget — project prices do. The table below shows the ranges common in Germany for freelancers and small agencies, alongside my own fixed prices for comparison (transparent, net):',
+    de: 'Stundensätze sagen wenig über Ihr Budget – Projektpreise schon. Die folgende Tabelle zeigt marktübliche Spannen für Freelancer und kleine Agenturen in Deutschland sowie unsere eigenen Festpreise zum Vergleich (transparent, netto):',
+    en: 'Hourly rates say little about your budget — project prices do. The table below shows the ranges common in Germany for freelancers and small agencies, alongside our own fixed prices for comparison (transparent, net):',
   } satisfies Localized,
   note: {
     de: 'Zur Einordnung der Marktspannen: Deutsche Preis-Ratgeber nennen für konversion-optimierte Landingpages 5.000–12.000 €, für KMU-Websites mit Individual-Design 5.000–12.000 € (bei größeren Agenturen 20.000–40.000 €) und für App-Design je nach Anspruch 3.000–50.000 €. Publizierte Festpreis-Beispiele für UX-Tests und Audits liegen zwischen 2.000 und 10.000 € – etwa der Basis-UX-Test ab 5.890 € bei eparo (Hamburg) oder der Festpreis-UX-Audit von inovex.',
@@ -201,7 +201,7 @@ export const KOSTEN_PROJECTS = {
   columns: {
     project: { de: 'Projekt', en: 'Project' } satisfies Localized,
     market: { de: 'Marktübliche Spanne', en: 'Typical market range' } satisfies Localized,
-    mine: { de: 'Mein Festpreis', en: 'My fixed price' } satisfies Localized,
+    mine: { de: 'Unser Festpreis', en: 'Our fixed price' } satisfies Localized,
     duration: { de: 'Dauer', en: 'Duration' } satisfies Localized,
   },
   caption: {
@@ -286,8 +286,8 @@ export const COST_FACTORS: CostFactor[] = [
       en: 'Delivery: design only or design + code',
     },
     description: {
-      de: 'Endet das Projekt mit Figma-Files oder mit einer live geschalteten Website? Design und Entwicklung aus einer Hand spart Übergabe- und Abstimmungskosten – ein Grund, warum ich beides anbiete.',
-      en: 'Does the project end with Figma files or with a live website? Design and development from a single provider saves handover and coordination costs — one reason I offer both.',
+      de: 'Endet das Projekt mit Figma-Files oder mit einer live geschalteten Website? Design und Entwicklung aus einer Hand spart Übergabe- und Abstimmungskosten – ein Grund, warum wir beides anbieten.',
+      en: 'Does the project end with Figma files or with a live website? Design and development from a single provider saves handover and coordination costs — one reason we offer both.',
     },
   },
 ]
@@ -345,8 +345,8 @@ export const KOSTEN_MODELS = {
     en: 'Hourly rate, day rate or fixed price?',
   } satisfies Localized,
   paragraph1: {
-    de: 'Drei Abrechnungsmodelle sind üblich – und sie setzen unterschiedliche Anreize. Nach Stunden bezahlt zu werden belohnt langsames Arbeiten; ein Festpreis belohnt Effizienz und zwingt beide Seiten, den Umfang vorher sauber zu definieren. Ich arbeite deshalb ausschließlich mit Festpreisen (Value-Based Pricing): Sie kennen Ihr Budget vor Projektstart, und Umfang, Ergebnisse und Preis stehen schriftlich fest. Für offene, langfristige Zusammenarbeit (z. B. Design-Sparring) sind Tagessätze dagegen völlig legitim.',
-    en: 'Three billing models are common — and they set different incentives. Being paid by the hour rewards working slowly; a fixed price rewards efficiency and forces both sides to define the scope properly beforehand. That is why I work exclusively with fixed prices (value-based pricing): you know your budget before the project starts, and scope, deliverables and price are set out in writing. For open-ended, long-term collaboration (design sparring, for example) day rates are perfectly legitimate.',
+    de: 'Drei Abrechnungsmodelle sind üblich – und sie setzen unterschiedliche Anreize. Nach Stunden bezahlt zu werden belohnt langsames Arbeiten; ein Festpreis belohnt Effizienz und zwingt beide Seiten, den Umfang vorher sauber zu definieren. Wir arbeiten deshalb ausschließlich mit Festpreisen (Value-Based Pricing): Sie kennen Ihr Budget vor Projektstart, und Umfang, Ergebnisse und Preis stehen schriftlich fest. Für offene, langfristige Zusammenarbeit (z. B. Design-Sparring) sind Tagessätze dagegen völlig legitim.',
+    en: 'Three billing models are common — and they set different incentives. Being paid by the hour rewards working slowly; a fixed price rewards efficiency and forces both sides to define the scope properly beforehand. That is why we work exclusively with fixed prices (value-based pricing): you know your budget before the project starts, and scope, deliverables and price are set out in writing. For open-ended, long-term collaboration (design sparring, for example) day rates are perfectly legitimate.',
   } satisfies Localized,
   paragraph2Lead: {
     de: 'Achten Sie beim Vergleich von Angeboten weniger auf den Stundensatz als auf drei Fragen: Was genau ist enthalten? Wer macht die Arbeit (Senior oder Junior)? Und was passiert bei Mehraufwand? Mehr dazu im Vergleich',
@@ -373,8 +373,8 @@ export const KOSTEN_BFSG = {
   } satisfies Localized,
   linkUrl: 'https://www.bundesfachstelle-barrierefreiheit.de/DE/Fachwissen/Produkte-und-Dienstleistungen/Barrierefreiheitsstaerkungsgesetz/barrierefreiheitsstaerkungsgesetz_node.html',
   paragraphRest: {
-    de: '– die deutsche Umsetzung des European Accessibility Act. Es verpflichtet viele B2C-Websites, Shops und Apps zur Barrierefreiheit; bei Verstößen drohen Bußgelder bis 100.000 €. Für Ihre Budget-Planung heißt das: Barrierefreiheit (WCAG 2.1 AA) gehört von Anfang an ins Projekt – eine Nachrüstung ist fast immer teurer als der Einbau beim Design. In meinen Projekten und',
-    en: '— the German implementation of the European Accessibility Act. It obliges many B2C websites, shops and apps to be accessible; breaches can attract fines of up to €100,000. For your budget planning that means accessibility (WCAG 2.1 AA) belongs in the project from the start — retrofitting is almost always more expensive than building it in during design. In my projects and',
+    de: '– die deutsche Umsetzung des European Accessibility Act. Es verpflichtet viele B2C-Websites, Shops und Apps zur Barrierefreiheit; bei Verstößen drohen Bußgelder bis 100.000 €. Für Ihre Budget-Planung heißt das: Barrierefreiheit (WCAG 2.1 AA) gehört von Anfang an ins Projekt – eine Nachrüstung ist fast immer teurer als der Einbau beim Design. In unseren Projekten und',
+    en: '— the German implementation of the European Accessibility Act. It obliges many B2C websites, shops and apps to be accessible; breaches can attract fines of up to €100,000. For your budget planning that means accessibility (WCAG 2.1 AA) belongs in the project from the start — retrofitting is almost always more expensive than building it in during design. In our projects and',
   } satisfies Localized,
   auditLinkLabel: { de: 'UX-Audits', en: 'UX audits' } satisfies Localized,
   paragraphEnd: {
@@ -498,8 +498,8 @@ export const KOSTEN_CTA = {
     en: 'What will your project actually cost?',
   } satisfies Localized,
   text: {
-    de: 'Buchen Sie ein kostenloses 30-Minuten-Erstgespräch: Sie schildern Ihr Vorhaben, ich nenne Ihnen eine ehrliche Einschätzung – und innerhalb von 48 Stunden einen Festpreis.',
-    en: 'Book a free 30-minute intro call: you describe what you have in mind, I give you an honest assessment — and a fixed price within 48 hours.',
+    de: 'Buchen Sie ein kostenloses 30-Minuten-Erstgespräch: Sie schildern Ihr Vorhaben, wir nennen Ihnen eine ehrliche Einschätzung – und innerhalb von 48 Stunden einen Festpreis.',
+    en: 'Book a free 30-minute intro call: you describe what you have in mind, we give you an honest assessment — and a fixed price within 48 hours.',
   } satisfies Localized,
 }
 

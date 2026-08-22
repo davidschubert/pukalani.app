@@ -23,7 +23,7 @@ const links = computed(() => [
   <header class="header">
     <div class="container header__inner">
       <NuxtLink :to="localePath('/')" class="header__brand">
-        david<span class="header__brand-accent">.</span>schubert
+        Pukalani <span class="header__brand-accent">Studio</span>
       </NuxtLink>
       <nav class="header__nav" :aria-label="t('portfolio.nav.label')">
         <NuxtLink

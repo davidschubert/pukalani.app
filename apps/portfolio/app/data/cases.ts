@@ -40,8 +40,8 @@ export const CASES: PortfolioCase[] = [
         en: 'Pukalani Platform is a Nuxt 4 monorepo with a foundation layer and composable product layers (comments, media, events, tickets, billing …). Every site picks its products via manifest; a CI check enforces consistency of contracts, dependencies and migrations.',
       },
       {
-        de: 'Das Control Plane (Studio) provisioniert neue Sites als Job — Appwrite-Projekt, Schema-Migrationen, Register-Eintrag und Produkt-Zuteilung entstehen aus einem Klick. Entitlements werden als signierte Ed25519-Dokumente zugestellt und serverseitig durchgesetzt.',
-        en: 'The control plane (Studio) provisions new sites as a job — Appwrite project, schema migrations, registry entry and product grants are all created from a single click. Entitlements are delivered as signed Ed25519 documents and enforced server-side.',
+        de: 'Das Control Plane (die Betreiber-Konsole) provisioniert neue Sites als Job — Appwrite-Projekt, Schema-Migrationen, Register-Eintrag und Produkt-Zuteilung entstehen aus einem Klick. Entitlements werden als signierte Ed25519-Dokumente zugestellt und serverseitig durchgesetzt.',
+        en: 'The control plane (the operator console) provisions new sites as a job — Appwrite project, schema migrations, registry entry and product grants are all created from a single click. Entitlements are delivered as signed Ed25519 documents and enforced server-side.',
       },
     ],
   },

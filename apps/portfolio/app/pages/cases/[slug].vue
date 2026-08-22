@@ -14,7 +14,7 @@ if (!entry) {
 
 const lang = computed(() => (locale.value.startsWith('de') ? 'de' : 'en') as 'de' | 'en')
 
-useHead({ title: `${entry.title} — David Schubert` })
+useHead({ title: `${entry.title} — Pukalani Studio` })
 useSeoMeta({ description: () => entry.teaser[lang.value] })
 
 // Nächster Case für die Weiter-Navigation (zyklisch)

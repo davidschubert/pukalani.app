@@ -10,6 +10,14 @@ import { SERVICE_CORES, type ServiceCore, type ServiceId } from './services'
  * Stand 14. Juli 2026); Englisch ist die gleichwertige Fassung derselben
  * Aussage — die Seite wirbt in beiden Sprachen um DACH-Kunden, der regionale
  * Fokus bleibt also auch im englischen Text erhalten.
+ *
+ * ABSENDER IST DAS STUDIO (Rebrand 21. August 2026): die Erzählstimme ist
+ * durchgehend „wir/unser" (en „we/our"), nicht mehr die Ich-Form der früheren
+ * Freelancer-Site. David Schubert bleibt als PERSON sichtbar, wo es um die
+ * Person geht — im Person-Knoten des JSON-LD und in der Studio-Sektion
+ * („Hinter Pukalani Studio steht …"). Kundenzitate bleiben unangetastet: das
+ * sind Aussagen Dritter. Eine Teamgröße wird NIRGENDS behauptet — „wir" ist
+ * das Studio, Partner kommen je nach Projekt dazu.
  */
 
 export interface KeyFact {
@@ -102,20 +110,20 @@ export const HERO = {
     en: 'Available for new projects · UX audits on a rolling basis',
   } satisfies Localized,
   eyebrow: {
-    de: 'David Schubert · Pukalani Studio · Remote für DACH',
-    en: 'David Schubert · Pukalani Studio · Remote for DACH',
+    de: 'Pukalani Studio · Design & Umsetzung · Remote für DACH',
+    en: 'Pukalani Studio · Design & build · Remote for DACH',
   } satisfies Localized,
   title: {
-    de: 'Senior UI/UX Designer (Freelancer) für Mittelstand & Agenturen',
-    en: 'Freelance Senior UI/UX Designer for mid-sized companies & agencies',
+    de: 'Senior UI/UX Design für Mittelstand und Agenturen',
+    en: 'Senior UI/UX design for mid-sized companies and agencies',
   } satisfies Localized,
   intro: {
-    de: 'Ich bin David Schubert, Senior UI/UX Designer und ausgebildeter Mediengestalter mit über 25 Jahren Erfahrung in Design und Werbung. Ich erarbeite mit Ihnen Designkonzepte, Strategien und digitales Brand Design, gestalte Websites und digitale Produkte – und setze sie auf Wunsch technisch um. Remote für Unternehmen und Agenturen in Deutschland, Österreich und der Schweiz, zu festen Projektpreisen.',
-    en: 'I am David Schubert, a senior UI/UX designer, trained media designer and creative technologist with more than 25 years in design and advertising. I develop design concepts, strategies and digital brand design with you, design websites and digital products — and build them myself if you would like. Remote for companies and agencies in Germany, Austria and Switzerland, at fixed project prices.',
+    de: 'Pukalani Studio ist ein digitales Design-Studio – mit über 25 Jahren Erfahrung aus Design und Werbung im Rücken. Wir erarbeiten mit Ihnen Designkonzepte, Strategien und digitales Brand Design, gestalten Websites und digitale Produkte – und setzen sie auf Wunsch technisch um. Remote für Unternehmen und Agenturen in Deutschland, Österreich und der Schweiz, zu festen Projektpreisen.',
+    en: 'Pukalani Studio is a digital design studio, backed by more than 25 years of experience in design and advertising. We develop design concepts, strategies and digital brand design with you, design websites and digital products — and build them for you if you would like. Remote for companies and agencies in Germany, Austria and Switzerland, at fixed project prices.',
   } satisfies Localized,
   brandsLead: {
-    de: 'In Agentur- und Freelance-Projekten verantwortlich für Konzepte und Gestaltung für Marken wie',
-    en: 'In agency and freelance projects I have led concept and design work for brands such as',
+    de: 'In Agentur- und Studio-Projekten verantworten wir Konzepte und Gestaltung für Marken wie',
+    en: 'In agency and studio projects we have led concept and design work for brands such as',
   } satisfies Localized,
   brands: {
     de: 'Astra, E WIE EINFACH, GEMA, Holsten, Lamborghini, NEFF, Telekom und T-Systems',
@@ -151,17 +159,17 @@ export const TRUST_BADGES: Localized<string[]> = {
 export const KEY_FACTS: KeyFact[] = [
   {
     label: { de: 'Name', en: 'Name' },
-    value: { de: 'David Schubert', en: 'David Schubert' },
+    value: { de: 'Pukalani Studio', en: 'Pukalani Studio' },
   },
   {
-    label: { de: 'Rolle', en: 'Role' },
+    label: { de: 'Profil', en: 'Profile' },
     value: {
-      de: 'Senior UI/UX Designer & Creative Technologist (Freelancer)',
-      en: 'Senior UI/UX designer & creative technologist (freelancer)',
+      de: 'Digitales Design-Studio für UI/UX, Brand Design und technische Umsetzung',
+      en: 'Digital design studio for UI/UX, brand design and technical implementation',
     },
   },
   {
-    label: { de: 'Ausbildung', en: 'Education' },
+    label: { de: 'Qualifikation', en: 'Qualifications' },
     value: {
       de: 'Mediengestalter Digital & Print · Bachelor Professional in Digital Media (IHK)',
       en: 'Media designer for digital & print · Bachelor Professional in Digital Media (German Chamber of Commerce)',
@@ -170,8 +178,8 @@ export const KEY_FACTS: KeyFact[] = [
   {
     label: { de: 'Erfahrung', en: 'Experience' },
     value: {
-      de: '25+ Jahre in Design & Werbung, davon viele Jahre in Hamburger Agenturen (zuletzt Senior UI/UX Designer bei Philipp und Keuntje)',
-      en: '25+ years in design and advertising, many of them in Hamburg agencies (most recently senior UI/UX designer at Philipp und Keuntje)',
+      de: '25+ Jahre in Design & Werbung, davon viele Jahre in Hamburger Agenturen (zuletzt Senior UI/UX Design bei Philipp und Keuntje)',
+      en: '25+ years in design and advertising, many of them in Hamburg agencies (most recently senior UI/UX design at Philipp und Keuntje)',
     },
   },
   {
@@ -184,12 +192,12 @@ export const KEY_FACTS: KeyFact[] = [
   {
     label: { de: 'Kunden & Marken', en: 'Clients & brands' },
     value: {
-      de: 'Astra, E WIE EINFACH, GEMA, Holsten, Lamborghini, NEFF, Telekom, T-Systems u. v. m. (Agentur- & Freelance-Projekte)',
-      en: 'Astra, E WIE EINFACH, GEMA, Holsten, Lamborghini, NEFF, Telekom, T-Systems and many more (agency & freelance projects)',
+      de: 'Astra, E WIE EINFACH, GEMA, Holsten, Lamborghini, NEFF, Telekom, T-Systems u. v. m. (Agentur- & Studio-Projekte)',
+      en: 'Astra, E WIE EINFACH, GEMA, Holsten, Lamborghini, NEFF, Telekom, T-Systems and many more (agency & studio projects)',
     },
   },
   {
-    label: { de: 'Zielgruppen', en: 'Who I work with' },
+    label: { de: 'Zielgruppen', en: 'Who we work with' },
     value: {
       de: 'Mittelständische Unternehmen sowie Werbe-, Marketing- & Digitalagenturen',
       en: 'Mid-sized companies as well as advertising, marketing & digital agencies',
@@ -224,10 +232,10 @@ export const KEY_FACTS: KeyFact[] = [
     },
   },
   {
-    label: { de: 'Studio', en: 'Studio' },
+    label: { de: 'Verantwortlich', en: 'Who runs it' },
     value: {
-      de: 'Pukalani Studio (Solo-Studio – Sie arbeiten direkt mit mir)',
-      en: 'Pukalani Studio (solo studio — you always work directly with me)',
+      de: 'David Schubert, Senior UI/UX Designer & Creative Technologist – Sie arbeiten immer direkt mit der Senior-Ebene; je nach Projekt kommen ausgewählte Partner dazu',
+      en: 'David Schubert, senior UI/UX designer & creative technologist — you always work directly with the senior level; selected partners join depending on the project',
     },
   },
 ]
@@ -249,8 +257,8 @@ export const AUDIENCES: Audience[] = [
       en: 'Advertising, marketing & digital agencies',
     },
     description: {
-      de: 'Ich verstärke Ihr Team als Senior-Freelancer – zuverlässig, remote und auf Wunsch unsichtbar für Ihren Kunden (White Label). Konzept, UI/UX-Design, Art Direction oder technische Umsetzung: Sie buchen genau die Kompetenz, die im Projekt fehlt.',
-      en: 'I add senior capacity to your team — reliable, remote and, on request, invisible to your client (white label). Concept, UI/UX design, art direction or technical implementation: you book exactly the skill your project is missing.',
+      de: 'Wir verstärken Ihr Team auf Senior-Niveau – zuverlässig, remote und auf Wunsch unsichtbar für Ihren Kunden (White Label). Konzept, UI/UX-Design, Art Direction oder technische Umsetzung: Sie buchen genau die Kompetenz, die im Projekt fehlt.',
+      en: 'We add senior capacity to your team — reliable, remote and, on request, invisible to your client (white label). Concept, UI/UX design, art direction or technical implementation: you book exactly the skill your project is missing.',
     },
   },
   {
@@ -259,8 +267,8 @@ export const AUDIENCES: Audience[] = [
       en: 'Here on a referral?',
     },
     description: {
-      de: 'Viele meiner Projekte entstehen über Empfehlungen ehemaliger Kolleginnen, Kollegen und Kunden. Schön, dass Sie da sind – Arbeitsproben, Referenzen und ein ehrliches Gespräch darüber, ob ich die richtige Besetzung bin, gibt es im kostenlosen Erstgespräch.',
-      en: 'Many of my projects come through referrals from former colleagues and clients. Glad you are here — work samples, references and an honest conversation about whether I am the right fit are all part of the free intro call.',
+      de: 'Viele unserer Projekte entstehen über Empfehlungen ehemaliger Kolleginnen, Kollegen und Kunden. Schön, dass Sie da sind – Arbeitsproben, Referenzen und ein ehrliches Gespräch darüber, ob wir die richtige Besetzung sind, gibt es im kostenlosen Erstgespräch.',
+      en: 'Many of our projects come through referrals from former colleagues and clients. Glad you are here — work samples, references and an honest conversation about whether we are the right fit are all part of the free intro call.',
     },
   },
 ]
@@ -304,8 +312,8 @@ const SERVICE_DETAILS: Record<ServiceId, ServiceDetail> = {
   },
   'ux-audit': {
     description: {
-      de: 'Der schnellste Einstieg: Ich analysiere Ihre Website oder App strukturiert und liefere eine priorisierte Maßnahmenliste mit Quick Wins.',
-      en: 'The fastest way in: I analyse your website or app in a structured way and deliver a prioritised action list with quick wins.',
+      de: 'Der schnellste Einstieg: Wir analysieren Ihre Website oder App strukturiert und liefern eine priorisierte Maßnahmenliste mit Quick Wins.',
+      en: 'The fastest way in: we analyse your website or app in a structured way and deliver a prioritised action list with quick wins.',
     },
     deliverables: {
       de: [
@@ -337,7 +345,7 @@ const SERVICE_DETAILS: Record<ServiceId, ServiceDetail> = {
   'landingpage-cro': {
     description: {
       de: 'Landingpages mit Conversion-Fokus: Nutzerpsychologie, Social Proof und technische Performance – gestaltet und auf Wunsch direkt entwickelt.',
-      en: 'Landing pages built for conversion: user psychology, social proof and technical performance — designed and, on request, built by me as well.',
+      en: 'Landing pages built for conversion: user psychology, social proof and technical performance — designed and, on request, built by us as well.',
     },
     deliverables: {
       de: [
@@ -432,8 +440,8 @@ const SERVICE_DETAILS: Record<ServiceId, ServiceDetail> = {
   },
   'content-produktion': {
     description: {
-      de: 'Inhalte, die zum Design passen: digitale Werbemittel, Fotografie und Videografie inklusive Schnitt – als ausgebildeter Mediengestalter aus einer Hand.',
-      en: 'Content that fits the design: digital ad assets, photography and video including editing — all from one trained media designer.',
+      de: 'Inhalte, die zum Design passen: digitale Werbemittel, Fotografie und Videografie inklusive Schnitt – aus einer Hand, mit dem Handwerk ausgebildeter Mediengestalter.',
+      en: 'Content that fits the design: digital ad assets, photography and video including editing — from one studio, with the craft of a trained media designer.',
     },
     deliverables: {
       de: [
@@ -508,8 +516,8 @@ export const PROCESS_STEPS: ProcessStep[] = [
   {
     title: { de: 'Entwicklung oder Handoff', en: 'Development or handoff' },
     description: {
-      de: 'Ich entwickle selbst in Nuxt 4 und TypeScript – oder übergebe developer-ready Figma-Files an Ihr Team.',
-      en: 'I build it myself in Nuxt 4 and TypeScript — or hand developer-ready Figma files to your team.',
+      de: 'Wir entwickeln selbst in Nuxt 4 und TypeScript – oder übergeben developer-ready Figma-Files an Ihr Team.',
+      en: 'We build it ourselves in Nuxt 4 and TypeScript — or hand developer-ready Figma files to your team.',
     },
     duration: { de: 'je nach Umfang', en: 'depending on scope' },
   },
@@ -667,17 +675,17 @@ export const TIMELINE: Milestone[] = [
     },
   },
   {
-    period: { de: '2011 – Freelance-Start', en: '2011 — going freelance' },
+    period: { de: '2011 – Selbstständigkeit', en: '2011 — going independent' },
     description: {
       de: 'Senior UI/UX Designer im Creative-Tech-Team von Philipp und Keuntje, Hamburg: digitale Konzeptideen und kreative Lösungen für Marken wie Astra, E WIE EINFACH, GEMA, Holsten, Lamborghini, NEFF, Telekom und T-Systems.',
       en: 'Senior UI/UX designer in the creative tech team at Philipp und Keuntje, Hamburg: digital concepts and creative solutions for brands such as Astra, E WIE EINFACH, GEMA, Holsten, Lamborghini, NEFF, Telekom and T-Systems.',
     },
   },
   {
-    period: { de: 'Heute', en: 'Today' },
+    period: { de: 'Heute – Pukalani Studio', en: 'Today — Pukalani Studio' },
     description: {
-      de: 'Freelance Creative Technologist (Pukalani Studio): Designkonzepte, Brand Design, Websites und Content – remote von Maui für die DACH-Region, plus KI-Beratung und -Training.',
-      en: 'Freelance creative technologist (Pukalani Studio): design concepts, brand design, websites and content — remote from Maui for the DACH region, plus AI consulting and training.',
+      de: 'Designkonzepte, Brand Design, Websites und Content – remote von Maui für die DACH-Region, dazu KI-Beratung und -Training. Für größere Vorhaben arbeiten wir mit ausgewählten Partnern zusammen.',
+      en: 'Design concepts, brand design, websites and content — remote from Maui for the DACH region, plus AI consulting and training. For larger undertakings we work with selected partners.',
     },
   },
 ]
@@ -719,13 +727,13 @@ export const STACK_GROUPS: StackGroup[] = [
 ]
 
 export const ABOUT_QUOTE: Localized = {
-  de: 'Gutes Design ist unsichtbar: Nutzer erreichen ihre Ziele ohne Reibung. Mein Ansatz – Komplexität verstehen, Einfachheit gestalten.',
-  en: 'Good design is invisible: users reach their goals without friction. My approach — understand complexity, design simplicity.',
+  de: 'Gutes Design ist unsichtbar: Nutzer erreichen ihre Ziele ohne Reibung. Unser Ansatz – Komplexität verstehen, Einfachheit gestalten.',
+  en: 'Good design is invisible: users reach their goals without friction. Our approach — understand complexity, design simplicity.',
 }
 
 export const ABOUT_AI_NOTE: Localized = {
-  de: 'Als KI-Berater und -Trainer unterstütze ich Teams und Entscheider:innen dabei, KI-Tools sinnvoll im Arbeitsalltag einzusetzen – praxisnah, ohne Buzzword-Bingo.',
-  en: 'As an AI consultant and trainer I help teams and decision-makers put AI tools to sensible everyday use — hands-on, without buzzword bingo.',
+  de: 'Als KI-Berater und -Trainer unterstützen wir Teams und Entscheider:innen dabei, KI-Tools sinnvoll im Arbeitsalltag einzusetzen – praxisnah, ohne Buzzword-Bingo.',
+  en: 'As AI consultants and trainers we help teams and decision-makers put AI tools to sensible everyday use — hands-on, without buzzword bingo.',
 }
 
 export const REMOTE_CARDS: RemoteCard[] = [
@@ -740,14 +748,14 @@ export const REMOTE_CARDS: RemoteCard[] = [
     title: { de: 'Feste Overlap-Zeiten', en: 'Fixed overlap hours' },
     description: {
       de: 'Video-Calls finden am DACH-Abend statt (Hawaii-Morgen). Der Rest läuft asynchron über Slack, Notion oder Linear – dokumentiert und nachvollziehbar.',
-      en: 'Video calls happen in the European evening (my Hawaii morning). Everything else runs asynchronously via Slack, Notion or Linear — documented and traceable.',
+      en: 'Video calls happen in the European evening (our Hawaii morning). Everything else runs asynchronously via Slack, Notion or Linear — documented and traceable.',
     },
   },
   {
     title: { de: 'Vor Ort in DACH', en: 'On site in the DACH region' },
     description: {
-      de: 'Für Kickoffs, Design Sprints und Workshops komme ich nach Vereinbarung zu Ihnen – u. a. nach Berlin, Hamburg, München, Wien, Zürich oder Basel.',
-      en: 'For kickoffs, design sprints and workshops I come to you by arrangement — to Berlin, Hamburg, Munich, Vienna, Zurich or Basel, among others.',
+      de: 'Für Kickoffs, Design Sprints und Workshops kommen wir nach Vereinbarung zu Ihnen – u. a. nach Berlin, Hamburg, München, Wien, Zürich oder Basel.',
+      en: 'For kickoffs, design sprints and workshops we come to you by arrangement — to Berlin, Hamburg, Munich, Vienna, Zurich or Basel, among others.',
     },
   },
 ]
@@ -815,12 +823,12 @@ export const FAQS: LocalizedFaq[] = [
   },
   {
     question: {
-      de: 'Freelancer oder Agentur – was passt besser?',
-      en: 'Freelancer or agency — which fits better?',
+      de: 'Studio oder Agentur – was passt besser?',
+      en: 'Studio or agency — which fits better?',
     },
     answer: {
-      de: 'Bei mir arbeiten Sie direkt mit einem Senior – ohne Projektleitungs-Overhead und ohne dass Juniors die Arbeit machen. Das ist in der Regel 30–50 % günstiger als eine Agentur und deutlich schneller in den Entscheidungen. Für Full-Service-Anforderungen ziehe ich bei Bedarf Partner aus meinem Netzwerk hinzu.',
-      en: 'With me you work directly with a senior — no project-management overhead and no juniors doing the work. That is usually 30–50% cheaper than an agency and decisions get made considerably faster. For full-service requirements I bring in partners from my network when needed.',
+      de: 'Bei uns arbeiten Sie direkt mit der Senior-Ebene – ohne Projektleitungs-Overhead und ohne dass Juniors die Arbeit machen. Das ist in der Regel 30–50 % günstiger als eine Agentur und deutlich schneller in den Entscheidungen. Für Full-Service-Anforderungen ziehen wir bei Bedarf Partner aus unserem Netzwerk hinzu.',
+      en: 'With us you work directly with the senior level — no project-management overhead and no juniors doing the work. That is usually 30–50% cheaper than an agency and decisions get made considerably faster. For full-service requirements we bring in partners from our network when needed.',
     },
   },
   {
@@ -850,7 +858,7 @@ export const FAQS: LocalizedFaq[] = [
     },
     answer: {
       de: 'Sehr gut – die Zeitverschiebung ist ein Vorteil: Feedback, das Sie am Ende Ihres Arbeitstags senden, wird über Nacht umgesetzt und liegt am nächsten Morgen fertig vor. Video-Calls finden am DACH-Abend statt (Hawaii-Morgen). Die restliche Kommunikation läuft asynchron über Slack, Notion oder Linear – auf Deutsch oder Englisch. Workshops vor Ort in DACH sind nach Vereinbarung möglich.',
-      en: 'Very well — the time difference is an advantage: feedback you send at the end of your working day is implemented overnight and ready the next morning. Video calls happen in the European evening (my Hawaii morning). The rest of the communication is asynchronous via Slack, Notion or Linear — in German or English. On-site workshops in the DACH region are possible by arrangement.',
+      en: 'Very well — the time difference is an advantage: feedback you send at the end of your working day is implemented overnight and ready the next morning. Video calls happen in the European evening (our Hawaii morning). The rest of the communication is asynchronous via Slack, Notion or Linear — in German or English. On-site workshops in the DACH region are possible by arrangement.',
     },
   },
   {
@@ -859,8 +867,8 @@ export const FAQS: LocalizedFaq[] = [
       en: 'Do you handle the technical implementation as well?',
     },
     answer: {
-      de: 'Ja. Ich gestalte nicht nur, sondern setze Websites und Web-Anwendungen auch selbst um – mit moderner, schneller und suchmaschinenfreundlicher Web-Technologie (u. a. Nuxt/Vue). Sie bekommen eine fertige, live geschaltete Website statt nur Design-Dateien. Alternativ übergebe ich sauber dokumentierte Design-Vorlagen an Ihr Entwicklungsteam oder Ihre Agentur.',
-      en: 'Yes. I do not just design — I build websites and web applications myself, with modern, fast and search-engine-friendly web technology (Nuxt/Vue among others). You get a finished, live website instead of design files alone. Alternatively I hand over cleanly documented design files to your development team or agency.',
+      de: 'Ja. Wir gestalten nicht nur, sondern setzen Websites und Web-Anwendungen auch selbst um – mit moderner, schneller und suchmaschinenfreundlicher Web-Technologie (u. a. Nuxt/Vue). Sie bekommen eine fertige, live geschaltete Website statt nur Design-Dateien. Alternativ übergeben wir sauber dokumentierte Design-Vorlagen an Ihr Entwicklungsteam oder Ihre Agentur.',
+      en: 'Yes. We do not just design — we build websites and web applications ourselves, with modern, fast and search-engine-friendly web technology (Nuxt/Vue among others). You get a finished, live website instead of design files alone. Alternatively we hand over cleanly documented design files to your development team or agency.',
     },
   },
   {
@@ -869,8 +877,8 @@ export const FAQS: LocalizedFaq[] = [
       en: 'Do you also do photography, video and digital ad assets?',
     },
     answer: {
-      de: 'Ja. Als ausgebildeter Mediengestalter produziere ich auch den Content zum Design: digitale Werbemittel, Social-Media-Assets, Fotografie sowie Videografie inklusive Schnitt (Final Cut Pro). Der Vorteil: Design und Inhalte kommen aus einer Hand und passen von Anfang an zusammen.',
-      en: 'Yes. As a trained media designer I also produce the content that goes with the design: digital ad assets, social media assets, photography and video including editing (Final Cut Pro). The advantage: design and content come from the same pair of hands and fit together from the start.',
+      de: 'Ja. Wir produzieren auch den Content zum Design: digitale Werbemittel, Social-Media-Assets, Fotografie sowie Videografie inklusive Schnitt (Final Cut Pro) – das Handwerk dahinter kommt aus der Ausbildung zum Mediengestalter. Der Vorteil: Design und Inhalte kommen aus einer Hand und passen von Anfang an zusammen.',
+      en: 'Yes. We also produce the content that goes with the design: digital ad assets, social media assets, photography and video including editing (Final Cut Pro) — the craft behind it comes from formal training as a media designer. The advantage: design and content come from one studio and fit together from the start.',
     },
   },
   {
@@ -879,8 +887,8 @@ export const FAQS: LocalizedFaq[] = [
       en: 'Do you work for agencies too?',
     },
     answer: {
-      de: 'Ja, regelmäßig. Ich verstärke Werbe-, Marketing- und Digitalagenturen als Senior-Freelancer – für Konzept, UI/UX-Design, Art Direction oder technische Umsetzung. Auf Wunsch White Label, also unsichtbar für Ihren Endkunden. Agentur-Erfahrung bringe ich aus über einem Jahrzehnt auf Agenturseite selbst mit.',
-      en: 'Yes, regularly. I work with advertising, marketing and digital agencies as a senior freelancer — for concept, UI/UX design, art direction or technical implementation. White label on request, so invisible to your end client. I spent more than a decade on the agency side myself.',
+      de: 'Ja, regelmäßig. Wir verstärken Werbe-, Marketing- und Digitalagenturen auf Senior-Niveau – für Konzept, UI/UX-Design, Art Direction oder technische Umsetzung. Auf Wunsch White Label, also unsichtbar für Ihren Endkunden. Die Agentur-Erfahrung dafür kommt aus über einem Jahrzehnt auf Agenturseite.',
+      en: 'Yes, regularly. We add senior capacity to advertising, marketing and digital agencies — for concept, UI/UX design, art direction or technical implementation. White label on request, so invisible to your end client. The agency experience behind that comes from more than a decade spent on the agency side.',
     },
   },
   {
@@ -889,8 +897,8 @@ export const FAQS: LocalizedFaq[] = [
       en: 'Do you also do app design for iOS and Android?',
     },
     answer: {
-      de: 'Ja – natives App-Design für iOS und Android, Progressive Web Apps und Design Systems für Apps. Die Entwicklung nativer Apps erfolgt bei Bedarf über mein Partnernetzwerk.',
-      en: 'Yes — native app design for iOS and Android, progressive web apps and design systems for apps. Native app development is handled through my partner network when required.',
+      de: 'Ja – natives App-Design für iOS und Android, Progressive Web Apps und Design Systems für Apps. Die Entwicklung nativer Apps erfolgt bei Bedarf über unser Partnernetzwerk.',
+      en: 'Yes — native app design for iOS and Android, progressive web apps and design systems for apps. Native app development is handled through our partner network when required.',
     },
   },
   {
@@ -909,8 +917,8 @@ export const FAQS: LocalizedFaq[] = [
       en: 'Do you offer AI consulting as well?',
     },
     answer: {
-      de: 'Ja. Als KI-Berater und -Trainer helfe ich Teams und Entscheider:innen, KI-Tools sinnvoll im Arbeitsalltag einzusetzen – praxisnah und ohne Buzzwords. Formate: Workshops, Team-Trainings und individuelle Beratung.',
-      en: 'Yes. As an AI consultant and trainer I help teams and decision-makers use AI tools sensibly in their daily work — hands-on and without buzzwords. Formats: workshops, team training and one-to-one consulting.',
+      de: 'Ja. Wir helfen Teams und Entscheider:innen, KI-Tools sinnvoll im Arbeitsalltag einzusetzen – praxisnah und ohne Buzzwords. Formate: Workshops, Team-Trainings und individuelle Beratung.',
+      en: 'Yes. We help teams and decision-makers use AI tools sensibly in their daily work — hands-on and without buzzwords. Formats: workshops, team training and one-to-one consulting.',
     },
   },
   {
@@ -919,8 +927,8 @@ export const FAQS: LocalizedFaq[] = [
       en: 'How quickly can we start?',
     },
     answer: {
-      de: 'Kurzfristig: Das Erstgespräch ist meist innerhalb weniger Tage direkt über cal.com buchbar, das Festpreis-Angebot folgt innerhalb von 48 Stunden nach dem Gespräch. UX-Audits sind laufend möglich. Auf E-Mails antworte ich innerhalb von 24 Stunden.',
-      en: 'Quickly: the intro call can usually be booked within a few days directly via cal.com, and the fixed-price quote follows within 48 hours of the call. UX audits are available on a rolling basis. I answer emails within 24 hours.',
+      de: 'Kurzfristig: Das Erstgespräch ist meist innerhalb weniger Tage direkt über cal.com buchbar, das Festpreis-Angebot folgt innerhalb von 48 Stunden nach dem Gespräch. UX-Audits sind laufend möglich. Auf E-Mails antworten wir innerhalb von 24 Stunden.',
+      en: 'Quickly: the intro call can usually be booked within a few days directly via cal.com, and the fixed-price quote follows within 48 hours of the call. UX audits are available on a rolling basis. We answer emails within 24 hours.',
     },
   },
 ]
@@ -939,8 +947,8 @@ export const CONTACT_CHANNELS: ContactChannel[] = [
   {
     title: { de: 'E-Mail senden', en: 'Send an email' },
     description: {
-      de: 'Projektidee, Zeitrahmen, Budget – ich antworte innerhalb von 24 Stunden.',
-      en: 'Project idea, timeline, budget — I reply within 24 hours.',
+      de: 'Projektidee, Zeitrahmen, Budget – wir antworten innerhalb von 24 Stunden.',
+      en: 'Project idea, timeline, budget — we reply within 24 hours.',
     },
     linkLabel: { de: 'mail@davidschubert.com', en: 'mail@davidschubert.com' },
     href: 'mail',
@@ -967,15 +975,15 @@ export const SECTIONS = {
   overview: {
     title: { de: 'Auf einen Blick', en: 'At a glance' },
     lead: {
-      de: 'Die wichtigsten Fakten zu David Schubert und Pukalani Studio – kompakt zusammengefasst.',
-      en: 'The most important facts about David Schubert and Pukalani Studio — in brief.',
+      de: 'Die wichtigsten Fakten zu Pukalani Studio – kompakt zusammengefasst.',
+      en: 'The most important facts about Pukalani Studio — in brief.',
     },
   },
   audiences: {
-    title: { de: 'Für wen ich arbeite', en: 'Who I work with' },
+    title: { de: 'Für wen wir arbeiten', en: 'Who we work with' },
     lead: {
-      de: 'Meine Kunden sind mittelständische Unternehmen, die einen erfahrenen Design-Partner ohne Agentur-Overhead suchen – und Agenturen, die punktuell Senior-Verstärkung brauchen. Viele kommen über Empfehlungen ehemaliger Kolleginnen und Kollegen.',
-      en: 'My clients are mid-sized companies looking for an experienced design partner without agency overhead — and agencies that need extra senior capacity for a specific job. Many of them come to me through referrals from former colleagues.',
+      de: 'Unsere Kunden sind mittelständische Unternehmen, die einen erfahrenen Design-Partner ohne Agentur-Overhead suchen – und Agenturen, die punktuell Senior-Verstärkung brauchen. Viele kommen über Empfehlungen ehemaliger Kolleginnen und Kollegen.',
+      en: 'Our clients are mid-sized companies looking for an experienced design partner without agency overhead — and agencies that need extra senior capacity for a specific job. Many of them come to us through referrals from former colleagues.',
     },
   },
   services: {
@@ -1005,14 +1013,14 @@ export const SECTIONS = {
     },
     lead: {
       de: 'Ausgewählte Projekte mit messbaren Ergebnissen – von +43 % Feature-Adoption in einem SaaS-Dashboard bis +73 % Conversion nach einem Checkout-Redesign. Aus Vertraulichkeitsgründen anonymisiert; Details und weitere Referenzen gern im persönlichen Gespräch.',
-      en: 'Selected projects with measurable outcomes — from +43% feature adoption in a SaaS dashboard to +73% conversion after a checkout redesign. Anonymised for confidentiality; I am happy to share details and further references in a call.',
+      en: 'Selected projects with measurable outcomes — from +43% feature adoption in a SaaS dashboard to +73% conversion after a checkout redesign. Anonymised for confidentiality; we are happy to share details and further references in a call.',
     },
   },
   ownWork: {
-    title: { de: 'Ausgewählte eigene Projekte', en: 'Selected projects of my own' },
+    title: { de: 'Ausgewählte eigene Projekte', en: 'Selected projects of our own' },
     lead: {
-      de: 'Produkte, die ich selbst konzipiert, gestaltet und gebaut habe – mit Details zu Architektur und Umsetzung.',
-      en: 'Products I conceived, designed and built myself — with details on architecture and implementation.',
+      de: 'Produkte, die wir selbst konzipiert, gestaltet und gebaut haben – mit Details zu Architektur und Umsetzung.',
+      en: 'Products we conceived, designed and built ourselves — with details on architecture and implementation.',
     },
   },
   testimonials: {
@@ -1027,12 +1035,12 @@ export const SECTIONS = {
   },
   about: {
     title: {
-      de: 'Über mich: vom Mediengestalter zum Creative Technologist',
-      en: 'About me: from media designer to creative technologist',
+      de: 'Das Studio: vom Mediengestalter zum Creative Technologist',
+      en: 'About the studio: from media designer to creative technologist',
     },
     lead: {
-      de: 'David Schubert ist Senior UI/UX Designer und Creative Technologist mit über 25 Jahren Erfahrung in Design und Werbung – ausgebildeter Mediengestalter, langjähriger Art Director und Senior Designer in Hamburger Agenturen, heute selbstständig unter der Marke Pukalani Studio. Sie arbeiten immer direkt mit ihm: von der kreativen Leitidee über das Design bis zur technischen Umsetzung und Content-Produktion.',
-      en: 'David Schubert is a senior UI/UX designer and creative technologist with more than 25 years in design and advertising — a trained media designer, long-time art director and senior designer in Hamburg agencies, today self-employed under the Pukalani Studio brand. You always work with him directly: from the core creative idea through design to technical implementation and content production.',
+      de: 'Hinter Pukalani Studio steht David Schubert, Senior UI/UX Designer & Creative Technologist mit über 25 Jahren Erfahrung in Design und Werbung – ausgebildeter Mediengestalter, langjähriger Art Director und Senior Designer in Hamburger Agenturen. Sie arbeiten immer direkt mit der Senior-Ebene: von der kreativen Leitidee über das Design bis zur technischen Umsetzung und Content-Produktion. Je nach Projekt holen wir ausgewählte Partner dazu.',
+      en: 'Behind Pukalani Studio is David Schubert, senior UI/UX designer & creative technologist with more than 25 years in design and advertising — a trained media designer, long-time art director and senior designer in Hamburg agencies. You always work directly with the senior level: from the core creative idea through design to technical implementation and content production. Depending on the project, we bring in selected partners.',
     },
   },
   remote: {
@@ -1099,20 +1107,24 @@ export const HOME_META = {
    * Fußzeile bleibt `CONTACT.lastUpdatedHuman`.
    */
   published: '2026-07-14',
-  updated: '2026-08-08',
-  updatedHuman: { de: '8. August 2026', en: '8 August 2026' } satisfies Localized,
+  updated: '2026-08-21',
+  updatedHuman: { de: '21. August 2026', en: '21 August 2026' } satisfies Localized,
   title: {
-    de: 'Senior UI/UX Designer Freelancer – Mittelstand & Agenturen | David Schubert',
-    en: 'Freelance Senior UI/UX Designer for Mid-Sized Companies & Agencies | David Schubert',
+    de: 'Pukalani Studio – Senior UI/UX Design für Mittelstand & Agenturen',
+    en: 'Pukalani Studio — Senior UI/UX Design for Mid-Sized Companies & Agencies',
   } satisfies Localized,
   description: {
-    de: 'David Schubert: Senior UI/UX Designer & ausgebildeter Mediengestalter (25+ Jahre, u. a. für Astra, GEMA, NEFF, Telekom). Designkonzepte, Brand Design, Websites & Content – remote für DACH, Festpreise.',
-    en: 'David Schubert – freelance senior UI/UX designer & creative technologist for Germany, Austria & Switzerland. Design concepts, brand design, websites, content production. 25+ years, brands like Astra, GEMA, NEFF, Telekom. Fixed prices.',
+    de: 'Pukalani Studio: Designkonzepte, digitales Brand Design, Websites & Content aus über 25 Jahren Design und Werbung (u. a. für Astra, GEMA, NEFF, Telekom). Remote für DACH, zu festen Projektpreisen.',
+    en: 'Pukalani Studio — digital design studio for Germany, Austria & Switzerland. Design concepts, brand design, websites and content production, backed by 25+ years and brands like Astra, GEMA, NEFF, Telekom. Fixed prices.',
   } satisfies Localized,
-  /** Beschreibung der Person im JSON-LD (länger als die Meta-Description). */
+  /**
+   * Beschreibung der PERSON im JSON-LD (länger als die Meta-Description) —
+   * bewusst weiterhin über David Schubert, nicht über das Studio: der
+   * Organization-Knoten trägt die Marke, dieser Knoten den Menschen dahinter.
+   */
   personDescription: {
-    de: 'Senior UI/UX Designer, Creative Technologist und ausgebildeter Mediengestalter mit über 25 Jahren Erfahrung in Design und Werbung. Erarbeitet Designkonzepte, digitales Brand Design, Websites und Content – remote für Mittelstand und Agenturen in der DACH-Region. In Agentur- und Freelance-Projekten für Marken wie Astra, E WIE EINFACH, GEMA, Holsten, Lamborghini, NEFF, Telekom und T-Systems tätig gewesen.',
-    en: 'Senior UI/UX designer, creative technologist and trained media designer with more than 25 years in design and advertising. Creates design concepts, digital brand design, websites and content — remote for mid-sized companies and agencies in the DACH region. Has worked on agency and freelance projects for brands such as Astra, E WIE EINFACH, GEMA, Holsten, Lamborghini, NEFF, Telekom and T-Systems.',
+    de: 'Senior UI/UX Designer, Creative Technologist und ausgebildeter Mediengestalter mit über 25 Jahren Erfahrung in Design und Werbung. Gründer von Pukalani Studio: Designkonzepte, digitales Brand Design, Websites und Content – remote für Mittelstand und Agenturen in der DACH-Region. In Agentur- und Studio-Projekten für Marken wie Astra, E WIE EINFACH, GEMA, Holsten, Lamborghini, NEFF, Telekom und T-Systems tätig gewesen.',
+    en: 'Senior UI/UX designer, creative technologist and trained media designer with more than 25 years in design and advertising. Founder of Pukalani Studio: design concepts, digital brand design, websites and content — remote for mid-sized companies and agencies in the DACH region. Has worked on agency and studio projects for brands such as Astra, E WIE EINFACH, GEMA, Holsten, Lamborghini, NEFF, Telekom and T-Systems.',
   } satisfies Localized,
   serviceDescription: {
     de: 'Designkonzepte, digitales Brand Design, UI/UX-Design, Websites mit technischer Umsetzung und Content-Produktion (Foto, Video, Werbemittel). Remote für Mittelstand und Agenturen in Deutschland, Österreich und der Schweiz.',
