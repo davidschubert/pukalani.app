@@ -171,6 +171,42 @@ export function ugcTranslationFor(
 }
 
 /**
+ * IST DIESE FASSUNG IN WAHRHEIT DIE GRUNDFASSUNG? (Davids Entscheidung
+ * 2026-08-21: KI-Marker + UI-Hinweis statt eines teuren en→en-Echos.)
+ *
+ * Wer einen englischen Text mit englischer Spracheinstellung übersetzen lässt,
+ * bekam bis dahin denselben Text zurück — bezahlt, und in der Anzeige ein
+ * Umschalter zwischen zwei identischen Fassungen. Seither antwortet das Modell
+ * in diesem Fall `{"same": true}`, und die Route legt die GRUNDFASSUNG wörtlich
+ * in den Cache (damit jeder weitere Klick ein Treffer bleibt und nichts mehr
+ * kostet). Diese Funktion ist die Gegenprobe dazu auf der Anzeige-Seite: sie
+ * sagt „hier gibt es nichts umzuschalten".
+ *
+ * ── WARUM EIN VERGLEICH UND KEIN FLAG IN DER ANTWORT ──────────────────────
+ * Ein Feld in der Antwort der Route wüsste nur der eine Klick, der sie gerufen
+ * hat. Der Cache in der Spalte reist aber in JEDER Listen-Antwort mit und wird
+ * von SPÄTEREN Lesern aufgeschlagen, die nie eine Route gerufen haben — die
+ * bekämen ihr Flag nie zu sehen. Der Vergleich gilt für beide Wege.
+ *
+ * ── WARUM NUR DER BODY ────────────────────────────────────────────────────
+ * Der Server schreibt im `same`-Fall die Grundfassung WÖRTLICH, und auch ein
+ * Modell, das den Marker ignoriert und den gleichsprachigen Text zurückechot,
+ * ist am Body erkennbar. Ein zusätzlicher Titel-Vergleich brächte also nichts
+ * als einen zweiten Parameter — den der comments-Konsument gar nicht hat (ein
+ * Kommentar hat keinen Titel).
+ *
+ * `null` (nichts übersetzt) ist NICHT die Grundfassung, sondern ihr Fehlen —
+ * dort steht der gewöhnliche „Übersetzen"-Knopf, kein Hinweis.
+ */
+export function ugcTranslationIsOriginal(
+  entry: UgcTranslationEntry | null,
+  originalBody: string,
+): boolean {
+  if (!entry) return false
+  return entry.body.trim() === originalBody.trim()
+}
+
+/**
  * DIE ÜBERSETZTEN UMFRAGE-OPTIONEN — oder `null` (Davids Entscheidung
  * 2026-08-18).
  *

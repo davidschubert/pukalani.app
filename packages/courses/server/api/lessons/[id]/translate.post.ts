@@ -76,13 +76,14 @@ function buildPrompt(lesson: LessonRow, locale: string): string {
     '- Inhalte von Code-Spans und Codeblöcken bleiben UNVERÄNDERT stehen — in einer Lektion ist der Code das Lernmaterial, nicht die Beschriftung.',
     '- URLs und Erwähnungen (@name) bleiben UNVERÄNDERT stehen.',
     '- Eigennamen, Produktnamen und Fachbegriffe, die auch in der Zielsprache unübersetzt benutzt werden, bleiben stehen (z. B. „Nuxt", „TypeScript").',
-    '- Ist der Text schon in der Zielsprache, gib ihn unverändert zurück.',
+    '- Ist der Text bereits vollständig in der Zielsprache, übersetze NICHT: Antworte stattdessen NUR mit {"same": true} und wiederhole den Text nicht.',
     '',
     'Antworte NUR mit einem JSON-Objekt (kein Markdown, keine Erklärung außenrum):',
     '{',
     '  "title": "<der übersetzte Titel>",',
     '  "body": "<der übersetzte Inhalt>"',
     '}',
+    'Oder, wenn der Text bereits in der Zielsprache ist: {"same": true}',
   ].join('\n')
 }
 
@@ -195,22 +196,49 @@ export default defineEventHandler(async (event): Promise<LessonTranslateResponse
 
   // Laufzeit-Override vor Build-Default (getEffectiveAiConfig, system-016).
   const aiConfig = await getEffectiveAiConfig(event)
-  const parsed = await aiCompleteJson<{ title?: unknown, body?: unknown }>(
+  const parsed = await aiCompleteJson<{ title?: unknown, body?: unknown, same?: unknown }>(
     event,
     buildPrompt(lesson, locale),
     { model: aiConfig.model, maxTokens: 8000, label: 'courses' },
   )
 
-  /**
-   * Klemmen statt vertrauen. Der Lektions-Titel teilt sich die Grenze mit dem
-   * Kurs-Titel (`MAX_COURSE_TITLE`, 200) — dieselbe Konstante, die auch das
-   * Lektions-Formular prüft; eine eigene `MAX_LESSON_TITLE` gibt es im Layer
-   * nicht, und eine hier erfundene wäre eine zweite Wahrheit.
-   */
-  const title = String(parsed.title ?? '').trim().slice(0, MAX_COURSE_TITLE)
-  const body = String(parsed.body ?? '').trim().slice(0, MAX_LESSON_CONTENT)
-  if (!body) {
-    throw createError({ status: 502, statusText: 'AI returned no translation' })
+  let title: string
+  let body: string
+  if (parsed.same === true) {
+    /**
+     * SCHON IN DER ZIELSPRACHE (Davids Entscheidung 2026-08-21).
+     *
+     * Das Modell hat den Marker gesetzt, statt die Lektion Wort für Wort
+     * zurückzuechoen — die halbe Rechnung gespart, und hier wiegt das am
+     * schwersten: eine Lektion ist der längste Text dieses Hauses. Gecacht wird
+     * trotzdem, und zwar die GRUNDFASSUNG wörtlich: genau das macht jeden
+     * weiteren Klick kostenlos (er trifft ab jetzt den Cache-Zweig ganz oben),
+     * und eine Lektion wird beim Lernen mehrfach aufgeschlagen.
+     *
+     * Die Antwort trägt KEIN Flag: der Client erkennt die Gleichheit selbst
+     * (`ugcTranslationIsOriginal`) und zeigt statt des sinnlosen Umschalters
+     * einen Hinweis. Ein Flag wüsste nur dieser eine Aufruf — spätere Leser
+     * sehen den Cache aus der Spalte und hätten nichts davon.
+     *
+     * Weder klemmen noch die 502-Prüfung: beides kommt aus der ZEILE, nicht vom
+     * Anbieter — es steht längst in seinen Grenzen, und der leere Inhalt hat die
+     * Vorprüfung oben bereits abgewiesen.
+     */
+    title = lesson.title
+    body = lesson.content
+  }
+  else {
+    /**
+     * Klemmen statt vertrauen. Der Lektions-Titel teilt sich die Grenze mit dem
+     * Kurs-Titel (`MAX_COURSE_TITLE`, 200) — dieselbe Konstante, die auch das
+     * Lektions-Formular prüft; eine eigene `MAX_LESSON_TITLE` gibt es im Layer
+     * nicht, und eine hier erfundene wäre eine zweite Wahrheit.
+     */
+    title = String(parsed.title ?? '').trim().slice(0, MAX_COURSE_TITLE)
+    body = String(parsed.body ?? '').trim().slice(0, MAX_LESSON_CONTENT)
+    if (!body) {
+      throw createError({ status: 502, statusText: 'AI returned no translation' })
+    }
   }
 
   // Ein leerer Titel ist KEIN Titel: der Eintrag trägt das Feld dann nicht, und

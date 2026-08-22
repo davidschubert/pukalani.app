@@ -532,11 +532,17 @@ Vollständiges Konzept: docs/CONCEPT.md
   als operator/actor:'operator' (kein M13, kein A5-Beitritt); (4) Übersetzen
   zeigt nie mehr als Lesen — die Lesson-Route trägt ALLE Vorprüfungen ihrer
   GET-Route, die Event-Schwärzung LEERT den Cache mit; (5) echte Bearbeitung
-  leert, No-op-Speichern nicht. Drosseln: 10/10 min je Mensch+Community,
-  geteilter Tages-Eimer `ugcTranslationDayKey` (100/24 h, EIN Deckel über
-  alle Arten), IP-Buckets in 05.rate-limit.ts. `NUXT_AI_KEY` ist auf platform
-  Pflicht (ops:site-env). Beweis: `packages/core/scripts/
-  verify-ugc-translation.mjs` (32/32, braucht Dev-Server + lokale Appwrite +
+  leert, No-op-Speichern nicht; (6) SCHON IN DER ZIELSPRACHE (2026-08-21,
+  Davids Entscheidung): das Modell antwortet `{"same": true}` statt eines
+  teuren Echos, die Route cacht die GRUNDFASSUNG wörtlich (zweiter Klick =
+  Cache-Treffer), erkannt wird der Fall client-seitig per Gleichheits-Vergleich
+  (`ugcTranslationIsOriginal`) — bewusst KEIN Flag in der Antwort, weil spätere
+  Leser den Cache aus der Spalte aufschlagen und nie eine Route rufen; die UI
+  zeigt einen Hinweis statt des Umschalters. Drosseln: 10/10 min je
+  Mensch+Community, geteilter Tages-Eimer `ugcTranslationDayKey` (100/24 h,
+  EIN Deckel über alle Arten), IP-Buckets in 05.rate-limit.ts. `NUXT_AI_KEY`
+  ist auf platform Pflicht (ops:site-env). Beweis: `packages/core/scripts/
+  verify-ugc-translation.mjs` (35/35, braucht Dev-Server + lokale Appwrite +
   Key, bezahlt echte KI-Aufrufe).
 - E-Mail: sendMail() (core mailer.ts, nodemailer, NUXT_SMTP_* — leerer Host =
   aus, lokal Mailpit localhost:1025). notify() hat einen Opt-in-E-Mail-Zweig:

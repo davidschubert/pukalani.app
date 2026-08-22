@@ -7,6 +7,7 @@ import {
   serializeUgcTranslations,
   translatedPollOptions,
   ugcTranslationDayKey,
+  type UgcTranslationEntry,
 } from '../../../../../core/shared/ugcTranslations'
 import { postTranslateSchema } from '../../../../schemas/post'
 import {
@@ -106,7 +107,7 @@ function buildPrompt(post: CommunityPost, options: string[], locale: string): st
     '- Inhalte von Code-Spans und Codeblöcken bleiben UNVERÄNDERT stehen, auch wenn dort Wörter der Ausgangssprache vorkommen.',
     '- Erwähnungen (@name), Themen-Verweise (#id) und URLs bleiben UNVERÄNDERT stehen.',
     '- Eigennamen, Produktnamen und Fachbegriffe, die auch in der Zielsprache unübersetzt benutzt werden, bleiben stehen.',
-    '- Ist der Text schon in der Zielsprache, gib ihn unverändert zurück.',
+    '- Ist der Beitrag bereits vollständig in der Zielsprache, übersetze NICHT: Antworte stattdessen NUR mit {"same": true} und wiederhole den Text nicht.',
     ...(options.length
       ? [
           `- Übersetze JEDE Wahlmöglichkeit und gib EXAKT ${options.length} zurück, in DERSELBEN Reihenfolge wie oben — keine zusammenfassen, keine weglassen, keine hinzufügen. Die Nummern selbst gehören nicht in die Ausgabe.`,
@@ -120,6 +121,7 @@ function buildPrompt(post: CommunityPost, options: string[], locale: string): st
     `  "body": "<der übersetzte Text>"${options.length ? ',' : ''}`,
     ...(options.length ? [`  "options": [<${options.length} übersetzte Wahlmöglichkeiten in der Reihenfolge oben>]`] : []),
     '}',
+    'Oder, wenn der Beitrag bereits in der Zielsprache ist: {"same": true}',
     ...(post.title ? [] : ['Der Beitrag hat keinen Titel — gib das Feld "title" nicht aus.']),
   ].join('\n')
 }
@@ -249,36 +251,62 @@ export default defineEventHandler(async (event): Promise<PostTranslateResponse> 
 
   // Laufzeit-Override vor Build-Default (getEffectiveAiConfig, system-016).
   const aiConfig = await getEffectiveAiConfig(event)
-  const parsed = await aiCompleteJson<{ title?: unknown, body?: unknown, options?: unknown }>(
+  const parsed = await aiCompleteJson<{ title?: unknown, body?: unknown, options?: unknown, same?: unknown }>(
     event,
     buildPrompt(post, pollOptions, locale),
     { model: aiConfig.model, maxTokens: 8000, label: 'posts' },
   )
 
-  // Klemmen statt vertrauen — die Antwort ist eine Behauptung, und sie geht in
-  // eine Spalte, deren Grenzen die des Originals sind.
-  const title = post.title ? String(parsed.title ?? '').trim().slice(0, MAX_POST_TITLE) : ''
-  const body = String(parsed.body ?? '').trim().slice(0, MAX_POST_BODY)
-  if (!body) {
-    // Ohne Text gibt es nichts zu zeigen und nichts zu merken. 502 wie überall,
-    // wo der Anbieter etwas Unbrauchbares geliefert hat.
-    throw createError({ status: 502, statusText: 'AI returned no translation' })
+  let entry: UgcTranslationEntry
+  if (parsed.same === true) {
+    /**
+     * SCHON IN DER ZIELSPRACHE (Davids Entscheidung 2026-08-21).
+     *
+     * Das Modell hat den Marker gesetzt, statt den Beitrag Wort für Wort
+     * zurückzuechoen — die halbe Rechnung gespart. Gecacht wird trotzdem, und
+     * zwar die GRUNDFASSUNG wörtlich: genau das macht jeden weiteren Klick
+     * kostenlos (er trifft ab jetzt den Cache-Zweig ganz oben). Ein verworfener
+     * `same`-Fall wäre der teuerste von allen — er bezahlte bei jedem Klick
+     * aufs Neue dafür, nichts zu tun.
+     *
+     * Die Antwort trägt KEIN Flag: der Client erkennt die Gleichheit selbst
+     * (`ugcTranslationIsOriginal`) und zeigt statt des sinnlosen Umschalters
+     * einen Hinweis. Ein Flag wüsste nur dieser eine Aufruf — spätere Leser
+     * sehen den Cache aus der Spalte und hätten nichts davon.
+     *
+     * Klemmen ist hier unnötig: Titel, Text und Optionen kommen aus der ZEILE,
+     * nicht vom Anbieter, und stehen damit längst in ihren Grenzen.
+     */
+    entry = {
+      ...(post.title ? { title: post.title } : {}),
+      body: post.body,
+      ...(pollOptions.length ? { options: pollOptions } : {}),
+    }
   }
-  /**
-   * Die Optionen sind das Gegenteil des Textes: hier gilt ALLES ODER NICHTS.
-   * `null` (falsche Anzahl, kein Array, ein leeres Element) ist KEIN Fehler
-   * nach außen — der Beitrag bleibt übersetzt, nur die Beschriftungen bleiben
-   * im Original. Ein 502 wäre die schlechtere Antwort: sie würfe eine
-   * brauchbare Übersetzung weg, die schon bezahlt ist.
-   */
-  const options = pollOptions.length
-    ? translatedPollOptions(pollOptions, parsed.options, MAX_POLL_OPTION_LENGTH)
-    : null
+  else {
+    // Klemmen statt vertrauen — die Antwort ist eine Behauptung, und sie geht in
+    // eine Spalte, deren Grenzen die des Originals sind.
+    const title = post.title ? String(parsed.title ?? '').trim().slice(0, MAX_POST_TITLE) : ''
+    const body = String(parsed.body ?? '').trim().slice(0, MAX_POST_BODY)
+    if (!body) {
+      // Ohne Text gibt es nichts zu zeigen und nichts zu merken. 502 wie überall,
+      // wo der Anbieter etwas Unbrauchbares geliefert hat.
+      throw createError({ status: 502, statusText: 'AI returned no translation' })
+    }
+    /**
+     * Die Optionen sind das Gegenteil des Textes: hier gilt ALLES ODER NICHTS.
+     * `null` (falsche Anzahl, kein Array, ein leeres Element) ist KEIN Fehler
+     * nach außen — der Beitrag bleibt übersetzt, nur die Beschriftungen bleiben
+     * im Original. Ein 502 wäre die schlechtere Antwort: sie würfe eine
+     * brauchbare Übersetzung weg, die schon bezahlt ist.
+     */
+    const options = pollOptions.length
+      ? translatedPollOptions(pollOptions, parsed.options, MAX_POLL_OPTION_LENGTH)
+      : null
+    entry = { ...(title ? { title } : {}), body, ...(options ? { options } : {}) }
+  }
 
-  const translations = serializeUgcTranslations({
-    ...existing,
-    [locale]: { ...(title ? { title } : {}), body, ...(options ? { options } : {}) },
-  })
+  const translations = serializeUgcTranslations({ ...existing, [locale]: entry })
 
   /**
    * DEN CACHE SCHREIBEN — FAIL-SOFT, und das ist eine Abwägung, keine
@@ -294,5 +322,5 @@ export default defineEventHandler(async (event): Promise<PostTranslateResponse> 
       console.error('[posts] Übersetzungs-Cache nicht geschrieben:', error)
     })
 
-  return { locale, title: title || null, body, options, cached: false }
+  return { locale, title: entry.title ?? null, body: entry.body, options: entry.options ?? null, cached: false }
 })

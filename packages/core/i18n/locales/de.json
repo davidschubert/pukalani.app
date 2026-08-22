@@ -415,6 +415,8 @@
       "dailyLimit": "Tagesgrenze erreicht",
       "dailyLimitHint": "Du hast heute schon viel übersetzt. Morgen geht es weiter.",
     "failed": "Übersetzung nicht möglich",
-    "failedHint": "Bitte versuche es noch einmal."
+    "failedHint": "Bitte versuche es noch einmal.",
+    "sameLanguage": "Schon in deiner Sprache",
+    "sameLanguageHint": "Dieser Text ist bereits in deiner Sprache verfasst."
   }
 }
