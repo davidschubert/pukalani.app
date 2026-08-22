@@ -24,6 +24,7 @@ definePageMeta({ layout: 'site' })
 
 const { t, locale } = useI18n()
 const localePath = useLocalePath()
+const { trackFunnel } = useFunnelEvent()
 
 const lang = computed<Lang>(() => (locale.value.startsWith('de') ? 'de' : 'en'))
 
@@ -93,9 +94,13 @@ usePortfolioSeo({
         <h1 class="page-head__title">{{ UX_AUDIT_HERO.title[lang] }}</h1>
         <p id="audit-answer" class="page-head__intro">{{ UX_AUDIT_HERO.intro[lang] }}</p>
         <div class="page-head__actions">
-          <a :href="CONTACT.calLink" target="_blank" rel="noopener nofollow" class="btn btn--solid">
+          <NuxtLink
+            :to="localePath('/erstgespraech')"
+            class="btn btn--solid"
+            @click="trackFunnel('studio_cta_erstgespraech', { source: 'hero' })"
+          >
             {{ UX_AUDIT_HERO.ctaPrimary[lang] }} →
-          </a>
+          </NuxtLink>
           <NuxtLink :to="localePath('/ux-audit#pakete')" class="btn">{{ UX_AUDIT_HERO.ctaSecondary[lang] }}</NuxtLink>
         </div>
         <p class="section-note">
@@ -144,15 +149,14 @@ usePortfolioSeo({
             <ul class="ticks tier__list">
               <li v-for="item in tier.includes[lang]" :key="item">{{ item }}</li>
             </ul>
-            <a
-              :href="CONTACT.calLink"
-              target="_blank"
-              rel="noopener nofollow"
+            <NuxtLink
+              :to="localePath('/erstgespraech')"
               class="btn tier__cta"
               :class="{ 'btn--solid': tier.featured }"
+              @click="trackFunnel('studio_cta_erstgespraech', { source: 'pricing' })"
             >
               {{ tier.name[lang] }} {{ t('portfolio.common.request') }}
-            </a>
+            </NuxtLink>
           </article>
         </div>
         <p class="section-note">{{ AUDIT_TIERS_HEADING.note[lang] }}</p>

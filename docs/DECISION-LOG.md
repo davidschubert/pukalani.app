@@ -1451,3 +1451,15 @@ kein Alt-Slug-Gedächtnis**. Der einzige echte Druckpunkt (Umbenennen) ist
 heute kein Bedarf; wird er einer, ist Weg C (Id-Muster überall) die
 vorgezeichnete Lösung, nie Weg B (bei Themen bereits bewusst verworfen).
 Analyse: docs/archiv/ADRESS-MUSTER-KATEGORIEN.md.
+
+## 2026-08-21 — Studio-Site: Wir-Stimme + Erstgespräch-Wizard (W1)
+
+Davids Entscheidungen: (1) pukalani.studio spricht als **„wir, Pukalani
+Studio"** — nie mehr Ich-Form; David bleibt benannte Person, keine Teamgröße
+wird behauptet („ausgewählte Partner je nach Projekt"). (2) Erstgespräch-
+Wizard nach tobiasnase-Vorbild (strukturierte Fragen, alle vier angenommen):
+Budget-Spannen < 5 k / 5–15 k / 15–50 k / > 50 k € + „noch offen" · Telefon
+optional · Erfolgsseite mit cal.com-Sofortbuchung UND 24-h-Rückfallzeile ·
+Speicherung Mail + App-lokale Tabelle `intro_requests` (kein Produkt-Layer —
+Eigenschaft der Marketing-Site, nicht der Plattform).
+Plan: docs/plans/STUDIO-ERSTGESPRAECH-FUNNEL.md.

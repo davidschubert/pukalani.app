@@ -187,13 +187,25 @@ const SITES = [
   {
     dir: 'portfolio.pukalani.app',
     name: 'portfolio',
-    note: 'Silo-Kunde — verschickt bewusst keine Mails (kein SMTP nötig)',
+    note: 'Studio-Site — SMTP seit dem Erstgespräch-Wizard (W1) Pflicht',
     localProjectFiles: ['apps/portfolio/.env.production'],
     required: [
       'NUXT_APPWRITE_KEY',
       'NUXT_PUBLIC_APPWRITE_ENDPOINT',
       'NUXT_PUBLIC_APPWRITE_PROJECT_ID',
       'NUXT_ANALYTICS_STATS_API_KEY',
+      /**
+       * Erstgespräch-Wizard (W1, 2026-08-21): `POST /api/intro-call` stellt
+       * jede Anfrage per Mail zu — ohne SMTP fiele die Zustellung still auf
+       * die Appwrite-Zeile allein zurück (exakt die F44-Sorte Loch: die Site
+       * läuft, nur die Mail bleibt aus). Die alte Notiz „verschickt bewusst
+       * keine Mails" galt bis zum Wizard.
+       */
+      'NUXT_SMTP_HOST',
+      'NUXT_SMTP_PORT',
+      'NUXT_SMTP_USER',
+      'NUXT_SMTP_PASS',
+      'NUXT_SMTP_FROM',
       /**
        * Die Silo-Naht zum Control Plane (control-036, eigene Domain).
        *

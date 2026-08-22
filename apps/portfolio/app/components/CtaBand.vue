@@ -14,6 +14,9 @@ const props = defineProps<{
   lang: Lang
 }>()
 
+const localePath = useLocalePath()
+const { trackFunnel } = useFunnelEvent()
+
 const primary = computed(() => CTA_LABELS.primary[props.lang])
 const secondary = computed(() => CTA_LABELS.secondary[props.lang])
 const note = computed(() => CTA_NOTE[props.lang])
@@ -25,9 +28,15 @@ const note = computed(() => CTA_NOTE[props.lang])
       <h2 id="cta-band-title" class="section-title">{{ title }}</h2>
       <p class="section-lead">{{ text }}</p>
       <div class="cta-band__actions">
-        <a :href="CONTACT.calLink" target="_blank" rel="noopener nofollow" class="btn btn--solid">
+        <!-- Ziel ist der Wizard, nicht mehr cal.com direkt (W1) — die
+             Beschriftung („Kostenloses Erstgespräch") stimmt unverändert. -->
+        <NuxtLink
+          :to="localePath('/erstgespraech')"
+          class="btn btn--solid"
+          @click="trackFunnel('studio_cta_erstgespraech', { source: 'band' })"
+        >
           {{ primary }} →
-        </a>
+        </NuxtLink>
         <a :href="`mailto:${CONTACT.email}`" class="btn">{{ secondary }}</a>
       </div>
       <p class="section-note">{{ note }}</p>

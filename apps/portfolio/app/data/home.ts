@@ -940,9 +940,12 @@ export const CONTACT_CHANNELS: ContactChannel[] = [
       de: '30 Minuten, kostenlos & unverbindlich – per Zoom, Teams oder Meet.',
       en: '30 minutes, free and without obligation — via Zoom, Teams or Meet.',
     },
-    linkLabel: { de: 'cal.com/davidschubert', en: 'cal.com/davidschubert' },
+    // Seit W1 (2026-08-21) führt dieser Kanal in den Erstgespräch-Wizard, nicht
+    // mehr direkt zu cal.com — deshalb steht hier kein cal.com-Adress-Label
+    // mehr (es wäre eine Behauptung über das Ziel) und `external: false`.
+    linkLabel: { de: 'Erstgespräch starten', en: 'Start your intro call' },
     href: 'cal',
-    external: true,
+    external: false,
   },
   {
     title: { de: 'E-Mail senden', en: 'Send an email' },

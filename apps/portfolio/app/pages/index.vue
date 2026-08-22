@@ -37,13 +37,21 @@ definePageMeta({ layout: 'site' })
 
 const { t, locale } = useI18n()
 const localePath = useLocalePath()
+const { trackFunnel } = useFunnelEvent()
 
 const lang = computed<Lang>(() => (locale.value.startsWith('de') ? 'de' : 'en'))
 
+/**
+ * Der Terminkanal zeigt seit W1 (2026-08-21) auf den Erstgespräch-Wizard und
+ * nicht mehr direkt auf cal.com — ein Conversion-Ziel überall. `external` ist
+ * damit `false` und die Karte trägt kein `target="_blank"` mehr; die Zusage im
+ * Text („30 Minuten, kostenlos") gilt unverändert, gebucht wird am Ende des
+ * Wizards.
+ */
 const contactChannels = computed(() => CONTACT_CHANNELS.map(channel => ({
   ...channel,
   url: channel.href === 'cal'
-    ? CONTACT.calLink
+    ? localePath('/erstgespraech')
     : channel.href === 'mail'
       ? `mailto:${CONTACT.email}`
       : `tel:${CONTACT.phoneTel}`,
@@ -177,9 +185,13 @@ usePortfolioSeo({
           <li v-for="badge in TRUST_BADGES[lang]" :key="badge" class="chip">{{ badge }}</li>
         </ul>
         <div class="hero__actions">
-          <a :href="CONTACT.calLink" target="_blank" rel="noopener nofollow" class="btn btn--solid">
+          <NuxtLink
+            :to="localePath('/erstgespraech')"
+            class="btn btn--solid"
+            @click="trackFunnel('studio_cta_erstgespraech', { source: 'hero' })"
+          >
             {{ HERO.ctaPrimary[lang] }} →
-          </a>
+          </NuxtLink>
           <NuxtLink :to="localePath('/#leistungen')" class="btn">{{ HERO.ctaSecondary[lang] }}</NuxtLink>
         </div>
       </div>
@@ -411,6 +423,7 @@ usePortfolioSeo({
             :target="channel.external ? '_blank' : undefined"
             :rel="channel.external ? 'noopener nofollow' : undefined"
             class="card channel"
+            @click="channel.href === 'cal' && trackFunnel('studio_cta_erstgespraech', { source: 'contact' })"
           >
             <h3 class="card__title">{{ channel.title[lang] }}</h3>
             <p class="card__text">{{ channel.description[lang] }}</p>

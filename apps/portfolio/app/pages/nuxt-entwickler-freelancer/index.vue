@@ -21,6 +21,7 @@ definePageMeta({ layout: 'site' })
 
 const { t, locale } = useI18n()
 const localePath = useLocalePath()
+const { trackFunnel } = useFunnelEvent()
 
 const lang = computed<Lang>(() => (locale.value.startsWith('de') ? 'de' : 'en'))
 
@@ -85,9 +86,13 @@ usePortfolioSeo({
           <li v-for="tech in NUXT_HERO_STACK" :key="tech" class="chip">{{ tech }}</li>
         </ul>
         <div class="page-head__actions">
-          <a :href="CONTACT.calLink" target="_blank" rel="noopener nofollow" class="btn btn--solid">
+          <NuxtLink
+            :to="localePath('/erstgespraech')"
+            class="btn btn--solid"
+            @click="trackFunnel('studio_cta_erstgespraech', { source: 'hero' })"
+          >
             {{ NUXT_HERO.ctaPrimary[lang] }} →
-          </a>
+          </NuxtLink>
           <NuxtLink :to="localePath('/nuxt-entwickler-freelancer#leistungen')" class="btn">
             {{ NUXT_HERO.ctaSecondary[lang] }}
           </NuxtLink>

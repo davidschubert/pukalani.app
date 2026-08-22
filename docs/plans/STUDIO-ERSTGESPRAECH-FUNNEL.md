@@ -172,6 +172,16 @@ analytics-Layers (kein zweites Script).
 | W3 | Startseiten-Ausbau: Problem-Spiegel, Vergleichstabelle, Selbst-Selektion, Disclaimer | M | Schmerz-Texte gegenlesen |
 | W4 | Cases um echte Kennzahlen ergänzen | S–M | **Ja: Zahlen liefern** |
 
-Offene Entscheidungen für David: (1) Budget-Spannen so ok? (2) Telefon optional
-— einverstanden? (3) Erfolgsseite mit Sofort-Buchung statt „wir melden uns"?
-(4) v2-Speicherung in Appwrite gewünscht oder reicht Mail?
+**Entscheidungen GEFALLEN (David, 2026-08-21, strukturierte Fragen):**
+1. Budget-Spannen: **< 5 k / 5–15 k / 15–50 k / > 50 k €** + „noch offen".
+2. Telefon: **optional**.
+3. Erfolgsseite: **beides** — cal.com-Sofortbuchung prominent, darunter
+   „oder wir melden uns binnen 24 h" als Rückfallebene.
+4. Speicherung: **Mail + Appwrite-Tabelle** `intro_requests` ab v1.
+
+Zuschnitt der Tabelle (Architektur-Entscheidung beim Bau): `intro_requests`
+ist APP-LOKAL in der portfolio-Instanz — kein Produkt-Layer, weil der Wizard
+eine Eigenschaft DIESER Marketing-Site ist und nichts, was eine Community je
+zuschaltet. Angelegt idempotent über `apps/portfolio/scripts/
+ensure-intro-requests.mjs` (409 → skip); der Schema-Parity-Wächter meldet
+unbekannte portfolio-Tabellen ohnehin nur als nicht-fatale Warnung.

@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { CONTACT } from '../data/contact'
-
 const { t } = useI18n()
 const localePath = useLocalePath()
+const { trackFunnel } = useFunnelEvent()
 
 /**
  * Navigation nach dem Muster der alten Site. `priority` steuert, was auf
@@ -35,14 +34,17 @@ const links = computed(() => [
         >
           {{ link.label }}
         </NuxtLink>
-        <a
-          :href="CONTACT.calLink"
-          target="_blank"
-          rel="noopener nofollow"
+        <!-- EIN Conversion-Ziel (W1, 2026-08-21): jeder CTA dieser Site führt in
+             den Erstgespräch-Wizard, nicht mehr direkt zu cal.com. Der
+             Direktlink bleibt nur an zwei Stellen: in der Fußzeile für die
+             Entschlossenen und auf der Erfolgsansicht des Wizards. -->
+        <NuxtLink
+          :to="localePath('/erstgespraech')"
           class="header__link header__link--cta"
+          @click="trackFunnel('studio_cta_erstgespraech', { source: 'header' })"
         >
           {{ t('portfolio.nav.cta') }}
-        </a>
+        </NuxtLink>
       </nav>
     </div>
   </header>

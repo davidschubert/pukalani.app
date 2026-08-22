@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import * as contact from '../app/data/contact'
+import * as erstgespraech from '../app/data/erstgespraech'
 import * as home from '../app/data/home'
 import * as localized from '../app/data/localized'
 import * as nuxtFreelancer from '../app/data/nuxtFreelancer'
@@ -39,6 +40,7 @@ const MODULES: Record<string, Record<string, unknown>> = {
   'contact.ts': contact,
   'services.ts': services,
   'home.ts': home,
+  'erstgespraech.ts': erstgespraech,
   'uxAudit.ts': uxAudit,
   'nuxtFreelancer.ts': nuxtFreelancer,
   'wissenKosten.ts': wissenKosten,
