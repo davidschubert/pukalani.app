@@ -311,6 +311,20 @@ const WRITE_LIMITED: { re: RegExp, bucket: string, max?: number }[] = [
   // Feedback-Widget: auch Gäste dürfen senden → enges Budget gegen Spam
   { re: /^POST \/api\/feedback$/, bucket: 'feedback:create', max: 5 },
   /**
+   * Der Erstgespräch-Wizard der Studio-Site (W1, apps/portfolio): völlig
+   * unauthentifiziert — es meldet sich jemand, der kein Konto hat und nie eins
+   * bekommen wird — und JEDER Aufruf verschickt eine Mail UND legt eine Zeile
+   * an. Das ist dieselbe Klasse wie das Feedback-Widget eine Zeile darüber,
+   * plus Mail-Bombing.
+   *
+   * FÜNF JE MINUTE UND IP sind großzügig gemeint: ein Mensch sendet EINEN
+   * Wizard, und danach steht die Erfolgsansicht. Der Honeypot in der Route ist
+   * die feinere Bremse (er kostet den Bot nichts und verrät ihm nichts) —
+   * dieser Deckel ist die grobe davor, damit ein Skript den Mailer gar nicht
+   * erst erreicht.
+   */
+  { re: /^POST \/api\/intro-call$/, bucket: 'portfolio:intro-call', max: 5 },
+  /**
    * DER CLAIM-POLL DES AI-RUNNERS (docs/plans/AI-RUNNER.md § 5).
    *
    * Kein Spam-Schutz, sondern SELBST-DoS-SCHUTZ: der Runner fragt alle paar
