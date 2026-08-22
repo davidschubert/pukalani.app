@@ -1,6 +1,6 @@
 # Offene Punkte
 
-**Stand: 2 offen · 2 geparkt/wartend · 13 bewusst zurückgestellt** (Zahlen bei JEDEM Umzug nach COMPLETE mitführen)
+**Stand: 3 offen · 2 geparkt/wartend · 13 bewusst zurückgestellt** (Zahlen bei JEDEM Umzug nach COMPLETE mitführen)
 
 Stand: **2026-08-19**. Hier steht **nur, was noch offen ist** — in der
 Reihenfolge, in der es abgearbeitet wird. Alles Erledigte (mit Begründung,
@@ -25,8 +25,9 @@ demo-Ausbau, comments in den Pool. Entscheidungen: DECISION-LOG 2026-08-11.
 
 | # | Was (einfach erklärt) | Prio | Aufwand | Braucht David? | Details |
 | --- | --- | --- | --- | --- | --- |
-| 1 · A1 | **Echte Rechtstexte** für Impressum, Datenschutz und AGB. **pukalani.studio ist fertig** (2026-08-12): Impressum + Datenschutz in de/en veröffentlicht, inkl. **ladungsfähiger Anschrift**; die Texte nennen nur Belegbares, Erfundenes wurde weggelassen. Dort noch offen und beim Anwalt: die Prüfung zu **Art. 27 DSGVO** (Vertreter in der Union — Sitz ausserhalb der EU bei DACH-Ansprache) samt Drittland-Grundlage, dazu die Angabe zur Verbraucherstreitbeilegung. Für **pukalani.app** stehen die Texte weiter aus. **Direkt danach `pukalani.auth.termsUrl` in `apps/platform` setzen** — die AGB-Checkbox fehlt heute genau dort, wo Kunden sich registrieren (Trichter M9). Schaltet Punkt 3 frei. | Hoch | S — Anwalt lesen lassen | Ja: nur David (ggf. Anwalt) | [Agenda: Studio](#a1-anwalt) · [Agenda: Plattform](#a1-plattform) |
-| 2 · A2 | **Stripe auf echtes Geld umstellen — über die F55-Seite.** Vorstufe A2a komplett grün, F55 selbst erledigt (beide 2026-08-08). Bei David bleiben: Bank-Aktivierung, Steuer-Registrierung, Live-Key ROTIERT eintragen (der erste ist teil-geleakt und rotiert), Portal-Konfiguration; alles andere klickt die F55-Seite. Braucht Punkt 2 (A1). | Hoch | S | Ja: Bank, Konto, Portal | [STRIPE-GO-LIVE-RUNBOOK.md](runbooks/STRIPE-GO-LIVE-RUNBOOK.md) |
+| 1 · S3 | **Betreiber-Konsole absichern.** Ihr einziges Konto hat keinen zweiten Faktor — und sie darf Communities stilllegen, Stripe verwalten und in jede Kunden-Community hineinsehen. (a) MFA im Konto einschalten, (b) Google-Client für Projekt **`admin`** anlegen (Redirect-URI endet auf `/admin`, NICHT `/control`). Code-Seite ist gebaut und wirkungslos bis dahin. | **Hoch** | S | Ja: zwei Konsolen-Durchgänge | [GOOGLE-LOGIN.md](runbooks/GOOGLE-LOGIN.md) |
+| 2 · A1 | **Echte Rechtstexte** für Impressum, Datenschutz und AGB. **pukalani.studio ist fertig** (2026-08-12): Impressum + Datenschutz in de/en veröffentlicht, inkl. **ladungsfähiger Anschrift**; die Texte nennen nur Belegbares, Erfundenes wurde weggelassen. Dort noch offen und beim Anwalt: die Prüfung zu **Art. 27 DSGVO** (Vertreter in der Union — Sitz ausserhalb der EU bei DACH-Ansprache) samt Drittland-Grundlage, dazu die Angabe zur Verbraucherstreitbeilegung. Für **pukalani.app** stehen die Texte weiter aus. **Direkt danach `pukalani.auth.termsUrl` in `apps/platform` setzen** — die AGB-Checkbox fehlt heute genau dort, wo Kunden sich registrieren (Trichter M9). Schaltet Punkt 3 frei. | Hoch | S — Anwalt lesen lassen | Ja: nur David (ggf. Anwalt) | [Agenda: Studio](#a1-anwalt) · [Agenda: Plattform](#a1-plattform) |
+| 3 · A2 | **Stripe auf echtes Geld umstellen — über die F55-Seite.** Vorstufe A2a komplett grün, F55 selbst erledigt (beide 2026-08-08). Bei David bleiben: Bank-Aktivierung, Steuer-Registrierung, Live-Key ROTIERT eintragen (der erste ist teil-geleakt und rotiert), Portal-Konfiguration; alles andere klickt die F55-Seite. Braucht Punkt 2 (A1). | Hoch | S | Ja: Bank, Konto, Portal | [STRIPE-GO-LIVE-RUNBOOK.md](runbooks/STRIPE-GO-LIVE-RUNBOOK.md) |
 
 ## ⏸️ Geparkt / wartet — in Arbeitsreihenfolge
 
@@ -133,6 +134,13 @@ bewusst **kein** Punkt geworden.
 
 **Die Entscheidungen vom 2026-08-11 (Account-Horizont)**: ein Konto überall — echte Projekt-ID-Migration pool→account (Davids Wahl gegen die Empfehlung; jetzt der einzige günstige Moment), my./start. gehen in account. auf, control. wird admin., master-Werkstatt + demo-Vollausbau, F3 fest eingeplant. Tiefe: [ACCOUNT-HORIZONT.md](plans/ACCOUNT-HORIZONT.md).
 
+**Die Entscheidung vom 2026-08-21**: Google-Login auf der Betreiber-Konsole JA
+(S3 — Anlass ist der fehlende zweite Faktor, nicht Bequemlichkeit), auf
+`pukalani.studio` **NEIN**: dort meldet sich niemand ausser David an, es gibt
+keinen wiederkehrenden Anmelde-Schmerz, und jeder weitere OAuth-Client ist ein
+weiteres Geheimnis, das gepflegt, rotiert und irgendwann aufgeraeumt werden
+muss. Nicht erneut aufwerfen.
+
 **Die Entscheidungen vom 2026-08-10** (Planungsrunde, strukturierte Fragen —
 Details im [DECISION-LOG](DECISION-LOG.md)): Code-Pflicht bleibt, bekommt aber
 einen Betreiber-Schalter (U2) · eigene Domain bleibt Pro-only (U13, damit
@@ -238,7 +246,7 @@ Nutzer liegen in EINEM Appwrite-Projekt, man registriert sich bei Pukalani,
 nicht bei der Community; (b) der Betreiber hat einen **protokollierten
 Break-Glass-Zugriff** auf Kunden-Communities; (c) der Betreiber kann eine
 Community **sperren** (`suspension: 'abuse'` ⇒ Host 404); (d) der
-**Auto-Hide-Schwellwert** (2 offene Meldungen) ist vom Betreiber gesetzt, nicht
+**Auto-Hide-Schwellwert** (3 offene Meldungen) ist vom Betreiber gesetzt, nicht
 vom Owner. Von der Antwort hängen AVV, Rollen-Formulierung in ALLEN Texten und
 die Kunden-Vorlagen im `pages`-Layer ab.
 
