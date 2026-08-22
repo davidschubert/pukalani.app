@@ -30,6 +30,48 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### W1/W2 — Studio-Rebrand (Wir-Stimme) + Erstgespräch-Wizard live ✅ 2026-08-22
+
+**Zwei Pakete in einer Sitzung** (Davids Auftrag 2026-08-21, Entscheidungen
+per strukturierten Fragen): (1) pukalani.studio spricht als „wir, Pukalani
+Studio" — Wortmarke im Header (`david.schubert` → `Pukalani Studio`), gesamte
+Copy in de+en gedreht (home, UX-Audit, Nuxt-Seite, beide Wissen-Guides,
+llms.txt); David bleibt benannte Person, keine Teamgröße behauptet,
+„Freelancer" nur noch Suchbegriff/Buchungsform. (2) `/erstgespraech`
+(Vorbild tobiasnase.de, live durchgeklickt): 5 Schritte Vorqualifizierung
+(Ziel aus den sechs Leistungen · Projektart/Budget-Spannen · Aufstellung ·
+Status/Zeitrahmen · Kontakt, Telefon optional), Honeypot, Rate-Limit
+`portfolio:intro-call`, zwei getrennt abgesicherte Zustellwege (Mail an
+CONTACT.email + Zeile in `intro_requests`, Erfolg ab einem), Erfolgsansicht
+mit cal.com-Sofortbuchung + 24-h-Rückfallzeile. Alle Site-CTAs → Wizard;
+Plausible misst `studio_cta_erstgespraech`/`_wizard_start`/`_step`/
+`_submitted`/`_booking_click` (U18-Liste erweitert, Wächter-Test nachgezogen).
+Tabelle app-lokal (`ensure-intro-requests.mjs`, idempotent, server-only,
+note als Mediumtext) — bewusst KEIN Produkt-Layer (Eigenschaft der
+Marketing-Site). SMTP jetzt Pflicht auf portfolio (ops:site-env) und auf dem
+Server gesetzt (Block von admin übernommen, Backup liegt daneben).
+
+**Beweise:** lokal Wizard-Durchlauf + Mailpit-Mail in Klartext-Labels +
+Appwrite-Zeile + Honeypot-Gegenprobe (schreibt nichts) + 6/6 E2E; live
+Build-SHA `bc7e57b4` auf beiden Hosts, Test-Anfrage → `{ok:true}`, Zeile in
+Prod angekommen (danach gelöscht), Mail ohne Fehler/Warnung im pm2-Log.
+Plan: [STUDIO-ERSTGESPRAECH-FUNNEL.md](plans/STUDIO-ERSTGESPRAECH-FUNNEL.md).
+
+**Gelernt:** (1) Der RELATIVE Import aus `app/` in den EIGENEN `shared/`-
+Ordner einer App überlebt den Dev-Server, aber nicht den Prod-Build — Vite
+externalisiert ihn und Nitro stirbt an `Could not resolve …/introCall.ts`
+(Deploy 2026-08-22 rot, beide Läufe). Der `#shared`-Alias ist das Hausmuster
+(apps/marketing macht es vor, app- UND server-seitig); Vitest braucht dieselbe
+Abbildung von Hand. Ein grüner `nuxi dev` + Typecheck beweist den Prod-Build
+NICHT. (2) Wer die U18-Event-Liste erweitert, muss `pnpm --filter
+@pukalani/core test` laufen lassen: `tests/funnelEvents.test.ts` nagelt Namen
+UND Präfix-Form fest — der Implementierungs-Agent hatte nur portfolio getestet.
+(3) E2E-Klicks vor der Hydration sind tote SSR-Klicks (F10) — der Wizard
+stempelt deshalb `data-ready` in seinem eigenen `onMounted`, und die Spec
+wartet darauf statt auf `networkidle`.
+
+---
+
 ### S2 — system-Kette auf `account` entblockt: eine tenantId als Label ✅ 2026-08-19
 
 **Der Befund** (Favicon-Sitzung, 2026-08-19): `system-031` starb auf `account`
