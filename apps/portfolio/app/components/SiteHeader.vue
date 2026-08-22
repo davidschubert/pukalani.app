@@ -1,7 +1,18 @@
 <script setup lang="ts">
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const localePath = useLocalePath()
+const switchLocalePath = useSwitchLocalePath()
 const { trackFunnel } = useFunnelEvent()
+
+/**
+ * Der Sprachwechsler zeigt BEIDE Sprachen mit aktivem Zustand (statt nur des
+ * Ziels wie in der Fußzeile): in der Kopfzeile muss auf einen Blick lesbar
+ * sein, wo man steht UND wohin man kann. Ziel ist immer DIESELBE Seite in der
+ * anderen Sprache (switchLocalePath); das i18n_redirected-Cookie zieht
+ * nuxt-i18n beim Wechsel selbst nach, die Wahl bleibt also über Besuche
+ * hinweg bestehen.
+ */
+const isGerman = computed(() => locale.value.startsWith('de'))
 
 /**
  * Navigation nach dem Muster der alten Site. `priority` steuert, was auf
@@ -45,6 +56,24 @@ const links = computed(() => [
         >
           {{ t('portfolio.nav.cta') }}
         </NuxtLink>
+        <!-- Bewusst OHNE priority-Klasse: die Sprachwahl verschwindet auf
+             keinem Viewport — eine zweisprachige Site, deren Wechsel nur in
+             der Fußzeile lebt, wirkt einsprachig (Davids Befund 2026-08-22). -->
+        <span class="header__lang" :aria-label="t('portfolio.nav.language')">
+          <NuxtLink
+            :to="switchLocalePath('de')"
+            class="header__lang-link"
+            :class="{ 'header__lang-link--active': isGerman }"
+            :aria-current="isGerman ? 'true' : undefined"
+          >DE</NuxtLink>
+          <span class="header__lang-sep" aria-hidden="true">/</span>
+          <NuxtLink
+            :to="switchLocalePath('en')"
+            class="header__lang-link"
+            :class="{ 'header__lang-link--active': !isGerman }"
+            :aria-current="!isGerman ? 'true' : undefined"
+          >EN</NuxtLink>
+        </span>
       </nav>
     </div>
   </header>
@@ -98,6 +127,28 @@ const links = computed(() => [
 }
 .header__link--cta:hover {
   color: var(--text);
+}
+.header__lang {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  white-space: nowrap;
+}
+.header__lang-link {
+  color: var(--metal);
+  transition: color 0.3s var(--ease);
+}
+.header__lang-link:hover {
+  color: var(--accent);
+}
+.header__lang-link--active {
+  color: var(--text);
+}
+.header__lang-sep {
+  color: var(--metal);
 }
 /* Gestaffeltes Ausblenden statt Umbruch — die Kopfzeile bleibt einzeilig. */
 @media (max-width: 1080px) {
