@@ -24,7 +24,7 @@ import type {
   IntroSetup,
   IntroTeamSize,
   IntroTiming,
-} from '../../../shared/types/introCall'
+} from '#shared/types/introCall'
 import { breadcrumbList } from '../../utils/schema'
 
 /**

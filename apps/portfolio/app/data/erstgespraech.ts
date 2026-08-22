@@ -7,7 +7,7 @@ import {
   INTRO_SETUPS,
   INTRO_TEAM_SIZES,
   INTRO_TIMINGS,
-} from '../../shared/types/introCall'
+} from '#shared/types/introCall'
 
 /**
  * Der komplette Inhalt des Erstgespräch-Wizards (`/erstgespraech`), zweisprachig

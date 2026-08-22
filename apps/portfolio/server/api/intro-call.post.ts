@@ -21,7 +21,7 @@ import {
   INTRO_TEAM_SIZES,
   INTRO_TIMINGS,
   type IntroCallResponse,
-} from '../../shared/types/introCall'
+} from '#shared/types/introCall'
 
 /**
  * Die Anfrage aus dem Erstgespräch-Wizard (`/erstgespraech`, W1) — die einzige

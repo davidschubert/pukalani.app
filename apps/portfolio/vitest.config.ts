@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vitest/config'
 
 /**
@@ -14,6 +15,17 @@ import { defineConfig } from 'vitest/config'
  * „Tsconfig not found".
  */
 export default defineConfig({
+  resolve: {
+    alias: {
+      // Nuxt löst #shared selbst auf; Vitest braucht dieselbe Abbildung von
+      // Hand (Muster marketing). Der RELATIVE Weg in den eigenen shared/-
+      // Ordner ist keine Alternative: Vite externalisiert ihn im Prod-Build
+      // und Nitro stirbt an „Could not resolve …/shared/types/introCall.ts"
+      // (Deploy 2026-08-22 live erwischt) — deshalb importiert die App
+      // AUSSCHLIESSLICH über den Alias.
+      '#shared': fileURLToPath(new URL('./shared', import.meta.url)),
+    },
+  },
   test: {
     include: ['tests/**/*.test.ts'],
     environment: 'node',
