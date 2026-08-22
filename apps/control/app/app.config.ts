@@ -19,7 +19,20 @@ export default defineAppConfig({
     // bleibt in RESERVED_SUBDOMAINS gesperrt (Phishing).
     // Betreiber-Login per OTP-Code (H2-Live): der Control-Admin braucht kein
     // Passwort — Prod-Konto wurde server-seitig ohne Passwort angelegt.
-    auth: { otp: true, termsUrl: '/terms' },
+    //
+    // GOOGLE hier ist die ERSTE von ZWEI Bedingungen (core/shared/
+    // oauthProviders.ts): der Knopf erscheint erst, wenn die INSTANZ ihn
+    // zusätzlich in `NUXT_PUBLIC_AUTH_OAUTH_PROVIDERS` nennt. Diese Zeile ist
+    // also wirkungslos, solange die Server-Env leer ist — genau so ist es
+    // gedacht, denn Client-Id und Geheimnis liegen in der Appwrite-Console
+    // des Projekts `admin`, nicht im Quelltext.
+    //
+    // WARUM ÜBERHAUPT (Davids Entscheidung 2026-08-21): dies ist die
+    // privilegierteste Oberfläche der Plattform, und ihr EINZIGES Konto hatte
+    // keinen zweiten Faktor. Über Google erbt der Login den Schutz des
+    // Google-Kontos. Die Redirect-URI endet auf `/admin` — die Projekt-Id,
+    // NICHT auf `/control` (das Projekt ist seit 2026-08-19 gelöscht).
+    auth: { otp: true, termsUrl: '/terms', providers: ['google'] },
     // Stripe-Transport des billing-Layers aktivieren (A6: Community-Billing).
     // plans bleibt leer — das Control verkauft keine Site-Abos an Endnutzer;
     // die Pläne leben in pukalani.control.plans (lookup_keys).
