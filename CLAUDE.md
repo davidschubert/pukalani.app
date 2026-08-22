@@ -411,6 +411,21 @@ Vollständiges Konzept: docs/CONCEPT.md
   ploi-Site `pukalani.app` — das überschreibt das Kunden-Wildcard. Neu
   anfordern nur auf der Site `platform.pukalani.app` mit `*.pukalani.app`.
   Wächter `node scripts/ops/verify-tls.mjs` (alle 30 min + nach jedem Deploy).
+- DREI WÄCHTER, EIN WORKFLOW (`.github/workflows/production-watch.yml`, seit
+  2026-08-20): Job `tls` alle 30 min (`verify-tls.mjs`, braucht weder ssh noch
+  Secret), Job `server` täglich 04:17 UTC mit `verify-site-env.mjs` +
+  `verify-stale-keys.mjs --strict`. Alle drei decken dieselbe blinde Stelle ab —
+  die Konfiguration ist falsch, aber nichts wird von selbst rot. GitHub kennt
+  keinen Zeitplan JE JOB (jeder cron löst den ganzen Workflow aus), die Takte
+  trennt daher `github.event.schedule`. ZWEI SICHERUNGEN dagegen, dass eine
+  cron-Änderung den täglichen Teil lautlos abschaltet: der Schritt „Zeitplan
+  bekannt?" wird bei unbekanntem cron ROT, und die Bedingung von `server` ist
+  NEGATIV formuliert („alles ausser dem Halbstunden-Takt") — so trägt genau EINE
+  Zeichenkette Bedeutung. `pnpm ops:stale-keys` findet Zugänge zu GELÖSCHTEN
+  Projekten (`--ssh` läuft auf dem Server, `--strict` macht daraus ein Tor):
+  NUR 404 beweist „tot", ein 401 heisst oft nur „anderer Wirkungsbereich" —
+  und den Umfang rät man auch nicht am Variablen-NAMEN ab. Runbook
+  docs/runbooks/ZUGAENGE-AUFRAEUMEN.md.
   Details: docs/content/2.architektur/6.hosts-und-ports.md
 - EINE FEHLENDE ENV-VARIABLE WIRD NICHT ROT (F44, 2026-08-02): `platform`
   hatte kein `NUXT_SMTP_*`, also ging für JEDE Kunden-Community nie eine
@@ -418,7 +433,8 @@ Vollständiges Konzept: docs/CONCEPT.md
   Mail blieb aus, und das sieht aus wie ein bewusst abgeschaltetes Produkt.
   Zwei Netze: `pnpm ops:site-env` (liest über ssh nur die SCHLÜSSELNAMEN jeder
   Server-`.env`, Werte bleiben dort; Pflicht-Liste gepflegt IM Skript, neue
-  Pflicht-Variable ⇒ dort eintragen — kein CI-Gate, weil ssh) und zur Laufzeit
+  Pflicht-Variable ⇒ dort eintragen — läuft seit 2026-08-20 TÄGLICH in der CI,
+  s. Wächter-Absatz unten) und zur Laufzeit
   `warnMailerMissingOnce()` in core/server/utils/mailer.ts, das beim ERSTEN
   verworfenen Versand einmal ins Log schreibt. Warnungen gehören dorthin, wo
   etwas verworfen wird — NIE in ein Prädikat wie `isMailerConfigured()`, das
@@ -999,6 +1015,10 @@ Vollständiges Konzept: docs/CONCEPT.md
   Der Trick `$fetch<…, string>` ist verboten (kompensierte nur die Karte;
   Grep-Stand 0). Umkehrbar über den einen Hook; Verhalten getestet in
   `packages/core/tests/nitroRouteTypes.test.ts`.
+- `pnpm -r lint` läuft NUR über die Workspace-Pakete — die Dateien in `scripts/`
+  (Migrations-Runner, ops-Wächter, CI-Aufbau) deckt `pnpm lint:scripts` ab, seit
+  2026-08-20 als eigener Schritt in lint.yml. Ein neues Skript dort ist also
+  gelintet; vor dem Commit selbst laufen lassen, `pnpm -r lint` sieht es nicht.
 - pnpm, TypeScript strict (kein any), vollständige Dateien, keine Spekulation
 - Dependencies via pnpm Catalog: Versionen zentral in pnpm-workspace.yaml,
   package.json referenziert "catalog:" — geteilte Deps auch in App-package.json
