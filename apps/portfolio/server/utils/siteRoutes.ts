@@ -41,7 +41,7 @@ export const SITE_ROUTES: SiteRoute[] = [
     path: '/',
     priority: 1.0,
     llms: {
-      title: 'Senior UI/UX Designer für Mittelstand & Agenturen',
+      title: 'Pukalani Studio – Senior UI/UX Design für Mittelstand & Agenturen',
       description: 'Haupt-Portfolio mit Leistungen, Preisen, Referenzen, Prozess und FAQ',
     },
   },
