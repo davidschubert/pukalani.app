@@ -46,6 +46,14 @@ const showsGeoData = computed(() => Boolean(props.session && (props.session.city
 const mapEl = ref<HTMLDivElement | null>(null)
 let map: LeafletMap | null = null
 
+/**
+ * Start-Zoom Stadt-Ebene (Davids Wunsch 2026-08-23, nach dem Vorbild der
+ * DB-IP-Beispielseite): der Ort mit seiner Umgebung, nicht die ganze Insel.
+ * Mehr Nähe wäre gelogen — die IP-Auflösung ist eine Stadt-Schätzung,
+ * keine Adresse.
+ */
+const MAP_ZOOM = 12
+
 function destroyMap(): void {
   // Ohne `remove()` bleibt bei jedem Öffnen eine Leaflet-Instanz samt ihren
   // Fenster-Listenern zurück — der Dialog wird über die Sitzung mehrfach
@@ -65,10 +73,21 @@ async function mountMap(el: HTMLDivElement, center: [number, number]): Promise<v
   // Zwischen `await` und hier kann der Dialog längst wieder zu sein.
   if (!open.value || mapEl.value !== el) return
 
+  // AUF ECHTE GRÖSSE WARTEN: während der Öffnungs-Transition ist der
+  // Container noch 0 Pixel hoch. Initialisiert Leaflet in dem Moment,
+  // vermisst es sich und rendert eine ZU NIEDRIGE Zoom-Stufe (live gemessen:
+  // erstes Öffnen Kachel-z9 statt der konfigurierten Stufe, jedes weitere
+  // korrekt). Deshalb erst loslegen, wenn der Container wirklich Höhe hat —
+  // begrenzt, damit ein nie sichtbarer Container keine Endlosschleife wird.
+  for (let i = 0; i < 30 && el.clientHeight === 0; i++) {
+    await new Promise(resolve => requestAnimationFrame(resolve))
+  }
+  if (!open.value || mapEl.value !== el) return
+
   destroyMap()
   map = L.map(el, {
     center,
-    zoom: 11,
+    zoom: MAP_ZOOM,
     // Im Dialog scrollt man die Seite, nicht die Karte — Zoom nur über die
     // Knöpfe, sonst bleibt man beim Scrollen ungewollt in der Karte hängen.
     scrollWheelZoom: false,
@@ -101,8 +120,13 @@ async function mountMap(el: HTMLDivElement, center: [number, number]): Promise<v
   }).addTo(map)
 
   // Der Dialog fährt beim Öffnen eine Transition — Leaflet hat die Größe des
-  // Containers dann womöglich zu früh gemessen.
-  requestAnimationFrame(() => map?.invalidateSize())
+  // Containers dann womöglich zu früh gemessen. Nach dem Nachmessen die
+  // Ansicht explizit festnageln: Sicherheitsnetz gegen jede Restdrift der
+  // Transition (der z9-Fehlstart oben war genau so eine).
+  requestAnimationFrame(() => {
+    map?.invalidateSize()
+    map?.setView(center, MAP_ZOOM, { animate: false })
+  })
 }
 
 /**
