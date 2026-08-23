@@ -115,3 +115,9 @@ catalog:
   '@types/nodemailer': ^7.0.0
   stripe: ^18.0.0
   '@playwright/test': ^1.50.0
+  # MMDB-Leser für die City-Auflösung der Session-IPs (server/utils/geoCity.ts).
+  # Bewusst `mmdb-lib` und nicht `maxmind`: reines JavaScript, keine nativen
+  # Abhängigkeiten und kein eigenes Datei-Handling — wir laden den Puffer
+  # selbst und behalten damit die Kontrolle über Lazy-Load und Neu-Einlesen
+  # nach dem monatlichen Datei-Tausch.
+  mmdb-lib: ^3.0.3

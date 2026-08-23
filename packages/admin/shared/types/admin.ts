@@ -46,6 +46,10 @@ export interface AdminUserSession {
   deviceModel: string
   countryCode: string
   countryName: string
+  /** Stadt/Region aus der lokalen MMDB ('' = unbekannt) — muss mitwandern,
+   *  sonst erfüllt diese Sicht den SessionRow-Vertrag der SessionsTable nicht. */
+  city: string
+  region: string
   factors: string[]
   expire: string
   current: boolean

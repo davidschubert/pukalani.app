@@ -267,7 +267,8 @@
       "auth": "Anmeldung",
       "factors": "MFA-Faktoren dieser Session",
       "expires": "läuft ab",
-      "times": "Zeitpunkte"
+      "times": "Zeitpunkte",
+      "geoAttribution": "Standortdaten: IP-Geolokalisierung von {provider}"
     },
     "password": {
       "title": "Passwort ändern",

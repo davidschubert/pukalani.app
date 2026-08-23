@@ -267,7 +267,8 @@
       "auth": "Sign-in",
       "factors": "MFA factors of this session",
       "expires": "expires",
-      "times": "Timestamps"
+      "times": "Timestamps",
+      "geoAttribution": "Location data: IP geolocation by {provider}"
     },
     "password": {
       "title": "Change password",

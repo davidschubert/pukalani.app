@@ -70,6 +70,21 @@ export default defineEventHandler(async (event): Promise<AdminUserDetailResponse
   const online = !!presence
   const lastSeen = presence?.updatedAt ?? ''
 
+  // mapSafeSession (core, Auto-Import): vollständige, Secret-freie Session-Sicht.
+  // lookupCityForIp (core, Auto-Import) reichert um Stadt/Region aus der lokalen
+  // MMDB an — dieselbe Kette wie in der Selbst-Sicht /api/auth/sessions, damit
+  // die geteilte SessionsTable hier nicht weniger zeigt als dort. Ohne
+  // konfigurierten Pfad ist das Ergebnis null und die Antwort unverändert.
+  const safeSessions = await Promise.all(
+    sessions.sessions.map(async s =>
+      mapSafeSession(
+        s,
+        viewingSelf ? s.$id === currentSessionId : s.current,
+        await lookupCityForIp(event, s.ip),
+      ),
+    ),
+  )
+
   return {
     user: {
       $id: user.$id,
@@ -90,10 +105,7 @@ export default defineEventHandler(async (event): Promise<AdminUserDetailResponse
       online,
       lastSeen,
     },
-    // mapSafeSession (core, Auto-Import): vollständige, Secret-freie Session-Sicht
-    sessions: sessions.sessions.map(s =>
-      mapSafeSession(s, viewingSelf ? s.$id === currentSessionId : s.current),
-    ),
+    sessions: safeSessions,
     activity: logs.logs.map(log => ({
       event: log.event,
       time: log.time,

@@ -301,6 +301,20 @@ export default defineNuxtConfig({
      * ein Tippfehler schaltet den Proxy ab (404), statt irgendwohin zu zeigen.
      */
     analyticsProxyOrigin: '',
+    /**
+     * server-only! Env: NUXT_GEO_CITY_DB_PATH — absoluter Pfad zur lokalen
+     * MMDB-Datei (DB-IP City Lite), aus der die Sessions-Liste zu jeder
+     * Session-IP Stadt + Region auflöst (server/utils/geoCity.ts).
+     *
+     * LEER = aus, und das ist der Default: die Datei ist ~124 MB und wird
+     * nicht mit deployt. Ohne Pfad zeigt die Sitzungsliste exakt wie bisher
+     * nur das Land, das Appwrite liefert — kein Fehler, keine Warnung.
+     *
+     * Der PFAD IST DER SCHALTER (kein zusätzliches app.config-Gate): eine
+     * Datei, die es geben muss, ist die ehrlichere Bedingung als ein Flag,
+     * das man neben ihr auch noch setzen könnte.
+     */
+    geoCityDbPath: '',
     public: {
       // Deployter Commit (Build-Zeit aus git) — /api/health spiegelt ihn,
       // der Deploy-Workflow verifiziert damit, dass ploi den erwarteten

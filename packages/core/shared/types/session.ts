@@ -28,6 +28,13 @@ export interface UserSession {
   /** ISO-Ländercode (klein, z. B. 'de') — für Flaggen-Icons */
   countryCode: string
   countryName: string
+  /**
+   * Stadt und Region zur Session-IP ('' = unbekannt). Kommen NICHT von
+   * Appwrite (das kennt nur das Land), sondern aus der lokalen MMDB
+   * (server/utils/geoCity.ts) — ohne konfigurierte Datei bleiben beide leer.
+   */
+  city: string
+  region: string
   /** MFA-Faktoren dieser Session (z. B. ['password', 'totp']) */
   factors: string[]
   /** Ablaufzeitpunkt (ISO) */
@@ -58,6 +65,9 @@ export interface SessionRow {
   ip: string
   countryCode: string
   countryName: string
+  /** Feinere Ortsangabe aus der lokalen MMDB ('' = unbekannt/nicht konfiguriert). */
+  city: string
+  region: string
   factors: string[]
   expire: string
   current: boolean

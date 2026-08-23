@@ -64,6 +64,26 @@ const SERVER = process.env.PUKALANI_OPS_SSH || 'ploi@49.13.211.173'
  * Wächter, der Optionales anmahnt, wird weggelesen — dann übersieht man den
  * echten Fund. Neue Pflicht-Variable ⇒ hier eintragen.
  */
+/**
+ * Pfad zur lokalen MMDB (DB-IP City Lite), aus der die Sitzungsliste zu jeder
+ * Session-IP Stadt + Region auflöst (packages/core/server/utils/geoCity.ts).
+ *
+ * PFLICHT AUF JEDER SITE MIT KONTEN — und zwar aus dem F44-Grund: fehlt die
+ * Variable, läuft alles weiter und die Anzeige fällt STILL auf das Land
+ * zurück, das Appwrite ohnehin liefert. „Deutschland" sieht nicht nach einem
+ * Defekt aus, sondern nach dem, was das Produkt eben kann — man käme nie auf
+ * die Idee, hier nachzusehen. Genau diese Sorte Loch soll dieser Wächter
+ * finden.
+ *
+ * Er kann nur „fehlt ganz" sehen, nicht „zeigt ins Leere": ob die Datei am
+ * genannten Pfad wirklich liegt, sagt beim ersten Zugriff die Warnung aus
+ * `geoCity.ts` im Server-Log.
+ *
+ * Als Konstante, weil sie in mehreren Site-Blöcken steht und die Begründung
+ * nur EINMAL geschrieben gehört.
+ */
+const GEO_CITY_DB_PATH = 'NUXT_GEO_CITY_DB_PATH'
+
 const SITES = [
   {
     dir: 'platform.pukalani.app',
@@ -123,6 +143,7 @@ const SITES = [
        * `portfolio` erst recht nicht.
        */
       'NUXT_INSTANCE_SECRETS_KEY',
+      GEO_CITY_DB_PATH,
     ],
   },
   {
@@ -182,6 +203,7 @@ const SITES = [
        * der Env-Wächter genau so rot weiterlief.)
        */
       'NUXT_INSTANCE_SECRETS_KEY',
+      GEO_CITY_DB_PATH,
     ],
   },
   {
@@ -218,6 +240,7 @@ const SITES = [
        */
       'NUXT_ONBOARDING_CONTROL_URL',
       'NUXT_ONBOARDING_SERVICE_SECRET',
+      GEO_CITY_DB_PATH,
     ],
   },
   {

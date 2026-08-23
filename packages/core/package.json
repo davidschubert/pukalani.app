@@ -20,6 +20,7 @@
     "@pinia/nuxt": "catalog:",
     "appwrite": "catalog:",
     "ioredis": "catalog:",
+    "mmdb-lib": "catalog:",
     "node-appwrite": "catalog:",
     "nodemailer": "catalog:",
     "pinia": "catalog:",
