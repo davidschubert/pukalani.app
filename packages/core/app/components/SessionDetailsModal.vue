@@ -79,7 +79,9 @@ async function mountMap(el: HTMLDivElement, center: [number, number]): Promise<v
   // erstes Öffnen Kachel-z9 statt der konfigurierten Stufe, jedes weitere
   // korrekt). Deshalb erst loslegen, wenn der Container wirklich Höhe hat —
   // begrenzt, damit ein nie sichtbarer Container keine Endlosschleife wird.
-  for (let i = 0; i < 30 && el.clientHeight === 0; i++) {
+  // Seit dem Weltkarten-Livefund (2026-08-23) BEIDE Dimensionen: auch eine
+  // Breite von 0 lässt Leaflet sich vermessen.
+  for (let i = 0; i < 30 && (el.clientWidth === 0 || el.clientHeight === 0); i++) {
     await new Promise(resolve => requestAnimationFrame(resolve))
   }
   if (!open.value || mapEl.value !== el) return
