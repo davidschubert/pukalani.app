@@ -11,11 +11,13 @@
   "dependencies": {
     "@nuxt/ui": "catalog:",
     "@nuxtjs/i18n": "catalog:",
+    "leaflet": "catalog:",
     "node-appwrite": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
     "@nuxt/eslint-config": "catalog:",
+    "@types/leaflet": "catalog:",
     "@types/node": "catalog:",
     "eslint": "catalog:",
     "typescript": "catalog:",

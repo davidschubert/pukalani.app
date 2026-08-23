@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import type { DropdownMenuItem, TableColumn } from '@nuxt/ui'
-import { COMMUNITY_ROLES, type CommunityRole } from '../../../../../core/shared/communityAuthz'
-import type { CommunityInviteView, CommunityMemberView, CommunityTeamResponse } from '../../../../../control/shared/communityTeam'
-import type { MemberInviteQuotaView } from '../../../../../control/shared/communityInviteQuota'
-import type { CommunityInviteResponse } from '../../../../shared/communityInvite'
+import { COMMUNITY_ROLES, type CommunityRole } from '../../../../../../core/shared/communityAuthz'
+import type { CommunityInviteView, CommunityMemberView, CommunityTeamResponse } from '../../../../../../control/shared/communityTeam'
+import type { MemberInviteQuotaView } from '../../../../../../control/shared/communityInviteQuota'
+import type { CommunityInviteResponse } from '../../../../../shared/communityInvite'
 
 /**
  * Mitglieder-Verwaltung EINER Community (Audit-Befund S9: `team.manage` war eine
@@ -400,6 +400,13 @@ function rowActions(member: CommunityMemberView): DropdownMenuItem[][] {
     <p class="mb-4 max-w-2xl text-sm text-muted">
       {{ canManageTeam ? t('members.description') : t('members.memberDescription') }}
     </p>
+
+    <!-- Zwei Ansichten auf dieselben Menschen (Etappe 2): die Liste verwaltet,
+         die Karte zeigt, wo sie sitzen. Der Umschalter steht auf BEIDEN Seiten
+         an derselben Stelle. -->
+    <div class="mb-4">
+      <MembersViewSwitch view="list" />
+    </div>
 
     <!-- F57: DIE ANSICHT EINES MITGLIEDS. Kein Team, keine Liste, keine
          offenen Einladungen — die eine Handlung, die es hier hat, und die

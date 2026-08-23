@@ -732,6 +732,30 @@
     "joined": "Dabei seit",
     "status": "Status",
     "you": "du",
+    "views": {
+      "list": "Liste",
+      "map": "Karte"
+    },
+    "map": {
+      "title": "Karte",
+      "description": "Wo eure Mitglieder sitzen. Auf der Karte steht, wer einen Ort in seinem Profil angegeben hat — freiwillig und jederzeit änderbar. Klick auf ein Bild, um zu sehen, wer dort ist.",
+      "emptyTitle": "Noch niemand mit Ort",
+      "emptyText": "Sobald Mitglieder einen Ort in ihrem Profil angeben, erscheinen sie hier. Fang bei dir selbst an — sichtbar ist immer nur der Ort, nie eine Adresse.",
+      "emptyAction": "Ort im Profil angeben",
+      "selectHint": "{n} Mitglieder an {places} Orten. Klick auf ein Bild in der Karte.",
+      "details": "Details",
+      "joined": "dabei seit {date}",
+      "unnamed": "Ohne Namen",
+      "truncatedTitle": "Die Karte zeigt nicht alle",
+      "truncatedText": "Diese Community hat mehr Mitglieder, als ein Aufruf ansehen kann. Es fehlen also womöglich Punkte.",
+      "geoAttribution": "Ortsnamen und Koordinaten von {provider} (CC BY 4.0)."
+    },
+    "profile": {
+      "back": "Zurück zur Karte",
+      "location": "Ort",
+      "notFoundTitle": "Mitglied nicht gefunden",
+      "notFoundText": "Diese Person gehört nicht (mehr) zu dieser Community."
+    },
     "searchPlaceholder": "Name oder E-Mail suchen",
     "rowActions": "Aktionen für dieses Mitglied",
     "emptyTitle": "Nur du bist dabei",

@@ -132,7 +132,10 @@ const links = computed<NavigationMenuItem[]>(() => tabs.value.map(tab => ({
  */
 const containerWidth = computed(() => {
   if (route.path.endsWith('/community/statistics')) return 'lg:max-w-6xl'
-  return route.path.endsWith('/community/members') ? 'lg:max-w-(--ui-container)' : 'lg:max-w-3xl'
+  // `includes` statt `endsWith`: die Mitglieder haben seit der Karte
+  // (2026-08-23) UNTERSEITEN (`/members/map`, `/members/<id>`), und die brauchen
+  // die Breite genauso — eine Weltkarte in Formular-Breite ist eine Briefmarke.
+  return route.path.includes('/community/members') ? 'lg:max-w-(--ui-container)' : 'lg:max-w-3xl'
 })
 </script>
 

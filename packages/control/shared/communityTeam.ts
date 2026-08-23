@@ -604,6 +604,71 @@ export interface PublicTeamResponse {
 }
 
 /**
+ * ── DIE MITGLIEDER-SICHT FÜR DIE KARTE (Mitglieder-Karte Etappe 2, 2026-08-23)
+ *
+ * DRITTE Sicht auf dieselben Zeilen, und sie ist weder die
+ * Verwaltungs- (`CommunityMemberView`) noch die öffentliche
+ * (`PublicTeamMember`). Der Grund ist derselbe wie bei `publicTeamFrom`: eine
+ * Sicht, die ein Feld gar nicht erst zusammenbaut, kann es auch nicht
+ * versehentlich herausgeben.
+ *
+ * WER SIE LESEN DARF: jedes Mitglied (`members.invite` — die Capability, die
+ * seit F57 jede der fünf Rollen trägt). Die Karte ist ausdrücklich für ALLE
+ * gedacht; sie darf deshalb nicht an `team.manage` hängen.
+ *
+ * WAS DESHALB FEHLT — und zwar hart, nicht durch Weglassen an der Aufrufstelle:
+ *  - **KEINE E-Mail.** Sie ist die einzige PII, die das Control Plane hält, und
+ *    ein `viewer` hat auf sie keinen Anspruch. Das ist der eigentliche Grund
+ *    für diese Route: `members/list` liefert sie, also darf `members/list`
+ *    nicht einfach mit einer kleineren Capability aufgerufen werden.
+ *  - **kein `removedAt`, kein `self`, keine Einladungen.** Die Karte zeigt, wer
+ *    JETZT dabei ist; wer ging und wann, ist Verwaltungswissen.
+ *
+ * WAS BLEIBT: `runtimeUserId` (ohne ihn kann die Runtime weder Name noch Avatar
+ * noch Standort auflösen), `role` und `joinedAt` — die zwei Community-FAKTEN,
+ * die die Detailseite neben dem zeigt, was ein Mensch selbst veröffentlicht hat.
+ *
+ * NUR MITGLIEDER MIT ZUGANG: `hasCommunityAccess`, dieselbe Regel wie überall.
+ * Ein Entfernter steht nicht mehr auf der Karte.
+ */
+export interface CommunityRosterMember {
+  runtimeUserId: string
+  role: CommunityRole
+  /** Beitrittsdatum = Entstehung der Mitgliedschaft. */
+  joinedAt: string
+}
+
+export interface CommunityRosterResponse {
+  members: CommunityRosterMember[]
+}
+
+/**
+ * PURE (unit-getestet): aus den Rohzeilen die Mitglieder-Sicht machen.
+ *
+ * Sie sitzt hier und nicht in der Route, weil sie — genau wie `publicTeamFrom`
+ * — die eigentliche Sicherheitsaussage ist: „nur aktive, nur diese drei
+ * Felder". Die REIHENFOLGE ist die des Beitritts (die Zeilen kommen schon
+ * `orderAsc($createdAt)` aus `listCommunityMembers`); sie bleibt damit stabil,
+ * ohne dass die Karte sortieren müsste.
+ *
+ * Zeilen OHNE `runtimeUserId` fallen heraus: sie sind der DSGVO-Rest eines
+ * gelöschten Kontos (`decideMembershipErasure` lässt den letzten Owner als
+ * Struktur stehen) — ein Punkt auf der Karte ohne auflösbaren Menschen wäre
+ * ein Geist.
+ */
+export function communityRosterFrom(
+  members: readonly { runtimeUserId: string, role: CommunityRole, status: CommunityMemberStatus, $createdAt: string }[],
+): CommunityRosterMember[] {
+  return members
+    .filter(member => hasCommunityAccess(member.status) && member.runtimeUserId !== '')
+    .map(member => ({
+      runtimeUserId: member.runtimeUserId,
+      role: member.role,
+      joinedAt: member.$createdAt,
+    }))
+}
+
+/**
  * WELCHE ROLLEN GELTEN ALS „ANSPRECHPARTNER" — und diese Liste ist der Kern
  * der ganzen Sicht.
  *

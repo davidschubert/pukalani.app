@@ -732,6 +732,30 @@
     "joined": "Member since",
     "status": "Status",
     "you": "you",
+    "views": {
+      "list": "List",
+      "map": "Map"
+    },
+    "map": {
+      "title": "Map",
+      "description": "Where your members are. The map shows everyone who added a place to their profile — voluntary, and changeable at any time. Click a picture to see who is there.",
+      "emptyTitle": "Nobody has added a place yet",
+      "emptyText": "As soon as members add a place to their profile, they show up here. Start with yourself — only the place is ever visible, never an address.",
+      "emptyAction": "Add a place to your profile",
+      "selectHint": "{n} members in {places} places. Click a picture on the map.",
+      "details": "Details",
+      "joined": "member since {date}",
+      "unnamed": "Unnamed",
+      "truncatedTitle": "The map is not showing everyone",
+      "truncatedText": "This community has more members than one request can look at, so some pins may be missing.",
+      "geoAttribution": "Place names and coordinates by {provider} (CC BY 4.0)."
+    },
+    "profile": {
+      "back": "Back to the map",
+      "location": "Place",
+      "notFoundTitle": "Member not found",
+      "notFoundText": "This person is not (or no longer) part of this community."
+    },
     "searchPlaceholder": "Search name or email",
     "rowActions": "Actions for this member",
     "emptyTitle": "Only you so far",
