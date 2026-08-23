@@ -38,7 +38,9 @@ Schlüssel über die Leitung zurückkommt. Anderer Server: `PUKALANI_OPS_SSH`.
 
 **Das läuft auch von selbst:** der Workflow „Produktions-Wächter"
 (`.github/workflows/production-watch.yml`, Job `server`) macht täglich um 04:17
-UTC zwei Blicke auf den Server — erst `ops:site-env` (fehlende Variablen, F44), dann diesen
+UTC drei Blicke auf den Server (der dritte, `pnpm ops:instance-admins`, meldet
+eine Instanz OHNE Admin-Konto — „Registrierung aus" ist nur so lange harmlos,
+wie es noch jemanden gibt, der sie wieder anschalten kann) — erst `ops:site-env` (fehlende Variablen, F44), dann diesen
 Lauf mit `--strict`. Beide laufen immer, auch wenn der erste rot wird, sonst
 verdeckt ein Befund den anderen. Ein toter Zugang wird damit rot und schickt
 die übliche Fehlermail. „Unklar" bleibt bewusst grün: ein Wächter, der bei jedem

@@ -18,6 +18,15 @@
 #
 #   2. TOTE ZUGÄNGE (`verify-stale-keys.mjs --strict`, s. u.), TÄGLICH.
 #
+#   3. VERWAISTE INSTANZ (`verify-instance-admins.mjs --strict`), TÄGLICH.
+#      „Registrierung aus" ist nur so lange harmlos, wie es noch jemanden
+#      gibt, der sie wieder anschalten kann (Davids Einwand 2026-08-23). Ohne
+#      Admin-Konto ist das Dashboard für niemanden bedienbar; ist zusätzlich
+#      die Registrierung zu, kommt dort überhaupt niemand mehr hinein. Auf dem
+#      Schreibweg im Produkt ist das gesichert (`assertNotLastAdmin`) — dieser
+#      Blick deckt ab, was daran vorbei entsteht: Console-Klicks, Skripte,
+#      eine frisch aufgesetzte Instanz ohne Label-Vergabe.
+#
 # Die beiden täglichen laufen IMMER beide, auch wenn der erste rot wird
 # (`if: always()`) — sonst verdeckt ein Befund den anderen und man repariert
 # zweimal hintereinander.
@@ -157,3 +166,9 @@ jobs:
         env:
           PUKALANI_OPS_SSH: ploi@49.13.211.173
         run: node scripts/ops/verify-stale-keys.mjs --ssh --strict
+
+      - name: Hat jede Instanz noch ein Admin-Konto?
+        if: always()
+        env:
+          PUKALANI_OPS_SSH: ploi@49.13.211.173
+        run: node scripts/ops/verify-instance-admins.mjs --ssh --strict
