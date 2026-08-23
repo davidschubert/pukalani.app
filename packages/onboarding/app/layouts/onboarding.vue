@@ -52,6 +52,19 @@ const items = computed<DropdownMenuItem[]>(() => [
     onSelect: () => { void logout() },
   },
 ])
+
+/**
+ * Die Bühne ist bewusst schmal (Lesebreite, max-w-2xl) — Wizard und Formulare
+ * leben davon. AUSNAHME ist die Sessions-Tabelle: vier Datenspalten plus
+ * Aktionen in 672 px sind Gedränge. Dasselbe Muster wie in der
+ * Dashboard-Zwillings-Hülle (packages/admin/app/pages/dashboard/settings.vue):
+ * NUR die Sessions-Route zieht weiter auf, Formular-Reiter bleiben schmal —
+ * ein Passwort-Formular auf 1280 px wäre verloren. 7xl = 1280 px (Davids
+ * Breiten-Wunsch 2026-08-23).
+ */
+const route = useRoute()
+const mainWidth = computed(() =>
+  route.path.endsWith('/settings/sessions') ? 'max-w-7xl' : 'max-w-2xl')
 </script>
 
 <template>
@@ -78,7 +91,7 @@ const items = computed<DropdownMenuItem[]>(() => [
       </UDropdownMenu>
     </header>
 
-    <main class="mx-auto w-full max-w-2xl px-4 pb-16 pt-6 sm:px-6 sm:pt-10">
+    <main class="mx-auto w-full px-4 pb-16 pt-6 sm:px-6 sm:pt-10" :class="mainWidth">
       <slot />
     </main>
 
