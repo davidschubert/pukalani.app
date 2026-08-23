@@ -315,6 +315,21 @@ export default defineNuxtConfig({
      * das man neben ihr auch noch setzen könnte.
      */
     geoCityDbPath: '',
+    /**
+     * server-only! Env: NUXT_GEO_CITIES_PATH — absoluter Pfad zum lokalen
+     * ORTS-VERZEICHNIS (GeoNames-Auszug als TSV, ~10 MB, erzeugt von
+     * scripts/geo/build-geonames-cities.mjs), aus dem der Orts-Picker im
+     * Profil seine Vorschläge nimmt (server/utils/geoCities.ts).
+     *
+     * NICHT ZU VERWECHSELN mit `geoCityDbPath` darüber: das ist die
+     * IP-Datenbank („wo war diese Sitzung?"), das hier ist ein Namens-
+     * Verzeichnis („wo wohnst du?"). Zwei Dateien, zwei Fragen, zwei
+     * Lizenzen (DB-IP bzw. GeoNames, beide CC BY 4.0).
+     *
+     * LEER = der Picker ist AUS: das Feld findet dann nichts. Der PFAD IST
+     * DER SCHALTER — dieselbe Regel wie eine Zeile höher.
+     */
+    geoCitiesPath: '',
     public: {
       // Deployter Commit (Build-Zeit aus git) — /api/health spiegelt ihn,
       // der Deploy-Workflow verifiziert damit, dass ploi den erwarteten

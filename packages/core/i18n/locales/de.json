@@ -202,7 +202,15 @@
     "photoUploadFailed": "Foto-Upload fehlgeschlagen — bitte erneut versuchen.",
     "photoUploadFailedDescription": "Dein Profil wurde nicht gespeichert. Versuche es erneut oder speichere zunächst ohne neues Foto.",
     "avatarLabel": "Avatar-URL",
-    "avatarPlaceholder": "https://…"
+    "avatarPlaceholder": "https://…",
+    "locationLabel": "Standort",
+    "locationPlaceholder": "Ort suchen …",
+    "locationHint": "Mindestens zwei Zeichen eingeben.",
+    "locationNoMatch": "Kein Ort gefunden.",
+    "locationCountryLabel": "Land (optional)",
+    "locationCountryPlaceholder": "Alle Länder",
+    "locationDisclosure": "Freiwillig — wird Mitgliedern deiner Communities auf der Mitglieder-Karte gezeigt.",
+    "locationAttribution": "Ortsdaten: {provider} (CC BY 4.0)"
   },
   "community": {
     "roles": {

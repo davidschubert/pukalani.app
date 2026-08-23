@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { FormSubmitEvent } from '@nuxt/ui'
 import { createProfileSchema, type ProfileInput } from '../../../schemas/profile'
+import { readProfileLocation } from '../../../shared/profileLocation'
 
 const { t } = useI18n()
 const auth = useAuthStore()
@@ -20,6 +21,27 @@ const state = reactive<ProfileInput>({
   // phone kommt aus dem nativen Appwrite-Feld, nicht aus prefs
   phone: auth.user?.phone ?? '',
   avatarUrl: typeof auth.user?.prefs?.avatarUrl === 'string' ? auth.user.prefs.avatarUrl : '',
+  /**
+   * Der Standort wird IMMER mitgeschickt — auch als `null`. Nur so kann das
+   * Löschen (X im Picker) beim Speichern ankommen: die Route unterscheidet
+   * „nicht angefasst" (Feld fehlt) von „gelöscht" (`null`), und ein Formular,
+   * das den Wert kennt, gehört immer zur zweiten Sorte.
+   *
+   * Gelesen wird über `readProfileLocation`, damit die drei prefs-Schlüssel
+   * nur an EINER Stelle beim Namen genannt werden (shared/profileLocation.ts).
+   */
+  location: readProfileLocation(auth.user?.prefs as Record<string, unknown> | undefined),
+})
+
+/**
+ * Der Picker kennt nur „Ort" oder „keiner" (`null`); das Schema kennt
+ * zusätzlich „Feld gar nicht dabei" (`undefined`, = nicht angefasst). Diese
+ * zwei Zeilen sind die Übersetzung — an EINER Stelle, statt in jeder Vorlage
+ * ein `?? null` zu streuen.
+ */
+const location = computed({
+  get: () => state.location ?? null,
+  set: (value) => { state.location = value },
 })
 
 // Pending-Datei aus UserAvatarUpload — wird erst hier beim Speichern hochgeladen,
@@ -85,6 +107,12 @@ async function onSubmit(event: FormSubmitEvent<ProfileInput>) {
 
     <UFormField :label="t('profile.bioLabel')" name="bio" :description="t('profile.bioDescription')">
       <UTextarea v-model="state.bio" :rows="3" class="w-full" />
+    </UFormField>
+
+    <!-- Standort: unter der Bio, weil er dieselbe Frage beantwortet („wer bin
+         ich") — und weil er wie sie freiwillig ist. -->
+    <UFormField :label="t('profile.locationLabel')" name="location">
+      <GeoCityPicker v-model="location" />
     </UFormField>
 
     <UFormField v-if="!hasBucket" :label="t('profile.avatarLabel')" name="avatarUrl">

@@ -202,7 +202,15 @@
     "photoUploadFailed": "Photo upload failed — please try again.",
     "photoUploadFailedDescription": "Your profile was not saved. Try again, or save without a new photo for now.",
     "avatarLabel": "Avatar URL",
-    "avatarPlaceholder": "https://…"
+    "avatarPlaceholder": "https://…",
+    "locationLabel": "Location",
+    "locationPlaceholder": "Search for a place …",
+    "locationHint": "Type at least two characters.",
+    "locationNoMatch": "No place found.",
+    "locationCountryLabel": "Country (optional)",
+    "locationCountryPlaceholder": "All countries",
+    "locationDisclosure": "Optional — shown to members of your communities on the member map.",
+    "locationAttribution": "Place data: {provider} (CC BY 4.0)"
   },
   "community": {
     "roles": {

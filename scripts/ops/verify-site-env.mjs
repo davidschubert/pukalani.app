@@ -84,6 +84,27 @@ const SERVER = process.env.PUKALANI_OPS_SSH || 'ploi@49.13.211.173'
  */
 const GEO_CITY_DB_PATH = 'NUXT_GEO_CITY_DB_PATH'
 
+/**
+ * Pfad zum lokalen ORTS-VERZEICHNIS (GeoNames-Auszug als TSV, ~10 MB), aus dem
+ * der Orts-Picker im Profil seine Vorschläge nimmt
+ * (packages/core/server/utils/geoCities.ts). NICHT dieselbe Datei wie oben:
+ * das dort ist die IP-Datenbank („wo war diese Sitzung?"), das hier ein
+ * Namensverzeichnis („wo wohnst du?").
+ *
+ * PFLICHT AUF JEDER SITE MIT KONTEN — und damit auf denselben dreien wie der
+ * Nachbar darüber, obwohl das Produkt (die Mitglieder-Karte) auf `platform`
+ * lebt. Der Grund ist nicht Symmetrie, sondern wo der Code steht: das
+ * Profil-Formular ist EINE Komponente in core (`UserProfileForm`), gerendert
+ * von `UserProfilePanel` — und die hängt über den `admin`-Layer auch in
+ * `/dashboard/settings` von control und portfolio. Der Picker ist dort also
+ * da; ohne Pfad findet er nur nichts. Das ist exakt die F44-Sorte Loch: kein
+ * Fehler, keine Warnung, nur ein Feld, das aussieht, als wäre es kaputt.
+ *
+ * Er kann wieder nur „fehlt ganz" sehen — ob die Datei am genannten Pfad
+ * liegt, sagt beim ersten Tippen die Warnung aus `geoCities.ts` im Log.
+ */
+const GEO_CITIES_PATH = 'NUXT_GEO_CITIES_PATH'
+
 const SITES = [
   {
     dir: 'platform.pukalani.app',
@@ -144,6 +165,7 @@ const SITES = [
        */
       'NUXT_INSTANCE_SECRETS_KEY',
       GEO_CITY_DB_PATH,
+      GEO_CITIES_PATH,
     ],
   },
   {
@@ -204,6 +226,7 @@ const SITES = [
        */
       'NUXT_INSTANCE_SECRETS_KEY',
       GEO_CITY_DB_PATH,
+      GEO_CITIES_PATH,
     ],
   },
   {
@@ -241,6 +264,7 @@ const SITES = [
       'NUXT_ONBOARDING_CONTROL_URL',
       'NUXT_ONBOARDING_SERVICE_SECRET',
       GEO_CITY_DB_PATH,
+      GEO_CITIES_PATH,
     ],
   },
   {

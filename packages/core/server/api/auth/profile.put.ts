@@ -1,6 +1,14 @@
 import { AppwriteException } from 'node-appwrite'
 import { createSessionClient, createAdminClient } from '../../lib/appwrite'
 import { profileSchema } from '../../../schemas/profile'
+import {
+  isProfileLocationKey,
+  PROFILE_LOCATION_LABEL_KEY,
+  PROFILE_LOCATION_LAT_KEY,
+  PROFILE_LOCATION_LON_KEY,
+  readProfileLocation,
+  sameProfileLocation,
+} from '../../../shared/profileLocation'
 
 // avatarFileId (URL→fileId) kommt aus server/utils/avatarFile.ts (Auto-Import)
 // — geteilt mit der GDPR-Löschung.
@@ -16,7 +24,7 @@ export default defineEventHandler(async (event) => {
     throw createError({ status: 401, statusText: 'Unauthorized' })
   }
 
-  const { name, bio, phone, avatarUrl } = await readValidatedBody(event, profileSchema.parse)
+  const { name, bio, phone, avatarUrl, location } = await readValidatedBody(event, profileSchema.parse)
   const { account } = createSessionClient(event)
 
   if (name !== event.context.user.name) {
@@ -41,13 +49,45 @@ export default defineEventHandler(async (event) => {
   }
 
   const nextAvatarUrl = avatarUrl ?? ''
-  await account.updatePrefs({
-    prefs: {
-      ...event.context.user.prefs,
-      bio: bio ?? '',
-      avatarUrl: nextAvatarUrl,
-    },
-  })
+
+  /**
+   * `updatePrefs` ERSETZT das ganze Fach — der Spread ist deshalb kein
+   * Komfort, sondern die Bedingung dafür, dass Zeitzone, Mail-Einstellungen
+   * und alles andere ein Profil-Speichern überleben.
+   */
+  const previousPrefs = (event.context.user.prefs ?? {}) as Record<string, unknown>
+
+  /**
+   * DREI ZUSTÄNDE, NICHT ZWEI (Standort, 2026-08-23):
+   *  - Feld fehlt (`undefined`) ⇒ NICHT ANGEFASST. Das ist der Normalfall für
+   *    jeden Aufrufer, der den Standort gar nicht kennt (ältere Clients, ein
+   *    Formular, das nur den Namen schickt) — ohne diesen Fall nähme jedes
+   *    Speichern den Standort still mit weg.
+   *  - `null` ⇒ LÖSCHEN. Die Schlüssel verschwinden, statt auf '' zu stehen:
+   *    „nicht angegeben" ist die ABWESENHEIT, und `readProfileLocation`
+   *    fragt genau danach.
+   *  - Objekt ⇒ alle drei Werte setzen (das Schema lässt nichts Halbes durch).
+   *
+   * Gelöscht wird durch WEGLASSEN beim Umkopieren, nicht mit `delete` —
+   * dasselbe Ergebnis, ohne einen dynamisch berechneten Schlüssel zu
+   * entfernen (ESLint verbietet das aus gutem Grund: was so verschwindet,
+   * sieht man an keiner Stelle mehr).
+   */
+  const keepLocation = location === undefined
+  const nextPrefs: Record<string, unknown> = Object.fromEntries(
+    Object.entries(previousPrefs).filter(([key]) => keepLocation || !isProfileLocationKey(key)),
+  )
+  nextPrefs.bio = bio ?? ''
+  nextPrefs.avatarUrl = nextAvatarUrl
+
+  const previousLocation = readProfileLocation(previousPrefs)
+  if (location) {
+    nextPrefs[PROFILE_LOCATION_LABEL_KEY] = location.label
+    nextPrefs[PROFILE_LOCATION_LAT_KEY] = location.lat
+    nextPrefs[PROFILE_LOCATION_LON_KEY] = location.lon
+  }
+
+  await account.updatePrefs({ prefs: nextPrefs })
 
   // Aktivitätsprotokoll (Admin-Sicht): WELCHE Felder sich geändert haben —
   // bewusst nur Feldnamen, nie Werte (Datenminimierung). Best-effort.
@@ -56,6 +96,10 @@ export default defineEventHandler(async (event) => {
     ...(nextPhone !== (event.context.user.phone ?? '') ? ['phone'] : []),
     ...((bio ?? '') !== (event.context.user.prefs?.bio ?? '') ? ['bio'] : []),
     ...(nextAvatarUrl !== (event.context.user.prefs?.avatarUrl ?? '') ? ['avatar'] : []),
+    // Wieder nur der FELDNAME, nie der Ort selbst (Datenminimierung) — ein
+    // Protokoll, das „Hamburg" mitschreibt, ist eine zweite Standort-Ablage
+    // mit eigener Aufbewahrungsfrist.
+    ...(location !== undefined && !sameProfileLocation(previousLocation, location) ? ['location'] : []),
   ]
   if (changedFields.length > 0) {
     await logAuthEvent(event, 'user.profile_updated', {

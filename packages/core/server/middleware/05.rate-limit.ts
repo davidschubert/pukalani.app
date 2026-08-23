@@ -263,6 +263,32 @@ const WRITE_LIMITED: { re: RegExp, bucket: string, max?: number }[] = [
    * (eine Anfrage je halbe Sekunde statt beliebig vieler).
    */
   { re: /^GET \/api\/handles\/search$/, bucket: 'handles:search', max: READ_MAX },
+  /**
+   * Die Orts-Suche des Profil-Pickers (Mitglieder-Karte Etappe 1, 2026-08-23)
+   * — dieselbe Klasse wie die zwei Tipp-Menüs darüber: sie läuft bei jedem
+   * getippten Zeichen los (client-seitig um 250 ms entprellt) und durchsucht
+   * je Aufruf ein Verzeichnis mit 170.000 Orten im Arbeitsspeicher.
+   *
+   * SESSION-GATED, also kein offener Vektor — aber ohne Deckel wäre die Route
+   * ein kostenloser Geocoding-Dienst für jedes angemeldete Konto, und der
+   * Durchlauf ist CPU auf einem Server, der neben sieben Apps steht.
+   *
+   * DERSELBE DECKEL (120/min) wie `handles:search`, aus demselben Grund: bei
+   * 250 ms Entprellung fliegt im Regelfall EINE Anfrage je Zeichen, und wer
+   * „San Francisco" tippt und sich zweimal umentscheidet, verbraucht schnell
+   * dreißig. Ein engerer Deckel (etwa 60/min) würgte das Feld im normalen
+   * Ausfüllen ab; 120/min begrenzt trotzdem hart auf zwei Anfragen je Sekunde.
+   *
+   * EIGENER BUCKET, weil das Profil und die Schreibfläche nichts miteinander
+   * zu tun haben — wer gerade seinen Ort sucht, soll nicht das Budget seines
+   * Erwähnungs-Menüs verbrauchen.
+   *
+   * DIE LÄNDERLISTE TEILT DENSELBEN BUCKET: sie beantwortet dieselbe Frage aus
+   * derselben Datei, wird EINMAL je Formular-Aufbau geholt und kann das Budget
+   * des Tippens deshalb nicht ernsthaft anknabbern. Ein eigener Bucket wäre
+   * hier Buchhaltung ohne Wirkung.
+   */
+  { re: /^GET \/api\/geo\/(cities|countries)$/, bucket: 'geo:cities', max: READ_MAX },
   // Medien-Upload: der einzige Schreibweg, der BINÄRDATEN auf die geteilte
   // Platte legt (bis 15 MB je Bild) — ein ungedrosseltes Budget ist hier nicht
   // „viele Zeilen", sondern viele Gigabyte. 30/min ist für eine Redaktion, die

@@ -496,7 +496,24 @@ export default defineAppConfig({
       // Gefahrlos ohne Mandanten-Kontext: die POST-Route lässt NUR den
       // Avatars-Bucket zu, GET/DELETE laufen über den Session-Client und
       // damit über Datei-Permissions — nichts davon ist tenant-gescopt.
-      controlApiPrefixes: ['/api/auth/', '/api/storage/', '/api/onboarding/', '/api/health', '/api/telemetry/', '/api/notifications', '/api/feedback', '/api/abuse', '/api/account/activity', '/api/account/handle', '/api/analytics/config', '/api/stats-script.js', '/api/stats-event', '/api/_nuxt_icon/'] as string[],
+      /**
+       * `/api/geo/cities` + `/api/geo/countries` (Mitglieder-Karte Etappe 1,
+       * 2026-08-23) — ZWEI EXAKTE Pfade, aus demselben Grund wie die zwei
+       * Konto-Routen darüber: `/api/geo/` als Präfix machte jede künftige
+       * Geo-Route ungefragt mit auf. Die Wache vergleicht mit `startsWith`,
+       * ein Eintrag deckt seinen Nachbarn also NICHT mit ab — der Länder-
+       * Filter braucht seine eigene Zeile.
+       *
+       * Sie GEHÖRT hierher, weil ihr Hauptwohnsitz der Kundenbereich ist: der
+       * Orts-Picker steht im Profil (`/profile` auf account.pukalani.app), und
+       * ohne diesen Eintrag antwortete er dort 404 — genau die Falle, in die
+       * schon der Avatar-Upload gelaufen ist (`/api/storage/`, 2026-08-18).
+       *
+       * Sicher ohne Mandanten-Scope: die Route liest eine LOKALE DATEI mit
+       * öffentlichen Ortsnamen (GeoNames) und fasst keine Zeile an. Ihre
+       * Grenze ist die Sitzung, nicht die Community.
+       */
+      controlApiPrefixes: ['/api/auth/', '/api/storage/', '/api/onboarding/', '/api/health', '/api/telemetry/', '/api/notifications', '/api/feedback', '/api/abuse', '/api/account/activity', '/api/account/handle', '/api/geo/cities', '/api/geo/countries', '/api/analytics/config', '/api/stats-script.js', '/api/stats-event', '/api/_nuxt_icon/'] as string[],
     },
     /**
      * Realtime-Gate (F14, 2026-08-01) — der EINE Schalter, mit dem eine App
