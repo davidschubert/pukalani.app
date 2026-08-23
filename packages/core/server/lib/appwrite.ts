@@ -1,5 +1,6 @@
 import { Client, Account, TablesDB, Health, Storage, Users, Presences, Avatars } from 'node-appwrite'
 import type { H3Event } from 'h3'
+import { trustedClientIp } from '../utils/clientIp'
 
 /**
  * Projekt des Requests (Horizont-3 Naht 2): der Tenant-Context der Middleware
@@ -80,12 +81,23 @@ export function requestLocale(event?: H3Event): string | undefined {
  * Reicht den Browser-User-Agent an Appwrite weiter, damit serverseitig erzeugte
  * Sessions das echte Gerät (Browser + Version + OS) statt des Node-SDK
  * aufzeichnen — plus die UI-Sprache (X-Appwrite-Locale), damit Appwrite-Mails
- * (Verification/OTP/Recovery) in der Sprache des Users rausgehen.
+ * (Verification/OTP/Recovery) in der Sprache des Users rausgehen — plus die
+ * Client-IP: ohne sie geolokalisiert Appwrite die IP des NUXT-SERVERS und
+ * jede Session stand mit „Deutschland" (Hetzner) auf der Sessions-Seite,
+ * egal wo der Mensch saß (2026-08-22 live aufgefallen; dieselbe Klasse wie
+ * der Plausible-Fix in stats-event.post.ts). Das SDK hat kein
+ * `setForwardedFor` — der Header ist der vorgesehene Weg, und `trustedClientIp`
+ * liefert das nicht-fälschbare LETZTE X-Forwarded-For-Segment. Geehrt wird
+ * der Header nur im Admin-Modus (API-Key) — Sessions entstehen genau dort
+ * (login/signup/otp/oauth laufen über createAdminClient). Bestands-Sessions
+ * behalten ihr eingefrorenes Land bis zum nächsten Login.
  */
 function forwardClientContext(client: Client, event?: H3Event) {
   if (!event) return
   const userAgent = getHeader(event, 'user-agent')
   if (userAgent) client.setForwardedUserAgent(userAgent)
+  const ip = trustedClientIp(event)
+  if (ip) client.addHeader('x-forwarded-for', ip)
   const locale = requestLocale(event)
   if (locale) client.setLocale(locale)
 }
