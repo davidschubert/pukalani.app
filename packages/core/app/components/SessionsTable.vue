@@ -8,23 +8,23 @@ const props = defineProps<{ sessions: SessionRow[] }>()
 const { t, locale } = useI18n()
 const slots = useSlots()
 
-// browserIcon/osIcon/deviceIcon/flagIcon: geteilte Helper aus utils/clientInfo (Auto-Import)
-function browserLabel(s: SessionRow): string {
-  return [s.clientName, s.clientVersion].filter(Boolean).join(' ').trim()
-}
-function osLabel(s: SessionRow): string {
-  return [s.osName, s.osVersion].filter(Boolean).join(' ').trim()
-}
-function engineLabel(s: SessionRow): string {
-  return [s.clientEngine, s.clientEngineVersion].filter(Boolean).join(' ').trim()
-}
-function deviceLabel(s: SessionRow): string {
-  // z. B. „smartphone · Apple iPhone" — Duplikate (brand im model) vermeiden
-  const brandModel = [s.deviceBrand, s.deviceModel].filter(Boolean).join(' ').trim()
-  return [s.deviceName, brandModel].filter(Boolean).join(' · ').trim()
-}
+// Icons aus utils/clientInfo, Beschriftungen aus utils/sessionInfo (Auto-Import) —
+// beide teilt sich diese Tabelle mit dem Detail-Dialog.
 function dateTime(iso: string): string {
-  return new Date(iso).toLocaleString(locale.value, { dateStyle: 'short', timeStyle: 'short' })
+  return sessionDateTime(iso, locale.value)
+}
+
+/**
+ * EIN Dialog für alle Zeilen: geöffnet wird er mit der angeklickten Sitzung,
+ * beim Schließen bleibt die Auswahl stehen. Ein Exemplar je Zeile wäre bei 20
+ * Sitzungen 20-mal dieselbe Karte im Baum.
+ */
+const detailsSession = ref<SessionRow | null>(null)
+const detailsOpen = ref(false)
+
+function showDetails(session: SessionRow): void {
+  detailsSession.value = session
+  detailsOpen.value = true
 }
 
 /**
@@ -89,6 +89,15 @@ const columns = computed<TableColumn<SessionRow>[]>(() => [
             <span class="truncate" :class="formatSessionLocation(row.original) ? '' : 'text-muted'">{{ formatSessionLocation(row.original) || t('account.sessions.unknown') }}</span>
           </div>
           <span class="truncate font-mono text-xs text-muted">{{ row.original.ip || '—' }}</span>
+          <UButton
+            color="neutral"
+            variant="link"
+            size="xs"
+            class="w-fit p-0"
+            @click="showDetails(row.original)"
+          >
+            {{ t('account.sessions.details') }}
+          </UButton>
         </div>
       </template>
       <template #times-cell="{ row }">
@@ -122,5 +131,6 @@ const columns = computed<TableColumn<SessionRow>[]>(() => [
         <ULink to="https://db-ip.com" target="_blank" rel="noopener" class="underline">DB-IP</ULink>
       </template>
     </i18n-t>
+    <SessionDetailsModal v-model:open="detailsOpen" :session="detailsSession" />
   </div>
 </template>

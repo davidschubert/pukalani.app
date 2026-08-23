@@ -35,6 +35,14 @@ export interface UserSession {
    */
   city: string
   region: string
+  /**
+   * Koordinaten der Session-IP aus derselben MMDB (`null` = unbekannt).
+   * Bewusst Zahlen und kein '': `0` ist ein gültiger Grad, „unbekannt" ist
+   * keine Zahl — nur so bleiben die zwei Fälle unterscheidbar. Gezeigt werden
+   * sie im Sitzungs-Dialog (Karte + Zeile), nie in der Tabelle.
+   */
+  latitude: number | null
+  longitude: number | null
   /** MFA-Faktoren dieser Session (z. B. ['password', 'totp']) */
   factors: string[]
   /** Ablaufzeitpunkt (ISO) */
@@ -68,6 +76,9 @@ export interface SessionRow {
   /** Feinere Ortsangabe aus der lokalen MMDB ('' = unbekannt/nicht konfiguriert). */
   city: string
   region: string
+  /** Koordinaten derselben Auflösung (`null` = unbekannt) — Karte im Dialog. */
+  latitude: number | null
+  longitude: number | null
   factors: string[]
   expire: string
   current: boolean

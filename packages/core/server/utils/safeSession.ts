@@ -13,7 +13,8 @@ import type { SessionGeoCity } from './geoCity'
  * Land: die zwei Quellen wissen unterschiedlich viel, und ein Sonderfall
  * „ohne Land keine Stadt" würde eine Angabe verschweigen, die wir haben.
  * Fehlt die Auflösung (kein Pfad konfiguriert, private IP, kein Treffer),
- * bleiben beide Felder leer und die Anzeige ist exakt die von vorher.
+ * bleiben Stadt/Region leer, die Koordinaten `null` — die Anzeige ist dann
+ * exakt die von vorher, und der Sitzungs-Dialog zeigt keine Karte.
  */
 export function mapSafeSession(s: Models.Session, current: boolean, geo?: SessionGeoCity | null): UserSession {
   const countryName = (!s.countryName || s.countryName === 'Unknown' || s.countryName === '--') ? '' : s.countryName
@@ -38,6 +39,8 @@ export function mapSafeSession(s: Models.Session, current: boolean, geo?: Sessio
     countryName,
     city: geo?.city ?? '',
     region: geo?.region ?? '',
+    latitude: geo?.latitude ?? null,
+    longitude: geo?.longitude ?? null,
     factors: s.factors ?? [],
     expire: s.expire,
     current,

@@ -121,3 +121,10 @@ catalog:
   # selbst und behalten damit die Kontrolle über Lazy-Load und Neu-Einlesen
   # nach dem monatlichen Datei-Tausch.
   mmdb-lib: ^3.0.3
+  # Karten-Overlay der Sessions-Seite (SessionDetailsModal): ein Pin auf die
+  # Koordinaten der Session-IP, Kacheln von OpenStreetMap — kein API-Key, kein
+  # Konto, keine Abrechnung. Geladen wird Leaflet AUSSCHLIESSLICH per
+  # dynamischem Import beim Öffnen des Dialogs: die Liste selbst bleibt damit
+  # drittanbieterfrei, Kachel-Abrufe passieren erst nach einem bewussten Klick.
+  leaflet: ^1.9.4
+  '@types/leaflet': ^1.9.20

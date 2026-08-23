@@ -18,7 +18,12 @@
  * geprüft wird. Ohne Cookie `i18n_redirected` ist die Request-Sprache
  * Englisch, also muss `names.en` herauskommen.
  *
- * Gegenprobe bleibt die Loopback-Session: private IP ⇒ city und region leer.
+ * Seit 2026-08-23 reisen auch die KOORDINATEN durch dieselbe Kette (Karte im
+ * Sitzungs-Dialog) — geprüft wird beides gleich: vorhanden UND deckungsgleich
+ * mit dem Direkt-Read.
+ *
+ * Gegenprobe bleibt die Loopback-Session: private IP ⇒ city und region leer,
+ * latitude und longitude `null`.
  * Ohne `GEO_MMDB` werden diese Prüfungen übersprungen (mit Meldung), damit der
  * Beweis auf einer Maschine ohne die 124-MB-Datei weiter läuft.
  *
@@ -125,7 +130,14 @@ else {
    *  i18n_redirected-Cookie schickt und die Route dann auf 'en' fällt. */
   const expected = (ip) => {
     const hit = reader.get(ip)
-    return { city: hit?.city?.names?.en ?? '', region: hit?.subdivisions?.[0]?.names?.en ?? '' }
+    return {
+      city: hit?.city?.names?.en ?? '',
+      region: hit?.subdivisions?.[0]?.names?.en ?? '',
+      // Koordinaten reisen seit 2026-08-23 mit (Karte im Sitzungs-Dialog) und
+      // sind Zahlen, nicht Strings — `null` heißt „unbekannt".
+      latitude: typeof hit?.location?.latitude === 'number' ? hit.location.latitude : null,
+      longitude: typeof hit?.location?.longitude === 'number' ? hit.location.longitude : null,
+    }
   }
 
   const wantGoogle = expected('8.8.8.8')
@@ -157,10 +169,27 @@ else {
   check(`Route: region = Direkt-Read (${wantSecond.region})`, current3?.region === wantSecond.region,
     `route=${current3?.region}, datei=${wantSecond.region}`)
 
+  // Koordinaten: erst überhaupt vorhanden (sonst hat die Kette sie verloren),
+  // dann deckungsgleich mit dem unabhängigen Direkt-Read. `typeof` gehört
+  // dazu — ein durchgereichter String sähe im Vergleich mit `===` rot aus,
+  // aber ein `null` gegen `null` wäre sonst still grün.
+  check(`Direkt-Read ${secondIp} liefert Koordinaten`,
+    typeof wantSecond.latitude === 'number' && typeof wantSecond.longitude === 'number',
+    `lat=${wantSecond.latitude}, lon=${wantSecond.longitude}`)
+  check('Route: Session trägt latitude/longitude als Zahlen',
+    typeof current3?.latitude === 'number' && typeof current3?.longitude === 'number',
+    `lat=${current3?.latitude} (${typeof current3?.latitude}), lon=${current3?.longitude} (${typeof current3?.longitude})`)
+  check(`Route: latitude = Direkt-Read (${wantSecond.latitude})`, current3?.latitude === wantSecond.latitude,
+    `route=${current3?.latitude}, datei=${wantSecond.latitude}`)
+  check(`Route: longitude = Direkt-Read (${wantSecond.longitude})`, current3?.longitude === wantSecond.longitude,
+    `route=${current3?.longitude}, datei=${wantSecond.longitude}`)
+
   // Gegenprobe: die Loopback-Session darf KEINE Ortsangabe tragen. Ohne sie
   // wäre nicht auszuschließen, dass die Route irgendetwas zurückgibt.
   check('Gegenprobe Loopback: city leer', (current2?.city ?? '') === '', `city=${current2?.city}`)
   check('Gegenprobe Loopback: region leer', (current2?.region ?? '') === '', `region=${current2?.region}`)
+  check('Gegenprobe Loopback: latitude null', current2?.latitude === null, `latitude=${current2?.latitude}`)
+  check('Gegenprobe Loopback: longitude null', current2?.longitude === null, `longitude=${current2?.longitude}`)
 }
 
 console.log(`\n${pass} ✔ / ${fail} ✗\n`)

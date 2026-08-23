@@ -50,6 +50,9 @@ export interface AdminUserSession {
    *  sonst erfüllt diese Sicht den SessionRow-Vertrag der SessionsTable nicht. */
   city: string
   region: string
+  /** Koordinaten derselben Auflösung (`null` = unbekannt) — Karte im Dialog. */
+  latitude: number | null
+  longitude: number | null
   factors: string[]
   expire: string
   current: boolean

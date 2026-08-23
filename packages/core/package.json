@@ -20,6 +20,7 @@
     "@pinia/nuxt": "catalog:",
     "appwrite": "catalog:",
     "ioredis": "catalog:",
+    "leaflet": "catalog:",
     "mmdb-lib": "catalog:",
     "node-appwrite": "catalog:",
     "nodemailer": "catalog:",
@@ -29,6 +30,7 @@
   },
   "devDependencies": {
     "@nuxt/eslint-config": "catalog:",
+    "@types/leaflet": "catalog:",
     "@types/node": "catalog:",
     "@types/nodemailer": "catalog:",
     "eslint": "catalog:",

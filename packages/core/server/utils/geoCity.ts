@@ -18,8 +18,9 @@ import { requestLocale } from '../lib/appwrite'
  *
  * FAIL-SOFT IST DAS LEITPRINZIP. Ohne konfigurierten Pfad, ohne Datei, bei
  * einem Lesefehler, bei einer privaten oder unsinnigen IP und bei einem
- * Treffer ohne Stadtnamen kommt `null` zurück — die Anzeige fällt dann exakt
- * auf den Stand von vorher (nur Land). Diese Funktion darf die Sessions-Route
+ * Treffer ganz ohne verwertbare Angabe (weder Name noch Koordinaten) kommt
+ * `null` zurück — die Anzeige fällt dann exakt auf den Stand von vorher (nur
+ * Land). Diese Funktion darf die Sessions-Route
  * NIE umwerfen; eine Standortangabe ist Komfort, die Liste selbst ist es
  * nicht.
  *
@@ -29,10 +30,19 @@ import { requestLocale } from '../lib/appwrite'
  * eine weitere Stelle, an der man „aus" vergisst zu erklären.
  */
 
-/** Aufgelöster Ort — beide Felder können leer sein ('' = nicht bekannt). */
+/**
+ * Aufgelöster Ort — jedes Feld kann fehlen ('' bzw. `null` = nicht bekannt).
+ *
+ * Die Koordinaten sind bewusst `number | null` und nicht '' : eine Zahl ist
+ * eine Zahl, und ein leerer String zwänge jede Anzeige zu einer Umwandlung,
+ * bei der `0` (ein gültiger Breiten-/Längengrad) und „unbekannt" ununter-
+ * scheidbar würden.
+ */
 export interface SessionGeoCity {
   city: string
   region: string
+  latitude: number | null
+  longitude: number | null
 }
 
 /**
@@ -175,7 +185,13 @@ export async function lookupCityForIp(event: H3Event, ip: string): Promise<Sessi
   const locale = requestLocale(event) ?? 'en'
   const city = pickName(hit.city?.names as LocalizedNames | undefined, locale)
   const region = pickName(hit.subdivisions?.[0]?.names as LocalizedNames | undefined, locale)
-  if (!city && !region) return null
+  // Koordinaten sind eigenständig wertvoll (die Karte im Sitzungs-Dialog
+  // braucht keinen Namen), deshalb reicht EINE der beiden Sorten für einen
+  // Treffer. Ein `hit` ganz ohne Namen und ohne Koordinaten bleibt `null` —
+  // das ist dann wirklich nichts, was man zeigen könnte.
+  const latitude = typeof hit.location?.latitude === 'number' ? hit.location.latitude : null
+  const longitude = typeof hit.location?.longitude === 'number' ? hit.location.longitude : null
+  if (!city && !region && latitude === null && longitude === null) return null
 
-  return { city, region }
+  return { city, region, latitude, longitude }
 }
