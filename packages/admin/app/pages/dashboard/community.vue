@@ -124,19 +124,17 @@ const links = computed<NavigationMenuItem[]>(() => tabs.value.map(tab => ({
 })))
 
 /**
- * Drei Breiten, ein Grund: Formularseiten lesen sich schmal besser, Tabellen
- * brauchen Platz (dieselbe Rechnung wie in der Konto-Hülle bei den Sitzungen),
- * und das Statistik-Bento (analytics) legt vier Spalten nebeneinander — in der
- * Formular-Breite wären das Kacheln von unter 180 px, in denen keine Zahl mehr
- * neben ihrem Label steht.
+ * EINE Breite für die ganze Hülle: 1280 px (`max-w-7xl`, Davids Entscheidung
+ * 2026-08-23 — dieselbe Zahl trägt die Konto-Hülle und die Bühne des
+ * Kundenbereichs).
+ *
+ * Vorher standen hier drei Breiten je Route (Formular schmal, Statistik 6xl,
+ * Mitglieder ganz weit). Das las sich als Regel gut und fühlte sich beim
+ * Reiter-Wechsel falsch an: derselbe Hub sprang bei jedem Klick in der Breite.
+ * Wer schmaler sein will, begrenzt sich INNEN (die Formulare tun das über ihre
+ * Felder), nicht über die Hülle.
  */
-const containerWidth = computed(() => {
-  if (route.path.endsWith('/community/statistics')) return 'lg:max-w-6xl'
-  // `includes` statt `endsWith`: die Mitglieder haben seit der Karte
-  // (2026-08-23) UNTERSEITEN (`/members/map`, `/members/<id>`), und die brauchen
-  // die Breite genauso — eine Weltkarte in Formular-Breite ist eine Briefmarke.
-  return route.path.includes('/community/members') ? 'lg:max-w-(--ui-container)' : 'lg:max-w-3xl'
-})
+const containerWidth = 'lg:max-w-7xl'
 </script>
 
 <template>

@@ -11,7 +11,6 @@ definePageMeta({ layout: 'dashboard', middleware: ['auth', 'admin'] })
 
 const { t } = useI18n()
 const localePath = useLocalePath()
-const route = useRoute()
 const auth = useAuthStore()
 const appConfig = useAppConfig()
 
@@ -54,10 +53,11 @@ const links = computed<NavigationMenuItem[]>(() => [
   ...registered.value.map(tab => ({ label: t(tab.labelKey), icon: tab.icon, to: localePath(tab.to) })),
 ])
 
-// Die Sessions-Tabelle braucht mehr Breite (5 Spalten) — Formularseiten bleiben
-// schmal. Daher den Container nur auf der Sessions-Route weiter aufziehen.
-const containerWidth = computed(() =>
-  route.path.endsWith('/settings/sessions') ? 'lg:max-w-4xl' : 'lg:max-w-2xl')
+// EINE Breite für alle Konto-Reiter: 1280 px (Davids Entscheidung 2026-08-23,
+// dieselbe Zahl wie in der Community-Hülle und im Kundenbereich). Vorher zog
+// nur die Sessions-Route auf — der Hub sprang damit bei jedem Reiter-Wechsel
+// in der Breite. Formulare begrenzen sich über ihre Felder, nicht über die Hülle.
+const containerWidth = 'lg:max-w-7xl'
 </script>
 
 <template>

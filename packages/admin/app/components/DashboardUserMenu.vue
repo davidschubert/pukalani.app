@@ -182,6 +182,20 @@ const items = computed<SwatchItem[][]>(() => {
         ? [{ label: t('account.nav.profile'), icon: 'i-ph-user-circle', to: localePath('/profile') }]
         : []),
       {
+        /**
+         * „KONTOEINSTELLUNGEN", nicht „Einstellungen" (2026-08-23, Davids
+         * Entscheidung). Der Eintrag steht im KONTO-Menü und führt auf die
+         * Konto-Seite (Allgemein, Benachrichtigungen, Sitzungen, Sicherheit,
+         * Daten) — daneben gibt es die Community-Einstellungen, und ein blosses
+         * „Einstellungen" liess offen, welche der beiden gemeint sind.
+         *
+         * Geändert wurde der WERT von `dashboard.settings.title`, kein neuer
+         * Schlüssel: den Text lesen genau drei Stellen, und alle drei meinen
+         * dieselbe Seite (dieser Eintrag, ihr Navbar-Titel und ihr Browser-Tab
+         * in packages/admin/app/pages/dashboard/settings.vue). Menü-Beschriftung
+         * und Seitenüberschrift sollen gleich lauten — genau das war Davids
+         * Argument, ein zweiter Schlüssel hätte sie auseinanderlaufen lassen.
+         */
         label: t('dashboard.settings.title'),
         icon: 'i-ph-gear',
         to: localePath(isControlCenter ? '/settings' : '/dashboard/settings'),

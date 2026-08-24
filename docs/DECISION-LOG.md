@@ -7,6 +7,45 @@ die kleinen, verstreuten Beschlüsse.
 
 ---
 
+## 2026-08-23 — Mitglieder gehören in die Navigation, nicht in die Einstellungen
+
+**Auslöser:** Nach dem Bau der Mitglieder-Weltkarte fragte David, ob die
+Mitglieder-Seiten überhaupt in die „Community-Einstellungen" gehören — „unter
+settings brauchen wir das eigentlich nicht". Er hat recht: Beiträge, Events,
+Kurse und Medien liegen als Nav-Module links, nur die Menschen der Community
+hingen als Einstellungs-Reiter dazwischen. Mitglieder stellt man nicht ein,
+man blättert sie durch.
+
+**Entscheidung (David):** Der Eintrag zieht in die linke Navigation, Gruppe
+**„Produkte"** — nicht in eine eigene Gruppe und nicht an den Anfang der
+Leiste. Die Seiten ziehen dabei WIRKLICH um (`/dashboard/members`,
+`/members/map`, `/members/<id>`), statt nur den Menüpunkt zu verschieben:
+sonst stünde über der Weltkarte weiter die Reiter-Reihe des
+Einstellungs-Hubs, und die Adresse behauptete etwas anderes als die Seite.
+Alt-Pfade antworten 301. **Kuriosum fürs Protokoll:** genau diese Adresse
+zieht zum ZWEITEN Mal um — vor F50 (2026-08-08) lag die Mitgliederliste
+schon einmal unter `/dashboard/members` und wanderte damals IN den Hub; die
+301 von damals zeigte in die Gegenrichtung und wird jetzt gedreht. Der
+F50-Beschluss („ein Hub für Community-Einstellungen") bleibt für alles
+gültig, was wirklich Einstellung ist.
+
+**Zwei kleinere Beschlüsse desselben Durchgangs:**
+- **Breite:** Konto-Hülle, Community-Hülle und die Bühne des Kundenbereichs
+  laufen einheitlich auf **1280 px (`max-w-7xl`)**. Vorher hatte jede Hülle
+  Breiten JE ROUTE (Formular schmal, Tabelle/Karte breit) — derselbe Hub
+  sprang bei jedem Reiter-Wechsel. Die 90rem-Regel vom 2026-08-20 bleibt für
+  ÖFFENTLICHE Seiten; Dashboard und Kundenbereich sind bewusst enger, weil
+  dort eine Sidebar danebensteht.
+- **Benennung:** Der Eintrag unten links im Nutzer-Menü heißt jetzt
+  **„Kontoeinstellungen"** statt „Einstellungen" — die Zielseite trägt diese
+  Überschrift bereits und sagt „gilt für dein Konto, nicht für eine einzelne
+  Community". Menü-Label und Seitenüberschrift sind damit identisch, und der
+  Punkt grenzt sich hörbar von „Community-Einstellungen" ab. Verworfen:
+  „Profileinstellungen" (dahinter liegen auch Sitzungen, Abrechnung und
+  Kontolöschung — mehr als ein Profil).
+
+---
+
 ## 2026-08-20 — Seitenbreite überall 90rem, Vorbild ui.nuxt.com
 
 **Auslöser:** David empfand alle Seiten auf seinem 27-Zoll-Monitor als zu
