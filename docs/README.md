@@ -47,6 +47,7 @@ gepflegt).
 | [referenz/EIGENE-DOMAIN.md](referenz/EIGENE-DOMAIN.md) | Kundendomains: Pool-Tenant vs. Silo-Alias, Zustandskette, kanonischer Host |
 | [referenz/CHANGELOG-WORKFLOW.md](referenz/CHANGELOG-WORKFLOW.md) | Release-Please + Kunden-Changelog |
 | [referenz/LIVE-BEWEISE.md](referenz/LIVE-BEWEISE.md) | Welche Beweis-Skripte es gibt und wogegen sie laufen |
+| [referenz/FIGMA-WORKFLOW.md](referenz/FIGMA-WORKFLOW.md) | Figma als Korrektur-Oberfläche: Token-Brücke, Kit-Abdeckung, Konventionen |
 
 ## Runbooks — Schritt für Schritt im Betrieb
 
