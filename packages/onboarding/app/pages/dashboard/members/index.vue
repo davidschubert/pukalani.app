@@ -412,6 +412,15 @@ function rowActions(member: CommunityMemberView): DropdownMenuItem[][] {
           <UDashboardSidebarCollapse />
         </template>
       </UDashboardNavbar>
+
+      <!-- Die Reiter gehören in die KOPFZEILE, nicht in den Körper (Davids
+           Anmerkung 2026-08-24): so stehen sie in jeder Hülle dieses Hauses
+           (Konto- und Community-Einstellungen) — direkt unter der Navbar, über
+           allem, was die Seite sonst zeigt. Im Körper wären sie ein Bedienteil
+           zwischen Inhalten statt eine Ebene über ihnen. -->
+      <UDashboardToolbar>
+        <MembersViewSwitch class="-mx-1 flex-1" />
+      </UDashboardToolbar>
     </template>
 
     <template #body>
@@ -419,11 +428,6 @@ function rowActions(member: CommunityMemberView): DropdownMenuItem[][] {
         <p class="mb-4 max-w-2xl text-sm text-muted">
           {{ canManageTeam ? t('members.description') : t('members.memberDescription') }}
         </p>
-
-        <!-- Zwei Ansichten auf dieselben Menschen (Etappe 2): die Liste verwaltet,
-             die Karte zeigt, wo sie sitzen. Die Reiter stehen auf BEIDEN Seiten
-             an derselben Stelle; welcher aktiv ist, sagt die Adresse. -->
-        <MembersViewSwitch class="mb-4" />
 
         <!-- F57: DIE ANSICHT EINES MITGLIEDS. Kein Team, keine Liste, keine
              offenen Einladungen — die eine Handlung, die es hier hat, und die

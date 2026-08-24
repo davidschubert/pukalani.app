@@ -94,6 +94,12 @@ function displayName(member: { name: string, handle: string }): string {
           <UDashboardSidebarCollapse />
         </template>
       </UDashboardNavbar>
+
+      <!-- Reiter in der KOPFZEILE wie in jeder Hülle des Hauses — dieselbe
+           Stelle wie auf der Listen-Seite, sonst springen sie beim Wechsel. -->
+      <UDashboardToolbar>
+        <MembersViewSwitch class="-mx-1 flex-1" />
+      </UDashboardToolbar>
     </template>
 
     <template #body>
@@ -101,8 +107,6 @@ function displayName(member: { name: string, handle: string }): string {
         <p class="mb-4 max-w-2xl text-sm text-muted">
           {{ t('members.map.description') }}
         </p>
-
-        <MembersViewSwitch class="mb-4" />
 
         <div v-if="status === 'pending'" class="flex h-[28rem] items-center justify-center rounded-lg border border-default">
           <UIcon name="i-ph-circle-notch" class="size-6 animate-spin text-muted" />

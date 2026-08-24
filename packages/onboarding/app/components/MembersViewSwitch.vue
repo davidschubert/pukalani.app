@@ -39,5 +39,8 @@ const links = computed<NavigationMenuItem[]>(() => [
 </script>
 
 <template>
-  <UNavigationMenu :items="links" highlight class="-mx-1" data-members-view />
+  <!-- OHNE Abstands-Klassen: wo die Reiter sitzen, entscheidet die Seite
+       (heute: `UDashboardToolbar` in ihrer Kopfzeile). Ein Bauteil, das seine
+       eigene Position mitbringt, kämpft mit jedem Ort, an dem es später steht. -->
+  <UNavigationMenu :items="links" highlight data-members-view />
 </template>
