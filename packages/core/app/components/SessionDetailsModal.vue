@@ -45,6 +45,7 @@ const showsGeoData = computed(() => Boolean(props.session && (props.session.city
 
 const mapEl = ref<HTMLDivElement | null>(null)
 let map: LeafletMap | null = null
+let stopObservingSize: (() => void) | null = null
 
 /**
  * Start-Zoom Stadt-Ebene (Davids Wunsch 2026-08-23, nach dem Vorbild der
@@ -55,6 +56,8 @@ let map: LeafletMap | null = null
 const MAP_ZOOM = 12
 
 function destroyMap(): void {
+  stopObservingSize?.()
+  stopObservingSize = null
   // Ohne `remove()` bleibt bei jedem Öffnen eine Leaflet-Instanz samt ihren
   // Fenster-Listenern zurück — der Dialog wird über die Sitzung mehrfach
   // geöffnet, das summiert sich.
@@ -73,20 +76,18 @@ async function mountMap(el: HTMLDivElement, center: [number, number]): Promise<v
   // Zwischen `await` und hier kann der Dialog längst wieder zu sein.
   if (!open.value || mapEl.value !== el) return
 
-  // AUF ECHTE GRÖSSE WARTEN: während der Öffnungs-Transition ist der
-  // Container noch 0 Pixel hoch. Initialisiert Leaflet in dem Moment,
-  // vermisst es sich und rendert eine ZU NIEDRIGE Zoom-Stufe (live gemessen:
-  // erstes Öffnen Kachel-z9 statt der konfigurierten Stufe, jedes weitere
-  // korrekt). Deshalb erst loslegen, wenn der Container wirklich Höhe hat —
-  // begrenzt, damit ein nie sichtbarer Container keine Endlosschleife wird.
-  // Seit dem Weltkarten-Livefund (2026-08-23) BEIDE Dimensionen: auch eine
-  // Breite von 0 lässt Leaflet sich vermessen.
-  for (let i = 0; i < 30 && (el.clientWidth === 0 || el.clientHeight === 0); i++) {
-    await new Promise(resolve => requestAnimationFrame(resolve))
-  }
-  if (!open.value || mapEl.value !== el) return
-
+  // Angelegt wird erst, wenn der Container echte Maße hat: die Dialog-
+  // Transition macht ihn erst nach dem Mounten groß, und eine Karte, die
+  // vorher entsteht, bleibt kaputt (core/app/utils/mapContainer.ts).
   destroyMap()
+  stopObservingSize = observeMapContainer(el, {
+    onFirstVisible: () => createMap(L, el, center),
+    onResize: () => map?.invalidateSize(),
+  })
+}
+
+/** Legt die Karte an — nur aus `onFirstVisible` heraus aufzurufen. */
+function createMap(L: typeof import('leaflet'), el: HTMLDivElement, center: [number, number]): void {
   map = L.map(el, {
     center,
     zoom: MAP_ZOOM,
@@ -121,14 +122,6 @@ async function mountMap(el: HTMLDivElement, center: [number, number]): Promise<v
     }),
   }).addTo(map)
 
-  // Der Dialog fährt beim Öffnen eine Transition — Leaflet hat die Größe des
-  // Containers dann womöglich zu früh gemessen. Nach dem Nachmessen die
-  // Ansicht explizit festnageln: Sicherheitsnetz gegen jede Restdrift der
-  // Transition (der z9-Fehlstart oben war genau so eine).
-  requestAnimationFrame(() => {
-    map?.invalidateSize()
-    map?.setView(center, MAP_ZOOM, { animate: false })
-  })
 }
 
 /**

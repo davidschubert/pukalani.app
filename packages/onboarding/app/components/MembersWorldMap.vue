@@ -59,7 +59,7 @@ const emit = defineEmits<{ select: [key: string] }>()
 const mapEl = ref<HTMLDivElement | null>(null)
 let map: LeafletMap | null = null
 let layer: LayerGroup | null = null
-let resizeObserver: ResizeObserver | null = null
+let stopObservingSize: (() => void) | null = null
 const markerElements = new Map<string, HTMLElement>()
 
 /** Totale der Erde, wenn es nichts einzupassen gibt. */
@@ -141,17 +141,22 @@ async function mountMap(el: HTMLDivElement): Promise<void> {
   // Zwischen `await` und hier kann die Seite längst verlassen sein.
   if (mapEl.value !== el) return
 
-  // Auf echte Grösse warten (siehe Kopf) — BEIDE Dimensionen: die Höhe ist
-  // per CSS fest (h-[28rem]) und damit sofort da, die BREITE kommt erst mit
-  // dem Layout des Dashboard-Panels. Live erwischt (2026-08-23): Init bei
-  // Breite 0 ⇒ fitBounds zoomt in die Boxmitte und malt einen Kachel-Streifen.
-  // Begrenzt, damit ein nie sichtbarer Container keine Endlosschleife wird.
-  for (let i = 0; i < 30 && (el.clientWidth === 0 || el.clientHeight === 0); i++) {
-    await new Promise(resolve => requestAnimationFrame(resolve))
-  }
-  if (mapEl.value !== el) return
-
+  /**
+   * ANGELEGT WIRD ERST, WENN DER CONTAINER ECHTE MASSE HAT — und das meldet
+   * der Beobachter, es wartet niemand darauf. Warum das keine Feinheit ist,
+   * sondern die ganze Miete, steht in core/app/utils/mapContainer.ts: eine
+   * Karte, die in einem 2-px-Container entsteht, bleibt für immer bei drei
+   * Kacheln, und eine rAF-Warteschleife davor hängt im Hintergrund-Tab ewig.
+   */
   destroyMap()
+  stopObservingSize = observeMapContainer(el, {
+    onFirstVisible: () => createMap(L, el),
+    onResize: () => map?.invalidateSize(),
+  })
+}
+
+/** Legt die Karte an — nur aus `onFirstVisible` heraus aufzurufen. */
+function createMap(L: typeof import('leaflet'), el: HTMLDivElement): void {
   map = L.map(el, {
     center: WORLD_CENTER,
     zoom: WORLD_ZOOM,
@@ -175,43 +180,33 @@ async function mountMap(el: HTMLDivElement): Promise<void> {
 
   layer = L.layerGroup().addTo(map)
   renderMarkers(L)
-
-  /**
-   * GRÖSSENÄNDERUNGEN NACHZIEHEN: Leaflet vermisst den Container genau EINMAL
-   * — klappt die Sidebar ein, ändert sich das Fenster oder war der Container
-   * beim Init noch (fast) unsichtbar, malt es sonst für immer den alten Stand
-   * (der Kachel-Streifen von oben). `invalidateSize` reicht im Normalfall;
-   * NUR beim Sprung von „praktisch unsichtbar" auf „echt" wird zusätzlich neu
-   * eingepasst — bei einem gewöhnlichen Resize würde das Re-Fit dem Menschen
-   * seinen gewählten Ausschnitt wegnehmen.
-   */
-  let lastWidth = el.clientWidth
-  resizeObserver = new ResizeObserver(() => {
-    if (!map) return
-    const width = el.clientWidth
-    const wasTiny = lastWidth < 50
-    lastWidth = width
-    map.invalidateSize()
-    if (wasTiny && width >= 50) fitToGroups()
-  })
-  resizeObserver.observe(el)
 }
 
 function destroyMap(): void {
-  resizeObserver?.disconnect()
-  resizeObserver = null
+  stopObservingSize?.()
+  stopObservingSize = null
   map?.remove()
   map = null
   layer = null
   markerElements.clear()
 }
 
-/** „Alle drauf" — geteilt von renderMarkers und dem Resize-Nachziehen. */
+/**
+ * „Alle drauf" — geteilt von renderMarkers und dem Resize-Nachziehen.
+ *
+ * `animate: false` ist hier PFLICHT, nicht Geschmack (live gemessen
+ * 2026-08-23): wächst der Container von fast null auf seine echte Breite,
+ * ruft der Beobachter `invalidateSize()` und direkt danach diese Funktion.
+ * Ein ANIMIERTES `fitBounds` unterbricht dabei das gerade angestossene
+ * Nachladen der Kacheln — die Karte stand danach mit drei Kacheln und viel
+ * Grau da, bis irgendein weiteres Resize sie erlöste. Ohne Animation läuft
+ * beides in derselben Runde durch (nachgemessen: 18 Kacheln).
+ */
 function fitToGroups(): void {
   if (!map) return
   const points = props.groups.map(group => [group.lat, group.lon] as [number, number])
   if (points.length > 0) {
-    map.fitBounds(points, { padding: [48, 48], maxZoom: 8 })
+    map.fitBounds(points, { padding: [48, 48], maxZoom: 8, animate: false })
   }
   else {
     map.setView(WORLD_CENTER, WORLD_ZOOM, { animate: false })

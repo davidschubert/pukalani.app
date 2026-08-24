@@ -21,13 +21,13 @@ const props = defineProps<{ lat: number, lon: number }>()
 
 const mapEl = ref<HTMLDivElement | null>(null)
 let map: LeafletMap | null = null
-let resizeObserver: ResizeObserver | null = null
+let stopObservingSize: (() => void) | null = null
 
 const MAP_ZOOM = 12
 
 function destroyMap(): void {
-  resizeObserver?.disconnect()
-  resizeObserver = null
+  stopObservingSize?.()
+  stopObservingSize = null
   map?.remove()
   map = null
 }
@@ -39,15 +39,17 @@ async function mountMap(el: HTMLDivElement, center: [number, number]): Promise<v
   ])
   if (mapEl.value !== el) return
 
-  // BEIDE Dimensionen: die Höhe ist per CSS fest und sofort da, die Breite
-  // kommt erst mit dem Layout (Weltkarten-Livefund 2026-08-23: Init bei
-  // Breite 0 malt für immer einen Kachel-Streifen).
-  for (let i = 0; i < 30 && (el.clientWidth === 0 || el.clientHeight === 0); i++) {
-    await new Promise(resolve => requestAnimationFrame(resolve))
-  }
-  if (mapEl.value !== el) return
-
+  // Angelegt wird erst, wenn der Container echte Masse hat (gemeldet, nicht
+  // erwartet) — Begründung in core/app/utils/mapContainer.ts.
   destroyMap()
+  stopObservingSize = observeMapContainer(el, {
+    onFirstVisible: () => createMap(L, el, center),
+    onResize: () => map?.invalidateSize(),
+  })
+}
+
+/** Legt die Karte an — nur aus `onFirstVisible` heraus aufzurufen. */
+function createMap(L: typeof import('leaflet'), el: HTMLDivElement, center: [number, number]): void {
   map = L.map(el, { center, zoom: MAP_ZOOM, scrollWheelZoom: false, attributionControl: true })
 
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -66,25 +68,6 @@ async function mountMap(el: HTMLDivElement, center: [number, number]): Promise<v
       iconAnchor: [6, 6],
     }),
   }).addTo(map)
-
-  requestAnimationFrame(() => {
-    map?.invalidateSize()
-    map?.setView(center, MAP_ZOOM, { animate: false })
-  })
-
-  // Grössenänderungen nachziehen (Sidebar, Fenster, spätes Layout) — beim
-  // Sprung von „praktisch unsichtbar" auf „echt" auch den Ausschnitt neu
-  // setzen, sonst bliebe der 0-Breite-Fehlstand für immer stehen.
-  let lastWidth = el.clientWidth
-  resizeObserver = new ResizeObserver(() => {
-    if (!map) return
-    const width = el.clientWidth
-    const wasTiny = lastWidth < 50
-    lastWidth = width
-    map.invalidateSize()
-    if (wasTiny && width >= 50) map.setView(center, MAP_ZOOM, { animate: false })
-  })
-  resizeObserver.observe(el)
 }
 
 watch([mapEl, () => [props.lat, props.lon] as [number, number]], ([el, center]) => {
