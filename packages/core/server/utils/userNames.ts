@@ -1,11 +1,13 @@
-import { Query } from 'node-appwrite'
 import type { H3Event } from 'h3'
 
 /**
  * Anzeigenamen für eine Menge User-IDs auflösen — EIN gebündelter
- * `users.list`-Query statt N Einzelabrufe, in 100er-Batches (`Query.equal` ist
- * auf 100 Werte begrenzt). Schwester von `resolveAvatars` nebenan, gleiche
- * Bauart und gleiche Zusagen.
+ * `users.list` statt N Einzelabrufe.
+ *
+ * Seit 2026-08-23 eine ABLEITUNG aus `resolveUserCards` (dieselbe Schleife,
+ * nur die halbe Antwort). Wer Name UND Bild braucht, ruft direkt die Karte —
+ * zwei identische Abfragen nebeneinander wären genau die Verdopplung, die
+ * `resolveUserCards` auflöst.
  *
  * FAIL-SOFT: fehlender Scope, fehlendes Konto oder ein Lesefehler ⇒ der Name
  * fehlt in der Karte. Ein Name ist eine Höflichkeit, kein Datum, an dem eine
@@ -19,22 +21,10 @@ import type { H3Event } from 'h3'
  * der erste Fall.
  */
 export async function resolveUserNames(event: H3Event, userIds: string[]): Promise<Map<string, string>> {
-  const ids = [...new Set(userIds.filter(Boolean))]
-  if (ids.length === 0) return new Map()
-
+  const cards = await resolveUserCards(event, userIds)
   const map = new Map<string, string>()
-  try {
-    const admin = createAdminClient(event)
-    for (let i = 0; i < ids.length; i += 100) {
-      const batch = ids.slice(i, i + 100)
-      const res = await admin.users.list({ queries: [Query.equal('$id', batch), Query.limit(batch.length)] })
-      for (const user of res.users) {
-        if (user.name) map.set(user.$id, user.name)
-      }
-    }
-    return map
+  for (const [id, card] of cards) {
+    if (card.name.length > 0) map.set(id, card.name)
   }
-  catch {
-    return new Map()
-  }
+  return map
 }
