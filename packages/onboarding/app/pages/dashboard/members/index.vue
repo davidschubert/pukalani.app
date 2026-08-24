@@ -421,11 +421,9 @@ function rowActions(member: CommunityMemberView): DropdownMenuItem[][] {
         </p>
 
         <!-- Zwei Ansichten auf dieselben Menschen (Etappe 2): die Liste verwaltet,
-             die Karte zeigt, wo sie sitzen. Der Umschalter steht auf BEIDEN Seiten
-             an derselben Stelle. -->
-        <div class="mb-4">
-          <MembersViewSwitch view="list" />
-        </div>
+             die Karte zeigt, wo sie sitzen. Die Reiter stehen auf BEIDEN Seiten
+             an derselben Stelle; welcher aktiv ist, sagt die Adresse. -->
+        <MembersViewSwitch class="mb-4" />
 
         <!-- F57: DIE ANSICHT EINES MITGLIEDS. Kein Team, keine Liste, keine
              offenen Einladungen — die eine Handlung, die es hier hat, und die

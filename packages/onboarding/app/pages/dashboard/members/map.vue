@@ -41,7 +41,7 @@ const localePath = useLocalePath()
 
 useBrandTitle(() => t('members.map.title'))
 
-const { data, status } = await useFetch<CommunityMembersMapResponse>('/api/community/members/map')
+const { data, status, error } = await useFetch<CommunityMembersMapResponse>('/api/community/members/map')
 
 const members = computed(() => data.value?.members ?? [])
 const truncated = computed(() => data.value?.truncated === true)
@@ -102,13 +102,27 @@ function displayName(member: { name: string, handle: string }): string {
           {{ t('members.map.description') }}
         </p>
 
-        <div class="mb-4">
-          <MembersViewSwitch view="map" />
-        </div>
+        <MembersViewSwitch class="mb-4" />
 
         <div v-if="status === 'pending'" class="flex h-[28rem] items-center justify-center rounded-lg border border-default">
           <UIcon name="i-ph-circle-notch" class="size-6 animate-spin text-muted" />
         </div>
+
+        <!-- FEHLER VOR LEERE: ohne diesen Zweig behauptet die Seite bei einem
+             kaputten Abruf „noch hat niemand einen Ort angegeben" — eine
+             Auskunft, die sie gar nicht hat (live erwischt 2026-08-24, als die
+             Service-Naht zum Control Plane weg war). Ein leerer Bestand und
+             ein gescheiterter Abruf sehen im `data`-Objekt gleich aus; nur
+             `error` unterscheidet sie. -->
+        <UAlert
+          v-else-if="error"
+          color="error"
+          variant="subtle"
+          icon="i-ph-warning-circle"
+          :title="t('members.map.errorTitle')"
+          :description="t('members.map.errorText')"
+          data-members-map-error
+        />
 
         <!-- Niemand mit Standort: eine leere Weltkarte sagt nichts und sieht aus
              wie ein Fehler. Der Hinweis nennt den einen Handgriff, der hilft. -->

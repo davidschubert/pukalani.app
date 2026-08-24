@@ -748,7 +748,9 @@
       "unnamed": "Ohne Namen",
       "truncatedTitle": "Die Karte zeigt nicht alle",
       "truncatedText": "Diese Community hat mehr Mitglieder, als ein Aufruf ansehen kann. Es fehlen also womöglich Punkte.",
-      "geoAttribution": "Ortsnamen und Koordinaten von {provider} (CC BY 4.0)."
+      "geoAttribution": "Ortsnamen und Koordinaten von {provider} (CC BY 4.0).",
+      "errorTitle": "Karte konnte nicht geladen werden",
+      "errorText": "Bitte lade die Seite neu. Bleibt es dabei, liegt es an uns — nicht an deinen Angaben."
     },
     "profile": {
       "back": "Zurück zur Karte",

@@ -748,7 +748,9 @@
       "unnamed": "Unnamed",
       "truncatedTitle": "The map is not showing everyone",
       "truncatedText": "This community has more members than one request can look at, so some pins may be missing.",
-      "geoAttribution": "Place names and coordinates by {provider} (CC BY 4.0)."
+      "geoAttribution": "Place names and coordinates by {provider} (CC BY 4.0).",
+      "errorTitle": "The map could not be loaded",
+      "errorText": "Please reload the page. If it keeps failing, that is on us — not on what you entered."
     },
     "profile": {
       "back": "Back to the map",
