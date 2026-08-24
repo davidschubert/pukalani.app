@@ -1,19 +1,25 @@
 <script setup lang="ts">
 import type { DropdownMenuItem, TableColumn } from '@nuxt/ui'
-import { COMMUNITY_ROLES, type CommunityRole } from '../../../../../../core/shared/communityAuthz'
-import type { CommunityInviteView, CommunityMemberView, CommunityTeamResponse } from '../../../../../../control/shared/communityTeam'
-import type { MemberInviteQuotaView } from '../../../../../../control/shared/communityInviteQuota'
-import type { CommunityInviteResponse } from '../../../../../shared/communityInvite'
+import { COMMUNITY_ROLES, type CommunityRole } from '../../../../../core/shared/communityAuthz'
+import type { CommunityInviteView, CommunityMemberView, CommunityTeamResponse } from '../../../../../control/shared/communityTeam'
+import type { MemberInviteQuotaView } from '../../../../../control/shared/communityInviteQuota'
+import type { CommunityInviteResponse } from '../../../../shared/communityInvite'
 
 /**
  * Mitglieder-Verwaltung EINER Community (Audit-Befund S9: `team.manage` war eine
  * tote Capability — Rolle vorhanden, Einstieg nirgends). Hier ist der Einstieg.
  *
- * Seit F51 (2026-08-07) ein REITER des Community-Hubs
- * (/dashboard/community/members) statt eines eigenen Menüpunkts im Hauptmenü.
- * Sie rendert deshalb kein eigenes UDashboardPanel mehr —
- * Panel, Kopfzeile und Reiter-Zeile bringt die Hülle mit
- * (packages/admin/app/pages/dashboard/community.vue).
+ * ZWEITER UMZUG DERSELBEN ADRESSE (2026-08-23, Davids Entscheidung): sie liegt
+ * wieder unter /dashboard/members und ist ein eigener Menüpunkt in der Gruppe
+ * „Produkte" — F51 hatte sie am 2026-08-07 zum REITER des Community-Hubs
+ * gemacht (/dashboard/community/members). Der Grund für die Kehrtwende steht in
+ * einem Satz: Mitglieder stellt man nicht ein, man blättert sie durch. Eine
+ * Einstellung setzt man einmal und geht; diese Seite ist ein Bestand, den man
+ * ansieht.
+ *
+ * Sie bringt deshalb ihr eigenes UDashboardPanel wieder mit (wie jede andere
+ * Produkt-Seite, z. B. /dashboard/my-posts) — die Hülle
+ * packages/admin/app/pages/dashboard/community.vue rendert sie nicht mehr.
  *
  * Vier Handgriffe, alle auf dieser Seite: einladen, Rolle ändern, Zugang
  * entziehen, Besitz übertragen. Die Community LÖSCHEN gehört bewusst NICHT
@@ -392,262 +398,280 @@ function rowActions(member: CommunityMemberView): DropdownMenuItem[][] {
 </script>
 
 <template>
-  <!-- Kind der Community-Hülle (F51): Karten + Tabelle, kein eigenes
-       UDashboardPanel. Kopfzeile und Reiter-Zeile bringt die Hülle mit; der
-       Einladen-Knopf sitzt deshalb in der Werkzeug-Reihe über der Liste
-       statt in einer Navbar, die es hier nicht mehr gibt. -->
-  <div class="flex w-full flex-col">
-    <p class="mb-4 max-w-2xl text-sm text-muted">
-      {{ canManageTeam ? t('members.description') : t('members.memberDescription') }}
-    </p>
+  <!-- EIGENE DASHBOARD-SEITE seit dem zweiten Umzug (2026-08-23): Panel und
+       Kopfzeile gehören wieder ihr, nicht der Community-Hülle. Aufbau wie bei
+       den Nachbarn der Gruppe „Produkte" (packages/posts, /dashboard/my-posts):
+       UDashboardPanel → #header mit Navbar und UDashboardSidebarCollapse →
+       #body. Die Breiten-Klammer (1280 px) steht hier, weil die Hülle sie nicht
+       mehr mitbringt — dieselbe Zahl wie im Community-Hub und in den
+       Kontoeinstellungen, damit ein Seitenwechsel den Text nicht verschiebt. -->
+  <UDashboardPanel id="community-members">
+    <template #header>
+      <UDashboardNavbar :title="t('members.title')">
+        <template #leading>
+          <UDashboardSidebarCollapse />
+        </template>
+      </UDashboardNavbar>
+    </template>
 
-    <!-- Zwei Ansichten auf dieselben Menschen (Etappe 2): die Liste verwaltet,
-         die Karte zeigt, wo sie sitzen. Der Umschalter steht auf BEIDEN Seiten
-         an derselben Stelle. -->
-    <div class="mb-4">
-      <MembersViewSwitch view="list" />
-    </div>
-
-    <!-- F57: DIE ANSICHT EINES MITGLIEDS. Kein Team, keine Liste, keine
-         offenen Einladungen — die eine Handlung, die es hier hat, und die
-         ehrliche Auskunft darüber, wie oft sie noch geht. Ist die Mechanik
-         aus oder das Kontingent leer, steht hier ein Satz statt eines
-         Knopfes, der 403 erntet. -->
-    <UPageCard
-      v-if="!canManageTeam"
-      :title="t('members.invite.cta')"
-      :description="t('members.invite.description')"
-      variant="subtle"
-      data-member-invite-card
-    >
-      <div class="flex flex-wrap items-center gap-3">
-        <UButton v-if="canInvite" icon="i-ph-user-plus" data-invite-open @click="openInvite">
-          {{ t('members.invite.cta') }}
-        </UButton>
-        <p v-if="showQuotaHint" class="text-sm text-muted" data-invite-quota>
-          {{ t('members.invite.quotaLeft', { remaining: quota?.remaining ?? 0, limit: quota?.limit ?? 0 }) }}
+    <template #body>
+      <div class="mx-auto flex w-full flex-col lg:max-w-7xl">
+        <p class="mb-4 max-w-2xl text-sm text-muted">
+          {{ canManageTeam ? t('members.description') : t('members.memberDescription') }}
         </p>
-        <p v-else-if="!canInvite" class="text-sm text-muted" data-invite-disabled>
-          {{ disabledReason }}
-        </p>
-      </div>
-    </UPageCard>
 
-    <!-- Offene Einladungen zuerst: sie sind der Zustand, der auf eine Antwort
-         wartet — und der einzige, den man widerrufen kann. -->
-    <UPageCard
-      v-if="canManageTeam && invites.length > 0"
-      :title="t('members.invites.title')"
-      :description="t('members.invites.description')"
-      variant="subtle"
-      class="mb-6"
-    >
-      <UTable :data="invites" :columns="inviteColumns" data-invites-table>
-        <template #role-cell="{ row }">
-          <UBadge :color="ROLE_COLOR[row.original.role]" variant="subtle">{{ roleLabel(row.original.role) }}</UBadge>
-        </template>
-        <template #expiresAt-cell="{ row }">
-          <span :title="formatDate(row.original.expiresAt)">{{ formatRelativeTime(row.original.expiresAt) }}</span>
-        </template>
-        <template #actions-cell="{ row }">
-          <div class="flex justify-end">
-            <UButton
-              size="xs"
-              color="neutral"
-              variant="ghost"
-              icon="i-ph-x"
-              :aria-label="t('members.revoke.confirm')"
-              :data-invite-revoke="row.original.id"
-              @click="revokeInvite(row.original)"
-            />
-          </div>
-        </template>
-      </UTable>
-    </UPageCard>
-
-    <div v-if="canManageTeam" class="mb-4 flex flex-wrap items-center gap-3">
-      <form class="flex min-w-64 flex-1 gap-2" @submit.prevent>
-        <UInput
-          v-model="search"
-          icon="i-ph-magnifying-glass"
-          :placeholder="t('members.searchPlaceholder')"
-          class="flex-1"
-          data-members-search
-        />
-      </form>
-
-      <!-- Team zuerst, alle auf einen Klick. Kein Dropdown: es sind zwei
-           Zustände, und beide sollen sichtbar sein — samt Anzahl, damit man
-           weiß, was der andere Klick bringt. -->
-      <UButtonGroup size="sm" data-members-scope>
-        <UButton
-          v-for="item in scopeItems"
-          :key="item.value"
-          :color="scope === item.value ? 'primary' : 'neutral'"
-          :variant="scope === item.value ? 'solid' : 'outline'"
-          :data-members-scope-option="item.value"
-          @click="scope = item.value"
-        >
-          {{ item.label }}
-        </UButton>
-      </UButtonGroup>
-
-      <!-- Der Einladen-Knopf saß bis F51 in der Navbar dieser Seite. Die gibt
-           es als Reiter der Community-Hülle nicht mehr (dort steht der Titel
-           der Hülle), also steht die Haupthandlung jetzt in der Werkzeug-Reihe
-           direkt über der Liste, auf die sie wirkt. -->
-      <UButton v-if="canInvite" icon="i-ph-user-plus" size="sm" data-invite-open @click="openInvite">
-        {{ t('members.invite.cta') }}
-      </UButton>
-    </div>
-
-    <UTable v-if="canManageTeam" :data="filtered" :columns="columns" :loading="status === 'pending'" data-members-table>
-      <template #name-header>
-        <SortableHeader :label="t('members.name')" field="name" :active="sortField" :dir="sortDir" @toggle="toggle" />
-      </template>
-      <template #role-header>
-        <SortableHeader :label="t('members.role')" field="role" :active="sortField" :dir="sortDir" @toggle="toggle" />
-      </template>
-      <template #joinedAt-header>
-        <SortableHeader :label="t('members.joined')" field="joinedAt" :active="sortField" :dir="sortDir" @toggle="toggle" />
-      </template>
-      <template #status-header>
-        <SortableHeader :label="t('members.status')" field="status" :active="sortField" :dir="sortDir" @toggle="toggle" />
-      </template>
-
-      <template #name-cell="{ row }">
-        <div class="flex items-center gap-2">
-          <UserAvatar :user="{ name: row.original.name || row.original.email, email: row.original.email }" size="xs" />
-          <div class="min-w-0">
-            <p class="truncate font-medium text-default">
-              {{ row.original.name || row.original.email }}
-              <span v-if="row.original.self" class="text-muted">· {{ t('members.you') }}</span>
-            </p>
-            <p v-if="row.original.name" class="truncate text-xs text-muted">{{ row.original.email }}</p>
-          </div>
+        <!-- Zwei Ansichten auf dieselben Menschen (Etappe 2): die Liste verwaltet,
+             die Karte zeigt, wo sie sitzen. Der Umschalter steht auf BEIDEN Seiten
+             an derselben Stelle. -->
+        <div class="mb-4">
+          <MembersViewSwitch view="list" />
         </div>
-      </template>
-      <template #role-cell="{ row }">
-        <UBadge :color="ROLE_COLOR[row.original.role]" variant="subtle">{{ roleLabel(row.original.role) }}</UBadge>
-      </template>
-      <template #joinedAt-cell="{ row }">
-        <span :title="formatDate(row.original.joinedAt)">{{ formatRelativeTime(row.original.joinedAt) }}</span>
-      </template>
-      <template #status-cell="{ row }">
-        <UBadge v-if="row.original.status === 'active'" color="success" variant="subtle">
-          {{ t('members.statusValues.active') }}
-        </UBadge>
-        <UBadge
-          v-else
-          color="neutral"
+
+        <!-- F57: DIE ANSICHT EINES MITGLIEDS. Kein Team, keine Liste, keine
+             offenen Einladungen — die eine Handlung, die es hier hat, und die
+             ehrliche Auskunft darüber, wie oft sie noch geht. Ist die Mechanik
+             aus oder das Kontingent leer, steht hier ein Satz statt eines
+             Knopfes, der 403 erntet. -->
+        <UPageCard
+          v-if="!canManageTeam"
+          :title="t('members.invite.cta')"
+          :description="t('members.invite.description')"
           variant="subtle"
-          icon="i-ph-user-minus"
-          :title="row.original.removedAt ? formatDate(row.original.removedAt) : undefined"
+          data-member-invite-card
         >
-          {{ t('members.statusValues.removed') }}
-        </UBadge>
-      </template>
-      <template #actions-cell="{ row }">
-        <div class="flex justify-end">
-          <UDropdownMenu :items="rowActions(row.original)" :content="{ align: 'end' }">
-            <UButton
-              icon="i-ph-dots-three-vertical"
-              color="neutral"
-              variant="ghost"
-              size="xs"
-              :aria-label="t('members.rowActions')"
-              :data-member-actions="row.original.id"
-            />
-          </UDropdownMenu>
-        </div>
-      </template>
-
-      <!--
-        Zwei Leerzustände (Muster der Nutzerliste, Audit-Befund C11): „Suche
-        ohne Treffer" verlangt Zurücksetzen, „noch niemand da" verlangt eine
-        Einladung. Die Mitgliederliste ist nie WIRKLICH leer — man selbst steht
-        drin —, deshalb heißt der zweite Zustand „nur du".
-      -->
-      <template #empty>
-        <CoreEmptyState
-          v-if="hasActiveFilter"
-          icon="i-ph-funnel"
-          :title="t('ui.empty.noResultsTitle')"
-          :description="t('ui.empty.noResultsText')"
-          :action-label="t('ui.empty.resetFilters')"
-          action-icon="i-ph-arrow-counter-clockwise"
-          @action="resetFilters"
-        />
-        <CoreEmptyState
-          v-else
-          icon="i-ph-users-three"
-          :title="t('members.emptyTitle')"
-          :description="t('members.emptyText')"
-          :action-label="t('members.invite.cta')"
-          action-icon="i-ph-user-plus"
-          @action="openInvite"
-        />
-      </template>
-    </UTable>
-
-    <!-- ROLLEN-ÜBERSICHT (Davids Wahl 2026-08-17). Am ENDE der Seite und für
-         JEDE Rolle sichtbar: sie ist Nachschlagewerk, nicht Handlung — oben
-         steht, was man hier TUN kann. Für ein Mitglied ohne Verwaltungsrechte
-         ist die Seite kurz, der Block steht ihm damit trotzdem sofort vor
-         Augen. Die eigene Rolle ist markiert; das beantwortet „wo stehe ich"
-         und „was gibt es sonst" in einem Blick. -->
-    <section class="mt-8" data-role-guide>
-      <h2 class="text-sm font-semibold">{{ t('members.roleGuide.title') }}</h2>
-      <p class="mt-1 max-w-2xl text-sm text-muted">{{ t('members.roleGuide.description') }}</p>
-      <dl class="mt-3 divide-y divide-default rounded-lg border border-default">
-        <div
-          v-for="entry in roleGuide"
-          :key="entry.role"
-          class="flex flex-col gap-1 p-3 sm:flex-row sm:items-baseline sm:gap-4"
-          :class="entry.isMine ? 'bg-elevated/50' : undefined"
-          :data-role-row="entry.role"
-        >
-          <dt class="flex shrink-0 items-center gap-2 sm:w-44">
-            <span class="text-sm font-medium">{{ entry.label }}</span>
-            <UBadge v-if="entry.isMine" color="primary" variant="subtle" size="sm" data-role-mine>
-              {{ t('members.roleGuide.yours') }}
-            </UBadge>
-          </dt>
-          <dd class="text-sm text-muted">{{ entry.help }}</dd>
-        </div>
-      </dl>
-    </section>
-
-    <UModal v-model:open="inviteOpen" :title="t('members.invite.title')" :description="t('members.invite.description')">
-      <template #body>
-        <form class="space-y-4" data-invite-form @submit.prevent="sendInvite">
-          <UFormField :label="t('members.invite.emailLabel')" :help="t('members.invite.emailHelp')" required>
-            <UInput v-model="inviteForm.email" type="email" class="w-full" :maxlength="254" data-invite-email />
-          </UFormField>
-          <!-- F57: die Rollen-WAHL bleibt an `team.manage`. Ein Mitglied lädt
-               immer als Leser/in ein — es bekommt deshalb kein Auswahlfeld,
-               sondern den Satz, was seine Einladung bewirkt. Die Grenze ist
-               trotzdem die Route (403 auf jede andere Rolle); dieses `v-if`
-               ist nur die ehrliche Oberfläche dazu. -->
-          <UFormField v-if="canManageTeam" :label="t('members.invite.roleLabel')" :help="t(`members.roleHelp.${inviteForm.role}`)" required>
-            <USelect v-model="inviteForm.role" :items="roleItems" class="w-full" data-invite-role />
-          </UFormField>
-          <p v-else class="text-sm text-muted" data-invite-fixed-role>
-            {{ t('members.invite.asViewer') }}
-          </p>
-
-          <p v-if="showQuotaHint" class="text-sm text-muted" data-invite-quota-modal>
-            {{ t('members.invite.quotaLeft', { remaining: quota?.remaining ?? 0, limit: quota?.limit ?? 0 }) }}
-          </p>
-
-          <div class="flex justify-end gap-2 pt-2">
-            <UButton color="neutral" variant="ghost" @click="() => { inviteOpen = false }">{{ t('ui.cancel') }}</UButton>
-            <UButton type="submit" :loading="inviteBusy" :disabled="!inviteForm.email.trim()" data-invite-submit>
-              {{ t('members.invite.submit') }}
+          <div class="flex flex-wrap items-center gap-3">
+            <UButton v-if="canInvite" icon="i-ph-user-plus" data-invite-open @click="openInvite">
+              {{ t('members.invite.cta') }}
             </UButton>
+            <p v-if="showQuotaHint" class="text-sm text-muted" data-invite-quota>
+              {{ t('members.invite.quotaLeft', { remaining: quota?.remaining ?? 0, limit: quota?.limit ?? 0 }) }}
+            </p>
+            <p v-else-if="!canInvite" class="text-sm text-muted" data-invite-disabled>
+              {{ disabledReason }}
+            </p>
           </div>
-        </form>
-      </template>
-    </UModal>
-  </div>
+        </UPageCard>
+
+        <!-- Offene Einladungen zuerst: sie sind der Zustand, der auf eine Antwort
+             wartet — und der einzige, den man widerrufen kann. -->
+        <UPageCard
+          v-if="canManageTeam && invites.length > 0"
+          :title="t('members.invites.title')"
+          :description="t('members.invites.description')"
+          variant="subtle"
+          class="mb-6"
+        >
+          <UTable :data="invites" :columns="inviteColumns" data-invites-table>
+            <template #role-cell="{ row }">
+              <UBadge :color="ROLE_COLOR[row.original.role]" variant="subtle">{{ roleLabel(row.original.role) }}</UBadge>
+            </template>
+            <template #expiresAt-cell="{ row }">
+              <span :title="formatDate(row.original.expiresAt)">{{ formatRelativeTime(row.original.expiresAt) }}</span>
+            </template>
+            <template #actions-cell="{ row }">
+              <div class="flex justify-end">
+                <UButton
+                  size="xs"
+                  color="neutral"
+                  variant="ghost"
+                  icon="i-ph-x"
+                  :aria-label="t('members.revoke.confirm')"
+                  :data-invite-revoke="row.original.id"
+                  @click="revokeInvite(row.original)"
+                />
+              </div>
+            </template>
+          </UTable>
+        </UPageCard>
+
+        <div v-if="canManageTeam" class="mb-4 flex flex-wrap items-center gap-3">
+          <form class="flex min-w-64 flex-1 gap-2" @submit.prevent>
+            <UInput
+              v-model="search"
+              icon="i-ph-magnifying-glass"
+              :placeholder="t('members.searchPlaceholder')"
+              class="flex-1"
+              data-members-search
+            />
+          </form>
+
+          <!-- Team zuerst, alle auf einen Klick. Kein Dropdown: es sind zwei
+               Zustände, und beide sollen sichtbar sein — samt Anzahl, damit man
+               weiß, was der andere Klick bringt. -->
+          <UButtonGroup size="sm" data-members-scope>
+            <UButton
+              v-for="item in scopeItems"
+              :key="item.value"
+              :color="scope === item.value ? 'primary' : 'neutral'"
+              :variant="scope === item.value ? 'solid' : 'outline'"
+              :data-members-scope-option="item.value"
+              @click="scope = item.value"
+            >
+              {{ item.label }}
+            </UButton>
+          </UButtonGroup>
+
+          <!-- Der Einladen-Knopf bleibt in der Werkzeug-Reihe direkt über der
+               Liste, obwohl die Seite seit dem zweiten Umzug (2026-08-23) wieder
+               eine eigene Navbar hat und die Nachbarn ihre Haupthandlung dort
+               führen. Grund: für ein Mitglied OHNE `team.manage` gibt es diese
+               Reihe gar nicht — es bekommt die Einladen-Karte oben. Ein zweiter
+               Knopf in der Navbar stünde für es neben derselben Handlung und
+               träge denselben Test-Haken (`data-invite-open`) ein zweites Mal. -->
+          <UButton v-if="canInvite" icon="i-ph-user-plus" size="sm" data-invite-open @click="openInvite">
+            {{ t('members.invite.cta') }}
+          </UButton>
+        </div>
+
+        <UTable v-if="canManageTeam" :data="filtered" :columns="columns" :loading="status === 'pending'" data-members-table>
+          <template #name-header>
+            <SortableHeader :label="t('members.name')" field="name" :active="sortField" :dir="sortDir" @toggle="toggle" />
+          </template>
+          <template #role-header>
+            <SortableHeader :label="t('members.role')" field="role" :active="sortField" :dir="sortDir" @toggle="toggle" />
+          </template>
+          <template #joinedAt-header>
+            <SortableHeader :label="t('members.joined')" field="joinedAt" :active="sortField" :dir="sortDir" @toggle="toggle" />
+          </template>
+          <template #status-header>
+            <SortableHeader :label="t('members.status')" field="status" :active="sortField" :dir="sortDir" @toggle="toggle" />
+          </template>
+
+          <template #name-cell="{ row }">
+            <div class="flex items-center gap-2">
+              <UserAvatar :user="{ name: row.original.name || row.original.email, email: row.original.email }" size="xs" />
+              <div class="min-w-0">
+                <p class="truncate font-medium text-default">
+                  {{ row.original.name || row.original.email }}
+                  <span v-if="row.original.self" class="text-muted">· {{ t('members.you') }}</span>
+                </p>
+                <p v-if="row.original.name" class="truncate text-xs text-muted">{{ row.original.email }}</p>
+              </div>
+            </div>
+          </template>
+          <template #role-cell="{ row }">
+            <UBadge :color="ROLE_COLOR[row.original.role]" variant="subtle">{{ roleLabel(row.original.role) }}</UBadge>
+          </template>
+          <template #joinedAt-cell="{ row }">
+            <span :title="formatDate(row.original.joinedAt)">{{ formatRelativeTime(row.original.joinedAt) }}</span>
+          </template>
+          <template #status-cell="{ row }">
+            <UBadge v-if="row.original.status === 'active'" color="success" variant="subtle">
+              {{ t('members.statusValues.active') }}
+            </UBadge>
+            <UBadge
+              v-else
+              color="neutral"
+              variant="subtle"
+              icon="i-ph-user-minus"
+              :title="row.original.removedAt ? formatDate(row.original.removedAt) : undefined"
+            >
+              {{ t('members.statusValues.removed') }}
+            </UBadge>
+          </template>
+          <template #actions-cell="{ row }">
+            <div class="flex justify-end">
+              <UDropdownMenu :items="rowActions(row.original)" :content="{ align: 'end' }">
+                <UButton
+                  icon="i-ph-dots-three-vertical"
+                  color="neutral"
+                  variant="ghost"
+                  size="xs"
+                  :aria-label="t('members.rowActions')"
+                  :data-member-actions="row.original.id"
+                />
+              </UDropdownMenu>
+            </div>
+          </template>
+
+          <!--
+            Zwei Leerzustände (Muster der Nutzerliste, Audit-Befund C11): „Suche
+            ohne Treffer" verlangt Zurücksetzen, „noch niemand da" verlangt eine
+            Einladung. Die Mitgliederliste ist nie WIRKLICH leer — man selbst steht
+            drin —, deshalb heißt der zweite Zustand „nur du".
+          -->
+          <template #empty>
+            <CoreEmptyState
+              v-if="hasActiveFilter"
+              icon="i-ph-funnel"
+              :title="t('ui.empty.noResultsTitle')"
+              :description="t('ui.empty.noResultsText')"
+              :action-label="t('ui.empty.resetFilters')"
+              action-icon="i-ph-arrow-counter-clockwise"
+              @action="resetFilters"
+            />
+            <CoreEmptyState
+              v-else
+              icon="i-ph-users-three"
+              :title="t('members.emptyTitle')"
+              :description="t('members.emptyText')"
+              :action-label="t('members.invite.cta')"
+              action-icon="i-ph-user-plus"
+              @action="openInvite"
+            />
+          </template>
+        </UTable>
+
+        <!-- ROLLEN-ÜBERSICHT (Davids Wahl 2026-08-17). Am ENDE der Seite und für
+             JEDE Rolle sichtbar: sie ist Nachschlagewerk, nicht Handlung — oben
+             steht, was man hier TUN kann. Für ein Mitglied ohne Verwaltungsrechte
+             ist die Seite kurz, der Block steht ihm damit trotzdem sofort vor
+             Augen. Die eigene Rolle ist markiert; das beantwortet „wo stehe ich"
+             und „was gibt es sonst" in einem Blick. -->
+        <section class="mt-8" data-role-guide>
+          <h2 class="text-sm font-semibold">{{ t('members.roleGuide.title') }}</h2>
+          <p class="mt-1 max-w-2xl text-sm text-muted">{{ t('members.roleGuide.description') }}</p>
+          <dl class="mt-3 divide-y divide-default rounded-lg border border-default">
+            <div
+              v-for="entry in roleGuide"
+              :key="entry.role"
+              class="flex flex-col gap-1 p-3 sm:flex-row sm:items-baseline sm:gap-4"
+              :class="entry.isMine ? 'bg-elevated/50' : undefined"
+              :data-role-row="entry.role"
+            >
+              <dt class="flex shrink-0 items-center gap-2 sm:w-44">
+                <span class="text-sm font-medium">{{ entry.label }}</span>
+                <UBadge v-if="entry.isMine" color="primary" variant="subtle" size="sm" data-role-mine>
+                  {{ t('members.roleGuide.yours') }}
+                </UBadge>
+              </dt>
+              <dd class="text-sm text-muted">{{ entry.help }}</dd>
+            </div>
+          </dl>
+        </section>
+
+        <UModal v-model:open="inviteOpen" :title="t('members.invite.title')" :description="t('members.invite.description')">
+          <template #body>
+            <form class="space-y-4" data-invite-form @submit.prevent="sendInvite">
+              <UFormField :label="t('members.invite.emailLabel')" :help="t('members.invite.emailHelp')" required>
+                <UInput v-model="inviteForm.email" type="email" class="w-full" :maxlength="254" data-invite-email />
+              </UFormField>
+              <!-- F57: die Rollen-WAHL bleibt an `team.manage`. Ein Mitglied lädt
+                   immer als Leser/in ein — es bekommt deshalb kein Auswahlfeld,
+                   sondern den Satz, was seine Einladung bewirkt. Die Grenze ist
+                   trotzdem die Route (403 auf jede andere Rolle); dieses `v-if`
+                   ist nur die ehrliche Oberfläche dazu. -->
+              <UFormField v-if="canManageTeam" :label="t('members.invite.roleLabel')" :help="t(`members.roleHelp.${inviteForm.role}`)" required>
+                <USelect v-model="inviteForm.role" :items="roleItems" class="w-full" data-invite-role />
+              </UFormField>
+              <p v-else class="text-sm text-muted" data-invite-fixed-role>
+                {{ t('members.invite.asViewer') }}
+              </p>
+
+              <p v-if="showQuotaHint" class="text-sm text-muted" data-invite-quota-modal>
+                {{ t('members.invite.quotaLeft', { remaining: quota?.remaining ?? 0, limit: quota?.limit ?? 0 }) }}
+              </p>
+
+              <div class="flex justify-end gap-2 pt-2">
+                <UButton color="neutral" variant="ghost" @click="() => { inviteOpen = false }">{{ t('ui.cancel') }}</UButton>
+                <UButton type="submit" :loading="inviteBusy" :disabled="!inviteForm.email.trim()" data-invite-submit>
+                  {{ t('members.invite.submit') }}
+                </UButton>
+              </div>
+            </form>
+          </template>
+        </UModal>
+      </div>
+    </template>
+  </UDashboardPanel>
 </template>

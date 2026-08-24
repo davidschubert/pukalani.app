@@ -40,8 +40,29 @@ export default defineNuxtConfig({
     '/de/dashboard/settings/community': { redirect: { to: '/de/dashboard/community', statusCode: 301 } },
     '/dashboard/branding': { redirect: { to: '/dashboard/community/branding', statusCode: 301 } },
     '/de/dashboard/branding': { redirect: { to: '/de/dashboard/community/branding', statusCode: 301 } },
-    '/dashboard/members': { redirect: { to: '/dashboard/community/members', statusCode: 301 } },
-    '/de/dashboard/members': { redirect: { to: '/de/dashboard/community/members', statusCode: 301 } },
+    /**
+     * DIE MITGLIEDER ZIEHEN ZUM ZWEITEN MAL — und wieder dorthin zurück, wo sie
+     * herkamen. Die Kette in einer Zeile: bis F51 `/dashboard/members`, dann
+     * (2026-08-07) als Reiter des Community-Hubs
+     * `/dashboard/community/members`, seit dem 2026-08-23 (Davids Entscheidung:
+     * Mitglieder stellt man nicht ein, man blättert sie durch) wieder
+     * `/dashboard/members`. Die Regel darüber lief bis heute in die
+     * GEGENRICHTUNG; sie ist ersetzt, nicht ergänzt — zwei Regeln über Kreuz
+     * wären eine Schleife.
+     *
+     * JE ZWEI ZEILEN PRO SPRACHE, weil eine routeRule Kind-Pfade NICHT
+     * mitnimmt: die Schlüssel sind statisch, `/dashboard/community/members/map`
+     * und `/dashboard/community/members/<id>` liefen ohne die `/**`-Regel ins
+     * 404. Die Wildcard-Regel hängt den Rest-Pfad an das Ziel an (Nitro
+     * schneidet dafür die Basis des Schlüssels ab) — `.../members/map` landet
+     * also auf `/dashboard/members/map`. Der exakte Schlüssel bleibt trotzdem
+     * stehen: ob `/**` auch null Segmente trifft, hängt am Router und ist keine
+     * Zusage, auf die man eine 301 stellt.
+     */
+    '/dashboard/community/members': { redirect: { to: '/dashboard/members', statusCode: 301 } },
+    '/dashboard/community/members/**': { redirect: { to: '/dashboard/members/**', statusCode: 301 } },
+    '/de/dashboard/community/members': { redirect: { to: '/de/dashboard/members', statusCode: 301 } },
+    '/de/dashboard/community/members/**': { redirect: { to: '/de/dashboard/members/**', statusCode: 301 } },
     '/dashboard/settings/domain': { redirect: { to: '/dashboard/community/domain', statusCode: 301 } },
     '/de/dashboard/settings/domain': { redirect: { to: '/de/dashboard/community/domain', statusCode: 301 } },
     '/dashboard/settings/subscription': { redirect: { to: '/dashboard/community/plan', statusCode: 301 } },

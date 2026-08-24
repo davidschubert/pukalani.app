@@ -51,7 +51,7 @@ const view = computed(() => resolveGettingStarted(data.value))
 const STEP_LINKS: Record<GettingStartedStep, string> = {
   post: '/feed',
   branding: '/dashboard/community/branding',
-  invite: '/dashboard/community/members',
+  invite: '/dashboard/members',
   homePage: '/dashboard/pages',
   plan: '/dashboard/community/plan',
 }

@@ -4,7 +4,7 @@ import { callControlPlane } from '../../../utils/controlPlane'
 import { requireCommunityTeamGate } from '../../../utils/communityTeamGate'
 
 /**
- * Das Team DIESER Community lesen — die Datenquelle von /dashboard/community/members.
+ * Das Team DIESER Community lesen — die Datenquelle von /dashboard/members.
  *
  * Zwei Welten, zwei Beiträge, und keine kann die andere ersetzen:
  *  - Das CONTROL PLANE besitzt `community_members`/`community_invites` und liefert Rollen,

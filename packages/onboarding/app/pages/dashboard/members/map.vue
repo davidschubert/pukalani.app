@@ -1,14 +1,19 @@
 <script setup lang="ts">
-import type { CommunityRole } from '../../../../../../core/shared/communityAuthz'
-import { groupMembersByLocation, type MemberLocationGroup } from '../../../../../shared/membersMap'
-import type { CommunityMembersMapResponse } from '../../../../../shared/types/membersMap'
+import type { CommunityRole } from '../../../../../core/shared/communityAuthz'
+import { groupMembersByLocation, type MemberLocationGroup } from '../../../../shared/membersMap'
+import type { CommunityMembersMapResponse } from '../../../../shared/types/membersMap'
 
 /**
  * DIE MITGLIEDER-KARTE (Etappe 2, 2026-08-23 — Davids Zuschnitt).
  *
  * Eine Weltkarte mit den Avataren aller Mitglieder, die einen Standort
- * angegeben haben. Zweite ANSICHT unter dem Reiter „Mitglieder", kein eigener
- * Reiter der Community-Hülle — die Begründung steht in `MembersViewSwitch`.
+ * angegeben haben. Zweite ANSICHT des Menüpunkts „Mitglieder", kein eigener
+ * Menüpunkt — die Begründung steht in `MembersViewSwitch`.
+ *
+ * MIT UMGEZOGEN am 2026-08-23 (Davids Entscheidung): die Mitglieder liegen
+ * nicht mehr unter /dashboard/community/*, sondern als eigener Menüpunkt in der
+ * Gruppe „Produkte". Die Seite bringt deshalb ihr eigenes UDashboardPanel mit;
+ * Begründung des Umzugs im Kopf von `index.vue` nebenan.
  *
  * ── DAS GATE IST DAS DER SEITE NEBENAN ─────────────────────────────────────
  * `members.invite` (seit F57 trägt es jede der fünf Rollen), nicht
@@ -75,104 +80,123 @@ function displayName(member: { name: string, handle: string }): string {
 </script>
 
 <template>
-  <div class="flex w-full flex-col">
-    <p class="mb-4 max-w-2xl text-sm text-muted">
-      {{ t('members.map.description') }}
-    </p>
+  <!-- EIGENE DASHBOARD-SEITE seit dem Umzug (2026-08-23): Panel, Kopfzeile und
+       Breiten-Klammer gehören ihr selbst, nicht mehr der Community-Hülle —
+       Aufbau wie bei den Nachbarn der Gruppe „Produkte". Die Karte MISST sich
+       an ihrem Container (Leaflet kennt keine Prozente), deshalb ist die
+       Klammer hier keine Kosmetik: ohne sie stünde sie in einem Element ohne
+       Breite. Ein ResizeObserver in `MembersWorldMap` fängt die späte Breite.
+       -->
+  <UDashboardPanel id="community-members-map">
+    <template #header>
+      <UDashboardNavbar :title="t('members.map.title')">
+        <template #leading>
+          <UDashboardSidebarCollapse />
+        </template>
+      </UDashboardNavbar>
+    </template>
 
-    <div class="mb-4">
-      <MembersViewSwitch view="map" />
-    </div>
-
-    <div v-if="status === 'pending'" class="flex h-[28rem] items-center justify-center rounded-lg border border-default">
-      <UIcon name="i-ph-circle-notch" class="size-6 animate-spin text-muted" />
-    </div>
-
-    <!-- Niemand mit Standort: eine leere Weltkarte sagt nichts und sieht aus
-         wie ein Fehler. Der Hinweis nennt den einen Handgriff, der hilft. -->
-    <CoreEmptyState
-      v-else-if="groups.length === 0"
-      icon="i-ph-map-pin-simple-area"
-      :title="t('members.map.emptyTitle')"
-      :description="t('members.map.emptyText')"
-      :action-label="t('members.map.emptyAction')"
-      action-icon="i-ph-user-circle"
-      :action-to="localePath('/dashboard/settings')"
-      data-members-map-empty
-    />
-
-    <template v-else>
-      <MembersWorldMap
-        :groups="groups"
-        :selected-key="selectedKey"
-        @select="key => selectedKey = key"
-      />
-
-      <!-- Der Deckel der Route sagt es selbst, statt still abzuschneiden. -->
-      <UAlert
-        v-if="truncated"
-        class="mt-4"
-        color="warning"
-        variant="subtle"
-        icon="i-ph-warning"
-        :title="t('members.map.truncatedTitle')"
-        :description="t('members.map.truncatedText')"
-        data-members-map-truncated
-      />
-
-      <!-- AUSWAHL-PANEL: gewöhnliches Markup unter der Karte, kein Leaflet-Popup. -->
-      <section class="mt-4" data-members-map-panel>
-        <p v-if="!selected" class="text-sm text-muted" data-members-map-hint>
-          {{ t('members.map.selectHint', { n: members.length, places: groups.length }) }}
+    <template #body>
+      <div class="mx-auto flex w-full flex-col lg:max-w-7xl">
+        <p class="mb-4 max-w-2xl text-sm text-muted">
+          {{ t('members.map.description') }}
         </p>
 
-        <UPageCard v-else :title="selected.label" variant="subtle">
-          <ul class="divide-y divide-default">
-            <li
-              v-for="member in selected.members"
-              :key="member.userId"
-              class="flex flex-wrap items-center gap-3 py-3"
-              :data-map-member="member.userId"
-            >
-              <!-- `prefs.avatarUrl` ist die Form, die UserAvatar liest (Konto-prefs,
-                   keine profiles-Tabelle) — nicht ein flaches `avatarUrl`. -->
-              <UserAvatar :user="{ name: displayName(member), prefs: { avatarUrl: member.avatarUrl } }" size="md" />
-              <div class="min-w-0 flex-1">
-                <p class="truncate font-medium text-default">{{ displayName(member) }}</p>
-                <p v-if="member.handle" class="truncate text-xs text-muted">{{ '@' + member.handle }}</p>
-                <p class="truncate text-xs text-dimmed">
-                  {{ member.location.label }} · {{ t('members.map.joined', { date: sessionDateTime(member.joinedAt, locale) }) }}
-                </p>
-              </div>
-              <UBadge :color="ROLE_COLOR[member.role]" variant="subtle">{{ roleLabel(member.role) }}</UBadge>
-              <UButton
-                size="xs"
-                color="neutral"
-                variant="outline"
-                icon="i-ph-arrow-right"
-                trailing
-                :to="localePath(`/dashboard/community/members/${member.userId}`)"
-                :data-map-member-details="member.userId"
-              >
-                {{ t('members.map.details') }}
-              </UButton>
-            </li>
-          </ul>
-        </UPageCard>
-      </section>
+        <div class="mb-4">
+          <MembersViewSwitch view="map" />
+        </div>
 
-      <!-- Attribution (CC BY 4.0) — sie hängt am ZEIGEN, nicht an der
-           Konfiguration. OpenStreetMap steht in der Karte selbst. -->
-      <i18n-t
-        keypath="members.map.geoAttribution"
-        tag="p"
-        scope="global"
-        class="mt-4 text-xs text-dimmed"
-      >
-        <template #provider>
-          <ULink to="https://www.geonames.org" target="_blank" rel="noopener" class="underline">GeoNames</ULink>
+        <div v-if="status === 'pending'" class="flex h-[28rem] items-center justify-center rounded-lg border border-default">
+          <UIcon name="i-ph-circle-notch" class="size-6 animate-spin text-muted" />
+        </div>
+
+        <!-- Niemand mit Standort: eine leere Weltkarte sagt nichts und sieht aus
+             wie ein Fehler. Der Hinweis nennt den einen Handgriff, der hilft. -->
+        <CoreEmptyState
+          v-else-if="groups.length === 0"
+          icon="i-ph-map-pin-simple-area"
+          :title="t('members.map.emptyTitle')"
+          :description="t('members.map.emptyText')"
+          :action-label="t('members.map.emptyAction')"
+          action-icon="i-ph-user-circle"
+          :action-to="localePath('/dashboard/settings')"
+          data-members-map-empty
+        />
+
+        <template v-else>
+          <MembersWorldMap
+            :groups="groups"
+            :selected-key="selectedKey"
+            @select="key => selectedKey = key"
+          />
+
+          <!-- Der Deckel der Route sagt es selbst, statt still abzuschneiden. -->
+          <UAlert
+            v-if="truncated"
+            class="mt-4"
+            color="warning"
+            variant="subtle"
+            icon="i-ph-warning"
+            :title="t('members.map.truncatedTitle')"
+            :description="t('members.map.truncatedText')"
+            data-members-map-truncated
+          />
+
+          <!-- AUSWAHL-PANEL: gewöhnliches Markup unter der Karte, kein Leaflet-Popup. -->
+          <section class="mt-4" data-members-map-panel>
+            <p v-if="!selected" class="text-sm text-muted" data-members-map-hint>
+              {{ t('members.map.selectHint', { n: members.length, places: groups.length }) }}
+            </p>
+
+            <UPageCard v-else :title="selected.label" variant="subtle">
+              <ul class="divide-y divide-default">
+                <li
+                  v-for="member in selected.members"
+                  :key="member.userId"
+                  class="flex flex-wrap items-center gap-3 py-3"
+                  :data-map-member="member.userId"
+                >
+                  <!-- `prefs.avatarUrl` ist die Form, die UserAvatar liest (Konto-prefs,
+                       keine profiles-Tabelle) — nicht ein flaches `avatarUrl`. -->
+                  <UserAvatar :user="{ name: displayName(member), prefs: { avatarUrl: member.avatarUrl } }" size="md" />
+                  <div class="min-w-0 flex-1">
+                    <p class="truncate font-medium text-default">{{ displayName(member) }}</p>
+                    <p v-if="member.handle" class="truncate text-xs text-muted">{{ '@' + member.handle }}</p>
+                    <p class="truncate text-xs text-dimmed">
+                      {{ member.location.label }} · {{ t('members.map.joined', { date: sessionDateTime(member.joinedAt, locale) }) }}
+                    </p>
+                  </div>
+                  <UBadge :color="ROLE_COLOR[member.role]" variant="subtle">{{ roleLabel(member.role) }}</UBadge>
+                  <UButton
+                    size="xs"
+                    color="neutral"
+                    variant="outline"
+                    icon="i-ph-arrow-right"
+                    trailing
+                    :to="localePath(`/dashboard/members/${member.userId}`)"
+                    :data-map-member-details="member.userId"
+                  >
+                    {{ t('members.map.details') }}
+                  </UButton>
+                </li>
+              </ul>
+            </UPageCard>
+          </section>
+
+          <!-- Attribution (CC BY 4.0) — sie hängt am ZEIGEN, nicht an der
+               Konfiguration. OpenStreetMap steht in der Karte selbst. -->
+          <i18n-t
+            keypath="members.map.geoAttribution"
+            tag="p"
+            scope="global"
+            class="mt-4 text-xs text-dimmed"
+          >
+            <template #provider>
+              <ULink to="https://www.geonames.org" target="_blank" rel="noopener" class="underline">GeoNames</ULink>
+            </template>
+          </i18n-t>
         </template>
-      </i18n-t>
+      </div>
     </template>
-  </div>
+  </UDashboardPanel>
 </template>

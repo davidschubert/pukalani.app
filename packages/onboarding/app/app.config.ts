@@ -3,13 +3,19 @@
  * Davids Community-Settings-Hub) vollständig als REITER in
  * `pukalani.admin.communityTabs`, nicht mehr als Sidebar-Module.
  *
- * WAS SICH GEÄNDERT HAT: die drei Sidebar-Einträge `members`,
- * `community-branding` und `site-subscription` sind ERSATZLOS gestrichen —
- * ersatzlos in der Seitenleiste, versteht sich; ihre Flächen leben als Reiter
- * unter `/dashboard/community/*` weiter. Grund ist Davids Entscheidung, dass
- * es EINEN Einstieg „Community-Einstellungen" gibt statt fünf verstreuter
- * Menüpunkte in drei Nav-Gruppen. Wer hier einen Punkt ZURÜCK in `modules`
- * legt, hat ihn danach doppelt.
+ * WAS F51 GEÄNDERT HAT: die drei Sidebar-Einträge `members`,
+ * `community-branding` und `site-subscription` wurden gestrichen — in der
+ * Seitenleiste, versteht sich; ihre Flächen leben als Reiter unter
+ * `/dashboard/community/*` weiter. Grund war Davids Entscheidung, dass es EINEN
+ * Einstieg „Community-Einstellungen" gibt statt fünf verstreuter Menüpunkte in
+ * drei Nav-Gruppen. Wer einen Punkt ZURÜCK in `modules` legt, muss ihn drüben
+ * aus `communityTabs` NEHMEN — sonst steht er danach doppelt.
+ *
+ * GENAU DAS IST MIT `members` PASSIERT (2026-08-23, Davids Entscheidung): der
+ * Reiter ist weg, der Menüpunkt ist zurück, und zwar in der Gruppe „Produkte"
+ * statt in „Einstellungen". Der Satz dazu: Mitglieder stellt man nicht ein, man
+ * blättert sie durch. Die anderen beiden bleiben Reiter — ein Branding und ein
+ * Abo setzt man, ein Mitgliederbestand wird angesehen.
  *
  * WARUM DIESER LAYER: die Seiten können nur so weit reichen wie ihre Routen,
  * und die liegen hier (`/api/community/*`) — dieser Layer besitzt die
@@ -40,6 +46,40 @@ export default defineAppConfig({
     },
     admin: {
       /**
+       * DER EINE SIDEBAR-EINTRAG DIESES LAYERS: die MITGLIEDER (2026-08-23,
+       * Davids Entscheidung). Er stand hier schon einmal, war von F51
+       * (2026-08-07) bis dahin ein Reiter des Community-Hubs und ist jetzt
+       * zurück — weil er dort falsch lag: Mitglieder sind kein Gegenstand, den
+       * man EINSTELLT, sondern ein Bestand, den man durchblättert. Die alten
+       * Adressen antworten 301 (packages/onboarding/nuxt.config.ts).
+       *
+       * `group: 'products'` und nicht 'settings': die Menschen dieser Community
+       * stehen bei dem, was sie hier tun (Beiträge, Events, Kurse), nicht beim
+       * Abo und beim Protokoll. `order: 10` setzt sie an den ANFANG der Gruppe —
+       * die Produkt-Layer registrieren sich ab 20.
+       *
+       * `members.invite` STATT `team.manage` (unverändert seit F57,
+       * 2026-08-14): jede der fünf Rollen trägt es, der Menüpunkt steht also
+       * jedem Mitglied offen — und das ist gewollt, seit die Karte da ist. Was
+       * die Seite dann ZEIGT, entscheidet sie selbst: die Mitglieder-LISTE
+       * hängt weiter an `team.manage`, und zwar in der Route
+       * (`/api/community/members`), nicht in der Oberfläche. Ein Menüpunkt mit
+       * `team.manage` würde die Karte ausgerechnet vor denen verstecken, für
+       * die sie gebaut ist.
+       */
+      modules: [
+        {
+          id: 'members',
+          scope: 'community',
+          labelKey: 'admin.nav.members',
+          icon: 'i-ph-users-three',
+          to: '/dashboard/members',
+          requiredCapability: 'members.invite',
+          group: 'products',
+          order: 10,
+        },
+      ],
+      /**
        * KENNZAHLEN DER COMMUNITY (U9/K2, 2026-08-11) — die zwei Zahlen, die
        * dem Owner über seine Community etwas sagen, ohne ein Produkt zu
        * zählen: wie viele Menschen sind hier, und woran ist sie vertraglich?
@@ -63,7 +103,7 @@ export default defineAppConfig({
           scope: 'community',
           labelKey: 'onboarding.stats.members',
           icon: 'i-ph-users-three',
-          to: '/dashboard/community/members',
+          to: '/dashboard/members',
           requiredCapability: 'team.manage',
           emptyHintKey: 'onboarding.stats.membersEmpty',
           emptyBelow: 2,
@@ -127,41 +167,6 @@ export default defineAppConfig({
           to: '/dashboard/community/branding',
           requiredCapability: 'branding.manage',
           order: 20,
-        },
-        {
-          /**
-           * MITGLIEDER. `team.manage` war bis zum Audit-Befund S9 eine TOTE
-           * Capability: in der Matrix vorhanden, im Dashboard ohne Einstieg.
-           * Dieser Eintrag ist der Einstieg.
-           */
-          id: 'members',
-          scope: 'community',
-          labelKey: 'admin.nav.members',
-          icon: 'i-ph-users-three',
-          /**
-           * DIESE ZEILE HAT GEFEHLT (2026-08-14 bis 2026-08-17, Commit
-           * f781655a): der Kommentarblock darunter hat sie beim F57-Umbau
-           * ersetzt. Folge war ein Reiter OHNE Ziel — `localePath(undefined)`
-           * ergab den aktuellen Pfad, also stand „Mitglieder" auf JEDER Seite
-           * der Hülle als aktiv hervorgehoben da, und ein Klick führte auf die
-           * Seite zurück, auf der man schon war. Gemeldet von David auf
-           * freelancer.supply; sichtbar war es für JEDES Mitglied, weil der
-           * Reiter seit F57 nur noch `members.invite` verlangt.
-           */
-          to: '/dashboard/community/members',
-          /**
-           * SEIT F57 `members.invite` STATT `team.manage` (2026-08-14): jedes
-           * Mitglied darf einladen, und der Einstieg dafür ist diese Seite.
-           *
-           * Der Reiter muss dieselbe Fähigkeit verlangen wie die SEITE, sonst
-           * gibt es ihn für ein Mitglied nicht — und eine Fähigkeit ohne
-           * Einstieg ist genau der Befund S9, gegen den dieser Eintrag
-           * überhaupt entstanden ist. Was die Seite dann ZEIGT, entscheidet
-           * sie selbst: Mitglieder sehen nur die Einladen-Karte, die
-           * Mitgliederliste bleibt an `team.manage`.
-           */
-          requiredCapability: 'members.invite',
-          order: 30,
         },
         {
           /**

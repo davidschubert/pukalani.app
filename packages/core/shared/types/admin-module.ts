@@ -112,9 +112,13 @@ export interface PukalaniAdminModule {
    *  - Betreiber: 'platform' (Communities, Anfragen, Codes, gesperrte Namen)
    *    · 'studio' (Websites) · 'management' (Betreiber-Werkzeuge: Feedback,
    *    Board)
-   *  - Community: 'website' (Seiten) · 'products' (Beiträge, Events, Kurse,
-   *    Medien) · 'branding' (Themes, Schriften) · 'settings' (Abo, Moderation,
-   *    Embed, Protokoll, Mitglieder)
+   *  - Community: 'website' (Seiten) · 'products' (Mitglieder, Beiträge,
+   *    Events, Kurse, Medien) · 'branding' (Themes, Schriften) · 'settings'
+   *    (Abo, Moderation, Embed, Protokoll)
+   *
+   * „Mitglieder" stand bis zum 2026-08-23 unter 'settings' und ist seit Davids
+   * Entscheidung an dem Tag der ERSTE Eintrag der Produkte: Mitglieder stellt
+   * man nicht ein, man blättert sie durch.
    *
    * 'design' ist mit E9 entfallen: Themes zogen nach 'branding', Medien zu den
    * Produkten — eine Gruppe mit einem einzigen Eintrag ist kein Abschnitt.
