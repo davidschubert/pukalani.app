@@ -1,5 +1,6 @@
 import { Query } from 'node-appwrite'
 import type { Models } from 'node-appwrite'
+import type { H3Event } from 'h3'
 import type { AdminCommentListResponse, ModeratedComment, ModerationFilter } from '../../../../shared/types/moderation'
 
 const PAGE_SIZE = 25
@@ -9,19 +10,30 @@ const SORTABLE = new Set(['$createdAt', 'status'])
 /** Appwrite nimmt je `equal`-Query höchstens 100 Werte. */
 const ID_CHUNK = 100
 
-type CommentRow = Models.Row & Omit<ModeratedComment, '$id' | '$createdAt' | 'reportCount'>
+// `authorAvatarUrl` steht NICHT an der Zeile (Account-prefs, nicht Spalte) und
+// gehört deshalb — wie `reportCount` — in die Omit-Liste.
+type CommentRow = Models.Row & Omit<ModeratedComment, '$id' | '$createdAt' | 'reportCount' | 'authorAvatarUrl'>
 
-function toModerated(row: CommentRow): ModeratedComment {
+function toModerated(row: CommentRow, avatars: Map<string, string>): ModeratedComment {
   return {
     $id: row.$id,
     $createdAt: row.$createdAt,
     content: row.content,
     authorId: row.authorId,
     authorName: row.authorName,
+    authorAvatarUrl: avatars.get(row.authorId) ?? '',
     targetId: row.targetId,
     targetType: row.targetType,
     status: row.status,
   }
+}
+
+/**
+ * Die Autoren-Bilder EINER Seite — gebündelt, nie je Zeile. Gäste haben keine
+ * Konto-Id und fallen in `resolveAvatars` ohnehin heraus.
+ */
+function avatarsFor(event: H3Event, rows: CommentRow[]) {
+  return resolveAvatars(event, rows.map(row => row.authorId))
 }
 
 export default defineEventHandler(async (event): Promise<AdminCommentListResponse> => {
@@ -70,10 +82,13 @@ export default defineEventHandler(async (event): Promise<AdminCommentListRespons
     if (!row) return { total: 0, comments: [], aiAssist }
     // Meldungen über den moderation-Vertrag, nicht über die reports-Tabelle
     // (Layer-Grenze A14) — dieselbe Quelle wie der KI-Assist.
-    const reports = await openReportsForTarget(event, 'comment', row.$id)
+    const [reports, avatars] = await Promise.all([
+      openReportsForTarget(event, 'comment', row.$id),
+      avatarsFor(event, [row]),
+    ])
     return {
       total: 1,
-      comments: [{ ...toModerated(row), reportCount: reports.length }],
+      comments: [{ ...toModerated(row, avatars), reportCount: reports.length }],
       aiAssist,
     }
   }
@@ -110,10 +125,11 @@ export default defineEventHandler(async (event): Promise<AdminCommentListRespons
       Query.limit(pageIds.length),
     ])
     const byId = new Map(result.rows.map(row => [row.$id, row]))
+    const avatars = await avatarsFor(event, result.rows)
     const comments = pageIds
       .map(id => byId.get(id))
       .filter((row): row is CommentRow => row !== undefined)
-      .map(row => ({ ...toModerated(row), reportCount: counts.get(row.$id) ?? 0 }))
+      .map(row => ({ ...toModerated(row, avatars), reportCount: counts.get(row.$id) ?? 0 }))
     return { total: ids.length, comments, aiAssist }
   }
 
@@ -125,9 +141,10 @@ export default defineEventHandler(async (event): Promise<AdminCommentListRespons
     Query.offset(offset),
   ])
 
+  const avatars = await avatarsFor(event, result.rows)
   return {
     total: result.total,
-    comments: result.rows.map(toModerated),
+    comments: result.rows.map(row => toModerated(row, avatars)),
     aiAssist,
   }
 })

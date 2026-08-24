@@ -73,11 +73,27 @@ const columns = computed<TableColumn<ReportedMessageView>[]>(() => ([
           :columns="columns"
           :loading="status === 'pending'"
         >
+          <!-- Gesicht statt nur Name: wer eine Meldung bearbeitet, erkennt die
+               Beteiligten schneller am Bild. Ohne hinterlegten Avatar rechnet
+               `UserAvatar` Initialen; ohne Namen bleibt die Id als letzte
+               ehrliche Auskunft stehen. -->
           <template #authorName-cell="{ row }">
-            <span class="text-sm">{{ row.original.authorName || row.original.authorId }}</span>
+            <div class="flex items-center gap-2">
+              <UserAvatar
+                :user="{ name: row.original.authorName, prefs: { avatarUrl: row.original.authorAvatarUrl } }"
+                size="2xs"
+              />
+              <span class="truncate text-sm">{{ row.original.authorName || row.original.authorId }}</span>
+            </div>
           </template>
           <template #recipientName-cell="{ row }">
-            <span class="text-sm">{{ row.original.recipientName || row.original.recipientId }}</span>
+            <div class="flex items-center gap-2">
+              <UserAvatar
+                :user="{ name: row.original.recipientName, prefs: { avatarUrl: row.original.recipientAvatarUrl } }"
+                size="2xs"
+              />
+              <span class="truncate text-sm">{{ row.original.recipientName || row.original.recipientId }}</span>
+            </div>
           </template>
           <template #body-cell="{ row }">
             <!-- DER EINGEFRORENE BELEG, nie der lebende Text. Gerendert wie

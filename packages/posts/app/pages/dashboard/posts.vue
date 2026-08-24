@@ -88,6 +88,16 @@ function typeLabel(post: CommunityPost): string {
   return t(`posts.composer.type${post.type === 'poll' ? 'Poll' : post.type === 'question' ? 'Question' : 'Post'}`)
 }
 
+/**
+ * Die Nutzer-FORM, die `UserAvatar` liest — das Bild steht NICHT an der Zeile
+ * (`community_posts` trägt nur `authorName`), sondern in den Account-prefs,
+ * die die Route je Liste gebündelt auflöst. Ohne Eintrag rechnet `UserAvatar`
+ * Initialen aus dem Namen.
+ */
+function authorOf(post: CommunityPost) {
+  return { name: post.authorName, prefs: { avatarUrl: data.value?.avatarUrls[post.authorId] ?? '' } }
+}
+
 // Autor und Typ sind Kontext — auf schmalen Schirmen fallen sie weg.
 const HIDE_SM = { td: 'hidden sm:table-cell', th: 'hidden sm:table-cell' }
 const HIDE_MD = { td: 'hidden md:table-cell', th: 'hidden md:table-cell' }
@@ -160,7 +170,10 @@ function rowActions(post: CommunityPost): DropdownMenuItem[][] {
                 </span>
               </template>
               <template #authorName-cell="{ row }">
-                <span class="text-sm text-muted">{{ row.original.authorName }}</span>
+                <div class="flex items-center gap-2">
+                  <UserAvatar :user="authorOf(row.original)" size="2xs" />
+                  <span class="truncate text-sm text-muted">{{ row.original.authorName }}</span>
+                </div>
               </template>
               <template #scheduledAt-cell="{ row }">
                 <span class="whitespace-nowrap text-sm text-dimmed">
@@ -189,7 +202,10 @@ function rowActions(post: CommunityPost): DropdownMenuItem[][] {
                 </div>
               </template>
               <template #authorName-cell="{ row }">
-                <span class="text-sm text-muted">{{ row.original.authorName }}</span>
+                <div class="flex items-center gap-2">
+                  <UserAvatar :user="authorOf(row.original)" size="2xs" />
+                  <span class="truncate text-sm text-muted">{{ row.original.authorName }}</span>
+                </div>
               </template>
               <template #type-cell="{ row }">
                 <span class="whitespace-nowrap text-sm text-muted">{{ typeLabel(row.original) }}</span>

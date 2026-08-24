@@ -16,6 +16,13 @@ export interface ModeratedComment {
   content: string
   authorId: string
   authorName: string
+  /**
+   * `prefs.avatarUrl` des Autors; '' = keins hinterlegt ODER Gast (ein
+   * Gast-Kommentar hat kein Konto und deshalb nie ein Bild). Die Zeile trägt
+   * ihn NICHT — die Route löst ihn je Liste gebündelt auf (`resolveAvatars`),
+   * die UI fällt ohne ihn auf Initialen zurück.
+   */
+  authorAvatarUrl: string
   targetId: string
   targetType: string
   status: string

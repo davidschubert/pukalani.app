@@ -58,9 +58,14 @@ function label(conversation: ConversationSummary): string {
       >
         <UChip :show="conversation.unread > 0" color="primary" size="sm" position="top-left">
           <!-- `UserAvatar` nimmt eine Nutzer-FORM, keine Id: das Bild steckt
-               in den Account-prefs, die eine Liste nicht auflöst. Ohne Bild
-               rechnet es Initialen aus dem Namen — genau der Fall hier. -->
-          <UserAvatar :user="{ name: conversation.partnerName }" size="sm" />
+               in den Account-prefs. Die Liste löst sie seit 2026-08-23
+               gebündelt auf (`resolveAvatars` in der Route) und reicht sie als
+               `prefs.avatarUrl` durch; ohne hinterlegtes Bild rechnet
+               `UserAvatar` weiter Initialen aus dem Namen. -->
+          <UserAvatar
+            :user="{ name: conversation.partnerName, prefs: { avatarUrl: conversation.partnerAvatarUrl } }"
+            size="sm"
+          />
         </UChip>
 
         <div class="min-w-0 flex-1">

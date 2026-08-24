@@ -46,10 +46,15 @@ export default defineEventHandler(async (event): Promise<EventModerationResponse
     Query.limit(50),
   ]).catch((error) => { throw toH3Error(error, 'Could not load events') })
 
-  const reports = await openReportsByTarget(event, 'event')
+  // Meldungen und Veranstalter-Bilder sind voneinander unabhängig — parallel.
+  const [reports, avatars] = await Promise.all([
+    openReportsByTarget(event, 'event'),
+    resolveAvatars(event, res.rows.map(row => row.organizerId)),
+  ])
 
   return {
     rows: res.rows,
     reportCounts: Object.fromEntries(reports.counts),
+    avatarUrls: Object.fromEntries(avatars),
   }
 })

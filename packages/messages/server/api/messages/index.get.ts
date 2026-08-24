@@ -42,9 +42,10 @@ export default defineEventHandler(async (event): Promise<{ conversations: Conver
 
   const partnerIds = entries.map(entry => partnerOf(entry.conversation, user.$id)).filter(Boolean)
   // Zwei gebündelte Auflösungen statt zweier je Zeile — eine Liste hat
-  // schnell 50 Gegenüber.
-  const [names, handles] = await Promise.all([
-    resolveUserNames(event, partnerIds),
+  // schnell 50 Gegenüber. Name und Bild kommen aus EINER Abfrage
+  // (`resolveUserCards`); der Handle hat eine andere Quelle (account_handles).
+  const [cards, handles] = await Promise.all([
+    resolveUserCards(event, partnerIds),
     resolveUserHandles(event, partnerIds),
   ])
 
@@ -54,8 +55,9 @@ export default defineEventHandler(async (event): Promise<{ conversations: Conver
       return {
         id: conversation.$id,
         partnerId,
-        partnerName: names.get(partnerId) ?? '',
+        partnerName: cards.get(partnerId)?.name ?? '',
         partnerHandle: handles.get(partnerId) ?? '',
+        partnerAvatarUrl: cards.get(partnerId)?.avatarUrl ?? '',
         lastMessageAt: conversation.lastMessageAt ?? '',
         lastMessagePreview: conversation.lastMessagePreview ?? '',
         unread: counterValue(member.unread),

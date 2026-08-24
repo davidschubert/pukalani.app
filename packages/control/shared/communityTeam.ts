@@ -540,6 +540,12 @@ export interface CommunityMemberView {
   runtimeUserId: string
   email: string
   name: string
+  /**
+   * `prefs.avatarUrl` des Kontos; '' = keins hinterlegt (die UI zeigt dann
+   * Initialen). Wie `name` eine Auskunft der RUNTIME — das Control Plane
+   * kennt die Konten seines Kunden-Projekts nicht und liefert es leer.
+   */
+  avatarUrl: string
   role: CommunityRole
   status: CommunityMemberStatus
   /** Beitrittsdatum = Entstehung der Mitgliedschaft. */

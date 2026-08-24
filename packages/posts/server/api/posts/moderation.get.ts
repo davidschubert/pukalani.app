@@ -29,11 +29,17 @@ export default defineEventHandler(async (event): Promise<PostModerationResponse>
     Query.limit(50),
   ]).catch((error) => { throw toH3Error(error, 'Could not load posts') })
 
-  const reports = await openReportsByTarget(event, 'post')
+  // Meldungen und Autoren-Bilder sind voneinander unabhängig — parallel.
+  // Die Id-Liste stammt aus Zeilen, die der Moderator ohnehin schon sieht.
+  const [reports, avatars] = await Promise.all([
+    openReportsByTarget(event, 'post'),
+    resolveAvatars(event, res.rows.map(row => row.authorId)),
+  ])
 
   return {
     rows: res.rows,
     reportCounts: Object.fromEntries(reports.counts),
+    avatarUrls: Object.fromEntries(avatars),
     // UI zeigt den KI-Assist-Button nur, wenn der Core-KI-Pfad nutzbar ist
     aiAssist: await isAiConfigured(event),
   }

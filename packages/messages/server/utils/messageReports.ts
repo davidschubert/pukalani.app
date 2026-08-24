@@ -149,15 +149,19 @@ async function toReportedView(
 
   const participants = conversation?.participants ?? []
   const recipientId = otherParticipant(participants, message.authorId)
-  const names = await resolveUserNames(event, [message.authorId, recipientId].filter(Boolean))
+  // Name UND Bild aus EINER Abfrage: `resolveUserNames` + `resolveAvatars`
+  // nebeneinander wären zwei identische `users.list` über dieselben zwei Ids.
+  const cards = await resolveUserCards(event, [message.authorId, recipientId].filter(Boolean))
 
   return {
     id: message.$id,
     conversationId: message.conversationId,
     authorId: message.authorId,
-    authorName: names.get(message.authorId) ?? '',
+    authorName: cards.get(message.authorId)?.name ?? '',
+    authorAvatarUrl: cards.get(message.authorId)?.avatarUrl ?? '',
     recipientId,
-    recipientName: names.get(recipientId) ?? '',
+    recipientName: cards.get(recipientId)?.name ?? '',
+    recipientAvatarUrl: cards.get(recipientId)?.avatarUrl ?? '',
     body: moderatorVisibleBody({
       reportedBody: message.reportedBody ?? '',
       reportedAt: message.reportedAt ?? '',

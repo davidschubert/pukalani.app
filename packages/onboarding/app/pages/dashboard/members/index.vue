@@ -537,7 +537,17 @@ function rowActions(member: CommunityMemberView): DropdownMenuItem[][] {
 
           <template #name-cell="{ row }">
             <div class="flex items-center gap-2">
-              <UserAvatar :user="{ name: row.original.name || row.original.email, email: row.original.email }" size="xs" />
+              <!-- `prefs.avatarUrl` ist die Form, die UserAvatar liest (Konto-prefs,
+                   keine profiles-Tabelle) — nicht ein flaches `avatarUrl`. Ohne
+                   hinterlegtes Bild rechnet es Initialen aus Name/E-Mail. -->
+              <UserAvatar
+                :user="{
+                  name: row.original.name || row.original.email,
+                  email: row.original.email,
+                  prefs: { avatarUrl: row.original.avatarUrl },
+                }"
+                size="xs"
+              />
               <div class="min-w-0">
                 <p class="truncate font-medium text-default">
                   {{ row.original.name || row.original.email }}

@@ -43,9 +43,11 @@ export default defineEventHandler(async (event): Promise<ConversationThread> => 
   const conversation = await requireConversation(event, id, user.$id)
   const partnerId = partnerOf(conversation, user.$id)
 
-  const [{ rows, total }, names, handles, blocked] = await Promise.all([
+  const [{ rows, total }, cards, handles, blocked] = await Promise.all([
     listMessages(event, conversation.$id, limit, offset),
-    resolveUserNames(event, [partnerId].filter(Boolean)),
+    // Name und Bild aus EINER Abfrage (`resolveUserCards`); der Handle hat
+    // eine andere Quelle (account_handles).
+    resolveUserCards(event, [partnerId].filter(Boolean)),
     resolveUserHandles(event, [partnerId].filter(Boolean)),
     // Die Sperre wird hier NUR ANGEZEIGT (der Antwort-Bereich verschwindet) —
     // durchgesetzt wird sie beim Senden. Eine Oberfläche, die nur versteckt,
@@ -63,8 +65,9 @@ export default defineEventHandler(async (event): Promise<ConversationThread> => 
   return {
     id: conversation.$id,
     partnerId,
-    partnerName: names.get(partnerId) ?? '',
+    partnerName: cards.get(partnerId)?.name ?? '',
     partnerHandle: handles.get(partnerId) ?? '',
+    partnerAvatarUrl: cards.get(partnerId)?.avatarUrl ?? '',
     blocked,
     total,
     messages: rows.map(row => ({

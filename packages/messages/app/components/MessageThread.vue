@@ -145,7 +145,7 @@ async function removeConversation() {
         :aria-label="t('messages.thread.close')"
         @click="emit('back')"
       />
-      <UserAvatar :user="{ name: thread?.partnerName }" size="sm" />
+      <UserAvatar :user="{ name: thread?.partnerName, prefs: { avatarUrl: thread?.partnerAvatarUrl } }" size="sm" />
       <div class="min-w-0 flex-1">
         <p class="truncate text-sm font-medium">
           {{ partnerLabel }}

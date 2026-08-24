@@ -335,6 +335,13 @@ export interface PostModerationAssist {
 export interface PostModerationResponse {
   rows: CommunityPost[]
   reportCounts: Record<string, number>
+  /**
+   * `prefs.avatarUrl` je Autor-Id — NICHT an der Zeile, weil dort nichts
+   * steht: `community_posts` trägt den Namen denormalisiert, das Bild lebt in
+   * den Account-prefs und wird je Liste gebündelt aufgelöst (`resolveAvatars`).
+   * Fehlt ein Eintrag, zeigt die Tabelle Initialen.
+   */
+  avatarUrls: Record<string, string>
   /** true = KI-Assist nutzbar (pukalani.ai an + NUXT_AI_KEY gesetzt) → UI zeigt den Button */
   aiAssist: boolean
 }

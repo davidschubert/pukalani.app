@@ -173,6 +173,8 @@ export interface ConversationSummary {
   partnerId: string
   partnerName: string
   partnerHandle: string
+  /** `prefs.avatarUrl` des Gegenübers; '' = keins (die UI zeigt Initialen). */
+  partnerAvatarUrl: string
   lastMessageAt: string
   lastMessagePreview: string
   unread: number
@@ -192,6 +194,8 @@ export interface ConversationThread {
   partnerId: string
   partnerName: string
   partnerHandle: string
+  /** `prefs.avatarUrl` des Gegenübers; '' = keins (die UI zeigt Initialen). */
+  partnerAvatarUrl: string
   /** Sperrt eine Sperre diesen Verlauf? (Antworten ist dann zu.) */
   blocked: boolean
   messages: MessageView[]
@@ -204,8 +208,12 @@ export interface ReportedMessageView {
   conversationId: string
   authorId: string
   authorName: string
+  /** `prefs.avatarUrl` des Absenders; '' = keins (die UI zeigt Initialen). */
+  authorAvatarUrl: string
   recipientId: string
   recipientName: string
+  /** `prefs.avatarUrl` des Empfängers; '' = keins. */
+  recipientAvatarUrl: string
   /** Der EINGEFRORENE Text, nie der aktuelle. */
   body: string
   reportedAt: string

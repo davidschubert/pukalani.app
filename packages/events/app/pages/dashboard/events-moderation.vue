@@ -116,6 +116,16 @@ async function redactEvent(row: EventRow) {
 const statusColor = (row: EventRow) =>
   row.status === 'published' ? 'success' : row.status === 'cancelled' ? 'error' : 'warning'
 
+/**
+ * Die Nutzer-FORM, die `UserAvatar` liest — das Bild steht NICHT an der Zeile
+ * (`events` trägt nur `organizerName`), sondern in den Account-prefs, die die
+ * Route je Liste gebündelt auflöst. Ohne Eintrag rechnet `UserAvatar`
+ * Initialen aus dem Namen.
+ */
+function organizerOf(row: EventRow) {
+  return { name: row.organizerName, prefs: { avatarUrl: data.value?.avatarUrls[row.organizerId] ?? '' } }
+}
+
 // Ort und Datum sind Kontext — auf schmalen Schirmen fallen sie weg.
 const HIDE_SM = { td: 'hidden sm:table-cell', th: 'hidden sm:table-cell' }
 const HIDE_MD = { td: 'hidden md:table-cell', th: 'hidden md:table-cell' }
@@ -198,7 +208,10 @@ function rowActions(row: EventRow): DropdownMenuItem[][] {
             </div>
           </template>
           <template #organizerName-cell="{ row }">
-            <span class="text-sm text-muted">{{ row.original.organizerName }}</span>
+            <div class="flex items-center gap-2">
+              <UserAvatar :user="organizerOf(row.original)" size="2xs" />
+              <span class="truncate text-sm text-muted">{{ row.original.organizerName }}</span>
+            </div>
           </template>
           <template #start-cell="{ row }">
             <span class="whitespace-nowrap text-sm text-muted">{{ formatDateTime(row.original.startAt) }}</span>

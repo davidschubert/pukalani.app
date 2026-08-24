@@ -446,16 +446,26 @@ function rowActions(comment: ModeratedComment): DropdownMenuItem[][] {
         </template>
 
         <template #authorName-cell="{ row }">
-          <!-- S5: Link nur, wenn die Nutzer-Detailseite auch erreichbar ist —
-               sonst der reine Name statt eines Links in ein 403. -->
-          <ULink
-            v-if="canManageUsers"
-            :to="localePath(`/dashboard/users/${row.original.authorId}`)"
-            class="font-medium text-default hover:text-primary hover:underline"
-          >
-            {{ row.original.authorName }}
-          </ULink>
-          <span v-else class="font-medium text-default">{{ row.original.authorName }}</span>
+          <div class="flex items-center gap-2">
+            <!-- Das Bild steht nicht an der Zeile, sondern in den Account-prefs
+                 (die Route löst sie je Seite gebündelt auf). Ohne Bild — und
+                 bei jedem GAST, der gar kein Konto hat — rechnet `UserAvatar`
+                 Initialen aus dem Namen. -->
+            <UserAvatar
+              :user="{ name: row.original.authorName, prefs: { avatarUrl: row.original.authorAvatarUrl } }"
+              size="2xs"
+            />
+            <!-- S5: Link nur, wenn die Nutzer-Detailseite auch erreichbar ist —
+                 sonst der reine Name statt eines Links in ein 403. -->
+            <ULink
+              v-if="canManageUsers"
+              :to="localePath(`/dashboard/users/${row.original.authorId}`)"
+              class="truncate font-medium text-default hover:text-primary hover:underline"
+            >
+              {{ row.original.authorName }}
+            </ULink>
+            <span v-else class="truncate font-medium text-default">{{ row.original.authorName }}</span>
+          </div>
         </template>
 
         <template #content-cell="{ row }">

@@ -11,8 +11,9 @@ import { listCommunityInvites, requireCommunityTeamContext } from '../../../../u
  * Routen dieser Naht sind deshalb POST; siehe onboardingService.ts.
  *
  * Die Antwort trägt KEINE Token und keine runtimeProjectId — nur, was die
- * Verwaltungsseite anzeigt. Namen fehlen hier bewusst: nur die RUNTIME kennt die
- * Nutzer ihres Projekts, sie reichert sie an (siehe onboarding/api/community/members).
+ * Verwaltungsseite anzeigt. Namen UND Avatare fehlen hier bewusst: nur die RUNTIME
+ * kennt die Nutzer ihres Projekts, sie reichert beides an (siehe
+ * onboarding/api/community/members).
  */
 const bodySchema = z.object({
   jwt: z.string().min(1).max(4096),
@@ -29,6 +30,7 @@ export default defineEventHandler(async (event): Promise<CommunityTeamResponse> 
     runtimeUserId: row.runtimeUserId,
     email: row.email ?? '',
     name: '',
+    avatarUrl: '',
     role: row.role,
     status: row.status,
     joinedAt: row.$createdAt,

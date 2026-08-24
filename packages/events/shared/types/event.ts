@@ -290,4 +290,11 @@ export interface EventModerationResponse {
   rows: EventRow[]
   /** Anzahl OFFENER Meldungen je Event-Id (targetType 'event') */
   reportCounts: Record<string, number>
+  /**
+   * `prefs.avatarUrl` je Veranstalter-Id — NICHT an der Zeile: `events` trägt
+   * `organizerName` denormalisiert, das Bild lebt in den Account-prefs und
+   * wird je Liste gebündelt aufgelöst (`resolveAvatars`). Fehlt ein Eintrag,
+   * zeigt die Tabelle Initialen.
+   */
+  avatarUrls: Record<string, string>
 }
