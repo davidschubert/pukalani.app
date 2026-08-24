@@ -155,12 +155,13 @@ async function setLeader(entry: TrustLevelMember, leader: boolean) {
               :key="entry.userId"
               class="flex items-center gap-2 rounded-lg border border-default px-3 py-2"
             >
-              <!-- Das Gesicht steht hier, wo bis 2026-08-24 ein Medaillen-Icon
-                   stand: die Überschrift des Abschnitts sagt schon „Ernannt",
-                   und ein N-mal wiederholtes Icon trägt keine Auskunft ÜBER
-                   DIESE Person — der Avatar tut es. Ohne hinterlegtes Bild
-                   rechnet `UserAvatar` Initialen aus dem Namen. -->
+              <!-- Erst das Gesicht, dann die Medaille (Davids Zuschnitt
+                   2026-08-24): der Avatar sagt WER, das Icon sagt WAS — die
+                   Reihenfolge ist die der Frage, die man an diese Liste hat.
+                   Ohne hinterlegtes Bild rechnet `UserAvatar` Initialen aus
+                   dem Namen. -->
               <UserAvatar :user="avatarUserOf(entry)" size="2xs" />
+              <UIcon name="i-ph-medal-fill" class="size-4 text-primary" />
               <span class="text-sm font-medium">{{ displayName(entry) }}</span>
               <UButton
                 color="neutral"
