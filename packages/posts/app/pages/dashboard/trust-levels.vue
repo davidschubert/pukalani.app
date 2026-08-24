@@ -59,6 +59,17 @@ const columns = computed<TableColumn<TrustLevelMember>[]>(() => [
 function displayName(entry: TrustLevelMember): string {
   return entry.name || t('posts.trustLevels.unknownPerson')
 }
+/**
+ * Die Nutzer-FORM, die `UserAvatar` liest. Die Zeilen dieser Seite führen nur
+ * Ids — Name und Bild kommen beide aus dem gebündelten Konto-Lookup der Route
+ * (`resolveUserCards`). `displayName` bleibt der Text daneben: ein nicht
+ * auflösbares Konto heißt dort „unbekannt", der Avatar zeigt dann die
+ * Initialen genau dieses Wortes, und das ist ehrlicher als ein leerer Kreis.
+ */
+function avatarUserOf(entry: TrustLevelMember) {
+  return { name: displayName(entry), prefs: { avatarUrl: entry.avatarUrl } }
+}
+
 
 function levelLabel(level: number): string {
   return t(`posts.trustLevels.level.${level}`)
@@ -144,7 +155,12 @@ async function setLeader(entry: TrustLevelMember, leader: boolean) {
               :key="entry.userId"
               class="flex items-center gap-2 rounded-lg border border-default px-3 py-2"
             >
-              <UIcon name="i-ph-medal-fill" class="size-4 text-primary" />
+              <!-- Das Gesicht steht hier, wo bis 2026-08-24 ein Medaillen-Icon
+                   stand: die Überschrift des Abschnitts sagt schon „Ernannt",
+                   und ein N-mal wiederholtes Icon trägt keine Auskunft ÜBER
+                   DIESE Person — der Avatar tut es. Ohne hinterlegtes Bild
+                   rechnet `UserAvatar` Initialen aus dem Namen. -->
+              <UserAvatar :user="avatarUserOf(entry)" size="2xs" />
               <span class="text-sm font-medium">{{ displayName(entry) }}</span>
               <UButton
                 color="neutral"
@@ -168,8 +184,13 @@ async function setLeader(entry: TrustLevelMember, leader: boolean) {
 
         <UTable :data="filtered" :columns="columns" data-trust-table>
           <template #name-cell="{ row }">
-            <p class="font-medium text-default">{{ displayName(row.original) }}</p>
-            <p class="font-mono text-xs text-dimmed">{{ row.original.userId }}</p>
+            <div class="flex items-center gap-2">
+              <UserAvatar :user="avatarUserOf(row.original)" size="xs" />
+              <div class="min-w-0">
+                <p class="truncate font-medium text-default">{{ displayName(row.original) }}</p>
+                <p class="truncate font-mono text-xs text-dimmed">{{ row.original.userId }}</p>
+              </div>
+            </div>
           </template>
 
           <template #level-cell="{ row }">

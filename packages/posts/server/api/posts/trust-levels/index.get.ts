@@ -57,10 +57,10 @@ export default defineEventHandler(async (event): Promise<TrustLevelMembersRespon
   ])
 
   const shown = memberRows.rows.slice(0, PAGE_LIMIT)
-  // Die Namen für BEIDE Listen in EINEM gebündelten Aufruf (Muster
-  // resolveAvatars/team.get.ts) — ein Lookup je Zeile wäre ein N+1 über bis zu
-  // 200 Konten.
-  const names = await resolveUserNames(event, [
+  // Namen UND Bilder für BEIDE Listen in EINEM gebündelten Aufruf — ein Lookup
+  // je Zeile wäre ein N+1 über bis zu 200 Konten, und `resolveUserNames`
+  // neben `resolveAvatars` wären zwei identische Abfragen über dieselben Ids.
+  const cards = await resolveUserCards(event, [
     ...leaderRows.rows.map(row => row.userId),
     ...shown.map(row => row.userId),
   ])
@@ -69,7 +69,8 @@ export default defineEventHandler(async (event): Promise<TrustLevelMembersRespon
     const leader = row.trustLevelLeader === true
     return {
       userId: row.userId,
-      name: names.get(row.userId) ?? '',
+      name: cards.get(row.userId)?.name ?? '',
+      avatarUrl: cards.get(row.userId)?.avatarUrl ?? '',
       level: effectiveTrustLevel(row.trustLevel, leader),
       // Die erarbeitete Stufe steht daneben, damit der Owner SIEHT, worauf ein
       // Entzug zurückfällt — sonst wäre „Leader entziehen" ein Sprung ins

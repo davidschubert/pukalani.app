@@ -786,6 +786,13 @@ export interface TrustLevelMember {
   userId: string
   /** Anzeigename aus dem Konto — leer, wenn er nicht aufzulösen war. */
   name: string
+  /**
+   * `prefs.avatarUrl` aus dem Konto; '' = keins hinterlegt oder nicht
+   * auflösbar. Kommt aus DERSELBEN Abfrage wie der Name (`resolveUserCards`)
+   * — die Zeilen hier führen nur Ids, deshalb ist beides ein Lookup und nicht
+   * eine denormalisierte Spalte.
+   */
+  avatarUrl: string
   /** Die WIRKENDE Stufe (erarbeitet oder ernannt). */
   level: number
   /** Die erarbeitete Stufe allein — sichtbar, damit ein Entzug erklärbar ist. */
