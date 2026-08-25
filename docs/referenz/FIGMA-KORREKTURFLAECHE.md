@@ -57,8 +57,10 @@ Namensordnung wie das Nuxt-UI-Kit (`--ui-color-primary-*`, `--ui-primary`,
 `--ui-radius`, Tailwind-v4-Architektur). Ein Pukalani-Theme ist in Figma damit
 kein Nachbau, sondern ein Variablen-Modus.
 
-Drei Sammlungen, 33 Variablen, alle mit `scopes` und WEB-Code-Syntax
-(`var(--…)`), damit Dev Mode den Rückweg kennt:
+Drei Sammlungen, 41 Variablen, 7 Textstile — jede Variable mit gesetzten
+`scopes` und WEB-Code-Syntax (`var(--…)`), damit Dev Mode den Rückweg kennt.
+Nachgezählt, nicht geschätzt: keine Variable steht auf `ALL_SCOPES`, keine
+ohne Syntax.
 
 | Sammlung | Modi | Inhalt | Quelle |
 |---|---|---|---|
@@ -94,26 +96,61 @@ Die Figma-MCP-Skills sind **Pflicht** und werden über die MCP-Ressource geladen
 - `figma-create-new-file` — vor jedem `create_new_file`
 - `figma-generate-design` — beim Spiegeln einer Seite
 
-Zwei Fallen, die beim Bau zugeschlagen haben:
+Fünf Fallen, die beim Bau zugeschlagen haben — alle live erwischt:
 
+- **Deckkraft geht beim ersten Zuweisen verloren.** `node.fills = [{...paint,
+  opacity: 0.13}]` landet als `opacity: 1` in der Datei, obwohl die
+  Variablen-Bindung sitzt. Es braucht zwei Schritte: erst `node.fills =
+  [paint]`, dann `node.fills = node.fills.map(f => ({...f, opacity}))`. Und:
+  eine nachträgliche Korrektur an der HAUPTKOMPONENTE zieht bei bestehenden
+  **Instanzen nicht nach** — die brauchen dieselbe Behandlung einzeln. Das war
+  der teuerste Fehler dieses Baus: dunkle Blöcke statt getönter Flächen, an
+  elf Komponenten und zwei Sektionen gleichzeitig.
+- **Verlaufs-Stopps lassen sich an Variablen binden** (`boundVariables.color`
+  je Stop) — nachgeprüft, nicht angenommen. Nur deshalb dreht die
+  Licht-Dramaturgie im Dunkelmodus mit, statt hell einzufrieren.
 - `figma.createAutoLayout()` erzeugt Frames mit **weißer Standardfüllung**. Im
   hellen Modus unsichtbar, im dunklen liegt hinter jeder Zeile ein weißer
   Balken. Container ohne eigene Farbe brauchen `fills = []`.
+- Das `textCase`-Enum heißt `ORIGINAL`, nicht `NONE`.
 - Der Geist-Stil heißt `SemiBold`, nicht `Semi Bold` (das ist Inters
   Schreibweise). Stilnamen immer über `listAvailableFontsAsync()` prüfen statt
-  aus dem Gedächtnis zu schreiben.
+  aus dem Gedächtnis zu schreiben. Text in Chips und Pillen braucht
+  `textAutoResize = "WIDTH_AND_HEIGHT"`, sonst bricht es um.
 
 Der Zustandsspeicher (IDs aller Sammlungen, Modi, Seiten, Variablen) liegt im
 Sitzungs-Scratchpad als `figma-state.json` — bei einer neuen Sitzung wird er
 aus der Datei rekonstruiert, nicht geraten.
 
+## Stand
+
+Die **Startseite ist vollständig gespiegelt**: 1440 × 11244 px, Kopfzeile, alle
+14 Sektionen in der Reihenfolge des Codes, Fußzeile. Echte Texte aus den
+i18n-Dateien, echte Maße aus dem `ui:`-Vertrag, die Licht-Dramaturgie
+(`tone-cloud → mist → sky → dawn → noon → ink`) als variablengebundene Flächen
+und Verläufe. Hell und Dunkel sind echte Variablen-Modi und beide am Rahmen
+„Startseite — 1440" nachgeprüft — der Akzent springt dabei wie im CSS von
+`puka-800` auf `puka-400`.
+
+Zehn Bausteine auf der Seite „Bausteine" (`UButton`, `UBadge`, `UPageCard`,
+`UPageFeature`, `UAlert`, `UAccordionItem`, `UTabs`, `UPricingPlan`,
+`USeparator`, `Icon`) — bewusst genau nach den Nuxt-UI-Komponenten benannt,
+damit sie sich später per `swapComponent` gegen die echten tauschen lassen.
+
+Drei Grenzen stehen auch auf dem Deckblatt der Datei:
+
+1. **Die Icons sind Platzhalter-Kreise.** Jede Instanz trägt ihren echten
+   Phosphor-Schlüssel im Ebenennamen (`i-ph-…`).
+2. **`clamp()` gibt es in Figma nicht** — alle Werte zeigen ihr Desktop-Maximum.
+3. **Geist hat keinen Italic-Schnitt** — die zwei Refrain-Zeilen stehen
+   aufrecht, im Browser sind sie kursiv.
+
 ## Offen
 
 **Das Nuxt-UI-v4-Kit ist in Figma noch nicht als Bibliothek verfügbar** —
 `get_libraries` zeigt nur Material 3, Simple Design System und die Apple-Kits.
-Das Kit ist eine Community-Datei und muss **von David** dupliziert und als
-Team-Bibliothek veröffentlicht werden; über MCP geht das nicht. Bis dahin steht
-das Fundament (Variablen, Farbtafel, Seitengerüst), aber die Startseite kann
-nicht mit echten Komponenten-Instanzen gespiegelt werden — und ohne die wäre
-der Spiegel ein flacher Baum aus Einweg-Frames, der beim Nachziehen des Kits
-komplett neu gebaut werden müsste.
+Das Kit ist eine Community-Datei und muss **von David** in ein Team dupliziert
+und als Bibliothek veröffentlicht werden; über MCP geht das nicht. Der Spiegel
+ist dadurch nicht blockiert (die Bausteine sind lokal gebaut), aber mit dem Kit
+kämen die echten Lucide-Icons und die Möglichkeit, Code Connect zwischen einer
+Figma-Komponente und unserer `.vue`-Datei zu setzen.
