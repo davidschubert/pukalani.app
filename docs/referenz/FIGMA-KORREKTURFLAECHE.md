@@ -96,7 +96,7 @@ Die Figma-MCP-Skills sind **Pflicht** und werden über die MCP-Ressource geladen
 - `figma-create-new-file` — vor jedem `create_new_file`
 - `figma-generate-design` — beim Spiegeln einer Seite
 
-Sieben Fallen, die beim Bau zugeschlagen haben — alle live erwischt:
+Acht Fallen, die beim Bau zugeschlagen haben — alle live erwischt:
 
 - **Deckkraft geht beim ersten Zuweisen verloren.** `node.fills = [{...paint,
   opacity: 0.13}]` landet als `opacity: 1` in der Datei, obwohl die
@@ -117,6 +117,15 @@ Sieben Fallen, die beim Bau zugeschlagen haben — alle live erwischt:
   Kreisfläche des Platzhalters als Instanz-Override hängen — aus jedem Icon
   wurde ein farbiges Quadrat. Nach einem Swap gehören geerbte `fills` auf der
   Instanz und ihren Wrapper-Frames geleert; Farbe trägt nur der `VECTOR`.
+- **`createNodeFromSvg` liefert Rahmen mit `constraints: MIN/MIN`.** Verkleinert
+  man die Instanz auf 17 px, bleibt der Inhalt bei 24 px stehen und läuft über.
+  Der innere Rahmen jeder Icon-Komponente braucht
+  `constraints = { horizontal: "SCALE", vertical: "SCALE" }` — dann zieht der
+  Vektor beim Skalieren mit. In Instanzen lässt sich `constraints` **nicht**
+  überschreiben (`This property cannot be overridden in an instance`), die
+  Bedingung gehört also an die Komponente; bestehende Instanzen rechnen danach
+  von selbst neu. Von Hand geht es auch über das Skalier-Werkzeug (`K`) statt
+  des Auswahl-Werkzeugs — das skaliert den Inhalt unabhängig von den Bedingungen.
 - Im `use_figma`-Kontext gibt es **kein `fetch`** — externe Daten (hier die
   SVG-Pfade) müssen im Skript mitgereicht werden.
 - Das `textCase`-Enum heißt `ORIGINAL`, nicht `NONE`.
