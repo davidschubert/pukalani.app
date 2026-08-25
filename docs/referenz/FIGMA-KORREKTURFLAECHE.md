@@ -96,7 +96,7 @@ Die Figma-MCP-Skills sind **Pflicht** und werden über die MCP-Ressource geladen
 - `figma-create-new-file` — vor jedem `create_new_file`
 - `figma-generate-design` — beim Spiegeln einer Seite
 
-Fünf Fallen, die beim Bau zugeschlagen haben — alle live erwischt:
+Sieben Fallen, die beim Bau zugeschlagen haben — alle live erwischt:
 
 - **Deckkraft geht beim ersten Zuweisen verloren.** `node.fills = [{...paint,
   opacity: 0.13}]` landet als `opacity: 1` in der Datei, obwohl die
@@ -112,6 +112,13 @@ Fünf Fallen, die beim Bau zugeschlagen haben — alle live erwischt:
 - `figma.createAutoLayout()` erzeugt Frames mit **weißer Standardfüllung**. Im
   hellen Modus unsichtbar, im dunklen liegt hinter jeder Zeile ein weißer
   Balken. Container ohne eigene Farbe brauchen `fills = []`.
+- **`swapComponent` vererbt die Überschreibungen der ALTEN Instanz.** Beim
+  Tausch der Icon-Platzhalter gegen die echten Vektoren blieb die getönte
+  Kreisfläche des Platzhalters als Instanz-Override hängen — aus jedem Icon
+  wurde ein farbiges Quadrat. Nach einem Swap gehören geerbte `fills` auf der
+  Instanz und ihren Wrapper-Frames geleert; Farbe trägt nur der `VECTOR`.
+- Im `use_figma`-Kontext gibt es **kein `fetch`** — externe Daten (hier die
+  SVG-Pfade) müssen im Skript mitgereicht werden.
 - Das `textCase`-Enum heißt `ORIGINAL`, nicht `NONE`.
 - Der Geist-Stil heißt `SemiBold`, nicht `Semi Bold` (das ist Inters
   Schreibweise). Stilnamen immer über `listAvailableFontsAsync()` prüfen statt
@@ -132,17 +139,23 @@ und Verläufe. Hell und Dunkel sind echte Variablen-Modi und beide am Rahmen
 „Startseite — 1440" nachgeprüft — der Akzent springt dabei wie im CSS von
 `puka-800` auf `puka-400`.
 
-Zehn Bausteine auf der Seite „Bausteine" (`UButton`, `UBadge`, `UPageCard`,
+Neun Bausteine auf der Seite „Bausteine" (`UButton`, `UBadge`, `UPageCard`,
 `UPageFeature`, `UAlert`, `UAccordionItem`, `UTabs`, `UPricingPlan`,
-`USeparator`, `Icon`) — bewusst genau nach den Nuxt-UI-Komponenten benannt,
-damit sie sich später per `swapComponent` gegen die echten tauschen lassen.
+`USeparator`) — bewusst genau nach den Nuxt-UI-Komponenten benannt, damit sie
+sich später per `swapComponent` gegen die echten tauschen lassen.
 
-Drei Grenzen stehen auch auf dem Deckblatt der Datei:
+**Die Icons sind echt.** 25 Icon-Komponenten mit den Original-Vektoren, geholt
+über die Iconify-API (`api.iconify.design/ph.json?icons=…` bzw. `lucide.json`)
+— also derselbe Satz, den der Code über `@iconify` auflöst. Farbe an
+`marke/akzent-schrift` gebunden, mit den Ausnahmen aus dem Markup
+(`cloud-fog` + `arrow-down` gedämpft, `sun` auf `marke/primary`, Chevrons
+gedämpft). Der Weg über die API ist reproduzierbar und braucht kein Plugin;
+für neue Icons von Hand tut es das Iconify-Plugin in Figma.
 
-1. **Die Icons sind Platzhalter-Kreise.** Jede Instanz trägt ihren echten
-   Phosphor-Schlüssel im Ebenennamen (`i-ph-…`).
-2. **`clamp()` gibt es in Figma nicht** — alle Werte zeigen ihr Desktop-Maximum.
-3. **Geist hat keinen Italic-Schnitt** — die zwei Refrain-Zeilen stehen
+Zwei Grenzen stehen auch auf dem Deckblatt der Datei:
+
+1. **`clamp()` gibt es in Figma nicht** — alle Werte zeigen ihr Desktop-Maximum.
+2. **Geist hat keinen Italic-Schnitt** — die zwei Refrain-Zeilen stehen
    aufrecht, im Browser sind sie kursiv.
 
 ## Offen
