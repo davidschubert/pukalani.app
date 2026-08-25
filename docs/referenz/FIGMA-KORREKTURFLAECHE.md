@@ -96,16 +96,25 @@ Die Figma-MCP-Skills sind **Pflicht** und werden über die MCP-Ressource geladen
 - `figma-create-new-file` — vor jedem `create_new_file`
 - `figma-generate-design` — beim Spiegeln einer Seite
 
-Acht Fallen, die beim Bau zugeschlagen haben — alle live erwischt:
+Elf Fallen, die beim Bau zugeschlagen haben — alle live erwischt:
 
-- **Deckkraft geht beim ersten Zuweisen verloren.** `node.fills = [{...paint,
-  opacity: 0.13}]` landet als `opacity: 1` in der Datei, obwohl die
-  Variablen-Bindung sitzt. Es braucht zwei Schritte: erst `node.fills =
-  [paint]`, dann `node.fills = node.fills.map(f => ({...f, opacity}))`. Und:
-  eine nachträgliche Korrektur an der HAUPTKOMPONENTE zieht bei bestehenden
-  **Instanzen nicht nach** — die brauchen dieselbe Behandlung einzeln. Das war
-  der teuerste Fehler dieses Baus: dunkle Blöcke statt getönter Flächen, an
-  elf Komponenten und zwei Sektionen gleichzeitig.
+- **Deckkraft hält nur, wenn sie in einem SPÄTEREN `use_figma`-Aufruf gesetzt
+  wird als dem, der den Knoten erzeugt hat.** Zwei Schritte im selben Skript
+  reichen NICHT — `node.fills = [paint]` gefolgt von
+  `node.fills = node.fills.map(f => ({...f, opacity}))` landet trotzdem als
+  `opacity: 1`, obwohl die Variablen-Bindung sitzt. Eine Korrektur an der
+  HAUPTKOMPONENTE zieht bei bestehenden **Instanzen** ebenfalls nicht nach.
+  Das war mit Abstand der teuerste Fehler dieses Baus: **62 Abweichungen über
+  die ganze Seite** — jede Karte, jeder Hinweis, die Umschalter, die
+  Preis-Karten, die Vergleichstabelle, das Produkt-Mock. Auf hellem Grund fiel
+  es nicht auf (Papier bei 100 % statt 65 % ist nur etwas weißer), auf den
+  akzentfarbenen Hinweiskästen dagegen sofort — die standen als massive dunkle
+  Blöcke da. **Konsequenz: nach jedem Bau eine eigene Deckkraft-Runde fahren
+  und gegen eine Soll-Tabelle nachmessen, nicht ansehen.**
+- **Figma bricht innerhalb eines Skripts nicht neu um.** Wer eine Größe ändert
+  und im selben Aufruf misst, liest den alten Stand — beim Ausmessen der
+  natürlichen Kartenhöhen meldeten alle vier Karten denselben Wert. Messen
+  gehört in einen eigenen Aufruf nach dem, der die Größe geändert hat.
 - **Verlaufs-Stopps lassen sich an Variablen binden** (`boundVariables.color`
   je Stop) — nachgeprüft, nicht angenommen. Nur deshalb dreht die
   Licht-Dramaturgie im Dunkelmodus mit, statt hell einzufrieren.
@@ -128,6 +137,20 @@ Acht Fallen, die beim Bau zugeschlagen haben — alle live erwischt:
   des Auswahl-Werkzeugs — das skaliert den Inhalt unabhängig von den Bedingungen.
 - Im `use_figma`-Kontext gibt es **kein `fetch`** — externe Daten (hier die
   SVG-Pfade) müssen im Skript mitgereicht werden.
+- **Gleiche Kartenhöhe ist eine Falle mit doppeltem Boden.**
+  `counterAxisAlignItems` kennt kein `STRETCH` (nur `MIN`/`MAX`/`CENTER`/
+  `BASELINE`) — gleiche Höhe kommt über `layoutSizingVertical = "FILL"` an den
+  KINDERN. Stehen dann aber ALLE Kinder auf `FILL`, hat der Container nichts
+  mehr, woran er sich messen kann, und wird zu klein: Inhalt läuft unter die
+  Polsterung. Verlässlich ist nur, das Defizit auszurechnen
+  (`letztesKind.y + height` gegen `container.height − paddingBottom`) und die
+  Reihe genau darum zu erhöhen.
+- **`layoutGrow` auf einem TEXT schiebt nicht, es quetscht.** Der Versuch, den
+  CTA einer Karte damit nach unten zu drücken, zwang den Beschreibungstext in
+  die Resthöhe — er überlappte die Zeile darüber. Richtig ist ein leerer
+  Abstandshalter-Frame mit `layoutGrow = 1` vor dem Knopf. In einer INSTANZ
+  lässt sich kein Kind einfügen; der Abstandshalter gehört dann in die
+  Hauptkomponente.
 - Das `textCase`-Enum heißt `ORIGINAL`, nicht `NONE`.
 - Der Geist-Stil heißt `SemiBold`, nicht `Semi Bold` (das ist Inters
   Schreibweise). Stilnamen immer über `listAvailableFontsAsync()` prüfen statt
