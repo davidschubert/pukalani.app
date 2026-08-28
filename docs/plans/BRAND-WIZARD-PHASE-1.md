@@ -44,7 +44,17 @@ gewinnt" macht sie ausdrücklich zu Richtwerten, das Produktziel der Beta
 ist „Median aktive Zeit MESSEN". P0 liefert dafür die
 **Interaktionsbilanz je Pfad**: minimale/erwartete/maximale Antwortzüge
 für Gründer/Rebrand × mit/ohne Naming × Solo/Team × mit/ohne
-Untermarken × normale/vertiefte Runde) und am Ende einer
+Untermarken × normale/vertiefte Runde). **VOLLSTÄNDIGKEITS-VERTRAG
+(David, 2026-08-28): Am Ende sind die 287 Fragen des Original-Katalogs
+KONTEXTBEZOGEN BEANTWORTET — nicht nur die ~40 getippten.** Die ~40 sind
+die Tipparbeit, nicht der Inhalt: Was der Mensch nicht selbst
+beantwortet, leitet George aus dem Kontext ab und legt es als Entwurf
+zur Bestätigung vor. Nachprüfbar über die **Abdeckungs-Matrix** (P0):
+jede der 287 Original-Fragen erhält genau ein Schicksal — menschlich
+beantwortet · KI-abgeleitet · als Duplikat verschmolzen · bewusst
+gestrichen MIT dokumentiertem Grund (z. B. Projekt-Logistik aus
+Formular 01). Kein Slot des Original-Katalogs geht stillschweigend
+verloren. Und am Ende einer
 **live gerenderten Vorschau der bezahlten Ableitung** (Themes-Engine) plus
 Erstgespräch-CTA.
 
@@ -1157,7 +1167,7 @@ entscheiden später über die Phase-2-Bezahlschranke — kein Nice-to-have.
 
 | # | Paket | Aufwand | Braucht David? |
 | --- | --- | --- | --- |
-| P0 | **Inhalts-Spez:** Slot-Katalog je Schicht, **Interaktionsbilanz je Pfad** (min/erwartete/max Antwortzüge über alle Weichen — prüft die 40/45-Hypothese VOR dem Bau, §1), alle Fragen beider Pfade (en+de, geprüft gegen §3c), Lehrblöcke übernommen/übersetzt, George-Prompts + DREI Persönlichkeits-Beispielantworten (§9b), Paarvergleichs-Paare + Visual-Spez für D/B2, **Persona-Namens-Prüfung („George")**, BIxD-Abgleich | M | **Ja:** Provokations-/Rebrand-Fragen gegenlesen, Persona-Name absegnen |
+| P0 | **Inhalts-Spez:** Slot-Katalog je Schicht, **Abdeckungs-Matrix 287 → Slot/Ableitung/Duplikat/gestrichen-mit-Grund** (Vollständigkeits-Vertrag §1), **Interaktionsbilanz je Pfad** (min/erwartete/max Antwortzüge über alle Weichen — prüft die 40/45-Hypothese VOR dem Bau, §1), alle Fragen beider Pfade (en+de, geprüft gegen §3c), Lehrblöcke übernommen/übersetzt, George-Prompts + DREI Persönlichkeits-Beispielantworten (§9b), Paarvergleichs-Paare + Visual-Spez für D/B2, **Persona-Namens-Prüfung („George")**, BIxD-Abgleich | M | **Ja:** Provokations-/Rebrand-Fragen gegenlesen, Persona-Name absegnen |
 | P0b | **UX-Prototyp** (§3d): klickbarer HTML-Ablauf, Zustandsmatrix, Wireframes, Usability-Test (~5 Beta-Personen) | M | **Ja:** verfeinern + abnehmen |
 | P1a | **Schema-Anhang + Kernverträge:** Tabellen-Spezifikation (Spalten/Indizes/Retention/Löschkaskade) zur Durchsicht, `registerSignupAdmissionProvider` (Core, eigener Commit), `requireBrandAccess`-Gate, `assertBrandOwnerAccess`, **System-Migrationen für `brandAdmissionMode` (Default closed) + `brandAiEnabled` (Default false) inkl. Paritäts-SOLL**, `providerRouting` in aiComplete (Core, eigener Commit) | M–L | **Ja:** Schema-Anhang absegnen |
 | P1b | Layer, Migrationen, API-Grundgerüst, Slot-Registry (§3e; startet erst nach ABNAHME von P0b UND P1a-Schema-Anhang) | M–L | Nein |
