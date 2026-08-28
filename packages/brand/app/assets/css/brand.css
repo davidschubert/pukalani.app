@@ -1,0 +1,116 @@
+/* Brand-Wizard Design-Tokens (UI-Vertrag §3d): editorial-warm, dünne
+   Linien, EIN Akzent. Gescopet auf .bw-root — färbt nie die Host-App. */
+.bw-root {
+  --bw-paper: #faf9f7;
+  --bw-surface: #ffffff;
+  --bw-ink: #1f2a2e;
+  --bw-ink-soft: #45555b;
+  --bw-muted: #7a8a8f;
+  --bw-line: #e4e1db;
+  --bw-line-strong: #c9c4bb;
+  --bw-accent: #0e6b64;
+  --bw-accent-soft: #e3efed;
+  --bw-draft: #8a6a2f;
+  --bw-draft-soft: #f6efe2;
+  --bw-stale: #8a4a3f;
+  --bw-radius: 6px;
+
+  background: var(--bw-paper);
+  color: var(--bw-ink);
+  font-variant-numeric: tabular-nums;
+}
+.dark .bw-root {
+  --bw-paper: #14191b;
+  --bw-surface: #1b2225;
+  --bw-ink: #e8ebe8;
+  --bw-ink-soft: #c0c9c7;
+  --bw-muted: #8b9a97;
+  --bw-line: #2b3438;
+  --bw-line-strong: #435055;
+  --bw-accent: #4fb3a9;
+  --bw-accent-soft: #16302e;
+  --bw-draft: #d3a95e;
+  --bw-draft-soft: #2e2617;
+  --bw-stale: #d08a7c;
+}
+
+/* Werkstatt-Layout: drei Zonen (>=1280), Bühne + George (768–1279),
+   Vollbild-Modi (<768). Scroll-Verantwortung: Bühne + Chat, nie außen. */
+.bw-shell { display: flex; flex-direction: column; height: 100dvh; }
+.bw-topbar {
+  display: flex; align-items: center; gap: 1rem;
+  padding: 0.6rem 1.1rem; border-bottom: 1px solid var(--bw-line);
+  background: var(--bw-surface); flex: none;
+}
+.bw-zones { display: grid; grid-template-columns: 260px minmax(0,1fr) 400px; flex: 1; min-height: 0; }
+.bw-rail { border-right: 1px solid var(--bw-line); overflow-y: auto; padding: 1.1rem 0.9rem; }
+.bw-stage { overflow-y: auto; padding: 2.2rem clamp(1.2rem, 4vw, 3.5rem) 4rem; }
+.bw-stage-inner { max-width: 46rem; margin: 0 auto; }
+.bw-george { border-left: 1px solid var(--bw-line); display: flex; flex-direction: column; min-height: 0; background: var(--bw-surface); }
+@media (max-width: 1279px) { .bw-zones { grid-template-columns: 56px minmax(0,1fr) 380px; } .bw-rail-full { display: none; } }
+@media (min-width: 1280px) { .bw-rail-mini { display: none; } }
+@media (max-width: 767px) {
+  .bw-zones { grid-template-columns: minmax(0,1fr); }
+  .bw-rail { display: none; }
+  .bw-george { border-left: 0; }
+  .bw-mode-stage .bw-george { display: none; }
+  .bw-mode-george .bw-stage { display: none; }
+}
+@media (min-width: 768px) { .bw-modeswitch { display: none; } }
+
+/* Typo: das Dokument liest sich editorial */
+.bw-stage h1, .bw-stage h2 { font-weight: 600; letter-spacing: -0.01em; }
+.bw-chapter { border-top: 1px solid var(--bw-line); padding: 1.6rem 0 1.9rem; }
+.bw-chapter:first-child { border-top: 0; }
+
+/* Zustands-Kennzeichen (nie nur Farbe: Icon + Text) */
+.bw-state {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  font-size: 0.72rem; letter-spacing: 0.04em; text-transform: uppercase;
+  padding: 0.15rem 0.5rem; border-radius: 999px; border: 1px solid var(--bw-line-strong);
+  color: var(--bw-muted);
+}
+.bw-state--draft { color: var(--bw-draft); border-color: var(--bw-draft); background: var(--bw-draft-soft); }
+.bw-state--confirmed { color: var(--bw-accent); border-color: var(--bw-accent); background: var(--bw-accent-soft); }
+.bw-state--stale { color: var(--bw-stale); border-color: var(--bw-stale); }
+.bw-draft-frame { border: 1px dashed var(--bw-draft); border-radius: var(--bw-radius); padding: 0.9rem 1rem; background: var(--bw-surface); }
+
+/* George-Chat: ruhig, keine dicken Blasen */
+.bw-msg { padding: 0.15rem 0; display: flex; gap: 0.65rem; }
+.bw-msg-mark {
+  flex: none; width: 1.65rem; height: 1.65rem; border-radius: 999px;
+  border: 1.5px solid var(--bw-accent); color: var(--bw-accent);
+  display: grid; place-items: center; font-size: 0.8rem; font-weight: 600;
+}
+.bw-msg--user { justify-content: flex-end; }
+.bw-msg--user .bw-msg-body {
+  background: var(--bw-accent-soft); border-radius: var(--bw-radius);
+  padding: 0.45rem 0.7rem; max-width: 85%;
+}
+.bw-msg-body { font-size: 0.925rem; line-height: 1.55; color: var(--bw-ink); }
+.bw-msg-help { font-size: 0.8rem; color: var(--bw-muted); margin-top: 0.15rem; }
+
+/* Chips: Empfehlung-zuerst, Tastatur-Fokus sichtbar */
+.bw-chip {
+  border: 1px solid var(--bw-line-strong); border-radius: 999px;
+  padding: 0.4rem 0.85rem; font-size: 0.875rem; background: var(--bw-surface);
+  cursor: pointer; transition: border-color 120ms, background 120ms;
+  color: var(--bw-ink);
+}
+.bw-chip:hover { border-color: var(--bw-accent); }
+.bw-chip:focus-visible { outline: 2px solid var(--bw-accent); outline-offset: 2px; }
+.bw-chip--selected { border-color: var(--bw-accent); background: var(--bw-accent-soft); color: var(--bw-accent); }
+.bw-chip--ghost { border-style: dashed; color: var(--bw-muted); }
+
+/* Paarvergleich */
+.bw-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+@media (max-width: 640px) { .bw-pair { grid-template-columns: 1fr; } }
+.bw-pair-card {
+  border: 1px solid var(--bw-line-strong); border-radius: var(--bw-radius);
+  padding: 1.3rem 1.2rem; background: var(--bw-surface); cursor: pointer; text-align: left;
+  transition: border-color 120ms, transform 120ms;
+}
+.bw-pair-card:hover { border-color: var(--bw-accent); transform: translateY(-1px); }
+.bw-pair-card:focus-visible { outline: 2px solid var(--bw-accent); outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) { .bw-root * { transition: none !important; animation: none !important; } }

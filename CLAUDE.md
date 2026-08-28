@@ -1183,5 +1183,9 @@ niemand weiß, ob ein Häkchen noch Arbeit bedeutet.
 - `docs/content/` = interne Doku-SITE (admin.pukalani.app/docs),
   `apps/help/content/` = Kunden-Hilfe (help.pukalani.app) — beides Produkt,
   kein Planungsdokument.
+- **Arbeitsablauf je Vorhaben** (Davids Workflow 2026-08-28): Strategie
+  (inkl. Analyse/Konkurrenz) → Konzeption → Prototyp (echte Nuxt-UI-
+  Komponenten) → Freigabe → Umsetzung → Audit → Testing → finale Freigabe
+  → Deployment → Changelog/Docs — Details: docs/referenz/WORKFLOW.md.
 - Regelwerk für Agenten: NUR CLAUDE.md. `AGENTS.md` ist ein Zeiger darauf —
   Inhalt dort NIE duplizieren (die alte Kopie war 144 Zeilen veraltet).

@@ -270,6 +270,11 @@ Nachweise und Gelerntes pro Ausbaustufe: [docs/OPEN-ITEMS-COMPLETE.md](docs/OPEN
 
 ## Konventionen
 
+**Arbeitsablauf je Vorhaben:** Strategie → Konzeption → Prototyp →
+Freigabe → Umsetzung → Audit → Testing → Deployment → Changelog/Docs —
+im Detail in [docs/referenz/WORKFLOW.md](docs/referenz/WORKFLOW.md).
+
+
 - [Conventional Commits](https://www.conventionalcommits.org) · Breaking Changes im Core mit `BREAKING CHANGE(core):` Prefix und eigenem Commit
 - Branches: `main` / `dev` / `feature/*` / `fix/*`
 - Im Layer nur relative Pfade (kein `~/` oder `@/`) · Domain-Types in `shared/types/`
