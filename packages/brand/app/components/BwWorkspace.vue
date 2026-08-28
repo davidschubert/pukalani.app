@@ -15,7 +15,7 @@ const userMenu = computed(() => [[
 
 <template>
   <div class="bw-root bw-shell" :class="mode === 'stage' ? 'bw-mode-stage' : 'bw-mode-george'">
-    <header class="bw-topbar grid grid-cols-[1fr_auto_1fr] items-center">
+    <header class="bw-topbar">
       <div class="flex items-center">
         <UButton to="/" color="neutral" variant="ghost" size="sm" icon="i-ph-squares-four" label="Meine Brands" />
       </div>
