@@ -1,6 +1,6 @@
 # Offene Punkte
 
-**Stand: 4 offen · 2 geparkt/wartend · 13 bewusst zurückgestellt** (Zahlen bei JEDEM Umzug nach COMPLETE mitführen)
+**Stand: 5 offen · 2 geparkt/wartend · 13 bewusst zurückgestellt** (Zahlen bei JEDEM Umzug nach COMPLETE mitführen)
 
 Stand: **2026-08-19**. Hier steht **nur, was noch offen ist** — in der
 Reihenfolge, in der es abgearbeitet wird. Alles Erledigte (mit Begründung,
@@ -29,6 +29,7 @@ demo-Ausbau, comments in den Pool. Entscheidungen: DECISION-LOG 2026-08-11.
 | 2 · A1 | **Echte Rechtstexte** für Impressum, Datenschutz und AGB. **pukalani.studio ist fertig** (2026-08-12): Impressum + Datenschutz in de/en veröffentlicht, inkl. **ladungsfähiger Anschrift**; die Texte nennen nur Belegbares, Erfundenes wurde weggelassen. Dort noch offen und beim Anwalt: die Prüfung zu **Art. 27 DSGVO** (Vertreter in der Union — Sitz ausserhalb der EU bei DACH-Ansprache) samt Drittland-Grundlage, dazu die Angabe zur Verbraucherstreitbeilegung. Für **pukalani.app** stehen die Texte weiter aus. **Direkt danach `pukalani.auth.termsUrl` in `apps/platform` setzen** — die AGB-Checkbox fehlt heute genau dort, wo Kunden sich registrieren (Trichter M9). Schaltet Punkt 3 frei. | Hoch | S — Anwalt lesen lassen | Ja: nur David (ggf. Anwalt) | [Agenda: Studio](#a1-anwalt) · [Agenda: Plattform](#a1-plattform) |
 | 3 · A2 | **Stripe auf echtes Geld umstellen — über die F55-Seite.** Vorstufe A2a komplett grün, F55 selbst erledigt (beide 2026-08-08). Bei David bleiben: Bank-Aktivierung, Steuer-Registrierung, Live-Key ROTIERT eintragen (der erste ist teil-geleakt und rotiert), Portal-Konfiguration; alles andere klickt die F55-Seite. Braucht Punkt 2 (A1). | Hoch | S | Ja: Bank, Konto, Portal | [STRIPE-GO-LIVE-RUNBOOK.md](runbooks/STRIPE-GO-LIVE-RUNBOOK.md) |
 | 4 · W2–W4 | **Studio-Funnel ausbauen.** Wizard + Messung sind seit 2026-08-22 LIVE (s. COMPLETE). Offen: (a) die 5 `studio_*`-Goals in der Plausible-UI anlegen (CE hat keine API — nur David), (b) W3 Startseiten-Ausbau (Problem-Spiegel, Vergleichstabelle, Selbst-Selektion), (c) W4 echte Kennzahlen in die Cases (Zahlen von David). | Mittel | S–M je Paket | Ja: Goals klicken, Schmerz-Texte gegenlesen, Case-Zahlen | [STUDIO-ERSTGESPRAECH-FUNNEL.md](plans/STUDIO-ERSTGESPRAECH-FUNNEL.md) |
+| 5 · BW1 | **Brand-Wizard Phase 1 „Fundament".** KI-Markenberater „George" (Layer `brand`) auf pukalani.studio (Projekt `portfolio`), später branding.supply (Domain registriert 2026-08-27): Fundament frei (Beta per E-Mail-Code), Ableitung bezahlt. Produktentscheidungen komplett, zwei Code-Audits eingearbeitet (§9c/§9d); Launch-Gates: A1-AVV, P0-Interaktionsbilanz, P1a-Schema-Anhang. | Mittel | XL (P0–P3 mehrere Wo.) | Ja: Freigeben, P0 + Schema-Anhang gegenlesen | [BRAND-WIZARD-PHASE-1.md](plans/BRAND-WIZARD-PHASE-1.md) |
 
 ## ⏸️ Geparkt / wartet — in Arbeitsreihenfolge
 
