@@ -15,12 +15,18 @@ defineProps<{ layers: BwRailLayer[] }>()
   <nav aria-label="Fortschritt">
     <div class="bw-rail-full space-y-5">
       <div v-for="layer in layers" :key="layer.id">
-        <div class="flex items-center gap-2 text-xs uppercase tracking-wider" :style="`color: var(--bw-${layer.locked ? 'muted' : 'ink-soft'})`">
-          <UIcon v-if="layer.locked" name="i-ph-lock-simple" />
-          {{ layer.label }}
+        <div v-if="layer.locked" class="grid grid-cols-[1.4rem_1fr] items-start" style="color: var(--bw-muted)">
+          <UIcon name="i-ph-lock-simple" class="mt-0.5" />
+          <div>
+            <div class="text-xs uppercase tracking-wider">{{ layer.label }}</div>
+            <p class="mt-0.5 text-xs">{{ layer.lockedNote }}</p>
+          </div>
         </div>
-        <p v-if="layer.locked" class="mt-1 text-xs" style="color: var(--bw-muted)">{{ layer.lockedNote }}</p>
-        <ul v-else class="mt-2 space-y-1.5">
+        <template v-else>
+          <div class="text-xs uppercase tracking-wider" style="color: var(--bw-ink-soft)">
+            {{ layer.label }}
+          </div>
+          <ul class="mt-2 space-y-1.5">
           <li v-for="step in layer.steps" :key="step.id">
             <button
               class="flex w-full items-start gap-2 rounded px-1.5 py-1 text-left text-sm"
@@ -34,7 +40,8 @@ defineProps<{ layers: BwRailLayer[] }>()
               </span>
             </button>
           </li>
-        </ul>
+          </ul>
+        </template>
       </div>
     </div>
     <div class="bw-rail-mini flex flex-col items-center gap-3 pt-1">

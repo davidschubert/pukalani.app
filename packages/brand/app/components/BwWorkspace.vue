@@ -1,22 +1,35 @@
 <script setup lang="ts">
-/** Drei-Zonen-Werkstatt (UI-Vertrag §3d): Fortschritt | Bühne | George.
- *  Mobil (<768) zwei Vollbild-Modi; Eingaben bleiben gemountet (CSS-Hide). */
-const props = defineProps<{ brandTitle: string, contentLocale: string }>()
+/** Drei-Zonen-Werkstatt (UI-Vertrag §3d). Korrekturrunde 1 (David):
+ *  Topbar-Mitte = Brandname + Fortschritts-% + Gespeichert; Sprachregler
+ *  wandert ins Menü hinter dem User-Icon. */
+const props = defineProps<{ brandTitle: string, progress: string, contentLocale: string }>()
 const mode = ref<'stage' | 'george'>('george')
-defineExpose({ mode })
-void props
+const userMenu = computed(() => [[
+  { label: `Inhaltssprache: ${props.contentLocale.toUpperCase()}`, icon: 'i-ph-translate', disabled: true },
+  { label: 'Oberfläche: Deutsch', icon: 'i-ph-globe-simple' },
+], [
+  { label: 'Konto', icon: 'i-ph-user-circle' },
+  { label: 'Abmelden', icon: 'i-ph-sign-out' },
+]])
 </script>
 
 <template>
   <div class="bw-root bw-shell" :class="mode === 'stage' ? 'bw-mode-stage' : 'bw-mode-george'">
-    <header class="bw-topbar">
-      <span class="font-semibold truncate">{{ brandTitle }}</span>
-      <span class="bw-state bw-state--confirmed"><UIcon name="i-ph-check" /> Gespeichert</span>
-      <span class="ml-auto flex items-center gap-3 text-sm" style="color: var(--bw-muted)">
-        <span class="hidden sm:inline-flex items-center gap-1"><UIcon name="i-ph-translate" /> Inhalt: {{ contentLocale.toUpperCase() }}</span>
+    <header class="bw-topbar grid grid-cols-[1fr_auto_1fr] items-center">
+      <div class="flex items-center">
+        <UButton to="/" color="neutral" variant="ghost" size="sm" icon="i-ph-squares-four" label="Meine Brands" />
+      </div>
+      <div class="flex items-center gap-2.5">
+        <span class="font-semibold">{{ brandTitle }}</span>
+        <span class="text-sm" style="color: var(--bw-muted)">· {{ progress }}</span>
+        <span class="bw-state bw-state--confirmed"><UIcon name="i-ph-check" /> Gespeichert</span>
+      </div>
+      <div class="flex items-center justify-end gap-3" style="color: var(--bw-muted)">
         <UIcon name="i-ph-question" class="size-5" />
-        <UIcon name="i-ph-user-circle" class="size-6" />
-      </span>
+        <UDropdownMenu :items="userMenu">
+          <button aria-label="Konto-Menü" class="grid place-items-center"><UIcon name="i-ph-user-circle" class="size-6" /></button>
+        </UDropdownMenu>
+      </div>
     </header>
 
     <div class="bw-modeswitch flex border-b" style="border-color: var(--bw-line)">
