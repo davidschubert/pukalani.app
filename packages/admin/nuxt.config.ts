@@ -1,3 +1,5 @@
+import { buildSystemManifest } from './build/systemManifest'
+
 /**
  * Produkt Layer: Admin-Dashboard (Grundgerüst + User-Verwaltung).
  * Eigene Table: `changelog` (A14). Administriert außerdem Appwrite-User und
@@ -28,5 +30,21 @@ export default defineNuxtConfig({
       { code: 'de', language: 'de-DE', name: 'Deutsch', file: 'de.json' },
       { code: 'en', language: 'en-US', name: 'English', file: 'en.json' },
     ],
+  },
+
+  runtimeConfig: {
+    /**
+     * server-only! Das Versions-Manifest der Systemseite — ZUR BAUZEIT
+     * ausgewertet, dasselbe Muster wie `buildSha` im Core. Grund: in
+     * Produktion wird nur `.output/` deployt; die bisherige Laufzeit-Auflösung
+     * (package.json-Lookups, Scan von `packages/*`) läuft dort ins Leere und
+     * lieferte „unknown" bzw. „0 Dateien".
+     *
+     * JSON-STRING statt Objekt, mit Absicht: runtimeConfig-Werte sind je
+     * Schlüssel env-überschreibbar, und ein verschachteltes Objekt mit Arrays
+     * (Layer → Kategorien → Dateinamen) hätte eine Env-Var-Zuordnung, die
+     * niemand sinnvoll bedienen kann. EIN String ist EIN Schlüssel.
+     */
+    adminSystemManifest: JSON.stringify(buildSystemManifest()),
   },
 })

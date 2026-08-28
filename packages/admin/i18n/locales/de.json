@@ -612,6 +612,8 @@
         "description": "Die laufende SaaS-Anwendung.",
         "name": "Name",
         "version": "Version",
+        "build": "Build",
+        "builtAt": "Gebaut am",
         "environment": "Umgebung",
         "url": "App-URL",
         "avatarsBucket": "Avatars-Bucket"

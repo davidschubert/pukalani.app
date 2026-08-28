@@ -1,69 +1,16 @@
-import { createRequire } from 'node:module'
-import { readFileSync } from 'node:fs'
-import { dirname, join } from 'node:path'
-
-const require = createRequire(join(process.cwd(), 'package.json'))
-
-// Kategorisierte Laufzeit-Abhängigkeiten (Anzeige + Update-Whitelist).
-export const DEP_GROUPS: Record<string, string[]> = {
-  Framework: ['nuxt', 'vue', '@nuxt/ui'],
-  State: ['pinia', '@pinia/nuxt'],
-  i18n: ['@nuxtjs/i18n'],
-  Appwrite: ['node-appwrite', 'appwrite'],
-  Validation: ['zod'],
-  Icons: ['@iconify-json/ph', '@iconify-json/circle-flags'],
-}
-
-/** Flache Liste aller bekannten Pakete — Whitelist für den Update-Endpoint. */
-export const ALL_DEP_NAMES: string[] = Object.values(DEP_GROUPS).flat()
-
 /**
- * Aufgelöste Version eines Pakets — best effort. Erst direkter package.json-Import;
- * scheitert der (viele Pakete sperren ./package.json via "exports"), wird vom
- * aufgelösten Entry nach oben bis zur passenden package.json gelaufen.
+ * Was hier NICHT mehr steht: die Paket-Kataloge und die Datei-System-Auflösung
+ * (`DEP_GROUPS`, `ALL_DEP_NAMES`, `pkgVersion`). Die sind nach
+ * `../../build/systemManifest.ts` umgezogen, weil sie ZUR BAUZEIT laufen
+ * müssen — in Produktion liegt nur `.output/`, dort findet ein
+ * `require('<pkg>/package.json')` nichts. Sie werden hier weiter EXPORTIERT,
+ * damit die bestehenden Aufrufstellen (system.get.ts, system/update.post.ts)
+ * unverändert bleiben; im Dev sind sie zugleich der Laufzeit-Rückfall.
+ *
+ * Hier bleibt, was in Produktion wirklich Laufzeit ist: der npm-/GitHub-Blick
+ * nach draußen und der Versions-Vergleich.
  */
-export function pkgVersion(name: string): string {
-  try {
-    return (require(`${name}/package.json`) as { version?: string }).version ?? 'unknown'
-  }
-  catch {
-    // exports-Sperre → über den Entry-Pfad nach oben suchen
-  }
-  try {
-    let dir = dirname(require.resolve(name))
-    for (let i = 0; i < 8; i++) {
-      try {
-        const pkg = JSON.parse(readFileSync(join(dir, 'package.json'), 'utf8')) as { name?: string, version?: string }
-        if (pkg.name === name) return pkg.version ?? 'unknown'
-      }
-      catch {
-        // hier keine/andere package.json — weiter hoch
-      }
-      const parent = dirname(dir)
-      if (parent === dir) break
-      dir = parent
-    }
-  }
-  catch {
-    // Entry nicht auflösbar (z.B. @nuxt/ui sperrt "." für require)
-  }
-  // Letzter Ausweg: node_modules/<name>/package.json direkt lesen (folgt pnpm-Symlinks,
-  // umgeht die exports-Sperre). Vom cwd nach oben bis zum Root-node_modules.
-  let dir = process.cwd()
-  for (let i = 0; i < 6; i++) {
-    try {
-      const pkg = JSON.parse(readFileSync(join(dir, 'node_modules', name, 'package.json'), 'utf8')) as { version?: string }
-      if (pkg.version) return pkg.version
-    }
-    catch {
-      // hier nicht installiert — weiter hoch
-    }
-    const parent = dirname(dir)
-    if (parent === dir) break
-    dir = parent
-  }
-  return 'unknown'
-}
+export { ALL_DEP_NAMES, DEP_GROUPS, pkgVersion } from '../../build/systemManifest'
 
 // --- npm-Registry: neueste Version + Aktualitäts-Vergleich -------------------
 

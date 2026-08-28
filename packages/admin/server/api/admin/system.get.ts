@@ -1,12 +1,33 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import os from 'node:os'
-import type { DependencyEntry, HealthEntry, LayerInfo, SystemInfo } from '../../../shared/types/system'
+import type { DependencyEntry, HealthEntry, LayerInfo, SystemInfo, SystemManifest } from '../../../shared/types/system'
 import { DEP_GROUPS, isOutdated, latestAppwriteVersion, latestVersion, pkgVersion } from '../../utils/dependencies'
-import { layerBreakdown } from '../../utils/layers'
+import { layerBreakdown, workspaceRoot } from '../../utils/layers'
+import { LAYER_PKGS } from '../../../build/systemManifest'
 
-const LAYER_PKGS = ['@pukalani/core', '@pukalani/comments', '@pukalani/admin', '@pukalani/themes']
 const MODULES = ['@nuxt/ui', '@pinia/nuxt', '@nuxtjs/i18n']
+
+/**
+ * Das Bauzeit-Manifest aus der server-only runtimeConfig lesen. FAIL-SOFT:
+ * ein fehlender oder kaputter Wert darf die Systemseite nie umwerfen — dann
+ * gilt eben wieder die Laufzeit-Auflösung (im Dev vollständig, in Produktion
+ * mit „unknown", also exakt der Zustand von vorher).
+ */
+function readManifest(raw: string): SystemManifest | null {
+  if (!raw) return null
+  try {
+    return JSON.parse(raw) as SystemManifest
+  }
+  catch {
+    return null
+  }
+}
+
+/** Ein Manifest-Wert zählt nur, wenn er wirklich etwas aussagt. */
+function usableVersion(version: string | undefined): version is string {
+  return !!version && version !== 'unknown'
+}
 
 /** Nicht-interne IPv4-Adressen des Servers */
 function serverIps(): string[] {
@@ -76,29 +97,45 @@ export default defineEventHandler(async (event): Promise<SystemInfo> => {
     timeDiffMs = null
   }
 
+  const manifest = readManifest(config.adminSystemManifest)
+  const manifestVersions = new Map((manifest?.dependencies ?? []).map(d => [d.name, d.version]))
+
   const depDefs: { name: string, category: string }[] = []
   for (const [category, names] of Object.entries(DEP_GROUPS)) {
     for (const name of names) depDefs.push({ name, category })
   }
-  // Versionen lokal auflösen + latest parallel von npm holen (Cache + Timeout)
+  // VERSIONEN: das Manifest ist die primäre Wahrheit — der Build-Stand IST der
+  // ausgelieferte Stand. Die Laufzeit-Auflösung greift nur, wenn das Manifest
+  // fehlt oder für dieses Paket nichts Brauchbares kennt (z.B. ein Paket, das
+  // erst nach dem Build in den Katalog kam). `latest` bleibt Laufzeit (npm).
   const dependencies: DependencyEntry[] = await Promise.all(
     depDefs.map(async ({ name, category }) => {
-      const version = pkgVersion(name)
+      const fromManifest = manifestVersions.get(name)
+      const version = usableVersion(fromManifest) ? fromManifest : pkgVersion(name)
       const latest = await latestVersion(name)
       return { name, version, category, latest, outdated: isOutdated(version, latest) }
     }),
   )
-  const layers: LayerInfo[] = LAYER_PKGS.map(name => layerBreakdown(name, pkgVersion(name)))
 
-  let appName = 'app'
-  let appVersion = 'unknown'
-  try {
-    const pkg = JSON.parse(readFileSync(join(process.cwd(), 'package.json'), 'utf8')) as { name?: string, version?: string }
-    appName = pkg.name ?? appName
-    appVersion = pkg.version ?? appVersion
-  }
-  catch {
-    // package.json nicht lesbar — Defaults
+  // LAYER: hier gilt die umgekehrte Vorfahrt. Liegt das Repo da (Entwicklung),
+  // wird LIVE gescannt — nur so zählt die Seite eine gerade angelegte Datei
+  // mit. Fehlt es (Produktion, nur `.output/`), gilt das Bauzeit-Manifest;
+  // ohne beides bleibt der alte, leere Best-effort-Weg.
+  const layers: LayerInfo[] = workspaceRoot()
+    ? LAYER_PKGS.map(name => layerBreakdown(name, pkgVersion(name)))
+    : manifest?.layers ?? LAYER_PKGS.map(name => layerBreakdown(name, pkgVersion(name)))
+
+  let appName = manifest?.app.name || 'app'
+  let appVersion = manifest?.app.version || 'unknown'
+  if (!manifest) {
+    try {
+      const pkg = JSON.parse(readFileSync(join(process.cwd(), 'package.json'), 'utf8')) as { name?: string, version?: string }
+      appName = pkg.name ?? appName
+      appVersion = pkg.version ?? appVersion
+    }
+    catch {
+      // package.json nicht lesbar — Defaults
+    }
   }
 
   const memory = process.memoryUsage()
@@ -133,6 +170,8 @@ export default defineEventHandler(async (event): Promise<SystemInfo> => {
       version: appVersion,
       url: config.public.appUrl,
       avatarsBucket: config.public.appwriteAvatarsBucket || null,
+      buildSha: config.public.buildSha || null,
+      builtAt: manifest?.builtAt ?? null,
     },
     layers,
     dependencies,

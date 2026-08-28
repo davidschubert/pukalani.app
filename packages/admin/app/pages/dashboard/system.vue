@@ -51,6 +51,14 @@ const generatedAtLabel = computed(() => {
   return new Date(data.value.generatedAt).toLocaleString(locale.value)
 })
 
+// Wie generatedAtLabel: die Formatierung hängt an der Zeitzone des Browsers und
+// darf deshalb nur im Client laufen (die ganze Karte steckt in `ClientOnly`).
+const builtAtLabel = computed(() => {
+  const value = data.value?.app.builtAt
+  if (!value) return '—'
+  return new Date(value).toLocaleString(locale.value)
+})
+
 const groupedDependencies = computed(() => {
   const groups = new Map<string, SystemInfo['dependencies']>()
   for (const dep of data.value?.dependencies ?? []) {
@@ -170,6 +178,16 @@ async function updateDep(dep: Dep) {
               <div class="flex items-center justify-between gap-4 border-b border-default/60 py-2">
                 <dt class="text-muted">{{ t('dashboard.system.app.version') }}</dt>
                 <dd class="font-mono">{{ data.app.version }}</dd>
+              </div>
+              <div class="flex items-center justify-between gap-4 border-b border-default/60 py-2">
+                <dt class="text-muted">{{ t('dashboard.system.app.build') }}</dt>
+                <!-- Gekürzt wie in `git log --oneline`; der volle SHA hängt im
+                     title, damit er kopierbar bleibt (Deploy-Verifikation). -->
+                <dd class="font-mono" :title="data.app.buildSha || undefined">{{ data.app.buildSha ? data.app.buildSha.slice(0, 8) : '—' }}</dd>
+              </div>
+              <div class="flex items-center justify-between gap-4 border-b border-default/60 py-2">
+                <dt class="text-muted">{{ t('dashboard.system.app.builtAt') }}</dt>
+                <dd class="font-mono">{{ builtAtLabel }}</dd>
               </div>
               <div class="flex items-center justify-between gap-4 border-b border-default/60 py-2">
                 <dt class="text-muted">{{ t('dashboard.system.app.environment') }}</dt>

@@ -33,6 +33,26 @@ export interface LayerInfo {
   categories: LayerCategory[]
 }
 
+/** Ein Paket-Eintrag im Bauzeit-Manifest (ohne npm-Vergleich — der ist Laufzeit). */
+export interface SystemManifestDependency {
+  name: string
+  version: string
+  category: string
+}
+
+/**
+ * Zur BAUZEIT eingefrorener Stand (packages/admin/build/systemManifest.ts,
+ * abgelegt als JSON-String in der server-only runtimeConfig). In Produktion
+ * ist er die einzige Quelle für Paketversionen und Layer-Inhalte — dort liegt
+ * nur `.output/`, kein Monorepo.
+ */
+export interface SystemManifest {
+  builtAt: string
+  app: { name: string, version: string }
+  dependencies: SystemManifestDependency[]
+  layers: LayerInfo[]
+}
+
 export interface SystemInfo {
   generatedAt: string
   runtime: {
@@ -65,6 +85,10 @@ export interface SystemInfo {
     version: string
     url: string
     avatarsBucket: string | null
+    /** Deployter Commit (Build-Zeit aus git, `public.buildSha`); null = unbekannt */
+    buildSha: string | null
+    /** Zeitpunkt des Builds aus dem Manifest (ISO); null = kein Manifest */
+    builtAt: string | null
   }
   layers: LayerInfo[]
   dependencies: DependencyEntry[]
