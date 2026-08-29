@@ -60,7 +60,7 @@ const langs = [
             <UIcon :name="l.flag" class="size-4.5 flex-none" /> {{ l.label }}
           </button>
         </div>
-        <p class="bw-label mt-2" style="color: var(--bw-muted)">Die Sprache, in der eure Markeninhalte entstehen — nicht die der Oberfläche.</p>
+        <p class="bw-label mt-2" style="color: var(--bw-muted)">Die Sprache, in der eure Markeninhalte entstehen — nicht die der Oberfläche. Und keine einsame Entscheidung: George übersetzt später alles auf Wunsch in weitere Sprachen, z. B. von Englisch nach Deutsch.</p>
 
         <div class="mt-7 flex justify-end">
           <UButton
