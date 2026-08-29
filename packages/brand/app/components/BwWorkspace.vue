@@ -29,7 +29,6 @@ const LOCALE_FLAGS: Record<string, string> = { en: 'i-circle-flags-us', de: 'i-c
 /* Erscheinungsbild nach Pukalani-Muster (DisplaySettingsMenu im
  * themes-Layer): Hell/Dunkel/System über colorMode.preference. */
 const colorMode = useColorMode()
-const NuxtLinkComp = resolveComponent('NuxtLink')
 const APPEARANCE = [
   ['light', 'Hell', 'i-ph-sun'],
   ['dark', 'Dunkel', 'i-ph-moon'],
@@ -105,25 +104,34 @@ const userMenu = computed(() => [[
         <div class="min-h-0 flex-1 overflow-y-auto pr-3"><slot name="rail" /></div>
         <!-- Runde 48 (David): Gesamt-Fortschritt unten links statt Ring in
              der Topbar — Balken wie im Info-Layer. -->
-        <component
-          :is="progressTo ? NuxtLinkComp : 'div'" :to="progressTo"
-          class="-mx-2 block flex-none rounded-xl px-2 pb-2 pt-5 transition-colors"
-          :class="progressTo ? 'hover:bg-[var(--bw-surface)]' : ''"
-        >
+        <div class="flex-none pt-5">
+          <!-- Runde 80 (David): das kombinierte Branding als ECHTER
+               Pill-Knopf über dem Fuß — gleiche Anatomie wie die
+               Ergebnis-Zeilen, nicht als unsichtbar verlinkte Fläche. -->
+          <NuxtLink
+            v-if="progressTo" :to="progressTo"
+            class="mb-4 flex w-full items-center gap-3 rounded-full py-2.5 pl-2 pr-2 text-left text-sm"
+            style="background: var(--bw-surface-hi); box-shadow: var(--bw-shadow-card)"
+          >
+            <span class="grid size-7 flex-none place-items-center rounded-full" style="background: var(--bw-accent-soft)">
+              <UIcon name="i-ph-sparkle" class="size-4" style="color: var(--bw-accent)" />
+            </span>
+            <span class="min-w-0 flex-1 font-medium">Euer Branding</span>
+            <span class="grid size-7 flex-none place-items-center rounded-full">
+              <UIcon name="i-ph-arrow-right" class="size-4" style="color: var(--bw-ink-soft)" />
+            </span>
+          </NuxtLink>
           <div class="flex items-baseline justify-between gap-3">
             <p v-if="progressNote" class="bw-label uppercase tracking-wider" style="color: var(--bw-muted)">
               {{ progressNote }}
               <span v-if="progressSubnote" class="block">{{ progressSubnote }}</span>
             </p>
-            <span class="bw-label flex flex-none items-center gap-1 uppercase tracking-wider whitespace-nowrap">
-              {{ progressPct }}&thinsp;%
-              <UIcon v-if="progressTo" name="i-ph-arrow-right" class="size-3.5" style="color: var(--bw-ink-soft)" />
-            </span>
+            <span class="bw-label flex-none uppercase tracking-wider whitespace-nowrap">{{ progressPct }}&thinsp;%</span>
           </div>
           <div class="mt-2 h-1.5 overflow-hidden rounded-full" style="background: var(--bw-line)">
             <div class="h-full rounded-full transition-all" :style="`width: ${progressPct}%; background: var(--bw-accent)`" />
           </div>
-        </component>
+        </div>
       </aside>
       <main class="bw-stage"><div class="bw-stage-inner"><slot /></div></main>
       <aside class="bw-george"><slot name="george" /></aside>
