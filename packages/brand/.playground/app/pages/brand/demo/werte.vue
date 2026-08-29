@@ -8,7 +8,27 @@ const messages = ref<BwMessage[]>([
   { id: 'm1', role: 'george', text: 'Zwei Dinge aus deinem Kontext klingen schon nach Werten: Du hast Verlässlichkeit betont — und dass ihr lieber absagt, als halbe Arbeit zu liefern.', help: 'Ich frage jetzt drei Dinge, dann schlage ich Wertewörter vor.' },
   { id: 'm2', role: 'george', text: 'Welches Verhalten würdest du nie dulden — auch nicht vom bestzahlenden Kunden?' },
 ])
-const phase = ref<'ask' | 'candidates' | 'done'>('ask')
+const phase = ref<'ask' | 'candidates' | 'done' | 'confirmed'>('ask')
+const syncState = ref<'saving' | 'offline' | 'conflict' | null>(null)
+let syncTimer: ReturnType<typeof setTimeout> | undefined
+function pulseSave() {
+  syncState.value = 'saving'
+  clearTimeout(syncTimer)
+  syncTimer = setTimeout(() => { syncState.value = null }, 1200)
+}
+/* Nach dem Abschluss zieht die Leiste nach: Werte -> fertig. */
+const railLayers = computed(() => phase.value !== 'confirmed'
+  ? demoRail
+  : demoRail.map(layer => layer.steps
+      ? { ...layer, steps: layer.steps.map(step => step.id === 'values' ? { ...step, state: 'done' as const } : step) }
+      : layer))
+const progressNote = computed(() => phase.value === 'confirmed' ? '14 von 21 Entscheidungen · ~18 Min' : '12 von 21 Entscheidungen · ~25 Min')
+const progressPct = computed(() => phase.value === 'confirmed' ? 67 : 57)
+function confirmChapter() {
+  phase.value = 'confirmed'
+  pulseSave()
+  messages.value.push({ id: `g${Date.now()}`, role: 'george', text: 'Eure Werte stehen — und sie passen zusammen: Klartext und Verlässlichkeit stützen sich gegenseitig. Als Nächstes leite ich daraus euren Archetyp ab.', help: 'Kapitel Werte ist fertig. Archetyp & Stimme ist jetzt dran — ~6 Min.' })
+}
 const picked = ref<string[]>([])
 
 const askOptions = [
@@ -34,6 +54,7 @@ const candidateChips = [
 
 function answer(text: string) {
   messages.value.push({ id: `u${Date.now()}`, role: 'user', text })
+  pulseSave()
   if (phase.value === 'ask') {
     phase.value = 'candidates'
     messages.value.push(
@@ -47,6 +68,7 @@ function pick(id: string) {
 }
 function confirmPick() {
   phase.value = 'done'
+  pulseSave()
   messages.value.push(
     { id: `u${Date.now()}`, role: 'user', text: picked.value.map(p => candidateChips.find(c => c.id === p)?.label).join(', ') },
     { id: 'm5', role: 'george', text: 'Gut — ich habe für jeden Wert einen Definitions-Entwurf ins Dokument gelegt. Lies sie auf der Bühne gegen: Stimmt „Klartext" so, wie ich es formuliert habe?' },
@@ -55,13 +77,13 @@ function confirmPick() {
 </script>
 
 <template>
-  <BwWorkspace :progress-pct="57" progress-note="12 von 21 Entscheidungen · ~25 Min" content-locale="en">
+  <BwWorkspace :progress-pct="progressPct" :progress-note="progressNote" :sync-state="syncState" content-locale="en">
     <template #brand>
       <BwBrandSwitcher :current="{ title: 'Kailua Coffee Co.', path: 'Neugründung', flag: 'i-circle-flags-us' }" :others="[{ title: 'Schubert UX Studio', path: 'Rebrand', flag: 'i-circle-flags-de', to: '/brand/demo/archetyp' }]" />
     </template>
 
     <template #rail>
-      <BwProgressRail :layers="demoRail" />
+      <BwProgressRail :layers="railLayers" />
     </template>
 
     <template #default>
@@ -79,8 +101,8 @@ function confirmPick() {
         />
       </BwChapter>
 
-      <BwChapter title="Werte" :state="phase === 'done' ? 'draft' : 'active'">
-        <template v-if="phase === 'done'">
+      <BwChapter title="Werte" :state="phase === 'confirmed' ? 'confirmed' : phase === 'done' ? 'draft' : 'active'" @confirm="confirmChapter">
+        <template v-if="phase === 'done' || phase === 'confirmed'">
           <ul class="space-y-2.5">
             <li><strong>Klartext</strong> → Wir sagen Preise, Herkunft und Grenzen, bevor jemand fragt.</li>
             <li><strong>Handwerk</strong> → Lieber eine Röstung perfekt als fünf Sorten mittelmäßig.</li>

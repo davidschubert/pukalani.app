@@ -129,6 +129,14 @@
 .bw-chapter { border-top: 1px solid var(--bw-line); padding: 1.6rem 0 1.9rem; }
 .bw-chapter:first-child { border-top: 0; }
 
+/* Kapitelabschluss-Moment (Iteration 2): einmaliges Aufblitzen in der
+   Fertig-Farbe; bei reduzierter Bewegung entfällt es. */
+@keyframes bw-celebrate { 0% { background: var(--bw-accent-soft); } 100% { background: transparent; } }
+.bw-celebrate { animation: bw-celebrate 1.4s ease-out; border-radius: var(--bw-radius-frame); }
+@media (prefers-reduced-motion: reduce) { .bw-celebrate { animation: none; } }
+.bw-sync-enter-active, .bw-sync-leave-active { transition: opacity 200ms; }
+.bw-sync-enter-from, .bw-sync-leave-to { opacity: 0; }
+
 /* Auswahl-Muster (UI-Audit B5): Hover = eine Tonstufe, Ausgewählt =
    Ink-Inversion — gilt für Karten, Chips und Sprach-Pills gleich. */
 .bw-select-card { background: var(--bw-surface); transition: background 120ms, color 120ms; }

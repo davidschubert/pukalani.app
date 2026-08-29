@@ -16,10 +16,21 @@ const stateMeta = computed(() => ({
   confirmed: { label: 'Fertig', icon: 'i-ph-check', cls: 'bw-state--confirmed' },
   stale: { label: 'Wird aktualisiert', icon: 'i-ph-clock-counter-clockwise', cls: 'bw-state--stale' },
 }[props.state]))
+
+/* Iteration 2: der Abschluss-Moment — beim Übergang zu 'confirmed'
+ *  blitzt das Kapitel einmal in der Fertig-Farbe auf (reduced-motion
+ *  respektiert die CSS). */
+const celebrating = ref(false)
+watch(() => props.state, (next, prev) => {
+  if (next === 'confirmed' && prev && prev !== 'confirmed') {
+    celebrating.value = true
+    setTimeout(() => { celebrating.value = false }, 1500)
+  }
+})
 </script>
 
 <template>
-  <section class="bw-chapter">
+  <section class="bw-chapter" :class="celebrating ? 'bw-celebrate' : ''">
     <div class="mb-3 flex items-center justify-between gap-3">
       <h2 class="text-lg">{{ title }}</h2>
       <span class="bw-state" :class="stateMeta.cls"><UIcon :name="stateMeta.icon" /> {{ stateMeta.label }}</span>

@@ -2,7 +2,18 @@
 /** Drei-Zonen-Werkstatt. Korrekturrunde 3 (David): Brandname + "% abgeschlossen"
  *  + Gespeichert LINKSBÜNDIG (der Meine-Brands-Weg lebt jetzt im Switcher);
  *  rechts Hilfe (kontextbezogen) + User-Menü mit Sprachregler. */
-const props = defineProps<{ progressPct: number, contentLocale: string, progressNote?: string }>()
+const props = defineProps<{
+  progressPct: number
+  contentLocale: string
+  progressNote?: string
+  /* §3e: NUR Abweichungs-Zustände erscheinen — Stille heißt gespeichert. */
+  syncState?: 'saving' | 'offline' | 'conflict' | null
+}>()
+const SYNC = {
+  saving: { label: 'Speichert …', icon: 'i-ph-circle-notch', spin: true, tone: 'var(--bw-muted)' },
+  offline: { label: 'Offline — Eingabe bleibt erhalten', icon: 'i-ph-cloud-slash', spin: false, tone: 'var(--bw-draft)' },
+  conflict: { label: 'Konflikt — Stand neu laden', icon: 'i-ph-warning', spin: false, tone: 'var(--bw-stale)' },
+} as const
 const mode = ref<'stage' | 'george'>('george')
 /* Runde 54 (David): das ?-Icon ist raus — Erklärungen macht der
  * Info-Layer je Schritt, Beispiele macht George; Tastaturkürzel und
@@ -58,6 +69,12 @@ const userMenu = computed(() => [[
       <div class="flex min-w-0 items-center gap-2.5">
         <!-- Runde 5: das Auswahlmenü ERSETZT den Brandnamen im Header -->
         <slot name="brand" />
+        <Transition name="bw-sync">
+          <span v-if="syncState" class="bw-label flex flex-none items-center gap-1.5" :style="`color: ${SYNC[syncState].tone}`">
+            <UIcon :name="SYNC[syncState].icon" :class="SYNC[syncState].spin ? 'animate-spin' : ''" class="size-4" />
+            {{ SYNC[syncState].label }}
+          </span>
+        </Transition>
         <!-- Kein Dauer-Badge (Runde 4): Autosave ist Vertrag, Stille heißt
              gespeichert. Hier erscheinen NUR Abweichungs-Zustände (§3e):
              Speichert… / Offline — Eingabe bleibt erhalten / Konflikt. -->
