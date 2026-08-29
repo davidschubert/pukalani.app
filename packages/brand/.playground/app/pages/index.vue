@@ -15,14 +15,14 @@
       <div class="grid gap-4 sm:grid-cols-2">
         <NuxtLink to="/brand/demo/werte" class="block">
           <BwBrandCard
-            title="Kailua Coffee Co." path="Neugründung · Inhalt: EN"
+            title="Kailua Coffee Co." path="Neugründung · 🇬🇧"
             step="Gerade dran: Werte" progress="4 von 7 Entscheidungen" remaining="~20 Min" :pct="57"
             edited="zuletzt vor 2 Stunden"
           />
         </NuxtLink>
         <NuxtLink to="/brand/demo/archetyp" class="block">
           <BwBrandCard
-            title="Schubert UX Studio" path="Rebrand · Inhalt: DE"
+            title="Schubert UX Studio" path="Rebrand · 🇩🇪"
             step="Gerade dran: Archetyp & Stimme" progress="6 von 7 Entscheidungen" remaining="~10 Min" :pct="86"
             edited="zuletzt gestern"
           />

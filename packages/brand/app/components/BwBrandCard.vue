@@ -16,7 +16,7 @@ defineProps<{
     <div class="flex items-start justify-between gap-3">
       <div>
         <h3 class="font-semibold">{{ title }}</h3>
-        <p class="text-xs" style="color: var(--bw-muted)">{{ path }}</p>
+        <p class="bw-label" style="color: var(--bw-muted)">{{ path }}</p>
       </div>
       <UDropdownMenu :items="[[{ label: 'Umbenennen', icon: 'i-ph-pencil-simple' }, { label: 'Teilen', icon: 'i-ph-share-network' }, { label: 'Löschen', icon: 'i-ph-trash' }]]">
         <UButton icon="i-ph-dots-three" color="neutral" variant="ghost" size="sm" aria-label="Aktionen" />

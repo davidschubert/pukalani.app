@@ -23,7 +23,7 @@ defineProps<{
         <div class="flex items-center justify-between gap-2 px-3 py-2">
           <span class="min-w-0">
             <span class="block truncate text-sm font-semibold">{{ current.title }}</span>
-            <span class="block truncate text-xs" style="color: var(--bw-muted)">{{ current.path }}</span>
+            <span class="bw-label block truncate" style="color: var(--bw-muted)">{{ current.path }}</span>
           </span>
           <UIcon name="i-ph-check" class="flex-none" style="color: var(--bw-accent)" />
         </div>
@@ -33,7 +33,7 @@ defineProps<{
         >
           <span class="min-w-0">
             <span class="block truncate text-sm font-medium">{{ o.title }}</span>
-            <span class="block truncate text-xs" style="color: var(--bw-muted)">{{ o.path }}</span>
+            <span class="bw-label block truncate" style="color: var(--bw-muted)">{{ o.path }}</span>
           </span>
         </NuxtLink>
         <div class="my-1.5 border-t" style="border-color: var(--bw-line)" />

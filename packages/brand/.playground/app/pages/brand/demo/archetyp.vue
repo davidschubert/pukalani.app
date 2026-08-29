@@ -25,7 +25,7 @@ function pick() {
 <template>
   <BwWorkspace :progress-pct="86" progress-note="2 von 5 Entscheidungen · ~8 Min" content-locale="de">
     <template #brand>
-      <BwBrandSwitcher :current="{ title: 'Schubert UX Studio', path: 'Rebrand · Inhalt: DE' }" :others="[{ title: 'Kailua Coffee Co.', path: 'Neugründung · Inhalt: EN', to: '/brand/demo/werte' }]" />
+      <BwBrandSwitcher :current="{ title: 'Schubert UX Studio', path: 'Rebrand · 🇩🇪' }" :others="[{ title: 'Kailua Coffee Co.', path: 'Neugründung · 🇬🇧', to: '/brand/demo/werte' }]" />
     </template>
 
     <template #rail>
