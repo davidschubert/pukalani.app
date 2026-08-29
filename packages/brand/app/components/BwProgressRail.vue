@@ -69,7 +69,7 @@ const infoPct = computed(() => {
               </span>
               <span
                 v-if="step.info"
-                class="grid size-7 flex-none place-items-center rounded-full transition-colors hover:bg-[var(--bw-line)]"
+                class="grid size-7 flex-none place-items-center rounded-full transition-colors hover:bg-[var(--bw-pop)]"
                 role="button" tabindex="0"
                 :aria-label="`Was bedeutet ${step.label}?`"
                 @click.stop="infoStep = { step, layerLabel: layer.label }"
