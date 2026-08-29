@@ -2,8 +2,7 @@
 /** Drei-Zonen-Werkstatt. Korrekturrunde 3 (David): Brandname + "% abgeschlossen"
  *  + Gespeichert LINKSBÜNDIG (der Meine-Brands-Weg lebt jetzt im Switcher);
  *  rechts Hilfe (kontextbezogen) + User-Menü mit Sprachregler. */
-const props = defineProps<{ progressPct: number, contentLocale: string }>()
-const RING = 2 * Math.PI * 8
+const props = defineProps<{ progressPct: number, contentLocale: string, progressNote?: string }>()
 const mode = ref<'stage' | 'george'>('george')
 const userMenu = computed(() => [[
   { label: `Inhaltssprache: ${props.contentLocale.toUpperCase()}`, icon: 'i-ph-translate', disabled: true },
@@ -27,16 +26,6 @@ const helpMenu = [[
       <div class="flex min-w-0 items-center gap-2.5">
         <!-- Runde 5: das Auswahlmenü ERSETZT den Brandnamen im Header -->
         <slot name="brand" />
-        <span class="flex flex-none items-center gap-1.5 text-sm" style="color: var(--bw-muted)">
-          <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true" class="-rotate-90">
-            <circle cx="10" cy="10" r="8" fill="none" stroke="var(--bw-line-strong)" stroke-width="2.5" />
-            <circle
-              cx="10" cy="10" r="8" fill="none" stroke="var(--bw-accent)" stroke-width="2.5"
-              stroke-linecap="round" :stroke-dasharray="RING" :stroke-dashoffset="RING * (1 - progressPct / 100)"
-            />
-          </svg>
-          <span class="bw-label" style="color: var(--bw-ink)">{{ progressPct }}&thinsp;%</span>
-        </span>
         <!-- Kein Dauer-Badge (Runde 4): Autosave ist Vertrag, Stille heißt
              gespeichert. Hier erscheinen NUR Abweichungs-Zustände (§3e):
              Speichert… / Offline — Eingabe bleibt erhalten / Konflikt. -->
@@ -61,7 +50,20 @@ const helpMenu = [[
     </div>
 
     <div class="bw-zones">
-      <aside class="bw-rail"><slot name="rail" /></aside>
+      <aside class="bw-rail flex flex-col">
+        <div class="min-h-0 flex-1 overflow-y-auto"><slot name="rail" /></div>
+        <!-- Runde 48 (David): Gesamt-Fortschritt unten links statt Ring in
+             der Topbar — Balken wie im Info-Layer. -->
+        <div class="flex-none pt-5">
+          <div class="flex items-baseline justify-between gap-3">
+            <p v-if="progressNote" class="bw-label" style="color: var(--bw-muted)">{{ progressNote }}</p>
+            <span class="bw-num text-base">{{ progressPct }}&thinsp;%</span>
+          </div>
+          <div class="mt-2 h-1.5 overflow-hidden rounded-full" style="background: var(--bw-line)">
+            <div class="h-full rounded-full transition-all" :style="`width: ${progressPct}%; background: var(--bw-accent)`" />
+          </div>
+        </div>
+      </aside>
       <main class="bw-stage"><div class="bw-stage-inner"><slot /></div></main>
       <aside class="bw-george"><slot name="george" /></aside>
     </div>

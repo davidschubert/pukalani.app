@@ -128,6 +128,10 @@
 .bw-chapter { border-top: 1px solid var(--bw-line); padding: 1.6rem 0 1.9rem; }
 .bw-chapter:first-child { border-top: 0; }
 
+/* Senden-Knopf (Runde 49, David): Pop-Gelbgrün, Hover invertiert. */
+.bw-send { background: var(--bw-pop) !important; color: var(--bw-ink) !important; }
+.bw-send:hover { background: var(--bw-ink) !important; color: var(--bw-paper) !important; }
+
 /* Zeiger-Regel (Runde 47, David): alles Klickbare zeigt die Hand —
    Tailwind 4 setzt buttons auf cursor:default, das gilt hier nicht. */
 .bw-root button:not(:disabled), .bw-root [role='button'] { cursor: pointer; }
