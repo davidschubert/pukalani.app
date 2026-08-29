@@ -51,7 +51,7 @@ const infoPct = computed(() => {
       <div v-for="layer in layers" :key="layer.id">
         <!-- Runde 85 (David): auch gesperrte Schichten zeigen ihre Pills
              komplett — mit Schloss im Status-Kreis statt versteckter Liste. -->
-          <div class="flex items-start justify-between gap-2">
+          <div class="flex items-start justify-between gap-2 pr-2">
             <div :style="layer.locked ? 'color: var(--bw-muted)' : ''">
               <div class="bw-label uppercase tracking-wider" :style="layer.locked ? '' : 'color: var(--bw-ink-soft)'">{{ layer.label }}</div>
               <p v-if="layer.locked && layer.lockedNote" class="mt-0.5 text-xs">{{ layer.lockedNote }}</p>
