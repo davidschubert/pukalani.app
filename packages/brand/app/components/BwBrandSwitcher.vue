@@ -19,7 +19,7 @@ defineProps<{
     </button>
 
     <template #content>
-      <div class="bw-root bw-card w-72 overflow-hidden py-1.5">
+      <div class="bw-root bw-card bw-card--menu w-72 overflow-hidden py-1.5">
         <div class="flex items-center justify-between gap-2 px-3 py-2">
           <span class="min-w-0">
             <span class="block truncate text-sm font-semibold">{{ current.title }}</span>
