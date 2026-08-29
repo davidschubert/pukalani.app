@@ -1,10 +1,10 @@
 <script setup lang="ts">
 /** Brand-Auswahl (Korrekturrunde 3, David): Trigger zeigt NUR den Namen;
  *  ausgeklappt alle Brandings mit Zusatzinfo untereinander, die aktive
- *  mit Haken. "Meine Brands verwalten" lebt hier, nicht in der Topbar. */
+ *  mit Haken. "Brands verwalten" lebt hier, nicht in der Topbar. */
 defineProps<{
-  current: { title: string, path: string }
-  others: { title: string, path: string, to: string }[]
+  current: { title: string, path: string, flag?: string }
+  others: { title: string, path: string, flag?: string, to: string }[]
 }>()
 </script>
 
@@ -23,7 +23,7 @@ defineProps<{
         <div class="flex items-center justify-between gap-2 px-3 py-2">
           <span class="min-w-0">
             <span class="block truncate text-sm font-semibold">{{ current.title }}</span>
-            <span class="bw-label block truncate" style="color: var(--bw-muted)">{{ current.path }}</span>
+            <span class="bw-label flex items-center gap-1.5 truncate uppercase tracking-wider" style="color: var(--bw-muted)">{{ current.path }}<UIcon v-if="current.flag" :name="current.flag" class="size-4 flex-none" /></span>
           </span>
           <UIcon name="i-ph-check" class="flex-none" style="color: var(--bw-accent)" />
         </div>
@@ -33,7 +33,7 @@ defineProps<{
         >
           <span class="min-w-0">
             <span class="block truncate text-sm font-medium">{{ o.title }}</span>
-            <span class="bw-label block truncate" style="color: var(--bw-muted)">{{ o.path }}</span>
+            <span class="bw-label flex items-center gap-1.5 truncate uppercase tracking-wider" style="color: var(--bw-muted)">{{ o.path }}<UIcon v-if="o.flag" :name="o.flag" class="size-4 flex-none" /></span>
           </span>
         </NuxtLink>
         <div class="my-1.5 border-t" style="border-color: var(--bw-line)" />
@@ -41,7 +41,7 @@ defineProps<{
           <UIcon name="i-ph-plus" style="color: var(--bw-muted)" /> Neue Brand anlegen
         </button>
         <NuxtLink to="/" class="flex items-center gap-2 px-3 py-2 text-sm hover:bg-(--bw-accent-soft)">
-          <UIcon name="i-ph-squares-four" style="color: var(--bw-muted)" /> Meine Brands verwalten
+          <UIcon name="i-ph-squares-four" style="color: var(--bw-muted)" /> Brands verwalten
         </NuxtLink>
       </div>
     </template>

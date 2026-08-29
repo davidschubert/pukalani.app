@@ -3,6 +3,7 @@
 defineProps<{
   title: string
   path: string
+  flag?: string
   step: string
   progress: string
   remaining: string
@@ -16,7 +17,7 @@ defineProps<{
     <div class="flex items-start justify-between gap-3">
       <div>
         <h3 class="font-semibold">{{ title }}</h3>
-        <p class="bw-label" style="color: var(--bw-muted)">{{ path }}</p>
+        <p class="bw-label flex items-center gap-1.5 uppercase tracking-wider" style="color: var(--bw-muted)">{{ path }}<UIcon v-if="flag" :name="flag" class="size-4 flex-none" /></p>
       </div>
       <UDropdownMenu :items="[[{ label: 'Umbenennen', icon: 'i-ph-pencil-simple' }, { label: 'Teilen', icon: 'i-ph-share-network' }, { label: 'Löschen', icon: 'i-ph-trash' }]]">
         <UButton icon="i-ph-dots-three" color="neutral" variant="ghost" size="sm" aria-label="Aktionen" />
