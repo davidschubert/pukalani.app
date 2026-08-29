@@ -122,7 +122,7 @@
 .bw-rail-full > div + div { border-top: 1px solid var(--bw-line); padding-top: 1rem; }
 
 /* Typo: das Dokument liest sich editorial */
-.bw-stage h1, .bw-stage h2 { font-weight: 300; letter-spacing: -0.02em; }
+.bw-stage h1, .bw-stage h2 { font-weight: 200; letter-spacing: -0.02em; }
 .bw-chapter { border-top: 1px solid var(--bw-line); padding: 1.6rem 0 1.9rem; }
 .bw-chapter:first-child { border-top: 0; }
 

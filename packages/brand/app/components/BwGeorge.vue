@@ -12,8 +12,8 @@ const draft = ref('')
     <div class="flex items-center gap-2.5 border-b px-6 pt-2 pb-3.5" style="border-color: var(--bw-line)">
       <span class="bw-msg-mark">G</span>
       <span class="leading-tight">
-        <span class="block text-2xl font-light leading-tight">George</span>
-        <span class="bw-label block" style="color: var(--bw-muted)">Persönlicher Markenberater</span>
+        <span class="block text-[22px] font-extralight leading-tight">George</span>
+        <span class="bw-label block uppercase tracking-wider" style="color: var(--bw-muted)">Markenberater</span>
       </span>
     </div>
     <div class="min-h-0 flex-1 space-y-4 overflow-y-auto px-6 py-5">
