@@ -20,8 +20,8 @@ watch(() => props.messages.length, async () => {
     <div class="flex items-center gap-2.5 border-b px-8 pt-6 pb-4" style="border-color: var(--bw-line)">
       <BwGeorgeAvatar />
       <span class="leading-tight">
-        <span class="block text-xl font-extralight leading-tight">George</span>
-        <span class="block text-xl font-extralight leading-tight" style="color: var(--bw-muted)">Markenberater</span>
+        <span class="bw-label block">George Wuffwuff</span>
+        <span class="bw-label block" style="color: var(--bw-muted)">Dein Markenberater</span>
       </span>
     </div>
     <div ref="scroller" class="min-h-0 flex-1 overflow-y-auto px-8 py-6">

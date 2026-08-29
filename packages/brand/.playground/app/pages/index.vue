@@ -1,5 +1,6 @@
 <script setup lang="ts">
 /** Clickdummy: "Meine Brands" (Dashboard-Modul-Vorschau). */
+const newBrandOpen = ref(false)
 </script>
 
 <template>
@@ -10,7 +11,7 @@
           <h1 class="text-2xl font-semibold">Meine Brands</h1>
           <p class="text-sm" style="color: var(--bw-muted)">Jede Brand ist ein eigener Wizard-Lauf — pausiere jederzeit, dein Stand bleibt gespeichert.</p>
         </div>
-        <UButton icon="i-ph-plus" label="Neue Brand" size="lg" color="neutral" variant="outline" class="rounded-full" style="background: var(--bw-surface-hi)" />
+        <UButton icon="i-ph-plus" label="Neue Brand" size="lg" color="neutral" variant="outline" class="rounded-full" style="background: var(--bw-surface-hi)" @click="newBrandOpen = true" />
       </div>
       <div class="grid gap-4 sm:grid-cols-2">
         <NuxtLink to="/brand/demo/werte" class="block">
@@ -31,8 +32,9 @@
       <div class="bw-rounded-card mt-10 border border-dashed p-10 text-center" style="border-color: var(--bw-line-strong)">
         <p class="font-medium">So sieht der Leerzustand aus:</p>
         <p class="mt-1 text-sm" style="color: var(--bw-muted)">Lass uns deine erste Brand aufbauen. Du kannst jederzeit pausieren — dein Stand bleibt gespeichert.</p>
-        <UButton class="mt-4" icon="i-ph-plus" label="Erste Brand starten" variant="outline" />
+        <UButton class="mt-4" icon="i-ph-plus" label="Erste Brand starten" variant="outline" @click="newBrandOpen = true" />
       </div>
     </div>
+    <BwNewBrandModal v-model:open="newBrandOpen" />
   </div>
 </template>
