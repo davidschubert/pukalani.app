@@ -61,7 +61,7 @@ function submitOwn() {
         v-model="own" variant="none" class="flex-1" :ui="{ base: 'rounded-full' }"
         :placeholder="ownPlaceholder ?? 'Oder etwas ganz Eigenes …'"
       />
-      <UButton type="submit" icon="i-ph-arrow-right" aria-label="Eigene Antwort senden" size="sm" color="neutral" variant="ghost" class="rounded-full" :disabled="!own.trim()" />
+      <UButton type="submit" icon="i-ph-arrow-right" aria-label="Eigene Antwort senden" size="sm" color="neutral" variant="ghost" class="bw-send rounded-full" :disabled="!own.trim()" />
     </form>
     <!-- Interaktionsregel 5 (Audit D16): "Weiß ich nicht" hängt IMMER hinten. -->
     <button class="bw-chip bw-chip--ghost text-left" @click="emit('dontKnow')">
