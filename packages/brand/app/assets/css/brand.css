@@ -129,8 +129,8 @@
 .bw-chapter:first-child { border-top: 0; }
 
 /* Noch-nicht-Texte (Davids Regel, Runde 30): Platzhalter/Wartetexte
-   hellgrau + kursiv — fertiger Inhalt steht schwarz und aufrecht. */
-.bw-pending { color: var(--bw-muted); font-style: italic; }
+   hellgrau in Geist Mono (12px/18px) — fertiger Inhalt steht schwarz in der Sans. Kursiv ausprobiert und verworfen (Runde 31). */
+.bw-pending { color: var(--bw-muted); font-family: var(--bw-font-mono); font-size: 12px; line-height: 18px; }
 
 /* Zustands-Kennzeichen (nie nur Farbe: Icon + Text) */
 .bw-state {
