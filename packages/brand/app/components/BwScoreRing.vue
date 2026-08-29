@@ -18,7 +18,7 @@ const tone = computed(() => props.value >= 90 ? 'var(--bw-accent)' : props.value
           :stroke-dasharray="CIRC" :stroke-dashoffset="CIRC * (1 - value / 100)"
         />
       </svg>
-      <span class="bw-label absolute inset-0 grid place-items-center" :style="`color: ${tone}`">{{ value }}</span>
+      <span class="absolute inset-0 grid place-items-center" :style="`color: ${tone}; font-family: var(--bw-font-mono); font-variant-numeric: tabular-nums; font-size: ${Math.max(12, Math.round(size * 0.24))}px`">{{ value }}</span>
     </div>
     <p v-if="label" class="bw-label text-center" style="color: var(--bw-muted)">{{ label }}</p>
   </div>

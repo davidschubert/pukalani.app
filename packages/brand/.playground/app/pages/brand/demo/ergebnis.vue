@@ -13,6 +13,17 @@ const messages = ref<BwMessage[]>([
   { id: 'm2', role: 'george', text: 'Wenn alles sitzt, bauen wir darauf euer Brand Design: Farben und Schrift kommen nicht aus dem Katalog, sondern aus dem, was hier steht.' },
 ])
 
+const scoreDims = [
+  { label: 'Vollständigkeit', value: 100 },
+  { label: 'Konsistenz', value: 92 },
+  { label: 'Differenzierung', value: 84 },
+  { label: 'Klarheit', value: 90 },
+  { label: 'Auffindbarkeit', value: 68 },
+]
+function scoreTone(v: number): string {
+  return v >= 90 ? 'var(--bw-accent)' : v >= 50 ? 'var(--bw-draft)' : 'var(--bw-stale)'
+}
+
 const palette = [
   { hex: '#4a3123', name: 'Roast' },
   { hex: '#b98a5e', name: 'Crema' },
@@ -77,13 +88,17 @@ const palette = [
           <p class="bw-label" style="color: var(--bw-muted)">Brand Score</p>
           <p class="bw-label" style="color: var(--bw-muted)">Stand: Foundation + Language</p>
         </div>
-        <div class="mt-5 grid grid-cols-3 items-start gap-x-2 gap-y-5 sm:grid-cols-6">
-          <BwScoreRing :value="87" :size="72" label="Gesamt" />
-          <BwScoreRing :value="100" label="Vollständigkeit" />
-          <BwScoreRing :value="92" label="Konsistenz" />
-          <BwScoreRing :value="84" label="Differenzierung" />
-          <BwScoreRing :value="90" label="Klarheit" />
-          <BwScoreRing :value="68" label="Auffindbarkeit" />
+        <div class="mt-6 flex flex-wrap items-center gap-x-10 gap-y-6">
+          <BwScoreRing :value="87" :size="96" label="Gesamt" class="flex-none" />
+          <div class="min-w-0 flex-1 space-y-3.5" style="min-width: 16rem">
+            <div v-for="d in scoreDims" :key="d.label" class="grid grid-cols-[8.5rem_1fr_2rem] items-center gap-3">
+              <p class="bw-label truncate" style="color: var(--bw-muted)">{{ d.label }}</p>
+              <div class="h-1.5 overflow-hidden rounded-full" style="background: var(--bw-line)">
+                <div class="h-full rounded-full" :style="`width: ${d.value}%; background: ${scoreTone(d.value)}`" />
+              </div>
+              <p class="bw-label text-right" :style="`color: ${scoreTone(d.value)}`">{{ d.value }}</p>
+            </div>
+          </div>
         </div>
         <p class="bw-pending mt-5">Jeder Wert unter 100 kennt seinen nächsten Schritt — Auffindbarkeit steigt mit Brand Experience (SEO &amp; GEO).</p>
       </div>
