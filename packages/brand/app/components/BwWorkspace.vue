@@ -9,7 +9,6 @@ const mode = ref<'stage' | 'george'>('george')
  * Support leben jetzt hier im Konto-Menü. */
 const userMenu = computed(() => [[
   { label: `Inhaltssprache: ${props.contentLocale.toUpperCase()}`, icon: 'i-ph-translate', disabled: true },
-  { label: 'Oberfläche: Deutsch', icon: 'i-ph-globe-simple' },
 ], [
   { label: 'Tastaturkürzel', icon: 'i-ph-keyboard' },
   { label: 'Support kontaktieren', icon: 'i-ph-lifebuoy' },
@@ -29,7 +28,10 @@ const userMenu = computed(() => [[
              gespeichert. Hier erscheinen NUR Abweichungs-Zustände (§3e):
              Speichert… / Offline — Eingabe bleibt erhalten / Konflikt. -->
       </div>
-      <div class="ml-auto flex items-center gap-3" style="color: var(--bw-muted)">
+      <div class="ml-auto flex items-center gap-4" style="color: var(--bw-muted)">
+        <!-- Runde 65 (David): der EINE Pukalani-Sprachwechsler (core),
+             wie überall im Projekt — DE / EN via switchLocalePath. -->
+        <CoreLocaleSwitcher />
         <UDropdownMenu :items="userMenu">
           <button aria-label="Konto-Menü" class="grid place-items-center"><UAvatar text="DS" size="md" /></button>
         </UDropdownMenu>
