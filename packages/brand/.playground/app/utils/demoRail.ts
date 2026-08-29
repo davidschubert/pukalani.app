@@ -132,11 +132,82 @@ export const demoRail: BwRailLayer[] = [
   {
     id: 'design',
     steps: [
-      { id: 'design-color', label: 'Farbwelt', icon: '', state: 'open' },
-      { id: 'design-type', label: 'Typografie', icon: '', state: 'open' },
-      { id: 'design-logo', label: 'Logo & Zeichen', icon: '', state: 'open' },
-      { id: 'design-imagery', label: 'Bildsprache & Ikonografie', icon: '', state: 'open' },
-      { id: 'design-motion', label: 'Motion', icon: '', state: 'open' },
+      {
+        id: 'design-color',
+        label: 'Farbwelt',
+        icon: '',
+        state: 'open',
+        info: {
+          description: 'Eure Farben kommen nicht aus dem Katalog: George leitet eine Basisfarbe aus Archetyp und Werten her und baut daraus eine geprüfte Hell- und Dunkel-Rampe mit barrierefreien Kontrast-Paaren.',
+          minutes: '~10 Min',
+          bausteine: [
+            { label: 'Basisfarbe', note: 'Hergeleitet aus Archetyp + Werten — mit Begründung.' },
+            { label: 'Hell-/Dunkel-Rampe', note: 'Automatisch erzeugt, Kontrast-geprüft — ihr bestätigt.' },
+            { label: 'Akzentfarbe', note: 'Der eine Pop — sparsam eingesetzt.' },
+            { label: 'Einsatzregeln', note: 'Was wofür: Flächen, Text, Signale.' },
+          ],
+        },
+      },
+      {
+        id: 'design-type',
+        label: 'Typografie',
+        icon: '',
+        state: 'open',
+        info: {
+          description: 'Schrift ist Stimme in Form: Aus eurer Tonalität schlägt George Schriftrollen vor — Text, Überschrift, Mono — und legt Grade und Hierarchie fest.',
+          minutes: '~6 Min',
+          bausteine: [
+            { label: 'Textschrift', note: 'Die Arbeitsschrift — lesbar, passend zur Stimme.' },
+            { label: 'Überschrift-Schrift', note: 'Der Charakterkopf — darf mehr wagen.' },
+            { label: 'Hierarchie & Grade', note: 'Größen und Gewichte als System.' },
+          ],
+        },
+      },
+      {
+        id: 'design-logo',
+        label: 'Logo & Zeichen',
+        icon: '',
+        state: 'open',
+        info: {
+          description: 'Die Richtung eures Zeichens — Wortmarke, Bildmarke oder beides — samt Varianten für App-Icon und Avatar, Schutzraum und Minimalgrößen.',
+          minutes: '~8 Min',
+          bausteine: [
+            { label: 'Richtung', note: 'Wortmarke, Bildmarke oder Kombination — begründet aus der Foundation.' },
+            { label: 'Varianten', note: 'App-Icon, Avatar, Favicon.' },
+            { label: 'Schutzraum & Minimalgrößen', note: 'Damit das Zeichen überall sauber steht.' },
+            { label: 'Datei-Set', note: 'Exporte für Web, Print und Social.' },
+          ],
+        },
+      },
+      {
+        id: 'design-imagery',
+        label: 'Bildsprache & Ikonografie',
+        icon: '',
+        state: 'open',
+        info: {
+          description: 'Wie eure Marke aussieht, wenn sie nicht spricht: Fotografie-Stil, Illustrations- und Icon-Stil — mit Do-&-Don’t-Beispielen zum Fühlen.',
+          minutes: '~6 Min',
+          bausteine: [
+            { label: 'Fotografie-Stil', note: 'Licht, Ausschnitt, Menschen — was zu euch passt.' },
+            { label: 'Illustrations-Stil', note: 'Ob und wie ihr zeichnet.' },
+            { label: 'Icon-Stil', note: 'Linie oder Fläche, rund oder kantig.' },
+          ],
+        },
+      },
+      {
+        id: 'design-motion',
+        label: 'Motion',
+        icon: '',
+        state: 'open',
+        info: {
+          description: 'Bewegung mit Charakter: Tempo und Übergänge (150–250 ms), ob euer Logo sich bewegt — und was bei reduzierter Bewegung passiert.',
+          minutes: '~5 Min',
+          bausteine: [
+            { label: 'Tempo-Charakter', note: 'Ruhig oder lebendig — aus dem Archetyp.' },
+            { label: 'Logo-Animation', note: 'Kinetisches Logo ja/nein, reduced-motion-fest.' },
+          ],
+        },
+      },
       { id: 'design-result', kind: 'result', label: 'Ergebnis', icon: '', state: 'open', to: '/brand/demo/ergebnis' },
     ],
     label: 'Brand Design',
@@ -157,9 +228,50 @@ export const demoRail: BwRailLayer[] = [
   {
     id: 'book',
     steps: [
-      { id: 'book-book', label: 'Brand Book', icon: '', state: 'open' },
-      { id: 'book-kit', label: 'Kit & Design Tokens', icon: '', state: 'open' },
-      { id: 'book-templates', label: 'Templates', icon: '', state: 'open' },
+      {
+        id: 'book-book',
+        label: 'Brand Book',
+        icon: '',
+        state: 'open',
+        info: {
+          description: 'Euer Regelwerk entsteht automatisch aus den fertigen Schichten — ihr kuratiert Kapitel, bestätigt Do-&-Don’t-Beispiele und legt fest, was KI im Namen eurer Marke darf.',
+          minutes: '~6 Min',
+          bausteine: [
+            { label: 'Kapitel', note: 'Zusammengestellt aus Foundation, Language und Design.' },
+            { label: 'Do & Don’t', note: 'Beispiele bestätigen oder tauschen.' },
+            { label: 'AI-Guidelines', note: 'Was KI in eurer Stimme erzeugen darf — und was nie.' },
+          ],
+        },
+      },
+      {
+        id: 'book-kit',
+        label: 'Kit & Design Tokens',
+        icon: '',
+        state: 'open',
+        info: {
+          description: 'Das Kit arbeitet: Design Tokens für hell und dunkel, Exporte für CSS, Tailwind und Figma — und das maschinenlesbare brand.json für KI-Werkzeuge.',
+          minutes: '~5 Min',
+          bausteine: [
+            { label: 'Token-Set', note: 'Hell/dunkel mit geprüften Kontrasten — bestätigen.' },
+            { label: 'Exporte', note: 'CSS, Tailwind, Figma.' },
+            { label: 'brand.json', note: 'Stimme, Vokabular und Tabus — maschinenlesbar.' },
+          ],
+        },
+      },
+      {
+        id: 'book-templates',
+        label: 'Templates',
+        icon: '',
+        state: 'open',
+        info: {
+          description: 'Vorlagen mit festen Wiedererkennungs-Ankern — für Social, Dokumente und Präsentationen.',
+          minutes: '~4 Min',
+          bausteine: [
+            { label: 'Social-Set', note: 'Formate je Plattform mit euren Ankern.' },
+            { label: 'Dokumente & Präsentationen', note: 'Basis-Vorlagen in eurem Design.' },
+          ],
+        },
+      },
       { id: 'book-result', kind: 'result', label: 'Ergebnis', icon: '', state: 'open', to: '/brand/demo/ergebnis' },
     ],
     label: 'Brand Book & Kit',
@@ -178,13 +290,108 @@ export const demoRail: BwRailLayer[] = [
   {
     id: 'experience',
     steps: [
-      { id: 'exp-website', label: 'Website', icon: '', state: 'open' },
-      { id: 'exp-social', label: 'Social', icon: '', state: 'open' },
-      { id: 'exp-seo', label: 'SEO & GEO', icon: '', state: 'open' },
-      { id: 'exp-mail', label: 'Newsletter & E-Mail', icon: '', state: 'open' },
-      { id: 'exp-content', label: 'Content-Vorlagen', icon: '', state: 'open' },
-      { id: 'exp-stationery', label: 'Geschäftsausstattung', icon: '', state: 'open' },
-      { id: 'exp-local', label: 'Vor Ort', icon: '', state: 'open' },
+      {
+        id: 'exp-website',
+        label: 'Website',
+        icon: '',
+        state: 'open',
+        info: {
+          description: 'Eure Marke als Website: Seitentypen aus euren Zielen, das Theme aus eurem Design — und ein Startseiten-Hero, der die Tagline trägt.',
+          minutes: '~5 Min',
+          bausteine: [
+            { label: 'Seitentypen', note: 'Was eure Site braucht — aus Zielen und Zielgruppe.' },
+            { label: 'Theme-Anwendung', note: 'Farben und Schrift werden zur laufenden Site.' },
+            { label: 'Startseiten-Hero', note: 'Der erste Eindruck, aus Tagline + Bildsprache.' },
+          ],
+        },
+      },
+      {
+        id: 'exp-social',
+        label: 'Social',
+        icon: '',
+        state: 'open',
+        info: {
+          description: 'Profile je Plattform, ein Content-Kompass mit 3–5 Säulen und Taktung — und die Interaktions-Stimme: wie ihr antwortet, nicht nur wie ihr postet.',
+          minutes: '~6 Min',
+          bausteine: [
+            { label: 'Profile', note: 'Bio, Avatar, Banner — je Plattform konsistent.' },
+            { label: 'Content-Kompass', note: '3–5 Säulen mit Format und Taktung.' },
+            { label: 'Interaktions-Stimme', note: 'Kommentare, DMs, Support — in eurem Ton.' },
+          ],
+        },
+      },
+      {
+        id: 'exp-seo',
+        label: 'SEO & GEO',
+        icon: '',
+        state: 'open',
+        info: {
+          description: 'Gefunden werden — von Google und von KI-Assistenten: Keywords aus eurer Positionierung, konsistente Entitätsdaten und zitierfähige Markenfakten samt llms.txt.',
+          minutes: '~6 Min',
+          bausteine: [
+            { label: 'Keyword-Set', note: 'Abgeleitet aus Positionierung + Vokabular.' },
+            { label: 'Entitäten-Konsistenz', note: 'Name, Ort, Angebot — überall gleich.' },
+            { label: 'Markenfakten & llms.txt', note: 'Zitierfähig für ChatGPT, Perplexity & Co.' },
+          ],
+        },
+      },
+      {
+        id: 'exp-mail',
+        label: 'Newsletter & E-Mail',
+        icon: '',
+        state: 'open',
+        info: {
+          description: 'Eure Stimme im Postfach: Absender-Auftritt und ein Template in eurem Design.',
+          minutes: '~3 Min',
+          bausteine: [
+            { label: 'Absender-Stimme', note: 'Von wem kommt die Mail — und wie klingt sie.' },
+            { label: 'Template', note: 'Kopf, Fuß, Typografie — einmal sauber.' },
+          ],
+        },
+      },
+      {
+        id: 'exp-content',
+        label: 'Content-Vorlagen',
+        icon: '',
+        state: 'open',
+        info: {
+          description: 'Post-Formate, die eure Werte und Beweise wiederverwenden — Inhalte entstehen aus der Foundation, nicht aus dem Bauch.',
+          minutes: '~4 Min',
+          bausteine: [
+            { label: 'Formate', note: 'Je Säule ein wiederholbares Format.' },
+            { label: 'Anker', note: 'Feste Wiedererkennungs-Elemente je Format.' },
+          ],
+        },
+      },
+      {
+        id: 'exp-stationery',
+        label: 'Geschäftsausstattung',
+        icon: '',
+        state: 'open',
+        info: {
+          description: 'Braucht jede Marke — auch rein digitale: Visitenkarte, Briefbogen und Rechnungsvorlage, E-Mail-Signatur.',
+          minutes: '~4 Min',
+          bausteine: [
+            { label: 'Drucksachen-Set', note: 'Visitenkarte, Briefbogen, Rechnung.' },
+            { label: 'E-Mail-Signatur', note: 'Konsistent für alle im Team.' },
+          ],
+        },
+      },
+      {
+        id: 'exp-local',
+        label: 'Vor Ort',
+        icon: '',
+        state: 'open',
+        info: {
+          description: 'Nur bei physischem Ort (per Weiche): euer Auftritt dort, wo Kunden euch wirklich begegnen — inklusive Google Maps.',
+          minutes: '~4 Min',
+          bausteine: [
+            { label: 'Google Business', note: 'Profil, Fotos, Kategorien — konsistent zur Marke.' },
+            { label: 'Bewertungs-Stimme', note: 'Antworten auf Bewertungen in eurem Ton.' },
+            { label: 'Print-Basics', note: 'Schild, Karte, Verpackung.' },
+          ],
+        },
+      },
       { id: 'exp-result', kind: 'result', label: 'Ergebnis', icon: '', state: 'open', to: '/brand/demo/ergebnis' },
     ],
     label: 'Brand Experience',

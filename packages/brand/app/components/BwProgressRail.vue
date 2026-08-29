@@ -95,7 +95,7 @@ const infoPct = computed(() => {
               </span>
               <span class="min-w-0 flex-1">{{ step.label }}</span>
               <span
-                v-if="step.info && !layer.locked"
+                v-if="step.info"
                 class="bw-info-btn grid size-7 flex-none place-items-center rounded-full"
                 role="button" tabindex="0"
                 :aria-label="`Was bedeutet ${step.label}?`"
