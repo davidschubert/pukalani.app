@@ -11,6 +11,18 @@ const messages = ref<BwMessage[]>([
 const phase = ref<'ask' | 'candidates' | 'done'>('ask')
 const picked = ref<string[]>([])
 
+const askOptions = [
+  {
+    id: 'a1',
+    label: 'Druck, Qualität zu opfern',
+    description: 'Termine schlagen nie das Handwerk.',
+    recommended: true,
+    why: 'Du hast zweimal betont, dass ihr lieber absagt, als halbe Arbeit zu liefern — das ist bereits gelebte Grenze, kein Wunschdenken. Und im Kaffeemarkt auf O\u02bbahu werben alle mit „Aloha“, fast niemand mit kompromissloser Qualität: genau hier hebt ihr euch ab.',
+  },
+  { id: 'a2', label: 'Respektlosigkeit im Ton', description: 'Egal ob Gast, Lieferant oder Team.' },
+  { id: 'a3', label: 'Intransparenz bei Geld', description: 'Versteckte Preise, stille Aufschläge.' },
+]
+
 const candidateChips = [
   { id: 'handwerk', label: 'Handwerk' },
   { id: 'klartext', label: 'Klartext', recommended: true },
@@ -87,10 +99,11 @@ function confirmPick() {
       <BwGeorge :messages="messages" @send="answer">
         <template #chips>
           <div v-if="phase === 'ask'" class="pl-9">
-            <BwChips
-              :options="[{ id: 'a1', label: 'Druck, Qualität zu opfern' }, { id: 'a2', label: 'Respektlosigkeit im Ton' }, { id: 'a3', label: 'Intransparenz bei Geld' }]"
-              @pick="(id) => answer(({ a1: 'Druck, Qualität zu opfern', a2: 'Respektlosigkeit im Ton', a3: 'Intransparenz bei Geld' } as Record<string, string>)[id]!)"
-              @dont-know="answer('Weiß ich nicht')"
+            <BwOptionCards
+              :options="askOptions"
+              own-placeholder="Oder beschreib es mit eigenen Worten …"
+              @pick="(id) => answer(askOptions.find(o => o.id === id)!.label)"
+              @own="answer"
             />
           </div>
           <div v-else-if="phase === 'candidates'" class="space-y-3 pl-9">
