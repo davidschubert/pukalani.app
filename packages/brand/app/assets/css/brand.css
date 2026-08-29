@@ -17,6 +17,7 @@
   --bw-draft: #8a6a2f;
   --bw-draft-soft: #f3eede;
   --bw-stale: #8a4a3f;
+  --bw-stale-soft: #f2e4e0;
   --bw-gutter: 2rem;
   --bw-radius: 12px;
   --bw-radius-card: 36px;
@@ -50,6 +51,7 @@
   --bw-draft: #d3a95e;
   --bw-draft-soft: #2e2617;
   --bw-stale: #d08a7c;
+  --bw-stale-soft: #33221e;
   --bw-shadow-card: 0 1px 1px rgb(0 0 0 / 0.2), 0 2px 10px rgb(0 0 0 / 0.25);
   --bw-shadow-card-hover: 0 1px 2px rgb(0 0 0 / 0.25), 0 6px 18px rgb(0 0 0 / 0.3);
   --bw-shadow-overlay: 0 2px 6px rgb(0 0 0 / 0.3), 0 16px 40px -8px rgb(0 0 0 / 0.5);
@@ -131,12 +133,12 @@
   display: inline-flex; align-items: center; gap: 0.35rem;
   font-family: var(--bw-font-mono); font-size: 12px; line-height: 18px;
   letter-spacing: 0.04em; text-transform: uppercase;
-  padding: 0.15rem 0.55rem; border-radius: 999px; border: 1px solid var(--bw-line-strong);
+  padding: 0.15rem 0.55rem; border-radius: 999px; background: var(--bw-line);
   color: var(--bw-muted);
 }
-.bw-state--draft { color: var(--bw-draft); border-color: var(--bw-draft); background: var(--bw-draft-soft); }
-.bw-state--confirmed { color: var(--bw-accent); border-color: var(--bw-accent); background: var(--bw-accent-soft); }
-.bw-state--stale { color: var(--bw-stale); border-color: var(--bw-stale); }
+.bw-state--draft { color: var(--bw-draft); background: var(--bw-draft-soft); }
+.bw-state--confirmed { color: var(--bw-accent); background: var(--bw-accent-soft); }
+.bw-state--stale { color: var(--bw-stale); background: var(--bw-stale-soft); }
 .bw-draft-frame { border: 1px dashed var(--bw-draft); border-radius: var(--bw-radius-frame); padding: 1.1rem 1.25rem; background: var(--bw-surface); }
 
 /* George-Chat: ruhig, keine dicken Blasen */
@@ -159,10 +161,10 @@
   border: 1px solid transparent; border-radius: 999px;
   padding: 0.5rem 1rem; font-size: 0.875rem; background: var(--bw-surface-hi);
   box-shadow: var(--bw-shadow-card);
-  cursor: pointer; transition: border-color 120ms, background 120ms;
+  cursor: pointer; transition: background 120ms, color 120ms;
   color: var(--bw-ink);
 }
-.bw-chip:hover { border-color: var(--bw-line-strong); }
+.bw-chip:hover { background: var(--bw-ink); color: var(--bw-paper); }
 .bw-chip:focus-visible { outline: 2px solid var(--bw-ink); outline-offset: 2px; }
 .bw-chip--selected { border-color: var(--bw-ink); background: var(--bw-surface-hi); font-weight: 600; }
 .bw-chip--ghost { background: transparent; box-shadow: none; border: 1px dashed var(--bw-line-strong); color: var(--bw-muted); }
