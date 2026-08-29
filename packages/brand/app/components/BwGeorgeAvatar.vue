@@ -1,12 +1,9 @@
 <script setup lang="ts">
-/** George als echtes Profilbild (Davids Wunsch, Runde 40): Foto rund
- *  beschnitten auf der Empfehlungs-Farbe (--bw-pop) als schmaler Ring.
- *  Dummy-Bild: /george.jpg (dog.ceo, nur Platzhalter) — fürs Produkt
- *  wird hier Davids eigenes George-Bild eingesetzt. */
+/** George als Profilbild (Runde 41, David): Nuxt UI UAvatar in der
+ *  größten Stufe (3xl), ohne Ring. Dummy-Bild /george.jpg (dog.ceo,
+ *  Platzhalter) — fürs Produkt kommt Davids eigenes George-Bild rein. */
 </script>
 
 <template>
-  <span class="bw-msg-mark p-0.5" aria-hidden="true">
-    <img src="/george.jpg" alt="" class="size-full rounded-full object-cover">
-  </span>
+  <UAvatar src="/george.jpg" alt="George" size="3xl" class="flex-none" />
 </template>
