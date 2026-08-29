@@ -249,8 +249,13 @@ ruhige natürliche Grundfarben · EINE prägnante Akzentfarbe für Aktionen ·
 dünne Linien für TRENNER · **Karten dagegen im modernen
 Soft-Look (präzisiert Runde 8, Davids Referenz): stark gerundet
 (30 px als **Squircle** — natives `corner-shape: superellipse(2)` mit
-border-radius-Fallback, Runde 8b), randlos, sehr weicher Schatten —
-schweben statt umranden** ·
+border-radius-Fallback, Runde 8b), randlos — **Trennung TONAL statt
+per Schatten (Runde 9, Davids Referenz): der Grund ist helles Grau, die
+Karten sind heller als der Grund, Schatten nur ein Hauch Ambient**. Dazu
+als Signature: **Dot-Matrix-Ziffern** (Google-Font Doto) für Prozent,
+Zähler und Scores, ein **Acid-Pop-Token** für Mikro-Chips (Empfehlung),
+Rail-Einträge als Pills, und Farbe lebt später NUR in den
+Grain-Gradient-Inhaltskarten (Ergebnis/Vorschau)** ·
 wenige hochwertige Illustrationen. VERBOTEN: futuristische KI-Verläufe, übermäßige
 Chatblasen, Punkte/Abzeichen/Erfolgsfeuerwerke. Wirkung: hochwertiges
 digitales Arbeitsbuch mit persönlicher Beratung, kein SaaS-Dashboard.

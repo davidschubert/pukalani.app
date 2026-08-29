@@ -1,13 +1,13 @@
 /* Brand-Wizard Design-Tokens (UI-Vertrag §3d): editorial-warm, dünne
    Linien, EIN Akzent. Gescopet auf .bw-root — färbt nie die Host-App. */
 .bw-root {
-  --bw-paper: #faf9f7;
-  --bw-surface: #ffffff;
+  --bw-paper: #ebebe7;
+  --bw-surface: #f9f9f6;
   --bw-ink: #1f2a2e;
   --bw-ink-soft: #45555b;
   --bw-muted: #7a8a8f;
-  --bw-line: #e4e1db;
-  --bw-line-strong: #c9c4bb;
+  --bw-line: #dcdcd5;
+  --bw-line-strong: #c2c3ba;
   --bw-accent: #0e6b64;
   --bw-accent-soft: #e3efed;
   --bw-draft: #8a6a2f;
@@ -16,16 +16,20 @@
   --bw-radius: 10px;
   --bw-radius-card: 36px;
   --bw-radius-frame: 18px;
-  --bw-shadow-card: 0 1px 2px rgb(31 42 46 / 0.04), 0 12px 32px -8px rgb(31 42 46 / 0.10);
-  --bw-shadow-card-hover: 0 2px 4px rgb(31 42 46 / 0.05), 0 18px 44px -10px rgb(31 42 46 / 0.16);
+  /* Tonale Trennung (Runde 9, Referenz superpower): Karten sind HELLER
+     als der Grund — Schatten nur noch ein Hauch Ambient. */
+  --bw-shadow-card: 0 1px 2px rgb(31 42 46 / 0.03), 0 6px 20px -6px rgb(31 42 46 / 0.05);
+  --bw-shadow-card-hover: 0 1px 3px rgb(31 42 46 / 0.04), 0 10px 28px -8px rgb(31 42 46 / 0.08);
+  --bw-pop: #dbe74b;
+  --bw-pop-ink: #2a2f10;
 
   background: var(--bw-paper);
   color: var(--bw-ink);
   font-variant-numeric: tabular-nums;
 }
 .dark .bw-root {
-  --bw-paper: #14191b;
-  --bw-surface: #1b2225;
+  --bw-paper: #171b1d;
+  --bw-surface: #222829;
   --bw-ink: #e8ebe8;
   --bw-ink-soft: #c0c9c7;
   --bw-muted: #8b9a97;
@@ -36,8 +40,10 @@
   --bw-draft: #d3a95e;
   --bw-draft-soft: #2e2617;
   --bw-stale: #d08a7c;
-  --bw-shadow-card: 0 1px 2px rgb(0 0 0 / 0.3), 0 12px 32px -8px rgb(0 0 0 / 0.45);
-  --bw-shadow-card-hover: 0 2px 4px rgb(0 0 0 / 0.35), 0 18px 44px -10px rgb(0 0 0 / 0.55);
+  --bw-shadow-card: 0 1px 2px rgb(0 0 0 / 0.2), 0 6px 20px -6px rgb(0 0 0 / 0.25);
+  --bw-shadow-card-hover: 0 1px 3px rgb(0 0 0 / 0.25), 0 10px 28px -8px rgb(0 0 0 / 0.3);
+  --bw-pop: #cdd94a;
+  --bw-pop-ink: #23270e;
 }
 
 /* Werkstatt-Layout: drei Zonen (>=1280), Bühne + George (768–1279),
@@ -63,6 +69,16 @@
   .bw-mode-george .bw-stage { display: none; }
 }
 @media (min-width: 768px) { .bw-modeswitch { display: none; } }
+
+/* Dot-Matrix-Ziffern (Runde 9, Referenz superpower) — das
+   Signature-Element für Zahlen: Prozent, Zähler, später Scores. */
+.bw-num { font-family: 'Doto', ui-monospace, monospace; font-weight: 800; letter-spacing: 0.04em; font-variant-numeric: tabular-nums; }
+.bw-pop-chip {
+  display: inline-flex; align-items: center;
+  padding: 0.1rem 0.55rem; border-radius: 999px;
+  background: var(--bw-pop); color: var(--bw-pop-ink);
+  font-size: 0.7rem; font-weight: 600;
+}
 
 /* Karten-Look (Runde 8, Referenz David): stark gerundet, randlos,
    sehr weicher Schatten — Linien bleiben den TRENNERN vorbehalten. */

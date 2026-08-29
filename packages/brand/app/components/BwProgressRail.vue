@@ -29,9 +29,9 @@ defineProps<{ layers: BwRailLayer[] }>()
           <ul class="mt-2 space-y-1.5">
           <li v-for="step in layer.steps" :key="step.id">
             <button
-              class="flex w-full items-start gap-2 rounded px-1.5 py-1 text-left text-sm"
+              class="flex w-full items-start gap-2 rounded-full px-3.5 py-2 text-left text-sm"
               :disabled="step.state === 'open'"
-              :style="step.state === 'active' ? 'background: var(--bw-accent-soft); color: var(--bw-accent); font-weight: 600' : step.state === 'open' ? 'color: var(--bw-muted)' : 'color: var(--bw-ink-soft)'"
+              :style="step.state === 'active' ? 'background: var(--bw-surface); color: var(--bw-ink); font-weight: 600; box-shadow: var(--bw-shadow-card)' : step.state === 'open' ? 'color: var(--bw-muted)' : 'color: var(--bw-ink-soft)'"
             >
               <span class="flex-1">
                 {{ step.label }}
