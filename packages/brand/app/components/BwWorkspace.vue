@@ -2,7 +2,7 @@
 /** Drei-Zonen-Werkstatt. Korrekturrunde 3 (David): Brandname + "% abgeschlossen"
  *  + Gespeichert LINKSBÜNDIG (der Meine-Brands-Weg lebt jetzt im Switcher);
  *  rechts Hilfe (kontextbezogen) + User-Menü mit Sprachregler. */
-const props = defineProps<{ brandTitle: string, progress: string, contentLocale: string }>()
+const props = defineProps<{ progress: string, contentLocale: string }>()
 const mode = ref<'stage' | 'george'>('george')
 const userMenu = computed(() => [[
   { label: `Inhaltssprache: ${props.contentLocale.toUpperCase()}`, icon: 'i-ph-translate', disabled: true },
@@ -24,7 +24,8 @@ const helpMenu = [[
   <div class="bw-root bw-shell" :class="mode === 'stage' ? 'bw-mode-stage' : 'bw-mode-george'">
     <header class="bw-topbar">
       <div class="flex min-w-0 items-center gap-2.5">
-        <span class="truncate font-semibold">{{ brandTitle }}</span>
+        <!-- Runde 5: das Auswahlmenü ERSETZT den Brandnamen im Header -->
+        <slot name="brand" />
         <span class="flex-none text-sm" style="color: var(--bw-muted)">· {{ progress }} abgeschlossen</span>
         <!-- Kein Dauer-Badge (Runde 4): Autosave ist Vertrag, Stille heißt
              gespeichert. Hier erscheinen NUR Abweichungs-Zustände (§3e):

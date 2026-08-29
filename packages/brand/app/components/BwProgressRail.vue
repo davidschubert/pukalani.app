@@ -15,7 +15,7 @@ defineProps<{ layers: BwRailLayer[] }>()
   <nav aria-label="Fortschritt">
     <div class="bw-rail-full space-y-5">
       <div v-for="layer in layers" :key="layer.id">
-        <div v-if="layer.locked" class="flex items-start justify-between gap-2" style="color: var(--bw-muted)">
+        <div v-if="layer.locked" class="flex items-start justify-between gap-2 pr-1.5" style="color: var(--bw-muted)">
           <div>
             <div class="text-xs uppercase tracking-wider">{{ layer.label }}</div>
             <p class="mt-0.5 text-xs">{{ layer.lockedNote }}</p>

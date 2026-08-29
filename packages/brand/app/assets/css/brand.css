@@ -106,8 +106,8 @@
 .bw-chip--ghost { border-style: dashed; color: var(--bw-muted); }
 
 /* Paarvergleich */
-.bw-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-@media (max-width: 640px) { .bw-pair { grid-template-columns: 1fr; } }
+/* Runde 5 (David): Antwort-Karten untereinander statt nebeneinander */
+.bw-pair { display: grid; grid-template-columns: 1fr; gap: 1rem; max-width: 34rem; }
 .bw-pair-card {
   border: 1px solid var(--bw-line-strong); border-radius: var(--bw-radius);
   padding: 1.3rem 1.2rem; background: var(--bw-surface); cursor: pointer; text-align: left;

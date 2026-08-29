@@ -11,10 +11,10 @@ defineProps<{
 <template>
   <UPopover :content="{ align: 'start' }">
     <button
-      class="mb-5 flex w-full items-center justify-between gap-2 rounded-md border px-3 py-2 text-left"
+      class="flex items-center gap-2 rounded-md border px-3 py-1.5 text-left"
       style="border-color: var(--bw-line-strong); background: var(--bw-surface)"
     >
-      <span class="truncate text-sm font-semibold">{{ current.title }}</span>
+      <span class="truncate font-semibold">{{ current.title }}</span>
       <UIcon name="i-ph-caret-up-down" class="flex-none" style="color: var(--bw-muted)" />
     </button>
 

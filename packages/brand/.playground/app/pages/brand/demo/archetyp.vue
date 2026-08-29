@@ -23,9 +23,12 @@ function pick() {
 </script>
 
 <template>
-  <BwWorkspace brand-title="Schubert UX Studio" progress="86 %" content-locale="de">
-    <template #rail>
+  <BwWorkspace progress="86 %" content-locale="de">
+    <template #brand>
       <BwBrandSwitcher :current="{ title: 'Schubert UX Studio', path: 'Rebrand · Inhalt: DE' }" :others="[{ title: 'Kailua Coffee Co.', path: 'Neugründung · Inhalt: EN', to: '/brand/demo/werte' }]" />
+    </template>
+
+    <template #rail>
       <BwProgressRail :layers="demoRail" />
     </template>
 

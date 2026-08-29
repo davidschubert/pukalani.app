@@ -43,9 +43,12 @@ function confirmPick() {
 </script>
 
 <template>
-  <BwWorkspace brand-title="Kailua Coffee Co." progress="57 %" content-locale="en">
-    <template #rail>
+  <BwWorkspace progress="57 %" content-locale="en">
+    <template #brand>
       <BwBrandSwitcher :current="{ title: 'Kailua Coffee Co.', path: 'Neugründung · Inhalt: EN' }" :others="[{ title: 'Schubert UX Studio', path: 'Rebrand · Inhalt: DE', to: '/brand/demo/archetyp' }]" />
+    </template>
+
+    <template #rail>
       <BwProgressRail :layers="demoRail" />
     </template>
 
