@@ -173,6 +173,15 @@
 .bw-send { background: var(--bw-pop) !important; color: var(--bw-pop-ink) !important; }
 .bw-send:hover { background: var(--bw-ink) !important; color: var(--bw-paper) !important; }
 
+/* Minimalistische Scrollbalken (Runde 89, David): dünner Daumen in
+   Linienfarbe, keine Schiene — Firefox über scrollbar-width/-color,
+   WebKit über die Pseudo-Elemente. */
+.bw-root, .bw-root * { scrollbar-width: thin; scrollbar-color: var(--bw-line-strong) transparent; }
+.bw-root ::-webkit-scrollbar { width: 6px; height: 6px; }
+.bw-root ::-webkit-scrollbar-track { background: transparent; }
+.bw-root ::-webkit-scrollbar-thumb { background: var(--bw-line-strong); border-radius: 999px; }
+.bw-root ::-webkit-scrollbar-thumb:hover { background: var(--bw-muted); }
+
 /* Zeiger-Regel (Runde 47, David): alles Klickbare zeigt die Hand —
    Tailwind 4 setzt buttons auf cursor:default, das gilt hier nicht. */
 .bw-root button:not(:disabled), .bw-root [role='button'] { cursor: pointer; }
