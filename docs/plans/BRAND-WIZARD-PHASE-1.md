@@ -987,6 +987,34 @@ fremden Logos als eigene Assets. POSITIONIERUNGS-SPLIT: branding.supply
 Verknüpfung über Autorenprofil (David → author → branding.supply) statt
 zweier Sites auf denselben Keywords.
 
+### Knowledge Base / Brand Intelligence Layer (Phase 3+, vorgemerkt 2026-08-29)
+
+Der strategische Überbau von Journal + Score + Discover (aus Davids
+Recherche geformt): eine wachsende, STRUKTURIERTE Wissensbasis —
+Sources → Extracted Knowledge → Entities → Relationships → Evidence →
+Content, von Anfang an GETRENNT modelliert. Kern-Objekt ist der
+**Insight** (Claim + Topic + Evidence-Quellen + betroffene Brands +
+Confidence + review_status mit MENSCHLICHER Verifikation) — ein
+Artikel ist nur eine Präsentationsschicht dieser Basis, dieselbe
+Erkenntnis speist Artikel, Rankings, Analysen, Audits und Georges
+Empfehlungen. ARCHITEKTUR-GRUNDSATZ: kein Fine-Tuning des
+Basismodells — RAG + strukturierte Daten + Knowledge Graph +
+Embeddings; das LLM bleibt Reasoning-/Interface-Schicht (passt zu
+aiComplete als policy-freiem Transport). DER MOAT ist die proprietäre
+Wissens-/Datenschicht (Brands + Cases + kuratierte Quellen +
+Beziehungen + Rating-Historie), nicht das Modell — Ziel-Bild
+„Morningstar/IMDb für Brands". RÜCKFLUSS IN DEN WIZARD: Georges
+Empfehlungen zitieren perspektivisch Insight-IDs statt Bauchgefühl
+(die Vollendung von „fundiert statt gefühlt"); Nutzer-Fragen wie
+„Compare my brand with Nike" kombinieren Entity-Daten + Rating +
+Prinzipien. ZWEI HARTE GRENZEN: (1) Nutzer-Brands fließen NUR
+anonymisiert/aggregiert oder per Publikations-Opt-in in die Basis
+(Datenschutz vor Flywheel); (2) Confidence ersetzt keine Redaktion —
+verified-Status bleibt menschlich. JETZT-BAUSTEIN für Phase 1/2:
+Georges Begründungen als STRUKTURIERTE DATEN am Entscheidungs-
+Datensatz speichern (eigenes Feld, nicht nur Chat-Text) — der billige
+Steckplatz für die spätere Evidence-Verknüpfung.
+
 ### BEWUSST NICHT aufgenommen
 
 - **Sonic Branding / Audio-Identität** — 2026 real, aber für die Zielgruppe
