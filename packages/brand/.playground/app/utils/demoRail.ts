@@ -131,6 +131,14 @@ export const demoRail: BwRailLayer[] = [
   },
   {
     id: 'design',
+    steps: [
+      { id: 'design-color', label: 'Farbwelt', icon: '', state: 'open' },
+      { id: 'design-type', label: 'Typografie', icon: '', state: 'open' },
+      { id: 'design-logo', label: 'Logo & Zeichen', icon: '', state: 'open' },
+      { id: 'design-imagery', label: 'Bildsprache & Ikonografie', icon: '', state: 'open' },
+      { id: 'design-motion', label: 'Motion', icon: '', state: 'open' },
+      { id: 'design-result', kind: 'result', label: 'Ergebnis', icon: '', state: 'open', to: '/brand/demo/ergebnis' },
+    ],
     label: 'Brand Design',
     locked: true,
     lockedNote: 'Baut auf deiner Foundation auf',
@@ -148,6 +156,12 @@ export const demoRail: BwRailLayer[] = [
   },
   {
     id: 'book',
+    steps: [
+      { id: 'book-book', label: 'Brand Book', icon: '', state: 'open' },
+      { id: 'book-kit', label: 'Kit & Design Tokens', icon: '', state: 'open' },
+      { id: 'book-templates', label: 'Templates', icon: '', state: 'open' },
+      { id: 'book-result', kind: 'result', label: 'Ergebnis', icon: '', state: 'open', to: '/brand/demo/ergebnis' },
+    ],
     label: 'Brand Book & Kit',
     locked: true,
     lockedNote: 'Entsteht aus Design + Foundation',
@@ -163,6 +177,16 @@ export const demoRail: BwRailLayer[] = [
   },
   {
     id: 'experience',
+    steps: [
+      { id: 'exp-website', label: 'Website', icon: '', state: 'open' },
+      { id: 'exp-social', label: 'Social', icon: '', state: 'open' },
+      { id: 'exp-seo', label: 'SEO & GEO', icon: '', state: 'open' },
+      { id: 'exp-mail', label: 'Newsletter & E-Mail', icon: '', state: 'open' },
+      { id: 'exp-content', label: 'Content-Vorlagen', icon: '', state: 'open' },
+      { id: 'exp-stationery', label: 'Geschäftsausstattung', icon: '', state: 'open' },
+      { id: 'exp-local', label: 'Vor Ort', icon: '', state: 'open' },
+      { id: 'exp-result', kind: 'result', label: 'Ergebnis', icon: '', state: 'open', to: '/brand/demo/ergebnis' },
+    ],
     label: 'Brand Experience',
     locked: true,
     lockedNote: 'Website, Social & Content',
