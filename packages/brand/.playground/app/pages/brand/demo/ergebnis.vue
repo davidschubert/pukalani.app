@@ -34,7 +34,7 @@ const palette = [
 
     <template #default>
       <p class="bw-label uppercase tracking-widest" style="color: var(--bw-muted)">Brand Foundation · Ergebnis</p>
-      <h1 class="mt-1 text-4xl leading-tight">Eure Brand Foundation ist fertig.</h1>
+      <h1 class="mt-1 text-4xl leading-tight">Eure Brand Foundation ist fertig</h1>
 
       <!-- Grain-Hero: die Marke als ein Stück -->
       <div class="bw-grain-hero mt-6 p-10" style="--hero-a: #e8d3b8; --hero-b: #b98a5e; --hero-c: #4a3123">
@@ -51,17 +51,17 @@ const palette = [
 
       <!-- Kit-Vorschau -->
       <div class="mt-6 grid gap-4 sm:grid-cols-2">
-        <div class="bw-card p-6">
+        <div class="bw-card p-8">
           <p class="bw-label" style="color: var(--bw-muted)">Farbwelt (Vorschlag)</p>
           <div class="mt-4 flex flex-wrap gap-2">
             <div v-for="c in palette" :key="c.hex" class="flex flex-col items-center gap-1.5">
-              <div class="rounded-full" :style="`background: ${c.hex}; width: 2.75rem; height: 2.75rem`" />
+              <div class="rounded-full" :style="`background: ${c.hex}; width: 2.5rem; height: 2.5rem`" />
               <p class="bw-label" style="color: var(--bw-muted)">{{ c.name }}</p>
             </div>
           </div>
           <p class="bw-pending mt-3">Wird im Brand Design entschieden — hergeleitet aus eurer Foundation.</p>
         </div>
-        <div class="bw-card p-6">
+        <div class="bw-card p-8">
           <p class="bw-label" style="color: var(--bw-muted)">Typografie (Vorschlag)</p>
           <p class="mt-2 text-5xl font-extralight leading-none tracking-tight">Aa</p>
           <p class="mt-2 text-sm" style="color: var(--bw-ink-soft)">Ruhig und fundiert — eine Serifenlose mit Wärme, dazu eine Mono für die Herkunftsangaben.</p>
