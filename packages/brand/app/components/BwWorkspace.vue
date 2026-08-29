@@ -2,7 +2,8 @@
 /** Drei-Zonen-Werkstatt. Korrekturrunde 3 (David): Brandname + "% abgeschlossen"
  *  + Gespeichert LINKSBÜNDIG (der Meine-Brands-Weg lebt jetzt im Switcher);
  *  rechts Hilfe (kontextbezogen) + User-Menü mit Sprachregler. */
-const props = defineProps<{ progress: string, contentLocale: string }>()
+const props = defineProps<{ progressPct: number, contentLocale: string }>()
+const RING = 2 * Math.PI * 8
 const mode = ref<'stage' | 'george'>('george')
 const userMenu = computed(() => [[
   { label: `Inhaltssprache: ${props.contentLocale.toUpperCase()}`, icon: 'i-ph-translate', disabled: true },
@@ -26,7 +27,16 @@ const helpMenu = [[
       <div class="flex min-w-0 items-center gap-2.5">
         <!-- Runde 5: das Auswahlmenü ERSETZT den Brandnamen im Header -->
         <slot name="brand" />
-        <span class="flex-none text-sm" style="color: var(--bw-muted)">· {{ progress }} abgeschlossen</span>
+        <span class="flex flex-none items-center gap-1.5 text-sm" style="color: var(--bw-muted)">
+          <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true" class="-rotate-90">
+            <circle cx="10" cy="10" r="8" fill="none" stroke="var(--bw-line-strong)" stroke-width="2.5" />
+            <circle
+              cx="10" cy="10" r="8" fill="none" stroke="var(--bw-accent)" stroke-width="2.5"
+              stroke-linecap="round" :stroke-dasharray="RING" :stroke-dashoffset="RING * (1 - progressPct / 100)"
+            />
+          </svg>
+          {{ progressPct }} % abgeschlossen
+        </span>
         <!-- Kein Dauer-Badge (Runde 4): Autosave ist Vertrag, Stille heißt
              gespeichert. Hier erscheinen NUR Abweichungs-Zustände (§3e):
              Speichert… / Offline — Eingabe bleibt erhalten / Konflikt. -->

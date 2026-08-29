@@ -20,7 +20,7 @@ defineProps<{ layers: BwRailLayer[] }>()
             <div class="text-xs uppercase tracking-wider">{{ layer.label }}</div>
             <p class="mt-0.5 text-xs">{{ layer.lockedNote }}</p>
           </div>
-          <UIcon name="i-ph-lock-simple" class="mt-0.5 flex-none" />
+          <UIcon name="i-ph-lock-simple" class="mt-0.5 size-4 flex-none" />
         </div>
         <template v-else>
           <div class="text-xs uppercase tracking-wider" style="color: var(--bw-ink-soft)">
@@ -37,7 +37,7 @@ defineProps<{ layers: BwRailLayer[] }>()
                 {{ step.label }}
                 <span v-if="step.slots" class="block text-xs font-normal" style="color: var(--bw-muted)">{{ step.slots }}<template v-if="step.minutes"> · {{ step.minutes }}</template></span>
               </span>
-              <UIcon :name="step.state === 'done' ? 'i-ph-check-circle-fill' : step.state === 'active' ? 'i-ph-circle-half-fill' : 'i-ph-circle'" class="mt-0.5 flex-none" />
+              <UIcon :name="step.state === 'done' ? 'i-ph-check-circle-fill' : step.state === 'active' ? 'i-ph-circle-half-fill' : 'i-ph-circle'" class="mt-0.5 size-4 flex-none" />
             </button>
           </li>
           </ul>
