@@ -252,7 +252,9 @@ Soft-Look (präzisiert Runde 8, Davids Referenz): stark gerundet
 border-radius-Fallback, Runde 8b), randlos — **Trennung TONAL statt
 per Schatten (Runde 9, Davids Referenz): der Grund ist helles Grau, die
 Karten sind heller als der Grund, Schatten nur ein Hauch Ambient**. Dazu
-als Signature: **Dot-Matrix-Ziffern** (Google-Font Doto) für Prozent,
+als Signature: **Dot-Matrix-Ziffern** (Runde 10: SCHRIFT-TRIAS fest = **Geist Sans**
+für UI, **Geist Mono** für technische Werte, **Geist Pixel** für
+Zahlen-Signature — nur diese drei; Doto bleibt Fallback) für Prozent,
 Zähler und Scores, ein **Acid-Pop-Token** für Mikro-Chips (Empfehlung),
 Rail-Einträge als Pills, und Farbe lebt später NUR in den
 Grain-Gradient-Inhaltskarten (Ergebnis/Vorschau)** ·

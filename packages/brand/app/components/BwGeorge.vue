@@ -28,7 +28,7 @@ const draft = ref('')
     </div>
     <form class="flex gap-2 border-t px-6 py-4" style="border-color: var(--bw-line)" @submit.prevent="draft.trim() && ($emit('send', draft), draft = '')">
       <UInput v-model="draft" class="flex-1" placeholder="Antwort schreiben — oder George etwas fragen …" size="lg" />
-      <UButton type="submit" icon="i-ph-paper-plane-right" aria-label="Senden" size="lg" />
+      <UButton type="submit" icon="i-ph-paper-plane-right" aria-label="Senden" size="lg" color="neutral" variant="outline" class="rounded-full" style="background: var(--bw-surface-hi)" />
     </form>
   </div>
 </template>

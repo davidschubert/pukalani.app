@@ -10,7 +10,7 @@
           <h1 class="text-2xl font-semibold">Meine Brands</h1>
           <p class="text-sm" style="color: var(--bw-muted)">Jede Brand ist ein eigener Wizard-Lauf — pausiere jederzeit, dein Stand bleibt gespeichert.</p>
         </div>
-        <UButton icon="i-ph-plus" label="Neue Brand" size="lg" />
+        <UButton icon="i-ph-plus" label="Neue Brand" size="lg" color="neutral" variant="outline" class="rounded-full" style="background: var(--bw-surface-hi)" />
       </div>
       <div class="grid gap-4 sm:grid-cols-2">
         <NuxtLink to="/brand/demo/werte" class="block">

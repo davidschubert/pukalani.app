@@ -25,7 +25,7 @@ defineProps<{
     <p class="text-sm" style="color: var(--bw-muted)">{{ progress }} · noch {{ remaining }}</p>
     <div class="mt-4 flex items-center justify-between">
       <span class="text-xs" style="color: var(--bw-muted)">{{ edited }}</span>
-      <UButton size="sm" trailing-icon="i-ph-arrow-right" label="Weiterarbeiten" />
+      <UButton size="sm" trailing-icon="i-ph-arrow-right" label="Weiterarbeiten" color="neutral" variant="outline" class="rounded-full" style="background: var(--bw-surface-hi)" />
     </div>
   </div>
 </template>
