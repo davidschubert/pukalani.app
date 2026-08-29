@@ -30,7 +30,7 @@ const stateMeta = computed(() => ({
     <div :class="state === 'draft' || state === 'edited' ? 'bw-draft-frame' : ''">
       <slot />
     </div>
-    <div v-if="state === 'draft' || state === 'edited'" class="mt-3 flex gap-2">
+    <div v-if="state === 'draft' || state === 'edited'" class="mt-3 flex justify-end gap-2">
       <UButton size="sm" color="neutral" variant="outline" icon="i-ph-arrows-clockwise" label="Neu versuchen" />
       <UButton size="sm" icon="i-ph-check" label="Kapitel bestätigen" @click="$emit('confirm')" />
     </div>
