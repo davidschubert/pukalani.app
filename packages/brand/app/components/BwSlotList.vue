@@ -32,7 +32,7 @@ defineEmits<{ edit: [id: string] }>()
         <span class="min-w-0 flex-1">
           <span class="bw-label block" style="color: var(--bw-muted)">{{ slot.label }}</span>
           <span v-if="slot.value" class="block truncate text-sm">{{ slot.value }}</span>
-          <span v-else class="block text-sm" style="color: var(--bw-muted)">Noch offen — kommt im Gespräch.</span>
+          <span v-else class="bw-pending block text-sm">Noch offen — kommt im Gespräch.</span>
         </span>
         <button
           v-if="slot.value"

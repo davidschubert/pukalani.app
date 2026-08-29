@@ -87,11 +87,11 @@ function confirmPick() {
             <li><strong>Nähe</strong> → Unsere Gäste kennen den Namen der Person, die ihre Bohnen geröstet hat.</li>
           </ul>
         </template>
-        <p v-else style="color: var(--bw-muted)">George stellt dir gerade die Werte-Fragen — dieses Kapitel füllt sich, sobald ihr die Kandidaten habt.</p>
+        <p v-else class="bw-pending">George stellt dir gerade die Werte-Fragen — dieses Kapitel füllt sich, sobald ihr die Kandidaten habt.</p>
       </BwChapter>
 
       <BwChapter title="Archetyp & Stimme" state="stale" stale-note="Deine Purpose-Änderung von gestern betrifft dieses Kapitel — George rechnet es nach der Bestätigung neu.">
-        <p style="color: var(--bw-muted)">Wartet auf die neue Werte-Grundlage.</p>
+        <p class="bw-pending">Wartet auf die neue Werte-Grundlage.</p>
       </BwChapter>
     </template>
 
