@@ -7,6 +7,7 @@ export const demoRail: BwRailLayer[] = [
   {
     id: 'foundation',
     label: 'Brand Foundation',
+    note: 'Wer ihr seid und wofür ihr steht',
     info: {
       description: 'Das Fundament eurer Marke: wer ihr seid, wofür ihr steht und wie ihr klingt. Alles Spätere — Design, Book, Website — wird hieraus hergeleitet; deshalb steht diese Schicht am Anfang und trägt die meisten Entscheidungen.',
       minutes: '~34 Min',
@@ -106,6 +107,7 @@ export const demoRail: BwRailLayer[] = [
   {
     id: 'verbal',
     label: 'Brand Language',
+    note: 'Tagline, Botschaften & Name',
     info: {
       description: 'Die verbale Identität: der eine Satz neben eurem Namen, die Botschaften dahinter — und der Name selbst auf dem Prüfstand. Baut direkt auf der Foundation auf: ohne geklärte Werte klingt jede Tagline beliebig.',
       minutes: '~13 Min',

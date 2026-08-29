@@ -27,6 +27,8 @@ export interface BwRailLayer {
   label: string
   locked?: boolean
   lockedNote?: string
+  /* Runde 90 (David): Subline auch für entsperrte Gruppen. */
+  note?: string
   /* Runde 82 (David): auch gesperrte Schichten erklären sich — der
    * Info-Layer zeigt, welche Schritte dort warten. */
   info?: BwRailStepInfo
@@ -54,7 +56,7 @@ const infoPct = computed(() => {
           <div class="flex items-start justify-between gap-2 pr-2">
             <div :style="layer.locked ? 'color: var(--bw-muted)' : ''">
               <div class="bw-label uppercase tracking-wider" :style="layer.locked ? '' : 'color: var(--bw-ink-soft)'">{{ layer.label }}</div>
-              <p v-if="layer.locked && layer.lockedNote" class="mt-0.5 text-xs">{{ layer.lockedNote }}</p>
+              <p v-if="layer.locked ? layer.lockedNote : layer.note" class="mt-0.5 text-xs" style="color: var(--bw-muted)">{{ layer.locked ? layer.lockedNote : layer.note }}</p>
             </div>
             <span
               v-if="layer.info"
