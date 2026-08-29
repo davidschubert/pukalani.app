@@ -6,6 +6,8 @@ const props = defineProps<{
   progressPct: number
   contentLocale: string
   progressNote?: string
+  /* Zweite Fuß-Zeile (Runde 77): bewusster Umbruch OHNE Trenner-Punkt. */
+  progressSubnote?: string
   /* §3e: NUR Abweichungs-Zustände erscheinen — Stille heißt gespeichert. */
   syncState?: 'saving' | 'offline' | 'conflict' | null
 }>()
@@ -102,7 +104,10 @@ const userMenu = computed(() => [[
              der Topbar — Balken wie im Info-Layer. -->
         <div class="flex-none pt-5">
           <div class="flex items-baseline justify-between gap-3">
-            <p v-if="progressNote" class="bw-label uppercase tracking-wider" style="color: var(--bw-muted)">{{ progressNote }}</p>
+            <p v-if="progressNote" class="bw-label uppercase tracking-wider" style="color: var(--bw-muted)">
+              {{ progressNote }}
+              <span v-if="progressSubnote" class="block">{{ progressSubnote }}</span>
+            </p>
             <span class="bw-label flex-none uppercase tracking-wider whitespace-nowrap">{{ progressPct }}&thinsp;%</span>
           </div>
           <div class="mt-2 h-1.5 overflow-hidden rounded-full" style="background: var(--bw-line)">

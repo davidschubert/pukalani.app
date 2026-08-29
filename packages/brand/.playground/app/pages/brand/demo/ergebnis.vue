@@ -23,7 +23,7 @@ const palette = [
 </script>
 
 <template>
-  <BwWorkspace :progress-pct="100" progress-note="21 von 21 Entscheidungen · Brand Foundation abgeschlossen" content-locale="en">
+  <BwWorkspace :progress-pct="100" progress-note="21 von 21 Entscheidungen" progress-subnote="Brand Foundation abgeschlossen" content-locale="en">
     <template #brand>
       <BwBrandSwitcher :current="{ title: 'Kailua Coffee Co.', path: 'Neugründung', flag: 'i-circle-flags-us' }" :others="[{ title: 'Schubert UX Studio', path: 'Rebrand', flag: 'i-circle-flags-de', to: '/brand/demo/archetyp' }]" />
     </template>
