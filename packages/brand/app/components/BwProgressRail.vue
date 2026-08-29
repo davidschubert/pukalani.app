@@ -1,9 +1,9 @@
 <script setup lang="ts">
-/** Fortschritt menschlich (§3d): "2 von 5 Bausteinen · ~8 Min", die fünf
+/** Fortschritt menschlich (§3d): "2 von 5 Entscheidungen · ~8 Min", die fünf
  *  Schichten sichtbar, künftige sichtbar-GESPERRT (= sichtbare Schranke).
  *  Runde 43 (David): keine Schmuck-Icons vorn — der STATUS führt links,
  *  hinten sitzt ein Info-Icon, das einen Erklär-Layer öffnet (was der
- *  Schritt bedeutet, welche Bausteine er hat, Fortschrittsbalken). */
+ *  Schritt bedeutet, welche Entscheidungen er hat, Fortschrittsbalken). */
 export interface BwRailStepInfo {
   description: string
   minutes?: string
@@ -105,7 +105,7 @@ const infoPct = computed(() => {
           <h2 class="mt-1 text-[28px] font-extralight leading-tight tracking-tight">{{ infoStep.step.label }}</h2>
           <p class="mt-3 text-sm leading-relaxed" style="color: var(--bw-ink-soft)">{{ infoStep.step.info!.description }}</p>
 
-          <p class="bw-label mt-6" style="color: var(--bw-muted)">Bausteine</p>
+          <p class="bw-label mt-6" style="color: var(--bw-muted)">Entscheidungen</p>
           <ul class="mt-2 space-y-2.5">
             <li v-for="b in infoStep.step.info!.bausteine" :key="b.label" class="flex items-start gap-3">
               <span class="mt-0.5 grid size-6 flex-none place-items-center rounded-full" :style="b.done ? 'background: var(--bw-accent-soft)' : 'background: var(--bw-surface)'">
@@ -121,7 +121,7 @@ const infoPct = computed(() => {
           <div class="mt-7">
             <div class="flex items-baseline justify-between gap-3">
               <p class="bw-label" style="color: var(--bw-muted)">
-                {{ infoStep.step.slots ?? `${infoStep.step.info!.bausteine.filter(b => b.done).length} von ${infoStep.step.info!.bausteine.length} Bausteinen` }}<template v-if="infoStep.step.info!.minutes"> · {{ infoStep.step.info!.minutes }}</template>
+                {{ infoStep.step.slots ?? `${infoStep.step.info!.bausteine.filter(b => b.done).length} von ${infoStep.step.info!.bausteine.length} Entscheidungen` }}<template v-if="infoStep.step.info!.minutes"> · {{ infoStep.step.info!.minutes }}</template>
               </p>
               <span class="bw-num text-base">{{ infoPct }}&thinsp;%</span>
             </div>

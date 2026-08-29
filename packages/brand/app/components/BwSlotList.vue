@@ -15,7 +15,7 @@ defineEmits<{ edit: [id: string] }>()
 
 <template>
   <div class="mt-4">
-    <p class="bw-label" style="color: var(--bw-muted)">Bausteine</p>
+    <p class="bw-label" style="color: var(--bw-muted)">Entscheidungen</p>
     <ul class="mt-2 space-y-2">
       <li
         v-for="slot in slots" :key="slot.id"

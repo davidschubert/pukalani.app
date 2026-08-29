@@ -2,7 +2,7 @@ import type { BwRailLayer } from '../../../app/components/BwProgressRail.vue'
 
 /** Statische Dummy-Daten (P0b): die fünf Schichten, Baustein C aktiv.
  *  Runde 45 (David): JEDER Schritt trägt sein Info-Paket für den
- *  Erklär-Layer — Bedeutung im Markenkosmos + Bausteine mit Erklärung. */
+ *  Erklär-Layer — Bedeutung im Markenkosmos + Entscheidungen mit Erklärung. */
 export const demoRail: BwRailLayer[] = [
   {
     id: 'foundation',
@@ -45,7 +45,7 @@ export const demoRail: BwRailLayer[] = [
         label: 'Werte',
         icon: 'i-ph-scales',
         state: 'active',
-        slots: '2 von 5 Bausteinen',
+        slots: '2 von 5 Entscheidungen',
         minutes: '~8 Min',
         info: {
           description: 'Werte sind die Verhaltensregeln eurer Marke: Sie sagen, wie ihr entscheidet, wenn es unbequem wird. In der Brand Foundation sind sie das Scharnier zwischen Purpose (warum es euch gibt) und Archetyp & Stimme (wie ihr klingt) — jede spätere Design- und Textentscheidung wird an ihnen gemessen.',
