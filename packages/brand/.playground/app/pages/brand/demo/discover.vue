@@ -32,7 +32,10 @@ const creators = [
           <p class="bw-label uppercase tracking-widest" style="color: var(--bw-muted)">Discover</p>
           <h1 class="mt-1 text-4xl leading-tight">Marken, gebaut mit George</h1>
         </div>
-        <UButton icon="i-ph-plus" label="Starte deine eigene" size="lg" class="rounded-full" />
+        <div class="flex items-center gap-2">
+          <UButton to="/brand/demo/journal" icon="i-ph-newspaper" label="Journal" size="lg" color="neutral" variant="ghost" class="rounded-full" />
+          <UButton icon="i-ph-plus" label="Starte deine eigene" size="lg" class="rounded-full" />
+        </div>
       </div>
       <p class="bw-label" style="color: var(--bw-muted)">Jede Brand hier ist freiwillig öffentlich — mit ihrer ganzen Anatomie.</p>
 
