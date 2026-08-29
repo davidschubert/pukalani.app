@@ -13,13 +13,18 @@ const messages = ref<BwMessage[]>([
   { id: 'm2', role: 'george', text: 'Wenn alles sitzt, bauen wir darauf euer Brand Design: Farben und Schrift kommen nicht aus dem Katalog, sondern aus dem, was hier steht.' },
 ])
 
+/* Score-Modell v2 (Runde 100): 8 Kategorien, stufen-bewusst — was
+ * noch nicht gebaut ist, zeigt ein Schloss statt einer 0. */
 const scoreDims = [
-  { label: 'Vollständigkeit', value: 100 },
+  { label: 'Eigenständigkeit', value: 84 },
+  { label: 'Visuelle Identität', locked: 'ab Brand Design' },
   { label: 'Konsistenz', value: 92 },
-  { label: 'Differenzierung', value: 84 },
-  { label: 'Klarheit', value: 90 },
-  { label: 'Auffindbarkeit', value: 68 },
-]
+  { label: 'Markenerlebnis', locked: 'ab Brand Experience' },
+  { label: 'Positionierung & Klarheit', value: 90 },
+  { label: 'Emotionale Wirkung', value: 88 },
+  { label: 'Anpassungsfähigkeit', locked: 'ab Kit' },
+  { label: 'Handwerk', value: 86 },
+] as { label: string, value?: number, locked?: string }[]
 function scoreTone(v: number): string {
   return v >= 90 ? 'var(--bw-accent)' : v >= 50 ? 'var(--bw-draft)' : 'var(--bw-stale)'
 }
@@ -34,7 +39,7 @@ const palette = [
 </script>
 
 <template>
-  <BwWorkspace :progress-pct="100" progress-note="21 von 21 Entscheidungen" progress-subnote="Brand Foundation abgeschlossen" progress-to="/brand/demo/ergebnis" :score="87" content-locale="en">
+  <BwWorkspace :progress-pct="100" progress-note="21 von 21 Entscheidungen" progress-subnote="Brand Foundation abgeschlossen" progress-to="/brand/demo/ergebnis" :score="88" content-locale="en">
     <template #brand>
       <BwBrandSwitcher :current="{ title: 'Kailua Coffee Co.', path: 'Neugründung', flag: 'i-circle-flags-us' }" :others="[{ title: 'Schubert UX Studio', path: 'Rebrand', flag: 'i-circle-flags-de', to: '/brand/demo/archetyp' }]" />
     </template>
@@ -89,18 +94,27 @@ const palette = [
           <p class="bw-label" style="color: var(--bw-muted)">Stand: Foundation + Language</p>
         </div>
         <div class="mt-6 flex flex-wrap items-center gap-x-10 gap-y-6">
-          <BwScoreRing :value="87" :size="96" label="Gesamt" class="flex-none" />
-          <div class="min-w-0 flex-1 space-y-3.5" style="min-width: 16rem">
-            <div v-for="d in scoreDims" :key="d.label" class="grid grid-cols-[8.5rem_1fr_2rem] items-center gap-3">
+          <div class="flex flex-none flex-col items-center gap-1">
+            <BwScoreRing :value="88" :size="96" label="Gesamt" class="flex-none" />
+            <p class="bw-label" style="color: var(--bw-draft)">Herausragend</p>
+          </div>
+          <div class="min-w-0 flex-1 space-y-3.5" style="min-width: 18rem">
+            <div v-for="d in scoreDims" :key="d.label" class="grid grid-cols-[11rem_1fr_2.5rem] items-center gap-3">
               <p class="bw-label truncate" style="color: var(--bw-muted)">{{ d.label }}</p>
-              <div class="h-1.5 overflow-hidden rounded-full" style="background: var(--bw-line)">
-                <div class="h-full rounded-full" :style="`width: ${d.value}%; background: ${scoreTone(d.value)}`" />
-              </div>
-              <p class="bw-label text-right" :style="`color: ${scoreTone(d.value)}`">{{ d.value }}</p>
+              <template v-if="d.value !== undefined">
+                <div class="h-1.5 overflow-hidden rounded-full" style="background: var(--bw-line)">
+                  <div class="h-full rounded-full" :style="`width: ${d.value}%; background: ${scoreTone(d.value)}`" />
+                </div>
+                <p class="bw-label text-right" :style="`color: ${scoreTone(d.value)}`">{{ d.value }}</p>
+              </template>
+              <template v-else>
+                <p class="bw-pending">{{ d.locked }}</p>
+                <UIcon name="i-ph-lock-simple" class="size-3.5 justify-self-end" style="color: var(--bw-muted)" />
+              </template>
             </div>
           </div>
         </div>
-        <p class="bw-pending mt-5">Jeder Wert unter 100 kennt seinen nächsten Schritt — Auffindbarkeit steigt mit Brand Experience (SEO &amp; GEO).</p>
+        <p class="bw-pending mt-5">Reine Qualität, kein Fortschritt — 40 Prüfkriterien, jede mit Georges Begründung. Verschlossene Kategorien öffnen sich mit ihren Schichten.</p>
       </div>
 
       <!-- Runde 93 (David): Monitoring auf dem Ergebnis andeuten —

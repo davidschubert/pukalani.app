@@ -915,7 +915,36 @@ Text-Kriterien am Purpose-Satz) · **Auffindbarkeit** (SEO-/GEO-
 Readiness; steigt erst mit Brand Experience — ehrlich niedrig davor).
 Framing ist REIFEGRAD, nie Zeugnis: jeder Wert unter 100 verlinkt auf
 seinen nächsten Schritt (der Score verkauft die To-dos — das macht
-Lighthouse groß). Zertifikats-/Badge-Gedanke: teilbares
+Lighthouse groß).
+
+**Bewertungsmodell v2 (2026-08-29, aus Davids Recherche geformt —
+branchenneutral, stufen-bewusst):** ACHT Kategorien mit 100 Punkten:
+Eigenständigkeit 15 · Visuelle Identität 15 · Konsistenz 15 ·
+Markenerlebnis 15 · Positionierung & Klarheit 10 · Emotionale Wirkung
+10 · Anpassungsfähigkeit 10 · Handwerk 10. Jede Kategorie hat 5
+PRÜFKRITERIEN à 0–2 Punkte mit ausformulierten Bewertungsregeln (40
+Kriterien gesamt, Rohwert 0–10 → aufs Gewicht normalisiert) — die
+Operationalisierung von „fundiert statt gefühlt", jedes Kriterium mit
+Georges Begründung. DREI Grundsätze: (1) FORTSCHRITT ≠ QUALITÄT — die
+frühere Vollständigkeits-Dimension ist raus, Fortschritt lebt im Fuß;
+(2) STUFEN-BEWUSST: Kategorien nicht gebauter Schichten zeigen SCHLOSS
+statt 0 (Visuelle Identität ab Brand Design, Markenerlebnis +
+Anpassungsfähigkeit ab Experience/Kit); der Gesamtwert normalisiert
+über die freigeschalteten Gewichte und trägt sein „Stand:"-Etikett;
+(3) AUSSCHLÜSSE: kein Umsatz/Marktanteil/Bekanntheit (Markenerfolg ≠
+Branding-Qualität — sonst schlägt Coca-Cola jede exzellent gestaltete
+kleine Marke), kein Heritage-Bonus, kein Innovations-Bonus (Rolex darf
+kontinuierlich sein). Auffindbarkeit (SEO/GEO) = unser
+Alleinstellungs-PRÜFKRITERIUM im Markenerlebnis. BÄNDER: 94+
+Außergewöhnlich · 88–93 Herausragend · 80–87 Exzellent · 70–79 Stark ·
+60–69 Durchschnittlich · 50–59 Schwach · <50 Mangelhaft (Ringfarben:
+90+ accent, 50–89 draft, <50 stale). CONTENT-PLAY (vorgemerkt,
+branding.supply-Redaktion): kuratierte Rankings mit genau diesem
+System („Die 30 besten Tech-Brands 2026 — nach Branding-Qualität, nicht
+Unternehmenswert") — Referenz-Vorbilder: Brand New/UnderConsideration
+(Kritiken), Kantar BrandZ + Brand Finance (Wert-Rankings, bewusst
+NICHT unsere Achse), The Brand Identity, BP&O. Nächster Schritt in
+Phase 2: die 40 Prüfkriterien ausformulieren (je 0/1/2-Regel). Zertifikats-/Badge-Gedanke: teilbares
 „Brand-geprüft"-Badge über das Snapshot-Share-Modell (§6) — Werbung
 für branding.supply auf Kundenseiten. RANKING gegeneinander bewusst
 VERSCHOBEN auf Discover: nur als Perzentil in der eigenen Kategorie
