@@ -17,20 +17,21 @@ const newBrandOpen = ref(false)
         <NuxtLink to="/brand/demo/werte" class="block">
           <BwBrandCard
             title="Kailua Coffee Co." path="Neugründung" flag="i-circle-flags-us"
-            step="Gerade dran: Werte" progress="4 von 7 Entscheidungen" remaining="~20 Min" :pct="57"
+            step="Gerade dran: Werte" progress="4 von 7 Entscheidungen" remaining="~20 Min" :pct="57" :activity="[2, 0, 3, 5, 4, 0, 0, 6, 8, 5, 9, 7, 4, 10]"
             edited="zuletzt vor 2 Stunden"
           />
         </NuxtLink>
         <NuxtLink to="/brand/demo/archetyp" class="block">
           <BwBrandCard
             title="Schubert UX Studio" path="Rebrand" flag="i-circle-flags-de"
-            step="Gerade dran: Archetyp & Stimme" progress="6 von 7 Entscheidungen" remaining="~10 Min" :pct="86"
+            step="Gerade dran: Archetyp & Stimme" progress="6 von 7 Entscheidungen" remaining="~10 Min" :pct="86" :activity="[8, 6, 9, 4, 0, 2, 5, 3, 6, 0, 1, 4, 7, 12]"
             edited="zuletzt gestern"
           />
         </NuxtLink>
       </div>
       <div class="bw-rounded-card mt-10 border border-dashed p-10 text-center" style="border-color: var(--bw-line-strong)">
-        <p class="font-medium">So sieht der Leerzustand aus:</p>
+        <BwIllustration variant="journey" class="mx-auto h-16 w-auto" style="color: var(--bw-ink-soft)" />
+        <p class="mt-4 font-medium">So sieht der Leerzustand aus:</p>
         <p class="mt-1 text-sm" style="color: var(--bw-muted)">Lass uns deine erste Brand aufbauen. Du kannst jederzeit pausieren — dein Stand bleibt gespeichert.</p>
         <UButton class="mt-4" icon="i-ph-plus" label="Erste Brand starten" variant="outline" @click="newBrandOpen = true" />
       </div>

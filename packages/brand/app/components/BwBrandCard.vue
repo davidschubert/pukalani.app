@@ -9,6 +9,7 @@ defineProps<{
   remaining: string
   edited: string
   pct: number
+  activity?: number[]
 }>()
 </script>
 
@@ -23,7 +24,10 @@ defineProps<{
         <UButton icon="i-ph-dots-three" color="neutral" variant="ghost" size="sm" aria-label="Aktionen" />
       </UDropdownMenu>
     </div>
-    <p class="bw-label mt-4" style="color: var(--bw-ink-soft)">{{ step }}</p>
+    <div class="mt-4 flex items-end justify-between gap-3">
+      <p class="bw-label" style="color: var(--bw-ink-soft)">{{ step }}</p>
+      <BwSparkline v-if="activity" :values="activity" style="color: var(--bw-line-strong)" />
+    </div>
     <!-- Runde 52 (David): dasselbe Fortschritts-Modul wie unten links im
          Wizard — Mono-Versal-Zeile, Prozent, horizontaler Balken. -->
     <div class="mt-4">
