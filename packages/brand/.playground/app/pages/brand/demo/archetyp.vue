@@ -34,7 +34,7 @@ function pick() {
 
     <template #default>
       <p class="bw-label uppercase tracking-widest" style="color: var(--bw-muted)">Brand Foundation · Archetyp</p>
-      <h1 class="mt-1 mb-6 text-5xl">Welcher Charakter ist eure Marke?</h1>
+      <h1 class="mt-1 mb-6 text-[40px] leading-tight">Welcher Charakter ist eure Marke?</h1>
       <BwPairCompare :a="pairs[Math.min(round, pairs.length - 1)]!.a" :b="pairs[Math.min(round, pairs.length - 1)]!.b" @pick="pick" />
       <p class="mt-4 text-sm" style="color: var(--bw-muted)">Paar {{ Math.min(round + 1, 8) }} von 8 · Bauchgefühl reicht</p>
     </template>

@@ -54,7 +54,7 @@ function confirmPick() {
 
     <template #default>
       <p class="bw-label uppercase tracking-widest" style="color: var(--bw-muted)">Brand Foundation</p>
-      <h1 class="mt-1 text-5xl">Kailua Coffee Co.</h1>
+      <h1 class="mt-1 text-[40px] leading-tight">Kailua Coffee Co.</h1>
 
       <BwChapter title="Purpose" state="confirmed">
         <p style="color: var(--bw-ink-soft)">We exist so that busy people on Oʻahu get one honest, quiet moment a day — a cup that was grown, roasted and served by people they can name.</p>
