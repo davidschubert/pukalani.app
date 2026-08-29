@@ -129,6 +129,24 @@
 .bw-chapter { border-top: 1px solid var(--bw-line); padding: 1.6rem 0 1.9rem; }
 .bw-chapter:first-child { border-top: 0; }
 
+/* Ergebnis-Hero (Iteration 2): Farbverlauf der Marke unter feinem
+   Korn (SVG-Rauschen) — die Verlaufsfarben kommen als Inline-Variablen
+   aus dem Inhalt, das Korn ist System. */
+.bw-grain-hero {
+  position: relative; overflow: hidden;
+  border-radius: var(--bw-radius-card);
+  background: linear-gradient(135deg, var(--hero-a, #e8d3b8), var(--hero-b, #b98a5e) 45%, var(--hero-c, #4a3123));
+  color: #f7f2ea;
+}
+@supports (corner-shape: superellipse(2)) {
+  .bw-grain-hero { corner-shape: superellipse(2); border-radius: 44px; }
+}
+.bw-grain-hero::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: 0.18; mix-blend-mode: overlay;
+}
+
 /* Kapitelabschluss-Moment (Iteration 2): einmaliges Aufblitzen in der
    Fertig-Farbe; bei reduzierter Bewegung entfällt es. */
 @keyframes bw-celebrate { 0% { background: var(--bw-accent-soft); } 100% { background: transparent; } }
