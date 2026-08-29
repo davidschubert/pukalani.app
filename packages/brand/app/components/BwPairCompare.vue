@@ -13,7 +13,7 @@ defineEmits<{ pick: [id: string] }>()
     <button v-for="card in [a, b]" :key="card.id" class="bw-pair-card" @click="$emit('pick', card.id)">
       <p class="text-3xl font-light leading-snug tracking-tight">„{{ card.motto }}"</p>
       <p class="mt-2 text-sm" style="color: var(--bw-ink-soft)">{{ card.mood }}</p>
-      <p class="mt-9 text-xs uppercase tracking-wider" style="color: var(--bw-muted)">wie {{ card.brands }}</p>
+      <p class="bw-label mt-9 uppercase tracking-wider" style="color: var(--bw-muted)">wie {{ card.brands }}</p>
     </button>
   </div>
 </template>

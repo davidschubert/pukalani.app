@@ -35,7 +35,7 @@ const helpMenu = [[
               stroke-linecap="round" :stroke-dasharray="RING" :stroke-dashoffset="RING * (1 - progressPct / 100)"
             />
           </svg>
-          <span class="bw-num text-base" style="color: var(--bw-ink)">{{ progressPct }}&thinsp;%</span> abgeschlossen
+          <span class="bw-label"><span style="color: var(--bw-ink)">{{ progressPct }}&thinsp;%</span> <span style="color: var(--bw-muted)">abgeschlossen</span></span>
         </span>
         <!-- Kein Dauer-Badge (Runde 4): Autosave ist Vertrag, Stille heißt
              gespeichert. Hier erscheinen NUR Abweichungs-Zustände (§3e):

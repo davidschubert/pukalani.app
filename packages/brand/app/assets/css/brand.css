@@ -152,7 +152,7 @@
   padding: 0.45rem 0.7rem; max-width: 85%;
 }
 .bw-msg-body { font-size: 0.925rem; line-height: 1.55; color: var(--bw-ink); max-width: 38rem; }
-.bw-msg-help { font-size: 0.8rem; color: var(--bw-muted); margin-top: 0.15rem; }
+.bw-msg-help { font-family: var(--bw-font-mono); font-size: 12px; line-height: 18px; color: var(--bw-muted); margin-top: 0.15rem; }
 
 /* Chips: Empfehlung-zuerst, Tastatur-Fokus sichtbar */
 .bw-chip {
