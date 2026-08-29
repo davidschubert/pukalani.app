@@ -11,6 +11,14 @@ const mode = ref<'stage' | 'george'>('george')
 const { locale, locales } = useI18n()
 const switchLocalePath = useSwitchLocalePath()
 const LOCALE_FLAGS: Record<string, string> = { en: 'i-circle-flags-us', de: 'i-circle-flags-de' }
+/* Erscheinungsbild nach Pukalani-Muster (DisplaySettingsMenu im
+ * themes-Layer): Hell/Dunkel/System über colorMode.preference. */
+const colorMode = useColorMode()
+const APPEARANCE = [
+  ['light', 'Hell', 'i-ph-sun'],
+  ['dark', 'Dunkel', 'i-ph-moon'],
+  ['system', 'System', 'i-ph-monitor'],
+] as const
 const userMenu = computed(() => [[
   { label: `Inhaltssprache: ${props.contentLocale.toUpperCase()}`, icon: 'i-ph-translate', disabled: true },
   {
@@ -22,6 +30,17 @@ const userMenu = computed(() => [[
       type: 'checkbox' as const,
       checked: entry.code === locale.value,
       to: switchLocalePath(entry.code),
+    })),
+  },
+  {
+    label: 'Erscheinungsbild',
+    icon: 'i-ph-sun-horizon',
+    children: APPEARANCE.map(([mode, label, icon]) => ({
+      label,
+      icon,
+      type: 'checkbox' as const,
+      checked: colorMode.preference === mode,
+      onSelect: (event: Event) => { event.preventDefault(); colorMode.preference = mode },
     })),
   },
 ], [
