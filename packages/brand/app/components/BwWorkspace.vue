@@ -10,6 +10,8 @@ const props = defineProps<{
   progressSubnote?: string
   /* §3e: NUR Abweichungs-Zustände erscheinen — Stille heißt gespeichert. */
   syncState?: 'saving' | 'offline' | 'conflict' | null
+  /* Runde 78 (David): der Fuß IST der Einstieg ins kombinierte Branding. */
+  progressTo?: string
 }>()
 const SYNC = {
   saving: { label: 'Speichert …', icon: 'i-ph-circle-notch', spin: true, tone: 'var(--bw-muted)' },
@@ -27,6 +29,7 @@ const LOCALE_FLAGS: Record<string, string> = { en: 'i-circle-flags-us', de: 'i-c
 /* Erscheinungsbild nach Pukalani-Muster (DisplaySettingsMenu im
  * themes-Layer): Hell/Dunkel/System über colorMode.preference. */
 const colorMode = useColorMode()
+const NuxtLinkComp = resolveComponent('NuxtLink')
 const APPEARANCE = [
   ['light', 'Hell', 'i-ph-sun'],
   ['dark', 'Dunkel', 'i-ph-moon'],
@@ -102,18 +105,25 @@ const userMenu = computed(() => [[
         <div class="min-h-0 flex-1 overflow-y-auto pr-3"><slot name="rail" /></div>
         <!-- Runde 48 (David): Gesamt-Fortschritt unten links statt Ring in
              der Topbar — Balken wie im Info-Layer. -->
-        <div class="flex-none pt-5">
+        <component
+          :is="progressTo ? NuxtLinkComp : 'div'" :to="progressTo"
+          class="-mx-2 block flex-none rounded-xl px-2 pb-2 pt-5 transition-colors"
+          :class="progressTo ? 'hover:bg-[var(--bw-surface)]' : ''"
+        >
           <div class="flex items-baseline justify-between gap-3">
             <p v-if="progressNote" class="bw-label uppercase tracking-wider" style="color: var(--bw-muted)">
               {{ progressNote }}
               <span v-if="progressSubnote" class="block">{{ progressSubnote }}</span>
             </p>
-            <span class="bw-label flex-none uppercase tracking-wider whitespace-nowrap">{{ progressPct }}&thinsp;%</span>
+            <span class="bw-label flex flex-none items-center gap-1 uppercase tracking-wider whitespace-nowrap">
+              {{ progressPct }}&thinsp;%
+              <UIcon v-if="progressTo" name="i-ph-arrow-right" class="size-3.5" style="color: var(--bw-ink-soft)" />
+            </span>
           </div>
           <div class="mt-2 h-1.5 overflow-hidden rounded-full" style="background: var(--bw-line)">
             <div class="h-full rounded-full transition-all" :style="`width: ${progressPct}%; background: var(--bw-accent)`" />
           </div>
-        </div>
+        </component>
       </aside>
       <main class="bw-stage"><div class="bw-stage-inner"><slot /></div></main>
       <aside class="bw-george"><slot name="george" /></aside>

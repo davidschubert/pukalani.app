@@ -17,6 +17,10 @@ export interface BwRailStep {
   slots?: string
   minutes?: string
   info?: BwRailStepInfo
+  /* Runde 78 (David): 'result' = Ergebnis-Ansicht der Schicht — letzter
+   * Punkt der Gruppe, verlinkt statt Info-Icon, gesperrt bis alles fertig. */
+  kind?: 'result'
+  to?: string
 }
 export interface BwRailLayer {
   id: string
@@ -56,6 +60,22 @@ const infoPct = computed(() => {
           <ul class="mt-2.5 space-y-1">
           <li v-for="step in layer.steps" :key="step.id">
             <button
+              v-if="step.kind === 'result'"
+              class="flex w-full items-center gap-3 rounded-full py-2.5 pl-2 pr-2 text-left text-sm"
+              :disabled="step.state !== 'done'"
+              :style="step.state === 'done' ? 'background: var(--bw-surface); color: var(--bw-ink)' : 'background: var(--bw-surface); color: var(--bw-muted)'"
+              @click="step.to && navigateTo(step.to)"
+            >
+              <span class="grid size-7 flex-none place-items-center rounded-full" :style="step.state === 'done' ? 'background: var(--bw-accent-soft)' : 'background: var(--bw-surface-hi)'">
+                <UIcon name="i-ph-sparkle" class="size-4" :style="step.state === 'done' ? 'color: var(--bw-accent)' : 'color: var(--bw-muted)'" />
+              </span>
+              <span class="min-w-0 flex-1">{{ step.label }}</span>
+              <span class="grid size-7 flex-none place-items-center rounded-full">
+                <UIcon :name="step.state === 'done' ? 'i-ph-arrow-right' : 'i-ph-lock-simple'" class="size-4" :style="step.state === 'done' ? 'color: var(--bw-ink-soft)' : 'color: var(--bw-muted)'" />
+              </span>
+            </button>
+            <button
+              v-else
               class="flex w-full items-center gap-3 rounded-full py-2.5 pl-2 pr-2 text-left text-sm"
               :disabled="step.state === 'open'"
               :style="step.state === 'active' ? 'background: var(--bw-surface-hi); color: var(--bw-ink); font-weight: 600; box-shadow: var(--bw-shadow-card)' : 'background: var(--bw-surface); color: ' + (step.state === 'open' ? 'var(--bw-muted)' : 'var(--bw-ink-soft)')"
@@ -84,7 +104,7 @@ const infoPct = computed(() => {
       <template v-for="layer in layers" :key="layer.id">
         <UIcon v-if="layer.locked" name="i-ph-lock-simple" style="color: var(--bw-muted)" />
         <button
-          v-for="step in layer.steps" v-else :key="step.id"
+          v-for="step in (layer.steps ?? []).filter(st => st.kind !== 'result')" v-else :key="step.id"
           class="grid place-items-center" :aria-label="`Was bedeutet ${step.label}?`"
           :disabled="!step.info" @click="step.info && (infoStep = { step, layerLabel: layer.label })"
         >

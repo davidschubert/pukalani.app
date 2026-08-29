@@ -89,6 +89,7 @@ export const demoRail: BwRailLayer[] = [
           ],
         },
       },
+      { id: 'foundation-result', kind: 'result', label: 'Ergebnis', icon: '', state: 'open', to: '/brand/demo/ergebnis' },
     ],
   },
   {
@@ -125,6 +126,7 @@ export const demoRail: BwRailLayer[] = [
           ],
         },
       },
+      { id: 'verbal-result', kind: 'result', label: 'Ergebnis', icon: '', state: 'open', to: '/brand/demo/ergebnis' },
     ],
   },
   { id: 'design', label: 'Brand Design', locked: true, lockedNote: 'Baut auf deiner Foundation auf' },
