@@ -822,11 +822,30 @@ Phase 1 = Schicht 1 + verbale Hälfte von 2 · Phase 2 = visuelle Hälfte von
   Designer-Arbeit UND perspektivisch für die KI-Produkte der Plattform
   (eine Community-KI, die in der Marken-Stimme antwortet).
 - **Nomenklatur-Regelwerk** je Produkttyp (Ausbau von B2).
-- **Discover-Seite** (Davids Idee 2026-08-27): abgeschlossene Brands
-  optional öffentlich (separates `publicationVisibility`-Feld, Opt-in —
-  kommt ERST mit Discover, Audit 6), Galerie mit
-  „Trending"/„Popular" (braucht Aufruf-Metriken) und **Featured Creators**
-  (Betreiber-Kuration). Bewusst NICHT Phase 1: zum Launch wäre die Seite
+- **Discover-Seite** (Davids Idee 2026-08-27, ausgebaut 2026-08-29 mit
+  Brand Score): abgeschlossene Brands optional öffentlich (separates
+  `publicationVisibility`-Feld, Opt-in — kommt ERST mit Discover,
+  Audit 6). SORTIERUNGEN/FILTER: Weiche (Neugründung/Rebrand), Branche,
+  Brand Score, Nutzer-Bewertung, Trending/Popular (Aufruf-Metriken),
+  Neueste — plus die Filter, die NUR wir haben: **Archetyp** und
+  **Farbwelt** (strukturierte Strategie-Daten als Browsing-Achsen).
+  FORMATE: **Vorher/Nachher-Slider bei Rebrands** (das teilbarste
+  Format der Branche), **Anatomie-Ansicht** je Brand (Purpose, Werte,
+  Archetyp, Score — jede öffentliche Brand = indexierbare Seite, die
+  SEO/GEO-Maschine für branding.supply), kuratierte **Collections**
+  und **Brand of the Day**/Featured (Betreiber-Kuration =
+  awwwards-Jury). NUTZER-BEWERTUNG in 2–3 Dimensionen (z. B. Klarheit /
+  Mut / Handwerk) statt 5 Sternen, nur eingeloggt. **Creator-Profile**:
+  veröffentlichte Brandings, Ø-Score, Auszeichnungen, perspektivisch
+  „Creator beauftragen" (Marktplatz-Keim; Nähe zu freelancer.supply
+  prüfen). ACHTUNG, bewusste KEHRTWENDE: öffentliche Profile
+  widersprechen der bisherigen Handle-Regel („keine öffentlichen
+  Profile", AH-7) — nur per Opt-in und als eigene Entscheidung bei
+  Discover-Bau. AGGREGIERTE INSIGHTS („meistgewählte Werte",
+  Archetyp-Verteilung je Branche) anonymisiert als Content-Marketing.
+  GRENZE: KEIN „Remix"/„Als Vorlage nutzen" an fremden Brandings —
+  Marken sind keine Templates; der CTA heißt immer „Starte deine
+  eigene". Bewusst NICHT Phase 1: zum Launch wäre die Seite
   leer, und öffentliche Nutzerinhalte brauchen den Moderations-Pfad
   (moderation-Layer existiert, muss aber verdrahtet werden). Vorbereitet
   in Phase 1 durch das Snapshot-Share-Modell (§6). Doppelnutzen: Social Proof
