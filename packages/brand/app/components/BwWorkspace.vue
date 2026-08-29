@@ -47,7 +47,7 @@ const userMenu = computed(() => [[
 
     <div class="bw-zones">
       <aside class="bw-rail flex flex-col">
-        <div class="min-h-0 flex-1 overflow-y-auto"><slot name="rail" /></div>
+        <div class="min-h-0 flex-1 overflow-y-auto pr-3"><slot name="rail" /></div>
         <!-- Runde 48 (David): Gesamt-Fortschritt unten links statt Ring in
              der Topbar — Balken wie im Info-Layer. -->
         <div class="flex-none pt-5">
