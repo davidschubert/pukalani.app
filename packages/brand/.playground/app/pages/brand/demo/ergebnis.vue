@@ -34,10 +34,10 @@ const palette = [
 
     <template #default>
       <p class="bw-label uppercase tracking-widest" style="color: var(--bw-muted)">Brand Foundation · Ergebnis</p>
-      <h1 class="mt-1 text-4xl leading-tight">Eure Foundation steht.</h1>
+      <h1 class="mt-1 text-4xl leading-tight">Eure Brand Foundation ist fertig.</h1>
 
       <!-- Grain-Hero: die Marke als ein Stück -->
-      <div class="bw-grain-hero mt-6 px-10 py-12" style="--hero-a: #e8d3b8; --hero-b: #b98a5e; --hero-c: #4a3123">
+      <div class="bw-grain-hero mt-6 p-10" style="--hero-a: #e8d3b8; --hero-b: #b98a5e; --hero-c: #4a3123">
         <p class="bw-label uppercase tracking-widest" style="color: rgb(247 242 234 / 0.7)">Kailua Coffee Co.</p>
         <p class="mt-4 max-w-xl text-3xl font-extralight leading-snug tracking-tight">
           One honest, quiet moment a day.
@@ -53,10 +53,10 @@ const palette = [
       <div class="mt-6 grid gap-4 sm:grid-cols-2">
         <div class="bw-card p-6">
           <p class="bw-label" style="color: var(--bw-muted)">Farbwelt (Vorschlag)</p>
-          <div class="mt-4 flex gap-2">
-            <div v-for="c in palette" :key="c.hex" class="min-w-0 flex-1">
-              <div class="rounded-xl" :style="`background: ${c.hex}; height: 3.5rem`" />
-              <p class="bw-label mt-1.5 truncate" style="color: var(--bw-muted)">{{ c.name }}</p>
+          <div class="mt-4 flex flex-wrap gap-2">
+            <div v-for="c in palette" :key="c.hex" class="flex flex-col items-center gap-1.5">
+              <div class="rounded-full" :style="`background: ${c.hex}; width: 2.75rem; height: 2.75rem`" />
+              <p class="bw-label" style="color: var(--bw-muted)">{{ c.name }}</p>
             </div>
           </div>
           <p class="bw-pending mt-3">Wird im Brand Design entschieden — hergeleitet aus eurer Foundation.</p>
