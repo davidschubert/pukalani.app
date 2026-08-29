@@ -9,7 +9,7 @@ const pairs = [
   { a: { id: 'creator', motto: 'Was vorstellbar ist, ist baubar', mood: 'Erfinderisch, ausdrucksstark, verliebt ins Machen.', brands: 'eine Werkstatt mit offener Tür' }, b: { id: 'caregiver', motto: 'Kümmern ist keine Schwäche', mood: 'Warm, verlässlich, zuerst der Mensch.', brands: 'ein Ort, an dem man aufatmet' } },
 ]
 const messages = ref<BwMessage[]>([
-  { id: 'm1', role: 'george', text: 'Aus deinem Auftritt lese ich eine Hypothese: viel Sage, ein Rest Creator. Prüfen wir das — welcher der beiden Sätze ist eher ihr?', help: 'Kein Richtig oder Falsch. 8 kurze Paare, dann rechne ich dein Profil.' },
+  { id: 'm1', role: 'george', text: 'Aus deinem Auftritt lese ich eine Hypothese: viel vom Weisen, ein Rest Schöpfer. Prüfen wir das — welcher der beiden Sätze ist eher ihr?', help: 'Kein Richtig oder Falsch. 8 kurze Paare, dann rechne ich dein Profil.' },
 ])
 function pick() {
   if (round.value < pairs.length - 1) {
