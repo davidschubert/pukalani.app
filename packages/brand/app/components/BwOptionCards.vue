@@ -49,7 +49,7 @@ function submitOwn() {
           <UIcon name="i-ph-info" class="size-4.5" style="color: var(--bw-ink-soft)" />
         </span>
       </button>
-      <p v-if="o.why && openWhy === o.id" class="mt-2 rounded-xl px-3 py-2.5 text-sm" style="background: var(--bw-surface); color: var(--bw-ink-soft)">
+      <p v-if="o.why && openWhy === o.id" class="bw-label mt-2 rounded-xl px-3 py-2.5" style="background: var(--bw-surface); color: var(--bw-ink-soft)">
         {{ o.why }}
       </p>
     </div>
