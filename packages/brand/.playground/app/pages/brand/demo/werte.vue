@@ -58,6 +58,13 @@ function confirmPick() {
 
       <BwChapter title="Purpose" state="confirmed">
         <p style="color: var(--bw-ink-soft)">We exist so that busy people on Oʻahu get one honest, quiet moment a day — a cup that was grown, roasted and served by people they can name.</p>
+        <BwSlotList
+          :slots="[
+            { id: 'purpose', label: 'Purpose-Satz', value: 'One honest, quiet moment a day.', state: 'done' },
+            { id: 'why', label: 'Warum es euch gibt', value: 'Kaffee mit nachvollziehbarer Herkunft — Anbau, Röstung, Ausschank aus einer Hand.', state: 'done' },
+            { id: 'anti', label: 'Anti-Purpose (was ihr nie sein wollt)', state: 'open' },
+          ]"
+        />
       </BwChapter>
 
       <BwChapter title="Werte" :state="phase === 'done' ? 'draft' : 'empty'">

@@ -8,7 +8,7 @@ export const demoRail: BwRailLayer[] = [
     steps: [
       { id: 'context', label: 'Kontext', icon: 'i-ph-globe-simple', state: 'done' },
       { id: 'pvm', label: 'Purpose · Vision · Mission', icon: 'i-ph-target', state: 'done' },
-      { id: 'values', label: 'Werte', icon: 'i-ph-scales', state: 'active', slots: '2 von 5 geklärt', minutes: '~8 Min' },
+      { id: 'values', label: 'Werte', icon: 'i-ph-scales', state: 'active', slots: '2 von 5 Bausteinen', minutes: '~8 Min' },
       { id: 'archetype', label: 'Archetyp & Stimme', icon: 'i-ph-mask-happy', state: 'open' },
       { id: 'manifesto', label: 'Manifest', icon: 'i-ph-scroll', state: 'open' },
     ],
