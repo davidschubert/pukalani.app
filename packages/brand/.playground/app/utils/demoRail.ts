@@ -94,7 +94,7 @@ export const demoRail: BwRailLayer[] = [
   },
   {
     id: 'verbal',
-    label: 'Markensprache',
+    label: 'Brand Language',
     steps: [
       {
         id: 'messaging',
