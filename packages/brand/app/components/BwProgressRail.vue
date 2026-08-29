@@ -17,13 +17,13 @@ defineProps<{ layers: BwRailLayer[] }>()
       <div v-for="layer in layers" :key="layer.id">
         <div v-if="layer.locked" class="flex items-start justify-between gap-2 pr-1.5" style="color: var(--bw-muted)">
           <div>
-            <div class="text-xs uppercase tracking-wider">{{ layer.label }}</div>
+            <div class="bw-label uppercase tracking-wider">{{ layer.label }}</div>
             <p class="mt-0.5 text-xs">{{ layer.lockedNote }}</p>
           </div>
           <UIcon name="i-ph-lock-simple" class="mt-0.5 size-4 flex-none" />
         </div>
         <template v-else>
-          <div class="text-xs uppercase tracking-wider" style="color: var(--bw-ink-soft)">
+          <div class="bw-label uppercase tracking-wider" style="color: var(--bw-ink-soft)">
             {{ layer.label }}
           </div>
           <ul class="mt-2 space-y-1.5">

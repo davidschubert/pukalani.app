@@ -53,7 +53,7 @@ function confirmPick() {
     </template>
 
     <template #default>
-      <p class="text-xs uppercase tracking-widest" style="color: var(--bw-muted)">Brand Foundation</p>
+      <p class="bw-label uppercase tracking-widest" style="color: var(--bw-muted)">Brand Foundation</p>
       <h1 class="mt-1 text-2xl">Kailua Coffee Co.</h1>
 
       <BwChapter title="Purpose" state="confirmed">

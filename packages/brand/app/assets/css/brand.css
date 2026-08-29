@@ -82,6 +82,10 @@
 
 /* Dot-Matrix-Ziffern (Runde 9, Referenz superpower) — das
    Signature-Element für Zahlen: Prozent, Zähler, später Scores. */
+/* Etiketten (Runde 11, David): Geist Mono, 12px / 18px — Leisten-
+   Überschriften, Eyebrows, Zustands-Badges. */
+.bw-label { font-family: var(--bw-font-mono); font-size: 12px; line-height: 18px; }
+
 .bw-num { font-family: var(--bw-font-pixel); font-weight: 700; letter-spacing: 0.05em; font-variant-numeric: tabular-nums; }
 .bw-pop-chip {
   display: inline-flex; align-items: center;
@@ -124,8 +128,9 @@
 /* Zustands-Kennzeichen (nie nur Farbe: Icon + Text) */
 .bw-state {
   display: inline-flex; align-items: center; gap: 0.35rem;
-  font-size: 0.72rem; letter-spacing: 0.04em; text-transform: uppercase;
-  padding: 0.15rem 0.5rem; border-radius: 999px; border: 1px solid var(--bw-line-strong);
+  font-family: var(--bw-font-mono); font-size: 12px; line-height: 18px;
+  letter-spacing: 0.04em; text-transform: uppercase;
+  padding: 0.15rem 0.55rem; border-radius: 999px; border: 1px solid var(--bw-line-strong);
   color: var(--bw-muted);
 }
 .bw-state--draft { color: var(--bw-draft); border-color: var(--bw-draft); background: var(--bw-draft-soft); }
