@@ -903,7 +903,12 @@ VERSCHOBEN auf Discover: nur als Perzentil in der eigenen Kategorie
 („besser als 78 % der Gastronomie-Brands") und nur bei Opt-in-
 Öffentlichkeit — ein Café gegen ein SaaS zu ranken wäre unfair und
 angreifbar. Score-VERLAUF über die Zeit gehört zu Brand Monitoring
-(Schicht 6) und ist dort Teil des Abo-Arguments.
+(Schicht 6) und ist dort Teil des Abo-Arguments. Referenz-Vorbild
+(David, 2026-08-29): **awwwards.com** — Dimensionen statt Schulnote,
+Reifegrad statt Scham trotz Geschmacks-Thema; daraus übernommen:
+AUSZEICHNUNGS-MOMENTE statt Dauer-Ranking („Brand of the Day" /
+Featured als Betreiber-Kuration im Discover = strukturell die
+awwwards-Jury).
 
 ### BEWUSST NICHT aufgenommen
 
