@@ -12,6 +12,8 @@ const props = defineProps<{
   syncState?: 'saving' | 'offline' | 'conflict' | null
   /* Runde 78 (David): der Fuß IST der Einstieg ins kombinierte Branding. */
   progressTo?: string
+  /* Runde 96 (David): der Brand Score gehört an den Branding-Einstieg. */
+  score?: number
 }>()
 const SYNC = {
   saving: { label: 'Speichert …', icon: 'i-ph-circle-notch', spin: true, tone: 'var(--bw-muted)' },
@@ -117,6 +119,7 @@ const userMenu = computed(() => [[
               <UIcon name="i-ph-sparkle" class="size-4" style="color: var(--bw-accent)" />
             </span>
             <span class="min-w-0 flex-1 font-medium">Euer Branding</span>
+            <BwScoreRing v-if="score !== undefined" :value="score" :size="28" class="flex-none" />
             <span class="grid size-7 flex-none place-items-center rounded-full">
               <UIcon name="i-ph-arrow-right" class="size-4" style="color: var(--bw-ink-soft)" />
             </span>
