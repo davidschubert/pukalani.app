@@ -26,7 +26,7 @@ defineProps<{ layers: BwRailLayer[] }>()
           <div class="bw-label uppercase tracking-wider" style="color: var(--bw-ink-soft)">
             {{ layer.label }}
           </div>
-          <ul class="mt-2.5 space-y-2">
+          <ul class="mt-2.5 space-y-1">
           <li v-for="step in layer.steps" :key="step.id">
             <button
               class="flex w-full items-center gap-3 rounded-full py-2.5 pl-4 pr-2 text-left text-sm"
