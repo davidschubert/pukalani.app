@@ -139,9 +139,9 @@ export const demoRail: BwRailLayer[] = [
       minutes: '~35 Min',
       bausteine: [
         { label: 'Farbwelt', note: 'Basisfarbe aus Archetyp + Werten, Hell-/Dunkel-Rampe mit geprüften Kontrast-Paaren, Akzent, Einsatzregeln.' },
-        { label: 'Typografie', note: 'Schriftrollen (Text, Überschrift, Mono), Grade und Hierarchie.' },
+        { label: 'Typografie', note: 'Schriftrollen (Text, Überschrift, Mono), Grade und Hierarchie — vorgeschlagen aus Stimme und Archetyp.' },
         { label: 'Logo & Zeichen', note: 'Wort-/Bildmarke, Varianten (App-Icon, Avatar), Schutzraum und Minimalgrößen.' },
-        { label: 'Bildsprache & Ikonografie', note: 'Fotografie-Stil, Illustrations- und Icon-Stil.' },
+        { label: 'Bildsprache & Ikonografie', note: 'Fotografie-Stil, Illustrations- und Icon-Stil — mit Do-&-Don’t-Beispielen zum Fühlen.' },
         { label: 'Motion', note: 'Tempo-Charakter, kinetisches Logo, reduced-motion-Verhalten.' },
       ],
     },
@@ -157,7 +157,7 @@ export const demoRail: BwRailLayer[] = [
       bausteine: [
         { label: 'Brand Book', note: 'Kapitel aus euren Schichten, Do-&-Don’t-Beispiele, AI-Guidelines (was KI im Namen der Marke darf).' },
         { label: 'Kit & Design Tokens', note: 'Token-Set hell/dunkel, Exporte (CSS, Tailwind, Figma), maschinenlesbares brand.json.' },
-        { label: 'Templates', note: 'Social-Set mit festen Wiedererkennungs-Ankern, Basis-Vorlagen.' },
+        { label: 'Templates', note: 'Social-Set mit festen Wiedererkennungs-Ankern, Basis-Vorlagen für Dokumente und Präsentationen.' },
       ],
     },
   },
