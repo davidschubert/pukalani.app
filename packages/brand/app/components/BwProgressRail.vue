@@ -13,7 +13,7 @@ defineProps<{ layers: BwRailLayer[] }>()
 
 <template>
   <nav aria-label="Fortschritt">
-    <div class="bw-rail-full space-y-5">
+    <div class="bw-rail-full space-y-10">
       <div v-for="layer in layers" :key="layer.id">
         <div v-if="layer.locked" class="flex items-start justify-between gap-2 pr-1.5" style="color: var(--bw-muted)">
           <div>
