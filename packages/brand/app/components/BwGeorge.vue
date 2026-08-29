@@ -12,7 +12,7 @@ const draft = ref('')
     <div class="flex items-center gap-2.5 border-b px-6 pt-2 pb-3.5" style="border-color: var(--bw-line)">
       <span class="bw-msg-mark">G</span>
       <span class="leading-tight">
-        <span class="block text-sm font-semibold">George</span>
+        <span class="block text-[28px] font-normal leading-tight">George</span>
         <span class="block text-xs" style="color: var(--bw-muted)">Persönlicher Markenberater</span>
       </span>
     </div>
