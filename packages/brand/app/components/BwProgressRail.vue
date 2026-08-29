@@ -57,12 +57,12 @@ const infoPct = computed(() => {
               <p v-if="layer.locked && layer.lockedNote" class="mt-0.5 text-xs">{{ layer.lockedNote }}</p>
             </div>
             <span
-              v-if="layer.locked && layer.info"
+              v-if="layer.info"
               class="bw-info-btn grid size-7 flex-none place-items-center rounded-full"
               role="button" tabindex="0"
               :aria-label="`Was kommt in ${layer.label}?`"
-              @click="infoStep = { step: { id: layer.id, label: layer.label, icon: '', state: 'open', info: layer.info }, layerLabel: layer.lockedNote ?? '' }"
-              @keydown.enter="infoStep = { step: { id: layer.id, label: layer.label, icon: '', state: 'open', info: layer.info }, layerLabel: layer.lockedNote ?? '' }"
+              @click="infoStep = { step: { id: layer.id, label: layer.label, icon: '', state: 'open', info: layer.info }, layerLabel: layer.lockedNote ?? 'Übersicht' }"
+              @keydown.enter="infoStep = { step: { id: layer.id, label: layer.label, icon: '', state: 'open', info: layer.info }, layerLabel: layer.lockedNote ?? 'Übersicht' }"
             >
               <UIcon name="i-ph-info" class="size-4.5" />
             </span>
