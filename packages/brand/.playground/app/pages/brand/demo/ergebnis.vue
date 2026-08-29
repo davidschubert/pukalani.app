@@ -99,7 +99,7 @@ const palette = [
             <p class="bw-label" style="color: var(--bw-draft)">Herausragend</p>
           </div>
           <div class="min-w-0 flex-1 space-y-3.5" style="min-width: 18rem">
-            <div v-for="d in scoreDims" :key="d.label" class="grid grid-cols-[11rem_1fr_2.5rem] items-center gap-3">
+            <div v-for="d in scoreDims" :key="d.label" class="grid grid-cols-[12rem_1fr_2.5rem] items-center gap-3">
               <p class="bw-label truncate" style="color: var(--bw-muted)">{{ d.label }}</p>
               <template v-if="d.value !== undefined">
                 <div class="h-1.5 overflow-hidden rounded-full" style="background: var(--bw-line)">
