@@ -9,7 +9,7 @@
   --bw-surface-hi: #fbfbfa;
   --bw-ink: #1b1b1a;
   --bw-ink-soft: #4a4a48;
-  --bw-muted: #8e8e8b;
+  --bw-muted: #676764;
   --bw-line: #dededb;
   --bw-line-strong: #c6c6c3;
   --bw-accent: #449e5b;
@@ -43,7 +43,7 @@
   --bw-surface-hi: #2b2c2b;
   --bw-ink: #ececea;
   --bw-ink-soft: #c3c3c0;
-  --bw-muted: #8f8f8c;
+  --bw-muted: #9c9c99;
   --bw-line: #2f302f;
   --bw-line-strong: #454644;
   --bw-accent: #5cb974;
@@ -67,7 +67,7 @@
   padding: 1.25rem 2rem; border-bottom: 1px solid var(--bw-line);
   background: var(--bw-surface); flex: none;
 }
-.bw-zones { display: grid; grid-template-columns: 400px minmax(0,62fr) minmax(0,38fr); flex: 1; min-height: 0; }
+.bw-zones { display: grid; grid-template-columns: clamp(320px, 24vw, 400px) minmax(0,62fr) minmax(0,38fr); flex: 1; min-height: 0; }
 .bw-rail { overflow-y: auto; padding: var(--bw-gutter); }
 .bw-stage { overflow-y: auto; padding: var(--bw-gutter) clamp(1.2rem, 4vw, 3.5rem) 4rem; }
 .bw-stage-inner { max-width: 46rem; margin: 0 auto; }
@@ -124,9 +124,24 @@
 .bw-rail-full > div + div { border-top: 1px solid var(--bw-line); padding-top: 1rem; }
 
 /* Typo: das Dokument liest sich editorial */
-.bw-stage h1, .bw-stage h2 { font-weight: 200; letter-spacing: -0.02em; }
+.bw-stage h1 { font-weight: 200; letter-spacing: -0.02em; }
+.bw-stage h2 { font-weight: 500; letter-spacing: -0.01em; }
 .bw-chapter { border-top: 1px solid var(--bw-line); padding: 1.6rem 0 1.9rem; }
 .bw-chapter:first-child { border-top: 0; }
+
+/* Auswahl-Muster (UI-Audit B5): Hover = eine Tonstufe, Ausgewählt =
+   Ink-Inversion — gilt für Karten, Chips und Sprach-Pills gleich. */
+.bw-select-card { background: var(--bw-surface); transition: background 120ms, color 120ms; }
+.bw-select-card:not(.bw-select-card--on):hover { background: var(--bw-line); }
+.bw-select-card--on { background: var(--bw-ink); color: var(--bw-paper); }
+.bw-select-note { color: var(--bw-ink-soft); }
+.bw-select-card--on .bw-select-note { color: var(--bw-line); }
+.bw-option-card { background: var(--bw-surface-hi); box-shadow: var(--bw-shadow-card); transition: background 120ms; }
+.bw-option-card:hover { background: var(--bw-line); }
+/* Info-Buttons (Audit D17): Ruheton muted, Hover Pop mit Ink-Zeichen. */
+.bw-info-btn { color: var(--bw-muted); transition: background 120ms, color 120ms; }
+.bw-info-btn:hover, .bw-info-btn:focus-visible { background: var(--bw-pop); color: var(--bw-ink); }
+.bw-send:disabled { opacity: 0.45; }
 
 /* Senden-Knopf (Runde 49, David): Pop-Gelbgrün, Hover invertiert. */
 .bw-send { background: var(--bw-pop) !important; color: var(--bw-ink) !important; }
@@ -135,6 +150,7 @@
 /* Zeiger-Regel (Runde 47, David): alles Klickbare zeigt die Hand —
    Tailwind 4 setzt buttons auf cursor:default, das gilt hier nicht. */
 .bw-root button:not(:disabled), .bw-root [role='button'] { cursor: pointer; }
+.bw-root :is(button, [role='button'], a):focus-visible { outline: 2px solid var(--bw-ink); outline-offset: 2px; }
 
 /* Noch-nicht-Texte (Davids Regel, Runde 30): Platzhalter/Wartetexte
    hellgrau in Geist Mono (12px/18px) — fertiger Inhalt steht schwarz in der Sans. Kursiv ausprobiert und verworfen (Runde 31). */
@@ -176,9 +192,9 @@
   cursor: pointer; transition: background 120ms, color 120ms;
   color: var(--bw-ink);
 }
-.bw-chip:hover { background: var(--bw-ink); color: var(--bw-paper); }
+.bw-chip:hover { background: var(--bw-line); }
 .bw-chip:focus-visible { outline: 2px solid var(--bw-ink); outline-offset: 2px; }
-.bw-chip--selected { border-color: var(--bw-ink); background: var(--bw-surface-hi); font-weight: 600; }
+.bw-chip--selected { background: var(--bw-ink); color: var(--bw-paper); font-weight: 600; }
 .bw-chip--ghost { background: transparent; box-shadow: none; border: 1px dashed var(--bw-line-strong); color: var(--bw-muted); }
 
 /* Paarvergleich */

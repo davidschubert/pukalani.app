@@ -11,7 +11,7 @@ export interface BwOptionCard {
   why?: string
 }
 defineProps<{ options: BwOptionCard[], ownPlaceholder?: string }>()
-const emit = defineEmits<{ pick: [id: string], own: [text: string] }>()
+const emit = defineEmits<{ pick: [id: string], own: [text: string], dontKnow: [] }>()
 const openWhy = ref<string | null>(null)
 const own = ref('')
 function toggleWhy(id: string) {
@@ -29,24 +29,23 @@ function submitOwn() {
   <div class="flex flex-col items-stretch gap-2">
     <div
       v-for="o in options" :key="o.id"
-      class="rounded-2xl px-4 py-3 text-left"
-      style="background: var(--bw-surface-hi); box-shadow: var(--bw-shadow-card)"
+      class="bw-option-card rounded-2xl px-4 py-3 text-left"
     >
       <button class="flex w-full items-start justify-between gap-3 text-left" @click="$emit('pick', o.id)">
         <span class="min-w-0">
-          <span class="block text-sm font-medium">
-            {{ o.label }}<span v-if="o.recommended" class="bw-pop-chip ml-1.5">Empfehlung</span>
+          <span class="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-sm font-medium">
+            {{ o.label }}<span v-if="o.recommended" class="bw-pop-chip">Empfehlung</span>
           </span>
           <span v-if="o.description" class="mt-0.5 block text-sm" style="color: var(--bw-ink-soft)">{{ o.description }}</span>
         </span>
         <span
           v-if="o.why"
-          class="grid size-7 flex-none place-items-center rounded-full transition-colors hover:bg-[var(--bw-pop)]"
+          class="bw-info-btn grid size-7 flex-none place-items-center rounded-full"
           role="button" tabindex="0"
           :aria-label="`Warum empfiehlt George ${o.label}?`" :aria-expanded="openWhy === o.id"
           @click.stop="toggleWhy(o.id)" @keydown.enter.stop="toggleWhy(o.id)"
         >
-          <UIcon name="i-ph-info" class="size-4.5" style="color: var(--bw-muted)" />
+          <UIcon name="i-ph-info" class="size-4.5" />
         </span>
       </button>
       <p v-if="o.why && openWhy === o.id" class="bw-label mt-2 rounded-xl px-3 py-2.5" style="background: var(--bw-surface); color: var(--bw-ink-soft)">
@@ -64,5 +63,9 @@ function submitOwn() {
       />
       <UButton type="submit" icon="i-ph-arrow-right" aria-label="Eigene Antwort senden" size="sm" color="neutral" variant="ghost" class="rounded-full" :disabled="!own.trim()" />
     </form>
+    <!-- Interaktionsregel 5 (Audit D16): "Weiß ich nicht" hängt IMMER hinten. -->
+    <button class="bw-chip bw-chip--ghost text-left" @click="emit('dontKnow')">
+      Weiß ich nicht
+    </button>
   </div>
 </template>

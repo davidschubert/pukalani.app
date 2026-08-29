@@ -3,12 +3,13 @@
  *  immer Icon + Text, nie nur Farbe. Entwürfe tragen Georges Handschrift. */
 const props = defineProps<{
   title: string
-  state: 'empty' | 'generating' | 'draft' | 'edited' | 'confirmed' | 'stale'
+  state: 'empty' | 'active' | 'generating' | 'draft' | 'edited' | 'confirmed' | 'stale'
   staleNote?: string
 }>()
 defineEmits<{ confirm: [] }>()
 const stateMeta = computed(() => ({
   empty: { label: 'Offen', icon: 'i-ph-circle-dashed', cls: '' },
+  active: { label: 'Im Gespräch', icon: 'i-ph-circle-half-fill', cls: '' },
   generating: { label: 'George schreibt …', icon: 'i-ph-circle-notch', cls: '' },
   draft: { label: 'Entwurf von George', icon: 'i-ph-pen-nib', cls: 'bw-state--draft' },
   edited: { label: 'Von dir bearbeitet', icon: 'i-ph-user-focus', cls: 'bw-state--draft' },

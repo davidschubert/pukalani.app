@@ -23,7 +23,7 @@ defineProps<{
         <UButton icon="i-ph-dots-three" color="neutral" variant="ghost" size="sm" aria-label="Aktionen" />
       </UDropdownMenu>
     </div>
-    <p class="mt-4 text-sm" style="color: var(--bw-ink-soft)">{{ step }}</p>
+    <p class="bw-label mt-4" style="color: var(--bw-ink-soft)">{{ step }}</p>
     <!-- Runde 52 (David): dasselbe Fortschritts-Modul wie unten links im
          Wizard — Mono-Versal-Zeile, Prozent, horizontaler Balken. -->
     <div class="mt-4">
@@ -36,7 +36,7 @@ defineProps<{
       </div>
     </div>
     <div class="mt-4 flex items-center justify-between">
-      <span class="text-xs" style="color: var(--bw-muted)">{{ edited }}</span>
+      <span class="bw-label" style="color: var(--bw-muted)">{{ edited }}</span>
       <UButton size="sm" trailing-icon="i-ph-arrow-right" label="Weiterarbeiten" color="neutral" variant="outline" class="rounded-full" style="background: var(--bw-surface-hi)" />
     </div>
   </div>

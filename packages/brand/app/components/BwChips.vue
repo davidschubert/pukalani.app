@@ -17,7 +17,7 @@ defineEmits<{ pick: [id: string], dontKnow: [] }>()
       :class="selected?.includes(o.id) ? 'bw-chip--selected' : ''"
       @click="$emit('pick', o.id)"
     >
-      {{ o.label }}<span v-if="o.recommended" class="bw-pop-chip ml-1.5">Empfehlung</span>
+      <span class="flex flex-wrap items-center gap-x-1.5 gap-y-1">{{ o.label }}<span v-if="o.recommended" class="bw-pop-chip">Empfehlung</span></span>
     </button>
     <button v-if="showDontKnow !== false" class="bw-chip bw-chip--ghost" @click="$emit('dontKnow')">
       Weiß ich nicht

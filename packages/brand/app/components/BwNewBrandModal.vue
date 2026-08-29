@@ -19,7 +19,7 @@ const langs = [
 <template>
   <UModal v-model:open="open">
     <template #content>
-      <div class="bw-root relative p-8" style="background: var(--bw-surface-hi)">
+      <div class="bw-root relative max-h-[85vh] overflow-y-auto p-8" style="background: var(--bw-surface-hi)">
         <button
           class="absolute right-5 top-5 grid size-8 place-items-center rounded-full transition-colors hover:bg-[var(--bw-line)]"
           aria-label="Schließen"
@@ -33,12 +33,12 @@ const langs = [
         <div class="mt-5 flex flex-col gap-2">
           <button
             v-for="k in kinds" :key="k.id"
-            class="w-full rounded-2xl px-4 py-3 text-left transition-colors"
-            :style="kind === k.id ? 'background: var(--bw-ink); color: var(--bw-paper)' : 'background: var(--bw-surface)'"
+            class="bw-select-card w-full rounded-2xl px-4 py-3 text-left"
+            :class="kind === k.id ? 'bw-select-card--on' : ''"
             @click="kind = k.id"
           >
             <span class="block text-sm font-medium">{{ k.label }}</span>
-            <span class="mt-0.5 block text-sm" :style="kind === k.id ? 'color: var(--bw-line)' : 'color: var(--bw-ink-soft)'">{{ k.note }}</span>
+            <span class="bw-select-note mt-0.5 block text-sm">{{ k.note }}</span>
           </button>
         </div>
 
@@ -53,8 +53,8 @@ const langs = [
         <div class="mt-2 flex gap-2">
           <button
             v-for="l in langs" :key="l.id"
-            class="flex items-center gap-2 rounded-full px-4 py-2 text-sm transition-colors"
-            :style="lang === l.id ? 'background: var(--bw-ink); color: var(--bw-paper)' : 'background: var(--bw-surface)'"
+            class="bw-select-card flex items-center gap-2 rounded-full px-4 py-2 text-sm"
+            :class="lang === l.id ? 'bw-select-card--on' : ''"
             @click="lang = l.id"
           >
             <UIcon :name="l.flag" class="size-4.5 flex-none" /> {{ l.label }}

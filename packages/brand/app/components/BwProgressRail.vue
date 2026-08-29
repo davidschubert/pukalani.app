@@ -66,13 +66,13 @@ const infoPct = computed(() => {
               <span class="min-w-0 flex-1">{{ step.label }}</span>
               <span
                 v-if="step.info"
-                class="grid size-7 flex-none place-items-center rounded-full transition-colors hover:bg-[var(--bw-pop)]"
+                class="bw-info-btn grid size-7 flex-none place-items-center rounded-full"
                 role="button" tabindex="0"
                 :aria-label="`Was bedeutet ${step.label}?`"
                 @click.stop="infoStep = { step, layerLabel: layer.label }"
                 @keydown.enter.stop="infoStep = { step, layerLabel: layer.label }"
               >
-                <UIcon name="i-ph-info" class="size-4.5" style="color: var(--bw-muted)" />
+                <UIcon name="i-ph-info" class="size-4.5" />
               </span>
             </button>
           </li>
@@ -83,17 +83,22 @@ const infoPct = computed(() => {
     <div class="bw-rail-mini flex flex-col items-center gap-3 pt-1">
       <template v-for="layer in layers" :key="layer.id">
         <UIcon v-if="layer.locked" name="i-ph-lock-simple" style="color: var(--bw-muted)" />
-        <UIcon
+        <button
           v-for="step in layer.steps" v-else :key="step.id"
-          :name="step.state === 'done' ? 'i-ph-check-circle-fill' : step.state === 'active' ? 'i-ph-circle-half-fill' : 'i-ph-circle'"
-          :style="`color: var(--bw-${step.state === 'active' ? 'accent' : 'muted'})`"
-        />
+          class="grid place-items-center" :aria-label="`Was bedeutet ${step.label}?`"
+          :disabled="!step.info" @click="step.info && (infoStep = { step, layerLabel: layer.label })"
+        >
+          <UIcon
+            :name="step.state === 'done' ? 'i-ph-check-circle-fill' : step.state === 'active' ? 'i-ph-circle-half-fill' : 'i-ph-circle'"
+            :style="`color: var(--bw-${step.state === 'active' ? 'accent' : 'muted'})`"
+          />
+        </button>
       </template>
     </div>
 
     <UModal v-model:open="infoOpen">
       <template #content>
-        <div v-if="infoStep" class="bw-root relative p-8" style="background: var(--bw-surface-hi)">
+        <div v-if="infoStep" class="bw-root relative max-h-[85vh] overflow-y-auto p-8" style="background: var(--bw-surface-hi)">
           <button
             class="absolute right-5 top-5 grid size-8 place-items-center rounded-full transition-colors hover:bg-[var(--bw-line)]"
             aria-label="Schließen"

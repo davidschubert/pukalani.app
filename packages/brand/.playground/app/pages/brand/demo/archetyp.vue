@@ -23,7 +23,7 @@ function pick() {
 </script>
 
 <template>
-  <BwWorkspace :progress-pct="86" progress-note="2 von 5 Entscheidungen · ~8 Min" content-locale="de">
+  <BwWorkspace :progress-pct="86" progress-note="18 von 21 Entscheidungen · ~10 Min" content-locale="de">
     <template #brand>
       <BwBrandSwitcher :current="{ title: 'Schubert UX Studio', path: 'Rebrand', flag: 'i-circle-flags-de' }" :others="[{ title: 'Kailua Coffee Co.', path: 'Neugründung', flag: 'i-circle-flags-us', to: '/brand/demo/werte' }]" />
     </template>

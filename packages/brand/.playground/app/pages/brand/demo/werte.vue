@@ -55,7 +55,7 @@ function confirmPick() {
 </script>
 
 <template>
-  <BwWorkspace :progress-pct="57" progress-note="2 von 5 Entscheidungen · ~8 Min" content-locale="en">
+  <BwWorkspace :progress-pct="57" progress-note="12 von 21 Entscheidungen · ~25 Min" content-locale="en">
     <template #brand>
       <BwBrandSwitcher :current="{ title: 'Kailua Coffee Co.', path: 'Neugründung', flag: 'i-circle-flags-us' }" :others="[{ title: 'Schubert UX Studio', path: 'Rebrand', flag: 'i-circle-flags-de', to: '/brand/demo/archetyp' }]" />
     </template>
@@ -79,7 +79,7 @@ function confirmPick() {
         />
       </BwChapter>
 
-      <BwChapter title="Werte" :state="phase === 'done' ? 'draft' : 'empty'">
+      <BwChapter title="Werte" :state="phase === 'done' ? 'draft' : 'active'">
         <template v-if="phase === 'done'">
           <ul class="space-y-2.5">
             <li><strong>Klartext</strong> → Wir sagen Preise, Herkunft und Grenzen, bevor jemand fragt.</li>
@@ -87,7 +87,18 @@ function confirmPick() {
             <li><strong>Nähe</strong> → Unsere Gäste kennen den Namen der Person, die ihre Bohnen geröstet hat.</li>
           </ul>
         </template>
-        <p v-else class="bw-pending">George stellt dir gerade die Werte-Fragen — dieses Kapitel füllt sich, sobald ihr die Kandidaten habt.</p>
+        <template v-else>
+          <p class="bw-pending">George stellt dir gerade die Werte-Fragen — dieses Kapitel füllt sich, sobald ihr die Kandidaten habt.</p>
+          <BwSlotList
+            :slots="[
+              { id: 'cand', label: 'Wertekandidaten', value: 'Handwerk, Klartext, Verlässlichkeit, Nähe, Eigensinn, Ruhe', state: 'done' },
+              { id: 'core', label: 'Kernwerte (3–5)', state: 'open' },
+              { id: 'rules', label: 'Verhaltensregeln', state: 'open' },
+              { id: 'anti', label: 'Anti-Werte', state: 'open' },
+              { id: 'proof', label: 'Beweise', state: 'open' },
+            ]"
+          />
+        </template>
       </BwChapter>
 
       <BwChapter title="Archetyp & Stimme" state="stale" stale-note="Deine Purpose-Änderung von gestern betrifft dieses Kapitel — George rechnet es nach der Bestätigung neu.">
@@ -104,12 +115,13 @@ function confirmPick() {
               own-placeholder="Oder beschreib es mit eigenen Worten …"
               @pick="(id) => answer(askOptions.find(o => o.id === id)!.label)"
               @own="answer"
+              @dont-know="answer('Weiß ich nicht')"
             />
           </div>
           <div v-else-if="phase === 'candidates'" class="space-y-3 pl-9">
             <BwChips :options="candidateChips" :selected="picked" :show-dont-know="false" multi @pick="pick" />
             <UButton v-if="picked.length >= 3" size="sm" icon="i-ph-check" :label="`${picked.length} Werte übernehmen`" @click="confirmPick" />
-            <p v-else class="text-xs" style="color: var(--bw-muted)">Wähle mindestens 3.</p>
+            <p v-else class="bw-label" style="color: var(--bw-muted)">Wähle mindestens 3.</p>
           </div>
         </template>
       </BwGeorge>

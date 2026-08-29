@@ -15,8 +15,8 @@ const popoverOpen = ref(false)
 <template>
   <UPopover v-model:open="popoverOpen" :content="{ align: 'start' }">
     <button
-      class="flex items-center gap-2 rounded-full border px-4 py-1.5 text-left"
-      style="border-color: var(--bw-line); background: var(--bw-surface)"
+      class="flex items-center gap-2 rounded-full px-4 py-1.5 text-left"
+      style="background: var(--bw-surface-hi); box-shadow: var(--bw-shadow-card)"
     >
       <span class="truncate font-semibold">{{ current.title }}</span>
       <UIcon name="i-ph-caret-up-down" class="flex-none" style="color: var(--bw-muted)" />

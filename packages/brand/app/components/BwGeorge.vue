@@ -27,7 +27,7 @@ watch(() => props.messages.length, async () => {
     <div ref="scroller" class="min-h-0 flex-1 overflow-y-auto px-7 py-5">
       <div class="flex min-h-full flex-col justify-end space-y-4">
       <div v-for="m in messages" :key="m.id" class="bw-msg" :class="m.role === 'user' ? 'bw-msg--user' : ''">
-        <BwGeorgeAvatar v-if="m.role === 'george'" />
+        <BwGeorgeAvatar v-if="m.role === 'george'" size="md" />
         <div class="bw-msg-body">
           <p>{{ m.text }}</p>
           <p v-if="m.help" class="bw-msg-help">{{ m.help }}</p>
@@ -38,7 +38,7 @@ watch(() => props.messages.length, async () => {
     </div>
     <form class="flex gap-2 border-t px-7 py-4" style="border-color: var(--bw-line)" @submit.prevent="draft.trim() && ($emit('send', draft), draft = '')">
       <UInput v-model="draft" variant="none" class="flex-1 rounded-full" :ui="{ base: 'rounded-full px-4' }" placeholder="Antwort schreiben — oder George etwas fragen …" size="lg" style="background: var(--bw-surface-hi)" />
-      <UButton type="submit" icon="i-ph-paper-plane-right" aria-label="Senden" size="lg" color="neutral" variant="ghost" class="bw-send rounded-full" />
+      <UButton type="submit" icon="i-ph-paper-plane-right" aria-label="Senden" size="lg" color="neutral" variant="ghost" class="bw-send rounded-full" :disabled="!draft.trim()" />
     </form>
   </div>
 </template>
