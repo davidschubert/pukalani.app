@@ -56,8 +56,8 @@ const helpMenu = [[
              der Topbar — Balken wie im Info-Layer. -->
         <div class="flex-none pt-5">
           <div class="flex items-baseline justify-between gap-3">
-            <p v-if="progressNote" class="bw-label" style="color: var(--bw-muted)">{{ progressNote }}</p>
-            <span class="bw-num text-base">{{ progressPct }}&thinsp;%</span>
+            <p v-if="progressNote" class="bw-label uppercase tracking-wider" style="color: var(--bw-muted)">{{ progressNote }}</p>
+            <span class="bw-label uppercase tracking-wider">{{ progressPct }}&thinsp;%</span>
           </div>
           <div class="mt-2 h-1.5 overflow-hidden rounded-full" style="background: var(--bw-line)">
             <div class="h-full rounded-full transition-all" :style="`width: ${progressPct}%; background: var(--bw-accent)`" />
