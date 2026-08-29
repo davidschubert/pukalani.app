@@ -93,4 +93,20 @@ export interface SystemInfo {
   layers: LayerInfo[]
   dependencies: DependencyEntry[]
   modules: string[]
+  /**
+   * Läuft in dieser App ein Ticket-Board (core-Vertrag
+   * `registerDependencyTicketCreator`)? Nur dann zeigt die Seite neben einer
+   * veralteten Version den Knopf „Update prüfen lassen".
+   */
+  dependencyTicketsAvailable: boolean
+}
+
+/** Antwort von POST /api/admin/system/dependency-ticket */
+export interface DependencyTicketResponse {
+  /** Row-Id des angelegten Tickets. */
+  ticketId: string
+  /** Paketname bzw. `appwrite-server`. */
+  name: string
+  from: string
+  to: string
 }

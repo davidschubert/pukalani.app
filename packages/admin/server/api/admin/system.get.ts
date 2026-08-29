@@ -1,33 +1,13 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import os from 'node:os'
-import type { DependencyEntry, HealthEntry, LayerInfo, SystemInfo, SystemManifest } from '../../../shared/types/system'
+import type { DependencyEntry, HealthEntry, LayerInfo, SystemInfo } from '../../../shared/types/system'
 import { DEP_GROUPS, isOutdated, latestAppwriteVersion, latestVersion, pkgVersion } from '../../utils/dependencies'
 import { layerBreakdown, workspaceRoot } from '../../utils/layers'
+import { readManifest, usableVersion } from '../../utils/systemManifestRead'
 import { LAYER_PKGS } from '../../../build/systemManifest'
 
 const MODULES = ['@nuxt/ui', '@pinia/nuxt', '@nuxtjs/i18n']
-
-/**
- * Das Bauzeit-Manifest aus der server-only runtimeConfig lesen. FAIL-SOFT:
- * ein fehlender oder kaputter Wert darf die Systemseite nie umwerfen — dann
- * gilt eben wieder die Laufzeit-Auflösung (im Dev vollständig, in Produktion
- * mit „unknown", also exakt der Zustand von vorher).
- */
-function readManifest(raw: string): SystemManifest | null {
-  if (!raw) return null
-  try {
-    return JSON.parse(raw) as SystemManifest
-  }
-  catch {
-    return null
-  }
-}
-
-/** Ein Manifest-Wert zählt nur, wenn er wirklich etwas aussagt. */
-function usableVersion(version: string | undefined): version is string {
-  return !!version && version !== 'unknown'
-}
 
 /** Nicht-interne IPv4-Adressen des Servers */
 function serverIps(): string[] {
@@ -176,5 +156,9 @@ export default defineEventHandler(async (event): Promise<SystemInfo> => {
     layers,
     dependencies,
     modules: MODULES,
+    // Gibt es in DIESER App ein Ticket-Board? Der admin-Layer kennt tickets
+    // nicht (A14) — er fragt nur den core-Vertrag, ob jemand ihn bedient. Ohne
+    // Board zeigt die Seite den „Ticket anlegen"-Knopf gar nicht erst.
+    dependencyTicketsAvailable: hasDependencyTicketCreator(),
   }
 })

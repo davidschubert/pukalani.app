@@ -681,6 +681,15 @@
         "restartNeeded": "Neustart nötig",
         "restartTitle": "Update läuft — Neustart nötig",
         "restartHint": "Der Install läuft im Hintergrund. Warte kurz und starte dann den Dev-Server neu, damit die aktualisierten Versionen geladen werden."
+      },
+      "depTicket": {
+        "tooltip": "Ticket anlegen: prüfen, ob wir updaten können",
+        "created": "Ticket für {name} angelegt",
+        "createdDesc": "Prüfen, ob wir von {from} auf {to} updaten können. Die KI-Einschätzung kommt gleich dazu.",
+        "toBoard": "Zum Board",
+        "exists": "Ticket existiert bereits.",
+        "failed": "Ticket konnte nicht angelegt werden.",
+        "failedDesc": "Es wurde nichts angelegt. Details stehen in der Server-Konsole."
       }
     }
   }

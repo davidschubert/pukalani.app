@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import type { TableColumn } from '@nuxt/ui'
-import type { SystemInfo } from '../../../shared/types/system'
+import type { DependencyTicketResponse, SystemInfo } from '../../../shared/types/system'
 
 definePageMeta({ layout: 'dashboard', middleware: ['auth', 'admin'], requiredCapability: 'system.manage', dashboardScope: 'operator' })
 
 const { t, locale } = useI18n()
+const localePath = useLocalePath()
 const toast = useToast()
 const confirm = useConfirm()
 const isDev = import.meta.dev
@@ -131,6 +132,75 @@ async function updateDep(dep: Dep) {
     })
   }
 }
+
+// --- Update-Prüfung: Ticket im Board anlegen ---------------------------------
+/**
+ * Der Knopf legt eine KARTE an, er updatet nichts (das bleibt `updateDep`,
+ * dev-only). Deshalb steht er auch in Produktion: dort sieht der Betreiber ja
+ * erst, dass etwas veraltet ist. Der Weg dorthin läuft über den core-Vertrag,
+ * admin kennt tickets nicht (A14) — ob überhaupt ein Board läuft, sagt
+ * `data.dependencyTicketsAvailable`.
+ */
+const APPWRITE_TICKET_KEY = 'appwrite-server'
+type DepTicketBody = { kind: 'package', name: string } | { kind: 'appwrite' }
+
+const depTicketPending = ref(new Set<string>())
+const depTicketCreated = ref(new Set<string>())
+
+/** Set-Kopie statt Mutation — sonst merkt Vue die Änderung nicht. */
+function toggleIn(target: Ref<Set<string>>, key: string, on: boolean) {
+  const next = new Set(target.value)
+  if (on) next.add(key)
+  else next.delete(key)
+  target.value = next
+}
+
+const boardAction = computed(() => [{
+  label: t('dashboard.system.depTicket.toBoard'),
+  to: localePath('/dashboard/tickets'),
+  color: 'neutral' as const,
+  variant: 'outline' as const,
+}])
+
+async function createDepTicket(body: DepTicketBody) {
+  const key = body.kind === 'appwrite' ? APPWRITE_TICKET_KEY : body.name
+  // Doppelklick-Schutz: eine laufende Anlage nicht zweimal, eine erledigte
+  // nicht noch einmal (die Route antwortet dann ohnehin 409).
+  if (depTicketPending.value.has(key) || depTicketCreated.value.has(key)) return
+  toggleIn(depTicketPending, key, true)
+  try {
+    const res = await $fetch<DependencyTicketResponse>('/api/admin/system/dependency-ticket', { method: 'POST', body })
+    toggleIn(depTicketCreated, key, true)
+    toast.add({
+      title: t('dashboard.system.depTicket.created', { name: res.name }),
+      description: t('dashboard.system.depTicket.createdDesc', { from: res.from, to: res.to }),
+      color: 'success',
+      actions: boardAction.value,
+    })
+  }
+  catch (error) {
+    // Fachlicher Grund aus dem Fehler-Envelope (core/server/error.ts) — „gibt
+    // es schon" ist kein Fehler, sondern eine Auskunft.
+    const reason = (error as { data?: { reason?: string } }).data?.reason
+    if (reason === 'ticket_exists') {
+      toggleIn(depTicketCreated, key, true)
+      toast.add({
+        title: t('dashboard.system.depTicket.exists'),
+        color: 'neutral',
+        actions: boardAction.value,
+      })
+      return
+    }
+    toast.add({
+      title: t('dashboard.system.depTicket.failed'),
+      description: t('dashboard.system.depTicket.failedDesc'),
+      color: 'error',
+    })
+  }
+  finally {
+    toggleIn(depTicketPending, key, false)
+  }
+}
 </script>
 
 <template>
@@ -218,6 +288,18 @@ async function updateDep(dep: Dep) {
                   <template v-if="data.appwrite.outdated">
                     <UIcon name="i-ph-arrow-right" class="size-3 text-dimmed" />
                     <span class="font-medium text-warning">{{ data.appwrite.latestVersion }}</span>
+                    <UTooltip v-if="data.dependencyTicketsAvailable" :text="t('dashboard.system.depTicket.tooltip')">
+                      <UButton
+                        size="xs"
+                        color="neutral"
+                        variant="ghost"
+                        :icon="depTicketCreated.has(APPWRITE_TICKET_KEY) ? 'i-ph-check' : 'i-ph-ticket'"
+                        :loading="depTicketPending.has(APPWRITE_TICKET_KEY)"
+                        :disabled="depTicketCreated.has(APPWRITE_TICKET_KEY)"
+                        :aria-label="t('dashboard.system.depTicket.tooltip')"
+                        @click="createDepTicket({ kind: 'appwrite' })"
+                      />
+                    </UTooltip>
                   </template>
                   <UTooltip v-else-if="data.appwrite.outdated === false" :text="t('dashboard.system.stack.current')">
                     <UIcon name="i-ph-check-circle" class="size-4 text-success" />
@@ -420,6 +502,19 @@ async function updateDep(dep: Dep) {
                             <template v-if="row.original.outdated">
                               <UIcon name="i-ph-arrow-right" class="size-3 text-dimmed" />
                               <span class="font-medium text-warning">{{ row.original.latest }}</span>
+                              <UTooltip v-if="data.dependencyTicketsAvailable" :text="t('dashboard.system.depTicket.tooltip')">
+                                <UButton
+                                  size="xs"
+                                  color="neutral"
+                                  variant="ghost"
+                                  :icon="depTicketCreated.has(row.original.name) ? 'i-ph-check' : 'i-ph-ticket'"
+                                  :loading="depTicketPending.has(row.original.name)"
+                                  :disabled="depTicketCreated.has(row.original.name)"
+                                  :aria-label="t('dashboard.system.depTicket.tooltip')"
+                                  class="ms-1 font-sans"
+                                  @click="createDepTicket({ kind: 'package', name: row.original.name })"
+                                />
+                              </UTooltip>
                               <UButton
                                 v-if="isDev"
                                 size="xs"

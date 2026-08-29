@@ -681,6 +681,15 @@
         "restartNeeded": "Restart needed",
         "restartTitle": "Update running — restart needed",
         "restartHint": "The install runs in the background. Wait a moment, then restart the dev server to load the updated versions."
+      },
+      "depTicket": {
+        "tooltip": "Create ticket: check whether we can update",
+        "created": "Ticket created for {name}",
+        "createdDesc": "Check whether we can update from {from} to {to}. The AI assessment follows shortly.",
+        "toBoard": "Go to board",
+        "exists": "Ticket already exists.",
+        "failed": "Ticket could not be created.",
+        "failedDesc": "Nothing was created. Details are in the server console."
       }
     }
   }
