@@ -2,9 +2,17 @@
 /** George-Panel: Monogramm statt Porträt, max 2–3 Sätze pro Zug, jeder
  *  Zug endet in Frage oder Schritt (§3d). Kein Lob-Spam, keine Fake-Delays. */
 export interface BwMessage { id: string, role: 'george' | 'user', text: string, help?: string }
-defineProps<{ messages: BwMessage[] }>()
+const props = defineProps<{ messages: BwMessage[] }>()
 defineEmits<{ send: [text: string] }>()
 const draft = ref('')
+
+/* Runde 55 (David): der Chat ankert UNTEN und wächst nach oben —
+ * neue Nachrichten schieben den Verlauf hoch, Blick bleibt beim Composer. */
+const scroller = ref<HTMLElement | null>(null)
+watch(() => props.messages.length, async () => {
+  await nextTick()
+  scroller.value?.scrollTo({ top: scroller.value.scrollHeight, behavior: 'smooth' })
+})
 </script>
 
 <template>
@@ -16,7 +24,8 @@ const draft = ref('')
         <span class="block text-xl font-extralight leading-tight" style="color: var(--bw-muted)">Markenberater</span>
       </span>
     </div>
-    <div class="min-h-0 flex-1 space-y-4 overflow-y-auto px-8 py-6">
+    <div ref="scroller" class="min-h-0 flex-1 overflow-y-auto px-8 py-6">
+      <div class="flex min-h-full flex-col justify-end space-y-4">
       <div v-for="m in messages" :key="m.id" class="bw-msg" :class="m.role === 'user' ? 'bw-msg--user' : ''">
         <BwGeorgeAvatar v-if="m.role === 'george'" />
         <div class="bw-msg-body">
@@ -25,6 +34,7 @@ const draft = ref('')
         </div>
       </div>
       <slot name="chips" />
+      </div>
     </div>
     <form class="flex gap-2 border-t px-8 py-5" style="border-color: var(--bw-line)" @submit.prevent="draft.trim() && ($emit('send', draft), draft = '')">
       <UInput v-model="draft" variant="none" class="flex-1 rounded-full" :ui="{ base: 'rounded-full px-4' }" placeholder="Antwort schreiben — oder George etwas fragen …" size="lg" style="background: var(--bw-surface-hi)" />
