@@ -6,10 +6,14 @@ defineProps<{
   current: { title: string, path: string, flag?: string }
   others: { title: string, path: string, flag?: string, to: string }[]
 }>()
+/* Runde 62 (David): "Neue Brand anlegen" öffnet denselben Layer wie
+ * auf der Startseite. */
+const newBrandOpen = ref(false)
+const popoverOpen = ref(false)
 </script>
 
 <template>
-  <UPopover :content="{ align: 'start' }">
+  <UPopover v-model:open="popoverOpen" :content="{ align: 'start' }">
     <button
       class="flex items-center gap-2 rounded-full border px-4 py-1.5 text-left"
       style="border-color: var(--bw-line); background: var(--bw-surface)"
@@ -37,7 +41,7 @@ defineProps<{
           </span>
         </NuxtLink>
         <div class="my-1.5 border-t" style="border-color: var(--bw-line)" />
-        <button class="flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-(--bw-accent-soft)">
+        <button class="flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-(--bw-accent-soft)" @click="popoverOpen = false; newBrandOpen = true">
           <UIcon name="i-ph-plus" style="color: var(--bw-muted)" /> Neue Brand anlegen
         </button>
         <NuxtLink to="/" class="flex items-center gap-2 px-3 py-2 text-sm hover:bg-(--bw-accent-soft)">
@@ -46,4 +50,5 @@ defineProps<{
       </div>
     </template>
   </UPopover>
+  <BwNewBrandModal v-model:open="newBrandOpen" />
 </template>
