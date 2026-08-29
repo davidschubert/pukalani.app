@@ -135,7 +135,7 @@
 .bw-grain-hero {
   position: relative; overflow: hidden;
   border-radius: var(--bw-radius-card);
-  background: linear-gradient(135deg, var(--hero-a, #e8d3b8), var(--hero-b, #b98a5e) 45%, var(--hero-c, #4a3123));
+  background: linear-gradient(135deg, var(--hero-c, #4a3123), var(--hero-b, #b98a5e) 55%, var(--hero-a, #e8d3b8));
   color: #f7f2ea;
 }
 @supports (corner-shape: superellipse(2)) {
