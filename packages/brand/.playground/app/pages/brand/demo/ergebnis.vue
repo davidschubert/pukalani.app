@@ -4,7 +4,7 @@ import { demoRail } from '../../../utils/demoRail'
 
 /** Clickdummy Iteration 2 — Ergebnis-Ansicht: die fertige Brand
  *  Foundation als EIN Stück (Grain-Hero + Kit-Vorschau). Statisch. */
-const doneRail = demoRail.map(layer => layer.steps
+const doneRail = demoRail.map(layer => layer.steps && !layer.locked
   ? { ...layer, steps: layer.steps.map(step => ({ ...step, state: 'done' as const, slots: undefined, minutes: undefined })) }
   : layer)
 
@@ -66,6 +66,22 @@ const palette = [
           <p class="mt-2 text-5xl font-extralight leading-none tracking-tight">Aa</p>
           <p class="mt-2 text-sm" style="color: var(--bw-ink-soft)">Ruhig und fundiert — eine Serifenlose mit Wärme, dazu eine Mono für die Herkunftsangaben.</p>
           <p class="bw-pending mt-3">Wird im Brand Design entschieden.</p>
+        </div>
+      </div>
+
+      <!-- Runde 93 (David): Monitoring auf dem Ergebnis andeuten —
+           die Marke ist fertig, beobachtet wird sie ab dem Launch. -->
+      <div class="bw-card mt-4 p-8">
+        <div class="flex items-end justify-between gap-4">
+          <div class="min-w-0">
+            <p class="bw-label" style="color: var(--bw-muted)">Brand Monitoring · läuft nach dem Launch dauerhaft mit</p>
+            <p class="mt-2 text-sm" style="color: var(--bw-ink-soft)">George behält eure Marke im Blick: Wird sie draußen so beschrieben, wie ihr sie gebaut habt — auch von ChatGPT &amp; Co.?</p>
+            <p class="bw-pending mt-3">Schaltet sich mit dem Launch frei.</p>
+          </div>
+          <div class="flex flex-none flex-col items-end gap-1.5">
+            <BwSparkline :values="[3, 4, 4, 5, 4, 6, 5, 7, 6, 7, 8, 8]" style="color: var(--bw-line-strong)" />
+            <p class="bw-label" style="color: var(--bw-muted)">Außenbild · KI-Antworten · Konsistenz</p>
+          </div>
         </div>
       </div>
 
