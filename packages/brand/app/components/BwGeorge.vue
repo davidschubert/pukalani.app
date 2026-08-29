@@ -9,14 +9,14 @@ const draft = ref('')
 
 <template>
   <div class="flex min-h-0 flex-1 flex-col">
-    <div class="flex items-center gap-2.5 border-b px-9 pt-7 pb-5" style="border-color: var(--bw-line)">
+    <div class="flex items-center gap-2.5 border-b px-8 pt-6 pb-4" style="border-color: var(--bw-line)">
       <span class="bw-msg-mark">G</span>
       <span class="leading-tight">
         <span class="block text-xl font-extralight leading-tight">George</span>
         <span class="block text-xl font-extralight leading-tight" style="color: var(--bw-muted)">Markenberater</span>
       </span>
     </div>
-    <div class="min-h-0 flex-1 space-y-4 overflow-y-auto px-9 py-7">
+    <div class="min-h-0 flex-1 space-y-4 overflow-y-auto px-8 py-6">
       <div v-for="m in messages" :key="m.id" class="bw-msg" :class="m.role === 'user' ? 'bw-msg--user' : ''">
         <span v-if="m.role === 'george'" class="bw-msg-mark" aria-hidden="true">G</span>
         <div class="bw-msg-body">
@@ -26,7 +26,7 @@ const draft = ref('')
       </div>
       <slot name="chips" />
     </div>
-    <form class="flex gap-2 border-t px-9 py-6" style="border-color: var(--bw-line)" @submit.prevent="draft.trim() && ($emit('send', draft), draft = '')">
+    <form class="flex gap-2 border-t px-8 py-5" style="border-color: var(--bw-line)" @submit.prevent="draft.trim() && ($emit('send', draft), draft = '')">
       <UInput v-model="draft" variant="none" class="flex-1 rounded-full" :ui="{ base: 'rounded-full px-4' }" placeholder="Antwort schreiben — oder George etwas fragen …" size="lg" style="background: var(--bw-surface-hi)" />
       <UButton type="submit" icon="i-ph-paper-plane-right" aria-label="Senden" size="lg" color="neutral" variant="ghost" class="rounded-full" style="background: var(--bw-surface-hi)" />
     </form>
