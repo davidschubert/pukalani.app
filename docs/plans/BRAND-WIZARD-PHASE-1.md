@@ -246,8 +246,10 @@ Grundsatz: **minimalistisch an der Oberfläche, informativ in der Tiefe**
 
 Editoriale, warme Premium-Ästhetik: viel Weißraum · sehr gute Typografie ·
 ruhige natürliche Grundfarben · EINE prägnante Akzentfarbe für Aktionen ·
-dünne Linien statt schwerer Karten und Schatten · wenige hochwertige
-Illustrationen. VERBOTEN: futuristische KI-Verläufe, übermäßige
+dünne Linien für TRENNER · **Karten dagegen im modernen
+Soft-Look (präzisiert Runde 8, Davids Referenz): stark gerundet
+(~22 px), randlos, sehr weicher Schatten — schweben statt umranden** ·
+wenige hochwertige Illustrationen. VERBOTEN: futuristische KI-Verläufe, übermäßige
 Chatblasen, Punkte/Abzeichen/Erfolgsfeuerwerke. Wirkung: hochwertiges
 digitales Arbeitsbuch mit persönlicher Beratung, kein SaaS-Dashboard.
 

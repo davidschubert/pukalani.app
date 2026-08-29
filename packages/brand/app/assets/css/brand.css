@@ -13,7 +13,10 @@
   --bw-draft: #8a6a2f;
   --bw-draft-soft: #f6efe2;
   --bw-stale: #8a4a3f;
-  --bw-radius: 6px;
+  --bw-radius: 10px;
+  --bw-radius-card: 22px;
+  --bw-shadow-card: 0 1px 2px rgb(31 42 46 / 0.04), 0 12px 32px -8px rgb(31 42 46 / 0.10);
+  --bw-shadow-card-hover: 0 2px 4px rgb(31 42 46 / 0.05), 0 18px 44px -10px rgb(31 42 46 / 0.16);
 
   background: var(--bw-paper);
   color: var(--bw-ink);
@@ -32,6 +35,8 @@
   --bw-draft: #d3a95e;
   --bw-draft-soft: #2e2617;
   --bw-stale: #d08a7c;
+  --bw-shadow-card: 0 1px 2px rgb(0 0 0 / 0.3), 0 12px 32px -8px rgb(0 0 0 / 0.45);
+  --bw-shadow-card-hover: 0 2px 4px rgb(0 0 0 / 0.35), 0 18px 44px -10px rgb(0 0 0 / 0.55);
 }
 
 /* Werkstatt-Layout: drei Zonen (>=1280), Bühne + George (768–1279),
@@ -58,6 +63,16 @@
 }
 @media (min-width: 768px) { .bw-modeswitch { display: none; } }
 
+/* Karten-Look (Runde 8, Referenz David): stark gerundet, randlos,
+   sehr weicher Schatten — Linien bleiben den TRENNERN vorbehalten. */
+.bw-card {
+  background: var(--bw-surface);
+  border-radius: var(--bw-radius-card);
+  box-shadow: var(--bw-shadow-card);
+  transition: box-shadow 150ms, transform 150ms;
+}
+.bw-card--hover:hover { box-shadow: var(--bw-shadow-card-hover); transform: translateY(-1px); }
+
 /* Pixellinie zwischen den Rail-Bereichen (Korrekturrunde 2) */
 .bw-rail-full > div + div { border-top: 1px solid var(--bw-line); padding-top: 1rem; }
 
@@ -76,7 +91,7 @@
 .bw-state--draft { color: var(--bw-draft); border-color: var(--bw-draft); background: var(--bw-draft-soft); }
 .bw-state--confirmed { color: var(--bw-accent); border-color: var(--bw-accent); background: var(--bw-accent-soft); }
 .bw-state--stale { color: var(--bw-stale); border-color: var(--bw-stale); }
-.bw-draft-frame { border: 1px dashed var(--bw-draft); border-radius: var(--bw-radius); padding: 0.9rem 1rem; background: var(--bw-surface); }
+.bw-draft-frame { border: 1px dashed var(--bw-draft); border-radius: var(--bw-radius-card); padding: 1.1rem 1.25rem; background: var(--bw-surface); }
 
 /* George-Chat: ruhig, keine dicken Blasen */
 .bw-msg { padding: 0.15rem 0; display: flex; gap: 0.65rem; }
@@ -109,11 +124,11 @@
 /* Runde 5 (David): Antwort-Karten untereinander statt nebeneinander */
 .bw-pair { display: grid; grid-template-columns: 1fr; gap: 1rem; max-width: 34rem; }
 .bw-pair-card {
-  border: 1px solid var(--bw-line-strong); border-radius: var(--bw-radius);
-  padding: 1.3rem 1.2rem; background: var(--bw-surface); cursor: pointer; text-align: left;
-  transition: border-color 120ms, transform 120ms;
+  border-radius: var(--bw-radius-card); box-shadow: var(--bw-shadow-card);
+  padding: 1.5rem 1.6rem; background: var(--bw-surface); cursor: pointer; text-align: left;
+  transition: box-shadow 150ms, transform 150ms;
 }
-.bw-pair-card:hover { border-color: var(--bw-accent); transform: translateY(-1px); }
+.bw-pair-card:hover { box-shadow: var(--bw-shadow-card-hover); transform: translateY(-1px); }
 .bw-pair-card:focus-visible { outline: 2px solid var(--bw-accent); outline-offset: 2px; }
 
 @media (prefers-reduced-motion: reduce) { .bw-root * { transition: none !important; animation: none !important; } }

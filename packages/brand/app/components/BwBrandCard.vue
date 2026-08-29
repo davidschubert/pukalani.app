@@ -11,7 +11,7 @@ defineProps<{
 </script>
 
 <template>
-  <div class="bw-root rounded-lg border p-5" style="border-color: var(--bw-line-strong); background: var(--bw-surface)">
+  <div class="bw-root bw-card bw-card--hover p-6">
     <div class="flex items-start justify-between gap-3">
       <div>
         <h3 class="font-semibold">{{ title }}</h3>
