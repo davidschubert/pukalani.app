@@ -192,7 +192,7 @@
   cursor: pointer; transition: background 120ms, color 120ms;
   color: var(--bw-ink);
 }
-.bw-chip:hover { background: var(--bw-line); }
+.bw-chip:not(.bw-chip--selected):hover { background: var(--bw-line); }
 .bw-chip:focus-visible { outline: 2px solid var(--bw-ink); outline-offset: 2px; }
 .bw-chip--selected { background: var(--bw-ink); color: var(--bw-paper); font-weight: 600; }
 .bw-chip--ghost { background: transparent; box-shadow: none; border: 1px dashed var(--bw-line-strong); color: var(--bw-muted); }
