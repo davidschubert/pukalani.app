@@ -60,7 +60,7 @@ const ratings = [
           <div class="bw-card p-8">
             <p class="bw-label" style="color: var(--bw-muted)">Farbwelt</p>
             <div class="mt-4 flex gap-2">
-              <div v-for="c in ['#25454c', '#7fb0ba', '#dbe9ec', '#e8b087', '#f6f4ef']" :key="c" class="rounded-full" :style="`background: ${c}; width: 2.5rem; height: 2.5rem`" />
+              <div v-for="c in ['#25454c', '#7fb0ba', '#dbe9ec', '#e8b087', '#f6f4ef']" :key="c" class="bw-swatch rounded-full" :style="`background: ${c}; width: 2.5rem; height: 2.5rem`" />
             </div>
             <p class="bw-label mt-4" style="color: var(--bw-muted)">Typografie</p>
             <p class="mt-1 text-4xl font-extralight leading-none tracking-tight">Aa</p>

@@ -958,6 +958,35 @@ AUSZEICHNUNGS-MOMENTE statt Dauer-Ranking („Brand of the Day" /
 Featured als Betreiber-Kuration im Discover = strukturell die
 awwwards-Jury).
 
+### Journal & Content-Intelligence (branding.supply-Redaktion — vorgemerkt 2026-08-29)
+
+Davids Idee, geformt: YouTube ist RESEARCH-SIGNAL, nie Quelle zum
+Umformulieren. Kein Transkript-Scraping als Content-Grundlage
+(urheberrechtlich und strategisch falsch); stattdessen Metadaten und
+Kommentare über die offizielle Data API als MARKTFORSCHUNG: welche
+Branding-Fragen erzeugen nachweislich Aufmerksamkeit? Kommentare sind
+Long-Tail-Intents („Why did they remove the serif?" → eigener
+Artikel). Normalisierter Popularity-Score (Views relativ zur
+Kanalgröße) + **Content Opportunity Score** (0–100: Performance,
+Alter, Suchnachfrage, Konkurrenz, Relevanz) ⇒ priorisierte
+Redaktions-Pipeline Discover → Analyze → Research → Brief → Draft →
+Review → Publish → Update. TRANSPARENZ: maßgeblich angestoßene
+Artikel nennen und betten das Quellvideo ein („Further watching") —
+Traffic für den Creator statt Content-Klau.
+
+INFORMATIONSARCHITEKTUR (Brand Knowledge Graph statt Blog):
+`/brands/<name>` (Entity-Seiten externer Marken mit Score-v2-Bewertung
+— das redaktionelle Gegenstück zur Discover-Anatomie eigener Brands) ·
+`/rankings/` (kuratierte Listen nach Branding-Qualität) · `/topics/`
+(Themencluster: Strategy, Visual Identity, Rebranding, Psychology,
+Analysis) · `/journal/` (Einzelartikel) — alles untereinander
+verknüpft. RECHTSRAHMEN externer Bewertungen: Kritik-/Meinungs-Framing
+wie Brand New, Methodik offengelegt, nominative Markennennung, keine
+fremden Logos als eigene Assets. POSITIONIERUNGS-SPLIT: branding.supply
+= Daten-/Informationsautorität, Davids persönliche Site = Experte;
+Verknüpfung über Autorenprofil (David → author → branding.supply) statt
+zweier Sites auf denselben Keywords.
+
 ### BEWUSST NICHT aufgenommen
 
 - **Sonic Branding / Audio-Identität** — 2026 real, aber für die Zielgruppe

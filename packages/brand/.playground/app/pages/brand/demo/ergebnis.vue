@@ -71,7 +71,7 @@ const palette = [
           <p class="bw-label" style="color: var(--bw-muted)">Farbwelt (Vorschlag)</p>
           <div class="mt-4 flex flex-wrap gap-2">
             <div v-for="c in palette" :key="c.hex" class="flex flex-col items-center gap-1.5">
-              <div class="rounded-full" :style="`background: ${c.hex}; width: 2.5rem; height: 2.5rem`" />
+              <div class="bw-swatch rounded-full" :style="`background: ${c.hex}; width: 2.5rem; height: 2.5rem`" />
               <p class="bw-label" style="color: var(--bw-muted)">{{ c.name }}</p>
             </div>
           </div>
