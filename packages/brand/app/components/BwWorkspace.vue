@@ -43,10 +43,10 @@ const helpMenu = [[
       </div>
       <div class="ml-auto flex items-center gap-3" style="color: var(--bw-muted)">
         <UDropdownMenu :items="helpMenu">
-          <button aria-label="Hilfe" class="grid place-items-center"><UIcon name="i-ph-question" class="size-5" /></button>
+          <button aria-label="Hilfe" class="grid place-items-center"><UIcon name="i-ph-question" class="size-8" /></button>
         </UDropdownMenu>
         <UDropdownMenu :items="userMenu">
-          <button aria-label="Konto-Menü" class="grid place-items-center"><UIcon name="i-ph-user-circle" class="size-8" /></button>
+          <button aria-label="Konto-Menü" class="grid place-items-center"><UAvatar text="DS" size="md" /></button>
         </UDropdownMenu>
       </div>
     </header>
