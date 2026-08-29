@@ -46,7 +46,7 @@ function submitOwn() {
           :aria-label="`Warum empfiehlt George ${o.label}?`" :aria-expanded="openWhy === o.id"
           @click.stop="toggleWhy(o.id)" @keydown.enter.stop="toggleWhy(o.id)"
         >
-          <UIcon name="i-ph-info" class="size-4.5" style="color: var(--bw-ink-soft)" />
+          <UIcon name="i-ph-info" class="size-4.5" style="color: var(--bw-muted)" />
         </span>
       </button>
       <p v-if="o.why && openWhy === o.id" class="bw-label mt-2 rounded-xl px-3 py-2.5" style="background: var(--bw-surface); color: var(--bw-ink-soft)">

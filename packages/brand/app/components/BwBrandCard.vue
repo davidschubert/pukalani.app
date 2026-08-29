@@ -7,6 +7,7 @@ defineProps<{
   progress: string
   remaining: string
   edited: string
+  pct: number
 }>()
 </script>
 
@@ -22,7 +23,17 @@ defineProps<{
       </UDropdownMenu>
     </div>
     <p class="mt-4 text-sm" style="color: var(--bw-ink-soft)">{{ step }}</p>
-    <p class="text-sm" style="color: var(--bw-muted)">{{ progress }} · noch {{ remaining }}</p>
+    <!-- Runde 52 (David): dasselbe Fortschritts-Modul wie unten links im
+         Wizard — Mono-Versal-Zeile, Prozent, horizontaler Balken. -->
+    <div class="mt-4">
+      <div class="flex items-baseline justify-between gap-3">
+        <p class="bw-label uppercase tracking-wider" style="color: var(--bw-muted)">{{ progress }} · {{ remaining }}</p>
+        <span class="bw-label uppercase tracking-wider">{{ pct }}&thinsp;%</span>
+      </div>
+      <div class="mt-2 h-1.5 overflow-hidden rounded-full" style="background: var(--bw-line)">
+        <div class="h-full rounded-full" :style="`width: ${pct}%; background: var(--bw-accent)`" />
+      </div>
+    </div>
     <div class="mt-4 flex items-center justify-between">
       <span class="text-xs" style="color: var(--bw-muted)">{{ edited }}</span>
       <UButton size="sm" trailing-icon="i-ph-arrow-right" label="Weiterarbeiten" color="neutral" variant="outline" class="rounded-full" style="background: var(--bw-surface-hi)" />

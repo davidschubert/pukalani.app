@@ -72,7 +72,7 @@ const infoPct = computed(() => {
                 @click.stop="infoStep = { step, layerLabel: layer.label }"
                 @keydown.enter.stop="infoStep = { step, layerLabel: layer.label }"
               >
-                <UIcon name="i-ph-info" class="size-4.5" style="color: var(--bw-ink-soft)" />
+                <UIcon name="i-ph-info" class="size-4.5" style="color: var(--bw-muted)" />
               </span>
             </button>
           </li>
@@ -120,10 +120,10 @@ const infoPct = computed(() => {
 
           <div class="mt-7">
             <div class="flex items-baseline justify-between gap-3">
-              <p class="bw-label" style="color: var(--bw-muted)">
+              <p class="bw-label uppercase tracking-wider" style="color: var(--bw-muted)">
                 {{ infoStep.step.slots ?? `${infoStep.step.info!.bausteine.filter(b => b.done).length} von ${infoStep.step.info!.bausteine.length} Entscheidungen` }}<template v-if="infoStep.step.info!.minutes"> · {{ infoStep.step.info!.minutes }}</template>
               </p>
-              <span class="bw-num text-base">{{ infoPct }}&thinsp;%</span>
+              <span class="bw-label uppercase tracking-wider">{{ infoPct }}&thinsp;%</span>
             </div>
             <div class="mt-2 h-1.5 overflow-hidden rounded-full" style="background: var(--bw-line)">
               <div class="h-full rounded-full transition-all" :style="`width: ${infoPct}%; background: var(--bw-accent)`" />

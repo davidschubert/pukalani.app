@@ -16,14 +16,14 @@
         <NuxtLink to="/brand/demo/werte" class="block">
           <BwBrandCard
             title="Kailua Coffee Co." path="Neugründung · Inhalt: EN"
-            step="Gerade dran: Werte" progress="4 von 7 Grundlagen geklärt" remaining="~20 Minuten"
+            step="Gerade dran: Werte" progress="4 von 7 Entscheidungen" remaining="~20 Min" :pct="57"
             edited="zuletzt vor 2 Stunden"
           />
         </NuxtLink>
         <NuxtLink to="/brand/demo/archetyp" class="block">
           <BwBrandCard
             title="Schubert UX Studio" path="Rebrand · Inhalt: DE"
-            step="Gerade dran: Archetyp & Stimme" progress="6 von 7 Grundlagen geklärt" remaining="~10 Minuten"
+            step="Gerade dran: Archetyp & Stimme" progress="6 von 7 Entscheidungen" remaining="~10 Min" :pct="86"
             edited="zuletzt gestern"
           />
         </NuxtLink>
