@@ -96,7 +96,14 @@ const infoPct = computed(() => {
 
     <UModal v-model:open="infoOpen">
       <template #content>
-        <div v-if="infoStep" class="bw-root p-8" style="background: var(--bw-surface-hi)">
+        <div v-if="infoStep" class="bw-root relative p-8" style="background: var(--bw-surface-hi)">
+          <button
+            class="absolute right-5 top-5 grid size-8 place-items-center rounded-full transition-colors hover:bg-[var(--bw-line)]"
+            aria-label="Schließen"
+            @click="infoStep = null"
+          >
+            <UIcon name="i-ph-x" class="size-4.5" style="color: var(--bw-ink-soft)" />
+          </button>
           <p class="bw-label uppercase tracking-widest" style="color: var(--bw-muted)">{{ infoStep.layerLabel }}</p>
           <h2 class="mt-1 text-[28px] font-extralight leading-tight tracking-tight">{{ infoStep.step.label }}</h2>
           <p class="mt-3 text-sm leading-relaxed" style="color: var(--bw-ink-soft)">{{ infoStep.step.info!.description }}</p>
