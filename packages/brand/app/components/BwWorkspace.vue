@@ -6,9 +6,24 @@ const props = defineProps<{ progressPct: number, contentLocale: string, progress
 const mode = ref<'stage' | 'george'>('george')
 /* Runde 54 (David): das ?-Icon ist raus — Erklärungen macht der
  * Info-Layer je Schritt, Beispiele macht George; Tastaturkürzel und
- * Support leben jetzt hier im Konto-Menü. */
+ * Support leben jetzt hier im Konto-Menü. Runde 66: der Sprachwechsler
+ * hängt als Untermenü hier — Wechsel wie überall via switchLocalePath. */
+const { locale, locales } = useI18n()
+const switchLocalePath = useSwitchLocalePath()
+const LOCALE_FLAGS: Record<string, string> = { en: 'i-circle-flags-us', de: 'i-circle-flags-de' }
 const userMenu = computed(() => [[
   { label: `Inhaltssprache: ${props.contentLocale.toUpperCase()}`, icon: 'i-ph-translate', disabled: true },
+  {
+    label: locale.value === 'de' ? 'Sprache: Deutsch' : 'Language: English',
+    icon: 'i-ph-globe-simple',
+    children: locales.value.map(entry => ({
+      label: entry.code === 'de' ? 'Deutsch' : 'English',
+      icon: LOCALE_FLAGS[entry.code] ?? 'i-ph-globe-hemisphere-west',
+      type: 'checkbox' as const,
+      checked: entry.code === locale.value,
+      to: switchLocalePath(entry.code),
+    })),
+  },
 ], [
   { label: 'Tastaturkürzel', icon: 'i-ph-keyboard' },
   { label: 'Support kontaktieren', icon: 'i-ph-lifebuoy' },
@@ -29,9 +44,6 @@ const userMenu = computed(() => [[
              Speichert… / Offline — Eingabe bleibt erhalten / Konflikt. -->
       </div>
       <div class="ml-auto flex items-center gap-4" style="color: var(--bw-muted)">
-        <!-- Runde 65 (David): der EINE Pukalani-Sprachwechsler (core),
-             wie überall im Projekt — DE / EN via switchLocalePath. -->
-        <CoreLocaleSwitcher />
         <UDropdownMenu :items="userMenu">
           <button aria-label="Konto-Menü" class="grid place-items-center"><UAvatar text="DS" size="md" /></button>
         </UDropdownMenu>
