@@ -12,8 +12,8 @@ const stateMeta = computed(() => ({
   generating: { label: 'George schreibt …', icon: 'i-ph-circle-notch', cls: '' },
   draft: { label: 'Entwurf von George', icon: 'i-ph-pen-nib', cls: 'bw-state--draft' },
   edited: { label: 'Von dir bearbeitet', icon: 'i-ph-user-focus', cls: 'bw-state--draft' },
-  confirmed: { label: 'Bestätigt', icon: 'i-ph-check', cls: 'bw-state--confirmed' },
-  stale: { label: 'Veraltet', icon: 'i-ph-clock-counter-clockwise', cls: 'bw-state--stale' },
+  confirmed: { label: 'Fertig', icon: 'i-ph-check', cls: 'bw-state--confirmed' },
+  stale: { label: 'Wird aktualisiert', icon: 'i-ph-clock-counter-clockwise', cls: 'bw-state--stale' },
 }[props.state]))
 </script>
 
