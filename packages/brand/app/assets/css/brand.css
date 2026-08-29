@@ -67,7 +67,7 @@
   padding: 1.25rem 2rem; border-bottom: 1px solid var(--bw-line);
   background: var(--bw-surface); flex: none;
 }
-.bw-zones { display: grid; grid-template-columns: 330px minmax(0,1fr) minmax(0,1fr); flex: 1; min-height: 0; }
+.bw-zones { display: grid; grid-template-columns: 400px minmax(0,1fr) minmax(0,1fr); flex: 1; min-height: 0; }
 .bw-rail { overflow-y: auto; padding: var(--bw-gutter); }
 .bw-stage { overflow-y: auto; padding: var(--bw-gutter) clamp(1.2rem, 4vw, 3.5rem) 4rem; }
 .bw-stage-inner { max-width: 46rem; margin: 0 auto; }
