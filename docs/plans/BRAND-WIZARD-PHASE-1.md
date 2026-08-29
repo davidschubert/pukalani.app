@@ -837,7 +837,7 @@ Phase 1 = Schicht 1 + verbale Hälfte von 2 · Phase 2 = visuelle Hälfte von
 Die Schritt-Listen der drei späteren Schichten — im UI schon heute in den
 Info-Layern der gesperrten Gruppen sichtbar. Charakter-Unterschied bewusst:
 **Design = entscheiden · Book & Kit = kuratieren/exportieren · Experience =
-anwenden.** Gesamtrechnung über alle Schichten ≈ 54 Entscheidungen mit
+anwenden.** Gesamtrechnung über alle Schichten ≈ 60 Entscheidungen mit
 abnehmender Last nach hinten („je weiter, desto mehr entsteht von selbst").
 
 **Brand Design** (~15 Entscheidungen, ~35 Min): Farbwelt (Basisfarbe aus
@@ -851,9 +851,20 @@ Ikonografie · Motion (Tempo, kinetisches Logo, reduced-motion).
 (light/dark, Exporte CSS/Tailwind/Figma, maschinenlesbares brand.json) ·
 Templates (Social-Set mit Wiedererkennungs-Ankern).
 
-**Brand Experience** (~10, ~20 Min): Website (Seitentypen,
+**Brand Experience** (~16, ~32 Min): Website (Seitentypen,
 Theme-Anwendung, Hero) · Social (Profile + Content-Kompass: 3–5 Säulen
-mit Taktung) · Newsletter & E-Mail · Content-Vorlagen.
+mit Taktung; inkl. Interaktions-Stimme — wie die Marke ANTWORTET) ·
+**SEO & GEO** (Keyword-Set abgeleitet aus Positionierung + Vokabular,
+Entitäten-Konsistenz, zitierfähige Markenfakten + llms.txt — GEO dockt
+direkt am maschinenlesbaren brand.json aus dem Kit an) · Newsletter &
+E-Mail · Content-Vorlagen · **Geschäftsausstattung** (Davids Ergänzung
+2026-08-29 — braucht JEDE Marke, auch rein digitale: Visitenkarte,
+Briefbogen/Rechnungsvorlage, E-Mail-Signatur) · **Vor Ort** (per Weiche, nur Marken mit
+physischem Ort: Google Business Profile, Bewertungs-Antworten in der
+Markenstimme, Print-Basics wie Schild/Karte/Verpackung). BEWUSST EIN
+Layer, keine Digital/Analog-Teilung (2026-08-29, David): die Trennlinie
+ist der ORT, nicht das Medium — Google Maps ist digital UND vor Ort.
+Gesamtrechnung damit ≈ 60 Entscheidungen.
 
 ### BEWUSST NICHT aufgenommen
 
