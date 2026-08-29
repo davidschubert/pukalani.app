@@ -33,6 +33,8 @@ export const demoRail: BwRailLayer[] = [
             { label: 'Angebot', note: 'Was ihr verkauft und was es besonders macht.', done: true },
             { label: 'Zielgruppe', note: 'Für wen ihr da seid — und für wen bewusst nicht.', done: true },
             { label: 'Marktumfeld', note: 'Wettbewerber und wie sie auftreten — die Lücke, in die ihr stoßt.', done: true },
+            { label: 'Positionierung', note: 'Für wen, gegen wen, warum ihr — die eine Kernentscheidung der Strategie.', done: true },
+            { label: 'Markenarchitektur', note: 'Eine Marke oder mehrere? Nur per Weiche, wenn Produktmarken geplant sind.', done: true },
           ],
         },
       },
@@ -290,6 +292,7 @@ export const demoRail: BwRailLayer[] = [
           bausteine: [
             { label: 'Social-Set', note: 'Formate je Plattform mit euren Ankern.' },
             { label: 'Dokumente & Präsentationen', note: 'Basis-Vorlagen in eurem Design.' },
+            { label: 'Pressekit', note: 'Logos, Boilerplate in drei Längen, Fakten — entsteht fast gratis aus Book + Kit.' },
           ],
         },
       },
@@ -304,7 +307,7 @@ export const demoRail: BwRailLayer[] = [
       bausteine: [
         { label: 'Brand Book', note: 'Kapitel aus euren Schichten, Do-&-Don’t-Beispiele, AI-Guidelines (was KI im Namen der Marke darf).' },
         { label: 'Kit & Design Tokens', note: 'Token-Set hell/dunkel, Exporte (CSS, Tailwind, Figma), maschinenlesbares brand.json.' },
-        { label: 'Templates', note: 'Social-Set mit festen Wiedererkennungs-Ankern, Basis-Vorlagen für Dokumente und Präsentationen.' },
+        { label: 'Templates', note: 'Social-Set mit Wiedererkennungs-Ankern, Basis-Vorlagen — und das Pressekit, fast gratis aus Book + Kit.' },
       ],
     },
   },
@@ -413,6 +416,21 @@ export const demoRail: BwRailLayer[] = [
           ],
         },
       },
+      {
+        id: 'exp-launch',
+        label: 'Launch & Ankündigung',
+        icon: '',
+        state: 'open',
+        info: {
+          description: 'Wie die Marke in die Welt kommt: die Warum-Story, der Kanal-Plan — und bei Rebrands zuerst die eigenen Leute. Ein Rebrand ohne Ankündigung verwirrt Bestandskunden; eine Neugründung bekommt ihren Hallo-Welt-Moment.',
+          minutes: '~5 Min',
+          bausteine: [
+            { label: 'Warum-Story', note: 'Der eine Ankündigungs-Text — aus Purpose und Manifest.' },
+            { label: 'Kanal-Plan', note: 'Wo zuerst, wo danach — aus eurem Content-Kompass.' },
+            { label: 'Intern zuerst', note: 'Bei Teams und Rebrands: die eigenen Leute vor der Welt.' },
+          ],
+        },
+      },
       { id: 'exp-result', kind: 'result', label: 'Ergebnis', icon: '', state: 'open', to: '/brand/demo/ergebnis' },
     ],
     label: 'Brand Experience',
@@ -420,7 +438,7 @@ export const demoRail: BwRailLayer[] = [
     lockedNote: 'Website, Social & Content',
     info: {
       description: 'Die Ableitungen: eure Marke im Einsatz. Website, Social, Suche und Newsletter entstehen aus Foundation + Design — welche Inhalte zu euch passen, wissen wir aus Archetyp und Zielgruppe längst.',
-      minutes: '~32 Min',
+      minutes: '~36 Min',
       bausteine: [
         { label: 'Website', note: 'Seitentypen, Theme-Anwendung, Startseiten-Hero.' },
         { label: 'Social', note: 'Profile je Plattform, Content-Kompass (3–5 Säulen mit Taktung) und Interaktions-Stimme — wie ihr antwortet.' },
@@ -429,7 +447,28 @@ export const demoRail: BwRailLayer[] = [
         { label: 'Content-Vorlagen', note: 'Post-Formate, die Werte und Beweise wiederverwenden.' },
         { label: 'Geschäftsausstattung', note: 'Visitenkarte, Briefbogen und Rechnung, E-Mail-Signatur — braucht jede Marke.' },
         { label: 'Vor Ort', note: 'Nur bei physischem Ort: Google Business, Bewertungs-Antworten in eurer Stimme, Print-Basics.' },
+        { label: 'Launch & Ankündigung', note: 'Warum-Story, Kanal-Plan — bei Rebrands zuerst intern.' },
       ],
     },
+  },
+  {
+    id: 'monitoring',
+    label: 'Brand Monitoring',
+    locked: true,
+    lockedNote: 'Nach dem Launch — läuft dauerhaft mit',
+    info: {
+      description: 'Markenarbeit hört nicht beim Launch auf: Wird eure Marke draußen so beschrieben, wie ihr sie gebaut habt? George prüft regelmäßig das Außenbild, die Konsistenz eurer Kanäle — und was KI-Assistenten über euch sagen.',
+      minutes: 'laufend',
+      bausteine: [
+        { label: 'Außenbild-Check', note: 'Beschreiben Menschen euch so, wie ihr euch selbst? Reviews, Erwähnungen, Suchtreffer.' },
+        { label: 'KI-Antwort-Radar', note: 'Was sagen ChatGPT, Perplexity & Co. über euch — und stimmt es?' },
+        { label: 'Konsistenz-Radar', note: 'Name, Farben, Stimme über alle Kanäle — Abweichungen werden gemeldet.' },
+      ],
+    },
+    steps: [
+      { id: 'mon-outside', label: 'Außenbild-Check', icon: '', state: 'open' },
+      { id: 'mon-ai', label: 'KI-Antwort-Radar', icon: '', state: 'open' },
+      { id: 'mon-consistency', label: 'Konsistenz-Radar', icon: '', state: 'open' },
+    ],
   },
 ]

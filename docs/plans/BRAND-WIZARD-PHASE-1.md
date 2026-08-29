@@ -863,10 +863,25 @@ E-Mail · Content-Vorlagen · **Geschäftsausstattung** (Davids Ergänzung
 2026-08-29 — braucht JEDE Marke, auch rein digitale: Visitenkarte,
 Briefbogen/Rechnungsvorlage, E-Mail-Signatur) · **Vor Ort** (per Weiche, nur Marken mit
 physischem Ort: Google Business Profile, Bewertungs-Antworten in der
-Markenstimme, Print-Basics wie Schild/Karte/Verpackung). BEWUSST EIN
-Layer, keine Digital/Analog-Teilung (2026-08-29, David): die Trennlinie
-ist der ORT, nicht das Medium — Google Maps ist digital UND vor Ort.
-Gesamtrechnung damit ≈ 60 Entscheidungen.
+Markenstimme, Print-Basics wie Schild/Karte/Verpackung) · **Launch &
+Ankündigung** (Marketing-Audit 2026-08-29: Warum-Story aus Purpose +
+Manifest, Kanal-Plan aus dem Content-Kompass, bei Rebrands INTERN
+ZUERST — ein Rebrand ohne Ankündigung verwirrt Bestandskunden). BEWUSST
+EIN Layer, keine Digital/Analog-Teilung (2026-08-29, David): die
+Trennlinie ist der ORT, nicht das Medium — Google Maps ist digital UND
+vor Ort. Book-&-Kit-Ergänzung aus demselben Audit: **Pressekit** im
+Templates-Schritt (Logos, Boilerplate 3 Längen, Fakten — fast gratis
+aus Book + Kit) sowie Positionierung + Markenarchitektur als SICHTBARE
+Kontext-Entscheidungen ausgewiesen. Gesamtrechnung ≈ 63 Entscheidungen.
+
+**Sechste Schicht (Phase 4, vorgemerkt): Brand Monitoring** — nach dem
+Launch als DAUERBETRIEB: Außenbild-Check (beschreiben Leute euch so,
+wie ihr euch selbst?), KI-Antwort-Radar („Was sagen ChatGPT/Perplexity
+über euch?" — die GEO-Messung zur GEO-Arbeit) und Konsistenz-Radar
+über die Kanäle. Kein Wizard-Durchlauf, sondern wiederkehrend — das
+natürliche ABO-Argument der Plattform (Schichten 1–5 kauft man einmal,
+Monitoring bindet monatlich). Im Dummy als gesperrte sechste Gruppe
+sichtbar.
 
 ### BEWUSST NICHT aufgenommen
 
