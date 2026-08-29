@@ -23,7 +23,7 @@ const stateMeta = computed(() => ({
       <h2 class="text-lg">{{ title }}</h2>
       <span class="bw-state" :class="stateMeta.cls"><UIcon :name="stateMeta.icon" /> {{ stateMeta.label }}</span>
     </div>
-    <p v-if="state === 'stale' && staleNote" class="mb-3 text-sm" style="color: var(--bw-stale)">
+    <p v-if="state === 'stale' && staleNote" class="bw-label mb-3" style="color: var(--bw-stale)">
       <UIcon name="i-ph-arrow-elbow-down-right" /> {{ staleNote }}
     </p>
     <div :class="state === 'draft' || state === 'edited' ? 'bw-draft-frame' : ''">

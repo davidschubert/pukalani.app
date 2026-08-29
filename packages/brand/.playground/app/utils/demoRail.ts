@@ -15,7 +15,7 @@ export const demoRail: BwRailLayer[] = [
   },
   {
     id: 'verbal',
-    label: 'Verbale Identität',
+    label: 'Markensprache',
     steps: [
       { id: 'messaging', label: 'Tagline & Messaging', icon: 'i-ph-chat-circle-text', state: 'open' },
       { id: 'naming', label: 'Name & Prüfung', icon: 'i-ph-seal-check', state: 'open' },
