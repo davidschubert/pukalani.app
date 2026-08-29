@@ -65,10 +65,10 @@
   background: var(--bw-surface); flex: none;
 }
 .bw-zones { display: grid; grid-template-columns: 330px minmax(0,1fr) minmax(0,1fr); flex: 1; min-height: 0; }
-.bw-rail { overflow-y: auto; padding: 1.25rem 1.25rem 1.5rem; }
-.bw-stage { overflow-y: auto; padding: 2.2rem clamp(1.2rem, 4vw, 3.5rem) 4rem; }
+.bw-rail { overflow-y: auto; padding: 1.5rem 1.25rem; }
+.bw-stage { overflow-y: auto; padding: 1.5rem clamp(1.2rem, 4vw, 3.5rem) 4rem; }
 .bw-stage-inner { max-width: 46rem; margin: 0 auto; }
-.bw-george { display: flex; flex-direction: column; min-height: 0; background: var(--bw-surface); border-radius: var(--bw-radius-card) var(--bw-radius-card) 0 0; margin: 0 0.75rem; }
+.bw-george { display: flex; flex-direction: column; min-height: 0; background: var(--bw-surface); border-radius: var(--bw-radius-card); margin: 0 0.75rem 0.75rem; }
 @media (max-width: 1279px) { .bw-zones { grid-template-columns: 56px minmax(0,1fr) 380px; } .bw-rail-full { display: none; } }
 @media (min-width: 1280px) { .bw-rail-mini { display: none; } }
 @media (max-width: 767px) {
