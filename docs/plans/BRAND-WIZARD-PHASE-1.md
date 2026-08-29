@@ -883,6 +883,28 @@ natürliche ABO-Argument der Plattform (Schichten 1–5 kauft man einmal,
 Monitoring bindet monatlich). Im Dummy als gesperrte sechste Gruppe
 sichtbar.
 
+### Brand Score (Davids Idee 2026-08-29, Runde 94 — Lighthouse-Prinzip)
+
+Jede Brand bekommt einen FUNDIERT GERECHNETEN Score (nie „gefühlt" —
+dieselbe Regel wie bei Georges Empfehlungen), sichtbar als Ring auf den
+Brands-verwalten-Karten und als Fünf-Ringe-Block auf der
+Ergebnis-Seite. Dimensionen: **Vollständigkeit** (Entscheidungs-
+Zustände, exakt messbar) · **Konsistenz** (passen die Entscheidungen
+zusammen — George-geprüft mit Begründung) · **Differenzierung**
+(Abstand zum Marktumfeld aus dem Kontext) · **Klarheit** (messbare
+Text-Kriterien am Purpose-Satz) · **Auffindbarkeit** (SEO-/GEO-
+Readiness; steigt erst mit Brand Experience — ehrlich niedrig davor).
+Framing ist REIFEGRAD, nie Zeugnis: jeder Wert unter 100 verlinkt auf
+seinen nächsten Schritt (der Score verkauft die To-dos — das macht
+Lighthouse groß). Zertifikats-/Badge-Gedanke: teilbares
+„Brand-geprüft"-Badge über das Snapshot-Share-Modell (§6) — Werbung
+für branding.supply auf Kundenseiten. RANKING gegeneinander bewusst
+VERSCHOBEN auf Discover: nur als Perzentil in der eigenen Kategorie
+(„besser als 78 % der Gastronomie-Brands") und nur bei Opt-in-
+Öffentlichkeit — ein Café gegen ein SaaS zu ranken wäre unfair und
+angreifbar. Score-VERLAUF über die Zeit gehört zu Brand Monitoring
+(Schicht 6) und ist dort Teil des Abo-Arguments.
+
 ### BEWUSST NICHT aufgenommen
 
 - **Sonic Branding / Audio-Identität** — 2026 real, aber für die Zielgruppe

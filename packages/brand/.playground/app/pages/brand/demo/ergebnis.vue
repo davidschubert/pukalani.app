@@ -69,6 +69,25 @@ const palette = [
         </div>
       </div>
 
+      <!-- Runde 94 (David): der Brand Score — fundiert gerechnet wie
+           Lighthouse, gerahmt als Reifegrad: jeder Punkt unter 100
+           verkauft seinen nächsten Schritt. -->
+      <div class="bw-card mt-4 p-8">
+        <div class="flex items-baseline justify-between gap-3">
+          <p class="bw-label" style="color: var(--bw-muted)">Brand Score</p>
+          <p class="bw-label" style="color: var(--bw-muted)">Stand: Foundation + Language</p>
+        </div>
+        <div class="mt-5 grid grid-cols-3 items-start gap-x-2 gap-y-5 sm:grid-cols-6">
+          <BwScoreRing :value="87" :size="72" label="Gesamt" />
+          <BwScoreRing :value="100" label="Vollständigkeit" />
+          <BwScoreRing :value="92" label="Konsistenz" />
+          <BwScoreRing :value="84" label="Differenzierung" />
+          <BwScoreRing :value="90" label="Klarheit" />
+          <BwScoreRing :value="68" label="Auffindbarkeit" />
+        </div>
+        <p class="bw-pending mt-5">Jeder Wert unter 100 kennt seinen nächsten Schritt — Auffindbarkeit steigt mit Brand Experience (SEO &amp; GEO).</p>
+      </div>
+
       <!-- Runde 93 (David): Monitoring auf dem Ergebnis andeuten —
            die Marke ist fertig, beobachtet wird sie ab dem Launch. -->
       <div class="bw-card mt-4 p-8">
