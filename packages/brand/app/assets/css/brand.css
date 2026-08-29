@@ -144,7 +144,7 @@
 .bw-send:disabled { opacity: 0.45; }
 
 /* Senden-Knopf (Runde 49, David): Pop-Gelbgrün, Hover invertiert. */
-.bw-send { background: var(--bw-pop) !important; color: var(--bw-ink) !important; }
+.bw-send { background: var(--bw-pop) !important; color: var(--bw-pop-ink) !important; }
 .bw-send:hover { background: var(--bw-ink) !important; color: var(--bw-paper) !important; }
 
 /* Zeiger-Regel (Runde 47, David): alles Klickbare zeigt die Hand —
