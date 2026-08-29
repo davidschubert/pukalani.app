@@ -856,7 +856,9 @@ Theme-Anwendung, Hero) · Social (Profile + Content-Kompass: 3–5 Säulen
 mit Taktung; inkl. Interaktions-Stimme — wie die Marke ANTWORTET) ·
 **SEO & GEO** (Keyword-Set abgeleitet aus Positionierung + Vokabular,
 Entitäten-Konsistenz, zitierfähige Markenfakten + llms.txt — GEO dockt
-direkt am maschinenlesbaren brand.json aus dem Kit an) · Newsletter &
+direkt am maschinenlesbaren brand.json aus dem Kit an; deckt fachlich
+auch AEO und LLMO ab — im UI bewusst NUR "SEO & GEO", zwei Anker statt
+vier Akronyme) · Newsletter &
 E-Mail · Content-Vorlagen · **Geschäftsausstattung** (Davids Ergänzung
 2026-08-29 — braucht JEDE Marke, auch rein digitale: Visitenkarte,
 Briefbogen/Rechnungsvorlage, E-Mail-Signatur) · **Vor Ort** (per Weiche, nur Marken mit

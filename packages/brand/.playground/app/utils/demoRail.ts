@@ -347,7 +347,7 @@ export const demoRail: BwRailLayer[] = [
         icon: '',
         state: 'open',
         info: {
-          description: 'Gefunden werden — von Google und von KI-Assistenten: Keywords aus eurer Positionierung, konsistente Entitätsdaten und zitierfähige Markenfakten samt llms.txt.',
+          description: 'Gefunden werden — von Google und von KI-Assistenten: Keywords aus eurer Positionierung, konsistente Entitätsdaten und zitierfähige Markenfakten samt llms.txt. Deckt ab, was draußen SEO, AEO, GEO oder LLMO heißt — für euch ist es EIN Schritt.',
           minutes: '~6 Min',
           bausteine: [
             { label: 'Keyword-Set', note: 'Abgeleitet aus Positionierung + Vokabular.' },
