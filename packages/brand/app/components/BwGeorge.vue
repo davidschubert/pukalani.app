@@ -10,7 +10,7 @@ const draft = ref('')
 <template>
   <div class="flex min-h-0 flex-1 flex-col">
     <div class="flex items-center gap-2.5 border-b px-8 pt-6 pb-4" style="border-color: var(--bw-line)">
-      <span class="bw-msg-mark">G</span>
+      <BwGeorgeAvatar />
       <span class="leading-tight">
         <span class="block text-xl font-extralight leading-tight">George</span>
         <span class="block text-xl font-extralight leading-tight" style="color: var(--bw-muted)">Markenberater</span>
@@ -18,7 +18,7 @@ const draft = ref('')
     </div>
     <div class="min-h-0 flex-1 space-y-4 overflow-y-auto px-8 py-6">
       <div v-for="m in messages" :key="m.id" class="bw-msg" :class="m.role === 'user' ? 'bw-msg--user' : ''">
-        <span v-if="m.role === 'george'" class="bw-msg-mark" aria-hidden="true">G</span>
+        <BwGeorgeAvatar v-if="m.role === 'george'" />
         <div class="bw-msg-body">
           <p>{{ m.text }}</p>
           <p v-if="m.help" class="bw-msg-help">{{ m.help }}</p>

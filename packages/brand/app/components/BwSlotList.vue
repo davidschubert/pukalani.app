@@ -22,7 +22,7 @@ defineEmits<{ edit: [id: string] }>()
         class="flex items-center gap-3 rounded-2xl px-4 py-2.5"
         style="background: var(--bw-surface-hi)"
       >
-        <span class="grid size-6 flex-none place-items-center rounded-full" style="background: var(--bw-surface)">
+        <span class="grid size-6 flex-none place-items-center rounded-full" :style="slot.state === 'done' ? 'background: var(--bw-accent-soft)' : 'background: var(--bw-surface)'">
           <UIcon
             :name="slot.state === 'done' ? 'i-ph-check' : slot.state === 'stale' ? 'i-ph-clock-counter-clockwise' : 'i-ph-circle'"
             class="size-3.5"

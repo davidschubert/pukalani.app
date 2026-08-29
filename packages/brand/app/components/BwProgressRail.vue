@@ -38,7 +38,7 @@ defineProps<{ layers: BwRailLayer[] }>()
                 {{ step.label }}
                 <span v-if="step.slots" class="block text-xs font-normal" style="color: var(--bw-muted)">{{ step.slots }}<template v-if="step.minutes"> · {{ step.minutes }}</template></span>
               </span>
-              <span class="grid size-7 flex-none place-items-center rounded-full" style="background: var(--bw-surface-hi)">
+              <span class="grid size-7 flex-none place-items-center rounded-full" :style="step.state === 'done' ? 'background: var(--bw-accent-soft)' : 'background: var(--bw-surface-hi)'">
                 <UIcon :name="step.state === 'done' ? 'i-ph-check' : step.state === 'active' ? 'i-ph-circle-half-fill' : 'i-ph-circle'" class="size-4" :style="step.state === 'done' ? 'color: var(--bw-accent)' : step.state === 'active' ? 'color: var(--bw-ink)' : 'color: var(--bw-muted)'" />
               </span>
             </button>
