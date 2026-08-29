@@ -45,12 +45,12 @@ const profiles = [
       </div>
 
       <!-- Featured -->
-      <div class="bw-grain-hero mt-6 p-10" style="--hero-a: #efe6db; --hero-b: #a89684; --hero-c: #2e2822">
+      <NuxtLink to="/brand/demo/artikel" class="bw-grain-hero mt-6 block p-10" style="--hero-a: #efe6db; --hero-b: #a89684; --hero-c: #2e2822">
         <p class="bw-label uppercase tracking-widest" style="color: rgb(247 242 234 / 0.7)">Rebranding · 8 Min</p>
         <p class="mt-3 max-w-xl text-3xl font-extralight leading-snug tracking-tight">Warum Luxusmarken ihre Serifen aufgeben</p>
         <p class="mt-4 max-w-xl text-sm leading-relaxed" style="color: rgb(247 242 234 / 0.85)">Burberry, Saint Laurent, Balenciaga — und jetzt alle gleich? Was hinter der großen Vereinheitlichung steckt, und wann sie ein Fehler ist.</p>
         <p class="bw-label mt-6" style="color: rgb(247 242 234 / 0.6)">Lena K. · Weiterführend: das Quellvideo ist eingebettet</p>
-      </div>
+      </NuxtLink>
 
       <!-- Artikel -->
       <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -73,7 +73,7 @@ const profiles = [
             <p class="bw-label" style="color: var(--bw-muted)">Bewertet mit dem Brand-Score-System</p>
           </div>
           <div class="mt-4 grid gap-4 sm:grid-cols-3">
-            <div v-for="pr in profiles" :key="pr.name" class="bw-card bw-card--hover p-5">
+            <NuxtLink v-for="pr in profiles" :key="pr.name" to="/brand/demo/profil" class="bw-card bw-card--hover block p-5">
               <div class="flex items-start justify-between gap-3">
                 <div class="min-w-0">
                   <p class="truncate font-semibold">{{ pr.name }}</p>
@@ -82,7 +82,7 @@ const profiles = [
                 <BwScoreRing :value="pr.score" :size="36" class="flex-none" />
               </div>
               <p class="bw-label mt-4" style="color: var(--bw-muted)">Profil, Artikel & Verlauf</p>
-            </div>
+            </NuxtLink>
           </div>
         </div>
         <div>
