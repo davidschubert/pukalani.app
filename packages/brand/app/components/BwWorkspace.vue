@@ -46,7 +46,7 @@ const helpMenu = [[
           <button aria-label="Hilfe" class="grid place-items-center"><UIcon name="i-ph-question" class="size-5" /></button>
         </UDropdownMenu>
         <UDropdownMenu :items="userMenu">
-          <button aria-label="Konto-Menü" class="grid place-items-center"><UIcon name="i-ph-user-circle" class="size-6" /></button>
+          <button aria-label="Konto-Menü" class="grid place-items-center"><UIcon name="i-ph-user-circle" class="size-8" /></button>
         </UDropdownMenu>
       </div>
     </header>
