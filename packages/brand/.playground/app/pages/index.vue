@@ -28,7 +28,7 @@
           />
         </NuxtLink>
       </div>
-      <div class="mt-10 border border-dashed p-10 text-center" style="border-color: var(--bw-line-strong); border-radius: var(--bw-radius-card)">
+      <div class="bw-rounded-card mt-10 border border-dashed p-10 text-center" style="border-color: var(--bw-line-strong)">
         <p class="font-medium">So sieht der Leerzustand aus:</p>
         <p class="mt-1 text-sm" style="color: var(--bw-muted)">Lass uns deine erste Brand aufbauen. Du kannst jederzeit pausieren — dein Stand bleibt gespeichert.</p>
         <UButton class="mt-4" icon="i-ph-plus" label="Erste Brand starten" variant="outline" />

@@ -248,7 +248,9 @@ Editoriale, warme Premium-Ästhetik: viel Weißraum · sehr gute Typografie ·
 ruhige natürliche Grundfarben · EINE prägnante Akzentfarbe für Aktionen ·
 dünne Linien für TRENNER · **Karten dagegen im modernen
 Soft-Look (präzisiert Runde 8, Davids Referenz): stark gerundet
-(~22 px), randlos, sehr weicher Schatten — schweben statt umranden** ·
+(30 px als **Squircle** — natives `corner-shape: superellipse(2)` mit
+border-radius-Fallback, Runde 8b), randlos, sehr weicher Schatten —
+schweben statt umranden** ·
 wenige hochwertige Illustrationen. VERBOTEN: futuristische KI-Verläufe, übermäßige
 Chatblasen, Punkte/Abzeichen/Erfolgsfeuerwerke. Wirkung: hochwertiges
 digitales Arbeitsbuch mit persönlicher Beratung, kein SaaS-Dashboard.
