@@ -62,14 +62,14 @@
 .bw-shell { display: flex; flex-direction: column; height: 100dvh; }
 .bw-topbar {
   display: flex; align-items: center; gap: 1rem;
-  padding: 0.85rem 1.5rem; border-bottom: 1px solid var(--bw-line);
+  padding: 1.25rem 2rem; border-bottom: 1px solid var(--bw-line);
   background: var(--bw-surface); flex: none;
 }
 .bw-zones { display: grid; grid-template-columns: 330px minmax(0,1fr) minmax(0,1fr); flex: 1; min-height: 0; }
 .bw-rail { overflow-y: auto; padding: var(--bw-gutter); }
 .bw-stage { overflow-y: auto; padding: var(--bw-gutter) clamp(1.2rem, 4vw, 3.5rem) 4rem; }
 .bw-stage-inner { max-width: 46rem; margin: 0 auto; }
-.bw-george { display: flex; flex-direction: column; min-height: 0; background: var(--bw-surface); border-radius: var(--bw-radius-card); margin: var(--bw-gutter); }
+.bw-george { display: flex; flex-direction: column; min-height: 0; background: var(--bw-surface); border-radius: 0; margin: 0; }
 @media (max-width: 1279px) { .bw-zones { grid-template-columns: 56px minmax(0,1fr) 380px; } .bw-rail-full { display: none; } }
 @media (min-width: 1280px) { .bw-rail-mini { display: none; } }
 @media (max-width: 767px) {
@@ -152,7 +152,7 @@
   padding: 0.45rem 0.7rem; max-width: 85%;
 }
 .bw-msg-body { font-size: 0.925rem; line-height: 1.55; color: var(--bw-ink); max-width: 38rem; }
-.bw-msg-help { font-family: var(--bw-font-mono); font-size: 12px; line-height: 18px; color: var(--bw-muted); margin-top: 0.15rem; }
+.bw-msg-help { font-family: var(--bw-font-mono); font-size: 12px; line-height: 18px; color: var(--bw-muted); margin-top: 0.3rem; }
 
 /* Chips: Empfehlung-zuerst, Tastatur-Fokus sichtbar */
 .bw-chip {
