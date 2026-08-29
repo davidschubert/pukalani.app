@@ -129,7 +129,52 @@ export const demoRail: BwRailLayer[] = [
       { id: 'verbal-result', kind: 'result', label: 'Ergebnis', icon: '', state: 'open', to: '/brand/demo/ergebnis' },
     ],
   },
-  { id: 'design', label: 'Brand Design', locked: true, lockedNote: 'Baut auf deiner Foundation auf' },
-  { id: 'book', label: 'Brand Book & Kit', locked: true, lockedNote: 'Entsteht aus Design + Foundation' },
-  { id: 'experience', label: 'Brand Experience', locked: true, lockedNote: 'Website, Social & Content' },
+  {
+    id: 'design',
+    label: 'Brand Design',
+    locked: true,
+    lockedNote: 'Baut auf deiner Foundation auf',
+    info: {
+      description: 'Die visuelle Identität eurer Marke — hergeleitet aus Foundation und Brand Language, nicht aus dem Katalog. Farben und Schrift entstehen aus Archetyp, Werten und Stimme; jede Entscheidung trägt eine Begründung.',
+      minutes: '~35 Min',
+      bausteine: [
+        { label: 'Farbwelt', note: 'Basisfarbe aus Archetyp + Werten, Hell-/Dunkel-Rampe mit geprüften Kontrast-Paaren, Akzent, Einsatzregeln.' },
+        { label: 'Typografie', note: 'Schriftrollen (Text, Überschrift, Mono), Grade und Hierarchie.' },
+        { label: 'Logo & Zeichen', note: 'Wort-/Bildmarke, Varianten (App-Icon, Avatar), Schutzraum und Minimalgrößen.' },
+        { label: 'Bildsprache & Ikonografie', note: 'Fotografie-Stil, Illustrations- und Icon-Stil.' },
+        { label: 'Motion', note: 'Tempo-Charakter, kinetisches Logo, reduced-motion-Verhalten.' },
+      ],
+    },
+  },
+  {
+    id: 'book',
+    label: 'Brand Book & Kit',
+    locked: true,
+    lockedNote: 'Entsteht aus Design + Foundation',
+    info: {
+      description: 'Regelwerk und Werkzeuge: Das Book erklärt, das Kit arbeitet. Das meiste entsteht hier automatisch aus euren fertigen Schichten — ihr kuratiert und bestätigt, statt neu zu entscheiden.',
+      minutes: '~15 Min',
+      bausteine: [
+        { label: 'Brand Book', note: 'Kapitel aus euren Schichten, Do-&-Don’t-Beispiele, AI-Guidelines (was KI im Namen der Marke darf).' },
+        { label: 'Kit & Design Tokens', note: 'Token-Set hell/dunkel, Exporte (CSS, Tailwind, Figma), maschinenlesbares brand.json.' },
+        { label: 'Templates', note: 'Social-Set mit festen Wiedererkennungs-Ankern, Basis-Vorlagen.' },
+      ],
+    },
+  },
+  {
+    id: 'experience',
+    label: 'Brand Experience',
+    locked: true,
+    lockedNote: 'Website, Social & Content',
+    info: {
+      description: 'Die Ableitungen: eure Marke im Einsatz. Website, Social und Newsletter entstehen aus Foundation + Design — welche Inhalte zu euch passen, wissen wir aus Archetyp und Zielgruppe längst.',
+      minutes: '~20 Min',
+      bausteine: [
+        { label: 'Website', note: 'Seitentypen, Theme-Anwendung, Startseiten-Hero.' },
+        { label: 'Social', note: 'Profile je Plattform + Content-Kompass: 3–5 Säulen mit Taktung.' },
+        { label: 'Newsletter & E-Mail', note: 'Absender-Stimme und Template.' },
+        { label: 'Content-Vorlagen', note: 'Post-Formate, die Werte und Beweise wiederverwenden.' },
+      ],
+    },
+  },
 ]

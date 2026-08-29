@@ -27,6 +27,9 @@ export interface BwRailLayer {
   label: string
   locked?: boolean
   lockedNote?: string
+  /* Runde 82 (David): auch gesperrte Schichten erklären sich — der
+   * Info-Layer zeigt, welche Schritte dort warten. */
+  info?: BwRailStepInfo
   steps?: BwRailStep[]
 }
 defineProps<{ layers: BwRailLayer[] }>()
@@ -51,7 +54,19 @@ const infoPct = computed(() => {
             <div class="bw-label uppercase tracking-wider">{{ layer.label }}</div>
             <p class="mt-0.5 text-xs">{{ layer.lockedNote }}</p>
           </div>
-          <UIcon name="i-ph-lock-simple" class="mt-0.5 size-4 flex-none" />
+          <div class="flex flex-none items-center gap-1">
+            <span
+              v-if="layer.info"
+              class="bw-info-btn grid size-7 place-items-center rounded-full"
+              role="button" tabindex="0"
+              :aria-label="`Was kommt in ${layer.label}?`"
+              @click="infoStep = { step: { id: layer.id, label: layer.label, icon: '', state: 'open', info: layer.info }, layerLabel: layer.lockedNote ?? '' }"
+              @keydown.enter="infoStep = { step: { id: layer.id, label: layer.label, icon: '', state: 'open', info: layer.info }, layerLabel: layer.lockedNote ?? '' }"
+            >
+              <UIcon name="i-ph-info" class="size-4.5" />
+            </span>
+            <UIcon name="i-ph-lock-simple" class="size-4" />
+          </div>
         </div>
         <template v-else>
           <div class="bw-label uppercase tracking-wider" style="color: var(--bw-ink-soft)">

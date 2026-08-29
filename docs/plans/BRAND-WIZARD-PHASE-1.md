@@ -832,6 +832,29 @@ Phase 1 = Schicht 1 + verbale Hälfte von 2 · Phase 2 = visuelle Hälfte von
   in Phase 1 durch das Snapshot-Share-Modell (§6). Doppelnutzen: Social Proof
   + SEO für branding.supply.
 
+### Schritt-Schnitt der Phasen 2+3 (2026-08-29, mit David am Dummy entschieden)
+
+Die Schritt-Listen der drei späteren Schichten — im UI schon heute in den
+Info-Layern der gesperrten Gruppen sichtbar. Charakter-Unterschied bewusst:
+**Design = entscheiden · Book & Kit = kuratieren/exportieren · Experience =
+anwenden.** Gesamtrechnung über alle Schichten ≈ 54 Entscheidungen mit
+abnehmender Last nach hinten („je weiter, desto mehr entsteht von selbst").
+
+**Brand Design** (~15 Entscheidungen, ~35 Min): Farbwelt (Basisfarbe aus
+Archetyp + Werten, Hell-/Dunkel-Rampe mit Kontrast-Paaren — die
+Themes-Engine nativ) · Typografie (Rollen, Grade, Hierarchie) · Logo &
+Zeichen (Wort-/Bildmarke, Varianten, Schutzraum) · Bildsprache &
+Ikonografie · Motion (Tempo, kinetisches Logo, reduced-motion).
+
+**Brand Book & Kit** (~8, meist Bestätigungen, ~15 Min): Brand Book
+(Kapitel aus den Schichten, Do/Don't, AI-Guidelines) · Kit & Design Tokens
+(light/dark, Exporte CSS/Tailwind/Figma, maschinenlesbares brand.json) ·
+Templates (Social-Set mit Wiedererkennungs-Ankern).
+
+**Brand Experience** (~10, ~20 Min): Website (Seitentypen,
+Theme-Anwendung, Hero) · Social (Profile + Content-Kompass: 3–5 Säulen
+mit Taktung) · Newsletter & E-Mail · Content-Vorlagen.
+
 ### BEWUSST NICHT aufgenommen
 
 - **Sonic Branding / Audio-Identität** — 2026 real, aber für die Zielgruppe
