@@ -987,6 +987,34 @@ fremden Logos als eigene Assets. POSITIONIERUNGS-SPLIT: branding.supply
 Verknüpfung über Autorenprofil (David → author → branding.supply) statt
 zweier Sites auf denselben Keywords.
 
+### Beispiel-Brand, Brand-Duell, Site-Navigation (Davids Wünsche 2026-08-29)
+
+- BEISPIEL-BRAND (Pflicht, Phase 1): mindestens EINE vollständige, wirklich
+  ausführliche Muster-Brand als ERGEBNIS-Referenz für alle User-Brands —
+  festgelegt auf Kailua Coffee Co. (der rote Faden des Wizards). Dummy:
+  `/brand/demo/beispiel` — alle sechs Schichten ausformuliert (Purpose inkl.
+  Anti-Purpose, Werte mit Regeln, Archetyp/Stimme mit Vokabular, Manifest,
+  Tagline/Pitch/Namens-Prüfung, Farbwelt mit Hex+Rollen, Typo/Logo/Bild/
+  Motion, Book & Kit-Artefakte, Content-Kompass, zitierfähige Fakten,
+  Bewertungs-Stimme, Score alle 8 Dimensionen, Monitoring aktiv). Rollen:
+  (a) Onboarding-Schaufenster („so sieht fertig aus"), (b) P0-Content-Anker
+  (die Beispiel-Antworten, die George zeigt, kommen aus dieser Brand),
+  (c) Anatomie-Referenz. Nike bleibt dagegen das EXTERNE Maximal-Profil
+  (von außen bewertbar); die Beispiel-Brand ist das INTERNE Maximal-Ergebnis.
+- BRAND-DUELL (Phase 2, Journal-Format): zwei Marken im Direktvergleich wie
+  die Statistik-Tafel nach einem Spiel — Dummy `/brand/demo/duell`
+  (Nike vs. Adidas): Aufstellung mit Ringen + VS, acht Dimensionen als
+  gespiegelte Balken (Sieger je Zeile in Akzent), Zahlen & Fakten
+  (Gegründet/Claim/Zeichen/Agentur/Archetyp), redaktionelle Einordnung,
+  CTA „Wie schlägt sich deine Marke im Duell?". Später auch
+  User-Brand vs. Referenz-Brand („Vergleiche deine Brand mit Nike").
+- SITE-NAVIGATION: die öffentlichen Seiten haben eine übergeordnete
+  Header-Navigation (`BwSiteNav`): Wortmarke (Pfoten-Icon = George) +
+  Meine Brands / Discover / Journal + „Neue Brand"-CTA; aktiver Punkt als
+  Ink-Pille, Detailseiten zählen zu ihrem Hauptpunkt (Artikel/Profil/Duell
+  → Journal, Anatomie → Discover, Beispiel → Meine Brands). Die Werkstatt
+  behält ihre eigene Topbar (BwWorkspace) — zwei Welten, zwei Köpfe.
+
 ### Knowledge Base / Brand Intelligence Layer (Phase 3+, vorgemerkt 2026-08-29)
 
 Der strategische Überbau von Journal + Score + Discover (aus Davids

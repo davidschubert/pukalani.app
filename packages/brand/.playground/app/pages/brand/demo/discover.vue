@@ -27,15 +27,13 @@ const creators = [
 <template>
   <div class="bw-root min-h-dvh px-6 py-10">
     <div class="mx-auto max-w-5xl">
+      <BwSiteNav />
       <div class="mb-2 flex items-end justify-between gap-4">
         <div>
           <p class="bw-label uppercase tracking-widest" style="color: var(--bw-muted)">Discover</p>
           <h1 class="mt-1 text-4xl leading-tight">Marken, gebaut mit George</h1>
         </div>
-        <div class="flex items-center gap-2">
-          <UButton to="/brand/demo/journal" icon="i-ph-newspaper" label="Journal" size="lg" color="neutral" variant="ghost" class="rounded-full" />
-          <UButton icon="i-ph-plus" label="Starte deine eigene" size="lg" class="rounded-full" />
-        </div>
+        <UButton icon="i-ph-plus" label="Starte deine eigene" size="lg" class="rounded-full" />
       </div>
       <p class="bw-label" style="color: var(--bw-muted)">Jede Brand hier ist freiwillig öffentlich — mit ihrer ganzen Anatomie.</p>
 

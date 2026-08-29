@@ -43,6 +43,7 @@ const competitors = [
 <template>
   <div class="bw-root min-h-dvh px-6 py-10">
     <div class="mx-auto max-w-4xl">
+      <BwSiteNav />
       <NuxtLink to="/brand/demo/journal" class="bw-label inline-flex items-center gap-1.5" style="color: var(--bw-muted)">
         <UIcon name="i-ph-arrow-left" class="size-4" /> Journal
       </NuxtLink>
@@ -131,7 +132,8 @@ const competitors = [
               <BwScoreRing :value="c.score" :size="30" class="flex-none" />
             </div>
           </div>
-          <UButton label="Vergleiche deine Brand mit Nike" size="sm" color="neutral" variant="ghost" class="mt-5 rounded-full" style="background: var(--bw-surface)" trailing-icon="i-ph-arrow-right" />
+          <UButton to="/brand/demo/duell" label="Duell ansehen: Nike vs. Adidas" size="sm" color="neutral" variant="ghost" class="mt-5 rounded-full" style="background: var(--bw-surface)" trailing-icon="i-ph-arrow-right" />
+          <UButton label="Vergleiche deine Brand mit Nike" size="sm" color="neutral" variant="ghost" class="mt-2 rounded-full" style="background: var(--bw-surface)" trailing-icon="i-ph-arrow-right" />
         </div>
       </div>
 

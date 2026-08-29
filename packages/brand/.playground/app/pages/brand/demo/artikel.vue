@@ -17,6 +17,7 @@ const related = [
 <template>
   <div class="bw-root min-h-dvh px-6 py-10">
     <div class="mx-auto max-w-4xl">
+      <BwSiteNav />
       <NuxtLink to="/brand/demo/journal" class="bw-label inline-flex items-center gap-1.5" style="color: var(--bw-muted)">
         <UIcon name="i-ph-arrow-left" class="size-4" /> Journal
       </NuxtLink>

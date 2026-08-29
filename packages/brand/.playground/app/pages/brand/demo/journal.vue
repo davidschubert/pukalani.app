@@ -24,12 +24,10 @@ const profiles = [
 <template>
   <div class="bw-root min-h-dvh px-6 py-10">
     <div class="mx-auto max-w-5xl">
-      <div class="mb-2 flex items-end justify-between gap-4">
-        <div>
-          <p class="bw-label uppercase tracking-widest" style="color: var(--bw-muted)">Journal</p>
-          <h1 class="mt-1 text-4xl leading-tight">Markenwissen, das trägt</h1>
-        </div>
-        <UButton to="/brand/demo/discover" icon="i-ph-compass" label="Discover" size="lg" color="neutral" variant="ghost" class="rounded-full" />
+      <BwSiteNav />
+      <div class="mb-2">
+        <p class="bw-label uppercase tracking-widest" style="color: var(--bw-muted)">Journal</p>
+        <h1 class="mt-1 text-4xl leading-tight">Markenwissen, das trägt</h1>
       </div>
       <p class="bw-label" style="color: var(--bw-muted)">Artikel, Brand-Profile und Rankings — verknüpft statt verbloggt.</p>
 
@@ -95,6 +93,11 @@ const profiles = [
             <h3 class="mt-2 font-semibold leading-snug">Die 30 besten Tech-Brands — nach Branding-Qualität, nicht Unternehmenswert</h3>
             <p class="mt-2 text-sm" style="color: var(--bw-ink-soft)">Bewertet mit denselben 40 Prüfkriterien wie jede Brand auf dieser Plattform.</p>
           </div>
+          <NuxtLink to="/brand/demo/duell" class="bw-card bw-card--hover mt-4 block p-6">
+            <p class="bw-label" style="color: var(--bw-muted)">Brand-Duell</p>
+            <h3 class="mt-2 font-semibold leading-snug">Nike vs. Adidas — der Direktvergleich</h3>
+            <p class="mt-2 text-sm" style="color: var(--bw-ink-soft)">Acht Dimensionen, Zahl gegen Zahl — wie die Statistik-Tafel nach dem Spiel.</p>
+          </NuxtLink>
         </div>
       </div>
 
