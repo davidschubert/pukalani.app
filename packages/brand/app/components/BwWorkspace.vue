@@ -4,20 +4,19 @@
  *  rechts Hilfe (kontextbezogen) + User-Menü mit Sprachregler. */
 const props = defineProps<{ progressPct: number, contentLocale: string, progressNote?: string }>()
 const mode = ref<'stage' | 'george'>('george')
+/* Runde 54 (David): das ?-Icon ist raus — Erklärungen macht der
+ * Info-Layer je Schritt, Beispiele macht George; Tastaturkürzel und
+ * Support leben jetzt hier im Konto-Menü. */
 const userMenu = computed(() => [[
   { label: `Inhaltssprache: ${props.contentLocale.toUpperCase()}`, icon: 'i-ph-translate', disabled: true },
   { label: 'Oberfläche: Deutsch', icon: 'i-ph-globe-simple' },
 ], [
+  { label: 'Tastaturkürzel', icon: 'i-ph-keyboard' },
+  { label: 'Support kontaktieren', icon: 'i-ph-lifebuoy' },
+], [
   { label: 'Konto', icon: 'i-ph-user-circle' },
   { label: 'Abmelden', icon: 'i-ph-sign-out' },
 ]])
-const helpMenu = [[
-  { label: 'Was ist dieser Baustein?', icon: 'i-ph-info' },
-  { label: 'Beispiel ansehen', icon: 'i-ph-eye' },
-  { label: 'Tastaturkürzel', icon: 'i-ph-keyboard' },
-], [
-  { label: 'Support kontaktieren', icon: 'i-ph-lifebuoy' },
-]]
 </script>
 
 <template>
@@ -31,9 +30,6 @@ const helpMenu = [[
              Speichert… / Offline — Eingabe bleibt erhalten / Konflikt. -->
       </div>
       <div class="ml-auto flex items-center gap-3" style="color: var(--bw-muted)">
-        <UDropdownMenu :items="helpMenu">
-          <button aria-label="Hilfe" class="grid place-items-center"><UIcon name="i-ph-question" class="size-8" /></button>
-        </UDropdownMenu>
         <UDropdownMenu :items="userMenu">
           <button aria-label="Konto-Menü" class="grid place-items-center"><UAvatar text="DS" size="md" /></button>
         </UDropdownMenu>
