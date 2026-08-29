@@ -11,9 +11,9 @@ defineEmits<{ pick: [id: string], dontKnow: [] }>()
 </script>
 
 <template>
-  <div class="flex flex-wrap gap-2">
+  <div class="flex flex-col items-stretch gap-2">
     <button
-      v-for="o in options" :key="o.id" class="bw-chip"
+      v-for="o in options" :key="o.id" class="bw-chip text-left"
       :class="selected?.includes(o.id) ? 'bw-chip--selected' : ''"
       @click="$emit('pick', o.id)"
     >

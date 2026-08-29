@@ -26,7 +26,9 @@ const helpMenu = [[
       <div class="flex min-w-0 items-center gap-2.5">
         <span class="truncate font-semibold">{{ brandTitle }}</span>
         <span class="flex-none text-sm" style="color: var(--bw-muted)">· {{ progress }} abgeschlossen</span>
-        <span class="bw-state bw-state--confirmed flex-none"><UIcon name="i-ph-check" /> Gespeichert</span>
+        <!-- Kein Dauer-Badge (Runde 4): Autosave ist Vertrag, Stille heißt
+             gespeichert. Hier erscheinen NUR Abweichungs-Zustände (§3e):
+             Speichert… / Offline — Eingabe bleibt erhalten / Konflikt. -->
       </div>
       <div class="ml-auto flex items-center gap-3" style="color: var(--bw-muted)">
         <UDropdownMenu :items="helpMenu">

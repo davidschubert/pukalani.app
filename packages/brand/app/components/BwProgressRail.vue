@@ -15,12 +15,12 @@ defineProps<{ layers: BwRailLayer[] }>()
   <nav aria-label="Fortschritt">
     <div class="bw-rail-full space-y-5">
       <div v-for="layer in layers" :key="layer.id">
-        <div v-if="layer.locked" class="grid grid-cols-[1.4rem_1fr] items-start" style="color: var(--bw-muted)">
-          <UIcon name="i-ph-lock-simple" class="mt-0.5" />
+        <div v-if="layer.locked" class="flex items-start justify-between gap-2" style="color: var(--bw-muted)">
           <div>
             <div class="text-xs uppercase tracking-wider">{{ layer.label }}</div>
             <p class="mt-0.5 text-xs">{{ layer.lockedNote }}</p>
           </div>
+          <UIcon name="i-ph-lock-simple" class="mt-0.5 flex-none" />
         </div>
         <template v-else>
           <div class="text-xs uppercase tracking-wider" style="color: var(--bw-ink-soft)">
@@ -33,11 +33,11 @@ defineProps<{ layers: BwRailLayer[] }>()
               :disabled="step.state === 'open'"
               :style="step.state === 'active' ? 'background: var(--bw-accent-soft); color: var(--bw-accent); font-weight: 600' : step.state === 'open' ? 'color: var(--bw-muted)' : 'color: var(--bw-ink-soft)'"
             >
-              <UIcon :name="step.state === 'done' ? 'i-ph-check-circle-fill' : step.state === 'active' ? 'i-ph-circle-half-fill' : 'i-ph-circle'" class="mt-0.5 flex-none" />
-              <span>
+              <span class="flex-1">
                 {{ step.label }}
                 <span v-if="step.slots" class="block text-xs font-normal" style="color: var(--bw-muted)">{{ step.slots }}<template v-if="step.minutes"> · {{ step.minutes }}</template></span>
               </span>
+              <UIcon :name="step.state === 'done' ? 'i-ph-check-circle-fill' : step.state === 'active' ? 'i-ph-circle-half-fill' : 'i-ph-circle'" class="mt-0.5 flex-none" />
             </button>
           </li>
           </ul>

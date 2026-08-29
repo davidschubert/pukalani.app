@@ -9,10 +9,12 @@ const draft = ref('')
 
 <template>
   <div class="flex min-h-0 flex-1 flex-col">
-    <div class="flex items-center gap-2 border-b px-4 py-2.5" style="border-color: var(--bw-line)">
+    <div class="flex items-center gap-2.5 border-b px-4 py-2" style="border-color: var(--bw-line)">
       <span class="bw-msg-mark">G</span>
-      <span class="text-sm font-semibold">George</span>
-      <span class="text-xs" style="color: var(--bw-muted)">Markenberater</span>
+      <span class="leading-tight">
+        <span class="block text-sm font-semibold">George</span>
+        <span class="block text-xs" style="color: var(--bw-muted)">Persönlicher Markenberater</span>
+      </span>
     </div>
     <div class="min-h-0 flex-1 space-y-3.5 overflow-y-auto px-4 py-4">
       <div v-for="m in messages" :key="m.id" class="bw-msg" :class="m.role === 'user' ? 'bw-msg--user' : ''">
