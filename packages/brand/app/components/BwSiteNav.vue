@@ -13,6 +13,9 @@ function isActive(it: { match: string[] }): boolean {
   return it.match.includes(route.path)
 }
 
+/* Neue Brand oeffnet das Start-Modal von jeder Seite aus. */
+const newBrandOpen = ref(false)
+
 /* Konto-Menü (aus BwWorkspace umgezogen): Sprachwechsel via
  * switchLocalePath, Erscheinungsbild nach Pukalani-Muster über
  * colorMode.preference. */
@@ -76,7 +79,8 @@ const userMenu = computed(() => [[
           ? 'background: var(--bw-ink); color: var(--bw-paper)'
           : 'color: var(--bw-muted)'"
       >{{ it.label }}</NuxtLink>
-      <UButton icon="i-ph-plus" label="Neue Brand" size="sm" color="neutral" variant="outline" class="ml-2 rounded-full" style="background: var(--bw-surface-hi)" />
+      <UButton icon="i-ph-plus" label="Neue Brand" size="sm" color="neutral" variant="outline" class="ml-2 rounded-full" style="background: var(--bw-surface-hi)" @click="newBrandOpen = true" />
+      <BwNewBrandModal v-model:open="newBrandOpen" />
       <UDropdownMenu :items="userMenu">
         <button aria-label="Konto-Menü" class="ml-2 grid place-items-center"><UAvatar text="DS" size="sm" /></button>
       </UDropdownMenu>
