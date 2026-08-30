@@ -987,6 +987,29 @@ fremden Logos als eigene Assets. POSITIONIERUNGS-SPLIT: branding.supply
 Verknüpfung über Autorenprofil (David → author → branding.supply) statt
 zweier Sites auf denselben Keywords.
 
+### Startseite + Perplexity-Analyse (2026-08-30)
+
+Analyse der Perplexity-Computer-Landing (personal-brand-strategy,
+Lead-Magnet): Was wir ÜBERNEHMEN — (1) **AUDIT-FIRST-AKQUISE**: der
+Einstieg ist nicht „bau eine Marke", sondern „lass deine prüfen" —
+unser Brand Score wird damit vom Ergebnis-Metrik zum
+AKQUISE-WERKZEUG: kostenloser **Brand-Check** (Website angeben ⇒
+George analysiert den Außenauftritt mit den 40 Prüfkriterien ⇒ Score
++ 3 Befunde, ohne Anmeldung) — zugleich der natürliche Einstieg in
+die Rebrand-Weiche und später in Monitoring. (2) Hero =
+ERGEBNIS+ZEIT-Versprechen (bei uns: Foundation in ~45 Min statt
+„in minutes"). (3) PROZESS-THEATER: den Agenten bei der Arbeit
+zeigen (4 Mono-Zeilen mit Status). (4) ARTEFAKTE KONKRET benennen
+(Brand Book, brand.json, Tokens, Pressekit, Content-Kompass +
+NEU: **90-Tage-Plan** als Brand-Experience-Artefakt, vorgemerkt).
+(5) Memory + Monitoring als VERKAUFBARE Capabilities auf der
+Landing (validiert Knowledge Base und Monitoring). Was wir NICHT
+übernehmen: Tool-Push (Notion/Canva-Export = Phase 3+),
+Personal-Brand-Fokus (wir bauen Unternehmens-Marken im Gespräch).
+Dummy: `/start` — Hero, Prozess-Theater, Artefakte-Grid,
+6 Capability-Karten, Brand-Check-Block, Beispiel-Brand-Beweis,
+UPageCTA, Footer. Im echten Bau ist das die ausgeloggte `/`.
+
 ### Squircle-Exponent (Systementscheidung David, 2026-08-30)
 
 - `corner-shape: superellipse(1.7)` ist DER Eckenverlauf des Produkts —
