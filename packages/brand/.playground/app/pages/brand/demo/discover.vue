@@ -96,7 +96,7 @@ const creators = [
           @click="activeArchetype = activeArchetype === a ? null : a"
         >{{ a }}</button>
         <span class="ml-auto" />
-        <USelect v-model="activeSort" :items="sorts" color="neutral" variant="ghost" class="bw-label rounded-full" style="background: var(--bw-surface-hi)" />
+        <USelect v-model="activeSort" :items="sorts" color="neutral" variant="ghost" class="w-48 justify-between rounded-full text-sm" :ui="{ base: 'px-4 py-2' }" style="background: var(--bw-surface-hi)" />
       </div>
 
       <!-- Galerie-Wand: die Farbwelt ist die Karte -->
