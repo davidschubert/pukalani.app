@@ -82,9 +82,7 @@ const userMenu = computed(() => [[
       <NuxtLink
         v-for="it in items" :key="it.to" :to="it.to"
         class="text-sm whitespace-nowrap transition-colors hover:!text-(--bw-ink)"
-        :style="isActive(it)
-          ? 'color: var(--bw-ink); font-weight: 550'
-          : 'color: var(--bw-muted)'"
+        :style="isActive(it) ? 'color: var(--bw-ink)' : 'color: var(--bw-muted)'"
       >{{ it.label }}</NuxtLink>
       <UButton icon="i-ph-plus" label="Neue Brand" size="sm" color="neutral" variant="outline" class="rounded-full" @click="newBrandOpen = true" />
       <BwNewBrandModal v-model:open="newBrandOpen" />
