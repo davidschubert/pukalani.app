@@ -2,7 +2,7 @@
 /** Drei-Zonen-Werkstatt. Korrekturrunde 3 (David): Brandname + "% abgeschlossen"
  *  + Gespeichert LINKSBÜNDIG (der Meine-Brands-Weg lebt jetzt im Switcher);
  *  rechts Hilfe (kontextbezogen) + User-Menü mit Sprachregler. */
-const props = defineProps<{
+defineProps<{
   progressPct: number
   contentLocale: string
   progressNote?: string
@@ -21,52 +21,10 @@ const SYNC = {
   conflict: { label: 'Konflikt — Stand neu laden', icon: 'i-ph-warning', spin: false, tone: 'var(--bw-stale)' },
 } as const
 const mode = ref<'stage' | 'george'>('george')
-/* Runde 54 (David): das ?-Icon ist raus — Erklärungen macht der
- * Info-Layer je Schritt, Beispiele macht George; Tastaturkürzel und
- * Support leben jetzt hier im Konto-Menü. Runde 66: der Sprachwechsler
- * hängt als Untermenü hier — Wechsel wie überall via switchLocalePath. */
-const { locale, locales } = useI18n()
-const switchLocalePath = useSwitchLocalePath()
-const LOCALE_FLAGS: Record<string, string> = { en: 'i-circle-flags-us', de: 'i-circle-flags-de' }
-/* Erscheinungsbild nach Pukalani-Muster (DisplaySettingsMenu im
- * themes-Layer): Hell/Dunkel/System über colorMode.preference. */
-const colorMode = useColorMode()
-const APPEARANCE = [
-  ['light', 'Hell', 'i-ph-sun'],
-  ['dark', 'Dunkel', 'i-ph-moon'],
-  ['system', 'System', 'i-ph-monitor'],
-] as const
-const userMenu = computed(() => [[
-  { label: `Inhaltssprache: ${props.contentLocale.toUpperCase()}`, icon: 'i-ph-translate', disabled: true },
-  {
-    label: locale.value === 'de' ? 'Sprache: Deutsch' : 'Language: English',
-    icon: 'i-ph-globe-simple',
-    children: locales.value.map(entry => ({
-      label: entry.code === 'de' ? 'Deutsch' : 'English',
-      icon: LOCALE_FLAGS[entry.code] ?? 'i-ph-globe-hemisphere-west',
-      type: 'checkbox' as const,
-      checked: entry.code === locale.value,
-      to: switchLocalePath(entry.code),
-    })),
-  },
-  {
-    label: 'Erscheinungsbild',
-    icon: 'i-ph-sun-horizon',
-    children: APPEARANCE.map(([mode, label, icon]) => ({
-      label,
-      icon,
-      type: 'checkbox' as const,
-      checked: colorMode.preference === mode,
-      onSelect: (event: Event) => { event.preventDefault(); colorMode.preference = mode },
-    })),
-  },
-], [
-  { label: 'Tastaturkürzel', icon: 'i-ph-keyboard' },
-  { label: 'Support kontaktieren', icon: 'i-ph-lifebuoy' },
-], [
-  { label: 'Konto', icon: 'i-ph-user-circle' },
-  { label: 'Abmelden', icon: 'i-ph-sign-out' },
-]])
+/* Runde 132 (David): das Konto-Menü (Sprache, Erscheinungsbild,
+ * Tastaturkürzel, Support, Konto) wohnt jetzt DAUERHAFT in BwSiteNav
+ * oben rechts — die Topbar behält nur Brand-Switcher und Sync-Zustand.
+ * Die Inhaltssprache der Brand zeigt eine stille Mono-Marke rechts. */
 </script>
 
 <template>
@@ -90,10 +48,8 @@ const userMenu = computed(() => [[
              gespeichert. Hier erscheinen NUR Abweichungs-Zustände (§3e):
              Speichert… / Offline — Eingabe bleibt erhalten / Konflikt. -->
       </div>
-      <div class="ml-auto flex items-center gap-4" style="color: var(--bw-muted)">
-        <UDropdownMenu :items="userMenu">
-          <button aria-label="Konto-Menü" class="grid place-items-center"><UAvatar text="DS" size="md" /></button>
-        </UDropdownMenu>
+      <div class="ml-auto flex items-center gap-4">
+        <span class="bw-label" style="color: var(--bw-muted)">Inhaltssprache: {{ contentLocale.toUpperCase() }}</span>
       </div>
     </header>
 

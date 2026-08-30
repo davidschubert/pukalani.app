@@ -1,7 +1,8 @@
 <script setup lang="ts">
-/** Übergeordnete Header-Navigation für die öffentlichen Seiten
- *  (Meine Brands · Discover · Journal). Die Werkstatt behält ihre
- *  eigene Topbar (BwWorkspace). */
+/** Übergeordnete Header-Navigation für alle Seiten (Meine Brands ·
+ *  Discover · Journal) — inkl. Konto-Menü (Runde 132, David): das
+ *  Avatar-Menü wohnt DAUERHAFT hier oben rechts, nicht mehr in der
+ *  Werkstatt-Topbar. */
 const route = useRoute()
 const items = [
   { label: 'Meine Brands', to: '/', match: ['/', '/brand/demo/beispiel'] },
@@ -11,6 +12,49 @@ const items = [
 function isActive(it: { match: string[] }): boolean {
   return it.match.includes(route.path)
 }
+
+/* Konto-Menü (aus BwWorkspace umgezogen): Sprachwechsel via
+ * switchLocalePath, Erscheinungsbild nach Pukalani-Muster über
+ * colorMode.preference. */
+const { locale, locales } = useI18n()
+const switchLocalePath = useSwitchLocalePath()
+const LOCALE_FLAGS: Record<string, string> = { en: 'i-circle-flags-us', de: 'i-circle-flags-de' }
+const colorMode = useColorMode()
+const APPEARANCE = [
+  ['light', 'Hell', 'i-ph-sun'],
+  ['dark', 'Dunkel', 'i-ph-moon'],
+  ['system', 'System', 'i-ph-monitor'],
+] as const
+const userMenu = computed(() => [[
+  {
+    label: locale.value === 'de' ? 'Sprache: Deutsch' : 'Language: English',
+    icon: 'i-ph-globe-simple',
+    children: locales.value.map(entry => ({
+      label: entry.code === 'de' ? 'Deutsch' : 'English',
+      icon: LOCALE_FLAGS[entry.code] ?? 'i-ph-globe-hemisphere-west',
+      type: 'checkbox' as const,
+      checked: entry.code === locale.value,
+      to: switchLocalePath(entry.code),
+    })),
+  },
+  {
+    label: 'Erscheinungsbild',
+    icon: 'i-ph-sun-horizon',
+    children: APPEARANCE.map(([mode, label, icon]) => ({
+      label,
+      icon,
+      type: 'checkbox' as const,
+      checked: colorMode.preference === mode,
+      onSelect: (event: Event) => { event.preventDefault(); colorMode.preference = mode },
+    })),
+  },
+], [
+  { label: 'Tastaturkürzel', icon: 'i-ph-keyboard' },
+  { label: 'Support kontaktieren', icon: 'i-ph-lifebuoy' },
+], [
+  { label: 'Konto', icon: 'i-ph-user-circle' },
+  { label: 'Abmelden', icon: 'i-ph-sign-out' },
+]])
 </script>
 
 <template>
@@ -33,6 +77,9 @@ function isActive(it: { match: string[] }): boolean {
           : 'color: var(--bw-muted)'"
       >{{ it.label }}</NuxtLink>
       <UButton icon="i-ph-plus" label="Neue Brand" size="sm" color="neutral" variant="outline" class="ml-2 rounded-full" style="background: var(--bw-surface-hi)" />
+      <UDropdownMenu :items="userMenu">
+        <button aria-label="Konto-Menü" class="ml-2 grid place-items-center"><UAvatar text="DS" size="sm" /></button>
+      </UDropdownMenu>
     </div>
   </nav>
 </template>
