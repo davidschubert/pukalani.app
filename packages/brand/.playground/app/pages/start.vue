@@ -33,31 +33,35 @@ const faehigkeiten = [
     <div class="@container mx-auto max-w-7xl">
       <BwSiteNav />
 
-      <!-- Hero: Ergebnis- und Zeitversprechen, EIN primärer CTA -->
-      <div class="mx-auto mt-16 max-w-3xl text-center">
-        <p class="bw-label uppercase tracking-widest" style="color: var(--bw-muted)">Branding Supply</p>
-        <h1 class="mt-5 text-balance text-5xl font-extralight leading-tight tracking-tight sm:text-6xl">Baut eine Marke, die trägt — im Gespräch mit George.</h1>
-        <p class="mx-auto mt-6 max-w-xl text-lg leading-relaxed" style="color: var(--bw-ink-soft)">Euer Markenberater führt euch durch jede Entscheidung: begründet, bewertet, versandfertig — von Purpose bis Monitoring.</p>
-        <div class="mt-9 flex flex-wrap items-center justify-center gap-2">
-          <UButton label="Starte deine Brand — kostenlos" icon="i-ph-plus" size="lg" class="rounded-full" />
-          <UButton label="Zum Brand-Check" size="lg" color="neutral" variant="ghost" class="rounded-full" style="background: var(--bw-surface)" />
+      <!-- Hero-Split (Runde 139, Perplexity-Muster): links Versprechen +
+           Brand-Check-FELD als Haupt-Conversion, rechts George bei der
+           Arbeit als Prozess-Panel. -->
+      <div class="mt-16 grid items-center gap-12 lg:grid-cols-2">
+        <div>
+          <p class="bw-label uppercase tracking-widest" style="color: var(--bw-muted)">Branding Supply</p>
+          <h1 class="mt-4 max-w-xl text-balance text-5xl font-extralight leading-tight tracking-tight">Baut eine Marke, die trägt — im Gespräch mit George.</h1>
+          <p class="mt-5 max-w-md text-lg leading-relaxed" style="color: var(--bw-ink-soft)">Euer Markenberater führt euch durch jede Entscheidung: begründet, bewertet, versandfertig — von Purpose bis Monitoring.</p>
+          <div class="mt-8 flex max-w-md items-center gap-2 rounded-full p-1.5 pl-5" style="background: var(--bw-surface-hi); box-shadow: var(--bw-shadow-card)">
+            <span class="bw-label flex-1" style="color: var(--bw-muted)">eure-website.de</span>
+            <UButton label="Brand-Check starten" size="sm" class="rounded-full" />
+          </div>
+          <p class="bw-label mt-3" style="color: var(--bw-muted)">Kostenlos: Brand Score + 3 Befunde zu eurem Außenauftritt · keine Anmeldung</p>
+          <UButton label="Oder direkt loslegen: Starte deine Brand" trailing-icon="i-ph-arrow-right" color="neutral" variant="ghost" class="mt-6 rounded-full" style="background: var(--bw-surface)" />
         </div>
-      </div>
-
-      <!-- Prozess-Theater: George bei der Arbeit -->
-      <div class="bw-card mx-auto mt-16 max-w-2xl p-8">
-        <div class="flex items-center justify-between gap-3">
-          <p class="bw-label" style="color: var(--bw-muted)">George bei der Arbeit</p>
-          <BwGeorgeAvatar size="md" />
+        <div class="bw-card p-8">
+          <div class="flex items-center justify-between gap-3">
+            <p class="bw-label" style="color: var(--bw-muted)">George bei der Arbeit</p>
+            <BwGeorgeAvatar size="md" />
+          </div>
+          <ul class="mt-6 space-y-4">
+            <li v-for="p in prozess" :key="p.text" class="flex items-center gap-3">
+              <span class="grid size-5 flex-none place-items-center rounded-full" :style="p.done ? 'background: var(--bw-accent-soft)' : 'background: var(--bw-surface-hi)'">
+                <UIcon :name="p.done ? 'i-ph-check' : 'i-ph-circle-notch'" class="size-3" :class="p.done ? '' : 'animate-spin'" :style="p.done ? 'color: var(--bw-accent)' : 'color: var(--bw-muted)'" />
+              </span>
+              <p class="bw-label" :style="p.done ? '' : 'color: var(--bw-muted)'">{{ p.text }}</p>
+            </li>
+          </ul>
         </div>
-        <ul class="mt-5 space-y-3.5">
-          <li v-for="p in prozess" :key="p.text" class="flex items-center gap-3">
-            <span class="grid size-5 flex-none place-items-center rounded-full" :style="p.done ? 'background: var(--bw-accent-soft)' : 'background: var(--bw-surface-hi)'">
-              <UIcon :name="p.done ? 'i-ph-check' : 'i-ph-circle-notch'" class="size-3" :class="p.done ? '' : 'animate-spin'" :style="p.done ? 'color: var(--bw-accent)' : 'color: var(--bw-muted)'" />
-            </span>
-            <p class="bw-label" :style="p.done ? '' : 'color: var(--bw-muted)'">{{ p.text }}</p>
-          </li>
-        </ul>
       </div>
 
       <!-- Artefakte: was am Ende auf dem Tisch liegt -->
@@ -85,24 +89,8 @@ const faehigkeiten = [
         </div>
       </div>
 
-      <!-- Brand-Check: Audit-first-Lead-Magnet (Perplexity-Learning) -->
-      <div class="bw-card mt-24 grid items-center gap-10 p-10 lg:grid-cols-[minmax(0,1fr)_22rem]">
-        <div class="min-w-0">
-          <p class="bw-label" style="color: var(--bw-muted)">Brand-Check · kostenlos</p>
-          <h2 class="mt-3 max-w-lg text-balance text-3xl font-extralight leading-snug tracking-tight">Wie stark ist eure Marke — von außen betrachtet?</h2>
-          <p class="mt-4 max-w-lg text-sm leading-relaxed" style="color: var(--bw-ink-soft)">Gebt eure Website an: George analysiert euren Außenauftritt mit denselben 40 Prüfkriterien wie jede Brand hier — und liefert euren Brand Score mit den drei wichtigsten Befunden. Der ehrlichste Einstieg in ein Rebrand.</p>
-        </div>
-        <div>
-          <div class="flex items-center gap-2 rounded-full p-1.5 pl-5" style="background: var(--bw-surface-hi)">
-            <span class="bw-label flex-1" style="color: var(--bw-muted)">eure-website.de</span>
-            <UButton label="Check starten" size="sm" class="rounded-full" />
-          </div>
-          <p class="bw-label mt-3 text-center" style="color: var(--bw-muted)">Score + 3 Befunde · keine Anmeldung nötig</p>
-        </div>
-      </div>
-
       <!-- Beweis: Beispiel-Brand -->
-      <NuxtLink to="/brand/demo/beispiel" class="bw-card bw-card--hover mt-6 grid items-center gap-6 p-8 sm:grid-cols-[10rem_minmax(0,1fr)]">
+      <NuxtLink to="/brand/demo/beispiel" class="bw-card bw-card--hover mt-24 grid items-center gap-6 p-8 sm:grid-cols-[10rem_minmax(0,1fr)]">
         <div class="bw-tile relative hidden overflow-hidden sm:block" style="aspect-ratio: 1 / 1; background: linear-gradient(165deg, #e8d3b8 0%, #b98a5e 45%, #4a3123 100%)">
           <p class="absolute inset-0 grid place-items-center p-4 text-center text-base font-extralight leading-snug tracking-tight" style="color: #f7f2ea; text-shadow: 0 1px 12px rgb(20 20 20 / 0.3)">Kailua Coffee Co.</p>
         </div>
