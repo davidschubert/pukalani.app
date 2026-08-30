@@ -17,6 +17,8 @@ const brands = [
   { name: 'Mila & Ben', meta: 'Kinderladen · Neugründung', archetype: 'Der Unschuldige', score: 78, votes: 61, a: '#f3e3e0', b: '#dba38f', c: '#5c3128' },
   { name: 'Faltwerk Architektur', meta: 'Architektur · Rebrand', archetype: 'Der Herrscher', score: 89, votes: 173, before: true, a: '#e4e6e2', b: '#9aa398', c: '#333a34' },
   { name: 'Trailtage', meta: 'Outdoor · Neugründung', archetype: 'Der Entdecker', score: 82, votes: 145, a: '#e2ead9', b: '#89a06b', c: '#2f3d22' },
+  { name: 'Studio Anker', meta: 'Agentur · Rebrand', archetype: 'Der Schöpfer', score: 86, votes: 88, a: '#e3e6ec', b: '#8792ab', c: '#2c3247' },
+  { name: 'Backhaus Lore', meta: 'Bäckerei · Neugründung', archetype: 'Der Jedermann', score: 80, votes: 132, a: '#f0e6d8', b: '#c9a06a', c: '#54381f' },
 ]
 
 const creators = [
@@ -28,7 +30,7 @@ const creators = [
 
 <template>
   <div class="bw-root min-h-dvh px-6 py-10">
-    <div class="mx-auto max-w-7xl">
+    <div class="@container mx-auto max-w-7xl">
       <BwSiteNav />
       <div class="mb-2 text-center">
         <p class="bw-label uppercase tracking-widest" style="color: var(--bw-muted)">Discover</p>
@@ -72,7 +74,7 @@ const creators = [
       </NuxtLink>
 
       <!-- Galerie-Wand: die Farbwelt ist die Karte -->
-      <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div class="mt-6 grid gap-x-6 gap-y-20 @sm:grid-cols-2 @md:grid-cols-4">
         <NuxtLink
           v-for="brand in brands" :key="brand.name" to="/brand/demo/anatomie"
           class="group relative block overflow-hidden rounded-[1.25rem]"

@@ -5,9 +5,9 @@ const newBrandOpen = ref(false)
 
 <template>
   <div class="bw-root min-h-dvh px-6 py-10">
-    <div class="mx-auto max-w-7xl">
+    <div class="@container mx-auto max-w-7xl">
       <BwSiteNav />
-      <div class="mx-auto max-w-4xl">
+      <div>
       <div class="mb-8 flex items-end justify-between gap-4">
         <div>
           <h1 class="text-2xl font-semibold">Meine Brands</h1>
@@ -18,7 +18,7 @@ const newBrandOpen = ref(false)
           <UButton icon="i-ph-plus" label="Neue Brand" size="lg" color="neutral" variant="outline" class="rounded-full" style="background: var(--bw-surface-hi)" @click="newBrandOpen = true" />
         </div>
       </div>
-      <div class="grid gap-4 sm:grid-cols-2">
+      <div class="grid gap-x-6 gap-y-20 @sm:grid-cols-2 @md:grid-cols-4">
         <NuxtLink to="/brand/demo/werte" class="block">
           <BwBrandCard
             title="Kailua Coffee Co." path="Neugründung" flag="i-circle-flags-us"
