@@ -1,6 +1,8 @@
 <script setup lang="ts">
 /** Neue-Brand-Layer (Davids Entscheidung, Runde 60): ein kleines Modal
- *  mit den drei unvermeidbaren Angaben — Weiche (Neugründung/Rebrand),
+ *  mit den drei unvermeidbaren Angaben — Weiche (Neugründung/Rebrand bzw.
+ *  Brandoptimierung — Produktentscheidung 2026-08-30: der zweite Pfad
+ *  deckt BEIDE Fälle, die Unterscheidung trifft George im Gespräch),
  *  Arbeitstitel (optional), Inhaltssprache — danach übernimmt George. */
 const open = defineModel<boolean>('open', { default: false })
 const kind = ref<'new' | 'rebrand' | null>(null)
@@ -8,7 +10,7 @@ const title = ref('')
 const lang = ref<'de' | 'en'>('de')
 const kinds = [
   { id: 'new' as const, label: 'Neugründung', note: 'Es gibt noch nichts — Name, Marke und Auftritt entstehen hier.' },
-  { id: 'rebrand' as const, label: 'Rebrand', note: 'Es gibt schon eine Marke — wir schärfen oder erneuern sie.' },
+  { id: 'rebrand' as const, label: 'Rebrand bzw. Brandoptimierung', note: 'Es gibt schon eine Marke — wir schärfen sie (Optimierung) oder schneiden sie neu (Rebrand). Was passt, entscheidet ihr mit George im Gespräch.' },
 ]
 const langs = [
   { id: 'de' as const, label: 'Deutsch', flag: 'i-circle-flags-de' },

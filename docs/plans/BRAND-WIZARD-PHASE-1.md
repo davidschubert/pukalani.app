@@ -987,6 +987,22 @@ fremden Logos als eigene Assets. POSITIONIERUNGS-SPLIT: branding.supply
 Verknüpfung über Autorenprofil (David → author → branding.supply) statt
 zweier Sites auf denselben Keywords.
 
+### Weiche: „Rebrand bzw. Brandoptimierung" (Produktentscheidung David, 2026-08-30)
+
+Der zweite Weiche-Pfad heißt kundenseitig **„Rebrand bzw.
+Brandoptimierung"** und deckt ZWEI Unterfälle: (a) **Brandoptimierung**
+— die Marke bleibt, sie wird geschärft (Kern-Assets bestehen, Lücken
+und Inkonsistenzen werden geschlossen; der sanfte, häufige Fall);
+(b) **Rebrand** — bewusster Neuschnitt der Identität. Die Weiche
+selbst bleibt ZWEIARMIG (Neugründung vs. Bestand) — die
+Unterscheidung Optimierung/Rebrand trifft nicht der Nutzer im Modal,
+sondern GEORGE im Gespräch der Rebrand-Strecke (nach Kontext +
+Brand-Check-Befunden: „viel Eigenständigkeit vorhanden ⇒ Evolution
+statt Revolution" — dieselbe Logik wie im Serifen-Artikel). Folgen:
+Start-Modal-Label + Startseiten-Button tragen die Doppel-Benennung;
+der Brand-Check ist der Lead-Magnet GENAU dieses Pfads; P0 braucht
+in der Rebrand-Strecke die Verzweigungs-Frage samt George-Empfehlung.
+
 ### Startseite + Perplexity-Analyse (2026-08-30)
 
 Analyse der Perplexity-Computer-Landing (personal-brand-strategy,
