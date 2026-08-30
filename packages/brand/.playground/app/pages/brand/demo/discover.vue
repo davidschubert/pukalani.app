@@ -77,17 +77,16 @@ const creators = [
       <div class="mt-6 grid gap-x-6 gap-y-20 @sm:grid-cols-2 @md:grid-cols-4">
         <NuxtLink
           v-for="brand in brands" :key="brand.name" to="/brand/demo/anatomie"
-          class="group relative block overflow-hidden rounded-[1.25rem]"
-          style="aspect-ratio: 4 / 3"
+          class="group block"
         >
-          <div class="absolute inset-0 transition-transform duration-300 group-hover:scale-[1.04]" :style="`background: linear-gradient(165deg, ${brand.a} 0%, ${brand.b} 45%, ${brand.c} 100%)`" />
-          <span v-if="brand.before" class="bw-label absolute left-4 top-4 rounded-full px-2.5 py-1" style="background: rgb(20 20 20 / 0.45); color: #f7f2ea">Vorher / Nachher</span>
-          <span class="bw-on-dark absolute right-4 top-4 grid place-items-center rounded-full p-1.5" style="background: rgb(20 20 20 / 0.35)">
-            <BwScoreRing :value="brand.score" :size="34" />
-          </span>
-          <div class="absolute inset-x-0 bottom-0 p-5">
-            <p class="text-lg font-medium leading-snug" style="color: #f7f2ea">{{ brand.name }}</p>
-            <p class="bw-label mt-1" style="color: rgb(247 242 234 / 0.7)">{{ brand.meta }} · {{ brand.archetype }} · {{ brand.votes }} Stimmen</p>
+          <div class="relative overflow-hidden rounded-[1.25rem]" style="aspect-ratio: 1 / 1">
+            <div class="absolute inset-0 transition-transform duration-300 group-hover:scale-[1.04]" :style="`background: linear-gradient(165deg, ${brand.a} 0%, ${brand.b} 45%, ${brand.c} 100%)`" />
+            <span v-if="brand.before" class="bw-label absolute left-4 top-4 rounded-full px-2.5 py-1" style="background: rgb(20 20 20 / 0.45); color: #f7f2ea">Vorher / Nachher</span>
+            <p class="absolute inset-0 grid place-items-center p-6 text-center text-2xl font-extralight leading-snug tracking-tight" style="color: #f7f2ea; text-shadow: 0 1px 12px rgb(20 20 20 / 0.3)">{{ brand.name }}</p>
+          </div>
+          <div class="mt-3 flex items-center justify-between gap-3">
+            <p class="bw-label" style="color: var(--bw-muted)">{{ brand.meta }} · {{ brand.archetype }} · {{ brand.votes }} Stimmen</p>
+            <BwScoreRing :value="brand.score" :size="34" class="flex-none" />
           </div>
         </NuxtLink>
       </div>
