@@ -14,7 +14,7 @@ const faehigkeiten = [
   { icon: 'i-ph-chats-circle', name: 'Geführtes Gespräch', line: 'Kein Formular-Marathon: George fragt, ihr entscheidet — pausiert jederzeit, der Stand bleibt.' },
   { icon: 'i-ph-gauge', name: 'Brand Score', line: '40 Prüfkriterien in 8 Dimensionen — reproduzierbar gerechnet, nie gefühlt.' },
   { icon: 'i-ph-sparkle', name: 'Beispiel-Brand', line: 'Kailua Coffee Co. zeigt durch alle sechs Schichten, wie fertig aussieht.' },
-  { icon: 'i-ph-compass', name: 'Discover', line: 'Echte Marken, freiwillig öffentlich — mit ihrer ganzen Anatomie.' },
+  { icon: 'i-ph-compass', name: 'Discover Brands', line: 'Echte Marken, freiwillig öffentlich — mit ihrer ganzen Anatomie.' },
   { icon: 'i-ph-radar', name: 'Brand Monitoring', line: 'Außenbild-Check und KI-Antwort-Radar — eure Marke bleibt deckungsgleich.' },
   { icon: 'i-ph-brain', name: 'George erinnert sich', line: 'Jede Entscheidung baut auf den vorherigen auf — über Sitzungen hinweg.' },
 ]
@@ -179,7 +179,7 @@ const faehigkeiten = [
         description="Konto anlegen, Arbeitstitel wählen — George übernimmt. Pausiert jederzeit, euer Stand bleibt gespeichert."
         :links="[
           { label: 'Starte deine Brand — kostenlos', icon: 'i-ph-plus', color: 'neutral' },
-          { label: 'Discover ansehen', to: '/brand/demo/discover', color: 'neutral', variant: 'ghost' },
+          { label: 'Discover Brands ansehen', to: '/brand/demo/discover', color: 'neutral', variant: 'ghost' },
         ]"
         class="bw-card mt-24"
         :ui="{ title: 'text-3xl font-medium tracking-tight sm:text-4xl', description: 'text-base', container: 'py-14 sm:py-16' }"

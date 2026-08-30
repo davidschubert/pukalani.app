@@ -38,7 +38,7 @@ const palette = [
       <BwSiteNav />
       <div class="mx-auto max-w-4xl">
       <NuxtLink to="/brand/demo/discover" class="bw-label inline-flex items-center gap-1.5" style="color: var(--bw-muted)">
-        <UIcon name="i-ph-arrow-left" class="size-4" /> Discover
+        <UIcon name="i-ph-arrow-left" class="size-4" /> Discover Brands
       </NuxtLink>
 
       <!-- Hero -->

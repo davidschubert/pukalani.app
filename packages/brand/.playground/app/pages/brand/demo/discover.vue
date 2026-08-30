@@ -44,7 +44,7 @@ const creators = [
     <div class="@container mx-auto max-w-7xl">
       <BwSiteNav />
       <div class="mb-2 text-center">
-        <p class="bw-label uppercase tracking-widest" style="color: var(--bw-muted)">Discover</p>
+        <p class="bw-label uppercase tracking-widest" style="color: var(--bw-muted)">Discover Brands</p>
         <h1 class="mt-1 text-4xl leading-tight">Marken, gebaut mit George</h1>
       </div>
       <p class="bw-label text-center" style="color: var(--bw-muted)">Jede Brand hier ist freiwillig öffentlich — mit ihrer ganzen Anatomie.</p>
