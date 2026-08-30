@@ -26,7 +26,7 @@ const bg = computed(() => `background: linear-gradient(165deg, ${props.gradient[
 
 <template>
   <div class="bw-root group">
-    <div class="relative overflow-hidden rounded-[1.25rem]" style="aspect-ratio: 1 / 1">
+    <div class="bw-tile relative overflow-hidden" style="aspect-ratio: 1 / 1">
       <div class="absolute inset-0 transition-transform duration-300 group-hover:scale-[1.04]" :style="bg" />
       <p class="absolute inset-0 grid place-items-center p-6 text-center text-2xl font-extralight leading-snug tracking-tight" style="color: #f7f2ea; text-shadow: 0 1px 12px rgb(20 20 20 / 0.3)">{{ title }}</p>
     </div>

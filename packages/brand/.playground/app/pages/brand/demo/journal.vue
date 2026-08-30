@@ -79,7 +79,7 @@ const profiles = [
           <p class="mt-5 max-w-2xl text-lg leading-relaxed" style="color: var(--bw-ink-soft)">Burberry, Saint Laurent, Balenciaga — und jetzt alle gleich? Was hinter der großen Vereinheitlichung steckt, und wann sie ein Fehler ist.</p>
           <p class="bw-label mt-6 inline-flex items-center gap-1.5" style="color: var(--bw-muted)">Lena K. · 29. August 2026 <UIcon name="i-ph-arrow-right" class="size-3.5 transition-transform group-hover:translate-x-0.5" /></p>
         </div>
-        <div class="hidden overflow-hidden rounded-[1.25rem] lg:block">
+        <div class="bw-tile hidden overflow-hidden lg:block">
           <div class="h-full min-h-56 w-full transition-transform duration-300 group-hover:scale-[1.03]" style="background: linear-gradient(150deg, #efe6db 0%, #a89684 45%, #2e2822 100%)" />
         </div>
       </NuxtLink>

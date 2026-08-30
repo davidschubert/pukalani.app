@@ -63,7 +63,7 @@ const creators = [
             class="w-full" :ui="{ item: 'basis-full' }"
             @select="dayIndex = $event"
           >
-            <NuxtLink to="/brand/demo/anatomie" class="bw-on-dark group relative flex flex-col justify-between overflow-hidden rounded-[1.5rem] p-8" :style="`aspect-ratio: 1 / 1; background: linear-gradient(165deg, ${item.a} 0%, ${item.b} 45%, ${item.c} 100%)`">
+            <NuxtLink to="/brand/demo/anatomie" class="bw-tile bw-tile--lg bw-on-dark group relative flex flex-col justify-between overflow-hidden p-8" :style="`aspect-ratio: 1 / 1; background: linear-gradient(165deg, ${item.a} 0%, ${item.b} 45%, ${item.c} 100%)`">
               <p class="text-xl font-medium" style="color: #f7f2ea">{{ item.name }}</p>
               <div>
                 <p class="text-6xl font-extralight leading-none tracking-tight" style="color: #f7f2ea">{{ item.score }}</p>
@@ -105,7 +105,7 @@ const creators = [
           v-for="brand in brands" :key="brand.name" to="/brand/demo/anatomie"
           class="group block"
         >
-          <div class="relative overflow-hidden rounded-[1.25rem]" style="aspect-ratio: 1 / 1">
+          <div class="bw-tile relative overflow-hidden" style="aspect-ratio: 1 / 1">
             <div class="absolute inset-0 transition-transform duration-300 group-hover:scale-[1.04]" :style="`background: linear-gradient(165deg, ${brand.a} 0%, ${brand.b} 45%, ${brand.c} 100%)`" />
             <span v-if="brand.before" class="bw-label absolute left-4 top-4 rounded-full px-2.5 py-1" style="background: rgb(20 20 20 / 0.45); color: #f7f2ea">Vorher / Nachher</span>
             <p class="absolute inset-0 grid place-items-center p-6 text-center text-2xl font-extralight leading-snug tracking-tight" style="color: #f7f2ea; text-shadow: 0 1px 12px rgb(20 20 20 / 0.3)">{{ brand.name }}</p>
