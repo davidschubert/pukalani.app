@@ -33,26 +33,13 @@ const faehigkeiten = [
           <p class="bw-label uppercase tracking-widest" style="color: var(--bw-muted)">Branding Supply</p>
           <h1 class="mt-4 max-w-xl text-balance text-5xl font-extralight leading-tight tracking-tight">Baut eine Marke, die trägt — im Gespräch mit George.</h1>
           <p class="mt-5 max-w-md text-lg leading-relaxed" style="color: var(--bw-ink-soft)">Euer Markenberater führt euch durch jede Entscheidung: begründet, bewertet, versandfertig — von Purpose bis Monitoring.</p>
-          <!-- Runde 147 (David): die WEICHE ist der Hero — jeder Besucher
-               sortiert sich selbst ein. Neugründung => Wizard,
-               Rebrand => Brand-Check (nur dort ergibt er Sinn). -->
-          <div class="mt-9 max-w-md space-y-6">
-            <div>
-              <p class="bw-label" style="color: var(--bw-muted)">Es gibt noch nichts — Neugründung:</p>
-              <div class="mt-2.5 flex items-center gap-0">
-                <UButton label="Starte deine Brand" color="neutral" variant="solid" class="rounded-full" />
-                <UButton icon="i-ph-arrow-right" color="neutral" variant="solid" class="rounded-full" aria-label="Starte deine Brand" />
-              </div>
-            </div>
-            <div>
-              <p class="bw-label" style="color: var(--bw-muted)">Es gibt schon eine Marke — Rebrand:</p>
-              <div class="mt-2.5 flex items-center gap-2 rounded-full p-1.5 pl-5" style="background: var(--bw-surface-hi); box-shadow: var(--bw-shadow-card)">
-                <span class="bw-label flex-1" style="color: var(--bw-muted)">eure-website.de</span>
-                <UButton label="Brand-Check starten" size="sm" class="rounded-full" />
-              </div>
-              <p class="bw-label mt-2" style="color: var(--bw-muted)">Kostenlos: Brand Score + 3 Befunde zu eurem Außenauftritt · keine Anmeldung</p>
-            </div>
+          <!-- Runde 148 (David): im Hero NUR die zwei Weiche-Optionen —
+               der Brand-Check wird weiter unten beworben. -->
+          <div class="mt-9 flex flex-wrap items-center gap-2">
+            <UButton label="Neugründung" size="lg" color="neutral" variant="solid" class="rounded-full" />
+            <UButton label="Rebrand bzw. Brandoptimierung" size="lg" color="neutral" variant="solid" class="rounded-full" />
           </div>
+          <p class="bw-label mt-4" style="color: var(--bw-muted)">Zwei Wege, ein Gespräch — George übernimmt ab der ersten Frage.</p>
         </div>
         <div class="bw-card p-8">
           <div class="flex items-center justify-between gap-3">
@@ -157,8 +144,24 @@ const faehigkeiten = [
         </div>
       </div>
 
+      <!-- Brand-Check: der Rebrand-Lead-Magnet, unterhalb beworben -->
+      <div class="bw-card mt-24 grid items-center gap-10 p-10 lg:grid-cols-[minmax(0,1fr)_22rem]">
+        <div class="min-w-0">
+          <p class="bw-label" style="color: var(--bw-muted)">Brand-Check · für Rebrand &amp; Brandoptimierung · kostenlos</p>
+          <h2 class="mt-3 max-w-lg text-balance text-3xl font-extralight leading-snug tracking-tight">Wie stark ist eure Marke — von außen betrachtet?</h2>
+          <p class="mt-4 max-w-lg text-sm leading-relaxed" style="color: var(--bw-ink-soft)">Gebt eure Website an: George analysiert euren Außenauftritt mit denselben 40 Prüfkriterien wie jede Brand hier — und liefert euren Brand Score mit den drei wichtigsten Befunden. Der ehrlichste Einstieg in ein Rebrand.</p>
+        </div>
+        <div>
+          <div class="flex items-center gap-2 rounded-full p-1.5 pl-5" style="background: var(--bw-surface-hi)">
+            <span class="bw-label flex-1" style="color: var(--bw-muted)">eure-website.de</span>
+            <UButton label="Check starten" size="sm" class="rounded-full" />
+          </div>
+          <p class="bw-label mt-3 text-center" style="color: var(--bw-muted)">Score + 3 Befunde · keine Anmeldung nötig</p>
+        </div>
+      </div>
+
       <!-- Beweis: Beispiel-Brand -->
-      <NuxtLink to="/brand/demo/beispiel" class="bw-card bw-card--hover mt-24 grid items-center gap-6 p-8 sm:grid-cols-[10rem_minmax(0,1fr)]">
+      <NuxtLink to="/brand/demo/beispiel" class="bw-card bw-card--hover mt-6 grid items-center gap-6 p-8 sm:grid-cols-[10rem_minmax(0,1fr)]">
         <div class="bw-tile relative hidden overflow-hidden sm:block" style="aspect-ratio: 1 / 1; background: linear-gradient(165deg, #e8d3b8 0%, #b98a5e 45%, #4a3123 100%)">
           <p class="absolute inset-0 grid place-items-center p-4 text-center text-base font-extralight leading-snug tracking-tight" style="color: #f7f2ea; text-shadow: 0 1px 12px rgb(20 20 20 / 0.3)">Kailua Coffee Co.</p>
         </div>
