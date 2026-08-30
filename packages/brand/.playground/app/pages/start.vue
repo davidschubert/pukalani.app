@@ -10,14 +10,6 @@ const prozess = [
   { text: 'Jede Empfehlung kommt mit strategischer Begründung', done: true },
   { text: 'Brand Foundation steht — in etwa 45 Minuten', done: false },
 ]
-const artefakte = [
-  { name: 'Brand Book', line: '24 Kapitel mit Do & Don\'t — inklusive AI-Guidelines.' },
-  { name: 'brand.json', line: 'Stimme, Vokabular, Tabus — maschinenlesbar für jede KI.' },
-  { name: 'Design-Tokens', line: 'Farbwelt hell/dunkel, Kontrast-geprüft — CSS, Tailwind, Figma.' },
-  { name: 'Pressekit', line: 'Logos, Boilerplate in drei Längen, alles versandfertig.' },
-  { name: 'Content-Kompass', line: '3–5 Säulen mit Taktung — nie wieder Posting-Panik.' },
-  { name: '90-Tage-Plan', line: 'Was nach dem Branding kommt, Woche für Woche.' },
-]
 const faehigkeiten = [
   { icon: 'i-ph-chats-circle', name: 'Geführtes Gespräch', line: 'Kein Formular-Marathon: George fragt, ihr entscheidet — pausiert jederzeit, der Stand bleibt.' },
   { icon: 'i-ph-gauge', name: 'Brand Score', line: '40 Prüfkriterien in 8 Dimensionen — reproduzierbar gerechnet, nie gefühlt.' },
@@ -68,10 +60,72 @@ const faehigkeiten = [
       <div class="mt-24">
         <h2 class="text-center text-3xl font-extralight tracking-tight">Was am Ende auf dem Tisch liegt</h2>
         <p class="bw-label mt-2 text-center" style="color: var(--bw-muted)">Keine Folien — Werkzeuge, mit denen ihr am nächsten Tag arbeitet.</p>
+        <!-- Runde 140 (Perplexity-Learning 2): Artefakte ZEIGEN statt
+             beschreiben — jede Karte traegt einen kleinen visuellen Beweis. -->
         <div class="mt-10 grid gap-x-6 gap-y-6 @sm:grid-cols-2 @md:grid-cols-3">
-          <div v-for="a in artefakte" :key="a.name" class="bw-card p-8">
-            <p class="bw-label" style="color: var(--bw-muted)">{{ a.name }}</p>
-            <p class="mt-2 text-sm leading-relaxed" style="color: var(--bw-ink-soft)">{{ a.line }}</p>
+          <div class="bw-card p-8">
+            <div class="mb-5 flex h-28 items-center rounded-2xl p-5" style="background: var(--bw-surface-hi)">
+              <div class="w-full">
+                <p class="bw-label" style="color: var(--bw-muted)">Kapitel 07 · Stimme</p>
+                <p class="bw-label mt-2 flex items-center gap-1.5"><UIcon name="i-ph-check" class="size-3.5 flex-none" style="color: var(--bw-accent)" />Do: „unsere Bohnen"</p>
+                <p class="bw-label mt-1 flex items-center gap-1.5" style="color: var(--bw-muted)"><UIcon name="i-ph-x" class="size-3.5 flex-none" style="color: var(--bw-stale)" />Don't: „Premium-Selektion"</p>
+              </div>
+            </div>
+            <p class="bw-label" style="color: var(--bw-muted)">Brand Book</p>
+            <p class="mt-2 text-sm leading-relaxed" style="color: var(--bw-ink-soft)">24 Kapitel mit Do & Don't — inklusive AI-Guidelines.</p>
+          </div>
+          <div class="bw-card p-8">
+            <div class="mb-5 flex h-28 items-center rounded-2xl p-5" style="background: var(--bw-ink)">
+              <pre class="bw-label" style="color: var(--bw-paper)">{
+  "voice": "ruhig, fundiert",
+  "avoid": ["Deluxe", "Auszeit"]
+}</pre>
+            </div>
+            <p class="bw-label" style="color: var(--bw-muted)">brand.json</p>
+            <p class="mt-2 text-sm leading-relaxed" style="color: var(--bw-ink-soft)">Stimme, Vokabular, Tabus — maschinenlesbar für jede KI.</p>
+          </div>
+          <div class="bw-card p-8">
+            <div class="mb-5 flex h-28 items-center rounded-2xl p-5" style="background: var(--bw-surface-hi)">
+              <div class="w-full">
+                <div class="flex gap-1.5">
+                  <span v-for="c in ['#4a3123', '#b98a5e', '#e8d3b8', '#2f4a3a', '#f7f2ea']" :key="c" class="bw-swatch rounded-full" :style="`background: ${c}; width: 1.75rem; height: 1.75rem`" />
+                </div>
+                <p class="bw-label mt-3" style="color: var(--bw-muted)">--color-roast · #4a3123 · AA geprüft</p>
+              </div>
+            </div>
+            <p class="bw-label" style="color: var(--bw-muted)">Design-Tokens</p>
+            <p class="mt-2 text-sm leading-relaxed" style="color: var(--bw-ink-soft)">Farbwelt hell/dunkel, Kontrast-geprüft — CSS, Tailwind, Figma.</p>
+          </div>
+          <div class="bw-card p-8">
+            <div class="mb-5 flex h-28 items-center rounded-2xl p-5" style="background: var(--bw-surface-hi)">
+              <div class="flex w-full flex-wrap gap-1.5">
+                <span v-for="f in ['logo.svg', 'wortmarke.svg', 'boilerplate.md', 'gruender.jpg']" :key="f" class="bw-label inline-flex items-center gap-1.5 rounded-full px-2.5 py-1" style="background: var(--bw-surface)"><UIcon name="i-ph-file" class="size-3 flex-none" style="color: var(--bw-muted)" />{{ f }}</span>
+              </div>
+            </div>
+            <p class="bw-label" style="color: var(--bw-muted)">Pressekit</p>
+            <p class="mt-2 text-sm leading-relaxed" style="color: var(--bw-ink-soft)">Logos, Boilerplate in drei Längen, alles versandfertig.</p>
+          </div>
+          <div class="bw-card p-8">
+            <div class="mb-5 flex h-28 items-center rounded-2xl p-5" style="background: var(--bw-surface-hi)">
+              <div class="w-full space-y-1.5">
+                <p class="bw-label flex items-baseline justify-between gap-3">Herkunft erzählen <span style="color: var(--bw-muted)">1×/Woche</span></p>
+                <p class="bw-label flex items-baseline justify-between gap-3">Handwerk zeigen <span style="color: var(--bw-muted)">2×/Woche</span></p>
+                <p class="bw-label flex items-baseline justify-between gap-3">Haltung vertreten <span style="color: var(--bw-muted)">2×/Monat</span></p>
+              </div>
+            </div>
+            <p class="bw-label" style="color: var(--bw-muted)">Content-Kompass</p>
+            <p class="mt-2 text-sm leading-relaxed" style="color: var(--bw-ink-soft)">3–5 Säulen mit Taktung — nie wieder Posting-Panik.</p>
+          </div>
+          <div class="bw-card p-8">
+            <div class="mb-5 flex h-28 items-center rounded-2xl p-5" style="background: var(--bw-surface-hi)">
+              <div class="w-full space-y-1.5">
+                <p class="bw-label flex items-baseline justify-between gap-3"><span style="color: var(--bw-muted)">Woche 1–2</span> Launch-Story</p>
+                <p class="bw-label flex items-baseline justify-between gap-3"><span style="color: var(--bw-muted)">Woche 3–6</span> Content-Rhythmus</p>
+                <p class="bw-label flex items-baseline justify-between gap-3"><span style="color: var(--bw-muted)">Woche 7–12</span> Sichtbarkeit & GEO</p>
+              </div>
+            </div>
+            <p class="bw-label" style="color: var(--bw-muted)">90-Tage-Plan</p>
+            <p class="mt-2 text-sm leading-relaxed" style="color: var(--bw-ink-soft)">Was nach dem Branding kommt, Woche für Woche.</p>
           </div>
         </div>
       </div>
