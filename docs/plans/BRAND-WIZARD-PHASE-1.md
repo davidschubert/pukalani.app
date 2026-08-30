@@ -1006,7 +1006,15 @@ NEU: **90-Tage-Plan** als Brand-Experience-Artefakt, vorgemerkt).
 Landing (validiert Knowledge Base und Monitoring). Was wir NICHT
 übernehmen: Tool-Push (Notion/Canva-Export = Phase 3+),
 Personal-Brand-Fokus (wir bauen Unternehmens-Marken im Gespräch).
-Dummy: `/start` — Hero, Prozess-Theater, Artefakte-Grid,
+KORREKTUR (David, 2026-08-30): der Brand-Check prüft den
+BESTEHENDEN Außenauftritt und ergibt nur auf der REBRAND-Seite der
+Weiche Sinn — für Neugründungen ist ein Audit-Feld eine Sackgasse.
+Deshalb ist die WEICHE selbst der Hero: „Es gibt noch nichts —
+Neugründung" ⇒ Split-Control in den Wizard; „Es gibt schon eine
+Marke — Rebrand" ⇒ Brand-Check-Feld. Vorgemerkt: ein erfolgreicher
+Check mündet direkt in die Rebrand-Weiche („George kennt euren
+Auftritt schon"), der Check-Score wird Ausgangspunkt der
+Rebrand-Story. Dummy: `/start` — Hero, Prozess-Theater, Artefakte-Grid,
 6 Capability-Karten, Brand-Check-Block, Beispiel-Brand-Beweis,
 UPageCTA, Footer. Im echten Bau ist das die ausgeloggte `/`.
 

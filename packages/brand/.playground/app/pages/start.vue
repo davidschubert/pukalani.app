@@ -33,17 +33,24 @@ const faehigkeiten = [
           <p class="bw-label uppercase tracking-widest" style="color: var(--bw-muted)">Branding Supply</p>
           <h1 class="mt-4 max-w-xl text-balance text-5xl font-extralight leading-tight tracking-tight">Baut eine Marke, die trägt — im Gespräch mit George.</h1>
           <p class="mt-5 max-w-md text-lg leading-relaxed" style="color: var(--bw-ink-soft)">Euer Markenberater führt euch durch jede Entscheidung: begründet, bewertet, versandfertig — von Purpose bis Monitoring.</p>
-          <div class="mt-8 flex max-w-md items-center gap-2 rounded-full p-1.5 pl-5" style="background: var(--bw-surface-hi); box-shadow: var(--bw-shadow-card)">
-            <span class="bw-label flex-1" style="color: var(--bw-muted)">eure-website.de</span>
-            <UButton label="Brand-Check starten" size="sm" class="rounded-full" />
-          </div>
-          <p class="bw-label mt-3" style="color: var(--bw-muted)">Kostenlos: Brand Score + 3 Befunde zu eurem Außenauftritt · keine Anmeldung</p>
-          <!-- Runde 146: dasselbe Split-Control wie in der Nav. -->
-          <div class="mt-6 flex flex-wrap items-center gap-3">
-            <p class="bw-label" style="color: var(--bw-muted)">Oder direkt loslegen:</p>
-            <div class="flex items-center gap-0">
-              <UButton label="Starte deine Brand" size="sm" color="neutral" variant="solid" class="rounded-full" />
-              <UButton icon="i-ph-arrow-right" size="sm" color="neutral" variant="solid" class="rounded-full" aria-label="Starte deine Brand" />
+          <!-- Runde 147 (David): die WEICHE ist der Hero — jeder Besucher
+               sortiert sich selbst ein. Neugründung => Wizard,
+               Rebrand => Brand-Check (nur dort ergibt er Sinn). -->
+          <div class="mt-9 max-w-md space-y-6">
+            <div>
+              <p class="bw-label" style="color: var(--bw-muted)">Es gibt noch nichts — Neugründung:</p>
+              <div class="mt-2.5 flex items-center gap-0">
+                <UButton label="Starte deine Brand" color="neutral" variant="solid" class="rounded-full" />
+                <UButton icon="i-ph-arrow-right" color="neutral" variant="solid" class="rounded-full" aria-label="Starte deine Brand" />
+              </div>
+            </div>
+            <div>
+              <p class="bw-label" style="color: var(--bw-muted)">Es gibt schon eine Marke — Rebrand:</p>
+              <div class="mt-2.5 flex items-center gap-2 rounded-full p-1.5 pl-5" style="background: var(--bw-surface-hi); box-shadow: var(--bw-shadow-card)">
+                <span class="bw-label flex-1" style="color: var(--bw-muted)">eure-website.de</span>
+                <UButton label="Brand-Check starten" size="sm" class="rounded-full" />
+              </div>
+              <p class="bw-label mt-2" style="color: var(--bw-muted)">Kostenlos: Brand Score + 3 Befunde zu eurem Außenauftritt · keine Anmeldung</p>
             </div>
           </div>
         </div>
