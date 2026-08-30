@@ -57,7 +57,7 @@ const competitors = [
             <p class="mt-2 max-w-md text-sm leading-relaxed" style="color: rgb(247 242 234 / 0.85)">Der Held unter den Weltmarken: ein Symbol, das ohne Namen trägt — und ein System, das seit Jahrzehnten kaum einen Fehltritt macht.</p>
             <p class="bw-label mt-5" style="color: rgb(247 242 234 / 0.6)">Sport · USA · seit 1971 · Der Held</p>
           </div>
-          <div class="flex flex-none flex-col items-center gap-1 rounded-2xl px-4 py-3" style="background: rgb(20 20 20 / 0.35)">
+          <div class="bw-on-dark flex flex-none flex-col items-center gap-1 rounded-2xl px-4 py-3" style="background: rgb(20 20 20 / 0.35)">
             <BwScoreRing :value="94" :size="80" label="Brand Score" />
             <p class="bw-label" style="color: rgb(247 242 234 / 0.7)">Außergewöhnlich</p>
           </div>

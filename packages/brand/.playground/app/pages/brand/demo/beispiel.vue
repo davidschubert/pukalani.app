@@ -55,7 +55,7 @@ const fakten = [
             <p class="mt-4 max-w-xl text-sm leading-relaxed" style="color: rgb(247 242 234 / 0.85)">Kaffee mit nachvollziehbarer Herkunft — Anbau, Röstung, Ausschank aus einer Hand.</p>
             <p class="bw-label mt-6" style="color: rgb(247 242 234 / 0.6)">Der Weise · ruhig, fundiert, gerade heraus · EN · Oʻahu</p>
           </div>
-          <div class="flex flex-none flex-col items-center gap-1 rounded-2xl px-4 py-3" style="background: rgb(20 20 20 / 0.35)">
+          <div class="bw-on-dark flex flex-none flex-col items-center gap-1 rounded-2xl px-4 py-3" style="background: rgb(20 20 20 / 0.35)">
             <BwScoreRing :value="92" :size="80" label="Brand Score" />
             <p class="bw-label" style="color: rgb(247 242 234 / 0.7)">Herausragend</p>
           </div>

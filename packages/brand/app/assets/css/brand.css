@@ -249,3 +249,16 @@
 .bw-pair-card:focus-visible { outline: 2px solid var(--bw-accent); outline-offset: 2px; }
 
 @media (prefers-reduced-motion: reduce) { .bw-root * { transition: none !important; animation: none !important; } }
+
+/* Kontext-Helfer: erzwingt die Dunkel-Werte der Signal-Tokens auf
+ * IMMER-dunklen Flächen (Hero-Scrims, Galerie-Kacheln) — dort gilt
+ * unabhängig vom Modus „hell auf dunkel". */
+.bw-on-dark {
+  --bw-ink: #f7f2ea;
+  --bw-muted: rgb(247 242 234 / 0.7);
+  --bw-line: rgb(247 242 234 / 0.25);
+  --bw-line-strong: rgb(247 242 234 / 0.4);
+  --bw-accent: #5cb974;
+  --bw-draft: #d3a95e;
+  --bw-stale: #d08a7c;
+}

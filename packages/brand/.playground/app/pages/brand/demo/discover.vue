@@ -1,6 +1,8 @@
 <script setup lang="ts">
-/** Clickdummy: Discover (Phase-2-Vorgeschmack) — öffentliche Galerie
- *  mit Score, Kuration und den Alleinstellungs-Filtern. Statisch. */
+/** Clickdummy: Discover (Phase-2-Vorgeschmack) — visuelle GALERIE:
+ *  die Farbwelt der Brand IST die Karte (Kachel mit Overlay), im
+ *  Unterschied zum redaktionellen Journal (Liste) und zum
+ *  Anatomie-Dossier. Statisch. */
 const filters = ['Alle', 'Neugründung', 'Rebrand']
 const activeFilter = ref('Alle')
 const sorts = ['Brand Score', 'Am besten bewertet', 'Trending', 'Neueste']
@@ -9,7 +11,7 @@ const archetypes = ['Der Weise', 'Der Entdecker', 'Der Schöpfer', 'Der Fürsorg
 const activeArchetype = ref<string | null>(null)
 
 const brands = [
-  { name: 'Kailua Coffee Co.', meta: 'Café · Neugründung · 🇺🇸', archetype: 'Der Weise', score: 87, votes: 128, a: '#e8d3b8', b: '#b98a5e', c: '#4a3123' },
+  { name: 'Kailua Coffee Co.', meta: 'Café · Neugründung', archetype: 'Der Weise', score: 87, votes: 128, a: '#e8d3b8', b: '#b98a5e', c: '#4a3123' },
   { name: 'Nordlicht Physio', meta: 'Gesundheit · Neugründung', archetype: 'Der Fürsorgliche', score: 91, votes: 96, a: '#dbe9ec', b: '#7fb0ba', c: '#25454c' },
   { name: 'Bergwerk Studio', meta: 'Design · Rebrand', archetype: 'Der Schöpfer', score: 84, votes: 214, before: true, a: '#e6e2da', b: '#8f867a', c: '#2b2723' },
   { name: 'Mila & Ben', meta: 'Kinderladen · Neugründung', archetype: 'Der Unschuldige', score: 78, votes: 61, a: '#f3e3e0', b: '#dba38f', c: '#5c3128' },
@@ -72,24 +74,21 @@ const creators = [
         </div>
       </NuxtLink>
 
-      <!-- Galerie -->
+      <!-- Galerie-Wand: die Farbwelt ist die Karte -->
       <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <NuxtLink v-for="brand in brands" :key="brand.name" to="/brand/demo/anatomie" class="bw-card bw-card--hover block overflow-hidden">
-          <div class="relative h-24" :style="`background: linear-gradient(120deg, ${brand.a}, ${brand.b} 55%, ${brand.c})`">
-            <span v-if="brand.before" class="bw-label absolute left-4 top-3 rounded-full px-2 py-0.5" style="background: rgb(20 20 20 / 0.45); color: #f7f2ea">Vorher / Nachher</span>
-          </div>
-          <div class="p-5">
-            <div class="flex items-start justify-between gap-3">
-              <div class="min-w-0">
-                <h3 class="truncate font-semibold">{{ brand.name }}</h3>
-                <p class="bw-label mt-0.5" style="color: var(--bw-muted)">{{ brand.meta }}</p>
-              </div>
-              <BwScoreRing :value="brand.score" :size="36" class="flex-none" />
-            </div>
-            <div class="mt-4 flex items-center justify-between gap-3">
-              <span class="bw-label rounded-full px-2.5 py-1" style="background: var(--bw-surface)">{{ brand.archetype }}</span>
-              <span class="bw-label" style="color: var(--bw-muted)">{{ brand.votes }} Stimmen</span>
-            </div>
+        <NuxtLink
+          v-for="brand in brands" :key="brand.name" to="/brand/demo/anatomie"
+          class="group relative block overflow-hidden rounded-[1.25rem]"
+          style="aspect-ratio: 4 / 3"
+        >
+          <div class="absolute inset-0 transition-transform duration-300 group-hover:scale-[1.04]" :style="`background: linear-gradient(165deg, ${brand.a} 0%, ${brand.b} 45%, ${brand.c} 100%)`" />
+          <span v-if="brand.before" class="bw-label absolute left-4 top-4 rounded-full px-2.5 py-1" style="background: rgb(20 20 20 / 0.45); color: #f7f2ea">Vorher / Nachher</span>
+          <span class="bw-on-dark absolute right-4 top-4 grid place-items-center rounded-full p-1.5" style="background: rgb(20 20 20 / 0.35)">
+            <BwScoreRing :value="brand.score" :size="34" />
+          </span>
+          <div class="absolute inset-x-0 bottom-0 p-5">
+            <p class="text-lg font-medium leading-snug" style="color: #f7f2ea">{{ brand.name }}</p>
+            <p class="bw-label mt-1" style="color: rgb(247 242 234 / 0.7)">{{ brand.meta }} · {{ brand.archetype }} · {{ brand.votes }} Stimmen</p>
           </div>
         </NuxtLink>
       </div>
