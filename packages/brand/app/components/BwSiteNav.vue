@@ -75,15 +75,18 @@ const userMenu = computed(() => [[
       </span>
       <span class="text-sm font-semibold tracking-tight">Branding Supply</span>
     </NuxtLink>
-    <div class="flex flex-wrap items-center gap-1.5">
+    <!-- Runde 143 (David): klassische Navigation wie apple.com/openai.com —
+         Geist Sans, reine Textlinks ohne Pill-/Button-Effekte; aktiv = Ink,
+         inaktiv = muted, Hover hebt auf Ink. -->
+    <div class="flex flex-wrap items-center gap-x-7 gap-y-2">
       <NuxtLink
         v-for="it in items" :key="it.to" :to="it.to"
-        class="bw-label whitespace-nowrap rounded-full px-3.5 py-2 transition-colors"
+        class="text-sm whitespace-nowrap transition-colors hover:!text-(--bw-ink)"
         :style="isActive(it)
-          ? 'background: var(--bw-ink); color: var(--bw-paper)'
+          ? 'color: var(--bw-ink); font-weight: 550'
           : 'color: var(--bw-muted)'"
       >{{ it.label }}</NuxtLink>
-      <UButton icon="i-ph-plus" label="Neue Brand" size="sm" color="neutral" variant="outline" class="ml-2 rounded-full" style="background: var(--bw-surface-hi)" @click="newBrandOpen = true" />
+      <UButton icon="i-ph-plus" label="Neue Brand" size="sm" color="neutral" variant="outline" class="rounded-full" @click="newBrandOpen = true" />
       <BwNewBrandModal v-model:open="newBrandOpen" />
       <UDropdownMenu :items="userMenu">
         <button aria-label="Konto-Menü" class="ml-2 grid place-items-center"><UAvatar text="DS" size="sm" /></button>
