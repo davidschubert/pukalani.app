@@ -38,7 +38,14 @@ const faehigkeiten = [
             <UButton label="Brand-Check starten" size="sm" class="rounded-full" />
           </div>
           <p class="bw-label mt-3" style="color: var(--bw-muted)">Kostenlos: Brand Score + 3 Befunde zu eurem Außenauftritt · keine Anmeldung</p>
-          <UButton label="Oder direkt loslegen: Starte deine Brand" trailing-icon="i-ph-arrow-right" color="neutral" variant="ghost" class="mt-6 rounded-full" style="background: var(--bw-surface)" />
+          <!-- Runde 146: dasselbe Split-Control wie in der Nav. -->
+          <div class="mt-6 flex flex-wrap items-center gap-3">
+            <p class="bw-label" style="color: var(--bw-muted)">Oder direkt loslegen:</p>
+            <div class="flex items-center gap-0">
+              <UButton label="Starte deine Brand" size="sm" color="neutral" variant="solid" class="rounded-full" />
+              <UButton icon="i-ph-arrow-right" size="sm" color="neutral" variant="solid" class="rounded-full" aria-label="Starte deine Brand" />
+            </div>
+          </div>
         </div>
         <div class="bw-card p-8">
           <div class="flex items-center justify-between gap-3">
