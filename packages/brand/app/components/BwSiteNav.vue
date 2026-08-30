@@ -11,7 +11,6 @@ const route = useRoute()
 const items = [
   { label: 'Discover', to: '/brand/demo/discover', match: ['/brand/demo/discover', '/brand/demo/anatomie'] },
   { label: 'Journal', to: '/brand/demo/journal', match: ['/brand/demo/journal', '/brand/demo/artikel', '/brand/demo/profil', '/brand/demo/duell'] },
-  { label: 'Meine Brands', to: '/', match: ['/', '/brand/demo/beispiel'] },
 ]
 function isActive(it: { match: string[] }): boolean {
   return it.match.includes(route.path)
@@ -84,7 +83,12 @@ const userMenu = computed(() => [[
         class="text-sm whitespace-nowrap transition-colors hover:!text-(--bw-ink)"
         :style="isActive(it) ? 'color: var(--bw-ink)' : 'color: var(--bw-muted)'"
       >{{ it.label }}</NuxtLink>
-      <UButton label="Neue Brand" size="sm" color="neutral" variant="solid" class="rounded-full" @click="newBrandOpen = true" />
+      <!-- Runde 145 (David): Split-Control — Meine-Brands-Pille und
+           Plus-Kreis beruehren sich mit 0px Abstand. -->
+      <div class="flex items-center gap-0">
+        <UButton to="/" label="Meine Brands" size="sm" color="neutral" variant="solid" class="rounded-full" />
+        <UButton icon="i-ph-plus" size="sm" color="neutral" variant="solid" class="rounded-full" aria-label="Neue Brand" @click="newBrandOpen = true" />
+      </div>
       <BwNewBrandModal v-model:open="newBrandOpen" />
       <UDropdownMenu :items="userMenu">
         <button aria-label="Konto-Menü" class="ml-2 grid place-items-center"><UAvatar text="DS" size="sm" /></button>
