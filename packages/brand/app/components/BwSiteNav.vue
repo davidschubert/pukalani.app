@@ -14,7 +14,10 @@ function isActive(it: { match: string[] }): boolean {
 </script>
 
 <template>
-  <nav class="mb-10 flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
+  <nav
+    class="sticky top-0 z-40 -mx-6 mb-10 flex flex-wrap items-center justify-between gap-x-6 gap-y-3 px-6 py-4"
+    style="background: color-mix(in srgb, var(--bw-paper) 88%, transparent); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px)"
+  >
     <NuxtLink to="/" class="flex items-center gap-2.5">
       <span class="grid size-8 flex-none place-items-center rounded-xl" style="background: var(--bw-ink); color: var(--bw-paper)">
         <UIcon name="i-ph-paw-print-fill" class="size-4.5" />

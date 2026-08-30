@@ -30,14 +30,11 @@ const creators = [
   <div class="bw-root min-h-dvh px-6 py-10">
     <div class="mx-auto max-w-5xl">
       <BwSiteNav />
-      <div class="mb-2 flex items-end justify-between gap-4">
-        <div>
-          <p class="bw-label uppercase tracking-widest" style="color: var(--bw-muted)">Discover</p>
-          <h1 class="mt-1 text-4xl leading-tight">Marken, gebaut mit George</h1>
-        </div>
-        <UButton icon="i-ph-plus" label="Starte deine eigene" size="lg" class="rounded-full" />
+      <div class="mb-2 text-center">
+        <p class="bw-label uppercase tracking-widest" style="color: var(--bw-muted)">Discover</p>
+        <h1 class="mt-1 text-4xl leading-tight">Marken, gebaut mit George</h1>
       </div>
-      <p class="bw-label" style="color: var(--bw-muted)">Jede Brand hier ist freiwillig öffentlich — mit ihrer ganzen Anatomie.</p>
+      <p class="bw-label text-center" style="color: var(--bw-muted)">Jede Brand hier ist freiwillig öffentlich — mit ihrer ganzen Anatomie.</p>
 
       <!-- Filter & Sortierung -->
       <div class="mt-8 flex flex-wrap items-center gap-2">
