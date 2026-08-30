@@ -71,7 +71,7 @@ const userMenu = computed(() => [[
   >
     <NuxtLink to="/start" class="flex items-center gap-2.5">
       <span class="grid size-8 flex-none place-items-center rounded-xl" style="background: var(--bw-ink); color: var(--bw-paper)">
-        <UIcon name="i-ph-paw-print-fill" class="size-4.5" />
+        <UIcon name="i-ph-fingerprint" class="size-4.5" />
       </span>
       <span class="text-sm font-semibold tracking-tight">Branding Supply</span>
     </NuxtLink>
