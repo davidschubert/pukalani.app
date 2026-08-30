@@ -112,7 +112,10 @@
 /* Squircle (Runde 8b, Davids Hinweis): kontinuierliche Ecken statt
    Kreisabschnitten — natives corner-shape, border-radius bleibt als
    Fallback für ältere Browser. Radius im Squircle-Fall leicht angehoben,
-   weil Superellipsen weniger "bauchig" wirken. */
+   weil Superellipsen weniger "bauchig" wirken.
+   SYSTEMENTSCHEIDUNG (David, 2026-08-30): Exponent 1.7 — nach Proben
+   mit 2 (zu straff) und 1.5 (zu bauchig). Gilt überall gleich;
+   nie je Stelle abweichen. */
 @supports (corner-shape: superellipse(1.7)) {
   .bw-root { --bw-radius-card: 44px; --bw-radius-frame: 22px; }
   .bw-card, .bw-pair-card, .bw-draft-frame, .bw-rounded-card {

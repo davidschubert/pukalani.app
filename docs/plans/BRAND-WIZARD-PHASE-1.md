@@ -987,6 +987,17 @@ fremden Logos als eigene Assets. POSITIONIERUNGS-SPLIT: branding.supply
 Verknüpfung über Autorenprofil (David → author → branding.supply) statt
 zweier Sites auf denselben Keywords.
 
+### Squircle-Exponent (Systementscheidung David, 2026-08-30)
+
+- `corner-shape: superellipse(1.7)` ist DER Eckenverlauf des Produkts —
+  nach Live-Proben mit 2 (zu straff) und 1.5 (zu bauchig/iOS). Gilt für
+  ALLE gerundeten Flächen gleich (bw-card, bw-grain-hero, bw-tile);
+  Bild-Kacheln laufen über `.bw-tile` auf dem Karten-Radius
+  (`--bw-radius-card`, 44px im Squircle-Modus), die große
+  Carousel-Karte +8px. Rohes `rounded-[…]` auf Flächen ist damit tabu —
+  neue Kachel ⇒ `.bw-tile`. `border-radius` bleibt als Fallback für
+  Browser ohne corner-shape.
+
 ### Beispiel-Brand, Brand-Duell, Site-Navigation (Davids Wünsche 2026-08-29)
 
 - BEISPIEL-BRAND (Pflicht, Phase 1): mindestens EINE vollständige, wirklich
