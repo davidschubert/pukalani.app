@@ -24,6 +24,8 @@ const articles = [
   { date: '18. Aug', topic: 'Brand Strategy', title: 'Der Content-Kompass: 3–5 Säulen statt Posting-Panik', dek: 'Warum „Was poste ich heute?" eine Strategie-Frage ist — und keine Kreativ-Frage.', meta: 'Lena K. · 5 Min', a: '#e2ead9', b: '#89a06b' },
   { date: '14. Aug', topic: 'Brand Language', title: 'Tagline vs. Slogan: der Unterschied, der Geld kostet', dek: 'Eine bleibt, einer wirbt — und warum Verwechslung teuer wird.', meta: 'David S. · 4 Min', a: '#f3e3e0', b: '#dba38f' },
   { date: '11. Aug', topic: 'SEO & GEO', title: 'llms.txt: Wie KI-Assistenten deine Marke zitieren', dek: 'Der neue Auffindbarkeits-Kanal — und warum dein brand.json dafür schon bereitliegt.', meta: 'Jonas T. · 6 Min', a: '#e6e2da', b: '#8f867a' },
+  { date: '8. Aug', topic: 'Brand Experience', title: 'Unboxing als Markenmoment: Verpackung, die erzählt', dek: 'Der erste physische Kontakt mit deiner Marke — und warum er öfter gefilmt wird als deine Website.', meta: 'Lena K. · 5 Min', a: '#ece5db', b: '#c2a97f' },
+  { date: '5. Aug', topic: 'Brand Language', title: 'Warum gute Namen unbequem sind', dek: 'Glatte Namen gleiten ab — die besten haben eine Kante, an der man hängen bleibt.', meta: 'David S. · 6 Min', a: '#e0e8e6', b: '#7ba69b' },
 ]
 
 const profiles = [
@@ -37,11 +39,11 @@ const profiles = [
   <div class="bw-root min-h-dvh px-6 py-10">
     <div class="mx-auto max-w-7xl">
       <BwSiteNav />
-      <div class="mb-2">
+      <div class="mb-2 text-center">
         <p class="bw-label uppercase tracking-widest" style="color: var(--bw-muted)">Journal</p>
         <h1 class="mt-1 text-4xl leading-tight">Markenwissen, das trägt</h1>
       </div>
-      <p class="bw-label" style="color: var(--bw-muted)">Artikel, Brand-Profile und Rankings — verknüpft statt verbloggt.</p>
+      <p class="bw-label text-center" style="color: var(--bw-muted)">Artikel, Brand-Profile und Rankings — verknüpft statt verbloggt.</p>
 
       <!-- Werkzeugleiste: Kategorien · Sortierung · Ansicht -->
       <div class="mt-8 flex flex-wrap items-center gap-2">
@@ -69,7 +71,7 @@ const profiles = [
       </div>
 
       <!-- Featured: Text-Aufmacher mit Artikelbild zwischen Linien -->
-      <NuxtLink to="/brand/demo/artikel" class="group mt-8 grid gap-10 border-y py-10 lg:grid-cols-[minmax(0,1fr)_24rem]" style="border-color: var(--bw-line-strong)">
+      <NuxtLink to="/brand/demo/artikel" class="group mt-8 grid gap-10 border-t py-10 lg:grid-cols-[minmax(0,1fr)_24rem]" style="border-color: var(--bw-line-strong)">
         <div class="min-w-0">
           <p class="bw-label" style="color: var(--bw-muted)">Featured · Rebranding · 8 Min</p>
           <p class="mt-4 max-w-3xl text-balance text-4xl font-extralight leading-tight tracking-tight sm:text-5xl">Warum Luxusmarken ihre Serifen aufgeben</p>
@@ -82,7 +84,7 @@ const profiles = [
       </NuxtLink>
 
       <!-- Rasteransicht: Karten mit Farb-Thumbnails -->
-      <div v-if="display === 'grid'" class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div v-if="display === 'grid'" class="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <NuxtLink v-for="a in articles" :key="a.title" to="/brand/demo/artikel" class="bw-card bw-card--hover flex flex-col overflow-hidden">
           <div class="h-28" :style="`background: linear-gradient(135deg, ${a.b}, ${a.a})`" />
           <div class="flex flex-1 flex-col p-5">
@@ -98,7 +100,7 @@ const profiles = [
       </div>
 
       <!-- Listenansicht: Zeitungs-Zeilen mit Datums-Spalte -->
-      <div v-else>
+      <div v-else class="mt-10">
         <NuxtLink v-for="a in articles" :key="a.title" to="/brand/demo/artikel" class="group grid gap-x-8 gap-y-1 border-b py-6 sm:grid-cols-[9rem_minmax(0,1fr)]" style="border-color: var(--bw-line)">
           <div>
             <p class="bw-label" style="color: var(--bw-muted)">{{ a.date }}</p>
