@@ -41,7 +41,7 @@ const palette = [
 <template>
   <BwWorkspace :progress-pct="100" progress-note="21 von 21 Entscheidungen" progress-subnote="Brand Foundation abgeschlossen" progress-to="/brand/demo/ergebnis" :score="88" content-locale="en">
     <template #brand>
-      <BwBrandSwitcher :current="{ title: 'Kailua Coffee Co.', path: 'Neugründung', flag: 'i-circle-flags-us' }" :others="[{ title: 'Schubert UX Studio', path: 'Rebrand', flag: 'i-circle-flags-de', to: '/brand/demo/archetyp' }]" />
+      <BwBrandSwitcher :current="{ title: 'Kailua Coffee Co.', path: 'Neue Marke', flag: 'i-circle-flags-us' }" :others="[{ title: 'Schubert UX Studio', path: 'Marken-Relaunch', flag: 'i-circle-flags-de', to: '/brand/demo/archetyp' }]" />
     </template>
 
     <template #rail>

@@ -987,7 +987,19 @@ fremden Logos als eigene Assets. POSITIONIERUNGS-SPLIT: branding.supply
 Verknüpfung über Autorenprofil (David → author → branding.supply) statt
 zweier Sites auf denselben Keywords.
 
-### Weiche: „Rebrand bzw. Brandoptimierung" (Produktentscheidung David, 2026-08-30)
+### Weiche: „Neue Marke" / „Marken-Relaunch" (Produktentscheidung David, 2026-08-30)
+
+BENENNUNG (bestätigt nach Fachbegriffs-Recherche): die Weiche heißt
+kundenseitig **„Neue Marke"** („Ihr startet bei null — Name und Marke
+entstehen im Gespräch.") und **„Marken-Relaunch"** („Ihr habt schon
+eine Marke — vom Feinschliff bis zum Neuschnitt."). Begründung:
+„Neugründung" ist Gesellschaftsrecht (und schließt neue Marken
+bestehender Unternehmen aus); „Marken-Relaunch" ist der etablierte
+deutsche Agentur-/Fachbegriff (Esch: „Markenrelaunch"), der das
+Spektrum evolutionär→revolutionär (Muzellec/Lambkin; Refresh bis
+Rebranding, Aaker: Brand Revitalization) OHNE „bzw."-Krücke abdeckt.
+„Rebranding" bleibt als Journal-Topic/redaktioneller Begriff bestehen.
+Alt-Absatz (Vorstufe „Rebrand bzw. Brandoptimierung"):
 
 Der zweite Weiche-Pfad heißt kundenseitig **„Rebrand bzw.
 Brandoptimierung"** und deckt ZWEI Unterfälle: (a) **Brandoptimierung**

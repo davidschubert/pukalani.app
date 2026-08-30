@@ -140,7 +140,7 @@ export const demoRail: BwRailLayer[] = [
         icon: 'i-ph-seal-check',
         state: 'open',
         info: {
-          description: 'Ob Neugründung oder Prüfstand für den Bestandsnamen: Hier wird der Name an der Foundation gemessen — passt er zu Purpose, Werten und Archetyp? Dazu die nüchterne Prüfung: Ist er frei, ist er aussprechbar, funktioniert er auch auf Englisch?',
+          description: 'Ob neue Marke oder Prüfstand für den Bestandsnamen: Hier wird der Name an der Foundation gemessen — passt er zu Purpose, Werten und Archetyp? Dazu die nüchterne Prüfung: Ist er frei, ist er aussprechbar, funktioniert er auch auf Englisch?',
           minutes: '~6 Min',
           bausteine: [
             { label: 'Namens-Kandidaten', note: 'Vorschläge mit Begründung aus eurer Markenwelt.' },
@@ -422,12 +422,12 @@ export const demoRail: BwRailLayer[] = [
         icon: '',
         state: 'open',
         info: {
-          description: 'Wie die Marke in die Welt kommt: die Warum-Story, der Kanal-Plan — und bei Rebrands zuerst die eigenen Leute. Ein Rebrand ohne Ankündigung verwirrt Bestandskunden; eine Neugründung bekommt ihren Hallo-Welt-Moment.',
+          description: 'Wie die Marke in die Welt kommt: die Warum-Story, der Kanal-Plan — und beim Marken-Relaunch zuerst die eigenen Leute. Ein Relaunch ohne Ankündigung verwirrt Bestandskunden; eine neue Marke bekommt ihren Hallo-Welt-Moment.',
           minutes: '~5 Min',
           bausteine: [
             { label: 'Warum-Story', note: 'Der eine Ankündigungs-Text — aus Purpose und Manifest.' },
             { label: 'Kanal-Plan', note: 'Wo zuerst, wo danach — aus eurem Content-Kompass.' },
-            { label: 'Intern zuerst', note: 'Bei Teams und Rebrands: die eigenen Leute vor der Welt.' },
+            { label: 'Intern zuerst', note: 'Bei Teams und Relaunches: die eigenen Leute vor der Welt.' },
           ],
         },
       },
@@ -447,7 +447,7 @@ export const demoRail: BwRailLayer[] = [
         { label: 'Content-Vorlagen', note: 'Post-Formate, die Werte und Beweise wiederverwenden.' },
         { label: 'Geschäftsausstattung', note: 'Visitenkarte, Briefbogen und Rechnung, E-Mail-Signatur — braucht jede Marke.' },
         { label: 'Vor Ort', note: 'Nur bei physischem Ort: Google Business, Bewertungs-Antworten in eurer Stimme, Print-Basics.' },
-        { label: 'Launch & Ankündigung', note: 'Warum-Story, Kanal-Plan — bei Rebrands zuerst intern.' },
+        { label: 'Launch & Ankündigung', note: 'Warum-Story, Kanal-Plan — beim Relaunch zuerst intern.' },
       ],
     },
   },

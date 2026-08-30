@@ -3,7 +3,7 @@
  *  die Farbwelt der Brand IST die Karte (Kachel mit Overlay), im
  *  Unterschied zum redaktionellen Journal (Liste) und zum
  *  Anatomie-Dossier. Statisch. */
-const filters = ['Alle', 'Neugründung', 'Rebrand']
+const filters = ['Alle', 'Neue Marke', 'Marken-Relaunch']
 const activeFilter = ref('Alle')
 const sorts = ['Brand Score', 'Am besten bewertet', 'Trending', 'Neueste']
 const activeSort = ref('Brand Score')
@@ -11,14 +11,14 @@ const archetypes = ['Der Weise', 'Der Entdecker', 'Der Schöpfer', 'Der Fürsorg
 const activeArchetype = ref<string | null>(null)
 
 const brands = [
-  { name: 'Kailua Coffee Co.', meta: 'Café · Neugründung', archetype: 'Der Weise', score: 87, votes: 128, a: '#e8d3b8', b: '#b98a5e', c: '#4a3123' },
-  { name: 'Nordlicht Physio', meta: 'Gesundheit · Neugründung', archetype: 'Der Fürsorgliche', score: 91, votes: 96, a: '#dbe9ec', b: '#7fb0ba', c: '#25454c' },
-  { name: 'Bergwerk Studio', meta: 'Design · Rebrand', archetype: 'Der Schöpfer', score: 84, votes: 214, before: true, a: '#e6e2da', b: '#8f867a', c: '#2b2723' },
-  { name: 'Mila & Ben', meta: 'Kinderladen · Neugründung', archetype: 'Der Unschuldige', score: 78, votes: 61, a: '#f3e3e0', b: '#dba38f', c: '#5c3128' },
-  { name: 'Faltwerk Architektur', meta: 'Architektur · Rebrand', archetype: 'Der Herrscher', score: 89, votes: 173, before: true, a: '#e4e6e2', b: '#9aa398', c: '#333a34' },
-  { name: 'Trailtage', meta: 'Outdoor · Neugründung', archetype: 'Der Entdecker', score: 82, votes: 145, a: '#e2ead9', b: '#89a06b', c: '#2f3d22' },
-  { name: 'Studio Anker', meta: 'Agentur · Rebrand', archetype: 'Der Schöpfer', score: 86, votes: 88, a: '#e3e6ec', b: '#8792ab', c: '#2c3247' },
-  { name: 'Backhaus Lore', meta: 'Bäckerei · Neugründung', archetype: 'Der Jedermann', score: 80, votes: 132, a: '#f0e6d8', b: '#c9a06a', c: '#54381f' },
+  { name: 'Kailua Coffee Co.', meta: 'Café · Neue Marke', archetype: 'Der Weise', score: 87, votes: 128, a: '#e8d3b8', b: '#b98a5e', c: '#4a3123' },
+  { name: 'Nordlicht Physio', meta: 'Gesundheit · Neue Marke', archetype: 'Der Fürsorgliche', score: 91, votes: 96, a: '#dbe9ec', b: '#7fb0ba', c: '#25454c' },
+  { name: 'Bergwerk Studio', meta: 'Design · Marken-Relaunch', archetype: 'Der Schöpfer', score: 84, votes: 214, before: true, a: '#e6e2da', b: '#8f867a', c: '#2b2723' },
+  { name: 'Mila & Ben', meta: 'Kinderladen · Neue Marke', archetype: 'Der Unschuldige', score: 78, votes: 61, a: '#f3e3e0', b: '#dba38f', c: '#5c3128' },
+  { name: 'Faltwerk Architektur', meta: 'Architektur · Marken-Relaunch', archetype: 'Der Herrscher', score: 89, votes: 173, before: true, a: '#e4e6e2', b: '#9aa398', c: '#333a34' },
+  { name: 'Trailtage', meta: 'Outdoor · Neue Marke', archetype: 'Der Entdecker', score: 82, votes: 145, a: '#e2ead9', b: '#89a06b', c: '#2f3d22' },
+  { name: 'Studio Anker', meta: 'Agentur · Marken-Relaunch', archetype: 'Der Schöpfer', score: 86, votes: 88, a: '#e3e6ec', b: '#8792ab', c: '#2c3247' },
+  { name: 'Backhaus Lore', meta: 'Bäckerei · Neue Marke', archetype: 'Der Jedermann', score: 80, votes: 132, a: '#f0e6d8', b: '#c9a06a', c: '#54381f' },
 ]
 
 /** Brand of the Day als UCarousel: rechts blättern die Karten, der
@@ -26,7 +26,7 @@ const brands = [
 const days = [
   { name: 'Nordlicht Physio', quote: '„Wir behandeln Menschen, keine Befunde."', line: 'Nordlicht Physio — der Fürsorgliche mit klarer Kante, aus Kiel. Kuratiert vom Team.', score: 91, sub: 'Brand Score — der Fürsorgliche · 96 Stimmen', a: '#dbe9ec', b: '#7fb0ba', c: '#25454c' },
   { name: 'Kailua Coffee Co.', quote: '„One honest, quiet moment a day."', line: 'Kailua Coffee Co. — der Weise unter den Cafés, von Oʻahu. Kuratiert vom Team.', score: 87, sub: 'Brand Score — der Weise · 128 Stimmen', a: '#e8d3b8', b: '#b98a5e', c: '#4a3123' },
-  { name: 'Faltwerk Architektur', quote: '„Wir bauen Ruhe."', line: 'Faltwerk Architektur — der Herrscher nach mutigem Rebrand, aus Wien. Kuratiert vom Team.', score: 89, sub: 'Brand Score — der Herrscher · 173 Stimmen', a: '#e4e6e2', b: '#9aa398', c: '#333a34' },
+  { name: 'Faltwerk Architektur', quote: '„Wir bauen Ruhe."', line: 'Faltwerk Architektur — der Herrscher nach mutigem Relaunch, aus Wien. Kuratiert vom Team.', score: 89, sub: 'Brand Score — der Herrscher · 173 Stimmen', a: '#e4e6e2', b: '#9aa398', c: '#333a34' },
 ]
 const dayIndex = ref(0)
 const day = computed(() => days[dayIndex.value] ?? days[0])

@@ -36,8 +36,8 @@ const faehigkeiten = [
           <!-- Runde 148 (David): im Hero NUR die zwei Weiche-Optionen —
                der Brand-Check wird weiter unten beworben. -->
           <div class="mt-9 flex flex-wrap items-center gap-2">
-            <UButton label="Neugründung" size="lg" color="neutral" variant="solid" class="rounded-full" />
-            <UButton label="Rebrand bzw. Brandoptimierung" size="lg" color="neutral" variant="solid" class="rounded-full" />
+            <UButton label="Neue Marke" size="lg" color="neutral" variant="solid" class="rounded-full" />
+            <UButton label="Marken-Relaunch" size="lg" color="neutral" variant="solid" class="rounded-full" />
           </div>
           <p class="bw-label mt-4" style="color: var(--bw-muted)">Zwei Wege, ein Gespräch — George übernimmt ab der ersten Frage.</p>
         </div>
@@ -144,12 +144,12 @@ const faehigkeiten = [
         </div>
       </div>
 
-      <!-- Brand-Check: der Rebrand-Lead-Magnet, unterhalb beworben -->
+      <!-- Brand-Check: der Relaunch-Lead-Magnet, unterhalb beworben -->
       <div class="bw-card mt-24 grid items-center gap-10 p-10 lg:grid-cols-[minmax(0,1fr)_22rem]">
         <div class="min-w-0">
-          <p class="bw-label" style="color: var(--bw-muted)">Brand-Check · für Rebrand &amp; Brandoptimierung · kostenlos</p>
+          <p class="bw-label" style="color: var(--bw-muted)">Brand-Check · für den Marken-Relaunch · kostenlos</p>
           <h2 class="mt-3 max-w-lg text-balance text-3xl font-extralight leading-snug tracking-tight">Wie stark ist eure Marke — von außen betrachtet?</h2>
-          <p class="mt-4 max-w-lg text-sm leading-relaxed" style="color: var(--bw-ink-soft)">Gebt eure Website an: George analysiert euren Außenauftritt mit denselben 40 Prüfkriterien wie jede Brand hier — und liefert euren Brand Score mit den drei wichtigsten Befunden. Der ehrlichste Einstieg in ein Rebrand.</p>
+          <p class="mt-4 max-w-lg text-sm leading-relaxed" style="color: var(--bw-ink-soft)">Gebt eure Website an: George analysiert euren Außenauftritt mit denselben 40 Prüfkriterien wie jede Brand hier — und liefert euren Brand Score mit den drei wichtigsten Befunden. Der ehrlichste Einstieg in einen Marken-Relaunch.</p>
         </div>
         <div>
           <div class="flex items-center gap-2 rounded-full p-1.5 pl-5" style="background: var(--bw-surface-hi)">

@@ -15,7 +15,7 @@ const newBrandOpen = ref(false)
       <div class="grid gap-x-6 gap-y-20 @sm:grid-cols-2 @md:grid-cols-4">
         <NuxtLink to="/brand/demo/werte" class="block">
           <BwBrandCard
-            title="Kailua Coffee Co." path="Neugründung" flag="i-circle-flags-us"
+            title="Kailua Coffee Co." path="Neue Marke" flag="i-circle-flags-us"
             :gradient="['#e8d3b8', '#b98a5e', '#4a3123']"
             step="Gerade dran: Werte" progress="4 von 7 Entscheidungen" remaining="~20 Min" :pct="57" :activity="[2, 0, 3, 5, 4, 0, 0, 6, 8, 5, 9, 7, 4, 10]" :score="74"
             edited="zuletzt vor 2 Stunden"
@@ -23,7 +23,7 @@ const newBrandOpen = ref(false)
         </NuxtLink>
         <NuxtLink to="/brand/demo/archetyp" class="block">
           <BwBrandCard
-            title="Schubert UX Studio" path="Rebrand" flag="i-circle-flags-de"
+            title="Schubert UX Studio" path="Marken-Relaunch" flag="i-circle-flags-de"
             :gradient="['#e2e4ea', '#8a93ad', '#2b3148']"
             step="Gerade dran: Archetyp & Stimme" progress="6 von 7 Entscheidungen" remaining="~10 Min" :pct="86" :activity="[8, 6, 9, 4, 0, 2, 5, 3, 6, 0, 1, 4, 7, 12]" :score="87"
             edited="zuletzt gestern"

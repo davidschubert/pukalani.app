@@ -79,7 +79,7 @@ function confirmPick() {
 <template>
   <BwWorkspace :progress-pct="progressPct" :progress-note="progressNote" :sync-state="syncState" progress-to="/brand/demo/ergebnis" :score="74" content-locale="en">
     <template #brand>
-      <BwBrandSwitcher :current="{ title: 'Kailua Coffee Co.', path: 'Neugründung', flag: 'i-circle-flags-us' }" :others="[{ title: 'Schubert UX Studio', path: 'Rebrand', flag: 'i-circle-flags-de', to: '/brand/demo/archetyp' }]" />
+      <BwBrandSwitcher :current="{ title: 'Kailua Coffee Co.', path: 'Neue Marke', flag: 'i-circle-flags-us' }" :others="[{ title: 'Schubert UX Studio', path: 'Marken-Relaunch', flag: 'i-circle-flags-de', to: '/brand/demo/archetyp' }]" />
     </template>
 
     <template #rail>

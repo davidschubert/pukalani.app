@@ -4,8 +4,8 @@
  *  Weiche (nebeneinander, links/rechts-Entscheidung, gleich lange
  *  Copy); erst nach der Wahl erscheinen die Rahmendaten (Titel +
  *  Sprache, bewusst EIN Schritt) samt CTA. Der Titel kommt NACH der
- *  Weiche, weil sich das Feld anpasst: Neugründung = optionaler
- *  Arbeitstitel (der echte Name kann im Gespräch entstehen), Rebrand =
+ *  Weiche, weil sich das Feld anpasst: Neue Marke = optionaler
+ *  Arbeitstitel (der echte Name kann im Gespräch entstehen), Relaunch =
  *  die Marke HAT einen Namen. */
 const open = defineModel<boolean>('open', { default: false })
 const kind = ref<'new' | 'rebrand' | null>(null)
@@ -19,8 +19,8 @@ watch(open, (o) => {
   }
 })
 const kinds = [
-  { id: 'new' as const, label: 'Neugründung', note: 'Es gibt noch nichts — Name und Marke entstehen im Gespräch.' },
-  { id: 'rebrand' as const, label: 'Rebrand bzw. Brand-Optimierung', note: 'Es gibt schon eine Marke — wir schärfen oder erneuern sie.' },
+  { id: 'new' as const, label: 'Neue Marke', note: 'Ihr startet bei null — Name und Marke entstehen im Gespräch.' },
+  { id: 'rebrand' as const, label: 'Marken-Relaunch', note: 'Ihr habt schon eine Marke — vom Feinschliff bis zum Neuschnitt.' },
 ]
 const langs = [
   { id: 'de' as const, label: 'Deutsch', flag: 'i-circle-flags-de' },

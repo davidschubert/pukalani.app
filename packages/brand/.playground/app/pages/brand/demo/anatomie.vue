@@ -17,7 +17,7 @@ const ratings = [
 const steckbrief = [
   ['Branche', 'Physiotherapie'],
   ['Ort', 'Kiel'],
-  ['Weiche', 'Neugründung'],
+  ['Weiche', 'Neue Marke'],
   ['Archetyp', 'Der Fürsorgliche'],
   ['Stimme', 'warm, gerade heraus'],
   ['Sprache', 'Deutsch'],
