@@ -56,8 +56,8 @@ const profiles = [
           @click="activeTopic = activeTopic === t ? null : t"
         >{{ t }}</button>
         <div class="ml-auto flex items-center gap-2">
-          <USelect v-model="activeLang" :items="langs" color="neutral" variant="ghost" class="w-44 justify-between rounded-full text-sm" :ui="{ base: 'px-4 py-2' }" style="background: var(--bw-surface-hi)" />
-          <USelect v-model="activeSort" :items="sorts" color="neutral" variant="ghost" class="w-48 justify-between rounded-full text-sm" :ui="{ base: 'px-4 py-2' }" style="background: var(--bw-surface-hi)" />
+          <USelect v-model="activeLang" :items="langs" color="neutral" variant="ghost" class="w-44 justify-between rounded-full text-sm focus-visible:outline-none" :ui="{ base: 'px-4 py-2' }" style="background: var(--bw-surface-hi)" />
+          <USelect v-model="activeSort" :items="sorts" color="neutral" variant="ghost" class="w-48 justify-between rounded-full text-sm focus-visible:outline-none" :ui="{ base: 'px-4 py-2' }" style="background: var(--bw-surface-hi)" />
           <div class="flex items-center gap-1 rounded-full p-1" style="background: var(--bw-surface-hi)">
           <button
             class="grid size-8 place-items-center rounded-full transition-colors" :style="display === 'grid' ? 'background: var(--bw-ink); color: var(--bw-paper)' : 'color: var(--bw-muted)'"
