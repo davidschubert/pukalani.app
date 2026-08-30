@@ -266,9 +266,8 @@
 /* Bild-Kacheln (Galerie, Brand-Karten, Artikelbilder): dieselben
  * kontinuierlichen Ecken wie die Karten — Squircle, wo der Browser es
  * kann, border-radius als Fallback. */
-.bw-tile { border-radius: 1.25rem; }
-.bw-tile--lg { border-radius: 1.5rem; }
+.bw-tile { border-radius: var(--bw-radius-card); }
+.bw-tile--lg { border-radius: calc(var(--bw-radius-card) + 8px); }
 @supports (corner-shape: superellipse(2)) {
-  .bw-tile { corner-shape: superellipse(2); border-radius: 1.75rem; }
-  .bw-tile--lg { border-radius: 2rem; }
+  .bw-tile, .bw-tile--lg { corner-shape: superellipse(2); }
 }
