@@ -113,10 +113,10 @@
    Kreisabschnitten — natives corner-shape, border-radius bleibt als
    Fallback für ältere Browser. Radius im Squircle-Fall leicht angehoben,
    weil Superellipsen weniger "bauchig" wirken. */
-@supports (corner-shape: superellipse(2)) {
+@supports (corner-shape: superellipse(1.5)) {
   .bw-root { --bw-radius-card: 44px; --bw-radius-frame: 22px; }
   .bw-card, .bw-pair-card, .bw-draft-frame, .bw-rounded-card {
-    corner-shape: superellipse(2);
+    corner-shape: superellipse(1.5);
   }
 }
 
@@ -138,8 +138,8 @@
   background: linear-gradient(135deg, var(--hero-c, #4a3123), var(--hero-b, #b98a5e) 55%, var(--hero-a, #e8d3b8));
   color: #f7f2ea;
 }
-@supports (corner-shape: superellipse(2)) {
-  .bw-grain-hero { corner-shape: superellipse(2); border-radius: 44px; }
+@supports (corner-shape: superellipse(1.5)) {
+  .bw-grain-hero { corner-shape: superellipse(1.5); border-radius: 44px; }
 }
 .bw-grain-hero::after {
   content: ''; position: absolute; inset: 0; pointer-events: none;
@@ -268,6 +268,6 @@
  * kann, border-radius als Fallback. */
 .bw-tile { border-radius: var(--bw-radius-card); }
 .bw-tile--lg { border-radius: calc(var(--bw-radius-card) + 8px); }
-@supports (corner-shape: superellipse(2)) {
-  .bw-tile, .bw-tile--lg { corner-shape: superellipse(2); }
+@supports (corner-shape: superellipse(1.5)) {
+  .bw-tile, .bw-tile--lg { corner-shape: superellipse(1.5); }
 }
