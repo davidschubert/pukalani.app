@@ -119,7 +119,7 @@ const profiles = [
       </div>
 
       <!-- Brand-Profile + Rankings: kompakte Zeilen -->
-      <div class="mt-12 grid gap-x-12 gap-y-10 lg:grid-cols-2">
+      <div class="mt-30 grid gap-x-12 gap-y-10 lg:grid-cols-2">
         <div>
           <div class="flex items-baseline justify-between gap-3 border-b pb-3" style="border-color: var(--bw-line-strong)">
             <h2 class="text-lg font-medium">Brand-Profile</h2>
