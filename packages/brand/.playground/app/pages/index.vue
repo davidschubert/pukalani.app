@@ -8,15 +8,9 @@ const newBrandOpen = ref(false)
     <div class="@container mx-auto max-w-7xl">
       <BwSiteNav />
       <div>
-      <div class="mb-8 flex items-end justify-between gap-4">
-        <div>
-          <h1 class="text-2xl font-semibold">Meine Brands</h1>
-          <p class="text-sm" style="color: var(--bw-muted)">Jede Brand ist ein eigener Wizard-Lauf — pausiere jederzeit, dein Stand bleibt gespeichert.</p>
-        </div>
-        <div class="flex items-center gap-2">
-          <UButton to="/brand/demo/beispiel" icon="i-ph-sparkle" label="Beispiel-Brand" size="lg" color="neutral" variant="ghost" class="rounded-full" />
-          <UButton icon="i-ph-plus" label="Neue Brand" size="lg" color="neutral" variant="outline" class="rounded-full" style="background: var(--bw-surface-hi)" @click="newBrandOpen = true" />
-        </div>
+      <div class="mb-8 text-center">
+        <h1 class="text-2xl font-semibold">Meine Brands</h1>
+        <p class="mt-1 text-sm" style="color: var(--bw-muted)">Jede Brand ist ein eigener Wizard-Lauf — pausiere jederzeit, dein Stand bleibt gespeichert.</p>
       </div>
       <div class="grid gap-x-6 gap-y-20 @sm:grid-cols-2 @md:grid-cols-4">
         <NuxtLink to="/brand/demo/werte" class="block">
@@ -36,6 +30,19 @@ const newBrandOpen = ref(false)
           />
         </NuxtLink>
       </div>
+      <!-- Beispiel-Brand: promoteter Teaser statt kleinem Knopf -->
+      <NuxtLink to="/brand/demo/beispiel" class="bw-card bw-card--hover mt-20 grid items-center gap-8 p-8 sm:grid-cols-[13rem_minmax(0,1fr)]">
+        <div class="bw-tile relative hidden overflow-hidden sm:block" style="aspect-ratio: 1 / 1; background: linear-gradient(165deg, #e8d3b8 0%, #b98a5e 45%, #4a3123 100%)">
+          <p class="absolute inset-0 grid place-items-center p-4 text-center text-lg font-extralight leading-snug tracking-tight" style="color: #f7f2ea; text-shadow: 0 1px 12px rgb(20 20 20 / 0.3)">Kailua Coffee Co.</p>
+        </div>
+        <div class="min-w-0">
+          <p class="bw-label" style="color: var(--bw-muted)">Beispiel-Brand · mit George gebaut</p>
+          <h2 class="mt-2 text-2xl font-medium tracking-tight">So sieht fertig aus: Kailua Coffee Co.</h2>
+          <p class="mt-3 max-w-2xl text-sm leading-relaxed" style="color: var(--bw-ink-soft)">Eine vollständige Referenz durch alle sechs Schichten — Purpose, Werte und Stimme, Tagline und Namens-Prüfung, Farbwelt und Typografie, Book & Kit, Content-Kompass und aktives Monitoring. Brand Score 92, jede Entscheidung mit Begründung. Schau nach, wie tief deine eigene Brand werden kann.</p>
+          <p class="bw-label mt-5 inline-flex items-center gap-1.5" style="color: var(--bw-muted)">Beispiel-Brand ansehen <UIcon name="i-ph-arrow-right" class="size-3.5" /></p>
+        </div>
+      </NuxtLink>
+
       <div class="bw-rounded-card mt-10 border border-dashed p-10 text-center" style="border-color: var(--bw-line-strong)">
         <BwIllustration variant="journey" class="mx-auto h-16 w-auto" style="color: var(--bw-ink-soft)" />
         <p class="mt-4 font-medium">So sieht der Leerzustand aus:</p>
