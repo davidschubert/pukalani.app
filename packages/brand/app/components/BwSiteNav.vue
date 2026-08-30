@@ -84,7 +84,7 @@ const userMenu = computed(() => [[
         class="text-sm whitespace-nowrap transition-colors hover:!text-(--bw-ink)"
         :style="isActive(it) ? 'color: var(--bw-ink)' : 'color: var(--bw-muted)'"
       >{{ it.label }}</NuxtLink>
-      <UButton icon="i-ph-plus" label="Neue Brand" size="sm" color="neutral" variant="outline" class="rounded-full" @click="newBrandOpen = true" />
+      <UButton label="Neue Brand" size="sm" color="neutral" variant="solid" class="rounded-full" @click="newBrandOpen = true" />
       <BwNewBrandModal v-model:open="newBrandOpen" />
       <UDropdownMenu :items="userMenu">
         <button aria-label="Konto-Menü" class="ml-2 grid place-items-center"><UAvatar text="DS" size="sm" /></button>
