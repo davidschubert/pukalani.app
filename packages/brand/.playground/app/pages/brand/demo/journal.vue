@@ -35,7 +35,7 @@ const profiles = [
 
 <template>
   <div class="bw-root min-h-dvh px-6 py-10">
-    <div class="mx-auto max-w-5xl">
+    <div class="mx-auto max-w-7xl">
       <BwSiteNav />
       <div class="mb-2">
         <p class="bw-label uppercase tracking-widest" style="color: var(--bw-muted)">Journal</p>

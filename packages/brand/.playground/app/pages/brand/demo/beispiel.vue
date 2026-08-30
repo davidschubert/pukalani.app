@@ -42,8 +42,9 @@ const fakten = [
 
 <template>
   <div class="bw-root min-h-dvh px-6 py-10">
-    <div class="mx-auto max-w-4xl">
+    <div class="mx-auto max-w-7xl">
       <BwSiteNav />
+      <div class="mx-auto max-w-4xl">
       <p class="bw-label" style="color: var(--bw-muted)">Beispiel-Brand · so sieht ein fertiges Ergebnis aus</p>
 
       <!-- Hero -->
@@ -200,6 +201,7 @@ const fakten = [
       <div class="bw-card mt-8 flex flex-wrap items-center justify-between gap-4 p-8">
         <p class="text-sm" style="color: var(--bw-ink-soft)">So sieht eine fertige Brand aus — deine beginnt mit einem Gespräch.</p>
         <UButton icon="i-ph-plus" label="Starte deine Brand" class="rounded-full" />
+      </div>
       </div>
     </div>
   </div>

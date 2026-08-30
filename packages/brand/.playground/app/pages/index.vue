@@ -5,8 +5,9 @@ const newBrandOpen = ref(false)
 
 <template>
   <div class="bw-root min-h-dvh px-6 py-10">
-    <div class="mx-auto max-w-4xl">
+    <div class="mx-auto max-w-7xl">
       <BwSiteNav />
+      <div class="mx-auto max-w-4xl">
       <div class="mb-8 flex items-end justify-between gap-4">
         <div>
           <h1 class="text-2xl font-semibold">Meine Brands</h1>
@@ -38,6 +39,7 @@ const newBrandOpen = ref(false)
         <p class="mt-4 font-medium">So sieht der Leerzustand aus:</p>
         <p class="mt-1 text-sm" style="color: var(--bw-muted)">Lass uns deine erste Brand aufbauen. Du kannst jederzeit pausieren — dein Stand bleibt gespeichert.</p>
         <UButton class="mt-4" icon="i-ph-plus" label="Erste Brand starten" variant="outline" @click="newBrandOpen = true" />
+      </div>
       </div>
     </div>
     <BwNewBrandModal v-model:open="newBrandOpen" />

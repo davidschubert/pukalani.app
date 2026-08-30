@@ -42,8 +42,9 @@ const competitors = [
 
 <template>
   <div class="bw-root min-h-dvh px-6 py-10">
-    <div class="mx-auto max-w-4xl">
+    <div class="mx-auto max-w-7xl">
       <BwSiteNav />
+      <div class="mx-auto max-w-4xl">
       <NuxtLink to="/brand/demo/journal" class="bw-label inline-flex items-center gap-1.5" style="color: var(--bw-muted)">
         <UIcon name="i-ph-arrow-left" class="size-4" /> Journal
       </NuxtLink>
@@ -152,6 +153,7 @@ const competitors = [
       </div>
 
       <p class="bw-pending mt-8">Redaktionelle Bewertung nach offengelegter Methodik — nominative Markennennung, keine fremden Logos. Zuletzt geprüft 08/2026.</p>
+      </div>
     </div>
   </div>
 </template>

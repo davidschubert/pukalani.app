@@ -34,8 +34,9 @@ const palette = [
 
 <template>
   <div class="bw-root min-h-dvh px-6 py-10">
-    <div class="mx-auto max-w-4xl">
+    <div class="mx-auto max-w-7xl">
       <BwSiteNav />
+      <div class="mx-auto max-w-4xl">
       <NuxtLink to="/brand/demo/discover" class="bw-label inline-flex items-center gap-1.5" style="color: var(--bw-muted)">
         <UIcon name="i-ph-arrow-left" class="size-4" /> Discover
       </NuxtLink>
@@ -143,6 +144,7 @@ const palette = [
       <div class="bw-card mt-12 flex flex-wrap items-center justify-between gap-4 p-8">
         <p class="text-sm" style="color: var(--bw-ink-soft)">Gefällt dir, wie das gebaut ist? Marken sind keine Vorlagen — aber der Weg dorthin steht dir offen.</p>
         <UButton icon="i-ph-plus" label="Starte deine eigene" class="rounded-full" />
+      </div>
       </div>
     </div>
   </div>

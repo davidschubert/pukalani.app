@@ -89,7 +89,7 @@ const more = [
 
 <template>
   <div class="bw-root min-h-dvh px-6 py-10">
-    <div class="mx-auto max-w-6xl">
+    <div class="mx-auto max-w-7xl">
       <BwSiteNav />
 
       <!-- Zentrierter Kopf -->
