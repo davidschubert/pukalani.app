@@ -11,6 +11,8 @@ const topics = ['Brand Strategy', 'Visual Identity', 'Rebranding', 'Brand Psycho
 const activeTopic = ref<string | null>(null)
 const sorts = ['Neueste', 'Meistgelesen', 'Kürzeste Lesezeit']
 const activeSort = ref('Neueste')
+const langs = ['Alle Sprachen', 'Deutsch', 'English']
+const activeLang = ref('Alle Sprachen')
 
 const display = ref<'grid' | 'list'>(route.query.display === 'list' ? 'list' : 'grid')
 watch(display, (d) => {
@@ -54,6 +56,7 @@ const profiles = [
           @click="activeTopic = activeTopic === t ? null : t"
         >{{ t }}</button>
         <div class="ml-auto flex items-center gap-2">
+          <USelect v-model="activeLang" :items="langs" color="neutral" variant="ghost" class="w-44 justify-between rounded-full text-sm" :ui="{ base: 'px-4 py-2' }" style="background: var(--bw-surface-hi)" />
           <USelect v-model="activeSort" :items="sorts" color="neutral" variant="ghost" class="w-48 justify-between rounded-full text-sm" :ui="{ base: 'px-4 py-2' }" style="background: var(--bw-surface-hi)" />
           <div class="flex items-center gap-1 rounded-full p-1" style="background: var(--bw-surface-hi)">
           <button
