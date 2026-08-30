@@ -2,7 +2,7 @@
 /** Brand Score (Davids Idee, Runde 94): Lighthouse-artiger Ring —
  *  fundiert gerechnet, nie gefühlt. Farblogik wie Lighthouse:
  *  90+ = accent, 50–89 = draft, darunter = stale. */
-const props = withDefaults(defineProps<{ value: number, size?: number, label?: string }>(), { size: 48 })
+const props = withDefaults(defineProps<{ value: number, size?: number, label?: string }>(), { size: 48, label: undefined })
 const R = 20
 const CIRC = 2 * Math.PI * R
 const tone = computed(() => props.value >= 90 ? 'var(--bw-accent)' : props.value >= 50 ? 'var(--bw-draft)' : 'var(--bw-stale)')

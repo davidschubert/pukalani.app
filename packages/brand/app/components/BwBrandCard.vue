@@ -16,6 +16,9 @@ const props = withDefaults(defineProps<{
   /** Farbwelt der Brand: [hell, mittel, dunkel]. */
   gradient?: [string, string, string]
 }>(), {
+  flag: undefined,
+  activity: undefined,
+  score: undefined,
   gradient: () => ['#e6e5e2', '#b8b7b3', '#4a4a47'],
 })
 const bg = computed(() => `background: linear-gradient(165deg, ${props.gradient[0]} 0%, ${props.gradient[1]} 45%, ${props.gradient[2]} 100%)`)
