@@ -65,7 +65,7 @@ const faehigkeiten = [
         <h2 class="text-center text-3xl font-extralight tracking-tight">Was am Ende auf dem Tisch liegt</h2>
         <p class="bw-label mt-2 text-center" style="color: var(--bw-muted)">Keine Folien — Werkzeuge, mit denen ihr am nächsten Tag arbeitet.</p>
         <div class="mt-10 grid gap-x-6 gap-y-6 @sm:grid-cols-2 @md:grid-cols-3">
-          <div v-for="a in artefakte" :key="a.name" class="bw-card p-7">
+          <div v-for="a in artefakte" :key="a.name" class="bw-card p-8">
             <p class="bw-label" style="color: var(--bw-muted)">{{ a.name }}</p>
             <p class="mt-2 text-sm leading-relaxed" style="color: var(--bw-ink-soft)">{{ a.line }}</p>
           </div>
@@ -77,7 +77,7 @@ const faehigkeiten = [
         <h2 class="text-center text-3xl font-extralight tracking-tight">Mehr als ein Generator</h2>
         <p class="bw-label mt-2 text-center" style="color: var(--bw-muted)">Marken sind keine Vorlagen — deshalb baut George keine.</p>
         <div class="mt-10 grid gap-x-6 gap-y-6 @sm:grid-cols-2 @md:grid-cols-3">
-          <div v-for="f in faehigkeiten" :key="f.name" class="bw-card p-7">
+          <div v-for="f in faehigkeiten" :key="f.name" class="bw-card p-8">
             <UIcon :name="f.icon" class="size-5" style="color: var(--bw-ink-soft)" />
             <p class="mt-3 font-medium">{{ f.name }}</p>
             <p class="mt-1.5 text-sm leading-relaxed" style="color: var(--bw-ink-soft)">{{ f.line }}</p>

@@ -12,7 +12,7 @@ const legal = ['Impressum', 'Datenschutz', 'AGB']
 <template>
   <footer class="mt-24 border-t pb-6 pt-8" style="border-color: var(--bw-line)">
     <div class="flex flex-wrap items-center justify-between gap-x-8 gap-y-4">
-      <NuxtLink to="/" class="flex items-center gap-2">
+      <NuxtLink to="/start" class="flex items-center gap-2">
         <span class="grid size-6 flex-none place-items-center rounded-lg" style="background: var(--bw-ink); color: var(--bw-paper)">
           <UIcon name="i-ph-paw-print-fill" class="size-3.5" />
         </span>
