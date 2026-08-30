@@ -37,7 +37,7 @@ const profiles = [
 
 <template>
   <div class="bw-root min-h-dvh px-6 py-10">
-    <div class="mx-auto max-w-7xl">
+    <div class="@container mx-auto max-w-7xl">
       <BwSiteNav />
       <div class="mb-2 text-center">
         <p class="bw-label uppercase tracking-widest" style="color: var(--bw-muted)">Journal</p>
@@ -84,7 +84,7 @@ const profiles = [
       </NuxtLink>
 
       <!-- Rasteransicht: Karten mit Farb-Thumbnails -->
-      <div v-if="display === 'grid'" class="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div v-if="display === 'grid'" class="mt-10 grid gap-x-6 gap-y-20 @sm:grid-cols-2 @md:grid-cols-4">
         <NuxtLink v-for="a in articles" :key="a.title" to="/brand/demo/artikel" class="bw-card bw-card--hover flex flex-col overflow-hidden">
           <div class="h-28" :style="`background: linear-gradient(135deg, ${a.b}, ${a.a})`" />
           <div class="flex flex-1 flex-col p-5">
