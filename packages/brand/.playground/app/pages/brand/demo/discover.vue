@@ -38,8 +38,36 @@ const creators = [
       </div>
       <p class="bw-label text-center" style="color: var(--bw-muted)">Jede Brand hier ist freiwillig öffentlich — mit ihrer ganzen Anatomie.</p>
 
+      <!-- Brand of the Day: Split-Aufmacher, Karte mit Stapel dahinter -->
+      <div class="mt-16 grid items-center gap-12 lg:grid-cols-2">
+        <div>
+          <p class="bw-label uppercase tracking-widest" style="color: var(--bw-muted)">Brand of the Day</p>
+          <h2 class="mt-4 max-w-lg text-balance text-4xl font-extralight leading-tight tracking-tight sm:text-5xl">„Wir behandeln Menschen, keine Befunde."</h2>
+          <p class="mt-5 max-w-md text-lg leading-relaxed" style="color: var(--bw-ink-soft)">Nordlicht Physio — der Fürsorgliche mit klarer Kante, aus Kiel. Kuratiert vom Team.</p>
+          <UButton to="/brand/demo/anatomie" label="Anatomie ansehen" trailing-icon="i-ph-arrow-right" class="mt-8 rounded-full" />
+        </div>
+        <div>
+          <div class="relative">
+            <div class="absolute inset-y-6 -left-6 w-full rounded-[1.5rem]" style="background: linear-gradient(165deg, #e8d3b8 0%, #b98a5e 45%, #4a3123 100%)" />
+            <div class="absolute inset-y-3 -left-3 w-full rounded-[1.5rem]" style="background: #1c1c1b" />
+            <NuxtLink to="/brand/demo/anatomie" class="bw-on-dark group relative flex flex-col justify-between overflow-hidden rounded-[1.5rem] p-8" style="aspect-ratio: 1 / 1; background: linear-gradient(165deg, #dbe9ec 0%, #7fb0ba 45%, #25454c 100%)">
+              <p class="text-xl font-medium" style="color: #f7f2ea">Nordlicht Physio</p>
+              <div>
+                <p class="text-6xl font-extralight leading-none tracking-tight" style="color: #f7f2ea">91</p>
+                <p class="mt-3 text-sm" style="color: rgb(247 242 234 / 0.85)">Brand Score — der Fürsorgliche · 96 Stimmen</p>
+                <p class="bw-label mt-5 inline-flex items-center gap-1.5" style="color: rgb(247 242 234 / 0.8)">Weiterlesen <UIcon name="i-ph-arrow-right" class="size-3.5 transition-transform group-hover:translate-x-0.5" /></p>
+              </div>
+            </NuxtLink>
+          </div>
+          <div class="mt-5 flex justify-center gap-2">
+            <button class="grid size-9 place-items-center rounded-full" style="background: var(--bw-surface-hi); color: var(--bw-muted)" aria-label="Vorherige Brand"><UIcon name="i-ph-arrow-left" class="size-4" /></button>
+            <button class="grid size-9 place-items-center rounded-full" style="background: var(--bw-surface-hi); color: var(--bw-ink)" aria-label="Nächste Brand"><UIcon name="i-ph-arrow-right" class="size-4" /></button>
+          </div>
+        </div>
+      </div>
+
       <!-- Filter & Sortierung -->
-      <div class="mt-8 flex flex-wrap items-center gap-2">
+      <div class="mt-20 flex flex-wrap items-center gap-2">
         <button
           v-for="f in filters" :key="f"
           class="bw-select-card rounded-full px-4 py-2 text-sm"
@@ -60,21 +88,8 @@ const creators = [
         </select>
       </div>
 
-      <!-- Brand of the Day -->
-      <NuxtLink to="/brand/demo/anatomie" class="bw-grain-hero mt-6 block p-10" style="--hero-a: #dbe9ec; --hero-b: #7fb0ba; --hero-c: #25454c">
-        <div class="flex flex-wrap items-start justify-between gap-6">
-          <div class="min-w-0">
-            <p class="bw-label uppercase tracking-widest" style="color: rgb(247 242 234 / 0.7)">Brand of the Day</p>
-            <p class="mt-3 text-3xl font-extralight leading-snug tracking-tight">Nordlicht Physio</p>
-            <p class="mt-2 max-w-md text-sm leading-relaxed" style="color: rgb(247 242 234 / 0.85)">„Wir behandeln Menschen, keine Befunde." — der Fürsorgliche mit klarer Kante, aus Kiel.</p>
-            <p class="bw-label mt-5" style="color: rgb(247 242 234 / 0.6)">Kuratiert · Gesundheit · Neugründung</p>
-          </div>
-          <BwScoreRing :value="91" :size="72" label="Brand Score" class="flex-none" />
-        </div>
-      </NuxtLink>
-
       <!-- Galerie-Wand: die Farbwelt ist die Karte -->
-      <div class="mt-6 grid gap-x-6 gap-y-20 @sm:grid-cols-2 @md:grid-cols-4">
+      <div class="mt-10 grid gap-x-6 gap-y-20 @sm:grid-cols-2 @md:grid-cols-4">
         <NuxtLink
           v-for="brand in brands" :key="brand.name" to="/brand/demo/anatomie"
           class="group block"
