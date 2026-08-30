@@ -203,6 +203,7 @@ const fakten = [
         <UButton icon="i-ph-plus" label="Starte deine Brand" class="rounded-full" />
       </div>
       </div>
+      <BwSiteFooter />
     </div>
   </div>
 </template>

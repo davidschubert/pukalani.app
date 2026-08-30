@@ -103,6 +103,7 @@ const bWins = dims.filter(d => d.b > d.a).length
 
       <p class="bw-pending mt-8">Redaktionelle Bewertung nach offengelegter Methodik — nominative Markennennung, keine fremden Logos. Zuletzt geprüft 08/2026.</p>
       </div>
+      <BwSiteFooter />
     </div>
   </div>
 </template>

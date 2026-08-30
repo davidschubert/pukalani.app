@@ -52,6 +52,7 @@ const newBrandOpen = ref(false)
       </div>
       </div>
       </div>
+      <BwSiteFooter />
     </div>
     <BwNewBrandModal v-model:open="newBrandOpen" />
   </div>

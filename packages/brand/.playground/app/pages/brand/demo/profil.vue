@@ -154,6 +154,7 @@ const competitors = [
 
       <p class="bw-pending mt-8">Redaktionelle Bewertung nach offengelegter Methodik — nominative Markennennung, keine fremden Logos. Zuletzt geprüft 08/2026.</p>
       </div>
+      <BwSiteFooter />
     </div>
   </div>
 </template>

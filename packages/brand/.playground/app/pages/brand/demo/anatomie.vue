@@ -146,6 +146,7 @@ const palette = [
         <UButton icon="i-ph-plus" label="Starte deine eigene" class="rounded-full" />
       </div>
       </div>
+      <BwSiteFooter />
     </div>
   </div>
 </template>

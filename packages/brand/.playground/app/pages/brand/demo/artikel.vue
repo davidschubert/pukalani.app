@@ -242,6 +242,7 @@ const more = [
       </div>
 
       <p class="bw-pending mt-16 text-center">Dummy — Chart-Daten redaktionell erfunden; im echten Bau kommt der TOC aus @nuxt/content (UContentToc).</p>
+      <BwSiteFooter />
     </div>
   </div>
 </template>

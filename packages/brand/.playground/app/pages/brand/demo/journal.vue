@@ -159,6 +159,7 @@ const profiles = [
       </div>
 
       <p class="bw-pending mt-12 text-center">Dummy-Vorgeschmack auf Phase 2 — Artikel entstehen aus Research-Signalen, nie aus fremden Inhalten; Quellvideos werden genannt und eingebettet.</p>
+      <BwSiteFooter />
     </div>
   </div>
 </template>

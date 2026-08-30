@@ -135,6 +135,7 @@ const creators = [
       </div>
 
       <p class="bw-pending mt-10 text-center">Dummy-Vorgeschmack auf Phase 2 — Bewertung in Dimensionen, Anatomie-Ansicht und Collections folgen dort.</p>
+      <BwSiteFooter />
     </div>
   </div>
 </template>

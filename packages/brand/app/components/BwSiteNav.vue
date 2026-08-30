@@ -75,10 +75,10 @@ const userMenu = computed(() => [[
       </span>
       <span class="text-sm font-semibold tracking-tight">Branding Supply</span>
     </NuxtLink>
-    <div class="flex items-center gap-1.5">
+    <div class="flex flex-wrap items-center gap-1.5">
       <NuxtLink
         v-for="it in items" :key="it.to" :to="it.to"
-        class="bw-label rounded-full px-3.5 py-2 transition-colors"
+        class="bw-label whitespace-nowrap rounded-full px-3.5 py-2 transition-colors"
         :style="isActive(it)
           ? 'background: var(--bw-ink); color: var(--bw-paper)'
           : 'color: var(--bw-muted)'"
