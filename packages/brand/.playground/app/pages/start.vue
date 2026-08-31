@@ -21,9 +21,9 @@ const faehigkeiten = [
 </script>
 
 <template>
-  <div class="bw-root min-h-dvh px-6 py-10">
+  <div class="bw-root min-h-dvh px-6 pb-10">
+    <BwSiteNav />
     <div class="@container mx-auto max-w-7xl">
-      <BwSiteNav />
 
       <!-- Hero-Split (Runde 139, Perplexity-Muster): links Versprechen +
            Brand-Check-FELD als Haupt-Conversion, rechts George bei der

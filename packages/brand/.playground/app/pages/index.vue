@@ -4,9 +4,9 @@ const newBrandOpen = ref(false)
 </script>
 
 <template>
-  <div class="bw-root min-h-dvh px-6 py-10">
+  <div class="bw-root min-h-dvh px-6 pb-10">
+    <BwSiteNav />
     <div class="@container mx-auto max-w-7xl">
-      <BwSiteNav />
       <div>
       <div class="mb-8 text-center">
         <h1 class="text-2xl font-semibold">Meine Brands</h1>

@@ -47,9 +47,9 @@ const creators = [
 </script>
 
 <template>
-  <div class="bw-root min-h-dvh px-6 py-10">
+  <div class="bw-root min-h-dvh px-6 pb-10">
+    <BwSiteNav />
     <div class="@container mx-auto max-w-7xl">
-      <BwSiteNav />
       <div class="mb-2 text-center">
         <p class="bw-label uppercase tracking-widest" style="color: var(--bw-muted)">Discover Brands</p>
         <h1 class="mt-1 text-4xl leading-tight">Marken, gebaut mit George</h1>

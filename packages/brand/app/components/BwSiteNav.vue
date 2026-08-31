@@ -77,23 +77,26 @@ const userMenu = computed(() => [[
 </script>
 
 <template>
-  <nav
-    class="sticky top-0 z-40 -mx-6 mb-10 flex flex-wrap items-center justify-between gap-x-6 gap-y-3 px-6 py-4"
-    style="background: color-mix(in srgb, var(--bw-paper) 88%, transparent); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px)"
+  <!-- Runde 178 (David): der Header IST Nuxt UIs UHeader — volle Breite,
+       startet buendig oben, sticky und Mobile-Menue kommen mit. Farben
+       laufen ueber unsere Tokens (Inline-Style schlaegt die Theme-Klassen). -->
+  <UHeader
+    to="/start" class="bw-root mb-10"
+    style="background: color-mix(in srgb, var(--bw-paper) 88%, transparent); border-color: var(--bw-line)"
   >
-    <!-- Runde 143/174 (David): drei Zonen — Wortmarke links, Navigation
-         horizontal ZENTRIERT, Aktionen rechts. -->
-    <NuxtLink to="/start" class="flex flex-1 items-center gap-2.5">
+    <template #title>
       <span class="grid size-8 flex-none place-items-center rounded-xl" style="background: var(--bw-ink); color: var(--bw-paper)">
         <UIcon name="i-ph-fingerprint" class="size-4.5" />
       </span>
-      <span class="text-sm font-semibold tracking-tight whitespace-nowrap">Branding Supply</span>
-    </NuxtLink>
+      <span class="text-sm font-semibold tracking-tight whitespace-nowrap" style="color: var(--bw-ink)">Branding Supply</span>
+    </template>
+
     <UNavigationMenu
-        :items="menuItems" variant="link" color="neutral"
+      :items="menuItems" variant="link" color="neutral"
       :ui="{ link: 'text-sm text-(--bw-muted) data-active:text-(--bw-ink) hover:text-(--bw-ink)', viewport: 'bw-root', childList: 'grid-cols-1', childLinkDescription: 'text-(--bw-muted)' }"
     />
-    <div class="flex flex-1 flex-wrap items-center justify-end gap-1.5">
+
+    <template #right>
       <!-- Runde 145 (David): Split-Control — Meine-Brands-Pille und
            Plus-Kreis beruehren sich mit 0px Abstand. -->
       <div class="flex items-center gap-0">
@@ -104,6 +107,13 @@ const userMenu = computed(() => [[
       <UDropdownMenu :items="userMenu">
         <button aria-label="Konto-Menü" class="ml-2 grid place-items-center"><UAvatar text="DS" size="sm" /></button>
       </UDropdownMenu>
-    </div>
-  </nav>
+    </template>
+
+    <template #body>
+      <UNavigationMenu
+        :items="menuItems" orientation="vertical" variant="link" color="neutral" class="-mx-2.5"
+        :ui="{ link: 'text-sm text-(--bw-muted) data-active:text-(--bw-ink) hover:text-(--bw-ink)' }"
+      />
+    </template>
+  </UHeader>
 </template>

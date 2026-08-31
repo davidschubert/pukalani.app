@@ -37,9 +37,9 @@ const palette = [
 </script>
 
 <template>
-  <div class="bw-root min-h-dvh px-6 py-10">
+  <div class="bw-root min-h-dvh px-6 pb-10">
+    <BwSiteNav />
     <div class="mx-auto max-w-7xl">
-      <BwSiteNav />
       <div class="mx-auto max-w-4xl">
       <NuxtLink to="/brand/demo/discover" class="bw-label inline-flex items-center gap-1.5" style="color: var(--bw-muted)">
         <UIcon name="i-ph-arrow-left" class="size-4" /> Discover Brands

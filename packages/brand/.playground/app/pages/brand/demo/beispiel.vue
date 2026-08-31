@@ -41,9 +41,9 @@ const fakten = [
 </script>
 
 <template>
-  <div class="bw-root min-h-dvh px-6 py-10">
+  <div class="bw-root min-h-dvh px-6 pb-10">
+    <BwSiteNav />
     <div class="mx-auto max-w-7xl">
-      <BwSiteNav />
       <div class="mx-auto max-w-4xl">
       <p class="bw-label" style="color: var(--bw-muted)">Beispiel-Brand · so sieht ein fertiges Ergebnis aus</p>
 

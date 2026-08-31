@@ -88,9 +88,9 @@ const more = [
 </script>
 
 <template>
-  <div class="bw-root min-h-dvh px-6 py-10">
+  <div class="bw-root min-h-dvh px-6 pb-10">
+    <BwSiteNav />
     <div class="mx-auto max-w-7xl">
-      <BwSiteNav />
 
       <!-- Zentrierter Kopf -->
       <div class="mx-auto mt-6 max-w-3xl text-center">
