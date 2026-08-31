@@ -39,7 +39,7 @@ const langs = [
         >
           <UIcon name="i-ph-x" class="size-4.5" style="color: var(--bw-ink-soft)" />
         </button>
-        <p class="bw-label uppercase tracking-widest" style="color: var(--bw-muted)">Neue Brand</p>
+        <p class="bw-label uppercase tracking-widest" style="color: var(--bw-muted)">Neues Branding</p>
         <h2 class="mt-1 text-[28px] font-extralight leading-tight tracking-tight">Womit starten wir?</h2>
 
         <!-- Schritt 1: die Weiche, links oder rechts -->

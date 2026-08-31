@@ -9,7 +9,7 @@ const newBrandOpen = ref(false)
     <div class="@container mx-auto max-w-7xl">
       <div>
       <div class="mb-8 text-center">
-        <h1 class="text-2xl font-semibold">Meine Brands</h1>
+        <h1 class="text-2xl font-semibold">Brandings</h1>
         <p class="mt-1 text-sm" style="color: var(--bw-muted)">Jede Brand ist ein eigener Wizard-Lauf — pausiere jederzeit, dein Stand bleibt gespeichert.</p>
       </div>
       <div class="grid gap-x-6 gap-y-20 @sm:grid-cols-2 @md:grid-cols-4">

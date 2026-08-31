@@ -45,6 +45,9 @@ const APPEARANCE = [
   ['system', 'System', 'i-ph-monitor'],
 ] as const
 const userMenu = computed(() => [[
+  { label: 'Brandings', icon: 'i-ph-squares-four', to: '/' },
+  { label: 'Neues Branding', icon: 'i-ph-plus', onSelect: () => { newBrandOpen.value = true } },
+], [
   {
     label: locale.value === 'de' ? 'Sprache: Deutsch' : 'Language: English',
     icon: 'i-ph-globe-simple',
@@ -67,9 +70,6 @@ const userMenu = computed(() => [[
       onSelect: (event: Event) => { event.preventDefault(); colorMode.preference = mode },
     })),
   },
-], [
-  { label: 'Tastaturkürzel', icon: 'i-ph-keyboard' },
-  { label: 'Support kontaktieren', icon: 'i-ph-lifebuoy' },
 ], [
   { label: 'Konto', icon: 'i-ph-user-circle' },
   { label: 'Abmelden', icon: 'i-ph-sign-out' },
@@ -100,15 +100,11 @@ const userMenu = computed(() => [[
     />
 
     <template #right>
-      <!-- Runde 145 (David): Split-Control — Meine-Brands-Pille und
-           Plus-Kreis beruehren sich mit 0px Abstand. -->
-      <div class="flex items-center gap-0">
-        <UButton to="/" label="Meine Brands" size="sm" color="neutral" variant="solid" class="rounded-full" />
-        <UButton icon="i-ph-plus" size="sm" color="neutral" variant="solid" class="rounded-full" aria-label="Neue Brand" @click="newBrandOpen = true" />
-      </div>
+      <!-- Runde 189 (David): Meine Brands + Neue Brand leben im
+           Avatar-Menue — rechts steht nur noch das Konto. -->
       <BwNewBrandModal v-model:open="newBrandOpen" />
       <UDropdownMenu :items="userMenu">
-        <button aria-label="Konto-Menü" class="ml-2 grid place-items-center"><UAvatar text="DS" size="sm" /></button>
+        <button aria-label="Konto-Menü" class="grid place-items-center"><UAvatar text="DS" size="md" /></button>
       </UDropdownMenu>
     </template>
 
