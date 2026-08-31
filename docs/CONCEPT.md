@@ -648,6 +648,7 @@ in ihrer Datei eine Regel steht, sondern weil sie im Themes-Layer liegt.
 | `tickets` | `tickets`, `ticket_lists`, `ticket_files`, `ticket_watchers` | — | core, (comments über `operatorTargets`) |
 | `analytics` | `analytics_settings` | Eigenen Tracker bauen (nur Plausible-Script-Id) | core |
 | `billing` | `billing_customers`, `billing_subscriptions`, `stripe_settings` | Produkt-Wissen (Fulfillment nur über `registerCheckoutFulfillment`) | core |
+| `brand` | `brand_profiles`, `brand_steps`, `brand_messages`, `brand_shares`, `brand_invites`, `brand_access`, `brand_events` — **server-only** (Permissions `[]`, `rowSecurity: false`) und nur auf der `portfolio`-Instanz | Andere Produkt-Layer kennen; eigene Theme-Tokens/Presets erfinden (Design-Richtungen werden aus `themes` KONSUMIERT, nie dort geschrieben); KI-Transport selbst bauen | core, system, (themes über den Preset-Vertrag) |
 | `activity` | **keine eigene Table** — liest `activities` (system) über den Core-Vertrag `recordActivity()` | Eigenes Schema | core, system |
 | `feedback` | Widget + Admin-Sichtung + Naht — **keine eigene Table** (`customer_feedback*` liegen im Control Plane) | Eigenes Schema | core, (control über die Naht) |
 | `domains` | Oberfläche + Prüfweg — **keine eigene Table** (die Domain steht an `communities`/`websites`) | Eigenes Schema, TLS-Anforderung selbst auslösen | core, (control über die Naht) |
@@ -656,6 +657,17 @@ in ihrer Datei eine Regel steht, sondern weil sie im Themes-Layer liegt.
 > einer bewusst kein `server/` (`blueprint`). Das ist kein Rückstand, sondern die
 > Aussage der Matrix: ein Layer darf eine Oberfläche haben, ohne Schema-Eigentümer zu
 > sein — wer das „nachrüstet", bricht die Grenze.
+
+> **`brand` ist der erste Produkt-Layer, dessen Tabellen auf genau EINER Instanz
+> stehen** (`portfolio`) — sie kommen deshalb ins `PORTFOLIO_SOLL` von
+> `verify-schema-parity.mjs` und NICHT in die instanzweite Spalten-Parität.
+> Nach oben hängt er an drei Nähten und an keiner vierten: `signupAdmission`
+> (core-Registry — der Einladungscode entscheidet über die Kontoanlage),
+> `aiComplete()` (KI-Transport; die Gates und die Antwort-Klemmung bleiben beim
+> Konsumenten) und die Theme-**Presets** aus `themes` als EXPLIZITER Vertrag —
+> gelesen, nie geschrieben. Zu keinem anderen Produkt-Layer gibt es eine
+> Verbindung; die Beta-Zulassung (`brand_access` + `app_config.brandAdmissionMode`)
+> ist eine eigene Grenze und nicht die Rollen-/Capability-Matrix.
 
 **Durchsetzung — dreistufig** (Stufen 1–2 ausführlich:
 [MODERATION-AND-LAYER-BOUNDARIES.md](referenz/MODERATION-AND-LAYER-BOUNDARIES.md);

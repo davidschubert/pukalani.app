@@ -55,6 +55,12 @@ export const RESERVED_SUBDOMAINS = new Set([
   // gibt: `app` und `studio` (oben) sowie `my` und `start`, die seit AH-1
   // nur noch 301 auf `account` weiterleiten.
   'control', 'my', 'start', 'master', 'manage', 'new', 'photos',
+  // `brand` — Brand-Wizard, P1b (2026-08-31). Noch kein Deployment, aber schon
+  // ein PRODUKTNAME in unserer Kundensprache: in fremder Hand wäre
+  // `brand.pukalani.app` eine Verwechslung mit unserem eigenen Angebot, und
+  // ein später zurückgeholter Name ist der teuerste. Reserviert VOR der Beta,
+  // nicht danach.
+  'brand',
   // Phishing-Schutz (Self-Service-Onboarding, SAAS-ROADMAP #1): Hosts, die wie
   // die Plattform selbst klingen, dürfen nie einem Kunden gehören —
   // `login.pukalani.app` in fremder Hand ist eine Anmeldedaten-Falle mit
