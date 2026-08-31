@@ -6,7 +6,35 @@
  *  Sprache, bewusst EIN Schritt) samt CTA. Der Titel kommt NACH der
  *  Weiche, weil sich das Feld anpasst: Neue Marke = optionaler
  *  Arbeitstitel (der echte Name kann im Gespräch entstehen), Relaunch =
- *  die Marke HAT einen Namen. */
+ *  die Marke HAT einen Namen.
+ *
+ *  P1c (2026-08-31): ZWEI BETRIEBSARTEN, damit der Klickdummy unangetastet
+ *  bleibt und dieselbe Optik trotzdem echt absenden kann.
+ *   - `mode: 'demo'` (Voreinstellung) — der Knopf ist ein Link auf den
+ *     Dummy-Pfad; der .playground benutzt die Komponente unverändert weiter.
+ *   - `mode: 'live'` — der Knopf sendet `submit` mit der Auswahl, die Seite
+ *     legt an (POST /api/brand/profiles) und navigiert. `loading` sperrt ihn
+ *     währenddessen.
+ *  Nichts an den Dummy-Zweigen wurde geändert: ohne die neuen Props verhält
+ *  sich die Komponente Zeichen für Zeichen wie vorher.
+ *
+ *  OFFEN UND BEWUSST SO: die Copy hier ist fest DEUTSCH — sie stammt aus dem
+ *  abgenommenen Klickdummy, und der ist Davids Demo-Anker. Die i18n-fähige
+ *  Fassung derselben Anlage ist die SEITE `/dashboard/brands/new`; wer die
+ *  Sprachumschaltung auch im Layer braucht, ersetzt hier die Zeichenketten
+ *  durch `brand.new.*` (die Schlüssel liegen bereits in beiden Sprachen). */
+export interface BwNewBrandSubmit {
+  kind: 'new' | 'rebrand'
+  title: string
+  lang: 'de' | 'en'
+}
+withDefaults(defineProps<{
+  mode?: 'demo' | 'live'
+  /** Ziel im Demo-Modus — bleibt der abgenommene Dummy-Pfad. */
+  to?: string
+  loading?: boolean
+}>(), { mode: 'demo', to: '/brand/demo/werte', loading: false })
+defineEmits<{ submit: [payload: BwNewBrandSubmit] }>()
 const open = defineModel<boolean>('open', { default: false })
 const kind = ref<'new' | 'rebrand' | null>(null)
 const title = ref('')
@@ -80,8 +108,15 @@ const langs = [
 
             <div class="mt-7 flex justify-end">
               <UButton
-                to="/brand/demo/werte"
+                v-if="mode === 'demo'"
+                :to="to"
                 trailing-icon="i-ph-arrow-right" label="Los geht's — George übernimmt" size="lg" class="rounded-full"
+              />
+              <UButton
+                v-else
+                :loading="loading"
+                trailing-icon="i-ph-arrow-right" label="Los geht's — George übernimmt" size="lg" class="rounded-full"
+                @click="$emit('submit', { kind, title, lang })"
               />
             </div>
           </div>

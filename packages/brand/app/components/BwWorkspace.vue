@@ -8,8 +8,12 @@ defineProps<{
   progressNote?: string
   /* Zweite Fuß-Zeile (Runde 77): bewusster Umbruch OHNE Trenner-Punkt. */
   progressSubnote?: string
-  /* §3e: NUR Abweichungs-Zustände erscheinen — Stille heißt gespeichert. */
-  syncState?: 'saving' | 'offline' | 'conflict' | null
+  /* §3e: NUR Abweichungs-Zustände erscheinen — Stille heißt gespeichert.
+   * P1c: 'error' kam dazu (der fünfte Zustand der Autosave-Regel); die drei
+   * bestehenden sind unverändert, der Dummy sieht davon nichts. */
+  syncState?: 'saving' | 'offline' | 'conflict' | 'error' | null
+  /* P1c: übersetzte Beschriftung. Ohne sie bleibt die feste Dummy-Copy. */
+  syncLabel?: string
   /* Runde 78 (David): der Fuß IST der Einstieg ins kombinierte Branding. */
   progressTo?: string
   /* Runde 96 (David): der Brand Score gehört an den Branding-Einstieg. */
@@ -19,6 +23,7 @@ const SYNC = {
   saving: { label: 'Speichert …', icon: 'i-ph-circle-notch', spin: true, tone: 'var(--bw-muted)' },
   offline: { label: 'Offline — Eingabe bleibt erhalten', icon: 'i-ph-cloud-slash', spin: false, tone: 'var(--bw-draft)' },
   conflict: { label: 'Konflikt — Stand neu laden', icon: 'i-ph-warning', spin: false, tone: 'var(--bw-stale)' },
+  error: { label: 'Nicht gespeichert — neuer Versuch folgt', icon: 'i-ph-warning-circle', spin: false, tone: 'var(--bw-stale)' },
 } as const
 const mode = ref<'stage' | 'george'>('george')
 /* Runde 191 (David): die zwei Zonen-Nähte sind ZIEHBAR — Nuxt UIs
@@ -62,7 +67,7 @@ const zoneItems = [
         <Transition name="bw-sync">
           <span v-if="syncState" class="bw-label flex flex-none items-center gap-1.5" :style="`color: ${SYNC[syncState].tone}`">
             <UIcon :name="SYNC[syncState].icon" :class="SYNC[syncState].spin ? 'animate-spin' : ''" class="size-4" />
-            {{ SYNC[syncState].label }}
+            {{ syncLabel ?? SYNC[syncState].label }}
           </span>
         </Transition>
         <!-- Kein Dauer-Badge (Runde 4): Autosave ist Vertrag, Stille heißt

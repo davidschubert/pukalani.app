@@ -184,7 +184,10 @@
       "stepLocked": {
         "title": "This chapter isn't open yet",
         "description": "Finish the chapter before it, and this one opens on its own."
-      }
+      },
+      "railLayer": "Brand Foundation",
+      "completeFailed": "The chapter is not finished yet",
+      "missingRequired": "Some required decisions are still open — confirm them, then try again."
     },
     "brands": {
       "title": "Brandings",
@@ -202,7 +205,10 @@
           "new": "New brand",
           "relaunch": "Brand relaunch"
         },
-        "edited": "last edited {when}"
+        "edited": "last edited {when}",
+        "untitled": "Untitled branding",
+        "stepOf": "Step {index} of {total}",
+        "remaining": "about {minutes} min left"
       },
       "loadFailed": "The brandings could not be loaded."
     },

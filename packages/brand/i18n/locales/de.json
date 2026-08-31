@@ -184,7 +184,10 @@
       "stepLocked": {
         "title": "Dieses Kapitel ist noch nicht offen",
         "description": "Schließ das Kapitel davor ab, dann geht dieses von selbst auf."
-      }
+      },
+      "railLayer": "Brand Foundation",
+      "completeFailed": "Das Kapitel ist noch nicht fertig",
+      "missingRequired": "Einige Pflicht-Entscheidungen sind noch offen — bestätige sie und versuch es erneut."
     },
     "brands": {
       "title": "Brandings",
@@ -202,7 +205,10 @@
           "new": "Neue Marke",
           "relaunch": "Marken-Relaunch"
         },
-        "edited": "zuletzt bearbeitet {when}"
+        "edited": "zuletzt bearbeitet {when}",
+        "untitled": "Namenloses Branding",
+        "stepOf": "Schritt {index} von {total}",
+        "remaining": "noch etwa {minutes} Min"
       },
       "loadFailed": "Die Brandings konnten nicht geladen werden."
     },

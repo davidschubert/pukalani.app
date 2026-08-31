@@ -49,6 +49,14 @@ import type {
  * (Datentür-Muster, `requireBrandAccess`). Der Store macht daraus `denied`, und
  * die Seiten zeigen einen Leerzustand statt einer Fehlerseite: der Grund bleibt
  * bewusst im Server, die Oberfläche sagt nur „noch kein Zugang".
+ *
+ * ── DIE LESE-AKTIONEN NEHMEN IHREN `fetch` ENTGEGEN ───────────────────────
+ * Beim SSR MÜSSEN die Browser-Cookies mitgehen, sonst antwortet das Gate mit
+ * der Gast-Sicht (404) und die Seite hydratisiert als „kein Zugang", obwohl das
+ * Konto längst eines hat — derselbe Fehler wie bei den Gast-Votes im
+ * comments-Store. `useRequestFetch()` gehört aber in eine SETUP-Funktion, nicht
+ * in einen Store. Also reicht die Seite ihn herein; im Browser ist die
+ * Voreinstellung `$fetch` genau dasselbe.
  */
 
 /** Was ein 409 dem Client hinterlässt, damit die UI beide Fassungen zeigen kann. */
@@ -58,6 +66,12 @@ export interface BrandWorkspaceConflict {
 }
 
 const EMPTY_PROGRESS: BrandStepProgress = { requiredTotal: 0, requiredFilled: 0, pct: 0 }
+
+/**
+ * Womit gelesen wird. Beim SSR reicht die Seite `useRequestFetch()` herein
+ * (Cookies!), im Browser bleibt es `$fetch` (s. Kopf).
+ */
+export type BrandFetcher = ReturnType<typeof useRequestFetch> | typeof $fetch
 
 /** Die vier Formen, in denen ein HTTP-Fehler bei ofetch ankommt. */
 interface FetchLikeError {
@@ -94,6 +108,13 @@ const setup = () => {
 
   /** Der Beta-Zugang fehlt (404 der Datentür) — kein Fehler, ein Zustand. */
   const denied = ref(false)
+  /**
+   * Der Baustein liegt nicht (mehr) auf dem Weg: `locked` (Vorgänger offen)
+   * oder `skipped` (Weiche abgewählt). Die Route antwortet darauf mit 403 und
+   * legt den Grund als `data.code` bei — anders als beim ZUGANG darf sie das,
+   * denn die Existenz des Bausteins ist hier keine Auskunft.
+   */
+  const blocked = ref<string | null>(null)
   const loading = ref(false)
 
   const profiles = ref<BrandProfileSummary[]>([])
@@ -187,6 +208,7 @@ const setup = () => {
     missingRequired.value = [...detail.missingRequired]
     conflict.value = null
     syncState.value = 'saved'
+    blocked.value = null
   }
 
   function applySaveResponse(response: BrandStepSaveResponse): void {
@@ -217,10 +239,10 @@ const setup = () => {
 
   // ── Routen ──────────────────────────────────────────────────────────────
 
-  async function loadProfiles(): Promise<void> {
+  async function loadProfiles(fetcher: BrandFetcher = $fetch): Promise<void> {
     loading.value = true
     try {
-      const response = await $fetch<BrandProfileListResponse>('/api/brand/profiles')
+      const response = await fetcher<BrandProfileListResponse>('/api/brand/profiles')
       profiles.value = response.profiles
       denied.value = false
     }
@@ -240,9 +262,9 @@ const setup = () => {
     denied.value = false
   }
 
-  async function loadProfile(profileId: string): Promise<boolean> {
+  async function loadProfile(profileId: string, fetcher: BrandFetcher = $fetch): Promise<boolean> {
     try {
-      const detail = await $fetch<BrandProfileDetailResponse>(`/api/brand/profiles/${profileId}`)
+      const detail = await fetcher<BrandProfileDetailResponse>(`/api/brand/profiles/${profileId}`)
       applyDetail(detail)
       return true
     }
@@ -257,17 +279,22 @@ const setup = () => {
     }
   }
 
-  async function loadStep(profileId: string, key: string): Promise<boolean> {
+  async function loadStep(profileId: string, key: string, fetcher: BrandFetcher = $fetch): Promise<boolean> {
     try {
-      const detail = await $fetch<BrandStepDetailResponse>(
+      const detail = await fetcher<BrandStepDetailResponse>(
         `/api/brand/profiles/${profileId}/steps/${key}`,
       )
       applyStepDetail(detail)
       return true
     }
     catch (error) {
-      if (errorStatus(error) === 404) {
+      const status = errorStatus(error)
+      if (status === 404) {
         denied.value = true
+        return false
+      }
+      if (status === 403) {
+        blocked.value = brandErrorReason(error) ?? 'locked'
         return false
       }
       throw error
@@ -309,6 +336,7 @@ const setup = () => {
     syncState.value = 'saved'
     conflict.value = null
     denied.value = false
+    blocked.value = null
   }
 
   return {
@@ -324,6 +352,7 @@ const setup = () => {
     syncState,
     conflict,
     denied,
+    blocked,
     loading,
     confidence,
     pendingSlots,
