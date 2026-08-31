@@ -21,12 +21,12 @@ const legal = ['Impressum', 'Datenschutz', 'AGB']
         <span class="whitespace-nowrap text-sm" style="font-weight: 400; letter-spacing: -0.01em">Branding Supply</span>
       </NuxtLink>
       <nav class="flex flex-wrap gap-x-6 gap-y-2" aria-label="Footer">
-        <NuxtLink v-for="it in nav" :key="it.to" :to="it.to" class="bw-label transition-colors hover:!text-(--bw-ink)" style="color: var(--bw-muted)">{{ it.label }}</NuxtLink>
+        <NuxtLink v-for="it in nav" :key="it.to" :to="it.to" class="text-sm whitespace-nowrap transition-colors hover:!text-(--bw-ink)" style="color: var(--bw-muted)">{{ it.label }}</NuxtLink>
       </nav>
       <div class="flex flex-wrap gap-x-6 gap-y-2">
-        <span v-for="l in legal" :key="l" class="bw-label" style="color: var(--bw-muted)">{{ l }}</span>
+        <span v-for="l in legal" :key="l" class="text-sm whitespace-nowrap" style="color: var(--bw-muted)">{{ l }}</span>
       </div>
     </div>
-    <p class="bw-label mt-6" style="color: var(--bw-muted)">© 2026 Branding Supply · Marken sind keine Vorlagen — aber der Weg dorthin steht allen offen.</p>
+    <p class="mt-6 text-sm" style="color: var(--bw-muted)">© 2026 Branding Supply · Marken sind keine Vorlagen — aber der Weg dorthin steht allen offen.</p>
   </footer>
 </template>
