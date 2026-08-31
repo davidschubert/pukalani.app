@@ -42,7 +42,7 @@ import { type BrandSlotRecord, brandSlotStoredValue } from './brandStore'
  * gleichzeitige Läufe schreiben nacheinander, der zweite gewinnt, und der
  * Autosave des Clients bemerkt den revision-Sprung. Eine prozessübergreifende
  * Sperre (Appwrite-Row mit 409-Idempotenz, wie `notify()`) ist der nächste
- * Schritt, wenn platform/portfolio je im Cluster laufen.
+ * Schritt, wenn branding je im Cluster läuft.
  */
 
 // ── Der Vertrag ────────────────────────────────────────────────────────────

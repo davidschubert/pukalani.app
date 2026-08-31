@@ -30,7 +30,7 @@ import {
  * eine Route braucht, steht EINMAL hier.
  *
  * ── KEIN `tenantDb`, UND DAS IST KEINE ABKÜRZUNG ──────────────────────────
- * `brand` ist ein SILO-Layer auf der Single-Tenant-Instanz `portfolio`; seine
+ * `brand` ist ein SILO-Layer auf der Single-Tenant-Instanz `branding`; seine
  * Tabellen tragen kein `communityId`, und der ESLint-Backstop gegen rohes
  * `.tablesDB` gilt den GEPOOLTEN Layern. Die Grenze zwischen zwei Konten ist
  * hier `assertBrandOwnerAccess` — sie ist die EINZIGE, weil alle

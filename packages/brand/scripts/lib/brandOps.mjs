@@ -6,7 +6,10 @@ import { Client, Query, TablesDB, Users } from 'node-appwrite'
  * SKRIPTE (keine Admin-UI nötig)".
  *
  * ── EINE ENV-KONVENTION, DIESELBE WIE BEI DEN MIGRATIONEN ─────────────────
- * Aufgerufen wird mit `--env-file=apps/portfolio/.env`; gelesen werden genau
+ * Aufgerufen wird mit `--env-file=apps/branding/.env` (bis zum Rückbau am
+ * 2026-08-31: `apps/portfolio/.env` — der Wizard hat seit dem Umzug ein eigenes
+ * Appwrite-Projekt, und ein Betreiber-Skript auf der falschen Instanz ist genau
+ * die Panne, vor der der nächste Absatz warnt); gelesen werden genau
  * die vier Variablen, die auch der Migrations-Runner liest. Kein eigener
  * Env-Dialekt, kein zweiter Pfad, den jemand pflegen müsste.
  *
@@ -31,7 +34,7 @@ export function readBrandOpsEnv() {
 
   if (!endpoint || !projectId || !databaseId || !apiKey) {
     console.error('✗ Env unvollständig. Aufruf über den Wrapper:')
-    console.error('    pnpm brand:invite <e-mail>   (liest apps/portfolio/.env)')
+    console.error('    pnpm brand:invite <e-mail>   (liest apps/branding/.env)')
     process.exit(1)
   }
 

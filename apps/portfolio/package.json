@@ -20,7 +20,6 @@
     "@iconify-json/ph": "catalog:",
     "@pukalani/admin": "workspace:*",
     "@pukalani/analytics": "workspace:*",
-    "@pukalani/brand": "workspace:*",
     "@pukalani/core": "workspace:*",
     "@pukalani/domains": "workspace:*",
     "@pukalani/pages": "workspace:*",

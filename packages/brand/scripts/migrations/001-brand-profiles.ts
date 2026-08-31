@@ -15,7 +15,8 @@
  *    Beta-Widerruf. Ohne Zeilen-Sicherheit gibt es diesen Pfad gar nicht.
  *    Muster: control-032 (customer_feedback), comments-012 (embed_sites).
  * 2. **Kein `communityId`.** `brand` ist ein SILO-Layer und läuft auf
- *    `portfolio` (Single-Tenant). Die Pool-Datentür (`tenantDb`) gilt hier
+ *    `branding` (Single-Tenant; bis 2026-08-31 `portfolio`). Die
+ *    Pool-Datentür (`tenantDb`) gilt hier
  *    nicht; die Zugehörigkeit einer Zeile trägt `ownerType`/`ownerId`.
  * 3. **Indizes NUR über die Fabrik** `createIndexSteps` (F19). Rohes
  *    `createIndex` verbietet ESLint.
@@ -44,7 +45,7 @@
  *
  * Idempotent (409 → skip). Aufruf über den Runner:
  *
- *   pnpm migrate --app portfolio --layer brand
+ *   pnpm migrate --app branding --layer brand
  */
 import { Client, Query, TablesDB, TablesDBIndexType } from 'node-appwrite'
 import { createIndexSteps } from '../../../../scripts/migrations-lib/indexRetry.mts'

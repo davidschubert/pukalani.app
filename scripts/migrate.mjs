@@ -45,8 +45,9 @@ const WAVES = ['internal', 'canary', 'stable']
 // mehr, das zentrale Kunden-Feedback liegt im Control Plane (control-032).
 // `brand` steht bei den Produkt-Layern: seine sieben brand_*-Tabellen hängen
 // an keiner anderen (kein communityId, kein Fremdschlüssel in ein anderes
-// Produkt) — es läuft ausschliesslich auf `portfolio`, und die zwei
-// Laufzeit-Flags, die es liest, gehören `system` und laufen davor.
+// Produkt) — es läuft ausschliesslich auf `branding` (branding.supply; bis zum
+// Rückbau 2026-08-31 war das `portfolio`), und die zwei Laufzeit-Flags, die es
+// liest, gehören `system` und laufen davor.
 const LAYER_ORDER = ['system', 'comments', 'posts', 'events', 'media', 'billing', 'pages', 'courses', 'tickets', 'brand', 'runner', 'moderation', 'analytics', 'messages', 'control', 'admin']
 
 function parseArgs(argv) {

@@ -24,7 +24,7 @@
  *
  * Idempotent (409 → skip). Aufruf über den Runner:
  *
- *   pnpm migrate --app portfolio --layer brand
+ *   pnpm migrate --app branding --layer brand
  */
 import { Client, Query, TablesDB } from 'node-appwrite'
 

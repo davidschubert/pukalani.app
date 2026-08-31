@@ -37,8 +37,9 @@
  * `brand.cta.book` existierte in keiner Locale-Datei, weil der Layer keine
  * hatte. Jetzt steht es in `i18n/locales/{de,en}.json`, und das Feld
  * `pukalani.brand.completionCta.labelKey` steht in der `FIELDS`-Tabelle von
- * `scripts/check-i18n-keys.mjs` — der Wächter prüft es über `apps/portfolio`,
- * die einzige App, die diesen Layer extended (Gegenprobe: Schlüssel entfernen
+ * `scripts/check-i18n-keys.mjs` — der Wächter prüft es über `apps/branding`,
+ * die einzige App, die diesen Layer extended (bis zum Rückbau am 2026-08-31
+ * war das `apps/portfolio`; Gegenprobe: Schlüssel entfernen
  * ⇒ ein Befund). Ohne beides stünde im Knopf am Ende wörtlich `brand.cta.book`
  * — genau der Fehler, der vier Tage lang im Fuß von comments.pukalani.app
  * stand.

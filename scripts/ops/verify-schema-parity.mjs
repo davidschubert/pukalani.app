@@ -72,6 +72,7 @@ import { join } from 'node:path'
  *                        media/billing (teils nur als Teilmengen). Deshalb wird
  *                        sein Soll unten EXPLIZIT gepflegt, nicht rein aus
  *                        Blöcken komponiert.
+ *   branding         : brand core system (noch nicht ausgerollt)
  *   photos           : themes admin media core system (noch nicht ausgerollt)
  *
  * GRUNDWAHRHEIT der Kuratierung: `account` und `control` sind gesund — ihr
@@ -255,8 +256,8 @@ const CONTROL_SOLL = [
  *   • posts nur `community_posts` + `post_votes` + `poll_votes`
  *   • control nur `entitlements` + `provisioning_jobs`
  * Volle Blöcke, die portfolio teilt: courses, events, tickets, media, moderation.
- * Dazu `brand` — der EINZIGE Block, den portfolio EXKLUSIV trägt (der
- * Brand-Wizard läuft nirgends sonst).
+ * `brand` stand hier bis zum 2026-08-31 und ist mit dem Umzug des Wizards nach
+ * `branding` wieder raus (Begründung am BRAND_TABLES-Block).
  * Neue portfolio-Tabelle ⇒ hier eintragen.
  *
  * NICHT im Soll und daher als WARNUNG erwartet — sechs TOTE Alt-Tabellen, die
@@ -267,9 +268,18 @@ const CONTROL_SOLL = [
  */
 /**
  * brand (packages/brand) — der Brand-Wizard. Die sieben Tabellen laufen
- * AUSSCHLIESSLICH auf `portfolio` und stehen deshalb NUR im PORTFOLIO_SOLL:
- * sie gehören nicht in die instanzweite Spalten-Parität (die vergleicht nur
- * system+admin+pages+analytics, s. u.). Schema: docs/plans/BRAND-WIZARD-SCHEMA.md.
+ * AUSSCHLIESSLICH auf `branding` (branding.supply) und stehen deshalb NUR im
+ * BRANDING_SOLL: sie gehören nicht in die instanzweite Spalten-Parität (die
+ * vergleicht nur system+admin+pages+analytics, s. u.).
+ * Schema: docs/plans/BRAND-WIZARD-SCHEMA.md.
+ *
+ * BIS 2026-08-31 STANDEN SIE IM PORTFOLIO_SOLL — das war der P1b-Zwischenstand
+ * („eine Site, eine Login-Welt"). Mit Davids Kehrtwende
+ * (docs/plans/BRANDING-SUPPLY-INFRA.md) bekommt der Wizard ein eigenes
+ * Appwrite-Projekt; angelegt wurde in `portfolio` nie eine brand_*-Tabelle
+ * (Plan §0: „Prod-Appwrite: KEINE brand_*-Tabellen irgendwo — bewusst
+ * gewartet"), der Umzug hier hinterlässt also weder eine Lücke noch eine
+ * Warnung.
  */
 const BRAND_TABLES = [
   'brand_profiles',
@@ -283,7 +293,6 @@ const BRAND_TABLES = [
 
 const PORTFOLIO_SOLL = [
   ...SYSTEM_TABLES,
-  ...BRAND_TABLES,
   ...ADMIN_TABLES,
   ...PAGES_TABLES,
   ...ANALYTICS_TABLES,
@@ -303,6 +312,24 @@ const PORTFOLIO_SOLL = [
   'entitlements',
   'provisioning_jobs',
 ]
+
+/**
+ * branding (apps/branding) = branding.supply, das neue Zuhause des
+ * Brand-Wizards (docs/plans/BRANDING-SUPPLY-INFRA.md §3). Layer: brand + core +
+ * system — mehr nicht, deshalb steht hier NUR der system-Block plus die sieben
+ * brand_*-Tabellen. KEIN `admin`: die App zieht den Layer nicht, es gibt dort
+ * also auch keinen Betreiber-Changelog.
+ *
+ * NOCH NICHT AUSGEROLLT (Plan §6 Schritt 1–4 stehen aus). Das ist der Grund,
+ * warum der Eintrag WARNT statt zu scheitern: fehlt die Env-Datei, überspringt
+ * die Schleife die Instanz mit einer sichtbaren Zeile („nicht ausgerollt?") —
+ * dasselbe Verhalten, das `photos` seit jeher hat. Ein harter Fehler wäre hier
+ * falsch: der Wächter läuft täglich in der CI (production-watch.yml), und ein
+ * Lauf, der wegen einer noch nicht gebauten Instanz dauerhaft rot steht, wird
+ * weggelesen — genau die Fehlerklasse, gegen die dieses Skript geschrieben ist.
+ * Sobald das Projekt steht, macht die Env-Datei den Eintrag von selbst scharf.
+ */
+const BRANDING_SOLL = [...SYSTEM_TABLES, ...BRAND_TABLES]
 
 /**
  * photos (apps/photos) = themes admin media core system. NICHT ausgerollt
@@ -361,6 +388,14 @@ const INSTANCES = [
   { name: 'account', env: join(homedir(), '.appwrite-secrets/migrations/account.env'), soll: ACCOUNT_SOLL },
   { name: 'control', env: join(homedir(), '.appwrite-secrets/migrations/control.env'), soll: CONTROL_SOLL },
   { name: 'portfolio', env: 'apps/portfolio/.env.production', soll: PORTFOLIO_SOLL },
+  /**
+   * `branding` folgt der Migrations-KONVENTION (~/.appwrite-secrets/migrations/),
+   * nicht dem portfolio-Muster mit `.env.production` im Repo-Baum — so steht es
+   * im Infra-Plan §3, und so liegen auch account und control. Bis die Datei
+   * existiert, meldet der Lauf „übersprungen" statt zu scheitern (Begründung am
+   * BRANDING_SOLL).
+   */
+  { name: 'branding', env: join(homedir(), '.appwrite-secrets/migrations/branding.env'), soll: BRANDING_SOLL },
   { name: 'photos', env: 'apps/photos/.env.production', soll: PHOTOS_SOLL },
 ]
 

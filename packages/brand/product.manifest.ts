@@ -6,9 +6,11 @@ import type { ProductManifest } from '../core/shared/types/manifest'
  * brand_*-Tabellen stehen (scripts/migrations/001–007, Schema-Anhang
  * docs/plans/BRAND-WIZARD-SCHEMA.md); die Routen folgen.
  *
- * Die Tabellen laufen NUR auf der `portfolio`-Instanz (Silo) — der Layer
- * steht deshalb im PORTFOLIO_SOLL von scripts/ops/verify-schema-parity.mjs,
- * nicht in der instanzweiten Spalten-Parität.
+ * Die Tabellen laufen NUR auf der `branding`-Instanz (branding.supply, Silo) —
+ * der Layer steht deshalb im BRANDING_SOLL von
+ * scripts/ops/verify-schema-parity.mjs, nicht in der instanzweiten
+ * Spalten-Parität. Bis zum 2026-08-31 hing er am `portfolio`-Silo (P1b); die
+ * Kehrtwende steht in docs/plans/BRANDING-SUPPLY-INFRA.md.
  */
 export default {
   key: 'brand',

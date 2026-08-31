@@ -14,7 +14,7 @@
  *
  * ROLLEN-WERTE STATT IMPORT: `owner`/`admin` sind hier als Zeichenketten
  * notiert, NICHT aus `packages/control/shared/communityTeam.ts` importiert.
- * `brand` ist ein Silo-Layer auf `portfolio` — er kennt das Control Plane
+ * `brand` ist ein Silo-Layer auf `branding` — er kennt das Control Plane
  * nicht und soll keine Abhängigkeit dorthin aufbauen (A14). Die Werte selbst
  * stehen seit E8-4 in Zeilen und ändern sich nicht; die Liste dort bleibt die
  * Referenz.

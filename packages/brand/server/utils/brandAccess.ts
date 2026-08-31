@@ -17,7 +17,7 @@ import {
  * dass es hinter dem Pfad etwas gibt, und machte die geschlossene Beta
  * enumerierbar. Der GRUND bleibt in `decideBrandAccess` und im Log.
  *
- * KEIN `tenantDb` HIER: `brand` ist ein SILO-Layer (er läuft auf `portfolio`,
+ * KEIN `tenantDb` HIER: `brand` ist ein SILO-Layer (er läuft auf `branding`,
  * einer Single-Tenant-Instanz), seine Tabellen tragen kein `communityId`, und
  * der ESLint-Backstop gegen rohes `.tablesDB` gilt nur den gepoolten Layern.
  * Der Admin-Client ist hier richtig und nötig: alle `brand_*`-Tabellen sind

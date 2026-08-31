@@ -2,13 +2,15 @@ export default defineNuxtConfig({
   // früher gelistet = höhere Priorität — Produkt Layer vor dem Core.
   // Nicht benötigte Layer einfach entfernen (und aus package.json streichen);
   // core + system bilden das Fundament und bleiben immer.
-  // `brand` steht hier, weil pukalani.studio DIE Site des Brand-Wizards ist
-  // (Plan §6, Phase 1): eine Site = eine Login-Welt, also kein zweites
-  // Appwrite-Projekt — die brand_*-Tabellen liegen in `portfolio`. Der Layer
-  // bringt in dieser Fassung NUR `/api/brand/**` mit: seine Seiten leben im
-  // .playground (Punkt-Ordner werden von `extends` nicht erfasst), seine
-  // Komponenten heissen `Bw*` und sein CSS ist auf `.bw-root` gescopet.
-  extends: ['../../packages/themes', '../../packages/admin', '../../packages/analytics', '../../packages/domains', '../../packages/pages', '../../packages/brand', '../../packages/core', '../../packages/system'],
+  //
+  // `brand` STAND HIER und ist mit dem Rückbau vom 2026-08-31 wieder raus
+  // (docs/plans/BRANDING-SUPPLY-INFRA.md §2): der Brand-Wizard lebt seit
+  // Davids Kehrtwende unter seiner eigenen Marke in `apps/branding` —
+  // eigene Domain, eigenes Appwrite-Projekt, eigener Konten-Stamm. Die
+  // P1b-Einhängung hier war der Zwischenstand „eine Site, eine Login-Welt".
+  // Kein toter Code bleibt zurück: die Routen `/api/brand/**` und die
+  // P1c-Seiten ziehen MIT dem Layer um, sie lagen nie in dieser App.
+  extends: ['../../packages/themes', '../../packages/admin', '../../packages/analytics', '../../packages/domains', '../../packages/pages', '../../packages/core', '../../packages/system'],
 
   // Port pro App eindeutig vergeben (Konvention: 3001 comments, 3002+ weitere)
   devServer: {
