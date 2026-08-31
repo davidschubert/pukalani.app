@@ -70,10 +70,10 @@ const plattform = [
       <NuxtLink to="/team" class="bw-card bw-card--hover mt-20 flex flex-wrap items-center justify-between gap-6 p-8">
         <div class="flex items-center gap-5">
           <div class="flex -space-x-2">
-            <BwGeorgeAvatar size="md" />
-            <UAvatar text="FF" size="md" />
-            <UAvatar text="RS" size="md" />
-            <UAvatar text="WW" size="md" />
+            <span class="rounded-full" style="outline: 2px solid var(--bw-surface)"><BwGeorgeAvatar size="md" /></span>
+            <UAvatar text="FF" size="md" style="outline: 2px solid var(--bw-surface)" />
+            <UAvatar text="RS" size="md" style="outline: 2px solid var(--bw-surface)" />
+            <UAvatar text="WW" size="md" style="outline: 2px solid var(--bw-surface)" />
           </div>
           <div>
             <h2 class="text-lg font-medium tracking-tight">Für jede Aufgabe das richtige Teammitglied</h2>
