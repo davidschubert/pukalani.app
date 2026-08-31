@@ -81,22 +81,19 @@ const userMenu = computed(() => [[
     class="sticky top-0 z-40 -mx-6 mb-10 flex flex-wrap items-center justify-between gap-x-6 gap-y-3 px-6 py-4"
     style="background: color-mix(in srgb, var(--bw-paper) 88%, transparent); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px)"
   >
-    <!-- Runde 143/165 (David): klassische Navigation, LINKSBUENDIG neben
-         der Wortmarke — Geist Sans, reine Textlinks; aktiv = Ink,
-         inaktiv = muted. Rechts nur die Aktionen. -->
-    <div class="flex flex-wrap items-center gap-x-10 gap-y-2">
-      <NuxtLink to="/start" class="flex items-center gap-2.5">
-        <span class="grid size-8 flex-none place-items-center rounded-xl" style="background: var(--bw-ink); color: var(--bw-paper)">
-          <UIcon name="i-ph-fingerprint" class="size-4.5" />
-        </span>
-        <span class="text-sm font-semibold tracking-tight">Branding Supply</span>
-      </NuxtLink>
-      <UNavigationMenu
+    <!-- Runde 143/174 (David): drei Zonen — Wortmarke links, Navigation
+         horizontal ZENTRIERT, Aktionen rechts. -->
+    <NuxtLink to="/start" class="flex flex-1 items-center gap-2.5">
+      <span class="grid size-8 flex-none place-items-center rounded-xl" style="background: var(--bw-ink); color: var(--bw-paper)">
+        <UIcon name="i-ph-fingerprint" class="size-4.5" />
+      </span>
+      <span class="text-sm font-semibold tracking-tight whitespace-nowrap">Branding Supply</span>
+    </NuxtLink>
+    <UNavigationMenu
         :items="menuItems" variant="link" color="neutral"
-        :ui="{ link: 'text-sm text-(--bw-muted) data-active:text-(--bw-ink) hover:text-(--bw-ink)', viewport: 'bw-root', childList: 'grid-cols-1', childLinkDescription: 'text-(--bw-muted)' }"
-      />
-    </div>
-    <div class="flex flex-wrap items-center gap-1.5">
+      :ui="{ link: 'text-sm text-(--bw-muted) data-active:text-(--bw-ink) hover:text-(--bw-ink)', viewport: 'bw-root', childList: 'grid-cols-1', childLinkDescription: 'text-(--bw-muted)' }"
+    />
+    <div class="flex flex-1 flex-wrap items-center justify-end gap-1.5">
       <!-- Runde 145 (David): Split-Control — Meine-Brands-Pille und
            Plus-Kreis beruehren sich mit 0px Abstand. -->
       <div class="flex items-center gap-0">
