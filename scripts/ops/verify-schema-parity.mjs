@@ -92,6 +92,9 @@ const SYSTEM_TABLES = [
   'audit_logs',
   'community_branding',
   'community_handles',
+  // system-036 (Instanz-Geheimnisse, KI-Schlüssel je Deployment) — fehlte in
+  // der Soll-Liste und stand als „unbekannt"-Warnung auf account+control.
+  'instance_secrets',
   'community_navigation',
   'community_redirects',
   'community_seo',
