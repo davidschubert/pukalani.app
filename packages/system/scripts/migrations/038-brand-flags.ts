@@ -2,11 +2,16 @@
  * Migration system-038: die zwei Laufzeit-Flags des Brand-Wizards
  * (docs/plans/BRAND-WIZARD-SCHEMA.md §8, Teil von P1a).
  *
- *   app_config.brandAdmissionMode — 'closed' (Default) = nur Konten mit einer
- *     brand_access-Row dürfen in den Wizard · 'open' = jedes eingeloggte,
- *     E-Mail-verifizierte Konto. Die Öffnung ist damit ein LAUFZEITFLAG, kein
- *     Deploy; die KONTO-PFLICHT gilt IMMER (kein Anonym-Start), und ein
- *     expliziter Entzug (brand_access.revokedAt) schlägt auch 'open'.
+ *   app_config.brandAdmissionMode — DREI Werte (Plan §3e):
+ *     'closed' (Default) = keine NEUEN Zugänge; bestehende brand_access-Rows
+ *       bleiben gültig · 'invite' = neue Zugänge nur per Einladungscode ·
+ *       'open' = jedes eingeloggte, E-Mail-verifizierte Konto.
+ *     Im GATE verhalten sich 'closed' und 'invite' gleich (Zeile nötig); sie
+ *     unterscheiden sich in der EINLÖSUNG — die pure Regel dazu steht in
+ *     packages/brand/shared/brandAccess.ts. Die Öffnung ist damit ein
+ *     LAUFZEITFLAG, kein Deploy; die KONTO-PFLICHT gilt IMMER (kein
+ *     Anonym-Start), und ein expliziter Entzug (brand_access.revokedAt)
+ *     schlägt jeden Modus. varchar(16) fasst alle drei Werte.
  *   app_config.brandAiEnabled — brand-spezifischer KI-Kill-Switch, Default
  *     false. Aus heißt: der bestehende Stand bleibt VOLL BEARBEITBAR, es
  *     entstehen nur keine neuen KI-Entwürfe mehr.

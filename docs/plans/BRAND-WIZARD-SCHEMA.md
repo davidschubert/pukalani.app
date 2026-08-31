@@ -170,8 +170,17 @@ Backstop-Regel). Die eine freiwillige Abschlussfrage (§9b, 1–5) ist
 
 | Flag | Ablage | Default | Wirkung |
 | --- | --- | --- | --- |
-| brandAdmissionMode | app_config (system-Migration, additiv) | **'closed'** | 'closed' = nur brand_access-Rows · 'open' = jedes eingeloggte, verifizierte Konto (Öffnung ist Laufzeitflag; Konto-Pflicht IMMER) |
+| brandAdmissionMode | app_config (system-Migration, additiv) | **'closed'** | DREI Werte (§3e-Korrektur): 'closed' = keine NEUEN Zugänge, bestehende brand_access-Rows bleiben gültig · 'invite' = neue nur per Einladung · 'open' = jedes eingeloggte, verifizierte Konto (Öffnung ist Laufzeitflag; Konto-Pflicht IMMER) |
 | brandAiEnabled | app_config (system-Migration, additiv) | **false** | brand-spezifischer AI-Kill-Switch (Plan §6-Limits); aus ⇒ Stand voll bearbeitbar, keine neuen Entwürfe |
+
+**§3e-Korrektur nach Abnahme, 2026-08-31:** die P1a-Fassung dieses Anhangs
+nannte nur `closed|open`; Plan §3e definiert DREI Modi. Im GATE verhalten
+sich `closed` und `invite` identisch (Zugang nur mit nicht-widerrufener
+`brand_access`-Row) — der Unterschied liegt in der EINLÖSUNG
+(`admissionAllowsRedeem` in `packages/brand/shared/brandAccess.ts`: nur
+`invite` verwandelt einen gültigen Code in eine neue Row). `revokedAt`
+schlägt weiterhin JEDEN Modus. Die Spaltengröße varchar(16) trägt alle drei
+Werte; system-038 bleibt unverändert gültig.
 
 `system`-Migrationen laufen auf JEDER Instanz mit (CLAUDE.md) — beide
 Spalten sind additiv mit Default und kommen ins Paritäts-SOLL

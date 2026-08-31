@@ -8,9 +8,25 @@
  * (`app_config.brandAdmissionMode`), Session, E-Mail-Verifizierung und die
  * `brand_access`-Zeile des Kontos — und genau eine Antwort kommt heraus.
  *
+ * DREI MODI, ZWEI FRAGEN (Plan §3e „Beta-Zugang operativ" — die P1a-Fassung
+ * kannte nur closed|open, das war eine Verkürzung):
+ *
+ *   'closed'  keine NEUEN Zugänge; bestehende `brand_access`-Zeilen bleiben
+ *             gültig (ein Stopp ist keine Enteignung der Beta-Tester).
+ *   'invite'  neue Zugänge nur per Einladung.
+ *   'open'    jedes eingeloggte, verifizierte Konto darf.
+ *
+ * Im GATE verhalten sich 'closed' und 'invite' IDENTISCH — beide verlangen
+ * eine nicht-widerrufene Zeile. Der Unterschied liegt in der EINLÖSUNG
+ * (`admissionAllowsRedeem`): nur 'invite' verwandelt einen gültigen Code in
+ * eine neue Zeile; bei 'open' braucht niemand einzulösen, bei 'closed' wird
+ * abgelehnt. Zwei Funktionen statt einer, weil es zwei verschiedene Fragen
+ * sind — „darf dieses Konto arbeiten?" und „darf ein Code jetzt Zugang
+ * schaffen?"; eine gemeinsame Antwort müsste eine davon verfälschen.
+ *
  * DREI DINGE, DIE MAN NICHT „VEREINFACHEN" DARF:
  *
- * 1. **Die Konto-Pflicht gilt in BEIDEN Modi.** 'open' öffnet die Beta für
+ * 1. **Die Konto-Pflicht gilt in ALLEN Modi.** 'open' öffnet die Beta für
  *    jedes eingeloggte, verifizierte Konto — es ist kein Anonym-Start (Plan
  *    §6: „KEIN Anonym-Start (gestrichen)"). Ohne Session gibt es deshalb nie
  *    ein Ja, auch nicht bei 'open'.
@@ -25,7 +41,7 @@
  */
 
 /** Aufnahme-Modus der Instanz (`app_config.brandAdmissionMode`, system-038). */
-export const BRAND_ADMISSION_MODES = ['closed', 'open'] as const
+export const BRAND_ADMISSION_MODES = ['closed', 'invite', 'open'] as const
 export type BrandAdmissionMode = (typeof BRAND_ADMISSION_MODES)[number]
 
 /** Warum abgelehnt wurde. Bleibt intern (Log/Test) — der Client sieht 404. */
@@ -60,7 +76,25 @@ export interface BrandAccessDecision {
  * der sichere (fail-closed).
  */
 export function normalizeBrandAdmissionMode(value: unknown): BrandAdmissionMode {
-  return value === 'open' ? 'open' : 'closed'
+  if (value === 'open') return 'open'
+  if (value === 'invite') return 'invite'
+  return 'closed'
+}
+
+/**
+ * DARF EIN GÜLTIGER EINLADUNGSCODE JETZT ZUGANG SCHAFFEN? — die zweite Frage
+ * des Modus, getrennt von `decideBrandAccess` (s. Kopf).
+ *
+ * Nur 'invite' sagt Ja. 'closed' lehnt ab (das ist die Bedeutung von „keine
+ * NEUEN Zugänge"; ein liegengebliebener Code darf einen Stopp nicht
+ * unterlaufen), und 'open' braucht die Einlösung gar nicht — dort hat jedes
+ * verifizierte Konto ohnehin Zugang, eine zusätzliche `brand_access`-Zeile
+ * wäre nur Rauschen mit einem `revokedAt`-Feld, das später niemand erwartet.
+ * Die Einlöse-Route antwortet in beiden Fällen mit DERSELBEN neutralen
+ * Ablehnung wie bei einem falschen Code (keine Enumeration, Schema-Anhang §5).
+ */
+export function admissionAllowsRedeem(mode: BrandAdmissionMode): boolean {
+  return mode === 'invite'
 }
 
 export function decideBrandAccess(input: BrandAccessInput): BrandAccessDecision {
@@ -69,6 +103,10 @@ export function decideBrandAccess(input: BrandAccessInput): BrandAccessDecision 
   // Regel 2: der Entzug steht VOR der Modus-Frage.
   if (input.accessRow?.revokedAt) return { allowed: false, reason: 'revoked' }
   if (input.admissionMode === 'open') return { allowed: true, reason: null }
+  // 'closed' UND 'invite' landen hier: beide verlangen eine Zeile. Der
+  // Unterschied ist, ob eine NEUE entstehen darf — das entscheidet
+  // `admissionAllowsRedeem`, nicht dieses Gate. Wer schon drin ist, bleibt
+  // drin, wenn der Betreiber die Beta auf 'closed' stellt.
   if (input.accessRow) return { allowed: true, reason: null }
   return { allowed: false, reason: 'no_access' }
 }
