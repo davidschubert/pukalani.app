@@ -8,15 +8,26 @@ const route = useRoute()
  * Discover und Journal sind die Außenwelt, Meine Brands steht als
  * persönlicher Bereich rechts — direkt neben seiner Aktion (Neue Brand)
  * und dem Konto. */
-const items = [
-  { label: 'Our Products', to: '/products', match: ['/products'] },
-  { label: 'Discover Brands', to: '/brand/demo/discover', match: ['/brand/demo/discover', '/brand/demo/anatomie'] },
-  { label: 'Brand Insights', to: '/brand/demo/journal', match: ['/brand/demo/journal', '/brand/demo/artikel', '/brand/demo/profil', '/brand/demo/duell'] },
-  { label: 'About us', to: '/team', match: ['/team'] },
-]
-function isActive(it: { match: string[] }): boolean {
-  return it.match.includes(route.path)
-}
+/* Runde 170 (David): „Our Products" als Dropdown im Nuxt-UI-Muster —
+ * UNavigationMenu mit Kindern (Icon + Titel + Beschreibung). */
+const menuItems = computed(() => [
+  {
+    label: 'Our Products',
+    active: route.path === '/products',
+    children: [
+      { label: 'Brand Wizard', icon: 'i-ph-chats-circle', description: 'Eure Marke entsteht im Gespräch mit George.', to: '/products' },
+      { label: 'Brand Design', icon: 'i-ph-palette', description: 'Drei Moodboards aus eurer Visual DNA.', to: '/products' },
+      { label: 'Brand Book & Kit', icon: 'i-ph-book-open-text', description: 'Book, Tokens, brand.json + Strategy Playbook.', to: '/products' },
+      { label: 'Brand Experience', icon: 'i-ph-rocket-launch', description: 'Assets und Pläne entlang des 90-Tage-Plans.', to: '/products' },
+      { label: 'Brand Monitoring', icon: 'i-ph-broadcast', description: 'Wöchentlicher Blick von außen, mit Alerts.', to: '/products' },
+      { label: 'Brand Score', icon: 'i-ph-gauge', description: '40 Prüfkriterien, reproduzierbar gerechnet.', to: '/products' },
+      { label: 'Brand Benchmark', icon: 'i-ph-binoculars', description: 'Wettbewerber im selben Raster.', to: '/products' },
+    ],
+  },
+  { label: 'Discover Brands', to: '/brand/demo/discover', active: ['/brand/demo/discover', '/brand/demo/anatomie'].includes(route.path) },
+  { label: 'Brand Insights', to: '/brand/demo/journal', active: ['/brand/demo/journal', '/brand/demo/artikel', '/brand/demo/profil', '/brand/demo/duell'].includes(route.path) },
+  { label: 'About us', to: '/team', active: route.path === '/team' },
+])
 
 /* Neue Brand oeffnet das Start-Modal von jeder Seite aus. */
 const newBrandOpen = ref(false)
@@ -80,13 +91,10 @@ const userMenu = computed(() => [[
         </span>
         <span class="text-sm font-semibold tracking-tight">Branding Supply</span>
       </NuxtLink>
-      <div class="flex flex-wrap items-center gap-x-7 gap-y-2">
-        <NuxtLink
-          v-for="it in items" :key="it.to" :to="it.to"
-          class="text-sm whitespace-nowrap transition-colors hover:!text-(--bw-ink)"
-          :style="isActive(it) ? 'color: var(--bw-ink)' : 'color: var(--bw-muted)'"
-        >{{ it.label }}</NuxtLink>
-      </div>
+      <UNavigationMenu
+        :items="menuItems" variant="link" color="neutral"
+        :ui="{ link: 'text-sm text-(--bw-muted) data-active:text-(--bw-ink) hover:text-(--bw-ink)', viewport: 'bw-root', childLinkDescription: 'text-(--bw-muted)' }"
+      />
     </div>
     <div class="flex flex-wrap items-center gap-1.5">
       <!-- Runde 145 (David): Split-Control — Meine-Brands-Pille und
