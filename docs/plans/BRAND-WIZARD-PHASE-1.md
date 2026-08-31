@@ -1861,3 +1861,17 @@ Außerdem: „Brandings" + „Neues Branding" leben als erste Gruppe im
 Avatar-Menü (das Split-Control im Header ist entfallen); „Tastaturkürzel"
 und „Support kontaktieren" sind aus dem Menü raus, weil es beides noch
 nicht gibt.
+
+## Werkstatt-Zonen ziehbar via USplitter (2026-08-30, David)
+
+Nuxt UI 4.11.0 (Katalog-Bump, repo-weit) bringt `USplitter` — die zwei
+Nähte Rail|Bühne und Bühne|George sind auf Desktop (>=1280px) ziehbar:
+1px-Linie als Handle (Akzent bei Hover/Drag), min/max je Zone (Rail
+16–34 %, Bühne min 32 %, George 20–42 %), `autoSaveId="bw-workspace"`
+persistiert die Aufteilung je Browser. SSR + erster Client-Paint rendern
+weiter das CSS-Grid (kein Hydration-Mismatch), der Splitter mountet per
+matchMedia; unter 1280px unverändert Mini-Rail/Modusschalter. Rail-Fuß
+extrahiert nach `BwRailFooter.vue` (eine Quelle für beide Zweige).
+Bump-Fallen dokumentiert: unhead-Doppelung per `pnpm dedupe` auf 3.4.0
+geeint; pnpm update zerstörte die Katalog-Kommentare der
+pnpm-workspace.yaml (restauriert).
