@@ -6,11 +6,13 @@
   "main": "./nuxt.config.ts",
   "scripts": {
     "dev": "nuxi dev .playground --port 3009",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "test": "vitest run"
   },
   "dependencies": {
     "@nuxt/ui": "catalog:",
     "@nuxtjs/i18n": "catalog:",
+    "node-appwrite": "catalog:",
     "nuxt": "catalog:",
     "zod": "catalog:"
   },
@@ -19,6 +21,7 @@
     "@types/node": "catalog:",
     "eslint": "catalog:",
     "typescript": "catalog:",
+    "vitest": "catalog:",
     "vue": "catalog:"
   }
 }

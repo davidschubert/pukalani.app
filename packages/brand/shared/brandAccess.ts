@@ -1,0 +1,74 @@
+/**
+ * WER DARF IN DEN BRAND-WIZARD? — die PURE Entscheidung (Plan §6 „Zugang",
+ * Schema-Anhang §5/§8). Kein Appwrite, kein H3: dieselbe Regel gilt für das
+ * Server-Gate (`server/utils/brandAccess.ts`) und für jede spätere UI-Anzeige,
+ * und sie ist ohne laufende Instanz prüfbar.
+ *
+ * Vier Tatsachen gehen hinein — Aufnahme-Modus der Instanz
+ * (`app_config.brandAdmissionMode`), Session, E-Mail-Verifizierung und die
+ * `brand_access`-Zeile des Kontos — und genau eine Antwort kommt heraus.
+ *
+ * DREI DINGE, DIE MAN NICHT „VEREINFACHEN" DARF:
+ *
+ * 1. **Die Konto-Pflicht gilt in BEIDEN Modi.** 'open' öffnet die Beta für
+ *    jedes eingeloggte, verifizierte Konto — es ist kein Anonym-Start (Plan
+ *    §6: „KEIN Anonym-Start (gestrichen)"). Ohne Session gibt es deshalb nie
+ *    ein Ja, auch nicht bei 'open'.
+ * 2. **Ein Entzug schlägt die Öffnung.** `revokedAt` ist eine ausdrückliche
+ *    Betreiber-Handlung gegen GENAU DIESES Konto; ein späteres Öffnen der Beta
+ *    ist eine allgemeine Einstellung. Würde 'open' den Entzug überstimmen,
+ *    käme ein hinausgeworfenes Konto durch die Öffnung stillschweigend zurück
+ *    — und der Betreiber erführe es nicht.
+ * 3. **Der GRUND bleibt hier drinnen.** Nach außen antwortet die Route 404
+ *    (Datentür-Muster) — die Beta soll nicht enumerierbar sein. `reason` ist
+ *    für Log und Test, nie für den Client.
+ */
+
+/** Aufnahme-Modus der Instanz (`app_config.brandAdmissionMode`, system-038). */
+export const BRAND_ADMISSION_MODES = ['closed', 'open'] as const
+export type BrandAdmissionMode = (typeof BRAND_ADMISSION_MODES)[number]
+
+/** Warum abgelehnt wurde. Bleibt intern (Log/Test) — der Client sieht 404. */
+export type BrandAccessDenialReason = 'no_session' | 'not_verified' | 'revoked' | 'no_access'
+
+/**
+ * Die einzigen Felder der `brand_access`-Zeile, die für die Entscheidung
+ * zählen. Bewusst schmal: `grantedVia`/`inviteId` sind Herkunft, kein Recht.
+ */
+export interface BrandAccessRowFacts {
+  /** Gesetzt = Zugang entzogen. Wirkt sofort, weil die Tabellen server-only sind. */
+  revokedAt?: string | null
+}
+
+export interface BrandAccessInput {
+  admissionMode: BrandAdmissionMode
+  /** Appwrite-User-Id der Session; `null` = kein Login. */
+  userId: string | null
+  emailVerified: boolean
+  /** `null` = keine Zeile (der Normalfall ausserhalb der Beta). */
+  accessRow: BrandAccessRowFacts | null
+}
+
+export interface BrandAccessDecision {
+  allowed: boolean
+  reason: BrandAccessDenialReason | null
+}
+
+/**
+ * Fehlende/unbekannte Spaltenwerte fallen auf 'closed' zurück — ein Deploy VOR
+ * der Migration system-038 liest `undefined`, und der geschlossene Zustand ist
+ * der sichere (fail-closed).
+ */
+export function normalizeBrandAdmissionMode(value: unknown): BrandAdmissionMode {
+  return value === 'open' ? 'open' : 'closed'
+}
+
+export function decideBrandAccess(input: BrandAccessInput): BrandAccessDecision {
+  if (!input.userId) return { allowed: false, reason: 'no_session' }
+  if (!input.emailVerified) return { allowed: false, reason: 'not_verified' }
+  // Regel 2: der Entzug steht VOR der Modus-Frage.
+  if (input.accessRow?.revokedAt) return { allowed: false, reason: 'revoked' }
+  if (input.admissionMode === 'open') return { allowed: true, reason: null }
+  if (input.accessRow) return { allowed: true, reason: null }
+  return { allowed: false, reason: 'no_access' }
+}
