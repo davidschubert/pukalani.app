@@ -1127,6 +1127,48 @@ Identität"), und Georges Empfehlungs-Begründungen („für euren
 Archetyp untypisch, DESHALB eigenständig"). Die Taxonomie ist damit
 Discover-Filter, Profil-Schema UND KB-Abfragesprache in einem.
 
+### Visual Brand DNA: die Generierungs-Taxonomie (Davids Notiz 2, 2026-08-30)
+
+Archetypen beschreiben Psyche, NICHT Optik — für Moodboards und
+Design-Ableitung braucht es eine EIGENE Taxonomie. Das Modell:
+**~10 orthogonale Dimensionen mit kontrollierten Vokabularen**
+(bewusst KEIN 50-Stile-Zoo — „Swiss", „Minimal", „Luxury" beschreiben
+verschiedene Dinge und überlappen):
+1. Visual Style (Minimalist … Experimental) · 2. Aesthetic Era
+(Heritage … Futuristic) · 3. Form Language (Geometric … Fluid) ·
+4. Typography (Grotesk … Handwritten) · 5. Color Character
+(Monochrome … High-Contrast) · 6. Imagery (Editorial … Generative) ·
+7. Composition (Grid-based … Layered) · 8. Materiality
+(Digital-clean … Natural) · 9. Motion Character (Calm … Experimental)
+· 10. Overall Mood (Sophisticated … Optimistic).
+
+KERNPRINZIPIEN: (a) **Ein Moodboard ist eine KOMBINATION dieser
+Eigenschaften, keine Kategorie** („Luxury Editorial" = Minimal+
+Editorial+Luxury / Didone+Grotesk / Monochrome+Neutral / Spacious /
+Paper+Metal / Sophisticated+Calm). (b) DNA ist ORTHOGONAL zum
+Archetyp — zwei Schöpfer-Marken können völlig verschiedene DNA
+tragen. (c) Die PIPELINE ist der eigentliche Wert:
+**Brand Psychology → Visual DNA → Design Direction → Design System**
+— aus den DNA-Parametern werden Moodboard, Logo-Direction, Typo,
+Farben, Photography, Shapes, UI, Packaging, Motion und am Ende die
+DESIGN TOKENS abgeleitet (Anschluss an unser Token-Artefakt).
+
+EINORDNUNG ZUR 6-ACHSEN-TAXONOMIE: die dortige Achse „Visual Style"
+bleibt als GROBE Discover-Facette (Suchsprache, eine Handvoll Chips);
+die Visual DNA ist die FEINE Ebene darunter (Profil-/KB-/
+Generierungs-Schema). Achse 6 „Design Characteristics" geht in den
+DNA-Dimensionen 3–9 auf.
+
+WIZARD-MAPPING: George schlägt die DNA aus der Foundation vor
+(Archetyp + Personality + Positionierung ⇒ DNA-Vorschlag mit
+Begründung), der Nutzer bestätigt/verschiebt einzelne Dimensionen —
+danach parametrisieren die Brand-Design-Schritte (Farbwelt,
+Typografie, Logo & Zeichen, Bildsprache, Motion) GENAU diese
+Dimensionen. VORGEMERKT (P2): eigener Schritt „Moodboard" am Anfang
+von Brand Design (Generate aus DNA, Auswahl aus 2–3 Richtungen);
+die DNA wandert maschinenlesbar in brand.json und wird
+KB-Abfragesprache („Creator-Brands mit brutalistischer DNA").
+
 ### Knowledge Base / Brand Intelligence Layer (Phase 3+, vorgemerkt 2026-08-29)
 
 Der strategische Überbau von Journal + Score + Discover (aus Davids

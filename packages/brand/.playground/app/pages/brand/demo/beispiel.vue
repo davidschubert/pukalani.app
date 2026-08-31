@@ -134,6 +134,7 @@ const fakten = [
             <div class="bw-card p-8">
               <p class="bw-label" style="color: var(--bw-muted)">Logo · Bildsprache · Motion</p>
               <p class="mt-3 text-sm leading-relaxed" style="color: var(--bw-ink-soft)">Wortmarke mit Wellenpunkt über dem i. Fotografie: Tageslicht, Hände, Herkunft — nie Stock-Lächeln. Motion: ruhig (200 ms), das Logo bewegt sich nicht.</p>
+              <p class="bw-label mt-4 leading-relaxed" style="color: var(--bw-muted)">Visual DNA · Contemporary · Minimal · Organic · Serif + Grotesk · Earthy · Editorial · Spacious · Paper + Grain · Calm · Warm</p>
             </div>
           </div>
         </div>
