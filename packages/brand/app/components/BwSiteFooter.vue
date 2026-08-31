@@ -3,7 +3,7 @@
  *  Reihenfolge wie die Hauptnavigation: öffentlich → persönlich. */
 const nav = [
   { label: 'Discover Brands', to: '/brand/demo/discover' },
-  { label: 'Insights', to: '/brand/demo/journal' },
+  { label: 'Brand Insights', to: '/brand/demo/journal' },
   { label: 'Meine Brands', to: '/' },
 ]
 const legal = ['Impressum', 'Datenschutz', 'AGB']

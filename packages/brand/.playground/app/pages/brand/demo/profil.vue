@@ -46,7 +46,7 @@ const competitors = [
       <BwSiteNav />
       <div class="mx-auto max-w-4xl">
       <NuxtLink to="/brand/demo/journal" class="bw-label inline-flex items-center gap-1.5" style="color: var(--bw-muted)">
-        <UIcon name="i-ph-arrow-left" class="size-4" /> Insights
+        <UIcon name="i-ph-arrow-left" class="size-4" /> Brand Insights
       </NuxtLink>
 
       <!-- Hero -->

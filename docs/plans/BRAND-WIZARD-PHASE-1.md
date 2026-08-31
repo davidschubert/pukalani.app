@@ -961,7 +961,7 @@ awwwards-Jury).
 ### Journal & Content-Intelligence (branding.supply-Redaktion — vorgemerkt 2026-08-29)
 
 NAV-BENENNUNG (David, 2026-08-30): der Bereich heißt in Navigation
-und Seitenkopf **„Insights"** (nicht „Journal" — klang nach Blog;
+und Seitenkopf **„Brand Insights"** (nicht „Journal" — klang nach Blog;
 Insights deckt Artikel UND Profile/Rankings/Duelle und verweist auf
 die Knowledge-Base-Einheit gleichen Namens). Die Galerie heißt
 **„Discover Brands"** (spiegelt „Meine Brands").
