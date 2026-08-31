@@ -81,7 +81,7 @@ const userMenu = computed(() => [[
        startet buendig oben, sticky und Mobile-Menue kommen mit. Farben
        laufen ueber unsere Tokens (Inline-Style schlaegt die Theme-Klassen). -->
   <UHeader
-    to="/start" class="bw-root mb-10"
+    to="/start" class="bw-root -mx-6 mb-10"
     :ui="{ container: 'max-w-full px-6', title: 'flex items-center gap-2.5 text-sm font-semibold' }"
     style="background: color-mix(in srgb, var(--bw-paper) 88%, transparent); border-color: var(--bw-line)"
   >

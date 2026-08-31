@@ -31,7 +31,7 @@ const mode = ref<'stage' | 'george'>('george')
   <div class="bw-root bw-shell" :class="mode === 'stage' ? 'bw-mode-stage' : 'bw-mode-george'">
     <!-- Hauptnavigation liegt auch über der Werkstatt (Davids Vorgabe
          Runde 131) — der Rest des Shells teilt sich die Resthöhe. -->
-    <div class="flex-none">
+    <div class="flex-none px-6">
       <BwSiteNav style="margin-bottom: 0" />
     </div>
     <header class="bw-topbar">
