@@ -65,8 +65,9 @@ const creators = [
           <UButton to="/brand/demo/anatomie" label="Anatomie ansehen" trailing-icon="i-ph-arrow-right" class="mt-8 rounded-full" />
         </div>
         <div>
+          <!-- Runde 176 (David): Ueberblenden statt Schieben (Embla-Fade). -->
           <UCarousel
-            ref="dayCarousel" v-slot="{ item }" :items="days" loop
+            ref="dayCarousel" v-slot="{ item }" :items="days" loop fade
             class="w-full" :ui="{ item: 'basis-full' }"
             @select="dayIndex = $event"
           >
@@ -79,11 +80,13 @@ const creators = [
               </div>
             </NuxtLink>
           </UCarousel>
-          <div class="mt-5 flex justify-center gap-2">
-            <button class="grid size-9 place-items-center rounded-full" style="background: var(--bw-surface-hi); color: var(--bw-muted)" aria-label="Vorherige Brand" @click="dayCarousel?.emblaApi?.scrollPrev()"><UIcon name="i-ph-arrow-left" class="size-4" /></button>
-            <button class="grid size-9 place-items-center rounded-full" style="background: var(--bw-surface-hi); color: var(--bw-ink)" aria-label="Nächste Brand" @click="dayCarousel?.emblaApi?.scrollNext()"><UIcon name="i-ph-arrow-right" class="size-4" /></button>
-          </div>
         </div>
+      </div>
+      <!-- Pfeile mittig unter dem GANZEN Aufmacher — sie blaettern auch
+           Headline und Copy links mit. -->
+      <div class="mt-8 flex justify-center gap-2">
+        <button class="grid size-9 place-items-center rounded-full" style="background: var(--bw-surface-hi); color: var(--bw-muted)" aria-label="Vorherige Brand" @click="dayCarousel?.emblaApi?.scrollPrev()"><UIcon name="i-ph-arrow-left" class="size-4" /></button>
+        <button class="grid size-9 place-items-center rounded-full" style="background: var(--bw-surface-hi); color: var(--bw-ink)" aria-label="Nächste Brand" @click="dayCarousel?.emblaApi?.scrollNext()"><UIcon name="i-ph-arrow-right" class="size-4" /></button>
       </div>
 
       <!-- Filter & Sortierung -->
