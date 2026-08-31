@@ -91,7 +91,7 @@ const userMenu = computed(() => [[
       <span class="grid size-8 flex-none place-items-center rounded-full" style="background: var(--bw-ink); color: var(--bw-paper)">
         <UIcon name="i-ph-fingerprint" class="size-5" />
       </span>
-      <span class="whitespace-nowrap text-[21px]" style="color: var(--bw-ink); font-weight: 400; letter-spacing: -0.01em">Branding Supply</span>
+      <span class="whitespace-nowrap text-[18px]" style="color: var(--bw-ink); font-weight: 400; letter-spacing: -0.01em">Branding Supply</span>
     </template>
 
     <UNavigationMenu
