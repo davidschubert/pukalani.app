@@ -70,21 +70,25 @@ const userMenu = computed(() => [[
     class="sticky top-0 z-40 -mx-6 mb-10 flex flex-wrap items-center justify-between gap-x-6 gap-y-3 px-6 py-4"
     style="background: color-mix(in srgb, var(--bw-paper) 88%, transparent); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px)"
   >
-    <NuxtLink to="/start" class="flex items-center gap-2.5">
-      <span class="grid size-8 flex-none place-items-center rounded-xl" style="background: var(--bw-ink); color: var(--bw-paper)">
-        <UIcon name="i-ph-fingerprint" class="size-4.5" />
-      </span>
-      <span class="text-sm font-semibold tracking-tight">Branding Supply</span>
-    </NuxtLink>
-    <!-- Runde 143 (David): klassische Navigation wie apple.com/openai.com —
-         Geist Sans, reine Textlinks ohne Pill-/Button-Effekte; aktiv = Ink,
-         inaktiv = muted, Hover hebt auf Ink. -->
-    <div class="flex flex-wrap items-center gap-x-7 gap-y-2">
-      <NuxtLink
-        v-for="it in items" :key="it.to" :to="it.to"
-        class="text-sm whitespace-nowrap transition-colors hover:!text-(--bw-ink)"
-        :style="isActive(it) ? 'color: var(--bw-ink)' : 'color: var(--bw-muted)'"
-      >{{ it.label }}</NuxtLink>
+    <!-- Runde 143/165 (David): klassische Navigation, LINKSBUENDIG neben
+         der Wortmarke — Geist Sans, reine Textlinks; aktiv = Ink,
+         inaktiv = muted. Rechts nur die Aktionen. -->
+    <div class="flex flex-wrap items-center gap-x-10 gap-y-2">
+      <NuxtLink to="/start" class="flex items-center gap-2.5">
+        <span class="grid size-8 flex-none place-items-center rounded-xl" style="background: var(--bw-ink); color: var(--bw-paper)">
+          <UIcon name="i-ph-fingerprint" class="size-4.5" />
+        </span>
+        <span class="text-sm font-semibold tracking-tight">Branding Supply</span>
+      </NuxtLink>
+      <div class="flex flex-wrap items-center gap-x-7 gap-y-2">
+        <NuxtLink
+          v-for="it in items" :key="it.to" :to="it.to"
+          class="text-sm whitespace-nowrap transition-colors hover:!text-(--bw-ink)"
+          :style="isActive(it) ? 'color: var(--bw-ink)' : 'color: var(--bw-muted)'"
+        >{{ it.label }}</NuxtLink>
+      </div>
+    </div>
+    <div class="flex flex-wrap items-center gap-1.5">
       <!-- Runde 145 (David): Split-Control — Meine-Brands-Pille und
            Plus-Kreis beruehren sich mit 0px Abstand. -->
       <div class="flex items-center gap-0">
