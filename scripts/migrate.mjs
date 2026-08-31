@@ -43,7 +43,11 @@ const WAVES = ['internal', 'canary', 'stable']
 // Fundament zuerst — admin liest z. B. Tables, die system/comments anlegen.
 // `feedback` steht seit E10 NICHT mehr hier: der Layer besitzt keine Tables
 // mehr, das zentrale Kunden-Feedback liegt im Control Plane (control-032).
-const LAYER_ORDER = ['system', 'comments', 'posts', 'events', 'media', 'billing', 'pages', 'courses', 'tickets', 'runner', 'moderation', 'analytics', 'messages', 'control', 'admin']
+// `brand` steht bei den Produkt-Layern: seine sieben brand_*-Tabellen hängen
+// an keiner anderen (kein communityId, kein Fremdschlüssel in ein anderes
+// Produkt) — es läuft ausschliesslich auf `portfolio`, und die zwei
+// Laufzeit-Flags, die es liest, gehören `system` und laufen davor.
+const LAYER_ORDER = ['system', 'comments', 'posts', 'events', 'media', 'billing', 'pages', 'courses', 'tickets', 'brand', 'runner', 'moderation', 'analytics', 'messages', 'control', 'admin']
 
 function parseArgs(argv) {
   const args = { app: null, envFile: null, layers: [], wave: null, controlEnv: null, keysDir: null }

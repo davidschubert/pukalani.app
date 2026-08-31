@@ -2,13 +2,18 @@ import type { ProductManifest } from '../core/shared/types/manifest'
 
 /**
  * Brand-Wizard (Phase 1 "Fundament") — KI-Markenberater "George".
- * Plan: docs/plans/BRAND-WIZARD-PHASE-1.md. Aktueller Stand: P0b-Clickdummy
- * im .playground (statische Daten); Tabellen/Routen folgen mit P1a/P1b.
+ * Plan: docs/plans/BRAND-WIZARD-PHASE-1.md. Aktueller Stand: P1b — die sieben
+ * brand_*-Tabellen stehen (scripts/migrations/001–007, Schema-Anhang
+ * docs/plans/BRAND-WIZARD-SCHEMA.md); die Routen folgen.
+ *
+ * Die Tabellen laufen NUR auf der `portfolio`-Instanz (Silo) — der Layer
+ * steht deshalb im PORTFOLIO_SOLL von scripts/ops/verify-schema-parity.mjs,
+ * nicht in der instanzweiten Spalten-Parität.
  */
 export default {
   key: 'brand',
   tier: 'optional',
-  hasMigrations: false,
+  hasMigrations: true,
   apiPrefixes: ['/api/brand'],
   title: { en: 'Brand Wizard', de: 'Brand-Wizard' },
   description: {

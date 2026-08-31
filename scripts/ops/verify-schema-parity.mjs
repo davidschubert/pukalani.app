@@ -255,6 +255,8 @@ const CONTROL_SOLL = [
  *   • posts nur `community_posts` + `post_votes` + `poll_votes`
  *   • control nur `entitlements` + `provisioning_jobs`
  * Volle Blöcke, die portfolio teilt: courses, events, tickets, media, moderation.
+ * Dazu `brand` — der EINZIGE Block, den portfolio EXKLUSIV trägt (der
+ * Brand-Wizard läuft nirgends sonst).
  * Neue portfolio-Tabelle ⇒ hier eintragen.
  *
  * NICHT im Soll und daher als WARNUNG erwartet — sechs TOTE Alt-Tabellen, die
@@ -263,8 +265,25 @@ const CONTROL_SOLL = [
  *   sites · workspaces · workspace_invites · workspace_members ·
  *   feature_catalog · feedback
  */
+/**
+ * brand (packages/brand) — der Brand-Wizard. Die sieben Tabellen laufen
+ * AUSSCHLIESSLICH auf `portfolio` und stehen deshalb NUR im PORTFOLIO_SOLL:
+ * sie gehören nicht in die instanzweite Spalten-Parität (die vergleicht nur
+ * system+admin+pages+analytics, s. u.). Schema: docs/plans/BRAND-WIZARD-SCHEMA.md.
+ */
+const BRAND_TABLES = [
+  'brand_profiles',
+  'brand_steps',
+  'brand_messages',
+  'brand_shares',
+  'brand_invites',
+  'brand_access',
+  'brand_events',
+]
+
 const PORTFOLIO_SOLL = [
   ...SYSTEM_TABLES,
+  ...BRAND_TABLES,
   ...ADMIN_TABLES,
   ...PAGES_TABLES,
   ...ANALYTICS_TABLES,
