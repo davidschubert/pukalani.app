@@ -33,8 +33,7 @@ du für die Person; Solo-Fassung durchgehend „du").
 | Dummy-Realität | George Wuffwuff (Chihuahua) trägt den Namen seit Wochen durch alle Ansichten; er funktioniert im UI, im Chat und im Team-Kontext (About-Seite). |
 | White-Label | Name lebt als `pukalani.brand.persona` (app.config) + i18n-Parameter `{persona}` — NIE hartkodiert in Texten. Der spätere White-Label-Tier tauscht ein Config-Feld, keine Übersetzungen. |
 
-→ **Gate ②: David segnet „George" ab** (oder benennt um — Kosten dann:
-ein Config-Wert, Team-Seite, Dummy-Texte).
+→ **Gate ②: ABGESEGNET (David, 2026-08-30) — George bleibt.**
 
 ### 1.2 System-Prompt (Kern, sprachneutral formuliert — ausgespielt in der Wizard-Sprache)
 
@@ -725,9 +724,9 @@ Beispielantworten (§1) · Paarvergleichs-Paare + Visual-Spez D/B2 (§12)
 · Persona-Namens-Prüfung (§1.1) · BIxD-Abgleich (§14) ·
 Abdeckungs-Matrix 287 (§15) · Interaktionsbilanz (§16).
 
-**Bei David (die drei Gates):** ① R1–R4 + Provokations-Wortlaute
-gegenlesen · ② „George" absegnen · ③ Bilanz-Befund zur Kenntnis
-(45-min-Kommunikation statt 40-Eingaben).
+**Bei David:** ① R1–R4 + Provokations-Wortlaute gegenlesen · ③
+Bilanz-Befund zur Kenntnis (45-min-Kommunikation statt 40-Eingaben).
+② „George" ist ABGESEGNET (2026-08-30).
 
 **Nächstes Paket danach:** P0b ist durch den Klick-Dummy substanziell
 vorweggenommen (Werkstatt, Zustände, Modal, Rail — abgenommen in der
