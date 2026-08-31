@@ -6,7 +6,6 @@ const nav = [
   { label: 'Discover Brands', to: '/brand/demo/discover' },
   { label: 'Brand Insights', to: '/brand/demo/journal' },
   { label: 'About', to: '/team' },
-  { label: 'Meine Brands', to: '/' },
 ]
 const legal = ['Impressum', 'Datenschutz', 'AGB']
 </script>
