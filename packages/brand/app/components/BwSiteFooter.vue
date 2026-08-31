@@ -27,6 +27,5 @@ const legal = ['Impressum', 'Datenschutz', 'AGB']
         <span v-for="l in legal" :key="l" class="text-sm whitespace-nowrap" style="color: var(--bw-muted)">{{ l }}</span>
       </div>
     </div>
-    <p class="mt-6 text-sm" style="color: var(--bw-muted)">© 2026 Branding Supply · Marken sind keine Vorlagen — aber der Weg dorthin steht allen offen.</p>
   </footer>
 </template>
