@@ -14,6 +14,8 @@ const activeArchetype = ref<string | null>(null)
  * auftreten. Facetten-Suche kombiniert beide. */
 const styles = ['Minimal', 'Editorial', 'Verspielt', 'Organisch', 'Luxus']
 const activeStyle = ref<string | null>(null)
+const positions = ['Premium', 'Mass Market', 'Accessible Luxury', 'Disruptiv']
+const activePosition = ref<string | null>(null)
 
 const brands = [
   { name: 'Kailua Coffee Co.', meta: 'Café · Neue Marke', archetype: 'Der Weise', score: 87, votes: 128, a: '#e8d3b8', b: '#b98a5e', c: '#4a3123' },
@@ -108,6 +110,14 @@ const creators = [
           :class="activeStyle === s ? 'bw-select-card--on' : ''"
           @click="activeStyle = activeStyle === s ? null : s"
         >{{ s }}</button>
+        <span class="mx-2 h-5 w-px" style="background: var(--bw-line-strong)" />
+        <span class="bw-label" style="color: var(--bw-muted)">Positionierung</span>
+        <button
+          v-for="p in positions" :key="p"
+          class="bw-select-card rounded-full px-4 py-2 text-sm"
+          :class="activePosition === p ? 'bw-select-card--on' : ''"
+          @click="activePosition = activePosition === p ? null : p"
+        >{{ p }}</button>
         <span class="ml-auto" />
         <USelect v-model="activeSort" :items="sorts" color="neutral" variant="ghost" class="w-48 justify-between rounded-full text-sm focus-visible:outline-none" :ui="{ base: 'px-4 py-2' }" style="background: var(--bw-surface-hi)" />
       </div>
