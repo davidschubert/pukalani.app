@@ -200,6 +200,17 @@
         "stopped": "Stopped. Your text is unchanged.",
         "failed": "That did not work just now. Try again in a moment.",
         "dismiss": "Got it"
+      },
+      "versions": {
+        "open": "Earlier versions",
+        "title": "Earlier versions",
+        "description": "Pick a version — it lands in the editor and is saved like any other input. Whatever is in there now will be replaced.",
+        "use": "Into the editor",
+        "first": "First version",
+        "dropped": "Text no longer stored — only its origin remains.",
+        "empty": "There is no earlier version for this field yet.",
+        "loading": "Fetching versions …",
+        "close": "Close"
       }
     },
     "brands": {

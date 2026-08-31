@@ -200,6 +200,17 @@
         "stopped": "Abgebrochen. Dein bisheriger Text ist unverändert.",
         "failed": "Das hat gerade nicht geklappt. Versuch es gleich nochmal.",
         "dismiss": "Verstanden"
+      },
+      "versions": {
+        "open": "Frühere Fassungen",
+        "title": "Frühere Fassungen",
+        "description": "Wähl eine Fassung aus — sie landet im Editor, gespeichert wird sie wie jede andere Eingabe. Was jetzt drinsteht, geht dabei verloren.",
+        "use": "In den Editor",
+        "first": "Erste Fassung",
+        "dropped": "Text nicht mehr gespeichert — nur die Herkunft ist geblieben.",
+        "empty": "Für dieses Feld gibt es noch keine frühere Fassung.",
+        "loading": "Fassungen werden geholt …",
+        "close": "Schließen"
       }
     },
     "brands": {

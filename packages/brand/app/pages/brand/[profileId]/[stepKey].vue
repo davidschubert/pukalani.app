@@ -16,6 +16,7 @@ import {
   slotsForStep,
 } from '../../../../shared/slotRegistry'
 import { brandSlotDisplayValue } from '../../../../shared/brandAutosaveDiff'
+import type { BrandGenerationVersionsResponse } from '../../../../shared/types/brand'
 import { useBrandWorkspaceStore } from '../../../stores/brandWorkspace'
 import { useBrandAutosave } from '../../../composables/useBrandAutosave'
 import { useBrandGeneration } from '../../../composables/useBrandGeneration'
@@ -199,6 +200,61 @@ async function generateSlot(slot: BrandSlot): Promise<void> {
  * Stand bleibt voll bearbeitbar (§9b.5). Sie bekommen deshalb einen ruhigen
  * Hinweis an Ort und Stelle — keinen Toast, keine Farbe, keine Warnung.
  */
+// ── Frühere Fassungen ─────────────────────────────────────────────────────
+
+/**
+ * DIE WIEDERHERSTELLUNG SCHREIBT IN DEN EDITOR, NICHT AUF DEN SERVER.
+ *
+ * Eine gewählte Fassung wird eine ganz gewöhnliche lokale Eingabe und geht über
+ * den NORMALEN Autosave — mit derselben `revision`-Rechnung wie jeder Tastendruck.
+ * Ein eigener Schreibweg hätte eine zweite Wahrheit über `revision` eingeführt,
+ * und der 409-Konfliktdialog aus P1c hätte einen Fall mehr zu erklären, den er
+ * nicht ausgelöst hat. Er bekommt durch diese Funktion deshalb NICHTS Neues:
+ * kollidiert das Zurückholen mit einer Änderung aus einem anderen Tab, ist das
+ * exakt der Konflikt, den er schon kennt.
+ */
+const versionsSlot = ref<BrandSlot | null>(null)
+const versions = ref<BrandGenerationVersionsResponse | null>(null)
+const versionsLoading = ref(false)
+
+const versionsOpen = computed({
+  get: () => versionsSlot.value !== null,
+  set: (value: boolean) => { if (!value) versionsSlot.value = null },
+})
+
+/** Es gibt etwas zu zeigen, sobald für den Slot je ein Text gespeichert war. */
+function hasHistory(slot: BrandSlot): boolean {
+  return Boolean(store.serverSlots[slot.id]?.firstDraft)
+}
+
+async function openVersions(slot: BrandSlot): Promise<void> {
+  versionsSlot.value = slot
+  versions.value = null
+  versionsLoading.value = true
+  try {
+    versions.value = await $fetch<BrandGenerationVersionsResponse>(
+      `/api/brand/profiles/${profileId.value}/steps/${routeStepKey.value}/generations`,
+      { query: { slotId: slot.id } },
+    )
+  }
+  catch {
+    // Eine unlesbare Historie ist kein Grund, die Werkstatt zu stören: das
+    // Fenster zeigt dann seinen Leerzustand.
+    versions.value = null
+  }
+  finally {
+    versionsLoading.value = false
+  }
+}
+
+function useVersion(text: string): void {
+  const slot = versionsSlot.value
+  if (!slot) return
+  store.setSlotValue(slot.id, text)
+  autosave.schedule()
+  versionsSlot.value = null
+}
+
 const generationNotice = computed<string | null>(() => {
   const code = generation.failureCode.value
   if (!code) return null
@@ -480,6 +536,13 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
               :label="store.slotValue(slot.id) ? t('brand.workspace.generate.again') : t('brand.workspace.generate.start')"
               @click="generateSlot(slot)"
             />
+            <UButton
+              v-if="hasHistory(slot)"
+              size="sm" variant="ghost" color="neutral" class="rounded-full"
+              icon="i-ph-clock-counter-clockwise"
+              :label="t('brand.workspace.versions.open')"
+              @click="openVersions(slot)"
+            />
           </div>
 
           <div v-if="slot.editor !== 'none' && slot.type !== 'special'" class="mt-2 flex justify-end">
@@ -528,6 +591,65 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
       </BwGeorge>
     </template>
   </BwWorkspace>
+
+  <!-- Frühere Fassungen: Auswahl schreibt in den EDITOR, gespeichert wird über
+       den normalen Autosave (kein eigener Schreibweg — s. `useVersion`). -->
+  <UModal v-model:open="versionsOpen">
+    <template #content>
+      <div class="bw-root max-h-[85vh] overflow-y-auto p-8" style="background: var(--bw-surface-hi)">
+        <p class="bw-label uppercase tracking-widest" style="color: var(--bw-muted)">
+          {{ versionsSlot ? slotLabel(versionsSlot) : '' }}
+        </p>
+        <h2 class="mt-1 text-[24px] font-extralight leading-tight tracking-tight">{{ t('brand.workspace.versions.title') }}</h2>
+        <p class="mt-3 text-sm leading-relaxed" style="color: var(--bw-ink-soft)">{{ t('brand.workspace.versions.description') }}</p>
+
+        <p v-if="versionsLoading" class="bw-pending mt-5">{{ t('brand.workspace.versions.loading') }}</p>
+
+        <template v-else>
+          <div v-for="item in versions?.items ?? []" :key="item.generationId" class="mt-5">
+            <div class="flex flex-wrap items-baseline justify-between gap-2">
+              <p class="bw-label" style="color: var(--bw-muted)">
+                {{ new Date(item.createdAt).toLocaleString(locale) }} · {{ item.model }} · {{ item.promptVersion }}
+              </p>
+              <UButton
+                size="xs" variant="outline" color="neutral" class="rounded-full"
+                :disabled="!item.draft"
+                :label="t('brand.workspace.versions.use')"
+                @click="useVersion(item.draft ?? '')"
+              />
+            </div>
+            <p v-if="item.draft" class="mt-1 whitespace-pre-wrap rounded-xl p-3 text-sm" style="background: var(--bw-surface)">{{ item.draft }}</p>
+            <!-- Ein Eintrag ohne Text ist dem Spalten-Deckel gewichen; seine
+                 Herkunft bleibt sichtbar, damit die Lücke erklärt ist. -->
+            <p v-else class="bw-pending mt-1">{{ t('brand.workspace.versions.dropped') }}</p>
+          </div>
+
+          <div v-if="versions?.firstDraft" class="mt-6 border-t pt-4" style="border-color: var(--bw-line)">
+            <div class="flex flex-wrap items-baseline justify-between gap-2">
+              <p class="bw-label" style="color: var(--bw-muted)">{{ t('brand.workspace.versions.first') }}</p>
+              <UButton
+                size="xs" variant="outline" color="neutral" class="rounded-full"
+                :label="t('brand.workspace.versions.use')"
+                @click="useVersion(versions.firstDraft ?? '')"
+              />
+            </div>
+            <p class="mt-1 whitespace-pre-wrap rounded-xl p-3 text-sm" style="background: var(--bw-surface)">{{ versions.firstDraft }}</p>
+          </div>
+
+          <p v-if="!versions?.items.length && !versions?.firstDraft" class="bw-pending mt-5">
+            {{ t('brand.workspace.versions.empty') }}
+          </p>
+        </template>
+
+        <div class="mt-6 flex justify-end">
+          <UButton
+            variant="ghost" color="neutral" class="rounded-full"
+            :label="t('brand.workspace.versions.close')" @click="versionsSlot = null"
+          />
+        </div>
+      </div>
+    </template>
+  </UModal>
 
   <!-- 409: BEIDE Fassungen, nichts wird automatisch überschrieben (§3e). -->
   <UModal v-model:open="conflictOpen">

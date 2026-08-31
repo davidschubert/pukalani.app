@@ -132,6 +132,36 @@ describe('brand i18n-Katalog', () => {
     expect(gaps).toEqual([])
   })
 
+  it('trägt die Beschriftung der Generierung und der Fassungs-Wiederherstellung', () => {
+    // Diese Schlüssel rendert die Werkstatt an Slots und in zwei Fenstern. Sie
+    // stehen hier NAMENTLICH, weil sie an keiner Registry hängen: fiele einer
+    // weg, stünde er wörtlich in der Oberfläche, und kein anderer Test sähe es.
+    const generation = [
+      'brand.workspace.draftBadge',
+      'brand.workspace.generate.start',
+      'brand.workspace.generate.again',
+      'brand.workspace.generate.stop',
+      'brand.workspace.generate.hintPlaceholder',
+      'brand.workspace.generate.hintLabel',
+      'brand.workspace.generate.aiDisabled',
+      'brand.workspace.generate.noGenerator',
+      'brand.workspace.generate.busy',
+      'brand.workspace.generate.stopped',
+      'brand.workspace.generate.failed',
+      'brand.workspace.generate.dismiss',
+      'brand.workspace.versions.open',
+      'brand.workspace.versions.title',
+      'brand.workspace.versions.description',
+      'brand.workspace.versions.use',
+      'brand.workspace.versions.first',
+      'brand.workspace.versions.dropped',
+      'brand.workspace.versions.empty',
+      'brand.workspace.versions.loading',
+      'brand.workspace.versions.close',
+    ]
+    expect(generation.filter(key => missingIn(key).length)).toEqual([])
+  })
+
   it('GEGENPROBE: ein erfundener Slot fällt durch', () => {
     const invented: BrandSlot = { ...activeSlots[0]!, id: 'z.erfunden', questionKey: 'brand.q.z.erfunden' }
     expect(keysFor(invented).every(key => missingIn(key).length === 0)).toBe(false)
