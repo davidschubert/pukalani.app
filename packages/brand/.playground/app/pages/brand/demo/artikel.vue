@@ -179,7 +179,7 @@ const more = [
                 <p class="bw-label" style="color: var(--bw-accent)">Verifiziert · Confidence 0.91</p>
               </div>
               <p class="mt-3 font-medium leading-snug">Radikale Identitätswechsel tragen das höchste Wiedererkennungs-Risiko dort, wo bereits starke eigenständige Markenzeichen existieren.</p>
-              <p class="bw-label mt-3" style="color: var(--bw-muted)">3 Quellen · 14 Brand-Fälle · fließt in das Prüfkriterium „Eigenständigkeit" ein</p>
+              <p class="bw-label mt-3" style="color: var(--bw-muted)">3 Quellen · 14 Marken-Fälle · fließt in das Prüfkriterium „Eigenständigkeit" ein</p>
             </div>
           </section>
 

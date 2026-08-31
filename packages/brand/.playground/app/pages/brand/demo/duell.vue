@@ -97,7 +97,7 @@ const bWins = dims.filter(d => d.b > d.a).length
       </div>
 
       <div class="bw-card mt-4 flex flex-wrap items-center justify-between gap-4 p-8">
-        <p class="text-sm" style="color: var(--bw-ink-soft)">Wie schlägt sich deine Marke im Duell? Jede Brand hier wird mit denselben Kriterien bewertet.</p>
+        <p class="text-sm" style="color: var(--bw-ink-soft)">Wie schlägt sich deine Marke im Duell? Jede Marke hier wird mit denselben Kriterien bewertet.</p>
         <UButton icon="i-ph-plus" label="Starte dein Branding" class="rounded-full" />
       </div>
 

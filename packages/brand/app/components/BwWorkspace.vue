@@ -70,7 +70,7 @@ const zoneItems = [
              Speichert… / Offline — Eingabe bleibt erhalten / Konflikt. -->
       </div>
       <div class="ml-auto flex items-center gap-4">
-        <span class="bw-label" style="color: var(--bw-muted)">Inhaltssprache: {{ contentLocale.toUpperCase() }}</span>
+        <span class="bw-label whitespace-nowrap" style="color: var(--bw-muted)">Inhaltssprache: {{ contentLocale.toUpperCase() }}</span>
       </div>
     </header>
 

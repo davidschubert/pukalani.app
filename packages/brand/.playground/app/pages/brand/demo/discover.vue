@@ -54,17 +54,17 @@ const creators = [
         <p class="bw-label uppercase tracking-widest" style="color: var(--bw-muted)">Discover Brands</p>
         <h1 class="mt-1 text-4xl leading-tight">Marken, gebaut mit George</h1>
       </div>
-      <p class="bw-label text-center" style="color: var(--bw-muted)">Jede Brand hier ist freiwillig öffentlich — mit ihrer ganzen Anatomie.</p>
+      <p class="bw-label text-center" style="color: var(--bw-muted)">Jedes Branding hier ist freiwillig öffentlich — mit seiner ganzen Anatomie.</p>
 
       <!-- Brand of the Day: Split-Aufmacher, Karte mit Stapel dahinter -->
-      <div class="mt-16 grid items-center gap-12 lg:grid-cols-2">
-        <div>
+      <div class="mt-16 grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
+        <div class="min-w-0">
           <p class="bw-label uppercase tracking-widest" style="color: var(--bw-muted)">Brand of the Day</p>
           <h2 class="mt-4 max-w-lg text-balance text-4xl font-extralight leading-tight tracking-tight sm:text-5xl">{{ day.quote }}</h2>
           <p class="mt-5 max-w-md text-lg leading-relaxed" style="color: var(--bw-ink-soft)">{{ day.line }}</p>
           <UButton to="/brand/demo/anatomie" label="Anatomie ansehen" trailing-icon="i-ph-arrow-right" class="mt-8 rounded-full" />
         </div>
-        <div>
+        <div class="min-w-0">
           <!-- Runde 176 (David): Ueberblenden statt Schieben (Embla-Fade). -->
           <UCarousel
             ref="dayCarousel" v-slot="{ item }" :items="days" loop fade

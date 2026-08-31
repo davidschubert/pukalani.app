@@ -2,6 +2,18 @@
 import type { BwMessage } from '../../../../../app/components/BwGeorge.vue'
 import { demoRail } from '../../../utils/demoRail'
 
+/* Audit-Befund B5: diese Seite zeigt Schubert UX Studio bei „Archetyp &
+ * Stimme" — die geteilte demoRail markiert aber Kailuas Stand (Werte
+ * aktiv). Abgeleiteter Stand statt zweiter Datensatz. */
+const schubertRail = demoRail.map(layer => layer.id === 'foundation' && layer.steps
+  ? {
+      ...layer,
+      steps: layer.steps.map(step => step.id === 'values'
+        ? { ...step, state: 'done' as const }
+        : step.id === 'archetype' ? { ...step, state: 'active' as const } : step),
+    }
+  : layer)
+
 /** Clickdummy Baustein D — Paarvergleich (Interaktionstyp Bild-Karten). */
 const round = ref(0)
 const pairs = [
@@ -29,7 +41,7 @@ function pick() {
     </template>
 
     <template #rail>
-      <BwProgressRail :layers="demoRail" />
+      <BwProgressRail :layers="schubertRail" />
     </template>
 
     <template #default>

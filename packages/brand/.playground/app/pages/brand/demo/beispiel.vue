@@ -201,7 +201,7 @@ const fakten = [
       </div>
 
       <div class="bw-card mt-8 flex flex-wrap items-center justify-between gap-4 p-8">
-        <p class="text-sm" style="color: var(--bw-ink-soft)">So sieht eine fertige Brand aus — deine beginnt mit einem Gespräch.</p>
+        <p class="text-sm" style="color: var(--bw-ink-soft)">So sieht ein fertiges Branding aus — deins beginnt mit einem Gespräch.</p>
         <UButton icon="i-ph-plus" label="Starte dein Branding" class="rounded-full" />
       </div>
       </div>
