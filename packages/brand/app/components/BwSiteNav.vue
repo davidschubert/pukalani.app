@@ -93,7 +93,7 @@ const userMenu = computed(() => [[
       </NuxtLink>
       <UNavigationMenu
         :items="menuItems" variant="link" color="neutral"
-        :ui="{ link: 'text-sm text-(--bw-muted) data-active:text-(--bw-ink) hover:text-(--bw-ink)', viewport: 'bw-root', childLinkDescription: 'text-(--bw-muted)' }"
+        :ui="{ link: 'text-sm text-(--bw-muted) data-active:text-(--bw-ink) hover:text-(--bw-ink)', viewport: 'bw-root', childList: 'grid-cols-1', childLinkDescription: 'text-(--bw-muted)' }"
       />
     </div>
     <div class="flex flex-wrap items-center gap-1.5">
