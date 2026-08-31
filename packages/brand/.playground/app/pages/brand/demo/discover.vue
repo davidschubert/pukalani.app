@@ -85,8 +85,8 @@ const creators = [
       <!-- Pfeile mittig unter dem GANZEN Aufmacher — sie blaettern auch
            Headline und Copy links mit. -->
       <div class="mt-8 flex justify-center gap-2">
-        <button class="grid size-9 place-items-center rounded-full" style="background: var(--bw-surface-hi); color: var(--bw-muted)" aria-label="Vorherige Brand" @click="dayCarousel?.emblaApi?.scrollPrev()"><UIcon name="i-ph-arrow-left" class="size-4" /></button>
-        <button class="grid size-9 place-items-center rounded-full" style="background: var(--bw-surface-hi); color: var(--bw-ink)" aria-label="Nächste Brand" @click="dayCarousel?.emblaApi?.scrollNext()"><UIcon name="i-ph-arrow-right" class="size-4" /></button>
+        <button class="grid size-9 place-items-center rounded-full" style="background: var(--bw-surface-hi); color: var(--bw-muted)" aria-label="Vorheriges Branding" @click="dayCarousel?.emblaApi?.scrollPrev()"><UIcon name="i-ph-arrow-left" class="size-4" /></button>
+        <button class="grid size-9 place-items-center rounded-full" style="background: var(--bw-surface-hi); color: var(--bw-ink)" aria-label="Nächstes Branding" @click="dayCarousel?.emblaApi?.scrollNext()"><UIcon name="i-ph-arrow-right" class="size-4" /></button>
       </div>
 
       <!-- Filter & Sortierung -->

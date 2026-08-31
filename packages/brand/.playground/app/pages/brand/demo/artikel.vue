@@ -97,7 +97,7 @@ const more = [
         <p class="bw-label" style="color: var(--bw-muted)">29. August 2026 · Rebranding · 8 Min Lesezeit</p>
         <h1 class="mt-5 text-balance text-4xl font-extralight leading-tight tracking-tight sm:text-5xl">Warum Luxusmarken ihre Serifen aufgeben</h1>
         <div class="mt-8 flex flex-wrap items-center justify-center gap-2">
-          <UButton label="Starte deine Brand" icon="i-ph-plus" class="rounded-full" />
+          <UButton label="Starte dein Branding" icon="i-ph-plus" class="rounded-full" />
           <UButton to="/brand/demo/journal" label="Alle Artikel" color="neutral" variant="ghost" class="rounded-full" style="background: var(--bw-surface)" />
         </div>
       </div>
@@ -217,8 +217,8 @@ const more = [
         title="Wie eigenständig ist deine Marke?"
         description="Finde es heraus — mit denselben 40 Prüfkriterien wie in diesem Artikel. George führt dich durch, Entscheidung für Entscheidung."
         :links="[
-          { label: 'Starte deine Brand', icon: 'i-ph-plus', color: 'neutral' },
-          { label: 'Beispiel-Brand ansehen', to: '/brand/demo/beispiel', color: 'neutral', variant: 'ghost' },
+          { label: 'Starte dein Branding', icon: 'i-ph-plus', color: 'neutral' },
+          { label: 'Beispiel-Branding ansehen', to: '/brand/demo/beispiel', color: 'neutral', variant: 'ghost' },
         ]"
         class="bw-card mx-auto mt-20 max-w-5xl"
         :ui="{ title: 'text-3xl font-medium tracking-tight sm:text-4xl', description: 'text-base', container: 'py-14 sm:py-16' }"

@@ -112,7 +112,7 @@ const team = [
 
       <div class="bw-card mt-16 flex flex-wrap items-center justify-between gap-4 p-8">
         <p class="text-sm" style="color: var(--bw-ink-soft)">Das Team steht bereit — die erste Frage stellt George.</p>
-        <UButton label="Starte deine Brand" class="rounded-full" />
+        <UButton label="Starte dein Branding" class="rounded-full" />
       </div>
 
       <BwSiteFooter />

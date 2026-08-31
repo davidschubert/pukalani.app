@@ -10,7 +10,7 @@ const newBrandOpen = ref(false)
       <div>
       <div class="mb-8 text-center">
         <h1 class="text-2xl font-semibold">Brandings</h1>
-        <p class="mt-1 text-sm" style="color: var(--bw-muted)">Jede Brand ist ein eigener Wizard-Lauf — pausiere jederzeit, dein Stand bleibt gespeichert.</p>
+        <p class="mt-1 text-sm" style="color: var(--bw-muted)">Jedes Branding ist ein eigener Wizard-Lauf — pausiere jederzeit, dein Stand bleibt gespeichert.</p>
       </div>
       <div class="grid gap-x-6 gap-y-20 @sm:grid-cols-2 @md:grid-cols-4">
         <NuxtLink to="/brand/demo/werte" class="block">
@@ -37,18 +37,18 @@ const newBrandOpen = ref(false)
           <p class="absolute inset-0 grid place-items-center p-4 text-center text-base font-extralight leading-snug tracking-tight" style="color: #f7f2ea; text-shadow: 0 1px 12px rgb(20 20 20 / 0.3)">Kailua Coffee Co.</p>
         </div>
         <div class="min-w-0">
-          <p class="bw-label" style="color: var(--bw-muted)">Beispiel-Brand · mit George gebaut</p>
+          <p class="bw-label" style="color: var(--bw-muted)">Beispiel-Branding · mit George gebaut</p>
           <h2 class="mt-2 text-2xl font-medium tracking-tight">So sieht fertig aus: Kailua Coffee Co.</h2>
           <p class="mt-3 max-w-2xl text-sm leading-relaxed" style="color: var(--bw-ink-soft)">Eine vollständige Referenz durch alle sechs Schichten — Purpose, Werte und Stimme, Tagline und Namens-Prüfung, Farbwelt und Typografie, Book & Kit, Content-Kompass und aktives Monitoring. Brand Score 92, jede Entscheidung mit Begründung.</p>
-          <p class="bw-label mt-5 inline-flex items-center gap-1.5" style="color: var(--bw-muted)">Beispiel-Brand ansehen <UIcon name="i-ph-arrow-right" class="size-3.5" /></p>
+          <p class="bw-label mt-5 inline-flex items-center gap-1.5" style="color: var(--bw-muted)">Beispiel-Branding ansehen <UIcon name="i-ph-arrow-right" class="size-3.5" /></p>
         </div>
       </NuxtLink>
 
       <div class="bw-rounded-card flex flex-col items-center justify-center border border-dashed p-10 text-center" style="border-color: var(--bw-line-strong)">
         <BwIllustration variant="journey" class="mx-auto h-16 w-auto" style="color: var(--bw-ink-soft)" />
         <p class="mt-4 font-medium">So sieht der Leerzustand aus:</p>
-        <p class="mt-1 text-sm" style="color: var(--bw-muted)">Lass uns deine erste Brand aufbauen. Du kannst jederzeit pausieren — dein Stand bleibt gespeichert.</p>
-        <UButton class="mt-4" icon="i-ph-plus" label="Erste Brand starten" variant="outline" @click="newBrandOpen = true" />
+        <p class="mt-1 text-sm" style="color: var(--bw-muted)">Lass uns dein erstes Branding aufbauen. Du kannst jederzeit pausieren — dein Stand bleibt gespeichert.</p>
+        <UButton class="mt-4" icon="i-ph-plus" label="Erstes Branding starten" variant="outline" @click="newBrandOpen = true" />
       </div>
       </div>
       </div>

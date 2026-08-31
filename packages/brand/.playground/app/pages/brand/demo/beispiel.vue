@@ -45,7 +45,7 @@ const fakten = [
     <BwSiteNav />
     <div class="mx-auto max-w-7xl">
       <div class="mx-auto max-w-4xl">
-      <p class="bw-label" style="color: var(--bw-muted)">Beispiel-Brand · so sieht ein fertiges Ergebnis aus</p>
+      <p class="bw-label" style="color: var(--bw-muted)">Beispiel-Branding · so sieht ein fertiges Ergebnis aus</p>
 
       <!-- Hero -->
       <div class="bw-grain-hero mt-4 p-10" style="--hero-a: #e8d3b8; --hero-b: #b98a5e; --hero-c: #4a3123">
@@ -202,7 +202,7 @@ const fakten = [
 
       <div class="bw-card mt-8 flex flex-wrap items-center justify-between gap-4 p-8">
         <p class="text-sm" style="color: var(--bw-ink-soft)">So sieht eine fertige Brand aus — deine beginnt mit einem Gespräch.</p>
-        <UButton icon="i-ph-plus" label="Starte deine Brand" class="rounded-full" />
+        <UButton icon="i-ph-plus" label="Starte dein Branding" class="rounded-full" />
       </div>
       </div>
       <BwSiteFooter />

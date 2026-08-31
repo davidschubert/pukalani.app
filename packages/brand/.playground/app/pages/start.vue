@@ -13,7 +13,7 @@ const prozess = [
 const faehigkeiten = [
   { icon: 'i-ph-chats-circle', name: 'Geführtes Gespräch', line: 'Kein Formular-Marathon: George fragt, ihr entscheidet — pausiert jederzeit, der Stand bleibt.' },
   { icon: 'i-ph-gauge', name: 'Brand Score', line: '40 Prüfkriterien in 8 Dimensionen — reproduzierbar gerechnet, nie gefühlt.' },
-  { icon: 'i-ph-sparkle', name: 'Beispiel-Brand', line: 'Kailua Coffee Co. zeigt durch alle sechs Schichten, wie fertig aussieht.' },
+  { icon: 'i-ph-sparkle', name: 'Beispiel-Branding', line: 'Kailua Coffee Co. zeigt durch alle sechs Schichten, wie fertig aussieht.' },
   { icon: 'i-ph-compass', name: 'Discover Brands', line: 'Echte Marken, freiwillig öffentlich — mit ihrer ganzen Anatomie.' },
   { icon: 'i-ph-broadcast', name: 'Brand Monitoring', line: 'Außenbild-Check und KI-Antwort-Radar — eure Marke bleibt deckungsgleich.' },
   { icon: 'i-ph-brain', name: 'George erinnert sich', line: 'Jede Entscheidung baut auf den vorherigen auf — über Sitzungen hinweg.' },
@@ -193,7 +193,7 @@ const faehigkeiten = [
         <div class="min-w-0">
           <p class="bw-label" style="color: var(--bw-muted)">Brand-Check · für den Marken-Relaunch · kostenlos</p>
           <h2 class="mt-3 max-w-lg text-balance text-3xl font-extralight leading-snug tracking-tight">Wie stark ist eure Marke — von außen betrachtet?</h2>
-          <p class="mt-4 max-w-lg text-sm leading-relaxed" style="color: var(--bw-ink-soft)">Gebt eure Website an: George analysiert euren Außenauftritt mit denselben 40 Prüfkriterien wie jede Brand hier — und liefert euren Brand Score mit den drei wichtigsten Befunden. Der ehrlichste Einstieg in einen Marken-Relaunch.</p>
+          <p class="mt-4 max-w-lg text-sm leading-relaxed" style="color: var(--bw-ink-soft)">Gebt eure Website an: George analysiert euren Außenauftritt mit denselben 40 Prüfkriterien wie jedes Branding hier — und liefert euren Brand Score mit den drei wichtigsten Befunden. Der ehrlichste Einstieg in einen Marken-Relaunch.</p>
         </div>
         <div>
           <div class="flex items-center gap-2 rounded-full p-1.5 pl-5" style="background: var(--bw-surface-hi)">
@@ -210,10 +210,10 @@ const faehigkeiten = [
           <p class="absolute inset-0 grid place-items-center p-4 text-center text-base font-extralight leading-snug tracking-tight" style="color: #f7f2ea; text-shadow: 0 1px 12px rgb(20 20 20 / 0.3)">Kailua Coffee Co.</p>
         </div>
         <div class="min-w-0">
-          <p class="bw-label" style="color: var(--bw-muted)">Der Beweis · Beispiel-Brand</p>
+          <p class="bw-label" style="color: var(--bw-muted)">Der Beweis · Beispiel-Branding</p>
           <h2 class="mt-2 text-2xl font-medium tracking-tight">So sieht fertig aus: Kailua Coffee Co.</h2>
           <p class="mt-3 max-w-2xl text-sm leading-relaxed" style="color: var(--bw-ink-soft)">Alle sechs Schichten ausgearbeitet, Brand Score 92, jede Entscheidung mit Begründung — schaut es euch an, bevor ihr startet.</p>
-          <p class="bw-label mt-4 inline-flex items-center gap-1.5" style="color: var(--bw-muted)">Beispiel-Brand ansehen <UIcon name="i-ph-arrow-right" class="size-3.5" /></p>
+          <p class="bw-label mt-4 inline-flex items-center gap-1.5" style="color: var(--bw-muted)">Beispiel-Branding ansehen <UIcon name="i-ph-arrow-right" class="size-3.5" /></p>
         </div>
       </NuxtLink>
 
@@ -222,7 +222,7 @@ const faehigkeiten = [
         title="Die erste Entscheidung ist die leichteste."
         description="Konto anlegen, Arbeitstitel wählen — George übernimmt. Pausiert jederzeit, euer Stand bleibt gespeichert."
         :links="[
-          { label: 'Starte deine Brand — kostenlos', icon: 'i-ph-plus', color: 'neutral' },
+          { label: 'Starte dein Branding — kostenlos', icon: 'i-ph-plus', color: 'neutral' },
           { label: 'Discover Brands ansehen', to: '/brand/demo/discover', color: 'neutral', variant: 'ghost' },
         ]"
         class="bw-card mt-24"

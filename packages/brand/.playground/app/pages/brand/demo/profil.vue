@@ -137,7 +137,7 @@ const competitors = [
             </div>
           </div>
           <UButton to="/brand/demo/duell" label="Duell ansehen: Nike vs. Adidas" size="sm" color="neutral" variant="ghost" class="mt-5 rounded-full" style="background: var(--bw-surface)" trailing-icon="i-ph-arrow-right" />
-          <UButton label="Vergleiche deine Brand mit Nike" size="sm" color="neutral" variant="ghost" class="mt-2 rounded-full" style="background: var(--bw-surface)" trailing-icon="i-ph-arrow-right" />
+          <UButton label="Vergleiche dein Branding mit Nike" size="sm" color="neutral" variant="ghost" class="mt-2 rounded-full" style="background: var(--bw-surface)" trailing-icon="i-ph-arrow-right" />
         </div>
       </div>
 
