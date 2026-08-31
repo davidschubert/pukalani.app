@@ -86,10 +86,12 @@ const userMenu = computed(() => [[
     style="background: color-mix(in srgb, var(--bw-paper) 88%, transparent); border-color: var(--bw-line)"
   >
     <template #title>
-      <span class="grid size-8 flex-none place-items-center rounded-xl" style="background: var(--bw-ink); color: var(--bw-paper)">
-        <UIcon name="i-ph-fingerprint" class="size-4.5" />
+      <!-- Runde 181 (David, Referenz PLATSUPPLY): Kreis-Marke + Versal-
+           Wortmarke, fette variable Geist mit weitem Tracking. -->
+      <span class="grid size-8 flex-none place-items-center rounded-full" style="background: var(--bw-ink); color: var(--bw-paper)">
+        <UIcon name="i-ph-fingerprint" class="size-5" />
       </span>
-      <span class="text-sm font-semibold tracking-tight whitespace-nowrap" style="color: var(--bw-ink)">Branding Supply</span>
+      <span class="whitespace-nowrap text-[15px] uppercase" style="color: var(--bw-ink); font-weight: 800; letter-spacing: 0.12em">Branding Supply</span>
     </template>
 
     <UNavigationMenu
