@@ -2,10 +2,10 @@
 /** Site-Footer der öffentlichen Seiten (Runde 136) — gleiche
  *  Reihenfolge wie die Hauptnavigation: öffentlich → persönlich. */
 const nav = [
-  { label: 'Our Products', to: '/products' },
+  { label: 'Products', to: '/products' },
   { label: 'Discover Brands', to: '/brand/demo/discover' },
   { label: 'Brand Insights', to: '/brand/demo/journal' },
-  { label: 'About us', to: '/team' },
+  { label: 'About', to: '/team' },
   { label: 'Meine Brands', to: '/' },
 ]
 const legal = ['Impressum', 'Datenschutz', 'AGB']

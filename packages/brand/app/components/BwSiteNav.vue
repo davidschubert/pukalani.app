@@ -12,7 +12,7 @@ const route = useRoute()
  * UNavigationMenu mit Kindern (Icon + Titel + Beschreibung). */
 const menuItems = computed(() => [
   {
-    label: 'Our Products',
+    label: 'Products',
     active: route.path === '/products',
     children: [
       { label: 'Brand Wizard', icon: 'i-ph-chats-circle', description: 'Eure Marke entsteht im Gespräch mit George.', to: '/products' },
@@ -26,7 +26,7 @@ const menuItems = computed(() => [
   },
   { label: 'Discover Brands', to: '/brand/demo/discover', active: ['/brand/demo/discover', '/brand/demo/anatomie'].includes(route.path) },
   { label: 'Brand Insights', to: '/brand/demo/journal', active: ['/brand/demo/journal', '/brand/demo/artikel', '/brand/demo/profil', '/brand/demo/duell'].includes(route.path) },
-  { label: 'About us', to: '/team', active: route.path === '/team' },
+  { label: 'About', to: '/team', active: route.path === '/team' },
 ])
 
 /* Neue Brand oeffnet das Start-Modal von jeder Seite aus. */
