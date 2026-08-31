@@ -3,13 +3,11 @@
  *  sieben Produkte, die aufeinander aufbauen: 1–4 als Aufbau-Pfad,
  *  5–7 laufen dauerhaft mit. Namen = Brand-X-Familie (der frei
  *  gewordene Name „Brand Wizard" wird Produkt 1). Statisch. */
-const path = [
+const products = [
   { nr: '01', name: 'Brand Wizard', line: 'Im Gespräch mit George entsteht eure Marke — neue Marke oder Marken-Relaunch. Jede Entscheidung begründet, jederzeit pausierbar.', result: 'Brand Foundation + Brand Language' },
   { nr: '02', name: 'Brand Design', line: 'Aus eurer Foundation entstehen drei Moodboards. Ihr hakt ab, kommentiert, kombiniert — Farbwelt aus 1, Typografie aus 3 — und nähert euch Stück für Stück eurem Design.', result: 'Visual DNA + Design-Richtung' },
   { nr: '03', name: 'Brand Book & Kit', line: 'Alles Festgehaltene wird Werkzeug: Brand Book, Design-Tokens, brand.json, Pressekit — plus Strategy Playbook mit Positionierung, Content-Säulen und 90-Tage-Plan.', result: 'Brand Book, Kit + Playbook' },
   { nr: '04', name: 'Brand Experience', line: 'Die Marke kommt in die Welt: Vorlagen, Ideen, Quick Wins und Pläne für Website, Social, Vor Ort, SEO & GEO — entlang eures 90-Tage-Plans.', result: 'Assets, Templates + Launch' },
-]
-const laufend = [
   { nr: '05', name: 'Brand Monitoring', line: 'Wöchentlicher Blick von außen: Sichtbarkeit, Wettbewerber-Verschiebungen, neue Chancen — mit Alarm, wenn sich etwas bewegt.', result: 'Wochenreport + Alerts' },
   { nr: '06', name: 'Brand Score', line: '40 Prüfkriterien in 8 Dimensionen — reproduzierbar gerechnet, nie gefühlt. Der eine Maßstab für jede Marke hier.', result: 'Score 0–100 mit Begründungen' },
   { nr: '07', name: 'Brand Benchmark', line: 'Wettbewerber und Vorbilder im selben Raster: Wer steht wo in eurem Markt — und warum?', result: 'Wettbewerbs-Raster' },
@@ -31,30 +29,16 @@ const plattform = [
         <p class="mx-auto mt-5 max-w-xl text-lg leading-relaxed" style="color: var(--bw-ink-soft)">Jedes baut auf dem vorherigen auf — von der ersten Entscheidung bis zur wachen Marke.</p>
       </div>
 
-      <!-- Der Aufbau-Pfad: 01–04 -->
+      <!-- Die sieben Produkte: EINE Liste, gleichwertig (Runde 168) -->
       <div class="mx-auto mt-16 max-w-3xl">
-        <p class="bw-label uppercase tracking-widest" style="color: var(--bw-muted)">Der Aufbau-Pfad</p>
-        <div class="mt-4 space-y-4">
-          <div v-for="p in path" :key="p.nr" class="bw-card grid gap-x-8 gap-y-3 p-8 sm:grid-cols-[3.5rem_minmax(0,1fr)]">
+        <div class="space-y-4">
+          <div v-for="p in products" :key="p.nr" class="bw-card grid gap-x-8 gap-y-3 p-8 sm:grid-cols-[3.5rem_minmax(0,1fr)]">
             <p class="text-3xl font-extralight tracking-tight" style="color: var(--bw-line-strong)">{{ p.nr }}</p>
             <div class="min-w-0">
               <h2 class="text-xl font-medium tracking-tight">{{ p.name }}</h2>
               <p class="mt-2 text-sm leading-relaxed" style="color: var(--bw-ink-soft)">{{ p.line }}</p>
               <p class="bw-label mt-3" style="color: var(--bw-muted)">Ergebnis: {{ p.result }}</p>
             </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Läuft dauerhaft mit: 05–07 -->
-      <div class="mt-20">
-        <p class="bw-label text-center uppercase tracking-widest" style="color: var(--bw-muted)">Läuft dauerhaft mit</p>
-        <div class="mt-4 grid gap-x-6 gap-y-6 @sm:grid-cols-2 @md:grid-cols-3">
-          <div v-for="l in laufend" :key="l.name" class="bw-card p-8">
-            <p class="text-3xl font-extralight tracking-tight" style="color: var(--bw-line-strong)">{{ l.nr }}</p>
-            <h2 class="mt-3 text-lg font-medium tracking-tight">{{ l.name }}</h2>
-            <p class="mt-2 text-sm leading-relaxed" style="color: var(--bw-ink-soft)">{{ l.line }}</p>
-            <p class="bw-label mt-3" style="color: var(--bw-muted)">Ergebnis: {{ l.result }}</p>
           </div>
         </div>
       </div>
