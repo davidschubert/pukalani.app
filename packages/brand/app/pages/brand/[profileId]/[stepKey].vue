@@ -18,6 +18,7 @@ import {
 import { brandSlotDisplayValue } from '../../../../shared/brandAutosaveDiff'
 import { useBrandWorkspaceStore } from '../../../stores/brandWorkspace'
 import { useBrandAutosave } from '../../../composables/useBrandAutosave'
+import { useBrandGeneration } from '../../../composables/useBrandGeneration'
 
 /**
  * DER VOLLBILD-WORKSPACE — die echte Werkstatt (Plan §3d Hauptansicht 4,
@@ -37,12 +38,18 @@ import { useBrandAutosave } from '../../../composables/useBrandAutosave'
  * Eine zweite Liste hier wäre genau das „fünfte getrennte Regelwerk", das §3e
  * ausschliesst — und sie liefe beim nächsten Katalog-Update auseinander.
  *
- * ── GEORGE FÜHRT IN P1c STATISCH ──────────────────────────────────────────
- * Kein `aiComplete`, kein Streaming: die Spalte zeigt die NÄCHSTE offene Frage
- * (`resolveNextQuestion` + `questionKeyFor` für den Pfad der Weiche W1) und
- * sagt offen, dass die KI mit der nächsten Phase kommt. Was der Mensch dort
- * schreibt, landet im zugehörigen Slot und wird gespeichert — die Spalte ist
- * also schon echt, nur eben ohne Gegenüber.
+ * ── GEORGE FÜHRT — UND SEIT P1c SCHREIBT ER AUCH ──────────────────────────
+ * Die Spalte zeigt weiter die NÄCHSTE offene Frage (`resolveNextQuestion` +
+ * `questionKeyFor` für den Pfad der Weiche W1). Dazu kommen seine ZÜGE aus dem
+ * Strom: jeder generierbare Slot hat einen Knopf, der
+ * `POST …/steps/:stepKey/generate` öffnet, die Deltas laufen live in eine
+ * Sprechblase, und der fertige Entwurf landet MARKIERT im Editor (§3b.3) —
+ * sichtbar als Entwurf, bis der Mensch bestätigt.
+ *
+ * WELCHER TEXT DABEI ENTSTEHT, entscheidet die Generator-Registry des Servers.
+ * In P1c ist das der Entwicklungs-Ersatz (`pukalani.brand.devStubGenerator`,
+ * nur im .playground); die echten Prompts kommen mit P2 an derselben Naht,
+ * ohne eine Zeile hier.
  *
  * ── DREI ZUSTÄNDE, DIE KEINE FEHLERSEITE SIND ─────────────────────────────
  * `denied` (404 der Datentür — kein Beta-Zugang), `blocked` (403: der Baustein
@@ -62,6 +69,10 @@ const profileId = computed(() => String(route.params.profileId ?? ''))
 const routeStepKey = computed(() => String(route.params.stepKey ?? ''))
 
 const autosave = useBrandAutosave(profileId)
+// ERST SPEICHERN, DANN GENERIEREN: der Server baut den Entwurf aus den
+// GESPEICHERTEN Quell-Slots. Ohne dieses Ausspülen entwürfe George aus einem
+// Stand, den der Mensch eine Sekunde vorher überholt hat.
+const generation = useBrandGeneration(profileId, { beforeGenerate: () => autosave.flush() })
 
 await useAsyncData(
   () => `brand-workspace-${profileId.value}-${routeStepKey.value}`,
@@ -112,16 +123,30 @@ const nextQuestion = computed(() =>
 const nextSlot = computed<BrandSlot | null>(() =>
   slots.value.find(slot => slot.id === nextQuestion.value?.slotId) ?? null)
 
+/** Georges Züge aus dem Strom — sie stehen VOR der nächsten Frage. */
+const streamed = computed<BwMessage[]>(() => store.streamMessages.map(message => ({
+  id: message.id,
+  role: 'george' as const,
+  text: message.text,
+  pending: message.pending,
+})))
+
 const georgeMessages = computed<BwMessage[]>(() => {
   if (!nextSlot.value) {
-    return [{ id: 'done', role: 'george', text: t('brand.workspace.george.nothingOpen') }]
+    return [
+      ...streamed.value,
+      { id: 'done', role: 'george', text: t('brand.workspace.george.nothingOpen') },
+    ]
   }
-  return [{
-    id: nextSlot.value.id,
-    role: 'george',
-    text: t(questionKeyFor(nextSlot.value, pathKind.value)),
-    help: nextSlot.value.helpKey ? t(nextSlot.value.helpKey) : t('brand.workspace.george.aiPending'),
-  }]
+  return [
+    ...streamed.value,
+    {
+      id: nextSlot.value.id,
+      role: 'george',
+      text: t(questionKeyFor(nextSlot.value, pathKind.value)),
+      help: nextSlot.value.helpKey ? t(nextSlot.value.helpKey) : undefined,
+    },
+  ]
 })
 
 function answerFromGeorge(text: string): void {
@@ -150,6 +175,39 @@ async function confirmSlot(slotId: string): Promise<void> {
   store.setSlotConfirmed(slotId, true)
   await autosave.flush()
 }
+
+// ── George entwirft (§3b.3) ───────────────────────────────────────────────
+
+/** Der Hinweis je Slot („wärmer", „kürzer") — lokal, nie gespeichert. */
+const hints = ref<Record<string, string>>({})
+watch(routeStepKey, () => { hints.value = {} })
+
+/** Nur Slots, die George überhaupt entwirft — eine reine Menschenfrage nicht. */
+function isGeneratable(slot: BrandSlot): boolean {
+  return slot.generator !== 'none'
+}
+
+async function generateSlot(slot: BrandSlot): Promise<void> {
+  await generation.generate(slot.id, hints.value[slot.id] ?? '')
+  // Der Hinweis hat gewirkt oder nicht — stehen bleiben soll er nicht, sonst
+  // reist er stillschweigend in den nächsten Versuch.
+  hints.value = { ...hints.value, [slot.id]: '' }
+}
+
+/**
+ * `ai_disabled` und `no_generator` sind BETRIEBSZUSTÄNDE, kein Unglück: der
+ * Stand bleibt voll bearbeitbar (§9b.5). Sie bekommen deshalb einen ruhigen
+ * Hinweis an Ort und Stelle — keinen Toast, keine Farbe, keine Warnung.
+ */
+const generationNotice = computed<string | null>(() => {
+  const code = generation.failureCode.value
+  if (!code) return null
+  if (code === 'ai_disabled') return t('brand.workspace.generate.aiDisabled')
+  if (code === 'no_generator') return t('brand.workspace.generate.noGenerator')
+  if (code === 'generation_active') return t('brand.workspace.generate.busy')
+  if (code === 'aborted') return t('brand.workspace.generate.stopped')
+  return t('brand.workspace.generate.failed')
+})
 
 // ── Leiste + Fortschritt ──────────────────────────────────────────────────
 
@@ -317,6 +375,15 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
       <p class="bw-label uppercase tracking-widest" style="color: var(--bw-muted)">{{ t('brand.workspace.stage.title') }}</p>
       <h1 class="mt-1 text-4xl leading-tight">{{ stepKey ? t(`brand.steps.${stepKey}`) : '' }}</h1>
 
+      <!-- Ein RUHIGER Hinweis, kein Toast-Gewitter: „KI ist aus" und „hier
+           entwirft niemand" sind Zustände, in denen weitergearbeitet wird. -->
+      <p v-if="generationNotice" class="bw-pending mt-3 flex items-center gap-2">
+        <span>{{ generationNotice }}</span>
+        <button type="button" class="underline" @click="generation.dismissFailure()">
+          {{ t('brand.workspace.generate.dismiss') }}
+        </button>
+      </p>
+
       <BwChapter
         :title="stepKey ? t(`brand.steps.${stepKey}`) : ''"
         :state="store.currentJourneyStep?.state === 'done' ? 'confirmed' : store.currentJourneyStep?.state === 'active' ? 'active' : 'empty'"
@@ -325,7 +392,14 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
 
         <div v-for="slot in slots" :key="slot.id" class="mb-6">
           <div class="flex items-start justify-between gap-3">
-            <p class="bw-label" style="color: var(--bw-muted)">{{ slotLabel(slot) }}</p>
+            <p class="bw-label" style="color: var(--bw-muted)">
+              {{ slotLabel(slot) }}
+              <!-- §3b.3: Georges Entwurf ist bis zur Bestätigung als Entwurf
+                   ERKENNBAR — Etikett UND gestrichelter Rahmen, nie nur Farbe. -->
+              <span v-if="store.slotIsGeorgeDraft(slot.id)" class="bw-state bw-state--draft ml-2">
+                {{ t('brand.workspace.draftBadge') }}
+              </span>
+            </p>
             <button
               v-if="slot.helpKey"
               type="button"
@@ -348,31 +422,65 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
           <!-- Der Paarvergleich ist ein eigenes Instrument (Katalog §12). -->
           <p v-if="slot.type === 'special'" class="bw-pending mt-2">{{ t('brand.workspace.stage.pairsPlaceholder') }}</p>
 
-          <template v-else-if="slot.editor === 'none'">
-            <p v-if="store.slotValue(slot.id)" class="mt-2 text-sm" style="color: var(--bw-ink-soft)">{{ store.slotValue(slot.id) }}</p>
-            <p v-else class="bw-pending mt-2">{{ t('brand.workspace.stage.notEditable') }}</p>
-          </template>
+          <!-- Der gestrichelte Rahmen umfasst den EDITOR, nicht die Zeile:
+               er sagt „dieser Text ist ein Entwurf", nicht „dieses Feld". -->
+          <div :class="store.slotIsGeorgeDraft(slot.id) ? 'bw-draft-frame mt-2' : ''">
+            <template v-if="slot.editor === 'none'">
+              <p v-if="store.slotValue(slot.id)" class="mt-2 text-sm" style="color: var(--bw-ink-soft)">{{ store.slotValue(slot.id) }}</p>
+              <p v-else class="bw-pending mt-2">{{ t('brand.workspace.stage.notEditable') }}</p>
+            </template>
 
-          <UTextarea
-            v-else-if="slot.editor === 'textarea' || slot.editor === 'stage'"
-            class="mt-2 w-full"
-            :rows="slot.editor === 'stage' ? 6 : 3"
-            :maxlength="slot.maxLength"
-            :model-value="store.slotValue(slot.id)"
-            :placeholder="t('brand.workspace.stage.pending')"
-            @update:model-value="value => onInput(slot.id, String(value))"
-            @blur="autosave.flush()"
-          />
+            <UTextarea
+              v-else-if="slot.editor === 'textarea' || slot.editor === 'stage'"
+              class="mt-2 w-full"
+              :rows="slot.editor === 'stage' ? 6 : 3"
+              :maxlength="slot.maxLength"
+              :model-value="store.slotValue(slot.id)"
+              :placeholder="t('brand.workspace.stage.pending')"
+              @update:model-value="value => onInput(slot.id, String(value))"
+              @blur="autosave.flush()"
+            />
 
-          <UInput
-            v-else
-            class="mt-2 w-full"
-            :maxlength="slot.maxLength"
-            :model-value="store.slotValue(slot.id)"
-            :placeholder="t('brand.workspace.stage.pending')"
-            @update:model-value="value => onInput(slot.id, String(value))"
-            @blur="autosave.flush()"
-          />
+            <UInput
+              v-else
+              class="mt-2 w-full"
+              :maxlength="slot.maxLength"
+              :model-value="store.slotValue(slot.id)"
+              :placeholder="t('brand.workspace.stage.pending')"
+              @update:model-value="value => onInput(slot.id, String(value))"
+              @blur="autosave.flush()"
+            />
+          </div>
+
+          <!-- „George, versuch's nochmal" — mit optionalem Hinweis (§3b.3). -->
+          <div v-if="isGeneratable(slot)" class="mt-2 flex flex-wrap items-center gap-2">
+            <UInput
+              class="min-w-40 flex-1"
+              size="sm"
+              maxlength="500"
+              :model-value="hints[slot.id] ?? ''"
+              :placeholder="t('brand.workspace.generate.hintPlaceholder')"
+              :aria-label="t('brand.workspace.generate.hintLabel')"
+              :disabled="generation.streaming.value"
+              @update:model-value="value => hints = { ...hints, [slot.id]: String(value) }"
+            />
+            <UButton
+              v-if="generation.isStreamingSlot(slot.id)"
+              size="sm" variant="outline" color="neutral" class="rounded-full"
+              icon="i-ph-stop"
+              :label="t('brand.workspace.generate.stop')"
+              @click="generation.stop()"
+            />
+            <UButton
+              v-else
+              size="sm" variant="ghost" color="neutral" class="rounded-full"
+              icon="i-ph-sparkle"
+              :loading="generation.streaming.value"
+              :disabled="generation.streaming.value"
+              :label="store.slotValue(slot.id) ? t('brand.workspace.generate.again') : t('brand.workspace.generate.start')"
+              @click="generateSlot(slot)"
+            />
+          </div>
 
           <div v-if="slot.editor !== 'none' && slot.type !== 'special'" class="mt-2 flex justify-end">
             <UButton

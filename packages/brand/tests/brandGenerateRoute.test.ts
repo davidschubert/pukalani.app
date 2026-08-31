@@ -1,0 +1,325 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import type { H3Event } from 'h3'
+import {
+  type BrandGenerationEvent,
+  decodeBrandGenerationChunk,
+} from '../shared/brandGeneration'
+import type { BrandGenerationsView } from '../shared/types/brand'
+
+/**
+ * DIE ROUTE, DURCHGESPIELT — mit gefälschter Ablage, echtem Handler.
+ *
+ * Warum das den Aufwand wert ist: die vier puren Regeln (Protokoll, Sperre,
+ * Hash, Beschnitt) sind einzeln bewiesen, aber die REIHENFOLGE ist die Aussage,
+ * an der alles hängt — „erst speichern, dann `generation.completed`" (Plan §6).
+ * Sie steht in keiner puren Funktion, sondern zwischen den Zeilen der Route,
+ * und genau solche Aussagen verrutschen beim Umbauen still. Hier wird sie
+ * gemessen: der Zeitpunkt des `updateRow` gegen den Zeitpunkt des
+ * Abschluss-Frames.
+ *
+ * Der zweite Grund ist der Kreisschluss: die Frames, die dieser Test einsammelt,
+ * gehen durch DENSELBEN Leser, den der Browser benutzt
+ * (`decodeBrandGenerationChunk`) — und zwar zerrissen. Server und Client sind
+ * damit an EINEM Beweis aneinandergenagelt statt an zwei Behauptungen.
+ *
+ * Ein Live-Beweis im Playground scheitert an etwas anderem: dort gibt es keinen
+ * Appwrite-Zugang, das Gate antwortet 404, bevor irgendein Frame entsteht.
+ */
+
+const appConfig = { pukalani: { brand: { devStubGenerator: true } } }
+
+interface FakeRow { $id: string, [key: string]: unknown }
+
+const profileRow: FakeRow = {
+  $id: 'p1',
+  $createdAt: '2026-08-01T00:00:00.000Z',
+  $updatedAt: '2026-08-01T00:00:00.000Z',
+  createdByUserId: 'u1',
+  ownerType: 'user',
+  ownerId: 'u1',
+  title: 'Testmarke',
+  contentLocale: 'de',
+  pathKind: 'new',
+  hasName: true,
+  team: 'solo',
+  subBrands: 'unknown',
+  progressPct: 0,
+  currentStepKey: 'context',
+  lastActivityAt: '2026-08-01T00:00:00.000Z',
+}
+
+let stepRow: FakeRow
+let appConfigRow: FakeRow
+/** Die Reihenfolge ALLER Wirkungen — Schreibvorgänge und gesendete Frames. */
+let timeline: string[]
+
+const tablesDB = {
+  getRow: vi.fn(async ({ tableId }: { tableId: string }) => {
+    if (tableId === 'brand_profiles') return profileRow
+    if (tableId === 'brand_steps') return stepRow
+    if (tableId === 'app_config') return appConfigRow
+    throw new Error(`unerwartete Tabelle ${tableId}`)
+  }),
+  listRows: vi.fn(async ({ tableId }: { tableId: string }) => (tableId === 'brand_steps'
+    ? { rows: [stepRow] }
+    : { rows: [] })),
+  updateRow: vi.fn(async ({ tableId, data }: { tableId: string, data: Record<string, unknown> }) => {
+    if (tableId === 'brand_steps') {
+      timeline.push('write:step')
+      Object.assign(stepRow, data)
+    }
+    else {
+      timeline.push('write:profile')
+    }
+    return stepRow
+  }),
+  createRow: vi.fn(async ({ tableId }: { tableId: string }) => {
+    timeline.push(`write:${tableId}`)
+    return { $id: 'm1' }
+  }),
+}
+
+vi.stubGlobal('defineEventHandler', (handler: unknown) => handler)
+vi.stubGlobal('useAppConfig', () => appConfig)
+vi.stubGlobal('useRuntimeConfig', () => ({ public: { appwriteDatabaseId: 'main' } }))
+vi.stubGlobal('createAdminClient', () => ({ tablesDB }))
+vi.stubGlobal('createError', (init: Record<string, unknown>) =>
+  Object.assign(new Error(String(init.statusText)), init, { statusCode: init.status }))
+vi.stubGlobal('toH3Error', (error: unknown) => error)
+vi.stubGlobal('logEvent', () => {})
+vi.stubGlobal('requireBrandAccess', async () => ({ userId: 'u1' }))
+vi.stubGlobal('assertBrandOwnerAccess', () => {})
+vi.stubGlobal('getRouterParam', (_event: H3Event, name: string) =>
+  (name === 'id' ? 'p1' : 'context'))
+
+let body: Record<string, unknown>
+vi.stubGlobal('readBody', async () => body)
+
+const handler = (await import('../server/api/brand/profiles/[id]/steps/[stepKey]/generate.post'))
+  .default as unknown as (event: H3Event) => Promise<unknown>
+
+/** Ein Response-Doppel, das mitschreibt, WANN etwas gesendet wurde. */
+function fakeEvent() {
+  const chunks: string[] = []
+  const closeHandlers: (() => void)[] = []
+  const res = {
+    writableEnded: false,
+    writeHead: vi.fn(),
+    write(chunk: string) {
+      chunks.push(chunk)
+      const type = /"type":"([^"]+)"/.exec(chunk)?.[1] ?? 'unknown'
+      timeline.push(`send:${type}`)
+      return true
+    },
+    end() { this.writableEnded = true },
+  }
+  const req = {
+    on(name: string, fn: () => void) { if (name === 'close') closeHandlers.push(fn) },
+  }
+  return {
+    event: { node: { req, res }, context: {} } as unknown as H3Event,
+    chunks,
+    close: () => closeHandlers.forEach(fn => fn()),
+  }
+}
+
+/**
+ * Die gesammelten Frames durch den CLIENT-Leser — und zwar BUCHSTABENWEISE
+ * zerrissen: so kommen sie in einem echten Browser an.
+ */
+function readBack(chunks: readonly string[]): BrandGenerationEvent[] {
+  let buffer = ''
+  const events: BrandGenerationEvent[] = []
+  for (const letter of [...chunks.join('')]) {
+    const step = decodeBrandGenerationChunk(buffer, letter)
+    buffer = step.buffer
+    events.push(...step.events)
+  }
+  return events
+}
+
+beforeEach(() => {
+  timeline = []
+  appConfigRow = { $id: 'global', brandAiEnabled: true }
+  stepRow = {
+    $id: 'p1_context',
+    profileId: 'p1',
+    stepKey: 'context',
+    state: 'open',
+    slots: '{}',
+    generations: '{"items":[],"count":0}',
+    revision: 3,
+    activeSeconds: 0,
+  }
+  body = { slotId: 'a.pitch' }
+  tablesDB.updateRow.mockClear()
+  tablesDB.createRow.mockClear()
+})
+
+describe('POST …/steps/:stepKey/generate', () => {
+  it('sendet die fünf Ereignisse in der Reihenfolge des Plans', async () => {
+    const { event, chunks } = fakeEvent()
+    await handler(event)
+    const events = readBack(chunks)
+
+    expect(events[0]!.type).toBe('generation.started')
+    expect(events.filter(item => item.type === 'message.delta').length).toBeGreaterThanOrEqual(4)
+    expect(events.at(-2)!.type).toBe('slot.ready')
+    expect(events.at(-1)!.type).toBe('generation.completed')
+    // Alle Frames tragen DIESELBE generationId (§3e).
+    expect(new Set(events.map(item => item.generationId)).size).toBe(1)
+  })
+
+  it('SPEICHERT VOR `generation.completed` (Plan §6)', async () => {
+    const { event } = fakeEvent()
+    await handler(event)
+    // Gemessen wird die REIHENFOLGE, nicht das Vorhandensein: der plausible
+    // Umbau ist „Frame sofort, Persistenz im Hintergrund" — und genau der
+    // fällt hier durch (Gegenprobe gefahren).
+    expect(timeline).toContain('write:step')
+    expect(timeline.indexOf('write:step')).toBeLessThan(timeline.indexOf('send:generation.completed'))
+    expect(timeline.indexOf('write:brand_messages')).toBeLessThan(timeline.indexOf('send:generation.completed'))
+  })
+
+  it('schreibt Entwurf, Historie, inputHash und die NEUE revision', async () => {
+    const { event, chunks } = fakeEvent()
+    await handler(event)
+
+    const data = tablesDB.updateRow.mock.calls
+      .map(call => call[0] as { tableId: string, data: Record<string, unknown> })
+      .find(call => call.tableId === 'brand_steps')!.data
+
+    expect(data.revision).toBe(4)
+    expect(String(data.inputHash)).toMatch(/^[0-9a-f]{64}$/)
+
+    const slots = JSON.parse(String(data.slots)) as Record<string, { firstDraft: string, latestDraft: string }>
+    expect(slots['a.pitch']!.latestDraft.length).toBeGreaterThan(0)
+    // Der ERSTE Entwurf wird gesetzt, weil noch keiner da war (Versions-Vertrag).
+    expect(slots['a.pitch']!.firstDraft).toBe(slots['a.pitch']!.latestDraft)
+
+    const generations = JSON.parse(String(data.generations)) as BrandGenerationsView
+    expect(generations.count).toBe(1)
+    expect(generations.items[0]!.slotId).toBe('a.pitch')
+    expect(generations.items[0]!.promptVersion).toBe('stub-1')
+    // Der Eintrag trägt den TEXT — sonst könnte die Fassungs-Wiederherstellung
+    // nichts zurückholen.
+    expect(generations.items[0]!.draft).toBe(slots['a.pitch']!.latestDraft)
+
+    // Und der Client erfährt die neue Fassung im Abschluss-Frame.
+    const completed = readBack(chunks).at(-1)!
+    expect(completed).toMatchObject({ type: 'generation.completed', revision: 4, reused: false })
+  })
+
+  it('DER ERSTE ENTWURF BLEIBT STEHEN, wenn schon einer da ist', async () => {
+    stepRow.slots = JSON.stringify({ 'a.pitch': { firstDraft: 'ganz früher', latestDraft: 'ganz früher' } })
+    const { event } = fakeEvent()
+    await handler(event)
+    const data = tablesDB.updateRow.mock.calls
+      .map(call => call[0] as { tableId: string, data: Record<string, unknown> })
+      .find(call => call.tableId === 'brand_steps')!.data
+    const slots = JSON.parse(String(data.slots)) as Record<string, { firstDraft: string, latestDraft: string }>
+    expect(slots['a.pitch']!.firstDraft).toBe('ganz früher')
+    expect(slots['a.pitch']!.latestDraft).not.toBe('ganz früher')
+  })
+
+  it('KI AUS ⇒ generation.failed(ai_disabled) und KEIN Schreibvorgang', async () => {
+    appConfigRow = { $id: 'global', brandAiEnabled: false }
+    const { event, chunks } = fakeEvent()
+    await handler(event)
+    const events = readBack(chunks)
+    expect(events).toHaveLength(1)
+    expect(events[0]).toMatchObject({ type: 'generation.failed', code: 'ai_disabled' })
+    expect(tablesDB.updateRow).not.toHaveBeenCalled()
+  })
+
+  it('GEGENPROBE: fehlt die Spalte, gilt dasselbe (fail-closed)', async () => {
+    appConfigRow = { $id: 'global' }
+    const { event, chunks } = fakeEvent()
+    await handler(event)
+    expect(readBack(chunks)[0]).toMatchObject({ type: 'generation.failed', code: 'ai_disabled' })
+  })
+
+  it('ohne Generator und ohne Schalter: no_generator', async () => {
+    appConfig.pukalani.brand.devStubGenerator = false
+    const { event, chunks } = fakeEvent()
+    await handler(event)
+    expect(readBack(chunks)[0]).toMatchObject({ type: 'generation.failed', code: 'no_generator' })
+    expect(tablesDB.updateRow).not.toHaveBeenCalled()
+    appConfig.pukalani.brand.devStubGenerator = true
+  })
+
+  it('lehnt einen Slot ab, den George gar nicht entwirft', async () => {
+    // `a.origin` ist eine reine Menschenfrage (`generator: 'none'`).
+    body = { slotId: 'a.origin' }
+    const { event } = fakeEvent()
+    await expect(handler(event)).rejects.toMatchObject({ status: 400 })
+  })
+
+  it('lehnt einen Slot aus einem ANDEREN Baustein ab', async () => {
+    body = { slotId: 'b.purpose' }
+    const { event } = fakeEvent()
+    await expect(handler(event)).rejects.toMatchObject({ status: 400 })
+  })
+
+  it('DIE ZWEITE GENERIERUNG WIRD ABGEWIESEN, solange die erste läuft', async () => {
+    const first = fakeEvent()
+    const running = handler(first.event)
+    const second = fakeEvent()
+    await handler(second.event)
+    await running
+
+    expect(readBack(second.chunks)[0]).toMatchObject({ type: 'generation.failed', code: 'generation_active' })
+    // Und danach ist wieder frei.
+    const third = fakeEvent()
+    await handler(third.event)
+    expect(readBack(third.chunks).at(-1)!.type).toBe('generation.completed')
+  })
+
+  it('ABBRUCH speichert NICHTS und meldet `aborted`', async () => {
+    const { event, chunks, close } = fakeEvent()
+    const running = handler(event)
+    // Der Stub liefert seine Deltas mit Pausen — der Abbruch trifft ihn mittendrin.
+    await new Promise(resolve => setTimeout(resolve, 30))
+    close()
+    await running
+
+    const events = readBack(chunks)
+    expect(events.at(-1)).toMatchObject({ type: 'generation.failed', code: 'aborted' })
+    expect(events.some(item => item.type === 'slot.ready')).toBe(false)
+    expect(tablesDB.updateRow).not.toHaveBeenCalled()
+  })
+
+  it('GLEICHER IDEMPOTENZSCHLÜSSEL ⇒ derselbe Entwurf, kein zweiter Lauf', async () => {
+    body = { slotId: 'a.pitch', idempotencyKey: 'k1' }
+    const first = fakeEvent()
+    await handler(first.event)
+    const firstDraft = readBack(first.chunks)
+      .find(item => item.type === 'slot.ready')!
+    tablesDB.updateRow.mockClear()
+
+    const second = fakeEvent()
+    await handler(second.event)
+    const events = readBack(second.chunks)
+
+    expect(events.find(item => item.type === 'slot.ready')).toMatchObject({
+      draft: (firstDraft as { draft: string }).draft,
+    })
+    expect(events.at(-1)).toMatchObject({ type: 'generation.completed', reused: true })
+    // Kein zweiter Schreibvorgang: die Wiederverwendung kostet kein Kontingent.
+    expect(tablesDB.updateRow).not.toHaveBeenCalled()
+  })
+
+  it('der Hinweis wandert in den Entwurf, nicht in `brand_events`', async () => {
+    body = { slotId: 'a.pitch', hint: 'wärmer' }
+    const { event, chunks } = fakeEvent()
+    await handler(event)
+    const ready = readBack(chunks).find(item => item.type === 'slot.ready') as { draft: string }
+    expect(ready.draft).toContain('wärmer')
+
+    const events = tablesDB.createRow.mock.calls
+      .map(call => call[0] as { tableId: string, data: Record<string, unknown> })
+      .filter(call => call.tableId === 'brand_events')
+    // Log-Regel §6: der Funnel trägt Kennzahlen, nie den Hinweistext.
+    for (const record of events) expect(JSON.stringify(record.data)).not.toContain('wärmer')
+  })
+})

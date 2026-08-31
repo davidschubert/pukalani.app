@@ -111,6 +111,49 @@ export function serializeBrandGenerationEvent<N extends BrandGenerationEventName
   return `event: ${type}\ndata: ${JSON.stringify({ type, ...data })}\n\n`
 }
 
+/**
+ * DER FRAME-SPLITTER DER LESE-SEITE — pur und chunk-grenzen-fest, wie sein
+ * Gegenstück im Core.
+ *
+ * ── WARUM HIER EINE ZWEITE FASSUNG STEHT ──────────────────────────────────
+ * `decodeSseChunk()` in `packages/core/server/utils/aiCompleteStream.ts` kann
+ * dasselbe — liegt aber in `server/utils`, also im NITRO-Bündel: der Browser
+ * kann es nicht importieren. Ihn nach `core/shared/` zu ziehen wäre die
+ * sauberere Faktorisierung, ist aber eine CORE-Änderung und gehört damit in
+ * einen eigenen Commit (Repo-Regel), nicht in eine Client-Verdrahtung.
+ *
+ * Was hier doppelt liegt, ist ausserdem klein und eine andere Aufgabe: der
+ * Core-Dekodierer versteht zusätzlich OpenAIs Chunk-FORM (choices/delta/usage),
+ * dieser hier nur unser eigenes Protokoll. Geteilt wäre allein die Regel
+ * „trenne an Leerzeilen, hebe den Rest auf" — zwölf Zeilen mit eigenem Beweis.
+ * Wer sie zusammenlegen will, legt `core/shared/sse.ts` an und lässt BEIDE
+ * darauf zeigen.
+ */
+export interface BrandGenerationDecodeResult {
+  /** Der unvollständige Rest — beim nächsten Aufruf wieder hineingeben. */
+  buffer: string
+  events: BrandGenerationEvent[]
+}
+
+export function decodeBrandGenerationChunk(buffer: string, chunk: string): BrandGenerationDecodeResult {
+  const combined = (buffer + chunk).replace(/\r\n/g, '\n')
+  const frames = combined.split('\n\n')
+  // Das letzte Stück ist per Definition unabgeschlossen.
+  const rest = frames.pop() ?? ''
+  const events: BrandGenerationEvent[] = []
+  for (const frame of frames) {
+    for (const rawLine of frame.split('\n')) {
+      const line = rawLine.trimEnd()
+      // `event:`-Kopf und Kommentare tragen nichts bei — die Wahrheit steht im
+      // `type`-Feld der Nutzlast (s. Kopf dieser Datei).
+      if (!line.startsWith('data:')) continue
+      const parsed = parseBrandGenerationEvent(line.slice('data:'.length).replace(/^ /, ''))
+      if (parsed) events.push(parsed)
+    }
+  }
+  return { buffer: rest, events }
+}
+
 /** Die Lese-Seite: aus einer `data:`-Nutzlast ein geprüftes Ereignis — oder `null`. */
 export function parseBrandGenerationEvent(payload: string): BrandGenerationEvent | null {
   let parsed: unknown

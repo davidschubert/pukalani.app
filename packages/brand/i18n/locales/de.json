@@ -166,8 +166,7 @@
       "george": {
         "subtitle": "Dein Markenberater",
         "placeholder": "Antwort schreiben — oder George etwas fragen",
-        "nothingOpen": "In diesem Kapitel ist nichts mehr offen — bestätige es, wenn es passt.",
-        "aiPending": "Georges Antworten kommen mit der nächsten Phase. Bis dahin schreibst du hier, und alles wird gespeichert."
+        "nothingOpen": "In diesem Kapitel ist nichts mehr offen — bestätige es, wenn es passt."
       },
       "stage": {
         "title": "Euer Brand-Dokument",
@@ -187,7 +186,21 @@
       },
       "railLayer": "Brand Foundation",
       "completeFailed": "Das Kapitel ist noch nicht fertig",
-      "missingRequired": "Einige Pflicht-Entscheidungen sind noch offen — bestätige sie und versuch es erneut."
+      "missingRequired": "Einige Pflicht-Entscheidungen sind noch offen — bestätige sie und versuch es erneut.",
+      "draftBadge": "Entwurf von George",
+      "generate": {
+        "start": "George, entwirf das",
+        "again": "George, versuch es nochmal",
+        "stop": "Stopp",
+        "hintPlaceholder": "Hinweis — z. B. wärmer, kürzer, weniger Fachsprache",
+        "hintLabel": "Hinweis für George",
+        "aiDisabled": "George entwirft gerade nicht. Du kannst alles ganz normal weiterschreiben.",
+        "noGenerator": "Für dieses Feld gibt es noch keinen Entwurf von George. Schreib es selbst — es wird gespeichert.",
+        "busy": "George schreibt schon an einer anderen Stelle. Einen Moment noch.",
+        "stopped": "Abgebrochen. Dein bisheriger Text ist unverändert.",
+        "failed": "Das hat gerade nicht geklappt. Versuch es gleich nochmal.",
+        "dismiss": "Verstanden"
+      }
     },
     "brands": {
       "title": "Brandings",

@@ -65,6 +65,26 @@ export interface BrandWorkspaceConflict {
   slots: Record<string, BrandSlotView>
 }
 
+/**
+ * EINE ZEILE IM GEORGE-PANEL, DIE AUS DEM STROM ENTSTEHT. `pending` heisst: es
+ * kommt noch etwas nach — die Oberfläche zeigt dann einen Schreib-Zustand statt
+ * einer fertigen Antwort.
+ *
+ * Der TEXT bleibt hier roher Text und wird von Vue escaped gerendert. Markdown
+ * im Chat (Plan §3e „gerendertes Chat-Markdown wird sanitisiert") kommt mit P2
+ * — der Renderer dafür steht schon im Core (`core/shared/markdown.ts` +
+ * `MarkdownContent.vue`, vnode-basiert, ohne jeden `v-html`-Pfad). Bis dahin ist
+ * escaped Klartext die ehrliche Zwischenstufe: sie zeigt Sternchen, aber sie
+ * zeigt niemals fremdes Markup.
+ */
+export interface BrandStreamMessage {
+  /** Die `generationId` — dieselbe wie beim Slot (§3e). */
+  id: string
+  role: 'george'
+  text: string
+  pending: boolean
+}
+
 const EMPTY_PROGRESS: BrandStepProgress = { requiredTotal: 0, requiredFilled: 0, pct: 0 }
 
 /**
@@ -105,6 +125,18 @@ const setup = () => {
 
   const syncState = ref<BrandSyncState>('saved')
   const conflict = ref<BrandWorkspaceConflict | null>(null)
+
+  /** Georges Züge dieses Bausteins, live aus dem Strom (§3e `message.delta`). */
+  const streamMessages = ref<BrandStreamMessage[]>([])
+  /**
+   * Slot-Id → `generationId` des Entwurfs, der dort steht und dem der Mensch
+   * noch NICHT zugestimmt hat (§3b.3: „bis zur Bestätigung sichtbar als
+   * Entwurf"). Die Markierung fällt, sobald er tippt oder bestätigt — und zwar
+   * in `setSlotValue`/`setSlotConfirmed`, also an der Stelle, die es merkt.
+   * Eine Markierung, die nach dem Überschreiben stehen bliebe, behauptete
+   * fremde Urheberschaft für eigenen Text.
+   */
+  const georgeDrafts = ref<Record<string, string>>({})
 
   /** Der Beta-Zugang fehlt (404 der Datentür) — kein Fehler, ein Zustand. */
   const denied = ref(false)
@@ -179,10 +211,64 @@ const setup = () => {
 
   function setSlotValue(slotId: string, value: string): void {
     localEdits.value = { ...localEdits.value, [slotId]: { ...localEdits.value[slotId], value } }
+    // Wer tippt, ist der Urheber — die Entwurfs-Markierung fällt (s. `georgeDrafts`).
+    clearGeorgeDraft(slotId)
   }
 
   function setSlotConfirmed(slotId: string, value: boolean): void {
     localEdits.value = { ...localEdits.value, [slotId]: { ...localEdits.value[slotId], confirmed: value } }
+    if (value) clearGeorgeDraft(slotId)
+  }
+
+  function clearGeorgeDraft(slotId: string): void {
+    if (!(slotId in georgeDrafts.value)) return
+    const { [slotId]: _removed, ...rest } = georgeDrafts.value
+    georgeDrafts.value = rest
+  }
+
+  /**
+   * Georges Entwurf landet im Editor — als LOKALE Eingabe, nicht als
+   * Serverfassung. Das ist Absicht: gespeichert wird er über den normalen
+   * Autosave, mit derselben `revision`-Rechnung wie jede Eingabe des Menschen.
+   * Die Route hat ihn zwar schon geschrieben (Persistenz vor `completed`,
+   * Plan §6) und schickt die neue `revision` mit — `applyGenerationRevision()`
+   * übernimmt sie, damit der nächste Autosave keinen 409 kassiert.
+   */
+  function applyGeorgeDraft(slotId: string, value: string, generationId: string): void {
+    setSlotValue(slotId, value)
+    georgeDrafts.value = { ...georgeDrafts.value, [slotId]: generationId }
+  }
+
+  function slotIsGeorgeDraft(slotId: string): boolean {
+    return slotId in georgeDrafts.value
+  }
+
+  /** Die neue Fassung aus `generation.completed` — s. `applyGeorgeDraft`. */
+  function applyGenerationRevision(value: number): void {
+    if (value > revision.value) revision.value = value
+  }
+
+  // ── Georges Züge aus dem Strom ──────────────────────────────────────────
+
+  function beginGeorgeMessage(generationId: string): void {
+    streamMessages.value = [
+      ...streamMessages.value.filter(message => message.id !== generationId),
+      { id: generationId, role: 'george', text: '', pending: true },
+    ]
+  }
+
+  function appendGeorgeDelta(generationId: string, text: string): void {
+    streamMessages.value = streamMessages.value.map(message => (message.id === generationId
+      ? { ...message, text: message.text + text }
+      : message))
+  }
+
+  function endGeorgeMessage(generationId: string): void {
+    streamMessages.value = streamMessages.value
+      .map(message => (message.id === generationId ? { ...message, pending: false } : message))
+      // Ein Zug ohne Text ist kein Zug: ein sofort gescheiterter Lauf soll keine
+      // leere Sprechblase hinterlassen.
+      .filter(message => message.text.length > 0)
   }
 
   function setConfidence(value: BrandConfidence): void {
@@ -209,6 +295,10 @@ const setup = () => {
     conflict.value = null
     syncState.value = 'saved'
     blocked.value = null
+    // Der Verlauf hängt am BAUSTEIN (Schema-Anhang §3) — ein Wechsel beginnt
+    // ein neues Gespräch, kein fortgesetztes.
+    streamMessages.value = []
+    georgeDrafts.value = {}
   }
 
   function applySaveResponse(response: BrandStepSaveResponse): void {
@@ -337,6 +427,8 @@ const setup = () => {
     conflict.value = null
     denied.value = false
     blocked.value = null
+    streamMessages.value = []
+    georgeDrafts.value = {}
   }
 
   return {
@@ -354,6 +446,8 @@ const setup = () => {
     denied,
     blocked,
     loading,
+    streamMessages,
+    georgeDrafts,
     confidence,
     pendingSlots,
     pendingConfidence,
@@ -368,6 +462,13 @@ const setup = () => {
     setSlotValue,
     setSlotConfirmed,
     setConfidence,
+    applyGeorgeDraft,
+    slotIsGeorgeDraft,
+    clearGeorgeDraft,
+    applyGenerationRevision,
+    beginGeorgeMessage,
+    appendGeorgeDelta,
+    endGeorgeMessage,
     mark,
     applyStepDetail,
     applySaveResponse,

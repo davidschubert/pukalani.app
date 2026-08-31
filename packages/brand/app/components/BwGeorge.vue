@@ -1,7 +1,14 @@
 <script setup lang="ts">
 /** George-Panel: Monogramm statt Porträt, max 2–3 Sätze pro Zug, jeder
  *  Zug endet in Frage oder Schritt (§3d). Kein Lob-Spam, keine Fake-Delays. */
-export interface BwMessage { id: string, role: 'george' | 'user', text: string, help?: string }
+export interface BwMessage {
+  id: string
+  role: 'george' | 'user'
+  text: string
+  help?: string
+  /** George schreibt noch — der Strom läuft (§3e `message.delta`). */
+  pending?: boolean
+}
 const props = defineProps<{ messages: BwMessage[] }>()
 defineEmits<{ send: [text: string] }>()
 const draft = ref('')
@@ -29,7 +36,12 @@ watch(() => props.messages.length, async () => {
       <div v-for="m in messages" :key="m.id" class="bw-msg" :class="m.role === 'user' ? 'bw-msg--user' : ''">
         <BwGeorgeAvatar v-if="m.role === 'george'" size="md" />
         <div class="bw-msg-body">
-          <p>{{ m.text }}</p>
+          <!-- Interpolation statt v-html: der Text kommt aus einem Sprachmodell
+               und wird escaped gerendert. Markdown im Chat kommt mit P2 über
+               core/shared/markdown.ts + MarkdownContent.vue (vnode-basiert,
+               ohne v-html-Pfad) — bis dahin zeigen wir lieber Sternchen als
+               fremdes Markup. -->
+          <p class="whitespace-pre-wrap">{{ m.text }}<span v-if="m.pending" class="bw-caret" aria-hidden="true">▍</span></p>
           <p v-if="m.help" class="bw-msg-help">{{ m.help }}</p>
         </div>
       </div>

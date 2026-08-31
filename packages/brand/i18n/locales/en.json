@@ -166,8 +166,7 @@
       "george": {
         "subtitle": "Your brand advisor",
         "placeholder": "Write your answer — or ask a question",
-        "nothingOpen": "Nothing open in this chapter — confirm it when it fits.",
-        "aiPending": "George's answers arrive with the next phase. Until then you write here and everything is saved."
+        "nothingOpen": "Nothing open in this chapter — confirm it when it fits."
       },
       "stage": {
         "title": "Your brand document",
@@ -187,7 +186,21 @@
       },
       "railLayer": "Brand Foundation",
       "completeFailed": "The chapter is not finished yet",
-      "missingRequired": "Some required decisions are still open — confirm them, then try again."
+      "missingRequired": "Some required decisions are still open — confirm them, then try again.",
+      "draftBadge": "Draft by George",
+      "generate": {
+        "start": "George, draft this",
+        "again": "George, try again",
+        "stop": "Stop",
+        "hintPlaceholder": "Hint — e.g. warmer, shorter, less jargon",
+        "hintLabel": "Hint for George",
+        "aiDisabled": "George is not drafting right now. You can keep writing as usual.",
+        "noGenerator": "There is no George draft for this field yet. Write it yourself — it will be saved.",
+        "busy": "George is already writing somewhere else. One moment.",
+        "stopped": "Stopped. Your text is unchanged.",
+        "failed": "That did not work just now. Try again in a moment.",
+        "dismiss": "Got it"
+      }
     },
     "brands": {
       "title": "Brandings",

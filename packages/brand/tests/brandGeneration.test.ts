@@ -6,6 +6,7 @@ import {
   brandGenerationHashInput,
   brandGenerationLockHeld,
   brandGenerationLockKey,
+  decodeBrandGenerationChunk,
   findBrandGenerationByKey,
   packBrandGenerations,
   parseBrandGenerationEvent,
@@ -72,6 +73,50 @@ describe('Ereignis-Serialisierung (§3e)', () => {
     expect(parseBrandGenerationEvent('{kaputt')).toBeNull()
     expect(parseBrandGenerationEvent('[1,2,3]')).toBeNull()
     expect(parseBrandGenerationEvent('{"generationId":"g1"}')).toBeNull()
+  })
+})
+
+describe('Lese-Seite: der Frame-Splitter des Clients', () => {
+  const stream = [
+    serializeBrandGenerationEvent('generation.started', { generationId: 'g1', slotId: 'a.pitch', stepKey: 'context' }),
+    serializeBrandGenerationEvent('message.delta', { generationId: 'g1', text: 'Hallo ' }),
+    serializeBrandGenerationEvent('message.delta', { generationId: 'g1', text: 'Welt' }),
+    serializeBrandGenerationEvent('slot.ready', { generationId: 'g1', slotId: 'a.pitch', draft: 'Hallo Welt' }),
+  ].join('')
+
+  function readAll(pieces: readonly string[]) {
+    let buffer = ''
+    const events = []
+    for (const piece of pieces) {
+      const step = decodeBrandGenerationChunk(buffer, piece)
+      buffer = step.buffer
+      events.push(...step.events)
+    }
+    return events
+  }
+
+  it('liest einen ganzen Strom', () => {
+    expect(readAll([stream]).map(item => item.type)).toEqual([
+      'generation.started', 'message.delta', 'message.delta', 'slot.ready',
+    ])
+  })
+
+  it('liefert BUCHSTABENWEISE zerrissen exakt dasselbe', () => {
+    expect(readAll([...stream])).toEqual(readAll([stream]))
+  })
+
+  it('gibt ein unvollständiges Frame NICHT heraus', () => {
+    const cut = stream.indexOf('Welt')
+    const step = decodeBrandGenerationChunk('', stream.slice(0, cut))
+    expect(step.events.map(item => item.type)).toEqual(['generation.started', 'message.delta'])
+    expect(step.buffer).toContain('message.delta')
+  })
+
+  it('überspringt Fremdes, statt den Strom abzubrechen', () => {
+    const noisy = ': keepalive\n\ndata: {"type":"nichts"}\n\ndata: {kaputt\n\n' + stream
+    expect(readAll([noisy]).map(item => item.type)).toEqual([
+      'generation.started', 'message.delta', 'message.delta', 'slot.ready',
+    ])
   })
 })
 
