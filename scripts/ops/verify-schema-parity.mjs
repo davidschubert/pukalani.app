@@ -386,7 +386,12 @@ const PARITY_TABLES = [...SYSTEM_TABLES, ...ADMIN_TABLES, ...PAGES_TABLES, ...AN
  */
 const INSTANCES = [
   { name: 'account', env: join(homedir(), '.appwrite-secrets/migrations/account.env'), soll: ACCOUNT_SOLL },
-  { name: 'control', env: join(homedir(), '.appwrite-secrets/migrations/control.env'), soll: CONTROL_SOLL },
+  // Seit AH-4c heisst das Konsolen-Projekt `admin` und seine Migrations-Env
+  // liegt als admin.env — der alte Zeiger auf control.env liess den Waechter
+  // die Betreiber-Konsole STILL ueberspringen (Instanz fehlt = Warnzeile, aber
+  // gruen; 2026-09-01 beim branding-Umzug erwischt). Der NAME bleibt
+  // `control` (Ordner/Slot-Konvention), nur die DATEI zeigt auf admin.env.
+  { name: 'control', env: join(homedir(), '.appwrite-secrets/migrations/admin.env'), soll: CONTROL_SOLL },
   { name: 'portfolio', env: 'apps/portfolio/.env.production', soll: PORTFOLIO_SOLL },
   /**
    * `branding` folgt der Migrations-KONVENTION (~/.appwrite-secrets/migrations/),
