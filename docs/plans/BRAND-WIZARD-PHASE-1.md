@@ -993,6 +993,41 @@ fremden Logos als eigene Assets. POSITIONIERUNGS-SPLIT: branding.supply
 Verknüpfung über Autorenprofil (David → author → branding.supply) statt
 zweier Sites auf denselben Keywords.
 
+### Produkt-Suite: sieben Produkte, ein System (David, 2026-08-30)
+
+Branding Supply ist eine SaaS-SUITE, deren Produkte aufeinander
+aufbauen — Namen aus der Brand-X-Familie (deckungsgleich mit den
+Layern; der durch die Plattform-Umbenennung freie Name „Brand Wizard"
+wird Produkt 1):
+**Aufbau-Pfad:** 01 **Brand Wizard** (Gespräch mit George, neue Marke
+oder Marken-Relaunch ⇒ Foundation + Language) → 02 **Brand Design**
+(aus der Foundation DREI Moodboards; iterative Verfeinerung nach
+Agentur-Art: Haken an Gefallendes, Kommentar/Edit an den Rest,
+MIX & MATCH über Boards — „Farbwelt aus 1, Typografie aus 3";
+Grundlage ist die Visual DNA) → 03 **Brand Book & Kit** (Book, Tokens,
+brand.json, Pressekit + **Strategy Playbook**: Positionierung,
+Content-Säulen, Plattform-Taktiken, 90-Tage-Plan — ready to execute)
+→ 04 **Brand Experience** (Assets, Templates, Ideen, Quick Wins
+entlang des 90-Tage-Plans).
+**Dauerhaft mitlaufend:** 05 **Brand Monitoring** (Monitor & Alert,
+wöchentlich) · 06 **Brand Score** · 07 **Brand Benchmark**
+(Konkurrenzanalyse — Wettbewerber im selben Raster).
+**Plattform-Fähigkeiten** (produktübergreifend): Remember & Refine
+(Gedächtnis über Sitzungen) · Connect Your Tools (Docs, Sheets,
+Figma — Phase 3+).
+
+**TEAM statt anonymer Agenten:** die spezialisierten Agenten sind
+PERSONEN — je Produkt ein Teammitglied mit Vor-/Nachname, Jobtitel,
+Beschreibung MIT Abgrenzung zu den anderen, Skills, Persönlichem
+(Wohnort, Hobbys) und Profilbild (Hunde, wie George): George Wuffwuff
+(Wizard) · Frida Fellini (Design) · Rex Setter (Book & Kit) · Kira
+Apport (Experience) · Wanda Wachsam (Monitoring) · Ada Prüfstein
+(Score) · Scout Schnüffler (Benchmark). Eigene Team-Seite; intern =
+„break your project into tasks, match each to the best model".
+Dummies: /products (Pfad 01–04 + laufende 05–07 + Plattform +
+Team-Teaser), /team (7 Persona-Karten); Nav-Punkt „Products" (Team
+im Footer). Profilbilder folgen (Platzhalter: Initialen).
+
 ### Weiche: „Neue Marke" / „Marken-Relaunch" (Produktentscheidung David, 2026-08-30)
 
 BENENNUNG (bestätigt nach Fachbegriffs-Recherche): die Weiche heißt
