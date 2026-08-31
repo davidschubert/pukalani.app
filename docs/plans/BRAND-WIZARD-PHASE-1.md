@@ -1091,6 +1091,42 @@ UPageCTA, Footer. Im echten Bau ist das die ausgeloggte `/`.
   → Journal, Anatomie → Discover, Beispiel → Meine Brands). Die Werkstatt
   behält ihre eigene Topbar (BwWorkspace) — zwei Welten, zwei Köpfe.
 
+### Marken-Taxonomie: 6 getrennte Achsen (Davids Notiz, 2026-08-30)
+
+KANON: die 12 Archetypen nach Mark/Pearson (auf Jung zurückgeführt),
+bei uns DEUTSCH benannt (Regel aus Runde ~101): Der Unschuldige · Der
+Entdecker · Der Weise · Der Held · Der Rebell · Der Magier · Der
+Jedermann · Der Liebende · Der Narr · Der Fürsorgliche · Der Schöpfer
+· Der Herrscher. Marken tragen PRIMARY + optional SECONDARY (unser
+„viel vom Weisen, ein Rest Schöpfer"-Muster aus dem Archetyp-Schritt).
+
+KERNREGEL — Achsen NIE vermischen: ein Archetyp ist Persönlichkeit/
+Motivation, KEIN visueller Stil (ein Entdecker kann minimalistisch,
+brutalistisch, retro oder luxuriös auftreten). Sechs getrennte
+Klassifikationen je Brand:
+1. **Brand Archetype** (wer ist sie?) — 12er-Kanon, primary/secondary
+2. **Visual Style** (wie sieht sie aus?) — Minimal, Swiss, Editorial,
+   Brutalist, Corporate, Luxury, Retro, Playful, Organic, Futuristic …
+3. **Brand Personality** (wie verhält sie sich?) — bold, sophisticated,
+   friendly, rebellious, technical …
+4. **Positioning** (wo steht sie?) — Premium, Mass Market, Accessible
+   Luxury, Disruptive …
+5. **Tone of Voice** (wie spricht sie?) — authoritative,
+   conversational, witty, provocative …
+6. **Design Characteristics** (konkrete Umsetzung) — Serif/Sans,
+   monochrom/bunt, geometrisch/organisch, dicht/minimal …
+
+WIZARD-MAPPING (die Achsen entstehen bei uns als NEBENPRODUKT der
+Schritte, kein Extra-Formular): Archetyp & Stimme ⇒ Achse 1+3+5;
+Kontext/Positionierung ⇒ 4; Farbwelt/Typo/Logo/Bildsprache ⇒ 2+6.
+VERWENDUNG: Discover-Facetten-Suche („Entdecker → Outdoor → Premium →
+Minimal"), Brand-Profile-Steckbriefe (Nike: Hero primary/Rebel
+secondary · Bold/Minimal/Athletic · Confident/Energetic/Progressive ·
+Premium Mass Market), KB-Queries („Creator-Brands mit brutalistischer
+Identität"), und Georges Empfehlungs-Begründungen („für euren
+Archetyp untypisch, DESHALB eigenständig"). Die Taxonomie ist damit
+Discover-Filter, Profil-Schema UND KB-Abfragesprache in einem.
+
 ### Knowledge Base / Brand Intelligence Layer (Phase 3+, vorgemerkt 2026-08-29)
 
 Der strategische Überbau von Journal + Score + Discover (aus Davids

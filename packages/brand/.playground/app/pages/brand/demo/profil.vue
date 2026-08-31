@@ -95,7 +95,10 @@ const competitors = [
             <p class="bw-label" style="color: var(--bw-muted)">Steckbrief</p>
             <ul class="mt-3 space-y-2 text-sm" style="color: var(--bw-ink-soft)">
               <li>Kategorie: Sportartikel</li>
-              <li>Archetyp: Der Held</li>
+              <li>Archetyp: Der Held · Rest Rebell</li>
+              <li>Visual Style: Bold · Minimal · Athletic</li>
+              <li>Personality: Confident · Energetic</li>
+              <li>Positionierung: Premium Mass Market</li>
               <li>Agentur-Beziehung: Wieden+Kennedy (seit 1982)</li>
               <li>Zeichen: Swoosh, symbol-only seit 1995</li>
             </ul>

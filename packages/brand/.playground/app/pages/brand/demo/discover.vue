@@ -9,6 +9,11 @@ const sorts = ['Brand Score', 'Am besten bewertet', 'Trending', 'Neueste']
 const activeSort = ref('Brand Score')
 const archetypes = ['Der Weise', 'Der Entdecker', 'Der Schöpfer', 'Der Fürsorgliche', 'Der Held']
 const activeArchetype = ref<string | null>(null)
+/* Zweite Taxonomie-Achse (Davids Notiz 2026-08-30): visueller Stil ist
+ * vom Archetyp GETRENNT — ein Entdecker kann minimal oder verspielt
+ * auftreten. Facetten-Suche kombiniert beide. */
+const styles = ['Minimal', 'Editorial', 'Verspielt', 'Organisch', 'Luxus']
+const activeStyle = ref<string | null>(null)
 
 const brands = [
   { name: 'Kailua Coffee Co.', meta: 'Café · Neue Marke', archetype: 'Der Weise', score: 87, votes: 128, a: '#e8d3b8', b: '#b98a5e', c: '#4a3123' },
@@ -95,6 +100,14 @@ const creators = [
           :class="activeArchetype === a ? 'bw-select-card--on' : ''"
           @click="activeArchetype = activeArchetype === a ? null : a"
         >{{ a }}</button>
+        <span class="mx-2 h-5 w-px" style="background: var(--bw-line-strong)" />
+        <span class="bw-label" style="color: var(--bw-muted)">Stil</span>
+        <button
+          v-for="s in styles" :key="s"
+          class="bw-select-card rounded-full px-4 py-2 text-sm"
+          :class="activeStyle === s ? 'bw-select-card--on' : ''"
+          @click="activeStyle = activeStyle === s ? null : s"
+        >{{ s }}</button>
         <span class="ml-auto" />
         <USelect v-model="activeSort" :items="sorts" color="neutral" variant="ghost" class="w-48 justify-between rounded-full text-sm focus-visible:outline-none" :ui="{ base: 'px-4 py-2' }" style="background: var(--bw-surface-hi)" />
       </div>
