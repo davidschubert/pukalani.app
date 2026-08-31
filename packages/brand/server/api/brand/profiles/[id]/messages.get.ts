@@ -1,0 +1,98 @@
+import { Query } from 'node-appwrite'
+import { createBrandMessagesQuerySchema } from '../../../../../schemas/brandAccess'
+import type { BrandMessageView, BrandMessagesResponse } from '../../../../../shared/types/brand'
+import {
+  BRAND_MESSAGES_TABLE,
+  type BrandMessageRow,
+  brandDb,
+  isAppwriteNotFound,
+  loadOwnedProfile,
+  requireProfileIdParam,
+  toBrandStepKey,
+} from '../../../../utils/brandStore'
+
+/**
+ * DER GESPRÄCHSVERLAUF — dauerhaft, cursor-paginiert (Schema-Anhang §3).
+ *
+ * ── WARUM CURSOR UND NICHT OFFSET ─────────────────────────────────────────
+ * Der Verlauf WÄCHST, während man ihn liest (George antwortet weiter). Ein
+ * Offset verschiebt sich dabei: Seite 2 zeigte Nachrichten, die schon auf Seite
+ * 1 standen, und liesse andere aus. Ein Cursor auf `$id` zeigt immer auf
+ * dieselbe Stelle im Strom.
+ *
+ * ── EIN ELEMENT MEHR HOLEN ALS AUSGEBEN ───────────────────────────────────
+ * `hasMore` aus „so viele wie das Limit" abzuleiten wäre am Rand falsch: bei
+ * genau 50 Nachrichten stünde dort dauerhaft „es gibt mehr", und der Client
+ * fragte ewig eine leere Seite nach. Ein Element Vorlauf beantwortet die Frage
+ * exakt und kostet eine Zeile.
+ *
+ * ── DAUERHAFT HEISST DAUERHAFT ────────────────────────────────────────────
+ * Kein Verfallsdatum (Davids Entscheidung 2026-08-27: echter Wiedereinstieg mit
+ * Kontext). Weg ist der Verlauf nur mit dem Branding — über die Löschkaskade
+ * oder den GDPR-Contributor.
+ */
+export default defineEventHandler(async (event): Promise<BrandMessagesResponse> => {
+  const { userId } = await requireBrandAccess(event)
+  const profileId = requireProfileIdParam(event)
+  await loadOwnedProfile(event, userId, profileId)
+
+  const query = await getValidatedQuery(event, createBrandMessagesQuerySchema().parse)
+  // Ein unbekannter Baustein-Schlüssel wird ABGEWIESEN, nicht ignoriert: sonst
+  // liefert ein Tippfehler den ganzen Verlauf statt einer leeren Antwort, und
+  // der Aufrufer merkt es nie.
+  if (query.stepKey !== undefined && !toBrandStepKey(query.stepKey)) {
+    throw createError({ status: 400, statusText: 'Unknown step', data: { code: 'unknown_step' } })
+  }
+
+  const { tablesDB, databaseId } = brandDb(event)
+  let rows: BrandMessageRow[] = []
+  try {
+    const res = await tablesDB.listRows<BrandMessageRow>({
+      databaseId,
+      tableId: BRAND_MESSAGES_TABLE,
+      queries: [
+        Query.equal('profileId', profileId),
+        ...(query.stepKey ? [Query.equal('stepKey', query.stepKey)] : []),
+        Query.orderAsc('$id'),
+        Query.limit(query.limit + 1),
+        ...(query.cursor ? [Query.cursorAfter(query.cursor)] : []),
+      ],
+    })
+    rows = res.rows
+  }
+  catch (error) {
+    if (!isAppwriteNotFound(error)) throw toH3Error(error, 'Brand messages could not be loaded')
+  }
+
+  const hasMore = rows.length > query.limit
+  const page = hasMore ? rows.slice(0, query.limit) : rows
+
+  const messages: BrandMessageView[] = page.map(row => ({
+    id: row.$id,
+    stepKey: row.stepKey,
+    role: row.role === 'user' || row.role === 'system' ? row.role : 'george',
+    body: row.body,
+    // `parts` ist strukturiertes JSON (Chips, Karten, Paar-Referenzen). Kaputte
+    // Zeilen geben `null` statt eine Ausnahme — eine unlesbare Beilage darf
+    // nicht den ganzen Verlauf kosten.
+    parts: parseParts(row.parts),
+    generationId: row.generationId ?? null,
+    createdAt: row.$createdAt,
+  }))
+
+  return {
+    messages,
+    cursor: hasMore ? page.at(-1)?.$id ?? null : null,
+    hasMore,
+  }
+})
+
+function parseParts(raw: string | null | undefined): unknown {
+  if (!raw) return null
+  try {
+    return JSON.parse(raw)
+  }
+  catch {
+    return null
+  }
+}

@@ -78,7 +78,7 @@ async function readBrandAccessRow(event: H3Event, userId: string): Promise<Brand
  * Defensiv: fehlende Spalte (Deploy vor system-038), fehlende Zeile oder
  * Lesefehler ⇒ 'closed'. Ein nicht lesbarer Modus darf die Beta nicht öffnen.
  */
-async function readAdmissionMode(event: H3Event) {
+export async function readBrandAdmissionMode(event: H3Event) {
   try {
     const config = useRuntimeConfig(event)
     const { tablesDB } = createAdminClient(event)
@@ -102,7 +102,7 @@ export async function requireBrandAccess(event: H3Event): Promise<BrandAccessCon
   if (!userId) throw createError({ status: 404, statusText: 'Not Found' })
 
   const [admissionMode, accessRow] = await Promise.all([
-    readAdmissionMode(event),
+    readBrandAdmissionMode(event),
     readBrandAccessRow(event, userId),
   ])
   if (accessRow === undefined) throw createError({ status: 404, statusText: 'Not Found' })

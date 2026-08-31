@@ -387,6 +387,30 @@ const WRITE_LIMITED: { re: RegExp, bucket: string, max?: number }[] = [
   // KI-Vorschlag: jeder Klick kostet echtes Geld beim Anbieter.
   { re: /^POST \/api\/onboarding\/suggest$/, bucket: 'onboarding:suggest', max: 10 },
   /**
+   * DER BETA-CODE DES BRAND-WIZARDS (Plan §3e „Beta-Zugang operativ": „Code-
+   * Prüfung UND Einlösung rate-limitiert").
+   *
+   * Beide Routen sind SESSION-LOS erreichbar — die Prüfung beantwortet die
+   * Frage vor dem Login, die Einlösung verlangt zwar eine Session, aber keine
+   * Beta-Zulassung (sonst wäre sie ein Zirkel). Der Code IST der Beweis, also
+   * gilt dieselbe Regel wie bei jedem anderen token-tragenden Endpunkt hier:
+   * geratene Codes sollen ins Budget laufen.
+   *
+   * EIN GEMEINSAMER BUCKET, weil es EIN Vorgang ist — prüfen und einlösen. Wer
+   * seinen Link öffnet, macht beides einmal; 10/min je IP ist dafür reichlich
+   * und macht Durchprobieren aussichtslos (der Code hat 32 Zufalls-Bytes, das
+   * Raten wäre ohnehin chancenlos — der Deckel schützt vor allem den Server vor
+   * dem Skript, das es trotzdem versucht: JEDER Aufruf kostet einen
+   * Appwrite-Abruf über den Admin-Client, an dem Appwrites eigene Bremse nicht
+   * greift).
+   *
+   * WARUM WRITE_LIMITED UND NICHT FAILURE_LIMITED: „nur Fehlversuche zählen"
+   * wäre hier schwächer und zugleich wirkungslos — die Prüfroute antwortet
+   * NEUTRAL mit 200 und `{ valid: false }` (keine Enumeration, Schema-Anhang
+   * §5), ein Fehlversuch ist an ihrem Status also gar nicht erkennbar.
+   */
+  { re: /^POST \/api\/brand\/invite\/(check|redeem)$/, bucket: 'brand:invite', max: TOKEN_MAX },
+  /**
    * INHALTE ÜBERSETZEN (2026-08-17) — dieselbe Kostenklasse wie eine Zeile
    * darüber, nur häufiger erreichbar: jeder Klick schickt bis zu 10.000 Zeichen
    * an den KI-Anbieter und bezahlt die Antwort. Beide Routen haben SCHON eine
