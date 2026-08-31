@@ -82,6 +82,7 @@ const userMenu = computed(() => [[
        laufen ueber unsere Tokens (Inline-Style schlaegt die Theme-Klassen). -->
   <UHeader
     to="/start" class="bw-root mb-10"
+    :ui="{ container: 'max-w-full px-6' }"
     style="background: color-mix(in srgb, var(--bw-paper) 88%, transparent); border-color: var(--bw-line)"
   >
     <template #title>
