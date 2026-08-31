@@ -62,7 +62,8 @@ catalog:
   node-appwrite: ^26.2.0
   '@types/node': ^22.18.0
   nuxt: ^4.5.1
-  '@nuxt/ui': ^4.10.0
+  # 4.11.0 bringt USplitter (Werkstatt-Zonen im brand-Layer).
+  '@nuxt/ui': ^4.11.0
   # EXAKT gepinnt, ohne Caret — und das ist hier keine Vorsicht, sondern die
   # Bedingung. Tiptap liegt bereits als auto-installierter optionaler Peer von
   # @nuxt/ui im Baum (3.27.1, genau eine Kopie je Paket). Wir nehmen NUR
@@ -84,7 +85,7 @@ catalog:
   # Abhaengigkeit und wird nur vom ipx-Anbieter gebraucht; dieses Repo
   # transformiert in Appwrite, nicht auf dem App-Server.
   '@nuxt/image': ^2.1.0
-  # MUSS zur Range von @nuxt/ui passen (4.10.0 verlangt ^4.3.2), sonst liegen
+  # MUSS zur Range von @nuxt/ui passen (4.11.0 verlangt ^4.3.2), sonst liegen
   # zwei Tailwind-Kopien im Baum. Steht hier, weil `tailwindcss` DIREKT gebraucht
   # wird: packages/core/app/assets/css/main.css und docs/app/assets/css/main.css
   # machen `@import "tailwindcss"`, und ein CSS-Import löst relativ zur DATEI auf
