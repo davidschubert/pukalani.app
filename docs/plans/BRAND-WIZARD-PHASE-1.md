@@ -1847,3 +1847,17 @@ entschieden — das Gesamtkonzept wird dafür nicht mehr geöffnet.
   GEGENPROBE** — fail-soft-Pfade sind sonst immer grün (Mail-Links-Lektion).
 - Unit: Weichen-Regel und Archetyp-Berechnung als pure Funktionen in
   `shared/` mit Tests (Muster resolveThemeSelection).
+
+## Benennung: „Branding" ist das Wort fürs eigene Projekt (2026-08-30, David)
+
+Das eigene Vorhaben eines Users heißt durchgängig **„Branding"** (Neutrum):
+„Brandings" (Übersicht, vorher „Meine Brands"), „Neues Branding",
+„Beispiel-Branding", „Starte dein Branding", „Brandings verwalten".
+UNANGETASTET bleiben englische Produktnamen (Brand Wizard, Brand Design,
+Brand Book & Kit, Brand Experience, Brand Monitoring, Brand Score, Brand
+Benchmark, Brand Foundation, Brand Insights, Discover Brands, Brand-Check)
+und echte Fremdmarken in Insights (Erwähnte Brands, Brand-Profil, Brand-Duell).
+Außerdem: „Brandings" + „Neues Branding" leben als erste Gruppe im
+Avatar-Menü (das Split-Control im Header ist entfallen); „Tastaturkürzel"
+und „Support kontaktieren" sind aus dem Menü raus, weil es beides noch
+nicht gibt.
