@@ -26,7 +26,7 @@ const plattform = [
       <BwSiteNav />
 
       <div class="mx-auto mt-14 max-w-3xl text-center">
-        <p class="bw-label uppercase tracking-widest" style="color: var(--bw-muted)">Products</p>
+        <p class="bw-label uppercase tracking-widest" style="color: var(--bw-muted)">Our Products</p>
         <h1 class="mt-4 text-balance text-5xl font-extralight leading-tight tracking-tight">Sieben Produkte, ein System.</h1>
         <p class="mx-auto mt-5 max-w-xl text-lg leading-relaxed" style="color: var(--bw-ink-soft)">Jedes baut auf dem vorherigen auf — von der ersten Entscheidung bis zur wachen Marke.</p>
       </div>

@@ -9,10 +9,10 @@ const route = useRoute()
  * persönlicher Bereich rechts — direkt neben seiner Aktion (Neue Brand)
  * und dem Konto. */
 const items = [
-  { label: 'Products', to: '/products', match: ['/products'] },
-  { label: 'Team', to: '/team', match: ['/team'] },
+  { label: 'Our Products', to: '/products', match: ['/products'] },
   { label: 'Discover Brands', to: '/brand/demo/discover', match: ['/brand/demo/discover', '/brand/demo/anatomie'] },
   { label: 'Brand Insights', to: '/brand/demo/journal', match: ['/brand/demo/journal', '/brand/demo/artikel', '/brand/demo/profil', '/brand/demo/duell'] },
+  { label: 'About us', to: '/team', match: ['/team'] },
 ]
 function isActive(it: { match: string[] }): boolean {
   return it.match.includes(route.path)
