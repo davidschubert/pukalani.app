@@ -10,9 +10,9 @@ const path = [
   { nr: '04', name: 'Brand Experience', line: 'Die Marke kommt in die Welt: Vorlagen, Ideen, Quick Wins und Pläne für Website, Social, Vor Ort, SEO & GEO — entlang eures 90-Tage-Plans.', result: 'Assets, Templates + Launch' },
 ]
 const laufend = [
-  { name: 'Brand Monitoring', line: 'Wöchentlicher Blick von außen: Sichtbarkeit, Wettbewerber-Verschiebungen, neue Chancen — mit Alarm, wenn sich etwas bewegt.' },
-  { name: 'Brand Score', line: '40 Prüfkriterien in 8 Dimensionen — reproduzierbar gerechnet, nie gefühlt. Der eine Maßstab für jede Marke hier.' },
-  { name: 'Brand Benchmark', line: 'Wettbewerber und Vorbilder im selben Raster: Wer steht wo in eurem Markt — und warum?' },
+  { nr: '05', name: 'Brand Monitoring', line: 'Wöchentlicher Blick von außen: Sichtbarkeit, Wettbewerber-Verschiebungen, neue Chancen — mit Alarm, wenn sich etwas bewegt.', result: 'Wochenreport + Alerts' },
+  { nr: '06', name: 'Brand Score', line: '40 Prüfkriterien in 8 Dimensionen — reproduzierbar gerechnet, nie gefühlt. Der eine Maßstab für jede Marke hier.', result: 'Score 0–100 mit Begründungen' },
+  { nr: '07', name: 'Brand Benchmark', line: 'Wettbewerber und Vorbilder im selben Raster: Wer steht wo in eurem Markt — und warum?', result: 'Wettbewerbs-Raster' },
 ]
 const plattform = [
   { icon: 'i-ph-brain', name: 'Remember & Refine', line: 'Wir erinnern uns an eure Guidelines, Strategien und Kennzahlen über Sitzungen hinweg — jedes Update baut auf dem auf, was funktioniert.' },
@@ -51,8 +51,10 @@ const plattform = [
         <p class="bw-label text-center uppercase tracking-widest" style="color: var(--bw-muted)">Läuft dauerhaft mit</p>
         <div class="mt-4 grid gap-x-6 gap-y-6 @sm:grid-cols-2 @md:grid-cols-3">
           <div v-for="l in laufend" :key="l.name" class="bw-card p-8">
-            <h2 class="text-lg font-medium tracking-tight">{{ l.name }}</h2>
+            <p class="text-3xl font-extralight tracking-tight" style="color: var(--bw-line-strong)">{{ l.nr }}</p>
+            <h2 class="mt-3 text-lg font-medium tracking-tight">{{ l.name }}</h2>
             <p class="mt-2 text-sm leading-relaxed" style="color: var(--bw-ink-soft)">{{ l.line }}</p>
+            <p class="bw-label mt-3" style="color: var(--bw-muted)">Ergebnis: {{ l.result }}</p>
           </div>
         </div>
       </div>
