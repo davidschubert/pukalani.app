@@ -54,7 +54,8 @@ const fakten = [
             <p class="bw-label uppercase tracking-widest" style="color: rgb(247 242 234 / 0.7)">Kailua Coffee Co.</p>
             <p class="mt-4 max-w-xl text-3xl font-extralight leading-snug tracking-tight">One honest, quiet moment a day.</p>
             <p class="mt-4 max-w-xl text-sm leading-relaxed" style="color: rgb(247 242 234 / 0.85)">Kaffee mit nachvollziehbarer Herkunft — Anbau, Röstung, Ausschank aus einer Hand.</p>
-            <p class="bw-label mt-6" style="color: rgb(247 242 234 / 0.6)">Der Weise · ruhig, fundiert, gerade heraus · EN · Oʻahu</p>
+            <p class="bw-label mt-6" style="color: rgb(247 242 234 / 0.6)">Der Weise · Rest Schöpfer — ruhig, fundiert, gerade heraus · EN · Oʻahu</p>
+            <p class="bw-label mt-1" style="color: rgb(247 242 234 / 0.6)">Stil: Warm · Editorial — Positionierung: Premium · lokal</p>
           </div>
           <div class="bw-on-dark flex flex-none flex-col items-center gap-1 rounded-2xl px-4 py-3" style="background: rgb(20 20 20 / 0.35)">
             <BwScoreRing :value="92" :size="80" label="Brand Score" />
