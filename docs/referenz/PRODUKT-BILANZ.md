@@ -19,7 +19,7 @@ Protokoll in [`docs/archiv/PRODUKT-BILANZ-2026-07-27.md`](../archiv/PRODUKT-BILA
 | --- | --- | --- | --- | --- | --- |
 | **activity** | ✅ | comments | 2/2 über `tenantDb` | — | basic |
 | **analytics** | ✅ | comments, portfolio | 3/3 über `tenantDb` | ✅ | personal |
-| **brand** | — | — | keine eigenen Routen | — | — |
+| **brand** | — | portfolio | 0/14 über `tenantDb` · 10 roh | ✅ | — |
 | **comments** | ✅ | _template, comments | 18/19 über `tenantDb` | ✅ | — |
 | **control** | — | control | 0/85 über `tenantDb` · 61 roh | ✅ | — |
 | **courses** | ✅ | _template, comments | 14/15 über `tenantDb` | ✅ | pro |
@@ -53,6 +53,7 @@ holt seine Daten über die Naht eines anderen Layers.
 | `analytics` | — | ✅ | — | — | — | — | ✅ | ✅ |
 | `billing` | — | ✅ | ✅ | — | — | — | — | — |
 | `blueprint` | ✅ | ✅ | — | — | — | — | ✅ | — |
+| `brand` | — | — | — | — | — | — | — | ✅ |
 | `comments` | ✅ | ✅ | — | — | — | — | ✅ | — |
 | `control` | — | — | ✅ | — | — | — | — | — |
 | `courses` | ✅ | ✅ | — | — | — | — | ✅ | — |

@@ -856,6 +856,9 @@ importers:
       '@pukalani/analytics':
         specifier: workspace:*
         version: link:../../packages/analytics
+      '@pukalani/brand':
+        specifier: workspace:*
+        version: link:../../packages/brand
       '@pukalani/core':
         specifier: workspace:*
         version: link:../../packages/core

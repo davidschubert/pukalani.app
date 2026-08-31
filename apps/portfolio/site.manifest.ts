@@ -25,5 +25,12 @@ export default {
     // werden im Dashboard gefüllt und veröffentlicht — der Footer verlinkt
     // nur Veröffentlichtes.
     'pages',
+    // Brand-Wizard (Phase 1). pukalani.studio IST die Site des Wizards
+    // (Plan §6) — eine Site, eine Login-Welt, deshalb kein zweites
+    // Appwrite-Projekt: die brand_*-Tabellen liegen in `portfolio` und ziehen
+    // ueber den normalen Runner (`pnpm migrate --app portfolio --layer brand`).
+    // In dieser Fassung bringt der Layer nur `/api/brand/**` mit; die
+    // Oberflaeche folgt.
+    'brand',
   ],
 } satisfies SiteManifest
