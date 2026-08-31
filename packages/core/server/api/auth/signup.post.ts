@@ -11,6 +11,14 @@ import { registerSchema } from '../../../schemas/auth'
  */
 const signupSchema = registerSchema.extend({
   inviteToken: z.string().regex(/^[a-f0-9]{64}$/).optional(),
+  /**
+   * Zulassungs-Code eines Produkt-Layers (Brand-Beta, …) — NICHT der
+   * Community-Einladungstoken darüber. Der Core kennt sein Format bewusst
+   * nicht (Prüfung, Adressbindung, Ablauf, Widerruf gehören dem registrierten
+   * Provider, s. server/utils/signupAdmission.ts); hier steht nur eine Schranke
+   * gegen Riesen-Bodies.
+   */
+  admissionCode: z.string().trim().min(1).max(200).optional(),
 })
 
 /**
@@ -19,11 +27,30 @@ const signupSchema = registerSchema.extend({
  */
 export default defineEventHandler(async (event) => {
   const appConfig = await getAppConfig(event)
-  if (!appConfig.registrationEnabled || appConfig.maintenanceMode) {
+  /**
+   * ZULASSUNG (Brand-Beta-Naht): ein registrierter Provider darf die
+   * geschlossene INSTANZ-Registrierung für genau diese Anlage öffnen — und
+   * sonst nichts. `maintenanceMode` steht deshalb in einer eigenen Bedingung
+   * und ist durch keine Einladung umgehbar; die Mandanten-Sperre weiter unten
+   * ebenso wenig.
+   *
+   * Ohne Provider ist das hier Zeile für Zeile das alte Verhalten: gleiche
+   * Reihenfolge (Schalter VOR dem Body), gleicher Status, gleiche Meldung.
+   * Mit Provider muss der Body vorgezogen werden — er trägt Adresse und Code,
+   * und ohne beides kann niemand entscheiden.
+   */
+  if (appConfig.maintenanceMode || (!appConfig.registrationEnabled && !hasSignupAdmissionProvider())) {
     throw createError({ status: 403, statusText: 'Registration is currently disabled' })
   }
 
-  const { email, password, name, inviteToken } = await readValidatedBody(event, signupSchema.parse)
+  const { email, password, name, inviteToken, admissionCode } = await readValidatedBody(event, signupSchema.parse)
+
+  // Identische Meldung wie oben: ein falscher, abgelaufener, widerrufener oder
+  // fehlender Code sieht aus wie eine schlicht geschlossene Registrierung
+  // (keine Enumeration).
+  if (!appConfig.registrationEnabled && !(await signupAdmissionOpensRegistration(event, { email, inviteCode: admissionCode }))) {
+    throw createError({ status: 403, statusText: 'Registration is currently disabled' })
+  }
 
   /**
    * Zweite, MANDANTEN-Ebene (S1): app_config ist EINE Row pro Projekt — im Pool
