@@ -14,6 +14,7 @@
     "@nuxtjs/i18n": "catalog:",
     "node-appwrite": "catalog:",
     "nuxt": "catalog:",
+    "pinia": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
