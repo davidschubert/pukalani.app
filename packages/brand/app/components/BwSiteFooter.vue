@@ -18,7 +18,7 @@ const legal = ['Impressum', 'Datenschutz', 'AGB']
         <span class="grid size-6 flex-none place-items-center rounded-full" style="background: var(--bw-ink); color: var(--bw-paper)">
           <UIcon name="i-ph-fingerprint" class="size-3.5" />
         </span>
-        <span class="whitespace-nowrap text-sm uppercase" style="font-weight: 400; letter-spacing: -0.01em">Branding Supply</span>
+        <span class="whitespace-nowrap text-sm" style="font-weight: 400; letter-spacing: -0.01em">Branding Supply</span>
       </NuxtLink>
       <nav class="flex flex-wrap gap-x-6 gap-y-2" aria-label="Footer">
         <NuxtLink v-for="it in nav" :key="it.to" :to="it.to" class="bw-label transition-colors hover:!text-(--bw-ink)" style="color: var(--bw-muted)">{{ it.label }}</NuxtLink>
