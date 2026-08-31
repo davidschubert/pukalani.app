@@ -21,6 +21,27 @@ const SYNC = {
   conflict: { label: 'Konflikt — Stand neu laden', icon: 'i-ph-warning', spin: false, tone: 'var(--bw-stale)' },
 } as const
 const mode = ref<'stage' | 'george'>('george')
+/* Runde 191 (David): die zwei Zonen-Nähte sind ZIEHBAR — Nuxt UIs
+ * USplitter (seit 4.11.0). Nur auf Desktop (>=1280px), wo alle drei
+ * Zonen nebeneinander stehen; darunter bleibt das Grid mit Mini-Rail
+ * bzw. dem Mobil-Modusschalter. SSR und erster Client-Paint rendern
+ * IMMER das Grid (identisch, kein Hydration-Mismatch) — der Splitter
+ * steigt erst nach dem Mount ein. autoSaveId merkt sich die
+ * Aufteilung je Browser in localStorage. */
+const isDesktop = ref(false)
+let desktopMq: MediaQueryList | null = null
+const onMq = (e: MediaQueryListEvent | MediaQueryList) => { isDesktop.value = e.matches }
+onMounted(() => {
+  desktopMq = window.matchMedia('(min-width: 1280px)')
+  onMq(desktopMq)
+  desktopMq.addEventListener('change', onMq)
+})
+onBeforeUnmount(() => desktopMq?.removeEventListener('change', onMq))
+const zoneItems = [
+  { slot: 'rail', defaultSize: 24, minSize: 16, maxSize: 34, class: 'min-w-0' },
+  { slot: 'stage', defaultSize: 48, minSize: 32, class: 'min-w-0' },
+  { slot: 'george', defaultSize: 28, minSize: 20, maxSize: 42, class: 'min-w-0' },
+]
 /* Runde 132 (David): das Konto-Menü (Sprache, Erscheinungsbild,
  * Tastaturkürzel, Support, Konto) wohnt jetzt DAUERHAFT in BwSiteNav
  * oben rechts — die Topbar behält nur Brand-Switcher und Sync-Zustand.
@@ -62,40 +83,30 @@ const mode = ref<'stage' | 'george'>('george')
       </button>
     </div>
 
-    <div class="bw-zones">
+    <USplitter
+      v-if="isDesktop" id="bw-workspace" auto-save-id="bw-workspace" :items="zoneItems"
+      class="min-h-0 flex-1"
+      :ui="{ handle: 'w-px transition-colors bg-(--bw-line) data-[state=hover]:bg-(--bw-accent) data-[state=drag]:bg-(--bw-accent)' }"
+    >
+      <template #rail>
+        <aside class="bw-rail flex h-full w-full flex-col">
+          <div class="min-h-0 flex-1 overflow-y-auto pr-3"><slot name="rail" /></div>
+          <BwRailFooter :progress-pct="progressPct" :progress-note="progressNote" :progress-subnote="progressSubnote" :progress-to="progressTo" :score="score" />
+        </aside>
+      </template>
+      <template #stage>
+        <main class="bw-stage h-full w-full min-w-0"><div class="bw-stage-inner"><slot /></div></main>
+      </template>
+      <template #george>
+        <aside class="bw-george h-full w-full"><slot name="george" /></aside>
+      </template>
+    </USplitter>
+    <div v-else class="bw-zones">
       <aside class="bw-rail flex flex-col">
         <div class="min-h-0 flex-1 overflow-y-auto pr-3"><slot name="rail" /></div>
         <!-- Runde 48 (David): Gesamt-Fortschritt unten links statt Ring in
              der Topbar — Balken wie im Info-Layer. -->
-        <div class="flex-none pt-5">
-          <!-- Runde 80 (David): das kombinierte Branding als ECHTER
-               Pill-Knopf über dem Fuß — gleiche Anatomie wie die
-               Ergebnis-Zeilen, nicht als unsichtbar verlinkte Fläche. -->
-          <NuxtLink
-            v-if="progressTo" :to="progressTo"
-            class="mb-4 flex w-full items-center gap-3 rounded-full py-2.5 pl-2 pr-2 text-left text-sm"
-            style="background: var(--bw-surface-hi); box-shadow: var(--bw-shadow-card)"
-          >
-            <span class="grid size-7 flex-none place-items-center rounded-full" style="background: var(--bw-accent-soft)">
-              <UIcon name="i-ph-sparkle" class="size-4" style="color: var(--bw-accent)" />
-            </span>
-            <span class="min-w-0 flex-1 font-medium">Euer Branding</span>
-            <BwScoreRing v-if="score !== undefined" :value="score" :size="28" class="flex-none" />
-            <span class="grid size-7 flex-none place-items-center rounded-full">
-              <UIcon name="i-ph-arrow-right" class="size-4" style="color: var(--bw-ink-soft)" />
-            </span>
-          </NuxtLink>
-          <div class="flex items-baseline justify-between gap-3">
-            <p v-if="progressNote" class="bw-label uppercase tracking-wider" style="color: var(--bw-muted)">
-              {{ progressNote }}
-              <span v-if="progressSubnote" class="block">{{ progressSubnote }}</span>
-            </p>
-            <span class="bw-label flex-none uppercase tracking-wider whitespace-nowrap">{{ progressPct }}&thinsp;%</span>
-          </div>
-          <div class="mt-2 h-1.5 overflow-hidden rounded-full" style="background: var(--bw-line)">
-            <div class="h-full rounded-full transition-all" :style="`width: ${progressPct}%; background: var(--bw-accent)`" />
-          </div>
-        </div>
+        <BwRailFooter :progress-pct="progressPct" :progress-note="progressNote" :progress-subnote="progressSubnote" :progress-to="progressTo" :score="score" />
       </aside>
       <main class="bw-stage"><div class="bw-stage-inner"><slot /></div></main>
       <aside class="bw-george"><slot name="george" /></aside>
