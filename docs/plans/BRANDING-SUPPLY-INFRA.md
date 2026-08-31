@@ -20,9 +20,10 @@ weiter — der Layer ist host-agnostisch, sie hängt nicht daran.
 - P1b-Code komplett auf main; brand-Routen laufen fail-closed auf
   pukalani.studio (wird zurückgebaut, §6-Rückbau in Schritt 3).
 - Prod-Appwrite: KEINE brand_*-Tabellen irgendwo (bewusst gewartet).
-- Der Cloudflare-DNS-Token des TLS-Wächters ist zonen-gescopet auf
-  pukalani.app — für branding.supply braucht es Scope-Erweiterung oder
-  einen eigenen Token (**David**, Punkt D2).
+- Der Cloudflare-DNS-Token für die ACME-Prüfung ist zonen-gescopet auf
+  pukalani.app — für branding.supply bräuchte es Scope-Erweiterung oder
+  einen eigenen Token (**David**, Punkt D2). ~~offen~~ **Erledigt ohne
+  Token (2026-08-31):** HTTP-01 hat gereicht, s. §4/D2.
 
 ## 1. Konsequenzen der Kehrtwende (Produkt-Ebene)
 
@@ -44,7 +45,14 @@ alles host-agnostisch gebaut.
   extends: brand vor core (blueprint nur, falls die Wizard-Seiten
   Chrome daraus brauchen — nach P1c-Stand entscheiden).
 - `site.manifest.ts`: products `['brand']`; check:manifests.
-- **Port 3006** (3000–3004 vergeben, 3009 ist der brand-Playground).
+- **Dev-Port 3006** (3000–3005 lokal vergeben, 3009 ist der
+  brand-Playground). **PROD-Port ist 3007** — das sind ZWEI Achsen, und
+  dieser Plan hat sie ursprünglich verwechselt: die Portkarte des
+  SERVERS ist eine eigene Liste (3002 portfolio · 3003 admin · 3004
+  platform · 3005 www/marketing · 3006 **help** · 3007 branding), dort
+  hält help die 3006 seit 2026-07-28. nginx der ploi-Site proxyt auf
+  3007, `ops/ecosystem-branding.config.cjs` setzt 3007; der Dev-Port in
+  `apps/branding/nuxt.config.ts` bleibt unverändert 3006.
 - apps/portfolio: brand aus extends + site.manifest wieder RAUS
   (eigener Commit „Rückbau P1b-Einhängung"; die Routen ziehen mit dem
   Layer um — kein toter Code).
@@ -73,13 +81,16 @@ alles host-agnostisch gebaut.
 
 - DNS: `branding.supply` A auf den Maui-Server (grau/nicht proxied wie
   alle App-Hosts außer dem pukalani.app-Apex) · `www` CNAME auf den Apex.
-- Neue ploi-Site **branding.supply** auf Port 3006; Verzeichnis
-  `/home/ploi/branding.supply/`.
-- TLS: Zertifikat `branding.supply` + `www.branding.supply` über DNS-01
-  (Cloudflare). NEUE ZONE = EIGENE LINEAGE — die Apex+Wildcard-Falle
-  der pukalani.app-Zone gilt hier nicht (kein Wildcard nötig, keine
-  Mandanten). Danach verify-tls.mjs um die zwei Hosts erweitern.
-- nginx: www auf Apex per 301; Standard-Proxy auf 3006.
+- Neue ploi-Site **branding.supply** (Id 402929) auf **Port 3007**
+  (Server-Portkarte, s. §2); Verzeichnis `/home/ploi/branding.supply/`.
+- TLS: Zertifikat `branding.supply` + `www.branding.supply`. NEUE ZONE =
+  EIGENE LINEAGE — die Apex+Wildcard-Falle der pukalani.app-Zone gilt
+  hier nicht (kein Wildcard nötig, keine Mandanten). **HTTP-01 hat
+  gereicht** (beides eigene Domains DIESER Site, beide grau/nicht
+  proxied — Port 80 antwortet für sie); der DNS-01-Weg und damit der
+  Cloudflare-Token D2 waren NICHT nötig. Danach verify-tls.mjs um die
+  zwei Hosts erweitern.
+- nginx: www auf Apex per 301; Standard-Proxy auf 3007.
 
 ## 5. Deploy / Betrieb
 
@@ -87,8 +98,11 @@ alles host-agnostisch gebaut.
   rsync, pm2-Prozess `brandingsupply`, Health
   `https://branding.supply/api/health`).
 - ecosystem-branding.config.cjs; pm2-Name-Match-Falle beachten.
-- ops:site-env: Pflicht-Envs für die neue Site eintragen (Appwrite-Keys,
-  SMTP, NUXT_PUBLIC_I18N_BASE_URL=https://branding.supply).
+- ops:site-env: Pflicht-Envs für die neue Site eintragen (Appwrite-Keys
+  + Database-Id, SMTP, NUXT_PUBLIC_APP_URL und
+  NUXT_PUBLIC_I18N_BASE_URL=https://branding.supply). SMTP ist hier
+  Pflicht statt Ablage-Sache: ohne den `admin`-Layer gibt es keinen
+  Reiter „Integrationen", also nur den Env-Weg.
 - production-watch: TLS-Wächter deckt die neuen Hosts (§4).
 - `pukalani.brand.enabled` bleibt Build-Schalter; brandAdmissionMode
   startet `closed` (Default) — geöffnet wird erst per
@@ -110,8 +124,11 @@ alles host-agnostisch gebaut.
 ## 7. Bei David (D-Punkte)
 
 - **D1:** Diesen Plan abnehmen.
-- **D2:** Cloudflare-DNS-Token für die neue Zone (Scope erweitern ODER
-  eigenen Token in ~/.appwrite-secrets ablegen) — nötig für DNS-01.
+- ~~**D2:** Cloudflare-DNS-Token für die neue Zone~~ — **HINFÄLLIG
+  (2026-08-31):** das Zertifikat kam über HTTP-01, weil beide Namen
+  eigene Domains DIESER ploi-Site sind (Port 80 antwortet für sie). Die
+  DNS-01-Pflicht der pukalani.app-Zone kommt von Wildcards und Aliassen,
+  die es hier nicht gibt.
 - **D3:** ploi-Site-Anlage bestätigen (kann ich über den ploi-Zugang
   anlegen; Server = der bestehende Maui-Server).
 - **D4:** Erstgespräch-CTA cross-domain ok? (Plausible-Ziel für den

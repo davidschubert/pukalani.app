@@ -83,6 +83,21 @@ const HOSTS = [
   // Abschnitt „Befund des Pool-Erstlaufs" lesen — NICHT blind neu anfordern.
   { host: 'freelancer.supply', ip: '49.13.211.173', note: 'Pool-Kundendomain (Tenant-Lineage, NICHT von der Wildcard gedeckt)' },
   { host: 'www.freelancer.supply', ip: '49.13.211.173', note: 'Pool-Kundendomain, www-Form (eigene Tenant-Lineage)' },
+  // EIGENE ZONE (2026-08-31, Brand-Wizard) — und aus demselben Grund
+  // eintragungspflichtig wie `pukalani.studio` darueber: `branding.supply`
+  // liegt ausserhalb der Zone `pukalani.app`, die Wildcard deckt sie NICHT.
+  // Die Site hat ihre EIGENE ploi-Lineage `branding.supply` (ein Zertifikat,
+  // zwei SANs: Apex + www) — geht deren Erneuerung schief, faellt die
+  // Produkt-Domain aus, und kein anderer Eintrag dieser Liste wuerde es
+  // bemerken. `www` steht mit drin, weil es im selben Zertifikat haengt: es
+  // antwortet nur eine 301 auf den Apex, und die wird erst NACH dem
+  // Handshake gesprochen — ein Loch dort bricht also jeden www-Link still.
+  //
+  // Die Apex+Wildcard-Falle der pukalani.app-Zone gilt hier NICHT (kein
+  // Wildcard, keine Mandanten): eine Anforderung auf dieser Site kann nur ihr
+  // eigenes Zertifikat ueberschreiben.
+  { host: 'branding.supply', ip: '49.13.211.173', note: 'Brand-Wizard (eigene Zone, eigene Lineage — NICHT von der pukalani.app-Wildcard gedeckt)' },
+  { host: 'www.branding.supply', ip: '49.13.211.173', note: 'Brand-Wizard, www-Form → 301 auf den Apex (im selben Zertifikat)' },
   { host: 'platform.pukalani.app', ip: '49.13.211.173', note: 'Pool-App' },
   { host: 'demo.pukalani.app', ip: '49.13.211.173', note: 'Pool-Tenant (Stellvertreter für ALLE Kunden)' },
   { host: 'account.pukalani.app', ip: '49.13.211.173', note: 'Kundenbereich' },

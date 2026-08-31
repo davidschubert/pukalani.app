@@ -268,6 +268,77 @@ const SITES = [
     ],
   },
   {
+    dir: 'branding.supply',
+    name: 'branding',
+    note: 'Branding-Supply-Site — eigenes Appwrite-Projekt branding, SMTP Pflicht (die Beta-Einladung hängt an der E-Mail-Verifizierung, F44)',
+    localProjectFiles: ['~/.appwrite-secrets/migrations/branding.env'],
+    required: [
+      'NUXT_APPWRITE_KEY',
+      'NUXT_PUBLIC_APPWRITE_ENDPOINT',
+      'NUXT_PUBLIC_APPWRITE_PROJECT_ID',
+      /**
+       * STEHT HIER, obwohl die drei älteren Site-Blöcke ihn nicht führen: die
+       * Database-Id hat keinen brauchbaren Default — ohne sie findet KEIN
+       * Row-Zugriff statt. Bei den Alt-Sites ist das nie aufgefallen, weil ihre
+       * Server-.env sie seit Tag eins trägt; bei einer FRISCH befüllten .env
+       * ist sie genau die Zeile, die man vergisst.
+       */
+      'NUXT_PUBLIC_APPWRITE_DATABASE_ID',
+      /**
+       * F44 IN REINFORM — und deshalb hier PFLICHT, obwohl `platform` und
+       * `control` ihre SMTP-Zeilen am 2026-08-19 in die verschlüsselte Ablage
+       * (`instance_secrets`) abgegeben haben und sie darum NICHT mehr führen:
+       *
+       * Diese Site hat den `admin`-Layer bewusst nicht (apps/branding extends
+       * nur brand + core + system, Begründung in ihrer nuxt.config.ts). Ohne
+       * ihn gibt es hier keinen Reiter „Integrationen", also niemanden, der die
+       * Ablage füllen könnte — die Env ist auf branding der EINZIGE Weg. Ein
+       * Wächter, der einen von zwei gleichwertigen Wegen anmahnt, erzieht zum
+       * Weglesen; hier gibt es aber nur einen.
+       *
+       * Was bei fehlendem SMTP still kaputtgeht: die Beta-Einladung HÄNGT an
+       * der E-Mail-Verifizierung. Ohne Mailer registriert sich der Eingeladene,
+       * bekommt nie seine Bestätigungs-Mail und kommt nie in den Wizard — die
+       * Site sieht dabei vollkommen gesund aus.
+       *
+       * `NUXT_INSTANCE_SECRETS_KEY` fehlt aus demselben Grund bewusst: ohne
+       * Konsolen-Reiter gäbe es nichts zu öffnen.
+       */
+      'NUXT_SMTP_HOST',
+      'NUXT_SMTP_PORT',
+      'NUXT_SMTP_USER',
+      'NUXT_SMTP_PASS',
+      'NUXT_SMTP_FROM',
+      /**
+       * DIE ZWEITE HÄLFTE DERSELBEN KETTE: `signup.post.ts` verschickt die
+       * Verifizierungs-Mail nur, wenn `pukalani.auth.verification` an ist (Core-
+       * Default, gilt hier) UND `config.public.appUrl` einen Wert hat. Ist er
+       * leer, wird der ganze Zweig ÜBERSPRUNGEN — ohne Fehler, ohne Log-Zeile.
+       * SMTP allein zu setzen reicht also nicht; es braucht beide.
+       * Wert: https://branding.supply
+       */
+      'NUXT_PUBLIC_APP_URL',
+      /**
+       * hreflang/canonical/og:url der zweisprachigen Site (de+en). Leer =
+       * relative Alternates — kein sichtbarer Defekt, nur stille SEO-Schäden.
+       * Wert: https://branding.supply
+       */
+      'NUXT_PUBLIC_I18N_BASE_URL',
+      /**
+       * NICHT in dieser Liste: `NUXT_AI_KEY`. Georges Entwürfe (P2) sind noch
+       * aus (`brandAiEnabled`), und ohne Generator streamt §3e bewusst gar
+       * nichts statt Ersatztext. MIT P2 / offenem `brandAiEnabled` wird er
+       * Pflicht — dann hier eintragen (dieselbe Sorte Loch wie bei platform:
+       * kein Fehler, der Knopf erscheint nur nicht).
+       *
+       * Ebenfalls NICHT: die GEO_*-Pfade der anderen Konten-Sites. Sie decken
+       * die Sitzungsliste und den Orts-Picker im Profil ab, und beide hängen
+       * an Seiten der Layer `admin` bzw. `onboarding` — branding hat keinen
+       * von beiden, die Formulare sind hier also gar nicht erreichbar.
+       */
+    ],
+  },
+  {
     dir: 'help.pukalani.app',
     name: 'help',
     note: 'Hilfe-Seiten — reine Inhalte, kein Appwrite, keine Mails',

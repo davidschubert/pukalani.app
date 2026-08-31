@@ -256,7 +256,7 @@ jobs:
         if: steps.changes.outputs.skip != 'true'
         run: |
           set -eu
-          for app in portfolio control platform marketing help; do
+          for app in portfolio control platform marketing help branding; do
             mkdir -p "apps/$app/node_modules/.cache/nuxt/fonts"
             rsync -a "prod:/home/ploi/fonts-cache/" "apps/$app/node_modules/.cache/nuxt/fonts/" || true
           done
@@ -267,7 +267,7 @@ jobs:
         if: steps.changes.outputs.skip != 'true'
         run: |
           set -eu
-          for app in portfolio control platform marketing help; do
+          for app in portfolio control platform marketing help branding; do
             echo "::group::Build $app"
             pnpm --filter "$app" build
             echo "::endgroup::"
@@ -285,7 +285,7 @@ jobs:
       - name: Font-Cache zurückschreiben (Blobs additiv, Metadaten aktualisierend)
         if: steps.changes.outputs.skip != 'true'
         run: |
-          for app in portfolio control platform marketing help; do
+          for app in portfolio control platform marketing help branding; do
             rsync -a --ignore-existing "apps/$app/node_modules/.cache/nuxt/fonts/" "prod:/home/ploi/fonts-cache/" || true
             rsync -a --include='meta/' --include='meta/**' --exclude='*' "apps/$app/node_modules/.cache/nuxt/fonts/" "prod:/home/ploi/fonts-cache/" || true
           done
@@ -313,10 +313,18 @@ jobs:
           # demselben Tag BEWUSST aufgegeben: der Host faellt in die Wildcard-
           # Site platform und antwortet 404 (Davids Entscheidung, s. CLAUDE.md
           # AH-4b und DECISION-LOG).
-          declare -A SITE=( [portfolio]=portfolio.pukalani.app [control]=admin.pukalani.app [platform]=platform.pukalani.app [marketing]=pukalani.app [help]=help.pukalani.app )
-          declare -A SLOT=( [portfolio]=portfolio [control]=control [platform]=platform [marketing]=marketing [help]=help )
-          declare -A PROBE=( [portfolio]=portfolio.pukalani.app [control]=admin.pukalani.app [platform]=platform.pukalani.app [marketing]=pukalani.app [help]=help.pukalani.app )
-          for app in portfolio control platform marketing help; do
+          #
+          # BRANDING (2026-08-31) ist die erste App AUSSERHALB der Zone
+          # pukalani.app: Site, Slot und Probe heissen `branding.supply` bzw.
+          # `branding`, der pm2-Prozess `brandingsupply` (Site ohne Punkte, wie
+          # ueberall). Ihr nginx proxyt auf Port 3007 — NICHT auf den DEV-Port
+          # 3006 der App: das ist die Portkarte des SERVERS, und dort haelt
+          # help seit 2026-07-28 die 3006 (Begruendung in
+          # ops/ecosystem-branding.config.cjs).
+          declare -A SITE=( [portfolio]=portfolio.pukalani.app [control]=admin.pukalani.app [platform]=platform.pukalani.app [marketing]=pukalani.app [help]=help.pukalani.app [branding]=branding.supply )
+          declare -A SLOT=( [portfolio]=portfolio [control]=control [platform]=platform [marketing]=marketing [help]=help [branding]=branding )
+          declare -A PROBE=( [portfolio]=portfolio.pukalani.app [control]=admin.pukalani.app [platform]=platform.pukalani.app [marketing]=pukalani.app [help]=help.pukalani.app [branding]=branding.supply )
+          for app in portfolio control platform marketing help branding; do
             site="${SITE[$app]}"
             probe="${PROBE[$app]}"
             echo "::group::Deploy $app → $site"
@@ -329,9 +337,10 @@ jobs:
             # mehr wert: die control-Site hat seit dem Cutover bewusst keinen,
             # die help-Site (2026-07-28) genauso.
             # (Die uebrigen Sites behalten ihre Checkouts fuer den ploi-
-            # FALLBACK-Deploy — der macht sein eigenes git pull. Fuer control
-            # und help gibt es diesen Fallback bewusst nicht; Ersatz sind die
-            # Runbooks docs/runbooks/CONTROL-CUTOVER.md bzw. HELP-GO-LIVE.md.)
+            # FALLBACK-Deploy — der macht sein eigenes git pull. Fuer control,
+            # help und branding gibt es diesen Fallback bewusst nicht; Ersatz
+            # sind die Runbooks docs/runbooks/CONTROL-CUTOVER.md,
+            # HELP-GO-LIVE.md bzw. BRANDING-SUPPLY-SETUP.md.)
             rsync -az ops/ "prod:/home/ploi/$site/ops/"
             # Flip + Reload (ZDT Stufe 2). pm2 startOrReload findet den Prozess
             # ueber den NAMEN in der Ecosystem-Datei — bei einer Umbenennung

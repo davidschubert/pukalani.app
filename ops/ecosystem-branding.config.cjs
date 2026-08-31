@@ -1,0 +1,56 @@
+// Zero-Downtime-Deploy (A.10-Muster, s. ecosystem-portfolio.config.cjs):
+// pm2-Cluster fuer branding.supply (Brand-Wizard, apps/branding) auf
+// Port 3007; Script zeigt auf den current-Symlink, die Server-.env wird beim
+// (Re-)Load geparst.
+//
+// PORT 3007, NICHT 3006 — ZWEI GETRENNTE ACHSEN (2026-08-31): der DEV-Port der
+// App ist 3006 (apps/branding/nuxt.config.ts, lokal frei), die PORTKARTE DES
+// SERVERS ist eine andere Liste und dort ist 3006 seit 2026-07-28 von help
+// belegt. Server-Belegung: 3002 portfolio · 3003 admin · 3004 platform ·
+// 3005 www/marketing · 3006 help · 3007 branding. Der Infra-Plan hatte die
+// beiden Achsen verwechselt; nginx der ploi-Site branding.supply proxyt auf
+// 3007. Wer den Wert hier aendert, muss den nginx-Block mitaendern.
+//
+// Der Prozessname MUSS die Site ohne Punkte sein (branding.supply →
+// brandingsupply): deploy.yml leitet ihn genau so ab (`PROC=$(echo "$site" |
+// tr -d .)`) und uebergibt ihn an pm2-heal.sh. Weicht der Name hier ab, findet
+// der Heiler still nichts.
+const fs = require('node:fs')
+
+const ENV_FILE = '/home/ploi/branding.supply/.env'
+const CURRENT = '/home/ploi/releases/branding/current'
+
+function parseEnvFile(path) {
+  const env = {}
+  for (const line of fs.readFileSync(path, 'utf8').split('\n')) {
+    const match = line.match(/^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*?)\s*$/)
+    if (!match || match[1].startsWith('#')) continue
+    let value = match[2]
+    if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith('\'') && value.endsWith('\''))) {
+      value = value.slice(1, -1)
+    }
+    env[match[1]] = value
+  }
+  return env
+}
+
+module.exports = {
+  apps: [
+    {
+      name: 'brandingsupply',
+      script: `${CURRENT}/server/index.mjs`,
+      // cwd EXPLIZIT (3. pm2-Falle, 2026-07-26): ohne cwd friert pm2 das
+      // Shell-cwd des ERSTSTARTS ein — s. ecosystem-portfolio.config.cjs.
+      cwd: CURRENT,
+      exec_mode: 'cluster',
+      instances: 1,
+      kill_timeout: 8000,
+      env: {
+        ...parseEnvFile(ENV_FILE),
+        PORT: 3007,
+        HOST: '127.0.0.1',
+        NODE_ENV: 'production',
+      },
+    },
+  ],
+}
