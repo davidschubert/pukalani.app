@@ -144,6 +144,50 @@ const faehigkeiten = [
         </div>
       </div>
 
+      <!-- Brand Insights: die Wissens-Seite der Plattform, drei Formate -->
+      <div class="mt-24">
+        <h2 class="text-center text-3xl font-extralight tracking-tight">Brand Insights</h2>
+        <p class="bw-label mt-2 text-center" style="color: var(--bw-muted)">Markenwissen mit Beweisen — Artikel, Brand-Profile und Duelle aus unserer Knowledge Base.</p>
+        <div class="mt-10 grid gap-x-6 gap-y-6 @sm:grid-cols-2 @md:grid-cols-3">
+          <NuxtLink to="/brand/demo/artikel" class="bw-card bw-card--hover flex flex-col overflow-hidden">
+            <div class="h-28" style="background: linear-gradient(135deg, #a89684, #efe6db)" />
+            <div class="flex flex-1 flex-col p-6">
+              <p class="bw-label" style="color: var(--bw-muted)">Artikel · Rebranding</p>
+              <h3 class="mt-1.5 font-medium leading-snug">Warum Luxusmarken ihre Serifen aufgeben</h3>
+              <p class="mt-1.5 flex-1 text-sm leading-relaxed" style="color: var(--bw-ink-soft)">Die große Vereinheitlichung — und wann sie ein Fehler ist.</p>
+            </div>
+          </NuxtLink>
+          <NuxtLink to="/brand/demo/profil" class="bw-card bw-card--hover flex flex-col p-6">
+            <div class="flex items-start justify-between gap-3">
+              <div class="min-w-0">
+                <p class="bw-label" style="color: var(--bw-muted)">Brand-Profil</p>
+                <h3 class="mt-1.5 font-medium leading-snug">Nike</h3>
+              </div>
+              <BwScoreRing :value="94" :size="40" class="flex-none" />
+            </div>
+            <p class="mt-1.5 flex-1 text-sm leading-relaxed" style="color: var(--bw-ink-soft)">Der Held unter den Weltmarken — bewertet in 8 Dimensionen, mit Historie und Markenzeichen.</p>
+            <p class="bw-label mt-3" style="color: var(--bw-muted)">Profil, Artikel & Verlauf</p>
+          </NuxtLink>
+          <NuxtLink to="/brand/demo/duell" class="bw-card bw-card--hover flex flex-col p-6">
+            <div class="flex items-start justify-between gap-3">
+              <div class="min-w-0">
+                <p class="bw-label" style="color: var(--bw-muted)">Brand-Duell</p>
+                <h3 class="mt-1.5 font-medium leading-snug">Nike vs. Adidas</h3>
+              </div>
+              <div class="flex flex-none items-center gap-1.5">
+                <BwScoreRing :value="94" :size="32" />
+                <BwScoreRing :value="91" :size="32" />
+              </div>
+            </div>
+            <p class="mt-1.5 flex-1 text-sm leading-relaxed" style="color: var(--bw-ink-soft)">Acht Dimensionen, Zahl gegen Zahl — wie die Statistik-Tafel nach dem Spiel.</p>
+            <p class="bw-label mt-3" style="color: var(--bw-muted)">Zum Direktvergleich</p>
+          </NuxtLink>
+        </div>
+        <div class="mt-8 text-center">
+          <NuxtLink to="/brand/demo/journal" class="bw-label inline-flex items-center gap-1.5 transition-colors hover:!text-(--bw-ink)" style="color: var(--bw-muted)">Alle Brand Insights <UIcon name="i-ph-arrow-right" class="size-3.5" /></NuxtLink>
+        </div>
+      </div>
+
       <!-- Brand-Check: der Relaunch-Lead-Magnet, unterhalb beworben -->
       <div class="bw-card mt-24 grid items-center gap-10 p-10 lg:grid-cols-[minmax(0,1fr)_22rem]">
         <div class="min-w-0">
