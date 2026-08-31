@@ -14,12 +14,16 @@ const ratings = [
   { label: 'Mut', value: 4.2 },
   { label: 'Handwerk', value: 4.8 },
 ]
+/* Steckbrief entlang der 6 Taxonomie-Achsen (Plan: Marken-Taxonomie) —
+ * Archetyp, Stil, Stimme und Positionierung sind GETRENNTE Angaben. */
 const steckbrief = [
   ['Branche', 'Physiotherapie'],
   ['Ort', 'Kiel'],
   ['Weiche', 'Neue Marke'],
-  ['Archetyp', 'Der Fürsorgliche'],
+  ['Archetyp', 'Der Fürsorgliche · Rest Weiser'],
+  ['Stil', 'Organisch · Minimal'],
   ['Stimme', 'warm, gerade heraus'],
+  ['Positionierung', 'Premium · regional'],
   ['Sprache', 'Deutsch'],
   ['Veröffentlicht', 'Juli 2026'],
 ]
