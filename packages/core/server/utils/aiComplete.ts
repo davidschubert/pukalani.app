@@ -19,6 +19,35 @@ export interface AiConfig {
   baseUrl: string
 }
 
+/**
+ * OpenRouter-PROVIDER-ROUTING — „welcher Anbieter darf diesen Prompt sehen,
+ * und unter welchen Bedingungen".
+ *
+ * Warum das in den Transport gehört und trotzdem keine Policy ist: die Felder
+ * reisen im REQUEST, ein Konsument kann sie also nicht nachträglich anlegen.
+ * Der Transport übersetzt sie nur in OpenRouters Schreibweise
+ * (`data_collection`, `allow_fallbacks`) und setzt KEINE Vorgaben: ohne diese
+ * Option ändert sich der Request um kein Byte, und wer sie setzt, bekommt
+ * genau das gesendet, was er geschrieben hat — auch eine leere Allowlist wird
+ * nicht stillschweigend weggelassen (ein weggelassener `only`-Eintrag wäre
+ * fail-OPEN, und diese Entscheidung gehört dem Aufrufer).
+ *
+ * Der erste Konsument ist der Brand-Wizard: `zdr: true`,
+ * `dataCollection: 'deny'`, geprüfte `only`-Allowlist, `allowFallbacks: false`
+ * — fail-closed, lieber „gerade nicht verfügbar" als ein stiller Ausweich auf
+ * einen Nicht-ZDR-Anbieter.
+ */
+export interface AiProviderRouting {
+  /** Nur Anbieter mit Zero-Data-Retention. */
+  zdr?: boolean
+  /** `'deny'` = der Anbieter darf den Inhalt nicht zum Training sammeln. */
+  dataCollection?: 'allow' | 'deny'
+  /** Allowlist von Anbieter-Slugs — wörtlich übernommen. */
+  only?: string[]
+  /** `false` = kein Ausweichen auf einen Anbieter außerhalb der Bedingungen. */
+  allowFallbacks?: boolean
+}
+
 export interface AiCompleteOptions {
   /** Model-Override — Default: pukalani.ai.model */
   model?: string
@@ -32,6 +61,53 @@ export interface AiCompleteOptions {
   timeoutMs?: number
   /** Log-Präfix des Aufrufers (z.B. 'tickets') — Fehler bleiben zuordenbar */
   label?: string
+  /** OpenRouter-Provider-Routing (ZDR/Allowlist/kein Fallback) — s. AiProviderRouting */
+  providerRouting?: AiProviderRouting
+}
+
+export interface AiRequestBodyInput {
+  model: string
+  prompt: string
+  system?: string
+  temperature?: number
+  maxTokens?: number
+  providerRouting?: AiProviderRouting
+  /** Nur gesetzt, wenn wahr — der heutige Non-Streaming-Body bleibt unverändert. */
+  stream?: boolean
+}
+
+/**
+ * DER EINE REQUEST-BAU. Bewusst exportiert und ohne H3Event/fetch: eine
+ * spätere Streaming-Variante (`stream: true`) baut ihren Body durch DIESELBE
+ * Funktion — sonst driften die Datenschutz-Felder auseinander, und ausgerechnet
+ * der Streaming-Pfad (der Brand-Wizard) führe ohne ZDR-Bedingungen.
+ */
+export function buildAiRequestBody(input: AiRequestBodyInput): Record<string, unknown> {
+  const body: Record<string, unknown> = {
+    model: input.model,
+    messages: [
+      ...(input.system ? [{ role: 'system', content: input.system }] : []),
+      { role: 'user', content: input.prompt },
+    ],
+    temperature: input.temperature ?? 0.2,
+    max_tokens: input.maxTokens ?? 700,
+  }
+
+  const routing = input.providerRouting
+  if (routing) {
+    const provider: Record<string, unknown> = {}
+    if (routing.zdr !== undefined) provider.zdr = routing.zdr
+    if (routing.dataCollection !== undefined) provider.data_collection = routing.dataCollection
+    if (routing.only !== undefined) provider.only = [...routing.only]
+    if (routing.allowFallbacks !== undefined) provider.allow_fallbacks = routing.allowFallbacks
+    // Ein leeres Routing-Objekt darf kein leeres `provider` senden — das wäre
+    // eine Behauptung ohne Inhalt.
+    if (Object.keys(provider).length > 0) body.provider = provider
+  }
+
+  if (input.stream) body.stream = true
+
+  return body
 }
 
 /** Core-KI-Gate (pukalani.ai) — Konsumenten prüfen enabled, Transport nicht. */
@@ -131,15 +207,14 @@ export async function aiComplete(event: H3Event, prompt: string, options: AiComp
         'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
+      body: JSON.stringify(buildAiRequestBody({
         model,
-        messages: [
-          ...(options.system ? [{ role: 'system', content: options.system }] : []),
-          { role: 'user', content: prompt },
-        ],
-        temperature: options.temperature ?? 0.2,
-        max_tokens: options.maxTokens ?? 700,
-      }),
+        prompt,
+        system: options.system,
+        temperature: options.temperature,
+        maxTokens: options.maxTokens,
+        providerRouting: options.providerRouting,
+      })),
     })
     if (!res.ok) {
       console.error(`[${label}] KI-API ${res.status}: ${(await res.text()).slice(0, 300)}`)
