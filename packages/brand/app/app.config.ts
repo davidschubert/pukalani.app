@@ -33,16 +33,15 @@
  * Was am Ende steht. `type: 'route'` zeigt auf das Erstgespräch — das eine
  * Conversion-Ziel der Studio-Site.
  *
- * OFFEN UND BEWUSST SO COMMITTET: `labelKey` ist ein VERSPRECHEN, das der
- * Layer noch nicht hält — `brand.cta.book` existiert in keiner Locale-Datei,
- * weil `brand` noch keine hat. Heute ist das folgenlos (es rendert diesen
- * Knopf noch niemand, und `brand` steht in keiner App-`extends`, also sieht
- * ihn auch `pnpm check:i18n-keys` nicht). Mit den Routen/Seiten muss BEIDES
- * kommen: die Locale-Einträge in de UND en, und das Feld
- * `pukalani.brand.completionCta.labelKey` in der `FIELDS`-Tabelle von
- * `scripts/check-i18n-keys.mjs`. Ohne das steht im Knopf am Ende wörtlich
- * `brand.cta.book` — genau der Fehler, der vier Tage lang im Fuß von
- * comments.pukalani.app stand.
+ * EINGELÖST MIT P1c (2026-08-31): `labelKey` war ein VERSPRECHEN ohne Deckung —
+ * `brand.cta.book` existierte in keiner Locale-Datei, weil der Layer keine
+ * hatte. Jetzt steht es in `i18n/locales/{de,en}.json`, und das Feld
+ * `pukalani.brand.completionCta.labelKey` steht in der `FIELDS`-Tabelle von
+ * `scripts/check-i18n-keys.mjs` — der Wächter prüft es über `apps/portfolio`,
+ * die einzige App, die diesen Layer extended (Gegenprobe: Schlüssel entfernen
+ * ⇒ ein Befund). Ohne beides stünde im Knopf am Ende wörtlich `brand.cta.book`
+ * — genau der Fehler, der vier Tage lang im Fuß von comments.pukalani.app
+ * stand.
  */
 export default defineAppConfig({
   pukalani: {

@@ -1,0 +1,264 @@
+{
+  "brand": {
+    "cta": {
+      "book": "Book your intro call"
+    },
+    "q": {
+      "a": {
+        "pitch": "Elevator pitch",
+        "category": "Category",
+        "competitors": "Competitors",
+        "audienceSketch": "Audience sketch",
+        "toneAnalysis": "Tone of your existing texts",
+        "origin": {
+          "new": "Why did you start this — what was the trigger, what problem couldn't you ignore?",
+          "relaunch": "What about your current brand MUST stay — the things people recognize you by, the things loyal customers would miss?"
+        },
+        "customerPraise": "What do your happiest customers say about you — the words THEY use?",
+        "complaints": "What complaints or negative feedback do you get? Be honest — this is as valuable as the praise.",
+        "oneThing": "What's the one thing you wish every customer knew about you?",
+        "challenge": "What's the biggest obstacle in front of you right now?",
+        "facts": "A few quick numbers: how big is the team, how long have you existed, which markets?"
+      },
+      "b": {
+        "whyStarted": {
+          "new": "You already told me how it began. In one sentence: why does that still matter today?",
+          "relaunch": "Forget the founding story for a second: why do you still exist TODAY — what would your customers lose tomorrow?"
+        },
+        "worldLoses": "What would the world lose if you shut down tomorrow? Impact, not revenue.",
+        "conviction": "What belief drives this company — the one you'd defend even when it costs you?",
+        "tenYears": "Ten years from now: what looks different in the world because you existed?",
+        "legacy": "When people talk about you in 20 years, what should they say?",
+        "purpose": "Purpose",
+        "vision": "Vision",
+        "mission": "Mission",
+        "positioningCategory": "Which category are you playing in?",
+        "positioningFirstChoice": "And within that category: for whom are you the FIRST choice — and against whom?"
+      },
+      "b2": {
+        "visibility": "Should your product brands visibly belong to the main brand — or stand on their own?",
+        "roleOfMaster": "Should the main brand lend them trust — or should they be free to reach audiences the main brand can't?",
+        "namingPattern": "How should they be ALLOWED to be named — \"Brand Product\", or names of their own?",
+        "model": "Which architecture model fits you?",
+        "rule": "Your naming rule"
+      },
+      "c": {
+        "discovery1": "Think of a moment when your business was at its best. What was happening?",
+        "discovery2": "Think of a moment when something felt deeply wrong. What happened?",
+        "discovery3": "What behavior would you never tolerate — not even from your best-paying client?",
+        "candidates": "Value candidates",
+        "final": "Which three to five would you defend, even when it costs you?",
+        "definitions": "What each value means here",
+        "livedExamples": "For each value: one REAL example where you already lived it.",
+        "conflictRule": "Where do two of your values collide — and which one wins?",
+        "teamFilter": "If you hired someone tomorrow: which value is the non-negotiable filter?"
+      },
+      "d": {
+        "hypothesis": "Archetype hypothesis from your current appearance",
+        "pairs": "Which of the two feels more like you?",
+        "primary": "Primary archetype",
+        "secondary": "Secondary archetype",
+        "gapReveal": "Self-image and outside view",
+        "party": "If your brand were a person at a party — how would they behave?",
+        "never": "Which trait should your brand NEVER have?",
+        "admired": "Name a brand whose personality you admire — what is it about them?",
+        "emotion": "What should people FEEL when they interact with you?",
+        "voiceSamples": "Which of these sentences sounds most like you?",
+        "toneWords": "Which words describe your tone?",
+        "vocabulary": "Which words would you NEVER use?"
+      },
+      "e": {
+        "warmup1": "What pisses you off about your industry?",
+        "warmup2": "What do you wish more people understood about your work?",
+        "statements": "The statement openers",
+        "composition": "Tone, length and use of the manifesto",
+        "manifesto": "Manifesto",
+        "anchorLine": "Which line is the one you would put on a wall?"
+      },
+      "ep": {
+        "taglines": "Which tagline carries it?",
+        "boilerplates": "Boilerplates — bio, short paragraph, paragraph",
+        "keyMessages": "Key messages per audience",
+        "vocabulary": "Words to use, words to avoid",
+        "distinctiveAsset": "Which line becomes your verbal signature?"
+      },
+      "f": {
+        "nameType": "Which kind of name fits you?",
+        "taste": "Name three to five brand names you love — any industry — and say why.",
+        "noGos": "Any words, styles or lengths that are off-limits?",
+        "candidates": "Name candidates",
+        "shortlist": "Which candidates make the shortlist?",
+        "checks": "Availability checks",
+        "criteria": "Rate the finalists against the eight criteria.",
+        "decision": "Your top three, in order."
+      },
+      "result": {
+        "direction": "Which direction fits your brand?",
+        "rating": "How helpful was this result?"
+      }
+    },
+    "help": {
+      "b": {
+        "purpose": "Purpose is the WHY: the reason you exist beyond making money. Vision is the WHERE TO, mission is the HOW — three sentences, three jobs. Patagonia's purpose does not sell jackets; it wants to save the planet.",
+        "vision": "The vision describes the world once you have succeeded — a picture, not a target figure. It may sit ten years out and still has to give direction today.",
+        "mission": "The mission says what you do every day to get there — concrete enough that a new colleague could act on it. Purpose is why, vision is where to, mission is how.",
+        "positioningCategory": "Positioning is the place you claim in someone's head: a category, and the people for whom you are the first choice within it. Without a category people still compare you — just without your say in it."
+      },
+      "b2": {
+        "model": "Four models: branded house (one brand carries everything), sub-brands, endorsed brands, house of brands (brands without a visible parent). Each buys a different kind of trust, and each has a price."
+      },
+      "c": {
+        "candidates": "Values are rules of behaviour that are allowed to cost money — not poster words. Survey after survey finds that most employees cannot name their own company's values; that is what happens when the words were picked for their sound.",
+        "final": "Three to five is the working range: fewer says nothing, more nobody remembers. Take the ones you would defend in a bad week, not the ones that read well."
+      },
+      "d": {
+        "pairs": "The archetype is your brand's character — it steers voice, imagery and effect. You don't pick it off a list: it comes out of comparisons, because a decision between two feelings is more honest than a menu of twelve.",
+        "primary": "Twelve archetypes in four groups; you get a primary and a secondary one. The primary sets the tone, the secondary keeps it from turning into a cliché.",
+        "gapReveal": "Here your self-image meets the picture your current appearance sends out. A gap is not a mistake — it is the most useful thing on this page, and it gets named plainly instead of smoothed over."
+      },
+      "e": {
+        "statements": "A manifesto takes a stand: it should attract the right people and put off the wrong ones. The openers are scaffolding — cross out whatever sounds borrowed and keep what you would say out loud.",
+        "manifesto": "A mission explains, a manifesto commits. It is written to be read aloud, so shorter and sharper almost always wins."
+      },
+      "f": {
+        "nameType": "There are nine kinds of names — descriptive, invented, metaphorical and so on. Choose the kind first, then brainstorm: a mixed list always collapses into the safest option.",
+        "taste": "The name is the most repeated element of a brand — it has to be sayable, memorable and protectable. What you love about other people's names says more about your taste than any list of adjectives.",
+        "checks": "The more invented a name, the more protectable it is. What you see here are indicators from public registries and from DNS — general information, not legal advice. Talk to a trademark lawyer before you commit."
+      }
+    },
+    "rebrand": {
+      "r1": "What about your current brand MUST stay — the things people recognize you by, the things loyal customers would miss?",
+      "r2": "What goes — deliberately? And why that?",
+      "r3": "Why now? What happened — growth, new audience, merger, or the moment you got embarrassed by your own website?",
+      "r4": "What do you NOT like about your current appearance?"
+    },
+    "workspace": {
+      "confidence": {
+        "question": "Does this chapter fit?",
+        "fits": "Fits",
+        "almost": "Almost — one thing bugs me",
+        "restart": "Start over"
+      },
+      "sync": {
+        "saving": "Saving …",
+        "saved": "Saved",
+        "offline": "Offline — your input stays here",
+        "error": "Not saved — we'll try again",
+        "conflict": "Conflict — this brand changed elsewhere"
+      },
+      "conflict": {
+        "title": "This step changed somewhere else",
+        "description": "Another tab or another device saved this step after you opened it. Nothing of yours was overwritten — choose which version continues.",
+        "serverLabel": "Version on the server",
+        "mineLabel": "Your version",
+        "loadServer": "Load server version",
+        "copyMine": "Copy my version",
+        "copied": "Copied to your clipboard — your text stays in the editor.",
+        "copyFailed": "Copying failed — select the text and copy it manually."
+      },
+      "next": "Continue",
+      "back": "Back",
+      "dontKnow": "I don't know",
+      "help": "Why we ask this",
+      "contentLocale": "Content language",
+      "confirmSlot": "Confirm",
+      "completeStep": "Confirm chapter",
+      "george": {
+        "subtitle": "Your brand advisor",
+        "placeholder": "Write your answer — or ask a question",
+        "nothingOpen": "Nothing open in this chapter — confirm it when it fits.",
+        "aiPending": "George's answers arrive with the next phase. Until then you write here and everything is saved."
+      },
+      "stage": {
+        "title": "Your brand document",
+        "empty": "Nothing here yet — it fills up as you answer.",
+        "pending": "Still open — comes up in the conversation.",
+        "pairsPlaceholder": "The archetype comparison is its own instrument and arrives with a later phase.",
+        "notEditable": "George derives this — you can't type here."
+      },
+      "progress": "{filled} of {total} decisions",
+      "noAccess": {
+        "title": "No access yet",
+        "description": "The brand wizard is in a closed beta. If you have an invitation link, open it — otherwise we'll get in touch once your access is ready."
+      },
+      "stepLocked": {
+        "title": "This chapter isn't open yet",
+        "description": "Finish the chapter before it, and this one opens on its own."
+      }
+    },
+    "brands": {
+      "title": "Brandings",
+      "subtitle": "Every branding is its own run — pause whenever you like, your progress stays saved.",
+      "new": "New branding",
+      "empty": {
+        "title": "Let's build your first branding.",
+        "description": "You can pause at any time — your progress stays saved.",
+        "action": "Start your first branding"
+      },
+      "card": {
+        "continue": "Continue",
+        "currentStep": "Currently: {step}",
+        "path": {
+          "new": "New brand",
+          "relaunch": "Brand relaunch"
+        },
+        "edited": "last edited {when}"
+      },
+      "loadFailed": "The brandings could not be loaded."
+    },
+    "new": {
+      "title": "What are we starting with?",
+      "eyebrow": "New branding",
+      "kind": {
+        "new": {
+          "label": "New brand",
+          "note": "You're starting from zero — name and brand come out of the conversation."
+        },
+        "relaunch": {
+          "label": "Brand relaunch",
+          "note": "You already have a brand — from a polish to a full recut."
+        }
+      },
+      "scope": {
+        "question": "Is this a sharpening — same brand, better told — or a real cut, where name, look or position may change?",
+        "refine": "Sharpening",
+        "recut": "Real cut",
+        "namingOpted": "Put the name up for review"
+      },
+      "titleField": {
+        "new": "Working title (optional)",
+        "relaunch": "What is your brand called?",
+        "placeholderNew": "e.g. Kailua Coffee Co. — the real name can still emerge",
+        "placeholderRelaunch": "e.g. Kailua Coffee Co."
+      },
+      "locale": {
+        "label": "Your brand speaks",
+        "note": "The language your brand content is written in — not the language of this interface."
+      },
+      "team": {
+        "label": "Who is behind it?",
+        "solo": "Just me",
+        "team": "Two or more"
+      },
+      "submit": "Let's go — George takes over",
+      "failed": "The branding could not be created."
+    },
+    "steps": {
+      "context": "Context",
+      "pvm": "Purpose, vision, mission",
+      "architecture": "Brand architecture",
+      "values": "Values",
+      "archetype": "Archetype and voice",
+      "manifesto": "Manifesto",
+      "verbal": "Verbal identity",
+      "naming": "Name",
+      "result": "Result"
+    },
+    "validation": {
+      "contentLocale": "This content language is not available.",
+      "relaunchScopeOnlyOnRelaunch": "A relaunch scope only exists on the relaunch path.",
+      "emptyPatch": "Nothing to change.",
+      "emptySlotPatch": "A slot change needs a value or a confirmation."
+    }
+  }
+}

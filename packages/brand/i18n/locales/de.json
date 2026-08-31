@@ -1,0 +1,264 @@
+{
+  "brand": {
+    "cta": {
+      "book": "Erstgespräch buchen"
+    },
+    "q": {
+      "a": {
+        "pitch": "Elevator-Pitch",
+        "category": "Kategorie",
+        "competitors": "Wettbewerber",
+        "audienceSketch": "Zielgruppen-Skizze",
+        "toneAnalysis": "Tonalität eurer bestehenden Texte",
+        "origin": {
+          "new": "Warum hast du angefangen — was war der Auslöser, welches Problem konntest du nicht ignorieren?",
+          "relaunch": "Was am bestehenden Auftritt MUSS bleiben — woran man euch erkennt, was Stammkunden vermissen würden?"
+        },
+        "customerPraise": "Was sagen deine glücklichsten Kunden über euch — in DEREN Worten?",
+        "complaints": "Welche Beschwerden oder Kritik bekommt ihr? Ehrlich — das ist so wertvoll wie das Lob.",
+        "oneThing": "Was ist das eine, von dem du dir wünschst, dass es jeder Kunde über euch wüsste?",
+        "challenge": "Was ist gerade das größte Hindernis vor euch?",
+        "facts": "Ein paar schnelle Zahlen: Wie groß ist das Team, wie lange gibt es euch, welche Märkte?"
+      },
+      "b": {
+        "whyStarted": {
+          "new": "Du hast mir schon erzählt, wie es angefangen hat. In einem Satz: Warum zählt das heute noch?",
+          "relaunch": "Vergiss kurz die Gründungsgeschichte: Warum gibt es euch HEUTE noch — was würde euren Kunden morgen fehlen?"
+        },
+        "worldLoses": "Was ginge der Welt verloren, wenn ihr morgen zumacht? Wirkung, nicht Umsatz.",
+        "conviction": "Welche Überzeugung treibt euch — die, die ihr auch verteidigt, wenn sie euch etwas kostet?",
+        "tenYears": "In zehn Jahren: Was sieht in der Welt anders aus, weil es euch gab?",
+        "legacy": "Wenn man in 20 Jahren über euch spricht — was sollen die Leute sagen?",
+        "purpose": "Purpose",
+        "vision": "Vision",
+        "mission": "Mission",
+        "positioningCategory": "In welcher Kategorie spielt ihr?",
+        "positioningFirstChoice": "Und in dieser Kategorie: Für wen seid ihr die ERSTE Wahl — und gegen wen?"
+      },
+      "b2": {
+        "visibility": "Sollen eure Produktmarken sichtbar zur Hauptmarke gehören — oder eigenständig auftreten?",
+        "roleOfMaster": "Soll die Hauptmarke ihnen Vertrauen leihen — oder dürfen sie Publika erreichen, die die Hauptmarke nicht erreicht?",
+        "namingPattern": "Wie dürfen sie HEISSEN — „Marke Produkt\", oder eigene Namen?",
+        "model": "Welches Architektur-Modell passt zu euch?",
+        "rule": "Eure Namensregel"
+      },
+      "c": {
+        "discovery1": "Denk an einen Moment, in dem euer Geschäft am besten war. Was ist da passiert?",
+        "discovery2": "Denk an einen Moment, in dem sich etwas zutiefst falsch angefühlt hat. Was war da los?",
+        "discovery3": "Welches Verhalten würdest du nie dulden — auch nicht vom bestzahlenden Kunden?",
+        "candidates": "Wertekandidaten",
+        "final": "Welche drei bis fünf würdet ihr verteidigen, auch wenn es euch etwas kostet?",
+        "definitions": "Was jeder Wert bei euch heißt",
+        "livedExamples": "Zu jedem Wert: EIN echtes Beispiel, wo ihr ihn schon gelebt habt.",
+        "conflictRule": "Wo geraten zwei eurer Werte in Konflikt — und welcher gewinnt?",
+        "teamFilter": "Wenn ihr morgen jemanden einstellt: Welcher Wert ist der unverhandelbare Filter?"
+      },
+      "d": {
+        "hypothesis": "Archetyp-Hypothese aus eurem heutigen Auftritt",
+        "pairs": "Welche der beiden fühlt sich mehr nach euch an?",
+        "primary": "Primärer Archetyp",
+        "secondary": "Sekundärer Archetyp",
+        "gapReveal": "Selbstbild und Außenbild",
+        "party": "Wenn eure Marke ein Mensch auf einer Party wäre — wie verhält sie sich?",
+        "never": "Welche Eigenschaft sollte eure Marke NIEMALS haben?",
+        "admired": "Nenn eine Marke, deren Persönlichkeit du bewunderst — was genau ist es bei denen?",
+        "emotion": "Was sollen Leute FÜHLEN, wenn sie mit euch zu tun haben?",
+        "voiceSamples": "Welcher dieser Sätze klingt am meisten nach euch?",
+        "toneWords": "Welche Wörter beschreiben euren Ton?",
+        "vocabulary": "Welche Wörter würdet ihr NIE benutzen?"
+      },
+      "e": {
+        "warmup1": "Was regt dich an deiner Branche auf?",
+        "warmup2": "Was sollten mehr Leute über eure Arbeit verstehen?",
+        "statements": "Die Satzanfänge",
+        "composition": "Ton, Länge und Verwendung des Manifests",
+        "manifesto": "Manifest",
+        "anchorLine": "Welche Zeile ist die, die ihr an eine Wand hängen würdet?"
+      },
+      "ep": {
+        "taglines": "Welche Tagline trägt es?",
+        "boilerplates": "Boilerplates — Bio, Kurzabsatz, Absatz",
+        "keyMessages": "Kernbotschaften je Zielgruppe",
+        "vocabulary": "Wörter zum Benutzen, Wörter zum Meiden",
+        "distinctiveAsset": "Welche Zeile wird euer verbales Erkennungszeichen?"
+      },
+      "f": {
+        "nameType": "Welche Sorte Name passt zu euch?",
+        "taste": "Nenn drei bis fünf Markennamen, die du liebst — egal welche Branche — und sag warum.",
+        "noGos": "Gibt es Wörter, Stile oder Längen, die tabu sind?",
+        "candidates": "Namens-Kandidaten",
+        "shortlist": "Welche Kandidaten kommen auf die Shortlist?",
+        "checks": "Vorprüfung der Verfügbarkeit",
+        "criteria": "Bewertet die Finalisten an den acht Kriterien.",
+        "decision": "Eure Top drei, in Reihenfolge."
+      },
+      "result": {
+        "direction": "Welche Richtung passt zu eurer Marke?",
+        "rating": "Wie hilfreich war das Ergebnis?"
+      }
+    },
+    "help": {
+      "b": {
+        "purpose": "Der Purpose ist das WARUM: der Grund, aus dem es euch gibt — jenseits vom Geldverdienen. Die Vision ist das WOHIN, die Mission das WIE: drei Sätze, drei Aufgaben. Patagonias Purpose verkauft keine Jacken, er will den Planeten retten.",
+        "vision": "Die Vision beschreibt die Welt, wenn ihr Erfolg hattet — ein Bild, keine Zielzahl. Sie darf zehn Jahre entfernt liegen und muss trotzdem heute Richtung geben.",
+        "mission": "Die Mission sagt, was ihr täglich tut, um dorthin zu kommen — konkret genug, dass eine neue Kollegin danach handeln kann. Purpose ist das Warum, Vision das Wohin, Mission das Wie.",
+        "positioningCategory": "Positionierung ist der Platz, den ihr im Kopf besetzt: eine Kategorie — und die Leute, für die ihr darin die erste Wahl seid. Ohne Kategorie vergleicht man euch trotzdem, nur ohne euer Zutun."
+      },
+      "b2": {
+        "model": "Vier Modelle: Branded House (eine Marke trägt alles), Sub-Brands, Endorsed Brands, House of Brands (Marken ohne sichtbare Mutter). Jedes kauft eine andere Art Vertrauen — und jedes hat seinen Preis."
+      },
+      "c": {
+        "candidates": "Werte sind Verhaltensregeln, die Geld kosten dürfen — keine Poster-Wörter. In Umfrage um Umfrage kennt die Mehrheit der Beschäftigten die Werte der eigenen Firma nicht; genau das passiert, wenn sie nach Klang gewählt wurden.",
+        "final": "Drei bis fünf ist die Arbeitsgröße: Weniger sagt nichts, mehr merkt sich niemand. Nehmt die, die ihr in einer schlechten Woche verteidigen würdet — nicht die, die sich gut lesen."
+      },
+      "d": {
+        "pairs": "Der Archetyp ist der Charakter eurer Marke — er steuert Stimme, Bilder und Wirkung. Man wählt ihn nicht aus einer Liste: Er entsteht aus Vergleichen, weil eine Entscheidung zwischen zwei Gefühlen ehrlicher ist als ein Menü mit zwölf Einträgen.",
+        "primary": "Zwölf Archetypen in vier Gruppen; ihr bekommt einen primären und einen sekundären. Der primäre setzt den Ton, der sekundäre bewahrt ihn vor dem Klischee.",
+        "gapReveal": "Hier trifft euer Selbstbild auf das Bild, das euer heutiger Auftritt sendet. Eine Abweichung ist kein Fehler — sie ist das Nützlichste auf dieser Seite, und sie wird benannt statt weggeglättet."
+      },
+      "e": {
+        "statements": "Ein Manifest bezieht Stellung: Es soll die Richtigen anziehen und die Falschen abschrecken. Die Satzanfänge sind ein Gerüst — streicht, was geliehen klingt, und behaltet, was ihr laut sagen würdet.",
+        "manifesto": "Eine Mission erklärt, ein Manifest verpflichtet. Es ist zum Vorlesen geschrieben — kürzer und schärfer gewinnt fast immer."
+      },
+      "f": {
+        "nameType": "Es gibt neun Sorten Namen — beschreibend, erfunden, metaphorisch und so weiter. Erst die Sorte wählen, dann brainstormen: Eine gemischte Liste kippt immer in die sicherste Option.",
+        "taste": "Der Name ist das meistwiederholte Element einer Marke — er muss sprechbar, merkbar und schützbar sein. Was ihr an fremden Namen liebt, sagt mehr über euren Geschmack als jede Adjektivliste.",
+        "checks": "Je erfundener ein Name, desto schützbarer ist er. Was hier steht, sind Indikatoren aus öffentlichen Registern und aus dem DNS — allgemeine Information, keine Rechtsberatung. Sprecht vor der Festlegung mit einer Markenanwältin."
+      }
+    },
+    "rebrand": {
+      "r1": "Was am bestehenden Auftritt MUSS bleiben — woran man euch erkennt, was Stammkunden vermissen würden?",
+      "r2": "Was fliegt bewusst raus — und warum gerade das?",
+      "r3": "Warum jetzt? Was ist passiert — Wachstum, neue Zielgruppe, Zusammenschluss, oder der Moment, in dem euch die eigene Website peinlich wurde?",
+      "r4": "Was gefällt dir am jetzigen Auftritt NICHT?"
+    },
+    "workspace": {
+      "confidence": {
+        "question": "Passt dieses Kapitel?",
+        "fits": "Passt",
+        "almost": "Fast — eine Sache stört",
+        "restart": "Nochmal von vorn"
+      },
+      "sync": {
+        "saving": "Speichert …",
+        "saved": "Gespeichert",
+        "offline": "Offline — deine Eingabe bleibt hier",
+        "error": "Nicht gespeichert — wir versuchen es erneut",
+        "conflict": "Konflikt — dieses Branding wurde woanders geändert"
+      },
+      "conflict": {
+        "title": "Dieser Schritt wurde woanders geändert",
+        "description": "Ein anderer Tab oder ein anderes Gerät hat diesen Schritt gespeichert, nachdem du ihn geöffnet hast. Von deiner Fassung wurde nichts überschrieben — entscheide, welche weitergeht.",
+        "serverLabel": "Fassung auf dem Server",
+        "mineLabel": "Deine Fassung",
+        "loadServer": "Serverfassung laden",
+        "copyMine": "Meine Fassung kopieren",
+        "copied": "In die Zwischenablage kopiert — dein Text bleibt im Editor.",
+        "copyFailed": "Kopieren hat nicht geklappt — markiere den Text und kopiere ihn von Hand."
+      },
+      "next": "Weiter",
+      "back": "Zurück",
+      "dontKnow": "Weiß ich nicht",
+      "help": "Warum wir das fragen",
+      "contentLocale": "Inhaltssprache",
+      "confirmSlot": "Bestätigen",
+      "completeStep": "Kapitel bestätigen",
+      "george": {
+        "subtitle": "Dein Markenberater",
+        "placeholder": "Antwort schreiben — oder George etwas fragen",
+        "nothingOpen": "In diesem Kapitel ist nichts mehr offen — bestätige es, wenn es passt.",
+        "aiPending": "Georges Antworten kommen mit der nächsten Phase. Bis dahin schreibst du hier, und alles wird gespeichert."
+      },
+      "stage": {
+        "title": "Euer Brand-Dokument",
+        "empty": "Hier steht noch nichts — es füllt sich, während ihr antwortet.",
+        "pending": "Noch offen — kommt im Gespräch.",
+        "pairsPlaceholder": "Der Archetypen-Vergleich ist ein eigenes Instrument und kommt mit einer späteren Phase.",
+        "notEditable": "Das leitet George ab — hier tippt niemand."
+      },
+      "progress": "{filled} von {total} Entscheidungen",
+      "noAccess": {
+        "title": "Noch kein Zugang",
+        "description": "Der Brand-Wizard ist in geschlossener Beta. Wenn du einen Einladungslink hast, öffne ihn — sonst melden wir uns, sobald dein Zugang bereitsteht."
+      },
+      "stepLocked": {
+        "title": "Dieses Kapitel ist noch nicht offen",
+        "description": "Schließ das Kapitel davor ab, dann geht dieses von selbst auf."
+      }
+    },
+    "brands": {
+      "title": "Brandings",
+      "subtitle": "Jedes Branding ist ein eigener Lauf — pausiere jederzeit, dein Stand bleibt gespeichert.",
+      "new": "Neues Branding",
+      "empty": {
+        "title": "Lass uns dein erstes Branding aufbauen.",
+        "description": "Du kannst jederzeit pausieren — dein Stand bleibt gespeichert.",
+        "action": "Erstes Branding starten"
+      },
+      "card": {
+        "continue": "Weiterarbeiten",
+        "currentStep": "Gerade dran: {step}",
+        "path": {
+          "new": "Neue Marke",
+          "relaunch": "Marken-Relaunch"
+        },
+        "edited": "zuletzt bearbeitet {when}"
+      },
+      "loadFailed": "Die Brandings konnten nicht geladen werden."
+    },
+    "new": {
+      "title": "Womit starten wir?",
+      "eyebrow": "Neues Branding",
+      "kind": {
+        "new": {
+          "label": "Neue Marke",
+          "note": "Ihr startet bei null — Name und Marke entstehen im Gespräch."
+        },
+        "relaunch": {
+          "label": "Marken-Relaunch",
+          "note": "Ihr habt schon eine Marke — vom Feinschliff bis zum Neuschnitt."
+        }
+      },
+      "scope": {
+        "question": "Ist das ein Feinschliff — gleiche Marke, besser erzählt — oder ein echter Schnitt, bei dem Name, Look oder Positionierung zur Debatte stehen?",
+        "refine": "Feinschliff",
+        "recut": "Echter Schnitt",
+        "namingOpted": "Name auf den Prüfstand"
+      },
+      "titleField": {
+        "new": "Arbeitstitel (optional)",
+        "relaunch": "Wie heißt eure Marke?",
+        "placeholderNew": "z. B. Kailua Coffee Co. — der echte Name kann noch entstehen",
+        "placeholderRelaunch": "z. B. Kailua Coffee Co."
+      },
+      "locale": {
+        "label": "Eure Marke spricht",
+        "note": "Die Sprache, in der eure Markeninhalte entstehen — nicht die dieser Oberfläche."
+      },
+      "team": {
+        "label": "Wer steckt dahinter?",
+        "solo": "Nur ich",
+        "team": "Zwei oder mehr"
+      },
+      "submit": "Los geht's — George übernimmt",
+      "failed": "Das Branding konnte nicht angelegt werden."
+    },
+    "steps": {
+      "context": "Kontext",
+      "pvm": "Purpose, Vision, Mission",
+      "architecture": "Markenarchitektur",
+      "values": "Werte",
+      "archetype": "Archetyp und Stimme",
+      "manifesto": "Manifest",
+      "verbal": "Verbale Identität",
+      "naming": "Name",
+      "result": "Ergebnis"
+    },
+    "validation": {
+      "contentLocale": "Diese Inhaltssprache steht nicht zur Verfügung.",
+      "relaunchScopeOnlyOnRelaunch": "Eine Relaunch-Spannbreite gibt es nur auf dem Relaunch-Pfad.",
+      "emptyPatch": "Nichts zu ändern.",
+      "emptySlotPatch": "Eine Slot-Änderung braucht einen Wert oder eine Bestätigung."
+    }
+  }
+}

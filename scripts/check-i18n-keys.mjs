@@ -164,6 +164,17 @@ const FIELDS = [
     keys: p => Object.values(p.admin?.stats ?? {}).flatMap(s => (s ? str(s.emptyHintKey) : [])),
   },
   {
+    // P1c (2026-08-31): der Abschluss-CTA des Brand-Wizards. Dieselbe Klasse
+    // Versprechen wie die Reiter-Registries — die SEITE gehört dem brand-Layer,
+    // der TEXT kommt aus der Config, damit keine Erstgespräch-Annahme im Layer
+    // steht (White-Label-Regel §3e). `app/app.config.ts` des Layers hat diese
+    // Schuld ausdrücklich notiert; sie ist mit den Locale-Katalogen beglichen,
+    // und dieser Eintrag ist das Netz darunter.
+    pfad: 'pukalani.brand.completionCta.labelKey',
+    quelle: 'packages/brand/app/pages/brand/[profileId]/[stepKey].vue',
+    keys: p => str(p.brand?.completionCta?.labelKey),
+  },
+  {
     pfad: 'pukalani.billing.plans[].labelKey',
     quelle: 'packages/billing/app/components/BillingPricingTable.vue · BillingCompareTable.vue · pages/dashboard/billing.vue',
     keys: p => arr(p.billing?.plans).flatMap(pl => str(pl?.labelKey)),
