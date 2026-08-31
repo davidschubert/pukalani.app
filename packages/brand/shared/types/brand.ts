@@ -127,6 +127,8 @@ export interface BrandSlotView {
 /** Metadaten EINER Generierung — nie ihr Inhalt (Log-Regel Plan §6). */
 export interface BrandGenerationMeta {
   generationId: string
+  /** Für WELCHEN Slot — ohne ihn wäre die Historie eines Bausteins nicht auftrennbar. */
+  slotId: string
   schemaVersion: number
   promptVersion: string
   model: string
@@ -134,13 +136,48 @@ export interface BrandGenerationMeta {
   locale: string
   inputHash: string
   createdAt: string
+  /** §3e-Idempotenzschlüssel des Auslösers, sofern einer mitkam. */
+  idempotencyKey?: string
+}
+
+/**
+ * DER GESPEICHERTE EINTRAG — Metadaten PLUS Entwurf.
+ *
+ * Der Schema-Anhang §2 listet unter `generations` nur Metadaten; der Anhang sagt
+ * an derselben Stelle aber auch, die Historie „bewahrt Zwischenstände", und das
+ * können Metadaten nicht leisten: `model` und `inputHash` bringen keine Fassung
+ * zurück. Deshalb trägt der Eintrag den erzeugten TEXT — die letzten zehn
+ * behalten ihn, ältere fliegen raus (`packBrandGenerations`), und beim
+ * Spalten-Deckel werden die ÄLTESTEN Entwürfe zuerst geleert.
+ *
+ * Das widerspricht der Log-Regel NICHT: die verbietet Inhalt in LOGS und in
+ * `brand_events`, nicht in der Zeile, deren Inhalt es ohnehin ist (derselbe Text
+ * steht als `latestDraft` im Slot nebenan).
+ */
+export interface BrandGenerationEntry extends BrandGenerationMeta {
+  /** Fehlt bei Einträgen, deren Entwurf dem Spalten-Deckel gewichen ist. */
+  draft?: string
 }
 
 export interface BrandGenerationsView {
-  /** Die letzten ~10 Generierungen. */
-  items: BrandGenerationMeta[]
+  /** Die letzten ~10 Generierungen — in der Detailantwort OHNE `draft`. */
+  items: BrandGenerationEntry[]
   /** Gesamtzahl — auch die, die aus `items` herausgefallen sind. */
   count: number
+}
+
+/**
+ * Antwort der Fassungs-Wiederherstellung: dieselben Einträge, aber MIT `draft`
+ * — plus der `firstDraft` des Slots als „Erste Fassung". Sie hat keinen
+ * Generations-Eintrag (sie kann auch vom Menschen stammen) und reist deshalb
+ * als eigenes Feld.
+ */
+export interface BrandGenerationVersionsResponse {
+  slotId: string
+  items: BrandGenerationEntry[]
+  count: number
+  firstDraft: string | null
+  latestDraft: string | null
 }
 
 export interface BrandStepDetailResponse {

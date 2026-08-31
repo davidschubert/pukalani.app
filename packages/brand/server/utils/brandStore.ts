@@ -186,6 +186,18 @@ export function toSlotView(record: BrandSlotRecord | undefined): BrandSlotView {
 }
 
 /**
+ * DER GELTENDE WERT EINES SLOTS auf der SERVER-Seite: bestätigt schlägt
+ * Entwurf, letzter Entwurf schlägt ersten. Dieselbe Rangfolge wie
+ * `brandSlotDisplayValue` im Client (`shared/brandAutosaveDiff.ts`) — die
+ * arbeitet aber auf der HINAUSGEGEBENEN Form (`BrandSlotView`, alles `null`),
+ * hier steht die GESPEICHERTE (Felder können fehlen). Ein gemeinsamer Helfer
+ * müsste beide Formen kennen und wäre an keiner von beiden mehr ehrlich.
+ */
+export function brandSlotStoredValue(record: BrandSlotRecord | undefined): string {
+  return record?.confirmed || record?.latestDraft || record?.firstDraft || ''
+}
+
+/**
  * DEAKTIVIERTE UND UNBEKANNTE SLOTS FLIEGEN BEIM HINAUSGEBEN NICHT RAUS.
  * Ein Leser muss alte Daten anzeigen können (Migrationsvertrag) — geschrieben
  * werden dürfen sie trotzdem nicht, das verhindert das Schema.

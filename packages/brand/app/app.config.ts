@@ -50,6 +50,21 @@ export default defineAppConfig({
       persona: { name: 'George', mark: '' },
       contentLocales: ['en', 'de'],
       completionCta: { type: 'route', to: '/erstgespraech', labelKey: 'brand.cta.book' },
+      /**
+       * DER ENTWICKLUNGS-ERSATZ FÜR GEORGES ENTWÜRFE (P1c).
+       *
+       * Steht er auf `true`, beantwortet ein deterministischer Stub jede
+       * Generierung — das §3e-Streaming-Protokoll ist damit OHNE KI-Schlüssel
+       * und ohne Anbieter end-to-end beweisbar. `false` ist der Default und
+       * gehört in JEDE App: ein Ersatztext, der einmal in einem echten
+       * Brand-Dokument landet, ist von einem Ergebnis nicht zu unterscheiden.
+       * Eingeschaltet ist er ausschliesslich im `.playground`.
+       *
+       * Er ist ein RÜCKFALL, keine Registrierung: sobald P2 einen echten
+       * Generator über `registerBrandSlotGenerator()` einträgt, gewinnt der
+       * — unabhängig von diesem Schalter (s. `server/utils/brandGenerators.ts`).
+       */
+      devStubGenerator: false,
     },
   },
 })

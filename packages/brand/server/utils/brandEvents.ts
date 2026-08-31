@@ -25,6 +25,11 @@ export type BrandEventType =
   | 'step.completed'
   | 'share.published'
   | 'invite.redeemed'
+  // Der Generierungs-Trichter (§3e). `payload` trägt Slot-Id, Modell, Dauer und
+  // Fehlercode — NIE Prompt und NIE den erzeugten Text (Regel 1 im Kopf).
+  | 'generation.requested'
+  | 'generation.completed'
+  | 'generation.failed'
 
 export interface BrandEventInput {
   type: BrandEventType
