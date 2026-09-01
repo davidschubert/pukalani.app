@@ -146,6 +146,14 @@ jobs:
     env:
       EXPECTED_SHA: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
       COREPACK_ENABLE_DOWNLOAD_PROMPT: '0'
+      # DIE EINE APP→HOST-LISTE (2026-09-01). Sie speist BEIDE Schritte, die
+      # Hosts kennen muessen: die Change-Detection („welcher Build laeuft wo?")
+      # und die Auslieferung („wohin rsyncen, wen fragen?"). Genau eine zweite,
+      # getrennt gepflegte Liste war die Luecke, durch die branding gefallen
+      # ist: die Auslieferung kannte den Host, die Diff-Basis nicht — und was
+      # keine Diff-Basis ist, kann auch nie als „haengt zurueck" auffallen.
+      # Neue App ⇒ HIER eintragen, nirgends sonst.
+      APP_HOSTS: 'portfolio=portfolio.pukalani.app control=admin.pukalani.app platform=platform.pukalani.app marketing=pukalani.app help=help.pukalani.app branding=branding.supply'
     steps:
       - name: Repo auschecken
         uses: actions/checkout@v7
@@ -176,22 +184,57 @@ jobs:
             echo "Manueller Trigger — deploye immer."
             echo "skip=false" >> "$GITHUB_OUTPUT"; exit 0
           fi
-          # DIE DIFF-BASIS IST EIN BELIEBIGER, ABER LEBENDER HOST (F3, 2026-08-12).
-          # Vorher stand hier comments.pukalani.app — der wird seit dem Umzug ins
-          # account-Projekt von der Wildcard-Site `platform` bedient und meldete
-          # damit ohnehin platforms Build-SHA. Der Aufruf hätte weiter
-          # funktioniert (/api/health ist host-frei, 00.tenant.ts lässt genau
-          # diesen Pfad vor der Mandanten-Auflösung durch), aber der Host hätte
-          # etwas anderes bedeutet als der Kommentar behauptet. Jetzt fragt die
-          # Basis den Host, dem sie gehört.
-          PROD=$(curl -fsS -m 15 https://platform.pukalani.app/api/health | jq -r '.build // empty' || true)
-          if [ -z "$PROD" ] || ! git cat-file -e "${PROD}^{commit}" 2>/dev/null; then
-            echo "Prod-SHA unbekannt oder nicht im Repo ('${PROD:-n/a}') — deploye sicherheitshalber."
+          # DIE DIFF-BASIS IST DER ÄLTESTE LEBENDE BUILD, NICHT EIN HOST
+          # (2026-09-01, beim Erst-Deploy von branding.supply live erwischt).
+          # Vorgeschichte: hier stand bis F3 (2026-08-12) comments.pukalani.app,
+          # danach platform.pukalani.app — immer EIN Host, der stellvertretend
+          # für „was läuft auf Prod?" befragt wurde.
+          # Der Vorfall: der Schritt „Ausliefern + verifizieren" deployt die Apps
+          # SEQUENZIELL (portfolio control platform marketing help branding). Der
+          # Lauf starb bei der LETZTEN App an einem rsync-Fehler (fehlender
+          # Release-Slot, inzwischen per --mkpath gefixt) — NACHDEM platform
+          # schon auf den neuen SHA geflippt war. Ab da meldete die Diff-Basis
+          # den neuen Stand, jeder Folge-Push sah „nur Doku geändert" und
+          # übersprang: branding blieb dauerhaft 502, bis ein manueller
+          # workflow_dispatch nachhalf. Die concurrency ist NICHT die Ursache
+          # (cancel-in-progress: false — ein laufender Deploy wird nie gekippt);
+          # jeder Abbruch mitten in der Schleife reicht, rot ODER Runner-Ausfall.
+          # Die Regel deshalb: JEDER Host aus APP_HOSTS wird gefragt, und der
+          # ÄLTESTE gemeldete Build ist die Basis — eine zurückgebliebene App
+          # zieht den Vergleich damit selbst zurück. Meldet ein Host gar keinen
+          # im Repo auflösbaren Commit (leer, 502, Timeout, Erst-Deploy einer
+          # neuen App), wird sofort deployt statt gerätselt (fail-open).
+          BASE=''
+          FAIL=''
+          for pair in $APP_HOSTS; do
+            app="${pair%%=*}"; host="${pair#*=}"
+            BUILD=$(curl -fsS -m 15 "https://$host/api/health" | jq -r '.build // empty' || true)
+            echo "  $app ($host): ${BUILD:-n/a}"
+            if [ -z "$BUILD" ] || ! git cat-file -e "${BUILD}^{commit}" 2>/dev/null; then
+              FAIL="$app meldet keinen im Repo auflösbaren Build ('${BUILD:-n/a}')"
+              break
+            fi
+            if [ -z "$BASE" ]; then
+              BASE="$BUILD"
+            elif git merge-base --is-ancestor "$BUILD" "$BASE"; then
+              BASE="$BUILD"
+            elif git merge-base --is-ancestor "$BASE" "$BUILD"; then
+              : # BASE ist schon der ältere — nichts zu tun.
+            else
+              # Zwei Builds ohne Vorfahren-Beziehung. Auf main kann das nicht
+              # vorkommen; wenn doch, ist die Annahme kaputt und nicht der Diff.
+              FAIL="$app meldet $BUILD, das mit $BASE nicht vergleichbar ist"
+              break
+            fi
+          done
+          if [ -n "$FAIL" ]; then
+            echo "$FAIL — deploye sicherheitshalber."
             echo "skip=false" >> "$GITHUB_OUTPUT"; exit 0
           fi
-          FILES=$(git diff --name-only "$PROD" "$EXPECTED_SHA" || true)
+          echo "Älteste lebende Diff-Basis: $BASE"
+          FILES=$(git diff --name-only "$BASE" "$EXPECTED_SHA" || true)
           if [ -z "$FILES" ]; then
-            echo "Keine Datei-Änderungen ggü. Prod ($PROD) — nichts zu deployen."
+            echo "Keine Datei-Änderungen ggü. der Basis ($BASE) — nichts zu deployen."
             echo "skip=true" >> "$GITHUB_OUTPUT"; exit 0
           fi
           RELEVANT=$(echo "$FILES" | grep -vE "$IGNORE" || true)
@@ -299,6 +342,12 @@ jobs:
           # SLOT  = Release-Verzeichnis unter /home/ploi/releases.
           # PROBE = der HOST, unter dem die App oeffentlich antwortet.
           #
+          # Die App→Host-Zuordnung kommt aus $APP_HOSTS (Job-env, ganz oben) —
+          # DIESELBE Liste, die auch die Change-Detection abfragt. Nie eine
+          # zweite hier anlegen: genau daran ist branding am 2026-09-01
+          # unsichtbar zurueckgeblieben. Die Reihenfolge der Auslieferung ist
+          # die Reihenfolge der Liste.
+          #
           # CONTROL heisst seit 2026-08-18 auch als ploi-SITE `admin.pukalani.app`
           # (Davids Panel-Umbenennung; ploi benennt dabei das Server-Verzeichnis
           # mit um) — SITE und PROBE sind damit wieder fuer ALLE Apps identisch.
@@ -321,12 +370,13 @@ jobs:
           # 3006 der App: das ist die Portkarte des SERVERS, und dort haelt
           # help seit 2026-07-28 die 3006 (Begruendung in
           # ops/ecosystem-branding.config.cjs).
-          declare -A SITE=( [portfolio]=portfolio.pukalani.app [control]=admin.pukalani.app [platform]=platform.pukalani.app [marketing]=pukalani.app [help]=help.pukalani.app [branding]=branding.supply )
           declare -A SLOT=( [portfolio]=portfolio [control]=control [platform]=platform [marketing]=marketing [help]=help [branding]=branding )
-          declare -A PROBE=( [portfolio]=portfolio.pukalani.app [control]=admin.pukalani.app [platform]=platform.pukalani.app [marketing]=pukalani.app [help]=help.pukalani.app [branding]=branding.supply )
-          for app in portfolio control platform marketing help branding; do
-            site="${SITE[$app]}"
-            probe="${PROBE[$app]}"
+          for pair in $APP_HOSTS; do
+            app="${pair%%=*}"
+            site="${pair#*=}"
+            # Seit AH-4b (s. o.) ist der PROBE-Host fuer JEDE App identisch mit
+            # ihrer Site — kein eigenes Array mehr, das auseinanderlaufen kann.
+            probe="$site"
             echo "::group::Deploy $app → $site"
             RELEASES="/home/ploi/releases/${SLOT[$app]}"
             RELEASE="$RELEASES/$EXPECTED_SHA"

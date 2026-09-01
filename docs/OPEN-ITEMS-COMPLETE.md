@@ -30,6 +30,35 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### Deploy-Change-Detection: ältester Build ALLER Probe-Hosts als Diff-Basis ✅ 2026-09-01
+
+**Was:** Nachzug zu Falle (3) des branding.supply-Erst-Deploys (Eintrag
+darunter). Die Change-Detection in `deploy.yml` verglich gegen den Build-SHA
+EINES Hosts (platform) — stirbt der sequenzielle Ausliefer-Schritt mitten in
+der App-Schleife (rot ODER Runner-Ausfall; die Concurrency ist mit
+`cancel-in-progress: false` NICHT die Ursache), sind die frühen Apps schon
+geflippt und jeder Folge-Deploy sieht „nur Doku geändert" — die gestrandeten
+Apps bleiben dauerhaft auf dem alten Stand (branding: 502 bis zum manuellen
+`workflow_dispatch`). Jetzt fragt der Schritt ALLE sechs Probe-Hosts ab und
+nimmt den ÄLTESTEN erreichbaren Build (Vorfahren-Vergleich per
+`git merge-base --is-ancestor`) als Diff-Basis; ein Host ohne auflösbaren
+`.build` (leer, 502, Timeout, unbekannter SHA — z. B. Erst-Deploy einer neuen
+App) erzwingt sofort `skip=false` (fail-open), ebenso zwei nicht vergleichbare
+Builds. Die App→Host-Liste ist entdoppelt: EINE Job-Env `APP_HOSTS` speist
+Change-Detection UND Auslieferung (dort entfielen die `SITE`/`PROBE`-Arrays —
+seit AH-4b ohnehin identisch; `SLOT` bleibt wegen control). Beweis: YAML-Parse
++ `bash -n` über alle 10 run-Blöcke grün; Basis-Wahl mit echten Commits
+simuliert (ältester gewinnt, Reihenfolge egal, LEER/unbekannter SHA ⇒
+fail-open); Live-Probe: alle sechs Hosts melden `d9dd981c`.
+
+**Gelernt:** Eine Change-Detection, die den Fortschritt an EINEM Stellvertreter
+misst, ist nur so ehrlich wie die am weitesten ZURÜCKLIEGENDE Einheit — bei
+jeder sequenziellen Welle muss die Basis das Minimum aller Teilnehmer sein,
+sonst versiegelt der erste Teilabbruch sich selbst. Und: eine Host-Liste, die
+an zwei Stellen gepflegt wird, IST schon der Fehler — die Auslieferung kannte
+branding, die Diff-Basis nicht; Listen gehören in genau eine Definition, aus
+der alle Verbraucher lesen.
+
 ### branding.supply live — eigenes Appwrite-Projekt, eigene Domain, Beta im Invite-Modus ✅ 2026-09-01
 
 **Was:** Ausführung des abgenommenen Infra-Plans (Davids Kehrtwende 2026-08-31,
@@ -55,7 +84,7 @@ LETZTE Pfadebene an — beim Erst-Deploy einer neuen App fehlte
 NUR platform-Build) alles für erledigt und übersprang dauerhaft — eine mitten
 in der App-Schleife gestorbene Welle strandet alle späteren Apps; Sofort-Kur
 `gh workflow run deploy.yml` (deployt immer), Härtung (ältester Build ALLER
-Probe-Hosts als Basis) als Task offen. (4) Dev-Port ≠ Server-Port: der Plan
+Probe-Hosts als Basis) am 2026-09-01 erledigt — s. Eintrag darüber. (4) Dev-Port ≠ Server-Port: der Plan
 setzte 3006, auf dem SERVER hält help die 3006 seit Wochen — die Portkarte des
 Servers ist eine EIGENE Liste (3002 portfolio · 3003 admin · 3004 platform ·
 3005 www · 3006 help · 3007 branding), die erste nginx-Fassung lieferte prompt
