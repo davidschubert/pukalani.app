@@ -30,6 +30,39 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### Brand-Wizard P2 — George wird echt: Drosseln, Prompts, Startkarte, URL-Analyse ✅ 2026-09-01
+
+**Was:** Vier Teilpakete am Stück (je ein Opus-Lauf, im Hauptloop geprüft):
+(1) Der §6-DROSSEL-VERTRAG als Launch-Gate — 200/Tag je Konto, 10/Tag je
+Brand×Slot, Burst 2 parallel, Instanz-Deckel 1000; gebucht wird NUR ein
+echter Anbieter-Lauf (Stub/Cache/Kill-Switch/Sperre kosten nichts), 429
+reist VOR dem SSE-Start als echtes HTTP mit Retry-After. (2) Der echte
+George-GENERATOR für Baustein A: 9-Regeln-System-Prompt als pure Templates,
+providerRouting wörtlich { zdr, dataCollection: 'deny', allowFallbacks:
+false }, und ein geteilter FORMVERTRAG (shared/brandSlotFormat.ts), durch
+den Stub und George dieselben list/structured-Formen schreiben — per Test
+aneinander genagelt. (3) Die STARTKARTE (Content-Spec §2.1) existierte nur
+als Papier — brand-009 legt websiteUrl/industry/about/audience an, der
+Anlage-Dialog erhebt sie mit den wörtlichen Spez-Texten, George bekommt sie
+als primäre Quelle (das Modal legt seither NICHT mehr selbst an, sondern
+übergibt an die Startkarten-Seite). (4) Die URL-ANALYSE mit GESCHLOSSENEM
+Rebinding-Fenster: einmal auflösen → alle IPs prüfen → eigene lookup-
+Funktion in den Request → remoteAddress-Nachprüfung; v4/v6-Sperrbereiche
+inkl. v4-mapped/NAT64/Oktal (81 Testfälle), max. 3 manuell geprüfte
+Redirects, Dekompressions-Deckel, rohes HTML wird nie gespeichert, eigener
+Tages-Deckel 20/Konto AUSSERHALB des KI-Kontingents. brand-Tests 227 → 437.
+Migrationen brand-009/010 liefen jeweils VOR dem Code-Deploy gegen Prod.
+
+**Gelernt:** (1) Eine SPEZIFIKATION ist keine Datenlage — Baustein A hätte
+ohne die nie gebauten Startkarten-Spalten inhaltsleer generiert; der
+Generator-Agent hat das ehrlich gemeldet („dir wurde nichts übergeben —
+erfinde nichts") statt es zu kaschieren, daraus wurde Paket 2.5. (2)
+MEDIUMTEXT kann in MariaDB keinen Default — Bestands-Zeilen lesen dann
+undefined; Startkarten-Felder deshalb varchar mit '' und Pflicht NUR im
+Zod. (3) Ein paralleler Server-.env-Neuschrieb verschluckte die frisch
+angehängte NUXT_AI_KEY-Zeile still — die Kur ist nicht Sorgfalt, sondern
+der Wächter: der Key ist seither Pflicht in ops:site-env.
+
 ### Deploy-Change-Detection: ältester Build ALLER Probe-Hosts als Diff-Basis ✅ 2026-09-01
 
 **Was:** Nachzug zu Falle (3) des branding.supply-Erst-Deploys (Eintrag
