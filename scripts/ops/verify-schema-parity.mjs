@@ -327,14 +327,13 @@ const PORTFOLIO_SOLL = [
  * brand_*-Tabellen. KEIN `admin`: die App zieht den Layer nicht, es gibt dort
  * also auch keinen Betreiber-Changelog.
  *
- * NOCH NICHT AUSGEROLLT (Plan §6 Schritt 1–4 stehen aus). Das ist der Grund,
- * warum der Eintrag WARNT statt zu scheitern: fehlt die Env-Datei, überspringt
- * die Schleife die Instanz mit einer sichtbaren Zeile („nicht ausgerollt?") —
+ * NOCH NICHT AUSGEROLLT (Plan §6 Schritt 1–4 stehen aus): der Eintrag trägt
+ * `ausgerollt: false` und WARNT deshalb nur, wenn die Env-Datei fehlt —
  * dasselbe Verhalten, das `photos` seit jeher hat. Ein harter Fehler wäre hier
- * falsch: der Wächter läuft täglich in der CI (production-watch.yml), und ein
- * Lauf, der wegen einer noch nicht gebauten Instanz dauerhaft rot steht, wird
- * weggelesen — genau die Fehlerklasse, gegen die dieses Skript geschrieben ist.
- * Sobald das Projekt steht, macht die Env-Datei den Eintrag von selbst scharf.
+ * falsch: ein Lauf, der wegen einer noch nicht gebauten Instanz dauerhaft rot
+ * steht, wird weggelesen — genau die Fehlerklasse, gegen die dieses Skript
+ * geschrieben ist. Beim Launch das Flag auf true drehen; die Env-Datei allein
+ * macht den Eintrag schon vorher scharf, sobald sie existiert.
  */
 const BRANDING_SOLL = [...SYSTEM_TABLES, ...BRAND_TABLES]
 
@@ -383,23 +382,40 @@ const PHOTOS_SOLL = [...SYSTEM_TABLES, ...ADMIN_TABLES, ...MEDIA_TABLES]
 const PARITY_TABLES = [...SYSTEM_TABLES, ...ADMIN_TABLES, ...PAGES_TABLES, ...ANALYTICS_TABLES]
 
 /**
- * Jede Instanz mit ihrer Env-Datei und ihrem Soll. Fehlt die Env-Datei, wird
- * die Instanz ÜBERSPRUNGEN und gemeldet — `photos` existiert als App im Repo,
- * ist aber nicht ausgerollt (kein pm2-Prozess, keine ploi-Site, keine
- * `.env.production`), und ein Wächter darf daran nicht scheitern.
+ * Jede Instanz mit ihrer Env-Datei, ihrem Soll und dem Flag `ausgerollt`.
+ *
+ * `ausgerollt: true` heisst: die Instanz LÄUFT in Produktion — fehlt ihre
+ * Env-Datei, ist das ein FEHLER, keine Notiz (Davids Entscheidung 2026-08-31).
+ * Genau so ist die Betreiber-Konsole nach dem AH-4c-Rename (control.env →
+ * admin.env, docs/runbooks/ADMIN-PROJEKT-CUTOVER.md) still aus der Prüfung
+ * gefallen: „übersprungen" war nur eine Warnzeile, der Lauf blieb grün —
+ * die Klasse „Konfiguration falsch, aber nichts wird rot", gegen die dieser
+ * Wächter geschrieben ist. Er läuft manuell auf dem Mac, auf dem die
+ * Env-Dateien liegen (NICHT in der CI) — ein harter Fehler kostet hier also
+ * kein Dauerrot.
+ *
+ * `ausgerollt: false` (photos; branding bis zum Launch): App existiert im
+ * Repo, aber kein pm2-Prozess, keine ploi-Site — fehlende Env bleibt eine
+ * sichtbare Übersprungen-Zeile, das Soll steht für den Tag der Ausrollung.
+ * Beim Launch das Flag mitdrehen.
  *
  * `comments` ist seit F3 (2026-08-12) keine eigene Instanz mehr, sondern eine
  * Pool-Community im `account`-Projekt — der Eintrag ist RAUS.
  */
 const INSTANCES = [
-  { name: 'account', env: join(homedir(), '.appwrite-secrets/migrations/account.env'), soll: ACCOUNT_SOLL },
+  { name: 'account', ausgerollt: true, env: join(homedir(), '.appwrite-secrets/migrations/account.env'), soll: ACCOUNT_SOLL },
   // Seit AH-4c heisst das Konsolen-Projekt `admin` und seine Migrations-Env
   // liegt als admin.env — der alte Zeiger auf control.env liess den Waechter
   // die Betreiber-Konsole STILL ueberspringen (Instanz fehlt = Warnzeile, aber
   // gruen; 2026-09-01 beim branding-Umzug erwischt). Der NAME bleibt
   // `control` (Ordner/Slot-Konvention), nur die DATEI zeigt auf admin.env.
-  { name: 'control', env: join(homedir(), '.appwrite-secrets/migrations/admin.env'), soll: CONTROL_SOLL },
-  { name: 'portfolio', env: 'apps/portfolio/.env.production', soll: PORTFOLIO_SOLL },
+  { name: 'control', ausgerollt: true, env: join(homedir(), '.appwrite-secrets/migrations/admin.env'), soll: CONTROL_SOLL },
+  // Seit 2026-08-31 nach der Migrations-Konvention (Umzug mit dem
+  // Ausgerollt-Flag, Davids Entscheidung): die alte
+  // apps/portfolio/.env.production lag im REPO-BAUM und fehlte damit in jedem
+  // Worktree — portfolio wäre dort immer „übersprungen" gewesen, mit dem Flag
+  // sogar fälschlich rot.
+  { name: 'portfolio', ausgerollt: true, env: join(homedir(), '.appwrite-secrets/migrations/portfolio.env'), soll: PORTFOLIO_SOLL },
   /**
    * `branding` folgt der Migrations-KONVENTION (~/.appwrite-secrets/migrations/),
    * nicht dem portfolio-Muster mit `.env.production` im Repo-Baum — so steht es
@@ -407,8 +423,8 @@ const INSTANCES = [
    * existiert, meldet der Lauf „übersprungen" statt zu scheitern (Begründung am
    * BRANDING_SOLL).
    */
-  { name: 'branding', env: join(homedir(), '.appwrite-secrets/migrations/branding.env'), soll: BRANDING_SOLL },
-  { name: 'photos', env: 'apps/photos/.env.production', soll: PHOTOS_SOLL },
+  { name: 'branding', ausgerollt: false, env: join(homedir(), '.appwrite-secrets/migrations/branding.env'), soll: BRANDING_SOLL },
+  { name: 'photos', ausgerollt: false, env: 'apps/photos/.env.production', soll: PHOTOS_SOLL },
 ]
 
 function parseEnvFile(path) {
@@ -454,9 +470,15 @@ async function columnsOf(cfg, table) {
 
 // ── Instanzen einlesen und ihre Ist-Tabellen holen ──────────────────────────
 const found = []
+let envErrors = 0
 for (const instance of INSTANCES) {
   if (!existsSync(instance.env)) {
-    console.log(`·  ${instance.name.padEnd(10)} übersprungen — ${instance.env} gibt es nicht (nicht ausgerollt?)`)
+    if (instance.ausgerollt) {
+      envErrors++
+      console.log(`✖  ${instance.name.padEnd(10)} AUSGEROLLT, aber ${instance.env} fehlt — Instanz bleibt ungeprüft`)
+    } else {
+      console.log(`·  ${instance.name.padEnd(10)} übersprungen — ${instance.env} gibt es nicht (nicht ausgerollt)`)
+    }
     continue
   }
   const env = parseEnvFile(instance.env)
@@ -467,6 +489,7 @@ for (const instance of INSTANCES) {
     key: env.NUXT_APPWRITE_MIGRATIONS_KEY || env.NUXT_APPWRITE_KEY,
   }
   if (!cfg.endpoint || !cfg.project || !cfg.key || !cfg.databaseId) {
+    if (instance.ausgerollt) envErrors++
     console.log(`✖  ${instance.name.padEnd(10)} Env unvollständig — übersprungen`)
     continue
   }
@@ -538,11 +561,19 @@ if (columnFindings.length) {
 if (warnings > 0) {
   console.log(`\n${warnings} unbekannte/Alt-Tabelle(n) gemeldet (nicht fatal — Soll-Liste prüfen oder Cruft).`)
 }
-if (missingTables > 0 || missingColumns > 0) {
+if (envErrors > 0) {
   console.log(
-    `\n${missingTables} fehlende Tabelle(n), ${missingColumns} fehlende Spalte(n). `
-    + 'Nachfahren mit:  pnpm migrate --app <app>  (ggf. --layer <layer>)',
+    `\n${envErrors} ausgerollte Instanz(en) ohne lesbare Env-Datei — sie wurden NICHT geprüft. `
+    + 'Datei unter ~/.appwrite-secrets/migrations/ wiederherstellen (Ablage: Runbooks/Memory), erst dann ist der Lauf eine Aussage.',
   )
+}
+if (missingTables > 0 || missingColumns > 0 || envErrors > 0) {
+  if (missingTables > 0 || missingColumns > 0) {
+    console.log(
+      `\n${missingTables} fehlende Tabelle(n), ${missingColumns} fehlende Spalte(n). `
+      + 'Nachfahren mit:  pnpm migrate --app <app>  (ggf. --layer <layer>)',
+    )
+  }
   process.exit(1)
 }
 console.log('\nJede Instanz trägt ihr volles Soll; geteilte Tabellen sind spaltengleich.')

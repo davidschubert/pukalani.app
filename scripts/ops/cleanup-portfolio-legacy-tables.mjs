@@ -20,14 +20,19 @@
  * Schlüssel werden nie ausgegeben. Ohne `--apply` wird NICHTS geschrieben.
  */
 import { existsSync, readFileSync } from 'node:fs'
+import { homedir } from 'node:os'
+import { join } from 'node:path'
 
-const ENV_PATH = 'apps/portfolio/.env.production'
+// Seit 2026-08-31 nach der Migrations-Konvention — die alte
+// apps/portfolio/.env.production ist dorthin UMGEZOGEN (fehlte im Repo-Baum
+// jedes Worktrees; Entscheidung beim Ausgerollt-Flag des Paritäts-Wächters).
+const ENV_PATH = join(homedir(), '.appwrite-secrets/migrations/portfolio.env')
 const APPLY = process.argv.includes('--apply')
 
 const DEAD = ['sites', 'workspaces', 'workspace_invites', 'workspace_members', 'feature_catalog', 'feedback']
 
 if (!existsSync(ENV_PATH)) {
-  console.error(`✗ ${ENV_PATH} nicht gefunden — vom Repo-Wurzelverzeichnis aus starten (Haupt-Checkout, nicht Worktree).`)
+  console.error(`✗ ${ENV_PATH} nicht gefunden — liegt nur auf Davids Rechner (Migrations-Ablage).`)
   process.exit(1)
 }
 

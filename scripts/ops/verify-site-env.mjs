@@ -233,7 +233,10 @@ const SITES = [
     dir: 'portfolio.pukalani.app',
     name: 'portfolio',
     note: 'Studio-Site — SMTP seit dem Erstgespräch-Wizard (W1) Pflicht',
-    localProjectFiles: ['apps/portfolio/.env.production'],
+    // Bis 2026-08-31 lag die Datei als apps/portfolio/.env.production im
+    // Repo-Baum — umgezogen zur Migrations-Konvention, damit Worktree-Läufe
+    // des Paritäts-Wächters portfolio nicht mehr überspringen.
+    localProjectFiles: ['~/.appwrite-secrets/migrations/portfolio.env'],
     required: [
       'NUXT_APPWRITE_KEY',
       'NUXT_PUBLIC_APPWRITE_ENDPOINT',
