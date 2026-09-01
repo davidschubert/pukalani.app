@@ -78,6 +78,38 @@ fast die falsche Härte-Entscheidung getragen. (3) Tabellen, die an
 `pnpm migrate` vorbei entstehen (ensure-Skripte), tauchen in keiner
 Migrations-Disziplin auf — die gepflegte Soll-Liste ist ihr einziges Netz.
 
+### Doku-Nachzug: CONCEPT.md kennt alle 24 Layer, Silo-Regel kennt branding.supply ✅ 2026-08-31
+
+**Anlass (Davids Auftrag):** die Layer-Tabelle und der Zähler „21 Layer" in
+[CONCEPT.md](CONCEPT.md) waren veraltet — `brand`, `runner` und `marketing`
+fehlten; real sind es 24 Workspace-Pakete. Nachgezogen in zwei Commits auf
+main (`1076e446`, `018bef82`), alle vier CI-Checks grün, Deploy wie erwartet
+übersprungen (reine Doku, Live-SHA unverändert):
+
+- **Layer-Tabelle + Verzeichnisbaum:** drei neue Zeilen (`marketing` =
+  Chrome-Layer ohne Tables, `brand` = Brand-Wizard „George", `runner` =
+  AI-Runner-Board), `branding/` bei den Apps. Beide Zähler 21 → 24.
+- **A14-Matrix:** `marketing` (Fundament) und `runner` (Plattform & Betrieb)
+  eingetragen, damit „A14 kennt alle Layer" wieder stimmt; der Hinweis „Layer
+  ohne eigene Tabelle" zählt jetzt vier. Nachgezählt: Tabelle 24 Zeilen,
+  A14 24 Zeilen.
+- **Über den Auftrag hinaus:** die A14-`brand`-Zeile („nur portfolio-Instanz",
+  `PORTFOLIO_SOLL`) war seit der Kehrtwende vom selben Tag falsch → auf
+  `branding`/`BRANDING_SOLL` gedreht. Auf Davids Nachtrag auch die
+  **Silo-Regel in CLAUDE.md**: nicht mehr „das einzige verbliebene
+  Silo-DEPLOYMENT ist portfolio", sondern ZWEI (portfolio + branding.supply,
+  apps/branding, Projekt `branding`, Server-Port 3007 / Dev-Port 3006 — zwei
+  getrennte Achsen); Grundregel unverändert. Die datierten Protokoll-Stellen
+  („21 Layer" in den 2026-08-16-Einträgen, Archiv) bleiben bewusst stehen.
+
+**Gelernt:** Der Auftrag nannte als Quelle die A14-Zeile („brand nur auf
+portfolio") — die war beim Losarbeiten bereits überholt, weil eine parallele
+Sitzung am SELBEN Tag den Umzug nach branding.supply gemergt hatte. „Erst
+main prüfen" heißt auch: die im Auftrag mitgelieferten FAKTEN gegen den
+frischen Stand messen (Manifest, Wächter-Skript), nicht nur nachsehen, ob die
+Arbeit schon getan ist — sonst schreibt man eine veraltete Angabe sauber
+formatiert neu hinein.
+
 ### W1/W2 — Studio-Rebrand (Wir-Stimme) + Erstgespräch-Wizard live ✅ 2026-08-22
 
 **Zwei Pakete in einer Sitzung** (Davids Auftrag 2026-08-21, Entscheidungen
