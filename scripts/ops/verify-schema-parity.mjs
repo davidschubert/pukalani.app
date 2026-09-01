@@ -314,6 +314,10 @@ const PORTFOLIO_SOLL = [
   'poll_votes',
   'entitlements',
   'provisioning_jobs',
+  // Erstgespräch-Wizard (live seit 2026-08-22): keine pnpm-migrate-Migration,
+  // sondern apps/portfolio/scripts/ensure-intro-requests.mjs — deshalb fehlte
+  // der Eintrag hier (die Soll-Liste ist gepflegt, nicht geparst).
+  'intro_requests',
 ]
 
 /**
