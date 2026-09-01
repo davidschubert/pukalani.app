@@ -92,6 +92,32 @@ die Hilfe-Seite aus.
 
 ---
 
+### branding-Dev-Port 3006→3010 — Kollision mit platform aufgelöst ✅ 2026-09-01
+
+**Befund (beim Doku-Nachzug der Hosts-und-Ports-Seite gemessen):** `apps/branding`
+und `apps/platform` starteten beide auf Dev-Port **3006** — der branding-Infra-Plan
+zählte die Dev-Portkarte falsch („3000–3005 lokal vergeben") und übersah, dass
+platform die 3006 seit jeher hält; er hatte damit BEIDE Portachsen falsch belegt
+(die Server-Achse war schon beim Erst-Deploy aufgefallen, 3007 statt 3006). Folge
+der Kollision: der zweite Nuxt-Server weicht STILL auf einen anderen Port aus —
+genau die bekannte Falle, bei der ein „Beweis" den falschen Server misst.
+
+**Gebaut (Commit `78bd3bb5`):** Dev-Port auf **3010** (nächster freier; 3009 hält
+der brand-Playground), Prod-Port 3007 unberührt (eigene Achse). Alle Erwähnungen
+in EINEM Commit nachgezogen: nuxt.config + package.json, Ecosystem-Kommentar
+(„3006 lokal frei" gestrichen), CLAUDE.md-Silo-Regel, Hosts-und-Ports-Seite
+(Warnbox durch Historien-Notiz ersetzt, 3010-Zeile), Infra-Plan §2, Runbook §3;
+Memory `branding-supply-live` mit. **Beweis:** Ports 3006/3010 vorher per lsof
+frei gemessen, dann `pnpm --filter branding dev` aus dem Worktree — erste
+Log-Zeile bestätigt den Worktree-Pfad, Listener auf `[::1]:3010`.
+
+**Gelernt:** Eine Portvergabe „aus dem Kopf" zählt verlässlich falsch — die
+Dev-Portkarte in docs/content/2.architektur/6.hosts-und-ports.md ist die EINE
+Liste, gegen die jede neue App prüft (dort steht es jetzt als Regel-Note). Und:
+derselbe Plan hatte dieselbe Fehlerklasse (Achse verwechselt/falsch gezählt)
+schon einmal auf der Server-Achse — wer einen Zähl-Fehler findet, prüft die
+Schwester-Liste gleich mit.
+
 ### Paritäts-Wächter: AH-4c-Lücke geschlossen + Ausgerollt-Flag ✅ 2026-08-31
 
 **Befund:** Seit dem AH-4c-Projekt-Rename (control→admin, 2026-08-18/19)
