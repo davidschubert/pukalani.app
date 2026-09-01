@@ -198,6 +198,10 @@
         "aiDisabled": "George entwirft gerade nicht. Du kannst alles ganz normal weiterschreiben.",
         "noGenerator": "Für dieses Feld gibt es noch keinen Entwurf von George. Schreib es selbst — es wird gespeichert.",
         "busy": "George schreibt schon an einer anderen Stelle. Einen Moment noch.",
+        "parallelLimit": "George schreibt schon an zwei Stellen gleichzeitig. Sobald eine fertig ist, geht es hier weiter.",
+        "slotLimit": "Für dieses Feld hat George heute genug Anläufe gemacht. Morgen wieder — oder schreib es jetzt selbst.",
+        "dailyLimit": "Du hast heute alle Entwürfe von George aufgebraucht. Morgen gibt es neue; dein Text bleibt natürlich da.",
+        "instanceLimit": "George macht heute Feierabend — das liegt nicht an dir. Morgen entwirft er wieder.",
         "stopped": "Abgebrochen. Dein bisheriger Text ist unverändert.",
         "failed": "Das hat gerade nicht geklappt. Versuch es gleich nochmal.",
         "dismiss": "Verstanden"

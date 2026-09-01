@@ -198,6 +198,10 @@
         "aiDisabled": "George is not drafting right now. You can keep writing as usual.",
         "noGenerator": "There is no George draft for this field yet. Write it yourself — it will be saved.",
         "busy": "George is already writing somewhere else. One moment.",
+        "parallelLimit": "George is already writing in two places at once. As soon as one finishes, this one can start.",
+        "slotLimit": "George has had enough goes at this field for today. Try again tomorrow — or write it yourself now.",
+        "dailyLimit": "You have used up all of George’s drafts for today. There will be new ones tomorrow; your text stays, of course.",
+        "instanceLimit": "George has called it a day — this is not about you. He will draft again tomorrow.",
         "stopped": "Stopped. Your text is unchanged.",
         "failed": "That did not work just now. Try again in a moment.",
         "dismiss": "Got it"

@@ -66,6 +66,16 @@ export default defineAppConfig({
        * — unabhängig von diesem Schalter (s. `server/utils/brandGenerators.ts`).
        */
       devStubGenerator: false,
+      /**
+       * DER INSTANZWEITE TAGES-DECKEL für echte KI-Generierungen (P2.1) —
+       * Gesamtzahl über ALLE Konten, das Kosten-Netz des Betreibers. Zahl,
+       * Begründung und die Prüfung stehen in `shared/brandAiLimits.ts`
+       * (`resolveBrandAiInstanceCap`): nur eine ganze Zahl > 0 gilt, alles
+       * andere fällt auf den Default zurück. AUSSCHALTEN geht hierüber
+       * BEWUSST nicht — dafür gibt es `app_config.brandAiEnabled`, und nur
+       * dort sagt die Oberfläche auch den richtigen Satz dazu.
+       */
+      aiDailyInstanceCap: 1000,
     },
   },
 })

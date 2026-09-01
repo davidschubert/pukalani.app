@@ -411,6 +411,20 @@ const WRITE_LIMITED: { re: RegExp, bucket: string, max?: number }[] = [
    */
   { re: /^POST \/api\/brand\/invite\/(check|redeem)$/, bucket: 'brand:invite', max: TOKEN_MAX },
   /**
+   * GEORGES ENTWÜRFE (P2.1) — die teuerste Route des Wizards: jeder Lauf ist
+   * ein Anbieter-Aufruf mit Streaming-Antwort. Die eigentlichen Deckel sind
+   * feiner und sitzen IN der Route (Burst 2 je Konto, 10/Tag je Brand ×
+   * Slot-Typ, 200/Tag je Konto, dazu der Instanz-Deckel —
+   * `shared/brandAiLimits.ts`); diese Zeile zählt je IP und DAVOR, bevor eine
+   * Zeile gelesen oder ein Kontingent gebucht wird.
+   *
+   * 6/min ist enger als das übliche `TOKEN_MAX`, und das mit Absicht: mehr als
+   * zwei Läufe gleichzeitig gibt es ohnehin nicht, ein Lauf dauert Sekunden,
+   * und ein Mensch liest zwischendurch, was George geschrieben hat. Wer
+   * schneller drückt, ist ein Skript.
+   */
+  { re: /^POST \/api\/brand\/profiles\/[^/]+\/steps\/[^/]+\/generate$/, bucket: 'brand:generate', max: 6 },
+  /**
    * INHALTE ÜBERSETZEN (2026-08-17) — dieselbe Kostenklasse wie eine Zeile
    * darüber, nur häufiger erreichbar: jeder Klick schickt bis zu 10.000 Zeichen
    * an den KI-Anbieter und bezahlt die Antwort. Beide Routen haben SCHON eine

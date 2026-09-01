@@ -36,7 +36,9 @@ import {
   collectSlotDependencies,
   readBrandAiEnabled,
   resolveBrandSlotGenerator,
+  retainBrandGeneration,
 } from '../../../../../../utils/brandGenerators'
+import { bookBrandAiQuota } from '../../../../../../utils/brandAiQuota'
 import { recordBrandEvent } from '../../../../../../utils/brandEvents'
 
 /**
@@ -88,13 +90,25 @@ import { recordBrandEvent } from '../../../../../../utils/brandEvents'
  * Logzeilen und `brand_events` tragen generationId, Slot-Id, Modell, Dauer und
  * Fehlercode — NIE Prompt, NIE Hinweis, NIE erzeugten Text.
  *
- * ── WAS HIER NOCH FEHLT (bewusst, mit Adresse) ────────────────────────────
- * Die Drossel-Zahlen aus Plan §6 (200/Tag je Konto, 10/Tag je Brand × Slot-Typ,
- * Burst 2, Instanz-Deckel) sind NICHT umgesetzt. Der Schema-Anhang §9 weist sie
- * ausdrücklich dem Drossel-Muster in `05.rate-limit.ts` zu, nicht dem Schema und
- * nicht dieser Route. Solange der einzige Generator der Dev-Stub ist, kostet ein
- * Lauf nichts — mit dem ersten echten Prompt (P2) ist die Drossel Pflicht,
- * BEVOR `brandAiEnabled` irgendwo auf `true` geht.
+ * ── DIE DROSSEL (P2.1) STEHT VOR DEM STROM, UND ZWAR AUS EINEM GRUND ──────
+ * Die vier Deckel aus Plan §6 (Burst 2 · 10/Tag je Brand × Slot-Typ · 200/Tag
+ * je Konto · Instanz-Deckel) werden gebucht, SOLANGE DIE ANTWORT NOCH KEIN SSE
+ * IST — als 429 mit `data.code`. Ein Nein im Strom wäre für einen Deckel die
+ * falsche Form: `fetch` hielte die Antwort für einen Erfolg, kein Proxy und
+ * kein Log sähe die Ablehnung, und `Retry-After` hätte keinen Platz.
+ *
+ * DAFÜR WANDERN DREI DINGE VOR DEN `writeHead`: der Kill-Switch, die
+ * Generator-Wahl und die Idempotenz-Prüfung. Sie MÜSSEN davor stehen —
+ * gebucht werden darf nur, was wirklich Geld kostet:
+ *   · `brandAiEnabled` aus (Kill-Switch) ⇒ gar nichts, auch keine Buchung.
+ *   · Kein Generator ⇒ nichts zu bezahlen.
+ *   · Der Dev-Stub (`chargesQuota: false`) ⇒ er ruft keinen Anbieter.
+ *   · Ein Idempotenz-Treffer ⇒ Cache-Treffer, „was nichts kostet, kostet kein
+ *     Kontingent" (Plan §6).
+ * GEMELDET werden Kill-Switch und fehlender Generator weiterhin IM Strom
+ * (`ai_disabled`, `no_generator`) — sie sind Zustände, keine Aufruferfehler,
+ * und die Oberfläche macht daraus einen ruhigen Hinweis. Nur der ZEITPUNKT der
+ * Prüfung hat sich verschoben, nicht ihre Form.
  */
 
 /** Was der Entwurf höchstens sein darf — die Registry sagt es je Slot. */
@@ -133,8 +147,71 @@ export default defineEventHandler(async (event) => {
     throw createError({ status: 400, statusText: 'Slot is not generated', data: { code: 'slot_not_generated' } })
   }
 
-  // ── Ab hier läuft der Strom ──────────────────────────────────────────────
+  /**
+   * ── WAS VOR DEM STROM FESTSTEHEN MUSS (s. Kopf) ──────────────────────────
+   * Kill-Switch, Generator-Wahl und Idempotenz-Prüfung — die drei Fragen, die
+   * entscheiden, ob dieser Lauf überhaupt etwas KOSTET. Gemeldet werden sie
+   * unverändert im Strom; hier wird nur gerechnet, nicht gesendet.
+   *
+   * Die Werte stammen aus DERSELBEN `stepRow`-Aufnahme, die der Strom ohnehin
+   * benutzt — vorgezogen wird die Rechnung, nicht die Wahrheit.
+   */
+  const aiEnabled = await readBrandAiEnabled(event)
+  const choice = aiEnabled ? resolveBrandSlotGenerator(stepKey) : null
+
+  const records = parseSlotRecords(stepRow.slots)
+  const dependencies = collectSlotDependencies(slot.id, records)
+  const inputHash = brandGenerationInputHash(slot.id, profile.contentLocale, dependencies)
+  const stored = parseGenerations(stepRow.generations)
+  const reused = findBrandGenerationByKey(stored.items, body.idempotencyKey)
+
   const generationId = ID.unique()
+
+  /**
+   * DIE SPERRE WIRD VOR DER BUCHUNG GEZOGEN, obwohl sie erst im Strom gemeldet
+   * wird: ein Lauf, der ohnehin an `generation_active` scheitert, darf kein
+   * Kontingent verbrauchen. Ohne Kill-Switch und ohne Generator wird sie gar
+   * nicht erst gezogen — sonst bliebe sie auf den beiden Ausgängen liegen, die
+   * gleich danach kommen.
+   */
+  const lock = aiEnabled && choice
+    ? acquireBrandGenerationLock(profile.$id, stepKey, generationId)
+    : null
+
+  /**
+   * KONTINGENT KOSTET NUR EIN ECHTER ANBIETER-LAUF: kein Dev-Stub
+   * (`chargesQuota: false`), kein Cache-Treffer, kein Lauf, den der
+   * Kill-Switch verhindert, und keiner, der an der Sperre hängen bleibt.
+   *
+   * BELEGT WIRD DER BURST-PLATZ VOR DER BUCHUNG, nicht danach — die Begründung
+   * steht in `brandAiQuota.ts` (zwischen Zählen und Belegen lägen sonst drei
+   * `await`). Ein Nein gibt ihn sofort wieder frei.
+   */
+  const charges = Boolean(choice?.chargesQuota) && !reused?.draft && Boolean(lock)
+  const burst = charges ? retainBrandGeneration(userId) : null
+  if (charges) {
+    const rejection = await bookBrandAiQuota(event, {
+      userId,
+      profileId: profile.$id,
+      slotId: slot.id,
+    })
+    if (rejection) {
+      burst?.release()
+      lock?.release()
+      logEvent('info', 'brand.generation_throttled', { slotId: slot.id, stepKey, code: rejection.code })
+      setHeader(event, 'Retry-After', rejection.retryAfterSec)
+      // Der GRUND reist mit: `data.code` wird vom zentralen Fehler-Handler als
+      // `reason` ins Envelope gehoben, und die Werkstatt sagt „gleich wieder"
+      // oder „morgen wieder" — nicht dasselbe für beides.
+      throw createError({
+        status: 429,
+        statusText: 'Brand generation limit reached',
+        data: { code: rejection.code },
+      })
+    }
+  }
+
+  // ── Ab hier läuft der Strom ──────────────────────────────────────────────
   const res = event.node.res
   res.writeHead(200, {
     'Content-Type': 'text/event-stream; charset=utf-8',
@@ -164,13 +241,9 @@ export default defineEventHandler(async (event) => {
     res.end()
   }
 
-  const aiEnabled = await readBrandAiEnabled(event)
   if (!aiEnabled) return fail('ai_disabled')
+  if (!choice) return fail('no_generator')
 
-  const generator = resolveBrandSlotGenerator(stepKey)
-  if (!generator) return fail('no_generator')
-
-  const lock = acquireBrandGenerationLock(profile.$id, stepKey, generationId)
   if (!lock) return fail('generation_active')
 
   // Der Abbruch hat zwei Auslöser: der Mensch drückt „Stopp" (der Client bricht
@@ -188,16 +261,11 @@ export default defineEventHandler(async (event) => {
       payload: { slotId: slot.id, stepKey, hasHint: Boolean(body.hint) },
     })
 
-    const records = parseSlotRecords(stepRow.slots)
-    const dependencies = collectSlotDependencies(slot.id, records)
-    const inputHash = brandGenerationInputHash(slot.id, profile.contentLocale, dependencies)
-    const stored = parseGenerations(stepRow.generations)
-
     // WIEDERVERWENDUNG statt zweitem KI-Aufruf: derselbe Idempotenzschlüssel,
     // derselbe Entwurf. Ein doppelt abgeschickter Knopfdruck (Doppelklick,
     // Wiederholung nach Netzhänger) kostet so kein Kontingent — „was nichts
-    // kostet, kostet kein Kontingent" (Plan §6).
-    const reused = findBrandGenerationByKey(stored.items, body.idempotencyKey)
+    // kostet, kostet kein Kontingent" (Plan §6). Entschieden wurde das schon
+    // oben (`charges`), damit dieser Fall gar nicht erst gebucht wird.
     if (reused?.draft) {
       send('message.delta', { generationId, text: reused.draft })
       send('slot.ready', { generationId, slotId: slot.id, draft: reused.draft })
@@ -229,7 +297,7 @@ export default defineEventHandler(async (event) => {
 
     let result: BrandGeneratorResult
     try {
-      result = await generator(context)
+      result = await choice.generator(context)
     }
     catch (error) {
       logEvent('error', 'brand.generation_provider_error', {
@@ -281,6 +349,9 @@ export default defineEventHandler(async (event) => {
   }
   finally {
     lock.release()
+    // Der Burst-Platz gehört diesem Lauf, nicht seinem Ausgang: Erfolg,
+    // Anbieterfehler und Abbruch geben ihn gleichermassen frei.
+    burst?.release()
   }
 
   /**

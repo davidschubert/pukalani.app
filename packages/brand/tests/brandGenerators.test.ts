@@ -35,6 +35,9 @@ const {
   registerBrandSlotGenerator,
   resolveBrandSlotGenerator,
   acquireBrandGenerationLock,
+  clearActiveBrandGenerations,
+  countActiveBrandGenerations,
+  retainBrandGeneration,
 } = await import('../server/utils/brandGenerators')
 
 const event = {} as H3Event
@@ -67,16 +70,23 @@ describe('Generator-Registry', () => {
     expect(resolveBrandSlotGenerator('pvm')).toBeNull()
   })
 
-  it('fällt mit Schalter auf den Dev-Stub zurück', () => {
+  it('fällt mit Schalter auf den Dev-Stub zurück — UND DER KOSTET NICHTS', () => {
     appConfig.pukalani.brand.devStubGenerator = true
-    expect(resolveBrandSlotGenerator('pvm')).toBe(brandDevStubGenerator)
+    // `chargesQuota: false` ist die Sicherung des Drossel-Vertrags (P2.1): der
+    // Stub ruft keinen Anbieter, also darf er auch kein Tageskontingent nehmen.
+    expect(resolveBrandSlotGenerator('pvm')).toEqual({
+      generator: brandDevStubGenerator,
+      chargesQuota: false,
+    })
   })
 
   it('EIN REGISTRIERTER GENERATOR SCHLÄGT DEN STUB — auch mit Schalter', () => {
     appConfig.pukalani.brand.devStubGenerator = true
     const real = vi.fn()
     registerBrandSlotGenerator('pvm', real as never)
-    expect(resolveBrandSlotGenerator('pvm')).toBe(real)
+    // Und ein echter Generator KOSTET — das ist der andere Zweig derselben
+    // Sicherung.
+    expect(resolveBrandSlotGenerator('pvm')).toEqual({ generator: real, chargesQuota: true })
   })
 
   it('nimmt den Stern-Eintrag für Bausteine ohne eigenen', () => {
@@ -84,8 +94,46 @@ describe('Generator-Registry', () => {
     const own = vi.fn()
     registerBrandSlotGenerator('*', any as never)
     registerBrandSlotGenerator('values', own as never)
-    expect(resolveBrandSlotGenerator('pvm')).toBe(any)
-    expect(resolveBrandSlotGenerator('values')).toBe(own)
+    expect(resolveBrandSlotGenerator('pvm')?.generator).toBe(any)
+    expect(resolveBrandSlotGenerator('values')?.generator).toBe(own)
+  })
+})
+
+/**
+ * DER BURST-ZÄHLER (P2.1) — zwei parallele Läufe je Konto.
+ *
+ * Er zählt nur; die Grenze zieht `decideBrandAiQuota()`. Beweisbedürftig ist
+ * deshalb die BUCHFÜHRUNG: dass Konten sich nicht mischen und dass eine
+ * doppelte Freigabe den Zähler nicht ins Negative treibt — dort verschwände
+ * der Deckel lautlos, und genau das passiert, wenn eine Route an zwei
+ * Ausgängen freigibt.
+ */
+describe('Burst-Zähler', () => {
+  afterEach(() => clearActiveBrandGenerations())
+
+  it('zählt je Konto hoch und wieder herunter', () => {
+    expect(countActiveBrandGenerations('u1')).toBe(0)
+    const first = retainBrandGeneration('u1')
+    const second = retainBrandGeneration('u1')
+    expect(countActiveBrandGenerations('u1')).toBe(2)
+    // Ein fremdes Konto ist davon unberührt.
+    expect(countActiveBrandGenerations('u2')).toBe(0)
+
+    first.release()
+    expect(countActiveBrandGenerations('u1')).toBe(1)
+    second.release()
+    expect(countActiveBrandGenerations('u1')).toBe(0)
+  })
+
+  it('EINE ZWEITE FREIGABE ZÄHLT NICHT NOCH EINMAL', () => {
+    const held = retainBrandGeneration('u3')
+    const other = retainBrandGeneration('u3')
+    held.release()
+    held.release()
+    held.release()
+    expect(countActiveBrandGenerations('u3')).toBe(1)
+    other.release()
+    expect(countActiveBrandGenerations('u3')).toBe(0)
   })
 })
 

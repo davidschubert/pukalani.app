@@ -85,6 +85,22 @@ export type BrandSlotGenerator = (context: BrandGeneratorContext) => Promise<Bra
 /** `'*'` gilt für jeden Baustein, der keinen eigenen Generator hat. */
 export type BrandGeneratorScope = BrandStepKey | '*'
 
+/**
+ * WER SCHREIBT — und ob dieser Lauf Kontingent kostet.
+ *
+ * `chargesQuota` ist die eine Auskunft, die die Route braucht und die sie sich
+ * nicht selbst zusammenreimen soll: der Dev-Stub rechnet eine Zeichenkette
+ * zusammen und schläft fünfmal 60 ms — er kostet nichts, also darf er auch
+ * nichts vom Tageskontingent nehmen. Ein `generator === brandDevStubGenerator`
+ * an der Aufrufstelle wäre dieselbe Aussage, nur als Identitätsvergleich, den
+ * der erste registrierte Wrapper (Logging, Retry) still falsch beantwortet.
+ */
+export interface BrandGeneratorChoice {
+  generator: BrandSlotGenerator
+  /** `false` NUR für den Entwicklungs-Ersatz. */
+  chargesQuota: boolean
+}
+
 const GENERATORS = new Map<BrandGeneratorScope, BrandSlotGenerator>()
 
 export function registerBrandSlotGenerator(scope: BrandGeneratorScope, generator: BrandSlotGenerator): void {
@@ -106,10 +122,10 @@ function devStubEnabled(): boolean {
  * (wenn erlaubt). `null` heisst „niemand schreibt hier" — die Route meldet
  * `generation.failed` mit `no_generator`, und der Stand bleibt bearbeitbar.
  */
-export function resolveBrandSlotGenerator(stepKey: BrandStepKey): BrandSlotGenerator | null {
-  return GENERATORS.get(stepKey)
-    ?? GENERATORS.get('*')
-    ?? (devStubEnabled() ? brandDevStubGenerator : null)
+export function resolveBrandSlotGenerator(stepKey: BrandStepKey): BrandGeneratorChoice | null {
+  const registered = GENERATORS.get(stepKey) ?? GENERATORS.get('*')
+  if (registered) return { generator: registered, chargesQuota: true }
+  return devStubEnabled() ? { generator: brandDevStubGenerator, chargesQuota: false } : null
 }
 
 // ── Der KI-Kill-Switch der Laufzeit ────────────────────────────────────────
@@ -199,6 +215,57 @@ export function acquireBrandGenerationLock(
       if (LOCKS.get(key)?.generationId === generationId) LOCKS.delete(key)
     },
   }
+}
+
+// ── Der Burst-Zähler (max. 2 parallele Läufe je Konto) ─────────────────────
+
+const ACTIVE = new Map<string, number>()
+
+/**
+ * Wie viele echte Generierungen dieses Kontos laufen GERADE — die Zahl, die
+ * `decideBrandAiQuota()` gegen `BRAND_AI_PARALLEL_LIMIT` hält.
+ *
+ * DIESELBE BEWUSSTE GRENZE WIE DIE SPERRE OBEN: eine Map im Prozess. Bei
+ * mehreren Node-Prozessen zählt jeder für sich, aus 2 würden 2×Worker — und das
+ * ist hier vertretbar, weil die drei TAGES-Deckel im geteilten Rate-Limit-Store
+ * liegen und die Rechnung ohnehin begrenzen. Der Burst-Deckel schützt das
+ * TEMPO, nicht die Summe.
+ *
+ * ZÄHLEN UND BELEGEN SIND ZWEI SCHRITTE, und dazwischen darf kein `await`
+ * stehen: Node ist einfädig, also ist die Folge `count → entscheiden → retain`
+ * atomar. Ein `await` dazwischen machte aus zwei Läufen drei.
+ */
+export function countActiveBrandGenerations(userId: string): number {
+  return ACTIVE.get(userId) ?? 0
+}
+
+export interface BrandGenerationSlotHandle {
+  release: () => void
+}
+
+/**
+ * Einen Platz belegen. Die Freigabe gehört in ein `finally` — und sie ist
+ * ABSICHTLICH mehrfach aufrufbar: die Route gibt an mehreren Ausgängen frei,
+ * und ein zweimal gezähltes Minus liesse den Zähler ins Negative laufen und
+ * damit den Deckel verschwinden.
+ */
+export function retainBrandGeneration(userId: string): BrandGenerationSlotHandle {
+  ACTIVE.set(userId, countActiveBrandGenerations(userId) + 1)
+  let released = false
+  return {
+    release: () => {
+      if (released) return
+      released = true
+      const next = countActiveBrandGenerations(userId) - 1
+      if (next > 0) ACTIVE.set(userId, next)
+      else ACTIVE.delete(userId)
+    },
+  }
+}
+
+/** Nur für Beweise/Tests: den Burst-Zähler leeren. */
+export function clearActiveBrandGenerations(): void {
+  ACTIVE.clear()
 }
 
 // ── Der Entwicklungs-Ersatz ────────────────────────────────────────────────

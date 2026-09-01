@@ -16,6 +16,7 @@ import {
   slotsForStep,
 } from '../../../../shared/slotRegistry'
 import { brandSlotDisplayValue } from '../../../../shared/brandAutosaveDiff'
+import { brandAiRejectionMessageKey } from '../../../../shared/brandAiLimits'
 import type { BrandGenerationVersionsResponse } from '../../../../shared/types/brand'
 import { useBrandWorkspaceStore } from '../../../stores/brandWorkspace'
 import { useBrandAutosave } from '../../../composables/useBrandAutosave'
@@ -258,6 +259,10 @@ function useVersion(text: string): void {
 const generationNotice = computed<string | null>(() => {
   const code = generation.failureCode.value
   if (!code) return null
+  // Die vier Drossel-Gründe zuerst: sie sind die einzigen, die dem Menschen
+  // sagen, WANN es wieder geht (gleich · morgen · nicht an dir).
+  const throttled = brandAiRejectionMessageKey(code)
+  if (throttled) return t(throttled)
   if (code === 'ai_disabled') return t('brand.workspace.generate.aiDisabled')
   if (code === 'no_generator') return t('brand.workspace.generate.noGenerator')
   if (code === 'generation_active') return t('brand.workspace.generate.busy')

@@ -1,5 +1,9 @@
 import type { MaybeRefOrGetter } from 'vue'
 import {
+  type BrandAiRejectionCode,
+  isBrandAiRejectionCode,
+} from '../../shared/brandAiLimits'
+import {
   type BrandGenerationFailureCode,
   decodeBrandGenerationChunk,
 } from '../../shared/brandGeneration'
@@ -42,12 +46,29 @@ import { useBrandWorkspaceStore } from '../stores/brandWorkspace'
 
 export type BrandGenerationStatus = 'idle' | 'streaming' | 'done' | 'failed'
 
-/** Server-Codes plus der eine Fall, den es nur beim Client gibt. */
-export type BrandGenerationClientFailure = BrandGenerationFailureCode | 'request_rejected'
+/**
+ * Server-Codes, die vier Drossel-Gründe und der eine Fall, den es nur beim
+ * Client gibt (`request_rejected` = irgendein Gate hat vor dem Strom mit HTTP
+ * abgewiesen, ohne uns einen Grund zu nennen).
+ */
+export type BrandGenerationClientFailure =
+  | BrandGenerationFailureCode
+  | BrandAiRejectionCode
+  | 'request_rejected'
 
 export interface UseBrandGenerationOptions {
   /** Vor dem Start ausführen — die Seite reicht hier `autosave.flush` herein. */
   beforeGenerate?: () => Promise<void> | void
+}
+
+/**
+ * Der Drossel-Grund aus dem Fehler-Envelope (`{ ok, code, message, reason }`).
+ * `null`, wenn dort nichts Bekanntes steht — ein alter Server, ein Proxy-429
+ * oder eine leere Antwort fallen so auf den bisherigen Text zurück.
+ */
+async function rejectionReason(response: Response): Promise<BrandAiRejectionCode | null> {
+  const body = await response.json().catch(() => null) as { reason?: unknown } | null
+  return isBrandAiRejectionCode(body?.reason) ? body.reason : null
 }
 
 function newIdempotencyKey(): string {
@@ -116,8 +137,14 @@ export function useBrandGeneration(
       if (!response.ok || !response.body) {
         // Ein Gate hat vor dem Strom abgewiesen (400/403/404). Der GRUND bleibt
         // beim Server — die Oberfläche sagt nur, dass es gerade nicht geht.
+        //
+        // MIT EINER AUSNAHME: die Drossel (429) nennt ihren Grund im Envelope
+        // (`reason`), und die vier Gründe sagen VERSCHIEDENE Dinge — „gleich
+        // wieder", „morgen wieder", „nicht an dir". Ein gemeinsames „hat nicht
+        // geklappt" schickte den Menschen zurück an denselben Knopf.
         status.value = 'failed'
-        failureCode.value = 'request_rejected'
+        failureCode.value = (response.status === 429 ? await rejectionReason(response) : null)
+          ?? 'request_rejected'
         return
       }
 

@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { H3Event } from 'h3'
 import {
   type BrandGenerationEvent,
@@ -26,7 +26,12 @@ import type { BrandGenerationsView } from '../shared/types/brand'
  * Appwrite-Zugang, das Gate antwortet 404, bevor irgendein Frame entsteht.
  */
 
-const appConfig = { pukalani: { brand: { devStubGenerator: true } } }
+const appConfig = { pukalani: { brand: { devStubGenerator: true, aiDailyInstanceCap: 1000 } } }
+
+/** Die gebuchten Eimer dieses Laufs — der Beweis, WAS Kontingent kostet. */
+let hits: string[] = []
+/** Zählerstand je Eimer; alles Ungenannte steht auf 1 (erster Lauf des Tages). */
+let bucketCounts: Record<string, number> = {}
 
 interface FakeRow { $id: string, [key: string]: unknown }
 
@@ -94,6 +99,17 @@ vi.stubGlobal('getRouterParam', (_event: H3Event, name: string) =>
 
 let body: Record<string, unknown>
 vi.stubGlobal('readBody', async () => body)
+vi.stubGlobal('setHeader', () => {})
+vi.stubGlobal('useRateLimitStore', () => ({
+  prefix: 'rl:test:',
+  store: {
+    hit: async (key: string) => {
+      const bucket = key.replace('rl:test:', '')
+      hits.push(bucket)
+      return { count: bucketCounts[bucket] ?? 1, resetInMs: 3_600_000 }
+    },
+  },
+}))
 
 const handler = (await import('../server/api/brand/profiles/[id]/steps/[stepKey]/generate.post'))
   .default as unknown as (event: H3Event) => Promise<unknown>
@@ -140,6 +156,8 @@ function readBack(chunks: readonly string[]): BrandGenerationEvent[] {
 
 beforeEach(() => {
   timeline = []
+  hits = []
+  bucketCounts = {}
   appConfigRow = { $id: 'global', brandAiEnabled: true }
   stepRow = {
     $id: 'p1_context',
@@ -321,5 +339,175 @@ describe('POST …/steps/:stepKey/generate', () => {
       .filter(call => call.tableId === 'brand_events')
     // Log-Regel §6: der Funnel trägt Kennzahlen, nie den Hinweistext.
     for (const record of events) expect(JSON.stringify(record.data)).not.toContain('wärmer')
+  })
+})
+
+/**
+ * DIE DROSSEL AN DER ROUTE (P2.1) — was Kontingent kostet und was nicht.
+ *
+ * Der Dev-Stub reicht dafür nicht: er sagt `chargesQuota: false` und bucht
+ * deshalb gar nichts (das ist eine der Aussagen hier). Für alles andere wird
+ * ein echter Generator registriert — genau so, wie P2 seine Prompts einträgt.
+ *
+ * Gemessen wird an den EIMERN: welche Schlüssel hat die Route angefasst, in
+ * welcher Reihenfolge, und wo hat sie aufgehört. Daran hängt die Sorgfalt, die
+ * man beim Umbauen als Erstes verliert — ein enger Deckel darf die weiteren
+ * nicht mitverbrauchen.
+ */
+describe('KI-Drossel', () => {
+  const SLOT_BUCKET = 'brand-ai-slot-day:p1:a.pitch'
+  const ACCOUNT_BUCKET = 'brand-ai-day:u1'
+  const INSTANCE_BUCKET = 'brand-ai-instance-day'
+
+  let generator: ReturnType<typeof vi.fn>
+
+  beforeEach(async () => {
+    const module = await import('../server/utils/brandGenerators')
+    module.clearActiveBrandGenerations()
+    generator = vi.fn(async () => ({
+      draft: 'Ein echter Entwurf.',
+      model: 'test-model',
+      provider: 'test',
+      promptVersion: 'p-1',
+      aborted: false,
+    }))
+    module.registerBrandSlotGenerator('context', generator as never)
+  })
+
+  afterEach(async () => {
+    const module = await import('../server/utils/brandGenerators')
+    module.clearBrandSlotGenerators()
+    module.clearActiveBrandGenerations()
+  })
+
+  it('bucht ALLE DREI Tages-Eimer — eng vor weit', async () => {
+    const { event } = fakeEvent()
+    await handler(event)
+    expect(hits).toEqual([SLOT_BUCKET, ACCOUNT_BUCKET, INSTANCE_BUCKET])
+    expect(generator).toHaveBeenCalledOnce()
+  })
+
+  it('DER SLOT-DECKEL LEHNT AB — und verbraucht die weiteren NICHT', async () => {
+    bucketCounts[SLOT_BUCKET] = 11
+    const { event } = fakeEvent()
+    await expect(handler(event)).rejects.toMatchObject({
+      status: 429,
+      data: { code: 'brand_ai_slot_limit' },
+    })
+    // Genau hier steckt die Sorgfalt: wer an einer Frage hängen bleibt, darf
+    // nicht sein Tageskontingent verlieren.
+    expect(hits).toEqual([SLOT_BUCKET])
+    expect(generator).not.toHaveBeenCalled()
+  })
+
+  it('DER KONTO-DECKEL lehnt ab, ohne den Instanz-Deckel zu belasten', async () => {
+    bucketCounts[ACCOUNT_BUCKET] = 201
+    const { event } = fakeEvent()
+    await expect(handler(event)).rejects.toMatchObject({
+      status: 429,
+      data: { code: 'brand_ai_daily_limit' },
+    })
+    expect(hits).toEqual([SLOT_BUCKET, ACCOUNT_BUCKET])
+  })
+
+  it('DER INSTANZ-DECKEL lehnt zuletzt ab', async () => {
+    bucketCounts[INSTANCE_BUCKET] = 1001
+    const { event } = fakeEvent()
+    await expect(handler(event)).rejects.toMatchObject({
+      status: 429,
+      data: { code: 'brand_ai_instance_limit' },
+    })
+    expect(hits).toEqual([SLOT_BUCKET, ACCOUNT_BUCKET, INSTANCE_BUCKET])
+  })
+
+  it('ZWEI LAUFEN SCHON ⇒ der dritte wird abgewiesen, OHNE einen Eimer anzufassen', async () => {
+    const module = await import('../server/utils/brandGenerators')
+    module.retainBrandGeneration('u1')
+    module.retainBrandGeneration('u1')
+
+    const { event } = fakeEvent()
+    await expect(handler(event)).rejects.toMatchObject({
+      status: 429,
+      data: { code: 'brand_ai_busy' },
+    })
+    expect(hits).toEqual([])
+  })
+
+  it('GIBT DEN BURST-PLATZ WIEDER FREI — auch nach einem Nein der Drossel', async () => {
+    const module = await import('../server/utils/brandGenerators')
+    bucketCounts[SLOT_BUCKET] = 11
+    const { event } = fakeEvent()
+    await expect(handler(event)).rejects.toMatchObject({ status: 429 })
+    // Ein Platz, der nach einer Ablehnung belegt bliebe, sperrte das Konto nach
+    // zwei Fehlversuchen dauerhaft aus.
+    expect(module.countActiveBrandGenerations('u1')).toBe(0)
+
+    // Und nach einem VOLLSTÄNDIGEN Lauf ebenso.
+    bucketCounts = {}
+    hits = []
+    const second = fakeEvent()
+    await handler(second.event)
+    expect(module.countActiveBrandGenerations('u1')).toBe(0)
+  })
+
+  it('EIN LAUF, DER AN DER SPERRE HÄNGT, KOSTET NICHTS', async () => {
+    // Der erste Lauf hält die Sperre, solange sein Generator arbeitet.
+    generator.mockImplementation(async () => {
+      await new Promise(resolve => setTimeout(resolve, 40))
+      return {
+        draft: 'Ein echter Entwurf.',
+        model: 'test-model',
+        provider: 'test',
+        promptVersion: 'p-1',
+        aborted: false,
+      }
+    })
+    const first = fakeEvent()
+    const running = handler(first.event)
+    const second = fakeEvent()
+    await handler(second.event)
+    await running
+
+    expect(readBack(second.chunks)[0]).toMatchObject({
+      type: 'generation.failed',
+      code: 'generation_active',
+    })
+    // Nur der ERSTE hat gebucht — der abgewiesene zweite nicht.
+    expect(hits).toEqual([SLOT_BUCKET, ACCOUNT_BUCKET, INSTANCE_BUCKET])
+  })
+
+  it('DER KILL-SWITCH KOMMT VOR JEDER BUCHUNG', async () => {
+    appConfigRow = { $id: 'global', brandAiEnabled: false }
+    const { event, chunks } = fakeEvent()
+    await handler(event)
+    expect(readBack(chunks)[0]).toMatchObject({ type: 'generation.failed', code: 'ai_disabled' })
+    // Kein Eimer, kein Generator: ein abgeschalteter Dienst kostet nichts.
+    expect(hits).toEqual([])
+    expect(generator).not.toHaveBeenCalled()
+  })
+
+  it('EIN CACHE-TREFFER KOSTET KEIN KONTINGENT', async () => {
+    body = { slotId: 'a.pitch', idempotencyKey: 'k1' }
+    const first = fakeEvent()
+    await handler(first.event)
+    expect(hits).toEqual([SLOT_BUCKET, ACCOUNT_BUCKET, INSTANCE_BUCKET])
+
+    hits = []
+    const second = fakeEvent()
+    await handler(second.event)
+    expect(readBack(second.chunks).at(-1)).toMatchObject({ reused: true })
+    // „Was nichts kostet, kostet kein Kontingent" (Plan §6).
+    expect(hits).toEqual([])
+    expect(generator).toHaveBeenCalledOnce()
+  })
+})
+
+describe('Der Dev-Stub bucht nichts', () => {
+  it('läuft durch, ohne einen einzigen Eimer anzufassen', async () => {
+    const { event, chunks } = fakeEvent()
+    await handler(event)
+    expect(readBack(chunks).at(-1)!.type).toBe('generation.completed')
+    // Er rechnet eine Zeichenkette zusammen — dafür zahlt niemand.
+    expect(hits).toEqual([])
   })
 })
