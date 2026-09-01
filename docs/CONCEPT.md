@@ -4,8 +4,8 @@
 > nachgezogen am **2026-08-16**.
 >
 > **Was aktuell ist:** die Ebenen-Darstellung (inkl. Kompositions-Layer `blueprint`),
-> Stack & Katalog, Verzeichnisstruktur (21 Layer, 8 Apps), Layer-Tabelle,
-> A9 (Deployment), A10 (Migrations), A11–A13, **A14 (Layer-Grenzen-Matrix, alle 21
+> Stack & Katalog, Verzeichnisstruktur (24 Layer, 8 Apps), Layer-Tabelle,
+> A9 (Deployment), A10 (Migrations), A11–A13, **A14 (Layer-Grenzen-Matrix, alle 24
 > Layer + Durchsetzung inkl. Datentür-Backstop)**, **A15 (Mandanten-Architektur:
 > Pool/Silo, Datentür, Publikum, Sperr-Stufen)**, Stolperfallen.
 >
@@ -152,6 +152,7 @@ apps/       ← Vollständige, deploybare Nuxt-Applikationen
 | `packages/moderation` | ✅ Aktiv | Fundament: generisches Melde-/Report-System (reports-Table, Queue-Verträge, ReportButton) |
 | `packages/blueprint` | ✅ Aktiv | **Kompositions-Layer** („Bauplan"): der EINZIGE Layer, der mehrere Produkt-Layer kennen darf — Produkt-Kompositionen (Feed + Kommentare, …) existieren genau einmal hier, damit Pool und Silo identisch funktionieren. Keine Produkt-Logik, keine Tables, kein `server/`. In `extends` VOR den Produkt-Layern |
 | `packages/onboarding` | ✅ Aktiv | Fundament des Selbstbedienungs-Trichters: Wizard (`/start`), Einladungen + Beitritt (`/join`), Mitglieder-Verwaltung, Community-Einstellungen, Plan/Abo-Seiten. Besitzt die Service-Naht zum Control Plane |
+| `packages/marketing` | ✅ Aktiv | **Chrome-Layer** der Marke Pukalani: Kopf- und Fußbereich der öffentlichen Seiten (pukalani.app + help.pukalani.app), Link-Auflösung `useMarketingSite()`, Marken-CSS und die i18n-Schlüssel beider Bauteile — keine Tables, keine Migrationen, keine Produkt-Logik |
 | `packages/themes` | ✅ Aktiv | Theme-Studio (Galerie + Editor), Built-in-Katalog 26 × 11 (286 generierte Varianten, Quelle `theme.catalog.ts`, CI-Gate `check:themes`) + Custom Themes (OKLCH-Ramp-Generator), 2 Schrift-Rollen inkl. WOFF2-Uploads, Live-Propagation — Konzept: docs/referenz/THEMES-CONCEPT-V2.md |
 | `packages/comments` | ✅ Aktiv | Kommentarsystem: targetId/targetType, Votes, Realtime — Spec: [[reddit-comment-system-setup]] |
 | `packages/admin` | ✅ Aktiv | Dashboard (RBAC-Capabilities), User-Verwaltung, Moderations-Queue, Changelog, Audit, GDPR-Exporte, Theme-/Font-Admin-Routen |
@@ -167,6 +168,8 @@ apps/       ← Vollständige, deploybare Nuxt-Applikationen
 | `packages/tickets` | ✅ Aktiv | Support-Ticket-Board (Kanban): Listen + Karten mit DnD, Zuweisung, Checklisten, Anhänge, Kommentare via comments-Vertrag `operatorTargets`, Benachrichtigungen, optionale KI-Triage |
 | `packages/analytics` | ✅ Aktiv | Cookielose Besucherstatistik via Plausible: Script-Id der eigenen Site eintragen, die Seiten melden sich selbst |
 | `packages/domains` | ✅ Aktiv | Eigene Domain je Community: eintragen, DNS-Besitznachweis, Zertifikat bestellen, umschalten — die Pukalani-Adresse bleibt als Rückfall |
+| `packages/brand` | ✅ Aktiv | Brand-Wizard „George" (KI-Markenberater): geführte Brand Foundation — Purpose, Werte, Archetyp, Stimme, Manifest. Sieben `brand_*`-Tabellen, server-only (Permissions `[]`) und nur auf der `branding`-Instanz (branding.supply) — Plan: docs/plans/BRAND-WIZARD-PHASE-1.md |
+| `packages/runner` | ✅ Aktiv | AI-Runner-Board (nur Betreiber-Konsole): führt Tickets als Claude-Code-Läufe auf einem registrierten Rechner aus — Board-UI + Naht zum Daemon `tools/ai-runner`, Tables `runners`/`runs`/`run_events`, Capability `runner.manage` (nur admin) — Konzept: docs/plans/AI-RUNNER.md |
 | `packages/control` | ✅ Aktiv | **Control Plane** (nur auf der Betreiber-Site `admin.pukalani.app`): Register der Communities (`communities`, `community_members`, `community_invites`), Provisionierung, Health-Übersicht, Entitlements, Stripe-Webhook. Migrationen `control-NNN` |
 | `packages/appwrite-functions` | 🔜 Zukunft | Appwrite Functions (Webhooks, CRON, Events) — `functions/changelog-draft` existiert bereits standalone |
 
@@ -336,6 +339,7 @@ maui-monorepo/
 │   ├── system/                            # Fundament-Layer (Infra-Tabellen)
 │   ├── moderation/                        # Fundament-Layer (Reports)
 │   ├── onboarding/                        # Fundament-Layer (Trichter, Mitglieder, Naht)
+│   ├── marketing/                         # Chrome-Layer (Marken-Kopf/Fuß, keine Tables)
 │   ├── blueprint/                         # KOMPOSITIONS-Layer — der einzige, der
 │   │                                      # mehrere Produkt-Layer kennen darf;
 │   │                                      # in extends VOR den Produkt-Layern
@@ -354,6 +358,8 @@ maui-monorepo/
 │   ├── analytics/                         # Produkt-Layer (Plausible)
 │   ├── domains/                           # Produkt-Layer (eigene Domain)
 │   ├── billing/                           # Produkt-Layer (Stripe)
+│   ├── brand/                             # Produkt-Layer (Brand-Wizard, nur branding-Instanz)
+│   ├── runner/                            # Betriebs-Layer (AI-Runner-Board, nur Betreiber-Site)
 │   └── control/                           # Control Plane (nur Betreiber-Site)
 │
 ├── apps/                                  # dünn: Komposition + Branding
@@ -369,7 +375,7 @@ maui-monorepo/
 │   ├── platform/                          # Mehr-Mandanten-App (Pool + Kundenbereich)
 │   ├── control/                           # Betreiber-Konsole (admin.pukalani.app)
 │   ├── portfolio/                         # Davids eigene Site (einziges Silo-Deployment)
-│   ├── photos/ · marketing/ · help/       # weitere Apps
+│   ├── photos/ · marketing/ · help/ · branding/  # weitere Apps
 │   └── _template/                         # Vorlage für neue Apps
 │
 ├── .github/workflows/                     # typecheck, lint, deploy
@@ -618,6 +624,7 @@ in ihrer Datei eine Regel steht, sondern weil sie im Themes-Layer liegt.
 | `core` | Auth, Client-Factories, RBAC-Matrix, SSR-Session, **Datentür `tenantDb`**, Registry-Verträge (`notify`, `sendMail`, `aiComplete`, GDPR-/Stats-/Join-/Host-Contributors), Base-UI, Shared-Utils | Produkt-Domäne, **eigene Tables** (A1) | — |
 | `system` | `audit_logs`, `app_config`, `app_secrets`, `notifications`, `activities`, `custom_themes`, `custom_fonts`, `community_branding`, `community_navigation`, `community_redirects`, `community_seo`, `account_handles`, `community_handles` (+ Bucket `fonts`) | Produkt-Domäne, UI-Welt | core |
 | `moderation` | `reports`, Melde-Erfassung + Queue + Lifecycle, generische Melde-UI | Domänen-Wissen, Konsequenz-Logik | core |
+| `marketing` | Kopf- und Fußbereich der Marke Pukalani (Chrome der öffentlichen Seiten), Link-Auflösung `useMarketingSite()`, Marken-CSS, i18n-Schlüssel beider Bauteile | Tables, Migrationen, Produkt-Logik; ein Produkt voraussetzen (der Chrome muss auf jeder Silo-Site tragen) | core |
 
 **Komposition:**
 
@@ -631,6 +638,7 @@ in ihrer Datei eine Regel steht, sondern weil sie im Themes-Layer liegt.
 |---|---|---|---|
 | `control` | `communities`, `community_members`, `community_invites`, `websites`, `entitlements`, `product_catalog`, `community_plans`, `invite_codes`, `invite_requests`, `provisioning_jobs`, `abuse_reports`, `customer_feedback*` | Auf einem Mandanten-Host laufen; Pool-Daten direkt lesen (kein Pool-Schlüssel) | core, system |
 | `onboarding` | Trichter/Wizard, `/join`, Mitglieder-Verwaltung, Community-Einstellungen — **und die Service-Naht zum Control Plane** | Eigene Tables (die Wahrheit liegt im Control Plane) | core, (control über die Naht) |
+| `runner` | `runners`, `runs`, `run_events` — AI-Runner-Board + Naht zum Daemon `tools/ai-runner`; Capability `runner.manage` (nur admin) | Auf Mandanten-Hosts laufen; selbst committen/pushen oder Modi/Modelle/Budget entscheiden (Allowlist und Commit gehören dem Daemon auf dem Mac) | core |
 
 **Produkt-Layer:**
 
@@ -648,19 +656,21 @@ in ihrer Datei eine Regel steht, sondern weil sie im Themes-Layer liegt.
 | `tickets` | `tickets`, `ticket_lists`, `ticket_files`, `ticket_watchers` | — | core, (comments über `operatorTargets`) |
 | `analytics` | `analytics_settings` | Eigenen Tracker bauen (nur Plausible-Script-Id) | core |
 | `billing` | `billing_customers`, `billing_subscriptions`, `stripe_settings` | Produkt-Wissen (Fulfillment nur über `registerCheckoutFulfillment`) | core |
-| `brand` | `brand_profiles`, `brand_steps`, `brand_messages`, `brand_shares`, `brand_invites`, `brand_access`, `brand_events` — **server-only** (Permissions `[]`, `rowSecurity: false`) und nur auf der `portfolio`-Instanz | Andere Produkt-Layer kennen; eigene Theme-Tokens/Presets erfinden (Design-Richtungen werden aus `themes` KONSUMIERT, nie dort geschrieben); KI-Transport selbst bauen | core, system, (themes über den Preset-Vertrag) |
+| `brand` | `brand_profiles`, `brand_steps`, `brand_messages`, `brand_shares`, `brand_invites`, `brand_access`, `brand_events` — **server-only** (Permissions `[]`, `rowSecurity: false`) und nur auf der `branding`-Instanz | Andere Produkt-Layer kennen; eigene Theme-Tokens/Presets erfinden (Design-Richtungen werden aus `themes` KONSUMIERT, nie dort geschrieben); KI-Transport selbst bauen | core, system, (themes über den Preset-Vertrag) |
 | `activity` | **keine eigene Table** — liest `activities` (system) über den Core-Vertrag `recordActivity()` | Eigenes Schema | core, system |
 | `feedback` | Widget + Admin-Sichtung + Naht — **keine eigene Table** (`customer_feedback*` liegen im Control Plane) | Eigenes Schema | core, (control über die Naht) |
 | `domains` | Oberfläche + Prüfweg — **keine eigene Table** (die Domain steht an `communities`/`websites`) | Eigenes Schema, TLS-Anforderung selbst auslösen | core, (control über die Naht) |
 
-> **Drei Layer besitzen bewusst keine Tabelle** (`activity`, `feedback`, `domains`) und
-> einer bewusst kein `server/` (`blueprint`). Das ist kein Rückstand, sondern die
+> **Vier Layer besitzen bewusst keine Tabelle** (`activity`, `feedback`, `domains`,
+> `marketing`) und einer bewusst kein `server/` (`blueprint`). Das ist kein Rückstand, sondern die
 > Aussage der Matrix: ein Layer darf eine Oberfläche haben, ohne Schema-Eigentümer zu
 > sein — wer das „nachrüstet", bricht die Grenze.
 
 > **`brand` ist der erste Produkt-Layer, dessen Tabellen auf genau EINER Instanz
-> stehen** (`portfolio`) — sie kommen deshalb ins `PORTFOLIO_SOLL` von
-> `verify-schema-parity.mjs` und NICHT in die instanzweite Spalten-Parität.
+> stehen** — seit der Kehrtwende vom 2026-08-31 (docs/plans/BRANDING-SUPPLY-INFRA.md)
+> ist das `branding` (branding.supply, vorher P1b: `portfolio`) — sie stehen deshalb
+> im `BRANDING_SOLL` von `verify-schema-parity.mjs` und NICHT in der instanzweiten
+> Spalten-Parität.
 > Nach oben hängt er an drei Nähten und an keiner vierten: `signupAdmission`
 > (core-Registry — der Einladungscode entscheidet über die Kontoanlage),
 > `aiComplete()` (KI-Transport; die Gates und die Antwort-Klemmung bleiben beim
