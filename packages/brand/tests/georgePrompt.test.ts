@@ -1,0 +1,278 @@
+import { describe, expect, it } from 'vitest'
+import {
+  BRAND_LIST_FORMAT_RULE,
+  BRAND_STRUCTURED_FORMAT_RULE,
+  brandSlotFormatExample,
+  brandSlotValueMatchesFormat,
+  formatBrandSlotList,
+  formatBrandSlotStructured,
+} from '../shared/brandSlotFormat'
+import { slotById } from '../shared/slotRegistry'
+import {
+  GEORGE_NO_DEPENDENCIES,
+  GEORGE_PROMPT_VERSION,
+  contextSlotInstruction,
+  formatDependencies,
+  georgeSystemPrompt,
+} from '../server/utils/georgePrompt'
+
+/**
+ * GEORGES PROMPT-BAUSTEINE (P2.2) — was ohne diesen Beweis Glaubenssache wäre.
+ *
+ *  1. Die NEUN REGELN der Content-Spec §1.2 stehen wirklich im System-Prompt.
+ *     Eine Persona, die man nur an ihren Antworten prüfen kann, prüft niemand:
+ *     jeder Beweis kostete dann Geld und einen Anbieter.
+ *  2. Die zwei Sprachen sind wirklich zwei. `locale` (Wizard) und
+ *     `contentLocale` (Brand) fallen im Alltag oft zusammen — genau deshalb
+ *     merkt niemand, wenn eine von beiden im Prompt fehlt, bis ein englischer
+ *     Wizard ein deutsches Manifest schreibt.
+ *  3. `a.competitors` VERBIETET das Erfinden. Das ist keine Stilfrage: ein
+ *     Modell, das drei Wettbewerber „kennt", schreibt sie hin, und der Mensch
+ *     hält sie für recherchiert (Content-Spec §4, §9b).
+ *  4. Die Formvorgabe für `list`/`structured` ist DIESELBE, die der
+ *     Entwicklungs-Ersatz schreibt. Zwei Formen hiessen: der Beweis am Stub
+ *     sagt nichts über den echten Weg.
+ *
+ * KEIN Aufruf geht hier an eine KI. Alles hier ist pure Zeichenkette.
+ */
+
+const SYSTEM = georgeSystemPrompt({ locale: 'de', contentLocale: 'en', pathKind: 'new' })
+
+describe('System-Prompt: die neun Regeln (§1.2)', () => {
+  it('nennt Rolle und Anbieter — und die Persona ist austauschbar', () => {
+    expect(SYSTEM).toContain('You are George, the digital brand advisor of Branding Supply')
+    const whiteLabel = georgeSystemPrompt({
+      locale: 'de', contentLocale: 'de', pathKind: 'new', persona: 'Ada', vendor: 'Acme',
+    })
+    expect(whiteLabel).toContain('You are Ada, the digital brand advisor of Acme')
+    expect(whiteLabel).not.toContain('George')
+  })
+
+  it('trägt alle neun Regeln, jede mit ihrem Kern', () => {
+    // Die Nummerierung selbst: eine fehlende Regel fällt sonst nur auf, wenn
+    // man ihren Wortlaut kennt.
+    for (const number of [1, 2, 3, 4, 5, 6, 7, 8, 9]) {
+      expect(SYSTEM).toContain(`${number}. `)
+    }
+    // 1 Rolle · 2 Zug-Regel · 3 Slot-Disziplin
+    expect(SYSTEM).toContain('brand strategy')
+    expect(SYSTEM).toContain('at most 2-3 sentences per turn')
+    expect(SYSTEM).toContain('exactly one question')
+    expect(SYSTEM).toContain('only ask what only the human can know')
+    // 4 Entwurfs-Ehrlichkeit · 5 Widerspruchs-Pflicht
+    expect(SYSTEM).toContain('You say what it rests on')
+    expect(SYSTEM).toContain('should disagree')
+    expect(SYSTEM).toContain('a better proposal')
+    // 6 Fachbegriffe · 7 Eingabe-Leitplanke
+    expect(SYSTEM).toContain('half-sentence explanation')
+    expect(SYSTEM).toContain('unpublished figures')
+    expect(SYSTEM).toContain('Never invent personal data')
+    // 8 Grenzen
+    expect(SYSTEM).toContain('no legal advice')
+    expect(SYSTEM).toContain('mark anything unknown as an assumption')
+  })
+
+  it('REGEL 9 TRENNT ZWEI SPRACHEN — Reden und Markeninhalt', () => {
+    expect(SYSTEM).toContain('you speak to the person in de')
+    expect(SYSTEM).toContain('is written in en')
+  })
+
+  it('die Weiche W1 ändert die Haltung', () => {
+    expect(SYSTEM).toContain('This brand is new')
+    const relaunch = georgeSystemPrompt({ locale: 'en', contentLocale: 'en', pathKind: 'relaunch' })
+    expect(relaunch).toContain('being relaunched')
+    expect(relaunch).toContain('Describe what IS')
+    expect(relaunch).not.toContain('This brand is new')
+  })
+})
+
+function optionsFor(slotId: string, overrides: { hint?: string, pathKind?: 'new' | 'relaunch' } = {}) {
+  const slot = slotById(slotId)!
+  return {
+    dependencies: [],
+    hint: overrides.hint ?? '',
+    pathKind: overrides.pathKind ?? ('new' as const),
+    maxLength: slot.maxLength,
+    kind: slot.schema.kind,
+  }
+}
+
+/** Die fünf Slots des Bausteins A, die George überhaupt entwirft (§4). */
+const CONTEXT_SLOTS = ['a.pitch', 'a.category', 'a.competitors', 'a.audienceSketch', 'a.toneAnalysis']
+
+describe('Slot-Instruktionen (Baustein A, §4)', () => {
+  it('deckt genau die Slots ab, die einen Generator haben', () => {
+    const generated = ['a.pitch', 'a.category', 'a.competitors', 'a.audienceSketch', 'a.toneAnalysis']
+      .filter(id => slotById(id)!.generator !== 'none')
+    expect(generated).toEqual(CONTEXT_SLOTS)
+  })
+
+  it('WIRFT für einen Slot ohne Auftrag — statt still etwas Allgemeines zu schreiben', () => {
+    expect(() => contextSlotInstruction('a.origin', optionsFor('a.pitch'))).toThrow(/a\.origin/)
+  })
+
+  it.each(CONTEXT_SLOTS)('%s: nennt maxLength hart und liefert nur den Wert', (slotId) => {
+    const slot = slotById(slotId)!
+    const instruction = contextSlotInstruction(slotId, optionsFor(slotId))
+    expect(instruction).toContain(`at most ${slot.maxLength} characters`)
+    expect(instruction).toContain('Return the value of this one field and nothing else')
+  })
+
+  it.each(CONTEXT_SLOTS)('%s: trägt Entwurfs-Ehrlichkeit und die Eingabe-Leitplanke', (slotId) => {
+    const instruction = contextSlotInstruction(slotId, optionsFor(slotId))
+    // Regel 4: worauf er sich stützt — als Eigenschaft des Textes.
+    expect(instruction).toContain('Use only the inputs below')
+    expect(instruction).toContain('mark it plainly as an assumption')
+    // Regel 7: keine fremde PII, weder übernommen noch erfunden.
+    expect(instruction).toContain('Never carry over or invent personal data')
+  })
+
+  it('a.pitch verlangt 2-3 Sätze', () => {
+    expect(contextSlotInstruction('a.pitch', optionsFor('a.pitch'))).toContain('Two to three sentences')
+  })
+
+  it('a.category verlangt einen normalisierten Branchenbegriff, kurz', () => {
+    const instruction = contextSlotInstruction('a.category', optionsFor('a.category'))
+    expect(instruction).toContain('normalised')
+    expect(instruction).toContain('at most five words')
+  })
+
+  it('a.competitors VERBIETET das Erfinden und will 3-5 Steckbriefe', () => {
+    const instruction = contextSlotInstruction('a.competitors', optionsFor('a.competitors'))
+    expect(instruction).toContain('3-5 short competitor profiles')
+    expect(instruction).toContain('USE ONLY names that appear literally in the inputs')
+    expect(instruction).toContain('Do NOT invent competitors')
+    expect(instruction).toContain('do NOT guess from the')
+    expect(instruction).toContain('strong:')
+    expect(instruction).toContain('weak:')
+  })
+
+  it('a.audienceSketch will eine Skizze in Blöcken', () => {
+    const instruction = contextSlotInstruction('a.audienceSketch', optionsFor('a.audienceSketch'))
+    expect(instruction).toContain('"Who"')
+    expect(instruction).toContain('"What they want"')
+    expect(instruction).toContain('"What holds them back"')
+  })
+
+  it('a.toneAnalysis analysiert VORHANDENE Texte — und erfindet sonst keinen Ton', () => {
+    const instruction = contextSlotInstruction('a.toneAnalysis', optionsFor('a.toneAnalysis'))
+    expect(instruction).toContain('do not analyse a tone you cannot see')
+    expect(instruction).toContain('do not describe how the brand SHOULD sound')
+  })
+
+  it('der Pfad wirkt bis in die Instruktion', () => {
+    expect(contextSlotInstruction('a.pitch', optionsFor('a.pitch')))
+      .toContain('This is a new brand')
+    expect(contextSlotInstruction('a.pitch', optionsFor('a.pitch', { pathKind: 'relaunch' })))
+      .toContain('This is a relaunch')
+  })
+
+  it('ein Hinweis darf die FORM wünschen, nicht die Regeln ändern', () => {
+    const ohne = contextSlotInstruction('a.pitch', optionsFor('a.pitch'))
+    const mit = contextSlotInstruction('a.pitch', optionsFor('a.pitch', { hint: 'wärmer' }))
+    expect(ohne).not.toContain('never overrides the rules above')
+    expect(mit).toContain('never overrides the rules above')
+    // Der Wunsch selbst reist als DATEN, nicht als Anweisung.
+    expect(mit).not.toContain('wärmer')
+  })
+
+  it('nennt die Quell-Slots, wenn es welche gibt', () => {
+    const base = optionsFor('a.pitch')
+    expect(contextSlotInstruction('a.pitch', base)).not.toContain('Your inputs are the fields')
+    const withDeps = contextSlotInstruction('a.pitch', {
+      ...base,
+      dependencies: [{ slotId: 'a.origin', value: 'x' }, { slotId: 'a.oneThing', value: '' }],
+    })
+    expect(withDeps).toContain('Your inputs are the fields: a.origin, a.oneThing.')
+  })
+})
+
+/**
+ * DIE FORM-KOPPLUNG. Regel, Beispiel und Schreiber stammen aus EINER Datei —
+ * hier wird bewiesen, dass sie dasselbe sagen und dass Georges Instruktion die
+ * Regel WÖRTLICH trägt. Driften sie auseinander, zeigt die Werkstatt für den
+ * Entwicklungs-Ersatz etwas anderes als für den echten Entwurf.
+ */
+describe('Formvorgabe list/structured — dieselbe Quelle wie der Dev-Stub', () => {
+  it('a.competitors (list) trägt Regel UND Beispiel wörtlich', () => {
+    const instruction = contextSlotInstruction('a.competitors', optionsFor('a.competitors'))
+    expect(slotById('a.competitors')!.schema.kind).toBe('list')
+    expect(instruction).toContain(BRAND_LIST_FORMAT_RULE)
+    expect(instruction).toContain(brandSlotFormatExample('list')!)
+  })
+
+  it('a.audienceSketch (structured) trägt Regel UND Beispiel wörtlich', () => {
+    const instruction = contextSlotInstruction('a.audienceSketch', optionsFor('a.audienceSketch'))
+    expect(slotById('a.audienceSketch')!.schema.kind).toBe('structured')
+    expect(instruction).toContain(BRAND_STRUCTURED_FORMAT_RULE)
+    expect(instruction).toContain(brandSlotFormatExample('structured')!)
+  })
+
+  it('freier Text bekommt KEINE erfundene Form', () => {
+    const instruction = contextSlotInstruction('a.pitch', optionsFor('a.pitch'))
+    expect(brandSlotFormatExample('text')).toBeNull()
+    expect(instruction).not.toContain(BRAND_LIST_FORMAT_RULE)
+    expect(instruction).not.toContain(BRAND_STRUCTURED_FORMAT_RULE)
+  })
+
+  it('Beispiel und Schreiber genügen der eigenen Regel', () => {
+    expect(brandSlotValueMatchesFormat('list', brandSlotFormatExample('list')!)).toBe(true)
+    expect(brandSlotValueMatchesFormat('structured', brandSlotFormatExample('structured')!)).toBe(true)
+    expect(brandSlotValueMatchesFormat('list', formatBrandSlotList(['a', 'b']))).toBe(true)
+    expect(brandSlotValueMatchesFormat(
+      'structured',
+      formatBrandSlotStructured([{ label: 'Who', body: 'x' }, { label: 'Why', body: 'y' }]),
+    )).toBe(true)
+  })
+
+  it('GEGENPROBE: formfremde Werte fallen durch', () => {
+    expect(brandSlotValueMatchesFormat('list', 'erster\nzweiter')).toBe(false)
+    expect(brandSlotValueMatchesFormat('list', '- a\n\n- b')).toBe(false)
+    expect(brandSlotValueMatchesFormat('structured', 'Who\nx')).toBe(false)
+    expect(brandSlotValueMatchesFormat('structured', '## Who\nx\n\nWhy\ny')).toBe(false)
+    expect(brandSlotValueMatchesFormat('list', '   ')).toBe(false)
+    // Freier Text hat keine Form — und bekommt deshalb auch kein Nein.
+    expect(brandSlotValueMatchesFormat('text', 'irgendwas')).toBe(true)
+  })
+
+  it('die Schreiber bringen mehrzeilige Eingaben auf EINE Zeile', () => {
+    expect(formatBrandSlotList(['erste\nZeile', '', '  ']).split('\n')).toEqual(['- erste Zeile'])
+    expect(formatBrandSlotStructured([{ label: 'A', body: 'x\ny' }])).toBe('## A\nx y')
+  })
+})
+
+describe('formatDependencies — die Daten als beschriftete Blöcke', () => {
+  it('OHNE Quell-Slots sagt es das ausdrücklich (Baustein A ist genau dieser Fall)', () => {
+    expect(formatDependencies([])).toBe(GEORGE_NO_DEPENDENCIES)
+    // Kein Verweis auf eine Startkarte, die im Prompt gar nicht mitreist —
+    // sonst wäre die Zeile eine Einladung zum Erfinden.
+    expect(GEORGE_NO_DEPENDENCIES).toContain('do not invent what is missing')
+  })
+
+  it('EIN Eintrag: Beschriftung, dann Wert', () => {
+    expect(formatDependencies([{ slotId: 'a.pitch', value: 'Wir bauen Werkzeug.' }]))
+      .toBe('[a.pitch]\nWir bauen Werkzeug.')
+  })
+
+  it('MEHRERE Einträge in der übergebenen Reihenfolge, durch Leerzeile getrennt', () => {
+    expect(formatDependencies([
+      { slotId: 'a.pitch', value: 'Erstes' },
+      { slotId: 'a.oneThing', value: 'Zweites' },
+    ])).toBe('[a.pitch]\nErstes\n\n[a.oneThing]\nZweites')
+  })
+
+  it('LEERE WERTE STEHEN TROTZDEM DA — sonst erfindet das Modell den Inhalt', () => {
+    const block = formatDependencies([
+      { slotId: 'a.pitch', value: '  ' },
+      { slotId: 'a.oneThing', value: 'da' },
+    ])
+    expect(block).toContain('[a.pitch]\n(not answered yet)')
+    expect(block).toContain('[a.oneThing]\nda')
+  })
+})
+
+describe('Prompt-Version', () => {
+  it('ist gesetzt und benennt den Baustein', () => {
+    expect(GEORGE_PROMPT_VERSION).toBe('george-a-1')
+  })
+})

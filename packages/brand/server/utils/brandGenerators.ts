@@ -7,6 +7,7 @@ import {
   brandGenerationLockHeld,
   brandGenerationLockKey,
 } from '../../shared/brandGeneration'
+import { formatBrandSlotList, formatBrandSlotStructured } from '../../shared/brandSlotFormat'
 import {
   type BrandSlot,
   type BrandStepKey,
@@ -274,6 +275,52 @@ function stubSleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
+const STUB_ORIGIN = 'Dieser Text stammt vom Entwicklungs-Ersatz, nicht von einem Sprachmodell.'
+const STUB_OUTLOOK = 'Die echten Prompts kommen mit Phase 2 über dieselbe Generator-Registry.'
+
+interface StubParts {
+  head: string
+  basis: string
+  hint: string
+}
+
+/**
+ * Die Deltas des Ersatzes — in der FORM, die die Slot-Art verlangt. Gebaut
+ * werden Liste und Blöcke von den Schreibern aus `shared/brandSlotFormat.ts`,
+ * nicht von Hand: eine zweite Stelle, die „- " voranstellt, ist eine Stelle,
+ * die es irgendwann anders macht.
+ *
+ * Die Stückelung bleibt die Sache des Ersatzes (mehrere Deltas beweisen das
+ * Streaming); die FORM bleibt die Sache des Vertrags.
+ */
+function stubPieces(kind: BrandSlot['schema']['kind'], parts: StubParts): string[] {
+  if (kind === 'list') {
+    return [parts.head, parts.basis, parts.hint, STUB_ORIGIN]
+      .filter(entry => entry.length > 0)
+      .map((entry, index, all) => formatBrandSlotList([entry]) + (index < all.length - 1 ? '\n' : ''))
+  }
+
+  if (kind === 'structured') {
+    const blocks = [
+      { label: 'Entwurf', body: parts.head },
+      { label: 'Grundlage', body: parts.basis },
+      ...(parts.hint ? [{ label: 'Hinweis', body: parts.hint }] : []),
+      { label: 'Herkunft', body: STUB_ORIGIN },
+    ]
+    return blocks.map((block, index) => (
+      formatBrandSlotStructured([block]) + (index < blocks.length - 1 ? '\n\n' : '')
+    ))
+  }
+
+  return [
+    `${parts.head} `,
+    `${parts.basis} `,
+    parts.hint ? `${parts.hint} ` : '',
+    `${STUB_ORIGIN} `,
+    STUB_OUTLOOK,
+  ]
+}
+
 /**
  * DETERMINISTISCHER ERSATZ-ENTWURF aus Slot-Id und Abhängigkeits-Werten, in
  * fünf Deltas mit kleinen Pausen. Er macht das Protokoll OHNE KI end-to-end
@@ -282,19 +329,28 @@ function stubSleep(ms: number): Promise<void> {
  *
  * Er sagt in seinem eigenen Text, dass er ein Ersatz ist. Ein Stub, der wie ein
  * Ergebnis aussieht, landet irgendwann in einem Screenshot.
+ *
+ * ── ER HÄLT DIE FORM SEINER SLOT-ART EIN (P2.2) ───────────────────────────
+ * Ein Slot der Art `list` oder `structured` ist im Speicher trotzdem Text, und
+ * WIE dieser Text aussieht, steht seit P2.2 an EINER Stelle
+ * (`shared/brandSlotFormat.ts`): Georges Instruktion verpflichtet das Modell
+ * wörtlich darauf, und der Ersatz hier hält sich daran. Vorher war er
+ * formblind — die Werkstatt hätte für den Ersatz etwas anderes gezeigt als für
+ * den echten Entwurf, und ein Beweis am Stub hätte über den echten Weg nichts
+ * mehr ausgesagt.
  */
 export const brandDevStubGenerator: BrandSlotGenerator = async (context) => {
   const filled = context.dependencies.filter(dependency => dependency.value.trim().length > 0)
-  const pieces = [
-    `Entwurf für ${context.slot.id} (${context.locale}, Pfad ${context.pathKind}). `,
-    filled.length
-      ? `Gestützt auf ${filled.length} Vorentscheidung${filled.length === 1 ? '' : 'en'}: `
-        + `${filled.slice(0, 3).map(dependency => dependency.value.slice(0, 60)).join(' · ')}. `
-      : 'Noch ohne Vorentscheidungen — gestützt allein auf die Startkarte. ',
-    context.hint ? `Hinweis aufgenommen: ${context.hint}. ` : '',
-    'Dieser Text stammt vom Entwicklungs-Ersatz, nicht von einem Sprachmodell. ',
-    'Die echten Prompts kommen mit Phase 2 über dieselbe Generator-Registry.',
-  ].filter(piece => piece.length > 0)
+  const basis = filled.length
+    ? `Gestützt auf ${filled.length} Vorentscheidung${filled.length === 1 ? '' : 'en'}: `
+      + `${filled.slice(0, 3).map(dependency => dependency.value.slice(0, 60)).join(' · ')}.`
+    : 'Noch ohne Vorentscheidungen — gestützt allein auf die Startkarte.'
+
+  const pieces = stubPieces(context.slot.schema.kind, {
+    head: `Entwurf für ${context.slot.id} (${context.locale}, Pfad ${context.pathKind}).`,
+    basis,
+    hint: context.hint ? `Hinweis aufgenommen: ${context.hint}.` : '',
+  }).filter(piece => piece.length > 0)
 
   let draft = ''
   for (const piece of pieces) {
