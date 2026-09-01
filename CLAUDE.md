@@ -126,7 +126,15 @@ Vollständiges Konzept: docs/CONCEPT.md
   liegen (control-037 sagt es im eigenen Kopf: „gehört NICHT auf jede Instanz").
   Alt-/unbekannte Ist-Tabellen sind eine nicht-fatale WARNUNG (portfolios sechs
   tote Tabellen). Die Soll-Listen sind GEPFLEGT, nicht aus Migrations-Dateien
-  geparst — neue Tabelle ⇒ in ihren Layer-Block im Skript eintragen. Die Migrationen des Control Plane heißen seit
+  geparst — neue Tabelle ⇒ in ihren Layer-Block im Skript eintragen; das gilt
+  AUCH für Tabellen aus ensure-Skripten statt pnpm migrate (intro_requests so
+  übersehen, 2026-08-31). Seit 2026-08-31 trägt jeder INSTANCES-Eintrag ein
+  `ausgerollt`-Flag: fehlt die Env-Datei einer AUSGEROLLTEN Instanz, endet der
+  Lauf rot (Exit 1) statt still „übersprungen" — so fiel die Betreiber-Konsole
+  nach AH-4c wochenlang ungeprüft aus der Runde. Alle Prod-Migrations-Envs
+  liegen unter ~/.appwrite-secrets/migrations/<name>.env (account, admin,
+  portfolio, branding; portfolios Repo-Baum-Datei ist umgezogen — sie fehlte in
+  jedem Worktree). Der Wächter läuft NUR manuell auf dem Mac, nicht in der CI. Die Migrationen des Control Plane heißen seit
   2026-07-29 `control-NNN`; Dokumente von VOR dem Cutover (docs/archiv/**,
   CHANGELOG) nennen dieselben Migrationen `studio-NNN` — bewusst nicht
   umgeschrieben, das ist ein Protokoll und kein Nachschlagewerk. Die
