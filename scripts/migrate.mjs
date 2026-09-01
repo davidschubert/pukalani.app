@@ -80,7 +80,13 @@ function resolveEnvFile({ app, envFile }) {
       console.error(`✗ Env-Datei nicht gefunden: ${abs}`)
       process.exit(1)
     }
-    return { envFile: abs, label: abs }
+    // `app` MUSS mit zurück (2026-08-31 live erwischt): ohne ihn übersprang
+    // der Manifest-Filter (M4) bei `--app X --env-file Y` still ALLE Grenzen
+    // und fuhr jeden Layer — der erste Prod-Lauf gegen `branding` legte so
+    // 18 Fremd-Tabellen (comments/posts/events) an, bevor er an einem
+    // fehlenden files.read-Scope starb. --env-file OHNE --app bleibt bewusst
+    // ungefiltert (CI/Wave-Läufe nennen ihre Layer selbst).
+    return { envFile: abs, label: abs, app }
   }
 
   let target = app
