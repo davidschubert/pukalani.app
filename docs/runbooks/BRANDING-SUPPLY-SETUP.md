@@ -113,6 +113,11 @@ Konsole der Prod-Appwrite öffnen (dieselbe wie für portfolio/admin).
       Worktree: `node --env-file=$HOME/.appwrite-secrets/migrations/
       branding.env packages/brand/scripts/<invite|access>.mjs` — das
       pnpm-Skript erwartet apps/branding/.env, die es dort nicht gibt.
-- [ ] David registriert sich über den Einladungs-Link, läuft den Wizard
-      an — der lebendige End-to-End-Beweis des Streaming-Protokolls
-      (Dev-Stub bleibt aus; ohne P2-Prompts antwortet George statisch).
+- [x] David hat sich registriert, verifiziert und eingelöst (2026-09-01,
+      brand_access-Zeile 08:39 UTC; Einladung 3 ms später gestempelt —
+      die Erst-Zeile-dann-Stempel-Reihenfolge hielt). DABEI GEFUNDEN UND
+      GEFIXT: die Zweiter-Tab-Falle — die Mail-Bestätigung landet in
+      einem neuen Tab, das Dashboard löste nicht ein und der /invite-Tab
+      bekam die Verifizierung nie mit (Fokus-Refresh + noAccess-Knopf,
+      Commit 95ced9cf). George antwortet erst mit P2 — der Generator
+      bleibt auf Prod bewusst ohne Dev-Stub.
