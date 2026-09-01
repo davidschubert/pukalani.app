@@ -45,14 +45,15 @@ alles host-agnostisch gebaut.
   extends: brand vor core (blueprint nur, falls die Wizard-Seiten
   Chrome daraus brauchen — nach P1c-Stand entscheiden).
 - `site.manifest.ts`: products `['brand']`; check:manifests.
-- **Dev-Port 3006** (3000–3005 lokal vergeben, 3009 ist der
-  brand-Playground). **PROD-Port ist 3007** — das sind ZWEI Achsen, und
-  dieser Plan hat sie ursprünglich verwechselt: die Portkarte des
-  SERVERS ist eine eigene Liste (3002 portfolio · 3003 admin · 3004
-  platform · 3005 www/marketing · 3006 **help** · 3007 branding), dort
-  hält help die 3006 seit 2026-07-28. nginx der ploi-Site proxyt auf
-  3007, `ops/ecosystem-branding.config.cjs` setzt 3007; der Dev-Port in
-  `apps/branding/nuxt.config.ts` bleibt unverändert 3006.
+- **Dev-Port 3010** (3000–3009 lokal vergeben; die erste Wahl 3006 aus
+  diesem Plan kollidierte LOKAL mit platform — auch die Dev-Portkarte
+  war hier falsch gezählt, am 2026-09-01 aufgelöst). **PROD-Port ist
+  3007** — das sind ZWEI Achsen, und dieser Plan hat beide ursprünglich
+  falsch belegt: die Portkarte des SERVERS ist eine eigene Liste (3002
+  portfolio · 3003 admin · 3004 platform · 3005 www/marketing · 3006
+  **help** · 3007 branding), dort hält help die 3006 seit 2026-07-28.
+  nginx der ploi-Site proxyt auf 3007, `ops/ecosystem-branding.config.cjs`
+  setzt 3007; der Dev-Port steht in `apps/branding/nuxt.config.ts`.
 - apps/portfolio: brand aus extends + site.manifest wieder RAUS
   (eigener Commit „Rückbau P1b-Einhängung"; die Routen ziehen mit dem
   Layer um — kein toter Code).

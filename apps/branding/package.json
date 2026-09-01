@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "nuxi dev --port 3006",
+    "dev": "nuxi dev --port 3010",
     "build": "nuxi build",
     "lint": "eslint .",
     "preview": "nuxi preview",

@@ -57,8 +57,9 @@ Konsole der Prod-Appwrite öffnen (dieselbe wie für portfolio/admin).
 
 ## 3 · Monorepo (Claude — läuft bereits parallel)
 
-- [x] apps/branding (**Dev**-Port 3006) + portfolio-Rückbau +
-      Wächter-Listen, CI grün. (Details im Infra-Plan §2.)
+- [x] apps/branding (**Dev**-Port 3010 — anfangs 3006, das kollidierte
+      lokal mit platform und wurde am 2026-09-01 verschoben) +
+      portfolio-Rückbau + Wächter-Listen, CI grün. (Infra-Plan §2.)
 
 ## 4 · DNS + ploi + TLS (Claude)
 

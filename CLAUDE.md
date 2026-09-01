@@ -25,7 +25,7 @@ Vollständiges Konzept: docs/CONCEPT.md
   Studio-Form (App-ohne-Deployment wie `photos`); Silo-DEPLOYMENTS sind seit
   der Kehrtwende vom 2026-08-31 ZWEI: portfolio (Davids eigene Site) und
   branding.supply (apps/branding, Appwrite-Projekt `branding`, Server-Port
-  3007 — Dev-Port 3006, zwei getrennte Achsen). Der kundenförmige Grund ist
+  3007 — Dev-Port 3010, zwei getrennte Achsen). Der kundenförmige Grund ist
   Davids Entscheidung selbst: der Brand-Wizard lebt von Tag eins unter
   eigener Marke mit eigenem Konten-Stamm statt im portfolio-Silo (P1b
   zurückgebaut) — docs/plans/BRANDING-SUPPLY-INFRA.md.

@@ -3,8 +3,9 @@
 // Port 3007; Script zeigt auf den current-Symlink, die Server-.env wird beim
 // (Re-)Load geparst.
 //
-// PORT 3007, NICHT 3006 — ZWEI GETRENNTE ACHSEN (2026-08-31): der DEV-Port der
-// App ist 3006 (apps/branding/nuxt.config.ts, lokal frei), die PORTKARTE DES
+// PORT 3007 — ZWEI GETRENNTE ACHSEN (2026-08-31): der DEV-Port der App ist
+// 3010 (apps/branding/nuxt.config.ts; die erste Wahl 3006 kollidierte LOKAL
+// mit platform und ist am 2026-09-01 verschoben), die PORTKARTE DES
 // SERVERS ist eine andere Liste und dort ist 3006 seit 2026-07-28 von help
 // belegt. Server-Belegung: 3002 portfolio · 3003 admin · 3004 platform ·
 // 3005 www/marketing · 3006 help · 3007 branding. Der Infra-Plan hatte die
