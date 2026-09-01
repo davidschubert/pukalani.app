@@ -328,13 +328,18 @@ const SITES = [
        */
       'NUXT_PUBLIC_I18N_BASE_URL',
       /**
-       * NICHT in dieser Liste: `NUXT_AI_KEY`. Georges Entwürfe (P2) sind noch
-       * aus (`brandAiEnabled`), und ohne Generator streamt §3e bewusst gar
-       * nichts statt Ersatztext. MIT P2 / offenem `brandAiEnabled` wird er
-       * Pflicht — dann hier eintragen (dieselbe Sorte Loch wie bei platform:
-       * kein Fehler, der Knopf erscheint nur nicht).
-       *
-       * Ebenfalls NICHT: die GEO_*-Pfade der anderen Konten-Sites. Sie decken
+       * Seit P2 (2026-09-01) PFLICHT: der George-Generator ist registriert und
+       * der Schlüssel liegt in der Server-.env. Der Anlass, ihn SOFORT hier
+       * einzutragen, war ein realer Verlust am Eintrag-Tag: eine parallele
+       * Sitzung schrieb die .env neu und die frisch angehängte Key-Zeile war
+       * still weg — exakt das Loch, das dieser Wächter täglich zudeckt.
+       * (Der KILL-SWITCH bleibt davon getrennt: `app_config.brandAiEnabled`
+       * entscheidet, ob George antwortet — der Wächter prüft nur, dass der
+       * Schlüssel da wäre.)
+       */
+      'NUXT_AI_KEY',
+      /**
+       * NICHT in dieser Liste: die GEO_*-Pfade der anderen Konten-Sites. Sie decken
        * die Sitzungsliste und den Orts-Picker im Profil ab, und beide hängen
        * an Seiten der Layer `admin` bzw. `onboarding` — branding hat keinen
        * von beiden, die Formulare sind hier also gar nicht erreichbar.
