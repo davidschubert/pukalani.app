@@ -29,6 +29,21 @@ const props = defineProps<{
    * noch der Klick auf „Einladung annehmen".
    */
   redirectTo?: string
+  /**
+   * Zulassungs-Code eines Produkt-Layers (Brand-Beta, …). Er öffnet eine per
+   * Admission-Naht geschlossene INSTANZ-Registrierung für genau diese Anlage —
+   * `core/server/utils/signupAdmission.ts` fragt den registrierten Provider,
+   * der Layer antwortet.
+   *
+   * Er ist NICHT `inviteToken` darüber: der gehört zu `community_invites` und
+   * öffnet eine geschlossene COMMUNITY. Beide können nebeneinander stehen,
+   * weil sie zwei verschiedene Türen aufschliessen.
+   *
+   * Hier wird nichts entschieden und nichts versprochen: Format, Ablauf,
+   * Adressbindung und Widerruf prüft ausschliesslich der Server, und er lehnt
+   * für JEDEN Grund gleich ab (keine Enumeration). Die UI reicht durch.
+   */
+  admissionCode?: string
 }>()
 
 const { t } = useI18n()
@@ -85,6 +100,9 @@ async function onSubmit(event: FormSubmitEvent<RegisterFormInput>) {
         // Nur gesetzt, wenn die Seite eine Einladung trägt. Der Server prüft
         // ihn selbst; hier wird nichts entschieden, nur weitergereicht.
         ...(props.inviteToken ? { inviteToken: props.inviteToken } : {}),
+        // Dasselbe für den Zulassungs-Code der Instanz (Brand-Beta) — eine
+        // andere Tür, dieselbe Arbeitsteilung.
+        ...(props.admissionCode ? { admissionCode: props.admissionCode } : {}),
       },
     })
     await auth.refresh()
