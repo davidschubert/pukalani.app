@@ -330,7 +330,12 @@ jobs:
             echo "::group::Deploy $app → $site"
             RELEASES="/home/ploi/releases/${SLOT[$app]}"
             RELEASE="$RELEASES/$EXPECTED_SHA"
-            rsync -az --delete "apps/$app/.output/" "prod:$RELEASE/"
+            # --mkpath, weil rsync sonst nur die LETZTE Pfadebene anlegt: beim
+            # Erst-Deploy einer neuen App existiert /home/ploi/releases/<slot>
+            # noch nicht und der Lauf stirbt mit "mkdir … failed: No such file
+            # or directory" (branding, 2026-09-01 live erwischt — die Slots der
+            # Alt-Apps existieren nur historisch).
+            rsync -az --delete --mkpath "apps/$app/.output/" "prod:$RELEASE/"
             # ops-Configs liefert die CI selbst aus (rsync) — frueher hielt ein
             # `git pull` im Site-Checkout sie aktuell, aber ein voller Monorepo-
             # Checkout auf dem Server nur fuer zwei Config-Dateien ist keiner
