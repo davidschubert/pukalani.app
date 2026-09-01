@@ -284,6 +284,24 @@
       "naming": "Name",
       "result": "Ergebnis"
     },
+    "invite": {
+      "title": "Einladung einlösen",
+      "description": "Mit einem Einladungscode schalten wir deinen Zugang zur Beta frei.",
+      "betaTitle": "Nur auf Einladung",
+      "betaText": "Branding Supply ist in geschlossener Beta. Wenn du einen Code bekommen hast, füg ihn hier ein.",
+      "codeLabel": "Einladungscode",
+      "codePlaceholder": "Code einfügen",
+      "submit": "Weiter",
+      "checking": "Einen Moment, wir sehen nach.",
+      "invalidTitle": "Code ungültig oder abgelaufen",
+      "invalidText": "Prüf den Code aus deiner Einladung, oder frag uns nach einem neuen.",
+      "registerIntro": "Der Code passt. Leg jetzt dein Konto an — danach bestätigst du deine E-Mail-Adresse und der Zugang steht.",
+      "verifyTitle": "Bestätige zuerst deine E-Mail-Adresse",
+      "verifyText": "Der Code ist an deine Adresse gebunden. Sobald sie bestätigt ist, kommst du auf diese Seite zurück und wir lösen ihn ein.",
+      "redeeming": "Wir schalten deinen Zugang frei.",
+      "deniedHint": "Ein Einladungscode gilt nur für die Adresse, an die er verschickt wurde. Bist du mit dem richtigen Konto angemeldet?",
+      "retry": "Erneut versuchen"
+    },
     "validation": {
       "contentLocale": "Diese Inhaltssprache steht nicht zur Verfügung.",
       "relaunchScopeOnlyOnRelaunch": "Eine Relaunch-Spannbreite gibt es nur auf dem Relaunch-Pfad.",

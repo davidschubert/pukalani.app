@@ -50,6 +50,20 @@ const { isLoggedIn } = useCurrentUser()
           variant="subtle"
           :label="t('home.cta.login')"
         />
+        <!--
+          Der dritte Weg, bewusst dezent: der Satz darunter sagt seit jeher,
+          dass es einen Code braucht — er nannte nur nie die Stelle, an der man
+          ihn loswird. Nur für Gäste, weil ein eingelöster Zugang am Konto
+          hängt und die Seite dann nichts mehr zu tun hat.
+        -->
+        <UButton
+          v-if="!isLoggedIn"
+          :to="localePath('/invite')"
+          size="lg"
+          color="neutral"
+          variant="ghost"
+          :label="t('home.cta.invite')"
+        />
       </div>
 
       <p class="mt-8 text-sm text-muted">

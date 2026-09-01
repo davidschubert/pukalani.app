@@ -284,6 +284,24 @@
       "naming": "Name",
       "result": "Result"
     },
+    "invite": {
+      "title": "Redeem your invitation",
+      "description": "An invitation code unlocks your access to the beta.",
+      "betaTitle": "Invitation only",
+      "betaText": "Branding Supply is in closed beta. If you received a code, paste it here.",
+      "codeLabel": "Invitation code",
+      "codePlaceholder": "Paste your code",
+      "submit": "Continue",
+      "checking": "One moment, we are checking.",
+      "invalidTitle": "Code invalid or expired",
+      "invalidText": "Check the code from your invitation, or ask us for a new one.",
+      "registerIntro": "The code fits. Create your account now — then confirm your email address and your access is ready.",
+      "verifyTitle": "Confirm your email address first",
+      "verifyText": "The code is bound to your address. Once it is confirmed, come back to this page and we will redeem it.",
+      "redeeming": "Unlocking your access.",
+      "deniedHint": "An invitation code only works for the address it was sent to. Are you signed in with the right account?",
+      "retry": "Try again"
+    },
     "validation": {
       "contentLocale": "This content language is not available.",
       "relaunchScopeOnlyOnRelaunch": "A relaunch scope only exists on the relaunch path.",
