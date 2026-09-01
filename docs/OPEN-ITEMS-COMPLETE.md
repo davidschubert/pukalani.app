@@ -30,6 +30,54 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### Paritäts-Wächter: AH-4c-Lücke geschlossen + Ausgerollt-Flag ✅ 2026-08-31
+
+**Befund:** Seit dem AH-4c-Projekt-Rename (control→admin, 2026-08-18/19)
+zeigte der `INSTANCES`-Eintrag in `scripts/ops/verify-schema-parity.mjs` auf
+die nicht mehr existierende `control.env` — die Betreiber-Konsole wurde
+wochenlang GAR NICHT auf Schema-Parität geprüft (inkl. runner-/tickets-
+Tabellen), und der Lauf blieb dabei grün, weil „übersprungen" nur eine
+Warnzeile war. Genau die Klasse „Konfiguration falsch, aber nichts wird von
+selbst rot", gegen die der Wächter geschrieben wurde.
+
+**Gebaut (drei Commits auf main, alle 2026-08-31):**
+- `b62e702a`: Env-Zeiger auf `admin.env` umgehängt (beim branding-Umzug
+  erwischt). Nachgeprüft: `admin.env` trägt `PROJECT_ID=admin` @
+  api.pukalani.app; voller Lauf danach `control` 42/42 Soll-Tabellen inkl.
+  runner — **keine Rückstände**, nichts für OPEN-ITEMS.
+- `bb38028b`: Nebenfund aus dem Prüf-Lauf — `intro_requests`
+  (Erstgespräch-Wizard, live seit 2026-08-22) fehlte im portfolio-Soll, weil
+  die Tabelle per `ensure-intro-requests.mjs` statt `pnpm migrate` entstand
+  und so an der Pflege-Regel („neue Tabelle ⇒ in ihren Layer-Block") vorbeikam.
+- `6e7c3c89` (Davids Entscheidungen per strukturierter Fragen): **jeder
+  INSTANCES-Eintrag trägt `ausgerollt`** — fehlt (oder ist unvollständig) die
+  Env-Datei einer ausgerollten Instanz (account, control, portfolio), meldet
+  der Lauf ✖ und endet mit Exit 1; photos/branding bleiben bis zum Launch
+  eine stille Übersprungen-Zeile. Dazu zog die **portfolio-Migrations-Env von
+  `apps/portfolio/.env.production` nach `~/.appwrite-secrets/migrations/
+  portfolio.env`** um (Konvention wie account/admin/branding): die
+  Repo-Baum-Datei fehlte in jedem Worktree, portfolio wäre dort mit dem Flag
+  fälschlich rot gewesen. Leser nachgezogen
+  (`cleanup-portfolio-legacy-tables.mjs`, `verify-site-env.mjs`), Original
+  nach Byte-Vergleich gelöscht.
+
+**Beweise:** Voller Lauf aus dem Worktree 4/4 ausgerollte Instanzen grün,
+keine Warnungen; Gegenprobe (Fake-HOME ohne portfolio.env) meldet
+`✖ AUSGEROLLT, aber … fehlt` + Exit 1, branding bleibt still; `lint:scripts`
+grün; CI auf main Test/Lint/Typecheck grün (E2E per Concurrency vom
+Folge-Commit abgelöst — kein Fehler).
+
+**Gelernt:** (1) „Übersprungen" ist für eine AUSGEROLLTE Instanz kein
+Hinweis, sondern ein Loch — ein Wächter, der bei fehlender Eingabe still
+grün bleibt, prüft im Ernstfall genau dann nichts, wenn es darauf ankommt
+(Umbenennung lässt Pfade zurück, zum wiederholten Mal). (2) Der
+Skript-Kommentar behauptete, der Wächter laufe täglich in
+production-watch.yml — stimmte nicht (er läuft nur manuell auf dem Mac);
+eine Begründung, die auf einer falschen Betriebs-Annahme fußt, hätte hier
+fast die falsche Härte-Entscheidung getragen. (3) Tabellen, die an
+`pnpm migrate` vorbei entstehen (ensure-Skripte), tauchen in keiner
+Migrations-Disziplin auf — die gepflegte Soll-Liste ist ihr einziges Netz.
+
 ### W1/W2 — Studio-Rebrand (Wir-Stimme) + Erstgespräch-Wizard live ✅ 2026-08-22
 
 **Zwei Pakete in einer Sitzung** (Davids Auftrag 2026-08-21, Entscheidungen
