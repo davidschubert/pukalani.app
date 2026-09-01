@@ -155,11 +155,38 @@ async function redeem(): Promise<void> {
  * Aufbau eintritt — die Adresse wird in einem zweiten Tab bestätigt, der
  * Auth-Store zieht nach, und die Seite steht plötzlich vor einer einlösbaren
  * Einladung. Ein einmaliger Aufruf beim Aufbau verpasste genau diesen Fall.
+ *
+ * ABER DER STORE ZIEHT NICHT VON SELBST NACH (P1d-Abnahme, 2026-09-01 live
+ * erwischt): die Verifizierung passiert im ZWEITEN Tab, und nichts im ersten
+ * ruft danach je wieder `/api/auth/me` — der Beobachter wartete auf einen
+ * Übergang, der nie eintraf, und Davids Einlösung blieb aus. Deshalb holt
+ * dieser Tab den Konto-Stand nach, sobald er den FOKUS zurückbekommt (genau
+ * der Moment, in dem jemand vom Mail-Tab zurückwechselt) — und nur im
+ * Warte-Zustand: überall sonst gibt es nichts nachzuholen.
  */
 onMounted(() => {
   watch(state, (value) => {
     if (value === 'redeeming' && redeemed.value === null && !redeeming.value) void redeem()
   }, { immediate: true })
+
+  const auth = useAuthStore()
+  let refreshing = false
+  const onFocus = async () => {
+    if (state.value !== 'verifyPending' || refreshing) return
+    refreshing = true
+    try {
+      await auth.refresh()
+    }
+    finally {
+      refreshing = false
+    }
+  }
+  window.addEventListener('focus', onFocus)
+  document.addEventListener('visibilitychange', onFocus)
+  onUnmounted(() => {
+    window.removeEventListener('focus', onFocus)
+    document.removeEventListener('visibilitychange', onFocus)
+  })
 })
 
 /** Der Knopf im abgelehnten Zustand — derselbe Vorgang, neu angestossen. */

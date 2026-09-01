@@ -146,6 +146,20 @@ useBrandTitle(() => t('brand.brands.title'))
         <BwIllustration variant="journey" class="mx-auto h-16 w-auto" style="color: var(--bw-ink-soft)" />
         <p class="mt-4 font-medium">{{ t('brand.workspace.noAccess.title') }}</p>
         <p class="mt-1 max-w-md text-sm" style="color: var(--bw-muted)">{{ t('brand.workspace.noAccess.description') }}</p>
+        <!--
+          Der Weg zur Einladungs-Seite — hier, weil genau HIER strandet, wer
+          seine Adresse im zweiten Tab bestätigt und dann ins Dashboard geht
+          (P1d-Abnahme, 2026-09-01): eingeloggt, verifiziert, Code im Cookie —
+          und nur /invite löst ein. Ohne Cookie schadet der Knopf nicht, die
+          Seite nimmt dort auch einen getippten Code.
+        -->
+        <UButton
+          class="mt-4"
+          icon="i-ph-envelope-open"
+          :label="t('brand.workspace.noAccess.action')"
+          variant="outline"
+          :to="localePath('/invite')"
+        />
       </div>
 
       <div

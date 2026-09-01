@@ -178,7 +178,8 @@
       "progress": "{filled} von {total} Entscheidungen",
       "noAccess": {
         "title": "Noch kein Zugang",
-        "description": "Der Brand-Wizard ist in geschlossener Beta. Wenn du einen Einladungslink hast, öffne ihn — sonst melden wir uns, sobald dein Zugang bereitsteht."
+        "description": "Der Brand-Wizard ist in geschlossener Beta. Wenn du einen Einladungslink hast, öffne ihn — sonst melden wir uns, sobald dein Zugang bereitsteht.",
+        "action": "Einladungscode einlösen"
       },
       "stepLocked": {
         "title": "Dieses Kapitel ist noch nicht offen",
