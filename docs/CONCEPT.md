@@ -374,8 +374,9 @@ maui-monorepo/
 │   │   └── package.json
 │   ├── platform/                          # Mehr-Mandanten-App (Pool + Kundenbereich)
 │   ├── control/                           # Betreiber-Konsole (admin.pukalani.app)
-│   ├── portfolio/                         # Davids eigene Site (einziges Silo-Deployment)
-│   ├── photos/ · marketing/ · help/ · branding/  # weitere Apps
+│   ├── portfolio/                         # Davids eigene Site (Silo-Deployment)
+│   ├── branding/                          # Brand-Wizard-Site branding.supply (Silo-Deployment)
+│   ├── photos/ · marketing/ · help/       # weitere Apps
 │   └── _template/                         # Vorlage für neue Apps
 │
 ├── .github/workflows/                     # typecheck, lint, deploy

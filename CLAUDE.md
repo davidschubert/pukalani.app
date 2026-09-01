@@ -22,8 +22,13 @@ Vollständiges Konzept: docs/CONCEPT.md
   Instanz, Env-Drift, TLS, Schema-Parity) — Playground + demo.pukalani.app
   reichen; eine Site nur mit kundenförmigem Grund. `comments` ist seit F3 (2026-08-12) eine POOL-COMMUNITY —
   der Ordner apps/comments bleibt als CODE der E2E-Anker und der Beweis der
-  Studio-Form (App-ohne-Deployment wie `photos`); das einzige verbliebene
-  Silo-DEPLOYMENT ist portfolio (Davids eigene Site).
+  Studio-Form (App-ohne-Deployment wie `photos`); Silo-DEPLOYMENTS sind seit
+  der Kehrtwende vom 2026-08-31 ZWEI: portfolio (Davids eigene Site) und
+  branding.supply (apps/branding, Appwrite-Projekt `branding`, Server-Port
+  3007 — Dev-Port 3006, zwei getrennte Achsen). Der kundenförmige Grund ist
+  Davids Entscheidung selbst: der Brand-Wizard lebt von Tag eins unter
+  eigener Marke mit eigenem Konten-Stamm statt im portfolio-Silo (P1b
+  zurückgebaut) — docs/plans/BRANDING-SUPPLY-INFRA.md.
   DECISION-LOG 2026-08-04.
 - Produkt-Manifeste (Plattform-Strategie F1): JEDER Layer hat
   product.manifest.ts (key/tier/requires/Katalog-Texte, nur `import type`!),
