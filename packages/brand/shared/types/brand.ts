@@ -60,6 +60,29 @@ export interface BrandStartCard {
 }
 
 /**
+ * WAS VON DER URL-ANALYSE NACH DRAUSSEN GEHT (P2.3) — drei Angaben ÜBER den
+ * Fund, nie der Fund selbst.
+ *
+ * Der gelesene Text bleibt am Server (`brand_profiles.siteAnalysis`): der
+ * Client braucht ihn nicht — er zeigt „gelesen am …" und einen Knopf. Ihn
+ * mitzuschicken hiesse, 20.000 Zeichen fremden Text in jede Profil-Antwort zu
+ * legen, samt allem, was auf dieser fremden Seite stand.
+ *
+ * `analyzedAt` ist '' , solange nie gelesen wurde — dieselbe Konvention wie in
+ * der Startkarte: '' heisst „nicht beantwortet", nicht `null`.
+ */
+export interface BrandSiteAnalysisView {
+  /** Welche Adresse der Zwischenspeicher beschreibt ('' = keiner da). */
+  url: string
+  /** ISO-Zeitpunkt des Lesens, '' = nie. */
+  analyzedAt: string
+  /** Wie viel Text dabei herauskam — die einzige Auskunft über den Umfang. */
+  textLength: number
+  /** Die Startkarte nennt heute eine ANDERE Adresse (`siteAnalysisIsStale`). */
+  stale: boolean
+}
+
+/**
  * Der KOPF eines Brandings, so wie ihn Liste und Detailseite brauchen.
  * `progressPct`/`currentStepKey` sind DENORM-Cache (Schema-Anhang §1) — die
  * Autorität sind die Slots, und die Journey rechnet sie im Detail neu.
@@ -78,6 +101,8 @@ export interface BrandProfileSummary {
   subBrands: BrandSubBrands
   /** Schritt 0 (§2.1). Owner-Daten — der öffentliche Share-Blick sieht sie nie. */
   startCard: BrandStartCard
+  /** Stand der URL-Analyse (P2.3) — Metadaten, nie der gelesene Text. */
+  siteAnalysis: BrandSiteAnalysisView
   progressPct: number
   currentStepKey: string
   lastActivityAt: string
@@ -128,6 +153,22 @@ export interface BrandProfileDetailResponse {
 export interface BrandProfilePatchResponse extends BrandProfileDetailResponse {
   activated: BrandStepKey[]
   deactivated: BrandStepKey[]
+}
+
+/**
+ * Antwort der URL-Analyse (`POST /api/brand/profiles/:id/analyze`).
+ *
+ * DER VOLLTEXT FEHLT HIER ABSICHTLICH: er ist Georges Material, nicht das des
+ * Browsers. Was der Mensch sehen soll, ist der BELEG, dass gelesen wurde —
+ * Titel und Beschreibung sagen ihm in einer Zeile, ob die richtige Seite
+ * erwischt wurde, und `textLength` sagt, ob überhaupt etwas dranstand.
+ */
+export interface BrandSiteAnalyzeResponse {
+  analyzed: true
+  title: string
+  description: string
+  textLength: number
+  analyzedAt: string
 }
 
 export interface BrandProfileDeleteResponse {

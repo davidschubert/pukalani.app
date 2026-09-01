@@ -17,7 +17,11 @@ import {
 } from '../../../../shared/slotRegistry'
 import { brandSlotDisplayValue } from '../../../../shared/brandAutosaveDiff'
 import { brandAiRejectionMessageKey } from '../../../../shared/brandAiLimits'
-import type { BrandGenerationVersionsResponse } from '../../../../shared/types/brand'
+import type {
+  BrandGenerationVersionsResponse,
+  BrandSiteAnalysisView,
+  BrandSiteAnalyzeResponse,
+} from '../../../../shared/types/brand'
 import { useBrandWorkspaceStore } from '../../../stores/brandWorkspace'
 import { useBrandAutosave } from '../../../composables/useBrandAutosave'
 import { useBrandGeneration } from '../../../composables/useBrandGeneration'
@@ -270,6 +274,89 @@ const generationNotice = computed<string | null>(() => {
   return t('brand.workspace.generate.failed')
 })
 
+// ── „Website lesen" (P2.3) ────────────────────────────────────────────────
+
+/**
+ * SICHTBAR, NICHT HEIMLICH (Plan §3d): das Anlage-Formular verspricht neben dem
+ * URL-Feld „ich lese sie, damit du dich nicht wiederholen musst" — hier steht,
+ * WANN das passiert, und es passiert erst auf Knopfdruck.
+ *
+ * NUR IM BAUSTEIN KONTEXT und nur mit hinterlegter Adresse: dort schöpfen die
+ * Slots aus der Startkarte, dort nützt der Website-Text etwas, und ein Streifen
+ * über jedem Baustein wäre eine Aufforderung ohne Anlass.
+ *
+ * ZWEI KLICKS, KEINE CHECKBOX: der erste zeigt den Satz „Ich darf diese Website
+ * analysieren lassen", der zweite löst aus. Eine Checkbox, die man einmal setzt
+ * und dann vergisst, ist keine Bestätigung — sie ist ein Zustand.
+ */
+const siteUrl = computed(() => store.profile?.startCard.websiteUrl ?? '')
+const showSiteStrip = computed(() => stepKey.value === 'context' && siteUrl.value.length > 0)
+
+const siteAnalysis = ref<BrandSiteAnalysisView | null>(null)
+watch(
+  () => store.profile?.siteAnalysis,
+  (value) => { siteAnalysis.value = value ?? null },
+  { immediate: true },
+)
+
+const siteConsent = ref(false)
+const siteRunning = ref(false)
+const siteError = ref<string | null>(null)
+const siteDone = ref<BrandSiteAnalyzeResponse | null>(null)
+
+watch(routeStepKey, () => {
+  siteConsent.value = false
+  siteError.value = null
+  siteDone.value = null
+})
+
+/**
+ * Die Gründe kommen als `data.reason` (der zentrale Fehler-Handler hebt
+ * `data.code` dorthin). Ein unbekannter Grund fällt auf den allgemeinen Satz
+ * zurück — ein fehlender Zweig darf keinen leeren Hinweis erzeugen.
+ */
+const SITE_ERROR_KEYS: Record<string, string> = {
+  no_url: 'brand.workspace.site.error.noUrl',
+  blocked_target: 'brand.workspace.site.error.blocked',
+  not_html: 'brand.workspace.site.error.notHtml',
+  too_large: 'brand.workspace.site.error.tooLarge',
+  fetch_failed: 'brand.workspace.site.error.unreachable',
+  brand_analyze_daily_limit: 'brand.workspace.site.error.dailyLimit',
+}
+
+function siteDate(iso: string): string {
+  return iso ? new Date(iso).toLocaleDateString(locale.value) : ''
+}
+
+async function readSite(): Promise<void> {
+  siteRunning.value = true
+  siteError.value = null
+  siteDone.value = null
+  try {
+    const response = await $fetch<BrandSiteAnalyzeResponse>(
+      `/api/brand/profiles/${profileId.value}/analyze`,
+      { method: 'POST', body: {} },
+    )
+    siteDone.value = response
+    // Der Server ist die Wahrheit, aber ein zweiter Abruf des ganzen Profils
+    // wäre für drei Zahlen zu viel: die Antwort trägt sie alle.
+    siteAnalysis.value = {
+      url: siteUrl.value,
+      analyzedAt: response.analyzedAt,
+      textLength: response.textLength,
+      stale: false,
+    }
+    siteConsent.value = false
+  }
+  catch (error) {
+    const reason = (error as { data?: { reason?: string } }).data?.reason ?? ''
+    siteError.value = SITE_ERROR_KEYS[reason] ?? 'brand.workspace.site.error.failed'
+  }
+  finally {
+    siteRunning.value = false
+  }
+}
+
 // ── Leiste + Fortschritt ──────────────────────────────────────────────────
 
 function railState(state: string): BwRailStep['state'] {
@@ -444,6 +531,61 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
           {{ t('brand.workspace.generate.dismiss') }}
         </button>
       </p>
+
+      <!-- „Website lesen" (P2.3) — ein schmaler Streifen über der Bühne, nur im
+           Baustein Kontext und nur mit hinterlegter Adresse. Er SAGT, dass
+           gelesen wird, und er tut es erst nach einer Bestätigung. -->
+      <div
+        v-if="showSiteStrip"
+        class="mt-4 rounded-2xl px-4 py-3"
+        style="background: var(--bw-surface)"
+      >
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="min-w-0">
+            <p class="bw-label" style="color: var(--bw-muted)">{{ t('brand.workspace.site.label') }}</p>
+            <p class="mt-0.5 truncate text-sm" style="color: var(--bw-ink-soft)">
+              <template v-if="siteAnalysis?.analyzedAt">
+                {{ t('brand.workspace.site.read', { date: siteDate(siteAnalysis.analyzedAt) }) }}
+              </template>
+              <template v-else>{{ t('brand.workspace.site.never') }}</template>
+            </p>
+          </div>
+
+          <div class="flex flex-none items-center gap-2">
+            <template v-if="siteConsent">
+              <UButton
+                size="sm" class="rounded-full" :loading="siteRunning"
+                :label="t('brand.workspace.site.confirm')" @click="readSite"
+              />
+              <UButton
+                size="sm" variant="ghost" color="neutral" class="rounded-full"
+                :disabled="siteRunning"
+                :label="t('brand.workspace.site.cancel')" @click="siteConsent = false"
+              />
+            </template>
+            <UButton
+              v-else
+              size="sm" variant="ghost" color="neutral" class="rounded-full"
+              icon="i-ph-globe"
+              :label="siteAnalysis?.analyzedAt ? t('brand.workspace.site.again') : t('brand.workspace.site.start')"
+              @click="siteConsent = true"
+            />
+          </div>
+        </div>
+
+        <!-- Die Bestätigung steht ZWISCHEN Klick und Wirkung, nicht daneben. -->
+        <p v-if="siteConsent" class="mt-2 text-sm" style="color: var(--bw-ink-soft)">
+          {{ t('brand.workspace.site.consent') }}
+        </p>
+        <p v-if="siteRunning" class="bw-pending mt-2">{{ t('brand.workspace.site.running') }}</p>
+        <p v-else-if="siteDone" class="mt-2 text-sm" style="color: var(--bw-ink-soft)">
+          {{ t('brand.workspace.site.done', { chars: siteDone.textLength }) }}
+        </p>
+        <p v-else-if="siteError" class="mt-2 text-sm" style="color: var(--bw-stale)">{{ t(siteError) }}</p>
+        <p v-else-if="siteAnalysis?.stale" class="mt-2 text-sm" style="color: var(--bw-stale)">
+          {{ t('brand.workspace.site.stale') }}
+        </p>
+      </div>
 
       <BwChapter
         :title="stepKey ? t(`brand.steps.${stepKey}`) : ''"

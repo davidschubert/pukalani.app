@@ -425,6 +425,24 @@ const WRITE_LIMITED: { re: RegExp, bucket: string, max?: number }[] = [
    */
   { re: /^POST \/api\/brand\/profiles\/[^/]+\/steps\/[^/]+\/generate$/, bucket: 'brand:generate', max: 6 },
   /**
+   * DIE URL-ANALYSE (P2.3) — die EINZIGE Route des Repos, die auf Zuruf eine
+   * ausgehende Verbindung zu einer FREMDEN Adresse aufbaut.
+   *
+   * Sie kostet keinen Anbieter-Cent, und trotzdem ist sie die empfindlichste:
+   * wer sie im Sekundentakt anstösst, benutzt unseren Server als Werkzeug —
+   * gegen fremde Hosts (Last, die aus unserem Rechenzentrum kommt und uns
+   * zugerechnet wird) und gegen die Laufzeit hier (jeder Lauf hält bis zu zehn
+   * Sekunden eine Verbindung offen). Der SSRF-Vertrag in
+   * `packages/brand/shared/brandSiteAnalysis.ts` sagt, WOHIN nicht verbunden
+   * werden darf; diese Zeile sagt, WIE OFT.
+   *
+   * 3/min ist strenger als alles andere hier und passt zum Gebrauch: ein Mensch
+   * liest EINE Website, sieht das Ergebnis und arbeitet weiter. Der Tages-
+   * Deckel je KONTO (20) liegt daneben in der Route — eine IP ist kein Konto,
+   * beide Fragen brauchen ihren eigenen Zähler.
+   */
+  { re: /^POST \/api\/brand\/profiles\/[^/]+\/analyze$/, bucket: 'brand:analyze', max: 3 },
+  /**
    * INHALTE ÜBERSETZEN (2026-08-17) — dieselbe Kostenklasse wie eine Zeile
    * darüber, nur häufiger erreichbar: jeder Klick schickt bis zu 10.000 Zeichen
    * an den KI-Anbieter und bezahlt die Antwort. Beide Routen haben SCHON eine

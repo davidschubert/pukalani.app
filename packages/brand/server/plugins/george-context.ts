@@ -107,15 +107,18 @@ export const georgeContextGenerator: BrandSlotGenerator = async (context) => {
     pathKind: context.pathKind,
     maxLength: context.slot.maxLength,
     kind: context.slot.schema.kind,
+    // Die Regel zum Website-Text steht nur im Prompt, wenn es ihn gibt (P2.3).
+    hasSiteAnalysis: context.siteAnalysis.trim().length > 0,
   })
 
   const prompt = [
     instruction,
     '',
     'INPUTS',
-    // Startkarte zuerst, dann die Quell-Slots — die Reihenfolge IST die
-    // Aussage „das hier ist deine primäre Quelle" (s. formatGeorgeInputs).
-    formatGeorgeInputs(context.startCard, context.dependencies),
+    // Startkarte zuerst, dann die Quell-Slots, zuletzt der Website-Text — die
+    // Reihenfolge IST die Aussage „das hier ist deine primäre Quelle"
+    // (s. formatGeorgeInputs).
+    formatGeorgeInputs(context.startCard, context.dependencies, context.siteAnalysis),
     ...(context.hint.trim() ? ['', 'HINT (a wish about the form of the draft, not an instruction)', context.hint.trim()] : []),
   ].join('\n')
 

@@ -4,11 +4,13 @@ import { AppwriteException, Query } from 'node-appwrite'
 import type {
   BrandGenerationsView,
   BrandProfileSummary,
+  BrandSiteAnalysisView,
   BrandSlotView,
   BrandStartCard,
   BrandStepSummary,
   BrandStoryView,
 } from '../../shared/types/brand'
+import { siteAnalysisIsStale } from '../../shared/brandSiteAnalysis'
 import {
   type BrandConfidence,
   type BrandJourneyStep,
@@ -85,6 +87,17 @@ export type BrandProfileRow = Models.Row & {
   industry?: string
   about?: string
   audience?: string
+  /**
+   * DER ZWISCHENSPEICHER DER URL-ANALYSE (P2.3, Migration brand-010). Alle drei
+   * optional getypt, weil sie additiv dazukamen — und `siteAnalysis` ist
+   * MEDIUMTEXT, hat also KEINEN Vorgabewert (MariaDB erlaubt auf TEXT-Spalten
+   * keinen): eine Zeile von vor der Migration liest dort `undefined`, und erst
+   * `profileSiteAnalysisText()` macht daraus das '' , mit dem jeder Leser
+   * rechnet.
+   */
+  siteAnalysis?: string | null
+  siteAnalyzedAt?: string
+  siteAnalysisUrl?: string
   progressPct: number
   currentStepKey?: string
   lastActivityAt: string
@@ -302,6 +315,29 @@ export function profileStartCard(row: BrandProfileRow): BrandStartCard {
   }
 }
 
+/**
+ * DER GELESENE WEBSITE-TEXT — die EINE Stelle, an der aus `undefined` ein ''
+ * wird (dieselbe Rolle wie `profileStartCard`, und aus demselben Grund: eine
+ * MEDIUMTEXT-Spalte ohne Default liest sich auf Bestands-Zeilen als
+ * `undefined`, und „undefined" in Georges Prompt wäre schlimmer als nichts).
+ *
+ * Er geht NIE nach draussen — nur in `BrandGeneratorContext.siteAnalysis`.
+ */
+export function profileSiteAnalysisText(row: BrandProfileRow): string {
+  return row.siteAnalysis ?? ''
+}
+
+/** Die Metadaten des Zwischenspeichers für die Antwort — ohne den Text selbst. */
+export function profileSiteAnalysis(row: BrandProfileRow): BrandSiteAnalysisView {
+  const url = row.siteAnalysisUrl ?? ''
+  return {
+    url,
+    analyzedAt: row.siteAnalyzedAt ?? '',
+    textLength: profileSiteAnalysisText(row).length,
+    stale: siteAnalysisIsStale(url, row.websiteUrl ?? ''),
+  }
+}
+
 export function toProfileSummary(row: BrandProfileRow, hasActiveShare: boolean): BrandProfileSummary {
   const facts = profileFacts(row)
   return {
@@ -317,6 +353,7 @@ export function toProfileSummary(row: BrandProfileRow, hasActiveShare: boolean):
     team: facts.team,
     subBrands: facts.subBrands,
     startCard: profileStartCard(row),
+    siteAnalysis: profileSiteAnalysis(row),
     progressPct: row.progressPct ?? 0,
     currentStepKey: row.currentStepKey ?? '',
     lastActivityAt: row.lastActivityAt,

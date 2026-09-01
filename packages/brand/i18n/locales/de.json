@@ -189,6 +189,28 @@
       "completeFailed": "Das Kapitel ist noch nicht fertig",
       "missingRequired": "Einige Pflicht-Entscheidungen sind noch offen — bestätige sie und versuch es erneut.",
       "draftBadge": "Entwurf von George",
+      "site": {
+        "label": "Eure Website",
+        "never": "Noch nicht gelesen.",
+        "read": "Gelesen am {date}.",
+        "stale": "In der Startkarte steht inzwischen eine andere Adresse — lies sie neu, damit George den richtigen Text hat.",
+        "start": "Website lesen",
+        "again": "Erneut lesen",
+        "consent": "Ich darf diese Website analysieren lassen. George ruft die öffentliche Seite einmal ab, behält nur den Text und nichts sonst.",
+        "confirm": "Ja, lesen",
+        "cancel": "Doch nicht",
+        "running": "Ich lese gerade eure Website …",
+        "done": "Gelesen — {chars} Zeichen übernommen. George nutzt sie beim nächsten Entwurf.",
+        "error": {
+          "noUrl": "In der Startkarte steht keine Adresse. Trag eine ein, dann lese ich sie.",
+          "blocked": "Diese Adresse darf ich nicht abrufen. Bitte nenn eine öffentliche http- oder https-Adresse.",
+          "notHtml": "Dahinter liegt keine Webseite, die ich lesen kann — vielleicht eine Datei oder ein Bild.",
+          "tooLarge": "Die Seite ist zu groß zum Lesen. Nimm eine einzelne Unterseite, etwa eure Startseite.",
+          "unreachable": "Ich komme gerade nicht an die Seite. Versuch es später noch einmal.",
+          "dailyLimit": "Für heute habe ich genug Websites gelesen. Morgen wieder.",
+          "failed": "Das hat gerade nicht geklappt. Versuch es gleich nochmal."
+        }
+      },
       "generate": {
         "start": "George, entwirf das",
         "again": "George, versuch es nochmal",

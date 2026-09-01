@@ -68,6 +68,7 @@ function context(overrides: {
   onDelta?: (text: string) => void
   dependencies?: { slotId: string, value: string }[]
   startCard?: Partial<typeof EMPTY_START_CARD>
+  siteAnalysis?: string
 } = {}) {
   return {
     event,
@@ -76,6 +77,8 @@ function context(overrides: {
     locale: 'de',
     pathKind: 'new' as const,
     startCard: { ...EMPTY_START_CARD, ...overrides.startCard },
+    // P2.3: leer heisst „niemand hat Website lesen gedrückt" — der Normalfall.
+    siteAnalysis: overrides.siteAnalysis ?? '',
     hint: overrides.hint ?? '',
     dependencies: overrides.dependencies ?? [],
     signal: overrides.signal ?? new AbortController().signal,
@@ -203,7 +206,7 @@ describe('Das Ergebnis im Vertrag', () => {
     expect(result.draft).toBe('ErstZweit')
     expect(result.model).toBe('m')
     expect(result.provider).toBe('p')
-    expect(result.promptVersion).toBe('george-a-2')
+    expect(result.promptVersion).toBe('george-a-3')
     expect(result.aborted).toBe(false)
   })
 

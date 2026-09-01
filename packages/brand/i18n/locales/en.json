@@ -189,6 +189,28 @@
       "completeFailed": "The chapter is not finished yet",
       "missingRequired": "Some required decisions are still open — confirm them, then try again.",
       "draftBadge": "Draft by George",
+      "site": {
+        "label": "Your website",
+        "never": "Not read yet.",
+        "read": "Read on {date}.",
+        "stale": "Your start card now names a different address — read it again so George works from the right text.",
+        "start": "Read website",
+        "again": "Read again",
+        "consent": "I may have this website analysed. George fetches the public page once, keeps the text and nothing else.",
+        "confirm": "Yes, read it",
+        "cancel": "Not now",
+        "running": "Reading your website …",
+        "done": "Read — {chars} characters kept. George will use them for the next draft.",
+        "error": {
+          "noUrl": "Your start card has no address. Add one and I will read it.",
+          "blocked": "I am not allowed to fetch that address. Please name a public http or https address.",
+          "notHtml": "There is no readable web page behind it — maybe a file or an image.",
+          "tooLarge": "That page is too big to read. Try a single page, for example your home page.",
+          "unreachable": "I cannot reach the page right now. Try again later.",
+          "dailyLimit": "I have read enough websites for today. Tomorrow again.",
+          "failed": "That did not work just now. Try again in a moment."
+        }
+      },
       "generate": {
         "start": "George, draft this",
         "again": "George, try again",

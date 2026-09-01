@@ -124,6 +124,21 @@ function fromCodePoint(code: number): string {
   return String.fromCodePoint(code)
 }
 
+/**
+ * EXPORTIERT, WEIL EIN ZWEITER DEKODIERER EIN ZWEITER MASSSTAB WÄRE (P2.3).
+ *
+ * Die URL-Analyse des brand-Layers zieht Text aus fremdem HTML und muss
+ * `&amp;` dabei zu `&` machen. Sie könnte sich fünf Zeilen selbst schreiben —
+ * und hätte damit eine zweite Tabelle im Repo, die beim nächsten Zusatz
+ * (`&mdash;`, `&#8212;`) nur an einer von zwei Stellen wächst. Die Regeln
+ * oben (kleine Namensliste, U+FFFD für Ungültiges, Sentinel-Bereich gesperrt)
+ * gelten dort unverändert und sind dort ebenso richtig: ein unbekannter Name
+ * bleibt sichtbarer Text statt geraten zu werden.
+ */
+export function decodeHtmlEntities(text: string): string {
+  return decodeEntities(text)
+}
+
 function decodeEntities(text: string): string {
   if (!text.includes('&')) return text
   return text.replace(ENTITY_RE, (whole, dec: string | undefined, hex: string | undefined, name: string | undefined) => {

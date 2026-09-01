@@ -23,6 +23,7 @@ import {
   parseGenerations,
   parseSlotRecords,
   profileFacts,
+  profileSiteAnalysisText,
   profileStartCard,
   resolveProfileProgress,
   serializeSlotRecords,
@@ -295,6 +296,10 @@ export default defineEventHandler(async (event) => {
       // `collectSlotDependencies` die einzige Quelle. Eine Änderung an der
       // Karte macht einen Entwurf deshalb heute nicht „veraltet".
       startCard: profileStartCard(profile),
+      // Der gelesene Website-Text (P2.3) — leer, solange niemand „Website
+      // lesen" gedrückt hat. Er geht wie die Startkarte NICHT in den
+      // `inputHash` (Begründung im Vertrag, `brandGenerators.ts`).
+      siteAnalysis: profileSiteAnalysisText(profile),
       hint: body.hint ?? '',
       dependencies,
       signal: abort.signal,

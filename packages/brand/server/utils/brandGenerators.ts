@@ -70,6 +70,22 @@ export interface BrandGeneratorContext {
    * jeder Generator muss mit einer vollständig leeren Karte umgehen können.
    */
   startCard: BrandStartCard
+  /**
+   * DER TEXT VON IHRER WEBSITE (P2.3) — leer, solange niemand „Website lesen"
+   * gedrückt hat, und das ist der Normalfall.
+   *
+   * Er steht NEBEN der Startkarte und nicht darin: die Karte sind ANTWORTEN
+   * eines Menschen, das hier ist FREMDER Text, den wir eingesammelt haben.
+   * Georges Prompt behandelt beides verschieden — die Karte ist Quelle, dieser
+   * Block ist Material, aus dem NIE eine Anweisung wird
+   * (Prompt-Injection-Grenze, Plan §9b).
+   *
+   * Er geht ebenfalls NICHT in den `inputHash`: der beschreibt den Stand der
+   * Quell-SLOTS. Ein neu gelesener Website-Text macht einen bestehenden Entwurf
+   * heute also nicht „veraltet" — dieselbe bewusste Grenze wie bei der
+   * Startkarte.
+   */
+  siteAnalysis: string
   /** Freier Hinweis des Menschen („wärmer", „kürzer") — bereits auf 500 Zeichen geklemmt. */
   hint: string
   /** Werte der (transitiven) Quell-Slots in Katalog-Reihenfolge. */

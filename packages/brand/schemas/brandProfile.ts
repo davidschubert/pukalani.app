@@ -119,6 +119,26 @@ export function createBrandProfileCreateSchema(contentLocales: readonly string[]
  * ein Branding ohne Startkarte kann Baustein A nicht mehr entwerfen. Die URL
  * darf sehr wohl geleert werden; sie war nie eine Antwort, sondern ein Angebot.
  */
+/**
+ * WAS DIE URL-ANALYSE ENTGEGENNIMMT (P2.3): nichts — oder eine Adresse.
+ *
+ * Der Normalfall ist der LEERE Rumpf: gelesen wird die `websiteUrl` der
+ * Startkarte, und die steht schon am Profil. `url` gibt es trotzdem, weil der
+ * Mensch eine andere Seite meinen kann als die, die er beim Anlegen genannt
+ * hat (Landingpage statt Shop) — und dann wäre der Umweg „Startkarte ändern,
+ * dann lesen" eine Änderung an seinen Daten, die er gar nicht wollte.
+ *
+ * Geprüft wird mit DERSELBEN Regel wie die Startkarte (`isBrandWebsiteUrl`);
+ * ob die Adresse auch ABGERUFEN werden darf, entscheidet danach der
+ * SSRF-Vertrag (`analyzableUrl` in `shared/brandSiteAnalysis.ts`) — das Schema
+ * kennt Schemata, nicht Adressbereiche.
+ */
+export function createBrandAnalyzeSchema() {
+  return z.object({
+    url: websiteUrl.optional(),
+  }).strict()
+}
+
 export function createBrandProfilePatchSchema() {
   return z.object({
     title: z.string().trim().max(BRAND_TITLE_MAX).optional(),
