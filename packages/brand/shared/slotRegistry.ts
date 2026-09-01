@@ -74,9 +74,15 @@
  *
  * Leere `dependencies` heissen NICHT „hängt von nichts ab": die Slots des
  * Bausteins A schöpfen aus der STARTKARTE (URL, Branche, „was macht ihr",
- * „für wen") und die ist kein Slot — sie steht auf `brand_profiles`
- * (Katalog §2.1: „Mehr erhebt Schritt 0 NICHT"). Ihr Anteil am inputHash
- * kommt aus dem Profil, nicht aus dieser Liste.
+ * „für wen") und die ist kein Slot — sie steht seit brand-009 auf
+ * `brand_profiles` (Katalog §2.1: „Mehr erhebt Schritt 0 NICHT") und reist
+ * über den Generator-Vertrag (`BrandGeneratorContext.startCard`) zu George,
+ * nicht über diese Liste.
+ *
+ * IM inputHash STEHT SIE HEUTE NICHT (Stand P2.5): der Hash beschreibt den
+ * Stand der Quell-SLOTS, und `collectSlotDependencies` ist seine einzige
+ * Quelle. Eine geänderte Startkarte macht einen bestehenden Entwurf also
+ * nicht „veraltet" — bekannt und bewusst offen, kein Versehen.
  *
  * ── questionKey / helpKey ─────────────────────────────────────────────────
  * Mechanisch `brand.q.<id>` bzw. `brand.help.<id>` — `defineSlot` baut sie,

@@ -275,6 +275,12 @@
         "solo": "Nur ich",
         "team": "Zwei oder mehr"
       },
+      "startCard": {
+        "website": "Eure Website (optional) — ich lese sie, damit du dich nicht wiederholen musst.",
+        "industry": "In welcher Branche seid ihr unterwegs?",
+        "about": "Was macht ihr — in 2–3 Sätzen, wie du es einem Freund erzählen würdest?",
+        "audience": "Für wen ist es gedacht?"
+      },
       "submit": "Los geht's — George übernimmt",
       "failed": "Das Branding konnte nicht angelegt werden."
     },
@@ -311,7 +317,8 @@
       "contentLocale": "Diese Inhaltssprache steht nicht zur Verfügung.",
       "relaunchScopeOnlyOnRelaunch": "Eine Relaunch-Spannbreite gibt es nur auf dem Relaunch-Pfad.",
       "emptyPatch": "Nichts zu ändern.",
-      "emptySlotPatch": "Eine Slot-Änderung braucht einen Wert oder eine Bestätigung."
+      "emptySlotPatch": "Eine Slot-Änderung braucht einen Wert oder eine Bestätigung.",
+      "websiteUrl": "Bitte eine vollständige Web-Adresse eintragen (http:// oder https://) — oder das Feld leer lassen."
     }
   }
 }

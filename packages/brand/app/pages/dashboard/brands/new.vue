@@ -1,5 +1,13 @@
 <script setup lang="ts">
 import type { BrandPathKind } from '../../../../shared/slotRegistry'
+import { brandIndustrySuggestions } from '../../../../shared/industrySuggestions'
+import {
+  BRAND_ABOUT_MAX,
+  BRAND_AUDIENCE_MAX,
+  BRAND_INDUSTRY_MAX,
+  BRAND_WEBSITE_URL_MAX,
+  isBrandWebsiteUrl,
+} from '../../../../shared/brandStartCard'
 import type {
   BrandProfileDetailResponse,
   BrandRelaunchScope,
@@ -32,12 +40,54 @@ const appConfig = useAppConfig() as { pukalani?: { brand?: { contentLocales?: st
 
 const contentLocales = computed(() => appConfig.pukalani?.brand?.contentLocales ?? ['en'])
 
-const pathKind = ref<BrandPathKind>('new')
+/**
+ * ÜBERGABE AUS DEM ANLAGE-MODAL: `/dashboard/brands` fragt in seinem Modal
+ * dieselben drei Dinge (Weiche, Titel, Sprache) und schickt den Menschen
+ * hierher weiter, seit die Startkarte Pflicht ist. Was er dort schon
+ * beantwortet hat, wird NICHT ein zweites Mal gefragt — mehr tut die Query
+ * nicht, und alles daraus wird geprüft, bevor es ein Anfangswert wird.
+ */
+const route = useRoute()
+
+function queryValue(key: string): string {
+  const raw = route.query[key]
+  return typeof raw === 'string' ? raw : ''
+}
+
+const pathKind = ref<BrandPathKind>(queryValue('path') === 'relaunch' ? 'relaunch' : 'new')
 const relaunchScope = ref<BrandRelaunchScope>('refine')
 const namingOpted = ref(false)
-const title = ref('')
-const contentLocale = ref(contentLocales.value[0] ?? 'en')
+const title = ref(queryValue('title'))
+const contentLocale = ref(
+  contentLocales.value.includes(queryValue('lang')) ? queryValue('lang') : contentLocales.value[0] ?? 'en',
+)
 const team = ref<BrandTeamKind>('solo')
+
+/**
+ * DIE STARTKARTE (Content-Spec §2.1) — vier Felder, mehr erhebt Schritt 0
+ * nicht. Sie steht am ENDE des Formulars, obwohl sie in der Spez „Schritt 0"
+ * heisst: die Vorschläge für die Branche folgen der INHALTSSPRACHE (sie werden
+ * gespeichert und wandern in Georges Prompt), und die wird eine Zeile weiter
+ * oben gewählt. Die Weichen davor bleiben unangetastet.
+ */
+const websiteUrl = ref('')
+const industry = ref('')
+const about = ref('')
+const audience = ref('')
+
+const industrySuggestions = computed(() => brandIndustrySuggestions(contentLocale.value))
+
+/**
+ * Drei Pflichtfelder, eine freiwillige Adresse — und die Adresse muss, WENN sie
+ * dasteht, eine sein. Geprüft wird hier dieselbe pure Regel, die auch das
+ * Anlage-Schema anwendet: der Knopf soll nicht freigegeben aussehen, um dann
+ * mit „konnte nicht angelegt werden" zu antworten.
+ */
+const startCardComplete = computed(() =>
+  industry.value.trim().length > 0
+  && about.value.trim().length > 0
+  && audience.value.trim().length > 0
+  && isBrandWebsiteUrl(websiteUrl.value.trim()))
 
 const submitting = ref(false)
 const failed = ref(false)
@@ -72,6 +122,10 @@ async function submit(): Promise<void> {
         team: team.value,
         subBrands: 'unknown',
         namingOpted: namingOpted.value,
+        websiteUrl: websiteUrl.value.trim(),
+        industry: industry.value.trim(),
+        about: about.value.trim(),
+        audience: audience.value.trim(),
       },
     })
     await navigateTo(localePath(`/brand/${detail.profile.id}/${firstOpenStep(detail)}`))
@@ -179,10 +233,47 @@ useBrandTitle(() => t('brand.new.title'))
       </button>
     </div>
 
+    <!-- Startkarte (Content-Spec §2.1) — vier Felder in der Reihenfolge der
+         Spez: URL (optional), Branche, „was ihr macht", „für wen". -->
+    <p class="bw-label mt-8" style="color: var(--bw-muted)">{{ t('brand.new.startCard.website') }}</p>
+    <UInput
+      v-model="websiteUrl" variant="none" class="mt-2 w-full" :ui="{ base: 'rounded-full px-4' }"
+      type="url" inputmode="url" :maxlength="BRAND_WEBSITE_URL_MAX"
+      style="background: var(--bw-surface)"
+    />
+
+    <p class="bw-label mt-6" style="color: var(--bw-muted)">{{ t('brand.new.startCard.industry') }}</p>
+    <UInput
+      v-model="industry" variant="none" class="mt-2 w-full" :ui="{ base: 'rounded-full px-4' }"
+      list="bw-industry-suggestions" :maxlength="BRAND_INDUSTRY_MAX"
+      style="background: var(--bw-surface)"
+    />
+    <!-- „Eingabe mit Vorschlägen" (§2.1): eine datalist, kein zweites API und
+         keine geschlossene Auswahl — jeder eigene Begriff bleibt erlaubt. -->
+    <datalist id="bw-industry-suggestions">
+      <option v-for="suggestion in industrySuggestions" :key="suggestion" :value="suggestion" />
+    </datalist>
+
+    <p class="bw-label mt-6" style="color: var(--bw-muted)">{{ t('brand.new.startCard.about') }}</p>
+    <UTextarea
+      v-model="about" variant="none" class="mt-2 w-full" :ui="{ base: 'rounded-2xl px-4 py-3' }"
+      :rows="3" :maxlength="BRAND_ABOUT_MAX"
+      style="background: var(--bw-surface)"
+    />
+
+    <p class="bw-label mt-6" style="color: var(--bw-muted)">{{ t('brand.new.startCard.audience') }}</p>
+    <UTextarea
+      v-model="audience" variant="none" class="mt-2 w-full" :ui="{ base: 'rounded-2xl px-4 py-3' }"
+      :rows="2" :maxlength="BRAND_AUDIENCE_MAX"
+      style="background: var(--bw-surface)"
+    />
+
     <div class="mt-8 flex items-center justify-end gap-3">
       <p v-if="failed" class="mr-auto text-sm" style="color: var(--bw-stale)">{{ t('brand.new.failed') }}</p>
       <UButton
-        :loading="submitting" trailing-icon="i-ph-arrow-right" :label="t('brand.new.submit')"
+        :loading="submitting"
+        :disabled="!startCardComplete"
+        trailing-icon="i-ph-arrow-right" :label="t('brand.new.submit')"
         size="lg" class="rounded-full" @click="submit"
       />
     </div>

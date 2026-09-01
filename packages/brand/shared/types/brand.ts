@@ -36,6 +36,30 @@ export type BrandTeamKind = 'solo' | 'team'
 export type BrandRelaunchScope = 'refine' | 'recut'
 
 /**
+ * DIE STARTKARTE (Content-Spec §2.1) — die vier Angaben aus Schritt 0, und
+ * ausdrücklich nicht mehr („Mehr erhebt Schritt 0 NICHT").
+ *
+ * Sie ist KEIN Slot: sie steht am Profil (`brand_profiles`, Migration
+ * brand-009), nicht in `brand_steps.slots`. Genau deshalb haben die Slots des
+ * Bausteins A in der Registry keine `dependencies` — sie schöpfen aus dieser
+ * Karte, und die reist über den Generator-Vertrag mit, nicht über die
+ * Abhängigkeitsliste.
+ *
+ * ALLE VIER FELDER SIND ZEICHENKETTEN, NIE `null` oder `undefined`: '' heisst
+ * „nicht beantwortet". Eine Bestands-Zeile von vor brand-009 liest genau das,
+ * und ein Leser muss nicht zwischen drei Arten von „leer" unterscheiden.
+ */
+export interface BrandStartCard {
+  /** Optional (§2.1) — leer oder eine http(s)-Adresse. */
+  websiteUrl: string
+  industry: string
+  /** „Was ihr macht" — zwei bis drei Sätze. */
+  about: string
+  /** „Für wen" — ein Satz. */
+  audience: string
+}
+
+/**
  * Der KOPF eines Brandings, so wie ihn Liste und Detailseite brauchen.
  * `progressPct`/`currentStepKey` sind DENORM-Cache (Schema-Anhang §1) — die
  * Autorität sind die Slots, und die Journey rechnet sie im Detail neu.
@@ -52,6 +76,8 @@ export interface BrandProfileSummary {
   namingOpted: boolean
   team: BrandTeamKind
   subBrands: BrandSubBrands
+  /** Schritt 0 (§2.1). Owner-Daten — der öffentliche Share-Blick sieht sie nie. */
+  startCard: BrandStartCard
   progressPct: number
   currentStepKey: string
   lastActivityAt: string

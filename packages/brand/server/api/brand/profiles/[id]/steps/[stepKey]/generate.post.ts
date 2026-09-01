@@ -23,6 +23,7 @@ import {
   parseGenerations,
   parseSlotRecords,
   profileFacts,
+  profileStartCard,
   resolveProfileProgress,
   serializeSlotRecords,
   toStepFacts,
@@ -289,6 +290,11 @@ export default defineEventHandler(async (event) => {
       slot,
       locale: profile.contentLocale,
       pathKind: profileFacts(profile).pathKind,
+      // Die STARTKARTE aus dem PROFIL (§2.1) — sie geht NICHT in den
+      // `inputHash`: der beschreibt den Stand der Quell-SLOTS, und dafür ist
+      // `collectSlotDependencies` die einzige Quelle. Eine Änderung an der
+      // Karte macht einen Entwurf deshalb heute nicht „veraltet".
+      startCard: profileStartCard(profile),
       hint: body.hint ?? '',
       dependencies,
       signal: abort.signal,

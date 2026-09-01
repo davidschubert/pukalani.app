@@ -1,5 +1,6 @@
 import type { BrandPathKind, BrandSlotSchemaKind } from '../../shared/slotRegistry'
 import { brandSlotFormatExample, brandSlotFormatRule } from '../../shared/brandSlotFormat'
+import type { BrandStartCard } from '../../shared/types/brand'
 import type { BrandSlotDependency } from './brandGenerators'
 
 /**
@@ -43,8 +44,15 @@ import type { BrandSlotDependency } from './brandGenerators'
  * Übernahme-Quoten (Audit 2) vergleichen Äpfel mit Birnen.
  */
 
-/** Fassung der Prompt-Bausteine dieses Bausteins (A · Kontext). */
-export const GEORGE_PROMPT_VERSION = 'george-a-1'
+/**
+ * Fassung der Prompt-Bausteine dieses Bausteins (A · Kontext).
+ *
+ * `george-a-2` (P2.5, 2026-09-01): die STARTKARTE reist mit — sie steht als
+ * erster Block in den Eingaben, und die Aufgaben nennen sie als primäre Quelle.
+ * Ein Entwurf aus `george-a-1` entstand nachweislich OHNE diese vier Angaben;
+ * die Version zu lassen hiesse, beide für vergleichbar zu erklären.
+ */
+export const GEORGE_PROMPT_VERSION = 'george-a-2'
 
 /** Default der Persona (Content-Spec §1.1, Gate ② abgesegnet). */
 export const GEORGE_PERSONA_DEFAULT = 'George'
@@ -123,24 +131,30 @@ export interface ContextSlotInstructionOptions {
 const CONTEXT_SLOT_TASKS: Record<string, (options: ContextSlotInstructionOptions) => string[]> = {
   'a.pitch': () => [
     'TASK: draft the elevator pitch for this brand.',
+    'Work from the start card: "what they do" and "who it is for" are the person\'s own words — keep their '
+    + 'substance, sharpen the wording.',
     'Two to three sentences, plain language, no superlatives and no marketing noise. '
     + 'Say what they do, who it is for, and what makes it different.',
   ],
   'a.category': () => [
     'TASK: name the industry / category this brand plays in, normalised to a term the industry itself uses.',
+    'The start card carries their own answer to "industry" — normalise THAT, do not replace it with a '
+    + 'category you would have picked.',
     'One line, at most five words. "Software agency for online shops" — not "we build stuff".',
   ],
   'a.competitors': () => [
     'TASK: write 3-5 short competitor profiles.',
     'USE ONLY names that appear literally in the inputs below — named by the person or linked from their '
     + 'own site. Do NOT invent competitors, do NOT add companies you happen to know, do NOT guess from the '
-    + 'industry. If fewer than three names are given, return only those and say nothing about the missing '
-    + 'ones. If no name is given at all, return a single entry saying that no competitor was named yet.',
+    + 'industry named in the start card. If fewer than three names are given, return only those and say '
+    + 'nothing about the missing ones. If no name is given at all, return a single entry saying that no '
+    + 'competitor was named yet.',
     'One line per competitor, in this shape: "- <name> - strong: <one point> - weak: <one point>". '
     + 'Both points must be traceable to the inputs.',
   ],
   'a.audienceSketch': () => [
     'TASK: sketch the audience of this brand.',
+    'The start card\'s "who it is for" is the seed — unfold it, do not overwrite it.',
     'One block per audience, at most three blocks. Use these labels: "Who", "What they want", '
     + '"What holds them back". Concrete over demographic: what these people are trying to get done.',
   ],
@@ -172,6 +186,9 @@ export function contextSlotInstruction(slotId: string, options: ContextSlotInstr
     // Entwurfs-Ehrlichkeit (Regel 4) — als Eigenschaft des Textes, nicht als
     // angehängte Fussnote: eine Zeile "Based on: ..." wäre im Brand-Dokument
     // Beifang, den der Mensch bei jedem Entwurf von Hand wieder wegräumt.
+    'Your primary source is the start card at the top of the inputs — the four things this person told us '
+    + 'at the very beginning (website, industry, what they do, who it is for). If it is not there or empty, '
+    + 'say plainly what you cannot know yet instead of filling it in.',
     'Use only the inputs below. Never assert a fact about this brand, its people, its customers or its '
     + 'numbers that is not in the inputs. Where something is missing, mark it plainly as an assumption '
     + 'inside the text instead of stating it as fact.',
@@ -212,21 +229,52 @@ export function contextSlotInstruction(slotId: string, options: ContextSlotInstr
 }
 
 /**
- * Was im Prompt steht, wenn es KEINE Quell-Slots gibt.
+ * Was im Prompt steht, wenn WEDER Startkarte NOCH Quell-Slots etwas hergeben.
  *
- * BAUSTEIN A IST GENAU DIESER FALL, UND ZWAR HEUTE NOCH VOLLSTÄNDIG: seine
- * Slots haben laut Registry keine `dependencies`, weil sie aus der STARTKARTE
- * schöpfen — und die Startkarte gibt es als Daten noch nicht
- * (`brand_profiles` trägt Pfad, Team, Sprache, aber weder URL noch Branche
- * noch „was macht ihr"; Content-Spec §2.1 beschreibt sie, keine Migration legt
- * sie an). Der Satz sagt deshalb, was WAHR ist — „mir wurde nichts übergeben"
- * — und nicht, was einmal wahr sein soll. Ein Prompt, der eine Startkarte
- * behauptet, die nicht mitreist, lädt genau das Erfinden ein, das Regel 8
- * verbietet.
+ * Bis P2.5 war das der Normalfall für Baustein A: seine Slots haben laut
+ * Registry keine `dependencies`, weil sie aus der STARTKARTE schöpfen — und
+ * die gab es als Daten nicht (Content-Spec §2.1 beschrieb sie, keine Migration
+ * legte sie an). Seit brand-009 reist sie mit, und der Satz bleibt trotzdem:
+ * ein Profil aus der Zeit davor hat eine leere Karte, und dann ist „mir wurde
+ * nichts übergeben" weiterhin die einzige wahre Auskunft. Ein Prompt, der eine
+ * Startkarte behauptet, die nicht mitreist, lädt genau das Erfinden ein, das
+ * Regel 8 verbietet.
  */
 export const GEORGE_NO_DEPENDENCIES
   = '(no earlier answers were handed to you — do not invent what is missing; '
     + 'say plainly what you cannot know yet)'
+
+/** Die Beschriftungen der Startkarte im Prompt — Reihenfolge wie §2.1. */
+const START_CARD_FIELDS: readonly { key: keyof BrandStartCard, label: string }[] = [
+  { key: 'websiteUrl', label: 'website' },
+  { key: 'industry', label: 'industry' },
+  { key: 'about', label: 'what they do' },
+  { key: 'audience', label: 'who it is for' },
+]
+
+/**
+ * DIE STARTKARTE ALS BESCHRIFTETE BLÖCKE — Georges primäre Quelle in
+ * Baustein A.
+ *
+ * ── HIER WIRD LEERES WEGGELASSEN, BEI DEN SLOTS NICHT ─────────────────────
+ * `formatDependencies` schreibt ein unbeantwortetes Feld ausdrücklich mit
+ * „(not answered yet)" hin — dort ist die ABWESENHEIT eine Auskunft, weil der
+ * Slot existiert und jemand ihn absichtlich offen gelassen hat. Die Startkarte
+ * kennt diesen Zustand nicht: drei ihrer vier Felder sind bei der Anlage
+ * Pflicht, und leer ist sie nur bei Bestands-Profilen, die die Frage nie
+ * gesehen haben. „website: (not answered yet)" wäre dort ein Vorwurf an
+ * jemanden, der nie gefragt wurde — und für die freiwillige URL schlicht
+ * falsch. Ist die ganze Karte leer, gibt es GAR KEINEN Block ('') und der
+ * Aufrufer fällt auf `GEORGE_NO_DEPENDENCIES` zurück.
+ */
+export function formatStartCard(startCard: BrandStartCard): string {
+  const blocks = START_CARD_FIELDS
+    .map(field => ({ label: field.label, value: (startCard[field.key] ?? '').trim() }))
+    .filter(field => field.value.length > 0)
+    .map(field => `[start card · ${field.label}]\n${field.value}`)
+
+  return blocks.length ? blocks.join('\n\n') : ''
+}
 
 /**
  * DIE DATEN — Slot-Werte als beschriftete Blöcke.
@@ -244,4 +292,28 @@ export function formatDependencies(dependencies: readonly BrandSlotDependency[])
       return `[${dependency.slotId}]\n${value || '(not answered yet)'}`
     })
     .join('\n\n')
+}
+
+/**
+ * DER GANZE INPUTS-BLOCK: Startkarte zuerst, dann die Quell-Slots.
+ *
+ * Die Reihenfolge ist eine Aussage — was oben steht, ist die primäre Quelle,
+ * und genau so benennen es die Slot-Aufgaben („from the start card"). Für
+ * Baustein A ist der zweite Teil heute immer leer, für spätere Bausteine ist
+ * es der andere Weg herum; beide Fälle brauchen keine zweite Funktion.
+ *
+ * SIND BEIDE LEER, STEHT DA DIE EHRLICHE ZEILE (`GEORGE_NO_DEPENDENCIES`) und
+ * nicht etwa eine leere Überschrift — ein Prompt, unter dessen „INPUTS" nichts
+ * steht, liest sich wie ein Fehler und wird vom Modell gefüllt.
+ */
+export function formatGeorgeInputs(
+  startCard: BrandStartCard,
+  dependencies: readonly BrandSlotDependency[],
+): string {
+  const blocks = [
+    formatStartCard(startCard),
+    dependencies.length ? formatDependencies(dependencies) : '',
+  ].filter(block => block.length > 0)
+
+  return blocks.length ? blocks.join('\n\n') : GEORGE_NO_DEPENDENCIES
 }

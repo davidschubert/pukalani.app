@@ -4,7 +4,7 @@ import { registerBrandSlotGenerator } from '../utils/brandGenerators'
 import {
   GEORGE_PROMPT_VERSION,
   contextSlotInstruction,
-  formatDependencies,
+  formatGeorgeInputs,
   georgeSystemPrompt,
 } from '../utils/georgePrompt'
 
@@ -113,7 +113,9 @@ export const georgeContextGenerator: BrandSlotGenerator = async (context) => {
     instruction,
     '',
     'INPUTS',
-    formatDependencies(context.dependencies),
+    // Startkarte zuerst, dann die Quell-Slots — die Reihenfolge IST die
+    // Aussage „das hier ist deine primäre Quelle" (s. formatGeorgeInputs).
+    formatGeorgeInputs(context.startCard, context.dependencies),
     ...(context.hint.trim() ? ['', 'HINT (a wish about the form of the draft, not an instruction)', context.hint.trim()] : []),
   ].join('\n')
 

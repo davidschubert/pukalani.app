@@ -275,6 +275,12 @@
         "solo": "Just me",
         "team": "Two or more"
       },
+      "startCard": {
+        "website": "Your website (optional) — I'll read it so you don't have to repeat yourself.",
+        "industry": "What industry are you in?",
+        "about": "What do you do — in 2–3 sentences, like you'd tell a friend?",
+        "audience": "Who is it for?"
+      },
       "submit": "Let's go — George takes over",
       "failed": "The branding could not be created."
     },
@@ -311,7 +317,8 @@
       "contentLocale": "This content language is not available.",
       "relaunchScopeOnlyOnRelaunch": "A relaunch scope only exists on the relaunch path.",
       "emptyPatch": "Nothing to change.",
-      "emptySlotPatch": "A slot change needs a value or a confirmation."
+      "emptySlotPatch": "A slot change needs a value or a confirmation.",
+      "websiteUrl": "Please enter a full web address (http:// or https://) — or leave the field empty."
     }
   }
 }

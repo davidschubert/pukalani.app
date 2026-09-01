@@ -13,8 +13,11 @@ import {
   GEORGE_PROMPT_VERSION,
   contextSlotInstruction,
   formatDependencies,
+  formatGeorgeInputs,
+  formatStartCard,
   georgeSystemPrompt,
 } from '../server/utils/georgePrompt'
+import type { BrandStartCard } from '../shared/types/brand'
 
 /**
  * GEORGES PROMPT-BAUSTEINE (P2.2) — was ohne diesen Beweis Glaubenssache wäre.
@@ -244,8 +247,6 @@ describe('Formvorgabe list/structured — dieselbe Quelle wie der Dev-Stub', () 
 describe('formatDependencies — die Daten als beschriftete Blöcke', () => {
   it('OHNE Quell-Slots sagt es das ausdrücklich (Baustein A ist genau dieser Fall)', () => {
     expect(formatDependencies([])).toBe(GEORGE_NO_DEPENDENCIES)
-    // Kein Verweis auf eine Startkarte, die im Prompt gar nicht mitreist —
-    // sonst wäre die Zeile eine Einladung zum Erfinden.
     expect(GEORGE_NO_DEPENDENCIES).toContain('do not invent what is missing')
   })
 
@@ -271,8 +272,88 @@ describe('formatDependencies — die Daten als beschriftete Blöcke', () => {
   })
 })
 
+/**
+ * DIE STARTKARTE (P2.5) — der Grund, warum Baustein A überhaupt etwas zu lesen
+ * hat. Ohne sie stand unter „INPUTS" bei jedem ersten Entwurf einer neuen Marke
+ * genau eine Zeile: „(no earlier answers were handed to you)".
+ */
+function startCard(overrides: Partial<BrandStartCard> = {}): BrandStartCard {
+  return { websiteUrl: '', industry: '', about: '', audience: '', ...overrides }
+}
+
+describe('formatStartCard — die vier Angaben aus Schritt 0 (§2.1)', () => {
+  it('VOLLE KARTE: alle vier in der Reihenfolge der Spez, beschriftet', () => {
+    expect(formatStartCard(startCard({
+      websiteUrl: 'https://kailua.coffee',
+      industry: 'Kaffeerösterei',
+      about: 'Wir rösten Kaffee in kleinen Mengen.',
+      audience: 'Cafés auf Maui.',
+    }))).toBe(
+      '[start card · website]\nhttps://kailua.coffee\n\n'
+      + '[start card · industry]\nKaffeerösterei\n\n'
+      + '[start card · what they do]\nWir rösten Kaffee in kleinen Mengen.\n\n'
+      + '[start card · who it is for]\nCafés auf Maui.',
+    )
+  })
+
+  it('TEILWEISE: leere Felder werden WEGGELASSEN, nicht als „nicht beantwortet" behauptet', () => {
+    const block = formatStartCard(startCard({ industry: 'Kaffeerösterei', about: '   ' }))
+    expect(block).toBe('[start card · industry]\nKaffeerösterei')
+    // Die Gegenprobe zur Slot-Regel: DORT bleibt Leeres stehen, hier nicht.
+    expect(block).not.toContain('not answered yet')
+  })
+
+  it('KOMPLETT LEER: gar kein Block — der Aufrufer entscheidet, was dann dasteht', () => {
+    expect(formatStartCard(startCard())).toBe('')
+  })
+})
+
+describe('formatGeorgeInputs — Startkarte zuerst, dann die Quell-Slots', () => {
+  it('BEIDE: die Karte steht oben, getrennt durch eine Leerzeile', () => {
+    expect(formatGeorgeInputs(
+      startCard({ industry: 'Kaffeerösterei' }),
+      [{ slotId: 'a.pitch', value: 'Wir rösten Kaffee.' }],
+    )).toBe('[start card · industry]\nKaffeerösterei\n\n[a.pitch]\nWir rösten Kaffee.')
+  })
+
+  it('NUR die Karte (der Alltag in Baustein A): keine leere Slot-Zeile darunter', () => {
+    const block = formatGeorgeInputs(startCard({ about: 'Wir rösten Kaffee.' }), [])
+    expect(block).toBe('[start card · what they do]\nWir rösten Kaffee.')
+    expect(block).not.toContain(GEORGE_NO_DEPENDENCIES)
+  })
+
+  it('NUR Slots: unverändert die Blöcke von formatDependencies', () => {
+    expect(formatGeorgeInputs(startCard(), [{ slotId: 'a.pitch', value: 'x' }]))
+      .toBe('[a.pitch]\nx')
+  })
+
+  it('GAR NICHTS: die ehrliche Zeile bleibt — ein leeres INPUTS läde zum Erfinden ein', () => {
+    expect(formatGeorgeInputs(startCard(), [])).toBe(GEORGE_NO_DEPENDENCIES)
+  })
+})
+
+describe('Die Startkarte in den Instruktionen (§4)', () => {
+  it('JEDE Aufgabe nennt sie als primäre Quelle — und sagt, was ohne sie gilt', () => {
+    for (const slotId of CONTEXT_SLOTS) {
+      const instruction = contextSlotInstruction(slotId, optionsFor(slotId))
+      expect(instruction).toContain('Your primary source is the start card')
+      expect(instruction).toContain('say plainly what you cannot know yet instead of filling it in')
+    }
+  })
+
+  it('a.pitch und a.audienceSketch bauen ausdrücklich darauf auf', () => {
+    expect(contextSlotInstruction('a.pitch', optionsFor('a.pitch')))
+      .toContain('Work from the start card')
+    expect(contextSlotInstruction('a.audienceSketch', optionsFor('a.audienceSketch')))
+      .toContain('"who it is for" is the seed')
+  })
+})
+
 describe('Prompt-Version', () => {
   it('ist gesetzt und benennt den Baustein', () => {
-    expect(GEORGE_PROMPT_VERSION).toBe('george-a-1')
+    // P2.5 hat den Prompt inhaltlich verändert (die Startkarte reist mit) —
+    // die Version MUSS mitsteigen, sonst behaupten alte Generations-Einträge,
+    // aus diesem Prompt zu stammen (Kopf von georgePrompt.ts).
+    expect(GEORGE_PROMPT_VERSION).toBe('george-a-2')
   })
 })

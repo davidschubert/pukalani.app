@@ -5,6 +5,7 @@ import type {
   BrandGenerationsView,
   BrandProfileSummary,
   BrandSlotView,
+  BrandStartCard,
   BrandStepSummary,
   BrandStoryView,
 } from '../../shared/types/brand'
@@ -74,6 +75,16 @@ export type BrandProfileRow = Models.Row & {
    * liest `undefined`, und das ist genau der Default `false`.
    */
   namingOpted?: boolean
+  /**
+   * Die STARTKARTE (Content-Spec §2.1). Alle vier optional getypt, weil die
+   * Spalten mit brand-009 additiv dazukamen — eine Zeile von vorher liest
+   * `undefined`, und `profileStartCard()` macht daraus dasselbe '' wie ein
+   * unbeantwortetes Feld.
+   */
+  websiteUrl?: string
+  industry?: string
+  about?: string
+  audience?: string
   progressPct: number
   currentStepKey?: string
   lastActivityAt: string
@@ -277,6 +288,20 @@ export function profileFacts(row: BrandProfileRow): BrandProfileFacts {
   }
 }
 
+/**
+ * Die Startkarte einer Zeile — EINE Stelle, an der aus `undefined` ein ''
+ * wird. Ohne sie stünde in Georges Prompt für eine Bestands-Zeile das Wort
+ * „undefined", und das ist die einzige Auskunft, die schlimmer ist als keine.
+ */
+export function profileStartCard(row: BrandProfileRow): BrandStartCard {
+  return {
+    websiteUrl: row.websiteUrl ?? '',
+    industry: row.industry ?? '',
+    about: row.about ?? '',
+    audience: row.audience ?? '',
+  }
+}
+
 export function toProfileSummary(row: BrandProfileRow, hasActiveShare: boolean): BrandProfileSummary {
   const facts = profileFacts(row)
   return {
@@ -291,6 +316,7 @@ export function toProfileSummary(row: BrandProfileRow, hasActiveShare: boolean):
     namingOpted: facts.namingOpted === true,
     team: facts.team,
     subBrands: facts.subBrands,
+    startCard: profileStartCard(row),
     progressPct: row.progressPct ?? 0,
     currentStepKey: row.currentStepKey ?? '',
     lastActivityAt: row.lastActivityAt,

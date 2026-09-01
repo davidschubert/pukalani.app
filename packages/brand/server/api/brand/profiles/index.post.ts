@@ -34,6 +34,15 @@ import { recordBrandEvent } from '../../../utils/brandEvents'
  * „entfallene Daten werden INAKTIV, nie gelöscht": wer Naming später
  * aktiviert, findet seine Zeile mit ihren Slots vor.
  *
+ * ── DIE STARTKARTE ENTSTEHT GENAU HIER (P2.5) ─────────────────────────────
+ * Vier Felder (§2.1: URL optional, Branche, „was ihr macht", „für wen") —
+ * mehr erhebt Schritt 0 nicht. Sie sind die EINZIGE Quelle der Slots aus
+ * Baustein A (die haben in der Registry keine `dependencies`), deshalb
+ * verlangt das Anlage-Schema die drei inhaltlichen als Pflicht. Ändern lassen
+ * sie sich später über den PATCH — anders als `contentLocale`, die fixiert
+ * bleibt: eine korrigierte Branche macht den nächsten Entwurf besser, eine
+ * gewechselte Sprache machte die bisherigen unlesbar.
+ *
  * ── DIE INHALTSSPRACHE WIRD HIER FIXIERT ──────────────────────────────────
  * Erlaubte Werte kommen aus `pukalani.brand.contentLocales` (App-Config-Form
  * §3e), nicht aus einer Liste im Layer — sonst wäre die White-Label-Zusage
@@ -89,6 +98,14 @@ export default defineEventHandler(async (event): Promise<BrandProfileDetailRespo
         namingOpted: body.namingOpted,
         team: body.team,
         subBrands: body.subBrands,
+        // Die STARTKARTE (§2.1) — vier Felder, mehr erhebt Schritt 0 nicht.
+        // Sie stehen hier EXPLIZIT, weil `createRow` im Layer jede Spalte
+        // ausdrücklich verlangt (CLAUDE.md): eine neue Spalte soll eine
+        // Entscheidung erzwingen, keinen stillen Default erben.
+        websiteUrl: body.websiteUrl,
+        industry: body.industry,
+        about: body.about,
+        audience: body.audience,
         progressPct: progress.progressPct,
         currentStepKey: progress.currentStepKey,
         lastActivityAt: now,
@@ -135,13 +152,17 @@ export default defineEventHandler(async (event): Promise<BrandProfileDetailRespo
     type: 'profile.created',
     profileId,
     userId,
-    // Kennzahlen, kein Inhalt: der Titel steht bewusst NICHT hier.
+    // Kennzahlen, kein Inhalt: der Titel steht bewusst NICHT hier — und aus
+    // der Startkarte nur die eine Zahl, die eine Produktfrage beantwortet
+    // („wie viele geben uns eine Adresse zum Lesen?"). Branche, „was ihr
+    // macht" und „für wen" sind INHALT und bleiben draußen (Log-Regel §6).
     payload: {
       pathKind: body.pathKind,
       hasName: body.hasName,
       team: body.team,
       subBrands: body.subBrands,
       contentLocale: body.contentLocale,
+      hasWebsite: Boolean(body.websiteUrl),
     },
   })
 

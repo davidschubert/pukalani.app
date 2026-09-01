@@ -60,11 +60,14 @@ function lastCall(): { prompt: string, options: StreamOptions } {
   return { prompt: call[1] as string, options: call[2] as StreamOptions }
 }
 
+const EMPTY_START_CARD = { websiteUrl: '', industry: '', about: '', audience: '' }
+
 function context(overrides: {
   hint?: string
   signal?: AbortSignal
   onDelta?: (text: string) => void
   dependencies?: { slotId: string, value: string }[]
+  startCard?: Partial<typeof EMPTY_START_CARD>
 } = {}) {
   return {
     event,
@@ -72,6 +75,7 @@ function context(overrides: {
     slot,
     locale: 'de',
     pathKind: 'new' as const,
+    startCard: { ...EMPTY_START_CARD, ...overrides.startCard },
     hint: overrides.hint ?? '',
     dependencies: overrides.dependencies ?? [],
     signal: overrides.signal ?? new AbortController().signal,
@@ -165,6 +169,25 @@ describe('Der Aufruf an den Transport', () => {
     await plugin.georgeContextGenerator(context())
     expect(lastCall().prompt).not.toContain('HINT')
   })
+
+  it('DIE STARTKARTE REIST MIT — und steht VOR den Quell-Slots', async () => {
+    await plugin.georgeContextGenerator(context({
+      startCard: { industry: 'Kaffeerösterei', about: 'Wir rösten in kleinen Mengen.' },
+      dependencies: [{ slotId: 'a.pitch', value: 'Wir rösten Kaffee.' }],
+    }))
+    const { prompt } = lastCall()
+    expect(prompt).toContain('[start card · industry]\nKaffeerösterei')
+    expect(prompt).toContain('[start card · what they do]\nWir rösten in kleinen Mengen.')
+    // Die Reihenfolge IST die Aussage „das hier ist deine primäre Quelle".
+    expect(prompt.indexOf('[start card · industry]')).toBeLessThan(prompt.indexOf('[a.pitch]'))
+  })
+
+  it('OHNE Startkarte und ohne Slots bleibt die ehrliche Zeile stehen', async () => {
+    await plugin.georgeContextGenerator(context())
+    const { prompt } = lastCall()
+    expect(prompt).toContain('no earlier answers were handed to you')
+    expect(prompt).not.toContain('[start card')
+  })
 })
 
 describe('Das Ergebnis im Vertrag', () => {
@@ -180,7 +203,7 @@ describe('Das Ergebnis im Vertrag', () => {
     expect(result.draft).toBe('ErstZweit')
     expect(result.model).toBe('m')
     expect(result.provider).toBe('p')
-    expect(result.promptVersion).toBe('george-a-1')
+    expect(result.promptVersion).toBe('george-a-2')
     expect(result.aborted).toBe(false)
   })
 

@@ -48,6 +48,12 @@ const profileRow: FakeRow = {
   hasName: true,
   team: 'solo',
   subBrands: 'unknown',
+  // Die Startkarte (§2.1) — sie steht am PROFIL und reist über den
+  // Generator-Vertrag zu George (P2.5).
+  websiteUrl: 'https://kailua.coffee',
+  industry: 'Kaffeerösterei',
+  about: 'Wir rösten Kaffee in kleinen Mengen.',
+  audience: 'Cafés auf Maui.',
   progressPct: 0,
   currentStepKey: 'context',
   lastActivityAt: '2026-08-01T00:00:00.000Z',
@@ -385,6 +391,24 @@ describe('KI-Drossel', () => {
     await handler(event)
     expect(hits).toEqual([SLOT_BUCKET, ACCOUNT_BUCKET, INSTANCE_BUCKET])
     expect(generator).toHaveBeenCalledOnce()
+  })
+
+  /**
+   * P2.5: die Startkarte steht am PROFIL, nicht in den Slots — nur diese Route
+   * kann sie in den Generator-Vertrag legen. Fehlt sie hier, bekommt George
+   * wieder nichts, und kein Prompt-Test würde es merken.
+   */
+  it('LEGT DIE STARTKARTE DES PROFILS IN DEN KONTEXT', async () => {
+    const { event } = fakeEvent()
+    await handler(event)
+    expect(generator.mock.calls[0]![0]).toMatchObject({
+      startCard: {
+        websiteUrl: 'https://kailua.coffee',
+        industry: 'Kaffeerösterei',
+        about: 'Wir rösten Kaffee in kleinen Mengen.',
+        audience: 'Cafés auf Maui.',
+      },
+    })
   })
 
   it('DER SLOT-DECKEL LEHNT AB — und verbraucht die weiteren NICHT', async () => {

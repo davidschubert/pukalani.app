@@ -23,7 +23,9 @@ import {
 } from '../../../../utils/brandStore'
 
 /**
- * TITEL UND WEICHEN ÄNDERN — mehr kann diese Route nicht, und das ist ihr Sinn.
+ * TITEL, STARTKARTE UND WEICHEN ÄNDERN — mehr kann diese Route nicht, und das
+ * ist ihr Sinn. Alle drei sind ERHOBENE Angaben: jemand hat sie gesagt, und
+ * jemand darf sie korrigieren.
  *
  * Fortschritt, Konfidenz, Story, Preset und Zustände der Bausteine stehen NICHT
  * im Schema: sie sind Ergebnisse der Arbeit. Ein PATCH, der sie entgegennähme,
@@ -97,6 +99,13 @@ export default defineEventHandler(async (event): Promise<BrandProfilePatchRespon
 
   const data: Record<string, unknown> = {}
   if (body.title !== undefined && body.title !== (profile.title ?? '')) data.title = body.title
+  // Die STARTKARTE (§2.1) — dieselbe Bauart wie der Titel: erhoben, nicht
+  // erarbeitet, und deshalb korrigierbar. Geschrieben wird nur, was sich
+  // wirklich unterscheidet (s. „NO-OP SCHREIBT NICHT" unten).
+  if (body.websiteUrl !== undefined && body.websiteUrl !== (profile.websiteUrl ?? '')) data.websiteUrl = body.websiteUrl
+  if (body.industry !== undefined && body.industry !== (profile.industry ?? '')) data.industry = body.industry
+  if (body.about !== undefined && body.about !== (profile.about ?? '')) data.about = body.about
+  if (body.audience !== undefined && body.audience !== (profile.audience ?? '')) data.audience = body.audience
   if (facts.hasName !== before.hasName) data.hasName = facts.hasName
   if (facts.team !== before.team) data.team = facts.team
   if (facts.subBrands !== before.subBrands) data.subBrands = facts.subBrands
@@ -125,6 +134,10 @@ export default defineEventHandler(async (event): Promise<BrandProfilePatchRespon
       {
         ...profile,
         title: data.title as string ?? profile.title,
+        websiteUrl: data.websiteUrl as string ?? profile.websiteUrl,
+        industry: data.industry as string ?? profile.industry,
+        about: data.about as string ?? profile.about,
+        audience: data.audience as string ?? profile.audience,
         hasName: facts.hasName,
         team: facts.team,
         subBrands: facts.subBrands,

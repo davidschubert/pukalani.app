@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { BwNewBrandSubmit } from '../../../components/BwNewBrandModal.vue'
 import { BRAND_STEP_KEYS, type BrandStepKey } from '../../../../shared/slotRegistry'
-import type { BrandProfileDetailResponse, BrandProfileSummary } from '../../../../shared/types/brand'
+import type { BrandProfileSummary } from '../../../../shared/types/brand'
 import { useBrandWorkspaceStore } from '../../../stores/brandWorkspace'
 
 /**
@@ -36,8 +36,6 @@ await useAsyncData('brand-profiles', async () => {
 })
 
 const newBrandOpen = ref(false)
-const creating = ref(false)
-const createError = ref(false)
 
 /**
  * Grobe Restzeit. §3d verlangt „menschlich, nicht technisch" — 45 Minuten ist
@@ -76,45 +74,32 @@ function workspacePath(profile: BrandProfileSummary): string {
   return localePath(`/brand/${profile.id}/${profile.currentStepKey}`)
 }
 
-/** Der erste Baustein, den die Zustandsmaschine freigibt. */
-function firstOpenStep(detail: BrandProfileDetailResponse): string {
-  return detail.journey.find(step => step.state === 'open' || step.state === 'active')?.stepKey
-    ?? detail.journey.find(step => step.state !== 'skipped')?.stepKey
-    ?? 'context'
-}
-
 /**
- * Der echte Submit des Modals. Es erhebt drei Dinge (Weiche, Titel, Sprache) —
- * die restlichen Weichen bekommen ihre Voreinstellung und werden im Gespräch
- * bzw. unter `/dashboard/brands/new` gestellt. `hasName` folgt der Weiche: eine
- * neue Marke startet namenlos (der Arbeitstitel ist keiner), ein Relaunch hat
- * einen — das ist genau die W2-Regel aus Katalog §2.2.
+ * Der Submit des Modals — seit P2.5 eine ÜBERGABE, keine Anlage mehr.
+ *
+ * Das Modal erhebt drei Dinge (Weiche, Titel, Sprache). Seit die STARTKARTE
+ * Pflicht ist (Content-Spec §2.1: URL, Branche, „was ihr macht", „für wen"),
+ * reichen die drei nicht mehr aus, um ein Branding anzulegen: die Anlage-Route
+ * antwortete mit 400, und der Mensch läse „konnte nicht angelegt werden".
+ *
+ * ZWEI WEGE WÄREN SCHLECHTER GEWESEN. Die Startkarte im Modal zu wiederholen
+ * hiesse, dasselbe Formular an zwei Stellen zu pflegen (und das Modal ist
+ * Davids abgenommener Klickdummy, dessen Copy bewusst fest deutsch ist). Sie
+ * für diesen Weg optional zu machen hiesse, Brandings anzulegen, denen George
+ * beim ersten Zug nichts entnehmen kann — genau die Lücke, die P2.5 schliesst.
+ * Also: die drei Antworten reisen als Query mit, `/dashboard/brands/new`
+ * übernimmt sie und fragt nur noch, was fehlt.
  */
 async function createFromModal(payload: BwNewBrandSubmit): Promise<void> {
-  creating.value = true
-  createError.value = false
-  try {
-    const detail = await $fetch<BrandProfileDetailResponse>('/api/brand/profiles', {
-      method: 'POST',
-      body: {
-        title: payload.title,
-        contentLocale: payload.lang,
-        pathKind: payload.kind === 'rebrand' ? 'relaunch' : 'new',
-        hasName: payload.kind === 'rebrand',
-        team: 'solo',
-        subBrands: 'unknown',
-        namingOpted: false,
-      },
-    })
-    newBrandOpen.value = false
-    await navigateTo(localePath(`/brand/${detail.profile.id}/${firstOpenStep(detail)}`))
-  }
-  catch {
-    createError.value = true
-  }
-  finally {
-    creating.value = false
-  }
+  newBrandOpen.value = false
+  await navigateTo({
+    path: localePath('/dashboard/brands/new'),
+    query: {
+      path: payload.kind === 'rebrand' ? 'relaunch' : 'new',
+      ...(payload.title ? { title: payload.title } : {}),
+      lang: payload.lang,
+    },
+  })
 }
 
 useBrandTitle(() => t('brand.brands.title'))
@@ -190,11 +175,10 @@ useBrandTitle(() => t('brand.brands.title'))
         </NuxtLink>
       </div>
 
-      <p v-if="createError" class="mt-6 text-sm" style="color: var(--bw-stale)">{{ t('brand.new.failed') }}</p>
     </div>
 
     <BwNewBrandModal
-      v-model:open="newBrandOpen" mode="live" :loading="creating"
+      v-model:open="newBrandOpen" mode="live"
       @submit="createFromModal"
     />
   </div>

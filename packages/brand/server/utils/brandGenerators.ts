@@ -13,6 +13,7 @@ import {
   type BrandStepKey,
   dependencyClosure,
 } from '../../shared/slotRegistry'
+import type { BrandStartCard } from '../../shared/types/brand'
 import { type BrandSlotRecord, brandSlotStoredValue } from './brandStore'
 
 /**
@@ -56,6 +57,19 @@ export interface BrandGeneratorContext {
   locale: string
   /** Die Weiche W1, für pfadabhängige Prompts. */
   pathKind: 'new' | 'relaunch'
+  /**
+   * DIE STARTKARTE DES PROFILS (Content-Spec §2.1) — die primäre Quelle des
+   * Bausteins A, dessen Slots gerade DESHALB keine `dependencies` haben.
+   *
+   * Sie steht NEBEN `dependencies` und nicht darin: Abhängigkeiten sind
+   * Slot-Werte (sie bilden den inputHash und stammen aus `brand_steps.slots`),
+   * die Startkarte steht am PROFIL. Zusammengelegt müsste man ihr vier
+   * Slot-Ids erfinden, die es in der Registry nicht gibt.
+   *
+   * Leere Felder sind der Normalfall (Bestands-Profile von vor brand-009) —
+   * jeder Generator muss mit einer vollständig leeren Karte umgehen können.
+   */
+  startCard: BrandStartCard
   /** Freier Hinweis des Menschen („wärmer", „kürzer") — bereits auf 500 Zeichen geklemmt. */
   hint: string
   /** Werte der (transitiven) Quell-Slots in Katalog-Reihenfolge. */
