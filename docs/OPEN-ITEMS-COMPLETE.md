@@ -30,6 +30,42 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### branding-Prod-Ausfall nach Reload: zerschossene Server-.env, nicht der Code ✅ 2026-09-01
+
+**Vorfall:** Nach dem Deploy des Dev-Port-Fixes (78bd3bb5) meldete der
+Deploy-Wächter branding rot — `/api/health` antwortete 500, die Startseite
+weiter 200. Ursache war NICHT der neue Build: die Server-`.env` der
+branding-Site war um 09:30 (16 Minuten vor dem Reload) bei einem
+Neuschrieb zerschossen worden — ein Kommentar klebte an `NUXT_SMTP_HOST`,
+der SMTP-Block stand doppelt, und es gab ZWEI `NUXT_APPWRITE_KEY`-Zeilen,
+von denen die LETZTE (die beim Parsen gewinnt) ungültig war. Die Zeitbombe
+blieb unsichtbar, weil pm2 die .env erst beim (Re-)Load neu einliest: die
+App lief mit dem alten, gesunden Env weiter, bis der nächste Deploy sie
+zündete. Das ist die Gegenseite des Gelernt-Punkts (3) im P2-Eintrag
+darunter — derselbe parallele .env-Neuschrieb, zwei Sitzungen an einer Datei.
+
+**Diagnose ohne Wert-Exfiltration:** beide Key-Zeilen einzeln per
+HTTP-Statuscode gegen `/v1/health` und `/v1/users` gemessen (Zeile 21:
+200/200 = gültig · Zeile 22: 401/401 = tot); Struktur der .env nur als
+Schlüsselnamen + Wertlängen gelesen, nie als Werte. **Reparatur** nach dem
+dokumentierten Verfahren (Werte nie durch den Chat): Original nach
+`~/.appwrite-secrets/branding-site-env-backup-2026-09-01-0930.env`
+gesichert, lokal chirurgisch gepatcht (tote Key-Zeile raus, Kommentar
+getrennt, SMTP dedupliziert, `NUXT_AI_KEY` blieb), per scp hoch, Reload
+über deploy.yml-Dispatch. Danach alle sechs Hosts `ok:true` auf demselben
+Build, branding 3× in Folge (Wächter-Kriterium).
+
+**Gelernt:** (1) Zwei Sitzungen dürfen nie gleichzeitig dieselbe
+Server-`.env` neu schreiben — und wegen der pm2-Reload-Verzögerung beweist
+„die App läuft noch" nach einem .env-Schreiben NICHTS: geprüft ist eine
+.env erst, wenn danach ein Reload sie eingelesen hat (oder man sie
+strukturell gegenliest: doppelte Schlüssel sind das Alarmsignal, der
+LETZTE gewinnt). (2) Ein 500 auf `/api/health` bei gesunder Startseite
+zeigt auf den Admin-Key, nicht auf den Build — die Startseite braucht ihn
+anonym nicht. (3) Leere pm2-Logs trotz 500ern heißen nur: das
+Observability-Gate ist in dieser App aus — die Diagnose läuft dann über
+direkte Proben am nginx vorbei (`curl 127.0.0.1:<port>`), nicht über Logs.
+
 ### Brand-Wizard P2 — George wird echt: Drosseln, Prompts, Startkarte, URL-Analyse ✅ 2026-09-01
 
 **Was:** Vier Teilpakete am Stück (je ein Opus-Lauf, im Hauptloop geprüft):
