@@ -30,6 +30,39 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### branding.supply live — eigenes Appwrite-Projekt, eigene Domain, Beta im Invite-Modus ✅ 2026-09-01
+
+**Was:** Ausführung des abgenommenen Infra-Plans (Davids Kehrtwende 2026-08-31,
+[BRANDING-SUPPLY-INFRA.md](plans/BRANDING-SUPPLY-INFRA.md), Runbook
+[BRANDING-SUPPLY-SETUP.md](runbooks/BRANDING-SUPPLY-SETUP.md) — dort stehen
+alle Häkchen und Fallen im Detail). Konsole komplett per Chrome-Fernsteuerung
+geklickt (Projekt `branding`, DB `main`, 2 Platforms, Runtime-Key 10 Scopes /
+Migrations-Key 12 Scopes); DNS grau, ploi-Site 402929 auf **Prod-Port 3007**,
+eigenes Zertifikat per HTTP-01 (D2-DNS-Token unnötig), nginx www→Apex;
+Migrationen 2× (53 grün / 178 ↷), Parität 21/21; erster Deploy Build
+`d9dd981c`, Proben `/` 200 · Datentür 404 · invite/check neutral; Modus
+`invite`, Davids Code ausgestellt und live gegengeprobt (`{valid:true}`).
+Secrets durchgängig file-to-file — geprüft wurde nur über Scope-Signaturen
+(users/health/tablesdb-HTTP-Codes), nie über Werte.
+
+**Gelernt:** VIER Fallen, drei davon mit Fix im Repo. (1) `pnpm migrate --app X
+--env-file Y` verlor den App-Kontext (resolveEnvFile gab `app` nicht zurück) —
+der Manifest-Filter griff nicht, der Erstlauf legte 18 Fremd-Tabellen an;
+Fix in scripts/migrate.mjs, Fremd-Anlagen gelöscht. (2) rsync legt nur die
+LETZTE Pfadebene an — beim Erst-Deploy einer neuen App fehlte
+`releases/branding`, der Lauf starb NACH dem Flip der fünf Alt-Apps; Fix
+`--mkpath` in deploy.yml. (3) Danach hielt die Change-Detection (Diff-Basis =
+NUR platform-Build) alles für erledigt und übersprang dauerhaft — eine mitten
+in der App-Schleife gestorbene Welle strandet alle späteren Apps; Sofort-Kur
+`gh workflow run deploy.yml` (deployt immer), Härtung (ältester Build ALLER
+Probe-Hosts als Basis) als Task offen. (4) Dev-Port ≠ Server-Port: der Plan
+setzte 3006, auf dem SERVER hält help die 3006 seit Wochen — die Portkarte des
+Servers ist eine EIGENE Liste (3002 portfolio · 3003 admin · 3004 platform ·
+3005 www · 3006 help · 3007 branding), die erste nginx-Fassung lieferte prompt
+die Hilfe-Seite aus.
+
+---
+
 ### Paritäts-Wächter: AH-4c-Lücke geschlossen + Ausgerollt-Flag ✅ 2026-08-31
 
 **Befund:** Seit dem AH-4c-Projekt-Rename (control→admin, 2026-08-18/19)

@@ -1,6 +1,6 @@
 # branding.supply — Einrichtung (Runbook)
 
-Stand: 2026-09-01. Ausführung des abgenommenen Plans
+Stand: 2026-09-01 — Site LIVE, Beta im Invite-Modus. Ausführung des abgenommenen Plans
 [BRANDING-SUPPLY-INFRA.md](../plans/BRANDING-SUPPLY-INFRA.md).
 Arbeitsteilung: **Schritt 1 klickt David** (Konsole, ~5 min — es gibt
 bewusst keinen Script-Console-Zugang), den Rest fährt Claude. Häkchen
@@ -28,8 +28,10 @@ Konsole der Prod-Appwrite öffnen (dieselbe wie für portfolio/admin).
       „Select all", das ist die 84-Scope-Falle).
 - [x] **Key 2 „migrations" (Migrationen):** ebenso, Scopes exakt wie der
       `migrations`-Key im Projekt `admin` (12 Häkchen).
-- [ ] **Ablage (file-to-file, nie in den Chat) — EINZIGER offener Punkt
-      aus Schritt 1, David:**
+- [x] **Ablage (file-to-file, nie in den Chat):** erledigt 2026-09-01 —
+      mit Umweg: zuerst lag in BEIDEN Dateien der Migrations-Key und auf dem
+      Server ein SMTP-Hostfragment in der Key-Zeile; erkannt rein über
+      Scope-Signaturen (users/health/tablesdb-HTTP-Codes, nie Werte).
       `~/.appwrite-secrets/migrations/branding.env` anlegen mit den vier
       Zeilen des bekannten Formats (wie `migrations/admin.env`):
       Endpoint der Prod-Appwrite, `NUXT_PUBLIC_APPWRITE_PROJECT_ID=branding`,
@@ -41,11 +43,17 @@ Konsole der Prod-Appwrite öffnen (dieselbe wie für portfolio/admin).
 
 ## 2 · Migrationen (Claude, nach Schritt 1)
 
-- [ ] `pnpm migrate --app branding` gegen die Prod-Instanz (Env aus
-      `~/.appwrite-secrets/migrations/branding.env`): system-001…038 +
-      brand-001…008. Zweiter Lauf = Idempotenz-Beweis (alles ↷).
-- [ ] app_config-Row prüfen/anlegen (Seed-Verhalten der system-Migrationen).
-- [ ] `pnpm ops:schema-parity` — neue Instanz `branding` grün.
+- [x] `pnpm migrate --app branding` gegen die Prod-Instanz: 53 Migrationen
+      grün, Zweitlauf 178× ↷ (Idempotenz-Beweis). ACHTUNG, dabei live
+      erwischt und gefixt: `--app X --env-file Y` verlor den App-Kontext
+      (resolveEnvFile gab `app` nicht zurück) — der Manifest-Filter griff
+      nicht und der Erstlauf legte 18 Fremd-Tabellen (comments/posts/events)
+      + Bucket an, bevor er an files.read starb. Fremd-Anlagen gelöscht
+      (alle 0 Zeilen), Fix in scripts/migrate.mjs.
+- [x] app_config-Row `global` da; brand-Flags null ⇒ fail-closed.
+- [x] `pnpm ops:schema-parity` grün — branding 21/21; die neuen
+      system-Spalten (brandAdmissionMode/brandAiEnabled) auf
+      account/admin/portfolio nachgefahren.
 
 ## 3 · Monorepo (Claude — läuft bereits parallel)
 
@@ -74,8 +82,8 @@ Konsole der Prod-Appwrite öffnen (dieselbe wie für portfolio/admin).
 
 ## 5 · Deploy (Claude)
 
-- [ ] **Server-.env der Site füllen — wartet auf Davids Runtime-Key aus
-      Schritt 1.** Pflichtliste = der `branding`-Block in
+- [x] **Server-.env der Site gefüllt** (2026-09-01; ops:site-env grün,
+      11/11). Pflichtliste = der `branding`-Block in
       `scripts/ops/verify-site-env.mjs`: `NUXT_APPWRITE_KEY`,
       `NUXT_PUBLIC_APPWRITE_ENDPOINT`, `NUXT_PUBLIC_APPWRITE_PROJECT_ID`,
       `NUXT_PUBLIC_APPWRITE_DATABASE_ID`, `NUXT_SMTP_HOST/PORT/USER/PASS/FROM`,
@@ -84,16 +92,27 @@ Konsole der Prod-Appwrite öffnen (dieselbe wie für portfolio/admin).
       Der Migrations-Key gehört NICHT auf den Server.
 - [x] deploy.yml + ecosystem-branding.config.cjs (pm2 `brandingsupply`,
       Port 3007), Release-Slot `releases/branding`, Health-Probe.
-- [ ] Erster Deploy; Proben: `/` 200 · `/api/health` 200 ·
-      `/api/brand/profiles` 404 · invite/check neutral {valid:false}.
-- [ ] production-watch nachziehen (der `server`-Job fährt
+- [x] Erster Deploy (2026-09-01, Build d9dd981c): `/` 200 ·
+      `/api/health` 200 · `/api/brand/profiles` 404 · invite/check
+      {valid:false} · www→Apex 301. ZWEI Erst-Deploy-Fallen dabei:
+      (1) rsync legt nur die letzte Pfadebene an — `releases/branding`
+      fehlte, Lauf starb NACH dem Flip der fünf Alt-Apps (Fix:
+      `--mkpath` in deploy.yml); (2) danach hielt die Change-Detection
+      (Basis = platform-Build) alles für erledigt und übersprang — die
+      Kur war `gh workflow run deploy.yml` (deployt immer); Härtung als
+      Task offen (ältester Build ALLER Probe-Hosts als Basis).
+- [x] production-watch nachziehen (der `server`-Job fährt
       `ops:site-env` täglich — der neue Block wird dort automatisch
       mitgeprüft, sobald die .env steht).
 
 ## 6 · Beta öffnen (Claude + David)
 
-- [ ] `pnpm brand:invite` → Code für David (Mail-gebunden).
-- [ ] `pnpm brand:access --mode invite`.
+- [x] `pnpm brand:access --mode invite` (closed → invite).
+- [x] `pnpm brand:invite` → Code für David ausgestellt (mail-gebunden,
+      30 Tage; Live-Gegenprobe: invite/check {valid:true}). Aufruf im
+      Worktree: `node --env-file=$HOME/.appwrite-secrets/migrations/
+      branding.env packages/brand/scripts/<invite|access>.mjs` — das
+      pnpm-Skript erwartet apps/branding/.env, die es dort nicht gibt.
 - [ ] David registriert sich über den Einladungs-Link, läuft den Wizard
       an — der lebendige End-to-End-Beweis des Streaming-Protokolls
       (Dev-Stub bleibt aus; ohne P2-Prompts antwortet George statisch).
