@@ -8,6 +8,7 @@ defineProps<{
 }>()
 /* Runde 62 (David): "Neues Branding anlegen" öffnet denselben Layer wie
  * auf der Startseite. */
+const { t } = useI18n()
 const newBrandOpen = ref(false)
 const popoverOpen = ref(false)
 </script>
@@ -42,10 +43,10 @@ const popoverOpen = ref(false)
         </NuxtLink>
         <div class="my-1.5 border-t" style="border-color: var(--bw-line)" />
         <button class="flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-(--bw-accent-soft)" @click="popoverOpen = false; newBrandOpen = true">
-          <UIcon name="i-ph-plus" style="color: var(--bw-muted)" /> Neues Branding anlegen
+          <UIcon name="i-ph-plus" style="color: var(--bw-muted)" /> {{ t('brand.nav.newBranding') }}
         </button>
         <NuxtLink to="/" class="flex items-center gap-2 px-3 py-2 text-sm hover:bg-(--bw-accent-soft)">
-          <UIcon name="i-ph-squares-four" style="color: var(--bw-muted)" /> Brandings verwalten
+          <UIcon name="i-ph-squares-four" style="color: var(--bw-muted)" /> {{ t('brand.nav.manageBrandings') }}
         </NuxtLink>
       </div>
     </template>

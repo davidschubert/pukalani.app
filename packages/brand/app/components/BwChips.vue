@@ -8,6 +8,7 @@ defineProps<{
   showDontKnow?: boolean
 }>()
 defineEmits<{ pick: [id: string], dontKnow: [] }>()
+const { t } = useI18n()
 </script>
 
 <template>
@@ -17,10 +18,10 @@ defineEmits<{ pick: [id: string], dontKnow: [] }>()
       :class="selected?.includes(o.id) ? 'bw-chip--selected' : ''"
       @click="$emit('pick', o.id)"
     >
-      <span class="flex flex-wrap items-center gap-x-1.5 gap-y-1">{{ o.label }}<span v-if="o.recommended" class="bw-pop-chip">Empfehlung</span></span>
+      <span class="flex flex-wrap items-center gap-x-1.5 gap-y-1">{{ o.label }}<span v-if="o.recommended" class="bw-pop-chip">{{ t('brand.workspace.recommended') }}</span></span>
     </button>
     <button v-if="showDontKnow !== false" class="bw-chip bw-chip--ghost" @click="$emit('dontKnow')">
-      Weiß ich nicht
+      {{ t('brand.workspace.dontKnow') }}
     </button>
   </div>
 </template>

@@ -7,15 +7,23 @@ const props = defineProps<{
   staleNote?: string
 }>()
 defineEmits<{ confirm: [] }>()
-const stateMeta = computed(() => ({
-  empty: { label: 'Offen', icon: 'i-ph-circle-dashed', cls: '' },
-  active: { label: 'Im Gespräch', icon: 'i-ph-circle-half-fill', cls: '' },
-  generating: { label: 'George schreibt …', icon: 'i-ph-circle-notch', cls: '' },
-  draft: { label: 'Entwurf von George', icon: 'i-ph-pen-nib', cls: 'bw-state--draft' },
-  edited: { label: 'Von dir bearbeitet', icon: 'i-ph-user-focus', cls: 'bw-state--draft' },
-  confirmed: { label: 'Fertig', icon: 'i-ph-check', cls: 'bw-state--confirmed' },
-  stale: { label: 'Wird aktualisiert', icon: 'i-ph-clock-counter-clockwise', cls: 'bw-state--stale' },
-}[props.state]))
+const { t } = useI18n()
+/* `draft` liest BEWUSST `brand.workspace.draftBadge` statt eines eigenen
+ * Schlüssels: das ist derselbe Satz, den die Werkstatt-Seite über einem
+ * Entwurf zeigt — zwei Schlüssel wären zwei Wortlaute. */
+const STATE = {
+  empty: { key: 'brand.workspace.chapterState.empty', icon: 'i-ph-circle-dashed', cls: '' },
+  active: { key: 'brand.workspace.chapterState.active', icon: 'i-ph-circle-half-fill', cls: '' },
+  generating: { key: 'brand.workspace.chapterState.generating', icon: 'i-ph-circle-notch', cls: '' },
+  draft: { key: 'brand.workspace.draftBadge', icon: 'i-ph-pen-nib', cls: 'bw-state--draft' },
+  edited: { key: 'brand.workspace.chapterState.edited', icon: 'i-ph-user-focus', cls: 'bw-state--draft' },
+  confirmed: { key: 'brand.workspace.chapterState.confirmed', icon: 'i-ph-check', cls: 'bw-state--confirmed' },
+  stale: { key: 'brand.workspace.chapterState.stale', icon: 'i-ph-clock-counter-clockwise', cls: 'bw-state--stale' },
+} as const
+const stateMeta = computed(() => {
+  const meta = STATE[props.state]
+  return { label: t(meta.key), icon: meta.icon, cls: meta.cls }
+})
 
 /* Iteration 2: der Abschluss-Moment — beim Übergang zu 'confirmed'
  *  blitzt das Kapitel einmal in der Fertig-Farbe auf (reduced-motion
@@ -43,8 +51,8 @@ watch(() => props.state, (next, prev) => {
       <slot />
     </div>
     <div v-if="state === 'draft' || state === 'edited'" class="mt-3 flex justify-end gap-2">
-      <UButton size="sm" color="neutral" variant="outline" icon="i-ph-pencil-simple" label="Anpassen" />
-      <UButton size="sm" icon="i-ph-check" label="Bestätigen" @click="$emit('confirm')" />
+      <UButton size="sm" color="neutral" variant="outline" icon="i-ph-pencil-simple" :label="t('brand.workspace.adjust')" />
+      <UButton size="sm" icon="i-ph-check" :label="t('brand.workspace.confirmSlot')" @click="$emit('confirm')" />
     </div>
   </section>
 </template>

@@ -22,6 +22,15 @@ const props = withDefaults(defineProps<{
   gradient: () => ['#e6e5e2', '#b8b7b3', '#4a4a47'],
 })
 const bg = computed(() => `background: linear-gradient(165deg, ${props.gradient[0]} 0%, ${props.gradient[1]} 45%, ${props.gradient[2]} 100%)`)
+/* Die Karten-TEXTE reicht die Seite bereits übersetzt herein (`step`,
+ * `progress`, `remaining`, `edited`); übrig blieben das Aktionen-Menü und
+ * der Knopf — die laufen seit 2026-09-01 ebenfalls über i18n. */
+const { t } = useI18n()
+const actions = computed(() => [[
+  { label: t('brand.brands.card.rename'), icon: 'i-ph-pencil-simple' },
+  { label: t('brand.brands.card.share'), icon: 'i-ph-share-network' },
+  { label: t('brand.brands.card.delete'), icon: 'i-ph-trash' },
+]])
 </script>
 
 <template>
@@ -34,8 +43,8 @@ const bg = computed(() => `background: linear-gradient(165deg, ${props.gradient[
       <p class="bw-label flex items-center gap-1.5" style="color: var(--bw-muted)">{{ path }}<UIcon v-if="flag" :name="flag" class="size-4 flex-none" /></p>
       <div class="flex flex-none items-center gap-2">
         <BwScoreRing v-if="score !== undefined" :value="score" :size="34" />
-        <UDropdownMenu :items="[[{ label: 'Umbenennen', icon: 'i-ph-pencil-simple' }, { label: 'Teilen', icon: 'i-ph-share-network' }, { label: 'Löschen', icon: 'i-ph-trash' }]]">
-          <UButton icon="i-ph-dots-three" color="neutral" variant="ghost" size="sm" aria-label="Aktionen" />
+        <UDropdownMenu :items="actions">
+          <UButton icon="i-ph-dots-three" color="neutral" variant="ghost" size="sm" :aria-label="t('brand.brands.card.actions')" />
         </UDropdownMenu>
       </div>
     </div>
@@ -56,7 +65,7 @@ const bg = computed(() => `background: linear-gradient(165deg, ${props.gradient[
     </div>
     <div class="mt-3 flex items-center justify-between">
       <span class="bw-label" style="color: var(--bw-muted)">{{ edited }}</span>
-      <UButton size="sm" trailing-icon="i-ph-arrow-right" label="Weiterarbeiten" color="neutral" variant="outline" class="rounded-full" style="background: var(--bw-surface-hi)" />
+      <UButton size="sm" trailing-icon="i-ph-arrow-right" :label="t('brand.brands.card.continue')" color="neutral" variant="outline" class="rounded-full" style="background: var(--bw-surface-hi)" />
     </div>
   </div>
 </template>

@@ -19,11 +19,15 @@ defineProps<{
   /* Runde 96 (David): der Brand Score gehört an den Branding-Einstieg. */
   score?: number
 }>()
+const { t } = useI18n()
+/* Die Beschriftung kommt aus `brand.workspace.sync.*` — dieselben vier
+ * Schlüssel, die die Werkstatt-Seite via `syncLabel` hereinreicht. Der
+ * Fallback ist damit kein zweiter Wortlaut mehr, sondern derselbe. */
 const SYNC = {
-  saving: { label: 'Speichert …', icon: 'i-ph-circle-notch', spin: true, tone: 'var(--bw-muted)' },
-  offline: { label: 'Offline — Eingabe bleibt erhalten', icon: 'i-ph-cloud-slash', spin: false, tone: 'var(--bw-draft)' },
-  conflict: { label: 'Konflikt — Stand neu laden', icon: 'i-ph-warning', spin: false, tone: 'var(--bw-stale)' },
-  error: { label: 'Nicht gespeichert — neuer Versuch folgt', icon: 'i-ph-warning-circle', spin: false, tone: 'var(--bw-stale)' },
+  saving: { key: 'brand.workspace.sync.saving', icon: 'i-ph-circle-notch', spin: true, tone: 'var(--bw-muted)' },
+  offline: { key: 'brand.workspace.sync.offline', icon: 'i-ph-cloud-slash', spin: false, tone: 'var(--bw-draft)' },
+  conflict: { key: 'brand.workspace.sync.conflict', icon: 'i-ph-warning', spin: false, tone: 'var(--bw-stale)' },
+  error: { key: 'brand.workspace.sync.error', icon: 'i-ph-warning-circle', spin: false, tone: 'var(--bw-stale)' },
 } as const
 const mode = ref<'stage' | 'george'>('george')
 /* Runde 191 (David): die zwei Zonen-Nähte sind ZIEHBAR — Nuxt UIs
@@ -67,7 +71,7 @@ const zoneItems = [
         <Transition name="bw-sync">
           <span v-if="syncState" class="bw-label flex flex-none items-center gap-1.5" :style="`color: ${SYNC[syncState].tone}`">
             <UIcon :name="SYNC[syncState].icon" :class="SYNC[syncState].spin ? 'animate-spin' : ''" class="size-4" />
-            {{ syncLabel ?? SYNC[syncState].label }}
+            {{ syncLabel ?? t(SYNC[syncState].key) }}
           </span>
         </Transition>
         <!-- Kein Dauer-Badge (Runde 4): Autosave ist Vertrag, Stille heißt
@@ -75,13 +79,13 @@ const zoneItems = [
              Speichert… / Offline — Eingabe bleibt erhalten / Konflikt. -->
       </div>
       <div class="ml-auto flex items-center gap-4">
-        <span class="bw-label whitespace-nowrap" style="color: var(--bw-muted)">Inhaltssprache: {{ contentLocale.toUpperCase() }}</span>
+        <span class="bw-label whitespace-nowrap" style="color: var(--bw-muted)">{{ t('brand.workspace.contentLocale') }}: {{ contentLocale.toUpperCase() }}</span>
       </div>
     </header>
 
     <div class="bw-modeswitch flex border-b" style="border-color: var(--bw-line)">
       <button class="flex-1 py-2 text-sm" :class="mode === 'stage' ? 'font-semibold' : ''" :style="mode === 'stage' ? 'color: var(--bw-accent)' : 'color: var(--bw-muted)'" @click="mode = 'stage'">
-        Dokument
+        {{ t('brand.workspace.mode.document') }}
       </button>
       <button class="flex-1 py-2 text-sm" :class="mode === 'george' ? 'font-semibold' : ''" :style="mode === 'george' ? 'color: var(--bw-accent)' : 'color: var(--bw-muted)'" @click="mode = 'george'">
         George

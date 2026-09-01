@@ -11,6 +11,8 @@ export interface BwMessage {
 }
 const props = defineProps<{ messages: BwMessage[] }>()
 defineEmits<{ send: [text: string] }>()
+/* „George Wuffwuff" bleibt hart — Eigenname (wie die Theme-Namen). */
+const { t } = useI18n()
 const draft = ref('')
 
 /* Runde 55 (David): der Chat ankert UNTEN und wächst nach oben —
@@ -28,7 +30,7 @@ watch(() => props.messages.length, async () => {
       <BwGeorgeAvatar />
       <span class="leading-tight">
         <span class="bw-label block">George Wuffwuff</span>
-        <span class="bw-label block" style="color: var(--bw-muted)">Dein Markenberater</span>
+        <span class="bw-label block" style="color: var(--bw-muted)">{{ t('brand.workspace.george.subtitle') }}</span>
       </span>
     </div>
     <div ref="scroller" class="min-h-0 flex-1 overflow-y-auto px-7 py-5">
@@ -49,8 +51,8 @@ watch(() => props.messages.length, async () => {
       </div>
     </div>
     <form class="flex gap-2 border-t px-7 py-4" style="border-color: var(--bw-line)" @submit.prevent="draft.trim() && ($emit('send', draft), draft = '')">
-      <UInput v-model="draft" variant="none" class="flex-1 rounded-full" :ui="{ base: 'rounded-full px-4' }" placeholder="Antwort schreiben — oder George etwas fragen …" size="lg" style="background: var(--bw-surface-hi)" />
-      <UButton type="submit" icon="i-ph-paper-plane-right" aria-label="Senden" size="lg" color="neutral" variant="ghost" class="bw-send rounded-full" :disabled="!draft.trim()" />
+      <UInput v-model="draft" variant="none" class="flex-1 rounded-full" :ui="{ base: 'rounded-full px-4' }" :placeholder="t('brand.workspace.george.placeholder')" size="lg" style="background: var(--bw-surface-hi)" />
+      <UButton type="submit" icon="i-ph-paper-plane-right" :aria-label="t('brand.common.send')" size="lg" color="neutral" variant="ghost" class="bw-send rounded-full" :disabled="!draft.trim()" />
     </form>
   </div>
 </template>

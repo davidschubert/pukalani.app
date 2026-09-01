@@ -3,6 +3,43 @@
     "cta": {
       "book": "Book your intro call"
     },
+    "common": {
+      "close": "Close",
+      "send": "Send"
+    },
+    "nav": {
+      "products": "Products",
+      "discover": "Discover Brands",
+      "insights": "Brand Insights",
+      "about": "About",
+      "product": {
+        "wizard": "Your brand takes shape in conversation with George.",
+        "design": "Three moodboards from your visual DNA.",
+        "book": "Book, tokens, brand.json + strategy playbook.",
+        "experience": "Assets and plans along the 90-day plan.",
+        "monitoring": "A weekly look from the outside, with alerts.",
+        "score": "40 criteria, scored reproducibly.",
+        "benchmark": "Competitors in the same grid."
+      },
+      "language": "Language: English",
+      "appearance": "Appearance",
+      "theme": {
+        "light": "Light",
+        "dark": "Dark",
+        "system": "System"
+      },
+      "account": "Account",
+      "accountMenu": "Account menu",
+      "signOut": "Sign out",
+      "newBranding": "Create a new branding",
+      "manageBrandings": "Manage brandings",
+      "footerNav": "Footer"
+    },
+    "legal": {
+      "imprint": "Imprint",
+      "privacy": "Privacy",
+      "terms": "Terms"
+    },
     "q": {
       "a": {
         "pitch": "Elevator pitch",
@@ -163,9 +200,35 @@
       "contentLocale": "Content language",
       "confirmSlot": "Confirm",
       "completeStep": "Confirm chapter",
+      "adjust": "Adjust",
+      "decisions": "Decisions",
+      "recommended": "Recommended",
+      "ownAnswerPlaceholder": "Or something entirely your own …",
+      "whyRecommended": "Why does George recommend {label}?",
+      "sendOwnAnswer": "Send your own answer",
+      "editSlot": "Edit {label}",
+      "ourBranding": "Your branding",
+      "likeBrands": "like {brands}",
+      "mode": {
+        "document": "Document"
+      },
+      "chapterState": {
+        "empty": "Open",
+        "active": "In conversation",
+        "generating": "George is writing …",
+        "edited": "Edited by you",
+        "confirmed": "Done",
+        "stale": "Being updated"
+      },
+      "rail": {
+        "progressNav": "Progress",
+        "overview": "Overview",
+        "whatsIn": "What's in {label}?",
+        "whatMeans": "What does {label} mean?"
+      },
       "george": {
         "subtitle": "Your brand advisor",
-        "placeholder": "Write your answer — or ask a question",
+        "placeholder": "Write your answer — or ask George something …",
         "nothingOpen": "Nothing open in this chapter — confirm it when it fits."
       },
       "stage": {
@@ -259,7 +322,11 @@
         "edited": "last edited {when}",
         "untitled": "Untitled branding",
         "stepOf": "Step {index} of {total}",
-        "remaining": "about {minutes} min left"
+        "remaining": "about {minutes} min left",
+        "actions": "Actions",
+        "rename": "Rename",
+        "share": "Share",
+        "delete": "Delete"
       },
       "loadFailed": "The brandings could not be loaded."
     },
@@ -285,12 +352,12 @@
       "titleField": {
         "new": "Working title (optional)",
         "relaunch": "What is your brand called?",
-        "placeholderNew": "e.g. Kailua Coffee Co. — the real name can still emerge",
+        "placeholderNew": "e.g. Kailua Coffee Co. — the real name can emerge in the conversation",
         "placeholderRelaunch": "e.g. Kailua Coffee Co."
       },
       "locale": {
         "label": "Your brand speaks",
-        "note": "The language your brand content is written in — not the language of this interface."
+        "note": "The language your brand content is written in — not the language of this interface. And it's not a lonely decision: George can later translate everything into more languages on request, e.g. from English to German."
       },
       "team": {
         "label": "Who is behind it?",

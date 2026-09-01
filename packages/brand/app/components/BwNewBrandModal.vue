@@ -18,11 +18,13 @@
  *  Nichts an den Dummy-Zweigen wurde geändert: ohne die neuen Props verhält
  *  sich die Komponente Zeichen für Zeichen wie vorher.
  *
- *  OFFEN UND BEWUSST SO: die Copy hier ist fest DEUTSCH — sie stammt aus dem
- *  abgenommenen Klickdummy, und der ist Davids Demo-Anker. Die i18n-fähige
- *  Fassung derselben Anlage ist die SEITE `/dashboard/brands/new`; wer die
- *  Sprachumschaltung auch im Layer braucht, ersetzt hier die Zeichenketten
- *  durch `brand.new.*` (die Schlüssel liegen bereits in beiden Sprachen). */
+ *  EINGELÖST (2026-09-01): die Copy lief über `brand.new.*` — sie war fest
+ *  DEUTSCH und stand damit auch auf einer englischen Oberfläche deutsch da.
+ *  Der Wortlaut des abgenommenen Klickdummys ist dabei der KANONISCHE: die
+ *  zwei Stellen, an denen die Seite `/dashboard/brands/new` kürzer war
+ *  (Titel-Platzhalter, Sprach-Hinweis), tragen jetzt den Modal-Text — beide
+ *  Oberflächen lesen denselben Schlüssel. Eigennamen bleiben hart:
+ *  „Deutsch"/„English" und George. */
 export interface BwNewBrandSubmit {
   kind: 'new' | 'rebrand'
   title: string
@@ -35,6 +37,7 @@ withDefaults(defineProps<{
   loading?: boolean
 }>(), { mode: 'demo', to: '/brand/demo/werte', loading: false })
 defineEmits<{ submit: [payload: BwNewBrandSubmit] }>()
+const { t } = useI18n()
 const open = defineModel<boolean>('open', { default: false })
 const kind = ref<'new' | 'rebrand' | null>(null)
 const title = ref('')
@@ -46,10 +49,14 @@ watch(open, (o) => {
     title.value = ''
   }
 })
-const kinds = [
-  { id: 'new' as const, label: 'Neue Marke', note: 'Ihr startet bei null — Name und Marke entstehen im Gespräch.' },
-  { id: 'rebrand' as const, label: 'Marken-Relaunch', note: 'Ihr habt schon eine Marke — vom Feinschliff bis zum Neuschnitt.' },
-]
+/* Die Weichen-Ids des Dummys heißen 'new' | 'rebrand', die Schlüssel des
+ * Layers 'new' | 'relaunch' (so heißt der Pfad im Datenmodell) — `key`
+ * hält die Übersetzung an den Schlüsseln, ohne die abgenommene API zu
+ * verschieben. */
+const kinds = computed(() => [
+  { id: 'new' as const, label: t('brand.new.kind.new.label'), note: t('brand.new.kind.new.note') },
+  { id: 'rebrand' as const, label: t('brand.new.kind.relaunch.label'), note: t('brand.new.kind.relaunch.note') },
+])
 const langs = [
   { id: 'de' as const, label: 'Deutsch', flag: 'i-circle-flags-de' },
   { id: 'en' as const, label: 'English', flag: 'i-circle-flags-us' },
@@ -62,13 +69,13 @@ const langs = [
       <div class="bw-root relative max-h-[85vh] overflow-y-auto p-8" style="background: var(--bw-surface-hi)">
         <button
           class="absolute right-5 top-5 grid size-8 place-items-center rounded-full transition-colors hover:bg-[var(--bw-line)]"
-          aria-label="Schließen"
+          :aria-label="t('brand.common.close')"
           @click="open = false"
         >
           <UIcon name="i-ph-x" class="size-4.5" style="color: var(--bw-ink-soft)" />
         </button>
-        <p class="bw-label uppercase tracking-widest" style="color: var(--bw-muted)">Neues Branding</p>
-        <h2 class="mt-1 text-[28px] font-extralight leading-tight tracking-tight">Womit starten wir?</h2>
+        <p class="bw-label uppercase tracking-widest" style="color: var(--bw-muted)">{{ t('brand.new.eyebrow') }}</p>
+        <h2 class="mt-1 text-[28px] font-extralight leading-tight tracking-tight">{{ t('brand.new.title') }}</h2>
 
         <!-- Schritt 1: die Weiche, links oder rechts -->
         <div class="mt-5 grid grid-cols-2 gap-2">
@@ -86,14 +93,14 @@ const langs = [
         <!-- Schritt 2 (erscheint erst nach der Wahl): Rahmendaten -->
         <Transition name="bw-sync">
           <div v-if="kind">
-            <p class="bw-label mt-6" style="color: var(--bw-muted)">{{ kind === 'new' ? 'Arbeitstitel (optional)' : 'Wie heißt eure Marke?' }}</p>
+            <p class="bw-label mt-6" style="color: var(--bw-muted)">{{ kind === 'new' ? t('brand.new.titleField.new') : t('brand.new.titleField.relaunch') }}</p>
             <UInput
               v-model="title" variant="none" class="mt-2 w-full" :ui="{ base: 'rounded-full px-4' }"
-              :placeholder="kind === 'new' ? 'z. B. Kailua Coffee Co. — der echte Name kann im Gespräch entstehen' : 'z. B. Kailua Coffee Co.'"
+              :placeholder="kind === 'new' ? t('brand.new.titleField.placeholderNew') : t('brand.new.titleField.placeholderRelaunch')"
               style="background: var(--bw-surface)"
             />
 
-            <p class="bw-label mt-6" style="color: var(--bw-muted)">Eure Marke spricht</p>
+            <p class="bw-label mt-6" style="color: var(--bw-muted)">{{ t('brand.new.locale.label') }}</p>
             <div class="mt-2 flex gap-2">
               <button
                 v-for="l in langs" :key="l.id"
@@ -104,18 +111,18 @@ const langs = [
                 <UIcon :name="l.flag" class="size-4.5 flex-none" /> {{ l.label }}
               </button>
             </div>
-            <p class="bw-label mt-2" style="color: var(--bw-muted)">Die Sprache, in der eure Markeninhalte entstehen — nicht die der Oberfläche. Und keine einsame Entscheidung: George übersetzt später alles auf Wunsch in weitere Sprachen, z. B. von Englisch nach Deutsch.</p>
+            <p class="bw-label mt-2" style="color: var(--bw-muted)">{{ t('brand.new.locale.note') }}</p>
 
             <div class="mt-7 flex justify-end">
               <UButton
                 v-if="mode === 'demo'"
                 :to="to"
-                trailing-icon="i-ph-arrow-right" label="Los geht's — George übernimmt" size="lg" class="rounded-full"
+                trailing-icon="i-ph-arrow-right" :label="t('brand.new.submit')" size="lg" class="rounded-full"
               />
               <UButton
                 v-else
                 :loading="loading"
-                trailing-icon="i-ph-arrow-right" label="Los geht's — George übernimmt" size="lg" class="rounded-full"
+                trailing-icon="i-ph-arrow-right" :label="t('brand.new.submit')" size="lg" class="rounded-full"
                 @click="$emit('submit', { kind, title, lang })"
               />
             </div>

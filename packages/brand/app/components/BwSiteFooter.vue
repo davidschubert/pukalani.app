@@ -1,13 +1,21 @@
 <script setup lang="ts">
 /** Site-Footer der öffentlichen Seiten (Runde 136) — gleiche
  *  Reihenfolge wie die Hauptnavigation: öffentlich → persönlich. */
-const nav = [
-  { label: 'Products', to: '/products' },
-  { label: 'Discover Brands', to: '/brand/demo/discover' },
-  { label: 'Brand Insights', to: '/brand/demo/journal' },
-  { label: 'About', to: '/team' },
-]
-const legal = ['Impressum', 'Datenschutz', 'AGB']
+/* Dieselben vier Punkte wie die Hauptnavigation und deshalb dieselben
+ * Schlüssel — die Beschriftungen sind Davids Design und heißen in BEIDEN
+ * Sprachen englisch; die Rechtstexte dahinter nicht. */
+const { t } = useI18n()
+const nav = computed(() => [
+  { label: t('brand.nav.products'), to: '/products' },
+  { label: t('brand.nav.discover'), to: '/brand/demo/discover' },
+  { label: t('brand.nav.insights'), to: '/brand/demo/journal' },
+  { label: t('brand.nav.about'), to: '/team' },
+])
+const legal = computed(() => [
+  t('brand.legal.imprint'),
+  t('brand.legal.privacy'),
+  t('brand.legal.terms'),
+])
 </script>
 
 <template>
@@ -19,7 +27,7 @@ const legal = ['Impressum', 'Datenschutz', 'AGB']
         </span>
         <span class="whitespace-nowrap text-sm" style="font-weight: 400; letter-spacing: -0.01em">Branding Supply</span>
       </NuxtLink>
-      <nav class="flex flex-wrap gap-x-6 gap-y-2" aria-label="Footer">
+      <nav class="flex flex-wrap gap-x-6 gap-y-2" :aria-label="t('brand.nav.footerNav')">
         <NuxtLink v-for="it in nav" :key="it.to" :to="it.to" class="text-sm whitespace-nowrap transition-colors hover:!text-(--bw-ink)" style="color: var(--bw-muted)">{{ it.label }}</NuxtLink>
       </nav>
       <div class="flex flex-wrap gap-x-6 gap-y-2">

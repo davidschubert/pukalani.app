@@ -36,6 +36,12 @@ export interface BwRailLayer {
 }
 defineProps<{ layers: BwRailLayer[] }>()
 
+/* Die INHALTE der Leiste (Schicht- und Schritt-Beschriftungen, Info-Texte)
+ * reicht die Seite bereits übersetzt herein — hier stehen nur die
+ * Rahmen-Texte der Komponente selbst (aria-Beschriftungen, „Übersicht",
+ * „Entscheidungen", die Fortschrittszeile). */
+const { t } = useI18n()
+
 const infoStep = ref<{ step: BwRailStep, layerLabel: string } | null>(null)
 const infoOpen = computed({
   get: () => infoStep.value !== null,
@@ -48,7 +54,7 @@ const infoPct = computed(() => {
 </script>
 
 <template>
-  <nav aria-label="Fortschritt">
+  <nav :aria-label="t('brand.workspace.rail.progressNav')">
     <div class="bw-rail-full space-y-10">
       <div v-for="layer in layers" :key="layer.id">
         <!-- Runde 85 (David): auch gesperrte Schichten zeigen ihre Pills
@@ -62,9 +68,9 @@ const infoPct = computed(() => {
               v-if="layer.info"
               class="bw-info-btn grid size-7 flex-none place-items-center rounded-full"
               role="button" tabindex="0"
-              :aria-label="`Was kommt in ${layer.label}?`"
-              @click="infoStep = { step: { id: layer.id, label: layer.label, icon: '', state: 'open', info: layer.info }, layerLabel: layer.lockedNote ?? 'Übersicht' }"
-              @keydown.enter="infoStep = { step: { id: layer.id, label: layer.label, icon: '', state: 'open', info: layer.info }, layerLabel: layer.lockedNote ?? 'Übersicht' }"
+              :aria-label="t('brand.workspace.rail.whatsIn', { label: layer.label })"
+              @click="infoStep = { step: { id: layer.id, label: layer.label, icon: '', state: 'open', info: layer.info }, layerLabel: layer.lockedNote ?? t('brand.workspace.rail.overview') }"
+              @keydown.enter="infoStep = { step: { id: layer.id, label: layer.label, icon: '', state: 'open', info: layer.info }, layerLabel: layer.lockedNote ?? t('brand.workspace.rail.overview') }"
             >
               <UIcon name="i-ph-info" class="size-4.5" />
             </span>
@@ -100,7 +106,7 @@ const infoPct = computed(() => {
                 v-if="step.info"
                 class="bw-info-btn grid size-7 flex-none place-items-center rounded-full"
                 role="button" tabindex="0"
-                :aria-label="`Was bedeutet ${step.label}?`"
+                :aria-label="t('brand.workspace.rail.whatMeans', { label: step.label })"
                 @click.stop="infoStep = { step, layerLabel: layer.label }"
                 @keydown.enter.stop="infoStep = { step, layerLabel: layer.label }"
               >
@@ -117,7 +123,7 @@ const infoPct = computed(() => {
         <UIcon v-if="layer.locked" name="i-ph-lock-simple" style="color: var(--bw-muted)" />
         <button
           v-for="step in (layer.steps ?? []).filter(st => st.kind !== 'result')" v-else :key="step.id"
-          class="grid place-items-center" :aria-label="`Was bedeutet ${step.label}?`"
+          class="grid place-items-center" :aria-label="t('brand.workspace.rail.whatMeans', { label: step.label })"
           :disabled="!step.info" @click="step.info && (infoStep = { step, layerLabel: layer.label })"
         >
           <UIcon
@@ -133,7 +139,7 @@ const infoPct = computed(() => {
         <div v-if="infoStep" class="bw-root relative max-h-[85vh] overflow-y-auto p-8" style="background: var(--bw-surface-hi)">
           <button
             class="absolute right-5 top-5 grid size-8 place-items-center rounded-full transition-colors hover:bg-[var(--bw-line)]"
-            aria-label="Schließen"
+            :aria-label="t('brand.common.close')"
             @click="infoStep = null"
           >
             <UIcon name="i-ph-x" class="size-4.5" style="color: var(--bw-ink-soft)" />
@@ -142,7 +148,7 @@ const infoPct = computed(() => {
           <h2 class="mt-1 text-[28px] font-extralight leading-tight tracking-tight">{{ infoStep.step.label }}</h2>
           <p class="mt-3 text-sm leading-relaxed" style="color: var(--bw-ink-soft)">{{ infoStep.step.info!.description }}</p>
 
-          <p class="bw-label mt-6" style="color: var(--bw-muted)">Entscheidungen</p>
+          <p class="bw-label mt-6" style="color: var(--bw-muted)">{{ t('brand.workspace.decisions') }}</p>
           <ul class="mt-2 space-y-2.5">
             <li v-for="b in infoStep.step.info!.bausteine" :key="b.label" class="flex items-start gap-3">
               <span class="mt-0.5 grid size-6 flex-none place-items-center rounded-full" :style="b.done ? 'background: var(--bw-accent-soft)' : 'background: var(--bw-surface)'">
@@ -158,7 +164,7 @@ const infoPct = computed(() => {
           <div class="mt-7">
             <div class="flex items-baseline justify-between gap-3">
               <p class="bw-label uppercase tracking-wider" style="color: var(--bw-muted)">
-                {{ infoStep.step.slots ?? `${infoStep.step.info!.bausteine.filter(b => b.done).length} von ${infoStep.step.info!.bausteine.length} Entscheidungen` }}<template v-if="infoStep.step.info!.minutes"> · {{ infoStep.step.info!.minutes }}</template>
+                {{ infoStep.step.slots ?? t('brand.workspace.progress', { filled: infoStep.step.info!.bausteine.filter(b => b.done).length, total: infoStep.step.info!.bausteine.length }) }}<template v-if="infoStep.step.info!.minutes"> · {{ infoStep.step.info!.minutes }}</template>
               </p>
               <span class="bw-label uppercase tracking-wider">{{ infoPct }}&thinsp;%</span>
             </div>

@@ -10,6 +10,9 @@ defineProps<{
   progressTo?: string
   score?: number
 }>()
+/* `progressNote`/`progressSubnote` reicht die Seite übersetzt herein —
+ * eigen ist hier nur die Beschriftung des Branding-Einstiegs. */
+const { t } = useI18n()
 </script>
 
 <template>
@@ -22,7 +25,7 @@ defineProps<{
       <span class="grid size-7 flex-none place-items-center rounded-full" style="background: var(--bw-accent-soft)">
         <UIcon name="i-ph-sparkle" class="size-4" style="color: var(--bw-accent)" />
       </span>
-      <span class="min-w-0 flex-1 font-medium">Euer Branding</span>
+      <span class="min-w-0 flex-1 font-medium">{{ t('brand.workspace.ourBranding') }}</span>
       <BwScoreRing v-if="score !== undefined" :value="score" :size="28" class="flex-none" />
       <span class="grid size-7 flex-none place-items-center rounded-full">
         <UIcon name="i-ph-arrow-right" class="size-4" style="color: var(--bw-ink-soft)" />

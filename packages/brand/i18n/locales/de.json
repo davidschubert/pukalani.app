@@ -3,6 +3,43 @@
     "cta": {
       "book": "Erstgespräch buchen"
     },
+    "common": {
+      "close": "Schließen",
+      "send": "Senden"
+    },
+    "nav": {
+      "products": "Products",
+      "discover": "Discover Brands",
+      "insights": "Brand Insights",
+      "about": "About",
+      "product": {
+        "wizard": "Eure Marke entsteht im Gespräch mit George.",
+        "design": "Drei Moodboards aus eurer Visual DNA.",
+        "book": "Book, Tokens, brand.json + Strategy Playbook.",
+        "experience": "Assets und Pläne entlang des 90-Tage-Plans.",
+        "monitoring": "Wöchentlicher Blick von außen, mit Alerts.",
+        "score": "40 Prüfkriterien, reproduzierbar gerechnet.",
+        "benchmark": "Wettbewerber im selben Raster."
+      },
+      "language": "Sprache: Deutsch",
+      "appearance": "Erscheinungsbild",
+      "theme": {
+        "light": "Hell",
+        "dark": "Dunkel",
+        "system": "System"
+      },
+      "account": "Konto",
+      "accountMenu": "Konto-Menü",
+      "signOut": "Abmelden",
+      "newBranding": "Neues Branding anlegen",
+      "manageBrandings": "Brandings verwalten",
+      "footerNav": "Fußzeile"
+    },
+    "legal": {
+      "imprint": "Impressum",
+      "privacy": "Datenschutz",
+      "terms": "AGB"
+    },
     "q": {
       "a": {
         "pitch": "Elevator-Pitch",
@@ -163,9 +200,35 @@
       "contentLocale": "Inhaltssprache",
       "confirmSlot": "Bestätigen",
       "completeStep": "Kapitel bestätigen",
+      "adjust": "Anpassen",
+      "decisions": "Entscheidungen",
+      "recommended": "Empfehlung",
+      "ownAnswerPlaceholder": "Oder etwas ganz Eigenes …",
+      "whyRecommended": "Warum empfiehlt George {label}?",
+      "sendOwnAnswer": "Eigene Antwort senden",
+      "editSlot": "{label} bearbeiten",
+      "ourBranding": "Euer Branding",
+      "likeBrands": "wie {brands}",
+      "mode": {
+        "document": "Dokument"
+      },
+      "chapterState": {
+        "empty": "Offen",
+        "active": "Im Gespräch",
+        "generating": "George schreibt …",
+        "edited": "Von dir bearbeitet",
+        "confirmed": "Fertig",
+        "stale": "Wird aktualisiert"
+      },
+      "rail": {
+        "progressNav": "Fortschritt",
+        "overview": "Übersicht",
+        "whatsIn": "Was kommt in {label}?",
+        "whatMeans": "Was bedeutet {label}?"
+      },
       "george": {
         "subtitle": "Dein Markenberater",
-        "placeholder": "Antwort schreiben — oder George etwas fragen",
+        "placeholder": "Antwort schreiben — oder George etwas fragen …",
         "nothingOpen": "In diesem Kapitel ist nichts mehr offen — bestätige es, wenn es passt."
       },
       "stage": {
@@ -259,7 +322,11 @@
         "edited": "zuletzt bearbeitet {when}",
         "untitled": "Namenloses Branding",
         "stepOf": "Schritt {index} von {total}",
-        "remaining": "noch etwa {minutes} Min"
+        "remaining": "noch etwa {minutes} Min",
+        "actions": "Aktionen",
+        "rename": "Umbenennen",
+        "share": "Teilen",
+        "delete": "Löschen"
       },
       "loadFailed": "Die Brandings konnten nicht geladen werden."
     },
@@ -285,12 +352,12 @@
       "titleField": {
         "new": "Arbeitstitel (optional)",
         "relaunch": "Wie heißt eure Marke?",
-        "placeholderNew": "z. B. Kailua Coffee Co. — der echte Name kann noch entstehen",
+        "placeholderNew": "z. B. Kailua Coffee Co. — der echte Name kann im Gespräch entstehen",
         "placeholderRelaunch": "z. B. Kailua Coffee Co."
       },
       "locale": {
         "label": "Eure Marke spricht",
-        "note": "Die Sprache, in der eure Markeninhalte entstehen — nicht die dieser Oberfläche."
+        "note": "Die Sprache, in der eure Markeninhalte entstehen — nicht die der Oberfläche. Und keine einsame Entscheidung: George übersetzt später alles auf Wunsch in weitere Sprachen, z. B. von Englisch nach Deutsch."
       },
       "team": {
         "label": "Wer steckt dahinter?",
