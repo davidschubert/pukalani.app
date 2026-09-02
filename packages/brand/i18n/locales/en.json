@@ -134,6 +134,57 @@
         "rating": "How helpful was this result?"
       }
     },
+    "example": {
+      "a": {
+        "origin": {
+          "new": "As a customer I could never find it done right — so I built it myself.",
+          "relaunch": "Our name and the personal service have to stay — that is what people know us for."
+        },
+        "customerPraise": "You never feel like a number here — and the result simply fits.",
+        "complaints": "Sometimes we take longer than promised, and at first glance our prices look high.",
+        "oneThing": "That real craft goes into every order — nothing off the shelf.",
+        "challenge": "We barely win new customers, even though our regulars love us."
+      },
+      "b": {
+        "whyStarted": {
+          "new": "Because the problem from back then still exists — and we solve it better than others.",
+          "relaunch": "Without us, our customers would have nobody who listens before selling."
+        },
+        "worldLoses": "A place where quality still beats speed — and people who stand behind it.",
+        "conviction": "Good work spreads by word of mouth — so we never cut corners on substance.",
+        "tenYears": "In our region, buying local has become normal instead of ordering anonymously.",
+        "legacy": "They proved you can do business honestly and still grow.",
+        "positioningFirstChoice": "First choice for people who want real advice — against the discount offers."
+      },
+      "b2": {
+        "visibility": "Visibly part of the main brand — the name should carry trust everywhere.",
+        "roleOfMaster": "The main brand should lend trust — the products are too young to stand alone.",
+        "namingPattern": "The pattern brand plus product — own names only for experiments."
+      },
+      "c": {
+        "discovery1": "When a customer recommended us before their own project was even finished.",
+        "discovery2": "When we took a job nobody believed in — just for the money.",
+        "discovery3": "Someone badmouthing colleagues in front of customers.",
+        "livedExamples": "Honesty: we advised a customer against a job, even though it cost us the order.",
+        "conflictRule": "Speed versus care — when in doubt, care wins.",
+        "teamFilter": "Reliability — if you do not keep your word, you do not fit here."
+      },
+      "d": {
+        "party": "Listens first, asks smart questions — then tells the story everyone remembers.",
+        "never": "Preachy — we explain without talking down.",
+        "admired": "Patagonia — they speak their mind even when it costs them revenue.",
+        "emotion": "Relief: finally someone who genuinely takes care of it.",
+        "vocabulary": "Never: cheap, deal, mega offer — we do not talk like a flyer."
+      },
+      "e": {
+        "warmup1": "That everyone promises the same thing and nobody delivers it.",
+        "warmup2": "How much experience goes into a result that looks simple."
+      },
+      "f": {
+        "taste": "Vitra, Patagonia, Aesop — short, distinctive, memorable without explanation.",
+        "noGos": "No made-up English words, nothing with global or 24 in the name."
+      }
+    },
     "help": {
       "b": {
         "purpose": "Purpose is the WHY: the reason you exist beyond making money. Vision is the WHERE TO, mission is the HOW — three sentences, three jobs. Patagonia's purpose does not sell jackets; it wants to save the planet.",

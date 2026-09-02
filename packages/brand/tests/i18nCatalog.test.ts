@@ -5,6 +5,7 @@ import { describe, expect, it } from 'vitest'
 import {
   BRAND_SLOTS,
   type BrandSlot,
+  exampleKeyFor,
   questionKeyFor,
 } from '../shared/slotRegistry'
 
@@ -86,6 +87,21 @@ describe('brand i18n-Katalog', () => {
     const gaps: string[] = []
     for (const slot of activeSlots) {
       for (const key of keysFor(slot)) {
+        const missing = missingIn(key)
+        if (missing.length) gaps.push(`${slot.id}: ${key} fehlt in ${missing.join(', ')}`)
+      }
+    }
+    expect(gaps).toEqual([])
+  })
+
+  it('hat für JEDE Menschenfrage eine Beispiel-Antwort (Composer-Platzhalter)', () => {
+    // Der Berater-Chat legt zur aktuellen `question`-Frage eine Beispiel-
+    // Antwort GRAU ins Antwortfeld (`exampleKeyFor`, Muster Claude Desktop).
+    // Fehlt der Schlüssel, stünde dort wörtlich `brand.example.…` — derselbe
+    // stille Fehler wie bei den Fragen, deshalb dieselbe Prüfung.
+    const gaps: string[] = []
+    for (const slot of activeSlots.filter(slot => slot.type === 'question')) {
+      for (const key of [...new Set([exampleKeyFor(slot, 'new'), exampleKeyFor(slot, 'relaunch')])]) {
         const missing = missingIn(key)
         if (missing.length) gaps.push(`${slot.id}: ${key} fehlt in ${missing.join(', ')}`)
       }

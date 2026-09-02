@@ -8,6 +8,7 @@ import {
   type BrandStepKey,
   REGISTRY_VERSION,
   dependencyClosure,
+  exampleKeyFor,
   questionKeyFor,
   requiredSlotsForStep,
   slotById,
@@ -302,6 +303,17 @@ describe('stepProgress — die ehrliche Formel', () => {
     expect(slotIsFilled({})).toBe(false)
     expect(slotIsFilled({ hasValue: false, confirmed: false })).toBe(false)
     expect(slotIsFilled({ hasValue: true })).toBe(true)
+  })
+})
+
+describe('exampleKeyFor — dieselbe Pfad-Konvention unter brand.example', () => {
+  it('hängt den Pfad nur an, wo die Frage eine eigene Fassung hat', () => {
+    const origin = slotById('a.origin')!
+    expect(exampleKeyFor(origin, 'new')).toBe('brand.example.a.origin.new')
+    expect(exampleKeyFor(origin, 'relaunch')).toBe('brand.example.a.origin.relaunch')
+    const praise = slotById('a.customerPraise')!
+    expect(exampleKeyFor(praise, 'new')).toBe('brand.example.a.customerPraise')
+    expect(exampleKeyFor(praise, 'relaunch')).toBe('brand.example.a.customerPraise')
   })
 })
 

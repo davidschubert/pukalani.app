@@ -12,6 +12,7 @@ import {
   type BrandSlot,
   type BrandSlotStateFacts,
   type BrandStepKey,
+  exampleKeyFor,
   questionKeyFor,
   slotsForStep,
 } from '../../../../shared/slotRegistry'
@@ -216,6 +217,21 @@ const georgeMessages = computed<BwMessage[]>(() => {
       help: nextSlot.value.helpKey ? t(nextSlot.value.helpKey) : undefined,
     },
   ]
+})
+
+/**
+ * DIE BEISPIEL-ANTWORT IM FELD (Davids Wunsch 2026-09-01, Muster Claude
+ * Desktop): zur aktuellen Menschenfrage steht eine Mustervorlage GRAU im
+ * Composer — Platzhalter, nie ein Wert, absenden kann man sie nicht. Die
+ * Texte stehen statisch im Katalog (`brand.example.<id>`, pfadabhängig wie
+ * die Frage selbst); eine KI-Fassung je Antwort wäre eine Kostenentscheidung
+ * (B5b) und gehört in die Konversations-Runde P3. Auswahl-Fragen behalten den
+ * generischen Platzhalter — geantwortet wird dort über Chips.
+ */
+const composerExample = computed<string>(() => {
+  const slot = nextSlot.value
+  if (!slot || slot.type !== 'question') return ''
+  return t(exampleKeyFor(slot, pathKind.value))
 })
 
 function answerFromGeorge(text: string): void {
@@ -949,6 +965,7 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
         :advisor-role="advisorRole"
         :advisor-avatar="advisor.avatar"
         :handover="handover"
+        :placeholder="composerExample"
         @send="answerFromGeorge"
       >
         <template #chips>

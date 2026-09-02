@@ -134,6 +134,57 @@
         "rating": "Wie hilfreich war das Ergebnis?"
       }
     },
+    "example": {
+      "a": {
+        "origin": {
+          "new": "Ich habe als Kunde nie gefunden, was ich gesucht habe — also habe ich es selbst gebaut.",
+          "relaunch": "Unser Name und die persönliche Beratung müssen bleiben — dafür kennt man uns seit Jahren."
+        },
+        "customerPraise": "Bei euch fühlt man sich nicht wie eine Nummer — und das Ergebnis passt einfach.",
+        "complaints": "Manchmal dauert es länger als versprochen, und die Preise wirken erst mal hoch.",
+        "oneThing": "Dass hinter jedem Auftrag echtes Handwerk steckt — nichts von der Stange.",
+        "challenge": "Wir gewinnen kaum Neukunden, obwohl unsere Stammkunden uns lieben."
+      },
+      "b": {
+        "whyStarted": {
+          "new": "Weil das Problem von damals immer noch existiert — und wir es besser lösen als andere.",
+          "relaunch": "Ohne uns hätten unsere Kunden niemanden, der erst zuhört und dann verkauft."
+        },
+        "worldLoses": "Ein Ort, an dem Qualität noch vor Tempo kommt — und Menschen, die dahinterstehen.",
+        "conviction": "Gute Arbeit spricht sich herum — deshalb sparen wir nie an der Substanz.",
+        "tenYears": "Bei uns in der Region ist es normal geworden, lokal zu kaufen statt anonym zu bestellen.",
+        "legacy": "Die haben bewiesen, dass man ehrlich wirtschaften und trotzdem wachsen kann.",
+        "positioningFirstChoice": "Erste Wahl für alle, die echte Beratung wollen — gegen die Discounter-Angebote."
+      },
+      "b2": {
+        "visibility": "Sichtbar zur Hauptmarke — der Name soll überall Vertrauen mitbringen.",
+        "roleOfMaster": "Die Hauptmarke soll Vertrauen leihen — die Produkte sind zu jung, um allein zu stehen.",
+        "namingPattern": "Nach dem Muster Marke plus Produkt — eigene Namen nur für Experimente."
+      },
+      "c": {
+        "discovery1": "Als ein Kunde uns weiterempfohlen hat, bevor sein eigenes Projekt fertig war.",
+        "discovery2": "Als wir einen Auftrag angenommen haben, hinter dem keiner stand — nur wegen des Geldes.",
+        "discovery3": "Dass jemand Kollegen vor Kunden schlecht macht.",
+        "livedExamples": "Ehrlichkeit: Wir haben einem Kunden abgeraten, obwohl uns das den Auftrag gekostet hat.",
+        "conflictRule": "Tempo gegen Sorgfalt — im Zweifel gewinnt die Sorgfalt.",
+        "teamFilter": "Verlässlichkeit — wer Zusagen nicht hält, passt nicht zu uns."
+      },
+      "d": {
+        "party": "Hört erst zu, stellt kluge Fragen — und erzählt dann die Geschichte, die hängen bleibt.",
+        "never": "Belehrend — wir erklären, ohne von oben herab zu reden.",
+        "admired": "Patagonia — die sagen ihre Meinung auch dann, wenn es Umsatz kostet.",
+        "emotion": "Erleichterung: endlich jemand, der sich wirklich kümmert.",
+        "vocabulary": "Nie: billig, Deal, Hammer-Angebot — wir reden nicht wie ein Prospekt."
+      },
+      "e": {
+        "warmup1": "Dass alle das Gleiche versprechen und niemand es hält.",
+        "warmup2": "Wie viel Erfahrung in einem Ergebnis steckt, das einfach aussieht."
+      },
+      "f": {
+        "taste": "Vitra, Patagonia, Aesop — kurz, eigenständig, ohne Erklärung merkbar.",
+        "noGos": "Keine englischen Kunstwörter, nichts mit Global oder 24 im Namen."
+      }
+    },
     "help": {
       "b": {
         "purpose": "Der Purpose ist das WARUM: der Grund, aus dem es euch gibt — jenseits vom Geldverdienen. Die Vision ist das WOHIN, die Mission das WIE: drei Sätze, drei Aufgaben. Patagonias Purpose verkauft keine Jacken, er will den Planeten retten.",
