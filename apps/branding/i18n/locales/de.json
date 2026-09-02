@@ -9,5 +9,23 @@
       "invite": "Einladungscode einlösen"
     },
     "beta": "Branding Supply ist in geschlossener Beta. Für ein eigenes Branding braucht ihr einen Einladungscode."
+  },
+  "team": {
+    "eyebrow": "About Branding Supply",
+    "title": "Wir sind unser eigener Beweis.",
+    "intro1": "Es gibt uns, weil gutes Branding zu oft entweder zu teuer ist oder zur Vorlage verkommt. Wir glauben: Jede Marke ist ein Fingerabdruck — und der Weg dorthin lässt sich führen, begründen und messen.",
+    "intro2": "Deshalb haben wir unsere Produkte zuerst auf uns selbst angewendet: Der Name, der Fingerabdruck, diese Farbwelt, diese Seite — alles ist mit dem Brand Wizard, unserer Visual DNA und dem eigenen Playbook entstanden. Bewertet von Ada, versteht sich.",
+    "fingerprint": "Branding Supply · Der Weise · Rest Schöpfer — Stil: Minimal · Editorial — Visual DNA: Contemporary · Geometric · Monochrome + Acid Pop · Spacious · Digital-clean · Precise",
+    "teamEyebrow": "Das Team",
+    "teamTitle": "Für jede Aufgabe das richtige Teammitglied.",
+    "teamIntro": "Wir zerlegen euer Projekt in Aufgaben — und jede übernimmt die Spezialistin oder der Spezialist, der sie am besten kann. Sieben Rollen, klare Grenzen, ein gemeinsames Gedächtnis.",
+    "willLabel": "In dieser Rolle wird {pronoun}:",
+    "becauseLabel": "Diese Rolle passt, weil:",
+    "crewEyebrow": "Die Wizard-Crew",
+    "crewTitle": "Im Wizard arbeitet George nicht allein.",
+    "crewIntro": "Jede Phase eures Brandings hat ihren eigenen Interviewer — weil die Person, die euch warm ausfragt, nicht dieselbe sein sollte, die eure Positionierung herausfordert. George führt und übergibt.",
+    "crewAsksLabel": "Typische Frage:",
+    "ctaText": "Das Team steht bereit — die erste Frage stellt George.",
+    "ctaButton": "Starte dein Branding"
   }
 }
