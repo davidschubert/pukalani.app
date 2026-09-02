@@ -622,15 +622,21 @@ interface ConflictRow { slotId: string, label: string, mine: string, server: str
 const conflictRows = computed<ConflictRow[]>(() => {
   const current = store.conflict
   if (!current) return []
-  return Object.keys(store.localEdits).map((slotId) => {
-    const slot = slots.value.find(entry => entry.id === slotId)
-    return {
-      slotId,
-      label: slot ? slotLabel(slot) : slotId,
-      mine: store.slotValue(slotId),
-      server: brandSlotDisplayValue(current.slots[slotId]),
-    }
-  })
+  return Object.keys(store.localEdits)
+    .map((slotId) => {
+      const slot = slots.value.find(entry => entry.id === slotId)
+      return {
+        slotId,
+        label: slot ? slotLabel(slot) : slotId,
+        mine: store.slotValue(slotId),
+        server: brandSlotDisplayValue(current.slots[slotId]),
+      }
+    })
+    // Nur ECHTE Abweichungen (Davids „same same"-Fund): wortgleiche Zeilen
+    // böten eine Wahl ohne Unterschied. Den Ganz-gleich-Fall löst der Store
+    // schon still auf — hier fällt der Mischfall (eine echte Abweichung,
+    // daneben wortgleiche Slots) auf die relevanten Zeilen zusammen.
+    .filter(row => row.mine !== row.server)
 })
 
 const copied = ref<'ok' | 'failed' | null>(null)

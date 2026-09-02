@@ -312,6 +312,24 @@ const setup = () => {
   }
 
   function applyConflict(current: BrandWorkspaceConflict): void {
+    /**
+     * SCHEIN-KONFLIKT STILL AUFLÖSEN (Davids Fund, 2026-09-02): die Revision
+     * bewegt sich auch OHNE Textänderung — Bestätigen/Korrigieren in einem
+     * anderen Tab genügt. Der Dialog bot dann die Wahl zwischen zwei
+     * identischen Texten an („same same"). Trägt der Server jede offene
+     * Eingabe bereits wortgleich, gibt es nichts zu entscheiden: Serverstand
+     * übernehmen (inklusive Bestätigungs-Flags), weiter wie nach einem
+     * normalen Speichern. Der Dialog bleibt echten Text-Abweichungen
+     * vorbehalten.
+     */
+    const stillOpen = pruneSettledEdits(current.slots, localEdits.value)
+    if (Object.keys(stillOpen).length === 0) {
+      serverSlots.value = current.slots
+      revision.value = current.revision
+      localEdits.value = {}
+      mark('ok')
+      return
+    }
     conflict.value = current
     mark('conflict')
   }
