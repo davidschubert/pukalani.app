@@ -200,7 +200,17 @@ export function georgeSystemPrompt(options: GeorgeSystemPromptOptions): string {
   ].join('\n')
 }
 
-export interface ContextSlotInstructionOptions {
+/**
+ * Die Angaben, aus denen JEDE Slot-Instruktion gebaut wird — die des
+ * Gastgebers wie die der Kolleginnen und Kollegen (P3.1).
+ *
+ * Der Name ohne „Context" ist die ganze Änderung: die Formalien (Quellen-
+ * Ehrlichkeit, Leitplanken, Form, Zug-Vertrag) galten nie nur für Baustein A,
+ * sie standen bloss nur dort. `ContextSlotInstructionOptions` bleibt als
+ * Zweitname bestehen — ein Rename, der Aufrufstellen bricht, wäre für eine
+ * Umbenennung ein zu hoher Preis.
+ */
+export interface BrandSlotInstructionOptions {
   /** Quell-Slots dieses Feldes — hier nur ihre IDs, die Werte liefert (c). */
   dependencies: readonly BrandSlotDependency[]
   /** Freier Wunsch des Menschen; leer = keiner. */
@@ -222,8 +232,11 @@ export interface ContextSlotInstructionOptions {
   hasSiteAnalysis: boolean
 }
 
+/** Zweitname aus der Zeit, als es nur Baustein A gab (s. o.). */
+export type ContextSlotInstructionOptions = BrandSlotInstructionOptions
+
 /** Die Aufgabe je Slot (Content-Spec §4) — ohne Daten, ohne Formalien. */
-const CONTEXT_SLOT_TASKS: Record<string, (options: ContextSlotInstructionOptions) => string[]> = {
+const CONTEXT_SLOT_TASKS: Record<string, (options: BrandSlotInstructionOptions) => string[]> = {
   'a.pitch': () => [
     'TASK: draft the elevator pitch for this brand.',
     'Work from the start card: "what they do" and "who it is for" are the person\'s own words — keep their '
@@ -268,18 +281,53 @@ const CONTEXT_SLOT_TASKS: Record<string, (options: ContextSlotInstructionOptions
 }
 
 /**
- * DIE INSTRUKTION FÜR EINEN KONTEXT-SLOT.
+ * DER SATZ ÜBER DIE PRIMÄRE QUELLE — je Baustein ein anderer.
  *
- * Wirft für einen Slot ohne Aufgabe. Das ist Absicht: ein stiller
- * Allzweck-Text wäre ein Entwurf ohne Auftrag, und der landet ununterscheidbar
- * im Brand-Dokument. Die Route macht aus dem Wurf `provider_error`, der Stand
- * bleibt bearbeitbar (§9b.5).
+ * In Baustein A ist es die STARTKARTE (seine Slots haben laut Registry keine
+ * `dependencies`, sie schöpfen aus ihr). Ab Baustein B sind es die ANTWORTEN
+ * des Menschen aus den Quell-Slots, und die Karte ist nur noch Hintergrund —
+ * ein Purpose, der aus vier Startkarten-Zeilen statt aus fünf beantworteten
+ * Fragen gebaut wird, ist genau die Behauptung, die Regel 4 verbietet.
  */
-export function contextSlotInstruction(slotId: string, options: ContextSlotInstructionOptions): string {
-  const task = CONTEXT_SLOT_TASKS[slotId]
-  if (!task) throw new Error(`Kein George-Auftrag für Slot ${slotId}`)
+export const GEORGE_PRIMARY_SOURCE_START_CARD
+  = 'Your primary source is the start card at the top of the inputs — the four things this person told us '
+    + 'at the very beginning (website, industry, what they do, who it is for). If it is not there or empty, '
+    + 'say plainly what you cannot know yet instead of filling it in.'
 
-  const lines = [...task(options)]
+export const GEORGE_PRIMARY_SOURCE_ANSWERS
+  = 'Your primary source are the answers in the inputs below — the fields this person has already filled '
+    + 'in. The start card at the top is background, not an answer. If the inputs do not carry what you '
+    + 'need, say plainly what you cannot know yet instead of filling it in.'
+
+export interface BrandSlotInstructionFrame {
+  /** Woraus geschöpft wird (s. o.) — eine der beiden Konstanten oder eigener Satz. */
+  primarySource: string
+  /**
+   * Zusätzliche Regeln für den FELDWERT, direkt unter „The field value:" —
+   * heute die legale Menge einer Auswahl (`brandChoicePromptRule`). Sie stehen
+   * VOR dem Zeichen-Deckel, weil sie sagen, WAS im Feld steht, und der Deckel
+   * nur, wie lang es sein darf.
+   */
+  valueRules?: readonly string[]
+}
+
+/**
+ * DIE FORMALIEN JEDER SLOT-INSTRUKTION — einmal, für alle Berater (P3.1).
+ *
+ * Sie standen bis P3.1 im Rumpf von `contextSlotInstruction` und galten damit
+ * nur für Baustein A. Das war nie eine Aussage über Baustein A, sondern der
+ * Zustand „es gibt erst einen Baustein": Quellen-Ehrlichkeit (Regel 4),
+ * Eingabe-Leitplanke (Regel 7), Pfad-Haltung, die Website-Grenze, der
+ * Hinweis-Rahmen, die Form des Feldwerts und der Zug-Vertrag aus
+ * `georgeTurn.ts` gelten für JEDEN Entwurf. Drei Kopien davon wären drei
+ * Chancen, dass eine Sicherung in einem Baustein fehlt — und genau das sähe
+ * man dem Ergebnis nicht an.
+ */
+export function brandSlotInstructionTail(
+  options: BrandSlotInstructionOptions,
+  frame: BrandSlotInstructionFrame,
+): string[] {
+  const lines: string[] = []
 
   lines.push(
     '',
@@ -287,9 +335,7 @@ export function contextSlotInstruction(slotId: string, options: ContextSlotInstr
     // Entwurfs-Ehrlichkeit (Regel 4) — als Eigenschaft des Textes, nicht als
     // angehängte Fussnote: eine Zeile "Based on: ..." wäre im Brand-Dokument
     // Beifang, den der Mensch bei jedem Entwurf von Hand wieder wegräumt.
-    'Your primary source is the start card at the top of the inputs — the four things this person told us '
-    + 'at the very beginning (website, industry, what they do, who it is for). If it is not there or empty, '
-    + 'say plainly what you cannot know yet instead of filling it in.',
+    frame.primarySource,
     'Use only the inputs below. Never assert a fact about this brand, its people, its customers or its '
     + 'numbers that is not in the inputs. Where something is missing, mark it plainly as an assumption '
     + 'inside the text instead of stating it as fact.',
@@ -333,6 +379,7 @@ export function contextSlotInstruction(slotId: string, options: ContextSlotInstr
   const formatRule = brandSlotFormatRule(options.kind)
   const formatExample = brandSlotFormatExample(options.kind)
   lines.push('', 'The field value:')
+  if (frame.valueRules?.length) lines.push(...frame.valueRules)
   if (formatRule && formatExample) {
     lines.push(formatRule, 'Example of the shape:', formatExample)
   }
@@ -365,7 +412,25 @@ export function contextSlotInstruction(slotId: string, options: ContextSlotInstr
     + 'person can answer in one sentence. No BASIS, no DRAFT, no ASK in that case.',
   )
 
-  return lines.join('\n')
+  return lines
+}
+
+/**
+ * DIE INSTRUKTION FÜR EINEN KONTEXT-SLOT (Baustein A · George).
+ *
+ * Wirft für einen Slot ohne Aufgabe. Das ist Absicht: ein stiller
+ * Allzweck-Text wäre ein Entwurf ohne Auftrag, und der landet ununterscheidbar
+ * im Brand-Dokument. Die Route macht aus dem Wurf `provider_error`, der Stand
+ * bleibt bearbeitbar (§9b.5).
+ */
+export function contextSlotInstruction(slotId: string, options: BrandSlotInstructionOptions): string {
+  const task = CONTEXT_SLOT_TASKS[slotId]
+  if (!task) throw new Error(`Kein George-Auftrag für Slot ${slotId}`)
+
+  return [
+    ...task(options),
+    ...brandSlotInstructionTail(options, { primarySource: GEORGE_PRIMARY_SOURCE_START_CARD }),
+  ].join('\n')
 }
 
 /**
