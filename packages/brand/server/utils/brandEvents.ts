@@ -30,6 +30,10 @@ export type BrandEventType =
   | 'generation.requested'
   | 'generation.completed'
   | 'generation.failed'
+  // Die Konversations-Runde (P3.2). `payload` trägt Baustein, Slot-Id, Modell
+  // und Dauer — NIE den getippten Text und NIE die Antwort (Regel 1 im Kopf).
+  | 'conversation.turn'
+  | 'conversation.failed'
 
 export interface BrandEventInput {
   type: BrandEventType

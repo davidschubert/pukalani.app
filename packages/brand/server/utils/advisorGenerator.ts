@@ -1,3 +1,4 @@
+import type { H3Event } from 'h3'
 import { advisorForStep } from '../../shared/brandAdvisors'
 import type { BrandSlot } from '../../shared/slotRegistry'
 import type { BrandGeneratorContext, BrandGeneratorResult, BrandSlotGenerator } from './brandGenerators'
@@ -98,6 +99,74 @@ function personaName(): string | undefined {
   return config.pukalani?.brand?.persona?.name
 }
 
+export interface AdvisorStreamRequest {
+  event: H3Event
+  /** Der System-Prompt (Regeln + Berater-Schicht) — gebaut vom Aufrufer. */
+  system: string
+  /** Auftrag + Eingaben. */
+  prompt: string
+  maxTokens: number
+  signal: AbortSignal
+  onDelta: (text: string) => Promise<void> | void
+}
+
+export interface AdvisorStreamResult {
+  /** Der ROHE Text des Modells, Marker eingeschlossen — die Lese-Seite gehört dem Aufrufer. */
+  text: string
+  model: string
+  provider: string
+  aborted: boolean
+}
+
+/**
+ * DER EINE WEG ZUM ANBIETER, für JEDEN Zug eines Beraters — Entwurf wie
+ * Gespräch (P3.2).
+ *
+ * Hier und nur hier stehen die Datenschutz-Bedingungen (`zdr`,
+ * `dataCollection: 'deny'`, `allowFallbacks: false`), die Modell-Kette und der
+ * Marker-Putzer für den Strom. Der Konversations-Zug ist der zweite Aufrufer
+ * geworden, und genau deshalb steht das hier: eine zweite Kopie dieser vier
+ * Zeilen wäre eine zweite Chance, dass Markeninhalte über einen Anbieter gehen,
+ * der sie behalten darf — und dem Ergebnis sähe man das nie an.
+ *
+ * DER PUTZER LÄUFT AUCH IM GESPRÄCH, obwohl dort kein Marker verlangt wird:
+ * dasselbe Modell schreibt in anderen Zügen mit `BASIS:`/`ASK:`, und ein
+ * verirrtes Etikett in der Sprechblase wäre ein Protokoll-Leck. Für Text ohne
+ * Marker ist das Putzen wirkungslos.
+ *
+ * FEHLER FLIEGEN UNGEFANGEN DURCH (503 kein Schlüssel, 502 Anbieter kaputt) —
+ * die Route macht daraus `provider_error` und lässt den Stand unangetastet.
+ */
+export async function streamAdvisorTurn(request: AdvisorStreamRequest): Promise<AdvisorStreamResult> {
+  // app_config.aiModel > pukalani.ai.model (s. Kopf).
+  const requested = (await getEffectiveAiConfig(request.event)).model
+  const scrub = createGeorgeTurnScrubber()
+
+  const result = await aiCompleteStream(request.event, request.prompt, {
+    system: request.system,
+    model: requested,
+    label: 'brand',
+    maxTokens: request.maxTokens,
+    timeoutMs: BRAND_STREAM_TIMEOUT_MS,
+    providerRouting: { ...BRAND_PROVIDER_ROUTING },
+    signal: request.signal,
+    onDelta: async (text: string) => {
+      const visible = scrub(text)
+      if (visible) await request.onDelta(visible)
+    },
+  })
+
+  return {
+    text: result.text,
+    // Was der Anbieter über sich sagt, sonst das, was wir VERLANGT haben —
+    // beides ist wahr, ein erfundener Name wäre es nicht. Sagt er nichts über
+    // sich selbst, bleibt `provider` leer statt geraten.
+    model: result.model || requested,
+    provider: result.provider,
+    aborted: result.aborted,
+  }
+}
+
 /**
  * DAS ERGEBNIS EINER NACHPRÜFUNG: entweder ein (ggf. normalisierter) Feldwert
  * oder eine Rückfrage STATT eines Entwurfs.
@@ -174,27 +243,17 @@ export function createAdvisorSlotGenerator(options: AdvisorSlotGeneratorOptions)
       persona: personaName(),
     })
 
-    // app_config.aiModel > pukalani.ai.model (s. Kopf).
-    const requested = (await getEffectiveAiConfig(context.event)).model
-
     // DIE MARKER GEHEN NICHT IN DIE SPRECHBLASE (george-a-4): der Mensch sieht
-    // George schreiben, nicht ein Protokoll. Geputzt wird IM FLUSS statt am Ende
-    // — ein Text, der nach dem letzten Delta noch einmal umspringt, macht aus dem
-    // Streaming einen Ruckler (Begründung im Kopf von `georgeTurn.ts`).
-    const scrub = createGeorgeTurnScrubber()
-
-    const result = await aiCompleteStream(context.event, prompt, {
+    // George schreiben, nicht ein Protokoll. Das Putzen im Fluss, die
+    // Datenschutz-Bedingungen und die Modell-Kette liegen seit P3.2 in
+    // `streamAdvisorTurn` — für Entwurf und Gespräch dieselbe eine Stelle.
+    const result = await streamAdvisorTurn({
+      event: context.event,
       system,
-      model: requested,
-      label: 'brand',
+      prompt,
       maxTokens: georgeMaxTokens(context.slot.maxLength),
-      timeoutMs: BRAND_STREAM_TIMEOUT_MS,
-      providerRouting: { ...BRAND_PROVIDER_ROUTING },
       signal: context.signal,
-      onDelta: async (text: string) => {
-        const visible = scrub(text)
-        if (visible) await context.onDelta(visible)
-      },
+      onDelta: context.onDelta,
     })
 
     // Ein Zug, zwei Ergebnisse: der Feldwert und der Chat-Zug. Ohne Marker fällt
@@ -202,10 +261,7 @@ export function createAdvisorSlotGenerator(options: AdvisorSlotGeneratorOptions)
     const turn = parseGeorgeTurn(result.text)
 
     const base = {
-      // Was der Anbieter über sich sagt, sonst das, was wir VERLANGT haben —
-      // beides ist wahr, ein erfundener Name wäre es nicht. Sagt er nichts über
-      // sich selbst, bleibt `provider` leer statt geraten.
-      model: result.model || requested,
+      model: result.model,
       provider: result.provider,
       promptVersion: options.promptVersion,
       aborted: result.aborted,

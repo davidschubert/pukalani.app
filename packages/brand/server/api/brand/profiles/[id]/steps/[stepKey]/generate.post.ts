@@ -297,6 +297,7 @@ export default defineEventHandler(async (event) => {
     const rejection = await bookBrandAiQuota(event, {
       userId,
       profileId: profile.$id,
+      kind: 'slot',
       slotId: slot.id,
     })
     if (rejection) {

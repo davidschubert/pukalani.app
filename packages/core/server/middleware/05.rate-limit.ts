@@ -425,6 +425,18 @@ const WRITE_LIMITED: { re: RegExp, bucket: string, max?: number }[] = [
    */
   { re: /^POST \/api\/brand\/profiles\/[^/]+\/steps\/[^/]+\/generate$/, bucket: 'brand:generate', max: 6 },
   /**
+   * DER GESPRÄCHS-ZUG (P3.2) — dieselbe Kostenklasse wie eine Zeile darüber,
+   * nur häufiger ausgelöst: er hängt nicht an einem Knopf, sondern an jeder
+   * getippten Antwort. Die feineren Deckel sitzen wieder IN der Route (Burst,
+   * 40/Tag je Branding, dazu Konto- und Instanz-Deckel); diese Zeile zählt je
+   * IP und DAVOR.
+   *
+   * 12/min ist doppelt so grosszügig wie beim Entwurf und trotzdem enger als
+   * `TOKEN_MAX`: ein Mensch tippt eine Antwort, liest die Reaktion und tippt
+   * die nächste — das sind Sekunden bis Minuten je Zug, keine zwölf.
+   */
+  { re: /^POST \/api\/brand\/profiles\/[^/]+\/steps\/[^/]+\/converse$/, bucket: 'brand:converse', max: 12 },
+  /**
    * DIE URL-ANALYSE (P2.3) — die EINZIGE Route des Repos, die auf Zuruf eine
    * ausgehende Verbindung zu einer FREMDEN Adresse aufbaut.
    *

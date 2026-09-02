@@ -314,6 +314,22 @@ export interface BrandMessagesResponse {
   hasMore: boolean
 }
 
+/**
+ * DIE EINE NICHT-STRÖMENDE ANTWORT DER KONVERSATIONS-ROUTE (P3.2).
+ *
+ * `conversed: false` heisst „es kommt kein Zug" — mehr sagt sie bewusst nicht.
+ * Dahinter stehen drei Fälle, die für die Oberfläche denselben Handgriff haben
+ * (nämlich keinen): der KI-Kill-Switch ist aus, der Zug wurde schon einmal
+ * geschickt, oder im Baustein läuft gerade ein anderer Zug. In allen dreien
+ * verhält sich die Werkstatt exakt wie vor P3.2.
+ *
+ * Der Client erkennt sie am `Content-Type`: kein `text/event-stream`, also kein
+ * Strom. Ein Fehler wäre die falsche Form — hier ist nichts schiefgegangen.
+ */
+export interface BrandConverseSkippedResponse {
+  conversed: false
+}
+
 /** NEUTRAL: dieselbe Form für falsch, abgelaufen, widerrufen, verbraucht. */
 export interface BrandInviteCheckResponse {
   valid: boolean

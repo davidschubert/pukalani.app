@@ -7,6 +7,7 @@ import {
   brandAiAccountDayKey,
   brandAiInstanceDayKey,
   brandAiSlotDayKey,
+  brandAiTalkDayKey,
   decideBrandAiQuota,
   resolveBrandAiInstanceCap,
 } from '../../shared/brandAiLimits'
@@ -16,6 +17,9 @@ import { countActiveBrandGenerations } from './brandGenerators'
  * DIE BUCHUNG — vier Zähler, in der Reihenfolge eng vor weit, mit Abbruch beim
  * ersten Nein. Die Zahlen, die Schlüssel und die Entscheidung stehen pur in
  * `shared/brandAiLimits.ts`; hier steht nur, WANN gezählt wird.
+ *
+ * Der ENGE Zähler ist seit P3.2 einer von zweien (`kind`): der Slot-Eimer für
+ * einen Entwurf, der Gesprächs-Eimer für einen Berater-Zug. Nie beide.
  *
  * ── GEBUCHT WIRD BEIM START, NICHT BEIM ERFOLG ────────────────────────────
  * Ein Lauf, der beim Anbieter scheitert oder den der Mensch abbricht, ist
@@ -43,7 +47,14 @@ import { countActiveBrandGenerations } from './brandGenerators'
 export interface BrandAiQuotaRequest {
   userId: string
   profileId: string
-  slotId: string
+  /**
+   * WELCHER ENGE EIMER (P3.2): der Entwurf eines Feldes bucht auf seinen
+   * Slot-Typ, ein Gesprächszug auf das Gespräch DIESES Brandings. Warum das
+   * zwei Eimer sind und kein geteilter, steht im Kopf von `brandAiLimits.ts`.
+   */
+  kind: 'slot' | 'talk'
+  /** Nur bei `kind: 'slot'` — der Slot-TYP, dessen Anläufe gezählt werden. */
+  slotId?: string
 }
 
 /**
@@ -76,6 +87,7 @@ export async function bookBrandAiQuota(
   const counts: BrandAiQuotaCounts = {
     parallel: countActiveBrandGenerations(request.userId),
     slotDay: 0,
+    talkDay: 0,
     accountDay: 0,
     instanceDay: 0,
   }
@@ -87,13 +99,19 @@ export async function bookBrandAiQuota(
 
   const { store, prefix } = useRateLimitStore(event)
 
-  const slotState = await store.hit(
-    `${prefix}${brandAiSlotDayKey(request.profileId, request.slotId)}`,
-    BRAND_AI_DAY_WINDOW_MS,
-  )
-  counts.slotDay = slotState.count
-  const slot = decideBrandAiQuota(counts, limits)
-  if (slot) return { code: slot, retryAfterSec: retryAfter(slotState.resetInMs) }
+  /**
+   * DER ENGE EIMER — genau EINER, nie beide. Ein Gesprächszug, der zusätzlich
+   * den Slot-Eimer anfasste, nähme dem Menschen die Entwürfe für das Feld, für
+   * das er gerade geantwortet hat (und eine freie Frage hätte gar keinen Slot).
+   */
+  const narrowKey = request.kind === 'talk'
+    ? brandAiTalkDayKey(request.profileId)
+    : brandAiSlotDayKey(request.profileId, request.slotId ?? '')
+  const narrowState = await store.hit(`${prefix}${narrowKey}`, BRAND_AI_DAY_WINDOW_MS)
+  if (request.kind === 'talk') counts.talkDay = narrowState.count
+  else counts.slotDay = narrowState.count
+  const narrow = decideBrandAiQuota(counts, limits)
+  if (narrow) return { code: narrow, retryAfterSec: retryAfter(narrowState.resetInMs) }
 
   const accountState = await store.hit(
     `${prefix}${brandAiAccountDayKey(request.userId)}`,
