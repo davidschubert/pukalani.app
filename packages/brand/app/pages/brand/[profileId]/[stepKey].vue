@@ -36,6 +36,7 @@ import type {
 } from '../../../../shared/types/brand'
 import { useBrandWorkspaceStore } from '../../../stores/brandWorkspace'
 import { useBrandAutosave } from '../../../composables/useBrandAutosave'
+import { useBrandConversation } from '../../../composables/useBrandConversation'
 import { useBrandGeneration } from '../../../composables/useBrandGeneration'
 
 /**
@@ -91,6 +92,9 @@ const autosave = useBrandAutosave(profileId)
 // GESPEICHERTEN Quell-Slots. Ohne dieses Ausspülen entwürfe George aus einem
 // Stand, den der Mensch eine Sekunde vorher überholt hat.
 const generation = useBrandGeneration(profileId, { beforeGenerate: () => autosave.flush() })
+// Dieselbe Regel für den Gesprächszug: der Server rechnet aus dem GESPEICHERTEN
+// Stand, welche Frage als nächste dran ist.
+const conversation = useBrandConversation(profileId, { beforeSend: () => autosave.flush() })
 
 await useAsyncData(
   () => `brand-workspace-${profileId.value}-${routeStepKey.value}`,
@@ -149,7 +153,12 @@ watch(advisor, (next) => {
 
 /** Lokal übersprungen („Weiß ich nicht") — nichts wird gespeichert, der Zeiger rückt vor. */
 const skipped = ref<string[]>([])
-watch(routeStepKey, () => { skipped.value = [] })
+watch(routeStepKey, () => {
+  skipped.value = []
+  // Ein Baustein-Wechsel beginnt ein neues Gespräch (§3e) — die Züge räumt der
+  // Store beim Laden weg, was der letzte Zug GETAN hat, muss hier fallen.
+  conversation.reset()
+})
 
 const slotFacts = computed<Record<string, BrandSlotStateFacts>>(() => {
   const facts: Record<string, BrandSlotStateFacts> = {}
@@ -168,53 +177,76 @@ const nextQuestion = computed(() =>
 const nextSlot = computed<BrandSlot | null>(() =>
   slots.value.find(slot => slot.id === nextQuestion.value?.slotId) ?? null)
 
-/** Georges Züge aus dem Strom — sie stehen VOR der nächsten Frage. */
+/**
+ * DIE ZÜGE DIESES BESUCHS, IN IHRER REIHENFOLGE — Berater UND Mensch.
+ *
+ * Bis zur Konversations-Runde standen die eigenen Antworten in einem zweiten
+ * Array (`answers`) und wurden hinter die Berater-Züge gehängt. Das war
+ * tragbar, solange der Berater nicht antwortete; seit er es tut, IST die
+ * Reihenfolge die Aussage — Antwort, Reaktion, Antwort. Eine Liste, im Store
+ * (`addUserMessage`), damit sie beim Baustein-Wechsel mit allem anderen fällt.
+ *
+ * ── DIE EIGENE ANTWORT WIRD JETZT GESPEICHERT (Umkehrung zu B5a) ─────────
+ * B5a hat sie bewusst NICHT als `brand_messages`-Zeile geschrieben: die
+ * Substanz stehe im Slot, eine zweite Kopie hätte ein Bearbeiten-Problem. Das
+ * stimmt weiterhin — nur wiegt es jetzt anders. Ein Verlauf, der die REAKTION
+ * des Beraters zeigt, aber nicht das, worauf sie reagiert, ist beim nächsten
+ * Aufschlagen unlesbar. Die Zeile im Verlauf ist deshalb ausdrücklich ein
+ * PROTOKOLL des Gesagten und keine zweite Fassung des Feldes: ändert der Mensch
+ * das Feld später, bleibt hier stehen, was damals dastand — und genau das macht
+ * die Reaktion nachvollziehbar. Geschrieben wird sie von der Konversations-
+ * Route, nicht von hier.
+ */
 const streamed = computed<BwMessage[]>(() => store.streamMessages.map(message => ({
   id: message.id,
-  role: 'george' as const,
+  role: message.role,
   text: message.text,
   pending: message.pending,
 })))
 
 /**
- * DIE EIGENEN ANTWORTEN, SICHTBAR (Audit-Befund B5a, 2026-09-01).
+ * DIE KATALOG-FRAGE STEHT NUR DA, WENN SIE NICHT SCHON GESTELLT WURDE (P3.2).
  *
- * Bis hierher verschwand jede getippte Antwort wortlos ins Feld: der Verlauf
- * zeigte nur Georges Seite, und ein Gespräch, in dem man sich selbst nicht
- * reden sieht, fühlt sich wie ein Formular an.
+ * Der Berater beendet seinen Zug mit der nächsten offenen Frage in EIGENEN
+ * Worten. Sie darunter noch einmal als Katalog-Satz zu wiederholen wäre genau
+ * das Formular-Gefühl, gegen das diese Runde gebaut ist — nur diesmal doppelt.
  *
- * SIE WERDEN NICHT ALS `brand_messages`-ZEILE GESPEICHERT, und das ist kein
- * Versehen: die SUBSTANZ ist längst persistiert — der Text steht im Slot und
- * geht über den normalen Autosave. Eine zweite Kopie im Verlauf bräuchte eine
- * eigene Schreib-Route, hätte ein zweites Bearbeiten-Problem (ändert der
- * Mensch das Feld, log der Verlauf die alte Fassung) und wäre bei der Löschung
- * eine zweite Stelle. Hier steht deshalb die ANSICHT des Besuchs.
+ * Weggelassen wird sie in zwei Lagen: solange der Berater SCHREIBT (ihm die
+ * Pointe vorwegzunehmen ist schlechter, als eine Sekunde zu warten) und wenn
+ * sein fertiger Zug genau diese Frage getragen hat (`coveredSlotId` aus dem
+ * Abschluss-Frame — der Server sagt es, geraten wird es nicht).
  *
- * WAS BEWUSST FEHLT (B5b, gehört in die Konversations-Runde P3): George
- * REAGIERT nicht auf diese Antworten — jede Reaktion wäre ein KI-Aufruf je
- * Antwort und damit eine Kostenentscheidung, keine Anzeigefrage.
+ * DER LEHRBLOCK BLEIBT TROTZDEM: er hängt an der FRAGE, nicht an ihrer
+ * Formulierung, und wandert dann unter den Zug des Beraters. Ohne diesen
+ * Umzug wäre die schönere Frage mit dem Verlust der Erklärung bezahlt.
  */
-const answers = ref<{ id: string, text: string }[]>([])
-watch(routeStepKey, () => { answers.value = [] })
-
 const georgeMessages = computed<BwMessage[]>(() => {
-  const spoken: BwMessage[] = [
-    ...streamed.value,
-    ...answers.value.map(entry => ({ id: entry.id, role: 'user' as const, text: entry.text })),
-  ]
+  const spoken: BwMessage[] = [...streamed.value]
+  const busy = conversation.pending.value
+
   if (!nextSlot.value) {
+    // Hat der Berater gerade selbst gesagt, dass nichts mehr offen ist, wäre
+    // der Standard-Satz eine Wiederholung.
+    if (busy || conversation.spoke.value) return spoken
     return [
       ...spoken,
       { id: 'done', role: 'george', text: t('brand.workspace.george.nothingOpen') },
     ]
   }
+
+  const help = nextSlot.value.helpKey ? t(nextSlot.value.helpKey) : undefined
+  if (busy || conversation.coveredSlotId.value === nextSlot.value.id) {
+    const last = spoken.at(-1)
+    return last && !busy ? [...spoken.slice(0, -1), { ...last, help }] : spoken
+  }
+
   return [
     ...spoken,
     {
       id: nextSlot.value.id,
       role: 'george',
       text: t(questionKeyFor(nextSlot.value, pathKind.value)),
-      help: nextSlot.value.helpKey ? t(nextSlot.value.helpKey) : undefined,
+      help,
     },
   ]
 })
@@ -225,8 +257,10 @@ const georgeMessages = computed<BwMessage[]>(() => {
  * Composer — Platzhalter, nie ein Wert, absenden kann man sie nicht. Die
  * Texte stehen statisch im Katalog (`brand.example.<id>`, pfadabhängig wie
  * die Frage selbst); eine KI-Fassung je Antwort wäre eine Kostenentscheidung
- * (B5b) und gehört in die Konversations-Runde P3. Auswahl-Fragen behalten den
- * generischen Platzhalter — geantwortet wird dort über Chips.
+ * (B5b) und bleibt es auch nach der Konversations-Runde: der Zug des Beraters
+ * ist die Reaktion, der Platzhalter nur eine Schreibhilfe VOR dem Tippen.
+ * Auswahl-Fragen behalten den generischen Platzhalter — geantwortet wird dort
+ * über Chips.
  */
 const composerExample = computed<string>(() => {
   const slot = nextSlot.value
@@ -234,12 +268,42 @@ const composerExample = computed<string>(() => {
   return t(exampleKeyFor(slot, pathKind.value))
 })
 
-function answerFromGeorge(text: string): void {
+/**
+ * EINE GETIPPTE ANTWORT — und was daraus alles folgt (P3.2).
+ *
+ * DIE BESTEHENDE LOGIK BLEIBT: der Text gehört in den SLOT, dort ist er die
+ * Antwort. Neu ist nur, dass danach der Berater dazu einen Zug macht.
+ *
+ * ── DER SLOT WIRD VOR DEM ZUG GELESEN, DIE NÄCHSTE FRAGE DANACH ──────────
+ * `nextSlot` rechnet aus den Slot-Werten; nach `setSlotValue` zeigt es deshalb
+ * schon auf die FOLGENDE Frage — genau die, die der Berater am Ende seines
+ * Zuges stellen soll. Beide Wortlaute reisen mit, weil es sie nur hier gibt
+ * (i18n lebt im Browser); WELCHE dran ist, entscheidet trotzdem der Server aus
+ * der Registry, und `nextSlotId` ist der Beleg, an dem er es prüft.
+ *
+ * ── OHNE OFFENE FRAGE IST DER TEXT EINE FREIE FRAGE ──────────────────────
+ * Vorher tat das Tippen dort GAR NICHTS (`if (!slot) return`) — wer am Ende
+ * eines Kapitels „was meinst du mit Positionierung?" schrieb, bekam keine
+ * Antwort und sah nicht einmal seinen eigenen Satz. Jetzt geht er als freie
+ * Frage ohne Slot an den Berater; geschrieben wird deswegen nichts.
+ */
+async function answerFromGeorge(text: string): Promise<void> {
   const slot = nextSlot.value
-  if (!slot) return
-  store.setSlotValue(slot.id, text)
-  answers.value = [...answers.value, { id: `answer-${slot.id}-${answers.value.length}`, text }]
-  autosave.schedule()
+  const question = slot ? t(questionKeyFor(slot, pathKind.value)) : ''
+
+  if (slot) store.setSlotValue(slot.id, text)
+  store.addUserMessage(`answer-${slot?.id ?? 'free'}-${store.streamMessages.length}`, text)
+  if (slot) autosave.schedule()
+
+  const upcoming = nextSlot.value
+  await conversation.converse({
+    text,
+    slotId: slot?.id,
+    question,
+    nextSlotId: upcoming?.id,
+    nextQuestion: upcoming ? t(questionKeyFor(upcoming, pathKind.value)) : '',
+    skipped: skipped.value,
+  })
 }
 
 function skipQuestion(): void {
@@ -448,8 +512,16 @@ function useVersion(text: string): void {
   versionsSlot.value = null
 }
 
+/**
+ * DER EINE RUHIGE HINWEIS — für den Entwurf UND für das Gespräch.
+ *
+ * Vom Gespräch kommt hier nur die DROSSEL an: ein ausgefallener Zug bleibt
+ * still (Begründung in `useBrandConversation`), ein aufgebrauchter Deckel nicht
+ * — sonst hörte der Berater ohne Erklärung auf zu antworten, und der Mensch
+ * suchte den Fehler bei sich.
+ */
 const generationNotice = computed<string | null>(() => {
-  const code = generation.failureCode.value
+  const code = generation.failureCode.value ?? conversation.failureCode.value
   if (!code) return null
   // Die vier Drossel-Gründe zuerst: sie sind die einzigen, die dem Menschen
   // sagen, WANN es wieder geht (gleich · morgen · nicht an dir).
@@ -735,7 +807,7 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
            entwirft niemand" sind Zustände, in denen weitergearbeitet wird. -->
       <p v-if="generationNotice" class="bw-pending mt-3 flex items-center gap-2">
         <span>{{ generationNotice }}</span>
-        <button type="button" class="underline" @click="generation.dismissFailure()">
+        <button type="button" class="underline" @click="generation.dismissFailure(); conversation.dismissFailure()">
           {{ t('brand.workspace.generate.dismiss') }}
         </button>
       </p>
@@ -983,6 +1055,7 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
         :advisor-avatar="advisor.avatar"
         :handover="handover"
         :placeholder="composerExample"
+        :busy="conversation.pending.value"
         @send="answerFromGeorge"
       >
         <template #chips>

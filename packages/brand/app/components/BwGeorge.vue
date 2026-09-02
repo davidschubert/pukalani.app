@@ -38,12 +38,20 @@ const props = withDefaults(defineProps<{
    * Absenden ohne Tastendruck bleibt gesperrt (`draft` bleibt leer).
    */
   placeholder?: string
+  /**
+   * Der Berater schreibt gerade (P3.2). Der Senden-Knopf ist dann aus — der
+   * DOPPEL-SENDE-SCHUTZ als Griff, nicht als Regel: weitertippen darf man,
+   * abschicken erst, wenn der Zug steht. Sonst käme die zweite Antwort auf eine
+   * Frage, die der Berater noch gar nicht gestellt hat.
+   */
+  busy?: boolean
 }>(), {
   advisorName: 'George',
   advisorRole: '',
   advisorAvatar: '/george.jpg',
   handover: null,
   placeholder: '',
+  busy: false,
 })
 
 defineEmits<{ send: [text: string] }>()
@@ -94,14 +102,14 @@ watch(() => props.messages.length, async () => {
         <slot name="chips" />
       </div>
     </div>
-    <form class="flex gap-2 border-t px-7 py-4" style="border-color: var(--bw-line)" @submit.prevent="draft.trim() && ($emit('send', draft), draft = '')">
+    <form class="flex gap-2 border-t px-7 py-4" style="border-color: var(--bw-line)" @submit.prevent="!busy && draft.trim() && ($emit('send', draft), draft = '')">
       <UInput
         v-model="draft" variant="none" class="flex-1 rounded-full" :ui="{ base: 'rounded-full px-4' }"
         :placeholder="placeholder || t('brand.workspace.george.placeholder')" size="lg" style="background: var(--bw-surface-hi)"
       />
       <UButton
         type="submit" icon="i-ph-paper-plane-right" :aria-label="t('brand.workspace.george.send')"
-        size="lg" color="neutral" variant="ghost" class="bw-send rounded-full" :disabled="!draft.trim()"
+        size="lg" color="neutral" variant="ghost" class="bw-send rounded-full" :disabled="busy || !draft.trim()"
       />
     </form>
   </div>

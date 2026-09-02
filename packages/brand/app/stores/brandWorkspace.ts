@@ -77,10 +77,20 @@ export interface BrandWorkspaceConflict {
  * escaped Klartext die ehrliche Zwischenstufe: sie zeigt Sternchen, aber sie
  * zeigt niemals fremdes Markup.
  */
+/**
+ * EIN ZUG DIESES BESUCHS — vom Berater ODER vom Menschen.
+ *
+ * Seit der Konversations-Runde (P3.2) ist das eine EINZIGE, geordnete Liste
+ * und keine zwei mehr. Vorher hielt die Seite die eigenen Antworten in einem
+ * eigenen `answers`-Array und hängte sie hinter die Berater-Züge — was
+ * funktionierte, solange der Berater nicht antwortete. Sobald er es tut, ist
+ * die REIHENFOLGE die halbe Aussage: Antwort, Reaktion, Antwort. Zwei Listen
+ * können sie nicht tragen, ohne eine dritte Zählung zu erfinden.
+ */
 export interface BrandStreamMessage {
-  /** Die `generationId` — dieselbe wie beim Slot (§3e). */
+  /** Die `generationId` des Zuges (§3e) bzw. eine lokale Id für eigene Antworten. */
   id: string
-  role: 'george'
+  role: 'george' | 'user'
   text: string
   pending: boolean
 }
@@ -248,7 +258,21 @@ const setup = () => {
     if (value > revision.value) revision.value = value
   }
 
-  // ── Georges Züge aus dem Strom ──────────────────────────────────────────
+  // ── Die Züge dieses Besuchs ─────────────────────────────────────────────
+
+  /**
+   * DIE EIGENE ANTWORT, SICHTBAR (Audit-Befund B5a) — an ihrem Platz in der
+   * Reihenfolge, nicht in einer zweiten Liste.
+   *
+   * Sie wird hier SOFORT gezeigt und erst danach vom Server als
+   * `brand_messages`-Zeile geschrieben (die Konversations-Route tut das). Eine
+   * Antwort, die erst nach dem Roundtrip erschiene, machte aus dem Tippen eine
+   * Wartezeit — und wenn der Zug ausbleibt (KI aus), ist die Zeile trotzdem
+   * richtig: gesagt wurde es.
+   */
+  function addUserMessage(id: string, text: string): void {
+    streamMessages.value = [...streamMessages.value, { id, role: 'user', text, pending: false }]
+  }
 
   function beginGeorgeMessage(generationId: string): void {
     streamMessages.value = [
@@ -267,7 +291,8 @@ const setup = () => {
     streamMessages.value = streamMessages.value
       .map(message => (message.id === generationId ? { ...message, pending: false } : message))
       // Ein Zug ohne Text ist kein Zug: ein sofort gescheiterter Lauf soll keine
-      // leere Sprechblase hinterlassen.
+      // leere Sprechblase hinterlassen. Eigene Antworten haben immer Text —
+      // der Composer lässt Leeres gar nicht erst abschicken.
       .filter(message => message.text.length > 0)
   }
 
@@ -484,6 +509,7 @@ const setup = () => {
     slotIsGeorgeDraft,
     clearGeorgeDraft,
     applyGenerationRevision,
+    addUserMessage,
     beginGeorgeMessage,
     appendGeorgeDelta,
     endGeorgeMessage,
