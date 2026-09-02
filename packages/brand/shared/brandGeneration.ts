@@ -52,6 +52,17 @@ export type BrandGenerationFailureCode
     | 'empty_result'
     | 'persist_failed'
 
+/**
+ * WAS EIN LAUF HERVORGEBRACHT HAT (george-a-4, Audit-Befund B3).
+ *
+ * `'draft'` ist der Normalfall und der Default an jeder Stelle, an der das Feld
+ * fehlen darf (Rückwärtskompatibilität: ein Generator, der es nicht setzt,
+ * verhält sich wie vorher). `'question'` heisst: das Material reichte nicht,
+ * George hat NACHGEFRAGT statt zu erfinden — es gibt dann keinen Slot-Text,
+ * kein `slot.ready` und keine Entwurfs-Markierung, nur einen Zug im Verlauf.
+ */
+export type BrandGenerationOutcome = 'draft' | 'question'
+
 export interface BrandGenerationStartedData {
   generationId: string
   slotId: string
@@ -80,6 +91,13 @@ export interface BrandGenerationCompletedData {
   createdAt: string
   /** Der Entwurf lag schon vor (gleicher Idempotenzschlüssel) — kein neuer KI-Aufruf. */
   reused: boolean
+  /**
+   * Entwurf oder Rückfrage. Der Client entscheidet daran, ob er überhaupt einen
+   * Slot-Text erwartet — ohne dieses Feld müsste er aus der ABWESENHEIT eines
+   * `slot.ready` schliessen, und „nichts gekommen" ist auch der Zustand eines
+   * abgerissenen Stroms.
+   */
+  outcome: BrandGenerationOutcome
 }
 
 export interface BrandGenerationFailedData {

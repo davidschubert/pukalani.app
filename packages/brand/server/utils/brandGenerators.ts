@@ -3,6 +3,7 @@ import type { H3Event } from 'h3'
 import type { Models } from 'node-appwrite'
 import {
   type BrandGenerationLockEntry,
+  type BrandGenerationOutcome,
   brandGenerationHashInput,
   brandGenerationLockHeld,
   brandGenerationLockKey,
@@ -102,7 +103,22 @@ export interface BrandSlotDependency {
 }
 
 export interface BrandGeneratorResult {
+  /** Der SLOT-Wert. Bei `outcome: 'question'` leer — dann wird kein Feld angefasst. */
   draft: string
+  /**
+   * DER CHAT-ZUG (george-a-4, Audit-Befund B2) — gerahmter Entwurf („worauf es
+   * sich stützt · der Entwurf · eine Frage") bzw. die Rückfrage selbst.
+   *
+   * OPTIONAL, und das ist der ganze Rückwärts-Vertrag: fehlt das Feld, nimmt
+   * die Route `draft` — also exakt das Verhalten vor a-4. Ein Generator, der
+   * die Rahmung nicht kann, verhält sich damit wie bisher statt gar nicht.
+   */
+  message?: string
+  /**
+   * Entwurf (Default) oder Rückfrage. Fehlt das Feld, gilt `'draft'` — ein
+   * Generator muss den neuen Zweig nicht kennen, um zu funktionieren.
+   */
+  outcome?: BrandGenerationOutcome
   model: string
   provider: string
   /** Steigt, sobald sich der Prompt ändert — sie steht im Generations-Eintrag. */
@@ -392,6 +408,10 @@ export const brandDevStubGenerator: BrandSlotGenerator = async (context) => {
 
   return {
     draft,
+    // Der Ersatz entwirft IMMER. Eine Rückfrage zu würfeln hiesse, das
+    // §3e-Protokoll mit einem Zufall zu beweisen — und der Zweig hat mit
+    // `georgeTurn.ts` seinen eigenen, deterministischen Beweis.
+    outcome: 'draft',
     model: 'dev-stub',
     provider: 'local',
     promptVersion: 'stub-1',

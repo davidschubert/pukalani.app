@@ -5,11 +5,13 @@ import {
   type BrandGenerationEventDataMap,
   type BrandGenerationEventName,
   type BrandGenerationFailureCode,
+  type BrandGenerationOutcome,
   findBrandGenerationByKey,
   packBrandGenerations,
   serializeBrandGenerationEvent,
 } from '../../../../../../../shared/brandGeneration'
 import { resolveBrandJourney } from '../../../../../../../shared/brandJourney'
+import { slotReadiness } from '../../../../../../../shared/brandSlotReadiness'
 import { slotById } from '../../../../../../../shared/slotRegistry'
 import type { BrandGenerationEntry } from '../../../../../../../shared/types/brand'
 import {
@@ -17,6 +19,7 @@ import {
   BRAND_STEPS_TABLE,
   type BrandSlotRecord,
   brandDb,
+  brandSlotStoredValue,
   loadBrandStepContext,
   loadStepRow,
   loadStepRows,
@@ -52,12 +55,26 @@ import { recordBrandEvent } from '../../../../../../utils/brandEvents'
  * `generation.failed`. Jedes trägt seine `generationId`; die Serialisierung
  * (und die Lese-Seite) liegen als pure Regel in `shared/brandGeneration.ts`.
  *
+ * ── ZWEI ERGEBNISSE SEIT `george-a-4` ─────────────────────────────────────
+ * Ein Lauf endet als ENTWURF oder als RÜCKFRAGE (`outcome`, Audit-Befund B3).
+ * Die Rückfrage schreibt KEINEN Slot-Wert, kein `slot.ready`, keinen
+ * `inputHash` — nur eine Zeile im Verlauf und einen Eintrag in der Historie.
+ * Der Client erfährt den Unterschied im `generation.completed`-Frame und nicht
+ * an der Abwesenheit eines Frames: „nichts gekommen" ist auch der Zustand
+ * eines abgerissenen Stroms.
+ *
+ * Ausserdem trägt der Zug seit a-4 eine RAHMUNG (Befund B2) — worauf sich der
+ * Entwurf stützt, der Entwurf, eine Frage. Der Chat-Text und der Feld-Text sind
+ * damit zwei verschiedene Zeichenketten; welche wohin gehört, entscheidet
+ * `parseGeorgeTurn` im Generator, nicht diese Route.
+ *
  * ── ZWEI ARTEN, NEIN ZU SAGEN — UND DER UNTERSCHIED IST ABSICHT ───────────
  * VOR dem Strom wird mit HTTP abgewiesen: kein Beta-Zugang (404, Datentür),
  * fremdes Profil (404), gesperrter Baustein (403), unbekannter/deaktivierter
- * Slot oder ein Slot, den George gar nicht entwirft (400). Das sind Fehler des
- * AUFRUFERS — sie gehören in den Status, nicht in einen Datenstrom, den ein
- * `fetch` ohne Weiteres für einen Erfolg hält.
+ * Slot oder ein Slot, den George gar nicht entwirft (400), und seit dem
+ * Bereitschafts-Gate auch „dafür ist zu wenig da" (409, `not_ready`). Das sind
+ * Fehler bzw. Voraussetzungen des AUFRUFERS — sie gehören in den Status, nicht
+ * in einen Datenstrom, den ein `fetch` ohne Weiteres für einen Erfolg hält.
  *
  * IM Strom wird abgewiesen, was ein ZUSTAND ist: KI abgeschaltet
  * (`ai_disabled`), kein Generator registriert (`no_generator`), hier läuft schon
@@ -166,6 +183,46 @@ export default defineEventHandler(async (event) => {
   const inputHash = brandGenerationInputHash(slot.id, profile.contentLocale, dependencies)
   const stored = parseGenerations(stepRow.generations)
   const reused = findBrandGenerationByKey(stored.items, body.idempotencyKey)
+
+  /**
+   * ── DAS BEREITSCHAFTS-GATE (Davids „zu wenig ist zu wenig") ──────────────
+   * Es steht VOR der Sperre und vor jeder Buchung, denn es sagt etwas, das
+   * schon vor dem Klick feststand: aus dieser Ausgangslage kann kein ehrlicher
+   * Entwurf entstehen. Es kostet keinen Anbieter-Aufruf und keine Zeile in der
+   * Datenbank — deshalb ist es ein HTTP-Nein (409, `not_ready`) und kein
+   * Zustand im Strom.
+   *
+   * Geprüft wird nur, was auch WIRKLICH generiert würde: kein Cache-Treffer,
+   * kein abgeschalteter Dienst, kein fehlender Generator. Sonst bekäme ein
+   * Mensch bei ausgeschalteter KI die falsche Auskunft — nämlich die über sein
+   * Material statt die über den Dienst.
+   *
+   * DIE QUELLEN SIND DIESELBEN, die gleich in den Generator-Vertrag wandern
+   * (Startkarte, Website-Text, Slot-Werte DIESER Zeile). Ein Gate, das mehr
+   * sieht als der Prompt, widerspricht George irgendwann öffentlich.
+   */
+  if (aiEnabled && choice && !reused?.draft) {
+    const readiness = slotReadiness(slot.id, {
+      startCard: profileStartCard(profile),
+      hasSiteAnalysis: profileSiteAnalysisText(profile).trim().length > 0,
+      records: Object.fromEntries(
+        Object.keys(records).map(id => [id, brandSlotStoredValue(records[id])]),
+      ),
+    })
+    if (!readiness.ready) {
+      logEvent('info', 'brand.generation_not_ready', {
+        slotId: slot.id, stepKey, missing: readiness.missing,
+      })
+      // Nur der CODE reist (der zentrale Handler hebt ihn als `reason`); WAS
+      // fehlt, rechnet die Werkstatt aus denselben Daten selbst — sie zeigt es
+      // ohnehin schon, bevor der Knopf gedrückt wird.
+      throw createError({
+        status: 409,
+        statusText: 'Not enough material for a draft',
+        data: { code: 'not_ready' },
+      })
+    }
+  }
 
   const generationId = ID.unique()
 
@@ -280,6 +337,10 @@ export default defineEventHandler(async (event) => {
         promptVersion: reused.promptVersion,
         createdAt: reused.createdAt,
         reused: true,
+        // Wiederverwendet wird nur, was einen Entwurf HAT
+        // (`findBrandGenerationByKey` verlangt ihn) — eine Rückfrage landet
+        // deshalb nie in diesem Zweig.
+        outcome: 'draft',
       })
       res.end()
       return
@@ -322,13 +383,32 @@ export default defineEventHandler(async (event) => {
 
     if (result.aborted || abort.signal.aborted) return fail('aborted')
 
-    const draft = clampDraft(result.draft, slot.maxLength)
-    if (!draft) return fail('empty_result')
+    /**
+     * ── ZWEI AUSGÄNGE STATT EINEM (george-a-4, Befund B3) ─────────────────
+     * `draft` ist der FELD-Wert, `chat` der Zug im Verlauf. Bis a-3 waren das
+     * dieselbe Zeichenkette; seit der Rahmung sind es zwei, und bei einer
+     * RÜCKFRAGE gibt es den ersten gar nicht.
+     *
+     * Der Rückfall `result.message ?? result.draft` ist der Vertrag für jeden
+     * Generator, der die Rahmung nicht kennt (Dev-Stub, künftige Bausteine):
+     * dann ist der Zug wieder der Entwurf, wie vorher.
+     */
+    const outcome: BrandGenerationOutcome = result.outcome ?? 'draft'
+    const chat = clampDraft(result.message ?? result.draft, slot.maxLength)
+    const draft = outcome === 'question' ? '' : clampDraft(result.draft, slot.maxLength)
 
-    send('slot.ready', { generationId, slotId: slot.id, draft })
+    // Bei einer Rückfrage ist der ZUG das Ergebnis; bei einem Entwurf das FELD.
+    // Ein leerer Zug wäre in beiden Fällen nichts, was man speichern sollte.
+    if (!chat || (outcome === 'draft' && !draft)) return fail('empty_result')
+
+    // KEIN `slot.ready` für eine Rückfrage: das Frame IST die Anweisung an den
+    // Client, ein Feld zu füllen und es als Entwurf zu markieren.
+    if (outcome === 'draft') send('slot.ready', { generationId, slotId: slot.id, draft })
 
     const completed = await persist({
       draft,
+      chat,
+      outcome,
       inputHash,
       generationId,
       result,
@@ -346,6 +426,7 @@ export default defineEventHandler(async (event) => {
       generationId,
       slotId: slot.id,
       stepKey,
+      outcome,
       model: result.model,
       provider: result.provider,
       ms: Date.now() - started,
@@ -354,7 +435,10 @@ export default defineEventHandler(async (event) => {
       type: 'generation.completed',
       profileId: profile.$id,
       userId,
-      payload: { slotId: slot.id, stepKey, model: result.model, ms: Date.now() - started },
+      // `outcome` ist eine KENNZAHL, kein Inhalt (Log-Regel §6): „wie oft musste
+      // George nachfragen" ist die Frage, an der man merkt, ob der Startbogen
+      // genug erhebt.
+      payload: { slotId: slot.id, stepKey, outcome, model: result.model, ms: Date.now() - started },
     })
     res.end()
   }
@@ -374,7 +458,11 @@ export default defineEventHandler(async (event) => {
    * statt eines Abschlusses, den niemand wiederfindet.
    */
   async function persist(input: {
+    /** Der FELD-Wert. Bei einer Rückfrage leer — dann bleiben die Slots unberührt. */
     draft: string
+    /** Der Zug im Verlauf (gerahmter Entwurf bzw. die Rückfrage). */
+    chat: string
+    outcome: BrandGenerationOutcome
     inputHash: string
     generationId: string
     result: { model: string, provider: string, promptVersion: string }
@@ -416,7 +504,12 @@ export default defineEventHandler(async (event) => {
         inputHash: input.inputHash,
         createdAt: now,
         ...(input.entryBase.idempotencyKey ? { idempotencyKey: input.entryBase.idempotencyKey } : {}),
-        draft: input.draft,
+        // EINE RÜCKFRAGE HAT KEINEN `draft`, und das ist mehr als Sparsamkeit:
+        // die Fassungs-Wiederherstellung bietet jeden Eintrag mit Text zum
+        // Übernehmen an — eine Frage im Feld wäre dort ein Angebot, das
+        // niemand annehmen will. Der Lauf steht trotzdem in der Historie
+        // (`outcome`), sonst fehlte in der Herkunft ein bezahlter Aufruf.
+        ...(input.outcome === 'question' ? { outcome: 'question' as const } : { draft: input.draft }),
       }
       const packed = packBrandGenerations([...history.items, entry], history.count + 1)
 
@@ -427,10 +520,15 @@ export default defineEventHandler(async (event) => {
         tableId: BRAND_STEPS_TABLE,
         rowId: fresh.$id,
         data: {
-          slots: serializeSlotRecords(next),
           generations: packed.json,
-          inputHash: input.inputHash,
           revision,
+          // NUR ein Entwurf fasst Slots und `inputHash` an. Der Hash sagt
+          // „woraus ist der aktuelle Entwurf entstanden" — nach einer Rückfrage
+          // gibt es keinen neuen, und ihn trotzdem fortzuschreiben machte einen
+          // veralteten Entwurf stillschweigend wieder „aktuell".
+          ...(input.outcome === 'draft'
+            ? { slots: serializeSlotRecords(next), inputHash: input.inputHash }
+            : {}),
         },
       })
 
@@ -447,8 +545,8 @@ export default defineEventHandler(async (event) => {
             profileId: profile.$id,
             stepKey,
             role: 'george',
-            body: input.draft,
-            parts: JSON.stringify({ kind: 'draft', slotId: input.entryBase.slotId }),
+            body: input.chat,
+            parts: JSON.stringify({ kind: input.outcome, slotId: input.entryBase.slotId }),
             generationId: input.generationId,
           },
         })
@@ -487,6 +585,7 @@ export default defineEventHandler(async (event) => {
         promptVersion: input.result.promptVersion,
         createdAt: now,
         reused: false,
+        outcome: input.outcome,
       }
     }
     catch (error) {

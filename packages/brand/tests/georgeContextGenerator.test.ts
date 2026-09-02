@@ -1,6 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { H3Event } from 'h3'
+import { advisorByKey } from '../shared/brandAdvisors'
 import { slotById } from '../shared/slotRegistry'
+import { stripGeorgeTurnMarkers } from '../server/utils/georgeTurn'
 
 /**
  * DER ZUSAMMENBAU (P2.2) — mechanisch geprüft, ohne einen einzigen KI-Aufruf.
@@ -150,6 +152,17 @@ describe('Der Aufruf an den Transport', () => {
     expect(system).toContain('is written in de')
   })
 
+  it('DER BERATER KOMMT AUS DER REGISTRY, nicht aus dieser Datei', async () => {
+    // Baustein A gehört dem Gastgeber — aber gefragt wird `advisorForStep`.
+    // Registriert sich der Generator morgen für einen zweiten Baustein, spricht
+    // dort automatisch dessen Berater.
+    await plugin.georgeContextGenerator(context())
+    const system = lastCall().options.system!
+    const george = advisorByKey('george')!
+    expect(system).toContain('You are George, Brand advisor in the brand advisory team')
+    expect(system).toContain(george.interviewTechnique)
+  })
+
   it('OHNE Cookie redet George in der Inhaltssprache', async () => {
     await plugin.georgeContextGenerator(context())
     expect(lastCall().options.system).toContain('you speak to the person in de')
@@ -206,7 +219,7 @@ describe('Das Ergebnis im Vertrag', () => {
     expect(result.draft).toBe('ErstZweit')
     expect(result.model).toBe('m')
     expect(result.provider).toBe('p')
-    expect(result.promptVersion).toBe('george-a-3')
+    expect(result.promptVersion).toBe('george-a-4')
     expect(result.aborted).toBe(false)
   })
 
@@ -227,6 +240,56 @@ describe('Das Ergebnis im Vertrag', () => {
   it('SCHLUCKT KEINEN ANBIETER-FEHLER — die Route macht daraus provider_error', async () => {
     streamMock.mockRejectedValue(Object.assign(new Error('AI provider unavailable'), { statusCode: 502 }))
     await expect(plugin.georgeContextGenerator(context())).rejects.toThrow('AI provider unavailable')
+  })
+
+  /**
+   * DER ZUG-VERTRAG AN DER NAHT (george-a-4). Die Marker-Regel selbst prüft
+   * `georgeTurn.test.ts`; hier geht es darum, dass der Generator sie WIRKLICH
+   * anwendet — auf das Ergebnis UND auf den Strom.
+   */
+  it('TRENNT FELDWERT UND CHAT-ZUG', async () => {
+    streamMock.mockResolvedValue({
+      text: 'BASIS: Aus eurem Startbogen.\nDRAFT:\nWir rösten Kaffee.\nASK: Trifft das?',
+      usage: null,
+      model: 'm',
+      provider: 'p',
+      aborted: false,
+    })
+    const result = await plugin.georgeContextGenerator(context())
+    expect(result.outcome).toBe('draft')
+    expect(result.draft).toBe('Wir rösten Kaffee.')
+    expect(result.message).toBe('Aus eurem Startbogen.\n\nWir rösten Kaffee.\n\nTrifft das?')
+  })
+
+  it('EINE RÜCKFRAGE LÄSST DEN ENTWURF LEER — die Route fasst dann keinen Slot an', async () => {
+    streamMock.mockResolvedValue({
+      text: 'QUESTION: Wen von euren Wettbewerbern nennt ihr selbst zuerst?',
+      usage: null,
+      model: 'm',
+      provider: 'p',
+      aborted: false,
+    })
+    const result = await plugin.georgeContextGenerator(context())
+    expect(result.outcome).toBe('question')
+    expect(result.draft).toBe('')
+    expect(result.message).toBe('Wen von euren Wettbewerbern nennt ihr selbst zuerst?')
+  })
+
+  it('DIE MARKER GEHEN NICHT IN DIE SPRECHBLASE — auch nicht zerrissen', async () => {
+    const text = 'BASIS: Kurz.\nDRAFT:\nDer Wert.\nASK: Passt?'
+    streamMock.mockImplementation(async (_e: unknown, _p: string, options: StreamOptions) => {
+      // So kommen Deltas an: an beliebiger Stelle zerteilt, mitten im Marker.
+      for (const piece of ['BA', 'SIS: Ku', 'rz.\nDRA', 'FT:\nDer Wert.\nAS', 'K: Passt?']) {
+        await options.onDelta?.(piece)
+      }
+      return { text, usage: null, model: 'm', provider: 'p', aborted: false }
+    })
+    const deltas: string[] = []
+    await plugin.georgeContextGenerator(context({ onDelta: piece => void deltas.push(piece) }))
+    expect(deltas.join('')).toBe(stripGeorgeTurnMarkers(text))
+    for (const marker of ['BASIS:', 'DRAFT:', 'ASK:']) {
+      expect(deltas.join('')).not.toContain(marker)
+    }
   })
 
   it('ein Slot ohne Auftrag wirft, statt still etwas zu erfinden', async () => {

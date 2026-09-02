@@ -1,4 +1,5 @@
 import type { H3Event } from 'h3'
+import { advisorForStep } from '../../shared/brandAdvisors'
 import type { BrandSlotGenerator } from '../utils/brandGenerators'
 import { registerBrandSlotGenerator } from '../utils/brandGenerators'
 import {
@@ -7,6 +8,7 @@ import {
   formatGeorgeInputs,
   georgeSystemPrompt,
 } from '../utils/georgePrompt'
+import { createGeorgeTurnScrubber, parseGeorgeTurn } from '../utils/georgeTurn'
 
 /**
  * DER ECHTE GEORGE FÜR BAUSTEIN A (P2.2) — die Registrierung an der Naht aus
@@ -126,11 +128,21 @@ export const georgeContextGenerator: BrandSlotGenerator = async (context) => {
     locale: wizardLocale(context.event, context.locale),
     contentLocale: context.locale,
     pathKind: context.pathKind,
+    // Baustein A gehört dem Gastgeber — aber gefragt wird die Registry, nicht
+    // die Datei: registriert sich dieser Generator morgen für einen zweiten
+    // Baustein, spricht dort automatisch dessen Berater.
+    advisor: advisorForStep(context.stepKey),
     persona: personaName(),
   })
 
   // app_config.aiModel > pukalani.ai.model (s. Kopf).
   const requested = (await getEffectiveAiConfig(context.event)).model
+
+  // DIE MARKER GEHEN NICHT IN DIE SPRECHBLASE (george-a-4): der Mensch sieht
+  // George schreiben, nicht ein Protokoll. Geputzt wird IM FLUSS statt am Ende
+  // — ein Text, der nach dem letzten Delta noch einmal umspringt, macht aus dem
+  // Streaming einen Ruckler (Begründung im Kopf von `georgeTurn.ts`).
+  const scrub = createGeorgeTurnScrubber()
 
   const result = await aiCompleteStream(context.event, prompt, {
     system,
@@ -140,11 +152,20 @@ export const georgeContextGenerator: BrandSlotGenerator = async (context) => {
     timeoutMs: GEORGE_STREAM_TIMEOUT_MS,
     providerRouting: { ...GEORGE_PROVIDER_ROUTING },
     signal: context.signal,
-    onDelta: context.onDelta,
+    onDelta: async (text: string) => {
+      const visible = scrub(text)
+      if (visible) await context.onDelta(visible)
+    },
   })
 
+  // Ein Zug, zwei Ergebnisse: der Feldwert und der Chat-Zug. Ohne Marker fällt
+  // beides auf den ganzen Text zurück — genau das Verhalten von `george-a-3`.
+  const turn = parseGeorgeTurn(result.text)
+
   return {
-    draft: result.text,
+    draft: turn.draft,
+    message: turn.message,
+    outcome: turn.outcome,
     // Was der Anbieter über sich sagt, sonst das, was wir VERLANGT haben —
     // beides ist wahr, ein erfundener Name wäre es nicht. Sagt er nichts über
     // sich selbst, bleibt `provider` leer statt geraten.

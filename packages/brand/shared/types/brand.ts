@@ -20,6 +20,7 @@
  * antworten 404 — Datentür).
  */
 
+import type { BrandGenerationOutcome } from '../brandGeneration'
 import type { BrandConfidence, BrandJourneyStep, BrandStoredStepState } from '../brandJourney'
 import type { BrandPathKind, BrandStepKey, BrandStepProgress } from '../slotRegistry'
 
@@ -205,6 +206,13 @@ export interface BrandGenerationMeta {
   createdAt: string
   /** §3e-Idempotenzschlüssel des Auslösers, sofern einer mitkam. */
   idempotencyKey?: string
+  /**
+   * `'question'`, wenn dieser Lauf NACHGEFRAGT statt entworfen hat (george-a-4).
+   * Fehlt bei jedem Eintrag von vorher und bei jedem Entwurf — der Leser liest
+   * „fehlt" als `'draft'`, sonst hätte ein Bestands-Eintrag rückwirkend eine
+   * Aussage, die niemand getroffen hat.
+   */
+  outcome?: BrandGenerationOutcome
 }
 
 /**

@@ -1,4 +1,5 @@
 import type { BrandPathKind, BrandSlotSchemaKind } from '../../shared/slotRegistry'
+import { type BrandAdvisor, advisorOpenersFor } from '../../shared/brandAdvisors'
 import { brandSlotFormatExample, brandSlotFormatRule } from '../../shared/brandSlotFormat'
 import { BRAND_SITE_ANALYSIS_PROMPT_MAX } from '../../shared/brandSiteAnalysis'
 import type { BrandStartCard } from '../../shared/types/brand'
@@ -57,8 +58,24 @@ import type { BrandSlotDependency } from './brandGenerators'
  * abgegrenzter Block MIT einer Regel, die ihn zu Material erklärt und nicht zu
  * Anweisungen. Ein Entwurf mit Website-Material und einer ohne stammen aus
  * verschiedenen Prompts, auch wenn die Instruktion dieselbe ist.
+ *
+ * `george-a-4` (2026-09-01, Live-Persona-Audit + Davids Team-Entscheidung):
+ * sechs Änderungen, jede aus einem Befund.
+ *   · BERATER-SCHICHT — wer spricht, steht jetzt ÜBER den Regeln: Identität,
+ *     Stärke, Interview-Technik, Satzanfänge, Verbotsliste (`brandAdvisors.ts`).
+ *     Bei Konflikt gewinnen die Regeln, und der Prompt sagt das ausdrücklich.
+ *   · B2 — der Chat-Zug RAHMT den Entwurf (Basis · Entwurf · genau eine Frage);
+ *     die Form dafür ist der Marker-Vertrag aus `georgeTurn.ts`.
+ *   · B3 — reicht das Material nicht, antwortet er mit `QUESTION:` statt mit
+ *     einem erfundenen Entwurf.
+ *   · B4 — der SLOT-Text trägt keine Markdown-Auszeichnung ausser der Form,
+ *     die sein Vertrag verlangt.
+ *   · B6 — Wettbewerber dürfen GEKENNZEICHNETE Annahmen tragen; erfundene NAMEN
+ *     bleiben verboten.
+ *   · B8/B9 — Kontext-Sensibilität (kein Vertriebston für einen Verein) und
+ *     eine Sorgfaltszeile gegen holprige Sprache.
  */
-export const GEORGE_PROMPT_VERSION = 'george-a-3'
+export const GEORGE_PROMPT_VERSION = 'george-a-4'
 
 /** Default der Persona (Content-Spec §1.1, Gate ② abgesegnet). */
 export const GEORGE_PERSONA_DEFAULT = 'George'
@@ -76,16 +93,52 @@ export interface GeorgeSystemPromptOptions {
   contentLocale: string
   /** Weiche W1 — sie ändert die Haltung, nicht die Regeln. */
   pathKind: BrandPathKind
+  /**
+   * WER SPRICHT (george-a-4). Fehlt der Berater, bleibt es beim Gastgeber-Satz
+   * von a-3 — dieselbe Rückwärts-Regel wie überall in dieser Runde: ein
+   * Aufrufer, der die neue Schicht nicht kennt, bekommt den alten Prompt und
+   * keinen halben neuen.
+   */
+  advisor?: BrandAdvisor
   persona?: string
   vendor?: string
 }
 
 /**
+ * DIE BERATER-SCHICHT — Persönlichkeit ÜBER dem Regel-Fundament.
+ *
+ * Sie steht bewusst VOR den Regeln und sagt in ihrem letzten Satz selbst, dass
+ * sie ihnen nachgeordnet ist. Der Grund ist die Erfahrung mit jedem
+ * Persona-Prompt: eine Figur, die nach den Regeln steht, liest sich für das
+ * Modell wie deren Korrektur — „sei fordernd" schlägt dann „sei knapp". Oben
+ * gestellt und ausdrücklich untergeordnet, prägt sie den TON und lässt die
+ * Grenzen in Ruhe.
+ */
+function advisorLayer(advisor: BrandAdvisor, locale: string): string[] {
+  const openers = advisorOpenersFor(advisor, locale)
+  return [
+    'Who you are in this part:',
+    `- Your strength: ${advisor.strengths}`,
+    `- How you interview: ${advisor.interviewTechnique}`,
+    `- Your tone: ${advisor.toneTraits.join(', ')}.`,
+    ...(openers.length
+      ? [`- Typical ways you open a turn (examples, never templates): ${openers.map(line => `"${line}"`).join(' / ')}`]
+      : []),
+    `- You never: ${advisor.neverDo.join('; ')}.`,
+    'These traits decide HOW you speak. The rules below decide WHAT you may do — where the two '
+    + 'collide, the rules win.',
+    '',
+  ]
+}
+
+/**
  * DER SYSTEM-PROMPT — die neun Regeln aus Content-Spec §1.2, wörtlich in
- * Verhalten übersetzt, plus eine Zeile zur Weiche W1.
+ * Verhalten übersetzt, plus die Berater-Schicht darüber, zwei Sorgfaltszeilen
+ * darunter und eine Zeile zur Weiche W1.
  */
 export function georgeSystemPrompt(options: GeorgeSystemPromptOptions): string {
-  const persona = options.persona?.trim() || GEORGE_PERSONA_DEFAULT
+  const advisor = options.advisor
+  const persona = advisor?.name ?? (options.persona?.trim() || GEORGE_PERSONA_DEFAULT)
   const vendor = options.vendor?.trim() || GEORGE_VENDOR_DEFAULT
 
   const path = options.pathKind === 'relaunch'
@@ -93,10 +146,21 @@ export function georgeSystemPrompt(options: GeorgeSystemPromptOptions): string {
       + 'and treat what the people say about their current appearance as evidence.'
     : 'This brand is new. Much will be missing, and that is expected: name the gap instead of filling it.'
 
+  // Mit Berater: das Team ist SICHTBAR, also sagt der Prompt auch, dass es
+  // Kolleginnen und Kollegen gibt — sonst erklärt sich ein „ab hier übernimmt
+  // Vera" in der Oberfläche aus dem Nichts, und das Modell antwortet als
+  // Alleskönner weiter.
+  const identity = advisor
+    ? `You are ${advisor.name}, ${advisor.role.en} in the brand advisory team of ${vendor}. Together `
+      + 'with your colleagues you guide one person through building a Brand Foundation; this part of '
+      + 'the work is yours. You are brief and concrete — never servile, never chatty.'
+    : `You are ${persona}, the digital brand advisor of ${vendor}. You guide one person through building a `
+      + 'Brand Foundation. You are warm, brief and concrete — never servile, never chatty.'
+
   return [
-    `You are ${persona}, the digital brand advisor of ${vendor}. You guide one person through building a `
-    + 'Brand Foundation. You are warm, brief and concrete — never servile, never chatty.',
+    identity,
     '',
+    ...(advisor ? advisorLayer(advisor, options.locale) : []),
     'Rules:',
     '1. ROLE: you advise on brand strategy and you build the foundation together with the person. '
     + 'You are not a chatbot showing off; you are the quiet expert doing the work.',
@@ -115,8 +179,22 @@ export function georgeSystemPrompt(options: GeorgeSystemPromptOptions): string {
     + "people's personal data, leave it out and ask for it to be left out. Never invent personal data.",
     '8. LIMITS: no legal advice (for naming and trademarks point to the guided checks and the disclaimer). '
     + 'Never invent facts about this brand or these people; mark anything unknown as an assumption.',
-    `9. LANGUAGE: you speak to the person in ${options.locale}. Brand content — everything that goes into `
-    + `the brand document — is written in ${options.contentLocale}.`,
+    `9. LANGUAGE: two languages, never mixed up. In the chat you speak to the person in ${options.locale} `
+    + '— your framing, your questions, your objections. Brand content — everything that goes into a '
+    + `field of the brand document — is written in ${options.contentLocale}, even when the person `
+    + 'writes to you in another language.',
+    '',
+    // B8/B9 — zwei Sorgfaltszeilen, ausdrücklich UNTER den Regeln: sie schärfen
+    // sie, sie ersetzen keine. Als zehnte und elfte Regel gezählt wären sie
+    // eine Änderung an §1.2, und die ist Davids Sache, nicht die dieses Codes.
+    'Care (these sharpen the rules, they never override them):',
+    '- CONTEXT: match the world this brand actually lives in. For a non-profit, an association, a club, '
+    + 'a public body or a volunteer project, drop sales language entirely: no "offer", no "winning '
+    + 'customers", no "market share". Speak of the mission, the members, the supporters and the people '
+    + 'they serve. Read which world it is from the inputs; do not ask for a label.',
+    '- WORDING: read your own sentence once more before you send it. No doubled words, no phrase that '
+    + 'only works when translated word by word, no sentence you would have to read twice. Short, '
+    + 'idiomatic sentences in the language you are writing.',
     '',
     `Path: ${path}`,
   ].join('\n')
@@ -166,8 +244,14 @@ const CONTEXT_SLOT_TASKS: Record<string, (options: ContextSlotInstructionOptions
     + 'industry named in the start card. If fewer than three names are given, return only those and say '
     + 'nothing about the missing ones. If no name is given at all, return a single entry saying that no '
     + 'competitor was named yet.',
-    'One line per competitor, in this shape: "- <name> - strong: <one point> - weak: <one point>". '
-    + 'Both points must be traceable to the inputs.',
+    'One line per competitor, in this shape: "- <name> - strong: <one point> - weak: <one point>".',
+    // B6: „steht nicht in den Eingaben" war als Steckbrief-Inhalt wertlos — der
+    // Mensch bekam drei Zeilen Füllung. Eine GEKENNZEICHNETE Annahme ist eine
+    // Aussage, die er prüfen kann; ein erfundener NAME bleibt verboten, weil er
+    // sich nicht prüfen, sondern nur glauben lässt.
+    'A point you can only infer — rather than read in the inputs — is allowed, but it must be marked in '
+    + 'the line itself, in this shape: "- <name> - assumption, please verify: <the point>". Never write '
+    + 'filler such as "not stated in the inputs": either say something checkable, or leave the point out.',
   ],
   'a.audienceSketch': () => [
     'TASK: sketch the audience of this brand.',
@@ -242,20 +326,44 @@ export function contextSlotInstruction(slotId: string, options: ContextSlotInstr
     )
   }
 
+  if (options.dependencies.length) {
+    lines.push(`Your inputs are the fields: ${options.dependencies.map(d => d.slotId).join(', ')}.`)
+  }
+
   const formatRule = brandSlotFormatRule(options.kind)
   const formatExample = brandSlotFormatExample(options.kind)
-  lines.push('', 'Output:')
+  lines.push('', 'The field value:')
   if (formatRule && formatExample) {
     lines.push(formatRule, 'Example of the shape:', formatExample)
   }
   lines.push(
     `Hard limit: at most ${options.maxLength} characters — stay clearly below it.`,
-    'Return the value of this one field and nothing else: no preamble, no heading, no closing question.',
+    // B4: der Slot-Text ist DOKUMENT-Inhalt und wird als Klartext gerendert.
+    // Sternchen und Unterstriche stünden dort wörtlich im Brand-Dokument —
+    // sichtbar als Zeichen, nicht als Auszeichnung.
+    'No markdown emphasis in the field value: no asterisks, no underscores, no bold, no italics, no '
+    + 'headings and no links beyond the shape required above. Plain text only.',
+    'It carries the value of this one field and nothing else: no preamble, no label, no closing question.',
+    '',
+    // B2: der Zug soll rahmen, das FELD nicht. Beides in EINER Antwort geht nur
+    // über Marker — der Vertrag dazu liegt in `georgeTurn.ts`, die Route trennt
+    // damit Slot-Text und Sprechblase.
+    'Answer as ONE chat turn in exactly this shape, each marker at the start of its own line:',
+    'BASIS: one short sentence saying what this draft rests on.',
+    'DRAFT:',
+    '(the field value, as described above — it may span several lines)',
+    'ASK: exactly one closing question, e.g. whether it lands, or a sharper one if you have a real doubt.',
+    'BASIS and ASK are chat and follow the chat language of rule 9; the DRAFT block is brand content and '
+    + 'follows the content language of rule 9.',
+    '',
+    // B3: die ehrliche Alternative zum erfundenen Entwurf. Sie steht hier und
+    // nicht im System-Prompt, weil sie eine AUSGABEFORM ist — und weil eine
+    // Instruktion ohne Entwurfsauftrag sie nicht braucht.
+    'IF THE INPUTS DO NOT CARRY ENOUGH for an honest draft, do not write one and do not fill the gap with '
+    + 'invention. Answer instead with a single turn that begins with the marker QUESTION: followed by '
+    + 'exactly ONE small, concrete question that would give you what is missing — the kind of question a '
+    + 'person can answer in one sentence. No BASIS, no DRAFT, no ASK in that case.',
   )
-
-  if (options.dependencies.length) {
-    lines.push(`Your inputs are the fields: ${options.dependencies.map(d => d.slotId).join(', ')}.`)
-  }
 
   return lines.join('\n')
 }

@@ -7,6 +7,7 @@ import {
   formatBrandSlotList,
   formatBrandSlotStructured,
 } from '../shared/brandSlotFormat'
+import { advisorByKey } from '../shared/brandAdvisors'
 import { slotById } from '../shared/slotRegistry'
 import {
   GEORGE_NO_DEPENDENCIES,
@@ -83,6 +84,32 @@ describe('System-Prompt: die neun Regeln (§1.2)', () => {
   it('REGEL 9 TRENNT ZWEI SPRACHEN — Reden und Markeninhalt', () => {
     expect(SYSTEM).toContain('you speak to the person in de')
     expect(SYSTEM).toContain('is written in en')
+    // a-4 schärft: der Mensch darf in einer dritten Sprache schreiben, der
+    // Markeninhalt bleibt trotzdem in der Inhaltssprache.
+    expect(SYSTEM).toContain('even when the person writes to you in another language')
+  })
+
+  /**
+   * B8/B9 — zwei Sorgfaltszeilen aus dem Live-Audit. Sie stehen UNTER den neun
+   * Regeln und ausdrücklich nicht als zehnte und elfte: §1.2 ist Davids Text,
+   * und eine Umnummerierung wäre eine Änderung daran.
+   */
+  it('trägt die zwei Sorgfaltszeilen — und lässt die Regeln neun bleiben', () => {
+    expect(SYSTEM).toContain('Care (these sharpen the rules, they never override them)')
+    // B8: Kontext-Sensibilität — kein Vertriebston für einen Verein.
+    expect(SYSTEM).toContain('For a non-profit, an association, a club')
+    expect(SYSTEM).toContain('drop sales language entirely')
+    expect(SYSTEM).toContain('do not ask for a label')
+    // B9: Sorgfalt beim Formulieren.
+    expect(SYSTEM).toContain('No doubled words')
+    expect(SYSTEM).not.toContain('10. ')
+  })
+
+  it('OHNE Berater bleibt es beim Gastgeber-Satz von a-3', () => {
+    // Der Rückwärts-Vertrag dieser Runde: ein Aufrufer, der die neue Schicht
+    // nicht kennt, bekommt den alten Prompt — keinen halben neuen.
+    expect(SYSTEM).not.toContain('Who you are in this part')
+    expect(SYSTEM).not.toContain('brand advisory team')
   })
 
   it('die Weiche W1 ändert die Haltung', () => {
@@ -91,6 +118,68 @@ describe('System-Prompt: die neun Regeln (§1.2)', () => {
     expect(relaunch).toContain('being relaunched')
     expect(relaunch).toContain('Describe what IS')
     expect(relaunch).not.toContain('This brand is new')
+  })
+})
+
+/**
+ * DIE BERATER-SCHICHT (george-a-4) — sie ist der Grund, warum der Wizard ein
+ * TEAM zeigt und nicht einen Alleskönner mit fünf Hüten.
+ *
+ * Geprüft wird dreierlei: dass die Persönlichkeit wirklich im Prompt ankommt
+ * (sonst wäre das Team eine reine Kopfzeile), dass sie ÜBER den Regeln steht
+ * und sich ihnen ausdrücklich unterordnet (sonst schlägt „sei fordernd" das
+ * „sei knapp"), und dass die Satzanfänge der WIZARD-Sprache folgen.
+ */
+describe('Berater-Schicht (george-a-4)', () => {
+  const vera = advisorByKey('vera')!
+  const withVera = georgeSystemPrompt({
+    locale: 'de', contentLocale: 'de', pathKind: 'new', advisor: vera,
+  })
+
+  it('stellt den Berater als Teil eines TEAMS vor', () => {
+    expect(withVera).toContain('You are Vera, Strategist in the brand advisory team of Branding Supply')
+    expect(withVera).toContain('this part of the work is yours')
+  })
+
+  it('trägt Stärke, Technik, Tonfall und Verbotsliste wörtlich', () => {
+    expect(withVera).toContain(vera.strengths)
+    expect(withVera).toContain(vera.interviewTechnique)
+    for (const trait of vera.toneTraits) expect(withVera).toContain(trait)
+    for (const never of vera.neverDo) expect(withVera).toContain(never)
+  })
+
+  it('DIE REGELN GEWINNEN — und der Prompt sagt es selbst', () => {
+    expect(withVera).toContain('These traits decide HOW you speak')
+    expect(withVera).toContain('where the two collide, the rules win')
+    // Und zwar in dieser Reihenfolge: Persönlichkeit oben, Fundament darunter.
+    expect(withVera.indexOf('Who you are in this part')).toBeLessThan(withVera.indexOf('Rules:'))
+  })
+
+  it('die Satzanfänge folgen der WIZARD-Sprache, nicht der Inhaltssprache', () => {
+    expect(withVera).toContain('Warum ausgerechnet ihr?')
+    const english = georgeSystemPrompt({
+      locale: 'en', contentLocale: 'de', pathKind: 'new', advisor: vera,
+    })
+    expect(english).toContain('Why you, of all people?')
+    expect(english).not.toContain('Warum ausgerechnet ihr?')
+  })
+
+  it('der Berater-NAME schlägt die Persona-Config — er ist die Identität', () => {
+    const otto = georgeSystemPrompt({
+      locale: 'de', contentLocale: 'de', pathKind: 'new', advisor: advisorByKey('otto')!, persona: 'Ada',
+    })
+    expect(otto).toContain('You are Otto')
+    expect(otto).not.toContain('You are Ada')
+  })
+
+  it('erwähnt die Hunde-Ebene mit keinem Wort', () => {
+    // Sie ist Davids ABOUT-Konzept; im Interview wäre sie ein Gag im Weg.
+    for (const key of ['george', 'vera', 'milo', 'nika', 'otto']) {
+      const prompt = georgeSystemPrompt({
+        locale: 'de', contentLocale: 'de', pathKind: 'new', advisor: advisorByKey(key)!,
+      })
+      expect(prompt, key).not.toMatch(/\b(dog|bark|wuff|Witterung|Treuherz|Bellkant|Testbiss|Wuffwuff)\b/i)
+    }
   })
 })
 
@@ -127,7 +216,42 @@ describe('Slot-Instruktionen (Baustein A, §4)', () => {
     const slot = slotById(slotId)!
     const instruction = contextSlotInstruction(slotId, optionsFor(slotId))
     expect(instruction).toContain(`at most ${slot.maxLength} characters`)
-    expect(instruction).toContain('Return the value of this one field and nothing else')
+    expect(instruction).toContain('It carries the value of this one field and nothing else')
+  })
+
+  /**
+   * B4 — der Slot-Text ist DOKUMENT-Inhalt und wird als Klartext gerendert.
+   * Sternchen stünden dort wörtlich; der Befund kam aus einem echten Entwurf.
+   */
+  it.each(CONTEXT_SLOTS)('%s: verbietet Markdown-Auszeichnung im FELDWERT', (slotId) => {
+    const instruction = contextSlotInstruction(slotId, optionsFor(slotId))
+    expect(instruction).toContain('No markdown emphasis in the field value')
+    expect(instruction).toContain('no asterisks, no underscores')
+  })
+
+  /**
+   * B2/B3 — der Zug rahmt den Entwurf, und wenn nichts da ist, wird gefragt
+   * statt erfunden. Beides hängt an denselben Markern wie `georgeTurn.ts`; die
+   * Prüfung steht deshalb WÖRTLICH gegen die Marker-Konstanten und nicht gegen
+   * abgeschriebene Zeichenketten.
+   */
+  it.each(CONTEXT_SLOTS)('%s: verlangt die Rahmung — Basis, Entwurf, EINE Frage', (slotId) => {
+    const instruction = contextSlotInstruction(slotId, optionsFor(slotId))
+    expect(instruction).toContain('Answer as ONE chat turn in exactly this shape')
+    for (const marker of ['BASIS:', 'DRAFT:', 'ASK:']) expect(instruction).toContain(marker)
+    expect(instruction).toContain('exactly one closing question')
+    // Und die Sprachregel je Teil (g): Meta in der Chat-Sprache, Feld in der
+    // Inhaltssprache — beides aus Regel 9, hier an der Ausgabeform wiederholt.
+    expect(instruction).toContain('BASIS and ASK are chat and follow the chat language of rule 9')
+    expect(instruction).toContain('the DRAFT block is brand content')
+  })
+
+  it.each(CONTEXT_SLOTS)('%s: bietet die Rückfrage als Alternative zum Erfinden an', (slotId) => {
+    const instruction = contextSlotInstruction(slotId, optionsFor(slotId))
+    expect(instruction).toContain('IF THE INPUTS DO NOT CARRY ENOUGH for an honest draft')
+    expect(instruction).toContain('QUESTION:')
+    expect(instruction).toContain('exactly ONE small, concrete question')
+    expect(instruction).toContain('a person can answer in one sentence')
   })
 
   it.each(CONTEXT_SLOTS)('%s: trägt Entwurfs-Ehrlichkeit und die Eingabe-Leitplanke', (slotId) => {
@@ -157,6 +281,16 @@ describe('Slot-Instruktionen (Baustein A, §4)', () => {
     expect(instruction).toContain('do NOT guess from the')
     expect(instruction).toContain('strong:')
     expect(instruction).toContain('weak:')
+  })
+
+  it('a.competitors ERLAUBT gekennzeichnete Annahmen — aber keinen erfundenen NAMEN (B6)', () => {
+    // Der Audit-Befund: „not stated in inputs" war als Steckbrief wertlos. Eine
+    // markierte Annahme kann der Mensch PRÜFEN, ein erfundener Name nicht.
+    const instruction = contextSlotInstruction('a.competitors', optionsFor('a.competitors'))
+    expect(instruction).toContain('assumption, please verify')
+    expect(instruction).toContain('Never write filler such as "not stated in the inputs"')
+    expect(instruction).toContain('USE ONLY names that appear literally in the inputs')
+    expect(instruction).toContain('Do NOT invent competitors')
   })
 
   it('a.audienceSketch will eine Skizze in Blöcken', () => {
@@ -361,10 +495,11 @@ describe('Die Startkarte in den Instruktionen (§4)', () => {
 describe('Prompt-Version', () => {
   it('ist gesetzt und benennt den Baustein', () => {
     // P2.5 hat den Prompt inhaltlich verändert (die Startkarte reist mit),
-    // P2.3 ein zweites Mal (der Website-Text kann mitreisen) — die Version MUSS
+    // P2.3 ein zweites Mal (der Website-Text kann mitreisen), a-4 ein drittes
+    // (Berater-Schicht, Rahmung, Rückfrage, B4/B6/B8/B9) — die Version MUSS
     // mitsteigen, sonst behaupten alte Generations-Einträge, aus diesem Prompt
     // zu stammen (Kopf von georgePrompt.ts).
-    expect(GEORGE_PROMPT_VERSION).toBe('george-a-3')
+    expect(GEORGE_PROMPT_VERSION).toBe('george-a-4')
   })
 })
 

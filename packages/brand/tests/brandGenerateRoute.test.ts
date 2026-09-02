@@ -535,3 +535,211 @@ describe('Der Dev-Stub bucht nichts', () => {
     expect(hits).toEqual([])
   })
 })
+
+/**
+ * DAS BEREITSCHAFTS-GATE AN DER ROUTE (Davids „zu wenig ist zu wenig").
+ *
+ * Die Regel selbst prüft `brandSlotReadiness.test.ts`. Hier zählt der ORT: das
+ * Nein muss VOR jeder Buchung und VOR dem Strom kommen, und es darf nur dann
+ * fallen, wenn wirklich generiert würde. Ein Gate, das bei ausgeschalteter KI
+ * feuert, gäbe dem Menschen die falsche Auskunft — die über sein Material statt
+ * die über den Dienst.
+ */
+describe('Bereitschafts-Gate', () => {
+  const emptyCard = { websiteUrl: '', industry: '', about: '', audience: '' }
+  let saved: Record<string, unknown>
+
+  beforeEach(() => {
+    saved = {
+      websiteUrl: profileRow.websiteUrl,
+      industry: profileRow.industry,
+      about: profileRow.about,
+      audience: profileRow.audience,
+    }
+  })
+
+  afterEach(() => { Object.assign(profileRow, saved) })
+
+  it('LEHNT MIT 409 ab, wenn die Startkarte nichts hergibt', async () => {
+    Object.assign(profileRow, emptyCard)
+    const { event } = fakeEvent()
+    await expect(handler(event)).rejects.toMatchObject({
+      status: 409,
+      data: { code: 'not_ready' },
+    })
+    // Kein Eimer, kein Schreibvorgang, kein Strom: der Klick kostet nichts.
+    expect(hits).toEqual([])
+    expect(tablesDB.updateRow).not.toHaveBeenCalled()
+  })
+
+  it('a.competitors braucht die Website — die volle Startkarte reicht dafür NICHT', async () => {
+    body = { slotId: 'a.competitors' }
+    const { event } = fakeEvent()
+    await expect(handler(event)).rejects.toMatchObject({ status: 409, data: { code: 'not_ready' } })
+
+    // Mit eingelesener Website geht derselbe Klick durch.
+    profileRow.siteAnalysis = 'Wir rösten seit 2019. Unsere Nachbarn: Kona Roasters.'
+    const second = fakeEvent()
+    await handler(second.event)
+    expect(readBack(second.chunks).at(-1)!.type).toBe('generation.completed')
+    delete profileRow.siteAnalysis
+  })
+
+  it('DIE VOLLE STARTKARTE GENÜGT — das Gate ist keine Sackgasse', async () => {
+    const { event, chunks } = fakeEvent()
+    await handler(event)
+    expect(readBack(chunks).at(-1)!.type).toBe('generation.completed')
+  })
+
+  it('KI AUS schlägt das Gate: der Mensch erfährt den Dienst-Zustand, nicht sein Material', async () => {
+    Object.assign(profileRow, emptyCard)
+    appConfigRow = { $id: 'global', brandAiEnabled: false }
+    const { event, chunks } = fakeEvent()
+    await handler(event)
+    expect(readBack(chunks)[0]).toMatchObject({ type: 'generation.failed', code: 'ai_disabled' })
+  })
+})
+
+/**
+ * DER RÜCKFRAGE-ZWEIG (george-a-4, Befund B3) — der heikelste Teil des Umbaus:
+ * ein Lauf, der KEINEN Slot anfasst und trotzdem als Erfolg endet.
+ *
+ * Drei Aussagen, die man beim Aufräumen als Erstes verliert:
+ *  1. kein `slot.ready` — sonst schriebe der Client die Frage ins Feld;
+ *  2. keine `slots` und kein `inputHash` in der Zeile — sonst gälte ein alter
+ *     Entwurf plötzlich wieder als „aus dem aktuellen Stand entstanden";
+ *  3. ein Historien-Eintrag OHNE `draft` — sonst böte die
+ *     Fassungs-Wiederherstellung eine Frage zum Übernehmen an.
+ */
+describe('Rückfrage statt Entwurf', () => {
+  beforeEach(async () => {
+    const module = await import('../server/utils/brandGenerators')
+    module.clearActiveBrandGenerations()
+    module.registerBrandSlotGenerator('context', (async (context: {
+      onDelta: (text: string) => Promise<void> | void
+    }) => {
+      await context.onDelta('Wen nennt ihr zuerst?')
+      return {
+        draft: '',
+        message: 'Wen nennt ihr zuerst?',
+        outcome: 'question' as const,
+        model: 'test-model',
+        provider: 'test',
+        promptVersion: 'george-a-4',
+        aborted: false,
+      }
+    }) as never)
+  })
+
+  afterEach(async () => {
+    const module = await import('../server/utils/brandGenerators')
+    module.clearBrandSlotGenerators()
+    module.clearActiveBrandGenerations()
+  })
+
+  it('sendet KEIN slot.ready und meldet `outcome: question`', async () => {
+    const { event, chunks } = fakeEvent()
+    await handler(event)
+    const events = readBack(chunks)
+    expect(events.some(item => item.type === 'slot.ready')).toBe(false)
+    expect(events.at(-1)).toMatchObject({ type: 'generation.completed', outcome: 'question' })
+    // Die Frage lief trotzdem als Zug durch den Strom.
+    expect(events.filter(item => item.type === 'message.delta')).toHaveLength(1)
+  })
+
+  it('SCHREIBT KEINEN SLOT UND KEINEN inputHash — nur Historie und Fassung', async () => {
+    const { event } = fakeEvent()
+    await handler(event)
+    const data = tablesDB.updateRow.mock.calls
+      .map(call => call[0] as { tableId: string, data: Record<string, unknown> })
+      .find(call => call.tableId === 'brand_steps')!.data
+
+    expect(data.slots).toBeUndefined()
+    expect(data.inputHash).toBeUndefined()
+    // Die `revision` steigt trotzdem: die Zeile HAT sich geändert, und der
+    // Autosave des Menschen liefe sonst in einen 409, den niemand ausgelöst hat.
+    expect(data.revision).toBe(4)
+
+    const generations = JSON.parse(String(data.generations)) as BrandGenerationsView
+    expect(generations.count).toBe(1)
+    expect(generations.items[0]!.outcome).toBe('question')
+    expect(generations.items[0]!.draft).toBeUndefined()
+  })
+
+  it('legt die Frage als Zug in den Verlauf — erkennbar als Frage', async () => {
+    const { event } = fakeEvent()
+    await handler(event)
+    const message = tablesDB.createRow.mock.calls
+      .map(call => call[0] as { tableId: string, data: Record<string, unknown> })
+      .find(call => call.tableId === 'brand_messages')!.data
+    expect(message.body).toBe('Wen nennt ihr zuerst?')
+    expect(JSON.parse(String(message.parts))).toMatchObject({ kind: 'question' })
+  })
+})
+
+/**
+ * DIE RAHMUNG (B2): der Chat-Zug und der Feldwert sind seit a-4 zwei
+ * verschiedene Zeichenketten. Was wohin gehört, entscheidet der Generator —
+ * die Route muss es nur auseinanderhalten.
+ */
+describe('Gerahmter Entwurf', () => {
+  beforeEach(async () => {
+    const module = await import('../server/utils/brandGenerators')
+    module.clearActiveBrandGenerations()
+    module.registerBrandSlotGenerator('context', (async () => ({
+      draft: 'Wir rösten Kaffee.',
+      message: 'Aus eurem Startbogen.\n\nWir rösten Kaffee.\n\nTrifft das?',
+      outcome: 'draft' as const,
+      model: 'test-model',
+      provider: 'test',
+      promptVersion: 'george-a-4',
+      aborted: false,
+    })) as never)
+  })
+
+  afterEach(async () => {
+    const module = await import('../server/utils/brandGenerators')
+    module.clearBrandSlotGenerators()
+    module.clearActiveBrandGenerations()
+  })
+
+  it('DER SLOT BEKOMMT DEN WERT, DER VERLAUF DEN GERAHMTEN ZUG', async () => {
+    const { event, chunks } = fakeEvent()
+    await handler(event)
+
+    const ready = readBack(chunks).find(item => item.type === 'slot.ready') as { draft: string }
+    expect(ready.draft).toBe('Wir rösten Kaffee.')
+
+    const data = tablesDB.updateRow.mock.calls
+      .map(call => call[0] as { tableId: string, data: Record<string, unknown> })
+      .find(call => call.tableId === 'brand_steps')!.data
+    const slots = JSON.parse(String(data.slots)) as Record<string, { latestDraft: string }>
+    // Im FELD steht nur der Wert — keine Basis-Zeile, keine Frage.
+    expect(slots['a.pitch']!.latestDraft).toBe('Wir rösten Kaffee.')
+
+    const message = tablesDB.createRow.mock.calls
+      .map(call => call[0] as { tableId: string, data: Record<string, unknown> })
+      .find(call => call.tableId === 'brand_messages')!.data
+    expect(message.body).toBe('Aus eurem Startbogen.\n\nWir rösten Kaffee.\n\nTrifft das?')
+    expect(JSON.parse(String(message.parts))).toMatchObject({ kind: 'draft' })
+  })
+
+  it('OHNE `message` bleibt es beim Stand von a-3: der Entwurf IST der Zug', async () => {
+    const module = await import('../server/utils/brandGenerators')
+    module.registerBrandSlotGenerator('context', (async () => ({
+      draft: 'Nur der Wert.',
+      model: 'test-model',
+      provider: 'test',
+      promptVersion: 'p-1',
+      aborted: false,
+    })) as never)
+
+    const { event, chunks } = fakeEvent()
+    await handler(event)
+    expect(readBack(chunks).at(-1)).toMatchObject({ outcome: 'draft' })
+    const message = tablesDB.createRow.mock.calls
+      .map(call => call[0] as { tableId: string, data: Record<string, unknown> })
+      .find(call => call.tableId === 'brand_messages')!.data
+    expect(message.body).toBe('Nur der Wert.')
+  })
+})
