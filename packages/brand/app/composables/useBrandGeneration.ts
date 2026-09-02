@@ -8,6 +8,7 @@ import {
   type BrandGenerationOutcome,
   decodeBrandGenerationChunk,
 } from '../../shared/brandGeneration'
+import { isBrandUiLocale } from '../../shared/brandUiLocale'
 import { useBrandWorkspaceStore } from '../stores/brandWorkspace'
 
 /**
@@ -58,6 +59,13 @@ export type BrandGenerationClientFailure =
   | 'request_rejected'
   /** Das Bereitschafts-Gate hat abgelehnt (409) — zu wenig Material (george-a-4). */
   | 'not_ready'
+  /**
+   * Die Bestätigungs-Sperre hat abgelehnt (409) — der Slot ist zu, bis
+   * „Korrigieren" ihn öffnet. Ein eigener Code neben `not_ready`, weil beide
+   * 409 sind und VERSCHIEDENE Dinge sagen: „hol mehr Material" gegen „du hast
+   * das schon entschieden".
+   */
+  | 'slot_confirmed'
 
 export interface UseBrandGenerationOptions {
   /** Vor dem Start ausführen — die Seite reicht hier `autosave.flush` herein. */
@@ -65,13 +73,13 @@ export interface UseBrandGenerationOptions {
 }
 
 /**
- * Der Drossel-Grund aus dem Fehler-Envelope (`{ ok, code, message, reason }`).
- * `null`, wenn dort nichts Bekanntes steht — ein alter Server, ein Proxy-429
- * oder eine leere Antwort fallen so auf den bisherigen Text zurück.
+ * Der Grund aus dem Fehler-Envelope (`{ ok, code, message, reason }`) — roh.
+ * `null`, wenn dort nichts steht: ein alter Server, ein Proxy-Fehler oder eine
+ * leere Antwort fallen so auf den allgemeinen Text zurück.
  */
-async function rejectionReason(response: Response): Promise<BrandAiRejectionCode | null> {
+async function envelopeReason(response: Response): Promise<string | null> {
   const body = await response.json().catch(() => null) as { reason?: unknown } | null
-  return isBrandAiRejectionCode(body?.reason) ? body.reason : null
+  return typeof body?.reason === 'string' ? body.reason : null
 }
 
 function newIdempotencyKey(): string {
@@ -84,6 +92,14 @@ export function useBrandGeneration(
   options: UseBrandGenerationOptions = {},
 ) {
   const store = useBrandWorkspaceStore()
+  /**
+   * DIE SPRACHE DER SEITE — sie reist im Rumpf mit (Davids Befund 2026-09-02).
+   * Der Server las sie bis dahin aus `i18n_redirected` und traf damit die
+   * einmal gewählte statt der gerade offenen: englische Werkstatt, deutscher
+   * George. `locale` aus `useI18n()` folgt der ROUTE (`prefix_except_default`)
+   * und ist damit genau die Auskunft, die dort fehlte.
+   */
+  const { locale } = useI18n()
 
   const status = ref<BrandGenerationStatus>('idle')
   const activeSlotId = ref<string | null>(null)
@@ -139,6 +155,10 @@ export function useBrandGeneration(
           headers: { 'Content-Type': 'application/json', 'Accept': 'text/event-stream' },
           body: JSON.stringify({
             slotId,
+            // Nur eine BEKANNTE Sprache wird mitgeschickt; alles andere lehnt
+            // das Schema ab (400), und der Rückfall auf die Inhaltssprache
+            // gehört ohnehin dem Server.
+            ...(isBrandUiLocale(locale.value) ? { uiLocale: locale.value } : {}),
             ...(hint.trim() ? { hint: hint.trim() } : {}),
             // Ein Schlüssel je Knopfdruck: wiederholt der Client denselben
             // Aufruf (Netzhänger), liefert der Server den bereits erzeugten
@@ -159,10 +179,19 @@ export function useBrandGeneration(
         // geklappt" schickte den Menschen zurück an denselben Knopf.
         status.value = 'failed'
         // Zwei Ausnahmen von „der Grund bleibt beim Server": die Drossel (429)
-        // sagt WANN es wieder geht, das Bereitschafts-Gate (409) sagt WAS fehlt.
+        // sagt WANN es wieder geht, die 409-Gates sagen WORAN es liegt.
         // Beides schickt den Menschen sonst zurück an denselben Knopf.
-        failureCode.value = (response.status === 429 ? await rejectionReason(response) : null)
-          ?? (response.status === 409 ? 'not_ready' : null)
+        //
+        // DIE BEIDEN 409 WERDEN UNTERSCHIEDEN, und zwar am `reason`, nicht am
+        // Status: „zu wenig Material" und „das hast du schon bestätigt" führen
+        // zu verschiedenen nächsten Handgriffen. Ein alter Server ohne
+        // `reason` fällt auf `not_ready` zurück — das war bis heute die einzige
+        // Bedeutung dieses Status.
+        const reason = response.status === 429 || response.status === 409
+          ? await envelopeReason(response)
+          : null
+        failureCode.value = (response.status === 429 && isBrandAiRejectionCode(reason) ? reason : null)
+          ?? (response.status === 409 ? (reason === 'slot_confirmed' ? 'slot_confirmed' : 'not_ready') : null)
           ?? 'request_rejected'
         return
       }

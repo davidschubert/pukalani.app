@@ -92,6 +92,32 @@ const startCardComplete = computed(() =>
 const submitting = ref(false)
 const failed = ref(false)
 
+/**
+ * ── B7: DIE STARTKARTE SCHLUCKTE EINGABEN (Audit 2026-09-02, dreimal
+ * reproduziert) ──────────────────────────────────────────────────────────
+ *
+ * Wer direkt nach der Navigation hierher zu tippen anfing, verlor den Text:
+ * bis zur Hydration hängt an den Feldern kein `v-model`, der Browser nimmt die
+ * Zeichen an, und der erste Vue-Render überschreibt sie mit dem leeren
+ * Anfangswert. Die Felder SAHEN aber bedienbar aus — das ist der ganze Fehler.
+ *
+ * DER KLEINSTE EHRLICHE FIX IST, NICHT ZU LÜGEN: bis `onMounted` + `nextTick`
+ * sind die Felder sichtbar abgeschaltet, mit einer ruhigen Zeile darüber.
+ * Kein Puffer, der vorgetipptes übernimmt — der müsste jedes Feld einzeln
+ * auslesen, käme bei Auswahl-Elementen und der `datalist` an seine Grenze und
+ * wäre ein zweiter Zustandsspeicher neben den Refs. Lieber eine halbe Sekunde
+ * ehrlich gesperrt als scheinbar bereit.
+ *
+ * `false` auf BEIDEN Seiten (SSR und erster Client-Render), damit das Markup
+ * übereinstimmt; das `nextTick` wartet den Render nach der Hydration ab, in dem
+ * die Bindungen wirklich hängen.
+ */
+const hydrated = ref(false)
+onMounted(async () => {
+  await nextTick()
+  hydrated.value = true
+})
+
 /** Der Chip erscheint nur beim Neuschnitt — der Feinschliff friert W2 ein. */
 const showNamingOpt = computed(() => pathKind.value === 'relaunch' && relaunchScope.value === 'recut')
 
@@ -149,12 +175,16 @@ useBrandTitle(() => t('brand.new.title'))
 
     <p class="bw-label mt-4 uppercase tracking-widest" style="color: var(--bw-muted)">{{ t('brand.new.eyebrow') }}</p>
     <h1 class="mt-1 text-[28px] font-extralight leading-tight tracking-tight">{{ t('brand.new.title') }}</h1>
+    <!-- B7: solange nichts angenommen wird, steht das auch da. Der Satz
+         verschwindet mit der Hydration und hinterlässt keine Lücke. -->
+    <p v-if="!hydrated" class="bw-pending mt-2">{{ t('brand.new.preparing') }}</p>
 
     <!-- W1: der Pfad -->
     <div class="mt-6 grid gap-2 sm:grid-cols-2">
       <button
         v-for="kind in (['new', 'relaunch'] as const)" :key="kind"
         type="button"
+        :disabled="!hydrated"
         class="bw-select-card rounded-2xl px-4 py-4 text-left"
         :class="pathKind === kind ? 'bw-select-card--on' : ''"
         :aria-pressed="pathKind === kind"
@@ -172,6 +202,7 @@ useBrandTitle(() => t('brand.new.title'))
         <button
           v-for="scope in (['refine', 'recut'] as const)" :key="scope"
           type="button"
+          :disabled="!hydrated"
           class="bw-select-card rounded-full px-4 py-2 text-sm"
           :class="relaunchScope === scope ? 'bw-select-card--on' : ''"
           :aria-pressed="relaunchScope === scope"
@@ -183,6 +214,7 @@ useBrandTitle(() => t('brand.new.title'))
       <div v-if="showNamingOpt" class="mt-3">
         <button
           type="button"
+          :disabled="!hydrated"
           class="bw-select-card inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm"
           :class="namingOpted ? 'bw-select-card--on' : ''"
           :aria-pressed="namingOpted"
@@ -200,6 +232,7 @@ useBrandTitle(() => t('brand.new.title'))
     </p>
     <UInput
       v-model="title" variant="none" class="mt-2 w-full" :ui="{ base: 'rounded-full px-4' }"
+      :disabled="!hydrated"
       :placeholder="pathKind === 'new' ? t('brand.new.titleField.placeholderNew') : t('brand.new.titleField.placeholderRelaunch')"
       style="background: var(--bw-surface)"
     />
@@ -209,6 +242,7 @@ useBrandTitle(() => t('brand.new.title'))
       <button
         v-for="code in contentLocales" :key="code"
         type="button"
+        :disabled="!hydrated"
         class="bw-select-card rounded-full px-4 py-2 text-sm uppercase"
         :class="contentLocale === code ? 'bw-select-card--on' : ''"
         :aria-pressed="contentLocale === code"
@@ -224,6 +258,7 @@ useBrandTitle(() => t('brand.new.title'))
       <button
         v-for="kind in (['solo', 'team'] as const)" :key="kind"
         type="button"
+        :disabled="!hydrated"
         class="bw-select-card rounded-full px-4 py-2 text-sm"
         :class="team === kind ? 'bw-select-card--on' : ''"
         :aria-pressed="team === kind"
@@ -238,14 +273,14 @@ useBrandTitle(() => t('brand.new.title'))
     <p class="bw-label mt-8" style="color: var(--bw-muted)">{{ t('brand.new.startCard.website') }}</p>
     <UInput
       v-model="websiteUrl" variant="none" class="mt-2 w-full" :ui="{ base: 'rounded-full px-4' }"
-      type="url" inputmode="url" :maxlength="BRAND_WEBSITE_URL_MAX"
+      :disabled="!hydrated" type="url" inputmode="url" :maxlength="BRAND_WEBSITE_URL_MAX"
       style="background: var(--bw-surface)"
     />
 
     <p class="bw-label mt-6" style="color: var(--bw-muted)">{{ t('brand.new.startCard.industry') }}</p>
     <UInput
       v-model="industry" variant="none" class="mt-2 w-full" :ui="{ base: 'rounded-full px-4' }"
-      list="bw-industry-suggestions" :maxlength="BRAND_INDUSTRY_MAX"
+      :disabled="!hydrated" list="bw-industry-suggestions" :maxlength="BRAND_INDUSTRY_MAX"
       style="background: var(--bw-surface)"
     />
     <!-- „Eingabe mit Vorschlägen" (§2.1): eine datalist, kein zweites API und
@@ -257,14 +292,14 @@ useBrandTitle(() => t('brand.new.title'))
     <p class="bw-label mt-6" style="color: var(--bw-muted)">{{ t('brand.new.startCard.about') }}</p>
     <UTextarea
       v-model="about" variant="none" class="mt-2 w-full" :ui="{ base: 'rounded-2xl px-4 py-3' }"
-      :rows="3" :maxlength="BRAND_ABOUT_MAX"
+      :disabled="!hydrated" :rows="3" :maxlength="BRAND_ABOUT_MAX"
       style="background: var(--bw-surface)"
     />
 
     <p class="bw-label mt-6" style="color: var(--bw-muted)">{{ t('brand.new.startCard.audience') }}</p>
     <UTextarea
       v-model="audience" variant="none" class="mt-2 w-full" :ui="{ base: 'rounded-2xl px-4 py-3' }"
-      :rows="2" :maxlength="BRAND_AUDIENCE_MAX"
+      :disabled="!hydrated" :rows="2" :maxlength="BRAND_AUDIENCE_MAX"
       style="background: var(--bw-surface)"
     />
 
@@ -272,7 +307,7 @@ useBrandTitle(() => t('brand.new.title'))
       <p v-if="failed" class="mr-auto text-sm" style="color: var(--bw-stale)">{{ t('brand.new.failed') }}</p>
       <UButton
         :loading="submitting"
-        :disabled="!startCardComplete"
+        :disabled="!hydrated || !startCardComplete"
         trailing-icon="i-ph-arrow-right" :label="t('brand.new.submit')"
         size="lg" class="rounded-full" @click="submit"
       />

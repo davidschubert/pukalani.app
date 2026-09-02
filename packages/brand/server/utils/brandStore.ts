@@ -222,6 +222,20 @@ export function brandSlotStoredValue(record: BrandSlotRecord | undefined): strin
 }
 
 /**
+ * HAT DER MENSCH DIESEM SLOT ZUGESTIMMT? — die eine Frage hinter der
+ * Bestätigungs-Sperre (Davids Entscheidung 2026-09-02: ein bestätigter Slot
+ * ist zu, bis „Korrigieren" ihn öffnet).
+ *
+ * Sie wird an DREI Stellen gestellt (Autosave-Route, Generate-Route,
+ * `toSlotFacts`) und darf überall dasselbe heissen: `confirmed` trägt den
+ * bestätigten TEXT, nicht ein Flag — eine leere Zeichenkette ist deshalb
+ * „nicht bestätigt" und nicht „bestätigt mit nichts".
+ */
+export function brandSlotRecordConfirmed(record: BrandSlotRecord | undefined): boolean {
+  return typeof record?.confirmed === 'string' && record.confirmed.length > 0
+}
+
+/**
  * DEAKTIVIERTE UND UNBEKANNTE SLOTS FLIEGEN BEIM HINAUSGEBEN NICHT RAUS.
  * Ein Leser muss alte Daten anzeigen können (Migrationsvertrag) — geschrieben
  * werden dürfen sie trotzdem nicht, das verhindert das Schema.
@@ -243,7 +257,7 @@ export function toSlotViews(records: Record<string, BrandSlotRecord>): Record<st
 export function toSlotFacts(records: Record<string, BrandSlotRecord>): Record<string, BrandSlotStateFacts> {
   const facts: Record<string, BrandSlotStateFacts> = {}
   for (const [slotId, record] of Object.entries(records)) {
-    const confirmed = typeof record.confirmed === 'string' && record.confirmed.length > 0
+    const confirmed = brandSlotRecordConfirmed(record)
     const hasValue = confirmed
       || (typeof record.latestDraft === 'string' && record.latestDraft.length > 0)
       || (typeof record.firstDraft === 'string' && record.firstDraft.length > 0)

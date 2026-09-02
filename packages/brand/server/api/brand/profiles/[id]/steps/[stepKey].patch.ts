@@ -9,6 +9,7 @@ import {
   BRAND_STEPS_TABLE,
   type BrandSlotRecord,
   brandDb,
+  brandSlotRecordConfirmed,
   loadBrandStepContext,
   parseSlotRecords,
   profileFacts,
@@ -46,11 +47,31 @@ import {
  *    Übernahmequoten (Audit 2) — wer `firstDraft` beim Speichern mitzieht,
  *    macht beide unberechenbar.
  *
+ * ── EIN BESTÄTIGTER SLOT IST ZU (Davids Entscheidung, 2026-09-02) ─────────
+ * „Wenn confirmed müsste es unmöglich sein zu korrigieren, außer wir klicken
+ * auf einen Button Korrigieren." Der Server ist die Durchsetzung davon: eine
+ * WERT-Änderung an einem bestätigten Slot wird mit 409 `slot_confirmed`
+ * abgewiesen. Vorher schrieb sie still einen neuen `latestDraft` NEBEN die
+ * bestätigte Fassung — der Mensch sah einen Text, das Dokument
+ * (`confirmedSlotValues`, die Grundlage jeder Veröffentlichung) trug einen
+ * anderen, und niemand wurde je darauf hingewiesen.
+ *
+ * DAS AUFHEBEN IST DIE EINZIGE TÜR ZURÜCK und war schon immer da
+ * (`confirmed: false` ⇒ `confirmed = null`); es fehlte nur der Knopf. Ein
+ * Patch, der GLEICHZEITIG aufhebt und schreibt, bleibt deshalb erlaubt: er
+ * geht durch dieselbe Tür, nur in einem Zug.
+ *
+ * ES IST KEIN NEUES FELD DARAUS GEWORDEN. `confirmed` trägt den bestätigten
+ * TEXT (Versions-Vertrag, Schema-Anhang §2) und ist damit bereits die
+ * vollständige Auskunft „bestätigt · und zwar dieser Wortlaut". Ein zusätzliches
+ * `confirmedAt` wäre ein zweiter Ort für dieselbe Tatsache — und der erste, der
+ * bei einer Migration danebenläuft.
+ *
  * ── WAS DER SERVER HIER ERZWINGT ──────────────────────────────────────────
  * Eintritt (`canEnterBrandStep`, in `loadBrandStepContext`) · Zugehörigkeit
- * und Länge jedes Slots (Registry, im Schema) · den Zustandsübergang
- * `open → active` und die Konfidenz (`transitionBrandStep`). Der Client
- * schickt Text, keine Zustände.
+ * und Länge jedes Slots (Registry, im Schema) · die Bestätigungs-Sperre (s. o.)
+ * · den Zustandsübergang `open → active` und die Konfidenz
+ * (`transitionBrandStep`). Der Client schickt Text, keine Zustände.
  */
 
 /** Die Ablehnungsgründe, die aus dem Schema kommen — sie reisen als `data.code`. */
@@ -95,6 +116,17 @@ export default defineEventHandler(async (event): Promise<BrandStepSaveResponse> 
   for (const [slotId, patch] of Object.entries(body.slots)) {
     const before = records[slotId]
     const candidate: BrandSlotRecord = { ...before }
+
+    // DIE SPERRE (s. Kopf). Sie steht VOR jeder Zuweisung: ein bestätigter
+    // Slot darf seinen Text nur verlieren, wenn derselbe Patch die
+    // Bestätigung aufhebt — „Korrigieren" ist die einzige Tür.
+    if (brandSlotRecordConfirmed(before) && patch.value !== undefined && patch.confirmed !== false) {
+      throw createError({
+        status: 409,
+        statusText: 'Slot is confirmed',
+        data: { code: 'slot_confirmed' },
+      })
+    }
 
     if (patch.value !== undefined) {
       // Der erste Wert bleibt stehen — auch wenn er von George kam.

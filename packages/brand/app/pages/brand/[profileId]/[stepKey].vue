@@ -18,7 +18,16 @@ import {
 import { brandSlotDisplayValue } from '../../../../shared/brandAutosaveDiff'
 import { brandAiRejectionMessageKey } from '../../../../shared/brandAiLimits'
 import { type BrandAdvisorKey, advisorForStep } from '../../../../shared/brandAdvisors'
-import { type BrandReadinessNeed, slotReadiness } from '../../../../shared/brandSlotReadiness'
+import {
+  type BrandReadinessNeed,
+  type BrandSlotReadiness,
+  slotReadiness,
+} from '../../../../shared/brandSlotReadiness'
+import {
+  type BrandSlotControls,
+  brandChapterProgress,
+  brandSlotControls,
+} from '../../../../shared/brandSlotControls'
 import type {
   BrandGenerationVersionsResponse,
   BrandSiteAnalysisView,
@@ -237,16 +246,29 @@ async function confirmSlot(slotId: string): Promise<void> {
   await autosave.flush()
 }
 
+/**
+ * „KORRIGIEREN" — die EINZIGE Tür zurück (Davids Entscheidung 2026-09-02).
+ *
+ * Ein bestätigter Slot ist zu: das Feld ist schreibgeschützt, George entwirft
+ * nicht, frühere Fassungen lassen sich nicht übernehmen. Das ist kein
+ * Schikane-Zustand, sondern die Bedingung dafür, dass „bestätigt" etwas
+ * bedeutet — vorher schrieb der nächste Tastendruck still einen `latestDraft`
+ * neben die bestätigte Fassung, und im Dokument stand weiter der alte Text.
+ *
+ * Aufheben ist eine Änderung wie jede andere: dieselbe `revision`-Rechnung,
+ * derselbe Autosave, derselbe 409-Weg. Der Server bestätigt es, erst dann ist
+ * der Slot wirklich offen — deshalb `flush()` und nicht `schedule()`.
+ */
+async function reviseSlot(slotId: string): Promise<void> {
+  store.setSlotConfirmed(slotId, false)
+  await autosave.flush()
+}
+
 // ── George entwirft (§3b.3) ───────────────────────────────────────────────
 
 /** Der Hinweis je Slot („wärmer", „kürzer") — lokal, nie gespeichert. */
 const hints = ref<Record<string, string>>({})
 watch(routeStepKey, () => { hints.value = {} })
-
-/** Nur Slots, die George überhaupt entwirft — eine reine Menschenfrage nicht. */
-function isGeneratable(slot: BrandSlot): boolean {
-  return slot.generator !== 'none'
-}
 
 /**
  * ── DAS BEREITSCHAFTS-GATE, SCHON VOR DEM KLICK ──────────────────────────
@@ -264,7 +286,7 @@ const slotValues = computed<Record<string, string>>(() => {
   return values
 })
 
-function readinessOf(slot: BrandSlot) {
+function readinessOf(slot: BrandSlot): BrandSlotReadiness {
   return slotReadiness(slot.id, {
     startCard: store.profile?.startCard ?? { websiteUrl: '', industry: '', about: '', audience: '' },
     hasSiteAnalysis: Boolean(store.profile?.siteAnalysis.analyzedAt),
@@ -282,14 +304,51 @@ const READINESS_KEYS: Record<BrandReadinessNeed, string> = {
   'source_slots': 'sourceSlots',
 }
 
-function readinessNote(slot: BrandSlot): string | null {
-  const readiness = readinessOf(slot)
+function readinessNote(readiness: BrandSlotReadiness): string | null {
   if (readiness.ready) return null
   return t('brand.workspace.ready.needs', {
     advisor: advisor.value.name,
     needs: readiness.missing.map(need => t(`brand.workspace.ready.need.${READINESS_KEYS[need]}`)).join(' · '),
   })
 }
+
+/**
+ * ── DIE BÜHNE RECHNET IHRE ZUSTÄNDE EINMAL ────────────────────────────────
+ *
+ * Je Slot: WAS er gerade ist (leer · Entwurf · bestätigt) und WELCHE
+ * Bedienelemente dazugehören. Die Entscheidung selbst liegt pur nebenan
+ * (`brandSlotControls`) und ist dort vollständig getestet — hier steht nur die
+ * Zuordnung von Store-Daten zu ihren Eingaben.
+ *
+ * Ein Paar aus Slot und Zustand statt einer Nachschlagetabelle: das Markup
+ * läuft ohnehin über die Slots, und eine `Record`-Suche im Template hätte für
+ * jeden Zugriff einen Undefined-Fall, den es hier nicht gibt.
+ */
+interface BrandStageSlot {
+  slot: BrandSlot
+  controls: BrandSlotControls
+  /** Der Satz des Bereitschafts-Gates — nur, wenn er auch gezeigt wird. */
+  note: string | null
+}
+
+const stageSlots = computed<BrandStageSlot[]>(() => slots.value.map((slot) => {
+  const readiness = readinessOf(slot)
+  const controls = brandSlotControls({
+    confirmed: store.slotConfirmed(slot.id),
+    hasValue: store.slotValue(slot.id).length > 0,
+    isGeorgeDraft: store.slotIsGeorgeDraft(slot.id),
+    hasEditor: slot.editor !== 'none',
+    // Der Paarvergleich (Katalog §12) hat kein Feld und keine Bestätigung.
+    confirmable: slot.type !== 'special',
+    generatable: slot.generator !== 'none',
+    hasHistory: Boolean(store.serverSlots[slot.id]?.firstDraft),
+    ready: readiness.ready,
+  })
+  return { slot, controls, note: controls.showReadinessNote ? readinessNote(readiness) : null }
+}))
+
+/** Der Balken DIESES Kapitels — der Gesamt-Weg steht unverändert in der Leiste. */
+const chapterProgress = computed(() => brandChapterProgress(stageSlots.value.map(entry => entry.controls)))
 
 async function generateSlot(slot: BrandSlot): Promise<void> {
   await generation.generate(slot.id, hints.value[slot.id] ?? '')
@@ -325,10 +384,15 @@ const versionsOpen = computed({
   set: (value: boolean) => { if (!value) versionsSlot.value = null },
 })
 
-/** Es gibt etwas zu zeigen, sobald für den Slot je ein Text gespeichert war. */
-function hasHistory(slot: BrandSlot): boolean {
-  return Boolean(store.serverSlots[slot.id]?.firstDraft)
-}
+/**
+ * AUF EINEM BESTÄTIGTEN SLOT IST DIE LISTE LESBAR, DIE ÜBERNAHME NICHT.
+ * `useVersion` schreibt eine gewöhnliche lokale Eingabe, und die weist der
+ * Server jetzt mit `slot_confirmed` ab — ein Knopf, der einen Konflikt
+ * erzeugt, den der Mensch nicht ausgelöst hat, wäre schlechter als ein
+ * sichtbar abgeschalteter. Der Weg dorthin ist „Korrigieren".
+ */
+const versionsControls = computed<BrandSlotControls | null>(() =>
+  stageSlots.value.find(entry => entry.slot.id === versionsSlot.value?.id)?.controls ?? null)
 
 async function openVersions(slot: BrandSlot): Promise<void> {
   versionsSlot.value = slot
@@ -372,6 +436,10 @@ const generationNotice = computed<string | null>(() => {
   // Das Gate hat schon am Slot gesagt, WAS fehlt — hier reicht der Hinweis,
   // dass es daran lag und nicht an einer Störung.
   if (code === 'not_ready') return t('brand.workspace.generate.notReady')
+  // Der Knopf ist am bestätigten Slot gar nicht sichtbar — dieser Zweig fängt
+  // den Fall, dass ein zweiter Tab inzwischen bestätigt hat. Er sagt, was zu
+  // tun ist, statt „hat nicht geklappt".
+  if (code === 'slot_confirmed') return t('brand.workspace.generate.slotConfirmed')
   return t('brand.workspace.generate.failed')
 })
 
@@ -691,17 +759,36 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
       <BwChapter
         :title="stepKey ? t(`brand.steps.${stepKey}`) : ''"
         :state="store.currentJourneyStep?.state === 'done' ? 'confirmed' : store.currentJourneyStep?.state === 'active' ? 'active' : 'empty'"
+        :progress-confirmed="chapterProgress.confirmed"
+        :progress-total="chapterProgress.total"
       >
         <p v-if="!slots.length" class="bw-pending">{{ t('brand.workspace.stage.empty') }}</p>
 
-        <div v-for="slot in slots" :key="slot.id" class="mb-6">
+        <div v-for="{ slot, controls, note } in stageSlots" :key="slot.id" class="mb-6">
           <div class="flex items-start justify-between gap-3">
-            <p class="bw-label" style="color: var(--bw-muted)">
-              {{ slotLabel(slot) }}
+            <p class="bw-label flex min-w-0 items-center gap-2" style="color: var(--bw-muted)">
+              <!-- DIE AMPEL: beim Runterscrollen soll auf einen Blick zu sehen
+                   sein, wo man steht. Sie steht NIE allein — daneben stehen die
+                   Etiketten in Worten, und der Punkt trägt seinen Zustand als
+                   Beschriftung (Regel „nie nur Farbe"). -->
+              <span
+                class="bw-dot"
+                :class="controls.state === 'confirmed' ? 'bw-dot--confirmed' : controls.state === 'draft' ? 'bw-dot--draft' : ''"
+                :title="t(`brand.workspace.slotState.${controls.state}`)"
+                :aria-label="t(`brand.workspace.slotState.${controls.state}`)"
+              >
+                <UIcon v-if="controls.state === 'confirmed'" name="i-ph-check-bold" class="size-2.5" />
+              </span>
+              <span class="min-w-0">{{ slotLabel(slot) }}</span>
               <!-- §3b.3: Georges Entwurf ist bis zur Bestätigung als Entwurf
-                   ERKENNBAR — Etikett UND gestrichelter Rahmen, nie nur Farbe. -->
-              <span v-if="store.slotIsGeorgeDraft(slot.id)" class="bw-state bw-state--draft ml-2">
+                   ERKENNBAR — Etikett UND gestrichelter Rahmen, nie nur Farbe.
+                   Mit der Bestätigung wird daraus SEIN Text: das Etikett
+                   wechselt, es steht nie eines neben dem anderen. -->
+              <span v-if="controls.showDraftBadge" class="bw-state bw-state--draft">
                 {{ t('brand.workspace.draftBadge') }}
+              </span>
+              <span v-else-if="controls.showConfirmedBadge" class="bw-state bw-state--confirmed">
+                {{ t('brand.workspace.confirmedBadge') }}
               </span>
             </p>
             <button
@@ -728,17 +815,22 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
 
           <!-- Der gestrichelte Rahmen umfasst den EDITOR, nicht die Zeile:
                er sagt „dieser Text ist ein Entwurf", nicht „dieses Feld". -->
-          <div :class="store.slotIsGeorgeDraft(slot.id) ? 'bw-draft-frame mt-2' : ''">
+          <div :class="controls.showDraftBadge ? 'bw-draft-frame mt-2' : ''">
             <template v-if="slot.editor === 'none'">
               <p v-if="store.slotValue(slot.id)" class="mt-2 text-sm" style="color: var(--bw-ink-soft)">{{ store.slotValue(slot.id) }}</p>
               <p v-else class="bw-pending mt-2">{{ t('brand.workspace.stage.notEditable') }}</p>
             </template>
 
+            <!-- BESTÄTIGT HEISST SCHREIBGESCHÜTZT (Davids Entscheidung): das
+                 Feld bleibt sichtbar und lesbar, nimmt aber nichts mehr an.
+                 `readonly` statt `disabled` — der Text soll normal lesbar und
+                 markierbar bleiben, nicht ausgegraut wie ein totes Feld. -->
             <UTextarea
               v-else-if="slot.editor === 'textarea' || slot.editor === 'stage'"
               class="mt-2 w-full"
               :rows="slot.editor === 'stage' ? 6 : 3"
               :maxlength="slot.maxLength"
+              :readonly="!controls.editable"
               :model-value="store.slotValue(slot.id)"
               :placeholder="t('brand.workspace.stage.pending')"
               @update:model-value="value => onInput(slot.id, String(value))"
@@ -749,6 +841,7 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
               v-else
               class="mt-2 w-full"
               :maxlength="slot.maxLength"
+              :readonly="!controls.editable"
               :model-value="store.slotValue(slot.id)"
               :placeholder="t('brand.workspace.stage.pending')"
               @update:model-value="value => onInput(slot.id, String(value))"
@@ -758,13 +851,14 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
 
           <!-- ZU WENIG IST ZU WENIG: statt eines Knopfes, der in ein 409 läuft,
                steht hier ruhig, was fehlt (Bereitschafts-Gate). -->
-          <p v-if="isGeneratable(slot) && readinessNote(slot)" class="bw-pending mt-2">
-            {{ readinessNote(slot) }}
-          </p>
+          <p v-if="note" class="bw-pending mt-2">{{ note }}</p>
 
-          <!-- „George, versuch's nochmal" — mit optionalem Hinweis (§3b.3). -->
-          <div v-else-if="isGeneratable(slot)" class="mt-2 flex flex-wrap items-center gap-2">
+          <!-- „George, versuch's nochmal" — mit optionalem Hinweis (§3b.3).
+               Am bestätigten Slot ist beides weg: es gibt nichts nachzujustieren,
+               solange nichts geändert werden darf. -->
+          <div v-if="controls.showGenerate" class="mt-2 flex flex-wrap items-center gap-2">
             <UInput
+              v-if="controls.showHint"
               class="min-w-40 flex-1"
               size="sm"
               maxlength="500"
@@ -790,23 +884,40 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
               :label="store.slotValue(slot.id) ? t('brand.workspace.generate.again') : t('brand.workspace.generate.start')"
               @click="generateSlot(slot)"
             />
+          </div>
+
+          <div v-if="controls.showConfirm || controls.showVersions" class="mt-2 flex flex-wrap items-center justify-end gap-2">
+            <!-- „Frühere Fassungen" bleibt auch am bestätigten Slot sichtbar —
+                 lesen darf man immer, übernehmen erst nach „Korrigieren". -->
             <UButton
-              v-if="hasHistory(slot)"
-              size="sm" variant="ghost" color="neutral" class="rounded-full"
+              v-if="controls.showVersions"
+              size="sm" variant="ghost" color="neutral" class="mr-auto rounded-full"
               icon="i-ph-clock-counter-clockwise"
               :label="t('brand.workspace.versions.open')"
               @click="openVersions(slot)"
             />
-          </div>
-
-          <div v-if="slot.editor !== 'none' && slot.type !== 'special'" class="mt-2 flex justify-end">
             <UButton
-              size="sm" variant="ghost" color="neutral"
-              :icon="store.slotConfirmed(slot.id) ? 'i-ph-check-circle-fill' : 'i-ph-check'"
-              :disabled="!store.slotValue(slot.id) || store.slotConfirmed(slot.id)"
-              :label="t('brand.workspace.confirmSlot')"
-              @click="confirmSlot(slot.id)"
+              v-if="controls.showRevise"
+              size="sm" variant="ghost" color="neutral" class="rounded-full"
+              icon="i-ph-pencil-simple"
+              :label="t('brand.workspace.reviseSlot')"
+              @click="reviseSlot(slot.id)"
             />
+            <!-- DERSELBE KNOPF, ZWEI FARBEN (Davids Wortlaut): bernstein
+                 umrandet „Bestätigen", grün gefüllt „Bestätigt". Vorher war er
+                 im bestätigten Zustand nur ausgegraut und las sich wie ein
+                 Etikett — man sah dem Slot nicht an, ob er entschieden war. -->
+            <button
+              v-if="controls.showConfirm"
+              type="button"
+              class="bw-confirm"
+              :class="controls.state === 'confirmed' ? 'bw-confirm--done' : 'bw-confirm--open'"
+              :disabled="!controls.confirmEnabled"
+              @click="confirmSlot(slot.id)"
+            >
+              <UIcon :name="controls.state === 'confirmed' ? 'i-ph-check-circle-fill' : 'i-ph-check'" class="size-4" />
+              {{ controls.state === 'confirmed' ? t('brand.workspace.confirmedSlot') : t('brand.workspace.confirmSlot') }}
+            </button>
           </div>
         </div>
       </BwChapter>
@@ -864,6 +975,12 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
         <h2 class="mt-1 text-[24px] font-extralight leading-tight tracking-tight">{{ t('brand.workspace.versions.title') }}</h2>
         <p class="mt-3 text-sm leading-relaxed" style="color: var(--bw-ink-soft)">{{ t('brand.workspace.versions.description') }}</p>
 
+        <!-- Lesen ja, übernehmen nein — s. `versionsControls`. Der Satz sagt,
+             wo der Weg zurück steht, statt nur einen toten Knopf zu zeigen. -->
+        <p v-if="versionsControls && !versionsControls.canRestoreVersion" class="bw-pending mt-3">
+          {{ t('brand.workspace.versions.confirmedLock') }}
+        </p>
+
         <p v-if="versionsLoading" class="bw-pending mt-5">{{ t('brand.workspace.versions.loading') }}</p>
 
         <template v-else>
@@ -874,7 +991,7 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
               </p>
               <UButton
                 size="xs" variant="outline" color="neutral" class="rounded-full"
-                :disabled="!item.draft"
+                :disabled="!item.draft || versionsControls?.canRestoreVersion === false"
                 :label="t('brand.workspace.versions.use')"
                 @click="useVersion(item.draft ?? '')"
               />
@@ -890,6 +1007,7 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
               <p class="bw-label" style="color: var(--bw-muted)">{{ t('brand.workspace.versions.first') }}</p>
               <UButton
                 size="xs" variant="outline" color="neutral" class="rounded-full"
+                :disabled="versionsControls?.canRestoreVersion === false"
                 :label="t('brand.workspace.versions.use')"
                 @click="useVersion(versions.firstDraft ?? '')"
               />

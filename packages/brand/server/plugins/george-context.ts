@@ -1,4 +1,3 @@
-import type { H3Event } from 'h3'
 import { advisorForStep } from '../../shared/brandAdvisors'
 import type { BrandSlotGenerator } from '../utils/brandGenerators'
 import { registerBrandSlotGenerator } from '../utils/brandGenerators'
@@ -84,18 +83,6 @@ export function georgeMaxTokens(maxLength: number): number {
   return Math.min(2_000, Math.max(300, Math.ceil(maxLength / 3)))
 }
 
-/**
- * Die WIZARD-Sprache (Regel 9) — sie steht nicht im Generator-Vertrag, weil
- * der bewusst die INHALTSSPRACHE trägt („nie die UI-Sprache"). Gelesen wird
- * dasselbe Cookie wie überall (`i18n_redirected`, `requestLocale()` im Core);
- * fehlt es, redet George in der Inhaltssprache — das ist der Fall, in dem er
- * mit hoher Wahrscheinlichkeit richtig liegt.
- */
-function wizardLocale(event: H3Event, fallback: string): string {
-  const cookie = getCookie(event, 'i18n_redirected')
-  return cookie && /^[a-z]{2,3}(-[A-Za-z]{2,4})?$/.test(cookie) ? cookie : fallback
-}
-
 function personaName(): string | undefined {
   const config = useAppConfig() as { pukalani?: { brand?: { persona?: { name?: string } } } }
   return config.pukalani?.brand?.persona?.name
@@ -125,7 +112,13 @@ export const georgeContextGenerator: BrandSlotGenerator = async (context) => {
   ].join('\n')
 
   const system = georgeSystemPrompt({
-    locale: wizardLocale(context.event, context.locale),
+    // DIE SPRACHE DER SEITE, NICHT DIE DES COOKIES (Davids Befund 2026-09-02):
+    // die Oberfläche stand auf Englisch, George redete Deutsch, weil hier das
+    // Cookie `i18n_redirected` gelesen wurde — die einmal GEWÄHLTE Sprache
+    // statt der gerade OFFENEN Seite. Der Vertrag trägt sie jetzt mit
+    // (`uiLocale`), inklusive Rückfall auf die Inhaltssprache; hier wird nur
+    // noch gelesen.
+    locale: context.uiLocale,
     contentLocale: context.locale,
     pathKind: context.pathKind,
     // Baustein A gehört dem Gastgeber — aber gefragt wird die Registry, nicht

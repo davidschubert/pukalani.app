@@ -212,6 +212,56 @@
 .bw-state--stale { color: var(--bw-stale); background: var(--bw-stale-soft); }
 .bw-draft-frame { border: 1px dashed var(--bw-draft); border-radius: var(--bw-radius-frame); padding: 1.1rem 1.25rem; background: var(--bw-surface); }
 
+/* ── Die Slot-Ampel (Davids Live-Walkthrough, 2026-09-02) ──────────────────
+   Drei Zustände, zwei Farben, KEINE neuen Tokens: Bernstein ist `--bw-draft`
+   (dieselbe Familie wie das DRAFT-BY-GEORGE-Etikett), Grün ist `--bw-accent`.
+   Beide gibt es in Hell und Dunkel; ein eigenes Ampel-Farbpaar wäre eine
+   zweite Wahrheit über dieselbe Farbe.
+
+   Der PUNKT ist eine Orientierungshilfe beim Scrollen, nie die einzige
+   Auskunft: daneben steht das Etikett in Worten, und der Punkt trägt seinen
+   Zustand als `title`/`aria-label` (Regel „nie nur Farbe"). */
+.bw-dot {
+  flex: none; display: grid; place-items: center;
+  inline-size: 1rem; block-size: 1rem; border-radius: 999px;
+  background: transparent; box-shadow: inset 0 0 0 1px var(--bw-line-strong);
+  color: var(--bw-paper);
+}
+.bw-dot--draft { background: var(--bw-draft); box-shadow: none; }
+.bw-dot--confirmed { background: var(--bw-accent); box-shadow: none; }
+
+/* Der Bestätigungs-Knopf trägt seinen Zustand in der Farbe: bernstein
+   umrandet = offen, grün gefüllt mit Häkchen = bestätigt (Davids Wortlaut).
+   BEWUSST kein `UButton`: dessen Varianten kennen `neutral`/`primary`, nicht
+   „die Farbe der Werkstatt-Ampel" — sie über `:ui` zu überschreiben hiesse,
+   gegen die Komponente zu arbeiten. Ein eigenes Element ist hier dasselbe
+   Muster wie `.bw-chip`, das aus demselben Grund existiert. */
+.bw-confirm {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  border-radius: 999px; padding: 0.3rem 0.85rem;
+  font-size: 0.875rem; line-height: 1.25rem; cursor: pointer;
+  background: transparent; color: var(--bw-draft);
+  box-shadow: inset 0 0 0 1px var(--bw-draft);
+  transition: background 120ms, color 120ms;
+}
+.bw-confirm:hover:not(:disabled) { background: var(--bw-draft-soft); }
+/* Leerer Slot: es gibt nichts zu bestätigen. Der BESTÄTIGTE Knopf ist
+   ebenfalls nicht klickbar, wird aber nicht gedimmt — er ist kein
+   abgeschaltetes Angebot, sondern eine Zustandsanzeige. */
+.bw-confirm:disabled { cursor: default; }
+.bw-confirm--open:disabled { opacity: 0.4; }
+.bw-confirm--done {
+  background: var(--bw-accent); color: var(--bw-surface-hi);
+  box-shadow: none; font-weight: 500;
+}
+
+/* Kapitel-Fortschritt: eine dünne Linie unter der Kapitel-Kopfzeile, die beim
+   Scrollen oben stehen bleibt. Sie beantwortet „wie weit bin ich in DIESEM
+   Kapitel" — der Balken unten in der Leiste beantwortet den ganzen Weg. */
+.bw-chapter-progress { position: sticky; top: 0; z-index: 2; background: var(--bw-paper); padding-block: 0.5rem; }
+.bw-chapter-progress-track { block-size: 3px; border-radius: 999px; background: var(--bw-line); overflow: hidden; }
+.bw-chapter-progress-fill { block-size: 100%; background: var(--bw-accent); border-radius: 999px; transition: inline-size 220ms ease-out; }
+
 /* George-Chat: ruhig, keine dicken Blasen */
 .bw-msg { padding: 0.15rem 0; display: flex; gap: 0.65rem; }
 .bw-msg-mark {

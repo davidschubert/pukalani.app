@@ -103,7 +103,18 @@ export function useBrandAutosave(profileId: MaybeRefOrGetter<string>) {
       const status = (error as { status?: number, statusCode?: number }).status
         ?? (error as { statusCode?: number }).statusCode
         ?? null
-      if (status === 409 || brandErrorReason(error) === 'revision_conflict') {
+      const reason = brandErrorReason(error)
+      if (reason === 'slot_confirmed') {
+        // BACKSTOP, kein Konflikt: die Werkstatt lässt an einem bestätigten
+        // Slot gar nicht erst tippen (`brandSlotControls`). Kommt es doch dazu
+        // — ein zweiter Tab hat inzwischen bestätigt —, wäre ein
+        // Wiederholungsversuch ewig: der Server sagt endgültig Nein, und der
+        // 409-Dialog fragte nach einer Entscheidung, die es nicht gibt. Also
+        // die Serverfassung holen; sie IST die bestätigte Wahrheit, und der
+        // Slot steht danach sichtbar im bestätigten Zustand.
+        if (store.stepKey) await store.loadStep(id, store.stepKey)
+      }
+      else if (status === 409 || reason === 'revision_conflict') {
         await loadConflictVersion(id)
       }
       else if (status === null || isOffline()) {

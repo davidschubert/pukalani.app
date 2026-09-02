@@ -199,6 +199,9 @@
       "help": "Warum wir das fragen",
       "contentLocale": "Inhaltssprache",
       "confirmSlot": "Bestätigen",
+      "confirmedSlot": "Bestätigt",
+      "confirmedBadge": "Bestätigt",
+      "reviseSlot": "Korrigieren",
       "completeStep": "Kapitel bestätigen",
       "adjust": "Anpassen",
       "decisions": "Entscheidungen",
@@ -211,6 +214,14 @@
       "likeBrands": "wie {brands}",
       "mode": {
         "document": "Dokument"
+      },
+      "slotState": {
+        "empty": "Noch nichts da",
+        "draft": "Noch nicht bestätigt",
+        "confirmed": "Bestätigt"
+      },
+      "chapterProgress": {
+        "label": "Bestätigte Entscheidungen in diesem Kapitel"
       },
       "chapterState": {
         "empty": "Offen",
@@ -291,7 +302,8 @@
         "stopped": "Abgebrochen. Dein bisheriger Text ist unverändert.",
         "failed": "Das hat gerade nicht geklappt. Versuch es gleich nochmal.",
         "dismiss": "Verstanden",
-        "notReady": "Dafür ist noch zu wenig da — oben steht, was fehlt."
+        "notReady": "Dafür ist noch zu wenig da — oben steht, was fehlt.",
+        "slotConfirmed": "Das hast du schon bestätigt. Wenn du es ändern willst, klick auf Korrigieren."
       },
       "versions": {
         "open": "Frühere Fassungen",
@@ -301,6 +313,7 @@
         "first": "Erste Fassung",
         "dropped": "Text nicht mehr gespeichert — nur die Herkunft ist geblieben.",
         "empty": "Für dieses Feld gibt es noch keine frühere Fassung.",
+        "confirmedLock": "Diese Entscheidung ist bestätigt — lesen kannst du die Fassungen, übernehmen erst nach „Korrigieren“.",
         "loading": "Fassungen werden geholt …",
         "close": "Schließen"
       },
@@ -384,7 +397,8 @@
         "audience": "Für wen ist es gedacht?"
       },
       "submit": "Los geht's — George übernimmt",
-      "failed": "Das Branding konnte nicht angelegt werden."
+      "failed": "Das Branding konnte nicht angelegt werden.",
+      "preparing": "Einen Moment — das Formular wird bereit gemacht."
     },
     "steps": {
       "context": "Kontext",

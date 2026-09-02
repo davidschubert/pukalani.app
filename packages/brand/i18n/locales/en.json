@@ -199,6 +199,9 @@
       "help": "Why we ask this",
       "contentLocale": "Content language",
       "confirmSlot": "Confirm",
+      "confirmedSlot": "Confirmed",
+      "confirmedBadge": "Confirmed",
+      "reviseSlot": "Revise",
       "completeStep": "Confirm chapter",
       "adjust": "Adjust",
       "decisions": "Decisions",
@@ -211,6 +214,14 @@
       "likeBrands": "like {brands}",
       "mode": {
         "document": "Document"
+      },
+      "slotState": {
+        "empty": "Nothing here yet",
+        "draft": "Not confirmed yet",
+        "confirmed": "Confirmed"
+      },
+      "chapterProgress": {
+        "label": "Confirmed decisions in this chapter"
       },
       "chapterState": {
         "empty": "Open",
@@ -291,7 +302,8 @@
         "stopped": "Stopped. Your text is unchanged.",
         "failed": "That did not work just now. Try again in a moment.",
         "dismiss": "Got it",
-        "notReady": "There is not enough here yet — the note above says what is missing."
+        "notReady": "There is not enough here yet — the note above says what is missing.",
+        "slotConfirmed": "You have already confirmed this one. Choose Revise if you want to change it."
       },
       "versions": {
         "open": "Earlier versions",
@@ -301,6 +313,7 @@
         "first": "First version",
         "dropped": "Text no longer stored — only its origin remains.",
         "empty": "There is no earlier version for this field yet.",
+        "confirmedLock": "This decision is confirmed — you can read the versions, but taking one over needs Revise first.",
         "loading": "Fetching versions …",
         "close": "Close"
       },
@@ -384,7 +397,8 @@
         "audience": "Who is it for?"
       },
       "submit": "Let's go — George takes over",
-      "failed": "The branding could not be created."
+      "failed": "The branding could not be created.",
+      "preparing": "One moment — the form is getting ready."
     },
     "steps": {
       "context": "Context",

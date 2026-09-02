@@ -13,12 +13,14 @@ import {
 import { resolveBrandJourney } from '../../../../../../../shared/brandJourney'
 import { slotReadiness } from '../../../../../../../shared/brandSlotReadiness'
 import { slotById } from '../../../../../../../shared/slotRegistry'
+import { resolveBrandUiLocale } from '../../../../../../../shared/brandUiLocale'
 import type { BrandGenerationEntry } from '../../../../../../../shared/types/brand'
 import {
   BRAND_MESSAGES_TABLE,
   BRAND_STEPS_TABLE,
   type BrandSlotRecord,
   brandDb,
+  brandSlotRecordConfirmed,
   brandSlotStoredValue,
   loadBrandStepContext,
   loadStepRow,
@@ -183,6 +185,28 @@ export default defineEventHandler(async (event) => {
   const inputHash = brandGenerationInputHash(slot.id, profile.contentLocale, dependencies)
   const stored = parseGenerations(stepRow.generations)
   const reused = findBrandGenerationByKey(stored.items, body.idempotencyKey)
+
+  /**
+   * ── DIE BESTÄTIGUNGS-SPERRE (Davids Entscheidung 2026-09-02) ─────────────
+   * Ein bestätigter Slot wird nicht überschrieben — auch nicht von George.
+   * Sie steht VOR jeder Buchung, denn sie kostet nichts, und sie steht
+   * UNBEDINGT, anders als das Bereitschafts-Gate eine Zeile weiter unten: das
+   * ist ein RAT über das vorhandene Material und schweigt deshalb, wenn ohnehin
+   * nicht generiert würde (abgeschaltete KI, Cache-Treffer); dies hier ist eine
+   * SPERRE über den Zustand des Slots, und die gilt in jeder Betriebslage.
+   * Sonst hinge die Unversehrtheit des bestätigten Textes daran, ob gerade ein
+   * Kill-Switch gesetzt ist.
+   *
+   * Der Weg zurück ist derselbe wie überall: „Korrigieren" (der Autosave hebt
+   * die Bestätigung auf), danach entwirft George wieder.
+   */
+  if (brandSlotRecordConfirmed(records[slot.id])) {
+    throw createError({
+      status: 409,
+      statusText: 'Slot is confirmed',
+      data: { code: 'slot_confirmed' },
+    })
+  }
 
   /**
    * ── DAS BEREITSCHAFTS-GATE (Davids „zu wenig ist zu wenig") ──────────────
@@ -351,6 +375,10 @@ export default defineEventHandler(async (event) => {
       stepKey,
       slot,
       locale: profile.contentLocale,
+      // Georges ANSPRACHE folgt der Seite, sein INHALT der Marke (s. Vertrag).
+      // Der Rückfall auf die Inhaltssprache passiert HIER, damit kein
+      // Generator ihn je selbst bauen muss.
+      uiLocale: resolveBrandUiLocale(body.uiLocale, profile.contentLocale),
       pathKind: profileFacts(profile).pathKind,
       // Die STARTKARTE aus dem PROFIL (§2.1) — sie geht NICHT in den
       // `inputHash`: der beschreibt den Stand der Quell-SLOTS, und dafür ist

@@ -5,7 +5,24 @@ const props = defineProps<{
   title: string
   state: 'empty' | 'active' | 'generating' | 'draft' | 'edited' | 'confirmed' | 'stale'
   staleNote?: string
+  /**
+   * DER KAPITEL-BALKEN (Davids Live-Walkthrough, 2026-09-02) — bestätigte
+   * Entscheidungen von allen möglichen DIESES Kapitels, gerechnet in
+   * `brandChapterProgress`. Er bleibt beim Scrollen oben stehen: die
+   * Kopfzeile wandert weg, die Auskunft „3/7" nicht.
+   *
+   * `progressTotal: 0` (oder fehlend) heisst „dieses Kapitel hat nichts zu
+   * zählen" — dann erscheint die Linie gar nicht. Ein Balken über einem
+   * leeren Nenner stünde für immer auf null und sähe aus wie Stillstand.
+   */
+  progressConfirmed?: number
+  progressTotal?: number
 }>()
+
+const showProgress = computed(() => (props.progressTotal ?? 0) > 0)
+const progressPct = computed(() => (showProgress.value
+  ? Math.round(((props.progressConfirmed ?? 0) / (props.progressTotal ?? 1)) * 100)
+  : 0))
 defineEmits<{ confirm: [] }>()
 const { t } = useI18n()
 /* `draft` liest BEWUSST `brand.workspace.draftBadge` statt eines eigenen
@@ -42,6 +59,23 @@ watch(() => props.state, (next, prev) => {
     <div class="mb-3 flex items-center justify-between gap-3">
       <h2 class="text-lg">{{ title }}</h2>
       <span class="bw-state" :class="stateMeta.cls"><UIcon :name="stateMeta.icon" /> {{ stateMeta.label }}</span>
+    </div>
+
+    <!-- Sticky: die Kopfzeile scrollt weg, der Stand bleibt. -->
+    <div v-if="showProgress" class="bw-chapter-progress mb-4 flex items-center gap-3">
+      <div
+        class="bw-chapter-progress-track min-w-0 flex-1"
+        role="progressbar"
+        :aria-valuenow="progressConfirmed ?? 0"
+        aria-valuemin="0"
+        :aria-valuemax="progressTotal"
+        :aria-label="t('brand.workspace.chapterProgress.label')"
+      >
+        <div class="bw-chapter-progress-fill" :style="`inline-size: ${progressPct}%`" />
+      </div>
+      <span class="bw-label flex-none tabular-nums" style="color: var(--bw-muted)">
+        {{ progressConfirmed ?? 0 }}/{{ progressTotal }}
+      </span>
     </div>
     <p v-if="state === 'stale' && staleNote" class="bw-label mb-3 flex items-start gap-1.5" style="color: var(--bw-stale)">
       <UIcon name="i-ph-arrow-elbow-down-right" class="mt-0.5 size-3.5 flex-none" />

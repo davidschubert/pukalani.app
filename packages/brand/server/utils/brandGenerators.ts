@@ -56,6 +56,18 @@ export interface BrandGeneratorContext {
   slot: BrandSlot
   /** Inhaltssprache des Brandings (`brand_profiles.contentLocale`) — nie die UI-Sprache. */
   locale: string
+  /**
+   * DIE SPRACHE DER SEITE, auf der der Mensch gerade steht — Georges ANSPRACHE
+   * (Chat-Zug, Rahmung, Rückfrage), nie der Slot-Inhalt.
+   *
+   * Sie steht NEBEN `locale` und nicht darin, weil beide auseinanderfallen
+   * DÜRFEN: eine deutschsprachige Marke, besprochen auf einer englischen
+   * Oberfläche, ist ein gültiger Fall. Sie kommt aus dem Rumpf (der Browser
+   * kennt seine Route, der Server nicht) und ist bereits geprüft; ist sie
+   * unbekannt oder fehlt sie, steht hier die Inhaltssprache — ein Generator
+   * muss also nie selbst zurückfallen.
+   */
+  uiLocale: string
   /** Die Weiche W1, für pfadabhängige Prompts. */
   pathKind: 'new' | 'relaunch'
   /**

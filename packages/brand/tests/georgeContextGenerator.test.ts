@@ -26,12 +26,10 @@ import { stripGeorgeTurnMarkers } from '../server/utils/georgeTurn'
 
 const streamMock = vi.fn()
 const appConfig = { pukalani: { brand: { persona: { name: 'George' }, devStubGenerator: false } } }
-let cookie: string | undefined
 let effectiveModel = 'anthropic/claude-haiku-4.5'
 
 vi.stubGlobal('defineNitroPlugin', (fn: unknown) => fn)
 vi.stubGlobal('useAppConfig', () => appConfig)
-vi.stubGlobal('getCookie', (_event: unknown, name: string) => (name === 'i18n_redirected' ? cookie : undefined))
 vi.stubGlobal('getEffectiveAiConfig', async () => ({
   enabled: true,
   model: effectiveModel,
@@ -71,12 +69,16 @@ function context(overrides: {
   dependencies?: { slotId: string, value: string }[]
   startCard?: Partial<typeof EMPTY_START_CARD>
   siteAnalysis?: string
+  uiLocale?: string
 } = {}) {
   return {
     event,
     stepKey: 'context' as const,
     slot,
     locale: 'de',
+    // Die Route setzt hier IMMER einen Wert (mit Rückfall auf die
+    // Inhaltssprache) — der Generator fällt deshalb nie selbst zurück.
+    uiLocale: overrides.uiLocale ?? 'de',
     pathKind: 'new' as const,
     startCard: { ...EMPTY_START_CARD, ...overrides.startCard },
     // P2.3: leer heisst „niemand hat Website lesen gedrückt" — der Normalfall.
@@ -91,7 +93,6 @@ function context(overrides: {
 beforeEach(() => {
   streamMock.mockReset()
   streamMock.mockResolvedValue({ text: 'Entwurf', usage: null, model: 'anthropic/x', provider: 'anthropic', aborted: false })
-  cookie = undefined
   effectiveModel = 'anthropic/claude-haiku-4.5'
 })
 
@@ -143,13 +144,31 @@ describe('Der Aufruf an den Transport', () => {
   })
 
   it('System-Prompt trägt die Persona aus der Config und beide Sprachen', async () => {
-    cookie = 'en'
-    await plugin.georgeContextGenerator(context())
+    await plugin.georgeContextGenerator(context({ uiLocale: 'en' }))
     const system = lastCall().options.system!
     expect(system).toContain('You are George')
-    // Wizard-Sprache aus dem Cookie, Inhaltssprache aus dem Vertrag.
+    // Ansprache aus der SEITE, Inhaltssprache aus dem Vertrag.
     expect(system).toContain('you speak to the person in en')
     expect(system).toContain('is written in de')
+  })
+
+  /**
+   * DAVIDS BEFUND (2026-09-02): englische Oberfläche, deutscher George. Die
+   * Ansprache kam aus dem Cookie `i18n_redirected` — der einmal GEWÄHLTEN
+   * Sprache statt der gerade OFFENEN Seite. Jetzt liest der Generator NUR noch
+   * `uiLocale` aus dem Vertrag, und ein Cookie könnte daran nichts mehr ändern.
+   */
+  it('DIE ANSPRACHE FOLGT DER SEITE, der Inhalt der Marke', async () => {
+    await plugin.georgeContextGenerator(context({ uiLocale: 'en' }))
+    expect(lastCall().options.system!).toContain('you speak to the person in en')
+
+    // Gegenprobe: dieselbe Marke, deutsche Seite — nur die Ansprache dreht
+    // sich, die Inhaltssprache steht still (der Prompt selbst ist immer
+    // englisch, er NENNT die beiden Sprachen nur).
+    await plugin.georgeContextGenerator(context({ uiLocale: 'de' }))
+    const german = lastCall().options.system!
+    expect(german).toContain('you speak to the person in de')
+    expect(german).toContain('is written in de')
   })
 
   it('DER BERATER KOMMT AUS DER REGISTRY, nicht aus dieser Datei', async () => {
