@@ -269,7 +269,8 @@
       "slotState": {
         "empty": "Nothing here yet",
         "draft": "Not confirmed yet",
-        "confirmed": "Confirmed"
+        "confirmed": "Confirmed",
+        "derived": "George derives this — no decision needed"
       },
       "chapterProgress": {
         "label": "Confirmed decisions in this chapter"
@@ -378,7 +379,8 @@
           "sourceTexts": "existing texts — read your website in for that",
           "sourceSlots": "at least one of the answers this field builds on"
         }
-      }
+      },
+      "progressConfirmed": "{confirmed} of {total} confirmed"
     },
     "brands": {
       "title": "Brandings",

@@ -229,6 +229,14 @@
 }
 .bw-dot--draft { background: var(--bw-draft); box-shadow: none; }
 .bw-dot--confirmed { background: var(--bw-accent); box-shadow: none; }
+/* Ableitungs-Blöcke ohne Eingabe (Davids Zähler-Frage, 2026-09-02): ein
+   Ampel-Punkt, der nie grün werden kann, wäre ein ewiger Vorwurf ohne
+   Handlung. Der Diamant sagt „George leitet das ab" — die Ampel bleibt
+   exklusiv für echte Entscheidungen. */
+.bw-dot--derived {
+  border-radius: 2px; transform: rotate(45deg) scale(0.72);
+  box-shadow: inset 0 0 0 1.5px var(--bw-muted);
+}
 
 /* Der Bestätigungs-Knopf trägt seinen Zustand in der Farbe: bernstein
    umrandet = offen, grün gefüllt mit Häkchen = bestätigt (Davids Wortlaut).

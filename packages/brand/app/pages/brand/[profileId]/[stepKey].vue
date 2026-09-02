@@ -561,9 +561,16 @@ const railLayers = computed<BwRailLayer[]>(() => [{
   })),
 }])
 
-const progressNote = computed(() => t('brand.workspace.progress', {
-  filled: store.progress.requiredFilled,
-  total: store.progress.requiredTotal,
+/**
+ * DIE LEISTE ZÄHLT BESTÄTIGT (Davids Entscheidung 2026-09-02): dieselbe Zahl
+ * wie die Sticky-Linie oben — eine Wahrheit, „grün = entschieden". Die
+ * Füll-Formel aus Plan §3b (`stepProgress`) lebt unverändert weiter, wo sie
+ * hingehört: in `progressPct` der Übersichts-Karten, wo sich der Balken
+ * bewegen soll, sobald George etwas hinlegt.
+ */
+const progressNote = computed(() => t('brand.workspace.progressConfirmed', {
+  confirmed: chapterProgress.value.confirmed,
+  total: chapterProgress.value.total,
 }))
 
 /** `BwWorkspace` zeigt nur ABWEICHUNGEN — Stille heisst gespeichert (§3e). */
@@ -696,7 +703,7 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
 
   <BwWorkspace
     v-else
-    :progress-pct="store.progress.pct"
+    :progress-pct="chapterProgress.pct"
     :progress-note="progressNote"
     :content-locale="store.profile?.contentLocale ?? locale"
     :sync-state="workspaceSync"
@@ -795,11 +802,11 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
                    Beschriftung (Regel „nie nur Farbe"). -->
               <span
                 class="bw-dot"
-                :class="controls.state === 'confirmed' ? 'bw-dot--confirmed' : controls.state === 'draft' ? 'bw-dot--draft' : ''"
-                :title="t(`brand.workspace.slotState.${controls.state}`)"
-                :aria-label="t(`brand.workspace.slotState.${controls.state}`)"
+                :class="!controls.countsForProgress ? 'bw-dot--derived' : controls.state === 'confirmed' ? 'bw-dot--confirmed' : controls.state === 'draft' ? 'bw-dot--draft' : ''"
+                :title="t(!controls.countsForProgress ? 'brand.workspace.slotState.derived' : `brand.workspace.slotState.${controls.state}`)"
+                :aria-label="t(!controls.countsForProgress ? 'brand.workspace.slotState.derived' : `brand.workspace.slotState.${controls.state}`)"
               >
-                <UIcon v-if="controls.state === 'confirmed'" name="i-ph-check-bold" class="size-2.5" />
+                <UIcon v-if="controls.countsForProgress && controls.state === 'confirmed'" name="i-ph-check-bold" class="size-2.5" />
               </span>
               <span class="min-w-0">{{ slotLabel(slot) }}</span>
               <!-- §3b.3: Georges Entwurf ist bis zur Bestätigung als Entwurf
