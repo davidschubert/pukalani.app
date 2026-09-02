@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { H3Event } from 'h3'
+import { AppwriteException } from 'node-appwrite'
 import {
   type BrandGenerationEvent,
   decodeBrandGenerationChunk,
@@ -59,25 +60,41 @@ const profileRow: FakeRow = {
   lastActivityAt: '2026-08-01T00:00:00.000Z',
 }
 
+/** Die Zeile des Bausteins, gegen den die Route läuft (`routeStepKey`). */
 let stepRow: FakeRow
+/**
+ * ALLE Baustein-Zeilen des Brandings. Seit P3.1 liest die Route sie — die
+ * Registry lässt einen Slot ausdrücklich aus einem ANDEREN Baustein schöpfen,
+ * und mit nur einer Zeile käme diese Quelle leer bei George an.
+ */
+let stepRows: FakeRow[]
+/** Welchen Baustein der Router gerade meldet (Standard: `context`). */
+let routeStepKey: string
 let appConfigRow: FakeRow
 /** Die Reihenfolge ALLER Wirkungen — Schreibvorgänge und gesendete Frames. */
 let timeline: string[]
 
 const tablesDB = {
-  getRow: vi.fn(async ({ tableId }: { tableId: string }) => {
+  getRow: vi.fn(async ({ tableId, rowId }: { tableId: string, rowId: string }) => {
     if (tableId === 'brand_profiles') return profileRow
-    if (tableId === 'brand_steps') return stepRow
+    // Die Route liest die Zeile über ihre DETERMINISTISCHE Id
+    // (`<profileId>_<stepKey>`); eine unbekannte Id muss hier fehlen, sonst
+    // bewiese der Test nichts über den Rückfall auf die Abfrage.
+    if (tableId === 'brand_steps') {
+      const hit = stepRows.find(row => row.$id === rowId)
+      if (!hit) throw new AppwriteException('not found', 404)
+      return hit
+    }
     if (tableId === 'app_config') return appConfigRow
     throw new Error(`unerwartete Tabelle ${tableId}`)
   }),
   listRows: vi.fn(async ({ tableId }: { tableId: string }) => (tableId === 'brand_steps'
-    ? { rows: [stepRow] }
+    ? { rows: stepRows }
     : { rows: [] })),
-  updateRow: vi.fn(async ({ tableId, data }: { tableId: string, data: Record<string, unknown> }) => {
+  updateRow: vi.fn(async ({ tableId, rowId, data }: { tableId: string, rowId: string, data: Record<string, unknown> }) => {
     if (tableId === 'brand_steps') {
       timeline.push('write:step')
-      Object.assign(stepRow, data)
+      Object.assign(stepRows.find(row => row.$id === rowId) ?? stepRow, data)
     }
     else {
       timeline.push('write:profile')
@@ -101,7 +118,7 @@ vi.stubGlobal('logEvent', () => {})
 vi.stubGlobal('requireBrandAccess', async () => ({ userId: 'u1' }))
 vi.stubGlobal('assertBrandOwnerAccess', () => {})
 vi.stubGlobal('getRouterParam', (_event: H3Event, name: string) =>
-  (name === 'id' ? 'p1' : 'context'))
+  (name === 'id' ? 'p1' : routeStepKey))
 
 let body: Record<string, unknown>
 vi.stubGlobal('readBody', async () => body)
@@ -160,21 +177,31 @@ function readBack(chunks: readonly string[]): BrandGenerationEvent[] {
   return events
 }
 
+/** Eine Baustein-Zeile, wie sie `index.post.ts` bei der Anlage schreibt. */
+function stepRowFor(stepKey: string, overrides: Partial<FakeRow> = {}): FakeRow {
+  return {
+    $id: `p1_${stepKey}`,
+    profileId: 'p1',
+    stepKey,
+    state: 'open',
+    slots: '{}',
+    generations: '{"items":[],"count":0}',
+    revision: 0,
+    activeSeconds: 0,
+    ...overrides,
+  }
+}
+
 beforeEach(() => {
   timeline = []
   hits = []
   bucketCounts = {}
   appConfigRow = { $id: 'global', brandAiEnabled: true }
-  stepRow = {
-    $id: 'p1_context',
-    profileId: 'p1',
-    stepKey: 'context',
-    state: 'open',
-    slots: '{}',
-    generations: '{"items":[],"count":0}',
-    revision: 3,
-    activeSeconds: 0,
-  }
+  routeStepKey = 'context'
+  stepRow = stepRowFor('context', { revision: 3 })
+  // Baustein B liegt DANEBEN — die meisten Prüfungen fassen ihn nicht an, aber
+  // die Route liest ihn seit P3.1 mit, und das soll auch der Normalfall messen.
+  stepRows = [stepRow, stepRowFor('pvm')]
   body = { slotId: 'a.pitch' }
   tablesDB.updateRow.mockClear()
   tablesDB.createRow.mockClear()
@@ -855,5 +882,117 @@ describe('POST …/generate — die Sprache der Seite', () => {
       data: { code: 'invalid_body' },
     })
     expect(seen).toEqual([])
+  })
+})
+
+/**
+ * ── DIE QUELLEN AUS ANDEREN BAUSTEINEN (P3.1) ─────────────────────────────
+ * Die Registry lässt einen Slot ausdrücklich aus einem FREMDEN Baustein
+ * schöpfen — `b.purpose` ← `a.pitch`, `c.candidates` ← `a.origin`. Bis P3.1 las
+ * die Route nur die Zeile ihres eigenen Bausteins: die fremden Werte kamen leer
+ * bei George an, der inputHash war blind für sie, und das Bereitschafts-Gate
+ * sperrte einen Slot, für den in Wahrheit reichlich Material dalag.
+ *
+ * Gemessen werden hier die drei Wirkungen dieser Änderung — was George SIEHT,
+ * was der HASH sagt und ob das GATE aufmacht. Alle drei an EINEM echten Lauf,
+ * damit kein Teilbeweis grün sein kann, während die Kette gerissen ist.
+ */
+describe('POST …/generate — Quellen aus anderen Bausteinen', () => {
+  let seen: { slotId: string, value: string }[][]
+
+  beforeEach(async () => {
+    seen = []
+    routeStepKey = 'pvm'
+    stepRow = stepRowFor('pvm', { revision: 1 })
+    stepRows = [
+      // `done`, sonst wäre `pvm` laut Journey gesperrt — Baustein B erreicht
+      // man erst, wenn A abgeschlossen ist.
+      stepRowFor('context', {
+        state: 'done',
+        slots: JSON.stringify({
+          'a.pitch': { latestDraft: 'Wir rösten Kaffee für Cafés auf Maui.' },
+          'a.oneThing': { confirmed: 'Frische in 48 Stunden.' },
+        }),
+      }),
+      stepRow,
+    ]
+    body = { slotId: 'b.purpose' }
+
+    const module = await import('../server/utils/brandGenerators')
+    module.registerBrandSlotGenerator('pvm', (async (
+      context: { dependencies: { slotId: string, value: string }[] },
+    ) => {
+      seen.push(context.dependencies.map(entry => ({ ...entry })))
+      return {
+        draft: 'Damit guter Kaffee kein Zufall ist.',
+        model: 'test-model',
+        provider: 'test',
+        promptVersion: 'vera-test',
+        aborted: false,
+      }
+    }) as never)
+  })
+
+  afterEach(async () => {
+    const module = await import('../server/utils/brandGenerators')
+    module.clearBrandSlotGenerators()
+    module.clearActiveBrandGenerations()
+  })
+
+  it('reicht den WERT eines Slots aus Baustein A an den Generator durch', async () => {
+    await handler(fakeEvent().event)
+    const dependencies = seen[0]!
+    expect(dependencies.find(entry => entry.slotId === 'a.pitch')?.value)
+      .toBe('Wir rösten Kaffee für Cafés auf Maui.')
+    // Eine Quelle des EIGENEN Bausteins bleibt leer und steht trotzdem drin —
+    // „gibt es und ist leer" ist eine andere Auskunft als „kommt nicht vor".
+    expect(dependencies.find(entry => entry.slotId === 'b.conviction')?.value).toBe('')
+  })
+
+  it('DER inputHash WIRD DADURCH EHRLICH: ein geänderter Fremd-Slot bewegt ihn', async () => {
+    await handler(fakeEvent().event)
+    const first = String(tablesDB.updateRow.mock.calls
+      .map(call => call[0] as { tableId: string, data: Record<string, unknown> })
+      .find(call => call.tableId === 'brand_steps')!.data.inputHash)
+
+    // Der Mensch bestätigt in Baustein A einen anderen Pitch …
+    tablesDB.updateRow.mockClear()
+    stepRows[0]!.slots = JSON.stringify({
+      'a.pitch': { latestDraft: 'Wir rösten Kaffee für Cafés auf Maui.', confirmed: 'Wir rösten für ganz Hawaii.' },
+      'a.oneThing': { confirmed: 'Frische in 48 Stunden.' },
+    })
+    body = { slotId: 'b.purpose' }
+    await handler(fakeEvent().event)
+    const second = String(tablesDB.updateRow.mock.calls
+      .map(call => call[0] as { tableId: string, data: Record<string, unknown> })
+      .find(call => call.tableId === 'brand_steps')!.data.inputHash)
+
+    expect(first).toMatch(/^[0-9a-f]{64}$/)
+    // GEGENPROBE des alten Standes: vor P3.1 sah der Hash nur die eigene Zeile,
+    // beide Läufe hätten denselben Wert geliefert.
+    expect(second).not.toBe(first)
+  })
+
+  it('DAS BEREITSCHAFTS-GATE MACHT AUF, weil die fremde Quelle gefüllt ist', async () => {
+    const { event, chunks } = fakeEvent()
+    await handler(event)
+    expect(readBack(chunks).at(-1)!.type).toBe('generation.completed')
+  })
+
+  it('GEGENPROBE: ist die fremde Quelle leer, sperrt das Gate mit 409', async () => {
+    stepRows[0]!.slots = '{}'
+    await expect(handler(fakeEvent().event)).rejects.toMatchObject({
+      status: 409,
+      data: { code: 'not_ready' },
+    })
+  })
+
+  it('EINE ZEILE TRÄGT NUR IHRE EIGENEN SLOTS — ein verirrter Fremd-Slot gilt nicht', async () => {
+    // `a.pitch` steht (durch einen Kopierfehler) AUCH in der pvm-Zeile. Gültig
+    // ist der Stand seiner Heimat-Zeile, nicht der zuletzt gelesene.
+    stepRow.slots = JSON.stringify({ 'a.pitch': { confirmed: 'aus der falschen Zeile' } })
+    await handler(fakeEvent().event)
+    expect(seen[0]!.find(entry => entry.slotId === 'a.pitch')?.value)
+      .toBe('Wir rösten Kaffee für Cafés auf Maui.')
   })
 })

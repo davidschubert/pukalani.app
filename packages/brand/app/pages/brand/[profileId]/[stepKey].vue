@@ -289,10 +289,19 @@ watch(routeStepKey, () => { hints.value = {} })
 /**
  * ── DAS BEREITSCHAFTS-GATE, SCHON VOR DEM KLICK ──────────────────────────
  * Dieselbe pure Regel wie in der Route (`slotReadiness`) und aus denselben
- * Quellen: Startkarte, Website-Stand, Slot-Werte DIESES Bausteins. Zweimal
- * gerechnet, einmal beschrieben — die Route ist die Durchsetzung, das hier ist
- * die Ehrlichkeit: statt eines Knopfes, der gleich ein 409 kassiert, steht da
- * ein Satz, WAS fehlt.
+ * Quellen: Startkarte, Website-Stand, Slot-Werte. Zweimal gerechnet, einmal
+ * beschrieben — die Route ist die Durchsetzung, das hier ist die Ehrlichkeit:
+ * statt eines Knopfes, der gleich ein 409 kassiert, steht da ein Satz, WAS
+ * fehlt.
+ *
+ * ── DER BROWSER SIEHT NUR DEN OFFENEN BAUSTEIN, UND SAGT DAS AUCH ────────
+ * `store.serverSlots` trägt die Slots des GELADENEN Bausteins (`applyStepDetail`
+ * ersetzt sie bei jedem Wechsel). Quell-Slots aus einem anderen Baustein —
+ * `b.purpose` schöpft aus `a.pitch` — stehen hier also nicht, obwohl sie
+ * ausgefüllt sein können. Deshalb wird `coveredSteps` auf genau diesen einen
+ * Baustein gesetzt: die Registry-Regel überspringt dann jede Quelle, die der
+ * Client nicht kennt, und lässt im Zweifel DURCH. Der Server prüft mit allen
+ * neun Zeilen; ein Knopf, der zu Unrecht verschwindet, wäre der teurere Fehler.
  */
 const slotValues = computed<Record<string, string>>(() => {
   const values: Record<string, string> = {}
@@ -307,6 +316,7 @@ function readinessOf(slot: BrandSlot): BrandSlotReadiness {
     startCard: store.profile?.startCard ?? { websiteUrl: '', industry: '', about: '', audience: '' },
     hasSiteAnalysis: Boolean(store.profile?.siteAnalysis.analyzedAt),
     records: slotValues.value,
+    coveredSteps: store.stepKey ? [store.stepKey] : [],
   })
 }
 

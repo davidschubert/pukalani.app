@@ -12,7 +12,7 @@ import {
 } from '../../../../../../../shared/brandGeneration'
 import { resolveBrandJourney } from '../../../../../../../shared/brandJourney'
 import { slotReadiness } from '../../../../../../../shared/brandSlotReadiness'
-import { slotById } from '../../../../../../../shared/slotRegistry'
+import { BRAND_STEP_KEYS, slotById } from '../../../../../../../shared/slotRegistry'
 import { resolveBrandUiLocale } from '../../../../../../../shared/brandUiLocale'
 import type { BrandGenerationEntry } from '../../../../../../../shared/types/brand'
 import {
@@ -25,6 +25,7 @@ import {
   loadBrandStepContext,
   loadStepRow,
   loadStepRows,
+  mergeStepSlotRecords,
   parseGenerations,
   parseSlotRecords,
   profileFacts,
@@ -141,7 +142,7 @@ function clampDraft(draft: string, maxLength: number): string {
 export default defineEventHandler(async (event) => {
   const started = Date.now()
   const { userId } = await requireBrandAccess(event)
-  const { profile, stepKey, stepRow } = await loadBrandStepContext(event, userId)
+  const { profile, stepKey, stepRow, stepRows } = await loadBrandStepContext(event, userId)
 
   // ── HTTP-Gates: Fehler des Aufrufers (s. Kopf) ───────────────────────────
   const parsed = createBrandGenerateSchema().safeParse(await readBody(event))
@@ -180,8 +181,24 @@ export default defineEventHandler(async (event) => {
   const aiEnabled = await readBrandAiEnabled(event)
   const choice = aiEnabled ? resolveBrandSlotGenerator(stepKey) : null
 
+  /**
+   * ── ZWEI AUFNAHMEN, ZWEI FRAGEN (P3.1) ───────────────────────────────────
+   * `records` ist die Zeile DIESES Bausteins — sie beantwortet die Frage nach
+   * dem Slot, der gerade geschrieben werden soll (ist er bestätigt?), und sie
+   * ist die Zeile, in die nachher geschrieben wird.
+   *
+   * `allRecords` ist der Stand ALLER neun Bausteine. Er beantwortet die Frage
+   * nach den QUELLEN — und die zeigen laut Registry ausdrücklich über
+   * Baustein-Grenzen hinweg (`b.purpose` ← `a.pitch`). Bis P3.1 gab es nur die
+   * erste Aufnahme, also kamen fremde Quellen leer bei George an und der
+   * inputHash sah ihre Änderungen nicht.
+   *
+   * Es kostet KEINE zusätzliche Abfrage: `loadBrandStepContext` hat die neun
+   * Zeilen für die Journey ohnehin schon mit EINEM `listRows` geholt.
+   */
   const records = parseSlotRecords(stepRow.slots)
-  const dependencies = collectSlotDependencies(slot.id, records)
+  const allRecords = mergeStepSlotRecords(stepRows)
+  const dependencies = collectSlotDependencies(slot.id, allRecords)
   const inputHash = brandGenerationInputHash(slot.id, profile.contentLocale, dependencies)
   const stored = parseGenerations(stepRow.generations)
   const reused = findBrandGenerationByKey(stored.items, body.idempotencyKey)
@@ -222,16 +239,20 @@ export default defineEventHandler(async (event) => {
    * Material statt die über den Dienst.
    *
    * DIE QUELLEN SIND DIESELBEN, die gleich in den Generator-Vertrag wandern
-   * (Startkarte, Website-Text, Slot-Werte DIESER Zeile). Ein Gate, das mehr
-   * sieht als der Prompt, widerspricht George irgendwann öffentlich.
+   * (Startkarte, Website-Text, Slot-Werte ALLER Bausteine — seit P3.1). Ein
+   * Gate, das mehr oder weniger sieht als der Prompt, widerspricht George
+   * irgendwann öffentlich.
    */
   if (aiEnabled && choice && !reused?.draft) {
     const readiness = slotReadiness(slot.id, {
       startCard: profileStartCard(profile),
       hasSiteAnalysis: profileSiteAnalysisText(profile).trim().length > 0,
       records: Object.fromEntries(
-        Object.keys(records).map(id => [id, brandSlotStoredValue(records[id])]),
+        Object.keys(allRecords).map(id => [id, brandSlotStoredValue(allRecords[id])]),
       ),
+      // Der Server kennt ALLE neun Zeilen und darf deshalb über jede Quelle
+      // urteilen; die Werkstatt reicht nur den offenen Baustein herein.
+      coveredSteps: BRAND_STEP_KEYS,
     })
     if (!readiness.ready) {
       logEvent('info', 'brand.generation_not_ready', {

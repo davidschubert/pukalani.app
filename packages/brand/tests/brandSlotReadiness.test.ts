@@ -3,7 +3,7 @@ import {
   type BrandReadinessInput,
   slotReadiness,
 } from '../shared/brandSlotReadiness'
-import { dependencyClosure } from '../shared/slotRegistry'
+import { BRAND_STEP_KEYS, dependencyClosure } from '../shared/slotRegistry'
 import type { BrandStartCard } from '../shared/types/brand'
 
 /**
@@ -32,11 +32,17 @@ const FULL_CARD = card({
   audience: 'Cafés auf Maui.',
 })
 
+/**
+ * Standard ist die SERVER-Sicht: alle neun Bausteine abgedeckt. Der Browser
+ * reicht nur seinen offenen Baustein herein — dieser Fall hat unten einen
+ * eigenen Block.
+ */
 function input(overrides: Partial<BrandReadinessInput> = {}): BrandReadinessInput {
   return {
     startCard: overrides.startCard ?? FULL_CARD,
     hasSiteAnalysis: overrides.hasSiteAnalysis ?? false,
     records: overrides.records ?? {},
+    coveredSteps: overrides.coveredSteps ?? BRAND_STEP_KEYS,
   }
 }
 
@@ -115,6 +121,38 @@ describe('Die Regel aus der Registry', () => {
 
   it('ein unbekannter Slot gilt als bereit — dieses Gate ist kein zweiter Katalog', () => {
     expect(slotReadiness('z.erfunden', input())).toEqual({ ready: true })
+  })
+})
+
+describe('Wer die Quelle nicht sieht, urteilt nicht über sie (P3.1)', () => {
+  it('SERVER: alle neun Bausteine abgedeckt ⇒ die Registry-Regel greift', () => {
+    // `b.purpose` schöpft aus `a.pitch` (Baustein A) UND drei B-Slots.
+    expect(slotReadiness('b.purpose', input({ coveredSteps: BRAND_STEP_KEYS })))
+      .toEqual({ ready: false, missing: ['source_slots'] })
+  })
+
+  it('BROWSER: nur der offene Baustein abgedeckt ⇒ im Zweifel DURCHLASSEN', () => {
+    // Der Client kennt `a.pitch` nicht — es könnte gefüllt sein. Ein Gate, das
+    // hier sperrt, nähme dem Menschen einen Knopf, den der Server ihm gibt.
+    expect(slotReadiness('b.purpose', input({ coveredSteps: ['pvm'] })))
+      .toEqual({ ready: true })
+  })
+
+  it('GEGENPROBE: sind ALLE Quellen abgedeckt, sperrt die Regel weiter', () => {
+    // `b.whyStarted` hat genau EINE Quelle, und die liegt in Baustein A. Wer
+    // Baustein A abdeckt, sieht sie also vollständig — und leer.
+    expect(dependencyClosure('b.whyStarted')).toEqual(['a.origin'])
+    expect(slotReadiness('b.whyStarted', input({ coveredSteps: ['context'] })))
+      .toEqual({ ready: false, missing: ['source_slots'] })
+    // Es entscheidet die ABDECKUNG, nicht der Baustein des Slots selbst:
+    // derselbe Slot, nur sein eigener Baustein abgedeckt ⇒ durchgelassen.
+    expect(slotReadiness('b.whyStarted', input({ coveredSteps: ['pvm'] })))
+      .toEqual({ ready: true })
+  })
+
+  it('DIE SLOT-EIGENEN REGELN BLEIBEN UNBERÜHRT — sie lesen die Startkarte, keine Slots', () => {
+    expect(slotReadiness('a.toneAnalysis', input({ coveredSteps: [] })))
+      .toEqual({ ready: false, missing: ['source_texts'] })
   })
 })
 

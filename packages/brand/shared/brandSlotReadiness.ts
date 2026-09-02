@@ -1,4 +1,4 @@
-import { dependencyClosure, slotById } from './slotRegistry'
+import { type BrandStepKey, dependencyClosure, slotById } from './slotRegistry'
 import type { BrandStartCard } from './types/brand'
 
 /**
@@ -23,11 +23,21 @@ import type { BrandStartCard } from './types/brand'
  * das andere Quellen zählt als der Prompt, widerspricht George irgendwann
  * öffentlich („George braucht erst X" während George fröhlich entwirft).
  *
- * Die Slot-Werte kommen aus DERSELBEN Aufnahme wie im Prompt: der Zeile des
- * AKTUELLEN Bausteins. Ein Quell-Slot aus einem anderen Baustein steht dort
- * heute leer — im Gate wie im Prompt. Das ist eine bekannte Grenze des
- * Generator-Kontexts (nicht dieses Gates), und sie wird hier ehrlich
- * abgebildet statt heimlich ausgeglichen.
+ * ── WER DIE FREMDEN BAUSTEINE SIEHT, DARF ÜBER SIE URTEILEN (P3.1) ────────
+ * Bis P3.1 las der Generator NUR die Zeile des aktuellen Bausteins; ein
+ * Quell-Slot aus einem anderen Baustein war dort leer, und dieses Gate bildete
+ * diese Grenze ehrlich mit ab. Seit P3.1 lädt die Route ALLE neun Zeilen (sie
+ * liegen ohnehin schon in `loadBrandStepContext`), und die Grenze ist gefallen:
+ * `b.purpose` sieht `a.pitch`, `c.candidates` sieht `a.origin`.
+ *
+ * Der BROWSER sieht sie weiterhin nicht — sein Store trägt nur den offenen
+ * Baustein (`applyStepDetail` ersetzt `serverSlots`). Deshalb sagt der Aufrufer
+ * mit `coveredSteps`, worüber er überhaupt Bescheid weiss, und die
+ * Registry-Regel urteilt nur über abgedeckte Quellen. Der Server reicht alle
+ * neun herein und sperrt mit vollem Wissen; die Werkstatt reicht den einen
+ * offenen herein und lässt im Zweifel DURCH. Ein Gate, das clientseitig
+ * fälschlich sperrt, nimmt dem Menschen einen Knopf, den der Server ihm gegeben
+ * hätte — und das ist der teurere Fehler von beiden.
  *
  * ── ANTWORTFORM ───────────────────────────────────────────────────────────
  * `{ ready: true }` oder `{ ready: false, missing: [...] }` mit SPRECHENDEN
@@ -50,8 +60,20 @@ export interface BrandReadinessInput {
   startCard: BrandStartCard
   /** Wurde die Website je eingelesen (`brand_profiles.siteAnalysis` nicht leer)? */
   hasSiteAnalysis: boolean
-  /** Slot-Id → gespeicherter Wert, aus der Zeile DIESES Bausteins (s. Kopf). */
+  /** Slot-Id → geltender Wert, so weit der Aufrufer sie kennt (s. `coveredSteps`). */
   records: Readonly<Record<string, string>>
+  /**
+   * WELCHE BAUSTEINE `records` ABDECKT (s. Kopf). Server: alle neun. Browser:
+   * der eine offene. Eine Quelle aus einem NICHT abgedeckten Baustein wird von
+   * der Registry-Regel übersprungen — wer sie nicht sehen kann, darf über sie
+   * auch nicht urteilen.
+   *
+   * PFLICHTFELD, obwohl ein Default bequemer wäre: der Default müsste „alles"
+   * oder „nur dieser" heissen, und beide Antworten sind für einen der zwei
+   * Aufrufer falsch. Ein Typfehler an der neuen Aufrufstelle ist billiger als
+   * ein Gate, das still das Falsche annimmt.
+   */
+  coveredSteps: readonly BrandStepKey[]
 }
 
 export type BrandSlotReadiness =
@@ -101,6 +123,10 @@ const SLOT_RULES: Record<string, (input: BrandReadinessInput) => BrandReadinessN
  *     „einer leer", weil ein teilweise gefüllter Stand genau der Fall ist, für
  *     den es Georges Rückfrage gibt.
  *
+ *     Sie urteilt NUR über abgedeckte Quellen (`coveredSteps`) und nur, wenn
+ *     ALLE Quellen abgedeckt sind: ein einziger ungesehener Quell-Slot könnte
+ *     gefüllt sein, und dann wäre „da ist nichts" schlicht falsch.
+ *
  * Ein unbekannter Slot gilt als bereit: dieses Gate ist eine Sicherung, kein
  * zweiter Katalog — welche Slots es gibt, sagt die Registry.
  */
@@ -108,8 +134,13 @@ export function slotReadiness(slotId: string, input: BrandReadinessInput): Brand
   const missing = new Set<BrandReadinessNeed>(SLOT_RULES[slotId]?.(input) ?? [])
 
   if (slotById(slotId)) {
+    const covered = new Set<BrandStepKey>(input.coveredSteps)
     const sources = dependencyClosure(slotId)
-    if (sources.length > 0 && !sources.some(id => filled(input.records[id]))) {
+    const allVisible = sources.every((id) => {
+      const home = slotById(id)?.stepId
+      return home !== undefined && covered.has(home)
+    })
+    if (sources.length > 0 && allVisible && !sources.some(id => filled(input.records[id]))) {
       missing.add('source_slots')
     }
   }

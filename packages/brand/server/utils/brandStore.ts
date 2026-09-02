@@ -26,6 +26,7 @@ import {
   BRAND_STEP_SLOTS_MAX_LENGTH,
   type BrandSlotStateFacts,
   type BrandStepKey,
+  slotById,
 } from '../../shared/slotRegistry'
 
 /**
@@ -264,6 +265,45 @@ export function toSlotFacts(records: Record<string, BrandSlotRecord>): Record<st
     facts[slotId] = { hasValue, confirmed }
   }
   return facts
+}
+
+/**
+ * ALLE SLOT-STÄNDE EINES BRANDINGS, QUER ÜBER DIE NEUN BAUSTEIN-ZEILEN (P3.1).
+ *
+ * ── WOZU ──────────────────────────────────────────────────────────────────
+ * Die Registry lässt einen Slot ausdrücklich von Slots ANDERER Bausteine
+ * abhängen (`b.purpose` ← `a.pitch`, `c.candidates` ← `a.origin` …). Die
+ * Generate-Route las bis P3.1 nur die Zeile ihres eigenen Bausteins — jede
+ * fremde Abhängigkeit kam damit leer bei George an, der inputHash war blind für
+ * sie, und das Bereitschafts-Gate bildete diese Grenze ehrlich mit ab.
+ *
+ * ── ES KOSTET KEINE EINZIGE ZUSÄTZLICHE ABFRAGE ───────────────────────────
+ * Und das ist der Grund, warum diese Funktion Zeilen entgegennimmt statt selbst
+ * zu laden: `loadBrandStepContext` holt für die Journey ohnehin ALLE Zeilen mit
+ * EINEM `listRows` (`loadStepRows`, Limit 9). Ein „Fremd-Step-Lader" mit
+ * Request-Cache wäre eine zweite Ladewegs-Wahrheit neben einer Liste, die schon
+ * im Speicher liegt — und `b.mission` mit fünf Quellen aus zwei Bausteinen
+ * bezahlte sie mit N Rundreisen für Daten, die er längst hat.
+ *
+ * ── EINE ZEILE TRÄGT NUR DIE SLOTS IHRES EIGENEN BAUSTEINS ────────────────
+ * Wessen Zuhause die Registry kennt, wird nur aus der Zeile SEINES Bausteins
+ * übernommen; alles andere wäre ein Wettlauf, den die Lese-Reihenfolge
+ * entscheidet (ein Slot, der durch einen Kopierfehler in zwei Zeilen steht,
+ * hätte sonst zwei Wahrheiten). Slot-Ids, die die Registry NICHT kennt
+ * (Altbestand, deaktivierte Ids), werden übernommen wie gelesen — der
+ * Migrationsvertrag verlangt, dass sie lesbar bleiben.
+ */
+export function mergeStepSlotRecords(rows: readonly BrandStepRow[]): Record<string, BrandSlotRecord> {
+  const merged: Record<string, BrandSlotRecord> = {}
+  for (const row of rows) {
+    const rowStepKey = toBrandStepKey(row.stepKey)
+    for (const [slotId, record] of Object.entries(parseSlotRecords(row.slots))) {
+      const home = slotById(slotId)?.stepId
+      if (home && rowStepKey && home !== rowStepKey) continue
+      merged[slotId] = record
+    }
+  }
+  return merged
 }
 
 export function serializeSlotRecords(records: Record<string, BrandSlotRecord>): string {
