@@ -17,6 +17,8 @@ import {
 } from '../../../../shared/slotRegistry'
 import { brandSlotDisplayValue } from '../../../../shared/brandAutosaveDiff'
 import { brandAiRejectionMessageKey } from '../../../../shared/brandAiLimits'
+import { type BrandAdvisorKey, advisorForStep } from '../../../../shared/brandAdvisors'
+import { type BrandReadinessNeed, slotReadiness } from '../../../../shared/brandSlotReadiness'
 import type {
   BrandGenerationVersionsResponse,
   BrandSiteAnalysisView,
@@ -106,6 +108,33 @@ function slotLabel(slot: BrandSlot): string {
     : t(slot.questionKey)
 }
 
+// ── Wer führt diesen Baustein? (Beraterteam, 2026-09-01) ──────────────────
+
+/**
+ * Der Chat-Kopf zeigt den Berater des AKTIVEN Bausteins — Vorname und
+ * Rollen-Titel, mehr nicht. Gerechnet wird das an EINER Stelle
+ * (`advisorForStep`, mit George als Rückfall), damit Kopf, Sprechblasen und
+ * Übergabe nie auseinanderlaufen können.
+ */
+const advisor = computed(() => advisorForStep(stepKey.value ?? 'context'))
+const advisorRole = computed(() => t(`brand.advisors.${advisor.value.key}.role`))
+
+/**
+ * DIE ÜBERGABE-ZEILE ist Anzeige, kein Verlauf: sie erscheint, wenn der
+ * Baustein von einem ANDEREN Berater geführt wird als der zuvor besuchte, und
+ * sie wird NICHT gespeichert. Persistiert müllte jedes Hin- und Herspringen
+ * zwischen zwei Bausteinen den Verlauf mit immer derselben Zeile zu — und ein
+ * KI-Aufruf wäre sie ohnehin nicht wert: der Text steht in den Locale-Dateien.
+ */
+const handover = ref<string | null>(null)
+let previousAdvisor: BrandAdvisorKey | null = null
+watch(advisor, (next) => {
+  handover.value = previousAdvisor && previousAdvisor !== next.key
+    ? t(`brand.advisors.${next.key}.handover`)
+    : null
+  previousAdvisor = next.key
+}, { immediate: true })
+
 // ── George: die nächste offene Frage ──────────────────────────────────────
 
 /** Lokal übersprungen („Weiß ich nicht") — nichts wird gespeichert, der Zeiger rückt vor. */
@@ -137,15 +166,40 @@ const streamed = computed<BwMessage[]>(() => store.streamMessages.map(message =>
   pending: message.pending,
 })))
 
+/**
+ * DIE EIGENEN ANTWORTEN, SICHTBAR (Audit-Befund B5a, 2026-09-01).
+ *
+ * Bis hierher verschwand jede getippte Antwort wortlos ins Feld: der Verlauf
+ * zeigte nur Georges Seite, und ein Gespräch, in dem man sich selbst nicht
+ * reden sieht, fühlt sich wie ein Formular an.
+ *
+ * SIE WERDEN NICHT ALS `brand_messages`-ZEILE GESPEICHERT, und das ist kein
+ * Versehen: die SUBSTANZ ist längst persistiert — der Text steht im Slot und
+ * geht über den normalen Autosave. Eine zweite Kopie im Verlauf bräuchte eine
+ * eigene Schreib-Route, hätte ein zweites Bearbeiten-Problem (ändert der
+ * Mensch das Feld, log der Verlauf die alte Fassung) und wäre bei der Löschung
+ * eine zweite Stelle. Hier steht deshalb die ANSICHT des Besuchs.
+ *
+ * WAS BEWUSST FEHLT (B5b, gehört in die Konversations-Runde P3): George
+ * REAGIERT nicht auf diese Antworten — jede Reaktion wäre ein KI-Aufruf je
+ * Antwort und damit eine Kostenentscheidung, keine Anzeigefrage.
+ */
+const answers = ref<{ id: string, text: string }[]>([])
+watch(routeStepKey, () => { answers.value = [] })
+
 const georgeMessages = computed<BwMessage[]>(() => {
+  const spoken: BwMessage[] = [
+    ...streamed.value,
+    ...answers.value.map(entry => ({ id: entry.id, role: 'user' as const, text: entry.text })),
+  ]
   if (!nextSlot.value) {
     return [
-      ...streamed.value,
+      ...spoken,
       { id: 'done', role: 'george', text: t('brand.workspace.george.nothingOpen') },
     ]
   }
   return [
-    ...streamed.value,
+    ...spoken,
     {
       id: nextSlot.value.id,
       role: 'george',
@@ -159,6 +213,7 @@ function answerFromGeorge(text: string): void {
   const slot = nextSlot.value
   if (!slot) return
   store.setSlotValue(slot.id, text)
+  answers.value = [...answers.value, { id: `answer-${slot.id}-${answers.value.length}`, text }]
   autosave.schedule()
 }
 
@@ -191,6 +246,49 @@ watch(routeStepKey, () => { hints.value = {} })
 /** Nur Slots, die George überhaupt entwirft — eine reine Menschenfrage nicht. */
 function isGeneratable(slot: BrandSlot): boolean {
   return slot.generator !== 'none'
+}
+
+/**
+ * ── DAS BEREITSCHAFTS-GATE, SCHON VOR DEM KLICK ──────────────────────────
+ * Dieselbe pure Regel wie in der Route (`slotReadiness`) und aus denselben
+ * Quellen: Startkarte, Website-Stand, Slot-Werte DIESES Bausteins. Zweimal
+ * gerechnet, einmal beschrieben — die Route ist die Durchsetzung, das hier ist
+ * die Ehrlichkeit: statt eines Knopfes, der gleich ein 409 kassiert, steht da
+ * ein Satz, WAS fehlt.
+ */
+const slotValues = computed<Record<string, string>>(() => {
+  const values: Record<string, string> = {}
+  for (const id of new Set([...Object.keys(store.serverSlots), ...Object.keys(store.localEdits)])) {
+    values[id] = store.slotValue(id)
+  }
+  return values
+})
+
+function readinessOf(slot: BrandSlot) {
+  return slotReadiness(slot.id, {
+    startCard: store.profile?.startCard ?? { websiteUrl: '', industry: '', about: '', audience: '' },
+    hasSiteAnalysis: Boolean(store.profile?.siteAnalysis.analyzedAt),
+    records: slotValues.value,
+  })
+}
+
+/** Die Bedarfs-Schlüssel tragen Punkte (`startcard.about`), i18n-Knoten nicht. */
+const READINESS_KEYS: Record<BrandReadinessNeed, string> = {
+  'startcard.about': 'startcardAbout',
+  'startcard.audience': 'startcardAudience',
+  'startcard.industry': 'startcardIndustry',
+  'competitor_names': 'competitorNames',
+  'source_texts': 'sourceTexts',
+  'source_slots': 'sourceSlots',
+}
+
+function readinessNote(slot: BrandSlot): string | null {
+  const readiness = readinessOf(slot)
+  if (readiness.ready) return null
+  return t('brand.workspace.ready.needs', {
+    advisor: advisor.value.name,
+    needs: readiness.missing.map(need => t(`brand.workspace.ready.need.${READINESS_KEYS[need]}`)).join(' · '),
+  })
 }
 
 async function generateSlot(slot: BrandSlot): Promise<void> {
@@ -271,6 +369,9 @@ const generationNotice = computed<string | null>(() => {
   if (code === 'no_generator') return t('brand.workspace.generate.noGenerator')
   if (code === 'generation_active') return t('brand.workspace.generate.busy')
   if (code === 'aborted') return t('brand.workspace.generate.stopped')
+  // Das Gate hat schon am Slot gesagt, WAS fehlt — hier reicht der Hinweis,
+  // dass es daran lag und nicht an einer Störung.
+  if (code === 'not_ready') return t('brand.workspace.generate.notReady')
   return t('brand.workspace.generate.failed')
 })
 
@@ -655,8 +756,14 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
             />
           </div>
 
+          <!-- ZU WENIG IST ZU WENIG: statt eines Knopfes, der in ein 409 läuft,
+               steht hier ruhig, was fehlt (Bereitschafts-Gate). -->
+          <p v-if="isGeneratable(slot) && readinessNote(slot)" class="bw-pending mt-2">
+            {{ readinessNote(slot) }}
+          </p>
+
           <!-- „George, versuch's nochmal" — mit optionalem Hinweis (§3b.3). -->
-          <div v-if="isGeneratable(slot)" class="mt-2 flex flex-wrap items-center gap-2">
+          <div v-else-if="isGeneratable(slot)" class="mt-2 flex flex-wrap items-center gap-2">
             <UInput
               class="min-w-40 flex-1"
               size="sm"
@@ -719,7 +826,14 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
     </template>
 
     <template #george>
-      <BwGeorge :messages="georgeMessages" @send="answerFromGeorge">
+      <BwGeorge
+        :messages="georgeMessages"
+        :advisor-name="advisor.name"
+        :advisor-role="advisorRole"
+        :advisor-avatar="advisor.avatar"
+        :handover="handover"
+        @send="answerFromGeorge"
+      >
         <template #chips>
           <div v-if="nextSlot" class="flex flex-col items-stretch gap-2">
             <button class="bw-chip bw-chip--ghost" @click="skipQuestion">{{ t('brand.workspace.dontKnow') }}</button>

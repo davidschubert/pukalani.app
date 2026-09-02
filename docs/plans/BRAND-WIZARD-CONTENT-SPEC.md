@@ -109,6 +109,66 @@ mit Beleg + Angebot", B3 zeigt „nimmt Last ab + bleibt ehrlich über
 Unsicherheit". Jede künftige George-Textzeile wird gegen diese drei
 gelesen.
 
+### 1.4 NACHTRAG 2026-09-01 — Beraterteam statt Alleskönner (hebt „nur George" auf)
+
+Nach dem Live-Persona-Audit an Davids erstem echten Branding. **Davids
+Leitsatz, der jede Prompt-Entscheidung führt:** „Die Qualität der Antworten
+wird durchs INTERVIEW bestimmt — eine kleine, leicht beantwortbare Frage
+zuerst; ehrlich benennen, was fehlt; runterbrechen, bevor jemand zu viel
+erzählt."
+
+**Davids Entscheidung 1: der Wizard zeigt ein TEAM.** §1.1/§1.2 sprechen von
+EINER Persona; das gilt ab hier nur noch für den Gastgeber. Fünf Beraterinnen
+und Berater, je einer pro Baustein — Registry:
+`packages/brand/shared/brandAdvisors.ts` (pur, `advisorForStep()` ist die
+einzige Rechenstelle, George der Rückfall).
+
+| Berater | Rolle | Bausteine | Kern der Interview-Technik |
+| --- | --- | --- | --- |
+| **George** Wuffwuff | Markenberater (Gastgeber) | Startbogen · A Kontext · Ergebnis | Journalist: kleinste konkrete Frage zuerst, spiegelt zurück |
+| **Vera** Witterung | Strategin | B PVM · B2 Architektur | fragt warum, bis es trägt; „Das könnte jeder sagen" — die Widerspruchs-Pflicht (Regel 5) lebt hier am stärksten |
+| **Milo** Treuherz | Werte-Berater | C Werte · D Archetyp | Momente statt Adjektive („Erzähl von einem Tag, an dem …"), destilliert Werte aus Geschichten |
+| **Nika** Bellkant | Sprach-Beraterin | E Manifest · E+ Verbale Identität | testet am Ohr, jagt Floskeln und Vertriebssprache |
+| **Otto** Testbiss | Namens-Berater | F Name | nüchtern-pragmatisch, dämpft Namens-Verliebtheit: erst überleben, dann gefallen |
+
+**Die neun Regeln aus §1.2 gelten unverändert für alle fünf.** Die
+Persönlichkeit steht im Prompt ÜBER dem Regel-Fundament und ordnet sich ihm
+ausdrücklich unter: sie entscheidet WIE gesprochen wird, die Regeln WAS erlaubt
+ist — bei Konflikt gewinnen die Regeln. Auch die drei Beispielantworten aus
+§1.3 bleiben die Kalibrierung; sie beschreiben Haltungen, keine Stimmen.
+
+**Davids Entscheidung 2: die Namen kommen aus dem bestehenden About-Konzept.**
+Das Branding-Supply-Team sind Hunde mit funktional-verspielten Nachnamen
+(Klickdummy-Runde 163, `packages/brand/.playground/app/pages/team.vue`: George
+Wuffwuff, Frida Fellini, Rex Setter, Ada Prüfstein …). Die vier Neuen stehen in
+derselben Welt — Vera Witterung (Weimaranerin, Vorstehhund), Milo Treuherz
+(Berner Sennenhund), Nika Bellkant (Papillon: bellen + Belcanto), Otto Testbiss
+(Mops). **Zwei Ebenen, bewusst getrennt:**
+- **About-Seite:** voller Name, Rasse, Marotten (`fullName`, `personal`).
+- **Arbeitsmodus:** nur Vorname + Rollen-Titel im Chat-Kopf.
+- **Prompt:** die Hunde-Natur kommt NICHT vor (per Test genagelt) — im
+  Interview sind das Beraterinnen und Berater, kein Maskottchen.
+
+**Was `george-a-4` sonst noch ändert** (jede Zeile ein Audit-Befund):
+
+| # | Befund | Änderung |
+| --- | --- | --- |
+| B2 | Entwürfe kamen ohne Rahmen | Der CHAT-Zug rahmt: 1 Satz worauf er fusst · der Entwurf · genau EINE Frage. Der SLOT bekommt nur den Wert. Marker-Vertrag `BASIS:/DRAFT:/ASK:` in `server/utils/georgeTurn.ts` |
+| B3 | dünnes Material ⇒ erfundener Entwurf | `QUESTION:` als Antwortform — der Lauf endet als Rückfrage (`outcome: 'question'`), fasst keinen Slot an, stellt EINE kleine Frage |
+| B4 | Sternchen im Slot-Text | Feldwert ohne Markdown-Auszeichnung, ausser dem list/structured-Formvertrag |
+| B6 | „steht nicht in den Eingaben" als Steckbrief-Füllung | GEKENNZEICHNETE Annahmen erlaubt (`- Name — assumption, please verify: …`); erfundene NAMEN bleiben verboten |
+| B8 | Vertriebston für einen Verein | Kontext-Sensibilität: Non-Profit/Verein ⇒ keine Vertriebssprache; gelesen aus den Eingaben, nicht erfragt |
+| B9 | Wortdoppler, holpriges Deutsch | Sorgfaltszeile unter den Regeln |
+| B5a | eigene Antworten unsichtbar | Der Verlauf zeigt die getippten Antworten. **NICHT dabei (B5b):** Georges Reaktion darauf — jede Reaktion wäre ein KI-Aufruf je Antwort, das ist eine Kostenentscheidung und gehört in die Konversations-Runde P3 |
+
+**Bereitschafts-Gate („zu wenig ist zu wenig", Davids Entscheidung):** je Slot
+prüft eine pure Regel (`shared/brandSlotReadiness.ts`) VOR dem Klick, ob das
+Material reicht — aus denselben Quellen, die der Generator sieht (Startkarte,
+Website-Text, Quell-Slots). Fehlt etwas, steht das beim Namen in der Werkstatt
+und die Route antwortet 409 `not_ready`; ein Anbieter-Aufruf entsteht nicht.
+Was man rechnen kann, fragt man nicht — die Rückfrage (B3) bleibt für das, was
+man nicht rechnen kann.
+
 ---
 
 ## 2. Schritt 0 — Startkarte und Weichen

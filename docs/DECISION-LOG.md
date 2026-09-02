@@ -7,6 +7,55 @@ die kleinen, verstreuten Beschlüsse.
 
 ---
 
+## 2026-09-01 — Brand Wizard: sichtbares Beraterteam statt eines Alleskönners
+
+**Auslöser:** Der Live-Persona-Audit an Davids erstem echten Branding. George
+lieferte Entwürfe ohne Rahmen (kein „worauf das fusst", keine Abschlussfrage),
+schrieb bei dünnem Material lieber etwas Erfundenes als eine Rückfrage, füllte
+Wettbewerber-Steckbriefe mit „steht nicht in den Eingaben" und redete einem
+Verein von „Kunden gewinnen". Davids Leitsatz dazu, der jede Entscheidung
+dieser Runde führt: **„Die Qualität der Antworten wird durchs INTERVIEW
+bestimmt — eine kleine, leicht beantwortbare Frage zuerst; ehrlich benennen,
+was fehlt; runterbrechen, bevor jemand zu viel erzählt."**
+
+**Entscheidung 1 (David): sichtbares Beraterteam.** Der Wizard zeigt nicht mehr
+einen Alleskönner, sondern fünf Fachleute — George bleibt der **Gastgeber**
+(Startbogen, Kontext, Ergebnis), **Vera** führt Purpose/Vision/Mission und die
+Markenarchitektur, **Milo** Werte und Archetyp, **Nika** Manifest und verbale
+Identität, **Otto** das Naming. Der Grund ist kein Schmuck: ein Wechsel der
+Person ist der billigste Weg, einen Wechsel der FRAGEART anzukündigen. Die
+neun Regeln aus Content-Spec §1.2 gelten unverändert für alle fünf — die
+Persönlichkeit entscheidet WIE gefragt wird, die Regeln WAS erlaubt ist, und
+bei Konflikt gewinnen die Regeln (steht so im Prompt).
+
+**Entscheidung 2 (David): die Namen.** George Wuffwuff · Vera Witterung
+(Weimaranerin, Vorstehhund — zeigt die Richtung) · Milo Treuherz (Berner
+Sennenhund) · Nika Bellkant (Papillon, bellen + Belcanto) · Otto Testbiss
+(Mops, beisst auf jeden Namen wie auf eine Münze). Damit bleiben sie im
+BESTEHENDEN About-Konzept (Runde 163): das Branding-Supply-Team sind Hunde mit
+funktional-verspielten Nachnamen. **Zwei Ebenen, bewusst getrennt:** die
+Hunde-Welt (voller Name, Rasse, Marotten) lebt auf der About-Seite; der
+Wizard-Kopf zeigt nur Vorname und Rollen-Titel, und die PROMPTS erwähnen sie
+mit keinem Wort — im Interview sind das Beraterinnen und Berater, kein
+Maskottchen.
+
+**Entscheidung 3: „zu wenig ist zu wenig" wird gerechnet, nicht gefragt.** Ein
+deterministisches Bereitschafts-Gate je Slot prüft VOR dem Klick, ob das
+Material für einen ehrlichen Entwurf reicht, und sagt sonst beim Namen, was
+fehlt (409 `not_ready` an der Route, ruhiger Satz in der Werkstatt). Es kostet
+keinen Anbieter-Aufruf. Was man rechnen kann, fragt man nicht — Georges neue
+Rückfrage bleibt für das, was man NICHT rechnen kann.
+
+**Zwei Dinge, die bewusst NICHT passiert sind:** (1) Georges REAKTION auf
+getippte Antworten (jede Reaktion wäre ein KI-Aufruf je Antwort — Kostenfrage,
+gehört in die Konversations-Runde P3); die Antworten werden vorerst nur
+SICHTBAR, ihre Substanz steht ohnehin im Slot. (2) Die Übergabe-Zeile beim
+Berater-Wechsel wird nicht persistiert — bei jedem Sprung zwischen zwei
+Bausteinen stünde sie sonst ein weiteres Mal im Verlauf.
+
+Prompt-Fassung: `george-a-4`. Nachtrag in
+docs/plans/BRAND-WIZARD-CONTENT-SPEC.md §1.
+
 ## 2026-08-23 — Mitglieder gehören in die Navigation, nicht in die Einstellungen
 
 **Auslöser:** Nach dem Bau der Mitglieder-Weltkarte fragte David, ob die

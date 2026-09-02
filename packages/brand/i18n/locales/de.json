@@ -228,8 +228,9 @@
       },
       "george": {
         "subtitle": "Dein Markenberater",
-        "placeholder": "Antwort schreiben — oder George etwas fragen …",
-        "nothingOpen": "In diesem Kapitel ist nichts mehr offen — bestätige es, wenn es passt."
+        "placeholder": "Antwort schreiben — oder George etwas fragen",
+        "nothingOpen": "In diesem Kapitel ist nichts mehr offen — bestätige es, wenn es passt.",
+        "send": "Senden"
       },
       "stage": {
         "title": "Euer Brand-Dokument",
@@ -289,7 +290,8 @@
         "instanceLimit": "George macht heute Feierabend — das liegt nicht an dir. Morgen entwirft er wieder.",
         "stopped": "Abgebrochen. Dein bisheriger Text ist unverändert.",
         "failed": "Das hat gerade nicht geklappt. Versuch es gleich nochmal.",
-        "dismiss": "Verstanden"
+        "dismiss": "Verstanden",
+        "notReady": "Dafür ist noch zu wenig da — oben steht, was fehlt."
       },
       "versions": {
         "open": "Frühere Fassungen",
@@ -301,6 +303,17 @@
         "empty": "Für dieses Feld gibt es noch keine frühere Fassung.",
         "loading": "Fassungen werden geholt …",
         "close": "Schließen"
+      },
+      "ready": {
+        "needs": "{advisor} braucht dafür erst: {needs}",
+        "need": {
+          "startcardAbout": "was ihr macht (aus dem Startbogen)",
+          "startcardAudience": "für wen ihr da seid (aus dem Startbogen)",
+          "startcardIndustry": "eure Branche (aus dem Startbogen)",
+          "competitorNames": "Namen von Wettbewerbern — lest eure Website ein oder tragt sie selbst ein",
+          "sourceTexts": "vorhandene Texte — lest dafür eure Website ein",
+          "sourceSlots": "mindestens eine der Antworten, auf denen dieses Feld aufbaut"
+        }
       }
     },
     "brands": {
@@ -383,6 +396,28 @@
       "verbal": "Verbale Identität",
       "naming": "Name",
       "result": "Ergebnis"
+    },
+    "advisors": {
+      "george": {
+        "role": "Markenberater",
+        "handover": "Ab hier führt George — er hält den Faden und fragt klein und konkret."
+      },
+      "vera": {
+        "role": "Strategin",
+        "handover": "Ab hier übernimmt Vera — sie stellt die Warum-Fragen, bis eure Positionierung trägt."
+      },
+      "milo": {
+        "role": "Werte-Berater",
+        "handover": "Ab hier übernimmt Milo — er fragt nach Momenten, nicht nach Adjektiven."
+      },
+      "nika": {
+        "role": "Sprach-Beraterin",
+        "handover": "Ab hier übernimmt Nika — sie prüft jeden Satz am Ohr und streicht Floskeln."
+      },
+      "otto": {
+        "role": "Namens-Berater",
+        "handover": "Ab hier übernimmt Otto — er prüft jeden Namen nüchtern: erst überleben, dann gefallen."
+      }
     },
     "invite": {
       "title": "Einladung einlösen",

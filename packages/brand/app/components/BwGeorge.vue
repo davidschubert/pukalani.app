@@ -1,6 +1,18 @@
 <script setup lang="ts">
-/** George-Panel: Monogramm statt Porträt, max 2–3 Sätze pro Zug, jeder
- *  Zug endet in Frage oder Schritt (§3d). Kein Lob-Spam, keine Fake-Delays. */
+/** Berater-Panel: Monogramm statt Porträt, max 2–3 Sätze pro Zug, jeder
+ *  Zug endet in Frage oder Schritt (§3d). Kein Lob-Spam, keine Fake-Delays.
+ *
+ *  ── DER KOPF ZEIGT, WER GERADE FÜHRT (2026-09-01) ────────────────────────
+ *  Bis hierher stand dort fest „George Wuffwuff · Dein Markenberater". Seit
+ *  dem sichtbaren Beraterteam kommen Name und Rollen-Titel von aussen — die
+ *  Seite fragt `advisorForStep()`. Und zwar VORNAME plus Rolle: die Hunde-Welt
+ *  mit den Nachnamen (Davids About-Konzept) lebt auf der About-Seite, im
+ *  Arbeitsmodus wäre sie ein Gag im Weg.
+ *
+ *  ── DIE ÜBERGABE IST ANZEIGE, KEIN VERLAUF ───────────────────────────────
+ *  `handover` steht als stille Zeile ÜBER den Nachrichten und wird nirgends
+ *  gespeichert: wer zwischen zwei Bausteinen hin- und herspringt, bekäme sonst
+ *  bei jedem Sprung eine weitere Zeile in seinen Verlauf geschrieben. */
 export interface BwMessage {
   id: string
   role: 'george' | 'user'
@@ -9,11 +21,30 @@ export interface BwMessage {
   /** George schreibt noch — der Strom läuft (§3e `message.delta`). */
   pending?: boolean
 }
-const props = defineProps<{ messages: BwMessage[] }>()
+
+const props = withDefaults(defineProps<{
+  messages: BwMessage[]
+  /** Vorname des führenden Beraters. */
+  advisorName?: string
+  /** Lokalisierter Rollen-Titel. */
+  advisorRole?: string
+  /** Bildpfad des Beraters; leer ⇒ Monogramm aus dem Vornamen. */
+  advisorAvatar?: string
+  /** Einmalige Übergabe-Zeile beim Betreten eines Bausteins (s. Kopf). */
+  handover?: string | null
+}>(), {
+  advisorName: 'George',
+  advisorRole: '',
+  advisorAvatar: '/george.jpg',
+  handover: null,
+})
+
 defineEmits<{ send: [text: string] }>()
-/* „George Wuffwuff" bleibt hart — Eigenname (wie die Theme-Namen). */
+
 const { t } = useI18n()
 const draft = ref('')
+
+const initial = computed(() => props.advisorName.slice(0, 1).toUpperCase())
 
 /* Runde 55 (David): der Chat ankert UNTEN und wächst nach oben —
  * neue Nachrichten schieben den Verlauf hoch, Blick bleibt beim Composer. */
@@ -27,32 +58,44 @@ watch(() => props.messages.length, async () => {
 <template>
   <div class="flex min-h-0 flex-1 flex-col">
     <div class="flex items-center gap-2.5 border-b px-7 pt-5 pb-3.5" style="border-color: var(--bw-line)">
-      <BwGeorgeAvatar />
+      <BwGeorgeAvatar :src="advisorAvatar" :initial="initial" :alt="advisorName" />
       <span class="leading-tight">
-        <span class="bw-label block">George Wuffwuff</span>
-        <span class="bw-label block" style="color: var(--bw-muted)">{{ t('brand.workspace.george.subtitle') }}</span>
+        <span class="bw-label block">{{ advisorName }}</span>
+        <span class="bw-label block" style="color: var(--bw-muted)">
+          {{ advisorRole || t('brand.workspace.george.subtitle') }}
+        </span>
       </span>
     </div>
     <div ref="scroller" class="min-h-0 flex-1 overflow-y-auto px-7 py-5">
       <div class="flex min-h-full flex-col justify-end space-y-4">
-      <div v-for="m in messages" :key="m.id" class="bw-msg" :class="m.role === 'user' ? 'bw-msg--user' : ''">
-        <BwGeorgeAvatar v-if="m.role === 'george'" size="md" />
-        <div class="bw-msg-body">
-          <!-- Interpolation statt v-html: der Text kommt aus einem Sprachmodell
-               und wird escaped gerendert. Markdown im Chat kommt mit P2 über
-               core/shared/markdown.ts + MarkdownContent.vue (vnode-basiert,
-               ohne v-html-Pfad) — bis dahin zeigen wir lieber Sternchen als
-               fremdes Markup. -->
-          <p class="whitespace-pre-wrap">{{ m.text }}<span v-if="m.pending" class="bw-caret" aria-hidden="true">▍</span></p>
-          <p v-if="m.help" class="bw-msg-help">{{ m.help }}</p>
+        <p v-if="handover" class="bw-label" style="color: var(--bw-muted)">{{ handover }}</p>
+        <div v-for="m in messages" :key="m.id" class="bw-msg" :class="m.role === 'user' ? 'bw-msg--user' : ''">
+          <BwGeorgeAvatar
+            v-if="m.role === 'george'"
+            size="md" :src="advisorAvatar" :initial="initial" :alt="advisorName"
+          />
+          <div class="bw-msg-body">
+            <!-- Interpolation statt v-html: der Text kommt aus einem Sprachmodell
+                 und wird escaped gerendert. Markdown im Chat kommt mit P2 über
+                 core/shared/markdown.ts + MarkdownContent.vue (vnode-basiert,
+                 ohne v-html-Pfad) — bis dahin zeigen wir lieber Sternchen als
+                 fremdes Markup. -->
+            <p class="whitespace-pre-wrap">{{ m.text }}<span v-if="m.pending" class="bw-caret" aria-hidden="true">▍</span></p>
+            <p v-if="m.help" class="bw-msg-help">{{ m.help }}</p>
+          </div>
         </div>
-      </div>
-      <slot name="chips" />
+        <slot name="chips" />
       </div>
     </div>
     <form class="flex gap-2 border-t px-7 py-4" style="border-color: var(--bw-line)" @submit.prevent="draft.trim() && ($emit('send', draft), draft = '')">
-      <UInput v-model="draft" variant="none" class="flex-1 rounded-full" :ui="{ base: 'rounded-full px-4' }" :placeholder="t('brand.workspace.george.placeholder')" size="lg" style="background: var(--bw-surface-hi)" />
-      <UButton type="submit" icon="i-ph-paper-plane-right" :aria-label="t('brand.common.send')" size="lg" color="neutral" variant="ghost" class="bw-send rounded-full" :disabled="!draft.trim()" />
+      <UInput
+        v-model="draft" variant="none" class="flex-1 rounded-full" :ui="{ base: 'rounded-full px-4' }"
+        :placeholder="t('brand.workspace.george.placeholder')" size="lg" style="background: var(--bw-surface-hi)"
+      />
+      <UButton
+        type="submit" icon="i-ph-paper-plane-right" :aria-label="t('brand.workspace.george.send')"
+        size="lg" color="neutral" variant="ghost" class="bw-send rounded-full" :disabled="!draft.trim()"
+      />
     </form>
   </div>
 </template>

@@ -5,6 +5,7 @@ import {
 } from '../../shared/brandAiLimits'
 import {
   type BrandGenerationFailureCode,
+  type BrandGenerationOutcome,
   decodeBrandGenerationChunk,
 } from '../../shared/brandGeneration'
 import { useBrandWorkspaceStore } from '../stores/brandWorkspace'
@@ -55,6 +56,8 @@ export type BrandGenerationClientFailure =
   | BrandGenerationFailureCode
   | BrandAiRejectionCode
   | 'request_rejected'
+  /** Das Bereitschafts-Gate hat abgelehnt (409) — zu wenig Material (george-a-4). */
+  | 'not_ready'
 
 export interface UseBrandGenerationOptions {
   /** Vor dem Start ausführen — die Seite reicht hier `autosave.flush` herein. */
@@ -85,6 +88,17 @@ export function useBrandGeneration(
   const status = ref<BrandGenerationStatus>('idle')
   const activeSlotId = ref<string | null>(null)
   const failureCode = ref<BrandGenerationClientFailure | null>(null)
+  /**
+   * WAS DER LETZTE LAUF WAR (george-a-4): ein Entwurf oder eine Rückfrage.
+   *
+   * Er wird aus dem `generation.completed`-Frame übernommen und NICHT aus dem
+   * Ausbleiben eines `slot.ready` geschlossen — ein abgerissener Strom sähe
+   * sonst aus wie eine Rückfrage. Für den Slot ist ohnehin nichts zu tun:
+   * `slot.ready` ist die einzige Stelle, die einen Editor füllt, und bei einer
+   * Rückfrage kommt es gar nicht erst. Die Frage steht dann als gewöhnlicher
+   * Zug im Verlauf — kein Fehler, kein Hinweis, kein Toast.
+   */
+  const lastOutcome = ref<BrandGenerationOutcome | null>(null)
 
   let controller: AbortController | null = null
 
@@ -113,6 +127,7 @@ export function useBrandGeneration(
     status.value = 'streaming'
     activeSlotId.value = slotId
     failureCode.value = null
+    lastOutcome.value = null
 
     let generationId = ''
 
@@ -143,7 +158,11 @@ export function useBrandGeneration(
         // wieder", „morgen wieder", „nicht an dir". Ein gemeinsames „hat nicht
         // geklappt" schickte den Menschen zurück an denselben Knopf.
         status.value = 'failed'
+        // Zwei Ausnahmen von „der Grund bleibt beim Server": die Drossel (429)
+        // sagt WANN es wieder geht, das Bereitschafts-Gate (409) sagt WAS fehlt.
+        // Beides schickt den Menschen sonst zurück an denselben Knopf.
         failureCode.value = (response.status === 429 ? await rejectionReason(response) : null)
+          ?? (response.status === 409 ? 'not_ready' : null)
           ?? 'request_rejected'
         return
       }
@@ -169,6 +188,7 @@ export function useBrandGeneration(
             store.applyGeorgeDraft(item.slotId, item.draft, item.generationId)
           }
           else if (item.type === 'generation.completed') {
+            lastOutcome.value = item.outcome ?? 'draft'
             store.applyGenerationRevision(item.revision)
             store.endGeorgeMessage(item.generationId)
             status.value = 'done'
@@ -213,5 +233,15 @@ export function useBrandGeneration(
     onBeforeUnmount(() => stop())
   }
 
-  return { status, streaming, activeSlotId, failureCode, isStreamingSlot, generate, stop, dismissFailure }
+  return {
+    status,
+    streaming,
+    activeSlotId,
+    failureCode,
+    lastOutcome,
+    isStreamingSlot,
+    generate,
+    stop,
+    dismissFailure,
+  }
 }

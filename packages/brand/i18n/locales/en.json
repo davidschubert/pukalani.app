@@ -228,8 +228,9 @@
       },
       "george": {
         "subtitle": "Your brand advisor",
-        "placeholder": "Write your answer — or ask George something …",
-        "nothingOpen": "Nothing open in this chapter — confirm it when it fits."
+        "placeholder": "Write your answer — or ask a question",
+        "nothingOpen": "Nothing open in this chapter — confirm it when it fits.",
+        "send": "Send"
       },
       "stage": {
         "title": "Your brand document",
@@ -289,7 +290,8 @@
         "instanceLimit": "George has called it a day — this is not about you. He will draft again tomorrow.",
         "stopped": "Stopped. Your text is unchanged.",
         "failed": "That did not work just now. Try again in a moment.",
-        "dismiss": "Got it"
+        "dismiss": "Got it",
+        "notReady": "There is not enough here yet — the note above says what is missing."
       },
       "versions": {
         "open": "Earlier versions",
@@ -301,6 +303,17 @@
         "empty": "There is no earlier version for this field yet.",
         "loading": "Fetching versions …",
         "close": "Close"
+      },
+      "ready": {
+        "needs": "{advisor} needs this first: {needs}",
+        "need": {
+          "startcardAbout": "what you do (from the start card)",
+          "startcardAudience": "who you are for (from the start card)",
+          "startcardIndustry": "your industry (from the start card)",
+          "competitorNames": "names of competitors — read your website in, or enter them yourself",
+          "sourceTexts": "existing texts — read your website in for that",
+          "sourceSlots": "at least one of the answers this field builds on"
+        }
       }
     },
     "brands": {
@@ -383,6 +396,28 @@
       "verbal": "Verbal identity",
       "naming": "Name",
       "result": "Result"
+    },
+    "advisors": {
+      "george": {
+        "role": "Brand advisor",
+        "handover": "George leads from here — he keeps the thread and asks small, concrete questions."
+      },
+      "vera": {
+        "role": "Strategist",
+        "handover": "Vera takes over from here — she asks the why questions until your positioning holds."
+      },
+      "milo": {
+        "role": "Values advisor",
+        "handover": "Milo takes over from here — he asks for moments, not adjectives."
+      },
+      "nika": {
+        "role": "Language advisor",
+        "handover": "Nika takes over from here — she tests every line by ear and cuts the filler."
+      },
+      "otto": {
+        "role": "Naming advisor",
+        "handover": "Otto takes over from here — he checks every name soberly: survive first, charm second."
+      }
     },
     "invite": {
       "title": "Redeem your invitation",
