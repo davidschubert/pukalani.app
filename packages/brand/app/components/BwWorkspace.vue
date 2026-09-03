@@ -80,12 +80,20 @@ const mode = ref<'stage' | 'george'>('george')
  * steigt erst nach dem Mount ein. autoSaveId merkt sich die
  * Aufteilung je Browser in localStorage. */
 const isDesktop = ref(false)
+/* Runde 30 (David, „links springt die 1px-Linie, rechts rutscht der Stand"):
+ * SSR + erster Client-Paint kennen die Viewport-Breite nicht — bis zum Mount
+ * rendert eine Seite MIT railWidth deshalb einen STATISCHEN Flex-Zweig, der
+ * pixel-identisch zum Fixed-Rail-Splitter aussieht (Rail-Linie, Balken über
+ * beiden Spalten, 63/37-Teilung). Vorher sprang der Grid-Fallback sichtbar
+ * ins Splitter-Layout um. */
+const mounted = ref(false)
 let desktopMq: MediaQueryList | null = null
 const onMq = (e: MediaQueryListEvent | MediaQueryList) => { isDesktop.value = e.matches }
 onMounted(() => {
   desktopMq = window.matchMedia('(min-width: 1280px)')
   onMq(desktopMq)
   desktopMq.addEventListener('change', onMq)
+  mounted.value = true
 })
 onBeforeUnmount(() => desktopMq?.removeEventListener('change', onMq))
 const zoneItems = [
@@ -176,6 +184,28 @@ const zoneItemsFixedRail = [
             <aside class="bw-george h-full w-full"><slot name="george" /></aside>
           </template>
         </USplitter>
+      </div>
+    </div>
+    <!-- Runde 30: der PRE-MOUNT-Zweig für Seiten mit fester Rail-Breite —
+         dieselbe Anatomie wie der Splitter-Zweig darüber, nur statisch
+         (63/37 wie zoneItemsFixedRail). SSR und erster Paint sehen damit
+         exakt das Endlayout; nach dem Mount übernimmt der Splitter lautlos. -->
+    <div v-else-if="railWidth && !mounted" class="flex min-h-0 flex-1">
+      <aside v-show="!railCollapsed" class="bw-rail flex h-full flex-none flex-col" :style="`width: ${railWidth}; border-right: 1px solid var(--bw-line)`">
+        <div class="bw-rail-scroll min-h-0 flex-1"><slot name="rail" /></div>
+        <div v-if="railFooter" class="bw-rail-foot flex-none">
+          <BwRailFooter :progress-pct="progressPct" :progress-note="progressNote" :progress-subnote="progressSubnote" :progress-to="progressTo" :score="score" :progress-title="progressTitle" :progress-count="progressCount" :progress-time="progressTime" />
+        </div>
+      </aside>
+      <div class="flex min-h-0 min-w-0 flex-1 flex-col">
+        <div v-if="$slots['stage-bar']" class="bw-stage-bar flex-none"><slot name="stage-bar" /></div>
+        <div class="flex min-h-0 min-w-0 flex-1">
+          <div class="flex h-full min-w-0 flex-col" style="flex: 63 1 0">
+            <main class="bw-stage min-h-0 w-full min-w-0 flex-1"><div class="bw-stage-inner"><slot /></div></main>
+            <div v-if="$slots['stage-footer']" class="bw-stage-foot flex-none"><div class="bw-stage-inner"><slot name="stage-footer" /></div></div>
+          </div>
+          <aside class="bw-george h-full min-w-0" style="flex: 37 1 0"><slot name="george" /></aside>
+        </div>
       </div>
     </div>
     <USplitter
