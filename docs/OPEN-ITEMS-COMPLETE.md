@@ -93,6 +93,75 @@ färben sich Bestands-Kacheln um). Bewusst kuratierte Tabelle statt
 Hash→OKLCH-Generator: unendlich viele Töne heisst regelmäßig hässliche.
 Später kann eine echte Farb-Phase des Wizards die Zuweisung überschreiben.
 
+**Zweite Welle in derselben Nacht (Davids Live-Test + „setze die offenen
+Tasks alle um"):**
+
+- **C5 verdrahtet** (`998b22c7`): „Nochmal von vorn" auf einem
+  abgeschlossenen Kapitel öffnet es jetzt wirklich (`reopen` im
+  Autosave-PATCH, Route öffnet vor der Konfidenz; vorher war die pure
+  Transition von keinem API-Weg erreichbar — der Chip war eine Attrappe).
+- **Mobil-Drawer statt Vollbild** (`d5d58630`, Davids Entscheidung):
+  Spaltenbreite (`--bw-rail-w`, Deckel 85vw), Backdrop dunkelt ab und
+  schliesst per Tipp; Backdrop teilt die z-50 der Rail über DOM-Reihenfolge
+  (eigener Zähler wäre die 51-Falle über dem Info-Layer).
+- **George sprach interne Slot-Ids nach** (`7fe8d8e8`, Davids Screenshot:
+  „Die Felder a.customerPraise, a.oneThing … enthalten Platzhalter"): die
+  Eingabe-Blöcke reisten als `[a.customerPraise]` in Prompt und Historie.
+  Jetzt tragen sie die Frage aus dem Locale-Katalog in der Inhaltssprache
+  (`brandSlotPromptLabel`, dieselbe Quelle wie die UI) und eine Care-Zeile
+  verbietet Feld-Ids ausdrücklich (george-a-6, converse-2; inputHash liest
+  slotId+value und blieb unberührt).
+- **Autosave-Klemme** (`7fe8d8e8`): „Nicht gespeichert — wir versuchen es
+  erneut" versprach eine Wiederholung, die es nicht gab — ein PATCH in
+  einen Deploy-Reload (502, pm2 lädt) blieb für immer stehen. Jetzt Retry
+  mit Backoff (4 s verdoppelnd, Deckel 60 s). Die Prod-Logs zeigten
+  KEINEN 5xx, aber ein Dutzend Reloads, während Davids Tab offen war —
+  der Fehler sass zwischen nginx und pm2, nicht im Code der Route.
+
+**Dritte Welle in derselben Nacht (Davids „setze alle offenen Tasks um" +
+sein zweiter Live-Test am eigenen Pukalani-Studio-Branding):**
+
+- **P4: Architektur-Karten für `b2.model`** (`e11df0e7`, Opus-Agent
+  implementiert, Hauptloop geprüft): Karten mit Titel/Wirkung/Beispiel je
+  Modell, Klick übermittelt die stabile Id; `brandChoiceDisplayLabel` löst
+  gespeicherte Ids an allen Lese-Stellen in den Namen auf. Offene
+  choice-Slots behalten ihr Textfeld. Live-Klickpfad steht noch aus (kein
+  Test-Branding hat `architecture` auf dem Weg).
+- **Gesprächs-Verlauf** (`69d52f0d`, Davids Screenshots): (a) eine
+  GEGENFRAGE landete wörtlich als Feld-Wert („wo hast du die website
+  her?") — Fragezeichen-Endung läuft jetzt als freie Frage, bewusste
+  Heuristik; (b) george-a-7: EINE Frage pro Zug (kein „oder was fehlt?",
+  kein „aber bevor wir das durchgehen:"), und die Eingabe-Blöcke sieht nur
+  das Modell — George verwies auf eine „start card hier oben im Gespräch",
+  die es für den Menschen nicht gibt; (c) B4 mechanisch: `**Fett-Marker**`
+  fallen server-seitig aus Slot-Entwürfen. Geklärt, kein Bug: englische
+  Ableitungen auf Davids Branding folgen `contentLocale: 'en'` (bei der
+  Anlage gewählt).
+- **Kurz-Labels + Erklär-Absätze** (`bda41103`): 50 dokumentartige
+  Log-Karten-Labels je Sprache (`brand.labels.<id>`, te()-Rückfall auf die
+  Frage) und der Beschreibungs-Absatz je Baustein im Erklär-Layer
+  (`brand.stepInfo.<key>` — die sieben Dummy-Texte wörtlich,
+  architecture/result neu, alle übersetzt).
+- **EIN Kopf für branding.supply** (`f838b330`, Davids Nachtrag „dieselbe
+  Navbar wie im Wizard, eingesetzt"): App-default-Layout rendert
+  BwSiteNav + BwSiteFooter im Fluss und überlagert das Core-Default —
+  dessen Kopfzeile stand auf /team ÜBER der Inline-Nav (zwei Köpfe).
+  Browser-bewiesen im Worktree-Dev (/, /team, /dashboard/brands).
+- **Nav-Konto echt + Karten-Rückweg** (`3b9f3532`): das hartkodierte
+  „DS"-Avatar wird zu echten Konto-Initialen, „Abmelden" wirkt
+  (useLogout), Gäste sehen den Anmelden-Knopf statt eines Konto-Menüs
+  ohne Konto (Gast-Zweig browser-bewiesen); und „Korrigieren" an
+  `b2.model` führt zurück auf die Auswahl-Karten statt in eine
+  UTextarea mit der rohen Id.
+- **Bewusst NICHT gebaut:** die Ergebnis-SEITE (P5–P7). Der einzige
+  Dummy (`demo/ergebnis.vue`) ist Iteration 2 von VOR dem Bühnen-Umbau
+  und widerspricht der Spec (Leseansicht ohne George) — das Paket
+  braucht Davids Konzept-Gate, keine Nacht-Improvisation. Ebenso die
+  Antwort-AKKUMULATION für mehrteilige Katalog-Fragen (a.facts):
+  Davids Richtung ist klar („einzeln nacheinander"), aber der Zuschnitt
+  (Teil-Fragen als neue Katalog-Texte? Akkumulations-Mechanik im Slot?)
+  ändert abgenommene Fragen und gehört vor sein Gate ①.
+
 **Gelernt:** (1) In Pinia-Setup-Stores gehört JEDE Ref ins Return, auch wenn
 nur ein computed sie liest — private Refs überleben die SSR-Hydration nicht,
 und der Fehler ist unsichtbar, solange man nur den SSR-HTML-Strom oder nur
@@ -109,6 +178,12 @@ beim Anlegen, also im Setup — und genau diese Fehlerklasse sehen weder
 Unit-Tests noch Typecheck noch Lint, nur ein Browser, der die Seite lädt.
 Deklarationen strikt vor der ersten Verwendung anordnen, und eine Seite mit
 neuen Computed-Verkettungen VOR dem Push einmal im Browser öffnen.
+(5) Jede Beschriftung, die in einen Prompt reist, spricht das Modell
+irgendwann nach — interne Ids, Pfade oder Codenamen haben in prompt-
+sichtbaren Blöcken nichts verloren; menschliche Labels aus derselben Quelle
+wie die UI. (6) Ein Zustandstext ist ein Versprechen: „wir versuchen es
+erneut" ohne Retry-Mechanismus ist gelogen — erst den Mechanismus bauen,
+dann den Text.
 
 ---
 
