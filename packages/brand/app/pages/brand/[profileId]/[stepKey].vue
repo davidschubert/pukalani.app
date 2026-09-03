@@ -1123,6 +1123,7 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
     rail-width="300px"
     :rail-collapsed="railCollapsed"
     :george-collapsed="logCollapsed"
+    initial-mode="stage"
     :sync-state="workspaceSync"
     :sync-label="workspaceSyncLabel"
     style="--bw-rail-pad-x: 1rem; --bw-rail-pad-y: 0.75rem"

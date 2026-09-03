@@ -35,6 +35,11 @@ const props = withDefaults(defineProps<{
   /* Runde 33 (David): dito für die STAND-Spalte rechts — eingeklappt entfällt
    * der Splitter und die Bühne nimmt die volle Restbreite. */
   georgeCollapsed?: boolean
+  /* Davids Entscheidung 2026-09-03: die WERKSTATT startet mobil im GESPRÄCH
+   * ('stage' — seit dem Bühnen-Tausch ist die Mitte das Gespräch). Default
+   * bleibt 'george', weil die Alt-Seiten (werte-/ergebnis-Demo, altes
+   * Modell) dort ihren Chat haben — deren Mobil-Start ändert sich nicht. */
+  initialMode?: 'stage' | 'george'
   /**
    * MOBIL (<768 px) IST DIE NAV EIN OVERLAY (Audit A7, Davids Entscheidung
    * 2026-09-02). Dort versteckt `.bw-rail { display: none }` die Spalte
@@ -75,6 +80,7 @@ const props = withDefaults(defineProps<{
   railWidth: undefined,
   railCollapsed: false,
   georgeCollapsed: false,
+  initialMode: 'george',
   railOverlay: false,
   progressNote: undefined,
   progressSubnote: undefined,
@@ -97,7 +103,7 @@ const SYNC = {
   conflict: { key: 'brand.workspace.sync.conflict', icon: 'i-ph-warning', spin: false, tone: 'var(--bw-stale)' },
   error: { key: 'brand.workspace.sync.error', icon: 'i-ph-warning-circle', spin: false, tone: 'var(--bw-stale)' },
 } as const
-const mode = ref<'stage' | 'george'>('george')
+const mode = ref<'stage' | 'george'>(props.initialMode)
 /* Runde 191 (David): die zwei Zonen-Nähte sind ZIEHBAR — Nuxt UIs
  * USplitter (seit 4.11.0). Nur auf Desktop (>=1280px), wo alle drei
  * Zonen nebeneinander stehen; darunter bleibt das Grid mit Mini-Rail
