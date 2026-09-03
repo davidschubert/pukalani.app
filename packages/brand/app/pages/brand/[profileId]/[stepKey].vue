@@ -4,6 +4,7 @@ import type { BwRailLayer, BwRailStep } from '../../../components/BwProgressRail
 import {
   BRAND_CONFIDENCE_VALUES,
   type BrandConfidence,
+  brandStepCompletion,
   resolveNextQuestion,
 } from '../../../../shared/brandJourney'
 import {
@@ -677,10 +678,45 @@ async function goToStep(key: string | null): Promise<void> {
 
 // ── Konfidenz-Weiche ──────────────────────────────────────────────────────
 
+/**
+ * DIE WEICHE ERSCHEINT ERST, WENN SIE HALTEN KANN, WAS SIE FRAGT (Davids
+ * Live-Durchlauf 2026-09-02).
+ *
+ * Vorher hing sie an `nextSlot === null` — also an „keine offene FRAGE mehr".
+ * Das ist eine ANDERE Frage als die des Abschlusses: `resolveNextQuestion`
+ * sieht nur Frage- und Auswahl-Slots und lässt schon einen Entwurf gelten,
+ * während die Route jeden Pflicht-Slot BESTÄTIGT sehen will. In `pvm` stand
+ * deshalb „Passt dieses Kapitel?" mit den drei Optionen, während Mission noch
+ * ein unbestätigter Entwurf war — Davids Satz: „das dürfte an der stelle ja
+ * noch überhaupt nicht gefragt werden".
+ *
+ * Jetzt hängt sie an derselben Rechnung wie die Route: `brandStepCompletion`
+ * (pur, geteilt, per Test an `transitionBrandStep(…, 'complete')` genagelt).
+ * Solange etwas fehlt, steht statt der Weiche ein ruhiger Hinweis mit Zähler
+ * UND den Namen der offenen Felder — er soll zum nächsten Handgriff führen,
+ * nicht nur sagen, dass es noch nicht geht.
+ */
+const completion = computed(() =>
+  (stepKey.value ? brandStepCompletion(stepKey.value, slotFacts.value) : null))
+
+/**
+ * Die offenen Felder in der Sprache der Bühne: GENAU die Beschriftung, unter
+ * der sie oben stehen (`slotLabel`) — ein zweiter Wortlaut hier hiesse, dass
+ * der Mensch das gesuchte Feld nicht wiedererkennt.
+ */
+const pendingConfirmations = computed<string[]>(() =>
+  (completion.value?.missingRequired ?? []).map((slotId) => {
+    const slot = slots.value.find(entry => entry.id === slotId)
+    return slot ? slotLabel(slot) : slotId
+  }))
+
 const confidenceOptions = computed(() => BRAND_CONFIDENCE_VALUES.map(value => ({
   id: value,
   label: t(`brand.workspace.confidence.${value}`),
   recommended: false,
+  // „Nochmal von vorn" ist der Weg ZURÜCK und steht deshalb abgesetzt — leiser
+  // als die beiden anderen, nicht lauter (s. `BwChips`).
+  ...(value === 'restart' ? { tone: 'quiet' as const } : {}),
 })))
 
 const completing = ref(false)
@@ -932,10 +968,25 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
               <p v-else class="bw-pending mt-2">{{ t('brand.workspace.stage.notEditable') }}</p>
             </template>
 
-            <!-- BESTÄTIGT HEISST SCHREIBGESCHÜTZT (Davids Entscheidung): das
-                 Feld bleibt sichtbar und lesbar, nimmt aber nichts mehr an.
-                 `readonly` statt `disabled` — der Text soll normal lesbar und
-                 markierbar bleiben, nicht ausgegraut wie ein totes Feld. -->
+            <!-- BESTÄTIGT IST DOKUMENT-TEXT, KEIN FELD (Davids Wortlaut
+                 2026-09-02). Ein schreibgeschütztes Feld war der halbe Weg: es
+                 nahm zwar nichts mehr an, sah aber weiter aus wie ein Feld und
+                 lud zum Tippen ein, das nichts tut. Jetzt steht der Text als
+                 Fliesstext in der Typografie des Dokuments — Zeilenumbrüche
+                 bleiben (Listen und beschriftete Blöcke behalten ihre Form),
+                 kein Rahmen, kein Platzhalter-Grau. EINE Fassung für ALLE
+                 Editor-Arten: `stage`/`textarea` bringen ihre Umbrüche mit,
+                 `text` ist eine Zeile davon, und bei `chips`/`cards` steht
+                 genau der gewählte Wert da. Zurück ins Feld führt
+                 „Korrigieren" (`showRevise`). -->
+            <p v-else-if="controls.renderAsText" class="bw-doc-text mt-2 whitespace-pre-wrap">
+              {{ store.slotValue(slot.id) }}
+            </p>
+
+            <!-- `readonly` bleibt als Netz an den Feldern: sichtbar sind sie
+                 nur im offenen Zustand, aber ein Feld, das schreiben liesse,
+                 was der Server mit `slot_confirmed` abweist, wäre schlimmer
+                 als eine überflüssige Bindung. -->
             <UTextarea
               v-else-if="slot.editor === 'textarea' || slot.editor === 'stage'"
               class="mt-2 w-full"
@@ -1062,6 +1113,23 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
           <div v-if="nextSlot" class="flex flex-col items-stretch gap-2">
             <button class="bw-chip bw-chip--ghost" @click="skipQuestion">{{ t('brand.workspace.dontKnow') }}</button>
           </div>
+
+          <!-- NOCH NICHT SO WEIT: dieselbe Bedingung, die die Route prüft
+               (`brandStepCompletion`). Statt einer Weiche, die einen Abschluss
+               verspricht, den die Route mit `required_slots_missing` abweist,
+               steht hier ruhig, WAS noch fehlt — mit Zähler und Feldnamen. -->
+          <div v-else-if="completion && !completion.slotsReady" class="flex flex-col items-stretch gap-2">
+            <p class="bw-label" style="color: var(--bw-muted)">
+              {{ t('brand.workspace.confidence.pending', {
+                open: completion.missingRequired.length,
+                total: completion.total,
+              }) }}
+            </p>
+            <ul class="bw-label flex flex-col gap-1" style="color: var(--bw-ink-soft)">
+              <li v-for="(label, index) in pendingConfirmations" :key="index">· {{ label }}</li>
+            </ul>
+          </div>
+
           <div v-else class="flex flex-col items-stretch gap-2">
             <p class="bw-label" style="color: var(--bw-muted)">{{ t('brand.workspace.confidence.question') }}</p>
             <BwChips

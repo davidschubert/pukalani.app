@@ -126,6 +126,27 @@ describe('brandSlotControls — der bestätigte Slot ist zu', () => {
     expect(confirmed.showRevise).toBe(true)
   })
 
+  it('zeigt seinen Text als DOKUMENT, nicht als Feld', () => {
+    // Davids Wortlaut 2026-09-02: „kann man dann dort direkt den antworttext
+    // zeigen, anstatt den antworttext im form field".
+    expect(confirmed.renderAsText).toBe(true)
+    // Und zwar GENAU dann, wenn auch nicht getippt werden darf — die beiden
+    // sind zwei Seiten derselben Münze.
+    expect(confirmed.editable).toBe(false)
+  })
+
+  it('hat nichts zu ersetzen, wo es gar kein Feld gibt (Ableitung)', () => {
+    // Eine Ableitung steht ohnehin schon als Text da; ein zweiter Textzweig
+    // hiesse zwei Stellen, die dasselbe rendern.
+    const derivation = brandSlotControls(input({ hasValue: true, confirmed: true, hasEditor: false }))
+    expect(derivation.renderAsText).toBe(false)
+  })
+
+  it('zeigt auch den bestätigten Sonderfall als Text — der Zustand zählt, nicht der Knopf', () => {
+    const special = brandSlotControls(input({ confirmable: false, confirmed: true, hasValue: true }))
+    expect(special.renderAsText).toBe(true)
+  })
+
   it('ist die EINZIGE Tür zurück: ohne „Korrigieren" bleibt alles zu', () => {
     // Gegenprobe — derselbe Slot ohne Bestätigung ist in jedem Punkt offen.
     const open = brandSlotControls(input({ hasValue: true, hasHistory: true }))
@@ -133,6 +154,8 @@ describe('brandSlotControls — der bestätigte Slot ist zu', () => {
     expect(open.showGenerate).toBe(true)
     expect(open.canRestoreVersion).toBe(true)
     expect(open.showRevise).toBe(false)
+    // Offen heisst: hier wird geschrieben, das Feld bleibt das Feld.
+    expect(open.renderAsText).toBe(false)
   })
 })
 

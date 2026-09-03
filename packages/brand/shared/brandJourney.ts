@@ -183,12 +183,58 @@ export function includedBrandSteps(profile: BrandProfileFacts): readonly BrandSt
   return BRAND_STEP_KEYS.filter(stepKey => includeStep(profile, stepKey).included)
 }
 
-/** Pflicht-Slots des Bausteins, die noch nicht bestätigt sind. */
-function missingRequiredSlots(
+/**
+ * DIE VORBEDINGUNG DES ABSCHLUSSES — eine Rechnung, zwei Leser.
+ *
+ * ── WARUM SIE EXPORTIERT IST ──────────────────────────────────────────────
+ * Der Server verlangt zum Abschluss BESTÄTIGTE Pflicht-Slots
+ * (`transitionBrandStep(…, 'complete')`). Der Browser fragte bis zum
+ * 2026-09-02 etwas ANDERES, um die Konfidenz-Weiche zu zeigen: „gibt es noch
+ * eine offene FRAGE?" (`resolveNextQuestion === null`). Das sind zwei
+ * verschiedene Fragen — `resolveNextQuestion` sieht nur Frage- und
+ * Auswahl-Slots und lässt schon einen ENTWURF gelten (`slotIsFilled`), während
+ * der Abschluss jeden Pflicht-Slot BESTÄTIGT sehen will, den Entwurfs-Slot der
+ * Bühne (`stage-edit`) eingeschlossen.
+ *
+ * Davids Live-Durchlauf hat den Unterschied sichtbar gemacht: im Baustein
+ * `pvm` stand „Passt dieses Kapitel?" mit den drei Optionen, während Mission
+ * noch unbestätigt war — „die fragen sind noch nicht einmal alle abgeschlossen
+ * … das dürfte an der stelle ja noch überhaupt nicht gefragt werden". Eine
+ * Weiche, die vor ihrer eigenen Bedingung erscheint, verspricht einen
+ * Abschluss, den die Route danach mit `required_slots_missing` abweist.
+ *
+ * Deshalb steht die Rechnung GENAU HIER und wird an beiden Enden gelesen: die
+ * Route entscheidet damit, der Chat zeigt damit die Weiche — und ein Test
+ * nagelt beide aneinander. Eine zweite Formel im Markup wäre exakt der Fehler,
+ * den dieser Export beendet.
+ *
+ * `slotsReady` ist die halbe Abschlussregel: die KONFIDENZ fehlt hier bewusst,
+ * denn sie ist das, was die Weiche EINSAMMELT — sie zur Vorbedingung ihrer
+ * eigenen Anzeige zu machen, wäre ein Knopf, der sich selbst versteckt.
+ */
+export interface BrandStepCompletion {
+  /** Alle Pflicht-Slots bestätigt — die Bedingung, unter der abgeschlossen wird. */
+  slotsReady: boolean
+  /** Pflicht-Slots ohne Bestätigung, in Registry-Reihenfolge. */
+  missingRequired: readonly string[]
+  /** Bestätigte Pflicht-Slots … */
+  confirmed: number
+  /** … von wie vielen. Zusammen der Zähler des ruhigen Hinweises. */
+  total: number
+}
+
+export function brandStepCompletion(
   stepKey: BrandStepKey,
-  slots: Readonly<Record<string, BrandSlotStateFacts | undefined>>,
-): readonly string[] {
-  return requiredSlotsForStep(stepKey).filter(slot => !slots[slot.id]?.confirmed).map(slot => slot.id)
+  slots: Readonly<Record<string, BrandSlotStateFacts | undefined>> = {},
+): BrandStepCompletion {
+  const required = requiredSlotsForStep(stepKey)
+  const missingRequired = required.filter(slot => !slots[slot.id]?.confirmed).map(slot => slot.id)
+  return {
+    slotsReady: missingRequired.length === 0,
+    missingRequired,
+    confirmed: required.length - missingRequired.length,
+    total: required.length,
+  }
 }
 
 /**
@@ -218,7 +264,7 @@ export function resolveBrandJourney(
       stepKey,
       optional: OPTIONAL_STEPS.includes(stepKey),
       progress: stepProgress(stepKey, slots),
-      missingRequired: missingRequiredSlots(stepKey, slots),
+      missingRequired: brandStepCompletion(stepKey, slots).missingRequired,
       confidence: facts?.confidence ?? null,
     }
 
@@ -364,8 +410,12 @@ export function transitionBrandStep(step: BrandStepFacts, action: BrandStepActio
     case 'complete': {
       const denial = requireActive(step)
       if (denial) return { ok: false, code: denial }
-      const missing = missingRequiredSlots(step.stepKey, step.slots ?? {})
-      if (missing.length) return { ok: false, code: 'required_slots_missing', missing }
+      // DIESELBE Rechnung, die im Browser über die Weiche entscheidet — nicht
+      // eine zweite Formel mit demselben Ergebnis (s. `brandStepCompletion`).
+      const completion = brandStepCompletion(step.stepKey, step.slots ?? {})
+      if (!completion.slotsReady) {
+        return { ok: false, code: 'required_slots_missing', missing: completion.missingRequired }
+      }
       if (!step.confidence) return { ok: false, code: 'confidence_missing' }
       return { ok: true, step: { ...step, state: 'done' }, changed: true }
     }

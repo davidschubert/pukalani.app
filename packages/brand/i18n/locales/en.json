@@ -223,6 +223,7 @@
     "workspace": {
       "confidence": {
         "question": "Does this chapter fit?",
+        "pending": "Still open: {open} of {total} fields. Confirm them and we'll close this chapter.",
         "fits": "Fits",
         "almost": "Almost — one thing bugs me",
         "restart": "Start over"

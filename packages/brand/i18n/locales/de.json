@@ -223,6 +223,7 @@
     "workspace": {
       "confidence": {
         "question": "Passt dieses Kapitel?",
+        "pending": "Noch offen: {open} von {total} Feldern. Bestätige sie, dann schließen wir das Kapitel ab.",
         "fits": "Passt",
         "almost": "Fast — eine Sache stört",
         "restart": "Nochmal von vorn"

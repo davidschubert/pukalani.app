@@ -61,6 +61,25 @@ export interface BrandSlotControls {
   state: BrandSlotVisualState
   /** Darf getippt werden? Ein bestätigter Slot ist zu — das ist die ganze Regel. */
   editable: boolean
+  /**
+   * ZEIGT DIESER SLOT SEINEN TEXT STATT SEINES FELDES? (Davids Wortlaut
+   * 2026-09-02: „kann man dann dort direkt den antworttext zeigen, anstatt den
+   * antworttext im form field").
+   *
+   * Ein bestätigter Slot ist kein Eingabegerät mehr, sondern eine STELLE IM
+   * DOKUMENT. Ein schreibgeschütztes Feld sagt das nicht: es sieht aus wie ein
+   * Feld, es hat einen Rahmen wie ein Feld, und es lädt zum Tippen ein, das
+   * dann nichts tut. Also fällt der Rahmen weg und der Text steht als Fliesstext
+   * da — dieselbe Typografie wie der übrige Dokument-Körper.
+   *
+   * DIE ENTSCHEIDUNG STEHT HIER UND NICHT ALS `v-if` IM MARKUP, weil sie an
+   * derselben Ampel hängt wie `editable`: die beiden sind zwei Seiten
+   * derselben Münze, und getrennt geschriebene Seiten laufen auseinander.
+   *
+   * `hasEditor` ist Bedingung: eine Ableitung (`editor: 'none'`) steht ohnehin
+   * schon als Text da und hat kein Feld, das man ersetzen könnte.
+   */
+  renderAsText: boolean
   /** „Entwurf von George" (Herkunft) — fällt mit der Bestätigung weg. */
   showDraftBadge: boolean
   /** „Bestätigt" (Zustand) — steht an derselben Stelle wie das Entwurfs-Etikett. */
@@ -105,6 +124,7 @@ export function brandSlotControls(input: BrandSlotControlsInput): BrandSlotContr
     return {
       state: 'confirmed',
       editable: false,
+      renderAsText: input.hasEditor,
       // Die Bestätigung ist die Übernahme: ab hier ist es SEIN Text, auch wenn
       // George ihn geschrieben hat. Beide Etiketten nebeneinander behaupteten
       // zwei Dinge gleichzeitig.
@@ -127,6 +147,8 @@ export function brandSlotControls(input: BrandSlotControlsInput): BrandSlotContr
   return {
     state: input.hasValue ? 'draft' : 'empty',
     editable: input.hasEditor,
+    // Offen heisst: hier wird geschrieben. Das Feld bleibt das Feld.
+    renderAsText: false,
     showDraftBadge: input.isGeorgeDraft,
     showConfirmedBadge: false,
     showConfirm: countsForProgress,

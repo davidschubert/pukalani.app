@@ -300,8 +300,37 @@
 }
 .bw-chip:not(.bw-chip--selected):hover { background: var(--bw-line); }
 .bw-chip:focus-visible { outline: 2px solid var(--bw-ink); outline-offset: 2px; }
-.bw-chip--selected { background: var(--bw-ink); color: var(--bw-paper); font-weight: 600; }
+/* GEWÄHLT SPRICHT DIE SPRACHE DER AMPEL (Davids Befund „ziemlich defekt",
+   2026-09-02). Vorher war es `--bw-ink` — fast schwarz, und in einer Reihe
+   von drei Optionen sah die eine gewählte aus wie eine VORAUSWAHL statt wie
+   eine Antwort. Jetzt dieselbe grüne Fläche wie am bestätigten Slot: gewählt
+   = entschieden, eine Bedeutung, eine Farbe. Der Ring trägt die Aussage auch
+   dort, wo Flächen schwer zu unterscheiden sind (Regel „nie nur Farbe" hält
+   der Text daneben). */
+.bw-chip--selected {
+  background: var(--bw-accent-soft); color: var(--bw-ink); font-weight: 600;
+  box-shadow: inset 0 0 0 1.5px var(--bw-accent);
+}
+.bw-chip--selected:hover { background: var(--bw-accent-soft); box-shadow: inset 0 0 0 2px var(--bw-accent); }
+/* ABGESETZT HEISST LEISER: der Weg zurück („Nochmal von vorn") steht ohne
+   Karte und ohne Schatten da. Eine Warnfarbe wäre falsch — die Option löscht
+   nichts, sie öffnet eine Vertiefungsrunde. */
+.bw-chip--quiet:not(.bw-chip--selected) {
+  background: transparent; box-shadow: none;
+  border-color: var(--bw-line-strong); color: var(--bw-muted);
+}
+.bw-chip--quiet:not(.bw-chip--selected):hover { background: var(--bw-line); color: var(--bw-ink); }
 .bw-chip--ghost { background: transparent; box-shadow: none; border: 1px dashed var(--bw-line-strong); color: var(--bw-muted); }
+
+/* BESTÄTIGT IST DOKUMENT-TEXT, KEIN FELD (Davids Wortlaut 2026-09-02: „kann
+   man dann dort direkt den antworttext zeigen, anstatt den antworttext im
+   form field"). Kein Rahmen, kein Platzhalter-Grau, dieselbe Ruhe wie der
+   übrige Körper — die Zeilenumbrüche bleiben stehen, damit Listen und
+   beschriftete Blöcke ihre Form behalten. */
+.bw-doc-text {
+  font-size: 1rem; line-height: 1.65; color: var(--bw-ink);
+  max-width: 42rem;
+}
 
 /* Paarvergleich */
 /* Runde 5+15 (David): Karten untereinander, volle Breite, 8px Lücke */

@@ -7,13 +7,20 @@ import {
   type BrandStepFacts,
   applyJunctionChange,
   brandNamingIncluded,
+  brandStepCompletion,
   canEnterBrandStep,
   includedBrandSteps,
   resolveBrandJourney,
   resolveNextQuestion,
   transitionBrandStep,
 } from '../shared/brandJourney'
-import { BRAND_STEP_KEYS, type BrandStepKey, requiredSlotsForStep, slotsForStep } from '../shared/slotRegistry'
+import {
+  BRAND_STEP_KEYS,
+  type BrandSlotStateFacts,
+  type BrandStepKey,
+  requiredSlotsForStep,
+  slotsForStep,
+} from '../shared/slotRegistry'
 
 /**
  * Die Zustandsmaschine. Geprüft wird nicht nur, dass der Weg funktioniert,
@@ -424,6 +431,88 @@ describe('transitionBrandStep — complete verlangt Vollständigkeit', () => {
   it('verweigert den Abschluss eines gesperrten Bausteins', () => {
     expect(transitionBrandStep({ stepKey: 'naming', state: 'locked' }, { kind: 'complete' }))
       .toEqual({ ok: false, code: 'step_locked' })
+  })
+})
+
+describe('brandStepCompletion — EINE Vorbedingung, zwei Leser', () => {
+  /**
+   * DER KERN VON DAVIDS BEFUND (Live-Durchlauf 2026-09-02): der Browser zeigte
+   * die Konfidenz-Weiche, wenn `resolveNextQuestion` nichts mehr fand — die
+   * Route verlangt aber BESTÄTIGTE Pflicht-Slots. Diese beiden Fragen dürfen
+   * nie wieder auseinanderlaufen, und genau das nagelt dieser Block fest:
+   * geprüft wird nicht, dass die Funktion „irgendwas Vernünftiges" sagt,
+   * sondern dass ihr Ja/Nein IDENTISCH ist mit dem der Abschluss-Regel.
+   */
+  it('sagt für jeden Baustein exakt das, was `complete` entscheidet', () => {
+    for (const stepKey of BRAND_STEP_KEYS) {
+      const required = requiredSlotsForStep(stepKey)
+      // Alle Teilmengen wären 2^n — der ehrliche Querschnitt: gar nichts,
+      // lauter Entwürfe ohne Bestätigung, jeweils genau EINER offen, alles
+      // bestätigt.
+      const cases: Record<string, BrandSlotStateFacts>[] = [
+        {},
+        Object.fromEntries(required.map(slot => [slot.id, { hasValue: true }])),
+        ...required.map(open => Object.fromEntries(
+          required.map(slot => [slot.id, { hasValue: true, confirmed: slot.id !== open.id }]),
+        )),
+        Object.fromEntries(required.map(slot => [slot.id, { hasValue: true, confirmed: true }])),
+      ]
+
+      for (const slots of cases) {
+        const completion = brandStepCompletion(stepKey, slots)
+        const result = transitionBrandStep(
+          // Konfidenz gesetzt und `active`: sonst schiede der Abschluss aus
+          // einem ANDEREN Grund aus, und der Vergleich bewiese nichts.
+          { stepKey, state: 'active', confidence: 'fits', slots },
+          { kind: 'complete' },
+        )
+        expect(result.ok).toBe(completion.slotsReady)
+        if (!result.ok) {
+          expect(result.code).toBe('required_slots_missing')
+          expect(result.missing).toEqual(completion.missingRequired)
+        }
+      }
+    }
+  })
+
+  it('zählt Bestätigtes von Pflicht — der Zähler des ruhigen Hinweises', () => {
+    const required = requiredSlotsForStep('values')
+    const slots = Object.fromEntries(
+      required.map((slot, index) => [slot.id, { hasValue: true, confirmed: index > 0 }]),
+    )
+    const completion = brandStepCompletion('values', slots)
+    expect(completion.total).toBe(required.length)
+    expect(completion.confirmed).toBe(required.length - 1)
+    expect(completion.missingRequired).toEqual([required[0]!.id])
+  })
+
+  it('DER BEFUND: ein unbestätigter Entwurfs-Slot hält die Weiche zu', () => {
+    // `pvm` wie bei David: alle Fragen beantwortet, „Mission" liegt als
+    // Entwurf da. `resolveNextQuestion` sieht deshalb nichts mehr — und genau
+    // deswegen stand die Weiche vorher zu früh auf der Bühne.
+    const slots = Object.fromEntries(
+      requiredSlotsForStep('pvm').map(slot => [slot.id, {
+        hasValue: true,
+        confirmed: slot.id !== 'b.mission',
+      }]),
+    )
+    expect(resolveNextQuestion('pvm', slots)).toBeNull()
+
+    const completion = brandStepCompletion('pvm', slots)
+    expect(completion.slotsReady).toBe(false)
+    expect(completion.missingRequired).toEqual(['b.mission'])
+    expect(completion.confirmed).toBe(completion.total - 1)
+  })
+
+  it('ist ohne jede Slot-Kenntnis nicht bereit (fail-closed)', () => {
+    const completion = brandStepCompletion('pvm')
+    expect(completion.slotsReady).toBe(false)
+    expect(completion.missingRequired).toEqual(requiredSlotsForStep('pvm').map(slot => slot.id))
+  })
+
+  it('gibt die offenen Slots in Registry-Reihenfolge zurück', () => {
+    const ordered = requiredSlotsForStep('context').map(slot => slot.id)
+    expect(brandStepCompletion('context').missingRequired).toEqual(ordered)
   })
 })
 
