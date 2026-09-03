@@ -929,8 +929,8 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
                     size="xs" color="neutral" variant="ghost" class="gd-fix rounded-full"
                     icon="i-ph-pencil-simple" label="Korrigieren" @click="reviseEntry(entry)"
                   />
-                  <button v-else class="bw-confirm bw-confirm--open" @click="confirmEntry(entry.id)">
-                    <UIcon name="i-ph-check" class="size-4" /> Bestätigen
+                  <button v-else class="bw-confirm bw-confirm--open bw-confirm--xs" @click="confirmEntry(entry.id)">
+                    <UIcon name="i-ph-check" class="size-3.5" /> Bestätigen
                   </button>
                 </div>
               </div>
@@ -984,14 +984,16 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
                 size="xs" color="neutral" variant="ghost" class="gd-fix rounded-full"
                 icon="i-ph-pencil-simple" label="Korrigieren" @click="reviseEntry(entry)"
               />
+              <!-- Runde 36 (David): „Korrigieren" statt „Anpassen", beide
+                   rechtsbündig, Bestätigen in derselben Größe (--xs). -->
               <template v-else>
                 <UButton
-                  size="xs" color="neutral" variant="ghost" class="mr-auto rounded-full"
-                  icon="i-ph-pencil-simple" :label="editingEntryId === entry.id ? 'Anpassen beenden' : 'Anpassen'"
+                  size="xs" color="neutral" variant="ghost" class="rounded-full"
+                  icon="i-ph-pencil-simple" :label="editingEntryId === entry.id ? 'Korrigieren beenden' : 'Korrigieren'"
                   @click="toggleEntryEditing(entry.id)"
                 />
-                <button class="bw-confirm bw-confirm--open" @click="editingEntryId = null; confirmEntry(entry.id)">
-                  <UIcon name="i-ph-check" class="size-4" /> Bestätigen
+                <button class="bw-confirm bw-confirm--open bw-confirm--xs" @click="editingEntryId = null; confirmEntry(entry.id)">
+                  <UIcon name="i-ph-check" class="size-3.5" /> Bestätigen
                 </button>
               </template>
             </div>
