@@ -386,6 +386,22 @@ describe('transitionBrandStep — Konfidenz lässt sich nicht manipulieren', () 
     expect(set.step.confidence).toBe('restart')
   })
 
+  /**
+   * DIE ZWEI WEGE EINES „PASST"-KLICKS AUF EINEM ABGESCHLOSSENEN BAUSTEIN.
+   *
+   * Die Werkstatt schickt bei `fits` zwei Dinge los: die Konfidenz-PATCH und
+   * den Abschluss. Auf `done` sagt die Zustandsmaschine dazu ZWEIERLEI — die
+   * Selbstauskunft geht durch, der Abschluss nicht (`already_done`). Genau
+   * diese Asymmetrie ist der Grund, warum die Seite den zweiten Weg auslassen
+   * MUSS: der Konfidenz-Knopf lief sonst in einen Warn-Toast (Audit A2).
+   */
+  it('trennt auf done die Selbstauskunft vom Abschluss (Grundlage des UI-Guards)', () => {
+    const done = completedStep('values')
+    expect(transitionBrandStep(done, { kind: 'setConfidence', confidence: 'fits' }).ok).toBe(true)
+    expect(transitionBrandStep(done, { kind: 'complete' }))
+      .toEqual({ ok: false, code: 'already_done' })
+  })
+
   it('ist ein No-op, wenn derselbe Chip noch einmal kommt', () => {
     const first = transitionBrandStep(active, { kind: 'setConfidence', confidence: 'almost' })
     expect(first.ok).toBe(true)

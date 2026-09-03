@@ -326,9 +326,30 @@ const setup = () => {
     georgeDrafts.value = {}
   }
 
-  function applySaveResponse(response: BrandStepSaveResponse): void {
+  /**
+   * `sentConfidence` ist das, was DIESER Request mitgeschickt hat — und der
+   * einzige Weg, die Konfidenz sauber als gespeichert zu verbuchen.
+   *
+   * ── WARUM NICHT AUS DER ANTWORT ───────────────────────────────────────────
+   * `BrandStepSaveResponse` trägt `revision` und `slots`, keine Konfidenz. Ohne
+   * diesen Parameter blieb `serverConfidence` für immer auf dem alten Stand,
+   * `pendingConfidence` damit für immer gesetzt und `hasPendingWork` für immer
+   * wahr: JEDER Blur schickte dieselbe Konfidenz erneut, und der sichtbare
+   * Zustand pendelte endlos „Speichert…" → still.
+   *
+   * ── WARUM NICHT EINFACH `localConfidence` ÜBERNEHMEN ──────────────────────
+   * Weil sie sich WÄHREND des Fluges geändert haben kann (Klick auf eine
+   * andere Antwort). Sie dann als gespeichert zu verbuchen, hiesse: der
+   * Nachhol-Lauf findet nichts mehr zu tun und die neue Wahl geht verloren.
+   * Verbucht wird deshalb genau der Wert, der auch abgeschickt wurde.
+   */
+  function applySaveResponse(
+    response: BrandStepSaveResponse,
+    sentConfidence?: BrandConfidence,
+  ): void {
     serverSlots.value = response.slots
     revision.value = response.revision
+    if (sentConfidence !== undefined) serverConfidence.value = sentConfidence
     // Was der Server jetzt so trägt, ist keine offene Änderung mehr — sonst
     // sendete der nächste Tick dieselbe Eingabe erneut.
     localEdits.value = pruneSettledEdits(response.slots, localEdits.value)

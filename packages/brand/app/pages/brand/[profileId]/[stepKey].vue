@@ -921,7 +921,14 @@ async function pickConfidence(value: string): Promise<void> {
   await autosave.flush()
   // Nur „Passt" schliesst ab — „Fast" und „Nochmal von vorn" sind
   // Vertiefungsrunden (§3b.8) und bleiben im Baustein.
-  if (confidence !== 'fits') return
+  //
+  // UND: ein ABGESCHLOSSENER Baustein wird nicht noch einmal abgeschlossen.
+  // Seit b31cf287 ist die Konfidenz auch auf `done` änderbar („done bleibt
+  // done") — `transitionBrandStep(…, 'complete')` weist genau diesen Weg aber
+  // mit `already_done` ab. Der Knopf, der nur eine Selbstauskunft ändern
+  // sollte, kassierte damit einen Warn-Toast. Die Konfidenz-PATCH darüber
+  // läuft unverändert; hier endet nur der Abschluss-Weg.
+  if (confidence !== 'fits' || store.currentJourneyStep?.state === 'done') return
 
   completing.value = true
   try {

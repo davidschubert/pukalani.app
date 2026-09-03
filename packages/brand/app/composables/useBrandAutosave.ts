@@ -83,11 +83,15 @@ export function useBrandAutosave(profileId: MaybeRefOrGetter<string>) {
     if (!store.stepKey || !store.autosaveAllowed || !store.hasPendingWork) return
 
     const id = toValue(profileId)
+    // Der ABGESCHICKTE Wert wird festgehalten: die Antwort trägt keine
+    // Konfidenz, und nur wer weiss, was er gesendet hat, kann sie hinterher
+    // als gespeichert verbuchen (s. `applySaveResponse`).
+    const sentConfidence = store.pendingConfidence
     const body = {
       // Die GELESENE Fassung — nicht die, die gerade entsteht.
       revision: store.revision,
       slots: store.pendingSlots,
-      ...(store.pendingConfidence ? { confidence: store.pendingConfidence } : {}),
+      ...(sentConfidence ? { confidence: sentConfidence } : {}),
     }
 
     running = true
@@ -97,7 +101,7 @@ export function useBrandAutosave(profileId: MaybeRefOrGetter<string>) {
         `/api/brand/profiles/${id}/steps/${store.stepKey}`,
         { method: 'PATCH', body },
       )
-      store.applySaveResponse(response)
+      store.applySaveResponse(response, sentConfidence)
     }
     catch (error) {
       const status = (error as { status?: number, statusCode?: number }).status
