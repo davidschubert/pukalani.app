@@ -164,7 +164,13 @@ const zoneItemsFixedRail = [
           :ui="{ handle: 'w-px transition-colors bg-(--bw-line) data-[state=hover]:bg-(--bw-accent) data-[state=drag]:bg-(--bw-accent)' }"
         >
           <template #stage>
-            <main class="bw-stage h-full w-full min-w-0"><div class="bw-stage-inner"><slot /></div></main>
+            <!-- Runde 23 (David): stage-footer = fester Fuß der Bühne (das
+                 Chat-Prompt des Nuxt-UI-Chat-Templates) — außerhalb des
+                 Scrollers, auf der 46rem-Flucht des Gesprächs. -->
+            <div class="flex h-full w-full min-w-0 flex-col">
+              <main class="bw-stage min-h-0 w-full min-w-0 flex-1"><div class="bw-stage-inner"><slot /></div></main>
+              <div v-if="$slots['stage-footer']" class="bw-stage-foot flex-none"><div class="bw-stage-inner"><slot name="stage-footer" /></div></div>
+            </div>
           </template>
           <template #george>
             <aside class="bw-george h-full w-full"><slot name="george" /></aside>
@@ -207,6 +213,7 @@ const zoneItemsFixedRail = [
       <div class="flex min-h-0 min-w-0 flex-col">
         <div v-if="$slots['stage-bar']" class="bw-stage-bar flex-none"><slot name="stage-bar" /></div>
         <main class="bw-stage min-h-0 flex-1"><div class="bw-stage-inner"><slot /></div></main>
+        <div v-if="$slots['stage-footer']" class="bw-stage-foot flex-none"><div class="bw-stage-inner"><slot name="stage-footer" /></div></div>
       </div>
       <aside class="bw-george"><slot name="george" /></aside>
     </div>

@@ -97,6 +97,9 @@
   block-size: 4rem; padding: 0 1.5rem;
   background: var(--bw-surface); border-bottom: 1px solid var(--bw-line);
 }
+/* Runde 23 (David): fester Bühnen-Fuß fürs Chat-Prompt — gleiche
+   horizontale Flucht wie die Bühne, unten mit Luft zum Rand. */
+.bw-stage-foot { padding: 0.5rem clamp(1.2rem, 4vw, 3.5rem) 1rem; }
 .bw-stage-inner { max-width: 46rem; margin: 0 auto; }
 .bw-george { display: flex; flex-direction: column; min-height: 0; background: var(--bw-surface); border-radius: 0; margin: 0; }
 @media (max-width: 1279px) { .bw-zones { grid-template-columns: 56px minmax(0,1fr) 380px; } .bw-rail-full { display: none; } }

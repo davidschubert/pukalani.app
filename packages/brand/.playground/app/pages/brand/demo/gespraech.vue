@@ -193,6 +193,16 @@ function acceptExample(turn: Turn, event: KeyboardEvent): void {
   draft.value = turn.example
 }
 
+/* Runde 23 (David, Nuxt-UI-Chat-Template): die Eingabe ist EIN Chat-Prompt
+ * fest am unteren Rand der Bühne — es bedient immer den jüngsten offenen
+ * answer-Zug; gibt es keinen, ist es ausgegraut (die anderen Blöcke
+ * antworten in ihren eigenen Modulen im Zug). */
+const activeAnswerTurn = computed(() => [...turns.value].reverse().find(t => t.block === 'answer') ?? null)
+function promptSubmit(): void { if (activeAnswerTurn.value) answer(activeAnswerTurn.value) }
+function promptDontKnow(): void { if (activeAnswerTurn.value) answer(activeAnswerTurn.value, 'Weiß ich nicht') }
+function promptTab(event: KeyboardEvent): void { if (activeAnswerTurn.value) acceptExample(activeAnswerTurn.value, event) }
+function promptDemo(): void { if (activeAnswerTurn.value?.demo) draft.value = activeAnswerTurn.value.demo }
+
 function answer(turn: Turn, text?: string): void {
   const said = (text ?? draft.value).trim()
   if (!said) return
@@ -579,38 +589,18 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
               <p v-if="turn.help" class="bw-msg-help">{{ turn.help }}</p>
               <p v-if="turn.question" class="mt-2 font-medium">{{ turn.question }}</p>
 
-              <!-- Antwortfläche: Feld, Senden, und daneben ruhig die zwei
-                   Auswege („Weiß ich nicht", „Beispiel ansehen"). -->
-              <div v-if="turn.block === 'answer'" class="mt-3">
-                <UTextarea
-                  v-model="draft" :rows="3" class="w-full"
-                  placeholder="Antwort schreiben …"
-                  @keydown.tab="acceptExample(turn, $event)"
-                />
-                <!-- Davids Korrekturrunde 3: Beispiel als Link linksbündig,
-                     „Weiß ich nicht" + Senden rechts — Senden ganz außen,
-                     ohne Icon. -->
-                <div class="mt-2 flex flex-wrap items-center gap-2">
-                  <button class="bw-label underline" style="color: var(--bw-muted)" @click="exampleOpen = !exampleOpen">
-                    {{ exampleOpen ? 'Beispiel ausblenden' : 'Beispiel ansehen' }}
-                  </button>
-                  <button class="bw-chip bw-chip--ghost ml-auto" @click="answer(turn, 'Weiß ich nicht')">Weiß ich nicht</button>
-                  <UButton
-                    color="neutral" variant="ghost" class="bw-send rounded-full"
-                    label="Senden" :disabled="!draft.trim()" @click="answer(turn)"
-                  />
-                </div>
+              <!-- Runde 23 (David, Nuxt-UI-Chat-Template): die EINGABE wohnt
+                   unten im Chat-Prompt (#stage-footer) — im Zug bleibt nur
+                   der Beispiel-Ausweg, direkt unter der Frage. -->
+              <div v-if="turn.block === 'answer'" class="mt-2">
+                <button class="bw-label underline" style="color: var(--bw-muted)" @click="exampleOpen = !exampleOpen">
+                  {{ exampleOpen ? 'Beispiel ausblenden' : 'Beispiel ansehen' }}
+                </button>
                 <button
                   v-if="exampleOpen" class="bw-pending mt-2 block text-left"
                   @click="draft = turn.example ?? ''"
                 >
                   „{{ turn.example }}“ — Tab oder Klick übernimmt den Text ins Feld.
-                </button>
-                <button
-                  class="bw-label mt-2 block underline" style="color: var(--bw-muted)"
-                  @click="draft = turn.demo ?? ''"
-                >
-                  Klickdummy: Demo-Antwort einfügen
                 </button>
               </div>
 
@@ -772,6 +762,34 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
           <div ref="tail" />
         </div>
       </div>
+    </template>
+
+    <!-- Runde 23 (David): das Chat-Prompt aus dem Nuxt-UI-Chat-Template,
+         fest am unteren Rand — nur Feld, „Weiß ich nicht" und der
+         Pfeil-nach-oben (unsere Return-Taste); kein Anhang, kein Modell.
+         Ausgegraut, solange kein answer-Zug offen ist. -->
+    <template #stage-footer>
+      <UChatPrompt
+        v-model="draft" placeholder="Antwort schreiben …"
+        :disabled="!activeAnswerTurn" :autofocus="false" class="w-full"
+        @submit="promptSubmit" @keydown.tab="promptTab"
+      >
+        <template #footer>
+          <button
+            class="bw-label underline disabled:opacity-40" style="color: var(--bw-muted)"
+            :disabled="!activeAnswerTurn?.demo" @click="promptDemo"
+          >
+            Klickdummy: Demo-Antwort einfügen
+          </button>
+          <div class="ml-auto flex items-center gap-1.5">
+            <UButton
+              label="Weiß ich nicht" color="neutral" variant="soft" size="sm"
+              :disabled="!activeAnswerTurn" @click="promptDontKnow"
+            />
+            <UChatPromptSubmit size="sm" color="neutral" :disabled="!activeAnswerTurn || !draft.trim()" />
+          </div>
+        </template>
+      </UChatPrompt>
     </template>
 
     <!-- RECHTS: der Stand. Oben der Kapitelfortschritt, darunter je
