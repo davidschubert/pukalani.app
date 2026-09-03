@@ -637,6 +637,8 @@ interface LogChapter {
   state: BrandJourneyStep['state']
   confirmed: number
   total: number
+  /** Optionale Slots des Kapitels (Registry-Zahl, unabhängig vom Stand). */
+  optional: number
   current: boolean
 }
 
@@ -651,9 +653,25 @@ const logChapters = computed<LogChapter[]>(() => store.railSteps.map((entry) => 
     state: entry.state,
     confirmed,
     total: current ? (completion.value?.total ?? 0) : entry.progress.requiredTotal,
+    optional: slotsForStep(entry.stepKey).filter(slot => !slot.required).length,
     current,
   }
 }))
+
+/**
+ * Die Zähl-Subline eines Kapitels. Der Zähler zählt NUR Pflicht-Slots —
+ * neben „10/10 bestätigt" stand deshalb eine unbestätigte (bernsteinfarbene)
+ * Tonalitäts-Karte, und das las sich wie ein Widerspruch. Davids Zuschnitt
+ * (2026-09-03): optionale Felder als eigenes Anhängsel benennen
+ * („10/10 bestätigt + 1 optional") statt sie in den Zähler zu mischen.
+ */
+function chapterCountLine(chapter: LogChapter): string {
+  const values = { confirmed: chapter.confirmed, total: chapter.total, optional: chapter.optional }
+  if (chapter.current) {
+    return t(chapter.optional > 0 ? 'brand.workspace.log.confirmedOfOptional' : 'brand.workspace.log.confirmedOf', values)
+  }
+  return t(chapter.optional > 0 ? 'brand.workspace.log.countOptional' : 'brand.workspace.log.count', values)
+}
 
 function chapterCards(chapter: LogChapter): LogCard[] {
   if (chapter.current) {
@@ -1505,9 +1523,7 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
               <span class="min-w-0 flex-1 leading-tight">
                 <span class="block text-sm font-medium">{{ chapter.label }}</span>
                 <span class="bw-label block tabular-nums" style="color: var(--bw-muted)">
-                  {{ chapter.current
-                    ? t('brand.workspace.log.confirmedOf', { confirmed: chapter.confirmed, total: chapter.total })
-                    : t('brand.workspace.log.count', { confirmed: chapter.confirmed, total: chapter.total }) }}
+                  {{ chapterCountLine(chapter) }}
                 </span>
               </span>
               <UIcon

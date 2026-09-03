@@ -274,7 +274,9 @@
       "log": {
         "overall": "Gesamtfortschritt",
         "confirmedOf": "{confirmed}/{total} bestätigt",
-        "count": "{confirmed}/{total}"
+        "confirmedOfOptional": "{confirmed}/{total} bestätigt + {optional} optional",
+        "count": "{confirmed}/{total}",
+        "countOptional": "{confirmed}/{total} + {optional} optional"
       },
       "advisorInfo": {
         "open": "Über {name}",
