@@ -75,7 +75,9 @@
    (.bw-rail-scroll), der Balken läuft an der Kante über die volle Höhe. */
 .bw-rail { overflow: hidden; }
 .bw-rail-scroll { overflow-y: auto; padding: var(--bw-gutter); }
-.bw-rail-foot { padding: 0 var(--bw-gutter) var(--bw-gutter); }
+/* Runde 15 (David): dieselbe 1px-Abschluss-Linie über dem Fuß wie rechts
+   im Stand — läuft über die volle Spaltenbreite. */
+.bw-rail-foot { padding: 0 var(--bw-gutter) var(--bw-gutter); border-top: 1px solid var(--bw-line); }
 .bw-stage { overflow-y: auto; padding: var(--bw-gutter) clamp(1.2rem, 4vw, 3.5rem) 4rem; }
 .bw-stage-inner { max-width: 46rem; margin: 0 auto; }
 .bw-george { display: flex; flex-direction: column; min-height: 0; background: var(--bw-surface); border-radius: 0; margin: 0; }
