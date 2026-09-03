@@ -9,7 +9,7 @@ import { registerBrandSlotGenerator } from '../utils/brandGenerators'
 import { VERA_PROMPT_VERSION, veraSlotInstruction } from '../utils/veraPrompt'
 
 /**
- * VERA WITTERUNG (P3.1) — Bausteine B (Purpose · Vision · Mission +
+ * VERA STEIN (P3.1) — Bausteine B (Purpose · Vision · Mission +
  * Positionierung) und B2 (Markenarchitektur).
  *
  * ── EIN GENERATOR, ZWEI BAUSTEINE, EIN BERATER ────────────────────────────

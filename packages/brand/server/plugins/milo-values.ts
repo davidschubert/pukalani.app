@@ -4,7 +4,7 @@ import { registerBrandSlotGenerator } from '../utils/brandGenerators'
 import { MILO_PROMPT_VERSION, miloSlotInstruction } from '../utils/miloPrompt'
 
 /**
- * MILO TREUHERZ (P3.1) — Baustein C · Werte.
+ * MILO BERGER (P3.1) — Baustein C · Werte.
  *
  * ── NUR `values`, OBWOHL MILO ZWEI BAUSTEINE HAT ──────────────────────────
  * `brandAdvisors.ts` gibt Milo `values` UND `archetype`. Registriert wird hier
