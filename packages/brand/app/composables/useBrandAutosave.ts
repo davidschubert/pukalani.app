@@ -40,6 +40,17 @@ export function useBrandAutosave(profileId: MaybeRefOrGetter<string>) {
   let timer: ReturnType<typeof setTimeout> | undefined
   let running = false
   let rerun = false
+  /**
+   * WIE OFT DER LETZTE VERSUCH SCHEITERTE (2026-09-03, Davids Live-Fund):
+   * der `error`-Zustand SAGTE „wir versuchen es erneut", aber nichts
+   * versuchte es — nur das `online`-Ereignis und weiteres Tippen. Ein PATCH,
+   * der in einen Deploy-Reload läuft (502 von nginx, während pm2 die App
+   * neu lädt), blieb damit für immer als „Nicht gespeichert" stehen, obwohl
+   * der Server zwei Sekunden später wieder da war. Jetzt gilt der Text:
+   * Wiederholung mit Backoff (4 s verdoppelnd, Deckel 60 s) — die Eingabe
+   * liegt ja weiter in `pendingSlots`, ein Versuch kostet einen Request.
+   */
+  let errorRetries = 0
 
   function cancel(): void {
     if (timer !== undefined) {
@@ -102,6 +113,7 @@ export function useBrandAutosave(profileId: MaybeRefOrGetter<string>) {
         { method: 'PATCH', body },
       )
       store.applySaveResponse(response, sentConfidence)
+      errorRetries = 0
     }
     catch (error) {
       const status = (error as { status?: number, statusCode?: number }).status
@@ -128,6 +140,10 @@ export function useBrandAutosave(profileId: MaybeRefOrGetter<string>) {
       }
       else {
         store.mark('error')
+        // s. `errorRetries` — der Zustandstext verspricht die Wiederholung.
+        errorRetries += 1
+        cancel()
+        timer = setTimeout(() => { void flush() }, Math.min(4_000 * 2 ** (errorRetries - 1), 60_000))
       }
     }
     finally {

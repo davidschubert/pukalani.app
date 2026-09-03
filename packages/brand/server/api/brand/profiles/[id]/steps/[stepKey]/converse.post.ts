@@ -33,6 +33,7 @@ import {
   brandConversePrompt,
 } from '../../../../../../utils/conversePrompt'
 import { georgeSystemPrompt } from '../../../../../../utils/georgePrompt'
+import { labelSlotDependencies } from '../../../../../../utils/brandSlotPromptLabels'
 import { stripGeorgeTurnMarkers } from '../../../../../../utils/georgeTurn'
 import { acquireBrandGenerationLock, readBrandAiEnabled, retainBrandGeneration } from '../../../../../../utils/brandGenerators'
 import { bookBrandAiQuota } from '../../../../../../utils/brandAiQuota'
@@ -339,10 +340,16 @@ export default defineEventHandler(async (event): Promise<BrandConverseSkippedRes
       { hasNextQuestion: Boolean(next), nextQuestionKnown: nextQuestion.length > 0 },
       {
         startCard: profileStartCard(profile),
-        slots: slotsForStep(stepKey).map(slot => ({
-          slotId: slot.id,
-          value: brandSlotStoredValue(records[slot.id]),
-        })),
+        // Menschliche Beschriftung statt interner Id (converse-2) — George
+        // sprach `a.customerPraise` & Co. sonst wortwörtlich nach.
+        slots: labelSlotDependencies(
+          slotsForStep(stepKey).map(slot => ({
+            slotId: slot.id,
+            value: brandSlotStoredValue(records[slot.id]),
+          })),
+          profile.contentLocale,
+          profileFacts(profile).pathKind,
+        ),
         history,
         answeredQuestion: body.question ?? '',
         text: body.text,

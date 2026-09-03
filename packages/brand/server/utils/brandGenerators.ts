@@ -112,6 +112,14 @@ export interface BrandGeneratorContext {
 export interface BrandSlotDependency {
   slotId: string
   value: string
+  /**
+   * Menschliche Beschriftung für PROMPTS (Frage/Label aus dem Locale-Katalog,
+   * `brandSlotPromptLabel`) — ohne sie druckt der Formatter die Id, und das
+   * Modell spricht `a.customerPraise` im Chat nach (Davids Live-Fund
+   * 2026-09-03). Optional, weil der inputHash sie nicht kennt und Bestands-
+   * Aufrufer ohne Label weiterlaufen.
+   */
+  label?: string
 }
 
 export interface BrandGeneratorResult {

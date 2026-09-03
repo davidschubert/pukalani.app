@@ -46,6 +46,7 @@ import {
   resolveBrandSlotGenerator,
   retainBrandGeneration,
 } from '../../../../../../utils/brandGenerators'
+import { labelSlotDependencies } from '../../../../../../utils/brandSlotPromptLabels'
 import { bookBrandAiQuota } from '../../../../../../utils/brandAiQuota'
 import { recordBrandEvent } from '../../../../../../utils/brandEvents'
 
@@ -198,7 +199,13 @@ export default defineEventHandler(async (event) => {
    */
   const records = parseSlotRecords(stepRow.slots)
   const allRecords = mergeStepSlotRecords(stepRows)
-  const dependencies = collectSlotDependencies(slot.id, allRecords)
+  // Die Labels reisen NUR in den Prompt (george-a-6) — der inputHash liest
+  // slotId+value und bleibt von ihnen unberührt.
+  const dependencies = labelSlotDependencies(
+    collectSlotDependencies(slot.id, allRecords),
+    profile.contentLocale,
+    profileFacts(profile).pathKind,
+  )
   const inputHash = brandGenerationInputHash(slot.id, profile.contentLocale, dependencies)
   const stored = parseGenerations(stepRow.generations)
   const reused = findBrandGenerationByKey(stored.items, body.idempotencyKey)

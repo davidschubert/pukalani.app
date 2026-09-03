@@ -59,6 +59,12 @@ import type { BrandSlotDependency } from './brandGenerators'
  * Anweisungen. Ein Entwurf mit Website-Material und einer ohne stammen aus
  * verschiedenen Prompts, auch wenn die Instruktion dieselbe ist.
  *
+ * `george-a-6` (2026-09-03, Davids Live-Fund): die Slot-Blöcke der Inputs
+ * tragen die menschliche Beschriftung aus dem Locale-Katalog statt der
+ * internen Id (`brandSlotPromptLabel`), und eine Care-Zeile verbietet
+ * Feld-Ids ausdrücklich — George sprach `a.customerPraise` & Co. im Chat
+ * nach, sogar rückbezüglich aus der eigenen Historie.
+ *
  * `george-a-5` (2026-09-02, Davids Eine-Stimme-Entscheidung): die
  * Berater-Schicht wird zur FACETTEN-Schicht. Die Identität ist in JEDEM
  * Baustein George; was aus `brandAdvisors.ts` kommt, ist nur noch die
@@ -86,7 +92,7 @@ import type { BrandSlotDependency } from './brandGenerators'
  *   · B8/B9 — Kontext-Sensibilität (kein Vertriebston für einen Verein) und
  *     eine Sorgfaltszeile gegen holprige Sprache.
  */
-export const GEORGE_PROMPT_VERSION = 'george-a-5'
+export const GEORGE_PROMPT_VERSION = 'george-a-6'
 
 /** Default der Persona (Content-Spec §1.1, Gate ② abgesegnet). */
 export const GEORGE_PERSONA_DEFAULT = 'George'
@@ -231,6 +237,9 @@ export function georgeSystemPrompt(options: GeorgeSystemPromptOptions): string {
     '- WORDING: read your own sentence once more before you send it. No doubled words, no phrase that '
     + 'only works when translated word by word, no sentence you would have to read twice. Short, '
     + 'idiomatic sentences in the language you are writing.',
+    '- FIELD NAMES: internal field ids (like "a.pitch" or "b.purpose") must never appear in what you '
+    + 'write — not even when earlier messages used them. Call every field by its plain-language '
+    + "wording in the person's language (the labels on the input blocks show it).",
     '',
     `Path: ${path}`,
   ].join('\n')
@@ -530,7 +539,9 @@ export function formatDependencies(dependencies: readonly BrandSlotDependency[])
   return dependencies
     .map((dependency) => {
       const value = dependency.value.trim()
-      return `[${dependency.slotId}]\n${value || '(not answered yet)'}`
+      // Menschliche Beschriftung, nie die interne Id — die spricht das Modell
+      // sonst wortwörtlich nach (Davids Live-Fund 2026-09-03, converse-2).
+      return `[${dependency.label ?? dependency.slotId}]\n${value || '(not answered yet)'}`
     })
     .join('\n\n')
 }

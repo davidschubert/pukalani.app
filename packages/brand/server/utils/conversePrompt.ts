@@ -35,8 +35,14 @@ import { formatStartCard } from './georgePrompt'
  * ausdrücklich — sonst erfindet ein hilfsbereites Modell die schönere Frage.
  */
 
-/** Steht in jeder Gesprächs-Nachricht; steigt bei jeder inhaltlichen Änderung. */
-export const BRAND_CONVERSE_PROMPT_VERSION = 'converse-1'
+/**
+ * Steht in jeder Gesprächs-Nachricht; steigt bei jeder inhaltlichen Änderung.
+ *
+ * `converse-2` (2026-09-03, Davids Live-Fund): die Slot-Blöcke tragen die
+ * FRAGE aus dem Locale-Katalog statt der internen Id — George sprach
+ * `a.customerPraise` & Co. wortwörtlich im Chat nach.
+ */
+export const BRAND_CONVERSE_PROMPT_VERSION = 'converse-2'
 
 /**
  * Was ein Mensch in EINEM Zug schreiben darf. Grosszügiger als der Hinweis
@@ -175,7 +181,11 @@ function nextQuestionLines(options: BrandConverseInstructionOptions): string[] {
 export interface BrandConverseInputsOptions {
   /** Die Startkarte des Profils (§2.1) — der Hintergrund, auf dem alles steht. */
   startCard: BrandStartCard
-  /** Die geltenden Werte DIESES Bausteins, in Katalog-Reihenfolge. */
+  /**
+   * Die geltenden Werte DIESES Bausteins, in Katalog-Reihenfolge — MIT
+   * menschlicher Beschriftung (`label`): eine nackte Id im Block landet
+   * wortwörtlich in Georges Antworten (Davids Live-Fund 2026-09-03).
+   */
   slots: readonly BrandSlotDependency[]
   /** Die letzten Nachrichten dieses Bausteins, ÄLTESTE zuerst. */
   history: readonly BrandConverseHistoryTurn[]
@@ -218,7 +228,7 @@ export function formatBrandConverseInputs(options: BrandConverseInputsOptions): 
         // leer" ist eine andere Auskunft als „das kommt nicht vor", und nur die
         // erste hält das Modell vom Erfinden ab (dieselbe Regel wie in
         // `formatDependencies`).
-        return `[${entry.slotId}]\n${value || '(not answered yet)'}`
+        return `[${entry.label ?? entry.slotId}]\n${value || '(not answered yet)'}`
       }),
     ].join('\n\n'))
   }

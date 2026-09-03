@@ -496,7 +496,10 @@ describe('Der Verlauf und der Kontext', () => {
     const { event } = fakeEvent()
     await handler(event)
     expect(lastPrompt).toContain('Kaffeerösterei')
-    expect(lastPrompt).toContain('[a.origin]\nWir haben 2019 angefangen.')
+    // Menschliche Beschriftung statt interner Id (converse-2, Davids
+    // Live-Fund 2026-09-03: George sprach `a.customerPraise` & Co. nach).
+    expect(lastPrompt).toContain('[Warum hast du angefangen — was war der Auslöser, welches Problem konntest du nicht ignorieren?]\nWir haben 2019 angefangen.')
+    expect(lastPrompt).not.toContain('[a.origin]')
     expect(lastPrompt).toContain('[what they just wrote]\nWeil uns der Kaffee hier zu langweilig war.')
     expect(lastPrompt).toContain('[the question they were answering]\nWarum habt ihr angefangen?')
   })
