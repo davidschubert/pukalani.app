@@ -140,6 +140,18 @@ function clampDraft(draft: string, maxLength: number): string {
   return trimmed.length > maxLength ? trimmed.slice(0, maxLength) : trimmed
 }
 
+/**
+ * B4, MECHANISCH (Davids Live-Fund 2026-09-03): die Tonalitäts-Ableitung kam
+ * mit `**Fett-Markern**` an, und die Log-Karte zeigt Slot-Text als reinen
+ * Text — der Mensch las wörtlich die Sternchen. Die Prompt-Regel („kein
+ * Markdown ausser der Vertragsform") bleibt; hier fällt, was trotzdem
+ * durchkommt. NUR der SLOT-Wert wird bereinigt, nie der Chat-Zug — und nur
+ * `**`-Paare: einzelne Sterne können Inhalt sein (Fussnoten, Mathe).
+ */
+function stripBoldMarkers(draft: string): string {
+  return draft.replace(/\*\*([^*]+)\*\*/g, '$1')
+}
+
 export default defineEventHandler(async (event) => {
   const started = Date.now()
   const { userId } = await requireBrandAccess(event)
@@ -452,7 +464,7 @@ export default defineEventHandler(async (event) => {
      */
     const outcome: BrandGenerationOutcome = result.outcome ?? 'draft'
     const chat = clampDraft(result.message ?? result.draft, slot.maxLength)
-    const draft = outcome === 'question' ? '' : clampDraft(result.draft, slot.maxLength)
+    const draft = outcome === 'question' ? '' : clampDraft(stripBoldMarkers(result.draft), slot.maxLength)
 
     // Bei einer Rückfrage ist der ZUG das Ergebnis; bei einem Entwurf das FELD.
     // Ein leerer Zug wäre in beiden Fällen nichts, was man speichern sollte.

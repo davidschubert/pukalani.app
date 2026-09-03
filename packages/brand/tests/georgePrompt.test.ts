@@ -531,7 +531,7 @@ describe('Prompt-Version', () => {
     // (EINE Stimme: aus der Berater- wird die Facetten-Schicht) — die Version
     // MUSS mitsteigen, sonst behaupten alte Generations-Einträge, aus diesem
     // Prompt zu stammen (Kopf von georgePrompt.ts).
-    expect(GEORGE_PROMPT_VERSION).toBe('george-a-6')
+    expect(GEORGE_PROMPT_VERSION).toBe('george-a-7')
   })
 })
 

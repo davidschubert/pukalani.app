@@ -359,12 +359,26 @@ function promptTab(event: KeyboardEvent): void {
 }
 
 /**
- * EINE GETIPPTE ANTWORT — und was daraus folgt (P3.2, unverändert).
+ * EINE GETIPPTE ANTWORT — und was daraus folgt (P3.2).
  * Der Text gehört in den SLOT; danach macht der Berater dazu einen Zug. Ohne
  * offene Frage ist er eine FREIE Frage ohne Slot — geschrieben wird dann nichts.
+ *
+ * EINE GEGENFRAGE IST KEINE ANTWORT (Davids Live-Fund 2026-09-03): „wo hast
+ * du die website her?" stand danach wörtlich als Wert im Baustein-Feld —
+ * George erkannte die Gegenfrage im GESPRÄCH, aber der Slot war schon
+ * beschrieben. Endet die Eingabe mit einem Fragezeichen, läuft sie deshalb
+ * als freie Frage (kein Slot-Schreiben; George antwortet, die Katalog-Frage
+ * bleibt offen). Bewusst eine HEURISTIK: eine echte Antwort, die auf „?"
+ * endet, ist im Feld-Kontext die seltene Ausnahme — und wer sie meint, kann
+ * das Feld über die Karte füllen. Die Testdaten trugen denselben Schaden
+ * schon einmal (b.positioningFirstChoice: „examples?").
  */
+function readsLikeQuestion(text: string): boolean {
+  return text.trimEnd().endsWith('?')
+}
+
 async function answerFromGeorge(text: string): Promise<void> {
-  const slot = nextSlot.value
+  const slot = readsLikeQuestion(text) ? null : nextSlot.value
   const question = slot ? t(questionKeyFor(slot, pathKind.value)) : ''
 
   if (slot) store.setSlotValue(slot.id, text)

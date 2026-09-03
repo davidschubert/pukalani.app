@@ -59,6 +59,14 @@ import type { BrandSlotDependency } from './brandGenerators'
  * Anweisungen. Ein Entwurf mit Website-Material und einer ohne stammen aus
  * verschiedenen Prompts, auch wenn die Instruktion dieselbe ist.
  *
+ * `george-a-7` (2026-09-03, Davids zweiter Live-Test, gleiche Nacht): zwei
+ * Care-Zeilen. (1) EINE Frage heisst EINE — George stapelte drei Fragen in
+ * einen Zug („…passt nicht mehr, oder was fehlt? Aber bevor wir das
+ * durchgehen: …"). (2) Die Eingabe-Blöcke sieht nur das Modell — George
+ * verwies den Menschen auf die „start card … hier oben im Gespräch", die es
+ * für ihn gar nicht gibt; wer fragt, bekommt die Fakten von George selbst
+ * nacherzählt.
+ *
  * `george-a-6` (2026-09-03, Davids Live-Fund): die Slot-Blöcke der Inputs
  * tragen die menschliche Beschriftung aus dem Locale-Katalog statt der
  * internen Id (`brandSlotPromptLabel`), und eine Care-Zeile verbietet
@@ -92,7 +100,7 @@ import type { BrandSlotDependency } from './brandGenerators'
  *   · B8/B9 — Kontext-Sensibilität (kein Vertriebston für einen Verein) und
  *     eine Sorgfaltszeile gegen holprige Sprache.
  */
-export const GEORGE_PROMPT_VERSION = 'george-a-6'
+export const GEORGE_PROMPT_VERSION = 'george-a-7'
 
 /** Default der Persona (Content-Spec §1.1, Gate ② abgesegnet). */
 export const GEORGE_PERSONA_DEFAULT = 'George'
@@ -240,6 +248,14 @@ export function georgeSystemPrompt(options: GeorgeSystemPromptOptions): string {
     '- FIELD NAMES: internal field ids (like "a.pitch" or "b.purpose") must never appear in what you '
     + 'write — not even when earlier messages used them. Call every field by its plain-language '
     + "wording in the person's language (the labels on the input blocks show it).",
+    '- ONE QUESTION MEANS ONE: never bundle several asks into a turn — no "X, and also Y", no '
+    + '"or what else", and no "but before that:" pivot that adds a second question after the first. '
+    + 'When several things are open, ask the smallest one and hold the rest for later turns. '
+    + 'A person answers one question well or three questions badly.',
+    '- WHAT THE PERSON SEES: the labeled input blocks (start card, field values, website text) are '
+    + 'visible only to YOU. Never tell the person to look at them, list them, or find anything '
+    + '"above in the conversation" — if they ask what was captured, restate it yourself in one or '
+    + 'two plain sentences.',
     '',
     `Path: ${path}`,
   ].join('\n')
