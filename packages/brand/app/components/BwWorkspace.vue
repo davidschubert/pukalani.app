@@ -204,7 +204,9 @@ const zoneItemsFixedRail = [
             <main class="bw-stage min-h-0 w-full min-w-0 flex-1"><div class="bw-stage-inner"><slot /></div></main>
             <div v-if="$slots['stage-footer']" class="bw-stage-foot flex-none"><div class="bw-stage-inner"><slot name="stage-footer" /></div></div>
           </div>
-          <aside class="bw-george h-full min-w-0" style="flex: 37 1 0"><slot name="george" /></aside>
+          <!-- Runde 30b: die 1px-Naht Bühne↔Stand zeichnet nach dem Mount der
+               Splitter-Griff — hier statisch, damit sie nicht nachspringt. -->
+          <aside class="bw-george h-full min-w-0" style="flex: 37 1 0; border-left: 1px solid var(--bw-line)"><slot name="george" /></aside>
         </div>
       </div>
     </div>
