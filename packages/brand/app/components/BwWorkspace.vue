@@ -355,12 +355,21 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onRailOverlayKey))
       ]"
       :style="railWidth ? `--bw-rail-w: ${railWidth}` : undefined"
     >
-      <!-- Mobil-Overlay (A7): DERSELBE `<aside>`, nur per `.bw-rail-overlay`
-           aus dem Fluss gehoben (position: fixed, ausschliesslich <768 px).
-           `role="dialog"` trägt er NUR offen — ab 768 px ist er eine ganz
-           gewöhnliche Spalte. `railCollapsed` darf ihn dann nicht `inert`
-           machen: wer auf dem Desktop einklappt und aufs Handy verkleinert,
-           hätte sonst ein Overlay, das keine Taste annimmt. -->
+      <!-- Mobil-Drawer (A7; „schmal statt Vollbild" 2026-09-03): DERSELBE
+           `<aside>`, nur per `.bw-rail-overlay` aus dem Fluss gehoben
+           (position: fixed, ausschliesslich <768 px). Der Backdrop dunkelt
+           die Werkstatt ab und schliesst per Tipp — er steht im DOM VOR der
+           Rail (gleiche z-50, Reihenfolge entscheidet, s. brand.css).
+           `role="dialog"` trägt der `<aside>` NUR offen — ab 768 px ist er
+           eine ganz gewöhnliche Spalte. `railCollapsed` darf ihn dann nicht
+           `inert` machen: wer auf dem Desktop einklappt und aufs Handy
+           verkleinert, hätte sonst ein Overlay, das keine Taste annimmt. -->
+      <div
+        v-if="railOverlay"
+        class="bw-rail-backdrop"
+        aria-hidden="true"
+        @click="emit('update:railOverlay', false)"
+      />
       <aside
         ref="railOverlayEl"
         class="bw-rail flex flex-col"

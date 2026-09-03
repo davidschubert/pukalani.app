@@ -154,31 +154,50 @@
      bekäme die halbe Werkstatt. Deshalb die festen Zeilen. */
   .bw-mode-george .bw-zones { grid-template-rows: auto minmax(0, 1fr); }
 
-  /* MOBIL IST DIE NAV EIN VOLLBILD-OVERLAY (A7, Davids Entscheidung
-     2026-09-02) — derselbe `<aside>` wie in der Spalte, nur aus dem Fluss
-     gehoben. Ein fixiertes Grid-Kind bildet KEINE Spur mehr, das Raster
-     darunter bleibt also einspaltig wie bisher.
+  /* MOBIL IST DIE NAV EIN SCHMALER DRAWER (A7, Davids Entscheidung
+     2026-09-02; „schmal statt Vollbild" 2026-09-03) — derselbe `<aside>` wie
+     in der Spalte, nur aus dem Fluss gehoben: links fixiert, Spaltenbreite
+     (`--bw-rail-w` erbt vom Zonen-Container, Deckel 85vw für schmale
+     Geräte), dahinter dunkelt `.bw-rail-backdrop` die Werkstatt ab und
+     schliesst per Tipp. Ein fixiertes Grid-Kind bildet KEINE Spur mehr, das
+     Raster darunter bleibt also einspaltig wie bisher.
      Die Regel sticht `.bw-rail { display: none }` zwei Zeilen weiter oben
      über die zweite Klasse, nicht über die Reihenfolge.
 
      Z-INDEX 50 IST EXAKT ABGEZÄHLT, nicht geraten (live erwischt): die
      Hauptnavigation (`BwSiteNav`) klebt mit `sticky z-50` oben — bei 30 lag
-     das „Vollbild"-Overlay UNTER ihr, der Schliessen-Knopf verschwand
+     das Overlay UNTER ihr, der Schliessen-Knopf verschwand
      dahinter, und man sah eine Leiste, die `inert` ist. Gleicher Wert heisst
      „DOM-Reihenfolge entscheidet": die Rail steht NACH der Navigation, also
      gewinnt sie. Und die teleportierten Modals („Was bedeutet das?", „Neues
      Branding") hängen am `body`-Ende, ebenfalls z-50 — sie gewinnen aus
      demselben Grund gegen die Rail. Höher zählen darf man hier also NICHT:
-     51 stellte das Overlay über den Info-Layer, aus dem es ihn öffnet. */
+     51 stellte das Overlay über den Info-Layer, aus dem es ihn öffnet.
+     Der Backdrop steht im DOM VOR der Rail und teilt ihre 50 — die Rail
+     gewinnt über die Reihenfolge, ein eigener Zähler wäre die 51-Falle. */
+  .bw-rail-backdrop {
+    position: fixed; inset: 0; z-index: 50;
+    background: rgb(20 18 15 / 0.45);
+  }
   .bw-rail.bw-rail-overlay {
-    display: flex; position: fixed; inset: 0; z-index: 50;
+    display: flex; position: fixed; inset: 0 auto 0 0; z-index: 50;
+    width: min(85vw, var(--bw-rail-w, 20rem));
     background: var(--bw-surface-hi);
+    box-shadow: 0 0 40px rgb(20 18 15 / 0.25);
   }
   .bw-rail.bw-rail-overlay .bw-rail-overlay-head {
     display: flex; justify-content: flex-end;
     padding: var(--bw-rail-pad-y, var(--bw-gutter)) var(--bw-rail-pad-x, var(--bw-gutter)) 0;
   }
+  @media (prefers-reduced-motion: no-preference) {
+    .bw-rail.bw-rail-overlay { animation: bw-drawer-in 0.2s ease-out; }
+    .bw-rail-backdrop { animation: bw-fade-in 0.2s ease-out; }
+  }
 }
+@keyframes bw-drawer-in { from { transform: translateX(-100%); } to { transform: translateX(0); } }
+@keyframes bw-fade-in { from { opacity: 0; } to { opacity: 1; } }
+/* Der Backdrop existiert nur mobil — ab 768 px ist die Rail eine Spalte. */
+@media (min-width: 768px) { .bw-rail-backdrop { display: none; } }
 @media (min-width: 768px) { .bw-modeswitch { display: none; } }
 /* Der Schliessen-Knopf des Overlays existiert nur mobil — ab 768 px ist der
    `<aside>` eine Spalte und braucht keinen. */
