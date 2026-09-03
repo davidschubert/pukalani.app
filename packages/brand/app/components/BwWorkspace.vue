@@ -143,7 +143,10 @@ const zoneItemsFixedRail = [
     <!-- Runde 18: feste Rail-Breite — die Rail steht als eigene Spalte NEBEN
          dem Splitter, der nur noch Bühne↔Stand teilt. -->
     <div v-if="isDesktop && railWidth" class="flex min-h-0 flex-1">
-      <aside v-show="!railCollapsed" class="bw-rail flex h-full flex-none flex-col" :style="`width: ${railWidth}`">
+      <!-- Runde 20c (David): die 1px-Trennlinie zur Bühne zeichnete vorher der
+           Splitter-Griff — bei fester Breite trägt die Rail sie selbst
+           (border-e, wie das DashboardSidebar-Theme des Vorbilds). -->
+      <aside v-show="!railCollapsed" class="bw-rail flex h-full flex-none flex-col" :style="`width: ${railWidth}; border-right: 1px solid var(--bw-line)`">
         <div class="bw-rail-scroll min-h-0 flex-1"><slot name="rail" /></div>
         <div v-if="railFooter" class="bw-rail-foot flex-none">
           <BwRailFooter :progress-pct="progressPct" :progress-note="progressNote" :progress-subnote="progressSubnote" :progress-to="progressTo" :score="score" :progress-title="progressTitle" :progress-count="progressCount" :progress-time="progressTime" />
