@@ -30,6 +30,38 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### S4: `events-sweep`-Naht-Geheimnis rotiert ✅ 2026-09-03
+
+**Was:** Das zweite Naht-Geheimnis aus der A0-Runde stand seit der
+Einrichtung unverändert in `platform.pukalani.app/.env`. Rotiert nach der
+Reihenfolge aus `sharedSeamSecret.ts` (Empfänger zuerst), komplett
+server-seitig und file-to-file — der Wert hat die Maschine nie verlassen:
+
+1. Neuer Wert (64 hex) auf dem Server erzeugt, verschlüsselt (secretBox
+   v1, exakt nach `secretBox.ts` repliziert) per Appwrite-REST in die
+   Ablage geschrieben (`instance_secrets/events-sweep`, Projekt aus der
+   platform-.env; Schreibstatus 200). Ab da nahm der Empfänger alt UND
+   neu an.
+2. Beweis an der Kante: falscher Schlüssel ⇒ 401, neuer ⇒ 200.
+3. `NUXT_EVENTS_SWEEP_KEY` in der .env getauscht (Backup zuvor auf dem
+   Server abgelegt, Eindeutigkeit der Schlüssel danach geprüft — die
+   Doppel-Zeilen-Zeitbombe vom 2026-09-01 war die Blaupause dafür), der
+   Cron-Weg mit der neuen .env liefert 200. Temp-Dateien gelöscht.
+
+Der ALTE Wert bleibt als Env-Kandidat des laufenden Prozesses gültig, bis
+der nächste Deploy die platform-App neu lädt — das ist der Sinn der
+Übergangsstufe, kein Rest.
+
+**Gelernt:** Nodes `fetch` (undici) VERWIRFT einen gesetzten
+`Host`-Header stillschweigend — die Kanten-Probe lief damit als
+unbekannter Host in die Tenant-404 und sah aus wie eine kaputte Route;
+für Host-Header-Proben auf Mehr-Mandanten-Apps immer `curl` (so macht es
+auch der Cron). Und: die Rotations-Reihenfolge „Empfänger zuerst" aus dem
+Datei-Kopf trägt wirklich fensterlos — der Sweep lief zwischen allen
+Schritten stündlich grün weiter.
+
+---
+
 ### Brand-Wizard: Werkstatt-Umbau „Gespräch als Bühne" live + Live-Audit-Befunde behoben ✅ 2026-09-03
 
 **Was passiert ist:** Der in 39 Dummy-Runden abgenommene Umbau
