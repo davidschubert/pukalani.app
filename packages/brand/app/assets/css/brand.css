@@ -360,8 +360,15 @@
    `.bw-nav-item`, nicht mehr an der Zeile selbst. */
 .bw-nav-item { position: relative; }
 .bw-nav-info { opacity: 0; transition: opacity 120ms; }
-.bw-nav-item:hover .bw-nav-info,
-.bw-nav-item:focus-within .bw-nav-info,
+/* Kind-Kombinator, nicht Nachfahre: die Gruppen-Hülle enthält AUCH alle
+   Zeilen-Hüllen, ein Nachfahren-Selektor weckte mit einer Zeile die ganze
+   Sektion (im Browser-Beweis gesehen). */
+.bw-nav-item:hover > .bw-nav-info,
+.bw-nav-item:focus-within > .bw-nav-info { opacity: 1; }
+/* Und ein Zeilen-Hover weckt nicht das Icon der GRUPPE darüber — der Fokus
+   schlägt die Regel, sonst wäre der Knopf beim Tabben unsichtbar. Fällt
+   `:has()` aus, bleibt nur diese Feinheit weg, nicht die Enthüllung. */
+.bw-nav-item:has(.bw-nav-item:hover) > .bw-nav-info:not(:focus-visible) { opacity: 0; }
 .bw-nav-info:focus-visible { opacity: 1; }
 
 /* Log-Spalte: „Korrigieren" ruht bis Hover/Fokus der Karte, „Bestätigen"
