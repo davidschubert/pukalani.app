@@ -482,6 +482,7 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
   <BwWorkspace
     :progress-pct="progressPct" :progress-note="progressNote" :sync-state="syncState"
     progress-to="/brand/demo/ergebnis" :score="61" content-locale="de" :rail-footer="false"
+    :locale-in-topbar="false"
   >
     <template #brand>
       <BwBrandSwitcher
@@ -495,44 +496,16 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
       <BwProgressRail :layers="railLayers" />
     </template>
 
-    <!-- MITTE: die Bühne IST das Gespräch (Davids Revision). Kopf oben fest,
-         Verlauf unten verankert — neue Züge schieben den Verlauf nach oben. -->
+    <!-- MITTE: die Bühne IST das Gespräch (Davids Revision). Verlauf unten
+         verankert — neue Züge schieben den Verlauf nach oben.
+         Runde 13 (David): die Bühne hat KEINEN Kopf mehr — „Gespräch mit
+         George · Markenberater" (samt Info-Knopf) wohnt jetzt im Stand-Kopf
+         rechts. Damit entfallen auch der klebende Papier-Schatten und der
+         1px-Trenner samt Kanten-Abgleich aus R4–R7: es gibt links nichts
+         mehr, das auf einer Höhe sitzen müsste. -->
     <template #default>
       <div class="flex flex-col">
-        <!-- Der Kopf bleibt oben stehen. Der Schatten ist kein Schmuck: die
-             Bühne (.bw-stage) hat 2rem Innenabstand, und ein klebender Kopf
-             hält dort an der INHALTS-Kante — darüber liefe der Verlauf sonst
-             sichtbar durch. Der Schatten verlängert die Papierfläche genau um
-             diesen Abstand nach oben. -->
-        <div
-          class="sticky top-0 z-10 pb-3"
-          style="background: var(--bw-paper); box-shadow: 0 -2rem 0 var(--bw-paper)"
-        >
-          <!-- Davids Korrekturrunde 4: EINE kompakte Zeile, damit die Linie
-               darunter auf derselben Höhe sitzt wie die Linie im Stand rechts —
-               beide 1px, durchgezogen, ohne runde Enden (gd-line unten). -->
-          <div class="flex items-center gap-2.5">
-            <BwGeorgeAvatar size="md" alt="George" />
-            <span class="min-w-0 truncate text-sm font-medium">Gespräch mit George</span>
-            <!-- Runde 10 (David): kein Bereichs-Label mehr im Chat-Kopf — WO
-                 man ist, sagen Leiste und Stand-Kopf; hier nur WER spricht. -->
-            <span class="bw-label truncate" style="color: var(--bw-muted)">· Markenberater</span>
-            <UButton
-              size="xs" color="neutral" variant="ghost" class="ml-auto rounded-full"
-              icon="i-ph-info" aria-label="Über George und sein Team" @click="veraInfoOpen = true"
-            />
-          </div>
-          <!-- Davids Korrekturrunde 5+6: KEIN Fortschritt hier — der wohnt im
-               Stand. Nur ein grauer 1px-Trenner, auf derselben Höhe wie die
-               Abschluss-Kante des Stand-Kopfs (gemessen: 237 = 237) und
-               DURCHGEZOGEN bis an beide Spalten-Kanten: die Bühne hat 56px
-               Innenabstand, die negativen Ränder heben ihn genau auf. -->
-          <!-- Runde 7: 31px statt mt-8/32px — die Border des Stand-Kopfs
-               liegt OBERHALB seiner Unterkante; 1px Versatz, Davids Auge. -->
-          <div style="height: 1px; background: var(--bw-line); margin: 31px -56px 0 -56px" />
-        </div>
-
-        <!-- Der Vera-Layer: alles über die Beraterin, ohne die Bühne zu verlassen. -->
+        <!-- Der Vera-Layer: alles über den Berater, ohne die Bühne zu verlassen. -->
         <div
           v-if="veraInfoOpen" class="fixed inset-0 z-50 flex items-center justify-center p-6"
           style="background: color-mix(in oklab, var(--bw-ink) 40%, transparent)"
@@ -769,12 +742,26 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
     <template #george>
       <div class="flex min-h-0 flex-1 flex-col">
         <div class="flex-none border-b px-6 pt-5 pb-4" style="border-color: var(--bw-line)">
-          <!-- Runde 10 (David): der KAPITELNAME ist der Titel („Euer Stand"
-               sagte nur, was die Spalte ist — das sieht man ihr an); darunter
-               links „n/4 bestätigt", ganz rechts die Prozentzahl. Die Zeilen
-               tauschen nur die Plätze (gleiche Höhen + Abstände), damit die
-               Abschluss-Kante auf der Höhe des Chat-Trenners bleibt (R5–R7). -->
-          <p class="text-sm font-medium">Purpose · Vision · Mission</p>
+          <!-- Runde 10+13 (David): der Stand-Kopf bündelt ALLE Meta-Ebenen des
+               Gesprächs, von oben nach unten sortiert nach „wo → mit wem →
+               wie weit": (1) Kapitelname als Titel, rechts still die
+               Inhaltssprache (aus der Topbar hierher gezogen); (2) mit wem
+               man spricht — Avatar, George, Rolle, Info-Knopf (aus dem
+               Chat-Kopf hierher gezogen, die Bühne gehört ganz dem Gespräch);
+               (3) links „n/4 bestätigt", ganz rechts die Prozentzahl;
+               (4) die dünne Fortschrittslinie als Abschluss-Kante. -->
+          <div class="flex items-baseline justify-between gap-3">
+            <p class="text-sm font-medium">Purpose · Vision · Mission</p>
+            <p class="bw-label flex-none" style="color: var(--bw-muted)">Inhaltssprache: DE</p>
+          </div>
+          <div class="mt-2.5 flex min-w-0 items-center gap-2">
+            <BwGeorgeAvatar size="md" alt="George" />
+            <span class="bw-label min-w-0 truncate" style="color: var(--bw-muted)">Gespräch mit George · Markenberater</span>
+            <UButton
+              size="xs" color="neutral" variant="ghost" class="ml-auto -my-1 rounded-full"
+              icon="i-ph-info" aria-label="Über George und sein Team" @click="veraInfoOpen = true"
+            />
+          </div>
           <div class="mt-2.5 flex items-baseline justify-between gap-3">
             <p class="bw-label tabular-nums" style="color: var(--bw-muted)">{{ confirmedCount }}/{{ CHAPTER_TOTAL }} bestätigt</p>
             <p class="bw-label tabular-nums" style="color: var(--bw-muted)">{{ chapterPct }}&thinsp;%</p>

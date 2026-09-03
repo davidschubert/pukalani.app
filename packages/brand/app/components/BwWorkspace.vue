@@ -13,6 +13,9 @@ withDefaults(defineProps<{
    * schaltet den Rail-Fuß hier ab. Default true via withDefaults, weil ein
    * fehlendes Boolean-Prop sonst `false` wäre und der Fuß überall verschwände. */
   railFooter?: boolean
+  /* Runde 13 (David, 2026-09-02): die Inhaltssprache darf in den Stand-Kopf
+   * umziehen — die Seite rendert sie dann selbst und schaltet sie hier ab. */
+  localeInTopbar?: boolean
   /* §3e: NUR Abweichungs-Zustände erscheinen — Stille heißt gespeichert.
    * P1c: 'error' kam dazu (der fünfte Zustand der Autosave-Regel); die drei
    * bestehenden sind unverändert, der Dummy sieht davon nichts. */
@@ -28,6 +31,7 @@ withDefaults(defineProps<{
    * wieder her, die das nackte defineProps hatte (vue/require-default-prop
    * verlangt ab withDefaults für JEDES optionale Prop einen Default). */
   railFooter: true,
+  localeInTopbar: true,
   progressNote: undefined,
   progressSubnote: undefined,
   syncState: null,
@@ -95,7 +99,7 @@ const zoneItems = [
              Speichert… / Offline — Eingabe bleibt erhalten / Konflikt. -->
       </div>
       <div class="ml-auto flex items-center gap-4">
-        <span class="bw-label whitespace-nowrap" style="color: var(--bw-muted)">{{ t('brand.workspace.contentLocale') }}: {{ contentLocale.toUpperCase() }}</span>
+        <span v-if="localeInTopbar" class="bw-label whitespace-nowrap" style="color: var(--bw-muted)">{{ t('brand.workspace.contentLocale') }}: {{ contentLocale.toUpperCase() }}</span>
       </div>
     </header>
 

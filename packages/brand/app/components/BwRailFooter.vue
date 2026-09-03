@@ -22,11 +22,14 @@ const { t } = useI18n()
       class="mb-4 flex w-full items-center gap-3 rounded-full py-2.5 pl-2 pr-2 text-left text-sm"
       style="background: var(--bw-surface-hi); box-shadow: var(--bw-shadow-card)"
     >
-      <span class="grid size-7 flex-none place-items-center rounded-full" style="background: var(--bw-accent-soft)">
+      <!-- Runde 13 (David): der Brand Score STEHT VORNE und ersetzt das
+           Sparkle-Icon — er ist die Information, das Icon war Schmuck.
+           Das Sparkle bleibt nur als Fallback, wenn (noch) kein Score da ist. -->
+      <BwScoreRing v-if="score !== undefined" :value="score" :size="28" class="flex-none" />
+      <span v-else class="grid size-7 flex-none place-items-center rounded-full" style="background: var(--bw-accent-soft)">
         <UIcon name="i-ph-sparkle" class="size-4" style="color: var(--bw-accent)" />
       </span>
       <span class="min-w-0 flex-1 font-medium">{{ t('brand.workspace.ourBranding') }}</span>
-      <BwScoreRing v-if="score !== undefined" :value="score" :size="28" class="flex-none" />
       <span class="grid size-7 flex-none place-items-center rounded-full">
         <UIcon name="i-ph-arrow-right" class="size-4" style="color: var(--bw-ink-soft)" />
       </span>
