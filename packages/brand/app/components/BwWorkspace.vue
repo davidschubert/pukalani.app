@@ -2,7 +2,7 @@
 /** Drei-Zonen-Werkstatt. Korrekturrunde 3 (David): Brandname + "% abgeschlossen"
  *  + Gespeichert LINKSBÜNDIG (der Meine-Brands-Weg lebt jetzt im Switcher);
  *  rechts Hilfe (kontextbezogen) + User-Menü mit Sprachregler. */
-withDefaults(defineProps<{
+const props = withDefaults(defineProps<{
   progressPct: number
   contentLocale: string
   progressNote?: string
@@ -100,17 +100,33 @@ onMounted(() => {
   mounted.value = true
 })
 onBeforeUnmount(() => desktopMq?.removeEventListener('change', onMq))
-const zoneItems = [
-  { slot: 'rail', defaultSize: 24, minSize: 16, maxSize: 34, class: 'min-w-0' },
+/**
+ * EINGEKLAPPT HEISST 0 BREIT, NICHT AUSGETAUSCHT (Audit-Befund B1).
+ *
+ * Vorher stand für den eingeklappten Stand ein EIGENER Zweig (`v-if` /
+ * `v-else` um den Splitter herum). Zwei Zweige sind zwei Vnode-Bäume: bei
+ * JEDEM Klick auf den Balken-Toggle wurden Bühne UND Log neu gemountet —
+ * Chat-Scrollposition weg, offene Bedien-Zustände der Karten weg. Jetzt
+ * bleibt die Struktur dieselbe, und das Panel wird per Klasse auf null
+ * gezogen (`.bw-panel-off`, sticht reka-uis Inline-`flex-grow`). Der
+ * Splitter behält damit auch seine gemerkte Aufteilung: beim Aufklappen
+ * steht die alte Naht wieder da, statt auf den Default zurückzufallen.
+ */
+const off = (collapsed: boolean): string => (collapsed ? 'min-w-0 bw-panel-off' : 'min-w-0')
+
+const HANDLE = 'w-px transition-colors bg-(--bw-line) data-[state=hover]:bg-(--bw-accent) data-[state=drag]:bg-(--bw-accent)'
+
+const zoneItems = computed(() => [
+  { slot: 'rail', defaultSize: 24, minSize: 16, maxSize: 34, class: off(props.railCollapsed) },
   { slot: 'stage', defaultSize: 48, minSize: 32, class: 'min-w-0' },
-  { slot: 'george', defaultSize: 28, minSize: 20, maxSize: 42, class: 'min-w-0' },
-]
+  { slot: 'george', defaultSize: 28, minSize: 20, maxSize: 42, class: off(props.georgeCollapsed) },
+])
 /* Runde 18: bei fester Rail-Breite trägt der Splitter nur noch zwei Zonen
  * (Prozente beziehen sich dann auf die Restbreite NEBEN der Rail). */
-const zoneItemsFixedRail = [
+const zoneItemsFixedRail = computed(() => [
   { slot: 'stage', defaultSize: 63, minSize: 42, class: 'min-w-0' },
-  { slot: 'george', defaultSize: 37, minSize: 24, maxSize: 55, class: 'min-w-0' },
-]
+  { slot: 'george', defaultSize: 37, minSize: 24, maxSize: 55, class: off(props.georgeCollapsed) },
+])
 /* Runde 132 (David): das Konto-Menü (Sprache, Erscheinungsbild,
  * Tastaturkürzel, Support, Konto) wohnt jetzt DAUERHAFT in BwSiteNav
  * oben rechts — die Topbar behält nur Brand-Switcher und Sync-Zustand.
@@ -143,12 +159,18 @@ const zoneItemsFixedRail = [
       </div>
     </header>
 
+    <!-- Der Mobil-Umschalter (unter 768 px). Audit A8: die Reiter hiessen
+         noch „Dokument" und — hartkodiert, also auch auf einer englischen
+         Oberfläche — „George". Beides stammt aus der Zeit vor dem Umbau
+         „Gespräch als Bühne": links steht heute das GESPRÄCH, rechts der
+         STAND. Beide Beschriftungen kommen jetzt aus dem Katalog und tragen
+         dieselben Wörter wie der Balken (`workspace.bar.*`). -->
     <div class="bw-modeswitch flex border-b" style="border-color: var(--bw-line)">
-      <button class="flex-1 py-2 text-sm" :class="mode === 'stage' ? 'font-semibold' : ''" :style="mode === 'stage' ? 'color: var(--bw-accent)' : 'color: var(--bw-muted)'" @click="mode = 'stage'">
-        {{ t('brand.workspace.mode.document') }}
+      <button type="button" class="flex-1 py-2 text-sm" :class="mode === 'stage' ? 'font-semibold' : ''" :style="mode === 'stage' ? 'color: var(--bw-accent)' : 'color: var(--bw-muted)'" @click="mode = 'stage'">
+        {{ t('brand.workspace.mode.conversation') }}
       </button>
-      <button class="flex-1 py-2 text-sm" :class="mode === 'george' ? 'font-semibold' : ''" :style="mode === 'george' ? 'color: var(--bw-accent)' : 'color: var(--bw-muted)'" @click="mode = 'george'">
-        George
+      <button type="button" class="flex-1 py-2 text-sm" :class="mode === 'george' ? 'font-semibold' : ''" :style="mode === 'george' ? 'color: var(--bw-accent)' : 'color: var(--bw-muted)'" @click="mode = 'george'">
+        {{ t('brand.workspace.mode.log') }}
       </button>
     </div>
 
@@ -166,19 +188,14 @@ const zoneItemsFixedRail = [
       </aside>
       <!-- Runde 32 (David, revidiert 20d): der Balken gehört NUR zur
            Gesprächs-Spalte (Zone über deren Scroller, 1px-Linie darunter) —
-           der Stand beginnt oben rechts direkt mit dem Log. -->
-      <!-- Runde 33: eingeklappter Stand — kein Splitter, die Bühne nimmt
-           die volle Restbreite (der Toggle sitzt im Balken der Seite). -->
-      <div v-if="georgeCollapsed" class="flex h-full min-w-0 flex-1 flex-col">
-        <div v-if="$slots['stage-bar']" class="bw-stage-bar flex-none"><slot name="stage-bar" /></div>
-        <main class="bw-stage min-h-0 w-full min-w-0 flex-1"><div class="bw-stage-inner"><slot /></div></main>
-        <div v-if="$slots['stage-footer']" class="bw-stage-foot flex-none"><div class="bw-stage-inner"><slot name="stage-footer" /></div></div>
-      </div>
+           der Stand beginnt oben rechts direkt mit dem Log.
+           Runde 33 / Audit B1: eingeklappt zieht sich das Stand-Panel auf
+           null zusammen — EIN Baum, damit die Bühne nicht bei jedem Toggle
+           neu mountet (s. `off()`). Der Griff verschwindet mit ihm. -->
       <USplitter
-        v-else
         id="bw-workspace-fixedrail" auto-save-id="bw-workspace-fixedrail" :items="zoneItemsFixedRail"
         class="min-h-0 min-w-0 flex-1"
-        :ui="{ handle: 'w-px transition-colors bg-(--bw-line) data-[state=hover]:bg-(--bw-accent) data-[state=drag]:bg-(--bw-accent)' }"
+        :ui="{ handle: georgeCollapsed ? 'hidden' : HANDLE }"
       >
         <template #stage>
           <!-- Runde 23 (David): stage-footer = fester Fuß der Bühne (das
@@ -191,7 +208,7 @@ const zoneItemsFixedRail = [
           </div>
         </template>
         <template #george>
-          <aside class="bw-george h-full w-full"><slot name="george" /></aside>
+          <aside class="bw-george h-full w-full" :inert="georgeCollapsed || undefined"><slot name="george" /></aside>
         </template>
       </USplitter>
     </div>
@@ -222,10 +239,10 @@ const zoneItemsFixedRail = [
     <USplitter
       v-else-if="isDesktop" id="bw-workspace" auto-save-id="bw-workspace" :items="zoneItems"
       class="min-h-0 flex-1"
-      :ui="{ handle: 'w-px transition-colors bg-(--bw-line) data-[state=hover]:bg-(--bw-accent) data-[state=drag]:bg-(--bw-accent)' }"
+      :ui="{ handle: HANDLE }"
     >
       <template #rail>
-        <aside class="bw-rail flex h-full w-full flex-col">
+        <aside class="bw-rail flex h-full w-full flex-col" :inert="railCollapsed || undefined">
           <!-- Runde 12 (David): der Scroller trägt das Spalten-Padding SELBST
                (.bw-rail-scroll) — vorher lag es außen an .bw-rail und der
                Scrollbalken schwebte mitten in der Spalte statt an ihrer Kante. -->
@@ -236,14 +253,35 @@ const zoneItemsFixedRail = [
         </aside>
       </template>
       <template #stage>
-        <main class="bw-stage h-full w-full min-w-0"><div class="bw-stage-inner"><slot /></div></main>
+        <!-- Audit B4: der Dreizonen-Zweig war der EINZIGE ohne Balken- und
+             Fuß-Zone — Seiten mit diesen Slots, aber ohne feste Rail-Breite,
+             verloren beide ab 1280 px. Dieselbe Anatomie wie oben. -->
+        <div class="flex h-full w-full min-w-0 flex-col">
+          <div v-if="$slots['stage-bar']" class="bw-stage-bar flex-none"><slot name="stage-bar" /></div>
+          <main class="bw-stage min-h-0 w-full min-w-0 flex-1"><div class="bw-stage-inner"><slot /></div></main>
+          <div v-if="$slots['stage-footer']" class="bw-stage-foot flex-none"><div class="bw-stage-inner"><slot name="stage-footer" /></div></div>
+        </div>
       </template>
       <template #george>
-        <aside class="bw-george h-full w-full"><slot name="george" /></aside>
+        <aside class="bw-george h-full w-full" :inert="georgeCollapsed || undefined"><slot name="george" /></aside>
       </template>
     </USplitter>
-    <div v-else class="bw-zones" :style="railWidth ? `--bw-rail-w: ${railWidth}` : undefined">
-      <aside class="bw-rail flex flex-col">
+    <!-- Der Grid-Zweig: unter 1280 px und (ohne feste Rail-Breite) vor dem
+         Mount. Audit B3: die beiden Balken-Toggles waren hier tote Knöpfe.
+         `display: none` verbietet sich in einem Grid — die drei Kinder
+         rutschten dann in die falschen Spuren; eingeklappt wird deshalb die
+         SPALTE auf null gezogen (`--bw-col-*`), der Inhalt liegt hinter
+         `overflow: hidden` und ist per `inert` aus dem Weg. -->
+    <div
+      v-else class="bw-zones"
+      :class="[
+        railWidth ? 'bw-zones--fixed-rail' : '',
+        railCollapsed ? 'bw-zones--rail-off' : '',
+        georgeCollapsed ? 'bw-zones--log-off' : '',
+      ]"
+      :style="railWidth ? `--bw-rail-w: ${railWidth}` : undefined"
+    >
+      <aside class="bw-rail flex flex-col" :inert="railCollapsed || undefined">
         <div class="bw-rail-scroll min-h-0 flex-1"><slot name="rail" /></div>
         <!-- Runde 48 (David): Gesamt-Fortschritt unten links statt Ring in
              der Topbar — Balken wie im Info-Layer. -->
@@ -256,7 +294,7 @@ const zoneItemsFixedRail = [
         <main class="bw-stage min-h-0 flex-1"><div class="bw-stage-inner"><slot /></div></main>
         <div v-if="$slots['stage-footer']" class="bw-stage-foot flex-none"><div class="bw-stage-inner"><slot name="stage-footer" /></div></div>
       </div>
-      <aside class="bw-george"><slot name="george" /></aside>
+      <aside class="bw-george" :inert="georgeCollapsed || undefined"><slot name="george" /></aside>
     </div>
   </div>
 </template>

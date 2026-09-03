@@ -73,8 +73,20 @@
   background: var(--bw-surface); flex: none;
 }
 /* Runde 18 (David): --bw-rail-w = feste Nav-Breite (Sidebar-Seiten);
-   ohne sie gilt weiter die mitwachsende clamp-Spalte. */
-.bw-zones { display: grid; grid-template-columns: var(--bw-rail-w, clamp(320px, 24vw, 400px)) minmax(0,62fr) minmax(0,38fr); flex: 1; min-height: 0; }
+   ohne sie gilt weiter die mitwachsende clamp-Spalte.
+   Audit B3: die drei Spuren stehen als EIGENE Variablen da, damit die
+   Balken-Toggles auch im Grid wirken. `display: none` scheidet aus — ein
+   verstecktes Grid-Kind gibt seine Spur nicht ab, die beiden anderen
+   rutschen eine Spalte nach links. Eingeklappt heisst deshalb: Spur auf
+   null (der Inhalt liegt hinter `overflow: hidden`). */
+.bw-zones {
+  display: grid;
+  grid-template-columns:
+    var(--bw-col-rail, var(--bw-rail-w, clamp(320px, 24vw, 400px)))
+    var(--bw-col-stage, minmax(0,62fr))
+    var(--bw-col-log, minmax(0,38fr));
+  flex: 1; min-height: 0;
+}
 /* Runde 12 (David, 2026-09-02): der Abstand lag AUSSEN am Scroller — die
    Spalte trug das Padding, der Scroll-Container war ein Kind DARIN. Folge:
    der Scrollbalken begann unter der Oberkante, endete vor der Unterkante
@@ -105,17 +117,43 @@
    horizontale Flucht wie die Bühne, unten mit Luft zum Rand. */
 .bw-stage-foot { padding: 0.5rem clamp(1.2rem, 4vw, 3.5rem) 1rem; }
 .bw-stage-inner { max-width: 46rem; margin: 0 auto; }
-.bw-george { display: flex; flex-direction: column; min-height: 0; background: var(--bw-surface); border-radius: 0; margin: 0; }
-@media (max-width: 1279px) { .bw-zones { grid-template-columns: 56px minmax(0,1fr) 380px; } .bw-rail-full { display: none; } }
+/* `overflow: hidden` gehört dazu, seit die Spur auf null gehen kann (B3) —
+   sonst steht der Log-Inhalt neben seiner eigenen, leeren Spalte. */
+.bw-george { display: flex; flex-direction: column; min-height: 0; overflow: hidden; background: var(--bw-surface); border-radius: 0; margin: 0; }
+@media (max-width: 1279px) {
+  .bw-zones { --bw-col-rail: 56px; --bw-col-stage: minmax(0,1fr); --bw-col-log: 380px; }
+  .bw-rail-full { display: none; }
+  /* B2-INTERIM (2026-09-02): Seiten MIT fester Rail-Breite behalten sie auch
+     zwischen 768 und 1279 px — die neue `BwWorkspaceSidebar` hat KEINEN
+     Mini-Zustand und wurde hier auf 56 px abgeschnitten. Zusammen mit den
+     jetzt wirksamen Toggles (B3) ist die Spalte damit bedienbar. Die
+     Teilung 63/37 ist dieselbe wie im Splitter- und im Pre-Mount-Zweig,
+     also springt beim Mount nichts mehr (B5). OFFENE DESIGN-FRAGE bei
+     David: ein echter Mini-Zustand der Sidebar (Glyphen-Spalte). */
+  .bw-zones--fixed-rail { --bw-col-rail: var(--bw-rail-w); --bw-col-stage: minmax(0,63fr); --bw-col-log: minmax(0,37fr); }
+  .bw-zones--fixed-rail .bw-rail-full { display: block; }
+}
 @media (min-width: 1280px) { .bw-rail-mini { display: none; } }
 @media (max-width: 767px) {
-  .bw-zones { grid-template-columns: minmax(0,1fr); }
+  .bw-zones, .bw-zones--fixed-rail { grid-template-columns: minmax(0,1fr); }
   .bw-rail { display: none; }
   .bw-george { margin: 0; border-radius: 0; }
   .bw-mode-stage .bw-george { display: none; }
-  .bw-mode-george .bw-stage { display: none; }
+  /* Audit B13: im Stand-Modus verschwindet die BÜHNE — dann dürfen weder ihr
+     Balken noch ihr Fuß (das Prompt) über dem Log stehen bleiben. */
+  .bw-mode-george .bw-stage,
+  .bw-mode-george .bw-stage-bar,
+  .bw-mode-george .bw-stage-foot { display: none; }
 }
 @media (min-width: 768px) { .bw-modeswitch { display: none; } }
+/* Die Toggle-Zustände stehen NACH den Media-Blöcken: gleiche Spezifität,
+   also gewinnt die spätere Zeile — in jedem Breitenbereich. */
+.bw-zones--rail-off { --bw-col-rail: 0px; }
+.bw-zones--log-off { --bw-col-log: 0px; }
+/* Dasselbe für die Splitter-Zweige: reka-ui schreibt `flex-grow` INLINE,
+   nur `!important` sticht das (Audit B1 — eine Klasse statt eines zweiten
+   Vnode-Baums, damit die Bühne beim Toggle nicht neu mountet). */
+.bw-panel-off { flex-grow: 0 !important; flex-basis: 0 !important; }
 
 /* Dot-Matrix-Ziffern (Runde 9, Referenz superpower) — das
    Signature-Element für Zahlen: Prozent, Zähler, später Scores. */

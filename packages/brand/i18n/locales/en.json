@@ -297,7 +297,8 @@
       "ourBranding": "Your branding",
       "likeBrands": "like {brands}",
       "mode": {
-        "document": "Document"
+        "conversation": "Conversation",
+        "log": "Progress"
       },
       "slotState": {
         "empty": "Nothing here yet",
