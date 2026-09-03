@@ -24,6 +24,10 @@ withDefaults(defineProps<{
   progressTitle?: string
   progressCount?: string
   progressTime?: string
+  /* Runde 18 (David, 2026-09-02): FESTE Breite der Nav-Spalte (z. B.
+   * '288px', Vorbild UDashboardSidebar --width). Gesetzt entfällt die
+   * ziehbare Naht Rail↔Bühne — nur Bühne↔Stand bleibt ein Splitter. */
+  railWidth?: string
   /* §3e: NUR Abweichungs-Zustände erscheinen — Stille heißt gespeichert.
    * P1c: 'error' kam dazu (der fünfte Zustand der Autosave-Regel); die drei
    * bestehenden sind unverändert, der Dummy sieht davon nichts. */
@@ -44,6 +48,7 @@ withDefaults(defineProps<{
   progressTitle: undefined,
   progressCount: undefined,
   progressTime: undefined,
+  railWidth: undefined,
   progressNote: undefined,
   progressSubnote: undefined,
   syncState: null,
@@ -82,6 +87,12 @@ const zoneItems = [
   { slot: 'rail', defaultSize: 24, minSize: 16, maxSize: 34, class: 'min-w-0' },
   { slot: 'stage', defaultSize: 48, minSize: 32, class: 'min-w-0' },
   { slot: 'george', defaultSize: 28, minSize: 20, maxSize: 42, class: 'min-w-0' },
+]
+/* Runde 18: bei fester Rail-Breite trägt der Splitter nur noch zwei Zonen
+ * (Prozente beziehen sich dann auf die Restbreite NEBEN der Rail). */
+const zoneItemsFixedRail = [
+  { slot: 'stage', defaultSize: 63, minSize: 42, class: 'min-w-0' },
+  { slot: 'george', defaultSize: 37, minSize: 24, maxSize: 55, class: 'min-w-0' },
 ]
 /* Runde 132 (David): das Konto-Menü (Sprache, Erscheinungsbild,
  * Tastaturkürzel, Support, Konto) wohnt jetzt DAUERHAFT in BwSiteNav
@@ -124,8 +135,30 @@ const zoneItems = [
       </button>
     </div>
 
+    <!-- Runde 18: feste Rail-Breite — die Rail steht als eigene Spalte NEBEN
+         dem Splitter, der nur noch Bühne↔Stand teilt. -->
+    <div v-if="isDesktop && railWidth" class="flex min-h-0 flex-1">
+      <aside class="bw-rail flex h-full flex-none flex-col" :style="`width: ${railWidth}`">
+        <div class="bw-rail-scroll min-h-0 flex-1"><slot name="rail" /></div>
+        <div v-if="railFooter" class="bw-rail-foot flex-none">
+          <BwRailFooter :progress-pct="progressPct" :progress-note="progressNote" :progress-subnote="progressSubnote" :progress-to="progressTo" :score="score" :progress-title="progressTitle" :progress-count="progressCount" :progress-time="progressTime" />
+        </div>
+      </aside>
+      <USplitter
+        id="bw-workspace-fixedrail" auto-save-id="bw-workspace-fixedrail" :items="zoneItemsFixedRail"
+        class="min-h-0 min-w-0 flex-1"
+        :ui="{ handle: 'w-px transition-colors bg-(--bw-line) data-[state=hover]:bg-(--bw-accent) data-[state=drag]:bg-(--bw-accent)' }"
+      >
+        <template #stage>
+          <main class="bw-stage h-full w-full min-w-0"><div class="bw-stage-inner"><slot /></div></main>
+        </template>
+        <template #george>
+          <aside class="bw-george h-full w-full"><slot name="george" /></aside>
+        </template>
+      </USplitter>
+    </div>
     <USplitter
-      v-if="isDesktop" id="bw-workspace" auto-save-id="bw-workspace" :items="zoneItems"
+      v-else-if="isDesktop" id="bw-workspace" auto-save-id="bw-workspace" :items="zoneItems"
       class="min-h-0 flex-1"
       :ui="{ handle: 'w-px transition-colors bg-(--bw-line) data-[state=hover]:bg-(--bw-accent) data-[state=drag]:bg-(--bw-accent)' }"
     >
@@ -147,7 +180,7 @@ const zoneItems = [
         <aside class="bw-george h-full w-full"><slot name="george" /></aside>
       </template>
     </USplitter>
-    <div v-else class="bw-zones">
+    <div v-else class="bw-zones" :style="railWidth ? `--bw-rail-w: ${railWidth}` : undefined">
       <aside class="bw-rail flex flex-col">
         <div class="bw-rail-scroll min-h-0 flex-1"><slot name="rail" /></div>
         <!-- Runde 48 (David): Gesamt-Fortschritt unten links statt Ring in

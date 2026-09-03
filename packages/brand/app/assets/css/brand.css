@@ -67,7 +67,9 @@
   padding: 1.25rem 2rem; border-bottom: 1px solid var(--bw-line);
   background: var(--bw-surface); flex: none;
 }
-.bw-zones { display: grid; grid-template-columns: clamp(320px, 24vw, 400px) minmax(0,62fr) minmax(0,38fr); flex: 1; min-height: 0; }
+/* Runde 18 (David): --bw-rail-w = feste Nav-Breite (Sidebar-Seiten);
+   ohne sie gilt weiter die mitwachsende clamp-Spalte. */
+.bw-zones { display: grid; grid-template-columns: var(--bw-rail-w, clamp(320px, 24vw, 400px)) minmax(0,62fr) minmax(0,38fr); flex: 1; min-height: 0; }
 /* Runde 12 (David, 2026-09-02): der Abstand lag AUSSEN am Scroller — die
    Spalte trug das Padding, der Scroll-Container war ein Kind DARIN. Folge:
    der Scrollbalken begann unter der Oberkante, endete vor der Unterkante

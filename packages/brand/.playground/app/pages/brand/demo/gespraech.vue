@@ -490,7 +490,7 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
     :progress-pct="progressPct" content-locale="de" :locale-in-topbar="false"
     :topbar="false" progress-title="Gesamtfortschritt"
     :progress-count="progressCount" progress-time="ca. 30 Min"
-    style="--bw-rail-pad-x: 1rem; --bw-rail-pad-y: 0.75rem"
+    rail-width="296px" style="--bw-rail-pad-x: 1rem; --bw-rail-pad-y: 0.75rem"
   >
     <!-- LINKS: die Sidebar im Nuxt-UI-Muster (Runde 16) — Switcher oben,
          einklappbare Bereiche, Sync-Zustand unten. Der frühere Topbar-
