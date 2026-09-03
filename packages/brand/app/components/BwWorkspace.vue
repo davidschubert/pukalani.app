@@ -152,24 +152,25 @@ const zoneItemsFixedRail = [
           <BwRailFooter :progress-pct="progressPct" :progress-note="progressNote" :progress-subnote="progressSubnote" :progress-to="progressTo" :score="score" :progress-title="progressTitle" :progress-count="progressCount" :progress-time="progressTime" />
         </div>
       </aside>
-      <USplitter
-        id="bw-workspace-fixedrail" auto-save-id="bw-workspace-fixedrail" :items="zoneItemsFixedRail"
-        class="min-h-0 min-w-0 flex-1"
-        :ui="{ handle: 'w-px transition-colors bg-(--bw-line) data-[state=hover]:bg-(--bw-accent) data-[state=drag]:bg-(--bw-accent)' }"
-      >
-        <template #stage>
-          <!-- Runde 20b (David): der Bühnen-Balken ist eine EIGENE Zone ÜBER
-               dem Scroller (heller Grund, 1px-Linie darunter, volle Spalten-
-               breite) — im Scroll-Inhalt bliebe er im zentrierten 46rem-Band. -->
-          <div class="flex h-full w-full min-w-0 flex-col">
-            <div v-if="$slots['stage-bar']" class="bw-stage-bar flex-none"><slot name="stage-bar" /></div>
-            <main class="bw-stage min-h-0 w-full min-w-0 flex-1"><div class="bw-stage-inner"><slot /></div></main>
-          </div>
-        </template>
-        <template #george>
-          <aside class="bw-george h-full w-full"><slot name="george" /></aside>
-        </template>
-      </USplitter>
+      <!-- Runde 20b+20d (David): der Balken ist eine EIGENE Zone ÜBER dem
+           Splitter — heller Grund, 1px-Linie darunter, und er spannt über
+           Bühne UND Stand (von der Nav-Kante bis zum rechten Rand). Im
+           Scroll-Inhalt bliebe er im zentrierten 46rem-Band. -->
+      <div class="flex min-h-0 min-w-0 flex-1 flex-col">
+        <div v-if="$slots['stage-bar']" class="bw-stage-bar flex-none"><slot name="stage-bar" /></div>
+        <USplitter
+          id="bw-workspace-fixedrail" auto-save-id="bw-workspace-fixedrail" :items="zoneItemsFixedRail"
+          class="min-h-0 min-w-0 flex-1"
+          :ui="{ handle: 'w-px transition-colors bg-(--bw-line) data-[state=hover]:bg-(--bw-accent) data-[state=drag]:bg-(--bw-accent)' }"
+        >
+          <template #stage>
+            <main class="bw-stage h-full w-full min-w-0"><div class="bw-stage-inner"><slot /></div></main>
+          </template>
+          <template #george>
+            <aside class="bw-george h-full w-full"><slot name="george" /></aside>
+          </template>
+        </USplitter>
+      </div>
     </div>
     <USplitter
       v-else-if="isDesktop" id="bw-workspace" auto-save-id="bw-workspace" :items="zoneItems"
