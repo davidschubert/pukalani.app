@@ -115,8 +115,13 @@ const zoneItems = [
     >
       <template #rail>
         <aside class="bw-rail flex h-full w-full flex-col">
-          <div class="min-h-0 flex-1 overflow-y-auto pr-3"><slot name="rail" /></div>
-          <BwRailFooter v-if="railFooter" :progress-pct="progressPct" :progress-note="progressNote" :progress-subnote="progressSubnote" :progress-to="progressTo" :score="score" />
+          <!-- Runde 12 (David): der Scroller trägt das Spalten-Padding SELBST
+               (.bw-rail-scroll) — vorher lag es außen an .bw-rail und der
+               Scrollbalken schwebte mitten in der Spalte statt an ihrer Kante. -->
+          <div class="bw-rail-scroll min-h-0 flex-1"><slot name="rail" /></div>
+          <div v-if="railFooter" class="bw-rail-foot flex-none">
+            <BwRailFooter :progress-pct="progressPct" :progress-note="progressNote" :progress-subnote="progressSubnote" :progress-to="progressTo" :score="score" />
+          </div>
         </aside>
       </template>
       <template #stage>
@@ -128,10 +133,12 @@ const zoneItems = [
     </USplitter>
     <div v-else class="bw-zones">
       <aside class="bw-rail flex flex-col">
-        <div class="min-h-0 flex-1 overflow-y-auto pr-3"><slot name="rail" /></div>
+        <div class="bw-rail-scroll min-h-0 flex-1"><slot name="rail" /></div>
         <!-- Runde 48 (David): Gesamt-Fortschritt unten links statt Ring in
              der Topbar — Balken wie im Info-Layer. -->
-        <BwRailFooter v-if="railFooter" :progress-pct="progressPct" :progress-note="progressNote" :progress-subnote="progressSubnote" :progress-to="progressTo" :score="score" />
+        <div v-if="railFooter" class="bw-rail-foot flex-none">
+          <BwRailFooter :progress-pct="progressPct" :progress-note="progressNote" :progress-subnote="progressSubnote" :progress-to="progressTo" :score="score" />
+        </div>
       </aside>
       <main class="bw-stage"><div class="bw-stage-inner"><slot /></div></main>
       <aside class="bw-george"><slot name="george" /></aside>

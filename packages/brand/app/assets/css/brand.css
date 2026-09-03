@@ -68,7 +68,14 @@
   background: var(--bw-surface); flex: none;
 }
 .bw-zones { display: grid; grid-template-columns: clamp(320px, 24vw, 400px) minmax(0,62fr) minmax(0,38fr); flex: 1; min-height: 0; }
-.bw-rail { overflow-y: auto; padding: var(--bw-gutter); }
+/* Runde 12 (David, 2026-09-02): der Abstand lag AUSSEN am Scroller — die
+   Spalte trug das Padding, der Scroll-Container war ein Kind DARIN. Folge:
+   der Scrollbalken begann unter der Oberkante, endete vor der Unterkante
+   und schwebte neben der Spalten-Kante. Das Padding wohnt jetzt IM Scroller
+   (.bw-rail-scroll), der Balken läuft an der Kante über die volle Höhe. */
+.bw-rail { overflow: hidden; }
+.bw-rail-scroll { overflow-y: auto; padding: var(--bw-gutter); }
+.bw-rail-foot { padding: 0 var(--bw-gutter) var(--bw-gutter); }
 .bw-stage { overflow-y: auto; padding: var(--bw-gutter) clamp(1.2rem, 4vw, 3.5rem) 4rem; }
 .bw-stage-inner { max-width: 46rem; margin: 0 auto; }
 .bw-george { display: flex; flex-direction: column; min-height: 0; background: var(--bw-surface); border-radius: 0; margin: 0; }
