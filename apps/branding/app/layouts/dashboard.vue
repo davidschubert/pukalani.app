@@ -15,20 +15,14 @@
  * Betreiber-Shell samt changelog-Tabellen und themes-Kopplung wäre drei Layer
  * für eine Konsole ohne Inhalte. Das bleibt Davids Produkt-Entscheidung.
  *
- * WAS ES TUT (Davids Entscheidung 2026-09-03: „auf der Branding-Übersicht
- * bitte die richtige Navbar — dieselbe wie ganz oben im Wizard, eingesetzt,
- * nicht drübergelegt"): es rendert `BwSiteNav` IM FLUSS über dem Inhalt —
- * dieselbe Leiste wie im Werkstatt-Kopf (`BwWorkspace`) und auf /team, statt
- * der Core-Kopfzeile, die hier vorher durchgereicht wurde. Der `px-6`-Wirt
- * gehört dazu: die Leiste zieht sich mit `-mx-6` bündig an die Kanten
- * (dasselbe Muster wie team.vue). `bw-root` macht den Rahmen zum Token-Wirt
- * und malt den Seiten-Grund.
+ * WAS ES TUT: durchreichen an das App-`default`-Layout — seit dem
+ * 2026-09-03 trägt DAS die Wizard-Nav (`BwSiteNav`) und den Fuß; eine
+ * eigene Fassung hier wäre die zweite Wahrheit über dieselbe Kopfzeile.
  */
 </script>
 
 <template>
-  <div class="bw-root min-h-dvh px-6">
-    <BwSiteNav />
+  <NuxtLayout name="default">
     <slot />
-  </div>
+  </NuxtLayout>
 </template>

@@ -258,8 +258,9 @@ const crew = BRAND_ADVISORS.filter(a => a.key !== 'george').map(a => ({
 </script>
 
 <template>
-  <div class="bw-root min-h-dvh px-6 pb-10">
-    <BwSiteNav />
+  <!-- Nav + Fuß kommen seit 2026-09-03 aus dem App-default-Layout — die
+       Inline-Kopien hier erzeugten mit der Core-Kopfzeile zwei Köpfe. -->
+  <div class="pb-10">
     <div class="@container mx-auto max-w-7xl">
       <!-- Wer wir sind: der Selbstbeweis (Dummy-Wortlaut, Runde 163) -->
       <div class="mx-auto mt-14 max-w-3xl text-center">
@@ -334,7 +335,6 @@ const crew = BRAND_ADVISORS.filter(a => a.key !== 'george').map(a => ({
         <UButton :label="t('team.ctaButton')" :to="localePath('/invite')" class="rounded-full" />
       </div>
 
-      <BwSiteFooter />
     </div>
   </div>
 </template>
