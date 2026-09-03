@@ -276,7 +276,11 @@
         "count": "{confirmed}/{total}"
       },
       "advisorInfo": {
-        "open": "Über {name}"
+        "open": "Über {name}",
+        "desc": "Führt euch durch den ganzen Wizard — von Kontext bis Name. Er stellt kleine, konkrete Fragen, sagt ehrlich, was fehlt, und hält den roten Faden. Im Rücken liest sein Team mit:",
+        "asksTitle": "Typische Frage",
+        "asks": "„Warum habt ihr angefangen — was war der Auslöser?“",
+        "personal": "Markenberater und Markenstratege — jede Empfehlung mit Begründung, jede Entscheidung festgehalten."
       },
       "sidebar": {
         "switchBrand": "Branding wechseln"
@@ -498,23 +502,28 @@
     "advisors": {
       "george": {
         "role": "Markenberater",
-        "handover": "Ab hier führt George — er hält den Faden und fragt klein und konkret."
+        "focus": "roter Faden, Kontext und Ergebnis",
+        "intro": "Weiter mit mir, George — kleine, konkrete Fragen, und ich sage ehrlich, wenn etwas fehlt."
       },
       "vera": {
         "role": "Strategin",
-        "handover": "Ab hier übernimmt Vera — sie stellt die Warum-Fragen, bis eure Positionierung trägt."
+        "focus": "Warum-Fragen, Positionierung",
+        "intro": "Ich habe euren Kontext mit Vera durchgesehen — unserer Strategin; sie liest in diesem Kapitel streng mit. Jetzt stelle ich die Warum-Fragen, bis eure Positionierung trägt."
       },
       "milo": {
         "role": "Werte-Berater",
-        "handover": "Ab hier übernimmt Milo — er fragt nach Momenten, nicht nach Adjektiven."
+        "focus": "Momente statt Adjektive",
+        "intro": "Für die Werte habe ich mich mit Milo abgestimmt — unserem Werte-Berater. Ab hier frage ich nach Momenten, nicht nach Adjektiven."
       },
       "nika": {
         "role": "Sprach-Beraterin",
-        "handover": "Ab hier übernimmt Nika — sie prüft jeden Satz am Ohr und streicht Floskeln."
+        "focus": "prüft Sätze am Ohr",
+        "intro": "Hier arbeite ich mit Nikas Ohr — unserer Sprach-Beraterin. Jeder Satz wird laut gelesen, bevor er stehen bleibt."
       },
       "otto": {
         "role": "Namens-Berater",
-        "handover": "Ab hier übernimmt Otto — er prüft jeden Namen nüchtern: erst überleben, dann gefallen."
+        "focus": "erst überleben, dann gefallen",
+        "intro": "Beim Namen halte ich mich an Otto — unseren Namens-Berater: erst überleben, dann gefallen."
       }
     },
     "invite": {

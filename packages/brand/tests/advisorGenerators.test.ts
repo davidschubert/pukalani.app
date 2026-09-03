@@ -127,22 +127,28 @@ describe('Registrierung an der Naht', () => {
   })
 })
 
-describe('Wer in welchem Baustein spricht', () => {
-  it('BAUSTEIN B UND B2 SPRECHEN VERA, Baustein C spricht Milo', async () => {
+describe('Wer spricht — und wessen Technik er trägt', () => {
+  it('ÜBERALL GEORGE, in B/B2 mit Veras Technik und in C mit Milos', async () => {
+    // Davids Eine-Stimme-Entscheidung 2026-09-02: der Sprecher wechselt nicht
+    // mehr mit dem Kapitel, die FRAGELOGIK schon.
     await vera.veraStrategyGenerator(context('b.purpose', 'pvm') as never)
     const pvm = lastCall().options.system!
-    expect(pvm).toContain('You are Vera, Strategist in the brand advisory team')
+    expect(pvm).toContain('You are George, Brand advisor at')
+    expect(pvm).toContain('You have gone through this chapter with Vera')
     expect(pvm).toContain(advisorByKey('vera')!.interviewTechnique)
+    expect(pvm).not.toContain('You are Vera')
 
     await vera.veraStrategyGenerator(context('b2.model', 'architecture') as never)
-    expect(lastCall().options.system!).toContain('You are Vera')
+    expect(lastCall().options.system!).toContain('with Vera, Strategist in your team')
 
     await milo.miloValuesGenerator(context('c.candidates', 'values') as never)
     const values = lastCall().options.system!
-    expect(values).toContain('You are Milo, Values advisor in the brand advisory team')
+    expect(values).toContain('You are George, Brand advisor at')
+    expect(values).toContain('You have gone through this chapter with Milo')
     expect(values).toContain(advisorByKey('milo')!.interviewTechnique)
-    // GEGENPROBE: Milos Zug ist nicht Veras.
-    expect(values).not.toContain('You are Vera')
+    // GEGENPROBE: Milos Kapitel borgt sich nicht Veras Technik.
+    expect(values).not.toContain('with Vera')
+    expect(values).not.toContain(advisorByKey('vera')!.interviewTechnique)
   })
 
   it('NACHNAMEN UND DIE VERWORFENE HUNDE-WELT BLEIBEN AUS DEM PROMPT', async () => {
@@ -173,11 +179,14 @@ describe('Der Aufruf an den Transport gilt für JEDEN Berater', () => {
     }
   })
 
-  it('DIE PROMPT-FASSUNG STEHT IM ERGEBNIS — je Berater eine eigene', async () => {
+  it('DIE PROMPT-FASSUNG STEHT IM ERGEBNIS — je Baustein-Satz eine eigene', async () => {
+    // Beide sind am 2026-09-02 gestiegen: die AUFGABEN sind unverändert, der
+    // System-Prompt nicht (`george-a-5`, Eine Stimme). Ein Eintrag aus `-b-1`
+    // stammt aus einem Lauf, in dem sich das Modell als Vera vorgestellt hat.
     const veraResult = await vera.veraStrategyGenerator(context('b.purpose', 'pvm') as never)
-    expect(veraResult.promptVersion).toBe('vera-b-1')
+    expect(veraResult.promptVersion).toBe('vera-b-2')
     const miloResult = await milo.miloValuesGenerator(context('c.candidates', 'values') as never)
-    expect(miloResult.promptVersion).toBe('milo-c-1')
+    expect(miloResult.promptVersion).toBe('milo-c-2')
   })
 
   it('QUELL-WERTE AUS ANDEREN BAUSTEINEN LANDEN IM PROMPT (P3.1)', async () => {

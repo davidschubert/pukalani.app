@@ -1,5 +1,5 @@
 import type { BrandPathKind, BrandSlotSchemaKind } from '../../shared/slotRegistry'
-import { type BrandAdvisor, advisorOpenersFor } from '../../shared/brandAdvisors'
+import { BRAND_VOICE, type BrandAdvisor, advisorOpenersFor } from '../../shared/brandAdvisors'
 import { brandSlotFormatExample, brandSlotFormatRule } from '../../shared/brandSlotFormat'
 import { BRAND_SITE_ANALYSIS_PROMPT_MAX } from '../../shared/brandSiteAnalysis'
 import type { BrandStartCard } from '../../shared/types/brand'
@@ -59,11 +59,22 @@ import type { BrandSlotDependency } from './brandGenerators'
  * Anweisungen. Ein Entwurf mit Website-Material und einer ohne stammen aus
  * verschiedenen Prompts, auch wenn die Instruktion dieselbe ist.
  *
+ * `george-a-5` (2026-09-02, Davids Eine-Stimme-Entscheidung): die
+ * Berater-Schicht wird zur FACETTEN-Schicht. Die Identität ist in JEDEM
+ * Baustein George; was aus `brandAdvisors.ts` kommt, ist nur noch die
+ * TECHNIK des Kapitels (Stärke, Interview-Technik, Tonfall, Satzanfänge,
+ * Verbotsliste) plus der Name der Kollegin bzw. des Kollegen, den George
+ * ERWÄHNEN darf. Kein Sprecherwechsel, keine Übergabe — der Prompt sagt beides
+ * ausdrücklich, weil ein Modell mit einem fremden Steckbrief vor der Nase sonst
+ * genau die Übergabe ansagt, die es nicht mehr gibt. Inhaltlich ist an den
+ * Techniken kein Wort geändert.
+ *
  * `george-a-4` (2026-09-01, Live-Persona-Audit + Davids Team-Entscheidung):
  * sechs Änderungen, jede aus einem Befund.
- *   · BERATER-SCHICHT — wer spricht, steht jetzt ÜBER den Regeln: Identität,
+ *   · BERATER-SCHICHT — wer spricht, stand ab hier ÜBER den Regeln: Identität,
  *     Stärke, Interview-Technik, Satzanfänge, Verbotsliste (`brandAdvisors.ts`).
  *     Bei Konflikt gewinnen die Regeln, und der Prompt sagt das ausdrücklich.
+ *     (Mit a-5 ist daraus die Facette EINER Person geworden.)
  *   · B2 — der Chat-Zug RAHMT den Entwurf (Basis · Entwurf · genau eine Frage);
  *     die Form dafür ist der Marker-Vertrag aus `georgeTurn.ts`.
  *   · B3 — reicht das Material nicht, antwortet er mit `QUESTION:` statt mit
@@ -75,7 +86,7 @@ import type { BrandSlotDependency } from './brandGenerators'
  *   · B8/B9 — Kontext-Sensibilität (kein Vertriebston für einen Verein) und
  *     eine Sorgfaltszeile gegen holprige Sprache.
  */
-export const GEORGE_PROMPT_VERSION = 'george-a-4'
+export const GEORGE_PROMPT_VERSION = 'george-a-5'
 
 /** Default der Persona (Content-Spec §1.1, Gate ② abgesegnet). */
 export const GEORGE_PERSONA_DEFAULT = 'George'
@@ -94,18 +105,20 @@ export interface GeorgeSystemPromptOptions {
   /** Weiche W1 — sie ändert die Haltung, nicht die Regeln. */
   pathKind: BrandPathKind
   /**
-   * WER SPRICHT (george-a-4). Fehlt der Berater, bleibt es beim Gastgeber-Satz
-   * von a-3 — dieselbe Rückwärts-Regel wie überall in dieser Runde: ein
-   * Aufrufer, der die neue Schicht nicht kennt, bekommt den alten Prompt und
-   * keinen halben neuen.
+   * WIE IN DIESEM KAPITEL GEFRAGT WIRD (george-a-5) — die Technik aus
+   * `techniqueForStep()`, NICHT der Sprecher. Der ist immer George.
+   *
+   * Fehlt sie, bleibt es beim schlichten Gastgeber-Satz von a-3 — dieselbe
+   * Rückwärts-Regel wie in a-4: ein Aufrufer, der die Schicht nicht kennt,
+   * bekommt den alten Prompt und keinen halben neuen.
    */
-  advisor?: BrandAdvisor
+  technique?: BrandAdvisor
   persona?: string
   vendor?: string
 }
 
 /**
- * DIE BERATER-SCHICHT — Persönlichkeit ÜBER dem Regel-Fundament.
+ * DIE FACETTEN-SCHICHT — wie George in DIESEM Kapitel arbeitet.
  *
  * Sie steht bewusst VOR den Regeln und sagt in ihrem letzten Satz selbst, dass
  * sie ihnen nachgeordnet ist. Der Grund ist die Erfahrung mit jedem
@@ -113,18 +126,37 @@ export interface GeorgeSystemPromptOptions {
  * Modell wie deren Korrektur — „sei fordernd" schlägt dann „sei knapp". Oben
  * gestellt und ausdrücklich untergeordnet, prägt sie den TON und lässt die
  * Grenzen in Ruhe.
+ *
+ * ── DIE ZWEI ZEILEN, DIE MAN NICHT STREICHEN DARF (a-5) ───────────────────
+ * Stammt die Technik von einer Kollegin oder einem Kollegen, steht ihr Name im
+ * Prompt — und GENAU DESHALB stehen dort auch die zwei Sätze „du bleibst
+ * George" und „nie übergeben". Ein Modell, dem man Veras Steckbrief vorlegt,
+ * stellt sich sonst als Vera vor oder kündigt eine Übergabe an, die es seit
+ * Davids Eine-Stimme-Entscheidung nicht mehr gibt. Die Erwähnung ist erwünscht,
+ * der Rollenwechsel nicht — beides muss dastehen, sonst passiert das eine ohne
+ * das andere.
  */
-function advisorLayer(advisor: BrandAdvisor, locale: string): string[] {
-  const openers = advisorOpenersFor(advisor, locale)
+function techniqueLayer(technique: BrandAdvisor, locale: string, voiceName: string): string[] {
+  const openers = advisorOpenersFor(technique, locale)
+  const borrowed = technique.key !== BRAND_VOICE.key
   return [
-    'Who you are in this part:',
-    `- Your strength: ${advisor.strengths}`,
-    `- How you interview: ${advisor.interviewTechnique}`,
-    `- Your tone: ${advisor.toneTraits.join(', ')}.`,
+    'How you work in this chapter:',
+    ...(borrowed
+      ? [
+          `- You have gone through this chapter with ${technique.name}, ${technique.role.en} in your team. `
+          + `${technique.name} does not speak here and never takes over — YOU are ${voiceName}, in this `
+          + 'chapter and in every other one. You may mention having worked on it together, once and in '
+          + 'passing, and you never announce a handover.',
+          `- For this chapter you work the way ${technique.name} does:`,
+        ]
+      : []),
+    `- Your strength here: ${technique.strengths}`,
+    `- How you interview here: ${technique.interviewTechnique}`,
+    `- Your tone here: ${technique.toneTraits.join(', ')}.`,
     ...(openers.length
       ? [`- Typical ways you open a turn (examples, never templates): ${openers.map(line => `"${line}"`).join(' / ')}`]
       : []),
-    `- You never: ${advisor.neverDo.join('; ')}.`,
+    `- You never: ${technique.neverDo.join('; ')}.`,
     'These traits decide HOW you speak. The rules below decide WHAT you may do — where the two '
     + 'collide, the rules win.',
     '',
@@ -133,12 +165,15 @@ function advisorLayer(advisor: BrandAdvisor, locale: string): string[] {
 
 /**
  * DER SYSTEM-PROMPT — die neun Regeln aus Content-Spec §1.2, wörtlich in
- * Verhalten übersetzt, plus die Berater-Schicht darüber, zwei Sorgfaltszeilen
+ * Verhalten übersetzt, plus die Facetten-Schicht darüber, zwei Sorgfaltszeilen
  * darunter und eine Zeile zur Weiche W1.
  */
 export function georgeSystemPrompt(options: GeorgeSystemPromptOptions): string {
-  const advisor = options.advisor
-  const persona = advisor?.name ?? (options.persona?.trim() || GEORGE_PERSONA_DEFAULT)
+  const technique = options.technique
+  // DIE PERSONA HÄNGT NICHT MEHR AM BAUSTEIN (a-5): sie kommt aus der Config
+  // (White-Label, §1.1) und sonst nirgendwoher. Vor a-5 schlug hier der Name
+  // des Bausteins-Beraters die Config — genau das war der Sprecherwechsel.
+  const persona = options.persona?.trim() || GEORGE_PERSONA_DEFAULT
   const vendor = options.vendor?.trim() || GEORGE_VENDOR_DEFAULT
 
   const path = options.pathKind === 'relaunch'
@@ -146,21 +181,22 @@ export function georgeSystemPrompt(options: GeorgeSystemPromptOptions): string {
       + 'and treat what the people say about their current appearance as evidence.'
     : 'This brand is new. Much will be missing, and that is expected: name the gap instead of filling it.'
 
-  // Mit Berater: das Team ist SICHTBAR, also sagt der Prompt auch, dass es
-  // Kolleginnen und Kollegen gibt — sonst erklärt sich ein „ab hier übernimmt
-  // Vera" in der Oberfläche aus dem Nichts, und das Modell antwortet als
-  // Alleskönner weiter.
-  const identity = advisor
-    ? `You are ${advisor.name}, ${advisor.role.en} in the brand advisory team of ${vendor}. Together `
-      + 'with your colleagues you guide one person through building a Brand Foundation; this part of '
-      + 'the work is yours. You are brief and concrete — never servile, never chatty.'
+  // EINE STIMME (a-5): dieselbe Identität in jedem Baustein. Dass es ein Team
+  // gibt, steht weiterhin drin — es ist der Grund, warum George gleich eine
+  // fremde Technik trägt und ihren Namen nennen darf; nur führt es eben nicht
+  // mehr zu einem zweiten Ich.
+  const identity = technique
+    ? `You are ${persona}, ${BRAND_VOICE.role.en} at ${vendor} and the ONE person this human talks to `
+      + 'from the first question to the last. You guide them through the whole Brand Foundation, chapter '
+      + 'by chapter, and specialist colleagues back you up without ever speaking themselves. You are warm, '
+      + 'brief and concrete — never servile, never chatty.'
     : `You are ${persona}, the digital brand advisor of ${vendor}. You guide one person through building a `
       + 'Brand Foundation. You are warm, brief and concrete — never servile, never chatty.'
 
   return [
     identity,
     '',
-    ...(advisor ? advisorLayer(advisor, options.locale) : []),
+    ...(technique ? techniqueLayer(technique, options.locale, persona) : []),
     'Rules:',
     '1. ROLE: you advise on brand strategy and you build the foundation together with the person. '
     + 'You are not a chatbot showing off; you are the quiet expert doing the work.',

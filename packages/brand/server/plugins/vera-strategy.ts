@@ -9,11 +9,12 @@ import { registerBrandSlotGenerator } from '../utils/brandGenerators'
 import { VERA_PROMPT_VERSION, veraSlotInstruction } from '../utils/veraPrompt'
 
 /**
- * VERA STEIN (P3.1) — Bausteine B (Purpose · Vision · Mission +
- * Positionierung) und B2 (Markenarchitektur).
+ * VERAS TECHNIK (P3.1) — Bausteine B (Purpose · Vision · Mission +
+ * Positionierung) und B2 (Markenarchitektur). GESPROCHEN von George
+ * (Eine Stimme, 2026-09-02).
  *
- * ── EIN GENERATOR, ZWEI BAUSTEINE, EIN BERATER ────────────────────────────
- * `advisorForStep()` ordnet Vera in `brandAdvisors.ts` beide Bausteine zu, und
+ * ── EIN GENERATOR, ZWEI BAUSTEINE, EINE TECHNIK ───────────────────────────
+ * `techniqueForStep()` ordnet Vera in `brandAdvisors.ts` beide Bausteine zu, und
  * die Fabrik fragt genau diese Registry — die Registrierung hier muss also
  * nichts über Personen sagen, nur über Zuständigkeit. Zwei Aufrufe statt eines
  * Wildcard-Eintrags, weil `'*'` auch jeden künftigen Baustein einfinge und dort

@@ -2,16 +2,18 @@
 /** Berater-Panel: Monogramm statt Porträt, max 2–3 Sätze pro Zug, jeder
  *  Zug endet in Frage oder Schritt (§3d). Kein Lob-Spam, keine Fake-Delays.
  *
- *  ── DER KOPF ZEIGT, WER GERADE FÜHRT (2026-09-01) ────────────────────────
- *  Bis hierher stand dort fest ein voller Name plus „Dein Markenberater". Seit
- *  dem sichtbaren Beraterteam kommen Name und Rollen-Titel von aussen — die
- *  Seite fragt `advisorForStep()`. Und zwar VORNAME plus Rolle: die Nachnamen
- *  gehören der About-Seite, im Arbeitsmodus sind sie nur Ballast.
+ *  ── DER KOPF ZEIGT DIE EINE STIMME (2026-09-02) ──────────────────────────
+ *  Name und Rollen-Titel kommen von aussen, stehen aber im ganzen Wizard auf
+ *  George (`BRAND_VOICE`): seit Davids Eine-Stimme-Entscheidung wechselt der
+ *  Sprecher nicht mehr mit dem Kapitel. Und zwar VORNAME plus Rolle — die
+ *  Nachnamen gehören der About-Ebene, im Arbeitsmodus sind sie nur Ballast.
  *
- *  ── DIE ÜBERGABE IST ANZEIGE, KEIN VERLAUF ───────────────────────────────
+ *  ── DAS PHASEN-INTRO IST ANZEIGE, KEIN VERLAUF ───────────────────────────
  *  `handover` steht als stille Zeile ÜBER den Nachrichten und wird nirgends
  *  gespeichert: wer zwischen zwei Bausteinen hin- und herspringt, bekäme sonst
- *  bei jedem Sprung eine weitere Zeile in seinen Verlauf geschrieben. */
+ *  bei jedem Sprung eine weitere Zeile in seinen Verlauf geschrieben. Es sagt
+ *  seit dem 2026-09-02 nicht mehr „ab hier übernimmt X", sondern mit wessen
+ *  Blick George dieses Kapitel angeht. */
 export interface BwMessage {
   id: string
   role: 'george' | 'user'

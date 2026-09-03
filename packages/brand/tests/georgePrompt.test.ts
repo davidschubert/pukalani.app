@@ -105,11 +105,11 @@ describe('System-Prompt: die neun Regeln (§1.2)', () => {
     expect(SYSTEM).not.toContain('10. ')
   })
 
-  it('OHNE Berater bleibt es beim Gastgeber-Satz von a-3', () => {
-    // Der Rückwärts-Vertrag dieser Runde: ein Aufrufer, der die neue Schicht
-    // nicht kennt, bekommt den alten Prompt — keinen halben neuen.
-    expect(SYSTEM).not.toContain('Who you are in this part')
-    expect(SYSTEM).not.toContain('brand advisory team')
+  it('OHNE Technik bleibt es beim Gastgeber-Satz von a-3', () => {
+    // Der Rückwärts-Vertrag: ein Aufrufer, der die Facetten-Schicht nicht
+    // kennt, bekommt den alten Prompt — keinen halben neuen.
+    expect(SYSTEM).not.toContain('How you work in this chapter')
+    expect(SYSTEM).not.toContain('in your team')
   })
 
   it('die Weiche W1 ändert die Haltung', () => {
@@ -122,23 +122,34 @@ describe('System-Prompt: die neun Regeln (§1.2)', () => {
 })
 
 /**
- * DIE BERATER-SCHICHT (george-a-4) — sie ist der Grund, warum der Wizard ein
- * TEAM zeigt und nicht einen Alleskönner mit fünf Hüten.
+ * DIE FACETTEN-SCHICHT (george-a-5) — sie ist der Grund, warum der Wizard EINE
+ * Stimme hat und trotzdem in jedem Kapitel anders fragt.
  *
- * Geprüft wird dreierlei: dass die Persönlichkeit wirklich im Prompt ankommt
- * (sonst wäre das Team eine reine Kopfzeile), dass sie ÜBER den Regeln steht
- * und sich ihnen ausdrücklich unterordnet (sonst schlägt „sei fordernd" das
- * „sei knapp"), und dass die Satzanfänge der WIZARD-Sprache folgen.
+ * Geprüft wird viererlei: dass die Identität in JEDEM Baustein George bleibt
+ * (Davids Entscheidung 2026-09-02), dass die Technik der Kollegin wirklich
+ * ankommt (sonst wäre die Facette eine reine Behauptung), dass sie ÜBER den
+ * Regeln steht und sich ihnen ausdrücklich unterordnet (sonst schlägt „sei
+ * fordernd" das „sei knapp"), und dass die Satzanfänge der WIZARD-Sprache
+ * folgen.
  */
-describe('Berater-Schicht (george-a-4)', () => {
+describe('Facetten-Schicht (george-a-5)', () => {
   const vera = advisorByKey('vera')!
   const withVera = georgeSystemPrompt({
-    locale: 'de', contentLocale: 'de', pathKind: 'new', advisor: vera,
+    locale: 'de', contentLocale: 'de', pathKind: 'new', technique: vera,
   })
 
-  it('stellt den Berater als Teil eines TEAMS vor', () => {
-    expect(withVera).toContain('You are Vera, Strategist in the brand advisory team of Branding Supply')
-    expect(withVera).toContain('this part of the work is yours')
+  it('SPRICHT AUCH IN VERAS KAPITEL ALS GEORGE', () => {
+    expect(withVera).toContain('You are George, Brand advisor at Branding Supply')
+    expect(withVera).toContain('the ONE person this human talks to from the first question to the last')
+    // GEGENPROBE: der Sprecherwechsel von a-4 ist weg.
+    expect(withVera).not.toContain('You are Vera')
+  })
+
+  it('ERWÄHNT DIE KOLLEGIN — und verbietet im selben Atemzug die Übergabe', () => {
+    expect(withVera).toContain('You have gone through this chapter with Vera, Strategist in your team')
+    expect(withVera).toContain('Vera does not speak here and never takes over')
+    expect(withVera).toContain('YOU are George, in this chapter and in every other one')
+    expect(withVera).toContain('you never announce a handover')
   })
 
   it('trägt Stärke, Technik, Tonfall und Verbotsliste wörtlich', () => {
@@ -148,28 +159,45 @@ describe('Berater-Schicht (george-a-4)', () => {
     for (const never of vera.neverDo) expect(withVera).toContain(never)
   })
 
+  it('IN GEORGES EIGENEN BAUSTEINEN wird niemand erwähnt', () => {
+    // Eine Selbst-Erwähnung („ich habe das mit George durchgesehen") wäre
+    // Unsinn — die Facette trägt dort nur seine eigene Fragelogik.
+    const own = georgeSystemPrompt({
+      locale: 'de', contentLocale: 'de', pathKind: 'new', technique: advisorByKey('george')!,
+    })
+    expect(own).toContain('How you work in this chapter')
+    expect(own).toContain(advisorByKey('george')!.interviewTechnique)
+    expect(own).not.toContain('You have gone through this chapter with')
+    expect(own).not.toContain('never takes over')
+  })
+
   it('DIE REGELN GEWINNEN — und der Prompt sagt es selbst', () => {
     expect(withVera).toContain('These traits decide HOW you speak')
     expect(withVera).toContain('where the two collide, the rules win')
-    // Und zwar in dieser Reihenfolge: Persönlichkeit oben, Fundament darunter.
-    expect(withVera.indexOf('Who you are in this part')).toBeLessThan(withVera.indexOf('Rules:'))
+    // Und zwar in dieser Reihenfolge: Facette oben, Fundament darunter.
+    expect(withVera.indexOf('How you work in this chapter')).toBeLessThan(withVera.indexOf('Rules:'))
   })
 
   it('die Satzanfänge folgen der WIZARD-Sprache, nicht der Inhaltssprache', () => {
     expect(withVera).toContain('Warum ausgerechnet ihr?')
     const english = georgeSystemPrompt({
-      locale: 'en', contentLocale: 'de', pathKind: 'new', advisor: vera,
+      locale: 'en', contentLocale: 'de', pathKind: 'new', technique: vera,
     })
     expect(english).toContain('Why you, of all people?')
     expect(english).not.toContain('Warum ausgerechnet ihr?')
   })
 
-  it('der Berater-NAME schlägt die Persona-Config — er ist die Identität', () => {
+  it('DIE PERSONA-CONFIG SCHLÄGT DURCH — auch in einem fremden Kapitel', () => {
+    // Vor a-5 gewann hier der Name des Baustein-Beraters, und der White-Label-
+    // Tier (§1.1) hätte in fünf von neun Bausteinen nicht gewirkt.
     const otto = georgeSystemPrompt({
-      locale: 'de', contentLocale: 'de', pathKind: 'new', advisor: advisorByKey('otto')!, persona: 'Ada',
+      locale: 'de', contentLocale: 'de', pathKind: 'new', technique: advisorByKey('otto')!, persona: 'Ada',
     })
-    expect(otto).toContain('You are Otto')
-    expect(otto).not.toContain('You are Ada')
+    expect(otto).toContain('You are Ada')
+    expect(otto).not.toContain('You are Otto')
+    // Erwähnt wird Otto trotzdem — er ist die Technik, nicht der Sprecher.
+    expect(otto).toContain('with Otto, Naming advisor in your team')
+    expect(otto).toContain('YOU are Ada, in this chapter and in every other one')
   })
 
   it('trägt weder Nachnamen noch die verworfene Hunde-Welt in den Prompt', () => {
@@ -178,7 +206,7 @@ describe('Berater-Schicht (george-a-4)', () => {
     // Nachname im Prompt wäre der erste Schritt zurück in die Steckbrief-Welt.
     for (const key of ['george', 'vera', 'milo', 'nika', 'otto']) {
       const prompt = georgeSystemPrompt({
-        locale: 'de', contentLocale: 'de', pathKind: 'new', advisor: advisorByKey(key)!,
+        locale: 'de', contentLocale: 'de', pathKind: 'new', technique: advisorByKey(key)!,
       })
       expect(prompt, key).not.toMatch(/\b(dog|bark|wuff|Wuffwuff|Witterung|Treuherz|Bellkant|Testbiss)\b/i)
       expect(prompt, key).not.toMatch(/\b(Winter|Stein|Berger|Sommer|Kessler)\b/)
@@ -499,10 +527,11 @@ describe('Prompt-Version', () => {
   it('ist gesetzt und benennt den Baustein', () => {
     // P2.5 hat den Prompt inhaltlich verändert (die Startkarte reist mit),
     // P2.3 ein zweites Mal (der Website-Text kann mitreisen), a-4 ein drittes
-    // (Berater-Schicht, Rahmung, Rückfrage, B4/B6/B8/B9) — die Version MUSS
-    // mitsteigen, sonst behaupten alte Generations-Einträge, aus diesem Prompt
-    // zu stammen (Kopf von georgePrompt.ts).
-    expect(GEORGE_PROMPT_VERSION).toBe('george-a-4')
+    // (Berater-Schicht, Rahmung, Rückfrage, B4/B6/B8/B9), a-5 ein viertes
+    // (EINE Stimme: aus der Berater- wird die Facetten-Schicht) — die Version
+    // MUSS mitsteigen, sonst behaupten alte Generations-Einträge, aus diesem
+    // Prompt zu stammen (Kopf von georgePrompt.ts).
+    expect(GEORGE_PROMPT_VERSION).toBe('george-a-5')
   })
 })
 

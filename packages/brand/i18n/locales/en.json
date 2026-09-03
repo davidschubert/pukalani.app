@@ -276,7 +276,11 @@
         "count": "{confirmed}/{total}"
       },
       "advisorInfo": {
-        "open": "About {name}"
+        "open": "About {name}",
+        "desc": "Guides you through the entire wizard — from context to name. He asks small, concrete questions, says plainly what is missing, and keeps the thread. His team reads along behind him:",
+        "asksTitle": "A typical question",
+        "asks": "“Why did you start — what set it off?”",
+        "personal": "Brand advisor and strategist — every recommendation with a reason, every decision written down."
       },
       "sidebar": {
         "switchBrand": "Switch branding"
@@ -498,23 +502,28 @@
     "advisors": {
       "george": {
         "role": "Brand advisor",
-        "handover": "George leads from here — he keeps the thread and asks small, concrete questions."
+        "focus": "keeps the thread, context and result",
+        "intro": "Staying with me, George — small, concrete questions, and I say plainly when something is missing."
       },
       "vera": {
         "role": "Strategist",
-        "handover": "Vera takes over from here — she asks the why questions until your positioning holds."
+        "focus": "why questions, positioning",
+        "intro": "I went through your context with Vera — our strategist; she reads this chapter closely. Now I ask the why questions until your positioning holds."
       },
       "milo": {
         "role": "Values advisor",
-        "handover": "Milo takes over from here — he asks for moments, not adjectives."
+        "focus": "moments instead of adjectives",
+        "intro": "For the values I checked in with Milo — our values advisor. From here I ask for moments, not adjectives."
       },
       "nika": {
         "role": "Language advisor",
-        "handover": "Nika takes over from here — she tests every line by ear and cuts the filler."
+        "focus": "tests every line by ear",
+        "intro": "Here I work with Nika's ear — our language advisor. Every line gets read out loud before it stays."
       },
       "otto": {
         "role": "Naming advisor",
-        "handover": "Otto takes over from here — he checks every name soberly: survive first, charm second."
+        "focus": "survive first, charm second",
+        "intro": "On names I keep to Otto — our naming advisor: survive first, charm second."
       }
     },
     "invite": {

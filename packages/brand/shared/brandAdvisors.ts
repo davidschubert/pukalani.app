@@ -1,16 +1,24 @@
 import type { BrandStepKey } from './slotRegistry'
 
 /**
- * DAS BERATERTEAM — fünf Steckbriefe, ein Baustein je Berater.
+ * DAS BERATERTEAM — fünf Steckbriefe, eine STIMME.
  *
- * Davids Entscheidung (2026-09-01, nach dem Live-Persona-Audit): der Wizard
- * zeigt ein SICHTBARES TEAM statt eines Alleskönners. George bleibt der
- * Gastgeber (Startbogen, Kontext, Ergebnis), vier Kolleginnen und Kollegen
- * übernehmen je ihren Baustein. Der Grund ist kein Schmuck, sondern Davids
- * Leitsatz: „Die Qualität der Antworten wird durchs INTERVIEW bestimmt." Ein
- * Wechsel der Person ist der billigste Weg, einen Wechsel der FRAGEART
- * anzukündigen — Vera fragt anders als Milo, und der Mensch merkt es, bevor er
- * die erste Frage gelesen hat.
+ * ── EINE STIMME, DAS TEAM IM RÜCKEN (Davids Entscheidung 2026-09-02) ──────
+ * George ist der EINZIGE Sprecher durch den ganzen Wizard. Vera, Milo, Nika
+ * und Otto sprechen nie selbst — George erwähnt sie („Ich habe euren Kontext
+ * mit Vera durchgesehen — sie liest in diesem Kapitel streng mit"), und ihre
+ * INTERVIEW-TECHNIK bleibt als seine Phasen-Facette in den Prompts. Grund
+ * (DECISION-LOG 2026-09-02): vier Sprecherwechsel in einer 45-Minuten-Sitzung
+ * heissen viermal Beziehung neu aufbauen — Aufstückelung statt Beratung.
+ *
+ * Damit trägt diese Datei ZWEI Dinge, die man nicht verwechseln darf:
+ *   · WER SPRICHT → `BRAND_VOICE`. Immer George, in jedem Baustein.
+ *   · WIE GEFRAGT WIRD → `techniqueForStep()`. Die Facette des Kapitels, und
+ *     `colleagueForStep()` sagt, welche Kollegin bzw. welcher Kollege dahinter
+ *     steht (`null` in Georges eigenen Bausteinen).
+ * Die Vorgänger-Entscheidung vom 2026-09-01 (fünf sichtbare SPRECHER) ist
+ * damit revidiert; die Steckbriefe selbst bleiben, sie sind jetzt Technik statt
+ * Bühne — und auf der Team-Seite bleibt das Team sichtbar.
  *
  * ── DIESE DATEI IST PUR ───────────────────────────────────────────────────
  * Kein i18n, kein H3, kein Appwrite: sie wird im Prompt (Server) UND in der
@@ -24,8 +32,10 @@ import type { BrandStepKey } from './slotRegistry'
  * Hier stehen Beraterinnen und Berater, sonst nichts: `fullName` ist ein
  * gewöhnlicher Name, `personal` eine PROFESSIONELLE Kurzzeile (Haltung und
  * Arbeitsweise, keine Stadt-und-Hobby-Verniedlichung) für die About-Seite.
- * `name` + `role` bleiben der ARBEITSMODUS: der Chat-Kopf zeigt Vorname und
- * Rollen-Titel, mehr nicht — die Nachnamen gehören der About-Ebene.
+ * `name` + `role` bleiben der ARBEITSMODUS: im Chat-Kopf steht seit der
+ * Eine-Stimme-Entscheidung immer George mit seinem Rollen-Titel; die Namen der
+ * Kolleginnen und Kollegen erscheinen in Georges Phasen-Intro und im
+ * Steckbrief, die Nachnamen gehören der About-Ebene.
  *
  * ── DIE ENGLISCHEN FELDER SIND PROMPT-TEXT ────────────────────────────────
  * `strengths`, `interviewTechnique`, `toneTraits` und `neverDo` reisen wörtlich
@@ -35,12 +45,12 @@ import type { BrandStepKey } from './slotRegistry'
  * zeigen dem Modell, wie ein Zug in der WIZARD-Sprache anfängt, und liegen
  * deshalb in beiden Sprachen vor.
  *
- * ── EIN BAUSTEIN HAT GENAU EINEN BERATER ──────────────────────────────────
- * `advisorForStep()` ist die einzige Stelle, die das rechnet, und sie fällt auf
- * George zurück. Der Rückfall ist kein Schlendrian: ein neuer Baustein ohne
- * Zuordnung bekommt lieber den Gastgeber als gar niemanden — die Prüfung, dass
- * jeder Baustein zugeordnet IST, macht der Test (`brandAdvisors.test.ts`), und
- * der ist die richtige Stelle dafür.
+ * ── EIN BAUSTEIN HAT GENAU EINE TECHNIK ───────────────────────────────────
+ * `techniqueForStep()` ist die einzige Stelle, die das rechnet, und sie fällt
+ * auf George zurück. Der Rückfall ist kein Schlendrian: ein neuer Baustein ohne
+ * Zuordnung bekommt lieber Georges eigene Fragelogik als gar keine — die
+ * Prüfung, dass jeder Baustein zugeordnet IST, macht der Test
+ * (`brandAdvisors.test.ts`), und der ist die richtige Stelle dafür.
  */
 
 export const BRAND_ADVISOR_KEYS = ['george', 'vera', 'milo', 'nika', 'otto'] as const
@@ -73,7 +83,11 @@ export interface BrandAdvisor {
    * verworfen wurde. Wer eines hat, trägt es hier ein — nur hier.
    */
   readonly avatar: string
-  /** Die Bausteine, die dieser Berater führt. */
+  /**
+   * Die Bausteine, deren INTERVIEW-TECHNIK von dieser Person kommt. Gesprochen
+   * werden sie alle von George (s. Kopf) — das hier ist die Zuständigkeit für
+   * die Fragelogik, nicht für die Sprechblase.
+   */
   readonly steps: readonly BrandStepKey[]
   /** Wofür er da ist — Prompt-Text, englisch. */
   readonly strengths: string
@@ -95,8 +109,9 @@ export const BRAND_ADVISORS: readonly BrandAdvisor[] = [
     personal: 'Markenberater und Markenstratege — jede Empfehlung mit Begründung, jede Entscheidung festgehalten.',
     role: { de: 'Markenberater', en: 'Brand advisor' },
     avatar: '',
-    // Der Gastgeber: Startbogen, Baustein A und das Ergebnis. Er macht auf und
-    // er macht zu — dazwischen übergibt er.
+    // Georges EIGENE Bausteine: Startbogen, Baustein A und das Ergebnis. Er
+    // spricht auch alle anderen — dort borgt er sich die Technik der Kollegin
+    // bzw. des Kollegen, nicht deren Stimme (s. Kopf).
     steps: ['context', 'result'],
     strengths: 'You open the work and you keep the thread. You turn a blank page into one small, '
       + 'answerable question, and you play back what you heard before you move on.',
@@ -220,16 +235,43 @@ const ADVISOR_BY_STEP = new Map<BrandStepKey, BrandAdvisor>(
   BRAND_ADVISORS.flatMap(advisor => advisor.steps.map(step => [step, advisor] as const)),
 )
 
-/** Der Gastgeber — Rückfall für jeden Baustein ohne eigene Zuordnung. */
-export const BRAND_HOST_ADVISOR: BrandAdvisor = ADVISORS_BY_KEY.get('george')!
+/**
+ * DIE STIMME DES WIZARDS — George, in JEDEM Baustein (Davids Entscheidung
+ * 2026-09-02, s. Kopf).
+ *
+ * Diese Konstante ist die einzige Antwort auf „wer spricht?", und sie hängt
+ * bewusst NICHT am Baustein: eine Funktion mit Parameter wäre die Einladung,
+ * irgendwann wieder eine Person je Kapitel zurückzugeben. Wer den Kopf der
+ * Werkstatt, den Avatar oder die Identität im System-Prompt füllt, liest hier.
+ */
+export const BRAND_VOICE: BrandAdvisor = ADVISORS_BY_KEY.get('george')!
 
 export function advisorByKey(key: string): BrandAdvisor | undefined {
   return ADVISORS_BY_KEY.get(key)
 }
 
-/** Wer diesen Baustein führt. Ohne Zuordnung: der Gastgeber (s. Kopf). */
-export function advisorForStep(stepKey: BrandStepKey): BrandAdvisor {
-  return ADVISOR_BY_STEP.get(stepKey) ?? BRAND_HOST_ADVISOR
+/**
+ * WELCHE TECHNIK dieser Baustein verlangt — die Fragelogik, die George sich
+ * hier zu eigen macht. Ohne Zuordnung: seine eigene (s. Kopf).
+ *
+ * Das ist NICHT der Sprecher. Wer diesen Rückgabewert in einen Namen im Chat-
+ * Kopf verwandelt, hebt die Eine-Stimme-Entscheidung auf.
+ */
+export function techniqueForStep(stepKey: BrandStepKey): BrandAdvisor {
+  return ADVISOR_BY_STEP.get(stepKey) ?? BRAND_VOICE
+}
+
+/**
+ * WEN GEORGE HIER ERWÄHNT — die Kollegin bzw. der Kollege hinter der Technik,
+ * `null` in seinen eigenen Bausteinen.
+ *
+ * Eigene Funktion, weil die Frage an drei Stellen gestellt wird (Phasen-Intro
+ * in der Werkstatt, Facetten-Schicht im Prompt, Steckbrief) und ein
+ * `=== 'george'`-Vergleich an drei Stellen dreimal falsch werden kann.
+ */
+export function colleagueForStep(stepKey: BrandStepKey): BrandAdvisor | null {
+  const technique = techniqueForStep(stepKey)
+  return technique.key === BRAND_VOICE.key ? null : technique
 }
 
 /**

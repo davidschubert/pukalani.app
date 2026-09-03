@@ -1,6 +1,6 @@
 import { ID, Query } from 'node-appwrite'
 import { createBrandConverseSchema } from '../../../../../../../schemas/brandConverse'
-import { advisorForStep } from '../../../../../../../shared/brandAdvisors'
+import { techniqueForStep } from '../../../../../../../shared/brandAdvisors'
 import {
   type BrandGenerationEventDataMap,
   type BrandGenerationEventName,
@@ -323,14 +323,16 @@ export default defineEventHandler(async (event): Promise<BrandConverseSkippedRes
     // füllt. `''` heisst: er stellt keine aus dem Katalog (s. `askedSlotId`).
     send('generation.started', { generationId: turnId, slotId: askedSlotId, stepKey })
 
-    const advisor = advisorForStep(stepKey)
+    // Die TECHNIK des Kapitels, nicht sein Sprecher: gesprochen wird jeder Zug
+    // von George (Davids Eine-Stimme-Entscheidung 2026-09-02).
+    const technique = techniqueForStep(stepKey)
     const uiLocale = resolveBrandUiLocale(body.uiLocale, profile.contentLocale)
 
     const system = georgeSystemPrompt({
       locale: uiLocale,
       contentLocale: profile.contentLocale,
       pathKind: profileFacts(profile).pathKind,
-      advisor,
+      technique,
     })
 
     const prompt = brandConversePrompt(

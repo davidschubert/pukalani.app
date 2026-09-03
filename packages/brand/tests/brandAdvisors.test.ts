@@ -5,11 +5,12 @@ import { describe, expect, it } from 'vitest'
 import {
   BRAND_ADVISORS,
   BRAND_ADVISOR_KEYS,
-  BRAND_HOST_ADVISOR,
+  BRAND_VOICE,
   type BrandAdvisor,
   advisorByKey,
-  advisorForStep,
   advisorOpenersFor,
+  colleagueForStep,
+  techniqueForStep,
   validateBrandAdvisors,
 } from '../shared/brandAdvisors'
 import { BRAND_STEP_KEYS } from '../shared/slotRegistry'
@@ -17,27 +18,32 @@ import { BRAND_STEP_KEYS } from '../shared/slotRegistry'
 /**
  * DAS BERATERTEAM — was ohne diesen Beweis stillschweigend kaputtgehen kann.
  *
- *  1. Ein Baustein OHNE Berater fällt auf George zurück — das ist die richtige
- *     Sicherung, aber es ist auch der perfekte Ort für ein Versehen: ein neuer
- *     Baustein sähe aus, als hätte ihn jemand zugeordnet. Hier wird deshalb
- *     geprüft, dass jeder der neun Bausteine WIRKLICH zugeordnet ist.
- *  2. Ein Baustein mit ZWEI Beratern hätte einen Kopf, der von der Reihenfolge
- *     der Registry abhängt.
- *  3. Die Rollen-Titel und Übergabe-Zeilen liegen in den Locale-Dateien; fehlt
- *     einer, rendert vue-i18n den SCHLÜSSEL (der `legal.imprint`-Fuss). Ein
- *     Berater ohne Text stünde also wörtlich als `brand.advisors.otto.role` im
- *     Chat-Kopf.
+ *  1. Ein Baustein OHNE Technik fällt auf Georges eigene zurück — das ist die
+ *     richtige Sicherung, aber es ist auch der perfekte Ort für ein Versehen:
+ *     ein neuer Baustein sähe aus, als hätte ihn jemand zugeordnet. Hier wird
+ *     deshalb geprüft, dass jeder der neun Bausteine WIRKLICH zugeordnet ist.
+ *  2. Ein Baustein mit ZWEI Technik-Gebern hätte eine Facette, die von der
+ *     Reihenfolge der Registry abhängt.
+ *  3. Die Rollen-Titel, Schwerpunkte und Intro-Zeilen liegen in den
+ *     Locale-Dateien; fehlt einer, rendert vue-i18n den SCHLÜSSEL (der
+ *     `legal.imprint`-Fuss). Ein Berater ohne Text stünde also wörtlich als
+ *     `brand.advisors.otto.role` im Steckbrief.
+ *  4. EINE STIMME (Davids Entscheidung 2026-09-02): `BRAND_VOICE` ist George,
+ *     und `techniqueForStep` darf nie wieder als Sprecher gelesen werden. Der
+ *     Wächter dafür ist `colleagueForStep`, das in Georges eigenen Bausteinen
+ *     ausdrücklich `null` sagt — „hier ist niemand zu erwähnen".
  */
 
 const localesDir = join(dirname(fileURLToPath(import.meta.url)), '..', 'i18n', 'locales')
 const LOCALES = ['de', 'en'] as const
 
+interface AdvisorCopy { role?: string, focus?: string, intro?: string }
+type Catalog = { brand: { advisors?: Record<string, AdvisorCopy> } }
+
 const catalogs = Object.fromEntries(LOCALES.map(locale => [
   locale,
-  JSON.parse(readFileSync(join(localesDir, `${locale}.json`), 'utf8')) as {
-    brand: { advisors?: Record<string, { role?: string, handover?: string }> }
-  },
-])) as Record<(typeof LOCALES)[number], { brand: { advisors?: Record<string, { role?: string, handover?: string }> } }>
+  JSON.parse(readFileSync(join(localesDir, `${locale}.json`), 'utf8')) as Catalog,
+])) as Record<(typeof LOCALES)[number], Catalog>
 
 describe('Berater-Registry', () => {
   it('kennt genau die fünf Beraterinnen und Berater aus Davids Entscheidung', () => {
@@ -62,20 +68,38 @@ describe('Berater-Registry', () => {
   })
 
   it('ORDNET DIE NEUN BAUSTEINE WÖRTLICH SO ZU, wie David sie geschnitten hat', () => {
-    expect(advisorForStep('context').key).toBe('george')
-    expect(advisorForStep('result').key).toBe('george')
-    expect(advisorForStep('pvm').key).toBe('vera')
-    expect(advisorForStep('architecture').key).toBe('vera')
-    expect(advisorForStep('values').key).toBe('milo')
-    expect(advisorForStep('archetype').key).toBe('milo')
-    expect(advisorForStep('manifesto').key).toBe('nika')
-    expect(advisorForStep('verbal').key).toBe('nika')
-    expect(advisorForStep('naming').key).toBe('otto')
+    expect(techniqueForStep('context').key).toBe('george')
+    expect(techniqueForStep('result').key).toBe('george')
+    expect(techniqueForStep('pvm').key).toBe('vera')
+    expect(techniqueForStep('architecture').key).toBe('vera')
+    expect(techniqueForStep('values').key).toBe('milo')
+    expect(techniqueForStep('archetype').key).toBe('milo')
+    expect(techniqueForStep('manifesto').key).toBe('nika')
+    expect(techniqueForStep('verbal').key).toBe('nika')
+    expect(techniqueForStep('naming').key).toBe('otto')
   })
 
-  it('fällt auf den Gastgeber zurück — aber nur für Unbekanntes', () => {
-    expect(BRAND_HOST_ADVISOR.key).toBe('george')
-    expect(advisorForStep('gibt-es-nicht' as never).key).toBe('george')
+  it('DIE STIMME IST GEORGE — in jedem einzelnen Baustein', () => {
+    // Davids Entscheidung 2026-09-02: `techniqueForStep` sagt, WIE gefragt
+    // wird, nie WER spricht. Der Sprecher hängt an gar keinem Baustein.
+    expect(BRAND_VOICE.key).toBe('george')
+    expect(BRAND_VOICE.fullName).toBe('George Winter')
+  })
+
+  it('NENNT DIE KOLLEGIN NUR, WO ES EINE GIBT — sonst ausdrücklich niemanden', () => {
+    // In Georges eigenen Bausteinen wäre „ich habe das mit George durchgesehen"
+    // eine Selbst-Erwähnung; `null` ist deshalb ein Ergebnis, kein Loch.
+    expect(colleagueForStep('context')).toBeNull()
+    expect(colleagueForStep('result')).toBeNull()
+    expect(colleagueForStep('pvm')?.key).toBe('vera')
+    expect(colleagueForStep('values')?.key).toBe('milo')
+    expect(colleagueForStep('verbal')?.key).toBe('nika')
+    expect(colleagueForStep('naming')?.key).toBe('otto')
+  })
+
+  it('fällt auf Georges eigene Technik zurück — aber nur für Unbekanntes', () => {
+    expect(techniqueForStep('gibt-es-nicht' as never).key).toBe('george')
+    expect(colleagueForStep('gibt-es-nicht' as never)).toBeNull()
     expect(advisorByKey('vera')?.fullName).toBe('Vera Stein')
     expect(advisorByKey('gibt-es-nicht')).toBeUndefined()
   })
@@ -128,23 +152,37 @@ describe('Berater-Registry', () => {
 })
 
 describe('Berater im i18n-Katalog', () => {
-  it('hat Rollen-Titel und Übergabe-Zeile in BEIDEN Sprachen', () => {
+  it('hat Rollen-Titel, Schwerpunkt und Intro-Zeile in BEIDEN Sprachen', () => {
     const gaps: string[] = []
     for (const advisor of BRAND_ADVISORS) {
       for (const locale of LOCALES) {
         const entry = catalogs[locale].brand.advisors?.[advisor.key]
         if (!entry?.role?.trim()) gaps.push(`${advisor.key}.role fehlt in ${locale}`)
-        if (!entry?.handover?.trim()) gaps.push(`${advisor.key}.handover fehlt in ${locale}`)
+        if (!entry?.focus?.trim()) gaps.push(`${advisor.key}.focus fehlt in ${locale}`)
+        if (!entry?.intro?.trim()) gaps.push(`${advisor.key}.intro fehlt in ${locale}`)
       }
     }
     expect(gaps).toEqual([])
   })
 
-  it('die Übergabe nennt den Berater beim Namen', () => {
+  it('das Phasen-Intro nennt die Kollegin beim Namen', () => {
     for (const advisor of BRAND_ADVISORS) {
       for (const locale of LOCALES) {
-        expect(catalogs[locale].brand.advisors![advisor.key]!.handover, `${advisor.key}/${locale}`)
+        expect(catalogs[locale].brand.advisors![advisor.key]!.intro, `${advisor.key}/${locale}`)
           .toContain(advisor.name)
+      }
+    }
+  })
+
+  it('KEIN INTRO KÜNDIGT EINE ÜBERGABE AN — George gibt nichts ab', () => {
+    // Der eigentliche Wächter der Eine-Stimme-Entscheidung auf der Textseite:
+    // „Ab hier übernimmt Vera" war bis zum 2026-09-02 der Wortlaut, und genau
+    // er macht aus einer Erwähnung wieder einen Sprecherwechsel.
+    const handoverWording = /übernimmt|takes over|führt ab hier|leads from here/i
+    for (const advisor of BRAND_ADVISORS) {
+      for (const locale of LOCALES) {
+        expect(catalogs[locale].brand.advisors![advisor.key]!.intro, `${advisor.key}/${locale}`)
+          .not.toMatch(handoverWording)
       }
     }
   })

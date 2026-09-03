@@ -24,7 +24,12 @@ import {
   brandSlotIsConfirmed,
 } from '../../../../shared/brandAutosaveDiff'
 import { brandAiRejectionMessageKey } from '../../../../shared/brandAiLimits'
-import { type BrandAdvisorKey, advisorForStep } from '../../../../shared/brandAdvisors'
+import {
+  BRAND_ADVISORS,
+  BRAND_VOICE,
+  type BrandAdvisorKey,
+  colleagueForStep,
+} from '../../../../shared/brandAdvisors'
 import {
   type BrandReadinessNeed,
   type BrandSlotReadiness,
@@ -155,31 +160,47 @@ function slotNote(slot: BrandSlot): string {
   return slot.helpKey ? t(slot.helpKey) : ''
 }
 
-// ── Wer führt diesen Baustein? (Beraterteam, 2026-09-01) ──────────────────
+// ── Eine Stimme: George, das Team im Rücken (Davids Entscheidung 2026-09-02) ─
 
 /**
- * Gerechnet an EINER Stelle (`advisorForStep`, mit George als Rückfall).
- * Der Avatar im Gespräch öffnet den Steckbrief — es gibt seit dem Umbau keine
- * eigene Berater-Zeile mehr, die ihn tragen könnte.
+ * WER SPRICHT, IST KEINE FRAGE MEHR: George, in jedem Baustein
+ * (`BRAND_VOICE`). Bis zum 2026-09-02 rechnete hier `advisorForStep()`, und im
+ * Baustein `pvm` stand deshalb ein „V" im Avatar — vier Sprecherwechsel in
+ * einer Sitzung heissen viermal Beziehung neu aufbauen (DECISION-LOG).
+ * Der Avatar öffnet den Steckbrief; eine eigene Berater-Zeile gibt es seit dem
+ * Werkstatt-Umbau nicht mehr.
  */
-const advisor = computed(() => advisorForStep(stepKey.value ?? 'context'))
-const advisorRole = computed(() => t(`brand.advisors.${advisor.value.key}.role`))
+const voice = BRAND_VOICE
+const voiceRole = computed(() => t(`brand.advisors.${voice.key}.role`))
 const advisorInfoOpen = ref(false)
 
+/** Das Team im Steckbrief — alle ausser George, in Registry-Reihenfolge. */
+const voiceTeam = computed(() => BRAND_ADVISORS
+  .filter(member => member.key !== voice.key)
+  .map(member => ({
+    key: member.key,
+    line: `${member.fullName} — ${t(`brand.advisors.${member.key}.role`)} · ${t(`brand.advisors.${member.key}.focus`)}`,
+  })))
+
 /**
- * DIE ÜBERGABE-ZEILE ist Anzeige, kein Verlauf: sie erscheint, wenn der
- * Baustein von einem ANDEREN Berater geführt wird als der zuvor besuchte, und
- * sie wird NICHT gespeichert. Sie ist zugleich der Beschreibungstext des
- * Steckbriefs — mehr localisierte Prosa über die Beratenden gibt es nicht,
- * und `brandAdvisors.personal` ist deutsch-only (Prompt-/About-Ebene).
+ * DAS PHASEN-INTRO ist Anzeige, kein Verlauf: es erscheint, wenn das Kapitel
+ * die Technik einer ANDEREN Kollegin bzw. eines anderen Kollegen trägt als das
+ * zuvor besuchte, und wird NICHT gespeichert (wer zwischen zwei Bausteinen
+ * hin- und herspringt, bekäme sonst bei jedem Sprung eine Zeile in seinen
+ * Verlauf geschrieben).
+ *
+ * Aus der Übergabe („Ab hier übernimmt Vera") ist eine ERWÄHNUNG geworden
+ * („Ich habe das mit Vera durchgesehen — sie liest hier streng mit"): George
+ * gibt nichts ab, er sagt nur, mit wessen Blick er dieses Kapitel angeht.
  */
-const handover = ref<string | null>(null)
-let previousAdvisor: BrandAdvisorKey | null = null
-watch(advisor, (next) => {
-  handover.value = previousAdvisor && previousAdvisor !== next.key
-    ? t(`brand.advisors.${next.key}.handover`)
+const phaseIntro = ref<string | null>(null)
+const introKey = computed(() => colleagueForStep(stepKey.value ?? 'context')?.key ?? voice.key)
+let previousIntroKey: BrandAdvisorKey | null = null
+watch(introKey, (next) => {
+  phaseIntro.value = previousIntroKey && previousIntroKey !== next
+    ? t(`brand.advisors.${next}.intro`)
     : null
-  previousAdvisor = next.key
+  previousIntroKey = next
 }, { immediate: true })
 
 // ── George: die nächste offene Frage ──────────────────────────────────────
@@ -427,7 +448,7 @@ const READINESS_KEYS: Record<BrandReadinessNeed, string> = {
 function readinessNote(readiness: BrandSlotReadiness): string | null {
   if (readiness.ready) return null
   return t('brand.workspace.ready.needs', {
-    advisor: advisor.value.name,
+    advisor: voice.name,
     needs: readiness.missing.map(need => t(`brand.workspace.ready.need.${READINESS_KEYS[need]}`)).join(' · '),
   })
 }
@@ -1104,17 +1125,18 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
           </p>
         </div>
 
-        <p v-if="handover" class="bw-label" style="color: var(--bw-muted); padding-left: 2.65rem">{{ handover }}</p>
+        <p v-if="phaseIntro" class="bw-label" style="color: var(--bw-muted); padding-left: 2.65rem">{{ phaseIntro }}</p>
 
         <div v-for="(turn, index) in turns" :key="turn.id" class="bw-msg" :class="turn.role === 'user' ? 'bw-msg--user' : ''">
           <!-- Der Avatar IST der Weg zum Steckbrief (Runde 20) — eine eigene
-               Berater-Zeile gibt es seit dem Umbau nicht mehr. -->
+               Berater-Zeile gibt es seit dem Umbau nicht mehr. Er trägt IMMER
+               George: die Stimme wechselt nicht mit dem Kapitel. -->
           <button
             v-if="turn.role === 'george'" class="flex-none self-start rounded-full"
-            :aria-label="t('brand.workspace.advisorInfo.open', { name: advisor.name })"
+            :aria-label="t('brand.workspace.advisorInfo.open', { name: voice.name })"
             @click="advisorInfoOpen = true"
           >
-            <BwGeorgeAvatar size="md" :src="advisor.avatar" :initial="advisor.name.slice(0, 1)" :alt="advisor.name" />
+            <BwGeorgeAvatar size="md" :src="voice.avatar" :initial="voice.name.slice(0, 1)" :alt="voice.name" />
           </button>
           <div class="bw-msg-body">
             <!-- Interpolation statt v-html: der Text kommt aus einem
@@ -1466,24 +1488,39 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
     </template>
   </BwWorkspace>
 
-  <!-- Der Steckbrief des führenden Beraters — geöffnet über den Avatar im
-       Gespräch. Er zeigt nur, was es LOKALISIERT gibt: Name, Rolle und die
-       Arbeitsweise-Zeile aus `brand.advisors.<key>.handover`. -->
+  <!-- GEORGES STECKBRIEF — geöffnet über den Avatar im Gespräch. Er zeigt die
+       EINE Stimme und das Team dahinter (Davids Entscheidung 2026-09-02):
+       Beschreibung, die Kolleginnen und Kollegen mit ihrem Schwerpunkt, eine
+       typische Frage und Georges Arbeitsweise-Zeile. Alles lokalisiert — die
+       `personal`-Zeile der Registry ist Prompt-/About-Ebene und deutsch-only. -->
   <UModal v-model:open="advisorInfoOpen">
     <template #content>
       <div class="bw-root max-h-[85vh] overflow-y-auto p-7" style="background: var(--bw-surface-hi)">
         <div class="flex items-center gap-3">
-          <BwGeorgeAvatar :src="advisor.avatar" :initial="advisor.name.slice(0, 1)" :alt="advisor.name" />
+          <BwGeorgeAvatar :src="voice.avatar" :initial="voice.name.slice(0, 1)" :alt="voice.name" />
           <span class="min-w-0 leading-tight">
-            <span class="block text-base font-medium">{{ advisor.fullName }}</span>
-            <span class="bw-label block" style="color: var(--bw-muted)">{{ advisorRole }}</span>
+            <span class="block text-base font-medium">{{ voice.fullName }}</span>
+            <span class="bw-label block" style="color: var(--bw-muted)">{{ voiceRole }}</span>
           </span>
           <UButton
             size="xs" color="neutral" variant="ghost" class="ml-auto rounded-full"
             icon="i-ph-x" :aria-label="t('brand.common.close')" @click="advisorInfoOpen = false"
           />
         </div>
-        <p class="bw-doc-text mt-4">{{ t(`brand.advisors.${advisor.key}.handover`) }}</p>
+        <p class="bw-doc-text mt-4">{{ t('brand.workspace.advisorInfo.desc') }}</p>
+        <ul class="mt-2 space-y-1">
+          <li
+            v-for="member in voiceTeam" :key="member.key"
+            class="flex gap-2 text-sm leading-relaxed" style="color: var(--bw-ink-soft)"
+          >
+            <span class="flex-none" style="color: var(--bw-line-strong)">—</span>{{ member.line }}
+          </li>
+        </ul>
+        <p class="bw-label mt-4" style="color: var(--bw-muted)">{{ t('brand.workspace.advisorInfo.asksTitle') }}</p>
+        <p class="mt-1 text-sm italic">{{ t('brand.workspace.advisorInfo.asks') }}</p>
+        <p class="bw-label mt-4 leading-relaxed" style="color: var(--bw-muted)">
+          {{ t('brand.workspace.advisorInfo.personal') }}
+        </p>
       </div>
     </template>
   </UModal>

@@ -171,15 +171,18 @@ describe('Der Aufruf an den Transport', () => {
     expect(german).toContain('is written in de')
   })
 
-  it('DER BERATER KOMMT AUS DER REGISTRY, nicht aus dieser Datei', async () => {
-    // Baustein A gehört dem Gastgeber — aber gefragt wird `advisorForStep`.
-    // Registriert sich der Generator morgen für einen zweiten Baustein, spricht
-    // dort automatisch dessen Berater.
+  it('DIE TECHNIK KOMMT AUS DER REGISTRY, nicht aus dieser Datei', async () => {
+    // Baustein A trägt Georges eigene Fragelogik — geholt wird sie aber über
+    // `techniqueForStep`. Registriert sich der Generator morgen für einen
+    // zweiten Baustein, gilt dort automatisch dessen Technik; die STIMME bleibt
+    // in jedem Fall George (Eine Stimme, 2026-09-02).
     await plugin.georgeContextGenerator(context())
     const system = lastCall().options.system!
     const george = advisorByKey('george')!
-    expect(system).toContain('You are George, Brand advisor in the brand advisory team')
+    expect(system).toContain('You are George, Brand advisor at')
     expect(system).toContain(george.interviewTechnique)
+    // In seinem eigenen Baustein erwähnt er niemanden.
+    expect(system).not.toContain('You have gone through this chapter with')
   })
 
   it('OHNE Cookie redet George in der Inhaltssprache', async () => {
@@ -238,7 +241,7 @@ describe('Das Ergebnis im Vertrag', () => {
     expect(result.draft).toBe('ErstZweit')
     expect(result.model).toBe('m')
     expect(result.provider).toBe('p')
-    expect(result.promptVersion).toBe('george-a-4')
+    expect(result.promptVersion).toBe('george-a-5')
     expect(result.aborted).toBe(false)
   })
 

@@ -1,5 +1,5 @@
 import type { H3Event } from 'h3'
-import { advisorForStep } from '../../shared/brandAdvisors'
+import { techniqueForStep } from '../../shared/brandAdvisors'
 import type { BrandSlot } from '../../shared/slotRegistry'
 import type { BrandGeneratorContext, BrandGeneratorResult, BrandSlotGenerator } from './brandGenerators'
 import { type BrandSlotInstructionOptions, formatGeorgeInputs, georgeSystemPrompt } from './georgePrompt'
@@ -19,12 +19,13 @@ import { createGeorgeTurnScrubber, parseGeorgeTurn } from './georgeTurn'
  * Ergebnis nichts an — der Entwurf kommt trotzdem, nur eben von einem Anbieter,
  * der ihn behalten darf.
  *
- * Was je Berater WIRKLICH verschieden ist, sind drei Dinge: die Aufgabe je Slot
- * (`instruction`), die Prompt-Fassung (`promptVersion`) und — neu — eine
+ * Was je Baustein WIRKLICH verschieden ist, sind drei Dinge: die Aufgabe je
+ * Slot (`instruction`), die Prompt-Fassung (`promptVersion`) und — neu — eine
  * Nachprüfung des Feldwerts (`verify`). Genau die drei nimmt die Fabrik
- * entgegen; WER spricht, fragt sie selbst bei der Registry
- * (`advisorForStep(context.stepKey)`), damit ein Generator, der sich morgen für
- * einen zweiten Baustein registriert, dort automatisch dessen Berater spricht.
+ * entgegen; WIE hier gefragt wird, fragt sie selbst bei der Registry
+ * (`techniqueForStep(context.stepKey)`), damit ein Generator, der sich morgen
+ * für einen zweiten Baustein registriert, dort automatisch dessen Technik
+ * bekommt. WER spricht, ist keine Frage mehr: George, überall.
  *
  * ── WAS HIER STEHT UND WAS NICHT ──────────────────────────────────────────
  * Hier steht der ZUSAMMENBAU: Prompt holen, Transport rufen, Ergebnis in den
@@ -236,10 +237,11 @@ export function createAdvisorSlotGenerator(options: AdvisorSlotGeneratorOptions)
       locale: context.uiLocale,
       contentLocale: context.locale,
       pathKind: context.pathKind,
-      // WER spricht, sagt die Registry und nicht diese Datei: registriert sich
-      // ein Generator morgen für einen zweiten Baustein, spricht dort
-      // automatisch dessen Berater.
-      advisor: advisorForStep(context.stepKey),
+      // WIE hier gefragt wird, sagt die Registry und nicht diese Datei:
+      // registriert sich ein Generator morgen für einen zweiten Baustein, gilt
+      // dort automatisch dessen Technik. WER spricht, steht gar nicht zur
+      // Debatte — das ist seit dem 2026-09-02 immer George.
+      technique: techniqueForStep(context.stepKey),
       persona: personaName(),
     })
 

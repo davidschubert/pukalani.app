@@ -5,7 +5,12 @@ import {
 } from './georgePrompt'
 
 /**
- * MILOS AUFTRÄGE (P3.1) — Baustein C · Werte, Content-Spec §6.
+ * DIE AUFTRÄGE AUS MILOS TECHNIK (P3.1) — Baustein C · Werte, Content-Spec §6.
+ *
+ * ── GESPROCHEN WERDEN SIE VON GEORGE (Davids Entscheidung 2026-09-02) ─────
+ * Milo ist seit der Eine-Stimme-Entscheidung kein Sprecher mehr, sondern die
+ * TECHNIK dieses Kapitels: Werte aus Geschichten, Moment-Beleg-Pflicht, kein
+ * Adjektiv ohne Beispiel. Am Inhalt dieser Datei hat das kein Wort geändert.
  *
  * ── DIE EINE TECHNIK, UM DIE ES HIER GEHT ─────────────────────────────────
  * §6 ersetzt die statische Wortliste des Original-Formulars (03 §6, sieben
@@ -33,8 +38,12 @@ import {
  * Beratern.
  */
 
-/** Fassung von Milos Aufträgen. Steigt, sobald sich eine Aufgabe inhaltlich ändert. */
-export const MILO_PROMPT_VERSION = 'milo-c-1'
+/**
+ * Fassung dieser Aufträge. Steigt, sobald sich eine Aufgabe inhaltlich ändert —
+ * oder der System-Prompt, mit dem sie gesendet werden (`milo-c-2`, 2026-09-02:
+ * Aufgaben unverändert, System-Prompt auf `george-a-5` · Eine Stimme).
+ */
+export const MILO_PROMPT_VERSION = 'milo-c-2'
 
 /**
  * Wie viele Kandidaten. §6/03 §7 grenzt danach auf 3–5 ein — weniger als fünf

@@ -6,8 +6,15 @@ import {
 } from './georgePrompt'
 
 /**
- * VERAS AUFTRÄGE (P3.1) — Baustein B (Purpose · Vision · Mission +
- * Positionierung) und B2 (Markenarchitektur), Content-Spec §5 und §5a.
+ * DIE AUFTRÄGE AUS VERAS TECHNIK (P3.1) — Baustein B (Purpose · Vision ·
+ * Mission + Positionierung) und B2 (Markenarchitektur), Content-Spec §5/§5a.
+ *
+ * ── GESPROCHEN WERDEN SIE VON GEORGE (Davids Entscheidung 2026-09-02) ─────
+ * Seit der Eine-Stimme-Entscheidung ist Vera keine Sprecherin mehr, sondern die
+ * TECHNIK dieser beiden Kapitel: ihre Wettbewerbs-Schärfe, ihre
+ * Provokationsfragen, ihr Prüfstein. Am Inhalt dieser Datei hat das kein Wort
+ * geändert — nur die Facetten-Schicht des System-Prompts (`georgePrompt.ts`)
+ * sagt jetzt „so arbeitest du hier" statt „so heisst du hier".
  *
  * Diese Datei ist PUR (kein H3, kein Appwrite, kein i18n) und trägt nur die
  * AUFGABE je Slot. Die Formalien — Quellen-Ehrlichkeit, Leitplanken, Form des
@@ -34,13 +41,22 @@ import {
  * ── VERAS PRÜFSTEIN STEHT IN JEDEM PVM-AUFTRAG ────────────────────────────
  * „Could any competitor in this industry say exactly this?" ist ihre
  * Interview-Technik (`brandAdvisors.ts`) und zugleich die Qualitätsschwelle
- * von §5. Sie steht in der Berater-Schicht des System-Prompts — und ZUSÄTZLICH
- * hier, als Prüfung am fertigen Satz. Die Schicht sagt, wie sie FRAGT; das hier
- * sagt, was sie ABGIBT.
+ * von §5. Sie steht in der Facetten-Schicht des System-Prompts — und ZUSÄTZLICH
+ * hier, als Prüfung am fertigen Satz. Die Schicht sagt, wie GEFRAGT wird; das
+ * hier sagt, was ABGEGEBEN wird.
  */
 
-/** Fassung von Veras Aufträgen. Steigt, sobald sich eine Aufgabe inhaltlich ändert. */
-export const VERA_PROMPT_VERSION = 'vera-b-1'
+/**
+ * Fassung dieser Aufträge. Steigt, sobald sich eine Aufgabe inhaltlich ändert —
+ * oder der System-Prompt, mit dem sie gesendet werden.
+ *
+ * `vera-b-2` (2026-09-02): die Aufgaben sind unverändert, der SYSTEM-Prompt
+ * nicht (`george-a-5`, Eine Stimme). Ein Eintrag aus `vera-b-1` stammt aus
+ * einem Lauf, in dem sich das Modell als Vera vorgestellt hat; beide für
+ * vergleichbar zu erklären, wäre genau die Sorte stille Unwahrheit, gegen die
+ * es diese Zahl gibt.
+ */
+export const VERA_PROMPT_VERSION = 'vera-b-2'
 
 /** Der Satz, der jeden PVM-Entwurf tragen muss — Veras Schwelle, wörtlich. */
 export const VERA_COMPETITOR_TEST
