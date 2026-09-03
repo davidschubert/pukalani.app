@@ -80,8 +80,12 @@ function glyph(layer: BwRailLayer, step: BwRailStep): { name: string, style: str
   <nav :aria-label="t('brand.workspace.rail.progressNav')">
     <!-- 1. Brand-Switcher oben (ersetzt den Topbar-Switcher) -->
     <!-- Runde 19 (David): das Menü spannt die VOLLE Trigger-Breite auf
-         (Reka-Variable), wie beim Team-Switcher des Vorbilds. -->
-    <UDropdownMenu :items="brandMenu" :content="{ align: 'start' }" :ui="{ content: 'w-(--reka-dropdown-menu-trigger-width)' }">
+         (Reka-Variable), wie beim Team-Switcher des Vorbilds. `bw-root` am
+         CONTENT ist Pflicht: das Menü teleportiert an den Body, außerhalb
+         des Token-Wirtes — ohne die Klasse sind alle --bw-*-Farben leer
+         (Monogramme ohne Quadrat, Häkchen schwarz; Runde 19b live erwischt).
+         Dasselbe Muster wie beim Erklär-Layer unten. -->
+    <UDropdownMenu :items="brandMenu" :content="{ align: 'start' }" :ui="{ content: 'bw-root w-(--reka-dropdown-menu-trigger-width)' }">
       <!-- Runde 17: Nuxt-UI-Standardmetrik — px-2.5 / gap-1.5 wie die
            NavigationMenu-Zeilen, damit alles auf einer Flucht sitzt. -->
       <button
@@ -96,13 +100,15 @@ function glyph(layer: BwRailLayer, step: BwRailStep): { name: string, style: str
         <UIcon name="i-ph-caret-up-down" class="size-4 flex-none" style="color: var(--bw-muted)" />
       </button>
 
+      <!-- Inline statt scoped-Klasse: der Slot-Inhalt landet im teleportierten
+           Menü, wo Scoped-CSS nicht verlässlich greift. -->
       <template #brand-current>
-        <span class="gd-mono">B</span>
+        <span class="grid size-6 flex-none place-items-center rounded-lg text-xs font-semibold" style="background: var(--bw-ink); color: var(--bw-paper)">B</span>
         <span class="min-w-0 flex-1 truncate text-left">Brot &amp; Zeit</span>
         <UIcon name="i-ph-check" class="size-4 flex-none" style="color: var(--bw-accent)" />
       </template>
       <template #brand-kailua>
-        <span class="gd-mono">K</span>
+        <span class="grid size-6 flex-none place-items-center rounded-lg text-xs font-semibold" style="background: var(--bw-ink); color: var(--bw-paper)">K</span>
         <span class="min-w-0 flex-1 truncate text-left">Kailua Coffee Co.</span>
       </template>
     </UDropdownMenu>
@@ -227,13 +233,6 @@ function glyph(layer: BwRailLayer, step: BwRailStep): { name: string, style: str
 
 <style scoped>
 .gd-switch:hover, .gd-switch:focus-visible { background: var(--bw-surface-hi); }
-/* Runde 19: dasselbe Monogramm wie im Trigger, eine Stufe kleiner. */
-.gd-mono {
-  display: grid; place-items: center; flex: none;
-  inline-size: 1.5rem; block-size: 1.5rem; border-radius: 0.5rem;
-  background: var(--bw-ink); color: var(--bw-paper);
-  font-size: 0.75rem; font-weight: 600;
-}
 .gd-row:not(:disabled):hover { background: var(--bw-surface-hi); }
 /* Info-Icons ruhen, bis die Zeile Hover/Fokus hat — sie bleiben fokussierbar. */
 .gd-info { opacity: 0; transition: opacity 120ms; }
