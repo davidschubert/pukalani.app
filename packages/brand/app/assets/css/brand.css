@@ -290,6 +290,10 @@
 /* Runde 36 (David): kompakte Fassung für die Log-Karten im Stand — gleiche
    Größe wie der Korrigieren-Knopf (UButton xs). */
 .bw-confirm--xs { padding: 0.15rem 0.65rem; font-size: 0.75rem; line-height: 1rem; gap: 0.3rem; }
+/* Runde 37b (David): der Korrigieren-Knopf in EXAKT der Bestätigen-Größe —
+   gleiche bw-confirm-Metrik, nur neutral statt bernstein und ohne Ring. */
+.bw-confirm--ghost { color: var(--bw-ink-soft); box-shadow: none; }
+.bw-confirm--ghost:hover:not(:disabled) { background: var(--bw-surface-hi); }
 /* Leerer Slot: es gibt nichts zu bestätigen. Der BESTÄTIGTE Knopf ist
    ebenfalls nicht klickbar, wird aber nicht gedimmt — er ist kein
    abgeschaltetes Angebot, sondern eine Zustandsanzeige. */

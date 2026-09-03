@@ -164,6 +164,10 @@ interface Turn {
   block?: TurnBlock
   /** Für 'confirm': welcher Eintrag im Stand daran hängt. */
   entryId?: string
+  /** Für 'confirm' (Runde 37c, David): die URSPRÜNGLICHE Frage, auf die
+   *  der festgehaltene Inhalt geantwortet hat — sie steht als Kopf der
+   *  Karte (nicht die Abschluss-Frage des Zugs). */
+  sourceQuestion?: string
   /** Für 'confirm': Veras besserer Vorschlag im Entwurfsrahmen. */
   proposal?: string
   /** Für 'answer': die Beispiel-Antwort hinter „Beispiel ansehen". */
@@ -293,6 +297,7 @@ function afterOrigin(): void {
     question: 'Passt das so als Grundlage?',
     block: 'confirm',
     entryId: 'origin',
+    sourceQuestion: 'Warum habt ihr angefangen — was war der Auslöser?',
   })
 }
 
@@ -567,7 +572,7 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
   <BwWorkspace
     :progress-pct="progressPct" content-locale="de" :locale-in-topbar="false"
     :topbar="false" :rail-footer="false"
-    rail-width="296px" :rail-collapsed="railCollapsed" :george-collapsed="standCollapsed"
+    rail-width="300px" :rail-collapsed="railCollapsed" :george-collapsed="standCollapsed"
     style="--bw-rail-pad-x: 1rem; --bw-rail-pad-y: 0.75rem"
   >
     <!-- LINKS: die Sidebar im Nuxt-UI-Muster (Runde 16) — Switcher oben,
@@ -602,7 +607,7 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
         <div class="min-w-0 leading-tight">
           <!-- Runde 34 (David): die Bereichs-Zeile in Versalien. -->
           <p class="bw-label uppercase tracking-wider" style="color: var(--bw-muted)">Brand Foundation</p>
-          <p class="truncate font-semibold">Purpose · Vision · Mission</p>
+          <p class="truncate font-semibold">Purpose, Vision & Mission</p>
         </div>
         <!-- Runde 33 (David): das Gegenstück zum Nav-Toggle — klappt die
              Stand-Spalte rechts ein und aus (Icon gespiegelt). -->
@@ -777,9 +782,10 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
                    wie im Stand rechts (Davids „nach jeder frage confirmen"). -->
               <div v-else-if="turn.block === 'confirm'" class="mt-3">
                 <div v-if="turn.entryId && findEntry(turn.entryId)" :class="entryState(turn.entryId) === 'confirmed' ? 'mb-3' : 'bw-draft-frame mb-3'">
-                  <!-- Runde 37 (David, rot): statt des generischen „Festgehalten"
-                       trägt die Karte die kontextbezogene Frage des Zugs. -->
-                  <p class="bw-label" style="color: var(--bw-muted)">{{ turn.proposal ? 'Mein Vorschlag' : (turn.question ?? 'Festgehalten') }}</p>
+                  <!-- Runde 37c (David): die Karte trägt die URSPRÜNGLICHE
+                       Frage, auf die der Inhalt geantwortet hat — nicht die
+                       Abschluss-Frage des Zugs (37 hatte die falsche). -->
+                  <p class="bw-label" style="color: var(--bw-muted)">{{ turn.proposal ? 'Mein Vorschlag' : (turn.sourceQuestion ?? 'Festgehalten') }}</p>
                   <UTextarea v-if="editingEntryId === turn.entryId && entryState(turn.entryId) !== 'confirmed'" v-model="findEntry(turn.entryId)!.text" :rows="3" class="mt-2 w-full" />
                   <p v-else class="bw-doc-text mt-2 whitespace-pre-wrap">{{ findEntry(turn.entryId)!.text }}</p>
                 </div>
@@ -787,12 +793,16 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
                 <!-- Runde 37 (David, blau): „Korrigieren" statt „Anpassen",
                      rechtsbündig neben Bestätigen, in dessen Größe. -->
                 <div class="flex flex-wrap items-center justify-end gap-2">
-                  <UButton
+                  <!-- Runde 37b: exakt die Bestätigen-Metrik (bw-confirm),
+                       nur neutral und ohne Ring. -->
+                  <button
                     v-if="turn.entryId && entryState(turn.entryId) !== 'confirmed'"
-                    size="sm" color="neutral" variant="ghost" class="rounded-full"
-                    icon="i-ph-pencil-simple" :label="editingEntryId === turn.entryId ? 'Korrigieren beenden' : 'Korrigieren'"
+                    class="bw-confirm bw-confirm--ghost"
                     @click="toggleEntryEditing(turn.entryId)"
-                  />
+                  >
+                    <UIcon name="i-ph-pencil-simple" class="size-4" />
+                    {{ editingEntryId === turn.entryId ? 'Korrigieren beenden' : 'Korrigieren' }}
+                  </button>
                   <button
                     class="bw-confirm"
                     :class="entryState(turn.entryId) === 'confirmed' ? 'bw-confirm--done' : 'bw-confirm--open'"
@@ -957,7 +967,7 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
               />
               <UIcon v-else name="i-ph-circle-half-fill" class="mt-0.5 size-5 flex-none" style="color: var(--bw-ink)" />
               <span class="min-w-0 flex-1 leading-tight">
-                <span class="block text-sm font-medium">Purpose · Vision · Mission</span>
+                <span class="block text-sm font-medium">Purpose, Vision & Mission</span>
                 <span class="bw-label block tabular-nums" style="color: var(--bw-muted)">{{ confirmedCount }}/{{ CHAPTER_TOTAL }} bestätigt</span>
               </span>
               <UIcon

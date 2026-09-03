@@ -16,7 +16,7 @@ export const demoRail: BwRailLayer[] = [
       minutes: '~34 Min',
       bausteine: [
         { label: 'Kontext', note: 'Wer ihr seid, was ihr anbietet, für wen — und euer Marktumfeld.', done: true },
-        { label: 'Purpose · Vision · Mission', note: 'Warum es euch gibt, wohin ihr wollt, wie ihr dorthin kommt.', done: true },
+        { label: 'Purpose, Vision & Mission', note: 'Warum es euch gibt, wohin ihr wollt, wie ihr dorthin kommt.', done: true },
         { label: 'Werte', note: 'Die Verhaltensregeln eurer Marke — gerade im Gespräch.' },
         { label: 'Archetyp & Stimme', note: 'Euer Charakter und wie er klingt.' },
         { label: 'Manifest', note: 'Die ganze Foundation als ein Text mit Haltung.' },
@@ -43,7 +43,7 @@ export const demoRail: BwRailLayer[] = [
       },
       {
         id: 'pvm',
-        label: 'Purpose · Vision · Mission',
+        label: 'Purpose, Vision & Mission',
         icon: 'i-ph-target',
         state: 'done',
         info: {
