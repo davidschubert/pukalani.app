@@ -503,6 +503,14 @@ const setup = () => {
     serverSlots,
     localEdits,
     revision,
+    // Beide Konfidenz-Refs MÜSSEN im Return stehen, obwohl die Seite nur das
+    // computed `confidence` liest: Pinia serialisiert in den SSR-Payload nur
+    // zurückgegebene Refs. Als private Refs starteten sie im Browser wieder
+    // bei null — SSR malte den gewählten Chip, die Hydration nahm ihn weg
+    // (live erwischt 2026-09-03: PATCH 200, GET trägt die Konfidenz, Chip
+    // nach Reload trotzdem leer).
+    serverConfidence,
+    localConfidence,
     progress,
     missingRequired,
     syncState,
