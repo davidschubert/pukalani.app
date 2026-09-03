@@ -1,0 +1,717 @@
+<script setup lang="ts">
+import { demoRail } from '../../../utils/demoRail'
+
+/**
+ * KLICKDUMMY „GESPRÄCH ALS BÜHNE" — Davids Konzept-Revision vom 2026-09-02.
+ *
+ * Seine Worte: „der ki markenberater muss zentral in der mitte sein, das
+ * kundengespräch zwischen kunde und markenberater. und rechts, wo jetzt der
+ * chat ist, der LOG-bereich … dort wird mir laufend gezeigt, was wir bereits
+ * beantwortet haben, und ich kann es dort revisen oder confirmen … nach jeder
+ * frage einmal final confirmen."
+ *
+ * Diese Seite ist NICHT die Werkstatt, sondern die Entscheidungsgrundlage für
+ * Davids Korrekturrunden: dieselben drei Zonen, aber Bühne und rechte Spalte
+ * haben die Rollen getauscht. Nichts hier spricht mit einem Server, es gibt
+ * keinen KI-Aufruf und keine Route — der ganze Ablauf ist geskriptet.
+ *
+ * DIE ECHTE WERKSTATT (unverändert, weiter der Stand der Abnahme):
+ *   · Klickdummy    /brand/demo/werte      (Bühne = Dokument, rechts = Chat)
+ *   · echte Seite   packages/brand/app/pages/brand/[profileId]/[stepKey].vue
+ *
+ * WAS AUS DEM SYSTEM KOMMT (nichts davon ist hier neu erfunden):
+ *   BwWorkspace (drei Zonen + USplitter) · BwProgressRail · BwOptionCards ·
+ *   BwChips · BwGeorgeAvatar · .bw-msg/.bw-msg--user · .bw-draft-frame ·
+ *   .bw-doc-text · .bw-dot (Ampel) · .bw-confirm (Bestätigen/Bestätigt) ·
+ *   .bw-chapter-progress-track/-fill · .bw-state · .bw-chip--ghost.
+ *
+ * DIE MARKE IST HIER EINE BÄCKEREI und nicht Kailua Coffee Co.: Davids
+ * Demo-Antwort für Frage 1 handelt vom Brotbacken in der Elternzeit. Eine
+ * Kaffeerösterei mit dieser Ursprungsgeschichte wäre in jedem zweiten Satz
+ * unglaubwürdig — und das Gesprächsgefühl ist genau das, was hier beurteilt
+ * werden soll.
+ */
+
+// ── Der Bestand: was das Kapitel zu entscheiden hat ────────────────────────
+
+type LogState = 'draft' | 'confirmed'
+
+interface LogEntry {
+  id: string
+  label: string
+  text: string
+  state: LogState
+}
+
+/** Vier Entscheidungen — der Nenner steht von Anfang an, auch leer. */
+const CHAPTER_TOTAL = 4
+
+/** Abgeschlossenes Kapitel: 10 Entscheidungen, 3 davon hier als Beispiel. */
+const CONTEXT_TOTAL = 10
+const CONTEXT_HIDDEN = 7
+
+const contextLog = ref<LogEntry[]>([
+  {
+    id: 'ctx-profile',
+    label: 'Steckbrief',
+    text: 'Brot & Zeit, Bäckerei in Kiel-Gaarden, gegründet 2026 von Marit Ahrens — eine Backstube, ein Verkaufsraum, drei Leute.',
+    state: 'confirmed',
+  },
+  {
+    id: 'ctx-offer',
+    label: 'Angebot',
+    text: 'Vier Brote, zwei Brötchensorten. Alles mit Sauerteig, mindestens 18 Stunden Führung, ohne Backmittel.',
+    state: 'confirmed',
+  },
+  {
+    id: 'ctx-audience',
+    label: 'Zielgruppe',
+    text: 'Menschen im Viertel, die Zutatenlisten lesen — und Familien, die sich auf eine Deklaration verlassen müssen.',
+    state: 'confirmed',
+  },
+])
+const contextOpen = ref(false)
+const contextConfirmed = computed(() =>
+  CONTEXT_HIDDEN + contextLog.value.filter(entry => entry.state === 'confirmed').length)
+
+const log = ref<LogEntry[]>([])
+const confirmedCount = computed(() => log.value.filter(entry => entry.state === 'confirmed').length)
+const chapterPct = computed(() => Math.round((confirmedCount.value / CHAPTER_TOTAL) * 100))
+const openLabels = computed(() => log.value.filter(entry => entry.state === 'draft').map(entry => entry.label))
+const allConfirmed = computed(() => log.value.length === CHAPTER_TOTAL && openLabels.value.length === 0)
+
+function findEntry(id: string): LogEntry | undefined {
+  return log.value.find(entry => entry.id === id) ?? contextLog.value.find(entry => entry.id === id)
+}
+function entryState(id: string | undefined): LogState | undefined {
+  return id ? findEntry(id)?.state : undefined
+}
+
+// ── Die Bühne: das Gespräch ───────────────────────────────────────────────
+
+type TurnBlock = 'answer' | 'draft' | 'options' | 'confirm' | 'gate' | 'done'
+
+interface Turn {
+  id: string
+  role: 'vera' | 'user'
+  /** Veras Zug: 2–3 Sätze. */
+  text: string
+  /** Leise Mono-Zeile darunter (Angebot, Hinweis) — nie eine zweite Frage. */
+  help?: string
+  /** Die EINE Frage, vor dem Block. */
+  question?: string
+  /** Die EINE Frage, nach dem Block (Entwurf, Vorschlag). */
+  closing?: string
+  block?: TurnBlock
+  /** Für 'confirm': welcher Eintrag im Stand daran hängt. */
+  entryId?: string
+  /** Für 'confirm': Veras besserer Vorschlag im Entwurfsrahmen. */
+  proposal?: string
+  /** Für 'answer': die Beispiel-Antwort hinter „Beispiel ansehen". */
+  example?: string
+  /** Für 'answer': die Demo-Antwort dieses Klickdummys. */
+  demo?: string
+  /** Für 'gate': die getroffene Wahl — je Zug eigen, damit ein zweiter
+   *  Durchgang die Wahl des ersten nicht rückwirkend umschreibt. */
+  choice?: string
+}
+
+const HANDOVER = 'Kapitel Purpose · Vision · Mission — George hat den Kontext übergeben.'
+
+const turns = ref<Turn[]>([
+  {
+    id: 'v1',
+    role: 'vera',
+    text: 'Ab hier übernehme ich — George hat mir euren Kontext übergeben. Ich stelle die Warum-Fragen, bis eure Positionierung trägt.',
+    question: 'Erste Frage: Warum habt ihr angefangen — was war der Auslöser?',
+    block: 'answer',
+    example: 'Ich habe drei Jahre in einer Großbäckerei gearbeitet und dort gesehen, wie viel Technik nötig ist, damit Brot billig aussieht. Das wollte ich anders machen.',
+    demo: 'Ich habe in der Elternzeit angefangen zu backen, weil ich kein Brot ohne Zusatzstoffe gefunden habe, das mir geschmeckt hat.',
+  },
+])
+
+let seq = 0
+function nextId(prefix: string): string {
+  seq += 1
+  return `${prefix}${seq}`
+}
+function push(turn: Omit<Turn, 'id'>): void {
+  turns.value.push({ ...turn, id: nextId(turn.role) })
+}
+/** Ein verbrauchter Block verschwindet, der Zug bleibt stehen (Verlauf). */
+function consume(turn: Turn): void {
+  turn.block = undefined
+}
+
+/* Runde 55 (David) für die BÜHNE: der Verlauf ankert unten und wächst nach
+ * oben. Gescrollt wird auf den Anker am Ende — die Bühne ist ihr eigener
+ * Scroller (.bw-stage), ein Element-Ref darauf gäbe es hier nicht. */
+const tail = ref<HTMLElement | null>(null)
+watch(() => turns.value.length, async () => {
+  await nextTick()
+  tail.value?.scrollIntoView({ behavior: 'smooth', block: 'end' })
+})
+
+// ── Die Antwortfläche im Zug ──────────────────────────────────────────────
+
+const draft = ref('')
+const exampleOpen = ref(false)
+
+/** Tab übernimmt die Beispiel-Antwort — aber nur, solange sie sichtbar und
+ *  das Feld leer ist (dasselbe Verhalten wie im echten Composer). */
+function acceptExample(turn: Turn, event: KeyboardEvent): void {
+  if (event.shiftKey || !exampleOpen.value || !turn.example || draft.value.length > 0) return
+  event.preventDefault()
+  draft.value = turn.example
+}
+
+function answer(turn: Turn, text?: string): void {
+  const said = (text ?? draft.value).trim()
+  if (!said) return
+  consume(turn)
+  draft.value = ''
+  exampleOpen.value = false
+  push({ role: 'user', text: said })
+  pulseSave()
+  if (turn.id === 'v1') afterOrigin()
+  else afterBoundary()
+}
+
+// ── Der Ablauf (geskriptet, in dieser Reihenfolge) ────────────────────────
+
+/** 2 → 3: Substanz-Echo, Nachfrage-Angebot, Bestätigung IM Zug. */
+function afterOrigin(): void {
+  log.value.push({
+    id: 'origin',
+    label: 'Warum gestartet',
+    text: 'In der Elternzeit angefangen zu backen — weil es kein Brot ohne Zusatzstoffe gab, das geschmeckt hat.',
+    state: 'draft',
+  })
+  push({
+    role: 'vera',
+    text: 'Das ist kein Marketing-Anlass, das ist ein Mangel, den du selbst hattest — daraus tragen Purpose-Sätze. Ich halte fest: der Auslöser war das fehlende Brot, nicht der Wunsch, Bäckerin zu werden.',
+    help: 'Wenn du willst, hake ich hier noch einmal nach — sonst nehme ich es so als Grundlage.',
+    question: 'Passt das so als Grundlage?',
+    block: 'confirm',
+    entryId: 'origin',
+  })
+}
+
+/** 4: der Entwurfs-Moment. */
+const PURPOSE_LONG = 'Es gibt uns, damit Menschen in Kiel wieder Brot essen, dessen Zutatenliste sie vorlesen können — gebacken in dem Tempo, das ein Teig wirklich braucht.'
+const PURPOSE_SHORT = 'Es gibt uns, damit Brot wieder aus vier Zutaten und viel Zeit besteht.'
+
+const purposeText = ref(PURPOSE_LONG)
+/* Die Karte im Zug liest denselben Zustand wie der Eintrag im Stand: wird der
+ * Purpose dort korrigiert, ist die Karte wieder ein Entwurf mit Aktionen. */
+const purposeConfirmed = computed(() => entryState('purpose') === 'confirmed')
+const purposeEditing = ref(false)
+const purposeRound = ref(1)
+const purposeHint = ref('')
+const purposeHintUsed = ref('')
+const hintOpen = ref(false)
+let purposeOffered = false
+
+function offerPurpose(): void {
+  if (purposeOffered) return
+  purposeOffered = true
+  push({
+    role: 'vera',
+    text: 'Dann lege ich euren Purpose vor. Ich habe ihn aus eurer Ursprungsgeschichte gebaut, nicht aus dem Angebot — ein Purpose, der das Produkt beschreibt, ist austauschbar.',
+    block: 'draft',
+    closing: 'Trifft das euer Warum — oder klingt es nach uns statt nach euch?',
+  })
+}
+
+function regeneratePurpose(): void {
+  if (!purposeHint.value.trim()) return
+  purposeHintUsed.value = purposeHint.value.trim()
+  purposeText.value = PURPOSE_SHORT
+  purposeRound.value = 2
+  purposeHint.value = ''
+  hintOpen.value = false
+  purposeEditing.value = false
+  pulseSave()
+}
+
+function acceptPurpose(): void {
+  purposeEditing.value = false
+  /* Nach einem „Korrigieren" im Stand führt derselbe Knopf zurück — dann wird
+   * der bestehende Eintrag geschärft, nicht ein zweiter angelegt. */
+  const existing = findEntry('purpose')
+  if (existing) {
+    existing.text = purposeText.value
+    existing.state = 'confirmed'
+  }
+  else {
+    log.value.push({ id: 'purpose', label: 'Purpose-Satz', text: purposeText.value, state: 'confirmed' })
+  }
+  pulseSave()
+  offerPosition()
+  maybeGate()
+}
+
+/** 5: der Auswahl-Moment. */
+const positionOptions = [
+  {
+    id: 'p1',
+    label: 'Gegen die Backshop-Kette',
+    description: 'Handwerk gegen Aufbackware — Qualität als Grenze, nicht als Werbewort.',
+    recommended: true,
+    why: 'Meine Empfehlung, weil eure Ursprungsgeschichte genau dieser Vergleich ist: du hast angefangen, weil das vorhandene Brot nichts taugte. Und im Kieler Umfeld werben fast alle mit „regional" — fast niemand mit einer Zutatenliste, die man vorlesen kann.',
+  },
+  { id: 'p2', label: 'Gegen die eigene Eile', description: 'Zeit als Zutat: lange Führung, wenige Sorten, nichts nachgeschoben.' },
+  { id: 'p3', label: 'Für Familien mit Allergien', description: 'Verträglichkeit als Versprechen — deklariert bis zur letzten Zutat.' },
+]
+
+let positionOffered = false
+function offerPosition(): void {
+  if (positionOffered) return
+  positionOffered = true
+  push({
+    role: 'vera',
+    text: 'Gut. Dann die Entscheidung, an der später jede Farbe und jeder Satz hängt.',
+    question: 'Für wen backt ihr — und gegen wen? Wähl die Richtung, die ihr auch dann vertretet, wenn sie Umsatz kostet.',
+    block: 'options',
+  })
+}
+
+function pickPosition(turn: Turn, text: string): void {
+  consume(turn)
+  push({ role: 'user', text })
+  log.value.push({ id: 'position', label: 'Positionierung', text, state: 'draft' })
+  pulseSave()
+  push({
+    role: 'vera',
+    text: 'Notiert. Ich lege es rechts in euren Stand — bestätigt ist es, wenn du dort bestätigst.',
+    question: 'Und wogegen grenzt ihr euch ab: Was macht ihr bewusst nicht, obwohl es Geld brächte?',
+    block: 'answer',
+    example: 'Wir machen kein Catering. Sobald wir Bleche für andere backen, leidet die Führung des Teigs.',
+    demo: 'wir sind halt die besten',
+  })
+}
+
+/** 6: der Widerspruchs-Moment. */
+const BOUNDARY_PROPOSAL = 'Wir verkaufen kein Brot, das wir nicht am selben Tag gebacken haben — auch nicht am Samstagnachmittag, wenn die Regale leer aussehen.'
+
+function afterBoundary(): void {
+  log.value.push({ id: 'boundary', label: 'Abgrenzung', text: BOUNDARY_PROPOSAL, state: 'draft' })
+  push({
+    role: 'vera',
+    text: 'Da widerspreche ich dir. „Die Besten" könnte jede Bäckerei der Stadt über sich schreiben, und niemand kann es nachprüfen — das ist eine Behauptung, keine Abgrenzung. Was du mir vorhin erzählt hast, ist überprüfbar und deshalb stärker.',
+    block: 'confirm',
+    entryId: 'boundary',
+    proposal: BOUNDARY_PROPOSAL,
+    closing: 'Nehmen wir das als eure Abgrenzung?',
+  })
+}
+
+/** 7: die Konfidenz-Weiche — erst, wenn alle vier bestätigt sind. */
+const gateOptions = [
+  { id: 'fits', label: 'Passt' },
+  { id: 'almost', label: 'Fast — eine Sache stört' },
+  { id: 'restart', label: 'Nochmal von vorn', tone: 'quiet' as const },
+]
+const chapterDone = ref(false)
+let gateOpen = false
+
+function maybeGate(): void {
+  if (gateOpen || !allConfirmed.value) return
+  gateOpen = true
+  push({
+    role: 'vera',
+    text: 'Alle vier Entscheidungen stehen — und sie stützen sich gegenseitig: das fehlende Brot, der Purpose, die Kante gegen die Kette und ein Satz, an dem man euch messen kann.',
+    question: 'Bevor wir zu Milo gehen: Sitzt dieses Kapitel?',
+    block: 'gate',
+  })
+}
+
+function pickGate(turn: Turn, id: string): void {
+  if (chapterDone.value) return
+  turn.choice = id
+  /* „Passt" und „Fast" LASSEN die Chips stehen: die getroffene Wahl trägt den
+   * grünen Ring und bleibt im Verlauf lesbar. Nur der Weg zurück räumt sie
+   * weg — dort beginnt eine neue Runde, und eine alte Wahl daneben wäre eine
+   * Auskunft, die nicht mehr stimmt. */
+  if (id === 'fits') {
+    chapterDone.value = true
+    pulseSave()
+    push({
+      role: 'vera',
+      text: 'Gut. Milo übernimmt bei den Werten — er wird nach Momenten fragen, nicht nach Adjektiven. Euer Purpose liegt ihm vor, er fängt nicht bei null an.',
+      block: 'done',
+    })
+    return
+  }
+  if (id === 'almost') {
+    push({
+      role: 'vera',
+      text: 'Dann sag mir die eine Sache. Wir machen sie auf, bevor Milo übernimmt — ein Kapitel, das man später wieder aufreißt, kostet mehr als zehn Minuten jetzt.',
+    })
+    return
+  }
+  consume(turn)
+  gateOpen = false
+  push({ role: 'user', text: 'Nochmal von vorn' })
+  log.value.forEach((entry) => { entry.state = 'draft' })
+  push({
+    role: 'vera',
+    text: 'Verstanden, wir gehen es nochmal durch. Ich habe die vier Einträge rechts wieder geöffnet — gelöscht ist nichts, wir schärfen sie einzeln nach.',
+  })
+}
+
+// ── Der Stand: bestätigen und korrigieren ─────────────────────────────────
+
+function confirmEntry(id: string | undefined): void {
+  const entry = id ? findEntry(id) : undefined
+  if (!entry || entry.state === 'confirmed') return
+  entry.state = 'confirmed'
+  pulseSave()
+  if (entry.id === 'origin') offerPurpose()
+  maybeGate()
+}
+
+/** Korrigieren im Stand schreibt einen Zug auf die Bühne — sonst wäre der
+ *  Klick eine stille Zustandsänderung, und das Gespräch hätte sie verpasst. */
+function reviseEntry(entry: LogEntry): void {
+  entry.state = 'draft'
+  /* Ein korrigierter Eintrag macht das Kapitel wieder auf — auch ein
+   * abgeschlossenes: sonst stünde in der Leiste ein Haken über einem
+   * Kapitel, in dem gerade wieder etwas offen ist. */
+  gateOpen = false
+  chapterDone.value = false
+  pulseSave()
+  push({
+    role: 'vera',
+    text: `Gut, dass du das nochmal aufmachst — besser jetzt als im Brand Book. Sag mir, was an „${entry.label}" nicht sitzt, dann formulieren wir es neu.`,
+  })
+}
+
+// ── Rahmen: Leiste, Fortschritt, Speicher-Zustand ─────────────────────────
+
+/* Die Leiste ist die abgenommene: Context abgeschlossen, Purpose · Vision ·
+ * Mission aktiv, der Rest offen bzw. gesperrt. Nach dem Kapitelabschluss
+ * zieht sie nach (dasselbe Muster wie /brand/demo/werte). */
+const railLayers = computed(() => demoRail.map(layer => (layer.id === 'foundation' && layer.steps
+  ? {
+      ...layer,
+      steps: layer.steps.map((step) => {
+        if (step.id === 'pvm') return { ...step, state: (chapterDone.value ? 'done' : 'active') as const }
+        if (step.id === 'values') return { ...step, state: 'open' as const }
+        return step
+      }),
+    }
+  : layer)))
+
+const doneDecisions = computed(() => 6 + (chapterDone.value ? CHAPTER_TOTAL : confirmedCount.value))
+const progressNote = computed(() => `${doneDecisions.value} von 21 Entscheidungen · ~30 Min`)
+const progressPct = computed(() => Math.round((doneDecisions.value / 21) * 100))
+
+const syncState = ref<'saving' | 'offline' | 'conflict' | null>(null)
+let syncTimer: ReturnType<typeof setTimeout> | undefined
+function pulseSave(): void {
+  syncState.value = 'saving'
+  clearTimeout(syncTimer)
+  syncTimer = setTimeout(() => { syncState.value = null }, 1200)
+}
+onBeforeUnmount(() => clearTimeout(syncTimer))
+</script>
+
+<template>
+  <BwWorkspace
+    :progress-pct="progressPct" :progress-note="progressNote" :sync-state="syncState"
+    progress-to="/brand/demo/ergebnis" :score="61" content-locale="de"
+  >
+    <template #brand>
+      <BwBrandSwitcher
+        :current="{ title: 'Brot & Zeit', path: 'Neue Marke', flag: 'i-circle-flags-de' }"
+        :others="[{ title: 'Kailua Coffee Co.', path: 'Neue Marke', flag: 'i-circle-flags-us', to: '/brand/demo/werte' }]"
+      />
+    </template>
+
+    <!-- LINKS: unverändert die abgenommene Leiste. -->
+    <template #rail>
+      <BwProgressRail :layers="railLayers" />
+    </template>
+
+    <!-- MITTE: die Bühne IST das Gespräch (Davids Revision). Kopf oben fest,
+         Verlauf unten verankert — neue Züge schieben den Verlauf nach oben. -->
+    <template #default>
+      <div class="flex flex-col">
+        <!-- Der Kopf bleibt oben stehen. Der Schatten ist kein Schmuck: die
+             Bühne (.bw-stage) hat 2rem Innenabstand, und ein klebender Kopf
+             hält dort an der INHALTS-Kante — darüber liefe der Verlauf sonst
+             sichtbar durch. Der Schatten verlängert die Papierfläche genau um
+             diesen Abstand nach oben. -->
+        <div
+          class="sticky top-0 z-10 flex items-center gap-3 pb-4"
+          style="background: var(--bw-paper); box-shadow: 0 -2rem 0 var(--bw-paper)"
+        >
+          <BwGeorgeAvatar src="" initial="V" alt="Vera" />
+          <span class="min-w-0 leading-tight">
+            <span class="block text-sm font-medium">Vera</span>
+            <span class="bw-label block" style="color: var(--bw-muted)">Strategin</span>
+          </span>
+          <span class="bw-label ml-auto hidden truncate sm:block" style="color: var(--bw-muted)">Purpose · Vision · Mission</span>
+        </div>
+
+        <div class="flex min-h-0 flex-1 flex-col gap-7 pb-4">
+          <p class="bw-label" style="color: var(--bw-muted)">{{ HANDOVER }}</p>
+
+          <div
+            v-for="turn in turns" :key="turn.id"
+            class="bw-msg" :class="turn.role === 'user' ? 'bw-msg--user' : ''"
+          >
+            <BwGeorgeAvatar v-if="turn.role === 'vera'" size="md" src="" initial="V" alt="Vera" />
+            <div class="bw-msg-body">
+              <p class="whitespace-pre-wrap">{{ turn.text }}</p>
+              <p v-if="turn.help" class="bw-msg-help">{{ turn.help }}</p>
+              <p v-if="turn.question" class="mt-2 font-medium">{{ turn.question }}</p>
+
+              <!-- Antwortfläche: Feld, Senden, und daneben ruhig die zwei
+                   Auswege („Weiß ich nicht", „Beispiel ansehen"). -->
+              <div v-if="turn.block === 'answer'" class="mt-3">
+                <UTextarea
+                  v-model="draft" :rows="3" class="w-full"
+                  placeholder="Antwort schreiben …"
+                  @keydown.tab="acceptExample(turn, $event)"
+                />
+                <div class="mt-2 flex flex-wrap items-center gap-2">
+                  <UButton
+                    color="neutral" variant="ghost" class="bw-send rounded-full"
+                    icon="i-ph-paper-plane-right" label="Senden"
+                    :disabled="!draft.trim()" @click="answer(turn)"
+                  />
+                  <button class="bw-chip bw-chip--ghost" @click="answer(turn, 'Weiß ich nicht')">Weiß ich nicht</button>
+                  <button class="bw-chip bw-chip--ghost" @click="exampleOpen = !exampleOpen">
+                    {{ exampleOpen ? 'Beispiel ausblenden' : 'Beispiel ansehen' }}
+                  </button>
+                </div>
+                <button
+                  v-if="exampleOpen" class="bw-pending mt-2 block text-left"
+                  @click="draft = turn.example ?? ''"
+                >
+                  „{{ turn.example }}“ — Tab oder Klick übernimmt den Text ins Feld.
+                </button>
+                <button
+                  class="bw-label mt-2 block underline" style="color: var(--bw-muted)"
+                  @click="draft = turn.demo ?? ''"
+                >
+                  Klickdummy: Demo-Antwort einfügen
+                </button>
+              </div>
+
+              <!-- Der Entwurfs-Moment: abgesetzte Karte im Zug, drei Wege
+                   heraus — übernehmen, anpassen, nochmal mit Hinweis. -->
+              <div v-else-if="turn.block === 'draft'" class="mt-3">
+                <!-- Der gestrichelte Rahmen sagt „das ist ein Entwurf" und geht
+                     mit der Bestätigung weg — dieselbe Regel wie in der echten
+                     Werkstatt, wo er nur den EDITOR umfasst. -->
+                <div :class="purposeConfirmed ? '' : 'bw-draft-frame'">
+                  <div class="flex flex-wrap items-center justify-between gap-2">
+                    <p class="bw-label" style="color: var(--bw-muted)">Basis: eure Ursprungsgeschichte und der Pitch aus dem Kontext</p>
+                    <span class="bw-state" :class="purposeConfirmed ? 'bw-state--confirmed' : 'bw-state--draft'">
+                      <UIcon :name="purposeConfirmed ? 'i-ph-check' : 'i-ph-pen-nib'" />
+                      {{ purposeConfirmed ? 'Bestätigt' : 'Entwurf' }}
+                    </span>
+                  </div>
+                  <UTextarea v-if="purposeEditing" v-model="purposeText" :rows="4" class="mt-3 w-full" />
+                  <p v-else class="bw-doc-text mt-3 whitespace-pre-wrap">{{ purposeText }}</p>
+                  <p v-if="purposeRound === 2" class="bw-label mt-2" style="color: var(--bw-muted)">
+                    Zweite Fassung · auf deinen Hinweis „{{ purposeHintUsed }}“
+                  </p>
+                </div>
+
+                <div v-if="!purposeConfirmed" class="mt-2 flex flex-wrap items-center justify-end gap-2">
+                  <UButton
+                    size="sm" color="neutral" variant="ghost" class="mr-auto rounded-full"
+                    icon="i-ph-sparkle" label="Nochmal, mit Hinweis"
+                    @click="hintOpen = !hintOpen"
+                  />
+                  <UButton
+                    size="sm" color="neutral" variant="ghost" class="rounded-full"
+                    icon="i-ph-pencil-simple" :label="purposeEditing ? 'Anpassen beenden' : 'Anpassen'"
+                    @click="purposeEditing = !purposeEditing"
+                  />
+                  <button class="bw-confirm bw-confirm--open" @click="acceptPurpose">
+                    <UIcon name="i-ph-check" class="size-4" />
+                    Übernehmen &amp; bestätigen
+                  </button>
+                </div>
+                <div v-if="hintOpen && !purposeConfirmed" class="mt-2 flex items-center gap-2">
+                  <UInput
+                    v-model="purposeHint" size="sm" class="flex-1"
+                    placeholder="Hinweis — z. B. kürzer, weniger Erklärung"
+                    aria-label="Hinweis für Vera"
+                    @keydown.enter="regeneratePurpose"
+                  />
+                  <UButton
+                    size="sm" color="neutral" variant="ghost" class="bw-send rounded-full"
+                    icon="i-ph-arrow-right" aria-label="Hinweis senden"
+                    :disabled="!purposeHint.trim()" @click="regeneratePurpose"
+                  />
+                </div>
+              </div>
+
+              <!-- Der Auswahl-Moment: Karten im Zug, Empfehlung mit Grund. -->
+              <div v-else-if="turn.block === 'options'" class="mt-3">
+                <BwOptionCards
+                  :options="positionOptions"
+                  own-placeholder="Oder beschreib eure Position mit eigenen Worten …"
+                  @pick="(id) => pickPosition(turn, positionOptions.find(o => o.id === id)!.label)"
+                  @own="(text) => pickPosition(turn, text)"
+                  @dont-know="pickPosition(turn, 'Weiß ich nicht')"
+                />
+              </div>
+
+              <!-- Bestätigen IM ZUG — derselbe Knopf und dieselben zwei Farben
+                   wie im Stand rechts (Davids „nach jeder frage confirmen"). -->
+              <div v-else-if="turn.block === 'confirm'" class="mt-3">
+                <div v-if="turn.proposal" class="bw-draft-frame mb-3">
+                  <p class="bw-label" style="color: var(--bw-muted)">Mein Vorschlag</p>
+                  <p class="bw-doc-text mt-2 whitespace-pre-wrap">{{ turn.proposal }}</p>
+                </div>
+                <button
+                  class="bw-confirm"
+                  :class="entryState(turn.entryId) === 'confirmed' ? 'bw-confirm--done' : 'bw-confirm--open'"
+                  :disabled="entryState(turn.entryId) === 'confirmed'"
+                  @click="confirmEntry(turn.entryId)"
+                >
+                  <UIcon :name="entryState(turn.entryId) === 'confirmed' ? 'i-ph-check-circle-fill' : 'i-ph-check'" class="size-4" />
+                  {{ entryState(turn.entryId) === 'confirmed' ? 'Bestätigt' : 'Bestätigen' }}
+                </button>
+              </div>
+
+              <!-- Die Konfidenz-Weiche steht IM Gespräch, nicht daneben. -->
+              <div v-else-if="turn.block === 'gate'" class="mt-3">
+                <BwChips
+                  :options="gateOptions" :selected="turn.choice ? [turn.choice] : []"
+                  :show-dont-know="false" @pick="(id) => pickGate(turn, id)"
+                />
+              </div>
+
+              <div v-else-if="turn.block === 'done'" class="mt-3">
+                <UButton
+                  color="neutral" variant="outline" class="rounded-full"
+                  trailing-icon="i-ph-arrow-right" label="Weiter zu Werte" disabled
+                />
+                <p class="bw-msg-help">Im Klickdummy endet der Weg hier — im Produkt übernimmt Milo.</p>
+              </div>
+
+              <p v-if="turn.closing" class="mt-3 font-medium">{{ turn.closing }}</p>
+            </div>
+          </div>
+
+          <!-- NOCH NICHT SO WEIT: dieselbe Regel wie in der echten Werkstatt —
+               die Weiche erscheint erst, wenn sie halten kann, was sie fragt. -->
+          <p v-if="log.length && !allConfirmed && !chapterDone" class="bw-label" style="color: var(--bw-muted)">
+            Noch offen: {{ openLabels.length }} von {{ CHAPTER_TOTAL }} Entscheidungen — bestätige sie rechts im Stand,
+            dann schließen wir das Kapitel ab.
+          </p>
+
+          <div ref="tail" />
+        </div>
+      </div>
+    </template>
+
+    <!-- RECHTS: der Stand. Oben der Kapitelfortschritt, darunter je
+         Entscheidung ein Eintrag in Dokument-Optik mit seiner Ampel. -->
+    <template #george>
+      <div class="flex min-h-0 flex-1 flex-col">
+        <div class="flex-none border-b px-6 pt-5 pb-4" style="border-color: var(--bw-line)">
+          <div class="flex items-baseline justify-between gap-3">
+            <p class="text-sm font-medium">Euer Stand</p>
+            <p class="bw-label tabular-nums" style="color: var(--bw-muted)">{{ confirmedCount }}/{{ CHAPTER_TOTAL }} bestätigt</p>
+          </div>
+          <div
+            class="bw-chapter-progress-track mt-2.5" role="progressbar"
+            :aria-valuenow="confirmedCount" aria-valuemin="0" :aria-valuemax="CHAPTER_TOTAL"
+            aria-label="Bestätigte Entscheidungen in diesem Kapitel"
+          >
+            <div class="bw-chapter-progress-fill" :style="`inline-size: ${chapterPct}%`" />
+          </div>
+          <p class="bw-label mt-2.5" style="color: var(--bw-muted)">Purpose · Vision · Mission</p>
+        </div>
+
+        <div class="min-h-0 flex-1 space-y-3 overflow-y-auto px-6 py-5">
+          <!-- Abgeschlossenes Kapitel: eingeklappt, aber nicht weg. -->
+          <div class="rounded-2xl" style="background: var(--bw-surface-hi)">
+            <button
+              class="flex w-full items-center gap-2 px-4 py-3 text-left"
+              :aria-expanded="contextOpen" @click="contextOpen = !contextOpen"
+            >
+              <UIcon :name="contextOpen ? 'i-ph-caret-down' : 'i-ph-caret-right'" class="size-4 flex-none" style="color: var(--bw-muted)" />
+              <span class="text-sm font-medium">Context</span>
+              <UIcon
+                v-if="contextConfirmed === CONTEXT_TOTAL" name="i-ph-check"
+                class="size-4 flex-none" style="color: var(--bw-accent)"
+              />
+              <span class="bw-label ml-auto flex-none tabular-nums" style="color: var(--bw-muted)">{{ contextConfirmed }}/{{ CONTEXT_TOTAL }}</span>
+            </button>
+            <div v-if="contextOpen" class="space-y-3 px-4 pb-4">
+              <div
+                v-for="entry in contextLog" :key="entry.id"
+                class="rounded-xl px-3 py-2.5" style="background: var(--bw-surface)"
+              >
+                <p class="bw-label flex items-center gap-2" style="color: var(--bw-muted)">
+                  <span
+                    class="bw-dot" :class="entry.state === 'confirmed' ? 'bw-dot--confirmed' : 'bw-dot--draft'"
+                    :title="entry.state === 'confirmed' ? 'Bestätigt' : 'Noch nicht bestätigt'"
+                    :aria-label="entry.state === 'confirmed' ? 'Bestätigt' : 'Noch nicht bestätigt'"
+                  >
+                    <UIcon v-if="entry.state === 'confirmed'" name="i-ph-check-bold" class="size-2.5" />
+                  </span>
+                  <span class="min-w-0 truncate">{{ entry.label }}</span>
+                </p>
+                <p class="bw-doc-text mt-1.5 whitespace-pre-wrap" style="font-size: 0.875rem; line-height: 1.5">{{ entry.text }}</p>
+                <div class="mt-2 flex justify-end">
+                  <UButton
+                    v-if="entry.state === 'confirmed'"
+                    size="xs" color="neutral" variant="ghost" class="rounded-full"
+                    icon="i-ph-pencil-simple" label="Korrigieren" @click="reviseEntry(entry)"
+                  />
+                  <button v-else class="bw-confirm bw-confirm--open" @click="confirmEntry(entry.id)">
+                    <UIcon name="i-ph-check" class="size-4" /> Bestätigen
+                  </button>
+                </div>
+              </div>
+              <p class="bw-pending">Und {{ CONTEXT_HIDDEN }} weitere Entscheidungen aus diesem Kapitel.</p>
+            </div>
+          </div>
+
+          <!-- Das laufende Kapitel: jeder Eintrag erscheint, sobald er im
+               Gespräch fällt — bernstein, bis er bestätigt ist. -->
+          <p v-if="!log.length" class="bw-pending pt-2">
+            Was ihr im Gespräch klärt, erscheint hier sofort — bestätigt oder noch offen.
+          </p>
+          <div
+            v-for="entry in log" :key="entry.id"
+            class="rounded-2xl px-4 py-3" style="background: var(--bw-surface-hi)"
+          >
+            <p class="bw-label flex items-center gap-2" style="color: var(--bw-muted)">
+              <span
+                class="bw-dot" :class="entry.state === 'confirmed' ? 'bw-dot--confirmed' : 'bw-dot--draft'"
+                :title="entry.state === 'confirmed' ? 'Bestätigt' : 'Noch nicht bestätigt'"
+                :aria-label="entry.state === 'confirmed' ? 'Bestätigt' : 'Noch nicht bestätigt'"
+              >
+                <UIcon v-if="entry.state === 'confirmed'" name="i-ph-check-bold" class="size-2.5" />
+              </span>
+              <span class="min-w-0 truncate">{{ entry.label }}</span>
+            </p>
+            <p class="bw-doc-text mt-1.5 whitespace-pre-wrap" style="font-size: 0.9rem; line-height: 1.55">{{ entry.text }}</p>
+            <div class="mt-2 flex justify-end">
+              <UButton
+                v-if="entry.state === 'confirmed'"
+                size="xs" color="neutral" variant="ghost" class="rounded-full"
+                icon="i-ph-pencil-simple" label="Korrigieren" @click="reviseEntry(entry)"
+              />
+              <button v-else class="bw-confirm bw-confirm--open" @click="confirmEntry(entry.id)">
+                <UIcon name="i-ph-check" class="size-4" /> Bestätigen
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </template>
+  </BwWorkspace>
+</template>
