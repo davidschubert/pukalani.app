@@ -407,6 +407,8 @@
         "actions": "Aktionen",
         "rename": "Umbenennen",
         "share": "Teilen",
+        "result": "Euer Branding",
+        "resultLocked": "Ab Foundation-Abschluss",
         "delete": "Löschen"
       },
       "loadFailed": "Die Brandings konnten nicht geladen werden."

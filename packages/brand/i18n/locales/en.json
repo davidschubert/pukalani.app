@@ -407,6 +407,8 @@
         "actions": "Actions",
         "rename": "Rename",
         "share": "Share",
+        "result": "Your branding",
+        "resultLocked": "After the foundation is complete",
         "delete": "Delete"
       },
       "loadFailed": "The brandings could not be loaded."

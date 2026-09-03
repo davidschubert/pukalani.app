@@ -891,7 +891,8 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
               />
               <UIcon v-else name="i-ph-circle-half-fill" class="mt-0.5 size-5 flex-none" style="color: var(--bw-ink)" />
               <span class="min-w-0 flex-1 leading-tight">
-                <span class="block text-sm font-medium">Context</span>
+                <!-- Runde 35 (David): „Kontext" wie in der Leiste — deutsch. -->
+                <span class="block text-sm font-medium">Kontext</span>
                 <span class="bw-label block tabular-nums" style="color: var(--bw-muted)">{{ contextConfirmed }}/{{ CONTEXT_TOTAL }}</span>
               </span>
               <UIcon
@@ -999,14 +1000,14 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
           </div>
         </div>
 
-        <!-- Runde 31 (David): unten rechts BEIDES — der Einstiegs-Button
-             „Euer Branding" UND darunter der dreizeilige Gesamtfortschritt
-             (R16-Zuschnitt); die Leiste links hat keinen Fuß mehr. -->
+        <!-- Runde 31+35 (David): unten rechts NUR noch der dreizeilige
+             Gesamtfortschritt — der „Euer Branding"-Einstieg wohnt jetzt
+             an der Kachel auf der Brandings-Übersicht (gesperrt bis zum
+             Foundation-Abschluss). -->
         <div class="flex-none border-t px-6 pb-5" style="border-color: var(--bw-line)">
           <BwRailFooter
             :progress-pct="progressPct" progress-title="Gesamtfortschritt"
             :progress-count="progressCount" progress-time="ca. 30 Min"
-            progress-to="/brand/demo/ergebnis" :score="61"
           />
         </div>
       </div>

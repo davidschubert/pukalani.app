@@ -15,11 +15,19 @@ const props = withDefaults(defineProps<{
   score?: number
   /** Farbwelt der Brand: [hell, mittel, dunkel]. */
   gradient?: [string, string, string]
+  /* Runde 35 (David): der „Euer Branding"-Einstieg wohnt AN DER KACHEL —
+   * gesperrt (ausgegraut, Schloss), bis die Brand Foundation abgeschlossen
+   * ist; erst dann aktiv mit Score und Pfeil. Bewusst kein 100%-Gate:
+   * Monitoring läuft dauerhaft, „alles fertig" träte nie ein. */
+  resultTo?: string
+  resultReady?: boolean
 }>(), {
   flag: undefined,
   activity: undefined,
   score: undefined,
   gradient: () => ['#e6e5e2', '#b8b7b3', '#4a4a47'],
+  resultTo: undefined,
+  resultReady: false,
 })
 const bg = computed(() => `background: linear-gradient(165deg, ${props.gradient[0]} 0%, ${props.gradient[1]} 45%, ${props.gradient[2]} 100%)`)
 /* Die Karten-TEXTE reicht die Seite bereits übersetzt herein (`step`,
@@ -66,6 +74,34 @@ const actions = computed(() => [[
     <div class="mt-3 flex items-center justify-between">
       <span class="bw-label" style="color: var(--bw-muted)">{{ edited }}</span>
       <UButton size="sm" trailing-icon="i-ph-arrow-right" :label="t('brand.brands.card.continue')" color="neutral" variant="outline" class="rounded-full" style="background: var(--bw-surface-hi)" />
+    </div>
+    <!-- Runde 35: der Ergebnis-Einstieg (vorher Button in der Werkstatt-
+         Spalte). Button statt NuxtLink, weil die Karte auf der Übersicht
+         selbst in einem Link steckt — kein a-in-a. -->
+    <div v-if="resultTo" class="mt-3">
+      <button
+        v-if="resultReady" type="button"
+        class="flex w-full items-center gap-3 rounded-full py-2.5 pl-2 pr-2 text-left text-sm"
+        style="background: var(--bw-surface-hi); box-shadow: var(--bw-shadow-card)"
+        @click.stop.prevent="navigateTo(resultTo)"
+      >
+        <BwScoreRing v-if="score !== undefined" :value="score" :size="28" class="flex-none" />
+        <span class="min-w-0 flex-1 font-medium">{{ t('brand.brands.card.result') }}</span>
+        <span class="grid size-7 flex-none place-items-center rounded-full">
+          <UIcon name="i-ph-arrow-right" class="size-4" style="color: var(--bw-ink-soft)" />
+        </span>
+      </button>
+      <div
+        v-else class="flex w-full items-center gap-3 rounded-full py-2.5 pl-2 pr-2 text-sm"
+        style="background: var(--bw-surface); color: var(--bw-muted)"
+        :aria-label="t('brand.brands.card.resultLocked')"
+      >
+        <span class="grid size-7 flex-none place-items-center rounded-full" style="background: var(--bw-surface-hi)">
+          <UIcon name="i-ph-lock-simple" class="size-4" />
+        </span>
+        <span class="min-w-0 flex-1">{{ t('brand.brands.card.result') }}</span>
+        <span class="bw-label flex-none pr-1">{{ t('brand.brands.card.resultLocked') }}</span>
+      </div>
     </div>
   </div>
 </template>
