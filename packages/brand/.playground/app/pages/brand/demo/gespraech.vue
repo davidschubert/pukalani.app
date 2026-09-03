@@ -831,9 +831,13 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
          „Weiß ich nicht"-Knopf (das kann man tippen, gleicher Antwort-Weg).
          Ausgegraut, solange kein answer-Zug offen ist. -->
     <template #stage-footer>
+      <!-- Runde 29 (David): keine Fokus-Outline beim Klick — Textareas gelten
+           im Browser immer als focus-visible, deshalb die Theme-Outline
+           per ui-Override neutralisieren. -->
       <UChatPrompt
         v-model="draft" placeholder="Antwort schreiben …"
         :disabled="!activeAnswerTurn" :autofocus="false" class="w-full"
+        :ui="{ root: 'has-[textarea:focus-visible]:outline-none' }"
         @submit="promptSubmit" @keydown.tab="promptTab"
       >
         <template #footer>
