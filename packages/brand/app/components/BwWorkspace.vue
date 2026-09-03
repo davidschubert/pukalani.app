@@ -160,31 +160,28 @@ const zoneItemsFixedRail = [
           <BwRailFooter :progress-pct="progressPct" :progress-note="progressNote" :progress-subnote="progressSubnote" :progress-to="progressTo" :score="score" :progress-title="progressTitle" :progress-count="progressCount" :progress-time="progressTime" />
         </div>
       </aside>
-      <!-- Runde 20b+20d (David): der Balken ist eine EIGENE Zone ÜBER dem
-           Splitter — heller Grund, 1px-Linie darunter, und er spannt über
-           Bühne UND Stand (von der Nav-Kante bis zum rechten Rand). Im
-           Scroll-Inhalt bliebe er im zentrierten 46rem-Band. -->
-      <div class="flex min-h-0 min-w-0 flex-1 flex-col">
-        <div v-if="$slots['stage-bar']" class="bw-stage-bar flex-none"><slot name="stage-bar" /></div>
-        <USplitter
-          id="bw-workspace-fixedrail" auto-save-id="bw-workspace-fixedrail" :items="zoneItemsFixedRail"
-          class="min-h-0 min-w-0 flex-1"
-          :ui="{ handle: 'w-px transition-colors bg-(--bw-line) data-[state=hover]:bg-(--bw-accent) data-[state=drag]:bg-(--bw-accent)' }"
-        >
-          <template #stage>
-            <!-- Runde 23 (David): stage-footer = fester Fuß der Bühne (das
-                 Chat-Prompt des Nuxt-UI-Chat-Templates) — außerhalb des
-                 Scrollers, auf der 46rem-Flucht des Gesprächs. -->
-            <div class="flex h-full w-full min-w-0 flex-col">
-              <main class="bw-stage min-h-0 w-full min-w-0 flex-1"><div class="bw-stage-inner"><slot /></div></main>
-              <div v-if="$slots['stage-footer']" class="bw-stage-foot flex-none"><div class="bw-stage-inner"><slot name="stage-footer" /></div></div>
-            </div>
-          </template>
-          <template #george>
-            <aside class="bw-george h-full w-full"><slot name="george" /></aside>
-          </template>
-        </USplitter>
-      </div>
+      <!-- Runde 32 (David, revidiert 20d): der Balken gehört NUR zur
+           Gesprächs-Spalte (Zone über deren Scroller, 1px-Linie darunter) —
+           der Stand beginnt oben rechts direkt mit dem Log. -->
+      <USplitter
+        id="bw-workspace-fixedrail" auto-save-id="bw-workspace-fixedrail" :items="zoneItemsFixedRail"
+        class="min-h-0 min-w-0 flex-1"
+        :ui="{ handle: 'w-px transition-colors bg-(--bw-line) data-[state=hover]:bg-(--bw-accent) data-[state=drag]:bg-(--bw-accent)' }"
+      >
+        <template #stage>
+          <!-- Runde 23 (David): stage-footer = fester Fuß der Bühne (das
+               Chat-Prompt des Nuxt-UI-Chat-Templates) — außerhalb des
+               Scrollers, auf der 46rem-Flucht des Gesprächs. -->
+          <div class="flex h-full w-full min-w-0 flex-col">
+            <div v-if="$slots['stage-bar']" class="bw-stage-bar flex-none"><slot name="stage-bar" /></div>
+            <main class="bw-stage min-h-0 w-full min-w-0 flex-1"><div class="bw-stage-inner"><slot /></div></main>
+            <div v-if="$slots['stage-footer']" class="bw-stage-foot flex-none"><div class="bw-stage-inner"><slot name="stage-footer" /></div></div>
+          </div>
+        </template>
+        <template #george>
+          <aside class="bw-george h-full w-full"><slot name="george" /></aside>
+        </template>
+      </USplitter>
     </div>
     <!-- Runde 30: der PRE-MOUNT-Zweig für Seiten mit fester Rail-Breite —
          dieselbe Anatomie wie der Splitter-Zweig darüber, nur statisch
@@ -197,17 +194,17 @@ const zoneItemsFixedRail = [
           <BwRailFooter :progress-pct="progressPct" :progress-note="progressNote" :progress-subnote="progressSubnote" :progress-to="progressTo" :score="score" :progress-title="progressTitle" :progress-count="progressCount" :progress-time="progressTime" />
         </div>
       </aside>
-      <div class="flex min-h-0 min-w-0 flex-1 flex-col">
-        <div v-if="$slots['stage-bar']" class="bw-stage-bar flex-none"><slot name="stage-bar" /></div>
-        <div class="flex min-h-0 min-w-0 flex-1">
-          <div class="flex h-full min-w-0 flex-col" style="flex: 63 1 0">
-            <main class="bw-stage min-h-0 w-full min-w-0 flex-1"><div class="bw-stage-inner"><slot /></div></main>
-            <div v-if="$slots['stage-footer']" class="bw-stage-foot flex-none"><div class="bw-stage-inner"><slot name="stage-footer" /></div></div>
-          </div>
-          <!-- Runde 30b: die 1px-Naht Bühne↔Stand zeichnet nach dem Mount der
-               Splitter-Griff — hier statisch, damit sie nicht nachspringt. -->
-          <aside class="bw-george h-full min-w-0" style="flex: 37 1 0; border-left: 1px solid var(--bw-line)"><slot name="george" /></aside>
+      <!-- Runde 32 (David): der Balken endet an der Naht — er gehört NUR zur
+           Gesprächs-Spalte, der Stand beginnt oben direkt mit dem Log. -->
+      <div class="flex min-h-0 min-w-0 flex-1">
+        <div class="flex h-full min-w-0 flex-col" style="flex: 63 1 0">
+          <div v-if="$slots['stage-bar']" class="bw-stage-bar flex-none"><slot name="stage-bar" /></div>
+          <main class="bw-stage min-h-0 w-full min-w-0 flex-1"><div class="bw-stage-inner"><slot /></div></main>
+          <div v-if="$slots['stage-footer']" class="bw-stage-foot flex-none"><div class="bw-stage-inner"><slot name="stage-footer" /></div></div>
         </div>
+        <!-- Runde 30b: die 1px-Naht Bühne↔Stand zeichnet nach dem Mount der
+             Splitter-Griff — hier statisch, damit sie nicht nachspringt. -->
+        <aside class="bw-george h-full min-w-0" style="flex: 37 1 0; border-left: 1px solid var(--bw-line)"><slot name="george" /></aside>
       </div>
     </div>
     <USplitter
