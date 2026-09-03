@@ -856,13 +856,14 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
              Fortschritt ist eine SEKTION im chronologischen Log, direkt
              unter Context (gleiche Zeilen-Anatomie, „n/4 bestätigt" als
              Subline). -->
-        <div class="min-h-0 flex-1 space-y-3 overflow-y-auto px-6 py-5">
+        <div class="min-h-0 flex-1 overflow-y-auto px-6 py-4">
           <!-- Runde 25 (David): der Log ist chronologisch — abgeschlossene
                Kapitel oben, das laufende darunter. Der Context-Kopf ist KEIN
                Knopf mehr, sondern eine ruhige Zeile: grüner Haken vorn
                (Kapitel fertig), Titel mit „10/10"-Subline darunter, hinten
-               nur der Auf-/Zuklapp-Pfeil. -->
-          <div>
+               nur der Auf-/Zuklapp-Pfeil. Runde 28: IMMER eine 1px-Linie
+               zwischen den Kapitel-Sektionen (gd-chapter). -->
+          <div class="gd-chapter">
             <button
               class="flex w-full items-start gap-2.5 py-1 text-left"
               :aria-expanded="contextOpen" @click="contextOpen = !contextOpen"
@@ -921,7 +922,7 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
           <!-- Runde 27: das LAUFENDE Kapitel als eigene Sektion unter Context —
                Halbmond solange offen, grüner Haken nach dem Abschluss;
                jeder Eintrag erscheint, sobald er im Gespräch fällt. -->
-          <div>
+          <div class="gd-chapter">
             <button
               class="flex w-full items-start gap-2.5 py-1 text-left"
               :aria-expanded="pvmOpen" @click="pvmOpen = !pvmOpen"
@@ -941,8 +942,7 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
                 style="color: var(--bw-muted)"
               />
             </button>
-          </div>
-          <template v-if="pvmOpen">
+            <div v-if="pvmOpen" class="mt-2 space-y-3">
           <div
             v-for="entry in log" :key="entry.id"
             class="gd-log-card rounded-2xl px-4 py-3" style="background: var(--bw-surface-hi)"
@@ -978,7 +978,8 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
               </template>
             </div>
           </div>
-          </template>
+            </div>
+          </div>
         </div>
 
         <!-- Runde 11+14: unten rechts NUR der Einstiegs-Button „Euer
@@ -1003,4 +1004,7 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
 .gd-fix { opacity: 0; transition: opacity 120ms; }
 .gd-log-card:hover .gd-fix, .gd-log-card:focus-within .gd-fix { opacity: 1; }
 @media (prefers-reduced-motion: reduce) { .gd-fix { transition: none; } }
+/* Runde 28 (David): IMMER eine 1px-Linie zwischen den Kapitel-Sektionen. */
+.gd-chapter { padding-block: 0.625rem; }
+.gd-chapter + .gd-chapter { border-top: 1px solid var(--bw-line); }
 </style>

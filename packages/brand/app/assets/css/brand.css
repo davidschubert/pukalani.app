@@ -95,7 +95,10 @@
 .bw-stage-bar {
   display: flex; align-items: center; gap: 0.375rem;
   block-size: 4rem; padding: 0 1.5rem;
-  background: var(--bw-surface); border-bottom: 1px solid var(--bw-line);
+  /* Runde 28 (David): DUNKLER als das Papier, nicht heller — der Balken
+     ist eine eigene Fläche, halb Papier, halb Linie. */
+  background: color-mix(in oklab, var(--bw-paper) 50%, var(--bw-line) 50%);
+  border-bottom: 1px solid var(--bw-line);
 }
 /* Runde 23 (David): fester Bühnen-Fuß fürs Chat-Prompt — gleiche
    horizontale Flucht wie die Bühne, unten mit Luft zum Rand. */
