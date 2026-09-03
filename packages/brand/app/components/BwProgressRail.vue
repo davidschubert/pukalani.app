@@ -5,7 +5,14 @@
  *  hinten sitzt ein Info-Icon, das einen Erklär-Layer öffnet (was der
  *  Schritt bedeutet, welche Entscheidungen er hat, Fortschrittsbalken). */
 export interface BwRailStepInfo {
-  description: string
+  /**
+   * Der Erklär-Absatz. OPTIONAL seit dem Umbau „Gespräch als Bühne"
+   * (2026-09-02): der Klickdummy liefert ihn aus `demoRail`, die echte
+   * Werkstatt baut ihre Info-Pakete dagegen aus der Slot-Registry und hat
+   * dafür (noch) keinen geschriebenen Absatz. Weglassen ist wahr, erfinden
+   * wäre es nicht — s. `BwStepInfoModal`.
+   */
+  description?: string
   minutes?: string
   bausteine: { label: string, note: string, done?: boolean }[]
 }
@@ -43,13 +50,12 @@ defineProps<{ layers: BwRailLayer[] }>()
 const { t } = useI18n()
 
 const infoStep = ref<{ step: BwRailStep, layerLabel: string } | null>(null)
+/* Der Erklär-Layer selbst wohnt seit 2026-09-02 in `BwStepInfoModal` — er
+ * stand vorher wörtlich auch in der Klickdummy-Sidebar, und mit der neuen
+ * `BwWorkspaceSidebar` wäre daraus eine dritte Kopie geworden. */
 const infoOpen = computed({
   get: () => infoStep.value !== null,
   set: (v: boolean) => { if (!v) infoStep.value = null },
-})
-const infoPct = computed(() => {
-  const b = infoStep.value?.step.info?.bausteine ?? []
-  return b.length ? Math.round((b.filter(x => x.done).length / b.length) * 100) : 0
 })
 </script>
 
@@ -134,46 +140,10 @@ const infoPct = computed(() => {
       </template>
     </div>
 
-    <UModal v-model:open="infoOpen">
-      <template #content>
-        <div v-if="infoStep" class="bw-root relative max-h-[85vh] overflow-y-auto p-8" style="background: var(--bw-surface-hi)">
-          <button
-            class="absolute right-5 top-5 grid size-8 place-items-center rounded-full transition-colors hover:bg-[var(--bw-line)]"
-            :aria-label="t('brand.common.close')"
-            @click="infoStep = null"
-          >
-            <UIcon name="i-ph-x" class="size-4.5" style="color: var(--bw-ink-soft)" />
-          </button>
-          <p class="bw-label uppercase tracking-widest" style="color: var(--bw-muted)">{{ infoStep.layerLabel }}</p>
-          <h2 class="mt-1 text-[28px] font-extralight leading-tight tracking-tight">{{ infoStep.step.label }}</h2>
-          <p class="mt-3 text-sm leading-relaxed" style="color: var(--bw-ink-soft)">{{ infoStep.step.info!.description }}</p>
-
-          <p class="bw-label mt-6" style="color: var(--bw-muted)">{{ t('brand.workspace.decisions') }}</p>
-          <ul class="mt-2 space-y-2.5">
-            <li v-for="b in infoStep.step.info!.bausteine" :key="b.label" class="flex items-start gap-3">
-              <span class="mt-0.5 grid size-6 flex-none place-items-center rounded-full" :style="b.done ? 'background: var(--bw-accent-soft)' : 'background: var(--bw-surface)'">
-                <UIcon :name="b.done ? 'i-ph-check' : 'i-ph-circle'" class="size-3.5" :style="b.done ? 'color: var(--bw-accent)' : 'color: var(--bw-muted)'" />
-              </span>
-              <span class="min-w-0">
-                <span class="block text-sm font-medium">{{ b.label }}</span>
-                <span class="block text-sm" style="color: var(--bw-ink-soft)">{{ b.note }}</span>
-              </span>
-            </li>
-          </ul>
-
-          <div class="mt-7">
-            <div class="flex items-baseline justify-between gap-3">
-              <p class="bw-label uppercase tracking-wider" style="color: var(--bw-muted)">
-                {{ infoStep.step.slots ?? t('brand.workspace.progress', { filled: infoStep.step.info!.bausteine.filter(b => b.done).length, total: infoStep.step.info!.bausteine.length }) }}<template v-if="infoStep.step.info!.minutes"> · {{ infoStep.step.info!.minutes }}</template>
-              </p>
-              <span class="bw-label uppercase tracking-wider">{{ infoPct }}&thinsp;%</span>
-            </div>
-            <div class="mt-2 h-1.5 overflow-hidden rounded-full" style="background: var(--bw-line)">
-              <div class="h-full rounded-full transition-all" :style="`width: ${infoPct}%; background: var(--bw-accent)`" />
-            </div>
-          </div>
-        </div>
-      </template>
-    </UModal>
+    <BwStepInfoModal
+      v-model:open="infoOpen"
+      :step="infoStep?.step ?? null"
+      :layer-label="infoStep?.layerLabel ?? ''"
+    />
   </nav>
 </template>
