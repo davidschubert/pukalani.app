@@ -140,7 +140,10 @@ const VERA_INFO = {
     'Otto Testbiss — Namens-Berater · erst überleben, dann gefallen',
   ],
   asks: '„Warum habt ihr angefangen — was war der Auslöser?"',
-  personal: 'Chihuahua mit Terrier-Anteil · Kiel · sammelt Manifeste, schwimmt in der Förde',
+  /* Davids Klarstellung 2026-09-02: George ist KEIN Hund — er ist ein
+   * professioneller Markenberater und Markenstratege. Keine Rasse, kein
+   * Gag; die Verspieltheit gehört, wenn überhaupt, woandershin. */
+  personal: 'Markenberater und Markenstratege — jede Empfehlung mit Begründung, jede Entscheidung festgehalten.',
 }
 
 const turns = ref<Turn[]>([
