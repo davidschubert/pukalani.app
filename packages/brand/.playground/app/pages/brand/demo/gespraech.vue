@@ -294,20 +294,20 @@ function pickPosition(turn: Turn, text: string): void {
 /** 6: der Widerspruchs-Moment. */
 const BOUNDARY_PROPOSAL = 'Wir verkaufen kein Brot, das wir nicht am selben Tag gebacken haben — auch nicht am Samstagnachmittag, wenn die Regale leer aussehen.'
 /**
- * Davids Korrekturrunde 1 (2026-09-02): auch VERAS VORSCHLAG ist ein Entwurf
- * wie jeder andere — nur bestätigen zu können, ohne anpassen, wäre „friss oder
- * stirb". Dieselben Wege wie die Entwurfs-Karte: Anpassen (inline) und
- * Bestätigen; der Stand rechts zieht den angepassten Text mit.
+ * Davids Korrekturrunde 1+2 (2026-09-02): JEDER bestätigbare Punkt hat überall
+ * BEIDE Wege — Bestätigen UND Anpassen, im Zug wie im Stand. Nur bestätigen zu
+ * können wäre „friss oder stirb"; und weil Zug und Stand denselben Log-Eintrag
+ * lesen, ist der angepasste Text sofort an beiden Orten derselbe.
  */
-const boundaryText = ref(BOUNDARY_PROPOSAL)
-const boundaryEditing = ref(false)
+const editingEntryId = ref<string | null>(null)
+
+function toggleEntryEditing(id: string | undefined): void {
+  if (!id) return
+  editingEntryId.value = editingEntryId.value === id ? null : id
+}
 
 function confirmProposal(turn: Turn): void {
-  if (turn.entryId === 'boundary') {
-    boundaryEditing.value = false
-    const entry = log.value.find(e => e.id === 'boundary')
-    if (entry) entry.text = boundaryText.value.trim() || BOUNDARY_PROPOSAL
-  }
+  editingEntryId.value = null
   confirmEntry(turn.entryId)
 }
 
@@ -585,18 +585,18 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
               <!-- Bestätigen IM ZUG — derselbe Knopf und dieselben zwei Farben
                    wie im Stand rechts (Davids „nach jeder frage confirmen"). -->
               <div v-else-if="turn.block === 'confirm'" class="mt-3">
-                <div v-if="turn.proposal" :class="entryState(turn.entryId) === 'confirmed' ? 'mb-3' : 'bw-draft-frame mb-3'">
-                  <p class="bw-label" style="color: var(--bw-muted)">Mein Vorschlag</p>
-                  <UTextarea v-if="boundaryEditing && entryState(turn.entryId) !== 'confirmed'" v-model="boundaryText" :rows="3" class="mt-2 w-full" />
-                  <p v-else class="bw-doc-text mt-2 whitespace-pre-wrap">{{ turn.entryId === 'boundary' ? boundaryText : turn.proposal }}</p>
+                <div v-if="turn.entryId && findEntry(turn.entryId)" :class="entryState(turn.entryId) === 'confirmed' ? 'mb-3' : 'bw-draft-frame mb-3'">
+                  <p class="bw-label" style="color: var(--bw-muted)">{{ turn.proposal ? 'Mein Vorschlag' : 'Festgehalten' }}</p>
+                  <UTextarea v-if="editingEntryId === turn.entryId && entryState(turn.entryId) !== 'confirmed'" v-model="findEntry(turn.entryId)!.text" :rows="3" class="mt-2 w-full" />
+                  <p v-else class="bw-doc-text mt-2 whitespace-pre-wrap">{{ findEntry(turn.entryId)!.text }}</p>
                 </div>
                 <p v-if="turn.closing" class="mb-2 font-medium">{{ turn.closing }}</p>
                 <div class="flex flex-wrap items-center justify-end gap-2">
                   <UButton
-                    v-if="turn.proposal && entryState(turn.entryId) !== 'confirmed'"
+                    v-if="turn.entryId && entryState(turn.entryId) !== 'confirmed'"
                     size="sm" color="neutral" variant="ghost" class="mr-auto rounded-full"
-                    icon="i-ph-pencil-simple" :label="boundaryEditing ? 'Anpassen beenden' : 'Anpassen'"
-                    @click="boundaryEditing = !boundaryEditing"
+                    icon="i-ph-pencil-simple" :label="editingEntryId === turn.entryId ? 'Anpassen beenden' : 'Anpassen'"
+                    @click="toggleEntryEditing(turn.entryId)"
                   />
                   <button
                     class="bw-confirm"
@@ -730,16 +730,24 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
               </span>
               <span class="min-w-0 truncate">{{ entry.label }}</span>
             </p>
-            <p class="bw-doc-text mt-1.5 whitespace-pre-wrap" style="font-size: 0.9rem; line-height: 1.55">{{ entry.text }}</p>
-            <div class="mt-2 flex justify-end">
+            <UTextarea v-if="editingEntryId === entry.id && entry.state !== 'confirmed'" v-model="entry.text" :rows="3" class="mt-1.5 w-full" />
+            <p v-else class="bw-doc-text mt-1.5 whitespace-pre-wrap" style="font-size: 0.9rem; line-height: 1.55">{{ entry.text }}</p>
+            <div class="mt-2 flex items-center justify-end gap-2">
               <UButton
                 v-if="entry.state === 'confirmed'"
                 size="xs" color="neutral" variant="ghost" class="rounded-full"
                 icon="i-ph-pencil-simple" label="Korrigieren" @click="reviseEntry(entry)"
               />
-              <button v-else class="bw-confirm bw-confirm--open" @click="confirmEntry(entry.id)">
-                <UIcon name="i-ph-check" class="size-4" /> Bestätigen
-              </button>
+              <template v-else>
+                <UButton
+                  size="xs" color="neutral" variant="ghost" class="mr-auto rounded-full"
+                  icon="i-ph-pencil-simple" :label="editingEntryId === entry.id ? 'Anpassen beenden' : 'Anpassen'"
+                  @click="toggleEntryEditing(entry.id)"
+                />
+                <button class="bw-confirm bw-confirm--open" @click="editingEntryId = null; confirmEntry(entry.id)">
+                  <UIcon name="i-ph-check" class="size-4" /> Bestätigen
+                </button>
+              </template>
             </div>
           </div>
         </div>
