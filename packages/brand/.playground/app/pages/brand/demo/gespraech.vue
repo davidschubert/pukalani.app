@@ -515,17 +515,19 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
          Scroller, s. BwWorkspace) — links das Einklapp-Icon für die
          Nav-Spalte, daneben die zweizeilige Ortsangabe. Er ersetzt die
          Ortsangaben, die bis Runde 19 im Stand-Kopf standen. -->
+    <!-- Runde 20e (David): Innenmaße nach UDashboardNavbar — gap-1.5,
+         Toggle in Standard-Buttongröße, Titel font-semibold + truncate. -->
     <template #stage-bar>
-      <div class="flex items-center gap-3">
+      <div class="flex min-w-0 items-center gap-1.5">
         <UButton
-          size="xs" color="neutral" variant="ghost" class="rounded-full"
+          size="sm" color="neutral" variant="ghost"
           icon="i-ph-sidebar-simple"
           :aria-label="railCollapsed ? 'Navigation einblenden' : 'Navigation ausblenden'"
           @click="railCollapsed = !railCollapsed"
         />
         <div class="min-w-0 leading-tight">
           <p class="bw-label" style="color: var(--bw-muted)">Brand Foundation</p>
-          <p class="truncate text-sm font-medium">Purpose · Vision · Mission</p>
+          <p class="truncate font-semibold">Purpose · Vision · Mission</p>
         </div>
       </div>
     </template>
