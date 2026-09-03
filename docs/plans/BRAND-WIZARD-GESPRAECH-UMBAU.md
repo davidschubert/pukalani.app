@@ -91,7 +91,8 @@ nur Abweichungen) — wie im Dummy.
     (Hinweis-Feld) / „Korrigieren" / „Übernehmen & bestätigen".
   - `options`: Claude-Desktop-Stil — volle Zeilen mit Titel + Begründung,
     Empfehlung markiert UND begründet, „Sonstiges" mit eigenem Feld,
-    Aktionen unten rechts (Überspringen/Übermitteln).
+    Aktion unten rechts: NUR „Übermitteln" (R39: kein Überspringen —
+    eine Kernentscheidung lässt sich nicht überspringen).
   - `confirm`: Karte trägt als Kopf die **URSPRUNGSFRAGE** des Inhalts
     (`sourceQuestion`), nicht die Abschluss-Frage; Abschluss-Frage steht
     über den Knöpfen. Aktionen rechtsbündig: „Korrigieren"

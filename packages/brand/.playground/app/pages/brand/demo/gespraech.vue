@@ -768,8 +768,9 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
                     />
                   </div>
                 </div>
+                <!-- Runde 39 (David): KEIN Überspringen — die Positionierung
+                     ist die Kernentscheidung, hier gibt es nur Übermitteln. -->
                 <div class="mt-3 flex items-center justify-end gap-2">
-                  <button class="bw-chip bw-chip--ghost" @click="pickPosition(turn, 'Weiß ich nicht')">Überspringen</button>
                   <UButton
                     color="neutral" variant="ghost" class="bw-send rounded-full" label="Übermitteln"
                     :disabled="!pickedOption || (pickedOption === 'own' && !ownPosition.trim())"
