@@ -182,6 +182,15 @@ export default defineEventHandler(async (event): Promise<BrandStepSaveResponse> 
     stateChanged = started.changed
   }
 
+  // „Nochmal von vorn" (C5): VOR der Konfidenz, damit sie auf dem wieder
+  // geöffneten (`active`) Baustein gesetzt wird — Reihenfolge der Maschine.
+  if (body.reopen) {
+    const reopened = transitionBrandStep(facts, { kind: 'reopen' })
+    if (!reopened.ok) throw createError({ status: 400, statusText: 'Step transition rejected', data: { code: reopened.code } })
+    facts = reopened.step
+    stateChanged = reopened.changed || stateChanged
+  }
+
   if (body.confidence !== undefined) {
     const set = transitionBrandStep(facts, { kind: 'setConfidence', confidence: body.confidence })
     if (!set.ok) throw createError({ status: 400, statusText: 'Step transition rejected', data: { code: set.code } })

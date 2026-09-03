@@ -1041,6 +1041,23 @@ const completing = ref(false)
 
 async function pickConfidence(value: string): Promise<void> {
   const confidence = value as BrandConfidence
+
+  // „NOCHMAL VON VORN" auf einem ABGESCHLOSSENEN Baustein öffnet ihn wieder
+  // (C5): EIN PATCH trägt `reopen` und die Konfidenz zusammen — der normale
+  // Autosave-Fluss darunter kennt kein `reopen` und liesse den Baustein
+  // `done`, der Chip wäre eine Attrappe. Auf einem OFFENEN Baustein bleibt
+  // „Nochmal von vorn" die Vertiefungsrunde von immer (nur Konfidenz).
+  if (confidence === 'restart' && store.currentJourneyStep?.state === 'done') {
+    store.setConfidence(confidence)
+    try {
+      await store.reopenStep(profileId.value)
+    }
+    catch {
+      toast.add({ color: 'warning', title: t('brand.workspace.reopenFailed') })
+    }
+    return
+  }
+
   store.setConfidence(confidence)
   await autosave.flush()
   // Nur „Passt" schliesst ab — „Fast" und „Nochmal von vorn" sind

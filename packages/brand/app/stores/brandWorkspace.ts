@@ -455,6 +455,26 @@ const setup = () => {
     }
   }
 
+  /**
+   * „NOCHMAL VON VORN" AUF EINEM ABGESCHLOSSENEN BAUSTEIN (C5, 2026-09-03) —
+   * bis dahin war die pure `reopen`-Transition UNVERDRAHTET: der Chip
+   * speicherte nur die Konfidenz, der Baustein blieb `done`, und für den
+   * Menschen passierte sichtbar nichts. EIN PATCH trägt `reopen` und die
+   * Konfidenz zusammen (die Route öffnet zuerst, setzt dann); die Journey
+   * zieht lokal nach, den Fortschritts-Cursor am Profil rechnet der Server.
+   */
+  async function reopenStep(profileId: string): Promise<void> {
+    if (!stepKey.value) return
+    const response = await $fetch<BrandStepSaveResponse>(
+      `/api/brand/profiles/${profileId}/steps/${stepKey.value}`,
+      { method: 'PATCH', body: { revision: revision.value, reopen: true, confidence: 'restart' } },
+    )
+    applySaveResponse(response, 'restart')
+    journey.value = journey.value.map(entry => (entry.stepKey === stepKey.value
+      ? { ...entry, state: 'active' as const }
+      : entry))
+  }
+
   async function completeStep(profileId: string): Promise<void> {
     if (!stepKey.value) return
     const response = await $fetch<BrandStepCompleteResponse>(
@@ -550,6 +570,7 @@ const setup = () => {
     loadProfiles,
     loadProfile,
     loadStep,
+    reopenStep,
     completeStep,
     reset,
   }

@@ -351,6 +351,7 @@
       },
       "railLayer": "Brand Foundation",
       "completeFailed": "The chapter is not finished yet",
+      "reopenFailed": "Reopening didn't work — try again in a moment",
       "missingRequired": "Some required decisions are still open — confirm them, then try again.",
       "draftBadge": "Draft by George",
       "site": {

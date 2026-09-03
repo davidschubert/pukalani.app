@@ -351,6 +351,7 @@
       },
       "railLayer": "Brand Foundation",
       "completeFailed": "Das Kapitel ist noch nicht fertig",
+      "reopenFailed": "Wieder öffnen hat nicht geklappt — versuch es gleich nochmal",
       "missingRequired": "Einige Pflicht-Entscheidungen sind noch offen — bestätige sie und versuch es erneut.",
       "draftBadge": "Entwurf von George",
       "site": {

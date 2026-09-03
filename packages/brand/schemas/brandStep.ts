@@ -55,6 +55,13 @@ export function createBrandStepSaveSchema(stepKey: BrandStepKey) {
     slots: z.record(z.string(), brandSlotPatchSchema).default({}),
     /** Die Konfidenz-Weiche des BAUSTEINS (nicht die eines Slots). */
     confidence: z.enum(BRAND_CONFIDENCE_VALUES).optional(),
+    /**
+     * „Nochmal von vorn" auf einem ABGESCHLOSSENEN Baustein (C5): öffnet ihn
+     * wieder (`done → active`, pure Transition `reopen` — Slots und Konfidenz
+     * bleiben stehen, nichts propagiert). Auf jedem anderen Zustand lehnt die
+     * Transition mit `not_done` ab.
+     */
+    reopen: z.boolean().optional(),
   }).strict().superRefine((body, ctx) => {
     for (const [slotId, patch] of Object.entries(body.slots)) {
       const slot = slotById(slotId)

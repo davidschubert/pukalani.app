@@ -198,3 +198,30 @@ describe('PATCH …/steps/:stepKey — bestätigen und aufheben', () => {
     await expect(handler(event)).rejects.toMatchObject({ status: 400, data: { code: 'slot_empty' } })
   })
 })
+
+/**
+ * „NOCHMAL VON VORN" (C5, 2026-09-03): die pure `reopen`-Transition war
+ * UNVERDRAHTET — kein API-Weg löste sie je aus, der Chip auf einem
+ * abgeschlossenen Kapitel speicherte nur die Konfidenz und der Baustein
+ * blieb `done`. Jetzt trägt der Autosave-PATCH ein optionales `reopen`.
+ */
+describe('PATCH …/steps/:stepKey — „Nochmal von vorn" (reopen)', () => {
+  it('ÖFFNET einen abgeschlossenen Baustein wieder — Konfidenz im selben Zug', async () => {
+    stepRow.state = 'done'
+    stepRow.confidence = 'fits'
+    body = { revision: 3, reopen: true, confidence: 'restart' }
+
+    const response = await handler(event)
+
+    expect(response.revision).toBe(4)
+    expect(stepRow.state).toBe('active')
+    expect(stepRow.confidence).toBe('restart')
+  })
+
+  it('GEGENPROBE: reopen auf einem offenen Baustein wird mit `not_done` abgewiesen', async () => {
+    body = { revision: 3, reopen: true }
+
+    await expect(handler(event)).rejects.toMatchObject({ status: 400, data: { code: 'not_done' } })
+    expect(tablesDB.updateRow).not.toHaveBeenCalled()
+  })
+})
