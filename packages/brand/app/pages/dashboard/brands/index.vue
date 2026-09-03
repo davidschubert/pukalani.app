@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { BwNewBrandSubmit } from '../../../components/BwNewBrandModal.vue'
 import { BRAND_STEP_KEYS, type BrandStepKey } from '../../../../shared/slotRegistry'
+import { brandGradientFor } from '../../../../shared/brandPalette'
 import type { BrandProfileSummary } from '../../../../shared/types/brand'
 import { useBrandWorkspaceStore } from '../../../stores/brandWorkspace'
 
@@ -210,6 +211,7 @@ useBrandTitle(() => t('brand.brands.title'))
         <BwBrandCard
           v-for="profile in store.profiles" :key="profile.id"
           :to="workspacePath(profile)"
+          :gradient="brandGradientFor(profile.id)"
           :title="profile.title || t('brand.brands.card.untitled')"
           :path="t(`brand.brands.card.path.${profile.pathKind}`)"
           :step="t('brand.brands.card.currentStep', { step: stepLabel(profile.currentStepKey) })"
