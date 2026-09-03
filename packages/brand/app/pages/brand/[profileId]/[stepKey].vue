@@ -269,7 +269,13 @@ const turns = computed<StageTurn[]>(() => {
 
   if (!nextSlot.value) {
     if (busy || conversation.spoke.value) return spoken
-    return [...spoken, { id: 'done', role: 'george', text: t('brand.workspace.george.nothingOpen') }]
+    // „Keine Frage mehr" ist NICHT „nichts mehr offen" (brandJourney.ts erklärt
+    // die zwei Fragen): Bühnen-Entwürfe wie `b.mission` stellt George nie als
+    // Frage. Solange solche Pflicht-Felder unbestätigt sind, behauptete der
+    // alte Satz „nichts mehr offen" direkt über „Noch offen: 1 von 10 Feldern"
+    // (live erwischt 2026-09-03) — der Wortlaut folgt jetzt dem Kapitel-Stand.
+    const key = completion.value?.slotsReady ? 'nothingOpen' : 'questionsDone'
+    return [...spoken, { id: 'done', role: 'george', text: t(`brand.workspace.george.${key}`) }]
   }
 
   const help = nextSlot.value.helpKey ? t(nextSlot.value.helpKey) : undefined

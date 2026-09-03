@@ -329,6 +329,7 @@
         "subtitle": "Your brand advisor",
         "placeholder": "Write your answer — or ask a question",
         "nothingOpen": "Nothing open in this chapter — confirm it when it fits.",
+        "questionsDone": "My questions are done — we'll shape the remaining fields right here in the conversation.",
         "send": "Send"
       },
       "stage": {
