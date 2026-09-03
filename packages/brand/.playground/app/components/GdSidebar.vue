@@ -85,7 +85,7 @@ function glyph(layer: BwRailLayer, step: BwRailStep): { name: string, style: str
          des Token-Wirtes — ohne die Klasse sind alle --bw-*-Farben leer
          (Monogramme ohne Quadrat, Häkchen schwarz; Runde 19b live erwischt).
          Dasselbe Muster wie beim Erklär-Layer unten. -->
-    <UDropdownMenu :items="brandMenu" :content="{ align: 'start' }" :ui="{ content: 'bw-root w-(--reka-dropdown-menu-trigger-width)' }">
+    <UDropdownMenu :items="brandMenu" :content="{ align: 'start' }" :ui="{ content: 'bw-root bw-overlay w-(--reka-dropdown-menu-trigger-width)' }">
       <!-- Runde 17: Nuxt-UI-Standardmetrik — px-2.5 / gap-1.5 wie die
            NavigationMenu-Zeilen, damit alles auf einer Flucht sitzt. -->
       <button

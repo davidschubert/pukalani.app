@@ -37,6 +37,11 @@
   color: var(--bw-ink);
   font-variant-numeric: tabular-nums;
 }
+/* Runde 19c (David, „wieso ist das Menü grau?"): .bw-root ist der
+   Token-Wirt UND malt den Seiten-Grund (--bw-paper). Teleportierte Layer
+   (Dropdowns, Menüs) brauchen die Token, aber die KARTEN-Farbe — diese
+   Klasse zusätzlich zu bw-root auf den Content geben. */
+.bw-root.bw-overlay { background: var(--bw-surface-hi); }
 .dark .bw-root {
   --bw-paper: #191a19;
   --bw-surface: #222323;
