@@ -353,10 +353,15 @@
 .bw-nav-switch:hover, .bw-nav-switch:focus-visible { background: var(--bw-surface-hi); }
 .bw-nav-row:not(:disabled):hover { background: var(--bw-surface-hi); }
 /* Info-Icons RUHEN, bis die Zeile Hover/Fokus hat — sie bleiben fokussierbar
-   (Runde 16, David: die schlanken Zeilen sollen still sein). */
+   (Runde 16, David: die schlanken Zeilen sollen still sein).
+   Seit Audit B6/B7 liegt der Info-Knopf als GESCHWISTER über der Zeile (ein
+   Knopf im Knopf ist ungültig, und auf einer deaktivierten Zeile schluckt der
+   Browser seinen Klick). Die Hover-Regel hängt deshalb an der Hülle
+   `.bw-nav-item`, nicht mehr an der Zeile selbst. */
+.bw-nav-item { position: relative; }
 .bw-nav-info { opacity: 0; transition: opacity 120ms; }
-.bw-nav-row:hover .bw-nav-info,
-.bw-nav-row:focus-within .bw-nav-info,
+.bw-nav-item:hover .bw-nav-info,
+.bw-nav-item:focus-within .bw-nav-info,
 .bw-nav-info:focus-visible { opacity: 1; }
 
 /* Log-Spalte: „Korrigieren" ruht bis Hover/Fokus der Karte, „Bestätigen"

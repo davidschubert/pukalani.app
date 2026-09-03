@@ -64,10 +64,16 @@ const langs = [
 </script>
 
 <template>
-  <UModal v-model:open="open">
+  <!-- `title` = der NAME des Dialogs (Audit B10). Bei belegtem `content`-Slot
+       rendert Nuxt UI ihn visuell versteckt als DialogTitle; ohne ihn kündigt
+       ein Screenreader nur „Dialog" an. -->
+  <UModal v-model:open="open" :title="t('brand.new.title')">
     <template #content>
-      <div class="bw-root relative max-h-[85vh] overflow-y-auto p-8" style="background: var(--bw-surface-hi)">
+      <!-- `bw-overlay` statt Inline-Hintergrund: dieselbe Farbe, aber aus dem
+           System und nicht aus einer zweiten Quelle (Audit B9). -->
+      <div class="bw-root bw-overlay relative max-h-[85vh] overflow-y-auto p-8">
         <button
+          type="button"
           class="absolute right-5 top-5 grid size-8 place-items-center rounded-full transition-colors hover:bg-[var(--bw-line)]"
           :aria-label="t('brand.common.close')"
           @click="open = false"

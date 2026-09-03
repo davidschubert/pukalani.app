@@ -82,19 +82,21 @@ const infoOpen = computed({
               <div class="bw-label uppercase tracking-wider" :style="layer.locked ? '' : 'color: var(--bw-ink-soft)'">{{ layer.label }}</div>
               <p v-if="layer.locked ? layer.lockedNote : layer.note" class="mt-0.5 text-xs" style="color: var(--bw-muted)">{{ layer.locked ? layer.lockedNote : layer.note }}</p>
             </div>
-            <span
+            <!-- Echter Knopf statt `role="button" tabindex=0` (Audit B7/A14):
+                 Leertaste und Enter funktionieren nativ, die Rolle ist keine
+                 Behauptung mehr. -->
+            <button
               v-if="layer.info"
+              type="button"
               class="bw-info-btn grid size-7 flex-none place-items-center rounded-full"
-              role="button" tabindex="0"
               :aria-label="t('brand.workspace.rail.whatsIn', { label: layer.label })"
-              @click="infoStep = { step: { id: layer.id, label: layer.label, icon: '', state: 'open', info: layer.info }, layerLabel: layer.lockedNote ?? t('brand.workspace.rail.overview') }"
-              @keydown.enter="infoStep = { step: { id: layer.id, label: layer.label, icon: '', state: 'open', info: layer.info }, layerLabel: layer.lockedNote ?? t('brand.workspace.rail.overview') }"
+              @click="infoStep = { step: { id: layer.id, label: layer.label, icon: '', state: 'open', info: layer.info }, layerLabel: layer.lockedNote ?? '' }"
             >
               <UIcon name="i-ph-info" class="size-4.5" />
-            </span>
+            </button>
           </div>
           <ul v-if="layer.steps" class="mt-2.5 space-y-1">
-          <li v-for="step in layer.steps" :key="step.id">
+          <li v-for="step in layer.steps" :key="step.id" class="relative">
             <button
               v-if="step.kind === 'result'"
               class="flex w-full items-center gap-3 rounded-full py-2.5 pl-2 pr-2 text-left text-sm"
@@ -120,16 +122,21 @@ const infoOpen = computed({
                 <UIcon :name="isLocked(layer, step) ? 'i-ph-lock-simple' : step.state === 'done' ? 'i-ph-check' : step.state === 'active' ? 'i-ph-circle-half-fill' : 'i-ph-circle'" class="size-4" :style="!isLocked(layer, step) && step.state === 'done' ? 'color: var(--bw-accent)' : !isLocked(layer, step) && step.state === 'active' ? 'color: var(--bw-ink)' : 'color: var(--bw-muted)'" />
               </span>
               <span class="min-w-0 flex-1">{{ step.label }}</span>
-              <span
-                v-if="step.info"
-                class="bw-info-btn grid size-7 flex-none place-items-center rounded-full"
-                role="button" tabindex="0"
-                :aria-label="t('brand.workspace.rail.whatMeans', { label: step.label })"
-                @click.stop="infoStep = { step, layerLabel: layer.label }"
-                @keydown.enter.stop="infoStep = { step, layerLabel: layer.label }"
-              >
-                <UIcon name="i-ph-info" class="size-4.5" />
-              </span>
+              <!-- Abstandhalter: der echte Knopf liegt als Geschwister darüber
+                   (Audit B6) — die Zeile behält ihre Maße. -->
+              <span v-if="step.info" class="size-7 flex-none" aria-hidden="true" />
+            </button>
+            <!-- AUSSERHALB der Zeile: sie ist bei `open`/`locked` deaktiviert,
+                 und ein Knopf IM deaktivierten Knopf bekommt keinen Klick —
+                 die Erklärung war genau dort tot, wo man sie braucht. -->
+            <button
+              v-if="step.info && step.kind !== 'result'"
+              type="button"
+              class="bw-info-btn absolute right-2 top-1/2 grid size-7 -translate-y-1/2 place-items-center rounded-full"
+              :aria-label="t('brand.workspace.rail.whatMeans', { label: step.label })"
+              @click="infoStep = { step, layerLabel: layer.label }"
+            >
+              <UIcon name="i-ph-info" class="size-4.5" />
             </button>
           </li>
           </ul>

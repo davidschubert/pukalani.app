@@ -1559,9 +1559,9 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
        Beschreibung, die Kolleginnen und Kollegen mit ihrem Schwerpunkt, eine
        typische Frage und Georges Arbeitsweise-Zeile. Alles lokalisiert — die
        `personal`-Zeile der Registry ist Prompt-/About-Ebene und deutsch-only. -->
-  <UModal v-model:open="advisorInfoOpen">
+  <UModal v-model:open="advisorInfoOpen" :title="voice.fullName">
     <template #content>
-      <div class="bw-root max-h-[85vh] overflow-y-auto p-7" style="background: var(--bw-surface-hi)">
+      <div class="bw-root bw-overlay max-h-[85vh] overflow-y-auto p-7">
         <div class="flex items-center gap-3">
           <BwGeorgeAvatar :src="voice.avatar" :initial="voice.name.slice(0, 1)" :alt="voice.name" />
           <span class="min-w-0 leading-tight">
@@ -1593,9 +1593,9 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
 
   <!-- Frühere Fassungen: Auswahl schreibt in den EDITOR, gespeichert wird über
        den normalen Autosave (kein eigener Schreibweg — s. `useVersion`). -->
-  <UModal v-model:open="versionsOpen">
+  <UModal v-model:open="versionsOpen" :title="t('brand.workspace.versions.title')">
     <template #content>
-      <div class="bw-root max-h-[85vh] overflow-y-auto p-8" style="background: var(--bw-surface-hi)">
+      <div class="bw-root bw-overlay max-h-[85vh] overflow-y-auto p-8">
         <p class="bw-label uppercase tracking-widest" style="color: var(--bw-muted)">
           {{ versionsSlot ? slotLabel(versionsSlot) : '' }}
         </p>
@@ -1657,9 +1657,9 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
   </UModal>
 
   <!-- 409: BEIDE Fassungen, nichts wird automatisch überschrieben (§3e). -->
-  <UModal v-model:open="conflictOpen">
+  <UModal v-model:open="conflictOpen" :title="t('brand.workspace.conflict.title')">
     <template #content>
-      <div class="bw-root max-h-[85vh] overflow-y-auto p-8" style="background: var(--bw-surface-hi)">
+      <div class="bw-root bw-overlay max-h-[85vh] overflow-y-auto p-8">
         <p class="bw-label uppercase tracking-widest" style="color: var(--bw-stale)">{{ t('brand.workspace.sync.conflict') }}</p>
         <h2 class="mt-1 text-[24px] font-extralight leading-tight tracking-tight">{{ t('brand.workspace.conflict.title') }}</h2>
         <p class="mt-3 text-sm leading-relaxed" style="color: var(--bw-ink-soft)">{{ t('brand.workspace.conflict.description') }}</p>

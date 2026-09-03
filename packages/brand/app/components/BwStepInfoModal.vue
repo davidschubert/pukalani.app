@@ -22,35 +22,62 @@ import type { BwRailStep } from './BwProgressRail.vue'
  * Statt sie zu erfinden, fällt der Absatz weg: die Entscheidungsliste allein
  * ist wahr, ein ausgedachter Absatz wäre es nicht.
  */
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   step: BwRailStep | null
-  layerLabel: string
-}>()
+  /**
+   * Die Zeile ÜBER der Überschrift. Leer heisst „Übersicht" — die Regel steht
+   * seit dem Audit (B11) HIER und nicht mehr zweimal bei den Aufrufern, wo sie
+   * schon auseinandergelaufen war (die Sidebar zog `layer.note` mit heran, die
+   * Leiste nicht).
+   */
+  layerLabel?: string
+}>(), { layerLabel: '' })
 
 const open = defineModel<boolean>('open', { default: false })
 
 const { t } = useI18n()
 
-const bausteine = computed(() => props.step?.info?.bausteine ?? [])
+/**
+ * WAS GEZEIGT WIRD, ÜBERLEBT DAS SCHLIESSEN (Audit-Befund B8).
+ *
+ * Die Aufrufer halten den offenen Baustein in einem Ref und NULLEN ihn beim
+ * Schliessen — daran hängt ja ihr `open`. Hing das Markup direkt an `step`,
+ * war der Inhalt weg, bevor die Schliess-Animation lief: der Layer klappte
+ * leer zu (Projektregel „offene Modals nie per v-if unmounten").
+ * Der letzte gezeigte Stand bleibt deshalb hier stehen, bis ein neuer kommt.
+ */
+const shown = ref<{ step: BwRailStep, layerLabel: string } | null>(null)
+watch(() => props.step, (step) => {
+  if (step) shown.value = { step, layerLabel: props.layerLabel }
+}, { immediate: true })
+
+const heading = computed(() => shown.value?.step.label ?? '')
+const eyebrow = computed(() => shown.value?.layerLabel || t('brand.workspace.rail.overview'))
+
+const bausteine = computed(() => shown.value?.step.info?.bausteine ?? [])
 const doneCount = computed(() => bausteine.value.filter(entry => entry.done).length)
 const pct = computed(() =>
   (bausteine.value.length ? Math.round((doneCount.value / bausteine.value.length) * 100) : 0))
 </script>
 
 <template>
-  <UModal v-model:open="open">
+  <!-- `title` gibt dem Dialog seinen NAMEN (Audit B10): Nuxt UI rendert ihn
+       bei belegtem `content`-Slot als visuell verstecktes DialogTitle, sonst
+       hat der Dialog gar keinen — Screenreader kündigen dann nichts an. -->
+  <UModal v-model:open="open" :title="heading">
     <template #content>
-      <div v-if="step?.info" class="bw-root relative max-h-[85vh] overflow-y-auto p-8" style="background: var(--bw-surface-hi)">
+      <div v-if="shown?.step.info" class="bw-root bw-overlay relative max-h-[85vh] overflow-y-auto p-8">
         <button
+          type="button"
           class="absolute right-5 top-5 grid size-8 place-items-center rounded-full transition-colors hover:bg-[var(--bw-line)]"
           :aria-label="t('brand.common.close')"
           @click="open = false"
         >
           <UIcon name="i-ph-x" class="size-4.5" style="color: var(--bw-ink-soft)" />
         </button>
-        <p class="bw-label uppercase tracking-widest" style="color: var(--bw-muted)">{{ layerLabel }}</p>
-        <h2 class="mt-1 text-[28px] font-extralight leading-tight tracking-tight">{{ step.label }}</h2>
-        <p v-if="step.info.description" class="mt-3 text-sm leading-relaxed" style="color: var(--bw-ink-soft)">{{ step.info.description }}</p>
+        <p class="bw-label uppercase tracking-widest" style="color: var(--bw-muted)">{{ eyebrow }}</p>
+        <h2 class="mt-1 text-[28px] font-extralight leading-tight tracking-tight">{{ heading }}</h2>
+        <p v-if="shown.step.info.description" class="mt-3 text-sm leading-relaxed" style="color: var(--bw-ink-soft)">{{ shown.step.info.description }}</p>
 
         <p class="bw-label mt-6" style="color: var(--bw-muted)">{{ t('brand.workspace.decisions') }}</p>
         <ul class="mt-2 space-y-2.5">
@@ -68,7 +95,7 @@ const pct = computed(() =>
         <div class="mt-7">
           <div class="flex items-baseline justify-between gap-3">
             <p class="bw-label uppercase tracking-wider" style="color: var(--bw-muted)">
-              {{ step.slots ?? t('brand.workspace.progress', { filled: doneCount, total: bausteine.length }) }}<template v-if="step.info.minutes"> · {{ step.info.minutes }}</template>
+              {{ shown.step.slots ?? t('brand.workspace.progress', { filled: doneCount, total: bausteine.length }) }}<template v-if="shown.step.info.minutes"> · {{ shown.step.info.minutes }}</template>
             </p>
             <span class="bw-label uppercase tracking-wider">{{ pct }}&thinsp;%</span>
           </div>

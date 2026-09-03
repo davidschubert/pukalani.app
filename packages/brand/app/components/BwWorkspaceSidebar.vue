@@ -154,7 +154,8 @@ function openLayerInfo(layer: BwRailLayer): void {
   if (!layer.info) return
   infoStep.value = {
     step: { id: layer.id, label: layer.label, icon: '', state: 'open', info: layer.info },
-    layerLabel: layer.lockedNote ?? layer.note ?? t('brand.workspace.rail.overview'),
+    // Leer heisst „Übersicht" — die Rückfall-Regel wohnt im Modal (B11).
+    layerLabel: layer.lockedNote ?? layer.note ?? '',
   }
 }
 
@@ -228,68 +229,84 @@ function selectStep(layer: BwRailLayer, step: BwRailStep): void {
       </template>
     </UDropdownMenu>
 
-    <!-- 3. Bereiche als einklappbare Gruppen -->
+    <!-- 3. Bereiche als einklappbare Gruppen.
+         DER INFO-KNOPF IST EIN GESCHWISTER, KEIN KIND (Audit B6/B7/A14). Er
+         stand IM Zeilen-Knopf: verschachtelt-interaktiv (ungültiges Markup),
+         `role="button" tabindex=0` statt eines echten Knopfs (Leertaste
+         blubberte zum Collapsible), und — der eigentliche Schaden — auf einer
+         DEAKTIVIERTEN Zeile unterdrückt der Browser jeden Klick im Knopf.
+         „Was bedeutet das?" war damit genau dort tot, wo man es braucht: an
+         einem Baustein, den man noch nicht betreten kann.
+         Der Platz bleibt derselbe (ein Abstandhalter im Fluss, der echte
+         Knopf absolut darüber) — die Zeile sieht Pixel für Pixel aus wie
+         vorher, inklusive Hover-Fläche über die volle Breite. -->
     <div class="mt-4 space-y-1">
-      <UCollapsible
-        v-for="layer in layers" :key="layer.id"
-        :default-open="!layer.locked" :unmount-on-hide="false" class="group/section"
-      >
-        <button
-          class="bw-nav-row group/row flex w-full items-center gap-1.5 rounded-md px-2.5 py-1.5 text-left text-sm font-medium"
-          :style="layer.locked ? 'color: var(--bw-muted)' : ''"
-        >
-          <UIcon v-if="layer.locked" name="i-ph-lock-simple" class="size-4 flex-none" style="color: var(--bw-muted)" />
-          <span class="min-w-0 flex-1 truncate">{{ layer.label }}</span>
-          <span
-            v-if="layer.info"
-            class="bw-info-btn bw-nav-info grid size-6 flex-none place-items-center rounded-full"
-            role="button" tabindex="0"
-            :aria-label="t('brand.workspace.rail.whatsIn', { label: layer.label })"
-            @click.stop="openLayerInfo(layer)"
-            @keydown.enter.stop="openLayerInfo(layer)"
+      <div v-for="layer in layers" :key="layer.id" class="bw-nav-item">
+        <UCollapsible :default-open="!layer.locked" :unmount-on-hide="false" class="group/section">
+          <button
+            type="button"
+            class="bw-nav-row group/row flex w-full items-center gap-1.5 rounded-md px-2.5 py-1.5 text-left text-sm font-medium"
+            :style="layer.locked ? 'color: var(--bw-muted)' : ''"
           >
-            <UIcon name="i-ph-info" class="size-4" />
-          </span>
-          <UIcon
-            name="i-ph-caret-down" class="size-4 flex-none transition-transform group-data-[state=closed]/section:-rotate-90"
-            style="color: var(--bw-muted)"
-          />
-        </button>
+            <UIcon v-if="layer.locked" name="i-ph-lock-simple" class="size-4 flex-none" style="color: var(--bw-muted)" />
+            <span class="min-w-0 flex-1 truncate">{{ layer.label }}</span>
+            <span v-if="layer.info" class="size-6 flex-none" aria-hidden="true" />
+            <UIcon
+              name="i-ph-caret-down" class="size-4 flex-none transition-transform group-data-[state=closed]/section:-rotate-90"
+              style="color: var(--bw-muted)"
+            />
+          </button>
 
-        <template #content>
-          <!-- Kinder an einer 1px-Führungslinie, Nuxt-UI-Einzug (ms-5 / ps-1.5). -->
-          <ul class="ml-5 mt-0.5 space-y-0.5 border-l pl-1.5" style="border-color: var(--bw-line)">
-            <li v-for="step in layer.steps ?? []" :key="step.id">
-              <button
-                class="bw-nav-row group/row flex w-full items-center gap-1.5 rounded-md px-2.5 py-1.5 text-left text-sm"
-                :class="!layer.locked && step.state === 'active' ? 'font-medium' : ''"
-                :style="!layer.locked && step.state === 'active'
-                  ? 'background: var(--bw-surface-hi); color: var(--bw-ink); box-shadow: var(--bw-shadow-card)'
-                  : stepDisabled(layer, step) ? 'color: var(--bw-muted)' : 'color: var(--bw-ink-soft)'"
-                :disabled="stepDisabled(layer, step)"
-                @click="selectStep(layer, step)"
-              >
-                <UIcon :name="glyph(layer, step).name" class="size-4 flex-none" :style="glyph(layer, step).style" />
-                <span class="min-w-0 flex-1 truncate">{{ step.label }}</span>
-                <span
+          <template #content>
+            <!-- Kinder an einer 1px-Führungslinie, Nuxt-UI-Einzug (ms-5 / ps-1.5). -->
+            <ul class="ml-5 mt-0.5 space-y-0.5 border-l pl-1.5" style="border-color: var(--bw-line)">
+              <li v-for="step in layer.steps ?? []" :key="step.id" class="bw-nav-item">
+                <button
+                  type="button"
+                  class="bw-nav-row group/row flex w-full items-center gap-1.5 rounded-md px-2.5 py-1.5 text-left text-sm"
+                  :class="!layer.locked && step.state === 'active' ? 'font-medium' : ''"
+                  :style="!layer.locked && step.state === 'active'
+                    ? 'background: var(--bw-surface-hi); color: var(--bw-ink); box-shadow: var(--bw-shadow-card)'
+                    : stepDisabled(layer, step) ? 'color: var(--bw-muted)' : 'color: var(--bw-ink-soft)'"
+                  :disabled="stepDisabled(layer, step)"
+                  @click="selectStep(layer, step)"
+                >
+                  <UIcon :name="glyph(layer, step).name" class="size-4 flex-none" :style="glyph(layer, step).style" />
+                  <span class="min-w-0 flex-1 truncate">{{ step.label }}</span>
+                  <span v-if="step.info && !layer.locked" class="size-6 flex-none" aria-hidden="true" />
+                  <UIcon
+                    v-if="step.kind === 'result' && step.state === 'done'"
+                    name="i-ph-arrow-right" class="size-4 flex-none" style="color: var(--bw-ink-soft)"
+                  />
+                </button>
+                <button
                   v-if="step.info && !layer.locked"
-                  class="bw-info-btn bw-nav-info grid size-6 flex-none place-items-center rounded-full"
-                  role="button" tabindex="0"
+                  type="button"
+                  class="bw-info-btn bw-nav-info absolute top-1/2 grid size-6 -translate-y-1/2 place-items-center rounded-full"
+                  :class="step.kind === 'result' && step.state === 'done' ? 'right-8' : 'right-2.5'"
                   :aria-label="t('brand.workspace.rail.whatMeans', { label: step.label })"
-                  @click.stop="infoStep = { step, layerLabel: layer.label }"
-                  @keydown.enter.stop="infoStep = { step, layerLabel: layer.label }"
+                  @click="infoStep = { step, layerLabel: layer.label }"
                 >
                   <UIcon name="i-ph-info" class="size-4" />
-                </span>
-                <UIcon
-                  v-if="step.kind === 'result' && step.state === 'done'"
-                  name="i-ph-arrow-right" class="size-4 flex-none" style="color: var(--bw-ink-soft)"
-                />
-              </button>
-            </li>
-          </ul>
-        </template>
-      </UCollapsible>
+                </button>
+              </li>
+            </ul>
+          </template>
+        </UCollapsible>
+        <!-- Steht AUSSERHALB des Collapsibles: dessen Standard-Slot IST der
+             Auslöser (`as-child`), ein Geschwister darin wäre wieder Teil des
+             Knopfs. Die 2rem sind die Flucht des Abstandhalters oben (Pfeil
+             1rem + Lücke 0,375rem + Rand 0,625rem). -->
+        <button
+          v-if="layer.info"
+          type="button"
+          class="bw-info-btn bw-nav-info absolute right-8 top-1.5 grid size-6 place-items-center rounded-full"
+          :aria-label="t('brand.workspace.rail.whatsIn', { label: layer.label })"
+          @click="openLayerInfo(layer)"
+        >
+          <UIcon name="i-ph-info" class="size-4" />
+        </button>
+      </div>
     </div>
 
     <!-- Sync-Zustand: ohne Topbar zeigt ihn die Sidebar (nur Abweichungen). -->
