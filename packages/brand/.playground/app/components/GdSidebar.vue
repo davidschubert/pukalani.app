@@ -34,11 +34,13 @@ const SYNC = {
   conflict: { key: 'brand.workspace.sync.conflict', icon: 'i-ph-warning', spin: false },
 } as const
 
-/* Dummy-Daten des Switchers — im echten Produkt kommt die Liste vom Konto. */
+/* Dummy-Daten des Switchers — im echten Produkt kommt die Liste vom Konto.
+ * Runde 19 (David): die Marken-Einträge tragen ihr MONOGRAMM (identisch zum
+ * Trigger) — deshalb eigene Item-Slots statt des Standard-Renderings. */
 const brandMenu = [
   [
-    { label: 'Brot & Zeit', type: 'checkbox' as const, checked: true },
-    { label: 'Kailua Coffee Co.', onSelect: () => { navigateTo('/brand/demo/werte') } },
+    { label: 'Brot & Zeit', slot: 'brand-current' as const },
+    { label: 'Kailua Coffee Co.', slot: 'brand-kailua' as const, onSelect: () => { navigateTo('/brand/demo/werte') } },
   ],
   [
     { label: 'Neues Branding', icon: 'i-ph-plus-circle' },
@@ -77,7 +79,9 @@ function glyph(layer: BwRailLayer, step: BwRailStep): { name: string, style: str
 <template>
   <nav :aria-label="t('brand.workspace.rail.progressNav')">
     <!-- 1. Brand-Switcher oben (ersetzt den Topbar-Switcher) -->
-    <UDropdownMenu :items="brandMenu" :content="{ align: 'start' }" :ui="{ content: 'min-w-56' }">
+    <!-- Runde 19 (David): das Menü spannt die VOLLE Trigger-Breite auf
+         (Reka-Variable), wie beim Team-Switcher des Vorbilds. -->
+    <UDropdownMenu :items="brandMenu" :content="{ align: 'start' }" :ui="{ content: 'w-(--reka-dropdown-menu-trigger-width)' }">
       <!-- Runde 17: Nuxt-UI-Standardmetrik — px-2.5 / gap-1.5 wie die
            NavigationMenu-Zeilen, damit alles auf einer Flucht sitzt. -->
       <button
@@ -91,6 +95,16 @@ function glyph(layer: BwRailLayer, step: BwRailStep): { name: string, style: str
         <span class="min-w-0 flex-1 truncate text-sm font-medium">Brot &amp; Zeit</span>
         <UIcon name="i-ph-caret-up-down" class="size-4 flex-none" style="color: var(--bw-muted)" />
       </button>
+
+      <template #brand-current>
+        <span class="gd-mono">B</span>
+        <span class="min-w-0 flex-1 truncate text-left">Brot &amp; Zeit</span>
+        <UIcon name="i-ph-check" class="size-4 flex-none" style="color: var(--bw-accent)" />
+      </template>
+      <template #brand-kailua>
+        <span class="gd-mono">K</span>
+        <span class="min-w-0 flex-1 truncate text-left">Kailua Coffee Co.</span>
+      </template>
     </UDropdownMenu>
 
     <!-- 3. Bereiche als einklappbare Gruppen -->
@@ -213,6 +227,13 @@ function glyph(layer: BwRailLayer, step: BwRailStep): { name: string, style: str
 
 <style scoped>
 .gd-switch:hover, .gd-switch:focus-visible { background: var(--bw-surface-hi); }
+/* Runde 19: dasselbe Monogramm wie im Trigger, eine Stufe kleiner. */
+.gd-mono {
+  display: grid; place-items: center; flex: none;
+  inline-size: 1.5rem; block-size: 1.5rem; border-radius: 0.5rem;
+  background: var(--bw-ink); color: var(--bw-paper);
+  font-size: 0.75rem; font-weight: 600;
+}
 .gd-row:not(:disabled):hover { background: var(--bw-surface-hi); }
 /* Info-Icons ruhen, bis die Zeile Hover/Fokus hat — sie bleiben fokussierbar. */
 .gd-info { opacity: 0; transition: opacity 120ms; }
