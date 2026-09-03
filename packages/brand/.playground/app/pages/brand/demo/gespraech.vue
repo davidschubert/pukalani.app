@@ -600,7 +600,8 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
           @click="railCollapsed = !railCollapsed"
         />
         <div class="min-w-0 leading-tight">
-          <p class="bw-label" style="color: var(--bw-muted)">Brand Foundation</p>
+          <!-- Runde 34 (David): die Bereichs-Zeile in Versalien. -->
+          <p class="bw-label uppercase tracking-wider" style="color: var(--bw-muted)">Brand Foundation</p>
           <p class="truncate font-semibold">Purpose · Vision · Mission</p>
         </div>
         <!-- Runde 33 (David): das Gegenstück zum Nav-Toggle — klappt die
