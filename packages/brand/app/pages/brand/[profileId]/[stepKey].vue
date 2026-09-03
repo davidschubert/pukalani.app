@@ -38,7 +38,6 @@ import {
 } from '../../../../shared/brandSlotReadiness'
 import {
   type BrandSlotControls,
-  brandChapterProgress,
   brandSlotControls,
 } from '../../../../shared/brandSlotControls'
 import type {
@@ -274,20 +273,29 @@ const turns = computed<StageTurn[]>(() => {
   }
 
   const help = nextSlot.value.helpKey ? t(nextSlot.value.helpKey) : undefined
-  if (busy || conversation.coveredSlotId.value === nextSlot.value.id) {
-    const last = spoken.at(-1)
-    return last && !busy ? [...spoken.slice(0, -1), { ...last, help }] : spoken
+  if (busy) return spoken
+
+  const question: StageTurn = {
+    id: nextSlot.value.id,
+    role: 'george',
+    text: t(questionKeyFor(nextSlot.value, pathKind.value)),
+    help,
   }
 
-  return [
-    ...spoken,
-    {
-      id: nextSlot.value.id,
-      role: 'george',
-      text: t(questionKeyFor(nextSlot.value, pathKind.value)),
-      help,
-    },
-  ]
+  if (conversation.coveredSlotId.value === nextSlot.value.id) {
+    const last = spoken.at(-1)
+    // NUR EINEN GEORGE-ZUG ERSETZEN (Audit-Befund A5). `coveredSlotId` sagt,
+    // dass die Frage gestellt WURDE — nicht, dass sein Zug noch dasteht: ein
+    // leer gebliebener Strom wird in `endGeorgeMessage` weggeräumt, und dann
+    // ist der letzte Zug die ANTWORT DES MENSCHEN. Der Lehrblock landete in
+    // dessen Blase, das Modul rendert dort gar nicht (es hängt an
+    // `role === 'george'`), und bei einer AUSWAHL war zugleich das Prompt
+    // gesperrt — die Bühne war unbedienbar. Steht sein Zug nicht mehr da,
+    // steht die Frage eben wieder da.
+    return last?.role === 'george' ? [...spoken.slice(0, -1), { ...last, help }] : [...spoken, question]
+  }
+
+  return [...spoken, question]
 })
 
 /* Runde 55 (David) für die BÜHNE: der Verlauf ankert unten und wächst nach
@@ -488,8 +496,10 @@ function cardFor(slotId: string): BrandSlotCard | null {
   return slotCards.value.find(entry => entry.slot.id === slotId) ?? null
 }
 
-/** Der Balken DIESES Kapitels — der Gesamt-Weg steht unten rechts im Log. */
-const chapterProgress = computed(() => brandChapterProgress(slotCards.value.map(entry => entry.controls)))
+/* Einen KAPITEL-Balken zeigt diese Seite nicht mehr (Audit A10): der
+ * Rail-Fuss ist aus (`railFooter=false`), unten rechts im Log steht der
+ * GESAMT-Fortschritt. `brandChapterProgress` bleibt als geprüfte Regel im
+ * shared-Ordner stehen — der Klickdummy dokumentiert den Balken weiter. */
 
 async function generateSlot(slot: BrandSlot): Promise<void> {
   await generation.generate(slot.id, hints.value[slot.id] ?? '')
@@ -821,9 +831,16 @@ async function readSite(): Promise<void> {
 
 // ── Leiste, Balken, Fortschritt ───────────────────────────────────────────
 
+/**
+ * Der Journey-Zustand in der Sprache der Leiste. `locked` wurde bis zum
+ * Audit-Befund A9 auf `open` abgebildet — das Schloss des Plans erschien in
+ * der Leiste damit NIE, obwohl der Log daneben es an derselben Stelle zeigt.
+ * `skipped` kommt hier nicht an (`store.railSteps` filtert es heraus).
+ */
 function railState(state: string): BwRailStep['state'] {
   if (state === 'done') return 'done'
   if (state === 'active') return 'active'
+  if (state === 'locked') return 'locked'
   return 'open'
 }
 
@@ -920,6 +937,19 @@ async function goToStep(key: string | null): Promise<void> {
   // Komponente, `onBeforeRouteLeave` feuert dafür NICHT.
   await autosave.flush()
   await navigateTo(localePath(`/brand/${profileId.value}/${key}`))
+}
+
+/**
+ * DER MARKEN-WECHSEL BRAUCHT DENSELBEN AUSSPÜLER (Audit-Befund A3). Er
+ * springt auf DENSELBEN Route-Record (nur andere `profileId`) — genau wie der
+ * Baustein-Wechsel feuert `onBeforeRouteLeave` dafür NICHT, und ein `to` am
+ * Menü-Eintrag hätte offene Eingaben mitgenommen. Das Ziel kommt aus der
+ * Liste des Kontos, nicht vom Menü-Klick.
+ */
+async function goToBrand(to: string): Promise<void> {
+  if (!to) return
+  await autosave.flush()
+  await navigateTo(to)
 }
 
 // ── Konfidenz-Weiche ──────────────────────────────────────────────────────
@@ -1043,7 +1073,7 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
        frei (R30), damit beim Laden nichts springt. -->
   <BwWorkspace
     v-else
-    :progress-pct="chapterProgress.pct"
+    :progress-pct="overallProgress.pct"
     :content-locale="store.profile?.contentLocale ?? locale"
     :locale-in-topbar="false"
     :topbar="false"
@@ -1063,6 +1093,7 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
         :sync-state="workspaceSync"
         :sync-label="workspaceSyncLabel"
         @select="goToStep"
+        @select-brand="goToBrand"
       />
     </template>
 
@@ -1176,11 +1207,18 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
             <template v-if="index === turns.length - 1 && turn.role === 'george'">
               <!-- ANSWER: nur der Beispiel-Ausweg; geantwortet wird im Prompt. -->
               <div v-if="stageModule === 'answer' && composerExample" class="mt-2">
-                <button class="bw-label underline" style="color: var(--bw-muted)" @click="exampleOpen = !exampleOpen">
+                <!-- Die ANFÜHRUNGSZEICHEN gehören in die Nachricht, nicht ins
+                     Markup (Audit A12): deutsche und englische Oberflächen
+                     setzen sie verschieden, und ein Literal hier hätte auf
+                     der englischen Seite deutsche Zeichen gezeigt. -->
+                <button
+                  type="button" class="bw-label underline" style="color: var(--bw-muted)"
+                  :aria-expanded="exampleOpen" @click="exampleOpen = !exampleOpen"
+                >
                   {{ exampleOpen ? t('brand.workspace.example.hide') : t('brand.workspace.example.show') }}
                 </button>
-                <button v-if="exampleOpen" class="bw-pending mt-2 block text-left" @click="takeExample">
-                  „{{ composerExample }}“ — {{ t('brand.workspace.example.take') }}
+                <button v-if="exampleOpen" type="button" class="bw-pending mt-2 block text-left" @click="takeExample">
+                  {{ t('brand.workspace.example.quoted', { text: composerExample, hint: t('brand.workspace.example.take') }) }}
                 </button>
               </div>
 
@@ -1256,6 +1294,7 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
                       :label="pendingCard.controls.showHint ? t('brand.workspace.retryWithHint') : t('brand.workspace.generate.start')"
                       :loading="generation.streaming.value"
                       :disabled="generation.streaming.value"
+                      :aria-expanded="pendingCard.controls.showHint ? hintOpen : undefined"
                       @click="pendingCard.controls.showHint ? (hintOpen = !hintOpen) : generateSlot(pendingCard.slot)"
                     />
                     <UButton

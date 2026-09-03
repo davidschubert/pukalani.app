@@ -64,6 +64,16 @@ const props = withDefaults(defineProps<{
 const emit = defineEmits<{
   /** Ein betretbarer Baustein wurde gewählt — die SEITE navigiert (Autosave!). */
   select: [stepId: string]
+  /**
+   * Eine ANDERE Marke wurde gewählt — auch hier navigiert die SEITE.
+   *
+   * Ein `to` am Menü-Eintrag wäre kürzer und falsch (Audit-Befund A3): der
+   * Sprung geht auf DENSELBEN Route-Record (`brand/[profileId]/[stepKey]`),
+   * also feuert `onBeforeRouteLeave` nicht, und der Autosave hat nie
+   * ausgespült — offene Eingaben wären weg. Es ist dieselbe Regel, die
+   * `goToStep` schon befolgt.
+   */
+  selectBrand: [to: string]
 }>()
 
 const { t } = useI18n()
@@ -123,7 +133,10 @@ const brandMenu = computed<BwSwitcherItem[][]>(() => [
     sub: brand.path,
     flag: brand.flag,
     active: brand.current === true,
-    ...(brand.to && !brand.current ? { to: brand.to } : {}),
+    // `onSelect` statt `to`: der Wechsel muss erst den Autosave ausspülen (A3).
+    ...(brand.to && !brand.current
+      ? { onSelect: () => { emit('selectBrand', brand.to as string) } }
+      : {}),
   })),
   [
     { label: t('brand.nav.newBranding'), icon: 'i-ph-plus-circle', onSelect: () => { newBrandOpen.value = true } },
@@ -147,7 +160,8 @@ function openLayerInfo(layer: BwRailLayer): void {
 
 /** Status-Glyphe VORN: Haken accent · Halbmond ink · Kreis muted · Schloss. */
 function glyph(layer: BwRailLayer, step: BwRailStep): { name: string, style: string } {
-  if (layer.locked) return { name: 'i-ph-lock-simple', style: 'color: var(--bw-muted)' }
+  // Gesperrt ist ein Punkt durch seine SCHICHT oder durch sich selbst (A9).
+  if (layer.locked || step.state === 'locked') return { name: 'i-ph-lock-simple', style: 'color: var(--bw-muted)' }
   if (step.kind === 'result') return { name: 'i-ph-sparkle', style: step.state === 'done' ? 'color: var(--bw-accent)' : 'color: var(--bw-muted)' }
   if (step.state === 'done') return { name: 'i-ph-check-circle-fill', style: 'color: var(--bw-accent)' }
   if (step.state === 'active') return { name: 'i-ph-circle-half-fill', style: 'color: var(--bw-ink)' }
@@ -161,12 +175,15 @@ function glyph(layer: BwRailLayer, step: BwRailStep): { name: string, style: str
  * Knopf anzubieten, der nichts tut.
  */
 function stepDisabled(layer: BwRailLayer, step: BwRailStep): boolean {
-  if (layer.locked) return true
+  if (layer.locked || step.state === 'locked') return true
   return step.kind === 'result' ? step.state !== 'done' : step.state === 'open'
 }
 
 function selectStep(layer: BwRailLayer, step: BwRailStep): void {
   if (stepDisabled(layer, step)) return
+  // Ein Punkt mit eigenem Ziel (Ergebnis-Ansicht) führt DORTHIN — `select`
+  // meint „öffne diesen Baustein" und liefe für ihn ins Leere.
+  if (step.to) { void navigateTo(step.to); return }
   emit('select', step.id)
 }
 </script>
@@ -248,7 +265,7 @@ function selectStep(layer: BwRailLayer, step: BwRailStep): void {
                 :class="!layer.locked && step.state === 'active' ? 'font-medium' : ''"
                 :style="!layer.locked && step.state === 'active'
                   ? 'background: var(--bw-surface-hi); color: var(--bw-ink); box-shadow: var(--bw-shadow-card)'
-                  : layer.locked || step.state === 'open' ? 'color: var(--bw-muted)' : 'color: var(--bw-ink-soft)'"
+                  : stepDisabled(layer, step) ? 'color: var(--bw-muted)' : 'color: var(--bw-ink-soft)'"
                 :disabled="stepDisabled(layer, step)"
                 @click="selectStep(layer, step)"
               >

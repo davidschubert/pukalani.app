@@ -262,7 +262,8 @@
       "example": {
         "show": "Show example",
         "hide": "Hide example",
-        "take": "Tab or click puts the text into the field."
+        "take": "Tab or click puts the text into the field.",
+        "quoted": "“{text}” — {hint}"
       },
       "bar": {
         "showNav": "Show navigation",

@@ -20,7 +20,14 @@ export interface BwRailStep {
   id: string
   label: string
   icon: string
-  state: 'done' | 'active' | 'open'
+  /**
+   * `locked` kam mit dem Audit dazu (A9): die Werkstatt bildete den
+   * gesperrten Zustand der Journey auf `open` ab, und das Schloss des Plans
+   * erschien in der Leiste nie — obwohl der Log es an derselben Stelle zeigt.
+   * `open` heisst „betretbar, aber noch nichts drin", `locked` heisst „der
+   * Vorgänger ist noch offen".
+   */
+  state: 'done' | 'active' | 'open' | 'locked'
   slots?: string
   minutes?: string
   info?: BwRailStepInfo
@@ -48,6 +55,11 @@ defineProps<{ layers: BwRailLayer[] }>()
  * Rahmen-Texte der Komponente selbst (aria-Beschriftungen, „Übersicht",
  * „Entscheidungen", die Fortschrittszeile). */
 const { t } = useI18n()
+
+/** Gesperrt ist ein Punkt durch seine SCHICHT oder durch sich selbst (A9). */
+function isLocked(layer: BwRailLayer, step: BwRailStep): boolean {
+  return layer.locked === true || step.state === 'locked'
+}
 
 const infoStep = ref<{ step: BwRailStep, layerLabel: string } | null>(null)
 /* Der Erklär-Layer selbst wohnt seit 2026-09-02 in `BwStepInfoModal` — er
@@ -101,11 +113,11 @@ const infoOpen = computed({
             <button
               v-else
               class="flex w-full items-center gap-3 rounded-full py-2.5 pl-2 pr-2 text-left text-sm"
-              :disabled="layer.locked || step.state === 'open'"
-              :style="!layer.locked && step.state === 'active' ? 'background: var(--bw-surface-hi); color: var(--bw-ink); font-weight: 600; box-shadow: var(--bw-shadow-card)' : 'background: var(--bw-surface); color: ' + (layer.locked || step.state === 'open' ? 'var(--bw-muted)' : 'var(--bw-ink-soft)')"
+              :disabled="isLocked(layer, step) || step.state === 'open'"
+              :style="!isLocked(layer, step) && step.state === 'active' ? 'background: var(--bw-surface-hi); color: var(--bw-ink); font-weight: 600; box-shadow: var(--bw-shadow-card)' : 'background: var(--bw-surface); color: ' + (isLocked(layer, step) || step.state === 'open' ? 'var(--bw-muted)' : 'var(--bw-ink-soft)')"
             >
-              <span class="grid size-7 flex-none place-items-center rounded-full" :style="!layer.locked && step.state === 'done' ? 'background: var(--bw-accent-soft)' : 'background: var(--bw-surface-hi)'">
-                <UIcon :name="layer.locked ? 'i-ph-lock-simple' : step.state === 'done' ? 'i-ph-check' : step.state === 'active' ? 'i-ph-circle-half-fill' : 'i-ph-circle'" class="size-4" :style="!layer.locked && step.state === 'done' ? 'color: var(--bw-accent)' : !layer.locked && step.state === 'active' ? 'color: var(--bw-ink)' : 'color: var(--bw-muted)'" />
+              <span class="grid size-7 flex-none place-items-center rounded-full" :style="!isLocked(layer, step) && step.state === 'done' ? 'background: var(--bw-accent-soft)' : 'background: var(--bw-surface-hi)'">
+                <UIcon :name="isLocked(layer, step) ? 'i-ph-lock-simple' : step.state === 'done' ? 'i-ph-check' : step.state === 'active' ? 'i-ph-circle-half-fill' : 'i-ph-circle'" class="size-4" :style="!isLocked(layer, step) && step.state === 'done' ? 'color: var(--bw-accent)' : !isLocked(layer, step) && step.state === 'active' ? 'color: var(--bw-ink)' : 'color: var(--bw-muted)'" />
               </span>
               <span class="min-w-0 flex-1">{{ step.label }}</span>
               <span
@@ -133,7 +145,7 @@ const infoOpen = computed({
           :disabled="!step.info" @click="step.info && (infoStep = { step, layerLabel: layer.label })"
         >
           <UIcon
-            :name="step.state === 'done' ? 'i-ph-check-circle-fill' : step.state === 'active' ? 'i-ph-circle-half-fill' : 'i-ph-circle'"
+            :name="step.state === 'locked' ? 'i-ph-lock-simple' : step.state === 'done' ? 'i-ph-check-circle-fill' : step.state === 'active' ? 'i-ph-circle-half-fill' : 'i-ph-circle'"
             :style="`color: var(--bw-${step.state === 'active' ? 'accent' : 'muted'})`"
           />
         </button>

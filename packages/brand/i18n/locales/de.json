@@ -262,7 +262,8 @@
       "example": {
         "show": "Beispiel ansehen",
         "hide": "Beispiel ausblenden",
-        "take": "Tab oder Klick übernimmt den Text ins Feld."
+        "take": "Tab oder Klick übernimmt den Text ins Feld.",
+        "quoted": "„{text}“ — {hint}"
       },
       "bar": {
         "showNav": "Navigation einblenden",
