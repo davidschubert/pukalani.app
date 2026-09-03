@@ -116,7 +116,21 @@ interface Turn {
   choice?: string
 }
 
-const HANDOVER = 'Kapitel Purpose · Vision · Mission — George hat den Kontext übergeben.'
+/**
+ * Davids Korrekturrunde 3: die Orts-Hinweise (Step-Label rechts im Kopf,
+ * „Kapitel …"-Zeile) sind RAUS — links im Menü und rechts im Stand steht
+ * längst, wo wir sind. Stattdessen trägt der klebende Kopf die eine Zeile
+ * „Gespräch mit …" + Info-Icon (Layer mit Veras Steckbrief) + dieselbe dünne
+ * Fortschritts-Linie wie der Stand.
+ */
+const veraInfoOpen = ref(false)
+const VERA_INFO = {
+  name: 'Vera Witterung',
+  role: 'Strategin',
+  desc: 'Übernimmt bei Purpose, Vision, Mission und Positionierung — und fragt „warum", bis es trägt. Beliebigkeit überlebt sie nicht.',
+  asks: '„Das könnte jeder sagen. Was könnt nur ihr sagen?"',
+  personal: 'Weimaranerin · Hamburg · steht vor, bevor sie bellt; läuft jede Frage dreimal ab',
+}
 
 const turns = ref<Turn[]>([
   {
@@ -263,6 +277,18 @@ const positionOptions = [
   { id: 'p2', label: 'Gegen die eigene Eile', description: 'Zeit als Zutat: lange Führung, wenige Sorten, nichts nachgeschoben.' },
   { id: 'p3', label: 'Für Familien mit Allergien', description: 'Verträglichkeit als Versprechen — deklariert bis zur letzten Zutat.' },
 ]
+
+const pickedOption = ref<string | null>(null)
+const ownPosition = ref('')
+
+function submitPosition(turn: Turn): void {
+  if (!pickedOption.value) return
+  const text = pickedOption.value === 'own'
+    ? ownPosition.value.trim()
+    : positionOptions.find(option => option.id === pickedOption.value)?.label ?? ''
+  if (!text) return
+  pickPosition(turn, text)
+}
 
 let positionOffered = false
 function offerPosition(): void {
@@ -461,19 +487,52 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
              sichtbar durch. Der Schatten verlängert die Papierfläche genau um
              diesen Abstand nach oben. -->
         <div
-          class="sticky top-0 z-10 flex items-center gap-3 pb-4"
+          class="sticky top-0 z-10 pb-3"
           style="background: var(--bw-paper); box-shadow: 0 -2rem 0 var(--bw-paper)"
         >
-          <BwGeorgeAvatar src="" initial="V" alt="Vera" />
-          <span class="min-w-0 leading-tight">
-            <span class="block text-sm font-medium">Vera</span>
-            <span class="bw-label block" style="color: var(--bw-muted)">Strategin</span>
-          </span>
-          <span class="bw-label ml-auto hidden truncate sm:block" style="color: var(--bw-muted)">Purpose · Vision · Mission</span>
+          <div class="flex items-center gap-3">
+            <BwGeorgeAvatar src="" initial="V" alt="Vera" />
+            <span class="min-w-0 leading-tight">
+              <span class="block text-sm font-medium">Gespräch mit Vera</span>
+              <span class="bw-label block truncate" style="color: var(--bw-muted)">Strategin · Purpose, Vision &amp; Mission</span>
+            </span>
+            <UButton
+              size="xs" color="neutral" variant="ghost" class="ml-auto rounded-full"
+              icon="i-ph-info" aria-label="Über Vera" @click="veraInfoOpen = true"
+            />
+          </div>
+          <div
+            class="bw-chapter-progress-track mt-3" role="progressbar"
+            :aria-valuenow="confirmedCount" aria-valuemin="0" :aria-valuemax="CHAPTER_TOTAL"
+            aria-label="Bestätigte Entscheidungen in diesem Kapitel"
+          >
+            <div class="bw-chapter-progress-fill" :style="`width: ${chapterPct}%`" />
+          </div>
+        </div>
+
+        <!-- Der Vera-Layer: alles über die Beraterin, ohne die Bühne zu verlassen. -->
+        <div
+          v-if="veraInfoOpen" class="fixed inset-0 z-50 flex items-center justify-center p-6"
+          style="background: color-mix(in oklab, var(--bw-ink) 40%, transparent)"
+          @click.self="veraInfoOpen = false"
+        >
+          <div class="w-full max-w-md rounded-2xl p-7" style="background: var(--bw-paper)">
+            <div class="flex items-center gap-3">
+              <BwGeorgeAvatar src="" initial="V" alt="Vera" />
+              <span class="min-w-0 leading-tight">
+                <span class="block text-base font-medium">{{ VERA_INFO.name }}</span>
+                <span class="bw-label block" style="color: var(--bw-muted)">{{ VERA_INFO.role }}</span>
+              </span>
+              <UButton size="xs" color="neutral" variant="ghost" class="ml-auto rounded-full" icon="i-ph-x" aria-label="Schließen" @click="veraInfoOpen = false" />
+            </div>
+            <p class="bw-doc-text mt-4">{{ VERA_INFO.desc }}</p>
+            <p class="bw-label mt-4" style="color: var(--bw-muted)">Typische Frage</p>
+            <p class="mt-1 text-sm italic">{{ VERA_INFO.asks }}</p>
+            <p class="bw-label mt-4 leading-relaxed" style="color: var(--bw-muted)">{{ VERA_INFO.personal }}</p>
+          </div>
         </div>
 
         <div class="flex min-h-0 flex-1 flex-col gap-7 pb-4">
-          <p class="bw-label" style="color: var(--bw-muted)">{{ HANDOVER }}</p>
 
           <div
             v-for="turn in turns" :key="turn.id"
@@ -493,16 +552,18 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
                   placeholder="Antwort schreiben …"
                   @keydown.tab="acceptExample(turn, $event)"
                 />
+                <!-- Davids Korrekturrunde 3: Beispiel als Link linksbündig,
+                     „Weiß ich nicht" + Senden rechts — Senden ganz außen,
+                     ohne Icon. -->
                 <div class="mt-2 flex flex-wrap items-center gap-2">
-                  <UButton
-                    color="neutral" variant="ghost" class="bw-send rounded-full"
-                    icon="i-ph-paper-plane-right" label="Senden"
-                    :disabled="!draft.trim()" @click="answer(turn)"
-                  />
-                  <button class="bw-chip bw-chip--ghost" @click="answer(turn, 'Weiß ich nicht')">Weiß ich nicht</button>
-                  <button class="bw-chip bw-chip--ghost" @click="exampleOpen = !exampleOpen">
+                  <button class="bw-label underline" style="color: var(--bw-muted)" @click="exampleOpen = !exampleOpen">
                     {{ exampleOpen ? 'Beispiel ausblenden' : 'Beispiel ansehen' }}
                   </button>
+                  <button class="bw-chip bw-chip--ghost ml-auto" @click="answer(turn, 'Weiß ich nicht')">Weiß ich nicht</button>
+                  <UButton
+                    color="neutral" variant="ghost" class="bw-send rounded-full"
+                    label="Senden" :disabled="!draft.trim()" @click="answer(turn)"
+                  />
                 </div>
                 <button
                   v-if="exampleOpen" class="bw-pending mt-2 block text-left"
@@ -572,14 +633,46 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
               </div>
 
               <!-- Der Auswahl-Moment: Karten im Zug, Empfehlung mit Grund. -->
-              <div v-else-if="turn.block === 'options'" class="mt-3">
-                <BwOptionCards
-                  :options="positionOptions"
-                  own-placeholder="Oder beschreib eure Position mit eigenen Worten …"
-                  @pick="(id) => pickPosition(turn, positionOptions.find(o => o.id === id)!.label)"
-                  @own="(text) => pickPosition(turn, text)"
-                  @dont-know="pickPosition(turn, 'Weiß ich nicht')"
-                />
+              <!-- Davids Korrekturrunde 3: das Antwort-MODUL nach dem
+                   Claude-Desktop-Vorbild — Optionen als volle Zeilen mit
+                   Titel + Begründung, Empfehlung markiert UND begründet,
+                   „Sonstiges" mit eigenem Feld, Aktionen unten rechts. -->
+              <div v-else-if="turn.block === 'options'" class="mt-3 rounded-2xl p-4" style="background: var(--bw-surface-hi)">
+                <div class="space-y-2">
+                  <button
+                    v-for="option in positionOptions" :key="option.id"
+                    class="block w-full rounded-xl px-4 py-3 text-left transition-shadow"
+                    :style="pickedOption === option.id
+                      ? 'background: var(--bw-accent-soft); box-shadow: inset 0 0 0 1.5px var(--bw-accent)'
+                      : 'background: var(--bw-paper)'"
+                    @click="pickedOption = option.id"
+                  >
+                    <span class="block text-sm font-medium">{{ option.label }}<span v-if="option.recommended" class="bw-label ml-2" style="color: var(--bw-accent)">Empfohlen</span></span>
+                    <span class="mt-0.5 block text-sm" style="color: var(--bw-muted)">{{ option.description }}</span>
+                    <span v-if="option.recommended && option.why" class="mt-1 block text-sm" style="color: var(--bw-ink-soft)">{{ option.why }}</span>
+                  </button>
+                  <div
+                    class="rounded-xl px-4 py-3"
+                    :style="pickedOption === 'own'
+                      ? 'background: var(--bw-accent-soft); box-shadow: inset 0 0 0 1.5px var(--bw-accent)'
+                      : 'background: var(--bw-paper)'"
+                  >
+                    <span class="block text-sm font-medium">Sonstiges</span>
+                    <UInput
+                      v-model="ownPosition" size="sm" class="mt-2 w-full"
+                      placeholder="Beschreib eure Position mit eigenen Worten …"
+                      @focus="pickedOption = 'own'"
+                    />
+                  </div>
+                </div>
+                <div class="mt-3 flex items-center justify-end gap-2">
+                  <button class="bw-chip bw-chip--ghost" @click="pickPosition(turn, 'Weiß ich nicht')">Überspringen</button>
+                  <UButton
+                    color="neutral" variant="ghost" class="bw-send rounded-full" label="Übermitteln"
+                    :disabled="!pickedOption || (pickedOption === 'own' && !ownPosition.trim())"
+                    @click="submitPosition(turn)"
+                  />
+                </div>
               </div>
 
               <!-- Bestätigen IM ZUG — derselbe Knopf und dieselben zwei Farben
