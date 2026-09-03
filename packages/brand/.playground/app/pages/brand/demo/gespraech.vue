@@ -199,7 +199,8 @@ function acceptExample(turn: Turn, event: KeyboardEvent): void {
  * antworten in ihren eigenen Modulen im Zug). */
 const activeAnswerTurn = computed(() => [...turns.value].reverse().find(t => t.block === 'answer') ?? null)
 function promptSubmit(): void { if (activeAnswerTurn.value) answer(activeAnswerTurn.value) }
-function promptDontKnow(): void { if (activeAnswerTurn.value) answer(activeAnswerTurn.value, 'Weiß ich nicht') }
+/* Runde 24 (David): kein „Weiß ich nicht"-Knopf mehr — das kann man tippen,
+ * es ist derselbe Antwort-Weg. */
 function promptTab(event: KeyboardEvent): void { if (activeAnswerTurn.value) acceptExample(activeAnswerTurn.value, event) }
 function promptDemo(): void { if (activeAnswerTurn.value?.demo) draft.value = activeAnswerTurn.value.demo }
 
@@ -764,9 +765,10 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
       </div>
     </template>
 
-    <!-- Runde 23 (David): das Chat-Prompt aus dem Nuxt-UI-Chat-Template,
-         fest am unteren Rand — nur Feld, „Weiß ich nicht" und der
-         Pfeil-nach-oben (unsere Return-Taste); kein Anhang, kein Modell.
+    <!-- Runde 23+24 (David): das Chat-Prompt aus dem Nuxt-UI-Chat-Template,
+         fest am unteren Rand — nur Feld und der Pfeil-nach-oben (unsere
+         Return-Taste); kein Anhang, kein Modell, und seit R24 auch kein
+         „Weiß ich nicht"-Knopf (das kann man tippen, gleicher Antwort-Weg).
          Ausgegraut, solange kein answer-Zug offen ist. -->
     <template #stage-footer>
       <UChatPrompt
@@ -781,13 +783,7 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
           >
             Klickdummy: Demo-Antwort einfügen
           </button>
-          <div class="ml-auto flex items-center gap-1.5">
-            <UButton
-              label="Weiß ich nicht" color="neutral" variant="soft" size="sm"
-              :disabled="!activeAnswerTurn" @click="promptDontKnow"
-            />
-            <UChatPromptSubmit size="sm" color="neutral" :disabled="!activeAnswerTurn || !draft.trim()" />
-          </div>
+          <UChatPromptSubmit class="ml-auto" size="sm" color="neutral" :disabled="!activeAnswerTurn || !draft.trim()" />
         </template>
       </UChatPrompt>
     </template>
