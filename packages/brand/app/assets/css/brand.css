@@ -142,10 +142,47 @@
   /* Audit B13: im Stand-Modus verschwindet die BÜHNE — dann dürfen weder ihr
      Balken noch ihr Fuß (das Prompt) über dem Log stehen bleiben. */
   .bw-mode-george .bw-stage,
-  .bw-mode-george .bw-stage-bar,
   .bw-mode-george .bw-stage-foot { display: none; }
+  /* A7-Nachtrag (David, 2026-09-02): der BALKEN bleibt jetzt stehen. Er
+     trägt den einzigen mobilen Einstieg in die Baustein-Navigation (den
+     Overlay-Toggle) und den Namen des offenen Bausteins — im Stand-Modus,
+     dem MOBILEN STARTZUSTAND, wäre er sonst nicht erreichbar. Versteckt
+     bleiben Bühne und Prompt, wie B13 es verlangt.
+     Damit stehen im Stand-Modus zwei Grid-Kinder untereinander, und dort
+     lauert eine Falle: bei zwei `auto`-Zeilen verteilt `align-content:
+     stretch` (der Default) die freie Höhe GLEICHMÄSSIG — der 4rem-Balken
+     bekäme die halbe Werkstatt. Deshalb die festen Zeilen. */
+  .bw-mode-george .bw-zones { grid-template-rows: auto minmax(0, 1fr); }
+
+  /* MOBIL IST DIE NAV EIN VOLLBILD-OVERLAY (A7, Davids Entscheidung
+     2026-09-02) — derselbe `<aside>` wie in der Spalte, nur aus dem Fluss
+     gehoben. Ein fixiertes Grid-Kind bildet KEINE Spur mehr, das Raster
+     darunter bleibt also einspaltig wie bisher.
+     Die Regel sticht `.bw-rail { display: none }` zwei Zeilen weiter oben
+     über die zweite Klasse, nicht über die Reihenfolge.
+
+     Z-INDEX 50 IST EXAKT ABGEZÄHLT, nicht geraten (live erwischt): die
+     Hauptnavigation (`BwSiteNav`) klebt mit `sticky z-50` oben — bei 30 lag
+     das „Vollbild"-Overlay UNTER ihr, der Schliessen-Knopf verschwand
+     dahinter, und man sah eine Leiste, die `inert` ist. Gleicher Wert heisst
+     „DOM-Reihenfolge entscheidet": die Rail steht NACH der Navigation, also
+     gewinnt sie. Und die teleportierten Modals („Was bedeutet das?", „Neues
+     Branding") hängen am `body`-Ende, ebenfalls z-50 — sie gewinnen aus
+     demselben Grund gegen die Rail. Höher zählen darf man hier also NICHT:
+     51 stellte das Overlay über den Info-Layer, aus dem es ihn öffnet. */
+  .bw-rail.bw-rail-overlay {
+    display: flex; position: fixed; inset: 0; z-index: 50;
+    background: var(--bw-surface-hi);
+  }
+  .bw-rail.bw-rail-overlay .bw-rail-overlay-head {
+    display: flex; justify-content: flex-end;
+    padding: var(--bw-rail-pad-y, var(--bw-gutter)) var(--bw-rail-pad-x, var(--bw-gutter)) 0;
+  }
 }
 @media (min-width: 768px) { .bw-modeswitch { display: none; } }
+/* Der Schliessen-Knopf des Overlays existiert nur mobil — ab 768 px ist der
+   `<aside>` eine Spalte und braucht keinen. */
+.bw-rail-overlay-head { display: none; }
 /* Die Toggle-Zustände stehen NACH den Media-Blöcken: gleiche Spezifität,
    also gewinnt die spätere Zeile — in jedem Breitenbereich. */
 .bw-zones--rail-off { --bw-col-rail: 0px; }

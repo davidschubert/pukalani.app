@@ -35,6 +35,23 @@ const props = withDefaults(defineProps<{
   /* Runde 33 (David): dito für die STAND-Spalte rechts — eingeklappt entfällt
    * der Splitter und die Bühne nimmt die volle Restbreite. */
   georgeCollapsed?: boolean
+  /**
+   * MOBIL (<768 px) IST DIE NAV EIN OVERLAY (Audit A7, Davids Entscheidung
+   * 2026-09-02). Dort versteckt `.bw-rail { display: none }` die Spalte
+   * komplett — der Balken-Toggle der Seite zeigte auf nichts, es gab GAR
+   * KEINE Baustein-Navigation. Offen legt sich dieselbe Rail als Vollbild-
+   * Layer über die Werkstatt.
+   *
+   * KEIN ZWEITER SIDEBAR-BAUM: das Overlay ist der Grid-Zweig-`<aside>`
+   * SELBST, nur per Klasse aus dem Fluss gehoben. Ein eigener Baum hätte
+   * eine zweite `BwWorkspaceSidebar`-Instanz gemountet — die eingeklappten
+   * Bereiche (UCollapsible), der offene Info-Layer und der Marken-Wähler
+   * hätten dann zwei Zustände, die auseinanderlaufen.
+   *
+   * Ab 768 px tut das Prop NICHTS (die CSS-Regeln stehen ausschliesslich in
+   * `@media (max-width: 767px)`); die Seite setzt es dort auch nie.
+   */
+  railOverlay?: boolean
   /* §3e: NUR Abweichungs-Zustände erscheinen — Stille heißt gespeichert.
    * P1c: 'error' kam dazu (der fünfte Zustand der Autosave-Regel); die drei
    * bestehenden sind unverändert, der Dummy sieht davon nichts. */
@@ -58,6 +75,7 @@ const props = withDefaults(defineProps<{
   railWidth: undefined,
   railCollapsed: false,
   georgeCollapsed: false,
+  railOverlay: false,
   progressNote: undefined,
   progressSubnote: undefined,
   syncState: null,
@@ -65,6 +83,10 @@ const props = withDefaults(defineProps<{
   progressTo: undefined,
   score: undefined,
 })
+/* Das Overlay schliesst sich auch SELBST (ESC, Schliessen-Knopf); der
+ * Zustand bleibt aber bei der Seite, die ihn öffnet — daher v-model. */
+const emit = defineEmits<{ 'update:railOverlay': [value: boolean] }>()
+
 const { t } = useI18n()
 /* Die Beschriftung kommt aus `brand.workspace.sync.*` — dieselben vier
  * Schlüssel, die die Werkstatt-Seite via `syncLabel` hereinreicht. Der
@@ -127,6 +149,52 @@ const zoneItemsFixedRail = computed(() => [
   { slot: 'stage', defaultSize: 63, minSize: 42, class: 'min-w-0' },
   { slot: 'george', defaultSize: 37, minSize: 24, maxSize: 55, class: off(props.georgeCollapsed) },
 ])
+/**
+ * BEDIENUNG DES NAV-OVERLAYS (mobil). Drei Dinge, die ein Vollbild-Layer
+ * schuldet — und je eine Falle dabei:
+ *
+ * 1. ESC schliesst. Der Lauscher hängt am `window`, weil der Fokus in einem
+ *    nicht-fokussierbaren Bereich auch beim `body` landen kann. Er hält sich
+ *    aber HERAUS, sobald der Fokus ausserhalb des Overlays steht: die
+ *    Sidebar öffnet teleportierte Modals (Info, „Neues Branding"), und dort
+ *    gehört ESC dem Modal — sonst schlösse ein Tastendruck beides.
+ * 2. Der Fokus wandert beim Öffnen HINEIN (auf den Schliessen-Knopf) und
+ *    beim Schliessen zurück auf das Element, das ihn abgegeben hat. Das ist
+ *    der Balken-Toggle, ohne dass diese Komponente ihn kennen muss.
+ * 3. Die Geschwister (Hauptnavigation, Modus-Umschalter, Bühne, Log) werden
+ *    `inert` — ein Vollbild-Layer, unter dem man weitertabben kann, ist ein
+ *    Layer, aus dem man herausfällt.
+ */
+const railOverlayEl = ref<HTMLElement | null>(null)
+let railOverlayReturn: HTMLElement | null = null
+
+function onRailOverlayKey(event: KeyboardEvent): void {
+  if (event.key !== 'Escape') return
+  const active = document.activeElement
+  if (active && active !== document.body && !railOverlayEl.value?.contains(active)) return
+  emit('update:railOverlay', false)
+}
+
+watch(() => props.railOverlay, async (open) => {
+  if (open) {
+    railOverlayReturn = document.activeElement instanceof HTMLElement ? document.activeElement : null
+    window.addEventListener('keydown', onRailOverlayKey)
+    await nextTick()
+    railOverlayEl.value?.querySelector<HTMLElement>('[data-bw-rail-close]')?.focus()
+    return
+  }
+  window.removeEventListener('keydown', onRailOverlayKey)
+  /* DAS `nextTick` IST PFLICHT, NICHT KOSMETIK (live erwischt): `watch`
+   * läuft mit `flush: 'pre'`, also VOR dem Neurendern — der Balken-Toggle
+   * steckt in diesem Moment noch in der `inert`-Spalte, und ein `inert`
+   * Element nimmt keinen Fokus an. Der Fokus fiel lautlos auf den `body`,
+   * die Tastatur-Bedienung begann wieder ganz oben. */
+  await nextTick()
+  railOverlayReturn?.focus()
+  railOverlayReturn = null
+})
+onBeforeUnmount(() => window.removeEventListener('keydown', onRailOverlayKey))
+
 /* Runde 132 (David): das Konto-Menü (Sprache, Erscheinungsbild,
  * Tastaturkürzel, Support, Konto) wohnt jetzt DAUERHAFT in BwSiteNav
  * oben rechts — die Topbar behält nur Brand-Switcher und Sync-Zustand.
@@ -137,10 +205,10 @@ const zoneItemsFixedRail = computed(() => [
   <div class="bw-root bw-shell" :class="mode === 'stage' ? 'bw-mode-stage' : 'bw-mode-george'">
     <!-- Hauptnavigation liegt auch über der Werkstatt (Davids Vorgabe
          Runde 131) — der Rest des Shells teilt sich die Resthöhe. -->
-    <div class="flex-none px-6">
+    <div class="flex-none px-6" :inert="railOverlay || undefined">
       <BwSiteNav style="margin-bottom: 0" />
     </div>
-    <header v-if="topbar" class="bw-topbar">
+    <header v-if="topbar" class="bw-topbar" :inert="railOverlay || undefined">
       <div class="flex min-w-0 items-center gap-2.5">
         <!-- Runde 5: das Auswahlmenü ERSETZT den Brandnamen im Header -->
         <slot name="brand" />
@@ -165,7 +233,7 @@ const zoneItemsFixedRail = computed(() => [
          „Gespräch als Bühne": links steht heute das GESPRÄCH, rechts der
          STAND. Beide Beschriftungen kommen jetzt aus dem Katalog und tragen
          dieselben Wörter wie der Balken (`workspace.bar.*`). -->
-    <div class="bw-modeswitch flex border-b" style="border-color: var(--bw-line)">
+    <div class="bw-modeswitch flex border-b" style="border-color: var(--bw-line)" :inert="railOverlay || undefined">
       <button type="button" class="flex-1 py-2 text-sm" :class="mode === 'stage' ? 'font-semibold' : ''" :style="mode === 'stage' ? 'color: var(--bw-accent)' : 'color: var(--bw-muted)'" @click="mode = 'stage'">
         {{ t('brand.workspace.mode.conversation') }}
       </button>
@@ -281,7 +349,30 @@ const zoneItemsFixedRail = computed(() => [
       ]"
       :style="railWidth ? `--bw-rail-w: ${railWidth}` : undefined"
     >
-      <aside class="bw-rail flex flex-col" :inert="railCollapsed || undefined">
+      <!-- Mobil-Overlay (A7): DERSELBE `<aside>`, nur per `.bw-rail-overlay`
+           aus dem Fluss gehoben (position: fixed, ausschliesslich <768 px).
+           `role="dialog"` trägt er NUR offen — ab 768 px ist er eine ganz
+           gewöhnliche Spalte. `railCollapsed` darf ihn dann nicht `inert`
+           machen: wer auf dem Desktop einklappt und aufs Handy verkleinert,
+           hätte sonst ein Overlay, das keine Taste annimmt. -->
+      <aside
+        ref="railOverlayEl"
+        class="bw-rail flex flex-col"
+        :class="railOverlay ? 'bw-rail-overlay' : ''"
+        :role="railOverlay ? 'dialog' : undefined"
+        :aria-modal="railOverlay ? 'true' : undefined"
+        :aria-label="railOverlay ? t('brand.workspace.rail.progressNav') : undefined"
+        :tabindex="railOverlay ? -1 : undefined"
+        :inert="(railCollapsed && !railOverlay) || undefined"
+      >
+        <div class="bw-rail-overlay-head flex-none">
+          <UButton
+            data-bw-rail-close
+            size="sm" color="neutral" variant="ghost" icon="i-ph-x"
+            :aria-label="t('brand.workspace.bar.hideNav')"
+            @click="emit('update:railOverlay', false)"
+          />
+        </div>
         <div class="bw-rail-scroll min-h-0 flex-1"><slot name="rail" /></div>
         <!-- Runde 48 (David): Gesamt-Fortschritt unten links statt Ring in
              der Topbar — Balken wie im Info-Layer. -->
@@ -289,12 +380,12 @@ const zoneItemsFixedRail = computed(() => [
           <BwRailFooter :progress-pct="progressPct" :progress-note="progressNote" :progress-subnote="progressSubnote" :progress-to="progressTo" :score="score" :progress-title="progressTitle" :progress-count="progressCount" :progress-time="progressTime" />
         </div>
       </aside>
-      <div class="flex min-h-0 min-w-0 flex-col">
+      <div class="flex min-h-0 min-w-0 flex-col" :inert="railOverlay || undefined">
         <div v-if="$slots['stage-bar']" class="bw-stage-bar flex-none"><slot name="stage-bar" /></div>
         <main class="bw-stage min-h-0 flex-1"><div class="bw-stage-inner"><slot /></div></main>
         <div v-if="$slots['stage-footer']" class="bw-stage-foot flex-none"><div class="bw-stage-inner"><slot name="stage-footer" /></div></div>
       </div>
-      <aside class="bw-george" :inert="georgeCollapsed || undefined"><slot name="george" /></aside>
+      <aside class="bw-george" :inert="georgeCollapsed || railOverlay || undefined"><slot name="george" /></aside>
     </div>
   </div>
 </template>

@@ -928,9 +928,49 @@ const workspaceSyncLabel = computed(() =>
 const railCollapsed = ref(false)
 const logCollapsed = ref(false)
 
+/**
+ * DERSELBE KNOPF, ZWEI GESTALTEN (Audit A7, Davids Entscheidung 2026-09-02).
+ *
+ * Ab 768 px klappt der Nav-Toggle im Bühnen-Balken die SPALTE ein — daran
+ * ändert sich nichts. Darunter gab es die Spalte gar nicht (`.bw-rail
+ * { display: none }`), der Knopf war ein Blindgänger und die Werkstatt ohne
+ * jede Baustein-Navigation. Mobil öffnet er die Sidebar jetzt als Overlay.
+ *
+ * ZWEI Zustände statt eines: die Vorgaben sind entgegengesetzt (die Spalte
+ * ist offen, bis man sie einklappt — das Overlay ist zu, bis man es öffnet),
+ * ein gemeinsames Flag stünde beim Laden auf einer der beiden Seiten falsch.
+ * Wer beim Verkleinern aus dem Overlay-Bereich herausfährt, verliert es
+ * (`onNarrow`) — sonst hinge ein `role="dialog"` an einer normalen Spalte.
+ */
+const navOverlayOpen = ref(false)
+const isNarrow = ref(false)
+let narrowMq: MediaQueryList | null = null
+const onNarrow = (event: MediaQueryListEvent | MediaQueryList): void => {
+  isNarrow.value = event.matches
+  if (!event.matches) navOverlayOpen.value = false
+}
+onMounted(() => {
+  narrowMq = window.matchMedia('(max-width: 767px)')
+  onNarrow(narrowMq)
+  narrowMq.addEventListener('change', onNarrow)
+})
+onBeforeUnmount(() => narrowMq?.removeEventListener('change', onNarrow))
+
+/** Ist die Navigation gerade sichtbar? (Für Beschriftung + aria-expanded.) */
+const navVisible = computed(() => (isNarrow.value ? navOverlayOpen.value : !railCollapsed.value))
+
+function toggleNav(): void {
+  if (isNarrow.value) navOverlayOpen.value = !navOverlayOpen.value
+  else railCollapsed.value = !railCollapsed.value
+}
+
 // ── Navigation ────────────────────────────────────────────────────────────
 
 async function goToStep(key: string | null): Promise<void> {
+  // Eine Auswahl im mobilen Nav-Overlay schliesst es — GANZ OBEN, vor den
+  // Wächtern: wer den bereits offenen Baustein antippt, hat trotzdem
+  // gewählt, und ein Overlay, das dann stehen bliebe, sähe kaputt aus.
+  navOverlayOpen.value = false
   if (!key || key === routeStepKey.value) return
   if (!store.canEnter(key)) return
   // §3e „vor interner Navigation": der Baustein-Wechsel bleibt in derselben
@@ -947,6 +987,7 @@ async function goToStep(key: string | null): Promise<void> {
  * Liste des Kontos, nicht vom Menü-Klick.
  */
 async function goToBrand(to: string): Promise<void> {
+  navOverlayOpen.value = false
   if (!to) return
   await autosave.flush()
   await navigateTo(to)
@@ -1073,6 +1114,7 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
        frei (R30), damit beim Laden nichts springt. -->
   <BwWorkspace
     v-else
+    v-model:rail-overlay="navOverlayOpen"
     :progress-pct="overallProgress.pct"
     :content-locale="store.profile?.contentLocale ?? locale"
     :locale-in-topbar="false"
@@ -1105,15 +1147,20 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
         <UButton
           size="sm" color="neutral" variant="ghost"
           icon="i-ph-sidebar-simple"
-          :aria-label="railCollapsed ? t('brand.workspace.bar.showNav') : t('brand.workspace.bar.hideNav')"
-          @click="railCollapsed = !railCollapsed"
+          :aria-label="navVisible ? t('brand.workspace.bar.hideNav') : t('brand.workspace.bar.showNav')"
+          :aria-expanded="navVisible"
+          @click="toggleNav"
         />
         <div class="min-w-0 leading-tight">
           <p class="bw-label uppercase tracking-wider" style="color: var(--bw-muted)">{{ t('brand.workspace.railLayer') }}</p>
           <p class="truncate font-semibold">{{ stepKey ? t(`brand.steps.${stepKey}`) : '' }}</p>
         </div>
+        <!-- Der Log-Toggle wirkt nur, wo es eine Log-SPALTE gibt: unter 768 px
+             ist das Raster einspaltig, und der Stand kommt über den
+             Modus-Umschalter. Neben dem jetzt lebendigen Nav-Toggle wäre er
+             dort ein toter Knopf — also mobil gar nicht erst anbieten. -->
         <UButton
-          size="sm" color="neutral" variant="ghost" class="ml-auto"
+          size="sm" color="neutral" variant="ghost" class="ml-auto max-md:hidden"
           icon="i-ph-sidebar-simple" :ui="{ leadingIcon: '-scale-x-100' }"
           :aria-label="logCollapsed ? t('brand.workspace.bar.showLog') : t('brand.workspace.bar.hideLog')"
           @click="logCollapsed = !logCollapsed"
