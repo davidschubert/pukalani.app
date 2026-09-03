@@ -293,6 +293,23 @@ function pickPosition(turn: Turn, text: string): void {
 
 /** 6: der Widerspruchs-Moment. */
 const BOUNDARY_PROPOSAL = 'Wir verkaufen kein Brot, das wir nicht am selben Tag gebacken haben — auch nicht am Samstagnachmittag, wenn die Regale leer aussehen.'
+/**
+ * Davids Korrekturrunde 1 (2026-09-02): auch VERAS VORSCHLAG ist ein Entwurf
+ * wie jeder andere — nur bestätigen zu können, ohne anpassen, wäre „friss oder
+ * stirb". Dieselben Wege wie die Entwurfs-Karte: Anpassen (inline) und
+ * Bestätigen; der Stand rechts zieht den angepassten Text mit.
+ */
+const boundaryText = ref(BOUNDARY_PROPOSAL)
+const boundaryEditing = ref(false)
+
+function confirmProposal(turn: Turn): void {
+  if (turn.entryId === 'boundary') {
+    boundaryEditing.value = false
+    const entry = log.value.find(e => e.id === 'boundary')
+    if (entry) entry.text = boundaryText.value.trim() || BOUNDARY_PROPOSAL
+  }
+  confirmEntry(turn.entryId)
+}
 
 function afterBoundary(): void {
   log.value.push({ id: 'boundary', label: 'Abgrenzung', text: BOUNDARY_PROPOSAL, state: 'draft' })
@@ -522,6 +539,7 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
                   </p>
                 </div>
 
+                <p v-if="turn.closing && !purposeConfirmed" class="mt-3 font-medium">{{ turn.closing }}</p>
                 <div v-if="!purposeConfirmed" class="mt-2 flex flex-wrap items-center justify-end gap-2">
                   <UButton
                     size="sm" color="neutral" variant="ghost" class="mr-auto rounded-full"
@@ -567,19 +585,29 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
               <!-- Bestätigen IM ZUG — derselbe Knopf und dieselben zwei Farben
                    wie im Stand rechts (Davids „nach jeder frage confirmen"). -->
               <div v-else-if="turn.block === 'confirm'" class="mt-3">
-                <div v-if="turn.proposal" class="bw-draft-frame mb-3">
+                <div v-if="turn.proposal" :class="entryState(turn.entryId) === 'confirmed' ? 'mb-3' : 'bw-draft-frame mb-3'">
                   <p class="bw-label" style="color: var(--bw-muted)">Mein Vorschlag</p>
-                  <p class="bw-doc-text mt-2 whitespace-pre-wrap">{{ turn.proposal }}</p>
+                  <UTextarea v-if="boundaryEditing && entryState(turn.entryId) !== 'confirmed'" v-model="boundaryText" :rows="3" class="mt-2 w-full" />
+                  <p v-else class="bw-doc-text mt-2 whitespace-pre-wrap">{{ turn.entryId === 'boundary' ? boundaryText : turn.proposal }}</p>
                 </div>
-                <button
-                  class="bw-confirm"
-                  :class="entryState(turn.entryId) === 'confirmed' ? 'bw-confirm--done' : 'bw-confirm--open'"
-                  :disabled="entryState(turn.entryId) === 'confirmed'"
-                  @click="confirmEntry(turn.entryId)"
-                >
-                  <UIcon :name="entryState(turn.entryId) === 'confirmed' ? 'i-ph-check-circle-fill' : 'i-ph-check'" class="size-4" />
-                  {{ entryState(turn.entryId) === 'confirmed' ? 'Bestätigt' : 'Bestätigen' }}
-                </button>
+                <p v-if="turn.closing" class="mb-2 font-medium">{{ turn.closing }}</p>
+                <div class="flex flex-wrap items-center justify-end gap-2">
+                  <UButton
+                    v-if="turn.proposal && entryState(turn.entryId) !== 'confirmed'"
+                    size="sm" color="neutral" variant="ghost" class="mr-auto rounded-full"
+                    icon="i-ph-pencil-simple" :label="boundaryEditing ? 'Anpassen beenden' : 'Anpassen'"
+                    @click="boundaryEditing = !boundaryEditing"
+                  />
+                  <button
+                    class="bw-confirm"
+                    :class="entryState(turn.entryId) === 'confirmed' ? 'bw-confirm--done' : 'bw-confirm--open'"
+                    :disabled="entryState(turn.entryId) === 'confirmed'"
+                    @click="confirmProposal(turn)"
+                  >
+                    <UIcon :name="entryState(turn.entryId) === 'confirmed' ? 'i-ph-check-circle-fill' : 'i-ph-check'" class="size-4" />
+                    {{ entryState(turn.entryId) === 'confirmed' ? 'Bestätigt' : 'Bestätigen' }}
+                  </button>
+                </div>
               </div>
 
               <!-- Die Konfidenz-Weiche steht IM Gespräch, nicht daneben. -->
@@ -598,7 +626,11 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
                 <p class="bw-msg-help">Im Klickdummy endet der Weg hier — im Produkt übernimmt Milo.</p>
               </div>
 
-              <p v-if="turn.closing" class="mt-3 font-medium">{{ turn.closing }}</p>
+              <!-- Davids Korrekturrunde 1: bei Karten-Zügen sitzt die
+                   Abschlussfrage ÜBER den Aktionen (die Frage ist die
+                   Aufforderung, der Knopf die Antwort darauf) — s. die
+                   Blöcke oben. Hier nur noch der Rest. -->
+              <p v-if="turn.closing && turn.block !== 'draft' && turn.block !== 'confirm'" class="mt-3 font-medium">{{ turn.closing }}</p>
             </div>
           </div>
 

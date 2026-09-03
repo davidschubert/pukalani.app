@@ -117,6 +117,15 @@
         "source ~/.nvm/nvm.sh && nvm use 22 >/dev/null && exec pnpm --filter marketing dev"
       ],
       "port": 3007
+    },
+    {
+      "name": "brand-gespraech",
+      "runtimeExecutable": "zsh",
+      "runtimeArgs": [
+        "-c",
+        "source ~/.nvm/nvm.sh && nvm use 22 >/dev/null && exec pnpm --filter @pukalani/brand exec nuxi dev .playground --port 3031"
+      ],
+      "port": 3031
     }
   ]
 }
