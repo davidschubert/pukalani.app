@@ -2,12 +2,17 @@
 /** Drei-Zonen-Werkstatt. Korrekturrunde 3 (David): Brandname + "% abgeschlossen"
  *  + Gespeichert LINKSBÜNDIG (der Meine-Brands-Weg lebt jetzt im Switcher);
  *  rechts Hilfe (kontextbezogen) + User-Menü mit Sprachregler. */
-defineProps<{
+withDefaults(defineProps<{
   progressPct: number
   contentLocale: string
   progressNote?: string
   /* Zweite Fuß-Zeile (Runde 77): bewusster Umbruch OHNE Trenner-Punkt. */
   progressSubnote?: string
+  /* Korrekturrunde 11 (David, 2026-09-02): der Gesamt-Fortschritt darf in die
+   * Stand-Spalte umziehen — die SEITE rendert BwRailFooter dann selbst und
+   * schaltet den Rail-Fuß hier ab. Default true via withDefaults, weil ein
+   * fehlendes Boolean-Prop sonst `false` wäre und der Fuß überall verschwände. */
+  railFooter?: boolean
   /* §3e: NUR Abweichungs-Zustände erscheinen — Stille heißt gespeichert.
    * P1c: 'error' kam dazu (der fünfte Zustand der Autosave-Regel); die drei
    * bestehenden sind unverändert, der Dummy sieht davon nichts. */
@@ -18,7 +23,18 @@ defineProps<{
   progressTo?: string
   /* Runde 96 (David): der Brand Score gehört an den Branding-Einstieg. */
   score?: number
-}>()
+}>(), {
+  /* Die `undefined`-Defaults ändern nichts — sie stellen nur die Exemption
+   * wieder her, die das nackte defineProps hatte (vue/require-default-prop
+   * verlangt ab withDefaults für JEDES optionale Prop einen Default). */
+  railFooter: true,
+  progressNote: undefined,
+  progressSubnote: undefined,
+  syncState: null,
+  syncLabel: undefined,
+  progressTo: undefined,
+  score: undefined,
+})
 const { t } = useI18n()
 /* Die Beschriftung kommt aus `brand.workspace.sync.*` — dieselben vier
  * Schlüssel, die die Werkstatt-Seite via `syncLabel` hereinreicht. Der
@@ -100,7 +116,7 @@ const zoneItems = [
       <template #rail>
         <aside class="bw-rail flex h-full w-full flex-col">
           <div class="min-h-0 flex-1 overflow-y-auto pr-3"><slot name="rail" /></div>
-          <BwRailFooter :progress-pct="progressPct" :progress-note="progressNote" :progress-subnote="progressSubnote" :progress-to="progressTo" :score="score" />
+          <BwRailFooter v-if="railFooter" :progress-pct="progressPct" :progress-note="progressNote" :progress-subnote="progressSubnote" :progress-to="progressTo" :score="score" />
         </aside>
       </template>
       <template #stage>
@@ -115,7 +131,7 @@ const zoneItems = [
         <div class="min-h-0 flex-1 overflow-y-auto pr-3"><slot name="rail" /></div>
         <!-- Runde 48 (David): Gesamt-Fortschritt unten links statt Ring in
              der Topbar — Balken wie im Info-Layer. -->
-        <BwRailFooter :progress-pct="progressPct" :progress-note="progressNote" :progress-subnote="progressSubnote" :progress-to="progressTo" :score="score" />
+        <BwRailFooter v-if="railFooter" :progress-pct="progressPct" :progress-note="progressNote" :progress-subnote="progressSubnote" :progress-to="progressTo" :score="score" />
       </aside>
       <main class="bw-stage"><div class="bw-stage-inner"><slot /></div></main>
       <aside class="bw-george"><slot name="george" /></aside>

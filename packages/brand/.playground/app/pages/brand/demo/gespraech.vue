@@ -475,9 +475,13 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
 </script>
 
 <template>
+  <!-- Runde 11 (David, 2026-09-02): der Gesamt-Fortschritt („Euer Branding",
+       n von 21, Prozent) zieht aus der linken Leiste in die Stand-Spalte —
+       die rechte Spalte ist die Status-Spalte: oben der Kapitel-Stand, unten
+       der Gesamt-Stand, dazwischen der Log. Die Leiste wird reine Navigation. -->
   <BwWorkspace
     :progress-pct="progressPct" :progress-note="progressNote" :sync-state="syncState"
-    progress-to="/brand/demo/ergebnis" :score="61" content-locale="de"
+    progress-to="/brand/demo/ergebnis" :score="61" content-locale="de" :rail-footer="false"
   >
     <template #brand>
       <BwBrandSwitcher
@@ -510,7 +514,9 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
           <div class="flex items-center gap-2.5">
             <BwGeorgeAvatar size="md" alt="George" />
             <span class="min-w-0 truncate text-sm font-medium">Gespräch mit George</span>
-            <span class="bw-label truncate" style="color: var(--bw-muted)">· Markenberater · Purpose, Vision &amp; Mission</span>
+            <!-- Runde 10 (David): kein Bereichs-Label mehr im Chat-Kopf — WO
+                 man ist, sagen Leiste und Stand-Kopf; hier nur WER spricht. -->
+            <span class="bw-label truncate" style="color: var(--bw-muted)">· Markenberater</span>
             <UButton
               size="xs" color="neutral" variant="ghost" class="ml-auto rounded-full"
               icon="i-ph-info" aria-label="Über George und sein Team" @click="veraInfoOpen = true"
@@ -763,9 +769,15 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
     <template #george>
       <div class="flex min-h-0 flex-1 flex-col">
         <div class="flex-none border-b px-6 pt-5 pb-4" style="border-color: var(--bw-line)">
-          <div class="flex items-baseline justify-between gap-3">
-            <p class="text-sm font-medium">Euer Stand</p>
+          <!-- Runde 10 (David): der KAPITELNAME ist der Titel („Euer Stand"
+               sagte nur, was die Spalte ist — das sieht man ihr an); darunter
+               links „n/4 bestätigt", ganz rechts die Prozentzahl. Die Zeilen
+               tauschen nur die Plätze (gleiche Höhen + Abstände), damit die
+               Abschluss-Kante auf der Höhe des Chat-Trenners bleibt (R5–R7). -->
+          <p class="text-sm font-medium">Purpose · Vision · Mission</p>
+          <div class="mt-2.5 flex items-baseline justify-between gap-3">
             <p class="bw-label tabular-nums" style="color: var(--bw-muted)">{{ confirmedCount }}/{{ CHAPTER_TOTAL }} bestätigt</p>
+            <p class="bw-label tabular-nums" style="color: var(--bw-muted)">{{ chapterPct }}&thinsp;%</p>
           </div>
           <div
             class="bw-chapter-progress-track gd-line mt-2.5" role="progressbar"
@@ -774,7 +786,6 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
           >
             <div class="bw-chapter-progress-fill" :style="`inline-size: ${chapterPct}%`" />
           </div>
-          <p class="bw-label mt-2.5" style="color: var(--bw-muted)">Purpose · Vision · Mission</p>
         </div>
 
         <div class="min-h-0 flex-1 space-y-3 overflow-y-auto px-6 py-5">
@@ -862,6 +873,17 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
               </template>
             </div>
           </div>
+        </div>
+
+        <!-- Runde 11: der Gesamt-Stand als Fuß der Status-Spalte — DIESELBE
+             Komponente wie vorher in der Leiste (BwRailFooter, eine Quelle),
+             nur kompakter gefasst: pt-4 statt des eingebauten pt-5 wäre eine
+             zweite Wahrheit, deshalb bleibt der Innenabstand der Komponente. -->
+        <div class="flex-none border-t px-6 pb-5" style="border-color: var(--bw-line)">
+          <BwRailFooter
+            :progress-pct="progressPct" :progress-note="progressNote"
+            progress-to="/brand/demo/ergebnis" :score="61"
+          />
         </div>
       </div>
     </template>
