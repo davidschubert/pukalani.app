@@ -304,6 +304,35 @@
   box-shadow: none; font-weight: 500;
 }
 
+/* ── WERKSTATT „GESPRÄCH ALS BÜHNE" (2026-09-02) ──────────────────────────
+   Die Klassen der neuen Sidebar (`BwWorkspaceSidebar`) und der Log-Spalte
+   der Werkstatt. Sie stehen GLOBAL und nicht als scoped CSS der Seite: die
+   Log-Karten leben in einem Slot von `BwWorkspace`, und der Slot-Inhalt
+   einer fremden Komponente bekommt das Scope-Attribut der Seite nicht
+   verlässlich mit (dieselbe Falle wie bei den teleportierten Menüs). */
+
+/* Sidebar-Zeilen: ruhige Flächen, Hover wie im Nuxt-UI-Vorbild. */
+.bw-nav-switch:hover, .bw-nav-switch:focus-visible { background: var(--bw-surface-hi); }
+.bw-nav-row:not(:disabled):hover { background: var(--bw-surface-hi); }
+/* Info-Icons RUHEN, bis die Zeile Hover/Fokus hat — sie bleiben fokussierbar
+   (Runde 16, David: die schlanken Zeilen sollen still sein). */
+.bw-nav-info { opacity: 0; transition: opacity 120ms; }
+.bw-nav-row:hover .bw-nav-info,
+.bw-nav-row:focus-within .bw-nav-info,
+.bw-nav-info:focus-visible { opacity: 1; }
+
+/* Log-Spalte: „Korrigieren" ruht bis Hover/Fokus der Karte, „Bestätigen"
+   bleibt IMMER sichtbar (Runde 25, David) — eine offene Entscheidung braucht
+   ihren Weg, eine erledigte nur bei Bedarf. */
+.bw-fix { opacity: 0; transition: opacity 120ms; }
+.bw-log-card:hover .bw-fix, .bw-log-card:focus-within .bw-fix { opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .bw-nav-info, .bw-fix { transition: none; }
+}
+/* Runde 28 (David): zwischen den Kapitel-Sektionen IMMER eine 1px-Linie. */
+.bw-log-chapter { padding-block: 0.625rem; }
+.bw-log-chapter + .bw-log-chapter { border-top: 1px solid var(--bw-line); }
+
 /* Kapitel-Fortschritt: eine dünne Linie unter der Kapitel-Kopfzeile, die beim
    Scrollen oben stehen bleibt. Sie beantwortet „wie weit bin ich in DIESEM
    Kapitel" — der Balken unten in der Leiste beantwortet den ganzen Weg. */

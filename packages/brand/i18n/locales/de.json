@@ -254,6 +254,33 @@
       "confirmedSlot": "Bestätigt",
       "confirmedBadge": "Bestätigt",
       "reviseSlot": "Korrigieren",
+      "reviseDone": "Korrigieren beenden",
+      "confirmQuestion": "Passt das so als Grundlage?",
+      "acceptAndConfirm": "Übernehmen & bestätigen",
+      "retryWithHint": "Nochmal, mit Hinweis",
+      "submitChoice": "Übermitteln",
+      "example": {
+        "show": "Beispiel ansehen",
+        "hide": "Beispiel ausblenden",
+        "take": "Tab oder Klick übernimmt den Text ins Feld."
+      },
+      "bar": {
+        "showNav": "Navigation einblenden",
+        "hideNav": "Navigation ausblenden",
+        "showLog": "Stand einblenden",
+        "hideLog": "Stand ausblenden"
+      },
+      "log": {
+        "overall": "Gesamtfortschritt",
+        "confirmedOf": "{confirmed}/{total} bestätigt",
+        "count": "{confirmed}/{total}"
+      },
+      "advisorInfo": {
+        "open": "Über {name}"
+      },
+      "sidebar": {
+        "switchBrand": "Branding wechseln"
+      },
       "completeStep": "Kapitel bestätigen",
       "adjust": "Anpassen",
       "decisions": "Entscheidungen",

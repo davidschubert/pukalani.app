@@ -254,6 +254,33 @@
       "confirmedSlot": "Confirmed",
       "confirmedBadge": "Confirmed",
       "reviseSlot": "Revise",
+      "reviseDone": "Done revising",
+      "confirmQuestion": "Does that work as a basis?",
+      "acceptAndConfirm": "Accept & confirm",
+      "retryWithHint": "Again, with a hint",
+      "submitChoice": "Submit",
+      "example": {
+        "show": "Show example",
+        "hide": "Hide example",
+        "take": "Tab or click puts the text into the field."
+      },
+      "bar": {
+        "showNav": "Show navigation",
+        "hideNav": "Hide navigation",
+        "showLog": "Show progress log",
+        "hideLog": "Hide progress log"
+      },
+      "log": {
+        "overall": "Overall progress",
+        "confirmedOf": "{confirmed}/{total} confirmed",
+        "count": "{confirmed}/{total}"
+      },
+      "advisorInfo": {
+        "open": "About {name}"
+      },
+      "sidebar": {
+        "switchBrand": "Switch branding"
+      },
       "completeStep": "Confirm chapter",
       "adjust": "Adjust",
       "decisions": "Decisions",
