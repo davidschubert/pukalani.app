@@ -254,15 +254,21 @@ export function toSlotViews(records: Record<string, BrandSlotRecord>): Record<st
  * `hasValue` = es liegt ein Entwurf vor (der Balken bewegt sich schon),
  * `confirmed` = der Mensch hat zugestimmt (erst das schliesst einen Baustein
  * ab). Genau diese zwei Fragen trennt `stepProgress` bewusst.
+ *
+ * `hasValue` folgt der ANZEIGE-Rangfolge (`brandSlotDisplayValue`:
+ * latestDraft ?? firstDraft ?? confirmed) — nicht „gab es je einen Entwurf".
+ * Ein GELEERTES Feld (latestDraft `''`) zählte sonst über den
+ * firstDraft-Fallback weiter als gefüllt, und der Gesamtfortschritt zeigte je
+ * Seite verschiedene Zahlen: die Journey (Server) sagte 20/59, die
+ * Live-Rechnung des offenen Bausteins (Client, aus dem Sichtbaren) 19/59 —
+ * live erwischt 2026-09-03 an `b.mission` (firstDraft 1 Zeichen,
+ * latestDraft geleert).
  */
 export function toSlotFacts(records: Record<string, BrandSlotRecord>): Record<string, BrandSlotStateFacts> {
   const facts: Record<string, BrandSlotStateFacts> = {}
   for (const [slotId, record] of Object.entries(records)) {
-    const confirmed = brandSlotRecordConfirmed(record)
-    const hasValue = confirmed
-      || (typeof record.latestDraft === 'string' && record.latestDraft.length > 0)
-      || (typeof record.firstDraft === 'string' && record.firstDraft.length > 0)
-    facts[slotId] = { hasValue, confirmed }
+    const displayed = record.latestDraft ?? record.firstDraft ?? record.confirmed ?? ''
+    facts[slotId] = { hasValue: displayed.length > 0, confirmed: brandSlotRecordConfirmed(record) }
   }
   return facts
 }
