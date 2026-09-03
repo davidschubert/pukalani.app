@@ -236,6 +236,21 @@ describe('slotsForStep / requiredSlotsForStep / slotById', () => {
  * Rechnung). Die Gegenprobe unten ist der Wächter: taucht ein ZWEITER
  * bedienungsloser Pflicht-Slot auf, ist das keine stille Sackgasse mehr.
  */
+/**
+ * DIE ANNAHME DER ÜBERSICHTS-KACHEL (Audit-Befund C4).
+ *
+ * `/dashboard/brands` schaltet den „Euer Branding"-Einstieg frei, sobald
+ * `currentStepKey === 'result'` — und das heisst nur deshalb „alles davor ist
+ * fertig", weil `result` der LETZTE Baustein des Weges ist
+ * (`resolveProfileProgress` nimmt den ersten offenen, sonst den letzten).
+ * Rutschte ein neuer Baustein dahinter, ginge das Schloss lautlos auf.
+ */
+describe('BRAND_STEP_KEYS — das Ergebnis steht am Ende', () => {
+  it('hat `result` als letzten Eintrag', () => {
+    expect(BRAND_STEP_KEYS.at(-1)).toBe('result')
+  })
+})
+
 describe('slotIsConfirmable / confirmableRequiredSlotsForStep', () => {
   it('nennt genau den Paarvergleich unbestätigbar', () => {
     const unconfirmable = BRAND_SLOTS.filter(slot => !slot.deactivated && !slotIsConfirmable(slot))

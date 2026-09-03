@@ -70,8 +70,14 @@ function editedAt(profile: BrandProfileSummary): string {
   return t('brand.brands.card.edited', { when })
 }
 
+/**
+ * Der leere `currentStepKey` ist kein Zustand, den die Liste versprechen
+ * müsste — aber ein Profil ohne ihn hätte hier auf `/brand/<id>/` gezeigt,
+ * also auf eine Route, die es nicht gibt (Audit C6). Der Einstieg ist
+ * derselbe wie beim Anlegen: der erste Baustein.
+ */
 function workspacePath(profile: BrandProfileSummary): string {
-  return localePath(`/brand/${profile.id}/${profile.currentStepKey}`)
+  return localePath(`/brand/${profile.id}/${profile.currentStepKey || 'context'}`)
 }
 
 /**
@@ -91,6 +97,12 @@ function workspacePath(profile: BrandProfileSummary): string {
  * `result` ist zugleich das ZIEL: eine eigene Ergebnis-SEITE gibt es im Layer
  * noch nicht (der Klickdummy zeigt `/brand/demo/ergebnis`), der Baustein
  * `result` ist heute die Ergebnis-Ansicht.
+ *
+ * DASS `result` DER LETZTE EINTRAG IST, trägt diese ganze Rechnung — und
+ * stünde er eines Tages nicht mehr dort, ginge das Schloss lautlos auf
+ * (Audit C4). Ein Test in `tests/slotRegistry.test.ts` nagelt die Invariante
+ * fest, statt sie hier per `.at(-1)` zu erraten: der NAME soll lesbar
+ * bleiben, die Annahme prüfbar.
  */
 const RESULT_STEP: BrandStepKey = 'result'
 
@@ -189,20 +201,25 @@ useBrandTitle(() => t('brand.brands.title'))
         />
       </div>
 
+      <!-- Die KARTE ist kein Link mehr (Audit C3): in ihr sitzen ein
+           Dropdown-Auslöser und zwei Knöpfe — `button` im `a` ist ungültig,
+           und ein Klick ohne `.stop` navigierte nebenbei zur Werkstatt.
+           Verlinkt sind jetzt die Kachel (sie trägt den Titel) und
+           „Weiterarbeiten"; die Karte bekommt ihr Ziel als Prop. -->
       <div v-else class="grid gap-x-6 gap-y-16 @sm:grid-cols-2 @lg:grid-cols-3">
-        <NuxtLink v-for="profile in store.profiles" :key="profile.id" :to="workspacePath(profile)" class="block">
-          <BwBrandCard
-            :title="profile.title || t('brand.brands.card.untitled')"
-            :path="t(`brand.brands.card.path.${profile.pathKind}`)"
-            :step="t('brand.brands.card.currentStep', { step: stepLabel(profile.currentStepKey) })"
-            :progress="stepPosition(profile)"
-            :remaining="remaining(profile)"
-            :edited="editedAt(profile)"
-            :pct="profile.progressPct"
-            :result-to="resultPath(profile)"
-            :result-ready="resultReady(profile)"
-          />
-        </NuxtLink>
+        <BwBrandCard
+          v-for="profile in store.profiles" :key="profile.id"
+          :to="workspacePath(profile)"
+          :title="profile.title || t('brand.brands.card.untitled')"
+          :path="t(`brand.brands.card.path.${profile.pathKind}`)"
+          :step="t('brand.brands.card.currentStep', { step: stepLabel(profile.currentStepKey) })"
+          :progress="stepPosition(profile)"
+          :remaining="remaining(profile)"
+          :edited="editedAt(profile)"
+          :pct="profile.progressPct"
+          :result-to="resultPath(profile)"
+          :result-ready="resultReady(profile)"
+        />
       </div>
 
     </div>
