@@ -397,7 +397,12 @@ export function transitionBrandStep(step: BrandStepFacts, action: BrandStepActio
     }
 
     case 'setConfidence': {
-      const denial = requireActive(step)
+      /* Davids Entscheidung 2026-09-02: die Konfidenz ist auch bei einem
+       * ABGESCHLOSSENEN Kapitel änderbar — sie ist eine Selbstauskunft,
+       * kein Inhalt, und der starre Weg lief im UI in ein klebendes 400
+       * („Not saved", Feinschliff-2-Befund). Gesperrt/nicht begonnen
+       * bleibt zu. */
+      const denial = step.state === 'done' ? null : requireActive(step)
       if (denial) return { ok: false, code: denial }
       // Die Konfidenz kommt vom Client — sie wird geprüft, nicht geglaubt.
       if (!BRAND_CONFIDENCE_VALUES.includes(action.confidence)) {

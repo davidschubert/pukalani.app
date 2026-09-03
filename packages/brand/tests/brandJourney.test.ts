@@ -369,13 +369,21 @@ describe('transitionBrandStep — Konfidenz lässt sich nicht manipulieren', () 
       .toEqual({ ok: false, code: 'invalid_confidence' })
   })
 
-  it('lässt die Konfidenz nicht am Baustein vorbei setzen (nicht gestartet / gesperrt / fertig)', () => {
+  it('lässt die Konfidenz nicht am Baustein vorbei setzen (nicht gestartet / gesperrt)', () => {
     expect(transitionBrandStep({ stepKey: 'values', state: 'open' }, { kind: 'setConfidence', confidence: 'fits' }))
       .toEqual({ ok: false, code: 'not_started' })
     expect(transitionBrandStep({ stepKey: 'values', state: 'locked' }, { kind: 'setConfidence', confidence: 'fits' }))
       .toEqual({ ok: false, code: 'step_locked' })
-    expect(transitionBrandStep(completedStep('values'), { kind: 'setConfidence', confidence: 'restart' }))
-      .toEqual({ ok: false, code: 'already_done' })
+  })
+
+  it('lässt die Konfidenz auch bei einem ABGESCHLOSSENEN Baustein ändern (Davids Entscheidung 2026-09-02)', () => {
+    // Die Konfidenz ist eine Selbstauskunft, kein Inhalt — der starre Weg
+    // lief im UI in ein klebendes 400 („Not saved"). done bleibt done.
+    const set = transitionBrandStep(completedStep('values'), { kind: 'setConfidence', confidence: 'restart' })
+    expect(set).toMatchObject({ ok: true, changed: true })
+    if (!set.ok) return
+    expect(set.step.state).toBe('done')
+    expect(set.step.confidence).toBe('restart')
   })
 
   it('ist ein No-op, wenn derselbe Chip noch einmal kommt', () => {
