@@ -16,6 +16,14 @@ withDefaults(defineProps<{
   /* Runde 13 (David, 2026-09-02): die Inhaltssprache darf in den Stand-Kopf
    * umziehen — die Seite rendert sie dann selbst und schaltet sie hier ab. */
   localeInTopbar?: boolean
+  /* Runde 16 (David, 2026-09-02): mit dem Brand-Switcher in der Sidebar hat
+   * die Topbar keine Aufgabe mehr — die Seite darf sie ganz abschalten und
+   * zeigt den Sync-Zustand dann selbst (im Dummy: in der Sidebar). */
+  topbar?: boolean
+  /* Runde 16: dreizeiliger Rail-Fuß — durchgereicht an BwRailFooter. */
+  progressTitle?: string
+  progressCount?: string
+  progressTime?: string
   /* §3e: NUR Abweichungs-Zustände erscheinen — Stille heißt gespeichert.
    * P1c: 'error' kam dazu (der fünfte Zustand der Autosave-Regel); die drei
    * bestehenden sind unverändert, der Dummy sieht davon nichts. */
@@ -32,6 +40,10 @@ withDefaults(defineProps<{
    * verlangt ab withDefaults für JEDES optionale Prop einen Default). */
   railFooter: true,
   localeInTopbar: true,
+  topbar: true,
+  progressTitle: undefined,
+  progressCount: undefined,
+  progressTime: undefined,
   progressNote: undefined,
   progressSubnote: undefined,
   syncState: null,
@@ -84,7 +96,7 @@ const zoneItems = [
     <div class="flex-none px-6">
       <BwSiteNav style="margin-bottom: 0" />
     </div>
-    <header class="bw-topbar">
+    <header v-if="topbar" class="bw-topbar">
       <div class="flex min-w-0 items-center gap-2.5">
         <!-- Runde 5: das Auswahlmenü ERSETZT den Brandnamen im Header -->
         <slot name="brand" />
@@ -124,7 +136,7 @@ const zoneItems = [
                Scrollbalken schwebte mitten in der Spalte statt an ihrer Kante. -->
           <div class="bw-rail-scroll min-h-0 flex-1"><slot name="rail" /></div>
           <div v-if="railFooter" class="bw-rail-foot flex-none">
-            <BwRailFooter :progress-pct="progressPct" :progress-note="progressNote" :progress-subnote="progressSubnote" :progress-to="progressTo" :score="score" />
+            <BwRailFooter :progress-pct="progressPct" :progress-note="progressNote" :progress-subnote="progressSubnote" :progress-to="progressTo" :score="score" :progress-title="progressTitle" :progress-count="progressCount" :progress-time="progressTime" />
           </div>
         </aside>
       </template>
@@ -141,7 +153,7 @@ const zoneItems = [
         <!-- Runde 48 (David): Gesamt-Fortschritt unten links statt Ring in
              der Topbar — Balken wie im Info-Layer. -->
         <div v-if="railFooter" class="bw-rail-foot flex-none">
-          <BwRailFooter :progress-pct="progressPct" :progress-note="progressNote" :progress-subnote="progressSubnote" :progress-to="progressTo" :score="score" />
+          <BwRailFooter :progress-pct="progressPct" :progress-note="progressNote" :progress-subnote="progressSubnote" :progress-to="progressTo" :score="score" :progress-title="progressTitle" :progress-count="progressCount" :progress-time="progressTime" />
         </div>
       </aside>
       <main class="bw-stage"><div class="bw-stage-inner"><slot /></div></main>

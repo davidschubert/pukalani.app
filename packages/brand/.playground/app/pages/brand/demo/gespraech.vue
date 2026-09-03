@@ -461,7 +461,8 @@ const railLayers = computed(() => demoRail.map(layer => (layer.id === 'foundatio
   : layer)))
 
 const doneDecisions = computed(() => 6 + (chapterDone.value ? CHAPTER_TOTAL : confirmedCount.value))
-const progressNote = computed(() => `${doneDecisions.value} von 21 Entscheidungen · ~30 Min`)
+/* Runde 16 (David): dreizeiliger Fuß — Titel/Prozent, Balken, Zähler/Zeit. */
+const progressCount = computed(() => `${doneDecisions.value}/21`)
 const progressPct = computed(() => Math.round((doneDecisions.value / 21) * 100))
 
 const syncState = ref<'saving' | 'offline' | 'conflict' | null>(null)
@@ -480,20 +481,19 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
        GESAMT-FORTSCHRITT (n von 21 · Zeit · Prozent + Balken) bleibt unten
        links in der Leiste. Ohne progress-to/score an BwWorkspace rendert der
        Rail-Fuß genau nur diese Zahlen. -->
+  <!-- Runde 16 (David): Leiste im Nuxt-UI-Sidebar-Muster (GdSidebar) — der
+       Switcher wohnt oben in der Sidebar, die Topbar ist ganz aus; den
+       Sync-Zustand zeigt die Sidebar. Fuß: dreizeilig. -->
   <BwWorkspace
-    :progress-pct="progressPct" :progress-note="progressNote" :sync-state="syncState"
-    content-locale="de" :locale-in-topbar="false"
+    :progress-pct="progressPct" content-locale="de" :locale-in-topbar="false"
+    :topbar="false" progress-title="Gesamtfortschritt"
+    :progress-count="progressCount" progress-time="ca. 30 Min"
   >
-    <template #brand>
-      <BwBrandSwitcher
-        :current="{ title: 'Brot & Zeit', path: 'Neue Marke', flag: 'i-circle-flags-de' }"
-        :others="[{ title: 'Kailua Coffee Co.', path: 'Neue Marke', flag: 'i-circle-flags-us', to: '/brand/demo/werte' }]"
-      />
-    </template>
-
-    <!-- LINKS: unverändert die abgenommene Leiste. -->
+    <!-- LINKS: die Sidebar im Nuxt-UI-Muster (Runde 16) — Switcher oben,
+         einklappbare Bereiche, Sync-Zustand unten. Der frühere Topbar-
+         Switcher (BwBrandSwitcher) entfällt mit der Topbar. -->
     <template #rail>
-      <BwProgressRail :layers="railLayers" />
+      <GdSidebar :layers="railLayers" :sync-state="syncState" />
     </template>
 
     <!-- MITTE: die Bühne IST das Gespräch (Davids Revision). Verlauf unten

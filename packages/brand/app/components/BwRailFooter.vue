@@ -14,12 +14,21 @@ withDefaults(defineProps<{
    * unten links in der Leiste. `progress: false` lässt nur die Karte stehen;
    * für „nur Zahlen" reicht es, kein `progressTo` zu übergeben. */
   progress?: boolean
+  /* Runde 16 (David, 2026-09-02): dreizeilige Fassung — Titel + Prozent /
+   * Balken / Zähler + Zeit. Aktiv, sobald `progressTitle` gesetzt ist;
+   * ohne ihn bleibt die einzeilige Note-Fassung (Alt-Seiten unverändert). */
+  progressTitle?: string
+  progressCount?: string
+  progressTime?: string
 }>(), {
   progressNote: undefined,
   progressSubnote: undefined,
   progressTo: undefined,
   score: undefined,
   progress: true,
+  progressTitle: undefined,
+  progressCount: undefined,
+  progressTime: undefined,
 })
 /* `progressNote`/`progressSubnote` reicht die Seite übersetzt herein —
  * eigen ist hier nur die Beschriftung des Branding-Einstiegs. */
@@ -46,7 +55,20 @@ const { t } = useI18n()
         <UIcon name="i-ph-arrow-right" class="size-4" style="color: var(--bw-ink-soft)" />
       </span>
     </NuxtLink>
-    <template v-if="progress">
+    <template v-if="progress && progressTitle">
+      <div class="flex items-baseline justify-between gap-3">
+        <p class="bw-label uppercase tracking-wider" style="color: var(--bw-muted)">{{ progressTitle }}</p>
+        <span class="bw-label flex-none uppercase tracking-wider whitespace-nowrap">{{ progressPct }}&thinsp;%</span>
+      </div>
+      <div class="mt-2 h-1.5 overflow-hidden rounded-full" style="background: var(--bw-line)">
+        <div class="h-full rounded-full transition-all" :style="`width: ${progressPct}%; background: var(--bw-accent)`" />
+      </div>
+      <div class="mt-2 flex items-baseline justify-between gap-3">
+        <span class="bw-label tabular-nums" style="color: var(--bw-muted)">{{ progressCount }}</span>
+        <span class="bw-label flex-none whitespace-nowrap" style="color: var(--bw-muted)">{{ progressTime }}</span>
+      </div>
+    </template>
+    <template v-else-if="progress">
       <div class="flex items-baseline justify-between gap-3">
         <p v-if="progressNote" class="bw-label uppercase tracking-wider" style="color: var(--bw-muted)">
           {{ progressNote }}
