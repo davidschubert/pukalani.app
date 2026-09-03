@@ -779,13 +779,13 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
     <template #george>
       <div class="flex min-h-0 flex-1 flex-col">
         <div class="flex-none border-b px-6 pt-5 pb-4" style="border-color: var(--bw-line)">
-          <!-- Runde 20 (David): der Stand-Kopf ist wieder REINER Fortschritt —
-               Kapitelname wohnt jetzt im Bühnen-Balken, die George-Zeile ist
-               ersatzlos raus (sein Info-Layer öffnet per Avatar-Klick im
-               Gespräch). Geblieben: Inhaltssprache (R13), Zähler + Prozent
+          <!-- Runde 20+22 (David): der Stand-Kopf ist wieder REINER
+               Fortschritt — Kapitelname wohnt im Bühnen-Balken, die
+               George-Zeile ist raus (Info-Layer per Avatar-Klick), und auch
+               die Inhaltssprache ist entfernt: sie steht als Flagge am
+               Branding im Switcher-Menü (R21). Geblieben: Zähler + Prozent
                (R10), Fortschrittslinie als Abschluss-Kante. -->
-          <p class="bw-label text-right" style="color: var(--bw-muted)">Inhaltssprache: DE</p>
-          <div class="mt-2.5 flex items-baseline justify-between gap-3">
+          <div class="flex items-baseline justify-between gap-3">
             <p class="bw-label tabular-nums" style="color: var(--bw-muted)">{{ confirmedCount }}/{{ CHAPTER_TOTAL }} bestätigt</p>
             <p class="bw-label tabular-nums" style="color: var(--bw-muted)">{{ chapterPct }}&thinsp;%</p>
           </div>
