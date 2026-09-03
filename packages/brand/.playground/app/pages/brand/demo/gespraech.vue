@@ -507,7 +507,9 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
                Abschluss-Kante des Stand-Kopfs (gemessen: 237 = 237) und
                DURCHGEZOGEN bis an beide Spalten-Kanten: die Bühne hat 56px
                Innenabstand, die negativen Ränder heben ihn genau auf. -->
-          <div class="mt-8" style="height: 1px; background: var(--bw-line); margin-left: -56px; margin-right: -56px" />
+          <!-- Runde 7: 31px statt mt-8/32px — die Border des Stand-Kopfs
+               liegt OBERHALB seiner Unterkante; 1px Versatz, Davids Auge. -->
+          <div style="height: 1px; background: var(--bw-line); margin: 31px -56px 0 -56px" />
         </div>
 
         <!-- Der Vera-Layer: alles über die Beraterin, ohne die Bühne zu verlassen. -->
