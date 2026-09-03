@@ -134,6 +134,87 @@
         "rating": "Wie hilfreich war das Ergebnis?"
       }
     },
+    "labels": {
+      "a": {
+        "origin": "Gründungsimpuls",
+        "customerPraise": "Kundenstimmen",
+        "complaints": "Kritik & Beschwerden",
+        "oneThing": "Das Eine",
+        "challenge": "Größtes Hindernis",
+        "facts": "Zahlen & Fakten"
+      },
+      "b": {
+        "whyStarted": "Warum es zählt",
+        "worldLoses": "Was fehlen würde",
+        "conviction": "Eure Überzeugung",
+        "tenYears": "Blick in zehn Jahre",
+        "legacy": "Euer Vermächtnis",
+        "positioningCategory": "Positionierungs-Kategorie",
+        "positioningFirstChoice": "Erste Wahl für"
+      },
+      "b2": {
+        "visibility": "Sichtbarkeit der Produktmarken",
+        "roleOfMaster": "Rolle der Hauptmarke",
+        "namingPattern": "Namensmuster",
+        "model": "Architektur-Modell"
+      },
+      "c": {
+        "discovery1": "Bester Moment",
+        "discovery2": "Falscher Moment",
+        "discovery3": "Nie geduldet",
+        "final": "Eure Werte",
+        "livedExamples": "Gelebte Beispiele",
+        "conflictRule": "Konfliktregel",
+        "teamFilter": "Einstellungs-Filter"
+      },
+      "d": {
+        "pairs": "Paarvergleich",
+        "gapReveal": "Selbstbild & Außenbild",
+        "party": "Party-Persona",
+        "never": "Niemals-Eigenschaft",
+        "admired": "Bewunderte Marke",
+        "emotion": "Ziel-Gefühl",
+        "voiceSamples": "Stimmproben",
+        "toneWords": "Ton-Wörter",
+        "vocabulary": "Tabu-Wörter"
+      },
+      "e": {
+        "warmup1": "Branchen-Ärgernis",
+        "warmup2": "Was mehr verstehen sollten",
+        "anchorLine": "Zeile für die Wand",
+        "composition": "Ton, Länge & Verwendung"
+      },
+      "ep": {
+        "taglines": "Tagline",
+        "keyMessages": "Kernbotschaften",
+        "vocabulary": "Wort-Leitfaden",
+        "distinctiveAsset": "Verbales Erkennungszeichen"
+      },
+      "f": {
+        "nameType": "Namens-Sorte",
+        "taste": "Namens-Geschmack",
+        "noGos": "No-Gos",
+        "shortlist": "Shortlist",
+        "checks": "Verfügbarkeits-Check",
+        "criteria": "Acht Kriterien",
+        "decision": "Top drei"
+      },
+      "result": {
+        "direction": "Richtung",
+        "rating": "Bewertung"
+      }
+    },
+    "stepInfo": {
+      "context": "Der Kontext ist der Boden, auf dem alles steht: Wer ihr seid, was ihr anbietet, für wen — und in welchem Markt ihr euch bewegt. Jede spätere Empfehlung von George stützt sich auf diese Fakten; ohne sauberen Kontext wären Werte, Archetyp und Tagline geraten statt hergeleitet.",
+      "pvm": "Der Kompass der Marke: Der Purpose sagt, warum es euch gibt. Die Vision, wohin ihr wollt. Die Mission, wie ihr dorthin kommt. Zusammen sind sie die Messlatte für jede Entscheidung — von der Preisliste bis zum Instagram-Post.",
+      "architecture": "Die Markenarchitektur ordnet eure Markenfamilie: Tritt alles unter einer Marke auf, tragen Produkte eigene Namen — und wer leiht wem Vertrauen? Aus drei Weichen leitet George ein Modell her und macht daraus eine Namensregel, an der sich jedes künftige Angebot messen lässt.",
+      "values": "Werte sind die Verhaltensregeln eurer Marke: Sie sagen, wie ihr entscheidet, wenn es unbequem wird. In der Brand Foundation sind sie das Scharnier zwischen Purpose (warum es euch gibt) und Archetyp & Stimme (wie ihr klingt) — jede spätere Design- und Textentscheidung wird an ihnen gemessen.",
+      "archetype": "Der Archetyp gibt eurer Marke einen wiedererkennbaren Charakter — ein Muster, das Menschen intuitiv verstehen (der Weise, der Entdecker, der Fürsorgliche …). Daraus leitet sich die Stimme ab: wie ihr klingt, worüber ihr sprecht und worüber nie. So schreibt jeder im Team, als schriebe dieselbe Person.",
+      "manifesto": "Das Manifest verdichtet die ganze Foundation in einen Text mit Haltung — das Stück, das man laut vorlesen kann: auf der Website, im Pitch, beim Onboarding neuer Leute. Es entsteht aus Purpose, Werten und Stimme, nicht umgekehrt.",
+      "verbal": "Die Tagline ist der eine Satz neben eurem Namen; das Messaging sind die Kernbotschaften dahinter — was ihr wem sagt, damit es hängen bleibt. Beides baut auf der Foundation auf: Ohne geklärte Werte klingt jede Tagline beliebig.",
+      "naming": "Ob neue Marke oder Prüfstand für den Bestandsnamen: Hier wird der Name an der Foundation gemessen — passt er zu Purpose, Werten und Archetyp? Dazu die nüchterne Prüfung: Ist er frei, ist er aussprechbar, funktioniert er auch auf Englisch?",
+      "result": "Das Ergebnis bündelt alle bestätigten Entscheidungen der Foundation zu eurem Markendokument — mit einer Richtung für alles Weitere. Von hier aus geht es in Design, Texte und den Auftritt; und je ehrlicher die Kapitel davor, desto tragfähiger ist, was hier steht."
+    },
     "example": {
       "a": {
         "origin": {

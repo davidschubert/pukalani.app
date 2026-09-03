@@ -134,6 +134,87 @@
         "rating": "How helpful was this result?"
       }
     },
+    "labels": {
+      "a": {
+        "origin": "Founding impulse",
+        "customerPraise": "Customer praise",
+        "complaints": "Complaints & criticism",
+        "oneThing": "The one thing",
+        "challenge": "Biggest obstacle",
+        "facts": "Facts & figures"
+      },
+      "b": {
+        "whyStarted": "Why it matters",
+        "worldLoses": "What the world would lose",
+        "conviction": "Your conviction",
+        "tenYears": "Ten-year view",
+        "legacy": "Your legacy",
+        "positioningCategory": "Positioning category",
+        "positioningFirstChoice": "First choice for"
+      },
+      "b2": {
+        "visibility": "Product-brand visibility",
+        "roleOfMaster": "Role of the master brand",
+        "namingPattern": "Naming pattern",
+        "model": "Architecture model"
+      },
+      "c": {
+        "discovery1": "Best moment",
+        "discovery2": "Moment that felt wrong",
+        "discovery3": "Never tolerated",
+        "final": "Your values",
+        "livedExamples": "Lived examples",
+        "conflictRule": "Conflict rule",
+        "teamFilter": "Hiring filter"
+      },
+      "d": {
+        "pairs": "Pair comparison",
+        "gapReveal": "Self-image & outside view",
+        "party": "Party persona",
+        "never": "Never trait",
+        "admired": "Admired brand",
+        "emotion": "Target feeling",
+        "voiceSamples": "Voice samples",
+        "toneWords": "Tone words",
+        "vocabulary": "Off-limits words"
+      },
+      "e": {
+        "warmup1": "Industry gripe",
+        "warmup2": "What more should get",
+        "anchorLine": "Line for the wall",
+        "composition": "Tone, length & use"
+      },
+      "ep": {
+        "taglines": "Tagline",
+        "keyMessages": "Key messages",
+        "vocabulary": "Word guide",
+        "distinctiveAsset": "Verbal signature"
+      },
+      "f": {
+        "nameType": "Name type",
+        "taste": "Naming taste",
+        "noGos": "No-gos",
+        "shortlist": "Shortlist",
+        "checks": "Availability check",
+        "criteria": "Eight criteria",
+        "decision": "Top three"
+      },
+      "result": {
+        "direction": "Direction",
+        "rating": "Rating"
+      }
+    },
+    "stepInfo": {
+      "context": "Context is the ground everything stands on: who you are, what you offer, for whom — and the market you move in. Every later recommendation from George rests on these facts; without solid context, values, archetype and tagline would be guesses instead of derivations.",
+      "pvm": "The compass of your brand: the purpose says why you exist. The vision, where you are headed. The mission, how you get there. Together they are the yardstick for every decision — from the price list to the Instagram post.",
+      "architecture": "Brand architecture sorts your family of brands: does everything appear under one brand, do products carry names of their own — and who lends trust to whom? From three switches George derives a model and turns it into a naming rule every future offer can be measured against.",
+      "values": "Values are the rules of conduct of your brand: they say how you decide when it gets uncomfortable. In the Brand Foundation they are the hinge between purpose (why you exist) and archetype & voice (how you sound) — every later design and copy decision is measured against them.",
+      "archetype": "The archetype gives your brand a recognisable character — a pattern people understand intuitively (the sage, the explorer, the caregiver …). The voice derives from it: how you sound, what you talk about and what you never do. That way everyone on the team writes as if the same person were writing.",
+      "manifesto": "The manifesto condenses the whole foundation into one text with a stance — the piece you can read out loud: on the website, in the pitch, when onboarding new people. It grows out of purpose, values and voice, not the other way round.",
+      "verbal": "The tagline is the one line next to your name; the messaging is the set of core messages behind it — what you tell whom so it sticks. Both build on the foundation: without clarified values, every tagline sounds arbitrary.",
+      "naming": "Whether it is a new brand or a test bench for the existing name: here the name is measured against the foundation — does it fit purpose, values and archetype? Plus the sober checks: is it available, is it pronounceable, does it work in English too?",
+      "result": "The result bundles every confirmed decision of the foundation into your brand document — with a direction for everything that follows. From here you move on to design, copy and the public face; and the more honest the chapters before, the more the result can carry."
+    },
     "example": {
       "a": {
         "origin": {

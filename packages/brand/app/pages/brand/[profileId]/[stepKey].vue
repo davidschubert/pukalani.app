@@ -106,7 +106,7 @@ import { useBrandGeneration } from '../../../composables/useBrandGeneration'
 definePageMeta({ layout: 'brand-workspace' })
 
 const route = useRoute()
-const { t, locale } = useI18n()
+const { t, te, locale } = useI18n()
 const localePath = useLocalePath()
 const toast = useToast()
 const store = useBrandWorkspaceStore()
@@ -148,8 +148,17 @@ const pathKind = computed<BrandPathKind>(() => store.profile?.pathKind ?? 'new')
 
 const slots = computed<readonly BrandSlot[]>(() => (stepKey.value ? slotsForStep(stepKey.value) : []))
 
-/** Die Beschriftung eines Slots: gefragt wird pfadabhängig, beschriftet nicht. */
+/**
+ * Die Beschriftung eines Slots: KURZ-LABEL vor Frage (Nacht 2026-09-03,
+ * Davids „Log-Karten wie ein Dokument"). `brand.labels.<id>` trägt für die
+ * Frage-Slots dokumentartige Substantive („Gründungsimpuls" statt „Warum
+ * hast du angefangen — …?"); wo die Frage schon kurz ist (Ableitungen wie
+ * „Elevator-Pitch"), gibt es bewusst KEINEN Label-Schlüssel und der
+ * Rückfall greift. Gefragt wird weiter pfadabhängig — das Label nicht.
+ */
 function slotLabel(slot: BrandSlot): string {
+  const labelKey = `brand.labels.${slot.id}`
+  if (te(labelKey)) return t(labelKey)
   return slot.type === 'question' || slot.type === 'choice'
     ? t(questionKeyFor(slot, pathKind.value))
     : t(slot.questionKey)
@@ -976,6 +985,10 @@ function railInfo(entry: BrandJourneyStep): BwRailStepInfo {
       : slotsForStep(entry.stepKey).filter(slot => slot.required && !entry.missingRequired.includes(slot.id)).map(slot => slot.id),
   )
   return {
+    // Der Erklär-Absatz je Baustein (Nacht 2026-09-03): die sieben im Dummy
+    // ABGENOMMENEN Texte, wörtlich übernommen, plus architecture/result im
+    // selben Stil — der Layer fiel vorher ehrlich auf „kein Absatz" zurück.
+    description: t(`brand.stepInfo.${entry.stepKey}`),
     bausteine: slotsForStep(entry.stepKey)
       .filter(slot => slot.required)
       .map(slot => ({ label: slotLabel(slot), note: slotNote(slot), done: done.has(slot.id) })),
