@@ -465,6 +465,9 @@ const doneDecisions = computed(() => 6 + (chapterDone.value ? CHAPTER_TOTAL : co
 const progressCount = computed(() => `${doneDecisions.value}/21`)
 const progressPct = computed(() => Math.round((doneDecisions.value / 21) * 100))
 
+/* Runde 20 (David): die Nav-Spalte ist über den Bühnen-Balken einklappbar. */
+const railCollapsed = ref(false)
+
 const syncState = ref<'saving' | 'offline' | 'conflict' | null>(null)
 let syncTimer: ReturnType<typeof setTimeout> | undefined
 function pulseSave(): void {
@@ -490,7 +493,8 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
     :progress-pct="progressPct" content-locale="de" :locale-in-topbar="false"
     :topbar="false" progress-title="Gesamtfortschritt"
     :progress-count="progressCount" progress-time="ca. 30 Min"
-    rail-width="296px" style="--bw-rail-pad-x: 1rem; --bw-rail-pad-y: 0.75rem"
+    rail-width="296px" :rail-collapsed="railCollapsed"
+    style="--bw-rail-pad-x: 1rem; --bw-rail-pad-y: 0.75rem"
   >
     <!-- LINKS: die Sidebar im Nuxt-UI-Muster (Runde 16) — Switcher oben,
          einklappbare Bereiche, Sync-Zustand unten. Der frühere Topbar-
@@ -508,7 +512,31 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
          mehr, das auf einer Höhe sitzen müsste. -->
     <template #default>
       <div class="flex flex-col">
-        <!-- Der Vera-Layer: alles über den Berater, ohne die Bühne zu verlassen. -->
+        <!-- Runde 20 (David): FESTER Balken über dem Gespräch — links das
+             Einklapp-Icon für die Nav-Spalte, daneben die zweizeilige
+             Ortsangabe (Bereich klein, Kapitel als Titel). Er ersetzt die
+             Ortsangaben, die bis Runde 19 im Stand-Kopf standen. Sticky mit
+             Papier-Schatten (2rem Bühnen-Innenabstand), wie der alte Kopf. -->
+        <div
+          class="sticky top-0 z-10 pb-3"
+          style="background: var(--bw-paper); box-shadow: 0 -2rem 0 var(--bw-paper)"
+        >
+          <div class="flex items-center gap-3">
+            <UButton
+              size="xs" color="neutral" variant="ghost" class="rounded-full"
+              icon="i-ph-sidebar-simple"
+              :aria-label="railCollapsed ? 'Navigation einblenden' : 'Navigation ausblenden'"
+              @click="railCollapsed = !railCollapsed"
+            />
+            <div class="min-w-0 leading-tight">
+              <p class="bw-label" style="color: var(--bw-muted)">Brand Foundation</p>
+              <p class="truncate text-sm font-medium">Purpose · Vision · Mission</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Der Vera-Layer: alles über den Berater, ohne die Bühne zu verlassen.
+             Geöffnet seit Runde 20 über Klick auf Georges Avatar im Gespräch. -->
         <div
           v-if="veraInfoOpen" class="fixed inset-0 z-50 flex items-center justify-center p-6"
           style="background: color-mix(in oklab, var(--bw-ink) 40%, transparent)"
@@ -539,7 +567,14 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
             v-for="turn in turns" :key="turn.id"
             class="bw-msg" :class="turn.role === 'user' ? 'bw-msg--user' : ''"
           >
-            <BwGeorgeAvatar v-if="turn.role === 'george'" size="md" alt="George" />
+            <!-- Runde 20 (David): der Avatar IST der Weg zu Georges
+                 Info-Layer — die eigene Info-Zeile im Stand ist dafür raus. -->
+            <button
+              v-if="turn.role === 'george'" class="flex-none self-start rounded-full"
+              aria-label="Über George und sein Team" @click="veraInfoOpen = true"
+            >
+              <BwGeorgeAvatar size="md" alt="George" />
+            </button>
             <div class="bw-msg-body">
               <p class="whitespace-pre-wrap">{{ turn.text }}</p>
               <p v-if="turn.help" class="bw-msg-help">{{ turn.help }}</p>
@@ -745,26 +780,12 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
     <template #george>
       <div class="flex min-h-0 flex-1 flex-col">
         <div class="flex-none border-b px-6 pt-5 pb-4" style="border-color: var(--bw-line)">
-          <!-- Runde 10+13 (David): der Stand-Kopf bündelt ALLE Meta-Ebenen des
-               Gesprächs, von oben nach unten sortiert nach „wo → mit wem →
-               wie weit": (1) Kapitelname als Titel, rechts still die
-               Inhaltssprache (aus der Topbar hierher gezogen); (2) mit wem
-               man spricht — Avatar, George, Rolle, Info-Knopf (aus dem
-               Chat-Kopf hierher gezogen, die Bühne gehört ganz dem Gespräch);
-               (3) links „n/4 bestätigt", ganz rechts die Prozentzahl;
-               (4) die dünne Fortschrittslinie als Abschluss-Kante. -->
-          <div class="flex items-baseline justify-between gap-3">
-            <p class="text-sm font-medium">Purpose · Vision · Mission</p>
-            <p class="bw-label flex-none" style="color: var(--bw-muted)">Inhaltssprache: DE</p>
-          </div>
-          <div class="mt-2.5 flex min-w-0 items-center gap-2">
-            <BwGeorgeAvatar size="md" alt="George" />
-            <span class="bw-label min-w-0 truncate" style="color: var(--bw-muted)">Gespräch mit George · Markenberater</span>
-            <UButton
-              size="xs" color="neutral" variant="ghost" class="ml-auto -my-1 rounded-full"
-              icon="i-ph-info" aria-label="Über George und sein Team" @click="veraInfoOpen = true"
-            />
-          </div>
+          <!-- Runde 20 (David): der Stand-Kopf ist wieder REINER Fortschritt —
+               Kapitelname wohnt jetzt im Bühnen-Balken, die George-Zeile ist
+               ersatzlos raus (sein Info-Layer öffnet per Avatar-Klick im
+               Gespräch). Geblieben: Inhaltssprache (R13), Zähler + Prozent
+               (R10), Fortschrittslinie als Abschluss-Kante. -->
+          <p class="bw-label text-right" style="color: var(--bw-muted)">Inhaltssprache: DE</p>
           <div class="mt-2.5 flex items-baseline justify-between gap-3">
             <p class="bw-label tabular-nums" style="color: var(--bw-muted)">{{ confirmedCount }}/{{ CHAPTER_TOTAL }} bestätigt</p>
             <p class="bw-label tabular-nums" style="color: var(--bw-muted)">{{ chapterPct }}&thinsp;%</p>
@@ -825,10 +846,8 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
           </div>
 
           <!-- Das laufende Kapitel: jeder Eintrag erscheint, sobald er im
-               Gespräch fällt — bernstein, bis er bestätigt ist. -->
-          <p v-if="!log.length" class="bw-pending pt-2">
-            Was ihr im Gespräch klärt, erscheint hier sofort — bestätigt oder noch offen.
-          </p>
+               Gespräch fällt — bernstein, bis er bestätigt ist. Der frühere
+               Leer-Hinweis ist raus (Runde 20, David: überflüssige Info). -->
           <div
             v-for="entry in log" :key="entry.id"
             class="rounded-2xl px-4 py-3" style="background: var(--bw-surface-hi)"

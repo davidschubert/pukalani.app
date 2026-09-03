@@ -28,6 +28,10 @@ withDefaults(defineProps<{
    * '288px', Vorbild UDashboardSidebar --width). Gesetzt entfällt die
    * ziehbare Naht Rail↔Bühne — nur Bühne↔Stand bleibt ein Splitter. */
   railWidth?: string
+  /* Runde 20 (David): die Seite darf die Nav-Spalte einklappen (Toggle im
+   * Bühnen-Balken). Wirkt nur im Fixed-Rail-Zweig; v-show statt v-if, damit
+   * Collapsible-Zustände der Sidebar das Einklappen überleben. */
+  railCollapsed?: boolean
   /* §3e: NUR Abweichungs-Zustände erscheinen — Stille heißt gespeichert.
    * P1c: 'error' kam dazu (der fünfte Zustand der Autosave-Regel); die drei
    * bestehenden sind unverändert, der Dummy sieht davon nichts. */
@@ -49,6 +53,7 @@ withDefaults(defineProps<{
   progressCount: undefined,
   progressTime: undefined,
   railWidth: undefined,
+  railCollapsed: false,
   progressNote: undefined,
   progressSubnote: undefined,
   syncState: null,
@@ -138,7 +143,7 @@ const zoneItemsFixedRail = [
     <!-- Runde 18: feste Rail-Breite — die Rail steht als eigene Spalte NEBEN
          dem Splitter, der nur noch Bühne↔Stand teilt. -->
     <div v-if="isDesktop && railWidth" class="flex min-h-0 flex-1">
-      <aside class="bw-rail flex h-full flex-none flex-col" :style="`width: ${railWidth}`">
+      <aside v-show="!railCollapsed" class="bw-rail flex h-full flex-none flex-col" :style="`width: ${railWidth}`">
         <div class="bw-rail-scroll min-h-0 flex-1"><slot name="rail" /></div>
         <div v-if="railFooter" class="bw-rail-foot flex-none">
           <BwRailFooter :progress-pct="progressPct" :progress-note="progressNote" :progress-subnote="progressSubnote" :progress-to="progressTo" :score="score" :progress-title="progressTitle" :progress-count="progressCount" :progress-time="progressTime" />
