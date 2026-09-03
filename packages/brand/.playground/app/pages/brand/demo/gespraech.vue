@@ -777,16 +777,20 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
                    wie im Stand rechts (Davids „nach jeder frage confirmen"). -->
               <div v-else-if="turn.block === 'confirm'" class="mt-3">
                 <div v-if="turn.entryId && findEntry(turn.entryId)" :class="entryState(turn.entryId) === 'confirmed' ? 'mb-3' : 'bw-draft-frame mb-3'">
-                  <p class="bw-label" style="color: var(--bw-muted)">{{ turn.proposal ? 'Mein Vorschlag' : 'Festgehalten' }}</p>
+                  <!-- Runde 37 (David, rot): statt des generischen „Festgehalten"
+                       trägt die Karte die kontextbezogene Frage des Zugs. -->
+                  <p class="bw-label" style="color: var(--bw-muted)">{{ turn.proposal ? 'Mein Vorschlag' : (turn.question ?? 'Festgehalten') }}</p>
                   <UTextarea v-if="editingEntryId === turn.entryId && entryState(turn.entryId) !== 'confirmed'" v-model="findEntry(turn.entryId)!.text" :rows="3" class="mt-2 w-full" />
                   <p v-else class="bw-doc-text mt-2 whitespace-pre-wrap">{{ findEntry(turn.entryId)!.text }}</p>
                 </div>
                 <p v-if="turn.closing" class="mb-2 font-medium">{{ turn.closing }}</p>
+                <!-- Runde 37 (David, blau): „Korrigieren" statt „Anpassen",
+                     rechtsbündig neben Bestätigen, in dessen Größe. -->
                 <div class="flex flex-wrap items-center justify-end gap-2">
                   <UButton
                     v-if="turn.entryId && entryState(turn.entryId) !== 'confirmed'"
-                    size="sm" color="neutral" variant="ghost" class="mr-auto rounded-full"
-                    icon="i-ph-pencil-simple" :label="editingEntryId === turn.entryId ? 'Anpassen beenden' : 'Anpassen'"
+                    size="sm" color="neutral" variant="ghost" class="rounded-full"
+                    icon="i-ph-pencil-simple" :label="editingEntryId === turn.entryId ? 'Korrigieren beenden' : 'Korrigieren'"
                     @click="toggleEntryEditing(turn.entryId)"
                   />
                   <button
@@ -827,7 +831,9 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
 
           <!-- NOCH NICHT SO WEIT: dieselbe Regel wie in der echten Werkstatt —
                die Weiche erscheint erst, wenn sie halten kann, was sie fragt. -->
-          <p v-if="log.length && !allConfirmed && !chapterDone" class="bw-label" style="color: var(--bw-muted)">
+          <!-- Runde 37 (David, grün): eingerückt wie die Gesprächstexte
+               (Avatar 2rem + Lücke 0.65rem). -->
+          <p v-if="log.length && !allConfirmed && !chapterDone" class="bw-label" style="color: var(--bw-muted); padding-left: 2.65rem">
             Noch offen: {{ openLabels.length }} von {{ CHAPTER_TOTAL }} Entscheidungen — bestätige sie rechts im Stand,
             dann schließen wir das Kapitel ab.
           </p>
