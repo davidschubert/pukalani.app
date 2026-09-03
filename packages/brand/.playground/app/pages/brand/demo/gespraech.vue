@@ -475,14 +475,14 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
 </script>
 
 <template>
-  <!-- Runde 11 (David, 2026-09-02): der Gesamt-Fortschritt („Euer Branding",
-       n von 21, Prozent) zieht aus der linken Leiste in die Stand-Spalte —
-       die rechte Spalte ist die Status-Spalte: oben der Kapitel-Stand, unten
-       der Gesamt-Stand, dazwischen der Log. Die Leiste wird reine Navigation. -->
+  <!-- Runde 11+14 (David, 2026-09-02): der EINSTIEG „Euer Branding" (Karte
+       mit Score vorn) wohnt unten rechts in der Stand-Spalte; der
+       GESAMT-FORTSCHRITT (n von 21 · Zeit · Prozent + Balken) bleibt unten
+       links in der Leiste. Ohne progress-to/score an BwWorkspace rendert der
+       Rail-Fuß genau nur diese Zahlen. -->
   <BwWorkspace
     :progress-pct="progressPct" :progress-note="progressNote" :sync-state="syncState"
-    progress-to="/brand/demo/ergebnis" :score="61" content-locale="de" :rail-footer="false"
-    :locale-in-topbar="false"
+    content-locale="de" :locale-in-topbar="false"
   >
     <template #brand>
       <BwBrandSwitcher
@@ -862,13 +862,11 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
           </div>
         </div>
 
-        <!-- Runde 11: der Gesamt-Stand als Fuß der Status-Spalte — DIESELBE
-             Komponente wie vorher in der Leiste (BwRailFooter, eine Quelle),
-             nur kompakter gefasst: pt-4 statt des eingebauten pt-5 wäre eine
-             zweite Wahrheit, deshalb bleibt der Innenabstand der Komponente. -->
+        <!-- Runde 11+14: unten rechts NUR der Einstiegs-Button „Euer
+             Branding" (progress: false) — die Zahlen wohnen unten links. -->
         <div class="flex-none border-t px-6 pb-5" style="border-color: var(--bw-line)">
           <BwRailFooter
-            :progress-pct="progressPct" :progress-note="progressNote"
+            :progress-pct="progressPct" :progress="false"
             progress-to="/brand/demo/ergebnis" :score="61"
           />
         </div>

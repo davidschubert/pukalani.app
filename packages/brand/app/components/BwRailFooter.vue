@@ -3,13 +3,24 @@
  *  BwWorkspace extrahiert (Runde 191), weil die Rail seit dem Splitter
  *  in ZWEI Zweigen lebt (Grid-Fallback + Splitter-Panel) und der Fuß
  *  nur eine Quelle haben darf. */
-defineProps<{
+withDefaults(defineProps<{
   progressPct: number
   progressNote?: string
   progressSubnote?: string
   progressTo?: string
   score?: number
-}>()
+  /* Runde 14 (David, 2026-09-02): Karte und Fortschritt dürfen GETRENNT
+   * wohnen — „Euer Branding" unten rechts im Stand, die Zahlen + der Balken
+   * unten links in der Leiste. `progress: false` lässt nur die Karte stehen;
+   * für „nur Zahlen" reicht es, kein `progressTo` zu übergeben. */
+  progress?: boolean
+}>(), {
+  progressNote: undefined,
+  progressSubnote: undefined,
+  progressTo: undefined,
+  score: undefined,
+  progress: true,
+})
 /* `progressNote`/`progressSubnote` reicht die Seite übersetzt herein —
  * eigen ist hier nur die Beschriftung des Branding-Einstiegs. */
 const { t } = useI18n()
@@ -19,7 +30,8 @@ const { t } = useI18n()
   <div class="flex-none pt-5">
     <NuxtLink
       v-if="progressTo" :to="progressTo"
-      class="mb-4 flex w-full items-center gap-3 rounded-full py-2.5 pl-2 pr-2 text-left text-sm"
+      class="flex w-full items-center gap-3 rounded-full py-2.5 pl-2 pr-2 text-left text-sm"
+      :class="progress ? 'mb-4' : ''"
       style="background: var(--bw-surface-hi); box-shadow: var(--bw-shadow-card)"
     >
       <!-- Runde 13 (David): der Brand Score STEHT VORNE und ersetzt das
@@ -34,15 +46,17 @@ const { t } = useI18n()
         <UIcon name="i-ph-arrow-right" class="size-4" style="color: var(--bw-ink-soft)" />
       </span>
     </NuxtLink>
-    <div class="flex items-baseline justify-between gap-3">
-      <p v-if="progressNote" class="bw-label uppercase tracking-wider" style="color: var(--bw-muted)">
-        {{ progressNote }}
-        <span v-if="progressSubnote" class="block">{{ progressSubnote }}</span>
-      </p>
-      <span class="bw-label flex-none uppercase tracking-wider whitespace-nowrap">{{ progressPct }}&thinsp;%</span>
-    </div>
-    <div class="mt-2 h-1.5 overflow-hidden rounded-full" style="background: var(--bw-line)">
-      <div class="h-full rounded-full transition-all" :style="`width: ${progressPct}%; background: var(--bw-accent)`" />
-    </div>
+    <template v-if="progress">
+      <div class="flex items-baseline justify-between gap-3">
+        <p v-if="progressNote" class="bw-label uppercase tracking-wider" style="color: var(--bw-muted)">
+          {{ progressNote }}
+          <span v-if="progressSubnote" class="block">{{ progressSubnote }}</span>
+        </p>
+        <span class="bw-label flex-none uppercase tracking-wider whitespace-nowrap">{{ progressPct }}&thinsp;%</span>
+      </div>
+      <div class="mt-2 h-1.5 overflow-hidden rounded-full" style="background: var(--bw-line)">
+        <div class="h-full rounded-full transition-all" :style="`width: ${progressPct}%; background: var(--bw-accent)`" />
+      </div>
+    </template>
   </div>
 </template>
