@@ -41,6 +41,10 @@ interface LogEntry {
   label: string
   text: string
   state: LogState
+  /* Runde 25 (David): jede Headline trägt eine Subline mit der Beschreibung
+   * der Entscheidung (dieselben Texte wie der Info-Layer) — darunter erst
+   * die Antwort. So liest sich der Log ohne Vorwissen. */
+  note?: string
 }
 
 /** Vier Entscheidungen — der Nenner steht von Anfang an, auch leer. */
@@ -54,18 +58,21 @@ const contextLog = ref<LogEntry[]>([
   {
     id: 'ctx-profile',
     label: 'Steckbrief',
+    note: 'Wer ihr seid, seit wann, in welcher Form — die nackten Fakten.',
     text: 'Brot & Zeit, Bäckerei in Kiel-Gaarden, gegründet 2026 von Marit Ahrens — eine Backstube, ein Verkaufsraum, drei Leute.',
     state: 'confirmed',
   },
   {
     id: 'ctx-offer',
     label: 'Angebot',
+    note: 'Was ihr verkauft und was es besonders macht.',
     text: 'Vier Brote, zwei Brötchensorten. Alles mit Sauerteig, mindestens 18 Stunden Führung, ohne Backmittel.',
     state: 'confirmed',
   },
   {
     id: 'ctx-audience',
     label: 'Zielgruppe',
+    note: 'Für wen ihr da seid — und für wen bewusst nicht.',
     text: 'Menschen im Viertel, die Zutatenlisten lesen — und Familien, die sich auf eine Deklaration verlassen müssen.',
     state: 'confirmed',
   },
@@ -223,6 +230,7 @@ function afterOrigin(): void {
   log.value.push({
     id: 'origin',
     label: 'Warum gestartet',
+    note: 'Die Geschichte hinter dem Purpose — in euren Worten.',
     text: 'In der Elternzeit angefangen zu backen — weil es kein Brot ohne Zusatzstoffe gab, das geschmeckt hat.',
     state: 'draft',
   })
@@ -283,7 +291,7 @@ function acceptPurpose(): void {
     existing.state = 'confirmed'
   }
   else {
-    log.value.push({ id: 'purpose', label: 'Purpose-Satz', text: purposeText.value, state: 'confirmed' })
+    log.value.push({ id: 'purpose', label: 'Purpose-Satz', note: 'Ein Satz, warum es euch gibt — ohne Produkt, ohne Floskel.', text: purposeText.value, state: 'confirmed' })
   }
   pulseSave()
   offerPosition()
@@ -330,7 +338,7 @@ function offerPosition(): void {
 function pickPosition(turn: Turn, text: string): void {
   consume(turn)
   push({ role: 'user', text })
-  log.value.push({ id: 'position', label: 'Positionierung', text, state: 'draft' })
+  log.value.push({ id: 'position', label: 'Positionierung', note: 'Für wen, gegen wen, warum ihr — die eine Kernentscheidung.', text, state: 'draft' })
   pulseSave()
   push({
     role: 'george',
@@ -363,7 +371,7 @@ function confirmProposal(turn: Turn): void {
 }
 
 function afterBoundary(): void {
-  log.value.push({ id: 'boundary', label: 'Abgrenzung', text: BOUNDARY_PROPOSAL, state: 'draft' })
+  log.value.push({ id: 'boundary', label: 'Abgrenzung', note: 'Was ihr bewusst nicht seid — die Grenze nach außen.', text: BOUNDARY_PROPOSAL, state: 'draft' })
   push({
     role: 'george',
     text: 'Da widerspreche ich dir. „Die Besten" könnte jede Bäckerei der Stadt über sich schreiben, und niemand kann es nachprüfen — das ist eine Behauptung, keine Abgrenzung. Was du mir vorhin erzählt hast, ist überprüfbar und deshalb stärker. Vera sieht das genauso — und sie ist schwerer zu überzeugen als ich.',
@@ -813,26 +821,42 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
         </div>
 
         <div class="min-h-0 flex-1 space-y-3 overflow-y-auto px-6 py-5">
-          <!-- Abgeschlossenes Kapitel: eingeklappt, aber nicht weg. -->
-          <div class="rounded-2xl" style="background: var(--bw-surface-hi)">
+          <!-- Runde 25 (David): der Log ist chronologisch — abgeschlossene
+               Kapitel oben, das laufende darunter. Der Context-Kopf ist KEIN
+               Knopf mehr, sondern eine ruhige Zeile: grüner Haken vorn
+               (Kapitel fertig), Titel mit „10/10"-Subline darunter, hinten
+               nur der Auf-/Zuklapp-Pfeil. -->
+          <div>
             <button
-              class="flex w-full items-center gap-2 px-4 py-3 text-left"
+              class="flex w-full items-start gap-2.5 py-1 text-left"
               :aria-expanded="contextOpen" @click="contextOpen = !contextOpen"
             >
-              <UIcon :name="contextOpen ? 'i-ph-caret-down' : 'i-ph-caret-right'" class="size-4 flex-none" style="color: var(--bw-muted)" />
-              <span class="text-sm font-medium">Context</span>
               <UIcon
-                v-if="contextConfirmed === CONTEXT_TOTAL" name="i-ph-check"
-                class="size-4 flex-none" style="color: var(--bw-accent)"
+                v-if="contextConfirmed === CONTEXT_TOTAL" name="i-ph-check-circle-fill"
+                class="mt-0.5 size-5 flex-none" style="color: var(--bw-accent)"
               />
-              <span class="bw-label ml-auto flex-none tabular-nums" style="color: var(--bw-muted)">{{ contextConfirmed }}/{{ CONTEXT_TOTAL }}</span>
+              <UIcon v-else name="i-ph-circle-half-fill" class="mt-0.5 size-5 flex-none" style="color: var(--bw-ink)" />
+              <span class="min-w-0 flex-1 leading-tight">
+                <span class="block text-sm font-medium">Context</span>
+                <span class="bw-label block tabular-nums" style="color: var(--bw-muted)">{{ contextConfirmed }}/{{ CONTEXT_TOTAL }}</span>
+              </span>
+              <UIcon
+                name="i-ph-caret-down"
+                class="mt-1 size-4 flex-none transition-transform" :class="contextOpen ? '' : '-rotate-90'"
+                style="color: var(--bw-muted)"
+              />
             </button>
-            <div v-if="contextOpen" class="space-y-3 px-4 pb-4">
+            <div v-if="contextOpen" class="mt-2 space-y-3">
+              <!-- Runde 25: jede Karte liest sich wie der Info-Layer —
+                   Headline, Beschreibungs-Subline, DANN die Antwort;
+                   „Korrigieren" erscheint erst bei Hover/Fokus (gd-fix). -->
+              <!-- Karten-Weiß statt --bw-surface: seit der weiße Container weg
+                   ist (R25), wäre surface unsichtbar auf der Spalten-Farbe. -->
               <div
                 v-for="entry in contextLog" :key="entry.id"
-                class="rounded-xl px-3 py-2.5" style="background: var(--bw-surface)"
+                class="gd-log-card rounded-xl px-3 py-2.5" style="background: var(--bw-surface-hi)"
               >
-                <p class="bw-label flex items-center gap-2" style="color: var(--bw-muted)">
+                <p class="flex items-center gap-2 text-sm font-medium">
                   <span
                     class="bw-dot" :class="entry.state === 'confirmed' ? 'bw-dot--confirmed' : 'bw-dot--draft'"
                     :title="entry.state === 'confirmed' ? 'Bestätigt' : 'Noch nicht bestätigt'"
@@ -842,11 +866,12 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
                   </span>
                   <span class="min-w-0 truncate">{{ entry.label }}</span>
                 </p>
+                <p v-if="entry.note" class="mt-0.5 text-xs" style="color: var(--bw-muted)">{{ entry.note }}</p>
                 <p class="bw-doc-text mt-1.5 whitespace-pre-wrap" style="font-size: 0.875rem; line-height: 1.5">{{ entry.text }}</p>
-                <div class="mt-2 flex justify-end">
+                <div class="mt-1 flex justify-end">
                   <UButton
                     v-if="entry.state === 'confirmed'"
-                    size="xs" color="neutral" variant="ghost" class="rounded-full"
+                    size="xs" color="neutral" variant="ghost" class="gd-fix rounded-full"
                     icon="i-ph-pencil-simple" label="Korrigieren" @click="reviseEntry(entry)"
                   />
                   <button v-else class="bw-confirm bw-confirm--open" @click="confirmEntry(entry.id)">
@@ -863,9 +888,9 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
                Leer-Hinweis ist raus (Runde 20, David: überflüssige Info). -->
           <div
             v-for="entry in log" :key="entry.id"
-            class="rounded-2xl px-4 py-3" style="background: var(--bw-surface-hi)"
+            class="gd-log-card rounded-2xl px-4 py-3" style="background: var(--bw-surface-hi)"
           >
-            <p class="bw-label flex items-center gap-2" style="color: var(--bw-muted)">
+            <p class="flex items-center gap-2 text-sm font-medium">
               <span
                 class="bw-dot" :class="entry.state === 'confirmed' ? 'bw-dot--confirmed' : 'bw-dot--draft'"
                 :title="entry.state === 'confirmed' ? 'Bestätigt' : 'Noch nicht bestätigt'"
@@ -875,12 +900,13 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
               </span>
               <span class="min-w-0 truncate">{{ entry.label }}</span>
             </p>
+            <p v-if="entry.note" class="mt-0.5 text-xs" style="color: var(--bw-muted)">{{ entry.note }}</p>
             <UTextarea v-if="editingEntryId === entry.id && entry.state !== 'confirmed'" v-model="entry.text" :rows="3" class="mt-1.5 w-full" />
             <p v-else class="bw-doc-text mt-1.5 whitespace-pre-wrap" style="font-size: 0.9rem; line-height: 1.55">{{ entry.text }}</p>
             <div class="mt-2 flex items-center justify-end gap-2">
               <UButton
                 v-if="entry.state === 'confirmed'"
-                size="xs" color="neutral" variant="ghost" class="rounded-full"
+                size="xs" color="neutral" variant="ghost" class="gd-fix rounded-full"
                 icon="i-ph-pencil-simple" label="Korrigieren" @click="reviseEntry(entry)"
               />
               <template v-else>
@@ -914,4 +940,9 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
 /* Davids Korrekturrunde 4: beide Kapitel-Linien 1px, durchgezogen, eckig. */
 .gd-line { height: 1px; border-radius: 0; }
 .gd-line .bw-chapter-progress-fill { border-radius: 0; }
+/* Runde 25 (David): „Korrigieren" ruht, bis die Log-Karte Hover/Fokus hat —
+   Bestätigen bleibt immer sichtbar (offene Entscheidung braucht den Weg). */
+.gd-fix { opacity: 0; transition: opacity 120ms; }
+.gd-log-card:hover .gd-fix, .gd-log-card:focus-within .gd-fix { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .gd-fix { transition: none; } }
 </style>
