@@ -61,6 +61,21 @@ const draft = ref('')
 
 const initial = computed(() => props.advisorName.slice(0, 1).toUpperCase())
 
+/**
+ * TAB ÜBERNIMMT DIE BEISPIEL-ANTWORT (Davids Wunsch 2026-09-02, Muster
+ * Claude Desktop): steht im LEEREN Feld eine Beispiel-Antwort grau, holt Tab
+ * sie als echten Text ins Feld — ab da ist sie normale Eingabe (editierbar,
+ * absendbar). Tab wird NUR dann abgefangen: sobald etwas getippt ist oder
+ * keine Beispiel-Antwort da ist (generischer Platzhalter), navigiert Tab wie
+ * immer — die Tastatur-Reihenfolge bleibt sonst unangetastet, Shift-Tab
+ * (rückwärts) ebenso.
+ */
+function acceptExample(event: KeyboardEvent): void {
+  if (event.shiftKey || !props.placeholder || draft.value.length > 0) return
+  event.preventDefault()
+  draft.value = props.placeholder
+}
+
 /* Runde 55 (David): der Chat ankert UNTEN und wächst nach oben —
  * neue Nachrichten schieben den Verlauf hoch, Blick bleibt beim Composer. */
 const scroller = ref<HTMLElement | null>(null)
@@ -106,6 +121,7 @@ watch(() => props.messages.length, async () => {
       <UInput
         v-model="draft" variant="none" class="flex-1 rounded-full" :ui="{ base: 'rounded-full px-4' }"
         :placeholder="placeholder || t('brand.workspace.george.placeholder')" size="lg" style="background: var(--bw-surface-hi)"
+        @keydown.tab="acceptExample"
       />
       <UButton
         type="submit" icon="i-ph-paper-plane-right" :aria-label="t('brand.workspace.george.send')"
