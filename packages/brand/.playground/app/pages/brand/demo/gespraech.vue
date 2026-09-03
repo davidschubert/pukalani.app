@@ -510,31 +510,28 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
          rechts. Damit entfallen auch der klebende Papier-Schatten und der
          1px-Trenner samt Kanten-Abgleich aus R4–R7: es gibt links nichts
          mehr, das auf einer Höhe sitzen müsste. -->
+    <!-- Runde 20+20b (David): FESTER heller Balken über dem Gespräch mit
+         1px-Linie darunter, volle Spaltenbreite (eigene Zone über dem
+         Scroller, s. BwWorkspace) — links das Einklapp-Icon für die
+         Nav-Spalte, daneben die zweizeilige Ortsangabe. Er ersetzt die
+         Ortsangaben, die bis Runde 19 im Stand-Kopf standen. -->
+    <template #stage-bar>
+      <div class="flex items-center gap-3">
+        <UButton
+          size="xs" color="neutral" variant="ghost" class="rounded-full"
+          icon="i-ph-sidebar-simple"
+          :aria-label="railCollapsed ? 'Navigation einblenden' : 'Navigation ausblenden'"
+          @click="railCollapsed = !railCollapsed"
+        />
+        <div class="min-w-0 leading-tight">
+          <p class="bw-label" style="color: var(--bw-muted)">Brand Foundation</p>
+          <p class="truncate text-sm font-medium">Purpose · Vision · Mission</p>
+        </div>
+      </div>
+    </template>
+
     <template #default>
       <div class="flex flex-col">
-        <!-- Runde 20 (David): FESTER Balken über dem Gespräch — links das
-             Einklapp-Icon für die Nav-Spalte, daneben die zweizeilige
-             Ortsangabe (Bereich klein, Kapitel als Titel). Er ersetzt die
-             Ortsangaben, die bis Runde 19 im Stand-Kopf standen. Sticky mit
-             Papier-Schatten (2rem Bühnen-Innenabstand), wie der alte Kopf. -->
-        <div
-          class="sticky top-0 z-10 pb-3"
-          style="background: var(--bw-paper); box-shadow: 0 -2rem 0 var(--bw-paper)"
-        >
-          <div class="flex items-center gap-3">
-            <UButton
-              size="xs" color="neutral" variant="ghost" class="rounded-full"
-              icon="i-ph-sidebar-simple"
-              :aria-label="railCollapsed ? 'Navigation einblenden' : 'Navigation ausblenden'"
-              @click="railCollapsed = !railCollapsed"
-            />
-            <div class="min-w-0 leading-tight">
-              <p class="bw-label" style="color: var(--bw-muted)">Brand Foundation</p>
-              <p class="truncate text-sm font-medium">Purpose · Vision · Mission</p>
-            </div>
-          </div>
-        </div>
-
         <!-- Der Vera-Layer: alles über den Berater, ohne die Bühne zu verlassen.
              Geöffnet seit Runde 20 über Klick auf Georges Avatar im Gespräch. -->
         <div
