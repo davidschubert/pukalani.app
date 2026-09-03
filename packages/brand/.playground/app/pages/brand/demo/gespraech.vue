@@ -486,12 +486,9 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
              hält dort an der INHALTS-Kante — darüber liefe der Verlauf sonst
              sichtbar durch. Der Schatten verlängert die Papierfläche genau um
              diesen Abstand nach oben. -->
-        <!-- top/-margin -24px: hebt die Linie exakt auf die Höhe der
-             Stand-Linie (gemessen 215→191; sticky klammert sonst an der
-             Inhalts-Kante der Bühne fest und schluckt den Margin). -->
         <div
-          class="sticky z-10 pb-3"
-          style="background: var(--bw-paper); box-shadow: 0 -2rem 0 var(--bw-paper); margin-top: -24px; top: -24px"
+          class="sticky top-0 z-10 pb-3"
+          style="background: var(--bw-paper); box-shadow: 0 -2rem 0 var(--bw-paper)"
         >
           <!-- Davids Korrekturrunde 4: EINE kompakte Zeile, damit die Linie
                darunter auf derselben Höhe sitzt wie die Linie im Stand rechts —
@@ -505,13 +502,10 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
               icon="i-ph-info" aria-label="Über Vera" @click="veraInfoOpen = true"
             />
           </div>
-          <div
-            class="bw-chapter-progress-track gd-line mt-2.5" role="progressbar"
-            :aria-valuenow="confirmedCount" aria-valuemin="0" :aria-valuemax="CHAPTER_TOTAL"
-            aria-label="Bestätigte Entscheidungen in diesem Kapitel"
-          >
-            <div class="bw-chapter-progress-fill" :style="`width: ${chapterPct}%`" />
-          </div>
+          <!-- Davids Korrekturrunde 5: KEIN Fortschritt hier — der wohnt im
+               Stand. Nur ein grauer 1px-Trenner, auf derselben Höhe wie die
+               Abschluss-Kante des Stand-Kopfs (gemessen: 237 = 237). -->
+          <div class="mt-8" style="height: 1px; background: var(--bw-line)" />
         </div>
 
         <!-- Der Vera-Layer: alles über die Beraterin, ohne die Bühne zu verlassen. -->
