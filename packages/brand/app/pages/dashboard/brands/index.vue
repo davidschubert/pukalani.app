@@ -75,6 +75,34 @@ function workspacePath(profile: BrandProfileSummary): string {
 }
 
 /**
+ * „EUER BRANDING" WOHNT AN DER KACHEL (Runde 35, David, 2026-09-02) — nicht
+ * mehr in der Werkstatt. Gesperrt mit Schloss, bis die Brand Foundation
+ * abgeschlossen ist; BEWUSST kein 100-%-Gate, denn Monitoring endet nie.
+ *
+ * ── WORAN „ABGESCHLOSSEN" HÄNGT, OHNE EIN NEUES SERVER-FELD ──────────────
+ * Die Liste liefert kein Journey-Objekt, wohl aber `currentStepKey`, und der
+ * ist genau definiert (`resolveProfileProgress`): der erste Baustein auf dem
+ * Weg, der `active` oder `open` ist — steht nichts mehr offen, der letzte.
+ * `result` ist der letzte Baustein der Registry. `currentStepKey === 'result'`
+ * heisst deshalb exakt „alles davor ist `done`", und das ist die Foundation.
+ * Ein eigenes `foundationDone`-Feld wäre eine zweite Wahrheit über denselben
+ * Sachverhalt.
+ *
+ * `result` ist zugleich das ZIEL: eine eigene Ergebnis-SEITE gibt es im Layer
+ * noch nicht (der Klickdummy zeigt `/brand/demo/ergebnis`), der Baustein
+ * `result` ist heute die Ergebnis-Ansicht.
+ */
+const RESULT_STEP: BrandStepKey = 'result'
+
+function resultPath(profile: BrandProfileSummary): string {
+  return localePath(`/brand/${profile.id}/${RESULT_STEP}`)
+}
+
+function resultReady(profile: BrandProfileSummary): boolean {
+  return profile.currentStepKey === RESULT_STEP
+}
+
+/**
  * Der Submit des Modals — seit P2.5 eine ÜBERGABE, keine Anlage mehr.
  *
  * Das Modal erhebt drei Dinge (Weiche, Titel, Sprache). Seit die STARTKARTE
@@ -171,6 +199,8 @@ useBrandTitle(() => t('brand.brands.title'))
             :remaining="remaining(profile)"
             :edited="editedAt(profile)"
             :pct="profile.progressPct"
+            :result-to="resultPath(profile)"
+            :result-ready="resultReady(profile)"
           />
         </NuxtLink>
       </div>
