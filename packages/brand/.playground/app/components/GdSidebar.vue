@@ -78,8 +78,10 @@ function glyph(layer: BwRailLayer, step: BwRailStep): { name: string, style: str
   <nav :aria-label="t('brand.workspace.rail.progressNav')">
     <!-- 1. Brand-Switcher oben (ersetzt den Topbar-Switcher) -->
     <UDropdownMenu :items="brandMenu" :content="{ align: 'start' }" :ui="{ content: 'min-w-56' }">
+      <!-- Runde 17: Nuxt-UI-Standardmetrik — px-2.5 / gap-1.5 wie die
+           NavigationMenu-Zeilen, damit alles auf einer Flucht sitzt. -->
       <button
-        class="gd-switch flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-left"
+        class="gd-switch flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left"
         aria-label="Branding wechseln"
       >
         <span
@@ -92,13 +94,13 @@ function glyph(layer: BwRailLayer, step: BwRailStep): { name: string, style: str
     </UDropdownMenu>
 
     <!-- 3. Bereiche als einklappbare Gruppen -->
-    <div class="mt-5 space-y-1">
+    <div class="mt-4 space-y-1">
       <UCollapsible
         v-for="layer in layers" :key="layer.id"
         :default-open="!layer.locked" :unmount-on-hide="false" class="group/section"
       >
         <button
-          class="gd-row group/row flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm font-medium"
+          class="gd-row group/row flex w-full items-center gap-1.5 rounded-md px-2.5 py-1.5 text-left text-sm font-medium"
           :style="layer.locked ? 'color: var(--bw-muted)' : ''"
         >
           <UIcon v-if="layer.locked" name="i-ph-lock-simple" class="size-4 flex-none" style="color: var(--bw-muted)" />
@@ -121,10 +123,11 @@ function glyph(layer: BwRailLayer, step: BwRailStep): { name: string, style: str
 
         <template #content>
           <!-- Kinder mit Führungslinie, wie in der Nuxt-UI-Sidebar -->
-          <ul class="ml-3.5 mt-0.5 space-y-0.5 border-l pl-2.5" style="border-color: var(--bw-line)">
+          <!-- Führungslinie mit Nuxt-UI-Einzug: childList ms-5, Kinder ps-1.5. -->
+          <ul class="ml-5 mt-0.5 space-y-0.5 border-l pl-1.5" style="border-color: var(--bw-line)">
             <li v-for="step in layer.steps ?? []" :key="step.id">
               <button
-                class="gd-row group/row flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm"
+                class="gd-row group/row flex w-full items-center gap-1.5 rounded-md px-2.5 py-1.5 text-left text-sm"
                 :class="!layer.locked && step.state === 'active' ? 'font-medium' : ''"
                 :style="!layer.locked && step.state === 'active'
                   ? 'background: var(--bw-surface-hi); color: var(--bw-ink); box-shadow: var(--bw-shadow-card)'

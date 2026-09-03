@@ -484,10 +484,13 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
   <!-- Runde 16 (David): Leiste im Nuxt-UI-Sidebar-Muster (GdSidebar) — der
        Switcher wohnt oben in der Sidebar, die Topbar ist ganz aus; den
        Sync-Zustand zeigt die Sidebar. Fuß: dreizeilig. -->
+  <!-- Runde 17 (David): Nuxt-UI-Standardabstände in der Sidebar-Spalte
+       (Body px-4/py-2 laut DashboardSidebar-Theme) statt des 2rem-Gutters. -->
   <BwWorkspace
     :progress-pct="progressPct" content-locale="de" :locale-in-topbar="false"
     :topbar="false" progress-title="Gesamtfortschritt"
     :progress-count="progressCount" progress-time="ca. 30 Min"
+    style="--bw-rail-pad-x: 1rem; --bw-rail-pad-y: 0.75rem"
   >
     <!-- LINKS: die Sidebar im Nuxt-UI-Muster (Runde 16) — Switcher oben,
          einklappbare Bereiche, Sync-Zustand unten. Der frühere Topbar-
