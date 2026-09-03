@@ -502,10 +502,12 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
               icon="i-ph-info" aria-label="Über Vera" @click="veraInfoOpen = true"
             />
           </div>
-          <!-- Davids Korrekturrunde 5: KEIN Fortschritt hier — der wohnt im
+          <!-- Davids Korrekturrunde 5+6: KEIN Fortschritt hier — der wohnt im
                Stand. Nur ein grauer 1px-Trenner, auf derselben Höhe wie die
-               Abschluss-Kante des Stand-Kopfs (gemessen: 237 = 237). -->
-          <div class="mt-8" style="height: 1px; background: var(--bw-line)" />
+               Abschluss-Kante des Stand-Kopfs (gemessen: 237 = 237) und
+               DURCHGEZOGEN bis an beide Spalten-Kanten: die Bühne hat 56px
+               Innenabstand, die negativen Ränder heben ihn genau auf. -->
+          <div class="mt-8" style="height: 1px; background: var(--bw-line); margin-left: -56px; margin-right: -56px" />
         </div>
 
         <!-- Der Vera-Layer: alles über die Beraterin, ohne die Bühne zu verlassen. -->
