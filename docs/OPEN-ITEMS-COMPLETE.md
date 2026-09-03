@@ -30,6 +30,88 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### Brand-Wizard: Werkstatt-Umbau „Gespräch als Bühne" live + Live-Audit-Befunde behoben ✅ 2026-09-03
+
+**Was passiert ist:** Der in 39 Dummy-Runden abgenommene Umbau
+([plans/BRAND-WIZARD-GESPRAECH-UMBAU.md](plans/BRAND-WIZARD-GESPRAECH-UMBAU.md),
+Davids Freigabe) wurde in zwei Opus-Läufen ausgeführt (Layout; Eine Stimme —
+George spricht durchgehend, `BRAND_VOICE`/`techniqueForStep`/`colleagueForStep`
+statt Berater-Übergaben), von drei parallelen Code-Audits geprüft, alle
+Befunde in einer Fix-Runde behoben, danach Design-Entscheidungen Davids
+umgesetzt (Kapitelname „Tagline & Messaging", Tablet volle Sidebar-Breite,
+Mobil-Sidebar als Overlay, mobil Start im Gespräch). Abschluss war ein
+**Live-Audit auf branding.supply** (Davids eingeloggter Chrome, Test-Brand
+Krume & Gold): Layout, Log-Sublines, UChatPrompt, George-Layer, Toggles und
+ein sparsamer George-Zug (erkannte die Platzhalter-Antworten und fragte nach,
+statt sie zu übernehmen) — alles grün, keine Konsolen-Fehler.
+
+**Die drei Live-Audit-Befunde, alle noch am selben Tag gefixt + deployt:**
+
+1. **Konfidenz-Wahl verschwand nach Reload** (`ba4d5de8`): PATCH 200, GET trug
+   den Wert, SSR malte den gewählten Chip — die Hydration nahm ihn weg.
+   `serverConfidence`/`localConfidence` waren PRIVATE Refs im Setup-Store, und
+   Pinia serialisiert nur Zurückgegebenes in den SSR-Payload. Beide Refs
+   stehen jetzt im Return; Quelltext-Wächter
+   `packages/brand/tests/brandWorkspaceStoreState.test.ts` prüft künftig jede
+   Store-Ref auf Rückgabe.
+2. **Gesamtfortschritt widersprach sich je Seite** (`52712129`): pvm 19/59,
+   context 20/59. `toSlotFacts` (Server) zählte „gab es je einen Entwurf" —
+   ein GELEERTES Feld (`b.mission`: latestDraft `''`, firstDraft 1 Zeichen)
+   blieb über den firstDraft-Fallback gefüllt, der Client zählt das Sichtbare.
+   Jetzt beidseitig die Anzeige-Rangfolge `latestDraft ?? firstDraft ??
+   confirmed` (drei Tests inkl. Gegenprobe). Live bestätigt: beide Seiten 19/59.
+3. **Georges Abschluss-Satz behauptete zu viel** (`71e5c792`): „In diesem
+   Kapitel ist nichts mehr offen" stand direkt über „Noch offen: 1 von 10
+   Feldern". Kein Server-Fehler, sondern Wortlaut: `resolveNextQuestion` kennt
+   bewusst nur Frage-/Auswahl-Slots, Bühnen-Entwürfe (`stage-edit` wie
+   `b.mission`) fragt George nie. Der Satz folgt jetzt dem Kapitel-Stand
+   (`completion.slotsReady`); davor: „Meine Fragen sind durch — die offenen
+   Felder unten formen wir jetzt hier im Gespräch."
+
+**Befund 3 riss selbst eine Regression** (behoben in `836f0283`, ~40 min
+Werkstatt-500 für Eingeloggte): `turns` las das erst ~280 Zeilen SPÄTER
+deklarierte `completion`, und der Scroll-Watcher
+(`watch(() => turns.value.length)`) wertet seine Quelle beim ANLEGEN aus —
+im Browser mitten im Setup ⇒ TDZ-ReferenceError („Cannot access 'K' before
+initialization") ⇒ 500-Seite auf jeder Werkstatt-Route. SSR blieb grün (der
+Server legt keine Watcher an, `curl` zeigte 200), Tests/Lint/Typecheck sehen
+TDZ in Callbacks nicht. Gefunden über `$nuxt.payload.error` im Browser, weil
+die Prod-Fehlerseite Details bewusst versteckt.
+
+**Dazu Davids Zuschnitt zur Optik-Meldung:** die Kapitel-Subline mischt
+optionale Felder nicht in den Zähler, sondern benennt sie als Anhängsel —
+„10/10 bestätigt + 1 optional" (`ef57a89c`, Registry-Zahl je Kapitel; betrifft
+context/values/result). Live verifiziert am Kontext-Kapitel.
+
+**Und die Kachel-Farbwelten je Brand** (Davids Auftrag aus dem Audit, gleich
+mitgebaut): `shared/brandPalette.ts` — zwölf handgestimmte Dreiklänge (die
+drei im Dummy ABGENOMMENEN führen die Tabelle an: Brot-Braun, Blaugrau,
+Tannengrün; dazu Terrakotta, Oliv, Petrol, Pflaume, Rosenholz, Schiefer,
+Messing, Taubenblau, Moos), deterministisch per FNV-1a aus der PROFIL-ID
+(Umbenennen ändert die Farbe nicht; Tabelle darf nur hinten wachsen, sonst
+färben sich Bestands-Kacheln um). Bewusst kuratierte Tabelle statt
+Hash→OKLCH-Generator: unendlich viele Töne heisst regelmäßig hässliche.
+Später kann eine echte Farb-Phase des Wizards die Zuweisung überschreiben.
+
+**Gelernt:** (1) In Pinia-Setup-Stores gehört JEDE Ref ins Return, auch wenn
+nur ein computed sie liest — private Refs überleben die SSR-Hydration nicht,
+und der Fehler ist unsichtbar, solange man nur den SSR-HTML-Strom oder nur
+die API prüft (beide waren korrekt; erst der DOM-Vergleich nach Hydration
+zeigte ihn). (2) Zwei Rechenwege für dieselbe Zahl (Server-Journey vs.
+Client-Live) divergieren an Rändern, die keiner bedacht hat — hier das
+GELEERTE Feld; die Kur ist eine geteilte Rangfolge, nicht ein Abgleich-Code.
+(3) Ein Widerspruch auf dem Bildschirm hat nicht immer EINE Ursache: Befund 2
+(Zahlen) und Befund 3 (Wortlaut) sahen aus wie dasselbe Problem und waren
+zwei — nach dem ersten Fix weiterprüfen, ob der Widerspruch wirklich weg ist.
+(4) In `<script setup>` ist jede Referenz auf eine SPÄTER deklarierte
+`const` in einem Computed/Watcher eine Zeitbombe: `watch`-Quellen laufen
+beim Anlegen, also im Setup — und genau diese Fehlerklasse sehen weder
+Unit-Tests noch Typecheck noch Lint, nur ein Browser, der die Seite lädt.
+Deklarationen strikt vor der ersten Verwendung anordnen, und eine Seite mit
+neuen Computed-Verkettungen VOR dem Push einmal im Browser öffnen.
+
+---
+
 ### branding-Prod-Ausfall nach Reload: zerschossene Server-.env, nicht der Code ✅ 2026-09-01
 
 **Vorfall:** Nach dem Deploy des Dev-Port-Fixes (78bd3bb5) meldete der
