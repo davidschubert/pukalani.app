@@ -132,7 +132,10 @@ const contextConfirmed = computed(() =>
 
 const log = ref<LogEntry[]>([])
 const confirmedCount = computed(() => log.value.filter(entry => entry.state === 'confirmed').length)
-const chapterPct = computed(() => Math.round((confirmedCount.value / CHAPTER_TOTAL) * 100))
+/* Runde 27 (David): der Kapitel-Fortschritt ist eine Log-SEKTION unter
+ * Context (kein eigener Stand-Kopf, keine Prozentzahl mehr — die lebt nur
+ * noch im Gesamtfortschritt unten links). */
+const pvmOpen = ref(true)
 const openLabels = computed(() => log.value.filter(entry => entry.state === 'draft').map(entry => entry.label))
 const allConfirmed = computed(() => log.value.length === CHAPTER_TOTAL && openLabels.value.length === 0)
 
@@ -849,26 +852,10 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
          Entscheidung ein Eintrag in Dokument-Optik mit seiner Ampel. -->
     <template #george>
       <div class="flex min-h-0 flex-1 flex-col">
-        <div class="flex-none border-b px-6 pt-5 pb-4" style="border-color: var(--bw-line)">
-          <!-- Runde 20+22 (David): der Stand-Kopf ist wieder REINER
-               Fortschritt — Kapitelname wohnt im Bühnen-Balken, die
-               George-Zeile ist raus (Info-Layer per Avatar-Klick), und auch
-               die Inhaltssprache ist entfernt: sie steht als Flagge am
-               Branding im Switcher-Menü (R21). Geblieben: Zähler + Prozent
-               (R10), Fortschrittslinie als Abschluss-Kante. -->
-          <div class="flex items-baseline justify-between gap-3">
-            <p class="bw-label tabular-nums" style="color: var(--bw-muted)">{{ confirmedCount }}/{{ CHAPTER_TOTAL }} bestätigt</p>
-            <p class="bw-label tabular-nums" style="color: var(--bw-muted)">{{ chapterPct }}&thinsp;%</p>
-          </div>
-          <div
-            class="bw-chapter-progress-track gd-line mt-2.5" role="progressbar"
-            :aria-valuenow="confirmedCount" aria-valuemin="0" :aria-valuemax="CHAPTER_TOTAL"
-            aria-label="Bestätigte Entscheidungen in diesem Kapitel"
-          >
-            <div class="bw-chapter-progress-fill" :style="`inline-size: ${chapterPct}%`" />
-          </div>
-        </div>
-
+        <!-- Runde 27 (David): KEIN eigener Stand-Kopf mehr — der Kapitel-
+             Fortschritt ist eine SEKTION im chronologischen Log, direkt
+             unter Context (gleiche Zeilen-Anatomie, „n/4 bestätigt" als
+             Subline). -->
         <div class="min-h-0 flex-1 space-y-3 overflow-y-auto px-6 py-5">
           <!-- Runde 25 (David): der Log ist chronologisch — abgeschlossene
                Kapitel oben, das laufende darunter. Der Context-Kopf ist KEIN
@@ -931,9 +918,31 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
             </div>
           </div>
 
-          <!-- Das laufende Kapitel: jeder Eintrag erscheint, sobald er im
-               Gespräch fällt — bernstein, bis er bestätigt ist. Der frühere
-               Leer-Hinweis ist raus (Runde 20, David: überflüssige Info). -->
+          <!-- Runde 27: das LAUFENDE Kapitel als eigene Sektion unter Context —
+               Halbmond solange offen, grüner Haken nach dem Abschluss;
+               jeder Eintrag erscheint, sobald er im Gespräch fällt. -->
+          <div>
+            <button
+              class="flex w-full items-start gap-2.5 py-1 text-left"
+              :aria-expanded="pvmOpen" @click="pvmOpen = !pvmOpen"
+            >
+              <UIcon
+                v-if="chapterDone" name="i-ph-check-circle-fill"
+                class="mt-0.5 size-5 flex-none" style="color: var(--bw-accent)"
+              />
+              <UIcon v-else name="i-ph-circle-half-fill" class="mt-0.5 size-5 flex-none" style="color: var(--bw-ink)" />
+              <span class="min-w-0 flex-1 leading-tight">
+                <span class="block text-sm font-medium">Purpose · Vision · Mission</span>
+                <span class="bw-label block tabular-nums" style="color: var(--bw-muted)">{{ confirmedCount }}/{{ CHAPTER_TOTAL }} bestätigt</span>
+              </span>
+              <UIcon
+                name="i-ph-caret-down"
+                class="mt-1 size-4 flex-none transition-transform" :class="pvmOpen ? '' : '-rotate-90'"
+                style="color: var(--bw-muted)"
+              />
+            </button>
+          </div>
+          <template v-if="pvmOpen">
           <div
             v-for="entry in log" :key="entry.id"
             class="gd-log-card rounded-2xl px-4 py-3" style="background: var(--bw-surface-hi)"
@@ -969,6 +978,7 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
               </template>
             </div>
           </div>
+          </template>
         </div>
 
         <!-- Runde 11+14: unten rechts NUR der Einstiegs-Button „Euer
