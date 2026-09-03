@@ -486,23 +486,27 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
              hält dort an der INHALTS-Kante — darüber liefe der Verlauf sonst
              sichtbar durch. Der Schatten verlängert die Papierfläche genau um
              diesen Abstand nach oben. -->
+        <!-- top/-margin -24px: hebt die Linie exakt auf die Höhe der
+             Stand-Linie (gemessen 215→191; sticky klammert sonst an der
+             Inhalts-Kante der Bühne fest und schluckt den Margin). -->
         <div
-          class="sticky top-0 z-10 pb-3"
-          style="background: var(--bw-paper); box-shadow: 0 -2rem 0 var(--bw-paper)"
+          class="sticky z-10 pb-3"
+          style="background: var(--bw-paper); box-shadow: 0 -2rem 0 var(--bw-paper); margin-top: -24px; top: -24px"
         >
-          <div class="flex items-center gap-3">
-            <BwGeorgeAvatar src="" initial="V" alt="Vera" />
-            <span class="min-w-0 leading-tight">
-              <span class="block text-sm font-medium">Gespräch mit Vera</span>
-              <span class="bw-label block truncate" style="color: var(--bw-muted)">Strategin · Purpose, Vision &amp; Mission</span>
-            </span>
+          <!-- Davids Korrekturrunde 4: EINE kompakte Zeile, damit die Linie
+               darunter auf derselben Höhe sitzt wie die Linie im Stand rechts —
+               beide 1px, durchgezogen, ohne runde Enden (gd-line unten). -->
+          <div class="flex items-center gap-2.5">
+            <BwGeorgeAvatar size="md" src="" initial="V" alt="Vera" />
+            <span class="min-w-0 truncate text-sm font-medium">Gespräch mit Vera</span>
+            <span class="bw-label truncate" style="color: var(--bw-muted)">· Strategin · Purpose, Vision &amp; Mission</span>
             <UButton
               size="xs" color="neutral" variant="ghost" class="ml-auto rounded-full"
               icon="i-ph-info" aria-label="Über Vera" @click="veraInfoOpen = true"
             />
           </div>
           <div
-            class="bw-chapter-progress-track mt-3" role="progressbar"
+            class="bw-chapter-progress-track gd-line mt-2.5" role="progressbar"
             :aria-valuenow="confirmedCount" aria-valuemin="0" :aria-valuemax="CHAPTER_TOTAL"
             aria-label="Bestätigte Entscheidungen in diesem Kapitel"
           >
@@ -749,7 +753,7 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
             <p class="bw-label tabular-nums" style="color: var(--bw-muted)">{{ confirmedCount }}/{{ CHAPTER_TOTAL }} bestätigt</p>
           </div>
           <div
-            class="bw-chapter-progress-track mt-2.5" role="progressbar"
+            class="bw-chapter-progress-track gd-line mt-2.5" role="progressbar"
             :aria-valuenow="confirmedCount" aria-valuemin="0" :aria-valuemax="CHAPTER_TOTAL"
             aria-label="Bestätigte Entscheidungen in diesem Kapitel"
           >
@@ -848,3 +852,9 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
     </template>
   </BwWorkspace>
 </template>
+
+<style scoped>
+/* Davids Korrekturrunde 4: beide Kapitel-Linien 1px, durchgezogen, eckig. */
+.gd-line { height: 1px; border-radius: 0; }
+.gd-line .bw-chapter-progress-fill { border-radius: 0; }
+</style>
