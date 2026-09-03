@@ -39,6 +39,22 @@ const menuItems = computed(() => [
 /* Neue Brand oeffnet das Start-Modal von jeder Seite aus. */
 const newBrandOpen = ref(false)
 
+/* DAS KONTO IST ECHT (Nacht 2026-09-03): das Avatar trug ein hartkodiertes
+ * „DS", „Abmelden" war ein toter Menüpunkt, und ein Gast sah ein Konto-Menü
+ * ohne Konto. Jetzt: Initialen aus dem echten Konto (Name vor E-Mail),
+ * Abmelden über den Core-Weg (useLogout), Gäste bekommen den Login-Knopf. */
+const { user, isLoggedIn } = useCurrentUser()
+const { logout } = useLogout()
+const localePath = useLocalePath()
+const initials = computed(() => {
+  const source = (user.value?.name || user.value?.email || '').trim()
+  if (!source) return '?'
+  const words = source.split(/\s+/).filter(Boolean)
+  return words.length >= 2
+    ? `${words[0]![0]}${words[1]![0]}`.toUpperCase()
+    : source.slice(0, 2).toUpperCase()
+})
+
 /* Konto-Menü (aus BwWorkspace umgezogen): Sprachwechsel via
  * switchLocalePath, Erscheinungsbild nach Pukalani-Muster über
  * colorMode.preference. */
@@ -82,8 +98,9 @@ const userMenu = computed(() => [[
     })),
   },
 ], [
-  { label: t('brand.nav.account'), icon: 'i-ph-user-circle' },
-  { label: t('brand.nav.signOut'), icon: 'i-ph-sign-out' },
+  /* Der frühere „Konto"-Punkt ist entfernt: branding.supply hat (noch)
+   * keine Konto-Seite — ein Menüpunkt ins Leere wäre eine Attrappe. */
+  { label: t('brand.nav.signOut'), icon: 'i-ph-sign-out', onSelect: () => { void logout() } },
 ]])
 </script>
 
@@ -114,9 +131,13 @@ const userMenu = computed(() => [[
       <!-- Runde 189 (David): Meine Brands + Neue Brand leben im
            Avatar-Menue — rechts steht nur noch das Konto. -->
       <BwNewBrandModal v-model:open="newBrandOpen" />
-      <UDropdownMenu :items="userMenu">
-        <button :aria-label="t('brand.nav.accountMenu')" class="grid place-items-center"><UAvatar text="DS" size="md" /></button>
+      <UDropdownMenu v-if="isLoggedIn" :items="userMenu">
+        <button :aria-label="t('brand.nav.accountMenu')" class="grid place-items-center"><UAvatar :text="initials" size="md" /></button>
       </UDropdownMenu>
+      <UButton
+        v-else :to="localePath('/login')" color="neutral" variant="ghost" size="sm"
+        :label="t('brand.nav.signIn')"
+      />
     </template>
 
     <template #body>

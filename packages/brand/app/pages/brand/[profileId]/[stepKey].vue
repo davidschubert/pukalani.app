@@ -16,6 +16,7 @@ import {
   type BrandStepKey,
   exampleKeyFor,
   questionKeyFor,
+  slotById,
   slotIsConfirmable,
   slotsForStep,
   stepProgress,
@@ -648,10 +649,9 @@ async function submitChoice(): Promise<void> {
  * choice-Slot wie `b.positioningCategory` fällt an beiden durch und behält
  * sein Textfeld — dort IST der Text die Antwort.
  */
-const choiceCards = computed<BwChoiceCard[]>(() => {
-  const slot = nextSlot.value
-  if (!slot || slot.editor !== 'cards') return []
-  const contract = brandChoiceContract(slot.id)
+function choiceCardsFor(slotId: string): BwChoiceCard[] {
+  if (slotById(slotId)?.editor !== 'cards') return []
+  const contract = brandChoiceContract(slotId)
   if (!contract || contract.kind !== 'closed') return []
   return contract.options.map(option => ({
     id: option.id,
@@ -659,7 +659,10 @@ const choiceCards = computed<BwChoiceCard[]>(() => {
     hint: t(`${option.copyKey}.hint`),
     example: t(`${option.copyKey}.example`),
   }))
-})
+}
+
+const choiceCards = computed<BwChoiceCard[]>(() =>
+  (nextSlot.value ? choiceCardsFor(nextSlot.value.id) : []))
 
 /**
  * Der Klick auf eine Karte geht denselben Weg wie die getippte Antwort — nur
@@ -1699,8 +1702,18 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
                 </p>
                 <p v-if="card.note" class="mt-0.5 text-xs" style="color: var(--bw-muted)">{{ card.note }}</p>
 
+                <!-- GESCHLOSSENE AUSWAHL: „Korrigieren" führt zurück auf die
+                     KARTEN, nie in ein Textfeld — dort stünde die rohe Id
+                     (`branded-house`) zur Bearbeitung (P4-Restkante). -->
+                <BwChoiceCards
+                  v-if="card.controls && editingSlotId === card.id && card.controls.editable && choiceCardsFor(card.id).length"
+                  class="mt-1.5"
+                  :options="choiceCardsFor(card.id)"
+                  :selected="card.value"
+                  @pick="id => { onInput(card.id, id); autosave.flush() }"
+                />
                 <UTextarea
-                  v-if="card.controls && editingSlotId === card.id && card.controls.editable"
+                  v-else-if="card.controls && editingSlotId === card.id && card.controls.editable"
                   class="mt-1.5 w-full" :rows="3"
                   :model-value="card.value"
                   @update:model-value="value => onInput(card.id, String(value))"
