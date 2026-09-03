@@ -76,30 +76,36 @@ describe('Berater-Registry', () => {
   it('fällt auf den Gastgeber zurück — aber nur für Unbekanntes', () => {
     expect(BRAND_HOST_ADVISOR.key).toBe('george')
     expect(advisorForStep('gibt-es-nicht' as never).key).toBe('george')
-    expect(advisorByKey('vera')?.fullName).toBe('Vera Witterung')
+    expect(advisorByKey('vera')?.fullName).toBe('Vera Stein')
     expect(advisorByKey('gibt-es-nicht')).toBeUndefined()
   })
 
-  it('trägt die About-Ebene mit — volle Namen und Rasse (Davids Hunde-Welt)', () => {
+  it('trägt die About-Ebene mit — volle Namen und eine PROFESSIONELLE Zeile', () => {
     expect(BRAND_ADVISORS.map(advisor => advisor.fullName)).toEqual([
-      'George Wuffwuff',
-      'Vera Witterung',
-      'Milo Treuherz',
-      'Nika Bellkant',
-      'Otto Testbiss',
+      'George Winter',
+      'Vera Stein',
+      'Milo Berger',
+      'Nika Sommer',
+      'Otto Kessler',
     ])
     for (const advisor of BRAND_ADVISORS) {
-      // Der Steckbrief der About-Seite hat die Form „Rasse · Ort · zwei Details".
-      expect(advisor.personal.split('·').length, advisor.key).toBeGreaterThanOrEqual(3)
+      // Davids Entscheidung 2026-09-02 (DECISION-LOG): die About-Zeile sagt,
+      // WIE jemand arbeitet — kein „Rasse · Ort · zwei Marotten" mehr. Das
+      // Trennzeichen der alten Steckbrief-Form ist deshalb der Wächter: käme
+      // sie zurück, käme sie mit ihm zurück.
+      expect(advisor.personal, advisor.key).not.toContain('·')
+      expect(advisor.personal.length, advisor.key).toBeGreaterThan(40)
     }
   })
 
-  it('DIE PROMPT-FELDER ERWÄHNEN DIE HUNDE-NATUR NICHT', () => {
-    // Im Gespräch sind das Beraterinnen und Berater. Die Hunde-Ebene ist
-    // Davids ABOUT-Konzept — landete sie im Prompt, bellte George im Interview.
-    const forbidden = /\b(dog|puppy|paw|bark|wuff|woof|breed)\b/i
+  it('WEDER DIE ANZEIGE NOCH DIE PROMPT-FELDER KENNEN DIE HUNDE-WELT', () => {
+    // Sie ist am 2026-09-02 komplett verworfen — im Wizard UND auf der
+    // About-Seite. Der Wächter deckt deshalb auch fullName und personal ab.
+    const forbidden = /\b(dog|puppy|paw|bark|wuff|woof|breed|Hunde?|Rasse|Pfote|Wuffwuff|Witterung|Treuherz|Bellkant|Testbiss)\b/i
     for (const advisor of BRAND_ADVISORS) {
-      const promptText = [
+      const everything = [
+        advisor.fullName,
+        advisor.personal,
         advisor.strengths,
         advisor.interviewTechnique,
         ...advisor.toneTraits,
@@ -107,7 +113,7 @@ describe('Berater-Registry', () => {
         ...advisor.openers.de,
         ...advisor.openers.en,
       ].join(' ')
-      expect(promptText, advisor.key).not.toMatch(forbidden)
+      expect(everything, advisor.key).not.toMatch(forbidden)
     }
   })
 

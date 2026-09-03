@@ -3,11 +3,10 @@
  *  Zug endet in Frage oder Schritt (§3d). Kein Lob-Spam, keine Fake-Delays.
  *
  *  ── DER KOPF ZEIGT, WER GERADE FÜHRT (2026-09-01) ────────────────────────
- *  Bis hierher stand dort fest „George Wuffwuff · Dein Markenberater". Seit
+ *  Bis hierher stand dort fest ein voller Name plus „Dein Markenberater". Seit
  *  dem sichtbaren Beraterteam kommen Name und Rollen-Titel von aussen — die
- *  Seite fragt `advisorForStep()`. Und zwar VORNAME plus Rolle: die Hunde-Welt
- *  mit den Nachnamen (Davids About-Konzept) lebt auf der About-Seite, im
- *  Arbeitsmodus wäre sie ein Gag im Weg.
+ *  Seite fragt `advisorForStep()`. Und zwar VORNAME plus Rolle: die Nachnamen
+ *  gehören der About-Seite, im Arbeitsmodus sind sie nur Ballast.
  *
  *  ── DIE ÜBERGABE IST ANZEIGE, KEIN VERLAUF ───────────────────────────────
  *  `handover` steht als stille Zeile ÜBER den Nachrichten und wird nirgends
@@ -48,7 +47,9 @@ const props = withDefaults(defineProps<{
 }>(), {
   advisorName: 'George',
   advisorRole: '',
-  advisorAvatar: '/george.jpg',
+  // Leer ⇒ Monogramm. Es gibt (seit 2026-09-02) kein Berater-Bild mehr; der
+  // Pfad kommt, wenn überhaupt, aus der Registry (`brandAdvisors.ts`).
+  advisorAvatar: '',
   handover: null,
   placeholder: '',
   busy: false,

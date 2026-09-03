@@ -18,13 +18,14 @@ import type { BrandStepKey } from './slotRegistry'
  * heisst, entscheidet der Rollen-Titel unten, und WAS die Oberfläche daraus
  * macht, entscheiden die Locale-Dateien (`brand.advisors.<key>.*`).
  *
- * ── ZWEI EBENEN, BEWUSST GETRENNT ─────────────────────────────────────────
- * `fullName` + `personal` gehören zur HUNDE-WELT der About-Seite (Davids
- * abgenommenes Konzept, `.playground/app/pages/team.vue`, Runde 163: das ganze
- * Branding-Supply-Team sind Hunde mit funktional-verspielten Nachnamen).
- * `name` + `role` sind der ARBEITSMODUS: der Chat-Kopf zeigt Vorname und
- * Rollen-Titel, mehr nicht. Und die PROMPTS erwähnen die Hunde-Natur mit
- * keinem Wort — im Gespräch sind das Beraterinnen und Berater, kein Maskottchen.
+ * ── EIN PROFESSIONELLES TEAM (Davids Entscheidung 2026-09-02) ─────────────
+ * Die Hunde-Welt der Runde 163 (Rassen, tierische Nachnamen, Marotten) ist
+ * KOMPLETT verworfen — nachzulesen im DECISION-LOG-Eintrag vom 2026-09-02.
+ * Hier stehen Beraterinnen und Berater, sonst nichts: `fullName` ist ein
+ * gewöhnlicher Name, `personal` eine PROFESSIONELLE Kurzzeile (Haltung und
+ * Arbeitsweise, keine Stadt-und-Hobby-Verniedlichung) für die About-Seite.
+ * `name` + `role` bleiben der ARBEITSMODUS: der Chat-Kopf zeigt Vorname und
+ * Rollen-Titel, mehr nicht — die Nachnamen gehören der About-Ebene.
  *
  * ── DIE ENGLISCHEN FELDER SIND PROMPT-TEXT ────────────────────────────────
  * `strengths`, `interviewTechnique`, `toneTraits` und `neverDo` reisen wörtlich
@@ -60,12 +61,17 @@ export interface BrandAdvisor {
   readonly key: BrandAdvisorKey
   /** Vorname — das, was im Arbeitsmodus zu sehen ist. */
   readonly name: string
-  /** Voller Name inkl. Nachname — die About-Ebene (Hunde-Welt, s. Kopf). */
+  /** Voller Name inkl. Nachname — die About-Ebene (s. Kopf). */
   readonly fullName: string
-  /** Rasse und zwei verspielte Details, im Stil der About-Seite. */
+  /** Eine professionelle Kurzzeile: Haltung und Arbeitsweise (About-Seite). */
   readonly personal: string
   readonly role: BrandAdvisorRole
-  /** Bildpfad, sonst '' — dann zeigt die Oberfläche das Monogramm. */
+  /**
+   * Bildpfad, sonst '' — dann zeigt die Oberfläche das Monogramm. Steht
+   * derzeit ÜBERALL auf '': echte Porträts der Beraterinnen und Berater gibt
+   * es noch nicht, und ein Platzhalter-Foto war genau das, was am 2026-09-02
+   * verworfen wurde. Wer eines hat, trägt es hier ein — nur hier.
+   */
   readonly avatar: string
   /** Die Bausteine, die dieser Berater führt. */
   readonly steps: readonly BrandStepKey[]
@@ -85,10 +91,10 @@ export const BRAND_ADVISORS: readonly BrandAdvisor[] = [
   {
     key: 'george',
     name: 'George',
-    fullName: 'George Wuffwuff',
-    personal: 'Chihuahua mit Terrier-Anteil · Kiel · sammelt Manifeste, schwimmt in der Förde',
+    fullName: 'George Winter',
+    personal: 'Markenberater und Markenstratege — jede Empfehlung mit Begründung, jede Entscheidung festgehalten.',
     role: { de: 'Markenberater', en: 'Brand advisor' },
-    avatar: '/george.jpg',
+    avatar: '',
     // Der Gastgeber: Startbogen, Baustein A und das Ergebnis. Er macht auf und
     // er macht zu — dazwischen übergibt er.
     steps: ['context', 'result'],
@@ -111,8 +117,8 @@ export const BRAND_ADVISORS: readonly BrandAdvisor[] = [
   {
     key: 'vera',
     name: 'Vera',
-    fullName: 'Vera Witterung',
-    personal: 'Weimaranerin · Hamburg · steht vor, bevor sie bellt; läuft jede Frage dreimal ab',
+    fullName: 'Vera Stein',
+    personal: 'Strategin — hält jeden Satz gegen den Wettbewerb und lässt keine Position stehen, die austauschbar ist.',
     role: { de: 'Strategin', en: 'Strategist' },
     avatar: '',
     steps: ['pvm', 'architecture'],
@@ -136,8 +142,8 @@ export const BRAND_ADVISORS: readonly BrandAdvisor[] = [
   {
     key: 'milo',
     name: 'Milo',
-    fullName: 'Milo Treuherz',
-    personal: 'Berner Sennenhund · Bern · hört länger zu, als bequem ist; trägt Decken durchs Haus',
+    fullName: 'Milo Berger',
+    personal: 'Werte-Berater — hört länger zu, als bequem ist, und leitet Werte aus Geschichten ab, nie aus Listen.',
     role: { de: 'Werte-Berater', en: 'Values advisor' },
     avatar: '',
     steps: ['values', 'archetype'],
@@ -161,8 +167,8 @@ export const BRAND_ADVISORS: readonly BrandAdvisor[] = [
   {
     key: 'nika',
     name: 'Nika',
-    fullName: 'Nika Bellkant',
-    personal: 'Papillon · Wien · liest jeden Satz laut vor, sammelt Ohrwürmer',
+    fullName: 'Nika Sommer',
+    personal: 'Sprach-Beraterin — liest jeden Satz laut, bevor er stehen bleibt, und streicht, was nach Werbung klingt.',
     role: { de: 'Sprach-Beraterin', en: 'Language advisor' },
     avatar: '',
     steps: ['manifesto', 'verbal'],
@@ -185,8 +191,8 @@ export const BRAND_ADVISORS: readonly BrandAdvisor[] = [
   {
     key: 'otto',
     name: 'Otto',
-    fullName: 'Otto Testbiss',
-    personal: 'Mops · Rotterdam · beißt auf jeden Namen wie auf eine Münze, schnarcht beim Denken',
+    fullName: 'Otto Kessler',
+    personal: 'Namens-Berater — prüft Aussprache, Schreibweise und Verfügbarkeit, bevor ein Name gefallen darf.',
     role: { de: 'Namens-Berater', en: 'Naming advisor' },
     avatar: '',
     steps: ['naming'],

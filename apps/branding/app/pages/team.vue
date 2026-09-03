@@ -10,14 +10,22 @@ import { BRAND_ADVISORS } from '../../../../packages/brand/shared/brandAdvisors'
  * Wie die Startseite (s. index.vue-Kopf): der brand-Layer ist host-agnostisch,
  * die Selbstdarstellung gehört der Marke DIESER Domain.
  *
- * ── ZWEI TEAM-EBENEN, EINE WELT ───────────────────────────────────────────
- * Das PRODUKT-Team (sieben Rollen, je Produkt eine) stammt wörtlich aus dem
- * Dummy — nur Georges Steckbrief ist angepasst: Naming gehört seit dem
- * Beraterteam (Davids Entscheidung 2026-09-01) Otto Testbiss. Die WIZARD-CREW
- * (Vera, Milo, Nika, Otto) kommt aus `brandAdvisors.ts` — Namen und Rollen
- * IMPORTIERT, damit eine Umbenennung in der Registry hier automatisch ankommt;
- * nur die Schau-Texte (desc/personal en) leben hier, weil die Registry
- * Prompt-Material trägt, keine Marketing-Copy.
+ * ── EIN PROFESSIONELLES TEAM (Davids Entscheidung 2026-09-02) ─────────────
+ * Der Dummy der Runde 163 spielte in einer HUNDE-WELT (Rassen, tierische
+ * Nachnamen, Wohnort-und-Hobby-Zeilen). Die ist komplett verworfen — siehe
+ * DECISION-LOG 2026-09-02. Hier stehen Beraterinnen und Berater: die
+ * `personal`-Zeile sagt, WIE jemand arbeitet, nicht wo er wohnt, und die
+ * Nachnamen sind gewöhnliche Namen. Wer hier eine verspielte Zeile ergänzt,
+ * holt genau das zurück, was David verworfen hat.
+ *
+ * ── ZWEI TEAM-EBENEN ──────────────────────────────────────────────────────
+ * Das PRODUKT-Team (sieben Rollen, je Produkt eine) lebt ganz hier; Georges
+ * Steckbrief ist angepasst, weil Naming seit dem Beraterteam (2026-09-01)
+ * Otto gehört. Die WIZARD-CREW (Vera, Milo, Nika, Otto) kommt aus
+ * `brandAdvisors.ts` — Namen und Rollen IMPORTIERT, damit eine Umbenennung in
+ * der Registry hier automatisch ankommt; nur die Schau-Texte (desc/asks und
+ * die englische personal-Zeile) leben hier, weil die Registry Prompt-Material
+ * trägt, keine Marketing-Copy.
  *
  * ── SPRACHE ───────────────────────────────────────────────────────────────
  * Der Dummy ist bewusst fest deutsch; live ist die Site de+en. Die Inhalte
@@ -48,10 +56,10 @@ interface Member {
 
 const productTeam: Member[] = [
   {
-    initials: 'GW', name: 'George Wuffwuff',
+    initials: 'GW', name: 'George Winter',
     title: { de: 'Markenberater · Brand Wizard', en: 'Brand advisor · Brand Wizard' },
     desc: {
-      de: 'Führt euch durch Foundation und Language — den roten Faden gibt er nie aus der Pfote. Was Gestaltung ist, gehört Frida; bei Namen übernimmt Otto.',
+      de: 'Führt euch durch Foundation und Language — den roten Faden gibt er nie aus der Hand. Was Gestaltung ist, gehört Frida; bei Namen übernimmt Otto.',
       en: 'Guides you through Foundation and Language — he never lets go of the thread. Design belongs to Frida; when it comes to names, Otto takes over.',
     },
     will: {
@@ -64,13 +72,13 @@ const productTeam: Member[] = [
     },
     skills: { de: ['Markenstrategie', 'Interview-Führung', 'Purpose & Werte', 'Roter Faden'], en: ['Brand strategy', 'Interviewing', 'Purpose & values', 'The thread'] },
     personal: {
-      de: 'Chihuahua mit Terrier-Anteil · Kiel · sammelt Manifeste, schwimmt in der Förde',
-      en: 'Chihuahua with a dash of terrier · Kiel · collects manifestos, swims in the fjord',
+      de: 'Markenberater und Markenstratege — jede Empfehlung mit Begründung, jede Entscheidung festgehalten.',
+      en: 'Brand advisor and brand strategist — every recommendation with a reason, every decision written down.',
     },
     pronoun: { de: 'er', en: 'he' },
   },
   {
-    initials: 'FF', name: 'Frida Fellini',
+    initials: 'FM', name: 'Frida Martens',
     title: { de: 'Design Directorin · Brand Design', en: 'Design director · Brand Design' },
     desc: {
       de: 'Macht aus eurer Foundation eine Gestalt. Strategie-Fragen reicht sie an George zurück.',
@@ -86,13 +94,13 @@ const productTeam: Member[] = [
     },
     skills: { de: ['Visual DNA', 'Moodboards', 'Farbwelten', 'Typografie'], en: ['Visual DNA', 'Moodboards', 'Color worlds', 'Typography'] },
     personal: {
-      de: 'Pudel · Mailand/Hamburg · fotografiert Hauswände, hasst Stock-Lächeln',
-      en: 'Poodle · Milan/Hamburg · photographs house walls, hates stock smiles',
+      de: 'Design Directorin — übersetzt Strategie in Gestalt und begründet jede Entscheidung am Fundament.',
+      en: 'Design director — turns strategy into form and justifies every decision against the foundation.',
     },
     pronoun: { de: 'sie', en: 'she' },
   },
   {
-    initials: 'RS', name: 'Rex Setter',
+    initials: 'RW', name: 'Rex Weber',
     title: { de: 'Produktioner · Brand Book & Kit', en: 'Producer · Brand Book & Kit' },
     desc: {
       de: 'Macht das Entschiedene versandfertig — er erfindet nichts Neues.',
@@ -108,13 +116,13 @@ const productTeam: Member[] = [
     },
     skills: { de: ['Brand Books', 'Design-Tokens', 'brand.json', 'Pressekits'], en: ['Brand books', 'Design tokens', 'brand.json', 'Press kits'] },
     personal: {
-      de: 'Irish Setter · Leipzig · Buchdruck-Nerd, sortiert Schrauben nach Größe',
-      en: 'Irish setter · Leipzig · letterpress nerd, sorts screws by size',
+      de: 'Produktioner — bringt Beschlossenes in Produktion, ohne unterwegs etwas Neues zu erfinden.',
+      en: 'Producer — takes decisions into production without inventing anything new along the way.',
     },
     pronoun: { de: 'er', en: 'he' },
   },
   {
-    initials: 'KA', name: 'Kira Apport',
+    initials: 'KH', name: 'Kira Hoffmann',
     title: { de: 'Content-Strategin · Brand Experience', en: 'Content strategist · Brand Experience' },
     desc: {
       de: 'Bringt die Marke in die Welt — immer entlang des 90-Tage-Plans. Bewertet nicht, was Ada gehört.',
@@ -130,17 +138,17 @@ const productTeam: Member[] = [
     },
     skills: { de: ['Content-Säulen', 'SEO & GEO', 'Launch-Pläne', 'Templates'], en: ['Content pillars', 'SEO & GEO', 'Launch plans', 'Templates'] },
     personal: {
-      de: 'Labrador · Köln · apportiert Deadlines, läuft Halbmarathon',
-      en: 'Labrador · Cologne · fetches deadlines, runs half marathons',
+      de: 'Content-Strategin — plant in Wochen statt in Ideen und schreibt für jeden Kanal, was er wirklich braucht.',
+      en: 'Content strategist — plans in weeks instead of ideas and writes what each channel actually needs.',
     },
     pronoun: { de: 'sie', en: 'she' },
   },
   {
-    initials: 'WW', name: 'Wanda Wachsam',
+    initials: 'WN', name: 'Wanda Nowak',
     title: { de: 'Monitoring-Analystin · Brand Monitoring', en: 'Monitoring analyst · Brand Monitoring' },
     desc: {
-      de: 'Der Blick von außen, jede Woche. Schlägt nur an, wenn es etwas zu melden gibt.',
-      en: 'The outside view, every week. Only barks when there is something to report.',
+      de: 'Der Blick von außen, jede Woche. Meldet sich nur, wenn es etwas zu melden gibt.',
+      en: 'The outside view, every week. Speaks up only when there is something to report.',
     },
     will: {
       de: ['euer Außenbild wöchentlich prüfen', 'KI-Antworten über eure Marke beobachten', 'Wettbewerber-Bewegungen und Chancen melden'],
@@ -152,13 +160,13 @@ const productTeam: Member[] = [
     },
     skills: { de: ['Außenbild-Checks', 'KI-Antwort-Radar', 'Alerts', 'Trend-Signale'], en: ['Outside-image checks', 'AI answer radar', 'Alerts', 'Trend signals'] },
     personal: {
-      de: 'Schäferhündin · Wien · Nachtschichten, Fernglas-Sammlung',
-      en: 'German shepherd · Vienna · night shifts, binocular collection',
+      de: 'Monitoring-Analystin — beobachtet das Außenbild wöchentlich und meldet erst, wenn eine Veränderung belegt ist.',
+      en: 'Monitoring analyst — watches the outside image weekly and reports only once a change is backed by evidence.',
     },
     pronoun: { de: 'sie', en: 'she' },
   },
   {
-    initials: 'AP', name: 'Ada Prüfstein',
+    initials: 'AS', name: 'Ada Sander',
     title: { de: 'Score-Prüferin · Brand Score', en: 'Score examiner · Brand Score' },
     desc: {
       de: 'Rechnet den Brand Score — unbestechlich, auch bei unseren eigenen Marken.',
@@ -174,13 +182,13 @@ const productTeam: Member[] = [
     },
     skills: { de: ['Prüfkriterien', 'Reproduzierbarkeit', 'Begründungen', 'Bänder'], en: ['Criteria', 'Reproducibility', 'Justifications', 'Bands'] },
     personal: {
-      de: 'Dackel · Zürich · misst alles zweimal, spielt Schach gegen sich selbst',
-      en: 'Dachshund · Zurich · measures everything twice, plays chess against herself',
+      de: 'Score-Prüferin — rechnet nachvollziehbar und begründet jede Wertung, auch bei unseren eigenen Marken.',
+      en: 'Score examiner — computes reproducibly and justifies every score, including for our own brands.',
     },
     pronoun: { de: 'sie', en: 'she' },
   },
   {
-    initials: 'SS', name: 'Scout Schnüffler',
+    initials: 'SK', name: 'Scout Krüger',
     title: { de: 'Research-Analyst · Brand Benchmark', en: 'Research analyst · Brand Benchmark' },
     desc: {
       de: 'Findet Wettbewerber und Vorbilder — Schlüsse zieht ihr mit George.',
@@ -196,8 +204,8 @@ const productTeam: Member[] = [
     },
     skills: { de: ['Wettbewerbs-Research', 'Benchmarks', 'Quellen-Belege', 'Markt-Raster'], en: ['Competitor research', 'Benchmarks', 'Source receipts', 'Market grids'] },
     personal: {
-      de: 'Beagle · Berlin · verliert nie eine Spur, außer beim Bällchen',
-      en: 'Beagle · Berlin · never loses a trail — except when the ball flies',
+      de: 'Research-Analyst — belegt jeden Fund mit Quellen und überlässt die Schlüsse dem Gespräch.',
+      en: 'Research analyst — backs every finding with sources and leaves the conclusions to the conversation.',
     },
     pronoun: { de: 'er', en: 'he' },
   },
@@ -216,7 +224,7 @@ const crewCopy: Record<string, { desc: Record<L, string>, asks: Record<L, string
       en: 'The strategist. Takes over for purpose, vision, mission and positioning — and asks "why" until it holds. Vagueness does not survive her.',
     },
     asks: { de: '„Das könnte jeder sagen. Was könnt nur ihr sagen?"', en: '"Anyone could say that. What can only you say?"' },
-    personalEn: 'Weimaraner · Hamburg · points before she barks; walks every question three times',
+    personalEn: 'Strategist — holds every sentence against the competition and lets no interchangeable position stand.',
   },
   milo: {
     desc: {
@@ -224,7 +232,7 @@ const crewCopy: Record<string, { desc: Record<L, string>, asks: Record<L, string
       en: 'The depth psychologist for values and archetype. Works with moments instead of adjectives and distills values from your stories.',
     },
     asks: { de: '„Erzähl mir von einem Tag, an dem ihr stolz wart."', en: '"Tell me about a day you were proud."' },
-    personalEn: 'Bernese mountain dog · Bern · listens longer than is comfortable; carries blankets through the house',
+    personalEn: 'Values advisor — listens longer than is comfortable and derives values from stories, never from lists.',
   },
   nika: {
     desc: {
@@ -232,7 +240,7 @@ const crewCopy: Record<string, { desc: Record<L, string>, asks: Record<L, string
       en: 'The word person for manifesto and verbal identity. Tests every sentence by ear and hunts down filler before it reaches the document.',
     },
     asks: { de: '„Lies das laut. Klingt das nach euch?"', en: '"Read that out loud. Does it sound like you?"' },
-    personalEn: 'Papillon · Copenhagen · reads everything aloud twice; alphabetizes her toys',
+    personalEn: 'Language advisor — reads every line out loud before it stays, and cuts whatever sounds like advertising.',
   },
   otto: {
     desc: {
@@ -240,7 +248,7 @@ const crewCopy: Record<string, { desc: Record<L, string>, asks: Record<L, string
       en: 'The sober one for naming. Tempers name infatuation and leads you through the checks — a name has to survive first, please second.',
     },
     asks: { de: '„Schöner Name. Gehört er dir auch?"', en: '"Lovely name. Do you actually own it?"' },
-    personalEn: 'Pug · Vienna · bites every name like a coin; unimpressed since birth',
+    personalEn: 'Naming advisor — checks pronunciation, spelling and availability before a name is allowed to charm.',
   },
 }
 const crew = BRAND_ADVISORS.filter(a => a.key !== 'george').map(a => ({
@@ -272,8 +280,11 @@ const crew = BRAND_ADVISORS.filter(a => a.key !== 'george').map(a => ({
       <div class="mt-10 grid gap-x-6 gap-y-6 @sm:grid-cols-2 @md:grid-cols-3">
         <div v-for="m in productTeam" :key="m.name" class="bw-card flex flex-col p-8">
           <div class="flex items-center gap-4">
-            <BwGeorgeAvatar v-if="m.initials === 'GW'" size="xl" />
-            <UAvatar v-else :text="m.initials" size="xl" />
+            <!-- Alle Karten tragen dasselbe Monogramm: Georges Sonderfall
+                 (BwGeorgeAvatar mit Foto) ist mit der Hunde-Welt gefallen
+                 (2026-09-02), und ein einzelnes „G" neben lauter „FM"/„RW"
+                 wäre nur noch ein Rest. Porträts kämen für ALLE oder gar nicht. -->
+            <UAvatar :text="m.initials" size="xl" />
             <div class="min-w-0">
               <h3 class="truncate text-lg font-medium tracking-tight">{{ m.name }}</h3>
               <p class="bw-label mt-0.5" style="color: var(--bw-muted)">{{ m.title[lang] }}</p>

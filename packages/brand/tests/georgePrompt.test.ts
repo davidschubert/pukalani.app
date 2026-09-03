@@ -172,13 +172,16 @@ describe('Berater-Schicht (george-a-4)', () => {
     expect(otto).not.toContain('You are Ada')
   })
 
-  it('erwähnt die Hunde-Ebene mit keinem Wort', () => {
-    // Sie ist Davids ABOUT-Konzept; im Interview wäre sie ein Gag im Weg.
+  it('trägt weder Nachnamen noch die verworfene Hunde-Welt in den Prompt', () => {
+    // Zwei Dinge in einem Wächter: die Hunde-Welt ist seit 2026-09-02 ganz weg
+    // (DECISION-LOG), und im Arbeitsmodus steht ohnehin nur der VORNAME — ein
+    // Nachname im Prompt wäre der erste Schritt zurück in die Steckbrief-Welt.
     for (const key of ['george', 'vera', 'milo', 'nika', 'otto']) {
       const prompt = georgeSystemPrompt({
         locale: 'de', contentLocale: 'de', pathKind: 'new', advisor: advisorByKey(key)!,
       })
-      expect(prompt, key).not.toMatch(/\b(dog|bark|wuff|Witterung|Treuherz|Bellkant|Testbiss|Wuffwuff)\b/i)
+      expect(prompt, key).not.toMatch(/\b(dog|bark|wuff|Wuffwuff|Witterung|Treuherz|Bellkant|Testbiss)\b/i)
+      expect(prompt, key).not.toMatch(/\b(Winter|Stein|Berger|Sommer|Kessler)\b/)
     }
   })
 })

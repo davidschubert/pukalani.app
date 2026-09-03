@@ -145,12 +145,13 @@ describe('Wer in welchem Baustein spricht', () => {
     expect(values).not.toContain('You are Vera')
   })
 
-  it('DIE HUNDE-WELT BLEIBT AUS DEM PROMPT', async () => {
+  it('NACHNAMEN UND DIE VERWORFENE HUNDE-WELT BLEIBEN AUS DEM PROMPT', async () => {
     await vera.veraStrategyGenerator(context('b.purpose', 'pvm') as never)
     await milo.miloValuesGenerator(context('c.candidates', 'values') as never)
     for (const call of streamMock.mock.calls) {
       const system = String((call[2] as StreamOptions).system)
       expect(system).not.toMatch(/\b(dog|Witterung|Treuherz)\b/i)
+      expect(system).not.toMatch(/\b(Stein|Berger)\b/)
     }
   })
 })

@@ -130,19 +130,19 @@ const veraInfoOpen = ref(false)
  * erwähnt, spricht aber nie selbst. Der Layer zeigt beides.
  */
 const VERA_INFO = {
-  name: 'George Wuffwuff',
+  name: 'George Winter',
   role: 'Markenberater',
   desc: 'Führt euch durch den ganzen Wizard — von Kontext bis Name. Er stellt kleine, konkrete Fragen, sagt ehrlich, was fehlt, und hält den roten Faden. Im Rücken liest sein Team mit:',
   team: [
-    'Vera Witterung — Strategin · Warum-Fragen, Positionierung',
-    'Milo Treuherz — Werte-Berater · Momente statt Adjektive',
-    'Nika Bellkant — Sprach-Beraterin · testet Sätze am Ohr',
-    'Otto Testbiss — Namens-Berater · erst überleben, dann gefallen',
+    'Vera Stein — Strategin · Warum-Fragen, Positionierung',
+    'Milo Berger — Werte-Berater · Momente statt Adjektive',
+    'Nika Sommer — Sprach-Beraterin · testet Sätze am Ohr',
+    'Otto Kessler — Namens-Berater · erst überleben, dann gefallen',
   ],
   asks: '„Warum habt ihr angefangen — was war der Auslöser?"',
-  /* Davids Klarstellung 2026-09-02: George ist KEIN Hund — er ist ein
-   * professioneller Markenberater und Markenstratege. Keine Rasse, kein
-   * Gag; die Verspieltheit gehört, wenn überhaupt, woandershin. */
+  /* Davids Entscheidung 2026-09-02 (DECISION-LOG): das ganze Team sind
+   * professionelle Beraterinnen und Berater — keine Rassen, keine Tier-Gags,
+   * nirgends. Diese Zeile sagt, WIE George arbeitet, nicht wo er wohnt. */
   personal: 'Markenberater und Markenstratege — jede Empfehlung mit Begründung, jede Entscheidung festgehalten.',
 }
 
