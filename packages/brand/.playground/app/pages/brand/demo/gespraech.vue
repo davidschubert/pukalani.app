@@ -50,9 +50,9 @@ interface LogEntry {
 /** Vier Entscheidungen — der Nenner steht von Anfang an, auch leer. */
 const CHAPTER_TOTAL = 4
 
-/** Abgeschlossenes Kapitel: 10 Entscheidungen, 3 davon hier als Beispiel. */
+/** Abgeschlossenes Kapitel: ALLE 10 Entscheidungen ausgeschrieben —
+ *  Runde 26 (David): kein „Und 7 weitere …"-Hinweis, der Log zeigt alles. */
 const CONTEXT_TOTAL = 10
-const CONTEXT_HIDDEN = 7
 
 const contextLog = ref<LogEntry[]>([
   {
@@ -76,10 +76,59 @@ const contextLog = ref<LogEntry[]>([
     text: 'Menschen im Viertel, die Zutatenlisten lesen — und Familien, die sich auf eine Deklaration verlassen müssen.',
     state: 'confirmed',
   },
+  {
+    id: 'ctx-market',
+    label: 'Marktumfeld',
+    note: 'Wettbewerber und wie sie auftreten — die Lücke, in die ihr stoßt.',
+    text: 'Zwei Ketten-Bäcker am Platz, Aufback-Theken in beiden Supermärkten — niemand backt vor Ort mit langer Führung.',
+    state: 'confirmed',
+  },
+  {
+    id: 'ctx-position',
+    label: 'Positionierung',
+    note: 'Für wen, gegen wen, warum ihr — die eine Kernentscheidung der Strategie.',
+    text: 'Die einzige Bäckerei im Viertel, die jede Zutat nennen kann — gegen die Aufback-Theke, für Menschen, die wissen wollen, was sie essen.',
+    state: 'confirmed',
+  },
+  {
+    id: 'ctx-architecture',
+    label: 'Markenarchitektur',
+    note: 'Eine Marke oder mehrere? Nur per Weiche, wenn Produktmarken geplant sind.',
+    text: 'Eine Marke: Brot & Zeit. Keine Produktmarken geplant.',
+    state: 'confirmed',
+  },
+  {
+    id: 'ctx-limits',
+    label: 'Angebots-Grenze',
+    note: 'Was ihr bewusst nicht anbietet — die Grenze des Sortiments.',
+    text: 'Kein Kuchen, kein Kaffee-Ausschank — die Theke bleibt Brot.',
+    state: 'confirmed',
+  },
+  {
+    id: 'ctx-channels',
+    label: 'Verkaufswege',
+    note: 'Wo man euch kauft — heute und geplant.',
+    text: 'Nur der eigene Laden, samstags der Wochenmarkt. Kein Versand.',
+    state: 'confirmed',
+  },
+  {
+    id: 'ctx-team',
+    label: 'Team & Rollen',
+    note: 'Wer die Marke nach außen trägt.',
+    text: 'Marit backt und spricht für die Marke; zwei Leute im Verkauf.',
+    state: 'confirmed',
+  },
+  {
+    id: 'ctx-pricing',
+    label: 'Preislage',
+    note: 'Wie ihr euch preislich einordnet — und warum.',
+    text: 'Über Supermarkt, unter Feinkost: ein ehrlicher Preis für 18 Stunden Handwerk.',
+    state: 'confirmed',
+  },
 ])
 const contextOpen = ref(false)
 const contextConfirmed = computed(() =>
-  CONTEXT_HIDDEN + contextLog.value.filter(entry => entry.state === 'confirmed').length)
+  contextLog.value.filter(entry => entry.state === 'confirmed').length)
 
 const log = ref<LogEntry[]>([])
 const confirmedCount = computed(() => log.value.filter(entry => entry.state === 'confirmed').length)
@@ -879,7 +928,6 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
                   </button>
                 </div>
               </div>
-              <p class="bw-pending">Und {{ CONTEXT_HIDDEN }} weitere Entscheidungen aus diesem Kapitel.</p>
             </div>
           </div>
 
