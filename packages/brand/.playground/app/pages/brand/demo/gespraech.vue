@@ -538,6 +538,8 @@ const progressPct = computed(() => Math.round((doneDecisions.value / 21) * 100))
 
 /* Runde 20 (David): die Nav-Spalte ist über den Bühnen-Balken einklappbar. */
 const railCollapsed = ref(false)
+/* Runde 33 (David): dito die Stand-Spalte — Toggle rechts im Balken. */
+const standCollapsed = ref(false)
 
 const syncState = ref<'saving' | 'offline' | 'conflict' | null>(null)
 let syncTimer: ReturnType<typeof setTimeout> | undefined
@@ -565,7 +567,7 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
   <BwWorkspace
     :progress-pct="progressPct" content-locale="de" :locale-in-topbar="false"
     :topbar="false" :rail-footer="false"
-    rail-width="296px" :rail-collapsed="railCollapsed"
+    rail-width="296px" :rail-collapsed="railCollapsed" :george-collapsed="standCollapsed"
     style="--bw-rail-pad-x: 1rem; --bw-rail-pad-y: 0.75rem"
   >
     <!-- LINKS: die Sidebar im Nuxt-UI-Muster (Runde 16) — Switcher oben,
@@ -590,7 +592,7 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
     <!-- Runde 20e (David): Innenmaße nach UDashboardNavbar — gap-1.5,
          Toggle in Standard-Buttongröße, Titel font-semibold + truncate. -->
     <template #stage-bar>
-      <div class="flex min-w-0 items-center gap-1.5">
+      <div class="flex min-w-0 flex-1 items-center gap-1.5">
         <UButton
           size="sm" color="neutral" variant="ghost"
           icon="i-ph-sidebar-simple"
@@ -601,6 +603,14 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
           <p class="bw-label" style="color: var(--bw-muted)">Brand Foundation</p>
           <p class="truncate font-semibold">Purpose · Vision · Mission</p>
         </div>
+        <!-- Runde 33 (David): das Gegenstück zum Nav-Toggle — klappt die
+             Stand-Spalte rechts ein und aus (Icon gespiegelt). -->
+        <UButton
+          size="sm" color="neutral" variant="ghost" class="ml-auto"
+          icon="i-ph-sidebar-simple" :ui="{ leadingIcon: '-scale-x-100' }"
+          :aria-label="standCollapsed ? 'Stand einblenden' : 'Stand ausblenden'"
+          @click="standCollapsed = !standCollapsed"
+        />
       </div>
     </template>
 

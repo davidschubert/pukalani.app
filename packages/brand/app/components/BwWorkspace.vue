@@ -32,6 +32,9 @@ withDefaults(defineProps<{
    * Bühnen-Balken). Wirkt nur im Fixed-Rail-Zweig; v-show statt v-if, damit
    * Collapsible-Zustände der Sidebar das Einklappen überleben. */
   railCollapsed?: boolean
+  /* Runde 33 (David): dito für die STAND-Spalte rechts — eingeklappt entfällt
+   * der Splitter und die Bühne nimmt die volle Restbreite. */
+  georgeCollapsed?: boolean
   /* §3e: NUR Abweichungs-Zustände erscheinen — Stille heißt gespeichert.
    * P1c: 'error' kam dazu (der fünfte Zustand der Autosave-Regel); die drei
    * bestehenden sind unverändert, der Dummy sieht davon nichts. */
@@ -54,6 +57,7 @@ withDefaults(defineProps<{
   progressTime: undefined,
   railWidth: undefined,
   railCollapsed: false,
+  georgeCollapsed: false,
   progressNote: undefined,
   progressSubnote: undefined,
   syncState: null,
@@ -163,7 +167,15 @@ const zoneItemsFixedRail = [
       <!-- Runde 32 (David, revidiert 20d): der Balken gehört NUR zur
            Gesprächs-Spalte (Zone über deren Scroller, 1px-Linie darunter) —
            der Stand beginnt oben rechts direkt mit dem Log. -->
+      <!-- Runde 33: eingeklappter Stand — kein Splitter, die Bühne nimmt
+           die volle Restbreite (der Toggle sitzt im Balken der Seite). -->
+      <div v-if="georgeCollapsed" class="flex h-full min-w-0 flex-1 flex-col">
+        <div v-if="$slots['stage-bar']" class="bw-stage-bar flex-none"><slot name="stage-bar" /></div>
+        <main class="bw-stage min-h-0 w-full min-w-0 flex-1"><div class="bw-stage-inner"><slot /></div></main>
+        <div v-if="$slots['stage-footer']" class="bw-stage-foot flex-none"><div class="bw-stage-inner"><slot name="stage-footer" /></div></div>
+      </div>
       <USplitter
+        v-else
         id="bw-workspace-fixedrail" auto-save-id="bw-workspace-fixedrail" :items="zoneItemsFixedRail"
         class="min-h-0 min-w-0 flex-1"
         :ui="{ handle: 'w-px transition-colors bg-(--bw-line) data-[state=hover]:bg-(--bw-accent) data-[state=drag]:bg-(--bw-accent)' }"
@@ -204,7 +216,7 @@ const zoneItemsFixedRail = [
         </div>
         <!-- Runde 30b: die 1px-Naht Bühne↔Stand zeichnet nach dem Mount der
              Splitter-Griff — hier statisch, damit sie nicht nachspringt. -->
-        <aside class="bw-george h-full min-w-0" style="flex: 37 1 0; border-left: 1px solid var(--bw-line)"><slot name="george" /></aside>
+        <aside v-show="!georgeCollapsed" class="bw-george h-full min-w-0" style="flex: 37 1 0; border-left: 1px solid var(--bw-line)"><slot name="george" /></aside>
       </div>
     </div>
     <USplitter
