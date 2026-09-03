@@ -234,6 +234,18 @@ const slotFacts = computed<Record<string, BrandSlotStateFacts>>(() => {
 const nextQuestion = computed(() =>
   (stepKey.value ? resolveNextQuestion(stepKey.value, slotFacts.value) : null))
 
+/**
+ * MUSS VOR `turns` DEKLARIERT SEIN (Prod-500 am 2026-09-03): `turns` liest
+ * `completion`, und der Scroll-Watcher (`watch(() => turns.value.length)`)
+ * wertet seine Quelle beim ANLEGEN aus — im Browser also mitten im Setup.
+ * Stand `completion` weiter unten, warf genau das die TDZ-ReferenceError
+ * („Cannot access 'K' before initialization") und die Werkstatt zeigte die
+ * 500-Seite. SSR blieb grün, weil der Server keine Watcher anlegt — ein
+ * Fehler, den nur der Browser zeigt.
+ */
+const completion = computed(() =>
+  (stepKey.value ? brandStepCompletion(stepKey.value, slotFacts.value) : null))
+
 const nextSlot = computed<BrandSlot | null>(() =>
   slots.value.find(slot => slot.id === nextQuestion.value?.slotId) ?? null)
 
@@ -548,9 +560,6 @@ const generationNotice = computed<string | null>(() => {
  *           während der Baustein gerade abgeschlossen wird)
  */
 type StageModule = 'answer' | 'options' | 'draft' | 'confirm' | 'gate' | 'none'
-
-const completion = computed(() =>
-  (stepKey.value ? brandStepCompletion(stepKey.value, slotFacts.value) : null))
 
 /** Der erste Pflicht-Slot ohne Bestätigung — in Registry-Reihenfolge. */
 const pendingCard = computed<BrandSlotCard | null>(() => {
