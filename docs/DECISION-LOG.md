@@ -7,6 +7,46 @@ die kleinen, verstreuten Beschlüsse.
 
 ---
 
+## 2026-09-02 — Das Team ist professionell: die Hunde-Welt fällt komplett
+
+**Entscheidung (David):** Alle Team-Mitglieder sind professionelle Beraterinnen
+und Berater. **Keine Rassen, keine Tier-Gags, nirgends** — nicht im Wizard,
+nicht auf der About-Seite, nicht in einem Steckbrief. Damit ist die Hunde-Welt
+der Klickdummy-Runde 163 und Entscheidung 2 vom 2026-09-01 (George Wuffwuff,
+Vera Witterung, Milo Treuherz, Nika Bellkant, Otto Testbiss) VERWORFEN.
+
+**Die abgesegneten Namen** (Vornamen bleiben, Nachnamen neu):
+- **Wizard:** George Winter (Markenberater & Markenstratege) · Vera Stein
+  (Strategin) · Milo Berger (Werte-Berater) · Nika Sommer (Sprach-Beraterin) ·
+  Otto Kessler (Namens-Berater).
+- **Produkt-Team (About):** Frida Martens (Design Directorin) · Rex Weber
+  (Produktioner) · Kira Hoffmann (Content-Strategin) · Wanda Nowak
+  (Monitoring-Analystin) · Ada Sander (Score-Prüferin) · Scout Krüger
+  (Research-Analyst).
+
+**Was aus `personal` wird:** eine PROFESSIONELLE Kurzzeile über Haltung und
+Arbeitsweise — nicht mehr „Rasse · Stadt · zwei Hobbys". George: „Markenberater
+und Markenstratege — jede Empfehlung mit Begründung, jede Entscheidung
+festgehalten." Der Wächter dagegen steht im Test (`brandAdvisors.test.ts`): die
+About-Zeile darf das Trennzeichen der alten Steckbrief-Form nicht mehr tragen,
+und weder Name noch Zeile noch Prompt-Feld dürfen Hunde-Vokabular enthalten.
+
+**Grund:** Das Produkt verkauft Markenberatung an Unternehmen. Ein Maskottchen
+im Steckbrief nimmt genau der Person Autorität, die gleich unbequeme Fragen
+stellen soll — und der Live-Persona-Audit hat gezeigt, dass die Fragen ohnehin
+das Produkt sind. Die Verspieltheit gehört, wenn überhaupt, in die Sprache der
+Marke, nicht in die Biografie der Beraterinnen und Berater.
+
+**Bilder:** Der Platzhalter `/george.jpg` (ein Hunde-Foto) ist gelöscht, der
+Default von `BwGeorgeAvatar` ist leer ⇒ Monogramm. Echte Porträts kommen für
+ALLE oder gar nicht, und dann in die Registry (`avatar`), nie zurück in einen
+Komponenten-Default.
+
+**Nicht umgeschrieben:** die Protokolle. Der Eintrag vom 2026-09-01 unten, die
+Audit-Archive und der Klickdummy `packages/brand/.playground/app/pages/team.vue`
+bleiben, wie sie sind — letzterer mit einer Ruhestands-Notiz im Kopf. Ein
+Protokoll, das man nachträglich hübsch macht, ist keins mehr.
+
 ## 2026-09-02 — Brand Wizard: EINE Stimme (George), das Team im Rücken — revidiert das sichtbare Beraterteam
 
 **Entscheidung (David, nach dem Gespräch-Dummy-Durchlauf):** George ist der

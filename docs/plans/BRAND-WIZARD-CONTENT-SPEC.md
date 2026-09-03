@@ -30,7 +30,7 @@ du für die Person; Solo-Fassung durchgehend „du").
 | Wirkung en | Klassisch, verlässlich, leicht britisch — der ruhige Berater, nicht das Maskottchen. Passt zum Weisen-Grundton. |
 | Wirkung de | Vertraut und leicht altmodisch im sympathischen Sinn; wird im Deutschen englisch ausgesprochen (kein „Schorsch"-Stolperer in der Zielgruppe). |
 | Passung Archetyp | Pukalani-Facette „Der Weise · Rest Schöpfer" — George führt wissend, baut aber sichtbar MIT. Passt. |
-| Dummy-Realität | George Wuffwuff (Chihuahua) trägt den Namen seit Wochen durch alle Ansichten; er funktioniert im UI, im Chat und im Team-Kontext (About-Seite). |
+| Dummy-Realität | George trägt den Namen seit Wochen durch alle Ansichten; er funktioniert im UI, im Chat und im Team-Kontext (About-Seite). Der volle Name ist seit dem 2026-09-02 **George Winter** — professioneller Markenberater, kein Maskottchen (s. §1.4). |
 | White-Label | Name lebt als `pukalani.brand.persona` (app.config) + i18n-Parameter `{persona}` — NIE hartkodiert in Texten. Der spätere White-Label-Tier tauscht ein Config-Feld, keine Übersetzungen. |
 
 → **Gate ②: ABGESEGNET (David, 2026-08-30) — George bleibt.**
@@ -125,11 +125,11 @@ einzige Rechenstelle, George der Rückfall).
 
 | Berater | Rolle | Bausteine | Kern der Interview-Technik |
 | --- | --- | --- | --- |
-| **George** Wuffwuff | Markenberater (Gastgeber) | Startbogen · A Kontext · Ergebnis | Journalist: kleinste konkrete Frage zuerst, spiegelt zurück |
-| **Vera** Witterung | Strategin | B PVM · B2 Architektur | fragt warum, bis es trägt; „Das könnte jeder sagen" — die Widerspruchs-Pflicht (Regel 5) lebt hier am stärksten |
-| **Milo** Treuherz | Werte-Berater | C Werte · D Archetyp | Momente statt Adjektive („Erzähl von einem Tag, an dem …"), destilliert Werte aus Geschichten |
-| **Nika** Bellkant | Sprach-Beraterin | E Manifest · E+ Verbale Identität | testet am Ohr, jagt Floskeln und Vertriebssprache |
-| **Otto** Testbiss | Namens-Berater | F Name | nüchtern-pragmatisch, dämpft Namens-Verliebtheit: erst überleben, dann gefallen |
+| **George** Winter | Markenberater (Gastgeber) | Startbogen · A Kontext · Ergebnis | Journalist: kleinste konkrete Frage zuerst, spiegelt zurück |
+| **Vera** Stein | Strategin | B PVM · B2 Architektur | fragt warum, bis es trägt; „Das könnte jeder sagen" — die Widerspruchs-Pflicht (Regel 5) lebt hier am stärksten |
+| **Milo** Berger | Werte-Berater | C Werte · D Archetyp | Momente statt Adjektive („Erzähl von einem Tag, an dem …"), destilliert Werte aus Geschichten |
+| **Nika** Sommer | Sprach-Beraterin | E Manifest · E+ Verbale Identität | testet am Ohr, jagt Floskeln und Vertriebssprache |
+| **Otto** Kessler | Namens-Berater | F Name | nüchtern-pragmatisch, dämpft Namens-Verliebtheit: erst überleben, dann gefallen |
 
 **Die neun Regeln aus §1.2 gelten unverändert für alle fünf.** Die
 Persönlichkeit steht im Prompt ÜBER dem Regel-Fundament und ordnet sich ihm
@@ -137,16 +137,22 @@ ausdrücklich unter: sie entscheidet WIE gesprochen wird, die Regeln WAS erlaubt
 ist — bei Konflikt gewinnen die Regeln. Auch die drei Beispielantworten aus
 §1.3 bleiben die Kalibrierung; sie beschreiben Haltungen, keine Stimmen.
 
-**Davids Entscheidung 2: die Namen kommen aus dem bestehenden About-Konzept.**
-Das Branding-Supply-Team sind Hunde mit funktional-verspielten Nachnamen
-(Klickdummy-Runde 163, `packages/brand/.playground/app/pages/team.vue`: George
-Wuffwuff, Frida Fellini, Rex Setter, Ada Prüfstein …). Die vier Neuen stehen in
-derselben Welt — Vera Witterung (Weimaranerin, Vorstehhund), Milo Treuherz
-(Berner Sennenhund), Nika Bellkant (Papillon: bellen + Belcanto), Otto Testbiss
-(Mops). **Zwei Ebenen, bewusst getrennt:**
-- **About-Seite:** voller Name, Rasse, Marotten (`fullName`, `personal`).
+**Davids Entscheidung 2: die Namen — REVIDIERT am 2026-09-02.** Die erste
+Fassung holte die Nachnamen aus der Hunde-Welt des Klickdummys (Runde 163:
+George Wuffwuff, Vera Witterung, Milo Treuherz, Nika Bellkant, Otto Testbiss).
+Diese Welt ist **komplett verworfen** — Davids Entscheidung, festgehalten im
+DECISION-LOG 2026-09-02. Das Team sind professionelle Beraterinnen und Berater,
+ohne Rassen und ohne Tier-Gags, im Wizard wie auf der About-Seite:
+
+| | Wizard | Produkt-Team (About) |
+| --- | --- | --- |
+| Namen | George **Winter** · Vera **Stein** · Milo **Berger** · Nika **Sommer** · Otto **Kessler** | Frida **Martens** · Rex **Weber** · Kira **Hoffmann** · Wanda **Nowak** · Ada **Sander** · Scout **Krüger** |
+
+**Zwei Ebenen, bewusst getrennt:**
+- **About-Seite:** voller Name + `personal` = eine PROFESSIONELLE Kurzzeile über
+  Haltung und Arbeitsweise (kein „Rasse · Stadt · zwei Hobbys" mehr).
 - **Arbeitsmodus:** nur Vorname + Rollen-Titel im Chat-Kopf.
-- **Prompt:** die Hunde-Natur kommt NICHT vor (per Test genagelt) — im
+- **Prompt:** weder Nachname noch Hunde-Vokabular (per Test genagelt) — im
   Interview sind das Beraterinnen und Berater, kein Maskottchen.
 
 **Was `george-a-4` sonst noch ändert** (jede Zeile ein Audit-Befund):

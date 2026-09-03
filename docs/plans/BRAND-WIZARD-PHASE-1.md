@@ -1028,6 +1028,19 @@ Dummies: /products (Pfad 01–04 + laufende 05–07 + Plattform +
 Team-Teaser), /team (7 Persona-Karten); Nav-Punkt „Products" (Team
 im Footer). Profilbilder folgen (Platzhalter: Initialen).
 
+> **NACHTRAG 2026-09-02 — die Hunde-Welt ist verworfen** (Davids
+> Entscheidung, DECISION-LOG). Der Absatz oben ist das Protokoll der
+> Runde 163 und bleibt stehen; GÜLTIG sind heute professionelle
+> Beraterinnen und Berater ohne Rassen und Tier-Gags: George **Winter**
+> (Wizard) · Frida **Martens** (Design) · Rex **Weber** (Book & Kit) ·
+> Kira **Hoffmann** (Experience) · Wanda **Nowak** (Monitoring) · Ada
+> **Sander** (Score) · Scout **Krüger** (Benchmark), dazu die
+> Wizard-Crew Vera **Stein** · Milo **Berger** · Nika **Sommer** · Otto
+> **Kessler**. „Persönliches" ist eine Kurzzeile über die Arbeitsweise,
+> kein Wohnort-und-Hobby-Steckbrief; Profilbilder gibt es keine
+> (Monogramme), und wenn, dann für alle. Stand: `apps/branding/app/
+> pages/team.vue` + `packages/brand/shared/brandAdvisors.ts`.
+
 ### Weiche: „Neue Marke" / „Marken-Relaunch" (Produktentscheidung David, 2026-08-30)
 
 BENENNUNG (bestätigt nach Fachbegriffs-Recherche): die Weiche heißt
