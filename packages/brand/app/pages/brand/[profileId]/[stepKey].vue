@@ -16,6 +16,7 @@ import {
   type BrandStepKey,
   exampleKeyFor,
   questionKeyFor,
+  slotIsConfirmable,
   slotsForStep,
   stepProgress,
 } from '../../../../shared/slotRegistry'
@@ -472,8 +473,10 @@ const slotCards = computed<BrandSlotCard[]>(() => slots.value.map((slot) => {
     hasValue: store.slotValue(slot.id).length > 0,
     isGeorgeDraft: store.slotIsGeorgeDraft(slot.id),
     hasEditor: slot.editor !== 'none',
-    // Der Paarvergleich (Katalog §12) hat kein Feld und keine Bestätigung.
-    confirmable: slot.type !== 'special',
+    // Der Paarvergleich (Katalog §12) hat kein Instrument und keine
+    // Bestätigung. Die Regel steht in der Registry, damit die Bühne und die
+    // Abschluss-Rechnung dieselbe Menge meinen (Audit A4).
+    confirmable: slotIsConfirmable(slot),
     generatable: slot.generator !== 'none',
     hasHistory: Boolean(store.serverSlots[slot.id]?.firstDraft),
     ready: readiness.ready,
@@ -591,8 +594,23 @@ interface LogCard {
   note: string
   value: string
   confirmed: boolean
+  /**
+   * Was statt eines Wertes dasteht. Für fast alle Slots „kommt im Gespräch";
+   * für den PAARVERGLEICH (`d.pairs`) der Satz, dass sein Instrument noch
+   * nicht gebaut ist (P4). Ohne ihn stand dort eine leere Karte ohne Weg —
+   * und die Zeile war die einzige Verwendung von `stage.pairsPlaceholder`,
+   * das seit dem Werkstatt-Umbau verwaist im Katalog lag (Audit A11).
+   */
+  placeholder: string
   /** Nur im laufenden Kapitel: die Bedienelemente. */
   controls: BrandSlotControls | null
+}
+
+/** Der Ersatztext einer leeren Karte — s. `LogCard.placeholder`. */
+function slotPlaceholder(slot: BrandSlot): string {
+  return slotIsConfirmable(slot)
+    ? t('brand.workspace.stage.pending')
+    : t('brand.workspace.stage.pairsPlaceholder')
 }
 
 const logChaptersOpen = ref<Set<string>>(new Set())
@@ -635,6 +653,7 @@ function chapterCards(chapter: LogChapter): LogCard[] {
       note: slotNote(entry.slot),
       value: store.slotValue(entry.slot.id),
       confirmed: entry.controls.state === 'confirmed',
+      placeholder: slotPlaceholder(entry.slot),
       controls: entry.controls,
     }))
   }
@@ -646,6 +665,7 @@ function chapterCards(chapter: LogChapter): LogCard[] {
     note: slotNote(slot),
     value: brandSlotDisplayValue(loaded[slot.id]),
     confirmed: brandSlotIsConfirmed(loaded[slot.id]),
+    placeholder: slotPlaceholder(slot),
     controls: null,
   }))
 }
@@ -1441,7 +1461,7 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
                   @blur="autosave.flush()"
                 />
                 <p v-else-if="card.value" class="bw-doc-text mt-1.5 whitespace-pre-wrap" style="font-size: 0.875rem; line-height: 1.5">{{ card.value }}</p>
-                <p v-else class="bw-pending mt-1.5">{{ t('brand.workspace.stage.pending') }}</p>
+                <p v-else class="bw-pending mt-1.5">{{ card.placeholder }}</p>
 
                 <div class="mt-1 flex items-center justify-end gap-2">
                   <!-- Ein Kapitel, das NICHT offen ist, wird nicht hier

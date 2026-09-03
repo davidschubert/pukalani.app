@@ -74,7 +74,7 @@ import {
   type BrandSlotStateFacts,
   type BrandStepKey,
   type BrandStepProgress,
-  requiredSlotsForStep,
+  confirmableRequiredSlotsForStep,
   slotById,
   slotIsFilled,
   slotsForStep,
@@ -227,7 +227,11 @@ export function brandStepCompletion(
   stepKey: BrandStepKey,
   slots: Readonly<Record<string, BrandSlotStateFacts | undefined>> = {},
 ): BrandStepCompletion {
-  const required = requiredSlotsForStep(stepKey)
+  // BESTÄTIGBAR ist Bedingung (Audit A4): `d.pairs` ist Pflicht, aber ohne
+  // Instrument — als Teil der Vorbedingung machte er `archetype` unschliessbar.
+  // Die Regel steht in der Registry, damit Bühne und Route dieselbe Menge
+  // meinen (s. `slotIsConfirmable`).
+  const required = confirmableRequiredSlotsForStep(stepKey)
   const missingRequired = required.filter(slot => !slots[slot.id]?.confirmed).map(slot => slot.id)
   return {
     slotsReady: missingRequired.length === 0,

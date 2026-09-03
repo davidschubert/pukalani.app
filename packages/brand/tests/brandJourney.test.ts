@@ -18,8 +18,10 @@ import {
   BRAND_STEP_KEYS,
   type BrandSlotStateFacts,
   type BrandStepKey,
+  confirmableRequiredSlotsForStep,
   requiredSlotsForStep,
   slotsForStep,
+  stepProgress,
 } from '../shared/slotRegistry'
 
 /**
@@ -455,6 +457,42 @@ describe('transitionBrandStep — complete verlangt Vollständigkeit', () => {
   it('verweigert den Abschluss eines gesperrten Bausteins', () => {
     expect(transitionBrandStep({ stepKey: 'naming', state: 'locked' }, { kind: 'complete' }))
       .toEqual({ ok: false, code: 'step_locked' })
+  })
+})
+
+describe('brandStepCompletion — der Baustein archetype ist schliessbar (Audit A4)', () => {
+  /**
+   * DIE SACKGASSE, DIE ES NICHT MEHR GIBT. `d.pairs` ist Pflicht und hat kein
+   * Instrument (P4) — solange er in der Vorbedingung stand, war `slotsReady`
+   * in `archetype` unerreichbar: die Konfidenz-Weiche erschien nie, und die
+   * Route hätte einen Abschluss ohnehin abgewiesen. Bühne und Route lesen
+   * dieselbe Rechnung, also war der Baustein für JEDEN Weg zu.
+   */
+  it('wird fertig, wenn alles Bedienbare bestätigt ist — auch ohne d.pairs', () => {
+    const slots = Object.fromEntries(
+      confirmableRequiredSlotsForStep('archetype').map(slot => [slot.id, { hasValue: true, confirmed: true }]),
+    )
+    const completion = brandStepCompletion('archetype', slots)
+    expect(completion.slotsReady).toBe(true)
+    expect(completion.missingRequired).toEqual([])
+    expect(transitionBrandStep({ stepKey: 'archetype', state: 'active', confidence: 'fits', slots }, { kind: 'complete' }).ok)
+      .toBe(true)
+  })
+
+  it('verlangt die vier Ableitungen weiterhin — sie sind bestätigbar', () => {
+    const slots = Object.fromEntries(
+      confirmableRequiredSlotsForStep('archetype')
+        .filter(slot => slot.id !== 'd.primary')
+        .map(slot => [slot.id, { hasValue: true, confirmed: true }]),
+    )
+    expect(brandStepCompletion('archetype', slots).missingRequired).toEqual(['d.primary'])
+  })
+
+  it('lässt den Balken 100 % erreichen (derselbe Nenner wie das Gate)', () => {
+    const slots = Object.fromEntries(
+      confirmableRequiredSlotsForStep('archetype').map(slot => [slot.id, { hasValue: true, confirmed: true }]),
+    )
+    expect(stepProgress('archetype', slots).pct).toBe(100)
   })
 })
 

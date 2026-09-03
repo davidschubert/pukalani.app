@@ -103,8 +103,20 @@ export interface BrandSlotControls {
   canRestoreVersion: boolean
   /**
    * Zählt dieser Slot in den Kapitel-Balken? Nur, was der Mensch überhaupt
-   * bestätigen KANN — eine Ableitung ohne Feld wäre ein Nenner, den niemand
-   * bewegen kann, und der Balken bliebe für immer unter 100 %.
+   * bestätigen KANN — ein Nenner, den niemand bewegen kann, hielte den Balken
+   * für immer unter 100 %.
+   *
+   * ── DAS IST NICHT DASSELBE WIE „HAT EIN FELD" (Audit-Befund A4) ──────────
+   * Bis zum 2026-09-02 stand hier `confirmable && hasEditor`, und weil
+   * `showConfirm`/`showRevise` daran hingen, trug eine ABLEITUNG (`editor:
+   * 'none'`) nie einen Bestätigen-Knopf. Im Baustein `archetype` sind vier der
+   * zwölf Pflicht-Entscheidungen genau das: George leitet sie ab, ein Mensch
+   * bestätigt sie. Ohne Knopf blieben sie offen, die Konfidenz-Weiche kam nie,
+   * der Baustein war zu.
+   *
+   * ANNEHMEN und TIPPEN sind zwei Dinge: `editable` hängt weiter am Feld
+   * (ohne Feld tippt niemand), die ZUSTIMMUNG hängt nur daran, ob der Slot
+   * überhaupt eine kennt (`confirmable`, s. `slotIsConfirmable`).
    */
   countsForProgress: boolean
 }
@@ -117,7 +129,7 @@ export interface BrandSlotControls {
  * Funktion mit `confirmed: false` füttert, bekommt die Werkstatt von vorher.
  */
 export function brandSlotControls(input: BrandSlotControlsInput): BrandSlotControls {
-  const countsForProgress = input.confirmable && input.hasEditor
+  const countsForProgress = input.confirmable
   const showVersions = input.generatable && input.hasHistory
 
   if (input.confirmed) {

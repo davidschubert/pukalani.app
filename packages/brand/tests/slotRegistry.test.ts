@@ -7,11 +7,13 @@ import {
   type BrandSlot,
   type BrandStepKey,
   REGISTRY_VERSION,
+  confirmableRequiredSlotsForStep,
   dependencyClosure,
   exampleKeyFor,
   questionKeyFor,
   requiredSlotsForStep,
   slotById,
+  slotIsConfirmable,
   slotIsFilled,
   slotsForStep,
   stepProgress,
@@ -221,6 +223,40 @@ describe('slotsForStep / requiredSlotsForStep / slotById', () => {
 
   it('findet einen unbekannten Slot nicht', () => {
     expect(slotById('z.nope')).toBeUndefined()
+  })
+})
+
+/**
+ * DIE BEDIENBARE PFLICHT-MENGE (Audit-Befund A4, 2026-09-02).
+ *
+ * Der Katalog darf mehr verlangen, als heute gebaut ist; das GATE darf es
+ * nicht. Genau ein Slot fällt auseinander — der Paarvergleich `d.pairs`, dessen
+ * Instrument mit P4 kommt. Solange er in der Pflicht-Menge stand, konnte
+ * `archetype` nie abgeschlossen werden (Bühne wie Route lesen dieselbe
+ * Rechnung). Die Gegenprobe unten ist der Wächter: taucht ein ZWEITER
+ * bedienungsloser Pflicht-Slot auf, ist das keine stille Sackgasse mehr.
+ */
+describe('slotIsConfirmable / confirmableRequiredSlotsForStep', () => {
+  it('nennt genau den Paarvergleich unbestätigbar', () => {
+    const unconfirmable = BRAND_SLOTS.filter(slot => !slot.deactivated && !slotIsConfirmable(slot))
+    expect(unconfirmable.map(slot => slot.id)).toEqual(['d.pairs'])
+  })
+
+  it('nimmt d.pairs aus der Pflicht-Menge von archetype, sonst nichts', () => {
+    const all = requiredSlotsForStep('archetype').map(slot => slot.id)
+    const gate = confirmableRequiredSlotsForStep('archetype').map(slot => slot.id)
+    expect(all).toContain('d.pairs')
+    expect(gate).not.toContain('d.pairs')
+    expect(gate).toEqual(all.filter(id => id !== 'd.pairs'))
+    // Die vier Ableitungen BLEIBEN drin: sie haben kein Feld, aber sehr wohl
+    // eine Zustimmung (`brandSlotControls`) — sie sind Pflicht und bedienbar.
+    expect(gate).toEqual(expect.arrayContaining(['d.hypothesis', 'd.primary', 'd.secondary', 'd.gapReveal']))
+  })
+
+  it('lässt jeden anderen Baustein unverändert', () => {
+    for (const stepKey of BRAND_STEP_KEYS.filter(key => key !== 'archetype')) {
+      expect(confirmableRequiredSlotsForStep(stepKey)).toEqual(requiredSlotsForStep(stepKey))
+    }
   })
 })
 

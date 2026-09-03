@@ -160,11 +160,29 @@ describe('brandSlotControls — der bestätigte Slot ist zu', () => {
 })
 
 describe('brandSlotControls — wer nichts entscheiden kann, zählt nicht', () => {
-  it('schliesst Ableitungen ohne Feld aus', () => {
+  /**
+   * ANNEHMEN UND TIPPEN SIND ZWEI DINGE (Audit-Befund A4, 2026-09-02).
+   * Vorher hing `showConfirm` an `hasEditor` — eine Ableitung, die George
+   * schreibt und ein Mensch nur abnickt, trug deshalb keinen Knopf. In
+   * `archetype` sind vier von zwölf Pflicht-Entscheidungen genau das, und der
+   * Baustein war damit unschliessbar.
+   */
+  it('lässt eine Ableitung BESTÄTIGEN, aber nicht bearbeiten', () => {
     const derivation = brandSlotControls(input({ hasEditor: false }))
-    expect(derivation.countsForProgress).toBe(false)
-    expect(derivation.showConfirm).toBe(false)
+    expect(derivation.countsForProgress).toBe(true)
+    expect(derivation.showConfirm).toBe(true)
     expect(derivation.editable).toBe(false)
+    // Ohne Wert bleibt der Knopf sichtbar, aber tot — `slot_empty` sagt es sonst der Server.
+    expect(derivation.confirmEnabled).toBe(false)
+    expect(brandSlotControls(input({ hasEditor: false, hasValue: true })).confirmEnabled).toBe(true)
+  })
+
+  it('gibt der bestätigten Ableitung den Weg zurück (Korrigieren)', () => {
+    const derivation = brandSlotControls(input({ hasEditor: false, hasValue: true, confirmed: true }))
+    expect(derivation.showRevise).toBe(true)
+    expect(derivation.editable).toBe(false)
+    // Ohne Feld gibt es nichts zu ersetzen — der Text steht ohnehin als Text da.
+    expect(derivation.renderAsText).toBe(false)
   })
 
   it('schliesst den Paarvergleich aus (eigenes Instrument, Katalog §12)', () => {
@@ -195,18 +213,19 @@ describe('brandChapterProgress', () => {
     expect(result).toEqual({ confirmed: 2, total: 4, pct: 50 })
   })
 
-  it('lässt Ableitungen und den Paarvergleich aus dem Nenner', () => {
+  it('lässt den Paarvergleich aus dem Nenner, die Ableitung aber nicht', () => {
     const result = brandChapterProgress([
       controls({ hasValue: true, confirmed: true }),
-      controls({ hasEditor: false }),
+      controls({ hasEditor: false, hasValue: true, confirmed: true }),
       controls({ confirmable: false }),
     ])
-    // Ein Nenner, den niemand bewegen kann, stünde für immer unter 100 %.
-    expect(result).toEqual({ confirmed: 1, total: 1, pct: 100 })
+    // Ein Nenner, den niemand bewegen kann, stünde für immer unter 100 % —
+    // und bewegen kann man seit A4 auch eine Ableitung (bestätigen).
+    expect(result).toEqual({ confirmed: 2, total: 2, pct: 100 })
   })
 
   it('ist bei einem Kapitel ohne zählbare Slots still (0/0, kein Balken)', () => {
-    expect(brandChapterProgress([controls({ hasEditor: false })]))
+    expect(brandChapterProgress([controls({ confirmable: false })]))
       .toEqual({ confirmed: 0, total: 0, pct: 0 })
     expect(brandChapterProgress([])).toEqual({ confirmed: 0, total: 0, pct: 0 })
   })

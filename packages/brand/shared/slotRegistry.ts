@@ -376,9 +376,41 @@ export function slotsForStep(stepKey: BrandStepKey): readonly BrandSlot[] {
   return BRAND_SLOTS.filter(slot => slot.stepId === stepKey && !slot.deactivated)
 }
 
-/** Die Pflicht-Slots eines Bausteins — der Nenner der Fortschritts-Formel. */
+/** Die Pflicht-Slots eines Bausteins — die Menge, die der Katalog verlangt. */
 export function requiredSlotsForStep(stepKey: BrandStepKey): readonly BrandSlot[] {
   return slotsForStep(stepKey).filter(slot => slot.required)
+}
+
+/**
+ * KANN EIN MENSCH DIESEN SLOT ÜBERHAUPT BESTÄTIGEN?
+ *
+ * ── WARUM ES DIESE FRAGE GEBEN MUSS (Audit-Befund A4, 2026-09-02) ─────────
+ * Der Katalog beschreibt den SOLL-Zustand, die Werkstatt das GEBAUTE. Genau
+ * ein Slot fällt heute auseinander: `d.pairs` (Katalog §12, `type: 'special'`)
+ * ist ein eigenes Instrument — der Paarvergleich — und das gibt es noch nicht
+ * (P4). Er trägt weder Feld noch Bestätigung, `brandSlotControls` sagt das
+ * ausdrücklich. `brandStepCompletion` zählte ihn trotzdem als Pflicht: im
+ * Baustein `archetype` konnte `slotsReady` deshalb NIE wahr werden, die
+ * Konfidenz-Weiche erschien nie, und der Baustein war eine stumme Sackgasse —
+ * im Browser wie in der Route, die dieselbe Rechnung liest.
+ *
+ * DIE ANTWORT IST EINE REGEL, KEIN `required: false` IM KATALOG. Der Katalog
+ * bleibt wahr (der Paarvergleich IST eine Pflicht-Entscheidung); was das Gate
+ * verlangen darf, ist die Teilmenge, die ein Mensch auch bedienen kann.
+ * Bekommt `d.pairs` sein Instrument, wechselt er den `type` und steht ohne
+ * weiteres Zutun wieder im Gate — ein `required`-Wechsel im Katalog hätte
+ * dagegen REGISTRY_VERSION und die Upcaster mitgezogen.
+ *
+ * Die BEDIEN-Rechnung liest dieselbe Regel (`brandSlotControls`, Eingabe
+ * `confirmable`): Abschluss-Menge und Bedien-Menge meinen damit dasselbe.
+ */
+export function slotIsConfirmable(slot: BrandSlot): boolean {
+  return slot.type !== 'special'
+}
+
+/** Der Nenner beider Fortschritts-Formeln: Pflicht UND bestätigbar. */
+export function confirmableRequiredSlotsForStep(stepKey: BrandStepKey): readonly BrandSlot[] {
+  return requiredSlotsForStep(stepKey).filter(slotIsConfirmable)
 }
 
 /**
@@ -500,13 +532,17 @@ export interface BrandStepProgress {
  * sind bewusst zwei verschiedene Fragen, und wer sie zusammenzieht, macht
  * entweder den Fortschritt träge oder den Abschluss zu billig.
  *
- * Deaktivierte Slots zählen weder oben noch unten (Migrationsvertrag).
+ * Deaktivierte Slots zählen weder oben noch unten (Migrationsvertrag), und
+ * seit A4 auch kein Slot, den niemand bedienen kann (`slotIsConfirmable`):
+ * ein Nenner, der sich nicht bewegen lässt, hielte den Balken für immer unter
+ * 100 % — dieselbe Menge wie beim Abschluss, damit Balken und Weiche nicht
+ * zwei verschiedene Dinge behaupten.
  */
 export function stepProgress(
   stepKey: BrandStepKey,
   slotStates: Readonly<Record<string, BrandSlotStateFacts | undefined>>,
 ): BrandStepProgress {
-  const required = requiredSlotsForStep(stepKey)
+  const required = confirmableRequiredSlotsForStep(stepKey)
   const requiredFilled = required.filter(slot => slotIsFilled(slotStates[slot.id])).length
   // Ein Baustein ohne Pflicht-Slots ist fertig, sobald man ihn betritt —
   // 0/0 als 0 % anzuzeigen wäre eine Sackgasse im Balken.
