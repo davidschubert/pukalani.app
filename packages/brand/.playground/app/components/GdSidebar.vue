@@ -101,15 +101,28 @@ function glyph(layer: BwRailLayer, step: BwRailStep): { name: string, style: str
       </button>
 
       <!-- Inline statt scoped-Klasse: der Slot-Inhalt landet im teleportierten
-           Menü, wo Scoped-CSS nicht verlässlich greift. -->
+           Menü, wo Scoped-CSS nicht verlässlich greift.
+           Runde 21 (David): ZWEIZEILIG wie der alte BwBrandSwitcher — Name,
+           darunter Vorhaben (Neue Marke / Marken-Relaunch) + Inhaltssprache
+           als Flaggen-Icon. -->
       <template #brand-current>
-        <span class="grid size-6 flex-none place-items-center rounded-lg text-xs font-semibold" style="background: var(--bw-ink); color: var(--bw-paper)">B</span>
-        <span class="min-w-0 flex-1 truncate text-left">Brot &amp; Zeit</span>
+        <span class="grid size-7 flex-none place-items-center rounded-lg text-xs font-semibold" style="background: var(--bw-ink); color: var(--bw-paper)">B</span>
+        <span class="min-w-0 flex-1 text-left leading-tight">
+          <span class="block truncate font-medium">Brot &amp; Zeit</span>
+          <span class="bw-label flex items-center gap-1.5" style="color: var(--bw-muted)">
+            Neue Marke <UIcon name="i-circle-flags-de" class="size-3.5 flex-none" />
+          </span>
+        </span>
         <UIcon name="i-ph-check" class="size-4 flex-none" style="color: var(--bw-accent)" />
       </template>
       <template #brand-kailua>
-        <span class="grid size-6 flex-none place-items-center rounded-lg text-xs font-semibold" style="background: var(--bw-ink); color: var(--bw-paper)">K</span>
-        <span class="min-w-0 flex-1 truncate text-left">Kailua Coffee Co.</span>
+        <span class="grid size-7 flex-none place-items-center rounded-lg text-xs font-semibold" style="background: var(--bw-ink); color: var(--bw-paper)">K</span>
+        <span class="min-w-0 flex-1 text-left leading-tight">
+          <span class="block truncate font-medium">Kailua Coffee Co.</span>
+          <span class="bw-label flex items-center gap-1.5" style="color: var(--bw-muted)">
+            Neue Marke <UIcon name="i-circle-flags-us" class="size-3.5 flex-none" />
+          </span>
+        </span>
       </template>
     </UDropdownMenu>
 
