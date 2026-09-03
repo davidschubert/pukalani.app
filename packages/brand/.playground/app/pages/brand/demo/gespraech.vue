@@ -560,10 +560,11 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
        Sync-Zustand zeigt die Sidebar. Fuß: dreizeilig. -->
   <!-- Runde 17 (David): Nuxt-UI-Standardabstände in der Sidebar-Spalte
        (Body px-4/py-2 laut DashboardSidebar-Theme) statt des 2rem-Gutters. -->
+  <!-- Runde 31 (David): der Gesamtfortschritt wohnt wieder unten RECHTS beim
+       Euer-Branding-Button — die Leiste ist reine Navigation (railFooter aus). -->
   <BwWorkspace
     :progress-pct="progressPct" content-locale="de" :locale-in-topbar="false"
-    :topbar="false" progress-title="Gesamtfortschritt"
-    :progress-count="progressCount" progress-time="ca. 30 Min"
+    :topbar="false" :rail-footer="false"
     rail-width="296px" :rail-collapsed="railCollapsed"
     style="--bw-rail-pad-x: 1rem; --bw-rail-pad-y: 0.75rem"
   >
@@ -987,11 +988,13 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
           </div>
         </div>
 
-        <!-- Runde 11+14: unten rechts NUR der Einstiegs-Button „Euer
-             Branding" (progress: false) — die Zahlen wohnen unten links. -->
+        <!-- Runde 31 (David): unten rechts BEIDES — der Einstiegs-Button
+             „Euer Branding" UND darunter der dreizeilige Gesamtfortschritt
+             (R16-Zuschnitt); die Leiste links hat keinen Fuß mehr. -->
         <div class="flex-none border-t px-6 pb-5" style="border-color: var(--bw-line)">
           <BwRailFooter
-            :progress-pct="progressPct" :progress="false"
+            :progress-pct="progressPct" progress-title="Gesamtfortschritt"
+            :progress-count="progressCount" progress-time="ca. 30 Min"
             progress-to="/brand/demo/ergebnis" :score="61"
           />
         </div>
