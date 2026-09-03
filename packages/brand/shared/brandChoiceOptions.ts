@@ -51,6 +51,29 @@ export interface BrandChoiceOption {
   readonly label: string
   /** Ein Halbsatz Wirkung — er steht im Prompt neben dem Namen. */
   readonly hint: string
+  /**
+   * WIE DIE OPTION DEM MENSCHEN HEISST, je Sprache der Oberfläche (P4).
+   *
+   * Sie steht HIER und nicht nur im i18n-Katalog, weil die Auflösung eines
+   * GESPEICHERTEN Wertes (`brandChoiceDisplayLabel`) pur bleiben muss: sie
+   * läuft in Log-Karten und Bühnen-Modulen, aber auch dort, wo es kein
+   * vue-i18n gibt. Der Katalog trägt dieselben Namen — dass beide nicht
+   * auseinanderlaufen, nagelt `brandChoiceOptions.test.ts` fest.
+   *
+   * Die vier Modell-Namen sind EIGENNAMEN (wie die Theme-Namen im Core), de
+   * und en sind heute deshalb wörtlich gleich. Das Feld ist trotzdem
+   * zweisprachig: ein künftiger geschlossener Vertrag („Ja"/„Nein") wäre es
+   * nicht, und ein einsprachiges Feld hätte ihn still falsch beschriftet.
+   */
+  readonly display: { readonly de: string, readonly en: string }
+  /**
+   * Die WURZEL der Karten-Copy im i18n-Katalog (`.label`, `.hint`,
+   * `.example`). Sie steht ausgeschrieben da und wird NICHT aus der Id
+   * gerechnet: die Ids tragen Bindestriche, ein Schlüssel-Pfad verträgt sie
+   * schlecht, und eine versteckte Umwandlung wäre eine Kopplung, die kein
+   * Test sieht.
+   */
+  readonly copyKey: string
 }
 
 /**
@@ -65,21 +88,29 @@ export const BRAND_ARCHITECTURE_MODELS: readonly BrandChoiceOption[] = [
     id: 'branded-house',
     label: 'Branded House',
     hint: 'one brand carries everything; the products are named after it (Apple)',
+    display: { de: 'Branded House', en: 'Branded House' },
+    copyKey: 'brand.choice.model.brandedHouse',
   },
   {
     id: 'sub-brands',
     label: 'Sub-Brands',
     hint: 'products carry a name of their own NEXT to the main brand (FedEx Express)',
+    display: { de: 'Sub-Brands', en: 'Sub-Brands' },
+    copyKey: 'brand.choice.model.subBrands',
   },
   {
     id: 'endorsed',
     label: 'Endorsed Brands',
     hint: 'products stand on their own and name who backs them ("by Marriott")',
+    display: { de: 'Endorsed Brands', en: 'Endorsed Brands' },
+    copyKey: 'brand.choice.model.endorsed',
   },
   {
     id: 'house-of-brands',
     label: 'House of Brands',
     hint: 'the brands stand alone, the parent stays invisible (P&G)',
+    display: { de: 'House of Brands', en: 'House of Brands' },
+    copyKey: 'brand.choice.model.houseOfBrands',
   },
 ]
 
@@ -225,4 +256,32 @@ export function checkBrandChoiceDraft(contract: BrandChoiceContract, draft: stri
  */
 export function brandChoiceFallbackQuestion(contract: BrandChoiceContract, locale: string): string {
   return locale.toLowerCase().startsWith('de') ? contract.fallbackQuestion.de : contract.fallbackQuestion.en
+}
+
+/**
+ * WAS DER MENSCH STATT DER ROHEN ID LIEST (P4).
+ *
+ * Gespeichert bleibt IMMER die stabile Id (`branded-house`) — sie ist die
+ * Zusage an das Brand-Dokument, an den Prompt und an jede spätere Ableitung.
+ * Angezeigt wird sie nie: „branded-house" in einer Log-Karte sieht aus wie ein
+ * Datenbank-Leck, und der Mensch hat auf einer KARTE „Branded House" geklickt.
+ *
+ * DREI FÄLLE, EINE ANTWORT — und der Rückfall ist der WERT SELBST:
+ *  - geschlossener Vertrag + bekannte Id ⇒ der Name in der Sprache der
+ *    Oberfläche;
+ *  - geschlossener Vertrag + UNBEKANNTER Wert (Alt-Bestand aus der Zeit des
+ *    Textfelds, ein von Hand korrigierter Slot) ⇒ unverändert. Ein „—" oder
+ *    eine leere Zeile würde einen vorhandenen Wert verschwinden lassen;
+ *  - offener Slot (`b.positioningCategory`) oder gar kein Vertrag ⇒
+ *    unverändert. Dort IST der Text die Antwort.
+ *
+ * Sprach-Konvention wie überall in dieser Datei: alles, was nicht mit `de`
+ * beginnt, bekommt Englisch.
+ */
+export function brandChoiceDisplayLabel(slotId: string, storedValue: string, locale = 'en'): string {
+  const contract = brandChoiceContract(slotId)
+  if (!contract || contract.kind !== 'closed') return storedValue
+  const hit = contract.options.find(option => option.id === storedValue)
+  if (!hit) return storedValue
+  return locale.toLowerCase().startsWith('de') ? hit.display.de : hit.display.en
 }

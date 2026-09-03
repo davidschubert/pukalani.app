@@ -26,6 +26,11 @@ import {
 } from '../../../../shared/brandAutosaveDiff'
 import { brandAiRejectionMessageKey } from '../../../../shared/brandAiLimits'
 import {
+  brandChoiceContract,
+  brandChoiceDisplayLabel,
+} from '../../../../shared/brandChoiceOptions'
+import type { BwChoiceCard } from '../../../components/BwChoiceCards.vue'
+import {
   BRAND_ADVISORS,
   BRAND_VOICE,
   type BrandAdvisorKey,
@@ -605,6 +610,62 @@ async function submitChoice(): Promise<void> {
   await answerFromGeorge(said)
 }
 
+/**
+ * DIE GESCHLOSSENE AUSWAHL BEKOMMT KARTEN (P4, Infografik §12.3).
+ *
+ * Der Absatz darüber bleibt wörtlich wahr: hier entsteht KEINE zweite Liste.
+ * Die Menge kommt aus dem geschlossenen Vertrag (`brandChoiceOptions.ts`) —
+ * derselben Stelle, aus der auch die Prompt-Regel des Generators gebaut wird.
+ * Sähe der Mensch andere Modelle als das Sprachmodell, wäre jede Begründung
+ * hinterher eine über etwas anderes.
+ *
+ * ZWEI BEDINGUNGEN, weil beide etwas ANDERES sagen: die Registry sagt, womit
+ * dieser Slot bedient wird (`editor: 'cards'`), der Vertrag sagt, dass es
+ * überhaupt eine endliche Menge gibt (`kind: 'closed'`). Ein offener
+ * choice-Slot wie `b.positioningCategory` fällt an beiden durch und behält
+ * sein Textfeld — dort IST der Text die Antwort.
+ */
+const choiceCards = computed<BwChoiceCard[]>(() => {
+  const slot = nextSlot.value
+  if (!slot || slot.editor !== 'cards') return []
+  const contract = brandChoiceContract(slot.id)
+  if (!contract || contract.kind !== 'closed') return []
+  return contract.options.map(option => ({
+    id: option.id,
+    label: t(`${option.copyKey}.label`),
+    hint: t(`${option.copyKey}.hint`),
+    example: t(`${option.copyKey}.example`),
+  }))
+})
+
+/**
+ * Der Klick auf eine Karte geht denselben Weg wie die getippte Antwort — nur
+ * mit der stabilen ID als Text. `answerFromGeorge` schreibt sie in den Slot,
+ * legt sie als Zug in den Verlauf und reicht sie an George weiter; ein eigener
+ * Übermittlungsweg wäre eine zweite Wahrheit über dieselbe Handlung.
+ */
+async function pickChoice(id: string): Promise<void> {
+  if (conversation.pending.value) return
+  ownChoice.value = ''
+  await answerFromGeorge(id)
+}
+
+/**
+ * WAS IN EINER KARTE STEHT, WENN DER WERT EINE ID IST (P4).
+ *
+ * Gespeichert bleibt `branded-house`, gelesen wird „Branded House". Die Regel
+ * ist pur und liegt beim Vertrag; hier hängt nur die Sprache der Oberfläche
+ * dran. Für jeden anderen Slot gibt sie den Wert unverändert zurück — sie darf
+ * deshalb überall stehen, wo ein Slot-Wert ANGEZEIGT wird.
+ *
+ * NICHT im Eingabefeld: dort wird der ROHE Wert bearbeitet und zurück-
+ * geschrieben. Ein Feld, das ein Etikett zeigt und eine Id speichert, würde
+ * beim ersten Tastendruck das Etikett speichern.
+ */
+function slotDisplayValue(slotId: string, value: string): string {
+  return brandChoiceDisplayLabel(slotId, value, locale.value)
+}
+
 // ── Der Log: Kapitel-Sektionen und ihre Karten ────────────────────────────
 
 /**
@@ -617,7 +678,15 @@ interface LogCard {
   id: string
   label: string
   note: string
+  /** Der ROHE Wert — er geht ins Feld und wird zurückgeschrieben. */
   value: string
+  /**
+   * Was der Mensch LIEST. Für fast alle Slots derselbe Text; für eine
+   * geschlossene Auswahl der Name statt der gespeicherten Id (P4). Zwei
+   * Felder, weil die Karte beides braucht: das Etikett zum Lesen, den Wert
+   * zum Bearbeiten.
+   */
+  display: string
   confirmed: boolean
   /**
    * Was statt eines Wertes dasteht. Für fast alle Slots „kommt im Gespräch";
@@ -695,6 +764,7 @@ function chapterCards(chapter: LogChapter): LogCard[] {
       label: slotLabel(entry.slot),
       note: slotNote(entry.slot),
       value: store.slotValue(entry.slot.id),
+      display: slotDisplayValue(entry.slot.id, store.slotValue(entry.slot.id)),
       confirmed: entry.controls.state === 'confirmed',
       placeholder: slotPlaceholder(entry.slot),
       controls: entry.controls,
@@ -707,6 +777,7 @@ function chapterCards(chapter: LogChapter): LogCard[] {
     label: slotLabel(slot),
     note: slotNote(slot),
     value: brandSlotDisplayValue(loaded[slot.id]),
+    display: slotDisplayValue(slot.id, brandSlotDisplayValue(loaded[slot.id])),
     confirmed: brandSlotIsConfirmed(loaded[slot.id]),
     placeholder: slotPlaceholder(slot),
     controls: null,
@@ -1326,14 +1397,27 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
               <div v-else-if="stageModule === 'options'" class="mt-3 rounded-2xl p-4" style="background: var(--bw-surface-hi)">
                 <div class="rounded-xl px-4 py-3" style="background: var(--bw-paper)">
                   <span class="block text-sm font-medium">{{ nextSlot ? slotLabel(nextSlot) : '' }}</span>
+                  <!-- GESCHLOSSENE MENGE ⇒ KARTEN (P4): der Klick übermittelt
+                       die stabile Id, „Übermitteln" entfällt — eine Karte IST
+                       die Entscheidung. Offene Auswahl (Positionierungs-
+                       Kategorie) behält ihr Feld. -->
+                  <BwChoiceCards
+                    v-if="choiceCards.length"
+                    class="mt-3"
+                    :options="choiceCards"
+                    :selected="nextSlot ? store.slotValue(nextSlot.id) : ''"
+                    :disabled="conversation.pending.value"
+                    @pick="pickChoice"
+                  />
                   <UInput
+                    v-else
                     v-model="ownChoice" size="sm" class="mt-2 w-full"
                     :placeholder="t('brand.workspace.ownAnswerPlaceholder')"
                     :aria-label="t('brand.workspace.sendOwnAnswer')"
                     @keydown.enter="submitChoice"
                   />
                 </div>
-                <div class="mt-3 flex items-center justify-end gap-2">
+                <div v-if="!choiceCards.length" class="mt-3 flex items-center justify-end gap-2">
                   <UButton
                     color="neutral" variant="ghost" class="bw-send rounded-full"
                     :label="t('brand.workspace.submitChoice')"
@@ -1362,7 +1446,7 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
                     @blur="autosave.flush()"
                   />
                   <p v-else-if="store.slotValue(pendingCard.slot.id)" class="bw-doc-text mt-3 whitespace-pre-wrap">
-                    {{ store.slotValue(pendingCard.slot.id) }}
+                    {{ slotDisplayValue(pendingCard.slot.id, store.slotValue(pendingCard.slot.id)) }}
                   </p>
                   <p v-else class="bw-pending mt-3">{{ t('brand.workspace.stage.pending') }}</p>
                 </div>
@@ -1454,7 +1538,7 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
                     @blur="autosave.flush()"
                   />
                   <p v-else-if="store.slotValue(pendingCard.slot.id)" class="bw-doc-text mt-2 whitespace-pre-wrap">
-                    {{ store.slotValue(pendingCard.slot.id) }}
+                    {{ slotDisplayValue(pendingCard.slot.id, store.slotValue(pendingCard.slot.id)) }}
                   </p>
                   <p v-else class="bw-pending mt-2">{{ t('brand.workspace.stage.pending') }}</p>
                 </div>
@@ -1595,7 +1679,7 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
                   @update:model-value="value => onInput(card.id, String(value))"
                   @blur="autosave.flush()"
                 />
-                <p v-else-if="card.value" class="bw-doc-text mt-1.5 whitespace-pre-wrap" style="font-size: 0.875rem; line-height: 1.5">{{ card.value }}</p>
+                <p v-else-if="card.value" class="bw-doc-text mt-1.5 whitespace-pre-wrap" style="font-size: 0.875rem; line-height: 1.5">{{ card.display }}</p>
                 <p v-else class="bw-pending mt-1.5">{{ card.placeholder }}</p>
 
                 <div class="mt-1 flex items-center justify-end gap-2">

@@ -1,7 +1,11 @@
+import { readFileSync } from 'node:fs'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import {
   BRAND_ARCHITECTURE_MODELS,
   brandChoiceContract,
+  brandChoiceDisplayLabel,
   brandChoiceFallbackQuestion,
   brandChoicePromptRule,
   checkBrandChoiceDraft,
@@ -138,6 +142,75 @@ describe('Die Rückfrage bei einem Verstoss', () => {
       const contract = brandChoiceContract(slotId)!
       for (const locale of ['de', 'en']) {
         expect(brandChoiceFallbackQuestion(contract, locale), `${slotId}/${locale}`).toContain('?')
+      }
+    }
+  })
+})
+
+/**
+ * DIE ANZEIGE EINER GESPEICHERTEN AUSWAHL (P4).
+ *
+ * Gespeichert bleibt die stabile Id — sie ist die Zusage an Prompt, Dokument
+ * und jede spätere Ableitung. Angezeigt wird sie nie: `branded-house` in einer
+ * Log-Karte sieht aus wie ein Datenbank-Leck, und geklickt hat der Mensch auf
+ * einer Karte „Branded House".
+ *
+ * Bewiesen wird deshalb BEIDES: dass der Name kommt, wo einer existiert — und
+ * dass der WERT UNVERÄNDERT durchgeht, wo keiner existiert. Der zweite Teil
+ * ist der wichtigere: ein Rückfall auf „—" oder auf eine leere Zeile würde
+ * einen vorhandenen Wert verschwinden lassen, und niemand würde es merken.
+ */
+describe('Was der Mensch statt der rohen Id liest', () => {
+  it('löst jede der vier Ids in ihren Namen auf, in beiden Sprachen', () => {
+    for (const option of BRAND_ARCHITECTURE_MODELS) {
+      expect(brandChoiceDisplayLabel('b2.model', option.id, 'de'), option.id).toBe(option.display.de)
+      expect(brandChoiceDisplayLabel('b2.model', option.id, 'en'), option.id).toBe(option.display.en)
+    }
+    expect(brandChoiceDisplayLabel('b2.model', 'branded-house', 'de')).toBe('Branded House')
+  })
+
+  it('folgt derselben Sprach-Konvention wie die Rückfrage', () => {
+    expect(brandChoiceDisplayLabel('b2.model', 'endorsed', 'de-DE')).toBe('Endorsed Brands')
+    expect(brandChoiceDisplayLabel('b2.model', 'endorsed', 'fr'))
+      .toBe(brandChoiceDisplayLabel('b2.model', 'endorsed', 'en'))
+    // Ohne Angabe gilt Englisch — dieselbe Voreinstellung wie sonst.
+    expect(brandChoiceDisplayLabel('b2.model', 'endorsed')).toBe('Endorsed Brands')
+  })
+
+  it('GEGENPROBE 1: eine UNBEKANNTE Id geht unverändert durch', () => {
+    // Alt-Bestand aus der Zeit des Textfelds, ein von Hand korrigierter Slot,
+    // ein „Hybrid", der es doch einmal hineingeschafft hat: der Wert bleibt
+    // sichtbar. Verschwinden wäre der schlimmere Fehler.
+    expect(brandChoiceDisplayLabel('b2.model', 'hybrid', 'de')).toBe('hybrid')
+    expect(brandChoiceDisplayLabel('b2.model', 'Branded House', 'de')).toBe('Branded House')
+    expect(brandChoiceDisplayLabel('b2.model', '', 'de')).toBe('')
+  })
+
+  it('GEGENPROBE 2: ein OFFENER Slot und ein Slot ohne Vertrag bleiben unangetastet', () => {
+    // `b.positioningCategory` ist eine Auswahl OHNE Menge — dort IST der Text
+    // die Antwort, und ein Nachschlagen hätte gar nichts nachzuschlagen.
+    expect(brandChoiceDisplayLabel('b.positioningCategory', 'branded-house', 'de')).toBe('branded-house')
+    expect(brandChoiceDisplayLabel('a.pitch', 'branded-house', 'de')).toBe('branded-house')
+    expect(brandChoiceDisplayLabel('c.final', 'Mut, Klarheit', 'en')).toBe('Mut, Klarheit')
+  })
+
+  it('DIE KARTEN-COPY HÄNGT AM VERTRAG — Katalog und Vertrag nennen denselben Namen', () => {
+    // Die Karten rendern Titel, Wirkung und Beispiel aus dem i18n-Katalog, die
+    // Log-Karte den Namen aus dem Vertrag. Laufen die beiden Namen
+    // auseinander, klickt der Mensch auf „X" und liest hinterher „Y" — genau
+    // die Sorte Bruch, die kein Typecheck sieht.
+    const localesDir = join(dirname(fileURLToPath(import.meta.url)), '..', 'i18n', 'locales')
+    for (const locale of ['de', 'en'] as const) {
+      const catalog = JSON.parse(readFileSync(join(localesDir, `${locale}.json`), 'utf8')) as Record<string, unknown>
+      for (const option of BRAND_ARCHITECTURE_MODELS) {
+        const copy = option.copyKey.split('.').reduce<unknown>(
+          (node, key) => (node && typeof node === 'object' ? (node as Record<string, unknown>)[key] : undefined),
+          catalog,
+        ) as { label?: string, hint?: string, example?: string } | undefined
+        expect(copy, `${locale}/${option.copyKey}`).toBeTruthy()
+        expect(copy!.label, `${locale}/${option.id}`).toBe(option.display[locale])
+        expect(copy!.hint?.length, `${locale}/${option.id}`).toBeGreaterThan(0)
+        expect(copy!.example?.length, `${locale}/${option.id}`).toBeGreaterThan(0)
       }
     }
   })

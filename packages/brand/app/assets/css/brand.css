@@ -295,6 +295,24 @@
 .bw-select-card--on .bw-select-note { color: var(--bw-line); }
 .bw-option-card { background: var(--bw-surface-hi); box-shadow: var(--bw-shadow-card); transition: background 120ms; }
 .bw-option-card:hover { background: var(--bw-line); }
+
+/* AUSWAHL-KARTEN der geschlossenen Menge (P4, Infografik §12.3): dieselbe
+   Bedeutung wie `.bw-chip--selected`, nur als Karte — grüne Fläche, grüner
+   Ring, „gewählt = entschieden". Die Karte ist HELLER als der Grund und trägt
+   nur einen Hauch Ambient (§3d, Runde 9): die Trennung ist tonal, der Schatten
+   ist kein Rahmen-Ersatz. */
+.bw-choice-card {
+  background: var(--bw-surface-hi); box-shadow: var(--bw-shadow-card);
+  cursor: pointer; transition: background 120ms, box-shadow 120ms;
+  color: var(--bw-ink);
+}
+.bw-choice-card:not(.bw-choice-card--selected):hover { background: var(--bw-line); }
+.bw-choice-card:focus-visible { outline: 2px solid var(--bw-ink); outline-offset: 2px; }
+.bw-choice-card--selected {
+  background: var(--bw-accent-soft);
+  box-shadow: inset 0 0 0 1.5px var(--bw-accent);
+}
+.bw-choice-card:disabled { cursor: default; opacity: 0.55; }
 /* Info-Buttons (Audit D17): Ruheton muted, Hover Pop mit Ink-Zeichen. */
 .bw-info-btn { color: var(--bw-muted); transition: background 120ms, color 120ms; }
 .bw-info-btn:hover, .bw-info-btn:focus-visible { background: var(--bw-pop); color: var(--bw-ink); }

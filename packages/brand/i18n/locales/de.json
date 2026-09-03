@@ -220,6 +220,31 @@
       "r3": "Warum jetzt? Was ist passiert — Wachstum, neue Zielgruppe, Zusammenschluss, oder der Moment, in dem euch die eigene Website peinlich wurde?",
       "r4": "Was gefällt dir am jetzigen Auftritt NICHT?"
     },
+    "choice": {
+      "exampleLabel": "Bekannt",
+      "model": {
+        "brandedHouse": {
+          "label": "Branded House",
+          "hint": "Eine Marke trägt alles — die Produkte heißen nach ihr.",
+          "example": "Apple: iPhone, iPad und Mac tragen denselben Namen."
+        },
+        "subBrands": {
+          "label": "Sub-Brands",
+          "hint": "Produkte tragen einen eigenen Namen neben der Hauptmarke.",
+          "example": "FedEx Express, FedEx Ground: eigener Zusatz, gleiche Mutter."
+        },
+        "endorsed": {
+          "label": "Endorsed Brands",
+          "hint": "Produkte stehen für sich und nennen, wer hinter ihnen steht.",
+          "example": "Courtyard by Marriott: eigener Name, sichtbare Mutter."
+        },
+        "houseOfBrands": {
+          "label": "House of Brands",
+          "hint": "Die Marken stehen allein, die Mutter bleibt unsichtbar.",
+          "example": "Procter und Gamble: Ariel, Pampers, Gillette."
+        }
+      }
+    },
     "workspace": {
       "confidence": {
         "question": "Passt dieses Kapitel?",
