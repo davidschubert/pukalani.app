@@ -93,7 +93,7 @@ type TurnBlock = 'answer' | 'draft' | 'options' | 'confirm' | 'gate' | 'done'
 
 interface Turn {
   id: string
-  role: 'vera' | 'user'
+  role: 'george' | 'user'
   /** Veras Zug: 2–3 Sätze. */
   text: string
   /** Leise Mono-Zeile darunter (Angebot, Hinweis) — nie eine zweite Frage. */
@@ -124,19 +124,30 @@ interface Turn {
  * Fortschritts-Linie wie der Stand.
  */
 const veraInfoOpen = ref(false)
+/**
+ * Davids Entscheidung 2026-09-02 („Mittelweg"): George ist die EINE Stimme
+ * durch den ganzen Wizard — sein Team liest im Rücken mit und wird von ihm
+ * erwähnt, spricht aber nie selbst. Der Layer zeigt beides.
+ */
 const VERA_INFO = {
-  name: 'Vera Witterung',
-  role: 'Strategin',
-  desc: 'Übernimmt bei Purpose, Vision, Mission und Positionierung — und fragt „warum", bis es trägt. Beliebigkeit überlebt sie nicht.',
-  asks: '„Das könnte jeder sagen. Was könnt nur ihr sagen?"',
-  personal: 'Weimaranerin · Hamburg · steht vor, bevor sie bellt; läuft jede Frage dreimal ab',
+  name: 'George Wuffwuff',
+  role: 'Markenberater',
+  desc: 'Führt euch durch den ganzen Wizard — von Kontext bis Name. Er stellt kleine, konkrete Fragen, sagt ehrlich, was fehlt, und hält den roten Faden. Im Rücken liest sein Team mit:',
+  team: [
+    'Vera Witterung — Strategin · Warum-Fragen, Positionierung',
+    'Milo Treuherz — Werte-Berater · Momente statt Adjektive',
+    'Nika Bellkant — Sprach-Beraterin · testet Sätze am Ohr',
+    'Otto Testbiss — Namens-Berater · erst überleben, dann gefallen',
+  ],
+  asks: '„Warum habt ihr angefangen — was war der Auslöser?"',
+  personal: 'Chihuahua mit Terrier-Anteil · Kiel · sammelt Manifeste, schwimmt in der Förde',
 }
 
 const turns = ref<Turn[]>([
   {
     id: 'v1',
-    role: 'vera',
-    text: 'Ab hier übernehme ich — George hat mir euren Kontext übergeben. Ich stelle die Warum-Fragen, bis eure Positionierung trägt.',
+    role: 'george',
+    text: 'Weiter geht es mit dem Warum. Ich habe euren Kontext mit Vera durchgesehen — unserer Strategin; sie liest in diesem Kapitel streng mit. Jetzt stelle ich die Warum-Fragen, bis eure Positionierung trägt.',
     question: 'Erste Frage: Warum habt ihr angefangen — was war der Auslöser?',
     block: 'answer',
     example: 'Ich habe drei Jahre in einer Großbäckerei gearbeitet und dort gesehen, wie viel Technik nötig ist, damit Brot billig aussieht. Das wollte ich anders machen.',
@@ -202,7 +213,7 @@ function afterOrigin(): void {
     state: 'draft',
   })
   push({
-    role: 'vera',
+    role: 'george',
     text: 'Das ist kein Marketing-Anlass, das ist ein Mangel, den du selbst hattest — daraus tragen Purpose-Sätze. Ich halte fest: der Auslöser war das fehlende Brot, nicht der Wunsch, Bäckerin zu werden.',
     help: 'Wenn du willst, hake ich hier noch einmal nach — sonst nehme ich es so als Grundlage.',
     question: 'Passt das so als Grundlage?',
@@ -230,7 +241,7 @@ function offerPurpose(): void {
   if (purposeOffered) return
   purposeOffered = true
   push({
-    role: 'vera',
+    role: 'george',
     text: 'Dann lege ich euren Purpose vor. Ich habe ihn aus eurer Ursprungsgeschichte gebaut, nicht aus dem Angebot — ein Purpose, der das Produkt beschreibt, ist austauschbar.',
     block: 'draft',
     closing: 'Trifft das euer Warum — oder klingt es nach uns statt nach euch?',
@@ -295,7 +306,7 @@ function offerPosition(): void {
   if (positionOffered) return
   positionOffered = true
   push({
-    role: 'vera',
+    role: 'george',
     text: 'Gut. Dann die Entscheidung, an der später jede Farbe und jeder Satz hängt.',
     question: 'Für wen backt ihr — und gegen wen? Wähl die Richtung, die ihr auch dann vertretet, wenn sie Umsatz kostet.',
     block: 'options',
@@ -308,7 +319,7 @@ function pickPosition(turn: Turn, text: string): void {
   log.value.push({ id: 'position', label: 'Positionierung', text, state: 'draft' })
   pulseSave()
   push({
-    role: 'vera',
+    role: 'george',
     text: 'Notiert. Ich lege es rechts in euren Stand — bestätigt ist es, wenn du dort bestätigst.',
     question: 'Und wogegen grenzt ihr euch ab: Was macht ihr bewusst nicht, obwohl es Geld brächte?',
     block: 'answer',
@@ -340,8 +351,8 @@ function confirmProposal(turn: Turn): void {
 function afterBoundary(): void {
   log.value.push({ id: 'boundary', label: 'Abgrenzung', text: BOUNDARY_PROPOSAL, state: 'draft' })
   push({
-    role: 'vera',
-    text: 'Da widerspreche ich dir. „Die Besten" könnte jede Bäckerei der Stadt über sich schreiben, und niemand kann es nachprüfen — das ist eine Behauptung, keine Abgrenzung. Was du mir vorhin erzählt hast, ist überprüfbar und deshalb stärker.',
+    role: 'george',
+    text: 'Da widerspreche ich dir. „Die Besten" könnte jede Bäckerei der Stadt über sich schreiben, und niemand kann es nachprüfen — das ist eine Behauptung, keine Abgrenzung. Was du mir vorhin erzählt hast, ist überprüfbar und deshalb stärker. Vera sieht das genauso — und sie ist schwerer zu überzeugen als ich.',
     block: 'confirm',
     entryId: 'boundary',
     proposal: BOUNDARY_PROPOSAL,
@@ -362,9 +373,9 @@ function maybeGate(): void {
   if (gateOpen || !allConfirmed.value) return
   gateOpen = true
   push({
-    role: 'vera',
+    role: 'george',
     text: 'Alle vier Entscheidungen stehen — und sie stützen sich gegenseitig: das fehlende Brot, der Purpose, die Kante gegen die Kette und ein Satz, an dem man euch messen kann.',
-    question: 'Bevor wir zu Milo gehen: Sitzt dieses Kapitel?',
+    question: 'Bevor wir zu den Werten gehen: Sitzt dieses Kapitel?',
     block: 'gate',
   })
 }
@@ -380,16 +391,16 @@ function pickGate(turn: Turn, id: string): void {
     chapterDone.value = true
     pulseSave()
     push({
-      role: 'vera',
-      text: 'Gut. Milo übernimmt bei den Werten — er wird nach Momenten fragen, nicht nach Adjektiven. Euer Purpose liegt ihm vor, er fängt nicht bei null an.',
+      role: 'george',
+      text: 'Gut. Bei den Werten frage ich nach Momenten, nicht nach Adjektiven — Milo aus meinem Team hat eure Antworten dafür schon vorsortiert. Euer Purpose liegt uns vor, wir fangen nicht bei null an.',
       block: 'done',
     })
     return
   }
   if (id === 'almost') {
     push({
-      role: 'vera',
-      text: 'Dann sag mir die eine Sache. Wir machen sie auf, bevor Milo übernimmt — ein Kapitel, das man später wieder aufreißt, kostet mehr als zehn Minuten jetzt.',
+      role: 'george',
+      text: 'Dann sag mir die eine Sache. Wir machen sie auf, bevor wir weiterziehen — ein Kapitel, das man später wieder aufreißt, kostet mehr als zehn Minuten jetzt.',
     })
     return
   }
@@ -398,7 +409,7 @@ function pickGate(turn: Turn, id: string): void {
   push({ role: 'user', text: 'Nochmal von vorn' })
   log.value.forEach((entry) => { entry.state = 'draft' })
   push({
-    role: 'vera',
+    role: 'george',
     text: 'Verstanden, wir gehen es nochmal durch. Ich habe die vier Einträge rechts wieder geöffnet — gelöscht ist nichts, wir schärfen sie einzeln nach.',
   })
 }
@@ -425,7 +436,7 @@ function reviseEntry(entry: LogEntry): void {
   chapterDone.value = false
   pulseSave()
   push({
-    role: 'vera',
+    role: 'george',
     text: `Gut, dass du das nochmal aufmachst — besser jetzt als im Brand Book. Sag mir, was an „${entry.label}" nicht sitzt, dann formulieren wir es neu.`,
   })
 }
@@ -494,12 +505,12 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
                darunter auf derselben Höhe sitzt wie die Linie im Stand rechts —
                beide 1px, durchgezogen, ohne runde Enden (gd-line unten). -->
           <div class="flex items-center gap-2.5">
-            <BwGeorgeAvatar size="md" src="" initial="V" alt="Vera" />
-            <span class="min-w-0 truncate text-sm font-medium">Gespräch mit Vera</span>
-            <span class="bw-label truncate" style="color: var(--bw-muted)">· Strategin · Purpose, Vision &amp; Mission</span>
+            <BwGeorgeAvatar size="md" alt="George" />
+            <span class="min-w-0 truncate text-sm font-medium">Gespräch mit George</span>
+            <span class="bw-label truncate" style="color: var(--bw-muted)">· Markenberater · Purpose, Vision &amp; Mission</span>
             <UButton
               size="xs" color="neutral" variant="ghost" class="ml-auto rounded-full"
-              icon="i-ph-info" aria-label="Über Vera" @click="veraInfoOpen = true"
+              icon="i-ph-info" aria-label="Über George und sein Team" @click="veraInfoOpen = true"
             />
           </div>
           <!-- Davids Korrekturrunde 5+6: KEIN Fortschritt hier — der wohnt im
@@ -520,7 +531,7 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
         >
           <div class="w-full max-w-md rounded-2xl p-7" style="background: var(--bw-paper)">
             <div class="flex items-center gap-3">
-              <BwGeorgeAvatar src="" initial="V" alt="Vera" />
+              <BwGeorgeAvatar alt="George" />
               <span class="min-w-0 leading-tight">
                 <span class="block text-base font-medium">{{ VERA_INFO.name }}</span>
                 <span class="bw-label block" style="color: var(--bw-muted)">{{ VERA_INFO.role }}</span>
@@ -528,6 +539,9 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
               <UButton size="xs" color="neutral" variant="ghost" class="ml-auto rounded-full" icon="i-ph-x" aria-label="Schließen" @click="veraInfoOpen = false" />
             </div>
             <p class="bw-doc-text mt-4">{{ VERA_INFO.desc }}</p>
+            <ul class="mt-2 space-y-1">
+              <li v-for="member in VERA_INFO.team" :key="member" class="flex gap-2 text-sm leading-relaxed" style="color: var(--bw-ink-soft)"><span class="flex-none" style="color: var(--bw-line-strong)">—</span>{{ member }}</li>
+            </ul>
             <p class="bw-label mt-4" style="color: var(--bw-muted)">Typische Frage</p>
             <p class="mt-1 text-sm italic">{{ VERA_INFO.asks }}</p>
             <p class="bw-label mt-4 leading-relaxed" style="color: var(--bw-muted)">{{ VERA_INFO.personal }}</p>
@@ -540,7 +554,7 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
             v-for="turn in turns" :key="turn.id"
             class="bw-msg" :class="turn.role === 'user' ? 'bw-msg--user' : ''"
           >
-            <BwGeorgeAvatar v-if="turn.role === 'vera'" size="md" src="" initial="V" alt="Vera" />
+            <BwGeorgeAvatar v-if="turn.role === 'george'" size="md" alt="George" />
             <div class="bw-msg-body">
               <p class="whitespace-pre-wrap">{{ turn.text }}</p>
               <p v-if="turn.help" class="bw-msg-help">{{ turn.help }}</p>
@@ -623,7 +637,7 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
                   <UInput
                     v-model="purposeHint" size="sm" class="flex-1"
                     placeholder="Hinweis — z. B. kürzer, weniger Erklärung"
-                    aria-label="Hinweis für Vera"
+                    aria-label="Hinweis für George"
                     @keydown.enter="regeneratePurpose"
                   />
                   <UButton
@@ -718,7 +732,7 @@ onBeforeUnmount(() => clearTimeout(syncTimer))
                   color="neutral" variant="outline" class="rounded-full"
                   trailing-icon="i-ph-arrow-right" label="Weiter zu Werte" disabled
                 />
-                <p class="bw-msg-help">Im Klickdummy endet der Weg hier — im Produkt übernimmt Milo.</p>
+                <p class="bw-msg-help">Im Klickdummy endet der Weg hier — im Produkt geht es mit den Werten weiter.</p>
               </div>
 
               <!-- Davids Korrekturrunde 1: bei Karten-Zügen sitzt die

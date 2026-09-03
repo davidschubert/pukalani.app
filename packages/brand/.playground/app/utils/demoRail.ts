@@ -6,6 +6,9 @@ import type { BwRailLayer } from '../../../app/components/BwProgressRail.vue'
 export const demoRail: BwRailLayer[] = [
   {
     id: 'foundation',
+    /* Davids Entscheidung 2026-09-02: Brand Language ist IN der Foundation
+     * aufgegangen (ein Wizard, ein Dokument, George durchgehend) — die
+     * Tagline/Naming-Kapitel stehen jetzt vor dem Foundation-Ergebnis. */
     label: 'Brand Foundation',
     note: 'Wer ihr seid und wofür ihr steht',
     info: {
@@ -103,22 +106,6 @@ export const demoRail: BwRailLayer[] = [
           ],
         },
       },
-      { id: 'foundation-result', kind: 'result', label: 'Ergebnis', icon: '', state: 'open', to: '/brand/demo/ergebnis' },
-    ],
-  },
-  {
-    id: 'verbal',
-    label: 'Brand Language',
-    note: 'Tagline, Botschaften & Name',
-    info: {
-      description: 'Die verbale Identität: der eine Satz neben eurem Namen, die Botschaften dahinter — und der Name selbst auf dem Prüfstand. Baut direkt auf der Foundation auf: ohne geklärte Werte klingt jede Tagline beliebig.',
-      minutes: '~13 Min',
-      bausteine: [
-        { label: 'Tagline & Messaging', note: 'Tagline-Kandidaten mit Herleitung, Kernbotschaften, Elevator Pitch.' },
-        { label: 'Name & Prüfung', note: 'Namens-Kandidaten oder Bestandsname — gemessen an der Foundation, plus Verfügbarkeits- und Sprach-Check.' },
-      ],
-    },
-    steps: [
       {
         id: 'messaging',
         label: 'Tagline & Messaging',
@@ -149,7 +136,7 @@ export const demoRail: BwRailLayer[] = [
           ],
         },
       },
-      { id: 'verbal-result', kind: 'result', label: 'Ergebnis', icon: '', state: 'open', to: '/brand/demo/ergebnis' },
+      { id: 'foundation-result', kind: 'result', label: 'Ergebnis', icon: '', state: 'open', to: '/brand/demo/ergebnis' },
     ],
   },
   {

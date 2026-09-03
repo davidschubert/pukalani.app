@@ -7,6 +7,28 @@ die kleinen, verstreuten Beschlüsse.
 
 ---
 
+## 2026-09-02 — Brand Wizard: EINE Stimme (George), das Team im Rücken — revidiert das sichtbare Beraterteam
+
+**Entscheidung (David, nach dem Gespräch-Dummy-Durchlauf):** George ist der
+einzige Sprecher durch den GESAMTEN Wizard. Die Spezialisten (Vera, Milo,
+Nika, Otto) sprechen nie selbst — George erwähnt sie („Ich habe das mit
+Vera, unserer Strategin, durchgesehen"), ihre Interview-Techniken bleiben
+als seine Phasen-Facetten in den Prompts, und auf der Team-Seite bleiben
+sie sichtbar. Grund: vier Sprecherwechsel in einer 45-Minuten-Sitzung
+heißen viermal Beziehung neu aufbauen — Aufstückelung statt Beratung.
+Die Registry (brandAdvisors.ts) bleibt die Quelle; sie bekommt mit dem
+Werkstatt-Umbau eine Sprecher/Referenz-Unterscheidung.
+
+**Dazu:** Brand Language geht IN Brand Foundation auf (ein Wizard, ein
+Dokument, George durchgehend — deckungsgleich mit dem Runde-163-About
+„George führt durch Foundation und Language"). Tagline/Messaging und
+Name & Prüfung sind Kapitel der Foundation-Reise, kein zweiter Einstieg.
+
+**Verworfen:** fünf wählbare Berater-Charaktere für den ganzen Durchlauf —
+verfünffacht Prompt-Pflege und Audits, macht Beta-Feedback unvergleichbar,
+verwässert George als Gesicht des Produkts. Die gute Essenz kommt später
+billiger als Ton-Regler auf EINER Person („direkter/weicher").
+
 ## 2026-09-01 — Brand Wizard: sichtbares Beraterteam statt eines Alleskönners
 
 **Auslöser:** Der Live-Persona-Audit an Davids erstem echten Branding. George
