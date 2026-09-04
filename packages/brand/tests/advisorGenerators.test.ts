@@ -220,7 +220,7 @@ describe('Der Aufruf an den Transport gilt für JEDEN Berater', () => {
     const archetypeResult = await archetype.georgeArchetypeGenerator(
       context('d.hypothesis', 'archetype') as never,
     )
-    expect(archetypeResult.promptVersion).toBe('george-archetype-1')
+    expect(archetypeResult.promptVersion).toBe('george-archetype-2')
   })
 
   it('QUELL-WERTE AUS ANDEREN BAUSTEINEN LANDEN IM PROMPT (P3.1)', async () => {
@@ -296,8 +296,12 @@ describe('Die Auswahl-Nachprüfung', () => {
     answers('BASIS: Eure Texte erklären viel.\nDRAFT:\nThe Sage\nASK: Trifft das?')
     const result = await archetype.georgeArchetypeGenerator(context('d.primary', 'archetype') as never)
     expect(result).toMatchObject({ outcome: 'draft', draft: 'sage' })
-    // Der ZUG behält den Klartext: derselbe Beschluss in zwei Registern.
-    expect(result.message).toContain('The Sage')
+    // Der ZUG zeigt die ANZEIGE der Seite (Live-Fund 2026-09-04: die rohe Id
+    // „sage" stand in der Sprechblase) — die Wert-Zeile wird gegen die
+    // Beschriftung der UI-Sprache getauscht, die Prosa bleibt unangetastet.
+    expect(result.message).toContain('Der Weise')
+    expect(result.message).not.toContain('The Sage')
+    expect(result.message).toContain('Eure Texte erklären viel.')
   })
 
   it('DER SEKUNDÄRE PRÜFT GEGEN DENSELBEN KATALOG', async () => {
