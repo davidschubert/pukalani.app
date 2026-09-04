@@ -798,7 +798,7 @@ Verifikation im Fable-Hauptloop, Merge erst grün.
 
 | # | Paket | Inhalt | Gate | Beweis |
 | --- | --- | --- | --- | --- |
-| 1 | **Session-Vertrag** | `BrandSessionConfig`, `defineSession`, `sessionsAffectedBy`, `resolveSessionStates`, `resolveNextSession` (Grundfassung); Prompt-Bauer `sessionInstruction` ersetzt die Feld-Anweisungen der drei Prompt-Dateien; Platzhalter-Ziele aus den heutigen Anweisungen | — | Registry-Tests erweitert (Rückwärts-Regel, Hülle mit Gegenprobe, Kind↔Typ), Prompt-Tests auf den Bauer umgestellt; Snapshot-Vergleich: Prompts je Feld inhaltsgleich zu vorher |
+| 1 ✅ 2026-09-04 | **Session-Vertrag** | `BrandSessionConfig`, `defineSession`, `sessionsAffectedBy`, `resolveSessionStates`, `resolveNextSession` (Grundfassung); Prompt-Bauer `sessionInstruction` ersetzt die Feld-Anweisungen der drei Prompt-Dateien; Platzhalter-Ziele aus den heutigen Anweisungen | — | Registry-Tests erweitert (Rückwärts-Regel, Hülle mit Gegenprobe, Kind↔Typ), Prompt-Tests auf den Bauer umgestellt; Snapshot-Vergleich: Prompts je Feld inhaltsgleich zu vorher |
 | 2 | **Session-Ziele (Inhalt)** | 68 Zielsätze + Verarbeitungs- und Antwort-Regeln als Content-Spec §14, dann in die Registry | **David liest gegen** | `slotRegistry.test.ts`: kein leeres `goal` |
 | 3 | **Verlauf + Nav + Finale Abnahme** | brand-011, `sessionKey` in converse/messages-Routen, Seitenleiste mit Unterpunkten, `?s=` in der Route, Auto-Weiter, Eröffnungszug-Regel, `collect`-Typ für `a.facts`; Abnahme-Seite je Kapitel (§5a: Bereich/Beispiel/Eingabe, Abnehmen je Block, Zähler, Hinweis + Frage erst bei 10/10, Restart-Layer mit getipptem Wort), `acceptSlot`/`restart` in der Zustandsmaschine, brand-013 — Konfidenz-Weiche zieht von der Bühne dorthin, `complete` bekommt die drei neuen Glieder | Davids Blick auf Seite und Restart-Layer | Playwright: Frage erscheint erst bei vollständiger Abnahme; Restart ohne Wort ⇒ Knopf aus; Route-Test: `restart` ohne Ack ⇒ 409, mit Ack ⇒ Schnappschuss-Event + leere Slots + `restartedAt`; Verlauf lädt nur Züge danach |
 | 4 | **Schliess-Aufruf** | brand-012, `review`-Eimer, Route `POST …/sessions/:id/close`, `BrandSessionReview`-Zod, Notizen/Befunde im Log, Georges „hat mitgelesen"-Block, adaptive `nextSession`, Kapitel-Modus für die Finale Abnahme | KI-Kosten: David sieht den Eimer | Route-Test mit Stub (goalReached false sperrt nichts; Schema-Fehler ⇒ fail-soft mit `reviewed:false`); Live-Probe an einem Test-Branding |
@@ -807,7 +807,18 @@ Verifikation im Fable-Hauptloop, Merge erst grün.
 | 7 | **Dokument + Prüfblick** | Ergebnis-Seite ohne George, „Dokument prüfen", Nachholung `reviewed:false` | Konzept-Gate P5–P7 damit beantwortet — **David nimmt die Seite ab** | Live-Durchlauf eines vollständigen Brandings |
 
 Reihenfolge ist Abhängigkeit: 1 vor allem; 2 parallel zu 3; 4 vor 5 und 6; 7
-zuletzt. Nach jedem Paket: OPEN-ITEMS aktualisieren, Erledigtes nach
+zuletzt.
+
+**Paket-1-Befunde für spätere Pakete (2026-09-04):** (a) Die Invariante
+`c.final count 3–5` zählt Zeilen im Listen-Format (`- eintrag`); Paket 6 muss
+vor dem Verdrahten von `facts.value` prüfen, dass der Chips-Editor die Werte
+genau so serialisiert — sonst blockt ein 409 jedes Bestätigen. (b)
+`f.decision memberOf f.shortlist` ist NICHT registriert: `f.decision` ist
+„top three, in order", kein Einzelwert; Paket 2 entscheidet die Wert-Form und
+trägt dann `subsetOf` ein. (c) `sessionInstruction` hat keinen
+`locale`-Parameter; kommt mit Paket 2, wenn Beispiele je Sprache nötig
+werden. (d) `answers.*` reist bewusst NICHT in den Entwurfs-Prompt, sondern
+gehört in `conversePrompt.ts` (Paket 3). Nach jedem Paket: OPEN-ITEMS aktualisieren, Erledigtes nach
 OPEN-ITEMS-COMPLETE.
 
 ## 16. Entscheidungen vom 2026-09-04 (David, per Fragenrunde)
