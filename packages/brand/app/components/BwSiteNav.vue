@@ -66,7 +66,7 @@ const APPEARANCE = [
   ['system', 'brand.nav.theme.system', 'i-ph-monitor'],
 ] as const
 const userMenu = computed(() => [[
-  { label: t('brand.brands.title'), icon: 'i-ph-squares-four', to: '/' },
+  { label: t('brand.brands.title'), icon: 'i-ph-squares-four', to: localePath('/dashboard/brands') },
   { label: t('brand.brands.new'), icon: 'i-ph-plus', onSelect: () => { newBrandOpen.value = true } },
 ], [
   {
