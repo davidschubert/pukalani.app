@@ -30,6 +30,62 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### Brand-Wizard: Komplett-Test (Links, Seiten, Login, Dashboard, 5 Brandings durchgespielt) ✅ 2026-09-03/04
+
+**Davids Auftrag** (fünf Punkte) — alles Testbare getestet, alles Fixbare
+gefixt (10 Commits, Details in den Commit-Messages), der Rest als
+Zuschnitts-Fragen in OPEN-ITEMS.
+
+**Durchgespielt:** Pfotenanker Kontext KOMPLETT (Fragen → Entwürfe →
+Hinweis → Korrigieren-Ausweg → 10/10 → Gate → Auto-Übergang), Krume & Gold
+pvm+Werte KOMPLETT + Archetyp bis zur Ableitungs-Wand, Pukalani Studio pvm
+(EN-Content/DE-Chat), Ember + Untitled Kontext-Anspiel. George-Qualität am
+neuen Prompt-Stand (a-7/a-8): Deutsch durchgehend, 3–4 Sätze, EINE Frage,
+Katalog-Reihenfolge exakt, konkrete Anerkennung, B8-Kontextton
+(Tierschutz), ehrliche Rückfragen statt dünner Entwürfe, aktive
+Widerspruchs-Erkennung.
+
+**Gefixte Blocker aus dem Durchspielen:**
+- `step_locked` (`60b8d2af`): `open` ist GERECHNET — Zeilen nach einem
+  Vorgänger-Abschluss bleiben roh `locked`, die Routen fütterten die
+  Maschine mit dem rohen Zustand ⇒ Kapitel liessen sich NIE abschliessen
+  („Passt" = stilles 400; Krume pvm 10/10 und fest). Routen nehmen jetzt
+  den Journey-Zustand. DANACH liefen pvm→Werte→Archetyp-Übergänge sauber.
+- Autosave wiederholte permanente 400 endlos (Retry jetzt nur 5xx/429).
+- Abschluss-Satz unter Live-Zügen + „Nochmal"-Label auf jungfräulichen
+  Feldern (`c0e678a1`).
+
+**Der zentrale offene Befund (Davids Zuschnitt):** Die KONVERSATIONS-SENKE.
+Antworten auf Georges Rückfragen (Kategorie-Einordnung, Purpose-Material,
+Kunden-Zitate) erreichen den Entwurfs-Generator NIE — der liest nur
+gespeicherte Slots. Folge: Entwurf → Rückfrage → Antwort → Entwurf →
+dieselbe Rückfrage (dreifach live belegt). Härtester Fall: `editor: none`-
+Ableitungen (d.hypothesis) — kein Entwurf (Generator verweigert ehrlich),
+kein Tippen (Absicht), Antworten versickern ⇒ Kapitel UNABSCHLIESSBAR bei
+dünnen/kaputten Quelldaten. Dazu: Rückfragen verweisen auf Felder
+ABGESCHLOSSENER Kapitel ohne Weg dorthin.
+
+**Weitere Zuschnitts-/Content-Befunde:** d.voiceSamples-Katalogfrage setzt
+eine Auswahl voraus, die es nicht gibt — George erfand „vier Sätze", die
+Bühne zeigt null (wie d.pairs behandeln oder Optionen generieren) ·
+leeres unfertiges Ableitungs-Feld ohne Quellen zeigt „Passt das so als
+Grundlage?" mit totem Bestätigen · Options-Modul-Platzhalter „Oder etwas
+ganz Eigenes …" ohne Optionen darüber; Haupt-Prompt derweil kommentarlos
+gesperrt · a.facts bündelt drei Fragen (bekannt) · `##`-Markdown roh in
+Log-Karten · Ember-Altentwurf bricht B6 (echte Rösterei-NAMEN, selbst als
+„not stated in inputs" markiert) · Kapitelwechsel blitzt <1 s die Frage
+des Vorkapitels.
+
+**Gelernt:** (1) Eine Katalog-Frage, die Optionen VORAUSSETZT („Welcher
+dieser Sätze…"), zwingt das Modell zum Erfinden der Optionen — Fragen
+müssen zur real existierenden UI passen. (2) „Ehrliche Verweigerung" des
+Generators ist nur ehrlich, wenn es danach einen WEG gibt — sonst ist sie
+eine höfliche Sackgasse. (3) CDP-getippte Eingaben wurden auf zwei Seiten
+verschluckt (per JS-Submit reproduzierbar ok) — vor einem UI-Bug-Urteil
+den Automations-Weg wechseln.
+
+---
+
 ### S4: `events-sweep`-Naht-Geheimnis rotiert ✅ 2026-09-03
 
 **Was:** Das zweite Naht-Geheimnis aus der A0-Runde stand seit der
