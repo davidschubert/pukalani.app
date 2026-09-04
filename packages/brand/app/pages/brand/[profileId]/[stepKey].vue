@@ -308,7 +308,13 @@ const turns = computed<StageTurn[]>(() => {
   const busy = conversation.pending.value
 
   if (!nextSlot.value) {
-    if (busy || conversation.spoke.value) return spoken
+    // Der statische Abschluss-Satz gehört NUR auf die frisch geladene Bühne
+    // (leerer Verlauf). Sobald LIVE-Züge da sind — auch die RÜCKFRAGE einer
+    // Generierung (outcome: question, läuft NICHT über `conversation`) —
+    // stünde er als Widerspruch direkt unter einer offenen Frage: „Was ist
+    // eure Überzeugung?" / „Meine Fragen sind durch" (Davids
+    // Durchspiel-Audit 2026-09-03, Pukalani Studio pvm).
+    if (busy || conversation.spoke.value || spoken.length > 0) return spoken
     // „Keine Frage mehr" ist NICHT „nichts mehr offen" (brandJourney.ts erklärt
     // die zwei Fragen): Bühnen-Entwürfe wie `b.mission` stellt George nie als
     // Frage. Solange solche Pflicht-Felder unbestätigt sind, behauptete der
@@ -1510,17 +1516,22 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
                     />
                   </template>
                   <template v-else>
-                    <!-- Leerer Slot: George legt vor. Steht schon etwas da,
-                         geht es nur noch MIT Hinweis weiter — „nochmal
-                         genauso" wäre ein Klick ins Ungefähre. -->
+                    <!-- Leerer Slot: George legt vor („George, entwirf das",
+                         EIN Klick). Steht schon etwas da, geht es nur noch
+                         MIT Hinweis weiter — „nochmal genauso" wäre ein Klick
+                         ins Ungefähre. Die Weiche ist der WERT, nicht
+                         `showHint` (das sagt nur „generierbar und bereit"):
+                         mit showHint stand auf jungfräulichen Feldern
+                         „Nochmal, mit Hinweis", obwohl es nie ein erstes Mal
+                         gab (Davids Durchspiel-Audit 2026-09-03). -->
                     <UButton
                       size="sm" color="neutral" variant="ghost" class="rounded-full"
                       icon="i-ph-sparkle"
-                      :label="pendingCard.controls.showHint ? t('brand.workspace.retryWithHint') : t('brand.workspace.generate.start')"
+                      :label="store.slotValue(pendingCard.slot.id) ? t('brand.workspace.retryWithHint') : t('brand.workspace.generate.start')"
                       :loading="generation.streaming.value"
                       :disabled="generation.streaming.value"
-                      :aria-expanded="pendingCard.controls.showHint ? hintOpen : undefined"
-                      @click="pendingCard.controls.showHint ? (hintOpen = !hintOpen) : generateSlot(pendingCard.slot)"
+                      :aria-expanded="store.slotValue(pendingCard.slot.id) ? hintOpen : undefined"
+                      @click="store.slotValue(pendingCard.slot.id) ? (hintOpen = !hintOpen) : generateSlot(pendingCard.slot)"
                     />
                     <UButton
                       v-if="pendingCard.controls.showVersions"
