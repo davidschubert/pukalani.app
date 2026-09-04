@@ -727,7 +727,7 @@ describe('Rückfrage MIT Antwort-Möglichkeiten', () => {
       outcome: 'question' as const,
       model: 'test-model',
       provider: 'test',
-      promptVersion: 'george-a-10',
+      promptVersion: 'george-a-11',
       aborted: false,
     })) as never)
   })
@@ -773,7 +773,7 @@ describe('GEGENPROBE: ein ENTWURF bekommt keine Antwort-Möglichkeiten', () => {
       outcome: 'draft' as const,
       model: 'test-model',
       provider: 'test',
-      promptVersion: 'george-a-10',
+      promptVersion: 'george-a-11',
       aborted: false,
     })) as never)
   })

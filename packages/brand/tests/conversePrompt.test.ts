@@ -66,24 +66,24 @@ describe('Die Zug-Regel steht im Auftrag', () => {
    * kein Knopf-Etikett) und der MARKER, der die Bühne überhaupt erst wissen
    * lässt, dass es eine Wahl gibt.
    */
-  it('converse-4: verlangt eigene Schlusszeile, Empfehlung UND OPTION-Zeilen', () => {
+  it('converse-5: verlangt eigene Schlusszeile, Empfehlung UND OPTION-Zeilen', () => {
     const instruction = brandConverseInstruction(BOTH)
-    expect(instruction).toMatch(/choice between two or three NAMED possibilities/)
+    expect(instruction).toMatch(/choose between two or three NAMED possibilities/)
     expect(instruction).toMatch(/in its own final sentence/)
     expect(instruction).toMatch(/which one you lean towards and why/)
     expect(instruction).toMatch(/starting with `OPTION: `/)
     // Sie sind Bedienelemente und folgen der CHAT-Sprache (Regel 9) — sonst
     // stünden auf einer deutschen Bühne englische Knöpfe.
-    expect(instruction).toMatch(/controls for the interface, never chat text/)
+    expect(instruction).toMatch(/controls for the interface, not text/)
     expect(instruction).toMatch(/CHAT language of rule 9/)
     // Und die Sicherung: eine OFFENE Frage bekommt keine erfundenen Knöpfe.
     expect(instruction).toMatch(/Never invent options where the question is open/)
   })
 
-  it('die Fassung steigt mit — converse-4', () => {
+  it('die Fassung steigt mit — converse-5', () => {
     // Ohne den Anstieg behaupteten Züge aus converse-3, aus diesem Auftrag zu
     // stammen (dieselbe Regel wie bei GEORGE_PROMPT_VERSION).
-    expect(BRAND_CONVERSE_PROMPT_VERSION).toBe('converse-4')
+    expect(BRAND_CONVERSE_PROMPT_VERSION).toBe('converse-5')
   })
 
   it('würdigt Substanz — aber verbietet das Lob ohne Deckung', () => {

@@ -85,7 +85,7 @@ describe('Ereignis-Serialisierung (§3e)', () => {
         revision: 3,
         messageId: 'm1',
         model: 'test',
-        promptVersion: 'converse-4',
+        promptVersion: 'converse-5',
         createdAt: '2026-09-04T10:00:00.000Z',
         reused: false,
         outcome: 'question',

@@ -313,11 +313,11 @@ describe('Slot-Instruktionen (Baustein A, §4)', () => {
    */
   it.each(CONTEXT_SLOTS)('%s: a-10 — die Rückfrage darf Antwort-Möglichkeiten anbieten', (slotId) => {
     const instruction = contextSlotInstruction(slotId, optionsFor(slotId))
-    expect(instruction).toContain('IF THAT QUESTION OFFERS A CHOICE')
+    expect(instruction).toContain('WHENEVER THAT QUESTION')
     expect(instruction).toContain('in its own final sentence')
     expect(instruction).toContain('which one you lean towards and why')
     expect(instruction).toContain('starting with `OPTION: `')
-    expect(instruction).toContain('controls for the interface, never chat text')
+    expect(instruction).toContain('controls, never chat text')
     // Die zwei Sicherungen: keine erfundenen Knöpfe an einer offenen Frage,
     // und KEINE OPTION-Zeile auf einem Entwurfs-Zug (dort stünde sie im Feld).
     expect(instruction).toContain('Never invent options where the question is open')
@@ -327,7 +327,7 @@ describe('Slot-Instruktionen (Baustein A, §4)', () => {
   it.each(CONTEXT_SLOTS)('%s: die OPTION-Regel steht im QUESTION-Zweig, nicht im ASK-Zweig', (slotId) => {
     const lines = contextSlotInstruction(slotId, optionsFor(slotId)).split('\n')
     const question = lines.findIndex(line => line.startsWith('IF THE INPUTS DO NOT CARRY ENOUGH'))
-    const option = lines.findIndex(line => line.startsWith('IF THAT QUESTION OFFERS A CHOICE'))
+    const option = lines.findIndex(line => line.startsWith('WHENEVER THAT QUESTION'))
     const ask = lines.findIndex(line => line.startsWith('ASK:'))
     expect(question).toBeGreaterThanOrEqual(0)
     expect(option).toBeGreaterThan(question)
@@ -582,7 +582,7 @@ describe('Prompt-Version', () => {
     // a-10 ein sechstes (die Rückfrage darf Antwort-Möglichkeiten anbieten) —
     // die Version MUSS mitsteigen, sonst behaupten alte Generations-Einträge,
     // aus diesem Prompt zu stammen (Kopf von georgePrompt.ts).
-    expect(GEORGE_PROMPT_VERSION).toBe('george-a-10')
+    expect(GEORGE_PROMPT_VERSION).toBe('george-a-11')
   })
 })
 

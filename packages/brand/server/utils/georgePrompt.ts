@@ -59,6 +59,10 @@ import type { BrandSlotDependency } from './brandGenerators'
  * Anweisungen. Ein Entwurf mit Website-Material und einer ohne stammen aus
  * verschiedenen Prompts, auch wenn die Instruktion dieselbe ist.
  *
+ * `george-a-11` (2026-09-04, Live-Gegenprobe): dieselbe Härtung wie
+ * `converse-5` — die Options-Regel wird ein MUST mit ausdrücklicher
+ * Klartext-Ausnahme; im Live-Test liess das Modell die Zeilen sonst weg.
+ *
  * `george-a-10` (2026-09-04, Davids Anforderung an die Entweder-oder-Frage):
  * die RÜCKFRAGE (`QUESTION:`) darf Antwort-Möglichkeiten anbieten. Bietet sie
  * eine Wahl zwischen zwei oder drei BENANNTEN Möglichkeiten, steht die Frage
@@ -124,7 +128,7 @@ import type { BrandSlotDependency } from './brandGenerators'
  *   · B8/B9 — Kontext-Sensibilität (kein Vertriebston für einen Verein) und
  *     eine Sorgfaltszeile gegen holprige Sprache.
  */
-export const GEORGE_PROMPT_VERSION = 'george-a-10'
+export const GEORGE_PROMPT_VERSION = 'george-a-11'
 
 /** Default der Persona (Content-Spec §1.1, Gate ② abgesegnet). */
 export const GEORGE_PERSONA_DEFAULT = 'George'
@@ -544,12 +548,13 @@ export function brandSlotInstructionTail(
     // man mit dem Bestätigen-Knopf oder mit einer Korrektur, nicht mit einem
     // Menü. Der Rückwärts-Vertrag bleibt: keine OPTION-Zeile heisst „keine
     // Chips", also der Stand von vorher.
-    'IF THAT QUESTION OFFERS A CHOICE between two or three NAMED possibilities, put the question in its '
-    + 'own final sentence, state briefly in your prose which one you lean towards and why, and then append '
-    + 'one line per choice at the very end, each starting with `OPTION: ` followed by a short label of at '
-    + 'most a few words. The OPTION lines are controls for the interface, never chat text — write them in '
-    + 'the chat language of rule 9. Never invent options where the question is open, and never put OPTION '
-    + 'lines on a draft turn.',
+    'WHENEVER THAT QUESTION asks them to choose between two or three NAMED possibilities, you MUST '
+    + 'append one line per choice at the very end, each starting with `OPTION: ` followed by a short '
+    + 'label of at most a few words — the interface turns them into buttons, and without them the person '
+    + 'has to type the choice out by hand. Put the question in its own final sentence and state briefly '
+    + 'which one you lean towards and why. The OPTION lines are controls, never chat text, and are exempt '
+    + 'from the plain-text rule; their labels follow the chat language of rule 9. Never invent options '
+    + 'where the question is open, and never put OPTION lines on a draft turn.',
   )
 
   return lines

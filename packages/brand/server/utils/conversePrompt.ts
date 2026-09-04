@@ -46,6 +46,12 @@ import { BRAND_CONVERSE_HISTORY_CHARS, formatStartCard } from './georgePrompt'
 /**
  * Steht in jeder Gesprächs-Nachricht; steigt bei jeder inhaltlichen Änderung.
  *
+ * `converse-5` (2026-09-04, Live-Gegenprobe): die Options-Regel war ein
+ * Kann direkt HINTER der Klartext-Regel („no bullet points, no numbered
+ * lists“) — das Modell liess die Zeilen im Live-Test weg (Handwerker/
+ * Gastgeber kam ohne Knöpfe). Jetzt: MUST, die Klartext-Regel nennt die
+ * Ausnahme ausdrücklich, und ein wörtliches Beispiel zeigt die Endung.
+ *
  * `converse-4` (2026-09-04, Davids Anforderung an den Archetyp-Vergleich):
  * eine Entweder-oder-Frage war Fließtext („…der Handwerker, der sein Handwerk
  * perfektioniert, oder der Mentor, der sein Wissen teilt?") — der Mensch musste
@@ -66,7 +72,7 @@ import { BRAND_CONVERSE_HISTORY_CHARS, formatStartCard } from './georgePrompt'
  * FRAGE aus dem Locale-Katalog statt der internen Id — George sprach
  * `a.customerPraise` & Co. wortwörtlich im Chat nach.
  */
-export const BRAND_CONVERSE_PROMPT_VERSION = 'converse-4'
+export const BRAND_CONVERSE_PROMPT_VERSION = 'converse-5'
 
 /**
  * Was ein Mensch in EINEM Zug schreiben darf. Grosszügiger als der Hinweis
@@ -159,7 +165,8 @@ export function brandConverseInstruction(options: BrandConverseInstructionOption
     'Two to three sentences, one turn, one paragraph.',
     'It ends with exactly ONE question — or, where there is nothing left to ask, one clear next step.',
     'Plain text only: no markdown, no asterisks, no underscores, no headings, no bullet points, no '
-    + 'numbered lists.',
+    + 'numbered lists. The ONE exception are the OPTION lines described next — they are controls for '
+    + 'the interface, not text.',
     // converse-4 (Davids Anforderung 2026-09-04): eine Wahl bekommt Knöpfe.
     // DREI Zusagen in einer Zeile, weil sie zusammengehören — die Frage
     // ABGEHOBEN (eigener Satz), die EMPFEHLUNG als Prosa (sie ist ein Satz mit
@@ -167,11 +174,13 @@ export function brandConverseInstruction(options: BrandConverseInstructionOption
     // „Never invent options" ist die Sicherung dahinter: eine OFFENE Frage mit
     // zwei erfundenen Knöpfen darunter verengt die Antwort, statt sie zu
     // erleichtern.
-    'If your closing question offers a choice between two or three NAMED possibilities, put the question '
-    + 'in its own final sentence, state briefly in your prose which one you lean towards and why, and then '
-    + 'append one line per choice at the very end, each starting with `OPTION: ` followed by a short label '
-    + 'of at most a few words. The OPTION lines are controls for the interface, never chat text — write '
-    + 'them in the CHAT language of rule 9. Never invent options where the question is open.',
+    'WHENEVER your closing question asks them to choose between two or three NAMED possibilities, you '
+    + 'MUST append one line per choice at the very end, each starting with `OPTION: ` followed by a short '
+    + 'label of at most a few words — without those lines the person has to type the choice out by hand. '
+    + 'Put the question in its own final sentence and state briefly in your prose which one you lean '
+    + 'towards and why. Example of such an ending: "Welcher der beiden fühlt sich mehr nach euch an?" '
+    + 'followed by the two lines "OPTION: Der Handwerker" and "OPTION: Der Gastgeber". The labels '
+    + 'follow the CHAT language of rule 9. Never invent options where the question is open.',
     // Ein Konversations-Zug ist VOLLSTÄNDIG Chat — anders als ein Slot-Entwurf
     // hat er keinen Teil, der in der Inhaltssprache stünde.
     'Everything in this turn is chat and follows the CHAT language of rule 9 — all of it, without '
