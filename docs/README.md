@@ -76,6 +76,7 @@ gehören dort hin.
 | [plans/ANALYTICS-V2.md](plans/ANALYTICS-V2.md) | Pakete 1–4 live; Rest = Optionales (F47) |
 | [plans/F7-PAYMENTS-CONNECT.md](plans/F7-PAYMENTS-CONNECT.md) | Entscheidungsvorlage, nichts gebaut (F7) |
 | [plans/CHANGELOG-3.0.0-ENTWURF.md](plans/CHANGELOG-3.0.0-ENTWURF.md) | fertiger Kundentext — **ob er eingefügt ist, muss David nachsehen** |
+| [plans/BRAND-WIZARD-SESSIONS.md](plans/BRAND-WIZARD-SESSIONS.md) | Branding-Atome: Session je Feld, Spezialist, Korrektur-Regel — freigegeben 2026-09-04, nichts gebaut (BW2) |
 
 **Regel:** Sobald ein Plan ausgeführt ist, wandert er nach `archiv/` und seine
 Reste nach `OPEN-ITEMS.md`. Ein Plan-Dokument ist nie eine To-do-Liste.
