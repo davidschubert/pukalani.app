@@ -10,12 +10,15 @@
     },
     "beta": "Branding Supply is in closed beta. You need an invitation code to start a branding."
   },
-  "team": {
+  "about": {
     "eyebrow": "About Branding Supply",
     "title": "We are our own proof.",
     "intro1": "We exist because good branding is too often either too expensive or reduced to a template. We believe every brand is a fingerprint — and the way there can be guided, reasoned and measured.",
     "intro2": "So we applied our products to ourselves first: the name, the fingerprint, this color world, this page — all of it was built with the Brand Wizard, our own Visual DNA and our own playbook. Graded by Ada, of course.",
     "fingerprint": "Branding Supply · The Sage · rest Creator — style: minimal · editorial — visual DNA: contemporary · geometric · monochrome + acid pop · spacious · digital-clean · precise",
+    "teamLink": "Meet the team"
+  },
+  "team": {
     "teamEyebrow": "The team",
     "teamTitle": "The right team member for every task.",
     "teamIntro": "We break your project into tasks — and each one is taken by the specialist who does it best. Seven roles, clear boundaries, one shared memory.",

@@ -10,12 +10,15 @@
     },
     "beta": "Branding Supply ist in geschlossener Beta. Für ein eigenes Branding braucht ihr einen Einladungscode."
   },
-  "team": {
+  "about": {
     "eyebrow": "About Branding Supply",
     "title": "Wir sind unser eigener Beweis.",
     "intro1": "Es gibt uns, weil gutes Branding zu oft entweder zu teuer ist oder zur Vorlage verkommt. Wir glauben: Jede Marke ist ein Fingerabdruck — und der Weg dorthin lässt sich führen, begründen und messen.",
     "intro2": "Deshalb haben wir unsere Produkte zuerst auf uns selbst angewendet: Der Name, der Fingerabdruck, diese Farbwelt, diese Seite — alles ist mit dem Brand Wizard, unserer Visual DNA und dem eigenen Playbook entstanden. Bewertet von Ada, versteht sich.",
     "fingerprint": "Branding Supply · Der Weise · Rest Schöpfer — Stil: Minimal · Editorial — Visual DNA: Contemporary · Geometric · Monochrome + Acid Pop · Spacious · Digital-clean · Precise",
+    "teamLink": "Lern das Team kennen"
+  },
+  "team": {
     "teamEyebrow": "Das Team",
     "teamTitle": "Für jede Aufgabe das richtige Teammitglied.",
     "teamIntro": "Wir zerlegen euer Projekt in Aufgaben — und jede übernimmt die Spezialistin oder der Spezialist, der sie am besten kann. Sieben Rollen, klare Grenzen, ein gemeinsames Gedächtnis.",
