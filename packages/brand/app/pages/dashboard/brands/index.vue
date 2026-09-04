@@ -23,8 +23,10 @@ import { useBrandWorkspaceStore } from '../../../stores/brandWorkspace'
  * Beim SSR müssen die Session-Cookies mitgehen; ein nacktes `$fetch` schickte
  * sie nicht mit und die Seite hydratisierte als „kein Zugang", obwohl das
  * Konto eines hat.
+ *
+ * KEIN `layout: 'dashboard'` mehr (2026-09-03): Kunden-Fläche mit Wizard-Nav
+ * (default-Layout); das dashboard-Layout gehört der Betreiber-Shell (admin).
  */
-definePageMeta({ layout: 'dashboard' })
 
 const { t, locale } = useI18n()
 const localePath = useLocalePath()

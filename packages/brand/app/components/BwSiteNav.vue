@@ -94,8 +94,15 @@ const userMenu = computed(() => [[
     })),
   },
 ], [
-  /* Der frühere „Konto"-Punkt ist entfernt: branding.supply hat (noch)
-   * keine Konto-Seite — ein Menüpunkt ins Leere wäre eine Attrappe. */
+  /* Seit der admin-Montage (2026-09-03) sind das ECHTE Ziele: die
+   * Konto-Seiten für jedes eingeloggte Konto, das Betreiber-Dashboard nur
+   * für Konten mit `admin`/`moderator`-Label (dieselbe RBAC-Matrix, die
+   * auch die Seite selbst durchsetzt — der Menüpunkt ist nur Sichtbarkeit,
+   * nie die Grenze). */
+  ...(userHasCapability(user.value, 'dashboard.access')
+    ? [{ label: t('brand.nav.dashboard'), icon: 'i-ph-squares-four', to: localePath('/dashboard') }]
+    : []),
+  { label: t('brand.nav.account'), icon: 'i-ph-user-circle', to: localePath('/dashboard/settings') },
   { label: t('brand.nav.signOut'), icon: 'i-ph-sign-out', onSelect: () => { void logout() } },
 ]])
 </script>

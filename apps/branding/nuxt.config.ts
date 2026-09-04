@@ -7,24 +7,31 @@ export default defineNuxtConfig({
    * bleiben immer. Die Menge muss zum Site-Manifest passen — `pnpm
    * check:manifests` erzwingt Reihenfolge UND Menge.
    *
-   * WARUM NUR `brand`, OHNE `blueprint` UND OHNE `admin`:
-   *  • `blueprint` ist der Kompositions-Layer und zieht per `requires` posts,
-   *    comments, events und courses mit — vier Produkt-Layer samt Tabellen,
-   *    von denen der Wizard keinen einzigen anfasst. Nachgesehen am
-   *    2026-08-31: keine Seite und keine Komponente des brand-Layers
-   *    referenziert eine blueprint-Komponente; sein Vollbild-Workspace bringt
-   *    seinen Rahmen über `BwWorkspace` + das eigene Layout
-   *    `brand-workspace` selbst mit.
-   *  • `admin` besitzt zwar das `dashboard`-Layout, das /dashboard/brands
-   *    anfordert — aber auch die changelog-Tabelle (admin-001…003) und die
-   *    ganze Betreiber-Navigation, und seine Shell koppelt über
-   *    `DashboardUserMenu` an `useTheme()` aus `themes`. Aus einem Layer mehr
-   *    würden also drei, und der Infra-Plan §3 nennt für die Instanz
-   *    `branding` ausdrücklich NUR `system-001…038` + `brand-001…008`. Der
-   *    Ersatz steht in `app/layouts/dashboard.vue` — dort auch die
-   *    Begründung und der Weg zurück.
+   * SEIT 2026-09-03 MIT `themes` + `admin` (Davids Entscheidung: „als Admin
+   * der Seite einen eigenen Dashboard-Zugang, wie auf allen anderen
+   * Pukalani-Websites"): die Betreiber-Konsole unter /dashboard (Changelog,
+   * Nutzer, Laufzeit-Config — u. a. der brandAiEnabled-Schalter ohne ssh)
+   * plus die Konto-Seiten (/dashboard/settings: Sitzungen, Sicherheit,
+   * Daten). `themes` kommt mit, weil die Dashboard-Shell über
+   * `DashboardUserMenu` an `useTheme()` koppelt. Die admin-Migrationen
+   * (001–003, changelog) gehören auf die branding-Instanz gefahren; die
+   * Soll-Liste im Schema-Parity-Wächter zieht mit.
+   *
+   * WEITER OHNE `blueprint`: der Kompositions-Layer zieht per `requires`
+   * posts/comments/events/courses mit — vier Produkt-Layer samt Tabellen,
+   * von denen der Wizard keinen einzigen anfasst (nachgesehen 2026-08-31);
+   * sein Vollbild-Workspace bringt seinen Rahmen über `BwWorkspace` + das
+   * eigene Layout `brand-workspace` selbst mit.
+   *
+   * REIHENFOLGE: themes/admin vorn (kanonische EXTENDS_ORDER), dann brand —
+   * die Werkstatt-Optik kollidiert mit keiner admin-Datei (eigene
+   * Bw-Präfixe, eigene Routen); das frühere App-Layout `dashboard.vue`
+   * (Ersatz-Durchreiche) ist GELÖSCHT, damit die echte Shell des
+   * admin-Layers greift. Die brand-eigenen Seiten /dashboard/brands/*
+   * fordern seit demselben Tag das default-Layout an (Wizard-Nav) — sie
+   * sind Kunden-Fläche, keine Betreiber-Fläche.
    */
-  extends: ['../../packages/brand', '../../packages/core', '../../packages/system'],
+  extends: ['../../packages/themes', '../../packages/admin', '../../packages/brand', '../../packages/core', '../../packages/system'],
 
   // Port pro App eindeutig vergeben (3000–3009 vergeben — 3006 hält platform,
   // 3009 der brand-Playground; die erste Wahl 3006 kollidierte damit und ist

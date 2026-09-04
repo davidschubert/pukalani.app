@@ -13,6 +13,10 @@ import type { SiteManifest } from '../../packages/core/shared/types/manifest'
 export default {
   siteId: 'branding',
   products: [
+    'themes',
+    // Betreiber-Konsole + Konto-Seiten (Davids Entscheidung 2026-09-03,
+    // „Dashboard-Zugang wie auf allen anderen Pukalani-Websites").
+    'admin',
     'brand',
   ],
 } satisfies SiteManifest

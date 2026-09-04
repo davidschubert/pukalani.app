@@ -72,7 +72,7 @@ import { join } from 'node:path'
  *                        media/billing (teils nur als Teilmengen). Deshalb wird
  *                        sein Soll unten EXPLIZIT gepflegt, nicht rein aus
  *                        Blöcken komponiert.
- *   branding         : brand core system (noch nicht ausgerollt)
+ *   branding         : themes admin brand core system (Dashboard seit 2026-09-03)
  *   photos           : themes admin media core system (noch nicht ausgerollt)
  *
  * GRUNDWAHRHEIT der Kuratierung: `account` und `control` sind gesund — ihr
@@ -335,7 +335,10 @@ const PORTFOLIO_SOLL = [
  * geschrieben ist. Beim Launch das Flag auf true drehen; die Env-Datei allein
  * macht den Eintrag schon vorher scharf, sobald sie existiert.
  */
-const BRANDING_SOLL = [...SYSTEM_TABLES, ...BRAND_TABLES]
+// Seit 2026-09-03 MIT admin (Davids Dashboard-Entscheidung): die
+// changelog-Tabelle gehört auf die branding-Instanz, sobald
+// `pnpm migrate --app branding` die admin-Migrationen gefahren hat.
+const BRANDING_SOLL = [...SYSTEM_TABLES, ...ADMIN_TABLES, ...BRAND_TABLES]
 
 /**
  * photos (apps/photos) = themes admin media core system. NICHT ausgerollt

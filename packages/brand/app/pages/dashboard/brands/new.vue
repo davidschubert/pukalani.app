@@ -32,7 +32,9 @@ import type {
  * einer Liste in dieser Datei — sonst stünde hier eine Pukalani-Annahme im
  * Layer (White-Label-Regel §3e). Sie wird bei der Anlage FIXIERT.
  */
-definePageMeta({ layout: 'dashboard' })
+/* KEIN `layout: 'dashboard'` mehr (2026-09-03): die Brandings-Seiten sind
+ * KUNDEN-Fläche und tragen die Wizard-Nav des default-Layouts — das
+ * dashboard-Layout gehört seit der admin-Montage der Betreiber-Shell. */
 
 const { t } = useI18n()
 const localePath = useLocalePath()
