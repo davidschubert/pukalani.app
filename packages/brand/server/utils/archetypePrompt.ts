@@ -68,13 +68,18 @@ import {
  * Fassung dieser Aufträge. Steigt, sobald sich eine Aufgabe inhaltlich ändert —
  * oder der System-Prompt, mit dem sie gesendet werden.
  *
+ * `george-archetype-2` (2026-09-04, noch am selben Tag): Kohärenz-Regel für
+ * die beiden Choice-Slots — Prosa und Wert müssen denselben Katalog-Archetyp
+ * nennen, informelle Gesprächs-Namen werden hörbar auf den Katalog abgebildet
+ * (Live-Fund: Prosa „Handwerker", Feld `sage`).
+ *
  * `george-archetype-1` (2026-09-04): erste Fassung, System-Prompt `george-a-11`.
  * Die Zahl trägt bewusst NICHT „interim" im Namen: sie soll sagen, WELCHE
  * Aufträge einen Eintrag erzeugt haben, und der Weg zum Wert ist Teil der
  * Aufgabe. Kommt der Paarvergleich, steigt sie auf `-2`, und ein alter Eintrag
  * bleibt lesbar als das, was er war.
  */
-export const ARCHETYPE_PROMPT_VERSION = 'george-archetype-1'
+export const ARCHETYPE_PROMPT_VERSION = 'george-archetype-2'
 
 /**
  * DER SATZ ÜBER DAS LEERE PAARVERGLEICH-FELD — wörtlich in beiden
@@ -97,6 +102,21 @@ export const ARCHETYPE_TWO_CANDIDATES_RULE
     + 'evidence — do NOT draft. Ask instead: use the QUESTION form, name the two in your own words, say '
     + 'which one you lean towards and why in one sentence, and append one OPTION line per archetype so '
     + 'they can pick with a click. Choosing between two defensible readings is theirs to do, not yours.'
+
+/**
+ * PROSA UND WERT MEINEN DENSELBEN ARCHETYP (`george-archetype-2`) — Live-Fund
+ * 2026-09-04, erster echter Lauf: das Gespräch hatte informelle Namen geprägt
+ * („Handwerker", „Gastgeber", beide stehen NICHT im Katalog), die Prosa
+ * argumentierte für den Handwerker — und im Feld stand `sage`. Ein Wert, dem
+ * die eigene Begründung widerspricht, ist schlimmer als eine Rückfrage.
+ */
+export const ARCHETYPE_COHERENCE_RULE
+  = 'YOUR PROSE AND YOUR DRAFT VALUE MUST NAME THE SAME ARCHETYPE. In the prose, call it by its '
+    + 'catalogue name (the labels of the twelve options below) — never argue for one archetype and '
+    + 'store another. The conversation may have used informal names that are not in the catalogue (a '
+    + 'craftsman, a host): map such a name to the closest catalogue archetype and say the mapping out '
+    + 'loud in your BASIS line, e.g. that what you both called the craftsman is the Creator of the '
+    + 'catalogue. Never store an informal name.'
 
 const ARCHETYPE_SLOT_TASKS: Record<string, (options: BrandSlotInstructionOptions) => string[]> = {
   // ── D · die Hypothese aus dem heutigen Auftritt (Spec §12.2 Punkt 1) ────
@@ -130,6 +150,7 @@ const ARCHETYPE_SLOT_TASKS: Record<string, (options: BrandSlotInstructionOptions
     'What they SAID about themselves outweighs what you read off their appearance: the appearance is '
     + 'where they are, the answers are where they mean to be. Where the two disagree, follow the '
     + 'answers — the disagreement itself gets its own field later.',
+    ARCHETYPE_COHERENCE_RULE,
     ARCHETYPE_TWO_CANDIDATES_RULE,
     'In the BASIS line of your turn, say in one sentence WHY this archetype and which of their own '
     + 'sentences carries it. A choice they cannot trace back to something they said is one they will '
@@ -148,6 +169,7 @@ const ARCHETYPE_SLOT_TASKS: Record<string, (options: BrandSlotInstructionOptions
     + 'conversation (party behaviour, the trait they never want, the brand personality they admire, the '
     + 'feeling they want to leave behind) and the tone of their texts. Look for the note that the '
     + 'primary does NOT explain — that note is the secondary.',
+    ARCHETYPE_COHERENCE_RULE,
     ARCHETYPE_TWO_CANDIDATES_RULE,
     'If the primary archetype is missing from the inputs, do not guess it in order to pick a second '
     + 'one: ask for it instead.',

@@ -2,6 +2,7 @@ import type { H3Event } from 'h3'
 import { techniqueForStep } from '../../shared/brandAdvisors'
 import {
   brandChoiceContract,
+  brandChoiceDisplayLabel,
   brandChoiceFallbackQuestion,
   checkBrandChoiceDraft,
 } from '../../shared/brandChoiceOptions'
@@ -183,7 +184,17 @@ export async function streamAdvisorTurn(request: AdvisorStreamRequest): Promise<
  * keine Möglichkeit mehr zu erkennen, dass er nie geprüft wurde.
  */
 export type AdvisorSlotVerdict =
-  | { readonly draft: string }
+  | {
+    readonly draft: string
+    /**
+     * MENSCHLICHE ANZEIGE des Werts für den CHAT-Zug (2026-09-04, Live-Fund am
+     * ersten Archetyp-Lauf): bei einem Choice-Slot ist der Feldwert eine
+     * stabile Id (`sage`), und genau die stand roh in der Sprechblase — der
+     * DRAFT-Block reist dort mit. Gesetzt tauscht die Fabrik die Wert-Zeile im
+     * Zug gegen diese Beschriftung; fehlt das Feld, bleibt alles wie vorher.
+     */
+    readonly display?: string
+  }
   | { readonly question: string }
 
 export interface AdvisorSlotVerifyInput {
@@ -219,7 +230,9 @@ export function verifyBrandChoiceSlot(input: {
 
   const check = checkBrandChoiceDraft(contract, input.draft)
   return check.ok
-    ? { draft: check.value }
+    // Die ANZEIGE reist mit (s. Verdict-Typ): der Chat spricht die Sprache der
+    // Seite, das Feld trägt die stabile Id — dieselbe Trennung wie überall.
+    ? { draft: check.value, display: brandChoiceDisplayLabel(input.slot.id, check.value, input.uiLocale) }
     : { question: brandChoiceFallbackQuestion(contract, input.uiLocale) }
 }
 
@@ -336,12 +349,38 @@ export function createAdvisorSlotGenerator(options: AdvisorSlotGeneratorOptions)
         // Feldwert normalisiert wurde (aus „House of Brands" wird die Id
         // `house-of-brands`). Der Chat spricht Menschensprache, das Feld trägt
         // den stabilen Wert; das ist dieselbe Entscheidung in zwei Registern
-        // und keine Abweichung.
-        message: turn.message,
+        // und keine Abweichung. EINE Ausnahme (Live-Fund 2026-09-04): steht in
+        // der Sprechblase die WERT-Zeile selbst — bei einem Choice-Slot die
+        // rohe Id („sage") —, tauscht `display` genau diese Zeile gegen die
+        // menschliche Beschriftung. Prosa-Sätze bleiben unangetastet.
+        message: verdict.display
+          ? swapStandaloneValueLine(turn.message, turn.draft, verdict.display)
+          : turn.message,
         outcome: 'draft',
       }
     }
 
     return { ...base, draft: turn.draft, message: turn.message, outcome: turn.outcome }
   }
+}
+
+/**
+ * Die Zeile, die NUR den Wert trägt, gegen seine Anzeige tauschen — höchstens
+ * einmal, und nur bei exakter Übereinstimmung der getrimmten Zeile. Findet sich
+ * keine (das Modell hat den Wert in einen Satz gebaut), bleibt der Zug
+ * unverändert — fail-soft, ein falscher Tausch mitten im Satz wäre schlimmer
+ * als eine sichtbare Id.
+ */
+function swapStandaloneValueLine(message: string, rawValue: string, display: string): string {
+  const needle = rawValue.trim()
+  if (!needle) return message
+  let swapped = false
+  const lines = message.split('\n').map((line) => {
+    if (!swapped && line.trim() === needle) {
+      swapped = true
+      return display
+    }
+    return line
+  })
+  return swapped ? lines.join('\n') : message
 }
