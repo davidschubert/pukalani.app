@@ -209,13 +209,17 @@ setzt. Die drei Prompt-Dateien schrumpfen auf Persönlichkeit + Fundament.
 Die bestehenden Prompt-Tests (`georgePrompt.test.ts`, `advisorPrompts.test.ts`)
 prüfen danach den Bauer statt drei Dateien.
 
-## 3a. Was eine Session sonst noch vorher wissen sollte (Vorschlag 2026-09-04, Davids Entscheidung offen)
+## 3a. Was eine Session sonst noch vorher wissen sollte (ENTSCHIEDEN, David 2026-09-04: alle acht plus die zwei mechanischen)
 
 Config, Ziel und Output sagen, WAS die Session tut. Für das bestmögliche
 Ergebnis fehlt noch, WORAN man ein gutes Ergebnis erkennt und WIE man den
 Menschen dorthin führt. Acht Ergänzungen, sortiert nach Wirkung; die ersten
 sechs sind Inhalt (Davids Gate mit den Zielsätzen), die letzten zwei sind
-mechanisch ableitbar und kosten keinen Text.
+mechanisch ableitbar und kosten keinen Text. **David hat am 2026-09-04 alle
+acht angenommen** (Nr. 1, 2, 4, 5 als Inhalt; Nr. 6, 7, 8 und Vertagen als
+Struktur; Nr. 3 war durch §5a schon Pflicht). Paket 1 baut den Vertrag damit
+VOLLSTÄNDIG; `answers.minSubstance` kommt in drei Stufen
+(`'short' | 'medium' | 'long'`, Stillschweigende Annahme, s. §16).
 
 ```ts
 export interface BrandSessionConfig {
@@ -561,8 +565,17 @@ veraltete Zeilen bernstein, bis sie neu gestempelt oder neu besprochen sind.
 
 Ein Aufruf je Session, beim Bestätigen des Outputs — NICHT je Zug (der
 Marker-Vertrag wurde gebaut, um einen zweiten Aufruf je Zug zu vermeiden:
-Geld, Latenz). `aiCompleteJson`, nicht gestreamt, kleines Modell, eigener
-Drossel-Eimer (§13).
+Geld, Latenz). `aiCompleteJson`, nicht gestreamt, eigener Drossel-Eimer
+(§13). **Zweistufig (Davids Entscheidung 2026-09-04):** Stufe 1 ist das
+günstigste ZDR-fähige Modell der Routing-Liste und liefert die volle
+Antwort unten. Meldet sie MINDESTENS einen Befund vom Typ `conflict` oder
+`affected` (bei `correct`), läuft Stufe 2 mit dem George-Modell und
+DENSELBEN Eingaben plus den Stufe-1-Befunden als Hypothese; ihre Antwort
+ERSETZT die Befunde von Stufe 1 (sie darf welche streichen oder schärfen),
+`notes`/`nextSession`/`goalReached` bleiben von Stufe 1. Grund: der teure
+Blick nur dort, wo er dem Kunden etwas kostet — ein falscher Konflikt sperrt
+später die Abnahme (§5a). Stufe 2 zählt im Eimer 3, scheitert sie, gilt
+Stufe 1 (fail-soft, mit `reviewedBy: 'stage1'` im Log).
 
 **Eingaben:** die Session-Config (Ziel, Regeln), der Output (Wert, Verlauf
 der Session), das BESTÄTIGTE Dokument (alle bestätigten Werte aller Kapitel,
@@ -739,14 +752,16 @@ bei Profil-Löschung §7 des Schema-Plans).
 | --- | --- | --- | --- |
 | George-Zug (Stream) | je Antwort des Menschen | wie heute | `talk` 40/Tag (unverändert) |
 | Generator | je Entwurf | wie heute | `slot` 10/Tag je Feld (unverändert) |
-| **Schliess-Aufruf** | je bestätigter Session | ~68 + Korrekturen | **neu** `review` 100/Tag je Brand, kleines Modell |
+| **Schliess-Aufruf, Stufe 1** | je bestätigter Session | ~68 + Korrekturen | **neu** `review` 120/Tag je Brand, günstiges ZDR-Modell |
+| **Schliess-Aufruf, Stufe 2** | nur bei Konflikt-Verdacht aus Stufe 1 | wenige | `review`, zählt 3, George-Modell |
 | **Kapitel-Abnahme** (`chapter`) | beim Öffnen der Finalen Abnahme | 9 (+ Wiederholungen) | `review`, zählt 2 |
 | **Prüfblick** | auf Klick | wenige | `review`, zählt 5 |
 
 `brandAiLimits.ts` bekommt den Eimer als eigenen Vertrag (Muster
-`BRAND_AI_TALK_DAILY_LIMIT`), der Instanz-Deckel zählt ihn mit. Modell:
-`pukalani.brand.ai.reviewModel` (app.config), Default das günstigste
-ZDR-fähige Modell der Routing-Liste; ohne Schlüssel läuft alles fail-soft
+`BRAND_AI_TALK_DAILY_LIMIT`), der Instanz-Deckel zählt ihn mit. Modelle:
+`pukalani.brand.ai.reviewModel` (Stufe 1, Default das günstigste ZDR-fähige
+Modell der Routing-Liste) und Stufe 2 = das George-Modell (kein eigener
+Schalter — sonst driften zwei Urteile). Ohne Schlüssel läuft alles fail-soft
 (§7), im Dev der bestehende Stub.
 
 ## 14. Nicht anfassen / bekannte Fallen
@@ -795,15 +810,20 @@ Reihenfolge ist Abhängigkeit: 1 vor allem; 2 parallel zu 3; 4 vor 5 und 6; 7
 zuletzt. Nach jedem Paket: OPEN-ITEMS aktualisieren, Erledigtes nach
 OPEN-ITEMS-COMPLETE.
 
-## 16. Offene Entscheidungen (klein, blockieren Paket 1 nicht)
+## 16. Entscheidungen vom 2026-09-04 (David, per Fragenrunde)
 
-- **Review-Modell:** günstigstes ZDR-Modell oder dasselbe wie George?
-  Vorschlag: günstig, weil JSON-Einordnung, kein Prosa-Stil.
-- **`minSubstance`-Werte:** je Session oder drei Stufen (kurz/mittel/lang)?
-  Vorschlag: drei Stufen, sonst 68 Zahlen ohne Massstab.
-- **Prüfblick auch automatisch** beim Abschluss des letzten Kapitels?
-  Vorschlag: nein — ein Klick, den der Mensch sieht, ist ein Ergebnis, das er
-  liest.
+- **§3a:** alle vier Inhalts-Ergänzungen (Qualitätskriterien, Anti-Muster,
+  Frage-Leiter, Form) und alle vier Struktur-Ergänzungen (Invarianten,
+  Vertraulichkeit, Vertagen, Umfang-Anzeige) — angenommen.
+- **Review-Modell:** zweistufig (§7) — günstig als Standard, George-Modell
+  nur bei Konflikt-Verdacht.
+- **Prüfblick:** nur auf Klick (§10), nie automatisch.
+- **`minSubstance`:** drei Stufen (`short`/`medium`/`long`) — stillschweigend
+  angenommen, weil 68 Zahlen ohne Massstab niemand pflegt; David hat es nicht
+  eigens entschieden. Wer es je Session braucht, ergänzt eine Zahl, die
+  Stufe bleibt der Default.
+
+Damit gibt es keine offene Entscheidung mehr, die Paket 1 blockiert.
 
 ## 17. Ausblick (NICHT Teil dieses Plans): Marktvergleich
 
