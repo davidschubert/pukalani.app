@@ -6,6 +6,7 @@ import {
   BRAND_SLOTS,
   type BrandSlot,
   exampleKeyFor,
+  partKeyFor,
   questionKeyFor,
 } from '../shared/slotRegistry'
 
@@ -92,6 +93,28 @@ describe('brand i18n-Katalog', () => {
       }
     }
     expect(gaps).toEqual([])
+  })
+
+  it('hat für JEDEN Teil einer Sammel-Session eine eigene Frage', () => {
+    // `a.facts` fragt drei Dinge nacheinander (Paket 3). Sie liegen unter
+    // `brand.part.<id>.<teil>` und NICHT unter `brand.q.a.facts.<teil>`: dort
+    // steht schon die Klammer-Frage als Zeichenkette, und ein JSON-Katalog kann
+    // unter einem Schlüssel nicht gleichzeitig Text und Kind-Objekt halten —
+    // dieselbe Grenze wie bei `d.gapReveal` (s. Kopf).
+    const gaps: string[] = []
+    for (const slot of activeSlots.filter(slot => slot.parts.length > 0)) {
+      // Die Klammer-Frage bleibt und wird weiter gerendert.
+      if (missingIn(slot.questionKey).length) gaps.push(`${slot.id}: ${slot.questionKey} fehlt`)
+      for (const part of slot.parts) {
+        const key = partKeyFor(slot, part)
+        const missing = missingIn(key)
+        if (missing.length) gaps.push(`${slot.id}: ${key} fehlt in ${missing.join(', ')}`)
+      }
+    }
+    expect(gaps).toEqual([])
+    // Ohne diese Zeile wäre der Test grün, sobald `parts` irgendwo leer würde.
+    expect(activeSlots.filter(slot => slot.parts.length > 0).map(slot => slot.id)).toEqual(['a.facts'])
+    expect(missingIn('brand.part.a.facts.erfunden').length).toBeGreaterThan(0)
   })
 
   it('hat für JEDE Menschenfrage eine Beispiel-Antwort (Composer-Platzhalter)', () => {

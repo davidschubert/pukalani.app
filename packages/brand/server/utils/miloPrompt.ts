@@ -37,10 +37,18 @@
 
 /**
  * Fassung dieser Aufträge. Steigt, sobald sich eine Aufgabe inhaltlich ändert —
- * oder der System-Prompt, mit dem sie gesendet werden (`milo-c-2`, 2026-09-02:
- * Aufgaben unverändert, System-Prompt auf `george-a-5` · Eine Stimme).
+ * oder der System-Prompt, mit dem sie gesendet werden.
+ *
+ * `milo-c-3` (2026-09-04, BW2 Paket 2 — Session-Inhalte): Kandidaten und
+ * Definitionen tragen jetzt Qualitätsmerkmale, Anti-Muster und ein Formvorbild
+ * aus einer fremden Branche (dieselbe Hundeschule durch das ganze Kapitel, so
+ * dass man Moment, Wert und Definition aneinander sieht). Die Moment-Beleg-
+ * Pflicht ist wörtlich geblieben.
+ *
+ * `milo-c-2` (2026-09-02): Aufgaben unverändert, System-Prompt auf
+ * `george-a-5` · Eine Stimme.
  */
-export const MILO_PROMPT_VERSION = 'milo-c-2'
+export const MILO_PROMPT_VERSION = 'milo-c-3'
 
 /**
  * WIE VIELE WERTE-KANDIDATEN — die Zahl, auf die §6/03 §7 danach auf 3–5

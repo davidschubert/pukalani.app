@@ -65,6 +65,12 @@
  * Fassung dieser Aufträge. Steigt, sobald sich eine Aufgabe inhaltlich ändert —
  * oder der System-Prompt, mit dem sie gesendet werden.
  *
+ * `george-archetype-3` (2026-09-04, BW2 Paket 2 — Session-Inhalte): die vier
+ * Ableitungen dieses Bausteins tragen jetzt Qualitätsmerkmale, Anti-Muster und
+ * ein Formvorbild aus einer fremden Branche. Die drei Regeltexte (leeres
+ * Paarvergleich-Feld, Zwei-Kandidaten-Regel, Kohärenz-Regel) sind wörtlich
+ * geblieben.
+ *
  * `george-archetype-2` (2026-09-04, noch am selben Tag): Kohärenz-Regel für
  * die beiden Choice-Slots — Prosa und Wert müssen denselben Katalog-Archetyp
  * nennen, informelle Gesprächs-Namen werden hörbar auf den Katalog abgebildet
@@ -76,7 +82,7 @@
  * Aufgabe. Kommt der Paarvergleich, steigt sie auf `-2`, und ein alter Eintrag
  * bleibt lesbar als das, was er war.
  */
-export const ARCHETYPE_PROMPT_VERSION = 'george-archetype-2'
+export const ARCHETYPE_PROMPT_VERSION = 'george-archetype-3'
 
 /**
  * DIE DREI REGELTEXTE DIESES BAUSTEINS — das leere Paarvergleich-Feld, die

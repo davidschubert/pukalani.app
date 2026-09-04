@@ -27,13 +27,25 @@ import {
  * damit jeder bedingte Zweig des Fundaments (`brandSlotInstructionTail`)
  * einmal in beiden Richtungen gelaufen ist.
  *
- * Geprüft wird ZWEIERLEI, und das ist Absicht: die verlangte Zeilen-Deckung
- * („jede nicht-leere Zeile von damals kommt heute vor") UND die
- * Zeichengleichheit. Die erste ist die Zusage des Plans, die zweite sagt
- * zusätzlich, dass auch keine Zeile DAZUGEKOMMEN ist — und genau daran hängt,
- * dass die Prompt-Fassungen (`GEORGE_/VERA_/MILO_/ARCHETYPE_PROMPT_VERSION`)
- * in diesem Paket NICHT steigen mussten. Wer eine Regel ändert, sieht hier
- * beides rot und weiss, dass er eine Fassung hochzählen muss.
+ * ── WAS PAKET 2 AN DIESEM BEWEIS GEÄNDERT HAT ────────────────────────────
+ * Bis Paket 1 prüfte diese Datei ZWEIERLEI: die Zeilen-Deckung („jede
+ * nicht-leere Zeile von damals kommt heute vor") UND die ZEICHENGLEICHHEIT.
+ * Die zweite ist mit Paket 2 gefallen, und zwar absichtlich: die
+ * Session-Inhalte (Qualitätsmerkmale, Anti-Muster, Beispiele, Leiter, Form)
+ * kommen als eigene Abschnitte HINZU, der Prompt ist also länger als der von
+ * damals. Genau deshalb sind in Paket 2 alle vier Prompt-Fassungen gestiegen
+ * (`george-a-12`, `vera-b-3`, `milo-c-3`, `george-archetype-3`) — die
+ * Zeichengleichheit war die Begründung dafür, dass sie es in Paket 1 NICHT
+ * mussten, und mit ihrem Wegfall übernimmt die Fassung diese Aufgabe.
+ *
+ * Die Zeilen-Deckung BLEIBT und ist die eigentliche Zusage des Plans: keine
+ * Verarbeitungsregel darf beim Inhalts-Paket verlorengehen. Ausgenommen ist
+ * die `TASK:`-Zeile — die Ziele durften geschärft werden (Plan §15, Paket 2:
+ * „Platzhalter-Ziele … Paket 2 tauscht sie gegen die abgenommenen").
+ *
+ * Das Fixture bleibt als Beweis liegen; dazu prüft `Der Bauer selbst`, dass
+ * jede Session mit Entwurfs-Auftrag ihre neuen Abschnitte auch WIRKLICH trägt
+ * — sonst wäre eine leere `quality`-Liste hier grün.
  */
 
 const HERE = dirname(fileURLToPath(import.meta.url))
@@ -78,17 +90,22 @@ describe('Inhaltsgleichheit mit den vier Vorgänger-Tabellen', () => {
     expect(Object.keys(BEFORE).length).toBe(42)
   })
 
-  it.each(Object.keys(BEFORE))('%s: jede alte Zeile steht auch im neuen Prompt', (key) => {
+  it.each(Object.keys(BEFORE))('%s: jede alte Zeile ausser TASK steht auch im neuen Prompt', (key) => {
     const after = rebuild(key)
     const lines = new Set(after.split('\n').map(line => line.trim()))
     for (const line of BEFORE[key]!.split('\n')) {
       if (!line.trim()) continue
+      // Die TASK-Zeile trägt das ZIEL, und das durfte Paket 2 schärfen.
+      if (line.startsWith('TASK: ')) continue
       expect(lines, line).toContain(line.trim())
     }
   })
 
-  it.each(Object.keys(BEFORE))('%s: und es ist keine Zeile dazugekommen', (key) => {
-    expect(rebuild(key)).toBe(BEFORE[key])
+  it.each(Object.keys(BEFORE))('%s: und der Prompt ist gewachsen, nicht geschrumpft', (key) => {
+    // Die Gegenrichtung der Deckung: Paket 2 legt Abschnitte DAZU. Ein Prompt,
+    // der kürzer geworden ist, hat etwas verloren — auch wenn jede geprüfte
+    // Zeile noch vorkommt (eine Regel kann in eine andere gerutscht sein).
+    expect(rebuild(key).length).toBeGreaterThan(BEFORE[key]!.length)
   })
 
   /**
@@ -102,7 +119,9 @@ describe('Inhaltsgleichheit mit den vier Vorgänger-Tabellen', () => {
       processing: { ...config.processing, rules: ['Do something else entirely.'] },
     }
     const text = sessionInstruction(mutated, optionsFor('a.pitch', 'new', false))
-    expect(text).not.toBe(BEFORE['a.pitch|new|plain'])
+    const lines = new Set(text.split('\n').map(line => line.trim()))
+    // Die echte Regel ist WEG — genau das soll die Deckungsprüfung sehen.
+    expect(lines).not.toContain(config.processing.rules[0]!.trim())
     expect(text).toContain('Do something else entirely.')
   })
 })
@@ -138,11 +157,43 @@ describe('Der Bauer selbst', () => {
       .not.toContain('house-of-brands')
   })
 
-  it('lässt leere Abschnitte weg — in Paket 1 sind das alle bis auf zwei', () => {
+  it('lässt leere Abschnitte weg — bei einem Entwurf ist das die Leiter', () => {
+    // `a.pitch` ist eine ABLEITUNG: dort fragt niemand, also hat sie keine
+    // Leiter (Registry-Regel seit Paket 2) und der Abschnitt fehlt ganz.
     const text = sessionInstructionForSlot('a.pitch', optionsFor('a.pitch', 'new', false))
-    for (const heading of ['Marks of a good value:', 'Never accept:', 'How to lead this session:']) {
-      expect(text).not.toContain(heading)
+    expect(text).not.toContain('How to lead this session:')
+    expect(text).toContain('Marks of a good value:')
+  })
+
+  it('gibt JEDER Session mit Entwurfs-Auftrag Qualität und ein Beispiel', () => {
+    // Ohne diese Prüfung wäre die Zeilen-Deckung oben auch dann grün, wenn
+    // Paket 2 die Inhalte nie in den Prompt gebracht hätte.
+    const drafting = BRAND_SLOTS.filter(session =>
+      session.generator !== 'none' && session.processing.rules.length > 0)
+    expect(drafting).toHaveLength(21)
+    for (const session of drafting) {
+      const text = sessionInstructionForSlot(session.id, optionsFor(session.id, 'new', false))
+      expect(text, session.id).toContain('Marks of a good value:')
+      expect(text, session.id).toContain('Never accept:')
+      expect(text, session.id).toContain('Examples of the FORM only')
     }
+  })
+
+  it('nimmt die Beispiele der INHALTSSPRACHE — und ohne Angabe die englischen', () => {
+    const german = sessionInstructionForSlot('b.purpose', {
+      ...optionsFor('b.purpose', 'new', false),
+      contentLocale: 'de',
+    })
+    const english = sessionInstructionForSlot('b.purpose', {
+      ...optionsFor('b.purpose', 'new', false),
+      contentLocale: 'en',
+    })
+    const withoutLocale = sessionInstructionForSlot('b.purpose', optionsFor('b.purpose', 'new', false))
+    const purpose = slotById('b.purpose')!
+    expect(german).toContain(purpose.examples.new.de[0]!)
+    expect(german).not.toContain(purpose.examples.new.en[0]!)
+    expect(english).toContain(purpose.examples.new.en[0]!)
+    expect(withoutLocale).toBe(english)
   })
 
   it('schreibt Qualität, Anti-Muster, Beispiele, Leiter und Form, sobald es sie gibt', () => {
@@ -151,7 +202,10 @@ describe('Der Bauer selbst', () => {
       ...config,
       quality: ['one sentence'],
       antiPatterns: ['a feature list'],
-      examples: { new: ['A pitch from another industry'], relaunch: ['Never shown on this path'] },
+      examples: {
+        new: { de: ['Nur auf Deutsch'], en: ['A pitch from another industry'] },
+        relaunch: { de: ['Nie auf diesem Pfad'], en: ['Never shown on this path'] },
+      },
       ladder: { opening: 'their own words', probes: ['what changed?'], reframes: ['ask for the moment'] },
       form: { person: 'we', tense: 'present', maxWords: 20, forbidden: ['the brand name'] },
     }, optionsFor('a.pitch', 'new', false))
@@ -160,6 +214,7 @@ describe('Der Bauer selbst', () => {
     expect(text).toContain('Never accept:\n- a feature list')
     expect(text).toContain('- A pitch from another industry')
     expect(text).not.toContain('Never shown on this path')
+    expect(text).not.toContain('Nur auf Deutsch')
     expect(text).toContain('Open with: their own words')
     expect(text).toContain('If the answer is thin, ask: what changed?')
     expect(text).toContain('If it falls into a known trap: ask for the moment')

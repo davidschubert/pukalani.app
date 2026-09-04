@@ -794,6 +794,13 @@ Abdeckungs-Matrix 287 (§15) · Interaktionsbilanz (§16).
 Bilanz-Befund zur Kenntnis (45-min-Kommunikation statt 40-Eingaben).
 ② „George" ist ABGESEGNET (2026-08-30).
 
+**Session-Inhalte (BW2 Paket 2, 2026-09-04):** Ziel, Qualitätsmerkmale,
+Anti-Muster, Frage-Leiter, Form, Antwort-Regeln und Beispiele je Session
+stehen in `packages/brand/shared/sessionContent.ts` und sind als Lese-Fassung
+erzeugt: [BRAND-WIZARD-SESSION-INHALTE.md](BRAND-WIZARD-SESSION-INHALTE.md)
+(generiert, nicht von Hand editieren). Hier steht der FRAGEN-Katalog, dort die
+Arbeitsanweisung je Feld — dieselbe Trennung wie zwischen Frage und Prompt.
+
 **Nächstes Paket danach:** P0b ist durch den Klick-Dummy substanziell
 vorweggenommen (Werkstatt, Zustände, Modal, Rail — abgenommen in der
 laufenden Dummy-Freigabe); formal offen bleibt der Usability-Test mit

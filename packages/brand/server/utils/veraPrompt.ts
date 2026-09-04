@@ -48,13 +48,19 @@
  * Fassung dieser Aufträge. Steigt, sobald sich eine Aufgabe inhaltlich ändert —
  * oder der System-Prompt, mit dem sie gesendet werden.
  *
+ * `vera-b-3` (2026-09-04, BW2 Paket 2 — Session-Inhalte): die vier PVM- und
+ * die zwei Architektur-Aufträge tragen jetzt Qualitätsmerkmale, Anti-Muster,
+ * ein Formvorbild aus einer fremden Branche und die Form des Werts (Purpose
+ * höchstens 25 Wörter, kein Markenname; Vision ohne Zahlen). Veras Prüfstein
+ * und die Formeln sind wörtlich geblieben.
+ *
  * `vera-b-2` (2026-09-02): die Aufgaben sind unverändert, der SYSTEM-Prompt
  * nicht (`george-a-5`, Eine Stimme). Ein Eintrag aus `vera-b-1` stammt aus
  * einem Lauf, in dem sich das Modell als Vera vorgestellt hat; beide für
  * vergleichbar zu erklären, wäre genau die Sorte stille Unwahrheit, gegen die
  * es diese Zahl gibt.
  */
-export const VERA_PROMPT_VERSION = 'vera-b-2'
+export const VERA_PROMPT_VERSION = 'vera-b-3'
 
 /**
  * VERAS PRÜFSTEIN, wörtlich — der Satz, der jeden PVM-Entwurf tragen muss.

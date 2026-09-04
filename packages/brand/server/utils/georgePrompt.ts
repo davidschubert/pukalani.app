@@ -54,6 +54,13 @@ import type { BrandSlotDependency } from './brandGenerators'
 /**
  * Fassung der Prompt-Bausteine dieses Bausteins (A · Kontext).
  *
+ * `george-a-12` (2026-09-04, BW2 Paket 2 — Session-Inhalte): jede Anweisung
+ * trägt jetzt zusätzlich Qualitätsmerkmale, Anti-Muster, ein Formvorbild aus
+ * einer fremden Branche und die Form des Werts (`shared/sessionContent.ts`).
+ * Die Verarbeitungsregeln sind wörtlich dieselben geblieben, der ZIEL-Satz
+ * wurde geschärft — der Prompt ist damit ein anderer, und ein Eintrag aus
+ * `george-a-11` entstand nachweislich ohne diese Abschnitte.
+ *
  * `george-a-2` (P2.5, 2026-09-01): die STARTKARTE reist mit — sie steht als
  * erster Block in den Eingaben, und die Aufgaben nennen sie als primäre Quelle.
  * Ein Entwurf aus `george-a-1` entstand nachweislich OHNE diese vier Angaben;
@@ -133,7 +140,7 @@ import type { BrandSlotDependency } from './brandGenerators'
  *   · B8/B9 — Kontext-Sensibilität (kein Vertriebston für einen Verein) und
  *     eine Sorgfaltszeile gegen holprige Sprache.
  */
-export const GEORGE_PROMPT_VERSION = 'george-a-11'
+export const GEORGE_PROMPT_VERSION = 'george-a-12'
 
 /** Default der Persona (Content-Spec §1.1, Gate ② abgesegnet). */
 export const GEORGE_PERSONA_DEFAULT = 'George'
@@ -341,6 +348,19 @@ export interface BrandSlotInstructionOptions {
    * Verlauf gelesen, legt dem Modell nahe, dass es schon einmal gefragt hätte.
    */
   hasConversation: boolean
+  /**
+   * DIE INHALTSSPRACHE DER MARKE — nur für die BEISPIELE (BW2 Paket 2).
+   *
+   * Sie ist OPTIONAL und fällt auf `en` zurück, die Default-Locale des Layers.
+   * Das ist keine Nachlässigkeit, sondern die Grenze dieses Vertrags: er
+   * beschreibt eine AUFGABE, und die Sprache der Aufgabe ist englisch
+   * (Content-Spec §1.2). Nur die Beispiele sind Text, den ein Mensch in seiner
+   * Sprache lesen soll; ein Pflichtfeld dafür zwänge jede Aufrufstelle, eine
+   * Sprache zu nennen, auch wo es gar keine Marke gibt (Beweise, Fixtures).
+   * Die echte Naht setzt sie: `createAdvisorSlotGenerator` reicht
+   * `context.locale` durch.
+   */
+  contentLocale?: string
 }
 
 /**

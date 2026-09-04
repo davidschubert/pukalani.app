@@ -217,6 +217,15 @@
       "naming": "Ob neue Marke oder Prüfstand für den Bestandsnamen: Hier wird der Name an der Foundation gemessen — passt er zu Purpose, Werten und Archetyp? Dazu die nüchterne Prüfung: Ist er frei, ist er aussprechbar, funktioniert er auch auf Englisch?",
       "result": "Das Ergebnis bündelt alle bestätigten Entscheidungen der Foundation zu eurem Markendokument — mit einer Richtung für alles Weitere. Von hier aus geht es in Design, Texte und den Auftritt; und je ehrlicher die Kapitel davor, desto tragfähiger ist, was hier steht."
     },
+    "part": {
+      "a": {
+        "facts": {
+          "teamSize": "Wie viele Leute arbeiten mit — feste und freie zusammen?",
+          "age": "Seit wann gibt es euch? Ein Jahr reicht.",
+          "markets": "Wo verkauft ihr wirklich — welche Orte, welche Kanäle?"
+        }
+      }
+    },
     "example": {
       "a": {
         "origin": {

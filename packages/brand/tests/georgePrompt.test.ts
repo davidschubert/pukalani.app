@@ -582,7 +582,7 @@ describe('Prompt-Version', () => {
     // a-10 ein sechstes (die Rückfrage darf Antwort-Möglichkeiten anbieten) —
     // die Version MUSS mitsteigen, sonst behaupten alte Generations-Einträge,
     // aus diesem Prompt zu stammen (Kopf von georgePrompt.ts).
-    expect(GEORGE_PROMPT_VERSION).toBe('george-a-11')
+    expect(GEORGE_PROMPT_VERSION).toBe('george-a-12')
   })
 })
 

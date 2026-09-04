@@ -167,6 +167,7 @@ export type {
   BrandSessionAnswers,
   BrandSessionEffort,
   BrandSessionExamples,
+  BrandSessionExampleSet,
   BrandSessionForm,
   BrandSessionKind,
   BrandSessionLadder,
@@ -284,13 +285,18 @@ export interface BrandSessionConfig {
     readonly review: 'full' | 'light'
   }
 
-  /** 3–5 prüfbare Merkmale eines GUTEN Werts. Inhalt: Paket 2. */
+  /** 3–5 prüfbare Merkmale eines GUTEN Werts — je eines mit Ja/Nein zu beantworten. */
   readonly quality: readonly string[]
-  /** Was der Spezialist zurückweist, je Feld. Inhalt: Paket 2. */
+  /** Was der Spezialist zurückweist, je Feld (2–3 konkrete Muster). */
   readonly antiPatterns: readonly string[]
-  /** 1–2 erfundene starke Werte je Pfad, FREMDE Branche. Inhalt: Paket 2. */
+  /**
+   * 1–2 erfundene starke Werte je Pfad, FREMDE Branche, JE SPRACHE.
+   * Zweisprachig, weil sie nicht nur in den Prompt reisen, sondern auf der
+   * Abnahme-Seite (Plan §5a) ein Mensch sie liest — Begründung in
+   * `sessionContent.ts`.
+   */
   readonly examples: BrandSessionExamples
-  /** Die Interviewführung dieser einen Session. Inhalt: Paket 2. */
+  /** Die Interviewführung dieser einen Session (leer bei derive/draft/instrument). */
   readonly ladder: BrandSessionLadder
   /** Regeln, die der WERT selbst einhalten muss. */
   readonly form: BrandSessionForm
@@ -412,6 +418,11 @@ const KIND_DEFAULTS: Readonly<Record<BrandSessionKind, {
 }
 
 const EMPTY_STRINGS: readonly string[] = []
+const EMPTY_EXAMPLES: BrandSessionExamples = {
+  new: { de: EMPTY_STRINGS, en: EMPTY_STRINGS },
+  relaunch: { de: EMPTY_STRINGS, en: EMPTY_STRINGS },
+}
+const EMPTY_LADDER: BrandSessionLadder = { opening: '', probes: EMPTY_STRINGS, reframes: EMPTY_STRINGS }
 
 /**
  * Baut EINEN Eintrag. Die i18n-Schlüssel und `schema` entstehen aus der Id
@@ -467,19 +478,17 @@ function defineSession(definition: BrandSlotDefinition): BrandSessionConfig {
       // eine zweite gepflegte Zuordnung liefe irgendwann auseinander.
       technique: techniqueForStep(definition.stepId).key,
     },
-    answers: content?.allowDefer === undefined
-      ? defaults.answers
-      : { ...defaults.answers, allowDefer: content.allowDefer },
+    answers: content?.answers ? { ...defaults.answers, ...content.answers } : defaults.answers,
     output: {
       schema,
       editor: definition.editor,
       generator: definition.generator,
       review: defaults.review,
     },
-    quality: EMPTY_STRINGS,
-    antiPatterns: EMPTY_STRINGS,
-    examples: { new: EMPTY_STRINGS, relaunch: EMPTY_STRINGS },
-    ladder: { opening: '', probes: EMPTY_STRINGS, reframes: EMPTY_STRINGS },
+    quality: content?.quality ?? EMPTY_STRINGS,
+    antiPatterns: content?.antiPatterns ?? EMPTY_STRINGS,
+    examples: content?.examples ?? EMPTY_EXAMPLES,
+    ladder: content?.ladder ?? EMPTY_LADDER,
     form: {
       person: 'fromTeam',
       tense: 'any',
@@ -489,7 +498,7 @@ function defineSession(definition: BrandSlotDefinition): BrandSessionConfig {
     },
     invariants: content?.invariants ?? [],
     sensitivity: content?.sensitivity ?? 'public',
-    effort: defaults.effort,
+    effort: content?.effort ?? defaults.effort,
   }
 }
 
@@ -690,6 +699,28 @@ export function dependencyClosure(slotId: string, slots: readonly BrandSlot[] = 
   return slots.filter(slot => seen.has(slot.id)).map(slot => slot.id)
 }
 
+/** Die erlaubten Minuten-Stufen (Plan §3a Nr. 8) — als Liste, nicht als Union-Cast. */
+const BRAND_EFFORT_MINUTES: readonly number[] = [1, 2, 3, 5, 10]
+
+/**
+ * Die Felder einer Session, die ein MENSCH zu sehen bekommt — Info-Modal und
+ * Abnahme-Seite (Plan §5a). `processing.rules` steht bewusst NICHT darin: die
+ * liest nur das Modell, und die Formeln dort tragen Platzhalter in spitzen
+ * Klammern.
+ */
+function humanReadableTexts(slot: BrandSlot): readonly (readonly [string, readonly string[]])[] {
+  return [
+    ['goal', [slot.goal]],
+    ['quality', slot.quality],
+    ['antiPatterns', slot.antiPatterns],
+    ['ladder', [slot.ladder.opening, ...slot.ladder.probes, ...slot.ladder.reframes]],
+    ['examples', [
+      ...slot.examples.new.de, ...slot.examples.new.en,
+      ...slot.examples.relaunch.de, ...slot.examples.relaunch.en,
+    ]],
+  ]
+}
+
 /**
  * DIE INVARIANTEN DES KATALOGS als prüfbare Funktion (statt als Prosa im
  * Test): sie nimmt eine BELIEBIGE Slot-Liste, damit der Beweis mutierte
@@ -764,6 +795,55 @@ export function validateSlotRegistry(slots: readonly BrandSlot[] = BRAND_SLOTS):
     if (slot.output.editor !== slot.editor || slot.output.generator !== slot.generator) {
       problems.push(`${slot.id}: output.editor/generator laufen auseinander`)
     }
+    // ── Der INHALT der Session (BW2 Paket 2) ───────────────────────────────
+    // Die Zahlen stehen im Plan §3a: „3–5 Qualitätskriterien, 2–3 Anti-Muster".
+    // Sie sind hier eine SPANNE und keine Untergrenze, weil beides schadet: ein
+    // Kriterium zu wenig macht `goalReached` zur Stimmung, zehn machen aus dem
+    // Prompt eine Prüfliste, die das Modell überfliegt.
+    if (slot.quality.length < 3 || slot.quality.length > 5) {
+      problems.push(`${slot.id}: ${slot.quality.length} Qualitätsmerkmale — verlangt sind 3 bis 5`)
+    }
+    if (slot.antiPatterns.length < 2) {
+      problems.push(`${slot.id}: weniger als zwei Anti-Muster`)
+    }
+    // Die Leiter ist die INTERVIEWFÜHRUNG — sie gehört zu den Sessions, in denen
+    // ein Mensch gefragt wird, und zu keiner anderen. Eine Eröffnung an einer
+    // Ableitung wäre eine Anweisung, die nie jemand ausführt.
+    const asksSomeone = slot.kind === 'ask' || slot.kind === 'collect' || slot.kind === 'choose'
+    if (asksSomeone && slot.ladder.opening.trim().length === 0) {
+      problems.push(`${slot.id}: kind "${slot.kind}" ohne Eröffnung in der Leiter`)
+    }
+    if (!asksSomeone && slot.ladder.opening.trim().length > 0) {
+      problems.push(`${slot.id}: kind "${slot.kind}" braucht keine Leiter — hier fragt niemand`)
+    }
+    // BEISPIELE SIND PFLICHT, WO GEORGE ETWAS HINLEGT (Plan §3a Nr. 3 + §5a):
+    // ein Entwurf ohne Formvorbild fällt auf den Durchschnitt des Modells
+    // zurück, und die Abnahme-Seite hätte an genau diesen Zeilen nichts zu
+    // zeigen. Beide Pfade, beide Sprachen — ein Beispiel, das nur eine Sprache
+    // hat, fehlt der Hälfte der Kundschaft.
+    const drafts = slot.kind === 'derive' || slot.kind === 'draft' || slot.generator === 'candidates'
+    if (drafts && !slot.deactivated) {
+      for (const pathKind of ['new', 'relaunch'] as const) {
+        for (const locale of ['de', 'en'] as const) {
+          if (slot.examples[pathKind][locale].length === 0) {
+            problems.push(`${slot.id}: kein Beispiel für Pfad "${pathKind}" in "${locale}"`)
+          }
+        }
+      }
+    }
+    if (!BRAND_EFFORT_MINUTES.includes(slot.effort.minutes) || slot.effort.turns <= 0) {
+      problems.push(`${slot.id}: unbrauchbarer Umfang (${slot.effort.minutes} min, ${slot.effort.turns} Züge)`)
+    }
+    // SPITZE KLAMMERN NUR IN DEN VERARBEITUNGSREGELN (die Formeln brauchen ihre
+    // Platzhalter, „We exist so that <who> …"). Alles andere hier liest ein
+    // MENSCH — im Info-Modal der Session und auf der Abnahme-Seite —, und dort
+    // ist eine spitze Klammer entweder HTML oder ein Rest aus einer Schablone.
+    for (const [label, texts] of humanReadableTexts(slot)) {
+      for (const text of texts) {
+        if (/[<>]/.test(text)) problems.push(`${slot.id}: spitze Klammern in ${label}`)
+      }
+    }
+
     // Eine Invariante darf nur auf einen Slot zeigen, der VOR ihr steht —
     // sonst prüfte sie beim Bestätigen gegen einen Wert, den es noch gar
     // nicht geben kann.
@@ -895,4 +975,25 @@ export function questionKeyFor(slot: BrandSlot, pathKind: BrandPathKind): string
 export function exampleKeyFor(slot: BrandSlot, pathKind: BrandPathKind): string {
   const base = `brand.example.${slot.id}`
   return slot.pathVariants?.[pathKind] ? `${base}.${pathKind}` : base
+}
+
+/**
+ * DER i18n-SCHLÜSSEL EINES TEILS einer `collect`-Session — die dritte
+ * Konvention neben `brand.q.<id>` und `brand.example.<id>`.
+ *
+ * ── WARUM NICHT `brand.q.<id>.<teil>` ─────────────────────────────────────
+ * Weil ein verschachtelter JSON-Katalog unter EINEM Schlüssel nicht
+ * gleichzeitig eine Zeichenkette und ein Kind-Objekt halten kann — dieselbe
+ * Grenze, an der schon `d.gapReveal` steht (s. `tests/i18nCatalog.test.ts`).
+ * `brand.q.a.facts` IST heute die Frage („Ein paar schnelle Zahlen: …"), die
+ * die Werkstatt als Feld-Etikett und als Frage rendert; sie in ein Objekt zu
+ * verwandeln, hiesse, an dieser Stelle wörtlich `brand.q.a.facts` in die
+ * Oberfläche zu schreiben.
+ *
+ * Also ein eigener Namensraum, wie bei den Beispielantworten auch. Die Frage
+ * bleibt die KLAMMER über den Teilen („ein paar schnelle Zahlen"), die Teile
+ * sind die drei Einzelfragen, die Paket 3 nacheinander stellt.
+ */
+export function partKeyFor(slot: BrandSlot, part: string): string {
+  return `brand.part.${slot.id}.${part}`
 }

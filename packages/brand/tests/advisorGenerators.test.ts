@@ -207,20 +207,22 @@ describe('Der Aufruf an den Transport gilt für JEDEN Berater', () => {
   })
 
   it('DIE PROMPT-FASSUNG STEHT IM ERGEBNIS — je Baustein-Satz eine eigene', async () => {
-    // Beide sind am 2026-09-02 gestiegen: die AUFGABEN sind unverändert, der
-    // System-Prompt nicht (`george-a-5`, Eine Stimme). Ein Eintrag aus `-b-1`
-    // stammt aus einem Lauf, in dem sich das Modell als Vera vorgestellt hat.
+    // Alle drei sind mit BW2 Paket 2 gestiegen: jede Anweisung trägt jetzt
+    // Qualitätsmerkmale, Anti-Muster, ein Formvorbild und die Form des Werts
+    // (`shared/sessionContent.ts`). Die Verarbeitungsregeln sind wörtlich
+    // dieselben — der Prompt ist es nicht, und ein Eintrag aus der Vorfassung
+    // entstand nachweislich ohne diese Abschnitte.
     const veraResult = await vera.veraStrategyGenerator(context('b.purpose', 'pvm') as never)
-    expect(veraResult.promptVersion).toBe('vera-b-2')
+    expect(veraResult.promptVersion).toBe('vera-b-3')
     const miloResult = await milo.miloValuesGenerator(context('c.candidates', 'values') as never)
-    expect(miloResult.promptVersion).toBe('milo-c-2')
-    // Baustein D beginnt bei 1 — INTERIM (Gesprächs-Ableitung statt
-    // Paarvergleich, Davids Entscheidung 2026-09-04). Kommt das Instrument,
-    // steigt sie, und ein alter Eintrag bleibt lesbar als das, was er war.
+    expect(miloResult.promptVersion).toBe('milo-c-3')
+    // Baustein D läuft weiter INTERIM (Gesprächs-Ableitung statt Paarvergleich,
+    // Davids Entscheidung 2026-09-04); die Zahl sagt, WELCHE Aufträge einen
+    // Eintrag erzeugt haben, nicht welcher Weg zum Wert führte.
     const archetypeResult = await archetype.georgeArchetypeGenerator(
       context('d.hypothesis', 'archetype') as never,
     )
-    expect(archetypeResult.promptVersion).toBe('george-archetype-2')
+    expect(archetypeResult.promptVersion).toBe('george-archetype-3')
   })
 
   it('QUELL-WERTE AUS ANDEREN BAUSTEINEN LANDEN IM PROMPT (P3.1)', async () => {

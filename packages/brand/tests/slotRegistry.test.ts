@@ -11,6 +11,7 @@ import {
   confirmableRequiredSlotsForStep,
   dependencyClosure,
   exampleKeyFor,
+  partKeyFor,
   questionKeyFor,
   requiredSlotsForStep,
   sessionKindFor,
@@ -485,9 +486,15 @@ describe('Session-Vertrag', () => {
     }
   })
 
-  it('hält genau die drei heiklen Sessions zurück (Plan §3a Nr. 7)', () => {
+  it('hält genau die vier heiklen Sessions zurück (Plan §3a Nr. 7)', () => {
+    // Drei nennt der Plan (Beschwerden, Herausforderung, Zahlen); die vierte
+    // ist eine Entscheidung aus Paket 2 und steht mit Begründung in
+    // `sessionContent.ts`: `b2.roleOfMaster` ist eine Selbstauskunft über den
+    // eigenen Ruf („unsere Hauptmarke schreckt genau diese Leute ab"), und ein
+    // Share-Link zeigt sie einem Fremden. Die ENTSCHEIDUNG daraus (`b2.model`,
+    // `b2.rule`) bleibt öffentlich — sie ist das Ergebnis, nicht das Material.
     expect(BRAND_SLOTS.filter(session => session.sensitivity !== 'public').map(session => session.id))
-      .toEqual(['a.complaints', 'a.challenge', 'a.facts'])
+      .toEqual(['a.complaints', 'a.challenge', 'a.facts', 'b2.roleOfMaster'])
   })
 
   it('lässt Invarianten nur auf Sessions zeigen, die VOR ihnen stehen', () => {
@@ -505,6 +512,121 @@ describe('Session-Vertrag', () => {
       .toContain('c.final: Invariante zeigt auf "f.shortlist", der nicht VOR dem Slot steht')
     expect(validateSlotRegistry(mutate('c.final', { invariants: [{ kind: 'memberOf', of: 'gibtsnicht' }] })))
       .toContain('c.final: Invariante zeigt auf unbekannten Slot "gibtsnicht"')
+  })
+
+  it('gibt jeder Session 3 bis 5 prüfbare Qualitätsmerkmale', () => {
+    for (const session of BRAND_SLOTS) {
+      expect(session.quality.length, session.id).toBeGreaterThanOrEqual(3)
+      expect(session.quality.length, session.id).toBeLessThanOrEqual(5)
+    }
+    expect(validateSlotRegistry(mutate('b.purpose', { quality: ['nur eines'] })))
+      .toContain('b.purpose: 1 Qualitätsmerkmale — verlangt sind 3 bis 5')
+  })
+
+  it('gibt jeder Session mindestens zwei Anti-Muster', () => {
+    for (const session of BRAND_SLOTS) {
+      expect(session.antiPatterns.length, session.id).toBeGreaterThanOrEqual(2)
+    }
+    expect(validateSlotRegistry(mutate('b.purpose', { antiPatterns: ['eines'] })))
+      .toContain('b.purpose: weniger als zwei Anti-Muster')
+  })
+
+  it('gibt eine Leiter NUR den Sessions, in denen jemand gefragt wird', () => {
+    const asks = (session: BrandSlot) =>
+      session.kind === 'ask' || session.kind === 'collect' || session.kind === 'choose'
+    for (const session of BRAND_SLOTS) {
+      if (asks(session)) expect(session.ladder.opening.trim(), session.id).not.toBe('')
+      else expect(session.ladder.opening, session.id).toBe('')
+    }
+    // 29 Fragen + 1 Sammlung (a.facts) + 15 Auswahlen = 45. Die Registry führt
+    // 16 `choice`-Slots, aber `a.facts` ist davon die Sammlung (Plan, Anhang A).
+    expect(BRAND_SLOTS.filter(asks)).toHaveLength(45)
+
+    expect(validateSlotRegistry(mutate('a.origin', {
+      ladder: { opening: '', probes: [], reframes: [] },
+    }))).toContain('a.origin: kind "ask" ohne Eröffnung in der Leiter')
+    expect(validateSlotRegistry(mutate('b.purpose', {
+      ladder: { opening: 'etwas', probes: [], reframes: [] },
+    }))).toContain('b.purpose: kind "draft" braucht keine Leiter — hier fragt niemand')
+  })
+
+  it('gibt jeder Entwurfs-Session ein Beispiel je Pfad UND je Sprache', () => {
+    const drafts = BRAND_SLOTS.filter(session =>
+      session.kind === 'derive' || session.kind === 'draft' || session.generator === 'candidates')
+    // 11 Ableitungen + 11 Entwürfe + `ep.taglines` (Auswahl mit Kandidaten-Generator).
+    expect(drafts).toHaveLength(23)
+    for (const session of drafts) {
+      for (const pathKind of ['new', 'relaunch'] as const) {
+        expect(session.examples[pathKind].de.length, `${session.id}/${pathKind}/de`).toBeGreaterThan(0)
+        expect(session.examples[pathKind].en.length, `${session.id}/${pathKind}/en`).toBeGreaterThan(0)
+      }
+    }
+
+    const purpose = slotById('b.purpose')!
+    expect(validateSlotRegistry(mutate('b.purpose', {
+      examples: { ...purpose.examples, relaunch: { de: [], en: [] } },
+    }))).toContain('b.purpose: kein Beispiel für Pfad "relaunch" in "de"')
+  })
+
+  it('lässt genau zwei Sessions bewusst ohne Beispiel', () => {
+    // `d.pairs` ist ein Instrument (der Wert entsteht Karte gegen Karte) und
+    // `result.rating` eine freiwillige Zahl — beides sind Fälle, in denen ein
+    // Beispiel keine Form zeigte, sondern nur ein Ergebnis vorwegnähme.
+    const withoutExamples = BRAND_SLOTS
+      .filter(session => session.examples.new.de.length === 0 && session.examples.relaunch.de.length === 0)
+      .map(session => session.id)
+    expect(withoutExamples).toEqual(['d.pairs', 'result.rating'])
+  })
+
+  it('meldet einen unbrauchbaren Umfang', () => {
+    expect(validateSlotRegistry(mutate('b.purpose', { effort: { minutes: 3, turns: 0 } })))
+      .toContain('b.purpose: unbrauchbarer Umfang (3 min, 0 Züge)')
+  })
+
+  it('hält spitze Klammern aus allem heraus, was ein MENSCH liest', () => {
+    // Die Verarbeitungsregeln dürfen sie tragen (die Formeln brauchen ihre
+    // Platzhalter) — Ziel, Qualität, Anti-Muster, Leiter und Beispiele nicht:
+    // die stehen im Info-Modal und auf der Abnahme-Seite.
+    expect(BRAND_SLOTS.some(session => session.processing.rules.some(rule => /[<>]/.test(rule)))).toBe(true)
+    expect(validateSlotRegistry(mutate('a.origin', { goal: 'capture <what>' })))
+      .toContain('a.origin: spitze Klammern in goal')
+    expect(validateSlotRegistry(mutate('a.origin', {
+      examples: { new: { de: ['<name>'], en: [] }, relaunch: { de: [], en: [] } },
+    }))).toContain('a.origin: spitze Klammern in examples')
+  })
+
+  it('trägt die beiden Invarianten-Entscheidungen aus Paket 2', () => {
+    // `f.decision` ist „top three, in order" — eine LISTE, deren Zeilen alle
+    // aus der Shortlist stammen müssen (Paket-1-Befund (b), jetzt entschieden).
+    expect(slotById('f.decision')!.invariants).toEqual([{ kind: 'subsetOf', of: 'f.shortlist' }])
+    // `f.shortlist` bekommt BEWUSST keine: eine Kandidaten-Zeile trägt laut
+    // Content-Spec §10 den Namenstyp mit, `subsetOf` verglich also Zeilen, die
+    // nie gleich sein können.
+    expect(slotById('f.shortlist')!.invariants).toEqual([])
+    expect(slotById('c.final')!.invariants).toEqual([{ kind: 'count', min: 3, max: 5 }])
+    expect(slotById('e.anchorLine')!.invariants).toEqual([{ kind: 'sentenceOf', of: 'e.manifesto' }])
+  })
+
+  it('lässt vertagen, wo jemand fehlt, der nicht am Tisch sitzt', () => {
+    // Zahlen (a.facts), Team-Fragen (Konfliktregel, Einstellungsfilter), die
+    // drei Architektur-Weichen und die Namens-Tabus — überall dort ist die
+    // Alternative zum Vertagen eine erfundene Antwort.
+    expect(BRAND_SLOTS.filter(session => session.answers.allowDefer).map(session => session.id))
+      .toEqual([
+        'a.facts',
+        'b2.visibility', 'b2.roleOfMaster', 'b2.namingPattern',
+        'c.conflictRule', 'c.teamFilter',
+        'f.noGos',
+      ])
+  })
+
+  it('nennt die Teile der Sammel-Session so, wie der Locale-Katalog sie führt', () => {
+    const facts = slotById('a.facts')!
+    expect(facts.parts.map(part => partKeyFor(facts, part))).toEqual([
+      'brand.part.a.facts.teamSize',
+      'brand.part.a.facts.age',
+      'brand.part.a.facts.markets',
+    ])
   })
 
   it('kennt zu jedem Inhalts-Eintrag eine Session', () => {

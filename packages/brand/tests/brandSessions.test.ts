@@ -239,14 +239,32 @@ describe('evaluateInvariants — was ein Test prüfen kann (§3a Nr. 6)', () => 
     invariants,
   })
 
-  it('registriert in der echten Registry genau die sicheren zwei', () => {
+  it('registriert in der echten Registry genau die sicheren drei', () => {
+    // `f.decision` kam mit Paket 2 dazu, nachdem die WERT-FORM entschieden war
+    // („top three, in order" = eine Liste, jede Zeile ein Name aus der
+    // Shortlist — Paket-1-Befund (b)). `f.shortlist subsetOf f.candidates`
+    // wurde BEWUSST nicht registriert: eine Kandidaten-Zeile trägt laut
+    // Content-Spec §10 den Namenstyp mit, die Zeilen können also nie gleich
+    // sein — die Invariante hätte jedes Bestätigen mit 409 abgewiesen.
     const registered = BRAND_SLOTS
       .filter(session => session.invariants.length > 0)
       .map(session => [session.id, session.invariants] as const)
     expect(registered).toEqual([
       ['c.final', [{ kind: 'count', min: 3, max: 5 }]],
       ['e.anchorLine', [{ kind: 'sentenceOf', of: 'e.manifesto' }]],
+      ['f.decision', [{ kind: 'subsetOf', of: 'f.shortlist' }]],
     ])
+  })
+
+  it('f.decision: die Rangfolge darf nur Namen der Shortlist tragen', () => {
+    const session = slotById('f.decision')!
+    const facts = { 'f.shortlist': { value: '- Kolben\n- Nabe\n- Sattelfest' } }
+    expect(evaluateInvariants(session, '- Kolben\n- Sattelfest\n- Nabe', facts)).toEqual({ ok: true })
+    expect(evaluateInvariants(session, '- Kolben\n- Speiche', facts)).toEqual({
+      ok: false,
+      code: 'invariant_violated',
+      invariant: { kind: 'subsetOf', of: 'f.shortlist' },
+    })
   })
 
   it('c.final: drei bis fünf Werte sind in Ordnung', () => {

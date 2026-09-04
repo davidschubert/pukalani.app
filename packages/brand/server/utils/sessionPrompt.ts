@@ -42,14 +42,15 @@ import {
  *    ENTWURFS-Auftrag fragt niemanden; sie gehören deshalb in
  *    `conversePrompt.ts` (Paket 3) und nicht hierher.
  *
- * ── IN PAKET 1 IST DAS ERGEBNIS WÖRTLICH DAS ALTE ─────────────────────────
- * `quality`, `antiPatterns`, `examples`, `ladder` sind leer und `form` trägt
- * nur mechanische Vorgaben (Paket 2 füllt beides, Davids Inhalts-Gate). Der
- * gebaute Text ist deshalb ZEICHENGLEICH mit dem der vier Vorgänger — bewiesen
- * an `tests/fixtures/slotInstructions.before.json`, das vor dem Umbau erzeugt
- * wurde. Genau deshalb steigt in diesem Paket auch KEINE Prompt-Fassung: eine
- * Fassung, die ohne Textänderung steigt, macht Generations-Einträge
- * unvergleichbar, ohne dass sich etwas geändert hätte.
+ * ── SEIT PAKET 2 IST DAS ERGEBNIS LÄNGER ALS DAS ALTE ────────────────────
+ * `quality`, `antiPatterns`, `examples`, `ladder` und `form` sind gefüllt
+ * (Davids Inhalts-Gate), also stehen unter den unveränderten
+ * Verarbeitungsregeln jetzt weitere Abschnitte. Was BLEIBT, ist die
+ * Zeilen-Deckung: jede Zeile der vier Vorgänger — ausser der `TASK:`-Zeile,
+ * deren Ziel geschärft werden durfte — steht wörtlich auch im neuen Prompt,
+ * bewiesen an `tests/fixtures/slotInstructions.before.json` (vor dem Umbau
+ * erzeugt). Weil der Text sich damit GEÄNDERT hat, sind in Paket 2 alle vier
+ * Prompt-Fassungen gestiegen; in Paket 1 war das Gegenteil richtig.
  *
  * ── EINE SESSION OHNE VERARBEITUNGSREGELN HAT KEINEN ENTWURFS-AUFTRAG ─────
  * Dann wirft der Bauer, wie die vier Vorgänger auch. Das ist Absicht: ein
@@ -88,9 +89,23 @@ function formLines(config: BrandSessionConfig): string[] {
   return lines
 }
 
-/** Beispiele des PFADES — nie die des anderen (Plan §3a Nr. 3). */
-function exampleLines(config: BrandSessionConfig, pathKind: BrandPathKind): string[] {
-  return config.examples[pathKind].map(example => `- ${example}`)
+/**
+ * Beispiele des PFADES und der INHALTSSPRACHE — nie die des anderen Pfades und
+ * nie die der anderen Sprache (Plan §3a Nr. 3).
+ *
+ * Die Sprachwahl folgt derselben Konvention wie `advisorOpenersFor`: alles, was
+ * nicht mit `de` beginnt, bekommt die englische Fassung. Fehlt die Sprache
+ * ganz, ist es `en` — die Default-Locale des Layers (s. `contentLocale` in
+ * `BrandSlotInstructionOptions`).
+ */
+function exampleLines(
+  config: BrandSessionConfig,
+  pathKind: BrandPathKind,
+  contentLocale: string | undefined,
+): string[] {
+  const set = config.examples[pathKind]
+  const texts = (contentLocale ?? 'en').toLowerCase().startsWith('de') ? set.de : set.en
+  return texts.map(example => `- ${example}`)
 }
 
 function ladderLines(config: BrandSessionConfig): string[] {
@@ -122,7 +137,7 @@ export function sessionInstruction(
     ...section('Never accept:', config.antiPatterns.map(pattern => `- ${pattern}`)),
     ...section(
       'Examples of the FORM only — a different industry, never copy their content:',
-      exampleLines(config, options.pathKind),
+      exampleLines(config, options.pathKind, options.contentLocale),
     ),
     ...section('How to lead this session:', ladderLines(config)),
   ]

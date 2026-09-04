@@ -217,6 +217,15 @@
       "naming": "Whether it is a new brand or a test bench for the existing name: here the name is measured against the foundation — does it fit purpose, values and archetype? Plus the sober checks: is it available, is it pronounceable, does it work in English too?",
       "result": "The result bundles every confirmed decision of the foundation into your brand document — with a direction for everything that follows. From here you move on to design, copy and the public face; and the more honest the chapters before, the more the result can carry."
     },
+    "part": {
+      "a": {
+        "facts": {
+          "teamSize": "How many people work with you — permanent and freelance together?",
+          "age": "Since when have you existed? A year is enough.",
+          "markets": "Where do you actually sell — which places, which channels?"
+        }
+      }
+    },
     "example": {
       "a": {
         "origin": {

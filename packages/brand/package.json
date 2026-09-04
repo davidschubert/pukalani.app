@@ -7,7 +7,9 @@
   "scripts": {
     "dev": "nuxi dev .playground --port 3009",
     "lint": "eslint .",
-    "test": "vitest run"
+    "test": "vitest run",
+    "print:sessions": "jiti scripts/print-session-content.mts",
+    "check:sessions": "jiti scripts/print-session-content.mts --check"
   },
   "dependencies": {
     "@nuxt/ui": "catalog:",
@@ -21,6 +23,7 @@
     "@nuxt/eslint-config": "catalog:",
     "@types/node": "catalog:",
     "eslint": "catalog:",
+    "jiti": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:",
     "vue": "catalog:"

@@ -251,6 +251,9 @@ export function createAdvisorSlotGenerator(options: AdvisorSlotGeneratorOptions)
       // Wiederholungsfrage und wäre ohne Verlauf ein Hinweis auf etwas, das gar
       // nicht stattgefunden hat.
       hasConversation: context.conversation.length > 0,
+      // NUR für die Beispiele der Session (BW2 Paket 2): sie liegen je Sprache
+      // vor, und ein deutsches Branding bekommt das deutsche Formvorbild.
+      contentLocale: context.locale,
     })
 
     const prompt = [
