@@ -114,6 +114,20 @@
  * „Aussenbild-Check", auf dem Gründer-Pfad bleibt es der Basis-Text).
  * `questionKeyFor()` ist die EINE Stelle, die das rechnet.
  *
+ * ── TEAM-VARIANTEN (Paket 2b, Davids Entscheidung 2026-09-04) ─────────────
+ * Dieselbe Mechanik für die Weiche W3 (Solo/Team), aber an EINEM Slot:
+ * `c.discovery3` fragt im Team nach der Entscheidungsregel für den Fall, dass
+ * der Inhaber nicht im Raum ist (D7 der Content-Spec §6), solo nach dem
+ * Verhalten, das niemals geduldet wird (D3). `teamVariant: true` markiert
+ * das, und der Schlüssel bekommt IMMER ein Suffix — `brand.q.c.discovery3.solo`
+ * bzw. `.team`. IMMER, nicht nur im Team-Fall: ein JSON-Katalog kann unter
+ * EINEM Schlüssel nicht gleichzeitig eine Zeichenkette und ein Kind-Objekt
+ * halten (dieselbe Grenze wie bei `d.gapReveal`, s. `tests/i18nCatalog.test.ts`),
+ * also sind beide Fassungen Kinder.
+ * Pfad- und Team-Variante schliessen sich aus: vier Fassungen je Frage wären
+ * vier Texte, die niemand mehr gegenliest — `validateSlotRegistry` weist die
+ * Kombination ab.
+ *
  * ── WAS HIER BEWUSST NICHT STEHT ──────────────────────────────────────────
  * Die Weiche W3 (Solo/Team) gatet keinen Step, sondern EINEN Slot
  * (`c.teamFilter`). Slot-Bedingungen INNERHALB eines Bausteins modelliert
@@ -219,6 +233,14 @@ export interface BrandSlotPathVariants {
 export type BrandPathKind = 'new' | 'relaunch'
 
 /**
+ * Die Weiche W3 (Solo/Team). Sie steht neben `BrandPathKind` und nicht in
+ * `shared/types/brand.ts`, weil `questionKeyFor` sie braucht und jene Datei
+ * AUS dieser hier importiert — die Gegenrichtung wäre ein Zyklus. Dort wird
+ * sie weiter re-exportiert, damit jede Aufrufstelle bleibt, wo sie war.
+ */
+export type BrandTeamKind = 'solo' | 'team'
+
+/**
  * DER SESSION-VERTRAG (Plan §3 + §3a) — eine deklarative Beschreibung je Feld,
  * PUR (kein i18n, kein H3, kein Appwrite).
  *
@@ -238,6 +260,8 @@ export interface BrandSessionConfig {
   readonly generator: BrandSlotGenerator
   readonly maxLength: number
   readonly pathVariants?: BrandSlotPathVariants
+  /** Eigene Fragefassung je Weiche W3 (Solo/Team) — s. Kopf „Team-Varianten". */
+  readonly teamVariant?: true
   /** Migrationsvertrag: nicht mehr gefragt, aber weiter lesbar. Nie löschen. */
   readonly deactivated?: true
 
@@ -345,6 +369,8 @@ interface BrandSlotDefinition {
   /** true ⇒ `helpKey` wird gesetzt (Lehrblock-Zuordnung s. Kopf). */
   help?: boolean
   pathVariants?: BrandSlotPathVariants
+  /** Eigene Fragefassung je Weiche W3 (Solo/Team) — s. Kopf „Team-Varianten". */
+  teamVariant?: true
   deactivated?: true
 }
 
@@ -376,6 +402,15 @@ export function sessionKindFor(slot: { id: string, type: BrandSlotType }): Brand
  * Sie stehen als TABELLE und nicht 68-mal von Hand: 68 vollständige Datensätze
  * wären 68 Chancen, einen Wert zu vergessen, und ein vergessener Deckel fällt
  * an einem Gespräch auf, das nicht aufhört zu fragen.
+ *
+ * ── DIE MINUTEN SIND IN PAKET 2b HALBIERT (Davids Entscheidung 2026-09-04) ─
+ * Die Summe der alten Schätzungen ergab 154 Min im Basispfad — gegen die
+ * Kommunikationslinie „~45 Minuten" (Content-Spec §16). Entschieden ist
+ * „halbieren und in Kapitel-Etappen kommunizieren": der Basispfad liegt jetzt
+ * bei ~77 Min, der Vollpfad bei ~95 Min, und `tests/slotRegistry.test.ts`
+ * nagelt die Spanne fest. `turns` sind NICHT halbiert — sie sind der Deckel
+ * der Leiter, nicht die Uhr, und müssen zu `answers.maxProbes` passen
+ * (Eröffnung + Nachfragen, ebenfalls geprüft).
  */
 const KIND_DEFAULTS: Readonly<Record<BrandSessionKind, {
   answers: BrandSessionAnswers
@@ -384,12 +419,12 @@ const KIND_DEFAULTS: Readonly<Record<BrandSessionKind, {
 }>> = {
   ask: {
     answers: { minSubstance: 'medium', maxProbes: 2, allowUnknown: true, allowDefer: false },
-    effort: { minutes: 3, turns: 4 },
+    effort: { minutes: 1, turns: 4 },
     review: 'full',
   },
   collect: {
     answers: { minSubstance: 'medium', maxProbes: 2, allowUnknown: true, allowDefer: false },
-    effort: { minutes: 5, turns: 6 },
+    effort: { minutes: 3, turns: 6 },
     review: 'full',
   },
   choose: {
@@ -402,17 +437,17 @@ const KIND_DEFAULTS: Readonly<Record<BrandSessionKind, {
   },
   derive: {
     answers: { minSubstance: 'short', maxProbes: 1, allowUnknown: false, allowDefer: false },
-    effort: { minutes: 2, turns: 2 },
+    effort: { minutes: 1, turns: 2 },
     review: 'full',
   },
   draft: {
     answers: { minSubstance: 'short', maxProbes: 1, allowUnknown: false, allowDefer: false },
-    effort: { minutes: 3, turns: 3 },
+    effort: { minutes: 2, turns: 3 },
     review: 'full',
   },
   instrument: {
     answers: { minSubstance: 'short', maxProbes: 0, allowUnknown: false, allowDefer: false },
-    effort: { minutes: 5, turns: 1 },
+    effort: { minutes: 3, turns: 1 },
     review: 'full',
   },
 }
@@ -454,6 +489,7 @@ function defineSession(definition: BrandSlotDefinition): BrandSessionConfig {
     generator: definition.generator,
     maxLength: definition.maxLength,
     ...(definition.pathVariants ? { pathVariants: definition.pathVariants } : {}),
+    ...(definition.teamVariant ? { teamVariant: definition.teamVariant } : {}),
     ...(definition.deactivated ? { deactivated: definition.deactivated } : {}),
 
     kind,
@@ -560,7 +596,7 @@ export const BRAND_SLOTS: readonly BrandSlot[] = [
   // wurde. Dieselbe Auflösung wie bei `e.warmup1/2`.
   defineSession({ id: 'c.discovery1', stepId: 'values', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'none' }),
   defineSession({ id: 'c.discovery2', stepId: 'values', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'none' }),
-  defineSession({ id: 'c.discovery3', stepId: 'values', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'none' }),
+  defineSession({ id: 'c.discovery3', stepId: 'values', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'none', teamVariant: true }),
   defineSession({ id: 'c.candidates', stepId: 'values', type: 'derivation', required: true, kind: 'list', maxLength: LONG, editor: 'stage', generator: 'candidates', help: true, dependencies: ['a.origin', 'a.customerPraise', 'a.complaints', 'b.conviction', 'c.discovery1', 'c.discovery2', 'c.discovery3'] }),
   defineSession({ id: 'c.final', stepId: 'values', type: 'choice', required: true, kind: 'list', maxLength: SHORT, editor: 'chips', generator: 'none', help: true, dependencies: ['c.candidates'] }),
   defineSession({ id: 'c.definitions', stepId: 'values', type: 'stage-edit', required: true, kind: 'list', maxLength: LONG, editor: 'stage', generator: 'draft', dependencies: ['c.discovery1', 'c.discovery2', 'c.discovery3', 'c.final'] }),
@@ -834,6 +870,31 @@ export function validateSlotRegistry(slots: readonly BrandSlot[] = BRAND_SLOTS):
     if (!BRAND_EFFORT_MINUTES.includes(slot.effort.minutes) || slot.effort.turns <= 0) {
       problems.push(`${slot.id}: unbrauchbarer Umfang (${slot.effort.minutes} min, ${slot.effort.turns} Züge)`)
     }
+    // DIE LEITER UND IHR DECKEL DÜRFEN SICH NICHT WIDERSPRECHEN (Paket 2b,
+    // Audit Teil 3 Nr. 1). Bei `maxProbes: 0` ist jede aufgeschriebene
+    // Nachfrage tot — der alte Stand schrieb 14-mal die beste Frage der
+    // Session auf und verbot sie im selben Atemzug.
+    if (slot.answers.maxProbes < slot.ladder.probes.length) {
+      problems.push(
+        `${slot.id}: ${slot.ladder.probes.length} Nachfragen in der Leiter, `
+        + `aber maxProbes ${slot.answers.maxProbes}`,
+      )
+    }
+    // Und der Zug-Deckel muss die Leiter tragen: Eröffnung plus Nachfragen.
+    // NUR bei `ask` und `choose`: bei `collect` zählen die Züge die TEILE
+    // (a.facts fragt drei Zahlen nacheinander), bei `instrument` ist das ganze
+    // Werkzeug EIN Zug — dort bedeutet die Zahl etwas anderes.
+    const countsProbeTurns = slot.kind === 'ask' || slot.kind === 'choose'
+    if (countsProbeTurns && slot.effort.turns < 1 + slot.answers.maxProbes) {
+      problems.push(
+        `${slot.id}: ${slot.effort.turns} Züge tragen keine Eröffnung `
+        + `plus ${slot.answers.maxProbes} Nachfragen`,
+      )
+    }
+    // Vier Fragefassungen je Slot (Pfad × Weiche W3) liest niemand mehr gegen.
+    if (slot.teamVariant && slot.pathVariants) {
+      problems.push(`${slot.id}: teamVariant und pathVariants zugleich`)
+    }
     // SPITZE KLAMMERN NUR IN DEN VERARBEITUNGSREGELN (die Formeln brauchen ihre
     // Platzhalter, „We exist so that <who> …"). Alles andere hier liest ein
     // MENSCH — im Info-Modal der Session und auf der Abnahme-Seite —, und dort
@@ -956,11 +1017,21 @@ export function slotIsFilled(state: BrandSlotStateFacts | undefined): boolean {
 }
 
 /**
- * Der i18n-Schlüssel der FRAGE für einen Pfad. Ohne Pfad-Variante der
- * Basis-Schlüssel, sonst mit Suffix — die eine Stelle, die die Konvention
- * `brand.q.<id>.<pfad>` kennt (s. Kopf „Pfad-Varianten").
+ * Der i18n-Schlüssel der FRAGE für einen Pfad — und, wo es eine Team-Fassung
+ * gibt, für die Weiche W3. Ohne Variante der Basis-Schlüssel, sonst mit
+ * Suffix: die eine Stelle, die die Konventionen `brand.q.<id>.<pfad>` und
+ * `brand.q.<id>.<solo|team>` kennt (s. Kopf).
+ *
+ * `team` ist OPTIONAL und fällt auf `'solo'` zurück: eine Aufrufstelle, die
+ * die Weiche nicht kennt, bekommt die Fassung für den Einzelnen — nie einen
+ * Schlüssel, den der Katalog nicht führt.
  */
-export function questionKeyFor(slot: BrandSlot, pathKind: BrandPathKind): string {
+export function questionKeyFor(
+  slot: BrandSlot,
+  pathKind: BrandPathKind,
+  team: BrandTeamKind = 'solo',
+): string {
+  if (slot.teamVariant) return `${slot.questionKey}.${team === 'team' ? 'team' : 'solo'}`
   return slot.pathVariants?.[pathKind] ? `${slot.questionKey}.${pathKind}` : slot.questionKey
 }
 

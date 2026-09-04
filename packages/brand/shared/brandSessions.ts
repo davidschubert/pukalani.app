@@ -182,6 +182,10 @@ function checkOne(
   const needsSource = invariant.kind !== 'count' && invariant.kind !== 'mentionsNone'
   if (needsSource && !source?.trim()) return true
 
+  /** Vergleichsformen der Quell-Einträge, leere weggeworfen. */
+  const sourceTerms = (): string[] =>
+    listEntries(source ?? '').map(comparable).filter(entry => entry.length > 0)
+
   switch (invariant.kind) {
     case 'count': {
       const count = listEntries(value).length
@@ -204,7 +208,24 @@ function checkOne(
     }
     case 'mentionsNone': {
       const haystack = comparable(value)
-      return (invariant.terms ?? []).every(term => !haystack.includes(comparable(term)))
+      // `terms` sind die FESTEN Verbote, `of` die aus einer anderen Session
+      // (Paket 2b): `d.secondary` darf nicht derselbe Archetyp sein wie
+      // `d.primary`, und dafür braucht es keine eigene Invarianten-Art —
+      // „nennt das hier nicht" ist genau die Frage. Ohne Quelle bleibt die
+      // Liste leer, die Prüfung also offen (s. Kopf).
+      const terms = [
+        ...(invariant.terms ?? []).map(comparable),
+        ...sourceTerms(),
+      ].filter(term => term.length > 0)
+      return terms.every(term => !haystack.includes(term))
+    }
+    case 'mentionsFrom': {
+      const terms = sourceTerms()
+      // Eine Quelle, aus der nichts Vergleichbares übrig bleibt, prüft nichts.
+      if (terms.length === 0) return true
+      const haystack = comparable(value)
+      const hits = terms.filter(term => haystack.includes(term)).length
+      return invariant.min === undefined ? hits === terms.length : hits >= invariant.min
     }
   }
 }

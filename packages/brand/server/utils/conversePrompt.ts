@@ -47,6 +47,15 @@ import { BRAND_CONVERSE_HISTORY_CHARS, formatStartCard } from './georgePrompt'
 /**
  * Steht in jeder Gesprächs-Nachricht; steigt bei jeder inhaltlichen Änderung.
  *
+ * `converse-7` (2026-09-04, BW2 Paket 2b — Gegenlese-Runde): der Bauplan ist
+ * derselbe, was er transportiert nicht. Vierzehn Auswahl-Sessions haben ihre
+ * Nachfrage zurück (`maxProbes: 0` hatte sie im selben Atemzug verboten, in
+ * dem die Leiter sie aufschrieb), vier Sessions haben das Vertagen gewechselt,
+ * zwei Leitern sind auf „eine Entscheidung je Zug" umgebaut, `c.discovery3`
+ * hat eine Team-Fassung und `e.statements` nennt seine 23 Satzanfänge im Ziel.
+ * Ein Zug aus `converse-6` ist damit unter anderen Antwort-Regeln entstanden,
+ * und genau dafür gibt es diese Zahl.
+ *
  * `converse-6` (2026-09-04, BW2 Paket 3a): der Auftrag kennt die SESSION. Bis
  * hierher war jeder Zug derselbe Auftrag mit anderen Eingaben — Ziel,
  * Qualitätsmerkmale, Anti-Muster und die Frage-Leiter der Session erreichten
@@ -84,7 +93,7 @@ import { BRAND_CONVERSE_HISTORY_CHARS, formatStartCard } from './georgePrompt'
  * FRAGE aus dem Locale-Katalog statt der internen Id — George sprach
  * `a.customerPraise` & Co. wortwörtlich im Chat nach.
  */
-export const BRAND_CONVERSE_PROMPT_VERSION = 'converse-6'
+export const BRAND_CONVERSE_PROMPT_VERSION = 'converse-7'
 
 /**
  * Was ein Mensch in EINEM Zug schreiben darf. Grosszügiger als der Hinweis

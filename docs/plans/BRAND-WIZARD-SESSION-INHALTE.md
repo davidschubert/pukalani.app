@@ -11,13 +11,13 @@ Die Ziel-, Qualitäts- und Anti-Muster-Texte sind ENGLISCH: sie reisen wörtlich
 Prompt (Content-Spec §1.2 — sie beschreiben Verhalten, nicht Text). Die Beispiele stehen
 in beiden Oberflächen-Sprachen, weil die Abnahme-Seite je Kapitel sie dem Kunden zeigt.
 
-## Kontext (`context`) — 11 Sessions
+## Kontext (`context`) — 11 Sessions, **Σ ~14 Min** (35 Züge)
 
 Interview-Technik: **George** (Markenberater). Gesprochen wird alles von George.
 
 ### `a.pitch` — Elevator-Pitch
 
-**Art:** Ableitung · **Umfang:** ~2 Min, 2 Züge · **Vertraulichkeit:** öffentlich
+**Art:** Ableitung · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** draft the elevator pitch of this brand: what they do, who it is for, and what is different about it, in two or three sentences.
 
@@ -46,18 +46,18 @@ Interview-Technik: **George** (Markenberater). Gesprochen wird alles von George.
 
 - **Neue Marke**
   - de:
-  > Wir bauen Einbauschränke für Altbauwohnungen mit schiefen Wänden — vor Ort eingemessen statt aus dem Katalog. Für Leute, die ihre Wohnung behalten und trotzdem Platz brauchen.
+  > Wir sind ein Tagescafé mit eigener Backstube: Das Brot vom Vortag geht mittags in die Suppe, weggeworfen wird nichts. Für Leute, die zwischen zwei Terminen zwanzig Minuten sitzen und trotzdem etwas Warmes essen wollen.
   - en:
-  > We build fitted cupboards for old flats with crooked walls, measured on site instead of ordered from a catalogue. For people who want to keep the flat and still find room for their things.
+  > We are a daytime café with our own bakery: yesterday's bread goes into the midday soup, and nothing is thrown out. For people who want to sit for twenty minutes between two appointments and still eat something warm.
 - **Marken-Relaunch**
   - de:
-  > Wir sind eine Physiotherapie für Menschen nach einer Knie-Operation. Wir nehmen uns 45 Minuten statt 20 und sprechen direkt mit der Klinik, die operiert hat.
+  > Wir kochen seit 1998 einen Mittagstisch für die Werkstätten und Büros im Viertel — zwei Gerichte am Tag, eines davon ohne Fleisch. Wer um halb eins kommt, sitzt um zehn nach eins wieder draußen.
   - en:
-  > We are a physiotherapy practice for people recovering from knee surgery. We take 45 minutes instead of 20 and talk directly to the clinic that did the operation.
+  > Since 1998 we have cooked a midday menu for the workshops and offices in this quarter — two dishes a day, one of them meat-free. Whoever arrives at half past twelve is back outside by ten past one.
 
 ### `a.category` — Kategorie
 
-**Art:** Ableitung · **Umfang:** ~2 Min, 2 Züge · **Vertraulichkeit:** öffentlich
+**Art:** Ableitung · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** name the industry / category this brand plays in, normalised to a term the industry itself uses.
 
@@ -86,18 +86,18 @@ Interview-Technik: **George** (Markenberater). Gesprochen wird alles von George.
 
 - **Neue Marke**
   - de:
-  > Imkerei mit Direktvermarktung
+  > Tagescafé mit eigener Backstube
   - en:
-  > Beekeeping with direct sales
+  > Café with its own bakery
 - **Marken-Relaunch**
   - de:
-  > Steuerkanzlei für Handwerksbetriebe
+  > Mittagstisch für Betriebe im Viertel
   - en:
-  > Tax practice for skilled trades
+  > Midday canteen for local businesses
 
 ### `a.competitors` — Wettbewerber
 
-**Art:** Entwurf · **Umfang:** ~3 Min, 3 Züge · **Vertraulichkeit:** öffentlich
+**Art:** Entwurf · **Umfang:** ~2 Min, 3 Züge · **Vertraulichkeit:** intern — reist nicht per Share-Link
 
 **Ziel:** write 3-5 short competitor profiles.
 
@@ -126,18 +126,18 @@ Interview-Technik: **George** (Markenberater). Gesprochen wird alles von George.
 
 - **Neue Marke**
   - de:
-  > - Backhaus Merten — stark: sechs Filialen, alle am Bahnhof — schwach: eine Teiglinie für alles, kein Sauerteig
+  > - (Name aus den Eingaben) — stark: mittags in elf Minuten am Tisch — schwach: dieselbe Karte seit Jahren
   - en:
-  > - Merten Bakeries — strong: six shops, all next to the station — weak: one dough line for everything, no sourdough
+  > - (name from the inputs) — strong: lunch on the table in eleven minutes — weak: the same menu for years
 - **Marken-Relaunch**
   - de:
-  > - Velo Grün — stark: Termin am selben Tag — schwach: repariert nur Räder, die sie selbst verkauft haben
+  > - (Name aus den Eingaben) — Annahme, bitte prüfen: nach 14 Uhr gibt es nichts Warmes mehr
   - en:
-  > - Velo Grün — strong: same-day appointments — weak: only repairs bikes they sold themselves
+  > - (name from the inputs) — assumption, please verify: nothing hot is served after two in the afternoon
 
 ### `a.audienceSketch` — Zielgruppen-Skizze
 
-**Art:** Entwurf · **Umfang:** ~3 Min, 3 Züge · **Vertraulichkeit:** öffentlich
+**Art:** Entwurf · **Umfang:** ~2 Min, 3 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** sketch the audience of this brand: who they are, what they want, and what holds them back.
 
@@ -167,45 +167,45 @@ Interview-Technik: **George** (Markenberater). Gesprochen wird alles von George.
 - **Neue Marke**
   - de:
   > ## Wer
-  > Eltern beim ersten Kind, ohne Familie in der Stadt
+  > Leute aus den Büros zwei Straßen weiter, die mittags raus wollen
   > 
   > ## Was sie wollen
-  > Jemanden, der nachts ans Telefon geht
+  > In zwanzig Minuten etwas Warmes, ohne vorher zu bestellen
   > 
   > ## Was sie bremst
-  > Sie wissen nicht, was die Kasse zahlt
+  > Die Sorge, um halb eins keinen Platz mehr zu bekommen
   - en:
   > ## Who
-  > First-time parents with no family in the city
+  > People from the offices two streets away who want to get out at lunchtime
   > 
   > ## What they want
-  > Somebody who picks up the phone at night
+  > Something warm within twenty minutes, without ordering ahead
   > 
   > ## What holds them back
-  > They do not know what the insurance covers
+  > The worry that there will be no table left at half past twelve
 - **Marken-Relaunch**
   - de:
   > ## Wer
-  > Erwachsene, die mit 40 wieder anfangen zu klettern
+  > Handwerker auf dem Weg zur nächsten Baustelle
   > 
   > ## Was sie wollen
-  > Einen Abend, an dem sie nicht die Schlechtesten sind
+  > Ein Essen, das satt macht und nicht nach Diät aussieht
   > 
   > ## Was sie bremst
-  > Die Angst, vor Zwanzigjährigen zu scheitern
+  > Der Eindruck, mit staubiger Hose hier fehl am Platz zu sein
   - en:
   > ## Who
-  > Adults taking up climbing again at 40
+  > Tradespeople on the way to the next building site
   > 
   > ## What they want
-  > An evening where they are not the worst in the room
+  > A meal that fills them up and does not look like a diet
   > 
   > ## What holds them back
-  > The fear of failing in front of twenty-year-olds
+  > The sense that dusty work trousers are out of place here
 
 ### `a.toneAnalysis` — Tonalität eurer bestehenden Texte
 
-**Art:** Ableitung (optional) · **Umfang:** ~2 Min, 2 Züge · **Vertraulichkeit:** öffentlich
+**Art:** Ableitung (optional) · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** analyse the tone of the existing texts contained in the inputs below.
 
@@ -234,18 +234,18 @@ Interview-Technik: **George** (Markenberater). Gesprochen wird alles von George.
 
 - **Neue Marke**
   - de:
-  > Sachlich und knapp — „Wir brennen zweimal, bei 1240 Grad." Viel Handwerk, keine Werbung. Distanziert: die Seite sagt nirgends „du" oder „ihr".
+  > Knapp und ohne Werbung — „Brot vom Vortag geht in die Suppe." Viel Handwerk, keine Adjektive. Distanziert: die Seite spricht niemanden direkt an.
   - en:
-  > Plain and short — "we fire twice, at 1240 degrees". A lot of craft, no advertising. Distant: the site never addresses anyone directly.
+  > Short and free of advertising — "yesterday's bread goes into the soup". A lot of craft, no adjectives. Distant: the site never addresses anyone directly.
 - **Marken-Relaunch**
   - de:
-  > Feierlich bis pathetisch — „Wo Sonne und Schiefer sich begegnen." Traditionsschwer, ohne eine einzige Jahreszahl oder einen Preis.
+  > Werbend bis laut — „Der beste Mittagstisch der Stadt." Viele Superlative, und nirgends steht, was tatsächlich auf der Karte steht.
   - en:
-  > Solemn to the point of pathos — "where sun and slate meet". Heavy with tradition, without a single year or price anywhere.
+  > Advertising, verging on loud — "the best midday menu in town". Plenty of superlatives, and nowhere does it say what is actually on the menu.
 
 ### `a.origin` — Warum hast du angefangen — was war der Auslöser, welches Problem konntest du nicht ignorieren?
 
-**Art:** Frage · **Umfang:** ~5 Min, 4 Züge · **Vertraulichkeit:** öffentlich
+**Art:** Frage · **Umfang:** ~2 Min, 4 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** capture why this brand was started — or, on a relaunch, what about the current brand must survive the relaunch.
 
@@ -282,18 +282,18 @@ Interview-Technik: **George** (Markenberater). Gesprochen wird alles von George.
 
 - **Neue Marke**
   - de:
-  > Nach zwölf Jahren im Reitstall habe ich zum dritten Mal einen Sattel abgenommen, der ein Pferd wundgescheuert hat, weil er von der Stange war. Danach habe ich angefangen, selbst zu messen.
+  > Drei Jahre habe ich in einer Kantine gekocht und jeden Abend zwei Bleche Brot in die Tonne geworfen. An dem Abend, an dem ich den Sack nicht mehr zubinden wollte, habe ich gekündigt und den Laden hier gemietet.
   - en:
-  > After twelve years in the stable I took off the third saddle that had rubbed a horse raw because it came off the shelf. That was when I started measuring and building them myself.
+  > For three years I cooked in a staff canteen and threw two trays of bread into the bin every evening. On the evening I could not bring myself to tie up the bag again, I quit and rented this place.
 - **Marken-Relaunch**
   - de:
-  > Bleiben muss der Name und das gelbe Klavier auf dem Schild — daran erkennen uns die Eltern seit 1994. Weg muss das Wort „Konservatorium": es schreckt genau die Erwachsenen ab, die abends anfangen wollen.
+  > Bleiben muss der Name und die blaue Tafel neben der Tür — daran findet uns die Nachbarschaft seit 1998. Weg muss das Wort „Gaststätte": es holt niemanden mehr herein, der unter vierzig ist.
   - en:
-  > The name stays, and the yellow piano on the sign — parents have recognised us by it since 1994. What goes is the word "conservatory": it scares off exactly the adults who want to start in the evening.
+  > The name stays, and the blue board next to the door — the neighbourhood has found us by it since 1998. What goes is the word "Gaststätte": nobody under forty walks in because of it.
 
 ### `a.customerPraise` — Was sagen deine glücklichsten Kunden über euch — in DEREN Worten?
 
-**Art:** Frage · **Umfang:** ~3 Min, 4 Züge · **Vertraulichkeit:** öffentlich
+**Art:** Frage · **Umfang:** ~1 Min, 4 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** capture the sentence their happiest customers say about them, in the words the customers use.
 
@@ -330,18 +330,18 @@ Interview-Technik: **George** (Markenberater). Gesprochen wird alles von George.
 
 - **Neue Marke**
   - de:
-  > „Ihr habt als Einzige die Kiste mit dem Geschirr meiner Mutter nicht gestapelt — ich hatte das nur einmal gesagt."
+  > „Ihr seid die Einzigen, die mir nicht das letzte Stück Kuchen aufschwatzen, wenn es schon trocken ist."
   - en:
-  > "You were the only ones who did not stack the box with my mother's china. I only mentioned it once."
+  > "You are the only ones who do not talk me into the last piece of cake when it has already gone dry."
 - **Marken-Relaunch**
   - de:
-  > „Bei euch fragt mich jemand, ob ich das schon mal genommen habe. Sonst bekomme ich nur die Schachtel über den Tresen."
+  > „Bei euch weiß ich um halb eins, dass ich um eins wieder auf der Baustelle stehe."
   - en:
-  > "Here somebody asks whether I have taken this before. Everywhere else I just get the box handed over the counter."
+  > "With you I know at half past twelve that I will be back on site by one."
 
 ### `a.complaints` — Welche Beschwerden oder Kritik bekommt ihr? Ehrlich — das ist so wertvoll wie das Lob.
 
-**Art:** Frage · **Umfang:** ~3 Min, 4 Züge · **Vertraulichkeit:** intern — reist nicht per Share-Link
+**Art:** Frage · **Umfang:** ~1 Min, 4 Züge · **Vertraulichkeit:** intern — reist nicht per Share-Link
 
 **Ziel:** capture the complaints and negative feedback this brand actually gets, unvarnished.
 
@@ -378,18 +378,18 @@ Interview-Technik: **George** (Markenberater). Gesprochen wird alles von George.
 
 - **Neue Marke**
   - de:
-  > „Ihr habt den Termin zweimal verschoben, und beide Male musste ich selbst nachfragen."
+  > „Zweimal hintereinander war um 13 Uhr die Suppe alle, und auf der Tafel stand sie noch."
   - en:
-  > "You moved the appointment twice, and both times I had to ask before anyone told me."
+  > "Twice in a row the soup was gone by one o'clock, and it was still up on the board."
 - **Marken-Relaunch**
   - de:
-  > „Am Ende waren es 900 Euro mehr als im Kostenvoranschlag, und vorher hat niemand Bescheid gesagt."
+  > „Seit die Karte geändert wurde, gibt es nichts mehr, was mein Vater essen kann — gesagt hat uns das niemand."
   - en:
-  > "The final bill was 900 euros over the estimate, and nobody warned us before the work was done."
+  > "Since the menu changed there is nothing my father can eat, and nobody told us in advance."
 
 ### `a.oneThing` — Was ist das eine, von dem du dir wünschst, dass es jeder Kunde über euch wüsste?
 
-**Art:** Frage · **Umfang:** ~3 Min, 4 Züge · **Vertraulichkeit:** öffentlich
+**Art:** Frage · **Umfang:** ~1 Min, 4 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** capture the one thing they wish every customer knew about them.
 
@@ -426,18 +426,18 @@ Interview-Technik: **George** (Markenberater). Gesprochen wird alles von George.
 
 - **Neue Marke**
   - de:
-  > Dass wir eine Sohle auch dann noch retten, wenn zwei andere Werkstätten schon abgelehnt haben.
+  > Dass wir das Brot am selben Morgen backen und nach 15 Uhr zum halben Preis abgeben, statt es wegzuwerfen.
   - en:
-  > That we still save a sole after two other workshops have turned it down.
+  > That we bake the bread the same morning and sell it at half price after three instead of throwing it away.
 - **Marken-Relaunch**
   - de:
-  > Dass wir Berufskleidung reparieren statt sie zu ersetzen — das steht auf keinem unserer Angebote.
+  > Dass jedes zweite Gericht ohne Fleisch ist — auf der Tafel steht das seit zwanzig Jahren nicht. Dass jedes zweite Gericht ohne Fleisch ist — auf der Tafel steht das seit zwanzig Jahren nicht.
   - en:
-  > That we repair workwear instead of replacing it — it is on none of our quotes.
+  > That every second dish is meat-free — the board has never said so in twenty years.
 
 ### `a.challenge` — Was ist gerade das größte Hindernis vor euch?
 
-**Art:** Frage · **Umfang:** ~3 Min, 4 Züge · **Vertraulichkeit:** intern — reist nicht per Share-Link
+**Art:** Frage · **Umfang:** ~1 Min, 4 Züge · **Vertraulichkeit:** intern — reist nicht per Share-Link
 
 **Ziel:** capture the biggest obstacle standing in front of this brand right now.
 
@@ -474,18 +474,18 @@ Interview-Technik: **George** (Markenberater). Gesprochen wird alles von George.
 
 - **Neue Marke**
   - de:
-  > Wir sind vier Monate im Jahr ausgebucht und acht Monate leer — die Ausbilder kann ich aber nur ganzjährig halten.
+  > Zwischen 11 und 14 Uhr platzen wir, den Rest des Tages steht die Backstube still — die zweite Kraft bekommen wir aber nur ganztags.
   - en:
-  > We are booked out four months a year and empty the other eight — but I can only keep instructors on a full-year contract.
+  > Between eleven and two we burst at the seams, and the rest of the day the bakery stands still — but the second baker is only available full time.
 - **Marken-Relaunch**
   - de:
-  > Unsere Stammkunden sind mit uns alt geworden. Die Vierzigjährigen kennen uns nur vom Etikett im Getränkemarkt.
+  > Die Stammgäste sind mit uns in Rente gegangen. Die neuen Büros im Viertel bestellen mittags beim Lieferdienst.
   - en:
-  > Our regulars have grown old with us. People in their forties only know us from the label in the supermarket.
+  > Our regulars retired when we got older. The new offices in the quarter order lunch from a delivery service.
 
 ### `a.facts` — Ein paar schnelle Zahlen: Wie groß ist das Team, wie lange gibt es euch, welche Märkte?
 
-**Art:** Sammlung · **Umfang:** ~2 Min, 3 Züge · **Vertraulichkeit:** intern — reist nicht per Share-Link
+**Art:** Sammlung · **Umfang:** ~1 Min, 3 Züge · **Vertraulichkeit:** intern — reist nicht per Share-Link
 
 **Ziel:** collect the plain facts of this brand: how big the team is, how long it has existed and which markets it serves.
 
@@ -518,7 +518,7 @@ Interview-Technik: **George** (Markenberater). Gesprochen wird alles von George.
 
 **Form des Werts:** Person: folgt der Weiche Solo/Team · Zeit: frei · kein Wortdeckel
 
-**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt · vertagen möglich
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 2 · „weiss nicht" gilt · vertagen möglich
 
 **Invarianten (im Code geprüft):** —
 
@@ -528,22 +528,22 @@ Interview-Technik: **George** (Markenberater). Gesprochen wird alles von George.
 
 - **Neue Marke**
   - de:
-  > Team: 3 fest, 2 auf Saison · Seit: 2021 · Märkte: Landkreis und Wochenmarkt in der Stadt
+  > Team: 3 fest, 1 Aushilfe am Wochenende · Seit: 2023 · Märkte: das Viertel und ein Stand auf dem Wochenmarkt
   - en:
-  > Team: 3 permanent, 2 seasonal · Since: 2021 · Markets: the county and the city farmers market
+  > Team: 3 permanent, 1 weekend helper · Since: 2023 · Markets: this quarter and a stall at the weekly market
 - **Marken-Relaunch**
   - de:
-  > Team: 11 Angestellte, davon 4 in Teilzeit · Seit: 1978 · Märkte: Deutschland und Österreich, Versand ab Werk
+  > Team: 7 Angestellte, davon 3 in Teilzeit · Seit: 1998 · Märkte: das Viertel, dazu Mittagslieferung an vier Betriebe
   - en:
-  > Team: 11 employees, 4 of them part-time · Since: 1978 · Markets: Germany and Austria, shipped from the works
+  > Team: 7 employees, 3 of them part-time · Since: 1998 · Markets: this quarter, plus lunch deliveries to four firms
 
-## Purpose, Vision & Mission (`pvm`) — 10 Sessions
+## Purpose, Vision & Mission (`pvm`) — 10 Sessions, **Σ ~14 Min** (35 Züge)
 
 Interview-Technik: **Vera** (Strategin). Gesprochen wird alles von George.
 
 ### `b.whyStarted` — Du hast mir schon erzählt, wie es angefangen hat. In einem Satz: Warum zählt das heute noch?
 
-**Art:** Frage · **Umfang:** ~3 Min, 4 Züge · **Vertraulichkeit:** öffentlich
+**Art:** Frage · **Umfang:** ~2 Min, 4 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** turn what this person already told you about the beginning of this brand into ONE sentence about why that still matters TODAY.
 
@@ -578,18 +578,18 @@ Interview-Technik: **Vera** (Strategin). Gesprochen wird alles von George.
 
 - **Neue Marke**
   - de:
-  > Weil Reparieren immer noch billiger und schöner ist als neu kaufen — nur weiß das kaum jemand.
+  > Weil die meisten Rücken nicht mehr Dehnung brauchen, sondern jemanden, der beim ersten Mal danebensteht.
   - en:
-  > Because mending is still cheaper and better looking than buying new — and almost nobody knows it.
+  > Because most backs do not need more stretching, they need somebody standing beside them the first time.
 - **Marken-Relaunch**
   - de:
-  > Weil eine Brille ein medizinisches Gerät ist, das jemand den ganzen Tag im Gesicht trägt.
+  > Weil eine Stunde, die niemand versteht, keine Ruhe bringt, sondern ein schlechtes Gewissen.
   - en:
-  > Because a pair of glasses is a medical device somebody wears on their face all day.
+  > Because an hour nobody understands brings no calm, only a bad conscience.
 
 ### `b.worldLoses` — Was ginge der Welt verloren, wenn ihr morgen zumacht? Wirkung, nicht Umsatz.
 
-**Art:** Frage · **Umfang:** ~3 Min, 4 Züge · **Vertraulichkeit:** öffentlich
+**Art:** Frage · **Umfang:** ~1 Min, 4 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** capture what the world would lose if this brand shut down tomorrow — impact, not revenue.
 
@@ -626,18 +626,18 @@ Interview-Technik: **Vera** (Strategin). Gesprochen wird alles von George.
 
 - **Neue Marke**
   - de:
-  > Dann gäbe es im Ort keinen Platz mehr, an dem jemand einem Zwölfjährigen zeigt, wie man einen Toaster aufschraubt.
+  > Dann gäbe es hier keinen Kurs mehr, in dem jemand mit Bandscheibenvorfall in der ersten Reihe stehen darf.
   - en:
-  > There would be no place left in town where somebody shows a twelve-year-old how to open a toaster.
+  > There would be no class left here where somebody with a slipped disc is allowed to stand in the front row.
 - **Marken-Relaunch**
   - de:
-  > Zwölf Dorfkirchen hier hätten niemanden mehr, der ihre Orgeln stimmt, ohne sie vorher umzubauen.
+  > Zwölf Leute, die seit Jahren dienstags um sieben kommen, hätten keinen festen Termin mehr, an dem jemand ihren Namen kennt.
   - en:
-  > Twelve village churches would have nobody left who tunes their organs without rebuilding them first.
+  > Twelve people who have come at seven on Tuesdays for years would lose the one fixed hour where somebody knows their name.
 
 ### `b.conviction` — Welche Überzeugung treibt euch — die, die ihr auch verteidigt, wenn sie euch etwas kostet?
 
-**Art:** Frage · **Umfang:** ~3 Min, 4 Züge · **Vertraulichkeit:** öffentlich
+**Art:** Frage · **Umfang:** ~1 Min, 4 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** capture the belief that drives this company — the one they would defend even when it costs them.
 
@@ -674,18 +674,18 @@ Interview-Technik: **Vera** (Strategin). Gesprochen wird alles von George.
 
 - **Neue Marke**
   - de:
-  > Rohmilch gehört in Käse. Pasteurisieren macht ihn sicher und gleichzeitig belanglos — das hat uns schon zwei Supermärkte gekostet.
+  > Wer eine Übung nicht kann, ist nicht zu unbeweglich — die Übung kommt zu früh. Das hat uns schon zwei Kursleiterinnen gekostet.
   - en:
-  > Raw milk belongs in cheese. Pasteurising makes it safe and meaningless at once — that has already cost us two supermarket listings.
+  > Somebody who cannot do a pose is not too stiff — the pose came too early. That has already cost us two teachers.
 - **Marken-Relaunch**
   - de:
-  > Wer Angst vor dem Kreisverkehr hat, braucht keine dreißig Übungsstunden, sondern einen Fahrlehrer, der nicht schreit.
+  > Yoga ist kein Wellness. Wir haben die Kerzen und die Klangschale abgeschafft und dabei ein Drittel der Anmeldungen verloren.
   - en:
-  > Somebody afraid of a roundabout does not need thirty more lessons, they need an instructor who does not shout.
+  > Yoga is not wellness. We dropped the candles and the singing bowl and lost a third of the sign-ups doing it.
 
 ### `b.tenYears` — In zehn Jahren: Was sieht in der Welt anders aus, weil es euch gab?
 
-**Art:** Frage · **Umfang:** ~3 Min, 4 Züge · **Vertraulichkeit:** öffentlich
+**Art:** Frage · **Umfang:** ~1 Min, 4 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** capture what looks different in the world ten years from now because this brand existed.
 
@@ -722,18 +722,18 @@ Interview-Technik: **Vera** (Strategin). Gesprochen wird alles von George.
 
 - **Neue Marke**
   - de:
-  > In den Neubaugebieten hier stehen dann Bäume, die 2040 noch Schatten werfen — nicht die drei Sorten, die im Container am billigsten sind.
+  > In zehn Jahren schickt die Hausärztin nach der Reha nicht nur zur Physiotherapie, sondern in einen Kurs, der weitergeht.
   - en:
-  > By then the new housing estates here have trees that will still give shade in 2040 — not the three varieties that are cheapest in a pot.
+  > In ten years a family doctor sends people after rehab not only to physiotherapy but into a class that keeps going.
 - **Marken-Relaunch**
   - de:
-  > Eine Stadtbibliothek ist dann selbstverständlich der Ort, an dem einem jemand beim Antrag hilft, nicht nur beim Buch.
+  > Eine Übungsstunde ist dann so selbstverständlich wie Schwimmen — man geht hin, ohne dabei etwas werden zu wollen.
   - en:
-  > By then a public library is obviously the place where somebody helps you with a form, not only with a book.
+  > By then a practice hour is as ordinary as swimming: people go without wanting to become anything.
 
 ### `b.legacy` — Wenn man in 20 Jahren über euch spricht — was sollen die Leute sagen?
 
-**Art:** Frage · **Umfang:** ~3 Min, 4 Züge · **Vertraulichkeit:** öffentlich
+**Art:** Frage · **Umfang:** ~1 Min, 4 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** capture what people should be saying about this brand in twenty years.
 
@@ -770,18 +770,18 @@ Interview-Technik: **Vera** (Strategin). Gesprochen wird alles von George.
 
 - **Neue Marke**
   - de:
-  > „Bei denen konnte man mitsingen, ohne vorher Noten lesen zu können — und es klang trotzdem gut."
+  > „Da konnte man mit einem kaputten Rücken anfangen, ohne sich zu schämen."
   - en:
-  > "You could sing with them without reading music first, and it still sounded good."
+  > "You could start there with a wrecked back and not feel ashamed."
 - **Marken-Relaunch**
   - de:
-  > „Die haben das Geländer gemacht, das seit vierzig Jahren hält, und man sieht keine einzige Schweißnaht."
+  > „Die haben nie behauptet, dass eine Stunde das Leben verändert — und alle kamen trotzdem wieder."
   - en:
-  > "They made the railing that has held for forty years, and you cannot see a single weld."
+  > "They never claimed an hour would change your life, and everybody came back anyway."
 
 ### `b.purpose` — Purpose
 
-**Art:** Entwurf · **Umfang:** ~3 Min, 3 Züge · **Vertraulichkeit:** öffentlich
+**Art:** Entwurf · **Umfang:** ~2 Min, 3 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** draft the PURPOSE of this brand — the WHY. The reason it exists beyond making money.
 
@@ -811,18 +811,18 @@ Interview-Technik: **Vera** (Strategin). Gesprochen wird alles von George.
 
 - **Neue Marke**
   - de:
-  > Damit niemand mehr glaubt, guter Kaffee sei eine Frage der Maschine und nicht der Bohne.
+  > Damit ein schmerzender Rücken kein Grund mehr ist, sich vom Bewegen ganz zu verabschieden.
   - en:
-  > So that nobody keeps believing good coffee is a question of the machine rather than the bean.
+  > So that an aching back stops being a reason to give up on moving altogether.
 - **Marken-Relaunch**
   - de:
-  > Damit alt werden zu Hause nicht davon abhängt, ob die Familie in der Nähe wohnt.
+  > Damit Ruhe nichts ist, das man kaufen muss, sondern etwas, das man üben kann.
   - en:
-  > So that growing old at home does not depend on whether your family lives nearby.
+  > So that calm is not something to be bought but something that can be practised.
 
 ### `b.vision` — Vision
 
-**Art:** Entwurf · **Umfang:** ~3 Min, 3 Züge · **Vertraulichkeit:** öffentlich
+**Art:** Entwurf · **Umfang:** ~2 Min, 3 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** draft the VISION of this brand — the WHERE TO. The world once they have succeeded.
 
@@ -851,18 +851,18 @@ Interview-Technik: **Vera** (Strategin). Gesprochen wird alles von George.
 
 - **Neue Marke**
   - de:
-  > Ein Haus aus Holz zu bauen ist hier so normal wie eines aus Stein — und niemand fragt mehr, ob das hält.
+  > Ein Anfängerkurs ist selbstverständlich der mit der besten Betreuung, nicht der billigste im Plan.
   - en:
-  > Building a house out of wood is as ordinary here as building one out of stone, and nobody asks any more whether it lasts.
+  > A beginners class is obviously the one with the closest attention, not the cheapest on the timetable.
 - **Marken-Relaunch**
   - de:
-  > Ein Tier zum Arzt zu bringen ist kein Kraftakt mehr, weil die Praxis dorthin kommt, wo das Tier lebt.
+  > Niemand entschuldigt sich mehr dafür, nur wegen des Rückens zu kommen und nicht wegen der Erleuchtung.
   - en:
-  > Taking an animal to the vet is no longer an ordeal, because the practice comes to where the animal lives.
+  > Nobody apologises any more for coming because of their back rather than for enlightenment.
 
 ### `b.mission` — Mission
 
-**Art:** Entwurf · **Umfang:** ~3 Min, 3 Züge · **Vertraulichkeit:** öffentlich
+**Art:** Entwurf · **Umfang:** ~2 Min, 3 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** draft the MISSION of this brand — the HOW. What they do every day to get towards the vision.
 
@@ -891,14 +891,14 @@ Interview-Technik: **Vera** (Strategin). Gesprochen wird alles von George.
 
 - **Neue Marke**
   - de:
-  > Wir lesen, was wir verkaufen, und legen jedem Kind das Buch in die Hand, das es tatsächlich zu Ende liest.
+  > Wir unterrichten in Gruppen von höchstens acht und gehen bei jeder Übung einmal durch die Reihe, damit niemand falsch übt.
   - en:
-  > We read what we sell, and we put into every child's hands the book they will actually finish.
+  > We teach in groups of no more than eight and walk the room during every pose, so that nobody practises it wrong.
 - **Marken-Relaunch**
   - de:
-  > Wir passen Hörgeräte in der Wohnung der Kundin an, damit sie dort funktionieren, wo sie getragen werden.
+  > Wir erklären vor jeder Übung, was sie im Körper tut, und lassen die Sanskrit-Namen weg, bis jemand danach fragt.
   - en:
-  > We fit hearing aids in the customer's own living room, so that they work where they are actually worn.
+  > We explain what each pose does in the body before we teach it, and leave the Sanskrit names out until somebody asks.
 
 ### `b.positioningCategory` — In welcher Kategorie spielt ihr?
 
@@ -927,7 +927,7 @@ Interview-Technik: **Vera** (Strategin). Gesprochen wird alles von George.
 
 **Form des Werts:** Person: ohne Person · Zeit: Präsens · höchstens 5 Wörter
 
-**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 0 · „weiss nicht" gilt hier nicht · nicht vertagbar
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
 
 **Invarianten (im Code geprüft):** —
 
@@ -937,18 +937,18 @@ Interview-Technik: **Vera** (Strategin). Gesprochen wird alles von George.
 
 - **Neue Marke**
   - de:
-  > Naturseifen für empfindliche Haut — nicht „Kosmetik"
+  > Rückenkurse für Wiedereinsteiger — nicht „Yoga"
   - en:
-  > Natural soap for sensitive skin — not "cosmetics"
+  > Back classes for returners — not "yoga"
 - **Marken-Relaunch**
   - de:
-  > Breitensport für späte Anfänger — nicht „Leistungssport"
+  > Übungsraum statt „Wellness-Studio"
   - en:
-  > Community sport for late starters — not "competitive sport"
+  > A practice room, not "wellness"
 
 ### `b.positioningFirstChoice` — Und in dieser Kategorie: Für wen seid ihr die ERSTE Wahl — und gegen wen?
 
-**Art:** Frage · **Umfang:** ~3 Min, 4 Züge · **Vertraulichkeit:** öffentlich
+**Art:** Frage · **Umfang:** ~1 Min, 4 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** capture for whom this brand is the FIRST choice inside its category, and against whom.
 
@@ -985,22 +985,22 @@ Interview-Technik: **Vera** (Strategin). Gesprochen wird alles von George.
 
 - **Neue Marke**
   - de:
-  > Für Hausbesitzer mit Reetdach, die schon einmal Pfusch bezahlt haben — gegen die großen Bedachungsfirmen, die Reet nebenbei mitnehmen.
+  > Für Leute, die nach der Reha weitermachen sollen und sich in ein volles Fitnessstudio nicht trauen — gegen die Volkshochschulkurse mit dreißig Teilnehmern.
   - en:
-  > For owners of a thatched roof who have already paid for a botched job — against the big roofing firms that carry thatch as a sideline.
+  > For people told to keep going after rehab who do not dare walk into a busy gym — against the adult-education classes with thirty people in the room.
 - **Marken-Relaunch**
   - de:
-  > Für Gastwirte, die ein ganzes Tier abnehmen können — gegen den Großhandel, der nur Teilstücke liefert.
+  > Für Berufstätige, die abends eine feste Stunde brauchen — gegen die Studios mit Zehnerkarte, in denen jede Woche jemand anderes unterrichtet.
   - en:
-  > For restaurant owners who can take a whole animal — against the wholesalers who only deliver cuts.
+  > For working people who need one fixed hour in the evening — against the studios with a ten-class pass where somebody different teaches every week.
 
-## Markenarchitektur (`architecture`) — 5 Sessions
+## Markenarchitektur (`architecture`) — 5 Sessions, **Σ ~6 Min** (17 Züge)
 
 Interview-Technik: **Vera** (Strategin). Gesprochen wird alles von George.
 
 ### `b2.visibility` — Sollen eure Produktmarken sichtbar zur Hauptmarke gehören — oder eigenständig auftreten?
 
-**Art:** Frage · **Umfang:** ~3 Min, 4 Züge · **Vertraulichkeit:** öffentlich
+**Art:** Frage · **Umfang:** ~1 Min, 4 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** settle whether the other brands should visibly belong to the main brand or stand on their own.
 
@@ -1035,18 +1035,18 @@ Interview-Technik: **Vera** (Strategin). Gesprochen wird alles von George.
 
 - **Neue Marke**
   - de:
-  > Sichtbar. Wer den Quittenbrand kauft, soll wissen, dass er vom selben Hof kommt wie der Most.
+  > Sichtbar. Wer das Rechnungsmodul kauft, soll wissen, dass es aus demselben Haus kommt wie die Zeiterfassung.
   - en:
-  > Visible. Whoever buys the quince spirit should know it comes from the same farm as the juice.
+  > Visible. Whoever buys the invoicing module should know it comes from the same house as the time tracking.
 - **Marken-Relaunch**
   - de:
-  > Eigenständig. Die Reha-Marke darf nicht nach Sanitätshaus aussehen, sonst kommt kein Sportverein auf uns zu.
+  > Eigenständig. Das Werkzeug für Freiberufler darf nicht nach Lohnbuchhaltung für Konzerne aussehen, sonst probiert es niemand aus.
   - en:
-  > On their own. The rehab brand must not look like a medical supplies shop, or no sports club will ever call us.
+  > On its own. The tool for freelancers must not look like corporate payroll, or nobody will ever try it.
 
 ### `b2.roleOfMaster` — Soll die Hauptmarke ihnen Vertrauen leihen — oder dürfen sie Publika erreichen, die die Hauptmarke nicht erreicht?
 
-**Art:** Frage · **Umfang:** ~3 Min, 4 Züge · **Vertraulichkeit:** intern — reist nicht per Share-Link
+**Art:** Frage · **Umfang:** ~1 Min, 4 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** settle whether the main brand lends the other brands its trust, or leaves them free to reach audiences the main brand cannot.
 
@@ -1081,18 +1081,18 @@ Interview-Technik: **Vera** (Strategin). Gesprochen wird alles von George.
 
 - **Neue Marke**
   - de:
-  > Vertrauen leihen. Wer unseren Most kennt, probiert auch den Brand — ohne den Hofnamen stünde er im Regal wie jeder andere.
+  > Vertrauen leihen. Wer Steinlach schon einsetzt, testet das zweite Modul ohne Ausschreibung — ohne den Hausnamen wäre es eines von zwanzig.
   - en:
-  > Lend trust. People who know our juice will try the spirit — without the farm name it would sit on the shelf like any other.
+  > Lend trust. Anyone already running Steinlach will test the second module without a tender — without the house name it would be one of twenty.
 - **Marken-Relaunch**
   - de:
-  > Freilassen. Die Reha-Marke erreicht junge Sportler, die bei „Sanitätshaus Krause" gar nicht erst anrufen.
+  > Freilassen. Die Freiberufler-Marke erreicht Leute, die bei Meerkamp nie anfragen würden, weil sie dort eine Personalabteilung vermuten.
   - en:
-  > Set them free. The rehab brand reaches young athletes who would never call a shop named "Krause Medical Supplies".
+  > Set it free. The freelancer brand reaches people who would never approach Meerkamp, because they assume an HR department behind it.
 
 ### `b2.namingPattern` — Wie dürfen sie HEISSEN — „Marke Produkt", oder eigene Namen?
 
-**Art:** Frage · **Umfang:** ~3 Min, 4 Züge · **Vertraulichkeit:** öffentlich
+**Art:** Frage · **Umfang:** ~1 Min, 4 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** settle how the other brands are allowed to be named — as "Brand Product" or with names of their own.
 
@@ -1127,14 +1127,14 @@ Interview-Technik: **Vera** (Strategin). Gesprochen wird alles von George.
 
 - **Neue Marke**
   - de:
-  > Immer der Hofname vorn, dann die Frucht: „Lindenhof Quitte", „Lindenhof Schlehe". Keine Fantasienamen.
+  > Immer der Hausname vorn, dann die Aufgabe: „Steinlach Rechnung", „Steinlach Zeit". Keine Fantasienamen, keine Versionsnummer im Namen.
   - en:
-  > Always the farm name first, then the fruit: "Lindenhof Quince", "Lindenhof Sloe". No invented names.
+  > Always the house name first, then the job it does: "Steinlach Rechnung", "Steinlach Zeit". No invented names, no version number in the name.
 - **Marken-Relaunch**
   - de:
-  > Eigene Namen sind erlaubt, aber nie mit unserem Kürzel davor — sonst hält es jeder für eine Eigenmarke.
+  > Eigene Namen sind erlaubt, aber nie mit unserem Kürzel davor — sonst hält es jeder für ein Zusatzmodul.
   - en:
-  > Names of their own are allowed, but never with our initials in front — otherwise everyone reads it as a store brand.
+  > Names of their own are allowed, but never with our initials in front — otherwise everyone reads it as an add-on module.
 
 ### `b2.model` — Welches Architektur-Modell passt zu euch?
 
@@ -1161,9 +1161,9 @@ Interview-Technik: **Vera** (Strategin). Gesprochen wird alles von George.
 - Nachfrage: does that still work if you add a product in a different field?
 - Umdeutung: if they want a hybrid, ask which of the four a customer would see first
 
-**Form des Werts:** Person: folgt der Weiche Solo/Team · Zeit: frei · kein Wortdeckel
+**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
 
-**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 0 · „weiss nicht" gilt hier nicht · nicht vertagbar
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · vertagen möglich
 
 **Invarianten (im Code geprüft):** —
 
@@ -1173,18 +1173,18 @@ Interview-Technik: **Vera** (Strategin). Gesprochen wird alles von George.
 
 - **Neue Marke**
   - de:
-  > Branded House — alles läuft unter dem Hofnamen, weil der Hof selbst das Versprechen ist.
+  > Branded House — alles läuft unter Steinlach, weil das Haus selbst das Versprechen ist.
   - en:
-  > Branded house — everything runs under the farm name, because the farm itself is the promise.
+  > Branded house — everything runs under Steinlach, because the house itself is the promise.
 - **Marken-Relaunch**
   - de:
-  > Endorsed — die Reha-Marke tritt eigenständig auf und trägt klein „vom Sanitätshaus Krause".
+  > Endorsed — die Freiberufler-Marke tritt eigenständig auf und trägt klein „von Meerkamp".
   - en:
-  > Endorsed — the rehab brand stands on its own and carries a small "from Krause Medical Supplies".
+  > Endorsed — the freelancer brand stands on its own and carries a small "from Meerkamp".
 
 ### `b2.rule` — Eure Namensregel
 
-**Art:** Entwurf · **Umfang:** ~3 Min, 3 Züge · **Vertraulichkeit:** öffentlich
+**Art:** Entwurf · **Umfang:** ~2 Min, 3 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** write the NAMING RULE that follows from the architecture model they chose.
 
@@ -1203,7 +1203,7 @@ Interview-Technik: **Vera** (Strategin). Gesprochen wird alles von George.
 
 **Form des Werts:** Person: wir · Zeit: Präsens · höchstens 80 Wörter
 
-**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · vertagen möglich
 
 **Invarianten (im Code geprüft):** —
 
@@ -1213,22 +1213,22 @@ Interview-Technik: **Vera** (Strategin). Gesprochen wird alles von George.
 
 - **Neue Marke**
   - de:
-  > Jeder neue Brand heißt „Lindenhof" plus die Frucht. Keine Fantasienamen, keine Jahreszahl im Namen. Über Ausnahmen entscheidet Marie, nicht die Etikettendruckerei.
+  > Jedes neue Modul heißt „Steinlach" plus die Aufgabe in einem Wort. Keine Fantasienamen, keine Jahreszahl. Über Ausnahmen entscheidet die Produktleitung, nicht der Vertrieb.
   - en:
-  > Every new spirit is called "Lindenhof" plus the fruit. No invented names, no year in the name. Marie decides on exceptions, not the label printer.
+  > Every new module is called "Steinlach" plus the job it does, in one word. No invented names, no year. Product management decides on exceptions, not sales.
 - **Marken-Relaunch**
   - de:
-  > Untermarken tragen einen eigenen Namen und in der Fußzeile immer „vom Sanitätshaus Krause". Nie das Kürzel im Namen selbst. Jeden neuen Namen gibt die Geschäftsführung frei.
+  > Untermarken tragen einen eigenen Namen und im Impressum immer „von Meerkamp". Nie das Kürzel im Namen selbst. Jeden neuen Namen gibt die Geschäftsführung frei.
   - en:
-  > Sub-brands carry a name of their own and always the line "from Krause Medical Supplies" in the footer. Never the initials in the name itself. The managing directors sign off every new name.
+  > Sub-brands carry a name of their own and always the line "from Meerkamp" in the legal notice. Never the initials in the name itself. The managing directors sign off every new name.
 
-## Werte (`values`) — 9 Sessions
+## Werte (`values`) — 9 Sessions, **Σ ~14 Min** (32 Züge)
 
 Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
 
 ### `c.discovery1` — Denk an einen Moment, in dem euer Geschäft am besten war. Was ist da passiert?
 
-**Art:** Frage · **Umfang:** ~3 Min, 4 Züge · **Vertraulichkeit:** öffentlich
+**Art:** Frage · **Umfang:** ~2 Min, 4 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** capture a moment when this business was at its best, told as a scene and not as an adjective.
 
@@ -1265,18 +1265,18 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
 
 - **Neue Marke**
   - de:
-  > Ein Hund kam nach zwei abgebrochenen Kursen zu uns. In der vierten Stunde hat er zum ersten Mal von allein Blickkontakt gehalten, und die Besitzerin hat auf dem Platz geweint.
+  > Eine Kundin kam nach drei gescheiterten Diäten. In der vierten Woche hat sie zum ersten Mal wieder gefrühstückt, statt bis mittags zu warten, und mir das aus dem Zug geschrieben.
   - en:
-  > A dog came to us after two abandoned courses. In the fourth session he held eye contact by himself for the first time, and his owner stood there and cried.
+  > A client came to us after three failed diets. In the fourth week she had breakfast again for the first time instead of waiting until noon, and wrote to me about it from the train.
 - **Marken-Relaunch**
   - de:
-  > Nach dem Gewitter stand die halbe Schulklasse durchnässt in der Halle. Der Stallmeister hat den Unterricht abgesagt und stattdessen alle beim Trockenreiben mitmachen lassen.
+  > Nach dem Wasserrohrbruch stand die halbe Frühgruppe im Flur. Der Trainer hat die Stunde abgesagt und stattdessen mit allen eine Stunde im Hof trainiert.
   - en:
-  > After the thunderstorm half a school group stood soaked in the arena. The stable master called off the lesson and had everybody help rub the horses down instead.
+  > After the burst pipe half the early group stood in the corridor. The trainer called the session off and trained everybody in the yard for an hour instead.
 
 ### `c.discovery2` — Denk an einen Moment, in dem sich etwas zutiefst falsch angefühlt hat. Was war da los?
 
-**Art:** Frage · **Umfang:** ~3 Min, 4 Züge · **Vertraulichkeit:** öffentlich
+**Art:** Frage · **Umfang:** ~2 Min, 4 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** capture a moment when something felt deeply wrong in this business, told as a scene.
 
@@ -1313,41 +1313,43 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
 
 - **Neue Marke**
   - de:
-  > Wir haben einen Kurs mit zwölf Hunden angenommen, weil die Gruppe voll bezahlt war. Nach der zweiten Stunde hat kein Hund mehr etwas gelernt, und ich wusste vorher, dass es zu viele sind.
+  > Wir haben ein Zwölf-Wochen-Paket an jemanden verkauft, der ab Woche zwei nicht mehr kam. Angerufen hat ihn niemand, das Geld war ja da.
   - en:
-  > We took a course with twelve dogs because the group was fully paid. After the second session no dog was learning anything, and I had known beforehand that it was too many.
+  > We sold a twelve-week package to somebody who stopped showing up in week two. Nobody called him, because the money was already in.
 - **Marken-Relaunch**
   - de:
-  > Wir haben ein lahmes Pferd noch eine Woche im Unterricht gelassen, weil der Ersatz gefehlt hat. Gesagt hat das niemand — bemerkt haben es alle.
+  > Wir haben einen Kunden weiter trainieren lassen, obwohl seine Schulter längst zum Arzt gehört hätte. Gesagt hat das niemand, gesehen haben es alle.
   - en:
-  > We kept a lame horse in lessons for another week because we had no replacement. Nobody said it out loud, and everybody noticed.
+  > We kept training a client although his shoulder should long since have seen a doctor. Nobody said it out loud, and everybody saw it.
 
 ### `c.discovery3` — Welches Verhalten würdest du nie dulden — auch nicht vom bestzahlenden Kunden?
 
-**Art:** Frage · **Umfang:** ~3 Min, 4 Züge · **Vertraulichkeit:** öffentlich
+**Art:** Frage · **Umfang:** ~2 Min, 4 Züge · **Vertraulichkeit:** öffentlich
 
-**Ziel:** capture the behaviour this brand would never tolerate, not even from its best-paying client.
+**Ziel:** capture where this brand draws its line: solo, the behaviour they would never tolerate even from their best-paying client; with a team, the rule the team decides by when the owner is not in the room.
+
+**Fassung im Team:** Wie soll dein Team entscheiden, wenn du nicht im Raum bist?
 
 **Woran man einen guten Wert erkennt:**
 
-- It names a behaviour, not a type of person.
-- It has been refused at least once, and they can say when.
-- It would still be refused from the best-paying client.
+- It names a behaviour or a decision rule, never a type of person.
+- It has been applied at least once, and they can say when.
+- It would still hold for the best-paying client, and without the owner present.
 - It is specific enough to recognise while it is happening.
 
 **Was zurückgewiesen wird:**
 
 - A no-go so extreme that nobody would ever ask for it.
 - A preference dressed up as a principle: "we do not like rush jobs".
-- A behaviour they have in fact tolerated.
+- A behaviour they have in fact tolerated, or a rule nobody has ever used.
 
 **Gesprächsleiter:**
 
-- Eröffnung: the behaviour they would refuse even from their best-paying client.
-- Nachfrage: when did you last say no to it, and what did it cost?
-- Nachfrage: has anybody ever asked you for exactly that?
+- Eröffnung: solo: the behaviour they would refuse even from their best-paying client. With a team: the rule the team decides by when the owner is not there.
+- Nachfrage: when did that last happen, and what did it cost?
+- Nachfrage: who applied it — and did they have to ask first?
 - Umdeutung: if the no-go is illegal anyway, ask for the one that is legal and still unacceptable
-- Umdeutung: if it has never been tested, ask what they came closest to tolerating
+- Umdeutung: if the rule has never been tested, ask what the team came closest to getting wrong
 
 **Form des Werts:** Person: folgt der Weiche Solo/Team · Zeit: frei · kein Wortdeckel
 
@@ -1361,18 +1363,18 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
 
 - **Neue Marke**
   - de:
-  > Wer seinen Hund vor uns am Halsband hochreißt, kommt nicht in den Kurs zurück — auch wenn er den ganzen Block bezahlt hat.
+  > Wer bei uns Nahrungsergänzung auf Provision verkaufen will, ist raus — auch wenn das ganze Jahr gebucht ist.
   - en:
-  > Anybody who yanks their dog up by the collar in front of us does not come back to the course, even if they paid for the whole block.
+  > Anybody who wants to sell supplements on commission here is out, even when the whole year has been booked.
 - **Marken-Relaunch**
   - de:
-  > Wir schreiben kein Pferd gesund, damit es verkauft werden kann. Das hat uns zwei Einstaller gekostet.
+  > Ist niemand von uns da, gilt: im Zweifel wird die Übung abgebrochen und ein Arztbesuch empfohlen. Das darf jeder Trainer allein entscheiden.
   - en:
-  > We will not sign a horse off as sound so that it can be sold. That has cost us two boarders.
+  > When none of us is there the rule is: when in doubt the exercise stops and a doctor is recommended. Every trainer may decide that alone.
 
 ### `c.candidates` — Wertekandidaten
 
-**Art:** Ableitung · **Umfang:** ~2 Min, 2 Züge · **Vertraulichkeit:** öffentlich
+**Art:** Ableitung · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** distil 5 to 7 candidate VALUES out of what this person has told you.
 
@@ -1401,18 +1403,18 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
 
 - **Neue Marke**
   - de:
-  > - Geduld — der Kurs wurde wiederholt, statt den Hund weiterzuschieben
-  > - Unbestechlichkeit — Kursplatz gekündigt, obwohl der ganze Block bezahlt war
+  > - Geduld — der Plan wurde umgeschrieben, statt die Kundin weiterzuschieben
+  > - Unbestechlichkeit — das Provisionsangebot eines Herstellers wurde abgelehnt
   - en:
-  > - Patience — the course was repeated instead of pushing the dog along
-  > - Incorruptibility — a place was cancelled although the whole block had been paid
+  > - Patience — the plan was rewritten instead of pushing the client along
+  > - Incorruptibility — a manufacturer's commission offer was turned down
 - **Marken-Relaunch**
   - de:
-  > - Ehrlichkeit — kein Pferd wird für den Verkauf gesundgeschrieben
-  > - Verlässlichkeit — bei Sturm wird abgesagt, nicht geritten
+  > - Ehrlichkeit — kein Training an einer Schulter, die zum Arzt gehört
+  > - Verlässlichkeit — bei Krankheit wird abgesagt, nicht vertreten
   - en:
-  > - Honesty — no horse is signed off as sound to make a sale
-  > - Reliability — in a storm the lesson is cancelled, not ridden
+  > - Honesty — no training on a shoulder that belongs at a doctor
+  > - Reliability — when a trainer is ill the session is cancelled, not handed over
 
 ### `c.final` — Welche drei bis fünf würdet ihr verteidigen, auch wenn es euch etwas kostet?
 
@@ -1441,7 +1443,7 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
 
 **Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
 
-**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 0 · „weiss nicht" gilt hier nicht · nicht vertagbar
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
 
 **Invarianten (im Code geprüft):** zwischen 3 und 5 Einträgen
 
@@ -1472,7 +1474,7 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
 
 ### `c.definitions` — Was jeder Wert bei euch heißt
 
-**Art:** Entwurf · **Umfang:** ~3 Min, 3 Züge · **Vertraulichkeit:** öffentlich
+**Art:** Entwurf · **Umfang:** ~2 Min, 3 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** for each value they chose, write ONE sentence saying what it means HERE — in this brand, not in a dictionary.
 
@@ -1493,7 +1495,7 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
 
 **Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
 
-**Invarianten (im Code geprüft):** —
+**Invarianten (im Code geprüft):** nennt JEDEN Eintrag aus `c.final`
 
 **Fliesst später in:** 6 Felder in 3 Kapiteln (Manifest · Tagline & Messaging · Ergebnis)
 
@@ -1501,18 +1503,18 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
 
 - **Neue Marke**
   - de:
-  > - Geduld — wir wiederholen eine Übung so lange, wie der Hund braucht, und rechnen die Stunde nicht doppelt ab.
+  > - Geduld — wir schreiben den Plan so oft um, wie der Alltag es verlangt, und rechnen die Beratung nicht doppelt ab.
   - en:
-  > - Patience — we repeat an exercise for as long as the dog needs, and we do not charge the hour twice.
+  > - Patience — we rewrite the plan as often as everyday life demands, and we do not charge for the session twice.
 - **Marken-Relaunch**
   - de:
-  > - Verlässlichkeit — bei Sturm sagen wir ab und geben den Termin kostenfrei zurück, auch wenn die Halle frei wäre.
+  > - Verlässlichkeit — fällt ein Trainer aus, sagen wir ab und geben den Termin kostenfrei zurück, statt jemanden einspringen zu lassen.
   - en:
-  > - Reliability — in a storm we cancel and refund the slot, even when the indoor arena would be free.
+  > - Reliability — if a trainer drops out we cancel and refund the slot instead of sending in a stand-in.
 
 ### `c.livedExamples` — Zu jedem Wert: EIN echtes Beispiel, wo ihr ihn schon gelebt habt.
 
-**Art:** Frage · **Umfang:** ~5 Min, 5 Züge · **Vertraulichkeit:** öffentlich
+**Art:** Frage · **Umfang:** ~2 Min, 5 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** capture one real example per chosen value where this brand already lived it.
 
@@ -1539,9 +1541,9 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
 
 **Form des Werts:** Person: folgt der Weiche Solo/Team · Zeit: frei · kein Wortdeckel
 
-**Antwort-Regeln:** Mindest-Substanz: ausführlich · Nachfragen: höchstens 2 · „weiss nicht" gilt · nicht vertagbar
+**Antwort-Regeln:** Mindest-Substanz: ausführlich · Nachfragen: höchstens 2 · „weiss nicht" gilt · vertagen möglich
 
-**Invarianten (im Code geprüft):** —
+**Invarianten (im Code geprüft):** nennt JEDEN Eintrag aus `c.final`
 
 **Fliesst später in:** nichts — eine Korrektur hier löst keine Warteschlange aus
 
@@ -1549,18 +1551,18 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
 
 - **Neue Marke**
   - de:
-  > - Unbestechlichkeit — im März haben wir Familie K. den Kursplatz gekündigt und 240 Euro zurückgezahlt.
+  > - Unbestechlichkeit — im März haben wir ein Provisionsangebot über 2.000 Euro abgelehnt und das in der Sprechstunde offen gesagt.
   - en:
-  > - Incorruptibility — in March we cancelled the K. family's place and refunded 240 euros.
+  > - Incorruptibility — in March we turned down a commission offer worth 2,000 euros and said so openly in the consultation hour.
 - **Marken-Relaunch**
   - de:
-  > - Ruhe — im Juli haben wir das Turnier abgesagt, weil zwei Pferde husteten; das Nenngeld ging zurück.
+  > - Ruhe — im Juli haben wir den Wettkampf abgesagt, weil zwei Leute krank waren; das Startgeld ging zurück.
   - en:
-  > - Calm — in July we called off the show because two horses had a cough, and the entry fees went back.
+  > - Calm — in July we called off the competition because two people were ill, and the entry fees went back.
 
 ### `c.conflictRule` — Wo geraten zwei eurer Werte in Konflikt — und welcher gewinnt?
 
-**Art:** Frage · **Umfang:** ~3 Min, 4 Züge · **Vertraulichkeit:** öffentlich
+**Art:** Frage · **Umfang:** ~1 Min, 4 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** settle which of the chosen values wins when two of them collide, and why.
 
@@ -1589,7 +1591,7 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
 
 **Antwort-Regeln:** Mindest-Substanz: mittel · Nachfragen: höchstens 2 · „weiss nicht" gilt · vertagen möglich
 
-**Invarianten (im Code geprüft):** —
+**Invarianten (im Code geprüft):** nennt mindestens 2 Einträge aus `c.final`
 
 **Fliesst später in:** nichts — eine Korrektur hier löst keine Warteschlange aus
 
@@ -1597,18 +1599,18 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
 
 - **Neue Marke**
   - de:
-  > Geduld gegen Klarheit: Wenn ein Hund den Kurs nicht schafft, gewinnt Klarheit — wir sagen es nach der dritten Stunde, statt weiter Geduld zu verkaufen.
+  > Geduld gegen Klarheit: Trägt ein Plan nach acht Wochen nicht, gewinnt Klarheit — wir sagen es, statt weiter Geduld zu verkaufen.
   - en:
-  > Patience against clarity: when a dog is not going to manage the course, clarity wins — we say so after the third session instead of selling more patience.
+  > Patience against clarity: when a plan is not working after eight weeks, clarity wins — we say so instead of selling more patience.
 - **Marken-Relaunch**
   - de:
-  > Verlässlichkeit gegen Ehrlichkeit: Ist ein Pferd nicht fit, gewinnt Ehrlichkeit — wir sagen den zugesagten Termin ab.
+  > Verlässlichkeit gegen Ehrlichkeit: Ist jemand nicht fit, gewinnt Ehrlichkeit — wir sagen den zugesagten Termin ab.
   - en:
-  > Reliability against honesty: if a horse is not fit, honesty wins — we cancel the lesson we promised.
+  > Reliability against honesty: if somebody is not fit, honesty wins — we cancel the session we promised.
 
 ### `c.teamFilter` — Wenn ihr morgen jemanden einstellt: Welcher Wert ist der unverhandelbare Filter?
 
-**Art:** Frage (optional) · **Umfang:** ~3 Min, 4 Züge · **Vertraulichkeit:** öffentlich
+**Art:** Frage (optional) · **Umfang:** ~1 Min, 4 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** settle which value is the non-negotiable filter when this brand hires someone.
 
@@ -1645,22 +1647,22 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
 
 - **Neue Marke**
   - de:
-  > Geduld. Wer am Probetag die Leine strafft, sobald es hektisch wird, passt nicht zu uns — Fachwissen bringen wir bei.
+  > Geduld. Wer am Probetag beim ersten Rückschritt die Stimme hebt, passt nicht zu uns — Fachwissen bringen wir bei.
   - en:
-  > Patience. Anybody who tightens the lead on their trial day as soon as things get hectic does not fit here — knowledge we can teach.
+  > Patience. Anybody who raises their voice at the first setback on a trial day does not fit here — knowledge we can teach.
 - **Marken-Relaunch**
   - de:
-  > Ehrlichkeit. Wer einen Fehler im Stall nicht meldet, weil er klein aussieht, ist raus.
+  > Ehrlichkeit. Wer einen Fehler im Studio nicht meldet, weil er klein aussieht, ist raus.
   - en:
-  > Honesty. Anybody who hides a small mistake in the stable because it looks harmless is out.
+  > Honesty. Anybody who hides a small mistake in the studio because it looks harmless is out.
 
-## Archetyp und Stimme (`archetype`) — 12 Sessions
+## Archetyp und Stimme (`archetype`) — 12 Sessions, **Σ ~14 Min** (33 Züge)
 
 Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
 
 ### `d.hypothesis` — Archetyp-Hypothese aus eurem heutigen Auftritt
 
-**Art:** Ableitung · **Umfang:** ~2 Min, 2 Züge · **Vertraulichkeit:** öffentlich
+**Art:** Ableitung · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** say which archetype speaks out of their appearance TODAY — as a reading, not as a decision.
 
@@ -1689,18 +1691,18 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
 
 - **Neue Marke**
   - de:
-  > Aus euren Texten spricht vor allem der Schöpfer: „Wir schmieden jedes Stück einzeln, auch wenn es zehnmal dasselbe ist." Daneben klingt der Weise durch, wo ihr das Material erklärt.
+  > Aus euren Texten spricht vor allem der Schöpfer: „Wir setzen jedes Buch neu, auch wenn es die vierte Auflage ist." Daneben klingt der Weise durch, wo ihr Papier und Bindung erklärt.
   - en:
-  > What speaks out of your texts is mostly the Creator: "we forge each piece on its own, even when it is the same one ten times". The Sage shows through where you explain the material.
+  > What speaks out of your texts is mostly the Creator: "we typeset every book from scratch, even for a fourth edition". The Sage shows through where you explain paper and binding.
 - **Marken-Relaunch**
   - de:
-  > Euer Auftritt zieht in zwei Richtungen: „Weltweit zu Hause" klingt nach dem Entdecker, die Seite mit den Stornobedingungen nach dem Herrscher.
+  > Euer Auftritt zieht in zwei Richtungen: „Bilder, die bleiben" klingt nach dem Schöpfer, die Seite mit den Stornobedingungen nach dem Herrscher.
   - en:
-  > Your appearance pulls two ways: "at home anywhere in the world" sounds like the Explorer, while the cancellation page sounds like the Ruler.
+  > Your appearance pulls two ways: "pictures that stay" sounds like the Creator, while the cancellation page sounds like the Ruler.
 
 ### `d.pairs` — Welche der beiden fühlt sich mehr nach euch an?
 
-**Art:** Instrument · **Umfang:** ~5 Min, 1 Züge · **Vertraulichkeit:** öffentlich
+**Art:** Instrument · **Umfang:** ~3 Min, 1 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** settle which archetype of each pair feels more like this brand, until a first and a second place stand.
 
@@ -1717,7 +1719,7 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
 - A choice justified by a famous brand instead of by their own feeling.
 - The result read as a personality test about the founder.
 
-**Form des Werts:** Person: folgt der Weiche Solo/Team · Zeit: frei · kein Wortdeckel
+**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
 
 **Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 0 · „weiss nicht" gilt hier nicht · nicht vertagbar
 
@@ -1727,7 +1729,7 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
 
 ### `d.primary` — Primärer Archetyp
 
-**Art:** Ableitung · **Umfang:** ~2 Min, 2 Züge · **Vertraulichkeit:** öffentlich
+**Art:** Ableitung · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** propose the PRIMARY archetype of this brand — the one that carries how they behave.
 
@@ -1744,7 +1746,7 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
 - A draft where two archetypes are equally defensible.
 - A choice derived from the pitch alone.
 
-**Form des Werts:** Person: folgt der Weiche Solo/Team · Zeit: frei · kein Wortdeckel
+**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
 
 **Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
 
@@ -1756,18 +1758,18 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
 
 - **Neue Marke**
   - de:
-  > Der Schöpfer — „auch wenn es zehnmal dasselbe ist" ist euer Satz, nicht der eines Zulieferers.
+  > Der Schöpfer — „auch wenn es die vierte Auflage ist" ist euer Satz, nicht der einer Druckerei.
   - en:
-  > The Creator — "even when it is the same one ten times" is your sentence, not a supplier's.
+  > The Creator — "even for a fourth edition" is your sentence, not a printer's.
 - **Marken-Relaunch**
   - de:
-  > Der Fürsorgliche — ihr habt dreimal gesagt, dass ihr sonntags ans Telefon geht, wenn jemand am Flughafen strandet.
+  > Der Fürsorgliche — ihr habt dreimal gesagt, dass ihr vorher anruft, wenn jemand zum ersten Mal vor einer Kamera steht.
   - en:
-  > The Caregiver — you said three times that you answer the phone on a Sunday when somebody is stranded at an airport.
+  > The Caregiver — you said three times that you call ahead when somebody stands in front of a camera for the first time.
 
 ### `d.secondary` — Sekundärer Archetyp
 
-**Art:** Ableitung · **Umfang:** ~2 Min, 2 Züge · **Vertraulichkeit:** öffentlich
+**Art:** Ableitung · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** propose the SECONDARY archetype — the one that keeps the primary from becoming a cliché.
 
@@ -1784,11 +1786,11 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
 - A second name with no relationship to the first.
 - A secondary guessed while the primary is missing.
 
-**Form des Werts:** Person: folgt der Weiche Solo/Team · Zeit: frei · kein Wortdeckel
+**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
 
 **Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
 
-**Invarianten (im Code geprüft):** —
+**Invarianten (im Code geprüft):** nennt nicht dasselbe wie `d.primary`
 
 **Fliesst später in:** 2 Felder in 1 Kapiteln (Archetyp und Stimme)
 
@@ -1796,9 +1798,9 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
 
 - **Neue Marke**
   - de:
-  > Der Weise als Zweiter — er hält den Schöpfer vom Schwärmen ab: ihr erklärt, warum Damast bricht, bevor ihr ihn verkauft.
+  > Der Weise als Zweiter — er hält den Schöpfer vom Schwärmen ab: ihr erklärt, warum ein Papier durchscheint, bevor ihr es empfehlt.
   - en:
-  > The Sage second — it keeps the Creator from mere enthusiasm: you explain why damascus breaks before you sell it.
+  > The Sage second — it keeps the Creator from mere enthusiasm: you explain why a paper shows through before you recommend it.
 - **Marken-Relaunch**
   - de:
   > Der Entdecker als Zweiter — er hält den Fürsorglichen davon ab, betulich zu werden.
@@ -1807,7 +1809,7 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
 
 ### `d.gapReveal` — Selbstbild und Außenbild
 
-**Art:** Ableitung · **Umfang:** ~2 Min, 2 Züge · **Vertraulichkeit:** öffentlich
+**Art:** Ableitung · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** put their self-image next to their outside image and name the difference.
 
@@ -1824,7 +1826,7 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
 - "There are elements of both."
 - A gap invented because a finding was expected.
 
-**Form des Werts:** Person: folgt der Weiche Solo/Team · Zeit: frei · kein Wortdeckel
+**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
 
 **Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
 
@@ -1836,18 +1838,18 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
 
 - **Neue Marke**
   - de:
-  > Ihr wollt als Schöpfer gelesen werden, eure Seite klingt aber an drei Stellen nach dem Herrscher: „Wir liefern ausschließlich an Fachbetriebe."
+  > Ihr wollt als Schöpfer gelesen werden, eure Seite klingt aber an drei Stellen nach dem Herrscher: „Wir arbeiten ausschließlich mit Verlagen."
   - en:
-  > You want to be read as the Creator, but in three places your site sounds like the Ruler: "we supply exclusively to trade customers".
+  > You want to be read as the Creator, but in three places your site sounds like the Ruler: "we work exclusively with publishers".
 - **Marken-Relaunch**
   - de:
-  > Selbstbild und Außenbild treffen sich beim Fürsorglichen — nur eure Preisliste spricht wie ein Herrscher: „Umbuchungen sind ausgeschlossen."
+  > Selbstbild und Außenbild treffen sich beim Fürsorglichen — nur die Preisliste spricht wie ein Herrscher: „Absagen unter 48 Stunden werden voll berechnet."
   - en:
-  > Self-image and outside image meet at the Caregiver — only your price list speaks like a Ruler: "rebooking is excluded".
+  > Self-image and outside image meet at the Caregiver — only the price list speaks like a Ruler: "cancellations within 48 hours are charged in full".
 
 ### `d.party` — Wenn eure Marke ein Mensch auf einer Party wäre — wie verhält sie sich?
 
-**Art:** Frage · **Umfang:** ~3 Min, 4 Züge · **Vertraulichkeit:** öffentlich
+**Art:** Frage · **Umfang:** ~1 Min, 4 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** capture how this brand would behave as a person at a party.
 
@@ -1884,18 +1886,18 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
 
 - **Neue Marke**
   - de:
-  > Steht am Rand, redet mit einem Menschen zwei Stunden über dessen Küchenmesser und geht früh.
+  > Steht am Rand, redet mit einem Menschen zwei Stunden über dessen Familienalbum und geht früh.
   - en:
-  > Stands at the edge, talks to one person about their kitchen knife for two hours, and leaves early.
+  > Stands at the edge, talks to one person about their family album for two hours, and leaves early.
 - **Marken-Relaunch**
   - de:
-  > Merkt sich, wer keinen Alkohol trinkt, und holt ungefragt Wasser — hält aber keine Rede.
+  > Merkt sich, wer nicht fotografiert werden will, und fragt kein zweites Mal — hält aber keine Rede.
   - en:
-  > Notices who is not drinking and fetches water unasked — but never makes a speech.
+  > Notices who does not want to be photographed and does not ask twice — but never makes a speech. Notices who does not want to be photographed and does not ask twice — but never makes a speech.
 
 ### `d.never` — Welche Eigenschaft sollte eure Marke NIEMALS haben?
 
-**Art:** Frage · **Umfang:** ~3 Min, 4 Züge · **Vertraulichkeit:** öffentlich
+**Art:** Frage · **Umfang:** ~1 Min, 4 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** capture the one trait this brand must never have.
 
@@ -1931,18 +1933,18 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
 
 - **Neue Marke**
   - de:
-  > Belehrend. Wir erklären das Material, aber wir sagen niemandem, dass er das falsche Messer benutzt.
+  > Belehrend. Wir erklären, warum eine Zeile umbricht, aber wir sagen niemandem, dass er den falschen Geschmack hat.
   - en:
-  > Preachy. We explain the material, but we never tell anybody they are using the wrong knife.
+  > Preachy. We explain why a line breaks where it does, but we never tell anybody their taste is wrong.
 - **Marken-Relaunch**
   - de:
-  > Aufgeregt. Kein „nur noch zwei Plätze frei" — dafür rufen die Leute uns nicht an.
+  > Aufgeregt. Kein „nur noch zwei Termine frei" — dafür ruft hier niemand an.
   - en:
-  > Breathless. No "only two seats left" — that is not what people call us for.
+  > Breathless. No "only two slots left" — that is not what people call for.
 
 ### `d.admired` — Nenn eine Marke, deren Persönlichkeit du bewunderst — was genau ist es bei denen?
 
-**Art:** Frage · **Umfang:** ~3 Min, 4 Züge · **Vertraulichkeit:** öffentlich
+**Art:** Frage · **Umfang:** ~1 Min, 4 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** capture a brand whose personality they admire and what exactly it is about that brand.
 
@@ -1978,18 +1980,18 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
 
 - **Neue Marke**
   - de:
-  > Eine kleine Outdoor-Marke aus Schweden: Sie legt seit Jahren dieselbe Reparaturanleitung bei, statt jedes Jahr eine neue Kampagne zu machen. Ihre Umweltpredigt wäre uns aber zu viel.
+  > Ein Hersteller, der seit Jahren dieselbe Reparaturanleitung beilegt, statt jede Saison eine neue Kampagne zu fahren. Das ständige Predigen der eigenen Haltung wäre uns zu viel.
   - en:
-  > A small outdoor brand from Sweden: they have enclosed the same repair instructions for years instead of running a new campaign each season. Their environmental preaching would be too much for us, though.
+  > A manufacturer that has enclosed the same repair instructions for years instead of running a new campaign every season. The constant preaching about their own stance would be too much for us.
 - **Marken-Relaunch**
   - de:
-  > Eine Kaffeerösterei in Hamburg: Sie schreibt auf jede Tüte, was der Bauer bekommen hat. Ihr Ton wäre uns aber zu belehrend.
+  > Ein Röster, der auf jede Tüte schreibt, was der Bauer bekommen hat. Der belehrende Ton wäre uns zu viel.
   - en:
-  > A coffee roastery in Hamburg: they print on every bag what the farmer was paid. Their tone would be too preachy for us, though.
+  > A roaster who prints on every bag what the farmer was paid. The lecturing tone would be too much for us.
 
 ### `d.emotion` — Was sollen Leute FÜHLEN, wenn sie mit euch zu tun haben?
 
-**Art:** Frage · **Umfang:** ~3 Min, 4 Züge · **Vertraulichkeit:** öffentlich
+**Art:** Frage · **Umfang:** ~1 Min, 4 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** capture what people should feel when they interact with this brand.
 
@@ -2026,14 +2028,14 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
 
 - **Neue Marke**
   - de:
-  > Erleichterung — in dem Moment, in dem jemand merkt, dass das Messer noch zu retten ist.
+  > Erleichterung — in dem Moment, in dem jemand merkt, dass sein Manuskript nicht kürzer werden muss.
   - en:
-  > Relief — at the moment somebody realises the knife can still be saved.
+  > Relief — at the moment somebody realises their manuscript does not have to get shorter.
 - **Marken-Relaunch**
   - de:
-  > Ruhe. Wenn die Bestätigung kommt, soll niemand mehr das Kleingedruckte suchen.
+  > Ruhe. Ist der Termin bestätigt, soll niemand mehr überlegen, was er anziehen muss.
   - en:
-  > Calm. When the confirmation arrives, nobody should still be looking for the small print.
+  > Calm. Once the appointment is confirmed, nobody should still be wondering what to wear.
 
 ### `d.voiceSamples` — Welcher dieser Sätze klingt am meisten nach euch?
 
@@ -2062,7 +2064,7 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
 
 **Form des Werts:** Person: wir · Zeit: Präsens · kein Wortdeckel
 
-**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 0 · „weiss nicht" gilt hier nicht · nicht vertagbar
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
 
 **Invarianten (im Code geprüft):** —
 
@@ -2072,22 +2074,22 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
 
 - **Neue Marke**
   - de:
-  > - Das Messer ist zu retten, aber der Griff muss neu.
-  > - Vor Ostern schaffen wir das nicht — ehrlich gesagt frühestens im Mai.
-  > - 180 Euro, weil der Stahl von Hand geschmiedet ist und nicht gefräst.
+  > - Der Satz steht, aber das Papier trägt ihn nicht.
+  > - Vor Oktober schaffen wir das nicht — ehrlich gesagt frühestens im November.
+  > - 2.400 Euro, weil jede Seite einzeln umbrochen wird und nicht aus einer Vorlage kommt.
   - en:
-  > - The knife can be saved, but the handle has to be new.
-  > - We will not manage it before Easter — honestly, May at the earliest.
-  > - 180 euros, because the steel is forged by hand and not milled.
+  > - The typesetting works, but the paper cannot carry it.
+  > - We will not manage it before October — honestly, November at the earliest.
+  > - 2,400 euros, because every page is set by hand and not poured into a template.
 - **Marken-Relaunch**
   - de:
-  > - Ihr Flug ist verschoben, wir haben schon umgebucht.
-  > - Das Hotel ist gut, aber laut — sagen wir lieber jetzt als hinterher.
-  > - Der Preis steigt am Freitag, deshalb melden wir uns heute.
+  > - Der Termin steht, die Bilder kommen am Freitag.
+  > - Das Licht ist gut, der Hintergrund nicht — besser jetzt gesagt als hinterher.
+  > - Ab Freitag gilt der neue Preis, deshalb melden wir uns heute.
   - en:
-  > - Your flight has moved, we have already rebooked you.
-  > - The hotel is good but noisy — better said now than afterwards.
-  > - The price goes up on Friday, which is why we are calling today.
+  > - The appointment is fixed, the pictures arrive on Friday.
+  > - The light is good, the background is not — better said now than afterwards.
+  > - The new price starts on Friday, which is why we are getting in touch today.
 
 ### `d.toneWords` — Welche Wörter beschreiben euren Ton?
 
@@ -2116,7 +2118,7 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
 
 **Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
 
-**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 0 · „weiss nicht" gilt hier nicht · nicht vertagbar
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
 
 **Invarianten (im Code geprüft):** —
 
@@ -2128,12 +2130,12 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
   - de:
   > - karg
   > - geduldig
-  > - werkstattnah
+  > - handfest
   > - unbeeindruckt
   - en:
   > - spare
   > - patient
-  > - workshop-plain
+  > - hands-on
   > - unimpressed
 - **Marken-Relaunch**
   - de:
@@ -2149,7 +2151,7 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
 
 ### `d.vocabulary` — Welche Wörter würdet ihr NIE benutzen?
 
-**Art:** Frage · **Umfang:** ~3 Min, 4 Züge · **Vertraulichkeit:** öffentlich
+**Art:** Frage · **Umfang:** ~1 Min, 4 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** build their vocabulary list — the words they use and the words they avoid.
 
@@ -2184,34 +2186,34 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
 
 - **Neue Marke**
   - de:
-  > - use: geschmiedet
-  > - use: Werkstatt
-  > - avoid: Premium
-  > - avoid: Manufaktur — steht inzwischen auf jeder Tiefkühlpizza
+  > - benutzen: gesetzt
+  > - benutzen: Bogen
+  > - meiden: Premium
+  > - meiden: Manufaktur — steht inzwischen auf jeder Tiefkühlpizza
   - en:
-  > - use: forged
-  > - use: workshop
+  > - use: typeset
+  > - use: sheet
   > - avoid: premium
   > - avoid: artisanal — it is on frozen pizza now
 - **Marken-Relaunch**
   - de:
-  > - use: umgebucht
-  > - use: Rückflug
-  > - avoid: Traumreise
-  > - avoid: unschlagbar
+  > - benutzen: Abzug
+  > - benutzen: Termin
+  > - meiden: Traumbilder
+  > - meiden: unschlagbar
   - en:
-  > - use: rebooked
-  > - use: return flight
-  > - avoid: dream holiday
+  > - use: print
+  > - use: appointment
+  > - avoid: dream pictures
   > - avoid: unbeatable
 
-## Manifest (`manifesto`) — 6 Sessions
+## Manifest (`manifesto`) — 6 Sessions, **Σ ~13 Min** (20 Züge)
 
 Interview-Technik: **Nika** (Sprach-Beraterin). Gesprochen wird alles von George.
 
 ### `e.warmup1` — Was regt dich an deiner Branche auf?
 
-**Art:** Frage · **Umfang:** ~3 Min, 4 Züge · **Vertraulichkeit:** öffentlich
+**Art:** Frage · **Umfang:** ~1 Min, 4 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** capture what makes them angry about their own industry.
 
@@ -2248,18 +2250,18 @@ Interview-Technik: **Nika** (Sprach-Beraterin). Gesprochen wird alles von George
 
 - **Neue Marke**
   - de:
-  > Dass Angebote absichtlich unvergleichbar gemacht werden — drei Seiten Positionen, damit niemand den Preis pro Fenster ausrechnen kann.
+  > Dass Angebote absichtlich unvergleichbar gemacht werden — vier Seiten Positionen, damit niemand den Stundensatz ausrechnen kann.
   - en:
-  > That quotes are made deliberately incomparable — three pages of line items so nobody can work out the price per window.
+  > That quotes are made deliberately incomparable — four pages of line items so nobody can work out the hourly rate.
 - **Marken-Relaunch**
   - de:
-  > Jahresverträge, die sich verlängern, wenn man die Kündigung um zwei Tage verpasst. Das ist kein Geschäftsmodell, das ist eine Falle.
+  > Rahmenverträge, die sich verlängern, wenn man die Kündigung um zwei Tage verpasst. Das ist kein Geschäftsmodell, das ist eine Falle.
   - en:
-  > Annual contracts that renew if you miss the notice period by two days. That is not a business model, it is a trap.
+  > Retainers that renew if you miss the notice period by two days. That is not a business model, it is a trap.
 
 ### `e.warmup2` — Was sollten mehr Leute über eure Arbeit verstehen?
 
-**Art:** Frage · **Umfang:** ~3 Min, 4 Züge · **Vertraulichkeit:** öffentlich
+**Art:** Frage · **Umfang:** ~1 Min, 4 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** capture what they wish more people understood about their work.
 
@@ -2295,23 +2297,24 @@ Interview-Technik: **Nika** (Sprach-Beraterin). Gesprochen wird alles von George
 
 - **Neue Marke**
   - de:
-  > Dass die Dämmung nicht das Erste ist. Bei den meisten Häusern bringt die eingestellte Heizung im ersten Winter mehr als eine Fassade für 20.000 Euro.
+  > Dass die Idee nicht das Teure ist. In den meisten Projekten kostet das Abstimmen dreimal so viel wie das Entwerfen.
   - en:
-  > That insulation is not the first step. In most houses, setting the heating properly does more in the first winter than a façade costing 20,000 euros.
+  > That the idea is not the expensive part. In most projects the rounds of approval cost three times as much as the design work.
 - **Marken-Relaunch**
   - de:
-  > Dass die ersten sechs Wochen nichts mit Muskeln zu tun haben, sondern damit, ob jemand überhaupt wiederkommt.
+  > Dass die ersten sechs Wochen nichts mit Kreativität zu tun haben, sondern damit, ob jemand die Zahlen des Kunden versteht.
   - en:
-  > That the first six weeks have nothing to do with muscle and everything to do with whether somebody comes back at all.
+  > That the first six weeks have nothing to do with creativity and everything to do with whether somebody understands the client's numbers.
 
 ### `e.statements` — Die Satzanfänge
 
-**Art:** Entwurf · **Umfang:** ~10 Min, 4 Züge · **Vertraulichkeit:** öffentlich
+**Art:** Entwurf · **Umfang:** ~5 Min, 4 Züge · **Vertraulichkeit:** öffentlich
 
-**Ziel:** draft the statement openers the manifesto will be built from — one line per opener, filled from what they have already said.
+**Ziel:** draft all 23 statement openers the manifesto will be built from — one line per opener, in the five groups of the instrument (belief, commitment, energy, stance, promise), filled from what they have already said.
 
 **Woran man einen guten Wert erkennt:**
 
+- There are 23 lines, and every group of the instrument is represented.
 - Every statement takes a side somebody could refuse.
 - Each one is traceable to an answer they gave.
 - They are sentences somebody would say, not headlines.
@@ -2335,22 +2338,22 @@ Interview-Technik: **Nika** (Sprach-Beraterin). Gesprochen wird alles von George
 
 - **Neue Marke**
   - de:
-  > - Wir glauben, dass die billigste Kilowattstunde die ist, die niemand braucht.
-  > - Wir weigern uns, eine Fassade zu empfehlen, bevor die Heizung eingestellt ist.
+  > - Wir glauben, dass die teuerste Runde die ist, die niemand gebraucht hätte.
+  > - Wir weigern uns, einen Entwurf zu zeigen, bevor die Frage feststeht.
   - en:
-  > - We believe the cheapest kilowatt hour is the one nobody needs.
-  > - We refuse to recommend a façade before the heating has been set up properly.
+  > - We believe the most expensive round is the one nobody needed.
+  > - We refuse to show a draft before the question has been settled.
 - **Marken-Relaunch**
   - de:
-  > - Wir glauben, dass Wiederkommen wichtiger ist als Fortschritt.
+  > - Wir glauben, dass Bleiben wichtiger ist als Auffallen.
   > - Wir weigern uns, Verträge zu verlängern, die niemand nutzt.
   - en:
-  > - We believe coming back matters more than progress.
+  > - We believe staying matters more than standing out.
   > - We refuse to renew a contract nobody is using.
 
 ### `e.composition` — Ton, Länge und Verwendung des Manifests
 
-**Art:** Auswahl · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
+**Art:** Auswahl · **Umfang:** ~2 Min, 3 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** settle the tone, the length and the intended use of the manifesto.
 
@@ -2369,13 +2372,14 @@ Interview-Technik: **Nika** (Sprach-Beraterin). Gesprochen wird alles von George
 
 **Gesprächsleiter:**
 
-- Eröffnung: settle tone, length and use — say which one you would take and why.
-- Nachfrage: where exactly will this be read first?
+- Eröffnung: start with the use — where will this be read first?
+- Nachfrage: what length does that place carry?
+- Nachfrage: which of the offered tones fits that place — one of them, not a mixture?
 - Umdeutung: if every use is ticked, ask which one it has to work for on day one
 
-**Form des Werts:** Person: folgt der Weiche Solo/Team · Zeit: frei · kein Wortdeckel
+**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
 
-**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 0 · „weiss nicht" gilt hier nicht · nicht vertagbar
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 2 · „weiss nicht" gilt hier nicht · nicht vertagbar
 
 **Invarianten (im Code geprüft):** —
 
@@ -2385,18 +2389,18 @@ Interview-Technik: **Nika** (Sprach-Beraterin). Gesprochen wird alles von George
 
 - **Neue Marke**
   - de:
-  > Ton: nüchtern · Länge: kurz, unter 120 Wörtern · Verwendung: die erste Seite des Beratungsberichts
+  > Ton: nüchtern · Länge: kurz, unter 120 Wörtern · Verwendung: die erste Seite jedes Angebots
   - en:
-  > Tone: sober · Length: short, under 120 words · Use: the first page of the advisory report
+  > Tone: sober · Length: short, under 120 words · Use: the first page of every proposal
 - **Marken-Relaunch**
   - de:
-  > Ton: direkt · Länge: mittel · Verwendung: das Plakat im Eingang und die Seite „Über uns"
+  > Ton: direkt · Länge: mittel · Verwendung: das Plakat im Besprechungsraum und die Seite „Über uns"
   - en:
-  > Tone: direct · Length: medium · Use: the poster in the entrance and the About page
+  > Tone: direct · Length: medium · Use: the poster in the meeting room and the About page
 
 ### `e.manifesto` — Manifest
 
-**Art:** Entwurf · **Umfang:** ~5 Min, 3 Züge · **Vertraulichkeit:** öffentlich
+**Art:** Entwurf · **Umfang:** ~3 Min, 3 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** draft the manifesto of this brand from the confirmed statements and the chosen composition.
 
@@ -2425,22 +2429,22 @@ Interview-Technik: **Nika** (Sprach-Beraterin). Gesprochen wird alles von George
 
 - **Neue Marke**
   - de:
-  > Die billigste Kilowattstunde ist die, die niemand braucht.
-  > Deshalb rechnen wir, bevor wir bauen.
-  > Und sagen ab, wenn sich das Gerüst nicht lohnt.
+  > Die teuerste Runde ist die, die niemand gebraucht hätte.
+  > Deshalb klären wir die Frage, bevor wir entwerfen.
+  > Und sagen ab, wenn die Frage nicht zu klären ist.
   - en:
-  > The cheapest kilowatt hour is the one nobody needs.
-  > So we do the arithmetic before we build.
-  > And we say no when the scaffolding is not worth it.
+  > The most expensive round is the one nobody needed.
+  > So we settle the question before we design.
+  > And we say no when the question cannot be settled.
 - **Marken-Relaunch**
   - de:
-  > Der beste Trainingsplan ist der, den jemand im November noch macht.
-  > Wir zählen keine Anmeldungen.
-  > Wir zählen, wer wiederkommt.
+  > Der beste Auftritt ist der, den ein Kunde in drei Jahren noch selbst pflegen kann.
+  > Wir zählen keine Preise.
+  > Wir zählen, was übrig bleibt.
   - en:
-  > The best training plan is the one somebody still follows in November.
-  > We do not count sign-ups.
-  > We count who comes back.
+  > The best brand is the one a client can still maintain three years later.
+  > We do not count awards.
+  > We count what is left.
 
 ### `e.anchorLine` — Welche Zeile ist die, die ihr an eine Wand hängen würdet?
 
@@ -2467,9 +2471,9 @@ Interview-Technik: **Nika** (Sprach-Beraterin). Gesprochen wird alles von George
 - Nachfrage: which line would you still want to say in five years?
 - Umdeutung: if they want to write a new one, point back to the manifesto and ask which line comes closest
 
-**Form des Werts:** Person: folgt der Weiche Solo/Team · Zeit: frei · kein Wortdeckel
+**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
 
-**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 0 · „weiss nicht" gilt hier nicht · nicht vertagbar
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
 
 **Invarianten (im Code geprüft):** der Wert ist ein Satz aus `e.manifesto`
 
@@ -2479,16 +2483,16 @@ Interview-Technik: **Nika** (Sprach-Beraterin). Gesprochen wird alles von George
 
 - **Neue Marke**
   - de:
-  > Die billigste Kilowattstunde ist die, die niemand braucht.
+  > Die teuerste Runde ist die, die niemand gebraucht hätte.
   - en:
-  > The cheapest kilowatt hour is the one nobody needs.
+  > The most expensive round is the one nobody needed.
 - **Marken-Relaunch**
   - de:
-  > Wir zählen, wer wiederkommt.
+  > Wir zählen, was übrig bleibt.
   - en:
-  > We count who comes back.
+  > We count what is left.
 
-## Tagline & Messaging (`verbal`) — 5 Sessions
+## Tagline & Messaging (`verbal`) — 5 Sessions, **Σ ~7 Min** (12 Züge)
 
 Interview-Technik: **Nika** (Sprach-Beraterin). Gesprochen wird alles von George.
 
@@ -2519,7 +2523,7 @@ Interview-Technik: **Nika** (Sprach-Beraterin). Gesprochen wird alles von George
 
 **Form des Werts:** Person: ohne Person · Zeit: Präsens · höchstens 7 Wörter
 
-**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 0 · „weiss nicht" gilt hier nicht · nicht vertagbar
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
 
 **Invarianten (im Code geprüft):** —
 
@@ -2529,18 +2533,18 @@ Interview-Technik: **Nika** (Sprach-Beraterin). Gesprochen wird alles von George
 
 - **Neue Marke**
   - de:
-  > Erst rechnen, dann bauen.
+  > Erst messen, dann möblieren.
   - en:
-  > Do the arithmetic before the building.
+  > Measure first, furnish second.
 - **Marken-Relaunch**
   - de:
-  > Wir zählen die Wiederkommer.
+  > Wir planen für den Montag.
   - en:
-  > We count the ones who return.
+  > We plan for the Monday.
 
 ### `ep.boilerplates` — Boilerplates — Bio, Kurzabsatz, Absatz
 
-**Art:** Entwurf · **Umfang:** ~5 Min, 3 Züge · **Vertraulichkeit:** öffentlich
+**Art:** Entwurf · **Umfang:** ~2 Min, 3 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** draft the three boilerplates of this brand: the one-line bio, the short paragraph and the full paragraph.
 
@@ -2570,21 +2574,21 @@ Interview-Technik: **Nika** (Sprach-Beraterin). Gesprochen wird alles von George
 - **Neue Marke**
   - de:
   > ## Bio
-  > Energieberatung für Altbauten in Ostwestfalen — wir rechnen, bevor jemand baut.
+  > Innenarchitektur für kleine Wohnungen in Leipzig — wir messen, bevor jemand kauft.
   - en:
   > ## Bio
-  > Energy advice for older houses in East Westphalia — we do the arithmetic before anybody builds.
+  > Interior design for small flats in Leipzig — we measure before anybody buys.
 - **Marken-Relaunch**
   - de:
   > ## Bio
-  > Studio für Erwachsene, die spät anfangen. Wir zählen, wer wiederkommt.
+  > Innenarchitektur für Praxen und Büros. Wir planen für den Montag, nicht für das Foto.
   - en:
   > ## Bio
-  > A gym for adults starting late. We count who comes back.
+  > Interior design for practices and offices. We plan for the Monday, not for the photograph.
 
 ### `ep.keyMessages` — Kernbotschaften je Zielgruppe
 
-**Art:** Entwurf · **Umfang:** ~5 Min, 3 Züge · **Vertraulichkeit:** öffentlich
+**Art:** Entwurf · **Umfang:** ~2 Min, 3 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** draft the key messages of this brand, one set per audience.
 
@@ -2613,26 +2617,26 @@ Interview-Technik: **Nika** (Sprach-Beraterin). Gesprochen wird alles von George
 
 - **Neue Marke**
   - de:
-  > ## Hausbesitzer über 60
-  > - Sie müssen nicht ausziehen, wir arbeiten in bewohnten Häusern.
-  > - Wir sagen Ihnen vorher, was sich nicht lohnt.
+  > ## Mieterinnen und Mieter
+  > - Nichts von dem, was wir planen, muss beim Auszug zurückgebaut werden.
+  > - Wir sagen vorher, was sich nicht lohnt.
   - en:
-  > ## Homeowners over 60
-  > - You do not have to move out, we work in occupied houses.
-  > - We tell you in advance what is not worth doing.
+  > ## Tenants
+  > - Nothing we plan has to be undone when the lease ends.
+  > - We say in advance what is not worth doing.
 - **Marken-Relaunch**
   - de:
-  > ## Wiedereinsteiger ab 40
-  > - In den ersten sechs Wochen zählt nur, dass ihr wiederkommt.
-  > - Kein Vertrag, der sich von selbst verlängert.
+  > ## Praxen im laufenden Betrieb
+  > - In den ersten sechs Wochen zählt nur, dass der Betrieb weiterläuft.
+  > - Kein Termin wird ohne Rücksprache verschoben.
   - en:
-  > ## People starting again after 40
-  > - For the first six weeks the only thing that counts is that you come back.
-  > - No contract that renews itself.
+  > ## Practices that stay open during the work
+  > - For the first six weeks the only thing that counts is that the practice keeps running.
+  > - No appointment is moved without asking first.
 
 ### `ep.vocabulary` — Wörter zum Benutzen, Wörter zum Meiden
 
-**Art:** Ableitung · **Umfang:** ~2 Min, 2 Züge · **Vertraulichkeit:** öffentlich
+**Art:** Ableitung · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** derive the words this brand uses and the words it avoids, as one list for everyday writing.
 
@@ -2661,25 +2665,28 @@ Interview-Technik: **Nika** (Sprach-Beraterin). Gesprochen wird alles von George
 
 - **Neue Marke**
   - de:
-  > - use: Heizkurve
-  > - use: Bestandsaufnahme
-  > - avoid: Sanierungsstau
-  > - avoid: energetisch optimiert
+  > - benutzen: Grundriss
+  > - benutzen: Aufmaß
+  > - meiden: Wohntraum
+  > - meiden: hochwertig ausgestattet
   - en:
-  > - use: heating curve
+  > - use: floor plan
   > - use: survey
-  > - avoid: renovation backlog
-  > - avoid: energy-optimised
+  > - avoid: dream home
+  > - avoid: high-end fittings
 - **Marken-Relaunch**
   - de:
-  > - use: wiederkommen
-  > - use: Probemonat
-  > - avoid: Bikinifigur
-  > - avoid: Transformation
+  > - benutzen: Bestandsaufnahme
+  > - benutzen: Bauabschnitt
+  > - meiden: Wohlfühlatmosphäre
+  > - meiden: Transformation
   - en:
-  > - use: come back
-  > - use: trial month
-  > - avoid: beach body
+  > - use: survey
+  > - use: construction phase
+  > - avoid: feel-good atmosphere
+  > - avoid: transformation - use: survey
+  > - use: construction phase
+  > - avoid: feel-good atmosphere
   > - avoid: transformation
 
 ### `ep.distinctiveAsset` — Welche Zeile wird euer verbales Erkennungszeichen?
@@ -2707,9 +2714,9 @@ Interview-Technik: **Nika** (Sprach-Beraterin). Gesprochen wird alles von George
 - Nachfrage: would you still want to say it in five years?
 - Umdeutung: if they want a new line, ask what the anchor line is missing
 
-**Form des Werts:** Person: folgt der Weiche Solo/Team · Zeit: frei · kein Wortdeckel
+**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
 
-**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 0 · „weiss nicht" gilt hier nicht · nicht vertagbar
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
 
 **Invarianten (im Code geprüft):** —
 
@@ -2719,16 +2726,16 @@ Interview-Technik: **Nika** (Sprach-Beraterin). Gesprochen wird alles von George
 
 - **Neue Marke**
   - de:
-  > Die billigste Kilowattstunde ist die, die niemand braucht.
+  > Erst messen, dann möblieren.
   - en:
-  > The cheapest kilowatt hour is the one nobody needs.
+  > Measure first, furnish second.
 - **Marken-Relaunch**
   - de:
-  > Wir zählen, wer wiederkommt.
+  > Wir planen für den Montag.
   - en:
-  > We count who comes back.
+  > We plan for the Monday.
 
-## Name (`naming`) — 8 Sessions
+## Name (`naming`) — 8 Sessions, **Σ ~12 Min** (21 Züge)
 
 Interview-Technik: **Otto** (Namens-Berater). Gesprochen wird alles von George.
 
@@ -2757,9 +2764,9 @@ Interview-Technik: **Otto** (Namens-Berater). Gesprochen wird alles von George.
 - Nachfrage: is there a type you would rule out straight away?
 - Umdeutung: if they pick a descriptive name, say plainly what that costs in protectability
 
-**Form des Werts:** Person: folgt der Weiche Solo/Team · Zeit: frei · kein Wortdeckel
+**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
 
-**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 0 · „weiss nicht" gilt hier nicht · nicht vertagbar
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
 
 **Invarianten (im Code geprüft):** —
 
@@ -2769,18 +2776,18 @@ Interview-Technik: **Otto** (Namens-Berater). Gesprochen wird alles von George.
 
 - **Neue Marke**
   - de:
-  > Erfundener Name — kurz, schützbar, sagt nichts über Fahrräder und passt auch noch, wenn ihr später Lastenräder vermietet.
+  > Erfundener Name — kurz, schützbar, sagt nichts über Texte und passt auch noch, wenn später Konzeptarbeit dazukommt.
   - en:
-  > An invented name — short, protectable, says nothing about bicycles, and still fits if you rent out cargo bikes later.
+  > An invented name — short, protectable, says nothing about copywriting, and still fits if concept work comes later.
 - **Marken-Relaunch**
   - de:
-  > Gründername bleibt, aber ohne Titel: „Praxis Ehlerding" statt „Zahnarztpraxis Dr. med. dent. Ehlerding".
+  > Gründername bleibt, aber ohne Zusatz: „Ohlsen" statt „Ohlsen Webentwicklung".
   - en:
-  > The founder name stays, but without the titles: "Ehlerding Practice" instead of "Dental Surgery Dr Ehlerding".
+  > The founder name stays, but without the add-on: "Ohlsen" instead of "Ohlsen Webentwicklung".
 
 ### `f.taste` — Nenn drei bis fünf Markennamen, die du liebst — egal welche Branche — und sag warum.
 
-**Art:** Frage · **Umfang:** ~3 Min, 4 Züge · **Vertraulichkeit:** öffentlich
+**Art:** Frage · **Umfang:** ~1 Min, 4 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** capture three to five brand names they love, from any industry, and why each one works for them.
 
@@ -2816,18 +2823,18 @@ Interview-Technik: **Otto** (Namens-Berater). Gesprochen wird alles von George.
 
 - **Neue Marke**
   - de:
-  > Mirabell — weich, zwei Silben, erklärt nichts. Kolibri — man sieht sofort ein Bild. Anker — kurz und am Telefon sofort verstanden.
+  > Kolibri — man sieht sofort ein Bild. Anker — kurz und am Telefon sofort verstanden. Marlen — weich, zwei Silben, erklärt nichts.
   - en:
-  > Mirabelle — soft, two syllables, explains nothing. Colibri — you see a picture at once. Anchor — short and understood on the phone straight away.
+  > Kolibri — you see a picture at once. Anker — short and understood on the phone straight away. Marlen — soft, two syllables, explains nothing.
 - **Marken-Relaunch**
   - de:
-  > Klar, weil es ein einziges Wort ist. Nordlicht, weil es die Gegend mitnimmt, ohne sie zu buchstabieren. Hain, weil man es nach einmal Hören schreiben kann.
+  > Nordlicht, weil es die Gegend mitnimmt, ohne sie zu buchstabieren. Hain, weil man es nach einmal Hören schreiben kann. Kiesel, weil es ein einziges Wort ist.
   - en:
-  > Clear, because it is a single word. Northlight, because it carries the region without spelling it out. Grove, because you can spell it after hearing it once.
+  > Nordlicht, because it carries the region without spelling it out. Hain, because you can write it down after hearing it once. Kiesel, because it is a single word.
 
 ### `f.noGos` — Gibt es Wörter, Stile oder Längen, die tabu sind?
 
-**Art:** Frage · **Umfang:** ~3 Min, 4 Züge · **Vertraulichkeit:** öffentlich
+**Art:** Frage · **Umfang:** ~1 Min, 4 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** capture the words, styles and lengths that are off-limits for this name.
 
@@ -2853,7 +2860,7 @@ Interview-Technik: **Otto** (Namens-Berater). Gesprochen wird alles von George.
 
 **Form des Werts:** Person: folgt der Weiche Solo/Team · Zeit: frei · kein Wortdeckel
 
-**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 2 · „weiss nicht" gilt · vertagen möglich
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 2 · „weiss nicht" gilt · nicht vertagbar
 
 **Invarianten (im Code geprüft):** —
 
@@ -2863,18 +2870,18 @@ Interview-Technik: **Otto** (Namens-Berater). Gesprochen wird alles von George.
 
 - **Neue Marke**
   - de:
-  > Kein „bike", kein „e-", nichts mit Bindestrich. Höchstens drei Silben — der Name muss auf den Anhänger passen.
+  > Kein „Text", kein „Media", nichts mit Bindestrich. Höchstens drei Silben — der Name muss in eine Signatur passen.
   - en:
-  > No "bike", no "e-", nothing with a hyphen. Three syllables at most — it has to fit on the trailer.
+  > No "Text", no "Media", nothing with a hyphen. Three syllables at most — the name has to fit into an email signature.
 - **Marken-Relaunch**
   - de:
-  > Nichts mit „dental" oder „smile". Kein Wort, das man buchstabieren muss, wenn ältere Patienten anrufen.
+  > Nichts mit „dev" oder „digital". Kein Wort, das man buchstabieren muss, wenn ein Kunde am Telefon mitschreibt.
   - en:
-  > Nothing with "dental" or "smile". No word that has to be spelled out when an older patient calls.
+  > Nothing with "dev" or "digital". No word that has to be spelled out when a client is taking it down over the phone.
 
 ### `f.candidates` — Namens-Kandidaten
 
-**Art:** Ableitung · **Umfang:** ~3 Min, 2 Züge · **Vertraulichkeit:** öffentlich
+**Art:** Ableitung · **Umfang:** ~2 Min, 2 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** propose name candidates that fit the chosen name type, their taste and their no-gos.
 
@@ -2903,22 +2910,22 @@ Interview-Technik: **Otto** (Namens-Berater). Gesprochen wird alles von George.
 
 - **Neue Marke**
   - de:
-  > - Kolben — erfunden
-  > - Nabe — beschreibend, aus dem Handwerk
-  > - Sattelfest — zusammengesetzt
+  > - Bogen — erfunden
+  > - Satzbau — beschreibend, aus dem Handwerk
+  > - Nordfeld — zusammengesetzt
   - en:
-  > - Piston — invented
-  > - Hub — descriptive, from the trade
-  > - Saddlefast — compound
+  > - Bogen — invented
+  > - Satzbau — descriptive, from the trade
+  > - Nordfeld — compound
 - **Marken-Relaunch**
   - de:
-  > - Ehlerding — Gründername
-  > - Hain — abstrakt
-  > - Nordlicht — bildhaft
+  > - Ohlsen — Gründername
+  > - Kiesel — abstrakt
+  > - Tagwerk — bildhaft
   - en:
-  > - Ehlerding — founder name
-  > - Grove — abstract
-  > - Northlight — evocative
+  > - Ohlsen — founder name
+  > - Kiesel — abstract
+  > - Tagwerk — evocative
 
 ### `f.shortlist` — Welche Kandidaten kommen auf die Shortlist?
 
@@ -2947,7 +2954,7 @@ Interview-Technik: **Otto** (Namens-Berater). Gesprochen wird alles von George.
 
 **Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
 
-**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 0 · „weiss nicht" gilt hier nicht · nicht vertagbar
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
 
 **Invarianten (im Code geprüft):** —
 
@@ -2957,26 +2964,26 @@ Interview-Technik: **Otto** (Namens-Berater). Gesprochen wird alles von George.
 
 - **Neue Marke**
   - de:
-  > - Kolben
-  > - Nabe
-  > - Sattelfest
+  > - Bogen
+  > - Satzbau
+  > - Nordfeld
   - en:
-  > - Piston
-  > - Hub
-  > - Saddlefast
+  > - Bogen
+  > - Satzbau
+  > - Nordfeld
 - **Marken-Relaunch**
   - de:
-  > - Ehlerding
-  > - Hain
-  > - Nordlicht
+  > - Ohlsen
+  > - Kiesel
+  > - Tagwerk
   - en:
-  > - Ehlerding
-  > - Grove
-  > - Northlight
+  > - Ohlsen
+  > - Kiesel
+  > - Tagwerk
 
 ### `f.checks` — Vorprüfung der Verfügbarkeit
 
-**Art:** Ableitung · **Umfang:** ~5 Min, 2 Züge · **Vertraulichkeit:** öffentlich
+**Art:** Ableitung · **Umfang:** ~3 Min, 2 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** derive the availability checks for the shortlisted names.
 
@@ -3005,22 +3012,22 @@ Interview-Technik: **Otto** (Namens-Berater). Gesprochen wird alles von George.
 
 - **Neue Marke**
   - de:
-  > ## Kolben
-  > Domain: kolben.de vergeben, kolben-rad.de frei · Handles: ungeprüft, Suchlink unten · Marke: DPMA-Suche noch offen · Fremdsprache: keine Auffälligkeit
+  > ## Bogen
+  > Domain: bogen.de vergeben, bogen-texte.de frei · Handles: ungeprüft, Suchlink unten · Marke: DPMA-Suche noch offen · Fremdsprache: keine Auffälligkeit
   - en:
-  > ## Piston
-  > Domain: piston.de taken, piston-bikes.de free · Handles: unverified, search link below · Trademark: DPMA search still open · Other languages: nothing conspicuous
+  > ## Bogen
+  > Domain: bogen.de taken, bogen-texte.de free · Handles: unverified, search link below · Trademark: DPMA search still open · Other languages: nothing conspicuous
 - **Marken-Relaunch**
   - de:
-  > ## Hain
-  > Domain: hain.de vergeben, praxis-hain.de frei · Handles: ungeprüft · Marke: geführte Suche noch offen · Fremdsprache: keine Auffälligkeit
+  > ## Kiesel
+  > Domain: kiesel.de vergeben, kiesel-code.de frei · Handles: ungeprüft · Marke: geführte Suche noch offen · Fremdsprache: keine Auffälligkeit
   - en:
-  > ## Grove
-  > Domain: grove.de taken, praxis-grove.de free · Handles: unverified · Trademark: guided search still open · Other languages: nothing conspicuous
+  > ## Kiesel
+  > Domain: kiesel.de taken, kiesel-code.de free · Handles: unverified · Trademark: guided search still open · Other languages: nothing conspicuous
 
 ### `f.criteria` — Bewertet die Finalisten an den acht Kriterien.
 
-**Art:** Auswahl · **Umfang:** ~3 Min, 3 Züge · **Vertraulichkeit:** öffentlich
+**Art:** Auswahl · **Umfang:** ~2 Min, 3 Züge · **Vertraulichkeit:** öffentlich
 
 **Ziel:** rate the shortlisted names against the eight criteria.
 
@@ -3039,13 +3046,13 @@ Interview-Technik: **Otto** (Namens-Berater). Gesprochen wird alles von George.
 
 **Gesprächsleiter:**
 
-- Eröffnung: rate two or three finalists against the eight criteria, one criterion at a time.
-- Nachfrage: which criterion did you rate highest — would a stranger agree?
+- Eröffnung: name the one criterion that would decide it, and compare the finalists on that one first.
+- Nachfrage: which criterion comes second — and does it change the order?
 - Umdeutung: if every criterion is high, ask where the name is weakest; every name is weak somewhere
 
-**Form des Werts:** Person: folgt der Weiche Solo/Team · Zeit: frei · kein Wortdeckel
+**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
 
-**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 0 · „weiss nicht" gilt hier nicht · nicht vertagbar
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
 
 **Invarianten (im Code geprüft):** —
 
@@ -3055,17 +3062,17 @@ Interview-Technik: **Otto** (Namens-Berater). Gesprochen wird alles von George.
 
 - **Neue Marke**
   - de:
-  > ## Kolben
+  > ## Bogen
   > Sprechbar: gut · Schreibbar: gut · Merkbar: mittel · Schützbar: gut · Passend: mittel · Erweiterbar: gut · Frei: offen · Zeitlos: gut
   - en:
-  > ## Piston
+  > ## Bogen
   > Sayable: good · Spellable: good · Memorable: medium · Protectable: good · Fitting: medium · Extendable: good · Available: open · Timeless: good
 - **Marken-Relaunch**
   - de:
-  > ## Hain
+  > ## Kiesel
   > Sprechbar: gut · Schreibbar: gut · Merkbar: mittel · Schützbar: mittel · Passend: gut · Erweiterbar: gut · Frei: offen · Zeitlos: gut
   - en:
-  > ## Grove
+  > ## Kiesel
   > Sayable: good · Spellable: good · Memorable: medium · Protectable: medium · Fitting: good · Extendable: good · Available: open · Timeless: good
 
 ### `f.decision` — Eure Top drei, in Reihenfolge.
@@ -3095,7 +3102,7 @@ Interview-Technik: **Otto** (Namens-Berater). Gesprochen wird alles von George.
 
 **Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
 
-**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 0 · „weiss nicht" gilt hier nicht · nicht vertagbar
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
 
 **Invarianten (im Code geprüft):** jede Zeile stammt aus `f.shortlist`
 
@@ -3105,24 +3112,24 @@ Interview-Technik: **Otto** (Namens-Berater). Gesprochen wird alles von George.
 
 - **Neue Marke**
   - de:
-  > - Kolben
-  > - Sattelfest
-  > - Nabe
+  > - Bogen
+  > - Nordfeld
+  > - Satzbau
   - en:
-  > - Piston
-  > - Saddlefast
-  > - Hub
+  > - Bogen
+  > - Nordfeld
+  > - Satzbau
 - **Marken-Relaunch**
   - de:
-  > - Hain
-  > - Ehlerding
-  > - Nordlicht
+  > - Kiesel
+  > - Ohlsen
+  > - Tagwerk
   - en:
-  > - Grove
-  > - Ehlerding
-  > - Northlight
+  > - Kiesel
+  > - Ohlsen
+  > - Tagwerk
 
-## Ergebnis (`result`) — 2 Sessions
+## Ergebnis (`result`) — 2 Sessions, **Σ ~2 Min** (3 Züge)
 
 Interview-Technik: **George** (Markenberater). Gesprochen wird alles von George.
 
@@ -3151,9 +3158,9 @@ Interview-Technik: **George** (Markenberater). Gesprochen wird alles von George.
 - Nachfrage: which of these would still feel right on an invoice?
 - Umdeutung: if the choice is about colour only, ask which one sounds like their tone words
 
-**Form des Werts:** Person: folgt der Weiche Solo/Team · Zeit: frei · kein Wortdeckel
+**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
 
-**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 0 · „weiss nicht" gilt hier nicht · nicht vertagbar
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
 
 **Invarianten (im Code geprüft):** —
 
@@ -3163,9 +3170,9 @@ Interview-Technik: **George** (Markenberater). Gesprochen wird alles von George.
 
 - **Neue Marke**
   - de:
-  > Die ruhige Richtung — sie passt zu „karg" und „geduldig"; die kontrastreiche wirkt wie ein Angebot im Schaufenster.
+  > Die ruhige Richtung — sie passt zu „knapp" und „zugewandt"; die kontrastreiche wirkt wie ein Werbebanner.
   - en:
-  > The quiet direction — it matches "spare" and "patient"; the high-contrast one looks like an offer in a shop window.
+  > The quiet direction — it matches "brief" and "attentive"; the high-contrast one looks like an advertising banner.
 - **Marken-Relaunch**
   - de:
   > Die warme Richtung, weil unsere Leute wiederkommen sollen und nicht angetrieben werden wollen.
@@ -3186,18 +3193,27 @@ Interview-Technik: **George** (Markenberater). Gesprochen wird alles von George.
 
 **Was zurückgewiesen wird:**
 
-- Asking again after a skip.
-- Reading the rating as a confirmation of the result.
-- Framing the question so that a low answer feels rude.
+- A rating recorded although they skipped the question.
+- A rating nobody gave, filled in from the mood of the conversation.
+- A number that is not one of the offered ones.
 
 **Gesprächsleiter:**
 
-- Eröffnung: ask once, plainly, and accept a skip as an answer.
+- Eröffnung: ask once, plainly, accept a skip as an answer, never ask again after one, and never read the number as a confirmation of the result.
 
-**Form des Werts:** Person: folgt der Weiche Solo/Team · Zeit: frei · kein Wortdeckel
+**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
 
 **Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 0 · „weiss nicht" gilt · nicht vertagbar
 
 **Invarianten (im Code geprüft):** —
 
 **Fliesst später in:** nichts — eine Korrektur hier löst keine Warteschlange aus
+
+## Umfang insgesamt
+
+- **Basispfad** (ohne Markenarchitektur, ohne Name): ~78 Min · 170 Züge
+- **Vollpfad** (mit beiden): ~96 Min · 208 Züge
+
+Die Zahl je Session ist eine SCHÄTZUNG der aktiven Zeit, nicht der Sitzungsdauer;
+kommuniziert wird sie als Kapitel-Etappe („11 Sessions, ~14 Min"), damit sichtbar
+bleibt, dass man aufhören und zurückkommen kann.

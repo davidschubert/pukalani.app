@@ -241,21 +241,77 @@ describe('evaluateInvariants — was ein Test prüfen kann (§3a Nr. 6)', () => 
     invariants,
   })
 
-  it('registriert in der echten Registry genau die sicheren drei', () => {
+  it('registriert in der echten Registry genau die sicheren sieben', () => {
     // `f.decision` kam mit Paket 2 dazu, nachdem die WERT-FORM entschieden war
     // („top three, in order" = eine Liste, jede Zeile ein Name aus der
-    // Shortlist — Paket-1-Befund (b)). `f.shortlist subsetOf f.candidates`
-    // wurde BEWUSST nicht registriert: eine Kandidaten-Zeile trägt laut
-    // Content-Spec §10 den Namenstyp mit, die Zeilen können also nie gleich
-    // sein — die Invariante hätte jedes Bestätigen mit 409 abgewiesen.
+    // Shortlist — Paket-1-Befund (b)). Paket 2b hat vier weitere gesetzt
+    // (Audit Teil 3 Nr. 4). ZWEI der sechs aus dem Audit sind BEWUSST NICHT
+    // dabei:
+    //  · `f.shortlist subsetOf f.candidates` — eine Kandidaten-Zeile trägt laut
+    //    Content-Spec §10 den Namenstyp mit, die Zeilen können also nie gleich
+    //    sein; die Invariante hätte jedes Bestätigen mit 409 abgewiesen.
+    //  · `ep.distinctiveAsset` — die Regel ist ein ODER über zwei Quellen
+    //    (Ankerzeile ODER Tagline), und der Invarianten-Vertrag kennt kein
+    //    ODER: `memberOf e.anchorLine` allein wiese die legitime Tagline ab.
     const registered = BRAND_SLOTS
       .filter(session => session.invariants.length > 0)
       .map(session => [session.id, session.invariants] as const)
     expect(registered).toEqual([
       ['c.final', [{ kind: 'count', min: 3, max: 5 }]],
+      ['c.definitions', [{ kind: 'mentionsFrom', of: 'c.final' }]],
+      ['c.livedExamples', [{ kind: 'mentionsFrom', of: 'c.final' }]],
+      ['c.conflictRule', [{ kind: 'mentionsFrom', of: 'c.final', min: 2 }]],
+      ['d.secondary', [{ kind: 'mentionsNone', of: 'd.primary' }]],
       ['e.anchorLine', [{ kind: 'sentenceOf', of: 'e.manifesto' }]],
       ['f.decision', [{ kind: 'subsetOf', of: 'f.shortlist' }]],
     ])
+  })
+
+  it('c.definitions: jeder gewählte Wert kommt vor, keiner fehlt', () => {
+    const session = slotById('c.definitions')!
+    const facts = { 'c.final': { value: '- Geduld\n- Klarheit\n- Sorgfalt' } }
+    expect(evaluateInvariants(
+      session,
+      '- Geduld — wir wiederholen.\n- Klarheit — wir sagen es.\n- Sorgfalt — wir prüfen zweimal.',
+      facts,
+    )).toEqual({ ok: true })
+    // GEGENPROBE: ein fehlender Wert fällt durch.
+    expect(evaluateInvariants(session, '- Geduld — wir wiederholen.\n- Klarheit — wir sagen es.', facts))
+      .toEqual({
+        ok: false,
+        code: 'invariant_violated',
+        invariant: { kind: 'mentionsFrom', of: 'c.final' },
+      })
+    // FAIL-OPEN: ohne Quelle prüft sie nichts.
+    expect(evaluateInvariants(session, '- Geduld — wir wiederholen.')).toEqual({ ok: true })
+  })
+
+  it('c.conflictRule: zwei der eigenen Werte müssen beim Namen genannt sein', () => {
+    const session = slotById('c.conflictRule')!
+    const facts = { 'c.final': { value: '- Geduld\n- Klarheit\n- Sorgfalt' } }
+    expect(evaluateInvariants(session, 'Geduld gegen Klarheit: Klarheit gewinnt.', facts))
+      .toEqual({ ok: true })
+    // EINER reicht nicht — und ein Konflikt zwischen Wert und Zeit erst recht nicht.
+    expect(evaluateInvariants(session, 'Geduld gegen den Zeitplan: der Zeitplan gewinnt.', facts))
+      .toEqual({
+        ok: false,
+        code: 'invariant_violated',
+        invariant: { kind: 'mentionsFrom', of: 'c.final', min: 2 },
+      })
+  })
+
+  it('d.secondary: der zweite Archetyp ist nicht der erste', () => {
+    const session = slotById('d.secondary')!
+    const facts = { 'd.primary': { value: 'creator' } }
+    expect(evaluateInvariants(session, 'sage', facts)).toEqual({ ok: true })
+    expect(evaluateInvariants(session, 'creator', facts)).toEqual({
+      ok: false,
+      code: 'invariant_violated',
+      invariant: { kind: 'mentionsNone', of: 'd.primary' },
+    })
+    // FAIL-OPEN ohne primären Wert — sonst hinge der zweite an einem Feld,
+    // das die Aufrufstelle vielleicht gar nicht mitgibt.
+    expect(evaluateInvariants(session, 'creator')).toEqual({ ok: true })
   })
 
   it('f.decision: die Rangfolge darf nur Namen der Shortlist tragen', () => {

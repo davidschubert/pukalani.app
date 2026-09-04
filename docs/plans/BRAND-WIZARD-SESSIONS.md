@@ -241,9 +241,14 @@ export interface BrandSessionConfig {
 
   /** 3 · BEISPIELE — 1–2 erfundene starke Werte, je Pfad, FREMDE Branche. PFLICHT seit §5a (Abnahme-Seite zeigt sie). */
   readonly examples: { new: readonly string[], relaunch: readonly string[] }
-  //   Für die FORM, nie für den Inhalt — deshalb immer aus einer anderen
-  //   Branche als der des Kunden (die Route wählt gegen `startCard.industry`),
-  //   sonst schreibt das Modell das Beispiel ab. Wo es keine gibt: leer.
+  //   Für die FORM, nie für den Inhalt — sonst schreibt das Modell das Beispiel
+  //   ab. Wo es keine gibt: leer. Die neun KAPITEL-Geschichten sind dafür
+  //   bewusst weit gestreut (Zuordnung im Kopf von `sessionContent.ts`): ein
+  //   Kunde sieht seine eigene Branche in höchstens EINEM Kapitel. Hier stand
+  //   bis 2026-09-04 „die Route wählt gegen `startCard.industry`" — eine Zusage
+  //   ohne Deckung: es gibt je Session GENAU EIN Beispielpaar, die Route hatte
+  //   nie etwas zu wählen (Inhalts-Audit Punkt 10, Davids Entscheidung: Zusage
+  //   streichen, Streuung dafür bewusst machen).
 
   /** 4 · FRAGE-LEITER — die Interviewführung dieser einen Session. */
   readonly ladder: {
@@ -915,7 +920,16 @@ eine Korrektur dort löst keine Warteschlange aus.
 | c.conflictRule | question | ask | ja | 1 | 0 |
 | c.teamFilter | question | ask | nein (nur Team) | 1 | 0 |
 
-### D · Archetyp (12) — Nika (Interim: Gesprächs-Ableitung)
+### D · Archetyp (12) — Milo (Interim: Gesprächs-Ableitung)
+
+Die Technik dieses Kapitels ist MILO, nicht Nika: `brandAdvisors.ts` gibt ihm
+`['values', 'archetype']`, die Content-Spec §1.4 bestätigt es, und das generierte
+Inhalts-Dokument folgt dem. Hier stand bis 2026-09-04 „Nika" — ein Doku-Konflikt,
+kein Code-Befund (Inhalts-Audit §2.4). Die letzten drei Sessions
+(`d.voiceSamples`, `d.toneWords`, `d.vocabulary`) sind fachlich Ohr-Arbeit und
+damit Nika-Stoff; ihre Leitern sind bereits so geschrieben. Wandert D eines Tages
+zu Nika, kollidiert ihre Verbotsliste („zwei Varianten anbieten, nie drei") mit
+`d.voiceSamples` („EXACTLY THREE", Content-Spec §7) — das ist dann zu entscheiden.
 
 | Session | Typ | Kind | Pflicht | liest | berührt |
 | --- | --- | --- | --- | --- | --- |

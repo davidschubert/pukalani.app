@@ -65,6 +65,11 @@
  * Fassung dieser Aufträge. Steigt, sobald sich eine Aufgabe inhaltlich ändert —
  * oder der System-Prompt, mit dem sie gesendet werden.
  *
+ * `george-archetype-4` (2026-09-04, BW2 Paket 2b — Gegenlese-Runde): neue
+ * Beispielwelt (Designstudio und Fotostudio statt Schmiede und Reisebüro),
+ * Form des Werts an allen vier Ableitungen gesetzt, und `d.secondary` prüft
+ * jetzt im Code, dass der zweite Archetyp nicht der erste ist.
+ *
  * `george-archetype-3` (2026-09-04, BW2 Paket 2 — Session-Inhalte): die vier
  * Ableitungen dieses Bausteins tragen jetzt Qualitätsmerkmale, Anti-Muster und
  * ein Formvorbild aus einer fremden Branche. Die drei Regeltexte (leeres
@@ -82,7 +87,7 @@
  * Aufgabe. Kommt der Paarvergleich, steigt sie auf `-2`, und ein alter Eintrag
  * bleibt lesbar als das, was er war.
  */
-export const ARCHETYPE_PROMPT_VERSION = 'george-archetype-3'
+export const ARCHETYPE_PROMPT_VERSION = 'george-archetype-4'
 
 /**
  * DIE DREI REGELTEXTE DIESES BAUSTEINS — das leere Paarvergleich-Feld, die

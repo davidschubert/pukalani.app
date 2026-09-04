@@ -14,6 +14,7 @@ import {
   type BrandSlot,
   type BrandSlotStateFacts,
   type BrandStepKey,
+  type BrandTeamKind,
   exampleKeyFor,
   questionKeyFor,
   slotById,
@@ -160,6 +161,14 @@ const stepKey = computed<BrandStepKey | null>(() =>
 
 const pathKind = computed<BrandPathKind>(() => store.profile?.pathKind ?? 'new')
 
+/**
+ * DIE WEICHE W3 (Solo/Team) — sie tauscht bei `c.discovery3` die Fragefassung
+ * (Paket 2b, Davids Entscheidung 2026-09-04: D7 statt D3, sobald jemand ein
+ * Team hat). `'solo'` ist der Rückfall, solange das Profil nicht geladen ist:
+ * die persönliche Fassung passt immer, die Team-Fassung nur mit Team.
+ */
+const teamKind = computed<BrandTeamKind>(() => store.profile?.team ?? 'solo')
+
 const slots = computed<readonly BrandSlot[]>(() => (stepKey.value ? slotsForStep(stepKey.value) : []))
 
 /**
@@ -174,7 +183,7 @@ function slotLabel(slot: BrandSlot): string {
   const labelKey = `brand.labels.${slot.id}`
   if (te(labelKey)) return t(labelKey)
   return slot.type === 'question' || slot.type === 'choice'
-    ? t(questionKeyFor(slot, pathKind.value))
+    ? t(questionKeyFor(slot, pathKind.value, teamKind.value))
     : t(slot.questionKey)
 }
 
@@ -358,7 +367,7 @@ const turns = computed<StageTurn[]>(() => {
   const question: StageTurn = {
     id: nextSlot.value.id,
     role: 'george',
-    text: t(questionKeyFor(nextSlot.value, pathKind.value)),
+    text: t(questionKeyFor(nextSlot.value, pathKind.value, teamKind.value)),
     help,
   }
 
@@ -471,7 +480,7 @@ function readsLikeQuestion(text: string): boolean {
 
 async function answerFromGeorge(text: string): Promise<void> {
   const slot = readsLikeQuestion(text) ? null : nextSlot.value
-  const question = slot ? t(questionKeyFor(slot, pathKind.value)) : ''
+  const question = slot ? t(questionKeyFor(slot, pathKind.value, teamKind.value)) : ''
 
   if (slot) store.setSlotValue(slot.id, text)
   store.addUserMessage(`answer-${slot?.id ?? 'free'}-${store.streamMessages.length}`, text)
@@ -483,7 +492,7 @@ async function answerFromGeorge(text: string): Promise<void> {
     slotId: slot?.id,
     question,
     nextSlotId: upcoming?.id,
-    nextQuestion: upcoming ? t(questionKeyFor(upcoming, pathKind.value)) : '',
+    nextQuestion: upcoming ? t(questionKeyFor(upcoming, pathKind.value, teamKind.value)) : '',
   })
 }
 

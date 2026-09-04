@@ -487,14 +487,14 @@ describe('Session-Vertrag', () => {
   })
 
   it('hält genau die vier heiklen Sessions zurück (Plan §3a Nr. 7)', () => {
-    // Drei nennt der Plan (Beschwerden, Herausforderung, Zahlen); die vierte
-    // ist eine Entscheidung aus Paket 2 und steht mit Begründung in
-    // `sessionContent.ts`: `b2.roleOfMaster` ist eine Selbstauskunft über den
-    // eigenen Ruf („unsere Hauptmarke schreckt genau diese Leute ab"), und ein
-    // Share-Link zeigt sie einem Fremden. Die ENTSCHEIDUNG daraus (`b2.model`,
-    // `b2.rule`) bleibt öffentlich — sie ist das Ergebnis, nicht das Material.
+    // Drei nennt der Plan (Beschwerden, Herausforderung, Zahlen); die vierte ist
+    // Davids Entscheidung vom 2026-09-04 (Audit Punkt 8): `a.competitors` nennt
+    // NAMENTLICH Dritte und zu jedem eine Schwäche — das Erste, was ein Kunde
+    // nicht teilen will. Umgekehrt ist `b2.roleOfMaster` zurück auf `public`:
+    // die Architektur-Aussage wird im geteilten Dokument gebraucht, sobald
+    // `b2.rule` darauf verweist.
     expect(BRAND_SLOTS.filter(session => session.sensitivity !== 'public').map(session => session.id))
-      .toEqual(['a.complaints', 'a.challenge', 'a.facts', 'b2.roleOfMaster'])
+      .toEqual(['a.competitors', 'a.complaints', 'a.challenge', 'a.facts'])
   })
 
   it('lässt Invarianten nur auf Sessions zeigen, die VOR ihnen stehen', () => {
@@ -595,6 +595,104 @@ describe('Session-Vertrag', () => {
     }))).toContain('a.origin: spitze Klammern in examples')
   })
 
+  it('hält den Basispfad bei 70 bis 80 Minuten (Davids Entscheidung 2026-09-04)', () => {
+    // Die alte Summe war 154 Min im Basispfad — gegen die Kommunikationslinie
+    // „~45 Minuten" (Content-Spec §16). Entschieden ist „halbieren und in
+    // Kapitel-Etappen kommunizieren". Die SPANNE steht hier und nicht die
+    // genaue Zahl: eine einzelne Session darf sich bewegen, die Zusage nicht.
+    const OPTIONAL: readonly string[] = ['architecture', 'naming']
+    const active = BRAND_SLOTS.filter(session => !session.deactivated)
+    const minutes = (sessions: readonly BrandSlot[]) =>
+      sessions.reduce((sum, session) => sum + session.effort.minutes, 0)
+    const base = minutes(active.filter(session => !OPTIONAL.includes(session.stepId)))
+    const full = minutes(active)
+
+    expect(base, `Basispfad ${base} Min`).toBeGreaterThanOrEqual(70)
+    expect(base, `Basispfad ${base} Min`).toBeLessThanOrEqual(80)
+    // Der Vollpfad ist der Basispfad plus zwei Kapitel hinter einer Weiche —
+    // er muss grösser sein, sonst rechnet die Zeile oben über die falsche Menge.
+    expect(full).toBeGreaterThan(base)
+    expect(full).toBeLessThanOrEqual(100)
+  })
+
+  it('schreibt keine Nachfrage auf, die der Deckel verbietet (Audit Teil 3 Nr. 1)', () => {
+    const contradicting = BRAND_SLOTS
+      .filter(session => session.answers.maxProbes < session.ladder.probes.length)
+      .map(session => `${session.id}: ${session.ladder.probes.length} > ${session.answers.maxProbes}`)
+    expect(contradicting).toEqual([])
+    // Ohne diese Zeile wäre der Test grün, sobald keine Leiter mehr Nachfragen
+    // trägt — 14 Auswahl-Sessions standen genau deshalb im Audit.
+    expect(BRAND_SLOTS.filter(session => session.ladder.probes.length > 0).length).toBeGreaterThan(20)
+
+    expect(validateSlotRegistry(mutate('c.final', {
+      answers: { ...slotById('c.final')!.answers, maxProbes: 0 },
+    }))).toContain('c.final: 1 Nachfragen in der Leiter, aber maxProbes 0')
+  })
+
+  it('gibt Frage- und Auswahl-Sessions genug Züge für ihre Leiter', () => {
+    for (const session of BRAND_SLOTS) {
+      if (session.kind !== 'ask' && session.kind !== 'choose') continue
+      expect(session.effort.turns, session.id).toBeGreaterThanOrEqual(1 + session.answers.maxProbes)
+    }
+    expect(validateSlotRegistry(mutate('a.origin', { effort: { minutes: 2, turns: 2 } })))
+      .toContain('a.origin: 2 Züge tragen keine Eröffnung plus 2 Nachfragen')
+  })
+
+  it('lässt in Beispielen, in denen die MARKE spricht, keine Anrede zu', () => {
+    // Davids Entscheidung 2026-09-04 (Audit Punkt 5): wessen Kundschaft geduzt
+    // oder gesiezt wird, entscheidet diese Marke — nicht unser Beispiel. Der
+    // Bruch stand in `ep.keyMessages`: „Sie müssen nicht ausziehen" auf dem
+    // einen Pfad, „dass ihr wiederkommt" auf dem anderen.
+    //
+    // GEPRÜFT WIRD DIE LISTE, IN DER DIE MARKE SPRICHT — nicht alle Beispiele:
+    // wo George oder der Kunde spricht (`d.hypothesis`, `d.gapReveal`,
+    // `a.customerPraise` …), IST „ihr/euch" der richtige Ton.
+    const BRAND_SPEAKS = [
+      'a.pitch', 'b.whyStarted', 'b.purpose', 'b.vision', 'b.mission', 'b2.rule',
+      'c.definitions', 'd.voiceSamples',
+      'e.statements', 'e.manifesto', 'e.anchorLine',
+      'ep.taglines', 'ep.boilerplates', 'ep.keyMessages', 'ep.distinctiveAsset',
+    ]
+    const GERMAN = /\b(du|dich|dir|dein\w*|euch|euer|eure\w*|ihr)\b/i
+    const FORMAL = /\b(Sie|Ihnen|Ihr|Ihre|Ihren|Ihrem|Ihrer)\b/
+    const ENGLISH = /\b(you|your|yours)\b/i
+
+    const hits: string[] = []
+    for (const id of BRAND_SPEAKS) {
+      const session = slotById(id)!
+      for (const pathKind of ['new', 'relaunch'] as const) {
+        for (const text of session.examples[pathKind].de) {
+          if (GERMAN.test(text) || FORMAL.test(text)) hits.push(`${id}/${pathKind}/de`)
+        }
+        for (const text of session.examples[pathKind].en) {
+          if (ENGLISH.test(text)) hits.push(`${id}/${pathKind}/en`)
+        }
+      }
+    }
+    expect(hits).toEqual([])
+    // GEGENPROBE: die Muster greifen überhaupt.
+    expect(GERMAN.test('Sie müssen nicht ausziehen, damit ihr wiederkommt')).toBe(true)
+    expect(FORMAL.test('Sie müssen nicht ausziehen')).toBe(true)
+    expect(ENGLISH.test('You do not have to move out')).toBe(true)
+    // Und die Liste ist nicht leer geworden.
+    expect(BRAND_SPEAKS.every(id => slotById(id) !== undefined)).toBe(true)
+  })
+
+  it('gibt c.discovery3 eine Team-Fassung und sonst keiner Session', () => {
+    expect(BRAND_SLOTS.filter(session => session.teamVariant).map(session => session.id))
+      .toEqual(['c.discovery3'])
+    const discovery3 = slotById('c.discovery3')!
+    expect(questionKeyFor(discovery3, 'new', 'solo')).toBe('brand.q.c.discovery3.solo')
+    expect(questionKeyFor(discovery3, 'relaunch', 'team')).toBe('brand.q.c.discovery3.team')
+    // Ohne Angabe gilt die persönliche Fassung — sie passt immer.
+    expect(questionKeyFor(discovery3, 'new')).toBe('brand.q.c.discovery3.solo')
+    // Eine Session OHNE Team-Fassung bleibt unberührt.
+    expect(questionKeyFor(slotById('c.discovery1')!, 'new', 'team')).toBe('brand.q.c.discovery1')
+    // Pfad- und Team-Variante zugleich wären vier Fassungen je Frage.
+    expect(validateSlotRegistry(mutate('c.discovery3', { pathVariants: { new: true } })))
+      .toContain('c.discovery3: teamVariant und pathVariants zugleich')
+  })
+
   it('trägt die beiden Invarianten-Entscheidungen aus Paket 2', () => {
     // `f.decision` ist „top three, in order" — eine LISTE, deren Zeilen alle
     // aus der Shortlist stammen müssen (Paket-1-Befund (b), jetzt entschieden).
@@ -608,15 +706,21 @@ describe('Session-Vertrag', () => {
   })
 
   it('lässt vertagen, wo jemand fehlt, der nicht am Tisch sitzt', () => {
-    // Zahlen (a.facts), Team-Fragen (Konfliktregel, Einstellungsfilter), die
-    // drei Architektur-Weichen und die Namens-Tabus — überall dort ist die
-    // Alternative zum Vertagen eine erfundene Antwort.
+    // Zahlen (a.facts), Team-Fragen (Konfliktregel, Einstellungsfilter) und das
+    // ganze Kapitel Markenarchitektur — überall dort ist die Alternative zum
+    // Vertagen eine erfundene Antwort.
+    //
+    // PAKET 2b hat die Liste mit sich selbst in Einklang gebracht (Audit Punkt
+    // 7): `b2.model` und `b2.rule` sind dazugekommen (wer die drei VORFRAGEN
+    // vertagen darf, kann die ENTSCHEIDUNG daraus erst recht nicht allein
+    // treffen), ebenso `c.livedExamples` („ein echtes Beispiel je Wert, mit
+    // Datum, Ort oder Person"). RAUS ist `f.noGos` — die persönlichste
+    // Geschmacksfrage des Bausteins braucht niemanden, der gerade fehlt.
     expect(BRAND_SLOTS.filter(session => session.answers.allowDefer).map(session => session.id))
       .toEqual([
         'a.facts',
-        'b2.visibility', 'b2.roleOfMaster', 'b2.namingPattern',
-        'c.conflictRule', 'c.teamFilter',
-        'f.noGos',
+        'b2.visibility', 'b2.roleOfMaster', 'b2.namingPattern', 'b2.model', 'b2.rule',
+        'c.livedExamples', 'c.conflictRule', 'c.teamFilter',
       ])
   })
 

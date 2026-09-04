@@ -37,15 +37,44 @@
  * geschrieben.
  *
  * ── WOFÜR DIE BEISPIELE DA SIND UND WOFÜR NICHT ───────────────────────────
- * Für die FORM, nie für den Inhalt (Plan §3a Nr. 3). Deshalb stammt jedes aus
- * einer FREMDEN Branche, und die Branchen wechseln über die Sessions hinweg
- * (Tischlerei, Imkerei, Hundeschule, Orgelbau, Energieberatung …): 68-mal
- * dasselbe Tech-Startup hätte jedem Kunden dieselbe Welt vorgesetzt, und ein
- * Beispiel aus SEINER Branche schreibt das Modell ab. Innerhalb eines Kapitels
- * bleibt es bewusst bei EINEM Beispielbetrieb je Pfad — die Werte-Sessions
- * erzählen dieselbe Hundeschule weiter, weil man an einer fortlaufenden
- * Geschichte sieht, wie aus einem Moment ein Wert und daraus eine Definition
- * wird.
+ * Für die FORM, nie für den Inhalt (Plan §3a Nr. 3). Innerhalb eines Kapitels
+ * bleibt es bewusst bei EINEM Beispielbetrieb je Pfad: die Werte-Sessions
+ * erzählen denselben Betrieb weiter, weil man an einer fortlaufenden Geschichte
+ * sieht, wie aus einem Moment ein Wert und daraus eine Definition wird.
+ *
+ * ── DIE BEISPIELWELT (Davids Entscheidung 2026-09-04, Paket 2b) ───────────
+ * Bis dahin war sie geschlossen analog und kleinstädtisch — 37 % Werkstatt,
+ * 22 % Tier und Landwirtschaft, kein einziges Software-, Agentur-, Studio-,
+ * Gastronomie- oder Personal-Brand-Beispiel (Audit §2.5 f). Ein Freelancer, der
+ * den Wizard für sein Designstudio benutzt, sah 30 Beispiele aus Welten, die
+ * mit seiner nichts zu tun hatten. Jetzt spielt jedes Kapitel in EINER Branche
+ * der Kundschaft, die branding.supply wirklich erreicht, und die neun Kapitel
+ * sind bewusst WEIT GESTREUT: ein Kunde aus einer dieser Branchen sieht seine
+ * eigene in höchstens EINEM Kapitel (die §3a-Zusage „die Route wählt gegen
+ * startCard.industry" ist damit gestrichen — es gibt je Session nur ein
+ * Beispielpaar, die Route hatte nie etwas zu wählen).
+ *
+ *   Kontext (A)        Gastronomie — Tagescafé mit Backstube / Mittagslokal
+ *   Purpose/Vision (B) Yoga-Studio — Rückenkurse / Studio seit 2009
+ *   Architektur (B2)   Software — Modul-Haus „Steinlach" / SaaS „Meerkamp"
+ *   Werte (C)          Coaching — Ernährungsberatung / Personal-Training
+ *   Archetyp (D)       Kreativ-Studio — Buchgestaltung / Fotostudio
+ *   Manifest (E)       Agentur — zwei Köpfe / Agentur seit 2011
+ *   Verbale Identität  Interior Design — kleine Wohnungen / Praxen und Büros
+ *   Name (F)           Freelancer — Texterin / Entwickler beim Umbenennen
+ *   Ergebnis           Personal Brand — Beratung unter eigenem Namen
+ *
+ * ZWEI REGELN, DIE MAN NICHT „AUFRÄUMEN" DARF: (1) EIGENNAMEN werden NICHT
+ * übersetzt — ein Markenname, der mit der Oberflächensprache wechselt, lehrt
+ * genau die Verwechslung, gegen die Baustein F gebaut ist (Kolben/Piston,
+ * kolben.de/piston.de: derselbe Kandidat hatte je Sprache eine andere Domain).
+ * (2) In Beispielen, in denen die MARKE SPRICHT (Pitch, Purpose, Mission,
+ * Manifest, Stimmproben, Boilerplates, Key Messages, Tagline …), kommt KEINE
+ * Anrede vor — weder du/ihr noch Sie. Wessen Kundschaft geduzt wird, ist die
+ * Entscheidung dieser Marke, nicht unsere; ein Beispielpaar, das auf einem Pfad
+ * siezt und auf dem anderen duzt, liest sich wie ein Versehen. Dort, wo George
+ * oder der Kunde spricht (Frage-Antworten, Hypothese, Abweichung), bleibt der
+ * Wizard-Ton „ihr/wir".
  *
  * ── DIE VERARBEITUNGSREGELN SIND WÖRTLICH DIE ALTEN ───────────────────────
  * `rules`/`pathRules` sind aus `georgePrompt.ts`, `veraPrompt.ts`,
@@ -172,11 +201,37 @@ export type BrandSessionSensitivity = 'public' | 'internal' | 'private'
  * billiger, schneller und lügt nie. Geprüft wird beim Bestätigen
  * (`transitionBrandStep`), ein Verstoss ist `invariant_violated`.
  */
-export type BrandInvariantKind = 'subsetOf' | 'memberOf' | 'sentenceOf' | 'count' | 'mentionsNone'
+export type BrandInvariantKind =
+  | 'subsetOf'
+  | 'memberOf'
+  | 'sentenceOf'
+  | 'count'
+  | 'mentionsNone'
+  /**
+   * DER WERT NENNT EINTRÄGE EINER QUELL-LISTE BEIM NAMEN (Paket 2b, Audit
+   * Teil 3 Nr. 4). Ohne `min` müssen ALLE Einträge vorkommen („je Wert eine
+   * Zeile, keiner fehlt"), mit `min` mindestens so viele („nennt zwei ihrer
+   * eigenen Werte").
+   *
+   * ── WARUM NICHT „NUR Werte aus der Liste" ────────────────────────────────
+   * §3a formuliert die Regel als Verbot („c.conflictRule nennt NUR Werte aus
+   * c.final"). Ein Verbot ist auf FREIEM Text nicht entscheidbar: um zu sehen,
+   * dass jemand einen FREMDEN Wert genannt hat, müsste die Prüfung wissen,
+   * welche Wörter im Satz überhaupt Werte sind — und diese Liste gibt es
+   * nirgends. Prüfbar ist die andere Hälfte derselben Zusage, und sie steht
+   * wörtlich im Qualitätsmerkmal: dass die eigenen Werte vorkommen. Was ein
+   * Test nicht entscheiden kann, bleibt beim Spezialisten (§7).
+   */
+  | 'mentionsFrom'
 
 export interface BrandInvariant {
   readonly kind: BrandInvariantKind
-  /** Quell-Slot — MUSS in der Registry VOR dieser Session stehen. */
+  /**
+   * Quell-Slot — MUSS in der Registry VOR dieser Session stehen. Bei
+   * `mentionsNone` ist er OPTIONAL und ergänzt `terms` um die Einträge des
+   * Quell-Werts (so wird aus „nennt keines dieser Wörter" ohne neue
+   * Invarianten-Art auch „ist nicht dasselbe wie dort").
+   */
   readonly of?: string
   readonly min?: number
   readonly max?: number
@@ -243,6 +298,23 @@ export const PVM_BANNED
  */
 export const MILO_CANDIDATE_RANGE = { min: 5, max: 7 } as const
 
+/**
+ * WIE VIELE SATZANFÄNGE DAS MANIFEST-INSTRUMENT HAT (Content-Spec §8: fünf
+ * Gruppen — „Wir glauben…" ×5 · Commitment ×5 · Energie ×4 · Haltung ×5 ·
+ * Versprechen ×4).
+ *
+ * Sie steht seit Paket 2b IM ZIEL und in einem Qualitätsmerkmal (Davids
+ * Entscheidung 2026-09-04, Audit Teil 3 Nr. 5): der Block bleibt EIN Zug, aber
+ * die Zahl darf nicht nur in der Spec stehen. Vorher nannte sie weder Ziel
+ * noch Qualität noch Invariante — ein Modell, das sechs Zeilen lieferte,
+ * verletzte keine einzige geschriebene Regel.
+ *
+ * KEINE Invariante daraus: der Wert ist ein `richtext`-Entwurf, den der Mensch
+ * auf der Bühne redigiert, und ein 409 auf „nur 21 Zeilen" hielte ihn von
+ * seinem eigenen Feld fern.
+ */
+export const MANIFESTO_STATEMENT_COUNT = 23
+
 /** Der Satz über das leere Paarvergleich-Feld — wörtlich in beiden Auswahl-Aufträgen. */
 export const ARCHETYPE_PAIRS_PENDING
   = 'The field d.pairs is the pair-comparison instrument and it does not exist yet, so it is empty for '
@@ -288,9 +360,8 @@ function pathExamples(
  */
 export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
   // ── A · Kontext ─────────────────────────────────────────────────────────
-  // Beispiel-Betriebe dieses Kapitels: Tischlerei / Physiotherapie und was der
-  // jeweiligen Frage am besten steht — Baustein A fragt breit, also darf er
-  // auch breit zeigen.
+  // Beispiel-Betriebe dieses Kapitels: Tagescafé mit eigener Backstube (neue
+  // Marke) / Mittagslokal seit 1998 (Relaunch).
   'a.pitch': {
     goal: 'draft the elevator pitch of this brand: what they do, who it is for, and what is different '
       + 'about it, in two or three sentences.',
@@ -308,16 +379,20 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
     form: { person: 'we', tense: 'present', maxWords: 60 },
     examples: pathExamples(
       {
-        de: 'Wir bauen Einbauschränke für Altbauwohnungen mit schiefen Wänden — vor Ort eingemessen statt '
-          + 'aus dem Katalog. Für Leute, die ihre Wohnung behalten und trotzdem Platz brauchen.',
-        en: 'We build fitted cupboards for old flats with crooked walls, measured on site instead of ordered '
-          + 'from a catalogue. For people who want to keep the flat and still find room for their things.',
+        de: 'Wir sind ein Tagescafé mit eigener Backstube: Das Brot vom Vortag geht mittags in die Suppe, '
+          + 'weggeworfen wird nichts. Für Leute, die zwischen zwei Terminen zwanzig Minuten sitzen und '
+          + 'trotzdem etwas Warmes essen wollen.',
+        en: 'We are a daytime café with our own bakery: yesterday\'s bread goes into the midday soup, and '
+          + 'nothing is thrown out. For people who want to sit for twenty minutes between two appointments '
+          + 'and still eat something warm.',
       },
       {
-        de: 'Wir sind eine Physiotherapie für Menschen nach einer Knie-Operation. Wir nehmen uns 45 Minuten '
-          + 'statt 20 und sprechen direkt mit der Klinik, die operiert hat.',
-        en: 'We are a physiotherapy practice for people recovering from knee surgery. We take 45 minutes '
-          + 'instead of 20 and talk directly to the clinic that did the operation.',
+        de: 'Wir kochen seit 1998 einen Mittagstisch für die Werkstätten und Büros im Viertel — zwei Gerichte '
+          + 'am Tag, eines davon ohne Fleisch. Wer um halb eins kommt, sitzt um zehn nach eins wieder '
+          + 'draußen.',
+        en: 'Since 1998 we have cooked a midday menu for the workshops and offices in this quarter — two '
+          + 'dishes a day, one of them meat-free. Whoever arrives at half past twelve is back outside by ten '
+          + 'past one.',
       },
     ),
     rules: [
@@ -342,8 +417,14 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
     ],
     form: { person: 'none', tense: 'present', maxWords: 5 },
     examples: pathExamples(
-      { de: 'Imkerei mit Direktvermarktung', en: 'Beekeeping with direct sales' },
-      { de: 'Steuerkanzlei für Handwerksbetriebe', en: 'Tax practice for skilled trades' },
+      {
+        de: 'Tagescafé mit eigener Backstube',
+        en: 'Café with its own bakery',
+      },
+      {
+        de: 'Mittagstisch für Betriebe im Viertel',
+        en: 'Midday canteen for local businesses',
+      },
     ),
     rules: [
       'The start card carries their own answer to "industry" — normalise THAT, do not replace it with a '
@@ -365,17 +446,22 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
       'A strength and a weakness that are the same sentence in two moods.',
     ],
     form: { person: 'none', tense: 'present' },
+    // INTERN (Davids Entscheidung 2026-09-04, Audit Punkt 8): der Block nennt
+    // NAMENTLICH Dritte und zu jedem eine Schwäche. „Ein Kunde, der seine Marke
+    // teilt, teilt nicht seine Beschwerden" (Plan §3a Nr. 7) gilt erst recht für
+    // sein Urteil über den Nachbarn — heute reiste es per Share-Link mit.
+    sensitivity: 'internal',
     examples: pathExamples(
       {
-        de: '- Backhaus Merten — stark: sechs Filialen, alle am Bahnhof — schwach: eine Teiglinie für alles, '
-          + 'kein Sauerteig',
-        en: '- Merten Bakeries — strong: six shops, all next to the station — weak: one dough line for '
-          + 'everything, no sourdough',
+        de: '- (Name aus den Eingaben) — stark: mittags in elf Minuten am Tisch — schwach: dieselbe Karte '
+          + 'seit Jahren',
+        en: '- (name from the inputs) — strong: lunch on the table in eleven minutes — weak: the same menu '
+          + 'for years',
       },
       {
-        de: '- Velo Grün — stark: Termin am selben Tag — schwach: repariert nur Räder, die sie selbst '
-          + 'verkauft haben',
-        en: '- Velo Grün — strong: same-day appointments — weak: only repairs bikes they sold themselves',
+        de: '- (Name aus den Eingaben) — Annahme, bitte prüfen: nach 14 Uhr gibt es nichts Warmes mehr',
+        en: '- (name from the inputs) — assumption, please verify: nothing hot is served after two in the '
+          + 'afternoon',
       },
     ),
     siteAnalysis: true,
@@ -411,18 +497,20 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
     form: { person: 'none', tense: 'present' },
     examples: pathExamples(
       {
-        de: '## Wer\nEltern beim ersten Kind, ohne Familie in der Stadt\n\n## Was sie wollen\nJemanden, der '
-          + 'nachts ans Telefon geht\n\n## Was sie bremst\nSie wissen nicht, was die Kasse zahlt',
-        en: '## Who\nFirst-time parents with no family in the city\n\n## What they want\nSomebody who picks '
-          + 'up the phone at night\n\n## What holds them back\nThey do not know what the insurance covers',
+        de: '## Wer\nLeute aus den Büros zwei Straßen weiter, die mittags raus wollen\n\n## Was sie '
+          + 'wollen\nIn zwanzig Minuten etwas Warmes, ohne vorher zu bestellen\n\n## Was sie bremst\nDie '
+          + 'Sorge, um halb eins keinen Platz mehr zu bekommen',
+        en: '## Who\nPeople from the offices two streets away who want to get out at lunchtime\n\n## What '
+          + 'they want\nSomething warm within twenty minutes, without ordering ahead\n\n## What holds them '
+          + 'back\nThe worry that there will be no table left at half past twelve',
       },
       {
-        de: '## Wer\nErwachsene, die mit 40 wieder anfangen zu klettern\n\n## Was sie wollen\nEinen Abend, '
-          + 'an dem sie nicht die Schlechtesten sind\n\n## Was sie bremst\nDie Angst, vor Zwanzigjährigen '
-          + 'zu scheitern',
-        en: '## Who\nAdults taking up climbing again at 40\n\n## What they want\nAn evening where they are '
-          + 'not the worst in the room\n\n## What holds them back\nThe fear of failing in front of '
-          + 'twenty-year-olds',
+        de: '## Wer\nHandwerker auf dem Weg zur nächsten Baustelle\n\n## Was sie wollen\nEin Essen, das satt '
+          + 'macht und nicht nach Diät aussieht\n\n## Was sie bremst\nDer Eindruck, mit staubiger Hose hier '
+          + 'fehl am Platz zu sein',
+        en: '## Who\nTradespeople on the way to the next building site\n\n## What they want\nA meal that '
+          + 'fills them up and does not look like a diet\n\n## What holds them back\nThe sense that dusty '
+          + 'work trousers are out of place here',
       },
     ),
     rules: [
@@ -447,16 +535,16 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
     form: { person: 'none', tense: 'present', maxWords: 70 },
     examples: pathExamples(
       {
-        de: 'Sachlich und knapp — „Wir brennen zweimal, bei 1240 Grad." Viel Handwerk, keine Werbung. '
-          + 'Distanziert: die Seite sagt nirgends „du" oder „ihr".',
-        en: 'Plain and short — "we fire twice, at 1240 degrees". A lot of craft, no advertising. Distant: '
-          + 'the site never addresses anyone directly.',
+        de: 'Knapp und ohne Werbung — „Brot vom Vortag geht in die Suppe." Viel Handwerk, keine Adjektive. '
+          + 'Distanziert: die Seite spricht niemanden direkt an.',
+        en: 'Short and free of advertising — "yesterday\'s bread goes into the soup". A lot of craft, no '
+          + 'adjectives. Distant: the site never addresses anyone directly.',
       },
       {
-        de: 'Feierlich bis pathetisch — „Wo Sonne und Schiefer sich begegnen." Traditionsschwer, ohne eine '
-          + 'einzige Jahreszahl oder einen Preis.',
-        en: 'Solemn to the point of pathos — "where sun and slate meet". Heavy with tradition, without a '
-          + 'single year or price anywhere.',
+        de: 'Werbend bis laut — „Der beste Mittagstisch der Stadt." Viele Superlative, und nirgends steht, '
+          + 'was tatsächlich auf der Karte steht.',
+        en: 'Advertising, verging on loud — "the best midday menu in town". Plenty of superlatives, and '
+          + 'nowhere does it say what is actually on the menu.',
       },
     ),
     siteAnalysis: true,
@@ -492,21 +580,21 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
       ],
     },
     answers: { minSubstance: 'long', maxProbes: 2 },
-    effort: { minutes: 5, turns: 4 },
+    effort: { minutes: 2, turns: 4 },
     examples: pathExamples(
       {
-        de: 'Nach zwölf Jahren im Reitstall habe ich zum dritten Mal einen Sattel abgenommen, der ein Pferd '
-          + 'wundgescheuert hat, weil er von der Stange war. Danach habe ich angefangen, selbst zu messen.',
-        en: 'After twelve years in the stable I took off the third saddle that had rubbed a horse raw '
-          + 'because it came off the shelf. That was when I started measuring and building them myself.',
+        de: 'Drei Jahre habe ich in einer Kantine gekocht und jeden Abend zwei Bleche Brot in die Tonne '
+          + 'geworfen. An dem Abend, an dem ich den Sack nicht mehr zubinden wollte, habe ich gekündigt und '
+          + 'den Laden hier gemietet.',
+        en: 'For three years I cooked in a staff canteen and threw two trays of bread into the bin every '
+          + 'evening. On the evening I could not bring myself to tie up the bag again, I quit and rented this '
+          + 'place.',
       },
       {
-        de: 'Bleiben muss der Name und das gelbe Klavier auf dem Schild — daran erkennen uns die Eltern seit '
-          + '1994. Weg muss das Wort „Konservatorium": es schreckt genau die Erwachsenen ab, die abends '
-          + 'anfangen wollen.',
-        en: 'The name stays, and the yellow piano on the sign — parents have recognised us by it since 1994. '
-          + 'What goes is the word "conservatory": it scares off exactly the adults who want to start in '
-          + 'the evening.',
+        de: 'Bleiben muss der Name und die blaue Tafel neben der Tür — daran findet uns die Nachbarschaft '
+          + 'seit 1998. Weg muss das Wort „Gaststätte": es holt niemanden mehr herein, der unter vierzig ist.',
+        en: 'The name stays, and the blue board next to the door — the neighbourhood has found us by it since '
+          + '1998. What goes is the word "Gaststätte": nobody under forty walks in because of it.',
       },
     ),
   },
@@ -537,15 +625,14 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
     answers: { minSubstance: 'short' },
     examples: pathExamples(
       {
-        de: '„Ihr habt als Einzige die Kiste mit dem Geschirr meiner Mutter nicht gestapelt — ich hatte das '
-          + 'nur einmal gesagt."',
-        en: '"You were the only ones who did not stack the box with my mother\'s china. I only mentioned it once."',
+        de: '„Ihr seid die Einzigen, die mir nicht das letzte Stück Kuchen aufschwatzen, wenn es schon '
+          + 'trocken ist."',
+        en: '"You are the only ones who do not talk me into the last piece of cake when it has already gone '
+          + 'dry."',
       },
       {
-        de: '„Bei euch fragt mich jemand, ob ich das schon mal genommen habe. Sonst bekomme ich nur die '
-          + 'Schachtel über den Tresen."',
-        en: '"Here somebody asks whether I have taken this before. Everywhere else I just get the box handed '
-          + 'over the counter."',
+        de: '„Bei euch weiß ich um halb eins, dass ich um eins wieder auf der Baustelle stehe."',
+        en: '"With you I know at half past twelve that I will be back on site by one."',
       },
     ),
   },
@@ -576,12 +663,13 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
     sensitivity: 'internal',
     examples: pathExamples(
       {
-        de: '„Ihr habt den Termin zweimal verschoben, und beide Male musste ich selbst nachfragen."',
-        en: '"You moved the appointment twice, and both times I had to ask before anyone told me."',
+        de: '„Zweimal hintereinander war um 13 Uhr die Suppe alle, und auf der Tafel stand sie noch."',
+        en: '"Twice in a row the soup was gone by one o\'clock, and it was still up on the board."',
       },
       {
-        de: '„Am Ende waren es 900 Euro mehr als im Kostenvoranschlag, und vorher hat niemand Bescheid gesagt."',
-        en: '"The final bill was 900 euros over the estimate, and nobody warned us before the work was done."',
+        de: '„Seit die Karte geändert wurde, gibt es nichts mehr, was mein Vater essen kann — gesagt hat uns '
+          + 'das niemand."',
+        en: '"Since the menu changed there is nothing my father can eat, and nobody told us in advance."',
       },
     ),
   },
@@ -612,12 +700,15 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
     answers: { minSubstance: 'short' },
     examples: pathExamples(
       {
-        de: 'Dass wir eine Sohle auch dann noch retten, wenn zwei andere Werkstätten schon abgelehnt haben.',
-        en: 'That we still save a sole after two other workshops have turned it down.',
+        de: 'Dass wir das Brot am selben Morgen backen und nach 15 Uhr zum halben Preis abgeben, statt es '
+          + 'wegzuwerfen.',
+        en: 'That we bake the bread the same morning and sell it at half price after three instead of '
+          + 'throwing it away.',
       },
       {
-        de: 'Dass wir Berufskleidung reparieren statt sie zu ersetzen — das steht auf keinem unserer Angebote.',
-        en: 'That we repair workwear instead of replacing it — it is on none of our quotes.',
+        de: 'Dass jedes zweite Gericht ohne Fleisch ist — auf der Tafel steht das seit zwanzig Jahren nicht. '
+          + 'Dass jedes zweite Gericht ohne Fleisch ist — auf der Tafel steht das seit zwanzig Jahren nicht.',
+        en: 'That every second dish is meat-free — the board has never said so in twenty years.',
       },
     ),
   },
@@ -648,16 +739,16 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
     sensitivity: 'internal',
     examples: pathExamples(
       {
-        de: 'Wir sind vier Monate im Jahr ausgebucht und acht Monate leer — die Ausbilder kann ich aber nur '
-          + 'ganzjährig halten.',
-        en: 'We are booked out four months a year and empty the other eight — but I can only keep instructors '
-          + 'on a full-year contract.',
+        de: 'Zwischen 11 und 14 Uhr platzen wir, den Rest des Tages steht die Backstube still — die zweite '
+          + 'Kraft bekommen wir aber nur ganztags.',
+        en: 'Between eleven and two we burst at the seams, and the rest of the day the bakery stands still — '
+          + 'but the second baker is only available full time.',
       },
       {
-        de: 'Unsere Stammkunden sind mit uns alt geworden. Die Vierzigjährigen kennen uns nur vom Etikett im '
-          + 'Getränkemarkt.',
-        en: 'Our regulars have grown old with us. People in their forties only know us from the label in the '
-          + 'supermarket.',
+        de: 'Die Stammgäste sind mit uns in Rente gegangen. Die neuen Büros im Viertel bestellen mittags beim '
+          + 'Lieferdienst.',
+        en: 'Our regulars retired when we got older. The new offices in the quarter order lunch from a '
+          + 'delivery service.',
       },
     ),
   },
@@ -693,26 +784,29 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
     // Vertagen, weil die Zahlen oft im Steuerbüro oder beim Partner liegen —
     // ohne diesen Ausgang schätzt jemand, und eine geschätzte Teamgrösse steht
     // danach als Tatsache im Dokument.
-    answers: { minSubstance: 'short', maxProbes: 1, allowDefer: true },
-    effort: { minutes: 2, turns: 3 },
+    answers: { minSubstance: 'short', allowDefer: true },
+    effort: { minutes: 1, turns: 3 },
     examples: pathExamples(
       {
-        de: 'Team: 3 fest, 2 auf Saison · Seit: 2021 · Märkte: Landkreis und Wochenmarkt in der Stadt',
-        en: 'Team: 3 permanent, 2 seasonal · Since: 2021 · Markets: the county and the city farmers market',
+        de: 'Team: 3 fest, 1 Aushilfe am Wochenende · Seit: 2023 · Märkte: das Viertel und ein Stand auf dem '
+          + 'Wochenmarkt',
+        en: 'Team: 3 permanent, 1 weekend helper · Since: 2023 · Markets: this quarter and a stall at the '
+          + 'weekly market',
       },
       {
-        de: 'Team: 11 Angestellte, davon 4 in Teilzeit · Seit: 1978 · Märkte: Deutschland und Österreich, '
-          + 'Versand ab Werk',
-        en: 'Team: 11 employees, 4 of them part-time · Since: 1978 · Markets: Germany and Austria, shipped '
-          + 'from the works',
+        de: 'Team: 7 Angestellte, davon 3 in Teilzeit · Seit: 1998 · Märkte: das Viertel, dazu '
+          + 'Mittagslieferung an vier Betriebe',
+        en: 'Team: 7 employees, 3 of them part-time · Since: 1998 · Markets: this quarter, plus lunch '
+          + 'deliveries to four firms',
       },
     ),
   },
 
   // ── B · Purpose · Vision · Mission ──────────────────────────────────────
-  // Beispiel-Betriebe: Buchbinderei / Optiker für die Fragen, Kaffeerösterei /
-  // Pflegedienst für die drei Sätze — der Purpose-Beispielsatz steht neben
-  // seinem Vision- und Mission-Pendant, sonst lernt man die Unterschiede nicht.
+  // Beispiel-Betriebe: Yoga-Studio für Rückenkurse (neue Marke) / Yoga-Studio
+  // seit 2009, das den Wellness-Anstrich loswerden will (Relaunch). Purpose,
+  // Vision und Mission stehen nebeneinander im selben Betrieb — sonst lernt man
+  // die Unterschiede zwischen den dreien nicht.
   'b.whyStarted': {
     goal: 'turn what this person already told you about the beginning of this brand into ONE sentence '
       + 'about why that still matters TODAY.',
@@ -732,15 +826,18 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
       probes: ['is that still the reason, or has it shifted since?'],
       reframes: ['if it comes back as an anecdote, ask what of it is still true on an ordinary Tuesday'],
     },
+    effort: { minutes: 2, turns: 4 },
     form: { person: 'we', tense: 'present', maxWords: 30 },
     examples: pathExamples(
       {
-        de: 'Weil Reparieren immer noch billiger und schöner ist als neu kaufen — nur weiß das kaum jemand.',
-        en: 'Because mending is still cheaper and better looking than buying new — and almost nobody knows it.',
+        de: 'Weil die meisten Rücken nicht mehr Dehnung brauchen, sondern jemanden, der beim ersten Mal '
+          + 'danebensteht.',
+        en: 'Because most backs do not need more stretching, they need somebody standing beside them the '
+          + 'first time.',
       },
       {
-        de: 'Weil eine Brille ein medizinisches Gerät ist, das jemand den ganzen Tag im Gesicht trägt.',
-        en: 'Because a pair of glasses is a medical device somebody wears on their face all day.',
+        de: 'Weil eine Stunde, die niemand versteht, keine Ruhe bringt, sondern ein schlechtes Gewissen.',
+        en: 'Because an hour nobody understands brings no calm, only a bad conscience.',
       },
     ),
     rules: [
@@ -778,13 +875,16 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
     },
     examples: pathExamples(
       {
-        de: 'Dann gäbe es im Ort keinen Platz mehr, an dem jemand einem Zwölfjährigen zeigt, wie man einen '
-          + 'Toaster aufschraubt.',
-        en: 'There would be no place left in town where somebody shows a twelve-year-old how to open a toaster.',
+        de: 'Dann gäbe es hier keinen Kurs mehr, in dem jemand mit Bandscheibenvorfall in der ersten Reihe '
+          + 'stehen darf.',
+        en: 'There would be no class left here where somebody with a slipped disc is allowed to stand in the '
+          + 'front row.',
       },
       {
-        de: 'Zwölf Dorfkirchen hier hätten niemanden mehr, der ihre Orgeln stimmt, ohne sie vorher umzubauen.',
-        en: 'Twelve village churches would have nobody left who tunes their organs without rebuilding them first.',
+        de: 'Zwölf Leute, die seit Jahren dienstags um sieben kommen, hätten keinen festen Termin mehr, an '
+          + 'dem jemand ihren Namen kennt.',
+        en: 'Twelve people who have come at seven on Tuesdays for years would lose the one fixed hour where '
+          + 'somebody knows their name.',
       },
     ),
   },
@@ -814,16 +914,16 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
     },
     examples: pathExamples(
       {
-        de: 'Rohmilch gehört in Käse. Pasteurisieren macht ihn sicher und gleichzeitig belanglos — das hat '
-          + 'uns schon zwei Supermärkte gekostet.',
-        en: 'Raw milk belongs in cheese. Pasteurising makes it safe and meaningless at once — that has '
-          + 'already cost us two supermarket listings.',
+        de: 'Wer eine Übung nicht kann, ist nicht zu unbeweglich — die Übung kommt zu früh. Das hat uns schon '
+          + 'zwei Kursleiterinnen gekostet.',
+        en: 'Somebody who cannot do a pose is not too stiff — the pose came too early. That has already cost '
+          + 'us two teachers.',
       },
       {
-        de: 'Wer Angst vor dem Kreisverkehr hat, braucht keine dreißig Übungsstunden, sondern einen '
-          + 'Fahrlehrer, der nicht schreit.',
-        en: 'Somebody afraid of a roundabout does not need thirty more lessons, they need an instructor who '
-          + 'does not shout.',
+        de: 'Yoga ist kein Wellness. Wir haben die Kerzen und die Klangschale abgeschafft und dabei ein '
+          + 'Drittel der Anmeldungen verloren.',
+        en: 'Yoga is not wellness. We dropped the candles and the singing bowl and lost a third of the '
+          + 'sign-ups doing it.',
       },
     ),
   },
@@ -853,16 +953,16 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
     },
     examples: pathExamples(
       {
-        de: 'In den Neubaugebieten hier stehen dann Bäume, die 2040 noch Schatten werfen — nicht die drei '
-          + 'Sorten, die im Container am billigsten sind.',
-        en: 'By then the new housing estates here have trees that will still give shade in 2040 — not the '
-          + 'three varieties that are cheapest in a pot.',
+        de: 'In zehn Jahren schickt die Hausärztin nach der Reha nicht nur zur Physiotherapie, sondern in '
+          + 'einen Kurs, der weitergeht.',
+        en: 'In ten years a family doctor sends people after rehab not only to physiotherapy but into a class '
+          + 'that keeps going.',
       },
       {
-        de: 'Eine Stadtbibliothek ist dann selbstverständlich der Ort, an dem einem jemand beim Antrag hilft, '
-          + 'nicht nur beim Buch.',
-        en: 'By then a public library is obviously the place where somebody helps you with a form, not only '
-          + 'with a book.',
+        de: 'Eine Übungsstunde ist dann so selbstverständlich wie Schwimmen — man geht hin, ohne dabei etwas '
+          + 'werden zu wollen.',
+        en: 'By then a practice hour is as ordinary as swimming: people go without wanting to become '
+          + 'anything.',
       },
     ),
   },
@@ -892,13 +992,13 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
     },
     examples: pathExamples(
       {
-        de: '„Bei denen konnte man mitsingen, ohne vorher Noten lesen zu können — und es klang trotzdem gut."',
-        en: '"You could sing with them without reading music first, and it still sounded good."',
+        de: '„Da konnte man mit einem kaputten Rücken anfangen, ohne sich zu schämen."',
+        en: '"You could start there with a wrecked back and not feel ashamed."',
       },
       {
-        de: '„Die haben das Geländer gemacht, das seit vierzig Jahren hält, und man sieht keine einzige '
-          + 'Schweißnaht."',
-        en: '"They made the railing that has held for forty years, and you cannot see a single weld."',
+        de: '„Die haben nie behauptet, dass eine Stunde das Leben verändert — und alle kamen trotzdem '
+          + 'wieder."',
+        en: '"They never claimed an hour would change your life, and everybody came back anyway."',
       },
     ),
   },
@@ -924,12 +1024,12 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
     },
     examples: pathExamples(
       {
-        de: 'Damit niemand mehr glaubt, guter Kaffee sei eine Frage der Maschine und nicht der Bohne.',
-        en: 'So that nobody keeps believing good coffee is a question of the machine rather than the bean.',
+        de: 'Damit ein schmerzender Rücken kein Grund mehr ist, sich vom Bewegen ganz zu verabschieden.',
+        en: 'So that an aching back stops being a reason to give up on moving altogether.',
       },
       {
-        de: 'Damit alt werden zu Hause nicht davon abhängt, ob die Familie in der Nähe wohnt.',
-        en: 'So that growing old at home does not depend on whether your family lives nearby.',
+        de: 'Damit Ruhe nichts ist, das man kaufen muss, sondern etwas, das man üben kann.',
+        en: 'So that calm is not something to be bought but something that can be practised.',
       },
     ),
     rules: [
@@ -966,16 +1066,15 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
     },
     examples: pathExamples(
       {
-        de: 'Ein Haus aus Holz zu bauen ist hier so normal wie eines aus Stein — und niemand fragt mehr, ob '
-          + 'das hält.',
-        en: 'Building a house out of wood is as ordinary here as building one out of stone, and nobody asks '
-          + 'any more whether it lasts.',
+        de: 'Ein Anfängerkurs ist selbstverständlich der mit der besten Betreuung, nicht der billigste im '
+          + 'Plan.',
+        en: 'A beginners class is obviously the one with the closest attention, not the cheapest on the '
+          + 'timetable.',
       },
       {
-        de: 'Ein Tier zum Arzt zu bringen ist kein Kraftakt mehr, weil die Praxis dorthin kommt, wo das Tier '
-          + 'lebt.',
-        en: 'Taking an animal to the vet is no longer an ordeal, because the practice comes to where the '
-          + 'animal lives.',
+        de: 'Niemand entschuldigt sich mehr dafür, nur wegen des Rückens zu kommen und nicht wegen der '
+          + 'Erleuchtung.',
+        en: 'Nobody apologises any more for coming because of their back rather than for enlightenment.',
       },
     ),
     rules: [
@@ -1006,15 +1105,16 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
     form: { person: 'we', tense: 'present', maxWords: 30 },
     examples: pathExamples(
       {
-        de: 'Wir lesen, was wir verkaufen, und legen jedem Kind das Buch in die Hand, das es tatsächlich zu '
-          + 'Ende liest.',
-        en: 'We read what we sell, and we put into every child\'s hands the book they will actually finish.',
+        de: 'Wir unterrichten in Gruppen von höchstens acht und gehen bei jeder Übung einmal durch die Reihe, '
+          + 'damit niemand falsch übt.',
+        en: 'We teach in groups of no more than eight and walk the room during every pose, so that nobody '
+          + 'practises it wrong.',
       },
       {
-        de: 'Wir passen Hörgeräte in der Wohnung der Kundin an, damit sie dort funktionieren, wo sie '
-          + 'getragen werden.',
-        en: 'We fit hearing aids in the customer\'s own living room, so that they work where they are '
-          + 'actually worn.',
+        de: 'Wir erklären vor jeder Übung, was sie im Körper tut, und lassen die Sanskrit-Namen weg, bis '
+          + 'jemand danach fragt.',
+        en: 'We explain what each pose does in the body before we teach it, and leave the Sanskrit names out '
+          + 'until somebody asks.',
       },
     ),
     rules: [
@@ -1046,15 +1146,16 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
       probes: ['who would you be compared against on that shelf?'],
       reframes: ['if they take the broadest option, ask which half of it they would rather not be measured against'],
     },
+    answers: { maxProbes: 1 },
     form: { person: 'none', tense: 'present', maxWords: 5 },
     examples: pathExamples(
       {
-        de: 'Naturseifen für empfindliche Haut — nicht „Kosmetik"',
-        en: 'Natural soap for sensitive skin — not "cosmetics"',
+        de: 'Rückenkurse für Wiedereinsteiger — nicht „Yoga"',
+        en: 'Back classes for returners — not "yoga"',
       },
       {
-        de: 'Breitensport für späte Anfänger — nicht „Leistungssport"',
-        en: 'Community sport for late starters — not "competitive sport"',
+        de: 'Übungsraum statt „Wellness-Studio"',
+        en: 'A practice room, not "wellness"',
       },
     ),
     rules: [
@@ -1092,22 +1193,25 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
     },
     examples: pathExamples(
       {
-        de: 'Für Hausbesitzer mit Reetdach, die schon einmal Pfusch bezahlt haben — gegen die großen '
-          + 'Bedachungsfirmen, die Reet nebenbei mitnehmen.',
-        en: 'For owners of a thatched roof who have already paid for a botched job — against the big roofing '
-          + 'firms that carry thatch as a sideline.',
+        de: 'Für Leute, die nach der Reha weitermachen sollen und sich in ein volles Fitnessstudio nicht '
+          + 'trauen — gegen die Volkshochschulkurse mit dreißig Teilnehmern.',
+        en: 'For people told to keep going after rehab who do not dare walk into a busy gym — against the '
+          + 'adult-education classes with thirty people in the room.',
       },
       {
-        de: 'Für Gastwirte, die ein ganzes Tier abnehmen können — gegen den Großhandel, der nur Teilstücke '
-          + 'liefert.',
-        en: 'For restaurant owners who can take a whole animal — against the wholesalers who only deliver cuts.',
+        de: 'Für Berufstätige, die abends eine feste Stunde brauchen — gegen die Studios mit Zehnerkarte, in '
+          + 'denen jede Woche jemand anderes unterrichtet.',
+        en: 'For working people who need one fixed hour in the evening — against the studios with a ten-class '
+          + 'pass where somebody different teaches every week.',
       },
     ),
   },
 
   // ── B2 · Markenarchitektur ──────────────────────────────────────────────
-  // Beispiel-Betriebe: Obstbrand-Destillerie / Sanitätshaus — beide haben
-  // mehrere Angebote unter einem Dach, und daran sieht man die vier Modelle.
+  // Beispiel-Betriebe: Software-Haus „Steinlach" mit Modulen unter dem Hausnamen
+  // (neue Marke) / SaaS „Meerkamp" mit einer eigenen Freiberufler-Marke
+  // (Relaunch) — beide haben mehrere Angebote unter einem Dach, und daran sieht
+  // man die vier Modelle. Die NAMEN stehen in beiden Sprachen gleich.
   'b2.visibility': {
     goal: 'settle whether the other brands should visibly belong to the main brand or stand on their own.',
     quality: [
@@ -1131,14 +1235,16 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
     answers: { minSubstance: 'short', allowDefer: true },
     examples: pathExamples(
       {
-        de: 'Sichtbar. Wer den Quittenbrand kauft, soll wissen, dass er vom selben Hof kommt wie der Most.',
-        en: 'Visible. Whoever buys the quince spirit should know it comes from the same farm as the juice.',
+        de: 'Sichtbar. Wer das Rechnungsmodul kauft, soll wissen, dass es aus demselben Haus kommt wie die '
+          + 'Zeiterfassung.',
+        en: 'Visible. Whoever buys the invoicing module should know it comes from the same house as the time '
+          + 'tracking.',
       },
       {
-        de: 'Eigenständig. Die Reha-Marke darf nicht nach Sanitätshaus aussehen, sonst kommt kein '
-          + 'Sportverein auf uns zu.',
-        en: 'On their own. The rehab brand must not look like a medical supplies shop, or no sports club '
-          + 'will ever call us.',
+        de: 'Eigenständig. Das Werkzeug für Freiberufler darf nicht nach Lohnbuchhaltung für Konzerne '
+          + 'aussehen, sonst probiert es niemand aus.',
+        en: 'On its own. The tool for freelancers must not look like corporate payroll, or nobody will ever '
+          + 'try it.',
       },
     ),
   },
@@ -1161,25 +1267,25 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
       probes: ['which customers would be put off if the main brand were on it?'],
       reframes: ['if the answer is "both", ask which of the two they would give up if forced'],
     },
-    // INTERN (Paket-2-Zusatz zu den drei aus Plan §3a Nr. 7): die ehrliche
-    // Antwort lautet oft „unsere Hauptmarke schreckt genau diese Kundschaft ab".
-    // Das ist eine Selbstauskunft über den eigenen Ruf — kein Satz, den ein
-    // Share-Link einem Fremden zeigen soll. Die ENTSCHEIDUNG daraus
-    // (`b2.model`, `b2.rule`) bleibt öffentlich: sie ist das Ergebnis.
-    sensitivity: 'internal',
+    // ÖFFENTLICH (Davids Entscheidung 2026-09-04, Audit Punkt 8): Paket 2 hatte
+    // die Session zurückgehalten, weil die ehrliche Antwort oft „unsere
+    // Hauptmarke schreckt genau diese Kundschaft ab" lautet. Sie ist aber eine
+    // ARCHITEKTUR-Aussage, auf die `b2.rule` (öffentlich) verweist — ohne sie
+    // ist die Markenarchitektur im geteilten Dokument halb blind. Zurückgehalten
+    // wird stattdessen `a.competitors`, das Dritte beim Namen nennt.
     answers: { minSubstance: 'short', allowDefer: true },
     examples: pathExamples(
       {
-        de: 'Vertrauen leihen. Wer unseren Most kennt, probiert auch den Brand — ohne den Hofnamen stünde '
-          + 'er im Regal wie jeder andere.',
-        en: 'Lend trust. People who know our juice will try the spirit — without the farm name it would sit '
-          + 'on the shelf like any other.',
+        de: 'Vertrauen leihen. Wer Steinlach schon einsetzt, testet das zweite Modul ohne Ausschreibung — '
+          + 'ohne den Hausnamen wäre es eines von zwanzig.',
+        en: 'Lend trust. Anyone already running Steinlach will test the second module without a tender — '
+          + 'without the house name it would be one of twenty.',
       },
       {
-        de: 'Freilassen. Die Reha-Marke erreicht junge Sportler, die bei „Sanitätshaus Krause" gar nicht '
-          + 'erst anrufen.',
-        en: 'Set them free. The rehab brand reaches young athletes who would never call a shop named '
-          + '"Krause Medical Supplies".',
+        de: 'Freilassen. Die Freiberufler-Marke erreicht Leute, die bei Meerkamp nie anfragen würden, weil '
+          + 'sie dort eine Personalabteilung vermuten.',
+        en: 'Set it free. The freelancer brand reaches people who would never approach Meerkamp, because they '
+          + 'assume an HR department behind it.',
       },
     ),
   },
@@ -1205,16 +1311,16 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
     answers: { minSubstance: 'short', allowDefer: true },
     examples: pathExamples(
       {
-        de: 'Immer der Hofname vorn, dann die Frucht: „Lindenhof Quitte", „Lindenhof Schlehe". Keine '
-          + 'Fantasienamen.',
-        en: 'Always the farm name first, then the fruit: "Lindenhof Quince", "Lindenhof Sloe". No invented '
-          + 'names.',
+        de: 'Immer der Hausname vorn, dann die Aufgabe: „Steinlach Rechnung", „Steinlach Zeit". Keine '
+          + 'Fantasienamen, keine Versionsnummer im Namen.',
+        en: 'Always the house name first, then the job it does: "Steinlach Rechnung", "Steinlach Zeit". No '
+          + 'invented names, no version number in the name.',
       },
       {
-        de: 'Eigene Namen sind erlaubt, aber nie mit unserem Kürzel davor — sonst hält es jeder für eine '
-          + 'Eigenmarke.',
+        de: 'Eigene Namen sind erlaubt, aber nie mit unserem Kürzel davor — sonst hält es jeder für ein '
+          + 'Zusatzmodul.',
         en: 'Names of their own are allowed, but never with our initials in front — otherwise everyone reads '
-          + 'it as a store brand.',
+          + 'it as an add-on module.',
       },
     ),
   },
@@ -1236,14 +1342,20 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
       probes: ['does that still work if you add a product in a different field?'],
       reframes: ['if they want a hybrid, ask which of the four a customer would see first'],
     },
+    // VERTAGEN (Paket 2b, Audit Punkt 7): die drei VORFRAGEN dieses Kapitels
+    // sind vertagbar — die ENTSCHEIDUNG, die aus ihnen folgt, war es nicht.
+    // Wer die Vorfragen allein nicht beantworten darf, kann das Modell erst
+    // recht nicht allein festlegen.
+    answers: { maxProbes: 1, allowDefer: true },
+    form: { person: 'none', tense: 'present' },
     examples: pathExamples(
       {
-        de: 'Branded House — alles läuft unter dem Hofnamen, weil der Hof selbst das Versprechen ist.',
-        en: 'Branded house — everything runs under the farm name, because the farm itself is the promise.',
+        de: 'Branded House — alles läuft unter Steinlach, weil das Haus selbst das Versprechen ist.',
+        en: 'Branded house — everything runs under Steinlach, because the house itself is the promise.',
       },
       {
-        de: 'Endorsed — die Reha-Marke tritt eigenständig auf und trägt klein „vom Sanitätshaus Krause".',
-        en: 'Endorsed — the rehab brand stands on its own and carries a small "from Krause Medical Supplies".',
+        de: 'Endorsed — die Freiberufler-Marke tritt eigenständig auf und trägt klein „von Meerkamp".',
+        en: 'Endorsed — the freelancer brand stands on its own and carries a small "from Meerkamp".',
       },
     ),
     rules: [
@@ -1270,18 +1382,20 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
       'A rule with nobody named as the decider.',
     ],
     form: { person: 'we', tense: 'present', maxWords: 80 },
+    // Vertagen wie bei `b2.model`: die Regel bindet jeden künftigen Namen.
+    answers: { allowDefer: true },
     examples: pathExamples(
       {
-        de: 'Jeder neue Brand heißt „Lindenhof" plus die Frucht. Keine Fantasienamen, keine Jahreszahl im '
-          + 'Namen. Über Ausnahmen entscheidet Marie, nicht die Etikettendruckerei.',
-        en: 'Every new spirit is called "Lindenhof" plus the fruit. No invented names, no year in the name. '
-          + 'Marie decides on exceptions, not the label printer.',
+        de: 'Jedes neue Modul heißt „Steinlach" plus die Aufgabe in einem Wort. Keine Fantasienamen, keine '
+          + 'Jahreszahl. Über Ausnahmen entscheidet die Produktleitung, nicht der Vertrieb.',
+        en: 'Every new module is called "Steinlach" plus the job it does, in one word. No invented names, no '
+          + 'year. Product management decides on exceptions, not sales.',
       },
       {
-        de: 'Untermarken tragen einen eigenen Namen und in der Fußzeile immer „vom Sanitätshaus Krause". '
-          + 'Nie das Kürzel im Namen selbst. Jeden neuen Namen gibt die Geschäftsführung frei.',
-        en: 'Sub-brands carry a name of their own and always the line "from Krause Medical Supplies" in the '
-          + 'footer. Never the initials in the name itself. The managing directors sign off every new name.',
+        de: 'Untermarken tragen einen eigenen Namen und im Impressum immer „von Meerkamp". Nie das Kürzel im '
+          + 'Namen selbst. Jeden neuen Namen gibt die Geschäftsführung frei.',
+        en: 'Sub-brands carry a name of their own and always the line "from Meerkamp" in the legal notice. '
+          + 'Never the initials in the name itself. The managing directors sign off every new name.',
       },
     ),
     rules: [
@@ -1295,10 +1409,11 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
   },
 
   // ── C · Werte ───────────────────────────────────────────────────────────
-  // EIN Betrieb je Pfad durch das ganze Kapitel (Hundeschule / Reiterhof): an
-  // einer fortlaufenden Geschichte sieht man, wie aus einem Moment ein Wert,
-  // daraus eine Definition und daraus eine Konfliktregel wird. Getrennte
-  // Branchen je Session hätten dieselben fünf Zeilen zusammenhanglos gezeigt.
+  // EIN Betrieb je Pfad durch das ganze Kapitel (Ernährungscoaching /
+  // Personal-Training-Studio): an einer fortlaufenden Geschichte sieht man, wie
+  // aus einem Moment ein Wert, daraus eine Definition und daraus eine
+  // Konfliktregel wird. Getrennte Branchen je Session hätten dieselben fünf
+  // Zeilen zusammenhanglos gezeigt.
   'c.discovery1': {
     goal: 'capture a moment when this business was at its best, told as a scene and not as an adjective.',
     quality: [
@@ -1324,19 +1439,19 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
       ],
     },
     answers: { minSubstance: 'long' },
-    effort: { minutes: 3, turns: 4 },
+    effort: { minutes: 2, turns: 4 },
     examples: pathExamples(
       {
-        de: 'Ein Hund kam nach zwei abgebrochenen Kursen zu uns. In der vierten Stunde hat er zum ersten Mal '
-          + 'von allein Blickkontakt gehalten, und die Besitzerin hat auf dem Platz geweint.',
-        en: 'A dog came to us after two abandoned courses. In the fourth session he held eye contact by '
-          + 'himself for the first time, and his owner stood there and cried.',
+        de: 'Eine Kundin kam nach drei gescheiterten Diäten. In der vierten Woche hat sie zum ersten Mal '
+          + 'wieder gefrühstückt, statt bis mittags zu warten, und mir das aus dem Zug geschrieben.',
+        en: 'A client came to us after three failed diets. In the fourth week she had breakfast again for the '
+          + 'first time instead of waiting until noon, and wrote to me about it from the train.',
       },
       {
-        de: 'Nach dem Gewitter stand die halbe Schulklasse durchnässt in der Halle. Der Stallmeister hat den '
-          + 'Unterricht abgesagt und stattdessen alle beim Trockenreiben mitmachen lassen.',
-        en: 'After the thunderstorm half a school group stood soaked in the arena. The stable master called '
-          + 'off the lesson and had everybody help rub the horses down instead.',
+        de: 'Nach dem Wasserrohrbruch stand die halbe Frühgruppe im Flur. Der Trainer hat die Stunde abgesagt '
+          + 'und stattdessen mit allen eine Stunde im Hof trainiert.',
+        en: 'After the burst pipe half the early group stood in the corridor. The trainer called the session '
+          + 'off and trained everybody in the yard for an hour instead.',
       },
     ),
   },
@@ -1365,57 +1480,71 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
       ],
     },
     answers: { minSubstance: 'long' },
-    effort: { minutes: 3, turns: 4 },
+    effort: { minutes: 2, turns: 4 },
     examples: pathExamples(
       {
-        de: 'Wir haben einen Kurs mit zwölf Hunden angenommen, weil die Gruppe voll bezahlt war. Nach der '
-          + 'zweiten Stunde hat kein Hund mehr etwas gelernt, und ich wusste vorher, dass es zu viele sind.',
-        en: 'We took a course with twelve dogs because the group was fully paid. After the second session no '
-          + 'dog was learning anything, and I had known beforehand that it was too many.',
+        de: 'Wir haben ein Zwölf-Wochen-Paket an jemanden verkauft, der ab Woche zwei nicht mehr kam. '
+          + 'Angerufen hat ihn niemand, das Geld war ja da.',
+        en: 'We sold a twelve-week package to somebody who stopped showing up in week two. Nobody called him, '
+          + 'because the money was already in.',
       },
       {
-        de: 'Wir haben ein lahmes Pferd noch eine Woche im Unterricht gelassen, weil der Ersatz gefehlt hat. '
-          + 'Gesagt hat das niemand — bemerkt haben es alle.',
-        en: 'We kept a lame horse in lessons for another week because we had no replacement. Nobody said it '
-          + 'out loud, and everybody noticed.',
+        de: 'Wir haben einen Kunden weiter trainieren lassen, obwohl seine Schulter längst zum Arzt gehört '
+          + 'hätte. Gesagt hat das niemand, gesehen haben es alle.',
+        en: 'We kept training a client although his shoulder should long since have seen a doctor. Nobody '
+          + 'said it out loud, and everybody saw it.',
       },
     ),
   },
+  // DIE EINE TEAM-FASSUNG DES KATALOGS (Davids Entscheidung 2026-09-04, Audit
+  // Punkt 12). Solo fragt D3 der Content-Spec §6 („welches Verhalten würdest
+  // du nie dulden"), im Team D7 („wie soll dein Team entscheiden, wenn du
+  // nicht im Raum bist"). Beides holt dieselbe Sache — die Grenze, an der
+  // dieser Betrieb nein sagt —, nur über den Weg, den der Betrieb kennt: allein
+  // über das eigene Nein, im Team über die Regel, die ohne den Inhaber gilt.
+  // Deshalb tragen Ziel, Qualität und Leiter BEIDE Fassungen; der Fragen-Pool
+  // bleibt im Übrigen eingefroren (D4–D6 und W3–W5 sind in der Spec als
+  // „nicht gebaut" vermerkt).
   'c.discovery3': {
-    goal: 'capture the behaviour this brand would never tolerate, not even from its best-paying client.',
+    goal: 'capture where this brand draws its line: solo, the behaviour they would never tolerate even '
+      + 'from their best-paying client; with a team, the rule the team decides by when the owner is not '
+      + 'in the room.',
     quality: [
-      'It names a behaviour, not a type of person.',
-      'It has been refused at least once, and they can say when.',
-      'It would still be refused from the best-paying client.',
+      'It names a behaviour or a decision rule, never a type of person.',
+      'It has been applied at least once, and they can say when.',
+      'It would still hold for the best-paying client, and without the owner present.',
       'It is specific enough to recognise while it is happening.',
     ],
     antiPatterns: [
       'A no-go so extreme that nobody would ever ask for it.',
       'A preference dressed up as a principle: "we do not like rush jobs".',
-      'A behaviour they have in fact tolerated.',
+      'A behaviour they have in fact tolerated, or a rule nobody has ever used.',
     ],
     ladder: {
-      opening: 'the behaviour they would refuse even from their best-paying client.',
+      opening: 'solo: the behaviour they would refuse even from their best-paying client. With a team: '
+        + 'the rule the team decides by when the owner is not there.',
       probes: [
-        'when did you last say no to it, and what did it cost?',
-        'has anybody ever asked you for exactly that?',
+        'when did that last happen, and what did it cost?',
+        'who applied it — and did they have to ask first?',
       ],
       reframes: [
         'if the no-go is illegal anyway, ask for the one that is legal and still unacceptable',
-        'if it has never been tested, ask what they came closest to tolerating',
+        'if the rule has never been tested, ask what the team came closest to getting wrong',
       ],
     },
+    effort: { minutes: 2, turns: 4 },
     examples: pathExamples(
       {
-        de: 'Wer seinen Hund vor uns am Halsband hochreißt, kommt nicht in den Kurs zurück — auch wenn er '
-          + 'den ganzen Block bezahlt hat.',
-        en: 'Anybody who yanks their dog up by the collar in front of us does not come back to the course, '
-          + 'even if they paid for the whole block.',
+        de: 'Wer bei uns Nahrungsergänzung auf Provision verkaufen will, ist raus — auch wenn das ganze Jahr '
+          + 'gebucht ist.',
+        en: 'Anybody who wants to sell supplements on commission here is out, even when the whole year has '
+          + 'been booked.',
       },
       {
-        de: 'Wir schreiben kein Pferd gesund, damit es verkauft werden kann. Das hat uns zwei Einstaller '
-          + 'gekostet.',
-        en: 'We will not sign a horse off as sound so that it can be sold. That has cost us two boarders.',
+        de: 'Ist niemand von uns da, gilt: im Zweifel wird die Übung abgebrochen und ein Arztbesuch '
+          + 'empfohlen. Das darf jeder Trainer allein entscheiden.',
+        en: 'When none of us is there the rule is: when in doubt the exercise stops and a doctor is '
+          + 'recommended. Every trainer may decide that alone.',
       },
     ),
   },
@@ -1436,16 +1565,16 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
     form: { person: 'none', tense: 'present' },
     examples: pathExamples(
       {
-        de: '- Geduld — der Kurs wurde wiederholt, statt den Hund weiterzuschieben\n'
-          + '- Unbestechlichkeit — Kursplatz gekündigt, obwohl der ganze Block bezahlt war',
-        en: '- Patience — the course was repeated instead of pushing the dog along\n'
-          + '- Incorruptibility — a place was cancelled although the whole block had been paid',
+        de: '- Geduld — der Plan wurde umgeschrieben, statt die Kundin weiterzuschieben\n- Unbestechlichkeit '
+          + '— das Provisionsangebot eines Herstellers wurde abgelehnt',
+        en: '- Patience — the plan was rewritten instead of pushing the client along\n- Incorruptibility — a '
+          + 'manufacturer\'s commission offer was turned down',
       },
       {
-        de: '- Ehrlichkeit — kein Pferd wird für den Verkauf gesundgeschrieben\n'
-          + '- Verlässlichkeit — bei Sturm wird abgesagt, nicht geritten',
-        en: '- Honesty — no horse is signed off as sound to make a sale\n'
-          + '- Reliability — in a storm the lesson is cancelled, not ridden',
+        de: '- Ehrlichkeit — kein Training an einer Schulter, die zum Arzt gehört\n- Verlässlichkeit — bei '
+          + 'Krankheit wird abgesagt, nicht vertreten',
+        en: '- Honesty — no training on a shoulder that belongs at a doctor\n- Reliability — when a trainer '
+          + 'is ill the session is cancelled, not handed over',
       },
     ),
     rules: [
@@ -1484,6 +1613,7 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
       probes: ['which of these would you still hold in the worst month of the year?'],
       reframes: ['if six or more survive, ask which one they have never actually paid for'],
     },
+    answers: { maxProbes: 1 },
     form: { person: 'none', tense: 'present' },
     // Die Frage im Katalog sagt „three to five" und der Wert ist eine LISTE
     // (eine Zeile je Wert, `brandSlotFormat.ts`) — damit ist die Zahl zählbar.
@@ -1514,18 +1644,22 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
       'A definition for a value they did not choose.',
     ],
     form: { person: 'we', tense: 'present' },
+    // „One line per chosen value, none missing" ist zählbar (Paket 2b, Audit
+    // Teil 3 Nr. 4): jede Zeile beginnt mit dem Wert, also muss jeder gewählte
+    // Wert im Feld vorkommen. Ohne `c.final` prüft sie nichts (fail-open).
+    invariants: [{ kind: 'mentionsFrom', of: 'c.final' }],
     examples: pathExamples(
       {
-        de: '- Geduld — wir wiederholen eine Übung so lange, wie der Hund braucht, und rechnen die Stunde '
-          + 'nicht doppelt ab.',
-        en: '- Patience — we repeat an exercise for as long as the dog needs, and we do not charge the hour '
-          + 'twice.',
+        de: '- Geduld — wir schreiben den Plan so oft um, wie der Alltag es verlangt, und rechnen die '
+          + 'Beratung nicht doppelt ab.',
+        en: '- Patience — we rewrite the plan as often as everyday life demands, and we do not charge for the '
+          + 'session twice.',
       },
       {
-        de: '- Verlässlichkeit — bei Sturm sagen wir ab und geben den Termin kostenfrei zurück, auch wenn '
-          + 'die Halle frei wäre.',
-        en: '- Reliability — in a storm we cancel and refund the slot, even when the indoor arena would be '
-          + 'free.',
+        de: '- Verlässlichkeit — fällt ein Trainer aus, sagen wir ab und geben den Termin kostenfrei zurück, '
+          + 'statt jemanden einspringen zu lassen.',
+        en: '- Reliability — if a trainer drops out we cancel and refund the slot instead of sending in a '
+          + 'stand-in.',
       },
     ),
     rules: [
@@ -1562,19 +1696,26 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
         'if one value has no story, say so plainly and ask whether it belongs on the list',
       ],
     },
-    answers: { minSubstance: 'long' },
-    effort: { minutes: 5, turns: 5 },
+    // VERTAGEN (Paket 2b, Audit Punkt 7): „ein echtes Beispiel je Wert, mit
+    // Datum, Ort oder Person" kann im Team niemand allein beantworten — und
+    // genau hier richtet eine erfundene Antwort den grössten Schaden an, weil
+    // sie die Substanz der Werte ist.
+    answers: { minSubstance: 'long', allowDefer: true },
+    effort: { minutes: 2, turns: 5 },
+    // Ein Beispiel JE gewähltem Wert — also kommt jeder Wert im Feld vor.
+    invariants: [{ kind: 'mentionsFrom', of: 'c.final' }],
     examples: pathExamples(
       {
-        de: '- Unbestechlichkeit — im März haben wir Familie K. den Kursplatz gekündigt und 240 Euro '
-          + 'zurückgezahlt.',
-        en: '- Incorruptibility — in March we cancelled the K. family\'s place and refunded 240 euros.',
+        de: '- Unbestechlichkeit — im März haben wir ein Provisionsangebot über 2.000 Euro abgelehnt und das '
+          + 'in der Sprechstunde offen gesagt.',
+        en: '- Incorruptibility — in March we turned down a commission offer worth 2,000 euros and said so '
+          + 'openly in the consultation hour.',
       },
       {
-        de: '- Ruhe — im Juli haben wir das Turnier abgesagt, weil zwei Pferde husteten; das Nenngeld ging '
-          + 'zurück.',
-        en: '- Calm — in July we called off the show because two horses had a cough, and the entry fees went '
-          + 'back.',
+        de: '- Ruhe — im Juli haben wir den Wettkampf abgesagt, weil zwei Leute krank waren; das Startgeld '
+          + 'ging zurück.',
+        en: '- Calm — in July we called off the competition because two people were ill, and the entry fees '
+          + 'went back.',
       },
     ),
   },
@@ -1606,17 +1747,23 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
     // ausdrücklich im Ergebnis-Dokument (Content-Spec §11, „Werte inkl.
     // Konfliktregel"). Sie ist das ERGEBNIS des Kapitels, nicht sein Rohmaterial.
     answers: { minSubstance: 'medium', allowDefer: true },
+    // DIE IN §3a NAMENTLICH ZUGESAGTE INVARIANTE (Paket 2b, Audit Teil 3
+    // Nr. 4): „c.conflictRule nennt nur Werte aus c.final". Entscheidbar ist
+    // die positive Hälfte — dass zwei der eigenen Werte beim Namen vorkommen;
+    // sie steht wörtlich als erstes Qualitätsmerkmal. Warum nicht das Verbot:
+    // s. `mentionsFrom` im Kopf dieser Datei.
+    invariants: [{ kind: 'mentionsFrom', of: 'c.final', min: 2 }],
     examples: pathExamples(
       {
-        de: 'Geduld gegen Klarheit: Wenn ein Hund den Kurs nicht schafft, gewinnt Klarheit — wir sagen es '
-          + 'nach der dritten Stunde, statt weiter Geduld zu verkaufen.',
-        en: 'Patience against clarity: when a dog is not going to manage the course, clarity wins — we say '
-          + 'so after the third session instead of selling more patience.',
+        de: 'Geduld gegen Klarheit: Trägt ein Plan nach acht Wochen nicht, gewinnt Klarheit — wir sagen es, '
+          + 'statt weiter Geduld zu verkaufen.',
+        en: 'Patience against clarity: when a plan is not working after eight weeks, clarity wins — we say so '
+          + 'instead of selling more patience.',
       },
       {
-        de: 'Verlässlichkeit gegen Ehrlichkeit: Ist ein Pferd nicht fit, gewinnt Ehrlichkeit — wir sagen den '
+        de: 'Verlässlichkeit gegen Ehrlichkeit: Ist jemand nicht fit, gewinnt Ehrlichkeit — wir sagen den '
           + 'zugesagten Termin ab.',
-        en: 'Reliability against honesty: if a horse is not fit, honesty wins — we cancel the lesson we '
+        en: 'Reliability against honesty: if somebody is not fit, honesty wins — we cancel the session we '
           + 'promised.',
       },
     ),
@@ -1651,21 +1798,22 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
     answers: { minSubstance: 'short', allowDefer: true },
     examples: pathExamples(
       {
-        de: 'Geduld. Wer am Probetag die Leine strafft, sobald es hektisch wird, passt nicht zu uns — '
-          + 'Fachwissen bringen wir bei.',
-        en: 'Patience. Anybody who tightens the lead on their trial day as soon as things get hectic does '
-          + 'not fit here — knowledge we can teach.',
+        de: 'Geduld. Wer am Probetag beim ersten Rückschritt die Stimme hebt, passt nicht zu uns — Fachwissen '
+          + 'bringen wir bei.',
+        en: 'Patience. Anybody who raises their voice at the first setback on a trial day does not fit here — '
+          + 'knowledge we can teach.',
       },
       {
-        de: 'Ehrlichkeit. Wer einen Fehler im Stall nicht meldet, weil er klein aussieht, ist raus.',
-        en: 'Honesty. Anybody who hides a small mistake in the stable because it looks harmless is out.',
+        de: 'Ehrlichkeit. Wer einen Fehler im Studio nicht meldet, weil er klein aussieht, ist raus.',
+        en: 'Honesty. Anybody who hides a small mistake in the studio because it looks harmless is out.',
       },
     ),
   },
 
   // ── D · Archetyp & Stimme ───────────────────────────────────────────────
-  // EIN Betrieb je Pfad durch das Kapitel (Schmiede / Reisebüro): Hypothese,
-  // Primär, Sekundär und Abweichung sind nur zusammen zu lesen.
+  // EIN Betrieb je Pfad durch das Kapitel (Designstudio für Buchgestaltung /
+  // Fotostudio): Hypothese, Primär, Sekundär und Abweichung sind nur zusammen
+  // zu lesen.
   'd.hypothesis': {
     goal: 'say which archetype speaks out of their appearance TODAY — as a reading, not as a decision.',
     quality: [
@@ -1682,16 +1830,16 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
     form: { person: 'none', tense: 'present', maxWords: 70 },
     examples: pathExamples(
       {
-        de: 'Aus euren Texten spricht vor allem der Schöpfer: „Wir schmieden jedes Stück einzeln, auch wenn '
-          + 'es zehnmal dasselbe ist." Daneben klingt der Weise durch, wo ihr das Material erklärt.',
-        en: 'What speaks out of your texts is mostly the Creator: "we forge each piece on its own, even when '
-          + 'it is the same one ten times". The Sage shows through where you explain the material.',
+        de: 'Aus euren Texten spricht vor allem der Schöpfer: „Wir setzen jedes Buch neu, auch wenn es die '
+          + 'vierte Auflage ist." Daneben klingt der Weise durch, wo ihr Papier und Bindung erklärt.',
+        en: 'What speaks out of your texts is mostly the Creator: "we typeset every book from scratch, even '
+          + 'for a fourth edition". The Sage shows through where you explain paper and binding.',
       },
       {
-        de: 'Euer Auftritt zieht in zwei Richtungen: „Weltweit zu Hause" klingt nach dem Entdecker, die '
+        de: 'Euer Auftritt zieht in zwei Richtungen: „Bilder, die bleiben" klingt nach dem Schöpfer, die '
           + 'Seite mit den Stornobedingungen nach dem Herrscher.',
-        en: 'Your appearance pulls two ways: "at home anywhere in the world" sounds like the Explorer, while '
-          + 'the cancellation page sounds like the Ruler.',
+        en: 'Your appearance pulls two ways: "pictures that stay" sounds like the Creator, while the '
+          + 'cancellation page sounds like the Ruler.',
       },
     ),
     siteAnalysis: true,
@@ -1732,6 +1880,11 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
       'A choice justified by a famous brand instead of by their own feeling.',
       'The result read as a personality test about the founder.',
     ],
+    // KEINE PERSON, WEIL HIER NIEMAND SPRICHT (Paket 2b, Audit Teil 1
+    // Spalte g): `fromTeam` war der durchgereichte Default und behauptete,
+    // der Wert folge der Weiche Solo/Team — er ist aber eine Ableitung bzw.
+    // eine Auswahl, in der kein Mensch einen Satz formuliert.
+    form: { person: 'none', tense: 'present' },
     // KEINE BEISPIELE, und das ist kein Vergessen: der Wert entsteht im
     // Instrument (Karte gegen Karte), nicht in einem Feld, das jemand füllt.
     // Ein erfundenes Ergebnis zeigte keine FORM, sondern nur ein Resultat — und
@@ -1751,16 +1904,21 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
       'A draft where two archetypes are equally defensible.',
       'A choice derived from the pitch alone.',
     ],
+    // KEINE PERSON, WEIL HIER NIEMAND SPRICHT (Paket 2b, Audit Teil 1
+    // Spalte g): `fromTeam` war der durchgereichte Default und behauptete,
+    // der Wert folge der Weiche Solo/Team — er ist aber eine Ableitung bzw.
+    // eine Auswahl, in der kein Mensch einen Satz formuliert.
+    form: { person: 'none', tense: 'present' },
     examples: pathExamples(
       {
-        de: 'Der Schöpfer — „auch wenn es zehnmal dasselbe ist" ist euer Satz, nicht der eines Zulieferers.',
-        en: 'The Creator — "even when it is the same one ten times" is your sentence, not a supplier\'s.',
+        de: 'Der Schöpfer — „auch wenn es die vierte Auflage ist" ist euer Satz, nicht der einer Druckerei.',
+        en: 'The Creator — "even for a fourth edition" is your sentence, not a printer\'s.',
       },
       {
-        de: 'Der Fürsorgliche — ihr habt dreimal gesagt, dass ihr sonntags ans Telefon geht, wenn jemand am '
-          + 'Flughafen strandet.',
-        en: 'The Caregiver — you said three times that you answer the phone on a Sunday when somebody is '
-          + 'stranded at an airport.',
+        de: 'Der Fürsorgliche — ihr habt dreimal gesagt, dass ihr vorher anruft, wenn jemand zum ersten Mal '
+          + 'vor einer Kamera steht.',
+        en: 'The Caregiver — you said three times that you call ahead when somebody stands in front of a '
+          + 'camera for the first time.',
       },
     ),
     rules: [
@@ -1794,12 +1952,23 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
       'A second name with no relationship to the first.',
       'A secondary guessed while the primary is missing.',
     ],
+    // KEINE PERSON, WEIL HIER NIEMAND SPRICHT (Paket 2b, Audit Teil 1
+    // Spalte g): `fromTeam` war der durchgereichte Default und behauptete,
+    // der Wert folge der Weiche Solo/Team — er ist aber eine Ableitung bzw.
+    // eine Auswahl, in der kein Mensch einen Satz formuliert.
+    form: { person: 'none', tense: 'present' },
+    // DIE EINZIGE REGEL DIESER SESSION, DIE EIN TEST ENTSCHEIDEN KANN (Paket 2b,
+    // Audit Teil 3 Nr. 4): der zweite Archetyp darf nicht der erste sein. Beide
+    // Felder tragen eine stabile Katalog-Id (`sage`), der Vergleich ist also
+    // exakt — und `mentionsNone` mit Quelle ist genau die Frage „steht das hier
+    // nicht drin?". Fehlt der primäre Wert, prüft sie nichts (fail-open).
+    invariants: [{ kind: 'mentionsNone', of: 'd.primary' }],
     examples: pathExamples(
       {
-        de: 'Der Weise als Zweiter — er hält den Schöpfer vom Schwärmen ab: ihr erklärt, warum Damast '
-          + 'bricht, bevor ihr ihn verkauft.',
-        en: 'The Sage second — it keeps the Creator from mere enthusiasm: you explain why damascus breaks '
-          + 'before you sell it.',
+        de: 'Der Weise als Zweiter — er hält den Schöpfer vom Schwärmen ab: ihr erklärt, warum ein Papier '
+          + 'durchscheint, bevor ihr es empfehlt.',
+        en: 'The Sage second — it keeps the Creator from mere enthusiasm: you explain why a paper shows '
+          + 'through before you recommend it.',
       },
       {
         de: 'Der Entdecker als Zweiter — er hält den Fürsorglichen davon ab, betulich zu werden.',
@@ -1835,18 +2004,23 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
       '"There are elements of both."',
       'A gap invented because a finding was expected.',
     ],
+    // KEINE PERSON, WEIL HIER NIEMAND SPRICHT (Paket 2b, Audit Teil 1
+    // Spalte g): `fromTeam` war der durchgereichte Default und behauptete,
+    // der Wert folge der Weiche Solo/Team — er ist aber eine Ableitung bzw.
+    // eine Auswahl, in der kein Mensch einen Satz formuliert.
+    form: { person: 'none', tense: 'present' },
     examples: pathExamples(
       {
         de: 'Ihr wollt als Schöpfer gelesen werden, eure Seite klingt aber an drei Stellen nach dem '
-          + 'Herrscher: „Wir liefern ausschließlich an Fachbetriebe."',
+          + 'Herrscher: „Wir arbeiten ausschließlich mit Verlagen."',
         en: 'You want to be read as the Creator, but in three places your site sounds like the Ruler: "we '
-          + 'supply exclusively to trade customers".',
+          + 'work exclusively with publishers".',
       },
       {
-        de: 'Selbstbild und Außenbild treffen sich beim Fürsorglichen — nur eure Preisliste spricht wie ein '
-          + 'Herrscher: „Umbuchungen sind ausgeschlossen."',
-        en: 'Self-image and outside image meet at the Caregiver — only your price list speaks like a Ruler: '
-          + '"rebooking is excluded".',
+        de: 'Selbstbild und Außenbild treffen sich beim Fürsorglichen — nur die Preisliste spricht wie ein '
+          + 'Herrscher: „Absagen unter 48 Stunden werden voll berechnet."',
+        en: 'Self-image and outside image meet at the Caregiver — only the price list speaks like a Ruler: '
+          + '"cancellations within 48 hours are charged in full".',
       },
     ),
     rules: [
@@ -1901,12 +2075,15 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
     answers: { minSubstance: 'short' },
     examples: pathExamples(
       {
-        de: 'Steht am Rand, redet mit einem Menschen zwei Stunden über dessen Küchenmesser und geht früh.',
-        en: 'Stands at the edge, talks to one person about their kitchen knife for two hours, and leaves early.',
+        de: 'Steht am Rand, redet mit einem Menschen zwei Stunden über dessen Familienalbum und geht früh.',
+        en: 'Stands at the edge, talks to one person about their family album for two hours, and leaves '
+          + 'early.',
       },
       {
-        de: 'Merkt sich, wer keinen Alkohol trinkt, und holt ungefragt Wasser — hält aber keine Rede.',
-        en: 'Notices who is not drinking and fetches water unasked — but never makes a speech.',
+        de: 'Merkt sich, wer nicht fotografiert werden will, und fragt kein zweites Mal — hält aber keine '
+          + 'Rede.',
+        en: 'Notices who does not want to be photographed and does not ask twice — but never makes a speech. '
+          + 'Notices who does not want to be photographed and does not ask twice — but never makes a speech.',
       },
     ),
   },
@@ -1934,12 +2111,14 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
     answers: { minSubstance: 'short' },
     examples: pathExamples(
       {
-        de: 'Belehrend. Wir erklären das Material, aber wir sagen niemandem, dass er das falsche Messer benutzt.',
-        en: 'Preachy. We explain the material, but we never tell anybody they are using the wrong knife.',
+        de: 'Belehrend. Wir erklären, warum eine Zeile umbricht, aber wir sagen niemandem, dass er den '
+          + 'falschen Geschmack hat.',
+        en: 'Preachy. We explain why a line breaks where it does, but we never tell anybody their taste is '
+          + 'wrong.',
       },
       {
-        de: 'Aufgeregt. Kein „nur noch zwei Plätze frei" — dafür rufen die Leute uns nicht an.',
-        en: 'Breathless. No "only two seats left" — that is not what people call us for.',
+        de: 'Aufgeregt. Kein „nur noch zwei Termine frei" — dafür ruft hier niemand an.',
+        en: 'Breathless. No "only two slots left" — that is not what people call for.',
       },
     ),
   },
@@ -1966,17 +2145,16 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
     },
     examples: pathExamples(
       {
-        de: 'Eine kleine Outdoor-Marke aus Schweden: Sie legt seit Jahren dieselbe Reparaturanleitung bei, '
-          + 'statt jedes Jahr eine neue Kampagne zu machen. Ihre Umweltpredigt wäre uns aber zu viel.',
-        en: 'A small outdoor brand from Sweden: they have enclosed the same repair instructions for years '
-          + 'instead of running a new campaign each season. Their environmental preaching would be too much '
-          + 'for us, though.',
+        de: 'Ein Hersteller, der seit Jahren dieselbe Reparaturanleitung beilegt, statt jede Saison eine neue '
+          + 'Kampagne zu fahren. Das ständige Predigen der eigenen Haltung wäre uns zu viel.',
+        en: 'A manufacturer that has enclosed the same repair instructions for years instead of running a new '
+          + 'campaign every season. The constant preaching about their own stance would be too much for us.',
       },
       {
-        de: 'Eine Kaffeerösterei in Hamburg: Sie schreibt auf jede Tüte, was der Bauer bekommen hat. Ihr '
-          + 'Ton wäre uns aber zu belehrend.',
-        en: 'A coffee roastery in Hamburg: they print on every bag what the farmer was paid. Their tone '
-          + 'would be too preachy for us, though.',
+        de: 'Ein Röster, der auf jede Tüte schreibt, was der Bauer bekommen hat. Der belehrende Ton wäre uns '
+          + 'zu viel.',
+        en: 'A roaster who prints on every bag what the farmer was paid. The lecturing tone would be too much '
+          + 'for us.',
       },
     ),
   },
@@ -2007,12 +2185,13 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
     answers: { minSubstance: 'short' },
     examples: pathExamples(
       {
-        de: 'Erleichterung — in dem Moment, in dem jemand merkt, dass das Messer noch zu retten ist.',
-        en: 'Relief — at the moment somebody realises the knife can still be saved.',
+        de: 'Erleichterung — in dem Moment, in dem jemand merkt, dass sein Manuskript nicht kürzer werden '
+          + 'muss.',
+        en: 'Relief — at the moment somebody realises their manuscript does not have to get shorter.',
       },
       {
-        de: 'Ruhe. Wenn die Bestätigung kommt, soll niemand mehr das Kleingedruckte suchen.',
-        en: 'Calm. When the confirmation arrives, nobody should still be looking for the small print.',
+        de: 'Ruhe. Ist der Termin bestätigt, soll niemand mehr überlegen, was er anziehen muss.',
+        en: 'Calm. Once the appointment is confirmed, nobody should still be wondering what to wear.',
       },
     ),
   },
@@ -2035,23 +2214,24 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
       probes: ['which of the three sounds least like you, and what is wrong with it?'],
       reframes: ['if all three feel right, ask which one they would actually send tomorrow'],
     },
+    answers: { maxProbes: 1 },
     form: { person: 'we', tense: 'present' },
     examples: pathExamples(
       {
-        de: '- Das Messer ist zu retten, aber der Griff muss neu.\n'
-          + '- Vor Ostern schaffen wir das nicht — ehrlich gesagt frühestens im Mai.\n'
-          + '- 180 Euro, weil der Stahl von Hand geschmiedet ist und nicht gefräst.',
-        en: '- The knife can be saved, but the handle has to be new.\n'
-          + '- We will not manage it before Easter — honestly, May at the earliest.\n'
-          + '- 180 euros, because the steel is forged by hand and not milled.',
+        de: '- Der Satz steht, aber das Papier trägt ihn nicht.\n- Vor Oktober schaffen wir das nicht — '
+          + 'ehrlich gesagt frühestens im November.\n- 2.400 Euro, weil jede Seite einzeln umbrochen wird und '
+          + 'nicht aus einer Vorlage kommt.',
+        en: '- The typesetting works, but the paper cannot carry it.\n- We will not manage it before October '
+          + '— honestly, November at the earliest.\n- 2,400 euros, because every page is set by hand and not '
+          + 'poured into a template.',
       },
       {
-        de: '- Ihr Flug ist verschoben, wir haben schon umgebucht.\n'
-          + '- Das Hotel ist gut, aber laut — sagen wir lieber jetzt als hinterher.\n'
-          + '- Der Preis steigt am Freitag, deshalb melden wir uns heute.',
-        en: '- Your flight has moved, we have already rebooked you.\n'
-          + '- The hotel is good but noisy — better said now than afterwards.\n'
-          + '- The price goes up on Friday, which is why we are calling today.',
+        de: '- Der Termin steht, die Bilder kommen am Freitag.\n- Das Licht ist gut, der Hintergrund nicht — '
+          + 'besser jetzt gesagt als hinterher.\n- Ab Freitag gilt der neue Preis, deshalb melden wir uns '
+          + 'heute.',
+        en: '- The appointment is fixed, the pictures arrive on Friday.\n- The light is good, the background '
+          + 'is not — better said now than afterwards.\n- The new price starts on Friday, which is why we are '
+          + 'getting in touch today.',
       },
     ),
     rules: [
@@ -2087,11 +2267,12 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
       probes: ['which of these words would you cross out first?'],
       reframes: ['if a word excludes nothing, name a brand it would also fit and ask whether that is right'],
     },
+    answers: { maxProbes: 1 },
     form: { person: 'none', tense: 'present' },
     examples: pathExamples(
       {
-        de: '- karg\n- geduldig\n- werkstattnah\n- unbeeindruckt',
-        en: '- spare\n- patient\n- workshop-plain\n- unimpressed',
+        de: '- karg\n- geduldig\n- handfest\n- unbeeindruckt',
+        en: '- spare\n- patient\n- hands-on\n- unimpressed',
       },
       {
         de: '- nüchtern\n- vorausschauend\n- warm ohne Zucker\n- knapp',
@@ -2131,14 +2312,13 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
     answers: { minSubstance: 'short' },
     examples: pathExamples(
       {
-        de: '- use: geschmiedet\n- use: Werkstatt\n- avoid: Premium\n'
-          + '- avoid: Manufaktur — steht inzwischen auf jeder Tiefkühlpizza',
-        en: '- use: forged\n- use: workshop\n- avoid: premium\n'
-          + '- avoid: artisanal — it is on frozen pizza now',
+        de: '- benutzen: gesetzt\n- benutzen: Bogen\n- meiden: Premium\n- meiden: Manufaktur — steht '
+          + 'inzwischen auf jeder Tiefkühlpizza',
+        en: '- use: typeset\n- use: sheet\n- avoid: premium\n- avoid: artisanal — it is on frozen pizza now',
       },
       {
-        de: '- use: umgebucht\n- use: Rückflug\n- avoid: Traumreise\n- avoid: unschlagbar',
-        en: '- use: rebooked\n- use: return flight\n- avoid: dream holiday\n- avoid: unbeatable',
+        de: '- benutzen: Abzug\n- benutzen: Termin\n- meiden: Traumbilder\n- meiden: unschlagbar',
+        en: '- use: print\n- use: appointment\n- avoid: dream pictures\n- avoid: unbeatable',
       },
     ),
     rules: [
@@ -2158,8 +2338,9 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
   },
 
   // ── E · Manifest ────────────────────────────────────────────────────────
-  // EIN Betrieb je Pfad (Energieberatung / Fitnessstudio) — Warmup, Statements,
-  // Manifest und Ankerzeile bauen aufeinander auf, das Beispiel ebenso.
+  // EIN Betrieb je Pfad (zweiköpfige Agentur / Agentur seit 2011) — Warmup,
+  // Statements, Manifest und Ankerzeile bauen aufeinander auf, das Beispiel
+  // ebenso.
   'e.warmup1': {
     goal: 'capture what makes them angry about their own industry.',
     quality: [
@@ -2186,16 +2367,16 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
     },
     examples: pathExamples(
       {
-        de: 'Dass Angebote absichtlich unvergleichbar gemacht werden — drei Seiten Positionen, damit niemand '
-          + 'den Preis pro Fenster ausrechnen kann.',
-        en: 'That quotes are made deliberately incomparable — three pages of line items so nobody can work '
-          + 'out the price per window.',
+        de: 'Dass Angebote absichtlich unvergleichbar gemacht werden — vier Seiten Positionen, damit niemand '
+          + 'den Stundensatz ausrechnen kann.',
+        en: 'That quotes are made deliberately incomparable — four pages of line items so nobody can work out '
+          + 'the hourly rate.',
       },
       {
-        de: 'Jahresverträge, die sich verlängern, wenn man die Kündigung um zwei Tage verpasst. Das ist kein '
+        de: 'Rahmenverträge, die sich verlängern, wenn man die Kündigung um zwei Tage verpasst. Das ist kein '
           + 'Geschäftsmodell, das ist eine Falle.',
-        en: 'Annual contracts that renew if you miss the notice period by two days. That is not a business '
-          + 'model, it is a trap.',
+        en: 'Retainers that renew if you miss the notice period by two days. That is not a business model, it '
+          + 'is a trap.',
       },
     ),
   },
@@ -2222,23 +2403,25 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
     },
     examples: pathExamples(
       {
-        de: 'Dass die Dämmung nicht das Erste ist. Bei den meisten Häusern bringt die eingestellte Heizung '
-          + 'im ersten Winter mehr als eine Fassade für 20.000 Euro.',
-        en: 'That insulation is not the first step. In most houses, setting the heating properly does more '
-          + 'in the first winter than a façade costing 20,000 euros.',
+        de: 'Dass die Idee nicht das Teure ist. In den meisten Projekten kostet das Abstimmen dreimal so viel '
+          + 'wie das Entwerfen.',
+        en: 'That the idea is not the expensive part. In most projects the rounds of approval cost three '
+          + 'times as much as the design work.',
       },
       {
-        de: 'Dass die ersten sechs Wochen nichts mit Muskeln zu tun haben, sondern damit, ob jemand '
-          + 'überhaupt wiederkommt.',
-        en: 'That the first six weeks have nothing to do with muscle and everything to do with whether '
-          + 'somebody comes back at all.',
+        de: 'Dass die ersten sechs Wochen nichts mit Kreativität zu tun haben, sondern damit, ob jemand die '
+          + 'Zahlen des Kunden versteht.',
+        en: 'That the first six weeks have nothing to do with creativity and everything to do with whether '
+          + 'somebody understands the client\'s numbers.',
       },
     ),
   },
   'e.statements': {
-    goal: 'draft the statement openers the manifesto will be built from — one line per opener, filled '
-      + 'from what they have already said.',
+    goal: `draft all ${MANIFESTO_STATEMENT_COUNT} statement openers the manifesto will be built from — `
+      + 'one line per opener, in the five groups of the instrument (belief, commitment, energy, stance, '
+      + 'promise), filled from what they have already said.',
     quality: [
+      `There are ${MANIFESTO_STATEMENT_COUNT} lines, and every group of the instrument is represented.`,
       'Every statement takes a side somebody could refuse.',
       'Each one is traceable to an answer they gave.',
       'They are sentences somebody would say, not headlines.',
@@ -2250,19 +2433,19 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
       'A filled-in opener with nothing behind it.',
     ],
     form: { person: 'we', tense: 'present' },
-    effort: { minutes: 10, turns: 4 },
+    effort: { minutes: 5, turns: 4 },
     examples: pathExamples(
       {
-        de: '- Wir glauben, dass die billigste Kilowattstunde die ist, die niemand braucht.\n'
-          + '- Wir weigern uns, eine Fassade zu empfehlen, bevor die Heizung eingestellt ist.',
-        en: '- We believe the cheapest kilowatt hour is the one nobody needs.\n'
-          + '- We refuse to recommend a façade before the heating has been set up properly.',
+        de: '- Wir glauben, dass die teuerste Runde die ist, die niemand gebraucht hätte.\n- Wir weigern uns, '
+          + 'einen Entwurf zu zeigen, bevor die Frage feststeht.',
+        en: '- We believe the most expensive round is the one nobody needed.\n- We refuse to show a draft '
+          + 'before the question has been settled.',
       },
       {
-        de: '- Wir glauben, dass Wiederkommen wichtiger ist als Fortschritt.\n'
-          + '- Wir weigern uns, Verträge zu verlängern, die niemand nutzt.',
-        en: '- We believe coming back matters more than progress.\n'
-          + '- We refuse to renew a contract nobody is using.',
+        de: '- Wir glauben, dass Bleiben wichtiger ist als Auffallen.\n- Wir weigern uns, Verträge zu '
+          + 'verlängern, die niemand nutzt.',
+        en: '- We believe staying matters more than standing out.\n- We refuse to renew a contract nobody is '
+          + 'using.',
       },
     ),
   },
@@ -2279,19 +2462,31 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
       'A tone chosen because it sounds impressive.',
       'A length nobody will read where it is meant to appear.',
     ],
+    // EINE ENTSCHEIDUNG JE ZUG (Paket 2b, Audit Teil 1 Spalte d): die alte
+    // Eröffnung verlangte Ton, Länge und Verwendung in EINEM Zug — gegen den
+    // Leitsatz „runterbrechen, bevor jemand zu viel erzählt" und gegen die
+    // Zug-Regel (Content-Spec §1.2.2). Jetzt: die Verwendung zuerst, weil der
+    // ORT die beiden anderen bestimmt, dann Länge, dann Ton.
     ladder: {
-      opening: 'settle tone, length and use — say which one you would take and why.',
-      probes: ['where exactly will this be read first?'],
+      opening: 'start with the use — where will this be read first?',
+      probes: [
+        'what length does that place carry?',
+        'which of the offered tones fits that place — one of them, not a mixture?',
+      ],
       reframes: ['if every use is ticked, ask which one it has to work for on day one'],
     },
+    answers: { maxProbes: 2 },
+    form: { person: 'none', tense: 'present' },
+    effort: { minutes: 2, turns: 3 },
     examples: pathExamples(
       {
-        de: 'Ton: nüchtern · Länge: kurz, unter 120 Wörtern · Verwendung: die erste Seite des Beratungsberichts',
-        en: 'Tone: sober · Length: short, under 120 words · Use: the first page of the advisory report',
+        de: 'Ton: nüchtern · Länge: kurz, unter 120 Wörtern · Verwendung: die erste Seite jedes Angebots',
+        en: 'Tone: sober · Length: short, under 120 words · Use: the first page of every proposal',
       },
       {
-        de: 'Ton: direkt · Länge: mittel · Verwendung: das Plakat im Eingang und die Seite „Über uns"',
-        en: 'Tone: direct · Length: medium · Use: the poster in the entrance and the About page',
+        de: 'Ton: direkt · Länge: mittel · Verwendung: das Plakat im Besprechungsraum und die Seite „Über '
+          + 'uns"',
+        en: 'Tone: direct · Length: medium · Use: the poster in the meeting room and the About page',
       },
     ),
   },
@@ -2309,19 +2504,19 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
       'A closing sales line.',
     ],
     form: { person: 'we', tense: 'present' },
-    effort: { minutes: 5, turns: 3 },
+    effort: { minutes: 3, turns: 3 },
     examples: pathExamples(
       {
-        de: 'Die billigste Kilowattstunde ist die, die niemand braucht.\nDeshalb rechnen wir, bevor wir '
-          + 'bauen.\nUnd sagen ab, wenn sich das Gerüst nicht lohnt.',
-        en: 'The cheapest kilowatt hour is the one nobody needs.\nSo we do the arithmetic before we '
-          + 'build.\nAnd we say no when the scaffolding is not worth it.',
+        de: 'Die teuerste Runde ist die, die niemand gebraucht hätte.\nDeshalb klären wir die Frage, bevor '
+          + 'wir entwerfen.\nUnd sagen ab, wenn die Frage nicht zu klären ist.',
+        en: 'The most expensive round is the one nobody needed.\nSo we settle the question before we '
+          + 'design.\nAnd we say no when the question cannot be settled.',
       },
       {
-        de: 'Der beste Trainingsplan ist der, den jemand im November noch macht.\nWir zählen keine '
-          + 'Anmeldungen.\nWir zählen, wer wiederkommt.',
-        en: 'The best training plan is the one somebody still follows in November.\nWe do not count '
-          + 'sign-ups.\nWe count who comes back.',
+        de: 'Der beste Auftritt ist der, den ein Kunde in drei Jahren noch selbst pflegen kann.\nWir zählen '
+          + 'keine Preise.\nWir zählen, was übrig bleibt.',
+        en: 'The best brand is the one a client can still maintain three years later.\nWe do not count '
+          + 'awards.\nWe count what is left.',
       },
     ),
   },
@@ -2343,24 +2538,33 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
       probes: ['which line would you still want to say in five years?'],
       reframes: ['if they want to write a new one, point back to the manifesto and ask which line comes closest'],
     },
+    answers: { maxProbes: 1 },
+    // Der Wert ist eine bereits bestätigte ZEILE — ihre Form gehört der Quelle.
+    // `none` sagt hier nur, dass diese Session dem Wert keine eigene Person
+    // aufzwingt; ein Entwurfs-Auftrag entsteht daraus ohnehin nie
+    // (`generator: 'none'`).
+    form: { person: 'none', tense: 'present' },
     // Der Wähler zeigt Zeilen des Manifests — der gewählte Satz MUSS deshalb
     // darin vorkommen (Plan §3a: „e.anchorLine ist ein Satz aus e.manifesto").
     invariants: [{ kind: 'sentenceOf', of: 'e.manifesto' }],
     examples: pathExamples(
       {
-        de: 'Die billigste Kilowattstunde ist die, die niemand braucht.',
-        en: 'The cheapest kilowatt hour is the one nobody needs.',
+        de: 'Die teuerste Runde ist die, die niemand gebraucht hätte.',
+        en: 'The most expensive round is the one nobody needed.',
       },
       {
-        de: 'Wir zählen, wer wiederkommt.',
-        en: 'We count who comes back.',
+        de: 'Wir zählen, was übrig bleibt.',
+        en: 'We count what is left.',
       },
     ),
   },
 
   // ── E+ · Verbale Identität ──────────────────────────────────────────────
-  // Dieselben zwei Betriebe wie in E: die verbale Identität ist die Fortsetzung
-  // des Manifests, und ein Wechsel der Branche verschenkte genau diesen Bezug.
+  // EIN Betrieb je Pfad (Innenarchitektur für kleine Wohnungen / für Praxen und
+  // Büros). Bis Paket 2b liefen E und E+ auf demselben Betrieb; die Streuung der
+  // Kapitel-Branchen (s. Kopf) wiegt schwerer als dieser Bezug — die Kette
+  // Ankerzeile → verbales Erkennungszeichen zeigt sich innerhalb dieses Kapitels
+  // an seiner eigenen Zeile.
   'ep.taglines': {
     goal: 'propose tagline candidates and settle on the one that carries this brand.',
     quality: [
@@ -2379,15 +2583,16 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
       probes: ['which of these would you actually say on the phone?'],
       reframes: ['if they like the one that describes the category, ask what it says that a competitor could not'],
     },
+    answers: { maxProbes: 1 },
     form: { person: 'none', tense: 'present', maxWords: 7 },
     examples: pathExamples(
       {
-        de: 'Erst rechnen, dann bauen.',
-        en: 'Do the arithmetic before the building.',
+        de: 'Erst messen, dann möblieren.',
+        en: 'Measure first, furnish second.',
       },
       {
-        de: 'Wir zählen die Wiederkommer.',
-        en: 'We count the ones who return.',
+        de: 'Wir planen für den Montag.',
+        en: 'We plan for the Monday.',
       },
     ),
   },
@@ -2406,16 +2611,15 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
       'A press-release voice nobody speaks.',
     ],
     form: { person: 'we', tense: 'present' },
-    effort: { minutes: 5, turns: 3 },
     examples: pathExamples(
       {
-        de: '## Bio\nEnergieberatung für Altbauten in Ostwestfalen — wir rechnen, bevor jemand baut.',
-        en: '## Bio\nEnergy advice for older houses in East Westphalia — we do the arithmetic before '
-          + 'anybody builds.',
+        de: '## Bio\nInnenarchitektur für kleine Wohnungen in Leipzig — wir messen, bevor jemand kauft.',
+        en: '## Bio\nInterior design for small flats in Leipzig — we measure before anybody buys.',
       },
       {
-        de: '## Bio\nStudio für Erwachsene, die spät anfangen. Wir zählen, wer wiederkommt.',
-        en: '## Bio\nA gym for adults starting late. We count who comes back.',
+        de: '## Bio\nInnenarchitektur für Praxen und Büros. Wir planen für den Montag, nicht für das Foto.',
+        en: '## Bio\nInterior design for practices and offices. We plan for the Monday, not for the '
+          + 'photograph.',
       },
     ),
   },
@@ -2433,19 +2637,18 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
       'A feature list disguised as a message.',
     ],
     form: { person: 'we', tense: 'present' },
-    effort: { minutes: 5, turns: 3 },
     examples: pathExamples(
       {
-        de: '## Hausbesitzer über 60\n- Sie müssen nicht ausziehen, wir arbeiten in bewohnten Häusern.\n'
-          + '- Wir sagen Ihnen vorher, was sich nicht lohnt.',
-        en: '## Homeowners over 60\n- You do not have to move out, we work in occupied houses.\n'
-          + '- We tell you in advance what is not worth doing.',
+        de: '## Mieterinnen und Mieter\n- Nichts von dem, was wir planen, muss beim Auszug zurückgebaut '
+          + 'werden.\n- Wir sagen vorher, was sich nicht lohnt.',
+        en: '## Tenants\n- Nothing we plan has to be undone when the lease ends.\n- We say in advance what is '
+          + 'not worth doing.',
       },
       {
-        de: '## Wiedereinsteiger ab 40\n- In den ersten sechs Wochen zählt nur, dass ihr wiederkommt.\n'
-          + '- Kein Vertrag, der sich von selbst verlängert.',
-        en: '## People starting again after 40\n- For the first six weeks the only thing that counts is that '
-          + 'you come back.\n- No contract that renews itself.',
+        de: '## Praxen im laufenden Betrieb\n- In den ersten sechs Wochen zählt nur, dass der Betrieb '
+          + 'weiterläuft.\n- Kein Termin wird ohne Rücksprache verschoben.',
+        en: '## Practices that stay open during the work\n- For the first six weeks the only thing that '
+          + 'counts is that the practice keeps running.\n- No appointment is moved without asking first.',
       },
     ),
   },
@@ -2465,12 +2668,15 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
     form: { person: 'none', tense: 'present' },
     examples: pathExamples(
       {
-        de: '- use: Heizkurve\n- use: Bestandsaufnahme\n- avoid: Sanierungsstau\n- avoid: energetisch optimiert',
-        en: '- use: heating curve\n- use: survey\n- avoid: renovation backlog\n- avoid: energy-optimised',
+        de: '- benutzen: Grundriss\n- benutzen: Aufmaß\n- meiden: Wohntraum\n- meiden: hochwertig '
+          + 'ausgestattet',
+        en: '- use: floor plan\n- use: survey\n- avoid: dream home\n- avoid: high-end fittings',
       },
       {
-        de: '- use: wiederkommen\n- use: Probemonat\n- avoid: Bikinifigur\n- avoid: Transformation',
-        en: '- use: come back\n- use: trial month\n- avoid: beach body\n- avoid: transformation',
+        de: '- benutzen: Bestandsaufnahme\n- benutzen: Bauabschnitt\n- meiden: Wohlfühlatmosphäre\n- meiden: '
+          + 'Transformation',
+        en: '- use: survey\n- use: construction phase\n- avoid: feel-good atmosphere\n- avoid: transformation '
+          + '- use: survey\n- use: construction phase\n- avoid: feel-good atmosphere\n- avoid: transformation',
       },
     ),
   },
@@ -2492,23 +2698,31 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
       probes: ['would you still want to say it in five years?'],
       reframes: ['if they want a new line, ask what the anchor line is missing'],
     },
+    answers: { maxProbes: 1 },
+    // Der Wert ist eine bereits bestätigte ZEILE — ihre Form gehört der Quelle.
+    // `none` sagt hier nur, dass diese Session dem Wert keine eigene Person
+    // aufzwingt; ein Entwurfs-Auftrag entsteht daraus ohnehin nie
+    // (`generator: 'none'`).
+    form: { person: 'none', tense: 'present' },
     examples: pathExamples(
       {
-        de: 'Die billigste Kilowattstunde ist die, die niemand braucht.',
-        en: 'The cheapest kilowatt hour is the one nobody needs.',
+        de: 'Erst messen, dann möblieren.',
+        en: 'Measure first, furnish second.',
       },
       {
-        de: 'Wir zählen, wer wiederkommt.',
-        en: 'We count who comes back.',
+        de: 'Wir planen für den Montag.',
+        en: 'We plan for the Monday.',
       },
     ),
   },
 
   // ── F · Name & Prüfung ──────────────────────────────────────────────────
-  // EIN Betrieb je Pfad (mobile Fahrradwerkstatt / Zahnarztpraxis): Typ,
-  // Geschmack, No-Gos, Kandidaten, Shortlist, Prüfung, Kriterien und
-  // Entscheidung sind EINE Kette — die Beispiele tragen dieselben Namen durch,
-  // sonst zeigt die Shortlist Namen, die nie Kandidaten waren.
+  // EIN Betrieb je Pfad (freie Texterin, die ihren Namen sucht / freier
+  // Entwickler, der sich umbenennt): Typ, Geschmack, No-Gos, Kandidaten,
+  // Shortlist, Prüfung, Kriterien und Entscheidung sind EINE Kette — die
+  // Beispiele tragen dieselben Namen durch, sonst zeigt die Shortlist Namen, die
+  // nie Kandidaten waren. UND SIE TRAGEN SIE IN BEIDEN SPRACHEN GLEICH: ein
+  // Namens-Kandidat wechselt nicht mit der Oberflächensprache (s. Kopf).
   'f.nameType': {
     goal: 'settle which kind of name fits this brand.',
     quality: [
@@ -2527,18 +2741,22 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
       probes: ['is there a type you would rule out straight away?'],
       reframes: ['if they pick a descriptive name, say plainly what that costs in protectability'],
     },
+    answers: { maxProbes: 1 },
+    // KEINE PERSON, WEIL HIER NIEMAND SPRICHT (Paket 2b, Audit Teil 1
+    // Spalte g): `fromTeam` war der durchgereichte Default und behauptete,
+    // der Wert folge der Weiche Solo/Team — er ist aber eine Ableitung bzw.
+    // eine Auswahl, in der kein Mensch einen Satz formuliert.
+    form: { person: 'none', tense: 'present' },
     examples: pathExamples(
       {
-        de: 'Erfundener Name — kurz, schützbar, sagt nichts über Fahrräder und passt auch noch, wenn ihr '
-          + 'später Lastenräder vermietet.',
-        en: 'An invented name — short, protectable, says nothing about bicycles, and still fits if you rent '
-          + 'out cargo bikes later.',
+        de: 'Erfundener Name — kurz, schützbar, sagt nichts über Texte und passt auch noch, wenn später '
+          + 'Konzeptarbeit dazukommt.',
+        en: 'An invented name — short, protectable, says nothing about copywriting, and still fits if concept '
+          + 'work comes later.',
       },
       {
-        de: 'Gründername bleibt, aber ohne Titel: „Praxis Ehlerding" statt „Zahnarztpraxis Dr. med. dent. '
-          + 'Ehlerding".',
-        en: 'The founder name stays, but without the titles: "Ehlerding Practice" instead of "Dental Surgery '
-          + 'Dr Ehlerding".',
+        de: 'Gründername bleibt, aber ohne Zusatz: „Ohlsen" statt „Ohlsen Webentwicklung".',
+        en: 'The founder name stays, but without the add-on: "Ohlsen" instead of "Ohlsen Webentwicklung".',
       },
     ),
   },
@@ -2565,16 +2783,16 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
     },
     examples: pathExamples(
       {
-        de: 'Mirabell — weich, zwei Silben, erklärt nichts. Kolibri — man sieht sofort ein Bild. Anker — '
-          + 'kurz und am Telefon sofort verstanden.',
-        en: 'Mirabelle — soft, two syllables, explains nothing. Colibri — you see a picture at once. Anchor '
-          + '— short and understood on the phone straight away.',
+        de: 'Kolibri — man sieht sofort ein Bild. Anker — kurz und am Telefon sofort verstanden. Marlen — '
+          + 'weich, zwei Silben, erklärt nichts.',
+        en: 'Kolibri — you see a picture at once. Anker — short and understood on the phone straight away. '
+          + 'Marlen — soft, two syllables, explains nothing.',
       },
       {
-        de: 'Klar, weil es ein einziges Wort ist. Nordlicht, weil es die Gegend mitnimmt, ohne sie zu '
-          + 'buchstabieren. Hain, weil man es nach einmal Hören schreiben kann.',
-        en: 'Clear, because it is a single word. Northlight, because it carries the region without spelling '
-          + 'it out. Grove, because you can spell it after hearing it once.',
+        de: 'Nordlicht, weil es die Gegend mitnimmt, ohne sie zu buchstabieren. Hain, weil man es nach einmal '
+          + 'Hören schreiben kann. Kiesel, weil es ein einziges Wort ist.',
+        en: 'Nordlicht, because it carries the region without spelling it out. Hain, because you can write it '
+          + 'down after hearing it once. Kiesel, because it is a single word.',
       },
     ),
   },
@@ -2599,20 +2817,22 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
       ],
       reframes: ['if the list rules out everything, ask which three of them are truly non-negotiable'],
     },
-    // Vertagen: No-Gos hängen oft an Menschen, die nicht am Tisch sitzen
-    // (Partnerin, Familienname, ein Wort aus der Sprache der Kundschaft) — und
-    // ein erfundenes Verbot verengt danach jeden Kandidaten.
-    answers: { minSubstance: 'short', allowDefer: true },
+    // KEIN Vertagen (Paket 2b, Audit Punkt 7): das ist die persönlichste
+    // Geschmacksfrage des ganzen Bausteins („welche Wörter sind tabu?") —
+    // dafür braucht niemand jemanden, der gerade nicht am Tisch sitzt.
+    answers: { minSubstance: 'short' },
     examples: pathExamples(
       {
-        de: 'Kein „bike", kein „e-", nichts mit Bindestrich. Höchstens drei Silben — der Name muss auf den '
-          + 'Anhänger passen.',
-        en: 'No "bike", no "e-", nothing with a hyphen. Three syllables at most — it has to fit on the trailer.',
+        de: 'Kein „Text", kein „Media", nichts mit Bindestrich. Höchstens drei Silben — der Name muss in eine '
+          + 'Signatur passen.',
+        en: 'No "Text", no "Media", nothing with a hyphen. Three syllables at most — the name has to fit into '
+          + 'an email signature.',
       },
       {
-        de: 'Nichts mit „dental" oder „smile". Kein Wort, das man buchstabieren muss, wenn ältere Patienten '
-          + 'anrufen.',
-        en: 'Nothing with "dental" or "smile". No word that has to be spelled out when an older patient calls.',
+        de: 'Nichts mit „dev" oder „digital". Kein Wort, das man buchstabieren muss, wenn ein Kunde am '
+          + 'Telefon mitschreibt.',
+        en: 'Nothing with "dev" or "digital". No word that has to be spelled out when a client is taking it '
+          + 'down over the phone.',
       },
     ),
   },
@@ -2630,15 +2850,15 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
       'A list in which every name is descriptive.',
     ],
     form: { person: 'none', tense: 'present' },
-    effort: { minutes: 3, turns: 2 },
+    effort: { minutes: 2, turns: 2 },
     examples: pathExamples(
       {
-        de: '- Kolben — erfunden\n- Nabe — beschreibend, aus dem Handwerk\n- Sattelfest — zusammengesetzt',
-        en: '- Piston — invented\n- Hub — descriptive, from the trade\n- Saddlefast — compound',
+        de: '- Bogen — erfunden\n- Satzbau — beschreibend, aus dem Handwerk\n- Nordfeld — zusammengesetzt',
+        en: '- Bogen — invented\n- Satzbau — descriptive, from the trade\n- Nordfeld — compound',
       },
       {
-        de: '- Ehlerding — Gründername\n- Hain — abstrakt\n- Nordlicht — bildhaft',
-        en: '- Ehlerding — founder name\n- Grove — abstract\n- Northlight — evocative',
+        de: '- Ohlsen — Gründername\n- Kiesel — abstrakt\n- Tagwerk — bildhaft',
+        en: '- Ohlsen — founder name\n- Kiesel — abstract\n- Tagwerk — evocative',
       },
     ),
   },
@@ -2660,22 +2880,23 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
       probes: ['say each one on the phone — which of them needs spelling?'],
       reframes: ['if a new name appears here, put it back into the candidate list first'],
     },
+    answers: { maxProbes: 1 },
     form: { person: 'none', tense: 'present' },
     // KEINE `subsetOf f.candidates`-INVARIANTE, und das ist eine Entscheidung:
     // eine Kandidaten-ZEILE trägt laut Content-Spec §10 mehr als den Namen (sie
-    // ist „je Namenstyp beschriftet", also „- Kolben — erfunden"). `subsetOf`
-    // vergleicht ganze Zeilen; die Shortlist-Zeile „- Kolben" käme darin nie
+    // ist „je Namenstyp beschriftet", also „- Bogen — erfunden"). `subsetOf`
+    // vergleicht ganze Zeilen; die Shortlist-Zeile „- Bogen" käme darin nie
     // vor, und ein 409 hielte den Menschen von seiner eigenen Auswahl fern.
     // Wenn Paket 3 die Kandidaten in ein Feld mit getrennter Typ-Spalte legt,
     // gehört die Invariante nachgetragen.
     examples: pathExamples(
       {
-        de: '- Kolben\n- Nabe\n- Sattelfest',
-        en: '- Piston\n- Hub\n- Saddlefast',
+        de: '- Bogen\n- Satzbau\n- Nordfeld',
+        en: '- Bogen\n- Satzbau\n- Nordfeld',
       },
       {
-        de: '- Ehlerding\n- Hain\n- Nordlicht',
-        en: '- Ehlerding\n- Grove\n- Northlight',
+        de: '- Ohlsen\n- Kiesel\n- Tagwerk',
+        en: '- Ohlsen\n- Kiesel\n- Tagwerk',
       },
     ),
   },
@@ -2693,18 +2914,18 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
       'An availability claim with no source behind it.',
     ],
     form: { person: 'none', tense: 'present' },
-    effort: { minutes: 5, turns: 2 },
+    effort: { minutes: 3, turns: 2 },
     examples: pathExamples(
       {
-        de: '## Kolben\nDomain: kolben.de vergeben, kolben-rad.de frei · Handles: ungeprüft, Suchlink '
-          + 'unten · Marke: DPMA-Suche noch offen · Fremdsprache: keine Auffälligkeit',
-        en: '## Piston\nDomain: piston.de taken, piston-bikes.de free · Handles: unverified, search link '
-          + 'below · Trademark: DPMA search still open · Other languages: nothing conspicuous',
+        de: '## Bogen\nDomain: bogen.de vergeben, bogen-texte.de frei · Handles: ungeprüft, Suchlink unten · '
+          + 'Marke: DPMA-Suche noch offen · Fremdsprache: keine Auffälligkeit',
+        en: '## Bogen\nDomain: bogen.de taken, bogen-texte.de free · Handles: unverified, search link below · '
+          + 'Trademark: DPMA search still open · Other languages: nothing conspicuous',
       },
       {
-        de: '## Hain\nDomain: hain.de vergeben, praxis-hain.de frei · Handles: ungeprüft · Marke: geführte '
-          + 'Suche noch offen · Fremdsprache: keine Auffälligkeit',
-        en: '## Grove\nDomain: grove.de taken, praxis-grove.de free · Handles: unverified · Trademark: '
+        de: '## Kiesel\nDomain: kiesel.de vergeben, kiesel-code.de frei · Handles: ungeprüft · Marke: '
+          + 'geführte Suche noch offen · Fremdsprache: keine Auffälligkeit',
+        en: '## Kiesel\nDomain: kiesel.de taken, kiesel-code.de free · Handles: unverified · Trademark: '
           + 'guided search still open · Other languages: nothing conspicuous',
       },
     ),
@@ -2722,23 +2943,33 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
       'A criterion skipped because it is inconvenient.',
       'Ten names rated instead of three.',
     ],
+    // EINE ENTSCHEIDUNG JE ZUG (Paket 2b, Audit Teil 1 Spalte d): „one
+    // criterion at a time" waren 16 bis 24 gesprochene Bewertungen in drei
+    // Zügen. Die acht Bewertungen stehen im Raster (Chips) — das GESPRÄCH
+    // führt je Zug über EIN Kriterium, und das erste ist das entscheidende.
     ladder: {
-      opening: 'rate two or three finalists against the eight criteria, one criterion at a time.',
-      probes: ['which criterion did you rate highest — would a stranger agree?'],
+      opening: 'name the one criterion that would decide it, and compare the finalists on that one first.',
+      probes: ['which criterion comes second — and does it change the order?'],
       reframes: ['if every criterion is high, ask where the name is weakest; every name is weak somewhere'],
     },
-    effort: { minutes: 3, turns: 3 },
+    effort: { minutes: 2, turns: 3 },
+    answers: { maxProbes: 1 },
+    // KEINE PERSON, WEIL HIER NIEMAND SPRICHT (Paket 2b, Audit Teil 1
+    // Spalte g): `fromTeam` war der durchgereichte Default und behauptete,
+    // der Wert folge der Weiche Solo/Team — er ist aber eine Ableitung bzw.
+    // eine Auswahl, in der kein Mensch einen Satz formuliert.
+    form: { person: 'none', tense: 'present' },
     examples: pathExamples(
       {
-        de: '## Kolben\nSprechbar: gut · Schreibbar: gut · Merkbar: mittel · Schützbar: gut · Passend: '
-          + 'mittel · Erweiterbar: gut · Frei: offen · Zeitlos: gut',
-        en: '## Piston\nSayable: good · Spellable: good · Memorable: medium · Protectable: good · Fitting: '
+        de: '## Bogen\nSprechbar: gut · Schreibbar: gut · Merkbar: mittel · Schützbar: gut · Passend: mittel '
+          + '· Erweiterbar: gut · Frei: offen · Zeitlos: gut',
+        en: '## Bogen\nSayable: good · Spellable: good · Memorable: medium · Protectable: good · Fitting: '
           + 'medium · Extendable: good · Available: open · Timeless: good',
       },
       {
-        de: '## Hain\nSprechbar: gut · Schreibbar: gut · Merkbar: mittel · Schützbar: mittel · Passend: '
-          + 'gut · Erweiterbar: gut · Frei: offen · Zeitlos: gut',
-        en: '## Grove\nSayable: good · Spellable: good · Memorable: medium · Protectable: medium · Fitting: '
+        de: '## Kiesel\nSprechbar: gut · Schreibbar: gut · Merkbar: mittel · Schützbar: mittel · Passend: gut '
+          + '· Erweiterbar: gut · Frei: offen · Zeitlos: gut',
+        en: '## Kiesel\nSayable: good · Spellable: good · Memorable: medium · Protectable: medium · Fitting: '
           + 'good · Extendable: good · Available: open · Timeless: good',
       },
     ),
@@ -2761,6 +2992,7 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
       probes: ['if the trademark check kills number one, is number two really your next choice?'],
       reframes: ['if only one name is named, ask which two they could live with'],
     },
+    answers: { maxProbes: 1 },
     form: { person: 'none', tense: 'present' },
     // DIE WERT-FORM IST EINE LISTE (Paket-1-Befund (b), jetzt entschieden):
     // „top three, in order" ist kein Einzelwert, also kein `memberOf`. Der Wert
@@ -2772,12 +3004,12 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
     invariants: [{ kind: 'subsetOf', of: 'f.shortlist' }],
     examples: pathExamples(
       {
-        de: '- Kolben\n- Sattelfest\n- Nabe',
-        en: '- Piston\n- Saddlefast\n- Hub',
+        de: '- Bogen\n- Nordfeld\n- Satzbau',
+        en: '- Bogen\n- Nordfeld\n- Satzbau',
       },
       {
-        de: '- Hain\n- Ehlerding\n- Nordlicht',
-        en: '- Grove\n- Ehlerding\n- Northlight',
+        de: '- Kiesel\n- Ohlsen\n- Tagwerk',
+        en: '- Kiesel\n- Ohlsen\n- Tagwerk',
       },
     ),
   },
@@ -2801,12 +3033,18 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
       probes: ['which of these would still feel right on an invoice?'],
       reframes: ['if the choice is about colour only, ask which one sounds like their tone words'],
     },
+    answers: { maxProbes: 1 },
+    // KEINE PERSON, WEIL HIER NIEMAND SPRICHT (Paket 2b, Audit Teil 1
+    // Spalte g): `fromTeam` war der durchgereichte Default und behauptete,
+    // der Wert folge der Weiche Solo/Team — er ist aber eine Ableitung bzw.
+    // eine Auswahl, in der kein Mensch einen Satz formuliert.
+    form: { person: 'none', tense: 'present' },
     examples: pathExamples(
       {
-        de: 'Die ruhige Richtung — sie passt zu „karg" und „geduldig"; die kontrastreiche wirkt wie ein '
-          + 'Angebot im Schaufenster.',
-        en: 'The quiet direction — it matches "spare" and "patient"; the high-contrast one looks like an '
-          + 'offer in a shop window.',
+        de: 'Die ruhige Richtung — sie passt zu „knapp" und „zugewandt"; die kontrastreiche wirkt wie ein '
+          + 'Werbebanner.',
+        en: 'The quiet direction — it matches "brief" and "attentive"; the high-contrast one looks like an '
+          + 'advertising banner.',
       },
       {
         de: 'Die warme Richtung, weil unsere Leute wiederkommen sollen und nicht angetrieben werden wollen.',
@@ -2821,19 +3059,30 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
       'A low rating is recorded as it stands.',
       'Skipping it is a valid outcome and ends the session.',
     ],
+    // ANTI-MUSTER SIND ZURÜCKGEWIESENE WERTE, NICHT GEORGES VERHALTEN (Paket
+    // 2b, Audit Teil 1 Spalte c): hier standen drei Prompt-Regeln („nach einem
+    // Überspringen nicht noch einmal fragen"). Der Spezialist kann beim
+    // Schliessen nur einen WERT zurückweisen; die Führung gehört in die Leiter,
+    // und dort steht sie jetzt.
     antiPatterns: [
-      'Asking again after a skip.',
-      'Reading the rating as a confirmation of the result.',
-      'Framing the question so that a low answer feels rude.',
+      'A rating recorded although they skipped the question.',
+      'A rating nobody gave, filled in from the mood of the conversation.',
+      'A number that is not one of the offered ones.',
     ],
     ladder: {
-      opening: 'ask once, plainly, and accept a skip as an answer.',
+      opening: 'ask once, plainly, accept a skip as an answer, never ask again after one, and never read '
+        + 'the number as a confirmation of the result.',
       // KEINE Nachfragen und keine Umdeutung — beides wäre hier Druck. Die
       // Frage ist ausdrücklich freiwillig (Content-Spec §11), und eine
       // freiwillige Frage, die zweimal gestellt wird, ist keine mehr.
       probes: [],
       reframes: [],
     },
+    // KEINE PERSON, WEIL HIER NIEMAND SPRICHT (Paket 2b, Audit Teil 1
+    // Spalte g): `fromTeam` war der durchgereichte Default und behauptete,
+    // der Wert folge der Weiche Solo/Team — er ist aber eine Ableitung bzw.
+    // eine Auswahl, in der kein Mensch einen Satz formuliert.
+    form: { person: 'none', tense: 'present' },
     answers: { maxProbes: 0, allowUnknown: true },
     effort: { minutes: 1, turns: 1 },
     // KEINE BEISPIELE: eine Beispiel-Bewertung („4 von 5") zeigt keine Form,

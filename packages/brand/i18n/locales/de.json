@@ -84,7 +84,10 @@
       "c": {
         "discovery1": "Denk an einen Moment, in dem euer Geschäft am besten war. Was ist da passiert?",
         "discovery2": "Denk an einen Moment, in dem sich etwas zutiefst falsch angefühlt hat. Was war da los?",
-        "discovery3": "Welches Verhalten würdest du nie dulden — auch nicht vom bestzahlenden Kunden?",
+        "discovery3": {
+          "solo": "Welches Verhalten würdest du nie dulden — auch nicht vom bestzahlenden Kunden?",
+          "team": "Wie soll dein Team entscheiden, wenn du nicht im Raum bist?"
+        },
         "candidates": "Wertekandidaten",
         "final": "Welche drei bis fünf würdet ihr verteidigen, auch wenn es euch etwas kostet?",
         "definitions": "Was jeder Wert bei euch heißt",
@@ -317,9 +320,7 @@
     },
     "rebrand": {
       "r1": "Was am bestehenden Auftritt MUSS bleiben — woran man euch erkennt, was Stammkunden vermissen würden?",
-      "r2": "Was fliegt bewusst raus — und warum gerade das?",
-      "r3": "Warum jetzt? Was ist passiert — Wachstum, neue Zielgruppe, Zusammenschluss, oder der Moment, in dem euch die eigene Website peinlich wurde?",
-      "r4": "Was gefällt dir am jetzigen Auftritt NICHT?"
+      "r2": "Was fliegt bewusst raus — und warum gerade das?"
     },
     "choice": {
       "exampleLabel": "Bekannt",

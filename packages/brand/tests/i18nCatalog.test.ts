@@ -67,10 +67,19 @@ function missingIn(key: string): string[] {
   return LOCALES.filter(locale => !catalogs[locale].has(key))
 }
 
-/** Die Schlüssel, die die Oberfläche für DIESEN Slot wirklich auflöst. */
+/**
+ * Die Schlüssel, die die Oberfläche für DIESEN Slot wirklich auflöst — über
+ * BEIDE Pfade und, wo es eine Team-Fassung gibt, über beide Seiten der Weiche
+ * W3 (Paket 2b: `c.discovery3` fragt im Team D7 statt D3).
+ */
 function keysFor(slot: BrandSlot): string[] {
   if (slot.type === 'question' || slot.type === 'choice') {
-    return [...new Set([questionKeyFor(slot, 'new'), questionKeyFor(slot, 'relaunch')])]
+    return [...new Set([
+      questionKeyFor(slot, 'new', 'solo'),
+      questionKeyFor(slot, 'relaunch', 'solo'),
+      questionKeyFor(slot, 'new', 'team'),
+      questionKeyFor(slot, 'relaunch', 'team'),
+    ])]
   }
   return [slot.questionKey]
 }
@@ -94,6 +103,18 @@ describe('brand i18n-Katalog', () => {
       }
     }
     expect(gaps).toEqual([])
+  })
+
+  it('führt beide Fassungen der Team-Weiche — in de UND en', () => {
+    // Sie liegen als KINDER unter `brand.q.c.discovery3` (`.solo` / `.team`)
+    // und nicht als Zeichenkette plus Kind: ein verschachtelter JSON-Katalog
+    // kann unter EINEM Schlüssel nicht beides halten (dieselbe Grenze wie bei
+    // `d.gapReveal`, s. Kopf). Deshalb bekommt AUCH der Solo-Fall ein Suffix.
+    expect(missingIn('brand.q.c.discovery3.solo')).toEqual([])
+    expect(missingIn('brand.q.c.discovery3.team')).toEqual([])
+    // Der Basis-Schlüssel darf es nicht mehr geben — er stünde sonst wörtlich
+    // in der Oberfläche, sobald jemand ihn ohne die Weiche auflöst.
+    expect(missingIn('brand.q.c.discovery3').length).toBeGreaterThan(0)
   })
 
   it('hat für JEDEN Teil einer Sammel-Session eine eigene Frage', () => {

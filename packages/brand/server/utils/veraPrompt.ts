@@ -48,6 +48,12 @@
  * Fassung dieser Aufträge. Steigt, sobald sich eine Aufgabe inhaltlich ändert —
  * oder der System-Prompt, mit dem sie gesendet werden.
  *
+ * `vera-b-4` (2026-09-04, BW2 Paket 2b — Gegenlese-Runde): neue Beispielwelt
+ * (Yoga-Studio in B, Software-Haus in B2), `b2.model` schreibt die Form des
+ * Werts jetzt ausdrücklich („ohne Person"), und die Namen in den
+ * B2-Beispielen stehen in beiden Sprachen gleich — ein Markenname wechselt
+ * nicht mit der Oberflächensprache. Prüfstein und Formeln bleiben wörtlich.
+ *
  * `vera-b-3` (2026-09-04, BW2 Paket 2 — Session-Inhalte): die vier PVM- und
  * die zwei Architektur-Aufträge tragen jetzt Qualitätsmerkmale, Anti-Muster,
  * ein Formvorbild aus einer fremden Branche und die Form des Werts (Purpose
@@ -60,7 +66,7 @@
  * vergleichbar zu erklären, wäre genau die Sorte stille Unwahrheit, gegen die
  * es diese Zahl gibt.
  */
-export const VERA_PROMPT_VERSION = 'vera-b-3'
+export const VERA_PROMPT_VERSION = 'vera-b-4'
 
 /**
  * VERAS PRÜFSTEIN, wörtlich — der Satz, der jeden PVM-Entwurf tragen muss.

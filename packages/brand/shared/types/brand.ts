@@ -42,8 +42,8 @@ export type BrandOwnerTypeValue = 'user' | 'community'
 /** Die Weiche W4 — `unknown` ist ein echter Zustand, kein fehlender Wert. */
 export type BrandSubBrands = 'unknown' | 'yes' | 'no'
 
-/** Die Weiche W3. */
-export type BrandTeamKind = 'solo' | 'team'
+/** Die Weiche W3 — deklariert neben `BrandPathKind` in der Registry (s. dort). */
+export type { BrandTeamKind } from '../slotRegistry'
 
 /** Rebrand-Verzweigung; `null` auf dem Gründer-Pfad. */
 export type BrandRelaunchScope = 'refine' | 'recut'

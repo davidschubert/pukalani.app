@@ -122,7 +122,17 @@ function invariantText(session: BrandSlot): string {
       case 'subsetOf': return `jede Zeile stammt aus \`${invariant.of}\``
       case 'memberOf': return `der Wert steht in \`${invariant.of}\``
       case 'sentenceOf': return `der Wert ist ein Satz aus \`${invariant.of}\``
-      case 'mentionsNone': return `nennt keines von: ${(invariant.terms ?? []).join(', ')}`
+      case 'mentionsNone': {
+        const terms = (invariant.terms ?? []).join(', ')
+        if (invariant.of === undefined) return `nennt keines von: ${terms}`
+        return terms
+          ? `nennt weder \`${invariant.of}\` noch: ${terms}`
+          : `nennt nicht dasselbe wie \`${invariant.of}\``
+      }
+      case 'mentionsFrom':
+        return invariant.min === undefined
+          ? `nennt JEDEN Eintrag aus \`${invariant.of}\``
+          : `nennt mindestens ${invariant.min} Einträge aus \`${invariant.of}\``
     }
   }).join(' · ')
 }
@@ -172,6 +182,18 @@ function sessionBlock(session: BrandSlot): string {
     '',
     `**Ziel:** ${session.goal}`,
     '',
+  ]
+
+  // Eine Session mit TEAM-FASSUNG hat zwei Wortlaute (Weiche W3) — die
+  // Überschrift zeigt nur den ersten. Wer gegenliest, muss beide sehen.
+  if (session.teamVariant) {
+    lines.push(
+      `**Fassung im Team:** ${localeText(`${session.questionKey}.team`)}`,
+      '',
+    )
+  }
+
+  lines.push(
     '**Woran man einen guten Wert erkennt:**',
     '',
     bulletList(session.quality),
@@ -180,7 +202,7 @@ function sessionBlock(session: BrandSlot): string {
     '',
     bulletList(session.antiPatterns),
     '',
-  ]
+  )
 
   if (session.parts.length > 0) {
     lines.push(
@@ -249,8 +271,11 @@ export function renderSessionContentMarkdown(): string {
     if (sessions.length === 0) continue
     const technique = techniqueForStep(stepKey)
     const advisor = BRAND_ADVISORS.find(entry => entry.key === technique.key)!
+    const minutes = sessions.reduce((sum, session) => sum + session.effort.minutes, 0)
+    const turns = sessions.reduce((sum, session) => sum + session.effort.turns, 0)
     parts.push(
-      `## ${localeText(`brand.steps.${stepKey}`)} (\`${stepKey}\`) — ${sessions.length} Sessions`,
+      `## ${localeText(`brand.steps.${stepKey}`)} (\`${stepKey}\`) — ${sessions.length} Sessions, `
+      + `**Σ ~${minutes} Min** (${turns} Züge)`,
       '',
       `Interview-Technik: **${advisor.name}** (${advisor.role.de}). Gesprochen wird alles von George.`,
       '',
@@ -258,7 +283,40 @@ export function renderSessionContentMarkdown(): string {
     for (const session of sessions) parts.push(sessionBlock(session))
   }
 
+  parts.push(pathTotals())
+
   return `${parts.join('\n').trimEnd()}\n`
+}
+
+/**
+ * DIE ZWEI ZAHLEN, DIE DER KUNDE ALS ERSTES SIEHT (Paket 2b, Davids
+ * Entscheidung 2026-09-04: „halbieren, in Kapitel-Etappen kommunizieren").
+ *
+ * Sie stehen am ENDE der Lese-Fassung und nicht in einer gepflegten Tabelle:
+ * eine Summe, die jemand von Hand fortschreibt, ist beim zweiten Umfang falsch.
+ * Der Basispfad lässt Markenarchitektur (nur bei Untermarken) und Name (nur
+ * ohne Namen) weg — beides sind Zusatz-Kapitel hinter einer Weiche.
+ */
+function pathTotals(): string {
+  const OPTIONAL: readonly BrandStepKey[] = ['architecture', 'naming']
+  const active = BRAND_SLOTS.filter(slot => !slot.deactivated)
+  const sum = (slots: readonly BrandSlot[]) => ({
+    minutes: slots.reduce((total, slot) => total + slot.effort.minutes, 0),
+    turns: slots.reduce((total, slot) => total + slot.effort.turns, 0),
+  })
+  const base = sum(active.filter(slot => !OPTIONAL.includes(slot.stepId)))
+  const full = sum(active)
+  return [
+    '## Umfang insgesamt',
+    '',
+    `- **Basispfad** (ohne Markenarchitektur, ohne Name): ~${base.minutes} Min · ${base.turns} Züge`,
+    `- **Vollpfad** (mit beiden): ~${full.minutes} Min · ${full.turns} Züge`,
+    '',
+    'Die Zahl je Session ist eine SCHÄTZUNG der aktiven Zeit, nicht der Sitzungsdauer;',
+    'kommuniziert wird sie als Kapitel-Etappe („11 Sessions, ~14 Min"), damit sichtbar',
+    'bleibt, dass man aufhören und zurückkommen kann.',
+    '',
+  ].join('\n')
 }
 
 /**

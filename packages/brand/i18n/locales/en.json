@@ -84,7 +84,10 @@
       "c": {
         "discovery1": "Think of a moment when your business was at its best. What was happening?",
         "discovery2": "Think of a moment when something felt deeply wrong. What happened?",
-        "discovery3": "What behavior would you never tolerate — not even from your best-paying client?",
+        "discovery3": {
+          "solo": "What behavior would you never tolerate — not even from your best-paying client?",
+          "team": "How should your team decide when you are not in the room?"
+        },
         "candidates": "Value candidates",
         "final": "Which three to five would you defend, even when it costs you?",
         "definitions": "What each value means here",
@@ -317,9 +320,7 @@
     },
     "rebrand": {
       "r1": "What about your current brand MUST stay — the things people recognize you by, the things loyal customers would miss?",
-      "r2": "What goes — deliberately? And why that?",
-      "r3": "Why now? What happened — growth, new audience, merger, or the moment you got embarrassed by your own website?",
-      "r4": "What do you NOT like about your current appearance?"
+      "r2": "What goes — deliberately? And why that?"
     },
     "choice": {
       "exampleLabel": "Known for",

@@ -54,6 +54,14 @@ import type { BrandSlotDependency } from './brandGenerators'
 /**
  * Fassung der Prompt-Bausteine dieses Bausteins (A · Kontext).
  *
+ * `george-a-13` (2026-09-04, BW2 Paket 2b — Gegenlese-Runde): dieselben
+ * Abschnitte, anderer Inhalt. Die Beispiele stehen in einer neuen Welt
+ * (Gastronomie statt Tischlerei; s. Kopf von `shared/sessionContent.ts`),
+ * `a.competitors` zeigt seine Form jetzt mit einem Platzhalter statt mit einem
+ * erfundenen Wettbewerber, und die Form des Werts ist an zwölf Sessions von
+ * „folgt der Weiche Solo/Team" auf „ohne Person" korrigiert. Der Prompt ist
+ * damit ein anderer.
+ *
  * `george-a-12` (2026-09-04, BW2 Paket 2 — Session-Inhalte): jede Anweisung
  * trägt jetzt zusätzlich Qualitätsmerkmale, Anti-Muster, ein Formvorbild aus
  * einer fremden Branche und die Form des Werts (`shared/sessionContent.ts`).
@@ -140,7 +148,7 @@ import type { BrandSlotDependency } from './brandGenerators'
  *   · B8/B9 — Kontext-Sensibilität (kein Vertriebston für einen Verein) und
  *     eine Sorgfaltszeile gegen holprige Sprache.
  */
-export const GEORGE_PROMPT_VERSION = 'george-a-12'
+export const GEORGE_PROMPT_VERSION = 'george-a-13'
 
 /** Default der Persona (Content-Spec §1.1, Gate ② abgesegnet). */
 export const GEORGE_PERSONA_DEFAULT = 'George'
