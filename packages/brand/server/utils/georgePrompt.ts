@@ -59,6 +59,12 @@ import type { BrandSlotDependency } from './brandGenerators'
  * Anweisungen. Ein Entwurf mit Website-Material und einer ohne stammen aus
  * verschiedenen Prompts, auch wenn die Instruktion dieselbe ist.
  *
+ * `george-a-8` (2026-09-03, Verlaufs-Audit über alle fünf Brandings): die
+ * SPRACHE der Chat-Züge steht jetzt zusätzlich als LETZTE Prompt-Zeile — in
+ * einem deutschen Branding (Krume & Gold, contentLocale de) standen englische
+ * George-Züge; Regel 9 weit oben verlor bei langem englischen Material die
+ * Recency.
+ *
  * `george-a-7` (2026-09-03, Davids zweiter Live-Test, gleiche Nacht): zwei
  * Care-Zeilen. (1) EINE Frage heisst EINE — George stapelte drei Fragen in
  * einen Zug („…passt nicht mehr, oder was fehlt? Aber bevor wir das
@@ -100,7 +106,7 @@ import type { BrandSlotDependency } from './brandGenerators'
  *   · B8/B9 — Kontext-Sensibilität (kein Vertriebston für einen Verein) und
  *     eine Sorgfaltszeile gegen holprige Sprache.
  */
-export const GEORGE_PROMPT_VERSION = 'george-a-7'
+export const GEORGE_PROMPT_VERSION = 'george-a-8'
 
 /** Default der Persona (Content-Spec §1.1, Gate ② abgesegnet). */
 export const GEORGE_PERSONA_DEFAULT = 'George'
@@ -258,6 +264,15 @@ export function georgeSystemPrompt(options: GeorgeSystemPromptOptions): string {
     + 'two plain sentences.',
     '',
     `Path: ${path}`,
+    '',
+    // BEWUSST DIE LETZTE ZEILE (a-8, Verlaufs-Audit 2026-09-03): in einem
+    // deutschen Branding standen englische George-Züge („I need one concrete
+    // thing …") — Regel 9 steht weit oben und verlor bei langem englischen
+    // Prompt-Material die Recency. Die Wiederholung am Ende ist billig und
+    // wirkt; sie ÄNDERT Regel 9 nicht, sie erinnert an sie.
+    `FINAL REMINDER: every chat turn you write is in ${options.locale} — even when the inputs, `
+    + 'the drafts or earlier messages are in another language. Brand content that goes into a '
+    + `field stays in ${options.contentLocale}.`,
   ].join('\n')
 }
 

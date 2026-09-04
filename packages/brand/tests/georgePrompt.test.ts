@@ -90,6 +90,18 @@ describe('System-Prompt: die neun Regeln (§1.2)', () => {
   })
 
   /**
+   * a-8 (Verlaufs-Audit 2026-09-03): die Sprach-Erinnerung ist die LETZTE
+   * Zeile — in einem deutschen Branding standen englische George-Züge, weil
+   * Regel 9 weit oben gegen langes englisches Prompt-Material die Recency
+   * verlor. Geprüft wird die POSITION, nicht nur die Existenz.
+   */
+  it('a-8: die Sprach-Erinnerung ist die letzte Zeile', () => {
+    const lines = SYSTEM.trimEnd().split('\n')
+    expect(lines.at(-1)).toContain('every chat turn you write is in de')
+    expect(lines.at(-1)).toContain('stays in en')
+  })
+
+  /**
    * B8/B9 — zwei Sorgfaltszeilen aus dem Live-Audit. Sie stehen UNTER den neun
    * Regeln und ausdrücklich nicht als zehnte und elfte: §1.2 ist Davids Text,
    * und eine Umnummerierung wäre eine Änderung daran.
@@ -531,7 +543,7 @@ describe('Prompt-Version', () => {
     // (EINE Stimme: aus der Berater- wird die Facetten-Schicht) — die Version
     // MUSS mitsteigen, sonst behaupten alte Generations-Einträge, aus diesem
     // Prompt zu stammen (Kopf von georgePrompt.ts).
-    expect(GEORGE_PROMPT_VERSION).toBe('george-a-7')
+    expect(GEORGE_PROMPT_VERSION).toBe('george-a-8')
   })
 })
 
