@@ -209,6 +209,121 @@ setzt. Die drei Prompt-Dateien schrumpfen auf Persönlichkeit + Fundament.
 Die bestehenden Prompt-Tests (`georgePrompt.test.ts`, `advisorPrompts.test.ts`)
 prüfen danach den Bauer statt drei Dateien.
 
+## 3a. Was eine Session sonst noch vorher wissen sollte (Vorschlag 2026-09-04, Davids Entscheidung offen)
+
+Config, Ziel und Output sagen, WAS die Session tut. Für das bestmögliche
+Ergebnis fehlt noch, WORAN man ein gutes Ergebnis erkennt und WIE man den
+Menschen dorthin führt. Acht Ergänzungen, sortiert nach Wirkung; die ersten
+sechs sind Inhalt (Davids Gate mit den Zielsätzen), die letzten zwei sind
+mechanisch ableitbar und kosten keinen Text.
+
+```ts
+export interface BrandSessionConfig {
+  // … §3 …
+
+  /** 1 · QUALITÄTSKRITERIEN — 3–5 prüfbare Merkmale eines GUTEN Werts. */
+  readonly quality: readonly string[]
+  //   Beispiel b.purpose: 'one sentence' · 'names why the world is better,
+  //   not what the company sells' · 'could not be said by a competitor' ·
+  //   'no product or feature mentioned'
+  //   Ohne sie ist `goalReached` (§7) eine Stimmung; mit ihnen ist es eine
+  //   Liste mit Ja/Nein je Punkt, die George dem Menschen auch SAGEN kann.
+
+  /** 2 · ANTI-MUSTER — was der Spezialist zurückweist, je Feld. */
+  readonly antiPatterns: readonly string[]
+  //   'generic claims (quality, passion, customer focus)' · 'a feature list'
+  //   · 'a sentence the competitor could sign'. Heute gibt es `neverDo` nur
+  //   je Beraterin; die scharfen Muster sind je FELD verschieden.
+
+  /** 3 · BEISPIELE — 1–2 erfundene starke Werte, je Pfad, FREMDE Branche. */
+  readonly examples: { new: readonly string[], relaunch: readonly string[] }
+  //   Für die FORM, nie für den Inhalt — deshalb immer aus einer anderen
+  //   Branche als der des Kunden (die Route wählt gegen `startCard.industry`),
+  //   sonst schreibt das Modell das Beispiel ab. Wo es keine gibt: leer.
+
+  /** 4 · FRAGE-LEITER — die Interviewführung dieser einen Session. */
+  readonly ladder: {
+    /** Womit George öffnet (Registry-Frage bleibt der Wortlaut, das hier ist die Absicht). */
+    readonly opening: string
+    /** Nachfrage 1 und 2 — je nachdem, WIE dünn die Antwort war. */
+    readonly probes: readonly string[]
+    /** Umdeutung, wenn die Antwort in ein bekanntes Anti-Muster fällt. */
+    readonly reframes: readonly string[]
+  }
+  //   Beispiel a.customerPraise: opening 'the one sentence a customer said,
+  //   verbatim' · probe 'when did you last hear it — what had just happened?'
+  //   · reframe 'if the answer is a feature, ask for the moment it mattered'.
+  //   `answers.maxProbes` deckelt die Leiter; die Leiter sagt, WAS gefragt wird.
+
+  /** 5 · FORM DES WERTS — Regeln, die der Wert selbst einhalten muss. */
+  readonly form: {
+    /** 'we' | 'I' | 'brand' | 'none' — Person; folgt der Weiche W3 (Solo/Team), wo nicht fest. */
+    readonly person: 'we' | 'I' | 'brand' | 'none' | 'fromTeam'
+    readonly tense: 'present' | 'future' | 'any'
+    /** Wortdeckel (enger als `maxLength` in Zeichen), z. B. Purpose ≤ 20 Wörter. */
+    readonly maxWords: number | null
+    /** Was im Wert nie vorkommen darf: Markenname im Purpose, Zahlen in der Vision … */
+    readonly forbidden: readonly string[]
+  }
+
+  /** 6 · INVARIANTEN — deterministische Prüfungen, im CODE, nicht im Modell. */
+  readonly invariants: readonly BrandInvariant[]
+  //   c.conflictRule nennt nur Werte aus c.final · e.anchorLine ist ein Satz
+  //   aus e.manifesto · f.decision ∈ f.shortlist · c.final hat 3–5 Einträge.
+  //   Eine Regel, die ein Test prüfen kann, wird nicht der KI überlassen —
+  //   sie ist billiger, schneller und lügt nie. Prüfung beim Bestätigen
+  //   (`transitionBrandStep`), Verstoss = 409 mit `data.code`, wie
+  //   `required_slots_missing`.
+
+  /** 7 · VERTRAULICHKEIT — was per Share-Link und Export standardmässig NICHT reist. */
+  readonly sensitivity: 'public' | 'internal' | 'private'
+  //   a.complaints, a.challenge, a.facts (Umsatz, Team) sind `internal`;
+  //   der Share-Link (brand_shares) zeigt heute alles. Ein Kunde, der seine
+  //   Marke teilt, teilt nicht seine Beschwerden.
+
+  /** 8 · UMFANG — was der Mensch vorher erfährt. */
+  readonly effort: { minutes: 1 | 2 | 3 | 5 | 10, turns: number }
+  //   Steht in der Seitenleiste („~3 Min") und am Kapitel („11 Sessions,
+  //   ~25 Min"); George hört auf zu bohren, wenn `turns` erreicht ist.
+  //   Nimmt dem Menschen die Frage „wie lange geht das noch".
+}
+
+export interface BrandInvariant {
+  readonly kind: 'subsetOf' | 'memberOf' | 'sentenceOf' | 'count' | 'mentionsNone'
+  readonly of?: string           // Quell-Slot
+  readonly min?: number
+  readonly max?: number
+  readonly terms?: readonly string[]
+}
+```
+
+**Mechanisch, ohne Text:**
+
+- **„Wofür brauchen wir das?"** — je Session der Satz „Das fliesst später in
+  Mission, Manifest und Taglines" kommt aus `sessionsAffectedBy(id)` (§9),
+  nicht aus einer gepflegten Liste. Der Mensch sieht, warum George fragt;
+  die Antwort wird besser, wenn man weiss, wozu sie dient. Steht im
+  Info-Modal der Session und in Georges Eröffnungszug, wenn er will.
+- **Vertagen** als vierter Ausgang neben Antwort, „weiss nicht" und
+  Bestätigen: `answers.allowDefer`. Manche Sessions brauchen jemanden, der
+  gerade nicht am Tisch sitzt (Zahlen in `a.facts`, die Konfliktregel im
+  Team). Vertagt = Session bleibt `open`, bekommt ein Merkzeichen, das
+  Kapitel kann ohne sie nicht abgenommen werden, Auto-Weiter überspringt sie
+  einmal. Ohne Vertagen erfindet der Mensch eine Antwort, um weiterzukommen.
+
+**Bewusst NICHT vorgeschlagen:** Tonregler je Session (kommt später als
+EIN Regler auf George, DECISION-LOG 2026-09-02), branchenspezifische
+Fragefassungen (verfünffacht die Pflege; die Startkarte trägt die Branche in
+den Prompt, das reicht), Wiedereinstiegs-Texte je Session (generisch aus
+Notizen + letztem Wert, keine 68 Fassungen).
+
+**Was es kostet:** je Session 3–5 Qualitätskriterien, 2–3 Anti-Muster,
+1–2 Beispiele, eine Leiter mit 3–4 Zeilen, vier Form-Werte — grob 15 Zeilen
+Inhalt × 68. Das ist die Content-Spec §14 (Paket 2), nicht mehr und nicht
+weniger; die Registry-Tests prüfen Vollständigkeit (kein leeres `quality`,
+Beispiele nie leer bei `draft`/`derive`, jede Invariante zeigt auf einen
+Slot, der VOR ihr steht).
+
 ## 4. Output-Vertrag und Log
 
 Jede Session endet mit GENAU EINEM Output-Objekt, das der Schliess-Aufruf (§7)
