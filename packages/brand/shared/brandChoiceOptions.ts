@@ -17,6 +17,19 @@
  * Endorsed · House of Brands). Mehr gibt es nicht, und was nicht dazugehört, ist
  * falsch.
  *
+ * `d.primary` und `d.secondary` sind EBENFALLS GESCHLOSSEN: die zwölf
+ * Archetypen stehen wörtlich in der Content-Spec §12.1. Sie teilen sich EINEN
+ * Katalog und haben trotzdem ZWEI Verträge — die Rückfrage ist eine andere,
+ * weil die Frage eine andere ist („welcher Archetyp seid ihr?" gegen „was
+ * bewahrt euch vor dem Klischee?").
+ *
+ * INTERIM bis zum Paarvergleich-Instrument (Spec §12.2) — Davids Entscheidung
+ * 2026-09-04: George leitet die Archetyp-Kette im GESPRÄCH her statt sie aus
+ * `d.pairs` zu BERECHNEN; das Instrument ersetzt diesen Weg, die gespeicherten
+ * Werte (stabile Ids) bleiben kompatibel. Der Katalog hier ist genau die Menge,
+ * aus der die Paarvergleich-Karten später ihre zwölf Karten bauen — er ist
+ * deshalb kein Provisorium, nur sein heutiger Konsument ist einer.
+ *
  * `b.positioningCategory` ist OFFEN: „In welcher Kategorie spielt ihr?" hat
  * keine Liste, aus der man wählt — die Kategorie gehört DIESER Marke („Software
  * agency for online shops"), und eine Taxonomie zu erfinden, aus der George
@@ -72,6 +85,17 @@ export interface BrandChoiceOption {
    * gerechnet: die Ids tragen Bindestriche, ein Schlüssel-Pfad verträgt sie
    * schlecht, und eine versteckte Umwandlung wäre eine Kopplung, die kein
    * Test sieht.
+   *
+   * ER DARF HEUTE INS LEERE ZEIGEN, und zwar genau dort, wo ihn niemand
+   * rendert: die Karten-Copy wird nur für einen Slot mit `editor: 'cards'`
+   * aufgelöst (`choiceCardsFor` in der Werkstatt). Die zwölf Archetypen haben
+   * heute keinen solchen Slot — `d.primary`/`d.secondary` stehen auf
+   * `editor: 'none'`, und die KARTEN dieses Bausteins gehören dem
+   * Paarvergleich-Instrument (Spec §12.1), das eine ANDERE Dreiheit zeigt
+   * (Motto · Stimmung · „wie …") als die `label`/`hint`/`example` der
+   * Architektur-Karten. Copy zu erfinden, bevor die Form entschieden ist,
+   * legte die Form fest. Der Wächter dagegen steht im Test: kippt ein
+   * Archetyp-Slot je auf `cards`, wird er rot und verlangt den Katalog-Eintrag.
    */
   readonly copyKey: string
 }
@@ -114,6 +138,120 @@ export const BRAND_ARCHITECTURE_MODELS: readonly BrandChoiceOption[] = [
   },
 ]
 
+/**
+ * DIE ZWÖLF ARCHETYPEN (Content-Spec §12.1).
+ *
+ * ── DIE IDS SIND DIE ENGLISCHEN NAMEN, KLEIN UND OHNE ARTIKEL ─────────────
+ * Sie sind das, was in `brand_steps.slots` steht — die Zusage an den Prompt,
+ * an das Brand-Dokument und an jede spätere Ableitung (`e.statements`,
+ * `ep.taglines`, `f.candidates` und die Themes-Richtung lesen sie alle). Ein
+ * deutscher Name als Id hiesse, dass ein Sprachwechsel den gespeicherten Wert
+ * bewegt; ein Artikel („der-weise") hiesse, dass ein grammatisches Geschlecht
+ * in einer Datenbank steht.
+ *
+ * `citizen` heisst so und nicht `everyman`, weil die Spec-Tabelle „Jedermann
+ * (Citizen)" sagt — die Id folgt der Spalte, nicht der Literatur.
+ *
+ * ── DER `hint` IST DIE STIMMUNG, NICHT DAS MOTTO ──────────────────────────
+ * Er steht neben dem Namen IM PROMPT und muss dort eine ENTSCHEIDUNG stützen:
+ * „Die Wahrheit macht euch frei" klingt gut und trennt nichts, „ruhig,
+ * fundiert, erklärt gern" trennt den Weisen vom Magier. Das Motto gehört auf
+ * die Karte des Paarvergleichs (§12.1), wo ein Mensch nach Gefühl wählt — hier
+ * wählt ein Modell nach Belegen.
+ *
+ * ── BEISPIELMARKEN STEHEN BEWUSST NICHT DRIN ──────────────────────────────
+ * §12.1 sagt es für die Karten („sie verankern die Wahl an fremder
+ * Bekanntheit statt am eigenen Gefühl"), und für den Prompt gilt es doppelt:
+ * ein Modell, das „wie Patagonia" liest, schreibt hinterher Patagonias
+ * Argumente in eine fremde Marke.
+ */
+export const BRAND_ARCHETYPES: readonly BrandChoiceOption[] = [
+  {
+    id: 'sage',
+    label: 'The Sage',
+    hint: 'calm, well-founded, likes to explain — the trustworthy head in the room',
+    display: { de: 'Der Weise', en: 'The Sage' },
+    copyKey: 'brand.choice.archetype.sage',
+  },
+  {
+    id: 'explorer',
+    label: 'The Explorer',
+    hint: 'independent, curious, always one step ahead of the map',
+    display: { de: 'Der Entdecker', en: 'The Explorer' },
+    copyKey: 'brand.choice.archetype.explorer',
+  },
+  {
+    id: 'creator',
+    label: 'The Creator',
+    hint: 'inventive, expressive, in love with making things',
+    display: { de: 'Der Schöpfer', en: 'The Creator' },
+    copyKey: 'brand.choice.archetype.creator',
+  },
+  {
+    id: 'caregiver',
+    label: 'The Caregiver',
+    hint: 'warm, dependable, the person comes first',
+    display: { de: 'Der Fürsorgliche', en: 'The Caregiver' },
+    copyKey: 'brand.choice.archetype.caregiver',
+  },
+  {
+    id: 'ruler',
+    label: 'The Ruler',
+    hint: 'assured, precise, sets the standard others measure against',
+    display: { de: 'Der Herrscher', en: 'The Ruler' },
+    copyKey: 'brand.choice.archetype.ruler',
+  },
+  {
+    id: 'innocent',
+    label: 'The Innocent',
+    hint: 'optimistic, clear, nothing hidden under the surface',
+    display: { de: 'Der Unschuldige', en: 'The Innocent' },
+    copyKey: 'brand.choice.archetype.innocent',
+  },
+  {
+    id: 'citizen',
+    label: 'The Citizen',
+    hint: 'down to earth, approachable, never on a pedestal',
+    display: { de: 'Der Jedermann', en: 'The Citizen' },
+    copyKey: 'brand.choice.archetype.citizen',
+  },
+  {
+    id: 'jester',
+    label: 'The Jester',
+    hint: 'playful, quick-witted, takes everything seriously except itself',
+    display: { de: 'Der Narr', en: 'The Jester' },
+    copyKey: 'brand.choice.archetype.jester',
+  },
+  {
+    id: 'lover',
+    label: 'The Lover',
+    hint: 'sensual, devoted, treats detail as affection',
+    display: { de: 'Die Liebende', en: 'The Lover' },
+    copyKey: 'brand.choice.archetype.lover',
+  },
+  {
+    id: 'hero',
+    label: 'The Hero',
+    hint: 'determined, demanding, grows against resistance',
+    display: { de: 'Der Held', en: 'The Hero' },
+    copyKey: 'brand.choice.archetype.hero',
+  },
+  {
+    id: 'magician',
+    label: 'The Magician',
+    hint: 'transforming, visionary, makes the impossible look casual',
+    display: { de: 'Der Magier', en: 'The Magician' },
+    copyKey: 'brand.choice.archetype.magician',
+  },
+  {
+    id: 'rebel',
+    label: 'The Rebel',
+    hint: 'uncomfortable, fearless, breaks what is already brittle',
+    display: { de: 'Der Rebell', en: 'The Rebel' },
+    copyKey: 'brand.choice.archetype.rebel',
+  },
+]
+
 /** Zweisprachige Rückfrage — s. Kopf, warum sie nicht im i18n-Katalog steht. */
 export interface BrandChoiceFallbackQuestion {
   readonly de: string
@@ -125,6 +263,18 @@ export type BrandChoiceContract =
     readonly slotId: string
     readonly kind: 'closed'
     readonly options: readonly BrandChoiceOption[]
+    /**
+     * DER SATZ, DER DIE AUSWEICHMANÖVER DIESER MENGE BEIM NAMEN NENNT —
+     * englisch, wörtlich in den Prompt.
+     *
+     * Er steht am VERTRAG und nicht in `brandChoicePromptRule`, weil er von der
+     * Menge abhängt: „erfinde kein fünftes Modell" ist für vier Modelle die
+     * ganze Wahrheit und für zwölf Archetypen schlicht falsch. Ein generischer
+     * Satz („do not invent options") wäre die Formulierung, die genau das
+     * zurückbringt, wogegen sie sich richtet — ein Modell weicht auf das aus,
+     * was man ihm nicht ausdrücklich verboten hat.
+     */
+    readonly strayRule: string
     readonly fallbackQuestion: BrandChoiceFallbackQuestion
   }
   | {
@@ -154,11 +304,57 @@ const CONTRACTS: readonly BrandChoiceContract[] = [
     slotId: 'b2.model',
     kind: 'closed',
     options: BRAND_ARCHITECTURE_MODELS,
+    strayRule: 'Do not invent a fifth model, do not combine two, do not write a "hybrid".',
     fallbackQuestion: {
       de: 'Ich kann daraus noch nicht genau EIN Architektur-Modell ableiten. '
         + 'Eine Frage dazu: Tragen eure weiteren Angebote heute euren Markennamen — oder eigene Namen?',
       en: 'I cannot pin this down to exactly ONE architecture model yet. '
         + 'One question: do your other offerings carry your brand name today — or names of their own?',
+    },
+  },
+  /**
+   * BAUSTEIN D — ZWEI SLOTS, EIN KATALOG, ZWEI RÜCKFRAGEN.
+   *
+   * INTERIM bis zum Paarvergleich-Instrument (Spec §12.2) — Davids Entscheidung
+   * 2026-09-04: Gesprächs-Ableitung statt Berechnung; das Instrument ersetzt
+   * diesen Weg, die gespeicherten Werte (stabile Ids) bleiben kompatibel.
+   *
+   * Der Vertrag selbst ist NICHT interim: er sagt nur, was in dem Feld stehen
+   * darf, und daran ändert das Instrument nichts — es ändert, WER die Wahl
+   * trifft (heute ein begründeter Vorschlag mit Bestätigung, später acht bis
+   * zwölf Paare).
+   *
+   * DASS DER SEKUNDÄRE SICH VOM PRIMÄREN UNTERSCHEIDEN MUSS, STEHT NICHT HIER:
+   * eine Prüfung sieht immer nur IHREN Slot und kennt den anderen Wert gar
+   * nicht. Sie stünde also entweder falsch (immer grün) oder sie bräuchte eine
+   * zweite Datenquelle in einer puren Datei. Die Regel steht deshalb in der
+   * INSTRUKTION (`archetypePrompt.ts`), wo sie hingehört — dort liegt der
+   * bestätigte Primär-Wert als Quell-Slot ohnehin vor.
+   */
+  {
+    slotId: 'd.primary',
+    kind: 'closed',
+    options: BRAND_ARCHETYPES,
+    strayRule: 'Do not invent a thirteenth archetype, do not merge two into one, do not write '
+      + '"a mix of Sage and Creator" — the second-strongest one has its own field right after this.',
+    fallbackQuestion: {
+      de: 'Ich kann daraus noch nicht EINEN Haupt-Archetyp ableiten, ohne zu raten. '
+        + 'Eine Frage dazu: Wenn eure Marke ein Mensch auf einer Party wäre — wie verhält sie sich?',
+      en: 'I cannot settle on ONE primary archetype from this without guessing. '
+        + 'One question: if your brand were a person at a party — how would they behave?',
+    },
+  },
+  {
+    slotId: 'd.secondary',
+    kind: 'closed',
+    options: BRAND_ARCHETYPES,
+    strayRule: 'Do not invent a thirteenth archetype, do not merge two into one, and do not repeat '
+      + 'the primary archetype — a brand that is twice the same thing has no second archetype.',
+    fallbackQuestion: {
+      de: 'Für den zweiten Archetyp fehlt mir noch etwas — er ist das, was euren ersten vor dem '
+        + 'Klischee bewahrt. Eine Frage dazu: Was sollen Leute fühlen, wenn sie mit euch zu tun haben?',
+      en: 'I am still missing something for the second archetype — it is what keeps the first one from '
+        + 'becoming a cliché. One question: what should people feel when they deal with you?',
     },
   },
 ]
@@ -189,8 +385,8 @@ export function brandChoicePromptRule(contract: BrandChoiceContract): string[] {
   return [
     'The field value is EXACTLY ONE of these ids, written on a single line and nothing else:',
     ...contract.options.map(option => `  ${option.id} = ${option.label} — ${option.hint}`),
-    'Do not invent a fifth model, do not combine two, do not write a "hybrid". Why you chose it and what '
-    + 'it costs them belongs in the BASIS line of your turn, never in the field.',
+    `${contract.strayRule} Why you chose it and what it costs them belongs in the BASIS line of your `
+    + 'turn, never in the field.',
   ]
 }
 
@@ -260,6 +456,11 @@ export function brandChoiceFallbackQuestion(contract: BrandChoiceContract, local
 
 /**
  * WAS DER MENSCH STATT DER ROHEN ID LIEST (P4).
+ *
+ * Sie gilt für JEDEN geschlossenen Vertrag, nicht für `b2.model` allein: seit
+ * P4/Interim liegen in `d.primary`/`d.secondary` Archetyp-Ids (`sage`), und die
+ * Log-Karte des Archetyp-Kapitels liest hier genauso nach wie die der
+ * Markenarchitektur.
  *
  * Gespeichert bleibt IMMER die stabile Id (`branded-house`) — sie ist die
  * Zusage an das Brand-Dokument, an den Prompt und an jede spätere Ableitung.

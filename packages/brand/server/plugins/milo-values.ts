@@ -9,12 +9,13 @@ import { MILO_PROMPT_VERSION, miloSlotInstruction } from '../utils/miloPrompt'
  *
  * ── NUR `values`, OBWOHL MILO ZWEI BAUSTEINE HAT ──────────────────────────
  * `brandAdvisors.ts` gibt Milo `values` UND `archetype`. Registriert wird hier
- * nur `values`: für Baustein D gibt es noch keine Aufträge (P4), und eine
- * Registrierung ohne Aufträge wäre schlechter als gar keine — sie machte aus
- * „hier entwirft noch niemand" (`no_generator`, ein ruhiger Hinweis, der Stand
- * bleibt bearbeitbar) ein `provider_error`, also die Auskunft „der Anbieter ist
- * kaputt". Das Beraterteam bleibt davon unberührt: WER in Baustein D spricht,
- * sagt die Registry, nicht diese Datei.
+ * nur `values`. Der Grund ist seit dem 2026-09-04 ein anderer als beim Bau
+ * dieser Datei: Baustein D hat seine eigenen Aufträge und seinen eigenen
+ * Generator (`george-archetype.ts`), und ZWEI Registrierungen für `archetype`
+ * wären eine, die die andere still überschreibt (`GENERATORS` ist eine Map).
+ * Die Zuständigkeit steht deshalb je Baustein an genau einer Stelle. Das
+ * Beraterteam bleibt davon unberührt: WESSEN Technik in Baustein D gilt, sagt
+ * die Registry — es ist weiterhin Milos, und die Fabrik holt sie sich selbst.
  *
  * ── KEINE NACHPRÜFUNG ─────────────────────────────────────────────────────
  * Milos beide Slots (`c.candidates`, `c.definitions`) sind Listen, keine

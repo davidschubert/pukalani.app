@@ -111,6 +111,29 @@ const SLOT_RULES: Record<string, (input: BrandReadinessInput) => BrandReadinessN
   // Eine Ton-ANALYSE ohne Texte wäre eine Ton-Erfindung (Instruktion §4 sagt
   // dasselbe; hier kostet die Einsicht nichts).
   'a.toneAnalysis': input => (input.hasSiteAnalysis ? [] : ['source_texts']),
+
+  /**
+   * BAUSTEIN D STEHT BEWUSST NICHT IN DIESER TABELLE.
+   *
+   * INTERIM bis zum Paarvergleich-Instrument (Spec §12.2) — Davids Entscheidung
+   * 2026-09-04: `d.primary`/`d.secondary` werden im GESPRÄCH hergeleitet statt
+   * aus `d.pairs` berechnet. `d.pairs` bleibt leer, solange es das Instrument
+   * nicht gibt — und das ist genau der Fall, in dem eine eigene Slot-Regel
+   * („ohne Paare kein Archetyp") den einzigen Weg zusperren würde, den es
+   * heute gibt.
+   *
+   * Die Registry-Regel unten lässt den Interim-Weg von selbst durch, und zwar
+   * ohne Ausnahme: sie fragt die TRANSITIVE Hülle, und die von `d.primary` ist
+   * `d.pairs · d.hypothesis · a.pitch · a.toneAnalysis · a.customerPraise`.
+   * Ein leeres `d.pairs` neben einem gefüllten Pitch ist damit „eine Quelle
+   * trägt", also bereit — und ein Stand, in dem AUCH Pitch, Ton-Analyse, Lob
+   * und Hypothese leer sind, ist zu Recht nicht bereit: daraus lässt sich kein
+   * Archetyp ableiten, nur einer erfinden.
+   *
+   * Es steht als Kommentar hier und nicht nur in den Beweisen, weil die
+   * Abwesenheit einer Regel sonst wie ein Versehen aussieht. Kommt das
+   * Instrument, ändert sich hier nichts.
+   */
 }
 
 /**
