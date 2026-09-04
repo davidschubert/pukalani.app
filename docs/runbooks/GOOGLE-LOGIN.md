@@ -5,7 +5,11 @@
 COMPLETE-Eintrag U14). **AUCH AUF branding.supply seit 2026-09-04** (gleicher
 Client, zweite Redirect-URI `…/google/branding`; Secret war weder in Google
 noch in Appwrite noch ablesbar ⇒ Davids Kopie bzw. „Add secret"-Weg, s.
-Kasten in Schritt 2). Dieses Runbook bleibt das Rezept für WEITERE Projekte
+Kasten in Schritt 2; ERSTE Speicherung schlug fehl —
+in Appwrite versteckt sich das Secret-Feld hinter „Update Client Secret",
+ein Update ohne den Klick dorthin speichert ein LEERES Secret und der
+Rückweg stirbt mit `client_secret is missing`; end-to-end bewiesen
+2026-09-04). Dieses Runbook bleibt das Rezept für WEITERE Projekte
 (z. B. Betreiber-Konsole oder branding.supply: derselbe Client, eine weitere
 Redirect-URI, die auf die Projekt-Id endet — Details im Kasten von Schritt 2).
 Zwei Fallen, die beim Einschalten live gefunden wurden und im Code verdrahtet
