@@ -174,6 +174,11 @@ export function useBrandConversation(
           else if (item.type === 'generation.completed') {
             spoke.value = true
             coveredSlotId.value = item.slotId || null
+            // ANTWORT-MÖGLICHKEITEN, falls der Zug eine Wahl anbietet (Davids
+            // Anforderung 2026-09-04). VOR dem Abschluss gesetzt, damit der Zug
+            // in EINEM Schritt fertig und beknopft wird — sonst rendert die
+            // Bühne für einen Wimpernschlag eine Frage ohne ihre Knöpfe.
+            if (item.options?.length) store.setGeorgeMessageOptions(item.generationId, item.options)
             store.endGeorgeMessage(item.generationId)
           }
           // `slot.ready` kommt hier NIE — die Route hat keinen Pfad dorthin.

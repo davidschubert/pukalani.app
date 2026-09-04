@@ -287,6 +287,13 @@ interface StageTurn {
   text: string
   help?: string
   pending?: boolean
+  /**
+   * ANTWORT-MÖGLICHKEITEN zu der Frage, mit der dieser Zug endet (Davids
+   * Anforderung 2026-09-04) — zwei oder drei Chips unter der Blase. Sie kommen
+   * aus dem Abschluss-Frame; im Text stehen sie NICHT (der Marker-Putzer nimmt
+   * die `OPTION:`-Zeilen heraus).
+   */
+  options?: readonly string[]
 }
 
 const streamed = computed<StageTurn[]>(() => store.streamMessages.map(message => ({
@@ -294,6 +301,7 @@ const streamed = computed<StageTurn[]>(() => store.streamMessages.map(message =>
   role: message.role,
   text: message.text,
   pending: message.pending,
+  options: message.options,
 })))
 
 /**
@@ -378,6 +386,41 @@ watch(() => turns.value.length, async () => {
   await nextTick()
   tail.value?.scrollIntoView({ behavior: 'smooth', block: 'end' })
 })
+
+/**
+ * WELCHER ZUG SEINE ANTWORT-KNÖPFE ZEIGT (Davids Anforderung 2026-09-04) —
+ * höchstens EINER, und nur bis der Mensch geantwortet hat.
+ *
+ * ── WARUM NICHT EINFACH „DER LETZTE ZUG" ──────────────────────────────────
+ * Zwischen Georges Zug und dem Ende der Liste kann die KATALOG-FRAGE stehen
+ * (`turns` hängt sie an, sobald der Zug sie nicht selbst gestellt hat) — an
+ * „letzter Zug" geknüpft wären die Chips dann still verschwunden, obwohl die
+ * Wahl noch offen ist. Gesucht wird deshalb rückwärts, und die Suche BRICHT AB,
+ * sobald eine eigene Antwort kommt: ein Klick legt genau die an, und damit ist
+ * die einmalige Wahl getroffen. Läuft gerade ein Zug, gibt es gar keine — ein
+ * Knopf, der während des Schreibens klickbar wäre, schickte in eine Sperre.
+ */
+const optionTurnId = computed<string | null>(() => {
+  if (conversation.pending.value) return null
+  const list = turns.value
+  for (let index = list.length - 1; index >= 0; index -= 1) {
+    const turn = list[index]!
+    if (turn.role === 'user') return null
+    if (turn.options?.length && !turn.pending) return turn.id
+  }
+  return null
+})
+
+/**
+ * Der Klick auf einen Chip geht denselben Weg wie eine getippte Antwort —
+ * `answerFromGeorge` ist der EINE Sende-Pfad (Prompt, eigene Formulierung,
+ * Auswahl-Karte hängen alle daran). Ein zweiter Weg hier hiesse: eine Regel
+ * (Gegenfrage-Heuristik, Slot-Schreiben, Verlauf) an zwei Stellen pflegen.
+ */
+async function answerOption(label: string): Promise<void> {
+  if (conversation.pending.value) return
+  await answerFromGeorge(label)
+}
 
 /**
  * DIE BEISPIEL-ANTWORT (Davids Wunsch 2026-09-01, Muster Claude Desktop).
@@ -1439,6 +1482,27 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
                  Sprachmodell und wird escaped gerendert. -->
             <p class="whitespace-pre-wrap">{{ turn.text }}<span v-if="turn.pending" class="bw-caret" aria-hidden="true">▍</span></p>
             <p v-if="turn.help" class="bw-msg-help">{{ turn.help }}</p>
+
+            <!-- ANTWORT-MÖGLICHKEITEN (Davids Anforderung 2026-09-04): stellt
+                 George eine Entweder-oder-Frage, steht sie in einer eigenen
+                 Schlusszeile und die Möglichkeiten stehen als Knöpfe darunter
+                 — abgetippt wird nichts mehr. Die Beschriftungen kommen vom
+                 Modell (deshalb kein i18n-Schlüssel), seine EMPFEHLUNG steht
+                 als Satz im Zug darüber. Einmalige Wahl: `optionTurnId` gibt
+                 sie frei, bis der Mensch geantwortet hat. -->
+            <div
+              v-if="turn.options?.length && turn.id === optionTurnId"
+              role="group" :aria-label="t('brand.workspace.turnOptions.label')"
+              class="mt-3 flex flex-wrap gap-2"
+            >
+              <UButton
+                v-for="option in turn.options" :key="option"
+                size="sm" color="neutral" variant="soft" class="rounded-full"
+                :label="option"
+                :disabled="conversation.pending.value"
+                @click="answerOption(option)"
+              />
+            </div>
 
             <!-- Die Antwort-Module hängen am LETZTEN Zug: die Frage steht
                  immer ÜBER den Aktionen (Davids Korrekturrunde 1). -->

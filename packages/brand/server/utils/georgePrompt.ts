@@ -59,6 +59,15 @@ import type { BrandSlotDependency } from './brandGenerators'
  * Anweisungen. Ein Entwurf mit Website-Material und einer ohne stammen aus
  * verschiedenen Prompts, auch wenn die Instruktion dieselbe ist.
  *
+ * `george-a-10` (2026-09-04, Davids Anforderung an die Entweder-oder-Frage):
+ * die RÜCKFRAGE (`QUESTION:`) darf Antwort-Möglichkeiten anbieten. Bietet sie
+ * eine Wahl zwischen zwei oder drei BENANNTEN Möglichkeiten, steht die Frage
+ * in einer eigenen Schlusszeile, George sagt in der Prosa, wozu er tendiert,
+ * und ganz am Ende hängt je eine `OPTION:`-Zeile — die Bühne macht daraus
+ * Knöpfe. Der ENTWURFS-Zweig (BASIS/DRAFT/ASK) bleibt unangetastet: „passt
+ * das?" beantwortet man mit dem Bestätigen-Knopf oder mit einer Korrektur,
+ * nicht mit einem Menü.
+ *
  * `george-a-9` (2026-09-04, die Konversations-Senke): der VERLAUF des Bausteins
  * reist in den Entwurf. Bis hierhin las der Entwurfs-Generator nur gespeicherte
  * Slot-Werte, Startkarte und Website-Text — was ein Mensch auf eine Rückfrage
@@ -115,7 +124,7 @@ import type { BrandSlotDependency } from './brandGenerators'
  *   · B8/B9 — Kontext-Sensibilität (kein Vertriebston für einen Verein) und
  *     eine Sorgfaltszeile gegen holprige Sprache.
  */
-export const GEORGE_PROMPT_VERSION = 'george-a-9'
+export const GEORGE_PROMPT_VERSION = 'george-a-10'
 
 /** Default der Persona (Content-Spec §1.1, Gate ② abgesegnet). */
 export const GEORGE_PERSONA_DEFAULT = 'George'
@@ -529,6 +538,18 @@ export function brandSlotInstructionTail(
     + 'invention. Answer instead with a single turn that begins with the marker QUESTION: followed by '
     + 'exactly ONE small, concrete question that would give you what is missing — the kind of question a '
     + 'person can answer in one sentence. No BASIS, no DRAFT, no ASK in that case.',
+    // a-10 (Davids Anforderung 2026-09-04): dieselbe Regel wie im Gespräch —
+    // eine Wahl bekommt Knöpfe statt abgetippter Fließtext-Möglichkeiten. Sie
+    // hängt am QUESTION-Zweig und NICHT am ASK-Zweig: „passt das?" beantwortet
+    // man mit dem Bestätigen-Knopf oder mit einer Korrektur, nicht mit einem
+    // Menü. Der Rückwärts-Vertrag bleibt: keine OPTION-Zeile heisst „keine
+    // Chips", also der Stand von vorher.
+    'IF THAT QUESTION OFFERS A CHOICE between two or three NAMED possibilities, put the question in its '
+    + 'own final sentence, state briefly in your prose which one you lean towards and why, and then append '
+    + 'one line per choice at the very end, each starting with `OPTION: ` followed by a short label of at '
+    + 'most a few words. The OPTION lines are controls for the interface, never chat text — write them in '
+    + 'the chat language of rule 9. Never invent options where the question is open, and never put OPTION '
+    + 'lines on a draft turn.',
   )
 
   return lines

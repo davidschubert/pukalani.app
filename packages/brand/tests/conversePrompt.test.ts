@@ -4,6 +4,7 @@ import { GEORGE_TURN_MARKERS } from '../server/utils/georgeTurn'
 // Gespräch und Entwurf klemmen denselben Zug gleich.
 import { BRAND_CONVERSE_HISTORY_CHARS } from '../server/utils/georgePrompt'
 import {
+  BRAND_CONVERSE_PROMPT_VERSION,
   BRAND_CONVERSE_QUESTION_MAX,
   BRAND_CONVERSE_TEXT_MAX,
   type BrandConverseInputsOptions,
@@ -53,6 +54,36 @@ describe('Die Zug-Regel steht im Auftrag', () => {
     const instruction = brandConverseInstruction(BOTH)
     expect(instruction).toContain('Two to three sentences')
     expect(instruction).toMatch(/exactly ONE question/)
+  })
+
+  /**
+   * ANTWORT-MÖGLICHKEITEN (converse-4, Davids Anforderung 2026-09-04) — die
+   * Form-Regel, ohne die Georges Entweder-oder-Frage Fließtext bleibt und der
+   * Mensch seine Wahl abtippen muss.
+   *
+   * Drei Hälften, die einzeln verschwinden könnten: die Frage ABGEHOBEN (eigene
+   * Schlusszeile), die EMPFEHLUNG als Prosa (sie ist ein Satz mit Begründung,
+   * kein Knopf-Etikett) und der MARKER, der die Bühne überhaupt erst wissen
+   * lässt, dass es eine Wahl gibt.
+   */
+  it('converse-4: verlangt eigene Schlusszeile, Empfehlung UND OPTION-Zeilen', () => {
+    const instruction = brandConverseInstruction(BOTH)
+    expect(instruction).toMatch(/choice between two or three NAMED possibilities/)
+    expect(instruction).toMatch(/in its own final sentence/)
+    expect(instruction).toMatch(/which one you lean towards and why/)
+    expect(instruction).toMatch(/starting with `OPTION: `/)
+    // Sie sind Bedienelemente und folgen der CHAT-Sprache (Regel 9) — sonst
+    // stünden auf einer deutschen Bühne englische Knöpfe.
+    expect(instruction).toMatch(/controls for the interface, never chat text/)
+    expect(instruction).toMatch(/CHAT language of rule 9/)
+    // Und die Sicherung: eine OFFENE Frage bekommt keine erfundenen Knöpfe.
+    expect(instruction).toMatch(/Never invent options where the question is open/)
+  })
+
+  it('die Fassung steigt mit — converse-4', () => {
+    // Ohne den Anstieg behaupteten Züge aus converse-3, aus diesem Auftrag zu
+    // stammen (dieselbe Regel wie bei GEORGE_PROMPT_VERSION).
+    expect(BRAND_CONVERSE_PROMPT_VERSION).toBe('converse-4')
   })
 
   it('würdigt Substanz — aber verbietet das Lob ohne Deckung', () => {

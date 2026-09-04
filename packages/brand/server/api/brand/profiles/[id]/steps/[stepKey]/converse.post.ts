@@ -31,7 +31,7 @@ import {
 } from '../../../../../../utils/conversePrompt'
 import { georgeSystemPrompt } from '../../../../../../utils/georgePrompt'
 import { brandSlotPromptLabel, labelSlotDependencies } from '../../../../../../utils/brandSlotPromptLabels'
-import { stripGeorgeTurnMarkers } from '../../../../../../utils/georgeTurn'
+import { parseGeorgeOptions, stripGeorgeTurnMarkers } from '../../../../../../utils/georgeTurn'
 import { acquireBrandGenerationLock, readBrandAiEnabled, retainBrandGeneration } from '../../../../../../utils/brandGenerators'
 import { bookBrandAiQuota } from '../../../../../../utils/brandAiQuota'
 import { recordBrandEvent } from '../../../../../../utils/brandEvents'
@@ -363,10 +363,19 @@ export default defineEventHandler(async (event): Promise<BrandConverseSkippedRes
 
     if (turn.aborted || abort.signal.aborted) return fail('aborted')
 
-    // Ein Konversations-Zug kennt keine Marker — hätte das Modell trotzdem
-    // welche gesetzt (es schreibt in anderen Zügen mit `BASIS:`/`ASK:`), fielen
-    // sie hier weg statt in den Verlauf zu wandern.
-    const message = stripGeorgeTurnMarkers(turn.text).trim()
+    /**
+     * ZUERST DIE ANTWORT-MÖGLICHKEITEN, DANN DAS PUTZEN (Davids Anforderung
+     * 2026-09-04) — und diese Reihenfolge ist keine Geschmackssache:
+     * `stripGeorgeTurnMarkers` wirft die `OPTION:`-Zeilen weg, wer danach
+     * fragt, findet nichts mehr.
+     *
+     * Der Rest bleibt, wie er war: ein Konversations-Zug kennt keine anderen
+     * Marker — hätte das Modell trotzdem welche gesetzt (es schreibt in anderen
+     * Zügen mit `BASIS:`/`ASK:`), fielen sie hier weg statt in den Verlauf zu
+     * wandern.
+     */
+    const spoken = parseGeorgeOptions(turn.text)
+    const message = stripGeorgeTurnMarkers(spoken.message).trim()
     if (!message) return fail('empty_result')
 
     let messageId: string
@@ -381,8 +390,15 @@ export default defineEventHandler(async (event): Promise<BrandConverseSkippedRes
           role: 'george',
           body: message,
           // Dieselbe `generationId` wie die Antwort, auf die sie reagiert — so
-          // gehören Frage und Reaktion im Verlauf sichtbar zusammen.
-          parts: JSON.stringify({ kind: 'reply', ...(body.slotId ? { slotId: body.slotId } : {}) }),
+          // gehören Frage und Reaktion im Verlauf sichtbar zusammen. `options`
+          // liegt ADDITIV daneben: der Verlauf soll später auch wissen, welche
+          // Wahl angeboten wurde — der `body` trägt sie bewusst NICHT, denn
+          // dort stünden sie als roher Text in der Sprechblase.
+          parts: JSON.stringify({
+            kind: 'reply',
+            ...(body.slotId ? { slotId: body.slotId } : {}),
+            ...(spoken.options.length ? { options: spoken.options } : {}),
+          }),
           generationId: turnId,
         },
       })
@@ -409,6 +425,9 @@ export default defineEventHandler(async (event): Promise<BrandConverseSkippedRes
       reused: false,
       // Kein Feldwert — dieselbe Bedeutung wie bei einer Rückfrage.
       outcome: 'question',
+      // NUR wenn es welche gibt: ein leeres Array wäre für den Leser dasselbe
+      // wie „keine", kostete aber einen Sonderfall im Rückwärts-Vertrag.
+      ...(spoken.options.length ? { options: spoken.options } : {}),
     })
     logEvent('info', 'brand.converse_completed', {
       stepKey,

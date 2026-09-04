@@ -305,6 +305,35 @@ describe('Slot-Instruktionen (Baustein A, §4)', () => {
     expect(instruction).toContain('a person can answer in one sentence')
   })
 
+  /**
+   * a-10 (Davids Anforderung 2026-09-04): eine Entweder-oder-RÜCKFRAGE bekommt
+   * Knöpfe. Die Regel hängt am QUESTION-Zweig und NICHT am ASK-Zweig — „passt
+   * das?" beantwortet man mit dem Bestätigen-Knopf oder mit einer Korrektur,
+   * nicht mit einem Menü.
+   */
+  it.each(CONTEXT_SLOTS)('%s: a-10 — die Rückfrage darf Antwort-Möglichkeiten anbieten', (slotId) => {
+    const instruction = contextSlotInstruction(slotId, optionsFor(slotId))
+    expect(instruction).toContain('IF THAT QUESTION OFFERS A CHOICE')
+    expect(instruction).toContain('in its own final sentence')
+    expect(instruction).toContain('which one you lean towards and why')
+    expect(instruction).toContain('starting with `OPTION: `')
+    expect(instruction).toContain('controls for the interface, never chat text')
+    // Die zwei Sicherungen: keine erfundenen Knöpfe an einer offenen Frage,
+    // und KEINE OPTION-Zeile auf einem Entwurfs-Zug (dort stünde sie im Feld).
+    expect(instruction).toContain('Never invent options where the question is open')
+    expect(instruction).toContain('never put OPTION lines on a draft turn')
+  })
+
+  it.each(CONTEXT_SLOTS)('%s: die OPTION-Regel steht im QUESTION-Zweig, nicht im ASK-Zweig', (slotId) => {
+    const lines = contextSlotInstruction(slotId, optionsFor(slotId)).split('\n')
+    const question = lines.findIndex(line => line.startsWith('IF THE INPUTS DO NOT CARRY ENOUGH'))
+    const option = lines.findIndex(line => line.startsWith('IF THAT QUESTION OFFERS A CHOICE'))
+    const ask = lines.findIndex(line => line.startsWith('ASK:'))
+    expect(question).toBeGreaterThanOrEqual(0)
+    expect(option).toBeGreaterThan(question)
+    expect(ask).toBeLessThan(question)
+  })
+
   it.each(CONTEXT_SLOTS)('%s: trägt Entwurfs-Ehrlichkeit und die Eingabe-Leitplanke', (slotId) => {
     const instruction = contextSlotInstruction(slotId, optionsFor(slotId))
     // Regel 4: worauf er sich stützt — als Eigenschaft des Textes.
@@ -549,10 +578,11 @@ describe('Prompt-Version', () => {
     // P2.3 ein zweites Mal (der Website-Text kann mitreisen), a-4 ein drittes
     // (Berater-Schicht, Rahmung, Rückfrage, B4/B6/B8/B9), a-5 ein viertes
     // (EINE Stimme: aus der Berater- wird die Facetten-Schicht), a-9 ein
-    // fünftes (die Konversations-Senke: der Verlauf reist in den Entwurf) —
+    // fünftes (die Konversations-Senke: der Verlauf reist in den Entwurf),
+    // a-10 ein sechstes (die Rückfrage darf Antwort-Möglichkeiten anbieten) —
     // die Version MUSS mitsteigen, sonst behaupten alte Generations-Einträge,
     // aus diesem Prompt zu stammen (Kopf von georgePrompt.ts).
-    expect(GEORGE_PROMPT_VERSION).toBe('george-a-9')
+    expect(GEORGE_PROMPT_VERSION).toBe('george-a-10')
   })
 })
 

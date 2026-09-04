@@ -367,6 +367,9 @@
       "acceptAndConfirm": "Übernehmen & bestätigen",
       "retryWithHint": "Nochmal, mit Hinweis",
       "submitChoice": "Übermitteln",
+      "turnOptions": {
+        "label": "Antwortmöglichkeiten"
+      },
       "example": {
         "show": "Beispiel ansehen",
         "hide": "Beispiel ausblenden",

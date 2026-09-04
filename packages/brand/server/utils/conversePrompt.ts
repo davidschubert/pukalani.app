@@ -46,6 +46,14 @@ import { BRAND_CONVERSE_HISTORY_CHARS, formatStartCard } from './georgePrompt'
 /**
  * Steht in jeder Gesprächs-Nachricht; steigt bei jeder inhaltlichen Änderung.
  *
+ * `converse-4` (2026-09-04, Davids Anforderung an den Archetyp-Vergleich):
+ * eine Entweder-oder-Frage war Fließtext („…der Handwerker, der sein Handwerk
+ * perfektioniert, oder der Mentor, der sein Wissen teilt?") — der Mensch musste
+ * die Möglichkeit abtippen, um sie zu wählen. Jetzt steht die Frage in einer
+ * EIGENEN Schlusszeile, George sagt in der Prosa, wozu er tendiert und warum,
+ * und ganz am Ende hängt je eine `OPTION:`-Zeile: die Bühne macht daraus
+ * Knöpfe. Der Marker ist ein Bedienelement, nie Chat-Text (`georgeTurn.ts`).
+ *
  * `converse-3` (2026-09-04, Davids Live-Fund am Krume-Archetyp): „keine
  * Katalog-Frage mehr" ist NICHT „nichts mehr offen". Auf „was ist noch
  * offen?" behauptete George „Nichts mehr in diesem Kapitel", während vier
@@ -58,7 +66,7 @@ import { BRAND_CONVERSE_HISTORY_CHARS, formatStartCard } from './georgePrompt'
  * FRAGE aus dem Locale-Katalog statt der internen Id — George sprach
  * `a.customerPraise` & Co. wortwörtlich im Chat nach.
  */
-export const BRAND_CONVERSE_PROMPT_VERSION = 'converse-3'
+export const BRAND_CONVERSE_PROMPT_VERSION = 'converse-4'
 
 /**
  * Was ein Mensch in EINEM Zug schreiben darf. Grosszügiger als der Hinweis
@@ -152,6 +160,18 @@ export function brandConverseInstruction(options: BrandConverseInstructionOption
     'It ends with exactly ONE question — or, where there is nothing left to ask, one clear next step.',
     'Plain text only: no markdown, no asterisks, no underscores, no headings, no bullet points, no '
     + 'numbered lists.',
+    // converse-4 (Davids Anforderung 2026-09-04): eine Wahl bekommt Knöpfe.
+    // DREI Zusagen in einer Zeile, weil sie zusammengehören — die Frage
+    // ABGEHOBEN (eigener Satz), die EMPFEHLUNG als Prosa (sie ist ein Satz mit
+    // Begründung, kein Knopf-Etikett) und die Beschriftungen als Marker.
+    // „Never invent options" ist die Sicherung dahinter: eine OFFENE Frage mit
+    // zwei erfundenen Knöpfen darunter verengt die Antwort, statt sie zu
+    // erleichtern.
+    'If your closing question offers a choice between two or three NAMED possibilities, put the question '
+    + 'in its own final sentence, state briefly in your prose which one you lean towards and why, and then '
+    + 'append one line per choice at the very end, each starting with `OPTION: ` followed by a short label '
+    + 'of at most a few words. The OPTION lines are controls for the interface, never chat text — write '
+    + 'them in the CHAT language of rule 9. Never invent options where the question is open.',
     // Ein Konversations-Zug ist VOLLSTÄNDIG Chat — anders als ein Slot-Entwurf
     // hat er keinen Teil, der in der Inhaltssprache stünde.
     'Everything in this turn is chat and follows the CHAT language of rule 9 — all of it, without '

@@ -367,6 +367,9 @@
       "acceptAndConfirm": "Accept & confirm",
       "retryWithHint": "Again, with a hint",
       "submitChoice": "Submit",
+      "turnOptions": {
+        "label": "Answer options"
+      },
       "example": {
         "show": "Show example",
         "hide": "Hide example",

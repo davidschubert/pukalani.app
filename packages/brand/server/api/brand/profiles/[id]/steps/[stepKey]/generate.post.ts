@@ -47,6 +47,7 @@ import {
   retainBrandGeneration,
 } from '../../../../../../utils/brandGenerators'
 import { labelSlotDependencies } from '../../../../../../utils/brandSlotPromptLabels'
+import { parseGeorgeOptions } from '../../../../../../utils/georgeTurn'
 import { loadBrandConversationHistory } from '../../../../../../utils/brandConversationHistory'
 import { bookBrandAiQuota } from '../../../../../../utils/brandAiQuota'
 import { recordBrandEvent } from '../../../../../../utils/brandEvents'
@@ -482,7 +483,22 @@ export default defineEventHandler(async (event) => {
      * dann ist der Zug wieder der Entwurf, wie vorher.
      */
     const outcome: BrandGenerationOutcome = result.outcome ?? 'draft'
-    const chat = clampDraft(result.message ?? result.draft, slot.maxLength)
+
+    /**
+     * ANTWORT-MÖGLICHKEITEN GIBT ES NUR ZUR RÜCKFRAGE (Davids Anforderung
+     * 2026-09-04). Ein ENTWURFS-Zug endet laut Vertrag mit „passt das?" — dafür
+     * sind zwei Knöpfe die falsche Form, denn die Antwort darauf ist entweder
+     * eine Bestätigung (die hat ihren eigenen Knopf) oder eine Korrektur (die
+     * ist Text). Sein ASK-Zweig bleibt deshalb unangetastet.
+     *
+     * GELESEN WIRD VOR DEM KLEMMEN: `clampDraft` schneidet auf den Slot-Deckel,
+     * und die `OPTION:`-Zeilen stehen ganz am Ende — nach dem Klemmen wären sie
+     * bei einem langen Zug die ersten, die fehlen.
+     */
+    const spoken = outcome === 'question'
+      ? parseGeorgeOptions(result.message ?? result.draft)
+      : { message: result.message ?? result.draft, options: [] as string[] }
+    const chat = clampDraft(spoken.message, slot.maxLength)
     const draft = outcome === 'question' ? '' : clampDraft(stripBoldMarkers(result.draft), slot.maxLength)
 
     // Bei einer Rückfrage ist der ZUG das Ergebnis; bei einem Entwurf das FELD.
@@ -496,6 +512,7 @@ export default defineEventHandler(async (event) => {
     const completed = await persist({
       draft,
       chat,
+      options: spoken.options,
       outcome,
       inputHash,
       generationId,
@@ -550,6 +567,8 @@ export default defineEventHandler(async (event) => {
     draft: string
     /** Der Zug im Verlauf (gerahmter Entwurf bzw. die Rückfrage). */
     chat: string
+    /** Antwort-Möglichkeiten zur Rückfrage — leer heisst „keine Chips". */
+    options: readonly string[]
     outcome: BrandGenerationOutcome
     inputHash: string
     generationId: string
@@ -634,7 +653,14 @@ export default defineEventHandler(async (event) => {
             stepKey,
             role: 'george',
             body: input.chat,
-            parts: JSON.stringify({ kind: input.outcome, slotId: input.entryBase.slotId }),
+            // `options` liegt ADDITIV daneben (Davids Anforderung 2026-09-04):
+            // der `body` trägt sie NICHT — dort stünden die Beschriftungen als
+            // roher Text in der Sprechblase.
+            parts: JSON.stringify({
+              kind: input.outcome,
+              slotId: input.entryBase.slotId,
+              ...(input.options.length ? { options: input.options } : {}),
+            }),
             generationId: input.generationId,
           },
         })
@@ -674,6 +700,9 @@ export default defineEventHandler(async (event) => {
         createdAt: now,
         reused: false,
         outcome: input.outcome,
+        // Rückwärts-Vertrag: fehlt das Feld, gibt es keine Chips — also genau
+        // das Verhalten von vor dieser Runde.
+        ...(input.options.length ? { options: input.options } : {}),
       }
     }
     catch (error) {

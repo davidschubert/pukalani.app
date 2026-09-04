@@ -63,6 +63,41 @@ export type BrandGenerationFailureCode
  */
 export type BrandGenerationOutcome = 'draft' | 'question'
 
+/**
+ * ANTWORT-MÖGLICHKEITEN ZU EINER ENTWEDER-ODER-FRAGE (Davids Anforderung
+ * 2026-09-04) — die Obergrenzen stehen HIER und nicht beim Parser.
+ *
+ * Sie werden an ZWEI Enden gebraucht: der Server klemmt beim Lesen der
+ * `OPTION:`-Zeilen (`parseGeorgeOptions`), der Browser beim Auspacken des
+ * Frames. Zwei Zahlenpaare wären zwei Wahrheiten darüber, was noch ein Chip
+ * ist — und die Abweichung sähe man erst an einer Knopfreihe, die umbricht.
+ *
+ * DREI ist die Grenze, weil eine Wahl mit vier Knöpfen keine Wahl mehr ist,
+ * sondern ein Menü; SECHZIG Zeichen, weil ein Chip in EINE Zeile passen muss.
+ */
+export const BRAND_TURN_OPTIONS_MAX = 3
+export const BRAND_TURN_OPTION_LABEL_MAX = 60
+
+/**
+ * Aus einem beliebigen Wert eine gültige Optionsliste machen — oder eine leere.
+ *
+ * WENIGER ALS ZWEI IST KEINE WAHL: ein einzelner Knopf sähe aus wie eine
+ * Zustimmung („Der Handwerker"), obwohl George eine Alternative gemeint hat.
+ * Dann lieber gar keine Chips und die Frage als Text — das ist der Stand von
+ * heute und damit der Rückwärts-Vertrag dieses Feldes.
+ */
+export function normalizeBrandTurnOptions(value: unknown): string[] {
+  if (!Array.isArray(value)) return []
+  const labels: string[] = []
+  for (const entry of value) {
+    if (typeof entry !== 'string') continue
+    const label = entry.trim().slice(0, BRAND_TURN_OPTION_LABEL_MAX).trim()
+    if (label) labels.push(label)
+    if (labels.length === BRAND_TURN_OPTIONS_MAX) break
+  }
+  return labels.length >= 2 ? labels : []
+}
+
 export interface BrandGenerationStartedData {
   generationId: string
   slotId: string
@@ -98,6 +133,17 @@ export interface BrandGenerationCompletedData {
    * abgerissenen Stroms.
    */
   outcome: BrandGenerationOutcome
+  /**
+   * ANTWORT-MÖGLICHKEITEN zu der Frage, mit der dieser Zug endet (Davids
+   * Anforderung 2026-09-04) — zwei oder drei kurze Beschriftungen, aus denen
+   * die Bühne Chips baut.
+   *
+   * OPTIONAL, und das ist der Rückwärts-Vertrag: FEHLT das Feld, gibt es keine
+   * Chips und die Frage steht als Text da — also exakt das Verhalten von
+   * vorher. Ein Frame ohne `options` ist deshalb kein halber Frame, sondern der
+   * Normalfall jeder offenen Frage.
+   */
+  options?: readonly string[]
 }
 
 export interface BrandGenerationFailedData {
@@ -185,6 +231,21 @@ export function parseBrandGenerationEvent(payload: string): BrandGenerationEvent
   const type = (parsed as { type?: unknown }).type
   if (typeof type !== 'string') return null
   if (!(BRAND_GENERATION_EVENTS as readonly string[]).includes(type)) return null
+
+  /**
+   * `options` IST DAS EINE FELD, DAS HIER GEPRÜFT WIRD — und das hat einen
+   * Grund, der für die anderen nicht gilt: es ist das einzige, aus dem die
+   * Oberfläche eine LISTE rendert (`v-for` über Chips). Ein Text statt eines
+   * Arrays wäre dort kein falscher Wert, sondern ein Fehler im Rendern; alle
+   * übrigen Felder landen in einer Zeichenkette und tragen sich selbst.
+   * Ungültiges verschwindet, statt den Frame zu verwerfen: der Zug ist die
+   * Sache, die Chips sind die Beilage.
+   */
+  if (type === 'generation.completed' && 'options' in (parsed as object)) {
+    const { options: _raw, ...rest } = parsed as BrandGenerationCompletedData & { type: 'generation.completed' }
+    const options = normalizeBrandTurnOptions(_raw)
+    return options.length ? { ...rest, options } : rest
+  }
   return parsed as BrandGenerationEvent
 }
 

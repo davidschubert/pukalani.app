@@ -1,9 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import {
+  GEORGE_TURN_MARKERS,
   createGeorgeTurnScrubber,
+  parseGeorgeOptions,
   parseGeorgeTurn,
   stripGeorgeTurnMarkers,
 } from '../server/utils/georgeTurn'
+import { BRAND_TURN_OPTION_LABEL_MAX } from '../shared/brandGeneration'
 
 /**
  * DER ZUG-VERTRAG (george-a-4) — vier Aussagen, die ohne Beweis Glaubenssache
@@ -46,7 +49,9 @@ describe('parseGeorgeTurn — Entwurf', () => {
 
   it('KEIN MARKER LANDET IM FELDWERT', () => {
     const turn = parseGeorgeTurn(FRAMED)
-    for (const marker of ['BASIS:', 'DRAFT:', 'ASK:', 'QUESTION:']) {
+    // Über die REGISTRIERTE Liste, nicht über eine zweite Aufzählung: ein
+    // sechster Marker wäre sonst hier ungedeckt und stünde im Brand-Dokument.
+    for (const marker of GEORGE_TURN_MARKERS) {
       expect(turn.draft).not.toContain(marker)
       expect(turn.message).not.toContain(marker)
     }
@@ -137,6 +142,85 @@ describe('stripGeorgeTurnMarkers', () => {
   it('lässt Text ohne Marker unangetastet', () => {
     expect(stripGeorgeTurnMarkers('einfach nur Text\nzweite Zeile')).toBe('einfach nur Text\nzweite Zeile')
   })
+
+  it('nimmt eine OPTION-Zeile GANZ weg — sie ist ein Knopf, kein Satz', () => {
+    // Der Unterschied zu BASIS/ASK ist die eigentliche Aussage: bliebe die
+    // Beschriftung als loser Satz stehen, stünde sie zweimal da — einmal als
+    // Text, einmal auf dem Knopf.
+    expect(stripGeorgeTurnMarkers('Was passt besser?\nOPTION: Der Handwerker\nOPTION: Der Mentor'))
+      .toBe('Was passt besser?')
+  })
+})
+
+/**
+ * DIE ANTWORT-MÖGLICHKEITEN (Davids Anforderung 2026-09-04) — vier Aussagen,
+ * deren Bruch man erst an der Bühne sähe:
+ *
+ *  1. Zwei oder drei Beschriftungen werden zu Chips, der Text verliert die
+ *     Zeilen — sonst steht der Marker-Vertrag roh in der Sprechblase.
+ *  2. EINE Möglichkeit ist keine Wahl: ein einzelner Knopf läse sich als
+ *     Zustimmung, obwohl George eine Alternative gemeint hat.
+ *  3. Die Zeilen gehen AUCH dann, wenn die Wahl verworfen wird.
+ *  4. Ein Marker mitten im Satz ist keiner — dieselbe Regel wie bei den vier
+ *     anderen.
+ */
+describe('parseGeorgeOptions', () => {
+  it('zieht zwei Möglichkeiten heraus und lässt den Zug ohne sie stehen', () => {
+    const turn = parseGeorgeOptions([
+      'Das trage ich mit. Was passt besser zu euch?',
+      'OPTION: Der Handwerker',
+      'OPTION: Der Mentor',
+    ].join('\n'))
+    expect(turn.options).toEqual(['Der Handwerker', 'Der Mentor'])
+    expect(turn.message).toBe('Das trage ich mit. Was passt besser zu euch?')
+  })
+
+  it('nimmt auch drei', () => {
+    const turn = parseGeorgeOptions('Was davon?\nOPTION: A\nOPTION: B\nOPTION: C')
+    expect(turn.options).toEqual(['A', 'B', 'C'])
+  })
+
+  it('nimmt HÖCHSTENS drei — vier wären ein Formular', () => {
+    const turn = parseGeorgeOptions('Was davon?\nOPTION: A\nOPTION: B\nOPTION: C\nOPTION: D')
+    expect(turn.options).toEqual(['A', 'B', 'C'])
+    // Und die vierte Zeile ist trotzdem aus dem Text verschwunden.
+    expect(turn.message).toBe('Was davon?')
+  })
+
+  it('EINE Möglichkeit ist keine Wahl — Optionen leer, Zeile trotzdem weg', () => {
+    const turn = parseGeorgeOptions('Passt der Handwerker?\nOPTION: Der Handwerker')
+    expect(turn.options).toEqual([])
+    expect(turn.message).toBe('Passt der Handwerker?')
+  })
+
+  it('verwirft leere Beschriftungen — und kippt damit auch die Wahl', () => {
+    const turn = parseGeorgeOptions('Was davon?\nOPTION: Der Mentor\nOPTION:   ')
+    expect(turn.options).toEqual([])
+    expect(turn.message).toBe('Was davon?')
+  })
+
+  it('klemmt eine zu lange Beschriftung — ein Chip passt in EINE Zeile', () => {
+    const long = 'x'.repeat(BRAND_TURN_OPTION_LABEL_MAX + 40)
+    const turn = parseGeorgeOptions(`Was davon?\nOPTION: ${long}\nOPTION: kurz`)
+    expect(turn.options[0]).toHaveLength(BRAND_TURN_OPTION_LABEL_MAX)
+    expect(turn.options[1]).toBe('kurz')
+  })
+
+  it('ein OPTION mitten im Satz ist keins', () => {
+    const turn = parseGeorgeOptions('Wir schreiben OPTION: als Wort in diesen Satz.')
+    expect(turn.options).toEqual([])
+    expect(turn.message).toBe('Wir schreiben OPTION: als Wort in diesen Satz.')
+  })
+
+  it('OHNE OPTION-Zeilen bleibt alles, wie es war (Rückwärts-Vertrag)', () => {
+    const turn = parseGeorgeOptions('Das nehme ich mit. Was loben eure Kunden?')
+    expect(turn).toEqual({ message: 'Das nehme ich mit. Was loben eure Kunden?', options: [] })
+  })
+
+  it('versteht CRLF — Windows-Zeilenenden kommen von echten Anbietern', () => {
+    const turn = parseGeorgeOptions('Was davon?\r\nOPTION: A\r\nOPTION: B')
+    expect(turn.options).toEqual(['A', 'B'])
+  })
 })
 
 /**
@@ -191,5 +275,19 @@ describe('createGeorgeTurnScrubber', () => {
   it('hält einen Text OHNE Marker nicht auf', () => {
     expect(stream('Wir rösten Kaffee.\nIn kleinen Mengen.', () => 2))
       .toBe('Wir rösten Kaffee.\nIn kleinen Mengen.')
+  })
+
+  it('LÄSST KEINE OPTION-ZEILE IN DEN STROM — auch nicht buchstabenweise', () => {
+    // Der Fall, den man beim Umbauen verliert: die Beschriftung tröpfelt in die
+    // Sprechblase und verschwindet dort NIE wieder (Deltas kennen kein Zurück).
+    const text = 'Was passt besser?\nOPTION: Der Handwerker\nOPTION: Der Mentor'
+    const scrub = createGeorgeTurnScrubber()
+    let shown = ''
+    for (const letter of [...text]) {
+      shown += scrub(letter)
+      expect(shown).not.toContain('OPTION')
+      expect(shown).not.toContain('Handwerker')
+    }
+    expect(shown.trim()).toBe('Was passt besser?')
   })
 })

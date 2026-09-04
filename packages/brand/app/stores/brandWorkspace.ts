@@ -93,6 +93,12 @@ export interface BrandStreamMessage {
   role: 'george' | 'user'
   text: string
   pending: boolean
+  /**
+   * ANTWORT-MÖGLICHKEITEN zu der Frage, mit der dieser Zug endet (Davids
+   * Anforderung 2026-09-04) — sie kommen aus dem Abschluss-Frame, nie aus dem
+   * Text. FEHLEN sie, rendert die Bühne keine Chips; das ist der Normalfall.
+   */
+  options?: readonly string[]
 }
 
 const EMPTY_PROGRESS: BrandStepProgress = { requiredTotal: 0, requiredFilled: 0, pct: 0 }
@@ -284,6 +290,21 @@ const setup = () => {
   function appendGeorgeDelta(generationId: string, text: string): void {
     streamMessages.value = streamMessages.value.map(message => (message.id === generationId
       ? { ...message, text: message.text + text }
+      : message))
+  }
+
+  /**
+   * DIE ANTWORT-MÖGLICHKEITEN AN IHREN ZUG HÄNGEN (Davids Anforderung
+   * 2026-09-04) — eine eigene Aktion NEBEN `endGeorgeMessage`, nicht ein
+   * Argument darin: „der Zug ist zu Ende" wird an fünf Stellen gerufen
+   * (Abbruch, Fehler, abgerissener Strom), und vier davon haben zu Optionen
+   * nichts zu sagen. Ein optionales Argument hiesse dort jedes Mal „keine" —
+   * und ein Fehler-Frame nach dem Abschluss-Frame löschte die Chips wieder.
+   */
+  function setGeorgeMessageOptions(generationId: string, options: readonly string[]): void {
+    if (!options.length) return
+    streamMessages.value = streamMessages.value.map(message => (message.id === generationId
+      ? { ...message, options: [...options] }
       : message))
   }
 
@@ -561,6 +582,7 @@ const setup = () => {
     addUserMessage,
     beginGeorgeMessage,
     appendGeorgeDelta,
+    setGeorgeMessageOptions,
     endGeorgeMessage,
     mark,
     applyStepDetail,

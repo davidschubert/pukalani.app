@@ -272,7 +272,7 @@ describe('Das Ergebnis im Vertrag', () => {
     expect(result.draft).toBe('ErstZweit')
     expect(result.model).toBe('m')
     expect(result.provider).toBe('p')
-    expect(result.promptVersion).toBe('george-a-9')
+    expect(result.promptVersion).toBe('george-a-10')
     expect(result.aborted).toBe(false)
   })
 

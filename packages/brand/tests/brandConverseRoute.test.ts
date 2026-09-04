@@ -313,6 +313,82 @@ describe('POST …/steps/:stepKey/converse', () => {
   })
 })
 
+/**
+ * ANTWORT-MÖGLICHKEITEN (Davids Anforderung 2026-09-04) — die Wahl reist
+ * STRUKTURIERT, nicht als Text.
+ *
+ * Drei Aussagen, und jede hat ihre eigene Bruchstelle:
+ *  1. Die Beschriftungen erreichen das Abschluss-Frame — daraus baut die Bühne
+ *     die Knöpfe.
+ *  2. Sie stehen NICHT im persistierten `body` und nicht im Strom: dort wären
+ *     sie roher Marker-Text in der Sprechblase.
+ *  3. `parts` trägt sie additiv — ein künftiger Verlaufs-Leser soll wissen,
+ *     welche Wahl damals angeboten wurde.
+ */
+describe('Antwort-Möglichkeiten', () => {
+  const WITH_OPTIONS = [
+    'Das trage ich mit. Was passt besser zu euch?',
+    'OPTION: Der Handwerker',
+    'OPTION: Der Mentor',
+  ].join('\n')
+
+  it('trägt die Beschriftungen ins Abschluss-Frame', async () => {
+    modelText = WITH_OPTIONS
+    const { event, chunks } = fakeEvent()
+    await handler(event)
+    expect(readBack(chunks).at(-1)).toMatchObject({
+      type: 'generation.completed',
+      options: ['Der Handwerker', 'Der Mentor'],
+    })
+  })
+
+  it('GEGENPROBE: im Zug selbst steht keine einzige OPTION-Zeile', async () => {
+    modelText = WITH_OPTIONS
+    const { event, chunks } = fakeEvent()
+    await handler(event)
+
+    // Weder gespeichert …
+    expect(String(messageRows[1]!.body)).toBe('Das trage ich mit. Was passt besser zu euch?')
+    expect(String(messageRows[1]!.body)).not.toContain('OPTION')
+    expect(String(messageRows[1]!.body)).not.toContain('Der Handwerker')
+    // … noch gestreamt: ein Delta kennt kein Zurück.
+    const streamed = readBack(chunks)
+      .filter(item => item.type === 'message.delta')
+      .map(item => (item as { text: string }).text)
+      .join('')
+    expect(streamed).not.toContain('OPTION')
+    expect(streamed).not.toContain('Der Mentor')
+  })
+
+  it('legt sie ADDITIV in `parts` — neben `kind` und `slotId`', async () => {
+    modelText = WITH_OPTIONS
+    const { event } = fakeEvent()
+    await handler(event)
+    expect(JSON.parse(String(messageRows[1]!.parts))).toEqual({
+      kind: 'reply',
+      slotId: 'a.origin',
+      options: ['Der Handwerker', 'Der Mentor'],
+    })
+  })
+
+  it('RÜCKWÄRTS-VERTRAG: ohne OPTION-Zeilen bleibt alles wie bisher', async () => {
+    const { event, chunks } = fakeEvent()
+    await handler(event)
+    const completed = readBack(chunks).at(-1) as { options?: unknown }
+    expect(completed.options).toBeUndefined()
+    expect(JSON.parse(String(messageRows[1]!.parts))).toEqual({ kind: 'reply', slotId: 'a.origin' })
+  })
+
+  it('EINE Möglichkeit ist keine Wahl — kein Feld, und die Zeile ist trotzdem weg', async () => {
+    modelText = 'Passt der Handwerker?\nOPTION: Der Handwerker'
+    const { event, chunks } = fakeEvent()
+    await handler(event)
+    const completed = readBack(chunks).at(-1) as { options?: unknown }
+    expect(completed.options).toBeUndefined()
+    expect(String(messageRows[1]!.body)).toBe('Passt der Handwerker?')
+  })
+})
+
 describe('Der Kill-Switch und die stillen Neins', () => {
   it('KI AUS ⇒ `{ conversed: false }`, kein Strom, keine Zeile, keine Buchung', async () => {
     appConfigRow = { $id: 'global', brandAiEnabled: false }

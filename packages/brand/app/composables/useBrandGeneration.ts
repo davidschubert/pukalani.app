@@ -218,6 +218,10 @@ export function useBrandGeneration(
           }
           else if (item.type === 'generation.completed') {
             lastOutcome.value = item.outcome ?? 'draft'
+            // Eine RÜCKFRAGE darf Antwort-Möglichkeiten tragen (Davids
+            // Anforderung 2026-09-04); ein Entwurf nie — die Route schickt sie
+            // dort gar nicht erst mit.
+            if (item.options?.length) store.setGeorgeMessageOptions(item.generationId, item.options)
             store.applyGenerationRevision(item.revision)
             store.endGeorgeMessage(item.generationId)
             status.value = 'done'
