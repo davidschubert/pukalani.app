@@ -30,6 +30,45 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### Brand-Wizard: Archetyp-Generator als Interim + Live-Durchstich bis zur Weiche ✅ 2026-09-04
+
+**Auslöser:** Davids Live-Check-Auftrag („checke du auch den chatverlauf und die
+buttons"). Der Durchstich fand den strukturellen Blocker: für `archetype` war
+NIE ein Generator registriert (`no_generator`), sieben editor-none-Slots ohne
+Weg, und laut Spec §12.2 wären Primär/Sekundär aus dem (bewusst späteren)
+Paarvergleich-Instrument BERECHNET — das Kapitel war unabschliessbar.
+**Davids Entscheidung** (AskUserQuestion, DECISION-LOG): Gesprächs-Ableitung
+als Interim.
+
+**Gebaut (Opus-Lauf + zwei eigene Fix-Runden):** 12-Archetypen-Katalog als
+geschlossene Choice-Verträge (stabile Ids; Choice-Prüfung in die Advisor-Fabrik
+gezogen — eine Kopie für B2 und D), 7 Slot-Aufträge (Hypothese ohne Festlegung;
+bei zwei Kandidaten Rückfrage mit OPTION-Chips; gapReveal benennt Abweichung
+ehrlich; voiceSamples = genau 3 Sätze), Stimme-Antworten erreichen George über
+den a-9-Verlauf (Registry-Rückwärtsregel verbietet sie als dependencies).
+Zwei Live-Funde sofort nachgefixt: (1) KOHÄRENZ — Prosa argumentierte
+„Handwerker", Feld speicherte `sage`; jetzt Pflicht-Regel „Prosa nennt den
+Katalog-Namen, informelle Gesprächs-Namen werden hörbar abgebildet"
+(george-archetype-2). (2) ROHE ID IN DER BLASE — der Server-Tausch griff nur
+auf der persistierten Nachricht; die Tausch-Regel wohnt jetzt in shared
+(`swapBrandChoiceValueLine`) und läuft an BEIDEN Enden (Persistenz + gestreamte
+Blase beim slot.ready-Frame). Dazu converse-5/george-a-11: OPTION-Zeilen als
+MUST mit ausdrücklicher Klartext-Ausnahme + wörtlichem Beispiel (das Modell
+liess die Kann-Fassung im Live-Test weg).
+
+**Live bewiesen (Krume & Gold, Davids Chrome):** Rückfrage bei Müll-Daten →
+Chat-Antwort → Entwurf wörtlich „aus euren eigenen Worten in diesem Gespräch"
+(Senke end-to-end) → Der Schöpfer primär, Der Fürsorgliche sekundär (kohärent,
+Anzeige statt Id) → gapReveal mit ehrlicher Lücke → **11/11, Konfidenz-Weiche
+erreicht** — das Kapitel war am Morgen desselben Tages strukturell
+unabschliessbar. Tests 727 → 1017 (inkl. BW2-Paket-1 der Nachbar-Session).
+
+**Gelernt:** Ein Rebase nach fremdem Push macht die eigene grüne Gate-Runde
+ungültig — die Gates liefen VOR dem Rebase, der kombinierte Baum war
+unverifiziert (hier gut gegangen: Nachbar-Refactor war kompatibel). Nach jedem
+Rebase mit Fremd-Commits die Gates auf dem NEUEN Baum wiederholen, bevor
+gepusht wird — oder direkt danach, vor dem nächsten Schritt.
+
 ### Brand-Wizard: Konversations-Senke geschlossen + Gesprächs-Runde ✅ 2026-09-04
 
 **Auftrag:** Davids Go („bau die konversations-senke wie du empfohlen hast") auf den
