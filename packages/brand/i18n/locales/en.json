@@ -438,6 +438,8 @@
         "placeholder": "Write your answer — or ask a question",
         "nothingOpen": "Nothing open in this chapter — confirm it when it fits.",
         "questionsDone": "My questions are done — we'll shape the remaining fields right here in the conversation.",
+        "nextDraft": "Let’s start with “{field}”: click “George, draft this” and I’ll lay out a first version from what you’ve told me so far — or just tell me here what’s on your mind about it.",
+        "nextConfirm": "Next step: look at “{field}” and confirm it — or click “Revise” if it doesn’t fit yet.",
         "send": "Send"
       },
       "stage": {

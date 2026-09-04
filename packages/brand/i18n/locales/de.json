@@ -438,6 +438,8 @@
         "placeholder": "Antwort schreiben — oder George etwas fragen",
         "nothingOpen": "In diesem Kapitel ist nichts mehr offen — bestätige es, wenn es passt.",
         "questionsDone": "Meine Fragen sind durch — die offenen Felder unten formen wir jetzt hier im Gespräch.",
+        "nextDraft": "Fangen wir mit „{field}“ an: Klick auf „George, entwirf das“, dann lege ich dir eine erste Fassung aus euren bisherigen Antworten vor — oder erzähl mir hier, was dir dazu durch den Kopf geht.",
+        "nextConfirm": "Nächster Schritt: Sieh dir „{field}“ an und bestätige es — oder klick auf „Korrigieren“, wenn es noch nicht passt.",
         "send": "Senden"
       },
       "stage": {

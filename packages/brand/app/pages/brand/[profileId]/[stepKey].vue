@@ -320,8 +320,28 @@ const turns = computed<StageTurn[]>(() => {
     // Frage. Solange solche Pflicht-Felder unbestätigt sind, behauptete der
     // alte Satz „nichts mehr offen" direkt über „Noch offen: 1 von 10 Feldern"
     // (live erwischt 2026-09-03) — der Wortlaut folgt jetzt dem Kapitel-Stand.
-    const key = completion.value?.slotsReady ? 'nothingOpen' : 'questionsDone'
-    return [...spoken, { id: 'done', role: 'george', text: t(`brand.workspace.george.${key}`) }]
+    if (completion.value?.slotsReady) {
+      return [...spoken, { id: 'done', role: 'george', text: t('brand.workspace.george.nothingOpen') }]
+    }
+    // DER SATZ ZEIGT AUF DEN NÄCHSTEN SCHRITT (Davids Live-Fund 2026-09-04,
+    // Krume & Gold, Archetyp): „die offenen Felder formen wir im Gespräch"
+    // stand allein da — kein Einstieg, keine Frage, und der Entwurfs-Knopf
+    // darunter blieb unerklärt. Jetzt benennt der Zug das erste offene
+    // Pflicht-Feld samt Aktion: Entwurfs-Knopf (leer, George entwirft) oder
+    // Bestätigen (Text steht schon). GERECHNET wird nur aus Quellen, die VOR
+    // dem Scroll-Watcher (Zeile ~357) deklariert sind — `pendingCard` läge
+    // dahinter, und sein Zugriff hier wäre exakt der TDZ-500 vom 2026-09-03.
+    const firstOpenId = completion.value?.missingRequired[0]
+    const firstOpen = firstOpenId ? slots.value.find(slot => slot.id === firstOpenId) ?? null : null
+    const hasText = firstOpen ? store.slotValue(firstOpen.id).trim().length > 0 : false
+    const actionKey = firstOpen && (hasText || firstOpen.generator !== 'none')
+      ? (hasText ? 'nextConfirm' : 'nextDraft')
+      : null
+    const intro = t('brand.workspace.george.questionsDone')
+    const text = actionKey && firstOpen
+      ? `${intro} ${t(`brand.workspace.george.${actionKey}`, { field: slotLabel(firstOpen) })}`
+      : intro
+    return [...spoken, { id: 'done', role: 'george', text }]
   }
 
   const help = nextSlot.value.helpKey ? t(nextSlot.value.helpKey) : undefined
