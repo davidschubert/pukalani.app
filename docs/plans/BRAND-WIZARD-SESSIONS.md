@@ -34,6 +34,12 @@ Davids Idee vom 2026-09-04, in drei Runden geschärft:
 5. **Schlussanalyse:** das fertige Dokument wird einmal als Ganzes geprüft
    (Widersprüche, Lücken, Schärfung). Das ist das Konzept der bisher offenen
    Ergebnis-Seite.
+6. **Finale Abnahme je Kapitel (2026-09-04, zweite Runde):** jedes Kapitel
+   endet mit einem eigenen Punkt „Finale Abnahme", der ALLE Ergebnisse seiner
+   Sessions untereinander zeigt, losgelöst von der Bühne. Erst wenn dort
+   alles abgenommen ist, öffnet das nächste Kapitel. Damit hat JEDE Ebene
+   ihren Abschluss: Session → bestätigen, Kapitel → Finale Abnahme,
+   Foundation → Dokument-Prüfblick (§10). Drei Ebenen, drei Abnahmen.
 
 **Unverändert bleiben** die Eine-Stimme-Entscheidung (DECISION-LOG
 2026-09-02: George spricht, das Team liest mit), der Marker-Vertrag des
@@ -280,6 +286,56 @@ active / done / skipped) und `transitionBrandStep` schreibt ihn. Neu:
 `setConfidence` / `complete` / `reopen`; die Konfidenz-Weiche bleibt je
 Kapitel (sie ist kein Slot, Registry-Kopf). Neu ist nur `correct` (§9).
 
+## 5a. Finale Abnahme je Kapitel
+
+Der Abschluss eines Kapitels ist heute eine WEICHE im Gespräch: sobald alle
+Pflicht-Slots bestätigt sind, zeigt die Bühne „Passt dieses Kapitel?" mit den
+drei Konfidenz-Chips, und `transitionBrandStep(…, 'complete')` verlangt beide
+(Slots bestätigt UND Konfidenz gesetzt). Das bleibt der SCHREIBWEG. Neu ist
+der ORT: eine eigene Seite je Kapitel, letzter Eintrag in der Seitenleiste
+unter den Sessions, Glyphe wie heute das Ergebnis (Funken).
+
+**Was die Seite zeigt:** jede Session des Kapitels als Zeile in
+Registry-Reihenfolge — Feldname, bestätigter Wert (vollständig, nicht
+gekürzt), Notizen eingeklappt, Status (bestätigt / offen / veraltet), offene
+Befunde als Chips. Optionale, nicht befüllte Sessions stehen grau dabei. Kein
+George auf dieser Seite; der Mensch liest sein Kapitel im Zusammenhang, was
+in der Session-Ansicht nie geht.
+
+**Was man dort tun kann:** „Korrigieren" an jeder Zeile (Impact-Regel §9
+greift, Sprung in die Session), Befunde annehmen oder ablehnen (§8),
+Konfidenz wählen, **„Kapitel abnehmen"**.
+
+**Die Abnahme-Bedingung** ist `brandStepCompletion` plus zwei neue Glieder,
+alle drei auf dem Server geprüft: alle Pflicht-Sessions bestätigt · keine
+`stale`-Session im Kapitel · kein offener Befund vom Typ `conflict` mit
+einem Feld dieses Kapitels. Ein offener Konflikt SPERRT damit die Abnahme,
+nicht die Session — das ist die eine Stelle, an der ein Befund Zwang ausübt,
+und sie ist bewusst die Kapitel-Grenze: wer weiterzieht, hat seinen Konflikt
+entschieden (angenommen ⇒ korrigiert, oder abgelehnt ⇒ mit Grund in den
+Notizen). Fehlt etwas, sagt die Seite je Zeile, was, mit Link.
+
+**Kein zweites Häkchen je Feld.** Die Bestätigung in der Session IST die
+Feld-Abnahme („Bestätigen ist ein Zustand"). Ein erneutes Abhaken jeder Zeile
+auf der Abnahme-Seite wäre das Formular-Gefühl, das der Bühnen-Umbau
+abgeschafft hat. Die Abnahme ist EINE Handlung je Kapitel; die Zeilen sind
+die Prüfliste dafür. (Will David später ein bewusstes „im Zusammenhang
+gelesen" je Zeile, ist das ein leichter Zusatz — kein Umbau.)
+
+**Der Spezialist liest das Kapitel mit** (Kapitel-Modus des Schliess-Aufrufs,
+§7): beim Öffnen der Abnahme-Seite ein Aufruf über die bestätigten Werte des
+Kapitels gegen das ganze bestätigte Dokument. Antwort nur `findings`. Das ist
+die Molekül-Ebene der Prüfung — der Prüfblick in §10 ist dieselbe Prüfung auf
+Foundation-Ebene. Fail-soft wie in §7 (Seite funktioniert ohne Befunde,
+`reviewed: false` am Kapitel).
+
+**Weiter geht es erst danach:** der Kapitel-Zustand `done` entsteht NUR durch
+die Abnahme; das nächste Kapitel wird `open`, wenn der Vorgänger `done` ist —
+wie heute in `resolveBrandJourney`. Zurück bleibt immer erlaubt (§3b.2), und
+`reopen` propagiert weiter nicht: eine Korrektur nach der Abnahme läuft über
+§9 und macht das Kapitel nicht „un-abgenommen", sondern zeigt seine veralteten
+Zeilen bernstein, bis sie neu gestempelt oder neu besprochen sind.
+
 ## 6. Gesprächsführung: ein George, 68 Sessions
 
 - **Prompt je Zug** = Fundament + Persönlichkeit + `sessionInstruction(config)`
@@ -359,6 +415,10 @@ export interface BrandSessionReview {
 - **Der Spezialist spricht nie.** Alles, was er sagt, wird zu Georges
   Prompt-Block („Vera hat mitgelesen: …") oder zu Log-Einträgen. Die
   Eine-Stimme-Entscheidung wird damit wörtlich wahr.
+- **Drei Modi, ein Vertrag:** `session` (Standard, beim Bestätigen),
+  `correct` (§9, mit `affected`), `chapter` (§5a, beim Öffnen der Finalen
+  Abnahme — nur `findings`). Der Prüfblick (§10) ist `chapter` über alle
+  Kapitel.
 - Prompt-Version `review-1` wie bei `converse-N`; Änderungen versioniert.
 
 ## 8. Konflikt-Befunde
@@ -434,7 +494,9 @@ Seitenleiste zählt sie am Kapitel („2 neu besprechen").
 
 Die Ergebnis-Seite (P5–P7) ist heute ein offenes Konzept-Gate; der einzige
 Dummy ist von vor dem Bühnen-Umbau und widerspricht der Spec („ohne George").
-Davids Entscheidung 5 ist das Konzept:
+Davids Entscheidung 5 ist das Konzept — und seit Entscheidung 6 ist die
+Ergebnis-Seite schlicht die **Finale Abnahme der Ebene 1**: dieselbe Seite
+wie §5a, nur über alle Kapitel, mit dem Prüfblick statt des Kapitel-Modus.
 
 - **Das Dokument** = alle bestätigten Werte in Registry-Reihenfolge, je
   Kapitel ein Abschnitt, Notizen einklappbar, offene Befunde als Chips.
@@ -457,6 +519,10 @@ Davids Entscheidung 5 ist das Konzept:
   anderen zeigen Zähler („7 von 11 bestätigt · 2 neu besprechen"). Glyphen:
   gesperrt / offen / aktiv / bestätigt / veraltet, dieselben wie auf der
   Bühne (`BwSlotList`).
+- Letzter Eintrag jedes Kapitels: **„Finale Abnahme"** (§5a), Glyphe
+  Funken, gesperrt bis alle Pflicht-Sessions bestätigt sind, grün nach der
+  Abnahme. Die Kapitel-Zähler zählen sie nicht mit („7 von 11 bestätigt"
+  meint die Sessions).
 - Klick auf eine Session = derselbe Route-Record wie heute
   (`brand/[profileId]/[stepKey]`), Session als Query (`?s=<id>`), damit
   Zurück/Vor im Browser funktionieren und der Sticky-Fortschritt bleibt.
@@ -484,6 +550,7 @@ bei Profil-Löschung §7 des Schema-Plans).
 | George-Zug (Stream) | je Antwort des Menschen | wie heute | `talk` 40/Tag (unverändert) |
 | Generator | je Entwurf | wie heute | `slot` 10/Tag je Feld (unverändert) |
 | **Schliess-Aufruf** | je bestätigter Session | ~68 + Korrekturen | **neu** `review` 100/Tag je Brand, kleines Modell |
+| **Kapitel-Abnahme** (`chapter`) | beim Öffnen der Finalen Abnahme | 9 (+ Wiederholungen) | `review`, zählt 2 |
 | **Prüfblick** | auf Klick | wenige | `review`, zählt 5 |
 
 `brandAiLimits.ts` bekommt den Eimer als eigenen Vertrag (Muster
@@ -500,7 +567,8 @@ ZDR-fähige Modell der Routing-Liste; ohne Schlüssel läuft alles fail-soft
   Stream; wer JSON in den George-Zug mischt, zerstört das Streaming.
 - **Eine Stimme:** kein zweiter Sprecher, auch nicht als „Vera sagt:".
 - **Bestätigen ist ein Zustand** (Server erzwingt; „Korrigieren" einziger
-  Rückweg — jetzt mit Impact-Ack davor).
+  Rückweg — jetzt mit Impact-Ack davor). Die Finale Abnahme verdoppelt es
+  NICHT je Feld (§5a).
 - **`reopen` propagiert nicht** — die Warteschlange ist die Antwort, nicht ein
   kaskadierendes Reset.
 - **Ein gespeichertes `done` wird nicht herabgestuft**, nur als `stale`
@@ -525,8 +593,8 @@ Verifikation im Fable-Hauptloop, Merge erst grün.
 | --- | --- | --- | --- | --- |
 | 1 | **Session-Vertrag** | `BrandSessionConfig`, `defineSession`, `sessionsAffectedBy`, `resolveSessionStates`, `resolveNextSession` (Grundfassung); Prompt-Bauer `sessionInstruction` ersetzt die Feld-Anweisungen der drei Prompt-Dateien; Platzhalter-Ziele aus den heutigen Anweisungen | — | Registry-Tests erweitert (Rückwärts-Regel, Hülle mit Gegenprobe, Kind↔Typ), Prompt-Tests auf den Bauer umgestellt; Snapshot-Vergleich: Prompts je Feld inhaltsgleich zu vorher |
 | 2 | **Session-Ziele (Inhalt)** | 68 Zielsätze + Verarbeitungs- und Antwort-Regeln als Content-Spec §14, dann in die Registry | **David liest gegen** | `slotRegistry.test.ts`: kein leeres `goal` |
-| 3 | **Verlauf + Nav** | brand-011, `sessionKey` in converse/messages-Routen, Seitenleiste mit Unterpunkten, `?s=` in der Route, Auto-Weiter, Eröffnungszug-Regel, `collect`-Typ für `a.facts` | Davids Blick auf die Leiste | Playwright: Session-Wechsel lädt eigenen Verlauf; Bestands-Branding zeigt Kapitel-Verlauf in der ersten Session; `verify-brand-sessions.mjs` (Dev-Server + lokale Appwrite) |
-| 4 | **Schliess-Aufruf** | brand-012, `review`-Eimer, Route `POST …/sessions/:id/close`, `BrandSessionReview`-Zod, Notizen/Befunde im Log, Georges „hat mitgelesen"-Block, adaptive `nextSession` | KI-Kosten: David sieht den Eimer | Route-Test mit Stub (goalReached false sperrt nichts; Schema-Fehler ⇒ fail-soft mit `reviewed:false`); Live-Probe an einem Test-Branding |
+| 3 | **Verlauf + Nav + Finale Abnahme** | brand-011, `sessionKey` in converse/messages-Routen, Seitenleiste mit Unterpunkten, `?s=` in der Route, Auto-Weiter, Eröffnungszug-Regel, `collect`-Typ für `a.facts`; Abnahme-Seite je Kapitel (§5a) — Konfidenz-Weiche zieht von der Bühne dorthin, `complete` bekommt die zwei neuen Glieder | Davids Blick auf die Leiste | Playwright: Session-Wechsel lädt eigenen Verlauf; Bestands-Branding zeigt Kapitel-Verlauf in der ersten Session; `verify-brand-sessions.mjs` (Dev-Server + lokale Appwrite) |
+| 4 | **Schliess-Aufruf** | brand-012, `review`-Eimer, Route `POST …/sessions/:id/close`, `BrandSessionReview`-Zod, Notizen/Befunde im Log, Georges „hat mitgelesen"-Block, adaptive `nextSession`, Kapitel-Modus für die Finale Abnahme | KI-Kosten: David sieht den Eimer | Route-Test mit Stub (goalReached false sperrt nichts; Schema-Fehler ⇒ fail-soft mit `reviewed:false`); Live-Probe an einem Test-Branding |
 | 5 | **Konflikt-Chips** | Befund-UI im Log und in beiden Sessions, `accepted`/`dismissed`, Georges Einmal-Hinweis | — | Playwright: Chip verlinkt beide Felder; `dismissed` schreibt Notiz |
 | 6 | **Korrektur-Regel** | `sourcesHash` beim Bestätigen (alle Feldarten), `GET impact`, `impactAck`/409, Warteschlange, `correct`-Modus des Schliess-Aufrufs mit Eingrenzung, „gilt weiter"-Stempel | Davids Blick auf den Hinweis | Unit: Hülle je Feld = Anhang A (Gegenprobe); Route-Test: PATCH ohne Ack ⇒ 409; ohne Review bleiben alle `stale`; mit Review nur `affected` |
 | 7 | **Dokument + Prüfblick** | Ergebnis-Seite ohne George, „Dokument prüfen", Nachholung `reviewed:false` | Konzept-Gate P5–P7 damit beantwortet — **David nimmt die Seite ab** | Live-Durchlauf eines vollständigen Brandings |
