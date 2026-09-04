@@ -141,9 +141,17 @@ export function useBrandAutosave(profileId: MaybeRefOrGetter<string>) {
       else {
         store.mark('error')
         // s. `errorRetries` — der Zustandstext verspricht die Wiederholung.
-        errorRetries += 1
-        cancel()
-        timer = setTimeout(() => { void flush() }, Math.min(4_000 * 2 ** (errorRetries - 1), 60_000))
+        // ABER: nur, was vorbeigehen KANN, wird wiederholt (5xx, 429). Ein
+        // 400 ist ein endgültiges Nein zur GLEICHEN Eingabe — die Schleife
+        // hämmerte sonst für immer denselben Fehler (live erwischt beim
+        // step_locked-Befund, Davids Durchspiel-Audit 2026-09-03); dort
+        // bleibt der Fehlerzustand stehen, bis Tippen oder `online` einen
+        // NEUEN Versuch mit neuem Inhalt auslösen.
+        if (status === 429 || (status !== null && status >= 500)) {
+          errorRetries += 1
+          cancel()
+          timer = setTimeout(() => { void flush() }, Math.min(4_000 * 2 ** (errorRetries - 1), 60_000))
+        }
       }
     }
     finally {

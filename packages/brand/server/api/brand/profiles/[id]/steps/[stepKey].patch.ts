@@ -79,7 +79,7 @@ const SCHEMA_CODES = new Set(['unknown_slot', 'slot_foreign', 'slot_too_long'])
 
 export default defineEventHandler(async (event): Promise<BrandStepSaveResponse> => {
   const { userId } = await requireBrandAccess(event)
-  const { profile, stepKey, stepRow, stepRows } = await loadBrandStepContext(event, userId)
+  const { profile, stepKey, stepRow, stepRows, journey: enteredJourney } = await loadBrandStepContext(event, userId)
 
   // Bewusst `safeParse` statt `readValidatedBody`: die drei Registry-Gründe
   // sollen als `data.code` beim Client ankommen (createError-Regel), und ein
@@ -162,9 +162,20 @@ export default defineEventHandler(async (event): Promise<BrandStepSaveResponse> 
   }
 
   // ── Zustand und Konfidenz über die pure Regel ────────────────────────────
+  //
+  // DER GERECHNETE ZUSTAND, NICHT DER ROHE (Davids Durchspiel-Audit
+  // 2026-09-03): `open` ist kein gespeicherter Zustand — eine Zeile, deren
+  // Vorgänger fertig wird, bleibt roh `locked`, und die Journey rechnet sie
+  // `open`. Mit dem ROHEN Zustand übersprang der Start-Zweig solche
+  // Bausteine (Tippen speicherte transitionslos), und `setConfidence`/
+  // `complete` prallten mit `step_locked` ab: ein Kapitel nach einem
+  // Vorgänger-Abschluss liess sich NIE abschliessen (live an Krume & Gold
+  // pvm erwischt, 10/10 bestätigt und trotzdem 400). `canEnterBrandStep`
+  // hat den Eintritt oben schon geprüft — was hier ankommt, ist auf dem Weg.
+  const resolvedState = enteredJourney.find(entry => entry.stepKey === stepKey)?.state ?? stepRow.state
   let facts: BrandStepFacts = {
     stepKey,
-    state: stepRow.state,
+    state: resolvedState,
     confidence: stepRow.confidence ?? null,
     slots: toSlotFacts(next),
   }

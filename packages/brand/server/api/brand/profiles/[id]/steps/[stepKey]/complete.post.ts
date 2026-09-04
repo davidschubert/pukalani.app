@@ -44,12 +44,17 @@ import { recordBrandEvent } from '../../../../../../utils/brandEvents'
  */
 export default defineEventHandler(async (event): Promise<BrandStepCompleteResponse> => {
   const { userId } = await requireBrandAccess(event)
-  const { profile, stepKey, stepRow, stepRows } = await loadBrandStepContext(event, userId)
+  const { profile, stepKey, stepRow, stepRows, journey: enteredJourney } = await loadBrandStepContext(event, userId)
   const body = await readValidatedBody(event, createBrandStepCompleteSchema().parse)
 
+  // DER GERECHNETE ZUSTAND, NICHT DER ROHE — dieselbe Regel wie im
+  // Autosave-PATCH (dort steht die ganze Begründung): eine Zeile, deren
+  // Vorgänger fertig wird, bleibt roh `locked`; die Journey rechnet sie
+  // `open`, und nur mit diesem Zustand greift der Betreten-Zweig unten.
+  const resolvedState = enteredJourney.find(entry => entry.stepKey === stepKey)?.state ?? stepRow.state
   let facts: BrandStepFacts = {
     stepKey,
-    state: stepRow.state,
+    state: resolvedState,
     confidence: stepRow.confidence ?? null,
     slots: toSlotFacts(parseSlotRecords(stepRow.slots)),
   }

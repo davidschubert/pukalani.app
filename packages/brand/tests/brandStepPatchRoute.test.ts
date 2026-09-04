@@ -225,3 +225,24 @@ describe('PATCH …/steps/:stepKey — „Nochmal von vorn" (reopen)', () => {
     expect(tablesDB.updateRow).not.toHaveBeenCalled()
   })
 })
+
+/**
+ * DER GERECHNETE ZUSTAND SCHLÄGT DEN ROHEN (Davids Durchspiel-Audit
+ * 2026-09-03): `open` ist kein gespeicherter Zustand — eine Zeile, deren
+ * Vorgänger fertig wird, bleibt roh `locked`. Mit dem rohen Zustand nahm der
+ * Start-Zweig solche Bausteine nie mit, und `setConfidence` prallte mit
+ * `step_locked` ab: Krume & Golds pvm stand mit 10/10 bestätigten Feldern da
+ * und liess sich trotzdem nicht abschliessen („Passt" ⇒ stilles 400).
+ */
+describe('PATCH …/steps/:stepKey — roh verriegelt, aber auf dem Weg erreichbar', () => {
+  it('NIMMT Konfidenz an: die Journey rechnet die Zeile `open`, der Start greift', async () => {
+    stepRow.state = 'locked'
+    body = { revision: 3, confidence: 'almost' }
+
+    const response = await handler(event)
+
+    expect(response.revision).toBe(4)
+    expect(stepRow.state).toBe('active')
+    expect(stepRow.confidence).toBe('almost')
+  })
+})
