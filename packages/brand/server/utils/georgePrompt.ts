@@ -30,13 +30,18 @@ import type { BrandSlotDependency } from './brandGenerators'
  * Der Anbieter-Name hat dieses Feld noch nicht — er steht als Konstante hier
  * und wandert dorthin, sobald es ihn gibt.
  *
- * ── WAS (b) NICHT TUT ─────────────────────────────────────────────────────
- * `contextSlotInstruction()` beschreibt die AUFGABE, nie die DATEN. Die Werte
- * der Quell-Slots baut `formatDependencies()`, und der Aufrufer setzt beides
- * zusammen. Zwei Funktionen, weil es zwei Fragen sind: „was soll er tun" ist
- * eine Produktentscheidung (Content-Spec §4), „was weiss er" ein Datenstand —
- * und nur getrennt kann ein Test die erste prüfen, ohne die zweite zu
- * erfinden.
+ * ── WAS HIER SEIT BW2 NICHT MEHR STEHT ────────────────────────────────────
+ * Die AUFGABEN je Feld. Sie sind Inhalt der Session (`shared/sessionContent.ts`)
+ * und werden von EINEM Bauer gesetzt (`sessionPrompt.ts`) — vier Tabellen für
+ * vier Bausteine waren vier Stellen, an denen ein Rahmen fehlen kann. Was hier
+ * bleibt, ist das FUNDAMENT, das für jeden Entwurf gilt: der System-Prompt mit
+ * den neun Regeln, die Formalien (`brandSlotInstructionTail`) und die
+ * Formatierer der Eingaben.
+ *
+ * Die Trennung „Aufgabe gegen Daten" gilt unverändert: eine Instruktion
+ * beschreibt, WAS zu tun ist, `formatDependencies()` baut die Werte, und der
+ * Aufrufer setzt beides zusammen. Nur getrennt kann ein Test die erste prüfen,
+ * ohne die zweite zu erfinden.
  *
  * ── PROMPT-VERSION ────────────────────────────────────────────────────────
  * `GEORGE_PROMPT_VERSION` steht in JEDEM Generations-Eintrag
@@ -304,9 +309,7 @@ export function georgeSystemPrompt(options: GeorgeSystemPromptOptions): string {
  *
  * Der Name ohne „Context" ist die ganze Änderung: die Formalien (Quellen-
  * Ehrlichkeit, Leitplanken, Form, Zug-Vertrag) galten nie nur für Baustein A,
- * sie standen bloss nur dort. `ContextSlotInstructionOptions` bleibt als
- * Zweitname bestehen — ein Rename, der Aufrufstellen bricht, wäre für eine
- * Umbenennung ein zu hoher Preis.
+ * sie standen bloss nur dort.
  */
 export interface BrandSlotInstructionOptions {
   /** Quell-Slots dieses Feldes — hier nur ihre IDs, die Werte liefert (c). */
@@ -338,54 +341,6 @@ export interface BrandSlotInstructionOptions {
    * Verlauf gelesen, legt dem Modell nahe, dass es schon einmal gefragt hätte.
    */
   hasConversation: boolean
-}
-
-/** Zweitname aus der Zeit, als es nur Baustein A gab (s. o.). */
-export type ContextSlotInstructionOptions = BrandSlotInstructionOptions
-
-/** Die Aufgabe je Slot (Content-Spec §4) — ohne Daten, ohne Formalien. */
-const CONTEXT_SLOT_TASKS: Record<string, (options: BrandSlotInstructionOptions) => string[]> = {
-  'a.pitch': () => [
-    'TASK: draft the elevator pitch for this brand.',
-    'Work from the start card: "what they do" and "who it is for" are the person\'s own words — keep their '
-    + 'substance, sharpen the wording.',
-    'Two to three sentences, plain language, no superlatives and no marketing noise. '
-    + 'Say what they do, who it is for, and what makes it different.',
-  ],
-  'a.category': () => [
-    'TASK: name the industry / category this brand plays in, normalised to a term the industry itself uses.',
-    'The start card carries their own answer to "industry" — normalise THAT, do not replace it with a '
-    + 'category you would have picked.',
-    'One line, at most five words. "Software agency for online shops" — not "we build stuff".',
-  ],
-  'a.competitors': () => [
-    'TASK: write 3-5 short competitor profiles.',
-    'USE ONLY names that appear literally in the inputs below — named by the person or linked from their '
-    + 'own site. Do NOT invent competitors, do NOT add companies you happen to know, do NOT guess from the '
-    + 'industry named in the start card. If fewer than three names are given, return only those and say '
-    + 'nothing about the missing ones. If no name is given at all, return a single entry saying that no '
-    + 'competitor was named yet.',
-    'One line per competitor, in this shape: "- <name> - strong: <one point> - weak: <one point>".',
-    // B6: „steht nicht in den Eingaben" war als Steckbrief-Inhalt wertlos — der
-    // Mensch bekam drei Zeilen Füllung. Eine GEKENNZEICHNETE Annahme ist eine
-    // Aussage, die er prüfen kann; ein erfundener NAME bleibt verboten, weil er
-    // sich nicht prüfen, sondern nur glauben lässt.
-    'A point you can only infer — rather than read in the inputs — is allowed, but it must be marked in '
-    + 'the line itself, in this shape: "- <name> - assumption, please verify: <the point>". Never write '
-    + 'filler such as "not stated in the inputs": either say something checkable, or leave the point out.',
-  ],
-  'a.audienceSketch': () => [
-    'TASK: sketch the audience of this brand.',
-    'The start card\'s "who it is for" is the seed — unfold it, do not overwrite it.',
-    'One block per audience, at most three blocks. Use these labels: "Who", "What they want", '
-    + '"What holds them back". Concrete over demographic: what these people are trying to get done.',
-  ],
-  'a.toneAnalysis': () => [
-    'TASK: analyse the tone of the existing texts contained in the inputs below.',
-    'Name three to five tonal traits and quote a short phrase from the inputs for each one. '
-    + 'If the inputs contain no existing brand texts, say exactly that in one sentence and stop — '
-    + 'do not analyse a tone you cannot see, and do not describe how the brand SHOULD sound.',
-  ],
 }
 
 /**
@@ -558,24 +513,6 @@ export function brandSlotInstructionTail(
   )
 
   return lines
-}
-
-/**
- * DIE INSTRUKTION FÜR EINEN KONTEXT-SLOT (Baustein A · George).
- *
- * Wirft für einen Slot ohne Aufgabe. Das ist Absicht: ein stiller
- * Allzweck-Text wäre ein Entwurf ohne Auftrag, und der landet ununterscheidbar
- * im Brand-Dokument. Die Route macht aus dem Wurf `provider_error`, der Stand
- * bleibt bearbeitbar (§9b.5).
- */
-export function contextSlotInstruction(slotId: string, options: BrandSlotInstructionOptions): string {
-  const task = CONTEXT_SLOT_TASKS[slotId]
-  if (!task) throw new Error(`Kein George-Auftrag für Slot ${slotId}`)
-
-  return [
-    ...task(options),
-    ...brandSlotInstructionTail(options, { primarySource: GEORGE_PRIMARY_SOURCE_START_CARD }),
-  ].join('\n')
 }
 
 /**

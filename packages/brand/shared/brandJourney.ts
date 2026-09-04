@@ -67,9 +67,12 @@
  * Mensch für eine Kommakorrektur sein halbes Ergebnis.
  */
 
+import { computeSourcesHash, evaluateInvariants } from './brandSessions'
 import {
+  BRAND_SLOTS,
   BRAND_STEP_KEYS,
   type BrandPathKind,
+  type BrandSessionKind,
   type BrandSlotEditor,
   type BrandSlotStateFacts,
   type BrandStepKey,
@@ -341,6 +344,12 @@ export type BrandTransitionErrorCode =
   | 'invalid_confidence'
   | 'required_slots_missing'
   | 'confidence_missing'
+  /**
+   * Eine deterministische Prüfung des Session-Vertrags ist gerissen (BW2 §3a
+   * Nr. 6) — z. B. weniger als drei Werte in `c.final`. Die Route macht daraus
+   * ein `data.code` wie `required_slots_missing`.
+   */
+  | 'invariant_violated'
 
 export type BrandStepTransition =
   | { ok: true, step: BrandStepFacts, changed: boolean }
@@ -390,6 +399,18 @@ export function transitionBrandStep(step: BrandStepFacts, action: BrandStepActio
       if (slot.stepId !== step.stepKey) return { ok: false, code: 'slot_foreign' }
       const previous = step.slots?.[slot.id]
       if (previous?.confirmed) return { ok: true, step, changed: false }
+      /**
+       * DIE INVARIANTEN DES SESSION-VERTRAGS (BW2 §3a Nr. 6) — was ein Test
+       * prüfen kann, wird nicht der KI überlassen.
+       *
+       * Sie laufen NUR, wenn der Aufrufer den WERT mitgibt (`facts.value` ist
+       * optional, s. `BrandSlotStateFacts`). Ohne Wert wird nichts geprüft:
+       * eine Sperre, die zuschlägt, weil eine Aufrufstelle etwas nicht
+       * mitreicht, hielte einen Menschen von seinem eigenen Feld fern, und dem
+       * 409 sähe niemand an, dass er ein Verdrahtungsfehler ist.
+       */
+      const verdict = evaluateInvariants(slot, previous?.value, step.slots ?? {})
+      if (!verdict.ok) return { ok: false, code: verdict.code }
       return {
         ok: true,
         changed: true,
@@ -464,10 +485,45 @@ export function resolveNextQuestion(
   stepKey: BrandStepKey,
   slotStates: Readonly<Record<string, BrandSlotStateFacts | undefined>> = {},
 ): BrandNextQuestion | null {
-  const next = slotsForStep(stepKey).find(slot =>
-    slot.required
-    && (slot.type === 'question' || slot.type === 'choice')
-    && !slotIsFilled(slotStates[slot.id]),
+  const next = resolveNextSession(stepKey, slotStates)
+  if (!next) return null
+  // `kind` ist die EINZIGE Zugabe der Session-Fassung — sie fällt hier raus,
+  // damit der Rückgabewert Feld für Feld der von P1b bleibt (die Aufrufstellen
+  // vergleichen ihn ganz).
+  const { kind: _kind, ...question } = next
+  return question
+}
+
+/**
+ * DIE SESSION-FASSUNG DERSELBEN FRAGE (BW2 §6) — Grundfassung, wie oben: die
+ * erste offene Pflicht-Session in Registry-Reihenfolge.
+ *
+ * Die Menge ist identisch mit der von P1b: `ask`/`collect` sind die Sessions
+ * vom Typ `question`, `choose` die vom Typ `choice` — die Abbildung
+ * (`sessionKindFor`) ist bijektiv auf diesen beiden Mengen, `a.facts`
+ * eingeschlossen. Deshalb kann `resolveNextQuestion` hierauf delegieren, ohne
+ * dass sich ihr Verhalten ändert; die bestehenden Tests beweisen es.
+ *
+ * Die ADAPTIVE Wahl (der Spezialist nennt beim Schliessen die Session mit dem
+ * höchsten Informationswert, §6) kommt mit Paket 4 und ersetzt genau diesen
+ * Rumpf. Sie liefert denselben Rückgabetyp und wird gegen die Registry
+ * geprüft — „Reihenfolge gehört der Registry" gilt weiter, beweglich ist nur
+ * die Reihenfolge INNERHALB der offenen Menge.
+ */
+export interface BrandNextSession extends BrandNextQuestion {
+  kind: BrandSessionKind
+}
+
+const ASKABLE_KINDS: readonly BrandSessionKind[] = ['ask', 'collect', 'choose']
+
+export function resolveNextSession(
+  stepKey: BrandStepKey,
+  slotStates: Readonly<Record<string, BrandSlotStateFacts | undefined>> = {},
+): BrandNextSession | null {
+  const next = slotsForStep(stepKey).find(session =>
+    session.required
+    && ASKABLE_KINDS.includes(session.kind)
+    && !slotIsFilled(slotStates[session.id]),
   )
   if (!next) return null
   return {
@@ -476,7 +532,70 @@ export function resolveNextQuestion(
     helpKey: next.helpKey,
     type: next.type as 'question' | 'choice',
     editor: next.editor,
+    kind: next.kind,
   }
+}
+
+/**
+ * DER ZUSTAND JEDER EINZELNEN SESSION (BW2 §5) — abgeleitet, keine neue Spalte.
+ *
+ * `locked`  solange eine Eingabe aus `inputs.slots` unbestätigt ist
+ * `open`    alle Eingaben bestätigt, eigener Wert noch nicht
+ * `done`    Wert bestätigt und `sourcesHash` aktuell
+ * `stale`   Wert bestätigt, aber die Quellen haben sich seither bewegt
+ *
+ * `active` (die EINE Session, die der Mensch gerade offen hat) fehlt hier
+ * absichtlich: das ist ein Client-Zustand aus Route und `brand_messages`,
+ * keine Rechnung über gespeicherten Fakten. Wer ihn hier ableitete, hätte zwei
+ * Wahrheiten darüber, wo jemand gerade steht.
+ *
+ * ── DREI REGELN, DIE MAN NICHT „VEREINFACHEN" DARF ────────────────────────
+ * 1. BESTÄTIGT SCHLÄGT GESPERRT. Ein bestätigter Wert, dessen Quelle jemand
+ *    später wieder geöffnet hat, wird `done`/`stale` — nie `locked`. Das ist
+ *    der Migrationsvertrag §3e in dieser Ebene: ein gespeichertes `done` darf
+ *    die Ableitung ANZEIGEN, aber nie herabstufen.
+ * 2. OHNE GESPEICHERTEN HASH NIE `stale`. Jedes Bestands-Branding hat keinen;
+ *    ein Deploy, der alle 68 Felder bernstein färbt, nimmt einem fertigen
+ *    Kunden sein Ergebnis.
+ * 3. SESSIONS EINES ÜBERSPRUNGENEN KAPITELS SIND `locked`. Die Weiche
+ *    entscheidet, ob sie zum Weg gehören — nicht ihr Fortschritt (§3e: die
+ *    Daten bleiben liegen, der Weg geht daran vorbei).
+ */
+export type BrandSessionState = 'locked' | 'open' | 'done' | 'stale'
+
+export function resolveSessionStates(
+  profile: BrandProfileFacts,
+  stepFacts: readonly BrandStepFacts[] = [],
+): Readonly<Record<string, BrandSessionState>> {
+  const included = new Set(includedBrandSteps(profile))
+  // Die Fakten ALLER Kapitel in einer Karte: eine Session liest ausdrücklich
+  // über Kapitelgrenzen (`b.purpose` ← `a.pitch`), also darf die Rechnung das
+  // auch — sonst stünde die halbe Registry für immer auf `locked`.
+  const slots: Record<string, BrandSlotStateFacts | undefined> = {}
+  for (const facts of stepFacts) {
+    for (const [slotId, state] of Object.entries(facts.slots ?? {})) slots[slotId] = state
+  }
+
+  const states: Record<string, BrandSessionState> = {}
+  for (const session of BRAND_SLOTS) {
+    if (session.deactivated) continue
+    const own = slots[session.id]
+
+    if (own?.confirmed) {
+      const stored = own.sourcesHash
+      states[session.id] = stored !== undefined && stored !== computeSourcesHash(session, slots)
+        ? 'stale'
+        : 'done'
+      continue
+    }
+    if (!included.has(session.stepId)) {
+      states[session.id] = 'locked'
+      continue
+    }
+    const inputsReady = session.inputs.slots.every(inputId => slots[inputId]?.confirmed)
+    states[session.id] = inputsReady ? 'open' : 'locked'
+  }
+  return states
 }
 
 export type BrandJunctionChange =

@@ -345,9 +345,16 @@ describe('Das Ergebnis im Vertrag', () => {
     }
   })
 
-  it('ein Slot ohne Auftrag wirft, statt still etwas zu erfinden', async () => {
-    const foreign = { ...context(), slot: slotById('b.purpose')! }
-    await expect(plugin.georgeContextGenerator(foreign)).rejects.toThrow(/b\.purpose/)
+  /**
+   * Bis BW2 stand hier `b.purpose` — ein Slot aus VERAS Tabelle, den Georges
+   * Tabelle nicht kannte. Diese Grenze ist mit dem einen Prompt-Bauer weg
+   * (BRAND-WIZARD-SESSIONS.md §3), die Zusage dahinter bleibt: eine Session
+   * ohne Entwurfs-Auftrag bekommt keinen stillen Allzweck-Text. `a.origin` ist
+   * eine reine Menschenfrage (`generator: 'none'`) und im selben Baustein.
+   */
+  it('eine Session ohne Entwurfs-Auftrag wirft, statt still etwas zu erfinden', async () => {
+    const foreign = { ...context(), slot: slotById('a.origin')! }
+    await expect(plugin.georgeContextGenerator(foreign)).rejects.toThrow(/a\.origin/)
     expect(streamMock).not.toHaveBeenCalled()
   })
 })

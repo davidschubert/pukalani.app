@@ -1,7 +1,8 @@
 import { createAdvisorSlotGenerator } from '../utils/advisorGenerator'
 import type { BrandSlotGenerator } from '../utils/brandGenerators'
 import { registerBrandSlotGenerator } from '../utils/brandGenerators'
-import { MILO_PROMPT_VERSION, miloSlotInstruction } from '../utils/miloPrompt'
+import { MILO_PROMPT_VERSION } from '../utils/miloPrompt'
+import { sessionInstructionForSlot } from '../utils/sessionPrompt'
 
 /**
  * MILOS TECHNIK (P3.1) — Baustein C · Werte. GESPROCHEN von George
@@ -36,7 +37,7 @@ import { MILO_PROMPT_VERSION, miloSlotInstruction } from '../utils/miloPrompt'
 /** Milos Generator für Baustein C · Werte. */
 export const miloValuesGenerator: BrandSlotGenerator = createAdvisorSlotGenerator({
   promptVersion: MILO_PROMPT_VERSION,
-  instruction: miloSlotInstruction,
+  instruction: sessionInstructionForSlot,
 })
 
 export default defineNitroPlugin(() => {

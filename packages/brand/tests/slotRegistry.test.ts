@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { techniqueForStep } from '../shared/brandAdvisors'
 import {
   BRAND_SLOTS,
   BRAND_SLOT_MAX_LENGTH,
@@ -12,6 +13,7 @@ import {
   exampleKeyFor,
   questionKeyFor,
   requiredSlotsForStep,
+  sessionKindFor,
   slotById,
   slotIsConfirmable,
   slotIsFilled,
@@ -390,5 +392,124 @@ describe('questionKeyFor — die Pfad-Konvention', () => {
   it('kennt genau die drei pfad-abhängigen Slots des Katalogs', () => {
     expect(BRAND_SLOTS.filter(slot => slot.pathVariants).map(slot => slot.id))
       .toEqual(['a.origin', 'b.whyStarted', 'd.gapReveal'])
+  })
+})
+
+/**
+ * DER SESSION-VERTRAG (BW2 Paket 1, Plan BRAND-WIZARD-SESSIONS.md §3/§3a).
+ *
+ * Die Registry ist damit nicht mehr nur eine Feld-Tabelle, sondern die
+ * Beschreibung von 68 Arbeitseinheiten. Was hier geprüft wird, ist genau das,
+ * was der Plan zusagt — jeweils mit einer MUTIERTEN Fassung als Gegenprobe:
+ * eine Prüfung, die nur die richtige Liste kennt, wäre immer grün.
+ */
+describe('Session-Vertrag', () => {
+  it('gibt jeder Session ein nicht-leeres Ziel', () => {
+    for (const session of BRAND_SLOTS) expect(session.goal.trim(), session.id).not.toBe('')
+  })
+
+  it('meldet ein fehlendes Ziel als Registry-Fehler', () => {
+    expect(validateSlotRegistry(mutate('b.purpose', { goal: '' })))
+      .toContain('b.purpose: leeres goal — jede Session braucht ein Ziel')
+  })
+
+  it('leitet `kind` mechanisch aus dem Füllweg ab — mit der einen Ausnahme', () => {
+    const byKind = (kind: string) => BRAND_SLOTS.filter(session => session.kind === kind).map(s => s.id)
+    for (const session of BRAND_SLOTS) {
+      if (session.id === 'a.facts') continue
+      expect(sessionKindFor(session), session.id).toBe(session.kind)
+      expect({
+        question: 'ask',
+        choice: 'choose',
+        derivation: 'derive',
+        'stage-edit': 'draft',
+        special: 'instrument',
+      }[session.type], session.id).toBe(session.kind)
+    }
+    // `a.facts` steht als `choice` im Katalog und ist trotzdem eine SAMMLUNG.
+    expect(byKind('collect')).toEqual(['a.facts'])
+    expect(slotById('a.facts')!.type).toBe('choice')
+    expect(byKind('instrument')).toEqual(['d.pairs'])
+  })
+
+  it('meldet ein `kind`, das nicht zum Füllweg passt', () => {
+    expect(validateSlotRegistry(mutate('b.purpose', { kind: 'ask' })))
+      .toContain('b.purpose: kind "ask" passt nicht zum type "stage-edit"')
+  })
+
+  it('gibt Teile NUR der Sammel-Session', () => {
+    expect(slotById('a.facts')!.parts).toEqual(['teamSize', 'age', 'markets'])
+    for (const session of BRAND_SLOTS) {
+      if (session.kind === 'collect') continue
+      expect(session.parts, session.id).toEqual([])
+    }
+    expect(validateSlotRegistry(mutate('b.purpose', { parts: ['x'] })))
+      .toContain('b.purpose: parts sind nur bei kind "collect" erlaubt')
+    expect(validateSlotRegistry(mutate('a.facts', { parts: [] })))
+      .toContain('a.facts: kind "collect" ohne parts')
+  })
+
+  it('führt `inputs.slots` und `dependencies` als DIESELBE Liste', () => {
+    for (const session of BRAND_SLOTS) {
+      expect(session.inputs.slots, session.id).toBe(session.dependencies)
+    }
+    expect(validateSlotRegistry(mutate('b.purpose', { inputs: { ...slotById('b.purpose')!.inputs, slots: [] } })))
+      .toContain('b.purpose: inputs.slots und dependencies sind nicht dieselbe Liste')
+  })
+
+  it('spiegelt Schema, Editor und Generator im Output-Vertrag', () => {
+    for (const session of BRAND_SLOTS) {
+      expect(session.output.schema, session.id).toEqual(session.schema)
+      expect(session.output.editor, session.id).toBe(session.editor)
+      expect(session.output.generator, session.id).toBe(session.generator)
+    }
+    const purpose = slotById('b.purpose')!
+    expect(validateSlotRegistry(mutate('b.purpose', {
+      output: { ...purpose.output, editor: 'chips' },
+    }))).toContain('b.purpose: output.editor/generator laufen auseinander')
+  })
+
+  it('gibt jeder Session genau EINE Technik — die ihres Kapitels', () => {
+    for (const session of BRAND_SLOTS) {
+      expect(session.processing.technique, session.id).toBe(techniqueForStep(session.stepId).key)
+    }
+    // Und sie ist nicht überall dieselbe — sonst prüfte die Zeile oben nichts.
+    expect(new Set(BRAND_SLOTS.map(session => session.processing.technique)).size).toBeGreaterThan(1)
+  })
+
+  it('setzt Vertraulichkeit und Umfang für jede Session', () => {
+    for (const session of BRAND_SLOTS) {
+      expect(['public', 'internal', 'private'], session.id).toContain(session.sensitivity)
+      expect([1, 2, 3, 5, 10], session.id).toContain(session.effort.minutes)
+      expect(session.effort.turns, session.id).toBeGreaterThan(0)
+    }
+  })
+
+  it('hält genau die drei heiklen Sessions zurück (Plan §3a Nr. 7)', () => {
+    expect(BRAND_SLOTS.filter(session => session.sensitivity !== 'public').map(session => session.id))
+      .toEqual(['a.complaints', 'a.challenge', 'a.facts'])
+  })
+
+  it('lässt Invarianten nur auf Sessions zeigen, die VOR ihnen stehen', () => {
+    const position = new Map(BRAND_SLOTS.map((session, index) => [session.id, index]))
+    BRAND_SLOTS.forEach((session, index) => {
+      for (const invariant of session.invariants) {
+        if (invariant.of === undefined) continue
+        expect(position.get(invariant.of), `${session.id} → ${invariant.of}`).toBeLessThan(index)
+      }
+    })
+  })
+
+  it('meldet eine Invariante, die nach vorne zeigt', () => {
+    expect(validateSlotRegistry(mutate('c.final', { invariants: [{ kind: 'memberOf', of: 'f.shortlist' }] })))
+      .toContain('c.final: Invariante zeigt auf "f.shortlist", der nicht VOR dem Slot steht')
+    expect(validateSlotRegistry(mutate('c.final', { invariants: [{ kind: 'memberOf', of: 'gibtsnicht' }] })))
+      .toContain('c.final: Invariante zeigt auf unbekannten Slot "gibtsnicht"')
+  })
+
+  it('kennt zu jedem Inhalts-Eintrag eine Session', () => {
+    // Die Gegenprobe läuft über die echte Registry: ein verwaister Eintrag
+    // wäre ein Tippfehler in einer Id und ein Ziel, das niemand liest.
+    expect(validateSlotRegistry()).toEqual([])
   })
 })

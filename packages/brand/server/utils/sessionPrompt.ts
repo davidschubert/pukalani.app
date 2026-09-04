@@ -1,0 +1,172 @@
+import { brandChoiceContract, brandChoicePromptRule } from '../../shared/brandChoiceOptions'
+import {
+  type BrandPathKind,
+  type BrandSessionConfig,
+  slotById,
+} from '../../shared/slotRegistry'
+import {
+  type BrandSlotInstructionOptions,
+  GEORGE_PRIMARY_SOURCE_ANSWERS,
+  GEORGE_PRIMARY_SOURCE_START_CARD,
+  brandSlotInstructionTail,
+} from './georgePrompt'
+
+/**
+ * DER EINE PROMPT-BAUER JE SESSION (BW2 Paket 1,
+ * docs/plans/BRAND-WIZARD-SESSIONS.md §3 „Prompt-Aufbau aus der Config").
+ *
+ * ── WARUM EINER STATT VIER ────────────────────────────────────────────────
+ * Bis heute lagen die Feld-Anweisungen in vier Dateien —
+ * `contextSlotInstruction`, `veraSlotInstruction`, `miloSlotInstruction`,
+ * `archetypeSlotInstruction` —, je eine Tabelle `slotId → Zeilen`. Das war nie
+ * eine Aussage über Bausteine, sondern der Zustand „wir bauen Kapitel für
+ * Kapitel": vier Tabellen, vier Stellen, an denen ein Rahmen fehlen kann, und
+ * ein Slot, der in der falschen Tabelle nachschlug, warf. Die Aufträge sind
+ * jetzt INHALT der Session (`sessionContent.ts`), dieser Bauer setzt sie
+ * zusammen, und das Regel-FUNDAMENT (Quellen-Ehrlichkeit, Leitplanken, Form
+ * des Feldwerts, Zug-Vertrag) bleibt wo es war: in
+ * `brandSlotInstructionTail()`.
+ *
+ * ── DIE FESTE REIHENFOLGE ─────────────────────────────────────────────────
+ * Ziel · Eingaben · Verarbeitung · Form · Qualität · Anti-Muster · Beispiele ·
+ * Leiter, danach das Fundament. Leere Abschnitte werden AUSGELASSEN — eine
+ * Überschrift ohne Inhalt liest ein Modell als Lücke und füllt sie.
+ *
+ * Zwei Abschnitte stehen bewusst nicht darin:
+ *  · EINGABEN. Welche Felder er lesen darf, sagt das Fundament schon
+ *    (`Your inputs are the fields: …`) — hier eine zweite Liste zu setzen
+ *    hiesse, dieselbe Auskunft zweimal zu geben und beim nächsten Umbau
+ *    einmal zu vergessen.
+ *  · ANTWORT-REGELN (`answers`). Sie steuern das GESPRÄCH — wie oft George
+ *    nachfragt, ob „weiss ich nicht" gilt, ob man vertagen darf. Ein
+ *    ENTWURFS-Auftrag fragt niemanden; sie gehören deshalb in
+ *    `conversePrompt.ts` (Paket 3) und nicht hierher.
+ *
+ * ── IN PAKET 1 IST DAS ERGEBNIS WÖRTLICH DAS ALTE ─────────────────────────
+ * `quality`, `antiPatterns`, `examples`, `ladder` sind leer und `form` trägt
+ * nur mechanische Vorgaben (Paket 2 füllt beides, Davids Inhalts-Gate). Der
+ * gebaute Text ist deshalb ZEICHENGLEICH mit dem der vier Vorgänger — bewiesen
+ * an `tests/fixtures/slotInstructions.before.json`, das vor dem Umbau erzeugt
+ * wurde. Genau deshalb steigt in diesem Paket auch KEINE Prompt-Fassung: eine
+ * Fassung, die ohne Textänderung steigt, macht Generations-Einträge
+ * unvergleichbar, ohne dass sich etwas geändert hätte.
+ *
+ * ── EINE SESSION OHNE VERARBEITUNGSREGELN HAT KEINEN ENTWURFS-AUFTRAG ─────
+ * Dann wirft der Bauer, wie die vier Vorgänger auch. Das ist Absicht: ein
+ * stiller Allzweck-Text wäre ein Entwurf ohne Auftrag, und der landet
+ * ununterscheidbar im Brand-Dokument. Die Route macht aus dem Wurf
+ * `provider_error`, der Stand bleibt bearbeitbar (§9b.5). Die zweite
+ * Bedingung — `generator: 'none'` — hält den Wurf auch dann, wenn Paket 2
+ * jeder Session Regeln gibt: ein Feld, das George gar nicht entwirft
+ * (`d.pairs`, jede reine Menschenfrage), bekommt hier nie eine Anweisung.
+ */
+
+/** Abschnitt: Überschrift plus Zeilen. Leere Zeilenlisten fliegen raus. */
+function section(heading: string, lines: readonly string[]): string[] {
+  return lines.length ? [heading, ...lines] : []
+}
+
+/**
+ * DIE FORM DES WERTS als Prompt-Zeilen — nur, was ABWEICHT.
+ *
+ * `person: 'fromTeam'`, `tense: 'any'`, kein Wortdeckel und keine Verbotsliste
+ * sind die mechanischen Vorgaben aus `defineSession`; sie auszuschreiben hiesse,
+ * dem Modell „keine Regel" als Regel zu verkaufen.
+ */
+function formLines(config: BrandSessionConfig): string[] {
+  const lines: string[] = []
+  if (config.form.person === 'we') lines.push('Write it in the first person plural ("we").')
+  if (config.form.person === 'I') lines.push('Write it in the first person singular ("I").')
+  if (config.form.person === 'brand') lines.push('Write it about the brand, in the third person.')
+  if (config.form.person === 'none') lines.push('Write it without a grammatical subject for the brand.')
+  if (config.form.tense === 'present') lines.push('Present tense.')
+  if (config.form.tense === 'future') lines.push('Future tense.')
+  if (config.form.maxWords !== null) lines.push(`At most ${config.form.maxWords} words.`)
+  if (config.form.forbidden.length) {
+    lines.push(`Never in this value: ${config.form.forbidden.join('; ')}.`)
+  }
+  return lines
+}
+
+/** Beispiele des PFADES — nie die des anderen (Plan §3a Nr. 3). */
+function exampleLines(config: BrandSessionConfig, pathKind: BrandPathKind): string[] {
+  return config.examples[pathKind].map(example => `- ${example}`)
+}
+
+function ladderLines(config: BrandSessionConfig): string[] {
+  const lines: string[] = []
+  if (config.ladder.opening.trim()) lines.push(`Open with: ${config.ladder.opening}`)
+  for (const probe of config.ladder.probes) lines.push(`If the answer is thin, ask: ${probe}`)
+  for (const reframe of config.ladder.reframes) lines.push(`If it falls into a known trap: ${reframe}`)
+  return lines
+}
+
+/**
+ * DIE ANWEISUNG FÜR EINE SESSION. Wirft, wenn sie keinen Entwurfs-Auftrag hat
+ * (s. Kopf).
+ */
+export function sessionInstruction(
+  config: BrandSessionConfig,
+  options: BrandSlotInstructionOptions,
+): string {
+  if (config.generator === 'none' || config.processing.rules.length === 0) {
+    throw new Error(`Kein Entwurfs-Auftrag für Session ${config.id}`)
+  }
+
+  const lines = [
+    `TASK: ${config.goal}`,
+    ...config.processing.rules,
+    ...config.processing.pathRules[options.pathKind],
+    ...section('The form of the value:', formLines(config)),
+    ...section('Marks of a good value:', config.quality.map(mark => `- ${mark}`)),
+    ...section('Never accept:', config.antiPatterns.map(pattern => `- ${pattern}`)),
+    ...section(
+      'Examples of the FORM only — a different industry, never copy their content:',
+      exampleLines(config, options.pathKind),
+    ),
+    ...section('How to lead this session:', ladderLines(config)),
+  ]
+
+  /**
+   * DIE PRIMÄRE QUELLE — mechanisch, nicht je Baustein gepflegt.
+   *
+   * Baustein A schöpft aus der STARTKARTE, und seine Sessions haben genau
+   * deshalb keine Slot-Eingaben. Sobald eine Session ANTWORTEN liest, sind die
+   * ihre Quelle und die Karte nur noch Hintergrund — ein Purpose aus vier
+   * Startkarten-Zeilen statt aus fünf beantworteten Fragen wäre genau die
+   * Behauptung, die Regel 4 verbietet.
+   */
+  const primarySource = config.inputs.startCard && config.inputs.slots.length === 0
+    ? GEORGE_PRIMARY_SOURCE_START_CARD
+    : GEORGE_PRIMARY_SOURCE_ANSWERS
+
+  // Die legale Menge einer Auswahl steht WÖRTLICH im Prompt
+  // (`brandChoiceOptions.ts`): „choose one of the common models" bringt
+  // „Hybrid" zurück, und ein fünftes Modell im Brand-Dokument rechnet niemand
+  // mehr zurück. Sessions ohne Vertrag bekommen keine Wert-Regeln.
+  const contract = brandChoiceContract(config.id)
+
+  return [
+    ...lines,
+    ...brandSlotInstructionTail(options, {
+      primarySource,
+      ...(contract ? { valueRules: brandChoicePromptRule(contract) } : {}),
+    }),
+  ].join('\n')
+}
+
+/**
+ * DIESELBE ANWEISUNG ÜBER DIE SLOT-ID — die Form, in der die Generator-Naht
+ * sie erwartet (`AdvisorSlotGeneratorOptions.instruction`).
+ *
+ * Sie wirft für eine unbekannte Id, statt still nichts zu liefern: eine Id, die
+ * es nicht gibt, ist ein Tippfehler in einer Registrierung und kein Zustand.
+ */
+export function sessionInstructionForSlot(
+  slotId: string,
+  options: BrandSlotInstructionOptions,
+): string {
+  const config = slotById(slotId)
+  if (!config) throw new Error(`Unbekannte Session ${slotId}`)
+  return sessionInstruction(config, options)
+}

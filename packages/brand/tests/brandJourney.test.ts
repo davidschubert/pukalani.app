@@ -12,14 +12,19 @@ import {
   includedBrandSteps,
   resolveBrandJourney,
   resolveNextQuestion,
+  resolveNextSession,
+  resolveSessionStates,
   transitionBrandStep,
 } from '../shared/brandJourney'
+import { computeSourcesHash } from '../shared/brandSessions'
 import {
+  BRAND_SLOTS,
   BRAND_STEP_KEYS,
   type BrandSlotStateFacts,
   type BrandStepKey,
   confirmableRequiredSlotsForStep,
   requiredSlotsForStep,
+  slotById,
   slotsForStep,
   stepProgress,
 } from '../shared/slotRegistry'
@@ -678,5 +683,175 @@ describe('applyJunctionChange — Weichen umlegen, ohne zu löschen', () => {
     const on = applyJunctionChange(off.profile, { junction: 'subBrands', value: 'yes' })
     expect(stateOf(resolveBrandJourney(on.profile, stand), 'architecture'))
       .toMatchObject({ state: 'done', progress: { pct: 100 } })
+  })
+})
+
+/**
+ * DIE SESSION-EBENE (BW2 Paket 1) — dieselbe Zustandsmaschine, eine Stufe
+ * feiner. Sie ersetzt die Kapitel-Ebene NICHT, sie liegt darunter.
+ */
+describe('resolveNextSession', () => {
+  it('ist wörtlich dieselbe Wahl wie `resolveNextQuestion`, nur mit `kind`', () => {
+    // Über ALLE Bausteine und über mehrere Füllstände: die Fassungen dürfen
+    // nie auseinanderlaufen — `resolveNextQuestion` delegiert hierher.
+    for (const stepKey of BRAND_STEP_KEYS) {
+      const sessions = slotsForStep(stepKey)
+      for (let filled = 0; filled <= sessions.length; filled += 1) {
+        const facts = Object.fromEntries(
+          sessions.slice(0, filled).map(session => [session.id, { hasValue: true }]),
+        )
+        const question = resolveNextQuestion(stepKey, facts)
+        const session = resolveNextSession(stepKey, facts)
+        if (!question) {
+          expect(session, `${stepKey}/${filled}`).toBeNull()
+          continue
+        }
+        const { kind: _kind, ...withoutKind } = session!
+        expect(withoutKind, `${stepKey}/${filled}`).toEqual(question)
+      }
+    }
+  })
+
+  it('nennt die Arbeitsform mit — die einzige Zugabe', () => {
+    expect(resolveNextSession('context')).toMatchObject({ slotId: 'a.origin', kind: 'ask' })
+    expect(resolveNextSession('naming')).toMatchObject({ slotId: 'f.nameType', kind: 'choose' })
+  })
+
+  it('fragt nie nach einer Ableitung, einem Entwurf oder dem Instrument', () => {
+    for (const stepKey of BRAND_STEP_KEYS) {
+      const next = resolveNextSession(stepKey)
+      if (!next) continue
+      expect(['ask', 'collect', 'choose']).toContain(next.kind)
+    }
+  })
+})
+
+describe('resolveSessionStates (§5)', () => {
+  const stepFacts = (slots: Record<string, BrandSlotStateFacts>): BrandStepFacts[] =>
+    BRAND_STEP_KEYS.map(stepKey => ({
+      stepKey,
+      state: 'active' as const,
+      slots: Object.fromEntries(
+        Object.entries(slots).filter(([id]) => slotById(id)!.stepId === stepKey),
+      ),
+    }))
+
+  it('sperrt eine Session, solange eine Eingabe unbestätigt ist', () => {
+    const states = resolveSessionStates(BASE_PROFILE)
+    // a.pitch liest keine Slots — offen ab dem ersten Moment.
+    expect(states['a.pitch']).toBe('open')
+    // b.purpose liest vier bestätigte Werte, die es noch nicht gibt.
+    expect(states['b.purpose']).toBe('locked')
+  })
+
+  it('öffnet sie, sobald ALLE Eingaben bestätigt sind — nicht schon bei Entwürfen', () => {
+    const drafts = stepFacts({
+      'a.pitch': { hasValue: true },
+      'b.whyStarted': { hasValue: true },
+      'b.worldLoses': { hasValue: true },
+      'b.conviction': { hasValue: true },
+    })
+    expect(resolveSessionStates(BASE_PROFILE, drafts)['b.purpose']).toBe('locked')
+
+    const confirmed = stepFacts({
+      'a.pitch': { confirmed: true },
+      'b.whyStarted': { confirmed: true },
+      'b.worldLoses': { confirmed: true },
+      'b.conviction': { confirmed: true },
+    })
+    expect(resolveSessionStates(BASE_PROFILE, confirmed)['b.purpose']).toBe('open')
+  })
+
+  it('liest über Kapitelgrenzen — sonst stünde die halbe Registry für immer zu', () => {
+    // `b.purpose` liest `a.pitch` aus einem ANDEREN Baustein.
+    const states = resolveSessionStates(BASE_PROFILE, stepFacts({
+      'a.pitch': { confirmed: true },
+      'b.whyStarted': { confirmed: true },
+      'b.worldLoses': { confirmed: true },
+      'b.conviction': { confirmed: true },
+    }))
+    expect(states['b.purpose']).toBe('open')
+  })
+
+  it('nennt eine bestätigte Session `done`', () => {
+    expect(resolveSessionStates(BASE_PROFILE, stepFacts({ 'a.pitch': { confirmed: true } }))['a.pitch'])
+      .toBe('done')
+  })
+
+  it('BESTAND OHNE HASH IST NIE VERALTET (Migrationsvertrag §3e)', () => {
+    // c.livedExamples ist bestätigt, seine Quelle c.final hat sich geändert —
+    // ohne gespeicherten Hash bleibt es trotzdem `done`.
+    const states = resolveSessionStates(BASE_PROFILE, stepFacts({
+      'c.final': { confirmed: true, value: '- Mut\n- Klarheit\n- Geduld' },
+      'c.livedExamples': { confirmed: true, value: 'Damals im Winter.' },
+    }))
+    expect(states['c.livedExamples']).toBe('done')
+  })
+
+  it('färbt eine Session bernstein, sobald ihr gespeicherter Hash abweicht', () => {
+    const lived = slotById('c.livedExamples')!
+    const before = { 'c.final': { confirmed: true, value: '- Mut\n- Klarheit\n- Geduld' } }
+    const hash = computeSourcesHash(lived, before)
+
+    const unchanged = stepFacts({
+      ...before,
+      'c.livedExamples': { confirmed: true, sourcesHash: hash },
+    })
+    expect(resolveSessionStates(BASE_PROFILE, unchanged)['c.livedExamples']).toBe('done')
+
+    const moved = stepFacts({
+      'c.final': { confirmed: true, value: '- Mut\n- Klarheit\n- Tempo' },
+      'c.livedExamples': { confirmed: true, sourcesHash: hash },
+    })
+    expect(resolveSessionStates(BASE_PROFILE, moved)['c.livedExamples']).toBe('stale')
+  })
+
+  it('BESTÄTIGT SCHLÄGT GESPERRT — ein `done` wird nie herabgestuft', () => {
+    // c.livedExamples ist bestätigt, seine Quelle c.final aber (noch) nicht.
+    const states = resolveSessionStates(BASE_PROFILE, stepFacts({
+      'c.livedExamples': { confirmed: true },
+    }))
+    expect(states['c.livedExamples']).toBe('done')
+  })
+
+  it('sperrt die Sessions eines übersprungenen Kapitels', () => {
+    const states = resolveSessionStates(BASE_PROFILE)
+    // BASE_PROFILE hat einen Namen und keine Sub-Brands: B2 und F sind aus.
+    expect(states['b2.visibility']).toBe('locked')
+    expect(states['f.nameType']).toBe('locked')
+
+    const withNaming = resolveSessionStates({ ...BASE_PROFILE, hasName: false })
+    expect(withNaming['f.nameType']).toBe('open')
+  })
+
+  it('spricht über jede aktive Session der Registry und keine mehr', () => {
+    const states = resolveSessionStates(BASE_PROFILE)
+    expect(Object.keys(states)).toEqual(BRAND_SLOTS.filter(s => !s.deactivated).map(s => s.id))
+  })
+})
+
+describe('transitionBrandStep — Invarianten beim Bestätigen (§3a Nr. 6)', () => {
+  const valuesStep = (slots: Record<string, BrandSlotStateFacts>): BrandStepFacts => ({
+    stepKey: 'values',
+    state: 'active',
+    slots,
+  })
+
+  it('weist ein `c.final` mit zwei Werten ab', () => {
+    const step = valuesStep({ 'c.final': { hasValue: true, value: '- Mut\n- Klarheit' } })
+    expect(transitionBrandStep(step, { kind: 'confirmSlot', slotId: 'c.final' }))
+      .toEqual({ ok: false, code: 'invariant_violated' })
+  })
+
+  it('lässt drei bis fünf Werte durch', () => {
+    const step = valuesStep({ 'c.final': { hasValue: true, value: '- Mut\n- Klarheit\n- Geduld' } })
+    const result = transitionBrandStep(step, { kind: 'confirmSlot', slotId: 'c.final' })
+    expect(result.ok).toBe(true)
+  })
+
+  it('PRÜFT NICHTS OHNE WERT — fail-open, damit ein 409 nie ein Verdrahtungsfehler ist', () => {
+    // Genau der Zustand von heute: `toSlotFacts` liefert nur die zwei Flags.
+    const step = valuesStep({ 'c.final': { hasValue: true } })
+    expect(transitionBrandStep(step, { kind: 'confirmSlot', slotId: 'c.final' }).ok).toBe(true)
   })
 })

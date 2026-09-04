@@ -5,7 +5,8 @@ import {
 } from '../utils/advisorGenerator'
 import type { BrandSlotGenerator } from '../utils/brandGenerators'
 import { registerBrandSlotGenerator } from '../utils/brandGenerators'
-import { VERA_PROMPT_VERSION, veraSlotInstruction } from '../utils/veraPrompt'
+import { sessionInstructionForSlot } from '../utils/sessionPrompt'
+import { VERA_PROMPT_VERSION } from '../utils/veraPrompt'
 
 /**
  * VERAS TECHNIK (P3.1) — Bausteine B (Purpose · Vision · Mission +
@@ -52,7 +53,7 @@ export function verifyVeraChoice(input: {
 /** Veras Generator für die Bausteine B und B2. */
 export const veraStrategyGenerator: BrandSlotGenerator = createAdvisorSlotGenerator({
   promptVersion: VERA_PROMPT_VERSION,
-  instruction: veraSlotInstruction,
+  instruction: sessionInstructionForSlot,
   verify: verifyVeraChoice,
 })
 

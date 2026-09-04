@@ -6,14 +6,13 @@ import {
   type BrandSlotInstructionOptions,
   GEORGE_PRIMARY_SOURCE_ANSWERS,
   GEORGE_PRIMARY_SOURCE_START_CARD,
-  contextSlotInstruction,
 } from '../server/utils/georgePrompt'
-import { MILO_CANDIDATE_RANGE, miloSlotInstruction } from '../server/utils/miloPrompt'
-import { VERA_COMPETITOR_TEST, veraSlotInstruction } from '../server/utils/veraPrompt'
+import { sessionInstructionForSlot } from '../server/utils/sessionPrompt'
+import { MILO_CANDIDATE_RANGE } from '../server/utils/miloPrompt'
+import { VERA_COMPETITOR_TEST } from '../server/utils/veraPrompt'
 import {
   ARCHETYPE_PAIRS_PENDING,
   ARCHETYPE_TWO_CANDIDATES_RULE,
-  archetypeSlotInstruction,
 } from '../server/utils/archetypePrompt'
 
 /**
@@ -69,7 +68,7 @@ describe('Jeder entwerfbare Slot hat einen Auftrag', () => {
       'b2.model', 'b2.rule',
     ])
     for (const slotId of slots) {
-      expect(() => veraSlotInstruction(slotId, optionsFor(slotId)), slotId).not.toThrow()
+      expect(() => sessionInstructionForSlot(slotId, optionsFor(slotId)), slotId).not.toThrow()
     }
   })
 
@@ -77,7 +76,7 @@ describe('Jeder entwerfbare Slot hat einen Auftrag', () => {
     const slots = generatableSlots('values')
     expect(slots).toEqual(['c.candidates', 'c.definitions'])
     for (const slotId of slots) {
-      expect(() => miloSlotInstruction(slotId, optionsFor(slotId)), slotId).not.toThrow()
+      expect(() => sessionInstructionForSlot(slotId, optionsFor(slotId)), slotId).not.toThrow()
     }
   })
 
@@ -88,24 +87,39 @@ describe('Jeder entwerfbare Slot hat einen Auftrag', () => {
       'd.voiceSamples', 'd.toneWords', 'd.vocabulary',
     ])
     for (const slotId of slots) {
-      expect(() => archetypeSlotInstruction(slotId, optionsFor(slotId)), slotId).not.toThrow()
+      expect(() => sessionInstructionForSlot(slotId, optionsFor(slotId)), slotId).not.toThrow()
     }
     // `d.pairs` steht bewusst NICHT dabei: er ist `generator: 'none'` und
     // bekommt sein eigenes Instrument (Spec §12.2).
     expect(slots).not.toContain('d.pairs')
-    expect(() => archetypeSlotInstruction('d.pairs', optionsFor('d.pairs'))).toThrow(/d\.pairs/)
+    expect(() => sessionInstructionForSlot('d.pairs', optionsFor('d.pairs'))).toThrow(/d\.pairs/)
   })
 
-  it('EIN FREMDER SLOT WIRFT, statt still einen Allzweck-Text zu liefern', () => {
-    expect(() => veraSlotInstruction('c.candidates', optionsFor('c.candidates'))).toThrow(/c\.candidates/)
-    expect(() => miloSlotInstruction('b.purpose', optionsFor('b.purpose'))).toThrow(/b\.purpose/)
-    expect(() => archetypeSlotInstruction('b.purpose', optionsFor('b.purpose'))).toThrow(/b\.purpose/)
+  /**
+   * BIS BW2 WAR DAS EINE ANDERE PRÜFUNG: vier Aufgaben-TABELLEN, je eine pro
+   * Berater, und ein Slot in der falschen Tabelle warf („Kein Vera-Auftrag
+   * für Slot c.candidates"). Diese Grenze gibt es nicht mehr — der Plan
+   * ersetzt die vier Tabellen ausdrücklich durch EINEN Bauer über der Registry
+   * (BRAND-WIZARD-SESSIONS.md §3), und für den ist `c.candidates` einfach eine
+   * Session mit Auftrag. Was BLEIBT und hier festgenagelt wird, ist die
+   * eigentliche Zusage: eine Session OHNE Entwurfs-Auftrag bekommt keinen
+   * stillen Allzweck-Text, sondern einen Wurf.
+   */
+  it('EINE SESSION OHNE ENTWURFS-AUFTRAG WIRFT, statt einen Allzweck-Text zu liefern', () => {
+    // Reine Menschenfragen (`generator: 'none'`) entwirft George nie.
+    expect(() => sessionInstructionForSlot('a.origin', optionsFor('a.origin'))).toThrow(/a\.origin/)
+    expect(() => sessionInstructionForSlot('c.livedExamples', optionsFor('c.livedExamples')))
+      .toThrow(/c\.livedExamples/)
+    // Entwerfbar laut Registry, aber noch ohne Verarbeitungsregeln (Paket 2).
+    expect(() => sessionInstructionForSlot('e.manifesto', optionsFor('e.manifesto'))).toThrow(/e\.manifesto/)
+    // Und eine Id, die es gar nicht gibt.
+    expect(() => sessionInstructionForSlot('a.erfunden', optionsFor('a.pitch'))).toThrow(/a\.erfunden/)
   })
 })
 
 describe('Vera · Purpose · Vision · Mission (Content-Spec §5)', () => {
   it('PURPOSE ist das WARUM — Formel als Gerüst, nicht als Lückentext', () => {
-    const instruction = veraSlotInstruction('b.purpose', optionsFor('b.purpose'))
+    const instruction = sessionInstructionForSlot('b.purpose', optionsFor('b.purpose'))
     expect(instruction).toContain('the WHY')
     expect(instruction).toContain('beyond making money')
     expect(instruction).toContain('"We exist so that <who> <what changes for them>."')
@@ -116,7 +130,7 @@ describe('Vera · Purpose · Vision · Mission (Content-Spec §5)', () => {
   })
 
   it('VISION ist das WOHIN — ein Bild, keine Zielzahl', () => {
-    const instruction = veraSlotInstruction('b.vision', optionsFor('b.vision'))
+    const instruction = sessionInstructionForSlot('b.vision', optionsFor('b.vision'))
     expect(instruction).toContain('the WHERE TO')
     expect(instruction).toContain('"In ten years, <what looks different in the world because they existed>."')
     expect(instruction).toContain('A picture, not a target figure')
@@ -126,7 +140,7 @@ describe('Vera · Purpose · Vision · Mission (Content-Spec §5)', () => {
   })
 
   it('MISSION ist das WIE — und bleibt unter dem Purpose', () => {
-    const instruction = veraSlotInstruction('b.mission', optionsFor('b.mission'))
+    const instruction = sessionInstructionForSlot('b.mission', optionsFor('b.mission'))
     expect(instruction).toContain('the HOW')
     expect(instruction).toContain('"We <do what> for <whom>, so that <what result>."')
     expect(instruction).toContain('a new colleague could act on it tomorrow')
@@ -135,18 +149,18 @@ describe('Vera · Purpose · Vision · Mission (Content-Spec §5)', () => {
 
   it('VERAS PRÜFSTEIN steht in allen drei — und die Verbotsliste dazu', () => {
     for (const slotId of ['b.purpose', 'b.vision', 'b.mission']) {
-      const instruction = veraSlotInstruction(slotId, optionsFor(slotId))
+      const instruction = sessionInstructionForSlot(slotId, optionsFor(slotId))
       expect(instruction, slotId).toContain(VERA_COMPETITOR_TEST)
       expect(instruction, slotId).toContain('could any competitor in this industry say exactly this')
       expect(instruction, slotId).toContain('"world-class", "innovative", "passionate"')
     }
     // GEGENPROBE: er steht NICHT in den Aufträgen, die keine Aussage entwerfen —
     // eine Kategorie ist kein Satz, den ein Wettbewerber „sagen" könnte.
-    expect(veraSlotInstruction('b2.rule', optionsFor('b2.rule'))).not.toContain(VERA_COMPETITOR_TEST)
+    expect(sessionInstructionForSlot('b2.rule', optionsFor('b2.rule'))).not.toContain(VERA_COMPETITOR_TEST)
   })
 
   it('b.whyStarted LEITET AB und erfindet nicht — und fragt lieber', () => {
-    const instruction = veraSlotInstruction('b.whyStarted', optionsFor('b.whyStarted'))
+    const instruction = sessionInstructionForSlot('b.whyStarted', optionsFor('b.whyStarted'))
     expect(instruction).toContain('This is a DERIVATION, not a new question')
     expect(instruction).toContain('traceable to their own origin story')
     expect(instruction).toContain('do not construct one: ask instead')
@@ -155,7 +169,7 @@ describe('Vera · Purpose · Vision · Mission (Content-Spec §5)', () => {
 
 describe('Vera · Positionierung und Architektur (§5 / §5a)', () => {
   it('DIE KATEGORIE IST NICHT DIE BRANCHE — und der Auftrag sagt, woran man sie erkennt', () => {
-    const instruction = veraSlotInstruction('b.positioningCategory', optionsFor('b.positioningCategory'))
+    const instruction = sessionInstructionForSlot('b.positioningCategory', optionsFor('b.positioningCategory'))
     expect(instruction).toContain('the industry is what they do, the category is what they are compared against')
     expect(instruction).toContain('the competitors are the strongest evidence')
     expect(instruction).toContain('Narrow beats broad')
@@ -164,7 +178,7 @@ describe('Vera · Positionierung und Architektur (§5 / §5a)', () => {
   })
 
   it('DIE VIER ARCHITEKTUR-MODELLE STEHEN WÖRTLICH IM PROMPT', () => {
-    const instruction = veraSlotInstruction('b2.model', optionsFor('b2.model'))
+    const instruction = sessionInstructionForSlot('b2.model', optionsFor('b2.model'))
     for (const option of BRAND_ARCHITECTURE_MODELS) {
       expect(instruction, option.id).toContain(option.id)
       expect(instruction, option.id).toContain(option.label)
@@ -175,7 +189,7 @@ describe('Vera · Positionierung und Architektur (§5 / §5a)', () => {
   })
 
   it('b2.rule verlangt Beispiele AUS IHREM KONTEXT, nicht „Brand Product A"', () => {
-    const instruction = veraSlotInstruction('b2.rule', optionsFor('b2.rule'))
+    const instruction = sessionInstructionForSlot('b2.rule', optionsFor('b2.rule'))
     expect(instruction).toContain('FROM THEIR OWN CONTEXT')
     expect(instruction).toContain('not "Brand Product A"')
     expect(instruction).toContain('who decides')
@@ -183,7 +197,7 @@ describe('Vera · Positionierung und Architektur (§5 / §5a)', () => {
 })
 
 describe('Milo · Werte aus Momenten (Content-Spec §6)', () => {
-  const instruction = miloSlotInstruction('c.candidates', optionsFor('c.candidates'))
+  const instruction = sessionInstructionForSlot('c.candidates', optionsFor('c.candidates'))
 
   it('destilliert 5–7 Kandidaten AUS DEN ANTWORTEN', () => {
     expect(instruction).toContain(`TASK: distil ${MILO_CANDIDATE_RANGE.min} to ${MILO_CANDIDATE_RANGE.max} candidate VALUES`)
@@ -216,7 +230,7 @@ describe('Milo · Werte aus Momenten (Content-Spec §6)', () => {
   })
 
   it('c.definitions ist VERHALTEN, keine Wörterbuch-Erklärung', () => {
-    const definitions = miloSlotInstruction('c.definitions', optionsFor('c.definitions'))
+    const definitions = sessionInstructionForSlot('c.definitions', optionsFor('c.definitions'))
     expect(definitions).toContain('in this brand, not in a dictionary')
     expect(definitions).toContain('says what someone DOES or DOES NOT do')
     expect(definitions).toContain('no extra ones, none left out')
@@ -240,7 +254,7 @@ describe('Milo · Werte aus Momenten (Content-Spec §6)', () => {
  */
 describe('Baustein D · Hypothese, Archetypen, Stimme', () => {
   it('d.hypothesis LIEST DEN AUFTRITT — und entscheidet nichts', () => {
-    const instruction = archetypeSlotInstruction('d.hypothesis', optionsFor('d.hypothesis'))
+    const instruction = sessionInstructionForSlot('d.hypothesis', optionsFor('d.hypothesis'))
     expect(instruction).toContain('as a reading, not as a decision')
     expect(instruction).toContain('DO NOT DECIDE ANYTHING HERE')
     expect(instruction).toContain('Never write "you are the Sage"')
@@ -252,15 +266,15 @@ describe('Baustein D · Hypothese, Archetypen, Stimme', () => {
   })
 
   it('d.hypothesis kennt den Unterschied zwischen Relaunch und neuer Marke', () => {
-    expect(archetypeSlotInstruction('d.hypothesis', optionsFor('d.hypothesis', { pathKind: 'relaunch' })))
+    expect(sessionInstructionForSlot('d.hypothesis', optionsFor('d.hypothesis', { pathKind: 'relaunch' })))
       .toContain('including the parts that no longer fit them')
-    expect(archetypeSlotInstruction('d.hypothesis', optionsFor('d.hypothesis')))
+    expect(sessionInstructionForSlot('d.hypothesis', optionsFor('d.hypothesis')))
       .toContain('do not invent an appearance to have something to analyse')
   })
 
   it('DIE ZWÖLF ARCHETYPEN STEHEN WÖRTLICH IM PROMPT — in beiden Auswahl-Slots', () => {
     for (const slotId of ['d.primary', 'd.secondary']) {
-      const instruction = archetypeSlotInstruction(slotId, optionsFor(slotId))
+      const instruction = sessionInstructionForSlot(slotId, optionsFor(slotId))
       for (const option of BRAND_ARCHETYPES) {
         expect(instruction, `${slotId}/${option.id}`).toContain(option.id)
         expect(instruction, `${slotId}/${option.id}`).toContain(option.label)
@@ -273,7 +287,7 @@ describe('Baustein D · Hypothese, Archetypen, Stimme', () => {
 
   it('ZWEI KANDIDATEN ⇒ RÜCKFRAGE MIT CHIPS, nicht Entwurf (Davids Interim-Zuschnitt)', () => {
     for (const slotId of ['d.primary', 'd.secondary']) {
-      const instruction = archetypeSlotInstruction(slotId, optionsFor(slotId))
+      const instruction = sessionInstructionForSlot(slotId, optionsFor(slotId))
       expect(instruction, slotId).toContain(ARCHETYPE_TWO_CANDIDATES_RULE)
       expect(instruction, slotId).toContain('do NOT draft. Ask instead')
       expect(instruction, slotId).toContain('append one OPTION line per archetype')
@@ -286,19 +300,19 @@ describe('Baustein D · Hypothese, Archetypen, Stimme', () => {
 
   it('DAS LEERE PAARVERGLEICH-FELD WIRD ALS LEER BENANNT, nicht als Aussage gelesen', () => {
     for (const slotId of ['d.primary', 'd.secondary']) {
-      const instruction = archetypeSlotInstruction(slotId, optionsFor(slotId))
+      const instruction = sessionInstructionForSlot(slotId, optionsFor(slotId))
       expect(instruction, slotId).toContain(ARCHETYPE_PAIRS_PENDING)
       expect(instruction, slotId).toContain('Its emptiness says NOTHING about this brand')
       expect(instruction, slotId).toContain('never mention it to them')
     }
     // GEGENPROBE: die Slots, die `d.pairs` gar nicht sehen, tragen den Satz
     // nicht — eine Warnung vor etwas Abwesendem lenkt nur darauf hin.
-    expect(archetypeSlotInstruction('d.toneWords', optionsFor('d.toneWords')))
+    expect(sessionInstructionForSlot('d.toneWords', optionsFor('d.toneWords')))
       .not.toContain(ARCHETYPE_PAIRS_PENDING)
   })
 
   it('d.secondary ist der GEGENGEWICHT-Slot — verschieden vom Primären', () => {
-    const instruction = archetypeSlotInstruction('d.secondary', optionsFor('d.secondary'))
+    const instruction = sessionInstructionForSlot('d.secondary', optionsFor('d.secondary'))
     expect(instruction).toContain('keeps the primary from becoming a cliché')
     expect(instruction).toContain('The secondary MUST be a different one')
     expect(instruction).toContain('do not repeat the primary archetype')
@@ -307,7 +321,7 @@ describe('Baustein D · Hypothese, Archetypen, Stimme', () => {
   })
 
   it('d.gapReveal BENENNT DIE ABWEICHUNG EHRLICH (§12.2 Punkt 5)', () => {
-    const instruction = archetypeSlotInstruction('d.gapReveal', optionsFor('d.gapReveal'))
+    const instruction = sessionInstructionForSlot('d.gapReveal', optionsFor('d.gapReveal'))
     expect(instruction).toContain('NAME THE DIFFERENCE HONESTLY, NEVER SMOOTH IT OVER')
     expect(instruction).toContain('Do not soften it into "there are elements of both"')
     expect(instruction).toContain('do not add a reassuring closing sentence')
@@ -317,14 +331,14 @@ describe('Baustein D · Hypothese, Archetypen, Stimme', () => {
   })
 
   it('d.gapReveal auf dem Gründer-Pfad: kein Aussenbild ⇒ keine Abweichung', () => {
-    expect(archetypeSlotInstruction('d.gapReveal', optionsFor('d.gapReveal')))
+    expect(sessionInstructionForSlot('d.gapReveal', optionsFor('d.gapReveal')))
       .toContain('a gap you cannot see is one you must not report')
-    expect(archetypeSlotInstruction('d.gapReveal', optionsFor('d.gapReveal', { pathKind: 'relaunch' })))
+    expect(sessionInstructionForSlot('d.gapReveal', optionsFor('d.gapReveal', { pathKind: 'relaunch' })))
       .toContain('Describe the gap as distance travelled, not as a verdict')
   })
 
   it('d.voiceSamples sind GENAU DREI Sätze — und keine Slogans', () => {
-    const instruction = archetypeSlotInstruction('d.voiceSamples', optionsFor('d.voiceSamples'))
+    const instruction = sessionInstructionForSlot('d.voiceSamples', optionsFor('d.voiceSamples'))
     expect(instruction).toContain('EXACTLY THREE example sentences')
     expect(instruction).toContain('three lines, no more and no fewer')
     expect(instruction).toContain('This is not a slogan collection')
@@ -335,7 +349,7 @@ describe('Baustein D · Hypothese, Archetypen, Stimme', () => {
   })
 
   it('d.toneWords sind 4–6 Wörter, die etwas AUSSCHLIESSEN', () => {
-    const instruction = archetypeSlotInstruction('d.toneWords', optionsFor('d.toneWords'))
+    const instruction = sessionInstructionForSlot('d.toneWords', optionsFor('d.toneWords'))
     expect(instruction).toContain('FOUR to SIX tone words')
     expect(instruction).toContain('Every word has to EXCLUDE something')
     expect(instruction).toContain('"Professional", "authentic", "modern" and "high-quality"')
@@ -344,7 +358,7 @@ describe('Baustein D · Hypothese, Archetypen, Stimme', () => {
   })
 
   it('d.vocabulary BAUT AUF DER ANTWORT DES MENSCHEN AUF', () => {
-    const instruction = archetypeSlotInstruction('d.vocabulary', optionsFor('d.vocabulary'))
+    const instruction = sessionInstructionForSlot('d.vocabulary', optionsFor('d.vocabulary'))
     expect(instruction).toContain('START FROM THEIR OWN ANSWER')
     expect(instruction).toContain('take those over unchanged into the avoid side')
     expect(instruction).toContain('never argue with them about one')
@@ -354,10 +368,10 @@ describe('Baustein D · Hypothese, Archetypen, Stimme', () => {
 })
 
 describe('Die Formalien sind für alle Berater dieselben', () => {
-  const vera = veraSlotInstruction('b.purpose', optionsFor('b.purpose'))
-  const milo = miloSlotInstruction('c.candidates', optionsFor('c.candidates'))
+  const vera = sessionInstructionForSlot('b.purpose', optionsFor('b.purpose'))
+  const milo = sessionInstructionForSlot('c.candidates', optionsFor('c.candidates'))
 
-  const archetype = archetypeSlotInstruction('d.primary', optionsFor('d.primary'))
+  const archetype = sessionInstructionForSlot('d.primary', optionsFor('d.primary'))
 
   it('Zug-Vertrag, Rückfrage-Ausweg und Leitplanken stehen überall', () => {
     for (const [name, instruction] of [
@@ -376,7 +390,7 @@ describe('Die Formalien sind für alle Berater dieselben', () => {
     // A schöpft aus der Startkarte (seine Slots haben keine `dependencies`),
     // ab B aus den ANTWORTEN — ein Purpose aus vier Startkarten-Zeilen wäre
     // genau die Behauptung, die Regel 4 verbietet.
-    expect(contextSlotInstruction('a.pitch', optionsFor('a.pitch')))
+    expect(sessionInstructionForSlot('a.pitch', optionsFor('a.pitch')))
       .toContain(GEORGE_PRIMARY_SOURCE_START_CARD)
     for (const instruction of [vera, milo, archetype]) {
       expect(instruction).toContain(GEORGE_PRIMARY_SOURCE_ANSWERS)
@@ -385,16 +399,16 @@ describe('Die Formalien sind für alle Berater dieselben', () => {
   })
 
   it('die pfadabhängige Haltung und der Hinweis-Rahmen reisen mit', () => {
-    expect(veraSlotInstruction('b.purpose', optionsFor('b.purpose', { pathKind: 'relaunch' })))
+    expect(sessionInstructionForSlot('b.purpose', optionsFor('b.purpose', { pathKind: 'relaunch' })))
       .toContain('This is a relaunch')
-    expect(veraSlotInstruction('b.purpose', optionsFor('b.purpose', { hint: 'kürzer' })))
+    expect(sessionInstructionForSlot('b.purpose', optionsFor('b.purpose', { hint: 'kürzer' })))
       .toContain('never overrides the rules above')
-    expect(veraSlotInstruction('b.purpose', optionsFor('b.purpose')))
+    expect(sessionInstructionForSlot('b.purpose', optionsFor('b.purpose')))
       .not.toContain('never overrides the rules above')
   })
 
   it('DIE QUELL-SLOTS WERDEN BEIM NAMEN GENANNT', () => {
-    const instruction = veraSlotInstruction('b.purpose', optionsFor('b.purpose', {
+    const instruction = sessionInstructionForSlot('b.purpose', optionsFor('b.purpose', {
       dependencies: [
         { slotId: 'a.pitch', value: 'Wir rösten Kaffee.' },
         { slotId: 'b.conviction', value: '' },

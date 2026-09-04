@@ -1,7 +1,8 @@
-import { ARCHETYPE_PROMPT_VERSION, archetypeSlotInstruction } from '../utils/archetypePrompt'
+import { ARCHETYPE_PROMPT_VERSION } from '../utils/archetypePrompt'
 import { createAdvisorSlotGenerator, verifyBrandChoiceSlot } from '../utils/advisorGenerator'
 import type { BrandSlotGenerator } from '../utils/brandGenerators'
 import { registerBrandSlotGenerator } from '../utils/brandGenerators'
+import { sessionInstructionForSlot } from '../utils/sessionPrompt'
 
 /**
  * DER GENERATOR DES BAUSTEINS D — Archetyp & Stimme (Content-Spec §7 + §12).
@@ -44,7 +45,7 @@ import { registerBrandSlotGenerator } from '../utils/brandGenerators'
 /** Der Generator für Baustein D · Archetyp & Stimme. */
 export const georgeArchetypeGenerator: BrandSlotGenerator = createAdvisorSlotGenerator({
   promptVersion: ARCHETYPE_PROMPT_VERSION,
-  instruction: archetypeSlotInstruction,
+  instruction: sessionInstructionForSlot,
   verify: verifyBrandChoiceSlot,
 })
 
