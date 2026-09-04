@@ -235,7 +235,7 @@ export interface BrandSessionConfig {
   //   · 'a sentence the competitor could sign'. Heute gibt es `neverDo` nur
   //   je Beraterin; die scharfen Muster sind je FELD verschieden.
 
-  /** 3 · BEISPIELE — 1–2 erfundene starke Werte, je Pfad, FREMDE Branche. */
+  /** 3 · BEISPIELE — 1–2 erfundene starke Werte, je Pfad, FREMDE Branche. PFLICHT seit §5a (Abnahme-Seite zeigt sie). */
   readonly examples: { new: readonly string[], relaunch: readonly string[] }
   //   Für die FORM, nie für den Inhalt — deshalb immer aus einer anderen
   //   Branche als der des Kunden (die Route wählt gegen `startCard.industry`),
@@ -399,57 +399,131 @@ active / done / skipped) und `transitionBrandStep` schreibt ihn. Neu:
 
 `transitionBrandStep` bleibt der Schreibweg für `confirmSlot` /
 `setConfidence` / `complete` / `reopen`; die Konfidenz-Weiche bleibt je
-Kapitel (sie ist kein Slot, Registry-Kopf). Neu ist nur `correct` (§9).
+Kapitel (sie ist kein Slot, Registry-Kopf). Neu sind `acceptSlot` (§5a),
+`correct` (§9) und `restart` (§5a — der einzige löschende Weg, mit
+Schnappschuss).
 
-## 5a. Finale Abnahme je Kapitel
+## 5a. Finale Abnahme je Kapitel (Ablauf von David festgelegt, 2026-09-04)
 
 Der Abschluss eines Kapitels ist heute eine WEICHE im Gespräch: sobald alle
 Pflicht-Slots bestätigt sind, zeigt die Bühne „Passt dieses Kapitel?" mit den
 drei Konfidenz-Chips, und `transitionBrandStep(…, 'complete')` verlangt beide
-(Slots bestätigt UND Konfidenz gesetzt). Das bleibt der SCHREIBWEG. Neu ist
-der ORT: eine eigene Seite je Kapitel, letzter Eintrag in der Seitenleiste
-unter den Sessions, Glyphe wie heute das Ergebnis (Funken).
+(Slots bestätigt UND Konfidenz gesetzt). Der SCHREIBWEG bleibt. Neu ist der
+ORT und der ABLAUF: eine eigene Seite je Kapitel, letzter Eintrag in der
+Seitenleiste unter den Sessions, Glyphe wie heute das Ergebnis (Funken).
 
-**Was die Seite zeigt:** jede Session des Kapitels als Zeile in
-Registry-Reihenfolge — Feldname, bestätigter Wert (vollständig, nicht
-gekürzt), Notizen eingeklappt, Status (bestätigt / offen / veraltet), offene
-Befunde als Chips. Optionale, nicht befüllte Sessions stehen grau dabei. Kein
-George auf dieser Seite; der Mensch liest sein Kapitel im Zusammenhang, was
-in der Session-Ansicht nie geht.
+### Der Ablauf, in Reihenfolge
 
-**Was man dort tun kann:** „Korrigieren" an jeder Zeile (Impact-Regel §9
-greift, Sprung in die Session), Befunde annehmen oder ablehnen (§8),
-Konfidenz wählen, **„Kapitel abnehmen"**.
+**1 · Die Liste.** Jede Session des Kapitels als Block in Registry-Reihenfolge,
+untereinander, je Block drei Dinge:
 
-**Die Abnahme-Bedingung** ist `brandStepCompletion` plus zwei neue Glieder,
-alle drei auf dem Server geprüft: alle Pflicht-Sessions bestätigt · keine
-`stale`-Session im Kapitel · kein offener Befund vom Typ `conflict` mit
-einem Feld dieses Kapitels. Ein offener Konflikt SPERRT damit die Abnahme,
-nicht die Session — das ist die eine Stelle, an der ein Befund Zwang ausübt,
-und sie ist bewusst die Kapitel-Grenze: wer weiterzieht, hat seinen Konflikt
-entschieden (angenommen ⇒ korrigiert, oder abgelehnt ⇒ mit Grund in den
-Notizen). Fehlt etwas, sagt die Seite je Zeile, was, mit Link.
+- **Bereich** — der Feldname aus dem Locale-Katalog und die Kapitel-Zuordnung,
+  dazu der mechanische Satz „fliesst später in …" (§3a, aus der
+  Abhängigkeits-Hülle).
+- **Beispiel** — das Beispiel aus der Session-Config (§3a Nr. 3), immer aus
+  einer FREMDEN Branche, je Pfad (neu/Relaunch). Damit ist Nr. 3 keine
+  Vorschlagsoption mehr, sondern Pflicht: die Abnahme-Seite zeigt es dem
+  Kunden. Optionale Sessions ohne Wert stehen grau mit Beispiel und leerer
+  Eingabe dabei.
+- **Eigene Eingabe** — der bestätigte Wert, vollständig, nicht gekürzt;
+  Notizen der Session eingeklappt darunter; offene Befunde als Chips.
 
-**Kein zweites Häkchen je Feld.** Die Bestätigung in der Session IST die
-Feld-Abnahme („Bestätigen ist ein Zustand"). Ein erneutes Abhaken jeder Zeile
-auf der Abnahme-Seite wäre das Formular-Gefühl, das der Bühnen-Umbau
-abgeschafft hat. Die Abnahme ist EINE Handlung je Kapitel; die Zeilen sind
-die Prüfliste dafür. (Will David später ein bewusstes „im Zusammenhang
-gelesen" je Zeile, ist das ein leichter Zusatz — kein Umbau.)
+Je Block zwei Handlungen: **Abnehmen** und **Bearbeiten**. Abnehmen setzt
+`slots[id].accepted = true` (additiv, JSON in der bestehenden Spalte) — ein
+ZWEITER Zustand neben `confirmed`, bewusst: `confirmed` heisst „in der Session
+so gesagt", `accepted` heisst „im Zusammenhang des Kapitels gelesen und für
+gut befunden". Davids Entscheidung vom 2026-09-04 (zweite Fassung; die erste
+Fassung dieses Abschnitts hatte kein Häkchen je Zeile — revidiert). Ein
+Wert, der sich nach der Abnahme ändert (Bearbeiten, Korrektur nach §9),
+verliert `accepted` automatisch — der Server setzt es beim Schreiben des
+Werts zurück, nie die Oberfläche. Bearbeiten = die Korrektur aus §9 (Impact-
+Hinweis, wenn bestätigte Felder daran hängen, dann Sprung in die Session).
 
-**Der Spezialist liest das Kapitel mit** (Kapitel-Modus des Schliess-Aufrufs,
-§7): beim Öffnen der Abnahme-Seite ein Aufruf über die bestätigten Werte des
-Kapitels gegen das ganze bestätigte Dokument. Antwort nur `findings`. Das ist
-die Molekül-Ebene der Prüfung — der Prüfblick in §10 ist dieselbe Prüfung auf
-Foundation-Ebene. Fail-soft wie in §7 (Seite funktioniert ohne Befunde,
-`reviewed: false` am Kapitel).
+**2 · Der Zähler.** Über der Liste „7 von 10 abgenommen"; die
+Pflicht-Sessions zählen, optionale ohne Wert nicht. Unbestätigte Sessions
+(Wert fehlt) stehen mit Link in ihre Session, können nicht abgenommen werden.
 
-**Weiter geht es erst danach:** der Kapitel-Zustand `done` entsteht NUR durch
-die Abnahme; das nächste Kapitel wird `open`, wenn der Vorgänger `done` ist —
-wie heute in `resolveBrandJourney`. Zurück bleibt immer erlaubt (§3b.2), und
-`reopen` propagiert weiter nicht: eine Korrektur nach der Abnahme läuft über
-§9 und macht das Kapitel nicht „un-abgenommen", sondern zeigt seine veralteten
-Zeilen bernstein, bis sie neu gestempelt oder neu besprochen sind.
+**3 · Alles abgenommen.** Erst wenn ALLE Pflicht-Sessions `accepted` sind,
+keine Session `stale` ist und kein offener `conflict`-Befund an einem Feld
+dieses Kapitels hängt, erscheint unter der Liste der Hinweis
+„In diesem Kapitel ist nichts mehr offen — bestätige es, wenn es passt."
+und darunter die Frage **„Passt dieses Kapitel?"** mit den drei Antworten
+(heute die Konfidenz-Chips `fits` / `almost` / `restart`). Vorher ist die
+Frage NICHT sichtbar — das ist dieselbe Regel wie `brandStepCompletion`
+(eine Weiche, die vor ihrer Bedingung erscheint, verspricht einen Abschluss,
+den die Route abweist), nur mit `accepted` und den zwei neuen Gliedern in
+der Bedingung. Ein offener Konflikt SPERRT damit die Abnahme, nicht die
+Session — die eine Stelle, an der ein Befund Zwang ausübt, bewusst die
+Kapitel-Grenze: wer weiterzieht, hat seinen Konflikt entschieden.
+
+**4 · Die drei Antworten.**
+
+- **„Passt"** ⇒ `complete` mit Konfidenz `fits`. Kapitel `done`, nächstes
+  Kapitel `open`, Knopf „Weiter zu Kapitel …" öffnet dessen erste Session
+  mit George.
+- **„Fast"** ⇒ `complete` mit Konfidenz `almost`. Dasselbe, das Kapitel trägt
+  die Selbstauskunft (heute schon so; George der späteren Kapitel kennt sie).
+- **„Nochmal von vorn"** ⇒ KEINE Konfidenz, sondern die Handlung `restart`
+  (unten). `restart` wird nie mehr als Konfidenz GESPEICHERT;
+  `BRAND_CONFIDENCE_VALUES` behält den Wert nur für Bestandszeilen.
+
+### „Nochmal von vorn" — die eine echte Verhaltensänderung
+
+Heute ist „Nochmal von vorn" eine VERTIEFUNGSRUNDE: `reopen` setzt das
+Kapitel auf `active`, Slots und Konfidenz bleiben stehen („kein Löschknopf",
+`brandJourney.ts` §3b.8). Davids Entscheidung 2026-09-04: von vorn heisst
+von vorn — die Ebene-3-Ergebnisse dieses Kapitels gehen verloren, und genau
+davor steht ein Schutz:
+
+1. **Der Klick öffnet einen Layer** (Modal, `UModal`), der ausdrücklich sagt,
+   dass ALLES in diesem Kapitel verloren geht und man in dieser Ebene von
+   vorn beginnt: Anzahl der Werte, Notizen, Abnahmen — und, falls spätere
+   Kapitel schon bestätigte Felder haben, die daran hängen, die
+   Abhängigkeits-Hülle aus §9 („berührt ausserdem 14 bestätigte Felder in
+   drei späteren Kapiteln"). Der Layer IST damit der Impact-Hinweis; ein
+   zweiter Dialog danach wäre eine Verdopplung.
+2. **Bestätigen nur durch Tippen:** ein Feld, in das der Mensch das Wort
+   **„bestätigen"** (Locale: `brand.acceptance.restart.word`, en `confirm`)
+   eintippt, dann der Knopf „Bestätigen" — vorher ist der Knopf
+   deaktiviert. Oder **„Abbrechen"**: nichts passiert. Das getippte Wort ist
+   Reibung gegen den Fehlklick und gehört der Oberfläche; der SERVER prüft
+   nicht das Wort, sondern `acknowledge: true` plus den `impactAck`-Hash
+   (§9), und weist ohne beides mit 409 `restart_unacknowledged` ab.
+3. **Was der Server bei `restart` tut** — als EINE Handlung in
+   `transitionBrandStep`, nicht als Aufräumen in der Route:
+   - Schnappschuss der Kapitel-Zeile (Slots, Notizen, Konfidenz, Abnahmen)
+     als `brand_events`-Eintrag `step.restarted` (24 Monate, Audit) — ein
+     versehentlicher Restart ist damit für den Betreiber rekonstruierbar,
+     für den Kunden aber wirklich „von vorn".
+   - Slots des Kapitels geleert, `accepted`/`notes`/`sourcesHash`/Konfidenz
+     zurückgesetzt, `state = 'active'`, `revision` steigt.
+   - `restartedAt` auf der Kapitel-Zeile (additiv). Die Nachrichten werden
+     NICHT gelöscht (Retention-Regel brand-003: dauerhaft), aber der Verlauf
+     lädt nur noch Züge NACH `restartedAt` — George beginnt ohne das alte
+     Gedächtnis, sonst wäre „von vorn" eine Lüge.
+   - Spätere Kapitel: ihre abhängigen Felder werden nach §9 mechanisch
+     `stale` (Hash weicht ab). Der Spezialist grenzt hier NICHT ein — es gibt
+     keinen neuen Wert, gegen den er prüfen könnte; die Eingrenzung kommt
+     mit der ersten neuen Bestätigung im Kapitel.
+   - Antwort: `next` = erste Session des Kapitels; George eröffnet.
+
+### Was die Seite sonst noch kann
+
+Befunde annehmen oder ablehnen (§8) direkt am Block. **Der Spezialist liest
+das Kapitel mit** (Kapitel-Modus des Schliess-Aufrufs, §7): beim Öffnen der
+Abnahme-Seite ein Aufruf über die bestätigten Werte des Kapitels gegen das
+ganze Dokument, Antwort nur `findings`. Molekül-Ebene der Prüfung; der
+Prüfblick in §10 ist dieselbe Prüfung auf Foundation-Ebene. Fail-soft (§7):
+die Seite funktioniert ohne Befunde, `reviewed: false` am Kapitel. Kein George
+auf dieser Seite.
+
+**Weiter geht es erst danach:** `done` entsteht NUR durch die Abnahme; das
+nächste Kapitel wird `open`, wenn der Vorgänger `done` ist — wie heute in
+`resolveBrandJourney`. Zurück bleibt immer erlaubt (§3b.2). `reopen` bleibt
+als leise Vertiefung (Session öffnen, Wert ändern) und propagiert weiter
+nicht; eine Korrektur nach der Abnahme macht das Kapitel nicht
+„un-abgenommen", sondern nimmt der geänderten Zeile `accepted` und zeigt
+veraltete Zeilen bernstein, bis sie neu gestempelt oder neu besprochen sind.
 
 ## 6. Gesprächsführung: ein George, 68 Sessions
 
@@ -651,7 +725,8 @@ wie §5a, nur über alle Kapitel, mit dem Prüfblick statt des Kapitel-Modus.
 | --- | --- | --- |
 | brand-011 | `brand_messages.sessionKey` (string, leer = Kapitel-Verlauf), Index `(profileId, stepKey, sessionKey)` | Bestands-Verläufe bleiben lesbar (§6) |
 | brand-012 | Tabelle `brand_findings`: `profileId`, `kind`, `slots` (JSON), `why`, `suggestion`, `status`, `sourceSession`, `$createdAt`; Index `(profileId, status)`; Permissions wie `brand_messages` | Befunde haben Status und sind kapitelübergreifend (§4) |
-| — | `brand_steps.slots[id].notes`, `.sourcesHash`, `.reviewed` | JSON in bestehender Spalte, kein Schema-Schritt |
+| — | `brand_steps.slots[id].notes`, `.sourcesHash`, `.reviewed`, `.accepted` | JSON in bestehender Spalte, kein Schema-Schritt |
+| brand-013 | `brand_steps.restartedAt` (datetime, null) | Verlaufs-Schnitt nach „Nochmal von vorn" (§5a), Nachrichten bleiben |
 
 Index-Anlage NUR über `createIndexSteps` (CLAUDE.md). Neue Tabelle ⇒ in die
 Soll-Liste von `pnpm ops:schema-parity` (Layer-Block `brand`) UND in den
@@ -685,7 +760,9 @@ ZDR-fähige Modell der Routing-Liste; ohne Schlüssel läuft alles fail-soft
   Rückweg — jetzt mit Impact-Ack davor). Die Finale Abnahme verdoppelt es
   NICHT je Feld (§5a).
 - **`reopen` propagiert nicht** — die Warteschlange ist die Antwort, nicht ein
-  kaskadierendes Reset.
+  kaskadierendes Reset. `restart` (§5a) ist davon getrennt: löschend, mit
+  Schnappschuss, getipptem Wort und Impact-Ack — und NUR über die
+  Abnahme-Seite erreichbar, nie über die Bühne.
 - **Ein gespeichertes `done` wird nicht herabgestuft**, nur als `stale`
   angezeigt (Migrationsvertrag §3e).
 - **Registry-Reihenfolge bleibt die Ordnung**; adaptiv ist nur die Wahl
@@ -708,7 +785,7 @@ Verifikation im Fable-Hauptloop, Merge erst grün.
 | --- | --- | --- | --- | --- |
 | 1 | **Session-Vertrag** | `BrandSessionConfig`, `defineSession`, `sessionsAffectedBy`, `resolveSessionStates`, `resolveNextSession` (Grundfassung); Prompt-Bauer `sessionInstruction` ersetzt die Feld-Anweisungen der drei Prompt-Dateien; Platzhalter-Ziele aus den heutigen Anweisungen | — | Registry-Tests erweitert (Rückwärts-Regel, Hülle mit Gegenprobe, Kind↔Typ), Prompt-Tests auf den Bauer umgestellt; Snapshot-Vergleich: Prompts je Feld inhaltsgleich zu vorher |
 | 2 | **Session-Ziele (Inhalt)** | 68 Zielsätze + Verarbeitungs- und Antwort-Regeln als Content-Spec §14, dann in die Registry | **David liest gegen** | `slotRegistry.test.ts`: kein leeres `goal` |
-| 3 | **Verlauf + Nav + Finale Abnahme** | brand-011, `sessionKey` in converse/messages-Routen, Seitenleiste mit Unterpunkten, `?s=` in der Route, Auto-Weiter, Eröffnungszug-Regel, `collect`-Typ für `a.facts`; Abnahme-Seite je Kapitel (§5a) — Konfidenz-Weiche zieht von der Bühne dorthin, `complete` bekommt die zwei neuen Glieder | Davids Blick auf die Leiste | Playwright: Session-Wechsel lädt eigenen Verlauf; Bestands-Branding zeigt Kapitel-Verlauf in der ersten Session; `verify-brand-sessions.mjs` (Dev-Server + lokale Appwrite) |
+| 3 | **Verlauf + Nav + Finale Abnahme** | brand-011, `sessionKey` in converse/messages-Routen, Seitenleiste mit Unterpunkten, `?s=` in der Route, Auto-Weiter, Eröffnungszug-Regel, `collect`-Typ für `a.facts`; Abnahme-Seite je Kapitel (§5a: Bereich/Beispiel/Eingabe, Abnehmen je Block, Zähler, Hinweis + Frage erst bei 10/10, Restart-Layer mit getipptem Wort), `acceptSlot`/`restart` in der Zustandsmaschine, brand-013 — Konfidenz-Weiche zieht von der Bühne dorthin, `complete` bekommt die drei neuen Glieder | Davids Blick auf Seite und Restart-Layer | Playwright: Frage erscheint erst bei vollständiger Abnahme; Restart ohne Wort ⇒ Knopf aus; Route-Test: `restart` ohne Ack ⇒ 409, mit Ack ⇒ Schnappschuss-Event + leere Slots + `restartedAt`; Verlauf lädt nur Züge danach |
 | 4 | **Schliess-Aufruf** | brand-012, `review`-Eimer, Route `POST …/sessions/:id/close`, `BrandSessionReview`-Zod, Notizen/Befunde im Log, Georges „hat mitgelesen"-Block, adaptive `nextSession`, Kapitel-Modus für die Finale Abnahme | KI-Kosten: David sieht den Eimer | Route-Test mit Stub (goalReached false sperrt nichts; Schema-Fehler ⇒ fail-soft mit `reviewed:false`); Live-Probe an einem Test-Branding |
 | 5 | **Konflikt-Chips** | Befund-UI im Log und in beiden Sessions, `accepted`/`dismissed`, Georges Einmal-Hinweis | — | Playwright: Chip verlinkt beide Felder; `dismissed` schreibt Notiz |
 | 6 | **Korrektur-Regel** | `sourcesHash` beim Bestätigen (alle Feldarten), `GET impact`, `impactAck`/409, Warteschlange, `correct`-Modus des Schliess-Aufrufs mit Eingrenzung, „gilt weiter"-Stempel | Davids Blick auf den Hinweis | Unit: Hülle je Feld = Anhang A (Gegenprobe); Route-Test: PATCH ohne Ack ⇒ 409; ohne Review bleiben alle `stale`; mit Review nur `affected` |
