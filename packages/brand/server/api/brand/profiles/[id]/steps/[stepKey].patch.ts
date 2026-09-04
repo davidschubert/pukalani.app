@@ -172,7 +172,10 @@ export default defineEventHandler(async (event): Promise<BrandStepSaveResponse> 
   // Vorgänger-Abschluss liess sich NIE abschliessen (live an Krume & Gold
   // pvm erwischt, 10/10 bestätigt und trotzdem 400). `canEnterBrandStep`
   // hat den Eintritt oben schon geprüft — was hier ankommt, ist auf dem Weg.
-  const resolvedState = enteredJourney.find(entry => entry.stepKey === stepKey)?.state ?? stepRow.state
+  // `skipped` kann hier nie ankommen (canEnterBrandStep hat oben abgewiesen)
+  // — der Rückfall auf den Zeilen-Zustand hält nur den Typ ehrlich.
+  const journeyState = enteredJourney.find(entry => entry.stepKey === stepKey)?.state
+  const resolvedState = journeyState && journeyState !== 'skipped' ? journeyState : stepRow.state
   let facts: BrandStepFacts = {
     stepKey,
     state: resolvedState,

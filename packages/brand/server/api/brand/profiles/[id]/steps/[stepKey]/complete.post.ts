@@ -51,7 +51,9 @@ export default defineEventHandler(async (event): Promise<BrandStepCompleteRespon
   // Autosave-PATCH (dort steht die ganze Begründung): eine Zeile, deren
   // Vorgänger fertig wird, bleibt roh `locked`; die Journey rechnet sie
   // `open`, und nur mit diesem Zustand greift der Betreten-Zweig unten.
-  const resolvedState = enteredJourney.find(entry => entry.stepKey === stepKey)?.state ?? stepRow.state
+  // `skipped` kann hier nie ankommen (canEnterBrandStep hat abgewiesen).
+  const journeyState = enteredJourney.find(entry => entry.stepKey === stepKey)?.state
+  const resolvedState = journeyState && journeyState !== 'skipped' ? journeyState : stepRow.state
   let facts: BrandStepFacts = {
     stepKey,
     state: resolvedState,
