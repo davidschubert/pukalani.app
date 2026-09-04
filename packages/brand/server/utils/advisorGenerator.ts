@@ -1,5 +1,10 @@
 import type { H3Event } from 'h3'
 import { techniqueForStep } from '../../shared/brandAdvisors'
+import {
+  brandChoiceContract,
+  brandChoiceFallbackQuestion,
+  checkBrandChoiceDraft,
+} from '../../shared/brandChoiceOptions'
 import type { BrandSlot } from '../../shared/slotRegistry'
 import type { BrandGeneratorContext, BrandGeneratorResult, BrandSlotGenerator } from './brandGenerators'
 import { type BrandSlotInstructionOptions, formatGeorgeInputs, georgeSystemPrompt } from './georgePrompt'
@@ -187,6 +192,35 @@ export interface AdvisorSlotVerifyInput {
   draft: string
   /** Sprache der OBERFLÄCHE — eine Rückfrage ist Chat und folgt Regel 9. */
   uiLocale: string
+}
+
+/**
+ * DIE AUSWAHL-NACHPRÜFUNG — einmal, für JEDEN Baustein mit `choice`-Slots.
+ *
+ * Sie stand bis zum 2026-09-04 im Vera-Plugin und galt damit nur für B/B2. Das
+ * war nie eine Aussage über Vera, sondern der Zustand „es gibt erst einen
+ * Baustein mit einer Auswahl": mit `d.primary`/`d.secondary` hat der
+ * Archetyp-Baustein zwei weitere, und eine zweite Kopie dieser sechs Zeilen
+ * wäre eine zweite Chance, dass ein erfundener Wert ungeprüft ins
+ * Brand-Dokument geht — und dort ist er von einem echten nicht mehr zu
+ * unterscheiden.
+ *
+ * Ein Slot OHNE Vertrag geht unverändert durch: nicht jeder Baustein hat eine
+ * geschlossene Menge, und eine Prüfung, die sich eine ausdenkt, wäre schlimmer
+ * als keine.
+ */
+export function verifyBrandChoiceSlot(input: {
+  slot: { id: string }
+  draft: string
+  uiLocale: string
+}): AdvisorSlotVerdict {
+  const contract = brandChoiceContract(input.slot.id)
+  if (!contract) return { draft: input.draft }
+
+  const check = checkBrandChoiceDraft(contract, input.draft)
+  return check.ok
+    ? { draft: check.value }
+    : { question: brandChoiceFallbackQuestion(contract, input.uiLocale) }
 }
 
 export interface AdvisorSlotGeneratorOptions {

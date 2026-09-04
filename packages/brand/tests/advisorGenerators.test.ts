@@ -41,6 +41,7 @@ vi.stubGlobal('aiCompleteStream', streamMock)
 const { clearBrandSlotGenerators, resolveBrandSlotGenerator } = await import('../server/utils/brandGenerators')
 const vera = await import('../server/plugins/vera-strategy')
 const milo = await import('../server/plugins/milo-values')
+const archetype = await import('../server/plugins/george-archetype')
 
 const event = {} as H3Event
 const EMPTY_START_CARD = { websiteUrl: '', industry: '', about: '', audience: '' }
@@ -110,20 +111,34 @@ describe('Registrierung an der Naht', () => {
     }
   })
 
-  it('Milo trägt sich NUR für `values` ein — Baustein D kommt mit P4', () => {
+  it('Milo trägt sich NUR für `values` ein — Baustein D hat seinen eigenen', () => {
     milo.default()
     expect(resolveBrandSlotGenerator('values')).toEqual({
       generator: milo.miloValuesGenerator,
       chargesQuota: true,
     })
-    // Ohne Aufträge wäre eine Registrierung schlechter als keine: sie machte
-    // aus `no_generator` (ruhiger Hinweis) ein `provider_error`.
+    // ZWEI Registrierungen für `archetype` wären eine, die die andere still
+    // überschreibt (`GENERATORS` ist eine Map) — die Zuständigkeit steht je
+    // Baustein an genau einer Stelle.
     expect(resolveBrandSlotGenerator('archetype')).toBeNull()
+  })
+
+  it('BAUSTEIN D HAT EINEN GENERATOR — und er kostet Kontingent', () => {
+    // Vorher gab `resolveBrandSlotGenerator('archetype')` null, „George,
+    // entwirf das" endete mit `no_generator`, und die sieben Slots dieses
+    // Bausteins haben `editor: 'none'` — es gab dort gar kein Feld zum
+    // Selberschreiben.
+    archetype.default()
+    expect(resolveBrandSlotGenerator('archetype')).toEqual({
+      generator: archetype.georgeArchetypeGenerator,
+      chargesQuota: true,
+    })
   })
 
   it('KEIN WILDCARD: ein Baustein ohne eigenen Generator bleibt ohne', () => {
     vera.default()
     milo.default()
+    archetype.default()
     for (const stepKey of ['manifesto', 'verbal', 'naming', 'result'] as const) {
       expect(resolveBrandSlotGenerator(stepKey), stepKey).toBeNull()
     }
@@ -152,6 +167,14 @@ describe('Wer spricht — und wessen Technik er trägt', () => {
     // GEGENPROBE: Milos Kapitel borgt sich nicht Veras Technik.
     expect(values).not.toContain('with Vera')
     expect(values).not.toContain(advisorByKey('vera')!.interviewTechnique)
+
+    // Baustein D gehört laut Registry EBENFALLS Milo — der neue Generator holt
+    // sich die Technik dort und nicht aus seinem eigenen Dateinamen.
+    await archetype.georgeArchetypeGenerator(context('d.primary', 'archetype') as never)
+    const archetypeSystem = lastCall().options.system!
+    expect(archetypeSystem).toContain('You are George, Brand advisor at')
+    expect(archetypeSystem).toContain('You have gone through this chapter with Milo')
+    expect(archetypeSystem).toContain(advisorByKey('milo')!.interviewTechnique)
   })
 
   it('NACHNAMEN UND DIE VERWORFENE HUNDE-WELT BLEIBEN AUS DEM PROMPT', async () => {
@@ -170,6 +193,7 @@ describe('Der Aufruf an den Transport gilt für JEDEN Berater', () => {
     for (const run of [
       () => vera.veraStrategyGenerator(context('b.purpose', 'pvm') as never),
       () => milo.miloValuesGenerator(context('c.candidates', 'values') as never),
+      () => archetype.georgeArchetypeGenerator(context('d.hypothesis', 'archetype') as never),
     ]) {
       await run()
       expect(lastCall().options.providerRouting).toEqual({
@@ -190,6 +214,13 @@ describe('Der Aufruf an den Transport gilt für JEDEN Berater', () => {
     expect(veraResult.promptVersion).toBe('vera-b-2')
     const miloResult = await milo.miloValuesGenerator(context('c.candidates', 'values') as never)
     expect(miloResult.promptVersion).toBe('milo-c-2')
+    // Baustein D beginnt bei 1 — INTERIM (Gesprächs-Ableitung statt
+    // Paarvergleich, Davids Entscheidung 2026-09-04). Kommt das Instrument,
+    // steigt sie, und ein alter Eintrag bleibt lesbar als das, was er war.
+    const archetypeResult = await archetype.georgeArchetypeGenerator(
+      context('d.hypothesis', 'archetype') as never,
+    )
+    expect(archetypeResult.promptVersion).toBe('george-archetype-1')
   })
 
   it('QUELL-WERTE AUS ANDEREN BAUSTEINEN LANDEN IM PROMPT (P3.1)', async () => {
@@ -250,6 +281,45 @@ describe('Die Auswahl-Nachprüfung', () => {
     answers('BASIS: Aus dem Pitch.\nDRAFT:\nSpezialitätenkaffee für Cafés\nASK: Trifft das?')
     const result = await vera.veraStrategyGenerator(context('b.positioningCategory', 'pvm') as never)
     expect(result).toMatchObject({ outcome: 'draft', draft: 'Spezialitätenkaffee für Cafés' })
+  })
+
+  it('EIN ERFUNDENER ARCHETYP WIRD ZUR RÜCKFRAGE — dieselbe Prüfung, neuer Baustein', async () => {
+    answers('BASIS: Ihr klingt neugierig.\nDRAFT:\nThe Wanderer\nASK: Passt das?')
+    const result = await archetype.georgeArchetypeGenerator(context('d.primary', 'archetype') as never)
+    expect(result.outcome).toBe('question')
+    expect(result.draft).toBe('')
+    expect(result.message).toContain('Archetyp')
+    expect(result.message).toContain('?')
+  })
+
+  it('GEGENPROBE: ein echter Archetyp wird auf seine stabile Id normalisiert', async () => {
+    answers('BASIS: Eure Texte erklären viel.\nDRAFT:\nThe Sage\nASK: Trifft das?')
+    const result = await archetype.georgeArchetypeGenerator(context('d.primary', 'archetype') as never)
+    expect(result).toMatchObject({ outcome: 'draft', draft: 'sage' })
+    // Der ZUG behält den Klartext: derselbe Beschluss in zwei Registern.
+    expect(result.message).toContain('The Sage')
+  })
+
+  it('DER SEKUNDÄRE PRÜFT GEGEN DENSELBEN KATALOG', async () => {
+    answers('BASIS: Der Gegenpol.\nDRAFT:\njester\nASK: Passt das?')
+    const result = await archetype.georgeArchetypeGenerator(context('d.secondary', 'archetype') as never)
+    expect(result).toMatchObject({ outcome: 'draft', draft: 'jester' })
+  })
+
+  it('DIE ARCHETYP-RÜCKFRAGE SPRICHT DIE SPRACHE DER SEITE', async () => {
+    answers('BASIS: Gemischt.\nDRAFT:\nThe Wanderer\nASK: Passt das?')
+    const result = await archetype.georgeArchetypeGenerator(
+      context('d.primary', 'archetype', { uiLocale: 'en' }) as never,
+    )
+    expect(result.message).toContain('primary archetype')
+    expect(result.message).not.toContain('Haupt-Archetyp')
+  })
+
+  it('DIE FÜNF SLOTS OHNE VERTRAG GEHEN UNANGETASTET DURCH', async () => {
+    answers('BASIS: Aus euren Texten.\nDRAFT:\n- ruhig\n- genau\n- warm\n- direkt\nASK: Passt das?')
+    const result = await archetype.georgeArchetypeGenerator(context('d.toneWords', 'archetype') as never)
+    expect(result).toMatchObject({ outcome: 'draft' })
+    expect(result.draft).toContain('- ruhig')
   })
 
   it('SLOTS OHNE AUSWAHL-VERTRAG WERDEN NICHT ANGEFASST', async () => {

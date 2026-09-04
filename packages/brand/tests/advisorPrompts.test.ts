@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { BRAND_ARCHITECTURE_MODELS } from '../shared/brandChoiceOptions'
+import { BRAND_ARCHETYPES, BRAND_ARCHITECTURE_MODELS } from '../shared/brandChoiceOptions'
 import { BRAND_LIST_FORMAT_RULE } from '../shared/brandSlotFormat'
 import { BRAND_SLOTS, type BrandStepKey, slotById } from '../shared/slotRegistry'
 import {
@@ -10,6 +10,11 @@ import {
 } from '../server/utils/georgePrompt'
 import { MILO_CANDIDATE_RANGE, miloSlotInstruction } from '../server/utils/miloPrompt'
 import { VERA_COMPETITOR_TEST, veraSlotInstruction } from '../server/utils/veraPrompt'
+import {
+  ARCHETYPE_PAIRS_PENDING,
+  ARCHETYPE_TWO_CANDIDATES_RULE,
+  archetypeSlotInstruction,
+} from '../server/utils/archetypePrompt'
 
 /**
  * VERAS UND MILOS AUFTRÄGE (P3.1) — geprüft ohne einen einzigen KI-Aufruf.
@@ -76,9 +81,25 @@ describe('Jeder entwerfbare Slot hat einen Auftrag', () => {
     }
   })
 
+  it('BAUSTEIN D IST VOLLSTÄNDIG ABGEDECKT — die letzte Lücke der Registry', () => {
+    const slots = generatableSlots('archetype')
+    expect(slots).toEqual([
+      'd.hypothesis', 'd.primary', 'd.secondary', 'd.gapReveal',
+      'd.voiceSamples', 'd.toneWords', 'd.vocabulary',
+    ])
+    for (const slotId of slots) {
+      expect(() => archetypeSlotInstruction(slotId, optionsFor(slotId)), slotId).not.toThrow()
+    }
+    // `d.pairs` steht bewusst NICHT dabei: er ist `generator: 'none'` und
+    // bekommt sein eigenes Instrument (Spec §12.2).
+    expect(slots).not.toContain('d.pairs')
+    expect(() => archetypeSlotInstruction('d.pairs', optionsFor('d.pairs'))).toThrow(/d\.pairs/)
+  })
+
   it('EIN FREMDER SLOT WIRFT, statt still einen Allzweck-Text zu liefern', () => {
     expect(() => veraSlotInstruction('c.candidates', optionsFor('c.candidates'))).toThrow(/c\.candidates/)
     expect(() => miloSlotInstruction('b.purpose', optionsFor('b.purpose'))).toThrow(/b\.purpose/)
+    expect(() => archetypeSlotInstruction('b.purpose', optionsFor('b.purpose'))).toThrow(/b\.purpose/)
   })
 })
 
@@ -202,12 +223,146 @@ describe('Milo · Werte aus Momenten (Content-Spec §6)', () => {
   })
 })
 
+/**
+ * BAUSTEIN D — Archetyp & Stimme (Content-Spec §7 + §12).
+ *
+ * INTERIM bis zum Paarvergleich-Instrument (§12.2) — Davids Entscheidung
+ * 2026-09-04: George leitet die Kette im GESPRÄCH her statt sie zu berechnen.
+ * Bewiesen werden hier die vier Zusagen, an denen dieser Weg hängt:
+ *  1. Die Hypothese LEGT NICHTS FEST — sie ist die Vorstufe, und ein „ihr seid
+ *     der Weise" an dieser Stelle nimmt die Wahl vorweg, die danach kommt.
+ *  2. Bei zwei ernsthaften Kandidaten wird GEFRAGT, nicht entworfen — mit
+ *     OPTION-Zeilen, damit der Mensch klickt statt abzutippen. Ein Münzwurf mit
+ *     Begründung sieht im Brand-Dokument aus wie eine Ableitung.
+ *  3. Das leere `d.pairs` wird als LEER benannt und nicht als Aussage gelesen.
+ *  4. Der Aussenbild-Abgleich benennt die Abweichung EHRLICH (§12.2 Punkt 5) —
+ *     das ist der Aha-Moment des Kapitels und der erste, den man wegglättet.
+ */
+describe('Baustein D · Hypothese, Archetypen, Stimme', () => {
+  it('d.hypothesis LIEST DEN AUFTRITT — und entscheidet nichts', () => {
+    const instruction = archetypeSlotInstruction('d.hypothesis', optionsFor('d.hypothesis'))
+    expect(instruction).toContain('as a reading, not as a decision')
+    expect(instruction).toContain('DO NOT DECIDE ANYTHING HERE')
+    expect(instruction).toContain('Never write "you are the Sage"')
+    // Belege statt Adjektive, und ein gemischter Auftritt ist ein Befund.
+    expect(instruction).toContain('a phrase from their own texts beats an adjective')
+    expect(instruction).toContain('If their appearance pulls in two directions, SAY SO')
+    // Der Auswahl-Vertrag gehört NICHT hierher: die Hypothese ist Prosa.
+    expect(instruction).not.toContain('EXACTLY ONE of these ids')
+  })
+
+  it('d.hypothesis kennt den Unterschied zwischen Relaunch und neuer Marke', () => {
+    expect(archetypeSlotInstruction('d.hypothesis', optionsFor('d.hypothesis', { pathKind: 'relaunch' })))
+      .toContain('including the parts that no longer fit them')
+    expect(archetypeSlotInstruction('d.hypothesis', optionsFor('d.hypothesis')))
+      .toContain('do not invent an appearance to have something to analyse')
+  })
+
+  it('DIE ZWÖLF ARCHETYPEN STEHEN WÖRTLICH IM PROMPT — in beiden Auswahl-Slots', () => {
+    for (const slotId of ['d.primary', 'd.secondary']) {
+      const instruction = archetypeSlotInstruction(slotId, optionsFor(slotId))
+      for (const option of BRAND_ARCHETYPES) {
+        expect(instruction, `${slotId}/${option.id}`).toContain(option.id)
+        expect(instruction, `${slotId}/${option.id}`).toContain(option.label)
+        expect(instruction, `${slotId}/${option.id}`).toContain(option.hint)
+      }
+      expect(instruction, slotId).toContain('EXACTLY ONE of these ids')
+      expect(instruction, slotId).toContain('Do not invent a thirteenth archetype')
+    }
+  })
+
+  it('ZWEI KANDIDATEN ⇒ RÜCKFRAGE MIT CHIPS, nicht Entwurf (Davids Interim-Zuschnitt)', () => {
+    for (const slotId of ['d.primary', 'd.secondary']) {
+      const instruction = archetypeSlotInstruction(slotId, optionsFor(slotId))
+      expect(instruction, slotId).toContain(ARCHETYPE_TWO_CANDIDATES_RULE)
+      expect(instruction, slotId).toContain('do NOT draft. Ask instead')
+      expect(instruction, slotId).toContain('append one OPTION line per archetype')
+      expect(instruction, slotId).toContain('say which one you lean towards and why')
+      // Die Formalien tragen die OPTION-Pflicht ohnehin (george-a-11) — hier
+      // steht der ANLASS, dort die FORM. Beides muss ankommen.
+      expect(instruction, slotId).toContain('each starting with `OPTION: `')
+    }
+  })
+
+  it('DAS LEERE PAARVERGLEICH-FELD WIRD ALS LEER BENANNT, nicht als Aussage gelesen', () => {
+    for (const slotId of ['d.primary', 'd.secondary']) {
+      const instruction = archetypeSlotInstruction(slotId, optionsFor(slotId))
+      expect(instruction, slotId).toContain(ARCHETYPE_PAIRS_PENDING)
+      expect(instruction, slotId).toContain('Its emptiness says NOTHING about this brand')
+      expect(instruction, slotId).toContain('never mention it to them')
+    }
+    // GEGENPROBE: die Slots, die `d.pairs` gar nicht sehen, tragen den Satz
+    // nicht — eine Warnung vor etwas Abwesendem lenkt nur darauf hin.
+    expect(archetypeSlotInstruction('d.toneWords', optionsFor('d.toneWords')))
+      .not.toContain(ARCHETYPE_PAIRS_PENDING)
+  })
+
+  it('d.secondary ist der GEGENGEWICHT-Slot — verschieden vom Primären', () => {
+    const instruction = archetypeSlotInstruction('d.secondary', optionsFor('d.secondary'))
+    expect(instruction).toContain('keeps the primary from becoming a cliché')
+    expect(instruction).toContain('The secondary MUST be a different one')
+    expect(instruction).toContain('do not repeat the primary archetype')
+    // Fehlt der Primäre, wird gefragt statt geraten.
+    expect(instruction).toContain('do not guess it in order to pick a second one: ask for it instead')
+  })
+
+  it('d.gapReveal BENENNT DIE ABWEICHUNG EHRLICH (§12.2 Punkt 5)', () => {
+    const instruction = archetypeSlotInstruction('d.gapReveal', optionsFor('d.gapReveal'))
+    expect(instruction).toContain('NAME THE DIFFERENCE HONESTLY, NEVER SMOOTH IT OVER')
+    expect(instruction).toContain('Do not soften it into "there are elements of both"')
+    expect(instruction).toContain('do not add a reassuring closing sentence')
+    // Und die Gegenrichtung: eine erfundene Abweichung ist derselbe Fehler.
+    expect(instruction).toContain('inventing a gap to have something to report is the same failure')
+    expect(instruction).toContain('A difference without a place to look at is an accusation')
+  })
+
+  it('d.gapReveal auf dem Gründer-Pfad: kein Aussenbild ⇒ keine Abweichung', () => {
+    expect(archetypeSlotInstruction('d.gapReveal', optionsFor('d.gapReveal')))
+      .toContain('a gap you cannot see is one you must not report')
+    expect(archetypeSlotInstruction('d.gapReveal', optionsFor('d.gapReveal', { pathKind: 'relaunch' })))
+      .toContain('Describe the gap as distance travelled, not as a verdict')
+  })
+
+  it('d.voiceSamples sind GENAU DREI Sätze — und keine Slogans', () => {
+    const instruction = archetypeSlotInstruction('d.voiceSamples', optionsFor('d.voiceSamples'))
+    expect(instruction).toContain('EXACTLY THREE example sentences')
+    expect(instruction).toContain('three lines, no more and no fewer')
+    expect(instruction).toContain('This is not a slogan collection')
+    expect(instruction).toContain('No taglines, no headlines, no calls to action')
+    // Listen-Form aus der Registry-Art, nicht eine zweite Fassung davon.
+    expect(slotById('d.voiceSamples')!.schema.kind).toBe('list')
+    expect(instruction).toContain(BRAND_LIST_FORMAT_RULE)
+  })
+
+  it('d.toneWords sind 4–6 Wörter, die etwas AUSSCHLIESSEN', () => {
+    const instruction = archetypeSlotInstruction('d.toneWords', optionsFor('d.toneWords'))
+    expect(instruction).toContain('FOUR to SIX tone words')
+    expect(instruction).toContain('Every word has to EXCLUDE something')
+    expect(instruction).toContain('"Professional", "authentic", "modern" and "high-quality"')
+    // Der Archetyp schlägt die Ton-Analyse: das ist der Ton, zu dem sie wollen.
+    expect(instruction).toContain('this is the tone they are going TO')
+  })
+
+  it('d.vocabulary BAUT AUF DER ANTWORT DES MENSCHEN AUF', () => {
+    const instruction = archetypeSlotInstruction('d.vocabulary', optionsFor('d.vocabulary'))
+    expect(instruction).toContain('START FROM THEIR OWN ANSWER')
+    expect(instruction).toContain('take those over unchanged into the avoid side')
+    expect(instruction).toContain('never argue with them about one')
+    expect(instruction).toContain('three to five suggestions per side')
+    expect(instruction).toContain('"- use: <word>" and "- avoid: <word>"')
+  })
+})
+
 describe('Die Formalien sind für alle Berater dieselben', () => {
   const vera = veraSlotInstruction('b.purpose', optionsFor('b.purpose'))
   const milo = miloSlotInstruction('c.candidates', optionsFor('c.candidates'))
 
+  const archetype = archetypeSlotInstruction('d.primary', optionsFor('d.primary'))
+
   it('Zug-Vertrag, Rückfrage-Ausweg und Leitplanken stehen überall', () => {
-    for (const [name, instruction] of [['vera', vera], ['milo', milo]] as const) {
+    for (const [name, instruction] of [
+      ['vera', vera], ['milo', milo], ['archetype', archetype],
+    ] as const) {
       expect(instruction, name).toContain('Answer as ONE chat turn in exactly this shape')
       for (const marker of ['BASIS:', 'DRAFT:', 'ASK:']) expect(instruction, name).toContain(marker)
       expect(instruction, name).toContain('IF THE INPUTS DO NOT CARRY ENOUGH for an honest draft')
@@ -223,7 +378,7 @@ describe('Die Formalien sind für alle Berater dieselben', () => {
     // genau die Behauptung, die Regel 4 verbietet.
     expect(contextSlotInstruction('a.pitch', optionsFor('a.pitch')))
       .toContain(GEORGE_PRIMARY_SOURCE_START_CARD)
-    for (const instruction of [vera, milo]) {
+    for (const instruction of [vera, milo, archetype]) {
       expect(instruction).toContain(GEORGE_PRIMARY_SOURCE_ANSWERS)
       expect(instruction).not.toContain(GEORGE_PRIMARY_SOURCE_START_CARD)
     }
