@@ -37,7 +37,7 @@ import { BRAND_ADVISORS } from '../../../../packages/brand/shared/brandAdvisors'
 const { locale, t } = useI18n()
 const localePath = useLocalePath()
 
-useHead({ title: computed(() => t('team.title')) })
+useHead({ title: computed(() => t('team.teamTitle')) })
 
 type L = 'de' | 'en'
 const lang = computed<L>(() => (locale.value === 'de' ? 'de' : 'en'))
@@ -262,20 +262,13 @@ const crew = BRAND_ADVISORS.filter(a => a.key !== 'george').map(a => ({
        Inline-Kopien hier erzeugten mit der Core-Kopfzeile zwei Köpfe. -->
   <div class="pb-10">
     <div class="@container mx-auto max-w-7xl">
-      <!-- Wer wir sind: der Selbstbeweis (Dummy-Wortlaut, Runde 163) -->
+      <!-- Der Seiten-Kopf: „Wer wir sind" wohnt seit der Aufteilung
+           (Davids Entscheidung 2026-09-04) auf /about — hier stehen nur
+           noch die Menschen, und der Team-Block rückt zum h1 auf. -->
       <div class="mx-auto mt-14 max-w-3xl text-center">
-        <p class="bw-label uppercase tracking-widest" style="color: var(--bw-muted)">{{ t('team.eyebrow') }}</p>
-        <h1 class="mt-4 text-balance text-5xl font-extralight leading-tight tracking-tight">{{ t('team.title') }}</h1>
-        <p class="mx-auto mt-6 max-w-2xl text-lg leading-relaxed" style="color: var(--bw-ink-soft)">{{ t('team.intro1') }}</p>
-        <p class="mx-auto mt-4 max-w-2xl text-lg leading-relaxed" style="color: var(--bw-ink-soft)">{{ t('team.intro2') }}</p>
-        <p class="bw-label mx-auto mt-6 max-w-2xl leading-relaxed" style="color: var(--bw-muted)">{{ t('team.fingerprint') }}</p>
-      </div>
-
-      <!-- Das Produkt-Team -->
-      <div class="mx-auto mt-24 max-w-3xl text-center">
         <p class="bw-label uppercase tracking-widest" style="color: var(--bw-muted)">{{ t('team.teamEyebrow') }}</p>
-        <h2 class="mt-3 text-balance text-3xl font-extralight tracking-tight">{{ t('team.teamTitle') }}</h2>
-        <p class="mx-auto mt-4 max-w-xl text-sm leading-relaxed" style="color: var(--bw-ink-soft)">{{ t('team.teamIntro') }}</p>
+        <h1 class="mt-4 text-balance text-5xl font-extralight leading-tight tracking-tight">{{ t('team.teamTitle') }}</h1>
+        <p class="mx-auto mt-6 max-w-2xl text-lg leading-relaxed" style="color: var(--bw-ink-soft)">{{ t('team.teamIntro') }}</p>
       </div>
 
       <div class="mt-10 grid gap-x-6 gap-y-6 @sm:grid-cols-2 @md:grid-cols-3">

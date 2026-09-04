@@ -10,12 +10,31 @@
     },
     "beta": "Branding Supply is in closed beta. You need an invitation code to start a branding."
   },
-  "team": {
+  "about": {
     "eyebrow": "About Branding Supply",
     "title": "We are our own proof.",
     "intro1": "We exist because good branding is too often either too expensive or reduced to a template. We believe every brand is a fingerprint — and the way there can be guided, reasoned and measured.",
     "intro2": "So we applied our products to ourselves first: the name, the fingerprint, this color world, this page — all of it was built with the Brand Wizard, our own Visual DNA and our own playbook. Graded by Ada, of course.",
     "fingerprint": "Branding Supply · The Sage · rest Creator — style: minimal · editorial — visual DNA: contemporary · geometric · monochrome + acid pop · spacious · digital-clean · precise",
+    "principlesEyebrow": "What we believe",
+    "principlesTitle": "Three principles everything is measured against.",
+    "p1Title": "Reasoned, not asserted",
+    "p1Body": "Every recommendation carries its why. A decision you cannot retrace is not one — so George explains instead of announcing, and every reason is written down.",
+    "p2Title": "You decide",
+    "p2Body": "George asks, proposes, sometimes pushes back — but nothing is confirmed without you. A chapter only closes when you say it fits. The brand stays yours.",
+    "p3Title": "Your content stays yours",
+    "p3Body": "What you share in the conversation becomes brand foundation — not training material. Brand content only ever goes to AI providers that do not retain it; where that is not guaranteed, the job does not run.",
+    "howEyebrow": "How we work",
+    "howTitle": "From the first sentence to a foundation that holds.",
+    "h1Title": "A conversation, not a form",
+    "h1Body": "George asks the questions a good agency would ask — one at a time, digging deeper where an answer is thin. “I don’t know” is a legitimate answer.",
+    "h2Title": "Decision by decision",
+    "h2Body": "Your answers become drafts: purpose, values, archetype, voice. You confirm or revise — nothing is adopted silently, and contradictions get named instead of smoothed over.",
+    "h3Title": "Written down, ready to ship",
+    "h3Body": "What is decided lives in your brand document: readable, reasoned, in your language. The foundation that design, copy and everything after builds on.",
+    "teamLink": "Meet the team"
+  },
+  "team": {
     "teamEyebrow": "The team",
     "teamTitle": "The right team member for every task.",
     "teamIntro": "We break your project into tasks — and each one is taken by the specialist who does it best. Seven roles, clear boundaries, one shared memory.",

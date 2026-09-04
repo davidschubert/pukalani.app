@@ -10,12 +10,31 @@
     },
     "beta": "Branding Supply ist in geschlossener Beta. Für ein eigenes Branding braucht ihr einen Einladungscode."
   },
-  "team": {
+  "about": {
     "eyebrow": "About Branding Supply",
     "title": "Wir sind unser eigener Beweis.",
     "intro1": "Es gibt uns, weil gutes Branding zu oft entweder zu teuer ist oder zur Vorlage verkommt. Wir glauben: Jede Marke ist ein Fingerabdruck — und der Weg dorthin lässt sich führen, begründen und messen.",
     "intro2": "Deshalb haben wir unsere Produkte zuerst auf uns selbst angewendet: Der Name, der Fingerabdruck, diese Farbwelt, diese Seite — alles ist mit dem Brand Wizard, unserer Visual DNA und dem eigenen Playbook entstanden. Bewertet von Ada, versteht sich.",
     "fingerprint": "Branding Supply · Der Weise · Rest Schöpfer — Stil: Minimal · Editorial — Visual DNA: Contemporary · Geometric · Monochrome + Acid Pop · Spacious · Digital-clean · Precise",
+    "principlesEyebrow": "Woran wir glauben",
+    "principlesTitle": "Drei Grundsätze, an denen sich alles messen lässt.",
+    "p1Title": "Begründet statt behauptet",
+    "p1Body": "Jede Empfehlung trägt ihr Warum. Eine Entscheidung, die ihr nicht nachvollziehen könnt, ist keine — deshalb erklärt George, statt zu verkünden, und hält jede Begründung fest.",
+    "p2Title": "Ihr entscheidet",
+    "p2Body": "George fragt, schlägt vor, widerspricht auch mal — aber bestätigt wird nichts ohne euch. Jedes Kapitel schließt erst, wenn ihr sagt: das sitzt. Die Marke bleibt eure.",
+    "p3Title": "Eure Inhalte gehören euch",
+    "p3Body": "Was ihr im Gespräch erzählt, wird Markenfundament — nicht Trainingsmaterial. Markeninhalte gehen ausschließlich an KI-Anbieter, die sie nicht speichern; ist das nicht garantiert, läuft der Auftrag nicht.",
+    "howEyebrow": "So arbeiten wir",
+    "howTitle": "Vom ersten Satz zum Fundament, das trägt.",
+    "h1Title": "Gespräch statt Formular",
+    "h1Body": "George stellt die Fragen, die eine gute Agentur stellt — eine nach der anderen, mit Nachfragen, wo es dünn wird. „Weiß ich nicht“ ist eine erlaubte Antwort.",
+    "h2Title": "Entscheidung für Entscheidung",
+    "h2Body": "Aus euren Antworten entstehen Entwürfe: Purpose, Werte, Archetyp, Stimme. Ihr bestätigt oder korrigiert — nichts wird still übernommen, und Widersprüche werden benannt statt geglättet.",
+    "h3Title": "Festgehalten und versandfertig",
+    "h3Body": "Was entschieden ist, steht im Markendokument: nachlesbar, begründet, in eurer Sprache. Das Fundament, auf dem Design, Texte und alles Weitere aufbauen.",
+    "teamLink": "Lern das Team kennen"
+  },
+  "team": {
     "teamEyebrow": "Das Team",
     "teamTitle": "Für jede Aufgabe das richtige Teammitglied.",
     "teamIntro": "Wir zerlegen euer Projekt in Aufgaben — und jede übernimmt die Spezialistin oder der Spezialist, der sie am besten kann. Sieben Rollen, klare Grenzen, ein gemeinsames Gedächtnis.",

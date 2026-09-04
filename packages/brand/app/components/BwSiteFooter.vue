@@ -10,7 +10,9 @@ const localePath = useLocalePath()
  * zeigten auf /products (404) bzw. die Klickdummy-Pfade /brand/demo/* —
  * sie kommen mit ihren Marketing-Seiten zurück (s. BwSiteNav). */
 const nav = computed(() => [
-  { label: t('brand.nav.about'), to: localePath('/team') },
+  // Zwei Seiten seit der Aufteilung (Davids Entscheidung 2026-09-04).
+  { label: t('brand.nav.about'), to: localePath('/about') },
+  { label: t('brand.nav.team'), to: localePath('/team') },
 ])
 const legal = computed(() => [
   t('brand.legal.imprint'),
