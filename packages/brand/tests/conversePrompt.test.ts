@@ -30,7 +30,7 @@ import {
  *     einen Slot-Text zu liefern — den niemand entgegennimmt.
  */
 
-const BOTH = { hasNextQuestion: true, nextQuestionKnown: true }
+const BOTH = { hasNextQuestion: true, nextQuestionKnown: true, openFieldLabels: [] as const }
 
 function inputsFor(overrides: Partial<BrandConverseInputsOptions> = {}): BrandConverseInputsOptions {
   return {
@@ -112,13 +112,13 @@ describe('Die Zug-Regel steht im Auftrag', () => {
 
 describe('Die nächste Frage gehört der Registry', () => {
   it('MIT Wortlaut: in eigenen Worten stellen, aber nicht austauschen', () => {
-    const instruction = brandConverseInstruction({ hasNextQuestion: true, nextQuestionKnown: true })
+    const instruction = brandConverseInstruction({ hasNextQuestion: true, nextQuestionKnown: true, openFieldLabels: [] })
     expect(instruction).toMatch(/Ask it IN YOUR OWN WORDS/)
     expect(instruction).toMatch(/which question comes next is not yours to choose/)
   })
 
   it('OHNE Wortlaut: NICHT erfinden, sondern übergeben', () => {
-    const instruction = brandConverseInstruction({ hasNextQuestion: true, nextQuestionKnown: false })
+    const instruction = brandConverseInstruction({ hasNextQuestion: true, nextQuestionKnown: false, openFieldLabels: [] })
     expect(instruction).toMatch(/Do NOT\s+invent one/)
     expect(instruction).toMatch(/hands over to\s+the question shown next/)
     // Und keinesfalls der Satz aus dem anderen Zweig.
@@ -126,19 +126,38 @@ describe('Die nächste Frage gehört der Registry', () => {
   })
 
   it('OHNE offene Frage: das sagen und NICHTS fragen', () => {
-    const instruction = brandConverseInstruction({ hasNextQuestion: false, nextQuestionKnown: false })
+    const instruction = brandConverseInstruction({ hasNextQuestion: false, nextQuestionKnown: false, openFieldLabels: [] })
     expect(instruction).toMatch(/THERE IS NO OPEN QUESTION LEFT/)
     expect(instruction).toMatch(/Ask nothing further/)
     expect(instruction).not.toMatch(/Ask it IN YOUR OWN WORDS/)
   })
 
-  it('die drei Zweige schliessen sich gegenseitig aus', () => {
+  it('OHNE Frage, ABER offene Felder (converse-3): nie „fertig" behaupten, erstes Feld vorantreiben', () => {
+    // Davids Live-Fund (Krume-Archetyp): auf „was ist noch offen?" behauptete
+    // George „nichts mehr", während vier Ableitungs-Felder unbestätigt waren —
+    // der alte Zweig kannte nur Frage/keine Frage.
+    const instruction = brandConverseInstruction({
+      hasNextQuestion: false,
+      nextQuestionKnown: false,
+      openFieldLabels: ['Archetyp-Hypothese', 'Primärer Archetyp'],
+    })
+    expect(instruction).toMatch(/THERE ARE NO MORE CATALOG QUESTIONS/)
+    expect(instruction).toMatch(/Archetyp-Hypothese · Primärer Archetyp/)
+    expect(instruction).toMatch(/Never claim the chapter is done/)
+    expect(instruction).toMatch(/moving the FIRST of those fields forward/)
+    // Und keinesfalls die Abschluss-Einladung des leeren Zweigs.
+    expect(instruction).not.toMatch(/THERE IS NO OPEN QUESTION LEFT/)
+    expect(instruction).not.toMatch(/invite them\s+to confirm/)
+  })
+
+  it('die vier Zweige schliessen sich gegenseitig aus', () => {
     const texts = [
-      brandConverseInstruction({ hasNextQuestion: true, nextQuestionKnown: true }),
-      brandConverseInstruction({ hasNextQuestion: true, nextQuestionKnown: false }),
-      brandConverseInstruction({ hasNextQuestion: false, nextQuestionKnown: false }),
+      brandConverseInstruction({ hasNextQuestion: true, nextQuestionKnown: true, openFieldLabels: [] }),
+      brandConverseInstruction({ hasNextQuestion: true, nextQuestionKnown: false, openFieldLabels: [] }),
+      brandConverseInstruction({ hasNextQuestion: false, nextQuestionKnown: false, openFieldLabels: [] }),
+      brandConverseInstruction({ hasNextQuestion: false, nextQuestionKnown: false, openFieldLabels: ['Feld A'] }),
     ]
-    expect(new Set(texts).size).toBe(3)
+    expect(new Set(texts).size).toBe(4)
     // Ein Auftrag, der beim Umbauen still zwei Abschlüsse bekäme, liesse das
     // Modell zwischen ihnen wählen.
     for (const text of texts) {
@@ -146,6 +165,7 @@ describe('Die nächste Frage gehört der Registry', () => {
         /Ask it IN YOUR OWN WORDS/,
         /Do NOT\s+invent one/,
         /THERE IS NO OPEN QUESTION LEFT/,
+        /THERE ARE NO MORE CATALOG QUESTIONS/,
       ].filter(pattern => pattern.test(text))
       expect(closings).toHaveLength(1)
     }

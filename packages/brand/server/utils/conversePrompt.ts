@@ -46,11 +46,19 @@ import { BRAND_CONVERSE_HISTORY_CHARS, formatStartCard } from './georgePrompt'
 /**
  * Steht in jeder Gesprächs-Nachricht; steigt bei jeder inhaltlichen Änderung.
  *
+ * `converse-3` (2026-09-04, Davids Live-Fund am Krume-Archetyp): „keine
+ * Katalog-Frage mehr" ist NICHT „nichts mehr offen". Auf „was ist noch
+ * offen?" behauptete George „Nichts mehr in diesem Kapitel", während vier
+ * Ableitungs-Felder unbestätigt waren — der alte Zweig kannte nur die zwei
+ * Zustände Frage/keine Frage. Jetzt reisen die offenen Pflicht-Felder mit
+ * (`openFieldLabels`), und der Zweig ohne Frage treibt das erste davon voran,
+ * statt zum Abschluss einzuladen, den die Route abweisen würde.
+ *
  * `converse-2` (2026-09-03, Davids Live-Fund): die Slot-Blöcke tragen die
  * FRAGE aus dem Locale-Katalog statt der internen Id — George sprach
  * `a.customerPraise` & Co. wortwörtlich im Chat nach.
  */
-export const BRAND_CONVERSE_PROMPT_VERSION = 'converse-2'
+export const BRAND_CONVERSE_PROMPT_VERSION = 'converse-3'
 
 /**
  * Was ein Mensch in EINEM Zug schreiben darf. Grosszügiger als der Hinweis
@@ -100,6 +108,14 @@ export interface BrandConverseInstructionOptions {
    * geraten.
    */
   nextQuestionKnown: boolean
+  /**
+   * OFFENE PFLICHT-FELDER OHNE KATALOG-FRAGE (converse-3): die Beschriftungen
+   * der unbestätigten Pflicht-Slots, sobald `hasNextQuestion` `false` ist —
+   * sonst leer. Ohne sie behauptete der Zweig „nichts mehr zu fragen" dem
+   * Menschen gegenüber „nichts mehr offen", und die Abschluss-Einladung lief
+   * in genau das `required_slots_missing`, das die Route dann ausspricht.
+   */
+  openFieldLabels: readonly string[]
 }
 
 /**
@@ -156,9 +172,25 @@ export function brandConverseInstruction(options: BrandConverseInstructionOption
   ].join('\n')
 }
 
-/** Der Abschluss des Zuges — drei Lagen, drei ehrliche Antworten (s. Kopf). */
+/** Der Abschluss des Zuges — vier Lagen, vier ehrliche Antworten (s. Kopf). */
 function nextQuestionLines(options: BrandConverseInstructionOptions): string[] {
   if (!options.hasNextQuestion) {
+    // converse-3: „keine Frage mehr" heisst erst dann „nichts mehr offen",
+    // wenn auch kein Pflicht-Feld mehr auf Bestätigung wartet. Dazwischen
+    // liegen die Ableitungs-Felder, die genau HIER im Gespräch entstehen —
+    // der Zug treibt das erste voran, statt einen Abschluss anzubieten, den
+    // die Route mit `required_slots_missing` abweisen würde.
+    if (options.openFieldLabels.length) {
+      return [
+        'THERE ARE NO MORE CATALOG QUESTIONS in this chapter, but it is NOT finished: these fields are '
+        + `still open and get shaped right here in the conversation — ${options.openFieldLabels.join(' · ')}. `
+        + 'Never claim the chapter is done or that nothing is open. If they ask what is left, name exactly '
+        + 'these fields.',
+        'Close your turn by moving the FIRST of those fields forward: either put ONE concrete proposal for '
+        + 'it on the table, built from what you already know, and ask whether it fits — or, where you truly '
+        + 'lack the material, ask ONE small question that would unlock it.',
+      ]
+    }
     return [
       'THERE IS NO OPEN QUESTION LEFT in this chapter. Say that plainly in one sentence and invite them '
       + 'to confirm the chapter if it fits. Ask nothing further.',

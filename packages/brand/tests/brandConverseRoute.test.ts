@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { H3Event } from 'h3'
+import { confirmableRequiredSlotsForStep } from '../shared/slotRegistry'
 import {
   type BrandGenerationEvent,
   decodeBrandGenerationChunk,
@@ -441,10 +442,27 @@ describe('Die nächste Frage gehört der Registry', () => {
     expect(lastPrompt).toContain('[the next question]\nWorüber beschweren sich Kunden?')
   })
 
-  it('OHNE offene Frage: der Auftrag sagt „nichts mehr offen"', async () => {
+  it('OHNE Katalog-Frage, ABER offene Pflicht-Felder: nie „fertig" behaupten (converse-3)', async () => {
+    // Alle FRAGE-Slots bestätigt, aber Ableitungs-Pflichten (a.pitch & Co.)
+    // stehen noch — Davids Live-Fund am Krume-Archetyp: der alte Zweig sagte
+    // hier „nichts mehr offen", während vier Felder unbestätigt waren.
     stepRow.slots = JSON.stringify(Object.fromEntries(
       ['a.origin', 'a.customerPraise', 'a.complaints', 'a.oneThing', 'a.challenge', 'a.facts']
         .map(id => [id, { confirmed: 'steht' }]),
+    ))
+    body = { text: 'Und was ist hier eigentlich noch offen?' }
+    const { event, chunks } = fakeEvent()
+    await handler(event)
+
+    expect(lastPrompt).toContain('THERE ARE NO MORE CATALOG QUESTIONS')
+    expect(lastPrompt).toContain('Never claim the chapter is done')
+    expect(lastPrompt).not.toContain('THERE IS NO OPEN QUESTION LEFT')
+    expect(readBack(chunks).at(-1)).toMatchObject({ slotId: '' })
+  })
+
+  it('ALLES bestätigt: der Auftrag sagt „nichts mehr offen"', async () => {
+    stepRow.slots = JSON.stringify(Object.fromEntries(
+      confirmableRequiredSlotsForStep('context').map(slot => [slot.id, { confirmed: 'steht' }]),
     ))
     body = { text: 'Und was heißt eigentlich Positionierung?' }
     const { event, chunks } = fakeEvent()

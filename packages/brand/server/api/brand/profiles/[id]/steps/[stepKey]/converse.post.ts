@@ -7,7 +7,7 @@ import {
   type BrandGenerationFailureCode,
   serializeBrandGenerationEvent,
 } from '../../../../../../../shared/brandGeneration'
-import { resolveNextQuestion } from '../../../../../../../shared/brandJourney'
+import { brandStepCompletion, resolveNextQuestion } from '../../../../../../../shared/brandJourney'
 import { resolveBrandUiLocale } from '../../../../../../../shared/brandUiLocale'
 import { type BrandSlotStateFacts, slotById, slotsForStep } from '../../../../../../../shared/slotRegistry'
 import type { BrandConverseSkippedResponse } from '../../../../../../../shared/types/brand'
@@ -30,7 +30,7 @@ import {
   brandConversePrompt,
 } from '../../../../../../utils/conversePrompt'
 import { georgeSystemPrompt } from '../../../../../../utils/georgePrompt'
-import { labelSlotDependencies } from '../../../../../../utils/brandSlotPromptLabels'
+import { brandSlotPromptLabel, labelSlotDependencies } from '../../../../../../utils/brandSlotPromptLabels'
 import { stripGeorgeTurnMarkers } from '../../../../../../utils/georgeTurn'
 import { acquireBrandGenerationLock, readBrandAiEnabled, retainBrandGeneration } from '../../../../../../utils/brandGenerators'
 import { bookBrandAiQuota } from '../../../../../../utils/brandAiQuota'
@@ -147,6 +147,20 @@ export default defineEventHandler(async (event): Promise<BrandConverseSkippedRes
   // als nächste sieht. Sonst bekommt der Berater gesagt, dass er keine erfinden
   // darf (`nextQuestionKnown: false`) — die Reihenfolge gehört der Registry.
   const nextQuestion = next && body.nextSlotId === next.slotId ? (body.nextQuestion ?? '').trim() : ''
+
+  /**
+   * DIE OFFENEN PFLICHT-FELDER, sobald keine Katalog-Frage mehr dran ist
+   * (converse-3, Davids Live-Fund am Krume-Archetyp): ohne sie sagte der
+   * Prompt-Zweig „nichts mehr offen", während vier Ableitungs-Felder
+   * unbestätigt waren — dieselbe Verwechslung von „keine Frage mehr" und
+   * „nichts mehr offen", die auch der Bühnen-Satz hatte. Beschriftet wie die
+   * Slot-Blöcke (Inhaltssprache, `brandSlotPromptLabel`), damit George im
+   * Chat dieselben Namen benutzt wie die Karten daneben.
+   */
+  const openFieldLabels = next
+    ? []
+    : brandStepCompletion(stepKey, facts).missingRequired
+        .map(slotId => brandSlotPromptLabel(slotId, profile.contentLocale, profileFacts(profile).pathKind))
 
   /**
    * WELCHE FRAGE DIESER ZUG STELLT — für die Oberfläche, nicht für den Prompt.
@@ -307,7 +321,7 @@ export default defineEventHandler(async (event): Promise<BrandConverseSkippedRes
     })
 
     const prompt = brandConversePrompt(
-      { hasNextQuestion: Boolean(next), nextQuestionKnown: nextQuestion.length > 0 },
+      { hasNextQuestion: Boolean(next), nextQuestionKnown: nextQuestion.length > 0, openFieldLabels },
       {
         startCard: profileStartCard(profile),
         // Menschliche Beschriftung statt interner Id (converse-2) — George
