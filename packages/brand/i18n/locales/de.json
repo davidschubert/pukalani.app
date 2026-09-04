@@ -226,6 +226,15 @@
         }
       }
     },
+    "partLabel": {
+      "a": {
+        "facts": {
+          "teamSize": "Team",
+          "age": "Seit",
+          "markets": "Märkte"
+        }
+      }
+    },
     "example": {
       "a": {
         "origin": {

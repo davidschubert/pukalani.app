@@ -8,10 +8,14 @@ import {
   BRAND_CONVERSE_QUESTION_MAX,
   BRAND_CONVERSE_TEXT_MAX,
   type BrandConverseInputsOptions,
+  type BrandConverseSessionOptions,
   brandConverseInstruction,
   brandConversePrompt,
+  countSessionProbes,
   formatBrandConverseInputs,
 } from '../server/utils/conversePrompt'
+import { BRAND_SUBSTANCE_MIN_WORDS } from '../shared/brandSessions'
+import { slotById } from '../shared/slotRegistry'
 
 /**
  * DER KONVERSATIONS-AUFTRAG (P3.2) — geprüft ohne einen einzigen KI-Aufruf.
@@ -46,6 +50,7 @@ function inputsFor(overrides: Partial<BrandConverseInputsOptions> = {}): BrandCo
     answeredQuestion: overrides.answeredQuestion ?? '',
     text: overrides.text ?? 'Weil uns der Kaffee hier zu langweilig war.',
     nextQuestion: overrides.nextQuestion ?? '',
+    ...(overrides.collected ? { collected: overrides.collected } : {}),
   }
 }
 
@@ -80,10 +85,11 @@ describe('Die Zug-Regel steht im Auftrag', () => {
     expect(instruction).toMatch(/Never invent options where the question is open/)
   })
 
-  it('die Fassung steigt mit — converse-5', () => {
+  it('die Fassung steigt mit — converse-6', () => {
     // Ohne den Anstieg behaupteten Züge aus converse-3, aus diesem Auftrag zu
-    // stammen (dieselbe Regel wie bei GEORGE_PROMPT_VERSION).
-    expect(BRAND_CONVERSE_PROMPT_VERSION).toBe('converse-5')
+    // stammen (dieselbe Regel wie bei GEORGE_PROMPT_VERSION). converse-6 ist
+    // der Session-Block (BW2 Paket 3a) — der Auftrag hat sich geändert.
+    expect(BRAND_CONVERSE_PROMPT_VERSION).toBe('converse-6')
   })
 
   it('würdigt Substanz — aber verbietet das Lob ohne Deckung', () => {
@@ -317,5 +323,221 @@ describe('Die Eingaben', () => {
     // Nutzen — und es ist Entwurfs-Material, kein Gesprächsstoff.
     const prompt = brandConversePrompt(BOTH, inputsFor())
     expect(prompt).not.toContain('from their website')
+  })
+})
+
+/**
+ * DER SESSION-BLOCK (converse-6, BW2 Paket 3a) — bis hierher war jeder Zug
+ * derselbe Auftrag mit anderen Eingaben.
+ *
+ * Fünf Aussagen, und jede hat ihre eigene Bruchstelle:
+ *  1. ZIEL, QUALITÄT, ANTI-MUSTER und LEITER stehen wirklich im Prompt — sie
+ *     sind seit Paket 2 gepflegter Inhalt und erreichten trotzdem KEINEN
+ *     Gesprächs-Prompt (Paket-1-Befund d).
+ *  2. `form` steht NICHT drin: die Form gilt dem WERT, nicht dem Chat-Zug.
+ *  3. Die MINDEST-SUBSTANZ reist als Wortzahl, nicht als Stufenname.
+ *  4. Der NACHFRAGE-DECKEL kippt den Auftrag: bei 0 wird angenommen statt
+ *     gefragt.
+ *  5. Ohne Session bleibt der Auftrag WÖRTLICH der von converse-5 — der
+ *     Rückwärts-Vertrag für jeden Client, der den Schlüssel noch nicht kennt.
+ */
+function sessionOptionsFor(overrides: Partial<BrandConverseSessionOptions> = {}): BrandConverseSessionOptions {
+  return {
+    goal: overrides.goal ?? 'name the one sentence a customer said, verbatim.',
+    minSubstanceWords: overrides.minSubstanceWords ?? 40,
+    probesLeft: overrides.probesLeft ?? 2,
+    allowUnknown: overrides.allowUnknown ?? true,
+    allowDefer: overrides.allowDefer ?? false,
+    ladder: overrides.ladder ?? {
+      opening: 'the one sentence a customer said, verbatim',
+      probes: ['when did you last hear it?'],
+      reframes: ['if the answer is a feature, ask for the moment it mattered'],
+    },
+    quality: overrides.quality ?? ['it is a quote', 'it names a moment'],
+    antiPatterns: overrides.antiPatterns ?? ['a feature list'],
+    collect: overrides.collect ?? null,
+  }
+}
+
+describe('Der Session-Block (converse-6)', () => {
+  it('trägt Ziel, Qualitätsmerkmale, Anti-Muster und die Nachfragen der Leiter', () => {
+    const instruction = brandConverseInstruction({ ...BOTH, session: sessionOptionsFor() })
+    expect(instruction).toContain('THIS SESSION:')
+    expect(instruction).toContain('Its goal: name the one sentence a customer said, verbatim.')
+    expect(instruction).toContain('A strong answer here:')
+    expect(instruction).toContain('- it names a moment')
+    expect(instruction).toContain('Push back on:')
+    expect(instruction).toContain('- a feature list')
+    expect(instruction).toContain('If the answer is thin, ask: when did you last hear it?')
+    expect(instruction).toContain('If it falls into a known trap: if the answer is a feature')
+  })
+
+  it('nennt die MINDEST-SUBSTANZ als Wortzahl — mit „roughly" davor', () => {
+    const instruction = brandConverseInstruction({
+      ...BOTH,
+      session: sessionOptionsFor({ minSubstanceWords: BRAND_SUBSTANCE_MIN_WORDS.short }),
+    })
+    expect(instruction).toContain('SHORTER THAN ROUGHLY 12 WORDS')
+    // Der Stufenname ist ein Pflege-Massstab, kein Prompt-Wort.
+    expect(instruction).not.toContain('minSubstance')
+  })
+
+  it('DIE ERÖFFNUNG DER LEITER gilt nur dem Eröffnungszug', () => {
+    const reply = brandConverseInstruction({ ...BOTH, session: sessionOptionsFor() })
+    const opening = brandConverseInstruction({ ...BOTH, session: sessionOptionsFor(), opening: true })
+    // In einer ANTWORT wäre „open this session with" die Aufforderung, noch
+    // einmal von vorn anzufangen.
+    expect(reply).not.toContain('Open this session with')
+    expect(opening).toContain('Open this session with: the one sentence a customer said, verbatim')
+  })
+
+  it('DER NACHFRAGE-DECKEL kippt den Auftrag bei 0 auf „annehmen"', () => {
+    const left = brandConverseInstruction({ ...BOTH, session: sessionOptionsFor({ probesLeft: 1 }) })
+    expect(left).toContain('You may follow up at most 1 more time in this session')
+    expect(left).not.toContain('USED UP YOUR FOLLOW-UPS')
+
+    const none = brandConverseInstruction({ ...BOTH, session: sessionOptionsFor({ probesLeft: 0 }) })
+    expect(none).toContain('YOU HAVE USED UP YOUR FOLLOW-UPS')
+    expect(none).toContain('propose locking it in as it stands')
+    expect(none).not.toContain('You may follow up at most')
+  })
+
+  it('„WEISS NICHT" und VERTAGEN haben je zwei Fassungen — und Vertagen ist Prosa', () => {
+    const open = brandConverseInstruction({
+      ...BOTH,
+      session: sessionOptionsFor({ allowUnknown: true, allowDefer: true }),
+    })
+    expect(open).toContain('"I do not know" is a valid answer HERE')
+    expect(open).toContain('THEY MAY ALSO PUT THIS OFF')
+    // Vertagen bekommt in dieser Runde KEINEN Marker im Zug-Vertrag — der
+    // Knopf ist Paket 3b, hier formuliert George es selbst.
+    expect(open).not.toContain('DEFER:')
+
+    const strict = brandConverseInstruction({
+      ...BOTH,
+      session: sessionOptionsFor({ allowUnknown: false, allowDefer: false }),
+    })
+    expect(strict).toContain('This session needs an answer from them')
+    expect(strict).not.toContain('THEY MAY ALSO PUT THIS OFF')
+  })
+
+  it('DIE FORM DES WERTS steht NICHT im Gesprächs-Auftrag', () => {
+    // `form` (Person, Zeitform, Wortdeckel, Verbotsliste) gehört dem
+    // ENTWURF (`sessionPrompt.ts`). George im Chat auf „höchstens 20 Wörter"
+    // zu verpflichten machte aus dem Interview ein Telegramm.
+    const purpose = slotById('b.purpose')!
+    expect(purpose.form.maxWords).toBeGreaterThan(0)
+    const instruction = brandConverseInstruction({
+      ...BOTH,
+      session: sessionOptionsFor({ goal: purpose.goal }),
+    })
+    expect(instruction).not.toContain('The form of the value:')
+    expect(instruction).not.toContain(`At most ${purpose.form.maxWords} words`)
+    expect(instruction).not.toContain('first person plural')
+  })
+
+  it('RÜCKWÄRTS-VERTRAG: ohne Session bleibt der Auftrag der von converse-5', () => {
+    const without = brandConverseInstruction(BOTH)
+    expect(without).not.toContain('THIS SESSION:')
+    // Und die vier Zweige von vorher stehen unverändert da.
+    expect(without).toContain('TASK: answer this person\'s latest message in ONE chat turn.')
+    expect(without).toMatch(/IF THE ANSWER IS THIN/)
+  })
+})
+
+describe('Der Eröffnungszug (§6)', () => {
+  const OPENING = { ...BOTH, session: sessionOptionsFor(), opening: true as const }
+
+  it('ist ein EIGENER Auftrag: George spricht zuerst, ohne Vorstellung', () => {
+    const instruction = brandConverseInstruction(OPENING)
+    expect(instruction).toContain('TASK: OPEN the next session')
+    expect(instruction).toContain('YOUR FIRST SENTENCE PICKS UP what was last settled')
+    expect(instruction).toContain('NEVER introduce yourself')
+    // Der Auftrag des gewöhnlichen Zuges darf NICHT daneben stehen — sonst
+    // antwortet das Modell auf eine Nachricht, die es nicht gibt.
+    expect(instruction).not.toContain('answer this person\'s latest message')
+  })
+
+  it('DAS KAPITEL-INTRO fällt genau einmal — sonst wird es ausdrücklich verboten', () => {
+    const first = brandConverseInstruction({ ...OPENING, chapterIntro: true })
+    expect(first).toContain('THIS IS THE FIRST TURN OF A NEW CHAPTER')
+    expect(first).toContain('which of your colleagues is reading along')
+
+    const later = brandConverseInstruction(OPENING)
+    expect(later).toContain('THE CHAPTER IS ALREADY RUNNING')
+    expect(later).toContain('no chapter introduction')
+    expect(later).not.toContain('THIS IS THE FIRST TURN OF A NEW CHAPTER')
+  })
+
+  it('schliesst NICHT mit „der nächsten offenen Frage des Kapitels"', () => {
+    // Die wäre die Frage NACH dieser — der Eröffnungszug stellt die Frage
+    // SEINER Session, und die sagt die Leiter.
+    const instruction = brandConverseInstruction({ ...OPENING, nextQuestionKnown: true })
+    expect(instruction).not.toMatch(/Ask it IN YOUR OWN WORDS/)
+    expect(instruction).toContain('Open this session with')
+    // Die Form-Regeln gelten trotzdem — ein Zug, eine Frage.
+    expect(instruction).toContain('Two to three sentences, one turn, one paragraph.')
+  })
+
+  it('OHNE TEXT gibt es keinen Block „was sie gerade schrieben"', () => {
+    const inputs = formatBrandConverseInputs(inputsFor({ text: '' }))
+    expect(inputs).not.toContain('[what they just wrote]')
+    // GEGENPROBE: mit Text steht er da.
+    expect(formatBrandConverseInputs(inputsFor())).toContain('[what they just wrote]')
+  })
+})
+
+describe('Die Sammel-Session im Auftrag', () => {
+  it('nennt Teil und Fortschritt — und verbietet das Bündeln', () => {
+    const instruction = brandConverseInstruction({
+      ...BOTH,
+      session: sessionOptionsFor({
+        collect: { question: 'Seit wann gibt es euch? Ein Jahr reicht.', index: 2, total: 3 },
+      }),
+    })
+    expect(instruction).toContain('This session COLLECTS 3 facts one at a time, and you are on part 2 of 3.')
+    expect(instruction).toContain('never bundle the remaining parts into the same turn')
+    expect(instruction).toContain('The part due now is: Seit wann gibt es euch? Ein Jahr reicht.')
+  })
+
+  it('legt die schon beantworteten Teile als eigenen Eingabe-Block dazu', () => {
+    const inputs = formatBrandConverseInputs(inputsFor({
+      collected: [{ label: 'Team', value: '3 fest, 2 auf Saison' }],
+    }))
+    expect(inputs).toContain('[what this session has collected so far]')
+    expect(inputs).toContain('[Team]\n3 fest, 2 auf Saison')
+  })
+
+  it('OHNE Teile gibt es den Block nicht', () => {
+    expect(formatBrandConverseInputs(inputsFor())).not.toContain('[what this session has collected so far]')
+  })
+})
+
+/**
+ * DIE NACHFRAGE-ZÄHLUNG — eine Rechnung über dem Verlauf, kein Zähler in der
+ * Datenbank. Mit GEGENPROBE: der Eröffnungszug darf nie mitzählen, sonst
+ * hätte jede Session eine Nachfrage weniger, als die Config zusagt.
+ */
+describe('countSessionProbes', () => {
+  it('zählt nur Berater-Züge NACH einer Antwort des Menschen', () => {
+    expect(countSessionProbes([
+      { role: 'george', body: 'Erzähl mir, wie ihr angefangen habt.' },
+      { role: 'user', body: 'Wir haben 2019 angefangen.' },
+      { role: 'george', body: 'Und was war der Auslöser?' },
+      { role: 'user', body: 'Der Kaffee war langweilig.' },
+      { role: 'george', body: 'Wann genau war das?' },
+    ])).toBe(2)
+  })
+
+  it('GEGENPROBE: der Eröffnungszug allein ist KEINE Nachfrage', () => {
+    expect(countSessionProbes([{ role: 'george', body: 'Womit fangen wir an?' }])).toBe(0)
+    expect(countSessionProbes([])).toBe(0)
+  })
+
+  it('`system`-Zeilen sind Protokoll und zählen nie', () => {
+    expect(countSessionProbes([
+      { role: 'user', body: 'Wir haben 2019 angefangen.' },
+      { role: 'system', body: 'Baustein gewechselt.' },
+    ])).toBe(0)
   })
 })

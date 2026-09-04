@@ -226,6 +226,15 @@
         }
       }
     },
+    "partLabel": {
+      "a": {
+        "facts": {
+          "teamSize": "Team",
+          "age": "Since",
+          "markets": "Markets"
+        }
+      }
+    },
     "example": {
       "a": {
         "origin": {

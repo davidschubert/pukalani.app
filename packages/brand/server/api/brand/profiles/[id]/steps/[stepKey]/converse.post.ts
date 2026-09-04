@@ -1,36 +1,67 @@
 import { ID } from 'node-appwrite'
 import { createBrandConverseSchema } from '../../../../../../../schemas/brandConverse'
 import { techniqueForStep } from '../../../../../../../shared/brandAdvisors'
+import { BRAND_SUBSTANCE_MIN_WORDS, nextCollectPart } from '../../../../../../../shared/brandSessions'
+import { formatBrandSlotStructured } from '../../../../../../../shared/brandSlotFormat'
 import {
   type BrandGenerationEventDataMap,
   type BrandGenerationEventName,
   type BrandGenerationFailureCode,
   serializeBrandGenerationEvent,
 } from '../../../../../../../shared/brandGeneration'
-import { brandStepCompletion, resolveNextQuestion } from '../../../../../../../shared/brandJourney'
+import {
+  brandStepCompletion,
+  resolveNextQuestion,
+  resolveNextSession,
+  resolveSessionStates,
+} from '../../../../../../../shared/brandJourney'
 import { resolveBrandUiLocale } from '../../../../../../../shared/brandUiLocale'
-import { type BrandSlotStateFacts, slotById, slotsForStep } from '../../../../../../../shared/slotRegistry'
-import type { BrandConverseSkippedResponse } from '../../../../../../../shared/types/brand'
+import {
+  type BrandSlot,
+  type BrandSlotStateFacts,
+  slotById,
+  slotsForStep,
+} from '../../../../../../../shared/slotRegistry'
+import type {
+  BrandConverseResponse,
+  BrandNextSessionRef,
+} from '../../../../../../../shared/types/brand'
 import {
   BRAND_MESSAGES_TABLE,
+  BRAND_STEPS_TABLE,
+  type BrandSlotRecord,
   brandDb,
   brandSlotRecordConfirmed,
   brandSlotStoredValue,
   loadBrandStepContext,
+  parseCollectedParts,
   parseSlotRecords,
   profileFacts,
   profileStartCard,
+  serializeSlotRecords,
+  toStepFacts,
 } from '../../../../../../utils/brandStore'
 import { streamAdvisorTurn } from '../../../../../../utils/advisorGenerator'
 import { claimBrandConverseKey } from '../../../../../../utils/brandConverse'
-import { loadBrandConversationHistory } from '../../../../../../utils/brandConversationHistory'
+import {
+  hasBrandSessionAdvisorTurn,
+  hasBrandStepMessage,
+  loadBrandConversationHistory,
+} from '../../../../../../utils/brandConversationHistory'
 import {
   BRAND_CONVERSE_MAX_TOKENS,
   BRAND_CONVERSE_PROMPT_VERSION,
+  type BrandConverseSessionOptions,
   brandConversePrompt,
+  countSessionProbes,
 } from '../../../../../../utils/conversePrompt'
 import { georgeSystemPrompt } from '../../../../../../utils/georgePrompt'
-import { brandSlotPromptLabel, labelSlotDependencies } from '../../../../../../utils/brandSlotPromptLabels'
+import {
+  brandSessionPartLabel,
+  brandSessionPartQuestion,
+  brandSlotPromptLabel,
+  labelSlotDependencies,
+} from '../../../../../../utils/brandSlotPromptLabels'
 import { parseGeorgeOptions, stripGeorgeTurnMarkers } from '../../../../../../utils/georgeTurn'
 import { acquireBrandGenerationLock, readBrandAiEnabled, retainBrandGeneration } from '../../../../../../utils/brandGenerators'
 import { bookBrandAiQuota } from '../../../../../../utils/brandAiQuota'
@@ -104,12 +135,37 @@ import { recordBrandEvent } from '../../../../../../utils/brandEvents'
  * ── LOG-REGEL §6 ─────────────────────────────────────────────────────────
  * Logzeilen und `brand_events` tragen Baustein, Slot-Id, Modell, Dauer und
  * Fehlercode — NIE den getippten Text, NIE den Prompt, NIE die Antwort.
+ *
+ * ── SEIT BW2 PAKET 3a: DER ZUG GEHÖRT EINER SESSION ──────────────────────
+ * Ein Kapitel hat bis zu zwölf Sessions, und jede hat ihr eigenes Ziel, ihre
+ * eigene Leiter und ihren eigenen Nachfrage-Deckel. Drei Dinge folgen daraus:
+ *
+ *  1. `sessionKey` im Rumpf (geprüft gegen die Registry, 400
+ *     `session_foreign`); fehlt er, rechnet der Server die Grundfassung
+ *     (`resolveNextSession`). Eine `locked`-Session wird mit 409
+ *     `session_locked` abgewiesen — BEVOR irgendetwas wirkt.
+ *  2. Der VERLAUF wird auf die Session geschnitten, und jede geschriebene
+ *     Zeile trägt ihren Schlüssel (brand-011).
+ *  3. Der ERÖFFNUNGSZUG (`opening: true`) ist ein Zug OHNE Nachricht davor:
+ *     George spricht zuerst. Er ist IDEMPOTENT — hat die Session schon einen
+ *     Zug des Beraters, antwortet die Route `{ conversed: false, skipped:
+ *     true }` statt einen zweiten zu erzeugen.
+ *
+ * ── DIE EINE AUSNAHME VON „SIE SCHREIBT KEINEN SLOT" ─────────────────────
+ * Die SAMMEL-Session (`kind: 'collect'`, heute nur `a.facts`) sammelt ihre
+ * Teile nacheinander, und es gibt kein Feld, in dem der Zwischenstand landen
+ * könnte: die Antwort auf „wie viele Leute arbeiten mit" ist kein Wert, sie
+ * ist ein Drittel davon. Also schreibt DIESE Route ihn — `slots[id].collected`
+ * — und legt beim letzten Teil den zusammengelegten Wert als unbestätigten
+ * Entwurf ab. Der Zug meldet dann die ERHÖHTE `revision`; jeder andere Zug
+ * meldet weiter die gelesene. Für alles ausser `collect` gilt der Satz oben
+ * unverändert, und die Gegenprobe im Beweis hängt genau daran.
  */
 
-export default defineEventHandler(async (event): Promise<BrandConverseSkippedResponse | undefined> => {
+export default defineEventHandler(async (event): Promise<BrandConverseResponse | undefined> => {
   const started = Date.now()
   const { userId } = await requireBrandAccess(event)
-  const { profile, stepKey, stepRow } = await loadBrandStepContext(event, userId)
+  const { profile, stepKey, stepRow, stepRows } = await loadBrandStepContext(event, userId)
 
   const parsed = createBrandConverseSchema().safeParse(await readBody(event))
   if (!parsed.success) {
@@ -143,6 +199,58 @@ export default defineEventHandler(async (event): Promise<BrandConverseSkippedRes
     }
   }
   const next = resolveNextQuestion(stepKey, facts)
+
+  /**
+   * WELCHE SESSION IST DAS HIER (BW2 §6)?
+   *
+   * Der Client NENNT sie (er weiss, was der Mensch angeklickt hat), der Server
+   * PRÜFT sie gegen die Registry — dieselbe Arbeitsteilung wie beim Wortlaut
+   * der nächsten Frage. Eine Session aus einem fremden Baustein wäre ein
+   * Gespräch, dessen Verlauf niemand mehr zuordnen kann, und ein Prompt, in
+   * dem das Ziel eines anderen Kapitels steht.
+   *
+   * FEHLT der Schlüssel (jeder Client bis Paket 3c), gilt die Grundfassung:
+   * die erste offene Pflicht-Session in Registry-Reihenfolge. `null` heisst
+   * „hier ist gerade keine Session dran" — eine freie Frage in einem fertigen
+   * Kapitel etwa; dann läuft der Zug wie vor BW2, ohne Session-Block.
+   */
+  let session: BrandSlot | null = null
+  if (body.sessionKey) {
+    const requested = slotById(body.sessionKey)
+    if (!requested || requested.stepId !== stepKey || requested.deactivated) {
+      throw createError({
+        status: 400,
+        statusText: 'Session does not belong to this step',
+        data: { code: 'session_foreign' },
+      })
+    }
+    session = requested
+  }
+  else {
+    const fallback = resolveNextSession(stepKey, facts)
+    session = fallback ? slotById(fallback.slotId) ?? null : null
+  }
+
+  /**
+   * EINE GESPERRTE SESSION IST NICHT BESPRECHBAR (§5 „Betreten") — 409 mit
+   * `data.code`, wie jede fachliche Ablehnung dieses Layers.
+   *
+   * `done` und `stale` bleiben ERLAUBT: eine Vertiefung an einem bestätigten
+   * Feld ist ein Gespräch, keine Korrektur — die Korrektur mit ihrem
+   * Impact-Hinweis kommt mit Paket 6 und geht über die Slot-Route, nicht hier
+   * durch. Gerechnet wird über die Fakten ALLER Kapitel, weil eine Session
+   * über Kapitelgrenzen liest (`b.purpose` ← `a.pitch`).
+   */
+  if (session) {
+    const states = resolveSessionStates(profileFacts(profile), toStepFacts(stepRows))
+    if (states[session.id] === 'locked') {
+      throw createError({
+        status: 409,
+        statusText: 'Session is locked',
+        data: { code: 'session_locked' },
+      })
+    }
+  }
   // Der Wortlaut zählt NUR, wenn er zu der Frage gehört, die der Server selbst
   // als nächste sieht. Sonst bekommt der Berater gesagt, dass er keine erfinden
   // darf (`nextQuestionKnown: false`) — die Reihenfolge gehört der Registry.
@@ -172,10 +280,41 @@ export default defineEventHandler(async (event): Promise<BrandConverseSkippedRes
    * verwiesen oder gar keine gestellt, steht hier `''` und die Katalog-Frage
    * bleibt sichtbar. Aus dem AUSBLEIBEN eines Frames wäre das nicht zu lesen.
    */
-  const askedSlotId = nextQuestion ? (next?.slotId ?? '') : ''
+  // Beim ERÖFFNUNGSZUG stellt George die Frage SEINER Session — dann gehört
+  // ihre Id hierher, damit die Werkstatt den Katalog-Satz nicht ein zweites
+  // Mal darunter setzt.
+  const askedSlotId = body.opening
+    ? (session?.id ?? '')
+    : (nextQuestion ? (next?.slotId ?? '') : '')
 
   const aiEnabled = await readBrandAiEnabled(event)
   if (!aiEnabled) return { conversed: false }
+
+  /**
+   * DER ERÖFFNUNGSZUG — und seine Sicherung gegen den zweiten (Plan §6).
+   *
+   * Der Client ruft ihn bei JEDEM Öffnen einer Session; er kann nicht wissen,
+   * ob sie schon einmal offen war. Hat sie ihren ersten Zug, ist die ehrliche
+   * Antwort „schon passiert" — nicht ein zweiter erster Satz und nicht ein
+   * Fehler: es ist nichts schiefgegangen.
+   *
+   * Das KAPITEL-INTRO („eine Kollegin liest mit") fällt genau dann, wenn das
+   * Kapitel noch KEINE einzige Nachricht hat. Eine EXISTENZ-Frage, keine
+   * Zählung: „ist das hier der Anfang" braucht keine Zahl.
+   */
+  let chapterIntro = false
+  if (body.opening) {
+    // Ohne Session gäbe es nichts zu eröffnen — der Fall tritt ein, wenn im
+    // Kapitel keine Frage mehr offen ist.
+    if (!session) return { conversed: false, skipped: true }
+    if (await hasBrandSessionAdvisorTurn(event, profile.$id, stepKey, session.id)) {
+      return { conversed: false, skipped: true }
+    }
+    chapterIntro = !(await hasBrandStepMessage(event, profile.$id, stepKey))
+  }
+
+  /** '' NUR beim Eröffnungszug — das Schema weist jeden anderen leeren Zug ab. */
+  const text = body.text ?? ''
 
   const turnId = ID.unique()
 
@@ -231,7 +370,79 @@ export default defineEventHandler(async (event): Promise<BrandConverseSkippedRes
    * Rückfrage erreichte den Entwurf sonst nie, und er fragte ein zweites Mal
    * dasselbe.
    */
-  const history = await loadBrandConversationHistory(event, profile.$id, stepKey)
+  const history = await loadBrandConversationHistory(event, profile.$id, stepKey, session?.id)
+
+  /**
+   * DIE SAMMEL-SESSION SCHREIBT (die eine Ausnahme, s. Kopf).
+   *
+   * Der Zwischenstand steht in `slots[id].collected` — Teil-Id → Antwort. Was
+   * der Mensch gerade geschrieben hat, gehört dem Teil, der GERADE OFFEN ist;
+   * es gibt darüber keine zweite Wahrheit und deshalb auch keine
+   * KI-Einordnung, die falsch liegen könnte.
+   *
+   * Ist danach kein Teil mehr offen, entsteht der WERT: die Teile als
+   * beschriftete Blöcke (`formatBrandSlotStructured`, die Form, auf die
+   * `structured` verpflichtet ist), Beschriftung in der INHALTSSPRACHE der
+   * Marke — der Wert gehört dem Dokument, nicht der Oberfläche. Er ist ein
+   * unbestätigter ENTWURF: bestätigt wird auf der Bühne, wie überall.
+   *
+   * EIN BESTÄTIGTER SLOT WIRD NIE ANGEFASST (dieselbe Sperre wie im Autosave):
+   * dort ist „Korrigieren" die einzige Tür.
+   */
+  const collecting = session?.kind === 'collect' && !brandSlotRecordConfirmed(records[session.id])
+  const storedParts = collecting ? parseCollectedParts(records[session!.id]) : {}
+  let promptParts: Record<string, string> = storedParts
+  let promptPart = collecting ? nextCollectPart(session!, storedParts) : null
+  let revision = stepRow.revision ?? 0
+  let collectFinished = false
+
+  if (collecting && !body.opening && promptPart && text) {
+    const answered: Record<string, string> = { ...storedParts, [promptPart]: text }
+    const stillOpen = nextCollectPart(session!, answered)
+    const value = stillOpen
+      ? null
+      : formatBrandSlotStructured(session!.parts.map(part => ({
+          label: brandSessionPartLabel(session!, part, profile.contentLocale),
+          body: answered[part] ?? '',
+        })))
+
+    const before = records[session!.id]
+    const candidate: BrandSlotRecord = { ...before, collected: answered, updatedAt: new Date().toISOString() }
+    if (value) {
+      // Der erste Wert bleibt stehen — dieselbe Regel wie im Autosave.
+      if (candidate.firstDraft === undefined || candidate.firstDraft === null) candidate.firstDraft = value
+      candidate.latestDraft = value
+    }
+
+    try {
+      const nextRevision = revision + 1
+      await tablesDB.updateRow({
+        databaseId,
+        tableId: BRAND_STEPS_TABLE,
+        rowId: stepRow.$id,
+        data: {
+          slots: serializeSlotRecords({ ...records, [session!.id]: candidate }),
+          revision: nextRevision,
+        },
+      })
+      revision = nextRevision
+      promptParts = answered
+      promptPart = stillOpen
+      collectFinished = Boolean(value)
+    }
+    catch (error) {
+      // FEHLGESCHLAGEN heisst: derselbe Teil ist weiter offen, und George
+      // fragt ihn in DIESEM Zug noch einmal. Den Prompt trotzdem weiterzu-
+      // schieben hiesse, den nächsten Teil zu fragen und den verlorenen beim
+      // übernächsten Aufruf ein zweites Mal — die verwirrendste der drei
+      // möglichen Reihenfolgen.
+      logEvent('warn', 'brand.converse_collect_failed', {
+        stepKey,
+        slotId: session!.id,
+        message: error instanceof Error ? error.message : String(error),
+      })
+    }
+  }
 
   /**
    * DIE ANTWORT DES MENSCHEN WIRD ZUERST GESCHRIEBEN — vor dem Strom, damit sie
@@ -245,29 +456,36 @@ export default defineEventHandler(async (event): Promise<BrandConverseSkippedRes
    * nachvollziehbar.
    */
   let userMessageId: string | null = null
-  try {
-    const row = await tablesDB.createRow({
-      databaseId,
-      tableId: BRAND_MESSAGES_TABLE,
-      rowId: ID.unique(),
-      data: {
-        profileId: profile.$id,
+  // Beim ERÖFFNUNGSZUG gibt es keine Antwort des Menschen — eine leere Zeile
+  // im Verlauf wäre eine Äusserung, die niemand getan hat.
+  if (!body.opening) {
+    try {
+      const row = await tablesDB.createRow({
+        databaseId,
+        tableId: BRAND_MESSAGES_TABLE,
+        rowId: ID.unique(),
+        data: {
+          profileId: profile.$id,
+          stepKey,
+          // Der Faden DIESER Session (brand-011) — '' nur, wenn hier gerade
+          // keine läuft (freie Frage in einem fertigen Kapitel).
+          sessionKey: session?.id ?? '',
+          role: 'user',
+          body: text,
+          // `kind: 'answer'` ist additiv neben 'draft'/'question' aus der
+          // Generierung. Ohne `slotId` war es eine freie Frage.
+          parts: JSON.stringify({ kind: 'answer', ...(body.slotId ? { slotId: body.slotId } : {}) }),
+          generationId: turnId,
+        },
+      })
+      userMessageId = row.$id
+    }
+    catch (error) {
+      logEvent('warn', 'brand.converse_user_message_failed', {
         stepKey,
-        role: 'user',
-        body: body.text,
-        // `kind: 'answer'` ist additiv neben 'draft'/'question' aus der
-        // Generierung. Ohne `slotId` war es eine freie Frage.
-        parts: JSON.stringify({ kind: 'answer', ...(body.slotId ? { slotId: body.slotId } : {}) }),
-        generationId: turnId,
-      },
-    })
-    userMessageId = row.$id
-  }
-  catch (error) {
-    logEvent('warn', 'brand.converse_user_message_failed', {
-      stepKey,
-      message: error instanceof Error ? error.message : String(error),
-    })
+        message: error instanceof Error ? error.message : String(error),
+      })
+    }
   }
 
   const res = event.node.res
@@ -320,8 +538,40 @@ export default defineEventHandler(async (event): Promise<BrandConverseSkippedRes
       technique,
     })
 
+    /**
+     * DIE SESSION ALS AUFTRAG (§3a/§6) — Ziel, Antwort-Regeln, Leiter,
+     * Qualität, Anti-Muster. Die Nachfrage-Zahl ist eine RECHNUNG über dem
+     * Verlauf (`countSessionProbes`), kein gespeicherter Zähler: ein zweiter
+     * Zähler neben dem Verlauf liefe bei jedem Abbruch auseinander.
+     */
+    const sessionOptions: BrandConverseSessionOptions | null = session
+      ? {
+          goal: session.goal,
+          minSubstanceWords: BRAND_SUBSTANCE_MIN_WORDS[session.answers.minSubstance],
+          probesLeft: Math.max(0, session.answers.maxProbes - countSessionProbes(history)),
+          allowUnknown: session.answers.allowUnknown,
+          allowDefer: session.answers.allowDefer,
+          ladder: session.ladder,
+          quality: session.quality,
+          antiPatterns: session.antiPatterns,
+          collect: promptPart
+            ? {
+                question: brandSessionPartQuestion(session, promptPart, uiLocale),
+                index: session.parts.indexOf(promptPart) + 1,
+                total: session.parts.length,
+              }
+            : null,
+        }
+      : null
+
     const prompt = brandConversePrompt(
-      { hasNextQuestion: Boolean(next), nextQuestionKnown: nextQuestion.length > 0, openFieldLabels },
+      {
+        hasNextQuestion: Boolean(next),
+        nextQuestionKnown: nextQuestion.length > 0,
+        openFieldLabels,
+        session: sessionOptions,
+        ...(body.opening ? { opening: true, chapterIntro } : {}),
+      },
       {
         startCard: profileStartCard(profile),
         // Menschliche Beschriftung statt interner Id (converse-2) — George
@@ -336,8 +586,18 @@ export default defineEventHandler(async (event): Promise<BrandConverseSkippedRes
         ),
         history,
         answeredQuestion: body.question ?? '',
-        text: body.text,
+        text,
         nextQuestion,
+        ...(session && Object.keys(promptParts).length
+          ? {
+              collected: session.parts
+                .filter(part => promptParts[part]?.trim())
+                .map(part => ({
+                  label: brandSessionPartLabel(session, part, profile.contentLocale),
+                  value: promptParts[part]!,
+                })),
+            }
+          : {}),
       },
     )
 
@@ -387,6 +647,7 @@ export default defineEventHandler(async (event): Promise<BrandConverseSkippedRes
         data: {
           profileId: profile.$id,
           stepKey,
+          sessionKey: session?.id ?? '',
           role: 'george',
           body: message,
           // Dieselbe `generationId` wie die Antwort, auf die sie reagiert — so
@@ -412,12 +673,30 @@ export default defineEventHandler(async (event): Promise<BrandConverseSkippedRes
       return fail('persist_failed')
     }
 
+    /**
+     * AUTO-WEITER (§5): welche Session nach diesem Zug dran ist — gerechnet
+     * NACH dem Zug und aus dem SERVER-Stand, nie aus dem Rumpf.
+     *
+     * In dieser Runde ist es die Grundfassung ohne Warteschlange: die
+     * `stale`-Sessions (Paket 6) und der adaptive Vorschlag des Spezialisten
+     * (Paket 4) füllen später dasselbe Feld, und die Aufrufstelle im Browser
+     * bleibt dieselbe.
+     */
+    const factsAfter: Record<string, BrandSlotStateFacts> = collectFinished && session
+      ? { ...facts, [session.id]: { ...facts[session.id], hasValue: true } }
+      : facts
+    const upcoming = resolveNextSession(stepKey, factsAfter)
+    const nextSession: BrandNextSessionRef | null = upcoming
+      ? { stepKey, sessionKey: upcoming.slotId }
+      : null
+
     send('generation.completed', {
       generationId: turnId,
       slotId: askedSlotId,
-      // GELESEN, nicht erhöht: dieser Zug hat nichts geschrieben, was eine neue
-      // Fassung rechtfertigte.
-      revision: stepRow.revision ?? 0,
+      // GELESEN, nicht erhöht — AUSSER die Sammel-Session hat geschrieben
+      // (s. Kopf): eine gemeldete alte Fassung liefe dem nächsten Autosave in
+      // einen 409.
+      revision,
       messageId,
       model: turn.model,
       promptVersion: BRAND_CONVERSE_PROMPT_VERSION,
@@ -428,6 +707,7 @@ export default defineEventHandler(async (event): Promise<BrandConverseSkippedRes
       // NUR wenn es welche gibt: ein leeres Array wäre für den Leser dasselbe
       // wie „keine", kostete aber einen Sonderfall im Rückwärts-Vertrag.
       ...(spoken.options.length ? { options: spoken.options } : {}),
+      next: nextSession,
     })
     logEvent('info', 'brand.converse_completed', {
       stepKey,

@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import {
   BRAND_SOURCES_HASH_SCOPE,
+  BRAND_SUBSTANCE_MIN_WORDS,
   computeSourcesHash,
   evaluateInvariants,
+  nextCollectPart,
   sessionsAffectedBy,
 } from '../shared/brandSessions'
 import {
@@ -329,5 +331,56 @@ describe('evaluateInvariants — was ein Test prüfen kann (§3a Nr. 6)', () => 
       { kind: 'mentionsNone', terms: ['Mut'] },
     ])
     expect(evaluateInvariants(session, '- Mut')).toMatchObject({ invariant: { kind: 'count', min: 9 } })
+  })
+})
+
+/**
+ * DIE SAMMEL-SESSION (BW2 Paket 3a) — welcher Teil ist dran?
+ *
+ * Die Rechnung ist der Grund, warum hier keine KI einordnen muss: die
+ * Reihenfolge steht in der Registry, der Zwischenstand in der Zeile, und der
+ * Text des Menschen gehört dem Teil, der GERADE gefragt wurde.
+ */
+describe('nextCollectPart', () => {
+  const facts = slotById('a.facts')!
+
+  it('geht die Teile in Registry-Reihenfolge durch', () => {
+    expect(nextCollectPart(facts)).toBe('teamSize')
+    expect(nextCollectPart(facts, { teamSize: '3 fest' })).toBe('age')
+    expect(nextCollectPart(facts, { teamSize: '3 fest', age: '2021' })).toBe('markets')
+  })
+
+  it('`null` heisst „alle beantwortet" — dann entsteht der Wert', () => {
+    expect(nextCollectPart(facts, { teamSize: '3 fest', age: '2021', markets: 'Landkreis' })).toBeNull()
+  })
+
+  it('LEERRAUM ist keine Antwort — sonst schöbe ein leerer Zug den Fortschritt vor', () => {
+    expect(nextCollectPart(facts, { teamSize: '   ' })).toBe('teamSize')
+  })
+
+  it('eine Session OHNE Teile hat nie einen offenen — jede andere Arbeitsform', () => {
+    expect(nextCollectPart(slotById('a.origin')!)).toBeNull()
+  })
+
+  it('unbekannte Schlüssel im Zwischenstand ändern nichts', () => {
+    // Eine gelöschte Teil-Id in Bestandsdaten darf die Session nicht
+    // fertigmelden — gelaufen wird über die REGISTRY, nicht über das Objekt.
+    expect(nextCollectPart(facts, { erfunden: 'x' })).toBe('teamSize')
+  })
+})
+
+describe('BRAND_SUBSTANCE_MIN_WORDS', () => {
+  it('übersetzt die drei Stufen in Wortzahlen, aufsteigend', () => {
+    expect(BRAND_SUBSTANCE_MIN_WORDS.short).toBe(12)
+    expect(BRAND_SUBSTANCE_MIN_WORDS.medium).toBe(40)
+    expect(BRAND_SUBSTANCE_MIN_WORDS.long).toBe(100)
+  })
+
+  it('JEDE Session der Registry findet ihre Zahl', () => {
+    // Ohne diese Zeile fiele eine neue Stufe erst im Prompt auf — als `NaN`
+    // mitten im Satz „shorter than roughly NaN words".
+    for (const session of BRAND_SLOTS) {
+      expect(BRAND_SUBSTANCE_MIN_WORDS[session.answers.minSubstance]).toBeGreaterThan(0)
+    }
   })
 })

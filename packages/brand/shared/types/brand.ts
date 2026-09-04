@@ -21,8 +21,20 @@
  */
 
 import type { BrandGenerationOutcome } from '../brandGeneration'
-import type { BrandConfidence, BrandJourneyStep, BrandStoredStepState } from '../brandJourney'
-import type { BrandPathKind, BrandStepKey, BrandStepProgress } from '../slotRegistry'
+import type {
+  BrandConfidence,
+  BrandJourneyStep,
+  BrandSessionState,
+  BrandStoredStepState,
+} from '../brandJourney'
+import type {
+  BrandPathKind,
+  BrandSessionEffort,
+  BrandSessionKind,
+  BrandSessionSensitivity,
+  BrandStepKey,
+  BrandStepProgress,
+} from '../slotRegistry'
 
 /** Wem ein Profil gehört (Phase 1 aktiviert nur `user`). */
 export type BrandOwnerTypeValue = 'user' | 'community'
@@ -255,6 +267,49 @@ export interface BrandGenerationVersionsResponse {
   latestDraft: string | null
 }
 
+/**
+ * WOHIN DIESES FELD SPÄTER FLIESST (Plan §3a, „mechanisch, ohne Text") — die
+ * transitive Hülle aus `sessionsAffectedBy`, auf zwei Zahlen und die Kapitel
+ * eingedampft.
+ *
+ * Die LISTE der berührten Felder steht bewusst NICHT drin: sie wäre bis zu 29
+ * Ids lang, der Mensch bekommt „fliesst später in Mission, Manifest und
+ * Taglines" zu lesen, und wer die Einzelfelder braucht (der Impact-Hinweis,
+ * Paket 6), rechnet dieselbe pure Funktion im Browser.
+ */
+export interface BrandSessionAffects {
+  /** Wie viele bestätigbare Sessions daran hängen — 0 heisst „nichts". */
+  count: number
+  /** In welchen Kapiteln, in Registry-Reihenfolge. */
+  steps: BrandStepKey[]
+}
+
+/**
+ * DER STAND EINER SESSION, wie ihn die Werkstatt liest (Plan §5).
+ *
+ * `accepted` und `deferred` sind in Paket 3a IMMER `undefined`: die
+ * Abnahme-Seite und das Vertagen sind Paket 3b, und ein hier erfundenes
+ * `false` behauptete eine Entscheidung, die niemand getroffen hat. Sie stehen
+ * trotzdem schon im Vertrag, damit die Oberfläche (3c) gegen die endgültige
+ * Form gebaut wird.
+ */
+export interface BrandSessionView {
+  state: BrandSessionState
+  /** Die Arbeitsform (`ask`/`collect`/`choose`/`derive`/`draft`/`instrument`). */
+  kind: BrandSessionKind
+  /** Was der Mensch vorher über den Umfang erfährt („~3 Min"). */
+  effort: BrandSessionEffort
+  /** Was per Share-Link und Export standardmässig nicht reist. */
+  sensitivity: BrandSessionSensitivity
+  affects: BrandSessionAffects
+  /** Im Kapitel-Zusammenhang abgenommen (Paket 3b). */
+  accepted?: boolean
+  /** Auf später vertagt (Paket 3b). */
+  deferred?: boolean
+  /** Der Fortschritt einer Sammel-Session: Teil-Id → Antwort. */
+  collected?: Record<string, string>
+}
+
 export interface BrandStepDetailResponse {
   profileId: string
   stepKey: BrandStepKey
@@ -266,6 +321,12 @@ export interface BrandStepDetailResponse {
   completedAt: string | null
   activeSeconds: number
   slots: Record<string, BrandSlotView>
+  /**
+   * Der Session-Zustand ALLER Sessions dieses Kapitels — abgeleitet, keine
+   * gespeicherte Spalte (`resolveSessionStates`). Gerechnet wird über die
+   * Fakten ALLER Kapitel, weil eine Session über Kapitelgrenzen liest.
+   */
+  sessions: Record<string, BrandSessionView>
   generations: BrandGenerationsView
   progress: BrandStepProgress
   missingRequired: string[]
@@ -300,6 +361,12 @@ export interface BrandStepCompleteResponse {
 export interface BrandMessageView {
   id: string
   stepKey: string
+  /**
+   * DIE SESSION, IN DER DIESER ZUG ENTSTAND (brand-011). `''` heisst
+   * „Kapitel-Verlauf aus der Zeit vor BW2" — und ist damit ein Wert, keine
+   * Lücke: solche Zeilen zählen zum Verlauf der ERSTEN Session ihres Kapitels.
+   */
+  sessionKey: string
   role: 'george' | 'user' | 'system'
   body: string
   parts: unknown
@@ -328,7 +395,33 @@ export interface BrandMessagesResponse {
  */
 export interface BrandConverseSkippedResponse {
   conversed: false
+  /**
+   * NUR beim Eröffnungszug (Paket 3a): diese Session hat ihren ersten Zug
+   * schon. Der Client ruft die Eröffnung bei JEDEM Öffnen — ohne dieses
+   * „schon passiert" bekäme eine Session bei jedem Blick einen neuen ersten
+   * Satz, und der Eimer bezahlte ihn.
+   *
+   * Es steht NEBEN `conversed: false` und ersetzt es nicht: für die Werkstatt
+   * ist beides derselbe Handgriff (keiner), und ein zweiter Antwort-Typ
+   * zwänge sie, zwei Formen zu unterscheiden, die dasselbe bedeuten.
+   */
+  skipped?: true
 }
+
+/**
+ * WOHIN ES DANACH WEITERGEHT (Auto-Weiter, Plan §5) — Kapitel und Session der
+ * nächsten offenen Pflicht-Session, gerechnet NACH dem Zug.
+ *
+ * `null` heisst „in diesem Kapitel ist keine Frage mehr offen"; die
+ * Warteschlange „neu besprechen" (`stale`) füllt dieses Feld erst mit Paket 6.
+ */
+export interface BrandNextSessionRef {
+  stepKey: BrandStepKey
+  sessionKey: string
+}
+
+/** Jede Antwort der Konversations-Route, die KEIN Strom ist. */
+export type BrandConverseResponse = BrandConverseSkippedResponse
 
 /** NEUTRAL: dieselbe Form für falsch, abgelaufen, widerrufen, verbraucht. */
 export interface BrandInviteCheckResponse {

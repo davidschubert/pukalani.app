@@ -997,3 +997,20 @@ export function exampleKeyFor(slot: BrandSlot, pathKind: BrandPathKind): string 
 export function partKeyFor(slot: BrandSlot, part: string): string {
   return `brand.part.${slot.id}.${part}`
 }
+
+/**
+ * DIE KURZE BESCHRIFTUNG EINES TEILS — `brand.partLabel.<id>.<part>` (Paket 3a).
+ *
+ * `partKeyFor` liefert die FRAGE („Wie viele Leute arbeiten mit — feste und
+ * freie zusammen?"); der zusammengelegte Wert einer Sammel-Session braucht
+ * daneben ein ETIKETT („Team"). Zwei Schlüssel und nicht einer, weil beides
+ * gleichzeitig gebraucht wird: die Frage im Chat, das Etikett im gespeicherten
+ * Wert — und der ist ein `structured`-Wert aus beschrifteten Blöcken
+ * (`brandSlotFormat.ts`), den ein Mensch später im Dokument liest.
+ *
+ * Er steht in der INHALTSSPRACHE der Marke, nicht in der Sprache der Seite:
+ * der Wert gehört dem Dokument, nicht der Oberfläche.
+ */
+export function partLabelKeyFor(slot: BrandSlot, part: string): string {
+  return `brand.partLabel.${slot.id}.${part}`
+}

@@ -55,6 +55,12 @@ export const BRAND_MESSAGES_LIMIT_MAX = 100
 export function createBrandMessagesQuerySchema() {
   return z.object({
     stepKey: z.string().max(32).optional(),
+    /**
+     * DER VERLAUF EINER SESSION (brand-011, BW2 §6) — ohne ihn kommt wie
+     * bisher das GANZE Kapitel. Zwei Fragen, ein Endpunkt: die Werkstatt zeigt
+     * den Faden einer Session, der Wiedereinstieg zeigt das Kapitel.
+     */
+    session: z.string().max(32).optional(),
     cursor: z.string().max(64).optional(),
     limit: z.coerce.number().int().min(1).max(BRAND_MESSAGES_LIMIT_MAX)
       .default(BRAND_MESSAGES_LIMIT_DEFAULT),

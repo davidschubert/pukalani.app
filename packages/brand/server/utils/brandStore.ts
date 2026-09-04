@@ -125,6 +125,14 @@ export type BrandStepRow = Models.Row & {
 export type BrandMessageRow = Models.Row & {
   profileId: string
   stepKey: string
+  /**
+   * DIE SESSION, in der dieser Zug entstand (brand-011, BW2 Paket 3a).
+   *
+   * OPTIONAL getypt, weil die Spalte ADDITIV dazukam: eine Zeile von vor der
+   * Migration liest `undefined`, und der einzige Leser macht daraus dasselbe
+   * '' wie die Spalten-Vorgabe — der Kapitel-Verlauf aus der Zeit vor BW2.
+   */
+  sessionKey?: string
   role: string
   body: string
   parts?: string | null
@@ -172,6 +180,33 @@ export interface BrandSlotRecord {
   confirmed?: string | null
   confidence?: BrandConfidence | null
   updatedAt?: string | null
+  /**
+   * DER FORTSCHRITT EINER SAMMEL-SESSION (BW2 Paket 3a): Teil-Id → Antwort,
+   * additiv in derselben JSON-Spalte (Plan §12: „kein Schema-Schritt").
+   *
+   * Nur `collect`-Sessions haben ihn (heute `a.facts`). Er ist ein
+   * ZWISCHENSTAND, kein Wert: der Wert entsteht erst, wenn alle Teile
+   * beantwortet sind, und steht dann wie jeder andere in `latestDraft`.
+   * Deshalb steht er auch NICHT in `sameSlot` (Autosave-No-op-Regel) — er
+   * wird ausschliesslich von der Konversations-Route geschrieben.
+   */
+  collected?: Record<string, string>
+}
+
+/**
+ * Der gelesene Zwischenstand einer Sammel-Session — kaputte oder fremde
+ * Formen ergeben ein LEERES Objekt statt einer Ausnahme (dieselbe
+ * Nachsicht wie `parseSlotRecords`: ein unlesbarer Zwischenstand darf die
+ * Session nicht unbedienbar machen, der nächste Zug schreibt ihn neu).
+ */
+export function parseCollectedParts(record: BrandSlotRecord | undefined): Record<string, string> {
+  const raw = record?.collected
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return {}
+  const out: Record<string, string> = {}
+  for (const [part, value] of Object.entries(raw)) {
+    if (typeof value === 'string') out[part] = value
+  }
+  return out
 }
 
 /**

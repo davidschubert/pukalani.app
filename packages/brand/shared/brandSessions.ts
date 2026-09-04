@@ -3,6 +3,7 @@ import {
   BRAND_SLOTS,
   type BrandInvariant,
   type BrandSessionConfig,
+  type BrandSessionSubstance,
   type BrandSlotStateFacts,
   type BrandStepKey,
 } from './slotRegistry'
@@ -25,6 +26,9 @@ import {
  *     und merkte eine Änderung nie.
  *  3. `evaluateInvariants` — was ein Test prüfen kann, wird nicht der KI
  *     überlassen. Sie ist billiger, schneller und lügt nie.
+ *  4. `nextCollectPart` (Paket 3a) — welcher Teil einer Sammel-Session gerade
+ *     dran ist. Ebenfalls Rechnung statt Modell: der Text gehört dem Teil, der
+ *     gefragt wurde.
  *
  * ── FAIL-OPEN IST HIER DIE RICHTIGE RICHTUNG ──────────────────────────────
  * Alle drei rechnen mit `BrandSlotStateFacts`, und dessen `value` ist
@@ -224,4 +228,50 @@ export function evaluateInvariants(
     }
   }
   return { ok: true }
+}
+
+// ── 4 · Die Sammel-Session: welcher Teil ist dran? ────────────────────────
+
+/**
+ * DER NÄCHSTE OFFENE TEIL einer `collect`-Session (BW2 §6, Paket 3a) — pur,
+ * ohne KI und ohne Route.
+ *
+ * `collect` sammelt ihre Teile NACHEINANDER, einen je Zug (heute nur
+ * `a.facts`: Teamgrösse, Alter, Märkte). Welcher gerade offen ist, ergibt sich
+ * aus der REGISTRY-Reihenfolge der Teile und dem bisher Gesammelten — nicht
+ * aus einer Zählung von Zügen und schon gar nicht aus einer KI-Einordnung: der
+ * Text, den der Mensch schreibt, gehört dem Teil, der gerade gefragt wurde,
+ * und mehr Wahrheit gibt es darüber nicht.
+ *
+ * `null` heisst „alle Teile beantwortet" — dann schreibt die Route den
+ * strukturierten Wert und hört auf zu fragen.
+ *
+ * Leerraum zählt NICHT als Antwort: ein Teil, in dem nur Leerzeichen stehen,
+ * ist offen. Sonst schöbe ein versehentlich leerer Zug den Fortschritt vor.
+ */
+export function nextCollectPart(
+  config: BrandSessionConfig,
+  collected: Readonly<Record<string, string | undefined>> = {},
+): string | null {
+  return config.parts.find(part => !collected[part]?.trim()) ?? null
+}
+
+/**
+ * MINDEST-SUBSTANZ IN WÖRTERN — die drei Stufen aus `sessionContent.ts` als
+ * Zahl, die im Prompt stehen kann (Plan §16).
+ *
+ * Die Stufen sind der Pflege-Massstab (68 Zahlen von Hand pflegt niemand); der
+ * PROMPT braucht trotzdem etwas Greifbares, sonst heisst „thin" für jedes
+ * Modell etwas anderes. Die Zahlen sind bewusst grob und mit „roughly"
+ * eingeleitet: eine harte Grenze machte aus dem Gespräch eine Zeichenzählung.
+ *
+ *  short  ≈ 12  ein Halbsatz reicht (Auswahl, Bestätigung, eine Jahreszahl)
+ *  medium ≈ 40  zwei bis drei Sätze — die Menschenfragen des Katalogs
+ *  long   ≈ 100 eine Geschichte mit Szene (heute von keiner Session verlangt,
+ *               die Stufe gibt es trotzdem, weil die Config sie kennt)
+ */
+export const BRAND_SUBSTANCE_MIN_WORDS: Readonly<Record<BrandSessionSubstance, number>> = {
+  short: 12,
+  medium: 40,
+  long: 100,
 }

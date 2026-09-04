@@ -1,5 +1,5 @@
 import { REGISTRY_VERSION } from './slotRegistry'
-import type { BrandGenerationEntry } from './types/brand'
+import type { BrandGenerationEntry, BrandNextSessionRef } from './types/brand'
 
 /**
  * DAS §3e-STREAMING-PROTOKOLL ALS PURE REGEL — Serialisierung, Lese-Seite,
@@ -144,6 +144,17 @@ export interface BrandGenerationCompletedData {
    * Normalfall jeder offenen Frage.
    */
   options?: readonly string[]
+  /**
+   * AUTO-WEITER (BW2 §5, Paket 3a): Kapitel und Session, die nach diesem Zug
+   * als nächste offen sind — gerechnet vom SERVER aus dem gespeicherten Stand,
+   * nie vom Client vorgeschlagen.
+   *
+   * OPTIONAL wie `options`, und aus demselben Grund: ein Frame ohne `next` ist
+   * der Normalfall jedes Zuges, der nichts weiterschiebt (Entwurfs-Route,
+   * Kapitel fertig). Fehlt es, bleibt der Mensch, wo er ist — genau das
+   * Verhalten von vor BW2.
+   */
+  next?: BrandNextSessionRef | null
 }
 
 export interface BrandGenerationFailedData {

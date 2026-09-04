@@ -7,6 +7,7 @@ import {
   type BrandSlot,
   exampleKeyFor,
   partKeyFor,
+  partLabelKeyFor,
   questionKeyFor,
 } from '../shared/slotRegistry'
 
@@ -115,6 +116,22 @@ describe('brand i18n-Katalog', () => {
     // Ohne diese Zeile wäre der Test grün, sobald `parts` irgendwo leer würde.
     expect(activeSlots.filter(slot => slot.parts.length > 0).map(slot => slot.id)).toEqual(['a.facts'])
     expect(missingIn('brand.part.a.facts.erfunden').length).toBeGreaterThan(0)
+  })
+
+  it('und für JEDEN Teil ein kurzes Etikett — es steht im gespeicherten Wert', () => {
+    // Der zusammengelegte Wert einer Sammel-Session ist ein `structured`-Wert
+    // aus beschrifteten Blöcken (`## Team`). Fehlt das Etikett, stünde dort die
+    // interne Teil-Id — im Brand-Dokument, das ein Mensch liest.
+    const gaps: string[] = []
+    for (const slot of activeSlots.filter(slot => slot.parts.length > 0)) {
+      for (const part of slot.parts) {
+        const key = partLabelKeyFor(slot, part)
+        const missing = missingIn(key)
+        if (missing.length) gaps.push(`${slot.id}: ${key} fehlt in ${missing.join(', ')}`)
+      }
+    }
+    expect(gaps).toEqual([])
+    expect(missingIn('brand.partLabel.a.facts.erfunden').length).toBeGreaterThan(0)
   })
 
   it('hat für JEDE Menschenfrage eine Beispiel-Antwort (Composer-Platzhalter)', () => {

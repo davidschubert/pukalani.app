@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { H3Event } from 'h3'
-import { confirmableRequiredSlotsForStep } from '../shared/slotRegistry'
+import { confirmableRequiredSlotsForStep, slotById } from '../shared/slotRegistry'
 import {
   type BrandGenerationEvent,
   decodeBrandGenerationChunk,
@@ -67,6 +67,16 @@ let timeline: string[]
 let messageRows: Record<string, unknown>[]
 /** Was `listRows` für den Verlauf liefert (ABSTEIGEND, wie die Route fragt). */
 let historyRows: FakeRow[]
+/** Die Abfragen gegen `brand_messages`, als Zeichenketten — je Aufruf eine Liste. */
+let messageQueries: string[][]
+/** Antwort der Existenz-Prüfung „hat diese Session schon einen George-Zug?". */
+let sessionProbeRows: FakeRow[]
+/** Antwort der Existenz-Prüfung „hat dieses Kapitel schon eine Nachricht?". */
+let stepProbeRows: FakeRow[]
+/** Was auf `brand_steps` geschrieben wurde (Sammel-Session, s. dort). */
+let stepWrites: Record<string, unknown>[]
+/** Welchen Baustein die Route sieht — `getRouterParam('stepKey')`. */
+let routeStepKey: string
 
 const tablesDB = {
   getRow: vi.fn(async ({ tableId, rowId }: { tableId: string, rowId: string }) => {
@@ -79,13 +89,24 @@ const tablesDB = {
     if (tableId === 'app_config') return appConfigRow
     throw new Error(`unerwartete Tabelle ${tableId}`)
   }),
-  listRows: vi.fn(async ({ tableId }: { tableId: string }) => {
+  listRows: vi.fn(async ({ tableId, queries }: { tableId: string, queries?: unknown[] }) => {
     if (tableId === 'brand_steps') return { rows: stepRows }
-    if (tableId === 'brand_messages') return { rows: historyRows }
+    if (tableId === 'brand_messages') {
+      // Drei Abfragen teilen sich diese Tabelle, und sie sind an ihrer FORM zu
+      // unterscheiden: die Existenz-Prüfung der Session filtert auf `role`,
+      // die des Kapitels sortiert nicht, der Verlauf sortiert absteigend.
+      const asText = (queries ?? []).map(query => String(query))
+      messageQueries.push(asText)
+      const joined = asText.join(' ')
+      if (joined.includes('"role"')) return { rows: sessionProbeRows }
+      if (!joined.includes('orderDesc')) return { rows: stepProbeRows }
+      return { rows: historyRows }
+    }
     return { rows: [] }
   }),
-  updateRow: vi.fn(async ({ tableId }: { tableId: string }) => {
+  updateRow: vi.fn(async ({ tableId, data }: { tableId: string, data?: Record<string, unknown> }) => {
     timeline.push(`write:${tableId}`)
+    if (tableId === 'brand_steps' && data) stepWrites.push(data)
     return stepRow
   }),
   createRow: vi.fn(async ({ tableId, data }: { tableId: string, data: Record<string, unknown> }) => {
@@ -124,7 +145,7 @@ vi.stubGlobal('toH3Error', (error: unknown) => error)
 vi.stubGlobal('logEvent', () => {})
 vi.stubGlobal('requireBrandAccess', async () => ({ userId: 'u1' }))
 vi.stubGlobal('assertBrandOwnerAccess', () => {})
-vi.stubGlobal('getRouterParam', (_event: H3Event, name: string) => (name === 'id' ? 'p1' : 'context'))
+vi.stubGlobal('getRouterParam', (_event: H3Event, name: string) => (name === 'id' ? 'p1' : routeStepKey))
 vi.stubGlobal('getEffectiveAiConfig', async () => ({ model: 'configured-model' }))
 vi.stubGlobal('aiCompleteStream', aiCompleteStream)
 
@@ -205,6 +226,11 @@ beforeEach(() => {
   bucketCounts = {}
   messageRows = []
   historyRows = []
+  messageQueries = []
+  sessionProbeRows = []
+  stepProbeRows = []
+  stepWrites = []
+  routeStepKey = 'context'
   modelText = 'Das nehme ich mit. Was loben eure Kunden an euch?'
   modelFails = null
   lastPrompt = ''
@@ -663,5 +689,280 @@ describe('Wenn etwas schiefgeht', () => {
       expect(JSON.stringify(record.data)).not.toContain('langweilig')
       expect(JSON.stringify(record.data)).not.toContain('loben')
     }
+  })
+})
+
+/**
+ * DER ZUG GEHÖRT EINER SESSION (BW2 Paket 3a) — vier Aussagen, vier
+ * Bruchstellen:
+ *
+ *  1. Eine Session aus einem FREMDEN Baustein wird abgewiesen (400) — sonst
+ *     stünde im Prompt das Ziel eines anderen Kapitels und im Verlauf eine
+ *     Zeile, die niemand mehr zuordnen kann.
+ *  2. Eine GESPERRTE Session wird abgewiesen (409) — und zwar VOR jeder
+ *     Wirkung: keine Buchung, keine Zeile, kein Strom.
+ *  3. OHNE Schlüssel rechnet der Server die Grundfassung (`resolveNextSession`)
+ *     — der Rückwärts-Vertrag für jeden Client bis Paket 3c.
+ *  4. Jede geschriebene Zeile trägt den Schlüssel (brand-011).
+ */
+describe('Die Session eines Zuges', () => {
+  it('lehnt eine Session aus einem FREMDEN Baustein ab — 400 `session_foreign`', async () => {
+    body = { ...body, sessionKey: 'b.purpose' }
+    const { event } = fakeEvent()
+    await expect(handler(event)).rejects.toMatchObject({
+      status: 400,
+      data: { code: 'session_foreign' },
+    })
+    // VOR jeder Wirkung: keine Zeile, keine Buchung, kein Anbieter-Aufruf.
+    expect(tablesDB.createRow).not.toHaveBeenCalled()
+    expect(hits).toEqual([])
+    expect(aiCompleteStream).not.toHaveBeenCalled()
+  })
+
+  it('lehnt eine unbekannte Session ab — dieselbe Antwort', async () => {
+    body = { ...body, sessionKey: 'a.erfunden' }
+    const { event } = fakeEvent()
+    await expect(handler(event)).rejects.toMatchObject({
+      status: 400,
+      data: { code: 'session_foreign' },
+    })
+  })
+
+  it('lehnt eine GESPERRTE Session ab — 409 `session_locked`, ohne jede Wirkung', async () => {
+    // `c.candidates` liest sieben bestätigte Felder; keines davon steht. Damit
+    // der BAUSTEIN erreichbar ist (sonst käme 403 aus der Journey), sind seine
+    // Vorgänger abgeschlossen.
+    routeStepKey = 'values'
+    stepRows = [
+      stepRowFor('context', { state: 'done' }),
+      stepRowFor('pvm', { state: 'done' }),
+      stepRowFor('architecture', { state: 'done' }),
+      stepRowFor('values'),
+    ]
+    stepRow = stepRows[3]!
+    body = { text: 'Verlässlichkeit, glaube ich.', sessionKey: 'c.candidates' }
+
+    const { event } = fakeEvent()
+    await expect(handler(event)).rejects.toMatchObject({
+      status: 409,
+      data: { code: 'session_locked' },
+    })
+    expect(tablesDB.createRow).not.toHaveBeenCalled()
+    expect(hits).toEqual([])
+    expect(aiCompleteStream).not.toHaveBeenCalled()
+  })
+
+  it('eine OFFENE Session desselben Bausteins geht durch', async () => {
+    body = { ...body, sessionKey: 'a.customerPraise' }
+    const { event, chunks } = fakeEvent()
+    await handler(event)
+    expect(readBack(chunks).at(-1)!.type).toBe('generation.completed')
+    // Und ihr Ziel steht im Prompt.
+    expect(lastPrompt).toContain('THIS SESSION:')
+    expect(lastPrompt).toContain(slotById('a.customerPraise')!.goal)
+  })
+
+  it('OHNE Schlüssel gilt die Grundfassung — die erste offene Pflicht-Session', async () => {
+    // `a.origin` ist beantwortet ⇒ `a.customerPraise` ist dran (dieselbe
+    // Rechnung, die auch die nächste Frage bestimmt).
+    const { event } = fakeEvent()
+    await handler(event)
+    expect(lastPrompt).toContain(slotById('a.customerPraise')!.goal)
+    expect(lastPrompt).not.toContain(slotById('a.origin')!.goal)
+  })
+
+  it('STEMPELT beide Zeilen mit dem Schlüssel der Session', async () => {
+    body = { ...body, sessionKey: 'a.customerPraise' }
+    const { event } = fakeEvent()
+    await handler(event)
+    expect(messageRows).toHaveLength(2)
+    expect(messageRows[0]).toMatchObject({ role: 'user', sessionKey: 'a.customerPraise' })
+    expect(messageRows[1]).toMatchObject({ role: 'george', sessionKey: 'a.customerPraise' })
+  })
+
+  it('meldet die NÄCHSTE Session im Abschluss-Frame (Auto-Weiter §5)', async () => {
+    const { event, chunks } = fakeEvent()
+    await handler(event)
+    expect(readBack(chunks).at(-1)).toMatchObject({
+      next: { stepKey: 'context', sessionKey: 'a.customerPraise' },
+    })
+  })
+
+  it('GEGENPROBE: ist nichts mehr offen, ist `next` null', async () => {
+    stepRow.slots = JSON.stringify(Object.fromEntries(
+      confirmableRequiredSlotsForStep('context').map(slot => [slot.id, { confirmed: 'steht' }]),
+    ))
+    body = { text: 'Und was heißt eigentlich Positionierung?' }
+    const { event, chunks } = fakeEvent()
+    await handler(event)
+    expect(readBack(chunks).at(-1)).toMatchObject({ next: null })
+  })
+})
+
+/**
+ * DER VERLAUF WIRD AUF DIE SESSION GESCHNITTEN — mit der einen Bestands-Regel,
+ * ohne die jedes Bestands-Branding nach dem Deploy ohne Gedächtnis dastünde:
+ * Zeilen mit LEEREM Schlüssel zählen zur ERSTEN Session des Kapitels.
+ */
+describe('Der Verlaufs-Filter', () => {
+  function historyQuery(): string {
+    return (messageQueries.find(query => query.join(' ').includes('orderDesc')) ?? []).join(' ')
+  }
+
+  it('die ERSTE Session des Kapitels liest auch den Kapitel-Verlauf von vorher mit', async () => {
+    // `a.pitch` ist die erste Session in `context` (Registry-Reihenfolge).
+    body = { ...body, sessionKey: 'a.pitch' }
+    const { event } = fakeEvent()
+    await handler(event)
+    expect(historyQuery()).toContain('"sessionKey"')
+    expect(historyQuery()).toContain('""')
+    expect(historyQuery()).toContain('"a.pitch"')
+  })
+
+  it('GEGENPROBE: jede ANDERE Session liest nur ihren eigenen Faden', async () => {
+    body = { ...body, sessionKey: 'a.customerPraise' }
+    const { event } = fakeEvent()
+    await handler(event)
+    const query = historyQuery()
+    expect(query).toContain('"a.customerPraise"')
+    // Der leere Schlüssel gehört NUR der ersten Session — sonst sähe jede
+    // Session denselben alten Kapitel-Faden.
+    expect(query).not.toMatch(/"values":\["",/)
+  })
+})
+
+/**
+ * DER ERÖFFNUNGSZUG (§6) — George spricht zuerst, und zwar genau EINMAL je
+ * Session. Der Client ruft ihn bei jedem Öffnen; ohne die Sicherung bekäme
+ * dieselbe Session bei jedem Blick einen neuen ersten Satz, bezahlt aus dem
+ * Tages-Eimer.
+ */
+describe('Der Eröffnungszug', () => {
+  beforeEach(() => {
+    body = { opening: true, sessionKey: 'a.customerPraise' }
+  })
+
+  it('erzeugt EINEN Zug des Beraters — und KEINE Zeile des Menschen', async () => {
+    const { event, chunks } = fakeEvent()
+    await handler(event)
+
+    expect(readBack(chunks).at(-1)!.type).toBe('generation.completed')
+    expect(messageRows).toHaveLength(1)
+    expect(messageRows[0]).toMatchObject({ role: 'george', sessionKey: 'a.customerPraise' })
+    expect(lastPrompt).toContain('TASK: OPEN the next session')
+    // Ohne Nachricht gibt es auch keinen Block darüber.
+    expect(lastPrompt).not.toContain('[what they just wrote]')
+  })
+
+  it('IDEMPOTENT: hat die Session ihren Zug, kommt `skipped` statt eines zweiten', async () => {
+    sessionProbeRows = [{ $id: 'm1', role: 'george' }]
+    const { event, res } = fakeEvent()
+    const result = await handler(event)
+
+    expect(result).toEqual({ conversed: false, skipped: true })
+    expect(res.headed).toBe(false)
+    expect(tablesDB.createRow).not.toHaveBeenCalled()
+    expect(aiCompleteStream).not.toHaveBeenCalled()
+    // Und er kostet nichts: abgewiesen wird VOR der Buchung.
+    expect(hits).toEqual([])
+  })
+
+  it('das KAPITEL-INTRO fällt nur, wenn das Kapitel noch keine Nachricht hat', async () => {
+    const first = fakeEvent()
+    await handler(first.event)
+    expect(lastPrompt).toContain('THIS IS THE FIRST TURN OF A NEW CHAPTER')
+
+    // Zweite Session desselben Kapitels: der Faden läuft schon.
+    stepProbeRows = [{ $id: 'm1', role: 'user' }]
+    body = { opening: true, sessionKey: 'a.complaints' }
+    const second = fakeEvent()
+    await handler(second.event)
+    expect(lastPrompt).toContain('THE CHAPTER IS ALREADY RUNNING')
+    expect(lastPrompt).not.toContain('THIS IS THE FIRST TURN OF A NEW CHAPTER')
+  })
+
+  it('ein Eröffnungszug MIT Text ist ein Rumpf-Fehler', async () => {
+    body = { opening: true, sessionKey: 'a.customerPraise', text: 'Hallo?' }
+    const { event } = fakeEvent()
+    await expect(handler(event)).rejects.toMatchObject({ status: 400, data: { code: 'invalid_body' } })
+  })
+})
+
+/**
+ * DIE SAMMEL-SESSION (`a.facts`) — die EINE Stelle, an der diese Route in
+ * `brand_steps` schreibt.
+ *
+ * Drei Teile, drei Züge, EIN Wert am Ende. Die Zuordnung „welcher Teil ist
+ * dran" ist eine Rechnung (`nextCollectPart`), keine KI-Einordnung: der Text
+ * gehört dem Teil, der gerade gefragt wurde.
+ */
+describe('Die Sammel-Session', () => {
+  /** Der Stand, den der letzte Schreibvorgang hinterlassen hat. */
+  function writtenSlots(): Record<string, { collected?: Record<string, string>, latestDraft?: string }> {
+    const last = stepWrites.at(-1)
+    return last ? JSON.parse(String(last.slots)) : {}
+  }
+
+  async function answer(text: string) {
+    body = { text, sessionKey: 'a.facts' }
+    const { event, chunks } = fakeEvent()
+    await handler(event)
+    // Der Stand des nächsten Zuges ist der, den dieser geschrieben hat —
+    // Slots UND Fassung, sonst zählte die Fassung nie weiter.
+    const written = stepWrites.at(-1)
+    if (written) {
+      stepRow.slots = String(written.slots)
+      stepRow.revision = written.revision
+    }
+    return readBack(chunks)
+  }
+
+  it('fragt die drei Teile NACHEINANDER und schreibt den Wert erst am Ende', async () => {
+    await answer('3 fest, 2 auf Saison')
+    expect(writtenSlots()['a.facts']!.collected).toEqual({ teamSize: '3 fest, 2 auf Saison' })
+    expect(writtenSlots()['a.facts']!.latestDraft).toBeUndefined()
+    // Der nächste Teil steht im Prompt — der übernächste nicht.
+    expect(lastPrompt).toContain('you are on part 2 of 3')
+    expect(lastPrompt).toContain('Seit wann gibt es euch?')
+
+    await answer('2021')
+    expect(writtenSlots()['a.facts']!.collected).toEqual({ teamSize: '3 fest, 2 auf Saison', age: '2021' })
+    expect(writtenSlots()['a.facts']!.latestDraft).toBeUndefined()
+    expect(lastPrompt).toContain('you are on part 3 of 3')
+
+    const events = await answer('Landkreis und Wochenmarkt')
+    const value = writtenSlots()['a.facts']!.latestDraft
+    // Die Form ist die des Schemas (`structured`): beschriftete Blöcke, die
+    // Beschriftung in der INHALTSSPRACHE der Marke.
+    expect(value).toBe([
+      '## Team',
+      '3 fest, 2 auf Saison',
+      '',
+      '## Seit',
+      '2021',
+      '',
+      '## Märkte',
+      'Landkreis und Wochenmarkt',
+    ].join('\n'))
+    // Ein unbestätigter ENTWURF — bestätigt wird auf der Bühne.
+    expect(writtenSlots()['a.facts']!.confirmed).toBeUndefined()
+    // Und die Fassung steigt mit, sonst liefe der nächste Autosave in einen 409.
+    expect(events.at(-1)).toMatchObject({ type: 'generation.completed', revision: 6 })
+  })
+
+  it('legt die schon gesammelten Teile in den Prompt', async () => {
+    await answer('3 fest, 2 auf Saison')
+    await answer('2021')
+    expect(lastPrompt).toContain('[what this session has collected so far]')
+    expect(lastPrompt).toContain('[Team]\n3 fest, 2 auf Saison')
+    expect(lastPrompt).toContain('[Seit]\n2021')
+  })
+
+  it('GEGENPROBE: jede ANDERE Session schreibt weiterhin NICHTS auf `brand_steps`', async () => {
+    body = { text: 'Weil uns der Kaffee zu langweilig war.', sessionKey: 'a.origin' }
+    const { event } = fakeEvent()
+    await handler(event)
+    expect(stepWrites).toEqual([])
+    expect(timeline).not.toContain('write:brand_steps')
   })
 })

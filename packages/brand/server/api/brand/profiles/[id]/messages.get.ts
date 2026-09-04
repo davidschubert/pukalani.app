@@ -26,6 +26,11 @@ import {
  * fragte ewig eine leere Seite nach. Ein Element Vorlauf beantwortet die Frage
  * exakt und kostet eine Zeile.
  *
+ * ── ZWEI FILTER, ZWEI FRAGEN (brand-011) ──────────────────────────────────
+ * `?stepKey=` schneidet auf ein Kapitel, `?session=` zusätzlich auf EINE
+ * Session. Ohne beides kommt der ganze Verlauf des Brandings — die Form, die
+ * der Wiedereinstieg und der GDPR-Export brauchen.
+ *
  * ── DAUERHAFT HEISST DAUERHAFT ────────────────────────────────────────────
  * Kein Verfallsdatum (Davids Entscheidung 2026-08-27: echter Wiedereinstieg mit
  * Kontext). Weg ist der Verlauf nur mit dem Branding — über die Löschkaskade
@@ -53,6 +58,12 @@ export default defineEventHandler(async (event): Promise<BrandMessagesResponse> 
       queries: [
         Query.equal('profileId', profileId),
         ...(query.stepKey ? [Query.equal('stepKey', query.stepKey)] : []),
+        // Der Session-Filter ist EXAKT — ohne die Bestands-Regel des
+        // Prompt-Fensters (`sessionKeyValues`): dort geht es um Georges
+        // Gedächtnis, hier um das, was der Mensch gerade angeklickt hat. Eine
+        // Leseansicht, die stillschweigend fremde Züge dazulegte, wäre ein
+        // Verlauf, den niemand mehr zuordnen kann.
+        ...(query.session ? [Query.equal('sessionKey', query.session)] : []),
         Query.orderAsc('$id'),
         Query.limit(query.limit + 1),
         ...(query.cursor ? [Query.cursorAfter(query.cursor)] : []),
@@ -70,6 +81,8 @@ export default defineEventHandler(async (event): Promise<BrandMessagesResponse> 
   const messages: BrandMessageView[] = page.map(row => ({
     id: row.$id,
     stepKey: row.stepKey,
+    // '' = Kapitel-Verlauf von vor BW2 (brand-011) — ein Wert, keine Lücke.
+    sessionKey: row.sessionKey ?? '',
     role: row.role === 'user' || row.role === 'system' ? row.role : 'george',
     body: row.body,
     // `parts` ist strukturiertes JSON (Chips, Karten, Paar-Referenzen). Kaputte

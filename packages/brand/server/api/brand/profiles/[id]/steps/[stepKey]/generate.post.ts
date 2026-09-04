@@ -651,6 +651,10 @@ export default defineEventHandler(async (event) => {
           data: {
             profileId: profile.$id,
             stepKey,
+            // DIE SESSION IST DAS FELD (brand-011): ein Entwurfs-Zug gehört in
+            // den Faden des Feldes, das er entwirft — sonst stünde er im
+            // Kapitel-Verlauf und in keiner Session.
+            sessionKey: input.entryBase.slotId,
             role: 'george',
             body: input.chat,
             // `options` liegt ADDITIV daneben (Davids Anforderung 2026-09-04):

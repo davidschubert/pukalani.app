@@ -1,4 +1,4 @@
-import type { BrandPathKind } from '../../shared/slotRegistry'
+import { type BrandPathKind, type BrandSlot, partKeyFor, partLabelKeyFor } from '../../shared/slotRegistry'
 import de from '../../i18n/locales/de.json'
 import en from '../../i18n/locales/en.json'
 
@@ -22,6 +22,51 @@ type CatalogNode = string | { [key: string]: CatalogNode }
 const CATALOGS: Record<string, CatalogNode> = {
   de: (de as { brand: { q: CatalogNode } }).brand.q,
   en: (en as { brand: { q: CatalogNode } }).brand.q,
+}
+
+/**
+ * DIE GANZEN KATALOGE — für die Teile einer Sammel-Session (Paket 3a), die
+ * NICHT unter `brand.q` liegen: die Frage eines Teils steht unter
+ * `brand.part.<id>.<teil>`, sein kurzes Etikett unter `brand.partLabel.…`
+ * (`slotRegistry.ts`, Begründung dort). Ein zweiter Zugriffspfad auf dieselbe
+ * Datei, keine zweite Datei.
+ */
+const ROOTS: Record<string, CatalogNode> = {
+  de: de as unknown as CatalogNode,
+  en: en as unknown as CatalogNode,
+}
+
+function lookup(root: CatalogNode | undefined, key: string): string | null {
+  let node: CatalogNode | undefined = root
+  for (const segment of key.split('.')) {
+    if (typeof node !== 'object' || node === null) return null
+    node = node[segment]
+  }
+  return typeof node === 'string' ? node : null
+}
+
+/**
+ * DIE FRAGE EINES TEILS einer Sammel-Session, in der gewünschten Sprache.
+ *
+ * Sie geht in Georges Prompt („frage jetzt genau nach diesem einen Teil") und
+ * folgt damit derselben Regel wie `brandSlotPromptLabel`: kein erfundener Text,
+ * sondern der Katalog-Satz, den die Oberfläche auch zeigt. Fehlt er, bleibt
+ * die Teil-Id der ehrliche Rückfall.
+ */
+export function brandSessionPartQuestion(slot: BrandSlot, part: string, locale: string): string {
+  return lookup(ROOTS[locale] ?? ROOTS.en, partKeyFor(slot, part)) ?? part
+}
+
+/**
+ * DAS KURZE ETIKETT EINES TEILS — die Überschrift seines Blocks im
+ * zusammengelegten `structured`-Wert („Team", „Seit", „Märkte").
+ *
+ * IMMER in der INHALTSSPRACHE der Marke, nie in der der Seite: der Wert gehört
+ * dem Brand-Dokument, und das ist einsprachig (dieselbe Trennung wie bei
+ * `contentLocale` gegenüber `uiLocale`).
+ */
+export function brandSessionPartLabel(slot: BrandSlot, part: string, contentLocale: string): string {
+  return lookup(ROOTS[contentLocale] ?? ROOTS.en, partLabelKeyFor(slot, part)) ?? part
 }
 
 /** Dieselbe Beschriftung für eine ganze Dependency-Liste (Prompt-Aufbau). */
