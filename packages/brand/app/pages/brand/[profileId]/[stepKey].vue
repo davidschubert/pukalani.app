@@ -116,6 +116,19 @@ const request = useRequestFetch()
 const profileId = computed(() => String(route.params.profileId ?? ''))
 const routeStepKey = computed(() => String(route.params.stepKey ?? ''))
 
+/**
+ * EIN UNGÜLTIGER BAUSTEIN-SCHLÜSSEL IST EIN 404, KEINE LEERE HÜLLE (Davids
+ * 404-Audit 2026-09-03): die Klickdummy-Pfade `/brand/demo/discover` u. a.
+ * fielen in diese Route (profileId='demo', stepKey='discover') und
+ * renderten eine „Namenloses Branding"-Werkstatt ohne Inhalt — ein
+ * Soft-404, der wie ein Produktfehler aussieht. Ob das PROFIL existiert,
+ * prüft weiter der Server (store.denied); der SCHLÜSSEL steht im Katalog
+ * und braucht keinen Request.
+ */
+if (!(BRAND_STEP_KEYS as readonly string[]).includes(routeStepKey.value)) {
+  throw createError({ status: 404, statusText: 'Unknown brand step' })
+}
+
 const autosave = useBrandAutosave(profileId)
 // ERST SPEICHERN, DANN GENERIEREN: der Server baut den Entwurf aus den
 // GESPEICHERTEN Quell-Slots. Ohne dieses Ausspülen entwürfe George aus einem

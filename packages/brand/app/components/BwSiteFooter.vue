@@ -5,11 +5,12 @@
  * Schlüssel — die Beschriftungen sind Davids Design und heißen in BEIDEN
  * Sprachen englisch; die Rechtstexte dahinter nicht. */
 const { t } = useI18n()
+const localePath = useLocalePath()
+/* NUR ECHTE ZIELE (Davids 404-Audit 2026-09-03): Products/Discover/Insights
+ * zeigten auf /products (404) bzw. die Klickdummy-Pfade /brand/demo/* —
+ * sie kommen mit ihren Marketing-Seiten zurück (s. BwSiteNav). */
 const nav = computed(() => [
-  { label: t('brand.nav.products'), to: '/products' },
-  { label: t('brand.nav.discover'), to: '/brand/demo/discover' },
-  { label: t('brand.nav.insights'), to: '/brand/demo/journal' },
-  { label: t('brand.nav.about'), to: '/team' },
+  { label: t('brand.nav.about'), to: localePath('/team') },
 ])
 const legal = computed(() => [
   t('brand.legal.imprint'),
@@ -21,7 +22,7 @@ const legal = computed(() => [
 <template>
   <footer class="mt-24 border-t pb-6 pt-8" style="border-color: var(--bw-line)">
     <div class="flex flex-wrap items-center justify-between gap-x-8 gap-y-4">
-      <NuxtLink to="/start" class="flex items-center gap-2">
+      <NuxtLink :to="localePath('/')" class="flex items-center gap-2">
         <span class="grid size-6 flex-none place-items-center rounded-full" style="background: var(--bw-ink); color: var(--bw-paper)">
           <UIcon name="i-ph-fingerprint" class="size-3.5" />
         </span>

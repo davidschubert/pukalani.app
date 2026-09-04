@@ -17,23 +17,20 @@ const { t } = useI18n()
  * und dem Konto. */
 /* Runde 170 (David): „Our Products" als Dropdown im Nuxt-UI-Muster —
  * UNavigationMenu mit Kindern (Icon + Titel + Beschreibung). */
+const localePath = useLocalePath()
+
+/**
+ * NUR ECHTE ZIELE (Davids 404-Audit 2026-09-03): „Products" (samt der sieben
+ * Dropdown-Kinder), „Discover Brands" und „Brand Insights" zeigten auf
+ * `/products` (404) bzw. die Klickdummy-Pfade `/brand/demo/*` — die fängt in
+ * der echten App die Werkstatt-Route als profileId='demo' und rendert eine
+ * leere „Namenloses Branding"-Hülle. Die drei Punkte kommen zurück, SOBALD
+ * ihre Marketing-Seiten existieren (die i18n-Schlüssel `brand.nav.products`
+ * etc. bleiben dafür stehen). Links IMMER über `localePath()` — nackte Pfade
+ * warfen den Besucher von /de auf die englische Fassung.
+ */
 const menuItems = computed(() => [
-  {
-    label: t('brand.nav.products'),
-    active: route.path === '/products',
-    children: [
-      { label: 'Brand Wizard', icon: 'i-ph-chats-circle', description: t('brand.nav.product.wizard'), to: '/products' },
-      { label: 'Brand Design', icon: 'i-ph-palette', description: t('brand.nav.product.design'), to: '/products' },
-      { label: 'Brand Book & Kit', icon: 'i-ph-book-open-text', description: t('brand.nav.product.book'), to: '/products' },
-      { label: 'Brand Experience', icon: 'i-ph-rocket-launch', description: t('brand.nav.product.experience'), to: '/products' },
-      { label: 'Brand Monitoring', icon: 'i-ph-broadcast', description: t('brand.nav.product.monitoring'), to: '/products' },
-      { label: 'Brand Score', icon: 'i-ph-gauge', description: t('brand.nav.product.score'), to: '/products' },
-      { label: 'Brand Benchmark', icon: 'i-ph-binoculars', description: t('brand.nav.product.benchmark'), to: '/products' },
-    ],
-  },
-  { label: t('brand.nav.discover'), to: '/brand/demo/discover', active: ['/brand/demo/discover', '/brand/demo/anatomie'].includes(route.path) },
-  { label: t('brand.nav.insights'), to: '/brand/demo/journal', active: ['/brand/demo/journal', '/brand/demo/artikel', '/brand/demo/profil', '/brand/demo/duell'].includes(route.path) },
-  { label: t('brand.nav.about'), to: '/team', active: route.path === '/team' },
+  { label: t('brand.nav.about'), to: localePath('/team'), active: route.path.endsWith('/team') },
 ])
 
 /* Neue Brand oeffnet das Start-Modal von jeder Seite aus. */
@@ -45,7 +42,6 @@ const newBrandOpen = ref(false)
  * Abmelden über den Core-Weg (useLogout), Gäste bekommen den Login-Knopf. */
 const { user, isLoggedIn } = useCurrentUser()
 const { logout } = useLogout()
-const localePath = useLocalePath()
 const initials = computed(() => {
   const source = (user.value?.name || user.value?.email || '').trim()
   if (!source) return '?'
@@ -108,8 +104,10 @@ const userMenu = computed(() => [[
   <!-- Runde 178 (David): der Header IST Nuxt UIs UHeader — volle Breite,
        startet buendig oben, sticky und Mobile-Menue kommen mit. Farben
        laufen ueber unsere Tokens (Inline-Style schlaegt die Theme-Klassen). -->
+  <!-- Das Logo führt zur Startseite — `/start` war der Klickdummy-Pfad und
+       auf branding.supply ein 404 (Davids 404-Audit 2026-09-03). -->
   <UHeader
-    to="/start" class="bw-root -mx-6 mb-10"
+    :to="localePath('/')" class="bw-root -mx-6 mb-10"
     :ui="{ container: 'max-w-full px-6', title: 'flex items-center gap-2.5 text-sm font-semibold' }"
     style="background: color-mix(in srgb, var(--bw-paper) 88%, transparent); border-color: var(--bw-line)"
   >

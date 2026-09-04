@@ -23,6 +23,16 @@ export default defineAppConfig({
      * (P2, `registerBrandSlotGenerator()`) liefert.
      */
     brand: { name: 'Branding Supply' },
+    /**
+     * „Anmelden mit Google" (Davids Auftrag 2026-09-03). Das ist der
+     * DESIGN-Schalter (welche Anbieter, in welcher Reihenfolge); der Knopf
+     * erscheint erst, wenn auch der BETRIEBS-Schalter der Site gesetzt ist
+     * (`NUXT_PUBLIC_AUTH_OAUTH_PROVIDERS=google` in der Server-.env) UND das
+     * Appwrite-Projekt `branding` einen Google-Client trägt — Rezept:
+     * docs/runbooks/GOOGLE-LOGIN.md (Redirect-URI endet auf `/branding`).
+     * Bis dahin ändert diese Zeile nichts Sichtbares; das ist Absicht.
+     */
+    auth: { providers: ['google'] },
   },
   ui: {},
 })
