@@ -104,6 +104,22 @@ watchEffect(() => {
   }
 })
 
+/**
+ * EIN ABGELEHNTER COOKIE-CODE IST ALTLAST, KEIN URTEIL (Davids Test-Audit
+ * 2026-09-03): der Cookie überlebt sieben Tage — auch das ERFOLGREICHE
+ * Einlösen von früher, wenn das Löschen damals fehlte oder in einem anderen
+ * Tab passierte. Ein leerer /invite-Besuch begrüsste dann mit „Code ungültig
+ * oder abgelaufen", bevor irgendjemand etwas eingegeben hatte. Nur ein
+ * QUERY-Code trägt eine echte Behauptung des Besuchers; einen Cookie-Code,
+ * den der Server ablehnt, räumen wir still weg — die Seite fällt damit auf
+ * `enterCode` (das leere Feld) zurück.
+ */
+watchEffect(() => {
+  if (!queryCode.value && inviteCookie.value && checkStatus.value === 'success' && !check.value?.valid) {
+    inviteCookie.value = null
+  }
+})
+
 /** `null` = noch kein Versuch. Siehe Kopf von `brandInviteView.ts`. */
 const redeemed = ref<boolean | null>(null)
 const redeeming = ref(false)
