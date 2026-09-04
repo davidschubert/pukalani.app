@@ -30,6 +30,46 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### Brand-Wizard: Konversations-Senke geschlossen + Gesprächs-Runde ✅ 2026-09-04
+
+**Auftrag:** Davids Go („bau die konversations-senke wie du empfohlen hast") auf den
+zentralen Befund des Komplett-Tests, plus drei Live-Funde aus seinem Krume-Test am
+selben Tag. Vier Pakete, alle auf main und live bewiesen (Health-SHA):
+
+1. **Konversations-Senke (`george-a-9`, Commit e91ac226, Opus-Lauf + eigene Prüfung):**
+   Die letzten Züge des Bausteins reisen als eigener Prompt-Block in den
+   Entwurfs-Generator (geteilte Verlaufs-Ladung `brandConversationHistory.ts` für
+   generate+converse — eigene Blatt-Datei, weil ein Import in brandStore den Ring
+   brandStore→conversePrompt→georgePrompt→brandGenerators→brandStore geschlossen hätte).
+   Zwei neue Arbeitsregeln: Chat-Antworten haben Feldwert-Gewicht; eine beantwortete
+   Frage wird NIE erneut gestellt. Injection-Grenze doppelt (Label + Regel).
+   `inputHash` bewusst unberührt (gleiche Grenze wie Startkarte/Website-Text — die
+   Neuerzeugung stösst der Mensch an). Heilt Loop UND editor-none-Sackgasse.
+2. **Bühnen-Einstieg (2598fb23):** Der statische Abschluss-Satz benennt das erste
+   offene Pflicht-Feld samt Aktion (Entwurfs-Knopf bzw. Bestätigen) statt ein Gespräch
+   zu versprechen, das nicht startet (Davids Archetyp-Screenshot). TDZ-sicher ohne
+   `pendingCard` gerechnet (Scroll-Watcher-Falle vom 2026-09-03).
+3. **converse-3 (5bb70154):** „Keine Katalog-Frage mehr" ist NICHT „nichts mehr offen" —
+   auf „was ist noch offen?" behauptete George „nichts mehr", während vier
+   Ableitungs-Felder unbestätigt waren. Die offenen Pflicht-Felder reisen jetzt
+   beschriftet in den Auftrag (brandStepCompletion + brandSlotPromptLabel); der Zweig
+   treibt das erste voran statt zum Abschluss einzuladen, den die Route abwiese.
+4. **Antwort-Chips (`george-a-10`/`converse-4`, 94f8e3db, Opus-Lauf):** Davids
+   Anforderung an Vergleichsfragen — neuer Marker `OPTION:` (2–3 Zeilen am Zug-Ende,
+   Empfehlung bleibt Prosa), Zeilen verlassen Sprechblase+Persistenz vollständig,
+   reisen strukturiert im completed-Frame; Bühne rendert Chips, Klick geht über den
+   EINEN bestehenden Sende-Pfad. Geteilte Normalisierung in shared (max 3 × 60,
+   unter 2 = keine Wahl) für Server UND Frame-Dekoder; fehlendes Feld = Verhalten
+   von vorher. Dazu Konto-Menü-Fix (b97592e0): „Brandings" führte auf nacktes `/`.
+
+Beweise: brand-Tests 727 → 764, Lint/Typecheck/i18n-Wächter grün je Push.
+
+**Gelernt:** Dieselbe fachliche Verwechslung („keine Frage mehr" vs. „nichts mehr
+offen") sass an ZWEI Stellen — Bühnen-Satz und Gesprächs-Prompt — und der zweite
+Fundort kam erst durch Davids Live-Test ans Licht, nachdem der erste längst gefixt
+war. Wer eine Zustands-Verwechslung findet, sucht sofort alle Leser desselben
+Zustands ab (hier: `resolveNextQuestion === null`), nicht nur den gemeldeten.
+
 ### Brand-Wizard: Komplett-Test (Links, Seiten, Login, Dashboard, 5 Brandings durchgespielt) ✅ 2026-09-03/04
 
 **Davids Auftrag** (fünf Punkte) — alles Testbare getestet, alles Fixbare
