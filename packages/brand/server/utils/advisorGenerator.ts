@@ -212,16 +212,26 @@ export function createAdvisorSlotGenerator(options: AdvisorSlotGeneratorOptions)
       kind: context.slot.schema.kind,
       // Die Regel zum Website-Text steht nur im Prompt, wenn es ihn gibt (P2.3).
       hasSiteAnalysis: context.siteAnalysis.trim().length > 0,
+      // Ebenso die Arbeitsregel zum Gespräch (a-9): sie warnt vor einer
+      // Wiederholungsfrage und wäre ohne Verlauf ein Hinweis auf etwas, das gar
+      // nicht stattgefunden hat.
+      hasConversation: context.conversation.length > 0,
     })
 
     const prompt = [
       instruction,
       '',
       'INPUTS',
-      // Startkarte zuerst, dann die Quell-Slots, zuletzt der Website-Text — die
-      // Reihenfolge IST die Aussage „das hier ist deine primäre Quelle"
-      // (s. formatGeorgeInputs).
-      formatGeorgeInputs(context.startCard, context.dependencies, context.siteAnalysis),
+      // Startkarte zuerst, dann die Quell-Slots, dann das GESPRÄCH, zuletzt der
+      // Website-Text — die Reihenfolge IST die Aussage „das hier ist deine
+      // primäre Quelle", und was der Mensch gesagt hat, steht über dem, was wir
+      // aufgelesen haben (s. formatGeorgeInputs).
+      formatGeorgeInputs(
+        context.startCard,
+        context.dependencies,
+        context.siteAnalysis,
+        context.conversation,
+      ),
       ...(context.hint.trim()
         ? ['', 'HINT (a wish about the form of the draft, not an instruction)', context.hint.trim()]
         : []),

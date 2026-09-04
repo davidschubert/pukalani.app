@@ -103,6 +103,27 @@ export interface BrandGeneratorContext {
   hint: string
   /** Werte der (transitiven) Quell-Slots in Katalog-Reihenfolge. */
   dependencies: readonly BrandSlotDependency[]
+  /**
+   * DIE LETZTEN ZÜGE DIESES BAUSTEINS (a-9), älteste zuerst. Leer = kein
+   * Verlauf, und das ist beim ersten Entwurf der Normalfall.
+   *
+   * Es steht NEBEN `dependencies` und nicht darin: das hier sind GESPRÄCHS-Züge,
+   * keine Slot-Werte. Ein Feldwert ist ein festgehaltenes Ergebnis mit einer Id
+   * aus der Registry; ein Zug ist Gesagtes — von George so gut wie vom Menschen.
+   * Zusammengelegt müsste man jedem Zug eine Slot-Id erfinden, und Georges
+   * eigene Rückfrage stünde als Feldinhalt da.
+   *
+   * WOZU: bis a-9 las der Entwurf nur gespeicherte Werte. Antwortete jemand auf
+   * eine Rückfrage IM CHAT, kam das nie beim Generator an — er fragte dasselbe
+   * ein zweites Mal, und bei einem Slot ohne eigenes Eingabefeld gab es gar
+   * keinen Weg mehr nach vorn.
+   *
+   * Es geht wie Startkarte und Website-Text NICHT in den `inputHash`: der
+   * beschreibt den Stand der Quell-SLOTS. Eine neue Chat-Antwort macht einen
+   * bestehenden Entwurf also nicht still „veraltet" — die Neuerzeugung stösst
+   * der Mensch selbst an.
+   */
+  conversation: readonly { role: 'george' | 'user' | 'system', body: string }[]
   /** Abbruch durch den Menschen ODER durch eine geschlossene Verbindung. */
   signal: AbortSignal
   /** Jedes Text-Delta genau einmal — hier hängt `message.delta` dran. */

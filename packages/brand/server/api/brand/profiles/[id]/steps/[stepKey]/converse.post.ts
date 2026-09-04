@@ -1,4 +1,4 @@
-import { ID, Query } from 'node-appwrite'
+import { ID } from 'node-appwrite'
 import { createBrandConverseSchema } from '../../../../../../../schemas/brandConverse'
 import { techniqueForStep } from '../../../../../../../shared/brandAdvisors'
 import {
@@ -13,11 +13,9 @@ import { type BrandSlotStateFacts, slotById, slotsForStep } from '../../../../..
 import type { BrandConverseSkippedResponse } from '../../../../../../../shared/types/brand'
 import {
   BRAND_MESSAGES_TABLE,
-  type BrandMessageRow,
   brandDb,
   brandSlotRecordConfirmed,
   brandSlotStoredValue,
-  isAppwriteNotFound,
   loadBrandStepContext,
   parseSlotRecords,
   profileFacts,
@@ -25,11 +23,10 @@ import {
 } from '../../../../../../utils/brandStore'
 import { streamAdvisorTurn } from '../../../../../../utils/advisorGenerator'
 import { claimBrandConverseKey } from '../../../../../../utils/brandConverse'
+import { loadBrandConversationHistory } from '../../../../../../utils/brandConversationHistory'
 import {
-  BRAND_CONVERSE_HISTORY_MAX,
   BRAND_CONVERSE_MAX_TOKENS,
   BRAND_CONVERSE_PROMPT_VERSION,
-  type BrandConverseHistoryTurn,
   brandConversePrompt,
 } from '../../../../../../utils/conversePrompt'
 import { georgeSystemPrompt } from '../../../../../../utils/georgePrompt'
@@ -213,41 +210,14 @@ export default defineEventHandler(async (event): Promise<BrandConverseSkippedRes
 
   /**
    * DER VERLAUF, DEN DER BERATER SIEHT: die letzten Nachrichten dieses
-   * Bausteins. Gelesen wird ABSTEIGEND mit Limit und danach umgedreht — die
-   * andere Richtung müsste die ganze Historie holen, um die letzten sechs zu
-   * finden.
+   * Bausteins, älteste zuerst — fail-soft.
    *
-   * FAIL-SOFT: ein unlesbarer Verlauf kostet den Zug nicht. Der Berater
-   * antwortet dann ohne Gedächtnis, und das ist immer noch besser als gar keine
-   * Reaktion — die Werte des Bausteins reisen ohnehin mit.
+   * Seit a-9 liegt die Abfrage in `brandConversationHistory.ts`, weil der
+   * ENTWURFS-Generator denselben Verlauf braucht: eine Antwort auf Georges
+   * Rückfrage erreichte den Entwurf sonst nie, und er fragte ein zweites Mal
+   * dasselbe.
    */
-  const history: BrandConverseHistoryTurn[] = []
-  try {
-    const res = await tablesDB.listRows<BrandMessageRow>({
-      databaseId,
-      tableId: BRAND_MESSAGES_TABLE,
-      queries: [
-        Query.equal('profileId', profile.$id),
-        Query.equal('stepKey', stepKey),
-        Query.orderDesc('$id'),
-        Query.limit(BRAND_CONVERSE_HISTORY_MAX),
-      ],
-    })
-    for (const row of [...res.rows].reverse()) {
-      history.push({
-        role: row.role === 'user' || row.role === 'system' ? row.role : 'george',
-        body: row.body,
-      })
-    }
-  }
-  catch (error) {
-    if (!isAppwriteNotFound(error)) {
-      logEvent('warn', 'brand.converse_history_failed', {
-        stepKey,
-        message: error instanceof Error ? error.message : String(error),
-      })
-    }
-  }
+  const history = await loadBrandConversationHistory(event, profile.$id, stepKey)
 
   /**
    * DIE ANTWORT DES MENSCHEN WIRD ZUERST GESCHRIEBEN — vor dem Strom, damit sie

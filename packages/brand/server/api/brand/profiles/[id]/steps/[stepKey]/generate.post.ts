@@ -47,6 +47,7 @@ import {
   retainBrandGeneration,
 } from '../../../../../../utils/brandGenerators'
 import { labelSlotDependencies } from '../../../../../../utils/brandSlotPromptLabels'
+import { loadBrandConversationHistory } from '../../../../../../utils/brandConversationHistory'
 import { bookBrandAiQuota } from '../../../../../../utils/brandAiQuota'
 import { recordBrandEvent } from '../../../../../../utils/brandEvents'
 
@@ -411,6 +412,23 @@ export default defineEventHandler(async (event) => {
       return
     }
 
+    /**
+     * DER VERLAUF DIESES BAUSTEINS (a-9) — die Antworten, die der Mensch auf
+     * Georges Rückfragen in den Chat getippt hat.
+     *
+     * ER WIRD ERST HIER GELESEN, nach dem Wiederverwendungs-Zweig: ein
+     * Cache-Treffer braucht ihn nicht, und was nichts kostet, soll auch keine
+     * Abfrage kosten. FAIL-SOFT — ein unlesbarer Verlauf gibt ein leeres Array
+     * und kostet den Lauf nicht (s. `brandConversationHistory.ts`).
+     *
+     * ER GEHT NICHT IN DEN `inputHash`: der beschreibt den Stand der
+     * Quell-SLOTS, und dafür ist `collectSlotDependencies` die einzige Quelle.
+     * Dieselbe bewusste Grenze wie bei Startkarte und Website-Text — eine neue
+     * Chat-Antwort macht einen bestehenden Entwurf nicht still „veraltet"; die
+     * Neuerzeugung stösst der Mensch selbst an.
+     */
+    const conversation = await loadBrandConversationHistory(event, profile.$id, stepKey)
+
     const context: BrandGeneratorContext = {
       event,
       stepKey,
@@ -432,6 +450,7 @@ export default defineEventHandler(async (event) => {
       siteAnalysis: profileSiteAnalysisText(profile),
       hint: body.hint ?? '',
       dependencies,
+      conversation,
       signal: abort.signal,
       onDelta: (text: string) => { send('message.delta', { generationId, text }) },
     }

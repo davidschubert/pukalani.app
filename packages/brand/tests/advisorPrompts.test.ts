@@ -44,6 +44,7 @@ function optionsFor(slotId: string, overrides: Partial<BrandSlotInstructionOptio
     maxLength: overrides.maxLength ?? slot.maxLength,
     kind: overrides.kind ?? slot.schema.kind,
     hasSiteAnalysis: overrides.hasSiteAnalysis ?? false,
+    hasConversation: overrides.hasConversation ?? false,
   }
 }
 

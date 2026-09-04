@@ -73,6 +73,9 @@ function context(slotId: string, stepKey: BrandStepKey, overrides: {
     siteAnalysis: '',
     hint: '',
     dependencies: overrides.dependencies ?? [],
+    // a-9: der Verlauf reist im Vertrag mit — hier leer, denn diese Beweise
+    // messen den Zusammenbau, nicht die Konversations-Senke.
+    conversation: [],
     signal: new AbortController().signal,
     onDelta: () => {},
   }

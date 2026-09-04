@@ -1,6 +1,14 @@
 import type { BrandStartCard } from '../../shared/types/brand'
 import type { BrandSlotDependency } from './brandGenerators'
-import { formatStartCard } from './georgePrompt'
+/**
+ * `BRAND_CONVERSE_HISTORY_CHARS` wohnt seit a-9 in `georgePrompt.ts`: der
+ * Zeichen-Deckel je Verlaufs-Zug gilt jetzt auch für den ENTWURF, und nur diese
+ * Import-Richtung ist zyklenfrei (diese Datei holt dort ohnehin schon
+ * `formatStartCard`). BEWUSST NICHT re-exportiert — Nitro auto-importiert
+ * `server/utils/**`, und zwei Ausfuhren desselben Namens sind dort eine
+ * Warnung und ein Zufall darüber, welche gewinnt.
+ */
+import { BRAND_CONVERSE_HISTORY_CHARS, formatStartCard } from './georgePrompt'
 
 /**
  * DER KONVERSATIONS-AUFTRAG (P3.2) — was ein Berater tut, wenn ein Mensch ihm
@@ -63,9 +71,6 @@ export const BRAND_CONVERSE_TEXT_MAX = 2_000
  * nicht im Geplauder.
  */
 export const BRAND_CONVERSE_HISTORY_MAX = 6
-
-/** Je Verlaufs-Nachricht — ein alter Manifest-Entwurf soll den Zug nicht fluten. */
-export const BRAND_CONVERSE_HISTORY_CHARS = 600
 
 /** Deckel für die beiden Fragen-Wortlaute aus der Oberfläche. */
 export const BRAND_CONVERSE_QUESTION_MAX = 400

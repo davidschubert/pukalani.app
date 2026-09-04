@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import { GEORGE_TURN_MARKERS } from '../server/utils/georgeTurn'
+// Der Zeichen-Deckel je Verlaufs-Zug wohnt seit a-9 in `georgePrompt.ts` —
+// Gespräch und Entwurf klemmen denselben Zug gleich.
+import { BRAND_CONVERSE_HISTORY_CHARS } from '../server/utils/georgePrompt'
 import {
-  BRAND_CONVERSE_HISTORY_CHARS,
   BRAND_CONVERSE_QUESTION_MAX,
   BRAND_CONVERSE_TEXT_MAX,
   type BrandConverseInputsOptions,

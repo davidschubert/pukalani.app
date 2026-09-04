@@ -70,6 +70,7 @@ function context(overrides: {
   startCard?: Partial<typeof EMPTY_START_CARD>
   siteAnalysis?: string
   uiLocale?: string
+  conversation?: { role: 'george' | 'user' | 'system', body: string }[]
 } = {}) {
   return {
     event,
@@ -85,6 +86,9 @@ function context(overrides: {
     siteAnalysis: overrides.siteAnalysis ?? '',
     hint: overrides.hint ?? '',
     dependencies: overrides.dependencies ?? [],
+    // a-9: leer heisst „in diesem Baustein wurde noch nicht geredet" — der
+    // Normalfall beim ersten Entwurf.
+    conversation: overrides.conversation ?? [],
     signal: overrides.signal ?? new AbortController().signal,
     onDelta: overrides.onDelta ?? (() => {}),
   }
@@ -220,6 +224,33 @@ describe('Der Aufruf an den Transport', () => {
     expect(prompt.indexOf('[start card · industry]')).toBeLessThan(prompt.indexOf('[a.pitch]'))
   })
 
+  /**
+   * DIE KONVERSATIONS-SENKE (a-9). Ohne diesen Beweis ist der ganze Umbau
+   * unsichtbar: der Verlauf stünde im Vertrag, käme aber nie im Prompt an — und
+   * George stellte weiter die Frage, die der Mensch längst beantwortet hat.
+   */
+  it('DAS GESPRÄCH REIST MIT — als Block UND als Arbeitsregel', async () => {
+    await plugin.georgeContextGenerator(context({
+      conversation: [
+        { role: 'george', body: 'Wen nennt ihr selbst zuerst?' },
+        { role: 'user', body: 'Kona Roasters und Lava Beans.' },
+      ],
+    }))
+    const { prompt } = lastCall()
+    expect(prompt).toContain('earlier in this conversation')
+    expect(prompt).toContain('you: Wen nennt ihr selbst zuerst?')
+    expect(prompt).toContain('person: Kona Roasters und Lava Beans.')
+    // Die Regel, die aus dem Material eine Wirkung macht.
+    expect(prompt).toContain('do NOT ask the same question again')
+  })
+
+  it('OHNE Gespräch steht weder der Block noch die Regel im Prompt', async () => {
+    await plugin.georgeContextGenerator(context())
+    const { prompt } = lastCall()
+    expect(prompt).not.toContain('earlier in this conversation')
+    expect(prompt).not.toContain('do NOT ask the same question again')
+  })
+
   it('OHNE Startkarte und ohne Slots bleibt die ehrliche Zeile stehen', async () => {
     await plugin.georgeContextGenerator(context())
     const { prompt } = lastCall()
@@ -241,7 +272,7 @@ describe('Das Ergebnis im Vertrag', () => {
     expect(result.draft).toBe('ErstZweit')
     expect(result.model).toBe('m')
     expect(result.provider).toBe('p')
-    expect(result.promptVersion).toBe('george-a-8')
+    expect(result.promptVersion).toBe('george-a-9')
     expect(result.aborted).toBe(false)
   })
 
