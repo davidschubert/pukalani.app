@@ -7,6 +7,25 @@ die kleinen, verstreuten Beschlüsse.
 
 ---
 
+## 2026-09-04 — Archetyp: Gesprächs-Ableitung als Interim (statt Paarvergleich-Berechnung)
+
+**Entscheidung (David, aus drei Optionen):** Solange das Paarvergleich-Instrument
+(Content-Spec §12.2 — 12 Karten, 8–12 adaptive Paare, berechnetes Ergebnis)
+nicht gebaut ist, leitet **George die Archetyp-Kette im Gespräch her**: die
+Hypothese spec-konform aus Baustein A; Primär/Sekundär/Selbstbild&Außenbild als
+begründeter Vorschlag mit Antwort-Chips, der Mensch bestätigt. Dafür wird ein
+George-Generator für das Kapitel registriert (bis dahin gab es KEINEN —
+`no_generator`, das Kapitel war strukturell unabschliessbar).
+
+**Verworfene Alternativen:** (a) Primär/Sekundär bis zum Instrument aus der
+Abschluss-Pflicht nehmen (Ergebnis-Profil hätte keinen Archetyp gehabt);
+(b) das Instrument sofort bauen (größtes Paket, blockiert die Beta-Tests).
+
+**Rückbau-Pfad:** Das Instrument ersetzt später NUR den Herleitungs-Weg — die
+gespeicherten Werte sind stabile Katalog-Ids und bleiben kompatibel.
+
+---
+
 ## 2026-09-02 — Das Team ist professionell: die Hunde-Welt fällt komplett
 
 **Entscheidung (David):** Alle Team-Mitglieder sind professionelle Beraterinnen
