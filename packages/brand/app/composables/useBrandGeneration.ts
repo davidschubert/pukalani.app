@@ -215,6 +215,10 @@ export function useBrandGeneration(
           }
           else if (item.type === 'slot.ready') {
             store.applyGeorgeDraft(item.slotId, item.draft, item.generationId)
+            // Die GESTREAMTE Blase zeigt bei einem Choice-Slot die Wert-Zeile
+            // roh (`sage`, Live-Fund 2026-09-04) — hier ist der Strom fertig,
+            // und die geteilte Regel tauscht sie gegen die Anzeige der Seite.
+            store.localizeGeorgeChoiceMessage(item.generationId, item.slotId, locale.value)
           }
           else if (item.type === 'generation.completed') {
             lastOutcome.value = item.outcome ?? 'draft'

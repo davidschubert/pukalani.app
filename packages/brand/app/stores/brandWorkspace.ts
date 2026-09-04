@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { swapBrandChoiceValueLine } from '../../shared/brandChoiceOptions'
 import type {
   BrandConfidence,
   BrandJourneyStep,
@@ -308,6 +309,21 @@ const setup = () => {
       : message))
   }
 
+  /**
+   * DIE GESTREAMTE BLASE SPRICHT DIE SPRACHE DER SEITE (Live-Fund 2026-09-04):
+   * bei einem Choice-Slot streamt das Modell die Wert-Zeile mit — die rohe Id
+   * (`sage`) stand wörtlich im Chat. Der Server tauscht sie nur in der
+   * PERSISTIERTEN Nachricht; die gemalten Deltas ersetzt niemand nachträglich.
+   * Gerufen beim `slot.ready`-Frame (der Strom ist dort fertig); die Regel
+   * selbst ist die GETEILTE aus `shared/brandChoiceOptions.ts` — ohne Vertrag
+   * für den Slot ist der Aufruf ein No-op.
+   */
+  function localizeGeorgeChoiceMessage(generationId: string, slotId: string, locale: string): void {
+    streamMessages.value = streamMessages.value.map(message => (message.id === generationId
+      ? { ...message, text: swapBrandChoiceValueLine(slotId, message.text, locale) }
+      : message))
+  }
+
   function endGeorgeMessage(generationId: string): void {
     streamMessages.value = streamMessages.value
       .map(message => (message.id === generationId ? { ...message, pending: false } : message))
@@ -583,6 +599,7 @@ const setup = () => {
     beginGeorgeMessage,
     appendGeorgeDelta,
     setGeorgeMessageOptions,
+    localizeGeorgeChoiceMessage,
     endGeorgeMessage,
     mark,
     applyStepDetail,

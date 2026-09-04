@@ -390,6 +390,38 @@ export function brandChoicePromptRule(contract: BrandChoiceContract): string[] {
   ]
 }
 
+/**
+ * DIE WERT-ZEILE EINES ZUGES GEGEN IHRE ANZEIGE TAUSCHEN (Live-Fund
+ * 2026-09-04, erster Archetyp-Lauf: die rohe Id `sage` stand in der
+ * Sprechblase — der DRAFT-Block reist im Chat-Zug mit).
+ *
+ * ── SIE STEHT IM SHARED-ORDNER, WEIL SIE ZWEI LESER HAT ───────────────────
+ * Der SERVER tauscht vor dem Persistieren (`advisorGenerator.ts` — der
+ * Verlauf beim Neuladen), der BROWSER tauscht die GESTREAMTE Blase beim
+ * `slot.ready`-Frame (die Deltas sind da längst gemalt, niemand ersetzt sie
+ * nachträglich). Zwei Kopien der Regel wären zwei Meinungen darüber, was
+ * eine Wert-Zeile ist — und die Abweichung stünde wörtlich im Chat.
+ *
+ * ── NUR GANZE ZEILEN, NUR KATALOG-TREFFER ─────────────────────────────────
+ * Getauscht wird eine Zeile, die FÜR SICH ALLEIN als Katalog-Wert durchgeht
+ * (dieselbe Prüfung wie beim Feldwert, `checkBrandChoiceDraft` — Id, Label
+ * oder Anzeige, egal welche Sprache). Prosa-Sätze bleiben unangetastet;
+ * ohne Vertrag für den Slot passiert nichts — fail-soft, ein falscher
+ * Tausch mitten im Satz wäre schlimmer als eine sichtbare Id.
+ */
+export function swapBrandChoiceValueLine(slotId: string, message: string, locale: string): string {
+  const contract = brandChoiceContract(slotId)
+  if (!contract) return message
+  let swapped = false
+  const lines = message.split('\n').map((line) => {
+    const check = checkBrandChoiceDraft(contract, line.trim())
+    if (!check.ok || !line.trim()) return line
+    swapped = true
+    return brandChoiceDisplayLabel(slotId, check.value, locale)
+  })
+  return swapped ? lines.join('\n') : message
+}
+
 export type BrandChoiceViolation = 'not_an_option' | 'not_a_label'
 
 export type BrandChoiceCheck =

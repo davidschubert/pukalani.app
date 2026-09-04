@@ -10,6 +10,7 @@ import {
   brandChoiceFallbackQuestion,
   brandChoicePromptRule,
   checkBrandChoiceDraft,
+  swapBrandChoiceValueLine,
 } from '../shared/brandChoiceOptions'
 import { slotById } from '../shared/slotRegistry'
 
@@ -355,5 +356,26 @@ describe('Was der Mensch statt der rohen Id liest', () => {
         expect(copy!.example?.length, `${locale}/${option.id}`).toBeGreaterThan(0)
       }
     }
+  })
+})
+
+describe('swapBrandChoiceValueLine — die Wert-Zeile spricht die Sprache der Seite', () => {
+  it('tauscht die rohe Id einer Standalone-Zeile gegen die Anzeige', () => {
+    const message = 'BASIS-Satz bleibt.\n\nsage\n\nPasst das?'
+    expect(swapBrandChoiceValueLine('d.primary', message, 'de'))
+      .toBe('BASIS-Satz bleibt.\n\nDer Weise\n\nPasst das?')
+  })
+
+  it('tauscht auch das Label — dieselbe Prüfung wie beim Feldwert', () => {
+    expect(swapBrandChoiceValueLine('d.primary', 'The Sage', 'de')).toBe('Der Weise')
+  })
+
+  it('lässt Prosa-Sätze unangetastet — nur ganze Zeilen sind Werte', () => {
+    const message = 'Ihr klingt wie der sage Kern eurer Branche.'
+    expect(swapBrandChoiceValueLine('d.primary', message, 'de')).toBe(message)
+  })
+
+  it('ohne Vertrag ist der Aufruf ein No-op', () => {
+    expect(swapBrandChoiceValueLine('a.pitch', 'sage', 'de')).toBe('sage')
   })
 })
