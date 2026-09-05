@@ -67,8 +67,8 @@ catalogs:
       specifier: ^3.0.3
       version: 3.0.3
     node-appwrite:
-      specifier: ^26.2.0
-      version: 26.2.0
+      specifier: ^28.0.0
+      version: 28.0.0
     nodemailer:
       specifier: ^7.0.0
       version: 7.0.13
@@ -212,7 +212,7 @@ importers:
         version: 5.11.1
       node-appwrite:
         specifier: 'catalog:'
-        version: 26.2.0
+        version: 28.0.0
       nodemailer:
         specifier: 'catalog:'
         version: 7.0.13
@@ -291,7 +291,7 @@ importers:
         version: 5.11.1
       node-appwrite:
         specifier: 'catalog:'
-        version: 26.2.0
+        version: 28.0.0
       nodemailer:
         specifier: 'catalog:'
         version: 7.0.13
@@ -406,7 +406,7 @@ importers:
         version: 5.11.1
       node-appwrite:
         specifier: 'catalog:'
-        version: 26.2.0
+        version: 28.0.0
       nodemailer:
         specifier: 'catalog:'
         version: 7.0.13
@@ -512,7 +512,7 @@ importers:
         version: 5.11.1
       node-appwrite:
         specifier: 'catalog:'
-        version: 26.2.0
+        version: 28.0.0
       nodemailer:
         specifier: 'catalog:'
         version: 7.0.13
@@ -591,7 +591,7 @@ importers:
         version: 5.11.1
       node-appwrite:
         specifier: 'catalog:'
-        version: 26.2.0
+        version: 28.0.0
       nodemailer:
         specifier: 'catalog:'
         version: 7.0.13
@@ -664,7 +664,7 @@ importers:
         version: 5.11.1
       node-appwrite:
         specifier: 'catalog:'
-        version: 26.2.0
+        version: 28.0.0
       nodemailer:
         specifier: 'catalog:'
         version: 7.0.13
@@ -752,7 +752,7 @@ importers:
         version: 5.11.1
       node-appwrite:
         specifier: 'catalog:'
-        version: 26.2.0
+        version: 28.0.0
       nodemailer:
         specifier: 'catalog:'
         version: 7.0.13
@@ -870,7 +870,7 @@ importers:
         version: 5.11.1
       node-appwrite:
         specifier: 'catalog:'
-        version: 26.2.0
+        version: 28.0.0
       nodemailer:
         specifier: 'catalog:'
         version: 7.0.13
@@ -958,7 +958,7 @@ importers:
         version: 5.11.1
       node-appwrite:
         specifier: 'catalog:'
-        version: 26.2.0
+        version: 28.0.0
       nodemailer:
         specifier: 'catalog:'
         version: 7.0.13
@@ -1038,7 +1038,7 @@ importers:
         version: 10.6.0(@vue/compiler-dom@3.5.40)(db0@0.3.4)(esbuild@0.28.1)(eslint@10.8.0(jiti@2.7.0))(ioredis@5.11.1)(magicast@0.5.3)(pinia@4.0.2(@vue/devtools-api@8.2.1)(typescript@5.9.3)(vue@3.5.40(typescript@5.9.3)))(rolldown@1.2.1)(rollup@4.62.2)(typescript@5.9.3)(vite@8.2.0(@types/node@22.20.0)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))(vue@3.5.40(typescript@5.9.3))
       node-appwrite:
         specifier: 'catalog:'
-        version: 26.2.0
+        version: 28.0.0
     devDependencies:
       '@nuxt/eslint-config':
         specifier: 'catalog:'
@@ -1072,7 +1072,7 @@ importers:
         version: 0.22.2(magic-string@1.2.3)(magicast@0.5.3)(oxc-parser@0.141.0)(rolldown@1.2.1)(unplugin@3.3.0(esbuild@0.28.1)(rolldown@1.2.1)(rollup@4.62.2)(vite@8.2.0(@types/node@22.20.0)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0)))
       node-appwrite:
         specifier: 'catalog:'
-        version: 26.2.0
+        version: 28.0.0
       zod:
         specifier: 'catalog:'
         version: 4.4.3
@@ -1106,7 +1106,7 @@ importers:
         version: 10.6.0(@vue/compiler-dom@3.5.40)(db0@0.3.4)(esbuild@0.28.1)(eslint@10.8.0(jiti@2.7.0))(ioredis@5.11.1)(magicast@0.5.3)(pinia@4.0.2(@vue/devtools-api@8.2.1)(typescript@5.9.3)(vue@3.5.40(typescript@5.9.3)))(rolldown@1.2.1)(rollup@4.62.2)(typescript@5.9.3)(vite@8.2.0(@types/node@22.20.0)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))(vue@3.5.40(typescript@5.9.3))
       node-appwrite:
         specifier: 'catalog:'
-        version: 26.2.0
+        version: 28.0.0
       zod:
         specifier: 'catalog:'
         version: 4.4.3
@@ -1140,7 +1140,7 @@ importers:
         version: 10.6.0(@vue/compiler-dom@3.5.40)(db0@0.3.4)(esbuild@0.28.1)(eslint@10.8.0(jiti@2.7.0))(ioredis@5.11.1)(magicast@0.5.3)(pinia@4.0.2(@vue/devtools-api@8.2.1)(typescript@5.9.3)(vue@3.5.40(typescript@5.9.3)))(rolldown@1.2.1)(rollup@4.62.2)(typescript@5.9.3)(vite@8.2.0(@types/node@22.20.0)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))(vue@3.5.40(typescript@5.9.3))
       node-appwrite:
         specifier: 'catalog:'
-        version: 26.2.0
+        version: 28.0.0
       stripe:
         specifier: 'catalog:'
         version: 18.5.0(@types/node@22.20.0)
@@ -1202,7 +1202,7 @@ importers:
         version: 10.6.0(@vue/compiler-dom@3.5.40)(db0@0.3.4)(esbuild@0.28.1)(eslint@10.8.0(jiti@2.7.0))(ioredis@5.11.1)(magicast@0.5.3)(pinia@4.0.2(@vue/devtools-api@8.2.1)(typescript@5.9.3)(vue@3.5.40(typescript@5.9.3)))(rolldown@1.2.1)(rollup@4.62.2)(typescript@5.9.3)(vite@8.2.0(@types/node@22.20.0)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))(vue@3.5.40(typescript@5.9.3))
       node-appwrite:
         specifier: 'catalog:'
-        version: 26.2.0
+        version: 28.0.0
       nuxt:
         specifier: 'catalog:'
         version: 4.5.1(@babel/plugin-syntax-jsx@7.29.7(@babel/core@7.29.7))(@babel/plugin-syntax-typescript@7.29.7(@babel/core@7.29.7))(@oxc-project/types@0.142.0)(@parcel/watcher@2.5.6)(@types/node@22.20.0)(@vitejs/devtools-kit@0.4.10(cac@7.0.0)(typescript@5.9.3)(vite@8.2.0(@types/node@22.20.0)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0)))(@vue/compiler-sfc@3.5.40)(cac@7.0.0)(db0@0.3.4)(esbuild@0.28.1)(eslint@10.8.0(jiti@2.7.0))(ioredis@5.11.1)(lightningcss@1.33.0)(magicast@0.5.3)(optionator@0.9.4)(oxc-parser@0.141.0)(pinia@4.0.2(@vue/devtools-api@8.2.1)(typescript@5.9.3)(vue@3.5.40(typescript@5.9.3)))(rollup-plugin-visualizer@7.0.1(rolldown@1.2.1)(rollup@4.62.2))(rollup@4.62.2)(terser@5.48.0)(typescript@5.9.3)(vite@8.2.0(@types/node@22.20.0)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))(yaml@2.9.0)
@@ -1245,7 +1245,7 @@ importers:
         version: 10.6.0(@vue/compiler-dom@3.5.40)(db0@0.3.4)(esbuild@0.28.1)(eslint@10.8.0(jiti@2.7.0))(ioredis@5.11.1)(magicast@0.5.3)(pinia@4.0.2(@vue/devtools-api@8.2.1)(typescript@5.9.3)(vue@3.5.40(typescript@5.9.3)))(rolldown@1.2.1)(rollup@4.62.2)(typescript@5.9.3)(vite@8.2.0(@types/node@22.20.0)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))(vue@3.5.40(typescript@5.9.3))
       node-appwrite:
         specifier: 'catalog:'
-        version: 26.2.0
+        version: 28.0.0
       pinia:
         specifier: 'catalog:'
         version: 4.0.2(@vue/devtools-api@8.2.1)(typescript@5.9.3)(vue@3.5.40(typescript@5.9.3))
@@ -1282,7 +1282,7 @@ importers:
         version: 10.6.0(@vue/compiler-dom@3.5.40)(db0@0.3.4)(esbuild@0.28.1)(eslint@10.8.0(jiti@2.7.0))(ioredis@5.11.1)(magicast@0.5.3)(pinia@4.0.2(@vue/devtools-api@8.2.1)(typescript@5.9.3)(vue@3.5.40(typescript@5.9.3)))(rolldown@1.2.1)(rollup@4.62.2)(typescript@5.9.3)(vite@8.2.0(@types/node@22.20.0)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))(vue@3.5.40(typescript@5.9.3))
       node-appwrite:
         specifier: 'catalog:'
-        version: 26.2.0
+        version: 28.0.0
       zod:
         specifier: 'catalog:'
         version: 4.4.3
@@ -1340,7 +1340,7 @@ importers:
         version: 3.0.3
       node-appwrite:
         specifier: 'catalog:'
-        version: 26.2.0
+        version: 28.0.0
       nodemailer:
         specifier: 'catalog:'
         version: 7.0.13
@@ -1395,7 +1395,7 @@ importers:
         version: 10.6.0(@vue/compiler-dom@3.5.40)(db0@0.3.4)(esbuild@0.28.1)(eslint@10.8.0(jiti@2.7.0))(ioredis@5.11.1)(magicast@0.5.3)(pinia@4.0.2(@vue/devtools-api@8.2.1)(typescript@5.9.3)(vue@3.5.40(typescript@5.9.3)))(rolldown@1.2.1)(rollup@4.62.2)(typescript@5.9.3)(vite@8.2.0(@types/node@22.20.0)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))(vue@3.5.40(typescript@5.9.3))
       node-appwrite:
         specifier: 'catalog:'
-        version: 26.2.0
+        version: 28.0.0
       zod:
         specifier: 'catalog:'
         version: 4.4.3
@@ -1460,7 +1460,7 @@ importers:
         version: 10.6.0(@vue/compiler-dom@3.5.40)(db0@0.3.4)(esbuild@0.28.1)(eslint@10.8.0(jiti@2.7.0))(ioredis@5.11.1)(magicast@0.5.3)(pinia@4.0.2(@vue/devtools-api@8.2.1)(typescript@5.9.3)(vue@3.5.40(typescript@5.9.3)))(rolldown@1.2.1)(rollup@4.62.2)(typescript@5.9.3)(vite@8.2.0(@types/node@22.20.0)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))(vue@3.5.40(typescript@5.9.3))
       node-appwrite:
         specifier: 'catalog:'
-        version: 26.2.0
+        version: 28.0.0
       zod:
         specifier: 'catalog:'
         version: 4.4.3
@@ -1494,7 +1494,7 @@ importers:
         version: 10.6.0(@vue/compiler-dom@3.5.40)(db0@0.3.4)(esbuild@0.28.1)(eslint@10.8.0(jiti@2.7.0))(ioredis@5.11.1)(magicast@0.5.3)(pinia@4.0.2(@vue/devtools-api@8.2.1)(typescript@5.9.3)(vue@3.5.40(typescript@5.9.3)))(rolldown@1.2.1)(rollup@4.62.2)(typescript@5.9.3)(vite@8.2.0(@types/node@22.20.0)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))(vue@3.5.40(typescript@5.9.3))
       node-appwrite:
         specifier: 'catalog:'
-        version: 26.2.0
+        version: 28.0.0
       zod:
         specifier: 'catalog:'
         version: 4.4.3
@@ -1587,7 +1587,7 @@ importers:
         version: 10.6.0(@vue/compiler-dom@3.5.40)(db0@0.3.4)(esbuild@0.28.1)(eslint@10.8.0(jiti@2.7.0))(ioredis@5.11.1)(magicast@0.5.3)(pinia@4.0.2(@vue/devtools-api@8.2.1)(typescript@5.9.3)(vue@3.5.40(typescript@5.9.3)))(rolldown@1.2.1)(rollup@4.62.2)(typescript@5.9.3)(vite@8.2.0(@types/node@22.20.0)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))(vue@3.5.40(typescript@5.9.3))
       node-appwrite:
         specifier: 'catalog:'
-        version: 26.2.0
+        version: 28.0.0
       zod:
         specifier: 'catalog:'
         version: 4.4.3
@@ -1621,7 +1621,7 @@ importers:
         version: 10.6.0(@vue/compiler-dom@3.5.40)(db0@0.3.4)(esbuild@0.28.1)(eslint@10.8.0(jiti@2.7.0))(ioredis@5.11.1)(magicast@0.5.3)(pinia@4.0.2(@vue/devtools-api@8.2.1)(typescript@5.9.3)(vue@3.5.40(typescript@5.9.3)))(rolldown@1.2.1)(rollup@4.62.2)(typescript@5.9.3)(vite@8.2.0(@types/node@22.20.0)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))(vue@3.5.40(typescript@5.9.3))
       node-appwrite:
         specifier: 'catalog:'
-        version: 26.2.0
+        version: 28.0.0
       zod:
         specifier: 'catalog:'
         version: 4.4.3
@@ -1655,7 +1655,7 @@ importers:
         version: 10.6.0(@vue/compiler-dom@3.5.40)(db0@0.3.4)(esbuild@0.28.1)(eslint@10.8.0(jiti@2.7.0))(ioredis@5.11.1)(magicast@0.5.3)(pinia@4.0.2(@vue/devtools-api@8.2.1)(typescript@5.9.3)(vue@3.5.40(typescript@5.9.3)))(rolldown@1.2.1)(rollup@4.62.2)(typescript@5.9.3)(vite@8.2.0(@types/node@22.20.0)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))(vue@3.5.40(typescript@5.9.3))
       node-appwrite:
         specifier: 'catalog:'
-        version: 26.2.0
+        version: 28.0.0
       zod:
         specifier: 'catalog:'
         version: 4.4.3
@@ -1692,7 +1692,7 @@ importers:
         version: 1.9.4
       node-appwrite:
         specifier: 'catalog:'
-        version: 26.2.0
+        version: 28.0.0
       zod:
         specifier: 'catalog:'
         version: 4.4.3
@@ -1729,7 +1729,7 @@ importers:
         version: 10.6.0(@vue/compiler-dom@3.5.40)(db0@0.3.4)(esbuild@0.28.1)(eslint@10.8.0(jiti@2.7.0))(ioredis@5.11.1)(magicast@0.5.3)(pinia@4.0.2(@vue/devtools-api@8.2.1)(typescript@5.9.3)(vue@3.5.40(typescript@5.9.3)))(rolldown@1.2.1)(rollup@4.62.2)(typescript@5.9.3)(vite@8.2.0(@types/node@22.20.0)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))(vue@3.5.40(typescript@5.9.3))
       node-appwrite:
         specifier: 'catalog:'
-        version: 26.2.0
+        version: 28.0.0
       zod:
         specifier: 'catalog:'
         version: 4.4.3
@@ -1766,7 +1766,7 @@ importers:
         version: 3.27.1(@tiptap/core@3.27.1(@tiptap/pm@3.27.1))(@tiptap/pm@3.27.1)(@tiptap/suggestion@3.27.1(@floating-ui/dom@1.8.0)(@tiptap/core@3.27.1(@tiptap/pm@3.27.1))(@tiptap/pm@3.27.1))
       node-appwrite:
         specifier: 'catalog:'
-        version: 26.2.0
+        version: 28.0.0
       zod:
         specifier: 'catalog:'
         version: 4.4.3
@@ -1800,7 +1800,7 @@ importers:
         version: 10.6.0(@vue/compiler-dom@3.5.40)(db0@0.3.4)(esbuild@0.28.1)(eslint@10.8.0(jiti@2.7.0))(ioredis@5.11.1)(magicast@0.5.3)(pinia@4.0.2(@vue/devtools-api@8.2.1)(typescript@5.9.3)(vue@3.5.40(typescript@5.9.3)))(rolldown@1.2.1)(rollup@4.62.2)(typescript@5.9.3)(vite@8.2.0(@types/node@22.20.0)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))(vue@3.5.40(typescript@5.9.3))
       node-appwrite:
         specifier: 'catalog:'
-        version: 26.2.0
+        version: 28.0.0
       zod:
         specifier: 'catalog:'
         version: 4.4.3
@@ -1828,7 +1828,7 @@ importers:
     dependencies:
       node-appwrite:
         specifier: 'catalog:'
-        version: 26.2.0
+        version: 28.0.0
     devDependencies:
       '@nuxt/eslint-config':
         specifier: 'catalog:'
@@ -1884,7 +1884,7 @@ importers:
         version: 10.6.0(@vue/compiler-dom@3.5.40)(db0@0.3.4)(esbuild@0.28.1)(eslint@10.8.0(jiti@2.7.0))(ioredis@5.11.1)(magicast@0.5.3)(pinia@4.0.2(@vue/devtools-api@8.2.1)(typescript@5.9.3)(vue@3.5.40(typescript@5.9.3)))(rolldown@1.2.1)(rollup@4.62.2)(typescript@5.9.3)(vite@8.2.0(@types/node@22.20.0)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))(vue@3.5.40(typescript@5.9.3))
       node-appwrite:
         specifier: 'catalog:'
-        version: 26.2.0
+        version: 28.0.0
       zod:
         specifier: 'catalog:'
         version: 4.4.3
@@ -6826,8 +6826,8 @@ packages:
   node-addon-api@7.1.1:
     resolution: {integrity: sha512-5m3bsyrjFWE1xf7nz7YXdN4udnVtXK6/Yfgn5qnahL6bCkf2yKt4k3nuTKAtT4r3IG8JNR2ncsIMdZuAzJjHQQ==}
 
-  node-appwrite@26.2.0:
-    resolution: {integrity: sha512-rRToHOuG05F5Q3BGRoJNNIcO69zrYul/V9HOTxfcMSqhdw3TwInAl7pnSnMRW7D0MOQcvaLb8iZIwE1P8TP9Cw==}
+  node-appwrite@28.0.0:
+    resolution: {integrity: sha512-3pLMannNwZf1WUJYdZ998B/ckgAkUGI+Wis31GEwy2NJlx0PooghXe6U3ZJvH86oFaLGl+evnjFWcaQJXu+PZg==}
 
   node-emoji@2.2.0:
     resolution: {integrity: sha512-Z3lTE9pLaJF47NyMhd4ww1yFTAP8YhYI8SleJiHzM46Fgpm5cnNzSl9XfzFNqbaz+VlJrIj3fXQ4DeN1Rjm6cw==}
@@ -15670,7 +15670,7 @@ snapshots:
 
   node-addon-api@7.1.1: {}
 
-  node-appwrite@26.2.0:
+  node-appwrite@28.0.0:
     dependencies:
       json-bigint: 1.0.0
       undici: 6.27.0
