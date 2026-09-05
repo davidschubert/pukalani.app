@@ -1,13 +1,17 @@
 import { describe, expect, it } from 'vitest'
 import {
+  BRAND_ACCEPTANCE_VIEW,
   type BrandNavSession,
   chapterEffortMinutes,
   countChapterSessions,
   decideAutoAdvance,
+  isAcceptanceView,
   needsOpeningTurn,
+  resolveAcceptanceStage,
   resolveActiveSession,
+  restartWordMatches,
 } from '../shared/brandWorkspaceNav'
-import { slotsForStep } from '../shared/slotRegistry'
+import { BRAND_SLOTS, slotsForStep } from '../shared/slotRegistry'
 
 /**
  * DIE VIER RECHNUNGEN DER SESSION-NAVIGATION (BW2 Paket 3c-i).
@@ -209,7 +213,7 @@ describe('decideAutoAdvance', () => {
       .toEqual({ kind: 'stay' })
   })
 
-  it('meldet das Kapitelende eigens (der Sprung kommt mit 3c-ii)', () => {
+  it('meldet das Kapitelende eigens (seit 3c-ii springt die Seite darauf)', () => {
     expect(decideAutoAdvance({ ...base, next: { stepKey: 'context', acceptance: true } }))
       .toEqual({ kind: 'acceptance', stepKey: 'context' })
   })
@@ -244,5 +248,87 @@ describe('needsOpeningTurn', () => {
     expect(needsOpeningTurn({
       sessionKey: '', opened: new Set(), hasAdvisorTurn: false, streaming: false,
     })).toBe(false)
+  })
+})
+
+/**
+ * DIE ABNAHME-ANSICHT (BW2 Paket 3c-ii, §5a). Drei Fragen, drei Rechnungen:
+ * steht sie in der Adresse, was steht unter ihrer Liste, und ist der löschende
+ * Weg freigegeben. Alle drei sind Ja/Nein-Fragen mit teuren falschen Antworten
+ * — die Gegenproben stehen deshalb jeweils daneben.
+ */
+describe('BRAND_ACCEPTANCE_VIEW', () => {
+  it('kollidiert mit KEINER Slot-Id (sonst verschluckt die Ansicht eine Session)', () => {
+    expect(BRAND_SLOTS.some(slot => slot.id === BRAND_ACCEPTANCE_VIEW)).toBe(false)
+  })
+
+  it('erkennt die Ansicht, auch mit Leerraum aus der Adresszeile', () => {
+    expect(isAcceptanceView('acceptance')).toBe(true)
+    expect(isAcceptanceView(' acceptance ')).toBe(true)
+  })
+
+  it('erkennt eine Session NICHT als Ansicht — Gegenprobe', () => {
+    expect(isAcceptanceView(FIRST)).toBe(false)
+    expect(isAcceptanceView('')).toBe(false)
+    expect(isAcceptanceView(undefined)).toBe(false)
+  })
+
+  it('macht aus `?s=acceptance` KEINE Session (sonst liefe darunter ein Gespräch)', () => {
+    const active = resolveActiveSession({
+      stepKey: 'context',
+      requested: BRAND_ACCEPTANCE_VIEW,
+      sessions: map({ [FIRST]: { state: 'open' }, [SECOND]: { state: 'open' } }),
+    })
+    expect(active).toBeNull()
+  })
+
+  it('GEGENPROBE: ohne die Ansicht in der Adresse gilt weiter die erste offene', () => {
+    const active = resolveActiveSession({
+      stepKey: 'context',
+      sessions: map({ [FIRST]: { state: 'open' }, [SECOND]: { state: 'open' } }),
+    })
+    expect(active).toBe(FIRST)
+  })
+})
+
+describe('resolveAcceptanceStage', () => {
+  it('zeigt die Frage erst, wenn nichts mehr offen ist', () => {
+    expect(resolveAcceptanceStage({ ready: true, storedState: 'active' })).toBe('question')
+  })
+
+  it('zeigt vorher die Blocker — Gegenprobe zur Weiche', () => {
+    expect(resolveAcceptanceStage({ ready: false, storedState: 'active' })).toBe('blocked')
+  })
+
+  it('fragt ein ABGESCHLOSSENES Kapitel nicht noch einmal (`already_done`)', () => {
+    expect(resolveAcceptanceStage({ ready: true, storedState: 'done' })).toBe('done')
+  })
+
+  it('lässt `done` auch dann stehen, wenn die Abnahme nicht mehr trägt', () => {
+    expect(resolveAcceptanceStage({ ready: false, storedState: 'done' })).toBe('done')
+  })
+
+  it('zeigt auf einer noch nicht betretenen Zeile die Blocker', () => {
+    expect(resolveAcceptanceStage({ ready: false, storedState: 'open' })).toBe('blocked')
+    expect(resolveAcceptanceStage({ ready: false, storedState: 'locked' })).toBe('blocked')
+  })
+})
+
+describe('restartWordMatches', () => {
+  it('gibt frei, wenn das Wort steht — unabhängig von Leerraum und Grossschreibung', () => {
+    expect(restartWordMatches('bestätigen', 'bestätigen')).toBe(true)
+    expect(restartWordMatches('  Bestätigen ', 'bestätigen')).toBe(true)
+    expect(restartWordMatches('CONFIRM', 'confirm')).toBe(true)
+  })
+
+  it('gibt bei einem anderen Wort NICHT frei', () => {
+    expect(restartWordMatches('bestätige', 'bestätigen')).toBe(false)
+    expect(restartWordMatches('ja', 'bestätigen')).toBe(false)
+    expect(restartWordMatches('', 'bestätigen')).toBe(false)
+  })
+
+  it('gibt ohne Erwartungswort NIE frei (fehlender Locale-Schlüssel)', () => {
+    expect(restartWordMatches('', '')).toBe(false)
+    expect(restartWordMatches('irgendwas', '   ')).toBe(false)
   })
 })

@@ -559,7 +559,7 @@
         }
       },
       "progressConfirmed": "{confirmed} of {total} confirmed",
-      "chapterReady": "Every field in this chapter is confirmed. The final sign-off is the next step."
+      "chapterReady": "Every field in this chapter is confirmed — on to the final sign-off."
     },
     "brands": {
       "title": "Brandings",
@@ -715,6 +715,60 @@
       "duplicateText": "This address is already on the list — you are up when the next wave opens.",
       "error": "That did not work just now. Please try again in a minute.",
       "consent": "We use your address only to invite you to the beta. No newsletter, never shared."
+    },
+    "acceptance": {
+      "title": "Final sign-off",
+      "lead": "Everything from this chapter side by side. Sign off every line that should stand as it is.",
+      "counter": "{accepted} of {total} signed off",
+      "area": "Area",
+      "exampleLabel": "Example — invented, unrelated industry",
+      "own": "Your input",
+      "notes": "Note",
+      "valueEmpty": "No input yet — optional.",
+      "accept": "Sign off",
+      "accepted": "Signed off",
+      "edit": "Edit",
+      "toSession": "Go to session",
+      "unconfirmed": "Not confirmed yet — go to the session.",
+      "acceptFailed": "Signing off did not work.",
+      "reloadHint": "Things have moved on — please reload the page.",
+      "loadFailed": "The sign-off could not be loaded.",
+      "status": {
+        "open": "open",
+        "confirmed": "confirmed",
+        "accepted": "signed off",
+        "stale": "outdated",
+        "deferred": "deferred"
+      },
+      "blockersTitle": "Still open",
+      "blocker": {
+        "unconfirmed": "Not discussed yet",
+        "unaccepted": "Not signed off yet",
+        "stale": "The sources have moved — talk it through again",
+        "conflict": "A conflict is open",
+        "deferred": "Deferred — pick it up again first"
+      },
+      "allClear": "Nothing is left open in this chapter — confirm it if it fits.",
+      "question": "Does this chapter fit?",
+      "completing": "Confirm chapter",
+      "completeFailed": "The chapter could not be closed.",
+      "doneNote": "This chapter is signed off.",
+      "continueTo": "Continue to {step}",
+      "restart": {
+        "title": "Start over",
+        "loss": "This chapter starts over: {values} confirmed values, {notes} notes and {accepted} sign-offs are lost.",
+        "downstream": "This also touches {count} confirmed fields in later chapters.",
+        "downstreamShow": "Show fields",
+        "downstreamHide": "Hide fields",
+        "typeToConfirm": "Type {word} to confirm.",
+        "word": "confirm",
+        "inputLabel": "Confirmation word",
+        "confirm": "Confirm",
+        "cancel": "Cancel",
+        "changed": "Things have moved on — please read it again.",
+        "failed": "That did not work.",
+        "loading": "Checking …"
+      }
     },
     "session": {
       "minutes": "~{minutes} min",

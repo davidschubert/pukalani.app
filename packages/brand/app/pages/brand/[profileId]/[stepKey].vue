@@ -2,8 +2,6 @@
 import type { BwSidebarBrand } from '../../../components/BwWorkspaceSidebar.vue'
 import type { BwRailLayer, BwRailSession, BwRailStep, BwRailStepInfo } from '../../../components/BwProgressRail.vue'
 import {
-  BRAND_CONFIDENCE_VALUES,
-  type BrandConfidence,
   type BrandJourneyStep,
   type BrandNextSessionRef,
   brandStepCompletion,
@@ -11,10 +9,12 @@ import {
   resolveNextStop,
 } from '../../../../shared/brandJourney'
 import {
+  BRAND_ACCEPTANCE_VIEW,
   type BrandNavSession,
   chapterEffortMinutes,
   countChapterSessions,
   decideAutoAdvance,
+  isAcceptanceView,
   needsOpeningTurn,
   resolveActiveSession,
 } from '../../../../shared/brandWorkspaceNav'
@@ -308,6 +308,23 @@ const sessionQuery = computed(() => {
   const raw = route.query.s
   return typeof raw === 'string' ? raw : ''
 })
+
+/**
+ * DIE FINALE ABNAHME IST EINE ANSICHT DIESER SEITE (BW2 Paket 3c-ii, §5a) —
+ * `?s=acceptance` auf demselben Route-Record.
+ *
+ * ── WARUM KEINE EIGENE ROUTE ─────────────────────────────────────────────
+ * Leiste, Log und Sticky-Fortschritt bleiben genau stehen; der Mensch schlägt
+ * sein Kapitel auf, er verlässt seine Werkstatt nicht. Eine zweite Seite
+ * müsste dieselbe Leiste ein zweites Mal montieren — und hätte damit eine
+ * zweite Stelle, an der sie altert.
+ *
+ * AUSGETAUSCHT WIRD NUR DIE MITTE: kein George, kein Prompt unten („Kein
+ * George auf dieser Seite", §5a). Der Wert `acceptance` kollidiert mit keiner
+ * Slot-Id (die tragen alle einen Punkt) und ist deshalb in derselben Query
+ * sicher — `resolveActiveSession` kennt ihn und antwortet „keine Session".
+ */
+const acceptanceView = computed(() => isAcceptanceView(sessionQuery.value))
 
 /** Nur das, was die Wahl der aktiven Session braucht — s. `BrandNavSession`. */
 const navSessions = computed<Record<string, BrandNavSession>>(() => {
@@ -706,15 +723,22 @@ async function goToSession(sessionId: string): Promise<void> {
   await navigateTo({ query: { ...route.query, s: sessionId } })
 }
 
+/** Dieselbe Adresse, die Abnahme-Ansicht statt einer Session (§5a). */
+async function goToAcceptance(): Promise<void> {
+  if (acceptanceView.value) return
+  await autosave.flush()
+  await navigateTo({ query: { ...route.query, s: BRAND_ACCEPTANCE_VIEW } })
+}
+
 /**
  * AUTO-WEITER (§5, Entscheidung 2) — die ENTSCHEIDUNG liegt pur nebenan
  * (`decideAutoAdvance`), hier steht nur, was daraus folgt.
  *
- * Das Kapitelende (`acceptance`) springt in 3c-i BEWUSST NICHT: die
- * Abnahme-Seite gibt es noch nicht (Paket 3c-ii). Der Mensch sieht stattdessen
- * den ruhigen Hinweis unter dem Chat, und der Leisten-Eintrag „Finale Abnahme"
- * hebt sich hervor — ein Sprung auf eine Seite, die es nicht gibt, wäre ein
- * 404 als Belohnung für ein fertiges Kapitel.
+ * Das Kapitelende (`acceptance`) springt seit Paket 3c-ii MIT: die Seite gibt
+ * es jetzt. Wer seinen letzten Pflicht-Wert bestätigt, steht danach vor der
+ * Liste seines Kapitels — dieselbe Bewegung wie zwischen zwei Sessions, nur
+ * eine Ebene höher. Alle vier Sperren gelten unverändert (Strom, offene
+ * Speicherung, Konflikt, überstimmter Mensch): sie stehen in der puren Regel.
  */
 async function autoAdvance(from: string, next: BrandNextSessionRef | null): Promise<void> {
   const decision = decideAutoAdvance({
@@ -725,8 +749,12 @@ async function autoAdvance(from: string, next: BrandNextSessionRef | null): Prom
     savePending: store.hasPendingWork,
     conflict: store.conflict !== null,
   })
-  if (decision.kind !== 'session') return
+  if (decision.kind === 'stay') return
   if (decision.stepKey !== stepKey.value) return
+  if (decision.kind === 'acceptance') {
+    await goToAcceptance()
+    return
+  }
   await goToSession(decision.sessionKey)
 }
 
@@ -1453,18 +1481,31 @@ function railSessions(entry: BrandJourneyStep): BwRailSession[] {
       ...(state === 'locked' ? { title: t('brand.nav.sessionLocked') } : {}),
     }
   })
-  // DER PLATZHALTER (§11): die Finale Abnahme ist der letzte Eintrag jedes
-  // Kapitels. Ihr ZIEL und ihre Freischaltung kommen mit Paket 3c-ii — hier
-  // steht sie gesperrt, damit die Ordnung der Leiste schon stimmt und niemand
-  // sie später an anderer Stelle sucht.
+  /**
+   * DIE FINALE ABNAHME ist der letzte Eintrag jedes Kapitels (§11) — seit
+   * Paket 3c-ii mit Ziel.
+   *
+   * FREI, SOBALD JEDER PFLICHT-WERT BESTÄTIGT IST (`completion.slotsReady`):
+   * dieselbe Bedingung, die auch `resolveNextStop` auf die Abnahme zeigen
+   * lässt. Vorher steht sie gesperrt mit ihrem Grund im `title` — die Seite
+   * fände sonst eine Liste ohne einen einzigen abnehmbaren Block.
+   *
+   * DREI ZUSTÄNDE, DREI AUSSAGEN: `done` heisst „abgenommen" (das Kapitel ist
+   * abgeschlossen), `active` heisst „diese Ansicht ist gerade offen", `open`
+   * heisst „frei". Die Id trägt das Kapitel mit (`<stepKey>:acceptance`),
+   * damit die Leiste sie nie mit einer Slot-Id verwechselt; in die ADRESSE
+   * geht `?s=acceptance` (s. `selectSession`).
+   */
+  const ready = completion.value?.slotsReady === true
+  const done = entry.state === 'done'
   list.push({
-    id: `${entry.stepKey}:acceptance`,
+    id: `${entry.stepKey}:${BRAND_ACCEPTANCE_VIEW}`,
     label: t('brand.nav.acceptance'),
-    state: 'locked',
+    state: done ? 'done' : acceptanceView.value ? 'active' : ready ? 'open' : 'locked',
     kind: 'acceptance',
-    disabled: true,
-    highlight: completion.value?.slotsReady === true,
-    title: t('brand.nav.acceptancePending'),
+    disabled: !ready && !done,
+    highlight: ready && !acceptanceView.value && !done,
+    ...(ready || done ? {} : { title: t('brand.nav.acceptancePending') }),
   })
   return list
 }
@@ -1641,6 +1682,12 @@ async function goToStep(key: string | null): Promise<void> {
 async function selectSession(payload: { stepId: string, sessionId: string }): Promise<void> {
   navOverlayOpen.value = false
   if (payload.stepId !== routeStepKey.value) return
+  // Der Eintrag „Finale Abnahme" trägt das Kapitel in seiner Id, die ADRESSE
+  // trägt nur die Ansicht (§5a) — hier steht die eine Übersetzung dazwischen.
+  if (payload.sessionId === `${payload.stepId}:${BRAND_ACCEPTANCE_VIEW}`) {
+    await goToAcceptance()
+    return
+  }
   await goToSession(payload.sessionId)
 }
 
@@ -1658,69 +1705,54 @@ async function goToBrand(to: string): Promise<void> {
   await navigateTo(to)
 }
 
-// ── Konfidenz-Weiche ──────────────────────────────────────────────────────
+// ── Die Finale Abnahme: was die Seite ihr schuldet (§5a) ──────────────────
 
-const confidenceOptions = computed(() => BRAND_CONFIDENCE_VALUES.map(value => ({
-  id: value,
-  label: t(`brand.workspace.confidence.${value}`),
-  recommended: false,
-  // „Nochmal von vorn" ist der Weg ZURÜCK und steht deshalb abgesetzt — leiser
-  // als die beiden anderen, nicht lauter (s. `BwChips`).
-  ...(value === 'restart' ? { tone: 'quiet' as const } : {}),
-})))
-
-const completing = ref(false)
-
-async function pickConfidence(value: string): Promise<void> {
-  const confidence = value as BrandConfidence
-
-  // „NOCHMAL VON VORN" auf einem ABGESCHLOSSENEN Baustein öffnet ihn wieder
-  // (C5): EIN PATCH trägt `reopen` und die Konfidenz zusammen — der normale
-  // Autosave-Fluss darunter kennt kein `reopen` und liesse den Baustein
-  // `done`, der Chip wäre eine Attrappe. Auf einem OFFENEN Baustein bleibt
-  // „Nochmal von vorn" die Vertiefungsrunde von immer (nur Konfidenz).
-  if (confidence === 'restart' && store.currentJourneyStep?.state === 'done') {
-    store.setConfidence(confidence)
-    try {
-      await store.reopenStep(profileId.value)
-    }
-    catch {
-      toast.add({ color: 'warning', title: t('brand.workspace.reopenFailed') })
-    }
-    return
-  }
-
-  store.setConfidence(confidence)
+/**
+ * DIE WEICHE IST UMGEZOGEN (Paket 3c-ii). Bis 3c-i standen die drei
+ * Konfidenz-Chips hier auf der Bühne; seit §5a stehen sie auf der
+ * Abnahme-Seite, UNTER der Liste aller Werte des Kapitels — dort, wo der
+ * Mensch sie im Zusammenhang lesen kann, statt am Ende eines Gesprächs über
+ * das letzte Feld. `BwAcceptance` trägt sie samt `complete`-Aufruf; die Bühne
+ * behält nur den Verweis dorthin.
+ *
+ * Was die SEITE dabei behält, ist die Navigation: sie besitzt den Ausspüler
+ * (`autosave.flush()`) und die Adresse. Eine Komponente, die selbst
+ * navigierte, umginge beides.
+ */
+async function advanceToStep(target: { stepKey: BrandStepKey, sessionKey: string }): Promise<void> {
+  if (!store.canEnter(target.stepKey)) return
   await autosave.flush()
-  // Nur „Passt" schliesst ab — „Fast" und „Nochmal von vorn" sind
-  // Vertiefungsrunden (§3b.8) und bleiben im Baustein.
-  //
-  // UND: ein ABGESCHLOSSENER Baustein wird nicht noch einmal abgeschlossen.
-  // Seit b31cf287 ist die Konfidenz auch auf `done` änderbar („done bleibt
-  // done") — `transitionBrandStep(…, 'complete')` weist genau diesen Weg aber
-  // mit `already_done` ab. Der Knopf, der nur eine Selbstauskunft ändern
-  // sollte, kassierte damit einen Warn-Toast. Die Konfidenz-PATCH darüber
-  // läuft unverändert; hier endet nur der Abschluss-Weg.
-  if (confidence !== 'fits' || store.currentJourneyStep?.state === 'done') return
+  await navigateTo({
+    path: localePath(`/brand/${profileId.value}/${target.stepKey}`),
+    query: { s: target.sessionKey },
+  })
+}
 
-  completing.value = true
-  try {
-    await store.completeStep(profileId.value)
-    await goToStep(store.neighbourStep(1))
-  }
-  catch (error) {
-    const reason = (error as { data?: { reason?: string } }).data?.reason
-    toast.add({
-      color: 'warning',
-      title: t('brand.workspace.completeFailed'),
-      description: reason === 'required_slots_missing'
-        ? t('brand.workspace.missingRequired')
-        : undefined,
-    })
-  }
-  finally {
-    completing.value = false
-  }
+/**
+ * NACH „NOCHMAL VON VORN": der Stand wird NEU GELESEN, nicht im Browser
+ * nachgebaut.
+ *
+ * Der Restart leert Slots, Notizen, Abnahmen und Konfidenz und setzt das
+ * Kapitel auf `active` — daraus folgen neue Session-Zustände, ein neuer
+ * Fortschritt und eine neue Liste fehlender Pflicht-Werte. Diese Kette rechnet
+ * der SERVER (`resolveSessionStates`), und ein zweiter Nachbau hier wäre die
+ * zweite Wahrheit, die beim nächsten Registry-Schritt auseinanderläuft. Ein
+ * `loadStep` kostet eine Anfrage und stimmt.
+ *
+ * Danach die erste Session: ihr Verlauf beginnt hinter `restartedAt` (der
+ * Server schneidet ihn ab), also lädt `sessionHistory` ein leeres Gespräch und
+ * `ensureOpeningTurn` lässt George neu eröffnen — die 3c-i-Mechanik,
+ * unverändert.
+ */
+async function afterRestart(target: { sessionKey: string }): Promise<void> {
+  await store.loadStep(profileId.value, routeStepKey.value)
+  openedSessions.value = new Set()
+  // Ohne benannte Session bleibt `?s=` WEG statt leer — die Rangfolge nimmt
+  // dann die erste offene, und bei einem geleerten Kapitel ist das dieselbe.
+  const query = { ...route.query }
+  if (target.sessionKey) query.s = target.sessionKey
+  else delete query.s
+  await navigateTo({ query })
 }
 
 // ── 409 ───────────────────────────────────────────────────────────────────
@@ -1852,9 +1884,21 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
       </div>
     </template>
 
-    <!-- MITTE: die Bühne IST das Gespräch. -->
+    <!-- MITTE: die Bühne IST das Gespräch — ausser in der Finalen Abnahme,
+         die genau diese Fläche übernimmt (§5a: „Kein George auf dieser
+         Seite"). Ein `v-if` und kein zweites Layout: Leiste, Log und der
+         Sticky-Fortschritt bleiben stehen. -->
     <template #default>
-      <div class="flex min-h-0 flex-1 flex-col gap-7 pb-4">
+      <BwAcceptance
+        v-if="acceptanceView && stepKey"
+        :profile-id="profileId"
+        :step-key="stepKey"
+        @session="goToSession"
+        @advance="advanceToStep"
+        @restarted="afterRestart"
+      />
+
+      <div v-else class="flex min-h-0 flex-1 flex-col gap-7 pb-4">
         <!-- Ein RUHIGER Hinweis, kein Toast-Gewitter: „KI ist aus" und „hier
              entwirft niemand" sind Zustände, in denen weitergearbeitet wird. -->
         <p v-if="generationNotice" class="bw-pending flex items-center gap-2">
@@ -2152,17 +2196,15 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
                 </div>
               </div>
 
-              <!-- GATE: die Konfidenz-Weiche steht IM Gespräch, nicht daneben —
-                   und erst, wenn `brandStepCompletion` sie halten kann. -->
+              <!-- GATE: die Weiche selbst ist auf die Abnahme-Seite gezogen
+                   (§5a, Paket 3c-ii) — hier steht nur noch der VERWEIS. Die
+                   Frage „Passt dieses Kapitel?" gehört unter die Liste aller
+                   Werte, nicht ans Ende des Gesprächs über das letzte Feld. -->
               <div v-else-if="stageModule === 'gate'" class="mt-3">
-                <p class="mb-2 font-medium">{{ t('brand.workspace.confidence.question') }}</p>
-                <BwChips
-                  :options="confidenceOptions"
-                  :selected="store.confidence ? [store.confidence] : []"
-                  :show-dont-know="false"
-                  @pick="pickConfidence"
+                <UButton
+                  class="rounded-full" trailing-icon="i-ph-arrow-right"
+                  :label="t('brand.nav.acceptance')" @click="goToAcceptance"
                 />
-                <p v-if="completing" class="bw-label mt-2" style="color: var(--bw-muted)">{{ t('brand.workspace.completeStep') }}</p>
               </div>
             </template>
           </div>
@@ -2199,13 +2241,19 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
           </div>
         </div>
 
-        <!-- KAPITELENDE (§5): in 3c-i wird NICHT gesprungen — die Finale
-             Abnahme ist Paket 3c-ii. Statt eines Sprungs ins Leere steht hier
-             ein ruhiger Satz, und in der Leiste hebt sich ihr Eintrag hervor. -->
-        <p
-          v-if="completion?.slotsReady" class="bw-pending"
+        <!-- KAPITELENDE (§5): der ruhige Satz IST seit Paket 3c-ii der Weg —
+             ein Hinweis auf eine Seite, die man nicht anklicken kann, wäre eine
+             Ansage ohne Tür. Der Auto-Weiter geht denselben Weg von selbst;
+             dieser Satz fängt den ab, bei dem eine Sperre gegriffen hat. -->
+        <button
+          v-if="completion?.slotsReady" type="button"
+          class="bw-pending flex items-center gap-1.5 text-left underline"
           style="padding-left: 2.65rem"
-        >{{ t('brand.workspace.chapterReady') }}</p>
+          @click="goToAcceptance"
+        >
+          {{ t('brand.workspace.chapterReady') }}
+          <UIcon name="i-ph-arrow-right" class="size-3.5 flex-none" />
+        </button>
 
         <!-- NOCH NICHT SO WEIT: eingerückt auf die Text-Flucht des Gesprächs
              (Avatar 2rem + Lücke 0.65rem). -->
@@ -2236,7 +2284,11 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
          gelten im Browser immer als focus-visible, deshalb Outline UND den
          dunklen ring-primary neutralisieren (Runde 29/29c). -->
     <template #stage-footer>
+      <!-- KEIN PROMPT IN DER ABNAHME (§5a): dort wird gelesen und abgenommen,
+           nicht gesprochen. Ein Feld, das an George schickt, während George
+           gar nicht da ist, wäre ein Versprechen ohne Empfänger. -->
       <UChatPrompt
+        v-if="!acceptanceView"
         v-model="promptDraft" :placeholder="t('brand.workspace.george.placeholder')"
         :disabled="!promptEnabled" :autofocus="false" class="w-full"
         :ui="{ root: 'has-[textarea:focus-visible]:outline-none has-[textarea:focus-visible]:ring-default' }"

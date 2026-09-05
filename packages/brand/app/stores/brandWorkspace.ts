@@ -610,6 +610,14 @@ const setup = () => {
    * Menschen passierte sichtbar nichts. EIN PATCH trägt `reopen` und die
    * Konfidenz zusammen (die Route öffnet zuerst, setzt dann); die Journey
    * zieht lokal nach, den Fortschritts-Cursor am Profil rechnet der Server.
+   *
+   * ── SEIT PAKET 3c-ii RUFT DIE WERKSTATT DAS NICHT MEHR ───────────────────
+   * Der Chip, an dem es hing, ist mit der Weiche auf die Abnahme-Seite gezogen,
+   * und „Nochmal von vorn" heisst dort die LÖSCHENDE Handlung `restart` (§5a) —
+   * eine andere Sache als diese leise Vertiefungsrunde. Die Aktion bleibt
+   * trotzdem: der Plan behält `reopen` ausdrücklich („Session öffnen, Wert
+   * ändern", §5a Schluss), und die Korrektur nach der Abnahme (Paket 6) ist ihr
+   * nächster Aufrufer. Wer sie vorher wegräumt, baut sie dann neu.
    */
   async function reopenStep(profileId: string): Promise<void> {
     if (!stepKey.value) return

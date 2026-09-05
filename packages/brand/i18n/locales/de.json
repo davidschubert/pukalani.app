@@ -559,7 +559,7 @@
         }
       },
       "progressConfirmed": "{confirmed} von {total} bestätigt",
-      "chapterReady": "Alle Felder dieses Kapitels sind bestätigt. Die Finale Abnahme kommt als nächster Schritt."
+      "chapterReady": "Alle Felder dieses Kapitels sind bestätigt — weiter zur Finalen Abnahme."
     },
     "brands": {
       "title": "Brandings",
@@ -715,6 +715,60 @@
       "duplicateText": "Diese Adresse steht schon auf der Liste — ihr seid dran, sobald die nächste Welle öffnet.",
       "error": "Das hat gerade nicht geklappt. Versucht es in einer Minute noch einmal.",
       "consent": "Wir nutzen die Adresse nur, um euch zur Beta einzuladen. Kein Newsletter, keine Weitergabe."
+    },
+    "acceptance": {
+      "title": "Finale Abnahme",
+      "lead": "Alles aus diesem Kapitel nebeneinander. Nimm jede Zeile ab, die so stehen bleiben soll.",
+      "counter": "{accepted} von {total} abgenommen",
+      "area": "Bereich",
+      "exampleLabel": "Beispiel — erfunden, fremde Branche",
+      "own": "Eure Eingabe",
+      "notes": "Notiz",
+      "valueEmpty": "Noch keine Eingabe — optional.",
+      "accept": "Abnehmen",
+      "accepted": "Abgenommen",
+      "edit": "Bearbeiten",
+      "toSession": "Zur Session",
+      "unconfirmed": "Noch nicht bestätigt — zur Session.",
+      "acceptFailed": "Das Abnehmen hat nicht geklappt.",
+      "reloadHint": "Der Stand hat sich geändert — lade die Seite neu.",
+      "loadFailed": "Die Abnahme konnte nicht geladen werden.",
+      "status": {
+        "open": "offen",
+        "confirmed": "bestätigt",
+        "accepted": "abgenommen",
+        "stale": "veraltet",
+        "deferred": "vertagt"
+      },
+      "blockersTitle": "Das steht noch offen",
+      "blocker": {
+        "unconfirmed": "Noch nicht besprochen",
+        "unaccepted": "Noch nicht abgenommen",
+        "stale": "Die Quellen haben sich bewegt — neu besprechen",
+        "conflict": "Ein Konflikt ist offen",
+        "deferred": "Vertagt — erst wieder aufnehmen"
+      },
+      "allClear": "In diesem Kapitel ist nichts mehr offen — bestätige es, wenn es passt.",
+      "question": "Passt dieses Kapitel?",
+      "completing": "Kapitel bestätigen",
+      "completeFailed": "Das Kapitel ließ sich nicht abschließen.",
+      "doneNote": "Dieses Kapitel ist abgenommen.",
+      "continueTo": "Weiter zu {step}",
+      "restart": {
+        "title": "Nochmal von vorn",
+        "loss": "Dieses Kapitel beginnt von vorn: {values} bestätigte Werte, {notes} Notizen und {accepted} Abnahmen gehen verloren.",
+        "downstream": "Das berührt außerdem {count} bestätigte Felder in späteren Kapiteln.",
+        "downstreamShow": "Felder anzeigen",
+        "downstreamHide": "Felder ausblenden",
+        "typeToConfirm": "Tippe {word}, um zu bestätigen.",
+        "word": "bestätigen",
+        "inputLabel": "Bestätigungswort",
+        "confirm": "Bestätigen",
+        "cancel": "Abbrechen",
+        "changed": "Der Stand hat sich geändert — bitte lies es noch einmal.",
+        "failed": "Das hat nicht geklappt.",
+        "loading": "Wird geprüft …"
+      }
     },
     "session": {
       "minutes": "~{minutes} Min",

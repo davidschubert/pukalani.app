@@ -1,9 +1,13 @@
-import type { BrandNextSessionRef, BrandSessionState } from './brandJourney'
+import type {
+  BrandNextSessionRef,
+  BrandSessionState,
+  BrandStoredStepState,
+} from './brandJourney'
 import { type BrandStepKey, slotsForStep } from './slotRegistry'
 
 /**
- * DIE VIER RECHNUNGEN DER SESSION-NAVIGATION (BW2 Paket 3c-i,
- * docs/plans/BRAND-WIZARD-SESSIONS.md §5 und §11).
+ * DIE RECHNUNGEN DER SESSION-NAVIGATION (BW2 Paket 3c-i/3c-ii,
+ * docs/plans/BRAND-WIZARD-SESSIONS.md §5, §5a und §11).
  *
  * PURE — kein Nuxt, kein i18n, kein `$fetch`, wie `brandJourney.ts` und
  * `brandSessions.ts`. Sie beantworten die vier Fragen, die die Werkstatt beim
@@ -18,6 +22,9 @@ import { type BrandStepKey, slotsForStep } from './slotRegistry'
  *     ~14 Min"), Summe aus der Registry.
  *  4. `decideAutoAdvance` — DARF jetzt gewechselt werden? Der Auto-Weiter aus
  *     §5, mit allen Sperren an EINER Stelle.
+ *  5. `resolveAcceptanceStage` — WAS zeigt die Finale Abnahme unter der Liste?
+ *     Blocker, Frage oder „Weiter zu Kapitel …" (§5a Schritte 3 und 4).
+ *  6. `restartWordMatches` — ist der Knopf „Bestätigen" im Schutz-Layer frei?
  *
  * ── WARUM DIE ZAHLEN HIER STEHEN UND DIE SÄTZE NICHT ─────────────────────
  * Diese Datei liefert Zahlen und Schlüssel, nie fertige Sätze: „7 von 11
@@ -25,6 +32,25 @@ import { type BrandStepKey, slotsForStep } from './slotRegistry'
  * Eine pure Funktion, die Sprache zusammensetzte, wäre in der zweiten Sprache
  * falsch — und im Test grün.
  */
+
+// ── 0 · Die eine Ansicht, die keine Session ist ───────────────────────────
+
+/**
+ * DER `?s=`-WERT DER FINALEN ABNAHME (§5a, Paket 3c-ii).
+ *
+ * Die Abnahme ist eine ANSICHT desselben Route-Records wie die Sessions —
+ * `brand/<id>/<kapitel>?s=acceptance`. Sie braucht deshalb einen Wert in
+ * derselben Query, und der darf mit keiner Slot-Id kollidieren: Slot-Ids
+ * tragen alle einen Punkt (`c.discovery1`), dieser Wert nicht. Der Test nagelt
+ * genau das fest — eine künftige Id ohne Punkt würde die Ansicht sonst
+ * lautlos verschlucken.
+ */
+export const BRAND_ACCEPTANCE_VIEW = 'acceptance'
+
+/** Steht in der Adresse die Abnahme-Ansicht statt einer Session? */
+export function isAcceptanceView(requested: string | null | undefined): boolean {
+  return (requested ?? '').trim() === BRAND_ACCEPTANCE_VIEW
+}
 
 // ── 1 · Welche Session ist aktiv? ─────────────────────────────────────────
 
@@ -75,9 +101,18 @@ function enterable(session: BrandNavSession | undefined): boolean {
  * SUCHEN die zweite Wahl — angeklickt oder als `next` genannt wird sie
  * trotzdem geöffnet. Sind alle offenen vertagt, gewinnt die erste von ihnen:
  * eine leere Bühne wäre die schlechtere Antwort auf „ich komme darauf zurück".
+ *
+ * ── DIE ABNAHME-ANSICHT IST KEINE SESSION, UND DAS MUSS HIER STEHEN ──────
+ * `?s=acceptance` beantwortet die Frage mit `null` — „in diesem Augenblick ist
+ * KEINE Session offen". Ohne diesen Zweig fiele der Wert durch die Rangfolge
+ * und die Rechnung nennte die erste offene Session: die Werkstatt lüde deren
+ * Verlauf, George eröffnete sie, und all das UNTER einer Abnahme-Seite, die
+ * der Mensch gerade liest. Die Ansicht selbst erkennt die Seite an
+ * `isAcceptanceView` — hier steht nur, dass sie keine Session ist.
  */
 export function resolveActiveSession(input: BrandActiveSessionInput): string | null {
   const requested = input.requested?.trim() ?? ''
+  if (isAcceptanceView(requested)) return null
   const order = slotsForStep(input.stepKey)
 
   if (requested && enterable(input.sessions[requested])
@@ -206,7 +241,62 @@ export function decideAutoAdvance(input: BrandAutoAdvanceInput): BrandAutoAdvanc
   return { kind: 'session', stepKey: next.stepKey, sessionKey: next.sessionKey }
 }
 
-// ── 4 · Der Merker für den Eröffnungszug ──────────────────────────────────
+// ── 4 · Die Finale Abnahme: was steht unter der Liste? ────────────────────
+
+export interface BrandAcceptanceStageInput {
+  /** `acceptance.ready` — nichts mehr offen (abgenommen · aktuell · konfliktfrei). */
+  ready: boolean
+  /** Der GESPEICHERTE Zustand der Kapitel-Zeile. */
+  storedState: BrandStoredStepState
+}
+
+export type BrandAcceptanceStage =
+  /** Es steht noch etwas im Weg — die Blocker-Liste, keine Frage. */
+  | 'blocked'
+  /** „Passt dieses Kapitel?" mit den drei Antworten (§5a Schritt 4). */
+  | 'question'
+  /** Schon abgeschlossen — „Weiter zu Kapitel …". */
+  | 'done'
+
+/**
+ * DIE WEICHE ERSCHEINT ERST, WENN SIE HÄLT (§5a Schritt 3).
+ *
+ * ── WARUM `done` VOR `ready` GEPRÜFT WIRD ────────────────────────────────
+ * Ein abgeschlossenes Kapitel ist weiterhin `ready` — seine Werte sind ja
+ * abgenommen. Stünde die Frage trotzdem da, liefe „Passt" in ein
+ * `already_done` der Route: genau der Blindgänger, den die Bühne bis 3c-i mit
+ * einer zweiten Bedingung am Klick abfangen musste (`store.currentJourneyStep
+ * ?.state === 'done'`). Die Bedingung gehört in die ANZEIGE, nicht in den
+ * Klick — ein Knopf, der garantiert eine Absage kassiert, ist kein Angebot.
+ *
+ * ── WARUM DER STAND UND NICHT DIE GERECHNETE JOURNEY ─────────────────────
+ * Die Abnahme-Antwort trägt `storedState` (die Zeile selbst), nicht den
+ * gerechneten Zustand. Das ist hier die richtige Quelle: gefragt ist „wurde
+ * dieses Kapitel schon abgeschlossen", und das ist eine Tatsache der Zeile.
+ */
+export function resolveAcceptanceStage(input: BrandAcceptanceStageInput): BrandAcceptanceStage {
+  if (input.storedState === 'done') return 'done'
+  return input.ready ? 'question' : 'blocked'
+}
+
+/**
+ * DAS GETIPPTE WORT IM SCHUTZ-LAYER (§5a Schritt 2) — Reibung gegen den
+ * Fehlklick, und ausdrücklich NUR das.
+ *
+ * Der SERVER prüft das Wort nie; er prüft `acknowledge` und den `impactAck`.
+ * Diese Rechnung entscheidet allein, ob der Knopf „Bestätigen" freigegeben
+ * ist. Grosszügig, wo Grosszügigkeit nichts kostet (führende Leerzeichen,
+ * Grossschreibung), streng beim Rest: ein leeres Erwartungswort gibt NIE frei
+ * — sonst öffnete ein fehlender Locale-Schlüssel den löschenden Weg mit einem
+ * leeren Feld.
+ */
+export function restartWordMatches(input: string, word: string): boolean {
+  const expected = word.trim().toLowerCase()
+  if (!expected) return false
+  return input.trim().toLowerCase() === expected
+}
+
+// ── 5 · Der Merker für den Eröffnungszug ──────────────────────────────────
 
 export interface BrandOpeningInput {
   sessionKey: string
