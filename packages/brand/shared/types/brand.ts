@@ -739,18 +739,48 @@ export interface BrandInviteCheckResponse {
  *
  * Der Einladungs-Code ist ein GEHEIMNIS: jede Auskunft über ihn hilft dem, der
  * rät. Hier steht die EIGENE Adresse im Rumpf — sie ist kein Geheimnis vor dem,
- * der sie gerade eingetippt hat. `duplicate: true` sagt ihm nur, was er selbst
- * schon getan hat („du stehst bereits drauf"), und erspart ihm die Frage, ob
- * das Formular kaputt ist. Über FREMDE Adressen sagt die Antwort nichts, was
- * ein Rater nicht selbst herausfände — die Drossel (`brand:waitlist`, 5/min)
- * ist die Grenze, nicht die Sprachlosigkeit.
+ * der sie gerade eingetippt hat. Über FREMDE Adressen sagt die Antwort nichts,
+ * was ein Rater nicht selbst herausfände — die Drossel (`brand:waitlist`,
+ * 5/min) ist die Grenze, nicht die Sprachlosigkeit.
  *
- * `ok` ist immer `true`: die Route antwortet entweder 200 oder wirft (400 bei
- * kaputtem Rumpf, 503 bei defekter Ablage). Ein `ok: false` gäbe es nie.
+ * ── ZWEI ZUSTÄNDE, UND `duplicate` IST KEINER DAVON MEHR ──────────────────
+ * Seit dem Double-Opt-in zählt eine Zeile erst nach dem Klick im Postfach; die
+ * Frage „stand die Adresse schon da?" hat für das Formular damit aufgehört,
+ * eine Frage zu sein. Was es wissen muss, ist, WAS ALS NÄCHSTES PASSIERT:
+ *  · `mail_sent` — im Postfach liegt ein Bestätigungs-Link (neue Adresse ODER
+ *    eine unbestätigte, die einen frischen Link bekommt: für den Menschen davor
+ *    ist beides derselbe Satz, und genau deshalb ist es auch dieselbe Antwort —
+ *    ein Unterschied wäre ein Enumerations-Leck).
+ *  · `already_confirmed` — diese Adresse ist bestätigt, es geht KEINE Mail mehr
+ *    raus. Das darf sie erfahren: sie hat sich gerade selbst eingetippt.
+ *
+ * `ok` ist immer `true`: die Route antwortet 200 oder wirft (400 bei kaputtem
+ * Rumpf, 503 bei defekter Ablage oder ausgefallener Mail). Ein `ok: false` gäbe
+ * es nie.
  */
 export interface BrandWaitlistResponse {
   ok: true
-  duplicate: boolean
+  state: 'mail_sent' | 'already_confirmed'
+}
+
+/**
+ * DER KLICK AUS DER MAIL. Auch hier keine Neutralität nötig: wer den Token hat,
+ * hat die Mail — und die ging an genau diese Adresse.
+ *
+ * `already_confirmed` ist der DEFENSIVE Zweig: das Bestätigen löscht den Hash
+ * aus der Zeile, ein zweiter Klick auf denselben Link findet also gar nichts
+ * mehr und endet in 400. Der Zustand steht trotzdem im Vertrag, weil die Zeile
+ * auf einem anderen Weg (Betreiber-Hand, künftiger Import) mit Hash UND Status
+ * 'confirmed' dastehen könnte — dann ist „schon bestätigt" die ehrliche
+ * Auskunft und kein Fehler.
+ *
+ * Abgewiesen wird mit einem Status, nicht mit einem dritten Wort: 400
+ * `token_invalid` (unbekannt), 410 `token_expired` (Frist vorbei — die Zeile
+ * bleibt `pending`, ein neuer Eintrag erneuert den Link).
+ */
+export interface BrandWaitlistConfirmResponse {
+  ok: true
+  state: 'confirmed' | 'already_confirmed'
 }
 
 /** Ebenso neutral — `false` sagt nie, WORAN es lag. */

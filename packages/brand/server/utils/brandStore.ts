@@ -162,12 +162,23 @@ export type BrandShareRow = Models.Row & {
 }
 
 /**
- * Die Warteliste (brand-011). Sie hängt an KEINEM Profil und an keinem Konto —
+ * Die Warteliste (brand-012). Sie hängt an KEINEM Profil und an keinem Konto —
  * die Zeile entsteht, bevor es beides gibt; ihre Identität ist `emailLower`
- * (UNIQUE). `status` ist heute reine ANZEIGE für den Betreiber: 'new' |
- * 'invited' | 'declined' sind Werte, keine Logik — es gibt keinen Code, der
- * sie liest, und das ist Absicht (der Übergang zur Einladung läuft über
- * `brand_invites`, nicht über ein Statusfeld).
+ * (UNIQUE).
+ *
+ * `status` IST SEIT DEM DOUBLE-OPT-IN (brand-015) LOGIK, nicht mehr nur
+ * Anzeige: 'pending' | 'confirmed' | 'invited' | 'declined'. Genau EIN Wert
+ * wird gelesen — 'confirmed' heisst „die Adresse hat sich selbst bestätigt";
+ * alles andere heisst „noch nicht", einschliesslich des Altwerts 'new' aus der
+ * Zeit davor (in Produktion existiert keine solche Zeile, die Tabelle war
+ * leer). 'invited'/'declined' bleiben Betreiber-Notizen ohne Code dahinter —
+ * der Übergang zur Einladung läuft über `brand_invites`, nicht über dieses Feld.
+ *
+ * Die drei Token-Felder kamen ADDITIV dazu und sind deshalb optional getypt:
+ * eine Zeile von vor der Migration liest `undefined`, und jeder Leser hier
+ * rechnet damit (`brandWaitlistTokenExpired` behandelt „fehlt" wie „abgelaufen").
+ * `tokenHash: ''` ist der NORMALFALL einer bestätigten Zeile — der Hash wird
+ * beim Bestätigen gelöscht, damit ein weitergeleiteter Link tot ist.
  */
 export type BrandWaitlistRow = Models.Row & {
   emailLower: string
@@ -179,6 +190,9 @@ export type BrandWaitlistRow = Models.Row & {
   source: string
   status: string
   note: string
+  tokenHash?: string
+  tokenExpiresAt?: string
+  confirmedAt?: string
 }
 
 /** Der Admin-Client + die Database-Id des Requests — EIN Aufruf statt zwei. */

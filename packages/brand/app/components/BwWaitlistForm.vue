@@ -21,9 +21,13 @@ import type { BrandWaitlistResponse } from '../../shared/types/brand'
  * der Server freundlich 200 und speichert nichts. Ein Captcha kostete jeden
  * ehrlichen Eintrag einen Klick — der Preis stünde in keinem Verhältnis.
  *
- * ── `duplicate` IST EINE FREUNDLICHE AUSKUNFT, KEIN FEHLER ────────────────
- * Wer sich zweimal einträgt, meint es ernst. Er bekommt „du stehst schon
- * drauf" statt einer roten Meldung.
+ * ── DOUBLE-OPT-IN: DIE MAIL ENTSCHEIDET, NICHT DER KLICK ──────────────────
+ * Der Server legt die Adresse als `pending` an und schickt einen Link (24 h).
+ * Erst der Klick macht daraus einen Eintrag — David: „sonst spammen die mir
+ * das Fach voll". Wer sich ein zweites Mal einträgt, bekommt einen frischen
+ * Link; wer schon bestätigt ist, die freundliche Auskunft statt einer roten
+ * Meldung. Kann die Mail nicht raus, antwortet der Server 503 — dann steht
+ * hier ehrlich „nicht geklappt", denn ohne Link gibt es keinen Eintrag.
  *
  * `source` sagt dem Betreiber, WELCHE Seite den Eintrag gebracht hat — die
  * eine Kennzahl, an der man sieht, ob eine Seite verkauft.
@@ -37,7 +41,13 @@ const email = ref('')
 const website = ref('')
 const hp = ref('')
 const status = ref<'idle' | 'sending' | 'done' | 'error'>('idle')
-const duplicate = ref(false)
+/**
+ * DOUBLE-OPT-IN (2026-09-04, Davids Auftrag): `mail_sent` heisst, der
+ * Bestätigungs-Link ist raus und die Adresse steht als `pending` in der
+ * Tabelle — auf die Liste kommt sie erst mit dem Klick in der Mail.
+ * `already_confirmed` ist die freundliche Auskunft für die eigene Adresse.
+ */
+const alreadyConfirmed = ref(false)
 
 const canSend = computed(() => status.value !== 'sending' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim()))
 
@@ -55,7 +65,7 @@ async function submit(): Promise<void> {
         hp: hp.value,
       },
     })
-    duplicate.value = result.duplicate
+    alreadyConfirmed.value = result.state === 'already_confirmed'
     status.value = 'done'
   }
   catch {
@@ -69,7 +79,7 @@ async function submit(): Promise<void> {
     <div v-if="status === 'done'" class="bw-frame p-6" style="background: var(--bw-accent-soft)">
       <p class="font-medium tracking-tight" style="color: var(--bw-ink)">{{ t('brand.waitlist.doneTitle') }}</p>
       <p class="mt-1.5 text-sm leading-relaxed" style="color: var(--bw-ink-soft)">
-        {{ duplicate ? t('brand.waitlist.duplicateText') : t('brand.waitlist.doneText') }}
+        {{ alreadyConfirmed ? t('brand.waitlist.duplicateText') : t('brand.waitlist.doneText') }}
       </p>
     </div>
 

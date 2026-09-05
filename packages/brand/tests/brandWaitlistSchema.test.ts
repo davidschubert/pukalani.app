@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import {
+  BRAND_WAITLIST_TOKEN_MAX,
+  BRAND_WAITLIST_TOKEN_MIN,
   BRAND_WAITLIST_WEBSITE_MAX,
+  createBrandWaitlistConfirmSchema,
   createBrandWaitlistSchema,
 } from '../schemas/brandWaitlist'
 
@@ -76,5 +79,34 @@ describe('createBrandWaitlistSchema', () => {
     expect(parsed.hp).toBe('ich bin ein Skript')
     // Alles andere bleibt trotzdem draußen: `.strict()` gilt weiter.
     expect(schema.safeParse({ email: 'a@b.de', status: 'invited' }).success).toBe(false)
+  })
+})
+
+/**
+ * DER RUMPF DER BESTÄTIGUNG — hier ist die GRENZE die Aussage.
+ *
+ * Der Token ist das einzige Geheimnis dieser Route; gemessen wird er, BEVOR er
+ * gehasht und abgefragt wird. Ohne den Deckel liefe ein 10-MB-„Token" erst
+ * durch sha256 und dann in eine Appwrite-Abfrage.
+ */
+describe('createBrandWaitlistConfirmSchema', () => {
+  const schema = createBrandWaitlistConfirmSchema()
+  /** So lang, wie ihn `randomBytes(32).toString('hex')` liefert. */
+  const token = 'a'.repeat(64)
+
+  it('nimmt einen echten Token und trimmt ihn', () => {
+    expect(schema.parse({ token }).token).toBe(token)
+    expect(schema.parse({ token: `  ${token} ` }).token).toBe(token)
+  })
+
+  it('lehnt zu kurz, zu lang und leer ab', () => {
+    expect(schema.safeParse({ token: '' }).success).toBe(false)
+    expect(schema.safeParse({ token: 'a'.repeat(BRAND_WAITLIST_TOKEN_MIN - 1) }).success).toBe(false)
+    expect(schema.safeParse({ token: 'a'.repeat(BRAND_WAITLIST_TOKEN_MAX + 1) }).success).toBe(false)
+    expect(schema.safeParse({}).success).toBe(false)
+  })
+
+  it('nimmt nur dieses eine Feld', () => {
+    expect(schema.safeParse({ token, email: 'a@b.de' }).success).toBe(false)
   })
 })
