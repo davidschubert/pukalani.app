@@ -69,6 +69,17 @@
  *     schweigt beim ZWEITEN Klick auf denselben Stand (`ran: false`) — mit
  *     GEGENPROBE (nach einer neuen Fassung läuft er wieder).
  *
+ * Seit Paket 9 (Davids Entscheidung 2026-09-05) kommt die Zusage der SEITEN
+ * dazu — die einzige hier, die HTML statt JSON misst:
+ *
+ * 20. FREMD ODER UNBEKANNT ⇒ 404: die WERKSTATT (`/de/brand/:id/:step`) und
+ *     ihre Abnahme-Ansicht (`?s=acceptance`) antworten ohne Anmeldung, mit
+ *     einem fremden Konto und für eine erfundene Profil-Id mit HTTP 404 statt
+ *     einer Hülle „Namenloses Branding" mit 200; der Besitzer bekommt seine
+ *     Seite. Mit zwei GEGENPROBEN: ein GESPERRTER Baustein bleibt die ruhige
+ *     Fläche (200 — er ist erklärbar), und dieselbe Regel gilt für das
+ *     Dokument (Paket 8).
+ *
  * ── WAS DIESER BEWEIS NICHT BEWEIST ──────────────────────────────────────
  * Den Anbieter. Ohne `NUXT_AI_KEY` wirft `aiCompleteStream` (503), die Route
  * schickt `generation.failed` mit `provider_error` — und genau das ist hier
@@ -166,10 +177,15 @@ function call(path, { method = 'GET', body, cookie } = {}) {
 
 const stamp = Date.now()
 
-async function makeAccount() {
+/**
+ * Ein Konto MIT Beta-Zugang. `tag` trennt die Adressen: Zusage 20 braucht ein
+ * ZWEITES Konto, das ebenfalls Zugang hat — nur so beweist ein 404 dort den
+ * BESITZ und nicht bloss das geschlossene Tor.
+ */
+async function makeAccount(tag = 'owner') {
   const user = await users.create({
     userId: ID.unique(),
-    email: `bw2-sessions-${stamp}@example.test`,
+    email: `bw2-sessions-${stamp}-${tag}@example.test`,
     password: `Pw-${ID.unique()}`,
     name: 'BW2-Sessions-Beweis',
   })
@@ -1070,6 +1086,53 @@ try {
     documentThird.status === 200 && documentThird.json?.ran === true
     && documentThird.json?.revisionKey !== look.json?.revisionKey,
     `${documentThird.status} ${documentThird.json?.ran}`)
+
+  // ── 20 · Die Seiten: fremd oder unbekannt ⇒ 404 (Paket 9) ──────────────
+  //
+  // Hier wird als einziges Mal die SEITE gemessen, nicht die Route: die Route
+  // antwortete schon immer 404 — der Fehler lebte im Browser-Zustand. Der
+  // Profil-Abruf setzte „nicht gefunden", und der Listen-Abruf für den
+  // Marken-Wähler nahm es einem eingeloggten Menschen sofort wieder weg;
+  // übrig blieb „Namenloses Branding" mit HTTP 200. Deshalb prüft dieser
+  // Block den STATUS der ausgelieferten Seite.
+  console.log('\n20 · Die Seiten: fremdes oder unbekanntes Branding ⇒ 404')
+  const stranger = await makeAccount('stranger')
+  // Eine wohlgeformte, aber nie vergebene Row-Id (20 Zeichen, wie Appwrite).
+  const inventedId = 'aaaaaaaabbbbccccdddd'
+
+  for (const [label, suffix] of [['Werkstatt', ''], ['Abnahme-Ansicht', '?s=acceptance']]) {
+    const own = await call(`/de/brand/${profileId}/context${suffix}`, { cookie: account.cookie })
+    check(`${label}: der Besitzer bekommt seine Seite (200, mit dem Namen der Marke)`,
+      own.status === 200 && own.text.includes('Kailua Coffee'),
+      `${own.status} ${own.text.length} Zeichen`)
+
+    const guest = await call(`/de/brand/${profileId}/context${suffix}`)
+    check(`${label}: ohne Anmeldung 404`, guest.status === 404, String(guest.status))
+
+    const foreign = await call(`/de/brand/${profileId}/context${suffix}`, { cookie: stranger.cookie })
+    check(`${label}: ein FREMDES Konto mit eigenem Beta-Zugang 404`,
+      foreign.status === 404, String(foreign.status))
+    check(`${label}: … und bekommt keine Hülle „Namenloses Branding" zu sehen`,
+      !foreign.text.includes('Namenloses Branding'), foreign.text.slice(0, 120))
+
+    const invented = await call(`/de/brand/${inventedId}/context${suffix}`, { cookie: account.cookie })
+    check(`${label}: eine erfundene Profil-Id 404`, invented.status === 404, String(invented.status))
+  }
+
+  // Der zweite Zustand bleibt bewusst eine FLÄCHE: `naming` ist für dieses
+  // Profil übersprungen (Name steht), die Route antwortet 403 mit Grund — und
+  // ein erklärbarer Zustand ist keine Fehlerseite.
+  const lockedStep = await call(`/de/brand/${profileId}/naming`, { cookie: account.cookie })
+  check('GEGENPROBE: ein übersprungener Baustein bleibt die ruhige Fläche (200)',
+    lockedStep.status === 200 && lockedStep.text.includes('Dieses Kapitel ist noch nicht offen'),
+    `${lockedStep.status} ${lockedStep.text.length} Zeichen`)
+
+  // Und die Nachbarseite hält, was Paket 8 versprochen hat.
+  const docForeign = await call(`/de/brand/${profileId}/document`, { cookie: stranger.cookie })
+  const docOwn = await call(`/de/brand/${profileId}/document`, { cookie: account.cookie })
+  check('GEGENPROBE: das Dokument antwortet genauso (fremd 404, Besitzer 200)',
+    docForeign.status === 404 && docOwn.status === 200,
+    `${docForeign.status}/${docOwn.status}`)
 }
 catch (error) {
   fail++

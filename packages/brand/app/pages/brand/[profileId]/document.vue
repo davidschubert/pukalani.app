@@ -91,9 +91,14 @@ const doc = await useAsyncData<BrandDocumentResponse | null>(
  * Adresse nichts, und die ehrliche Antwort ist die Fehlerseite mit 404 — auch
  * für „kein Beta-Zugang": die Datentür sagt bewusst beides mit derselben
  * Antwort (sie verrät nicht, ob es die Zeile gibt), also kann diese Seite die
- * zwei Fälle gar nicht auseinanderhalten. Die WERKSTATT behält ihre ruhige
- * Fläche: sie ist der Einstieg, den man ohne Zugang tatsächlich anläuft, und
- * sie kennt mit `blocked` (403) einen zweiten, erklärbaren Zustand.
+ * zwei Fälle gar nicht auseinanderhalten.
+ *
+ * NACHTRAG PAKET 9 (Davids Entscheidung 2026-09-05, „Werkstatt soll auch 404
+ * zeigen"): die Werkstatt macht es seither genauso. Damit ist auch das oben
+ * beschriebene RENNEN geschlossen — es an der Wurzel: `loadProfiles` schreibt
+ * in ein anderes Feld als `loadProfile` (`denied` gegen `profileDenied`).
+ * Diese Seite bleibt trotzdem am Rückgabewert: er beantwortet genau die
+ * Frage, die hier zählt, ohne über den Store zu gehen.
  *
  * FAIL-SOFT BLEIBT für alles andere: nur ein AUSDRÜCKLICHES „nicht gefunden"
  * wirft. Ein Transportfehler lässt `data` leer, die Seite steht, und die Mitte

@@ -119,10 +119,36 @@ import { useBrandGeneration } from '../../../composables/useBrandGeneration'
  *    Layer noch nicht (im Dummy steht er als deutsches Literal in
  *    `demoRail`) — er bleibt weg, statt erfunden zu werden.
  *
- * ── DREI ZUSTÄNDE, DIE KEINE FEHLERSEITE SIND ─────────────────────────────
- * `denied` (404 der Datentür — kein Beta-Zugang), `blocked` (403: der
- * Baustein liegt nicht auf dem Weg) und der KONFLIKT (409). Alle drei
- * bekommen eine Fläche mit Erklärung; geworfen wird hier nichts.
+ * ── ZWEI ZUSTÄNDE, DIE KEINE FEHLERSEITE SIND ─────────────────────────────
+ * `blocked` (403: der Baustein liegt nicht auf dem Weg — `locked` oder
+ * `skipped`) und der KONFLIKT (409). Beide bekommen eine Fläche mit
+ * Erklärung, denn beide sind ERKLÄRBAR: es gibt dieses Branding, es gibt
+ * diesen Baustein, er ist hier nur (noch) nicht dran.
+ *
+ * ── EIN FREMDES ODER UNBEKANNTES BRANDING IST EIN 404 (Paket 9) ───────────
+ * Davids Entscheidung 2026-09-05 („Werkstatt soll auch 404 zeigen") — dieselbe
+ * Regel wie auf dem Dokument (Paket 8). Vorher stand hier eine dritte Fläche
+ * an `store.denied`, und die war eine Lüge in zwei Richtungen: Für einen
+ * FREMDEN Schlüssel sah man sie gar nicht erst (der Listen-Abruf für den
+ * Marken-Wähler nahm einem eingeloggten Menschen das `denied` sofort wieder
+ * weg — übrig blieb „Namenloses Branding" mit HTTP 200, ein Soft-404 wie beim
+ * ungültigen Baustein-Schlüssel darunter). Und wo sie zog, versprach sie
+ * einer Adresse eine Bedeutung, die sie nicht hat.
+ *
+ * Jetzt wirft die Seite bei einem ausdrücklichen „nicht gefunden" 404 — SSR
+ * mit echtem Status. Das RENNEN ist an der Wurzel geschlossen: `loadProfiles`
+ * schreibt seit Paket 9 in ein eigenes Feld (`denied`), das Profil in
+ * `profileDenied` (s. Store-Kopf).
+ *
+ * WARUM DIE RUHIGE FLÄCHE FÜR `blocked` BLEIBT: sie beantwortet eine ANDERE
+ * Frage. „Kein Beta-Zugang" und „fremdes Branding" klingen aus der Datentür
+ * absichtlich gleich (sie verrät nicht, ob es die Zeile gibt) — dieser Seite
+ * bleibt also nur die 404-Seite. Beim gesperrten Baustein darf der Server den
+ * Grund nennen (`data.code`), und dann ist eine Erklärung mit dem Weg zurück
+ * die bessere Antwort als eine Fehlerseite.
+ *
+ * FAIL-SOFT BLEIBT für alles andere: ein Transportfehler wirft nicht. Aus
+ * einem 500 einen 404 zu machen wäre eine Lüge über die Ursache.
  */
 definePageMeta({ layout: 'brand-workspace' })
 
@@ -144,8 +170,9 @@ const routeStepKey = computed(() => String(route.params.stepKey ?? ''))
  * fielen in diese Route (profileId='demo', stepKey='discover') und
  * renderten eine „Namenloses Branding"-Werkstatt ohne Inhalt — ein
  * Soft-404, der wie ein Produktfehler aussieht. Ob das PROFIL existiert,
- * prüft weiter der Server (store.denied); der SCHLÜSSEL steht im Katalog
- * und braucht keinen Request.
+ * prüft weiter der Server (die Hülle darunter); der SCHLÜSSEL steht im
+ * Katalog und braucht keinen Request — und weil er VOR jedem Abruf geprüft
+ * wird, spricht ein 404 der Baustein-Route immer über das Profil.
  */
 if (!(BRAND_STEP_KEYS as readonly string[]).includes(routeStepKey.value)) {
   throw createError({ status: 404, statusText: 'Unknown brand step' })
@@ -160,7 +187,7 @@ const generation = useBrandGeneration(profileId, { beforeGenerate: () => autosav
 // Stand, welche Frage als nächste dran ist.
 const conversation = useBrandConversation(profileId, { beforeSend: () => autosave.flush() })
 
-await useAsyncData(
+const shell = await useAsyncData<{ found: boolean } | null>(
   () => `brand-workspace-${profileId.value}-${routeStepKey.value}`,
   async () => {
     const ok = await store.loadProfile(profileId.value, request)
@@ -170,10 +197,17 @@ await useAsyncData(
     // Werkstatt, die an einer Auswahlliste scheitert, wäre die schlechtere
     // Antwort auf einen Listen-Fehler.
     await store.loadProfiles(request).catch(() => {})
-    return true
+    // `profileDenied` und nicht `ok`: auch ein 404 des BAUSTEIN-Abrufs spricht
+    // über das Profil (den Schlüssel hat der Katalog oben schon geprüft). Ein
+    // 403 setzt `blocked` und bleibt hier bewusst unberührt.
+    return { found: ok && !store.profileDenied }
   },
-  { watch: [profileId, routeStepKey] },
+  { watch: [profileId, routeStepKey], default: () => null },
 )
+
+if (shell.data.value && !shell.data.value.found) {
+  throw createError({ status: 404, statusText: 'Unknown brand profile' })
+}
 
 const stepKey = computed<BrandStepKey | null>(() =>
   (BRAND_STEP_KEYS as readonly string[]).includes(routeStepKey.value)
@@ -2168,15 +2202,18 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
 </script>
 
 <template>
-  <!-- Kein Beta-Zugang oder gesperrter Baustein: eine Fläche, keine Fehlerseite. -->
-  <div v-if="store.denied || store.blocked" class="bw-root grid min-h-dvh place-items-center px-6">
+  <!-- Gesperrter Baustein: eine Fläche, keine Fehlerseite (s. Kopf). Der
+       Zweig für „kein Zugang" ist mit Paket 9 weg — dieser Fall endet oben
+       als 404, und ein Zweig, der nie zieht, ist kein Sicherheitsnetz,
+       sondern eine Behauptung über einen Zustand, den es nicht gibt. -->
+  <div v-if="store.blocked" class="bw-root grid min-h-dvh place-items-center px-6">
     <div class="max-w-md text-center">
       <BwIllustration variant="journey" class="mx-auto h-16 w-auto" style="color: var(--bw-ink-soft)" />
       <p class="mt-4 font-medium">
-        {{ store.denied ? t('brand.workspace.noAccess.title') : t('brand.workspace.stepLocked.title') }}
+        {{ t('brand.workspace.stepLocked.title') }}
       </p>
       <p class="mt-1 text-sm" style="color: var(--bw-muted)">
-        {{ store.denied ? t('brand.workspace.noAccess.description') : t('brand.workspace.stepLocked.description') }}
+        {{ t('brand.workspace.stepLocked.description') }}
       </p>
       <UButton
         class="mt-5 rounded-full" variant="outline" :to="localePath('/dashboard/brands')"

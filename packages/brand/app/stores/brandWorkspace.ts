@@ -59,10 +59,14 @@ import type {
  * dieselbe Trennung wie zwischen `brandJourney.ts` und den Routen.
  *
  * ── 404 IST EINE ANTWORT, KEIN AUSFALL ────────────────────────────────────
- * Die `/api/brand/**`-Routen antworten bei fehlendem Beta-Zugang 404
- * (Datentür-Muster, `requireBrandAccess`). Der Store macht daraus `denied`, und
- * die Seiten zeigen einen Leerzustand statt einer Fehlerseite: der Grund bleibt
- * bewusst im Server, die Oberfläche sagt nur „noch kein Zugang".
+ * Die `/api/brand/**`-Routen antworten mit 404, wo eine andere Antwort etwas
+ * verraten würde (Datentür-Muster, `requireBrandAccess`): fehlender
+ * Beta-Zugang und ein fremdes Branding klingen absichtlich gleich. Der Store
+ * merkt sich beides GETRENNT — `denied` für die LISTE („dieses Konto hat
+ * keinen Zugang"), `profileDenied` für EIN Branding („das gibt es hier
+ * nicht") — und die Seiten antworten unterschiedlich darauf: die Übersicht
+ * zeigt einen Leerzustand, Werkstatt und Dokument werfen eine 404-Seite,
+ * weil ihre Adresse ohne dieses Branding nichts bedeutet.
  *
  * ── DIE LESE-AKTIONEN NEHMEN IHREN `fetch` ENTGEGEN ───────────────────────
  * Beim SSR MÜSSEN die Browser-Cookies mitgehen, sonst antwortet das Gate mit
@@ -198,8 +202,32 @@ const setup = () => {
    */
   const georgeDrafts = ref<Record<string, string>>({})
 
-  /** Der Beta-Zugang fehlt (404 der Datentür) — kein Fehler, ein Zustand. */
+  /**
+   * DER BETA-ZUGANG FEHLT — die Antwort der Datentür auf die LISTE (404).
+   * Kein Fehler, ein Zustand: `/dashboard/brands` zeigt dafür einen
+   * Leerzustand mit dem Weg zur Einladung, keine Fehlerseite.
+   */
   const denied = ref(false)
+  /**
+   * DIESES EINE BRANDING GIBT ES FÜR DIESES KONTO NICHT — die Antwort der
+   * Datentür auf das PROFIL (404). Sie sagt „fremd", „gelöscht", „erfunden"
+   * und „kein Zugang" bewusst mit DERSELBEN Antwort; der Client kann die
+   * Fälle deshalb gar nicht auseinanderhalten und soll es auch nicht.
+   *
+   * ── ZWEI FRAGEN, ZWEI FELDER (Paket 9, 2026-09-05) ──────────────────────
+   * Bis hierher schrieben BEIDE Abrufe in `denied` — und die Werkstatt holt
+   * erst das Profil und danach die Liste für den Marken-Wähler. Für einen
+   * fremden Schlüssel hiess das bei einem eingeloggten Menschen: `loadProfile`
+   * setzt `denied`, `loadProfiles` nimmt es eine Zeile später wieder weg (er
+   * hat ja eigene Brandings) — übrig blieb eine Hülle mit HTTP 200. Paket 8
+   * ist dem auf dem Dokument nur AUSGEWICHEN (die Seite liest den
+   * RÜCKGABEWERT von `loadProfile`, nicht den Store). Hier ist das Rennen
+   * geschlossen: die Liste spricht nur über die Liste, das Profil nur über
+   * das Profil, und keiner der beiden kann die Antwort des anderen
+   * zurücknehmen. Ein gemeinsames Feld könnte diese zwei Fragen nie wieder
+   * auseinanderhalten.
+   */
+  const profileDenied = ref(false)
   /**
    * Der Baustein liegt nicht (mehr) auf dem Weg: `locked` (Vorgänger offen)
    * oder `skipped` (Weiche abgewählt). Die Route antwortet darauf mit 403 und
@@ -788,8 +816,11 @@ const setup = () => {
     }
     catch (error) {
       profiles.value = []
-      denied.value = errorStatus(error) === 404
-      if (!denied.value) throw error
+      // Nur ein 404 ist eine ANTWORT („kein Zugang"). Alles andere ist ein
+      // Ausfall und gehört dem Aufrufer — und `denied` bleibt dann, wie es
+      // war, statt einen Transportfehler als „Zugang vorhanden" zu verbuchen.
+      if (errorStatus(error) !== 404) throw error
+      denied.value = true
     }
     finally {
       loading.value = false
@@ -799,7 +830,7 @@ const setup = () => {
   function applyDetail(detail: BrandProfileDetailResponse): void {
     profile.value = detail.profile
     journey.value = detail.journey
-    denied.value = false
+    profileDenied.value = false
   }
 
   async function loadProfile(profileId: string, fetcher: BrandFetcher = $fetch): Promise<boolean> {
@@ -810,7 +841,7 @@ const setup = () => {
     }
     catch (error) {
       if (errorStatus(error) === 404) {
-        denied.value = true
+        profileDenied.value = true
         profile.value = null
         journey.value = []
         return false
@@ -829,8 +860,11 @@ const setup = () => {
     }
     catch (error) {
       const status = errorStatus(error)
+      // Der Baustein-Schlüssel steht im Katalog (die Seite prüft ihn ohne
+      // Request) — ein 404 hier spricht also über das PROFIL, nicht über den
+      // Baustein: es gibt dieses Branding für dieses Konto nicht (mehr).
       if (status === 404) {
-        denied.value = true
+        profileDenied.value = true
         return false
       }
       if (status === 403) {
@@ -898,6 +932,7 @@ const setup = () => {
     syncState.value = 'saved'
     conflict.value = null
     denied.value = false
+    profileDenied.value = false
     blocked.value = null
     streamMessages.value = []
     georgeDrafts.value = {}
@@ -930,6 +965,7 @@ const setup = () => {
     syncState,
     conflict,
     denied,
+    profileDenied,
     blocked,
     loading,
     streamMessages,
