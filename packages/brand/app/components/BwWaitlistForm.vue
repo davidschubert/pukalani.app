@@ -11,10 +11,11 @@ import type { BrandWaitlistResponse } from '../../shared/types/brand'
  * `POST /api/brand/waitlist`; der Server prüft, dedupliziert und
  * benachrichtigt den Betreiber fail-soft.
  *
- * ── SO WENIG FELDER WIE MÖGLICH ───────────────────────────────────────────
- * Jedes Pflichtfeld kostet Eintragungen. Pflicht ist nur die Adresse; die
- * Website ist der eine optionale Kontext, der dem Betreiber beim Freischalten
- * wirklich hilft (Relaunch oder Neugründung? Welche Branche?).
+ * ── EIN PFLICHTFELD, DREI OPTIONALE ───────────────────────────────────────
+ * Jedes Pflichtfeld kostet Eintragungen. Pflicht ist nur die Adresse; Name,
+ * Firma (Davids Ergänzung 2026-09-05) und Website sind optional — sie sind
+ * das, was der Betreiber beim Einladen vor sich haben will (wer, welche
+ * Marke, Relaunch oder Neugründung?), ohne dass die Hürde steigt.
  *
  * ── HONEYPOT STATT CAPTCHA ────────────────────────────────────────────────
  * `hp` ist ein für Menschen unsichtbares Feld; füllt ein Skript es, antwortet
@@ -38,6 +39,8 @@ const { t, locale } = useI18n()
 const localePath = useLocalePath()
 
 const email = ref('')
+const name = ref('')
+const company = ref('')
 const website = ref('')
 const hp = ref('')
 const status = ref<'idle' | 'sending' | 'done' | 'error'>('idle')
@@ -59,6 +62,8 @@ async function submit(): Promise<void> {
       method: 'POST',
       body: {
         email: email.value.trim(),
+        name: name.value.trim(),
+        company: company.value.trim(),
         website: website.value.trim(),
         locale: locale.value === 'de' ? 'de' : 'en',
         source: props.source,
@@ -89,6 +94,21 @@ async function submit(): Promise<void> {
         :placeholder="t('brand.waitlist.emailPlaceholder')" :aria-label="t('brand.waitlist.email')"
         class="w-full"
       />
+      <!-- Name und Firma (Davids Ergänzung 2026-09-05): optional, damit die
+           Adresse allein reicht — aber sichtbar, weil der Betreiber beim
+           Einladen sonst nur eine Adresse und eine Domain vor sich hat. -->
+      <div class="grid gap-3 sm:grid-cols-2">
+        <UInput
+          v-model="name" type="text" name="name" autocomplete="name" size="lg"
+          :placeholder="t('brand.waitlist.namePlaceholder')" :aria-label="t('brand.waitlist.name')"
+          class="w-full"
+        />
+        <UInput
+          v-model="company" type="text" name="organization" autocomplete="organization" size="lg"
+          :placeholder="t('brand.waitlist.companyPlaceholder')" :aria-label="t('brand.waitlist.company')"
+          class="w-full"
+        />
+      </div>
       <UInput
         v-model="website" type="text" name="website" autocomplete="url" inputmode="url" size="lg"
         :placeholder="t('brand.waitlist.websitePlaceholder')" :aria-label="t('brand.waitlist.website')"
