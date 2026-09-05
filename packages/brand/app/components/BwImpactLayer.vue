@@ -99,7 +99,7 @@ function close(): void {
             {{ t('brand.impact.changed') }}
           </p>
           <p class="mt-3 text-sm leading-relaxed" style="color: var(--bw-ink-soft)">
-            {{ t('brand.impact.summary', { count: impact.count, steps: steps.length }) }}
+            {{ t('brand.impact.summary', { fields: t('brand.impact.fieldCount', impact.count), chapters: t('brand.impact.chapterCount', steps.length) }) }}
           </p>
 
           <div class="mt-4 flex flex-col gap-4">

@@ -820,13 +820,15 @@
       "eyebrow": "Vor der Korrektur",
       "title": "Diese Änderung berührt anderes",
       "loading": "Wir sehen nach, was daran hängt …",
-      "summary": "Diese Änderung berührt {count} bestätigte Felder in {steps} Kapiteln.",
+      "summary": "Diese Änderung berührt {fields} {chapters}.",
       "direct": "· hängt direkt daran",
       "indirect": "· hängt über andere Felder daran",
       "note": "Nichts davon wird gelöscht. Die betroffenen Felder werden als „neu besprechen\" markiert — was die Änderung nicht wirklich trifft, macht der Berater danach wieder grün.",
       "changed": "Seit dem letzten Blick hat sich etwas bewegt — das hier ist der neue Stand.",
       "accept": "Annehmen und korrigieren",
-      "cancel": "Abbrechen"
+      "cancel": "Abbrechen",
+      "fieldCount": "{n} bestätigtes Feld | {n} bestätigte Felder",
+      "chapterCount": "in {n} Kapitel | in {n} Kapiteln"
     },
     "invariant": {
       "title": "Das passt so noch nicht",
