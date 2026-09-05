@@ -7,6 +7,38 @@ die kleinen, verstreuten Beschlüsse.
 
 ---
 
+## 2026-09-05 — Brand Foundation als Guidelines: Leseansicht des Ergebnis-Dokuments (P5–P7-Rest)
+
+**Anlass (David):** eine allgemeine Brand-Guidelines-Definition (Story, Logo, Farbe,
+Typografie, Tone of Voice, Bildsprache) eingebracht; Wahl unter vier Wegen: das
+Ergebnis-Dokument des Wizards wird an diesem klassischen Aufbau ausgerichtet —
+Konzept, kein Code. Abgleich: die verbale Hälfte deckt der Wizard vollständig und
+tiefer (Positionierung, Architektur, Name, Manifest), die visuelle gar nicht —
+das ist die Produktentscheidung „Fundament frei, Ableitung bezahlt".
+
+**Entscheidungen (Fragenrunde, alle nach Empfehlung):** (1) Der Name bleibt
+**„Brand Foundation"** — „Brand Book (24 Kapitel)" ist auf der Startseite Produkt 03
+und bezahlt; ein freies „Guidelines" dazwischen hätte die Frage „was kaufe ich
+dann noch?" ausgelöst. Der Guidelines-AUFBAU ist die Form, nicht der Name.
+(2) Die Leseansicht zeigt **nur Festlegungen**: neues Registry-Feld `audience`
+NEBEN dem bestehenden `sensitivity` (zwei Fragen — „ist es eine Festlegung?" und
+„darf es reisen?" — zwei Felder, wie `as`/`actor` an der Datentür). (3) Logo,
+Farbe, Typografie, Bildsprache erscheinen **sichtbar gesperrt mit Begründung und
+CTA**; beim Fremdleser nur ein Satz ohne Preisanker. (4) Export = **Browser-Druck
+mit Print-CSS**, kein Server-PDF. Annahme ohne Widerspruch: die Share-SEITE gehört
+in dieses Vorhaben (Backend `brand_shares` + Routen existieren seit P1b, nur die
+Seite fehlt).
+
+**Befund dabei (Vertrag ohne Code):** `sensitivity: 'internal'` (a.competitors,
+a.complaints, a.challenge, a.facts) verspricht seit BW2 „reist nicht per
+Share-Link" — `share.post.ts` friert aber ALLE bestätigten Werte ein. Unsichtbar,
+weil es die Share-Seite noch nicht gibt; Paket G1 schliesst es beidseitig
+(Snapshot-Schreiben UND Renderer filtern, Gegenprobe), bestehende Prod-Shares
+werden beim G3-Deploy widerrufen.
+
+Plan: docs/plans/BRAND-FOUNDATION-LESEANSICHT.md (Pakete G1–G5; Davids Gates:
+Schranken-Text + Preisanker, Richtungen-Katalog).
+
 ## 2026-09-05 — Brand-Check: „Markenabdruck", Ampel-Matrix statt Heatmap, Befunde als Stärke · Chance · Nächster Schritt
 
 **Anlass:** externer Visualisierungs-Input (Radar, Heatmap, Score-Cards, Insight-Cards) — als
