@@ -7,6 +7,29 @@ die kleinen, verstreuten Beschlüsse.
 
 ---
 
+## 2026-09-05 — Brand-Check wird Produktseite: Ranking nur mit Opt-in, Branche per KI + Korrekturvorschlag, Dokument-Check sofort
+
+**Anlass (David nach dem ersten gelungenen Live-Check):** der Check gehört auf EINE eigene
+Seite (`/brand-check`, heute 404), alle Teaser zeigen dorthin; dazu ein Archiv/Ranking aller
+geprüften Auftritte, ein Quartett-Vergleich zweier Brands (links/rechts, Kategorie für
+Kategorie) und für eigene Brands „Score neu ermitteln" mit Gegenüberstellung zum Vorgänger
+und Experten-To-do-Liste. Konzept: docs/plans/BRAND-CHECK-SEITE.md.
+
+**Entscheidungen (David, Fragenrunde):** (1) **Ranking nur mit Opt-in des Prüfers** — ohne
+Häkchen bleibt ein Check privat; verworfen: alle Checks öffentlich (Bewertung Dritter ohne
+deren Wissen), Ranking nur für Eingeloggte. (2) **Branche als KI-Vorschlag** im selben
+Judge-Aufruf, korrigierbar über einen **Korrekturvorschlag-Workflow „wie Google Business
+Profile"** (Vorschlag → Betreiber prüft → annehmen/ablehnen mit Begründung); Besitzer eigener
+Brands korrigieren direkt. Umsetzung SCHLANK im brand-Layer (eigene Tabelle + Dashboard-
+Warteschlange wie die Warteliste), nicht über den `tickets`-Layer — branding.supply fährt ihn
+nicht, und er brächte für ein Feld vier Tabellen und ein Produkt mit. (3) **Dokument-Check
+sofort mit** (Brands ohne Website: Fundament-Dokument als Material, eigener Score
+„Fundament-Reife", nie mit Website-Scores in einer Zahl); Brands ohne Website zeigen
+zusätzlich „Website hinterlegen". (4) **Konto-Deckel 10/Tag** für „neu ermitteln" (umgeht den
+7-Tage-Cache); Gäste bleiben bei 3/Tag je IP.
+
+---
+
 ## 2026-09-05 — Marktvergleich: Strategie + Konzept freigegeben (acht Entscheidungen)
 
 **Entscheidungen (David, per Fragenrunde, alle nach Empfehlung):** Das Produkt zeigt den
