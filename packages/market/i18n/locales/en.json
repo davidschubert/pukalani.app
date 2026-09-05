@@ -1,0 +1,164 @@
+{
+  "market": {
+    "nav": {
+      "branding": "Your branding",
+      "market": "Market",
+      "findings": "{count} findings"
+    },
+    "page": {
+      "title": "Market",
+      "lead": "What your competitors say in public, translated into the same fields as your own foundation — statement by statement, each one with a quote and its source.",
+      "limit": "We show what brands say — not how successfully they say it.",
+      "unlocked": "This page is open because chapter B (purpose, vision and mission) is accepted.",
+      "sources": "Read from public marketing pages only. Team, imprint and contact pages are never fetched."
+    },
+    "candidates": {
+      "title": "Candidates",
+      "hint": "The names come from your context chapter. The address is yours to enter — we never guess one.",
+      "name": "Competitor",
+      "url": "Website address",
+      "urlPlaceholder": "competitor.example",
+      "max": "At most {count} competitors per branding.",
+      "add": "Add a competitor",
+      "remove": "Remove {name}",
+      "suggested": "Suggested from your context chapter"
+    },
+    "status": {
+      "pending": "Not read yet",
+      "reading": "Reading",
+      "fetched": "Profile created",
+      "excluded": "Excluded",
+      "failed": "Could not be read"
+    },
+    "reason": {
+      "robots": "The website does not allow the analysis (robots.txt).",
+      "tdm": "The website reserves its texts against automated analysis.",
+      "noText": "This page gives nothing away without a browser.",
+      "unreachable": "The address could not be reached."
+    },
+    "paywall": {
+      "title": "The market comparison is a paid step",
+      "body": "Building your foundation stays free. Holding it against the field is the paid part.",
+      "price": "Price in the intro call",
+      "beta": "Beta accounts have it unlocked.",
+      "unlockedTitle": "Unlocked for your beta account",
+      "unlockedBody": "Three runs per branding and day. A run on an unchanged state costs nothing.",
+      "toggle": "Beta account",
+      "toggleHint": "Prototype switch — shows both states of the paywall."
+    },
+    "action": {
+      "compare": "Compare the market",
+      "again": "Run it again",
+      "toResult": "Open the report",
+      "back": "Back to the market page"
+    },
+    "run": {
+      "title": "Comparison run",
+      "lead": "Every competitor is checked first, then read, then translated into the field structure.",
+      "robots": "robots.txt checked",
+      "pages": "{count} pages read",
+      "profiled": "Profile created",
+      "waiting": "Waiting",
+      "comparing": "Comparing the field",
+      "done": "Report ready",
+      "replay": "Play the run again"
+    },
+    "result": {
+      "title": "The field, side by side",
+      "matrix": "Side by side",
+      "matrixHint": "One row per field, one column per brand. Every cell shows the short value; the quote and its source sit behind it.",
+      "field": "Field",
+      "you": "You",
+      "excluded": "excluded",
+      "empty": "not publicly formulated",
+      "missingOwn": "Not confirmed on your side yet",
+      "meta": "Report from {date}"
+    },
+    "field": {
+      "categoryLanguage": "Category language",
+      "pitch": "What they promise",
+      "audience": "Who it is for",
+      "firstChoice": "Why choose them first",
+      "purpose": "Purpose",
+      "values": "Values claimed",
+      "toneWords": "Tone",
+      "tagline": "Tagline",
+      "keyMessages": "Key messages",
+      "distinctiveAsset": "Verbal signature"
+    },
+    "claims": {
+      "convention": {
+        "title": "Conventions",
+        "hint": "What almost everyone in the field says. An entry ticket — it tells nobody apart.",
+        "count": "{shared} of {of} say it"
+      },
+      "overlap": {
+        "title": "Overlaps",
+        "hint": "Your statement, and who else in the field makes it.",
+        "count": "also said by {shared} of {of}",
+        "also": "Also said by"
+      },
+      "whitespace": {
+        "title": "Open ground",
+        "hint": "Nobody in the field says this. Whether it is worth saying is your call — an empty spot can be empty because nobody believes it."
+      }
+    },
+    "profiles": {
+      "title": "Competitor profiles",
+      "hint": "Every field with the sentence it came from. Empty fields stay empty — that is a statement about the category, not a gap in the report.",
+      "open": "Show profile",
+      "close": "Hide profile",
+      "read": "{count} pages read on {date}",
+      "none": "No profile — this competitor was not evaluated."
+    },
+    "evidence": {
+      "show": "Evidence",
+      "hide": "Hide evidence",
+      "source": "Source",
+      "fetched": "Retrieved {date}",
+      "stated": "stated in these words",
+      "implied": "derived from several passages",
+      "demoNote": "Prototype: the sources open the invented demo websites in this playground."
+    },
+    "finding": {
+      "kind": "Market finding",
+      "title": "What this shows about your own fields",
+      "hint": "A finding always addresses one of your own fields. It never judges a competitor and never drafts a sentence that names one.",
+      "field": "Your field",
+      "accept": "Accept",
+      "dismiss": "Dismiss",
+      "accepted": "Accepted",
+      "dismissed": "Dismissed",
+      "open": "Open the field"
+    },
+    "stand": {
+      "title": "State",
+      "candidates": "Candidates",
+      "profiles": "Profiles created",
+      "excluded": "Excluded",
+      "findings": "Open findings",
+      "lastRun": "Last run",
+      "never": "never",
+      "missingOwn": "Your key messages are not confirmed yet — that row compares only what the field says.",
+      "limits": "Three runs per branding and day. Raw text is deleted after 24 hours; the profile keeps the short quotes and their source.",
+      "confidential": "Confidential, like your competitor notes: never in a share link, never in the export."
+    },
+    "workshop": {
+      "chapter": "Purpose, Vision and Mission",
+      "session": "Your session",
+      "chipHint": "The market finding sits above the field it is about — the same place a conflict finding sits.",
+      "yourAnswer": "Your confirmed answer",
+      "log": "Confirmed in this chapter"
+    },
+    "demo": {
+      "title": "Market comparison — prototype",
+      "lead": "Four screens, one interaction type each (plan §2.11). The brand is the invented Kailua Coffee Co., the field is three invented competitors whose websites live in this playground.",
+      "note": "Nothing here talks to a server: no fetching, no model, no tables. This is the component template that packages M1 to M4 take over.",
+      "screen1": "1 · Market page: candidates, addresses, paywall",
+      "screen2": "2 · Run: what happens per competitor",
+      "screen3": "3 · Report: side by side, three lists, profiles, findings",
+      "screen4": "4 · Workshop: the market finding at the field",
+      "sites": "The invented competitor websites"
+    }
+  }
+}

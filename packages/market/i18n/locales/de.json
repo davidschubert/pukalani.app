@@ -1,0 +1,164 @@
+{
+  "market": {
+    "nav": {
+      "branding": "Euer Branding",
+      "market": "Markt",
+      "findings": "{count} Befunde"
+    },
+    "page": {
+      "title": "Markt",
+      "lead": "Was eure Wettbewerber öffentlich sagen, übersetzt in dieselben Felder wie eure eigene Foundation — Aussage für Aussage, jede mit Zitat und Quelle.",
+      "limit": "Wir zeigen, was Marken sagen — nicht, wie erfolgreich sie damit sind.",
+      "unlocked": "Diese Seite ist offen, weil Kapitel B (Purpose, Vision und Mission) abgenommen ist.",
+      "sources": "Gelesen werden nur öffentliche Marketing-Seiten. Team-, Impressums- und Kontaktseiten werden gar nicht erst abgerufen."
+    },
+    "candidates": {
+      "title": "Kandidaten",
+      "hint": "Die Namen kommen aus eurem Kontext-Kapitel. Die Adresse tragt ihr ein — geraten wird sie nie.",
+      "name": "Wettbewerber",
+      "url": "Adresse der Website",
+      "urlPlaceholder": "wettbewerber.example",
+      "max": "Höchstens {count} Wettbewerber je Branding.",
+      "add": "Wettbewerber ergänzen",
+      "remove": "{name} entfernen",
+      "suggested": "Vorschlag aus eurem Kontext-Kapitel"
+    },
+    "status": {
+      "pending": "Noch nicht gelesen",
+      "reading": "Wird gelesen",
+      "fetched": "Profil erstellt",
+      "excluded": "Ausgeschlossen",
+      "failed": "Konnte nicht gelesen werden"
+    },
+    "reason": {
+      "robots": "Die Website untersagt die Auswertung (robots.txt).",
+      "tdm": "Die Website behält sich ihre Texte gegen automatisierte Auswertung vor.",
+      "noText": "Diese Seite gibt ohne Browser nichts preis.",
+      "unreachable": "Die Adresse war nicht erreichbar."
+    },
+    "paywall": {
+      "title": "Der Marktvergleich ist ein bezahlter Schritt",
+      "body": "Eure Foundation zu bauen bleibt kostenlos. Sie gegen das Feld zu halten ist der bezahlte Teil.",
+      "price": "Preis im Erstgespräch",
+      "beta": "Beta-Konten haben ihn freigeschaltet.",
+      "unlockedTitle": "Für euer Beta-Konto freigeschaltet",
+      "unlockedBody": "Drei Läufe je Branding und Tag. Ein Lauf auf unverändertem Stand kostet nichts.",
+      "toggle": "Beta-Konto",
+      "toggleHint": "Schalter des Prototyps — zeigt beide Zustände der Schranke."
+    },
+    "action": {
+      "compare": "Markt vergleichen",
+      "again": "Erneut vergleichen",
+      "toResult": "Bericht öffnen",
+      "back": "Zurück zur Markt-Seite"
+    },
+    "run": {
+      "title": "Vergleichs-Lauf",
+      "lead": "Jeder Wettbewerber wird zuerst geprüft, dann gelesen, dann in die Feldstruktur übersetzt.",
+      "robots": "robots.txt geprüft",
+      "pages": "{count} Seiten gelesen",
+      "profiled": "Profil erstellt",
+      "waiting": "Wartet",
+      "comparing": "Vergleich läuft",
+      "done": "Bericht fertig",
+      "replay": "Lauf noch einmal abspielen"
+    },
+    "result": {
+      "title": "Das Feld, nebeneinander",
+      "matrix": "Gegenüberstellung",
+      "matrixHint": "Eine Zeile je Feld, eine Spalte je Marke. Jede Zelle zeigt den Kurzwert; Zitat und Quelle liegen dahinter.",
+      "field": "Feld",
+      "you": "Wir",
+      "excluded": "ausgeschlossen",
+      "empty": "nicht öffentlich formuliert",
+      "missingOwn": "Bei euch noch nicht bestätigt",
+      "meta": "Bericht vom {date}"
+    },
+    "field": {
+      "categoryLanguage": "Kategorie-Sprache",
+      "pitch": "Was sie versprechen",
+      "audience": "Für wen",
+      "firstChoice": "Warum zuerst wählen",
+      "purpose": "Purpose",
+      "values": "Behauptete Werte",
+      "toneWords": "Tonwörter",
+      "tagline": "Tagline",
+      "keyMessages": "Kernbotschaften",
+      "distinctiveAsset": "Markenzeichen (verbal)"
+    },
+    "claims": {
+      "convention": {
+        "title": "Konventionen",
+        "hint": "Was fast alle im Feld sagen. Eine Eintrittskarte — sie unterscheidet niemanden.",
+        "count": "{shared} von {of} sagen das"
+      },
+      "overlap": {
+        "title": "Überschneidungen",
+        "hint": "Eure Aussage, und wer sie im Feld ebenfalls macht.",
+        "count": "sagen {shared} von {of} ebenfalls",
+        "also": "Sagen ebenfalls"
+      },
+      "whitespace": {
+        "title": "Freie Stellen",
+        "hint": "Niemand im Feld sagt das. Ob es sich zu sagen lohnt, entscheidet ihr — eine freie Stelle kann frei sein, weil niemand sie glaubt."
+      }
+    },
+    "profiles": {
+      "title": "Profile der Wettbewerber",
+      "hint": "Jedes Feld mit dem Satz, aus dem es stammt. Leere Felder bleiben leer — das ist eine Aussage über die Kategorie, keine Lücke im Bericht.",
+      "open": "Profil zeigen",
+      "close": "Profil schliessen",
+      "read": "{count} Seiten gelesen am {date}",
+      "none": "Kein Profil — dieser Wettbewerber wurde nicht ausgewertet."
+    },
+    "evidence": {
+      "show": "Beleg",
+      "hide": "Beleg schliessen",
+      "source": "Quelle",
+      "fetched": "Abgerufen am {date}",
+      "stated": "wörtlich so gesagt",
+      "implied": "aus mehreren Stellen abgeleitet",
+      "demoNote": "Prototyp: die Quellen öffnen die erfundenen Demo-Websites in diesem Playground."
+    },
+    "finding": {
+      "kind": "Markt-Befund",
+      "title": "Was das über eure eigenen Felder zeigt",
+      "hint": "Ein Befund richtet sich immer an ein Feld von euch. Er bewertet nie einen Wettbewerber und entwirft nie einen Satz, der einen nennt.",
+      "field": "Euer Feld",
+      "accept": "Annehmen",
+      "dismiss": "Ablehnen",
+      "accepted": "Angenommen",
+      "dismissed": "Abgelehnt",
+      "open": "Feld öffnen"
+    },
+    "stand": {
+      "title": "Stand",
+      "candidates": "Kandidaten",
+      "profiles": "Profile erstellt",
+      "excluded": "Ausgeschlossen",
+      "findings": "Offene Befunde",
+      "lastRun": "Letzter Lauf",
+      "never": "nie",
+      "missingOwn": "Eure Kernbotschaften sind bei euch noch nicht bestätigt — diese Zeile vergleicht nur, was das Feld sagt.",
+      "limits": "Drei Läufe je Branding und Tag. Rohtext wird nach 24 Stunden gelöscht; im Profil bleiben die kurzen Zitate und ihre Quelle.",
+      "confidential": "Vertraulich wie eure Wettbewerber-Notizen: nie in einem Teilen-Link, nie im Export."
+    },
+    "workshop": {
+      "chapter": "Purpose, Vision und Mission",
+      "session": "Eure Session",
+      "chipHint": "Der Markt-Befund steht über dem Feld, um das es geht — an derselben Stelle wie ein Konflikt-Befund.",
+      "yourAnswer": "Eure bestätigte Antwort",
+      "log": "In diesem Kapitel bestätigt"
+    },
+    "demo": {
+      "title": "Marktvergleich — Prototyp",
+      "lead": "Vier Screens, je ein Interaktionstyp (Plan §2.11). Die Marke ist die erfundene Kailua Coffee Co., das Feld sind drei erfundene Wettbewerber, deren Websites in diesem Playground liegen.",
+      "note": "Nichts hier spricht mit einem Server: kein Abruf, kein Modell, keine Tabellen. Das ist die Komponenten-Vorlage, die die Pakete M1 bis M4 übernehmen.",
+      "screen1": "1 · Markt-Seite: Kandidaten, Adressen, Schranke",
+      "screen2": "2 · Lauf: was je Wettbewerber passiert",
+      "screen3": "3 · Bericht: Gegenüberstellung, drei Listen, Profile, Befunde",
+      "screen4": "4 · Werkstatt: der Markt-Befund am Feld",
+      "sites": "Die erfundenen Wettbewerber-Websites"
+    }
+  }
+}
