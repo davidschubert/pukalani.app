@@ -2,7 +2,7 @@ import type { BrandSiteContent, BrandSiteSignals } from '../../shared/brandSiteA
 import { BRAND_CHECK_CRITERIA, type BrandCheckScoreValue } from '../../shared/brandCheck'
 
 /**
- * DIE SECHZEHN GERECHNETEN KRITERIEN (docs/plans/BRAND-CHECK.md §3, alle mit
+ * DIE SECHZEHN GERECHNETEN KRITERIEN (docs/archiv/BRAND-CHECK.md §3, alle mit
  * **M** markiert) — deterministisch, ohne Modell, ohne Netz.
  *
  * ── WARUM DAS DIE HÄLFTE DES PRODUKTVERSPRECHENS IST ──────────────────────

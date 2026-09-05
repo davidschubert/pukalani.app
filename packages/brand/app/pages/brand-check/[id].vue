@@ -3,7 +3,7 @@ import type { BrandCheckResult, BrandCheckCategoryResult, BrandCheckCriterionRes
 
 /**
  * DIE ERGEBNISSEITE DES BRAND-CHECKS — `/brand-check/<id>`
- * (Konzept: docs/plans/BRAND-CHECK.md §4, Hybrid-Entscheidung §7).
+ * (Konzept: docs/archiv/BRAND-CHECK.md §4, Hybrid-Entscheidung §7).
  *
  * Aufbau von oben nach unten: Score-Kopf · acht Kategorien · die drei
  * wichtigsten Befunde · der Weg weiter · alle 40 Kriterien zum Aufklappen.
