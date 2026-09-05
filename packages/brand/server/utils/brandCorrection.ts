@@ -21,7 +21,7 @@ import {
 
 /**
  * DIE KORREKTUR-REGEL AUF DER SERVERSEITE (BW2 Paket 6,
- * docs/plans/BRAND-WIZARD-SESSIONS.md §9).
+ * docs/archiv/BRAND-WIZARD-SESSIONS.md §9).
  *
  * Drei Dinge, die alle drei am gespeicherten Stand hängen und deshalb nicht in
  * `shared/` können: der ACK-HASH (sha256, `node:crypto` läge sonst im

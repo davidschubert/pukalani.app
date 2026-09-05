@@ -13,7 +13,7 @@ import {
 
 /**
  * DER EINE PROMPT-BAUER JE SESSION (BW2 Paket 1,
- * docs/plans/BRAND-WIZARD-SESSIONS.md §3 „Prompt-Aufbau aus der Config").
+ * docs/archiv/BRAND-WIZARD-SESSIONS.md §3 „Prompt-Aufbau aus der Config").
  *
  * ── WARUM EINER STATT VIER ────────────────────────────────────────────────
  * Bis heute lagen die Feld-Anweisungen in vier Dateien —

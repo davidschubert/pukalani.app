@@ -1,6 +1,6 @@
 /**
  * DIE BEFUNDE DES SPEZIALISTEN — die reinen Regeln (BW2 Paket 4,
- * docs/plans/BRAND-WIZARD-SESSIONS.md §4, §7, §8).
+ * docs/archiv/BRAND-WIZARD-SESSIONS.md §4, §7, §8).
  *
  * PUR: kein Appwrite, kein H3, kein i18n, kein Modell. Hier stehen die Werte
  * (Arten, Zustände, Deckel), die Antwort auf „ist das derselbe Befund noch

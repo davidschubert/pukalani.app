@@ -1,6 +1,6 @@
 /**
  * Migration brand-013: `brand_steps.restartedAt` — der Verlaufs-Schnitt nach
- * „Nochmal von vorn" (docs/plans/BRAND-WIZARD-SESSIONS.md §5a/§12, Paket 3b).
+ * „Nochmal von vorn" (docs/archiv/BRAND-WIZARD-SESSIONS.md §5a/§12, Paket 3b).
  * Gemeinsame Regeln aller brand_*-Tabellen: Kopf von `001-brand-profiles.ts`.
  *
  * ── WARUM ─────────────────────────────────────────────────────────────────

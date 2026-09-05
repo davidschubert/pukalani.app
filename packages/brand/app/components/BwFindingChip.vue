@@ -11,7 +11,7 @@ import type {
 import { useBrandFieldLabel } from '../composables/useBrandFieldLabel'
 
 /**
- * EIN BEFUND ALS CHIP (BW2 Paket 5, docs/plans/BRAND-WIZARD-SESSIONS.md §8).
+ * EIN BEFUND ALS CHIP (BW2 Paket 5, docs/archiv/BRAND-WIZARD-SESSIONS.md §8).
  *
  * ── „BERATEND, NIE SPERREND — AUSSER AN DER KAPITEL-GRENZE" ───────────────
  * Deshalb BERNSTEIN (`--bw-stale`, dieselbe Farbe wie „veraltet") und kein

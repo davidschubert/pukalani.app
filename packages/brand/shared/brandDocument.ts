@@ -3,7 +3,7 @@ import type { BrandStepKey } from './slotRegistry'
 
 /**
  * DIE REINEN RECHNUNGEN DES DOKUMENTS (BW2 Paket 7,
- * docs/plans/BRAND-WIZARD-SESSIONS.md §10).
+ * docs/archiv/BRAND-WIZARD-SESSIONS.md §10).
  *
  * PUR — kein Appwrite, kein H3, kein i18n, wie `brandSessions.ts` und
  * `brandWorkspaceNav.ts`. Zwei Fragen stehen hier, und beide entscheiden über

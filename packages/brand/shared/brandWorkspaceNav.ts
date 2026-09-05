@@ -8,7 +8,7 @@ import { type BrandStepKey, slotById, slotsForStep } from './slotRegistry'
 
 /**
  * DIE RECHNUNGEN DER SESSION-NAVIGATION (BW2 Paket 3c-i/3c-ii,
- * docs/plans/BRAND-WIZARD-SESSIONS.md §5, §5a und §11).
+ * docs/archiv/BRAND-WIZARD-SESSIONS.md §5, §5a und §11).
  *
  * PURE — kein Nuxt, kein i18n, kein `$fetch`, wie `brandJourney.ts` und
  * `brandSessions.ts`. Sie beantworten die vier Fragen, die die Werkstatt beim

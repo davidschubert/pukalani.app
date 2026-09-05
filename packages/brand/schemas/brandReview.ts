@@ -17,7 +17,7 @@ import type { BrandSessionReview } from '../shared/types/brand'
 
 /**
  * WAS DER SPEZIALIST ANTWORTEN DARF (BW2 Paket 4,
- * docs/plans/BRAND-WIZARD-SESSIONS.md §7) — plus die zwei Rümpfe der neuen
+ * docs/archiv/BRAND-WIZARD-SESSIONS.md §7) — plus die zwei Rümpfe der neuen
  * Routen (der Kapitel-Blick hat keinen, s. seine Route).
  *
  * ── ZWEI VERSCHIEDENE STRENGEN IN EINEM SCHEMA ────────────────────────────

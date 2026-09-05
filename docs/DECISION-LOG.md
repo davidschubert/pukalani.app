@@ -7,6 +7,46 @@ die kleinen, verstreuten Beschlüsse.
 
 ---
 
+## 2026-09-05 — Brand Wizard: Pakete eines freigegebenen Plans starten selbstständig
+
+**Entscheidung (David):** „Immer wenn ein Paket abgeschlossen ist, kann das nächste
+starten … kannst auch gerne selbstständig starten, ohne meine Aufforderung." Gilt
+für Pakete eines FREIGEGEBENEN Plans; Davids Gates bleiben dort, wo der Plan sie
+setzt (Inhalte gegenlesen, Prod-Migrationen, Abnahme einer Seite).
+
+---
+
+## 2026-09-04 — Brand Wizard: „Branding-Atome" — eine Session je Feld, drei Ebenen, drei Abnahmen
+
+**Entscheidungen (David, in drei Gesprächsrunden + zwei Fragenrunden):**
+1. **Session je FELD** (68), nicht je Kapitel/Abschnitt — eine Session ist eine
+   konfigurierte Arbeitseinheit (Ziel, Eingaben, Verarbeitung, Antwort-Regeln,
+   Output), kein Chat-Faden; Ableitungen ohne Frage sind ein gültiger Session-Typ.
+2. **Auto-Weiter** nach Bestätigung; der Mensch sieht EIN Gespräch.
+3. **Spezialist beim SCHLIESSEN** jeder Session (nicht je Zug), **zweistufig**:
+   günstiges ZDR-Modell, George-Modell nur bei Konflikt-Verdacht.
+4. **Korrektur-Regel:** vor jeder Korrektur eines bestätigten Feldes zeigt der
+   Server die Abhängigkeits-Hülle — annehmen oder abbrechen.
+5. **Prüfblick** über das Dokument NUR auf Klick.
+6. **Finale Abnahme je Kapitel** als eigener Punkt: Blöcke (Bereich/Beispiel/
+   Eingabe), Abnehmen je Block (zweiter Zustand `accepted`), Frage „Passt dieses
+   Kapitel?" erst bei 10/10, „Nochmal von vorn" LÖSCHT (bisher Vertiefungsrunde)
+   mit Layer, getipptem Wort und Ack. Drei Ebenen ⇒ drei Abnahmen (Session →
+   Kapitel → Dokument); tiefer als Ebene 3 geht es nie.
+7. **§3a-Ergänzungen** alle angenommen (Qualitätskriterien, Anti-Muster, Beispiele
+   fremder Branche in de+en, Frage-Leiter, Form, Invarianten im Code,
+   Vertraulichkeit, Umfang, Vertagen). **Gegenlese-Runde:** Umfang halbiert
+   (~78 Min Basispfad), Beispielwelt = Software/Agentur/Studio/Gastro/Yoga/
+   Interior/Coaches/Personal Brands, Anrede in Beispielen vermieden, Manifest ein
+   Block (23), Wettbewerber intern / Hauptmarken-Rolle öffentlich, Fragen-Pools
+   eingefroren (D7 nur bei Team).
+
+**Verworfen:** Session je Abschnitt (Fable-Vorschlag — Davids Rahmen „Config je
+Session" löste die Einwände auf); Spezialist je Zug (Geld, Latenz, Marker-Vertrag).
+Plan + Begründungen: docs/archiv/BRAND-WIZARD-SESSIONS.md.
+
+---
+
 ## 2026-09-04 — Archetyp: Gesprächs-Ableitung als Interim (statt Paarvergleich-Berechnung)
 
 **Entscheidung (David, aus drei Optionen):** Solange das Paarvergleich-Instrument

@@ -17,7 +17,7 @@ import { useBrandImpactConsent } from '../../../composables/useBrandImpactConsen
 
 /**
  * „EUER BRANDING" — DAS DOKUMENT (BW2 Paket 7,
- * docs/plans/BRAND-WIZARD-SESSIONS.md §10).
+ * docs/archiv/BRAND-WIZARD-SESSIONS.md §10).
  *
  * ── ES IST DIE FINALE ABNAHME DER EBENE 1 ────────────────────────────────
  * Session → bestätigen, Kapitel → Finale Abnahme, Foundation → hier. Deshalb

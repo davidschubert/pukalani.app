@@ -24,7 +24,7 @@ import {
 
 /**
  * DER SCHLIESS-AUFRUF: DER SPEZIALIST (BW2 Paket 4,
- * docs/plans/BRAND-WIZARD-SESSIONS.md §7).
+ * docs/archiv/BRAND-WIZARD-SESSIONS.md §7).
  *
  * EIN Aufruf je Session, beim Bestätigen — nicht je Zug. Der Marker-Vertrag
  * (`georgeTurn.ts`) wurde genau gebaut, um einen zweiten Aufruf je Zug zu

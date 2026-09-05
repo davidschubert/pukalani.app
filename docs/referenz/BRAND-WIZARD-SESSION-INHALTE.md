@@ -4,8 +4,8 @@
 Korrekturen gehören in die Registry, danach `pnpm --filter @pukalani/brand print:sessions`.
 Ein Test hält beides zusammen: Regenerieren darf keinen Diff erzeugen.
 
-Struktur und Begründung: [BRAND-WIZARD-SESSIONS.md](BRAND-WIZARD-SESSIONS.md) §3/§3a ·
-Inhaltsgrundlage: [BRAND-WIZARD-CONTENT-SPEC.md](BRAND-WIZARD-CONTENT-SPEC.md).
+Struktur und Begründung: [BRAND-WIZARD-SESSIONS.md](../archiv/BRAND-WIZARD-SESSIONS.md) §3/§3a ·
+Inhaltsgrundlage: [BRAND-WIZARD-CONTENT-SPEC.md](../plans/BRAND-WIZARD-CONTENT-SPEC.md).
 
 Die Ziel-, Qualitäts- und Anti-Muster-Texte sind ENGLISCH: sie reisen wörtlich in den
 Prompt (Content-Spec §1.2 — sie beschreiben Verhalten, nicht Text). Die Beispiele stehen

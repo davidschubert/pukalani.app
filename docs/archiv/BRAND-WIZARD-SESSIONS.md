@@ -1,8 +1,7 @@
 # Branding-Atome: eine Session je Feld — das Designsystem der Foundation
 
-Stand 2026-09-04 · Status: **Gesamtbild von David freigegeben (2026-09-04),
-Zielsätze und Verarbeitungsregeln je Session sind Davids Inhalts-Gate** ·
-Ausführung: Opus-Läufe je Paket (§15), Verifikation im Fable-Hauptloop.
+Stand 2026-09-05 · Status: **AUSGEFÜHRT — Pakete 1–8 live auf branding.supply (2026-09-04/05)**; offen nur Davids Abnahme der Dokument-Seite und die Reste in OPEN-ITEMS (BW2). Archiviert als Begründung und Rezept, keine Arbeitsliste.
+Ursprünglich: Gesamtbild von David freigegeben 2026-09-04, Ausführung als Opus-Läufe je Paket (§15), Verifikation im Fable-Hauptloop.
 
 ## 0. Was das hier ist
 

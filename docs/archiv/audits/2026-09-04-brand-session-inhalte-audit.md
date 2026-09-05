@@ -1,7 +1,7 @@
 # Inhalts-Audit Paket 2 — die 68 Session-Inhalte
 
 Prüferin: unabhängig, nur Inhalt (Markenstrategie + Interviewführung), keine Code-Prüfung,
-keine Datei geändert. Gegenstand: `docs/plans/BRAND-WIZARD-SESSION-INHALTE.md`
+keine Datei geändert. Gegenstand: `docs/referenz/BRAND-WIZARD-SESSION-INHALTE.md`
 (generiert aus `packages/brand/shared/sessionContent.ts`, Stand 2026-09-04).
 Maßstab: CONTENT-SPEC §§1–16, SESSIONS §3a, `packages/brand/shared/brandAdvisors.ts`,
 `packages/brand/i18n/locales/{de,en}.json`.

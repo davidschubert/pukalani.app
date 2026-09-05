@@ -1,6 +1,6 @@
 /**
  * Migration brand-011: `brand_messages.sessionKey` — der Verlauf hängt an der
- * SESSION, nicht mehr nur am Kapitel (docs/plans/BRAND-WIZARD-SESSIONS.md §12,
+ * SESSION, nicht mehr nur am Kapitel (docs/archiv/BRAND-WIZARD-SESSIONS.md §12,
  * Paket 3a). Gemeinsame Regeln aller brand_*-Tabellen: Kopf von
  * `001-brand-profiles.ts`.
  *

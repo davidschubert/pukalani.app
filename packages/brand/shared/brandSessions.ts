@@ -11,7 +11,7 @@ import {
 
 /**
  * DIE DREI REINEN RECHNUNGEN ÜBER DEM SESSION-VERTRAG (BW2 Paket 1,
- * docs/plans/BRAND-WIZARD-SESSIONS.md §9 und §3a Nr. 6).
+ * docs/archiv/BRAND-WIZARD-SESSIONS.md §9 und §3a Nr. 6).
  *
  * PURE — kein Appwrite, kein H3, kein i18n, wie `slotRegistry.ts` und
  * `brandJourney.ts`. Dieselben Regeln laufen im Browser (Impact-Hinweis,

@@ -1,6 +1,6 @@
 /**
  * Migration brand-014: `brand_findings` — WAS DER SPEZIALIST BEIM SCHLIESSEN
- * GEFUNDEN HAT (docs/plans/BRAND-WIZARD-SESSIONS.md §4, §8, §12).
+ * GEFUNDEN HAT (docs/archiv/BRAND-WIZARD-SESSIONS.md §4, §8, §12).
  *
  * ── WARUM EINE EIGENE TABELLE UND KEIN JSON IM SLOT ───────────────────────
  * Notizen (`slots[id].notes`) und Quellen-Hash liegen additiv in der

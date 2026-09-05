@@ -71,12 +71,12 @@ gehören dort hin.
 
 | Datei | Zustand |
 | --- | --- |
+| [archiv/BRAND-WIZARD-SESSIONS.md](archiv/BRAND-WIZARD-SESSIONS.md) | Branding-Atome (BW2): Pakete 1–8 ausgeführt 2026-09-04/05 — Lese-Fassung der 68 Session-Inhalte: [referenz/BRAND-WIZARD-SESSION-INHALTE.md](referenz/BRAND-WIZARD-SESSION-INHALTE.md) (generiert) |
 | [plans/PRIVATE-NACHRICHTEN-KONZEPT.md](plans/PRIVATE-NACHRICHTEN-KONZEPT.md) | Stufe 1 komplett (inkl. F56, 2026-08-13); ungebaut nur Stufen 2/3 — bewusst keine offenen Punkte |
 | [plans/DASHBOARD-IA.md](plans/DASHBOARD-IA.md) | Schritt 3 + Community-Hub gebaut; **12 der 14 Schritt-4-Seiten fehlen** — als U15 jetzt in OPEN-ITEMS geführt |
 | [plans/ANALYTICS-V2.md](plans/ANALYTICS-V2.md) | Pakete 1–4 live; Rest = Optionales (F47) |
 | [plans/F7-PAYMENTS-CONNECT.md](plans/F7-PAYMENTS-CONNECT.md) | Entscheidungsvorlage, nichts gebaut (F7) |
 | [plans/CHANGELOG-3.0.0-ENTWURF.md](plans/CHANGELOG-3.0.0-ENTWURF.md) | fertiger Kundentext — **ob er eingefügt ist, muss David nachsehen** |
-| [plans/BRAND-WIZARD-SESSIONS.md](plans/BRAND-WIZARD-SESSIONS.md) | Branding-Atome: Session je Feld, Spezialist, Korrektur-Regel — freigegeben 2026-09-04, nichts gebaut (BW2) |
 
 **Regel:** Sobald ein Plan ausgeführt ist, wandert er nach `archiv/` und seine
 Reste nach `OPEN-ITEMS.md`. Ein Plan-Dokument ist nie eine To-do-Liste.

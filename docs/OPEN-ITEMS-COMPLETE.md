@@ -30,6 +30,49 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### Brand-Wizard „Branding-Atome" (BW2): Session je Feld, Spezialist, Abnahmen, Korrektur-Regel, Dokument ✅ 2026-09-04/05
+
+**Was:** Davids Idee vom 2026-09-04 („wir dröseln alles bis ins letzte Detail auf … jeder
+Einzelpunkt bekommt seine eigene Session … wie ein Designsystem aus Atomen") als Plan
+(docs/archiv/BRAND-WIZARD-SESSIONS.md) in acht Opus-Läufen gebaut, jeder im Fable-Hauptloop
+geprüft (Bilanz + Klick-Beweis im Browser), alle live auf branding.supply:
+- **P1** Session-Vertrag `BrandSessionConfig` (alle 68 Felder), `sessionsAffectedBy` (Hülle =
+  Anhang A, mit Gegenprobe), Zustand je Session, EIN Prompt-Bauer statt vier Tabellen —
+  Prompts zeichengleich (Fixture unabhängig gegen origin/main regeneriert, 42/42).
+- **P2/2b** Inhalte für 68 Sessions (Ziel, Qualität, Anti-Muster, Leiter, Form, Beispiele de+en);
+  unabhängiger Inhalts-Audit (archiv/audits/2026-09-04-brand-session-inhalte-audit.md), Davids
+  8 Entscheidungen + 5 Reparaturen; Lese-Fassung GENERIERT (referenz/BRAND-WIZARD-SESSION-INHALTE.md,
+  `check:sessions` hält sie am Code).
+- **P3a/3b/3c** Verlauf je Session (brand-011), Eröffnungszug, Sammel-Session (a.facts), Abnahme-
+  Backend (accept/defer/restart, brand-013, Quellen-Hash beim Bestätigen), Werkstatt mit
+  Unterpunkten/`?s=`/Auto-Weiter/Vertagen, Finale-Abnahme-Seite mit Restart-Layer.
+- **P4** `brand_findings` (brand-014), zweistufiger Prüf-Aufruf, Kapitel-Modus, hat-mitgelesen-Block,
+  adaptive nächste Session, Eimer `review`. **P5** Befund-Chips (Abnahme/Log/Bühne, Annehmen/Ablehnen
+  mit Grund). **P6** Impact vor Korrektur (409 ohne Ack), Warteschlange stale, „Gilt weiter",
+  `correct`-Eingrenzung fail-closed, Invarianten scharf mit toleranter Listen-Lesung.
+- **P7** „Euer Branding" (Dokument = Finale Abnahme der Ebene 1) + Prüfblick auf Klick (Nachholung ≤ 10).
+- **P8** Reste: Hydration-Mismatch (Ursache: Eröffnungszug im Setup statt onMounted — NICHT die
+  Layout-Zweige), Team-Fassung in Platzhalter/Prompt-Etikett, toter Store-Aufruf, 404 auf dem Dokument.
+- Prod-Migrationen 011/013/014 mit Davids Ja (Runner zog 012 der Nachbar-Sitzung mit).
+- Tests brand 799 → 1434; Beweis-Skript `verify-brand-sessions.mjs` 106 Zusagen.
+
+**Gelernt:** (1) **Die Bilanz-Gate-Liste gehört in JEDEN Agent-Auftrag** — ohne `check:bilanz` ging
+Paket 3 mit rotem Lint auf main (Deploy hängt an Test+E2E, nicht an Lint). (2) **Screenshots des
+Browser-Panes hinken der Darstellung hinterher** — dreimal sah eine korrekte Seite leer aus; DOM
+(`get_page_text`/JS) ist die Wahrheit, dann eine zweite Aufnahme. (3) **Klick-Beweise finden, was
+Route-Tests nicht sehen:** Abnahme-Entscheidung erreichte den Store nicht (P5), Plural im Layer (P6)
+— beides erst im Browser sichtbar. (4) **Agent-Berichte prüfen, nicht glauben:** das Fixture „vor dem
+Umbau erzeugt" wurde unabhängig gegen origin/main regeneriert; die Hydration-„Ursache" aus dem
+Auftrag (Layout-Zweige) war falsch, der Agent hat sie mit Instrumentierung widerlegt. (5) **Ein
+Agent im Worktree blockiert Doku-Fixes** — Fix in einem Wegwerf-Worktree (`git worktree add
+--detach`) und `push HEAD:main`. (6) **Parallele Sitzungen auf main**: dreimal Doku-Konflikte in
+OPEN-ITEMS (BW1-Zeile von main, BW2-Zeile von uns), einmal Push abgewiesen — immer `fetch+merge`
+direkt vor dem Push und danach Bilanz. (7) **`readonly`-Einwände gegen einen Kundenwunsch prüfen,
+ob sie am Rahmen hängen:** „Session je Feld" schien falsch, bis David „Session" als konfigurierte
+Arbeitseinheit definierte — dann fielen alle Einwände. (8) Lokale branding-Entwicklung hat weder
+`.env` noch Appwrite-Projekt: Läufe nutzen `portfolio-g4ml` @ localhost + Shiki-Symlink-Krücke —
+gehört eigentlich in eine `apps/branding/.env.example`-taugliche Dev-Anleitung.
+
 ### branding.supply: Startseite, Vektoren, Double-Opt-in, Copy-Regeln ✅ 2026-09-04/05
 
 **Startseite** nach dem abgenommenen Conversion-Dummy (Runden 137–148): Hero-Split

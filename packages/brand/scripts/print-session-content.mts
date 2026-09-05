@@ -1,6 +1,6 @@
 /**
  * DIE LESE-FASSUNG DER 68 SESSIONS — Davids Gegenlese-Gate (BW2 Paket 2,
- * docs/plans/BRAND-WIZARD-SESSIONS.md §15 „David liest gegen").
+ * docs/archiv/BRAND-WIZARD-SESSIONS.md §15 „David liest gegen").
  *
  * ── WARUM EIN GENERATOR UND KEIN GEPFLEGTES DOKUMENT ──────────────────────
  * Der Inhalt der Sessions ist CODE (`shared/sessionContent.ts`) — dort steht
@@ -10,7 +10,7 @@
  * ein Test, der beweist, dass das Erzeugnis aktuell ist (Muster
  * `check:themes` aus dem themes-Layer).
  *
- * Erzeugt `docs/plans/BRAND-WIZARD-SESSION-INHALTE.md`.
+ * Erzeugt `docs/referenz/BRAND-WIZARD-SESSION-INHALTE.md`.
  *
  * ── DIE DATEI IST FÜR EINEN MENSCHEN, NICHT FÜR EIN MODELL ────────────────
  * Deshalb steht dort die deutsche Feld-Bezeichnung aus dem Locale-Katalog
@@ -46,7 +46,7 @@ const HERE = dirname(fileURLToPath(import.meta.url))
 const LAYER_ROOT = resolve(HERE, '..')
 const REPO_ROOT = resolve(LAYER_ROOT, '..', '..')
 
-export const SESSION_CONTENT_DOC = join(REPO_ROOT, 'docs', 'plans', 'BRAND-WIZARD-SESSION-INHALTE.md')
+export const SESSION_CONTENT_DOC = join(REPO_ROOT, 'docs', 'referenz', 'BRAND-WIZARD-SESSION-INHALTE.md')
 
 type LocaleNode = string | { [key: string]: LocaleNode }
 
@@ -257,8 +257,8 @@ export function renderSessionContentMarkdown(): string {
     'Korrekturen gehören in die Registry, danach `pnpm --filter @pukalani/brand print:sessions`.',
     'Ein Test hält beides zusammen: Regenerieren darf keinen Diff erzeugen.',
     '',
-    'Struktur und Begründung: [BRAND-WIZARD-SESSIONS.md](BRAND-WIZARD-SESSIONS.md) §3/§3a ·',
-    'Inhaltsgrundlage: [BRAND-WIZARD-CONTENT-SPEC.md](BRAND-WIZARD-CONTENT-SPEC.md).',
+    'Struktur und Begründung: [BRAND-WIZARD-SESSIONS.md](../archiv/BRAND-WIZARD-SESSIONS.md) §3/§3a ·',
+    'Inhaltsgrundlage: [BRAND-WIZARD-CONTENT-SPEC.md](../plans/BRAND-WIZARD-CONTENT-SPEC.md).',
     '',
     'Die Ziel-, Qualitäts- und Anti-Muster-Texte sind ENGLISCH: sie reisen wörtlich in den',
     'Prompt (Content-Spec §1.2 — sie beschreiben Verhalten, nicht Text). Die Beispiele stehen',

@@ -20,7 +20,7 @@ import { BRAND_CONVERSE_HISTORY_CHARS } from './georgePrompt'
 
 /**
  * DER AUFTRAG DES SPEZIALISTEN (BW2 Paket 4,
- * docs/plans/BRAND-WIZARD-SESSIONS.md §7).
+ * docs/archiv/BRAND-WIZARD-SESSIONS.md §7).
  *
  * Diese Datei ist PUR: keine Fetches, kein H3Event, kein Appwrite, kein i18n.
  * Sie baut Zeichenketten, sonst nichts — dieselbe Begründung wie bei
