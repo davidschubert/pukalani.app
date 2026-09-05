@@ -30,6 +30,57 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### branding.supply: About und Team als Produktseiten + Warteliste ✅ 2026-09-04
+
+**Auftrag (David):** /about und /team trennen (erst zu leer, dann: „optimiere
+Struktur, Konzept und Texte auf Verständlichkeit, Verkaufsargumente, SEO,
+Lead-Generierung, Mehrwert — Vorbild Apple; Platzhalter für Bildmaterial mit
+Prompt an der Stelle").
+
+**Konzept:** ein Gedanke je Abschnitt, grosse Aussage, ein Satz, ein Bild.
+About = Verkaufsgespräch in acht Schritten (Hero „Wir sind unser eigener
+Beweis" · Warum es uns gibt: Agentur/Generator/George · Drei Grundsätze · So
+arbeiten wir mit 45-Minuten-Versprechen aus dem abgenommenen Landing-Dummy ·
+Der Beweis · FAQ mit Preis-Wahrheit „Beta kostenlos, Fundament bleibt frei,
+Ableitung bezahlt" (Produktentscheidung 2026-08-27) · Frühzugang · Team-
+Teaser). Team = Produktseite: George als Hauptdarsteller, je Rolle ein
+Nutzen-Satz „Was das für euch heißt", Wizard-Crew, Zusammenspiel als
+Reihenfolge Fundament → Gestalt → Produktion → Draussen, Frühzugang. Die
+Startseiten-Inhalte (Artefakte, Brand-Check, Beispiel-Branding) bleiben dem
+abgenommenen Dummy vorbehalten — About wiederholt sie nicht.
+
+**SEO:** `useSeoMeta` je Seite (Title/Description/OG), JSON-LD Organization
++ FAQPage (about) und AboutPage (team) über `apps/branding/app/utils/
+jsonLd.ts`; FAQ-Antworten stehen IMMER im Markup, geklappt wird nur die
+Sichtbarkeit.
+
+**Lead-Generierung — die Warteliste (Opus-Lauf, Server; Formular selbst):**
+bis dahin gab es KEINE Erfassung ohne Code. `POST /api/brand/waitlist`
+(öffentlich, Zod, Honeypot statt Captcha, Dedupe per `emailLower`, 503 ohne
+Tabelle, Betreiber-Mail fail-soft über `pukalani.brand.waitlistNotify`),
+Tabelle `brand_waitlist` (Migration brand-012 — auf 012 umnummeriert, weil
+die Nachbar-Session parallel eine 011 anlegte; server-only, UNIQUE-Index über
+die indexRetry-Fabrik), Drossel `brand:waitlist` 5/min, `BwWaitlistForm` auf
+About, Team und unter dem Code-Feld auf /invite. Datenschutz-Grenze
+dokumentiert: kein `registerUserDataContributor` (kein Konto), Löschung heute
+manuell.
+
+**Bildmaterial:** `BwImagePlaceholder` (Kennung sichtbar, Prompt als Prop im
+Code, NICHT im DOM) an neun Stellen (A1–A6, T1–T3); Register mit Visual-DNA-
+Regel und wörtlichen Prompts in `docs/referenz/BRANDING-SUPPLY-BILDMATERIAL.md`.
+
+**Beweise:** 1103 Tests (kombinierter Baum inkl. BW2 Paket 2b/3a der
+Nachbar-Session), Typecheck, Lints (brand/core/app/scripts), i18n- und
+Manifest-Wächter grün; live geprüft (de+en, JSON-LD geparst, Platzhalter,
+Formulare gerendert).
+
+**Gelernt:** (1) Rohe `@` in Locale-Nachrichten fängt `i18nCatalog.test.ts`
+— auch die `{'@'}`-Schreibweise; Platzhalter-Texte ohne @ formulieren.
+(2) Zwei Sessions, zwei Migrationen mit derselben Nummer: der Runner läuft
+beide, aber die Labels lügen im Log — vor dem Push `ls scripts/migrations`
+gegen origin/main prüfen. (3) Gates nach dem Rebase WIEDERHOLEN (diesmal
+gemacht: 1034 → 1103 Tests auf dem kombinierten Baum).
+
 ### Brand-Wizard: Archetyp-Generator als Interim + Live-Durchstich bis zur Weiche ✅ 2026-09-04
 
 **Auslöser:** Davids Live-Check-Auftrag („checke du auch den chatverlauf und die

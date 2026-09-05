@@ -383,10 +383,7 @@ const crew = BRAND_ADVISORS.filter(a => a.key !== 'george').map(a => ({
           <h2 class="mt-3 text-balance text-3xl font-extralight tracking-tight sm:text-4xl">{{ t('team.flowTitle') }}</h2>
           <p class="mx-auto mt-4 max-w-xl text-sm leading-relaxed" style="color: var(--bw-ink-soft)">{{ t('team.flowLead') }}</p>
         </div>
-        <BwImagePlaceholder
-          id="T3" ratio="3 / 1" class="mt-10" :label="t('team.flowImage')"
-          prompt="Product-style still life, 3:1 panorama: four objects in a straight row on matte grey — a closed notebook, a fanned colour-swatch deck (all greys), a cloth-bound book, a small antenna. A single thin acid-green (#dbe74b) thread runs through all four. Monochrome photograph, geometric, spacious, soft studio light, digital-clean. No text, no people."
-        />
+        <ArtT3 :label="t('team.flowImage')" class="mt-10" />
         <!-- Nummern tragen hier Bedeutung: es IST eine Reihenfolge. -->
         <div class="mt-6 grid gap-6 @sm:grid-cols-2 @lg:grid-cols-4">
           <div v-for="(f, index) in ['flow1', 'flow2', 'flow3', 'flow4']" :key="f" class="bw-card p-8">
