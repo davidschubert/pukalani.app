@@ -559,6 +559,26 @@ export interface BrandInviteCheckResponse {
   valid: boolean
 }
 
+/**
+ * DIE WARTELISTE — bewusst NICHT neutral, und das ist kein Widerspruch zu den
+ * zwei Antworten darüber.
+ *
+ * Der Einladungs-Code ist ein GEHEIMNIS: jede Auskunft über ihn hilft dem, der
+ * rät. Hier steht die EIGENE Adresse im Rumpf — sie ist kein Geheimnis vor dem,
+ * der sie gerade eingetippt hat. `duplicate: true` sagt ihm nur, was er selbst
+ * schon getan hat („du stehst bereits drauf"), und erspart ihm die Frage, ob
+ * das Formular kaputt ist. Über FREMDE Adressen sagt die Antwort nichts, was
+ * ein Rater nicht selbst herausfände — die Drossel (`brand:waitlist`, 5/min)
+ * ist die Grenze, nicht die Sprachlosigkeit.
+ *
+ * `ok` ist immer `true`: die Route antwortet entweder 200 oder wirft (400 bei
+ * kaputtem Rumpf, 503 bei defekter Ablage). Ein `ok: false` gäbe es nie.
+ */
+export interface BrandWaitlistResponse {
+  ok: true
+  duplicate: boolean
+}
+
 /** Ebenso neutral — `false` sagt nie, WORAN es lag. */
 export interface BrandInviteRedeemResponse {
   redeemed: boolean

@@ -76,6 +76,21 @@ export default defineAppConfig({
        * dort sagt die Oberfläche auch den richtigen Satz dazu.
        */
       aiDailyInstanceCap: 1000,
+      /**
+       * WOHIN DIE WARTELISTE MELDET — die Adresse des Betreibers, an die
+       * `POST /api/brand/waitlist` eine neue Anfrage schickt.
+       *
+       * LEER ist der Default und heißt „keine Mail": die Zeile steht dann
+       * trotzdem in `brand_waitlist`, sie holt sich nur niemand ab. Ein
+       * erfundener Standard-Empfänger (`hallo@…`) wäre schlimmer als keiner —
+       * eine Zustellung ins Nichts sieht wie eine Zustellung aus.
+       *
+       * Sie steht als CONFIG und nicht in der Env, weil sie kein Geheimnis ist
+       * und je App verschieden sein darf; `apps/branding` setzt sie bewusst
+       * NICHT — David trägt sie ein, wenn er benachrichtigt werden will. Ein
+       * Mail-Fehler ändert die Antwort der Route nie (fail-soft).
+       */
+      waitlistNotify: '',
     },
   },
 })

@@ -30,7 +30,10 @@ const localePath = useLocalePath()
  * warfen den Besucher von /de auf die englische Fassung.
  */
 const menuItems = computed(() => [
-  { label: t('brand.nav.about'), to: localePath('/team'), active: route.path.endsWith('/team') },
+  // Seit der Aufteilung (Davids Entscheidung 2026-09-04) sind das ZWEI
+  // Seiten: /about = wer wir sind, /team = die Menschen dahinter.
+  { label: t('brand.nav.about'), to: localePath('/about'), active: route.path.endsWith('/about') },
+  { label: t('brand.nav.team'), to: localePath('/team'), active: route.path.endsWith('/team') },
 ])
 
 /* Neue Brand oeffnet das Start-Modal von jeder Seite aus. */

@@ -12,6 +12,7 @@
       "discover": "Discover Brands",
       "insights": "Brand Insights",
       "about": "About",
+      "team": "Team",
       "product": {
         "wizard": "Eure Marke entsteht im Gespräch mit George.",
         "design": "Drei Moodboards aus eurer Visual DNA.",
@@ -680,7 +681,9 @@
       "verifyText": "Der Code ist an deine Adresse gebunden. Sobald sie bestätigt ist, kommst du auf diese Seite zurück und wir lösen ihn ein.",
       "redeeming": "Wir schalten deinen Zugang frei.",
       "deniedHint": "Ein Einladungscode gilt nur für die Adresse, an die er verschickt wurde. Bist du mit dem richtigen Konto angemeldet?",
-      "retry": "Erneut versuchen"
+      "retry": "Erneut versuchen",
+      "noCodeTitle": "Noch keinen Code?",
+      "noCodeText": "Tragt euch in die Warteliste ein — wir schalten in Wellen frei und melden uns, sobald euer Zugang bereitsteht."
     },
     "validation": {
       "contentLocale": "Diese Inhaltssprache steht nicht zur Verfügung.",
@@ -688,6 +691,23 @@
       "emptyPatch": "Nichts zu ändern.",
       "emptySlotPatch": "Eine Slot-Änderung braucht einen Wert oder eine Bestätigung.",
       "websiteUrl": "Bitte eine vollständige Web-Adresse eintragen (http:// oder https://) — oder das Feld leer lassen."
+    },
+    "placeholder": {
+      "pending": "Bild folgt"
+    },
+    "waitlist": {
+      "email": "E-Mail-Adresse",
+      "emailPlaceholder": "Eure E-Mail-Adresse",
+      "website": "Website (optional)",
+      "websitePlaceholder": "eure-website.de — falls es sie schon gibt",
+      "submit": "Auf die Warteliste",
+      "sending": "Wird eingetragen …",
+      "haveCode": "Ich habe einen Code",
+      "doneTitle": "Ihr steht auf der Liste.",
+      "doneText": "Wir schalten in Wellen frei und melden uns per E-Mail, sobald euer Zugang bereitsteht.",
+      "duplicateText": "Diese Adresse steht schon auf der Liste — ihr seid dran, sobald die nächste Welle öffnet.",
+      "error": "Das hat gerade nicht geklappt. Versucht es in einer Minute noch einmal.",
+      "consent": "Wir nutzen die Adresse nur, um euch zur Beta einzuladen. Kein Newsletter, keine Weitergabe."
     }
   }
 }

@@ -287,6 +287,19 @@ async function submitCode(): Promise<void> {
         >
           {{ t('brand.invite.submit') }}
         </UButton>
+
+        <!-- OHNE CODE GAB ES HIER NICHTS ZU TUN (bis 2026-09-04): „sonst
+             melden wir uns" versprach eine Meldung, für die es keinen Weg
+             gab. Die Warteliste ist der Weg — unter dem Code-Feld, damit
+             der Code-Besitzer sie nicht suchen muss und der Code-Lose nicht
+             leer ausgeht. -->
+        <div class="pt-2" data-invite-waitlist>
+          <p class="text-sm font-medium tracking-tight">{{ t('brand.invite.noCodeTitle') }}</p>
+          <p class="mt-1 text-sm text-muted">{{ t('brand.invite.noCodeText') }}</p>
+          <div class="mt-4">
+            <BwWaitlistForm source="invite" />
+          </div>
+        </div>
       </div>
 
       <!-- Gültig, aber kein Konto: es entsteht HIER. Ein Verweis auf
