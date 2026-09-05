@@ -7,6 +7,23 @@ die kleinen, verstreuten Beschlüsse.
 
 ---
 
+## 2026-09-05 — Marktvergleich: Strategie + Konzept freigegeben (acht Entscheidungen)
+
+**Entscheidungen (David, per Fragenrunde, alle nach Empfehlung):** Das Produkt zeigt den
+BEHAUPTUNGS-Raum einer Kategorie — was Wettbewerber auf ihren Websites sagen, übersetzt
+in die Feldstruktur der Brand Foundation, jede Aussage mit Zitat + Quelle — und liefert
+Konventionen, Überschneidungen, freie Stellen und Befunde am EIGENEN Feld. Kein Ranking,
+kein Score je Wettbewerber, keine Aussage über Markterfolg, keine veröffentlichungsfähigen
+Vergleichs-Claims (§ 6 UWG). Eigener Layer `market` mit Vertrag zu `brand`; freigeschaltet
+nach Kapitel B; bezahlt ab Tag eins (Beta frei); Adressen vom Kunden; Ausgabe Tabelle +
+Listen + Befunde; nur Websites als Quelle; Abruf-Vertrag bleibt in `brand` und wird
+exportiert. Plan: docs/plans/BRAND-MARKTVERGLEICH.md (Recherche im Anhang).
+
+**Verworfen:** Vergleichs-Score, Websuche nach Adressen, Zwei-Achsen-Karte mit
+Modell-Achsen, Bewertungs-/Social-Quellen in Phase 1.
+
+---
+
 ## 2026-09-05 — Brand Wizard: fremdes Branding ⇒ 404 auch in der Werkstatt; Dokument-Seite abgenommen
 
 **Entscheidung (David):** „Dokument-Seite abgenommen, Werkstatt soll auch 404 zeigen." Ein

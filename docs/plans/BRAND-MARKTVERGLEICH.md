@@ -1,8 +1,9 @@
 # Marktvergleich — Strategie und Konzept
 
-Stand 2026-09-05 · Status: **ENTWURF, Phase 1 (Strategie) + Phase 2 (Konzeption) des
-Workflows (docs/referenz/WORKFLOW.md) — wartet auf Davids Freigabe der Strategie, danach
-der Konzept-Entscheidungen (§6), erst dann Prototyp (Phase 3).** Nichts hiervon ist gebaut.
+Stand 2026-09-05 · Status: **Strategie UND Konzept von David FREIGEGEBEN (2026-09-05, alle
+acht Entscheidungen in §6 nach Empfehlung). Nächste Phase: Prototyp M0 (Phase 3 des
+Workflows, docs/referenz/WORKFLOW.md), Davids Abnahme des Prototyps ist das nächste Gate.**
+Nichts hiervon ist im Produkt gebaut.
 
 ## 0. Was das hier ist
 
@@ -450,37 +451,23 @@ haben, das Marktprofil steht in der Inhaltssprache der Marke).
 | M4 | Oberfläche | Seite „Markt", Leiste, Schranke, Chips | Klick-Beweis |
 | M5 | Betrieb | Eimer, Sweep, Wächter (Parität, Bilanz), Messung, Doku/Changelog | Live-Build |
 
-## 6. Entscheidungen für David (Fragen mit Optionen, Empfehlung zuerst)
+## 6. Entscheidungen (David, 2026-09-05 — alle nach Empfehlung)
 
-1. **Ort im Monorepo.** (a) **Eigener Layer `market`** mit explizitem Vertrag zu `brand`
-   (Empfehlung: Silo-Regel, eigener Preis-Tier, eigene Tabellen, sauber abschaltbar) ·
-   (b) Modul im brand-Layer (`packages/brand/market/**`, Tabellen `brand_market_*`) —
-   weniger Gerüst, aber der brand-Layer wächst um ein zweites Produkt · (c) erst Modul,
-   später Layer — kostet den Umzug doppelt.
-2. **Freischaltung.** (a) **Nach abgenommenem Kapitel B** (Empfehlung: erste eigene
-   Behauptung vorhanden, Vergleich hilft dann schon bei C–EP) · (b) erst nach abgenommener
-   Foundation (vollständiger, aber spät) · (c) immer (ohne eigene Behauptung ist der
-   Vergleich ein Spiegel ohne Bild).
-3. **Bezahlschranke.** (a) **Bezahlt ab Tag eins, in der Beta für Beta-Konten frei
-   geschaltet** (Empfehlung: Schranke sichtbar, Beta misst trotzdem) · (b) ein freier Lauf
-   je Branding, weitere bezahlt · (c) komplett frei bis branding.supply-Preise stehen.
-4. **Adressen der Wettbewerber.** (a) **Der Kunde trägt sie ein** (Empfehlung: keine
-   geratene Adresse, keine Halluzination) · (b) Vorschlag per Websuche mit Bestätigung
-   (braucht Such-API, Kosten, Fehlerquelle) · (c) beides, Suche als spätere Stufe.
-5. **Ausgabeform Phase 1.** (a) **Gegenüberstellung als Tabelle + drei Listen + Befunde**
-   (Empfehlung: ehrlich, ohne erfundene Achsen) · (b) zusätzlich Zwei-Achsen-Karte mit
-   vom Modell gewählten Achsen (sieht nach Agentur aus, misst nichts) · (c) Karte mit
-   FESTEN Achsen je Kategorie (braucht Kategorie-Wissen, Phase 2).
-6. **Datenquellen Phase 1.** (a) **Nur Websites** (Empfehlung) · (b) plus
-   Bewertungs-Snippets nach Rechtsprüfung · (c) plus LinkedIn/Social.
-7. **Wo wohnt der geteilte Abruf-Vertrag.** (a) **bleibt in `brand`, wird exportiert und
-   von `market` importiert** (Empfehlung: kleinster Schritt, ein Besitzer) · (b) zieht nach
-   `core` (Fundament darf nie von Produkten abhängen — der Abruf ist produktneutral, das
-   spräche dafür; kostet einen Core-Commit) · (c) Kopie in `market` (verboten: zwei
-   SSRF-Schutze).
+0. **Strategie-Kern freigegeben:** Behauptungs-Raum der Kategorie mit Zitat und Quelle;
+   KEIN Ranking, kein Score je Wettbewerber, keine Aussage über Markterfolg (§1.4).
+1. **Ort:** eigener Layer `market` mit explizitem Vertrag zu `brand` (§2.1).
+2. **Freischaltung:** nach abgenommenem Kapitel B (§2.4).
+3. **Schranke:** bezahlt ab Tag eins, Beta-Konten frei geschaltet (§1.9).
+4. **Adressen:** der Kunde trägt sie ein; Namen aus `a.competitors` nur als Vorschlag (§2.3).
+5. **Ausgabe Phase 1:** Gegenüberstellung als Tabelle + drei Listen + Befunde; keine
+   Achsen-Karte (§2.5).
+6. **Datenquellen Phase 1:** nur Websites (§1.6).
+7. **Abruf-Vertrag:** bleibt in `brand`, wird explizit exportiert, `market` importiert (§2.7).
 
-Nach den Antworten: §6 wird zu Entscheidungen (mit Datum), §2 wird nachgezogen, dann
-Prototyp M0.
+Verworfen und warum: Score je Wettbewerber (misst nichts Belegbares, UWG-Grauzone) ·
+Websuche nach Adressen (Kosten + Halluzinationsquelle) · Zwei-Achsen-Karte (Achsen vom
+Modell = Scheinpräzision) · Bewertungs-/Social-Quellen (Plattform-AGB, PII) · Umzug des
+Abrufs nach core (sauberer, aber ein Schritt mehr als nötig — bleibt Option).
 
 ---
 
