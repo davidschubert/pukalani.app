@@ -43,6 +43,13 @@ Kunden; Leitplanke: nur mit ausdrücklichem Opt-in der Eigentümerin, nur das Ma
 Leitplanken: eigene Herkunft, immer als ungeprüft beschriftet, Konsens-Filter über ≥ 2
 Modelle, kein Einfluss auf den Score. Plan §7.
 
+**Korrektur am selben Abend (David bestätigt):** Der Brand-Check existiert bereits (parallele
+Sitzung, BC1) — der geplante Klarheits-Score ist GESTRICHEN, der Marktvergleich übernimmt den
+bestehenden Brand-Score je Kandidat; der Marktvergleich lebt in der WERKSTATT als Ebene-1-Seite
+„Markt", nicht als Reiter unter /brand-check; Abruf-Erweiterung (Sitemap/llms.txt/Mehrseiten)
+wird EINMAL im brand-Layer gebaut und beiden Produkten zugänglich; Opt-in für fremde Marken =
+dieselbe Zustimmung wie das Brand-Check-Ranking.
+
 ---
 
 ## 2026-09-05 — Marktvergleich: Strategie + Konzept freigegeben (acht Entscheidungen)

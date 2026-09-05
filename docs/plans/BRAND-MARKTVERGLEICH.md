@@ -491,8 +491,19 @@ gleichem Input und verschiedenem Output — KEINE drei Produkte:
 | **Brand-Score** | ein Marktprofil | eine Zahl 0–100 (§7.3) mit ihren Bausteinen |
 | **Marktvergleich** | N Marktprofile | Gegenüberstellung, Konventionen, Überschneidungen, freie Stellen, Befunde (§2.3) |
 
-Der Marktvergleich bleibt die erste Umsetzung; Check und Score sind Ansichten desselben
-Motors und kommen in denselben Paketen mit (§5 nachgezogen).
+**Korrektur nach Blick auf `main` (2026-09-05, abends, David bestätigt):** Der **Brand-Check
+existiert bereits** — gebaut von einer parallelen Sitzung (docs/archiv/BRAND-CHECK.md,
+docs/plans/BRAND-CHECK-SEITE.md, Migrationen brand-016/017, Tabelle `brand_checks`,
+`/brand-check` mit Start/Ranking/Quartett-Vergleich/„Meine Brands"/Dokument-Check).
+Er misst mit 40 Kriterien in 8 Kategorien, **wie gut ein Auftritt gemacht ist** (Reifegrad,
+Score 0–100, öffentliches Ranking mit Opt-in des Prüfers). Der Marktvergleich misst etwas
+anderes: **was alle im Feld SAGEN und wo die eigene Marke steht.** Deshalb ist „ein Motor,
+drei Ansichten" so zu lesen: der Brand-Check IST die Ansicht „Check + Score" und wird
+WIEDERVERWENDET, nicht nachgebaut; der Marktvergleich ist die Ansicht „Feld", und gemeinsam
+haben beide den Abruf (§7.4) und die Opt-in-Semantik (§7.2 Nr. 4). Der Marktvergleich lebt
+in der **Werkstatt als Ebene-1-Seite „Markt"** (David, 2026-09-05), nicht als Reiter unter
+`/brand-check`; die Ergebnisseiten verlinken sich gegenseitig („Diese Marke im Brand-Check"
+/ „Dieses Feld im Marktvergleich").
 
 ### 7.2 Vier Quellen für Kandidaten (Entscheidung David)
 
@@ -509,30 +520,28 @@ Motors und kommen in denselben Paketen mit (§5 nachgezogen).
 4. **Fremde Wizard-Marken anderer Kunden** — Davids Entscheidung GEGEN die Empfehlung
    (Phase 2). **Leitplanke, die nicht verhandelbar ist:** eine Marke eines anderen Kontos
    erscheint NUR, wenn ihre Eigentümerin sie ausdrücklich für den Marktvergleich freigegeben
-   hat (Opt-in am Profil, `marketVisibility: 'listed'`, Default `'private'`, jederzeit
-   widerrufbar; der Vorbereitungs-Schalter ist das in Phase 1 gestrichene `visibility` aus
-   dem Phase-1-Plan — jetzt mit einem Zweck). Sichtbar wird dann NUR das Marktprofil (die
+   hat (Opt-in am Profil, jederzeit widerrufbar — DIESELBE Zustimmung wie das Brand-Check-Ranking
+   (`rankingOptIn` / Dokument-Check „Opt-in des Besitzers", BRAND-CHECK-SEITE.md §5b/§8),
+   keine zweite Schalter-Semantik; ob das Feld an `brand_checks` oder am Profil hängt,
+   klärt M1 mit der anderen Sitzung). Sichtbar wird dann NUR das Marktprofil (die
    zehn Außen-Felder), nie Foundation-Interna, nie Notizen/Befunde/Wettbewerber. Ohne
    Opt-in gibt es keine Kandidatin — auch nicht per Name-Suche. Das ist Datenschutz und
    Vertrauen in einem: der Wizard ist ein privater Raum.
 
-### 7.3 Der Brand-Score (Entscheidung David, nach Empfehlung)
+### 7.3 Der Brand-Score — der BESTEHENDE, kein zweiter (Entscheidung David, 2026-09-05 abends)
 
-Eine **deterministische Zahl 0–100 für Klarheit und Konsistenz der öffentlichen
-Behauptung** — ausdrücklich NICHT Markterfolg (§1.4 bleibt). Bausteine, je aus dem
-Marktprofil berechnet, keiner vom Modell „gefühlt":
-
-| Baustein | Anteil | Misst |
-| --- | --- | --- |
-| **Vollständigkeit** | 40 | wie viele der zehn Felder öffentlich formuliert sind (stated) |
-| **Beleg-Stärke** | 15 | Anteil `stated` gegenüber `implied` |
-| **Konsistenz** | 20 | dieselbe Aussage über mehrere Seiten (Häufigkeit ≥ 2 Seiten je Feld) |
-| **Unterscheidbarkeit** | 25 | Anteil eigener Aussagen, die KEINE Konvention des Feldes sind (nur mit Vergleichsfeld; sonst aus Bibliotheks-Kategorie oder entfällt anteilig) |
-
-Sichtbar: für die **eigene Marke** und die **Bibliothek**. Für einen namentlich genannten
-**Wettbewerber**: intern beim Kunden (Sensitivity `internal`), nie im Export, nie per
-Share-Link — § 6 UWG (§1.8). Die Zahl trägt immer ihre Bausteine mit, damit sie erklärbar
-bleibt („78 — vollständig, aber vier Aussagen sind Konvention").
+Der am Nachmittag skizzierte „Klarheits-Score" ist GESTRICHEN: er wäre eine zweite Zahl
+neben dem Brand-Score des Brand-Checks (`brand_checks.score`, `scoreVersion`, Band). Der
+Marktvergleich zeigt je Kandidat den **Brand-Check-Score** (Score-Ring + Band + Link auf
+`/brand-check/<id>`), sofern für die Adresse ein Check vorliegt oder der Lauf einen anstösst
+(derselbe 7-Tage-Cache, dieselben Deckel). Sichtbarkeit folgt dem Brand-Check (Ergebnis
+`noindex`, teilbar; Ranking nur mit Opt-in) — eine eigene Vertraulichkeits-Regel für den
+Score braucht der Marktvergleich damit nicht mehr; vertraulich bleibt das, was der
+Marktvergleich SELBST erzeugt (Marktprofile fremder Marken, Bericht, Befunde: `internal`).
+Die drei Bausteine des gestrichenen Scores (Vollständigkeit der öffentlichen Aussage,
+Konsistenz über Seiten, Unterscheidbarkeit von den Konventionen) gehen als
+KRITERIEN-VORSCHLÄGE an die Kategorie E „Positionierung & Klarheit" des Brand-Check-Katalogs
+(Pflege der anderen Sitzung / Davids Gegenlesen des Katalogs) — nicht als eigene Zahl.
 
 ### 7.4 Erweiterter Abruf (Entscheidung David)
 
@@ -544,6 +553,11 @@ dichteste Quelle) · **schema.org JSON-LD** (Organization/description/sameAs) ·
 Aussage, die auf mehreren Seiten wiederkehrt, ist zentral (Gewicht), eine einmalige ist
 Rand. Vergleichbar wird das durch das feste Schema und die Häufigkeits-Angabe, nicht durch
 die Websites. Deckel: 8 Seiten, 2 MB je Seite, 80 000 Zeichen je Marke an das Modell.
+**Koordination:** der Brand-Check liest heute EINE Seite (`fetchBrandSite`, 20 000 Zeichen,
+Meta/OG/JSON-LD-Signale, GEO-Readiness-Kriterium D4). Die Mehrseiten-/Sitemap-/llms.txt-
+Erweiterung ist eine Verbesserung des GETEILTEN Abrufs im brand-Layer und nützt beiden —
+sie wird EINMAL gebaut (M2), mit der Brand-Check-Sitzung abgestimmt, und der Check darf sie
+danach nutzen (eigene Entscheidung dort).
 
 ### 7.5 KI-Suche als Quelle SCHON in Phase 1 (Entscheidung David, GEGEN die Empfehlung)
 
@@ -567,16 +581,21 @@ durch, wird die Quelle in Phase 2 verschoben — mit Davids Wissen.
   `library` | `ai-search`); §2.6 bekommt `market_library` (versioniert im Repo, nicht in der
   DB) und `marketVisibility` am Profil (Migration im brand-Layer, additiv).
 - §2.5: Seite „Markt" bekommt einen Quellen-Wähler je Kandidat (Adresse · eigene Marke ·
-  Bibliothek · freigegebene Marke) und einen Reiter **Brand-Check** (eigene Marke + Score);
-  öffentliche **Brand-Check-Startseite** auf branding.supply mit den Bibliotheks-Paaren als
-  Beispiel und der Schranke.
-- §5 Pakete: M2 wächst um Sitemap/llms.txt/JSON-LD/Häufigkeit und die AI-Außensicht mit
-  Konsens-Filter; M3 um Score + Bibliotheks-Import; M4 um Quellen-Wähler, Brand-Check-Reiter
-  und Startseite; neues **M6 Bibliothek** (Rechnen + Handprüfung der ersten Paare, Rechts-
-  Check der Namensnennung).
-- Prototyp **M0b** setzt die Erweiterung sichtbar um (Quellen-Wähler, Brand-Check mit Score,
-  Bibliotheks-Startseite, erweiterter Lauf mit Sitemap/llms.txt/KI-Suche, „Website sagt /
-  KI sagt"-Spalte), dann Davids Prototyp-Abnahme.
+  Bibliothek · freigegebene Marke) und zeigt je Kandidat den Brand-Check-Score mit Link;
+  KEINE eigene Brand-Check-Startseite (die gehört `/brand-check`, andere Sitzung) — die
+  Bibliotheks-Paare erscheinen im Quellen-Wähler und im Marketing der Werkstatt-Schranke.
+- §5 Pakete: M2 wächst um Sitemap/llms.txt/JSON-LD/Häufigkeit (geteilter Abruf, abgestimmt)
+  und die AI-Außensicht mit Konsens-Filter; M3 um Brand-Check-Anbindung (Score lesen/anstoßen)
+  + Bibliotheks-Import; M4 um Quellen-Wähler und die gegenseitigen Links; neues **M6
+  Bibliothek** (Rechnen + Handprüfung der ersten Paare, Rechts-Check der Namensnennung).
+- Prototyp **M0b** setzt die Erweiterung sichtbar um (Quellen-Wähler mit vier Quellen,
+  Brand-Check-Score je Kandidat mit Link, erweiterter Lauf mit Sitemap/llms.txt/JSON-LD/
+  KI-Außensicht, „Website sagt / KI-Antworten sagen"-Spalte, Häufigkeit je Aussage), dann
+  Davids Prototyp-Abnahme.
+
+**Gelernt (Prozess):** Der Blick auf `main` VOR dem Schreiben von §7 hätte den Brand-Check
+gezeigt — die Regel „erst main prüfen" gilt auch für KONZEPT-Arbeit, nicht nur für Code.
+Davids Fragen benutzten die Begriffe eines Produkts, das seit Stunden auf main lag.
 
 ---
 
