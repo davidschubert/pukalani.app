@@ -85,12 +85,12 @@ describe('Die Zug-Regel steht im Auftrag', () => {
     expect(instruction).toMatch(/Never invent options where the question is open/)
   })
 
-  it('die Fassung steigt mit — converse-7', () => {
+  it('die Fassung steigt mit — converse-8', () => {
     // Ohne den Anstieg behaupteten Züge aus converse-3, aus diesem Auftrag zu
     // stammen (dieselbe Regel wie bei GEORGE_PROMPT_VERSION). converse-6 war
-    // der Session-Block (BW2 Paket 3a); converse-7 ist die Gegenlese-Runde
-    // (Paket 2b) — dieselben Abschnitte, andere Leitern und Antwort-Regeln.
-    expect(BRAND_CONVERSE_PROMPT_VERSION).toBe('converse-7')
+    // der Session-Block (BW2 Paket 3a); converse-7 die Gegenlese-Runde
+    // (Paket 2b); converse-8 ist der „hat mitgelesen"-Block (Paket 4).
+    expect(BRAND_CONVERSE_PROMPT_VERSION).toBe('converse-8')
   })
 
   it('würdigt Substanz — aber verbietet das Lob ohne Deckung', () => {

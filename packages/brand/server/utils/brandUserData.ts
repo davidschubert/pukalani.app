@@ -3,6 +3,7 @@ import type { Models } from 'node-appwrite'
 import { Query } from 'node-appwrite'
 import { BRAND_ACCESS_TABLE } from './brandAccess'
 import type { BrandInviteRow } from './brandInvites'
+import { BRAND_FINDINGS_TABLE } from './brandFindingsStore'
 import {
   BRAND_EVENTS_TABLE,
   BRAND_MESSAGES_TABLE,
@@ -90,6 +91,10 @@ export async function brandExportUserData(event: H3Event, userId: string): Promi
       profile,
       steps: await safeListAll(event, BRAND_STEPS_TABLE, filter),
       messages: await safeListAll(event, BRAND_MESSAGES_TABLE, filter),
+      // Die Befunde des Spezialisten (brand-014) gehören zum Branding: sie
+      // tragen Aussagen ÜBER die Marke dieses Menschen und müssen deshalb im
+      // Export erscheinen — ein Export, der sie verschwiege, wäre unvollständig.
+      findings: await safeListAll(event, BRAND_FINDINGS_TABLE, filter),
       // `tokenHash` fliegt raus: er ist kein Datum ÜBER die Person, sondern das
       // Geheimnis eines Links — ein Export ist kein Ort dafür.
       shares: shares.map(({ tokenHash: _tokenHash, ...rest }) => rest),
@@ -133,7 +138,13 @@ export async function brandDeleteUserData(event: H3Event, userId: string): Promi
     // Kinder zuerst — dieselbe Reihenfolge und derselbe Grund wie in der
     // Löschroute: ein Abbruch soll sichtbaren Rest hinterlassen, keinen
     // unsichtbaren.
-    for (const tableId of [BRAND_STEPS_TABLE, BRAND_MESSAGES_TABLE, BRAND_SHARES_TABLE, BRAND_EVENTS_TABLE]) {
+    for (const tableId of [
+      BRAND_STEPS_TABLE,
+      BRAND_MESSAGES_TABLE,
+      BRAND_SHARES_TABLE,
+      BRAND_EVENTS_TABLE,
+      BRAND_FINDINGS_TABLE,
+    ]) {
       for (const row of await safeListAll<Models.Row>(event, tableId, filter)) {
         await remove(tableId, row.$id)
       }

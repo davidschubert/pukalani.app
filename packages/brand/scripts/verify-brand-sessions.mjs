@@ -32,6 +32,18 @@
  *     abgeschnittener Verlauf — und die abhängige Session eines SPÄTEREN
  *     Kapitels steht danach auf `stale`, ohne dass ihre Zeile angefasst wurde.
  *
+ * Seit Paket 4 (BW2 §7/§8) kommen die drei Zusagen des SPEZIALISTEN dazu:
+ *
+ * 12. SCHLIESSEN: `POST …/sessions/:id/close` schreibt Urteil und Notizen
+ *     (`reviewed: true`) und antwortet mit dem ADAPTIVEN Wegweiser — der
+ *     Ersatz nennt die LETZTE offene Session, die Grundfassung wäre die
+ *     erste. Ein zweiter Klick bewegt nichts (Idempotenz).
+ * 13. KONFLIKT: ein Befund aus dem Schliess-Aufruf sperrt die Finale Abnahme
+ *     (`ready: false`, Blocker `conflict`); das Ablehnen MIT Grund öffnet sie
+ *     wieder und hängt den Grund als Notiz an die Quell-Session.
+ * 14. KAPITEL-BLICK: `POST …/review` prüft dieselbe Fassung genau einmal —
+ *     mit GEGENPROBE (nach einer neuen Fassung läuft er wieder).
+ *
  * ── WAS DIESER BEWEIS NICHT BEWEIST ──────────────────────────────────────
  * Den Anbieter. Ohne `NUXT_AI_KEY` wirft `aiCompleteStream` (503), die Route
  * schickt `generation.failed` mit `provider_error` — und genau das ist hier
@@ -46,7 +58,11 @@
  * Branding selbst an und räumt am Ende alles weg (auch `app_config`, falls es
  * das KI-Flag umstellen musste).
  *
- *   pnpm --filter branding exec nuxi dev --port 3016
+ * Der Dev-Server braucht seit Paket 4 den ERSATZ-SPEZIALISTEN, sonst gäbe es
+ * ohne KI-Schlüssel kein Urteil (fail-soft, §7) — `BRAND_DEV_STUB_REVIEW=1`
+ * schaltet ihn ein und wirkt NUR dort (`server/utils/brandReview.ts`):
+ *
+ *   BRAND_DEV_STUB_REVIEW=1 pnpm --filter branding exec nuxi dev --port 3016
  *   BRANDING_PORT=3016 node --env-file=apps/branding/.env \
  *     packages/brand/scripts/verify-brand-sessions.mjs
  */
@@ -192,6 +208,13 @@ async function setSlots(profileId, stepKey, slots) {
 async function setStepState(profileId, stepKey, state) {
   await tablesDB.updateRow({
     databaseId, tableId: 'brand_steps', rowId: `${profileId}_${stepKey}`, data: { state },
+  })
+}
+
+/** Die Fassung einer Kapitel-Zeile bewegen — ohne Route, für die Gegenprobe zu 14. */
+async function bumpRevision(profileId, stepKey, revision) {
+  await tablesDB.updateRow({
+    databaseId, tableId: 'brand_steps', rowId: `${profileId}_${stepKey}`, data: { revision },
   })
 }
 
@@ -579,6 +602,147 @@ try {
   check('… und ihr Wert steht unangetastet da (nichts wurde gelöscht)',
     archetypeAfter.json?.slots?.['d.voiceSamples']?.confirmed === voiceValue,
     JSON.stringify(archetypeAfter.json?.slots?.['d.voiceSamples'] ?? null))
+
+  // ── 12 · Der Spezialist beim Schliessen (BW2 Paket 4, §7) ────────────
+  console.log('\n12 · Schliessen: Urteil, Notizen und der ADAPTIVE Wegweiser')
+  // Nur EIN bestätigtes Feld ⇒ zwei offene Sessions. Nur so lassen sich der
+  // Vorschlag des Spezialisten (letzte offene) und die Grundfassung (erste
+  // offene) überhaupt auseinanderhalten.
+  await setSlots(profileId, 'values', {
+    'c.discovery1': { firstDraft: 'steht', latestDraft: 'steht', confirmed: 'steht' },
+  })
+  let valuesDetail = await call(`${base}/steps/values`, { cookie: account.cookie })
+  const closeRevision = valuesDetail.json?.revision ?? 0
+
+  const closed = await call(`${valuesBase}/sessions/c.discovery1/close`, {
+    method: 'POST', cookie: account.cookie, body: { revision: closeRevision },
+  })
+  check('der Schliess-Aufruf läuft und meldet ein Urteil',
+    closed.status === 200 && closed.json?.reviewed === true && closed.json?.reviewedBy === 'stage1',
+    `${closed.status} ${closed.text.slice(0, 200)}`)
+  check('… die Notiz landet an der Session',
+    (closed.json?.review?.notes ?? []).length > 0,
+    JSON.stringify(closed.json?.review ?? null))
+  check('… und der Wegweiser folgt dem Vorschlag, NICHT der Grundfassung',
+    closed.json?.next?.sessionKey === 'c.discovery3',
+    JSON.stringify(closed.json?.next ?? null))
+  check('… die Fassung ist gestiegen', closed.json?.revision === closeRevision + 1,
+    `${closed.json?.revision} statt ${closeRevision + 1}`)
+
+  valuesDetail = await call(`${base}/steps/values`, { cookie: account.cookie })
+  check('… und die Session trägt `reviewed` samt Notiz',
+    valuesDetail.json?.sessions?.['c.discovery1']?.reviewed === true
+    && typeof valuesDetail.json?.sessions?.['c.discovery1']?.notes === 'string',
+    JSON.stringify(valuesDetail.json?.sessions?.['c.discovery1'] ?? null))
+
+  const closedAgain = await call(`${valuesBase}/sessions/c.discovery1/close`, {
+    method: 'POST', cookie: account.cookie, body: { revision: closed.json?.revision ?? 0 },
+  })
+  check('GEGENPROBE: der zweite Klick bewegt nichts (Idempotenz)',
+    closedAgain.status === 200
+    && closedAgain.json?.reviewed === true
+    && closedAgain.json?.revision === closed.json?.revision,
+    `${closedAgain.status} ${closedAgain.json?.revision}`)
+
+  const unconfirmed = await call(`${valuesBase}/sessions/c.discovery2/close`, {
+    method: 'POST', cookie: account.cookie, body: { revision: closedAgain.json?.revision ?? 0 },
+  })
+  check('GEGENPROBE: eine unbestätigte Session ⇒ 409 not_confirmed',
+    unconfirmed.status === 409 && unconfirmed.json?.reason === 'not_confirmed',
+    `${unconfirmed.status} ${unconfirmed.text.slice(0, 160)}`)
+
+  // ── 13 · Ein offener Konflikt sperrt die Abnahme (§5a Schritt 3) ─────
+  console.log('\n13 · Der Konflikt sperrt — und das Ablehnen mit Grund öffnet')
+  await setSlots(profileId, 'values', Object.fromEntries(
+    valuesRequired.map(id => [id, {
+      firstDraft: 'steht', latestDraft: 'steht', confirmed: 'steht', accepted: true,
+    }]),
+  ))
+  await setStepState(profileId, 'values', 'active')
+
+  page = await call(`${valuesBase}/acceptance`, { cookie: account.cookie })
+  check('vor dem Befund ist die Abnahme bereit', page.json?.acceptance?.ready === true,
+    JSON.stringify(page.json?.acceptance ?? null))
+
+  const withConflict = await call(
+    `${valuesBase}/sessions/c.final/close?stub=conflict`,
+    { method: 'POST', cookie: account.cookie, body: { revision: page.json?.revision ?? 0 } },
+  )
+  check('der Schliess-Aufruf legt den Befund an',
+    withConflict.status === 200 && (withConflict.json?.findings ?? []).length === 1,
+    `${withConflict.status} ${withConflict.text.slice(0, 200)}`)
+
+  page = await call(`${valuesBase}/acceptance`, { cookie: account.cookie })
+  check('… und die Abnahme ist gesperrt, mit dem Grund `conflict`',
+    page.json?.acceptance?.ready === false
+    && (page.json?.acceptance?.blockers ?? []).some(entry => entry.reason === 'conflict'),
+    JSON.stringify(page.json?.acceptance ?? null))
+  check('… der Chip-Datensatz hängt am Block (Paket 5 rendert ihn)',
+    (page.json?.sessions ?? []).some(entry => (entry.findings ?? []).length > 0),
+    JSON.stringify((page.json?.sessions ?? []).map(entry => (entry.findings ?? []).length)))
+
+  const blockedComplete = await call(`${valuesBase}/complete`, {
+    method: 'POST', cookie: account.cookie, body: { confidence: 'fits' },
+  })
+  check('… und `complete` weist ab',
+    blockedComplete.status === 400 && blockedComplete.json?.reason === 'acceptance_incomplete',
+    `${blockedComplete.status} ${blockedComplete.text.slice(0, 160)}`)
+
+  const openFindings = await call(`${base}/findings?status=open`, { cookie: account.cookie })
+  check('die Befund-Liste zeigt genau den einen offenen',
+    openFindings.status === 200 && (openFindings.json?.findings ?? []).length === 1
+    && openFindings.json.findings[0].kind === 'conflict'
+    && openFindings.json.findings[0].slots.length === 2,
+    `${openFindings.status} ${openFindings.text.slice(0, 200)}`)
+  const findingId = openFindings.json?.findings?.[0]?.id
+  const sourceSession = openFindings.json?.findings?.[0]?.sourceSession
+
+  const noReason = await call(`${base}/findings/${findingId}`, {
+    method: 'POST', cookie: account.cookie, body: { status: 'dismissed' },
+  })
+  check('GEGENPROBE: ablehnen OHNE Grund wird abgewiesen', noReason.status === 400,
+    `${noReason.status} ${noReason.text.slice(0, 160)}`)
+
+  const dismissed = await call(`${base}/findings/${findingId}`, {
+    method: 'POST',
+    cookie: account.cookie,
+    body: { status: 'dismissed', dismissReason: 'Das ist bei uns Absicht.' },
+  })
+  check('mit Grund geht es — und der Befund ist entschieden',
+    dismissed.status === 200 && dismissed.json?.finding?.status === 'dismissed',
+    `${dismissed.status} ${dismissed.text.slice(0, 200)}`)
+
+  valuesDetail = await call(`${base}/steps/values`, { cookie: account.cookie })
+  check('… der Grund hängt als Notiz an der QUELL-Session',
+    (valuesDetail.json?.sessions?.[sourceSession]?.notes ?? '').includes('Das ist bei uns Absicht.'),
+    JSON.stringify(valuesDetail.json?.sessions?.[sourceSession] ?? null))
+
+  page = await call(`${valuesBase}/acceptance`, { cookie: account.cookie })
+  check('… und die Abnahme ist wieder bereit', page.json?.acceptance?.ready === true,
+    JSON.stringify(page.json?.acceptance ?? null))
+
+  // ── 14 · Der Kapitel-Blick läuft einmal je Fassung (§5a) ─────────────
+  console.log('\n14 · Der Kapitel-Blick: einmal je Fassung')
+  const firstLook = await call(`${valuesBase}/review`, { method: 'POST', cookie: account.cookie })
+  check('der erste Blick läuft',
+    firstLook.status === 200 && firstLook.json?.reviewed === true,
+    `${firstLook.status} ${firstLook.text.slice(0, 200)}`)
+  const beforeSecond = (firstLook.json?.findings ?? []).length
+
+  const secondLook = await call(`${valuesBase}/review?stub=conflict`, {
+    method: 'POST', cookie: account.cookie,
+  })
+  check('derselbe Stand wird NICHT ein zweites Mal geprüft',
+    secondLook.status === 200 && (secondLook.json?.findings ?? []).length === beforeSecond,
+    `${secondLook.status} ${(secondLook.json?.findings ?? []).length} statt ${beforeSecond}`)
+
+  await bumpRevision(profileId, 'values', (secondLook.json?.revision ?? 0) + 1)
+  const thirdLook = await call(`${valuesBase}/review?stub=conflict`, {
+    method: 'POST', cookie: account.cookie,
+  })
+  check('GEGENPROBE: eine NEUE Fassung wird wieder geprüft',
+    thirdLook.status === 200 && (thirdLook.json?.findings ?? []).length > beforeSecond,
+    `${thirdLook.status} ${(thirdLook.json?.findings ?? []).length} statt > ${beforeSecond}`)
 }
 catch (error) {
   fail++
@@ -604,6 +768,16 @@ finally {
     }).catch(() => ({ rows: [] }))
     for (const row of rest.rows) {
       await tablesDB.deleteRow({ databaseId, tableId: 'brand_messages', rowId: row.$id }).catch(() => {})
+    }
+  }
+  for (const id of cleanup.profiles) {
+    const findings = await tablesDB.listRows({
+      databaseId,
+      tableId: 'brand_findings',
+      queries: [Query.equal('profileId', id), Query.limit(200)],
+    }).catch(() => ({ rows: [] }))
+    for (const row of findings.rows) {
+      await tablesDB.deleteRow({ databaseId, tableId: 'brand_findings', rowId: row.$id }).catch(() => {})
     }
   }
   for (const id of cleanup.profiles) {

@@ -20,6 +20,7 @@ import type {
   BrandSessionAcceptResponse,
   BrandStepAcceptanceResponse,
   BrandStepRestartResponse,
+  BrandStepReviewResponse,
 } from '../../shared/types/brand'
 import { useBrandWorkspaceStore } from '../stores/brandWorkspace'
 
@@ -55,11 +56,19 @@ import { useBrandWorkspaceStore } from '../stores/brandWorkspace'
  * Abnahme zu sehen (`applySessionAcceptance`) — Leiste und Zähler der
  * Werkstatt lesen daraus.
  *
+ * ── DER SPEZIALIST LIEST DAS KAPITEL MIT (Paket 4, §5a) ───────────────────
+ * Beim Öffnen der Seite geht EIN Aufruf an `POST …/review`: der Kapitel-Modus
+ * des Schliess-Aufrufs, der die bestätigten Werte dieses Kapitels gegen das
+ * ganze Dokument hält. Er ist FAIL-SOFT (die Seite steht auch ohne ihn) und
+ * idempotent je Fassung (der Server lässt dieselbe `revision` nur einmal
+ * durch). Sein Ergebnis ist eine neue Befund-Liste — deshalb wird danach die
+ * Seite selbst neu gelesen und nicht ein Teilstück gepatcht.
+ *
  * ── WAS HIER BEWUSST NOCH NICHT STEHT ─────────────────────────────────────
- * Die BEFUND-Chips am Block (§8) und der Kapitel-Modus des Spezialisten (§7)
- * kommen mit Paket 4; der Einhängepunkt ist die leere `findings`-Zeile unter
- * dem Wert. Der IMPACT-Hinweis vor dem Bearbeiten (§9) kommt mit Paket 6 —
- * „Bearbeiten" springt heute direkt in die Session (s. `edit()`).
+ * Die BEFUND-Chips am Block (§8) sind Paket 5; die DATEN dafür stehen seit
+ * Paket 4 in jeder Zeile (`session.findings`). Der IMPACT-Hinweis vor dem
+ * Bearbeiten (§9) kommt mit Paket 6 — „Bearbeiten" springt heute direkt in
+ * die Session (s. `edit()`).
  */
 const props = defineProps<{
   profileId: string
@@ -103,6 +112,45 @@ watch(view, (next) => { if (next) revision.value = next.revision }, { immediate:
 /** Der Zähler-Stand; nach einer Abnahme aus der ANTWORT, nicht aus einem Abruf. */
 const counter = ref<BrandStepAcceptanceResponse['acceptance'] | null>(null)
 watch(view, (next) => { counter.value = next?.acceptance ?? null }, { immediate: true })
+
+/**
+ * DER KAPITEL-BLICK, EINMAL JE ÖFFNEN (s. Kopf).
+ *
+ * NUR IM BROWSER: beim SSR wäre er ein Modell-Aufruf im Seitenaufbau — jeder
+ * Crawler, jeder Reload und jeder Prefetch bezahlte ihn mit. Und nur EINMAL je
+ * geladener Seite: der Server hat seinen eigenen Riegel je `revision`, dieser
+ * hier spart den Roundtrip.
+ */
+const chapterReviewed = ref('')
+
+async function runChapterReview(): Promise<void> {
+  const current = view.value
+  if (!current) return
+  const key = `${props.stepKey}:${current.revision}`
+  if (chapterReviewed.value === key) return
+  chapterReviewed.value = key
+  try {
+    const response = await $fetch<BrandStepReviewResponse>(
+      `/api/brand/profiles/${props.profileId}/steps/${props.stepKey}/review`,
+      // OHNE Rumpf: der Idempotenz-Schlüssel ist die `revision`, wie der SERVER
+      // sie liest (s. dort). Der lokale Zähler oben ist nur der Sparhandgriff
+      // gegen einen zweiten Roundtrip.
+      { method: 'POST' },
+    )
+    // Neue Befunde können die Abnahme SPERREN (§5a Schritt 3) — die Zahlen und
+    // Blocker rechnet der Server, also wird die Seite neu gelesen statt ein
+    // Teilstück gepatcht.
+    if (response.findings.length) await acceptance.refresh()
+  }
+  catch {
+    // Fail-soft (§7): die Seite funktioniert ohne Befunde. Kein Toast — der
+    // Mensch hat nichts angefordert.
+  }
+}
+
+if (import.meta.client) {
+  watch(view, () => { void runChapterReview() }, { immediate: true })
+}
 
 // ── Ein Block: Bereich · Beispiel · eigene Eingabe ────────────────────────
 

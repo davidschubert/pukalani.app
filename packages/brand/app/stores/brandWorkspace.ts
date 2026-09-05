@@ -19,11 +19,13 @@ import {
   pruneSettledEdits,
 } from '../../shared/brandAutosaveDiff'
 import type {
+  BrandFindingView,
   BrandMessagesResponse,
   BrandProfileDetailResponse,
   BrandProfileListResponse,
   BrandProfileSummary,
   BrandSessionAcceptResponse,
+  BrandSessionCloseResponse,
   BrandSessionView,
   BrandSlotView,
   BrandStepCompleteResponse,
@@ -151,6 +153,17 @@ const setup = () => {
    * „fliesst später in", vertagt).
    */
   const sessions = ref<Record<string, BrandSessionView>>({})
+
+  /**
+   * DIE OFFENEN BEFUNDE DIESES KAPITELS (BW2 Paket 4, §8) — die Daten, aus
+   * denen Paket 5 seine Chips baut.
+   *
+   * Sie stehen NEBEN `sessions` und nicht darin, obwohl die Abnahme-Seite sie
+   * je Block filtert: ein Konflikt gehört ZWEI Feldern, und in beide Karten
+   * kopiert wären es zwei Zeilen über einen Zustand, den ein Klick auf einer
+   * von beiden verändert. Gefiltert wird beim Rendern über `slots`.
+   */
+  const findings = ref<BrandFindingView[]>([])
 
   /**
    * WELCHE SESSION DER MENSCH GERADE OFFEN HAT (`?s=` in der Adresse).
@@ -443,6 +456,35 @@ const setup = () => {
     }
   }
 
+  /**
+   * WAS DER SCHLIESS-AUFRUF HINTERLÄSST (Paket 4, §7) — die Antwort, hier
+   * gelesen.
+   *
+   * Die `revision` MUSS übernommen werden (dieselbe Regel wie bei
+   * `applySessionAcceptance`): die Route hat die Kapitel-Zeile geschrieben, und
+   * ein Autosave mit der alten Fassung liefe danach in einen 409. Alles andere
+   * ist ANZEIGE und wird beim nächsten vollständigen Abruf ohnehin bestätigt.
+   *
+   * FAIL-SOFT-Antworten (`reviewed: false`) ändern nur die Befund-Liste — es
+   * gibt kein Urteil, und ein erfundenes `reviewed: false` an der Session wäre
+   * eine Auskunft, die die Route bewusst nicht gespeichert hat.
+   */
+  function applySessionClose(response: BrandSessionCloseResponse): void {
+    if (response.revision > revision.value) revision.value = response.revision
+    findings.value = response.findings
+    const current = sessions.value[response.sessionKey]
+    if (!current || !response.reviewed) return
+    sessions.value = {
+      ...sessions.value,
+      [response.sessionKey]: {
+        ...current,
+        reviewed: true,
+        ...(response.review.notes.length ? { notes: response.review.notes.join('\n') } : {}),
+        ...(response.review.missing.length ? { missing: [...response.review.missing] } : {}),
+      },
+    }
+  }
+
   function setConfidence(value: BrandConfidence): void {
     localConfidence.value = value
   }
@@ -465,6 +507,7 @@ const setup = () => {
     progress.value = detail.progress
     missingRequired.value = [...detail.missingRequired]
     sessions.value = detail.sessions
+    findings.value = detail.findings
     conflict.value = null
     syncState.value = 'saved'
     blocked.value = null
@@ -664,6 +707,7 @@ const setup = () => {
     progress.value = { ...EMPTY_PROGRESS }
     missingRequired.value = []
     sessions.value = {}
+    findings.value = []
     activeSessionKey.value = ''
     syncState.value = 'saved'
     conflict.value = null
@@ -692,6 +736,7 @@ const setup = () => {
     progress,
     missingRequired,
     sessions,
+    findings,
     activeSessionKey,
     syncState,
     conflict,
@@ -729,6 +774,7 @@ const setup = () => {
     applyStepDetail,
     applySaveResponse,
     applySessionAcceptance,
+    applySessionClose,
     applyConflict,
     resolveWithServer,
     loadProfiles,

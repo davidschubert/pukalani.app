@@ -77,6 +77,34 @@ export default defineAppConfig({
        */
       aiDailyInstanceCap: 1000,
       /**
+       * DAS MODELL DER STUFE 1 DES SPEZIALISTEN (BW2 Paket 4, Plan §7/§13).
+       *
+       * ── WARUM ES DIESEN SCHLÜSSEL GIBT UND KEINEN FÜR STUFE 2 ───────────
+       * Davids Entscheidung vom 2026-09-04 ist ZWEISTUFIG: Stufe 1 prüft jede
+       * geschlossene Session mit einem günstigen Modell, Stufe 2 schaut nur
+       * dort genau hin, wo Stufe 1 einen Konflikt vermutet — und zwar mit dem
+       * GEORGE-Modell. Für Stufe 2 gibt es deshalb bewusst KEINEN eigenen
+       * Schalter: zwei getrennt einstellbare Urteile driften auseinander, und
+       * der teure Blick soll derselbe sein, der auch die Entwürfe schreibt
+       * (`getEffectiveAiConfig()`: app_config.aiModel > pukalani.ai.model).
+       *
+       * ── WARUM DER DEFAULT DERSELBE STRING IST WIE DER CORE-DEFAULT ──────
+       * `anthropic/claude-haiku-4.5` ist das EINZIGE Modell, das dieses
+       * Projekt je durch die ZDR-Bedingungen des Wizards geschickt hat
+       * (`BRAND_PROVIDER_ROUTING`: zdr, dataCollection deny, keine
+       * Ausweich-Anbieter) — und damit das einzige, von dem wir wissen, dass
+       * es unter ihnen erreichbar ist. Ein billigeres Modell hier
+       * hineinzuschreiben, ohne es gegen diese Bedingungen geprüft zu haben,
+       * wäre eine Behauptung: „allowFallbacks: false" macht daraus keinen
+       * langsameren Lauf, sondern gar keinen.
+       *
+       * Der Schlüssel steht trotzdem GETRENNT da und zeigt nicht einfach auf
+       * die George-Kette: hebt der Betreiber `app_config.aiModel` auf ein
+       * teures Modell an (weil Georges Entwürfe besser werden sollen), bleibt
+       * Stufe 1 hier stehen, wo sie steht. Genau dafür ist die Trennung da.
+       */
+      ai: { reviewModel: 'anthropic/claude-haiku-4.5' },
+      /**
        * WOHIN DIE WARTELISTE MELDET — die Adresse des Betreibers, an die
        * `POST /api/brand/waitlist` eine neue Anfrage schickt.
        *

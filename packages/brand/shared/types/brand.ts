@@ -22,6 +22,12 @@
 
 import type { BrandGenerationOutcome } from '../brandGeneration'
 import type {
+  BrandFinding,
+  BrandFindingKind,
+  BrandFindingStatus,
+  BrandReviewStage,
+} from '../brandFindings'
+import type {
   BrandAcceptanceBlocker,
   BrandConfidence,
   BrandJourneyStep,
@@ -190,7 +196,7 @@ export interface BrandSiteAnalyzeResponse {
 export interface BrandProfileDeleteResponse {
   deleted: true
   /** Was die Kaskade wirklich entfernt hat — für Log und Beweis. */
-  removed: { steps: number, messages: number, shares: number, events: number }
+  removed: { steps: number, messages: number, shares: number, events: number, findings: number }
 }
 
 /**
@@ -313,6 +319,21 @@ export interface BrandSessionView {
   accepted: boolean
   /** Auf später vertagt (§3a `answers.allowDefer`). Ebenfalls immer gesetzt. */
   deferred: boolean
+  /**
+   * Der Schliess-Aufruf ist gelaufen (§7). `false` heisst „fail-soft
+   * ausgefallen" — der Prüfblick (§10) holt genau diese Sessions nach.
+   */
+  reviewed: boolean
+  /**
+   * Die Notizen des Schliess-Aufrufs (§4), als EIN Text mit Zeilenumbrüchen.
+   * NUR wo es welche gibt — ein leeres Feld an 67 Sessions wäre Rauschen.
+   */
+  notes?: string
+  /**
+   * Was der Spezialist am Ziel vermisst hat (§7). Er reist mit, weil Paket 5
+   * ihn im Log zeigt; SPERREN tut er nichts.
+   */
+  missing?: string[]
   /** Der Fortschritt einer Sammel-Session: Teil-Id → Antwort. */
   collected?: Record<string, string>
 }
@@ -336,6 +357,15 @@ export interface BrandStepDetailResponse {
    * Fakten ALLER Kapitel, weil eine Session über Kapitelgrenzen liest.
    */
   sessions: Record<string, BrandSessionView>
+  /**
+   * DIE OFFENEN BEFUNDE, an denen ein Feld DIESES Kapitels beteiligt ist (§8).
+   *
+   * Sie reisen mit der Werkstatt mit, damit Paket 5 nur noch rendert: die
+   * Chips im Log und an der Bühne lesen dieselbe Liste, die auch die
+   * Abnahme-Seite je Block filtert. Leer, solange nichts gefunden wurde — und
+   * ebenso, wenn die Befund-Tabelle gerade nicht lesbar ist (fail-soft).
+   */
+  findings: BrandFindingView[]
   generations: BrandGenerationsView
   progress: BrandStepProgress
   missingRequired: string[]
@@ -404,8 +434,10 @@ export interface BrandAcceptanceSessionView {
   allowDefer: boolean
   /** Der bestätigte Wert, VOLLSTÄNDIG — die Seite kürzt nicht (§5a Schritt 1). */
   value: string
-  /** Die Notiz des Schliess-Aufrufs (Paket 4). Heute immer `''`. */
+  /** Die Notiz des Schliess-Aufrufs (§4) — plus die Gründe abgelehnter Befunde. */
   notes: string
+  /** OFFENE Befunde, an denen dieses Feld beteiligt ist (§8, Chips in Paket 5). */
+  findings: BrandFindingView[]
   /** `brand.labels.<id>` — kann fehlen; dann gilt `questionKey` (wie in der Werkstatt). */
   labelKey: string
   /** Die Frage in ihrer Pfad-/Team-Fassung — der Rückfall der Beschriftung. */
@@ -480,6 +512,99 @@ export interface BrandStepRestartResponse {
   next: BrandNextSessionRef | null
   progressPct: number
   currentStepKey: string
+}
+
+// ── Der Spezialist beim Schliessen (BW2 Paket 4, Plan §4/§7/§8) ────────────
+
+/**
+ * WAS DER SPEZIALIST GEANTWORTET HAT (§7, wörtlich).
+ *
+ * Sie ist das Ergebnis EINES Aufrufs, nicht der gespeicherte Stand: was davon
+ * an der Session hängen bleibt, sind `goalReached`, `missing` und die Notizen
+ * (`slots[id].review` bzw. `.notes`); die Befunde ziehen in ihre eigene
+ * Tabelle um, weil sie einen Status haben und kapitelübergreifend sind.
+ *
+ * `goalReached: false` SPERRT NICHTS (§7): die Bestätigung des Menschen gilt.
+ * George sagt im nächsten Zug einmal, was fehlt, und bietet an nachzulegen.
+ */
+export interface BrandSessionReview {
+  goalReached: boolean
+  /** Was fehlt, wenn nicht (max. 3). */
+  missing: string[]
+  /** 0–3 Notizen in der Inhaltssprache. */
+  notes: string[]
+  findings: BrandFinding[]
+  /** Vorschlag für die nächste offene Session — ungeprüft, `pickNextSession` entscheidet. */
+  nextSession: string | null
+  /** Nur im `correct`-Modus (Paket 6): welche veralteten Felder wirklich getroffen sind. */
+  affected?: string[]
+}
+
+/** Eine gespeicherte Befund-Zeile, wie die Oberfläche sie liest (Paket 5 rendert sie). */
+export interface BrandFindingView {
+  id: string
+  kind: BrandFindingKind
+  status: BrandFindingStatus
+  /** Beteiligte Felder — bei `conflict` genau zwei. */
+  slots: string[]
+  why: string
+  suggestion: string
+  /** Das Kapitel der Quell-Session — die Kapitel-Sperre der Abnahme. */
+  stepKey: BrandStepKey
+  /** Die Session, deren Schliess-Aufruf ihn erzeugt hat. */
+  sourceSession: string
+  dismissReason: string
+  createdAt: string
+  resolvedAt: string | null
+  /** Wann George ihn im Gespräch ausgesprochen hat — `null` = noch nie (§8). */
+  mentionedAt: string | null
+}
+
+export interface BrandFindingsResponse {
+  findings: BrandFindingView[]
+}
+
+/**
+ * DIE ANTWORT DES SCHLIESS-AUFRUFS.
+ *
+ * `reviewed: false` heisst fail-soft (§7): der Wert steht, aber es gibt keine
+ * Befunde und keine Notizen — der Prüfblick (§10, Paket 7) holt genau diese
+ * Sessions nach. `review` trägt dann die leere Form, nie `null`: ein Leser,
+ * der zwischen „nichts gefunden" und „nicht gelaufen" unterscheiden will,
+ * liest `reviewed`, und ein zweiter Weg dafür wäre einer zu viel.
+ */
+export interface BrandSessionCloseResponse {
+  stepKey: BrandStepKey
+  sessionKey: string
+  review: BrandSessionReview
+  /** Die OFFENEN Befunde, an denen ein Feld dieses Kapitels beteiligt ist. */
+  findings: BrandFindingView[]
+  /** Auto-Weiter: der geprüfte Vorschlag, sonst die Grundfassung. */
+  next: BrandNextSessionRef | null
+  revision: number
+  reviewed: boolean
+  /** Welche Stufe die Befunde geschrieben hat — `null`, wenn keine lief. */
+  reviewedBy: BrandReviewStage | null
+}
+
+/** Die Antwort des KAPITEL-Modus (§5a) — nur Befunde, kein Urteil, kein Wegweiser. */
+export interface BrandStepReviewResponse {
+  stepKey: BrandStepKey
+  revision: number
+  reviewed: boolean
+  reviewedBy: BrandReviewStage | null
+  findings: BrandFindingView[]
+}
+
+/** Die Antwort auf „annehmen"/„ablehnen" (§8). */
+export interface BrandFindingDecisionResponse {
+  finding: BrandFindingView
+  /**
+   * Die neue Fassung der QUELL-Kapitel-Zeile, wenn der Ablehnungs-Grund als
+   * Notiz dort gelandet ist — sonst die unveränderte. Die Abnahme-Seite führt
+   * ihre `revision` selbst und muss sie übernehmen.
+   */
+  revision: number
 }
 
 /** Der Rumpf eines 400 `acceptance_incomplete` (`complete`). */

@@ -33,13 +33,22 @@ import { brandSlotRecordConfirmed } from '../../../../../../utils/brandStore'
  * stehen dort in beiden Sprachen; welche gilt, weiss der Browser besser.
  *
  * ── KEIN GEORGE UND KEIN MODELL ──────────────────────────────────────────
- * Diese Route ruft nichts an. Der Kapitel-Modus des Schliess-Aufrufs (§7,
- * „der Spezialist liest das Kapitel mit") kommt mit Paket 4 und legt sich
- * fail-soft daneben — die Seite funktioniert ohne Befunde.
+ * Diese Route ruft nichts an — auch seit Paket 4 nicht. Der Kapitel-Modus des
+ * Schliess-Aufrufs (§7, „der Spezialist liest das Kapitel mit") ist eine
+ * EIGENE Route (`POST …/review`), die der Client beim Öffnen der Seite
+ * daneben ruft: ein Modell-Aufruf in einem GET wäre eine Leseroute, die Geld
+ * kostet und die ein Reload beliebig oft auslöst.
+ *
+ * ── DIE BEFUNDE STEHEN JETZT DABEI (Paket 4, §8) ─────────────────────────
+ * Je Block die OFFENEN Befunde, an denen dieses Feld beteiligt ist — die
+ * Daten für die Chips aus Paket 5. Die SPERRE daraus rechnet nicht diese
+ * Route, sondern `brandStepAcceptance` über `openConflicts` aus dem
+ * gemeinsamen Kontext: ein Feld mit offenem `conflict` steht als Blocker in
+ * `acceptance.blockers`, und die Frage „Passt dieses Kapitel?" bleibt weg.
  */
 export default defineEventHandler(async (event): Promise<BrandStepAcceptanceResponse> => {
   const { userId } = await requireBrandAccess(event)
-  const { profile, stepKey, stepRow, records, sessionStates, acceptance, journey }
+  const { profile, stepKey, stepRow, records, sessionStates, acceptance, journey, findings }
     = await loadBrandAcceptanceContext(event, userId)
 
   const pathKind = profile.pathKind === 'relaunch' ? 'relaunch' : 'new'
@@ -61,8 +70,14 @@ export default defineEventHandler(async (event): Promise<BrandStepAcceptanceResp
       // Dokument, nicht die Werkstatt. Eine optionale Session ohne Wert steht
       // grau mit ihrem Beispiel da (§5a Schritt 1).
       value: record?.confirmed ?? '',
-      // Die Notiz des Schliess-Aufrufs (§4) — geschrieben wird sie mit Paket 4.
+      // Die Notiz des Schliess-Aufrufs (§4) — seit Paket 4 gefüllt; hier steht
+      // auch der Grund einer abgelehnten Befund-Meldung (§8).
       notes: record?.notes ?? '',
+      // Die OFFENEN Befunde, an denen GENAU DIESES Feld beteiligt ist. Ein
+      // Konflikt hat zwei Felder und erscheint deshalb an beiden Blöcken —
+      // gewollt: er verbindet sie, und wer ihn an einer Stelle entscheidet,
+      // entscheidet ihn für beide.
+      findings: findings.filter(view => view.slots.includes(session.id)),
       labelKey: `brand.labels.${session.id}`,
       questionKey: questionKeyFor(session, pathKind, team),
       // Nur Menschenfragen haben eine Beispiel-ANTWORT im Katalog; Auswahlen

@@ -527,6 +527,7 @@
         "parallelLimit": "George schreibt schon an zwei Stellen gleichzeitig. Sobald eine fertig ist, geht es hier weiter.",
         "slotLimit": "Für dieses Feld hat George heute genug Anläufe gemacht. Morgen wieder — oder schreib es jetzt selbst.",
         "talkLimit": "Für dieses Branding hat George heute genug geantwortet. Schreib ruhig weiter — deine Antworten werden gespeichert, morgen redet er wieder mit.",
+        "reviewLimit": "Für dieses Branding ist heute genug gegengelesen worden. Deine Antworten stehen trotzdem — morgen schaut das Team wieder mit.",
         "dailyLimit": "Du hast heute alle Entwürfe von George aufgebraucht. Morgen gibt es neue; dein Text bleibt natürlich da.",
         "instanceLimit": "George macht heute Feierabend — das liegt nicht an dir. Morgen entwirft er wieder.",
         "stopped": "Abgebrochen. Dein bisheriger Text ist unverändert.",

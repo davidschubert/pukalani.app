@@ -6,6 +6,7 @@ import {
   type BrandAiRejectionCode,
   brandAiAccountDayKey,
   brandAiInstanceDayKey,
+  brandAiReviewDayKey,
   brandAiSlotDayKey,
   brandAiTalkDayKey,
   decideBrandAiQuota,
@@ -18,8 +19,9 @@ import { countActiveBrandGenerations } from './brandGenerators'
  * ersten Nein. Die Zahlen, die Schlüssel und die Entscheidung stehen pur in
  * `shared/brandAiLimits.ts`; hier steht nur, WANN gezählt wird.
  *
- * Der ENGE Zähler ist seit P3.2 einer von zweien (`kind`): der Slot-Eimer für
- * einen Entwurf, der Gesprächs-Eimer für einen Berater-Zug. Nie beide.
+ * Der ENGE Zähler ist seit Paket 4 einer von DREIEN (`kind`): der Slot-Eimer
+ * für einen Entwurf, der Gesprächs-Eimer für einen Berater-Zug, der
+ * Review-Eimer für den Schliess-Aufruf. Nie zwei davon.
  *
  * ── GEBUCHT WIRD BEIM START, NICHT BEIM ERFOLG ────────────────────────────
  * Ein Lauf, der beim Anbieter scheitert oder den der Mensch abbricht, ist
@@ -52,9 +54,22 @@ export interface BrandAiQuotaRequest {
    * Slot-Typ, ein Gesprächszug auf das Gespräch DIESES Brandings. Warum das
    * zwei Eimer sind und kein geteilter, steht im Kopf von `brandAiLimits.ts`.
    */
-  kind: 'slot' | 'talk'
+  kind: 'slot' | 'talk' | 'review'
   /** Nur bei `kind: 'slot'` — der Slot-TYP, dessen Anläufe gezählt werden. */
   slotId?: string
+  /**
+   * WIE SCHWER dieser Aufruf wiegt (Paket 4, nur bei `kind: 'review'`): Stufe 1
+   * zählt 1, Stufe 2 zählt 3, die Kapitel-Abnahme 2 (`BRAND_AI_REVIEW_WEIGHTS`).
+   *
+   * Umgesetzt als MEHRERE `hit`s auf denselben Schlüssel und nicht als ein
+   * `hit` mit Faktor: der Rate-Limit-Store des Core kennt genau eine Zählart
+   * („einen Versuch zählen"), und ein Gewichts-Parameter dort wäre eine
+   * Änderung an einer Schnittstelle, die fünf andere Layer teilen — für eine
+   * Zahl, die nur dieser Eimer kennt. Gebucht wird in EINER Schleife, und
+   * entschieden wird nach dem LETZTEN Treffer: die Zwischenstände sind keine
+   * eigenen Aufrufe, sondern Teile desselben.
+   */
+  weight?: number
 }
 
 /**
@@ -88,6 +103,7 @@ export async function bookBrandAiQuota(
     parallel: countActiveBrandGenerations(request.userId),
     slotDay: 0,
     talkDay: 0,
+    reviewDay: 0,
     accountDay: 0,
     instanceDay: 0,
   }
@@ -106,9 +122,18 @@ export async function bookBrandAiQuota(
    */
   const narrowKey = request.kind === 'talk'
     ? brandAiTalkDayKey(request.profileId)
-    : brandAiSlotDayKey(request.profileId, request.slotId ?? '')
-  const narrowState = await store.hit(`${prefix}${narrowKey}`, BRAND_AI_DAY_WINDOW_MS)
+    : request.kind === 'review'
+      ? brandAiReviewDayKey(request.profileId)
+      : brandAiSlotDayKey(request.profileId, request.slotId ?? '')
+  // Das GEWICHT (s. `weight`): mehrere Treffer auf denselben Schlüssel, aber
+  // EIN Aufruf — entschieden wird nach dem letzten Stand, nicht nach jedem.
+  const weight = Math.max(1, Math.trunc(request.weight ?? 1))
+  let narrowState = await store.hit(`${prefix}${narrowKey}`, BRAND_AI_DAY_WINDOW_MS)
+  for (let extra = 1; extra < weight; extra++) {
+    narrowState = await store.hit(`${prefix}${narrowKey}`, BRAND_AI_DAY_WINDOW_MS)
+  }
   if (request.kind === 'talk') counts.talkDay = narrowState.count
+  else if (request.kind === 'review') counts.reviewDay = narrowState.count
   else counts.slotDay = narrowState.count
   const narrow = decideBrandAiQuota(counts, limits)
   if (narrow) return { code: narrow, retryAfterSec: retryAfter(narrowState.resetInMs) }

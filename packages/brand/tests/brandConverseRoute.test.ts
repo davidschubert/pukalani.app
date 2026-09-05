@@ -77,6 +77,8 @@ let stepProbeRows: FakeRow[]
 let stepWrites: Record<string, unknown>[]
 /** Welchen Baustein die Route sieht — `getRouterParam('stepKey')`. */
 let routeStepKey: string
+/** Die offenen Befunde (brand-014) — Grundlage des „hat mitgelesen"-Blocks. */
+let findingRows: FakeRow[]
 
 const tablesDB = {
   getRow: vi.fn(async ({ tableId, rowId }: { tableId: string, rowId: string }) => {
@@ -102,11 +104,20 @@ const tablesDB = {
       if (!joined.includes('orderDesc')) return { rows: stepProbeRows }
       return { rows: historyRows }
     }
+    if (tableId === 'brand_findings') return { rows: findingRows }
     return { rows: [] }
   }),
-  updateRow: vi.fn(async ({ tableId, data }: { tableId: string, data?: Record<string, unknown> }) => {
+  updateRow: vi.fn(async ({ tableId, rowId, data }: {
+    tableId: string
+    rowId?: string
+    data?: Record<string, unknown>
+  }) => {
     timeline.push(`write:${tableId}`)
     if (tableId === 'brand_steps' && data) stepWrites.push(data)
+    if (tableId === 'brand_findings' && data) {
+      const row = findingRows.find(entry => entry.$id === rowId)
+      if (row) Object.assign(row, data)
+    }
     return stepRow
   }),
   createRow: vi.fn(async ({ tableId, data }: { tableId: string, data: Record<string, unknown> }) => {
@@ -230,6 +241,7 @@ beforeEach(() => {
   sessionProbeRows = []
   stepProbeRows = []
   stepWrites = []
+  findingRows = []
   routeStepKey = 'context'
   modelText = 'Das nehme ich mit. Was loben eure Kunden an euch?'
   modelFails = null
@@ -982,5 +994,147 @@ describe('Die Sammel-Session', () => {
     await handler(event)
     expect(stepWrites).toEqual([])
     expect(timeline).not.toContain('write:brand_steps')
+  })
+})
+
+/**
+ * DER „HAT MITGELESEN"-BLOCK (BW2 Paket 4, Plan §7/§8).
+ *
+ * Zwei Zusagen, und beide sind Verbote: George sagt es EINMAL, und er sagt es
+ * NICHT, wenn es nichts zu sagen gibt. Die Marken dafür (`briefDelivered` am
+ * Slot, `mentionedAt` am Befund) setzt der Zug, der es ausspricht — ohne sie
+ * stünde derselbe Satz in jedem Zug, und aus einem Hinweis würde eine Mahnung.
+ */
+describe('Was die Kollegin beim Mitlesen gemerkt hat', () => {
+  /** Ein geschlossenes Feld mit unerfülltem Ziel — der Stoff des Nachtrags. */
+  function withUnmetGoal(): void {
+    stepRow.slots = JSON.stringify({
+      'a.origin': {
+        confirmed: 'Wir haben 2019 angefangen.',
+        reviewed: true,
+        review: { goalReached: false, missing: ['nennt keinen Moment'], at: '2026-09-05T10:00:00.000Z' },
+      },
+    })
+  }
+
+  function withConflict(mentionedAt: string | null = null): void {
+    findingRows.push({
+      $id: 'f1',
+      $createdAt: '2026-09-05T09:00:00.000Z',
+      profileId: 'p1',
+      stepKey: 'context',
+      kind: 'conflict',
+      slots: JSON.stringify(['a.customerPraise', 'b.purpose']),
+      why: 'Das reibt sich mit eurem Purpose.',
+      suggestion: 'Eines von beiden anfassen.',
+      status: 'open',
+      sourceSession: 'a.customerPraise',
+      mentionedAt,
+    })
+  }
+
+  it('trägt das unerfüllte Ziel in den Prompt — und markiert es als gesagt', async () => {
+    withUnmetGoal()
+    body = { text: 'Passt.', sessionKey: 'a.customerPraise' }
+    const { event } = fakeEvent()
+    await handler(event)
+
+    expect(lastPrompt).toContain('WHAT A COLLEAGUE NOTICED WHILE READING ALONG:')
+    expect(lastPrompt).toContain('nennt keinen Moment')
+    expect(lastPrompt).toMatch(/Mention this ONCE/)
+    // Die Marke fällt NACH dem Persistieren des Zuges.
+    const written = JSON.parse(String(stepWrites.at(-1)!.slots)) as Record<string, { briefDelivered?: boolean }>
+    expect(written['a.origin']!.briefDelivered).toBe(true)
+    expect(stepWrites.at(-1)!.revision).toBe(4)
+  })
+
+  it('sagt es NICHT ein zweites Mal', async () => {
+    stepRow.slots = JSON.stringify({
+      'a.origin': {
+        confirmed: 'Wir haben 2019 angefangen.',
+        reviewed: true,
+        briefDelivered: true,
+        review: { goalReached: false, missing: ['nennt keinen Moment'], at: '2026-09-05T10:00:00.000Z' },
+      },
+    })
+    body = { text: 'Passt.', sessionKey: 'a.customerPraise' }
+    const { event } = fakeEvent()
+    await handler(event)
+    expect(lastPrompt).not.toContain('WHAT A COLLEAGUE NOTICED WHILE READING ALONG:')
+    expect(stepWrites).toEqual([])
+  })
+
+  it('GEGENPROBE: ein ERREICHTES Ziel erzeugt keinen Nachtrag', async () => {
+    stepRow.slots = JSON.stringify({
+      'a.origin': {
+        confirmed: 'Wir haben 2019 angefangen.',
+        reviewed: true,
+        review: { goalReached: true, missing: [], at: '2026-09-05T10:00:00.000Z' },
+      },
+    })
+    body = { text: 'Passt.', sessionKey: 'a.customerPraise' }
+    const { event } = fakeEvent()
+    await handler(event)
+    expect(lastPrompt).not.toContain('WHAT A COLLEAGUE NOTICED WHILE READING ALONG:')
+  })
+
+  it('nennt einen offenen Konflikt DIESER Session — und stempelt ihn', async () => {
+    withConflict()
+    body = { text: 'Passt.', sessionKey: 'a.customerPraise' }
+    const { event } = fakeEvent()
+    await handler(event)
+
+    expect(lastPrompt).toContain('Das reibt sich mit eurem Purpose.')
+    expect(lastPrompt).toContain('Eines von beiden anfassen.')
+    // Beide Felder MIT Beschriftung, nie mit ihrer Id.
+    expect(lastPrompt).not.toContain('a.customerPraise + b.purpose')
+    expect(findingRows[0]!.mentionedAt).toBeTruthy()
+  })
+
+  it('GEGENPROBE: ein SCHON genannter Konflikt kommt nicht zurück', async () => {
+    withConflict('2026-09-05T08:00:00.000Z')
+    body = { text: 'Passt.', sessionKey: 'a.customerPraise' }
+    const { event } = fakeEvent()
+    await handler(event)
+    expect(lastPrompt).not.toContain('Das reibt sich mit eurem Purpose.')
+  })
+
+  it('GEGENPROBE: ein Konflikt an einer ANDEREN Session bleibt still', async () => {
+    withConflict()
+    body = { text: 'Passt.', sessionKey: 'a.origin' }
+    const { event } = fakeEvent()
+    await handler(event)
+    expect(lastPrompt).not.toContain('Das reibt sich mit eurem Purpose.')
+    expect(findingRows[0]!.mentionedAt).toBeNull()
+  })
+
+  it('nennt in Georges EIGENEM Baustein keine Kollegin', async () => {
+    withUnmetGoal()
+    body = { text: 'Passt.', sessionKey: 'a.customerPraise' }
+    const { event } = fakeEvent()
+    await handler(event)
+    // Baustein A ist Georges eigener — er hat selbst noch einmal darüber
+    // gelesen, und „George hat gemerkt" wäre ein zweiter George im Zug.
+    expect(lastPrompt).toContain('Reading back over the value that was just settled')
+    expect(lastPrompt).not.toContain('George read over')
+  })
+
+  it('nennt in einem FREMDEN Baustein die Kollegin', async () => {
+    routeStepKey = 'pvm'
+    stepRow = stepRowFor('pvm', {
+      revision: 3,
+      slots: JSON.stringify({
+        'b.whyStarted': {
+          confirmed: 'Weil es niemand sonst tat.',
+          reviewed: true,
+          review: { goalReached: false, missing: ['zu allgemein'], at: '2026-09-05T10:00:00.000Z' },
+        },
+      }),
+    })
+    stepRows = [stepRowFor('context', { state: 'done' }), stepRow]
+    body = { text: 'Passt.', sessionKey: 'b.worldLoses' }
+    const { event } = fakeEvent()
+    await handler(event)
+    expect(lastPrompt).toContain('Vera read over')
   })
 })

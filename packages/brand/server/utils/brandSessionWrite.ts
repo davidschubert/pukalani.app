@@ -129,7 +129,10 @@ export async function writeBrandSessionFlag(
   // NEU GERECHNET aus dem geschriebenen Stand — die Seite bekommt den Zähler,
   // den sie danach zeigen soll, ohne einen zweiten Abruf.
   const afterFacts = withStepSlotFacts(stepFacts, stepKey, nextRecords)
-  const derived = deriveBrandAcceptance(context.profile, stepKey, afterFacts)
+  // DIE KONFLIKTE REISEN MIT (Paket 4): der Zähler, den die Seite danach zeigt,
+  // muss dieselbe Sperre kennen wie der, den sie vorher gezeigt hat — sonst
+  // sagte die Antwort „bereit", während der nächste Abruf wieder sperrt.
+  const derived = deriveBrandAcceptance(context.profile, stepKey, afterFacts, context.openConflicts)
 
   return {
     stepKey,

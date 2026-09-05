@@ -9,6 +9,7 @@ import {
   BRAND_AI_PARALLEL_LIMIT,
   BRAND_AI_SLOT_DAILY_LIMIT,
   BRAND_AI_SLOT_LIMIT_CODE,
+  BRAND_AI_REVIEW_DAILY_LIMIT,
   BRAND_AI_TALK_DAILY_LIMIT,
   BRAND_AI_TALK_LIMIT_CODE,
   type BrandAiQuotaCounts,
@@ -42,7 +43,9 @@ import {
  * muss trotzdem beide sehen können, sonst könnte sie nicht sagen, welcher
  * Deckel gefallen ist.
  */
-const zero: BrandAiQuotaCounts = { parallel: 0, slotDay: 0, talkDay: 0, accountDay: 0, instanceDay: 0 }
+const zero: BrandAiQuotaCounts = {
+  parallel: 0, slotDay: 0, talkDay: 0, reviewDay: 0, accountDay: 0, instanceDay: 0,
+}
 
 describe('Die Zahlen des Vertrags (Plan §6)', () => {
   it('stehen so da, wie der Plan sie zusagt', () => {
@@ -51,10 +54,12 @@ describe('Die Zahlen des Vertrags (Plan §6)', () => {
     expect(BRAND_AI_TALK_DAILY_LIMIT).toBe(40)
     expect(BRAND_AI_PARALLEL_LIMIT).toBe(2)
     expect(BRAND_AI_INSTANCE_DAILY_DEFAULT).toBe(1000)
+    expect(BRAND_AI_REVIEW_DAILY_LIMIT).toBe(120)
     expect(BRAND_AI_LIMITS).toEqual({
       parallel: 2,
       slotDay: 10,
       talkDay: 40,
+      reviewDay: 120,
       accountDay: 200,
       instanceDay: 1000,
     })
@@ -64,8 +69,9 @@ describe('Die Zahlen des Vertrags (Plan §6)', () => {
 describe('decideBrandAiQuota', () => {
   it('lässt einen Lauf durch, solange nichts überschritten ist', () => {
     expect(decideBrandAiQuota(zero)).toBeNull()
-    expect(decideBrandAiQuota({ parallel: 2, slotDay: 10, talkDay: 40, accountDay: 200, instanceDay: 1000 }))
-      .toBeNull()
+    expect(decideBrandAiQuota({
+      parallel: 2, slotDay: 10, talkDay: 40, reviewDay: 120, accountDay: 200, instanceDay: 1000,
+    })).toBeNull()
   })
 
   it('DER LETZTE ERLAUBTE LAUF GEHT, der nächste nicht (je Deckel)', () => {

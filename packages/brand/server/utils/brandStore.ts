@@ -234,12 +234,49 @@ export interface BrandSlotRecord {
   /** Auf später vertagt (§3a `answers.allowDefer`) — je Session, nicht je Teil. */
   deferred?: boolean
   /**
-   * Die Notiz des Schliess-Aufrufs (§4). GESCHRIEBEN wird sie erst mit Paket 4;
-   * hier steht sie, weil der Restart-Schutz VORHER zählen muss, wie viel
-   * verloren geht — eine Zahl, die ein fehlendes Feld stillschweigend als 0
-   * meldet, wäre der falsche Trost.
+   * DIE NOTIZ DES SCHLIESS-AUFRUFS (§4) — 0–3 kurze Sätze in der
+   * Inhaltssprache, als EIN Text mit Zeilenumbrüchen.
+   *
+   * Warum ein String und keine Liste: sie wird gelesen (Abnahme-Seite,
+   * Kapitel-Notizen im nächsten Prompt), nie einzeln adressiert — und eine
+   * Liste in einer gedeckelten JSON-Spalte kostet Klammern ohne Gegenwert.
+   * GESCHRIEBEN wird sie seit Paket 4; der Restart-Schutz zählt sie schon
+   * seit 3b.
+   *
+   * Der Ablehnungs-Grund eines Befunds (§8) landet ebenfalls hier — er ist
+   * genau das: etwas Gelerntes, das in kein Feld passt.
    */
   notes?: string
+  /**
+   * DAS URTEIL DES SPEZIALISTEN (§7). `goalReached: false` sperrt NICHTS — es
+   * ist der Stoff für Georges „hat mitgelesen"-Block und für den Prüfblick.
+   */
+  review?: {
+    goalReached?: boolean
+    missing?: string[]
+    reviewedBy?: string
+    at?: string
+  }
+  /**
+   * DER SCHLIESS-AUFRUF IST GELAUFEN (§7). FEHLT er, ist er fail-soft
+   * ausgefallen — und genau diese Sessions holt der Prüfblick (§10) nach. Ein
+   * gespeichertes `false` gibt es deshalb nicht: „nicht da" heisst „nicht
+   * gelaufen", und ein drittes Wort dafür wäre eines zu viel.
+   */
+  reviewed?: boolean
+  /**
+   * DER VORSCHLAG DES SPEZIALISTEN für die nächste Session (§6). Er wird beim
+   * Antworten GEPRÜFT (`pickNextSession`) und nicht beim Speichern: zwischen
+   * Schreiben und nächstem Lesen kann die vorgeschlagene Session längst
+   * bestätigt sein.
+   */
+  nextSession?: string
+  /**
+   * GEORGE HAT AUSGESPROCHEN, WAS DEM SPEZIALISTEN FEHLTE (§7: „George sagt im
+   * nächsten Zug EINMAL, was fehlt"). Ohne diese Marke stünde derselbe Satz in
+   * jedem Zug der nächsten Session — aus einem Hinweis würde eine Mahnung.
+   */
+  briefDelivered?: boolean
 }
 
 /**

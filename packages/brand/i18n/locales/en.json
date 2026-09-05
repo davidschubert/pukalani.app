@@ -527,6 +527,7 @@
         "parallelLimit": "George is already writing in two places at once. As soon as one finishes, this one can start.",
         "slotLimit": "George has had enough goes at this field for today. Try again tomorrow — or write it yourself now.",
         "talkLimit": "George has done enough talking on this branding today. Keep going — your answers are saved, and he is back tomorrow.",
+        "reviewLimit": "Enough has been read over on this branding today. Your answers stand either way — the team looks along again tomorrow.",
         "dailyLimit": "You have used up all of George’s drafts for today. There will be new ones tomorrow; your text stays, of course.",
         "instanceLimit": "George has called it a day — this is not about you. He will draft again tomorrow.",
         "stopped": "Stopped. Your text is unchanged.",

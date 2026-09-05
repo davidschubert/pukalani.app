@@ -294,6 +294,10 @@ const BRAND_TABLES = [
   'brand_events',
   // brand-011: die Warteliste der geschlossenen Beta („Frühzugang anfragen").
   'brand_waitlist',
+  // brand-014: die Befunde des Spezialisten (BW2 §4) — Konflikte, betroffene
+  // Felder und Lücken. Eigene Tabelle, weil sie einen STATUS haben und
+  // kapitelübergreifend sind.
+  'brand_findings',
 ]
 
 const PORTFOLIO_SOLL = [

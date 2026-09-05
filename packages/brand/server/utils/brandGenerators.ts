@@ -200,7 +200,17 @@ export function clearBrandSlotGenerators(): void {
   GENERATORS.clear()
 }
 
-function devStubEnabled(): boolean {
+/**
+ * LÄUFT DER ENTWICKLUNGS-ERSATZ? — `pukalani.brand.devStubGenerator`, EINMAL
+ * gelesen.
+ *
+ * EXPORTIERT seit Paket 4: der Schliess-Aufruf (`brandReview.ts`) braucht
+ * dieselbe Auskunft, und zwei Abfragen desselben Schlüssels wären zwei
+ * Stellen, an denen jemand später einen Schalter vergisst — eine Marke mit
+ * echten Entwürfen und einem Ersatz-Spezialisten (oder umgekehrt) wäre in
+ * ihrem Ergebnis von einer echten nicht zu unterscheiden.
+ */
+export function brandDevStubEnabled(): boolean {
   const config = useAppConfig() as { pukalani?: { brand?: { devStubGenerator?: boolean } } }
   return config.pukalani?.brand?.devStubGenerator === true
 }
@@ -213,7 +223,7 @@ function devStubEnabled(): boolean {
 export function resolveBrandSlotGenerator(stepKey: BrandStepKey): BrandGeneratorChoice | null {
   const registered = GENERATORS.get(stepKey) ?? GENERATORS.get('*')
   if (registered) return { generator: registered, chargesQuota: true }
-  return devStubEnabled() ? { generator: brandDevStubGenerator, chargesQuota: false } : null
+  return brandDevStubEnabled() ? { generator: brandDevStubGenerator, chargesQuota: false } : null
 }
 
 // ── Der KI-Kill-Switch der Laufzeit ────────────────────────────────────────

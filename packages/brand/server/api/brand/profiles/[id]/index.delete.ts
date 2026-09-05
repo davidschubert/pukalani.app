@@ -1,6 +1,7 @@
 import type { Models } from 'node-appwrite'
 import { Query } from 'node-appwrite'
 import type { BrandProfileDeleteResponse } from '../../../../../shared/types/brand'
+import { BRAND_FINDINGS_TABLE } from '../../../../utils/brandFindingsStore'
 import {
   BRAND_EVENTS_TABLE,
   BRAND_MESSAGES_TABLE,
@@ -15,7 +16,8 @@ import {
 
 /**
  * EIN BRANDING LÖSCHEN — die Kaskade aus Schema-Anhang §7, wörtlich in dieser
- * Reihenfolge: steps → messages → shares → events(profileId) → profile.
+ * Reihenfolge: steps → messages → shares → events(profileId) → findings →
+ * profile (die Befunde seit brand-014).
  *
  * ── KINDER ZUERST, UND ZWAR AUS EINEM BETRIEBLICHEN GRUND ─────────────────
  * Appwrite kennt keine Transaktion und kein ON DELETE CASCADE. Bricht der Lauf
@@ -72,6 +74,10 @@ export default defineEventHandler(async (event): Promise<BrandProfileDeleteRespo
   const messages = await purge(BRAND_MESSAGES_TABLE)
   const shares = await purge(BRAND_SHARES_TABLE)
   const events = await purge(BRAND_EVENTS_TABLE)
+  // Die Befunde des Spezialisten (brand-014). Sie hängen an `profileId` wie
+  // alles andere — ohne diese Zeile bliebe unsichtbarer Inhalt liegen, den
+  // keine Route mehr erreicht (die Begründung im Kopf gilt wörtlich).
+  const findings = await purge(BRAND_FINDINGS_TABLE)
 
   try {
     await tablesDB.deleteRow({ databaseId, tableId: BRAND_PROFILES_TABLE, rowId: profileId })
@@ -83,7 +89,7 @@ export default defineEventHandler(async (event): Promise<BrandProfileDeleteRespo
   // Das Löschen selbst schreibt KEIN brand_event: der Funnel hängt an
   // `profileId`, und dessen Zeilen sind gerade Teil der Kaskade gewesen — ein
   // Ereignis über ein gelöschtes Profil wäre der einzige Rest, der bliebe.
-  logEvent('info', 'brand.profile_deleted', { profileId, steps, messages, shares, events })
+  logEvent('info', 'brand.profile_deleted', { profileId, steps, messages, shares, events, findings })
 
-  return { deleted: true, removed: { steps, messages, shares, events } }
+  return { deleted: true, removed: { steps, messages, shares, events, findings } }
 })

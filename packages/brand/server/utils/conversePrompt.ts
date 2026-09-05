@@ -92,8 +92,12 @@ import { BRAND_CONVERSE_HISTORY_CHARS, formatStartCard } from './georgePrompt'
  * `converse-2` (2026-09-03, Davids Live-Fund): die Slot-Blöcke tragen die
  * FRAGE aus dem Locale-Katalog statt der internen Id — George sprach
  * `a.customerPraise` & Co. wortwörtlich im Chat nach.
+ *
+ * `converse-8` (BW2 Paket 4): der Block „<Kollegin> hat mitgelesen" — was der
+ * Spezialist beim Schliessen der letzten Session vermisst hat, und die offenen
+ * Konflikt-Befunde an diesem Feld. EINMAL gesagt, dann nie wieder (§7/§8).
  */
-export const BRAND_CONVERSE_PROMPT_VERSION = 'converse-7'
+export const BRAND_CONVERSE_PROMPT_VERSION = 'converse-8'
 
 /**
  * Was ein Mensch in EINEM Zug schreiben darf. Grosszügiger als der Hinweis
@@ -206,6 +210,38 @@ export function countSessionProbes(history: readonly BrandConverseHistoryTurn[])
   return probes
 }
 
+/**
+ * DER „HAT MITGELESEN"-BLOCK (BW2 Paket 4, Plan §7/§8).
+ *
+ * ── WARUM DER SPEZIALIST DURCH GEORGE SPRICHT ─────────────────────────────
+ * „Der Spezialist spricht nie" (§7): alles, was er sagt, wird zu Georges
+ * Prompt-Block oder zu einem Log-Eintrag. Die Eine-Stimme-Entscheidung
+ * (DECISION-LOG 2026-09-02) wird damit wörtlich wahr — es gibt keinen zweiten
+ * Sprecher, auch nicht als „Vera sagt:". George sagt es in SEINEN Worten und
+ * nennt die Kollegin höchstens als Quelle.
+ *
+ * ── EINMAL, UND ZWAR WIRKLICH EINMAL ──────────────────────────────────────
+ * Beides ist ein HINWEIS, keine Mahnung. Der Zug, der ihn ausspricht, setzt
+ * die Marke (`briefDelivered` am Slot, `mentionedAt` am Befund) — ohne sie
+ * stünde derselbe Satz in jedem Zug der Session, und aus „mir ist da etwas
+ * aufgefallen" würde ein Vorwurf, der sich wiederholt.
+ */
+export interface BrandConverseBriefOptions {
+  /**
+   * Die Kollegin dieses Kapitels — als QUELLE, nie als Sprecherin. `''` in
+   * Georges EIGENEN Bausteinen (`colleagueForStep` liefert dort `null`): dann
+   * hat er selbst noch einmal darüber gelesen, und „George hat gemerkt" wäre
+   * ein zweiter George im selben Zug.
+   */
+  colleague: string
+  /** Das zuletzt geschlossene Feld, dem das Urteil gilt (menschliche Beschriftung). */
+  field: string
+  /** Was der Spezialist dort vermisst hat (max. 3). Leer = nur Konflikte. */
+  missing: readonly string[]
+  /** Offene Konflikt-Befunde an DIESEM Feld — je einer mit zwei Beschriftungen. */
+  conflicts: readonly { fields: readonly string[], why: string, suggestion?: string }[]
+}
+
 export interface BrandConverseInstructionOptions {
   /**
    * Hat dieser Baustein laut REGISTRY noch eine offene Frage? Der Server
@@ -234,6 +270,11 @@ export interface BrandConverseInstructionOptions {
    */
   session?: BrandConverseSessionOptions | null
   /**
+   * WAS DIE KOLLEGIN BEIM MITLESEN GEMERKT HAT (Paket 4, §7/§8). `null` ist
+   * der Normalfall — dann fehlt der Block ganz.
+   */
+  brief?: BrandConverseBriefOptions | null
+  /**
    * ERÖFFNUNGSZUG (Plan §6): niemand hat etwas geschrieben, George spricht
    * zuerst. Ein anderer Auftrag, nicht bloss eine andere Eingabe — die vier
    * Zweige oben beantworten alle eine NACHRICHT, und es gibt keine.
@@ -256,6 +297,7 @@ export function brandConverseInstruction(options: BrandConverseInstructionOption
   return [
     ...(options.opening ? openingTaskLines(options) : replyTaskLines()),
     ...sessionLines(options),
+    ...briefLines(options.brief),
     // Der Eröffnungszug schliesst mit der Frage SEINER Session (die Leiter sagt
     // welche) — die „nächste offene Frage des Kapitels" ist dort die falsche
     // Auskunft: sie wäre die Frage NACH dieser.
@@ -428,6 +470,59 @@ function sessionLines(options: BrandConverseInstructionOptions): string[] {
   if (session.antiPatterns.length) {
     lines.push('Push back on:', ...session.antiPatterns.map(pattern => `- ${pattern}`))
   }
+  return lines
+}
+
+/**
+ * DER BLOCK SELBST — höchstens ein paar Zeilen, und jede sagt „einmal".
+ *
+ * Er steht NACH dem Session-Auftrag und VOR der nächsten Frage: er ist ein
+ * Nachtrag zum eben Abgeschlossenen, kein neues Thema. Und er endet mit dem
+ * ANGEBOT, nicht mit der Forderung — der Mensch hat bestätigt, und diese
+ * Bestätigung gilt (§7).
+ */
+function briefLines(brief: BrandConverseBriefOptions | null | undefined): string[] {
+  if (!brief) return []
+  if (!brief.missing.length && !brief.conflicts.length) return []
+
+  const lines: string[] = ['', 'WHAT A COLLEAGUE NOTICED WHILE READING ALONG:']
+
+  const who = brief.colleague
+    ? `${brief.colleague} read over`
+    : 'Reading back over'
+  const alsoSees = brief.colleague ? `${brief.colleague} also sees` : 'You also see'
+
+  if (brief.missing.length) {
+    lines.push(
+      `${who} the value that was just settled for "${brief.field}", these things are still missing: `
+      + `${brief.missing.join(' · ')}.`,
+      'Mention this ONCE, in ONE short clause, in your own words and without listing it back item by '
+      + 'item — then offer to add it later and move on. Their confirmation stands; this is a remark, '
+      + 'not a correction, and you never ask them to redo what they just settled.',
+    )
+  }
+
+  for (const conflict of brief.conflicts) {
+    lines.push(
+      `${alsoSees} a tension between "${conflict.fields.join('" and "')}": `
+      + conflict.why
+      + (conflict.suggestion ? ` A possible way out: ${conflict.suggestion}` : ''),
+    )
+  }
+  if (brief.conflicts.length) {
+    lines.push(
+      'Name that tension ONCE, in one sentence, and ask whether they want to touch one of the two — '
+      + 'then let it go. It stays visible next to the conversation either way, so you never bring it '
+      + 'up a second time.',
+    )
+  }
+
+  lines.push(
+    'Never say that a "specialist", a "check" or a "system" found this, never quote a colleague '
+    + 'verbatim, and never speak as anyone but yourself. Where a colleague is named above you may say '
+    + 'that they noticed it — you are one voice speaking for a team that reads along; where none is '
+    + 'named, it is simply something you noticed.',
+  )
   return lines
 }
 

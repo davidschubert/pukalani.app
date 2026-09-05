@@ -2,6 +2,7 @@ import { stripBrandGenerationDrafts } from '../../../../../../shared/brandGenera
 import { sessionsAffectedBy } from '../../../../../../shared/brandSessions'
 import { slotsForStep } from '../../../../../../shared/slotRegistry'
 import type { BrandSessionView, BrandStepDetailResponse } from '../../../../../../shared/types/brand'
+import { listBrandFindings, toBrandFindingView } from '../../../../../utils/brandFindingsStore'
 import {
   loadBrandStepContext,
   parseCollectedParts,
@@ -88,11 +89,31 @@ export default defineEventHandler(async (event): Promise<BrandStepDetailResponse
       // Abnahme-Seite hat keinen dritten Zustand.
       accepted: records[session.id]?.accepted === true,
       deferred: records[session.id]?.deferred === true,
-      // NUR wo es welche gibt: ein leeres Objekt an 67 Sessions wäre Rauschen
-      // in jeder Antwort.
+      // Der Schliess-Aufruf (Paket 4, §7). FEHLT die Marke, ist er fail-soft
+      // ausgefallen — und genau diese Sessions holt der Prüfblick nach.
+      reviewed: records[session.id]?.reviewed === true,
+      // NUR wo es welche gibt: ein leeres Objekt bzw. ein leeres Feld an 67
+      // Sessions wäre Rauschen in jeder Antwort.
       ...(Object.keys(collected).length ? { collected } : {}),
+      ...(records[session.id]?.notes ? { notes: records[session.id]!.notes! } : {}),
+      ...(records[session.id]?.review?.missing?.length
+        ? { missing: [...records[session.id]!.review!.missing!] }
+        : {}),
     }
   }
+
+  /**
+   * DIE OFFENEN BEFUNDE DIESES KAPITELS (§8) — die Daten für die Chips aus
+   * Paket 5, gefiltert über die beteiligten FELDER und nicht über den
+   * Herkunfts-Stempel: ein Konflikt zwischen B und C gehört in beide Kapitel.
+   *
+   * FAIL-SOFT (`listBrandFindings`): ohne Befund-Tabelle ist die Liste leer
+   * und die Werkstatt verhält sich wie vor Paket 4.
+   */
+  const own = new Set(slotsForStep(stepKey).map(entry => entry.id))
+  const findings = (await listBrandFindings(event, stepRow.profileId, 'open'))
+    .map(toBrandFindingView)
+    .filter(view => view.slots.some(slotId => own.has(slotId)))
 
   return {
     profileId: stepRow.profileId,
@@ -108,6 +129,7 @@ export default defineEventHandler(async (event): Promise<BrandStepDetailResponse
     activeSeconds: stepRow.activeSeconds ?? 0,
     slots: toSlotViews(records),
     sessions,
+    findings,
     generations: { items: stripBrandGenerationDrafts(generations.items), count: generations.count },
     progress: step.progress,
     missingRequired: [...step.missingRequired],

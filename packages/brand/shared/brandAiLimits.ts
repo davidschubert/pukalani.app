@@ -10,17 +10,23 @@
  * sind die Eimer-Schlüssel FUNKTIONEN und die Zahlen KONSTANTEN, genau wie bei
  * der UGC-Übersetzung (`core/shared/ugcTranslations.ts`).
  *
- * ── FÜNF FRAGEN, FÜNF ZÄHLER ──────────────────────────────────────────────
+ * ── SECHS FRAGEN, SECHS ZÄHLER ────────────────────────────────────────────
  *  1. „Wie viele laufen JETZT?"    — Burst, je Konto, im Prozess (2).
  *  2. „Wie oft heute AN DIESER Stelle?" — je Brand × Slot-Typ (10).
  *  2b. „Wie viel wurde heute in diesem Branding GEREDET?" — je Brand (40).
+ *  2c. „Wie oft hat der SPEZIALIST heute geprüft?" — je Brand (120, Paket 4).
  *  3. „Wie oft heute ÜBERHAUPT?"   — je Konto, über alle Brands (200).
  *  4. „Was kostet das die INSTANZ?" — Gesamtzahl über alle Konten (Default
  *     1000, konfigurierbar).
  * Sie beantworten verschiedene Fragen und dürfen sich deshalb nicht ersetzen:
  * (1) begrenzt das Tempo, (2) das Ausfransen an einer einzigen Frage, (2b) das
- * Ausfransen des GESPRÄCHS, (3) die Rechnung eines Menschen, (4) die Rechnung
- * des Betreibers.
+ * Ausfransen des GESPRÄCHS, (2c) die Prüf-Aufrufe, die der Mensch gar nicht
+ * auslöst, (3) die Rechnung eines Menschen, (4) die Rechnung des Betreibers.
+ *
+ * Der Spezialist bekommt einen EIGENEN Eimer aus demselben Grund wie das
+ * Gespräch: sein Aufruf ist keine Frage des Menschen an ein Feld, sondern eine
+ * Folge seiner Bestätigung. Auf dem Gesprächs-Eimer gebucht, verlöre wer viel
+ * bestätigt genau dadurch seine Antworten von George.
  *
  * ── WARUM DAS GESPRÄCH EINEN EIGENEN EIMER HAT (P3.2) ─────────────────────
  * Naheliegend wäre, eine Konversations-Reaktion auf den Slot-Eimer der Frage
@@ -80,6 +86,44 @@ export const BRAND_AI_SLOT_DAILY_LIMIT = 10
 export const BRAND_AI_TALK_DAILY_LIMIT = 40
 
 /**
+ * DER DECKEL DES SPEZIALISTEN je Branding (BW2 Paket 4, Plan §13): so viele
+ * Schliess-Aufrufe an EINEM Tag.
+ *
+ * 120 ist wie die 40 des Gesprächs aus der Arbeit gerechnet: ein vollständiges
+ * Fundament hat 68 Sessions, also 68 Aufrufe für einen kompletten Durchlauf.
+ * Dazu die neun Kapitel-Abnahmen (je 2) und Luft für Korrekturen, Stufe 2 (je
+ * 3) und Wiederholungen — 120 trägt einen ganzen Durchlauf MIT Nacharbeit an
+ * einem Tag. Wer darüber hinaus schliesst, wiederholt; und weil der
+ * Schliess-Aufruf FAIL-SOFT ist (§7), kostet ihn das Erreichen des Deckels
+ * nichts als fehlende Befunde — sein bestätigter Wert steht trotzdem.
+ *
+ * Der Eimer hängt am BRANDING, nicht am Konto: dieselbe Begründung wie beim
+ * Gespräch (wer zwei Marken baut, schliesst zwei Mal 68 Sessions). Dahinter
+ * greifen unverändert der Konto-Deckel (200) und der Instanz-Deckel.
+ */
+export const BRAND_AI_REVIEW_DAILY_LIMIT = 120
+
+/**
+ * WAS EIN AUFRUF IM REVIEW-EIMER KOSTET (Plan §13) — nicht jeder gleich viel.
+ *
+ * Stufe 1 ist der Normalfall und kostet 1. Stufe 2 läuft auf dem TEUREN
+ * George-Modell und kostet 3; die Kapitel-Abnahme liest das ganze Dokument
+ * gegen ein ganzes Kapitel und kostet 2. Die Gewichte sind grob und sollen es
+ * sein: sie bilden die KOSTENVERHÄLTNISSE ab, nicht eine Rechnung — ein Eimer,
+ * der Tokens zählte, wäre eine zweite Buchhaltung neben der des Anbieters.
+ *
+ * Der Prüfblick (§10, Gewicht 5) fehlt hier bewusst: er ist Paket 7, und ein
+ * Gewicht ohne Aufrufer wäre eine Zahl, die niemand prüft.
+ */
+export const BRAND_AI_REVIEW_WEIGHTS = {
+  stage1: 1,
+  stage2: 3,
+  chapter: 2,
+} as const
+
+export type BrandAiReviewWeight = keyof typeof BRAND_AI_REVIEW_WEIGHTS
+
+/**
  * Höchstens zwei GLEICHZEITIGE Läufe je Konto. Gezählt wird im Prozess — mit
  * derselben bewussten Grenze wie die Generierungs-Sperre in
  * `server/utils/brandGenerators.ts`: bei mehreren Node-Prozessen (pm2-Cluster)
@@ -112,6 +156,7 @@ export interface BrandAiLimits {
   parallel: number
   slotDay: number
   talkDay: number
+  reviewDay: number
   accountDay: number
   instanceDay: number
 }
@@ -120,6 +165,7 @@ export const BRAND_AI_LIMITS: BrandAiLimits = {
   parallel: BRAND_AI_PARALLEL_LIMIT,
   slotDay: BRAND_AI_SLOT_DAILY_LIMIT,
   talkDay: BRAND_AI_TALK_DAILY_LIMIT,
+  reviewDay: BRAND_AI_REVIEW_DAILY_LIMIT,
   accountDay: BRAND_AI_ACCOUNT_DAILY_LIMIT,
   instanceDay: BRAND_AI_INSTANCE_DAILY_DEFAULT,
 }
@@ -163,6 +209,19 @@ export function brandAiTalkDayKey(profileId: string): string {
 }
 
 /**
+ * DER SPEZIALIST EINES BRANDINGS (Paket 4) — ohne Slot und ohne Konto, aus
+ * denselben zwei Gründen wie beim Gespräch.
+ *
+ * Ohne SLOT, obwohl jeder Schliess-Aufruf zu genau einer Session gehört: der
+ * Kapitel-Modus gehört keiner, und ein Deckel „zehn Reviews je Feld" hätte
+ * nichts zu begrenzen — ein Feld wird einmal geschlossen, nicht zehnmal
+ * entworfen.
+ */
+export function brandAiReviewDayKey(profileId: string): string {
+  return `brand-ai-review-day:${profileId}`
+}
+
+/**
  * EIN Eimer für die ganze Instanz — ohne Konto, ohne Brand. Er liegt im
  * geteilten Rate-Limit-Store und ist damit auch über mehrere Prozesse hinweg
  * EIN Deckel (mit Redis; ohne Redis zählt jede Instanz für sich, wie überall).
@@ -183,6 +242,14 @@ export function brandAiInstanceDayKey(): string {
 export const BRAND_AI_BUSY_CODE = 'brand_ai_busy'
 export const BRAND_AI_SLOT_LIMIT_CODE = 'brand_ai_slot_limit'
 export const BRAND_AI_TALK_LIMIT_CODE = 'brand_ai_talk_limit'
+/**
+ * Der Deckel des Schliess-Aufrufs (Paket 4). Er hat einen EIGENEN Code, obwohl
+ * ihn heute niemand als 429 zu sehen bekommt: der Schliess-Aufruf ist fail-soft
+ * und macht aus jeder Ablehnung ein `reviewed: false`. Der Code steht trotzdem
+ * hier, weil er im LOG erscheint — und „brand_ai_talk_limit" an einer Stelle,
+ * an der niemand geredet hat, wäre die falsche Auskunft an den Betreiber.
+ */
+export const BRAND_AI_REVIEW_LIMIT_CODE = 'brand_ai_review_limit'
 export const BRAND_AI_DAILY_LIMIT_CODE = 'brand_ai_daily_limit'
 export const BRAND_AI_INSTANCE_LIMIT_CODE = 'brand_ai_instance_limit'
 
@@ -190,6 +257,7 @@ export type BrandAiRejectionCode =
   | typeof BRAND_AI_BUSY_CODE
   | typeof BRAND_AI_SLOT_LIMIT_CODE
   | typeof BRAND_AI_TALK_LIMIT_CODE
+  | typeof BRAND_AI_REVIEW_LIMIT_CODE
   | typeof BRAND_AI_DAILY_LIMIT_CODE
   | typeof BRAND_AI_INSTANCE_LIMIT_CODE
 
@@ -197,6 +265,7 @@ const REJECTION_CODES: readonly string[] = [
   BRAND_AI_BUSY_CODE,
   BRAND_AI_SLOT_LIMIT_CODE,
   BRAND_AI_TALK_LIMIT_CODE,
+  BRAND_AI_REVIEW_LIMIT_CODE,
   BRAND_AI_DAILY_LIMIT_CODE,
   BRAND_AI_INSTANCE_LIMIT_CODE,
 ]
@@ -220,6 +289,10 @@ export function brandAiRejectionMessageKey(value: unknown): string | null {
   // betrifft: das ist der EINE Ort für Drossel-Hinweise, und ein zweiter
   // Knoten hiesse, dass diese Abbildung künftig zwei Präfixe kennen muss.
   if (value === BRAND_AI_TALK_LIMIT_CODE) return 'brand.workspace.generate.talkLimit'
+  // Er erreicht die Oberfläche heute nicht (fail-soft, s. o.); die Abbildung
+  // bleibt trotzdem vollständig — eine Lücke hier wäre ein Nein ohne Satz,
+  // sobald irgendwann eine Route den Code doch weiterreicht.
+  if (value === BRAND_AI_REVIEW_LIMIT_CODE) return 'brand.workspace.generate.reviewLimit'
   if (value === BRAND_AI_DAILY_LIMIT_CODE) return 'brand.workspace.generate.dailyLimit'
   return 'brand.workspace.generate.instanceLimit'
 }
@@ -239,6 +312,14 @@ export interface BrandAiQuotaCounts {
    * bleibt 0 und kann deshalb nie ein Nein erzeugen.
    */
   talkDay: number
+  /**
+   * Zählerstand des Spezialisten-Eimers nach dieser Buchung (Paket 4).
+   *
+   * Er ist der DRITTE enge Zähler, und wie die zwei anderen ist in EINEM
+   * Aufruf immer nur einer belegt: ein Entwurf bucht `slotDay`, ein
+   * Gesprächszug `talkDay`, ein Schliess-Aufruf `reviewDay`.
+   */
+  reviewDay: number
   /** Zählerstand des Konto-Eimers nach dieser Buchung. */
   accountDay: number
   /** Zählerstand des Instanz-Eimers nach dieser Buchung. */
@@ -271,6 +352,7 @@ export function decideBrandAiQuota(
   if (counts.parallel > limits.parallel) return BRAND_AI_BUSY_CODE
   if (counts.slotDay > limits.slotDay) return BRAND_AI_SLOT_LIMIT_CODE
   if (counts.talkDay > limits.talkDay) return BRAND_AI_TALK_LIMIT_CODE
+  if (counts.reviewDay > limits.reviewDay) return BRAND_AI_REVIEW_LIMIT_CODE
   if (counts.accountDay > limits.accountDay) return BRAND_AI_DAILY_LIMIT_CODE
   if (counts.instanceDay > limits.instanceDay) return BRAND_AI_INSTANCE_LIMIT_CODE
   return null

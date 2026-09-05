@@ -1,6 +1,6 @@
 import { ID } from 'node-appwrite'
 import { createBrandConverseSchema } from '../../../../../../../schemas/brandConverse'
-import { techniqueForStep } from '../../../../../../../shared/brandAdvisors'
+import { colleagueForStep, techniqueForStep } from '../../../../../../../shared/brandAdvisors'
 import { BRAND_SUBSTANCE_MIN_WORDS, nextCollectPart } from '../../../../../../../shared/brandSessions'
 import { formatBrandSlotStructured } from '../../../../../../../shared/brandSlotFormat'
 import {
@@ -45,6 +45,11 @@ import {
 import { streamAdvisorTurn } from '../../../../../../utils/advisorGenerator'
 import { claimBrandConverseKey } from '../../../../../../utils/brandConverse'
 import {
+  listBrandFindings,
+  markBrandFindingsMentioned,
+  toBrandFindingView,
+} from '../../../../../../utils/brandFindingsStore'
+import {
   hasBrandSessionAdvisorTurn,
   hasBrandStepMessage,
   loadBrandConversationHistory,
@@ -52,6 +57,7 @@ import {
 import {
   BRAND_CONVERSE_MAX_TOKENS,
   BRAND_CONVERSE_PROMPT_VERSION,
+  type BrandConverseBriefOptions,
   type BrandConverseSessionOptions,
   brandConversePrompt,
   countSessionProbes,
@@ -396,6 +402,77 @@ export default defineEventHandler(async (event): Promise<BrandConverseResponse |
   let promptPart = collecting ? nextCollectPart(session!, storedParts) : null
   let revision = stepRow.revision ?? 0
   let collectFinished = false
+  /**
+   * DER STAND, DEN EIN SPÄTERER SCHREIBVORGANG SEHEN MUSS. Die Sammel-Session
+   * schreibt VOR dem Strom, die Merke „ausgesprochen" (Paket 4) DANACH — und
+   * wer dabei die gelesenen `records` nähme, machte den Zwischenstand der
+   * Sammel-Session wieder rückgängig.
+   */
+  let currentRecords: Record<string, BrandSlotRecord> = records
+
+  /**
+   * DER „HAT MITGELESEN"-BLOCK (Paket 4, Plan §7/§8) — was George in DIESEM
+   * Zug einmal aussprechen darf.
+   *
+   * ── DREI ENTSCHEIDUNGEN, DIE MAN NICHT VEREINFACHEN DARF ────────────────
+   * 1. DAS URTEIL GEHÖRT DER ZULETZT GESCHLOSSENEN Session dieses Kapitels,
+   *    nicht der aktuellen: die aktuelle ist gerade erst aufgegangen und hat
+   *    noch kein Urteil. Gewählt wird über `review.at` und nicht über die
+   *    Registry-Reihenfolge — wer zurückspringt und ein früheres Feld
+   *    korrigiert, soll dessen Nachtrag hören und nicht den eines Feldes,
+   *    das er vor einer Woche geschlossen hat.
+   * 2. NUR `goalReached: false`. Ein erfülltes Ziel braucht keinen Nachtrag,
+   *    und „mir ist nichts aufgefallen" ist kein Gesprächsbeitrag.
+   * 3. DIE KONFLIKTE HÄNGEN AN DER AKTUELLEN Session, nicht am Kapitel: der
+   *    Mensch sitzt gerade an DIESEM Feld, und ein Konflikt zwischen zwei
+   *    anderen Feldern wäre hier ein Themenwechsel. Er steht ohnehin als Chip
+   *    an beiden beteiligten Blöcken (Paket 5).
+   *
+   * FAIL-SOFT: eine unlesbare Befund-Tabelle kostet den Hinweis, nie den Zug.
+   */
+  async function collectBrief(): Promise<{
+    options: BrandConverseBriefOptions
+    slotId: string | null
+    findingIds: string[]
+  } | null> {
+    if (!session) return null
+
+    const contentLocale = profile.contentLocale
+    const pathKind = profileFacts(profile).pathKind
+
+    let latest: { slotId: string, at: string, missing: string[] } | null = null
+    for (const [slotId, record] of Object.entries(currentRecords)) {
+      if (record.review?.goalReached !== false || record.briefDelivered === true) continue
+      const missing = (record.review.missing ?? []).filter(entry => entry.trim().length > 0)
+      if (!missing.length) continue
+      const at = record.review.at ?? ''
+      if (!latest || at > latest.at) latest = { slotId, at, missing }
+    }
+
+    const conflicts = (await listBrandFindings(event, profile.$id, 'open'))
+      .map(toBrandFindingView)
+      .filter(view => view.kind === 'conflict' && !view.mentionedAt && view.slots.includes(session.id))
+
+    if (!latest && !conflicts.length) return null
+
+    // '' in Georges eigenen Bausteinen — dort hat er selbst noch einmal
+    // darüber gelesen (Begründung am Vertrag in `conversePrompt.ts`).
+    const colleague = colleagueForStep(stepKey)?.name ?? ''
+    return {
+      options: {
+        colleague,
+        field: brandSlotPromptLabel(latest?.slotId ?? session.id, contentLocale, pathKind),
+        missing: latest?.missing ?? [],
+        conflicts: conflicts.map(view => ({
+          fields: view.slots.map(slotId => brandSlotPromptLabel(slotId, contentLocale, pathKind)),
+          why: view.why,
+          ...(view.suggestion ? { suggestion: view.suggestion } : {}),
+        })),
+      },
+      slotId: latest?.slotId ?? null,
+      findingIds: conflicts.map(view => view.id),
+    }
+  }
 
   if (collecting && !body.opening && promptPart && text) {
     const answered: Record<string, string> = { ...storedParts, [promptPart]: text }
@@ -430,6 +507,7 @@ export default defineEventHandler(async (event): Promise<BrandConverseResponse |
         },
       })
       revision = nextRevision
+      currentRecords = { ...records, [session!.id]: candidate }
       promptParts = answered
       promptPart = stillOpen
       collectFinished = Boolean(value)
@@ -568,12 +646,26 @@ export default defineEventHandler(async (event): Promise<BrandConverseResponse |
         }
       : null
 
+    /**
+     * WAS DIE KOLLEGIN BEIM MITLESEN GEMERKT HAT (Paket 4, §7/§8).
+     *
+     * ZWEI Quellen, EIN Block: das Urteil des Schliess-Aufrufs über die zuletzt
+     * geschlossene Session dieses Kapitels (`goalReached: false`) und die
+     * offenen Konflikt-Befunde an DIESER Session. Beides wird genau EINMAL
+     * ausgesprochen — die Marken dafür setzt der Zug, der es sagt (s. unten).
+     *
+     * Gelesen wird erst HIER, hinter Kill-Switch, Sperre und Buchung: ein Zug,
+     * der ohnehin nicht läuft, soll keine Abfrage kosten.
+     */
+    const brief = await collectBrief()
+
     const prompt = brandConversePrompt(
       {
         hasNextQuestion: Boolean(next),
         nextQuestionKnown: nextQuestion.length > 0,
         openFieldLabels,
         session: sessionOptions,
+        ...(brief ? { brief: brief.options } : {}),
         ...(body.opening ? { opening: true, chapterIntro } : {}),
       },
       {
@@ -678,6 +770,45 @@ export default defineEventHandler(async (event): Promise<BrandConverseResponse |
     }
 
     /**
+     * DER ZUG HAT ES GESAGT, ALSO IST ES GESAGT (Paket 4, §7/§8).
+     *
+     * Die Marken fallen NACH dem Persistieren: ein Zug, der nie im Verlauf
+     * landet, hat auch nichts ausgesprochen — und ein `briefDelivered`, das
+     * vor einem `persist_failed` gesetzt worden wäre, hätte den Hinweis für
+     * immer verschluckt.
+     *
+     * FAIL-SOFT in beide Richtungen: scheitert der Stempel, wiederholt George
+     * den Nachtrag einmal. Lästig, aber harmlos — und deutlich besser als ein
+     * `provider_error` für einen Zug, den der Mensch schon gelesen hat.
+     */
+    if (brief) {
+      await markBrandFindingsMentioned(event, brief.findingIds)
+      if (brief.slotId) {
+        const marked: BrandSlotRecord = { ...currentRecords[brief.slotId], briefDelivered: true }
+        const nextRevision = revision + 1
+        try {
+          await tablesDB.updateRow({
+            databaseId,
+            tableId: BRAND_STEPS_TABLE,
+            rowId: stepRow.$id,
+            data: {
+              slots: serializeSlotRecords({ ...currentRecords, [brief.slotId]: marked }),
+              revision: nextRevision,
+            },
+          })
+          revision = nextRevision
+          currentRecords = { ...currentRecords, [brief.slotId]: marked }
+        }
+        catch (error) {
+          logEvent('warn', 'brand.converse_brief_mark_failed', {
+            stepKey,
+            message: error instanceof Error ? error.message : String(error),
+          })
+        }
+      }
+    }
+
+    /**
      * AUTO-WEITER (§5): welche Session nach diesem Zug dran ist — gerechnet
      * NACH dem Zug und aus dem SERVER-Stand, nie aus dem Rumpf.
      *
@@ -697,8 +828,8 @@ export default defineEventHandler(async (event): Promise<BrandConverseResponse |
       generationId: turnId,
       slotId: askedSlotId,
       // GELESEN, nicht erhöht — AUSSER die Sammel-Session hat geschrieben
-      // (s. Kopf): eine gemeldete alte Fassung liefe dem nächsten Autosave in
-      // einen 409.
+      // oder der „hat mitgelesen"-Block wurde als gesagt vermerkt (s. Kopf):
+      // eine gemeldete alte Fassung liefe dem nächsten Autosave in einen 409.
       revision,
       messageId,
       model: turn.model,

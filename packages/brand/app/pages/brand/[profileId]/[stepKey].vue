@@ -62,6 +62,7 @@ import {
 import type {
   BrandGenerationVersionsResponse,
   BrandSessionAcceptResponse,
+  BrandSessionCloseResponse,
   BrandSiteAnalysisView,
   BrandSiteAnalyzeResponse,
   BrandSlotView,
@@ -857,16 +858,47 @@ function onInput(slotId: string, value: string): void {
   autosave.schedule()
 }
 
+/**
+ * DER SCHLIESS-AUFRUF (BW2 Paket 4, §7) — der Spezialist liest mit, NACHDEM
+ * bestätigt wurde.
+ *
+ * ── ER DARF NICHTS AUFHALTEN ─────────────────────────────────────────────
+ * Die Bestätigung ist bereits gespeichert (`autosave.flush()` davor). Was hier
+ * schiefgeht — Netz, 409, ausgeschaltete KI —, kostet das Urteil und nichts
+ * sonst: kein Toast, kein Blocker, nur der Wegweiser fällt auf die
+ * Grundfassung zurück. Ein Fehlerhinweis für eine Zugabe, die der Mensch nie
+ * angefordert hat, wäre Lärm.
+ *
+ * ── DER WEGWEISER KOMMT JETZT VOM SERVER ─────────────────────────────────
+ * Bis Paket 3 rechnete diese Stelle `resolveNextStop` selbst. Der Server kennt
+ * mehr: den Vorschlag des Spezialisten, geprüft gegen Registry UND
+ * Session-Zustände (`pickNextSession`). Sein `next` ist damit dieselbe Antwort
+ * oder eine bessere — und die lokale Rechnung bleibt als Rückfall stehen, für
+ * genau die Fälle oben.
+ */
+async function closeSession(slotId: string): Promise<BrandNextSessionRef | null> {
+  if (!stepKey.value) return null
+  try {
+    const response = await $fetch<BrandSessionCloseResponse>(
+      `/api/brand/profiles/${profileId.value}/steps/${stepKey.value}/sessions/${slotId}/close`,
+      { method: 'POST', body: { revision: store.revision } },
+    )
+    store.applySessionClose(response)
+    return response.next
+  }
+  catch {
+    return null
+  }
+}
+
 async function confirmSlot(slotId: string): Promise<void> {
   editingSlotId.value = null
   store.setSlotConfirmed(slotId, true)
   await autosave.flush()
-  // AUTO-WEITER NACH DEM BESTÄTIGEN (§5). Die PATCH-Antwort trägt KEINEN
-  // Wegweiser (`BrandStepSaveResponse` = `revision` + `slots`) — gerechnet
-  // wird er deshalb hier, mit DERSELBEN puren Regel wie auf dem Server
-  // (`resolveNextStop`) und aus den soeben gespeicherten Fakten. Eine eigene
-  // Rechnung wäre die zweite Antwort auf „was kommt jetzt".
-  if (stepKey.value) await autoAdvance(slotId, resolveNextStop(stepKey.value, slotFacts.value))
+  if (!stepKey.value) return
+  // Die lokale Grundfassung ist der RÜCKFALL, nicht die Regel (s. oben).
+  const next = await closeSession(slotId) ?? resolveNextStop(stepKey.value, slotFacts.value)
+  await autoAdvance(slotId, next)
 }
 
 /**

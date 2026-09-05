@@ -882,6 +882,58 @@ export function resolveNextStop(
   return brandStepCompletion(stepKey, slotStates).slotsReady ? { stepKey, acceptance: true } : null
 }
 
+/**
+ * DIE ZUSTÄNDE, aus denen der Wegweiser rechnet — beide, weil er zwei
+ * verschiedene Fragen stellt.
+ *
+ * `slots` beantwortet „was steht schon?" (die Grundfassung `resolveNextStop`),
+ * `sessions` beantwortet „ist der VORSCHLAG überhaupt betretbar?" — und das
+ * ist eine Rechnung über ALLE Kapitel (`resolveSessionStates`), weil eine
+ * Session über Kapitelgrenzen liest. Zusammengelegt wären es zwei Antworten
+ * aus einer Karte, die nur eine der beiden Fragen kennt.
+ */
+export interface BrandNextSessionStates {
+  slots: Readonly<Record<string, BrandSlotStateFacts | undefined>>
+  sessions: Readonly<Record<string, BrandSessionState | undefined>>
+}
+
+/**
+ * DIE ADAPTIVE NÄCHSTE SESSION (BW2 §6, Paket 4) — der Vorschlag des
+ * Spezialisten, GEPRÜFT gegen die Registry.
+ *
+ * ── „REIHENFOLGE GEHÖRT DER REGISTRY" GILT WEITER ────────────────────────
+ * Beweglich ist ausschliesslich die Reihenfolge INNERHALB der offenen Menge.
+ * Vier Bedingungen muss ein Vorschlag erfüllen, sonst gilt die Grundfassung:
+ * er muss eine bekannte, nicht deaktivierte Session sein, er muss zu DIESEM
+ * Kapitel gehören, und ihr Zustand muss `open` sein.
+ *
+ * `open` ist dabei die einzige richtige Bedingung, und die drei anderen
+ * Zustände sagen warum: `locked` heisst „ihre Eingaben stehen noch nicht" —
+ * George dorthin zu schicken wäre ein Gespräch ohne Grundlage. `done` und
+ * `stale` heissen „hier steht ein bestätigter Wert" — das ist eine
+ * Korrektur (§9, Paket 6) und nicht der nächste Schritt.
+ *
+ * Ohne Vorschlag oder mit einem, der durchfällt, antwortet `resolveNextStop`
+ * wie bisher — inklusive des Sprungs auf die Finale Abnahme am Kapitelende.
+ * Ein Modell kann den Weg damit UMORDNEN, aber nie verlassen.
+ */
+export function pickNextSession(
+  stepKey: BrandStepKey,
+  states: BrandNextSessionStates,
+  suggestion: string | null | undefined,
+): BrandNextSessionRef | null {
+  const proposed = suggestion ? slotById(suggestion) : undefined
+  if (
+    proposed
+    && !proposed.deactivated
+    && proposed.stepId === stepKey
+    && states.sessions[proposed.id] === 'open'
+  ) {
+    return { stepKey, sessionKey: proposed.id }
+  }
+  return resolveNextStop(stepKey, states.slots)
+}
+
 export type BrandJunctionChange =
   | { junction: 'subBrands', value: BrandProfileFacts['subBrands'] }
   | { junction: 'hasName', value: boolean }

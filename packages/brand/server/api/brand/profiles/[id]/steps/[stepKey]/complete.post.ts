@@ -13,10 +13,7 @@ import {
   toStepFacts,
   touchProfile,
 } from '../../../../../../utils/brandStore'
-import {
-  BRAND_OPEN_CONFLICTS_NONE,
-  loadBrandAcceptanceContext,
-} from '../../../../../../utils/brandAcceptance'
+import { loadBrandAcceptanceContext } from '../../../../../../utils/brandAcceptance'
 import { recordBrandEvent } from '../../../../../../utils/brandEvents'
 
 /**
@@ -52,6 +49,7 @@ export default defineEventHandler(async (event): Promise<BrandStepCompleteRespon
     stepRows,
     stepFacts,
     sessionStates,
+    openConflicts,
     journey: enteredJourney,
   } = await loadBrandAcceptanceContext(event, userId)
   const body = await readValidatedBody(event, createBrandStepCompleteSchema().parse)
@@ -89,14 +87,15 @@ export default defineEventHandler(async (event): Promise<BrandStepCompleteRespon
   /**
    * DIE DREI NEUEN GLIEDER DER ABNAHME (§5a) reisen als PARAMETER hinein, nicht
    * als Abfrage in der puren Regel: `sessionStates` sagt, was veraltet ist,
-   * `openConflicts` sagt, wo ein Befund hängt — und Letzteres ist heute
-   * bewusst leer (`brand_findings` kommt mit Paket 4). Der Haken ist damit da,
-   * der Inhalt kommt später, und keine Route muss dafür angefasst werden.
+   * `openConflicts` sagt, wo ein offener `conflict`-Befund hängt (seit Paket 4
+   * echt, aus `brand_findings`). Beide kommen aus DEMSELBEN Kontext, den auch
+   * die Abnahme-Seite gelesen hat — sonst zeigte sie „bereit" und diese Route
+   * antwortete `acceptance_incomplete`.
    */
   const done = transitionBrandStep(facts, {
     kind: 'complete',
     sessionStates,
-    openConflicts: BRAND_OPEN_CONFLICTS_NONE,
+    openConflicts,
   })
   if (!done.ok) {
     throw createError({

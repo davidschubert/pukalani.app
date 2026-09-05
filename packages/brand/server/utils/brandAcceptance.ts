@@ -7,13 +7,17 @@ import {
   brandStepAcceptance,
   mergeBrandSlotFacts,
 } from '../../shared/brandJourney'
+import { blockingFindingSlots } from '../../shared/brandFindings'
 import { type BrandRestartImpact, brandRestartImpact } from '../../shared/brandSessions'
 import {
   type BrandSlot,
   type BrandSlotStateFacts,
   type BrandStepKey,
   slotById,
+  slotsForStep,
 } from '../../shared/slotRegistry'
+import type { BrandFindingView } from '../../shared/types/brand'
+import { listBrandFindings, toBrandFindingView } from './brandFindingsStore'
 import {
   type BrandProfileRow,
   type BrandSlotRecord,
@@ -39,12 +43,18 @@ import {
  * `loadBrandStepContext` entstanden ist. Diese Datei legt nur die
  * Session-Ebene darüber.
  *
- * ── DIE KONFLIKTE SIND EIN HAKEN, KEIN INHALT ─────────────────────────────
- * `openConflicts` ist heute IMMER leer: die Befunde (`brand_findings`) kommen
- * mit Paket 4. Der Parameter steht trotzdem schon in der puren Regel und wird
- * hier durchgereicht — so ist die Bedingung „ein offener Konflikt sperrt die
- * Abnahme" (§5a Schritt 3) an EINER Stelle formuliert, und Paket 4 füllt sie,
- * ohne eine Route anzufassen.
+ * ── DIE KONFLIKTE SIND SEIT PAKET 4 ECHT ──────────────────────────────────
+ * Bis Paket 3b war `openConflicts` immer leer und der Parameter ein Haken für
+ * später. Jetzt kommt er aus `brand_findings`: jeder OFFENE `conflict`, an dem
+ * ein Feld dieses Kapitels beteiligt ist, sperrt die Finale Abnahme (§5a
+ * Schritt 3). Die Rechnung dahinter ist pur (`blockingFindingSlots`), das
+ * Laden ist FAIL-SOFT (`listBrandFindings`) — eine Abnahme-Seite, die wegen
+ * einer klemmenden Nebentabelle nicht mehr lädt, hätte einen Menschen für eine
+ * Zugabe ausgesperrt.
+ *
+ * Gefiltert wird über die SLOTS und nicht über `brand_findings.stepKey`: der
+ * Stempel sagt, wo ein Befund ENTSTANDEN ist, gesperrt wird aber jedes
+ * Kapitel, dessen Feld daran hängt. Ein Konflikt zwischen B und C sperrt beide.
  */
 export const BRAND_OPEN_CONFLICTS_NONE: readonly string[] = []
 
@@ -59,6 +69,10 @@ export interface BrandAcceptanceContext extends BrandStepContext, BrandAcceptanc
   /** Die gelesenen Slot-Datensätze DIESES Kapitels. */
   records: Record<string, BrandSlotRecord>
   stepFacts: BrandStepFacts[]
+  /** ALLE offenen Befunde des Brandings — kapitelübergreifend, wie die Tabelle. */
+  findings: BrandFindingView[]
+  /** Die davon, die ein Feld DIESES Kapitels sperren (§5a Schritt 3). */
+  openConflicts: string[]
 }
 
 export async function loadBrandAcceptanceContext(
@@ -68,11 +82,18 @@ export async function loadBrandAcceptanceContext(
   const context = await loadBrandStepContext(event, userId)
   const records = parseSlotRecords(context.stepRow.slots)
   const stepFacts = toStepFacts(context.stepRows)
+  const findings = (await listBrandFindings(event, context.profile.$id, 'open')).map(toBrandFindingView)
+  const openConflicts = blockingFindingSlots(
+    findings,
+    slotsForStep(context.stepKey).map(session => session.id),
+  )
   return {
     ...context,
     records,
     stepFacts,
-    ...deriveBrandAcceptance(context.profile, context.stepKey, stepFacts),
+    findings,
+    openConflicts,
+    ...deriveBrandAcceptance(context.profile, context.stepKey, stepFacts, openConflicts),
   }
 }
 
@@ -85,15 +106,11 @@ export function deriveBrandAcceptance(
   profile: BrandProfileRow,
   stepKey: BrandStepKey,
   stepFacts: readonly BrandStepFacts[],
+  openConflicts: readonly string[] = BRAND_OPEN_CONFLICTS_NONE,
 ): BrandAcceptanceDerivation {
   const allFacts = mergeBrandSlotFacts(stepFacts)
   const sessionStates = resolveBrandSessionStates(profileFacts(profile), stepFacts)
-  const acceptance = brandStepAcceptance(
-    stepKey,
-    allFacts,
-    sessionStates,
-    BRAND_OPEN_CONFLICTS_NONE,
-  )
+  const acceptance = brandStepAcceptance(stepKey, allFacts, sessionStates, openConflicts)
   return { allFacts, sessionStates, acceptance }
 }
 

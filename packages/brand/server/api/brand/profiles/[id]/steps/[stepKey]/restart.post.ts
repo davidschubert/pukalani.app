@@ -14,6 +14,7 @@ import {
   BRAND_EVENT_PAYLOAD_MAX,
   recordBrandEvent,
 } from '../../../../../../utils/brandEvents'
+import { purgeBrandStepFindings } from '../../../../../../utils/brandFindingsStore'
 import {
   BRAND_STEPS_TABLE,
   type BrandSlotRecord,
@@ -139,6 +140,18 @@ export default defineEventHandler(async (event): Promise<BrandStepRestartRespons
   catch (error) {
     throw toH3Error(error, 'Brand step could not be restarted')
   }
+
+  /**
+   * DIE BEFUNDE DIESES KAPITELS GEHEN MIT (Paket 4).
+   *
+   * Sie sind das Ergebnis desselben Schliess-Aufrufs, der auch die Notizen
+   * geschrieben hat — und die sind soeben gelöscht worden. Ein offener
+   * `conflict` an einem Feld, das es nicht mehr gibt, sperrte die Abnahme
+   * eines Kapitels, das gerade leer ist; der Schnappschuss oben bewahrt den
+   * Stand für den Betreiber. FAIL-SOFT: gelöscht ist gelöscht, ein Rest-Befund
+   * darf daraus kein 500 machen (s. `purgeBrandStepFindings`).
+   */
+  await purgeBrandStepFindings(event, profile.$id, stepKey)
 
   // Der Fortschritts-Cache am Profil zieht mit — aus der neu gerechneten
   // Journey, nie aus dem Client (dieselbe Kette wie im Autosave).
