@@ -9,12 +9,13 @@
  * Die Optik borgt sich UTabs (Pillen in einer Leiste), das Verhalten nicht.
  *
  * ── „bald" IST EIN ZUSTAND, KEIN LINK ─────────────────────────────────────
- * Ranking (P3) und Vergleich (P4) sind noch nicht gebaut. Sie stehen hier
- * trotzdem, weil die Seite ihre Nachbarn ankündigt — aber als ETIKETT, nicht
- * als Link: ein Reiter, der auf die Seite zurückführt, auf der man schon
- * steht, ist eine Sackgasse mit Beschriftung. Fertig heisst genau eine
- * Änderung je Reiter: `soon: false` und der echte Pfad; alles andere hier
- * bleibt, wie es ist.
+ * Ein noch nicht gebauter Reiter steht hier trotzdem, weil die Seite ihre
+ * Nachbarn ankündigt — aber als ETIKETT, nicht als Link: ein Reiter, der auf
+ * die Seite zurückführt, auf der man schon steht, ist eine Sackgasse mit
+ * Beschriftung. Fertig heisst genau eine Änderung je Reiter: `soon: false`;
+ * alles andere hier bleibt, wie es ist. Das RANKING hat diesen Schritt mit P3
+ * (2026-09-05) hinter sich, der VERGLEICH mit P4 (2026-09-05) — seither steht
+ * kein Reiter mehr auf „bald", der Zweig bleibt für den nächsten.
  *
  * ── DER AKTIVE REITER BLEIBT EIN LINK ─────────────────────────────────────
  * Auf der Ergebnisseite (`/brand-check/<id>`) ist „Start" der Rückweg — sie
@@ -39,8 +40,8 @@ interface TabDefinition {
 /** Die Ziele — die EINE Stelle, die P3/P4 anfassen. */
 const TABS: readonly TabDefinition[] = [
   { key: 'start', path: '/brand-check', soon: false },
-  { key: 'ranking', path: '/brand-check/ranking', soon: true },
-  { key: 'compare', path: '/brand-check/vergleich', soon: true },
+  { key: 'ranking', path: '/brand-check/ranking', soon: false },
+  { key: 'compare', path: '/brand-check/vergleich', soon: false },
 ] as const
 
 const tabs = computed(() => TABS.map(tab => ({

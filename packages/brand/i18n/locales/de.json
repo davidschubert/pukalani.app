@@ -67,6 +67,69 @@
         },
         "emptyTitle": "Nichts in dieser Ansicht",
         "empty": "Hier steht noch niemand. Wechselt den Filter, um die anderen Zustände zu sehen."
+      },
+      "checkCorrections": {
+        "nav": "Korrekturen",
+        "title": "Korrekturvorschläge",
+        "subtitle": "Wer im Ranking eine falsch zugeordnete Branche sieht, schlägt hier eine Korrektur vor. Angenommen wandert der Wert in den Check, abgelehnt bleibt er stehen.",
+        "refresh": "Neu laden",
+        "more": "Mehr laden",
+        "shown": "{count} von {total} angezeigt",
+        "actionFailed": "Das hat nicht geklappt",
+        "accepted": "Vorschlag angenommen",
+        "acceptedHint": "Die Branche des Checks ist jetzt der vorgeschlagene Wert.",
+        "unchangedHint": "Der Check trug diesen Wert bereits — geändert hat sich nichts.",
+        "declined": "Vorschlag abgelehnt",
+        "filter": {
+          "open": "Offen",
+          "accepted": "Angenommen",
+          "declined": "Abgelehnt",
+          "all": "Alle"
+        },
+        "status": {
+          "open": "Offen",
+          "accepted": "Angenommen",
+          "declined": "Abgelehnt"
+        },
+        "field": {
+          "industry": "Branche"
+        },
+        "col": {
+          "host": "Auftritt",
+          "field": "Feld",
+          "change": "Heute · Vorschlag",
+          "reason": "Begründung",
+          "reporter": "Absender",
+          "status": "Status",
+          "date": "Eingegangen"
+        },
+        "action": {
+          "accept": "Annehmen",
+          "decline": "Ablehnen"
+        },
+        "declineTitle": "Vorschlag ablehnen",
+        "declineText": "Der Vorschlag zu {host} wird abgelehnt. Der Check bleibt, wie er ist.",
+        "declineNoteLabel": "Begründung",
+        "declineNoteHint": "Freiwillig, höchstens 300 Zeichen. Sie bleibt an der Zeile stehen.",
+        "declineNotePlaceholder": "Warum wird der Vorschlag abgelehnt?",
+        "emptyTitle": "Nichts in dieser Ansicht",
+        "empty": "Hier wartet gerade kein Vorschlag. Wechselt den Filter, um die entschiedenen zu sehen.",
+        "error": {
+          "already_decided": "Dieser Vorschlag ist bereits anders entschieden. Ändert das Feld direkt über den Entfernen-Weg unten.",
+          "invalid_value": "Der vorgeschlagene Wert gehört nicht zum Branchen-Katalog.",
+          "not_found": "Diesen Vorschlag gibt es nicht mehr.",
+          "check_not_found": "Den Check dazu gibt es nicht mehr.",
+          "corrections_unavailable": "Die Liste antwortet gerade nicht. Versucht es in einer Minute noch einmal.",
+          "generic": "Unbekannter Fehler. Ladet die Liste neu."
+        },
+        "hiddenTitle": "Eintrag aus dem Ranking nehmen",
+        "hiddenHint": "Auf Wunsch eines Website-Betreibers. Ausgeblendet antwortet der Check überall so, als gäbe es ihn nicht — die Zeile bleibt als Beleg erhalten.",
+        "hiddenLabel": "Check-Id",
+        "hiddenPlaceholder": "Check-Id einfügen",
+        "hide": "Ausblenden",
+        "unhide": "Wieder einblenden",
+        "hiddenOn": "Der Check ist ausgeblendet",
+        "hiddenOff": "Der Check ist wieder sichtbar"
       }
     },
     "cta": {
@@ -827,7 +890,7 @@
           "generic": "Das hat gerade nicht geklappt. Versucht es in einem Moment noch einmal."
         },
         "ranking": "Diesen Check ins öffentliche Ranking aufnehmen",
-        "rankingHint": "Ohne Häkchen bleibt euer Ergebnis privat, die Adresse ist trotzdem teilbar."
+        "rankingHint": "Ohne Häkchen bleibt euer Ergebnis privat, die Adresse ist trotzdem teilbar. Wurde dieselbe Adresse in den letzten sieben Tagen schon geprüft, bekommt ihr den gespeicherten Check mit seiner damaligen Einstellung — dieses Häkchen ändert daran nichts."
       },
       "bands": {
         "exceptional": "Außergewöhnlich",
@@ -1042,6 +1105,102 @@
           "title": "Saubere Meta-Angaben",
           "next": "Räumt doppelte Angaben im Seitenkopf auf und setzt eine kanonische Adresse."
         }
+      },
+      "document": {
+        "eyebrow": "Brand-Check · Fundament-Reife",
+        "source": "Quelle: Fundament-Dokument von {host}, Stand {date}",
+        "sourceUnnamed": "Quelle: Fundament-Dokument, Stand {date}",
+        "hint": "Geprüft wurden eure bestätigten Antworten, nicht eine Website. Die 16 gerechneten Kriterien gibt es an einem Dokument nicht — sie bleiben nicht bewertbar.",
+        "errors": {
+          "empty": "Bestätigt zuerst Felder im Fundament. Ohne bestätigte Antworten gibt es nichts zu prüfen.",
+          "accountLimit": "Heute sind eure 10 Neu-Ermittlungen aufgebraucht. Morgen geht es weiter.",
+          "notFound": "Diese Brand gibt es für euch nicht.",
+          "unavailable": "Der Check ist gerade nicht erreichbar. Versucht es in ein paar Minuten noch einmal.",
+          "generic": "Das hat gerade nicht geklappt. Versucht es in einem Moment noch einmal."
+        }
+      }
+    },
+    "myScores": {
+      "title": "Brand-Score",
+      "subtitle": "Wo diese Marke heute steht — von außen gemessen und im Fundament geprüft.",
+      "back": "Zu euren Brands",
+      "loading": "Wir holen eure Stände …",
+      "missingTitle": "Diese Brand gibt es hier nicht.",
+      "missingText": "Der Link zeigt auf eine Brand, die es nicht mehr gibt oder die nicht euch gehört.",
+      "sources": {
+        "website": "Website",
+        "document": "Fundament"
+      },
+      "website": {
+        "title": "Website-Score",
+        "lead": "Der Außen-Check eurer Startseite — dieselben 40 Kriterien wie im öffentlichen Brand-Check.",
+        "stand": "Geprüft am {date}",
+        "open": "Ergebnis ansehen",
+        "recheck": "Brand-Score neu ermitteln",
+        "running": "Wir prüfen eure Website …",
+        "none": "Für diese Brand gibt es noch keinen Website-Check.",
+        "start": "Website prüfen",
+        "noUrl": "Für diese Brand ist noch keine Website hinterlegt.",
+        "addUrl": "Website hinterlegen",
+        "urlLabel": "Eure Website",
+        "urlPlaceholder": "eure-website.de",
+        "save": "Speichern",
+        "saved": "Website gespeichert"
+      },
+      "document": {
+        "title": "Fundament-Reife",
+        "lead": "Dieselben Kriterien, gestellt an euer Fundament-Dokument statt an eine Seite. Die 16 gerechneten Kriterien bleiben dort nicht bewertbar.",
+        "stand": "Geprüft am {date}",
+        "open": "Ergebnis ansehen",
+        "recheck": "Fundament erneut prüfen",
+        "start": "Fundament prüfen",
+        "running": "Wir lesen euer Fundament …",
+        "none": "Euer Fundament wurde noch nicht geprüft."
+      },
+      "diff": {
+        "title": "Gegenüberstellung",
+        "lead": "Der jüngste Stand gegen den davor — je Kategorie und im Gesamtwert.",
+        "dates": "{previous} gegen {latest}",
+        "category": "Kategorie",
+        "previous": "Vorher",
+        "latest": "Jetzt",
+        "change": "Veränderung",
+        "total": "Gesamtwert",
+        "notAssessable": "nicht bewertbar",
+        "isNew": "neu"
+      },
+      "todos": {
+        "title": "Was der Experte jetzt angehen würde",
+        "lead": "Alle Kriterien unter der vollen Punktzahl, nach Gewicht sortiert — jedes mit dem Beleg, auf dem es steht.",
+        "empty": "Nichts offen: in dieser Prüfung hat jedes bewertbare Kriterium die volle Punktzahl.",
+        "points": "{score} von 2",
+        "chapter": "Passt ins Kapitel {chapter}",
+        "openChapter": "Kapitel öffnen"
+      },
+      "history": {
+        "title": "Verlauf",
+        "lead": "Jeder Stand, den wir für diese Brand gespeichert haben.",
+        "date": "Datum",
+        "source": "Quelle",
+        "score": "Score",
+        "open": "Ansehen",
+        "empty": "Für diese Brand ist noch kein Stand gespeichert."
+      },
+      "card": {
+        "score": "Brand-Score: {score}",
+        "empty": "Brand-Score: noch keiner",
+        "open": "Score ansehen",
+        "addUrl": "Website hinterlegen"
+      },
+      "errors": {
+        "accountLimit": "Heute sind eure 10 Neu-Ermittlungen aufgebraucht. Morgen geht es weiter.",
+        "documentEmpty": "Bestätigt zuerst Felder im Fundament. Ohne bestätigte Antworten gibt es nichts zu prüfen.",
+        "notFound": "Diese Brand gibt es für euch nicht.",
+        "invalidUrl": "Diese Adresse können wir nicht lesen. Schreibt sie bitte so, wie ihr sie im Browser eingebt.",
+        "blockedTarget": "Diese Adresse dürfen wir nicht abrufen. Nennt uns bitte die öffentliche Adresse eurer Website.",
+        "fetchFailed": "Die Seite hat nicht geantwortet. Prüft die Adresse und versucht es gleich noch einmal.",
+        "unavailable": "Der Check ist gerade nicht erreichbar. Versucht es in ein paar Minuten noch einmal.",
+        "generic": "Das hat gerade nicht geklappt. Versucht es in einem Moment noch einmal."
       }
     },
     "checkPage": {
@@ -1138,6 +1297,148 @@
         "cta": "Brand-Check starten",
         "sampleLabel": "Beispiel",
         "sampleNote": "So sieht ein Ergebnis aus: ein Wert mit Band und acht Kategorien darunter."
+      }
+    },
+    "checkRanking": {
+      "seoTitle": "Brand-Ranking — alle geprüften Markenauftritte",
+      "seoDescription": "Die Bestenliste des Brand-Checks: geprüfte Markenauftritte mit Brand Score, Band und Branche. Filterbar nach Branche und Stärke, sortierbar nach jeder der acht Kategorien.",
+      "eyebrow": "Brand-Check · Ranking",
+      "title": "Das Ranking",
+      "lead": "Alle Auftritte, deren Prüfer sie ins Ranking aufgenommen haben — je höher, desto stärker.",
+      "total": "{count} Auftritte",
+      "compare": "Vergleichen",
+      "compareHint": "Hakt zwei Zeilen an, um beide Ergebnisse nebeneinander zu sehen. Ein dritter Haken ersetzt den ältesten.",
+      "pick": "{host} für den Vergleich auswählen",
+      "note": "Im Ranking steht nur, wer beim Check das Häkchen gesetzt hat. Betreibt ihr einen der Auftritte und wollt ihn hier nicht sehen? Schreibt uns, wir blenden ihn aus.",
+      "filter": {
+        "industry": "Branche",
+        "band": "Stärke",
+        "sort": "Sortierung",
+        "allIndustries": "Alle Branchen",
+        "allBands": "Alle Stärken"
+      },
+      "sort": {
+        "score": "Bester Score",
+        "date": "Zuletzt geprüft",
+        "category": "Die Besten in {category}"
+      },
+      "col": {
+        "rank": "Rang",
+        "host": "Auftritt",
+        "score": "Score",
+        "industry": "Branche",
+        "source": "Quelle",
+        "strongest": "Stärkste Kategorie",
+        "date": "Geprüft"
+      },
+      "source": {
+        "website": "Website",
+        "document": "Fundament"
+      },
+      "emptyTitle": "Noch kein Auftritt im Ranking",
+      "empty": "Prüft euren und setzt das Häkchen — dann steht er hier.",
+      "emptyCta": "Brand-Check starten"
+    },
+    "industry": {
+      "agency": "Agentur",
+      "software": "Software",
+      "ecommerce": "Online-Handel",
+      "consulting": "Beratung",
+      "craft": "Handwerk",
+      "food": "Lebensmittel und Getränke",
+      "hospitality": "Gastgewerbe und Reisen",
+      "health": "Gesundheit",
+      "finance": "Finanzen und Versicherung",
+      "education": "Bildung",
+      "creative": "Kreativ und Design",
+      "realestate": "Immobilien",
+      "manufacturing": "Industrie und Fertigung",
+      "nonprofit": "Gemeinnützig",
+      "personal": "Personen und persönliche Marken",
+      "other": "Sonstiges",
+      "unknown": "Nicht zugeordnet"
+    },
+    "checkCorrection": {
+      "trigger": "Branche stimmt nicht?",
+      "title": "Branche korrigieren",
+      "lead": "Die Branche schätzt der Markenexperte aus der Startseite. Sagt uns, was stimmt — wir sehen es uns an.",
+      "current": "Heute eingetragen: {industry}",
+      "proposedLabel": "Richtige Branche",
+      "proposedPlaceholder": "Branche wählen",
+      "reasonLabel": "Begründung",
+      "reasonHint": "Freiwillig, höchstens 300 Zeichen.",
+      "reasonPlaceholder": "Was macht dieser Auftritt wirklich?",
+      "emailLabel": "E-Mail-Adresse",
+      "emailHint": "Freiwillig — nur, falls wir nachfragen wollen.",
+      "emailPlaceholder": "Eure E-Mail-Adresse",
+      "submit": "Vorschlag senden",
+      "thanks": "Danke — wir prüfen den Vorschlag.",
+      "errors": {
+        "correctionOpen": "Dazu liegt schon ein Vorschlag vor.",
+        "rateLimited": "Zu viele Vorschläge, später noch einmal.",
+        "notFound": "Diesen Check gibt es nicht mehr.",
+        "unavailable": "Das antwortet gerade nicht. Versucht es in einer Minute noch einmal.",
+        "generic": "Das hat nicht geklappt. Versucht es noch einmal."
+      }
+    },
+    "checkCompare": {
+      "seoTitle": "Vergleich · {a} gegen {b}",
+      "seoTitleEmpty": "Zwei Markenauftritte vergleichen",
+      "eyebrow": "Vergleich · zwei Auftritte nebeneinander",
+      "title": "Zwei Marken, Kategorie für Kategorie",
+      "lead": "Zwei geprüfte Auftritte direkt gegeneinander: ein Markenabdruck mit beiden Profilen übereinander und acht Kategorien im direkten Duell.",
+      "sideA": "Seite A",
+      "sideB": "Seite B",
+      "stand": "Stand {date}",
+      "open": "Ergebnis ansehen",
+      "pick": "Anderen Check wählen",
+      "pickHint": "Zur Auswahl stehen die Auftritte aus dem Ranking. Einen privaten Check vergleicht ihr über seinen Link.",
+      "pickTitle": "Auftritt wählen",
+      "pickLead": "Sucht nach der Adresse. Die Liste zeigt die Auftritte, die im Ranking stehen.",
+      "pickSearch": "Adresse suchen",
+      "pickLoading": "Die Liste wird geladen.",
+      "pickFailed": "Die Liste antwortet gerade nicht. Versucht es in einem Moment noch einmal.",
+      "pickEmpty": "Dazu steht nichts im Ranking.",
+      "pickCount": "{count} Auftritt zur Auswahl | {count} Auftritte zur Auswahl",
+      "slotEmpty": "Hier ist noch nichts gewählt.",
+      "swap": "Seiten tauschen",
+      "rowsTitle": "Kategorie für Kategorie",
+      "rowsLead": "Jede Zeile ist ein direktes Duell: die Seite mit dem höheren Wert steht in voller Farbe.",
+      "notAssessable": "n. b.",
+      "notAssessableHint": "n. b. heißt nicht bewertbar: was wir von außen nicht prüfen konnten, gewinnt und verliert keine Kategorie.",
+      "missingTitle": "Diesen Check gibt es nicht",
+      "missingText": "Mindestens einer der beiden Links führt ins Leere. Wählt einen Auftritt aus dem Ranking oder prüft die Adresse.",
+      "missingCta": "Zum Ranking",
+      "chooseTitle": "Wählt zwei Auftritte",
+      "chooseText": "Wählt zwei Auftritte aus dem Ranking — oder öffnet einen Check und klickt dort auf Vergleichen.",
+      "chooseA": "Seite A wählen",
+      "chooseB": "Seite B wählen",
+      "fromResult": "Vergleichen",
+      "summary": {
+        "eyebrow": "Fazit",
+        "leader": "{host} liegt vorn",
+        "tie": "Gleichstand — keiner der beiden gewinnt mehr Kategorien",
+        "wins": "{host} gewinnt keine Kategorie. | {host} gewinnt eine Kategorie. | {host} gewinnt {count} Kategorien.",
+        "ties": "Kein Gleichstand. | Ein Gleichstand. | {count} Gleichstände.",
+        "notAssessable": "Eine Kategorie war auf mindestens einer Seite nicht bewertbar. | {count} Kategorien waren auf mindestens einer Seite nicht bewertbar.",
+        "basis": "Bewertbare Kategorien: {a} auf Seite A, {b} auf Seite B."
+      }
+    },
+    "fingerprint": {
+      "title": "Markenabdruck",
+      "lead": "Die acht Kategorien als Profil. Je weiter außen, desto stärker.",
+      "notAssessable": "nicht bewertbar",
+      "aria": "Markenabdruck mit acht Achsen. {values}",
+      "ariaSeries": "{label}: {values}",
+      "axis": {
+        "distinctiveness": "Eigenart",
+        "visual": "Optik",
+        "consistency": "Konsistenz",
+        "experience": "Erlebnis",
+        "clarity": "Klarheit",
+        "emotion": "Wirkung",
+        "adaptability": "Anpassung",
+        "craft": "Handwerk"
       }
     },
     "acceptance": {
