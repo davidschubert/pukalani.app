@@ -270,7 +270,7 @@ const CONTROL_SOLL = [
  *   feature_catalog · feedback
  */
 /**
- * brand (packages/brand) — der Brand-Wizard. Die sieben Tabellen laufen
+ * brand (packages/brand) — der Brand-Wizard. Die acht Tabellen laufen
  * AUSSCHLIESSLICH auf `branding` (branding.supply) und stehen deshalb NUR im
  * BRANDING_SOLL: sie gehören nicht in die instanzweite Spalten-Parität (die
  * vergleicht nur system+admin+pages+analytics, s. u.).
@@ -292,6 +292,8 @@ const BRAND_TABLES = [
   'brand_invites',
   'brand_access',
   'brand_events',
+  // brand-011: die Warteliste der geschlossenen Beta („Frühzugang anfragen").
+  'brand_waitlist',
 ]
 
 const PORTFOLIO_SOLL = [

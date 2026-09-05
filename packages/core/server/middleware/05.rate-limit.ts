@@ -411,6 +411,22 @@ const WRITE_LIMITED: { re: RegExp, bucket: string, max?: number }[] = [
    */
   { re: /^POST \/api\/brand\/invite\/(check|redeem)$/, bucket: 'brand:invite', max: TOKEN_MAX },
   /**
+   * DIE WARTELISTE — die einzige Route des Layers, die OHNE jeden Beweis eine
+   * Zeile schreibt (kein Gate, keine Session, kein Code): sie existiert genau
+   * für die Menschen, die das Beta-Gate nicht passieren.
+   *
+   * 5/min je IP ist enger als `TOKEN_MAX`, und das passt zum Gebrauch: ein
+   * Mensch trägt sich EINMAL ein, im Zweifel ein zweites Mal, weil er nicht
+   * sicher war. Wer öfter drückt, ist ein Skript — und für das soll jeder
+   * Versuch teuer sein, denn jeder kostet hier eine Abfrage UND (beim ersten
+   * Mal je Adresse) einen Schreibvorgang über den Admin-Client, an dem
+   * Appwrites eigene Bremse nicht greift.
+   *
+   * Die Zeile ist der DECKEL, nicht der Filter: den Bot fängt der Honigtopf im
+   * Rumpf (`hp`), die Dublette der UNIQUE-Index auf `emailLower`.
+   */
+  { re: /^POST \/api\/brand\/waitlist$/, bucket: 'brand:waitlist', max: 5 },
+  /**
    * GEORGES ENTWÜRFE (P2.1) — die teuerste Route des Wizards: jeder Lauf ist
    * ein Anbieter-Aufruf mit Streaming-Antwort. Die eigentlichen Deckel sind
    * feiner und sitzen IN der Route (Burst 2 je Konto, 10/Tag je Brand ×

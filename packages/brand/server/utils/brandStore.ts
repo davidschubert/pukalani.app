@@ -60,6 +60,7 @@ export const BRAND_MESSAGES_TABLE = 'brand_messages'
 export const BRAND_SHARES_TABLE = 'brand_shares'
 export const BRAND_INVITES_TABLE = 'brand_invites'
 export const BRAND_EVENTS_TABLE = 'brand_events'
+export const BRAND_WAITLIST_TABLE = 'brand_waitlist'
 
 export type BrandProfileRow = Models.Row & {
   createdByUserId: string
@@ -146,6 +147,26 @@ export type BrandShareRow = Models.Row & {
   publishedAt: string
   expiresAt: string
   revokedAt?: string | null
+}
+
+/**
+ * Die Warteliste (brand-011). Sie hängt an KEINEM Profil und an keinem Konto —
+ * die Zeile entsteht, bevor es beides gibt; ihre Identität ist `emailLower`
+ * (UNIQUE). `status` ist heute reine ANZEIGE für den Betreiber: 'new' |
+ * 'invited' | 'declined' sind Werte, keine Logik — es gibt keinen Code, der
+ * sie liest, und das ist Absicht (der Übergang zur Einladung läuft über
+ * `brand_invites`, nicht über ein Statusfeld).
+ */
+export type BrandWaitlistRow = Models.Row & {
+  emailLower: string
+  email: string
+  name: string
+  company: string
+  website: string
+  locale: string
+  source: string
+  status: string
+  note: string
 }
 
 /** Der Admin-Client + die Database-Id des Requests — EIN Aufruf statt zwei. */

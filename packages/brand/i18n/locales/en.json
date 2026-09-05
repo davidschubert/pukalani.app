@@ -681,7 +681,9 @@
       "verifyText": "The code is bound to your address. Once it is confirmed, come back to this page and we will redeem it.",
       "redeeming": "Unlocking your access.",
       "deniedHint": "An invitation code only works for the address it was sent to. Are you signed in with the right account?",
-      "retry": "Try again"
+      "retry": "Try again",
+      "noCodeTitle": "No code yet?",
+      "noCodeText": "Join the waitlist — we open access in waves and will get in touch as soon as your spot is ready."
     },
     "validation": {
       "contentLocale": "This content language is not available.",
@@ -689,6 +691,23 @@
       "emptyPatch": "Nothing to change.",
       "emptySlotPatch": "A slot change needs a value or a confirmation.",
       "websiteUrl": "Please enter a full web address (http:// or https://) — or leave the field empty."
+    },
+    "placeholder": {
+      "pending": "Image to come"
+    },
+    "waitlist": {
+      "email": "Email address",
+      "emailPlaceholder": "Your email address",
+      "website": "Website (optional)",
+      "websitePlaceholder": "your-website.com — if it already exists",
+      "submit": "Join the waitlist",
+      "sending": "Adding you …",
+      "haveCode": "I have a code",
+      "doneTitle": "You are on the list.",
+      "doneText": "We open access in waves and will email you as soon as your spot is ready.",
+      "duplicateText": "This address is already on the list — you are up when the next wave opens.",
+      "error": "That did not work just now. Please try again in a minute.",
+      "consent": "We use your address only to invite you to the beta. No newsletter, never shared."
     }
   }
 }
