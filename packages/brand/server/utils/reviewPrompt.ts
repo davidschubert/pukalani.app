@@ -57,8 +57,16 @@ import { BRAND_CONVERSE_HISTORY_CHARS } from './georgePrompt'
  *    zu etwas, dem niemand zugestimmt hat, ist kein Widerspruch.
  */
 
-/** Steigt mit jeder inhaltlichen Änderung — wie `converse-N` (§7). */
-export const BRAND_REVIEW_PROMPT_VERSION = 'review-1'
+/**
+ * Steigt mit jeder inhaltlichen Änderung — wie `converse-N` (§7).
+ *
+ * `review-2` (BW2 Paket 6): der `correct`-Modus ist verdrahtet und bekommt
+ * dafür den WORTLAUT VOR der Korrektur als eigenen Block. Ohne ihn müsste das
+ * Modell aus dem neuen Wert allein raten, WAS sich geändert hat — und die
+ * Frage „welches Feld trifft das inhaltlich" ist ohne den Unterschied gar
+ * nicht zu beantworten.
+ */
+export const BRAND_REVIEW_PROMPT_VERSION = 'review-2'
 
 /**
  * Die Antwort ist ein kleines JSON-Objekt: drei Listen von höchstens drei bis
@@ -119,6 +127,12 @@ export interface BrandReviewPromptOptions {
   openSessions: readonly { id: string, label: string }[]
   /** Nur `correct` (Paket 6): die mechanisch veralteten Felder mit ihren Werten. */
   staleFields?: readonly BrandReviewDocumentEntry[]
+  /**
+   * Nur `correct` (Paket 6): der bestätigte Wortlaut VOR der Korrektur. Die
+   * Frage des Modus ist ein UNTERSCHIED, und einen Unterschied kann man nicht
+   * aus einer Seite lesen.
+   */
+  previousValue?: string
   /** Nur Stufe 2: die Befunde der Stufe 1 als HYPOTHESE, nicht als Vorgabe. */
   hypothesis?: readonly BrandFinding[]
 }
@@ -190,7 +204,8 @@ function answerLines(mode: BrandReviewMode): string[] {
     '',
     'ANSWER WITH JSON ONLY — no prose, no markdown, no code fences. Exactly this shape:',
     '{"goalReached": <true|false>, "missing": ["…"], "notes": ["…"], "findings": [{"kind": '
-    + '"conflict"|"gap", "slots": ["<field id>"], "why": "…", "suggestion": "…"}], "nextSession": '
+    + (mode === 'correct' ? '"conflict"|"gap"|"affected"' : '"conflict"|"gap"')
+    + ', "slots": ["<field id>"], "why": "…", "suggestion": "…"}], "nextSession": '
     + '"<field id>"|null'
     + (mode === 'correct' ? ', "affected": ["<field id>"]' : '')
     + '}',
@@ -236,6 +251,12 @@ function ruleLines(options: BrandReviewPromptOptions): string[] {
     lines.push(
       '"affected" contains only field ids from the out-of-date list below. Leaving a field out is the '
       + 'friendly answer and the right one wherever the change does not reach it.',
+      // Die Id sagt WAS, der Befund sagt WARUM — und der `why` gehört dem
+      // Spezialisten. Ohne diese Zeile stünde neben einem bernsteinen Feld ein
+      // Satz, den die Software erfunden hätte.
+      'For EVERY id you name in "affected", also add one finding with kind "affected", exactly that one '
+      + 'field id in "slots", and one sentence in "why" saying what no longer fits after this change. A '
+      + 'field named in "affected" without such a finding leaves the person with a warning and no reason.',
     )
   }
   if (options.session?.invariants.length) {
@@ -280,6 +301,12 @@ function inputBlocks(options: BrandReviewPromptOptions): string[] {
   else {
     const value = clamp(options.value, BRAND_REVIEW_VALUE_CHARS)
     blocks.push(`[the value that was just confirmed]\n${value || '(empty)'}`)
+    // DER UNTERSCHIED IST DIE FRAGE (`correct`, Paket 6): erst neben dem alten
+    // Wortlaut ist zu sehen, ob hier ein Komma oder eine Haltung gewechselt hat.
+    const previous = clamp(options.previousValue ?? '', BRAND_REVIEW_VALUE_CHARS)
+    if (options.mode === 'correct' && previous) {
+      blocks.push(`[the same field BEFORE this correction — compare the two]\n${previous}`)
+    }
   }
 
   if (options.hypothesis?.length) {

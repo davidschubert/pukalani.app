@@ -22,6 +22,7 @@ import {
 import { sessionsAffectedBy } from '../../../../shared/brandSessions'
 import {
   BRAND_STEP_KEYS,
+  type BrandInvariant,
   type BrandPathKind,
   type BrandSlot,
   type BrandSlotStateFacts,
@@ -66,6 +67,7 @@ import type {
   BrandGenerationVersionsResponse,
   BrandSessionAcceptResponse,
   BrandSessionCloseResponse,
+  BrandSessionImpactResponse,
   BrandSiteAnalysisView,
   BrandSiteAnalyzeResponse,
   BrandSlotView,
@@ -73,6 +75,7 @@ import type {
 } from '../../../../shared/types/brand'
 import { useBrandWorkspaceStore } from '../../../stores/brandWorkspace'
 import { useBrandAutosave } from '../../../composables/useBrandAutosave'
+import { useBrandFieldLabel } from '../../../composables/useBrandFieldLabel'
 import { useBrandConversation } from '../../../composables/useBrandConversation'
 import { useBrandGeneration } from '../../../composables/useBrandGeneration'
 
@@ -130,6 +133,8 @@ const localePath = useLocalePath()
 const toast = useToast()
 const store = useBrandWorkspaceStore()
 const request = useRequestFetch()
+/** Die EINE Beschriftungs-Regel — auch für Felder FREMDER Kapitel (§9). */
+const fieldLabel = useBrandFieldLabel()
 
 const profileId = computed(() => String(route.params.profileId ?? ''))
 const routeStepKey = computed(() => String(route.params.stepKey ?? ''))
@@ -928,16 +933,210 @@ async function confirmSlot(slotId: string): Promise<void> {
   await autoAdvance(slotId, next)
 }
 
+// ── Die Korrektur-Regel (BW2 Paket 6, §9) ────────────────────────────────
+
+/**
+ * DER IMPACT-HINWEIS VOR EINER KORREKTUR — EINE Stelle, DREI Eingänge.
+ *
+ * „Korrigieren" gibt es an der Log-Karte, als „Bearbeiten" auf der Finalen
+ * Abnahme und am Feld-Link eines Befund-Chips. Alle drei laufen durch
+ * `requestImpactConsent()`: Hülle holen, bei leerer Hülle sofort weiter, sonst
+ * den Layer zeigen und auf Annehmen oder Abbrechen warten. Die KOMPONENTEN
+ * lösen dabei nur ihr Ereignis aus (`edit()`/`jumpTo()` emittieren wie bisher)
+ * — die Seite ist die Stelle, die spült, navigiert und speichert, und dreimal
+ * derselbe `$fetch` mit demselben Modal wäre dreimal dieselbe Pflege.
+ *
+ * ── DIE ZUSTIMMUNG GILT FÜR DIESEN BESUCH ────────────────────────────────
+ * Wer auf der Abnahme-Seite „Bearbeiten" annimmt, landet in der Session und
+ * korrigiert dort — der Layer darf ihn nicht ein zweites Mal fragen. Die
+ * angenommene Hülle liegt deshalb je Feld hier (`acknowledged`), und der PATCH
+ * trägt sie als `impactAck`. Bewegt sie sich zwischendurch, weist der SERVER
+ * mit 409 ab, und der Layer kommt mit `changed` zurück (s. `correctionRejected`).
+ *
+ * ── FAIL-OPEN BEIM LADEN ─────────────────────────────────────────────────
+ * Kommt die Hülle nicht (Netz, 5xx), wird korrigiert. Ein Ausfall darf einen
+ * Menschen nicht von seinem eigenen Feld aussperren, und die Durchsetzung
+ * hängt nicht an dieser Anzeige: der Server verlangt den Hash trotzdem, und
+ * genau dann zeigt der Layer sich eben nachträglich.
+ */
+const impactOpen = ref(false)
+const impactData = ref<BrandSessionImpactResponse | null>(null)
+const impactLoading = ref(false)
+const impactChanged = ref(false)
+/** Feld-Id → angenommener Hüllen-Hash (dieser Besuch). */
+const acknowledged = ref<Record<string, string>>({})
+/** Die offene Frage des Layers — sie wird mit Annehmen/Abbrechen beantwortet. */
+let impactAnswer: ((accepted: boolean) => void) | null = null
+
+async function loadImpact(slotId: string): Promise<BrandSessionImpactResponse | null> {
+  const target = slotById(slotId)?.stepId
+  if (!target) return null
+  impactLoading.value = true
+  try {
+    return await $fetch<BrandSessionImpactResponse>(
+      `/api/brand/profiles/${profileId.value}/steps/${target}/sessions/${slotId}/impact`,
+    )
+  }
+  catch {
+    return null
+  }
+  finally {
+    impactLoading.value = false
+  }
+}
+
+async function requestImpactConsent(slotId: string): Promise<boolean> {
+  if (acknowledged.value[slotId]) return true
+  impactChanged.value = false
+  const impact = await loadImpact(slotId)
+  // Leere Hülle heisst: hier hängt nichts dran — es gibt nichts anzukündigen.
+  if (!impact || impact.count === 0) return true
+  impactData.value = impact
+  impactOpen.value = true
+  return new Promise<boolean>((resolve) => { impactAnswer = resolve })
+}
+
+function acceptImpact(): void {
+  const impact = impactData.value
+  if (impact) acknowledged.value = { ...acknowledged.value, [impact.slotId]: impact.ack }
+  impactOpen.value = false
+  impactAnswer?.(true)
+  impactAnswer = null
+}
+
+function cancelImpact(): void {
+  impactOpen.value = false
+  impactAnswer?.(false)
+  impactAnswer = null
+}
+
 /**
  * „KORRIGIEREN" — die EINZIGE Tür zurück (Davids Entscheidung 2026-09-02).
  * Ein bestätigter Slot ist zu; Aufheben ist eine Änderung wie jede andere
  * (dieselbe `revision`-Rechnung, derselbe 409-Weg). Deshalb `flush()` und
  * nicht `schedule()`: erst wenn der Server es bestätigt, ist der Slot offen.
+ *
+ * SEIT PAKET 6 steht der Impact-Hinweis davor (§9) — und der angenommene Hash
+ * reist mit dem PATCH, sonst weist die Route ihn ab.
  */
 async function reviseSlot(slotId: string): Promise<void> {
+  if (!await requestImpactConsent(slotId)) return
+  const ack = acknowledged.value[slotId]
+  if (ack) store.setImpactAck(ack)
   store.setSlotConfirmed(slotId, false)
   editingSlotId.value = slotId
   await autosave.flush()
+}
+
+/**
+ * DER SPRUNG IN EIN BESTÄTIGTES FELD (Abnahme-Seite „Bearbeiten", Feld-Link
+ * eines Befund-Chips) — mit demselben Hinweis davor.
+ *
+ * Er korrigiert NICHT selbst: er holt die Zustimmung und geht dann dorthin, wo
+ * korrigiert wird. Zwei Gründe, und beide sind Betrieb, nicht Geschmack. Die
+ * Abnahme-Seite führt ihre eigene `revision` (sie lädt sich selbst neu), ein
+ * PATCH von hier liefe ihr mit der Fassung der Werkstatt in einen Konflikt.
+ * Und ein Feld-Link darf über die KAPITEL-Grenze gehen — dessen Zeile liegt
+ * gar nicht im Store dieser Seite. Die Zustimmung bleibt gemerkt, also fragt
+ * „Korrigieren" drüben nicht ein zweites Mal.
+ */
+async function correctThenGo(slotId: string, go: () => Promise<void>): Promise<void> {
+  // Nur ein BESTÄTIGTES Feld wird korrigiert; alles andere ist Navigation.
+  // Für ein fremdes Kapitel weiss diese Seite es nicht — dort fragt die
+  // Log-Karte drüben.
+  if (store.slotConfirmed(slotId) && !await requestImpactConsent(slotId)) return
+  await go()
+}
+
+/**
+ * DER SERVER HAT DIE KORREKTUR ABGEWIESEN (409 `impact_unacknowledged`) — die
+ * Hülle hat sich bewegt, seit der Mensch sie gesehen hat.
+ *
+ * Die Zustimmung von vorhin galt einer anderen Zahl und verfällt deshalb; der
+ * Layer kommt mit dem Hinweis `brand.impact.changed` zurück, und wer erneut
+ * annimmt, korrigiert danach ohne einen weiteren Klick. Die neue Hülle wird
+ * GEHOLT und nicht geraten (der 409 trägt sie nicht mit — nur `data.code`
+ * wird zu `reason`).
+ */
+watch(() => store.correctionRejected, async (slotId) => {
+  if (!slotId) return
+  store.dismissCorrectionRejection()
+  const { [slotId]: _stale, ...rest } = acknowledged.value
+  acknowledged.value = rest
+  const impact = await loadImpact(slotId)
+  if (!impact || impact.count === 0) return
+  impactData.value = impact
+  impactChanged.value = true
+  impactOpen.value = true
+  const accepted = await new Promise<boolean>((resolve) => { impactAnswer = resolve })
+  if (accepted) await reviseSlot(slotId)
+})
+
+/**
+ * EINE DETERMINISTISCHE REGEL DES FELDES HAT DAS BESTÄTIGEN ABGEWIESEN
+ * (§3a Nr. 6) — ein Satz, der sagt, WAS zu tun ist.
+ *
+ * Der Server schickt nur `invariant_violated`; welche Regel es war, hat der
+ * Store mit derselben puren Funktion nachgerechnet. Der Satz nennt das Feld
+ * und, wo es eine Quelle gibt, deren Beschriftung — „drei bis fünf Werte" ist
+ * eine Ansage, „ungültig" wäre eine Sackgasse.
+ */
+watch(() => store.invariantRejection, (rejection) => {
+  if (!rejection) return
+  store.dismissInvariantRejection()
+  toast.add({
+    color: 'warning',
+    title: t('brand.invariant.title'),
+    description: invariantMessage(rejection.slotId, rejection.invariant),
+  })
+})
+
+function invariantMessage(slotId: string, invariant: BrandInvariant | null): string {
+  const field = fieldLabel(slotId)
+  if (!invariant) return t('brand.invariant.generic', { field })
+  return t(`brand.invariant.${invariant.kind}`, {
+    field,
+    source: invariant.of ? fieldLabel(invariant.of) : '',
+    min: invariant.min ?? 0,
+    max: invariant.max ?? 0,
+  })
+}
+
+// ── Die Warteschlange „neu besprechen" (§9) ──────────────────────────────
+
+/**
+ * DIESE SESSION IST VERALTET: ein Feld, aus dem sie schöpft, hat sich
+ * geändert. Zwei Wege stehen offen, und der Mensch wählt — „Gilt weiter"
+ * stempelt den neuen Stand als Grundlage, „Neu besprechen" lässt das Gespräch
+ * laufen (George eröffnet mit Bezug auf die Änderung, s. converse-9).
+ *
+ * Der Hinweis ist RUHIG und keine Sperre: der bestätigte Wert steht weiter da,
+ * und wer nichts tut, verliert nichts.
+ */
+const activeStale = computed(() => activeSession.value?.state === 'stale')
+const staleHidden = ref(false)
+const restamping = ref(false)
+
+async function keepSessionValid(): Promise<void> {
+  const slot = activeSlot.value
+  if (!slot || !stepKey.value || restamping.value) return
+  restamping.value = true
+  try {
+    // Erst ausspülen: der Stempel schreibt dieselbe Zeile, und eine offene
+    // Eingabe liefe danach in einen 409 mit der alten Fassung.
+    await autosave.flush()
+    const response = await $fetch<BrandSessionAcceptResponse>(
+      `/api/brand/profiles/${profileId.value}/steps/${stepKey.value}/sessions/${slot.id}/restamp`,
+      { method: 'POST', body: { revision: store.revision } },
+    )
+    store.applySessionRestamp(response)
+  }
+  catch {
+    toast.add({ color: 'warning', title: t('brand.session.keepFailed') })
+  }
+  finally {
+    restamping.value = false
+  }
 }
 
 /** Der Hinweis je Slot („wärmer", „kürzer") — lokal, nie gespeichert. */
@@ -956,6 +1155,8 @@ watch([routeStepKey, activeSessionKey], () => {
   promptDraft.value = ''
   exampleOpen.value = false
   editingSlotId.value = null
+  // Ein weggeklickter Veraltet-Hinweis gehörte zu GENAU dieser Session.
+  staleHidden.value = false
 })
 
 /**
@@ -2042,8 +2243,8 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
         v-if="acceptanceView && stepKey"
         :profile-id="profileId"
         :step-key="stepKey"
-        @session="goToSession"
-        @field="goToField"
+        @session="slotId => correctThenGo(slotId, () => goToSession(slotId))"
+        @field="slotId => correctThenGo(slotId, () => goToField(slotId))"
         @decided="findingDecided"
         @advance="advanceToStep"
         @restarted="afterRestart"
@@ -2374,10 +2575,34 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
           <BwFindingChip
             v-for="finding in activeFindings" :key="finding.id"
             :finding="finding" :profile-id="profileId"
-            @field="goToField"
+            @field="slotId => correctThenGo(slotId, () => goToField(slotId))"
             @decided="findingDecided"
             @stale="store.dropFinding(finding.id)"
           />
+
+          <!-- VERALTET (§9): ein Feld davor hat sich geändert. RUHIG und ohne
+               Sperre — der bestätigte Wert steht weiter da. Zwei Ausgänge:
+               „Gilt weiter" stempelt den neuen Stand als Grundlage, „Neu
+               besprechen" räumt den Hinweis weg und überlässt das Feld dem
+               Gespräch (George eröffnet mit Bezug auf die Änderung). -->
+          <div
+            v-if="activeStale && !staleHidden"
+            class="rounded-2xl px-4 py-3" style="background: var(--bw-surface)"
+          >
+            <p class="text-sm" style="color: var(--bw-ink-soft)">{{ t('brand.session.stale') }}</p>
+            <div class="mt-2 flex flex-wrap items-center gap-2">
+              <UButton
+                size="sm" variant="ghost" color="neutral" class="rounded-full"
+                icon="i-ph-check" :loading="restamping"
+                :label="t('brand.session.keep')" @click="keepSessionValid"
+              />
+              <UButton
+                size="sm" variant="ghost" color="neutral" class="rounded-full"
+                icon="i-ph-chat-circle-dots"
+                :label="t('brand.session.rediscuss')" @click="staleHidden = true"
+              />
+            </div>
+          </div>
 
           <!-- VERTAGT: der Zwischenstand bleibt sichtbar, aber nicht
                bearbeitbar — der Wert entsteht im Gespräch. -->
@@ -2546,7 +2771,7 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
                   <BwFindingChip
                     v-for="finding in card.findings" :key="finding.id"
                     compact :finding="finding" :profile-id="profileId"
-                    @field="goToField"
+                    @field="slotId => correctThenGo(slotId, () => goToField(slotId))"
                     @decided="findingDecided"
                     @stale="store.dropFinding(finding.id)"
                   />
@@ -2727,6 +2952,19 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
   </UModal>
 
   <!-- 409: BEIDE Fassungen, nichts wird automatisch überschrieben (§3e). -->
+  <!-- DER IMPACT-HINWEIS (§9) — EINE Instanz für alle drei Eingänge
+       („Korrigieren" im Log, „Bearbeiten" in der Abnahme, der Feld-Link eines
+       Befund-Chips). Nie per `v-if` unmountet: ein offener Dialog, den man
+       wegrendert, lässt Fokus-Falle und Overlay zurück. -->
+  <BwImpactLayer
+    v-model:open="impactOpen"
+    :impact="impactData"
+    :loading="impactLoading"
+    :changed="impactChanged"
+    @accept="acceptImpact"
+    @cancel="cancelImpact"
+  />
+
   <UModal v-model:open="conflictOpen" :title="t('brand.workspace.conflict.title')">
     <template #content>
       <div class="bw-root bw-overlay max-h-[85vh] overflow-y-auto p-8">

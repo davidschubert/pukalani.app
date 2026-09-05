@@ -55,9 +55,12 @@ import {
  * nach. Ein Spezialist, der eine Bestätigung verhindert, wäre ein zweiter
  * Schreibweg neben `transitionBrandStep`.
  *
- * Die AUSNAHME `correct` (dort ist fail-soft fail-CLOSED in Richtung „bitte
- * ansehen") ist Paket 6 und steht hier bewusst noch nicht: der Modus ist
- * gebaut, verdrahtet ist er nicht.
+ * Die AUSNAHME `correct` ist seit Paket 6 verdrahtet, und dort ist fail-soft
+ * fail-CLOSED in Richtung „bitte ansehen": ohne gültige Antwort fehlt
+ * `affected` ganz, und `applyAffected` lässt dann ALLE mechanisch veralteten
+ * Felder veraltet. Die Entscheidung darüber steht nicht hier, sondern in
+ * dieser einen puren Funktion — hier kommt einfach kein `affected` an, und das
+ * ist genau die Auskunft, die sie braucht.
  *
  * ── ER SCHREIBT NICHT ─────────────────────────────────────────────────────
  * Diese Datei ruft den Anbieter und prüft die Antwort. Was davon in
@@ -113,6 +116,8 @@ export interface BrandReviewRequest {
   notes: readonly BrandReviewDocumentEntry[]
   openSessions: readonly { id: string, label: string }[]
   staleFields?: readonly BrandReviewDocumentEntry[]
+  /** Nur `correct` (§9): der bestätigte Wortlaut VOR der Korrektur. */
+  previousValue?: string
   /**
    * NUR FÜR BEWEISE: der Entwicklungs-Ersatz soll einen Beispiel-Befund
    * liefern. Ohne diesen Wunsch tut er es NIE — sonst erzeugte jeder Klick in
@@ -121,6 +126,13 @@ export interface BrandReviewRequest {
    * läuft (s. `reviewStubEnabled`).
    */
   stubFinding?: boolean
+  /**
+   * NUR FÜR BEWEISE, `correct`-Modus: der Ersatz soll GENAU EIN veraltetes
+   * Feld als getroffen melden (§9). Ohne diesen Wunsch meldet er `affected:
+   * []` — „nachgesehen, es trifft nichts", der freundliche Normalfall, der
+   * alle mechanisch veralteten Felder wieder grün stempelt.
+   */
+  stubAffected?: boolean
 }
 
 /**
@@ -213,6 +225,26 @@ function stubReview(request: BrandReviewRequest): BrandSessionReview {
     }
   }
 
+  /**
+   * DIE EINGRENZUNG IM ERSATZ (§9): ohne Wunsch trifft die Korrektur NICHTS —
+   * dann stempelt der Server alle mechanisch veralteten Felder neu, und der
+   * Beweis sieht die freundliche Hälfte der Regel. `stubAffected` zeigt die
+   * andere: genau der ERSTE Abhängige bleibt veraltet und bekommt seinen
+   * Befund. Zwei Läufe, zwei Ausgänge, kein Sprachmodell.
+   */
+  const affected: string[] = []
+  if (request.mode === 'correct') {
+    const first = request.staleFields?.[0]?.slotId
+    if (request.stubAffected && first) {
+      affected.push(first)
+      findings.push({
+        kind: 'affected',
+        slots: [first],
+        why: 'Ersatz-Befund für den Beweis — er zeigt, dass ein getroffenes Feld veraltet bleibt.',
+      })
+    }
+  }
+
   return {
     goalReached: true,
     missing: [],
@@ -222,6 +254,7 @@ function stubReview(request: BrandReviewRequest): BrandSessionReview {
     // die wäre die Grundfassung (`resolveNextStop`), und ein Beweis, der beide
     // nicht auseinanderhalten kann, beweist die adaptive Wahl nicht.
     nextSession: request.openSessions.at(-1)?.id ?? null,
+    ...(request.mode === 'correct' ? { affected } : {}),
   }
 }
 
@@ -238,6 +271,7 @@ function promptFor(request: BrandReviewRequest, hypothesis?: readonly BrandFindi
     notes: request.notes,
     openSessions: request.openSessions,
     ...(request.staleFields ? { staleFields: request.staleFields } : {}),
+    ...(request.previousValue ? { previousValue: request.previousValue } : {}),
     ...(hypothesis ? { hypothesis } : {}),
   })
 }

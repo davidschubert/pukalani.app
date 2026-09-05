@@ -141,6 +141,12 @@ export async function writeBrandSessionFlag(
     accepted: Boolean(after?.accepted),
     deferred: Boolean(after?.deferred),
     acceptance: derived.acceptance,
-    next: resolveNextStop(stepKey, afterFacts.find(entry => entry.stepKey === stepKey)?.slots ?? {}),
+    // Der Wegweiser kennt seit Paket 6 die Warteschlange „neu besprechen" —
+    // die Zustände dazu sind gerade neu gerechnet worden (s. `derived`).
+    next: resolveNextStop(
+      stepKey,
+      afterFacts.find(entry => entry.stepKey === stepKey)?.slots ?? {},
+      derived.sessionStates,
+    ),
   }
 }

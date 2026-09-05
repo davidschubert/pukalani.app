@@ -39,6 +39,12 @@ const profileRow = {
 interface FakeRow { $id: string, [key: string]: unknown }
 
 let stepRow: FakeRow
+/**
+ * WEITERE KAPITEL-ZEILEN (BW2 Paket 6): die Abhängigkeits-Hülle eines Feldes
+ * liegt fast immer in einem ANDEREN Kapitel (`a.pitch` → `b.purpose`), und
+ * ohne dessen Zeile wäre jede Hülle leer — der Test bewiese dann genau nichts.
+ */
+let extraRows: FakeRow[]
 let body: Record<string, unknown>
 
 const tablesDB = {
@@ -48,7 +54,7 @@ const tablesDB = {
     throw new Error(`unerwartete Tabelle ${tableId}`)
   }),
   listRows: vi.fn(async ({ tableId }: { tableId: string }) => (tableId === 'brand_steps'
-    ? { rows: [stepRow] }
+    ? { rows: [stepRow, ...extraRows] }
     : { rows: [] })),
   updateRow: vi.fn(async ({ tableId, data }: { tableId: string, data: Record<string, unknown> }) => {
     if (tableId === 'brand_steps') Object.assign(stepRow, data)
@@ -65,12 +71,26 @@ vi.stubGlobal('toH3Error', (error: unknown) => error)
 vi.stubGlobal('logEvent', () => {})
 vi.stubGlobal('requireBrandAccess', async () => ({ userId: 'u1' }))
 vi.stubGlobal('assertBrandOwnerAccess', () => {})
-vi.stubGlobal('getRouterParam', (_event: H3Event, name: string) =>
-  (name === 'id' ? 'p1' : 'context'))
+/**
+ * Die Adresse ist ab Paket 6 beweglich: die Invarianten-Prüfung braucht das
+ * Kapitel `values` (dort wohnt `c.final`), und die Impact-Route trägt
+ * zusätzlich eine Session-Id.
+ */
+let routeStepKey = 'context'
+let routeSlotId = 'a.pitch'
+vi.stubGlobal('getRouterParam', (_event: H3Event, name: string) => {
+  if (name === 'id') return 'p1'
+  if (name === 'stepKey') return routeStepKey
+  return routeSlotId
+})
 vi.stubGlobal('readBody', async () => body)
 
 const handler = (await import('../server/api/brand/profiles/[id]/steps/[stepKey].patch'))
   .default as unknown as (event: H3Event) => Promise<{ revision: number, slots: Record<string, { latestDraft: string | null, confirmed: string | null }> }>
+
+/** Die Lese-Route der Hülle — sie liefert den `ack`, den der PATCH verlangt. */
+const impactHandler = (await import('../server/api/brand/profiles/[id]/steps/[stepKey]/sessions/[slotId]/impact.get'))
+  .default as unknown as (event: H3Event) => Promise<{ count: number, transitive: string[], ack: string }>
 
 const event = { context: {} } as unknown as H3Event
 
@@ -80,6 +100,9 @@ function storedSlots(): Record<string, { firstDraft?: string | null, latestDraft
 }
 
 beforeEach(() => {
+  routeStepKey = 'context'
+  routeSlotId = 'a.pitch'
+  extraRows = []
   stepRow = {
     $id: 'p1_context',
     profileId: 'p1',
@@ -310,5 +333,165 @@ describe('PATCH …/steps/:stepKey — Quellen-Hash und Abnahme (Paket 3b)', () 
 
     expect(tablesDB.updateRow).not.toHaveBeenCalled()
     expect(storedSlots()['a.pitch']).toMatchObject({ accepted: true })
+  })
+})
+
+/**
+ * DIE KORREKTUR-REGEL AM AUTOSAVE (BW2 Paket 6, Plan §9).
+ *
+ * ── WARUM DAS HIER GEMESSEN WIRD UND NICHT NUR PUR ────────────────────────
+ * `confirmedDependents` sagt, WER an einem Feld hängt; ob die Route daraus
+ * wirklich ein 409 macht, sagt nur die Route. Genau dazwischen liegen die
+ * Fehler, die eine pure Prüfung nie sieht: eine Hülle, die aus dem falschen
+ * Stand gerechnet wird (mit dem Patch statt vor ihm), ein Ack, der gegen eine
+ * andere `revision` gebildet wurde, oder eine Sperre, die auch dann zuschlägt,
+ * wenn gar nichts daran hängt.
+ *
+ * Die Zeile des zweiten Kapitels ist Bedingung: `a.pitch` berührt `b.purpose`,
+ * und ohne die `pvm`-Zeile wäre die Hülle leer.
+ */
+describe('PATCH …/steps/:stepKey — Impact-Ack vor der Korrektur (Paket 6)', () => {
+  /** Ein bestätigtes `a.pitch` und ein bestätigtes `b.purpose` daran. */
+  function withDependent(): void {
+    stepRow.slots = JSON.stringify({
+      'a.pitch': { firstDraft: 'alt', latestDraft: 'alt', confirmed: 'alt' },
+    })
+    extraRows = [{
+      $id: 'p1_pvm',
+      profileId: 'p1',
+      stepKey: 'pvm',
+      state: 'active',
+      slots: JSON.stringify({ 'b.purpose': { confirmed: 'Damit die Welt besser wird.' } }),
+      generations: '{"items":[],"count":0}',
+      revision: 1,
+      activeSeconds: 0,
+    }]
+  }
+
+  it('LEHNT die Korrektur ohne Ack mit 409 `impact_unacknowledged` ab', async () => {
+    withDependent()
+    body = { revision: 3, slots: { 'a.pitch': { confirmed: false } } }
+
+    await expect(handler(event)).rejects.toMatchObject({
+      status: 409,
+      data: { code: 'impact_unacknowledged' },
+    })
+    // NICHTS geschrieben — die Bestätigung steht unangetastet.
+    expect(tablesDB.updateRow).not.toHaveBeenCalled()
+  })
+
+  it('MIT dem passenden Ack geht sie durch — und merkt sich den alten Wortlaut', async () => {
+    withDependent()
+    const impact = await impactHandler(event)
+    expect(impact.count).toBe(1)
+    expect(impact.transitive).toEqual(['b.purpose'])
+
+    body = { revision: 3, slots: { 'a.pitch': { confirmed: false } }, impactAck: impact.ack }
+    await handler(event)
+
+    expect(storedSlots()['a.pitch']!.confirmed).toBeNull()
+    // `previousValue` ist die einzige Spur, an der die Eingrenzung später
+    // erkennt, dass sie eine Korrektur vor sich hat (§9).
+    expect(storedSlots()['a.pitch']).toMatchObject({ previousValue: 'alt' })
+  })
+
+  it('ein FREMDER Ack wird abgewiesen — die Hülle kann sich bewegt haben', async () => {
+    withDependent()
+    body = { revision: 3, slots: { 'a.pitch': { confirmed: false } }, impactAck: 'a'.repeat(64) }
+
+    await expect(handler(event)).rejects.toMatchObject({
+      status: 409,
+      data: { code: 'impact_unacknowledged' },
+    })
+  })
+
+  it('LEERE HÜLLE ⇒ kein Ack, kein Hinweis, kein `previousValue`', async () => {
+    // Ohne bestätigte Abhängige läuft „Korrigieren" wie vor Paket 6.
+    stepRow.slots = JSON.stringify({
+      'a.pitch': { firstDraft: 'alt', latestDraft: 'alt', confirmed: 'alt' },
+    })
+    body = { revision: 3, slots: { 'a.pitch': { confirmed: false } } }
+    await handler(event)
+
+    expect(storedSlots()['a.pitch']!.confirmed).toBeNull()
+    expect(storedSlots()['a.pitch']).not.toHaveProperty('previousValue')
+  })
+
+  it('ein gewöhnliches Speichern braucht nie ein Ack', async () => {
+    withDependent()
+    body = { revision: 3, slots: { 'a.category': { value: 'Rösterei' } } }
+    await handler(event)
+
+    expect(storedSlots()['a.category']!.latestDraft).toBe('Rösterei')
+  })
+})
+
+/**
+ * DIE INVARIANTEN SIND SCHARF (BW2 Paket 6, §3a Nr. 6).
+ *
+ * Sie standen seit Paket 1 in `transitionBrandStep('confirmSlot')` — und diese
+ * Handlung ruft keine Route: bestätigt wird HIER. Eine Regel, die niemand
+ * ausführt, ist eine Zusage ohne Deckung, und genau das misst dieser Block.
+ */
+describe('PATCH …/steps/:stepKey — Invarianten beim Bestätigen (Paket 6)', () => {
+  beforeEach(() => {
+    routeStepKey = 'values'
+    stepRow.$id = 'p1_values'
+    stepRow.stepKey = 'values'
+    // Die Vorgänger-Kapitel müssen ABGESCHLOSSEN sein, sonst ist `values`
+    // gesperrt und `canEnterBrandStep` weist schon vor der Regel ab.
+    extraRows = ['context', 'pvm', 'architecture'].map(stepKey => ({
+      $id: `p1_${stepKey}`,
+      profileId: 'p1',
+      stepKey,
+      state: 'done',
+      slots: '{}',
+      generations: '{"items":[],"count":0}',
+      revision: 1,
+      activeSeconds: 0,
+    }))
+  })
+
+  it('LEHNT `c.final` mit zwei Einträgen ab — 409 `invariant_violated`', async () => {
+    body = { revision: 3, slots: { 'c.final': { value: '- Geduld\n- Klarheit', confirmed: true } } }
+
+    await expect(handler(event)).rejects.toMatchObject({
+      status: 409,
+      data: { code: 'invariant_violated' },
+    })
+    expect(tablesDB.updateRow).not.toHaveBeenCalled()
+  })
+
+  it('… und nimmt drei an', async () => {
+    body = {
+      revision: 3,
+      slots: { 'c.final': { value: '- Geduld\n- Klarheit\n- Sorgfalt', confirmed: true } },
+    }
+    await handler(event)
+
+    expect(storedSlots()['c.final']!.confirmed).toBe('- Geduld\n- Klarheit\n- Sorgfalt')
+  })
+
+  it('TOLERANT gegenüber der Schreibweise — drei Werte in EINER Zeile gelten auch', async () => {
+    // Der Editor `chips` gibt es in der Werkstatt nicht; die Antwort kommt als
+    // getippter Fliesstext (Paket-6-Vorabklärung). Eine Invariante darf an der
+    // Form nie scheitern, nur an der Sache.
+    body = {
+      revision: 3,
+      slots: { 'c.final': { value: 'Geduld, Unbestechlichkeit und Klarheit', confirmed: true } },
+    }
+    await handler(event)
+
+    expect(storedSlots()['c.final']!.confirmed).toBe('Geduld, Unbestechlichkeit und Klarheit')
+  })
+
+  it('BESTAND wird NICHT nachgeprüft — nur der Schreibweg', async () => {
+    // Ein schon bestätigter Wert, der die Regel verletzt, bleibt stehen: eine
+    // Regel, die rückwirkend sperrt, nähme jemandem sein fertiges Kapitel weg.
+    stepRow.slots = JSON.stringify({ 'c.final': { confirmed: '- Geduld\n- Klarheit' } })
+    body = { revision: 3, slots: { 'c.livedExamples': { value: 'Ein Beispiel.' } } }
+    await handler(event)
+
+    expect(storedSlots()['c.final']!.confirmed).toBe('- Geduld\n- Klarheit')
   })
 })

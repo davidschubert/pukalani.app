@@ -231,6 +231,21 @@ export interface BrandSlotRecord {
   sourcesHash?: string
   /** Im Kapitel-Zusammenhang abgenommen (§5a). Fällt mit jeder Wert-Änderung. */
   accepted?: boolean
+  /**
+   * DER BESTÄTIGTE WORTLAUT VOR EINER KORREKTUR (§9, Paket 6) — gesetzt vom
+   * Autosave-PATCH, sobald „Korrigieren" ein Feld mit bestätigten Abhängigen
+   * öffnet, und von der Schliess-Route wieder gelöscht, sobald sie ihn benutzt
+   * hat.
+   *
+   * Er ist die EINZIGE Spur, an der die spätere Eingrenzung erkennt, dass sie
+   * eine Korrektur vor sich hat und nicht eine erste Bestätigung — und der
+   * alte Wortlaut ist zugleich die Hälfte ihrer Eingabe („was hat sich
+   * geändert"). Der Versions-Vertrag kann ihn nicht liefern: `firstDraft`/
+   * `latestDraft`/`confirmed` sind drei Rollen, kein Verlauf.
+   *
+   * Ohne Abhängige wird er NICHT gesetzt: dort gibt es nichts einzugrenzen.
+   */
+  previousValue?: string
   /** Auf später vertagt (§3a `answers.allowDefer`) — je Session, nicht je Teil. */
   deferred?: boolean
   /**

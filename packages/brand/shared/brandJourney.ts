@@ -876,10 +876,37 @@ export type BrandNextSessionRef =
 export function resolveNextStop(
   stepKey: BrandStepKey,
   slotStates: Readonly<Record<string, BrandSlotStateFacts | undefined>> = {},
+  sessionStates: Readonly<Record<string, BrandSessionState | undefined>> = {},
 ): BrandNextSessionRef | null {
+  const queued = nextStaleSession(stepKey, sessionStates)
+  if (queued) return { stepKey, sessionKey: queued }
   const upcoming = resolveNextSession(stepKey, slotStates)
   if (upcoming) return { stepKey, sessionKey: upcoming.slotId }
   return brandStepCompletion(stepKey, slotStates).slotsReady ? { stepKey, acceptance: true } : null
+}
+
+/**
+ * DIE WARTESCHLANGE „NEU BESPRECHEN" (§9, Paket 6) — die erste VERALTETE
+ * Session dieses Kapitels in Registry-Reihenfolge.
+ *
+ * ── WARUM SIE VOR DEN OFFENEN KOMMT ──────────────────────────────────────
+ * Eine `stale`-Session trägt einen bestätigten Wert, der auf einer Grundlage
+ * steht, die es so nicht mehr gibt. Wer daran vorbei erst die nächsten
+ * offenen Felder beantwortet, baut auf demselben Sand weiter — und muss die
+ * neuen Antworten hinterher ein zweites Mal ansehen. Der Plan sagt es in
+ * einem Satz: „Auto-Weiter bedient sie vor den offenen Sessions."
+ *
+ * ── OHNE ZUSTÄNDE ÄNDERT SICH NICHTS ─────────────────────────────────────
+ * `sessionStates` ist optional und leer der Vorgabewert: eine Aufrufstelle,
+ * die die Zustände nicht kennt (sie sind eine Rechnung über ALLE Kapitel),
+ * bekommt wörtlich das Verhalten von vor Paket 6. Das ist Absicht — eine
+ * halbe Warteschlange aus halben Daten wäre schlimmer als keine.
+ */
+function nextStaleSession(
+  stepKey: BrandStepKey,
+  sessionStates: Readonly<Record<string, BrandSessionState | undefined>>,
+): string | null {
+  return slotsForStep(stepKey).find(session => sessionStates[session.id] === 'stale')?.id ?? null
 }
 
 /**
@@ -922,6 +949,13 @@ export function pickNextSession(
   states: BrandNextSessionStates,
   suggestion: string | null | undefined,
 ): BrandNextSessionRef | null {
+  // DIE WARTESCHLANGE SCHLÄGT DEN VORSCHLAG (§9, Paket 6): der Spezialist
+  // wählt unter den OFFENEN Sessions, die Warteschlange räumt auf, was durch
+  // eine Korrektur unsicher geworden ist. Ein Vorschlag, der daran vorbeiführt,
+  // schiebt Arbeit vor sich her, die der Mensch gerade selbst ausgelöst hat.
+  const queued = nextStaleSession(stepKey, states.sessions)
+  if (queued) return { stepKey, sessionKey: queued }
+
   const proposed = suggestion ? slotById(suggestion) : undefined
   if (
     proposed
@@ -931,7 +965,7 @@ export function pickNextSession(
   ) {
     return { stepKey, sessionKey: proposed.id }
   }
-  return resolveNextStop(stepKey, states.slots)
+  return resolveNextStop(stepKey, states.slots, states.sessions)
 }
 
 export type BrandJunctionChange =

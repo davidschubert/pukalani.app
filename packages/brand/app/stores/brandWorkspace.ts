@@ -5,7 +5,14 @@ import type {
   BrandJourneyStep,
 } from '../../shared/brandJourney'
 import { canEnterBrandStep } from '../../shared/brandJourney'
-import type { BrandStepKey, BrandStepProgress } from '../../shared/slotRegistry'
+import { evaluateInvariants } from '../../shared/brandSessions'
+import type {
+  BrandInvariant,
+  BrandSlotStateFacts,
+  BrandStepKey,
+  BrandStepProgress,
+} from '../../shared/slotRegistry'
+import { slotById } from '../../shared/slotRegistry'
 import {
   type BrandLocalSlotEdit,
   type BrandSlotPatch,
@@ -233,6 +240,34 @@ const setup = () => {
     () => Object.keys(pendingSlots.value).length > 0 || pendingConfidence.value !== undefined,
   )
 
+  /**
+   * DIE ANGENOMMENE HÜLLE EINER KORREKTUR (BW2 Paket 6, §9) — sie wartet hier
+   * auf den nächsten Autosave.
+   *
+   * Der Layer fragt, der Mensch nimmt an, der PATCH trägt den Hash. Zwischen
+   * diesen drei Schritten liegt der entprellte Autosave-Takt, also muss der
+   * Wert irgendwo liegen — und zwar dort, wo auch die Eingabe liegt, die er
+   * begleitet. Er gilt für GENAU EINE Speicherung: die Route verbraucht ihn,
+   * und ein liegen gebliebener Hash würde beim nächsten Mal eine Zustimmung
+   * behaupten, die niemand gegeben hat.
+   */
+  const pendingImpactAck = ref<string>('')
+
+  /**
+   * EINE INVARIANTE HAT DAS BESTÄTIGEN ABGEWIESEN (§3a Nr. 6) — welche, und
+   * für welches Feld.
+   *
+   * Der Server schickt nur `invariant_violated` (der Envelope trägt
+   * ausschliesslich `data.code` als `reason`). WELCHE Regel gerissen ist,
+   * rechnet der Browser mit derselben puren Funktion nach — sie liegt im
+   * Bündel, und alle heute registrierten Invarianten lesen Quellen aus dem
+   * EIGENEN Kapitel (`c.final` zählt sich selbst, `f.decision` liest
+   * `f.shortlist`, `e.anchorLine` liest `e.manifesto`). Findet die
+   * Nachrechnung nichts, bleibt `invariant: null` und die Seite sagt den
+   * allgemeinen Satz — lieber unscharf als falsch.
+   */
+  const invariantRejection = ref<{ slotId: string, invariant: BrandInvariant | null } | null>(null)
+
   const confidence = computed<BrandConfidence | null>(
     () => localConfidence.value ?? serverConfidence.value,
   )
@@ -271,6 +306,108 @@ const setup = () => {
   function setSlotConfirmed(slotId: string, value: boolean): void {
     localEdits.value = { ...localEdits.value, [slotId]: { ...localEdits.value[slotId], confirmed: value } }
     if (value) clearGeorgeDraft(slotId)
+  }
+
+  /** Die angenommene Hülle für den nächsten PATCH (s. `pendingImpactAck`). */
+  function setImpactAck(ack: string): void {
+    pendingImpactAck.value = ack
+  }
+
+  /**
+   * DIE BESTÄTIGUNG ZURÜCKNEHMEN, DIE DER SERVER ABGEWIESEN HAT (§3a Nr. 6).
+   *
+   * Der Text bleibt stehen, nur die ABSICHT „bestätigen" fällt: der Mensch
+   * hat etwas geschrieben, das die Regel dieses Feldes verletzt — sein Text
+   * ist deswegen nicht wertlos, er ist nur noch nicht bestätigungsreif. Würde
+   * die Absicht stehen bleiben, schickte der nächste Autosave-Tick dieselbe
+   * Bestätigung erneut und der Toast käme im Takt von 750 ms wieder.
+   *
+   * Die zurückgegebene Auskunft ist die Nachrechnung: WELCHE Regel es war
+   * (s. `invariantRejection`).
+   */
+  function rejectInvariantConfirmations(): void {
+    /**
+     * DIESELBE RANGFOLGE WIE AUF DEM SERVER (`brandSlotStoredValue`:
+     * bestätigt schlägt Entwurf) — nicht die ANZEIGE-Rangfolge daneben. Wer
+     * hier `latestDraft` zuerst läse, prüfte gegen einen Text, den der Server
+     * für diese Frage gar nicht ansieht, und die Nachrechnung fiele anders
+     * aus als das 409, das sie erklären soll.
+     */
+    const storedValue = (slotId: string): string => {
+      const view = serverSlots.value[slotId]
+      return view?.confirmed || view?.latestDraft || view?.firstDraft || ''
+    }
+
+    const facts: Record<string, BrandSlotStateFacts> = {}
+    for (const slotId of Object.keys(serverSlots.value)) {
+      facts[slotId] = {
+        hasValue: brandSlotDisplayValue(serverSlots.value[slotId]).length > 0,
+        confirmed: brandSlotIsConfirmed(serverSlots.value[slotId]),
+        value: storedValue(slotId),
+      }
+    }
+
+    let rejection: { slotId: string, invariant: BrandInvariant | null } | null = null
+    const edits = { ...localEdits.value }
+    for (const [slotId, patch] of Object.entries(pendingSlots.value)) {
+      if (patch.confirmed !== true) continue
+      const edit = edits[slotId]
+      if (edit) {
+        const { confirmed: _dropped, ...rest } = edit
+        edits[slotId] = rest
+      }
+      // Der ERSTE Verstoss gewinnt — wie auf dem Server: der Mensch soll eine
+      // Sache reparieren, nicht eine Liste.
+      if (rejection) continue
+      const config = slotById(slotId)
+      if (!config) continue
+      const value = slotValue(slotId)
+      const verdict = evaluateInvariants(config, value, {
+        ...facts,
+        [slotId]: { hasValue: value.length > 0, confirmed: false, value },
+      })
+      rejection = { slotId, invariant: verdict.ok ? null : verdict.invariant }
+    }
+
+    localEdits.value = edits
+    invariantRejection.value = rejection
+  }
+
+  /** Der Toast ist gezeigt — die Auskunft hat ihren Zweck erfüllt. */
+  function dismissInvariantRejection(): void {
+    invariantRejection.value = null
+  }
+
+  /**
+   * DER SERVER HAT DIE KORREKTUR ABGEWIESEN (§9, 409 `impact_unacknowledged`)
+   * — welches Feld es war, damit die Seite den Layer erneut zeigen kann.
+   *
+   * Die lokale Aufhebung fällt dabei zurück: ohne sie wiederholte der nächste
+   * Autosave-Tick denselben abgewiesenen Rumpf, und das Feld sähe im Browser
+   * offen aus, während es auf dem Server bestätigt bleibt — genau die
+   * Divergenz, gegen die die Bestätigungs-Sperre gebaut wurde.
+   */
+  const correctionRejected = ref<string>('')
+
+  function rejectCorrection(): void {
+    const edits = { ...localEdits.value }
+    let first = ''
+    for (const [slotId, patch] of Object.entries(pendingSlots.value)) {
+      if (patch.confirmed !== false) continue
+      if (!first) first = slotId
+      const edit = edits[slotId]
+      if (edit) {
+        const { confirmed: _dropped, ...rest } = edit
+        edits[slotId] = rest
+      }
+    }
+    localEdits.value = edits
+    correctionRejected.value = first
+  }
+
+  /** Der Layer ist wieder offen — die Meldung hat ihren Zweck erfüllt. */
+  function dismissCorrectionRejection(): void {
+    correctionRejected.value = ''
   }
 
   function clearGeorgeDraft(slotId: string): void {
@@ -458,6 +595,28 @@ const setup = () => {
   }
 
   /**
+   * WAS „GILT WEITER" HINTERLÄSST (Paket 6, §9) — dieselbe Antwort wie beim
+   * Abnehmen, plus die eine Sache, die sie nicht trägt: der neue ZUSTAND.
+   *
+   * `BrandSessionAcceptResponse` sagt nichts über `stale`/`done` — sie ist die
+   * Antwort auf eine Handlung, nicht eine Zustandsauskunft. Der Zustand ist
+   * hier trotzdem bekannt, und zwar sicher: der Server hat den Quell-Hash auf
+   * den heutigen Stand gesetzt, also IST diese Session wieder aktuell. Ihn
+   * lokal nachzuziehen erspart der Bühne einen vollständigen Neu-Abruf für
+   * eine Zeile, die gerade grün geworden ist; der nächste Abruf bestätigt ihn
+   * ohnehin.
+   */
+  function applySessionRestamp(response: BrandSessionAcceptResponse): void {
+    applySessionAcceptance(response)
+    const current = sessions.value[response.sessionKey]
+    if (!current || current.state !== 'stale') return
+    sessions.value = {
+      ...sessions.value,
+      [response.sessionKey]: { ...current, state: 'done' },
+    }
+  }
+
+  /**
    * WAS DER SCHLIESS-AUFRUF HINTERLÄSST (Paket 4, §7) — die Antwort, hier
    * gelesen.
    *
@@ -576,6 +735,11 @@ const setup = () => {
     // sendete der nächste Tick dieselbe Eingabe erneut.
     localEdits.value = pruneSettledEdits(response.slots, localEdits.value)
     if (pendingConfidence.value === undefined) localConfidence.value = null
+    // Die angenommene Hülle gilt für GENAU DIESE Speicherung (§9): sie ist
+    // verbraucht, sobald der Server sie angenommen hat. Ein liegen gebliebener
+    // Hash behauptete beim nächsten Mal eine Zustimmung, die niemand gegeben
+    // hat — und der Server prüfte ihn gegen eine andere Hülle.
+    pendingImpactAck.value = ''
     mark('ok')
   }
 
@@ -690,8 +854,12 @@ const setup = () => {
    * und „Nochmal von vorn" heisst dort die LÖSCHENDE Handlung `restart` (§5a) —
    * eine andere Sache als diese leise Vertiefungsrunde. Die Aktion bleibt
    * trotzdem: der Plan behält `reopen` ausdrücklich („Session öffnen, Wert
-   * ändern", §5a Schluss), und die Korrektur nach der Abnahme (Paket 6) ist ihr
-   * nächster Aufrufer. Wer sie vorher wegräumt, baut sie dann neu.
+   * ändern", §5a Schluss). Die KORREKTUR (Paket 6) ist es NICHT — sie macht das
+   * Kapitel bewusst nicht „un-abgenommen" (§5a Schluss: sie nimmt der
+   * geänderten Zeile ihr `accepted` und färbt veraltete Zeilen bernstein, mehr
+   * nicht), und ein `done`-Kapitel ist ohnehin beschreibbar. `reopen` bleibt
+   * damit die leise Vertiefungsrunde ohne heutigen Aufrufer — wer sie
+   * wegräumt, baut sie beim nächsten Anlass neu.
    */
   async function reopenStep(profileId: string): Promise<void> {
     if (!stepKey.value) return
@@ -746,6 +914,9 @@ const setup = () => {
     blocked.value = null
     streamMessages.value = []
     georgeDrafts.value = {}
+    pendingImpactAck.value = ''
+    invariantRejection.value = null
+    correctionRejected.value = ''
   }
 
   return {
@@ -779,6 +950,9 @@ const setup = () => {
     confidence,
     pendingSlots,
     pendingConfidence,
+    pendingImpactAck,
+    invariantRejection,
+    correctionRejected,
     hasPendingWork,
     autosaveAllowed,
     currentJourneyStep,
@@ -789,6 +963,11 @@ const setup = () => {
     neighbourStep,
     setSlotValue,
     setSlotConfirmed,
+    setImpactAck,
+    rejectInvariantConfirmations,
+    dismissInvariantRejection,
+    rejectCorrection,
+    dismissCorrectionRejection,
     setActiveSession,
     setConfidence,
     applyGeorgeDraft,
@@ -805,6 +984,7 @@ const setup = () => {
     applyStepDetail,
     applySaveResponse,
     applySessionAcceptance,
+    applySessionRestamp,
     applySessionClose,
     applyFindingDecision,
     dropFinding,

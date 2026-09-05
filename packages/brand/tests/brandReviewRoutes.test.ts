@@ -697,3 +697,136 @@ describe('GET …/findings — die Liste', () => {
     await expect(listFindings(event)).rejects.toMatchObject({ status: 400 })
   })
 })
+
+/**
+ * DER `correct`-MODUS UND DIE EINGRENZUNG (BW2 Paket 6, Plan §9).
+ *
+ * ── DIE FRAGE, DIE HIER ENTSCHIEDEN WIRD ──────────────────────────────────
+ * Nach einer Korrektur ist JEDES abhängige Feld mechanisch veraltet. Ob der
+ * Mensch dafür zwanzig Gespräche führen muss oder keines, hängt an genau
+ * dieser Route: was der Spezialist NICHT als getroffen nennt, bekommt seinen
+ * Quell-Hash neu und ist wieder fertig.
+ *
+ * ── UND DIE GEGENPROBE IST DIE WICHTIGERE HÄLFTE ─────────────────────────
+ * Ohne Antwort (Drossel, Anbieter, Schema) bleibt ALLES veraltet — fail-soft
+ * ist hier fail-CLOSED in Richtung „bitte ansehen" (§7). Ein Test, der nur
+ * den freundlichen Fall prüft, wäre auch dann grün, wenn die Route bei einem
+ * Ausfall alles blind grün stempelte.
+ */
+describe('POST …/sessions/:id/close — der `correct`-Modus (Paket 6)', () => {
+  /**
+   * `c.final` gerade korrigiert (`previousValue` steht), und ZWEI bestätigte
+   * Abhängige daran: `c.definitions` im eigenen Kapitel, `e.statements` im
+   * Manifest. Genau so sieht der Stand nach „Korrigieren + neu bestätigen" aus.
+   */
+  function afterCorrection(): void {
+    stepRow('values').slots = JSON.stringify({
+      ...confirmedSlots('values'),
+      'c.final': { confirmed: '- Mut\n- Klarheit\n- Geduld', previousValue: '- Mut\n- Klarheit\n- Ruhe' },
+      'c.definitions': { confirmed: '- Mut — wir sagen es.', sourcesHash: 'von-gestern' },
+    })
+    stepRow('manifesto').slots = JSON.stringify({
+      'e.statements': { confirmed: '- Wir fangen an.', sourcesHash: 'von-gestern' },
+    })
+  }
+
+  it('läuft im Modus `correct`, sieht den ALTEN Wortlaut und die veralteten Felder', async () => {
+    afterCorrection()
+    aiQueue = [answer({ affected: [] })]
+    body = { revision: 2 }
+    await close(event)
+
+    const prompt = aiPrompts[0] ?? ''
+    expect(prompt).toContain('checking a CORRECTION')
+    expect(prompt).toContain('BEFORE this correction')
+    expect(prompt).toContain('- Mut\n- Klarheit\n- Ruhe')
+    expect(prompt).toContain('mechanically out of date')
+    expect(prompt).toContain('c.definitions')
+    expect(prompt).toContain('e.statements')
+  })
+
+  it('STEMPELT die nicht getroffenen Felder neu — auch über die Kapitel-Grenze', async () => {
+    afterCorrection()
+    aiQueue = [answer({ affected: [] })]
+    body = { revision: 2 }
+    const response = await close(event) as { correction?: { affected: string[], restamped: string[] } }
+
+    expect(response.correction?.affected).toEqual([])
+    // Die ganze Hülle: drei Felder des eigenen Kapitels und eines im Manifest.
+    expect(response.correction?.restamped)
+      .toEqual(['c.definitions', 'c.livedExamples', 'c.conflictRule', 'e.statements'])
+    expect(storedSlots('values')['c.definitions']!.sourcesHash).not.toBe('von-gestern')
+    expect(storedSlots('manifesto')['e.statements']!.sourcesHash).not.toBe('von-gestern')
+    // Der VOR-Wert hat seine Arbeit getan und ist weg.
+    expect(storedSlots('values')['c.final']).not.toHaveProperty('previousValue')
+  })
+
+  it('LÄSST das getroffene Feld veraltet — und legt seinen Befund an', async () => {
+    afterCorrection()
+    aiQueue = [
+      answer({
+        affected: ['e.statements'],
+        findings: [{ kind: 'affected', slots: ['e.statements'], why: 'Der dritte Wert ist ein anderer.' }],
+      }),
+      // Ein `affected`-Befund löst die zweite Stufe aus (§7) — sie bestätigt ihn.
+      answer({
+        affected: ['e.statements'],
+        findings: [{ kind: 'affected', slots: ['e.statements'], why: 'Der dritte Wert ist ein anderer.' }],
+      }),
+    ]
+    body = { revision: 2 }
+    const response = await close(event) as { correction?: { affected: string[], restamped: string[] } }
+
+    expect(response.correction?.affected).toEqual(['e.statements'])
+    expect(response.correction?.restamped)
+      .toEqual(['c.definitions', 'c.livedExamples', 'c.conflictRule'])
+    expect(storedSlots('manifesto')['e.statements']!.sourcesHash).toBe('von-gestern')
+    expect(findingRows.map(row => row.kind)).toEqual(['affected'])
+    expect(findingRows[0]!.slots).toBe('["e.statements"]')
+  })
+
+  it('FAIL-CLOSED: ohne gültige Antwort bleibt ALLES veraltet und es gibt keinen Befund', async () => {
+    afterCorrection()
+    // Kein Urteil (Schema-Fehler) ⇒ die Route schreibt gar nichts.
+    aiQueue = [{ kaputt: true }]
+    body = { revision: 2 }
+    const response = await close(event) as { reviewed: boolean, correction?: unknown }
+
+    expect(response.reviewed).toBe(false)
+    expect(response.correction).toBeUndefined()
+    expect(storedSlots('values')['c.definitions']!.sourcesHash).toBe('von-gestern')
+    expect(storedSlots('manifesto')['e.statements']!.sourcesHash).toBe('von-gestern')
+    expect(findingRows).toHaveLength(0)
+    // Und der VOR-Wert bleibt stehen: der nächste Versuch ist wieder eine
+    // Korrektur, keine gewöhnliche Bestätigung.
+    expect(storedSlots('values')['c.final']).toMatchObject({ previousValue: '- Mut\n- Klarheit\n- Ruhe' })
+  })
+
+  it('OHNE `previousValue` ist es eine gewöhnliche Bestätigung — Modus `session`', async () => {
+    stepRow('values').slots = JSON.stringify({
+      ...confirmedSlots('values'),
+      'c.definitions': { confirmed: '- Mut — wir sagen es.', sourcesHash: 'von-gestern' },
+    })
+    aiQueue = [answer()]
+    body = { revision: 2 }
+    const response = await close(event) as { correction?: unknown }
+
+    expect(aiPrompts[0]).not.toContain('checking a CORRECTION')
+    expect(response.correction).toBeUndefined()
+    // Nichts wurde nachgestempelt — die Eingrenzung gehört der Korrektur.
+    expect(storedSlots('values')['c.definitions']!.sourcesHash).toBe('von-gestern')
+  })
+
+  it('die Idempotenz-Weiche gilt für die Korrektur NICHT — sonst liefe sie nie', async () => {
+    afterCorrection()
+    const slots = JSON.parse(String(stepRow('values').slots)) as Record<string, Record<string, unknown>>
+    slots['c.final']!.reviewed = true
+    stepRow('values').slots = JSON.stringify(slots)
+    aiQueue = [answer({ affected: [] })]
+    body = { revision: 2 }
+    await close(event)
+
+    expect(aiPrompts).toHaveLength(1)
+    expect(aiPrompts[0]).toContain('checking a CORRECTION')
+  })
+})

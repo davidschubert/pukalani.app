@@ -39,11 +39,12 @@ import { useBrandFieldLabel } from '../composables/useBrandFieldLabel'
  * Notiz an der Quell-Session, sonst wäre die Ablehnung später nicht von „nie
  * gesehen" zu unterscheiden.
  *
- * ── WAS HIER BEWUSST NOCH NICHT STEHT ─────────────────────────────────────
- * Der IMPACT-HINWEIS VOR DER KORREKTUR (§9, „berührt 14 bestätigte Felder in
- * vier Kapiteln") ist Paket 6 und hängt sich in `jumpTo()` ein — genau dort,
- * wo heute direkt gesprungen wird, und mit derselben Kette wie „Bearbeiten"
- * auf der Abnahme-Seite (`BwAcceptance.edit`).
+ * ── DER IMPACT-HINWEIS LIEGT EINE EBENE HÖHER (§9, Paket 6) ───────────────
+ * `jumpTo()` emittiert wie bisher; die WERKSTATT-Seite legt den Hinweis
+ * dazwischen (`correctThenGo`) und springt erst nach dem Annehmen — dieselbe
+ * Kette wie „Bearbeiten" auf der Abnahme-Seite. Sie gehört dorthin, weil ein
+ * Feld-Link ausdrücklich in ein FREMDES Kapitel zeigen darf: dessen Stand
+ * kennt dieser Chip nicht, die Seite holt ihn.
  */
 const props = withDefaults(defineProps<{
   finding: BrandFindingView
@@ -140,8 +141,8 @@ async function decide(status: 'accepted' | 'dismissed', reason?: string): Promis
 }
 
 /**
- * DER SPRUNG IN DIE SESSION. Hier hängt sich Paket 6 ein: erst `GET
- * …/sessions/:id/impact`, dann der Layer, dann derselbe Sprung.
+ * DER SPRUNG IN DIE SESSION — die SEITE entscheidet, ob vorher der
+ * Impact-Hinweis steht (§9, s. Kopf).
  */
 function jumpTo(slotId: string): void {
   emit('field', slotId)

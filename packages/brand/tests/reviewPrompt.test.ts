@@ -46,8 +46,8 @@ function options(overrides: Partial<BrandReviewPromptOptions> = {}): BrandReview
 }
 
 describe('Die Fassung', () => {
-  it('heisst review-1 (§7: „Änderungen versioniert")', () => {
-    expect(BRAND_REVIEW_PROMPT_VERSION).toBe('review-1')
+  it('heisst review-2 (§7: „Änderungen versioniert" — Paket 6 verdrahtet `correct`)', () => {
+    expect(BRAND_REVIEW_PROMPT_VERSION).toBe('review-2')
   })
 })
 

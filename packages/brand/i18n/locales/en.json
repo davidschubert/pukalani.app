@@ -784,7 +784,11 @@
       "error": {
         "session_locked": "This field is still locked — the fields before it come first.",
         "session_foreign": "This field belongs to a different chapter."
-      }
+      },
+      "stale": "A field before this one has changed — does this still fit?",
+      "keep": "Still valid",
+      "rediscuss": "Talk it through again",
+      "keepFailed": "That did not work — please try again."
     },
     "finding": {
       "kind": {
@@ -811,6 +815,28 @@
     },
     "log": {
       "notes": "Notes"
+    },
+    "impact": {
+      "eyebrow": "Before you change this",
+      "title": "This change touches other fields",
+      "loading": "Checking what depends on this …",
+      "summary": "This change touches {count} confirmed fields in {steps} chapters.",
+      "direct": "· depends on it directly",
+      "indirect": "· depends on it through other fields",
+      "note": "Nothing gets deleted. The fields concerned are marked for a second look — whatever the change does not really reach, your advisor clears again afterwards.",
+      "changed": "Something moved since you last looked — this is the current picture.",
+      "accept": "Accept and correct",
+      "cancel": "Cancel"
+    },
+    "invariant": {
+      "title": "Not quite there yet",
+      "generic": "“{field}” does not meet a rule of this field yet.",
+      "count": "“{field}” needs between {min} and {max} entries — one per line, or separated by commas.",
+      "memberOf": "“{field}” has to be one of the entries in “{source}”.",
+      "subsetOf": "“{field}” may only contain what is also in “{source}”.",
+      "sentenceOf": "“{field}” has to be one sentence from “{source}”, word for word.",
+      "mentionsFrom": "“{field}” has to name the entries from “{source}” as well.",
+      "mentionsNone": "“{field}” must not repeat anything from “{source}”."
     }
   }
 }

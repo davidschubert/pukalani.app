@@ -12,6 +12,7 @@ import {
   brandStepCompletion,
   canEnterBrandStep,
   includedBrandSteps,
+  pickNextSession,
   resolveBrandJourney,
   resolveNextQuestion,
   resolveNextSession,
@@ -1100,6 +1101,76 @@ describe('resolveNextStop — der Wegweiser am Kapitelende', () => {
       index === 0 ? { hasValue: true } : { hasValue: true, confirmed: true },
     ]))
     expect(resolveNextStop('context', slots)).toBeNull()
+  })
+
+  /**
+   * DIE WARTESCHLANGE „NEU BESPRECHEN" (BW2 Paket 6, §9) — sie wird VOR den
+   * offenen Sessions bedient.
+   *
+   * Wer an einer veralteten Session vorbei die nächsten Fragen beantwortet,
+   * baut auf einer Grundlage weiter, die es so nicht mehr gibt — und sieht
+   * seine neuen Antworten hinterher ein zweites Mal an.
+   */
+  it('bedient eine VERALTETE Session vor jeder offenen', () => {
+    expect(resolveNextStop('context', {}, { 'a.customerPraise': 'stale' }))
+      .toEqual({ stepKey: 'context', sessionKey: 'a.customerPraise' })
+  })
+
+  it('mehrere veraltete ⇒ die erste in REGISTRY-Reihenfolge', () => {
+    expect(resolveNextStop('context', {}, { 'a.complaints': 'stale', 'a.origin': 'stale' }))
+      .toEqual({ stepKey: 'context', sessionKey: 'a.origin' })
+  })
+
+  it('sie gilt auch am Kapitelende — vor der Finalen Abnahme', () => {
+    const slots = Object.fromEntries(confirmableRequiredSlotsForStep('context')
+      .map(slot => [slot.id, { hasValue: true, confirmed: true }]))
+    expect(resolveNextStop('context', slots, { 'a.oneThing': 'stale' }))
+      .toEqual({ stepKey: 'context', sessionKey: 'a.oneThing' })
+    // GEGENPROBE: ohne veraltete Session steht dort weiter die Abnahme.
+    expect(resolveNextStop('context', slots, { 'a.oneThing': 'done' }))
+      .toEqual({ stepKey: 'context', acceptance: true })
+  })
+
+  it('OHNE Session-Zustände verhält sie sich wie vor Paket 6', () => {
+    // Der Vorgabewert ist leer: eine Aufrufstelle, die die Zustände nicht
+    // kennt (sie sind eine Rechnung über ALLE Kapitel), bekommt wörtlich das
+    // alte Verhalten.
+    expect(resolveNextStop('context', {})).toEqual({ stepKey: 'context', sessionKey: 'a.origin' })
+  })
+
+  it('eine VERALTETE Session eines ANDEREN Kapitels zählt hier nicht', () => {
+    expect(resolveNextStop('context', {}, { 'c.final': 'stale' }))
+      .toEqual({ stepKey: 'context', sessionKey: 'a.origin' })
+  })
+})
+
+describe('pickNextSession — der Vorschlag des Spezialisten, geprüft (§6/§9)', () => {
+  const states = (sessions: Record<string, 'locked' | 'open' | 'done' | 'stale'>) => ({
+    slots: {},
+    sessions,
+  })
+
+  it('folgt einem gültigen Vorschlag aus der offenen Menge', () => {
+    expect(pickNextSession('context', states({ 'a.complaints': 'open' }), 'a.complaints'))
+      .toEqual({ stepKey: 'context', sessionKey: 'a.complaints' })
+  })
+
+  it('DIE WARTESCHLANGE SCHLÄGT DEN VORSCHLAG', () => {
+    // Der Spezialist wählt unter den OFFENEN; die Warteschlange räumt auf, was
+    // eine Korrektur gerade unsicher gemacht hat.
+    expect(pickNextSession(
+      'context',
+      states({ 'a.complaints': 'open', 'a.origin': 'stale' }),
+      'a.complaints',
+    )).toEqual({ stepKey: 'context', sessionKey: 'a.origin' })
+  })
+
+  it('ein Vorschlag auf eine VERALTETE Session fällt durch — das wäre eine Korrektur', () => {
+    expect(pickNextSession('context', states({ 'a.origin': 'stale' }), 'a.origin'))
+      .toEqual({ stepKey: 'context', sessionKey: 'a.origin' })
+    // … und ohne Warteschlange bliebe von dem Vorschlag die Grundfassung übrig.
+    expect(pickNextSession('context', states({ 'a.origin': 'done' }), 'a.origin'))
+      .toEqual({ stepKey: 'context', sessionKey: 'a.origin' })
   })
 })
 

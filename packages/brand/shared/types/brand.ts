@@ -497,6 +497,41 @@ export interface BrandRestartImpactResponse {
   ack: string
 }
 
+// ── Die Korrektur-Regel (BW2 Paket 6, Plan §9) ────────────────────────────
+
+/**
+ * WAS DIE KORREKTUR EINES FELDES BERÜHRT (§9 Schritt 1) — die Antwort auf
+ * `GET …/sessions/:id/impact`, OHNE KI und ohne einen Schreibvorgang.
+ *
+ * ── NUR BESTÄTIGTE FELDER ────────────────────────────────────────────────
+ * Die Hülle zählt, was schon entschieden ist (`confirmedDependents`). Was
+ * ohnehin noch besprochen wird, ist kein Verlust — und eine Warnung, die 29
+ * Felder nennt, von denen 26 leer sind, wird beim zweiten Mal weggeklickt.
+ *
+ * ── `direct` UND `transitive` ÜBERLAPPEN SICH ────────────────────────────
+ * Wie bei `sessionsAffectedBy`: `direct` ist die Teilmenge derer, die
+ * unmittelbar aus diesem Feld schöpfen, `transitive` ist die ganze Hülle.
+ * `count` ist ihre Länge — die Zahl im Satz „berührt {count} bestätigte
+ * Felder in {steps} Kapiteln".
+ *
+ * `ack` bindet Feld, `revision` und die sortierte Hülle zusammen; der PATCH
+ * trägt ihn als `impactAck` zurück, und ohne ihn antwortet der Server 409
+ * `impact_unacknowledged` (Muster `restart_unacknowledged`).
+ */
+export interface BrandSessionImpactResponse {
+  slotId: string
+  stepKey: BrandStepKey
+  revision: number
+  /** Bestätigte Felder, die UNMITTELBAR aus diesem schöpfen. */
+  direct: string[]
+  /** Die ganze bestätigte Hülle, in Registry-Reihenfolge. */
+  transitive: string[]
+  /** Dieselbe Hülle je Kapitel — leere Kapitel kommen nicht vor. */
+  byStep: Partial<Record<BrandStepKey, string[]>>
+  count: number
+  ack: string
+}
+
 /** Der Rumpf eines 409 `restart_unacknowledged` — die Hülle reist mit. */
 export interface BrandRestartConflictData {
   code: 'restart_unacknowledged'
@@ -585,6 +620,20 @@ export interface BrandSessionCloseResponse {
   reviewed: boolean
   /** Welche Stufe die Befunde geschrieben hat — `null`, wenn keine lief. */
   reviewedBy: BrandReviewStage | null
+  /**
+   * NUR NACH EINER KORREKTUR (§9, `correct`-Modus): wie die mechanisch
+   * veralteten Felder aufgeteilt wurden.
+   *
+   * `restamped` sind die, für die der Server den Quell-Hash neu gesetzt hat —
+   * sie sind wieder `done`. `affected` bleiben `stale` und haben je einen
+   * Befund bekommen. Fehlt das Feld ganz, war es eine gewöhnliche
+   * Bestätigung; `affected` gleich der ganzen Hülle heisst fail-closed (kein
+   * Urteil, also bleibt alles zum Ansehen stehen).
+   */
+  correction?: {
+    affected: string[]
+    restamped: string[]
+  }
 }
 
 /** Die Antwort des KAPITEL-Modus (§5a) — nur Befunde, kein Urteil, kein Wegweiser. */

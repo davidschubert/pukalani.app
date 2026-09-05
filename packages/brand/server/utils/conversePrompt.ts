@@ -96,8 +96,14 @@ import { BRAND_CONVERSE_HISTORY_CHARS, formatStartCard } from './georgePrompt'
  * `converse-8` (BW2 Paket 4): der Block „<Kollegin> hat mitgelesen" — was der
  * Spezialist beim Schliessen der letzten Session vermisst hat, und die offenen
  * Konflikt-Befunde an diesem Feld. EINMAL gesagt, dann nie wieder (§7/§8).
+ *
+ * `converse-9` (BW2 Paket 6, §9): der ERÖFFNUNGSZUG einer VERALTETEN Session
+ * nennt den Grund. Wer eine Session „neu besprechen" anklickt, hat eben
+ * gelesen, dass ein Feld davor sich geändert hat — bekäme er dann denselben
+ * Eröffnungssatz wie beim ersten Mal, wäre die Warteschlange eine Schleife
+ * ohne Anlass.
  */
-export const BRAND_CONVERSE_PROMPT_VERSION = 'converse-8'
+export const BRAND_CONVERSE_PROMPT_VERSION = 'converse-9'
 
 /**
  * Was ein Mensch in EINEM Zug schreiben darf. Grosszügiger als der Hinweis
@@ -286,6 +292,17 @@ export interface BrandConverseInstructionOptions {
    * genau einmal je Kapitel (Plan §6).
    */
   chapterIntro?: boolean
+  /**
+   * Nur beim Eröffnungszug einer VERALTETEN Session (§9, converse-9): die
+   * Beschriftungen der Felder, aus denen sie schöpft.
+   *
+   * WARUM ALLE QUELLEN und nicht die eine geänderte: gespeichert wird EIN
+   * Hash über den ganzen Quellen-Stand (`sourcesHash`), nicht einer je Quelle.
+   * „Eines dieser Felder hat sich bewegt" ist damit die genaueste Aussage, die
+   * es gibt — und eine erfundene Genauigkeit („a.pitch hat sich geändert")
+   * wäre schlimmer als die ehrliche Unschärfe.
+   */
+  staleSources?: readonly string[]
 }
 
 /**
@@ -392,6 +409,14 @@ function openingTaskLines(options: BrandConverseInstructionOptions): string[] {
     + 'they told you — and says in one short clause what follows from it for this session.',
     'NEVER introduce yourself, never greet them again, never explain what this tool does and never '
     + 'summarise what has happened so far. You have been talking to this person all along.',
+    ...(options.staleSources?.length
+      ? [
+          'THIS SESSION IS BEING REVISITED: a field it draws on has changed since they confirmed this '
+          + `one — one of: ${options.staleSources.join('; ')}. Say so in your FIRST clause, name the `
+          + 'field in their words, and ask whether what stands here still fits. Do not re-ask the '
+          + 'original question as if nothing had happened.',
+        ]
+      : []),
     ...(options.chapterIntro
       ? [
           'THIS IS THE FIRST TURN OF A NEW CHAPTER: you may say in ONE short clause which of your '

@@ -2,7 +2,11 @@ import { describe, expect, it } from 'vitest'
 import {
   BRAND_SOURCES_HASH_SCOPE,
   BRAND_SUBSTANCE_MIN_WORDS,
+  applyAffected,
+  brandListEntries,
   computeSourcesHash,
+  confirmedDependents,
+  correctionNeedsAck,
   evaluateInvariants,
   nextCollectPart,
   sessionsAffectedBy,
@@ -437,6 +441,179 @@ describe('BRAND_SUBSTANCE_MIN_WORDS', () => {
     // mitten im Satz „shorter than roughly NaN words".
     for (const session of BRAND_SLOTS) {
       expect(BRAND_SUBSTANCE_MIN_WORDS[session.answers.minSubstance]).toBeGreaterThan(0)
+    }
+  })
+})
+
+/**
+ * DIE KORREKTUR-REGEL (BW2 Paket 6, Plan §9) — die drei puren Rechnungen, an
+ * denen der Impact-Hinweis, das 409 und die Eingrenzung hängen.
+ *
+ * ── WARUM DIE GEGENPROBEN HIER PFLICHT SIND ───────────────────────────────
+ * Alle drei liefern im Normalfall „nichts zu tun": leere Hülle, kein Ack
+ * nötig, alles wieder gestempelt. Ein Test, der nur den Normalfall prüft, ist
+ * damit auch dann grün, wenn die Funktion GAR NICHTS tut — deshalb steht
+ * neben jeder Zusage ihr Gegenteil.
+ */
+describe('confirmedDependents — was kostet diese Korrektur? (§9)', () => {
+  const confirmed = (...ids: string[]): Record<string, BrandSlotStateFacts> =>
+    Object.fromEntries(ids.map(id => [id, { hasValue: true, confirmed: true }]))
+
+  it('zählt NUR bestätigte Abhängige — ohne Bestätigungen ist die Hülle leer', () => {
+    // `a.customerPraise` berührt strukturell 29 Felder (Anhang A). Am zweiten
+    // Tag eines Brandings ist davon nichts bestätigt, und genau das soll der
+    // Hinweis sagen: hier hängt (noch) nichts dran.
+    expect(sessionsAffectedBy('a.customerPraise').transitive.length).toBe(29)
+    expect(confirmedDependents('a.customerPraise', {}).count).toBe(0)
+  })
+
+  it('nimmt die bestätigten auf, in Registry-Reihenfolge und je Kapitel', () => {
+    const impact = confirmedDependents('c.final', confirmed('c.definitions', 'e.statements'))
+    expect(impact.transitive).toEqual(['c.definitions', 'e.statements'])
+    expect(impact.count).toBe(2)
+    expect(impact.byStep).toEqual({ values: ['c.definitions'], manifesto: ['e.statements'] })
+  })
+
+  it('trennt direkt und indirekt — `direct` ist die Teilmenge', () => {
+    // `e.anchorLine` schöpft aus `e.manifesto`, das aus `e.statements`, das aus
+    // `c.final`: über drei Ecken erreichbar, also INDIREKT. `c.definitions` und
+    // `e.statements` nennen `c.final` dagegen selbst in ihren Eingaben.
+    const impact = confirmedDependents('c.final', confirmed('c.definitions', 'e.statements', 'e.anchorLine'))
+    expect(impact.direct).toEqual(['c.definitions', 'e.statements'])
+    expect(impact.transitive).toContain('e.anchorLine')
+    expect(impact.direct).not.toContain('e.anchorLine')
+    expect(impact.direct.every(id => impact.transitive.includes(id))).toBe(true)
+  })
+
+  it('GEGENPROBE: eine erfundene Abhängigkeit vergrössert die Hülle', () => {
+    const sessions = BRAND_SLOTS.map(session => (session.id === 'a.challenge'
+      ? { ...session, inputs: { ...session.inputs, slots: ['c.final'] } }
+      : session))
+    const facts = confirmed('c.definitions', 'a.challenge')
+    expect(confirmedDependents('c.final', facts).transitive).not.toContain('a.challenge')
+    expect(confirmedDependents('c.final', facts, sessions).transitive).toContain('a.challenge')
+  })
+
+  it('ein Feld ganz unten berührt nichts — auch mit vollem Dokument', () => {
+    const all = confirmed(...BRAND_SLOTS.map(session => session.id))
+    expect(confirmedDependents('f.decision', all).count).toBe(0)
+    expect(confirmedDependents('a.challenge', all).count).toBe(0)
+  })
+})
+
+describe('correctionNeedsAck — braucht diese Korrektur eine Zustimmung?', () => {
+  it('leere Hülle ⇒ kein Ack, sonst ⇒ Ack', () => {
+    expect(correctionNeedsAck({ count: 0 })).toBe(false)
+    expect(correctionNeedsAck({ count: 1 })).toBe(true)
+    expect(correctionNeedsAck({ count: 14 })).toBe(true)
+  })
+})
+
+describe('applyAffected — die Eingrenzung durch den Spezialisten (§9)', () => {
+  const hull = ['c.definitions', 'c.livedExamples', 'e.statements']
+
+  it('teilt die Hülle: getroffen bleibt veraltet, der Rest wird neu gestempelt', () => {
+    expect(applyAffected(hull, ['c.livedExamples'])).toEqual({
+      restamp: ['c.definitions', 'e.statements'],
+      stale: ['c.livedExamples'],
+    })
+  })
+
+  it('eine LEERE Liste ist eine Antwort — dann wird alles wieder grün', () => {
+    expect(applyAffected(hull, [])).toEqual({ restamp: hull, stale: [] })
+  })
+
+  it('FAIL-CLOSED: ohne Antwort bleibt ALLES veraltet', () => {
+    // Der Unterschied zur leeren Liste ist der ganze Punkt: „nachgesehen, es
+    // trifft nichts" gegen „es hat niemand nachgesehen".
+    expect(applyAffected(hull, undefined)).toEqual({ restamp: [], stale: hull })
+  })
+
+  it('Felder AUSSERHALB der Hülle werden verworfen — ein Modell darf sie nicht vergrössern', () => {
+    expect(applyAffected(hull, ['c.livedExamples', 'a.pitch', 'erfunden'])).toEqual({
+      restamp: ['c.definitions', 'e.statements'],
+      stale: ['c.livedExamples'],
+    })
+  })
+})
+
+/**
+ * DIE TOLERANTE LISTEN-LESUNG (Paket-6-Vorabklärung zum Paket-1-Befund (a)).
+ *
+ * Nachgemessen am 2026-09-05: `c.final` und `f.shortlist` haben den Editor
+ * `chips`, den es in der Werkstatt nicht gibt — ihre Antwort läuft durch
+ * `answerFromGeorge()` und landet als getippter Fliesstext im Slot. Im lokalen
+ * Test-Branding steht wörtlich „Wir servieren nur Bohnen von Farmen, die wir
+ * kennen." — ein Satz, eine Zeile, kein Strich. Eine Invariante, die daran
+ * scheitert, hielte einen Menschen von seinem eigenen Feld fern.
+ */
+describe('brandListEntries — jede Schreibweise derselben Aufzählung (§3a Nr. 6)', () => {
+  const three = ['Geduld', 'Unbestechlichkeit', 'Klarheit']
+
+  it('Strich-Liste (die Form des Generators)', () => {
+    expect(brandListEntries('- Geduld\n- Unbestechlichkeit\n- Klarheit')).toEqual(three)
+  })
+
+  it('Aufzählungszeichen und Nummern', () => {
+    expect(brandListEntries('• Geduld\n• Unbestechlichkeit\n• Klarheit')).toEqual(three)
+    expect(brandListEntries('1. Geduld\n2. Unbestechlichkeit\n3. Klarheit')).toEqual(three)
+    expect(brandListEntries('1) Geduld\n2) Unbestechlichkeit\n3) Klarheit')).toEqual(three)
+    expect(brandListEntries('* Geduld\n* Unbestechlichkeit\n* Klarheit')).toEqual(three)
+  })
+
+  it('blosse Zeilen, mit Leerzeilen dazwischen', () => {
+    expect(brandListEntries('Geduld\n\nUnbestechlichkeit\n\nKlarheit')).toEqual(three)
+    expect(brandListEntries('Geduld\r\nUnbestechlichkeit\r\nKlarheit')).toEqual(three)
+  })
+
+  it('EINE Zeile: Komma, Semikolon und „und" trennen ebenfalls', () => {
+    expect(brandListEntries('Geduld, Unbestechlichkeit und Klarheit')).toEqual(three)
+    expect(brandListEntries('Geduld; Unbestechlichkeit; Klarheit')).toEqual(three)
+    expect(brandListEntries('Patience, incorruptibility and clarity'))
+      .toEqual(['Patience', 'incorruptibility', 'clarity'])
+  })
+
+  it('eine Zeile OHNE Trenner bleibt EIN Eintrag', () => {
+    expect(brandListEntries('Klarheit')).toEqual(['Klarheit'])
+    expect(brandListEntries('Wir schliessen lieber früher als schlechten Kaffee auszuschenken'))
+      .toEqual(['Wir schliessen lieber früher als schlechten Kaffee auszuschenken'])
+    expect(brandListEntries('')).toEqual([])
+  })
+
+  it('ein EINZEILIGER Satz MIT Komma wird geschnitten — und das ist gewollt', () => {
+    // Die Kehrseite der Toleranz, bewusst so: nur AUFZÄHLENDE Felder tragen
+    // die Invarianten, die hier lesen (`c.final` zählt, `f.decision` prüft
+    // Zugehörigkeit). Für ein Prosa-Feld läuft diese Rechnung nie — und wo
+    // sie liefe, wäre „drei Werte in eine Zeile getippt" der häufigere Fall
+    // als „ein Satz mit Komma".
+    expect(brandListEntries('Wir servieren nur Bohnen von Farmen, die wir kennen.'))
+      .toEqual(['Wir servieren nur Bohnen von Farmen', 'die wir kennen.'])
+  })
+
+  it('MEHRERE Zeilen werden NICHT noch einmal an Kommas geschnitten', () => {
+    // Wer Zeilen schreibt, hat seine Einträge schon getrennt — ein Komma darin
+    // gehört zum Eintrag. Sonst würden aus drei Werten sechs.
+    expect(brandListEntries('- Klarheit, auch wenn es weh tut\n- Geduld, immer\n- Sorgfalt'))
+      .toEqual(['Klarheit, auch wenn es weh tut', 'Geduld, immer', 'Sorgfalt'])
+  })
+
+  it('c.final `count 3–5` gilt in JEDER dieser Formen — die Sache zählt, nicht die Form', () => {
+    const session = slotById('c.final')!
+    for (const value of [
+      '- Geduld\n- Unbestechlichkeit\n- Klarheit',
+      '1. Geduld\n2. Unbestechlichkeit\n3. Klarheit',
+      'Geduld, Unbestechlichkeit und Klarheit',
+      'Geduld; Unbestechlichkeit; Klarheit',
+    ]) {
+      expect(evaluateInvariants(session, value)).toEqual({ ok: true })
+    }
+    // GEGENPROBE: zwei sind zwei, in jeder Schreibweise.
+    for (const value of ['- Geduld\n- Klarheit', 'Geduld und Klarheit']) {
+      expect(evaluateInvariants(session, value)).toEqual({
+        ok: false,
+        code: 'invariant_violated',
+        invariant: { kind: 'count', min: 3, max: 5 },
+      })
     }
   })
 })

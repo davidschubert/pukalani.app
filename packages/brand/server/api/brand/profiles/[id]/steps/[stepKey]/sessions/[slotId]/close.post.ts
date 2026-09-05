@@ -1,6 +1,7 @@
 import { createBrandSessionCloseSchema } from '../../../../../../../../../schemas/brandReview'
-import type { BrandReviewStage } from '../../../../../../../../../shared/brandFindings'
-import { pickNextSession } from '../../../../../../../../../shared/brandJourney'
+import type { BrandFinding, BrandReviewStage } from '../../../../../../../../../shared/brandFindings'
+import { mergeBrandSlotFacts, pickNextSession } from '../../../../../../../../../shared/brandJourney'
+import { applyAffected, confirmedDependents } from '../../../../../../../../../shared/brandSessions'
 import { slotsForStep } from '../../../../../../../../../shared/slotRegistry'
 import type {
   BrandFindingView,
@@ -12,6 +13,7 @@ import {
   requireSessionParam,
   withStepSlotFacts,
 } from '../../../../../../../../utils/brandAcceptance'
+import { restampBrandSessions } from '../../../../../../../../utils/brandCorrection'
 import {
   listBrandFindings,
   toBrandFindingView,
@@ -19,6 +21,7 @@ import {
 } from '../../../../../../../../utils/brandFindingsStore'
 import { loadBrandConversationHistory } from '../../../../../../../../utils/brandConversationHistory'
 import { BRAND_REVIEW_EMPTY, runBrandSessionReview } from '../../../../../../../../utils/brandReview'
+import { brandSlotPromptLabel } from '../../../../../../../../utils/brandSlotPromptLabels'
 import {
   brandReviewChapter,
   brandReviewDocument,
@@ -127,8 +130,20 @@ export default defineEventHandler(async (event): Promise<BrandSessionCloseRespon
     )
   }
 
+  /**
+   * DER VOR-WERT EINER KORREKTUR (§9) — er steht VOR der Idempotenz-Weiche,
+   * weil er sie aufhebt.
+   *
+   * Nach einer Korrektur trägt der Datensatz noch das Urteil über den ALTEN
+   * Wortlaut (`reviewed: true`). Ohne diese Ausnahme antwortete die Route
+   * damit — und der `correct`-Modus, um dessentwillen es Paket 6 gibt, liefe
+   * nie. Die Kostenregel von Paket 4 bleibt trotzdem stehen: sie gilt dem
+   * zweiten Klick auf DENSELBEN Wert, und genau den gibt es hier nicht.
+   */
+  const previousValue = record?.previousValue
+
   // ── Schon geprüft? Dann kostet dieser Aufruf nichts (s. Kopf). ───────────
-  if (record?.reviewed && !body.force) {
+  if (record?.reviewed && !body.force && previousValue === undefined) {
     const stored: BrandSessionReview = {
       goalReached: record.review?.goalReached ?? true,
       missing: [...(record.review?.missing ?? [])],
@@ -151,13 +166,37 @@ export default defineEventHandler(async (event): Promise<BrandSessionCloseRespon
     }
   }
 
+  /**
+   * IST DAS EINE KORREKTUR? (BW2 Paket 6, §9 „Die Eingrenzung durch den
+   * Spezialisten".)
+   *
+   * ZWEI Bedingungen, und die Route entscheidet es selbst — der Client sagt
+   * nirgends „das war eine Korrektur":
+   *
+   *  1. `previousValue` steht am Datensatz. Gesetzt hat ihn der
+   *     Autosave-PATCH, als „Korrigieren" dieses Feld geöffnet hat — und nur
+   *     dann, wenn dabei ein Ack fällig war.
+   *  2. Die Hülle ist AUCH JETZT noch nicht leer. Zwischen dem Öffnen und dem
+   *     erneuten Bestätigen kann jemand die abhängigen Felder aufgehoben
+   *     haben; dann gibt es nichts einzugrenzen, und der teurere Modus mit
+   *     seinen zusätzlichen Eingaben wäre bezahlte Arbeit ohne Gegenstand.
+   *
+   * Die Hülle wird über den Stand VOR diesem Aufruf gerechnet: die Sessions
+   * darin sind bestätigt und mechanisch veraltet, weil sich ihr Quell-Hash mit
+   * dem neuen Wert bewegt hat.
+   */
+  const hull = previousValue === undefined
+    ? []
+    : confirmedDependents(session.id, mergeBrandSlotFacts(stepFacts)).transitive
+  const correcting = previousValue !== undefined && hull.length > 0
+
   // ── Die Eingaben (§7): Config, Wert, Verlauf, Dokument, Notizen ─────────
   const allRecords = mergeStepSlotRecords(stepRows)
   const outcome = await runBrandSessionReview({
     event,
     userId,
     profileId: profile.$id,
-    mode: 'session',
+    mode: correcting ? 'correct' : 'session',
     stepKey,
     session: brandReviewSessionInfo(session, contentLocale, pathKind),
     value: record?.confirmed ?? '',
@@ -168,8 +207,22 @@ export default defineEventHandler(async (event): Promise<BrandSessionCloseRespon
     chapter: brandReviewChapter(allRecords, stepKey, contentLocale, pathKind),
     notes: brandReviewNotes(records, stepKey, contentLocale, pathKind),
     openSessions: brandReviewOpenSessions(stepKey, context.sessionStates, contentLocale, pathKind),
+    // DIE HÜLLE MIT WERTEN (§9): nur so kann der Spezialist sagen, welches
+    // Feld die Änderung inhaltlich trifft — eine Liste nackter Ids wäre eine
+    // Frage nach einem Inhalt, den er nicht kennt.
+    ...(correcting
+      ? {
+          staleFields: hull.map(slotId => ({
+            slotId,
+            label: brandSlotPromptLabel(slotId, contentLocale, pathKind),
+            value: allRecords[slotId]?.confirmed ?? '',
+          })),
+          previousValue,
+        }
+      : {}),
     // Nur wirksam, solange der Ersatz-Spezialist läuft (Beweis-Schalter).
     stubFinding: String(getQuery(event).stub ?? '') === 'conflict',
+    stubAffected: String(getQuery(event).stub ?? '') === 'affected',
   })
 
   if (!outcome.reviewed) {
@@ -211,6 +264,16 @@ export default defineEventHandler(async (event): Promise<BrandSessionCloseRespon
   // Das Briefing-Flag wird GELÖSCHT statt auf `true` gesetzt, wenn es nichts
   // zu sagen gibt — „fehlt" heisst hier überall dasselbe wie „nein".
   if (review.goalReached) delete nextRecords[session.id]!.briefDelivered
+  /**
+   * DER VOR-WERT HAT SEINE ARBEIT GETAN (§9).
+   *
+   * Er wird gelöscht, sobald dieser Aufruf WIRKLICH schreibt — nicht schon
+   * beim Lesen: ein fail-soft ausgefallener Aufruf (Drossel, Anbieter) darf
+   * seine eigene Eingabe nicht verbrennen, sonst wäre der zweite Versuch
+   * keine Korrektur mehr, sondern eine gewöhnliche Bestätigung, und die Hülle
+   * bliebe für immer bernstein.
+   */
+  if (previousValue !== undefined) delete nextRecords[session.id]!.previousValue
 
   const nextRevision = revision + 1
   const { tablesDB, databaseId } = brandDb(event)
@@ -226,12 +289,44 @@ export default defineEventHandler(async (event): Promise<BrandSessionCloseRespon
     throw toH3Error(error, 'Brand session could not be closed')
   }
 
+  /**
+   * DIE EINGRENZUNG (§9) — was die Korrektur NICHT trifft, wird neu gestempelt.
+   *
+   * `applyAffected` teilt die Hülle in zwei Hälften: die getroffenen bleiben
+   * `stale` (bernstein, mit ihrem Befund), die übrigen bekommen den heutigen
+   * Quell-Hash und sind wieder `done`. Ohne gültige Antwort ist `affected`
+   * gar nicht da, und die Regel ist fail-CLOSED — dann bleibt alles stehen und
+   * der Mensch entscheidet selbst („gilt weiter" oder neu besprechen).
+   *
+   * GESTEMPELT WIRD MIT DEM SCHON GESCHRIEBENEN STAND: die Kapitel-Zeile oben
+   * ist durch, also muss der Hash über den neuen Wert rechnen — sonst
+   * stempelte er genau die Fassung, die gerade veraltet ist.
+   */
+  const split = correcting
+    ? applyAffected(hull, review.affected)
+    : { restamp: [], stale: [] }
+  const restamp = await restampBrandSessions(event, {
+    stepRows: stepRows.map(row => (row.$id === stepRow.$id
+      ? { ...row, slots: serializeSlotRecords(nextRecords), revision: nextRevision }
+      : row)),
+    sessions: split.restamp,
+  })
+  // Ein Feld DESSELBEN Kapitels hat die eigene Zeile ein zweites Mal
+  // geschrieben — dann gilt deren Fassung, sonst liefe der nächste Autosave
+  // des Clients in einen 409 (s. `BrandRestampResult.revisionOf`).
+  const finalRevision = restamp.revisionOf[stepRow.$id] ?? nextRevision
+  const finalRecords = restamp.recordsOf[stepRow.$id] ?? nextRecords
+
   // Die Befunde in ihre eigene Tabelle — fail-soft und dedupliziert (s. dort).
+  // Ein `affected`-Befund an einem Feld, das gerade neu gestempelt wurde, wäre
+  // ein Chip ohne Anlass: gefiltert wird deshalb auf die WIRKLICH veralteten.
+  const survivors = new Set(split.stale)
   await writeBrandFindings(event, {
     profileId: profile.$id,
     stepKey,
     sourceSession: session.id,
-    findings: review.findings,
+    findings: review.findings.filter((finding: BrandFinding) => finding.kind !== 'affected'
+      || finding.slots.every(slotId => survivors.has(slotId))),
   })
 
   return {
@@ -239,9 +334,10 @@ export default defineEventHandler(async (event): Promise<BrandSessionCloseRespon
     sessionKey: session.id,
     review,
     findings: await chapterFindings(),
-    next: nextStop(nextRecords, review.nextSession),
-    revision: nextRevision,
+    next: nextStop(finalRecords, review.nextSession),
+    revision: finalRevision,
     reviewed: true,
     reviewedBy: outcome.reviewedBy,
+    ...(correcting ? { correction: { affected: [...split.stale], restamped: restamp.stamped } } : {}),
   }
 })

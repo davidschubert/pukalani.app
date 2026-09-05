@@ -102,6 +102,8 @@ const restartImpact = (await import('../server/api/brand/profiles/[id]/steps/[st
   .default as unknown as (event: H3Event) => Promise<Record<string, unknown>>
 const restart = (await import('../server/api/brand/profiles/[id]/steps/[stepKey]/restart.post'))
   .default as unknown as (event: H3Event) => Promise<Record<string, unknown>>
+const restamp = (await import('../server/api/brand/profiles/[id]/steps/[stepKey]/sessions/[slotId]/restamp.post'))
+  .default as unknown as (event: H3Event) => Promise<{ revision: number }>
 
 const event = { context: {} } as unknown as H3Event
 
@@ -413,5 +415,93 @@ describe('POST …/steps/:stepKey/restart', () => {
       status: 409,
       data: { code: 'revision_conflict' },
     })
+  })
+})
+
+/**
+ * „GILT WEITER" (BW2 Paket 6, §9) — der Stempel auf eine VERALTETE Session.
+ *
+ * Er ist die Hand des Menschen an der Warteschlange: der Wert bleibt Wort für
+ * Wort stehen, nur seine Grundlage wird auf den heutigen Stand gesetzt. Was
+ * hier gemessen wird, ist genau die Grenze — er stempelt einen HASH und
+ * verändert keinen Inhalt, keine Abnahme, keine Bestätigung.
+ */
+describe('POST …/sessions/:slotId/restamp', () => {
+  /** `d.voiceSamples` bestätigt, mit einem Hash von GESTERN ⇒ `stale`. */
+  function makeStale(): void {
+    stepRow('values').state = 'done'
+    stepRow('archetype').state = 'active'
+    stepRow('values').slots = JSON.stringify({
+      ...confirmedSlots('values'),
+      'c.final': { confirmed: '- Mut\n- Klarheit\n- Geduld' },
+    })
+    stepRow('archetype').slots = JSON.stringify({
+      'd.voiceSamples': { confirmed: 'steht', accepted: true, sourcesHash: 'von-gestern' },
+    })
+    routeStepKey = 'archetype'
+    routeSlotId = 'd.voiceSamples'
+  }
+
+  it('STEMPELT den heutigen Quellen-Stand — und die Zeile ist wieder aktuell', async () => {
+    makeStale()
+    const before = (await acceptance(event)).sessions as { slotId: string, state: string }[]
+    expect(before.find(entry => entry.slotId === 'd.voiceSamples')?.state).toBe('stale')
+
+    body = { revision: 2 }
+    const response = await restamp(event)
+
+    expect(response.revision).toBe(3)
+    const stored = storedSlots('archetype')['d.voiceSamples'] as { sourcesHash?: string }
+    expect(stored.sourcesHash).toHaveLength(64)
+
+    const after = (await acceptance(event)).sessions as { slotId: string, state: string }[]
+    expect(after.find(entry => entry.slotId === 'd.voiceSamples')?.state).toBe('done')
+  })
+
+  it('lässt WERT und ABNAHME unangetastet — „gilt weiter" ist keine Änderung', async () => {
+    makeStale()
+    body = { revision: 2 }
+    await restamp(event)
+
+    expect(storedSlots('archetype')['d.voiceSamples']).toMatchObject({
+      confirmed: 'steht',
+      accepted: true,
+    })
+  })
+
+  it('eine AKTUELLE Session ist ein No-op — keine Fassung, kein Schreibvorgang', async () => {
+    makeStale()
+    body = { revision: 2 }
+    await restamp(event)
+    const revision = stepRow('archetype').revision as number
+    tablesDB.updateRow.mockClear()
+
+    body = { revision }
+    const second = await restamp(event)
+    expect(second.revision).toBe(revision)
+    expect(tablesDB.updateRow).not.toHaveBeenCalled()
+  })
+
+  it('WEIST einen unbestätigten Wert mit 409 `not_confirmed` ab', async () => {
+    makeStale()
+    stepRow('archetype').slots = JSON.stringify({ 'd.voiceSamples': { latestDraft: 'Entwurf' } })
+    body = { revision: 2 }
+
+    await expect(restamp(event)).rejects.toMatchObject({
+      status: 409,
+      data: { code: 'not_confirmed' },
+    })
+    expect(tablesDB.updateRow).not.toHaveBeenCalled()
+  })
+
+  it('WEIST eine veraltete Fassung mit 409 ab — vor jeder Wirkung', async () => {
+    makeStale()
+    body = { revision: 1 }
+
+    await expect(restamp(event)).rejects.toMatchObject({
+      status: 409,
+      data: { code: 'revision_conflict', revision: 2 },
+    })
+    expect(tablesDB.updateRow).not.toHaveBeenCalled()
   })
 })

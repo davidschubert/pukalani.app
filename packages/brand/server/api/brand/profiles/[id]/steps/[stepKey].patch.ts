@@ -5,8 +5,14 @@ import {
   resolveBrandJourney,
   transitionBrandStep,
 } from '../../../../../../shared/brandJourney'
+import {
+  confirmedDependents,
+  correctionNeedsAck,
+  evaluateInvariants,
+} from '../../../../../../shared/brandSessions'
 import { slotById } from '../../../../../../shared/slotRegistry'
 import type { BrandStepSaveResponse } from '../../../../../../shared/types/brand'
+import { brandCorrectionAck } from '../../../../../utils/brandCorrection'
 import {
   BRAND_STEPS_TABLE,
   type BrandSlotRecord,
@@ -118,6 +124,18 @@ export default defineEventHandler(async (event): Promise<BrandStepSaveResponse> 
   /** Slots, die dieser Patch NEU bestätigt — sie bekommen ihren Quellen-Hash. */
   const confirmedNow: string[] = []
 
+  /**
+   * DER STAND VOR DIESEM PATCH, über ALLE Kapitel — die Grundlage der
+   * Impact-Hülle (§9).
+   *
+   * Sie wird aus dem GELESENEN Stand gerechnet, nicht aus dem entstehenden:
+   * die Hülle ist die Ankündigung, die der Mensch VOR seinem Klick gesehen
+   * hat, und ihr Hash bindet genau diesen Augenblick (Feld, `revision`,
+   * bestätigte Abhängige). Rechnete man sie mit dem Patch, änderte der Patch
+   * seine eigene Vorbedingung.
+   */
+  const factsBefore = mergeBrandSlotFacts(toStepFacts(stepRows))
+
   for (const [slotId, patch] of Object.entries(body.slots)) {
     const before = records[slotId]
     const candidate: BrandSlotRecord = { ...before }
@@ -155,6 +173,53 @@ export default defineEventHandler(async (event): Promise<BrandStepSaveResponse> 
       candidate.confirmed = value
     }
     else if (patch.confirmed === false) {
+      /**
+       * DIE KORREKTUR-REGEL (BW2 Paket 6, §9) — hier und nur hier.
+       *
+       * „Korrigieren" IST dieser Zweig: ein bestätigter Wert wird wieder
+       * offen. Hängen daran BESTÄTIGTE Felder, hat der Mensch das vorher
+       * gesehen (`GET …/sessions/:id/impact`) und angenommen — und trägt den
+       * Hash genau dieser Hülle zurück. Ohne ihn 409, mit einem alten
+       * ebenfalls: die Hülle kann sich zwischen dem Zeigen und dem Klick
+       * bewegt haben, und dann ist die Zustimmung eine zu einer anderen Zahl.
+       *
+       * DIE HÜLLE REIST NICHT IM 409 MIT. Der zentrale Fehler-Handler
+       * (`packages/core/server/error.ts`) hebt ausschliesslich `data.code` als
+       * `reason` ins Envelope; alles andere bliebe liegen. Der Client holt sie
+       * deshalb mit einem GET nach — dieselbe Kette, die der Autosave beim
+       * `revision_conflict` schon geht (s. `useBrandAutosave`).
+       *
+       * NUR auf einem BESTÄTIGTEN Slot: `confirmed: false` auf einem offenen
+       * ist ein No-op und keine Korrektur.
+       */
+      if (brandSlotRecordConfirmed(before)) {
+        const impact = confirmedDependents(slotId, factsBefore)
+        if (correctionNeedsAck(impact)) {
+          const expected = brandCorrectionAck(slotId, stepRow.revision ?? 0, impact.transitive)
+          if (body.impactAck !== expected) {
+            throw createError({
+              status: 409,
+              statusText: 'Correction was not acknowledged',
+              data: { code: 'impact_unacknowledged' },
+            })
+          }
+          /**
+           * DER WERT VON VORHER, für die EINGRENZUNG (§9).
+           *
+           * Der Schliess-Aufruf im `correct`-Modus vergleicht alten und neuen
+           * Wortlaut — sonst könnte er nicht sagen, welches abhängige Feld die
+           * Änderung inhaltlich trifft. `slots[id]` führt keine Historie
+           * (`firstDraft`/`latestDraft`/`confirmed` sind der Versions-Vertrag,
+           * kein Verlauf), also hält ihn diese eine additive Zeile fest — und
+           * die Schliess-Route löscht sie wieder, sobald sie ihn benutzt hat.
+           *
+           * GESETZT WIRD ER NUR MIT HÜLLE: ohne Abhängige gäbe es nichts
+           * einzugrenzen, und ein Feld, das für immer seinen Vorgänger-Text
+           * mitschleppt, wäre Ballast in einer gedeckelten JSON-Spalte.
+           */
+          candidate.previousValue = before?.confirmed ?? ''
+        }
+      }
       candidate.confirmed = null
     }
 
@@ -202,6 +267,47 @@ export default defineEventHandler(async (event): Promise<BrandStepSaveResponse> 
         ? { ...facts, slots: toSlotFacts(next) }
         : facts)),
     )
+    /**
+     * DIE INVARIANTEN SIND SCHARF (BW2 Paket 6, §3a Nr. 6) — und zwar HIER,
+     * weil hier bestätigt wird.
+     *
+     * Die Prüfung stand seit Paket 1 in `transitionBrandStep('confirmSlot')`,
+     * und diese Handlung ruft keine Route: bestätigt wird im Autosave-PATCH,
+     * der den Wert direkt schreibt (Paket-1-Befund (a)). Sie lief damit nie —
+     * eine Regel, die niemand ausführt, ist eine Zusage ohne Deckung.
+     *
+     * ── SIE LÄUFT VOR DEM SCHREIBEN, ÜBER DEN GANZEN PATCH ────────────────
+     * Gerechnet wird gegen `factsForHash`: den Stand ALLER Kapitel MIT diesem
+     * Patch. Eine Session liest über Kapitelgrenzen (`f.decision` ←
+     * `f.shortlist`), und zwei Slots können in einem Rumpf kommen — wer nur
+     * die gespeicherte Zeile prüfte, bekäme für den zweiten ein 409 auf einen
+     * Wert, der im selben Rumpf mitkommt.
+     *
+     * ── NUR DER SCHREIBWEG, NIE DER BESTAND ───────────────────────────────
+     * Geprüft wird ausschliesslich, was DIESER Patch neu bestätigt. Ein
+     * Bestands-Wert, der die Regel verletzt, bleibt unangetastet stehen: eine
+     * Regel, die rückwirkend Felder sperrt, nähme jemandem sein fertiges
+     * Kapitel weg, ohne dass er etwas getan hätte.
+     *
+     * ── WELCHE Invariante gerissen ist, sagt der Client sich SELBST ───────
+     * Der Envelope trägt nur `data.code` als `reason` (createError-Regel), und
+     * `invariant_violated` ist dieser Code. Die Oberfläche rechnet mit
+     * DERSELBEN puren Funktion nach, welche Regel es war, und schreibt den
+     * passenden Satz — ein zweiter Kanal für dieselbe Auskunft wäre eine
+     * Sonderbehandlung im Core.
+     */
+    for (const slotId of confirmedNow) {
+      const config = slotById(slotId)
+      if (!config) continue
+      const verdict = evaluateInvariants(config, next[slotId]?.confirmed ?? '', factsForHash)
+      if (!verdict.ok) {
+        throw createError({
+          status: 409,
+          statusText: 'Value breaks a rule of this field',
+          data: { code: verdict.code },
+        })
+      }
+    }
     for (const slotId of confirmedNow) {
       const config = slotById(slotId)
       if (!config) continue

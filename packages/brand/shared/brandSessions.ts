@@ -30,6 +30,10 @@ import {
  *  4. `nextCollectPart` (Paket 3a) — welcher Teil einer Sammel-Session gerade
  *     dran ist. Ebenfalls Rechnung statt Modell: der Text gehört dem Teil, der
  *     gefragt wurde.
+ *  5. Die KORREKTUR-REGEL (Paket 6): `confirmedDependents` (was kostet diese
+ *     Korrektur), `correctionNeedsAck` (braucht sie eine Bestätigung) und
+ *     `applyAffected` (welche Felder bleiben danach veraltet). Drei Zeilen
+ *     Rechnung, die an drei Enden gleich lauten müssen — Layer, 409, Stempel.
  *
  * ── FAIL-OPEN IST HIER DIE RICHTIGE RICHTUNG ──────────────────────────────
  * Alle drei rechnen mit `BrandSlotStateFacts`, und dessen `value` ist
@@ -158,6 +162,120 @@ export function brandRestartImpact(
   return { sessions: list, byStep, count: list.length }
 }
 
+// ── 1c · Was kostet die Korrektur EINES Feldes? (§9) ──────────────────────
+
+export interface BrandCorrectionImpact {
+  /** Bestätigte Sessions, deren `inputs.slots` DIREKT auf dieses Feld zeigen. */
+  readonly direct: readonly string[]
+  /** Dieselben plus die über Zwischenschritte — in Registry-Reihenfolge. */
+  readonly transitive: readonly string[]
+  /** Dieselbe Menge je Kapitel — leere Kapitel kommen nicht vor. */
+  readonly byStep: Readonly<Partial<Record<BrandStepKey, readonly string[]>>>
+  /** Die Zahl im Hinweis: „berührt {count} bestätigte Felder". */
+  readonly count: number
+}
+
+/**
+ * WER HÄNGT AN DIESEM FELD — UND HAT SCHON EINEN BESTÄTIGTEN WERT? (§9
+ * Schritt 1.)
+ *
+ * `sessionsAffectedBy` beantwortet die STRUKTUR-Frage („wer schöpft daraus"),
+ * diese hier die Frage des Menschen vor dem Klick: was ist SCHON entschieden
+ * und wird durch meine Korrektur wieder unsicher. Eine noch nicht bestätigte
+ * Session ist kein Verlust — sie wird ohnehin erst später besprochen, und sie
+ * in einer Warnung mitzuzählen liesse die Zahl bedrohlicher aussehen, als die
+ * Sache ist (`a.customerPraise` berührt strukturell 29 Felder; am zweiten Tag
+ * eines Brandings sind davon vielleicht drei bestätigt).
+ *
+ * Dieselbe Rechnung läuft im Browser (der Layer zeigt die Liste) und auf dem
+ * Server (der Ack-Hash, das 409). Zwei Fassungen wären zwei Zahlen für
+ * dieselbe Warnung — und der Hash über die eine passte nie zur anderen.
+ *
+ * `sessions` bleibt überschreibbar (Gegenprobe mit mutierter Registry).
+ */
+export function confirmedDependents(
+  sessionId: string,
+  slotFacts: Readonly<Record<string, BrandSlotStateFacts | undefined>> = {},
+  sessions: readonly BrandSessionConfig[] = BRAND_SLOTS,
+): BrandCorrectionImpact {
+  const hull = sessionsAffectedBy(sessionId, sessions)
+  const isConfirmed = (id: string): boolean => slotFacts[id]?.confirmed === true
+
+  const transitive = hull.transitive.filter(isConfirmed)
+  const kept = new Set(transitive)
+  const byStep: Partial<Record<BrandStepKey, string[]>> = {}
+  for (const [stepKey, ids] of Object.entries(hull.byStep)) {
+    const own = (ids ?? []).filter(id => kept.has(id))
+    if (own.length) byStep[stepKey as BrandStepKey] = own
+  }
+
+  return {
+    direct: hull.direct.filter(isConfirmed),
+    transitive,
+    byStep,
+    count: transitive.length,
+  }
+}
+
+/**
+ * BRAUCHT DIESE KORREKTUR EINE BESTÄTIGUNG? (§9 Schritt 3.)
+ *
+ * Eine Zeile, aber an EINER Stelle: der Server entscheidet damit über das 409,
+ * der Browser darüber, ob er den Layer überhaupt zeigt. Stünde die Bedingung
+ * zweimal, wäre der Layer irgendwann höflicher oder strenger als die Route —
+ * und beides ist schlecht: eine Warnung, die der Server nicht erzwingt, ist
+ * Theater; ein 409 ohne vorherige Warnung ist eine Sackgasse.
+ *
+ * Leere Hülle ⇒ kein Ack. Die Korrektur eines Feldes, an dem nichts hängt
+ * (`a.challenge`, `f.decision`, alle `ep.*`), läuft wie vor Paket 6.
+ */
+export function correctionNeedsAck(impact: Pick<BrandCorrectionImpact, 'count'>): boolean {
+  return impact.count > 0
+}
+
+// ── 1d · Die Eingrenzung nach der Korrektur (§9) ──────────────────────────
+
+export interface BrandAffectedSplit {
+  /** Nicht getroffen ⇒ der Server stempelt ihren `sourcesHash` neu (wieder `done`). */
+  readonly restamp: readonly string[]
+  /** Getroffen ⇒ bleiben `stale` und bekommen je einen Befund `affected`. */
+  readonly stale: readonly string[]
+}
+
+/**
+ * WELCHE DER MECHANISCH VERALTETEN FELDER BLEIBEN VERALTET? (§9 „Die
+ * Eingrenzung durch den Spezialisten".)
+ *
+ * Nach einer erneuten Bestätigung ist JEDES Feld der Hülle mechanisch `stale`
+ * (der Quell-Hash weicht ab). Der Spezialist sagt, welche die Änderung
+ * INHALTLICH trifft; für alle anderen wird neu gestempelt — eine
+ * Kommakorrektur soll niemanden zwanzig Gespräche kosten.
+ *
+ * ── FAIL-CLOSED, UND ZWAR IN RICHTUNG „BITTE ANSEHEN" (§7) ────────────────
+ * `affected === undefined` heisst „es gab keine gültige Antwort" (Drossel,
+ * Anbieter, Schema, KI aus). Dann bleibt ALLES veraltet: der Mensch sieht
+ * bernstein, was er selbst mit einem Klick („gilt weiter") wieder grün machen
+ * kann. Die andere Richtung — ohne Urteil alles neu stempeln — hiesse, einen
+ * Ausfall als „geprüft, passt" auszugeben, und niemand erführe je davon.
+ *
+ * Eine LEERE Liste ist ausdrücklich etwas anderes als keine Liste: „ich habe
+ * nachgesehen, es trifft nichts" ist die häufigste richtige Antwort.
+ *
+ * Feld-Ids ausserhalb der Hülle werden verworfen — ein Modell darf die Menge
+ * nicht vergrössern, nur aufteilen.
+ */
+export function applyAffected(
+  hull: readonly string[],
+  affected: readonly string[] | undefined,
+): BrandAffectedSplit {
+  if (affected === undefined) return { restamp: [], stale: [...hull] }
+  const hit = new Set(affected)
+  return {
+    restamp: hull.filter(id => !hit.has(id)),
+    stale: hull.filter(id => hit.has(id)),
+  }
+}
+
 // ── 2 · Ist dieser Stand noch der, aus dem der Wert entstand? ──────────────
 
 /**
@@ -203,16 +321,84 @@ export type BrandInvariantResult =
   | { readonly ok: true }
   | { readonly ok: false, readonly code: 'invariant_violated', readonly invariant: BrandInvariant }
 
-/** Listen-Einträge eines Werts — die Form aus `brandSlotFormat.ts` (`- <eintrag>`). */
-function listEntries(value: string): string[] {
-  return value
+/**
+ * DIE EINTRÄGE EINES WERTS — TOLERANT GELESEN (Paket-6-Vorabklärung zum
+ * Paket-1-Befund (a)).
+ *
+ * ── WARUM TOLERANZ HIER PFLICHT IST ───────────────────────────────────────
+ * `brandSlotFormat.ts` schreibt für einen `list`-Wert „eine Zeile je Eintrag,
+ * jede beginnt mit `- `" — aber diese Regel bindet den GENERATOR, nicht den
+ * MENSCHEN. Nachgemessen am 2026-09-05: `c.final` und `f.shortlist` haben den
+ * Editor `chips`, und den gibt es in der Werkstatt gar nicht (nur `cards` hat
+ * ein eigenes Modul, s. `choiceCardsFor`). Ihre Antwort läuft deshalb durch
+ * `answerFromGeorge()` und landet als GETIPPTER FLIESSTEXT im Slot —
+ * „Geduld, Unbestechlichkeit und Klarheit", nicht drei Zeilen. Im lokalen
+ * Test-Branding (`6a9b5e870033ce9c82f4`) steht wörtlich nichts anderes:
+ * `c.discovery1` = "Wir servieren nur Bohnen von Farmen, die wir kennen." —
+ * ein Satz, eine Zeile, kein Strich.
+ *
+ * Eine Invariante darf NIE an der Schreibweise scheitern, nur an der Sache:
+ * „drei Werte, in eine Zeile getippt" ist die Erfüllung von `count 3–5`, nicht
+ * ihr Bruch. Ein 409 auf eine formal richtige Antwort wäre ein Programmfehler
+ * mit dem Gesicht einer Regel.
+ *
+ * ── DIE REGEL, MIT BEISPIELEN ─────────────────────────────────────────────
+ * 1. MEHRERE ZEILEN ⇒ eine Zeile ist ein Eintrag. Führende Aufzählungszeichen
+ *    fallen weg: `- `, `– `, `— `, `* `, `• `, `1. `, `2) `.
+ *      "- Geduld\n- Klarheit"      ⇒ ['Geduld', 'Klarheit']
+ *      "1. Geduld\n2) Klarheit"    ⇒ ['Geduld', 'Klarheit']
+ *      "• Geduld\n\n• Klarheit"    ⇒ ['Geduld', 'Klarheit']  (Leerzeilen raus)
+ * 2. GENAU EINE ZEILE ⇒ zusätzlich an Komma, Semikolon, „·", „/" und den
+ *    Konjunktionen „und"/„and"/„sowie" getrennt — das ist die Form, in der ein
+ *    Mensch eine Aufzählung tippt.
+ *      "Geduld, Unbestechlichkeit und Klarheit" ⇒ drei Einträge
+ *      "Bogen; Nordfeld; Satzbau"               ⇒ drei Einträge
+ * 3. EINE ZEILE OHNE TRENNER bleibt EIN Eintrag — auch wenn sie ein ganzer
+ *    Satz ist. Der Punkt am Ende fällt erst in `comparable()`.
+ *      "Wir schliessen lieber früher" ⇒ ein Eintrag
+ *
+ * DIE KEHRSEITE, BEWUSST IN KAUF GENOMMEN: ein einzeiliger Satz MIT Komma
+ * wird geschnitten („Bohnen von Farmen, die wir kennen" ⇒ zwei). Das ist
+ * richtig herum: die Invarianten, die hier lesen, hängen ausschliesslich an
+ * AUFZÄHLENDEN Feldern (`c.final` zählt, `f.decision` prüft Zugehörigkeit),
+ * und dort ist „drei Werte in eine Zeile getippt" der häufigere Fall. Ein
+ * Prosa-Feld hat keine dieser Regeln, die Rechnung läuft für es also nie.
+ *
+ * ── WARUM NUR BEI EINER ZEILE GETRENNT WIRD ───────────────────────────────
+ * Wer Zeilen schreibt, hat seine Einträge schon getrennt. Ein Komma INNERHALB
+ * einer solchen Zeile gehört dann zum Eintrag („Klarheit, auch wenn es weh
+ * tut") — dort noch einmal zu schneiden machte aus zwei Werten vier und aus
+ * `count 3–5` eine Lotterie.
+ */
+export function brandListEntries(value: string): string[] {
+  const lines = value
     .replace(/\r\n/g, '\n')
     .split('\n')
-    .map(line => line.trim())
+    .map(line => stripListMarker(line.trim()))
     .filter(line => line.length > 0)
-    .map(line => (line.startsWith('- ') ? line.slice(2).trim() : line))
-    .filter(line => line.length > 0)
+
+  if (lines.length !== 1) return lines
+  return splitInlineList(lines[0]!)
 }
+
+/** Führendes Aufzählungszeichen weg — Strich, Punkt, Stern, Ziffer mit `.`/`)`. */
+function stripListMarker(line: string): string {
+  return line.replace(/^(?:[-–—*•·]\s+|\d{1,2}[.)]\s+)/u, '').trim()
+}
+
+/**
+ * Eine EINZELNE Zeile als Aufzählung lesen (s. Regel 2). Bleibt nach dem
+ * Schneiden nur ein Stück übrig, war es keine Aufzählung — dann gilt die Zeile
+ * wörtlich, samt ihrer Kommas.
+ */
+function splitInlineList(line: string): string[] {
+  const parts = line
+    .split(/\s*[,;·/]\s*|\s+(?:und|and|sowie)\s+/giu)
+    .map(part => part.trim())
+    .filter(part => part.length > 0)
+  return parts.length > 1 ? parts : [line]
+}
+
 
 /**
  * Vergleichsform: Leerraum zusammengezogen, kleingeschrieben, Satzzeichen am
@@ -236,22 +422,22 @@ function checkOne(
 
   /** Vergleichsformen der Quell-Einträge, leere weggeworfen. */
   const sourceTerms = (): string[] =>
-    listEntries(source ?? '').map(comparable).filter(entry => entry.length > 0)
+    brandListEntries(source ?? '').map(comparable).filter(entry => entry.length > 0)
 
   switch (invariant.kind) {
     case 'count': {
-      const count = listEntries(value).length
+      const count = brandListEntries(value).length
       if (invariant.min !== undefined && count < invariant.min) return false
       if (invariant.max !== undefined && count > invariant.max) return false
       return true
     }
     case 'memberOf': {
-      const allowed = listEntries(source!).map(comparable)
+      const allowed = brandListEntries(source!).map(comparable)
       return allowed.includes(comparable(value))
     }
     case 'subsetOf': {
-      const allowed = new Set(listEntries(source!).map(comparable))
-      return listEntries(value).every(entry => allowed.has(comparable(entry)))
+      const allowed = new Set(brandListEntries(source!).map(comparable))
+      return brandListEntries(value).every(entry => allowed.has(comparable(entry)))
     }
     case 'sentenceOf': {
       // Der Wert muss WÖRTLICH im Quelltext vorkommen — der Wähler zeigt

@@ -44,6 +44,20 @@
  * 14. KAPITEL-BLICK: `POST …/review` prüft dieselbe Fassung genau einmal —
  *     mit GEGENPROBE (nach einer neuen Fassung läuft er wieder).
  *
+ * Seit Paket 6 (BW2 §9) kommen die drei Zusagen der KORREKTUR-REGEL dazu:
+ *
+ * 15. IMPACT UND ACK: `GET …/sessions/:id/impact` nennt die bestätigten
+ *     Abhängigen; der PATCH, der die Bestätigung aufhebt, wird OHNE passendes
+ *     `impactAck` mit 409 abgewiesen — mit GEGENPROBE (fremder Hash). Danach
+ *     stehen die Abhängigen in der Warteschlange, und „Gilt weiter"
+ *     (`restamp`) holt GENAU EINE davon zurück, ohne ihren Wert anzufassen.
+ * 16. EINGRENZUNG: wird das Feld erneut bestätigt, läuft der Schliess-Aufruf
+ *     im `correct`-Modus. Mit `?stub=affected` bleibt genau ein Feld veraltet
+ *     und bekommt seinen Befund; der Rest wird neu gestempelt.
+ * 17. INVARIANTEN: `c.final` mit zwei Einträgen ⇒ 409 `invariant_violated`,
+ *     dieselben drei Werte in EINER Zeile ⇒ 200 (die Sache zählt, nicht die
+ *     Schreibweise — Paket-1-Befund (a)).
+ *
  * ── WAS DIESER BEWEIS NICHT BEWEIST ──────────────────────────────────────
  * Den Anbieter. Ohne `NUXT_AI_KEY` wirft `aiCompleteStream` (503), die Route
  * schickt `generation.failed` mit `provider_error` — und genau das ist hier
@@ -743,6 +757,222 @@ try {
   check('GEGENPROBE: eine NEUE Fassung wird wieder geprüft',
     thirdLook.status === 200 && (thirdLook.json?.findings ?? []).length > beforeSecond,
     `${thirdLook.status} ${(thirdLook.json?.findings ?? []).length} statt > ${beforeSecond}`)
+
+  // ── 15 · Die Korrektur-Regel: Hülle, Ack, Warteschlange (Paket 6, §9) ──
+  //
+  // Der Aufbau ist die halbe Zusage: `a.customerPraise` (Kapitel A) ist die
+  // Quelle von `b.mission` (Kapitel B) und `c.candidates` (Kapitel C). Beide
+  // werden über die ROUTE bestätigt und nicht von Hand geschrieben — nur so
+  // trägt ihre Zeile den `sourcesHash`, den der Server selbst gestempelt hat.
+  // Ein von Hand gesetzter Hash bewiese nur, dass zwei Zeichenketten gleich
+  // sind. Und zwei KAPITEL, weil das Stempeln über Kapitelgrenzen geht.
+  console.log('\n15 · Korrektur: die Hülle, das Ack und die Warteschlange')
+  const contextBase = `${base}/steps/context`
+  await setStepState(profileId, 'values', 'active')
+  // Der Block steht auf EIGENEN Füssen: was die Blöcke davor bestätigt haben,
+  // gehörte zu ihren Zusagen und würde hier nur die Hülle vergrössern.
+  for (const stepKey of ['context', 'pvm', 'values', 'archetype']) {
+    await setSlots(profileId, stepKey, {})
+  }
+
+  async function stepRevision(stepKey) {
+    const detail = await call(`${base}/steps/${stepKey}`, { cookie: account.cookie })
+    return detail.json?.revision ?? 0
+  }
+
+  /** Ein Feld über die Route schreiben — mit dem Stempel, den der Server setzt. */
+  async function saveVia(stepKey, slots, extra = {}) {
+    return call(`${base}/steps/${stepKey}`, {
+      method: 'PATCH',
+      cookie: account.cookie,
+      body: { revision: await stepRevision(stepKey), slots, ...extra },
+    })
+  }
+
+  await setStepState(profileId, 'context', 'active')
+  const praise = await saveVia('context', {
+    'a.customerPraise': { value: 'Ihr habt uns nie hängen lassen.', confirmed: true },
+  })
+  check('die Quelle ist bestätigt und gestempelt', praise.status === 200
+    && typeof praise.json?.slots?.['a.customerPraise']?.confirmed === 'string',
+  `${praise.status} ${praise.text.slice(0, 160)}`)
+
+  await setStepState(profileId, 'context', 'done')
+  await setStepState(profileId, 'pvm', 'active')
+  await saveVia('pvm', {
+    'b.mission': { value: 'Wir bringen guten Kaffee auf jeden Tisch.', confirmed: true },
+  })
+  for (const stepKey of ['pvm', 'architecture']) await setStepState(profileId, stepKey, 'done')
+  await saveVia('values', {
+    'c.candidates': { value: '- Mut\n- Klarheit\n- Geduld\n- Ruhe', confirmed: true },
+  })
+
+  let pvmState = await call(`${base}/steps/pvm`, { cookie: account.cookie })
+  let valuesState = await call(`${base}/steps/values`, { cookie: account.cookie })
+  check('zwei abhängige Felder in ZWEI Kapiteln stehen bestätigt und aktuell',
+    pvmState.json?.sessions?.['b.mission']?.state === 'done'
+    && valuesState.json?.sessions?.['c.candidates']?.state === 'done',
+    JSON.stringify([
+      pvmState.json?.sessions?.['b.mission']?.state,
+      valuesState.json?.sessions?.['c.candidates']?.state,
+    ]))
+
+  const hull = await call(`${contextBase}/sessions/a.customerPraise/impact`, {
+    cookie: account.cookie,
+  })
+  check('die Hülle nennt genau diese beiden',
+    hull.status === 200 && hull.json?.count === 2
+    && JSON.stringify(hull.json?.transitive) === JSON.stringify(['b.mission', 'c.candidates']),
+    `${hull.status} ${hull.text.slice(0, 240)}`)
+  check('… je Kapitel eines, und der Ack ist da',
+    (hull.json?.byStep?.pvm ?? []).length === 1 && (hull.json?.byStep?.values ?? []).length === 1
+    && typeof hull.json?.ack === 'string' && hull.json.ack.length === 64,
+    JSON.stringify(hull.json?.byStep ?? null))
+
+  const contextRevision = await stepRevision('context')
+  const withoutAck = await call(`${contextBase}`, {
+    method: 'PATCH',
+    cookie: account.cookie,
+    body: { revision: contextRevision, slots: { 'a.customerPraise': { confirmed: false } } },
+  })
+  check('OHNE Ack: 409 impact_unacknowledged',
+    withoutAck.status === 409 && withoutAck.json?.reason === 'impact_unacknowledged',
+    `${withoutAck.status} ${withoutAck.text.slice(0, 200)}`)
+
+  const foreignAck = await call(`${contextBase}`, {
+    method: 'PATCH',
+    cookie: account.cookie,
+    body: {
+      revision: contextRevision,
+      slots: { 'a.customerPraise': { confirmed: false } },
+      impactAck: 'f'.repeat(64),
+    },
+  })
+  check('GEGENPROBE: ein fremder Ack wird ebenso abgewiesen',
+    foreignAck.status === 409 && foreignAck.json?.reason === 'impact_unacknowledged',
+    `${foreignAck.status}`)
+
+  const corrected = await call(`${contextBase}`, {
+    method: 'PATCH',
+    cookie: account.cookie,
+    body: {
+      revision: contextRevision,
+      slots: { 'a.customerPraise': { confirmed: false } },
+      impactAck: hull.json?.ack,
+    },
+  })
+  check('MIT Ack geht die Korrektur durch',
+    corrected.status === 200 && corrected.json?.slots?.['a.customerPraise']?.confirmed === null,
+    `${corrected.status} ${corrected.text.slice(0, 200)}`)
+
+  valuesState = await call(`${base}/steps/values`, { cookie: account.cookie })
+  check('das AUFHEBEN allein bewegt noch nichts — der Wortlaut ist ja derselbe',
+    valuesState.json?.sessions?.['c.candidates']?.state === 'done',
+    JSON.stringify(valuesState.json?.sessions?.['c.candidates'] ?? null))
+
+  // ERST DER NEUE WORTLAUT macht die Abhängigen veraltet: „veraltet" ist eine
+  // Aussage über die QUELLE, nicht über einen Knopfdruck.
+  const rewritten = await saveVia('context', {
+    'a.customerPraise': { value: 'Ihr habt uns nie im Stich gelassen.' },
+  })
+  check('der neue Wortlaut ist gespeichert', rewritten.status === 200,
+    `${rewritten.status} ${rewritten.text.slice(0, 160)}`)
+
+  pvmState = await call(`${base}/steps/pvm`, { cookie: account.cookie })
+  valuesState = await call(`${base}/steps/values`, { cookie: account.cookie })
+  check('… und beide abhängigen Felder stehen jetzt in der Warteschlange',
+    pvmState.json?.sessions?.['b.mission']?.state === 'stale'
+    && valuesState.json?.sessions?.['c.candidates']?.state === 'stale',
+    JSON.stringify([
+      pvmState.json?.sessions?.['b.mission']?.state,
+      valuesState.json?.sessions?.['c.candidates']?.state,
+    ]))
+
+  const keepValid = await call(`${valuesBase}/sessions/c.candidates/restamp`, {
+    method: 'POST',
+    cookie: account.cookie,
+    body: { revision: valuesState.json?.revision ?? 0 },
+  })
+  check('„Gilt weiter" stempelt neu', keepValid.status === 200,
+    `${keepValid.status} ${keepValid.text.slice(0, 200)}`)
+
+  pvmState = await call(`${base}/steps/pvm`, { cookie: account.cookie })
+  valuesState = await call(`${base}/steps/values`, { cookie: account.cookie })
+  check('… genau diese eine ist wieder aktuell, die andere bleibt bernstein',
+    valuesState.json?.sessions?.['c.candidates']?.state === 'done'
+    && pvmState.json?.sessions?.['b.mission']?.state === 'stale',
+    JSON.stringify([
+      valuesState.json?.sessions?.['c.candidates']?.state,
+      pvmState.json?.sessions?.['b.mission']?.state,
+    ]))
+  check('… und der Wert steht dabei unangetastet da',
+    valuesState.json?.slots?.['c.candidates']?.confirmed === '- Mut\n- Klarheit\n- Geduld\n- Ruhe',
+    JSON.stringify(valuesState.json?.slots?.['c.candidates'] ?? null))
+
+  // ── 16 · Die Eingrenzung durch den Spezialisten (§9, `correct`) ────────
+  console.log('\n16 · Die Eingrenzung: nur das Getroffene bleibt veraltet')
+  // Der neue Wortlaut UND die Bestätigung in einem Zug — so sieht das Ende
+  // einer Korrektur aus. Beide Abhängigen sind damit wieder veraltet: der
+  // eine, weil er nie gestempelt wurde, der andere, weil sich die Quelle ein
+  // zweites Mal bewegt hat.
+  const reconfirmed = await saveVia('context', {
+    'a.customerPraise': { value: 'Ihr wart immer da, wenn es eng wurde.', confirmed: true },
+  })
+  check('das korrigierte Feld ist wieder bestätigt', reconfirmed.status === 200,
+    `${reconfirmed.status} ${reconfirmed.text.slice(0, 160)}`)
+
+  const closedCorrect = await call(
+    `${contextBase}/sessions/a.customerPraise/close?stub=affected`,
+    { method: 'POST', cookie: account.cookie, body: { revision: reconfirmed.json?.revision ?? 0 } },
+  )
+  check('der Schliess-Aufruf läuft im Korrektur-Modus und grenzt ein',
+    closedCorrect.status === 200
+    && JSON.stringify(closedCorrect.json?.correction?.affected) === JSON.stringify(['b.mission'])
+    && JSON.stringify(closedCorrect.json?.correction?.restamped) === JSON.stringify(['c.candidates']),
+    `${closedCorrect.status} ${JSON.stringify(closedCorrect.json?.correction ?? null)}`)
+
+  pvmState = await call(`${base}/steps/pvm`, { cookie: account.cookie })
+  valuesState = await call(`${base}/steps/values`, { cookie: account.cookie })
+  check('… genau eine bleibt veraltet, die andere ist wieder fertig',
+    pvmState.json?.sessions?.['b.mission']?.state === 'stale'
+    && valuesState.json?.sessions?.['c.candidates']?.state === 'done',
+    JSON.stringify([
+      pvmState.json?.sessions?.['b.mission']?.state,
+      valuesState.json?.sessions?.['c.candidates']?.state,
+    ]))
+
+  const affectedFindings = await call(`${base}/findings?status=open`, { cookie: account.cookie })
+  const affectedFound = (affectedFindings.json?.findings ?? []).filter(entry => entry.kind === 'affected')
+  check('… und das getroffene Feld trägt seinen Befund',
+    affectedFound.length === 1 && JSON.stringify(affectedFound[0]?.slots) === JSON.stringify(['b.mission']),
+    `${affectedFindings.status} ${JSON.stringify(affectedFound).slice(0, 200)}`)
+
+  // ── 17 · Die Invarianten sind scharf (§3a Nr. 6) ──────────────────────
+  console.log('\n17 · Die Invariante zählt — und lässt jede Schreibweise gelten')
+  const three = await saveVia('values', {
+    'c.final': { value: '- Mut\n- Klarheit\n- Geduld', confirmed: true },
+  })
+  check('drei Werte in `c.final` gehen durch', three.status === 200,
+    `${three.status} ${three.text.slice(0, 200)}`)
+
+  const freed = await saveVia('values', { 'c.final': { confirmed: false } })
+  check('das Feld ist zum Korrigieren offen (leere Hülle ⇒ kein Ack)',
+    freed.status === 200 && freed.json?.slots?.['c.final']?.confirmed === null,
+    `${freed.status} ${freed.text.slice(0, 200)}`)
+
+  const tooFew = await saveVia('values', {
+    'c.final': { value: '- Mut\n- Klarheit', confirmed: true },
+  })
+  check('zwei Werte in `c.final` ⇒ 409 invariant_violated',
+    tooFew.status === 409 && tooFew.json?.reason === 'invariant_violated',
+    `${tooFew.status} ${tooFew.text.slice(0, 200)}`)
+
+  const inline = await saveVia('values', {
+    'c.final': { value: 'Mut, Klarheit und Geduld', confirmed: true },
+  })
+  check('drei Werte in EINER Zeile gelten ebenso — die Sache zählt, nicht die Form',
+    inline.status === 200 && inline.json?.slots?.['c.final']?.confirmed === 'Mut, Klarheit und Geduld',
+    `${inline.status} ${inline.text.slice(0, 200)}`)
 }
 catch (error) {
   fail++

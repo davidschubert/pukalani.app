@@ -103,6 +103,10 @@ export function useBrandAutosave(profileId: MaybeRefOrGetter<string>) {
       revision: store.revision,
       slots: store.pendingSlots,
       ...(sentConfidence ? { confidence: sentConfidence } : {}),
+      // DIE ANGENOMMENE HÜLLE EINER KORREKTUR (§9, Paket 6). Sie reist nur
+      // mit, wenn der Mensch sie eben angenommen hat; ohne sie weist der
+      // Server das Aufheben einer Bestätigung mit bestätigten Abhängigen ab.
+      ...(store.pendingImpactAck ? { impactAck: store.pendingImpactAck } : {}),
     }
 
     running = true
@@ -129,6 +133,42 @@ export function useBrandAutosave(profileId: MaybeRefOrGetter<string>) {
         // die Serverfassung holen; sie IST die bestätigte Wahrheit, und der
         // Slot steht danach sichtbar im bestätigten Zustand.
         if (store.stepKey) await store.loadStep(id, store.stepKey)
+      }
+      else if (reason === 'impact_unacknowledged') {
+        /**
+         * DIE KORREKTUR BRAUCHT EINE ZUSTIMMUNG (§9) — oder die alte passt
+         * nicht mehr.
+         *
+         * Der Fall tritt in zwei Formen auf: die Oberfläche hat die Hülle nie
+         * gezeigt (alter Client, zweiter Tab), oder sie hat sich seit dem
+         * Zeigen bewegt. Beide Male ist die Antwort dieselbe: die lokale
+         * Aufhebung fällt (sonst hämmerte der nächste Tick denselben 409),
+         * und die SEITE zeigt den Layer erneut — sie sieht es an
+         * `correctionRejected` und holt die neue Hülle mit einem GET nach. Die
+         * `data` des 409 trägt sie nicht mit (nur `data.code` wird zu
+         * `reason`), s. Kopf.
+         */
+        store.setImpactAck('')
+        store.rejectCorrection()
+        // Nichts mehr offen heisst gespeichert — sonst bliebe „Speichert…"
+        // stehen, während in Wahrheit gerade ein Dialog auf eine Antwort
+        // wartet.
+        if (!store.hasPendingWork) store.mark('ok')
+      }
+      else if (reason === 'invariant_violated') {
+        /**
+         * EINE DETERMINISTISCHE REGEL DES FELDES IST GERISSEN (§3a Nr. 6).
+         *
+         * Der Text bleibt stehen, die BESTÄTIGUNG fällt — und weil damit ein
+         * anderer Rumpf entsteht (ohne `confirmed: true`), darf sofort noch
+         * einmal gespeichert werden: der Mensch soll seine Eingabe nicht
+         * verlieren, nur weil sie noch nicht bestätigungsreif ist. Ein
+         * Wiederholungsversuch mit UNVERÄNDERTEM Rumpf wäre dagegen eine
+         * Endlosschleife (s. der 400-Zweig unten).
+         */
+        store.rejectInvariantConfirmations()
+        if (store.hasPendingWork) schedule()
+        else store.mark('ok')
       }
       else if (status === 409 || reason === 'revision_conflict') {
         await loadConflictVersion(id)

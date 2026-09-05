@@ -72,10 +72,13 @@ import { useBrandWorkspaceStore } from '../stores/brandWorkspace'
  * wird er einmal, und danach wird die SEITE neu gelesen: die Sperre der Weiche
  * unten rechnet der Server (§5a Schritt 3), nicht diese Ansicht.
  *
- * ── WAS HIER BEWUSST NOCH NICHT STEHT ─────────────────────────────────────
- * Der IMPACT-Hinweis vor dem Bearbeiten (§9) kommt mit Paket 6 — „Bearbeiten"
- * springt heute direkt in die Session (s. `edit()`), und der Feld-Link eines
- * Chips nimmt denselben Weg.
+ * ── DER IMPACT-HINWEIS HÄNGT AN DER SEITE, NICHT HIER (§9, Paket 6) ───────
+ * „Bearbeiten" und der Feld-Link eines Chips emittieren wie bisher nach oben;
+ * die WERKSTATT-Seite legt den Hinweis davor (`correctThenGo`) und navigiert
+ * danach. Grund: dieselbe Kette gilt für die Log-Karte und für einen
+ * Feld-Link, der über die Kapitel-Grenze zeigt — dreimal derselbe `$fetch`
+ * mit demselben Modal wäre dreimal dieselbe Pflege, und die Zustimmung muss
+ * über die Sprünge hinweg gemerkt bleiben, sonst fragt der Layer zweimal.
  */
 const props = defineProps<{
   profileId: string
@@ -294,6 +297,44 @@ async function accept(session: BrandAcceptanceSessionView): Promise<void> {
 }
 
 /**
+ * „GILT WEITER" AUF EINER VERALTETEN ZEILE (BW2 Paket 6, §9).
+ *
+ * Eine `stale`-Zeile SPERRT die Abnahme (Blocker-Grund `stale`), und der
+ * Ausweg gehört an die Zeile selbst: hier steht der Wert, hier sieht der
+ * Mensch, ob er nach der Änderung davor noch stimmt. Der Server stempelt den
+ * heutigen Quellen-Stand, der Wert bleibt Wort für Wort — wer stattdessen neu
+ * besprechen will, geht über „Bearbeiten" in die Session.
+ *
+ * Danach wird die SEITE neu gelesen und nicht ein Teilstück gepatcht: an einer
+ * gefallenen Sperre hängen Zähler, Blocker-Liste und die Weiche unten, und
+ * alle drei rechnet der Server.
+ */
+const keeping = ref<string | null>(null)
+
+async function keep(session: BrandAcceptanceSessionView): Promise<void> {
+  if (keeping.value) return
+  keeping.value = session.slotId
+  try {
+    const response = await $fetch<BrandSessionAcceptResponse>(
+      `/api/brand/profiles/${props.profileId}/steps/${props.stepKey}/sessions/${session.slotId}/restamp`,
+      { method: 'POST', body: { revision: revision.value } },
+    )
+    revision.value = response.revision
+    counter.value = response.acceptance
+    // Leiste und Werkstatt lesen aus dem Store — dort fällt das Bernstein.
+    store.applySessionRestamp(response)
+    await acceptance.refresh()
+  }
+  catch {
+    toast.add({ color: 'warning', title: t('brand.session.keepFailed') })
+    await acceptance.refresh()
+  }
+  finally {
+    keeping.value = null
+  }
+}
+
+/**
  * EIN BEFUND WURDE ENTSCHIEDEN (§8) — die SEITE wird neu gelesen.
  *
  * Nicht ein Teilstück gepatcht: an einem Befund hängen der Zähler, die
@@ -310,10 +351,10 @@ async function findingDecided(decision: BrandFindingDecisionResponse): Promise<v
 }
 
 /**
- * BEARBEITEN = SPRUNG IN DIE SESSION. Der Impact-Hinweis vor der Korrektur
- * eines BESTÄTIGTEN Feldes (§9, „berührt 14 bestätigte Felder in vier
- * Kapiteln") gehört Paket 6 und hängt sich GENAU HIER ein: `GET
- * …/sessions/:id/impact`, Layer, dann derselbe Sprung.
+ * BEARBEITEN = SPRUNG IN DIE SESSION. Den Impact-Hinweis davor (§9, „berührt
+ * 14 bestätigte Felder in vier Kapiteln") legt die SEITE dazwischen: sie hört
+ * dieses Ereignis, holt die Hülle, zeigt den Layer und springt erst nach dem
+ * Annehmen (`correctThenGo`, s. Kopf).
  */
 function edit(session: BrandAcceptanceSessionView): void {
   emit('session', session.slotId)
@@ -601,6 +642,16 @@ async function confirmRestart(): Promise<void> {
         <p v-if="!row.session.confirmed" class="bw-label mr-auto" style="color: var(--bw-muted)">
           {{ t('brand.acceptance.unconfirmed') }}
         </p>
+        <!-- VERALTET (§9): der Wert steht, seine Grundlage hat sich bewegt.
+             „Gilt weiter" stempelt sie neu — die Sperre fällt, ohne dass
+             jemand ein Gespräch führen muss. -->
+        <UButton
+          v-if="row.session.state === 'stale'"
+          size="xs" color="neutral" variant="ghost" class="rounded-full"
+          icon="i-ph-check" :loading="keeping === row.session.slotId"
+          :label="t('brand.session.keep')"
+          @click="keep(row.session)"
+        />
         <UButton
           size="xs" color="neutral" variant="ghost" class="rounded-full"
           icon="i-ph-pencil-simple" :label="t('brand.acceptance.edit')"

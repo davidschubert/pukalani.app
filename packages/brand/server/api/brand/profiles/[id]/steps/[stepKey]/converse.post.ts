@@ -248,15 +248,13 @@ export default defineEventHandler(async (event): Promise<BrandConverseResponse |
    * durch. Gerechnet wird über die Fakten ALLER Kapitel, weil eine Session
    * über Kapitelgrenzen liest (`b.purpose` ← `a.pitch`).
    */
-  if (session) {
-    const states = resolveBrandSessionStates(profileFacts(profile), toStepFacts(stepRows))
-    if (states[session.id] === 'locked') {
-      throw createError({
-        status: 409,
-        statusText: 'Session is locked',
-        data: { code: 'session_locked' },
-      })
-    }
+  const sessionStates = resolveBrandSessionStates(profileFacts(profile), toStepFacts(stepRows))
+  if (session && sessionStates[session.id] === 'locked') {
+    throw createError({
+      status: 409,
+      statusText: 'Session is locked',
+      data: { code: 'session_locked' },
+    })
   }
   // Der Wortlaut zählt NUR, wenn er zu der Frage gehört, die der Server selbst
   // als nächste sieht. Sonst bekommt der Berater gesagt, dass er keine erfinden
@@ -667,6 +665,21 @@ export default defineEventHandler(async (event): Promise<BrandConverseResponse |
         session: sessionOptions,
         ...(brief ? { brief: brief.options } : {}),
         ...(body.opening ? { opening: true, chapterIntro } : {}),
+        /**
+         * EINE VERALTETE SESSION WIRD NEU BESPROCHEN (§9, converse-9): George
+         * eröffnet mit dem GRUND, nicht mit der alten Frage. Die Quellen
+         * kommen beschriftet, nicht als Ids (converse-2), und nur beim
+         * Eröffnungszug — mitten im Gespräch wäre es eine Wiederholung.
+         */
+        ...(body.opening && session && sessionStates[session.id] === 'stale'
+          ? {
+              staleSources: session.inputs.slots.map(slotId => brandSlotPromptLabel(
+                slotId,
+                profile.contentLocale,
+                profileFacts(profile).pathKind,
+              )),
+            }
+          : {}),
       },
       {
         startCard: profileStartCard(profile),
@@ -812,17 +825,18 @@ export default defineEventHandler(async (event): Promise<BrandConverseResponse |
      * AUTO-WEITER (§5): welche Session nach diesem Zug dran ist — gerechnet
      * NACH dem Zug und aus dem SERVER-Stand, nie aus dem Rumpf.
      *
-     * In dieser Runde ist es die Grundfassung ohne Warteschlange: die
-     * `stale`-Sessions (Paket 6) und der adaptive Vorschlag des Spezialisten
-     * (Paket 4) füllen später dasselbe Feld, und die Aufrufstelle im Browser
-     * bleibt dieselbe.
+     * Seit Paket 6 bedient er die WARTESCHLANGE „neu besprechen" zuerst
+     * (§9): die Zustände sind die von oben — ein Gesprächszug bestätigt
+     * nichts, also kann er auch keine Session veralten lassen oder heilen.
+     * Der adaptive Vorschlag des Spezialisten (Paket 4) füllt dasselbe Feld
+     * an der Schliess-Route; die Aufrufstelle im Browser bleibt dieselbe.
      */
     const factsAfter: Record<string, BrandSlotStateFacts> = collectFinished && session
       ? { ...facts, [session.id]: { ...facts[session.id], hasValue: true } }
       : facts
     // Am KAPITELENDE zeigt der Wegweiser auf die Finale Abnahme statt ins
     // Leere (`resolveNextStop`, Fables Produktentscheidung zu 3a-Frage 4).
-    const nextSession: BrandNextSessionRef | null = resolveNextStop(stepKey, factsAfter)
+    const nextSession: BrandNextSessionRef | null = resolveNextStop(stepKey, factsAfter, sessionStates)
 
     send('generation.completed', {
       generationId: turnId,

@@ -784,7 +784,11 @@
       "error": {
         "session_locked": "Dieses Feld ist noch gesperrt — erst sind die Felder davor dran.",
         "session_foreign": "Dieses Feld gehört zu einem anderen Kapitel."
-      }
+      },
+      "stale": "Ein Feld davor hat sich geändert — passt das hier noch?",
+      "keep": "Gilt weiter",
+      "rediscuss": "Neu besprechen",
+      "keepFailed": "Das hat nicht geklappt — bitte noch einmal."
     },
     "finding": {
       "kind": {
@@ -811,6 +815,28 @@
     },
     "log": {
       "notes": "Notizen"
+    },
+    "impact": {
+      "eyebrow": "Vor der Korrektur",
+      "title": "Diese Änderung berührt anderes",
+      "loading": "Wir sehen nach, was daran hängt …",
+      "summary": "Diese Änderung berührt {count} bestätigte Felder in {steps} Kapiteln.",
+      "direct": "· hängt direkt daran",
+      "indirect": "· hängt über andere Felder daran",
+      "note": "Nichts davon wird gelöscht. Die betroffenen Felder werden als „neu besprechen\" markiert — was die Änderung nicht wirklich trifft, macht der Berater danach wieder grün.",
+      "changed": "Seit dem letzten Blick hat sich etwas bewegt — das hier ist der neue Stand.",
+      "accept": "Annehmen und korrigieren",
+      "cancel": "Abbrechen"
+    },
+    "invariant": {
+      "title": "Das passt so noch nicht",
+      "generic": "„{field}\" hält eine Regel dieses Feldes noch nicht ein.",
+      "count": "„{field}\" braucht zwischen {min} und {max} Einträge — je Eintrag eine Zeile oder mit Komma getrennt.",
+      "memberOf": "„{field}\" muss einer der Einträge aus „{source}\" sein.",
+      "subsetOf": "In „{field}\" darf nur stehen, was auch in „{source}\" steht.",
+      "sentenceOf": "„{field}\" muss wörtlich ein Satz aus „{source}\" sein.",
+      "mentionsFrom": "„{field}\" muss die Einträge aus „{source}\" auch nennen.",
+      "mentionsNone": "„{field}\" darf nichts aus „{source}\" wiederholen."
     }
   }
 }
