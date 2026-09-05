@@ -802,7 +802,11 @@
         "expiredText": "Confirmation links are valid for 24 hours. Sign up again — you will get a new one right away.",
         "back": "Back to the waitlist",
         "home": "Go to the start page"
-      }
+      },
+      "name": "Name",
+      "namePlaceholder": "Your name (optional)",
+      "company": "Company",
+      "companyPlaceholder": "Company or brand (optional)"
     },
     "acceptance": {
       "title": "Final sign-off",

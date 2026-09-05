@@ -802,7 +802,11 @@
         "expiredText": "Bestätigungs-Links gelten 24 Stunden. Tragt euch noch einmal ein — ihr bekommt sofort einen neuen.",
         "back": "Zur Warteliste",
         "home": "Zur Startseite"
-      }
+      },
+      "name": "Name",
+      "namePlaceholder": "Euer Name (optional)",
+      "company": "Firma",
+      "companyPlaceholder": "Firma oder Marke (optional)"
     },
     "acceptance": {
       "title": "Finale Abnahme",
