@@ -73,6 +73,32 @@ Arbeitseinheit definierte — dann fielen alle Einwände. (8) Lokale branding-En
 `.env` noch Appwrite-Projekt: Läufe nutzen `portfolio-g4ml` @ localhost + Shiki-Symlink-Krücke —
 gehört eigentlich in eine `apps/branding/.env.example`-taugliche Dev-Anleitung.
 
+### branding.supply: Warteliste-Dashboard („wie bei pukalani.app") ✅ 2026-09-05
+
+**Anlass:** Davids Frage, ob die Warteliste wie die Frühzugang-Anfragen auf
+pukalani.app auch im Dashboard bedienbar sein muss — ja: ohne Seite hiesse jede
+Beta-Welle Console-Arbeit und Codes von Hand.
+
+**Gebaut (Opus-Lauf, eigene Prüfung):** Betreiber-Modul `/dashboard/waitlist`
+(admin-Layer, `users.manage`, Registry-Eintrag „Management"): Zähler je Status,
+Filter (Standard „bestätigt" = Arbeitsliste), UTable, Aktionen Einladen ·
+Ablehnen · Notiz, CSV-Export (BOM, Semikolon). Routen unter
+`/api/brand/admin/waitlist/*`, die EINE Auslass-Naht liefert nie `tokenHash`.
+**Einladen** nutzt die bestehende Code-Erzeugung aus `scripts/invite.mjs`
+(jetzt `createBrandInviteForEmail`: sha256-Hash, an emailLower gebunden, 30
+Tage) + Einladungs-Mail de/en; scheitert die Mail, wird der Code zurückgenommen
+— kein Code ohne Mail. Pure Zustandsregeln (`brandWaitlistAdmin.ts`), 36 Tests;
+Bilanz regeneriert (neue Routen). Bewusste Abweichungen vom Vorbild:
+Capability `users.manage` statt `sites.manage` (branding hat keine Sites),
+Ablehnen auf Abgelehntes ist ein 200-No-op, kein eigener Drossel-Eimer.
+
+**End-to-end von David bewiesen (2026-09-05):** Eintrag über die Brand-Check-
+Karte → Bestätigungs-Mail → Link → „Bestätigt" → im Dashboard sichtbar →
+Einladen → Einladungs-Mail mit Code angekommen.
+
+**Gelernt:** Der Produkt-Bilanz-Wächter zählt Routen — neue Betreiber-Routen
+verlangen `node scripts/produkt-bilanz.mjs` vor dem Push.
+
 ### branding.supply: Startseite, Vektoren, Double-Opt-in, Copy-Regeln ✅ 2026-09-04/05
 
 **Startseite** nach dem abgenommenen Conversion-Dummy (Runden 137–148): Hero-Split
