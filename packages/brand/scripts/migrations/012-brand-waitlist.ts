@@ -1,5 +1,5 @@
 /**
- * Migration brand-011: `brand_waitlist` — WER GEFRAGT HAT, ALS ES NOCH KEINEN
+ * Migration brand-012: `brand_waitlist` — WER GEFRAGT HAT, ALS ES NOCH KEINEN
  * ZUGANG GAB.
  *
  * ── WOFÜR ─────────────────────────────────────────────────────────────────
@@ -130,7 +130,7 @@ async function waitForColumns(tableId: string) {
   throw new Error(`Columns von "${tableId}" wurden nicht verfügbar`)
 }
 
-console.log(`Migration brand-011 gegen ${endpoint} / Projekt ${projectId} / DB ${databaseId}`)
+console.log(`Migration brand-012 gegen ${endpoint} / Projekt ${projectId} / DB ${databaseId}`)
 
 await step(`Table ${WAITLIST}`, () => tablesDB.createTable({
   databaseId, tableId: WAITLIST, name: 'Brand Waitlist', permissions: [], rowSecurity: false,
@@ -179,4 +179,4 @@ await step(`Table ${WAITLIST}`, () => tablesDB.createTable({
   })
 }
 
-console.log('✔ Migration brand-011 fertig')
+console.log('✔ Migration brand-012 fertig')

@@ -21,7 +21,7 @@ import { BRAND_WAITLIST_TABLE, type BrandWaitlistRow, brandDb } from '../../util
  * (2) Der HONIGTOPF `hp`: gefüllt ⇒ dieselbe 200-Antwort wie sonst, nur ohne
  *     Zeile. Ein 400 oder eine andere Antwortform wäre eine Rückmeldung an den
  *     Bot, an der er seinen Schreiber verbessert.
- * (3) Der UNIQUE-Index auf `emailLower` (brand-011): auch wenn zwei Anfragen
+ * (3) Der UNIQUE-Index auf `emailLower` (brand-012): auch wenn zwei Anfragen
  *     gleichzeitig ankommen, entsteht höchstens eine Zeile.
  * (4) Das Schema deckelt JEDES Feld — eine offene Schreibroute ohne Längen ist
  *     ein Speicher-Angebot.
