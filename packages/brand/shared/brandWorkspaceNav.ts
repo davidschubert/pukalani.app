@@ -3,7 +3,8 @@ import type {
   BrandSessionState,
   BrandStoredStepState,
 } from './brandJourney'
-import { type BrandStepKey, slotsForStep } from './slotRegistry'
+import { BRAND_FINDING_REASON_MIN, type BrandFindingStatus } from './brandFindings'
+import { type BrandStepKey, slotById, slotsForStep } from './slotRegistry'
 
 /**
  * DIE RECHNUNGEN DER SESSION-NAVIGATION (BW2 Paket 3c-i/3c-ii,
@@ -25,6 +26,9 @@ import { type BrandStepKey, slotsForStep } from './slotRegistry'
  *  5. `resolveAcceptanceStage` — WAS zeigt die Finale Abnahme unter der Liste?
  *     Blocker, Frage oder „Weiter zu Kapitel …" (§5a Schritte 3 und 4).
  *  6. `restartWordMatches` — ist der Knopf „Bestätigen" im Schutz-Layer frei?
+ *  7. `dismissReasonValid` — darf „Ablehnen" abschicken? (Befund-Chips, §8)
+ *  8. `countOpenFindings` — wie viele Befunde berühren dieses Kapitel?
+ *  9. `acceptTargets` — welches Feld kann man nach dem Annehmen anfassen?
  *
  * ── WARUM DIE ZAHLEN HIER STEHEN UND DIE SÄTZE NICHT ─────────────────────
  * Diese Datei liefert Zahlen und Schlüssel, nie fertige Sätze: „7 von 11
@@ -322,4 +326,79 @@ export function needsOpeningTurn(input: BrandOpeningInput): boolean {
   if (!input.sessionKey || input.streaming) return false
   if (input.opened.has(input.sessionKey)) return false
   return !input.hasAdvisorTurn
+}
+
+// ── 6 · Die Befund-Chips (BW2 Paket 5, §8) ────────────────────────────────
+
+/**
+ * DARF „ABLEHNEN" ABSCHICKEN? (§8 „mit Grund, eine Zeile, landet in den
+ * Notizen".)
+ *
+ * Dieselbe Grenze wie im Zod-Schema der Route (`BRAND_FINDING_REASON_MIN`) —
+ * hier, damit der Knopf zu bleibt, statt in ein 400 zu laufen. Sie ist
+ * ausdrücklich KEINE Qualitätsprüfung: der Grund wird als Notiz an die
+ * Quell-Session gehängt, und eine leere Notiz behauptete eine Begründung, die
+ * nie gegeben wurde.
+ *
+ * Der SERVER bleibt der Prüfer; diese Rechnung entscheidet allein über die
+ * Freigabe des Knopfes — dieselbe Arbeitsteilung wie `restartWordMatches`.
+ */
+export function dismissReasonValid(reason: string): boolean {
+  return reason.trim().length >= BRAND_FINDING_REASON_MIN
+}
+
+/**
+ * WIE VIELE BEFUNDE BERÜHREN DIESES KAPITEL? (§8, Zähler in Leiste und Log.)
+ *
+ * ── GEZÄHLT WIRD ÜBER DIE SLOTS, NICHT ÜBER `stepKey` ────────────────────
+ * Dieselbe Regel wie in `blockingFindingSlots`: der Stempel am Befund sagt,
+ * aus welchem Kapitel er STAMMT — betroffen ist aber jedes Kapitel, dessen
+ * Feld beteiligt ist. Ein Konflikt zwischen B und C zählt in beiden.
+ *
+ * Gezählt werden BEFUNDE, nicht Felder: ein Konflikt, der zwei Felder
+ * DESSELBEN Kapitels verbindet, ist EIN offener Punkt, kein zweiter Anlass.
+ * Und ausdrücklich alle drei Arten — der Zähler ist eine Auskunft, keine
+ * Sperre (die kennt nur `conflict`, §5a Schritt 3).
+ */
+export function countOpenFindings(
+  findings: readonly { status: BrandFindingStatus, slots: readonly string[] }[],
+  stepKey: BrandStepKey,
+): number {
+  const inStep = new Set(slotsForStep(stepKey).map(slot => slot.id))
+  let open = 0
+  for (const finding of findings) {
+    if (finding.status !== 'open') continue
+    if (finding.slots.some(slotId => inStep.has(slotId))) open += 1
+  }
+  return open
+}
+
+/**
+ * WELCHES FELD KANN MAN NACH DEM ANNEHMEN ANFASSEN? (§8: „accepted ⇒ Korrektur
+ * eines der Felder".)
+ *
+ * Ein `conflict` trägt ZWEI Felder — dann muss der Mensch wählen, und die
+ * Oberfläche fragt ihn („Welches Feld anfassen?"). Ein `gap` trägt eines, dann
+ * gibt es nichts zu fragen und der Sprung geht direkt. Die Zahl der Rückgaben
+ * ist damit die ganze Antwort auf „braucht es eine Auswahl".
+ *
+ * ── UNBEKANNTE IDS FALLEN RAUS, UND ZWAR HIER ────────────────────────────
+ * Die Slot-Ids eines Befunds kommen aus einer MODELL-Antwort. Der
+ * Schliess-Aufruf prüft sie (`brandFindingIsUsable`), eine ältere Zeile aus
+ * einer früheren Registry-Fassung kann trotzdem auf ein Feld zeigen, das es
+ * nicht mehr gibt — ein Sprung dorthin landete auf einer leeren Bühne. Zu
+ * wenig anzubieten ist die richtige Richtung; steht am Ende gar nichts, ist
+ * der Befund nur noch Text (annehmen geht, springen nicht).
+ *
+ * Doppelte Ids werden zusammengefasst: zweimal dasselbe Feld ist keine Wahl.
+ */
+export function acceptTargets(finding: { slots: readonly string[] }): string[] {
+  const seen = new Set<string>()
+  const targets: string[] = []
+  for (const slotId of finding.slots) {
+    if (seen.has(slotId) || !slotById(slotId)) continue
+    seen.add(slotId)
+    targets.push(slotId)
+  }
+  return targets
 }

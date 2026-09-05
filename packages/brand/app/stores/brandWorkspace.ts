@@ -19,6 +19,7 @@ import {
   pruneSettledEdits,
 } from '../../shared/brandAutosaveDiff'
 import type {
+  BrandFindingDecisionResponse,
   BrandFindingView,
   BrandMessagesResponse,
   BrandProfileDetailResponse,
@@ -485,6 +486,36 @@ const setup = () => {
     }
   }
 
+  /**
+   * EIN BEFUND IST ENTSCHIEDEN (Paket 5, §8) — er verschwindet aus der Liste.
+   *
+   * `findings` trägt ausdrücklich nur OFFENE Befunde (s. dort), also ist
+   * „annehmen" wie „ablehnen" dasselbe Ergebnis für diese Liste: weg. Der
+   * ZUSTAND der Zeile lebt weiter auf dem Server und im Chip, der ihn gerade
+   * gesetzt hat.
+   *
+   * DIE `revision` MUSS MIT (dieselbe Regel wie bei `applySessionAcceptance`):
+   * eine Ablehnung hängt ihren Grund als Notiz an die Quell-Session und
+   * schreibt damit die Kapitel-Zeile — ein Autosave mit der alten Fassung
+   * liefe danach in einen 409. Die NOTIZ selbst erscheint erst beim nächsten
+   * vollständigen Abruf; sie hier zu erraten hiesse, den Text des Servers
+   * nachzubauen.
+   */
+  function applyFindingDecision(decision: BrandFindingDecisionResponse): void {
+    if (decision.revision > revision.value) revision.value = decision.revision
+    dropFinding(decision.finding.id)
+  }
+
+  /**
+   * EIN BEFUND IST WEG, OHNE DASS WIR IHN ENTSCHIEDEN HÄTTEN — die Antwort auf
+   * 409 `already_decided`. Der Server sagt, dass er entschieden ist; ein Chip,
+   * der danach stehen bliebe, böte einen Klick an, der garantiert wieder
+   * abgewiesen wird.
+   */
+  function dropFinding(findingId: string): void {
+    findings.value = findings.value.filter(entry => entry.id !== findingId)
+  }
+
   function setConfidence(value: BrandConfidence): void {
     localConfidence.value = value
   }
@@ -775,6 +806,8 @@ const setup = () => {
     applySaveResponse,
     applySessionAcceptance,
     applySessionClose,
+    applyFindingDecision,
+    dropFinding,
     applyConflict,
     resolveWithServer,
     loadProfiles,

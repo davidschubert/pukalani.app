@@ -785,6 +785,32 @@
         "session_locked": "This field is still locked — the fields before it come first.",
         "session_foreign": "This field belongs to a different chapter."
       }
+    },
+    "finding": {
+      "kind": {
+        "conflict": "Conflict",
+        "affected": "Affected",
+        "gap": "Gap"
+      },
+      "fields": "Fields",
+      "accept": "Accept",
+      "acceptWhich": "Which field do you want to touch?",
+      "dismiss": "Dismiss",
+      "dismissTitle": "Dismiss finding",
+      "dismissPrompt": "Why does this not apply?",
+      "dismissTooShort": "Please write a reason — it becomes a note on the session.",
+      "dismissed": "dismissed",
+      "accepted": "accepted",
+      "openCount": "{count} finding open | {count} findings open",
+      "openMarker": "Open finding",
+      "decideFailed": "That did not work.",
+      "alreadyDecided": "This finding has already been decided — the list is being refreshed."
+    },
+    "review": {
+      "unreviewed": "not reviewed yet"
+    },
+    "log": {
+      "notes": "Notes"
     }
   }
 }

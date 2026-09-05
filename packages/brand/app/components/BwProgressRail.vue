@@ -55,6 +55,16 @@ export interface BwRailSession {
   highlight?: boolean
   /** Erklärt die Sperre beim Überfahren (`title`), z. B. „kommt als Nächstes". */
   title?: string
+  /**
+   * An dieser Session hängt ein OFFENER Befund (§8, Paket 5) — ein
+   * bernsteinfarbenes Merkzeichen HINTER der Beschriftung.
+   *
+   * Ein eigener Schalter statt eines Zustands, aus demselben Grund wie
+   * `highlight`: die Zeile zeigt genau EINE Glyphe, und die sagt, wie es um die
+   * Arbeit steht („bestätigt", „veraltet", „vertagt"). Ein Befund ist eine
+   * ZWEITE Auskunft daneben — beratend, nie sperrend.
+   */
+  finding?: boolean
 }
 export interface BwRailStep {
   id: string

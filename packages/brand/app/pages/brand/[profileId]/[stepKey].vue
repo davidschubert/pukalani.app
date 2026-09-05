@@ -13,6 +13,7 @@ import {
   type BrandNavSession,
   chapterEffortMinutes,
   countChapterSessions,
+  countOpenFindings,
   decideAutoAdvance,
   isAcceptanceView,
   needsOpeningTurn,
@@ -60,6 +61,8 @@ import {
   brandSlotControls,
 } from '../../../../shared/brandSlotControls'
 import type {
+  BrandFindingDecisionResponse,
+  BrandFindingView,
   BrandGenerationVersionsResponse,
   BrandSessionAcceptResponse,
   BrandSessionCloseResponse,
@@ -724,6 +727,30 @@ async function goToSession(sessionId: string): Promise<void> {
   await navigateTo({ query: { ...route.query, s: sessionId } })
 }
 
+/**
+ * DER FELD-LINK EINES BEFUND-CHIPS (§8) — er darf die KAPITEL-GRENZE
+ * überschreiten.
+ *
+ * Ein Konflikt verbindet ausdrücklich zwei Kapitel (`b.purpose` ↔
+ * `c.conflictRule`), und der Chip steht an beiden Enden. `goToSession` kann das
+ * nicht: es tauscht nur die Query auf DEMSELBEN Route-Record. Hier steht
+ * deshalb die eine Übersetzung „Feld ⇒ Adresse": gleiches Kapitel ⇒ nur `?s=`,
+ * fremdes Kapitel ⇒ neue Adresse MIT `?s=`, damit der Sprung auf dem Feld
+ * landet und nicht auf der ersten offenen Session.
+ *
+ * Ein gesperrtes Kapitel wird nicht betreten (`canEnter`, wie `goToStep`) — der
+ * Fall ist theoretisch, weil ein Befund nur BESTÄTIGTE Werte vergleicht, aber
+ * ein Sprung in ein 403 wäre die schlechtere Antwort als gar keiner.
+ */
+async function goToField(slotId: string): Promise<void> {
+  const target = slotById(slotId)?.stepId
+  if (!target) return
+  if (target === routeStepKey.value) { await goToSession(slotId); return }
+  if (!store.canEnter(target)) return
+  await autosave.flush()
+  await navigateTo({ path: localePath(`/brand/${profileId.value}/${target}`), query: { s: slotId } })
+}
+
 /** Dieselbe Adresse, die Abnahme-Ansicht statt einer Session (§5a). */
 async function goToAcceptance(): Promise<void> {
   if (acceptanceView.value) return
@@ -1203,6 +1230,52 @@ interface LogCard {
   placeholder: string
   /** Nur im laufenden Kapitel: die Bedienelemente. */
   controls: BrandSlotControls | null
+  /**
+   * DIE OFFENEN BEFUNDE AN DIESEM FELD (§8, Paket 5) — gefiltert über die
+   * Slot-Id, nicht über das Kapitel: ein Konflikt gehört zwei Feldern, und der
+   * Chip steht an beiden. Der Store trägt die Befunde des OFFENEN Kapitels;
+   * berührt einer davon ein Feld eines fremden Kapitels, erscheint er auch
+   * dort — mehr weiss der Browser über fremde Kapitel nicht, und mehr
+   * behauptet er auch nicht.
+   */
+  findings: BrandFindingView[]
+  /** Die Notizen des Schliess-Aufrufs (§4) — eingeklappt, grau. */
+  reviewNotes: string
+  /** Was der Spezialist am Ziel vermisst hat (§7) — Hinweis, keine Sperre. */
+  missing: string[]
+  /**
+   * Der Schliess-Aufruf ist gelaufen. `false` heisst fail-soft ausgefallen
+   * (§7) — ein stilles Etikett, kein Knopf: der Prüfblick (§10, Paket 7) holt
+   * genau diese Sessions nach.
+   */
+  reviewed: boolean
+}
+
+/** Die offenen Befunde, an denen GENAU dieses Feld beteiligt ist (§8). */
+function findingsForSlot(slotId: string): BrandFindingView[] {
+  return store.findings.filter(finding => finding.slots.includes(slotId))
+}
+
+/**
+ * DIE BEFUNDE DER AKTIVEN SESSION — der Chip auf der BÜHNE (§8, „im Log und in
+ * beiden Sessions").
+ *
+ * Er steht EINMAL über dem Feld, unter der Session-Zeile. George hat den Befund
+ * schon einmal ausgesprochen (Paket 4, `mentionedAt`); der Chip ist der
+ * BLEIBENDE Weg, kein zweiter Chat-Text — ein Hinweis, der mit dem nächsten Zug
+ * nach oben scrollt, ist nach drei Antworten weg.
+ */
+const activeFindings = computed<BrandFindingView[]>(() =>
+  (activeSessionKey.value ? findingsForSlot(activeSessionKey.value) : []))
+
+/**
+ * EIN BEFUND WURDE ENTSCHIEDEN (§8). Der Store nimmt ihn aus der Liste und
+ * übernimmt die `revision` — ein vollständiger Neuabruf des Kapitels wäre hier
+ * der falsche Handgriff: `applyStepDetail` leert die gestreamten Züge, und der
+ * Mensch stünde nach einem Klick auf einen Chip vor einem leeren Gespräch.
+ */
+function findingDecided(decision: BrandFindingDecisionResponse): void {
+  store.applyFindingDecision(decision)
 }
 
 /** Der Ersatztext einer leeren Karte — s. `LogCard.placeholder`. */
@@ -1229,6 +1302,13 @@ interface LogChapter {
   /** Optionale Slots des Kapitels (Registry-Zahl, unabhängig vom Stand). */
   optional: number
   current: boolean
+  /**
+   * Wie viele OFFENE Befunde dieses Kapitel berühren (§8). Gerechnet über die
+   * Slots (`countOpenFindings`), nicht über den Kapitel-Stempel des Befunds:
+   * ein Konflikt zwischen B und C zählt in beiden — genau so, wie er auch
+   * beide Abnahmen sperrt.
+   */
+  findings: number
 }
 
 const logChapters = computed<LogChapter[]>(() => store.railSteps.map((entry) => {
@@ -1244,6 +1324,7 @@ const logChapters = computed<LogChapter[]>(() => store.railSteps.map((entry) => 
     total: current ? (completion.value?.total ?? 0) : entry.progress.requiredTotal,
     optional: slotsForStep(entry.stepKey).filter(slot => !slot.required).length,
     current,
+    findings: countOpenFindings(store.findings, entry.stepKey),
   }
 }))
 
@@ -1273,6 +1354,13 @@ function chapterCards(chapter: LogChapter): LogCard[] {
       confirmed: entry.controls.state === 'confirmed',
       placeholder: slotPlaceholder(entry.slot),
       controls: entry.controls,
+      findings: findingsForSlot(entry.slot.id),
+      reviewNotes: store.sessions[entry.slot.id]?.notes ?? '',
+      missing: store.sessions[entry.slot.id]?.missing ?? [],
+      // Ohne Session-Stand gilt „geprüft": ein Etikett „noch nicht
+      // gegengelesen" an einem Feld, über das wir nichts wissen, wäre eine
+      // Behauptung statt einer Auskunft.
+      reviewed: store.sessions[entry.slot.id]?.reviewed !== false,
     }))
   }
   const loaded = foreignSlots.value[chapter.stepKey]
@@ -1286,6 +1374,12 @@ function chapterCards(chapter: LogChapter): LogCard[] {
     confirmed: brandSlotIsConfirmed(loaded[slot.id]),
     placeholder: slotPlaceholder(slot),
     controls: null,
+    findings: findingsForSlot(slot.id),
+    // Notizen und Prüf-Stand stehen in der `sessions`-Karte, und die gibt es
+    // nur für das OFFENE Kapitel — der lesende Abruf holt bewusst nur Slots.
+    reviewNotes: '',
+    missing: [],
+    reviewed: true,
   }))
 }
 
@@ -1510,6 +1604,10 @@ function railSessions(entry: BrandJourneyStep): BwRailSession[] {
         ? 'active'
         : view?.deferred ? 'deferred' : state,
       disabled: state === 'locked',
+      // Das bernsteinfarbene Merkzeichen (§8): an dieser Session hängt ein
+      // offener Befund. Es ersetzt die Glyphe NICHT — der Zustand der Session
+      // („bestätigt", „veraltet") bleibt die Hauptauskunft der Zeile.
+      ...(findingsForSlot(slot.id).length ? { finding: true } : {}),
       ...(state === 'locked' ? { title: t('brand.nav.sessionLocked') } : {}),
     }
   })
@@ -1559,20 +1657,39 @@ function railSessions(entry: BrandJourneyStep): BwRailSession[] {
  * ist, wären der falsche Preis (dieselbe Regel wie im Log: fremde Kapitel
  * werden beim AUFKLAPPEN gelesen).
  */
+/**
+ * DER BEFUND-ZÄHLER DER LEISTE (§8) — er hängt sich HINTEN an die zweite Zeile
+ * eines Kapitels, und nur wenn es etwas zu zählen gibt: „7 von 11 bestätigt ·
+ * 1 Befund offen".
+ *
+ * An BEIDE Fassungen der Zeile, denn die Leiste tauscht sie: das aufgeklappte
+ * (aktive) Kapitel zeigt den UMFANG, die eingeklappten den ZÄHLER
+ * (`stepSubline`). Hinge er nur am Zähler, verschwände er ausgerechnet dort,
+ * wo der Mensch gerade arbeitet.
+ *
+ * Er ersetzt nichts — „bestätigt" und „offener Befund" sind zwei Aussagen über
+ * zwei Mengen, genau wie „neu besprechen" daneben.
+ */
+function railFindingSuffix(stepKey: BrandStepKey): string {
+  const findings = countOpenFindings(store.findings, stepKey)
+  return findings > 0 ? ` · ${t('brand.finding.openCount', { count: findings }, findings)}` : ''
+}
+
 function railCounter(entry: BrandJourneyStep, current: boolean): string {
+  const suffix = railFindingSuffix(entry.stepKey)
   if (current) {
     const counts = countChapterSessions(entry.stepKey, navSessions.value)
     // Als LITERAL und nicht als Objekt weitergereicht: `t()` verlangt einen
     // Index-Signatur-Typ, ein Interface hat keine.
     const values = { confirmed: counts.confirmed, total: counts.total, stale: counts.stale }
-    return counts.stale > 0
+    return (counts.stale > 0
       ? t('brand.nav.chapterCountStale', values)
-      : t('brand.nav.chapterCount', values)
+      : t('brand.nav.chapterCount', values)) + suffix
   }
   return t('brand.nav.chapterCount', {
     confirmed: entry.progress.requiredTotal - entry.missingRequired.length,
     total: slotsForStep(entry.stepKey).length,
-  })
+  }) + suffix
 }
 
 const railLayers = computed<BwRailLayer[]>(() => [{
@@ -1596,7 +1713,7 @@ const railLayers = computed<BwRailLayer[]>(() => [{
             effort: t('brand.nav.chapterEffort', {
               count: slotsForStep(entry.stepKey).length,
               minutes: chapterEffortMinutes(entry.stepKey),
-            }),
+            }) + railFindingSuffix(entry.stepKey),
           }
         : {}),
     }
@@ -1926,6 +2043,7 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
         :profile-id="profileId"
         :step-key="stepKey"
         @session="goToSession"
+        @field="goToField"
         @advance="advanceToStep"
         @restarted="afterRestart"
       />
@@ -2249,6 +2367,17 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
         <div v-if="activeSlot" class="flex flex-col gap-2" style="padding-left: 2.65rem">
           <p class="bw-label" style="color: var(--bw-muted)">{{ affectsLine(activeSlot.id) }}</p>
 
+          <!-- DER BEFUND AN DIESER SESSION (§8) — EINMAL, neben „fliesst
+               später in". George hat ihn schon ausgesprochen; hier bleibt er
+               stehen, mit beiden Feld-Links und beiden Handlungen. -->
+          <BwFindingChip
+            v-for="finding in activeFindings" :key="finding.id"
+            :finding="finding" :profile-id="profileId"
+            @field="goToField"
+            @decided="findingDecided"
+            @stale="store.dropFinding(finding.id)"
+          />
+
           <!-- VERTAGT: der Zwischenstand bleibt sichtbar, aber nicht
                bearbeitbar — der Wert entsteht im Gespräch. -->
           <div v-if="activeSession?.deferred" class="rounded-2xl px-4 py-3" style="background: var(--bw-surface)">
@@ -2352,6 +2481,12 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
                 <span class="bw-label block tabular-nums" style="color: var(--bw-muted)">
                   {{ chapterCountLine(chapter) }}
                 </span>
+                <!-- Der Befund-Zähler steht in SEINER Farbe und nur, wenn es
+                     etwas zu zählen gibt (§8) — beratend, nicht alarmierend. -->
+                <span
+                  v-if="chapter.findings > 0"
+                  class="bw-label block tabular-nums" style="color: var(--bw-stale)"
+                >{{ t('brand.finding.openCount', { count: chapter.findings }, chapter.findings) }}</span>
               </span>
               <UIcon
                 name="i-ph-caret-down"
@@ -2402,6 +2537,39 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
                 />
                 <p v-else-if="card.value" class="bw-doc-text mt-1.5 whitespace-pre-wrap" style="font-size: 0.875rem; line-height: 1.5">{{ card.display }}</p>
                 <p v-else class="bw-pending mt-1.5">{{ card.placeholder }}</p>
+
+                <!-- DIE BEFUNDE AN DIESEM FELD (§8) — kompakt: Icon und ein
+                     gekürzter Satz, ein Klick klappt Felder und Handlungen
+                     auf. Der Log ist eine SPALTE, kein Formular. -->
+                <div v-if="card.findings.length" class="mt-1.5 flex flex-col gap-1.5">
+                  <BwFindingChip
+                    v-for="finding in card.findings" :key="finding.id"
+                    compact :finding="finding" :profile-id="profileId"
+                    @field="goToField"
+                    @decided="findingDecided"
+                    @stale="store.dropFinding(finding.id)"
+                  />
+                </div>
+
+                <!-- Die Notizen des Schliess-Aufrufs (§4): grau, einklappbar.
+                     Sie fangen ab, was nach sechs Zügen aus dem Gespräch
+                     fällt — und tragen die Gründe abgelehnter Befunde. -->
+                <details v-if="card.reviewNotes || card.missing.length" class="mt-1.5">
+                  <summary class="bw-label cursor-pointer" style="color: var(--bw-muted)">{{ t('brand.log.notes') }}</summary>
+                  <p v-if="card.reviewNotes" class="mt-1 whitespace-pre-wrap text-sm" style="color: var(--bw-ink-soft)">{{ card.reviewNotes }}</p>
+                  <ul v-if="card.missing.length" class="mt-1 flex flex-col gap-0.5">
+                    <li v-for="(entry, index) in card.missing" :key="index" class="bw-label" style="color: var(--bw-muted)">
+                      · {{ entry }}
+                    </li>
+                  </ul>
+                </details>
+
+                <!-- FAIL-SOFT SICHTBAR (§7): der Schliess-Aufruf ist
+                     ausgefallen. Ein stilles Etikett, kein Knopf — der
+                     Prüfblick (§10) holt diese Sessions nach. -->
+                <p v-if="card.confirmed && !card.reviewed" class="bw-label mt-1.5" style="color: var(--bw-muted)">
+                  {{ t('brand.review.unreviewed') }}
+                </p>
 
                 <div class="mt-1 flex items-center justify-end gap-2">
                   <!-- Ein Kapitel, das NICHT offen ist, wird nicht hier

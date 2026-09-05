@@ -785,6 +785,32 @@
         "session_locked": "Dieses Feld ist noch gesperrt — erst sind die Felder davor dran.",
         "session_foreign": "Dieses Feld gehört zu einem anderen Kapitel."
       }
+    },
+    "finding": {
+      "kind": {
+        "conflict": "Konflikt",
+        "affected": "Betroffen",
+        "gap": "Lücke"
+      },
+      "fields": "Felder",
+      "accept": "Annehmen",
+      "acceptWhich": "Welches Feld anfassen?",
+      "dismiss": "Ablehnen",
+      "dismissTitle": "Befund ablehnen",
+      "dismissPrompt": "Warum passt das nicht?",
+      "dismissTooShort": "Bitte schreibe einen Grund — er landet als Notiz an der Session.",
+      "dismissed": "abgelehnt",
+      "accepted": "angenommen",
+      "openCount": "{count} Befund offen | {count} Befunde offen",
+      "openMarker": "Offener Befund",
+      "decideFailed": "Das hat nicht geklappt.",
+      "alreadyDecided": "Dieser Befund ist bereits entschieden — die Liste wird aufgefrischt."
+    },
+    "review": {
+      "unreviewed": "noch nicht gegengelesen"
+    },
+    "log": {
+      "notes": "Notizen"
     }
   }
 }

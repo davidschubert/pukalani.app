@@ -16,6 +16,7 @@ import {
 } from '../../shared/slotRegistry'
 import type {
   BrandAcceptanceSessionView,
+  BrandFindingDecisionResponse,
   BrandRestartImpactResponse,
   BrandSessionAcceptResponse,
   BrandStepAcceptanceResponse,
@@ -64,11 +65,17 @@ import { useBrandWorkspaceStore } from '../stores/brandWorkspace'
  * durch). Sein Ergebnis ist eine neue Befund-Liste — deshalb wird danach die
  * Seite selbst neu gelesen und nicht ein Teilstück gepatcht.
  *
+ * ── DIE BEFUND-CHIPS AM BLOCK (§8, Paket 5) ───────────────────────────────
+ * Sie stehen unter der Kopfzeile jeder Zeile und lesen `session.findings` —
+ * die OFFENEN Befunde, an denen genau dieses Feld beteiligt ist. Ein Konflikt
+ * verbindet zwei Felder und erscheint deshalb an beiden Blöcken; entschieden
+ * wird er einmal, und danach wird die SEITE neu gelesen: die Sperre der Weiche
+ * unten rechnet der Server (§5a Schritt 3), nicht diese Ansicht.
+ *
  * ── WAS HIER BEWUSST NOCH NICHT STEHT ─────────────────────────────────────
- * Die BEFUND-Chips am Block (§8) sind Paket 5; die DATEN dafür stehen seit
- * Paket 4 in jeder Zeile (`session.findings`). Der IMPACT-Hinweis vor dem
- * Bearbeiten (§9) kommt mit Paket 6 — „Bearbeiten" springt heute direkt in
- * die Session (s. `edit()`).
+ * Der IMPACT-Hinweis vor dem Bearbeiten (§9) kommt mit Paket 6 — „Bearbeiten"
+ * springt heute direkt in die Session (s. `edit()`), und der Feld-Link eines
+ * Chips nimmt denselben Weg.
  */
 const props = defineProps<{
   profileId: string
@@ -78,6 +85,12 @@ const props = defineProps<{
 const emit = defineEmits<{
   /** „Bearbeiten" und jeder Blocker-Link — die SEITE navigiert (sie spült aus). */
   session: [sessionId: string]
+  /**
+   * Ein Feld-Link eines Befund-Chips (§8). EIGENES Ereignis, weil ein Konflikt
+   * ausdrücklich zwei KAPITEL verbinden darf (`b.purpose` ↔ `c.conflictRule`):
+   * `session` meint eine Session DIESES Kapitels, `field` kann anderswo landen.
+   */
+  field: [slotId: string]
   /** Nach dem Abschluss: das nächste Kapitel mit seiner ersten Session. */
   advance: [target: { stepKey: BrandStepKey, sessionKey: string }]
   /** Nach „Nochmal von vorn": zurück auf die erste Session DIESES Kapitels. */
@@ -271,6 +284,21 @@ async function accept(session: BrandAcceptanceSessionView): Promise<void> {
   finally {
     accepting.value = null
   }
+}
+
+/**
+ * EIN BEFUND WURDE ENTSCHIEDEN (§8) — die SEITE wird neu gelesen.
+ *
+ * Nicht ein Teilstück gepatcht: an einem Befund hängen der Zähler, die
+ * Blocker-Liste und die Weiche unten, und alle drei rechnet der Server
+ * (`acceptance.ready`). Die `revision` kommt MIT der Antwort, weil ein
+ * abgelehnter Befund seinen Grund als Notiz an die Quell-Session hängt — ohne
+ * sie liefe das nächste „Abnehmen" in einen 409 (s. Kopf, „die `revision` ist
+ * lokal").
+ */
+async function findingDecided(decision: BrandFindingDecisionResponse): Promise<void> {
+  if (decision.revision > revision.value) revision.value = decision.revision
+  await acceptance.refresh()
 }
 
 /**
@@ -510,8 +538,17 @@ async function confirmRestart(): Promise<void> {
       </div>
       <p class="bw-label mt-1" style="color: var(--bw-muted)">{{ row.affects }}</p>
 
-      <!-- BEFUND-CHIPS (§8) hängen sich hier ein — Paket 4 füllt sie; heute
-           gibt es keine Daten, und ein erfundener Chip wäre eine Behauptung. -->
+      <!-- BEFUND-CHIPS (§8): offen, weil hier entschieden wird. Der Feld-Link
+           kann in ein ANDERES Kapitel zeigen — deshalb `field`, nicht `session`. -->
+      <div v-if="row.session.findings.length" class="mt-3 flex flex-col gap-2">
+        <BwFindingChip
+          v-for="finding in row.session.findings" :key="finding.id"
+          :finding="finding" :profile-id="profileId"
+          @field="emit('field', $event)"
+          @decided="findingDecided"
+          @stale="acceptance.refresh()"
+        />
+      </div>
 
       <div v-if="row.example" class="mt-3">
         <p class="bw-label" style="color: var(--bw-muted)">{{ t('brand.acceptance.exampleLabel') }}</p>
@@ -542,8 +579,9 @@ async function confirmRestart(): Promise<void> {
         <p v-else class="bw-pending mt-1">{{ t('brand.acceptance.valueEmpty') }}</p>
       </div>
 
-      <!-- Die Notiz des Schliess-Aufrufs (§4) — geschrieben wird sie mit
-           Paket 4; bis dahin fällt die Zeile weg statt leer dazustehen. -->
+      <!-- Die Notiz des Schliess-Aufrufs (§4), eingeklappt — dazu die Gründe
+           abgelehnter Befunde, die als Notiz an ihrer Quell-Session landen
+           (§8). Ohne Inhalt fällt die Zeile weg, statt leer dazustehen. -->
       <details v-if="row.session.notes" class="mt-3">
         <summary class="bw-label cursor-pointer" style="color: var(--bw-muted)">{{ t('brand.acceptance.notes') }}</summary>
         <p class="mt-1 whitespace-pre-wrap text-sm" style="color: var(--bw-ink-soft)">{{ row.session.notes }}</p>

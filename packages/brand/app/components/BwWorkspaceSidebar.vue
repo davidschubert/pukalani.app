@@ -369,6 +369,16 @@ function selectStep(layer: BwRailLayer, step: BwRailStep): void {
                     >
                       <UIcon :name="sessionGlyph(session).name" class="size-3.5 flex-none" :style="sessionGlyph(session).style" />
                       <span class="min-w-0 flex-1 truncate">{{ session.label }}</span>
+                      <!-- Offener Befund (§8): ein kleiner bernsteinfarbener
+                           Punkt, nie nur Farbe — der Titel sagt, was er meint.
+                           Er steht NEBEN der Glyphe, weil er eine zweite
+                           Auskunft ist und nicht der Zustand der Session. -->
+                      <UIcon
+                        v-if="session.finding" name="i-ph-warning-circle-fill"
+                        class="size-3 flex-none" style="color: var(--bw-stale)"
+                        :aria-label="t('brand.finding.openMarker')"
+                        :title="t('brand.finding.openMarker')"
+                      />
                       <span
                         v-if="session.effort" class="bw-label flex-none tabular-nums"
                         style="color: var(--bw-muted)"

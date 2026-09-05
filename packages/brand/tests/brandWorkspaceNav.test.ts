@@ -2,9 +2,12 @@ import { describe, expect, it } from 'vitest'
 import {
   BRAND_ACCEPTANCE_VIEW,
   type BrandNavSession,
+  acceptTargets,
   chapterEffortMinutes,
   countChapterSessions,
+  countOpenFindings,
   decideAutoAdvance,
+  dismissReasonValid,
   isAcceptanceView,
   needsOpeningTurn,
   resolveAcceptanceStage,
@@ -330,5 +333,72 @@ describe('restartWordMatches', () => {
   it('gibt ohne Erwartungswort NIE frei (fehlender Locale-Schlüssel)', () => {
     expect(restartWordMatches('', '')).toBe(false)
     expect(restartWordMatches('irgendwas', '   ')).toBe(false)
+  })
+})
+
+// ── Die Befund-Chips (BW2 Paket 5, §8) ────────────────────────────────────
+
+const VALUES = slotsForStep('values')
+const ARCHETYPE = slotsForStep('archetype')
+
+function finding(
+  slots: string[],
+  status: 'open' | 'accepted' | 'dismissed' = 'open',
+): { status: 'open' | 'accepted' | 'dismissed', slots: string[] } {
+  return { status, slots }
+}
+
+describe('dismissReasonValid', () => {
+  it('gibt frei, sobald ein Grund dasteht', () => {
+    expect(dismissReasonValid('Absicht')).toBe(true)
+    expect(dismissReasonValid('  Ja.  ')).toBe(true)
+  })
+
+  it('gibt bei leerem Klick NICHT frei — die Notiz wäre eine leere Behauptung', () => {
+    expect(dismissReasonValid('')).toBe(false)
+    expect(dismissReasonValid('    ')).toBe(false)
+    expect(dismissReasonValid('ok')).toBe(false)
+  })
+})
+
+describe('countOpenFindings', () => {
+  it('zählt einen Befund in BEIDEN Kapiteln, die er berührt', () => {
+    const list = [finding([VALUES[0]!.id, ARCHETYPE[0]!.id])]
+    expect(countOpenFindings(list, 'values')).toBe(1)
+    expect(countOpenFindings(list, 'archetype')).toBe(1)
+    expect(countOpenFindings(list, 'context')).toBe(0)
+  })
+
+  it('zählt Befunde, nicht Felder: zwei Felder desselben Kapitels sind EIN Punkt', () => {
+    expect(countOpenFindings([finding([VALUES[0]!.id, VALUES[1]!.id])], 'values')).toBe(1)
+  })
+
+  it('GEGENPROBE: entschiedene Befunde zählen nicht mehr mit', () => {
+    const list = [
+      finding([VALUES[0]!.id], 'accepted'),
+      finding([VALUES[1]!.id], 'dismissed'),
+      finding([VALUES[2]!.id]),
+    ]
+    expect(countOpenFindings(list, 'values')).toBe(1)
+  })
+})
+
+describe('acceptTargets', () => {
+  it('nennt bei einem Konflikt BEIDE Felder — dann fragt die Oberfläche', () => {
+    const targets = acceptTargets({ slots: [VALUES[0]!.id, ARCHETYPE[0]!.id] })
+    expect(targets).toEqual([VALUES[0]!.id, ARCHETYPE[0]!.id])
+  })
+
+  it('nennt bei einer Lücke genau eines — dann geht der Sprung direkt', () => {
+    expect(acceptTargets({ slots: [VALUES[0]!.id] })).toEqual([VALUES[0]!.id])
+  })
+
+  it('lässt unbekannte Ids fallen (Sprung auf eine leere Bühne)', () => {
+    expect(acceptTargets({ slots: ['x.erfunden', VALUES[0]!.id] })).toEqual([VALUES[0]!.id])
+    expect(acceptTargets({ slots: ['x.erfunden'] })).toEqual([])
+  })
+
+  it('fasst dasselbe Feld zusammen — zweimal dasselbe ist keine Wahl', () => {
+    expect(acceptTargets({ slots: [VALUES[0]!.id, VALUES[0]!.id] })).toEqual([VALUES[0]!.id])
   })
 })
