@@ -825,7 +825,9 @@
           "rateLimited": "Für heute sind die kostenlosen Checks aufgebraucht. Morgen geht es weiter — oder tragt euch für den vollständigen Report ein.",
           "unavailable": "Der Check ist gerade nicht erreichbar. Versucht es in ein paar Minuten noch einmal.",
           "generic": "Das hat gerade nicht geklappt. Versucht es in einem Moment noch einmal."
-        }
+        },
+        "ranking": "Diesen Check ins öffentliche Ranking aufnehmen",
+        "rankingHint": "Ohne Häkchen bleibt euer Ergebnis privat, die Adresse ist trotzdem teilbar."
       },
       "bands": {
         "exceptional": "Außergewöhnlich",
@@ -877,7 +879,7 @@
         "nextFallback": "Euer Markenberater ordnet diesen Punkt im Relaunch ein.",
         "missingTitle": "Diesen Check gibt es nicht (mehr).",
         "missingText": "Der Link ist unvollständig, oder das Ergebnis ist inzwischen gelöscht. Startet den Check einfach neu — er dauert eine knappe Minute.",
-        "missingCta": "Zur Startseite"
+        "missingCta": "Zum Brand-Check"
       },
       "criteria": {
         "a1": {
@@ -1040,6 +1042,102 @@
           "title": "Saubere Meta-Angaben",
           "next": "Räumt doppelte Angaben im Seitenkopf auf und setzt eine kanonische Adresse."
         }
+      }
+    },
+    "checkPage": {
+      "seoTitle": "Brand-Check — euren Markenauftritt prüfen und den Brand Score erhalten",
+      "seoDescription": "Kostenloser Brand-Check: Website eintragen, 40 Kriterien in acht Kategorien, ein Brand Score von 0 bis 100 und die drei wichtigsten Befunde mit Beleg. Ohne Konto, in einer knappen Minute.",
+      "tabsAria": "Brand-Check",
+      "tabs": {
+        "start": "Start",
+        "ranking": "Ranking",
+        "compare": "Vergleich",
+        "soon": "bald"
+      },
+      "hero": {
+        "eyebrow": "Brand-Check · kostenlos, ohne Konto",
+        "title": "Wie stark ist eure Marke?",
+        "lead": "Website eintragen und in einer knappen Minute wissen, wo euer Markenauftritt heute steht — Brand Score, acht Kategorien, drei Befunde mit Beleg."
+      },
+      "what": {
+        "eyebrow": "Was der Brand-Check ist",
+        "title": "Der Blick von außen auf euren Markenauftritt",
+        "body": "Wir lesen eure Startseite — genau das, was jeder Besucher auch sieht — und bewerten sie mit 40 Kriterien in acht Kategorien. Heraus kommt ein Brand Score von 0 bis 100, acht Kategorie-Werte und die drei wichtigsten Befunde, jeder mit dem Beleg, auf dem er steht.",
+        "honest": "Das ist ein Reifegrad, kein Zeugnis: er sagt, wo ihr heute steht und was als Nächstes dran wäre.",
+        "f1Label": "40 Kriterien",
+        "f1Body": "Jedes mit einer festen Regel von 0 bis 2. Nichts davon ist Geschmack.",
+        "f2Label": "Acht Kategorien",
+        "f2Body": "Von Eigenständigkeit bis Handwerk, jede mit ihrem eigenen Gewicht.",
+        "f3Label": "0 bis 100",
+        "f3Body": "Ein Wert mit Band, den ihr in einem Jahr wieder mit heute vergleichen könnt."
+      },
+      "why": {
+        "eyebrow": "Warum es ihn gibt",
+        "title": "Eure Marke entsteht im Kopf der anderen",
+        "body1": "Eine Marke ist nicht das, was ihr über euch sagt, sondern was bei anderen ankommt. Genau diesen Blick habt ihr auf euren eigenen Auftritt nie: ihr kennt die Absicht hinter jedem Satz, ein Besucher kennt nur den Satz.",
+        "body2": "Der Check nimmt diesen Blick ein. Er urteilt nicht über euren Geschmack, sondern prüft, ob eure Absicht nach draußen kommt — und sagt bei jedem Befund dazu, woran er das festmacht."
+      },
+      "value": {
+        "eyebrow": "Was ihr davon habt",
+        "title": "Drei Befunde, mit denen ihr morgen anfangen könnt",
+        "v1Title": "Belege statt Bauchgefühl",
+        "v1Body": "Jeder Befund trägt sein Zitat oder seinen Messwert und den nächsten Schritt. Ihr müsst niemandem glauben, ihr könnt nachlesen.",
+        "v2Title": "Kostenlos und ohne Konto",
+        "v2Body": "Kein Anmelden, keine Mail-Adresse, keine Rückrufbitte. Adresse eintragen, Ergebnis ansehen.",
+        "v3Title": "Teilbar",
+        "v3Body": "Das Ergebnis hat eine eigene Adresse. Ihr schickt sie ins Team oder an eure Geschäftsführung, statt Folien zu bauen."
+      },
+      "basis": {
+        "eyebrow": "Worauf er aufbaut",
+        "title": "Acht Kategorien, vierzig Kriterien",
+        "lead": "Dieselben Kriterien, mit denen hier jedes Branding entsteht. Die Gewichte stehen fest, bevor eure Seite gelesen wird.",
+        "weight": "{weight} von 100 Punkten",
+        "note": "16 Kriterien werden gerechnet, 24 beurteilt ein Markenexperte — jedes Urteil mit Beleg.",
+        "lockedNote": "Was von außen nicht prüfbar ist, raten wir nicht: es fällt aus der Rechnung, statt als null Punkte zu zählen."
+      },
+      "features": {
+        "eyebrow": "Rund um den Check",
+        "title": "Was der Check sonst noch kann",
+        "f1Label": "Sieben Tage dieselbe Antwort",
+        "f1Body": "Dieselbe Adresse liefert innerhalb einer Woche denselben gespeicherten Check — reproduzierbar statt zufällig.",
+        "f2Label": "Öffentliches Ranking",
+        "f2Body": "Wer mag, nimmt seinen Check in die Liste aller geprüften Auftritte auf. Ohne Häkchen bleibt er privat.",
+        "f3Label": "Zwei Marken vergleichen",
+        "f3Body": "Zwei Ergebnisse nebeneinander, Kategorie für Kategorie — wie zwei Karten gegeneinander.",
+        "f4Label": "Verlauf",
+        "f4Body": "Nach einem Relaunch noch einmal prüfen und beide Stände nebeneinander sehen."
+      },
+      "next": {
+        "eyebrow": "Und dann?",
+        "title": "Aus den Befunden wird die Reihenfolge der Arbeit",
+        "body": "Euer Markenberater kennt euren Auftritt dann schon — ihr steigt mit dem Ergebnis ein statt bei null. Und euer neues Branding lässt sich später noch einmal durch denselben Check schicken.",
+        "cta": "Marken-Relaunch starten",
+        "brands": "Meine Brands",
+        "brandsHint": "Ihr seid angemeldet: eure Brands liegen im Dashboard."
+      },
+      "faq": {
+        "eyebrow": "Häufige Fragen",
+        "title": "Was ihr vorher wissen wollt",
+        "q1Q": "Was wird gelesen?",
+        "q1A": "Nur eure Startseite: der sichtbare Text und die Angaben im Seitenkopf, höchstens 20.000 Zeichen. Kein Login-Bereich, keine Unterseiten, keine Daten von Dritten.",
+        "q2Q": "Werden Daten gespeichert?",
+        "q2A": "Wir speichern die geprüfte Adresse, den Score und die Belege, damit euer Ergebnis unter seinem Link erreichbar bleibt. Eine Mail-Adresse braucht der Check nicht.",
+        "q3Q": "Warum nur die Startseite?",
+        "q3A": "Weil dort die Marke entscheidet: die Startseite ist der erste Eindruck. Sie ist außerdem der einzige Ort, den wir bei jeder Website gleich behandeln können — nur so sind zwei Ergebnisse überhaupt vergleichbar.",
+        "q4Q": "Wie oft darf ich?",
+        "q4A": "Drei Checks am Tag je Anschluss. Dieselbe Adresse liefert innerhalb von sieben Tagen dasselbe gespeicherte Ergebnis und zählt dann nicht erneut.",
+        "q5Q": "Kann ich meine Website aus dem Ranking nehmen?",
+        "q5A": "Ja. Ins Ranking kommt ein Check nur mit Häkchen, und wer eine Website betreibt, kann ihren Eintrag jederzeit entfernen lassen — schreibt uns, wir blenden ihn aus.",
+        "q6Q": "Was heißt „nicht bewertbar\"?",
+        "q6A": "Manches ist von außen nicht prüfbar. Statt zu raten weisen wir es aus und lassen es aus der Rechnung: es zählt weder als Punkt noch als Abzug."
+      },
+      "teaser": {
+        "eyebrow": "Brand-Check · kostenlos",
+        "title": "Wie stark ist eure Marke — von außen betrachtet?",
+        "body": "40 Kriterien, acht Kategorien, ein Brand Score von 0 bis 100 mit den drei wichtigsten Befunden. Ohne Konto, in einer knappen Minute.",
+        "cta": "Brand-Check starten",
+        "sampleLabel": "Beispiel",
+        "sampleNote": "So sieht ein Ergebnis aus: ein Wert mit Band und acht Kategorien darunter."
       }
     },
     "acceptance": {

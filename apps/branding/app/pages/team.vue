@@ -394,7 +394,13 @@ const crew = BRAND_ADVISORS.filter(a => a.key !== 'george').map(a => ({
         </div>
       </section>
 
-      <!-- 6 · Frühzugang: die Warteliste -->
+      <!-- 6 · Brand-Check: der kostenlose Einstieg NEBEN der Warteliste
+           (Plan docs/plans/BRAND-CHECK-SEITE.md §1 — ergänzend, nicht
+           ersetzend). Das Formular selbst lebt genau einmal, auf
+           /brand-check; hier steht nur der Verweis. -->
+      <BwBrandCheckTeaser source="team" class="mt-28" />
+
+      <!-- 7 · Frühzugang: die Warteliste -->
       <section class="bw-card mt-28 grid items-center gap-10 p-10 @lg:grid-cols-[minmax(0,1fr)_26rem] @lg:p-14">
         <div class="min-w-0">
           <p class="bw-label uppercase tracking-widest" style="color: var(--bw-muted)">{{ t('lead.eyebrow') }}</p>

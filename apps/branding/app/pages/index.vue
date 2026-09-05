@@ -23,14 +23,15 @@ import { jsonLdScript } from '../utils/jsonLd'
  * stehen in OPEN-ITEMS. Im Fähigkeiten-Block rücken dafür zwei Zusagen auf,
  * die es HEUTE gibt (begründet statt behauptet · Inhalte bleiben eure).
  *
- * ── DER BRAND-CHECK IST SEIT 2026-09-05 ECHT ──────────────────────────────
- * Bis dahin stand hier die Warteliste mit `source: 'brand-check'` und die
- * Karte sagte, dass der Check „mit der nächsten Welle öffnet" — das
- * Instrument gab es noch nicht. Jetzt gibt es es: `BwBrandCheckForm` startet
- * ihn wirklich (`POST /api/brand/check`) und führt auf `/brand-check/<id>`.
- * Der Hinweis-Satz ist deshalb weg; ein Vorbehalt zu einem Knopf, der tut was
- * er sagt, wäre nur noch Zögern. Der Report per Mail bleibt die Warteliste —
- * er steht auf der ERGEBNISSEITE, wo er etwas zu ergänzen hat.
+ * ── DER BRAND-CHECK IST SEIT 2026-09-05 ECHT — UND WOHNT WOANDERS ─────────
+ * Erst stand hier die Warteliste mit `source: 'brand-check'`, dann (seit dem
+ * Bau des Instruments) das Formular selbst. Seit dem Teaser-Umbau steht hier
+ * `BwBrandCheckTeaser`: das Formular lebt GENAU EINMAL, auf `/brand-check`
+ * (Plan docs/plans/BRAND-CHECK-SEITE.md §1). Grund: die Seite mit dem
+ * Formular ist die indexierbare Produkt-Seite des Checks; drei Formulare an
+ * drei Stellen wären drei Erklärungen und trotzdem keine Seite, die jemand
+ * findet. Der Report per Mail bleibt die Warteliste — er steht auf der
+ * ERGEBNISSEITE, wo er etwas zu ergänzen hat.
  *
  * ── WEICHE W1 ────────────────────────────────────────────────────────────
  * Eingeloggt führen „Neue Marke"/„Marken-Relaunch" direkt in die Anlage mit
@@ -210,15 +211,9 @@ const KIT_FILES = ['logo.svg', 'wortmarke.svg', 'boilerplate.md', 'gruender.jpg'
         </div>
       </section>
 
-      <!-- 4 · Brand-Check: der Relaunch-Lead-Magnet (s. Kopf: ehrlicher Vorab-Eintrag) -->
-      <section class="bw-card mt-24 grid items-center gap-10 p-10 @lg:grid-cols-[minmax(0,1fr)_24rem] @lg:p-14">
-        <div class="min-w-0">
-          <p class="bw-label" style="color: var(--bw-muted)">{{ t('home.checkEyebrow') }}</p>
-          <h2 class="mt-3 max-w-lg text-balance text-3xl font-extralight leading-snug tracking-tight sm:text-4xl">{{ t('home.checkTitle') }}</h2>
-          <p class="mt-4 max-w-lg text-sm leading-relaxed" style="color: var(--bw-ink-soft)">{{ t('home.checkBody') }}</p>
-        </div>
-        <BwBrandCheckForm source="home" />
-      </section>
+      <!-- 4 · Brand-Check: der Relaunch-Lead-Magnet, jetzt als TEASER
+           (s. Kopf) — das Formular steht auf /brand-check. -->
+      <BwBrandCheckTeaser source="home" class="mt-24" />
 
       <!-- 5 · Abschluss-CTA -->
       <section class="bw-card mt-24 px-8 py-14 text-center sm:py-16">

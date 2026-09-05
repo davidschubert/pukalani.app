@@ -27,6 +27,19 @@ import type { BrandCheckStartResponse } from '../../shared/types/brand'
  * ── HONEYPOT WIE BEI DER WARTELISTE ───────────────────────────────────────
  * `hp` ist für Menschen unsichtbar; füllt ein Skript es, entscheidet der
  * Server. Ein Captcha kostete jeden ehrlichen Check einen Klick.
+ *
+ * ── DAS RANKING IST EIN OPT-IN, DEFAULT AUS ───────────────────────────────
+ * Davids Entscheidung 2026-09-05 (Plan §8.1): ein Check kommt NUR mit
+ * Häkchen in die öffentliche Liste; ohne Häkchen bleibt das Ergebnis privat
+ * und ist trotzdem über seine Adresse teilbar. Das Häkchen steht deshalb im
+ * FORMULAR (jede Einbettung trägt es), nicht auf der Seite darum herum.
+ *
+ * ── DAS FELD GEHÖRT INS SCHEMA, BEVOR ES HIER MITREIST ────────────────────
+ * Das Schema der Route ist `.strict()` (schemas/brandCheck.ts): ein Feld, das
+ * es dort nicht gibt, wird nicht ignoriert, sondern mit 400 abgewiesen — ein
+ * blindes Mitschicken hätte JEDEN Check umgebracht, auch den ohne Häkchen.
+ * `rankingOptIn` steht dort (Default `false`), deshalb reist es hier
+ * bedingungslos mit.
  */
 defineProps<{
   /** Woher der Check gestartet wurde — für die spätere Auswertung. */
@@ -42,6 +55,8 @@ const STATUS_KEYS = ['status1', 'status2', 'status3'] as const
 
 const url = ref('')
 const hp = ref('')
+/** Ins öffentliche Ranking? Default AUS (s. Kopf). */
+const rankingOptIn = ref(false)
 const status = ref<'idle' | 'running' | 'error'>('idle')
 const errorKey = ref('generic')
 const statusIndex = ref(0)
@@ -132,6 +147,7 @@ async function submit(): Promise<void> {
         url: withScheme(url.value),
         locale: locale.value === 'de' ? 'de' : 'en',
         hp: hp.value,
+        rankingOptIn: rankingOptIn.value,
       },
     })
     stopStatusTimer()
@@ -165,6 +181,15 @@ async function submit(): Promise<void> {
       <!-- Honeypot: für Menschen unsichtbar und unerreichbar (s. Kopf). -->
       <div class="absolute -left-[9999px] top-auto h-px w-px overflow-hidden" aria-hidden="true">
         <input v-model="hp" type="text" name="hp" tabindex="-1" autocomplete="off">
+      </div>
+      <!-- Ranking-Opt-in: Default AUS, mit dem Satz, der sagt, was OHNE
+           Häkchen gilt (s. Kopf). -->
+      <div class="pt-1">
+        <UCheckbox
+          v-model="rankingOptIn" :disabled="status === 'running'"
+          :label="t('brand.check.form.ranking')" data-brand-check-ranking
+        />
+        <p class="bw-label mt-1.5 leading-relaxed" style="color: var(--bw-muted)">{{ t('brand.check.form.rankingHint') }}</p>
       </div>
       <UButton
         type="submit" size="lg" class="rounded-full" :disabled="!canSend" :loading="status === 'running'"

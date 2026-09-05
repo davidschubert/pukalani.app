@@ -825,7 +825,9 @@
           "rateLimited": "The free checks for today are used up. Tomorrow it continues — or sign up for the full report.",
           "unavailable": "The check is not reachable right now. Please try again in a few minutes.",
           "generic": "That did not work just now. Please try again in a moment."
-        }
+        },
+        "ranking": "Add this check to the public ranking",
+        "rankingHint": "Without the checkbox your result stays private, the link is shareable either way."
       },
       "bands": {
         "exceptional": "Exceptional",
@@ -877,7 +879,7 @@
         "nextFallback": "Your brand advisor will place this point in the relaunch.",
         "missingTitle": "This check does not exist (any more).",
         "missingText": "The link is incomplete, or the result has since been deleted. Just start the check again — it takes under a minute.",
-        "missingCta": "Back to the homepage"
+        "missingCta": "To the brand check"
       },
       "criteria": {
         "a1": {
@@ -1040,6 +1042,102 @@
           "title": "Clean meta information",
           "next": "Clear out duplicate entries in the page head and set a canonical address."
         }
+      }
+    },
+    "checkPage": {
+      "seoTitle": "Brand check — audit your brand presence and get your Brand Score",
+      "seoDescription": "Free brand check: enter your website, 40 criteria across eight categories, a Brand Score from 0 to 100 and the three most important findings with evidence. No account, in under a minute.",
+      "tabsAria": "Brand check",
+      "tabs": {
+        "start": "Start",
+        "ranking": "Ranking",
+        "compare": "Compare",
+        "soon": "soon"
+      },
+      "hero": {
+        "eyebrow": "Brand check · free, no account",
+        "title": "How strong is your brand?",
+        "lead": "Enter your website and know in under a minute where your brand presence stands today — Brand Score, eight categories, three findings with evidence."
+      },
+      "what": {
+        "eyebrow": "What the brand check is",
+        "title": "The outside view of your brand presence",
+        "body": "We read your homepage — exactly what any visitor sees — and assess it against 40 criteria in eight categories. Out comes a Brand Score from 0 to 100, eight category scores and the three most important findings, each with the evidence it rests on.",
+        "honest": "This is a maturity level, not a report card: it says where you stand today and what would be next.",
+        "f1Label": "40 criteria",
+        "f1Body": "Each with a fixed rule from 0 to 2. None of it is taste.",
+        "f2Label": "Eight categories",
+        "f2Body": "From distinctiveness to craft, each with its own weight.",
+        "f3Label": "0 to 100",
+        "f3Body": "One number with a band that you can compare with today a year from now."
+      },
+      "why": {
+        "eyebrow": "Why it exists",
+        "title": "Your brand takes shape in other minds",
+        "body1": "A brand is not what you say about yourselves, it is what arrives with everyone else. That view of your own presence is the one you never get: you know the intent behind every sentence, a visitor only knows the sentence.",
+        "body2": "The check takes that view. It does not judge your taste, it checks whether your intent makes it out — and every finding says what it rests on."
+      },
+      "value": {
+        "eyebrow": "What you get out of it",
+        "title": "Three findings you can start with tomorrow",
+        "v1Title": "Evidence instead of gut feeling",
+        "v1Body": "Every finding carries its quote or its measurement and the next step. You do not have to believe anyone, you can read it.",
+        "v2Title": "Free and without an account",
+        "v2Body": "No sign-up, no email address, no call-back request. Enter the address, look at the result.",
+        "v3Title": "Shareable",
+        "v3Body": "The result has an address of its own. Send it to your team or your management instead of building slides."
+      },
+      "basis": {
+        "eyebrow": "What it is built on",
+        "title": "Eight categories, forty criteria",
+        "lead": "The same criteria every branding here is built with. The weights are fixed before your page is read.",
+        "weight": "{weight} of 100 points",
+        "note": "16 criteria are computed, 24 are assessed by a brand expert — every judgement with evidence.",
+        "lockedNote": "What cannot be checked from the outside we do not guess: it drops out of the calculation instead of counting as zero."
+      },
+      "features": {
+        "eyebrow": "Around the check",
+        "title": "What else the check does",
+        "f1Label": "Same answer for seven days",
+        "f1Body": "The same address returns the same stored check within a week — reproducible instead of random.",
+        "f2Label": "Public ranking",
+        "f2Body": "If you like, your check joins the list of all audited presences. Without the checkbox it stays private.",
+        "f3Label": "Compare two brands",
+        "f3Body": "Two results side by side, category by category — like two cards against each other.",
+        "f4Label": "History",
+        "f4Body": "Run the check again after a relaunch and see both states next to each other."
+      },
+      "next": {
+        "eyebrow": "And then?",
+        "title": "The findings become the order of the work",
+        "body": "Your brand advisor already knows your presence by then — you start with the result instead of from zero. And your new branding can go through the same check later on.",
+        "cta": "Start a brand relaunch",
+        "brands": "My brands",
+        "brandsHint": "You are signed in: your brands are in the dashboard."
+      },
+      "faq": {
+        "eyebrow": "Frequently asked",
+        "title": "What you want to know first",
+        "q1Q": "What gets read?",
+        "q1A": "Your homepage only: the visible text and the details in the page head, at most 20,000 characters. No login area, no subpages, no third-party data.",
+        "q2Q": "Is any data stored?",
+        "q2A": "We store the audited address, the score and the evidence so your result stays reachable under its link. The check needs no email address.",
+        "q3Q": "Why only the homepage?",
+        "q3A": "Because that is where the brand decides: the homepage is the first impression. It is also the one place we can treat the same way on every website — only then are two results comparable at all.",
+        "q4Q": "How often may I run it?",
+        "q4A": "Three checks a day per connection. The same address returns the same stored result within seven days and does not count again.",
+        "q5Q": "Can I take my website out of the ranking?",
+        "q5A": "Yes. A check only enters the ranking with the checkbox, and anyone who runs a website can have its entry removed at any time — write to us and we hide it.",
+        "q6Q": "What does “not assessable” mean?",
+        "q6A": "Some things cannot be checked from the outside. Instead of guessing we mark them and leave them out of the calculation: they count neither as a point nor as a deduction."
+      },
+      "teaser": {
+        "eyebrow": "Brand check · free",
+        "title": "How strong is your brand — seen from the outside?",
+        "body": "40 criteria, eight categories, a Brand Score from 0 to 100 with the three most important findings. No account, in under a minute.",
+        "cta": "Start the brand check",
+        "sampleLabel": "Example",
+        "sampleNote": "This is what a result looks like: one number with a band and eight categories below it."
       }
     },
     "acceptance": {

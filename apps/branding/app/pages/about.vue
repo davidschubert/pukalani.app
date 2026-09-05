@@ -17,13 +17,16 @@ import { jsonLdScript } from '../utils/jsonLd'
  *   5. Der Beweis — diese Seite selbst
  *   6. FAQ — die Einwände, bevor sie jemand stellt (und Suchmaschinen-Futter:
  *      FAQPage-JSON-LD)
- *   7. Frühzugang — die Warteliste, die EINE Lead-Erfassung der Beta
- *   8. Team-Teaser — der Weg zu den Menschen
+ *   7. Brand-Check — der kostenlose Einstieg als Teaser auf /brand-check
+ *   8. Frühzugang — die Warteliste, die EINE Lead-Erfassung der Beta
+ *   9. Team-Teaser — der Weg zu den Menschen
  *
  * ── WAS HIER NICHT STEHT ──────────────────────────────────────────────────
- * Artefakte, Brand-Check und Beispiel-Branding gehören der Startseite
- * (abgenommener Dummy `packages/brand/.playground/app/pages/start.vue`) —
- * About wiederholt sie nicht. Preise nennt nur die FAQ, und zwar den Stand
+ * Artefakte und Beispiel-Branding gehören der Startseite (abgenommener Dummy
+ * `packages/brand/.playground/app/pages/start.vue`) — About wiederholt sie
+ * nicht. Der Brand-Check steht seit dem Teaser-Umbau (Plan
+ * docs/plans/BRAND-CHECK-SEITE.md §1) auch hier, aber NUR als Verweis: das
+ * Formular lebt genau einmal, auf /brand-check. Preise nennt nur die FAQ, und zwar den Stand
  * der Produktentscheidung vom 2026-08-27: Fundament frei, Ableitung bezahlt.
  *
  * ── BILDER SIND PLATZHALTER MIT PROMPT ────────────────────────────────────
@@ -202,7 +205,13 @@ const openFaq = ref<string | null>(null)
         </div>
       </section>
 
-      <!-- 7 · Frühzugang: die Warteliste -->
+      <!-- 7 · Brand-Check: der kostenlose Einstieg NEBEN der Warteliste
+           (Plan docs/plans/BRAND-CHECK-SEITE.md §1 — ergänzend, nicht
+           ersetzend: wer noch nichts hinterlassen will, kann trotzdem etwas
+           mitnehmen). -->
+      <BwBrandCheckTeaser source="about" class="mt-28" />
+
+      <!-- 8 · Frühzugang: die Warteliste -->
       <section class="bw-card mt-28 grid items-center gap-10 p-10 @lg:grid-cols-[minmax(0,1fr)_26rem] @lg:p-14">
         <div class="min-w-0">
           <p class="bw-label uppercase tracking-widest" style="color: var(--bw-muted)">{{ t('lead.eyebrow') }}</p>
@@ -212,7 +221,7 @@ const openFaq = ref<string | null>(null)
         <BwWaitlistForm source="about" />
       </section>
 
-      <!-- 8 · Team-Teaser -->
+      <!-- 9 · Team-Teaser -->
       <section class="mt-16 flex flex-wrap items-center justify-between gap-6 px-2">
         <div class="max-w-xl">
           <p class="bw-label uppercase tracking-widest" style="color: var(--bw-muted)">{{ t('about.teamTeaserEyebrow') }}</p>

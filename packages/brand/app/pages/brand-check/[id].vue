@@ -128,7 +128,13 @@ async function copyLink(): Promise<void> {
 
 <template>
   <div class="pb-10">
-    <div class="mx-auto mt-14 max-w-4xl">
+    <div class="mx-auto mt-10 max-w-4xl">
+      <!-- Die Reiter des Instruments: „Start" ist hier zugleich der Rückweg
+           auf `/brand-check` (die Seite mit dem Formular). -->
+      <div class="mb-8">
+        <BwBrandCheckTabs current="start" />
+      </div>
+
       <!-- Solange geladen wird, steht noch nichts fest — kein Urteil, keine
            Leermeldung, nur die Ansage, dass geholt wird. -->
       <div v-if="loadStatus === 'pending'" class="bw-card p-10 text-center" data-check-loading>
@@ -144,7 +150,9 @@ async function copyLink(): Promise<void> {
         <h1 class="mt-6 text-balance text-3xl font-extralight tracking-tight">{{ t('brand.check.result.missingTitle') }}</h1>
         <p class="mx-auto mt-4 max-w-md text-sm leading-relaxed" style="color: var(--bw-ink-soft)">{{ t('brand.check.result.missingText') }}</p>
         <div class="mt-8">
-          <UButton :label="t('brand.check.result.missingCta')" :to="localePath('/')" size="lg" color="neutral" class="rounded-full" />
+          <!-- Zurück zum FORMULAR, nicht zur Startseite: dort steht der Check
+               seit dem Teaser-Umbau nicht mehr (Plan §1). -->
+          <UButton :label="t('brand.check.result.missingCta')" :to="localePath('/brand-check')" size="lg" color="neutral" class="rounded-full" />
         </div>
       </div>
 
