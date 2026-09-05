@@ -368,11 +368,17 @@ export function decideBrandAiQuota(
  * WARUM DER CHECK NICHT IN `decideBrandAiQuota` PASST.
  *
  * Alle Deckel oben kennen einen MENSCHEN (`userId`) und meistens ein BRANDING
- * (`profileId`). Der Brand-Check kennt beides nicht: er ist die öffentliche
- * Route ohne Konto (Davids Hybrid-Zugang, 2026-09-05, Plan §5). Was ihn
- * begrenzt, sind zwei ganz andere Fragen — „wie oft von DIESEM Anschluss?" und
+ * (`profileId`). Der Brand-Check kennt im Normalfall beides nicht: er ist die
+ * öffentliche Route ohne Konto (Davids Hybrid-Zugang, 2026-09-05, Plan §5).
+ * Was ihn begrenzt, sind andere Fragen — „wie oft von DIESEM Anschluss?" und
  * „was kostet das die INSTANZ?" —, und die Antwort auf die erste ist ein
  * gehashter IP-Stempel, kein Konto.
+ *
+ * SEIT DEM RANKING-PAKET GIBT ES EINEN DRITTEN ZÄHLER, und er ist die
+ * Ausnahme, die die Regel schärft: „neu ermitteln" (`force`) gibt es NUR mit
+ * Konto, weil nur dort ein Deckel greifen kann, den man nicht mit einem
+ * Router-Neustart abwirft — `BRAND_CHECK_ACCOUNT_DAILY_LIMIT`. Er bucht statt
+ * des Anschluss-Eimers, nie zusätzlich.
  *
  * Die Werte trotzdem in DIESER Datei, nicht in einer eigenen: es ist derselbe
  * Vertrag („was ein KI-Aufruf kosten darf"), es ist derselbe Rate-Limit-Store,
@@ -405,9 +411,38 @@ export const BRAND_CHECK_IP_DAILY_LIMIT = 3
  */
 export const BRAND_CHECK_INSTANCE_DAILY_DEFAULT = 200
 
+/**
+ * ZEHN CHECKS JE KONTO UND TAG — der Deckel des „neu ermitteln" (Davids
+ * Entscheidung 4 vom 2026-09-05, docs/plans/BRAND-CHECK-SEITE.md §8.4).
+ *
+ * ── ER GILT NUR MIT `force` ───────────────────────────────────────────────
+ * Ein eingeloggter Mensch, der einfach eine Adresse eintippt, zählt weiter
+ * gegen den ANSCHLUSS-Deckel (3/Tag). Das ist kein Versehen: der Konto-Deckel
+ * ist der Preis dafür, den Sieben-Tage-Zwischenspeicher zu UMGEHEN — also für
+ * genau die Handlung, die einen KI-Aufruf erzwingt, den es sonst nicht gäbe.
+ * Andersherum („eingeloggt ⇒ immer Konto-Deckel") wäre die Anmeldung ein
+ * Gutschein auf das Dreifache für dieselbe Arbeit, und der Gast-Deckel wäre
+ * mit einem Klick auf „Registrieren" ausgehebelt.
+ *
+ * 10 ist aus der Arbeit gerechnet: eigene Marke plus Vorher/Nachher eines
+ * Relaunch plus ein paar Kundenmarken an einem Tag. Wer darüber hinaus neu
+ * ermittelt, misst dieselbe Seite und nicht mehr eine andere — und der
+ * 7-Tage-Wert steht ihm dabei unverändert kostenlos zur Verfügung.
+ */
+export const BRAND_CHECK_ACCOUNT_DAILY_LIMIT = 10
+
 /** Alle Checks EINES Anschlusses. Der Schlüssel trägt den HASH, nie die IP. */
 export function brandCheckIpDayKey(ipHash: string): string {
   return `brand-check-ip-day:${ipHash}`
+}
+
+/**
+ * Alle ERZWUNGENEN Checks EINES Kontos, über alle Adressen hinweg (s. o.).
+ * Ohne Adresse im Schlüssel: wer drei Marken betreut, hat trotzdem EINE
+ * Rechnung (dieselbe Begründung wie bei `brandAiAccountDayKey`).
+ */
+export function brandCheckAccountDayKey(userId: string): string {
+  return `brand-check-account-day:${userId}`
 }
 
 /** EIN Eimer für die ganze Instanz — ohne Anschluss, ohne Konto. */
@@ -416,34 +451,44 @@ export function brandCheckInstanceDayKey(): string {
 }
 
 export const BRAND_CHECK_IP_LIMIT_CODE = 'brand_check_ip_limit'
+export const BRAND_CHECK_ACCOUNT_LIMIT_CODE = 'brand_check_account_limit'
 export const BRAND_CHECK_INSTANCE_LIMIT_CODE = 'brand_check_instance_limit'
 
 export type BrandCheckRejectionCode =
   | typeof BRAND_CHECK_IP_LIMIT_CODE
+  | typeof BRAND_CHECK_ACCOUNT_LIMIT_CODE
   | typeof BRAND_CHECK_INSTANCE_LIMIT_CODE
 
 export interface BrandCheckQuotaCounts {
   /** Zählerstand des Anschluss-Eimers nach dieser Buchung. */
   ipDay: number
+  /**
+   * Zählerstand des Konto-Eimers nach dieser Buchung. In EINEM Aufruf ist
+   * immer nur EINER der beiden engen Zähler belegt (s. `decideBrandCheckMode`);
+   * der andere bleibt 0 und kann deshalb nie ein Nein erzeugen.
+   */
+  accountDay: number
   /** Zählerstand des Instanz-Eimers nach dieser Buchung. */
   instanceDay: number
 }
 
 export interface BrandCheckLimits {
   ipDay: number
+  accountDay: number
   instanceDay: number
 }
 
 export const BRAND_CHECK_LIMITS: BrandCheckLimits = {
   ipDay: BRAND_CHECK_IP_DAILY_LIMIT,
+  accountDay: BRAND_CHECK_ACCOUNT_DAILY_LIMIT,
   instanceDay: BRAND_CHECK_INSTANCE_DAILY_DEFAULT,
 }
 
 /**
- * ENG VOR WEIT, wie oben: erst der Anschluss, dann die Instanz. Wer sein
- * eigenes Kontingent aufgebraucht hat, soll die Rechnung des Betreibers nicht
- * zusätzlich belasten — der Aufrufer bucht in dieser Reihenfolge und hört beim
- * ersten Nein auf.
+ * ENG VOR WEIT, wie oben: erst der Anschluss bzw. das Konto, dann die Instanz.
+ * Wer sein eigenes Kontingent aufgebraucht hat, soll die Rechnung des
+ * Betreibers nicht zusätzlich belasten — der Aufrufer bucht in dieser
+ * Reihenfolge und hört beim ersten Nein auf.
  *
  * `>` statt `>=`, weil `store.hit()` den Zähler EINSCHLIESSLICH dieses Laufs
  * liefert: der dritte Check des Tages ist erlaubt, der vierte nicht.
@@ -453,6 +498,34 @@ export function decideBrandCheckQuota(
   limits: BrandCheckLimits = BRAND_CHECK_LIMITS,
 ): BrandCheckRejectionCode | null {
   if (counts.ipDay > limits.ipDay) return BRAND_CHECK_IP_LIMIT_CODE
+  if (counts.accountDay > limits.accountDay) return BRAND_CHECK_ACCOUNT_LIMIT_CODE
   if (counts.instanceDay > limits.instanceDay) return BRAND_CHECK_INSTANCE_LIMIT_CODE
   return null
+}
+
+/**
+ * DIE EINE WEICHE DES CHECKS: darf der Zwischenspeicher übergangen werden, und
+ * WELCHER enge Eimer zahlt dafür?
+ *
+ * Pur und an EINER Stelle, weil sie zwei Dinge gleichzeitig entscheidet, die
+ * sonst auseinanderlaufen: „umgehen" ohne „Konto-Eimer" wäre ein kostenloser
+ * Weg an jedem Deckel vorbei, „Konto-Eimer" ohne „umgehen" wäre eine Buchung
+ * für einen Aufruf, den es nicht gab.
+ *
+ * ── EIN GAST MIT `force` IST KEIN FEHLER ──────────────────────────────────
+ * Er bekommt schlicht den gewöhnlichen Check (Zwischenspeicher gilt,
+ * IP-Deckel). Ein 401 wäre die falsche Auskunft: er hat nichts Verbotenes
+ * versucht, sondern einen Knopf gedrückt, den es für ihn nicht gibt — und die
+ * Antwortform (`cached: true`) sagt ihm genau das.
+ */
+export interface BrandCheckMode {
+  /** Den 7-Tage-Zwischenspeicher überspringen (nur mit Konto UND `force`). */
+  bypassCache: boolean
+  /** Welcher enge Eimer bucht: der Anschluss oder das Konto. Nie beide. */
+  quota: 'ip' | 'account'
+}
+
+export function decideBrandCheckMode(input: { userId: string, force: boolean }): BrandCheckMode {
+  const forced = input.force && !!input.userId
+  return { bypassCache: forced, quota: forced ? 'account' : 'ip' }
 }

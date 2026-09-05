@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto'
+import type { H3Event } from 'h3'
 import { ID, Query } from 'node-appwrite'
 import { createBrandCheckSchema } from '../../../schemas/brandCheck'
 import {
@@ -15,11 +16,19 @@ import type {
   BrandCheckFinding,
   BrandCheckStartResponse,
 } from '../../../shared/types/brand'
+import { decideBrandCheckMode } from '../../../shared/brandAiLimits'
 import { bookBrandCheckQuota, brandCheckIpHash } from '../../utils/brandAiQuota'
 import { BRAND_CHECK_PROMPT_VERSION, judgeBrandCheck } from '../../utils/brandCheckJudge'
 import { measureBrandCheck } from '../../utils/brandCheckMeasure'
 import { BrandSiteFetchError, fetchBrandSite } from '../../utils/brandSiteFetch'
-import { BRAND_CHECKS_TABLE, type BrandCheckRow, brandDb } from '../../utils/brandStore'
+import {
+  BRAND_CHECKS_TABLE,
+  BRAND_PROFILES_TABLE,
+  type BrandCheckRow,
+  type BrandProfileRow,
+  brandDb,
+  isAppwriteNotFound,
+} from '../../utils/brandStore'
 
 /**
  * DER KOSTENLOSE BRAND-CHECK (docs/archiv/BRAND-CHECK.md) — die vierte
@@ -57,6 +66,23 @@ import { BRAND_CHECKS_TABLE, type BrandCheckRow, brandDb } from '../../utils/bra
  * Geloggt werden Host, Score, Dauer und Fehlercode — nie ein Stück Seitentext,
  * nie die rohe IP. GESPEICHERT wird ebenfalls kein Seitentext: nur die Belege
  * (je ≤ 160 Zeichen) und ein `textHash`.
+ *
+ * ── SEIT DEM RANKING-PAKET (BRAND-CHECK-SEITE §3/§5/§8) ───────────────────
+ * Die Route kennt jetzt auch KONTEN, ohne eines zu verlangen: wer eingeloggt
+ * ist, kann „neu ermitteln" (`force`) und damit den Zwischenspeicher umgehen —
+ * das kostet ihn seinen Konto-Deckel (10/Tag) STATT des Anschluss-Deckels.
+ * Ein Gast, der `force` schickt, bekommt schlicht den gewöhnlichen Check; die
+ * eine Weiche dafür ist `decideBrandCheckMode` und steht pur im Vertrag.
+ *
+ * ── DER ZWISCHENSPEICHER TRÄGT SEIN HÄKCHEN MIT SICH ──────────────────────
+ * Ein Treffer gibt die GESPEICHERTE Zeile zurück, mitsamt ihrem
+ * `rankingOptIn` — er läuft nichts und ändert nichts. Wer heute ein Häkchen
+ * setzt und einen sieben Tage alten Check zurückbekommt, landet also NICHT im
+ * Ranking. Das ist die richtige Reihenfolge: der Zwischenspeicher ist der
+ * Kostendeckel, und ein Schreibvorgang „nur fürs Häkchen" liesse jeden
+ * Vorbeikommenden über die Sichtbarkeit eines FREMDEN Auftritts entscheiden,
+ * den ein anderer geprüft hat. Wer sein eigenes Ergebnis ins Ranking bringen
+ * will, ermittelt es mit Konto neu.
  */
 export default defineEventHandler(async (event): Promise<BrandCheckStartResponse> => {
   const body = await readValidatedBody(event, createBrandCheckSchema().parse)
@@ -73,9 +99,20 @@ export default defineEventHandler(async (event): Promise<BrandCheckStartResponse
     throw createError({ status: 400, statusText: 'Invalid check payload', data: { code: 'invalid_body' } })
   }
 
+  // Die Session, falls es eine gibt — die Route VERLANGT keine (Davids
+  // Hybrid-Zugang). `requireBrandAccess` wäre hier falsch: das ist das Gate
+  // der Beta-WERKSTATT, und der Check ist das Akquise-Instrument davor.
+  const userId = typeof event.context.user?.$id === 'string' ? event.context.user.$id : ''
+  const mode = decideBrandCheckMode({ userId, force: body.force })
+
   const { tablesDB, databaseId } = brandDb(event)
 
   // (2) Der Zwischenspeicher — VOR jeder Buchung und vor jedem Abruf.
+  //
+  // Die ABFRAGE läuft auch bei `force`, nur ihr Ergebnis zählt dann nicht: sie
+  // ist zugleich der Lebenszeichen-Test der Ablage. Ohne sie merkte ein „neu
+  // ermitteln" erst beim Speichern, dass die Tabelle fehlt — nachdem es ein
+  // Modell bezahlt hat.
   let cached: BrandCheckRow | undefined
   try {
     const found = await tablesDB.listRows<BrandCheckRow>({
@@ -83,7 +120,7 @@ export default defineEventHandler(async (event): Promise<BrandCheckStartResponse
       tableId: BRAND_CHECKS_TABLE,
       queries: [Query.equal('urlKey', urlKey), Query.orderDesc('$createdAt'), Query.limit(1)],
     })
-    cached = found.rows[0]
+    cached = mode.bypassCache ? undefined : found.rows[0]
   }
   catch (error) {
     // Fehlende Tabelle (Migration nicht gelaufen) oder kranke Appwrite. Beides
@@ -107,8 +144,23 @@ export default defineEventHandler(async (event): Promise<BrandCheckStartResponse
     return { ok: true, id: cached.$id, cached: true }
   }
 
-  // (3) Die zwei Deckel. Erst ab hier kostet der Aufruf etwas.
-  const rejection = await bookBrandCheckQuota(event, brandCheckIpHash(event))
+  // (2b) Die eigene Brand, falls eine mitgeschickt wurde (§5 „Meine Brands").
+  //
+  // VOR der Buchung, weil eine fremde Profil-Id ein Fehler des Aufrufers ist
+  // und kein Kontingent kosten soll; und mit 404 statt 403 — dieselbe Regel
+  // wie überall im Layer: ein 403 auf eine fremde Id bestätigte deren Existenz.
+  // Die Prüfung ist bewusst KEIN `loadOwnedProfile` (das zieht
+  // `assertBrandOwnerAccess` und dessen community-Zweig): hier wird nur
+  // gefragt, ob DIESES Konto der Eigentümer ist, und mehr darf ein
+  // Check-Anstoss auch nicht dürfen.
+  const profileId = body.profileId && userId ? await requireOwnProfileId(event, userId, body.profileId) : ''
+
+  // (3) Die Deckel. Erst ab hier kostet der Aufruf etwas.
+  const rejection = await bookBrandCheckQuota(event, {
+    ipHash: brandCheckIpHash(event),
+    quota: mode.quota,
+    userId,
+  })
   if (rejection) {
     setHeader(event, 'Retry-After', rejection.retryAfterSec)
     logEvent('info', 'brand.check_throttled', { code: rejection.code })
@@ -218,6 +270,21 @@ export default defineEventHandler(async (event): Promise<BrandCheckStartResponse
         // Der einzige Rest der gelesenen Seite (Plan §5, „kein Rohtext").
         textHash: createHash('sha256').update(site.content.text).digest('hex'),
         ipHash: brandCheckIpHash(event),
+        // Die Branche kam im SELBEN Modell-Aufruf mit (Davids Entscheidung 2)
+        // und ist bereits gegen den Katalog geprüft — `unknown`, wenn sie sich
+        // aus der Seite nicht ergab.
+        industry: judged.industry,
+        rankingOptIn: body.rankingOptIn,
+        // Ein frischer Check ist nie ausgeblendet: `hidden` ist die Antwort
+        // des Betreibers auf einen Entfernungswunsch, kein Anfangszustand.
+        hidden: false,
+        userId,
+        profileId,
+        // Heute prüft der Check Websites. 'document' kommt mit dem
+        // Fundament-Check (§5b) und bekommt dort auch eine eigene
+        // `scoreVersion` — die zwei Zahlen dürfen nie in einer verglichen
+        // werden.
+        source: 'website',
       },
     })
     rowId = row.$id
@@ -239,6 +306,40 @@ export default defineEventHandler(async (event): Promise<BrandCheckStartResponse
 
   return { ok: true, id: rowId, cached: false }
 })
+
+/**
+ * DIE MITGESCHICKTE BRAND — nur, wenn sie diesem Konto gehört.
+ *
+ * Sie ist eine ZUORDNUNG und kein Zugriffsrecht: `brand_checks.profileId`
+ * entscheidet, unter welcher Brand ein Check in „Meine Brands" auftaucht, nicht
+ * wer ihn lesen darf (die Ergebnis-Seite ist für jeden mit der Adresse offen).
+ * Trotzdem wird der Besitz belegt — sonst hängte ein Fremder seine Messung an
+ * die Marke eines anderen, und dessen Verlauf zeigte einen Stand, den er nie
+ * ermittelt hat.
+ *
+ * FEHLENDE Tabelle ⇒ 404 wie eine fehlende Zeile: für den Aufrufer ist beides
+ * „diese Brand gibt es für dich nicht".
+ */
+async function requireOwnProfileId(event: H3Event, userId: string, profileId: string): Promise<string> {
+  const { tablesDB, databaseId } = brandDb(event)
+  try {
+    const row = await tablesDB.getRow<BrandProfileRow>({
+      databaseId,
+      tableId: BRAND_PROFILES_TABLE,
+      rowId: profileId,
+    })
+    if (row.ownerType !== 'user' || row.ownerId !== userId) {
+      throw createError({ status: 404, statusText: 'Not Found', data: { code: 'profile_not_found' } })
+    }
+    return row.$id
+  }
+  catch (error) {
+    if (isAppwriteNotFound(error)) {
+      throw createError({ status: 404, statusText: 'Not Found', data: { code: 'profile_not_found' } })
+    }
+    throw error
+  }
+}
 
 /** Nur der Host — und nur, wenn sich die Eingabe überhaupt als URL lesen lässt. */
 function hostOf(value: string): string {

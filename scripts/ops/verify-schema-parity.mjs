@@ -302,6 +302,11 @@ const BRAND_TABLES = [
   // einzige brand_*-Tabelle ohne Konto — sie ist zugleich der 7-Tage-
   // Zwischenspeicher, der die KI-Kosten der öffentlichen Route deckelt.
   'brand_checks',
+  // brand-017: die Korrekturvorschläge zum öffentlichen Ranking
+  // (docs/plans/BRAND-CHECK-SEITE.md §3b). Ebenfalls ohne Konto — ein
+  // Vorschlag hat einen eigenen Status, einen freiwilligen Absender und es
+  // kann mehrere je Check geben; deshalb eine Tabelle und keine Spalte.
+  'brand_check_corrections',
 ]
 
 const PORTFOLIO_SOLL = [

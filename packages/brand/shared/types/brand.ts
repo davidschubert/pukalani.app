@@ -1069,3 +1069,96 @@ export interface BrandCheckResult {
   criteria: BrandCheckCriterionResult[]
   findings: BrandCheckFinding[]
 }
+
+// ── Ranking, Korrekturen, Betreiber-Fläche (BRAND-CHECK-SEITE §3/§3b/§7) ────
+
+/**
+ * EINE ZEILE DES RANKINGS. Bewusst SCHMAL: Host, Zahl, Band, Branche, Quelle,
+ * Datum und die acht Kategorie-Werte — mehr braucht eine Tabelle nicht, und
+ * jedes zusätzliche Feld wäre eine weitere Aussage über eine FREMDE Marke auf
+ * einer öffentlichen, indexierbaren Seite (§3 „Recht").
+ *
+ * Was hier NICHT steht und in `BrandCheckResult` schon: die vollständige
+ * Adresse (nur der Host), die vierzig Kriterien mit ihren Zitaten und die drei
+ * Befunde. Wer sie sehen will, öffnet die Ergebnis-Seite — dort steht auch der
+ * Weg, den Eintrag entfernen zu lassen.
+ *
+ * `categories[].score` ist der auf 0–100 normierte Wert DIESER Kategorie, und
+ * `null` heisst „nicht bewertbar" — nicht „null Punkte". Eine Bestenliste je
+ * Kategorie sortiert solche Zeilen deshalb ans Ende und nicht nach unten
+ * (`sortBrandCheckRankingItems`).
+ */
+export interface BrandCheckRankingItem {
+  id: string
+  host: string
+  score: number
+  band: string
+  industry: string
+  /** 'website' | 'document' — zwei Zahlen, die nicht dasselbe messen (§5b). */
+  source: string
+  createdAt: string
+  categories: { id: string, score: number | null }[]
+}
+
+/**
+ * `total` ist die Zahl der Auftritte NACH Filter und NACH der Auswahl „je
+ * Adresse der jüngste" — also genau das, was die Seitenleiste zählen soll, und
+ * nicht die Zeilenzahl der Tabelle. Sie ist durch das Lesefenster gedeckelt
+ * (`BRAND_CHECK_RANKING_SCAN_LIMIT`); die Begründung steht dort.
+ */
+export interface BrandCheckRankingResponse {
+  items: BrandCheckRankingItem[]
+  total: number
+  page: number
+  pageSize: number
+}
+
+/** Der Vorschlag ist angekommen — mehr sagt die öffentliche Antwort nicht. */
+export interface BrandCheckCorrectionResponse {
+  ok: true
+}
+
+/**
+ * EIN KORREKTURVORSCHLAG, WIE IHN DER BETREIBER SIEHT.
+ *
+ * `reporterEmail` steht hier und NUR hier (die Liste ist `users.manage`);
+ * `ipHash` steht auch hier nicht — er ist ein pseudonymer Personenbezug und
+ * gehört dem Deckel, nicht der Ansicht. `host` und `current` reisen mit, damit
+ * die Liste ohne einen zweiten Abruf je Zeile entscheidbar ist.
+ */
+export interface BrandCheckCorrection {
+  id: string
+  checkId: string
+  host: string
+  field: string
+  /** Der heutige Wert des Feldes im Check — leer, wenn der Check fehlt. */
+  current: string
+  proposed: string
+  reason: string
+  reporterEmail: string
+  status: string
+  decisionNote: string
+  decidedAt: string
+  createdAt: string
+}
+
+export interface BrandCheckCorrectionListResponse {
+  items: BrandCheckCorrection[]
+  total: number
+  /** Leer = keine weitere Seite (dieselbe Regel wie in der Warteliste). */
+  nextCursor: string
+  counts: Record<string, number>
+}
+
+/** Angenommen bzw. abgelehnt — `changed: false` heisst „war schon so". */
+export interface BrandCheckCorrectionDecisionResponse {
+  ok: true
+  status: 'accepted' | 'declined'
+  changed: boolean
+}
+
+/** Der Entfernen-Weg des Betreibers (§3 „Recht", §7). */
+export interface BrandCheckHiddenResponse {
+  ok: true
+  hidden: boolean
+}

@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import { BRAND_CHECK_CRITERIA } from '../shared/brandCheck'
+import { BRAND_INDUSTRY_UNKNOWN, BRAND_INDUSTRY_VALUES } from '../shared/brandIndustries'
 import {
   BRAND_CHECK_JUDGED_IDS,
   BRAND_CHECK_JUDGE_TEXT_MAX,
+  BRAND_CHECK_PROMPT_VERSION,
   brandCheckJudgePrompt,
   brandCheckJudgeSystemPrompt,
   parseBrandCheckJudgement,
@@ -95,20 +97,20 @@ describe('brandCheckJudgeSystemPrompt', () => {
 
 describe('parseBrandCheckJudgement', () => {
   it('nimmt gültige Einträge und lässt fehlende einfach weg', () => {
-    const result = parseBrandCheckJudgement({
+    const { judgements } = parseBrandCheckJudgement({
       items: [
         { id: 'a1', score: 2, evidence: 'Wir rösten in kleinen Mengen.', note: 'Eigen.' },
         { id: 'a2', score: 0, evidence: 'Beratung für Unternehmen.', note: 'Gattungsbegriff.' },
       ],
     })
 
-    expect(Object.keys(result)).toEqual(['a1', 'a2'])
-    expect(result.a1).toEqual({ score: 2, evidence: 'Wir rösten in kleinen Mengen.', note: 'Eigen.' })
-    expect(result.a3).toBeUndefined()
+    expect(Object.keys(judgements)).toEqual(['a1', 'a2'])
+    expect(judgements.a1).toEqual({ score: 2, evidence: 'Wir rösten in kleinen Mengen.', note: 'Eigen.' })
+    expect(judgements.a3).toBeUndefined()
   })
 
   it('verwirft FREMDE Ids — auch die eines gerechneten Kriteriums', () => {
-    const result = parseBrandCheckJudgement({
+    const { judgements } = parseBrandCheckJudgement({
       items: [
         { id: 'b1', score: 2, evidence: 'erfunden' },
         { id: 'zz', score: 2, evidence: 'erfunden' },
@@ -116,11 +118,11 @@ describe('parseBrandCheckJudgement', () => {
       ],
     })
 
-    expect(Object.keys(result)).toEqual(['a1'])
+    expect(Object.keys(judgements)).toEqual(['a1'])
   })
 
   it('verwirft ungültige Noten, statt sie zu einer 0 zu machen', () => {
-    const result = parseBrandCheckJudgement({
+    const { judgements } = parseBrandCheckJudgement({
       items: [
         { id: 'a1', score: 3, evidence: 'zu hoch' },
         { id: 'a2', score: '2', evidence: 'als Text' },
@@ -128,43 +130,102 @@ describe('parseBrandCheckJudgement', () => {
       ],
     })
 
-    expect(result).toEqual({})
+    expect(judgements).toEqual({})
   })
 
   it('verwirft ein Urteil OHNE Beleg — genau das wäre „gefühlt"', () => {
-    expect(parseBrandCheckJudgement({ items: [{ id: 'a1', score: 2, evidence: '' }] })).toEqual({})
-    expect(parseBrandCheckJudgement({ items: [{ id: 'a1', score: 2 }] })).toEqual({})
+    expect(parseBrandCheckJudgement({ items: [{ id: 'a1', score: 2, evidence: '' }] }).judgements).toEqual({})
+    expect(parseBrandCheckJudgement({ items: [{ id: 'a1', score: 2 }] }).judgements).toEqual({})
   })
 
   it('klemmt den Beleg auf 160 Zeichen', () => {
-    const result = parseBrandCheckJudgement({
+    const { judgements } = parseBrandCheckJudgement({
       items: [{ id: 'a1', score: 2, evidence: 'y'.repeat(400), note: 'z'.repeat(900) }],
     })
 
-    expect(result.a1!.evidence).toHaveLength(BRAND_CHECK_JUDGE_EVIDENCE_MAX)
-    expect(result.a1!.note.length).toBeLessThanOrEqual(240)
+    expect(judgements.a1!.evidence).toHaveLength(BRAND_CHECK_JUDGE_EVIDENCE_MAX)
+    expect(judgements.a1!.note.length).toBeLessThanOrEqual(240)
   })
 
   it('eine fehlende Notiz ist erlaubt — der Beleg ist die Pflicht', () => {
-    const result = parseBrandCheckJudgement({ items: [{ id: 'a1', score: 1, evidence: 'da' }] })
-    expect(result.a1).toEqual({ score: 1, evidence: 'da', note: '' })
+    const { judgements } = parseBrandCheckJudgement({ items: [{ id: 'a1', score: 1, evidence: 'da' }] })
+    expect(judgements.a1).toEqual({ score: 1, evidence: 'da', note: '' })
   })
 
   it('bei doppelter Id gewinnt das ERSTE Vorkommen', () => {
-    const result = parseBrandCheckJudgement({
+    const { judgements } = parseBrandCheckJudgement({
       items: [
         { id: 'a1', score: 2, evidence: 'zuerst' },
         { id: 'a1', score: 0, evidence: 'danach' },
       ],
     })
 
-    expect(result.a1).toMatchObject({ score: 2, evidence: 'zuerst' })
+    expect(judgements.a1).toMatchObject({ score: 2, evidence: 'zuerst' })
   })
 
   it('alles, was kein Array ist, ergibt nichts (statt eines Wurfs)', () => {
-    expect(parseBrandCheckJudgement(null)).toEqual({})
-    expect(parseBrandCheckJudgement({})).toEqual({})
-    expect(parseBrandCheckJudgement({ items: 'a1=2' })).toEqual({})
-    expect(parseBrandCheckJudgement({ items: [null, 7, 'a1'] })).toEqual({})
+    expect(parseBrandCheckJudgement(null).judgements).toEqual({})
+    expect(parseBrandCheckJudgement({}).judgements).toEqual({})
+    expect(parseBrandCheckJudgement({ items: 'a1=2' }).judgements).toEqual({})
+    expect(parseBrandCheckJudgement({ items: [null, 7, 'a1'] }).judgements).toEqual({})
+  })
+})
+
+/**
+ * DIE BRANCHE — sie reist seit `check-judge-2` im SELBEN Aufruf mit (Davids
+ * Entscheidung 2 vom 2026-09-05).
+ *
+ * Der wichtigste Test hier ist der über die ERFUNDENE Id: käme sie durch,
+ * stünde in einer Spalte, nach der ein öffentliches Ranking filtert, ein Wert,
+ * den der Katalog nicht kennt — und der Filter zeigte einen Auftritt, den er
+ * nie wieder findet.
+ */
+describe('parseBrandCheckJudgement · die Branche', () => {
+  it('nimmt eine Katalog-Id, auch grossgeschrieben', () => {
+    expect(parseBrandCheckJudgement({ industry: 'agency', items: [] }).industry).toBe('agency')
+    expect(parseBrandCheckJudgement({ industry: ' Agency ', items: [] }).industry).toBe('agency')
+  })
+
+  it('macht aus allem Unbekannten `unknown` — nie eine erfundene Branche', () => {
+    for (const value of ['agentur', '', 'AGENCY_2', 42, null, undefined, { id: 'agency' }]) {
+      expect(parseBrandCheckJudgement({ industry: value, items: [] }).industry, String(value))
+        .toBe(BRAND_INDUSTRY_UNKNOWN)
+    }
+  })
+
+  it('fehlt sie ganz, ist sie `unknown` — und die Urteile bleiben trotzdem stehen', () => {
+    const result = parseBrandCheckJudgement({
+      items: [{ id: 'a1', score: 2, evidence: 'da' }],
+    })
+    expect(result.industry).toBe(BRAND_INDUSTRY_UNKNOWN)
+    expect(Object.keys(result.judgements)).toEqual(['a1'])
+  })
+
+  it('eine kaputte Antwort ohne `items` verliert die Branche NICHT', () => {
+    // Sie steht neben den Urteilen und nicht in ihnen: ein Modell, das die
+    // Liste vergisst, hat die Einordnung trotzdem geliefert.
+    expect(parseBrandCheckJudgement({ industry: 'craft', items: 'nope' }).industry).toBe('craft')
+  })
+
+  it('`unknown` ist ein gültiger Wert und kein Ausfall', () => {
+    expect(parseBrandCheckJudgement({ industry: 'unknown', items: [] }).industry)
+      .toBe(BRAND_INDUSTRY_UNKNOWN)
+  })
+})
+
+/**
+ * DER SYSTEMPROMPT MUSS DIE LISTE TRAGEN, aus der das Modell wählt — sonst
+ * rät es, und `normalizeBrandIndustry` macht daraus reihenweise `unknown`.
+ */
+describe('brandCheckJudgeSystemPrompt · die Branchen-Liste', () => {
+  it('nennt jede Katalog-Id und die Regel „genau eine"', () => {
+    const system = brandCheckJudgeSystemPrompt()
+    for (const id of BRAND_INDUSTRY_VALUES) expect(system, id).toContain(`- ${id}`)
+    expect(system).toContain('exactly one id from this list')
+    expect(system).toContain('"industry"')
+  })
+
+  it('die Fassung heisst `check-judge-2` — ein alter Check behauptet nichts Neues', () => {
+    expect(BRAND_CHECK_PROMPT_VERSION).toBe('check-judge-2')
   })
 })

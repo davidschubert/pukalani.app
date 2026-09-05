@@ -11,6 +11,7 @@ import type {
   BrandStepSummary,
   BrandStoryView,
 } from '../../shared/types/brand'
+import { BRAND_INDUSTRY_UNKNOWN } from '../../shared/brandIndustries'
 import { siteAnalysisIsStale } from '../../shared/brandSiteAnalysis'
 import {
   type BrandConfidence,
@@ -72,6 +73,12 @@ export const BRAND_WAITLIST_TABLE = 'brand_waitlist'
  * die Route ohne Anmeldung läuft (Davids Hybrid-Zugang, Plan §5).
  */
 export const BRAND_CHECKS_TABLE = 'brand_checks'
+/**
+ * Die Korrekturvorschläge zum Ranking (brand-017, Plan §3b). Eigene Tabelle
+ * und keine Spalte an `brand_checks`: ein Vorschlag hat einen eigenen STATUS,
+ * einen eigenen Absender und es kann mehrere je Check geben.
+ */
+export const BRAND_CHECK_CORRECTIONS_TABLE = 'brand_check_corrections'
 
 export type BrandProfileRow = Models.Row & {
   createdByUserId: string
@@ -228,6 +235,82 @@ export type BrandCheckRow = Models.Row & {
   findings: string
   textHash: string
   ipHash: string
+  /**
+   * DIE SECHS SPALTEN DES RANKINGS (brand-017, Plan §3/§5/§8) — alle OPTIONAL
+   * getypt, weil sie ADDITIV dazukamen: eine Zeile aus der Zeit davor liest
+   * `undefined`, und jeder Leser hier macht daraus denselben Wert wie die
+   * Spalten-Vorgabe (`brandCheckRankingFacts`). Das ist dasselbe Muster wie
+   * bei `namingOpted` und der Startkarte am Profil.
+   *
+   * `industry` ist ein VARCHAR und kein Enum — dieselbe Entscheidung wie bei
+   * `brand_waitlist.status`: die Wahrheit über die erlaubten Werte steht in
+   * `shared/brandIndustries.ts`, und eine siebzehnte Branche soll ein Eintrag
+   * in einer Datei sein und keine Migration auf einer laufenden Instanz.
+   *
+   * `rankingOptIn` ist das Häkchen des PRÜFERS (Davids Entscheidung 1),
+   * `hidden` der Entfernen-Weg des BETREIBERS (§3 „Recht"). Zwei Flags, weil
+   * es zwei verschiedene Menschen sind: ein ausgeblendeter Check darf nicht
+   * dadurch zurückkommen, dass jemand das Häkchen erneut setzt.
+   *
+   * `source` trennt Website- von Dokument-Checks (§5b) — beide haben eine
+   * Zahl, aber sie messen nicht dasselbe und dürfen deshalb nie in einer
+   * Spalte verglichen werden.
+   */
+  industry?: string
+  rankingOptIn?: boolean
+  hidden?: boolean
+  userId?: string
+  profileId?: string
+  source?: string
+}
+
+/**
+ * EIN KORREKTURVORSCHLAG (brand-017, Plan §3b).
+ *
+ * `reporterEmail` ist FREIWILLIG und der einzige Personenbezug neben dem
+ * `ipHash` — sie steht in der Zeile, damit der Betreiber zurückfragen kann,
+ * und sie geht deshalb NUR an die Betreiber-Liste, nie an eine öffentliche
+ * Antwort.
+ */
+export type BrandCheckCorrectionRow = Models.Row & {
+  checkId: string
+  field: string
+  proposed: string
+  reason: string
+  reporterEmail: string
+  status: string
+  decisionNote: string
+  decidedAt?: string | null
+  ipHash: string
+}
+
+/**
+ * DIE RANKING-TATSACHEN EINER ZEILE — die EINE Stelle, an der aus `undefined`
+ * ein Wert wird (dieselbe Rolle wie `profileStartCard` für die Startkarte).
+ *
+ * Ohne sie stünde in der Ranking-Antwort einer Bestands-Zeile `undefined` als
+ * Branche, und `rankingOptIn` wäre dort weder wahr noch falsch, sondern
+ * nichts — und `!undefined` ist zwar zufällig richtig, aber niemand hätte es
+ * entschieden.
+ */
+export interface BrandCheckRankingFacts {
+  industry: string
+  rankingOptIn: boolean
+  hidden: boolean
+  userId: string
+  profileId: string
+  source: string
+}
+
+export function brandCheckRankingFacts(row: BrandCheckRow): BrandCheckRankingFacts {
+  return {
+    industry: row.industry || BRAND_INDUSTRY_UNKNOWN,
+    rankingOptIn: row.rankingOptIn === true,
+    hidden: row.hidden === true,
+    userId: row.userId ?? '',
+    profileId: row.profileId ?? '',
+    source: row.source || 'website',
+  }
 }
 
 /** Der Admin-Client + die Database-Id des Requests — EIN Aufruf statt zwei. */

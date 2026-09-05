@@ -498,6 +498,27 @@ const WRITE_LIMITED: { re: RegExp, bucket: string, max?: number }[] = [
    */
   { re: /^POST \/api\/brand\/check$/, bucket: 'brand:check', max: 3 },
   /**
+   * DER KORREKTURVORSCHLAG ZU EINEM CHECK (BRAND-CHECK-SEITE §3b) — die zweite
+   * öffentliche Schreibroute des Layers nach der Warteliste: kein Gate, keine
+   * Session, kein Code. Sie muss so sein, denn sie existiert für die Betreiber
+   * der geprüften Auftritte, und die haben hier kein Konto.
+   *
+   * 3/min je IP ist enger als `TOKEN_MAX` und passt zum Gebrauch: ein Mensch
+   * sieht EINEN falschen Eintrag und meldet ihn. Wer öfter drückt, ist ein
+   * Skript — und für das soll jeder Versuch teuer sein, denn jeder kostet eine
+   * Abfrage UND (beim ersten Mal je Check) einen Schreibvorgang über den
+   * Admin-Client, an dem Appwrites eigene Bremse nicht greift.
+   *
+   * DIESE ZEILE IST DER MINUTEN-DECKEL, NICHT DER GANZE. Der Plan verlangt
+   * 3/Stunde je Anschluss; ein Stundenfenster kennt diese Middleware nicht
+   * (`WINDOW_MS` ist eine Minute für alle). Den Rest zählt die Route selbst
+   * (`bookBrandCorrectionQuota`, `shared/brandCheckCorrections.ts`) — die
+   * Minute schützt den Server, die Stunde die Arbeitsliste des Betreibers.
+   * Den Bot fängt daneben der Honigtopf im Rumpf, die Dublette der 409 auf
+   * einen bereits offenen Vorschlag.
+   */
+  { re: /^POST \/api\/brand\/check\/[^/]+\/correction$/, bucket: 'brand:correction', max: 3 },
+  /**
    * INHALTE ÜBERSETZEN (2026-08-17) — dieselbe Kostenklasse wie eine Zeile
    * darüber, nur häufiger erreichbar: jeder Klick schickt bis zu 10.000 Zeichen
    * an den KI-Anbieter und bezahlt die Antwort. Beide Routen haben SCHON eine

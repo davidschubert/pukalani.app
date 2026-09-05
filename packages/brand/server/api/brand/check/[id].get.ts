@@ -65,6 +65,17 @@ export default defineEventHandler(async (event): Promise<BrandCheckResult> => {
     throw createError({ status: 503, statusText: 'Check unavailable', data: { code: 'check_unavailable' } })
   }
 
+  // AUSGEBLENDET ⇒ dasselbe 404 wie „gibt es nicht" (§3 „Recht", §7).
+  //
+  // Kein 410 und kein eigener Code: der Betreiber hat einem Entfernungswunsch
+  // stattgegeben, und ein Statuscode, der „hier stand mal etwas" sagt, nähme
+  // genau die Wirkung wieder weg. Die ZEILE bleibt trotzdem stehen — sie ist
+  // der Beleg dafür, was wann behauptet wurde, und ein Löschen brächte den
+  // Check beim nächsten Aufruf derselben Adresse frisch zurück.
+  if (row.hidden === true) {
+    throw createError({ status: 404, statusText: 'Check not found', data: { code: 'check_not_found' } })
+  }
+
   const categories = parseJson<BrandCheckCategoryResult[]>(row.categories)
   const criteria = parseJson<BrandCheckCriterionResult[]>(row.criteria)
   const findings = parseJson<BrandCheckFinding[]>(row.findings)

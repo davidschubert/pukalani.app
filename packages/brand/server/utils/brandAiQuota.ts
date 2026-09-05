@@ -12,12 +12,19 @@ import {
   brandAiReviewDayKey,
   brandAiSlotDayKey,
   brandAiTalkDayKey,
+  brandCheckAccountDayKey,
   brandCheckInstanceDayKey,
   brandCheckIpDayKey,
   decideBrandAiQuota,
   decideBrandCheckQuota,
   resolveBrandAiInstanceCap,
 } from '../../shared/brandAiLimits'
+import type { BRAND_CHECK_CORRECTION_LIMIT_CODE } from '../../shared/brandCheckCorrections'
+import {
+  BRAND_CHECK_CORRECTION_WINDOW_MS,
+  brandCheckCorrectionIpHourKey,
+  decideBrandCheckCorrectionQuota,
+} from '../../shared/brandCheckCorrections'
 import { countActiveBrandGenerations } from './brandGenerators'
 
 /**
@@ -221,22 +228,47 @@ export function brandCheckIpHash(event: H3Event, now: Date = new Date()): string
  * ändern will, ändert `BRAND_CHECK_INSTANCE_DAILY_DEFAULT`.
  */
 export interface BrandCheckQuotaRejection {
-  code: BrandCheckRejectionCode
+  /**
+   * Der erste verletzte Deckel. Der Korrektur-Code steht mit in der Union,
+   * weil `bookBrandCorrectionQuota` dieselbe Form zurückgibt und die Route
+   * damit dasselbe tut (Retry-After setzen, 429 mit `data.code`) — zwei
+   * Formen für eine Handlung wären zwei Stellen zum Vergessen.
+   */
+  code: BrandCheckRejectionCode | typeof BRAND_CHECK_CORRECTION_LIMIT_CODE
   /** Sekunden bis zur nächsten Chance — der Wert des `Retry-After`-Kopfes. */
   retryAfterSec: number
 }
 
+export interface BrandCheckQuotaRequest {
+  ipHash: string
+  /**
+   * WELCHER ENGE EIMER — die Entscheidung stammt aus `decideBrandCheckMode`
+   * und wird hier NICHT noch einmal getroffen. Genau EINER wird gebucht: ein
+   * „neu ermitteln", das zusätzlich den Anschluss-Eimer anfasste, nähme dem
+   * Menschen die drei gewöhnlichen Checks des Tages für etwas, das er bereits
+   * aus seinem eigenen Kontingent bezahlt.
+   */
+  quota: 'ip' | 'account'
+  /** Nur bei `quota: 'account'` — sonst leer. */
+  userId?: string
+}
+
 export async function bookBrandCheckQuota(
   event: H3Event,
-  ipHash: string,
+  request: BrandCheckQuotaRequest,
 ): Promise<BrandCheckQuotaRejection | null> {
   const { store, prefix } = useRateLimitStore(event)
-  const counts: BrandCheckQuotaCounts = { ipDay: 0, instanceDay: 0 }
+  const counts: BrandCheckQuotaCounts = { ipDay: 0, accountDay: 0, instanceDay: 0 }
 
-  const ipState = await store.hit(`${prefix}${brandCheckIpDayKey(ipHash)}`, BRAND_AI_DAY_WINDOW_MS)
-  counts.ipDay = ipState.count
-  const perIp = decideBrandCheckQuota(counts)
-  if (perIp) return { code: perIp, retryAfterSec: retryAfter(ipState.resetInMs) }
+  const narrowKey = request.quota === 'account'
+    ? brandCheckAccountDayKey(request.userId ?? '')
+    : brandCheckIpDayKey(request.ipHash)
+  const narrowState = await store.hit(`${prefix}${narrowKey}`, BRAND_AI_DAY_WINDOW_MS)
+  if (request.quota === 'account') counts.accountDay = narrowState.count
+  else counts.ipDay = narrowState.count
+
+  const narrow = decideBrandCheckQuota(counts)
+  if (narrow) return { code: narrow, retryAfterSec: retryAfter(narrowState.resetInMs) }
 
   const instanceState = await store.hit(
     `${prefix}${brandCheckInstanceDayKey()}`,
@@ -247,4 +279,26 @@ export async function bookBrandCheckQuota(
   return perInstance
     ? { code: perInstance, retryAfterSec: retryAfter(instanceState.resetInMs) }
     : null
+}
+
+/**
+ * DIE STÜNDLICHE DROSSEL DER KORREKTURVORSCHLÄGE (§3b) — je Anschluss, auf
+ * demselben Tages-Stempel wie der Check.
+ *
+ * Sie steht NEBEN dem Minuten-Eimer aus `05.rate-limit.ts` und meint etwas
+ * anderes: die Minute schützt den Server vor dem Sekundentakt, die Stunde die
+ * Arbeitsliste des Betreibers vor der Flut über den Tag. Gebucht wird VOR
+ * jedem Appwrite-Ruf — ein Deckel, der erst nach der Arbeit greift, ist keiner.
+ */
+export async function bookBrandCorrectionQuota(
+  event: H3Event,
+  ipHash: string,
+): Promise<BrandCheckQuotaRejection | null> {
+  const { store, prefix } = useRateLimitStore(event)
+  const state = await store.hit(
+    `${prefix}${brandCheckCorrectionIpHourKey(ipHash)}`,
+    BRAND_CHECK_CORRECTION_WINDOW_MS,
+  )
+  const rejected = decideBrandCheckCorrectionQuota(state.count)
+  return rejected ? { code: rejected, retryAfterSec: retryAfter(state.resetInMs) } : null
 }

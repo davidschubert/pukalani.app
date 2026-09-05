@@ -466,6 +466,25 @@ export type BrandScoreBand
     | 'poor'
 
 /**
+ * DIE SIEBEN, ALS LISTE — in absteigender Stärke, also in der Reihenfolge, in
+ * der ein Filter sie anbietet.
+ *
+ * Sie ist die WAHRHEIT über die erlaubten Werte der Spalte `brand_checks.band`
+ * und wird gebraucht, seit das Ranking nach ihnen filtert
+ * (`?band=strong`): ein Filterwert aus einer Adresszeile muss gegen etwas
+ * geprüft werden, und `brandScoreBand()` prüft nicht, es rechnet.
+ */
+export const BRAND_SCORE_BANDS: readonly string[] = [
+  'exceptional',
+  'outstanding',
+  'excellent',
+  'strong',
+  'average',
+  'weak',
+  'poor',
+]
+
+/**
  * DIE SIEBEN BÄNDER aus dem Bewertungsmodell v2 (94+ · 88–93 · 80–87 · 70–79 ·
  * 60–69 · 50–59 · <50). Sie sind REIFEGRAD, kein Zeugnis — die Wörter dazu
  * liegen beim Client, hier steht nur die Grenze.

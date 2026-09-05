@@ -28,10 +28,14 @@ import { BRAND_CHECK_CRITERIA } from '../shared/brandCheck'
 interface FakeRow { $id: string, $createdAt: string, [key: string]: unknown }
 
 let stored: FakeRow[]
+/** `brand_profiles` — nur für die Besitz-Prüfung des optionalen `profileId`. */
+let profiles: FakeRow[]
 let storeBroken: boolean
 let createBroken: boolean
 let fetchOutcome: 'ok' | 'blocked' | 'failed'
 let judgeBroken: boolean
+/** Was das Modell als Branche liefert (seit `check-judge-2` im selben Aufruf). */
+let judgeIndustry: string
 let logs: { level: string, event: string, data: Record<string, unknown> }[]
 let body: Record<string, unknown>
 let buckets: Map<string, number>
@@ -59,9 +63,10 @@ const tablesDB = {
     stored.push(row)
     return row
   }),
-  getRow: vi.fn(async ({ rowId }: { rowId: string }) => {
+  getRow: vi.fn(async ({ tableId, rowId }: { tableId: string, rowId: string }) => {
     if (storeBroken) throw new AppwriteException('Table not found', 404)
-    const row = stored.find(entry => entry.$id === rowId)
+    const table = tableId === 'brand_profiles' ? profiles : stored
+    const row = table.find(entry => entry.$id === rowId)
     if (!row) throw new AppwriteException('Row not found', 404)
     return row
   }),
@@ -123,7 +128,7 @@ vi.mock('../server/utils/brandCheckJudge', async (importOriginal) => {
       for (const id of actual.BRAND_CHECK_JUDGED_IDS) {
         judgements[id] = { score: 2, evidence: 'Wir rösten in kleinen Mengen.', note: 'Klar gesagt.' }
       }
-      return { judgements, model: 'anthropic/claude-haiku-4.5' }
+      return { judgements, industry: judgeIndustry, model: 'anthropic/claude-haiku-4.5' }
     }),
   }
 })
@@ -169,15 +174,19 @@ function lastWrite(): Record<string, unknown> {
 
 beforeEach(() => {
   stored = []
+  profiles = []
   storeBroken = false
   createBroken = false
   fetchOutcome = 'ok'
   judgeBroken = false
+  judgeIndustry = 'food'
   logs = []
   buckets = new Map()
   clientIp = CLIENT_IP
   routerId = ''
   body = { url: 'kailua.coffee', locale: 'de' }
+  // Die Session wird je Test gesetzt — der Normalfall dieser Route ist der Gast.
+  ;(event as unknown as { context: Record<string, unknown> }).context = {}
   tablesDB.listRows.mockClear()
   tablesDB.createRow.mockClear()
   tablesDB.getRow.mockClear()
@@ -338,7 +347,7 @@ describe('POST /api/brand/check · was gespeichert wird', () => {
       host: 'kailua.coffee',
       locale: 'de',
       scoreVersion: 'score-1',
-      promptVersion: 'check-judge-1',
+      promptVersion: 'check-judge-2',
       model: 'anthropic/claude-haiku-4.5',
       band: 'exceptional',
     })
@@ -435,6 +444,171 @@ describe('GET /api/brand/check/[id]', () => {
 
   it('eine kaputte JSON-Spalte ist ein 404, kein 500', async () => {
     stored = [{ $id: 'c1', $createdAt: new Date().toISOString(), categories: '{{', criteria: '[]', findings: '[]' }]
+    routerId = 'c1'
+
+    await expect(getHandler(event)).rejects.toMatchObject({
+      status: 404,
+      data: { code: 'check_not_found' },
+    })
+  })
+})
+
+/**
+ * DAS RANKING-HÄKCHEN, DIE BRANCHE UND „NEU ERMITTELN"
+ * (docs/plans/BRAND-CHECK-SEITE.md §3/§5/§8, Davids Entscheidungen 1, 2 und 4).
+ *
+ * Vier Aussagen, die in der REIHENFOLGE der Route stecken:
+ *  1. Ein frischer Check trägt das Häkchen des Prüfers, die Branche aus dem
+ *     einen Modell-Aufruf, `hidden: false` und seine Quelle.
+ *  2. `force` wirkt NUR mit Konto — und zahlt dann vom Konto-Deckel STATT vom
+ *     Anschluss-Deckel.
+ *  3. Ein eingeloggter Mensch OHNE `force` zählt weiter gegen den Anschluss:
+ *     die Anmeldung ist kein Gutschein auf das Dreifache.
+ *  4. Eine FREMDE Brand-Id ist ein 404 — und kostet kein Kontingent.
+ */
+function login(userId = 'u-1') {
+  ;(event as unknown as { context: Record<string, unknown> }).context = { user: { $id: userId } }
+}
+
+describe('POST /api/brand/check · Ranking-Häkchen, Branche und Quelle', () => {
+  it('schreibt Häkchen, Branche, `hidden: false` und die Quelle', async () => {
+    body = { ...body, rankingOptIn: true }
+    judgeIndustry = 'agency'
+
+    await postHandler(event)
+
+    expect(lastWrite()).toMatchObject({
+      rankingOptIn: true,
+      industry: 'agency',
+      hidden: false,
+      source: 'website',
+      userId: '',
+      profileId: '',
+    })
+  })
+
+  it('ohne Häkchen bleibt der Check privat — Default AUS', async () => {
+    await postHandler(event)
+    expect(lastWrite().rankingOptIn).toBe(false)
+  })
+
+  it('schreibt die Branche des Urteils, ohne eine eigene zu erfinden', async () => {
+    // Die PRÜFUNG gegen den Katalog steht in `parseBrandCheckJudgement` (dort
+    // getestet); die Route reicht das Ergebnis nur durch — sie darf keine
+    // zweite Meinung haben, sonst gäbe es zwei Stellen, an denen eine Branche
+    // entsteht.
+    judgeIndustry = 'unknown'
+    await postHandler(event)
+    expect(lastWrite().industry).toBe('unknown')
+  })
+
+  it('eingeloggt: die userId steht in der Zeile', async () => {
+    login()
+    await postHandler(event)
+    expect(lastWrite().userId).toBe('u-1')
+  })
+})
+
+describe('POST /api/brand/check · „neu ermitteln"', () => {
+  const cachedRow = () => ({
+    $id: 'c9',
+    $createdAt: new Date(Date.now() - 60_000).toISOString(),
+    urlKey: 'kailua.coffee',
+    score: 71,
+  })
+
+  it('Gast mit `force` bekommt trotzdem den Zwischenspeicher', async () => {
+    stored = [cachedRow()]
+    body = { ...body, force: true }
+
+    await expect(postHandler(event)).resolves.toEqual({ ok: true, id: 'c9', cached: true })
+    expect(tablesDB.createRow).not.toHaveBeenCalled()
+    expect(buckets.size).toBe(0)
+  })
+
+  it('eingeloggt mit `force` umgeht den Zwischenspeicher und prüft neu', async () => {
+    stored = [cachedRow()]
+    login()
+    body = { ...body, force: true }
+
+    const result = await postHandler(event)
+
+    expect(result.cached).toBe(false)
+    expect(tablesDB.createRow).toHaveBeenCalled()
+  })
+
+  it('`force` zahlt vom KONTO-Eimer, nicht vom Anschluss-Eimer', async () => {
+    login()
+    body = { ...body, force: true }
+    await postHandler(event)
+
+    expect([...buckets.keys()]).toEqual(
+      expect.arrayContaining(['rl:brand-check-account-day:u-1', 'rl:brand-check-instance-day']),
+    )
+    expect([...buckets.keys()].some(key => key.startsWith('rl:brand-check-ip-day:'))).toBe(false)
+  })
+
+  it('eingeloggt OHNE `force` zahlt weiter vom Anschluss-Eimer', async () => {
+    login()
+    await postHandler(event)
+
+    expect([...buckets.keys()].some(key => key.startsWith('rl:brand-check-ip-day:'))).toBe(true)
+    expect(buckets.has('rl:brand-check-account-day:u-1')).toBe(false)
+  })
+
+  it('der elfte erzwungene Check des Tages wird abgewiesen', async () => {
+    login()
+    body = { ...body, force: true }
+    for (let i = 0; i < 10; i++) await postHandler(event)
+
+    await expect(postHandler(event)).rejects.toMatchObject({
+      status: 429,
+      data: { code: 'brand_check_account_limit' },
+    })
+  })
+})
+
+describe('POST /api/brand/check · die eigene Brand', () => {
+  it('übernimmt eine EIGENE Profil-Id', async () => {
+    login()
+    profiles = [{ $id: 'p1', $createdAt: '', ownerType: 'user', ownerId: 'u-1' }]
+    body = { ...body, profileId: 'p1' }
+
+    await postHandler(event)
+
+    expect(lastWrite().profileId).toBe('p1')
+  })
+
+  it('eine FREMDE Profil-Id ist ein 404 — und kostet kein Kontingent', async () => {
+    login()
+    profiles = [{ $id: 'p1', $createdAt: '', ownerType: 'user', ownerId: 'jemand-anderes' }]
+    body = { ...body, profileId: 'p1' }
+
+    await expect(postHandler(event)).rejects.toMatchObject({ status: 404 })
+    expect(buckets.size).toBe(0)
+    expect(tablesDB.createRow).not.toHaveBeenCalled()
+  })
+
+  it('ein GAST kann keine Brand zuordnen — die Angabe fällt still weg', async () => {
+    profiles = [{ $id: 'p1', $createdAt: '', ownerType: 'user', ownerId: 'u-1' }]
+    body = { ...body, profileId: 'p1' }
+
+    await postHandler(event)
+
+    expect(lastWrite().profileId).toBe('')
+  })
+})
+
+describe('GET /api/brand/check/<id> · ausgeblendet', () => {
+  it('ein ausgeblendeter Check ist ein 404, nicht ein leeres Ergebnis', async () => {
+    stored = [{
+      $id: 'c1',
+      $createdAt: new Date().toISOString(),
+      hidden: true,
+      categories: '[]',
+      criteria: '[]',
+      findings: '[]',
+    }]
     routerId = 'c1'
 
     await expect(getHandler(event)).rejects.toMatchObject({
