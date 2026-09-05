@@ -809,7 +809,7 @@ Verifikation im Fable-Hauptloop, Merge erst grün.
 | 4 ✅ 2026-09-05 | **Schliess-Aufruf** | brand-012, `review`-Eimer, Route `POST …/sessions/:id/close`, `BrandSessionReview`-Zod, Notizen/Befunde im Log, Georges „hat mitgelesen"-Block, adaptive `nextSession`, Kapitel-Modus für die Finale Abnahme | KI-Kosten: David sieht den Eimer | Route-Test mit Stub (goalReached false sperrt nichts; Schema-Fehler ⇒ fail-soft mit `reviewed:false`); Live-Probe an einem Test-Branding |
 | 5 ✅ 2026-09-05 | **Konflikt-Chips** | Befund-UI im Log und in beiden Sessions, `accepted`/`dismissed`, Georges Einmal-Hinweis | — | Playwright: Chip verlinkt beide Felder; `dismissed` schreibt Notiz |
 | 6 ✅ 2026-09-05 | **Korrektur-Regel** | `sourcesHash` beim Bestätigen (alle Feldarten), `GET impact`, `impactAck`/409, Warteschlange, `correct`-Modus des Schliess-Aufrufs mit Eingrenzung, „gilt weiter"-Stempel | Davids Blick auf den Hinweis | Unit: Hülle je Feld = Anhang A (Gegenprobe); Route-Test: PATCH ohne Ack ⇒ 409; ohne Review bleiben alle `stale`; mit Review nur `affected` |
-| 7 | **Dokument + Prüfblick** | Ergebnis-Seite ohne George, „Dokument prüfen", Nachholung `reviewed:false` | Konzept-Gate P5–P7 damit beantwortet — **David nimmt die Seite ab** | Live-Durchlauf eines vollständigen Brandings |
+| 7 ✅ 2026-09-05 (Davids Seiten-Abnahme offen) | **Dokument + Prüfblick** | Ergebnis-Seite ohne George, „Dokument prüfen", Nachholung `reviewed:false` | Konzept-Gate P5–P7 damit beantwortet — **David nimmt die Seite ab** | Live-Durchlauf eines vollständigen Brandings |
 
 Reihenfolge ist Abhängigkeit: 1 vor allem; 2 parallel zu 3; 4 vor 5 und 6; 7
 zuletzt.
