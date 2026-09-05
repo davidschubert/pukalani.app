@@ -498,6 +498,23 @@ const WRITE_LIMITED: { re: RegExp, bucket: string, max?: number }[] = [
    */
   { re: /^POST \/api\/brand\/check$/, bucket: 'brand:check', max: 3 },
   /**
+   * DER FUNDAMENT-CHECK (BRAND-CHECK-SEITE §5b) — derselbe Eimer, weil es
+   * dieselbe Ausgabe ist: ein Modell urteilt über eine ganze Marke.
+   *
+   * Er braucht eine EIGENE Zeile, weil die Zeile darüber auf `/api/brand/check`
+   * genagelt ist und diese Route unter `/api/brand/profiles/:id/check` liegt —
+   * ohne sie fiele der teuerste Aufruf des Dashboards in den allgemeinen
+   * Token-Eimer und wäre damit praktisch ungedrosselt.
+   *
+   * Denselben Eimer wie der öffentliche Check und nicht einen zweiten: Beide
+   * bezahlen eine Anbieter-Antwort über ein ganzes Markenbild, und ein Mensch,
+   * der abwechselnd Website und Fundament anstösst, soll dafür EINEN Zähler
+   * haben. Was hier NICHT dazukommt, ist die ausgehende Verbindung — das
+   * Material steht in unserer eigenen Ablage. Der feinere Deckel sitzt in der
+   * Route (10/Tag je Konto, `BRAND_CHECK_ACCOUNT_DAILY_LIMIT`).
+   */
+  { re: /^POST \/api\/brand\/profiles\/[^/]+\/check$/, bucket: 'brand:check', max: 3 },
+  /**
    * DER KORREKTURVORSCHLAG ZU EINEM CHECK (BRAND-CHECK-SEITE §3b) — die zweite
    * öffentliche Schreibroute des Layers nach der Warteliste: kein Gate, keine
    * Session, kein Code. Sie muss so sein, denn sie existiert für die Betreiber

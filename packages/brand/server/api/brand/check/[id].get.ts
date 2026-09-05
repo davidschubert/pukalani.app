@@ -7,6 +7,7 @@ import type {
 import {
   BRAND_CHECKS_TABLE,
   type BrandCheckRow,
+  brandCheckRankingFacts,
   brandDb,
   isAppwriteNotFound,
 } from '../../../utils/brandStore'
@@ -84,6 +85,7 @@ export default defineEventHandler(async (event): Promise<BrandCheckResult> => {
     throw createError({ status: 404, statusText: 'Check not found', data: { code: 'check_not_found' } })
   }
 
+  const facts = brandCheckRankingFacts(row)
   return {
     id: row.$id,
     url: row.url,
@@ -93,6 +95,14 @@ export default defineEventHandler(async (event): Promise<BrandCheckResult> => {
     score: row.score,
     band: row.band,
     scoreVersion: row.scoreVersion,
+    // Die QUELLE (§5b) — sie muss mit, seit dieselbe Seite auch einen
+    // Dokument-Check anzeigt: dort gibt es keine geprüfte Adresse, und
+    // „Stand: Aussen-Check der Startseite " über einem leeren `url` wäre die
+    // eine Zeile, die das Ergebnis falsch erklärt. Eine Zeile aus der Zeit vor
+    // brand-017 liest sich als 'website' (`brandCheckRankingFacts`) — das war
+    // sie auch.
+    source: facts.source,
+    industry: facts.industry,
     categories,
     criteria,
     findings,

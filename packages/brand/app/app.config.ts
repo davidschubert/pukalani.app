@@ -82,6 +82,31 @@ export default defineAppConfig({
           group: 'management',
           order: 130,
         },
+        /**
+         * DIE KORREKTUR-WARTESCHLANGE (2026-09-05, Plan §3b) — der zweite
+         * Betreiber-Eintrag dieses Layers, und zwar direkt unter der
+         * Warteliste (`order: 131`): beide sind Arbeitslisten desselben
+         * Menschen, und zwischen ihnen gehört keine fremde Sache.
+         *
+         * Dieselbe Capability wie die Warteliste: `users.manage`. Sie ist die
+         * Betreiber-Klammer dieses Layers — wer über den Beta-Zugang
+         * entscheidet, entscheidet auch über eine falsch zugeordnete Branche.
+         * Eine eigene Capability dafür wäre eine Rolle, die es hier nicht gibt.
+         *
+         * KEIN `productKey`, aus demselben Grund wie oben: das Produkt-Gate
+         * `brand` schaltet den WIZARD ab, nicht die Pflichten, die aus einem
+         * öffentlichen Ranking über fremde Auftritte folgen (§3 „Recht").
+         */
+        {
+          id: 'brand-check-corrections',
+          scope: 'operator',
+          labelKey: 'brand.admin.checkCorrections.nav',
+          icon: 'i-ph-chats-circle',
+          to: '/dashboard/brand-check/corrections',
+          requiredCapability: 'users.manage',
+          group: 'management',
+          order: 131,
+        },
       ],
     },
     brand: {

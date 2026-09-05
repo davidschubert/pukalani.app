@@ -67,6 +67,69 @@
         },
         "emptyTitle": "Nothing in this view",
         "empty": "Nobody here yet. Switch the filter to see the other states."
+      },
+      "checkCorrections": {
+        "nav": "Corrections",
+        "title": "Correction proposals",
+        "subtitle": "Anyone who spots a wrongly assigned industry in the ranking proposes a correction here. Accepted, the value moves into the check; declined, it stays as it is.",
+        "refresh": "Reload",
+        "more": "Load more",
+        "shown": "{count} of {total} shown",
+        "actionFailed": "That did not work",
+        "accepted": "Proposal accepted",
+        "acceptedHint": "The industry of this check is now the proposed value.",
+        "unchangedHint": "The check already carried this value — nothing changed.",
+        "declined": "Proposal declined",
+        "filter": {
+          "open": "Open",
+          "accepted": "Accepted",
+          "declined": "Declined",
+          "all": "All"
+        },
+        "status": {
+          "open": "Open",
+          "accepted": "Accepted",
+          "declined": "Declined"
+        },
+        "field": {
+          "industry": "Industry"
+        },
+        "col": {
+          "host": "Site",
+          "field": "Field",
+          "change": "Today · Proposed",
+          "reason": "Reason",
+          "reporter": "Sender",
+          "status": "Status",
+          "date": "Received"
+        },
+        "action": {
+          "accept": "Accept",
+          "decline": "Decline"
+        },
+        "declineTitle": "Decline proposal",
+        "declineText": "The proposal for {host} will be declined. The check stays as it is.",
+        "declineNoteLabel": "Reason",
+        "declineNoteHint": "Optional, up to 300 characters. It stays with the row.",
+        "declineNotePlaceholder": "Why is the proposal declined?",
+        "emptyTitle": "Nothing in this view",
+        "empty": "No proposal is waiting right now. Switch the filter to see the decided ones.",
+        "error": {
+          "already_decided": "This proposal was already decided differently. Change the field directly through the removal box below.",
+          "invalid_value": "The proposed value is not part of the industry catalogue.",
+          "not_found": "This proposal no longer exists.",
+          "check_not_found": "The check behind it no longer exists.",
+          "corrections_unavailable": "The list is not responding right now. Please try again in a minute.",
+          "generic": "Unknown error. Please reload the list."
+        },
+        "hiddenTitle": "Remove an entry from the ranking",
+        "hiddenHint": "At the request of a website owner. Hidden, the check answers everywhere as if it did not exist — the row itself stays as a record.",
+        "hiddenLabel": "Check ID",
+        "hiddenPlaceholder": "Paste the check ID",
+        "hide": "Hide",
+        "unhide": "Show again",
+        "hiddenOn": "The check is hidden",
+        "hiddenOff": "The check is visible again"
       }
     },
     "cta": {
@@ -827,7 +890,7 @@
           "generic": "That did not work just now. Please try again in a moment."
         },
         "ranking": "Add this check to the public ranking",
-        "rankingHint": "Without the checkbox your result stays private, the link is shareable either way."
+        "rankingHint": "Without the checkbox your result stays private, the link is shareable either way. If the same address was already checked in the last seven days, you get the stored check with the setting it was made with — this checkbox does not change that."
       },
       "bands": {
         "exceptional": "Exceptional",
@@ -1042,6 +1105,102 @@
           "title": "Clean meta information",
           "next": "Clear out duplicate entries in the page head and set a canonical address."
         }
+      },
+      "document": {
+        "eyebrow": "Brand check · foundation maturity",
+        "source": "Source: brand foundation document of {host}, as of {date}",
+        "sourceUnnamed": "Source: brand foundation document, as of {date}",
+        "hint": "We graded your confirmed answers, not a website. The 16 measured criteria do not exist in a document — they stay unassessable.",
+        "errors": {
+          "empty": "Confirm a few fields in your foundation first. Without confirmed answers there is nothing to grade.",
+          "accountLimit": "Your 10 re-runs for today are used up. It continues tomorrow.",
+          "notFound": "This brand does not exist for you.",
+          "unavailable": "The check is unavailable right now. Try again in a few minutes.",
+          "generic": "That did not work just now. Give it another try in a moment."
+        }
+      }
+    },
+    "myScores": {
+      "title": "Brand Score",
+      "subtitle": "Where this brand stands today — measured from the outside and graded in its foundation.",
+      "back": "Back to your brands",
+      "loading": "Fetching your results …",
+      "missingTitle": "This brand does not exist here.",
+      "missingText": "The link points to a brand that is gone or that does not belong to you.",
+      "sources": {
+        "website": "Website",
+        "document": "Foundation"
+      },
+      "website": {
+        "title": "Website score",
+        "lead": "The outside check of your home page — the same 40 criteria as the public brand check.",
+        "stand": "Checked on {date}",
+        "open": "View result",
+        "recheck": "Run the Brand Score again",
+        "running": "We are checking your website …",
+        "none": "There is no website check for this brand yet.",
+        "start": "Check the website",
+        "noUrl": "No website is on file for this brand yet.",
+        "addUrl": "Add a website",
+        "urlLabel": "Your website",
+        "urlPlaceholder": "your-website.com",
+        "save": "Save",
+        "saved": "Website saved"
+      },
+      "document": {
+        "title": "Foundation maturity",
+        "lead": "The same criteria, asked of your foundation document instead of a page. The 16 measured criteria stay unassessable there.",
+        "stand": "Checked on {date}",
+        "open": "View result",
+        "recheck": "Check the foundation again",
+        "start": "Check the foundation",
+        "running": "We are reading your foundation …",
+        "none": "Your foundation has not been checked yet."
+      },
+      "diff": {
+        "title": "Side by side",
+        "lead": "The latest result against the one before — per category and overall.",
+        "dates": "{previous} against {latest}",
+        "category": "Category",
+        "previous": "Before",
+        "latest": "Now",
+        "change": "Change",
+        "total": "Overall",
+        "notAssessable": "not assessable",
+        "isNew": "new"
+      },
+      "todos": {
+        "title": "What an expert would tackle next",
+        "lead": "Every criterion below full marks, sorted by weight — each with the evidence it rests on.",
+        "empty": "Nothing open: every assessable criterion in this run has full marks.",
+        "points": "{score} of 2",
+        "chapter": "Belongs to chapter {chapter}",
+        "openChapter": "Open the chapter"
+      },
+      "history": {
+        "title": "History",
+        "lead": "Every result we have stored for this brand.",
+        "date": "Date",
+        "source": "Source",
+        "score": "Score",
+        "open": "View",
+        "empty": "No result stored for this brand yet."
+      },
+      "card": {
+        "score": "Brand Score: {score}",
+        "empty": "Brand Score: none yet",
+        "open": "View score",
+        "addUrl": "Add a website"
+      },
+      "errors": {
+        "accountLimit": "Your 10 re-runs for today are used up. It continues tomorrow.",
+        "documentEmpty": "Confirm a few fields in your foundation first. Without confirmed answers there is nothing to grade.",
+        "notFound": "This brand does not exist for you.",
+        "invalidUrl": "We cannot read that address. Please write it the way you type it into a browser.",
+        "blockedTarget": "We are not allowed to fetch that address. Please give us the public address of your website.",
+        "fetchFailed": "The page did not answer. Check the address and try again in a moment.",
+        "unavailable": "The check is unavailable right now. Try again in a few minutes.",
+        "generic": "That did not work just now. Give it another try in a moment."
       }
     },
     "checkPage": {
@@ -1138,6 +1297,148 @@
         "cta": "Start the brand check",
         "sampleLabel": "Example",
         "sampleNote": "This is what a result looks like: one number with a band and eight categories below it."
+      }
+    },
+    "checkRanking": {
+      "seoTitle": "Brand ranking — every checked brand presence",
+      "seoDescription": "The leaderboard of the brand check: checked brand presences with their Brand Score, band and industry. Filter by industry and strength, sort by any of the eight categories.",
+      "eyebrow": "Brand check · ranking",
+      "title": "The ranking",
+      "lead": "Every presence whose checker added it to the ranking — the higher, the stronger.",
+      "total": "{count} presences",
+      "compare": "Compare",
+      "compareHint": "Tick two rows to see both results side by side. A third tick replaces the oldest one.",
+      "pick": "Select {host} for the comparison",
+      "note": "Only checks whose checker ticked the box appear here. Do you run one of these sites and would rather not see it listed? Write to us and we hide it.",
+      "filter": {
+        "industry": "Industry",
+        "band": "Strength",
+        "sort": "Sorting",
+        "allIndustries": "All industries",
+        "allBands": "All strengths"
+      },
+      "sort": {
+        "score": "Highest score",
+        "date": "Most recently checked",
+        "category": "Best in {category}"
+      },
+      "col": {
+        "rank": "Rank",
+        "host": "Site",
+        "score": "Score",
+        "industry": "Industry",
+        "source": "Source",
+        "strongest": "Strongest category",
+        "date": "Checked"
+      },
+      "source": {
+        "website": "Website",
+        "document": "Foundation"
+      },
+      "emptyTitle": "No presence in the ranking yet",
+      "empty": "Check yours and tick the box — then it shows up here.",
+      "emptyCta": "Start the brand check"
+    },
+    "industry": {
+      "agency": "Agency",
+      "software": "Software",
+      "ecommerce": "E-commerce",
+      "consulting": "Consulting",
+      "craft": "Trades and crafts",
+      "food": "Food and drink",
+      "hospitality": "Hospitality and travel",
+      "health": "Health",
+      "finance": "Finance and insurance",
+      "education": "Education",
+      "creative": "Creative and design",
+      "realestate": "Real estate",
+      "manufacturing": "Industry and manufacturing",
+      "nonprofit": "Non-profit",
+      "personal": "People and personal brands",
+      "other": "Other",
+      "unknown": "Not assigned"
+    },
+    "checkCorrection": {
+      "trigger": "Industry not right?",
+      "title": "Correct the industry",
+      "lead": "The industry is the brand expert's estimate from the home page. Tell us what is right — we will look at it.",
+      "current": "Currently recorded: {industry}",
+      "proposedLabel": "Correct industry",
+      "proposedPlaceholder": "Choose an industry",
+      "reasonLabel": "Reason",
+      "reasonHint": "Optional, up to 300 characters.",
+      "reasonPlaceholder": "What does this presence actually do?",
+      "emailLabel": "Email address",
+      "emailHint": "Optional — only in case we want to ask back.",
+      "emailPlaceholder": "Your email address",
+      "submit": "Send proposal",
+      "thanks": "Thank you — we will review the proposal.",
+      "errors": {
+        "correctionOpen": "There is already a proposal for this.",
+        "rateLimited": "Too many proposals, please try again later.",
+        "notFound": "This check no longer exists.",
+        "unavailable": "This is not responding right now. Please try again in a minute.",
+        "generic": "That did not work. Please try again."
+      }
+    },
+    "checkCompare": {
+      "seoTitle": "Comparison · {a} against {b}",
+      "seoTitleEmpty": "Compare two brand presences",
+      "eyebrow": "Comparison · two presences side by side",
+      "title": "Two brands, category by category",
+      "lead": "Two audited presences head to head: one brand fingerprint with both profiles laid over each other, and eight categories in a direct duel.",
+      "sideA": "Side A",
+      "sideB": "Side B",
+      "stand": "As of {date}",
+      "open": "Open the result",
+      "pick": "Choose another check",
+      "pickHint": "The list offers the presences from the ranking. A private check you compare through its link.",
+      "pickTitle": "Choose a presence",
+      "pickLead": "Search by address. The list shows the presences that are in the ranking.",
+      "pickSearch": "Search address",
+      "pickLoading": "Loading the list.",
+      "pickFailed": "The list is not responding right now. Please try again in a moment.",
+      "pickEmpty": "Nothing in the ranking matches this.",
+      "pickCount": "{count} presence to choose from | {count} presences to choose from",
+      "slotEmpty": "Nothing chosen here yet.",
+      "swap": "Swap sides",
+      "rowsTitle": "Category by category",
+      "rowsLead": "Every row is a direct duel: the side with the higher value stands in full colour.",
+      "notAssessable": "n/a",
+      "notAssessableHint": "n/a means not assessable: what we could not check from the outside wins and loses no category.",
+      "missingTitle": "This check does not exist",
+      "missingText": "At least one of the two links leads nowhere. Choose a presence from the ranking or check the address.",
+      "missingCta": "To the ranking",
+      "chooseTitle": "Choose two presences",
+      "chooseText": "Choose two presences from the ranking — or open a check and click Compare there.",
+      "chooseA": "Choose side A",
+      "chooseB": "Choose side B",
+      "fromResult": "Compare",
+      "summary": {
+        "eyebrow": "Verdict",
+        "leader": "{host} is ahead",
+        "tie": "A tie — neither side wins more categories",
+        "wins": "{host} wins no category. | {host} wins one category. | {host} wins {count} categories.",
+        "ties": "No tie. | One tie. | {count} ties.",
+        "notAssessable": "One category was not assessable on at least one side. | {count} categories were not assessable on at least one side.",
+        "basis": "Assessable categories: {a} on side A, {b} on side B."
+      }
+    },
+    "fingerprint": {
+      "title": "Brand fingerprint",
+      "lead": "The eight categories as a profile. The further out, the stronger.",
+      "notAssessable": "not assessable",
+      "aria": "Brand fingerprint with eight axes. {values}",
+      "ariaSeries": "{label}: {values}",
+      "axis": {
+        "distinctiveness": "Uniqueness",
+        "visual": "Visual",
+        "consistency": "Consistency",
+        "experience": "Experience",
+        "clarity": "Clarity",
+        "emotion": "Emotion",
+        "adaptability": "Adaptability",
+        "craft": "Craft"
       }
     },
     "acceptance": {

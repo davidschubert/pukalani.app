@@ -82,11 +82,11 @@ const categories = computed(() => BRAND_CHECK_CATEGORIES.map(category => ({
 
 const WHAT_FACTS = ['f1', 'f2', 'f3'] as const
 const VALUES = ['v1', 'v2', 'v3'] as const
-/** Ranking (P3) und Vergleich (P4) sind angekündigt, nicht gebaut. */
+/** Das Ranking steht seit P3; Vergleich (P4) und Verlauf (P5) sind angekündigt. */
 const FEATURES = [
   { key: 'f1', icon: 'i-ph-clock-counter-clockwise', soon: false },
-  { key: 'f2', icon: 'i-ph-list-numbers', soon: true },
-  { key: 'f3', icon: 'i-ph-columns', soon: true },
+  { key: 'f2', icon: 'i-ph-list-numbers', soon: false },
+  { key: 'f3', icon: 'i-ph-columns', soon: false },
   { key: 'f4', icon: 'i-ph-chart-line-up', soon: true },
 ] as const
 

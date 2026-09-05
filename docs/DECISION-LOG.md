@@ -7,6 +7,81 @@ die kleinen, verstreuten Beschlüsse.
 
 ---
 
+## 2026-09-05 — branding.supply: fünf Ebenen als Karte, „Brand Context" als Export, Strang „Brand System"
+
+**Anlass (David):** eigene Auswertung der Guidelines-Referenzen (Frontify, Corebook°,
+standards.site, Brandkit, Lovable, Bynder, Galerien) mit der These: nicht ein
+kleineres Frontify bauen, sondern den Raum DAVOR besetzen — „Wie gut ist unsere
+Marke, was fehlt, wie entwickeln wir sie — und wie wird daraus ein Brand System?"
+Als Leitplanke am Projektstand geprüft: Audit (Brand-Check), Compare (Quartett/
+Marktvergleich), Build (Wizard), Kit/Tokens/brand.json (Produkt 03), Do & Don't,
+„Guide = Website, PDF = Export" (BF1) existieren oder sind geplant; die
+Nachbar-Sitzung hat Markenabdruck, Ampel-Matrix und Stärke · Chance · Nächster
+Schritt am selben Tag entschieden.
+
+**Entscheidungen (Fragenrunde, alle nach Empfehlung):** (1) Die fünf Ebenen
+**Discover → Audit → Compare → Build → Supply** kommen als KARTE über die sieben
+Suite-Produkte in den Phase-1-Plan §5b — Produkte und Namen bleiben; der Satz
+„Understand. Improve. Build. Supply your brand." ist Positionierungs-Kandidat,
+nicht Startseiten-Copy. (2) Produkt 03 bekommt den benannten Export **„Brand
+Context"** (`brand.md` neben `brand.json` und Tokens); „Connect" (MCP/API) bleibt
+Phase 3+. (3) Reihenfolge nach BC1 P6 als Strang „Brand System": BF1 → Produkt 02
+(Extraktion als Relaunch-Einstieg) → Produkt 03 — **ohne neue P-Nummern** (P7–P10
+aus dem Text kollidieren mit BC1 und Phase-1). (4) Brand Library: zwei Vermerke an
+der Discover-Skizze („Ähnliche Marken", Cases als Judge-Referenz), kein Vorhaben.
+**Deckungsgleich, keine Entscheidung nötig:** kein DAM, kein Template-Editor.
+
+---
+
+## 2026-09-05 — Brand Foundation als Guidelines: Leseansicht des Ergebnis-Dokuments (P5–P7-Rest)
+
+**Anlass (David):** eine allgemeine Brand-Guidelines-Definition (Story, Logo, Farbe,
+Typografie, Tone of Voice, Bildsprache) eingebracht; Wahl unter vier Wegen: das
+Ergebnis-Dokument des Wizards wird an diesem klassischen Aufbau ausgerichtet —
+Konzept, kein Code. Abgleich: die verbale Hälfte deckt der Wizard vollständig und
+tiefer (Positionierung, Architektur, Name, Manifest), die visuelle gar nicht —
+das ist die Produktentscheidung „Fundament frei, Ableitung bezahlt".
+
+**Entscheidungen (Fragenrunde, alle nach Empfehlung):** (1) Der Name bleibt
+**„Brand Foundation"** — „Brand Book (24 Kapitel)" ist auf der Startseite Produkt 03
+und bezahlt; ein freies „Guidelines" dazwischen hätte die Frage „was kaufe ich
+dann noch?" ausgelöst. Der Guidelines-AUFBAU ist die Form, nicht der Name.
+(2) Die Leseansicht zeigt **nur Festlegungen**: neues Registry-Feld `audience`
+NEBEN dem bestehenden `sensitivity` (zwei Fragen — „ist es eine Festlegung?" und
+„darf es reisen?" — zwei Felder, wie `as`/`actor` an der Datentür). (3) Logo,
+Farbe, Typografie, Bildsprache erscheinen **sichtbar gesperrt mit Begründung und
+CTA**; beim Fremdleser nur ein Satz ohne Preisanker. (4) Export = **Browser-Druck
+mit Print-CSS**, kein Server-PDF. Annahme ohne Widerspruch: die Share-SEITE gehört
+in dieses Vorhaben (Backend `brand_shares` + Routen existieren seit P1b, nur die
+Seite fehlt).
+
+**Befund dabei (Vertrag ohne Code):** `sensitivity: 'internal'` (a.competitors,
+a.complaints, a.challenge, a.facts) verspricht seit BW2 „reist nicht per
+Share-Link" — `share.post.ts` friert aber ALLE bestätigten Werte ein. Unsichtbar,
+weil es die Share-Seite noch nicht gibt; Paket G1 schliesst es beidseitig
+(Snapshot-Schreiben UND Renderer filtern, Gegenprobe), bestehende Prod-Shares
+werden beim G3-Deploy widerrufen.
+
+Plan: docs/plans/BRAND-FOUNDATION-LESEANSICHT.md (Pakete G1–G5; Davids Gates:
+Schranken-Text + Preisanker, Richtungen-Katalog).
+
+## 2026-09-05 — Brand-Check: „Markenabdruck", Ampel-Matrix statt Heatmap, Befunde als Stärke · Chance · Nächster Schritt
+
+**Anlass:** externer Visualisierungs-Input (Radar, Heatmap, Score-Cards, Insight-Cards) — als
+Leitplanke am eigenen Modell geprüft, nicht kopiert. **Entscheidungen (David):** (1) Die 8
+Kategorie-Werte als Netz heißen **„Markenabdruck"** (EN „Brand Fingerprint") — der Begriff ist
+das Feature, „Radar" ist nur die Technik und steht nie im UI. (2) Die 40 Kriterien als
+**Ampel-Matrix 8 × 5** mit vier Zuständen (0/1/2/nicht bewertbar), bewusst KEINE 0–100-Heatmap
+je Kriterium (Scheingenauigkeit). (3) Die drei Befunde werden **Stärke · Chance · Nächster
+Schritt** statt „drei schwächste Kriterien" — aus dem Audit wird Beratung, der dritte Befund
+zeigt ins Wizard-Kapitel (Analyse → Erkenntnis → Empfehlung → Handlung → Relaunch). Drei
+Zoomstufen derselben Daten: Score = Urteil, Markenabdruck = Profil, Matrix = Diagnose.
+**Verworfen:** Treemap/Sunburst, Radial Bars, Benchmark-Bullet (erst mit Ranking-Perzentil),
+Chart-Framework (Inline-SVG aus Tokens). Bauplan: P4 mit überlagerten Markenabdrücken, P6
+Ergebnisseite v2 — docs/plans/BRAND-CHECK-SEITE.md §10.
+
+---
+
 ## 2026-09-05 — Brand-Check wird Produktseite: Ranking nur mit Opt-in, Branche per KI + Korrekturvorschlag, Dokument-Check sofort
 
 **Anlass (David nach dem ersten gelungenen Live-Check):** der Check gehört auf EINE eigene

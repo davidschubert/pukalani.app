@@ -1065,6 +1065,21 @@ export interface BrandCheckResult {
   score: number
   band: string
   scoreVersion: string
+  /**
+   * 'website' | 'document' (§5b). Er steht hier, weil die Ergebnis-Seite
+   * dieselbe ist und trotzdem etwas anderes über dem Score sagen muss: bei
+   * einem Dokument-Check gibt es KEINE geprüfte Adresse, und `url`/`host`
+   * tragen dort die leere Zeichenkette bzw. den Markennamen. Eine Zeile aus
+   * der Zeit vor brand-017 liest sich als 'website' — das war sie auch.
+   */
+  source: string
+  /**
+   * Branchen-Id aus dem Katalog (`BRAND_INDUSTRIES`, 'unknown' vor brand-017
+   * oder wenn das Modell sie nicht zuordnen konnte). Die Ergebnis-Seite zeigt
+   * sie neben „Branche stimmt nicht?" — ein Korrekturvorschlag ohne den
+   * heutigen Wert wäre ein Vorschlag ins Blaue.
+   */
+  industry: string
   categories: BrandCheckCategoryResult[]
   criteria: BrandCheckCriterionResult[]
   findings: BrandCheckFinding[]
@@ -1161,4 +1176,88 @@ export interface BrandCheckCorrectionDecisionResponse {
 export interface BrandCheckHiddenResponse {
   ok: true
   hidden: boolean
+}
+
+// ── Meine Brands & Scores (BRAND-CHECK-SEITE §5 / §5b) ─────────────────────
+
+/**
+ * EIN EINTRAG IM VERLAUF EINER BRAND.
+ *
+ * Schmal wie eine Ranking-Zeile und aus demselben Grund NICHT dieselbe: hier
+ * steht kein `host` und keine `industry` (die Brand kennt der Leser, es ist
+ * seine eigene), dafür die QUELLE — Website und Fundament laufen in einer
+ * Liste nebeneinander und müssen unterscheidbar bleiben, weil ihre Zahlen
+ * nicht dasselbe messen (§5b).
+ *
+ * `categories[].score` ist auf 0–100 normiert (`brandCheckCategoryScores`);
+ * `null` heisst „nicht bewertbar", nicht „null Punkte".
+ */
+export interface BrandCheckHistoryItem {
+  id: string
+  /** 'website' | 'document'. */
+  source: string
+  score: number
+  band: string
+  createdAt: string
+  categories: { id: string, score: number | null }[]
+}
+
+/**
+ * EINE ZEILE DER GEGENÜBERSTELLUNG. `delta: null` heisst „kein Vergleich
+ * möglich" und ist etwas anderes als `delta: 0` („gemessen und gleich") — die
+ * Begründung steht in `shared/brandCheckHistory.ts`.
+ */
+export interface BrandCheckDiffCategory {
+  id: string
+  latest: number | null
+  previous: number | null
+  delta: number | null
+  trend: 'up' | 'down' | 'same' | 'new'
+}
+
+/** Zwei Checks DERSELBEN Quelle, nebeneinandergelegt. */
+export interface BrandCheckDiff {
+  latestId: string
+  previousId: string
+  latestAt: string
+  previousAt: string
+  source: string
+  latestScore: number
+  previousScore: number
+  delta: number
+  categories: BrandCheckDiffCategory[]
+}
+
+/**
+ * `diff` ist `null`, solange es keinen Vorgänger derselben Quelle gibt — der
+ * Normalfall beim ersten Check einer Brand. Die Seite lässt den Abschnitt dann
+ * weg, statt eine Tabelle aus Strichen zu zeigen.
+ */
+export interface BrandCheckHistoryResponse {
+  items: BrandCheckHistoryItem[]
+  diff: BrandCheckDiff | null
+}
+
+/** Der jüngste Stand EINER Quelle — für die Karten der Übersicht. */
+export interface BrandProfileScoreEntry {
+  checkId: string
+  score: number
+  band: string
+  createdAt: string
+}
+
+/**
+ * Die zwei Zahlen EINER Brand. Getrennt und nicht zu einer verrechnet: eine
+ * Brand kann eine starke Website und ein leeres Fundament haben (oder
+ * umgekehrt), und ein Mittelwert daraus wäre eine Zahl, die niemand erklären
+ * kann. `null` heisst „dafür gibt es noch keinen Check".
+ */
+export interface BrandProfileScores {
+  profileId: string
+  website: BrandProfileScoreEntry | null
+  document: BrandProfileScoreEntry | null
+}
+
+export interface BrandProfileScoresResponse {
+  items: BrandProfileScores[]
 }
