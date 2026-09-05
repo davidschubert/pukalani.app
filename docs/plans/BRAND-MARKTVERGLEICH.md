@@ -1,8 +1,9 @@
 # Marktvergleich — Strategie und Konzept
 
-Stand 2026-09-05 · Status: **Strategie UND Konzept von David FREIGEGEBEN (2026-09-05, alle
-acht Entscheidungen in §6 nach Empfehlung). Nächste Phase: Prototyp M0 (Phase 3 des
-Workflows, docs/referenz/WORKFLOW.md), Davids Abnahme des Prototyps ist das nächste Gate.**
+Stand 2026-09-05 (abends) · Status: **Strategie + Konzept FREIGEGEBEN (2026-09-05, §6);
+Prototyp M0 gebaut (Commit 81552629, Playground Port 3012); Prototyp-Runde 1 mit David hat
+das Konzept ERWEITERT (§7: ein Motor, drei Ansichten; vier Quellen; Brand-Score; erweiterter
+Abruf; KI-Suche) — Prototyp M0b setzt die Erweiterung um, danach Davids Prototyp-Abnahme.**
 Nichts hiervon ist im Produkt gebaut.
 
 ## 0. Was das hier ist
@@ -468,6 +469,114 @@ Verworfen und warum: Score je Wettbewerber (misst nichts Belegbares, UWG-Grauzon
 Websuche nach Adressen (Kosten + Halluzinationsquelle) · Zwei-Achsen-Karte (Achsen vom
 Modell = Scheinpräzision) · Bewertungs-/Social-Quellen (Plattform-AGB, PII) · Umzug des
 Abrufs nach core (sauberer, aber ein Schritt mehr als nötig — bleibt Option).
+
+## 7. Erweiterung aus der Prototyp-Runde 1 (David, 2026-09-05 abends)
+
+Davids Fragen am Prototyp: „nicht nur die Website — auch ein fertiger Brand-Score oder eine
+im Wizard entstandene Marke sollen Kandidat sein können"; „lesen wir auch SEO-/GEO-relevante
+Dokumente, decken wir moderne KI-Suche ab, Startseite oder alle Seiten, wie wird der
+Brand-Score über individuelle Websites vergleichbar"; „adidas vs. nike, anthropic vs. openai,
+meta vs. apple als Beispiele auf der Startseite"; „sind Brand-Check, Brand-Score und
+Marktvergleich verschiedene Produkte?"
+
+### 7.1 Ein Motor, drei Ansichten (Entscheidung David, nach Empfehlung)
+
+Die gemeinsame Währung ist das **Marktprofil** (§2.2): zehn Felder, je mit Beleg, Herkunft
+und Häufigkeit. Es entsteht aus JEDER Quelle in derselben Form. Darauf drei Ansichten mit
+gleichem Input und verschiedenem Output — KEINE drei Produkte:
+
+| Ansicht | Input | Output |
+| --- | --- | --- |
+| **Brand-Check** | EIN Marktprofil (Website, eigene Marke oder Bibliothek) | Profil mit Belegen + **Brand-Score** + „was fehlt öffentlich" |
+| **Brand-Score** | ein Marktprofil | eine Zahl 0–100 (§7.3) mit ihren Bausteinen |
+| **Marktvergleich** | N Marktprofile | Gegenüberstellung, Konventionen, Überschneidungen, freie Stellen, Befunde (§2.3) |
+
+Der Marktvergleich bleibt die erste Umsetzung; Check und Score sind Ansichten desselben
+Motors und kommen in denselben Paketen mit (§5 nachgezogen).
+
+### 7.2 Vier Quellen für Kandidaten (Entscheidung David)
+
+1. **Website-Adresse** — wie §2.3, Abruf erweitert (§7.4).
+2. **Eigene Marke aus dem Konto** — Abbildung der BESTÄTIGTEN Foundation-Felder auf das
+   Marktprofil, kein Abruf. Der stärkste Relaunch-Fall: alte Website gegen neue Foundation;
+   ebenso Sub-Marken gegeneinander.
+3. **Kuratierte Bibliothek bekannter Marken** — von uns mit demselben Motor gerechnet und
+   VON HAND GEPRÜFT, versioniert im Repo (`packages/market/library/*.json`), Namen ja, Logos
+   nein, nur wörtliche Zitate, keine Herabsetzung. Erste Paare: adidas/Nike,
+   Anthropic/OpenAI, Meta/Apple, dazu drei bis fünf kleinere bekannte Marken je Zielbranche
+   (Studio, Coach, Café). Zweck: Beispiele auf der Brand-Check-Startseite UND Kalibrierung
+   des Scores.
+4. **Fremde Wizard-Marken anderer Kunden** — Davids Entscheidung GEGEN die Empfehlung
+   (Phase 2). **Leitplanke, die nicht verhandelbar ist:** eine Marke eines anderen Kontos
+   erscheint NUR, wenn ihre Eigentümerin sie ausdrücklich für den Marktvergleich freigegeben
+   hat (Opt-in am Profil, `marketVisibility: 'listed'`, Default `'private'`, jederzeit
+   widerrufbar; der Vorbereitungs-Schalter ist das in Phase 1 gestrichene `visibility` aus
+   dem Phase-1-Plan — jetzt mit einem Zweck). Sichtbar wird dann NUR das Marktprofil (die
+   zehn Außen-Felder), nie Foundation-Interna, nie Notizen/Befunde/Wettbewerber. Ohne
+   Opt-in gibt es keine Kandidatin — auch nicht per Name-Suche. Das ist Datenschutz und
+   Vertrauen in einem: der Wizard ist ein privater Raum.
+
+### 7.3 Der Brand-Score (Entscheidung David, nach Empfehlung)
+
+Eine **deterministische Zahl 0–100 für Klarheit und Konsistenz der öffentlichen
+Behauptung** — ausdrücklich NICHT Markterfolg (§1.4 bleibt). Bausteine, je aus dem
+Marktprofil berechnet, keiner vom Modell „gefühlt":
+
+| Baustein | Anteil | Misst |
+| --- | --- | --- |
+| **Vollständigkeit** | 40 | wie viele der zehn Felder öffentlich formuliert sind (stated) |
+| **Beleg-Stärke** | 15 | Anteil `stated` gegenüber `implied` |
+| **Konsistenz** | 20 | dieselbe Aussage über mehrere Seiten (Häufigkeit ≥ 2 Seiten je Feld) |
+| **Unterscheidbarkeit** | 25 | Anteil eigener Aussagen, die KEINE Konvention des Feldes sind (nur mit Vergleichsfeld; sonst aus Bibliotheks-Kategorie oder entfällt anteilig) |
+
+Sichtbar: für die **eigene Marke** und die **Bibliothek**. Für einen namentlich genannten
+**Wettbewerber**: intern beim Kunden (Sensitivity `internal`), nie im Export, nie per
+Share-Link — § 6 UWG (§1.8). Die Zahl trägt immer ihre Bausteine mit, damit sie erklärbar
+bleibt („78 — vollständig, aber vier Aussagen sind Konvention").
+
+### 7.4 Erweiterter Abruf (Entscheidung David)
+
+Statt Startseite + Pfad-Raterei: `robots.txt` (Erlaubnis) · **`sitemap.xml`** (Seitenauswahl:
+5–8 Schlüsselseiten nach Relevanz — Start, Über uns, Leistungen/Produkte, Preise, Manifest/
+Werte, FAQ) · **`llms.txt`** (die Selbstbeschreibung für KI-Suchen — wo vorhanden die
+dichteste Quelle) · **schema.org JSON-LD** (Organization/description/sameAs) · **Meta/OG-Tags**
+· `<h1>–<h3>`. Aggregation NICHT als Mittelwert, sondern als **Aussage mit Häufigkeit**: eine
+Aussage, die auf mehreren Seiten wiederkehrt, ist zentral (Gewicht), eine einmalige ist
+Rand. Vergleichbar wird das durch das feste Schema und die Häufigkeits-Angabe, nicht durch
+die Websites. Deckel: 8 Seiten, 2 MB je Seite, 80 000 Zeichen je Marke an das Modell.
+
+### 7.5 KI-Suche als Quelle SCHON in Phase 1 (Entscheidung David, GEGEN die Empfehlung)
+
+Zusätzlich zur Website wird gefragt, **was KI-Antworten über eine Marke sagen** („AI-
+Außensicht"): dieselbe Frage an zwei bis drei Modelle über die bestehende ZDR-Naht („What
+does <Marke> (<Domain>) stand for, whom does it serve, how does it describe itself?"),
+Antworten in dieselben zehn Felder extrahiert. **Leitplanken, weil das Halluzinationsrisiko
+hier am höchsten ist:** (a) eigene Herkunft `source: 'ai-search'`, in der Oberfläche IMMER
+als „ungeprüfte Außensicht — so beschreiben KI-Antworten die Marke" beschriftet, nie mit
+Website-Belegen vermischt; (b) nur Aussagen, die in ≥ 2 Modellantworten übereinstimmen,
+werden übernommen (Konsens-Filter); (c) kein Einfluss auf den Brand-Score (der bleibt
+belegbasiert); (d) fließt in den Vergleich nur als eigene Spalte/Sicht („Website sagt" vs.
+„KI-Antworten sagen") — der Unterschied zwischen beiden IST der Befund („eure Website sagt
+X, KI-Antworten beschreiben euch als Y"); (e) eigener Eimer-Anteil, weil es je Marke 2–3
+Aufrufe kostet. Ein eigenes Experiment im Prototyp zeigt, ob die Ausgabe trägt; fällt es
+durch, wird die Quelle in Phase 2 verschoben — mit Davids Wissen.
+
+### 7.6 Folgen für Konzept und Pakete
+
+- §2.2 bekommt je Feld `frequency` (Seiten) und `source` (`website` | `foundation` |
+  `library` | `ai-search`); §2.6 bekommt `market_library` (versioniert im Repo, nicht in der
+  DB) und `marketVisibility` am Profil (Migration im brand-Layer, additiv).
+- §2.5: Seite „Markt" bekommt einen Quellen-Wähler je Kandidat (Adresse · eigene Marke ·
+  Bibliothek · freigegebene Marke) und einen Reiter **Brand-Check** (eigene Marke + Score);
+  öffentliche **Brand-Check-Startseite** auf branding.supply mit den Bibliotheks-Paaren als
+  Beispiel und der Schranke.
+- §5 Pakete: M2 wächst um Sitemap/llms.txt/JSON-LD/Häufigkeit und die AI-Außensicht mit
+  Konsens-Filter; M3 um Score + Bibliotheks-Import; M4 um Quellen-Wähler, Brand-Check-Reiter
+  und Startseite; neues **M6 Bibliothek** (Rechnen + Handprüfung der ersten Paare, Rechts-
+  Check der Namensnennung).
+- Prototyp **M0b** setzt die Erweiterung sichtbar um (Quellen-Wähler, Brand-Check mit Score,
+  Bibliotheks-Startseite, erweiterter Lauf mit Sitemap/llms.txt/KI-Suche, „Website sagt /
+  KI sagt"-Spalte), dann Davids Prototyp-Abnahme.
 
 ---
 

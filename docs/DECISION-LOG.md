@@ -30,6 +30,21 @@ zusätzlich „Website hinterlegen". (4) **Konto-Deckel 10/Tag** für „neu erm
 
 ---
 
+## 2026-09-05 (abends) — Marktvergleich, Prototyp-Runde 1: ein Motor, drei Ansichten; vier Quellen; Brand-Score; KI-Suche
+
+**Entscheidungen (David, am Prototyp):** (1) EIN Motor (Marktprofil mit Beleg) und drei
+Ansichten Brand-Check / Brand-Score / Marktvergleich — keine drei Produkte. (2) Brand-Score
+= deterministische Klarheits-/Konsistenz-Zahl 0–100, sichtbar für eigene Marke und
+Bibliothek, für Wettbewerber nur intern. (3) Kandidaten-Quellen: Website, eigene Marke aus
+dem Konto, kuratierte Bibliothek bekannter Marken (adidas/Nike, Anthropic/OpenAI,
+Meta/Apple + kleinere) UND — GEGEN die Empfehlung (Phase 2) — fremde Wizard-Marken anderer
+Kunden; Leitplanke: nur mit ausdrücklichem Opt-in der Eigentümerin, nur das Marktprofil.
+(4) KI-Suche („AI-Außensicht") SCHON in Phase 1 — GEGEN die Empfehlung (Phase-2-Experiment);
+Leitplanken: eigene Herkunft, immer als ungeprüft beschriftet, Konsens-Filter über ≥ 2
+Modelle, kein Einfluss auf den Score. Plan §7.
+
+---
+
 ## 2026-09-05 — Marktvergleich: Strategie + Konzept freigegeben (acht Entscheidungen)
 
 **Entscheidungen (David, per Fragenrunde, alle nach Empfehlung):** Das Produkt zeigt den
