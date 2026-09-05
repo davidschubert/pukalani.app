@@ -1,5 +1,74 @@
 {
   "brand": {
+    "admin": {
+      "waitlist": {
+        "nav": "Warteliste",
+        "title": "Warteliste",
+        "subtitle": "Wer auf Zugang zur Beta wartet. Bestätigt heißt: der Link aus der Mail wurde geöffnet — diese Einträge warten auf eine Entscheidung.",
+        "refresh": "Neu laden",
+        "export": "CSV exportieren",
+        "filterLabel": "Nach Status filtern",
+        "shown": "{count} angezeigt",
+        "rowActions": "Aktionen",
+        "counts": {
+          "pending": "Wartend",
+          "confirmed": "Bestätigt",
+          "invited": "Eingeladen",
+          "declined": "Abgelehnt"
+        },
+        "filter": {
+          "pending": "Wartend",
+          "confirmed": "Bestätigt",
+          "invited": "Eingeladen",
+          "declined": "Abgelehnt",
+          "all": "Alle"
+        },
+        "status": {
+          "pending": "Wartend",
+          "confirmed": "Bestätigt",
+          "invited": "Eingeladen",
+          "declined": "Abgelehnt"
+        },
+        "col": {
+          "email": "E-Mail",
+          "who": "Name / Firma",
+          "website": "Website",
+          "source": "Quelle",
+          "status": "Status",
+          "date": "Eingetragen"
+        },
+        "action": {
+          "invite": "Einladen",
+          "decline": "Ablehnen",
+          "note": "Notiz"
+        },
+        "inviteTitle": "Beta-Code senden?",
+        "inviteText": "Code an {email} senden?",
+        "inviteHint": "Der Code geht sofort per E-Mail raus, gilt 30 Tage und nur für diese Adresse. Er lässt sich hier nicht noch einmal anzeigen — gespeichert wird nur seine Prüfsumme.",
+        "invited": "Code an {email} verschickt",
+        "invitedHint": "Der Eintrag steht jetzt auf „Eingeladen“.",
+        "declineTitle": "Anfrage ablehnen?",
+        "declineText": "{email} ablehnen?",
+        "declineHint": "Der Eintrag bleibt in der Liste stehen, damit dieselbe Adresse nicht erneut als neue Anfrage auftaucht. Eine Mail geht nicht raus.",
+        "declined": "{email} abgelehnt",
+        "noteTitle": "Notiz",
+        "noteLabel": "Notiz zu diesem Eintrag",
+        "noteHint": "Nur für euch — sie wird niemandem angezeigt und geht in keine Mail.",
+        "notePlaceholder": "Was ihr euch merken wollt",
+        "noteSaved": "Notiz gespeichert",
+        "actionFailed": "Das hat nicht geklappt",
+        "error": {
+          "not_confirmed": "Dieser Eintrag ist noch nicht bestätigt — der Link aus der Mail wurde noch nicht geöffnet.",
+          "already_invited": "Für diesen Eintrag ist bereits ein Code raus. Ein zweiter geht über das Skript.",
+          "invite_mail_failed": "Der Code konnte nicht verschickt werden. Er wurde deshalb wieder zurückgenommen — versucht es gleich noch einmal.",
+          "waitlist_unavailable": "Die Warteliste antwortet gerade nicht. Versucht es in einer Minute noch einmal.",
+          "not_found": "Diesen Eintrag gibt es nicht mehr.",
+          "generic": "Unbekannter Fehler. Ladet die Liste neu."
+        },
+        "emptyTitle": "Nichts in dieser Ansicht",
+        "empty": "Hier steht noch niemand. Wechselt den Filter, um die anderen Zustände zu sehen."
+      }
+    },
     "cta": {
       "book": "Erstgespräch buchen"
     },

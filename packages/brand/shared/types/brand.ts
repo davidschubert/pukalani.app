@@ -21,6 +21,7 @@
  */
 
 import type { BrandGenerationOutcome } from '../brandGeneration'
+import type { BrandWaitlistStatus } from '../brandWaitlistAdmin'
 import type {
   BrandFinding,
   BrandFindingKind,
@@ -879,6 +880,67 @@ export interface BrandWaitlistConfirmResponse {
 /** Ebenso neutral — `false` sagt nie, WORAN es lag. */
 export interface BrandInviteRedeemResponse {
   redeemed: boolean
+}
+
+/**
+ * DIE WARTELISTE, WIE DER BETREIBER SIE SIEHT (`/api/brand/admin/waitlist`).
+ *
+ * ── WAS HIER FEHLT, FEHLT ABSICHTLICH ─────────────────────────────────────
+ * `tokenHash` und `tokenExpiresAt` verlassen den Server NIE. Sie sind das
+ * Geheimnis des Double-Opt-in; ein Betreiber-Dashboard, das sie mitliefert,
+ * legte den Bestätigungs-Link jeder offenen Anfrage in ein Browser-Fenster —
+ * und in jedes Fehler-Protokoll, das die Antwort mitschneidet. Was der
+ * Betreiber daran ablesen wollte („ist der Link noch gültig?"), sagt ihm der
+ * Status.
+ *
+ * `status` ist hier ENG getypt, obwohl die Spalte ein varchar ist: der Server
+ * rechnet jede Zeile durch `normalizeBrandWaitlistStatus`, der Client bekommt
+ * also nie einen Wert, für den er keinen Zweig hat (`brandWaitlistAdmin.ts`).
+ */
+export interface BrandWaitlistAdminItem {
+  id: string
+  email: string
+  name: string
+  company: string
+  website: string
+  locale: string
+  source: string
+  status: BrandWaitlistStatus
+  note: string
+  createdAt: string
+  confirmedAt: string
+}
+
+/**
+ * `counts` zählt IMMER alle vier Zustände, unabhängig vom Filter — sonst wäre
+ * die Kopfzeile eine Funktion der Ansicht („0 wartend", weil man gerade
+ * `invited` anschaut) statt eine Aussage über die Liste.
+ *
+ * `nextCursor` ist die Zeilen-Id der letzten gelieferten Zeile oder `''`
+ * (= es gibt nichts mehr). Leerer String statt `null`, weil der Wert
+ * unverändert als Query-Parameter zurückreist.
+ */
+export interface BrandWaitlistAdminListResponse {
+  items: BrandWaitlistAdminItem[]
+  total: number
+  nextCursor: string
+  counts: Record<BrandWaitlistStatus, number>
+}
+
+/** Code erzeugt, Mail zugestellt, Status gestempelt — in dieser Reihenfolge. */
+export interface BrandWaitlistInviteResponse {
+  ok: true
+  status: 'invited'
+}
+
+export interface BrandWaitlistDeclineResponse {
+  ok: true
+  status: 'declined'
+}
+
+/** Die Notiz gehört dem Betreiber — die Route bestätigt nur, dass sie steht. */
+export interface BrandWaitlistNoteResponse {
+  ok: true
 }
 
 /** Der eingefrorene Inhalt einer Veröffentlichung (nie Chats/Entwürfe). */

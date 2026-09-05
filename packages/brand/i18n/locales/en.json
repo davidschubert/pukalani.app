@@ -1,5 +1,74 @@
 {
   "brand": {
+    "admin": {
+      "waitlist": {
+        "nav": "Waitlist",
+        "title": "Waitlist",
+        "subtitle": "Who is waiting for beta access. Confirmed means the link from the email was opened — those entries are waiting for a decision.",
+        "refresh": "Reload",
+        "export": "Export CSV",
+        "filterLabel": "Filter by status",
+        "shown": "{count} shown",
+        "rowActions": "Actions",
+        "counts": {
+          "pending": "Pending",
+          "confirmed": "Confirmed",
+          "invited": "Invited",
+          "declined": "Declined"
+        },
+        "filter": {
+          "pending": "Pending",
+          "confirmed": "Confirmed",
+          "invited": "Invited",
+          "declined": "Declined",
+          "all": "All"
+        },
+        "status": {
+          "pending": "Pending",
+          "confirmed": "Confirmed",
+          "invited": "Invited",
+          "declined": "Declined"
+        },
+        "col": {
+          "email": "Email",
+          "who": "Name / company",
+          "website": "Website",
+          "source": "Source",
+          "status": "Status",
+          "date": "Added"
+        },
+        "action": {
+          "invite": "Invite",
+          "decline": "Decline",
+          "note": "Note"
+        },
+        "inviteTitle": "Send beta code?",
+        "inviteText": "Send a code to {email}?",
+        "inviteHint": "The code goes out by email right away, is valid for 30 days and only for this address. It cannot be shown again here — only its checksum is stored.",
+        "invited": "Code sent to {email}",
+        "invitedHint": "The entry is now marked as invited.",
+        "declineTitle": "Decline request?",
+        "declineText": "Decline {email}?",
+        "declineHint": "The entry stays in the list so the same address does not show up as a fresh request again. No email is sent.",
+        "declined": "{email} declined",
+        "noteTitle": "Note",
+        "noteLabel": "Note on this entry",
+        "noteHint": "For you only — it is never shown to anyone and never goes into an email.",
+        "notePlaceholder": "Whatever you want to remember",
+        "noteSaved": "Note saved",
+        "actionFailed": "That did not work",
+        "error": {
+          "not_confirmed": "This entry is not confirmed yet — the link from the email has not been opened.",
+          "already_invited": "A code is already out for this entry. A second one goes through the script.",
+          "invite_mail_failed": "The code could not be sent, so it was withdrawn again — please try once more.",
+          "waitlist_unavailable": "The waitlist is not responding right now. Please try again in a minute.",
+          "not_found": "This entry no longer exists.",
+          "generic": "Unknown error. Please reload the list."
+        },
+        "emptyTitle": "Nothing in this view",
+        "empty": "Nobody here yet. Switch the filter to see the other states."
+      }
+    },
     "cta": {
       "book": "Book your intro call"
     },
