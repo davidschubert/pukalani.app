@@ -66,7 +66,7 @@ async function submit(): Promise<void> {
 
 <template>
   <div>
-    <div v-if="status === 'done'" class="rounded-2xl p-6" style="background: var(--bw-accent-soft)">
+    <div v-if="status === 'done'" class="bw-frame p-6" style="background: var(--bw-accent-soft)">
       <p class="font-medium tracking-tight" style="color: var(--bw-ink)">{{ t('brand.waitlist.doneTitle') }}</p>
       <p class="mt-1.5 text-sm leading-relaxed" style="color: var(--bw-ink-soft)">
         {{ duplicate ? t('brand.waitlist.duplicateText') : t('brand.waitlist.doneText') }}

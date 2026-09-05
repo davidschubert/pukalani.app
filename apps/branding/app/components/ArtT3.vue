@@ -14,8 +14,8 @@ withDefaults(defineProps<{ label: string, rounded?: boolean }>(), { rounded: tru
 
 <template>
   <svg
-    viewBox="0 0 1600 533" role="img" :aria-label="label" class="block h-auto w-full"
-    :style="`background: var(--bw-surface-hi); border-radius: ${rounded ? 'var(--bw-radius-frame)' : '0'}`"
+    viewBox="0 0 1600 533" role="img" :aria-label="label"
+    class="block h-auto w-full" :class="rounded ? 'bw-frame' : ''" style="background: var(--bw-surface-hi)"
   >
     <!-- Notizbuch · Farbfächer · Buch · Antenne — verbunden durch einen Acid-Faden -->
     <path d="M 120 360 C 400 250, 560 470, 800 360 S 1200 260, 1480 360" fill="none" stroke="var(--bw-pop)" stroke-width="6" stroke-linecap="round" />

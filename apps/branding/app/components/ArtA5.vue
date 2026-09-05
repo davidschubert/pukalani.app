@@ -14,8 +14,8 @@ withDefaults(defineProps<{ label: string, rounded?: boolean }>(), { rounded: tru
 
 <template>
   <svg
-    viewBox="0 0 1200 900" role="img" :aria-label="label" class="block h-auto w-full"
-    :style="`background: var(--bw-surface-hi); border-radius: ${rounded ? 'var(--bw-radius-frame)' : '0'}`"
+    viewBox="0 0 1200 900" role="img" :aria-label="label"
+    class="block h-auto w-full" :class="rounded ? 'bw-frame' : ''" style="background: var(--bw-surface-hi)"
   >
     <!-- Gebundenes Dokument, Rücken, leeres Titelschild, Acid-Lesebändchen -->
     <ellipse cx="600" cy="740" rx="300" ry="24" fill="var(--bw-line)" opacity="0.55" />

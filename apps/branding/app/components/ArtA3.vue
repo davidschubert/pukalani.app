@@ -14,8 +14,8 @@ withDefaults(defineProps<{ label: string, rounded?: boolean }>(), { rounded: tru
 
 <template>
   <svg
-    viewBox="0 0 1200 900" role="img" :aria-label="label" class="block h-auto w-full"
-    :style="`background: var(--bw-surface-hi); border-radius: ${rounded ? 'var(--bw-radius-frame)' : '0'}`"
+    viewBox="0 0 1200 900" role="img" :aria-label="label"
+    class="block h-auto w-full" :class="rounded ? 'bw-frame' : ''" style="background: var(--bw-surface-hi)"
   >
     <!-- Von oben: runder Tisch, zwei Stühle einander gegenüber, ein Acid-Punkt -->
     <ellipse cx="600" cy="470" rx="190" ry="60" fill="var(--bw-line)" opacity="0.5" />
