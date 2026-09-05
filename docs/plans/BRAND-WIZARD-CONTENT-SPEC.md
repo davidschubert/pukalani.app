@@ -836,7 +836,7 @@ Bilanz-Befund zur Kenntnis (45-min-Kommunikation statt 40-Eingaben).
 **Session-Inhalte (BW2 Paket 2, 2026-09-04):** Ziel, Qualitätsmerkmale,
 Anti-Muster, Frage-Leiter, Form, Antwort-Regeln und Beispiele je Session
 stehen in `packages/brand/shared/sessionContent.ts` und sind als Lese-Fassung
-erzeugt: [BRAND-WIZARD-SESSION-INHALTE.md](BRAND-WIZARD-SESSION-INHALTE.md)
+erzeugt: [BRAND-WIZARD-SESSION-INHALTE.md](../referenz/BRAND-WIZARD-SESSION-INHALTE.md)
 (generiert, nicht von Hand editieren). Hier steht der FRAGEN-Katalog, dort die
 Arbeitsanweisung je Feld — dieselbe Trennung wie zwischen Frage und Prompt.
 
