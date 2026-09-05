@@ -66,6 +66,12 @@ export const BRAND_SHARES_TABLE = 'brand_shares'
 export const BRAND_INVITES_TABLE = 'brand_invites'
 export const BRAND_EVENTS_TABLE = 'brand_events'
 export const BRAND_WAITLIST_TABLE = 'brand_waitlist'
+/**
+ * Der kostenlose Aussen-Check (brand-016). Er gehört zu KEINEM Profil und zu
+ * keinem Konto — die einzige `brand_*`-Tabelle ohne `createdByUserId`, weil
+ * die Route ohne Anmeldung läuft (Davids Hybrid-Zugang, Plan §5).
+ */
+export const BRAND_CHECKS_TABLE = 'brand_checks'
 
 export type BrandProfileRow = Models.Row & {
   createdByUserId: string
@@ -193,6 +199,35 @@ export type BrandWaitlistRow = Models.Row & {
   tokenHash?: string
   tokenExpiresAt?: string
   confirmedAt?: string
+}
+
+/**
+ * EIN GESPEICHERTER BRAND-CHECK (brand-016).
+ *
+ * `categories`, `criteria` und `findings` sind JSON-Zeichenketten, keine
+ * Objekte: Appwrite kennt kein JSON-Feld, und drei Spalten je Kriterium wären
+ * hundertzwanzig Spalten. Wer sie liest, parst sie — die Route tut das an
+ * genau einer Stelle.
+ *
+ * KEIN SEITENTEXT (Plan §5): `textHash` ist alles, was von der gelesenen Seite
+ * bleibt. Er beantwortet später „hat sich dort überhaupt etwas geändert?",
+ * ohne dass wir fremde Inhalte aufbewahren.
+ */
+export type BrandCheckRow = Models.Row & {
+  urlKey: string
+  url: string
+  host: string
+  locale: string
+  score: number
+  band: string
+  scoreVersion: string
+  promptVersion: string
+  model: string
+  categories: string
+  criteria: string
+  findings: string
+  textHash: string
+  ipHash: string
 }
 
 /** Der Admin-Client + die Database-Id des Requests — EIN Aufruf statt zwei. */

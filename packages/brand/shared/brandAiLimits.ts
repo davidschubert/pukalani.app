@@ -361,3 +361,98 @@ export function decideBrandAiQuota(
   if (counts.instanceDay > limits.instanceDay) return BRAND_AI_INSTANCE_LIMIT_CODE
   return null
 }
+
+// ── Der Brand-Check: eine EIGENE Art (`check`) ─────────────────────────────
+
+/**
+ * WARUM DER CHECK NICHT IN `decideBrandAiQuota` PASST.
+ *
+ * Alle Deckel oben kennen einen MENSCHEN (`userId`) und meistens ein BRANDING
+ * (`profileId`). Der Brand-Check kennt beides nicht: er ist die öffentliche
+ * Route ohne Konto (Davids Hybrid-Zugang, 2026-09-05, Plan §5). Was ihn
+ * begrenzt, sind zwei ganz andere Fragen — „wie oft von DIESEM Anschluss?" und
+ * „was kostet das die INSTANZ?" —, und die Antwort auf die erste ist ein
+ * gehashter IP-Stempel, kein Konto.
+ *
+ * Die Werte trotzdem in DIESER Datei, nicht in einer eigenen: es ist derselbe
+ * Vertrag („was ein KI-Aufruf kosten darf"), es ist derselbe Rate-Limit-Store,
+ * und ein zweiter Ort für Deckel wäre ein zweiter Ort zum Vergessen.
+ *
+ * DIE CODES SIND BEWUSST NICHT TEIL VON `BrandAiRejectionCode`: dessen
+ * Abbildung (`brandAiRejectionMessageKey`) zeigt in den `brand.workspace.*`-
+ * Baum, und das ist die Werkstatt — der Check hat seine eigene Oberfläche und
+ * seine eigenen Texte (`brand.check.*`).
+ */
+
+/**
+ * DREI CHECKS JE ANSCHLUSS UND TAG (Plan §5). Ein Mensch prüft seine eigene
+ * Seite, vielleicht die eines Kunden, vielleicht die eines Wettbewerbers —
+ * drei. Wer mehr braucht, hat kein Erlebnis, sondern ein Werkzeug gefunden,
+ * und dieses Werkzeug bezahlen wir.
+ */
+export const BRAND_CHECK_IP_DAILY_LIMIT = 3
+
+/**
+ * ZWEIHUNDERT CHECKS JE TAG ÜBER ALLE ANSCHLÜSSE. Das ist die Reissleine gegen
+ * die Rechnung, die niemand kommen sah — dieselbe Rolle wie
+ * `BRAND_AI_INSTANCE_DAILY_DEFAULT`, nur mit einer eigenen Zahl, weil ein
+ * Check und ein Entwurf verschieden teuer sind und der Check von JEDEM
+ * ausgelöst werden kann.
+ *
+ * Eigener Eimer (`brand-check-instance-day`) und NICHT der des Wizards: sonst
+ * nähme eine Werbe-Welle auf der Startseite den zahlenden Kunden ihre
+ * Entwürfe weg.
+ */
+export const BRAND_CHECK_INSTANCE_DAILY_DEFAULT = 200
+
+/** Alle Checks EINES Anschlusses. Der Schlüssel trägt den HASH, nie die IP. */
+export function brandCheckIpDayKey(ipHash: string): string {
+  return `brand-check-ip-day:${ipHash}`
+}
+
+/** EIN Eimer für die ganze Instanz — ohne Anschluss, ohne Konto. */
+export function brandCheckInstanceDayKey(): string {
+  return 'brand-check-instance-day'
+}
+
+export const BRAND_CHECK_IP_LIMIT_CODE = 'brand_check_ip_limit'
+export const BRAND_CHECK_INSTANCE_LIMIT_CODE = 'brand_check_instance_limit'
+
+export type BrandCheckRejectionCode =
+  | typeof BRAND_CHECK_IP_LIMIT_CODE
+  | typeof BRAND_CHECK_INSTANCE_LIMIT_CODE
+
+export interface BrandCheckQuotaCounts {
+  /** Zählerstand des Anschluss-Eimers nach dieser Buchung. */
+  ipDay: number
+  /** Zählerstand des Instanz-Eimers nach dieser Buchung. */
+  instanceDay: number
+}
+
+export interface BrandCheckLimits {
+  ipDay: number
+  instanceDay: number
+}
+
+export const BRAND_CHECK_LIMITS: BrandCheckLimits = {
+  ipDay: BRAND_CHECK_IP_DAILY_LIMIT,
+  instanceDay: BRAND_CHECK_INSTANCE_DAILY_DEFAULT,
+}
+
+/**
+ * ENG VOR WEIT, wie oben: erst der Anschluss, dann die Instanz. Wer sein
+ * eigenes Kontingent aufgebraucht hat, soll die Rechnung des Betreibers nicht
+ * zusätzlich belasten — der Aufrufer bucht in dieser Reihenfolge und hört beim
+ * ersten Nein auf.
+ *
+ * `>` statt `>=`, weil `store.hit()` den Zähler EINSCHLIESSLICH dieses Laufs
+ * liefert: der dritte Check des Tages ist erlaubt, der vierte nicht.
+ */
+export function decideBrandCheckQuota(
+  counts: BrandCheckQuotaCounts,
+  limits: BrandCheckLimits = BRAND_CHECK_LIMITS,
+): BrandCheckRejectionCode | null {
+  if (counts.ipDay > limits.ipDay) return BRAND_CHECK_IP_LIMIT_CODE
+  if (counts.instanceDay > limits.instanceDay) return BRAND_CHECK_INSTANCE_LIMIT_CODE
+  return null
+}

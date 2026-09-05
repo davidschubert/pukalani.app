@@ -10,6 +10,7 @@ import type { BrandStepKey } from '../../shared/slotRegistry'
 import type { BrandSessionReview } from '../../shared/types/brand'
 import { createBrandSessionReviewSchema } from '../../schemas/brandReview'
 import { bookBrandAiQuota } from './brandAiQuota'
+import { BRAND_PROVIDER_ROUTING } from './brandProviderRouting'
 import { brandDevStubEnabled, readBrandAiEnabled } from './brandGenerators'
 import type { BrandConverseHistoryTurn } from './conversePrompt'
 import {
@@ -158,21 +159,16 @@ function reviewModel(): string {
 }
 
 /**
- * DIESELBEN DATENSCHUTZ-BEDINGUNGEN WIE JEDER ANDERE BRAND-AUFRUF.
+ * DIESELBEN DATENSCHUTZ-BEDINGUNGEN WIE JEDER ANDERE BRAND-AUFRUF — seit dem
+ * Brand-Check aus `brandProviderRouting.ts`.
  *
- * Sie stehen hier als eigene Konstante und nicht als Import aus
- * `advisorGenerator.ts`, weil die dortige an der STREAM-Naht hängt und diese
- * hier am JSON-Transport — und weil eine geteilte Konstante über zwei
- * Transporte hinweg genau die Art von Kopplung ist, die man beim nächsten
- * Umbau versehentlich löst. Was NICHT abweichen darf, sind die drei Werte:
- * `zdr`, `dataCollection: 'deny'`, `allowFallbacks: false`. Ein Befund über
- * die Marke ist derselbe Markeninhalt wie ein Entwurf.
+ * Hier stand bis dahin eine eigene Kopie mit der Begründung, dass die eine an
+ * der STREAM-Naht hängt und diese am JSON-Transport. Mit dem DRITTEN Aufrufer
+ * (dem Check-Urteil) trägt das nicht mehr: „die drei Werte dürfen nie
+ * abweichen" ist als Verabredung zwischen drei Dateien keine Regel, sondern
+ * eine Hoffnung. Ein Befund über die Marke ist derselbe Markeninhalt wie ein
+ * Entwurf — und bekommt deshalb wörtlich dieselben Bedingungen.
  */
-const BRAND_REVIEW_ROUTING = {
-  zdr: true,
-  dataCollection: 'deny',
-  allowFallbacks: false,
-} as const
 
 /** Ein JSON-Aufruf ist kein Strom — 45 s Core-Default reichen, 60 s sind Luft. */
 const BRAND_REVIEW_TIMEOUT_MS = 60_000
@@ -327,7 +323,7 @@ async function runStage(
       // Ein Urteil soll bei gleicher Eingabe möglichst gleich ausfallen —
       // deutlich unter dem Core-Default von 0.2.
       temperature: 0,
-      providerRouting: { ...BRAND_REVIEW_ROUTING },
+      providerRouting: { ...BRAND_PROVIDER_ROUTING },
     })
   }
   catch (error) {

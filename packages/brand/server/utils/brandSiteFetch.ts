@@ -8,11 +8,13 @@ import {
   BRAND_SITE_ANALYSIS_TIMEOUT_MS,
   type BrandSiteAnalysisErrorCode,
   type BrandSiteContent,
+  type BrandSiteSignals,
   allIpsAllowed,
   analyzableUrl,
   contentTypeIsHtml,
   exceedsByteBudget,
   extractSiteContent,
+  extractSiteSignals,
   ipIsForbidden,
   isRedirectStatus,
   redirectBudgetLeft,
@@ -65,10 +67,25 @@ export class BrandSiteFetchError extends Error {
 
 export interface BrandSiteFetchResult {
   content: BrandSiteContent
+  /**
+   * DIE MESSBAREN SIGNALE derselben Seite (Brand-Check §3) — aus DEMSELBEN
+   * HTML gewonnen wie `content`, weil das rohe HTML diese Datei nicht verlässt
+   * (s. Kopf). Ein zweiter Abruf, nur um Kopfdaten zu lesen, wäre eine zweite
+   * Last auf einem fremden Server für Material, das wir schon in der Hand
+   * hatten. Der Wizard ignoriert das Feld.
+   */
+  signals: BrandSiteSignals
   /** Die Adresse, bei der wir nach allen Sprüngen gelandet sind. */
   finalUrl: string
   /** Nur fürs Log — der HOST, nie der Pfad. */
   finalHost: string
+  /**
+   * Sind wir von `http:` auf `https:` GESPRUNGEN? Das ist der einzige Beweis
+   * für die Weiterleitung, den ein Aussen-Check mit EINEM Abruf führen kann
+   * (Kriterium h3) — ohne eigene Anfrage an die http-Adresse, die der Plan in
+   * Runde 1 ausschliesst (§6, „Mehrseiten-Crawl" gehört nicht dazu).
+   */
+  httpsUpgraded: boolean
 }
 
 /** Ein Hostname ohne die Klammern, die `URL.hostname` einer v6-Adresse lässt. */
@@ -314,6 +331,7 @@ export async function fetchBrandSite(raw: string): Promise<BrandSiteFetchResult>
   if (!target) throw new BrandSiteFetchError('blocked_target', 'URL is not analyzable')
 
   const deadline = Date.now() + BRAND_SITE_ANALYSIS_TIMEOUT_MS
+  const startedInsecure = target.protocol === 'http:'
 
   for (let hop = 0; ; hop++) {
     if (Date.now() >= deadline) throw new BrandSiteFetchError('fetch_failed', 'Timed out')
@@ -324,8 +342,10 @@ export async function fetchBrandSite(raw: string): Promise<BrandSiteFetchResult>
     if (result.kind === 'body') {
       return {
         content: extractSiteContent(result.html),
+        signals: extractSiteSignals(result.html),
         finalUrl: target.toString(),
         finalHost: target.host,
+        httpsUpgraded: startedInsecure && target.protocol === 'https:',
       }
     }
 

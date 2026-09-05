@@ -1,15 +1,21 @@
+import { createHash } from 'node:crypto'
 import type { H3Event } from 'h3'
 import {
   BRAND_AI_DAY_WINDOW_MS,
   BRAND_AI_LIMITS,
   type BrandAiQuotaCounts,
   type BrandAiRejectionCode,
+  type BrandCheckQuotaCounts,
+  type BrandCheckRejectionCode,
   brandAiAccountDayKey,
   brandAiInstanceDayKey,
   brandAiReviewDayKey,
   brandAiSlotDayKey,
   brandAiTalkDayKey,
+  brandCheckInstanceDayKey,
+  brandCheckIpDayKey,
   decideBrandAiQuota,
+  decideBrandCheckQuota,
   resolveBrandAiInstanceCap,
 } from '../../shared/brandAiLimits'
 import { countActiveBrandGenerations } from './brandGenerators'
@@ -166,4 +172,79 @@ function retryAfter(resetInMs: number): number {
 function brandAiInstanceCapFromConfig(): unknown {
   const config = useAppConfig() as { pukalani?: { brand?: { aiDailyInstanceCap?: unknown } } }
   return config.pukalani?.brand?.aiDailyInstanceCap
+}
+
+// ── Der Brand-Check ────────────────────────────────────────────────────────
+
+/**
+ * DER TAGES-STEMPEL EINES ANSCHLUSSES — sha256 aus IP und einem Salz, das
+ * täglich wechselt. Die ROHE IP verlässt diese Funktion nie und steht weder in
+ * einer Zeile noch in einem Log.
+ *
+ * ── WOHER DAS SALZ KOMMT ──────────────────────────────────────────────────
+ * Aus `runtimeConfig.appwriteKey` — demselben server-only Geheimnis, aus dem
+ * der Core schon den Handoff-Schlüssel ableitet (`deriveHandoffKey`). Kein
+ * neuer Env-Eintrag: eine Pflicht-Variable mehr wäre eine Variable mehr, die
+ * auf einer Instanz fehlen kann, und `pnpm ops:site-env` müsste sie ab dann
+ * bewachen. Fehlt der Schlüssel (nur in Tests denkbar), bleibt der Hash
+ * trotzdem stabil — er ist dann nur nicht mehr geheim, und der Deckel wirkt
+ * unverändert.
+ *
+ * ── WARUM DAS SALZ TÄGLICH WECHSELT ───────────────────────────────────────
+ * Der Stempel soll GENAU SO LANGE zuordenbar sein wie das Fenster, das er
+ * deckelt. Mit einem festen Salz wäre er ein dauerhaftes Pseudonym: zwei
+ * Zeilen aus verschiedenen Monaten liessen sich derselben Leitung zuordnen,
+ * und aus einem Kostendeckel würde eine Besucher-Historie. Der Preis ist
+ * bekannt und gewollt — um Mitternacht (UTC) beginnt jeder Anschluss von vorn.
+ * Das rollierende 24-Stunden-Fenster des Eimers bleibt davon unberührt, es ist
+ * nur nach dem Salz-Wechsel ein neuer Eimer.
+ */
+export function brandCheckIpHash(event: H3Event, now: Date = new Date()): string {
+  const ip = trustedClientIp(event) ?? ''
+  const salt = useRuntimeConfig(event).appwriteKey || 'brand-check'
+  const day = now.toISOString().slice(0, 10)
+  return createHash('sha256').update(`${salt}|brand-check|${day}|${ip}`).digest('hex')
+}
+
+/**
+ * DIE BUCHUNG DES CHECKS — zwei Zähler, eng vor weit, Abbruch beim ersten Nein.
+ *
+ * GEBUCHT WIRD NUR, WAS AUCH ETWAS KOSTET: der Aufrufer ruft diese Funktion
+ * NACH dem Blick in den Zwischenspeicher. Ein Cache-Treffer holt weder eine
+ * fremde Seite noch ein Modell-Urteil — „was nichts kostet, kostet kein
+ * Kontingent" (dieselbe Regel wie oben, und derselbe Grund: sonst sperrt sich
+ * jemand mit drei Klicks auf dasselbe Ergebnis selbst aus).
+ *
+ * Der Instanz-Deckel ist eine KONSTANTE und kein Config-Feld: anders als beim
+ * Wizard gibt es hier keine Oberfläche, an der ihn jemand heben könnte, und
+ * ein Feld ohne Oberfläche ist eine Einstellung, die niemand findet. Wer ihn
+ * ändern will, ändert `BRAND_CHECK_INSTANCE_DAILY_DEFAULT`.
+ */
+export interface BrandCheckQuotaRejection {
+  code: BrandCheckRejectionCode
+  /** Sekunden bis zur nächsten Chance — der Wert des `Retry-After`-Kopfes. */
+  retryAfterSec: number
+}
+
+export async function bookBrandCheckQuota(
+  event: H3Event,
+  ipHash: string,
+): Promise<BrandCheckQuotaRejection | null> {
+  const { store, prefix } = useRateLimitStore(event)
+  const counts: BrandCheckQuotaCounts = { ipDay: 0, instanceDay: 0 }
+
+  const ipState = await store.hit(`${prefix}${brandCheckIpDayKey(ipHash)}`, BRAND_AI_DAY_WINDOW_MS)
+  counts.ipDay = ipState.count
+  const perIp = decideBrandCheckQuota(counts)
+  if (perIp) return { code: perIp, retryAfterSec: retryAfter(ipState.resetInMs) }
+
+  const instanceState = await store.hit(
+    `${prefix}${brandCheckInstanceDayKey()}`,
+    BRAND_AI_DAY_WINDOW_MS,
+  )
+  counts.instanceDay = instanceState.count
+  const perInstance = decideBrandCheckQuota(counts)
+  return perInstance
+    ? { code: perInstance, retryAfterSec: retryAfter(instanceState.resetInMs) }
+    : null
 }

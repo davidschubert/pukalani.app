@@ -1,0 +1,445 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import type { H3Event } from 'h3'
+import { AppwriteException } from 'node-appwrite'
+import type { BrandCheckResult, BrandCheckStartResponse } from '../shared/types/brand'
+import { BRAND_CHECK_CRITERIA } from '../shared/brandCheck'
+
+/**
+ * DER BRAND-CHECK, DURCHGESPIELT — gefälschte Ablage, gefälschter Abruf,
+ * gefälschtes Modell, ECHTE Route.
+ *
+ * Sieben Aussagen hängen nicht in einer puren Funktion, sondern in der
+ * REIHENFOLGE der Route — und genau die verrutscht beim Umbauen still:
+ *
+ *  1. Ein Zwischenspeicher-Treffer holt NICHTS und bucht NICHTS. Andersherum
+ *     sperrte sich jemand mit drei Klicks auf dasselbe Ergebnis selbst aus,
+ *     und ein geteilter Link kostete bei jedem Öffnen Geld.
+ *  2. Der Honigtopf antwortet wie der Erfolg und rührt die Ablage nicht an.
+ *  3. „Da dürfen wir nicht hin" ist ein 400, „da stand nichts Lesbares" ein
+ *     422 — zwei verschiedene Sätze für den Menschen davor.
+ *  4. Fällt das Modell aus, wird NICHTS gespeichert: ein halber Check läge
+ *     sonst sieben Tage als „Ergebnis" im Zwischenspeicher.
+ *  5. Die Zeile trägt alle vierzig Kriterien und KEINEN Seitentext.
+ *  6. Die rohe IP steht nirgends — weder in der Zeile noch im Log.
+ *  7. Der GET zeigt weniger als die Zeile trägt (kein ipHash, kein textHash,
+ *     kein Modellname).
+ */
+
+interface FakeRow { $id: string, $createdAt: string, [key: string]: unknown }
+
+let stored: FakeRow[]
+let storeBroken: boolean
+let createBroken: boolean
+let fetchOutcome: 'ok' | 'blocked' | 'failed'
+let judgeBroken: boolean
+let logs: { level: string, event: string, data: Record<string, unknown> }[]
+let body: Record<string, unknown>
+let buckets: Map<string, number>
+let clientIp: string
+let routerId: string
+
+const CLIENT_IP = '203.0.113.7'
+
+const tablesDB = {
+  // Die Ablage FILTERT — sonst fände der Zwischenspeicher jede Zeile für jede
+  // Adresse, und ein Test über zwei verschiedene Websites prüfte am Ende nur
+  // noch, dass die Attrappe alles zurückgibt.
+  listRows: vi.fn(async ({ queries }: { queries: string[] }) => {
+    if (storeBroken) throw new AppwriteException('Table not found', 404)
+    const wanted = /"values":\["([^"]*)"\]/.exec(queries.join(' '))?.[1] ?? ''
+    const rows = stored
+      .filter(row => row.urlKey === wanted)
+      .sort((a, b) => b.$createdAt.localeCompare(a.$createdAt))
+      .slice(0, 1)
+    return { rows, total: rows.length }
+  }),
+  createRow: vi.fn(async ({ data }: { data: Record<string, unknown> }) => {
+    if (createBroken) throw new AppwriteException('Table not found', 404)
+    const row = { $id: `c${stored.length + 1}`, $createdAt: new Date().toISOString(), ...data }
+    stored.push(row)
+    return row
+  }),
+  getRow: vi.fn(async ({ rowId }: { rowId: string }) => {
+    if (storeBroken) throw new AppwriteException('Table not found', 404)
+    const row = stored.find(entry => entry.$id === rowId)
+    if (!row) throw new AppwriteException('Row not found', 404)
+    return row
+  }),
+}
+
+const SITE = {
+  content: {
+    title: 'Kailua Coffee — Rösterei auf Oahu',
+    description: 'Wir rösten Kaffee in kleinen Mengen auf Oahu und liefern ihn frisch geröstet bis vor eure Haustür.',
+    text: 'GEHEIMER SEITENTEXT der niemals gespeichert werden darf. '.repeat(40),
+  },
+  signals: {
+    title: 'Kailua Coffee — Rösterei auf Oahu',
+    titleCount: 1,
+    metaDescription: 'Wir rösten Kaffee in kleinen Mengen auf Oahu und liefern ihn frisch geröstet bis vor eure Haustür.',
+    metaDescriptionCount: 1,
+    ogTitle: 'Kailua Coffee',
+    ogDescription: 'Rösterei auf Oahu',
+    ogImage: 'https://kailua.coffee/og.png',
+    hasFavicon: true,
+    themeColor: '#0a7',
+    colorScheme: 'light dark',
+    hasPrefersColorScheme: true,
+    viewport: 'width=device-width',
+    htmlLang: 'de',
+    headings: [{ level: 1, text: 'Kailua Coffee' }, { level: 2, text: 'Sorten' }],
+    canonical: 'https://kailua.coffee/',
+    jsonLdTypes: ['organization'],
+    ctaTexts: ['Jetzt bestellen'],
+    imageAlts: ['Die Farm im Morgenlicht'],
+    doubleSpaceCount: 0,
+    mojibakeCount: 0,
+    doubleEscapedCount: 0,
+  },
+  finalUrl: 'https://kailua.coffee/',
+  finalHost: 'kailua.coffee',
+  httpsUpgraded: false,
+}
+
+vi.mock('../server/utils/brandSiteFetch', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../server/utils/brandSiteFetch')>()
+  return {
+    ...actual,
+    fetchBrandSite: vi.fn(async () => {
+      if (fetchOutcome === 'blocked') throw new actual.BrandSiteFetchError('blocked_target', 'nope')
+      if (fetchOutcome === 'failed') throw new actual.BrandSiteFetchError('not_html', 'nope')
+      return SITE
+    }),
+  }
+})
+
+vi.mock('../server/utils/brandCheckJudge', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../server/utils/brandCheckJudge')>()
+  return {
+    ...actual,
+    judgeBrandCheck: vi.fn(async () => {
+      if (judgeBroken) throw new Error('provider down')
+      const judgements: Record<string, { score: 0 | 1 | 2, evidence: string, note: string }> = {}
+      for (const id of actual.BRAND_CHECK_JUDGED_IDS) {
+        judgements[id] = { score: 2, evidence: 'Wir rösten in kleinen Mengen.', note: 'Klar gesagt.' }
+      }
+      return { judgements, model: 'anthropic/claude-haiku-4.5' }
+    }),
+  }
+})
+
+vi.stubGlobal('defineEventHandler', (handler: unknown) => handler)
+vi.stubGlobal('useRuntimeConfig', () => ({
+  public: { appwriteDatabaseId: 'main' },
+  appwriteKey: 'test-server-secret',
+}))
+vi.stubGlobal('useAppConfig', () => ({ pukalani: { brand: {} } }))
+vi.stubGlobal('createAdminClient', () => ({ tablesDB }))
+vi.stubGlobal('createError', (init: Record<string, unknown>) =>
+  Object.assign(new Error(String(init.statusText)), init, { statusCode: init.status }))
+vi.stubGlobal('logEvent', (level: string, event: string, data: Record<string, unknown> = {}) => {
+  logs.push({ level, event, data })
+})
+vi.stubGlobal('setHeader', () => {})
+vi.stubGlobal('readValidatedBody', async (_event: H3Event, parse: (input: unknown) => unknown) => parse(body))
+vi.stubGlobal('getRouterParam', () => routerId)
+vi.stubGlobal('trustedClientIp', () => clientIp)
+vi.stubGlobal('useRateLimitStore', () => ({
+  prefix: 'rl:',
+  store: {
+    hit: async (key: string) => {
+      const count = (buckets.get(key) ?? 0) + 1
+      buckets.set(key, count)
+      return { count, resetInMs: 3_600_000 }
+    },
+  },
+}))
+
+const postHandler = (await import('../server/api/brand/check.post'))
+  .default as unknown as (event: H3Event) => Promise<BrandCheckStartResponse>
+const getHandler = (await import('../server/api/brand/check/[id].get'))
+  .default as unknown as (event: H3Event) => Promise<BrandCheckResult>
+
+const event = { context: {} } as unknown as H3Event
+
+function lastWrite(): Record<string, unknown> {
+  const call = tablesDB.createRow.mock.calls.at(-1)?.[0] as { data: Record<string, unknown> } | undefined
+  return call?.data ?? {}
+}
+
+beforeEach(() => {
+  stored = []
+  storeBroken = false
+  createBroken = false
+  fetchOutcome = 'ok'
+  judgeBroken = false
+  logs = []
+  buckets = new Map()
+  clientIp = CLIENT_IP
+  routerId = ''
+  body = { url: 'kailua.coffee', locale: 'de' }
+  tablesDB.listRows.mockClear()
+  tablesDB.createRow.mockClear()
+  tablesDB.getRow.mockClear()
+})
+
+describe('POST /api/brand/check · der Zwischenspeicher', () => {
+  it('gleiche Adresse innerhalb von sieben Tagen ⇒ die alte Zeile, ohne Abruf und ohne Buchung', async () => {
+    stored = [{ $id: 'c9', $createdAt: new Date(Date.now() - 60_000).toISOString(), urlKey: 'kailua.coffee', score: 71 }]
+
+    const result = await postHandler(event)
+
+    expect(result).toEqual({ ok: true, id: 'c9', cached: true })
+    expect(tablesDB.createRow).not.toHaveBeenCalled()
+    // Nichts gebucht: was nichts kostet, kostet kein Kontingent.
+    expect(buckets.size).toBe(0)
+    expect(logs.find(entry => entry.event === 'brand.check_completed')?.data.cached).toBe(true)
+  })
+
+  it('eine acht Tage alte Zeile zählt nicht mehr — es wird neu geprüft', async () => {
+    stored = [{
+      $id: 'c9',
+      $createdAt: new Date(Date.now() - 8 * 24 * 3_600_000).toISOString(),
+      urlKey: 'kailua.coffee',
+      score: 71,
+    }]
+
+    const result = await postHandler(event)
+
+    expect(result.cached).toBe(false)
+    expect(tablesDB.createRow).toHaveBeenCalledTimes(1)
+  })
+
+  it('fragt mit dem normalisierten Schlüssel, absteigend und mit Limit', async () => {
+    body = { url: 'https://Kailua.Coffee/?utm_source=news', locale: 'en' }
+
+    await postHandler(event)
+
+    const queries = (tablesDB.listRows.mock.calls[0]?.[0] as { queries: string[] }).queries
+    expect(queries).toHaveLength(3)
+    expect(queries.join(' ')).toContain('kailua.coffee')
+    expect(queries.join(' ')).not.toContain('utm_source')
+    expect(queries.join(' ')).toContain('limit')
+  })
+})
+
+describe('POST /api/brand/check · Abwehr', () => {
+  it('HONIGTOPF: antwortet wie der Erfolg, rührt aber nichts an', async () => {
+    body = { ...body, hp: 'ich bin ein Skript' }
+
+    const result = await postHandler(event)
+
+    expect(result).toEqual({ ok: true, id: '', cached: true })
+    expect(tablesDB.listRows).not.toHaveBeenCalled()
+    expect(tablesDB.createRow).not.toHaveBeenCalled()
+    expect(logs.map(entry => entry.event)).toContain('brand.check_honeypot')
+  })
+
+  it('verbotenes Ziel ⇒ 400 `blocked_target`', async () => {
+    fetchOutcome = 'blocked'
+
+    await expect(postHandler(event)).rejects.toMatchObject({
+      status: 400,
+      data: { code: 'blocked_target' },
+    })
+    expect(tablesDB.createRow).not.toHaveBeenCalled()
+  })
+
+  it('unlesbare Seite ⇒ 422 `fetch_failed` (kein 502 — nicht WIR sind ausgefallen)', async () => {
+    fetchOutcome = 'failed'
+
+    await expect(postHandler(event)).rejects.toMatchObject({
+      status: 422,
+      data: { code: 'fetch_failed' },
+    })
+  })
+
+  it('Anbieter kaputt ⇒ 503 `check_unavailable` UND keine Zeile', async () => {
+    judgeBroken = true
+
+    await expect(postHandler(event)).rejects.toMatchObject({
+      status: 503,
+      data: { code: 'check_unavailable' },
+    })
+    expect(tablesDB.createRow).not.toHaveBeenCalled()
+    expect(stored).toHaveLength(0)
+  })
+
+  it('kaputte Ablage beim LESEN ⇒ 503, bevor irgendetwas Geld kostet', async () => {
+    storeBroken = true
+
+    await expect(postHandler(event)).rejects.toMatchObject({
+      status: 503,
+      data: { code: 'check_unavailable' },
+    })
+    expect(buckets.size).toBe(0)
+  })
+
+  it('kaputte Ablage beim SCHREIBEN ⇒ 503 (ein Ergebnis, das niemand wiederfindet, ist keins)', async () => {
+    createBroken = true
+
+    await expect(postHandler(event)).rejects.toMatchObject({
+      status: 503,
+      data: { code: 'check_unavailable' },
+    })
+  })
+})
+
+describe('POST /api/brand/check · die zwei Deckel', () => {
+  it('drei Checks je Anschluss und Tag — der vierte ist ein 429', async () => {
+    for (let run = 1; run <= 3; run++) {
+      body = { url: `kailua-${run}.coffee`, locale: 'de' }
+      await expect(postHandler(event)).resolves.toMatchObject({ cached: false })
+    }
+
+    body = { url: 'kailua-4.coffee', locale: 'de' }
+    await expect(postHandler(event)).rejects.toMatchObject({
+      status: 429,
+      data: { code: 'brand_check_ip_limit' },
+    })
+  })
+
+  it('bucht auf einen HASH, nie auf die rohe IP', async () => {
+    await postHandler(event)
+
+    const ipKeys = [...buckets.keys()].filter(key => key.includes('brand-check-ip-day'))
+    expect(ipKeys).toHaveLength(1)
+    expect(ipKeys[0]).not.toContain(CLIENT_IP)
+    expect(ipKeys[0]).toMatch(/brand-check-ip-day:[0-9a-f]{64}$/)
+  })
+
+  it('zwei verschiedene Anschlüsse teilen sich den Deckel NICHT', async () => {
+    await postHandler(event)
+    clientIp = '198.51.100.4'
+    body = { url: 'kailua-2.coffee', locale: 'de' }
+    await postHandler(event)
+
+    expect([...buckets.keys()].filter(key => key.includes('brand-check-ip-day'))).toHaveLength(2)
+  })
+
+  it('bucht zusätzlich auf den EIGENEN Instanz-Eimer', async () => {
+    await postHandler(event)
+    expect(buckets.get('rl:brand-check-instance-day')).toBe(1)
+    // Nicht der Eimer des Wizards — sonst nähme eine Werbe-Welle den zahlenden
+    // Kunden ihre Entwürfe weg.
+    expect(buckets.has('rl:brand-ai-instance-day')).toBe(false)
+  })
+})
+
+describe('POST /api/brand/check · was gespeichert wird', () => {
+  it('schreibt alle Felder, alle vierzig Kriterien und einen Score', async () => {
+    const result = await postHandler(event)
+
+    expect(result).toMatchObject({ ok: true, cached: false })
+    const written = lastWrite()
+    expect(written).toMatchObject({
+      urlKey: 'kailua.coffee',
+      url: 'https://kailua.coffee/',
+      host: 'kailua.coffee',
+      locale: 'de',
+      scoreVersion: 'score-1',
+      promptVersion: 'check-judge-1',
+      model: 'anthropic/claude-haiku-4.5',
+      band: 'exceptional',
+    })
+    expect(written.score).toBe(100)
+
+    const criteria = JSON.parse(String(written.criteria)) as { id: string, kind: string }[]
+    expect(criteria).toHaveLength(BRAND_CHECK_CRITERIA.length)
+    expect(criteria.map(entry => entry.id)).toEqual(BRAND_CHECK_CRITERIA.map(entry => entry.id))
+    expect(JSON.parse(String(written.categories))).toHaveLength(8)
+    // Alles voll bewertet ⇒ nichts zu verbessern, also kein Befund.
+    expect(JSON.parse(String(written.findings))).toEqual([])
+  })
+
+  it('speichert KEINEN Seitentext — nur seinen Hash', async () => {
+    await postHandler(event)
+
+    const written = lastWrite()
+    expect(JSON.stringify(written)).not.toContain('GEHEIMER SEITENTEXT')
+    expect(String(written.textHash)).toMatch(/^[0-9a-f]{64}$/)
+  })
+
+  it('speichert KEINE rohe IP — nur den Tages-Stempel', async () => {
+    await postHandler(event)
+
+    const written = lastWrite()
+    expect(JSON.stringify(written)).not.toContain(CLIENT_IP)
+    expect(String(written.ipHash)).toMatch(/^[0-9a-f]{64}$/)
+  })
+
+  it('protokolliert Host, Score und Dauer — nie Seitentext und nie die IP', async () => {
+    await postHandler(event)
+
+    const completed = logs.find(entry => entry.event === 'brand.check_completed')
+    expect(completed?.data).toMatchObject({ host: 'kailua.coffee', score: 100, cached: false })
+    expect(JSON.stringify(logs)).not.toContain('GEHEIMER SEITENTEXT')
+    expect(JSON.stringify(logs)).not.toContain(CLIENT_IP)
+  })
+
+  it('nicht beurteilte Kriterien werden `null`, nicht 0', async () => {
+    const judge = await import('../server/utils/brandCheckJudge')
+    vi.mocked(judge.judgeBrandCheck).mockResolvedValueOnce({ judgements: {}, model: 'stub' })
+
+    await postHandler(event)
+
+    const written = lastWrite()
+    const criteria = JSON.parse(String(written.criteria)) as { id: string, kind: string, score: number | null }[]
+    expect(criteria.filter(entry => entry.kind === 'judged').every(entry => entry.score === null)).toBe(true)
+    // Vier von acht Kategorien haben nur beurteilte Kriterien und sind damit
+    // gesperrt — der Gesamtwert rechnet über die übrigen, nicht über Nullen.
+    const categories = JSON.parse(String(written.categories)) as { locked: boolean }[]
+    expect(categories.filter(entry => entry.locked)).toHaveLength(2)
+    expect(written.score).toBe(100)
+  })
+})
+
+describe('GET /api/brand/check/[id]', () => {
+  it('unbekannte Id ⇒ 404 `check_not_found`', async () => {
+    routerId = 'gibtesnicht'
+    await expect(getHandler(event)).rejects.toMatchObject({
+      status: 404,
+      data: { code: 'check_not_found' },
+    })
+  })
+
+  it('eine Id, die keine sein kann, wird gar nicht erst abgefragt', async () => {
+    routerId = '../../etc/passwd'
+    await expect(getHandler(event)).rejects.toMatchObject({ status: 404 })
+    expect(tablesDB.getRow).not.toHaveBeenCalled()
+  })
+
+  it('liefert das gespeicherte Ergebnis — und WENIGER, als die Zeile trägt', async () => {
+    const started = await postHandler(event)
+    routerId = started.id
+
+    const result = await getHandler(event)
+
+    expect(result).toMatchObject({
+      id: started.id,
+      url: 'https://kailua.coffee/',
+      host: 'kailua.coffee',
+      locale: 'de',
+      score: 100,
+      band: 'exceptional',
+      scoreVersion: 'score-1',
+    })
+    expect(result.criteria).toHaveLength(BRAND_CHECK_CRITERIA.length)
+    expect(result.categories).toHaveLength(8)
+    // Weder Personenbezug noch Betriebsinterna verlassen den Server.
+    expect(Object.keys(result)).not.toContain('ipHash')
+    expect(Object.keys(result)).not.toContain('textHash')
+    expect(Object.keys(result)).not.toContain('model')
+    expect(JSON.stringify(result)).not.toContain('GEHEIMER SEITENTEXT')
+  })
+
+  it('eine kaputte JSON-Spalte ist ein 404, kein 500', async () => {
+    stored = [{ $id: 'c1', $createdAt: new Date().toISOString(), categories: '{{', criteria: '[]', findings: '[]' }]
+    routerId = 'c1'
+
+    await expect(getHandler(event)).rejects.toMatchObject({
+      status: 404,
+      data: { code: 'check_not_found' },
+    })
+  })
+})

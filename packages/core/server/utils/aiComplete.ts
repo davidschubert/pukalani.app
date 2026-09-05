@@ -234,6 +234,25 @@ export async function aiComplete(event: H3Event, prompt: string, options: AiComp
 }
 
 /**
+ * Schneidet eine Modell-Antwort auf das äußere JSON-Objekt zu: vom ERSTEN `{`
+ * bis zum LETZTEN `}` — Zaun-Markierungen (```json) und Plauderei davor oder
+ * dahinter fallen weg.
+ *
+ * Bis 2026-09-05 stand hier `raw.replace(/\}[\s\S]*$/, '}')`, und das greift
+ * am ersten `}` der Antwort: jedes Objekt mit einem VERSCHACHTELTEN Objekt
+ * (`{"items":[{…}]}`) wurde hinter dem inneren Ende abgeschnitten und war
+ * damit nie parsbar. Die flachen Antworten der Triage, der Übersetzung und des
+ * Assistenten haben das nie berührt; der Brand-Check war der erste Konsument
+ * mit einer Liste von Objekten und starb live daran.
+ */
+export function extractJsonObject(raw: string): string {
+  const start = raw.indexOf('{')
+  const end = raw.lastIndexOf('}')
+  if (start === -1 || end < start) return raw.trim()
+  return raw.slice(start, end + 1)
+}
+
+/**
  * Completion mit JSON-Antwort: schneidet defensiv auf das äußere Objekt zu
  * (manche Modelle wrappen trotz Anweisung in ```json) und parst. Der Aufrufer
  * validiert/klemmt die Felder selbst — T ist eine Behauptung, kein Beweis
@@ -241,7 +260,7 @@ export async function aiComplete(event: H3Event, prompt: string, options: AiComp
  */
 export async function aiCompleteJson<T = unknown>(event: H3Event, prompt: string, options: AiCompleteOptions = {}): Promise<T> {
   const raw = await aiComplete(event, prompt, options)
-  const jsonText = raw.replace(/^[\s\S]*?\{/, '{').replace(/\}[\s\S]*$/, '}')
+  const jsonText = extractJsonObject(raw)
   try {
     return JSON.parse(jsonText) as T
   }

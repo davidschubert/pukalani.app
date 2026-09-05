@@ -10,6 +10,7 @@ import type { BrandSlot } from '../../shared/slotRegistry'
 import type { BrandGeneratorContext, BrandGeneratorResult, BrandSlotGenerator } from './brandGenerators'
 import { type BrandSlotInstructionOptions, formatGeorgeInputs, georgeSystemPrompt } from './georgePrompt'
 import { createGeorgeTurnScrubber, parseGeorgeTurn } from './georgeTurn'
+import { BRAND_PROVIDER_ROUTING } from './brandProviderRouting'
 
 /**
  * DER ZUSAMMENBAU EINES BERATER-GENERATORS — einmal, für alle (P3.1).
@@ -66,23 +67,13 @@ import { createGeorgeTurnScrubber, parseGeorgeTurn } from './georgeTurn'
  */
 
 /**
- * DIE DATENSCHUTZ-BEDINGUNGEN DES LAUFS — fail-closed, wörtlich so gesendet.
- *
- * `zdr` (nur Anbieter mit Zero-Data-Retention) und `dataCollection: 'deny'`
- * sind der Grund, warum Markeninhalte überhaupt über einen fremden Anbieter
- * gehen dürfen. `allowFallbacks: false` ist die Sicherung dahinter: ohne sie
- * weicht OpenRouter bei Last auf einen Anbieter AUSSERHALB dieser Bedingungen
- * aus, und der Lauf gelänge — mit genau dem Ergebnis, das die zwei Felder
- * verhindern sollen. Lieber „gerade nicht verfügbar".
+ * DIE DATENSCHUTZ-BEDINGUNGEN DES LAUFS — fail-closed, wörtlich so gesendet;
+ * sie stehen seit dem Brand-Check in `brandProviderRouting.ts`, weil DREI
+ * Aufrufer sie teilen (Strom, Prüf-Urteil, Aussen-Check).
  *
  * Eine geprüfte `only`-Allowlist fehlt noch bewusst: sie wäre eine Liste ohne
  * Pflege, und eine veraltete Allowlist ist ein Ausfall, den niemand erklärt.
  */
-const BRAND_PROVIDER_ROUTING = {
-  zdr: true,
-  dataCollection: 'deny',
-  allowFallbacks: false,
-} as const
 
 /**
  * Grosszügig, weil ein Manifest-langer Entwurf im Strom Minuten dauern darf —

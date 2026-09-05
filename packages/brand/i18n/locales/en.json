@@ -808,6 +808,240 @@
       "company": "Company",
       "companyPlaceholder": "Company or brand (optional)"
     },
+    "check": {
+      "form": {
+        "label": "Your website",
+        "placeholder": "your-website.com",
+        "submit": "Start the check",
+        "running": "Checking …",
+        "hint": "We only read your homepage — exactly what any visitor sees. The result takes under a minute.",
+        "status1": "Reading your homepage …",
+        "status2": "Working through 40 criteria …",
+        "status3": "Score and findings are taking shape …",
+        "errors": {
+          "invalidUrl": "We cannot read that address. Please write it the way you would type it into a browser — for example your-website.com.",
+          "blockedTarget": "We are not allowed to fetch that address. Please give us the public address of your website.",
+          "fetchFailed": "The site did not answer. Check the address and try again in a moment.",
+          "rateLimited": "The free checks for today are used up. Tomorrow it continues — or sign up for the full report.",
+          "unavailable": "The check is not reachable right now. Please try again in a few minutes.",
+          "generic": "That did not work just now. Please try again in a moment."
+        }
+      },
+      "bands": {
+        "exceptional": "Exceptional",
+        "outstanding": "Outstanding",
+        "excellent": "Excellent",
+        "strong": "Strong",
+        "average": "Average",
+        "weak": "Developing",
+        "poor": "Right at the start"
+      },
+      "categories": {
+        "distinctiveness": "Distinctiveness",
+        "visual": "Visual identity",
+        "consistency": "Consistency",
+        "experience": "Brand experience",
+        "clarity": "Positioning and clarity",
+        "emotion": "Emotional impact",
+        "adaptability": "Adaptability",
+        "craft": "Craft"
+      },
+      "result": {
+        "seoTitle": "Brand check · {host}",
+        "seoTitleEmpty": "Brand check",
+        "eyebrow": "Brand check · outside view of your homepage",
+        "stand": "As of: outside view of the homepage {host}, {date}",
+        "maturity": "This is a level of maturity, not a report card. It says where your presence stands today and what would come next — judged by the same 40 criteria every branding here is built on.",
+        "copy": "Copy link",
+        "copied": "Link copied",
+        "copyFailed": "Copying did not work",
+        "loading": "Fetching your result …",
+        "categoriesTitle": "Eight categories",
+        "points": "{points} of {weight}",
+        "locked": "Not verifiable from the outside — we do not guess here, we leave it out of the calculation.",
+        "findingsTitle": "The three most important findings",
+        "findingsLead": "What we would tackle first — each finding with the evidence it rests on.",
+        "nextLabel": "Next step",
+        "relaunchEyebrow": "Where to go from here",
+        "relaunchTitle": "Start your brand relaunch",
+        "relaunchBody": "Your brand advisor already knows your presence — you start from this result instead of from zero. The findings become the order of the work.",
+        "relaunchCta": "Start the relaunch",
+        "reportEyebrow": "To read at leisure",
+        "reportTitle": "Full report by email",
+        "reportBody": "All 40 criteria with their evidence as a document — as soon as report delivery is switched on. The ratings themselves are already further down this page.",
+        "allTitle": "All 40 criteria",
+        "allLead": "Every criterion with its points and evidence — open it up if you want the detail.",
+        "criterionPoints": "{score} of 2",
+        "notAssessable": "not assessable",
+        "criterionFallback": "Further criterion",
+        "nextFallback": "Your brand advisor will place this point in the relaunch.",
+        "missingTitle": "This check does not exist (any more).",
+        "missingText": "The link is incomplete, or the result has since been deleted. Just start the check again — it takes under a minute.",
+        "missingCta": "Back to the homepage"
+      },
+      "criteria": {
+        "a1": {
+          "title": "The first sentence belongs to you alone",
+          "next": "Write the first sentence so that no competitor could sign it — in the relaunch that is the first building block."
+        },
+        "a2": {
+          "title": "Name and claim are unmistakable",
+          "next": "Check whether your claim states something instead of naming a category — your brand advisor asks that first."
+        },
+        "a3": {
+          "title": "No stock phrases in the opening",
+          "next": "Replace every stock phrase with a concrete fact: a number, a name, an example."
+        },
+        "a4": {
+          "title": "A recognisable point of view",
+          "next": "Write down one sentence you would say even when not everybody likes it — that becomes your stance."
+        },
+        "a5": {
+          "title": "Your own imagery instead of stock",
+          "next": "Collect three motifs from your real working day; they carry more than any bought picture."
+        },
+        "b1": {
+          "title": "Favicon and preview image in place",
+          "next": "Add both — it is the smallest piece of brand there is, and it travels everywhere."
+        },
+        "b2": {
+          "title": "Clean heading hierarchy",
+          "next": "Give the page exactly one main heading and a clear order beneath it."
+        },
+        "b3": {
+          "title": "Alt texts describe a visual world",
+          "next": "Describe in the alt texts what can be seen — you sort out your imagery along the way."
+        },
+        "b4": {
+          "title": "Colour and theme meta set",
+          "next": "Put your brand colour into the page head so browsers and apps pick it up."
+        },
+        "b5": {
+          "title": "Words and pictures belong together",
+          "next": "Put texts and motifs side by side and cut whatever could come from another brand."
+        },
+        "c1": {
+          "title": "One tone across the whole page",
+          "next": "Settle on one form of address and one register and keep it — the wizard records it as a rule."
+        },
+        "c2": {
+          "title": "Title, preview and heading say the same",
+          "next": "Align the three lines; it is the same sentence in three places."
+        },
+        "c3": {
+          "title": "The promise at the top carries the page",
+          "next": "Check section by section whether it delivers the promise from the opening."
+        },
+        "c4": {
+          "title": "Language declared and consistent",
+          "next": "Set the language attribute to match the text — for search engines and for screen readers."
+        },
+        "c5": {
+          "title": "The brand name is written consistently",
+          "next": "Fix one spelling and keep it everywhere, including inside running text."
+        },
+        "d1": {
+          "title": "One clear call to action",
+          "next": "Put an action with a verb at the top — book, ask, try — instead of a vague more."
+        },
+        "d2": {
+          "title": "The next step is unambiguous",
+          "next": "Cut the side paths until one main action is left."
+        },
+        "d3": {
+          "title": "Findability: title and description",
+          "next": "Write title and description at a good length — they are your appearance in search."
+        },
+        "d4": {
+          "title": "Structured data for search and AI",
+          "next": "Add organisation and website as structured data so answer engines quote you correctly."
+        },
+        "d5": {
+          "title": "Contact and trust are visible",
+          "next": "Show who stands behind the brand and make contact reachable in one click."
+        },
+        "e1": {
+          "title": "Understandable in ten seconds",
+          "next": "Say what you offer in the first paragraph, without a run-up."
+        },
+        "e2": {
+          "title": "Who it is made for",
+          "next": "Name your audience — in the wizard that is a building block of its own."
+        },
+        "e3": {
+          "title": "A short, active core sentence",
+          "next": "Cut your core sentence to twenty words at most, with an active verb."
+        },
+        "e4": {
+          "title": "Recognisable differentiation",
+          "next": "Say plainly what you do differently — without naming the competition."
+        },
+        "e5": {
+          "title": "Little jargon",
+          "next": "Swap long technical words for the words your customers use."
+        },
+        "f1": {
+          "title": "The page speaks to a feeling",
+          "next": "Alongside the service, tell what it changes for people."
+        },
+        "f2": {
+          "title": "A story or an origin",
+          "next": "Write three sentences on why you exist — that carries half the brand."
+        },
+        "f3": {
+          "title": "A human voice instead of officialese",
+          "next": "Speak as people: we instead of one, concrete images, short sentences."
+        },
+        "f4": {
+          "title": "A moment worth passing on",
+          "next": "Allow yourselves one wilful line — one is enough."
+        },
+        "f5": {
+          "title": "The tone fits the category",
+          "next": "Check that your tone fits what you offer — and the people who buy it."
+        },
+        "g1": {
+          "title": "Prepared for mobile devices",
+          "next": "Set the viewport meta; without it your presence falls apart on a phone."
+        },
+        "g2": {
+          "title": "Ready for dark mode",
+          "next": "Provide a dark version of your colours — many people only ever see you that way."
+        },
+        "g3": {
+          "title": "The message works as a one-liner",
+          "next": "Write one line that stands alone: in search, in a profile, on a card."
+        },
+        "g4": {
+          "title": "Complete social preview",
+          "next": "Add title, description and image for shared links."
+        },
+        "g5": {
+          "title": "The language works short and long",
+          "next": "Write labels and buttons in the same tone as your paragraphs."
+        },
+        "h1": {
+          "title": "Spelling and punctuation",
+          "next": "Read the homepage out loud once — most of the findings sort themselves out."
+        },
+        "h2": {
+          "title": "No placeholder text",
+          "next": "Replace every placeholder with real content before anyone reads it."
+        },
+        "h3": {
+          "title": "HTTPS and a clean redirect",
+          "next": "Move the site fully to HTTPS and redirect the old address there."
+        },
+        "h4": {
+          "title": "Short sentences in the opening",
+          "next": "Cut the opening sentences to one statement each."
+        },
+        "h5": {
+          "title": "Clean meta information",
+          "next": "Clear out duplicate entries in the page head and set a canonical address."
+        }
+      }
+    },
     "acceptance": {
       "title": "Final sign-off",
       "lead": "Everything from this chapter side by side. Sign off every line that should stand as it is.",

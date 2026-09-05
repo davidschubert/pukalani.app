@@ -976,3 +976,96 @@ export interface BrandShareViewResponse {
   publishedAt: string
   expiresAt: string
 }
+
+// ── Brand-Check (docs/plans/BRAND-CHECK.md) ────────────────────────────────
+
+/**
+ * DER VERTRAG DES KOSTENLOSEN AUSSEN-CHECKS. Er ist FEST, weil Client und
+ * Server ihn gleichzeitig gebaut haben — und weil das Ergebnis unter
+ * `/brand-check/<id>` teilbar ist: ein geänderter Vertrag hiesse ein
+ * geteilter Link, der nichts mehr anzeigt.
+ */
+
+/**
+ * DIE ANTWORT DES ANSTOSSES — bewusst NUR eine Id, nie das Ergebnis.
+ *
+ * Der Client springt danach auf `/brand-check/<id>` und holt es dort. So ist
+ * das Ergebnis von der ersten Sekunde an eine ADRESSE (teilbar, nachladbar,
+ * bookmarkfähig) und nicht der Inhalt einer Antwort, die es nur einmal gibt.
+ *
+ * `cached: true` heisst „dieselbe Adresse wurde in den letzten sieben Tagen
+ * schon geprüft" — es ist KEIN Fehler, sondern der Kostendeckel des Plans
+ * (§2 „Reproduzierbarkeit"). Der HONIGTOPF antwortet ebenfalls `cached: true`,
+ * dann aber mit leerer `id`: ein Bot bekommt dieselbe Form wie ein Mensch,
+ * ohne dass etwas entsteht.
+ */
+export interface BrandCheckStartResponse {
+  ok: true
+  id: string
+  cached: boolean
+}
+
+/**
+ * EIN KRITERIUM, WIE ES DER LESER SIEHT.
+ *
+ * `score: null` heisst „nicht bewertbar" (nicht „null Punkte") — das Kriterium
+ * fällt aus der Normalisierung und erscheint als Schloss. `evidence` ist der
+ * BELEG: ein Messwert-Satz bei den gerechneten Kriterien, ein Zitat von der
+ * Seite bei den beurteilten. `note` ist der eine Satz des Modells dazu und
+ * bleibt bei gerechneten Kriterien leer.
+ *
+ * Titel und „nächster Schritt" stehen NICHT hier: sie sind i18n
+ * (`brand.check.criteria.<id>.title|next`) und wechseln mit der Sprache des
+ * Lesers, nicht mit der Sprache der geprüften Seite.
+ */
+export interface BrandCheckCriterionResult {
+  id: string
+  category: string
+  kind: 'measured' | 'judged'
+  score: 0 | 1 | 2 | null
+  evidence: string
+  note: string
+}
+
+/**
+ * EINE KATEGORIE. `raw` ist die Rohsumme (0–10) der BEWERTBAREN Kriterien,
+ * `assessable` sagt, wie viele das waren, `points` ist der aufs Gewicht
+ * normalisierte Beitrag. `locked: true` (assessable 0) heisst: die Kategorie
+ * zählt weder im Zähler noch im Nenner des Gesamtwerts.
+ */
+export interface BrandCheckCategoryResult {
+  key: string
+  weight: number
+  raw: number
+  assessable: number
+  points: number
+  locked: boolean
+}
+
+/** Ein Befund trägt seinen eigenen Beleg mit — der Client muss nichts suchen. */
+export interface BrandCheckFinding {
+  criterionId: string
+  evidence: string
+}
+
+/**
+ * DAS GESPEICHERTE ERGEBNIS. `locale` ist die Sprache, in der GEFRAGT wurde;
+ * die Belege sprechen dagegen die Sprache der geprüften Seite (Plan §2) — ein
+ * Zitat zu übersetzen wäre kein Zitat mehr.
+ *
+ * `scoreVersion` steht mit in der Zeile, damit ein alter Wert nicht behauptet,
+ * nach der heutigen Rechnung entstanden zu sein.
+ */
+export interface BrandCheckResult {
+  id: string
+  url: string
+  host: string
+  locale: 'de' | 'en'
+  createdAt: string
+  score: number
+  band: string
+  scoreVersion: string
+  categories: BrandCheckCategoryResult[]
+  criteria: BrandCheckCriterionResult[]
+  findings: BrandCheckFinding[]
+}

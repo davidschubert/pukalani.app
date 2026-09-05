@@ -298,6 +298,10 @@ const BRAND_TABLES = [
   // Felder und Lücken. Eigene Tabelle, weil sie einen STATUS haben und
   // kapitelübergreifend sind.
   'brand_findings',
+  // brand-016: der kostenlose Aussen-Check (docs/plans/BRAND-CHECK.md). Die
+  // einzige brand_*-Tabelle ohne Konto — sie ist zugleich der 7-Tage-
+  // Zwischenspeicher, der die KI-Kosten der öffentlichen Route deckelt.
+  'brand_checks',
 ]
 
 const PORTFOLIO_SOLL = [
