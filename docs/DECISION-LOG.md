@@ -7,6 +7,15 @@ die kleinen, verstreuten Beschlüsse.
 
 ---
 
+## 2026-09-05 — Brand Wizard: fremdes Branding ⇒ 404 auch in der Werkstatt; Dokument-Seite abgenommen
+
+**Entscheidung (David):** „Dokument-Seite abgenommen, Werkstatt soll auch 404 zeigen." Ein
+fremdes oder unbekanntes Branding ist in Werkstatt UND Dokument ein echter HTTP 404
+(Datentür-Muster), keine halbe Seite „Namenloses Branding". Unverändert: fehlender
+Beta-Zugang / gesperrter Baustein (`blocked`, 403) bleibt die ruhige Fläche.
+
+---
+
 ## 2026-09-05 — Brand Wizard: Pakete eines freigegebenen Plans starten selbstständig
 
 **Entscheidung (David):** „Immer wenn ein Paket abgeschlossen ist, kann das nächste

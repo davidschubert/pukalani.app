@@ -53,6 +53,9 @@ geprüft (Bilanz + Klick-Beweis im Browser), alle live auf branding.supply:
 - **P7** „Euer Branding" (Dokument = Finale Abnahme der Ebene 1) + Prüfblick auf Klick (Nachholung ≤ 10).
 - **P8** Reste: Hydration-Mismatch (Ursache: Eröffnungszug im Setup statt onMounted — NICHT die
   Layout-Zweige), Team-Fassung in Platzhalter/Prompt-Etikett, toter Store-Aufruf, 404 auf dem Dokument.
+- **P9** (2026-09-05, Davids Entscheidung): Werkstatt antwortet für fremde/unbekannte Brandings mit 404 wie das
+  Dokument; `blocked` (kein Beta-Zugang) bleibt die ruhige Fläche. Store trennt Listen-404 (`denied`) und
+  Profil-404 (`profileDenied`) — das Rennen ist strukturell zu. **Dokument-Seite von David abgenommen 2026-09-05.**
 - Prod-Migrationen 011/013/014 mit Davids Ja (Runner zog 012 der Nachbar-Sitzung mit).
 - Tests brand 799 → 1434; Beweis-Skript `verify-brand-sessions.mjs` 106 Zusagen.
 
