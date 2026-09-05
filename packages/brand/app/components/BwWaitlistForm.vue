@@ -32,8 +32,14 @@ import type { BrandWaitlistResponse } from '../../shared/types/brand'
  *
  * `source` sagt dem Betreiber, WELCHE Seite den Eintrag gebracht hat — die
  * eine Kennzahl, an der man sieht, ob eine Seite verkauft.
+ *
+ * ── `website` IST EINE VORBELEGUNG, KEIN GESCHLOSSENES FELD ───────────────
+ * Auf der Ergebnisseite des Brand-Checks kennt die Seite die geprüfte Adresse
+ * schon — sie noch einmal abzutippen wäre eine Zumutung. Der Wert steht
+ * deshalb im Feld, bleibt aber änderbar: wer den Report für eine ANDERE
+ * Adresse will, korrigiert ihn.
  */
-const props = defineProps<{ source: string }>()
+const props = withDefaults(defineProps<{ source: string, website?: string }>(), { website: '' })
 
 const { t, locale } = useI18n()
 const localePath = useLocalePath()
@@ -41,7 +47,7 @@ const localePath = useLocalePath()
 const email = ref('')
 const name = ref('')
 const company = ref('')
-const website = ref('')
+const website = ref(props.website)
 const hp = ref('')
 const status = ref<'idle' | 'sending' | 'done' | 'error'>('idle')
 /**
@@ -51,6 +57,15 @@ const status = ref<'idle' | 'sending' | 'done' | 'error'>('idle')
  * `already_confirmed` ist die freundliche Auskunft für die eigene Adresse.
  */
 const alreadyConfirmed = ref(false)
+
+/**
+ * Die Vorbelegung kann NACH dem ersten Aufbau eintreffen (die Ergebnisseite
+ * lädt ihren Check bei einer Navigation im Browser nach). Übernommen wird sie
+ * nur in ein LEERES Feld — was jemand selbst getippt hat, überschreibt nichts.
+ */
+watch(() => props.website, (value) => {
+  if (value && !website.value) website.value = value
+})
 
 const canSend = computed(() => status.value !== 'sending' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim()))
 

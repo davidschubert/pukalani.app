@@ -23,12 +23,14 @@ import { jsonLdScript } from '../utils/jsonLd'
  * stehen in OPEN-ITEMS. Im Fähigkeiten-Block rücken dafür zwei Zusagen auf,
  * die es HEUTE gibt (begründet statt behauptet · Inhalte bleiben eure).
  *
- * ── DER BRAND-CHECK IST EHRLICH EIN VORAB-EINTRAG ─────────────────────────
- * Das Instrument (Website → Score + drei Befunde) ist noch nicht gebaut. Ein
- * Feld „Check starten", das nichts startet, wäre ein toter Knopf. Das
- * Formular ist deshalb die Warteliste mit `source: 'brand-check'` — Website
- * vorne, und die Karte SAGT, dass der Check mit der nächsten Welle öffnet.
- * Der Lead ist echt, das Versprechen auch.
+ * ── DER BRAND-CHECK IST SEIT 2026-09-05 ECHT ──────────────────────────────
+ * Bis dahin stand hier die Warteliste mit `source: 'brand-check'` und die
+ * Karte sagte, dass der Check „mit der nächsten Welle öffnet" — das
+ * Instrument gab es noch nicht. Jetzt gibt es es: `BwBrandCheckForm` startet
+ * ihn wirklich (`POST /api/brand/check`) und führt auf `/brand-check/<id>`.
+ * Der Hinweis-Satz ist deshalb weg; ein Vorbehalt zu einem Knopf, der tut was
+ * er sagt, wäre nur noch Zögern. Der Report per Mail bleibt die Warteliste —
+ * er steht auf der ERGEBNISSEITE, wo er etwas zu ergänzen hat.
  *
  * ── WEICHE W1 ────────────────────────────────────────────────────────────
  * Eingeloggt führen „Neue Marke"/„Marken-Relaunch" direkt in die Anlage mit
@@ -214,9 +216,8 @@ const KIT_FILES = ['logo.svg', 'wortmarke.svg', 'boilerplate.md', 'gruender.jpg'
           <p class="bw-label" style="color: var(--bw-muted)">{{ t('home.checkEyebrow') }}</p>
           <h2 class="mt-3 max-w-lg text-balance text-3xl font-extralight leading-snug tracking-tight sm:text-4xl">{{ t('home.checkTitle') }}</h2>
           <p class="mt-4 max-w-lg text-sm leading-relaxed" style="color: var(--bw-ink-soft)">{{ t('home.checkBody') }}</p>
-          <p class="bw-label mt-4 max-w-lg leading-relaxed" style="color: var(--bw-muted)">{{ t('home.checkNote') }}</p>
         </div>
-        <BwWaitlistForm source="brand-check" />
+        <BwBrandCheckForm source="home" />
       </section>
 
       <!-- 5 · Abschluss-CTA -->

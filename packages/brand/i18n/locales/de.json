@@ -808,6 +808,240 @@
       "company": "Firma",
       "companyPlaceholder": "Firma oder Marke (optional)"
     },
+    "check": {
+      "form": {
+        "label": "Eure Website",
+        "placeholder": "eure-website.de",
+        "submit": "Check starten",
+        "running": "Wir prüfen …",
+        "hint": "Wir lesen nur eure Startseite — genau das, was jeder Besucher auch sieht. Das Ergebnis dauert eine knappe Minute.",
+        "status1": "Wir lesen eure Startseite …",
+        "status2": "40 Kriterien werden geprüft …",
+        "status3": "Score und Befunde entstehen …",
+        "errors": {
+          "invalidUrl": "Diese Adresse können wir nicht lesen. Schreibt sie bitte so, wie ihr sie im Browser eingebt — zum Beispiel eure-website.de.",
+          "blockedTarget": "Diese Adresse dürfen wir nicht abrufen. Nennt uns bitte die öffentliche Adresse eurer Website.",
+          "fetchFailed": "Die Seite hat nicht geantwortet. Prüft die Adresse und versucht es gleich noch einmal.",
+          "rateLimited": "Für heute sind die kostenlosen Checks aufgebraucht. Morgen geht es weiter — oder tragt euch für den vollständigen Report ein.",
+          "unavailable": "Der Check ist gerade nicht erreichbar. Versucht es in ein paar Minuten noch einmal.",
+          "generic": "Das hat gerade nicht geklappt. Versucht es in einem Moment noch einmal."
+        }
+      },
+      "bands": {
+        "exceptional": "Außergewöhnlich",
+        "outstanding": "Herausragend",
+        "excellent": "Ausgezeichnet",
+        "strong": "Stark",
+        "average": "Durchschnittlich",
+        "weak": "Ausbaufähig",
+        "poor": "Ganz am Anfang"
+      },
+      "categories": {
+        "distinctiveness": "Eigenständigkeit",
+        "visual": "Visuelle Identität",
+        "consistency": "Konsistenz",
+        "experience": "Markenerlebnis",
+        "clarity": "Positionierung und Klarheit",
+        "emotion": "Emotionale Wirkung",
+        "adaptability": "Anpassungsfähigkeit",
+        "craft": "Handwerk"
+      },
+      "result": {
+        "seoTitle": "Brand-Check · {host}",
+        "seoTitleEmpty": "Brand-Check",
+        "eyebrow": "Brand-Check · Außen-Check der Startseite",
+        "stand": "Stand: Außen-Check der Startseite {host}, {date}",
+        "maturity": "Das ist ein Reifegrad, kein Zeugnis. Er sagt, wo euer Auftritt heute steht und was als Nächstes dran wäre — bewertet mit denselben 40 Kriterien, mit denen hier jedes Branding entsteht.",
+        "copy": "Link kopieren",
+        "copied": "Link kopiert",
+        "copyFailed": "Kopieren hat nicht geklappt",
+        "loading": "Wir holen euer Ergebnis …",
+        "categoriesTitle": "Acht Kategorien",
+        "points": "{points} von {weight}",
+        "locked": "Von außen nicht prüfbar — wir raten hier nicht, sondern lassen es aus der Rechnung.",
+        "findingsTitle": "Die drei wichtigsten Befunde",
+        "findingsLead": "Was wir zuerst angehen würden — jeder Befund mit dem Beleg, auf dem er steht.",
+        "nextLabel": "Nächster Schritt",
+        "relaunchEyebrow": "Der Weg weiter",
+        "relaunchTitle": "Marken-Relaunch starten",
+        "relaunchBody": "Euer Markenberater kennt euren Auftritt schon — ihr steigt mit diesem Ergebnis ein statt bei null. Aus den Befunden wird die Reihenfolge der Arbeit.",
+        "relaunchCta": "Relaunch starten",
+        "reportEyebrow": "Zum Nachlesen",
+        "reportTitle": "Vollständigen Report per Mail",
+        "reportBody": "Alle 40 Kriterien mit ihren Belegen als Dokument — sobald der Report-Versand freigeschaltet ist. Die Bewertungen selbst stehen schon unten auf dieser Seite.",
+        "allTitle": "Alle 40 Kriterien",
+        "allLead": "Jedes Kriterium mit Punkten und Beleg — aufklappen, wenn ihr es genau wissen wollt.",
+        "criterionPoints": "{score} von 2",
+        "notAssessable": "nicht bewertbar",
+        "criterionFallback": "Weiteres Kriterium",
+        "nextFallback": "Euer Markenberater ordnet diesen Punkt im Relaunch ein.",
+        "missingTitle": "Diesen Check gibt es nicht (mehr).",
+        "missingText": "Der Link ist unvollständig, oder das Ergebnis ist inzwischen gelöscht. Startet den Check einfach neu — er dauert eine knappe Minute.",
+        "missingCta": "Zur Startseite"
+      },
+      "criteria": {
+        "a1": {
+          "title": "Der erste Satz gehört nur euch",
+          "next": "Schreibt den ersten Satz so, dass ihn kein Wettbewerber unterschreiben könnte — im Relaunch ist das der erste Baustein."
+        },
+        "a2": {
+          "title": "Name und Claim sind unverwechselbar",
+          "next": "Prüft, ob euer Claim etwas behauptet, statt nur die Kategorie zu nennen — euer Markenberater stellt genau diese Frage zuerst."
+        },
+        "a3": {
+          "title": "Keine Floskeln im Einstieg",
+          "next": "Ersetzt jede Floskel durch eine konkrete Tatsache: eine Zahl, einen Namen, ein Beispiel."
+        },
+        "a4": {
+          "title": "Ein erkennbarer Standpunkt",
+          "next": "Formuliert einen Satz, den ihr auch dann sagt, wenn er nicht allen gefällt — daraus wird eure Haltung."
+        },
+        "a5": {
+          "title": "Eigene Bildsprache statt Stock-Motive",
+          "next": "Sammelt drei Motive aus eurem echten Alltag; sie tragen mehr als jedes gekaufte Bild."
+        },
+        "b1": {
+          "title": "Favicon und Vorschaubild vorhanden",
+          "next": "Legt beides an — es ist das kleinste Stück Marke, und es reist überallhin mit."
+        },
+        "b2": {
+          "title": "Saubere Überschriften-Hierarchie",
+          "next": "Gebt der Seite genau eine Hauptüberschrift und darunter eine klare Staffelung."
+        },
+        "b3": {
+          "title": "Alt-Texte beschreiben eine Bildwelt",
+          "next": "Beschreibt in den Alt-Texten, was zu sehen ist — nebenbei ordnet ihr damit eure Bildwelt."
+        },
+        "b4": {
+          "title": "Farb- und Theme-Angaben gesetzt",
+          "next": "Hinterlegt eure Markenfarbe im Seitenkopf, damit Browser und App sie übernehmen."
+        },
+        "b5": {
+          "title": "Wort- und Bildwelt passen zusammen",
+          "next": "Stellt Texte und Motive nebeneinander und streicht, was aus einer anderen Marke stammen könnte."
+        },
+        "c1": {
+          "title": "Ein Ton durch die ganze Seite",
+          "next": "Entscheidet euch für eine Anrede und ein Register und zieht sie durch — im Wizard wird daraus eine festgehaltene Regel."
+        },
+        "c2": {
+          "title": "Titel, Vorschau und Überschrift sagen dasselbe",
+          "next": "Gleicht die drei Zeilen an; es ist derselbe Satz an drei Orten."
+        },
+        "c3": {
+          "title": "Das Versprechen oben trägt die Seite",
+          "next": "Prüft Abschnitt für Abschnitt, ob er das Versprechen aus dem Einstieg einlöst."
+        },
+        "c4": {
+          "title": "Sprache deklariert und stimmig",
+          "next": "Setzt die Sprachangabe passend zum Text — für Suchmaschinen und für Vorleseprogramme."
+        },
+        "c5": {
+          "title": "Der Markenname wird einheitlich geschrieben",
+          "next": "Legt eine Schreibweise fest und haltet sie überall, auch mitten im Fließtext."
+        },
+        "d1": {
+          "title": "Eine klare Handlungsaufforderung",
+          "next": "Setzt oben eine Aktion mit einem Verb — buchen, anfragen, testen — statt eines allgemeinen Weiter."
+        },
+        "d2": {
+          "title": "Der nächste Schritt ist eindeutig",
+          "next": "Streicht Nebenwege, bis eine Hauptaktion übrig bleibt."
+        },
+        "d3": {
+          "title": "Auffindbarkeit: Titel und Beschreibung",
+          "next": "Schreibt Titel und Beschreibung in guter Länge — sie sind euer Auftritt in der Suche."
+        },
+        "d4": {
+          "title": "Strukturierte Daten für Suche und KI",
+          "next": "Hinterlegt Organisation und Website als strukturierte Daten, damit Antwortmaschinen euch richtig zitieren."
+        },
+        "d5": {
+          "title": "Kontakt und Vertrauen sichtbar",
+          "next": "Zeigt, wer hinter der Marke steht, und macht den Kontakt in einem Klick erreichbar."
+        },
+        "e1": {
+          "title": "In zehn Sekunden verständlich",
+          "next": "Sagt im ersten Absatz ohne Anlauf, was ihr anbietet."
+        },
+        "e2": {
+          "title": "Für wen es gemacht ist",
+          "next": "Benennt eure Zielgruppe beim Namen — im Wizard ist das ein eigener Baustein."
+        },
+        "e3": {
+          "title": "Ein kurzer, aktiver Kernsatz",
+          "next": "Kürzt euren Kernsatz auf höchstens zwanzig Wörter mit einem aktiven Verb."
+        },
+        "e4": {
+          "title": "Erkennbare Abgrenzung",
+          "next": "Sagt sachlich, was ihr anders macht — ohne den Wettbewerb zu nennen."
+        },
+        "e5": {
+          "title": "Wenig Fachjargon",
+          "next": "Tauscht lange Fachwörter gegen die Worte eurer Kundschaft."
+        },
+        "f1": {
+          "title": "Die Seite spricht ein Gefühl an",
+          "next": "Erzählt neben der Leistung, was sie für Menschen verändert."
+        },
+        "f2": {
+          "title": "Eine Geschichte oder ein Ursprung",
+          "next": "Schreibt in drei Sätzen auf, warum es euch gibt — das trägt die halbe Marke."
+        },
+        "f3": {
+          "title": "Menschliche Stimme statt Behördenton",
+          "next": "Sprecht als Menschen: wir statt man, konkrete Bilder, kurze Sätze."
+        },
+        "f4": {
+          "title": "Ein Moment, den man weitersagt",
+          "next": "Gönnt euch eine eigenwillige Zeile — eine genügt."
+        },
+        "f5": {
+          "title": "Der Ton passt zur Kategorie",
+          "next": "Prüft, ob euer Ton zu dem passt, was ihr anbietet — und zu denen, die es kaufen."
+        },
+        "g1": {
+          "title": "Für mobile Geräte vorbereitet",
+          "next": "Setzt die Viewport-Angabe; ohne sie bricht euer Auftritt auf dem Telefon auseinander."
+        },
+        "g2": {
+          "title": "Bereit für den Dunkelmodus",
+          "next": "Hinterlegt eine dunkle Fassung eurer Farben — viele Menschen sehen euch nur so."
+        },
+        "g3": {
+          "title": "Die Botschaft trägt als Einzeiler",
+          "next": "Formuliert eine Zeile, die allein steht: in der Suche, im Profil, auf einer Karte."
+        },
+        "g4": {
+          "title": "Vollständige soziale Vorschau",
+          "next": "Ergänzt Titel, Beschreibung und Bild für geteilte Links."
+        },
+        "g5": {
+          "title": "Die Sprache trägt kurz und lang",
+          "next": "Schreibt Beschriftungen und Knöpfe im selben Ton wie eure Absätze."
+        },
+        "h1": {
+          "title": "Rechtschreibung und Zeichensetzung",
+          "next": "Lest die Startseite einmal laut — die meisten Funde erledigen sich dabei von selbst."
+        },
+        "h2": {
+          "title": "Kein Platzhalter-Text",
+          "next": "Ersetzt jeden Platzhalter durch echten Inhalt, bevor ihn jemand liest."
+        },
+        "h3": {
+          "title": "HTTPS und saubere Weiterleitung",
+          "next": "Stellt die Seite vollständig auf HTTPS um und leitet die alte Adresse dorthin."
+        },
+        "h4": {
+          "title": "Kurze Sätze im Einstieg",
+          "next": "Kürzt die ersten Sätze auf eine Aussage pro Satz."
+        },
+        "h5": {
+          "title": "Saubere Meta-Angaben",
+          "next": "Räumt doppelte Angaben im Seitenkopf auf und setzt eine kanonische Adresse."
+        }
+      }
+    },
     "acceptance": {
       "title": "Finale Abnahme",
       "lead": "Alles aus diesem Kapitel nebeneinander. Nimm jede Zeile ab, die so stehen bleiben soll.",
