@@ -100,6 +100,30 @@ export function createBrandCheckSchema() {
 export type BrandCheckInput = z.output<ReturnType<typeof createBrandCheckSchema>>
 
 /**
+ * DER RUMPF DES DOKUMENT-CHECKS (`POST /api/brand/profiles/:id/check`, §5b).
+ *
+ * Es gibt hier KEINE Adresse und keinen Honigtopf: die Route liegt hinter
+ * `requireBrandAccess` und `loadOwnedProfile`, das Material sind die eigenen
+ * bestätigten Felder. Was bleibt, sind dieselben zwei Entscheidungen wie beim
+ * Website-Check — das Ranking-Häkchen (Default AUS, §8.1) und „neu ermitteln"
+ * (§8.4).
+ *
+ * `force` wirkt hier IMMER, wo es beim Website-Check nur mit Konto wirkt: ohne
+ * Konto gibt es diese Route gar nicht. Gebucht wird deshalb ausnahmslos der
+ * Konto-Deckel (10/Tag) — ein Dokument-Check ist ein KI-Aufruf wie jeder
+ * andere, und einen Anschluss-Deckel für eine Route mit Session gäbe es nicht
+ * zu umgehen, sondern nur zu verwechseln.
+ */
+export function createBrandDocumentCheckSchema() {
+  return z.object({
+    rankingOptIn: z.boolean().default(false),
+    force: z.boolean().default(false),
+  }).strict()
+}
+
+export type BrandDocumentCheckInput = z.output<ReturnType<typeof createBrandDocumentCheckSchema>>
+
+/**
  * DIE ANTWORT DES MODELLS auf die beurteilten Kriterien (Plan §2).
  *
  * ── JE EINTRAG GEPRÜFT, NICHT DIE GANZE LISTE ─────────────────────────────

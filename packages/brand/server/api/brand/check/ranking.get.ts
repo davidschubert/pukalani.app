@@ -1,6 +1,6 @@
 import { Query } from 'node-appwrite'
 import { createBrandCheckRankingQuerySchema } from '../../../../schemas/brandCheck'
-import { BRAND_CHECK_CRITERION_MAX } from '../../../../shared/brandCheck'
+import { brandCheckCategoryScores } from '../../../../shared/brandCheck'
 import {
   BRAND_CHECK_RANKING_PAGE_SIZE,
   BRAND_CHECK_RANKING_SCAN_LIMIT,
@@ -156,16 +156,10 @@ function toRankingRow(row: BrandCheckRow): { urlKey: string, createdAt: string, 
 /**
  * DIE ACHT KATEGORIE-WERTE, AUF 0–100 NORMIERT.
  *
- * `points` aus der gespeicherten Rechnung wäre der falsche Wert für eine
- * Bestenliste: er trägt das GEWICHT der Kategorie (Eigenständigkeit geht bis
- * 15, Handwerk bis 10), zwei Kategorien wären damit nicht vergleichbar und
- * eine Zahl neben der anderen unlesbar. Gerechnet wird deshalb der Anteil der
- * ERREICHBAREN Punkte — dieselbe Normalisierung, die auch der Gesamtwert
- * benutzt, nur je Kategorie.
- *
- * `locked` (kein einziges bewertbares Kriterium) wird `null` und NICHT 0:
- * „konnten wir nicht ansehen" ist keine schwache Kategorie. Die Sortierung
- * stellt solche Zeilen ans Ende (`sortBrandCheckRankingItems`).
+ * Die RECHNUNG steht pur in `shared/brandCheck.ts`
+ * (`brandCheckCategoryScores`) — sie hat seit dem Verlauf einer Brand einen
+ * zweiten Leser, und dieselbe Zahl zweimal gerechnet wäre zweimal eine
+ * Gelegenheit, verschieden zu runden. Hier bleibt nur das LESEN der Spalte.
  *
  * Kaputtes JSON ergibt eine LEERE Liste statt eines Wurfs: eine unlesbare
  * Nebenangabe darf die ganze Seite nicht kosten.
@@ -179,18 +173,5 @@ function toCategoryScores(raw: string): { id: string, score: number | null }[] {
     return []
   }
   if (!Array.isArray(parsed)) return []
-
-  return (parsed as BrandCheckCategoryResult[])
-    .filter(entry => entry && typeof entry.key === 'string')
-    .map((entry) => {
-      const assessable = typeof entry.assessable === 'number' ? entry.assessable : 0
-      const raw10 = typeof entry.raw === 'number' ? entry.raw : 0
-      const locked = entry.locked === true || assessable <= 0
-      return {
-        id: entry.key,
-        score: locked
-          ? null
-          : Math.round((raw10 / (assessable * BRAND_CHECK_CRITERION_MAX)) * 100),
-      }
-    })
+  return brandCheckCategoryScores(parsed as BrandCheckCategoryResult[])
 }

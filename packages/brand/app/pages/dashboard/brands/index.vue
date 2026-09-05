@@ -2,7 +2,7 @@
 import type { BwNewBrandSubmit } from '../../../components/BwNewBrandModal.vue'
 import { BRAND_STEP_KEYS, type BrandStepKey } from '../../../../shared/slotRegistry'
 import { brandGradientFor } from '../../../../shared/brandPalette'
-import type { BrandProfileSummary } from '../../../../shared/types/brand'
+import type { BrandProfileScoresResponse, BrandProfileSummary } from '../../../../shared/types/brand'
 import { useBrandWorkspaceStore } from '../../../stores/brandWorkspace'
 
 /**
@@ -118,6 +118,49 @@ function resultReady(profile: BrandProfileSummary): boolean {
 }
 
 /**
+ * DER BRAND-SCORE JE KARTE (BRAND-CHECK-SEITE §5) — GEBÜNDELT geholt.
+ *
+ * Eine Abfrage je Karte wäre das N+1, das `activeShareProfileIds` für die
+ * geteilten Brandings schon einmal verhindert hat; `GET /api/brand/profiles/
+ * scores` beantwortet die Frage für ALLE eigenen Brands in einem Zug.
+ *
+ * FAIL-SOFT: keine Antwort ⇒ keine Zahl. Der Score ist eine ANGABE auf einer
+ * Karte, kein Recht und keine Bedingung — die Übersicht darf daran nicht
+ * scheitern (dieselbe Haltung wie bei „geteilt").
+ *
+ * GEZEIGT WIRD DER WEBSITE-SCORE, sonst der des Fundaments. Nie beide in
+ * einer Zahl: sie messen Verschiedenes (§5b), und eine Karte hat für die
+ * Erklärung keinen Platz — die hat die Score-Seite.
+ */
+const { data: scores } = await useAsyncData<BrandProfileScoresResponse | null>(
+  'brand-profile-scores',
+  async () => {
+    try {
+      return await request<BrandProfileScoresResponse>('/api/brand/profiles/scores')
+    }
+    catch {
+      return null
+    }
+  },
+)
+
+function scoreOf(profile: BrandProfileSummary): number | null {
+  const entry = scores.value?.items.find(item => item.profileId === profile.id)
+  return entry?.website?.score ?? entry?.document?.score ?? null
+}
+
+function scoreLine(profile: BrandProfileSummary): string {
+  const score = scoreOf(profile)
+  return score === null
+    ? t('brand.myScores.card.empty')
+    : t('brand.myScores.card.score', { score })
+}
+
+function scorePath(profile: BrandProfileSummary): string {
+  return localePath(`/dashboard/brands/${profile.id}/score`)
+}
+
+/**
  * Der Submit des Modals — seit P2.5 eine ÜBERGABE, keine Anlage mehr.
  *
  * Das Modal erhebt drei Dinge (Weiche, Titel, Sprache). Seit die STARTKARTE
@@ -210,20 +253,38 @@ useBrandTitle(() => t('brand.brands.title'))
            Verlinkt sind jetzt die Kachel (sie trägt den Titel) und
            „Weiterarbeiten"; die Karte bekommt ihr Ziel als Prop. -->
       <div v-else class="grid gap-x-6 gap-y-16 @sm:grid-cols-2 @lg:grid-cols-3">
-        <BwBrandCard
-          v-for="profile in store.profiles" :key="profile.id"
-          :to="workspacePath(profile)"
-          :gradient="brandGradientFor(profile.id)"
-          :title="profile.title || t('brand.brands.card.untitled')"
-          :path="t(`brand.brands.card.path.${profile.pathKind}`)"
-          :step="t('brand.brands.card.currentStep', { step: stepLabel(profile.currentStepKey) })"
-          :progress="stepPosition(profile)"
-          :remaining="remaining(profile)"
-          :edited="editedAt(profile)"
-          :pct="profile.progressPct"
-          :result-to="resultPath(profile)"
-          :result-ready="resultReady(profile)"
-        />
+        <div v-for="profile in store.profiles" :key="profile.id">
+          <BwBrandCard
+            :to="workspacePath(profile)"
+            :gradient="brandGradientFor(profile.id)"
+            :title="profile.title || t('brand.brands.card.untitled')"
+            :path="t(`brand.brands.card.path.${profile.pathKind}`)"
+            :step="t('brand.brands.card.currentStep', { step: stepLabel(profile.currentStepKey) })"
+            :progress="stepPosition(profile)"
+            :remaining="remaining(profile)"
+            :edited="editedAt(profile)"
+            :pct="profile.progressPct"
+            :result-to="resultPath(profile)"
+            :result-ready="resultReady(profile)"
+          />
+          <!-- Der Brand-Score (BRAND-CHECK-SEITE §5) steht UNTER der Karte und
+               nicht in ihr: `BwBrandCard` ist Davids abgenommener Klickdummy,
+               und seine `score`-Prop meint den Ergebnis-Ring der Foundation,
+               nicht den Aussen-Check. Eine Zeile, zwei Wege — die Zahl führt
+               zur Score-Seite, und wo keine Website hinterlegt ist, steht der
+               fehlende Schritt daneben. -->
+          <div class="mt-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-1" data-brand-score-line>
+            <NuxtLink :to="scorePath(profile)" class="bw-label hover:underline" style="color: var(--bw-ink-soft)">
+              {{ scoreLine(profile) }}
+            </NuxtLink>
+            <NuxtLink
+              v-if="!profile.startCard.websiteUrl" :to="scorePath(profile)"
+              class="bw-label hover:underline" style="color: var(--bw-muted)"
+            >
+              {{ t('brand.myScores.card.addUrl') }}
+            </NuxtLink>
+          </div>
+        </div>
       </div>
 
     </div>

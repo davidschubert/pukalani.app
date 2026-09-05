@@ -21,6 +21,15 @@ import type { BrandCheckResult, BrandCheckCategoryResult, BrandCheckCriterionRes
  * lieferte dieselbe Zeichenkette zweimal ein anderes Ergebnis und die
  * Hydration bräche. Das Datum ist tagesgenau — die Zone ist hier kein Verlust.
  *
+ * ── DIE BRANCHE STEHT (NOCH) NICHT IM KOPF ────────────────────────────────
+ * Plan §3b sieht hier eine Zeile „Branche: <Label>" mit dem Weg „Stimmt
+ * nicht?" vor. Der KORREKTUR-Weg ist gebaut (`BwBrandCheckCorrectionForm`),
+ * die ANZEIGE nicht: `BrandCheckResult` trägt kein `industry`, und
+ * `GET /api/brand/check/<id>` liefert es folgerichtig auch nicht mit — es steht
+ * in der Zeile (brand-017) und wandert bisher nur ins Ranking. Eine erfundene
+ * Anzeige wäre schlimmer als keine; sobald das Feld in der Antwort steht,
+ * reicht diese Seite es als `current` durch, mehr ist dort nicht zu tun.
+ *
  * ── DER REPORT IST EHRLICH EIN VORAB-EINTRAG ──────────────────────────────
  * Die Details stehen unten auf der Seite (Hybrid: sichtbar, aber zugeklappt).
  * Der REPORT als Dokument kommt in Phase 2 — das Formular sagt genau das und
@@ -28,7 +37,7 @@ import type { BrandCheckResult, BrandCheckCategoryResult, BrandCheckCriterionRes
  */
 definePageMeta({ layout: 'default' })
 
-const { t, te, locale } = useI18n()
+const { t, te } = useI18n()
 const route = useRoute()
 const localePath = useLocalePath()
 const request = useRequestFetch()
@@ -61,17 +70,6 @@ const host = computed(() => result.value?.host ?? '')
 useSeoMeta({
   title: () => (host.value ? t('brand.check.result.seoTitle', { host: host.value }) : t('brand.check.result.seoTitleEmpty')),
   robots: 'noindex, nofollow',
-})
-
-const createdAt = computed(() => {
-  const raw = result.value?.createdAt
-  if (!raw) return ''
-  const date = new Date(raw)
-  if (Number.isNaN(date.getTime())) return ''
-  return new Intl.DateTimeFormat(locale.value === 'de' ? 'de-DE' : 'en-US', {
-    dateStyle: 'long',
-    timeZone: 'UTC',
-  }).format(date)
 })
 
 /** Titel und nächster Schritt eines Kriteriums — mit Rückfall, falls der
@@ -162,21 +160,32 @@ async function copyLink(): Promise<void> {
           <div class="flex flex-wrap items-center gap-8">
             <BwScoreRing :value="result.score" :size="132" />
             <div class="min-w-0 flex-1">
-              <p class="bw-label uppercase tracking-widest" style="color: var(--bw-muted)">{{ t('brand.check.result.eyebrow') }}</p>
+              <p class="bw-label uppercase tracking-widest" style="color: var(--bw-muted)">{{ result.source === 'document' ? t('brand.check.document.eyebrow') : t('brand.check.result.eyebrow') }}</p>
               <h1 class="mt-3 text-balance text-4xl font-extralight leading-tight tracking-tight sm:text-5xl">
                 {{ t(`brand.check.bands.${result.band}`) }}
               </h1>
-              <p class="bw-label mt-3 leading-relaxed" style="color: var(--bw-muted)">
-                {{ t('brand.check.result.stand', { host: result.host, date: createdAt }) }}
-              </p>
+              <BwBrandScoreSource :result="result" class="mt-3" />
             </div>
           </div>
           <p class="mt-8 max-w-2xl text-sm leading-relaxed" style="color: var(--bw-ink-soft)">{{ t('brand.check.result.maturity') }}</p>
-          <div class="mt-6">
+          <div class="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2">
             <UButton
               icon="i-ph-link-simple" size="sm" color="neutral" variant="ghost" class="rounded-full"
               :label="t('brand.check.result.copy')" data-check-copy @click="copyLink"
             />
+            <!-- Vergleichen (P4): dieser Check als linke Seite, die rechte
+                 wählt man dort aus dem Ranking. -->
+            <UButton
+              icon="i-ph-columns" size="sm" color="neutral" variant="ghost" class="rounded-full"
+              :label="t('brand.checkCompare.fromResult')"
+              :to="localePath({ path: '/brand-check/vergleich', query: { a: result.id } })"
+              data-check-compare
+            />
+            <!-- Branche falsch zugeordnet? Der Vorschlag geht in die
+                 Warteschlange des Betreibers (Plan §3b); `current` ist der
+                 heutige Wert aus der Zeile, damit der Vorschlag nicht ins
+                 Blaue geht. -->
+            <BwBrandCheckCorrectionForm :check-id="result.id" :current="result.industry" />
           </div>
         </section>
 

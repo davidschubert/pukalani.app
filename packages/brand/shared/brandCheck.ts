@@ -1,3 +1,5 @@
+import type { BrandStepKey } from './slotRegistry'
+
 /**
  * DER KATALOG UND DIE RECHNUNG DES BRAND-CHECKS (docs/archiv/BRAND-CHECK.md §3
  * und §4, Bewertungsmodell v2 aus BRAND-WIZARD-PHASE-1 „Brand Score") — pur,
@@ -636,4 +638,282 @@ export function pickBrandCheckFindings(scores: BrandCheckScores, limit = 3): str
     .sort((a, b) => (b.gap - a.gap) || (a.index - b.index))
     .slice(0, Math.max(0, limit))
     .map(entry => entry.id)
+}
+
+// ── Die Kategorie-Werte, vergleichbar gemacht ──────────────────────────────
+
+/**
+ * DIE ACHT KATEGORIEN AUF 0–100 — die eine Umrechnung, mit der zwei
+ * Kategorien (und zwei Checks) überhaupt nebeneinander stehen dürfen.
+ *
+ * `points` aus der gespeicherten Rechnung wäre der falsche Wert dafür: er
+ * trägt das GEWICHT (Eigenständigkeit geht bis 15, Handwerk bis 10) — eine 9
+ * neben einer 9 hiesse dort zweierlei. Gerechnet wird der Anteil der
+ * ERREICHBAREN Punkte, also dieselbe Normalisierung, die auch der Gesamtwert
+ * benutzt, nur je Kategorie.
+ *
+ * `locked` (kein einziges bewertbares Kriterium) wird `null` und NICHT 0:
+ * „konnten wir nicht ansehen" ist keine schwache Kategorie. Genau davon lebt
+ * die Gegenüberstellung — ein `null` gegen eine 60 ist kein Absturz, sondern
+ * eine fehlende Messung.
+ *
+ * Sie steht HIER und nicht in der Ranking-Route, seit ein zweiter Leser
+ * dazugekommen ist (der Verlauf einer Brand): dieselbe Zahl, zweimal
+ * gerechnet, wäre zweimal eine Gelegenheit, verschieden zu runden.
+ */
+export interface BrandCheckCategoryLike {
+  key: string
+  raw: number
+  assessable: number
+  locked: boolean
+}
+
+export interface BrandCheckCategoryScore {
+  id: string
+  score: number | null
+}
+
+export function brandCheckCategoryScores(
+  categories: readonly Partial<BrandCheckCategoryLike>[],
+): BrandCheckCategoryScore[] {
+  return categories
+    .filter(entry => !!entry && typeof entry.key === 'string')
+    .map((entry) => {
+      const assessable = typeof entry.assessable === 'number' ? entry.assessable : 0
+      const raw = typeof entry.raw === 'number' ? entry.raw : 0
+      const locked = entry.locked === true || assessable <= 0
+      return {
+        id: entry.key as string,
+        score: locked ? null : Math.round((raw / (assessable * BRAND_CHECK_CRITERION_MAX)) * 100),
+      }
+    })
+}
+
+// ── Die Experten-To-dos ────────────────────────────────────────────────────
+
+/**
+ * WELCHES WIZARD-KAPITEL EIN KRITERIUM ADRESSIERT — und wo bewusst KEINES steht.
+ *
+ * Der Check misst einen AUFTRITT, der Wizard baut ein FUNDAMENT; beides deckt
+ * sich nur zur Hälfte. Vier Kategorien haben ein Kapitel, in dem genau diese
+ * Frage gestellt wird:
+ *  · Eigenständigkeit und Positionierung ⇒ `pvm` (Purpose · Vision · Mission
+ *    · Positionierung) — dort entstehen der erste Satz, der Standpunkt und die
+ *    Abgrenzung.
+ *  · Konsistenz und emotionale Wirkung ⇒ `archetype` (Archetyp & Stimme) —
+ *    dort entstehen Ton, Vokabular und die Stimme, die eine Seite trägt.
+ *
+ * Die vier anderen (visuelle Identität, Markenerlebnis, Anpassungsfähigkeit,
+ * Handwerk) bekommen `''`, und das ist eine AUSSAGE: ein fehlendes Favicon,
+ * ein fehlender Viewport oder ein doppelter `title` sind Umsetzung, kein
+ * Fundament — ein Link ins Kapitel „Werte" wäre dort ein Versprechen, das der
+ * Wizard nicht einlöst.
+ *
+ * Der Wert ist ein `BrandStepKey` (Typprüfung gegen die Registry) bzw. `''` —
+ * eine erfundene Kapitel-Adresse führte im Dashboard auf eine 404.
+ */
+export const BRAND_CHECK_WIZARD_STEPS: Readonly<Record<BrandCheckCategoryKey, BrandStepKey | ''>> = {
+  distinctiveness: 'pvm',
+  clarity: 'pvm',
+  consistency: 'archetype',
+  emotion: 'archetype',
+  visual: '',
+  experience: '',
+  adaptability: '',
+  craft: '',
+}
+
+/** Das Kapitel eines KRITERIUMS (über seine Kategorie) — `''` = keines. */
+export function brandCheckWizardStep(criterionId: string): BrandStepKey | '' {
+  const criterion = brandCheckCriterionById(criterionId)
+  return criterion ? BRAND_CHECK_WIZARD_STEPS[criterion.category] : ''
+}
+
+/** Ein Kriterium, so wie es in einer gespeicherten Zeile steht. */
+export interface BrandCheckCriterionLike {
+  id: string
+  score: BrandCheckScoreValue
+  evidence: string
+  note: string
+}
+
+export interface BrandCheckTodo {
+  criterionId: string
+  category: BrandCheckCategoryKey
+  /** 0 oder 1 — eine 2 ist kein To-do, ein `null` erst recht nicht. */
+  score: 0 | 1
+  evidence: string
+  note: string
+  /** Der gewichtete Abstand zur 2 — die Sortiergrösse, sichtbar gemacht. */
+  gap: number
+  /** Das Wizard-Kapitel oder `''` (s. `BRAND_CHECK_WIZARD_STEPS`). */
+  wizardStep: BrandStepKey | ''
+}
+
+/**
+ * „WAS DER EXPERTE JETZT ANGEHEN WÜRDE" (BRAND-CHECK-SEITE §5) — dieselbe
+ * Regel wie die drei Befunde, nur OHNE Deckel.
+ *
+ * Wörtlich dieselbe: `brandCheckWeightedGap` sortiert, die Katalog-Reihenfolge
+ * bricht Gleichstände, `null` kommt nicht vor. Eine zweite Rangfolge daneben
+ * hiesse, dass die Ergebnis-Seite drei Punkte nennt und die To-do-Liste
+ * darunter mit einem vierten anfängt.
+ *
+ * `null` FEHLT HIER AUS DEMSELBEN GRUND wie bei den Befunden: es ist keine
+ * Schwäche, sondern eine Grenze unserer Messung — und beim Dokument-Check sind
+ * das alle sechzehn gerechneten Kriterien. Stünden sie in der Liste, bestünde
+ * die halbe To-do-Liste einer Brand ohne Website aus „Favicon anlegen".
+ *
+ * Die Eingabe ist die KRITERIEN-Liste eines gespeicherten Ergebnisses (sie
+ * trägt Beleg und Notiz mit sich, `BrandCheckResult` passt strukturell) — nicht
+ * die `scores`-Karte: ein To-do ohne Beleg wäre wieder das „gefühlt", gegen das
+ * der ganze Check gebaut ist. Unbekannte Ids (Bestandsdaten eines älteren
+ * Katalogs) fallen raus, statt ohne Gewicht ganz vorn zu landen.
+ */
+export function pickBrandCheckTodos(
+  result: { criteria: readonly BrandCheckCriterionLike[] },
+): BrandCheckTodo[] {
+  const order = new Map(BRAND_CHECK_CRITERIA.map((criterion, index) => [criterion.id, index]))
+
+  return result.criteria
+    .filter(entry => entry.score === 0 || entry.score === 1)
+    .map(entry => ({ entry, criterion: brandCheckCriterionById(entry.id) }))
+    .filter((pair): pair is { entry: BrandCheckCriterionLike, criterion: BrandCheckCriterion } =>
+      pair.criterion !== null)
+    .map(({ entry, criterion }) => ({
+      criterionId: entry.id,
+      category: criterion.category,
+      score: entry.score as 0 | 1,
+      evidence: entry.evidence ?? '',
+      note: entry.note ?? '',
+      gap: brandCheckWeightedGap(entry.id, entry.score),
+      wizardStep: BRAND_CHECK_WIZARD_STEPS[criterion.category],
+    }))
+    .sort((a, b) =>
+      (b.gap - a.gap)
+      || ((order.get(a.criterionId) ?? 0) - (order.get(b.criterionId) ?? 0)))
+}
+
+// ── Der Dokument-Check (BRAND-CHECK-SEITE §5b) ─────────────────────────────
+
+/**
+ * DIE FASSUNG DER DOKUMENT-RECHNUNG. Sie ist eine EIGENE (§5b: „damit
+ * Website- und Dokument-Scores nie in einer Zahl verglichen werden") — nicht,
+ * weil anders gerechnet würde (`computeBrandCheck` ist dieselbe Funktion),
+ * sondern weil anderes GEMESSEN wird: sechzehn der vierzig Kriterien gibt es
+ * an einem Dokument nicht, sie fallen als „nicht bewertbar" aus der
+ * Normalisierung. Eine 78 aus dem Dokument und eine 78 aus der Website sagen
+ * deshalb Verschiedenes, und die `scoreVersion` ist die einzige Stelle, an der
+ * eine spätere Auswertung das noch erkennen kann.
+ */
+export const BRAND_CHECK_DOC_SCORE_VERSION = 'doc-score-1'
+
+/**
+ * DER ZWISCHENSPEICHER-SCHLÜSSEL EINES DOKUMENT-CHECKS.
+ *
+ * Er sieht aus wie eine Adresse und ist keine — genau deshalb trägt er das
+ * Präfix `doc:`: ein `urlKey` besteht sonst aus Host und Pfad
+ * (`brandCheckUrlKey`), und ein Doppelpunkt kann darin nie vorkommen. Damit
+ * greift der Sieben-Tage-Zwischenspeicher JE BRAND, ohne dass ein
+ * Dokument-Check je eine Website verdecken könnte (oder umgekehrt).
+ */
+export function brandCheckDocumentUrlKey(profileId: string): string {
+  return `doc:${profileId}`.slice(0, BRAND_CHECK_URL_KEY_MAX)
+}
+
+/**
+ * DIE ZEILE EINES DOKUMENT-CHECKS — pur, damit die REGEL prüfbar ist und nicht
+ * nur die Route.
+ *
+ * Jede Spalte steht explizit da (CLAUDE.md, dieselbe Regel wie in
+ * `check.post.ts`): eine neue Spalte soll eine Entscheidung an dieser Stelle
+ * sein und kein stiller Default. Drei Werte sind dabei die eigentliche Aussage
+ * dieses Checks und werden deshalb hier gesetzt und nicht vom Aufrufer:
+ *
+ *  · `source: 'document'` — die Quelle, an der die Ergebnis-Seite „Fundament-
+ *    Dokument" statt einer Adresse zeigt.
+ *  · `url: ''` — es gibt keine. Ein „Platzhalter" wie die Website der Brand
+ *    wäre eine Adresse, die dieser Check nie gelesen hat.
+ *  · `hidden: false` — ein frischer Check ist nie ausgeblendet; `hidden` ist
+ *    die Antwort des Betreibers auf einen Entfernungswunsch.
+ *
+ * `host` trägt den MARKENNAMEN. Das ist bewusst dieselbe Spalte wie beim
+ * Website-Check: sie beantwortet die Frage „worüber redet diese Zeile", und
+ * eine zweite Spalte „name" hiesse, dass jede Liste künftig zwei Felder
+ * abfragen muss, um eine Überschrift zu setzen.
+ */
+export interface BrandCheckDocumentRowInput {
+  profileId: string
+  /** Der Markenname — er landet in `host` (s. o.). */
+  brandName: string
+  locale: string
+  userId: string
+  rankingOptIn: boolean
+  industry: string
+  model: string
+  promptVersion: string
+  textHash: string
+  ipHash: string
+  computation: BrandCheckComputation
+  criteria: readonly BrandCheckCriterionLike[]
+  findings: readonly { criterionId: string, evidence: string }[]
+}
+
+/** Deckel der Spalten `brand_checks.host` bzw. `.model` (brand-016). */
+const BRAND_CHECK_HOST_MAX = 256
+const BRAND_CHECK_MODEL_MAX = 120
+
+/**
+ * DIE SPALTEN EINER `brand_checks`-ZEILE — vollständig und getypt.
+ *
+ * Sie steht als eigener Typ da, damit `createRow<BrandCheckRow>` sie
+ * annimmt: ein `Record<string, unknown>` würde dort abgewiesen, und genau das
+ * ist die Sicherung, die eine vergessene Spalte findet.
+ */
+export interface BrandCheckRowData {
+  urlKey: string
+  url: string
+  host: string
+  locale: string
+  score: number
+  band: string
+  scoreVersion: string
+  promptVersion: string
+  model: string
+  categories: string
+  criteria: string
+  findings: string
+  textHash: string
+  ipHash: string
+  industry: string
+  rankingOptIn: boolean
+  hidden: boolean
+  userId: string
+  profileId: string
+  source: string
+}
+
+export function brandCheckDocumentRow(input: BrandCheckDocumentRowInput): BrandCheckRowData {
+  return {
+    urlKey: brandCheckDocumentUrlKey(input.profileId),
+    url: '',
+    host: input.brandName.slice(0, BRAND_CHECK_HOST_MAX),
+    locale: input.locale,
+    score: input.computation.score,
+    band: input.computation.band,
+    scoreVersion: BRAND_CHECK_DOC_SCORE_VERSION,
+    promptVersion: input.promptVersion,
+    model: input.model.slice(0, BRAND_CHECK_MODEL_MAX),
+    categories: JSON.stringify(input.computation.categories),
+    criteria: JSON.stringify(input.criteria),
+    findings: JSON.stringify(input.findings),
+    textHash: input.textHash,
+    ipHash: input.ipHash,
+    industry: input.industry,
+    rankingOptIn: input.rankingOptIn,
+    hidden: false,
+    userId: input.userId,
+    profileId: input.profileId,
+    source: 'document',
+  }
 }
