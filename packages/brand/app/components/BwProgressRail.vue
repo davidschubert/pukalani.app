@@ -82,8 +82,14 @@ export interface BwRailStep {
   minutes?: string
   info?: BwRailStepInfo
   /* Runde 78 (David): 'result' = Ergebnis-Ansicht der Schicht — letzter
-   * Punkt der Gruppe, verlinkt statt Info-Icon, gesperrt bis alles fertig. */
-  kind?: 'result'
+   * Punkt der Gruppe, verlinkt statt Info-Icon, gesperrt bis alles fertig.
+   *
+   * 'document' = „Euer Branding" (BW2 Paket 7, §10): der letzte Eintrag UNTER
+   * den Kapiteln, mit eigener Adresse (`to`) und IMMER klickbar — Lesen ist
+   * immer erlaubt, und ein Dokument, das erst am Ende aufgeht, sähe man nie
+   * wachsen. Es ist bewusst KEIN 'result': das ist die gesperrte Ergebnis-Kachel
+   * der Übersicht (R35), eine andere Sache mit einer anderen Regel. */
+  kind?: 'result' | 'document'
   to?: string
   /**
    * DIE SESSIONS DIESES KAPITELS (§11) — nur die Sidebar rendert sie, und nur

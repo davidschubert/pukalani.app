@@ -16,6 +16,7 @@ import {
   BRAND_REVIEW_MAX_TOKENS,
   BRAND_REVIEW_PROMPT_VERSION,
   type BrandReviewDocumentEntry,
+  type BrandReviewScope,
   type BrandReviewSessionInfo,
   brandReviewPrompt,
   brandReviewSystemPrompt,
@@ -106,6 +107,12 @@ export interface BrandReviewRequest {
   userId: string
   profileId: string
   mode: BrandReviewMode
+  /**
+   * NUR im Kapitel-Modus: `document` macht daraus den PRÜFBLICK (§10) — dieselbe
+   * Antwort-Form, alle Kapitel im Prompt, Gewicht 5 statt 2. Ohne Angabe gilt
+   * `chapter`, also bleibt jeder bestehende Aufrufer unverändert.
+   */
+  scope?: BrandReviewScope
   stepKey: BrandStepKey
   /** `null` im Kapitel-Modus. */
   session: BrandReviewSessionInfo | null
@@ -262,6 +269,7 @@ function stubReview(request: BrandReviewRequest): BrandSessionReview {
 function promptFor(request: BrandReviewRequest, hypothesis?: readonly BrandFinding[]): string {
   return brandReviewPrompt({
     mode: request.mode,
+    ...(request.scope ? { scope: request.scope } : {}),
     stepKey: request.stepKey,
     session: request.session,
     value: request.value,
@@ -403,6 +411,104 @@ export function clearBrandChapterReviews(): void {
 }
 
 /**
+ * DER PRÜFBLICK LÄUFT EINMAL JE DOKUMENT-STAND (§10, Paket 7).
+ *
+ * ── WARUM ÜBERHAUPT EIN RIEGEL, WENN ER DOCH AUF KLICK LÄUFT ─────────────
+ * Weil ein Klick nicht der einzige Weg zu einem zweiten Aufruf ist: ein
+ * Doppelklick, ein Reload während der Anfrage, ein zweiter Tab. Der Aufruf
+ * wiegt 5 im Eimer von 120 — drei versehentliche Wiederholungen sind ein
+ * Achtel des Tages für dasselbe Ergebnis.
+ *
+ * ── DER MERKER LIEGT IM PROZESS, UND ZWAR MANGELS ORT ────────────────────
+ * `brand_profiles` hat kein freies JSON-Feld: `storyMeta` gehört der Brand
+ * Story (inputHash, generatedAt, editedByUser), alles andere sind getypte
+ * Spalten. Eine EIGENE Spalte für einen Cache-Stempel wäre eine Migration,
+ * deren einziger Zweck es ist, einen Aufruf zu sparen, den der Mensch selbst
+ * auslöst — dieselbe Rechnung, aus der schon der Kapitel-Blick prozess-lokal
+ * merkt (s. dort) und die Gesprächs-Idempotenz ebenso.
+ *
+ * Der Schaden bei mehreren Prozessen oder nach einem Neustart ist EIN weiterer
+ * Aufruf mit Gewicht 5; der Preis einer Spalte wäre eine Migration auf jeder
+ * Instanz plus ein Feld, das niemand liest.
+ *
+ * ── EIN EINTRAG JE BRANDING, NICHT JE STAND ──────────────────────────────
+ * Anders als beim Kapitel-Blick (`profileId:stepKey:revision`): der
+ * Dokument-Stand ändert sich mit JEDER Bestätigung, und alte Stände sind
+ * danach wertlos — sie können nicht zurückkommen (`revision` steigt
+ * monoton). Ein Eintrag je Branding reicht also, und die Leseroute kann
+ * daraus „zuletzt geprüft am" beantworten, ohne einen Schlüssel zu kennen.
+ */
+export interface BrandDocumentReviewRun {
+  revisionKey: string
+  /** ISO-Zeitpunkt — die Leseroute meldet ihn als `lastRunAt`. */
+  at: string
+  /** Die Sessions, deren Urteil dieser Lauf nachgeholt hat. */
+  caughtUp: readonly string[]
+  reviewedBy: BrandReviewStage | null
+}
+
+const DOCUMENT_REVIEW_TTL_MS = 30 * 60_000
+const DOCUMENT_REVIEW_MAX_KEYS = 500
+const DOCUMENT_REVIEWS = new Map<string, { run: BrandDocumentReviewRun, at: number }>()
+
+function pruneDocumentReviews(now: number): void {
+  for (const [key, entry] of DOCUMENT_REVIEWS) {
+    if (now - entry.at >= DOCUMENT_REVIEW_TTL_MS) DOCUMENT_REVIEWS.delete(key)
+  }
+  while (DOCUMENT_REVIEWS.size > DOCUMENT_REVIEW_MAX_KEYS) {
+    const oldest = DOCUMENT_REVIEWS.keys().next()
+    if (oldest.done) break
+    DOCUMENT_REVIEWS.delete(oldest.value)
+  }
+}
+
+/**
+ * `granted: true` = dieser Prüfblick darf laufen. `granted: false` = derselbe
+ * Stand wurde in diesem Prozess schon geprüft; `previous` trägt dann das
+ * Ergebnis von damals, damit die Antwort vollständig bleibt (die BEFUNDE kommen
+ * ohnehin aus der Tabelle — der Riegel spart den Aufruf, nicht die Auskunft).
+ */
+export function claimBrandDocumentReview(
+  profileId: string,
+  revisionKey: string,
+  now: number = Date.now(),
+): { granted: boolean, previous: BrandDocumentReviewRun | null } {
+  pruneDocumentReviews(now)
+  const entry = DOCUMENT_REVIEWS.get(profileId)
+  if (entry && entry.run.revisionKey === revisionKey) return { granted: false, previous: entry.run }
+  return { granted: true, previous: null }
+}
+
+/** Was dieser Lauf hinterlässt — erst NACH dem Aufruf, mit seinem Ergebnis. */
+export function rememberBrandDocumentReview(
+  profileId: string,
+  run: BrandDocumentReviewRun,
+  now: number = Date.now(),
+): void {
+  pruneDocumentReviews(now)
+  DOCUMENT_REVIEWS.set(profileId, { run, at: now })
+}
+
+/** „Zuletzt geprüft" für die Leseroute — `null`, solange hier nichts lief. */
+export function readBrandDocumentReview(
+  profileId: string,
+  now: number = Date.now(),
+): BrandDocumentReviewRun | null {
+  const entry = DOCUMENT_REVIEWS.get(profileId)
+  if (!entry) return null
+  if (now - entry.at >= DOCUMENT_REVIEW_TTL_MS) {
+    DOCUMENT_REVIEWS.delete(profileId)
+    return null
+  }
+  return entry.run
+}
+
+/** Nur für Beweise/Tests. */
+export function clearBrandDocumentReviews(): void {
+  DOCUMENT_REVIEWS.clear()
+}
+
+/**
  * DER GANZE AUFRUF: Kill-Switch, Ersatz, Stufe 1, ggf. Stufe 2 (s. Kopf).
  */
 export async function runBrandSessionReview(
@@ -423,12 +529,16 @@ export async function runBrandSessionReview(
   }
 
   /**
-   * WAS STUFE 1 WIEGT: 1 für eine Session, 2 für ein ganzes Kapitel (§13). Der
-   * Kapitel-Modus liest dieselbe Menge Dokument, aber ein ganzes Kapitel
-   * dagegen — er ist der teurere Aufruf und zählt deshalb doppelt.
+   * WAS STUFE 1 WIEGT: 1 für eine Session, 2 für ein ganzes Kapitel, 5 für den
+   * PRÜFBLICK über die ganze Foundation (§13). Der Kapitel-Modus liest dieselbe
+   * Menge Dokument, aber ein ganzes Kapitel dagegen — er ist der teurere Aufruf
+   * und zählt deshalb doppelt; der Prüfblick trägt neun Kapitel im Prompt und
+   * zählt fünffach.
    */
   const stage1Weight = request.mode === 'chapter'
-    ? BRAND_AI_REVIEW_WEIGHTS.chapter
+    ? (request.scope === 'document'
+        ? BRAND_AI_REVIEW_WEIGHTS.document
+        : BRAND_AI_REVIEW_WEIGHTS.chapter)
     : BRAND_AI_REVIEW_WEIGHTS.stage1
   const stage1 = await runStage(request, reviewModel(), stage1Weight, promptFor(request))
   if (!stage1.review) {
@@ -456,6 +566,7 @@ export async function runBrandSessionReview(
 
   logEvent('info', 'brand.review_completed', {
     mode: request.mode,
+    scope: request.scope ?? 'chapter',
     stepKey: request.stepKey,
     slotId: request.session?.id ?? '',
     reviewedBy,

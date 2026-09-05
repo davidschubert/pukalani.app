@@ -42,7 +42,8 @@
       "acceptancePending": "Opens once every field in this chapter is confirmed.",
       "chapterCount": "{confirmed} of {total} confirmed",
       "chapterCountStale": "{confirmed} of {total} confirmed · {stale} to revisit",
-      "chapterEffort": "{count} sessions, ~{minutes} min"
+      "chapterEffort": "{count} sessions, ~{minutes} min",
+      "document": "Your branding"
     },
     "legal": {
       "imprint": "Imprint",
@@ -783,7 +784,35 @@
         "changed": "Things have moved on — please read it again.",
         "failed": "That did not work.",
         "loading": "Checking …"
-      }
+      },
+      "continueToDocument": "On to your branding"
+    },
+    "document": {
+      "title": "Your branding",
+      "lead": "Every confirmed decision of your foundation, chapter by chapter. This is for reading — the accepting happens in the chapter.",
+      "loadFailed": "The document could not be loaded.",
+      "empty": "Nothing here yet — it fills up as soon as you have talked through a chapter.",
+      "standTitle": "Progress",
+      "standProgress": "Accepted",
+      "state": {
+        "done": "accepted",
+        "active": "in progress",
+        "open": "open",
+        "locked": "locked"
+      },
+      "chapter": {
+        "toAcceptance": "To the review"
+      },
+      "reviewTitle": "The final look",
+      "reviewLead": "The team reads your whole document in one go and reports contradictions, gaps and lines that could be sharper.",
+      "review": "Check the document",
+      "reviewing": "Reading …",
+      "reviewNeedsChapter": "Once a chapter is accepted, the look is worth it.",
+      "unreviewedCount": "{count} session has not been read over yet — it will be caught up. | {count} sessions have not been read over yet — they will be caught up.",
+      "reviewResult": "{caughtUp} sessions caught up, {findings} findings.",
+      "stillUnreviewed": "{count} session is still waiting — the next look will catch it up. | {count} sessions are still waiting — the next look will catch them up.",
+      "noFindings": "Nothing found that rubs.",
+      "reviewFailed": "The look did not come through just now. Your document stands either way — try again later."
     },
     "session": {
       "minutes": "~{minutes} min",

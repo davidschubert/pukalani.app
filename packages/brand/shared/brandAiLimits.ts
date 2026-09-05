@@ -112,13 +112,17 @@ export const BRAND_AI_REVIEW_DAILY_LIMIT = 120
  * sein: sie bilden die KOSTENVERHÄLTNISSE ab, nicht eine Rechnung — ein Eimer,
  * der Tokens zählte, wäre eine zweite Buchhaltung neben der des Anbieters.
  *
- * Der Prüfblick (§10, Gewicht 5) fehlt hier bewusst: er ist Paket 7, und ein
- * Gewicht ohne Aufrufer wäre eine Zahl, die niemand prüft.
+ * `document` (Paket 7, §13) ist der PRÜFBLICK: derselbe Kapitel-Modus, aber
+ * über ALLE Kapitel gegen das ganze Dokument. 5 ist die teuerste Zahl in
+ * dieser Tabelle, und sie ist verdient — der Aufruf trägt neun Kapitel im
+ * Prompt. Er läuft ausschliesslich auf Klick (§16), also bezahlt ihn nie
+ * jemand, der ihn nicht bestellt hat.
  */
 export const BRAND_AI_REVIEW_WEIGHTS = {
   stage1: 1,
   stage2: 3,
   chapter: 2,
+  document: 5,
 } as const
 
 export type BrandAiReviewWeight = keyof typeof BRAND_AI_REVIEW_WEIGHTS

@@ -34,6 +34,7 @@ import type {
   BrandNextSessionRef,
   BrandSessionState,
   BrandStepAcceptance,
+  BrandStepState,
   BrandStoredStepState,
 } from '../brandJourney'
 import type {
@@ -634,6 +635,98 @@ export interface BrandSessionCloseResponse {
     affected: string[]
     restamped: string[]
   }
+}
+
+// ── Das Dokument und der Prüfblick (BW2 Paket 7, Plan §10) ────────────────
+
+/**
+ * EIN KAPITEL IM DOKUMENT — dieselbe Form wie auf der Finalen Abnahme, nur
+ * neunmal.
+ *
+ * ── WARUM DIESELBEN `sessions` WIE IN DER KAPITEL-ABNAHME ────────────────
+ * Das Dokument IST die Finale Abnahme der Ebene 1 (§10: „dieselbe Seite wie
+ * §5a, nur über alle Kapitel"). Eine eigene, schlankere Zeilenform hätte
+ * zwangsläufig eine zweite Antwort auf „was steht in diesem Feld" — und
+ * spätestens beim ersten veralteten Wert liefen die beiden Seiten
+ * auseinander. Das Beispiel reist trotzdem mit: die Oberfläche entscheidet, ob
+ * sie es zeigt (im Dokument nicht — dort steht die Marke, nicht die Lehre).
+ *
+ * ÜBERSPRUNGENE Kapitel stehen gar nicht erst drin (§10): das Dokument ist
+ * das, was diese Marke ist, nicht das, was sie hätte sein können.
+ */
+export interface BrandDocumentChapter {
+  stepKey: BrandStepKey
+  /** Der GELTENDE Zustand aus `resolveBrandJourney` (ohne `skipped`, s. o.). */
+  state: BrandStepState
+  /** Der GESPEICHERTE Zustand der Zeile — die Abnahme-Seite liest ihn so. */
+  storedState: BrandStoredStepState
+  /** Für „Gilt weiter" und jede andere Handlung an einer Zeile dieses Kapitels. */
+  revision: number
+  restartedAt: string | null
+  acceptance: BrandStepAcceptance
+  sessions: BrandAcceptanceSessionView[]
+}
+
+/**
+ * WAS DER PRÜFBLICK VORFINDET (§10 „Nachholung aller Sessions mit
+ * `reviewed: false`").
+ *
+ * `unreviewed` sind die bestätigten Sessions OHNE Urteil — fail-soft
+ * ausgefallene Schliess-Aufrufe (§7). Sie stehen in REGISTRY-Reihenfolge, weil
+ * der Deckel die ersten zehn nimmt und die frühen Felder die sind, an denen
+ * der Rest hängt.
+ *
+ * `lastRunAt`/`lastRunRevisionKey` fehlen, solange in DIESEM Prozess kein
+ * Prüfblick lief (s. `claimBrandDocumentReview` — der Merker ist bewusst
+ * prozess-lokal). Sie sind eine Auskunft, keine Zusage: der Knopf bleibt
+ * klickbar, und der Server entscheidet beim Klick.
+ */
+export interface BrandDocumentReviewState {
+  unreviewed: string[]
+  lastRunAt?: string
+  lastRunRevisionKey?: string
+}
+
+export interface BrandDocumentResponse {
+  profileId: string
+  title: string
+  /** Die Kapitel des WEGES, in Registry-Reihenfolge. */
+  chapters: BrandDocumentChapter[]
+  /** ALLE offenen Befunde des Brandings — kapitelübergreifend, wie die Tabelle. */
+  findings: BrandFindingView[]
+  review: BrandDocumentReviewState
+}
+
+/**
+ * DIE ANTWORT DES PRÜFBLICKS (§10) — er läuft NUR auf Klick (§16), nie von
+ * selbst.
+ *
+ * `ran: false` heisst „derselbe Dokument-Stand wurde in diesem Prozess schon
+ * geprüft": kein Aufruf, kein Geld, und trotzdem die volle Auskunft (die
+ * Befunde kommen aus der Tabelle, `caughtUp` aus dem gemerkten Lauf). Das ist
+ * dieselbe Arbeitsteilung wie beim Kapitel-Blick: der Riegel spart den Aufruf,
+ * nicht die Antwort.
+ *
+ * `stillUnreviewed` ist der Rest hinter dem Deckel (`BRAND_DOCUMENT_CATCHUP_MAX`)
+ * — er verschwindet nicht, er wartet auf den nächsten Klick.
+ */
+export interface BrandDocumentReviewResponse {
+  ran: boolean
+  /** Sessions, deren Urteil dieser Lauf nachgeholt hat. */
+  caughtUp: string[]
+  /** Sessions, die ungeprüft bleiben — Deckel oder fail-soft ausgefallen. */
+  stillUnreviewed: string[]
+  /** ALLE offenen Befunde nach diesem Lauf. */
+  findings: BrandFindingView[]
+  /** Wer den DOKUMENT-Blick geschrieben hat — `null`, wenn keine Stufe durchkam. */
+  reviewedBy: BrandReviewStage | null
+  /**
+   * Der Stand, für den dieser Lauf gilt (Idempotenz-Schlüssel, §10) — und zwar
+   * der NACH der Nachholung: sie schreibt (`reviewed`, Notizen) und bewegt
+   * damit die `revision` der berührten Kapitel. Der nächste Klick rechnet
+   * genau diesen Schlüssel, und nur so hält der Riegel gegen den Doppelklick.
+   */
+  revisionKey: string
 }
 
 /** Die Antwort des KAPITEL-Modus (§5a) — nur Befunde, kein Urteil, kein Wegweiser. */

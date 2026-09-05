@@ -3,8 +3,6 @@ import {
   BRAND_SETTABLE_CONFIDENCE_VALUES,
   type BrandConfidence,
 } from '../../shared/brandJourney'
-import { brandChoiceDisplayLabel } from '../../shared/brandChoiceOptions'
-import { brandSlotValueView } from '../../shared/brandSlotFormat'
 import {
   resolveAcceptanceStage,
   restartWordMatches,
@@ -103,11 +101,17 @@ const emit = defineEmits<{
   decided: [decision: BrandFindingDecisionResponse]
   /** Nach dem Abschluss: das nächste Kapitel mit seiner ersten Session. */
   advance: [target: { stepKey: BrandStepKey, sessionKey: string }]
+  /**
+   * Nach dem LETZTEN Kapitel des Weges: „Euer Branding" (§10). Ein eigenes
+   * Ereignis und kein `advance` mit leerem Ziel — das Dokument ist kein
+   * Kapitel, es ist die Finale Abnahme der Ebene darüber.
+   */
+  document: []
   /** Nach „Nochmal von vorn": zurück auf die erste Session DIESES Kapitels. */
   restarted: [target: { sessionKey: string }]
 }>()
 
-const { t, te, locale } = useI18n()
+const { t, te } = useI18n()
 const toast = useToast()
 const store = useBrandWorkspaceStore()
 const request = useRequestFetch()
@@ -178,74 +182,14 @@ if (import.meta.client) {
 // ── Ein Block: Bereich · Beispiel · eigene Eingabe ────────────────────────
 
 /**
- * EINE GLYPHE JE ZEILE, und die Rangfolge ist die Auskunft: was im Weg steht,
- * schlägt was erledigt ist. Eine abgenommene, aber VERALTETE Zeile als
- * „abgenommen" zu zeigen, versteckte genau den Grund, aus dem die Weiche unten
- * fehlt.
- */
-const STATUS = {
-  deferred: { key: 'brand.acceptance.status.deferred', icon: 'i-ph-clock', tone: 'var(--bw-ink-soft)' },
-  stale: { key: 'brand.acceptance.status.stale', icon: 'i-ph-clock-counter-clockwise', tone: 'var(--bw-stale)' },
-  accepted: { key: 'brand.acceptance.status.accepted', icon: 'i-ph-check-circle-fill', tone: 'var(--bw-accent)' },
-  confirmed: { key: 'brand.acceptance.status.confirmed', icon: 'i-ph-check', tone: 'var(--bw-ink-soft)' },
-  open: { key: 'brand.acceptance.status.open', icon: 'i-ph-circle-dashed', tone: 'var(--bw-muted)' },
-} as const
-
-function statusOf(session: BrandAcceptanceSessionView): typeof STATUS[keyof typeof STATUS] {
-  if (session.deferred) return STATUS.deferred
-  if (session.state === 'stale') return STATUS.stale
-  if (session.accepted) return STATUS.accepted
-  return session.confirmed ? STATUS.confirmed : STATUS.open
-}
-
-/**
- * EIN BLOCK, EINMAL GERECHNET (§5a Schritt 1). Beschriftung, Beispiel, Wert
- * und Status stehen im Template als FERTIGE Angaben — nicht als Aufruf je
- * Zeile: `valueView()` im Markup liefe bei jedem Neuzeichnen erneut durch den
- * Format-Leser, und die Typ-Umwege („ist das jetzt eine Liste?") stünden in
- * der Vorlage statt im Skript.
+ * DIE BLOCK-OPTIK WOHNT SEIT PAKET 7 IN `BwSessionBlock.vue` (§10).
  *
- * Die BESCHRIFTUNG ist Kurz-Label vor Frage — exakt wie in Werkstatt und Log
- * (`slotLabel` dort). Ein zweiter Wortlaut hiesse, dass der Mensch das Feld
- * nicht wiedererkennt, das er gerade besprochen hat. Das BEISPIEL kommt in der
- * OBERFLÄCHEN-Sprache: der Server schickt beide, weil er die Anzeigesprache
- * des Browsers nicht besser kennt als der Browser selbst.
+ * Sie steht dort, weil das DOKUMENT dieselbe Zeile zeigt — Bereich, Beispiel,
+ * eigene Eingabe, Notiz, Befunde. Was hier blieb, ist alles, was mit dem
+ * KAPITEL zu tun hat: seine `revision`, sein Zähler, seine Weiche und der
+ * Schutz-Layer von „Nochmal von vorn". Der Block bekommt die Session, wie der
+ * Server sie schickt, und emittiert zurück, was ein Mensch getan hat.
  */
-interface AcceptanceRow {
-  session: BrandAcceptanceSessionView
-  label: string
-  affects: string
-  example: string
-  value: ReturnType<typeof brandSlotValueView>
-  status: { label: string, icon: string, tone: string }
-  acceptable: boolean
-}
-
-const rows = computed<AcceptanceRow[]>(() => sessions.value.map((session) => {
-  const meta = statusOf(session)
-  const examples = locale.value === 'de' ? session.example.de : session.example.en
-  return {
-    session,
-    label: te(session.labelKey) ? t(session.labelKey) : t(session.questionKey),
-    affects: session.affects.count === 0
-      ? t('brand.session.affectsNone')
-      : t('brand.session.affects', {
-          count: session.affects.count,
-          steps: session.affects.steps.map(key => t(`brand.steps.${key}`)).join(' · '),
-        }),
-    example: examples[0] ?? '',
-    // Eine geschlossene Auswahl zeigt ihren NAMEN, nicht die gespeicherte Id
-    // (dieselbe Regel wie im Log); die FORM (`list`/`structured`) kommt aus
-    // `brandSlotFormat.ts` — hier wird sie nur gelesen.
-    value: brandSlotValueView(
-      slotById(session.slotId)?.schema.kind ?? 'text',
-      brandChoiceDisplayLabel(session.slotId, session.value, locale.value),
-    ),
-    status: { label: t(meta.key), icon: meta.icon, tone: meta.tone },
-    // Abnehmbar ist, was bestätigt und noch nicht abgenommen ist (Schritt 2).
-    acceptable: session.confirmed && !session.accepted,
-  }
-}))
 
 // ── Abnehmen ──────────────────────────────────────────────────────────────
 
@@ -573,103 +517,21 @@ async function confirmRestart(): Promise<void> {
 
     <!-- DIE LISTE: ein Block je Session, in Registry-Reihenfolge. Eine
          optionale Session ohne Wert steht grau dabei — mit Beispiel und leerer
-         Eingabe (§5a Schritt 1). -->
-    <div
-      v-for="row in rows" :key="row.session.slotId"
-      class="rounded-2xl px-4 py-4"
-      :style="row.session.confirmed ? 'background: var(--bw-surface-hi)' : 'background: var(--bw-surface)'"
-    >
-      <div class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-        <p class="min-w-0 text-sm font-medium">{{ row.label }}</p>
-        <span class="bw-label flex flex-none items-center gap-1" :style="`color: ${row.status.tone}`">
-          <UIcon :name="row.status.icon" class="size-3.5" />{{ row.status.label }}
-        </span>
-      </div>
-      <p class="bw-label mt-1" style="color: var(--bw-muted)">{{ row.affects }}</p>
-
-      <!-- BEFUND-CHIPS (§8): offen, weil hier entschieden wird. Der Feld-Link
-           kann in ein ANDERES Kapitel zeigen — deshalb `field`, nicht `session`. -->
-      <div v-if="row.session.findings.length" class="mt-3 flex flex-col gap-2">
-        <BwFindingChip
-          v-for="finding in row.session.findings" :key="finding.id"
-          :finding="finding" :profile-id="profileId"
-          @field="emit('field', $event)"
-          @decided="findingDecided"
-          @stale="acceptance.refresh()"
-        />
-      </div>
-
-      <div v-if="row.example" class="mt-3">
-        <p class="bw-label" style="color: var(--bw-muted)">{{ t('brand.acceptance.exampleLabel') }}</p>
-        <p class="mt-1 text-sm italic leading-relaxed" style="color: var(--bw-ink-soft)">{{ row.example }}</p>
-      </div>
-
-      <div class="mt-3">
-        <p class="bw-label" style="color: var(--bw-muted)">{{ t('brand.acceptance.own') }}</p>
-        <template v-if="row.session.value">
-          <ul v-if="row.value.kind === 'list'" class="mt-1 space-y-1">
-            <li
-              v-for="(item, index) in row.value.items" :key="index"
-              class="bw-doc-text flex gap-2" style="font-size: 0.875rem; line-height: 1.5"
-            >
-              <span class="flex-none" style="color: var(--bw-line-strong)">—</span>{{ item }}
-            </li>
-          </ul>
-          <div v-else-if="row.value.kind === 'blocks'" class="mt-1 space-y-3">
-            <div v-for="(block, index) in row.value.blocks" :key="index">
-              <p class="bw-label" style="color: var(--bw-ink-soft)">{{ block.label }}</p>
-              <p class="bw-doc-text mt-0.5 whitespace-pre-wrap" style="font-size: 0.875rem; line-height: 1.5">{{ block.body }}</p>
-            </div>
-          </div>
-          <p v-else class="bw-doc-text mt-1 whitespace-pre-wrap" style="font-size: 0.875rem; line-height: 1.5">
-            {{ row.value.text }}
-          </p>
-        </template>
-        <p v-else class="bw-pending mt-1">{{ t('brand.acceptance.valueEmpty') }}</p>
-      </div>
-
-      <!-- Die Notiz des Schliess-Aufrufs (§4), eingeklappt — dazu die Gründe
-           abgelehnter Befunde, die als Notiz an ihrer Quell-Session landen
-           (§8). Ohne Inhalt fällt die Zeile weg, statt leer dazustehen. -->
-      <details v-if="row.session.notes" class="mt-3">
-        <summary class="bw-label cursor-pointer" style="color: var(--bw-muted)">{{ t('brand.acceptance.notes') }}</summary>
-        <p class="mt-1 whitespace-pre-wrap text-sm" style="color: var(--bw-ink-soft)">{{ row.session.notes }}</p>
-      </details>
-
-      <div class="mt-3 flex flex-wrap items-center justify-end gap-2">
-        <!-- Ein Knopf, der garantiert in eine Absage liefe, ist kein Angebot:
-             statt seiner steht der GRUND mit dem Weg dorthin. -->
-        <p v-if="!row.session.confirmed" class="bw-label mr-auto" style="color: var(--bw-muted)">
-          {{ t('brand.acceptance.unconfirmed') }}
-        </p>
-        <!-- VERALTET (§9): der Wert steht, seine Grundlage hat sich bewegt.
-             „Gilt weiter" stempelt sie neu — die Sperre fällt, ohne dass
-             jemand ein Gespräch führen muss. -->
-        <UButton
-          v-if="row.session.state === 'stale'"
-          size="xs" color="neutral" variant="ghost" class="rounded-full"
-          icon="i-ph-check" :loading="keeping === row.session.slotId"
-          :label="t('brand.session.keep')"
-          @click="keep(row.session)"
-        />
-        <UButton
-          size="xs" color="neutral" variant="ghost" class="rounded-full"
-          icon="i-ph-pencil-simple" :label="t('brand.acceptance.edit')"
-          @click="edit(row.session)"
-        />
-        <span v-if="row.session.accepted" class="bw-confirm bw-confirm--done bw-confirm--xs">
-          <UIcon name="i-ph-check" class="size-3.5" />{{ t('brand.acceptance.accepted') }}
-        </span>
-        <button
-          v-else
-          type="button" class="bw-confirm bw-confirm--open bw-confirm--xs"
-          :disabled="!row.acceptable || accepting !== null"
-          @click="accept(row.session)"
-        >
-          <UIcon name="i-ph-check" class="size-3.5" />{{ t('brand.acceptance.accept') }}
-        </button>
-      </div>
-    </div>
+         Eingabe (§5a Schritt 1). Die OPTIK des Blocks wohnt in
+         `BwSessionBlock`, weil das Dokument (§10) dieselbe Zeile zeigt. -->
+    <BwSessionBlock
+      v-for="session in sessions" :key="session.slotId"
+      :session="session" :profile-id="profileId"
+      :accepting="accepting === session.slotId"
+      :keeping="keeping === session.slotId"
+      :busy="accepting !== null"
+      @accept="accept(session)"
+      @keep="keep(session)"
+      @edit="edit(session)"
+      @field="emit('field', $event)"
+      @decided="findingDecided"
+      @stale="acceptance.refresh()"
+    />
 
     <!-- NOCH NICHT SO WEIT: die Blocker als ruhige Liste, je Zeile der Grund
          und der Weg in seine Session (§5a Schritt 2/3). -->
@@ -701,7 +563,9 @@ async function confirmRestart(): Promise<void> {
       <p v-if="completing" class="bw-label mt-2" style="color: var(--bw-muted)">{{ t('brand.acceptance.completing') }}</p>
     </div>
 
-    <!-- SCHON ABGENOMMEN: der Weg weiter, nicht die Frage noch einmal. -->
+    <!-- SCHON ABGENOMMEN: der Weg weiter, nicht die Frage noch einmal.
+         Am ENDE des Weges (kein nächstes Kapitel) führt er ins Dokument —
+         die Finale Abnahme der Ebene darüber (§10). -->
     <div v-else-if="stage === 'done'">
       <p class="text-sm leading-relaxed" style="color: var(--bw-ink-soft)">{{ t('brand.acceptance.doneNote') }}</p>
       <UButton
@@ -709,6 +573,12 @@ async function confirmRestart(): Promise<void> {
         class="mt-3 rounded-full" trailing-icon="i-ph-arrow-right"
         :label="t('brand.acceptance.continueTo', { step: t(`brand.steps.${nextStep}`) })"
         @click="advance"
+      />
+      <UButton
+        v-else
+        class="mt-3 rounded-full" trailing-icon="i-ph-arrow-right"
+        :label="t('brand.acceptance.continueToDocument')"
+        @click="emit('document')"
       />
     </div>
 

@@ -174,12 +174,28 @@ export async function loadBrandFinding(
   return row
 }
 
+/**
+ * WO EIN BEFUND HERKOMMT — fest oder je Befund gerechnet (Paket 7).
+ *
+ * Der Schliess-Aufruf und der Kapitel-Blick haben EINE Quelle: die Session
+ * bzw. das Kapitel, in dem sie liefen. Der PRÜFBLICK (§10) hat keine — er
+ * läuft über die ganze Foundation, und seine Befunde gehören dorthin, wo ihre
+ * Felder wohnen. Deshalb darf der Aufrufer statt eines Wertes eine Rechnung
+ * hereingeben; ein Vorgabe-Kapitel für alle wäre ein Stempel, der neun Mal
+ * falsch ist.
+ */
+export type BrandFindingAnchor<T> = T | ((finding: BrandFinding) => T)
+
+function anchor<T>(value: BrandFindingAnchor<T>, finding: BrandFinding): T {
+  return typeof value === 'function' ? (value as (f: BrandFinding) => T)(finding) : value
+}
+
 export interface BrandFindingWriteRequest {
   profileId: string
   /** Das Kapitel der QUELL-Session — die Kapitel-Sperre der Abnahme. */
-  stepKey: BrandStepKey
+  stepKey: BrandFindingAnchor<BrandStepKey>
   /** Die Session, deren Schliess-Aufruf die Befunde erzeugt hat. */
-  sourceSession: string
+  sourceSession: BrandFindingAnchor<string>
   findings: readonly BrandFinding[]
 }
 
@@ -216,6 +232,7 @@ export async function writeBrandFindings(
     const key = brandFindingKey(finding)
     if (seen.has(key)) continue
     seen.add(key)
+    const stepKey = anchor(request.stepKey, finding)
     try {
       const row = await tablesDB.createRow<BrandFindingRow>({
         databaseId,
@@ -223,13 +240,13 @@ export async function writeBrandFindings(
         rowId: ID.unique(),
         data: {
           profileId: request.profileId,
-          stepKey: request.stepKey,
+          stepKey,
           kind: finding.kind,
           slots: JSON.stringify([...finding.slots]),
           why: finding.why,
           suggestion: finding.suggestion ?? '',
           status: 'open',
-          sourceSession: request.sourceSession,
+          sourceSession: anchor(request.sourceSession, finding),
           dismissReason: '',
           resolvedAt: null,
           mentionedAt: null,
@@ -239,7 +256,7 @@ export async function writeBrandFindings(
     }
     catch (error) {
       logEvent('warn', 'brand.finding_write_failed', {
-        stepKey: request.stepKey,
+        stepKey,
         kind: finding.kind,
         message: error instanceof Error ? error.message : String(error),
       })

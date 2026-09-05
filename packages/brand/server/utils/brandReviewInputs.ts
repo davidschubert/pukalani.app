@@ -104,6 +104,33 @@ export function brandReviewNotes(
 }
 
 /**
+ * ALLE NOTIZEN DES BRANDINGS (Paket 7, §10: „der Spezialist liest ALLE Notizen
+ * des Brandings beim Prüfblick").
+ *
+ * Dieselbe Form wie `brandReviewNotes`, nur ohne Kapitel-Grenze — und das ist
+ * genau die Aussage des Prüfblicks: er sucht die Reibungen ZWISCHEN den
+ * Kapiteln, und eine Notiz aus Kapitel A ist oft der Grund, aus dem etwas in
+ * Kapitel E anders klingt. In REGISTRY-Reihenfolge, wie das Dokument selbst.
+ */
+export function brandReviewAllNotes(
+  records: Readonly<Record<string, BrandSlotRecord>>,
+  contentLocale: string,
+  pathKind: BrandPathKind,
+): BrandReviewDocumentEntry[] {
+  const entries: BrandReviewDocumentEntry[] = []
+  for (const session of BRAND_SLOTS) {
+    const note = records[session.id]?.notes
+    if (typeof note !== 'string' || note.trim().length === 0) continue
+    entries.push({
+      slotId: session.id,
+      label: brandSlotPromptLabel(session.id, contentLocale, pathKind),
+      value: note,
+    })
+  }
+  return entries
+}
+
+/**
  * DIE OFFENEN SESSIONS DIESES KAPITELS — die Menge, aus der `nextSession`
  * kommen darf (§6).
  *

@@ -58,6 +58,17 @@
  *     dieselben drei Werte in EINER Zeile ⇒ 200 (die Sache zählt, nicht die
  *     Schreibweise — Paket-1-Befund (a)).
  *
+ * Seit Paket 7 (BW2 §10) kommen die zwei Zusagen des DOKUMENTS dazu:
+ *
+ * 18. DAS DOKUMENT: `GET …/document` liefert alle Kapitel des WEGES (die
+ *     übersprungenen fehlen), je Kapitel dieselben Blöcke wie die Finale
+ *     Abnahme — und `review.unreviewed` nennt genau die bestätigten Sessions
+ *     ohne Urteil. Mit GEGENPROBE (eine gegengelesene steht nicht darin).
+ * 19. DER PRÜFBLICK: `POST …/review` holt die ungeprüften Sessions nach
+ *     (`caughtUp`), hinterlässt mit `?stub=conflict` einen Dokument-Befund und
+ *     schweigt beim ZWEITEN Klick auf denselben Stand (`ran: false`) — mit
+ *     GEGENPROBE (nach einer neuen Fassung läuft er wieder).
+ *
  * ── WAS DIESER BEWEIS NICHT BEWEIST ──────────────────────────────────────
  * Den Anbieter. Ohne `NUXT_AI_KEY` wirft `aiCompleteStream` (503), die Route
  * schickt `generation.failed` mit `provider_error` — und genau das ist hier
@@ -973,6 +984,92 @@ try {
   check('drei Werte in EINER Zeile gelten ebenso — die Sache zählt, nicht die Form',
     inline.status === 200 && inline.json?.slots?.['c.final']?.confirmed === 'Mut, Klarheit und Geduld',
     `${inline.status} ${inline.text.slice(0, 200)}`)
+
+  // ── 18 · Das Dokument (Paket 7, §10) ──────────────────────────────────
+  //
+  // Auf EIGENEN Füssen: die Blöcke davor haben in fünf Kapiteln Werte
+  // hinterlassen, und die Zusage hier ist eine über eine ÜBERSCHAUBARE Menge —
+  // „alle Kapitel des Weges" prüft man nicht an einem Haufen.
+  console.log('\n18 · Das Dokument: alle Kapitel des Weges, mit ihren Werten')
+  for (const stepKey of [
+    'context', 'pvm', 'architecture', 'values', 'archetype', 'manifesto', 'verbal', 'naming', 'result',
+  ]) {
+    await setSlots(profileId, stepKey, {})
+  }
+  await setSlots(profileId, 'context', {
+    'a.origin': { confirmed: 'Wir wollten Kaffee, den man zurückverfolgen kann.', reviewed: true },
+    'a.customerPraise': { confirmed: 'Ihr wart immer da, wenn es eng wurde.' },
+  })
+  await setSlots(profileId, 'values', {
+    'c.discovery1': { confirmed: 'Wir servieren nur Bohnen von Farmen, die wir kennen.' },
+  })
+
+  const doc = await call(`${base}/document`, { cookie: account.cookie })
+  const docChapters = (doc.json?.chapters ?? []).map(entry => entry.stepKey)
+  check('das Dokument nennt die Kapitel des Weges in Registry-Reihenfolge',
+    doc.status === 200 && JSON.stringify(docChapters) === JSON.stringify([
+      'context', 'pvm', 'values', 'archetype', 'manifesto', 'verbal', 'result',
+    ]),
+    `${doc.status} ${JSON.stringify(docChapters)}`)
+  check('… übersprungene Kapitel fehlen (architecture, naming)',
+    !docChapters.includes('architecture') && !docChapters.includes('naming'),
+    JSON.stringify(docChapters))
+
+  const docContext = (doc.json?.chapters ?? []).find(entry => entry.stepKey === 'context')
+  const docPraise = (docContext?.sessions ?? []).find(entry => entry.slotId === 'a.customerPraise')
+  check('… je Kapitel dieselben Blöcke wie die Abnahme, mit vollem Wert',
+    docPraise?.value === 'Ihr wart immer da, wenn es eng wurde.'
+    && docPraise?.confirmed === true && typeof docContext?.revision === 'number',
+    JSON.stringify(docPraise ?? null))
+
+  const unreviewed = doc.json?.review?.unreviewed ?? []
+  check('… `unreviewed` nennt genau die bestätigten Sessions OHNE Urteil',
+    JSON.stringify(unreviewed) === JSON.stringify(['a.customerPraise', 'c.discovery1']),
+    JSON.stringify(unreviewed))
+  check('GEGENPROBE: die gegengelesene Session steht NICHT darin',
+    !unreviewed.includes('a.origin'), JSON.stringify(unreviewed))
+
+  // ── 19 · Der Prüfblick (Paket 7, §10/§16) ─────────────────────────────
+  console.log('\n19 · Der Prüfblick: nachholen, prüfen, beim zweiten Klick schweigen')
+  const look = await call(`${base}/review?stub=conflict`, { method: 'POST', cookie: account.cookie })
+  check('er läuft und holt genau die ungeprüften Sessions nach',
+    look.status === 200 && look.json?.ran === true
+    && JSON.stringify(look.json?.caughtUp) === JSON.stringify(unreviewed),
+    `${look.status} ${JSON.stringify(look.json?.caughtUp ?? null)}`)
+  check('… und nichts bleibt liegen (der Deckel greift hier nicht)',
+    (look.json?.stillUnreviewed ?? []).length === 0,
+    JSON.stringify(look.json?.stillUnreviewed ?? null))
+
+  const docAfter = await call(`${base}/document`, { cookie: account.cookie })
+  check('… die nachgeholten Urteile stehen an ihren Zeilen',
+    (docAfter.json?.review?.unreviewed ?? []).length === 0,
+    JSON.stringify(docAfter.json?.review?.unreviewed ?? null))
+
+  const documentFinding = (look.json?.findings ?? []).find(entry => entry.kind === 'conflict')
+  check('… der Ersatz-Blick hinterlässt einen Dokument-Befund an SEINEM Feld',
+    Boolean(documentFinding) && documentFinding.slots.length === 2
+    && documentFinding.sourceSession === documentFinding.slots[0],
+    JSON.stringify(documentFinding ?? null))
+
+  const documentAgain = await call(`${base}/review?stub=conflict`, {
+    method: 'POST', cookie: account.cookie,
+  })
+  check('derselbe Stand wird NICHT ein zweites Mal geprüft',
+    documentAgain.status === 200 && documentAgain.json?.ran === false,
+    `${documentAgain.status} ${documentAgain.text.slice(0, 200)}`)
+  check('… die Auskunft kommt trotzdem vollständig aus der Tabelle',
+    (documentAgain.json?.findings ?? []).length === (look.json?.findings ?? []).length
+    && documentAgain.json?.revisionKey === look.json?.revisionKey,
+    `${(documentAgain.json?.findings ?? []).length} statt ${(look.json?.findings ?? []).length}`)
+
+  const valuesRevision = (docAfter.json?.chapters ?? [])
+    .find(entry => entry.stepKey === 'values')?.revision ?? 0
+  await bumpRevision(profileId, 'values', valuesRevision + 1)
+  const documentThird = await call(`${base}/review`, { method: 'POST', cookie: account.cookie })
+  check('GEGENPROBE: eine NEUE Fassung wird wieder geprüft',
+    documentThird.status === 200 && documentThird.json?.ran === true
+    && documentThird.json?.revisionKey !== look.json?.revisionKey,
+    `${documentThird.status} ${documentThird.json?.ran}`)
 }
 catch (error) {
   fail++

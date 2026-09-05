@@ -65,8 +65,14 @@ import { BRAND_CONVERSE_HISTORY_CHARS } from './georgePrompt'
  * Modell aus dem neuen Wert allein raten, WAS sich geändert hat — und die
  * Frage „welches Feld trifft das inhaltlich" ist ohne den Unterschied gar
  * nicht zu beantworten.
+ *
+ * `review-3` (BW2 Paket 7): der PRÜFBLICK kommt dazu — der Kapitel-Modus über
+ * ALLE Kapitel (`scope: 'document'`). Er ist kein vierter MODUS, sondern eine
+ * Variante des dritten: dieselbe Antwort-Form, dieselben Regeln, nur eine
+ * andere Aufgabe und eine andere Menge im Prompt. Ein eigener Modus hätte das
+ * Zod-Schema um einen Zweig erweitert, den niemand anders liest.
  */
-export const BRAND_REVIEW_PROMPT_VERSION = 'review-2'
+export const BRAND_REVIEW_PROMPT_VERSION = 'review-3'
 
 /**
  * Die Antwort ist ein kleines JSON-Objekt: drei Listen von höchstens drei bis
@@ -107,8 +113,24 @@ export interface BrandReviewDocumentEntry {
   value: string
 }
 
+/**
+ * DIE REICHWEITE DES KAPITEL-MODUS (Paket 7, §10).
+ *
+ * `chapter` = ein Kapitel gegen das Dokument (die Finale Abnahme, §5a).
+ * `document` = ALLE Kapitel gegen sich selbst — der Prüfblick. Es ist derselbe
+ * Modus mit derselben Antwort-Form; was sich unterscheidet, sind drei Sätze in
+ * der Aufgabe und die Überschrift der Werte-Liste.
+ *
+ * Sie steht NEBEN `mode` und nicht darin, weil `mode` das Zod-Schema wählt
+ * (§7 „drei Modi, ein Vertrag"). Ein vierter Modus hätte dort einen Zweig
+ * verlangt, der nichts zu entscheiden hat.
+ */
+export type BrandReviewScope = 'chapter' | 'document'
+
 export interface BrandReviewPromptOptions {
   mode: BrandReviewMode
+  /** Nur im Kapitel-Modus von Bedeutung; ohne Angabe gilt `chapter`. */
+  scope?: BrandReviewScope
   /** Das Kapitel, um das es geht — als Registry-Schlüssel, für die Aufgabe. */
   stepKey: string
   /** Die Session, die geschlossen wird. `null` im Kapitel-Modus. */
@@ -159,6 +181,27 @@ function entryLines(entries: readonly BrandReviewDocumentEntry[]): string[] {
  * liefert im Zweifel alles.
  */
 function taskLines(options: BrandReviewPromptOptions): string[] {
+  if (options.mode === 'chapter' && options.scope === 'document') {
+    /**
+     * DER PRÜFBLICK (§10). Er stellt dieselben drei Fragen wie der
+     * Kapitel-Blick — nur über die ganze Foundation, und mit dem einen Zusatz,
+     * der ihn erst nützlich macht: gesucht sind die Reibungen ZWISCHEN den
+     * Kapiteln. Die innerhalb eines Kapitels hat der Kapitel-Blick schon
+     * gesehen, und ein Prüfblick, der sie noch einmal meldet, produziert
+     * Dubletten, die der Mensch ein zweites Mal entscheiden muss.
+     */
+    return [
+      'TASK: you are the specialist reading the WHOLE brand foundation at once, because the person asked '
+      + 'for a final look over their finished document.',
+      'Check the confirmed values of ALL chapters against each other and report ONLY findings: '
+      + 'contradictions between two fields, fields that are visibly missing something, and sharpenings '
+      + 'worth one sentence.',
+      'Look for what only becomes visible ACROSS chapters — a promise in one chapter that the values in '
+      + 'another do not carry, a tone that changes halfway, a claim nothing else supports.',
+      'You are NOT judging whether any single session reached its goal here, and you do NOT propose a '
+      + 'next session. Those questions belong to the moment a session is closed.',
+    ]
+  }
   if (options.mode === 'chapter') {
     return [
       'TASK: you are the specialist reading a whole chapter of a brand foundation at once, right after '
@@ -292,7 +335,15 @@ function sessionLines(session: BrandReviewSessionInfo | null): string[] {
 function inputBlocks(options: BrandReviewPromptOptions): string[] {
   const blocks: string[] = []
 
-  if (options.mode === 'chapter') {
+  const wholeDocument = options.mode === 'chapter' && options.scope === 'document'
+
+  if (wholeDocument) {
+    // KEIN eigener Block: im Prüfblick IST das Dokument die geprüfte Menge, und
+    // die steht unten ohnehin. Beides zu senden hiesse, 68 Feldwerte doppelt zu
+    // bezahlen — für ein Modell, das dann raten müsste, warum es dasselbe
+    // zweimal liest.
+  }
+  else if (options.mode === 'chapter') {
     const chapter = entryLines(options.chapter)
     blocks.push(chapter.length
       ? [`[the confirmed values of chapter ${options.stepKey}]`, ...chapter].join('\n')
@@ -338,8 +389,12 @@ function inputBlocks(options: BrandReviewPromptOptions): string[] {
   }
 
   const document = entryLines(options.document)
+  const documentHeading = wholeDocument
+    ? '[the confirmed document — every chapter, in the order it was built. This is what you are checking, '
+      + 'and the only truth you may check against]'
+    : '[the confirmed document so far — the only truth you may check against]'
   blocks.push(document.length
-    ? ['[the confirmed document so far — the only truth you may check against]', ...document].join('\n')
+    ? [documentHeading, ...document].join('\n')
     : '[the confirmed document so far]\n(nothing confirmed yet)')
 
   if (options.mode !== 'chapter') {

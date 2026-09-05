@@ -167,6 +167,14 @@ function openLayerInfo(layer: BwRailLayer): void {
 
 /** Status-Glyphe VORN: Haken accent · Halbmond ink · Kreis muted · Schloss. */
 function glyph(layer: BwRailLayer, step: BwRailStep): { name: string, style: string } {
+  // „Euer Branding" (§10) trägt das BUCH und kennt keine Sperre — es steht vor
+  // der Schicht-Prüfung, weil Lesen auch in einem gesperrten Weg erlaubt ist.
+  if (step.kind === 'document') {
+    return {
+      name: 'i-ph-book-open',
+      style: step.state === 'active' ? 'color: var(--bw-accent)' : 'color: var(--bw-ink-soft)',
+    }
+  }
   // Gesperrt ist ein Punkt durch seine SCHICHT oder durch sich selbst (A9).
   if (layer.locked || step.state === 'locked') return { name: 'i-ph-lock-simple', style: 'color: var(--bw-muted)' }
   if (step.kind === 'result') return { name: 'i-ph-sparkle', style: step.state === 'done' ? 'color: var(--bw-accent)' : 'color: var(--bw-muted)' }
@@ -182,6 +190,9 @@ function glyph(layer: BwRailLayer, step: BwRailStep): { name: string, style: str
  * Knopf anzubieten, der nichts tut.
  */
 function stepDisabled(layer: BwRailLayer, step: BwRailStep): boolean {
+  // „Euer Branding" ist IMMER erreichbar (§10): es zeigt ausschliesslich
+  // bestätigte Werte, und die hat der Mensch selbst gesagt.
+  if (step.kind === 'document') return false
   if (layer.locked || step.state === 'locked') return true
   return step.kind === 'result' ? step.state !== 'done' : step.state === 'open'
 }

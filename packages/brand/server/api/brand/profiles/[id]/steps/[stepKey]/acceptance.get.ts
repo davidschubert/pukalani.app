@@ -1,11 +1,8 @@
-import { sessionsAffectedBy } from '../../../../../../../shared/brandSessions'
-import { exampleKeyFor, questionKeyFor, slotsForStep } from '../../../../../../../shared/slotRegistry'
-import type {
-  BrandAcceptanceSessionView,
-  BrandStepAcceptanceResponse,
-} from '../../../../../../../shared/types/brand'
-import { loadBrandAcceptanceContext } from '../../../../../../utils/brandAcceptance'
-import { brandSlotRecordConfirmed } from '../../../../../../utils/brandStore'
+import type { BrandStepAcceptanceResponse } from '../../../../../../../shared/types/brand'
+import {
+  brandAcceptanceSessions,
+  loadBrandAcceptanceContext,
+} from '../../../../../../utils/brandAcceptance'
 
 /**
  * DIE FINALE ABNAHME EINES KAPITELS (Plan §5a) — was die Seite zeigt, in
@@ -25,12 +22,12 @@ import { brandSlotRecordConfirmed } from '../../../../../../utils/brandStore'
  * (abgenommen · nicht veraltet · kein offener Konflikt), und sie stehen in
  * DERSELBEN Rechnung, die `complete` durchsetzt (`brandStepAcceptance`).
  *
- * ── SCHLÜSSEL STATT TEXT ─────────────────────────────────────────────────
- * Der Server schickt i18n-SCHLÜSSEL (`labelKey`, `questionKey`, `exampleKey`),
- * nie übersetzte Zeichenketten: WIE etwas heisst, entscheiden die
- * Locale-Dateien. Die BEISPIELE sind die Ausnahme und keine — sie sind
- * INHALT aus der Registry (Davids Inhalts-Gate, `sessionContent.ts`) und
- * stehen dort in beiden Sprachen; welche gilt, weiss der Browser besser.
+ * ── DIE BLÖCKE BAUT SIE NICHT MEHR SELBST (Paket 7) ──────────────────────
+ * `brandAcceptanceSessions` liegt in `server/utils/brandAcceptance.ts`, weil
+ * das DOKUMENT (§10) dieselbe Liste für alle neun Kapitel braucht: es IST die
+ * Finale Abnahme der Ebene 1. Zwei Bauer wären zwei Antworten auf „was steht in
+ * diesem Feld" — dort stehen auch die Regeln (Schlüssel statt Text, Beispiele
+ * als Inhalt, Befunde je Block).
  *
  * ── KEIN GEORGE UND KEIN MODELL ──────────────────────────────────────────
  * Diese Route ruft nichts an — auch seit Paket 4 nicht. Der Kapitel-Modus des
@@ -54,48 +51,14 @@ export default defineEventHandler(async (event): Promise<BrandStepAcceptanceResp
   const pathKind = profile.pathKind === 'relaunch' ? 'relaunch' : 'new'
   const team = profile.team === 'team' ? 'team' : 'solo'
 
-  const sessions: BrandAcceptanceSessionView[] = slotsForStep(stepKey).map((session) => {
-    const record = records[session.id]
-    const affected = sessionsAffectedBy(session.id)
-    return {
-      slotId: session.id,
-      kind: session.kind,
-      required: session.required,
-      state: sessionStates[session.id] ?? 'locked',
-      confirmed: brandSlotRecordConfirmed(record),
-      accepted: record?.accepted === true,
-      deferred: record?.deferred === true,
-      allowDefer: session.answers.allowDefer,
-      // Der BESTÄTIGTE Wert, nicht der Entwurf: die Abnahme-Seite zeigt das
-      // Dokument, nicht die Werkstatt. Eine optionale Session ohne Wert steht
-      // grau mit ihrem Beispiel da (§5a Schritt 1).
-      value: record?.confirmed ?? '',
-      // Die Notiz des Schliess-Aufrufs (§4) — seit Paket 4 gefüllt; hier steht
-      // auch der Grund einer abgelehnten Befund-Meldung (§8).
-      notes: record?.notes ?? '',
-      // Die OFFENEN Befunde, an denen GENAU DIESES Feld beteiligt ist. Ein
-      // Konflikt hat zwei Felder und erscheint deshalb an beiden Blöcken —
-      // gewollt: er verbindet sie, und wer ihn an einer Stelle entscheidet,
-      // entscheidet ihn für beide.
-      findings: findings.filter(view => view.slots.includes(session.id)),
-      labelKey: `brand.labels.${session.id}`,
-      questionKey: questionKeyFor(session, pathKind, team),
-      // Nur Menschenfragen haben eine Beispiel-ANTWORT im Katalog; Auswahlen
-      // haben Chips statt Freitext (s. `exampleKeyFor`).
-      exampleKey: session.type === 'question' ? exampleKeyFor(session, pathKind) : null,
-      example: {
-        de: [...session.examples[pathKind].de],
-        en: [...session.examples[pathKind].en],
-      },
-      affects: {
-        count: affected.transitive.length,
-        // Die Kapitel in Registry-Reihenfolge — `byStep` ist ein Objekt, seine
-        // Schlüssel-Reihenfolge ist keine Zusage.
-        steps: journey
-          .map(entry => entry.stepKey)
-          .filter(candidate => affected.byStep[candidate]?.length),
-      },
-    }
+  const sessions = brandAcceptanceSessions({
+    stepKey,
+    records,
+    sessionStates,
+    findings,
+    journey,
+    pathKind,
+    team,
   })
 
   return {

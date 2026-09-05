@@ -67,7 +67,6 @@ import type {
   BrandGenerationVersionsResponse,
   BrandSessionAcceptResponse,
   BrandSessionCloseResponse,
-  BrandSessionImpactResponse,
   BrandSiteAnalysisView,
   BrandSiteAnalyzeResponse,
   BrandSlotView,
@@ -756,6 +755,19 @@ async function goToField(slotId: string): Promise<void> {
   await navigateTo({ path: localePath(`/brand/${profileId.value}/${target}`), query: { s: slotId } })
 }
 
+/**
+ * „EUER BRANDING" (§10) — eine EIGENE Adresse, kein `?s=`.
+ *
+ * Das Dokument gehört keinem Kapitel: es steht über allen neun. Es als dritte
+ * Ansicht in `brand/[profileId]/[stepKey]` zu legen hiesse, einen Kapitel-
+ * Schlüssel in die Adresse zu schreiben, der dort nichts bedeutet — und die
+ * Leiste müsste sich für einen aussuchen.
+ */
+async function goToDocument(): Promise<void> {
+  await autosave.flush()
+  await navigateTo(localePath(`/brand/${profileId.value}/document`))
+}
+
 /** Dieselbe Adresse, die Abnahme-Ansicht statt einer Session (§5a). */
 async function goToAcceptance(): Promise<void> {
   if (acceptanceView.value) return
@@ -936,79 +948,28 @@ async function confirmSlot(slotId: string): Promise<void> {
 // ── Die Korrektur-Regel (BW2 Paket 6, §9) ────────────────────────────────
 
 /**
- * DER IMPACT-HINWEIS VOR EINER KORREKTUR — EINE Stelle, DREI Eingänge.
+ * DER IMPACT-HINWEIS VOR EINER KORREKTUR — EINE Stelle, drei Eingänge auf
+ * dieser Seite (Log-Karte, „Bearbeiten" der Abnahme, Feld-Link eines Chips).
  *
- * „Korrigieren" gibt es an der Log-Karte, als „Bearbeiten" auf der Finalen
- * Abnahme und am Feld-Link eines Befund-Chips. Alle drei laufen durch
- * `requestImpactConsent()`: Hülle holen, bei leerer Hülle sofort weiter, sonst
- * den Layer zeigen und auf Annehmen oder Abbrechen warten. Die KOMPONENTEN
- * lösen dabei nur ihr Ereignis aus (`edit()`/`jumpTo()` emittieren wie bisher)
- * — die Seite ist die Stelle, die spült, navigiert und speichert, und dreimal
- * derselbe `$fetch` mit demselben Modal wäre dreimal dieselbe Pflege.
+ * Die MECHANIK wohnt seit Paket 7 in `useBrandImpactConsent` — das Dokument
+ * (§10) hat denselben Hinweis, und ein zweiter `$fetch` mit demselben Modal
+ * wäre zweimal dieselbe Pflege. Die KOMPONENTEN lösen weiterhin nur ihr
+ * Ereignis aus (`edit()`/`jumpTo()`); die SEITE ist die Stelle, die spült,
+ * navigiert und speichert.
  *
- * ── DIE ZUSTIMMUNG GILT FÜR DIESEN BESUCH ────────────────────────────────
- * Wer auf der Abnahme-Seite „Bearbeiten" annimmt, landet in der Session und
- * korrigiert dort — der Layer darf ihn nicht ein zweites Mal fragen. Die
- * angenommene Hülle liegt deshalb je Feld hier (`acknowledged`), und der PATCH
- * trägt sie als `impactAck`. Bewegt sie sich zwischendurch, weist der SERVER
- * mit 409 ab, und der Layer kommt mit `changed` zurück (s. `correctionRejected`).
- *
- * ── FAIL-OPEN BEIM LADEN ─────────────────────────────────────────────────
- * Kommt die Hülle nicht (Netz, 5xx), wird korrigiert. Ein Ausfall darf einen
- * Menschen nicht von seinem eigenen Feld aussperren, und die Durchsetzung
- * hängt nicht an dieser Anzeige: der Server verlangt den Hash trotzdem, und
- * genau dann zeigt der Layer sich eben nachträglich.
+ * Die Namen bleiben die von Paket 6: die Vorlage unten liest sie unverändert.
  */
-const impactOpen = ref(false)
-const impactData = ref<BrandSessionImpactResponse | null>(null)
-const impactLoading = ref(false)
-const impactChanged = ref(false)
-/** Feld-Id → angenommener Hüllen-Hash (dieser Besuch). */
-const acknowledged = ref<Record<string, string>>({})
-/** Die offene Frage des Layers — sie wird mit Annehmen/Abbrechen beantwortet. */
-let impactAnswer: ((accepted: boolean) => void) | null = null
-
-async function loadImpact(slotId: string): Promise<BrandSessionImpactResponse | null> {
-  const target = slotById(slotId)?.stepId
-  if (!target) return null
-  impactLoading.value = true
-  try {
-    return await $fetch<BrandSessionImpactResponse>(
-      `/api/brand/profiles/${profileId.value}/steps/${target}/sessions/${slotId}/impact`,
-    )
-  }
-  catch {
-    return null
-  }
-  finally {
-    impactLoading.value = false
-  }
-}
-
-async function requestImpactConsent(slotId: string): Promise<boolean> {
-  if (acknowledged.value[slotId]) return true
-  impactChanged.value = false
-  const impact = await loadImpact(slotId)
-  // Leere Hülle heisst: hier hängt nichts dran — es gibt nichts anzukündigen.
-  if (!impact || impact.count === 0) return true
-  impactData.value = impact
-  impactOpen.value = true
-  return new Promise<boolean>((resolve) => { impactAnswer = resolve })
-}
-
-function acceptImpact(): void {
-  const impact = impactData.value
-  if (impact) acknowledged.value = { ...acknowledged.value, [impact.slotId]: impact.ack }
-  impactOpen.value = false
-  impactAnswer?.(true)
-  impactAnswer = null
-}
-
-function cancelImpact(): void {
-  impactOpen.value = false
-  impactAnswer?.(false)
-  impactAnswer = null
-}
+const {
+  open: impactOpen,
+  impact: impactData,
+  loading: impactLoading,
+  changed: impactChanged,
+  ackOf: impactAckOf,
+  request: requestImpactConsent,
+  reopen: reopenImpactConsent,
+  accept: acceptImpact,
+  cancel: cancelImpact,
+} = useBrandImpactConsent(profileId)
 
 /**
  * „KORRIGIEREN" — die EINZIGE Tür zurück (Davids Entscheidung 2026-09-02).
@@ -1021,7 +982,7 @@ function cancelImpact(): void {
  */
 async function reviseSlot(slotId: string): Promise<void> {
   if (!await requestImpactConsent(slotId)) return
-  const ack = acknowledged.value[slotId]
+  const ack = impactAckOf(slotId)
   if (ack) store.setImpactAck(ack)
   store.setSlotConfirmed(slotId, false)
   editingSlotId.value = slotId
@@ -1061,15 +1022,7 @@ async function correctThenGo(slotId: string, go: () => Promise<void>): Promise<v
 watch(() => store.correctionRejected, async (slotId) => {
   if (!slotId) return
   store.dismissCorrectionRejection()
-  const { [slotId]: _stale, ...rest } = acknowledged.value
-  acknowledged.value = rest
-  const impact = await loadImpact(slotId)
-  if (!impact || impact.count === 0) return
-  impactData.value = impact
-  impactChanged.value = true
-  impactOpen.value = true
-  const accepted = await new Promise<boolean>((resolve) => { impactAnswer = resolve })
-  if (accepted) await reviseSlot(slotId)
+  if (await reopenImpactConsent(slotId)) await reviseSlot(slotId)
 })
 
 /**
@@ -1893,32 +1846,72 @@ function railCounter(entry: BrandJourneyStep, current: boolean): string {
   }) + suffix
 }
 
+/**
+ * „EUER BRANDING" — DER LETZTE EINTRAG DER LEISTE (BW2 Paket 7, §10/§11).
+ *
+ * Er steht UNTER den Kapiteln, hinter `result`, und ist IMMER klickbar: Lesen
+ * ist immer erlaubt, und ein Dokument, das erst am Ende aufginge, sähe niemand
+ * wachsen. Er trägt seine eigene ADRESSE (`to`) statt eines `select` — die
+ * Sidebar navigiert dann selbst, und der Autosave spült trotzdem aus, weil der
+ * Sprung den Route-Record wechselt (`onBeforeRouteLeave`, s. `useBrandAutosave`).
+ *
+ * Sein Zähler nennt nur, was es zu zählen gibt: offene Befunde über ALLE
+ * Kapitel. Eine Zeile „0 Befunde offen" wäre eine Beruhigung, nach der niemand
+ * gefragt hat.
+ */
+const openFindingsTotal = computed(
+  () => store.findings.filter(finding => finding.status === 'open').length,
+)
+
+function railDocumentStep(): BwRailStep {
+  return {
+    id: 'document',
+    label: t('brand.nav.document'),
+    icon: '',
+    state: 'open',
+    kind: 'document',
+    to: localePath(`/brand/${profileId.value}/document`),
+    ...(openFindingsTotal.value > 0
+      ? {
+          counter: t(
+            'brand.finding.openCount',
+            { count: openFindingsTotal.value },
+            openFindingsTotal.value,
+          ),
+        }
+      : {}),
+  }
+}
+
 const railLayers = computed<BwRailLayer[]>(() => [{
   id: 'foundation',
   label: t('brand.workspace.railLayer'),
-  steps: store.railSteps.map((entry): BwRailStep => {
-    const current = entry.stepKey === stepKey.value
-    return {
-      id: entry.stepKey,
-      label: t(`brand.steps.${entry.stepKey}`),
-      icon: '',
-      state: current && entry.state !== 'done' ? 'active' : railState(entry.state),
-      info: railInfo(entry),
-      counter: railCounter(entry, current),
-      // Die Unterpunkte und der Umfang gehören dem OFFENEN Kapitel: „nur das
-      // aktive aufgeklappt" (§11) ist damit eine Aussage über die Daten und
-      // keine zweite Regel in der Leiste.
-      ...(current
-        ? {
-            sessions: railSessions(entry),
-            effort: t('brand.nav.chapterEffort', {
-              count: slotsForStep(entry.stepKey).length,
-              minutes: chapterEffortMinutes(entry.stepKey),
-            }) + railFindingSuffix(entry.stepKey),
-          }
-        : {}),
-    }
-  }),
+  steps: [
+    ...store.railSteps.map((entry): BwRailStep => {
+      const current = entry.stepKey === stepKey.value
+      return {
+        id: entry.stepKey,
+        label: t(`brand.steps.${entry.stepKey}`),
+        icon: '',
+        state: current && entry.state !== 'done' ? 'active' : railState(entry.state),
+        info: railInfo(entry),
+        counter: railCounter(entry, current),
+        // Die Unterpunkte und der Umfang gehören dem OFFENEN Kapitel: „nur das
+        // aktive aufgeklappt" (§11) ist damit eine Aussage über die Daten und
+        // keine zweite Regel in der Leiste.
+        ...(current
+          ? {
+              sessions: railSessions(entry),
+              effort: t('brand.nav.chapterEffort', {
+                count: slotsForStep(entry.stepKey).length,
+                minutes: chapterEffortMinutes(entry.stepKey),
+              }) + railFindingSuffix(entry.stepKey),
+            }
+          : {}),
+      }
+    }),
+    railDocumentStep(),
+  ],
 }])
 
 /** Die Marken des Kontos für den Wähler oben in der Sidebar. */
@@ -2247,6 +2240,7 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
         @field="slotId => correctThenGo(slotId, () => goToField(slotId))"
         @decided="findingDecided"
         @advance="advanceToStep"
+        @document="goToDocument"
         @restarted="afterRestart"
       />
 

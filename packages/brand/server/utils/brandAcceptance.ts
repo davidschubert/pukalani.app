@@ -1,30 +1,45 @@
 import { createHash } from 'node:crypto'
 import type { H3Event } from 'h3'
 import {
+  type BrandJourneyStep,
   type BrandSessionState,
   type BrandStepAcceptance,
   type BrandStepFacts,
   brandStepAcceptance,
   mergeBrandSlotFacts,
+  resolveBrandJourney,
 } from '../../shared/brandJourney'
 import { blockingFindingSlots } from '../../shared/brandFindings'
-import { type BrandRestartImpact, brandRestartImpact } from '../../shared/brandSessions'
 import {
+  type BrandRestartImpact,
+  brandRestartImpact,
+  sessionsAffectedBy,
+} from '../../shared/brandSessions'
+import {
+  type BrandPathKind,
   type BrandSlot,
   type BrandSlotStateFacts,
   type BrandStepKey,
+  type BrandTeamKind,
+  exampleKeyFor,
+  questionKeyFor,
   slotById,
   slotsForStep,
 } from '../../shared/slotRegistry'
-import type { BrandFindingView } from '../../shared/types/brand'
+import type { BrandAcceptanceSessionView, BrandFindingView } from '../../shared/types/brand'
 import { listBrandFindings, toBrandFindingView } from './brandFindingsStore'
 import {
   type BrandProfileRow,
   type BrandSlotRecord,
   type BrandStepContext,
+  type BrandStepRow,
+  brandSlotRecordConfirmed,
   loadBrandStepContext,
+  loadOwnedProfile,
+  loadStepRows,
   parseSlotRecords,
   profileFacts,
+  requireProfileIdParam,
   resolveBrandSessionStates,
   toSlotFacts,
   toStepFacts,
@@ -126,6 +141,137 @@ export function withStepSlotFacts(
   return stepFacts.map(facts => (facts.stepKey === stepKey
     ? { ...facts, slots: toSlotFacts(records) }
     : facts))
+}
+
+/**
+ * DIE BLÖCKE EINES KAPITELS (Plan §5a Schritt 1) — EINE Rechnung, ZWEI Leser.
+ *
+ * ── WARUM SIE HIER STEHT UND NICHT IN DER ABNAHME-ROUTE ──────────────────
+ * Seit Paket 7 gibt es dieselbe Liste zweimal: die Finale Abnahme zeigt SIE
+ * für ein Kapitel, das Dokument (§10) für alle neun. Das Dokument IST die
+ * Finale Abnahme der Ebene 1 — eine zweite, schlankere Zeilenform hätte
+ * zwangsläufig eine zweite Antwort auf „was steht in diesem Feld", und
+ * spätestens beim ersten veralteten Wert liefen die Seiten auseinander.
+ *
+ * ── SCHLÜSSEL STATT TEXT, BEISPIELE ALS TEXT ─────────────────────────────
+ * `labelKey`/`questionKey`/`exampleKey` sind i18n-Schlüssel: WIE etwas heisst,
+ * entscheiden die Locale-Dateien. Das `example` ist INHALT aus der Registry
+ * (Davids Gate, `sessionContent.ts`) und steht dort in beiden Sprachen — welche
+ * gilt, weiss der Browser besser. Ob es GEZEIGT wird, entscheidet ebenfalls die
+ * Oberfläche: die Abnahme zeigt es (dort wird gelernt), das Dokument nicht
+ * (dort steht die Marke).
+ */
+export interface BrandAcceptanceSessionsInput {
+  stepKey: BrandStepKey
+  /** Die Slot-Datensätze DIESES Kapitels. */
+  records: Record<string, BrandSlotRecord>
+  /** Die Session-Zustände ALLER Kapitel (eine Session liest über Grenzen). */
+  sessionStates: Readonly<Record<string, BrandSessionState>>
+  /** ALLE offenen Befunde des Brandings — gefiltert wird je Block. */
+  findings: readonly BrandFindingView[]
+  /** Für die Kapitel-Reihenfolge in `affects.steps`. */
+  journey: readonly BrandJourneyStep[]
+  pathKind: BrandPathKind
+  team: BrandTeamKind
+}
+
+export function brandAcceptanceSessions(
+  input: BrandAcceptanceSessionsInput,
+): BrandAcceptanceSessionView[] {
+  return slotsForStep(input.stepKey).map((session) => {
+    const record = input.records[session.id]
+    const affected = sessionsAffectedBy(session.id)
+    return {
+      slotId: session.id,
+      kind: session.kind,
+      required: session.required,
+      state: input.sessionStates[session.id] ?? 'locked',
+      confirmed: brandSlotRecordConfirmed(record),
+      accepted: record?.accepted === true,
+      deferred: record?.deferred === true,
+      allowDefer: session.answers.allowDefer,
+      // Der BESTÄTIGTE Wert, nicht der Entwurf: beide Seiten zeigen das
+      // Dokument, nicht die Werkstatt. Eine optionale Session ohne Wert steht
+      // grau mit ihrem Beispiel da (§5a Schritt 1).
+      value: record?.confirmed ?? '',
+      // Die Notiz des Schliess-Aufrufs (§4) — hier steht auch der Grund einer
+      // abgelehnten Befund-Meldung (§8).
+      notes: record?.notes ?? '',
+      // Die OFFENEN Befunde, an denen GENAU DIESES Feld beteiligt ist. Ein
+      // Konflikt hat zwei Felder und erscheint deshalb an beiden Blöcken —
+      // gewollt: er verbindet sie, und wer ihn an einer Stelle entscheidet,
+      // entscheidet ihn für beide.
+      findings: input.findings.filter(view => view.slots.includes(session.id)),
+      labelKey: `brand.labels.${session.id}`,
+      questionKey: questionKeyFor(session, input.pathKind, input.team),
+      // Nur Menschenfragen haben eine Beispiel-ANTWORT im Katalog; Auswahlen
+      // haben Chips statt Freitext (s. `exampleKeyFor`).
+      exampleKey: session.type === 'question' ? exampleKeyFor(session, input.pathKind) : null,
+      example: {
+        de: [...session.examples[input.pathKind].de],
+        en: [...session.examples[input.pathKind].en],
+      },
+      affects: {
+        count: affected.transitive.length,
+        // Die Kapitel in Registry-Reihenfolge — `byStep` ist ein Objekt, seine
+        // Schlüssel-Reihenfolge ist keine Zusage.
+        steps: input.journey
+          .map(entry => entry.stepKey)
+          .filter(candidate => affected.byStep[candidate]?.length),
+      },
+    }
+  })
+}
+
+/**
+ * DER EINSTIEG DER DOKUMENT-ROUTEN (Plan §10) — dasselbe wie
+ * `loadBrandAcceptanceContext`, nur OHNE Kapitel.
+ *
+ * ── WARUM NICHT `loadBrandStepContext` ───────────────────────────────────
+ * Der verlangt einen `stepKey` aus der Adresse, prüft den Eintritt in dieses
+ * eine Kapitel und wirft 403, wenn es gesperrt ist. Das Dokument hat keinen
+ * Schlüssel und kennt diese Sperre nicht: LESEN ist immer erlaubt (§10 — es
+ * zeigt ausschliesslich BESTÄTIGTE Werte, und was bestätigt ist, hat der Mensch
+ * selbst gesagt). Die Grenze bleibt dieselbe wie überall in diesem Silo-Layer:
+ * `assertBrandOwnerAccess` in `loadOwnedProfile`.
+ *
+ * ── EINE ABFRAGE MEHR ALS NÖTIG GIBT ES HIER NICHT ───────────────────────
+ * Neun Kapitel-Zeilen kommen mit EINEM `listRows` (Limit 9), die Befunde mit
+ * einem zweiten. Alles Weitere — Journey, Session-Zustände, Abnahme-Zähler —
+ * ist Rechnung über dem, was schon im Speicher liegt.
+ */
+export interface BrandDocumentContext {
+  profile: BrandProfileRow
+  stepRows: BrandStepRow[]
+  stepFacts: BrandStepFacts[]
+  journey: readonly BrandJourneyStep[]
+  /** Die Slot-Fakten ALLER Kapitel. */
+  allFacts: Record<string, BrandSlotStateFacts | undefined>
+  sessionStates: Readonly<Record<string, BrandSessionState>>
+  /** ALLE offenen Befunde des Brandings. */
+  findings: BrandFindingView[]
+}
+
+export async function loadBrandDocumentContext(
+  event: H3Event,
+  userId: string,
+): Promise<BrandDocumentContext> {
+  const profileId = requireProfileIdParam(event)
+  const profile = await loadOwnedProfile(event, userId, profileId)
+  const stepRows = await loadStepRows(event, profileId)
+  const stepFacts = toStepFacts(stepRows)
+  const journey = resolveBrandJourney(profileFacts(profile), stepFacts)
+  const findings = (await listBrandFindings(event, profileId, 'open')).map(toBrandFindingView)
+
+  return {
+    profile,
+    stepRows,
+    stepFacts,
+    journey,
+    allFacts: mergeBrandSlotFacts(stepFacts),
+    sessionStates: resolveBrandSessionStates(profileFacts(profile), stepFacts),
+    findings,
+  }
 }
 
 /**

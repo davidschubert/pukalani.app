@@ -42,7 +42,8 @@
       "acceptancePending": "Frei, sobald alle Felder dieses Kapitels bestätigt sind.",
       "chapterCount": "{confirmed} von {total} bestätigt",
       "chapterCountStale": "{confirmed} von {total} bestätigt · {stale} neu besprechen",
-      "chapterEffort": "{count} Sessions, ~{minutes} Min"
+      "chapterEffort": "{count} Sessions, ~{minutes} Min",
+      "document": "Euer Branding"
     },
     "legal": {
       "imprint": "Impressum",
@@ -783,7 +784,35 @@
         "changed": "Der Stand hat sich geändert — bitte lies es noch einmal.",
         "failed": "Das hat nicht geklappt.",
         "loading": "Wird geprüft …"
-      }
+      },
+      "continueToDocument": "Weiter zu eurem Branding"
+    },
+    "document": {
+      "title": "Euer Branding",
+      "lead": "Alle bestätigten Entscheidungen eurer Foundation, Kapitel für Kapitel. Hier wird gelesen — abgenommen wird im Kapitel.",
+      "loadFailed": "Das Dokument konnte nicht geladen werden.",
+      "empty": "Hier steht noch nichts — sobald ihr ein Kapitel besprochen habt, füllt es sich.",
+      "standTitle": "Stand",
+      "standProgress": "Abgenommen",
+      "state": {
+        "done": "abgenommen",
+        "active": "in Arbeit",
+        "open": "offen",
+        "locked": "gesperrt"
+      },
+      "chapter": {
+        "toAcceptance": "Zur Abnahme"
+      },
+      "reviewTitle": "Der letzte Blick",
+      "reviewLead": "Das Team liest euer ganzes Dokument einmal am Stück und meldet Widersprüche, Lücken und Stellen, die schärfer gehen.",
+      "review": "Dokument prüfen",
+      "reviewing": "Wird gelesen …",
+      "reviewNeedsChapter": "Sobald ein Kapitel abgenommen ist, lohnt sich der Blick.",
+      "unreviewedCount": "{count} Session ist noch nicht gegengelesen — sie wird dabei nachgeholt. | {count} Sessions sind noch nicht gegengelesen — sie werden dabei nachgeholt.",
+      "reviewResult": "{caughtUp} Sessions nachgeholt, {findings} Befunde.",
+      "stillUnreviewed": "{count} Session bleibt noch offen — der nächste Blick holt sie nach. | {count} Sessions bleiben noch offen — der nächste Blick holt sie nach.",
+      "noFindings": "Nichts gefunden, was sich reibt.",
+      "reviewFailed": "Der Blick kam gerade nicht zustande. Euer Dokument steht trotzdem — versucht es später noch einmal."
     },
     "session": {
       "minutes": "~{minutes} Min",
