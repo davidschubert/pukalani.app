@@ -1,4 +1,10 @@
-import { type BrandPathKind, type BrandSlot, partKeyFor, partLabelKeyFor } from '../../shared/slotRegistry'
+import {
+  type BrandPathKind,
+  type BrandSlot,
+  type BrandTeamKind,
+  partKeyFor,
+  partLabelKeyFor,
+} from '../../shared/slotRegistry'
 import de from '../../i18n/locales/de.json'
 import en from '../../i18n/locales/en.json'
 
@@ -74,17 +80,38 @@ export function labelSlotDependencies<T extends { slotId: string }>(
   dependencies: readonly T[],
   contentLocale: string,
   pathKind: BrandPathKind,
+  team: BrandTeamKind,
 ): (T & { label: string })[] {
   return dependencies.map(dependency => ({
     ...dependency,
-    label: brandSlotPromptLabel(dependency.slotId, contentLocale, pathKind),
+    label: brandSlotPromptLabel(dependency.slotId, contentLocale, pathKind, team),
   }))
 }
 
+/**
+ * DIE WEICHEN GEHÖREN BEIDE HIERHER (Paket 8, Rest aus 2b).
+ *
+ * `brand.q.<id>` kann ein Kind-Objekt sein, und es gibt ZWEI Gründe dafür:
+ * die Pfad-Weiche W1 (`{ new, relaunch }`) und die Team-Weiche W3
+ * (`{ solo, team }`, heute nur `c.discovery3`). Der alte Rückfall
+ * `node[pathKind] ?? node.new ?? Object.values(node)[0]` traf beim
+ * Team-Objekt zwangsläufig `solo` — im Prompt stand für ein Team-Branding
+ * also das Etikett der Solo-Frage („Nie geduldet …") über einem Wert, der
+ * die Entscheidungsregel des Teams beschreibt. George redet dann über das
+ * falsche Feld.
+ *
+ * `team` ist deshalb ein PFLICHT-Argument, nicht eines mit Default: die
+ * Aufrufstellen sind alle Server-Routen, die `profileFacts(profile)` ohnehin
+ * lesen — ein stiller Default hätte genau diesen Fehler wieder eingebaut,
+ * und die Typprüfung ist hier der einzige Wächter, der ihn findet.
+ * (`questionKeyFor`/`exampleKeyFor` in `shared/` bleiben bewusst optional:
+ * sie werden auch von Stellen gerufen, die die Weiche nicht kennen können.)
+ */
 export function brandSlotPromptLabel(
   slotId: string,
   contentLocale: string,
   pathKind: BrandPathKind,
+  team: BrandTeamKind,
 ): string {
   const catalog = CATALOGS[contentLocale] ?? CATALOGS.en!
   let node: CatalogNode | undefined = catalog
@@ -94,7 +121,7 @@ export function brandSlotPromptLabel(
   }
   if (typeof node === 'string') return node
   if (node && typeof node === 'object') {
-    const variant = node[pathKind] ?? node.new ?? Object.values(node)[0]
+    const variant = node[team] ?? node[pathKind] ?? node.new ?? Object.values(node)[0]
     if (typeof variant === 'string') return variant
   }
   return slotId

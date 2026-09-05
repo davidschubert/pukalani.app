@@ -360,7 +360,7 @@ describe('stepProgress — die ehrliche Formel', () => {
   })
 })
 
-describe('exampleKeyFor — dieselbe Pfad-Konvention unter brand.example', () => {
+describe('exampleKeyFor — dieselben Konventionen unter brand.example', () => {
   it('hängt den Pfad nur an, wo die Frage eine eigene Fassung hat', () => {
     const origin = slotById('a.origin')!
     expect(exampleKeyFor(origin, 'new')).toBe('brand.example.a.origin.new')
@@ -368,6 +368,19 @@ describe('exampleKeyFor — dieselbe Pfad-Konvention unter brand.example', () =>
     const praise = slotById('a.customerPraise')!
     expect(exampleKeyFor(praise, 'new')).toBe('brand.example.a.customerPraise')
     expect(exampleKeyFor(praise, 'relaunch')).toBe('brand.example.a.customerPraise')
+  })
+
+  /**
+   * DIE TEAM-WEICHE GILT AUCH FÜRS BEISPIEL (Paket 8): sonst stünde unter
+   * der Team-Frage von `c.discovery3` die Musterantwort zur Solo-Frage.
+   * Wie bei `questionKeyFor` trägt der Schlüssel IMMER ein Suffix — ein
+   * JSON-Katalog kann unter einem Schlüssel nicht Text UND Kinder halten.
+   */
+  it('hängt bei der Team-Variante immer solo/team an', () => {
+    const discovery = slotById('c.discovery3')!
+    expect(exampleKeyFor(discovery, 'new')).toBe('brand.example.c.discovery3.solo')
+    expect(exampleKeyFor(discovery, 'new', 'solo')).toBe('brand.example.c.discovery3.solo')
+    expect(exampleKeyFor(discovery, 'relaunch', 'team')).toBe('brand.example.c.discovery3.team')
   })
 })
 

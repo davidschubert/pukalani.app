@@ -1054,15 +1054,28 @@ export function questionKeyFor(
 }
 
 /**
- * Der i18n-Schlüssel der BEISPIEL-ANTWORT einer Menschenfrage — dieselbe
- * Pfad-Konvention wie `questionKeyFor`, nur unter `brand.example.<id>`. Sie
+ * Der i18n-Schlüssel der BEISPIEL-ANTWORT einer Menschenfrage — dieselben
+ * Konventionen wie `questionKeyFor`, nur unter `brand.example.<id>`. Sie
  * steht GRAU im Antwortfeld des Berater-Chats (Platzhalter, nie ein Wert):
  * eine Mustervorlage senkt die Hürde vor der leeren Zeile, ohne etwas zu
  * beantworten. Nur `type: 'question'` wird so gefragt; Auswahl-Slots haben
  * Chips statt Freitext und darum keinen Beispiel-Schlüssel.
+ *
+ * DIE TEAM-FASSUNG GEHÖRT MIT DAZU (Paket 8, Rest aus 2b): `c.discovery3`
+ * fragt solo und im Team etwas ANDERES (D3 gegen D7). Ein Beispiel zur
+ * falschen Frage ist schlimmer als gar keines — es lenkt die Antwort in die
+ * Irre. Vorher kannte diese Funktion nur die Pfad-Weiche, also stand unter
+ * „Wie soll dein Team entscheiden, wenn du nicht im Raum bist?" das
+ * Solo-Beispiel („Dass jemand Kollegen vor Kunden schlecht macht."). `team`
+ * ist wie bei `questionKeyFor` optional und fällt auf `'solo'` zurück.
  */
-export function exampleKeyFor(slot: BrandSlot, pathKind: BrandPathKind): string {
+export function exampleKeyFor(
+  slot: BrandSlot,
+  pathKind: BrandPathKind,
+  team: BrandTeamKind = 'solo',
+): string {
   const base = `brand.example.${slot.id}`
+  if (slot.teamVariant) return `${base}.${team === 'team' ? 'team' : 'solo'}`
   return slot.pathVariants?.[pathKind] ? `${base}.${pathKind}` : base
 }
 

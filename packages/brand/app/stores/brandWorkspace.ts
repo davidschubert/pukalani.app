@@ -842,36 +842,23 @@ const setup = () => {
   }
 
   /**
-   * „NOCHMAL VON VORN" AUF EINEM ABGESCHLOSSENEN BAUSTEIN (C5, 2026-09-03) —
-   * bis dahin war die pure `reopen`-Transition UNVERDRAHTET: der Chip
-   * speicherte nur die Konfidenz, der Baustein blieb `done`, und für den
-   * Menschen passierte sichtbar nichts. EIN PATCH trägt `reopen` und die
-   * Konfidenz zusammen (die Route öffnet zuerst, setzt dann); die Journey
-   * zieht lokal nach, den Fortschritts-Cursor am Profil rechnet der Server.
+   * HIER STAND `reopenStep()` — ENTFERNT (Paket 8, 2026-09-05).
    *
-   * ── SEIT PAKET 3c-ii RUFT DIE WERKSTATT DAS NICHT MEHR ───────────────────
-   * Der Chip, an dem es hing, ist mit der Weiche auf die Abnahme-Seite gezogen,
-   * und „Nochmal von vorn" heisst dort die LÖSCHENDE Handlung `restart` (§5a) —
-   * eine andere Sache als diese leise Vertiefungsrunde. Die Aktion bleibt
-   * trotzdem: der Plan behält `reopen` ausdrücklich („Session öffnen, Wert
-   * ändern", §5a Schluss). Die KORREKTUR (Paket 6) ist es NICHT — sie macht das
-   * Kapitel bewusst nicht „un-abgenommen" (§5a Schluss: sie nimmt der
-   * geänderten Zeile ihr `accepted` und färbt veraltete Zeilen bernstein, mehr
-   * nicht), und ein `done`-Kapitel ist ohnehin beschreibbar. `reopen` bleibt
-   * damit die leise Vertiefungsrunde ohne heutigen Aufrufer — wer sie
-   * wegräumt, baut sie beim nächsten Anlass neu.
+   * Die pure Transition `reopen` BLEIBT (`shared/brandJourney.ts`, das
+   * optionale `reopen` im Autosave-PATCH und seine Tests): sie ist die LEISE
+   * Vertiefungsrunde des Plans (§5a Schluss, „Session öffnen, Wert ändern") —
+   * `done → active`, Slots und Konfidenz bleiben stehen.
+   *
+   * Nur die CLIENT-Aktion war tot. Ihr Aufrufer, der Konfidenz-Chip, ist mit
+   * Paket 3c-ii auf die Abnahme-Seite gezogen, und „Nochmal von vorn" heisst
+   * dort die LÖSCHENDE Handlung `restart` — eine andere Sache. Die Korrektur
+   * (Paket 6) ist es ebenfalls nicht: sie öffnet das Kapitel bewusst nicht
+   * wieder. Eine Aktion, die niemand ruft, ist kein Vorrat, sondern eine
+   * Behauptung über einen Weg, den es in der Oberfläche nicht gibt — und sie
+   * hielte eine `journey`-Nachführung am Leben, die niemand mehr gegenprüft.
+   * Der Server-Vertrag steht; wer die Runde wieder braucht, schreibt drei
+   * Zeilen an genau der Stelle, an der sie dann gedrückt wird.
    */
-  async function reopenStep(profileId: string): Promise<void> {
-    if (!stepKey.value) return
-    const response = await $fetch<BrandStepSaveResponse>(
-      `/api/brand/profiles/${profileId}/steps/${stepKey.value}`,
-      { method: 'PATCH', body: { revision: revision.value, reopen: true, confidence: 'restart' } },
-    )
-    applySaveResponse(response, 'restart')
-    journey.value = journey.value.map(entry => (entry.stepKey === stepKey.value
-      ? { ...entry, state: 'active' as const }
-      : entry))
-  }
 
   async function completeStep(profileId: string): Promise<void> {
     if (!stepKey.value) return
@@ -994,7 +981,6 @@ const setup = () => {
     loadProfile,
     loadStep,
     loadSessionMessages,
-    reopenStep,
     completeStep,
     reset,
   }

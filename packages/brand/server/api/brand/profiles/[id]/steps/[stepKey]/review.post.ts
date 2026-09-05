@@ -75,7 +75,7 @@ export default defineEventHandler(async (event): Promise<BrandStepReviewResponse
   }
 
   const contentLocale = profile.contentLocale
-  const pathKind = profileFacts(profile).pathKind
+  const { pathKind, team } = profileFacts(profile)
   const allRecords = mergeStepSlotRecords(stepRows)
 
   const outcome = await runBrandSessionReview({
@@ -87,9 +87,9 @@ export default defineEventHandler(async (event): Promise<BrandStepReviewResponse
     session: null,
     value: '',
     history: [],
-    document: brandReviewDocument(allRecords, contentLocale, pathKind),
-    chapter: brandReviewChapter(allRecords, stepKey, contentLocale, pathKind),
-    notes: brandReviewNotes(records, stepKey, contentLocale, pathKind),
+    document: brandReviewDocument(allRecords, contentLocale, pathKind, team),
+    chapter: brandReviewChapter(allRecords, stepKey, contentLocale, pathKind, team),
+    notes: brandReviewNotes(records, stepKey, contentLocale, pathKind, team),
     openSessions: [],
     stubFinding: String(getQuery(event).stub ?? '') === 'conflict',
   })

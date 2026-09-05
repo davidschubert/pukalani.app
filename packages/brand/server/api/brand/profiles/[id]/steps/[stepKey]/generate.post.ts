@@ -219,6 +219,7 @@ export default defineEventHandler(async (event) => {
     collectSlotDependencies(slot.id, allRecords),
     profile.contentLocale,
     profileFacts(profile).pathKind,
+    profileFacts(profile).team,
   )
   const inputHash = brandGenerationInputHash(slot.id, profile.contentLocale, dependencies)
   const stored = parseGenerations(stepRow.generations)

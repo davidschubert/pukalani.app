@@ -4,6 +4,7 @@ import {
   type BrandPathKind,
   type BrandSlot,
   type BrandStepKey,
+  type BrandTeamKind,
   slotsForStep,
 } from '../../shared/slotRegistry'
 import { brandSlotPromptLabel } from './brandSlotPromptLabels'
@@ -49,6 +50,7 @@ export function brandReviewDocument(
   records: Readonly<Record<string, BrandSlotRecord>>,
   contentLocale: string,
   pathKind: BrandPathKind,
+  team: BrandTeamKind,
 ): BrandReviewDocumentEntry[] {
   const entries: BrandReviewDocumentEntry[] = []
   for (const session of BRAND_SLOTS) {
@@ -56,7 +58,7 @@ export function brandReviewDocument(
     if (typeof confirmed !== 'string' || confirmed.length === 0) continue
     entries.push({
       slotId: session.id,
-      label: brandSlotPromptLabel(session.id, contentLocale, pathKind),
+      label: brandSlotPromptLabel(session.id, contentLocale, pathKind, team),
       value: confirmed,
     })
   }
@@ -69,9 +71,10 @@ export function brandReviewChapter(
   stepKey: BrandStepKey,
   contentLocale: string,
   pathKind: BrandPathKind,
+  team: BrandTeamKind,
 ): BrandReviewDocumentEntry[] {
   const own = new Set(slotsForStep(stepKey).map(session => session.id))
-  return brandReviewDocument(records, contentLocale, pathKind).filter(entry => own.has(entry.slotId))
+  return brandReviewDocument(records, contentLocale, pathKind, team).filter(entry => own.has(entry.slotId))
 }
 
 /**
@@ -89,6 +92,7 @@ export function brandReviewNotes(
   stepKey: BrandStepKey,
   contentLocale: string,
   pathKind: BrandPathKind,
+  team: BrandTeamKind,
 ): BrandReviewDocumentEntry[] {
   const entries: BrandReviewDocumentEntry[] = []
   for (const session of slotsForStep(stepKey)) {
@@ -96,7 +100,7 @@ export function brandReviewNotes(
     if (typeof note !== 'string' || note.trim().length === 0) continue
     entries.push({
       slotId: session.id,
-      label: brandSlotPromptLabel(session.id, contentLocale, pathKind),
+      label: brandSlotPromptLabel(session.id, contentLocale, pathKind, team),
       value: note,
     })
   }
@@ -116,6 +120,7 @@ export function brandReviewAllNotes(
   records: Readonly<Record<string, BrandSlotRecord>>,
   contentLocale: string,
   pathKind: BrandPathKind,
+  team: BrandTeamKind,
 ): BrandReviewDocumentEntry[] {
   const entries: BrandReviewDocumentEntry[] = []
   for (const session of BRAND_SLOTS) {
@@ -123,7 +128,7 @@ export function brandReviewAllNotes(
     if (typeof note !== 'string' || note.trim().length === 0) continue
     entries.push({
       slotId: session.id,
-      label: brandSlotPromptLabel(session.id, contentLocale, pathKind),
+      label: brandSlotPromptLabel(session.id, contentLocale, pathKind, team),
       value: note,
     })
   }
@@ -144,12 +149,13 @@ export function brandReviewOpenSessions(
   sessionStates: Readonly<Record<string, BrandSessionState | undefined>>,
   contentLocale: string,
   pathKind: BrandPathKind,
+  team: BrandTeamKind,
 ): { id: string, label: string }[] {
   return slotsForStep(stepKey)
     .filter(session => sessionStates[session.id] === 'open')
     .map(session => ({
       id: session.id,
-      label: brandSlotPromptLabel(session.id, contentLocale, pathKind),
+      label: brandSlotPromptLabel(session.id, contentLocale, pathKind, team),
     }))
 }
 
@@ -158,10 +164,11 @@ export function brandReviewSessionInfo(
   session: BrandSlot,
   contentLocale: string,
   pathKind: BrandPathKind,
+  team: BrandTeamKind,
 ): BrandReviewSessionInfo {
   return {
     id: session.id,
-    label: brandSlotPromptLabel(session.id, contentLocale, pathKind),
+    label: brandSlotPromptLabel(session.id, contentLocale, pathKind, team),
     goal: session.goal,
     quality: session.quality,
     antiPatterns: session.antiPatterns,

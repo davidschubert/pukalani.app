@@ -75,18 +75,44 @@ const doc = await useAsyncData<BrandDocumentResponse | null>(
 
 /**
  * Das PROFIL für die Leiste (Journey, Marken-Wähler, Kapitel-Beschriftungen).
- * FAIL-SOFT: ohne es steht die Seite trotzdem — das Dokument kommt aus seinem
- * eigenen Abruf, und eine Leiste ohne Kapitel ist besser als eine leere Seite.
+ *
+ * ── EIN FREMDES BRANDING IST EIN 404, KEINE HALBE WERKSTATT (Paket 8) ────
+ * Bis hierher stand der Abruf FAIL-SOFT („eine Leiste ohne Kapitel ist besser
+ * als eine leere Seite"), und der Rückgabewert wurde weggeworfen. Für einen
+ * fremden oder erfundenen Schlüssel hiess das: die Datentür antwortet 404,
+ * `loadProfile` setzt `denied` — und der Listen-Abruf gleich darauf setzt es
+ * bei einem eingeloggten Menschen SOFORT WIEDER auf `false` (er hat ja eigene
+ * Brandings). Übrig blieb die Hülle: „Namenloses Branding" in der Leiste,
+ * „Das Dokument konnte nicht geladen werden" in der Mitte, HTTP 200. Ein
+ * Soft-404, der wie ein Produktfehler aussieht — dieselbe Falle wie beim
+ * ungültigen Baustein-Schlüssel in der Werkstatt (Davids 404-Audit).
+ *
+ * Das Dokument gehört EINEM Branding. Ist das nicht erreichbar, bedeutet die
+ * Adresse nichts, und die ehrliche Antwort ist die Fehlerseite mit 404 — auch
+ * für „kein Beta-Zugang": die Datentür sagt bewusst beides mit derselben
+ * Antwort (sie verrät nicht, ob es die Zeile gibt), also kann diese Seite die
+ * zwei Fälle gar nicht auseinanderhalten. Die WERKSTATT behält ihre ruhige
+ * Fläche: sie ist der Einstieg, den man ohne Zugang tatsächlich anläuft, und
+ * sie kennt mit `blocked` (403) einen zweiten, erklärbaren Zustand.
+ *
+ * FAIL-SOFT BLEIBT für alles andere: nur ein AUSDRÜCKLICHES „nicht gefunden"
+ * wirft. Ein Transportfehler lässt `data` leer, die Seite steht, und die Mitte
+ * sagt es über `brand.document.loadFailed` — aus einem 500 einen 404 zu machen
+ * wäre eine Lüge über die Ursache.
  */
-await useAsyncData(
+const shell = await useAsyncData<{ found: boolean } | null>(
   () => `brand-document-shell-${profileId.value}`,
   async () => {
-    await store.loadProfile(profileId.value, request).catch(() => false)
+    const found = await store.loadProfile(profileId.value, request)
     await store.loadProfiles(request).catch(() => {})
-    return true
+    return { found }
   },
-  { watch: [profileId] },
+  { watch: [profileId], default: () => null },
 )
+
+if (shell.data.value && !shell.data.value.found) {
+  throw createError({ status: 404, statusText: 'Unknown brand profile' })
+}
 
 const view = computed(() => doc.data.value)
 const chapters = computed<BrandDocumentChapter[]>(() => view.value?.chapters ?? [])
@@ -332,21 +358,12 @@ useBrandTitle(() => (store.profile?.title || view.value?.title || t('brand.docum
 </script>
 
 <template>
-  <!-- Kein Beta-Zugang: eine Fläche, keine Fehlerseite (wie in der Werkstatt). -->
-  <div v-if="store.denied" class="bw-root grid min-h-dvh place-items-center px-6">
-    <div class="max-w-md text-center">
-      <BwIllustration variant="journey" class="mx-auto h-16 w-auto" style="color: var(--bw-ink-soft)" />
-      <p class="mt-4 font-medium">{{ t('brand.workspace.noAccess.title') }}</p>
-      <p class="mt-1 text-sm" style="color: var(--bw-muted)">{{ t('brand.workspace.noAccess.description') }}</p>
-      <UButton
-        class="mt-5 rounded-full" variant="outline" :to="localePath('/dashboard/brands')"
-        :label="t('brand.brands.title')"
-      />
-    </div>
-  </div>
-
+  <!-- KEINE „kein Zugang"-Fläche mehr (Paket 8): sie hing an `store.denied`,
+       und dieser Zustand ist hier seit dem 404 oben unerreichbar — kein
+       Zugang UND unbekannt beantwortet die Datentür gleich, und beide
+       enden jetzt auf der Fehlerseite. Ein Zweig, der nie zieht, ist kein
+       Sicherheitsnetz, sondern eine Behauptung. -->
   <BwWorkspace
-    v-else
     v-model:rail-overlay="navOverlayOpen"
     :progress-pct="overall.pct"
     :content-locale="store.profile?.contentLocale ?? locale"

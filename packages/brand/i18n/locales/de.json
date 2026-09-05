@@ -345,7 +345,10 @@
       "c": {
         "discovery1": "Als ein Kunde uns weiterempfohlen hat, bevor sein eigenes Projekt fertig war.",
         "discovery2": "Als wir einen Auftrag angenommen haben, hinter dem keiner stand — nur wegen des Geldes.",
-        "discovery3": "Dass jemand Kollegen vor Kunden schlecht macht.",
+        "discovery3": {
+          "solo": "Dass jemand Kollegen vor Kunden schlecht macht.",
+          "team": "Im Zweifel die sorgfältige Lösung — lieber einmal mehr nachfragen als etwas Halbes ausliefern."
+        },
         "livedExamples": "Ehrlichkeit: Wir haben einem Kunden abgeraten, obwohl uns das den Auftrag gekostet hat.",
         "conflictRule": "Tempo gegen Sorgfalt — im Zweifel gewinnt die Sorgfalt.",
         "teamFilter": "Verlässlichkeit — wer Zusagen nicht hält, passt nicht zu uns."

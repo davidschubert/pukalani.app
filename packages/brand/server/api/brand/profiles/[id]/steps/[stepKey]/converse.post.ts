@@ -273,7 +273,12 @@ export default defineEventHandler(async (event): Promise<BrandConverseResponse |
   const openFieldLabels = next
     ? []
     : brandStepCompletion(stepKey, facts).missingRequired
-        .map(slotId => brandSlotPromptLabel(slotId, profile.contentLocale, profileFacts(profile).pathKind))
+        .map(slotId => brandSlotPromptLabel(
+          slotId,
+          profile.contentLocale,
+          profileFacts(profile).pathKind,
+          profileFacts(profile).team,
+        ))
 
   /**
    * WELCHE FRAGE DIESER ZUG STELLT — für die Oberfläche, nicht für den Prompt.
@@ -436,7 +441,7 @@ export default defineEventHandler(async (event): Promise<BrandConverseResponse |
     if (!session) return null
 
     const contentLocale = profile.contentLocale
-    const pathKind = profileFacts(profile).pathKind
+    const { pathKind, team } = profileFacts(profile)
 
     let latest: { slotId: string, at: string, missing: string[] } | null = null
     for (const [slotId, record] of Object.entries(currentRecords)) {
@@ -459,10 +464,10 @@ export default defineEventHandler(async (event): Promise<BrandConverseResponse |
     return {
       options: {
         colleague,
-        field: brandSlotPromptLabel(latest?.slotId ?? session.id, contentLocale, pathKind),
+        field: brandSlotPromptLabel(latest?.slotId ?? session.id, contentLocale, pathKind, team),
         missing: latest?.missing ?? [],
         conflicts: conflicts.map(view => ({
-          fields: view.slots.map(slotId => brandSlotPromptLabel(slotId, contentLocale, pathKind)),
+          fields: view.slots.map(slotId => brandSlotPromptLabel(slotId, contentLocale, pathKind, team)),
           why: view.why,
           ...(view.suggestion ? { suggestion: view.suggestion } : {}),
         })),
@@ -677,6 +682,7 @@ export default defineEventHandler(async (event): Promise<BrandConverseResponse |
                 slotId,
                 profile.contentLocale,
                 profileFacts(profile).pathKind,
+                profileFacts(profile).team,
               )),
             }
           : {}),
@@ -692,6 +698,7 @@ export default defineEventHandler(async (event): Promise<BrandConverseResponse |
           })),
           profile.contentLocale,
           profileFacts(profile).pathKind,
+          profileFacts(profile).team,
         ),
         history,
         answeredQuestion: body.question ?? '',

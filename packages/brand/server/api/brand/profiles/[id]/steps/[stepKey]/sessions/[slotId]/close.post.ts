@@ -103,7 +103,7 @@ export default defineEventHandler(async (event): Promise<BrandSessionCloseRespon
   }
 
   const contentLocale = profile.contentLocale
-  const pathKind = profileFacts(profile).pathKind
+  const { pathKind, team } = profileFacts(profile)
   const stepSlotIds = slotsForStep(stepKey).map(entry => entry.id)
 
   /** Die offenen Befunde, an denen ein Feld DIESES Kapitels beteiligt ist. */
@@ -198,15 +198,15 @@ export default defineEventHandler(async (event): Promise<BrandSessionCloseRespon
     profileId: profile.$id,
     mode: correcting ? 'correct' : 'session',
     stepKey,
-    session: brandReviewSessionInfo(session, contentLocale, pathKind),
+    session: brandReviewSessionInfo(session, contentLocale, pathKind, team),
     value: record?.confirmed ?? '',
     history: await loadBrandConversationHistory(
       event, profile.$id, stepKey, session.id, stepRow.restartedAt,
     ),
-    document: brandReviewDocument(allRecords, contentLocale, pathKind),
-    chapter: brandReviewChapter(allRecords, stepKey, contentLocale, pathKind),
-    notes: brandReviewNotes(records, stepKey, contentLocale, pathKind),
-    openSessions: brandReviewOpenSessions(stepKey, context.sessionStates, contentLocale, pathKind),
+    document: brandReviewDocument(allRecords, contentLocale, pathKind, team),
+    chapter: brandReviewChapter(allRecords, stepKey, contentLocale, pathKind, team),
+    notes: brandReviewNotes(records, stepKey, contentLocale, pathKind, team),
+    openSessions: brandReviewOpenSessions(stepKey, context.sessionStates, contentLocale, pathKind, team),
     // DIE HÜLLE MIT WERTEN (§9): nur so kann der Spezialist sagen, welches
     // Feld die Änderung inhaltlich trifft — eine Liste nackter Ids wäre eine
     // Frage nach einem Inhalt, den er nicht kennt.
@@ -214,7 +214,7 @@ export default defineEventHandler(async (event): Promise<BrandSessionCloseRespon
       ? {
           staleFields: hull.map(slotId => ({
             slotId,
-            label: brandSlotPromptLabel(slotId, contentLocale, pathKind),
+            label: brandSlotPromptLabel(slotId, contentLocale, pathKind, team),
             value: allRecords[slotId]?.confirmed ?? '',
           })),
           previousValue,

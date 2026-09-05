@@ -566,12 +566,14 @@ async function answerOption(label: string): Promise<void> {
  * Sie steht seit dem Umbau als aufklappbarer Link DIREKT UNTER DER FRAGE
  * (Runde 23) statt als grauer Platzhalter im Feld — Klick ODER Tab übernimmt
  * sie ins leere Prompt. Die Texte stehen statisch im Katalog
- * (`brand.example.<id>`, pfadabhängig wie die Frage selbst).
+ * (`brand.example.<id>`, pfad- UND team-abhängig wie die Frage selbst —
+ * ohne `teamKind` stünde unter der Team-Fassung von `c.discovery3` das
+ * Beispiel zur Solo-Frage, Paket 8).
  */
 const composerExample = computed<string>(() => {
   const slot = nextSlot.value
   if (!slot || slot.type !== 'question') return ''
-  return t(exampleKeyFor(slot, pathKind.value))
+  return t(exampleKeyFor(slot, pathKind.value, teamKind.value))
 })
 
 const exampleOpen = ref(false)
@@ -708,13 +710,31 @@ async function ensureOpeningTurn(sessionKey: string): Promise<void> {
  * der er gehört. Am `activeSessionKey` allein zu hängen hiesse, mit dem Stand
  * der VORIGEN Session zu entscheiden: ein überflüssiger Aufruf, den die Route
  * zwar abweist (`skipped: true`), der aber trotzdem eine Anfrage kostet.
+ *
+ * ── UND ERST NACH DEM MOUNT, NICHT SCHON IM SETUP (Paket 8, 2026-09-05) ───
+ * Der Wächter stand hier als `watch(…, { immediate: true })` — und damit lief
+ * `converse()` schon WÄHREND der Hydration los. Sein erstes `await` (der
+ * Autosave-Ausspüler) fällt in einen Microtask, also nach dem Setup und VOR
+ * dem ersten Rendern: `conversation.pending` war beim ersten Client-Paint
+ * `true`, `turns` gab deshalb nur die (leeren) Live-Züge zurück, und der
+ * Server hatte an derselben Stelle die Katalog-Frage gemalt. Ergebnis: fünf
+ * „Hydration node mismatch" und ein „children mismatch" an <BwWorkspace> —
+ * genau der SSR/Client-Zweigtausch, den CLAUDE.md verbietet, nur nicht im
+ * Markup, sondern in einer Nebenwirkung.
+ *
+ * `onMounted` ist die kleinste ehrliche Klammer: die Hydration sieht denselben
+ * Baum wie der Server, und der Eröffnungszug startet unmittelbar danach — für
+ * den Menschen ist das derselbe Moment, für Vue sind es zwei. Der Wächter
+ * bleibt für die ganze Lebensdauer bestehen (Session-Wechsel), weil ein in
+ * einem Lifecycle-Hook angelegter `watch` am Scope der Komponente hängt.
+ * `import.meta.client` entfällt: `onMounted` läuft server-seitig nie.
  */
-if (import.meta.client) {
+onMounted(() => {
   watch(() => sessionHistory.data.value, (data) => {
     if (!data?.sessionKey || data.sessionKey !== activeSessionKey.value) return
     void ensureOpeningTurn(data.sessionKey)
   }, { immediate: true })
-}
+})
 
 /**
  * EINE SESSION ÖFFNEN — dieselbe Adresse, andere Query (§11).

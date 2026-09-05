@@ -162,7 +162,15 @@ describe('brand i18n-Katalog', () => {
     // stille Fehler wie bei den Fragen, deshalb dieselbe Prüfung.
     const gaps: string[] = []
     for (const slot of activeSlots.filter(slot => slot.type === 'question')) {
-      for (const key of [...new Set([exampleKeyFor(slot, 'new'), exampleKeyFor(slot, 'relaunch')])]) {
+      const keys = new Set([
+        exampleKeyFor(slot, 'new', 'solo'),
+        exampleKeyFor(slot, 'relaunch', 'solo'),
+        // Auch die Team-Fassung (Paket 8): `c.discovery3` fragt im Team etwas
+        // anderes und braucht dafür ihre eigene Musterantwort.
+        exampleKeyFor(slot, 'new', 'team'),
+        exampleKeyFor(slot, 'relaunch', 'team'),
+      ])
+      for (const key of keys) {
         const missing = missingIn(key)
         if (missing.length) gaps.push(`${slot.id}: ${key} fehlt in ${missing.join(', ')}`)
       }

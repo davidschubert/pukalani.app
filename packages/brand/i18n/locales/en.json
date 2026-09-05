@@ -345,7 +345,10 @@
       "c": {
         "discovery1": "When a customer recommended us before their own project was even finished.",
         "discovery2": "When we took a job nobody believed in — just for the money.",
-        "discovery3": "Someone badmouthing colleagues in front of customers.",
+        "discovery3": {
+          "solo": "Someone badmouthing colleagues in front of customers.",
+          "team": "When in doubt, the careful option — better to ask once more than to ship something half-finished."
+        },
         "livedExamples": "Honesty: we advised a customer against a job, even though it cost us the order.",
         "conflictRule": "Speed versus care — when in doubt, care wins.",
         "teamFilter": "Reliability — if you do not keep your word, you do not fit here."

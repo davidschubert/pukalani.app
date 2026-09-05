@@ -88,7 +88,7 @@ export default defineEventHandler(async (event): Promise<BrandDocumentReviewResp
   const { profile, stepRows, journey, sessionStates } = context
 
   const contentLocale = profile.contentLocale
-  const pathKind = profileFacts(profile).pathKind
+  const { pathKind, team } = profileFacts(profile)
 
   /** Die Kapitel des WEGES — übersprungene gehören nicht zum Dokument (§10). */
   const included = journey.filter(entry => entry.state !== 'skipped').map(entry => entry.stepKey)
@@ -185,14 +185,14 @@ export default defineEventHandler(async (event): Promise<BrandDocumentReviewResp
       profileId: profile.$id,
       mode: 'session',
       stepKey: session.stepId,
-      session: brandReviewSessionInfo(session, contentLocale, pathKind),
+      session: brandReviewSessionInfo(session, contentLocale, pathKind, team),
       value: record.confirmed ?? '',
       history: await loadBrandConversationHistory(
         event, profile.$id, session.stepId, session.id, stepRow?.restartedAt,
       ),
-      document: brandReviewDocument(merged, contentLocale, pathKind),
-      chapter: brandReviewChapter(merged, session.stepId, contentLocale, pathKind),
-      notes: brandReviewAllNotes(merged, contentLocale, pathKind),
+      document: brandReviewDocument(merged, contentLocale, pathKind, team),
+      chapter: brandReviewChapter(merged, session.stepId, contentLocale, pathKind, team),
+      notes: brandReviewAllNotes(merged, contentLocale, pathKind, team),
       // KEIN Wegweiser: der Prüfblick schickt niemanden in ein Gespräch, er
       // holt ein Urteil nach. Eine leere Liste heisst „antworte null" (s. Prompt).
       openSessions: [],
@@ -265,7 +265,7 @@ export default defineEventHandler(async (event): Promise<BrandDocumentReviewResp
 
   // ── 2 · Der Blick über das ganze Dokument (§10) ─────────────────────────
   const merged = allRecords()
-  const documentEntries = brandReviewDocument(merged, contentLocale, pathKind)
+  const documentEntries = brandReviewDocument(merged, contentLocale, pathKind, team)
 
   const outcome = await runBrandSessionReview({
     event,
@@ -284,7 +284,7 @@ export default defineEventHandler(async (event): Promise<BrandDocumentReviewResp
     document: documentEntries,
     // Dieselbe Liste: der Prompt schickt sie GENAU EINMAL (s. `inputBlocks`).
     chapter: documentEntries,
-    notes: brandReviewAllNotes(merged, contentLocale, pathKind),
+    notes: brandReviewAllNotes(merged, contentLocale, pathKind, team),
     openSessions: [],
     stubFinding: String(getQuery(event).stub ?? '') === 'conflict',
   })

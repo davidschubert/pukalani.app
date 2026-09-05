@@ -206,7 +206,7 @@ export function brandAcceptanceSessions(
       questionKey: questionKeyFor(session, input.pathKind, input.team),
       // Nur Menschenfragen haben eine Beispiel-ANTWORT im Katalog; Auswahlen
       // haben Chips statt Freitext (s. `exampleKeyFor`).
-      exampleKey: session.type === 'question' ? exampleKeyFor(session, input.pathKind) : null,
+      exampleKey: session.type === 'question' ? exampleKeyFor(session, input.pathKind, input.team) : null,
       example: {
         de: [...session.examples[input.pathKind].de],
         en: [...session.examples[input.pathKind].en],
