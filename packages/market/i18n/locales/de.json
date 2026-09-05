@@ -10,7 +10,8 @@
       "lead": "Was eure Wettbewerber öffentlich sagen, übersetzt in dieselben Felder wie eure eigene Foundation — Aussage für Aussage, jede mit Zitat und Quelle.",
       "limit": "Wir zeigen, was Marken sagen — nicht, wie erfolgreich sie damit sind.",
       "unlocked": "Diese Seite ist offen, weil Kapitel B (Purpose, Vision und Mission) abgenommen ist.",
-      "sources": "Gelesen werden nur öffentliche Marketing-Seiten. Team-, Impressums- und Kontaktseiten werden gar nicht erst abgerufen."
+      "sources": "Gelesen werden nur öffentliche Marketing-Seiten. Team-, Impressums- und Kontaktseiten werden gar nicht erst abgerufen.",
+      "sourcesFour": "Ein Kandidat muss keine Website sein: er kann auch eine eigene Marke aus eurem Konto sein (der Relaunch-Fall), ein Eintrag unserer geprüften Bibliothek oder eine fremde Marke, deren Eigentümerin sie freigegeben hat."
     },
     "candidates": {
       "title": "Kandidaten",
@@ -22,6 +23,62 @@
       "add": "Wettbewerber ergänzen",
       "remove": "{name} entfernen",
       "suggested": "Vorschlag aus eurem Kontext-Kapitel"
+    },
+    "source": {
+      "label": "Quelle",
+      "website": "Website-Adresse",
+      "foundation": "Eigene Marke",
+      "library": "Bibliothek",
+      "shared": "Freigegebene Marke",
+      "search": "Marke suchen",
+      "foundationPlaceholder": "Eigene Marke wählen",
+      "libraryPlaceholder": "Bekannte Marke wählen",
+      "sharedPlaceholder": "Freigegebene Marke wählen",
+      "foundationHint": "Aus euren bestätigten Feldern. Kein Abruf, kein Zitat — diese Sätze sind beschlossen, nicht abgelesen.",
+      "libraryHint": "Marktprofil folgt in M6 — von uns gerechnet und geprüft. Bis dahin steht hier nur der Name: ein erfundenes Zitat unter einem echten Markennamen gibt es bei uns nie.",
+      "sharedHint": "Nur mit Zustimmung der Eigentümerin sichtbar, und nur die zehn Außen-Felder. Nichts aus ihrer Werkstatt."
+    },
+    "score": {
+      "link": "Zum Brand-Check",
+      "pending": "Brand-Check läuft mit"
+    },
+    "frequency": {
+      "pages": "auf {pages} von {of} Seiten"
+    },
+    "view": {
+      "website": "Website sagt",
+      "ai": "KI-Antworten sagen"
+    },
+    "ai": {
+      "title": "KI-Außensicht",
+      "label": "ungeprüfte Außensicht",
+      "consensus": "{agree} von {asked} KI-Antworten übereinstimmend",
+      "adopted": "übernommen",
+      "dropped": "verworfen",
+      "agree": "{agree} von {asked} Antworten",
+      "empty": "keine übereinstimmende Antwort",
+      "disclaimer": "Ungeprüfte Außensicht ohne Beleg — sie hat keinen Einfluss auf den Brand-Check-Score.",
+      "tableHint": "So beschreiben KI-Antworten diese Marken. Es gibt dazu keine Quelle und keinen Beleg: übernommen wird nur, was mindestens zwei Modelle übereinstimmend sagen."
+    },
+    "relaunch": {
+      "title": "Eure Marke gegen eure alte Website",
+      "lead": "Links, was auf eurer alten Website noch steht. Rechts, was ihr in der Foundation bestätigt habt. Feld für Feld, dieselbe Struktur wie bei jedem Wettbewerber.",
+      "oldSite": "Alte Website",
+      "newFoundation": "Neue Foundation",
+      "state": {
+        "same": "gleich",
+        "different": "anders",
+        "onlyFoundation": "nur in der Foundation",
+        "onlyWebsite": "nur auf der Website",
+        "neither": "nirgends formuliert"
+      },
+      "gapTitle": "Was eure Foundation sagt und eure Website noch nicht",
+      "gapHint": "Aus dem Vergleich wird eine Liste. Anders heißt anders, nicht schlechter — eine Website darf älter sein als eine Entscheidung.",
+      "gap": {
+        "missing": "Steht auf eurer Website noch gar nicht.",
+        "differs": "Eure Website sagt dazu etwas anderes."
+      },
+      "gapNone": "Eure Website sagt bereits alles, was ihr bestätigt habt."
     },
     "status": {
       "pending": "Noch nicht gelesen",
@@ -56,7 +113,12 @@
       "title": "Vergleichs-Lauf",
       "lead": "Jeder Wettbewerber wird zuerst geprüft, dann gelesen, dann in die Feldstruktur übersetzt.",
       "robots": "robots.txt geprüft",
-      "pages": "{count} Seiten gelesen",
+      "sitemap": "sitemap.xml gelesen ({count} Adressen)",
+      "pages": "{count} Schlüsselseiten gelesen",
+      "llmsFound": "llms.txt gefunden",
+      "llmsMissing": "llms.txt nicht gefunden",
+      "jsonLd": "JSON-LD gelesen",
+      "brandCheck": "Brand-Check angestoßen",
       "profiled": "Profil erstellt",
       "waiting": "Wartet",
       "comparing": "Vergleich läuft",
@@ -152,13 +214,15 @@
     },
     "demo": {
       "title": "Marktvergleich — Prototyp",
-      "lead": "Vier Screens, je ein Interaktionstyp (Plan §2.11). Die Marke ist die erfundene Kailua Coffee Co., das Feld sind drei erfundene Wettbewerber, deren Websites in diesem Playground liegen.",
+      "lead": "Fünf Screens, je ein Interaktionstyp (Plan §2.11 und §7). Die Marke ist die erfundene Kailua Coffee Co., das Feld sind drei erfundene Wettbewerber, deren Websites in diesem Playground liegen — dazu die alte Website der eigenen Marke.",
       "note": "Nichts hier spricht mit einem Server: kein Abruf, kein Modell, keine Tabellen. Das ist die Komponenten-Vorlage, die die Pakete M1 bis M4 übernehmen.",
       "screen1": "1 · Markt-Seite: Kandidaten, Adressen, Schranke",
       "screen2": "2 · Lauf: was je Wettbewerber passiert",
       "screen3": "3 · Bericht: Gegenüberstellung, drei Listen, Profile, Befunde",
       "screen4": "4 · Werkstatt: der Markt-Befund am Feld",
-      "sites": "Die erfundenen Wettbewerber-Websites"
+      "screen5": "5 · Relaunch: eure Marke gegen eure alte Website",
+      "sites": "Die erfundenen Wettbewerber-Websites",
+      "checkNote": "Die Links „Zum Brand-Check\" sind Platzhalter: der Brand-Check ist gebaut, aber er lebt in seiner eigenen App — dieser Playground zeigt nur, wo sein Score im Marktvergleich steht."
     }
   }
 }

@@ -1,16 +1,19 @@
 <script setup lang="ts">
 import type { MarketFinding, MarketFindingStatus } from '../../../../../shared/marketProfile'
+import { MARKET_OWN_ID } from '../../../../../shared/marketProfile'
 import {
+  DEMO_AI_VIEWS,
   DEMO_BRAND,
   DEMO_CLAIMS,
   DEMO_COMPETITORS,
   DEMO_FINDINGS,
   DEMO_OWN,
+  DEMO_OWN_CHECK,
   DEMO_PROFILES,
   DEMO_REPORT_DATE,
   demoHref,
 } from '../../../utils/demoMarket'
-import { useBrandFieldLabels, useBrandSlotLabel } from '../../../composables/useBrandFieldLabels'
+import { useBrandBandLabel, useBrandFieldLabels, useBrandSlotLabel } from '../../../composables/useBrandFieldLabels'
 
 /**
  * SCREEN 3 — DER BERICHT (Plan §2.11 Nr. 3, Ausgabe nach Entscheidung 5).
@@ -34,6 +37,7 @@ const { t, locale } = useI18n()
 const localePath = useLocalePath()
 const fieldLabels = useBrandFieldLabels()
 const slotLabel = useBrandSlotLabel()
+const bandLabel = useBrandBandLabel()
 
 const findings = ref<MarketFinding[]>(DEMO_FINDINGS.map(finding => ({ ...finding })))
 
@@ -57,6 +61,22 @@ const standRows = computed(() => [
 function profileOf(competitorId: string) {
   return DEMO_PROFILES.find(profile => profile.competitorId === competitorId) ?? null
 }
+
+/**
+ * Die Aussensicht wird HIER gefiltert und nicht in der Karte: die Karte soll
+ * eine Marke zeigen, nicht in einer Liste suchen — dieselbe Arbeitsteilung wie
+ * bei `profileOf`.
+ */
+function aiViewOf(competitorId: string) {
+  return DEMO_AI_VIEWS.find(view => view.competitorId === competitorId) ?? null
+}
+
+/** Der Prototyp-Link auf den Brand-Check — im Playground ein Platzhalter. */
+function checkHref(checkId: string): string {
+  return `/brand-check/${checkId}`
+}
+
+const ownId = MARKET_OWN_ID
 </script>
 
 <template>
@@ -88,11 +108,19 @@ function profileOf(competitorId: string) {
       <MkComparisonTable
         :own="DEMO_OWN"
         :own-name="DEMO_BRAND"
+        :own-check="DEMO_OWN_CHECK"
         :competitors="DEMO_COMPETITORS"
         :profiles="DEMO_PROFILES"
+        :ai-views="DEMO_AI_VIEWS"
         :field-labels="fieldLabels"
         :resolve-href="demoHref"
-      />
+        :resolve-band-label="bandLabel"
+        :resolve-check-href="checkHref"
+      >
+        <template #score="{ check }">
+          <BwScoreRing :value="check.score" :size="36" />
+        </template>
+      </MkComparisonTable>
     </div>
 
     <!-- 2 · Die drei Listen -->
@@ -114,10 +142,45 @@ function profileOf(competitorId: string) {
           v-for="(competitor, index) in DEMO_COMPETITORS" :key="competitor.id"
           :competitor="competitor"
           :profile="profileOf(competitor.id)"
+          :ai-view="aiViewOf(competitor.id)"
           :field-labels="fieldLabels"
           :resolve-href="demoHref"
+          :resolve-band-label="bandLabel"
+          :resolve-check-href="checkHref"
           :default-open="index === 0"
-        />
+        >
+          <template #score="{ check }">
+            <BwScoreRing :value="check.score" :size="40" />
+          </template>
+        </MkCompetitorCard>
+      </div>
+    </section>
+
+    <!-- 3b · Die eigene Aussensicht — getrennt von allem, was Beleg hat. -->
+    <section v-if="aiViewOf(ownId)" class="mt-10">
+      <h2 class="flex items-center gap-2 text-lg font-medium tracking-tight">
+        <UIcon name="i-ph-sparkle" class="size-4 flex-none" style="color: var(--bw-muted)" />
+        {{ t('market.ai.title') }} &middot; {{ DEMO_BRAND }}
+      </h2>
+      <p class="mt-1 text-sm leading-relaxed" style="color: var(--bw-ink-soft)">{{ t('market.ai.tableHint') }}</p>
+      <div class="bw-card mt-3 p-4">
+        <p class="bw-label flex items-center gap-1.5" style="color: var(--bw-draft)">
+          <UIcon name="i-ph-warning-circle" class="size-3.5 flex-none" />{{ t('market.ai.label') }}
+        </p>
+        <dl class="mt-3 space-y-3">
+          <div v-for="statement in aiViewOf(ownId)?.statements ?? []" :key="statement.fieldId">
+            <dt class="bw-label" style="color: var(--bw-muted)">
+              {{ fieldLabels[statement.fieldId] ?? t(`market.field.${statement.fieldId}`) }}
+            </dt>
+            <dd class="mt-0.5">
+              <p class="text-sm leading-snug">{{ statement.value }}</p>
+              <p class="bw-label" style="color: var(--bw-muted)">
+                {{ t('market.ai.agree', { agree: statement.agree, asked: statement.asked }) }}
+              </p>
+            </dd>
+          </div>
+        </dl>
+        <p class="bw-label mt-3" style="color: var(--bw-muted)">{{ t('market.ai.disclaimer') }}</p>
       </div>
     </section>
 

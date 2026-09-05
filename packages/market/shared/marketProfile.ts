@@ -97,6 +97,47 @@ export interface MarketEvidence {
 }
 
 /**
+ * WOHER EIN KANDIDAT KOMMT (Plan §7.2, vier Quellen) — und damit auch, woher
+ * eine einzelne Aussage stammt (§7.6: `source` am Feld).
+ *
+ * VIER WERTE, WEIL ES VIER VERSCHIEDENE VERSPRECHEN SIND: `website` ist
+ * ABGELESEN (mit Beleg), `foundation` ist ENTSCHIEDEN (bestätigte eigene
+ * Felder, deshalb ohne Beleg — sie sind nicht zitiert, sondern beschlossen),
+ * `library` ist von UNS gerechnet und VON HAND GEPRÜFT, `shared` ist die
+ * freigegebene Marke eines anderen Kontos (nur mit Opt-in, nur die zehn
+ * Aussen-Felder). Wer die Herkunft nicht anzeigt, behauptet für alle vier
+ * dieselbe Belastbarkeit — und genau das wäre gelogen.
+ *
+ * Die KI-Aussensicht steht BEWUSST NICHT in dieser Aufzählung: sie ist keine
+ * fünfte Quelle für dieselbe Zelle, sondern eine EIGENE Sicht neben „Website
+ * sagt" (§7.5 d). Vermischt man beides, ist die ungeprüfte Aussage nicht mehr
+ * von der belegten zu unterscheiden.
+ */
+export type MarketCandidateSource = 'website' | 'foundation' | 'library' | 'shared'
+
+export const MARKET_CANDIDATE_SOURCES: readonly MarketCandidateSource[] = [
+  'website',
+  'foundation',
+  'library',
+  'shared',
+]
+
+/**
+ * WIE OFT EINE AUSSAGE WIEDERKEHRT (§7.4: Aggregation als „Aussage mit
+ * Häufigkeit", nicht als Mittelwert).
+ *
+ * `pages` von `of` gelesenen Seiten. Eine Aussage auf vier von sechs Seiten
+ * ist zentral, eine auf einer von sechs ist Rand — DAS macht Websites
+ * vergleichbar, nicht eine gemittelte Zahl. Fehlt die Angabe, wurde nur eine
+ * Seite gelesen (oder die Quelle hat gar keine Seiten: eine Foundation
+ * bestätigt, sie wiederholt nicht).
+ */
+export interface MarketFrequency {
+  readonly pages: number
+  readonly of: number
+}
+
+/**
  * EIN FELD EINES MARKTPROFILS. `value` LEER heisst „nicht öffentlich
  * formuliert" — und das ist eine Aussage über die Kategorie, kein Fehler
  * (§1.10). Deshalb bleibt das Feld in der Liste stehen, statt zu fehlen.
@@ -108,6 +149,31 @@ export interface MarketProfileField {
   readonly items?: readonly string[]
   /** Fehlt, wenn `value` leer ist — sonst Pflicht. */
   readonly evidence?: MarketEvidence
+  /** Woher diese eine Aussage stammt (§7.6). Fehlt = `website`. */
+  readonly source?: MarketCandidateSource
+  /** Auf wie vielen der gelesenen Seiten sie steht (§7.4). */
+  readonly frequency?: MarketFrequency
+}
+
+/**
+ * DER BRAND-CHECK-SCORE EINES KANDIDATEN (§7.3) — der BESTEHENDE Score des
+ * Brand-Checks (`brand_checks.score`/`band`), NICHT ein zweiter.
+ *
+ * ── WARUM `band` HIER EINE ZEICHENKETTE IST ──────────────────────────────
+ * Die sieben Bänder gehören `packages/brand`
+ * (`BRAND_SCORE_BANDS`/`brandScoreBand`), und `market` importiert `brand`
+ * nicht (CONCEPT A14, Plan §2.1) — die Kopplung wird ein EXPLIZITER Vertrag
+ * (M3), kein relativer Sprung. Bis dahin reist das Band als Wert, und die
+ * ÜBERSETZUNG des Wortes kommt von aussen herein (`resolveBandLabel`), damit
+ * in diesem Layer kein `brand.*`-Schlüssel steht.
+ *
+ * `checkId` ist die Adresse des Ergebnisses (`/brand-check/<id>`): ein Score
+ * ohne den Weg zu seiner Begründung wäre eine Note ohne Zeugnis.
+ */
+export interface MarketBrandCheck {
+  readonly score: number
+  readonly band: string
+  readonly checkId: string
 }
 
 export type MarketCompetitorStatus = 'pending' | 'reading' | 'fetched' | 'excluded' | 'failed'
@@ -129,6 +195,29 @@ export interface MarketCompetitor {
   /** Welche Seiten gelesen wurden — die Belege zeigen darauf. */
   readonly pagesRead?: readonly string[]
   readonly fetchedAt?: string
+  /** Welche der vier Quellen (§7.2). Fehlt = `website`, der Normalfall. */
+  readonly source?: MarketCandidateSource
+  /** Bei `foundation`/`library`/`shared`: der gewählte Eintrag. */
+  readonly sourceRefId?: string
+  /** Der Brand-Check dieser Marke (§7.3) — fehlt, solange keiner vorliegt. */
+  readonly brandCheck?: MarketBrandCheck
+}
+
+/**
+ * EIN WÄHLBARER EINTRAG EINER NICHT-WEBSITE-QUELLE (§7.2 Nr. 2–4).
+ *
+ * `label` und `hint` sind INHALT (Markenname, Branche, Adresse) und laufen
+ * nie über i18n. Was die QUELLE bedeutet — „nur mit Zustimmung sichtbar",
+ * „Marktprofil folgt" — ist dagegen ein Satz von uns und steht am
+ * Quellen-Wähler, nicht am Eintrag: sonst stünde derselbe Hinweis sechsmal
+ * in den Daten und in der zweiten Sprache gar nicht.
+ */
+export interface MarketSourceOption {
+  readonly id: string
+  readonly label: string
+  readonly hint?: string
+  /** Nur bei Einträgen, die eine echte Adresse haben (eigene alte Website). */
+  readonly url?: string
 }
 
 /** Das Marktprofil EINES Wettbewerbers. */
@@ -142,6 +231,8 @@ export interface MarketCitation {
   readonly competitorId: string
   readonly competitorName: string
   readonly evidence: MarketEvidence
+  /** Auf wie vielen der gelesenen Seiten dieser Absender es sagt (§7.4). */
+  readonly frequency?: MarketFrequency
 }
 
 export type MarketClaimKind = 'convention' | 'overlap' | 'whitespace'
@@ -162,6 +253,14 @@ export interface MarketClaimEntry {
   readonly sharedBy?: number
   readonly of?: number
   readonly citations?: readonly MarketCitation[]
+  /**
+   * Wie oft die Aussage im Feld über SEITEN wiederkehrt (§7.4) — zwei Zahlen
+   * neben `sharedBy`/`of`, weil sie eine ANDERE Frage beantworten: „wie viele
+   * Marken" ist Breite, „auf wie vielen Seiten" ist Gewicht. Eine Marke, die
+   * ihren Satz auf jeder Seite wiederholt, meint ihn anders als eine, die ihn
+   * einmal im Fussbereich stehen hat.
+   */
+  readonly frequency?: MarketFrequency
 }
 
 export interface MarketClaimList {
@@ -190,7 +289,64 @@ export interface MarketFinding {
   readonly status: MarketFindingStatus
 }
 
-/** Der Lauf-Zustand eines Wettbewerbers (Oberfläche des Fortschritts, §2.11 Nr. 2). */
+/**
+ * DIE KI-AUSSENSICHT EINER MARKE (§7.5, Davids Entscheidung GEGEN die
+ * Empfehlung — deshalb mit den schärfsten Leitplanken im ganzen Vertrag).
+ *
+ * ── SIE IST EINE EIGENE SICHT, KEINE ZWEITE SPALTE IM PROFIL ─────────────
+ * Sie steht deshalb NEBEN `MarketProfile` und nicht darin: „Website sagt" und
+ * „KI-Antworten sagen" dürfen sich nirgends berühren (§7.5 a/d). Ein Feld,
+ * das beides in einem Wert trüge, wäre nicht mehr trennbar — und die
+ * ungeprüfte Aussage sähe aus wie die belegte.
+ *
+ * ── SIE TRÄGT KEINEN BELEG, UND ZWAR ABSICHTLICH ─────────────────────────
+ * Es GIBT keinen: eine Modellantwort ist keine Quelle. Statt eines Zitats
+ * trägt sie den Konsens (`agree` von `asked`); übernommen wird nur, was
+ * mindestens zwei Modelle übereinstimmend sagen (§7.5 b). Kein Einfluss auf
+ * den Brand-Score (§7.5 c) — der bleibt belegbasiert.
+ */
+export interface MarketAiStatement {
+  readonly fieldId: MarketFieldId
+  readonly value: string
+  /** Wie viele der befragten Modelle das übereinstimmend sagten. */
+  readonly agree: number
+  readonly asked: number
+}
+
+/** `competitorId` ist bei der eigenen Marke `MARKET_OWN_ID`. */
+export interface MarketAiView {
+  readonly competitorId: string
+  readonly statements: readonly MarketAiStatement[]
+}
+
+/**
+ * DIE EIGENE MARKE ALS SPALTEN-ID. Sie braucht eine, weil die KI-Aussensicht
+ * auch für UNS erhoben wird (§7.5 d: der Unterschied zwischen beiden IST der
+ * Befund). Der Unterstrich hält sie von jeder Row-Id fern — Row-Ids beginnen
+ * nie mit `_`, dasselbe Muster wie `notificationScope`.
+ */
+export const MARKET_OWN_ID = '_own'
+
+/** Die KI-Aussagen EINER Marke holen. */
+export function marketAiStatement(
+  views: readonly MarketAiView[],
+  competitorId: string,
+  fieldId: MarketFieldId,
+): MarketAiStatement | undefined {
+  return views
+    .find(view => view.competitorId === competitorId)
+    ?.statements.find(statement => statement.fieldId === fieldId)
+}
+
+/**
+ * Der Lauf-Zustand eines Wettbewerbers (Oberfläche des Fortschritts, §2.11
+ * Nr. 2), seit M0b mit der ERWEITERTEN Kette aus §7.4.
+ *
+ * JEDER SCHRITT IST EINE TATSACHE, KEIN VERSPRECHEN: die Zeile erscheint
+ * erst, wenn er wahr ist. `llmsTxt: 'missing'` ist deshalb ein eigener Wert
+ * und nicht `undefined` — „nicht vorhanden" ist eine geprüfte Auskunft über
+ * die Website, „noch nicht nachgesehen" ist keine.
+ */
 export interface MarketRunStep {
   readonly competitorId: string
   readonly name: string
@@ -198,6 +354,22 @@ export interface MarketRunStep {
   readonly robotsChecked: boolean
   readonly pagesRead: number
   readonly excludedReason?: MarketExclusionReason
+  /** Wie viele Adressen die sitemap.xml nannte (§7.4). */
+  readonly sitemapUrls?: number
+  /** Die Selbstbeschreibung für KI-Suchen — wo vorhanden die dichteste Quelle. */
+  readonly llmsTxt?: 'found' | 'missing'
+  /** schema.org Organization/description/sameAs gelesen. */
+  readonly jsonLd?: boolean
+  /** Der Brand-Check wurde mit angestossen (§7.3, derselbe 7-Tage-Cache). */
+  readonly brandCheckStarted?: boolean
+}
+
+/** Der eigene Abschnitt „KI-Aussensicht" im Lauf (§7.5). */
+export interface MarketAiRunStep {
+  readonly agree: number
+  readonly asked: number
+  /** Unter dem Konsens-Deckel (< 2 übereinstimmend) wird verworfen, nicht gezeigt. */
+  readonly adopted: boolean
 }
 
 export type MarketRunPhase = 'idle' | 'running' | 'comparing' | 'done'
@@ -212,6 +384,44 @@ export interface MarketReport {
   readonly profiles: readonly MarketProfile[]
   readonly claims: readonly MarketClaimList[]
   readonly findings: readonly MarketFinding[]
+  /** Die ungeprüfte Aussensicht — getrennt gespeichert, getrennt gezeigt (§7.5). */
+  readonly aiViews?: readonly MarketAiView[]
+}
+
+/**
+ * DER RELAUNCH-VERGLEICH (§7.2 Nr. 2, „der stärkste Relaunch-Fall: alte
+ * Website gegen neue Foundation").
+ *
+ * FÜNF ZUSTÄNDE, WEIL VIER ZU WENIG SIND: `onlyFoundation` ist der ganze
+ * Nutzen dieser Quelle — „das sagt eure neue Foundation, eure Website aber
+ * noch nicht". Ihn mit `different` zu verschmelzen hiesse, genau die Liste zu
+ * verlieren, wegen der es den Screen gibt. `onlyWebsite` ist der Gegenfall
+ * (die Website sagt etwas, das ihr nicht mehr bestätigt) und `neither` sagt
+ * über die Kategorie dasselbe wie ein leeres Feld sonst auch.
+ */
+export type MarketRelaunchState = 'same' | 'different' | 'onlyFoundation' | 'onlyWebsite' | 'neither'
+
+/**
+ * Der Vergleich normalisiert BEWUSST nur Schreibweise, Leerraum und einen
+ * Schlusspunkt — nicht Bedeutung. „Wir rösten in kleinen Mengen." und „Kleine
+ * Röstmengen" bleiben `different`, und das ist richtig so: ob zwei Sätze
+ * dasselbe MEINEN, entscheidet der Mensch vor dem Bildschirm. Eine Funktion,
+ * die hier klüger sein will, meldet Gleichheit, wo eine Entscheidung ansteht.
+ */
+export function marketRelaunchState(
+  website: MarketProfileField | undefined,
+  foundation: MarketProfileField | undefined,
+): MarketRelaunchState {
+  const left = normalizeForCompare(website?.value ?? '')
+  const right = normalizeForCompare(foundation?.value ?? '')
+  if (!left && !right) return 'neither'
+  if (!left) return 'onlyFoundation'
+  if (!right) return 'onlyWebsite'
+  return left === right ? 'same' : 'different'
+}
+
+function normalizeForCompare(value: string): string {
+  return value.trim().toLowerCase().replace(/\s+/g, ' ').replace(/[.!?]+$/, '')
 }
 
 /** Das Feld einer Profil-Liste holen — fehlt es, gilt „nicht formuliert". */

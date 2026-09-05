@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { MarketRunPhase, MarketRunStep } from '../../../../../shared/marketProfile'
-import { DEMO_COMPETITORS } from '../../../utils/demoMarket'
+import type { MarketAiRunStep, MarketRunPhase, MarketRunStep } from '../../../../../shared/marketProfile'
+import { DEMO_AI_RUN, DEMO_COMPETITORS } from '../../../utils/demoMarket'
 
 /**
  * SCREEN 2 — DER LAUF (Plan §2.11 Nr. 2).
@@ -37,23 +37,41 @@ function initialSteps(): MarketRunStep[] {
 
 const steps = ref<MarketRunStep[]>(initialSteps())
 const phase = ref<MarketRunPhase>('idle')
+const ai = ref<MarketAiRunStep | null>(null)
 
 function patch(id: string, change: Partial<MarketRunStep>): void {
   steps.value = steps.value.map(step => (step.competitorId === id ? { ...step, ...change } : step))
 }
 
-/** Das Drehbuch: Verzögerung in ms und was dann wahr ist. */
+/**
+ * Das Drehbuch: Verzögerung in ms und was dann wahr ist.
+ *
+ * SEIT M0b IST DIE KETTE LÄNGER (§7.4) — und sie erzählt in drei Zeilen drei
+ * verschiedene Wahrheiten: die sitemap nennt ACHT Adressen, gelesen werden
+ * SECHS (Impressum und Kontakt stehen auf der Sperrliste, §2.9 Nr. 2); die
+ * eine Marke hat eine `llms.txt`, die andere nicht; und der Brand-Check wird
+ * MIT angestossen statt getrennt bestellt (§7.3). Alle drei Dateien liegen
+ * wirklich im Playground — eine erfundene Zahl wäre hier so falsch wie ein
+ * erfundenes Zitat.
+ */
 const SCRIPT: readonly { at: number, run: () => void }[] = [
   { at: 300, run: () => patch('upcountry', { status: 'reading', robotsChecked: true }) },
-  { at: 900, run: () => patch('upcountry', { pagesRead: 2 }) },
-  { at: 1400, run: () => patch('upcountry', { status: 'fetched' }) },
-  { at: 1700, run: () => patch('pacific', { status: 'reading', robotsChecked: true }) },
-  { at: 2300, run: () => patch('pacific', { pagesRead: 2 }) },
-  { at: 2800, run: () => patch('pacific', { status: 'fetched' }) },
-  { at: 3100, run: () => patch('kona', { robotsChecked: true }) },
-  { at: 3500, run: () => patch('kona', { status: 'excluded', excludedReason: 'robots' }) },
-  { at: 3800, run: () => { phase.value = 'comparing' } },
-  { at: 5200, run: () => { phase.value = 'done' } },
+  { at: 700, run: () => patch('upcountry', { sitemapUrls: 8 }) },
+  { at: 1200, run: () => patch('upcountry', { pagesRead: 6, llmsTxt: 'found' }) },
+  { at: 1600, run: () => patch('upcountry', { jsonLd: true }) },
+  { at: 2000, run: () => patch('upcountry', { status: 'fetched', brandCheckStarted: true }) },
+  { at: 2300, run: () => patch('pacific', { status: 'reading', robotsChecked: true }) },
+  { at: 2700, run: () => patch('pacific', { sitemapUrls: 8 }) },
+  { at: 3200, run: () => patch('pacific', { pagesRead: 6, llmsTxt: 'missing' }) },
+  { at: 3600, run: () => patch('pacific', { jsonLd: true }) },
+  { at: 4000, run: () => patch('pacific', { status: 'fetched', brandCheckStarted: true }) },
+  { at: 4300, run: () => patch('kona', { robotsChecked: true }) },
+  { at: 4700, run: () => patch('kona', { status: 'excluded', excludedReason: 'robots' }) },
+  // Die Aussensicht kommt NACH den Websites: sie ist eine eigene Frage an
+  // eigene Modelle, kein Teil des Abrufs (§7.5).
+  { at: 5100, run: () => { ai.value = { ...DEMO_AI_RUN } } },
+  { at: 5400, run: () => { phase.value = 'comparing' } },
+  { at: 6800, run: () => { phase.value = 'done' } },
 ]
 
 let timers: ReturnType<typeof setTimeout>[] = []
@@ -62,6 +80,7 @@ function play(): void {
   for (const timer of timers) clearTimeout(timer)
   timers = []
   steps.value = initialSteps()
+  ai.value = null
   phase.value = 'running'
   timers = SCRIPT.map(entry => setTimeout(entry.run, entry.at))
 }
@@ -97,7 +116,7 @@ const standRows = computed(() => [
       </div>
     </template>
 
-    <MkRunProgress :steps="steps" :phase="phase" />
+    <MkRunProgress :steps="steps" :phase="phase" :ai="ai" />
 
     <div class="mt-6 flex flex-wrap items-center gap-3">
       <UButton

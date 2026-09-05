@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import type { MarketCompetitor } from '../../../../../shared/marketProfile'
-import { DEMO_CANDIDATES } from '../../../utils/demoMarket'
+import type { MarketCandidateSource, MarketCompetitor } from '../../../../../shared/marketProfile'
+import { DEMO_CANDIDATES, DEMO_SOURCE_OPTIONS } from '../../../utils/demoMarket'
+import { useBrandBandLabel } from '../../../composables/useBrandFieldLabels'
 
 /**
  * SCREEN 1 — DIE SEITE „MARKT", AUSGANGSLAGE (Plan §2.11 Nr. 1).
@@ -21,18 +22,53 @@ import { DEMO_CANDIDATES } from '../../../utils/demoMarket'
  */
 const { t } = useI18n()
 const localePath = useLocalePath()
+const bandLabel = useBrandBandLabel()
 
 /** Der Beta-Schalter des Prototyps — im Produkt ist das eine Zuteilung. */
 const unlocked = ref(false)
 
 const candidates = ref<MarketCompetitor[]>(DEMO_CANDIDATES.map(candidate => ({ ...candidate })))
 
-/** Ohne Adresse kein Lauf: geraten wird sie nie (§1.4, Entscheidung 4). */
-const ready = computed(() => candidates.value.some(candidate => candidate.url.trim().length > 0))
+/**
+ * Ohne Adresse kein Lauf: geraten wird sie nie (§1.4, Entscheidung 4). Seit
+ * M0b zählt auch ein GEWÄHLTER Eintrag der drei anderen Quellen als
+ * vollständige Zeile — dort gibt es nichts zu raten, die Marke steht schon
+ * fest (§7.2).
+ */
+const ready = computed(() => candidates.value.some(candidate =>
+  (candidate.source ?? 'website') === 'website'
+    ? candidate.url.trim().length > 0
+    : Boolean(candidate.sourceRefId)))
 
 function setUrl({ id, url }: { id: string, url: string }): void {
   const found = candidates.value.find(candidate => candidate.id === id)
   if (found) found.url = url
+}
+
+/**
+ * Die Quelle wechseln SETZT DIE ZEILE ZURÜCK — Adresse und gewählter Eintrag
+ * fallen weg. Das ist Absicht: eine stehengebliebene Adresse unter der Quelle
+ * „Bibliothek" wäre ein Rest, den niemand mehr liest, und beim Speichern die
+ * Frage, welches der beiden Felder gilt.
+ */
+function setSource({ id, source }: { id: string, source: MarketCandidateSource }): void {
+  candidates.value = candidates.value.map(candidate => (candidate.id === id
+    ? { ...candidate, source, url: '', sourceRefId: undefined, brandCheck: undefined }
+    : candidate))
+}
+
+/** Ein gewählter Eintrag benennt die Zeile: der Name kommt von der Quelle. */
+function setRef({ id, refId }: { id: string, refId: string }): void {
+  candidates.value = candidates.value.map((candidate) => {
+    if (candidate.id !== id) return candidate
+    const entry = (DEMO_SOURCE_OPTIONS[candidate.source ?? 'website'] ?? []).find(option => option.id === refId)
+    return {
+      ...candidate,
+      sourceRefId: refId,
+      name: entry?.label ?? candidate.name,
+      url: entry?.url ?? '',
+    }
+  })
 }
 
 function remove(id: string): void {
@@ -97,13 +133,24 @@ const standRows = computed(() => [
     <div class="mt-8">
       <MkCompetitorList
         :competitors="candidates"
+        :source-options="DEMO_SOURCE_OPTIONS"
+        :resolve-band-label="bandLabel"
         @update:url="setUrl"
+        @update:source="setSource"
+        @update:ref="setRef"
         @remove="remove"
         @add="add"
-      />
+      >
+        <!-- Der Ring gehört dem brand-Layer; die SEITE kennt beide Layer,
+             die Komponente nur einen (s. MkBrandScore). -->
+        <template #score="{ check }">
+          <BwScoreRing :value="check.score" :size="40" />
+        </template>
+      </MkCompetitorList>
     </div>
 
     <p class="mt-4 text-sm leading-relaxed" style="color: var(--bw-muted)">{{ t('market.page.sources') }}</p>
+    <p class="mt-2 text-sm leading-relaxed" style="color: var(--bw-muted)">{{ t('market.page.sourcesFour') }}</p>
 
     <div class="mt-8">
       <MkPaywall :unlocked="unlocked">

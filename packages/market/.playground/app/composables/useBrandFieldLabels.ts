@@ -35,6 +35,23 @@ export function useBrandFieldLabels(): ComputedRef<Partial<Record<MarketFieldId,
   })
 }
 
+/**
+ * DAS BAND DES BRAND-CHECKS ALS WORT (§7.3).
+ *
+ * Dieselbe Naht wie oben, eine Ebene tiefer: die sieben Bänder sind
+ * `brand.check.bands.*` und gehören dem brand-Layer — `market` schreibt keinen
+ * `brand.*`-Schlüssel (CONCEPT A14). Die SEITE löst auf, die Komponenten
+ * bekommen eine Funktion. Fehlt der Schlüssel, steht der rohe Wert da
+ * (`strong`): sichtbar falsch ist besser als still falsch.
+ */
+export function useBrandBandLabel(): (band: string) => string {
+  const { t, te } = useI18n()
+  return (band: string): string => {
+    const key = `brand.check.bands.${band}`
+    return te(key) ? t(key) : band
+  }
+}
+
 /** Dieselbe Rangfolge für EINE Slot-Id — für den Befund-Chip. */
 export function useBrandSlotLabel(): (slotId: string) => string {
   const { t, te } = useI18n()

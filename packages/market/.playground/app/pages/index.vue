@@ -1,10 +1,14 @@
 <script setup lang="ts">
 /**
- * PROTOTYP (M0) — die Übersicht der vier Screens (Plan §2.11).
+ * PROTOTYP (M0/M0b) — die Übersicht der FÜNF Screens (Plan §2.11 und §7).
  *
- * Sie ist Davids Einstieg für die Abnahme-Runde: vier Adressen, die drei
+ * Sie ist Davids Einstieg für die Abnahme-Runde: fünf Adressen, die vier
  * erfundenen Demo-Websites daneben, und der Satz, was dieser Prototyp NICHT
  * tut (kein Server, kein Modell, keine Tabellen).
+ *
+ * Der Satz zu den Brand-Check-Links steht bewusst HIER und nicht an jedem
+ * Link: der Brand-Check ist gebaut, aber er lebt in seiner eigenen App —
+ * dieser Playground zeigt nur, WO sein Score im Marktvergleich steht.
  */
 const { t } = useI18n()
 const localePath = useLocalePath()
@@ -14,12 +18,14 @@ const screens = [
   { key: 'screen2', to: '/market/demo/lauf', icon: 'i-ph-spinner-gap' },
   { key: 'screen3', to: '/market/demo/ergebnis', icon: 'i-ph-table' },
   { key: 'screen4', to: '/market/demo/werkstatt', icon: 'i-ph-book-open' },
+  { key: 'screen5', to: '/market/demo/relaunch', icon: 'i-ph-arrows-left-right' },
 ]
 
 const sites = [
   { name: 'Upcountry Roast Co.', host: 'upcountry-roast.example', href: '/demo-sites/upcountry-roast/index.html' },
   { name: 'Pacific Bean Supply', host: 'pacificbean.example', href: '/demo-sites/pacificbean/index.html' },
   { name: 'Kona Trading', host: 'kona-trading.example', href: '/demo-sites/kona-trading/index.html' },
+  { name: 'Kailua Coffee Co. — old website', host: 'kailua-coffee.example', href: '/demo-sites/kailua-coffee-old/index.html' },
 ]
 </script>
 
@@ -29,6 +35,7 @@ const sites = [
       <h1 class="text-2xl font-medium tracking-tight">{{ t('market.demo.title') }}</h1>
       <p class="mt-2 text-sm leading-relaxed" style="color: var(--bw-ink-soft)">{{ t('market.demo.lead') }}</p>
       <p class="mt-2 text-sm leading-relaxed" style="color: var(--bw-muted)">{{ t('market.demo.note') }}</p>
+      <p class="mt-2 text-sm leading-relaxed" style="color: var(--bw-muted)">{{ t('market.demo.checkNote') }}</p>
 
       <ul class="mt-8 space-y-2">
         <li v-for="screen in screens" :key="screen.key">

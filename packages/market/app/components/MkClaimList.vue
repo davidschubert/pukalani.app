@@ -59,25 +59,39 @@ const GLYPH = {
         </p>
         <p class="mt-1 text-sm leading-snug" style="color: var(--bw-ink)">{{ entry.statement }}</p>
 
+        <!-- ZWEI ZAHLEN, ZWEI FRAGEN: „wie viele Marken" ist Breite,
+             „auf wie vielen Seiten" ist Gewicht (§7.4). -->
         <p
           v-if="entry.sharedBy !== undefined && entry.of !== undefined && list.kind !== 'whitespace'"
-          class="bw-label mt-1.5"
+          class="bw-label mt-1.5 flex flex-wrap items-center gap-x-1.5"
           style="color: var(--bw-ink-soft)"
         >
-          {{ t(`market.claims.${list.kind}.count`, { shared: entry.sharedBy, of: entry.of }) }}
+          <span>{{ t(`market.claims.${list.kind}.count`, { shared: entry.sharedBy, of: entry.of }) }}</span>
+          <template v-if="entry.frequency">
+            <span style="color: var(--bw-muted)">&middot;</span>
+            <span style="color: var(--bw-muted)">
+              {{ t('market.frequency.pages', { pages: entry.frequency.pages, of: entry.frequency.of }) }}
+            </span>
+          </template>
         </p>
 
         <div v-if="entry.citations?.length" class="mt-2 space-y-1.5">
           <p v-if="list.kind === 'overlap'" class="bw-label" style="color: var(--bw-muted)">
             {{ t('market.claims.overlap.also') }}
           </p>
-          <MkEvidence
+          <div
             v-for="citation in entry.citations"
             :key="`${citation.competitorId}-${citation.evidence.sourceUrl}`"
-            :evidence="citation.evidence"
-            :label="citation.competitorName"
-            :resolve-href="resolveHref"
-          />
+          >
+            <MkEvidence
+              :evidence="citation.evidence"
+              :label="citation.competitorName"
+              :resolve-href="resolveHref"
+            />
+            <p v-if="citation.frequency" class="bw-label mt-0.5" style="color: var(--bw-muted)">
+              {{ t('market.frequency.pages', { pages: citation.frequency.pages, of: citation.frequency.of }) }}
+            </p>
+          </div>
         </div>
       </li>
     </ul>

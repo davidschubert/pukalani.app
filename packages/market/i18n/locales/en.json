@@ -10,7 +10,8 @@
       "lead": "What your competitors say in public, translated into the same fields as your own foundation — statement by statement, each one with a quote and its source.",
       "limit": "We show what brands say — not how successfully they say it.",
       "unlocked": "This page is open because chapter B (purpose, vision and mission) is accepted.",
-      "sources": "Read from public marketing pages only. Team, imprint and contact pages are never fetched."
+      "sources": "Read from public marketing pages only. Team, imprint and contact pages are never fetched.",
+      "sourcesFour": "A candidate does not have to be a website: it can be one of your own brands from your account (the relaunch case), an entry from our hand-checked library, or another brand whose owner has released it."
     },
     "candidates": {
       "title": "Candidates",
@@ -56,12 +57,17 @@
       "title": "Comparison run",
       "lead": "Every competitor is checked first, then read, then translated into the field structure.",
       "robots": "robots.txt checked",
-      "pages": "{count} pages read",
+      "sitemap": "sitemap.xml read ({count} addresses)",
+      "pages": "{count} key pages read",
       "profiled": "Profile created",
       "waiting": "Waiting",
       "comparing": "Comparing the field",
       "done": "Report ready",
-      "replay": "Play the run again"
+      "replay": "Play the run again",
+      "llmsFound": "llms.txt found",
+      "llmsMissing": "llms.txt not found",
+      "jsonLd": "JSON-LD read",
+      "brandCheck": "Brand check started"
     },
     "result": {
       "title": "The field, side by side",
@@ -152,13 +158,71 @@
     },
     "demo": {
       "title": "Market comparison — prototype",
-      "lead": "Four screens, one interaction type each (plan §2.11). The brand is the invented Kailua Coffee Co., the field is three invented competitors whose websites live in this playground.",
+      "lead": "Five screens, one interaction type each (plan §2.11 and §7). The brand is the invented Kailua Coffee Co., the field is three invented competitors whose websites live in this playground — plus the old website of the brand itself.",
       "note": "Nothing here talks to a server: no fetching, no model, no tables. This is the component template that packages M1 to M4 take over.",
       "screen1": "1 · Market page: candidates, addresses, paywall",
       "screen2": "2 · Run: what happens per competitor",
       "screen3": "3 · Report: side by side, three lists, profiles, findings",
       "screen4": "4 · Workshop: the market finding at the field",
-      "sites": "The invented competitor websites"
+      "sites": "The invented competitor websites",
+      "screen5": "5 · Relaunch: your brand against your old website",
+      "checkNote": "The “Open the brand check” links are placeholders: the brand check is built, but it lives in its own app — this playground only shows where its score sits inside the market comparison."
+    },
+    "source": {
+      "label": "Source",
+      "website": "Website address",
+      "foundation": "Your own brand",
+      "library": "Library",
+      "shared": "Released brand",
+      "search": "Search a brand",
+      "foundationPlaceholder": "Pick one of your brands",
+      "libraryPlaceholder": "Pick a known brand",
+      "sharedPlaceholder": "Pick a released brand",
+      "foundationHint": "From your accepted fields. No fetching, no quote — these sentences are decided, not read off.",
+      "libraryHint": "Market profile follows in M6 — computed by us and checked by hand. Until then only the name stands here: an invented quote under a real brand name is something we never write.",
+      "sharedHint": "Visible only with the owner’s consent, and only the ten outward fields. Nothing from her workshop."
+    },
+    "score": {
+      "link": "Open the brand check",
+      "pending": "Brand check running along"
+    },
+    "frequency": {
+      "pages": "on {pages} of {of} pages"
+    },
+    "view": {
+      "website": "The website says",
+      "ai": "AI answers say"
+    },
+    "ai": {
+      "title": "AI outside view",
+      "label": "unverified outside view",
+      "consensus": "{agree} of {asked} AI answers agree",
+      "adopted": "adopted",
+      "dropped": "dropped",
+      "agree": "{agree} of {asked} answers",
+      "empty": "no answer the models agreed on",
+      "disclaimer": "Unverified outside view without evidence — it has no influence on the brand check score.",
+      "tableHint": "This is how AI answers describe these brands. There is no source and no quote behind it: only what at least two models say alike is adopted."
+    },
+    "relaunch": {
+      "title": "Your brand against your old website",
+      "lead": "On the left what your old website still says. On the right what you accepted in the foundation. Field by field, the same structure as for any competitor.",
+      "oldSite": "Old website",
+      "newFoundation": "New foundation",
+      "state": {
+        "same": "same",
+        "different": "different",
+        "onlyFoundation": "only in the foundation",
+        "onlyWebsite": "only on the website",
+        "neither": "stated nowhere"
+      },
+      "gapTitle": "What your foundation says and your website does not",
+      "gapHint": "The comparison turns into a list. Different means different, not worse — a website is allowed to be older than a decision.",
+      "gap": {
+        "missing": "Your website does not say this at all yet.",
+        "differs": "Your website says something else about this."
+      },
+      "gapNone": "Your website already says everything you have accepted."
     }
   }
 }
