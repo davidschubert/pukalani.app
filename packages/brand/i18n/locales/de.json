@@ -711,11 +711,25 @@
       "submit": "Auf die Warteliste",
       "sending": "Wird eingetragen …",
       "haveCode": "Ich habe einen Code",
-      "doneTitle": "Ihr steht auf der Liste.",
-      "doneText": "Wir schalten in Wellen frei und melden uns per E-Mail, sobald euer Zugang bereitsteht.",
-      "duplicateText": "Diese Adresse steht schon auf der Liste — ihr seid dran, sobald die nächste Welle öffnet.",
-      "error": "Das hat gerade nicht geklappt. Versucht es in einer Minute noch einmal.",
-      "consent": "Wir nutzen die Adresse nur, um euch zur Beta einzuladen. Kein Newsletter, keine Weitergabe."
+      "doneTitle": "Fast geschafft — schaut in euer Postfach.",
+      "doneText": "Wir haben euch einen Bestätigungs-Link geschickt, 24 Stunden gültig. Erst mit dem Klick steht ihr auf der Liste — so bleibt sie frei von Adressen, die niemand eingetragen hat.",
+      "duplicateText": "Diese Adresse ist schon bestätigt und steht auf der Liste — ihr seid dran, sobald die nächste Welle öffnet.",
+      "error": "Das hat gerade nicht geklappt — die Bestätigungs-Mail konnte nicht raus. Versucht es in einer Minute noch einmal.",
+      "consent": "Wir nutzen die Adresse nur, um euch zur Beta einzuladen. Kein Newsletter, keine Weitergabe.",
+      "confirm": {
+        "title": "Warteliste bestätigen",
+        "checking": "Wir prüfen euren Link …",
+        "confirmedTitle": "Bestätigt — ihr steht auf der Liste.",
+        "confirmedText": "Wir schalten in Wellen frei und melden uns per E-Mail, sobald euer Zugang bereitsteht.",
+        "alreadyTitle": "Schon bestätigt.",
+        "alreadyText": "Diese Adresse steht bereits auf der Liste — es gibt nichts weiter zu tun.",
+        "invalidTitle": "Dieser Link ist ungültig.",
+        "invalidText": "Er ist unvollständig oder wurde schon benutzt. Tragt euch einfach noch einmal ein — ihr bekommt einen neuen Link.",
+        "expiredTitle": "Dieser Link ist abgelaufen.",
+        "expiredText": "Bestätigungs-Links gelten 24 Stunden. Tragt euch noch einmal ein — ihr bekommt sofort einen neuen.",
+        "back": "Zur Warteliste",
+        "home": "Zur Startseite"
+      }
     },
     "acceptance": {
       "title": "Finale Abnahme",

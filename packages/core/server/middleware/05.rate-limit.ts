@@ -424,8 +424,16 @@ const WRITE_LIMITED: { re: RegExp, bucket: string, max?: number }[] = [
    *
    * Die Zeile ist der DECKEL, nicht der Filter: den Bot fängt der Honigtopf im
    * Rumpf (`hp`), die Dublette der UNIQUE-Index auf `emailLower`.
+   *
+   * SEIT DEM DOUBLE-OPT-IN GILT SIE FÜR BEIDE HÄLFTEN — Eintragen UND
+   * Bestätigen teilen sich EINEN Eimer, weil es EIN Vorgang ist (dasselbe
+   * Muster wie `brand:invite` für check+redeem). Wer sich einträgt und den Link
+   * öffnet, macht beides je einmal; 5/min reichen dafür doppelt. Und das
+   * Bestätigen ist die teurere Hälfte: sie liest, schreibt und verschickt eine
+   * Mail — ein eigener, grosszügigerer Eimer daneben wäre die Lücke, durch die
+   * ein Skript Token durchprobiert.
    */
-  { re: /^POST \/api\/brand\/waitlist$/, bucket: 'brand:waitlist', max: 5 },
+  { re: /^POST \/api\/brand\/waitlist(\/confirm)?$/, bucket: 'brand:waitlist', max: 5 },
   /**
    * GEORGES ENTWÜRFE (P2.1) — die teuerste Route des Wizards: jeder Lauf ist
    * ein Anbieter-Aufruf mit Streaming-Antwort. Die eigentlichen Deckel sind

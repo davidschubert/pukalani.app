@@ -711,11 +711,25 @@
       "submit": "Join the waitlist",
       "sending": "Adding you …",
       "haveCode": "I have a code",
-      "doneTitle": "You are on the list.",
-      "doneText": "We open access in waves and will email you as soon as your spot is ready.",
-      "duplicateText": "This address is already on the list — you are up when the next wave opens.",
-      "error": "That did not work just now. Please try again in a minute.",
-      "consent": "We use your address only to invite you to the beta. No newsletter, never shared."
+      "doneTitle": "Almost there — check your inbox.",
+      "doneText": "We have sent you a confirmation link, valid for 24 hours. Only that click puts you on the list — it keeps the list free of addresses nobody actually signed up.",
+      "duplicateText": "This address is already confirmed and on the list — you are up when the next wave opens.",
+      "error": "That did not work just now — the confirmation email could not be sent. Please try again in a minute.",
+      "consent": "We use your address only to invite you to the beta. No newsletter, never shared.",
+      "confirm": {
+        "title": "Confirm waitlist",
+        "checking": "Checking your link …",
+        "confirmedTitle": "Confirmed — you are on the list.",
+        "confirmedText": "We open access in waves and will email you as soon as your spot is ready.",
+        "alreadyTitle": "Already confirmed.",
+        "alreadyText": "This address is already on the list — nothing more to do.",
+        "invalidTitle": "This link is not valid.",
+        "invalidText": "It is incomplete or has already been used. Simply sign up again — you will get a fresh link.",
+        "expiredTitle": "This link has expired.",
+        "expiredText": "Confirmation links are valid for 24 hours. Sign up again — you will get a new one right away.",
+        "back": "Back to the waitlist",
+        "home": "Go to the start page"
+      }
     },
     "acceptance": {
       "title": "Final sign-off",

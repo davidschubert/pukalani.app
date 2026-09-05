@@ -100,3 +100,28 @@ export function createBrandWaitlistSchema() {
 }
 
 export type BrandWaitlistInput = z.output<ReturnType<typeof createBrandWaitlistSchema>>
+
+/**
+ * DER RUMPF DER BESTÄTIGUNG (`POST /api/brand/waitlist/confirm`).
+ *
+ * Der Token ist das GANZE Geheimnis dieser Route — es gibt keine Session, die
+ * daneben stünde. Deshalb misst das Schema ihn, BEVOR die Route ihn hasht:
+ *  · `min` 32 — kürzer war nie einer von uns (`randomBytes(32)` ⇒ 64 Zeichen
+ *    hex). Ein zweistelliger „Token" ist kein Tippfehler, sondern ein Versuch.
+ *  · `max` 128 — der Deckel gegen den 10-MB-„Token": ohne ihn liefe eine
+ *    beliebig lange Zeichenkette erst durch sha256 und dann in eine Abfrage.
+ *    Dieselbe Vorsicht wie im Share-GET, nur als Schema statt als if.
+ *
+ * `.strict()`, weil das Formular genau ein Feld schickt — ein zweites käme aus
+ * keiner unserer Seiten.
+ */
+export const BRAND_WAITLIST_TOKEN_MIN = 32
+export const BRAND_WAITLIST_TOKEN_MAX = 128
+
+export function createBrandWaitlistConfirmSchema() {
+  return z.object({
+    token: z.string().trim().min(BRAND_WAITLIST_TOKEN_MIN).max(BRAND_WAITLIST_TOKEN_MAX),
+  }).strict()
+}
+
+export type BrandWaitlistConfirmInput = z.output<ReturnType<typeof createBrandWaitlistConfirmSchema>>
