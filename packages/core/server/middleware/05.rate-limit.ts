@@ -479,6 +479,25 @@ const WRITE_LIMITED: { re: RegExp, bucket: string, max?: number }[] = [
    */
   { re: /^POST \/api\/brand\/profiles\/[^/]+\/analyze$/, bucket: 'brand:analyze', max: 3 },
   /**
+   * DER KOSTENLOSE BRAND-CHECK (docs/plans/BRAND-CHECK.md) — die Zeile darüber
+   * plus eine Anbieter-Rechnung, und OHNE Konto davor: der Check ist Davids
+   * Akquise-Instrument und läuft bewusst ohne Anmeldung.
+   *
+   * Er tut in EINEM Aufruf beides, was die zwei teuersten Routen des Layers je
+   * einzeln tun: eine fremde Seite holen (Last aus unserem Rechenzentrum,
+   * bis zu zehn Sekunden offene Verbindung) und ein Modell über den ganzen
+   * Seitentext urteilen lassen. Deshalb dieselben 3/min wie bei der Analyse —
+   * ein Mensch gibt eine Adresse ein und liest dann ein Ergebnis.
+   *
+   * Die feineren Deckel sitzen IN der Route (3/Tag je Anschluss, 200/Tag je
+   * Instanz — `packages/brand/shared/brandAiLimits.ts`); diese Zeile zählt je
+   * IP und DAVOR, bevor der Zwischenspeicher überhaupt befragt wird. Der GET
+   * auf das Ergebnis (`/api/brand/check/<id>`) steht bewusst NICHT hier: er
+   * liest eine fertige Zeile, kostet nichts, und ein geteilter Link soll auch
+   * dann noch aufgehen, wenn ihn zehn Menschen gleichzeitig öffnen.
+   */
+  { re: /^POST \/api\/brand\/check$/, bucket: 'brand:check', max: 3 },
+  /**
    * INHALTE ÜBERSETZEN (2026-08-17) — dieselbe Kostenklasse wie eine Zeile
    * darüber, nur häufiger erreichbar: jeder Klick schickt bis zu 10.000 Zeichen
    * an den KI-Anbieter und bezahlt die Antwort. Beide Routen haben SCHON eine
