@@ -143,6 +143,34 @@ core/system), und er brächte für ein Feld vier Tabellen und ein Produkt mit.
    zusätzlich „Website hinterlegen".
 4. **Konto-Deckel „neu ermitteln": 10/Tag je Konto**; Gäste bleiben bei 3/Tag je IP.
 
+## 10 · Visualisierung — drei Zoomstufen derselben Daten (David, 2026-09-05)
+
+Externer Input (Radar/Heatmap/Score-Cards) als Leitplanke am eigenen Modell
+geprüft; festgezogen:
+- **Score = Urteil:** Score-Ring mit Band und Delta zum Vorgänger („↑ +7").
+- **Markenabdruck = Profil** (EN „Brand Fingerprint"): die 8 Kategorie-Werte als
+  Netz mit 8 Achsen. Der Begriff ist das FEATURE — im UI nie „Radar" nennen
+  (das ist nur die Technik). Inline-SVG aus `--bw-`-Tokens, kein Chart-Framework.
+  Im Vergleich (P4) liegen zwei Markenabdrücke übereinander.
+- **Ampel-Matrix 8 × 5 = Diagnose:** die 40 Kriterien als Zellen mit VIER
+  Zuständen (0 rot · 1 bernstein · 2 grün · nicht bewertbar = Schloss). Bewusst
+  KEINE 0–100-Heatmap je Kriterium: Kriterien sind 0/1/2, alles andere wäre
+  Scheingenauigkeit. Dazu 8 Kategorie-Karten (Wert, Band-Wort), klickbar → die
+  5 Kriterien der Kategorie.
+- **Drei Befunde neu geschnitten: Stärke · Chance · Nächster Schritt** (statt
+  „drei schwächste Kriterien"): Stärke = höchstes gewichtetes Kriterium mit
+  Beleg („was funktioniert schon"), Chance = größter gewichteter Abstand zu 2
+  („größter Hebel"), Nächster Schritt = die Chance übersetzt in das Wizard-
+  Kapitel, das sie adressiert (Zuordnung Kategorie → Kapitel aus P5). Kette:
+  Analyse → Erkenntnis → Empfehlung → Handlung → Relaunch.
+- **Verworfen:** Treemap/Sunburst (Gewichte sind Konstanten), Radial Bars
+  (Doppelung), Bullet-Chart gegen Benchmark (erst mit genug Ranking-Einträgen
+  als Perzentil), fremde Kategorienamen (unser Katalog steht).
+
+**P6 „Ergebnisseite v2"** (nach P5): Score + Delta → Markenabdruck → 8
+Kategorie-Karten → Ampel-Matrix → Stärke · Chance · Nächster Schritt →
+Report-per-Mail-CTA. Ersetzt die heutige Balken-Liste + zugeklappte 40er-Liste.
+
 ## 9 · Bauplan (aktualisiert)
 
 | # | Paket | Braucht |
@@ -150,5 +178,6 @@ core/system), und er brächte für ein Feld vier Tabellen und ein Produkt mit.
 | P1 | `/brand-check` Start-Seite mit Reitern, Marketing, FAQ + JSON-LD, Opt-in-Häkchen im Formular, Teaser-Umbau (Startseite/About/Team) | Davids Blick auf die Texte |
 | P2 | Backend: Migration brand-017 (`industry`, `rankingOptIn`, `hidden`, `userId`, `profileId`, `source` auf `brand_checks`; Tabelle `brand_check_corrections`), Branche im Judge, Konto-Deckel + Cache-Umgehung, Ranking-API, Korrektur-Routen | Migration (Davids Ja) |
 | P3 | Ranking-Seite (Filter/Sortierung/Kategorie-Bestenlisten), Korrektur-Formular + Dashboard-Warteschlange | P1+P2 |
-| P4 | Vergleich (Quartett) + Einstiege aus Ergebnis und Ranking | P2 |
-| P5 | Meine Brands, neu ermitteln, Gegenüberstellung, To-do-Liste, Dokument-Check | P2 |
+| P4 | Vergleich (Quartett): zwei überlagerte Markenabdrücke + 8 direkte Kategorievergleiche; Einstiege aus Ergebnis und Ranking | P2 |
+| P5 | Meine Brands, neu ermitteln, Gegenüberstellung (Score-Delta, Kategorie-/Kriterien-Änderungen), To-do-Liste, Dokument-Check | P2 |
+| P6 | Ergebnisseite v2 (§10): Score+Delta, Markenabdruck, Kategorie-Karten, Ampel-Matrix, Stärke · Chance · Nächster Schritt | P4, P5 |

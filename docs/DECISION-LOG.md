@@ -7,6 +7,23 @@ die kleinen, verstreuten Beschlüsse.
 
 ---
 
+## 2026-09-05 — Brand-Check: „Markenabdruck", Ampel-Matrix statt Heatmap, Befunde als Stärke · Chance · Nächster Schritt
+
+**Anlass:** externer Visualisierungs-Input (Radar, Heatmap, Score-Cards, Insight-Cards) — als
+Leitplanke am eigenen Modell geprüft, nicht kopiert. **Entscheidungen (David):** (1) Die 8
+Kategorie-Werte als Netz heißen **„Markenabdruck"** (EN „Brand Fingerprint") — der Begriff ist
+das Feature, „Radar" ist nur die Technik und steht nie im UI. (2) Die 40 Kriterien als
+**Ampel-Matrix 8 × 5** mit vier Zuständen (0/1/2/nicht bewertbar), bewusst KEINE 0–100-Heatmap
+je Kriterium (Scheingenauigkeit). (3) Die drei Befunde werden **Stärke · Chance · Nächster
+Schritt** statt „drei schwächste Kriterien" — aus dem Audit wird Beratung, der dritte Befund
+zeigt ins Wizard-Kapitel (Analyse → Erkenntnis → Empfehlung → Handlung → Relaunch). Drei
+Zoomstufen derselben Daten: Score = Urteil, Markenabdruck = Profil, Matrix = Diagnose.
+**Verworfen:** Treemap/Sunburst, Radial Bars, Benchmark-Bullet (erst mit Ranking-Perzentil),
+Chart-Framework (Inline-SVG aus Tokens). Bauplan: P4 mit überlagerten Markenabdrücken, P6
+Ergebnisseite v2 — docs/plans/BRAND-CHECK-SEITE.md §10.
+
+---
+
 ## 2026-09-05 — Brand-Check wird Produktseite: Ranking nur mit Opt-in, Branche per KI + Korrekturvorschlag, Dokument-Check sofort
 
 **Anlass (David nach dem ersten gelungenen Live-Check):** der Check gehört auf EINE eigene
