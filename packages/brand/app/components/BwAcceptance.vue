@@ -91,6 +91,13 @@ const emit = defineEmits<{
    * `session` meint eine Session DIESES Kapitels, `field` kann anderswo landen.
    */
   field: [slotId: string]
+  /**
+   * Ein Befund wurde HIER entschieden (§8). Die Seite liest sich selbst neu,
+   * aber Log und Leiste der Werkstatt hängen am STORE — ohne dieses Ereignis
+   * zeigten sie den Befund weiter, bis jemand neu lädt (Klick-Beweis
+   * 2026-09-05: „1 Befund offen" blieb nach der Ablehnung stehen).
+   */
+  decided: [decision: BrandFindingDecisionResponse]
   /** Nach dem Abschluss: das nächste Kapitel mit seiner ersten Session. */
   advance: [target: { stepKey: BrandStepKey, sessionKey: string }]
   /** Nach „Nochmal von vorn": zurück auf die erste Session DIESES Kapitels. */
@@ -298,6 +305,7 @@ async function accept(session: BrandAcceptanceSessionView): Promise<void> {
  */
 async function findingDecided(decision: BrandFindingDecisionResponse): Promise<void> {
   if (decision.revision > revision.value) revision.value = decision.revision
+  emit('decided', decision)
   await acceptance.refresh()
 }
 

@@ -2044,6 +2044,7 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
         :step-key="stepKey"
         @session="goToSession"
         @field="goToField"
+        @decided="findingDecided"
         @advance="advanceToStep"
         @restarted="afterRestart"
       />
