@@ -1,22 +1,25 @@
 import { describe, expect, it } from 'vitest'
 import {
   BRAND_CONFIDENCE_VALUES,
+  BRAND_SETTABLE_CONFIDENCE_VALUES,
   type BrandConfidence,
   type BrandJourneyStep,
   type BrandProfileFacts,
   type BrandStepFacts,
   applyJunctionChange,
   brandNamingIncluded,
+  brandStepAcceptance,
   brandStepCompletion,
   canEnterBrandStep,
   includedBrandSteps,
   resolveBrandJourney,
   resolveNextQuestion,
   resolveNextSession,
+  resolveNextStop,
   resolveSessionStates,
   transitionBrandStep,
 } from '../shared/brandJourney'
-import { computeSourcesHash } from '../shared/brandSessions'
+import { brandRestartImpact, computeSourcesHash, sessionsAffectedBy } from '../shared/brandSessions'
 import {
   BRAND_SLOTS,
   BRAND_STEP_KEYS,
@@ -57,13 +60,21 @@ function stateOf(journey: readonly BrandJourneyStep[], stepKey: BrandStepKey) {
   return journey.find(step => step.stepKey === stepKey)!
 }
 
-/** Ein Baustein mit ALLEN Pflicht-Slots bestätigt. */
+/**
+ * Ein Baustein mit ALLEN Pflicht-Slots bestätigt UND abgenommen.
+ *
+ * `accepted` steht seit BW2 Paket 3b mit drin: der Abschluss verlangt nicht
+ * mehr nur, dass alles GESAGT ist, sondern auch, dass es auf der Finalen
+ * Abnahme gelesen wurde (§5a). Ein „fertiger" Baustein ohne Abnahme wäre in
+ * dieser Fassung kein fertiger mehr.
+ */
 function completedStep(stepKey: BrandStepKey, confidence: BrandConfidence = 'fits'): BrandStepFacts {
   return {
     stepKey,
     state: 'done',
     confidence,
-    slots: Object.fromEntries(requiredSlotsForStep(stepKey).map(slot => [slot.id, { hasValue: true, confirmed: true }])),
+    slots: Object.fromEntries(requiredSlotsForStep(stepKey)
+      .map(slot => [slot.id, { hasValue: true, confirmed: true, accepted: true }])),
   }
 }
 
@@ -222,6 +233,12 @@ describe('resolveBrandJourney — Happy-Path über den ganzen Vollpfad', () => {
         expect(result.ok).toBe(true)
         step = result.ok ? result.step : step
       }
+      // … und die Finale Abnahme: bestätigt ist nicht abgenommen (§5a).
+      for (const slot of requiredSlotsForStep(stepKey)) {
+        const result = transitionBrandStep(step, { kind: 'acceptSlot', slotId: slot.id })
+        expect(result.ok).toBe(true)
+        step = result.ok ? result.step : step
+      }
       const confidence = transitionBrandStep(step, { kind: 'setConfidence', confidence: 'fits' })
       step = confidence.ok ? confidence.step : step
 
@@ -363,10 +380,16 @@ describe('transitionBrandStep — confirmSlot', () => {
 describe('transitionBrandStep — Konfidenz lässt sich nicht manipulieren', () => {
   const active: BrandStepFacts = { stepKey: 'values', state: 'active' }
 
-  it('nimmt genau die drei Chips', () => {
-    for (const confidence of BRAND_CONFIDENCE_VALUES) {
+  it('nimmt die zwei SETZBAREN Chips — und `restart` ist keiner mehr', () => {
+    for (const confidence of BRAND_SETTABLE_CONFIDENCE_VALUES) {
       expect(transitionBrandStep(active, { kind: 'setConfidence', confidence })).toMatchObject({ ok: true })
     }
+    // Seit §5a ist „Nochmal von vorn" eine HANDLUNG (`restart`) und keine
+    // Selbstauskunft: der Wert bleibt für Bestandszeilen lesbar, gesetzt wird
+    // er nie mehr.
+    expect(BRAND_CONFIDENCE_VALUES).toContain('restart')
+    expect(transitionBrandStep(active, { kind: 'setConfidence', confidence: 'restart' }))
+      .toEqual({ ok: false, code: 'invalid_confidence' })
   })
 
   it('weist einen erfundenen Wert ab, statt ihn zu speichern', () => {
@@ -386,11 +409,11 @@ describe('transitionBrandStep — Konfidenz lässt sich nicht manipulieren', () 
   it('lässt die Konfidenz auch bei einem ABGESCHLOSSENEN Baustein ändern (Davids Entscheidung 2026-09-02)', () => {
     // Die Konfidenz ist eine Selbstauskunft, kein Inhalt — der starre Weg
     // lief im UI in ein klebendes 400 („Not saved"). done bleibt done.
-    const set = transitionBrandStep(completedStep('values'), { kind: 'setConfidence', confidence: 'restart' })
+    const set = transitionBrandStep(completedStep('values'), { kind: 'setConfidence', confidence: 'almost' })
     expect(set).toMatchObject({ ok: true, changed: true })
     if (!set.ok) return
     expect(set.step.state).toBe('done')
-    expect(set.step.confidence).toBe('restart')
+    expect(set.step.confidence).toBe('almost')
   })
 
   /**
@@ -475,7 +498,8 @@ describe('brandStepCompletion — der Baustein archetype ist schliessbar (Audit 
    */
   it('wird fertig, wenn alles Bedienbare bestätigt ist — auch ohne d.pairs', () => {
     const slots = Object.fromEntries(
-      confirmableRequiredSlotsForStep('archetype').map(slot => [slot.id, { hasValue: true, confirmed: true }]),
+      confirmableRequiredSlotsForStep('archetype')
+        .map(slot => [slot.id, { hasValue: true, confirmed: true, accepted: true }]),
     )
     const completion = brandStepCompletion('archetype', slots)
     expect(completion.slotsReady).toBe(true)
@@ -516,13 +540,21 @@ describe('brandStepCompletion — EINE Vorbedingung, zwei Leser', () => {
       // Alle Teilmengen wären 2^n — der ehrliche Querschnitt: gar nichts,
       // lauter Entwürfe ohne Bestätigung, jeweils genau EINER offen, alles
       // bestätigt.
+      // `accepted` läuft mit `confirmed`: geprüft wird hier die Deckung von
+      // `brandStepCompletion` und `complete`, nicht die Abnahme daneben — ein
+      // Fall ohne Abnahme schiede aus einem ANDEREN Grund aus und bewiese
+      // nichts über diese Deckung (dafür gibt es `brandStepAcceptance`).
       const cases: Record<string, BrandSlotStateFacts>[] = [
         {},
         Object.fromEntries(required.map(slot => [slot.id, { hasValue: true }])),
         ...required.map(open => Object.fromEntries(
-          required.map(slot => [slot.id, { hasValue: true, confirmed: slot.id !== open.id }]),
+          required.map(slot => [slot.id, {
+            hasValue: true,
+            confirmed: slot.id !== open.id,
+            accepted: slot.id !== open.id,
+          }]),
         )),
-        Object.fromEntries(required.map(slot => [slot.id, { hasValue: true, confirmed: true }])),
+        Object.fromEntries(required.map(slot => [slot.id, { hasValue: true, confirmed: true, accepted: true }])),
       ]
 
       for (const slots of cases) {
@@ -853,5 +885,254 @@ describe('transitionBrandStep — Invarianten beim Bestätigen (§3a Nr. 6)', ()
     // Genau der Zustand von heute: `toSlotFacts` liefert nur die zwei Flags.
     const step = valuesStep({ 'c.final': { hasValue: true } })
     expect(transitionBrandStep(step, { kind: 'confirmSlot', slotId: 'c.final' }).ok).toBe(true)
+  })
+})
+
+/**
+ * DIE FINALE ABNAHME (BW2 §5a) — abnehmen, vertagen, und die drei neuen
+ * Glieder, die `complete` seither verlangt.
+ *
+ * Was hier bewiesen wird, ist die Trennung, an der die ganze Ebene hängt:
+ * `confirmed` heisst „in der Session so gesagt", `accepted` heisst „im
+ * Zusammenhang des Kapitels gelesen". Fällt sie, ist die Abnahme-Seite ein
+ * zweiter Bestätigen-Knopf ohne Aussage.
+ */
+describe('transitionBrandStep — abnehmen und vertagen (§5a)', () => {
+  const activeValues = (slots: Record<string, BrandSlotStateFacts>): BrandStepFacts => ({
+    stepKey: 'values',
+    state: 'active',
+    slots,
+  })
+
+  it('NIMMT einen bestätigten Wert ab', () => {
+    const step = activeValues({ 'c.final': { hasValue: true, confirmed: true } })
+    const result = transitionBrandStep(step, { kind: 'acceptSlot', slotId: 'c.final' })
+    expect(result).toMatchObject({ ok: true, changed: true })
+    expect(result.ok && result.step.slots?.['c.final']?.accepted).toBe(true)
+  })
+
+  it('ist idempotent — zweimal abnehmen schreibt nicht zweimal', () => {
+    const step = activeValues({ 'c.final': { hasValue: true, confirmed: true, accepted: true } })
+    expect(transitionBrandStep(step, { kind: 'acceptSlot', slotId: 'c.final' }))
+      .toMatchObject({ ok: true, changed: false })
+  })
+
+  it('VERWEIGERT die Abnahme eines unbestätigten Werts', () => {
+    const step = activeValues({ 'c.final': { hasValue: true } })
+    expect(transitionBrandStep(step, { kind: 'acceptSlot', slotId: 'c.final' }))
+      .toEqual({ ok: false, code: 'not_confirmed' })
+  })
+
+  it('lässt eine Abnahme auch auf einem ABGESCHLOSSENEN Kapitel zu', () => {
+    // Nach einer Korrektur verliert die Zeile ihr `accepted`; sie danach nur
+    // über `reopen` wieder annehmen zu lassen, machte aus einer
+    // Kommakorrektur einen Kapitel-Neustart.
+    const done = completedStep('values')
+    const slots = { ...done.slots, 'c.final': { hasValue: true, confirmed: true } }
+    expect(transitionBrandStep({ ...done, slots }, { kind: 'acceptSlot', slotId: 'c.final' }))
+      .toMatchObject({ ok: true, changed: true })
+  })
+
+  it('weist eine fremde und eine erfundene Session ab', () => {
+    const step = activeValues({})
+    expect(transitionBrandStep(step, { kind: 'acceptSlot', slotId: 'a.pitch' }))
+      .toEqual({ ok: false, code: 'slot_foreign' })
+    expect(transitionBrandStep(step, { kind: 'acceptSlot', slotId: 'c.erfunden' }))
+      .toEqual({ ok: false, code: 'unknown_slot' })
+  })
+
+  it('VERTAGT nur, wo die Session es erlaubt', () => {
+    const step = activeValues({})
+    // `c.conflictRule` trägt `allowDefer: true` (sessionContent.ts) …
+    expect(transitionBrandStep(step, { kind: 'deferSlot', slotId: 'c.conflictRule', deferred: true }))
+      .toMatchObject({ ok: true, changed: true })
+    // … `c.final` nicht.
+    expect(transitionBrandStep(step, { kind: 'deferSlot', slotId: 'c.final', deferred: true }))
+      .toEqual({ ok: false, code: 'defer_not_allowed' })
+  })
+
+  it('vertagt KEINEN bestätigten Wert — er ist ja da', () => {
+    const step = activeValues({ 'c.conflictRule': { hasValue: true, confirmed: true } })
+    expect(transitionBrandStep(step, { kind: 'deferSlot', slotId: 'c.conflictRule', deferred: true }))
+      .toEqual({ ok: false, code: 'already_confirmed' })
+  })
+
+  it('nimmt das Vertagen zurück und ist dabei ein No-op, wenn nichts anders wird', () => {
+    const step = activeValues({ 'c.conflictRule': { deferred: true } })
+    expect(transitionBrandStep(step, { kind: 'deferSlot', slotId: 'c.conflictRule', deferred: true }))
+      .toMatchObject({ ok: true, changed: false })
+    const back = transitionBrandStep(step, { kind: 'deferSlot', slotId: 'c.conflictRule', deferred: false })
+    expect(back).toMatchObject({ ok: true, changed: true })
+    expect(back.ok && back.step.slots?.['c.conflictRule']?.deferred).toBe(false)
+  })
+
+  it('ABNEHMEN HEBT EIN VERTAGEN AUF — beides zugleich wäre keine Aussage', () => {
+    const step = activeValues({ 'c.conflictRule': { hasValue: true, confirmed: true, deferred: true } })
+    const result = transitionBrandStep(step, { kind: 'acceptSlot', slotId: 'c.conflictRule' })
+    expect(result.ok && result.step.slots?.['c.conflictRule'])
+      .toMatchObject({ accepted: true, deferred: false })
+  })
+})
+
+describe('brandStepAcceptance — die drei neuen Glieder (§5a Schritt 3)', () => {
+  /** Alle Pflicht-Sessions bestätigt und abgenommen. */
+  function ready(stepKey: BrandStepKey): Record<string, BrandSlotStateFacts> {
+    return Object.fromEntries(confirmableRequiredSlotsForStep(stepKey)
+      .map(slot => [slot.id, { hasValue: true, confirmed: true, accepted: true }]))
+  }
+
+  it('ist bereit, wenn alles bestätigt UND abgenommen ist', () => {
+    const acceptance = brandStepAcceptance('values', ready('values'))
+    expect(acceptance.ready).toBe(true)
+    expect(acceptance.blockers).toEqual([])
+    expect(acceptance.accepted).toBe(acceptance.total)
+    expect(acceptance.total).toBe(confirmableRequiredSlotsForStep('values').length)
+  })
+
+  it('nennt JEDEN Grund beim Namen — nicht „irgendwas fehlt"', () => {
+    const slots = ready('values')
+    slots['c.final'] = { hasValue: true, confirmed: true }
+    slots['c.livedExamples'] = { hasValue: true }
+    slots['c.conflictRule'] = { deferred: true }
+    const acceptance = brandStepAcceptance(
+      'values',
+      slots,
+      { 'c.definitions': 'stale' },
+      ['c.discovery1'],
+    )
+    expect(acceptance.ready).toBe(false)
+    expect(acceptance.blockers).toContainEqual({ slotId: 'c.final', reason: 'unaccepted' })
+    expect(acceptance.blockers).toContainEqual({ slotId: 'c.livedExamples', reason: 'unconfirmed' })
+    expect(acceptance.blockers).toContainEqual({ slotId: 'c.conflictRule', reason: 'deferred' })
+    expect(acceptance.blockers).toContainEqual({ slotId: 'c.definitions', reason: 'stale' })
+    expect(acceptance.blockers).toContainEqual({ slotId: 'c.discovery1', reason: 'conflict' })
+  })
+
+  it('EIN OFFENER KONFLIKT SPERRT DIE ABNAHME — auch an einer optionalen Session', () => {
+    // §5a: die eine Stelle, an der ein Befund Zwang ausübt, und zwar an der
+    // KAPITEL-Grenze — nicht in der Session.
+    expect(brandStepAcceptance('values', ready('values'), {}, ['c.teamFilter']).ready).toBe(false)
+  })
+
+  it('zählt eine OPTIONALE Session erst mit, wenn sie einen bestätigten Wert hat', () => {
+    const without = brandStepAcceptance('values', ready('values'))
+    const slots = { ...ready('values'), 'c.teamFilter': { hasValue: true, confirmed: true } }
+    const withOptional = brandStepAcceptance('values', slots)
+    expect(withOptional.total).toBe(without.total + 1)
+    expect(withOptional.ready).toBe(false)
+    expect(withOptional.blockers).toEqual([{ slotId: 'c.teamFilter', reason: 'unaccepted' }])
+  })
+
+  it('LESEN BLEIBT NACHSICHTIG: ein gespeichertes `done` wird nicht herabgestuft', () => {
+    // Ein Bestands-Kapitel kennt gar kein `accepted` — die Journey rechnet es
+    // trotzdem `done` (Migrationsvertrag §3e). Streng ist nur `complete`.
+    const legacy: BrandStepFacts = {
+      stepKey: 'values',
+      state: 'done',
+      confidence: 'fits',
+      slots: Object.fromEntries(confirmableRequiredSlotsForStep('values')
+        .map(slot => [slot.id, { hasValue: true, confirmed: true }])),
+    }
+    expect(brandStepAcceptance('values', legacy.slots).ready).toBe(false)
+    const journey = resolveBrandJourney(BASE_PROFILE, [
+      completedStep('context'), completedStep('pvm'), legacy,
+    ])
+    expect(stateOf(journey, 'values').state).toBe('done')
+  })
+
+  it('`complete` weist mit `acceptance_incomplete` ab und legt die Gründe bei', () => {
+    const slots = Object.fromEntries(confirmableRequiredSlotsForStep('values')
+      .map(slot => [slot.id, { hasValue: true, confirmed: true }]))
+    const result = transitionBrandStep(
+      { stepKey: 'values', state: 'active', confidence: 'fits', slots },
+      { kind: 'complete' },
+    )
+    expect(result).toMatchObject({ ok: false, code: 'acceptance_incomplete' })
+    expect(!result.ok && result.blockers?.every(blocker => blocker.reason === 'unaccepted')).toBe(true)
+    expect(!result.ok && result.missing).toEqual(confirmableRequiredSlotsForStep('values').map(slot => slot.id))
+  })
+})
+
+describe('transitionBrandStep — restart (§5a)', () => {
+  it('LEERT das Kapitel und stellt es auf `active`', () => {
+    const result = transitionBrandStep(completedStep('values'), { kind: 'restart' })
+    expect(result).toMatchObject({ ok: true, changed: true })
+    if (!result.ok) return
+    expect(result.step.state).toBe('active')
+    expect(result.step.confidence).toBeNull()
+    expect(result.step.slots).toEqual({})
+  })
+
+  it('geht von `active` genauso', () => {
+    expect(transitionBrandStep(filledActiveStep('values'), { kind: 'restart' }))
+      .toMatchObject({ ok: true, changed: true })
+  })
+
+  it('GEGENPROBE: ein nicht begonnenes oder gesperrtes Kapitel hat nichts zu verlieren', () => {
+    expect(transitionBrandStep({ stepKey: 'values', state: 'open' }, { kind: 'restart' }))
+      .toEqual({ ok: false, code: 'not_started' })
+    expect(transitionBrandStep({ stepKey: 'values', state: 'locked' }, { kind: 'restart' }))
+      .toEqual({ ok: false, code: 'step_locked' })
+  })
+
+  it('ist NICHT `reopen`: der lässt Slots und Konfidenz stehen', () => {
+    const reopened = transitionBrandStep(completedStep('values'), { kind: 'reopen' })
+    expect(reopened.ok && Object.keys(reopened.step.slots ?? {}).length).toBeGreaterThan(0)
+    expect(reopened.ok && reopened.step.confidence).toBe('fits')
+  })
+})
+
+describe('resolveNextStop — der Wegweiser am Kapitelende', () => {
+  it('zeigt auf die nächste offene Pflicht-Session', () => {
+    expect(resolveNextStop('context', {})).toEqual({ stepKey: 'context', sessionKey: 'a.origin' })
+  })
+
+  it('zeigt auf die FINALE ABNAHME, wenn nichts mehr offen ist', () => {
+    const slots = Object.fromEntries(confirmableRequiredSlotsForStep('context')
+      .map(slot => [slot.id, { hasValue: true, confirmed: true }]))
+    expect(resolveNextStop('context', slots)).toEqual({ stepKey: 'context', acceptance: true })
+  })
+
+  it('GEGENPROBE: keine offene FRAGE, aber ein unbestätigter Entwurf ⇒ null', () => {
+    const required = confirmableRequiredSlotsForStep('context')
+    const slots = Object.fromEntries(required.map((slot, index) => [
+      slot.id,
+      index === 0 ? { hasValue: true } : { hasValue: true, confirmed: true },
+    ]))
+    expect(resolveNextStop('context', slots)).toBeNull()
+  })
+})
+
+describe('brandRestartImpact — was ein Neustart kostet', () => {
+  /** Jede Session der Registry bestätigt — die volle Hülle wird sichtbar. */
+  const allConfirmed: Record<string, BrandSlotStateFacts> = Object.fromEntries(
+    BRAND_SLOTS.filter(slot => !slot.deactivated)
+      .map(slot => [slot.id, { hasValue: true, confirmed: true }]),
+  )
+
+  it('nennt nur BESTÄTIGTE Felder SPÄTERER Kapitel', () => {
+    const impact = brandRestartImpact('context', allConfirmed)
+    expect(impact.count).toBeGreaterThan(0)
+    expect(impact.sessions.every(id => slotById(id)!.stepId !== 'context')).toBe(true)
+    expect(Object.keys(impact.byStep)).not.toContain('context')
+  })
+
+  it('GEGENPROBE: ohne bestätigte Werte ist die Hülle leer', () => {
+    expect(brandRestartImpact('context', {}).count).toBe(0)
+  })
+
+  it('GEGENPROBE: das letzte Kapitel berührt nichts mehr', () => {
+    expect(brandRestartImpact('result', allConfirmed).count).toBe(0)
+  })
+
+  it('ist die VEREINIGUNG über alle Sessions des Kapitels', () => {
+    const union = new Set<string>()
+    for (const slot of slotsForStep('values')) {
+      for (const id of sessionsAffectedBy(slot.id).transitive) union.add(id)
+    }
+    const expected = [...union].filter(id => slotById(id)!.stepId !== 'values'
+      && BRAND_STEP_KEYS.indexOf(slotById(id)!.stepId) > BRAND_STEP_KEYS.indexOf('values'))
+    expect([...brandRestartImpact('values', allConfirmed).sessions].sort())
+      .toEqual(expected.sort())
   })
 })

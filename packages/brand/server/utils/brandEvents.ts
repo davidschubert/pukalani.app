@@ -34,6 +34,20 @@ export type BrandEventType =
   // und Dauer — NIE den getippten Text und NIE die Antwort (Regel 1 im Kopf).
   | 'conversation.turn'
   | 'conversation.failed'
+  /**
+   * DER SCHNAPPSCHUSS VOR „NOCHMAL VON VORN" (§5a). Die EINE Ausnahme von
+   * Regel 1 im Kopf, und sie ist eng gefasst: dieser Eintrag trägt Slot-TEXT,
+   * weil er genau dafür da ist — ein versehentlicher Restart soll für den
+   * Betreiber rekonstruierbar sein, während er für den Kunden wirklich „von
+   * vorn" ist. Er ist damit KEINE Messung, sondern ein AUDIT-Eintrag; dieselbe
+   * Aufbewahrung (24 Monate), dieselbe Löschkaskade.
+   *
+   * Was NICHT hineinpasst, wird gekürzt und als `truncated` markiert — der
+   * Deckel liegt bei 4096 Zeichen, und ein Kapitel darf 200k tragen. Ein
+   * halber Schnappschuss mit ehrlicher Marke ist mehr wert als gar keiner
+   * (`payload` wird sonst KOMPLETT verworfen, s. u.).
+   */
+  | 'step.restarted'
 
 export interface BrandEventInput {
   type: BrandEventType
@@ -43,7 +57,16 @@ export interface BrandEventInput {
   payload?: Record<string, string | number | boolean>
 }
 
-const PAYLOAD_MAX = 4096
+/**
+ * Der Spaltendeckel (`brand_events.payload`, varchar 4096, Migration
+ * brand-007). EXPORTIERT, weil der Restart-Schnappschuss VOR dem Schreiben
+ * wissen muss, wie viel hineinpasst: hier wird ein zu grosser `payload`
+ * KOMPLETT verworfen (gekappt wäre er kaputtes JSON), und ein Audit-Eintrag,
+ * der still leer ankommt, ist schlimmer als einer, der sagt, dass er gekürzt
+ * wurde.
+ */
+export const BRAND_EVENT_PAYLOAD_MAX = 4096
+const PAYLOAD_MAX = BRAND_EVENT_PAYLOAD_MAX
 
 export async function recordBrandEvent(event: H3Event, input: BrandEventInput): Promise<void> {
   try {

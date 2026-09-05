@@ -428,7 +428,12 @@ export default defineEventHandler(async (event) => {
      * Chat-Antwort macht einen bestehenden Entwurf nicht still „veraltet"; die
      * Neuerzeugung stösst der Mensch selbst an.
      */
-    const conversation = await loadBrandConversationHistory(event, profile.$id, stepKey)
+    // Der Verlaufs-Schnitt gilt auch hier (brand-013): ein Entwurf, der aus
+    // dem verworfenen Gespräch schöpft, wäre genau die Erinnerung, die
+    // ein Neubeginn beseitigen sollte.
+    const conversation = await loadBrandConversationHistory(
+      event, profile.$id, stepKey, undefined, stepRow.restartedAt,
+    )
 
     const context: BrandGeneratorContext = {
       event,
@@ -586,17 +591,22 @@ export default defineEventHandler(async (event) => {
       const now = new Date().toISOString()
 
       const before: BrandSlotRecord = records[input.entryBase.slotId] ?? {}
+      const written: BrandSlotRecord = {
+        ...before,
+        // Der ERSTE Wert bleibt für immer stehen — aus dem Verhältnis von
+        // `firstDraft` zu `confirmed` entstehen die beiden Übernahmequoten
+        // (Audit 2). Eine Regeneration darf ihn nicht mitziehen.
+        firstDraft: before.firstDraft ?? input.draft,
+        latestDraft: input.draft,
+        updatedAt: now,
+      }
+      // Ein NEUER Entwurf nimmt der Zeile ihre Abnahme (§5a): `accepted` ist
+      // eine Aussage über einen gelesenen Wortlaut, und der ist jetzt ein
+      // anderer. Der Server tut das, nie die Oberfläche.
+      delete written.accepted
       const next: Record<string, BrandSlotRecord> = {
         ...records,
-        [input.entryBase.slotId]: {
-          ...before,
-          // Der ERSTE Wert bleibt für immer stehen — aus dem Verhältnis von
-          // `firstDraft` zu `confirmed` entstehen die beiden Übernahmequoten
-          // (Audit 2). Eine Regeneration darf ihn nicht mitziehen.
-          firstDraft: before.firstDraft ?? input.draft,
-          latestDraft: input.draft,
-          updatedAt: now,
-        },
+        [input.entryBase.slotId]: written,
       }
 
       const history = parseGenerations(fresh.generations)

@@ -1,5 +1,4 @@
 import { stripBrandGenerationDrafts } from '../../../../../../shared/brandGeneration'
-import { resolveSessionStates } from '../../../../../../shared/brandJourney'
 import { sessionsAffectedBy } from '../../../../../../shared/brandSessions'
 import { slotsForStep } from '../../../../../../shared/slotRegistry'
 import type { BrandSessionView, BrandStepDetailResponse } from '../../../../../../shared/types/brand'
@@ -9,6 +8,7 @@ import {
   parseGenerations,
   parseSlotRecords,
   profileFacts,
+  resolveBrandSessionStates,
   toSlotViews,
   toStepFacts,
 } from '../../../../../utils/brandStore'
@@ -65,7 +65,7 @@ export default defineEventHandler(async (event): Promise<BrandStepDetailResponse
   const generations = parseGenerations(stepRow.generations)
   const records = parseSlotRecords(stepRow.slots)
 
-  const states = resolveSessionStates(profileFacts(profile), toStepFacts(stepRows))
+  const states = resolveBrandSessionStates(profileFacts(profile), toStepFacts(stepRows))
   const sessions: Record<string, BrandSessionView> = {}
   for (const session of slotsForStep(stepKey)) {
     const affected = sessionsAffectedBy(session.id)
@@ -83,9 +83,13 @@ export default defineEventHandler(async (event): Promise<BrandStepDetailResponse
           .map(entry => entry.stepKey)
           .filter(candidate => affected.byStep[candidate]?.length),
       },
+      // Die zwei Flags der Finalen Abnahme (Paket 3b) — IMMER gesetzt, auch als
+      // `false`: ein fehlendes Feld hiesse für den Leser „unbekannt", und die
+      // Abnahme-Seite hat keinen dritten Zustand.
+      accepted: records[session.id]?.accepted === true,
+      deferred: records[session.id]?.deferred === true,
       // NUR wo es welche gibt: ein leeres Objekt an 67 Sessions wäre Rauschen
-      // in jeder Antwort. `accepted`/`deferred` fehlen in dieser Runde ganz —
-      // sie kommen mit Paket 3b (s. `BrandSessionView`).
+      // in jeder Antwort.
       ...(Object.keys(collected).length ? { collected } : {}),
     }
   }
@@ -99,6 +103,8 @@ export default defineEventHandler(async (event): Promise<BrandStepDetailResponse
     inputHash: stepRow.inputHash ?? '',
     startedAt: stepRow.startedAt ?? null,
     completedAt: stepRow.completedAt ?? null,
+    // Der Verlaufs-Schnitt (brand-013): der Client lädt Züge nur DANACH.
+    restartedAt: stepRow.restartedAt ?? null,
     activeSeconds: stepRow.activeSeconds ?? 0,
     slots: toSlotViews(records),
     sessions,

@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto'
 import type { H3Event } from 'h3'
 import type { Models } from 'node-appwrite'
 import { AppwriteException, Query } from 'node-appwrite'
@@ -15,19 +16,23 @@ import {
   type BrandConfidence,
   type BrandJourneyStep,
   type BrandProfileFacts,
+  type BrandSessionState,
   type BrandStepFacts,
   type BrandStoredStepState,
   canEnterBrandStep,
   resolveBrandJourney,
+  resolveSessionStates,
 } from '../../shared/brandJourney'
 import {
   BRAND_SLOTS,
   BRAND_STEP_KEYS,
   BRAND_STEP_SLOTS_MAX_LENGTH,
+  type BrandSlot,
   type BrandSlotStateFacts,
   type BrandStepKey,
   slotById,
 } from '../../shared/slotRegistry'
+import { computeSourcesHash } from '../../shared/brandSessions'
 
 /**
  * DER LESE-/SCHREIB-UNTERBAU DER `/api/brand/**`-ROUTEN — alles, was mehr als
@@ -119,6 +124,13 @@ export type BrandStepRow = Models.Row & {
   confidence?: BrandConfidence | null
   startedAt?: string | null
   completedAt?: string | null
+  /**
+   * DER VERLAUFS-SCHNITT nach „Nochmal von vorn" (brand-013, §5a). Die
+   * Nachrichten bleiben stehen (Retention brand-003), aber der Verlauf lädt
+   * nur noch Züge DANACH — George beginnt ohne das alte Gedächtnis, sonst
+   * wäre „von vorn" eine Lüge. `null`/fehlend = nie neu begonnen.
+   */
+  restartedAt?: string | null
   activeSeconds: number
 }
 
@@ -191,6 +203,22 @@ export interface BrandSlotRecord {
    * wird ausschliesslich von der Konversations-Route geschrieben.
    */
   collected?: Record<string, string>
+  /**
+   * DER STAND DER QUELLEN BEIM BESTÄTIGEN (§9, seit Paket 3b verdrahtet).
+   * Fehlt er, gilt die Session als AKTUELL — Bestand wird nie bernstein.
+   */
+  sourcesHash?: string
+  /** Im Kapitel-Zusammenhang abgenommen (§5a). Fällt mit jeder Wert-Änderung. */
+  accepted?: boolean
+  /** Auf später vertagt (§3a `answers.allowDefer`) — je Session, nicht je Teil. */
+  deferred?: boolean
+  /**
+   * Die Notiz des Schliess-Aufrufs (§4). GESCHRIEBEN wird sie erst mit Paket 4;
+   * hier steht sie, weil der Restart-Schutz VORHER zählen muss, wie viel
+   * verloren geht — eine Zahl, die ein fehlendes Feld stillschweigend als 0
+   * meldet, wäre der falsche Trost.
+   */
+  notes?: string
 }
 
 /**
@@ -303,9 +331,64 @@ export function toSlotFacts(records: Record<string, BrandSlotRecord>): Record<st
   const facts: Record<string, BrandSlotStateFacts> = {}
   for (const [slotId, record] of Object.entries(records)) {
     const displayed = record.latestDraft ?? record.firstDraft ?? record.confirmed ?? ''
-    facts[slotId] = { hasValue: displayed.length > 0, confirmed: brandSlotRecordConfirmed(record) }
+    facts[slotId] = {
+      hasValue: displayed.length > 0,
+      confirmed: brandSlotRecordConfirmed(record),
+      /**
+       * DER WERT REIST SEIT PAKET 3b MIT — und zwar in der SERVER-Rangfolge
+       * (`brandSlotStoredValue`: bestätigt schlägt Entwurf), nicht in der
+       * Anzeige-Rangfolge daneben. Er muss es: `computeSourcesHash` rechnet
+       * über genau diesen Wert, und ein Leser ohne Wert bekäme für jede
+       * bestätigte Session einen anderen Hash als der Schreiber — jedes Feld
+       * stünde nach dem ersten Deploy auf `stale`.
+       *
+       * DIE INVARIANTEN SIND DAMIT NICHT SCHARF (Paket-1-Befund a): sie laufen
+       * ausschliesslich in `transitionBrandStep(…, 'confirmSlot')`, und diese
+       * Handlung ruft heute KEINE Route — bestätigt wird im Autosave-PATCH, der
+       * den Wert direkt schreibt. Wer `confirmSlot` verdrahtet, schaltet damit
+       * auch `c.final count 3–5` scharf und muss vorher prüfen, dass der
+       * Chips-Editor Listen als `- eintrag`-Zeilen speichert (heute tut er das
+       * nicht: die Antwort geht als getippter Fliesstext in den Slot).
+       */
+      value: brandSlotStoredValue(record),
+      ...(record.sourcesHash ? { sourcesHash: record.sourcesHash } : {}),
+      ...(record.accepted ? { accepted: true } : {}),
+      ...(record.deferred ? { deferred: true } : {}),
+    }
   }
   return facts
+}
+
+/**
+ * DER GESTEMPELTE QUELLEN-HASH einer Session (§9) — sha256 über die kanonische
+ * Zeichenkette aus `shared/brandSessions.ts`, genau wie der `inputHash` einer
+ * Generation (`brandGenerationInputHash`). `node:crypto` bleibt dabei auf der
+ * Serverseite: die Zeichenkette gehört `shared/`, das Hashen nicht.
+ */
+export function brandSourcesHash(
+  config: BrandSlot,
+  slotFacts: Readonly<Record<string, BrandSlotStateFacts | undefined>>,
+): string {
+  return createHash('sha256').update(computeSourcesHash(config, slotFacts)).digest('hex')
+}
+
+/**
+ * DER SESSION-ZUSTAND AUF DER SERVERSEITE — dieselbe pure Regel, aber mit dem
+ * Stempler, der die Werte auch GESCHRIEBEN hat.
+ *
+ * ── DIESER WRAPPER IST DIE SICHERUNG, NICHT DIE BEQUEMLICHKEIT ───────────
+ * `resolveSessionStates` vergleicht den GESPEICHERTEN `sourcesHash` mit einem
+ * frisch gerechneten. Gespeichert wird sha256 (`brandSourcesHash`), gerechnet
+ * würde ohne Zutun die kanonische Zeichenkette — der Vergleich schlüge dann
+ * IMMER fehl und jede bestätigte Session stünde auf `stale`. Genau das ist
+ * eine Sicherung, die in die Schnittstelle gehört und nicht in die Disziplin:
+ * jede Route ruft diesen Wrapper, keine ruft die pure Regel mit Vorgabe.
+ */
+export function resolveBrandSessionStates(
+  profile: BrandProfileFacts,
+  stepFacts: readonly BrandStepFacts[],
+): Readonly<Record<string, BrandSessionState>> {
+  return resolveSessionStates(profile, stepFacts, brandSourcesHash)
 }
 
 /**

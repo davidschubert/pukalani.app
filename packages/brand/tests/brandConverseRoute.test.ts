@@ -788,9 +788,27 @@ describe('Die Session eines Zuges', () => {
     })
   })
 
-  it('GEGENPROBE: ist nichts mehr offen, ist `next` null', async () => {
+  it('AM KAPITELENDE zeigt der Wegweiser auf die Finale Abnahme (Paket 3b)', async () => {
+    // Jeder Pflicht-Slot bestätigt, keine Frage mehr offen: `next: null` war
+    // hier zweideutig („nichts zu fragen" sah aus wie „hier ist Schluss") —
+    // seit §5a gibt es einen Ort, an den es weitergeht.
     stepRow.slots = JSON.stringify(Object.fromEntries(
       confirmableRequiredSlotsForStep('context').map(slot => [slot.id, { confirmed: 'steht' }]),
+    ))
+    body = { text: 'Und was heißt eigentlich Positionierung?' }
+    const { event, chunks } = fakeEvent()
+    await handler(event)
+    expect(readBack(chunks).at(-1)).toMatchObject({
+      next: { stepKey: 'context', acceptance: true },
+    })
+  })
+
+  it('GEGENPROBE: fehlt ein bestätigter Pflicht-Wert, bleibt `next` null', async () => {
+    // Keine offene FRAGE mehr, aber ein Bühnen-Entwurf ist unbestätigt — dann
+    // ist weder eine Session dran noch die Abnahme reif.
+    const required = confirmableRequiredSlotsForStep('context')
+    stepRow.slots = JSON.stringify(Object.fromEntries(
+      required.map((slot, index) => [slot.id, index === 0 ? { latestDraft: 'Entwurf' } : { confirmed: 'steht' }]),
     ))
     body = { text: 'Und was heißt eigentlich Positionierung?' }
     const { event, chunks } = fakeEvent()

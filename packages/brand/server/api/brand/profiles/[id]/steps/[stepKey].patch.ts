@@ -1,15 +1,18 @@
 import { createBrandStepSaveSchema } from '../../../../../../schemas/brandStep'
 import {
   type BrandStepFacts,
+  mergeBrandSlotFacts,
   resolveBrandJourney,
   transitionBrandStep,
 } from '../../../../../../shared/brandJourney'
+import { slotById } from '../../../../../../shared/slotRegistry'
 import type { BrandStepSaveResponse } from '../../../../../../shared/types/brand'
 import {
   BRAND_STEPS_TABLE,
   type BrandSlotRecord,
   brandDb,
   brandSlotRecordConfirmed,
+  brandSourcesHash,
   loadBrandStepContext,
   parseSlotRecords,
   profileFacts,
@@ -112,6 +115,8 @@ export default defineEventHandler(async (event): Promise<BrandStepSaveResponse> 
   const now = new Date().toISOString()
   const next: Record<string, BrandSlotRecord> = { ...records }
   let slotsChanged = false
+  /** Slots, die dieser Patch NEU bestätigt — sie bekommen ihren Quellen-Hash. */
+  const confirmedNow: string[] = []
 
   for (const [slotId, patch] of Object.entries(body.slots)) {
     const before = records[slotId]
@@ -156,9 +161,52 @@ export default defineEventHandler(async (event): Promise<BrandStepSaveResponse> 
     // Vergleich OHNE `updatedAt` — sonst wäre jede Speicherung per Definition
     // eine Änderung und die No-op-Regel wirkungslos.
     if (sameSlot(before, candidate)) continue
+
+    /**
+     * EINE WERT-ÄNDERUNG NIMMT DIE ABNAHME (Plan §5a, Fables Entscheidung
+     * 2026-09-04) — und zwar HIER, im Server, nie in der Oberfläche.
+     *
+     * `accepted` heisst „im Zusammenhang des Kapitels gelesen und für gut
+     * befunden". Sobald der Wortlaut ein anderer ist, ist es eine Aussage über
+     * einen Text, den niemand mehr gelesen hat. Sie fällt deshalb bei JEDER
+     * Änderung, die `sameSlot` sieht — Schreiben, Bestätigen, Aufheben —, und
+     * `sameSlot` selbst ignoriert `accepted`/`deferred` weiter: sie sind kein
+     * Inhalt, und ein Autosave-Tick darf davon keine Änderung machen.
+     */
+    delete candidate.accepted
     candidate.updatedAt = now
+    if (candidate.confirmed && candidate.confirmed !== before?.confirmed) confirmedNow.push(slotId)
     next[slotId] = candidate
     slotsChanged = true
+  }
+
+  /**
+   * DER QUELLEN-HASH BEIM BESTÄTIGEN (§9, aus Paket 6 vorgezogen).
+   *
+   * Ohne ihn könnte „Nochmal von vorn" nachgelagerte Felder nicht als veraltet
+   * zeigen: der `inputHash` einer Generation beantwortet dieselbe Frage nur für
+   * GENERIERTE Felder, und ein Frage-Feld wie `c.livedExamples` hängt an
+   * `c.final`, ohne je etwas zu generieren.
+   *
+   * Gerechnet wird über die Slot-Fakten ALLER Kapitel — mit DIESEM Patch schon
+   * eingesetzt, denn eine Session schöpft auch aus ihrem eigenen Kapitel
+   * (`c.definitions` ← `c.final`), und zwei Slots können in einem Rumpf
+   * kommen. Die Zusammenlegung ist wörtlich dieselbe wie in
+   * `resolveSessionStates` (`mergeBrandSlotFacts`); zwei Zusammenlegungen
+   * hiessen zwei Hashes für denselben Stand, und die Abweichung sähe man erst
+   * an einem Feld, das sich für veraltet hält.
+   */
+  if (confirmedNow.length > 0) {
+    const factsForHash = mergeBrandSlotFacts(
+      toStepFacts(stepRows).map(facts => (facts.stepKey === stepKey
+        ? { ...facts, slots: toSlotFacts(next) }
+        : facts)),
+    )
+    for (const slotId of confirmedNow) {
+      const config = slotById(slotId)
+      if (!config) continue
+      next[slotId] = { ...next[slotId], sourcesHash: brandSourcesHash(config, factsForHash) }
+    }
   }
 
   // ── Zustand und Konfidenz über die pure Regel ────────────────────────────

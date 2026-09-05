@@ -54,6 +54,7 @@ export async function loadBrandConversationHistory(
   profileId: string,
   stepKey: string,
   sessionKey?: string,
+  restartedAt?: string | null,
 ): Promise<BrandConverseHistoryTurn[]> {
   const history: BrandConverseHistoryTurn[] = []
   try {
@@ -67,6 +68,12 @@ export async function loadBrandConversationHistory(
         Query.equal('profileId', profileId),
         Query.equal('stepKey', stepKey),
         ...(sessionKey ? [Query.equal('sessionKey', sessionKeyValues(stepKey, sessionKey))] : []),
+        // DER VERLAUFS-SCHNITT nach „Nochmal von vorn" (brand-013, §5a): die
+        // Nachrichten BLEIBEN stehen (Retention brand-003), aber George
+        // beginnt ohne das alte Gedächtnis — sonst wäre „von vorn" eine Lüge.
+        // Die Bestands-Regel darüber (leerer `sessionKey` zählt zur ersten
+        // Session) bleibt daneben bestehen: sie beantwortet eine andere Frage.
+        ...(restartedAt ? [Query.greaterThan('$createdAt', restartedAt)] : []),
         Query.orderDesc('$id'),
         Query.limit(BRAND_CONVERSE_HISTORY_MAX),
       ],

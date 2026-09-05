@@ -22,9 +22,12 @@
 
 import type { BrandGenerationOutcome } from '../brandGeneration'
 import type {
+  BrandAcceptanceBlocker,
   BrandConfidence,
   BrandJourneyStep,
+  BrandNextSessionRef,
   BrandSessionState,
+  BrandStepAcceptance,
   BrandStoredStepState,
 } from '../brandJourney'
 import type {
@@ -302,10 +305,14 @@ export interface BrandSessionView {
   /** Was per Share-Link und Export standardmässig nicht reist. */
   sensitivity: BrandSessionSensitivity
   affects: BrandSessionAffects
-  /** Im Kapitel-Zusammenhang abgenommen (Paket 3b). */
-  accepted?: boolean
-  /** Auf später vertagt (Paket 3b). */
-  deferred?: boolean
+  /**
+   * Im Kapitel-Zusammenhang abgenommen (§5a). IMMER gesetzt, auch als `false`:
+   * ein fehlendes Feld hiesse für den Leser „unbekannt", und die Abnahme-Seite
+   * hat keinen dritten Zustand.
+   */
+  accepted: boolean
+  /** Auf später vertagt (§3a `answers.allowDefer`). Ebenfalls immer gesetzt. */
+  deferred: boolean
   /** Der Fortschritt einer Sammel-Session: Teil-Id → Antwort. */
   collected?: Record<string, string>
 }
@@ -319,6 +326,8 @@ export interface BrandStepDetailResponse {
   inputHash: string
   startedAt: string | null
   completedAt: string | null
+  /** Wann dieses Kapitel zuletzt neu begonnen wurde (brand-013) — `null` = nie. */
+  restartedAt: string | null
   activeSeconds: number
   slots: Record<string, BrandSlotView>
   /**
@@ -356,6 +365,128 @@ export interface BrandStepCompleteResponse {
   journey: BrandJourneyStep[]
   progressPct: number
   currentStepKey: string
+}
+
+/**
+ * DIE FINALE ABNAHME EINES KAPITELS (Plan §5a) — was die Seite zeigt, in
+ * Registry-Reihenfolge und ohne einen einzigen Text, den die Oberfläche selbst
+ * erfinden müsste.
+ *
+ * ── WARUM SO VIEL IN EINER ANTWORT ───────────────────────────────────────
+ * Die Seite stellt je Session DREI Dinge nebeneinander (Bereich · Beispiel ·
+ * eigene Eingabe) und darüber einen Zähler. Käme das aus drei Abrufen, zeigte
+ * sie beim Blättern drei Stände desselben Kapitels — und die Frage „Passt
+ * dieses Kapitel?" hinge an einer Zahl aus einem vierten. Ein Abruf, ein
+ * Stand, eine Entscheidung.
+ *
+ * ── SCHLÜSSEL STATT TEXT, ABER BEISPIELE ALS TEXT ────────────────────────
+ * `labelKey`/`questionKey`/`exampleKey` sind i18n-Schlüssel: WIE etwas heisst,
+ * entscheiden die Locale-Dateien, nicht der Server. Das `example` dagegen ist
+ * INHALT aus der Registry (`sessionContent.ts`, Davids Gate) und steht dort in
+ * beiden Sprachen — die Oberfläche wählt, der Server schickt beide, weil er
+ * die Anzeigesprache des Browsers nicht besser kennt als der Browser selbst.
+ */
+export interface BrandAcceptanceExample {
+  de: string[]
+  en: string[]
+}
+
+export interface BrandAcceptanceSessionView {
+  slotId: string
+  kind: BrandSessionKind
+  required: boolean
+  state: BrandSessionState
+  /** Es gibt einen bestätigten Wert (`confirmed` trägt den Text, nicht ein Flag). */
+  confirmed: boolean
+  accepted: boolean
+  deferred: boolean
+  /** Kennt diese Session ein Vertagen? (`answers.allowDefer`) */
+  allowDefer: boolean
+  /** Der bestätigte Wert, VOLLSTÄNDIG — die Seite kürzt nicht (§5a Schritt 1). */
+  value: string
+  /** Die Notiz des Schliess-Aufrufs (Paket 4). Heute immer `''`. */
+  notes: string
+  /** `brand.labels.<id>` — kann fehlen; dann gilt `questionKey` (wie in der Werkstatt). */
+  labelKey: string
+  /** Die Frage in ihrer Pfad-/Team-Fassung — der Rückfall der Beschriftung. */
+  questionKey: string
+  /** `brand.example.<id>` — nur bei Menschenfragen, sonst `null`. */
+  exampleKey: string | null
+  /** Das erfundene Vorbild aus einer FREMDEN Branche, je Sprache. */
+  example: BrandAcceptanceExample
+  affects: BrandSessionAffects
+}
+
+export interface BrandStepAcceptanceResponse {
+  stepKey: BrandStepKey
+  storedState: BrandStoredStepState
+  revision: number
+  confidence: BrandConfidence | null
+  restartedAt: string | null
+  /** Registry-Reihenfolge — die Reihenfolge der Blöcke auf der Seite. */
+  sessions: BrandAcceptanceSessionView[]
+  acceptance: BrandStepAcceptance
+}
+
+/** Antwort von „Abnehmen" und „Vertagen" — der neue Stand DIESER Session. */
+export interface BrandSessionAcceptResponse {
+  stepKey: BrandStepKey
+  sessionKey: string
+  revision: number
+  accepted: boolean
+  deferred: boolean
+  acceptance: BrandStepAcceptance
+  /** Auto-Weiter: die nächste Session oder die Finale Abnahme. */
+  next: BrandNextSessionRef | null
+}
+
+/**
+ * WAS „NOCHMAL VON VORN" KOSTET (§5a Schritt 1) — der Inhalt des Schutz-Layers.
+ *
+ * `ack` ist der Hash über GENAU diese Hülle. Der Restart trägt ihn zurück; der
+ * Server rechnet neu und weist ohne passenden Wert mit 409 ab — dieselbe
+ * Mechanik wie der `impactAck` der Korrektur-Regel (§9). Die Oberfläche
+ * erzwingt es damit nie allein.
+ */
+export interface BrandRestartImpactResponse {
+  stepKey: BrandStepKey
+  revision: number
+  /** Was in DIESEM Kapitel verloren geht — Zahlen, keine Texte. */
+  chapter: {
+    values: number
+    notes: number
+    accepted: number
+  }
+  /** Bestätigte Felder SPÄTERER Kapitel, die daran hängen. */
+  downstream: {
+    byStep: Partial<Record<BrandStepKey, string[]>>
+    count: number
+  }
+  ack: string
+}
+
+/** Der Rumpf eines 409 `restart_unacknowledged` — die Hülle reist mit. */
+export interface BrandRestartConflictData {
+  code: 'restart_unacknowledged'
+  impact: BrandRestartImpactResponse
+}
+
+export interface BrandStepRestartResponse {
+  stepKey: BrandStepKey
+  storedState: BrandStoredStepState
+  revision: number
+  restartedAt: string
+  /** Die erste Session des Kapitels — George eröffnet sie. */
+  next: BrandNextSessionRef | null
+  progressPct: number
+  currentStepKey: string
+}
+
+/** Der Rumpf eines 400 `acceptance_incomplete` (`complete`). */
+export interface BrandAcceptanceConflictData {
+  code: 'acceptance_incomplete'
+  blockers: BrandAcceptanceBlocker[]
+  missing: string[]
 }
 
 export interface BrandMessageView {
@@ -409,16 +540,16 @@ export interface BrandConverseSkippedResponse {
 }
 
 /**
- * WOHIN ES DANACH WEITERGEHT (Auto-Weiter, Plan §5) — Kapitel und Session der
- * nächsten offenen Pflicht-Session, gerechnet NACH dem Zug.
+ * WOHIN ES DANACH WEITERGEHT (Auto-Weiter, Plan §5) — die nächste offene
+ * Pflicht-Session ODER, am Kapitelende, die Finale Abnahme.
  *
- * `null` heisst „in diesem Kapitel ist keine Frage mehr offen"; die
- * Warteschlange „neu besprechen" (`stale`) füllt dieses Feld erst mit Paket 6.
+ * Der Typ und die Rechnung dazu (`resolveNextStop`) stehen in
+ * `shared/brandJourney.ts`: er ist eine Aussage der ZUSTANDSMASCHINE und
+ * gehört dorthin, wo sie lebt. Hier steht nur der Name, unter dem ihn die
+ * Antwort-Typen kennen — die Warteschlange „neu besprechen" (`stale`) füllt
+ * dasselbe Feld später mit Paket 6.
  */
-export interface BrandNextSessionRef {
-  stepKey: BrandStepKey
-  sessionKey: string
-}
+export type { BrandNextSessionRef } from '../brandJourney'
 
 /** Jede Antwort der Konversations-Route, die KEIN Strom ist. */
 export type BrandConverseResponse = BrandConverseSkippedResponse

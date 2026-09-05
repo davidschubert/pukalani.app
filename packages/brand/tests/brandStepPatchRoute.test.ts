@@ -209,13 +209,27 @@ describe('PATCH …/steps/:stepKey — „Nochmal von vorn" (reopen)', () => {
   it('ÖFFNET einen abgeschlossenen Baustein wieder — Konfidenz im selben Zug', async () => {
     stepRow.state = 'done'
     stepRow.confidence = 'fits'
-    body = { revision: 3, reopen: true, confidence: 'restart' }
+    body = { revision: 3, reopen: true, confidence: 'almost' }
 
     const response = await handler(event)
 
     expect(response.revision).toBe(4)
     expect(stepRow.state).toBe('active')
-    expect(stepRow.confidence).toBe('restart')
+    expect(stepRow.confidence).toBe('almost')
+  })
+
+  it('NIMMT `restart` NICHT MEHR ALS KONFIDENZ (Paket 3b)', async () => {
+    // Seit §5a ist „Nochmal von vorn" eine eigene Handlung mit Schnappschuss
+    // und Ack — als Selbstauskunft gespeichert hiesse eine Zeile gleichzeitig
+    // „abgeschlossen" und „von vorn".
+    stepRow.state = 'done'
+    body = { revision: 3, reopen: true, confidence: 'restart' }
+
+    await expect(handler(event)).rejects.toMatchObject({
+      status: 400,
+      data: { code: 'invalid_confidence' },
+    })
+    expect(tablesDB.updateRow).not.toHaveBeenCalled()
   })
 
   it('GEGENPROBE: reopen auf einem offenen Baustein wird mit `not_done` abgewiesen', async () => {
@@ -244,5 +258,57 @@ describe('PATCH …/steps/:stepKey — roh verriegelt, aber auf dem Weg erreichb
     expect(response.revision).toBe(4)
     expect(stepRow.state).toBe('active')
     expect(stepRow.confidence).toBe('almost')
+  })
+})
+
+/**
+ * DER QUELLEN-HASH UND DIE ABNAHME (BW2 Paket 3b) — was der Autosave NEBEN
+ * dem Text noch schreibt.
+ *
+ * Beides ist Server-Sache und darf es nie werden: der Hash, weil ohne ihn
+ * „Nochmal von vorn" nachgelagerte Felder nicht als veraltet zeigen kann
+ * (§9); die Rücknahme der Abnahme, weil `accepted` eine Aussage über einen
+ * GELESENEN Wortlaut ist — und der ist nach einer Änderung ein anderer.
+ */
+describe('PATCH …/steps/:stepKey — Quellen-Hash und Abnahme (Paket 3b)', () => {
+  it('STEMPELT beim Bestätigen den Stand der Quellen', async () => {
+    body = { revision: 3, slots: { 'a.pitch': { value: 'Wir rösten Kaffee.', confirmed: true } } }
+    await handler(event)
+
+    const stored = storedSlots()['a.pitch'] as { sourcesHash?: string }
+    expect(typeof stored.sourcesHash).toBe('string')
+    expect(stored.sourcesHash).toHaveLength(64)
+  })
+
+  it('stempelt NICHT beim blossen Speichern — bestätigt ist etwas anderes als geschrieben', async () => {
+    body = { revision: 3, slots: { 'a.pitch': { value: 'Ein Entwurf.' } } }
+    await handler(event)
+
+    expect(storedSlots()['a.pitch']).not.toHaveProperty('sourcesHash')
+  })
+
+  it('NIMMT DIE ABNAHME, sobald sich der Wert bewegt', async () => {
+    stepRow.slots = JSON.stringify({
+      'a.pitch': { firstDraft: 'alt', latestDraft: 'alt', confirmed: 'alt', accepted: true },
+    })
+    // Erst aufheben (die einzige Tür), im selben Zug neu schreiben.
+    body = { revision: 3, slots: { 'a.pitch': { value: 'neu', confirmed: false } } }
+    await handler(event)
+
+    expect(storedSlots()['a.pitch']).not.toHaveProperty('accepted')
+    expect(storedSlots()['a.pitch']!.latestDraft).toBe('neu')
+  })
+
+  it('GEGENPROBE: ein No-op lässt die Abnahme stehen', async () => {
+    stepRow.slots = JSON.stringify({
+      'a.pitch': { firstDraft: 'alt', latestDraft: 'alt', confirmed: 'alt', accepted: true },
+    })
+    // Dieselbe Bestätigung noch einmal — `sameSlot` sieht keine Änderung, und
+    // `accepted`/`deferred` sind darin bewusst kein Inhalt.
+    body = { revision: 3, slots: { 'a.pitch': { confirmed: true } } }
+    await handler(event)
+
+    expect(tablesDB.updateRow).not.toHaveBeenCalled()
+    expect(storedSlots()['a.pitch']).toMatchObject({ accepted: true })
   })
 })

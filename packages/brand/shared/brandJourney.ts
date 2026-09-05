@@ -72,6 +72,7 @@ import {
   BRAND_SLOTS,
   BRAND_STEP_KEYS,
   type BrandPathKind,
+  type BrandSessionConfig,
   type BrandSessionKind,
   type BrandSlotEditor,
   type BrandSlotStateFacts,
@@ -79,14 +80,32 @@ import {
   type BrandStepProgress,
   confirmableRequiredSlotsForStep,
   slotById,
+  slotIsConfirmable,
   slotIsFilled,
   slotsForStep,
   stepProgress,
 } from './slotRegistry'
 
-/** Die drei Konfidenz-Chips (§3b.8, `brand_steps.confidence`). */
+/**
+ * Die GESPEICHERTEN Konfidenz-Werte (§3b.8, `brand_steps.confidence`).
+ *
+ * `restart` steht hier NUR NOCH FÜR BESTANDSZEILEN. Seit BW2 §5a ist „Nochmal
+ * von vorn" keine Selbstauskunft mehr, sondern eine HANDLUNG (`restart`) mit
+ * Schnappschuss, getipptem Wort und Impact-Ack — es als Konfidenz zu speichern
+ * hiesse, dass eine Zeile gleichzeitig „abgeschlossen" und „von vorn" sagt.
+ * Der Wert bleibt im Array, damit eine Bestandszeile weiter lesbar ist
+ * (Migrationsvertrag §3e); GESETZT werden darf er nicht mehr.
+ */
 export const BRAND_CONFIDENCE_VALUES = ['fits', 'almost', 'restart'] as const
 export type BrandConfidence = (typeof BRAND_CONFIDENCE_VALUES)[number]
+
+/**
+ * Die zwei Werte, die die Finale Abnahme noch SETZT — „Passt" und „Fast".
+ * `setConfidence` prüft gegen diese Liste, nicht gegen die gespeicherte:
+  * Lesen bleibt nachsichtig, Schreiben wird streng (s. Kopf).
+ */
+export const BRAND_SETTABLE_CONFIDENCE_VALUES = ['fits', 'almost'] as const
+export type BrandSettableConfidence = (typeof BRAND_SETTABLE_CONFIDENCE_VALUES)[number]
 
 /** Vier gespeicherte Zustände + `skipped` als reines Ergebnis (s. Kopf). */
 export type BrandStepState = 'locked' | 'open' | 'active' | 'done' | 'skipped'
@@ -245,6 +264,98 @@ export function brandStepCompletion(
 }
 
 /**
+ * DIE ZWEITE HÄLFTE DER ABSCHLUSS-BEDINGUNG — die FINALE ABNAHME (Plan §5a).
+ *
+ * ── ZWEI RECHNUNGEN, WEIL ES ZWEI FRAGEN SIND ─────────────────────────────
+ * `brandStepCompletion` beantwortet „ist in den Sessions alles GESAGT?"
+ * (jeder Pflicht-Slot bestätigt). Diese hier beantwortet „ist es im
+ * Zusammenhang des Kapitels auch GELESEN?" — und das sind drei zusätzliche
+ * Glieder, die David am 2026-09-04 festgelegt hat:
+ *
+ *   1. jede zählende Session ist ABGENOMMEN (`accepted`),
+ *   2. keine davon ist VERALTET (`stale`, s. `resolveSessionStates`),
+ *   3. an keinem Feld des Kapitels hängt ein offener KONFLIKT-Befund.
+ *
+ * ── `openConflicts` IST EIN PARAMETER UND KEINE ABFRAGE ───────────────────
+ * Die Befunde (`brand_findings`) kommen erst mit Paket 4. Diese Rechnung
+ * bleibt PUR und bekommt die Slot-Ids mit offenem Konflikt gereicht; die
+ * Routen reichen heute `[]` durch. Der Haken ist damit da, der Inhalt kommt
+ * später — und keine pure Regel muss dafür je eine Tabelle kennen.
+ *
+ * ── WER ZÄHLT ────────────────────────────────────────────────────────────
+ * Jede PFLICHT-Session, die ein Mensch überhaupt bestätigen kann
+ * (`slotIsConfirmable` — derselbe Nenner wie Balken und Abschluss), PLUS jede
+ * OPTIONALE Session, die einen bestätigten Wert trägt. §5a sagt es so herum:
+ * „die Pflicht-Sessions zählen, optionale ohne Wert nicht" — eine optionale
+ * Session MIT Wert steht mit Knopf auf der Seite, also gehört sie in den
+ * Zähler, sonst zeigte die Seite eine Handlung ohne Wirkung.
+ *
+ * ── LESEN BLEIBT NACHSICHTIG ─────────────────────────────────────────────
+ * Diese Bedingung gilt beim SCHREIBEN von `complete`. Ein Kapitel, das schon
+ * `done` ist und dessen Slots aus der Zeit vor BW2 gar kein `accepted`
+ * kennen, bleibt `done` — `resolveBrandJourney` rechnet es nicht nach
+ * (Migrationsvertrag §3e, s. Kopf). Sonst nähme ein Deploy jedem fertigen
+ * Branding neun abgeschlossene Kapitel weg.
+ */
+export type BrandAcceptanceBlockerReason =
+  /** Kein bestätigter Wert — die Session ist noch nicht besprochen. */
+  | 'unconfirmed'
+  /** Bestätigt, aber auf der Abnahme-Seite noch nicht angenommen. */
+  | 'unaccepted'
+  /** Bestätigt, aber die Quellen haben sich seither bewegt. */
+  | 'stale'
+  /** Ein offener Konflikt-Befund hängt an diesem Feld (Paket 4). */
+  | 'conflict'
+  /** Auf später vertagt — eine Pflicht-Session kann so nicht abgenommen werden. */
+  | 'deferred'
+
+export interface BrandAcceptanceBlocker {
+  slotId: string
+  reason: BrandAcceptanceBlockerReason
+}
+
+export interface BrandStepAcceptance {
+  /** Nichts mehr offen — erst dann darf „Passt dieses Kapitel?" erscheinen. */
+  ready: boolean
+  /** Abgenommene zählende Sessions … */
+  accepted: number
+  /** … von wie vielen. Zusammen der Zähler „7 von 10 abgenommen". */
+  total: number
+  /** Was im Weg steht, in Registry-Reihenfolge. Leer ⇔ `ready`. */
+  blockers: readonly BrandAcceptanceBlocker[]
+}
+
+export function brandStepAcceptance(
+  stepKey: BrandStepKey,
+  slots: Readonly<Record<string, BrandSlotStateFacts | undefined>> = {},
+  sessionStates: Readonly<Record<string, BrandSessionState | undefined>> = {},
+  openConflicts: readonly string[] = [],
+): BrandStepAcceptance {
+  const conflicted = new Set(openConflicts)
+  const blockers: BrandAcceptanceBlocker[] = []
+  let accepted = 0
+  let total = 0
+
+  for (const session of slotsForStep(stepKey)) {
+    if (conflicted.has(session.id)) blockers.push({ slotId: session.id, reason: 'conflict' })
+    if (!slotIsConfirmable(session)) continue
+    const facts = slots[session.id]
+    // Optional UND leer: steht grau mit Beispiel auf der Seite und zählt nicht.
+    if (!session.required && !facts?.confirmed) continue
+
+    total++
+    if (facts?.accepted) accepted++
+
+    if (facts?.deferred) blockers.push({ slotId: session.id, reason: 'deferred' })
+    else if (!facts?.confirmed) blockers.push({ slotId: session.id, reason: 'unconfirmed' })
+    else if (sessionStates[session.id] === 'stale') blockers.push({ slotId: session.id, reason: 'stale' })
+    else if (!facts.accepted) blockers.push({ slotId: session.id, reason: 'unaccepted' })
+  }
+
+  return { ready: blockers.length === 0, accepted, total, blockers }
+}
+
+/**
  * DIE GEORDNETE STEP-LISTE mit Zustand und Begründung.
  *
  * Sequenziell: ein Baustein wird `open`, wenn der Vorgänger `done` ist. Ein
@@ -329,9 +440,15 @@ export function canEnterBrandStep(
 export type BrandStepAction =
   | { kind: 'start' }
   | { kind: 'confirmSlot', slotId: string }
+  /** Im Kapitel-Zusammenhang gelesen und angenommen (Plan §5a). */
+  | { kind: 'acceptSlot', slotId: string }
+  /** Auf später vertagt — nur wo die Session es erlaubt (`answers.allowDefer`). */
+  | { kind: 'deferSlot', slotId: string, deferred: boolean }
   | { kind: 'setConfidence', confidence: BrandConfidence }
-  | { kind: 'complete' }
+  | { kind: 'complete', openConflicts?: readonly string[], sessionStates?: Readonly<Record<string, BrandSessionState | undefined>> }
   | { kind: 'reopen' }
+  /** „Nochmal von vorn" — der EINZIGE löschende Weg (Plan §5a). */
+  | { kind: 'restart' }
 
 export type BrandTransitionErrorCode =
   | 'step_locked'
@@ -350,10 +467,23 @@ export type BrandTransitionErrorCode =
    * ein `data.code` wie `required_slots_missing`.
    */
   | 'invariant_violated'
+  /** Abgenommen wird nur, was bestätigt ist (§5a: erst sagen, dann lesen). */
+  | 'not_confirmed'
+  /** Ein bestätigter Wert wird nicht vertagt — er ist ja da. */
+  | 'already_confirmed'
+  /** Diese Session kennt kein Vertagen (`answers.allowDefer` ist aus). */
+  | 'defer_not_allowed'
+  /** Die drei neuen Glieder der Abnahme sind nicht erfüllt (§5a Schritt 3). */
+  | 'acceptance_incomplete'
 
 export type BrandStepTransition =
   | { ok: true, step: BrandStepFacts, changed: boolean }
-  | { ok: false, code: BrandTransitionErrorCode, missing?: readonly string[] }
+  | {
+    ok: false
+    code: BrandTransitionErrorCode
+    missing?: readonly string[]
+    blockers?: readonly BrandAcceptanceBlocker[]
+  }
 
 /**
  * Ein Baustein, der gerade bearbeitet werden darf, ist `active`. Alles andere
@@ -430,7 +560,9 @@ export function transitionBrandStep(step: BrandStepFacts, action: BrandStepActio
       const denial = step.state === 'done' ? null : requireActive(step)
       if (denial) return { ok: false, code: denial }
       // Die Konfidenz kommt vom Client — sie wird geprüft, nicht geglaubt.
-      if (!BRAND_CONFIDENCE_VALUES.includes(action.confidence)) {
+      // Und geprüft wird gegen die SETZBARE Liste: `restart` ist seit §5a eine
+      // Handlung und keine Selbstauskunft mehr (s. BRAND_CONFIDENCE_VALUES).
+      if (!(BRAND_SETTABLE_CONFIDENCE_VALUES as readonly string[]).includes(action.confidence)) {
         return { ok: false, code: 'invalid_confidence' }
       }
       if (step.confidence === action.confidence) return { ok: true, step, changed: false }
@@ -446,16 +578,105 @@ export function transitionBrandStep(step: BrandStepFacts, action: BrandStepActio
       if (!completion.slotsReady) {
         return { ok: false, code: 'required_slots_missing', missing: completion.missingRequired }
       }
+      // … und darüber die DREI NEUEN GLIEDER der Finalen Abnahme (§5a): jede
+      // zählende Session abgenommen, keine veraltet, kein offener Konflikt.
+      const acceptance = brandStepAcceptance(
+        step.stepKey,
+        step.slots ?? {},
+        action.sessionStates ?? {},
+        action.openConflicts ?? [],
+      )
+      if (!acceptance.ready) {
+        return {
+          ok: false,
+          code: 'acceptance_incomplete',
+          blockers: acceptance.blockers,
+          // Die Liste in derselben Form wie bei `required_slots_missing` —
+          // die Oberfläche markiert damit genau die Zeilen, die im Weg stehen.
+          missing: acceptance.blockers.map(blocker => blocker.slotId),
+        }
+      }
       if (!step.confidence) return { ok: false, code: 'confidence_missing' }
       return { ok: true, step: { ...step, state: 'done' }, changed: true }
     }
 
     case 'reopen': {
       if (step.state !== 'done') return { ok: false, code: 'not_done' }
-      // Slots UND Konfidenz bleiben stehen: „Nochmal von vorn" ist eine
-      // Vertiefungsrunde (§3b.8), kein Löschknopf. Und es propagiert nicht
-      // nach unten (s. Kopf).
+      // Slots UND Konfidenz bleiben stehen: `reopen` ist die LEISE
+      // Vertiefungsrunde (§3b.8), kein Löschknopf — der Löschknopf heisst seit
+      // §5a `restart` und steht darunter. Und `reopen` propagiert nicht nach
+      // unten (s. Kopf).
       return { ok: true, step: { ...step, state: 'active' }, changed: true }
+    }
+
+    case 'acceptSlot': {
+      /* Wie `setConfidence`: auch ein ABGESCHLOSSENES Kapitel darf abgenommen
+       * werden. Nach einer Korrektur verliert die geänderte Zeile ihr
+       * `accepted` (der Server nimmt es beim Schreiben des Werts) — sie danach
+       * nur über `reopen` wieder annehmen zu lassen, machte aus einer
+       * Kommakorrektur einen Kapitel-Neustart. */
+      const denial = step.state === 'done' ? null : requireActive(step)
+      if (denial) return { ok: false, code: denial }
+      const slot = slotById(action.slotId)
+      if (!slot || slot.deactivated) return { ok: false, code: 'unknown_slot' }
+      if (slot.stepId !== step.stepKey) return { ok: false, code: 'slot_foreign' }
+      const previous = step.slots?.[slot.id]
+      // ERST SAGEN, DANN LESEN: ohne bestätigten Wert gäbe es nichts, dem man
+      // im Zusammenhang zustimmen könnte — die Seite verlinkt dann in die
+      // Session, statt einen Haken anzubieten (§5a Schritt 2).
+      if (!previous?.confirmed) return { ok: false, code: 'not_confirmed' }
+      if (previous.accepted) return { ok: true, step, changed: false }
+      return {
+        ok: true,
+        changed: true,
+        step: {
+          ...step,
+          // Abnehmen hebt ein Vertagen auf: beides gleichzeitig hiesse „gelesen
+          // und trotzdem offen", und das ist keine Aussage.
+          slots: { ...step.slots, [slot.id]: { ...previous, accepted: true, deferred: false } },
+        },
+      }
+    }
+
+    case 'deferSlot': {
+      const denial = step.state === 'done' ? null : requireActive(step)
+      if (denial) return { ok: false, code: denial }
+      const slot = slotById(action.slotId)
+      if (!slot || slot.deactivated) return { ok: false, code: 'unknown_slot' }
+      if (slot.stepId !== step.stepKey) return { ok: false, code: 'slot_foreign' }
+      // Die ERLAUBNIS steht in der Session-Config und nirgends sonst — eine
+      // zweite Liste hier liefe ihr davon.
+      if (!slot.answers.allowDefer) return { ok: false, code: 'defer_not_allowed' }
+      const previous = step.slots?.[slot.id]
+      // Ein bestätigter Wert IST da; ihn zu vertagen wäre eine Aussage über
+      // etwas, das schon entschieden ist.
+      if (previous?.confirmed) return { ok: false, code: 'already_confirmed' }
+      if (Boolean(previous?.deferred) === action.deferred) return { ok: true, step, changed: false }
+      return {
+        ok: true,
+        changed: true,
+        step: {
+          ...step,
+          slots: { ...step.slots, [slot.id]: { ...previous, deferred: action.deferred } },
+        },
+      }
+    }
+
+    case 'restart': {
+      /* NUR von einem Kapitel aus, das dem Menschen gehört: `done` (die
+       * Abnahme-Seite eines abgeschlossenen Kapitels) oder `active` (die
+       * Abnahme-Seite vor dem Abschluss). `open` hat noch nichts, was man
+       * verlieren könnte, `locked` gehört nicht ihm. */
+      const denial = step.state === 'done' ? null : requireActive(step)
+      if (denial) return { ok: false, code: denial }
+      // DIE GELEERTE ZEILE, als EINE Handlung der Maschine — nicht als
+      // Aufräumen in der Route (§5a). Der Schnappschuss, `restartedAt` und das
+      // Schreiben gehören der Route; WAS übrig bleibt, entscheidet sich hier.
+      return {
+        ok: true,
+        changed: true,
+        step: { stepKey: step.stepKey, state: 'active', confidence: null, slots: {} },
+      }
     }
   }
 }
@@ -563,18 +784,52 @@ export function resolveNextSession(
  */
 export type BrandSessionState = 'locked' | 'open' | 'done' | 'stale'
 
-export function resolveSessionStates(
-  profile: BrandProfileFacts,
-  stepFacts: readonly BrandStepFacts[] = [],
-): Readonly<Record<string, BrandSessionState>> {
-  const included = new Set(includedBrandSteps(profile))
-  // Die Fakten ALLER Kapitel in einer Karte: eine Session liest ausdrücklich
-  // über Kapitelgrenzen (`b.purpose` ← `a.pitch`), also darf die Rechnung das
-  // auch — sonst stünde die halbe Registry für immer auf `locked`.
+/**
+ * DIE SLOT-FAKTEN ALLER KAPITEL IN EINER KARTE.
+ *
+ * Eine Session liest ausdrücklich über Kapitelgrenzen (`b.purpose` ←
+ * `a.pitch`), also muss jede Rechnung darüber das auch — sonst stünde die
+ * halbe Registry für immer auf `locked` und jeder `sourcesHash` rechnete mit
+ * leeren Quellen. Sie steht als EIGENE Funktion da, weil GENAU DIESE
+ * Zusammenlegung an zwei Enden gebraucht wird: hier beim Ableiten der
+ * Zustände und auf dem Schreibweg beim Stempeln des Hashes. Zwei
+ * Zusammenlegungen hiessen zwei Hashes für denselben Stand — und die
+ * Abweichung sähe man erst an einem Feld, das sich für veraltet hält.
+ */
+export function mergeBrandSlotFacts(
+  stepFacts: readonly BrandStepFacts[],
+): Record<string, BrandSlotStateFacts | undefined> {
   const slots: Record<string, BrandSlotStateFacts | undefined> = {}
   for (const facts of stepFacts) {
     for (const [slotId, state] of Object.entries(facts.slots ?? {})) slots[slotId] = state
   }
+  return slots
+}
+
+/**
+ * WIE AUS DEN QUELL-WERTEN EIN GESPEICHERTER STEMPEL WIRD.
+ *
+ * ── WARUM DAS EIN PARAMETER IST UND KEINE FESTE ZEILE ─────────────────────
+ * Die kanonische Zeichenkette (`computeSourcesHash`) gehört `shared/`, das
+ * HASHEN nicht: `node:crypto` läge im Client-Bündel. Der Server stempelt
+ * deshalb sha256 darüber (`brandSourcesHash`) — und genau denselben Weg muss
+ * diese Rechnung gehen, sonst vergleicht sie einen Hash mit einer
+ * Zeichenkette und meldet JEDE bestätigte Session als veraltet. Der Vorgabe-
+ * Wert ist die reine Zeichenkette, damit ein Test ohne Krypto auskommt; die
+ * Routen reichen den Server-Stempler durch (`resolveBrandSessionStates`).
+ */
+export type BrandSourcesHasher = (
+  config: BrandSessionConfig,
+  slotFacts: Readonly<Record<string, BrandSlotStateFacts | undefined>>,
+) => string
+
+export function resolveSessionStates(
+  profile: BrandProfileFacts,
+  stepFacts: readonly BrandStepFacts[] = [],
+  sourcesHash: BrandSourcesHasher = computeSourcesHash,
+): Readonly<Record<string, BrandSessionState>> {
+  const included = new Set(includedBrandSteps(profile))
+  const slots = mergeBrandSlotFacts(stepFacts)
 
   const states: Record<string, BrandSessionState> = {}
   for (const session of BRAND_SLOTS) {
@@ -583,7 +838,7 @@ export function resolveSessionStates(
 
     if (own?.confirmed) {
       const stored = own.sourcesHash
-      states[session.id] = stored !== undefined && stored !== computeSourcesHash(session, slots)
+      states[session.id] = stored !== undefined && stored !== sourcesHash(session, slots)
         ? 'stale'
         : 'done'
       continue
@@ -596,6 +851,35 @@ export function resolveSessionStates(
     states[session.id] = inputsReady ? 'open' : 'locked'
   }
   return states
+}
+
+/**
+ * WOHIN ES NACH DIESEM ZUG WEITERGEHT (Auto-Weiter, Plan §5) — Kapitel und
+ * Session der nächsten offenen Pflicht-Session.
+ *
+ * ── ODER DIE FINALE ABNAHME ──────────────────────────────────────────────
+ * Steht keine Frage mehr offen UND ist jeder Pflicht-Slot bestätigt, zeigt der
+ * Wegweiser nicht ins Leere, sondern auf die Abnahme-Seite des Kapitels
+ * (`{ acceptance: true }`, Fables Produktentscheidung zu 3a-Frage 4,
+ * 2026-09-04). Vorher war `null` an dieser Stelle zweideutig: „nichts mehr zu
+ * fragen" und „hier ist Schluss" sahen für den Client gleich aus, und die
+ * Abnahme-Seite war nur über die Seitenleiste erreichbar.
+ *
+ * `null` heisst jetzt genau eine Sache: in diesem Kapitel ist keine Frage
+ * offen, aber es fehlt noch ein bestätigter Pflicht-Wert (ein Entwurf auf der
+ * Bühne etwa) — der Mensch bleibt, wo er ist.
+ */
+export type BrandNextSessionRef =
+  | { stepKey: BrandStepKey, sessionKey: string }
+  | { stepKey: BrandStepKey, acceptance: true }
+
+export function resolveNextStop(
+  stepKey: BrandStepKey,
+  slotStates: Readonly<Record<string, BrandSlotStateFacts | undefined>> = {},
+): BrandNextSessionRef | null {
+  const upcoming = resolveNextSession(stepKey, slotStates)
+  if (upcoming) return { stepKey, sessionKey: upcoming.slotId }
+  return brandStepCompletion(stepKey, slotStates).slotsReady ? { stepKey, acceptance: true } : null
 }
 
 export type BrandJunctionChange =

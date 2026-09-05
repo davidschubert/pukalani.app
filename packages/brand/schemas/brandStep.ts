@@ -86,3 +86,51 @@ export function createBrandStepCompleteSchema() {
     confidence: z.enum(BRAND_CONFIDENCE_VALUES).optional(),
   }).strict()
 }
+
+/**
+ * ABNEHMEN UND VERTAGEN (Plan §5a) — zwei eigene Rümpfe, nicht zwei Felder im
+ * Autosave.
+ *
+ * ── WARUM EIGENE ROUTEN UND KEINE PATCH-FELDER ────────────────────────────
+ * Der Autosave-PATCH ist ein SPEICHER-Rumpf: „hier ist Text, hier ist eine
+ * Bestätigung". Abnehmen und Vertagen sind HANDLUNGEN auf einer anderen Seite,
+ * mit anderer Ablehnung (`not_confirmed`, `defer_not_allowed`) und ohne einen
+ * einzigen Buchstaben Inhalt. Als Felder im Autosave-Rumpf reisten sie bei
+ * jedem Tastendruck mit — und die No-op-Regel („Speichern ohne Änderung
+ * erhöht keine `revision`") müsste plötzlich zwei Arten von Änderung
+ * auseinanderhalten. Die Routen liegen unter `sessions/<slotId>/`, dieselbe
+ * Form, die der Plan für `impact` und `close` vorsieht (§7/§9).
+ *
+ * `revision` ist auch hier PFLICHT: die Abnahme-Seite liest denselben Stand
+ * wie die Werkstatt, und ein zweiter Tab darf ihn nicht still überholen.
+ */
+export function createBrandSessionAcceptSchema() {
+  return z.object({
+    revision: z.number().int().min(0),
+  }).strict()
+}
+
+export function createBrandSessionDeferSchema() {
+  return z.object({
+    revision: z.number().int().min(0),
+    /** `false` nimmt das Vertagen zurück. Fehlt es, ist „vertagen" gemeint. */
+    deferred: z.boolean().default(true),
+  }).strict()
+}
+
+/**
+ * „NOCHMAL VON VORN" (§5a) — der einzige löschende Rumpf des Wizards.
+ *
+ * Der SERVER prüft nicht das getippte Wort („bestätigen"): das ist Reibung
+ * gegen den Fehlklick und gehört der Oberfläche. Er prüft `acknowledge` UND
+ * den `impactAck` — den Hash über genau die Hülle, die dem Menschen gezeigt
+ * wurde. Passt er nicht, hat sich seither etwas bewegt, und der Layer muss
+ * neu zeigen, bevor jemand löscht.
+ */
+export function createBrandStepRestartSchema() {
+  return z.object({
+    revision: z.number().int().min(0),
+    acknowledge: z.boolean(),
+    impactAck: z.string().min(1).max(128),
+  }).strict()
+}

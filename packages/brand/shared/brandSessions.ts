@@ -1,6 +1,7 @@
 import { brandGenerationHashInput } from './brandGeneration'
 import {
   BRAND_SLOTS,
+  BRAND_STEP_KEYS,
   type BrandInvariant,
   type BrandSessionConfig,
   type BrandSessionSubstance,
@@ -104,6 +105,57 @@ export function sessionsAffectedBy(
   }
 
   return { direct, transitive, byStep }
+}
+
+// ── 1b · Was kostet „Nochmal von vorn"? ───────────────────────────────────
+
+export interface BrandRestartImpact {
+  /** Bestätigte Sessions SPÄTERER Kapitel, die an diesem Kapitel hängen. */
+  readonly sessions: readonly string[]
+  /** Dieselbe Menge, gruppiert je Kapitel — leere Kapitel kommen nicht vor. */
+  readonly byStep: Readonly<Partial<Record<BrandStepKey, readonly string[]>>>
+  readonly count: number
+}
+
+/**
+ * DIE HÜLLE EINES GANZEN KAPITELS (Plan §5a, Schutz vor „Nochmal von vorn").
+ *
+ * `sessionsAffectedBy` beantwortet die Frage für EIN Feld; der Restart löscht
+ * ein ganzes Kapitel, also ist die Antwort die VEREINIGUNG über alle seine
+ * Sessions. Gezählt wird nur, was auch wirklich etwas verliert:
+ *
+ *  1. **BESTÄTIGTE** Sessions — ein unbestätigter Entwurf, der veraltet, ist
+ *     kein Verlust, den man ankündigen müsste.
+ *  2. Sessions **SPÄTERER** Kapitel — die des eigenen Kapitels gehen ohnehin
+ *     mit; sie noch einmal als „berührt" aufzuführen, machte die Zahl im
+ *     Schutz-Layer zu einer, die niemand nachrechnen kann.
+ *
+ * PUR und mit überschreibbarer Registry, wie `sessionsAffectedBy`: der Beweis
+ * muss eine mutierte Fassung vorlegen können.
+ */
+export function brandRestartImpact(
+  stepKey: BrandStepKey,
+  slotFacts: Readonly<Record<string, BrandSlotStateFacts | undefined>> = {},
+  sessions: readonly BrandSessionConfig[] = BRAND_SLOTS,
+): BrandRestartImpact {
+  const order = BRAND_STEP_KEYS.indexOf(stepKey)
+  const hull = new Set<string>()
+  for (const session of sessions) {
+    if (session.stepId !== stepKey || session.deactivated) continue
+    for (const affected of sessionsAffectedBy(session.id, sessions).transitive) hull.add(affected)
+  }
+
+  const byStep: Partial<Record<BrandStepKey, string[]>> = {}
+  const list: string[] = []
+  for (const session of sessions) {
+    if (!hull.has(session.id) || session.deactivated) continue
+    if (BRAND_STEP_KEYS.indexOf(session.stepId) <= order) continue
+    if (!slotFacts[session.id]?.confirmed) continue
+    list.push(session.id)
+    ;(byStep[session.stepId] ??= []).push(session.id)
+  }
+
+  return { sessions: list, byStep, count: list.length }
 }
 
 // ── 2 · Ist dieser Stand noch der, aus dem der Wert entstand? ──────────────

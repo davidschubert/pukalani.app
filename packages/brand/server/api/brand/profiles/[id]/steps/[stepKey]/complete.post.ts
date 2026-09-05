@@ -8,14 +8,15 @@ import type { BrandStepCompleteResponse } from '../../../../../../../shared/type
 import {
   BRAND_STEPS_TABLE,
   brandDb,
-  loadBrandStepContext,
-  parseSlotRecords,
   profileFacts,
   resolveProfileProgress,
-  toSlotFacts,
   toStepFacts,
   touchProfile,
 } from '../../../../../../utils/brandStore'
+import {
+  BRAND_OPEN_CONFLICTS_NONE,
+  loadBrandAcceptanceContext,
+} from '../../../../../../utils/brandAcceptance'
 import { recordBrandEvent } from '../../../../../../utils/brandEvents'
 
 /**
@@ -44,7 +45,15 @@ import { recordBrandEvent } from '../../../../../../utils/brandEvents'
  */
 export default defineEventHandler(async (event): Promise<BrandStepCompleteResponse> => {
   const { userId } = await requireBrandAccess(event)
-  const { profile, stepKey, stepRow, stepRows, journey: enteredJourney } = await loadBrandStepContext(event, userId)
+  const {
+    profile,
+    stepKey,
+    stepRow,
+    stepRows,
+    stepFacts,
+    sessionStates,
+    journey: enteredJourney,
+  } = await loadBrandAcceptanceContext(event, userId)
   const body = await readValidatedBody(event, createBrandStepCompleteSchema().parse)
 
   // DER GERECHNETE ZUSTAND, NICHT DER ROHE — dieselbe Regel wie im
@@ -58,7 +67,7 @@ export default defineEventHandler(async (event): Promise<BrandStepCompleteRespon
     stepKey,
     state: resolvedState,
     confidence: stepRow.confidence ?? null,
-    slots: toSlotFacts(parseSlotRecords(stepRow.slots)),
+    slots: stepFacts.find(entry => entry.stepKey === stepKey)?.slots ?? {},
   }
 
   // Ein Baustein, dessen Slots über den Generierungs-Weg gefüllt wurden, kann
@@ -77,14 +86,31 @@ export default defineEventHandler(async (event): Promise<BrandStepCompleteRespon
     facts = set.step
   }
 
-  const done = transitionBrandStep(facts, { kind: 'complete' })
+  /**
+   * DIE DREI NEUEN GLIEDER DER ABNAHME (§5a) reisen als PARAMETER hinein, nicht
+   * als Abfrage in der puren Regel: `sessionStates` sagt, was veraltet ist,
+   * `openConflicts` sagt, wo ein Befund hängt — und Letzteres ist heute
+   * bewusst leer (`brand_findings` kommt mit Paket 4). Der Haken ist damit da,
+   * der Inhalt kommt später, und keine Route muss dafür angefasst werden.
+   */
+  const done = transitionBrandStep(facts, {
+    kind: 'complete',
+    sessionStates,
+    openConflicts: BRAND_OPEN_CONFLICTS_NONE,
+  })
   if (!done.ok) {
     throw createError({
       status: 400,
       statusText: 'Brand step cannot be completed yet',
       // `missing` steht NEBEN `code`: den Grund hebt der zentrale Handler als
-      // `reason` heraus, die Liste bleibt für die Oberfläche in `data`.
-      data: { code: done.code, missing: done.missing ?? [] },
+      // `reason` heraus, die Liste bleibt für die Oberfläche in `data`. Bei
+      // `acceptance_incomplete` kommt `blockers` dazu — dieselben Ids, aber mit
+      // dem Grund daneben („veraltet" ist etwas anderes als „nicht abgenommen").
+      data: {
+        code: done.code,
+        missing: done.missing ?? [],
+        ...(done.blockers ? { blockers: done.blockers } : {}),
+      },
     })
   }
   facts = done.step

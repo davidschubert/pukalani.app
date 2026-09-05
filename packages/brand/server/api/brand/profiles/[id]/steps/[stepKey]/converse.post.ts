@@ -13,7 +13,7 @@ import {
   brandStepCompletion,
   resolveNextQuestion,
   resolveNextSession,
-  resolveSessionStates,
+  resolveNextStop,
 } from '../../../../../../../shared/brandJourney'
 import { resolveBrandUiLocale } from '../../../../../../../shared/brandUiLocale'
 import {
@@ -38,6 +38,7 @@ import {
   parseSlotRecords,
   profileFacts,
   profileStartCard,
+  resolveBrandSessionStates,
   serializeSlotRecords,
   toStepFacts,
 } from '../../../../../../utils/brandStore'
@@ -242,7 +243,7 @@ export default defineEventHandler(async (event): Promise<BrandConverseResponse |
    * über Kapitelgrenzen liest (`b.purpose` ← `a.pitch`).
    */
   if (session) {
-    const states = resolveSessionStates(profileFacts(profile), toStepFacts(stepRows))
+    const states = resolveBrandSessionStates(profileFacts(profile), toStepFacts(stepRows))
     if (states[session.id] === 'locked') {
       throw createError({
         status: 409,
@@ -370,7 +371,7 @@ export default defineEventHandler(async (event): Promise<BrandConverseResponse |
    * Rückfrage erreichte den Entwurf sonst nie, und er fragte ein zweites Mal
    * dasselbe.
    */
-  const history = await loadBrandConversationHistory(event, profile.$id, stepKey, session?.id)
+  const history = await loadBrandConversationHistory(event, profile.$id, stepKey, session?.id, stepRow.restartedAt)
 
   /**
    * DIE SAMMEL-SESSION SCHREIBT (die eine Ausnahme, s. Kopf).
@@ -412,6 +413,9 @@ export default defineEventHandler(async (event): Promise<BrandConverseResponse |
       // Der erste Wert bleibt stehen — dieselbe Regel wie im Autosave.
       if (candidate.firstDraft === undefined || candidate.firstDraft === null) candidate.firstDraft = value
       candidate.latestDraft = value
+      // Und dieselbe Regel wie dort auch für die Abnahme: wer den WERT bewegt,
+      // nimmt ihm das `accepted` (§5a) — der Server, nie die Oberfläche.
+      delete candidate.accepted
     }
 
     try {
@@ -685,10 +689,9 @@ export default defineEventHandler(async (event): Promise<BrandConverseResponse |
     const factsAfter: Record<string, BrandSlotStateFacts> = collectFinished && session
       ? { ...facts, [session.id]: { ...facts[session.id], hasValue: true } }
       : facts
-    const upcoming = resolveNextSession(stepKey, factsAfter)
-    const nextSession: BrandNextSessionRef | null = upcoming
-      ? { stepKey, sessionKey: upcoming.slotId }
-      : null
+    // Am KAPITELENDE zeigt der Wegweiser auf die Finale Abnahme statt ins
+    // Leere (`resolveNextStop`, Fables Produktentscheidung zu 3a-Frage 4).
+    const nextSession: BrandNextSessionRef | null = resolveNextStop(stepKey, factsAfter)
 
     send('generation.completed', {
       generationId: turnId,

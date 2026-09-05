@@ -7,6 +7,7 @@ import {
   brandDb,
   isAppwriteNotFound,
   loadOwnedProfile,
+  loadStepRow,
   requireProfileIdParam,
   toBrandStepKey,
 } from '../../../../utils/brandStore'
@@ -45,9 +46,26 @@ export default defineEventHandler(async (event): Promise<BrandMessagesResponse> 
   // Ein unbekannter Baustein-Schlüssel wird ABGEWIESEN, nicht ignoriert: sonst
   // liefert ein Tippfehler den ganzen Verlauf statt einer leeren Antwort, und
   // der Aufrufer merkt es nie.
-  if (query.stepKey !== undefined && !toBrandStepKey(query.stepKey)) {
+  const stepKey = query.stepKey === undefined ? null : toBrandStepKey(query.stepKey)
+  if (query.stepKey !== undefined && !stepKey) {
     throw createError({ status: 400, statusText: 'Unknown step', data: { code: 'unknown_step' } })
   }
+
+  /**
+   * DER VERLAUFS-SCHNITT nach „Nochmal von vorn" (brand-013, §5a).
+   *
+   * Die Nachrichten bleiben stehen (Retention brand-003: dauerhaft) — was
+   * verschwindet, ist ihre SICHTBARKEIT im neu begonnenen Kapitel. Der Mensch
+   * sähe sonst auf der Seite genau das Gespräch, das er gerade verworfen hat,
+   * während George es nicht mehr kennt: zwei Wahrheiten über denselben Faden.
+   *
+   * NUR MIT `?stepKey=`: `restartedAt` gehört EINER Kapitel-Zeile, und der
+   * ganze Verlauf eines Brandings (Wiedereinstieg, GDPR-Export) darf davon
+   * nichts verlieren. Ein zusätzlicher Lesevorgang, und zwar nur dann.
+   */
+  const restartedAt = stepKey
+    ? (await loadStepRow(event, profileId, stepKey))?.restartedAt ?? null
+    : null
 
   const { tablesDB, databaseId } = brandDb(event)
   let rows: BrandMessageRow[] = []
@@ -64,6 +82,7 @@ export default defineEventHandler(async (event): Promise<BrandMessagesResponse> 
         // Leseansicht, die stillschweigend fremde Züge dazulegte, wäre ein
         // Verlauf, den niemand mehr zuordnen kann.
         ...(query.session ? [Query.equal('sessionKey', query.session)] : []),
+        ...(restartedAt ? [Query.greaterThan('$createdAt', restartedAt)] : []),
         Query.orderAsc('$id'),
         Query.limit(query.limit + 1),
         ...(query.cursor ? [Query.cursorAfter(query.cursor)] : []),

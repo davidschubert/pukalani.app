@@ -966,7 +966,9 @@ export interface BrandSlotStateFacts {
    */
   value?: string
   /**
-   * DER STAND DER QUELLEN BEIM BESTÄTIGEN (`computeSourcesHash`, Paket 6).
+   * DER STAND DER QUELLEN BEIM BESTÄTIGEN (`computeSourcesHash`, seit Paket 3b
+   * verdrahtet — vorgezogen aus Paket 6, weil „Nochmal von vorn" ohne ihn
+   * nachgelagerte Felder nicht als veraltet zeigen könnte).
    *
    * FEHLT er, gilt die Session als AKTUELL und nie als veraltet — das ist der
    * Migrationsvertrag §3e in einer Zeile: jedes Bestands-Branding hat ihn
@@ -974,6 +976,22 @@ export interface BrandSlotStateFacts {
    * fertigen Kunden sein Ergebnis.
    */
   sourcesHash?: string
+  /**
+   * IM ZUSAMMENHANG DES KAPITELS GELESEN UND FÜR GUT BEFUNDEN (Plan §5a).
+   *
+   * Ein ZWEITER Zustand neben `confirmed`, bewusst: `confirmed` heisst „in der
+   * Session so gesagt", `accepted` heisst „auf der Abnahme-Seite neben allem
+   * anderen gelesen und angenommen". Er fällt automatisch weg, sobald sich der
+   * WERT ändert — und zwar durch den SERVER, nie durch die Oberfläche.
+   */
+  accepted?: boolean
+  /**
+   * AUF SPÄTER VERTAGT (Plan §3a, `answers.allowDefer`). JE SESSION, nicht je
+   * Teil: ein vertagter `collect` behält seinen Zwischenstand (Fable,
+   * 2026-09-04). Vertagen ist kein Wert — es sagt nur, dass hier gerade nichts
+   * entschieden wird.
+   */
+  deferred?: boolean
 }
 
 export interface BrandStepProgress {
