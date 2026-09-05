@@ -3,7 +3,7 @@ import type { BrandCheckStartResponse } from '../../shared/types/brand'
 
 /**
  * DER BRAND-CHECK-EINSTIEG — ein Feld, ein Knopf, ein Ergebnis
- * (Konzept: docs/plans/BRAND-CHECK.md §1).
+ * (Konzept: docs/archiv/BRAND-CHECK.md §1).
  *
  * Bis heute stand an dieser Stelle die Warteliste mit `source: 'brand-check'`,
  * weil es das Instrument noch nicht gab. Jetzt gibt es es: die Adresse geht an

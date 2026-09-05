@@ -479,7 +479,7 @@ const WRITE_LIMITED: { re: RegExp, bucket: string, max?: number }[] = [
    */
   { re: /^POST \/api\/brand\/profiles\/[^/]+\/analyze$/, bucket: 'brand:analyze', max: 3 },
   /**
-   * DER KOSTENLOSE BRAND-CHECK (docs/plans/BRAND-CHECK.md) — die Zeile darüber
+   * DER KOSTENLOSE BRAND-CHECK (docs/archiv/BRAND-CHECK.md) — die Zeile darüber
    * plus eine Anbieter-Rechnung, und OHNE Konto davor: der Check ist Davids
    * Akquise-Instrument und läuft bewusst ohne Anmeldung.
    *

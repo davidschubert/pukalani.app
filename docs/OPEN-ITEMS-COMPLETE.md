@@ -30,6 +30,59 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### Brand-Check als Instrument: Website → Brand Score, 8 Kategorien, 3 Befunde ✅ 2026-09-05
+
+**Was:** Davids Auftrag „mach mit dem brand-check instrument weiter" — der kostenlose
+Aussen-Check der Startseite aus BRAND-WIZARD-PHASE-1 („Brand Score", Bewertungsmodell v2)
+als baubares Instrument konzipiert (docs/archiv/BRAND-CHECK.md, 40 Kriterien in 8
+Kategorien ausformuliert) und nach drei Entscheidungen Davids (Hybrid-Zugang: Score sofort,
+Report per Mail über die Warteliste · mit dem Kriterien-Entwurf bauen · Ergebnis teilbar mit
+`noindex`) in einem Opus-Lauf gebaut, im Fable-Hauptloop geprüft, live auf branding.supply:
+- **Katalog + Rechnung pur** (`packages/brand/shared/brandCheck.ts`): 16 messbare + 24
+  KI-beurteilte Kriterien, Gewichte 15/15/15/15/10/10/10/10, Bänder 94+/88/80/70/60/50,
+  `scoreVersion` in der Zeile; nicht bewertbare Kriterien fallen aus der Normalisierung
+  (Schloss statt 0). Die 16 Messwerte (`brandCheckMeasure.ts`) rechnen aus
+  `extractSiteSignals()` (Kopf-Metadaten, Überschriften, Alt-Texte, CTA-Texte, JSON-LD,
+  Mojibake/Doppel-Escapes) — deterministisch, ohne KI.
+- **EIN Judge-Aufruf** für alle 24 beurteilten Kriterien (`brandCheckJudge.ts`,
+  temperature 0, ZDR-Routing wie der Wizard, 12.000 Zeichen Seitentext, Pflicht-Beleg
+  ≤ 160 Zeichen in Originalsprache); Antwort wird Eintrag für Eintrag geprüft — fremde Ids
+  verworfen (ein Modell kann kein GERECHNETES Kriterium überschreiben), fehlende = `null`.
+- **Route** `POST /api/brand/check`: Honeypot → `urlKey` → **7-Tage-Cache** je URL (0 KI-Kosten
+  beim zweiten Aufruf) → Deckel **3/Tag je IP-Hash** (Salt aus Runtime-Key + UTC-Tag) und
+  **200/Tag Instanz** (`brandAiQuota` kind `check`) → SSRF-sicherer `fetchBrandSite` → Messung →
+  Judge → Score → Zeile `brand_checks` (Migration **brand-016**, mit Davids Ja gefahren; Parität
+  25/25). Judge-Fehler ⇒ 503 `check_unavailable` und NICHTS gespeichert — ein „Score" aus 16
+  von 40 Kriterien misst etwas anderes, als er behauptet. Kein Seitentext in der Zeile, nur
+  Belege.
+- **Client:** `BwBrandCheckForm` (Startseiten-Karte, drei Statuszeilen, Fehler je `reason`),
+  Ergebnisseite `/brand-check/<id>` (SSR, Score-Ring, 8 Balken, 3 Befunde mit Beleg + nächstem
+  Schritt, Relaunch-CTA, „Report per Mail" über `BwWaitlistForm :website`, Link kopieren, 40
+  Kriterien zugeklappt); 140 i18n-Schlüssel je Sprache.
+
+**Der eine Live-Fehler (und wo er wirklich lag):** der erste echte Check antwortete 503
+`check_unavailable`; Log: `[brand-check] KI-Antwort war kein JSON: ```json`. Verdacht zuerst
+beim Judge (Zaun, Token-Deckel, unmaskierte Anführungszeichen) — alles ausgeschlossen. Ursache
+war **`aiCompleteJson` im Core**: `raw.replace(/\}[\s\S]*$/, '}')` greift am ERSTEN `}` der
+Antwort, jedes verschachtelte Objekt (`{"items":[{…}]}`) wurde dahinter abgeschnitten. Die
+bisherigen Konsumenten (Triage, Übersetzung, Assist) antworten flach und haben es nie berührt;
+der Brand-**Review** des Wizards erwartet `findings: [{…}]` und lief bei jedem Befund still in
+`provider_error` (fail-soft — deshalb unbemerkt). Fix: pure `extractJsonObject` (erstes `{` bis
+letztes `}`) + Tests (`packages/core/tests/aiJsonExtract.test.ts`), Commit `7414cacb`.
+**Live-Beweis nach dem Flip:** `POST /api/brand/check` für branding.supply/de → 200 in 14,5 s,
+Score 80, 38 von 40 Kriterien bewertet (a5 Bildsprache und b5 Wort-/Bildwelt ehrlich „nicht
+bewertbar" — die Seite hat keine Alt-Texte), drei Befunde mit Messwert-Beleg, Ergebnisseite 200.
+
+**Gelernt:** (1) Ein „defensiver" Regex, der nur an flachen Antworten getestet wurde, ist eine
+Zeitbombe für den ersten Konsumenten mit einer Liste von Objekten — Zuschnitt-Helfer gehören
+als pure Funktion exportiert und mit einem VERSCHACHTELTEN Fall getestet. (2) Fail-soft
+verbirgt Fehler: der Review hat monatelang „keine Befunde" gezeigt statt zu scheitern; wer
+fail-soft baut, braucht einen Zähler im Log, den jemand liest. (3) Ein Log-Ausschnitt von 300
+Zeichen, der mit „```json" beginnt und danach abbricht, heisst nicht „nur der Zaun kam an" —
+pm2 schneidet Mehrzeilen-Ausgaben an der ersten Zeile; erst der Regex-Test in Node hat die
+Ursache gezeigt. (4) Migrations-Nummern VOR der Anlage gegen `origin/main` prüfen (013/014 waren
+von der Nachbar-Sitzung vergeben → 016).
+
 ### Brand-Wizard „Branding-Atome" (BW2): Session je Feld, Spezialist, Abnahmen, Korrektur-Regel, Dokument ✅ 2026-09-04/05
 
 **Was:** Davids Idee vom 2026-09-04 („wir dröseln alles bis ins letzte Detail auf … jeder

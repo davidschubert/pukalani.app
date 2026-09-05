@@ -22,7 +22,7 @@ import { BrandSiteFetchError, fetchBrandSite } from '../../utils/brandSiteFetch'
 import { BRAND_CHECKS_TABLE, type BrandCheckRow, brandDb } from '../../utils/brandStore'
 
 /**
- * DER KOSTENLOSE BRAND-CHECK (docs/plans/BRAND-CHECK.md) — die vierte
+ * DER KOSTENLOSE BRAND-CHECK (docs/archiv/BRAND-CHECK.md) — die vierte
  * öffentliche Route des Layers und die teuerste von allen: sie baut eine
  * ausgehende Verbindung zu einer FREMDEN Adresse auf UND bezahlt einen
  * KI-Aufruf, beides ohne Konto davor (Davids Hybrid-Zugang 2026-09-05: „Score

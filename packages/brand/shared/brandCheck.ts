@@ -1,5 +1,5 @@
 /**
- * DER KATALOG UND DIE RECHNUNG DES BRAND-CHECKS (docs/plans/BRAND-CHECK.md §3
+ * DER KATALOG UND DIE RECHNUNG DES BRAND-CHECKS (docs/archiv/BRAND-CHECK.md §3
  * und §4, Bewertungsmodell v2 aus BRAND-WIZARD-PHASE-1 „Brand Score") — pur,
  * ohne h3, ohne Appwrite, ohne Vue.
  *

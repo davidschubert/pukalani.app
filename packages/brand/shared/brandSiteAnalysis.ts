@@ -432,7 +432,7 @@ export function composeSiteAnalysis(content: BrandSiteContent): string {
 
 /**
  * WAS EIN AUSSEN-CHECK OHNE MODELL SEHEN KANN — die Rohwerte der sechzehn
- * messbaren Kriterien aus docs/plans/BRAND-CHECK.md §3.
+ * messbaren Kriterien aus docs/archiv/BRAND-CHECK.md §3.
  *
  * ── WARUM NEBEN `extractSiteContent()` UND NICHT DARIN ────────────────────
  * `BrandSiteContent` ist der Vertrag des WIZARDS: Titel, Beschreibung, Text —

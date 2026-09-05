@@ -977,7 +977,7 @@ export interface BrandShareViewResponse {
   expiresAt: string
 }
 
-// ── Brand-Check (docs/plans/BRAND-CHECK.md) ────────────────────────────────
+// ── Brand-Check (docs/archiv/BRAND-CHECK.md) ────────────────────────────────
 
 /**
  * DER VERTRAG DES KOSTENLOSEN AUSSEN-CHECKS. Er ist FEST, weil Client und

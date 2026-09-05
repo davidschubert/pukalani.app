@@ -8,7 +8,7 @@
  * `git fetch origin main`).
  *
  * ── WOFÜR ─────────────────────────────────────────────────────────────────
- * Ein Ergebnis von `POST /api/brand/check` (docs/plans/BRAND-CHECK.md): Brand
+ * Ein Ergebnis von `POST /api/brand/check` (docs/archiv/BRAND-CHECK.md): Brand
  * Score, acht Kategorie-Werte, vierzig Kriterien mit Beleg, drei Befunde. Es
  * ist zugleich der ZWISCHENSPEICHER — dieselbe Adresse innerhalb von sieben
  * Tagen bekommt genau diese Zeile zurück, ohne Abruf und ohne KI-Aufruf (Plan

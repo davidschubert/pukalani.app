@@ -1,5 +1,17 @@
 # Brand-Check — das kostenlose Instrument (Konzept, 2026-09-05)
 
+> **AUSGEFÜHRT 2026-09-05** — Katalog (`packages/brand/shared/brandCheck.ts`),
+> Messung, Judge, Routen, Tabelle `brand_checks` (Migration brand-016 gefahren),
+> Formular auf der Startseite und Ergebnisseite `/brand-check/<id>` sind live
+> auf branding.supply. Die drei Entscheidungen in §7 hat David so getroffen:
+> Hybrid-Zugang (Score sofort, Report per Mail über die Warteliste), mit
+> diesem Kriterien-Entwurf gebaut (Wortlaut jederzeit nachschärfbar), Ergebnis
+> teilbar mit `noindex`. Die Deckel aus §5 gelten unverändert. Der Satz
+> „17 messbar, 23 beurteilt" am Ende von §3 war ein Zählfehler des Entwurfs —
+> die Liste selbst hat 16 **M** und 24 **K**, und so ist es gebaut (der Test
+> nagelt `BRAND_CHECK_JUDGED_IDS` auf 24). Erledigt-Eintrag: docs/OPEN-ITEMS-COMPLETE.md. Dieses Dokument ist Archiv,
+> keine Arbeitsliste.
+
 Grundlage: BRAND-WIZARD-PHASE-1.md → „Brand Score" (Bewertungsmodell v2,
 2026-08-29) und „Startseite + Perplexity-Analyse" (Audit-first-Akquise,
 Korrektur 2026-08-30: der Check gilt dem BESTEHENDEN Auftritt, also der
