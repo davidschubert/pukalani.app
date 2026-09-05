@@ -125,3 +125,64 @@ export function createBrandWaitlistConfirmSchema() {
 }
 
 export type BrandWaitlistConfirmInput = z.output<ReturnType<typeof createBrandWaitlistConfirmSchema>>
+
+/**
+ * ── DIE BETREIBER-SEITE DERSELBEN TABELLE ─────────────────────────────────
+ *
+ * Ab hier beschreibt diese Datei nicht mehr den Menschen vor dem Formular,
+ * sondern den Betreiber vor `/dashboard/waitlist`. Die Schemas stehen trotzdem
+ * hier und nicht in einer zweiten Datei: es ist DIESELBE Tabelle, und die
+ * Längen-Deckel (`note` 500) müssen zu denselben Spalten passen. Zwei Dateien
+ * hießen zwei Orte, an denen jemand eine Spaltengröße nachpflegen müsste.
+ */
+
+/** Der Deckel der Betreiber-Notiz = die Spaltengröße aus brand-012. */
+export const BRAND_WAITLIST_NOTE_MAX = 500
+
+/**
+ * Die Seitengröße der Liste. 50 ist der Default (die Warteliste einer
+ * geschlossenen Beta passt fast immer auf eine Seite), 100 der Deckel — ein
+ * `Query.limit()` ist in diesem Repo PFLICHT, und ein vom Aufrufer frei
+ * wählbares Limit wäre ein Deckel, der keiner ist.
+ */
+export const BRAND_WAITLIST_PAGE_DEFAULT = 50
+export const BRAND_WAITLIST_PAGE_MAX = 100
+
+/**
+ * DIE ABFRAGE DER LISTE.
+ *
+ * `.strict()` ist hier BEWUSST NICHT gesetzt: eine Query trägt regelmäßig
+ * Fremdes mit sich (Cache-Brecher der Fetch-Schicht, `?_=…` aus einem
+ * Proxy), und ein 400 darauf wäre eine Fehlfunktion ohne Angreifer. Die
+ * bekannten Felder werden trotzdem streng gemessen.
+ *
+ * Der `cursor` ist eine Appwrite-Zeilen-Id und kommt aus UNSERER eigenen
+ * vorherigen Antwort — geprüft wird er trotzdem: er reist über die Adresszeile,
+ * und eine ungeprüfte Zeichenkette in einer Abfrage ist eine Zeichenkette, die
+ * jemand ausprobiert. `''` heißt „von vorn".
+ */
+export function createBrandWaitlistListQuerySchema() {
+  return z.object({
+    status: z.enum(['pending', 'confirmed', 'invited', 'declined', 'all']).default('confirmed'),
+    cursor: z.string().trim().max(64).regex(/^[A-Za-z0-9_-]*$/).default(''),
+    limit: z.coerce.number().int().min(1).max(BRAND_WAITLIST_PAGE_MAX).default(BRAND_WAITLIST_PAGE_DEFAULT),
+  })
+}
+
+export type BrandWaitlistListQuery = z.output<ReturnType<typeof createBrandWaitlistListQuerySchema>>
+
+/**
+ * DIE NOTIZ DES BETREIBERS.
+ *
+ * Ein leerer String ist ein gültiger Wert — „Notiz löschen" ist eine Handlung
+ * und braucht keinen eigenen Endpunkt. `.strict()`, weil dieses Formular genau
+ * ein Feld schickt: käme ein `status` mit, wäre das ein Versuch, die
+ * Zustands-Regeln (`brandWaitlistAdmin.ts`) über die Notiz-Route zu umgehen.
+ */
+export function createBrandWaitlistNoteSchema() {
+  return z.object({
+    note: z.string().trim().max(BRAND_WAITLIST_NOTE_MAX).default(''),
+  }).strict()
+}
+
+export type BrandWaitlistNoteInput = z.output<ReturnType<typeof createBrandWaitlistNoteSchema>>

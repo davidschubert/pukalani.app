@@ -44,7 +44,7 @@ import type { Capability } from './types/authz'
  * Einträgen ist immer Platz für einen dritten:
  *
  *   posts 10–40 · events 50–60 · courses 70 · media 80 · messages 90–100 ·
- *   comments 110–120 · feedback 10 (eigene Gruppe „Dein Konto")
+ *   comments 110–120 · brand 130 · feedback 10 (eigene Gruppe „Dein Konto")
  *
  * Die Blöcke gelten je LAYER, nicht je Gruppe: `posts` vergibt 10 an seine
  * Moderationsfläche (Gruppe „Moderation") und 20–40 an seine drei übrigen

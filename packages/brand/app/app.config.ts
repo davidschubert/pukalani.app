@@ -46,6 +46,44 @@
  */
 export default defineAppConfig({
   pukalani: {
+    admin: {
+      /**
+       * DIE BETREIBER-FLÄCHE DIESES LAYERS (2026-09-05) — bisher hatte `brand`
+       * keinen einzigen Eintrag in der Dashboard-Registry, weil seine Seiten
+       * (`/dashboard/brands/*`) KUNDEN-Fläche sind und über das
+       * default-Layout laufen. Die Warteliste ist die erste Ausnahme: sie
+       * verwaltet den Zugang zur Beta und gehört damit dem Betreiber.
+       *
+       * `scope: 'operator'` — dieselbe Aussage wie beim AI-Runner: auf einem
+       * Mandanten-Host wäre das die Verwaltung einer fremden Plattform. Dass
+       * `branding` gar keine Mandanten hat, ändert die richtige EBENE nicht.
+       *
+       * `users.manage` statt `sites.manage`: die Liste entscheidet, wer ein
+       * Konto in dieser Beta bekommt — Sites gibt es hier keine (Begründung
+       * ausführlich in `server/utils/brandWaitlistAdmin.ts`). Beide sind
+       * ohnehin nur im Admin-Wildcard.
+       *
+       * `group: 'management'` (Betreiber-Werkzeuge), `order: 130` — der nächste
+       * freie Zehner-Block nach der Vergabe-Regel in
+       * `core/shared/dashboardNav.ts` (posts 10–40 … comments 110–120).
+       *
+       * KEIN `productKey`: das Produkt-Gate `brand` schaltet den WIZARD ab, und
+       * genau dann muss die Warteliste erst recht erreichbar bleiben — sie ist
+       * die Liste derer, die auf seine Öffnung warten.
+       */
+      modules: [
+        {
+          id: 'brand-waitlist',
+          scope: 'operator',
+          labelKey: 'brand.admin.waitlist.nav',
+          icon: 'i-ph-list-checks',
+          to: '/dashboard/waitlist',
+          requiredCapability: 'users.manage',
+          group: 'management',
+          order: 130,
+        },
+      ],
+    },
     brand: {
       enabled: true,
       persona: { name: 'George', mark: '' },
