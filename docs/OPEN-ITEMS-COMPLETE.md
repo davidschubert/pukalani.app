@@ -30,6 +30,43 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### branding.supply: Startseite, Vektoren, Double-Opt-in, Copy-Regeln ✅ 2026-09-04/05
+
+**Startseite** nach dem abgenommenen Conversion-Dummy (Runden 137–148): Hero-Split
+mit den zwei Weiche-Optionen (eingeloggt → Anlage mit `?path=`, Gäste → /invite),
+Artefakte mit visuellen Beweisen, sechs Fähigkeiten, Brand-Check als EHRLICHER
+Vorab-Eintrag über die Warteliste (Instrument noch nicht gebaut — ein „Check
+starten" ins Leere wäre ein toter Knopf), Abschluss-CTA. Brand Insights und
+Beispiel-Branding bleiben draussen (nur echte Ziele) — offen in OPEN-ITEMS.
+
+**Vektor-Illustrationen** (Davids Entscheidung statt KI-Fotos): sieben Inline-SVGs
+(`apps/branding/app/components/Art*.vue`) aus den `--bw-`-Tokens, genau ein Acid-Pop
+je Motiv, beide Farbwelten ohne zweite Fassung; Squircle-Regel per `.bw-frame`
+auf Rahmen/Platzhalter/Erfolgskarte ausgedehnt (corner-shape superellipse 1.7 —
+cornerKit bewusst NICHT eingeführt: Safari/Firefox-Squircles nur per JS-Clip-Path,
+der unsere randlosen Schatten abschnitte).
+
+**Double-Opt-in der Warteliste** (Opus-Lauf Server, Formular/Landeseite selbst):
+`pending` + sha256-Token-Hash + 24 h, Rohtoken nur in der Mail (Base-URL
+`public.appUrl`), `POST /waitlist/confirm` stempelt `confirmed` und leert den
+Hash — Betreiber-Mail ERST danach; kein Mailer/Mail-Fehler ⇒ 503 statt
+Schein-Erfolg. Migration brand-015 (013/014 waren von der Nachbar-Session
+belegt), Drossel für beide Routen, 21 Tests. Live bewiesen: `mail_sent`, Re-Signup
+erneuert den Link, 400 bei unbekanntem Token.
+
+**Copy-Regeln (David):** Rolle vor Name — „persönlicher Markenberater"/„Team aus
+Markenexperten" statt bloß „George" (SEO + Verständlichkeit; George nur mit Rolle
+gekoppelt, Wizard-Chat ausgenommen). Titel-Muster „Erstellt eure eigene Marke.
+Ganz einfach, im Gespräch mit eurem persönlichen Markenberater." Positionierung
+BREIT (Marke), Personal Brand nur in Sub-Copy/Description; Marketing „ihr",
+Wizard „du" — zwei bewusste Register.
+
+**Gelernt:** (1) Resend lehnt `example.com`-Empfänger mit 550 ab — Probe-Adressen
+für Mail-Pfade sind `delivered@resend.dev`, sonst misst man den Anbieter statt
+den Code. (2) Parallel-Sessions belegen Migrationsnummern: vor dem Anlegen
+`ls scripts/migrations` gegen origin/main — 011 UND 013/014 wurden am selben Tag
+doppelt vergeben.
+
 ### branding.supply: About und Team als Produktseiten + Warteliste ✅ 2026-09-04
 
 **Auftrag (David):** /about und /team trennen (erst zu leer, dann: „optimiere
