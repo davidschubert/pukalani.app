@@ -1,6 +1,9 @@
 # branding.supply — Bildmaterial-Register (Platzhalter + Prompts)
 
-Stand 2026-09-04. Die Seiten `/about` und `/team` tragen Bild-Platzhalter
+Stand 2026-09-04 (abends): A1–A6 und T3 sind als VEKTOR-Illustrationen live
+(`apps/branding/app/components/Art*.vue`, Inline-SVG aus den `--bw-`-Tokens —
+Davids Entscheidung: Vektoren statt KI-Fotos für die Objekt-Motive). Offen sind
+nur die zwei Porträts T1/T2 als Foto. Die Seiten `/about` und `/team` trugen Bild-Platzhalter
 (`BwImagePlaceholder`, Kennung sichtbar auf der Kachel). Hier steht je
 Kennung, **wo** das Bild hängt, **welches Format** es braucht und der
 **Generierungs-Prompt**. Derselbe Prompt steht als `prompt`-Prop an der
@@ -25,17 +28,17 @@ surfaces, soft studio light, high detail, no text"*.
 
 ## Register
 
-| Kennung | Seite · Stelle | Format | Motiv (Kurz) |
-| --- | --- | --- | --- |
-| A1 | /about · Hero | 16:7 (breit) | Papierbogen mit Fingerabdruck-Zeile, Acid-Pin |
-| A2 | /about · Warum es uns gibt | 3:1 (Streifen) | Agentur-Mappe · Schablone · Lautsprecher |
-| A3 | /about · So arbeiten wir 01 | 4:3 | Zwei Stühle am Tisch, von oben |
-| A4 | /about · So arbeiten wir 02 | 4:3 | Karteikarten-Stapel, eine Karte lit |
-| A5 | /about · So arbeiten wir 03 | 4:3 | Gebundenes Dokument mit Lesebändchen |
-| A6 | /about · Der Beweis | 1:1 | Fingerabdruck-Poster an der Wand |
-| T1 | /team · George | 4:5 (Porträt) | George Winter, Porträt |
-| T2 | /team · Das Team | 16:7 (breit) | Das siebenköpfige Team im Studio |
-| T3 | /team · Zusammenspiel | 3:1 (Streifen) | Vier Objekte, ein Faden |
+| Kennung | Seite · Stelle | Format | Motiv (Kurz) | Status |
+| --- | --- | --- | --- | --- |
+| A1 | /about · Hero | 16:7 (breit) | Papierbogen mit Fingerabdruck-Zeile, Acid-Pin | Vektor live (`components/ArtA1.vue`) |
+| A2 | /about · Warum es uns gibt | 3:1 (Streifen) | Agentur-Mappe · Schablone · Lautsprecher | Vektor live |
+| A3 | /about · So arbeiten wir 01 | 4:3 | Zwei Stühle am Tisch, von oben | Vektor live |
+| A4 | /about · So arbeiten wir 02 | 4:3 | Karteikarten-Stapel, eine Karte lit | Vektor live |
+| A5 | /about · So arbeiten wir 03 | 4:3 | Gebundenes Dokument mit Lesebändchen | Vektor live |
+| A6 | /about · Der Beweis | 1:1 | Fingerabdruck-Poster an der Wand | Vektor live |
+| T1 | /team · George | 4:5 (Porträt) | George Winter, Porträt | offen — Foto extern (Prompt unten) |
+| T2 | /team · Das Team | 16:7 (breit) | Das siebenköpfige Team im Studio | offen — Foto extern (Prompt unten) |
+| T3 | /team · Zusammenspiel | 3:1 (Streifen) | Vier Objekte, ein Faden | Vektor live |
 
 ## Prompts (wörtlich)
 

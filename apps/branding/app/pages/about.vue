@@ -88,10 +88,7 @@ const openFaq = ref<string | null>(null)
           <p class="mx-auto mt-4 max-w-2xl text-lg leading-relaxed" style="color: var(--bw-ink-soft)">{{ t('about.intro2') }}</p>
         </div>
         <!-- A1 · Hero-Bild (16:9) -->
-        <BwImagePlaceholder
-          id="A1" ratio="16 / 7" class="mt-12" :label="t('about.heroImage')"
-          prompt="Editorial still life, 16:9: a single sheet of heavy off-white paper on a matte grey surface, printed with one line of small monospaced text (illegible), a single acid-green (#dbe74b) enamel pin resting on its corner. Monochrome photograph, geometric shadows, soft studio light, wide negative space, digital-clean, precise. No readable text, no people."
-        />
+        <ArtA1 :label="t('about.heroImage')" class="mt-12" />
         <p class="bw-label mx-auto mt-6 max-w-3xl text-center leading-relaxed" style="color: var(--bw-muted)">{{ t('about.fingerprint') }}</p>
       </section>
 
@@ -120,10 +117,7 @@ const openFaq = ref<string | null>(null)
           </div>
         </div>
         <!-- A2 · Bild zum Warum (3:1 Streifen) -->
-        <BwImagePlaceholder
-          id="A2" ratio="3 / 1" class="mt-6" :label="t('about.whyImage')"
-          prompt="Product-style still life, 3:1 panorama: three objects evenly spaced on a matte grey surface — a heavy dark leather agency folder, a flat plastic template stencil, and a small matte black cylindrical speaker. Monochrome photograph; only the speaker carries a single acid-green (#dbe74b) ring of light. Geometric, spacious, soft studio light, digital-clean. No text, no people."
-        />
+        <ArtA2 :label="t('about.whyImage')" class="mt-6" />
       </section>
 
       <!-- 3 · Grundsätze -->
@@ -149,10 +143,7 @@ const openFaq = ref<string | null>(null)
         </div>
         <div class="mt-10 grid gap-6 @md:grid-cols-3">
           <div class="bw-card overflow-hidden">
-            <BwImagePlaceholder
-              id="A3" ratio="4 / 3" :label="t('about.h1Image')"
-              prompt="Top-down photograph, 4:3: two identical minimal chairs facing each other across a small round table on a matte grey floor. Monochrome; one chair seat carries a single acid-green (#dbe74b) dot. Geometric composition, wide negative space, soft even light, digital-clean. No text, no people."
-            />
+            <ArtA3 :label="t('about.h1Image')" :rounded="false" />
             <div class="p-8">
               <p class="bw-label" style="color: var(--bw-muted)">01</p>
               <h3 class="mt-2 text-lg font-medium tracking-tight">{{ t('about.h1Title') }}</h3>
@@ -160,10 +151,7 @@ const openFaq = ref<string | null>(null)
             </div>
           </div>
           <div class="bw-card overflow-hidden">
-            <BwImagePlaceholder
-              id="A4" ratio="4 / 3" :label="t('about.h2Image')"
-              prompt="Still life, 4:3: a neat stack of blank white index cards on matte grey, one card lifted at an angle and lit from the side, its edge glowing acid-green (#dbe74b). Monochrome photograph otherwise, geometric shadow, spacious, precise. No text, no people."
-            />
+            <ArtA4 :label="t('about.h2Image')" :rounded="false" />
             <div class="p-8">
               <p class="bw-label" style="color: var(--bw-muted)">02</p>
               <h3 class="mt-2 text-lg font-medium tracking-tight">{{ t('about.h2Title') }}</h3>
@@ -171,10 +159,7 @@ const openFaq = ref<string | null>(null)
             </div>
           </div>
           <div class="bw-card overflow-hidden">
-            <BwImagePlaceholder
-              id="A5" ratio="4 / 3" :label="t('about.h3Image')"
-              prompt="Still life, 4:3: a closed, cloth-bound A4 document lying flat on matte grey, a thin acid-green (#dbe74b) ribbon bookmark trailing out of it. Monochrome photograph, geometric, soft studio light, wide negative space, digital-clean. No readable text, no people."
-            />
+            <ArtA5 :label="t('about.h3Image')" :rounded="false" />
             <div class="p-8">
               <p class="bw-label" style="color: var(--bw-muted)">03</p>
               <h3 class="mt-2 text-lg font-medium tracking-tight">{{ t('about.h3Title') }}</h3>
@@ -186,10 +171,7 @@ const openFaq = ref<string | null>(null)
 
       <!-- 5 · Der Beweis: diese Seite (A6) -->
       <section class="bw-card mt-28 grid items-center gap-10 overflow-hidden @lg:grid-cols-2">
-        <BwImagePlaceholder
-          id="A6" ratio="1 / 1" class="!rounded-none" :label="t('about.proofImage')"
-          prompt="Interior photograph, 1:1: a large geometric poster on a light grey wall showing an abstract fingerprint made of thin concentric monochrome lines, one line in acid-green (#dbe74b). Minimal gallery setting, soft daylight, spacious, editorial, precise. No readable text, no people."
-        />
+        <ArtA6 :label="t('about.proofImage')" :rounded="false" />
         <div class="p-10 @lg:pr-14">
           <p class="bw-label uppercase tracking-widest" style="color: var(--bw-muted)">{{ t('about.proofEyebrow') }}</p>
           <h2 class="mt-3 text-balance text-3xl font-extralight tracking-tight sm:text-4xl">{{ t('about.proofTitle') }}</h2>
