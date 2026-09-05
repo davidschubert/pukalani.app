@@ -407,3 +407,12 @@ Details: [SAAS-ROADMAP #1](archiv/SAAS-ROADMAP.md).
   Tour ist belegt, dass sie nichts verbessert (die Startliste aus U4 ist die
   Alternative, nicht ihre Vorstufe); auf die Karte verzichtet das ganze Feld
   außer einem Anbieter, und der wird dafür kritisiert.
+- **Strang „Brand System" nach dem Brand-Check (Davids Entscheidung
+  2026-09-05, DECISION-LOG):** sobald BC1 P6 (Ergebnisseite v2) steht, kommt
+  NICHT das nächste Analyse-Feature, sondern in dieser Reihenfolge **BF1
+  Foundation-Leseansicht → Produkt 02 Brand Design (URL-/Asset-Extraktion als
+  Relaunch-Einstieg) → Produkt 03 Book & Kit inkl. „Brand Context"
+  (brand.md/brand.json/Tokens)**. Bewusst KEINE eigenen P-Nummern für den
+  Strang — jedes Glied hat seinen Plan (BF1: plans/BRAND-FOUNDATION-
+  LESEANSICHT.md; 02/03: Phase-1-Plan §5b, Nachtrag 2026-09-05). Fünf Ebenen
+  Discover → Audit → Compare → Build → Supply sind die Karte darüber.

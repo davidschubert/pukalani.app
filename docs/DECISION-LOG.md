@@ -7,6 +7,32 @@ die kleinen, verstreuten Beschlüsse.
 
 ---
 
+## 2026-09-05 — branding.supply: fünf Ebenen als Karte, „Brand Context" als Export, Strang „Brand System"
+
+**Anlass (David):** eigene Auswertung der Guidelines-Referenzen (Frontify, Corebook°,
+standards.site, Brandkit, Lovable, Bynder, Galerien) mit der These: nicht ein
+kleineres Frontify bauen, sondern den Raum DAVOR besetzen — „Wie gut ist unsere
+Marke, was fehlt, wie entwickeln wir sie — und wie wird daraus ein Brand System?"
+Als Leitplanke am Projektstand geprüft: Audit (Brand-Check), Compare (Quartett/
+Marktvergleich), Build (Wizard), Kit/Tokens/brand.json (Produkt 03), Do & Don't,
+„Guide = Website, PDF = Export" (BF1) existieren oder sind geplant; die
+Nachbar-Sitzung hat Markenabdruck, Ampel-Matrix und Stärke · Chance · Nächster
+Schritt am selben Tag entschieden.
+
+**Entscheidungen (Fragenrunde, alle nach Empfehlung):** (1) Die fünf Ebenen
+**Discover → Audit → Compare → Build → Supply** kommen als KARTE über die sieben
+Suite-Produkte in den Phase-1-Plan §5b — Produkte und Namen bleiben; der Satz
+„Understand. Improve. Build. Supply your brand." ist Positionierungs-Kandidat,
+nicht Startseiten-Copy. (2) Produkt 03 bekommt den benannten Export **„Brand
+Context"** (`brand.md` neben `brand.json` und Tokens); „Connect" (MCP/API) bleibt
+Phase 3+. (3) Reihenfolge nach BC1 P6 als Strang „Brand System": BF1 → Produkt 02
+(Extraktion als Relaunch-Einstieg) → Produkt 03 — **ohne neue P-Nummern** (P7–P10
+aus dem Text kollidieren mit BC1 und Phase-1). (4) Brand Library: zwei Vermerke an
+der Discover-Skizze („Ähnliche Marken", Cases als Judge-Referenz), kein Vorhaben.
+**Deckungsgleich, keine Entscheidung nötig:** kein DAM, kein Template-Editor.
+
+---
+
 ## 2026-09-05 — Brand Foundation als Guidelines: Leseansicht des Ergebnis-Dokuments (P5–P7-Rest)
 
 **Anlass (David):** eine allgemeine Brand-Guidelines-Definition (Story, Logo, Farbe,
