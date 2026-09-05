@@ -38,8 +38,8 @@ void props.prompt
 <template>
   <div
     role="img" :aria-label="label"
-    class="bw-placeholder relative overflow-hidden"
-    :style="`aspect-ratio: ${ratio}; background: var(--bw-surface-hi); border-radius: var(--bw-radius-frame)`"
+    class="bw-placeholder bw-frame relative overflow-hidden"
+    :style="`aspect-ratio: ${ratio}; background: var(--bw-surface-hi)`"
   >
     <div class="absolute inset-3 rounded-[calc(var(--bw-radius-frame)-0.5rem)] border border-dashed" style="border-color: var(--bw-line-strong)" />
     <span class="absolute left-[38%] top-[34%] size-3 rounded-full" style="background: var(--bw-pop)" aria-hidden="true" />

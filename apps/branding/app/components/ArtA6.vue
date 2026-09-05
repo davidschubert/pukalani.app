@@ -14,8 +14,8 @@ withDefaults(defineProps<{ label: string, rounded?: boolean }>(), { rounded: tru
 
 <template>
   <svg
-    viewBox="0 0 1000 1000" role="img" :aria-label="label" class="block h-auto w-full"
-    :style="`background: var(--bw-surface-hi); border-radius: ${rounded ? 'var(--bw-radius-frame)' : '0'}`"
+    viewBox="0 0 1000 1000" role="img" :aria-label="label"
+    class="block h-auto w-full" :class="rounded ? 'bw-frame' : ''" style="background: var(--bw-surface-hi)"
   >
     <!-- Poster an der Wand: konzentrische Fingerabdruck-Bögen, einer in Acid -->
     <rect x="0" y="880" width="1000" height="120" fill="var(--bw-surface)" />
