@@ -72,6 +72,7 @@ gehören dort hin.
 | Datei | Zustand |
 | --- | --- |
 | [archiv/BRAND-WIZARD-SESSIONS.md](archiv/BRAND-WIZARD-SESSIONS.md) | Branding-Atome (BW2): Pakete 1–8 ausgeführt 2026-09-04/05 — Lese-Fassung der 68 Session-Inhalte: [referenz/BRAND-WIZARD-SESSION-INHALTE.md](referenz/BRAND-WIZARD-SESSION-INHALTE.md) (generiert) |
+| [plans/BRAND-MARKTVERGLEICH.md](plans/BRAND-MARKTVERGLEICH.md) | Marktvergleich: Strategie + Konzept 2026-09-05, wartet auf Davids Freigabe, nichts gebaut (MV1) |
 | [plans/PRIVATE-NACHRICHTEN-KONZEPT.md](plans/PRIVATE-NACHRICHTEN-KONZEPT.md) | Stufe 1 komplett (inkl. F56, 2026-08-13); ungebaut nur Stufen 2/3 — bewusst keine offenen Punkte |
 | [plans/DASHBOARD-IA.md](plans/DASHBOARD-IA.md) | Schritt 3 + Community-Hub gebaut; **12 der 14 Schritt-4-Seiten fehlen** — als U15 jetzt in OPEN-ITEMS geführt |
 | [plans/ANALYTICS-V2.md](plans/ANALYTICS-V2.md) | Pakete 1–4 live; Rest = Optionales (F47) |
