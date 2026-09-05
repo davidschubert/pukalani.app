@@ -14,7 +14,47 @@ export interface BwRailStepInfo {
    */
   description?: string
   minutes?: string
-  bausteine: { label: string, note: string, done?: boolean }[]
+  /**
+   * `affects` ist der Satz „Wofür brauchen wir das?" (§3a): wohin dieses Feld
+   * später fliesst. Er kommt aus einer RECHNUNG über der Registry
+   * (`sessionsAffectedBy`), nie aus einer gepflegten Liste — eine gepflegte
+   * Liste ist irgendwann falsch. Optional, weil der Klickdummy ihn nicht hat.
+   */
+  bausteine: { label: string, note: string, done?: boolean, affects?: string }[]
+}
+/**
+ * EIN UNTERPUNKT: die SESSION eines Kapitels (BW2 Paket 3c-i, Plan §11).
+ *
+ * Die Beschriftungen (Label, Umfang, Titel) reicht die SEITE übersetzt herein
+ * — dieselbe Regel wie bei den Kapiteln. Die Komponente kennt nur Glyphe,
+ * Sperre und Klick.
+ */
+export interface BwRailSession {
+  /** Slot-Id der Session (`a.origin`) — sie reist als `?s=` in die Adresse. */
+  id: string
+  label: string
+  /** „~3 Min" aus der Registry (`effort.minutes`). */
+  effort?: string
+  /**
+   * `deferred` ist KEIN Zustand der Zustandsmaschine, sondern ein Merkzeichen
+   * daneben (`answers.allowDefer`, §3a). Er steht hier trotzdem in derselben
+   * Liste, weil die LEISTE genau eine Glyphe je Zeile zeigt und „vertagt" die
+   * Auskunft ist, die der Mensch dann sucht.
+   */
+  state: 'locked' | 'open' | 'active' | 'done' | 'stale' | 'deferred'
+  /** Der gesperrte Platzhalter „Finale Abnahme" (Funken-Glyphe, Paket 3c-ii). */
+  kind?: 'acceptance'
+  /** Gesperrt heisst NICHT anklickbar — kein 409 für den Menschen (3a-Befund 3). */
+  disabled?: boolean
+  /**
+   * HERVORGEHOBEN, OHNE ANKLICKBAR ZU SEIN: die Finale Abnahme, sobald das
+   * Kapitel vollständig ist (§11). Ein eigener Schalter statt `state:
+   * 'active'`, weil „aktiv" die Session meint, in der der Mensch GERADE
+   * steht — zwei Zeilen mit demselben Zeichen wären eine Frage zu viel.
+   */
+  highlight?: boolean
+  /** Erklärt die Sperre beim Überfahren (`title`), z. B. „kommt als Nächstes". */
+  title?: string
 }
 export interface BwRailStep {
   id: string
@@ -35,6 +75,17 @@ export interface BwRailStep {
    * Punkt der Gruppe, verlinkt statt Info-Icon, gesperrt bis alles fertig. */
   kind?: 'result'
   to?: string
+  /**
+   * DIE SESSIONS DIESES KAPITELS (§11) — nur die Sidebar rendert sie, und nur
+   * für das AKTIVE Kapitel. `BwProgressRail` (der Klickdummy-Vorfahr) ignoriert
+   * das Feld bewusst: dort gibt es keine Unterpunkte, und eine zweite
+   * Darstellung derselben Liste wäre eine zweite Stelle zum Altern.
+   */
+  sessions?: BwRailSession[]
+  /** Die Zähl-Zeile eines EINGEKLAPPTEN Kapitels („7 von 11 bestätigt · 2 neu besprechen"). */
+  counter?: string
+  /** Der Umfang des AUFGEKLAPPTEN Kapitels („11 Sessions, ~14 Min"). */
+  effort?: string
 }
 export interface BwRailLayer {
   id: string

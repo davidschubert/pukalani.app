@@ -19,9 +19,12 @@ import {
   pruneSettledEdits,
 } from '../../shared/brandAutosaveDiff'
 import type {
+  BrandMessagesResponse,
   BrandProfileDetailResponse,
   BrandProfileListResponse,
   BrandProfileSummary,
+  BrandSessionAcceptResponse,
+  BrandSessionView,
   BrandSlotView,
   BrandStepCompleteResponse,
   BrandStepDetailResponse,
@@ -139,6 +142,25 @@ const setup = () => {
   const localConfidence = ref<BrandConfidence | null>(null)
   const progress = ref<BrandStepProgress>({ ...EMPTY_PROGRESS })
   const missingRequired = ref<string[]>([])
+
+  /**
+   * DER STAND JE SESSION dieses Kapitels (BW2 §5) — abgeleitet vom Server,
+   * nie hier gerechnet. `slots` sagt, WAS in einem Feld steht; das hier sagt,
+   * wie es um die Arbeitseinheit dahinter steht (gesperrt · offen · fertig ·
+   * veraltet) und was der Mensch vorher darüber erfahren soll (Umfang,
+   * „fliesst später in", vertagt).
+   */
+  const sessions = ref<Record<string, BrandSessionView>>({})
+
+  /**
+   * WELCHE SESSION DER MENSCH GERADE OFFEN HAT (`?s=` in der Adresse).
+   *
+   * `active` steht bewusst NICHT in `resolveSessionStates` (dort ist es im
+   * Kopf begründet): es ist ein Zustand aus Route und Verlauf, keine Rechnung
+   * über gespeicherten Fakten. Die SEITE setzt ihn aus der Adresse — der Store
+   * hält ihn nur, damit Verlauf, Bühne und Leiste dieselbe Antwort lesen.
+   */
+  const activeSessionKey = ref<string>('')
 
   const syncState = ref<BrandSyncState>('saved')
   const conflict = ref<BrandWorkspaceConflict | null>(null)
@@ -333,6 +355,94 @@ const setup = () => {
       .filter(message => message.text.length > 0)
   }
 
+  /**
+   * DIE ANTWORT-MÖGLICHKEITEN EINES GESPEICHERTEN ZUGES (BW2 3c-i).
+   *
+   * Sie liegen ADDITIV in `parts` (`{ kind: 'reply', options: [...] }`) und
+   * NICHT im Text — genau deshalb kann ein nachgeladener Verlauf sie wieder
+   * als Knöpfe zeigen, statt sie als rohe Zeilen in der Blase zu haben. Alles
+   * andere in `parts` geht diese Rechnung nichts an, kaputtes JSON hat die
+   * Leseroute schon zu `null` gemacht.
+   */
+  function optionsFromParts(parts: unknown): readonly string[] | undefined {
+    if (parts === null || typeof parts !== 'object') return undefined
+    const raw = (parts as { options?: unknown }).options
+    if (!Array.isArray(raw)) return undefined
+    const options = raw.filter((entry): entry is string => typeof entry === 'string' && entry.length > 0)
+    return options.length ? options : undefined
+  }
+
+  /**
+   * DER VERLAUF EINER SESSION (BW2 §6, brand-011) — beim Umschalten geladen,
+   * nicht auf Vorrat.
+   *
+   * Er ERSETZT die Züge im Store, er hängt nicht an: eine andere Session ist
+   * ein anderes Gespräch, und zwei Fäden untereinander wären ein Protokoll,
+   * das niemand mehr zuordnen kann. Die `system`-Zeilen bleiben draussen — die
+   * Bühne kennt zwei Sprecher, und ein dritter hätte weder Avatar noch Platz.
+   *
+   * FAIL-SOFT: bleibt der Abruf aus, ist die Bühne eben leer und George
+   * eröffnet neu. Ein Fehlerbanner über einen ungeladenen Verlauf wäre lauter
+   * als der Verlust.
+   */
+  async function loadSessionMessages(
+    profileId: string,
+    key: string,
+    sessionKey: string,
+    fetcher: BrandFetcher = $fetch,
+  ): Promise<boolean> {
+    try {
+      const response = await fetcher<BrandMessagesResponse>(
+        `/api/brand/profiles/${profileId}/messages`,
+        { query: { stepKey: key, session: sessionKey } },
+      )
+      streamMessages.value = response.messages
+        .filter(message => message.role === 'george' || message.role === 'user')
+        .map(message => ({
+          id: message.id,
+          role: message.role === 'user' ? 'user' as const : 'george' as const,
+          text: message.body,
+          pending: false,
+          ...(message.role === 'george' && optionsFromParts(message.parts)
+            ? { options: optionsFromParts(message.parts) }
+            : {}),
+        }))
+      return response.messages.some(message => message.role === 'george')
+    }
+    catch {
+      streamMessages.value = []
+      return false
+    }
+  }
+
+  /** Die Session, die der Mensch gerade offen hat (`?s=`) — s. `activeSessionKey`. */
+  function setActiveSession(sessionKey: string): void {
+    activeSessionKey.value = sessionKey
+  }
+
+  /**
+   * WAS „ABNEHMEN"/„VERTAGEN" HINTERLÄSST (Paket 3b-Antwort, hier gelesen).
+   *
+   * Die `revision` MUSS übernommen werden: die Route hat die Baustein-Zeile
+   * geschrieben, und ein Autosave mit der alten Fassung liefe danach in einen
+   * 409 — dieselbe Regel wie bei `applyGenerationRevision`. Die zwei Flags
+   * ziehen lokal nach, damit Leiste und Bühne sofort stimmen; der nächste
+   * vollständige Abruf bestätigt sie.
+   */
+  function applySessionAcceptance(response: BrandSessionAcceptResponse): void {
+    if (response.revision > revision.value) revision.value = response.revision
+    const current = sessions.value[response.sessionKey]
+    if (!current) return
+    sessions.value = {
+      ...sessions.value,
+      [response.sessionKey]: {
+        ...current,
+        accepted: response.accepted,
+        deferred: response.deferred,
+      },
+    }
+  }
+
   function setConfidence(value: BrandConfidence): void {
     localConfidence.value = value
   }
@@ -354,6 +464,7 @@ const setup = () => {
     localEdits.value = {}
     progress.value = detail.progress
     missingRequired.value = [...detail.missingRequired]
+    sessions.value = detail.sessions
     conflict.value = null
     syncState.value = 'saved'
     blocked.value = null
@@ -544,6 +655,8 @@ const setup = () => {
     localConfidence.value = null
     progress.value = { ...EMPTY_PROGRESS }
     missingRequired.value = []
+    sessions.value = {}
+    activeSessionKey.value = ''
     syncState.value = 'saved'
     conflict.value = null
     denied.value = false
@@ -570,6 +683,8 @@ const setup = () => {
     localConfidence,
     progress,
     missingRequired,
+    sessions,
+    activeSessionKey,
     syncState,
     conflict,
     denied,
@@ -590,6 +705,7 @@ const setup = () => {
     neighbourStep,
     setSlotValue,
     setSlotConfirmed,
+    setActiveSession,
     setConfidence,
     applyGeorgeDraft,
     slotIsGeorgeDraft,
@@ -604,11 +720,13 @@ const setup = () => {
     mark,
     applyStepDetail,
     applySaveResponse,
+    applySessionAcceptance,
     applyConflict,
     resolveWithServer,
     loadProfiles,
     loadProfile,
     loadStep,
+    loadSessionMessages,
     reopenStep,
     completeStep,
     reset,

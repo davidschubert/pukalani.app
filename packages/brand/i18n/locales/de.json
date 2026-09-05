@@ -36,7 +36,13 @@
       "dashboard": "Dashboard",
       "newBranding": "Neues Branding anlegen",
       "manageBrandings": "Brandings verwalten",
-      "footerNav": "Fußzeile"
+      "footerNav": "Fußzeile",
+      "sessionLocked": "Erst sind die Felder davor dran.",
+      "acceptance": "Finale Abnahme",
+      "acceptancePending": "Frei, sobald alle Felder dieses Kapitels bestätigt sind.",
+      "chapterCount": "{confirmed} von {total} bestätigt",
+      "chapterCountStale": "{confirmed} von {total} bestätigt · {stale} neu besprechen",
+      "chapterEffort": "{count} Sessions, ~{minutes} Min"
     },
     "legal": {
       "imprint": "Impressum",
@@ -552,7 +558,8 @@
           "sourceSlots": "mindestens eine der Antworten, auf denen dieses Feld aufbaut"
         }
       },
-      "progressConfirmed": "{confirmed} von {total} bestätigt"
+      "progressConfirmed": "{confirmed} von {total} bestätigt",
+      "chapterReady": "Alle Felder dieses Kapitels sind bestätigt. Die Finale Abnahme kommt als nächster Schritt."
     },
     "brands": {
       "title": "Brandings",
@@ -708,6 +715,21 @@
       "duplicateText": "Diese Adresse steht schon auf der Liste — ihr seid dran, sobald die nächste Welle öffnet.",
       "error": "Das hat gerade nicht geklappt. Versucht es in einer Minute noch einmal.",
       "consent": "Wir nutzen die Adresse nur, um euch zur Beta einzuladen. Kein Newsletter, keine Weitergabe."
+    },
+    "session": {
+      "minutes": "~{minutes} Min",
+      "affects": "Das fließt später in {count} weitere Felder ein — in {steps}.",
+      "affectsNone": "Eine Korrektur hier löst nichts Weiteres aus.",
+      "defer": "Später",
+      "resume": "Wieder aufnehmen",
+      "deferredNote": "Vertagt — wir kommen später darauf zurück. Bis dahin bleibt das Kapitel offen.",
+      "deferFailed": "Das Vertagen hat nicht geklappt.",
+      "resumeFailed": "Das Wiederaufnehmen hat nicht geklappt.",
+      "deferConfirmed": "Dieses Feld ist bereits bestätigt — dafür gibt es „Korrigieren\".",
+      "error": {
+        "session_locked": "Dieses Feld ist noch gesperrt — erst sind die Felder davor dran.",
+        "session_foreign": "Dieses Feld gehört zu einem anderen Kapitel."
+      }
     }
   }
 }

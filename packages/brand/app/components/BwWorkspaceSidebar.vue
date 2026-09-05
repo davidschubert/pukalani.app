@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { BwRailLayer, BwRailStep } from './BwProgressRail.vue'
+import type { BwRailLayer, BwRailSession, BwRailStep } from './BwProgressRail.vue'
 import type { BwNewBrandSubmit } from './BwNewBrandModal.vue'
 
 /**
@@ -74,6 +74,12 @@ const emit = defineEmits<{
    * `goToStep` schon befolgt.
    */
   selectBrand: [to: string]
+  /**
+   * EINE SESSION WURDE GEWÄHLT (BW2 §11). Sie reist als `?s=` in DIESELBE
+   * Route (`brand/[profileId]/[stepKey]`) — die SEITE navigiert, wie bei
+   * Baustein und Marke, damit der Autosave vorher ausspülen kann.
+   */
+  selectSession: [payload: { stepId: string, sessionId: string }]
 }>()
 
 const { t } = useI18n()
@@ -180,6 +186,43 @@ function stepDisabled(layer: BwRailLayer, step: BwRailStep): boolean {
   return step.kind === 'result' ? step.state !== 'done' : step.state === 'open'
 }
 
+/**
+ * DIE GLYPHE EINER SESSION — dieselbe Bildsprache wie auf der Bühne
+ * (`BwSlotList`) und beim Kapitel darüber, plus zwei eigene Zeichen:
+ * die UHR für „vertagt" (ein Merkzeichen, kein Zustand) und der FUNKEN für
+ * die Finale Abnahme (§11).
+ */
+function sessionGlyph(session: BwRailSession): { name: string, style: string } {
+  if (session.kind === 'acceptance') {
+    return {
+      name: 'i-ph-sparkle',
+      style: session.state === 'locked' && !session.highlight ? 'color: var(--bw-muted)' : 'color: var(--bw-accent)',
+    }
+  }
+  if (session.state === 'locked') return { name: 'i-ph-lock-simple', style: 'color: var(--bw-muted)' }
+  if (session.state === 'deferred') return { name: 'i-ph-clock', style: 'color: var(--bw-ink-soft)' }
+  if (session.state === 'stale') return { name: 'i-ph-clock-counter-clockwise', style: 'color: var(--bw-stale)' }
+  if (session.state === 'done') return { name: 'i-ph-check-circle-fill', style: 'color: var(--bw-accent)' }
+  if (session.state === 'active') return { name: 'i-ph-circle-half-fill', style: 'color: var(--bw-ink)' }
+  return { name: 'i-ph-circle', style: 'color: var(--bw-muted)' }
+}
+
+/**
+ * DIE ZWEITE ZEILE EINES KAPITELS. Aufgeklappt steht dort der UMFANG („11
+ * Sessions, ~14 Min"), eingeklappt der ZÄHLER („7 von 11 bestätigt · 2 neu
+ * besprechen") — zwei Auskünfte für zwei Situationen: wer die Liste sieht,
+ * liest den Stand an den Glyphen ab und braucht die Zeit; wer sie nicht sieht,
+ * braucht den Stand.
+ */
+function stepSubline(step: BwRailStep): string {
+  return (step.sessions?.length ? step.effort : step.counter) ?? ''
+}
+
+function selectSession(step: BwRailStep, session: BwRailSession): void {
+  if (session.disabled) return
+  emit('selectSession', { stepId: step.id, sessionId: session.id })
+}
+
 function selectStep(layer: BwRailLayer, step: BwRailStep): void {
   if (stepDisabled(layer, step)) return
   // Ein Punkt mit eigenem Ziel (Ergebnis-Ansicht) führt DORTHIN — `select`
@@ -260,35 +303,79 @@ function selectStep(layer: BwRailLayer, step: BwRailStep): void {
           <template #content>
             <!-- Kinder an einer 1px-Führungslinie, Nuxt-UI-Einzug (ms-5 / ps-1.5). -->
             <ul class="ml-5 mt-0.5 space-y-0.5 border-l pl-1.5" style="border-color: var(--bw-line)">
-              <li v-for="step in layer.steps ?? []" :key="step.id" class="bw-nav-item">
-                <button
-                  type="button"
-                  class="bw-nav-row group/row flex w-full items-center gap-1.5 rounded-md px-2.5 py-1.5 text-left text-sm"
-                  :class="!layer.locked && step.state === 'active' ? 'font-medium' : ''"
-                  :style="!layer.locked && step.state === 'active'
-                    ? 'background: var(--bw-surface-hi); color: var(--bw-ink); box-shadow: var(--bw-shadow-card)'
-                    : stepDisabled(layer, step) ? 'color: var(--bw-muted)' : 'color: var(--bw-ink-soft)'"
-                  :disabled="stepDisabled(layer, step)"
-                  @click="selectStep(layer, step)"
+              <li v-for="step in layer.steps ?? []" :key="step.id">
+                <!-- Die Hülle trägt `bw-nav-item` (Position + Hover-Regel des
+                     Info-Knopfs) und umschliesst NUR die Kapitel-Zeile: läge
+                     die Unterpunkt-Liste darin, zentrierte sich der absolut
+                     gesetzte Info-Knopf auf die ganze Gruppe. -->
+                <div class="bw-nav-item">
+                  <button
+                    type="button"
+                    class="bw-nav-row group/row flex w-full items-center gap-1.5 rounded-md px-2.5 py-1.5 text-left text-sm"
+                    :class="!layer.locked && step.state === 'active' ? 'font-medium' : ''"
+                    :style="!layer.locked && step.state === 'active'
+                      ? 'background: var(--bw-surface-hi); color: var(--bw-ink); box-shadow: var(--bw-shadow-card)'
+                      : stepDisabled(layer, step) ? 'color: var(--bw-muted)' : 'color: var(--bw-ink-soft)'"
+                    :disabled="stepDisabled(layer, step)"
+                    @click="selectStep(layer, step)"
+                  >
+                    <UIcon :name="glyph(layer, step).name" class="size-4 flex-none" :style="glyph(layer, step).style" />
+                    <span class="min-w-0 flex-1 leading-tight">
+                      <span class="block truncate">{{ step.label }}</span>
+                      <span
+                        v-if="stepSubline(step)"
+                        class="bw-label block truncate tabular-nums" style="color: var(--bw-muted)"
+                      >{{ stepSubline(step) }}</span>
+                    </span>
+                    <span v-if="step.info && !layer.locked" class="size-6 flex-none" aria-hidden="true" />
+                    <UIcon
+                      v-if="step.kind === 'result' && step.state === 'done'"
+                      name="i-ph-arrow-right" class="size-4 flex-none" style="color: var(--bw-ink-soft)"
+                    />
+                  </button>
+                  <button
+                    v-if="step.info && !layer.locked"
+                    type="button"
+                    class="bw-info-btn bw-nav-info absolute top-1/2 grid size-6 -translate-y-1/2 place-items-center rounded-full"
+                    :class="step.kind === 'result' && step.state === 'done' ? 'right-8' : 'right-2.5'"
+                    :aria-label="t('brand.workspace.rail.whatMeans', { label: step.label })"
+                    @click="infoStep = { step, layerLabel: layer.label }"
+                  >
+                    <UIcon name="i-ph-info" class="size-4" />
+                  </button>
+                </div>
+
+                <!-- DIE SESSIONS (§11). Die Seite reicht sie NUR für das offene
+                     Kapitel herein — „nur das aktive Kapitel aufgeklappt" ist
+                     damit eine Tatsache der Daten, keine zweite Regel hier.
+                     Gesperrte Zeilen sind `disabled`: ein Klick, der garantiert
+                     ein 409 kassiert, ist kein Angebot (3a-Befund 3). -->
+                <ul
+                  v-if="step.sessions?.length && !layer.locked"
+                  class="ml-5 mt-0.5 space-y-0.5 border-l pl-1.5" style="border-color: var(--bw-line)"
                 >
-                  <UIcon :name="glyph(layer, step).name" class="size-4 flex-none" :style="glyph(layer, step).style" />
-                  <span class="min-w-0 flex-1 truncate">{{ step.label }}</span>
-                  <span v-if="step.info && !layer.locked" class="size-6 flex-none" aria-hidden="true" />
-                  <UIcon
-                    v-if="step.kind === 'result' && step.state === 'done'"
-                    name="i-ph-arrow-right" class="size-4 flex-none" style="color: var(--bw-ink-soft)"
-                  />
-                </button>
-                <button
-                  v-if="step.info && !layer.locked"
-                  type="button"
-                  class="bw-info-btn bw-nav-info absolute top-1/2 grid size-6 -translate-y-1/2 place-items-center rounded-full"
-                  :class="step.kind === 'result' && step.state === 'done' ? 'right-8' : 'right-2.5'"
-                  :aria-label="t('brand.workspace.rail.whatMeans', { label: step.label })"
-                  @click="infoStep = { step, layerLabel: layer.label }"
-                >
-                  <UIcon name="i-ph-info" class="size-4" />
-                </button>
+                  <li v-for="session in step.sessions" :key="session.id">
+                    <button
+                      type="button"
+                      class="bw-nav-row flex w-full items-center gap-1.5 rounded-md px-2.5 py-1 text-left text-sm"
+                      :class="session.state === 'active' || session.highlight ? 'font-medium' : ''"
+                      :style="session.state === 'active' || session.highlight
+                        ? 'background: var(--bw-surface-hi); color: var(--bw-ink)'
+                        : session.disabled ? 'color: var(--bw-muted)' : 'color: var(--bw-ink-soft)'"
+                      :disabled="session.disabled"
+                      :title="session.title || undefined"
+                      :aria-current="session.state === 'active' ? 'true' : undefined"
+                      @click="selectSession(step, session)"
+                    >
+                      <UIcon :name="sessionGlyph(session).name" class="size-3.5 flex-none" :style="sessionGlyph(session).style" />
+                      <span class="min-w-0 flex-1 truncate">{{ session.label }}</span>
+                      <span
+                        v-if="session.effort" class="bw-label flex-none tabular-nums"
+                        style="color: var(--bw-muted)"
+                      >{{ session.effort }}</span>
+                    </button>
+                  </li>
+                </ul>
               </li>
             </ul>
           </template>

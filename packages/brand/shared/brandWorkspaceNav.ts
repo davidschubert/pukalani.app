@@ -1,0 +1,235 @@
+import type { BrandNextSessionRef, BrandSessionState } from './brandJourney'
+import { type BrandStepKey, slotsForStep } from './slotRegistry'
+
+/**
+ * DIE VIER RECHNUNGEN DER SESSION-NAVIGATION (BW2 Paket 3c-i,
+ * docs/plans/BRAND-WIZARD-SESSIONS.md §5 und §11).
+ *
+ * PURE — kein Nuxt, kein i18n, kein `$fetch`, wie `brandJourney.ts` und
+ * `brandSessions.ts`. Sie beantworten die vier Fragen, die die Werkstatt beim
+ * Umschalten zwischen Sessions stellt, und sie sind hier, damit ein Test sie
+ * stellen kann, ohne eine 2000-Zeilen-Seite zu montieren:
+ *
+ *  1. `resolveActiveSession` — WELCHE Session ist gerade offen? Adresse vor
+ *     Wegweiser vor erster offener.
+ *  2. `countChapterSessions` — die Zähl-Zeile eines EINGEKLAPPTEN Kapitels
+ *     („7 von 11 bestätigt · 2 neu besprechen").
+ *  3. `chapterEffortMinutes` — der Umfang eines Kapitels („11 Sessions,
+ *     ~14 Min"), Summe aus der Registry.
+ *  4. `decideAutoAdvance` — DARF jetzt gewechselt werden? Der Auto-Weiter aus
+ *     §5, mit allen Sperren an EINER Stelle.
+ *
+ * ── WARUM DIE ZAHLEN HIER STEHEN UND DIE SÄTZE NICHT ─────────────────────
+ * Diese Datei liefert Zahlen und Schlüssel, nie fertige Sätze: „7 von 11
+ * bestätigt" ist ein i18n-Text mit Platzhaltern und gehört der Oberfläche.
+ * Eine pure Funktion, die Sprache zusammensetzte, wäre in der zweiten Sprache
+ * falsch — und im Test grün.
+ */
+
+// ── 1 · Welche Session ist aktiv? ─────────────────────────────────────────
+
+/**
+ * Was die Werkstatt über die Sessions ihres Kapitels weiss. Das ist ABSICHTLICH
+ * weniger als `BrandSessionView`: die Wahl der aktiven Session hängt am
+ * Zustand und am Vertagen, nicht an Umfang, Vertraulichkeit oder Arbeitsform.
+ */
+export interface BrandNavSession {
+  state: BrandSessionState
+  deferred?: boolean
+}
+
+export interface BrandActiveSessionInput {
+  stepKey: BrandStepKey
+  /** `?s=` aus der Adresse — leer, wenn niemand eine Session gewählt hat. */
+  requested?: string
+  /** Der Wegweiser des Servers (`generation.completed`, Abnehmen, Vertagen). */
+  next?: BrandNextSessionRef | null
+  /** Der Stand je Session dieses Kapitels (aus der `sessions`-Karte). */
+  sessions: Readonly<Record<string, BrandNavSession | undefined>>
+}
+
+/** Betretbar heisst: nicht gesperrt. `stale` und `done` darf man wieder öffnen. */
+function enterable(session: BrandNavSession | undefined): boolean {
+  return session !== undefined && session.state !== 'locked'
+}
+
+/**
+ * DIE AKTIVE SESSION — Adresse schlägt Wegweiser schlägt erste offene.
+ *
+ * ── DIE REIHENFOLGE IST EINE RANGFOLGE, KEIN GESCHMACK ───────────────────
+ * 1. `?s=` — der Mensch hat geklickt (oder einen Link geöffnet, oder Zurück
+ *    gedrückt). Was in der Adresse steht, gewinnt IMMER; sonst risse ein
+ *    nachgeladener Wegweiser ihm die Seite unter der Hand weg.
+ * 2. `next` — der Server hat gesagt, wo es weitergeht (Auto-Weiter, §5).
+ * 3. Die erste OFFENE Session in Registry-Reihenfolge — der Einstieg beim
+ *    ersten Betreten eines Kapitels.
+ *
+ * ── EINE GESPERRTE SESSION GEWINNT NIE ───────────────────────────────────
+ * Auch nicht aus der Adresszeile (§5 „Betreten"): sie fällt durch und die
+ * Rangfolge läuft weiter. Der Server wiese sie mit 409 `session_locked` ab —
+ * ein 409 ist aber eine Auskunft an ein Programm, nicht an einen Menschen
+ * (3a-Befund 3).
+ *
+ * ── VERTAGT WIRD ÜBERSPRUNGEN, ABER NUR EINMAL ───────────────────────────
+ * „Auto-Weiter überspringt sie einmal" (§3a): eine vertagte Session ist beim
+ * SUCHEN die zweite Wahl — angeklickt oder als `next` genannt wird sie
+ * trotzdem geöffnet. Sind alle offenen vertagt, gewinnt die erste von ihnen:
+ * eine leere Bühne wäre die schlechtere Antwort auf „ich komme darauf zurück".
+ */
+export function resolveActiveSession(input: BrandActiveSessionInput): string | null {
+  const requested = input.requested?.trim() ?? ''
+  const order = slotsForStep(input.stepKey)
+
+  if (requested && enterable(input.sessions[requested])
+    && order.some(session => session.id === requested)) {
+    return requested
+  }
+
+  const next = input.next
+  if (next && 'sessionKey' in next && next.stepKey === input.stepKey
+    && enterable(input.sessions[next.sessionKey])
+    && order.some(session => session.id === next.sessionKey)) {
+    return next.sessionKey
+  }
+
+  const open = order.filter(session => input.sessions[session.id]?.state === 'open')
+  const fresh = open.find(session => !input.sessions[session.id]?.deferred)
+  return (fresh ?? open[0])?.id ?? null
+}
+
+// ── 2 · Die Zähl-Zeile eines eingeklappten Kapitels ───────────────────────
+
+export interface BrandChapterSessionCounts {
+  /** Bestätigt UND aktuell (`done`) — die Zahl vor dem „von". */
+  confirmed: number
+  /** Alle Sessions des Kapitels; die „Finale Abnahme" zählt NICHT mit (§11). */
+  total: number
+  /** Bestätigt, aber die Quellen haben sich bewegt — „neu besprechen". */
+  stale: number
+  /** Auf später vertagt — eigenes Merkzeichen, kein eigener Zähler-Teil. */
+  deferred: number
+}
+
+/**
+ * DER ZÄHLER JE KAPITEL (§11).
+ *
+ * `stale` steht NEBEN `confirmed` und nicht darin: „7 von 11 bestätigt · 2 neu
+ * besprechen" sagt zwei Dinge über zwei verschiedene Mengen. Zöge man die
+ * veralteten mit in die 7, verschwände genau die Arbeit aus der Zeile, auf die
+ * sie hinweisen soll.
+ *
+ * Gezählt werden ALLE Sessions des Kapitels, nicht nur die Pflicht-Sessions:
+ * die Zeile beantwortet „wie viel ist hier noch zu tun", und ein optionales
+ * Feld, das jemand ausgefüllt hat, ist getane Arbeit. Fehlt eine Session in
+ * der Karte (frisch geladenes Kapitel), zählt sie als offen — nie als fertig.
+ */
+export function countChapterSessions(
+  stepKey: BrandStepKey,
+  sessions: Readonly<Record<string, BrandNavSession | undefined>>,
+): BrandChapterSessionCounts {
+  const order = slotsForStep(stepKey)
+  let confirmed = 0
+  let stale = 0
+  let deferred = 0
+  for (const session of order) {
+    const state = sessions[session.id]
+    if (state?.state === 'done') confirmed += 1
+    else if (state?.state === 'stale') stale += 1
+    if (state?.deferred) deferred += 1
+  }
+  return { confirmed, total: order.length, stale, deferred }
+}
+
+/**
+ * DER UMFANG EINES KAPITELS — Summe der Registry-Minuten (§3a Nr. 8).
+ *
+ * Aus der REGISTRY, nicht aus der Antwort: der Umfang ist eine Eigenschaft des
+ * Katalogs und ändert sich nicht mit dem Fortschritt. Ein Abruf dafür wäre eine
+ * Anfrage für eine Zahl, die schon im Bündel steht.
+ */
+export function chapterEffortMinutes(stepKey: BrandStepKey): number {
+  return slotsForStep(stepKey).reduce((sum, session) => sum + session.effort.minutes, 0)
+}
+
+// ── 3 · Auto-Weiter: darf jetzt gewechselt werden? ────────────────────────
+
+export interface BrandAutoAdvanceInput {
+  /** Die Session, aus der der Auslöser kam (bestätigt, vertagt, Zug beendet). */
+  from: string
+  /** Was in DIESEM Augenblick offen ist — der Mensch darf überstimmt haben. */
+  active: string
+  /** Der Wegweiser aus der Antwort; `null` heisst „bleib, wo du bist". */
+  next: BrandNextSessionRef | null
+  /** Läuft gerade ein Strom (Zug oder Entwurf)? */
+  streaming: boolean
+  /** Steht noch eine Speicherung aus? */
+  savePending: boolean
+  /** Steht ein 409 offen? */
+  conflict: boolean
+}
+
+export type BrandAutoAdvance =
+  | { kind: 'stay' }
+  | { kind: 'session', stepKey: BrandStepKey, sessionKey: string }
+  /** Kapitelende — der Sprung auf die Abnahme-Seite kommt mit Paket 3c-ii. */
+  | { kind: 'acceptance', stepKey: BrandStepKey }
+
+const STAY: BrandAutoAdvance = { kind: 'stay' }
+
+/**
+ * DIE EINE ENTSCHEIDUNG „JETZT WEITER?" (§5, Entscheidung 2).
+ *
+ * ── VIER SPERREN, UND JEDE HAT IHREN VORFALL ─────────────────────────────
+ * 1. **Der Mensch hat überstimmt.** Zwischen Auslöser und Antwort liegt ein
+ *    Netz-Roundtrip; wer in dieser Zeit eine andere Session anklickt, will
+ *    dorthin. Ein Sprung danach risse ihm die Seite weg — deshalb `from`
+ *    UND `active`, und nicht nur „wohin".
+ * 2. **Ein laufender Strom.** Ein Session-Wechsel tauscht den Verlauf aus;
+ *    eine Blase, die dabei weiterschreibt, schreibt in ein fremdes Gespräch.
+ * 3. **Eine ausstehende Speicherung.** Der Wechsel lädt den Baustein neu,
+ *    und ein nicht ausgespülter Tastendruck liefe danach in einen 409 —
+ *    dieselbe `revision`-Falle wie beim Marken-Wechsel (Audit A3).
+ * 4. **Ein offener Konflikt.** Solange der Mensch nicht entschieden hat,
+ *    welche Fassung gilt, wird gar nichts bewegt.
+ *
+ * `next` auf die EIGENE Session ist ebenfalls `stay`: der Server nennt sie,
+ * solange ihr Wert noch nicht steht (ein Entwurf auf der Bühne etwa). Ein
+ * „Wechsel" auf sich selbst wäre ein zweiter Eröffnungszug für dasselbe Feld.
+ */
+export function decideAutoAdvance(input: BrandAutoAdvanceInput): BrandAutoAdvance {
+  if (input.conflict || input.streaming || input.savePending) return STAY
+  if (input.from !== input.active) return STAY
+  const next = input.next
+  if (!next) return STAY
+  if ('acceptance' in next) return { kind: 'acceptance', stepKey: next.stepKey }
+  if (next.sessionKey === input.from) return STAY
+  return { kind: 'session', stepKey: next.stepKey, sessionKey: next.sessionKey }
+}
+
+// ── 4 · Der Merker für den Eröffnungszug ──────────────────────────────────
+
+export interface BrandOpeningInput {
+  sessionKey: string
+  /** Sessions, die in DIESEM Besuch schon eröffnet wurden. */
+  opened: ReadonlySet<string>
+  /** Trägt der geladene Verlauf schon einen Zug des Beraters? */
+  hasAdvisorTurn: boolean
+  /** Läuft gerade ein Zug? */
+  streaming: boolean
+}
+
+/**
+ * BRAUCHT DIESE SESSION EINEN ERÖFFNUNGSZUG? (§6)
+ *
+ * Die Route ist selbst idempotent (`skipped: true`, wenn schon ein Zug des
+ * Beraters existiert) — dieser Merker spart trotzdem den Weg dorthin: ohne ihn
+ * schickte jedes Hin- und Herklicken zwischen zwei Sessions eine Anfrage, die
+ * garantiert nichts tut. Zwei Bedingungen, weil sie verschiedene Zeiträume
+ * meinen: `opened` ist DIESER Besuch, `hasAdvisorTurn` ist der gespeicherte
+ * Verlauf von gestern.
+ */
+export function needsOpeningTurn(input: BrandOpeningInput): boolean {
+  if (!input.sessionKey || input.streaming) return false
+  if (input.opened.has(input.sessionKey)) return false
+  return !input.hasAdvisorTurn
+}

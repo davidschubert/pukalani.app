@@ -36,7 +36,13 @@
       "dashboard": "Dashboard",
       "newBranding": "Create a new branding",
       "manageBrandings": "Manage brandings",
-      "footerNav": "Footer"
+      "footerNav": "Footer",
+      "sessionLocked": "The fields before this one come first.",
+      "acceptance": "Final sign-off",
+      "acceptancePending": "Opens once every field in this chapter is confirmed.",
+      "chapterCount": "{confirmed} of {total} confirmed",
+      "chapterCountStale": "{confirmed} of {total} confirmed · {stale} to revisit",
+      "chapterEffort": "{count} sessions, ~{minutes} min"
     },
     "legal": {
       "imprint": "Imprint",
@@ -552,7 +558,8 @@
           "sourceSlots": "at least one of the answers this field builds on"
         }
       },
-      "progressConfirmed": "{confirmed} of {total} confirmed"
+      "progressConfirmed": "{confirmed} of {total} confirmed",
+      "chapterReady": "Every field in this chapter is confirmed. The final sign-off is the next step."
     },
     "brands": {
       "title": "Brandings",
@@ -708,6 +715,21 @@
       "duplicateText": "This address is already on the list — you are up when the next wave opens.",
       "error": "That did not work just now. Please try again in a minute.",
       "consent": "We use your address only to invite you to the beta. No newsletter, never shared."
+    },
+    "session": {
+      "minutes": "~{minutes} min",
+      "affects": "This later feeds {count} more fields — in {steps}.",
+      "affectsNone": "A correction here does not trigger anything else.",
+      "defer": "Later",
+      "resume": "Pick this up again",
+      "deferredNote": "Deferred — we will come back to this. The chapter stays open until then.",
+      "deferFailed": "Deferring did not work.",
+      "resumeFailed": "Picking this up again did not work.",
+      "deferConfirmed": "This field is already confirmed — use “Correct” for that.",
+      "error": {
+        "session_locked": "This field is still locked — the fields before it come first.",
+        "session_foreign": "This field belongs to a different chapter."
+      }
     }
   }
 }

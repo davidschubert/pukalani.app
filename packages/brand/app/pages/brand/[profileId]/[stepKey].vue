@@ -1,13 +1,24 @@
 <script setup lang="ts">
 import type { BwSidebarBrand } from '../../../components/BwWorkspaceSidebar.vue'
-import type { BwRailLayer, BwRailStep, BwRailStepInfo } from '../../../components/BwProgressRail.vue'
+import type { BwRailLayer, BwRailSession, BwRailStep, BwRailStepInfo } from '../../../components/BwProgressRail.vue'
 import {
   BRAND_CONFIDENCE_VALUES,
   type BrandConfidence,
   type BrandJourneyStep,
+  type BrandNextSessionRef,
   brandStepCompletion,
   resolveNextQuestion,
+  resolveNextStop,
 } from '../../../../shared/brandJourney'
+import {
+  type BrandNavSession,
+  chapterEffortMinutes,
+  countChapterSessions,
+  decideAutoAdvance,
+  needsOpeningTurn,
+  resolveActiveSession,
+} from '../../../../shared/brandWorkspaceNav'
+import { sessionsAffectedBy } from '../../../../shared/brandSessions'
 import {
   BRAND_STEP_KEYS,
   type BrandPathKind,
@@ -16,6 +27,7 @@ import {
   type BrandStepKey,
   type BrandTeamKind,
   exampleKeyFor,
+  partLabelKeyFor,
   questionKeyFor,
   slotById,
   slotIsConfirmable,
@@ -49,6 +61,7 @@ import {
 } from '../../../../shared/brandSlotControls'
 import type {
   BrandGenerationVersionsResponse,
+  BrandSessionAcceptResponse,
   BrandSiteAnalysisView,
   BrandSiteAnalyzeResponse,
   BrandSlotView,
@@ -251,6 +264,18 @@ watch(introKey, (next) => {
 watch(routeStepKey, () => { conversation.reset() })
 
 /**
+ * EINE ANDERE SESSION IST EIN ANDERES GESPRÄCH (§6): `spoke`/`coveredSlotId`
+ * sagen, ob die Katalog-Frage schon gestellt wurde — beide gelten für die
+ * Session, in der sie entstanden sind. Ohne dieses Zurücksetzen unterdrückte
+ * ein Zug aus Session A die Frage in Session B.
+ *
+ * Der Beobachter steht hier bewusst NACH `activeSessionKey` (weiter unten
+ * deklariert wäre er zu spät) und arbeitet mit einem Getter, weil die Quelle
+ * erst dort entsteht — dieselbe TDZ-Vorsicht wie beim Scroll-Beobachter.
+ */
+watch(() => store.activeSessionKey, () => { conversation.reset() })
+
+/**
  * DER LOKALE „WEISS ICH NICHT"-ÜBERSPRINGER IST WEG (Runde 24, David): „das
  * kann man tippen, es ist derselbe Antwort-Weg" — Georges Ehrlichkeits-Umgang
  * übernimmt. Damit rechnet der Browser jetzt GENAU wie der Server: gefüllt ist,
@@ -268,6 +293,63 @@ const slotFacts = computed<Record<string, BrandSlotStateFacts>>(() => {
   return facts
 })
 
+// ── Die aktive Session (BW2 §11) ──────────────────────────────────────────
+
+/**
+ * DIE SESSION STEHT IN DER ADRESSE, NICHT IM ZUSTAND (Plan §11).
+ *
+ * `?s=<slotId>` auf DEMSELBEN Route-Record: Zurück und Vor im Browser
+ * funktionieren, ein Link auf „genau diese Frage" ist teilbar, und der
+ * Sticky-Fortschritt bleibt stehen, weil die Komponente gar nicht wechselt.
+ * Ein Zustand im Store könnte das alles nicht — er überlebt keinen Reload und
+ * hat keine Geschichte.
+ */
+const sessionQuery = computed(() => {
+  const raw = route.query.s
+  return typeof raw === 'string' ? raw : ''
+})
+
+/** Nur das, was die Wahl der aktiven Session braucht — s. `BrandNavSession`. */
+const navSessions = computed<Record<string, BrandNavSession>>(() => {
+  const map: Record<string, BrandNavSession> = {}
+  for (const [id, view] of Object.entries(store.sessions)) {
+    map[id] = { state: view.state, deferred: view.deferred }
+  }
+  return map
+})
+
+/**
+ * WELCHE SESSION IST OFFEN: Adresse ⇒ Wegweiser ⇒ erste offene
+ * (`resolveActiveSession`, pur und getestet).
+ *
+ * ── WARUM DER WEGWEISER HIER NICHT MITREIST ──────────────────────────────
+ * Die Rangfolge kennt ihn (und 3c-ii braucht ihn für die Abnahme-Seite), die
+ * BÜHNE bekommt ihn aber nicht als reaktive Quelle: `conversation.nextStop`
+ * fällt beim Session-Wechsel mit `conversation.reset()`, und eine Rechnung,
+ * die davon abhängt, spränge dann auf die erste offene Session zurück —
+ * sichtbares Flackern für einen Wechsel, der schon stattgefunden hat.
+ * Der Wegweiser wirkt deshalb an EINER Stelle: `autoAdvance()` navigiert mit
+ * ihm, und danach steht die Antwort in der Adresse (Rang 1). Nur dort hängen
+ * auch die Sperren (Strom, offene Speicherung, Konflikt).
+ */
+const activeSessionKey = computed<string>(() => (stepKey.value
+  ? resolveActiveSession({
+      stepKey: stepKey.value,
+      requested: sessionQuery.value,
+      sessions: navSessions.value,
+    }) ?? ''
+  : ''))
+
+const activeSlot = computed<BrandSlot | null>(() =>
+  (activeSessionKey.value ? slots.value.find(slot => slot.id === activeSessionKey.value) ?? null : null))
+
+/** Der Server-Stand der aktiven Session (Zustand, vertagt, Umfang, `affects`). */
+const activeSession = computed(() =>
+  (activeSessionKey.value ? store.sessions[activeSessionKey.value] ?? null : null))
+
+/** Der Store hält sie, damit Bühne, Leiste und Verlauf dieselbe Antwort lesen. */
+watch(activeSessionKey, key => store.setActiveSession(key), { immediate: true })
+
 const nextQuestion = computed(() =>
   (stepKey.value ? resolveNextQuestion(stepKey.value, slotFacts.value) : null))
 
@@ -283,8 +365,31 @@ const nextQuestion = computed(() =>
 const completion = computed(() =>
   (stepKey.value ? brandStepCompletion(stepKey.value, slotFacts.value) : null))
 
-const nextSlot = computed<BrandSlot | null>(() =>
-  slots.value.find(slot => slot.id === nextQuestion.value?.slotId) ?? null)
+/**
+ * DIE FRAGE AUF DER BÜHNE — und seit BW2 3c-i geht die AKTIVE SESSION VOR.
+ *
+ * Vorher zeigte die Bühne immer „das erste offene Feld" der Registry. Wer in
+ * der Leiste eine andere offene Session anklickte, landete trotzdem wieder bei
+ * der ersten — die Unterpunkte wären Zierde gewesen. Jetzt fragt die Bühne
+ * das, was der Mensch gewählt hat, SOFERN es überhaupt eine Frage ist
+ * (`question`/`choice` — Ableitungen und Bühnen-Entwürfe fragt George nie) und
+ * noch nichts drinsteht.
+ *
+ * Ist die aktive Session keine Frage oder schon beantwortet, gilt unverändert
+ * die Grundfassung: `resolveNextQuestion` in Registry-Reihenfolge. Der SERVER
+ * rechnet weiter seine eigene Reihenfolge und verwirft einen Wortlaut, der
+ * nicht dazu passt (`nextQuestionKnown: false`) — das ist die bestehende,
+ * gewollte Arbeitsteilung, nicht ein Nebeneffekt dieser Änderung.
+ */
+const nextSlot = computed<BrandSlot | null>(() => {
+  const active = activeSlot.value
+  if (active
+    && (active.type === 'question' || active.type === 'choice')
+    && !slotFacts.value[active.id]?.hasValue) {
+    return active
+  }
+  return slots.value.find(slot => slot.id === nextQuestion.value?.slotId) ?? null
+})
 
 /**
  * DIE ZÜGE DIESES BESUCHS, IN IHRER REIHENFOLGE — Berater UND Mensch (P3.2).
@@ -487,13 +592,19 @@ async function answerFromGeorge(text: string): Promise<void> {
   if (slot) autosave.schedule()
 
   const upcoming = nextSlot.value
+  // DIE SESSION REIST IMMER MIT (BW2 §6): ohne sie rechnete der Server die
+  // Grundfassung und George bekäme das Ziel eines anderen Feldes in den
+  // Prompt — genau die Session, die der Mensch NICHT angeklickt hat.
+  const from = activeSessionKey.value
   await conversation.converse({
     text,
+    ...(from ? { sessionKey: from } : {}),
     slotId: slot?.id,
     question,
     nextSlotId: upcoming?.id,
     nextQuestion: upcoming ? t(questionKeyFor(upcoming, pathKind.value, teamKind.value)) : '',
   })
+  await autoAdvance(from, conversation.nextStop.value)
 }
 
 /**
@@ -510,6 +621,199 @@ async function submitPrompt(): Promise<void> {
   exampleOpen.value = false
   await answerFromGeorge(said)
 }
+
+// ── Verlauf, Eröffnungszug und Auto-Weiter (BW2 §5/§6) ───────────────────
+
+/**
+ * WELCHE SESSIONS IN DIESEM BESUCH SCHON ERÖFFNET WURDEN — ein reiner
+ * Client-Merker (`needsOpeningTurn`). Die Route ist selbst idempotent; der
+ * Merker spart nur den Weg dorthin, wenn jemand zwischen zwei Sessions hin-
+ * und herklickt.
+ */
+const openedSessions = ref<Set<string>>(new Set())
+
+watch(routeStepKey, () => { openedSessions.value = new Set() })
+
+/**
+ * DER VERLAUF DIESER SESSION (brand-011).
+ *
+ * Als `useAsyncData`, nicht als Browser-Watcher: so malt schon der SERVER das
+ * Gespräch, und die Hydration schiebt es nicht nach. Der Rückgabewert trägt
+ * BEIDES — welche Session gemeint war und ob der Berater dort schon gesprochen
+ * hat. Über den SSR-Payload ist das die einzige Form, in der die Auskunft im
+ * Browser ankommt: eine Ref, die der Server setzt, startet hier wieder bei
+ * ihrem Anfangswert.
+ */
+const sessionHistory = await useAsyncData(
+  () => `brand-session-${profileId.value}-${routeStepKey.value}-${activeSessionKey.value}`,
+  async () => {
+    const key = activeSessionKey.value
+    if (!key) return { sessionKey: '', spoke: false }
+    const spoke = await store.loadSessionMessages(profileId.value, routeStepKey.value, key, request)
+    return { sessionKey: key, spoke }
+  },
+  { watch: [profileId, routeStepKey, activeSessionKey] },
+)
+
+/**
+ * DER ERÖFFNUNGSZUG (§6) — George spricht zuerst, wenn die Session noch stumm
+ * ist. Er läuft NUR im Browser: die Route streamt, und ein Strom im SSR wäre
+ * eine Antwort, die niemand liest.
+ */
+async function ensureOpeningTurn(sessionKey: string): Promise<void> {
+  const spoke = sessionHistory.data.value?.spoke === true
+  if (!needsOpeningTurn({
+    sessionKey,
+    opened: openedSessions.value,
+    hasAdvisorTurn: spoke,
+    streaming: conversation.pending.value,
+  })) {
+    // „Hier hat er schon gesprochen" ist ebenfalls eine Antwort — merken, damit
+    // der Rückweg auf diese Session nicht erneut nachschlägt.
+    if (spoke) openedSessions.value.add(sessionKey)
+    return
+  }
+  openedSessions.value.add(sessionKey)
+  await conversation.converse({ opening: true, sessionKey })
+  await autoAdvance(sessionKey, conversation.nextStop.value)
+}
+
+/**
+ * ERÖFFNET WIRD ERST, WENN DER VERLAUF DA IST — und nur für die Session, zu
+ * der er gehört. Am `activeSessionKey` allein zu hängen hiesse, mit dem Stand
+ * der VORIGEN Session zu entscheiden: ein überflüssiger Aufruf, den die Route
+ * zwar abweist (`skipped: true`), der aber trotzdem eine Anfrage kostet.
+ */
+if (import.meta.client) {
+  watch(() => sessionHistory.data.value, (data) => {
+    if (!data?.sessionKey || data.sessionKey !== activeSessionKey.value) return
+    void ensureOpeningTurn(data.sessionKey)
+  }, { immediate: true })
+}
+
+/**
+ * EINE SESSION ÖFFNEN — dieselbe Adresse, andere Query (§11).
+ *
+ * `navigateTo` mit `query` statt `path`: der Route-Record bleibt, die
+ * Komponente auch, und der Browser bekommt einen echten Eintrag in seiner
+ * Geschichte. Der AUSSPÜLER davor ist derselbe wie beim Baustein- und
+ * Marken-Wechsel (Audit A3): `onBeforeRouteLeave` feuert auf demselben Record
+ * nicht, und eine offene Eingabe wäre sonst weg.
+ */
+async function goToSession(sessionId: string): Promise<void> {
+  if (!sessionId || sessionId === activeSessionKey.value) return
+  await autosave.flush()
+  await navigateTo({ query: { ...route.query, s: sessionId } })
+}
+
+/**
+ * AUTO-WEITER (§5, Entscheidung 2) — die ENTSCHEIDUNG liegt pur nebenan
+ * (`decideAutoAdvance`), hier steht nur, was daraus folgt.
+ *
+ * Das Kapitelende (`acceptance`) springt in 3c-i BEWUSST NICHT: die
+ * Abnahme-Seite gibt es noch nicht (Paket 3c-ii). Der Mensch sieht stattdessen
+ * den ruhigen Hinweis unter dem Chat, und der Leisten-Eintrag „Finale Abnahme"
+ * hebt sich hervor — ein Sprung auf eine Seite, die es nicht gibt, wäre ein
+ * 404 als Belohnung für ein fertiges Kapitel.
+ */
+async function autoAdvance(from: string, next: BrandNextSessionRef | null): Promise<void> {
+  const decision = decideAutoAdvance({
+    from,
+    active: activeSessionKey.value,
+    next,
+    streaming: conversation.pending.value || generation.streaming.value,
+    savePending: store.hasPendingWork,
+    conflict: store.conflict !== null,
+  })
+  if (decision.kind !== 'session') return
+  if (decision.stepKey !== stepKey.value) return
+  await goToSession(decision.sessionKey)
+}
+
+/**
+ * VERTAGEN (§3a) — „darauf komme ich zurück", der vierte Ausgang neben
+ * Antwort, „weiss nicht" und Bestätigen.
+ *
+ * Er gilt nur, wo die Registry ihn kennt (`answers.allowDefer`, Davids
+ * Inhalts-Gate). Der Zwischenstand einer Sammel-Session bleibt stehen — die
+ * Route sagt es im Kopf, die Bühne zeigt ihn.
+ */
+const activeAllowsDefer = computed(() => activeSlot.value?.answers.allowDefer === true)
+const deferring = ref(false)
+
+async function setDeferred(deferred: boolean): Promise<void> {
+  const slot = activeSlot.value
+  if (!slot || !stepKey.value || deferring.value) return
+  deferring.value = true
+  try {
+    await autosave.flush()
+    const response = await $fetch<BrandSessionAcceptResponse>(
+      `/api/brand/profiles/${profileId.value}/steps/${stepKey.value}/sessions/${slot.id}/defer`,
+      { method: 'POST', body: { revision: store.revision, deferred } },
+    )
+    store.applySessionAcceptance(response)
+    // WEITER GEHT ES NUR BEIM VERTAGEN: wer eine Session wieder aufnimmt, will
+    // genau hier bleiben.
+    if (deferred) await autoAdvance(slot.id, response.next)
+  }
+  catch (error) {
+    const reason = (error as { data?: { reason?: string } }).data?.reason
+    toast.add({
+      color: 'warning',
+      title: t(deferred ? 'brand.session.deferFailed' : 'brand.session.resumeFailed'),
+      description: reason === 'already_confirmed' ? t('brand.session.deferConfirmed') : undefined,
+    })
+  }
+  finally {
+    deferring.value = false
+  }
+}
+
+/** Der Zwischenstand einer vertagten Sammel-Session — ANZEIGE, nie Eingabe. */
+const activeCollected = computed<{ label: string, value: string }[]>(() => {
+  const slot = activeSlot.value
+  const collected = activeSession.value?.collected
+  if (!slot || !collected) return []
+  return slot.parts
+    .filter(part => (collected[part] ?? '').trim().length > 0)
+    .map(part => ({ label: t(partLabelKeyFor(slot, part)), value: collected[part] ?? '' }))
+})
+
+/**
+ * „WOFÜR BRAUCHEN WIR DAS?" (§3a) — der Satz kommt aus einer RECHNUNG über der
+ * Registry, nie aus einer gepflegten Liste.
+ *
+ * Für das OFFENE Kapitel steht die Antwort schon in der `sessions`-Karte (der
+ * Server hat sie mit derselben Funktion gerechnet); für jedes andere rechnet
+ * der Browser sie selbst — `sessionsAffectedBy` ist pur und liegt im Bündel.
+ * Zwei Quellen, EIN Ergebnis: die Karte ist die Abkürzung, nicht eine zweite
+ * Wahrheit.
+ */
+function affectsLine(sessionId: string): string {
+  const known = store.sessions[sessionId]?.affects
+  const steps = known
+    ? known.steps
+    : store.railSteps
+        .map(entry => entry.stepKey)
+        .filter(candidate => sessionsAffectedBy(sessionId).byStep[candidate]?.length)
+  const count = known ? known.count : sessionsAffectedBy(sessionId).transitive.length
+  if (count === 0) return t('brand.session.affectsNone')
+  return t('brand.session.affects', {
+    count,
+    steps: steps.map(key => t(`brand.steps.${key}`)).join(' · '),
+  })
+}
+
+/**
+ * DIE ZWEI SESSION-ABLEHNUNGEN BEKOMMEN EINEN SATZ (3a-Befund 3): ein 409 ist
+ * eine Auskunft an ein Programm. Gesperrte Zeilen sind in der Leiste zwar gar
+ * nicht anklickbar — über die Adresszeile kommt man trotzdem hin.
+ */
+watch(() => conversation.sessionFailure.value, (failure) => {
+  if (!failure) return
+  toast.add({ color: 'warning', title: t(`brand.session.error.${failure}`) })
+  conversation.dismissSessionFailure()
+})
 
 // ── Slot-Zustände: eine Rechnung, zwei Leser (Bühne + Log) ────────────────
 
@@ -529,6 +833,12 @@ async function confirmSlot(slotId: string): Promise<void> {
   editingSlotId.value = null
   store.setSlotConfirmed(slotId, true)
   await autosave.flush()
+  // AUTO-WEITER NACH DEM BESTÄTIGEN (§5). Die PATCH-Antwort trägt KEINEN
+  // Wegweiser (`BrandStepSaveResponse` = `revision` + `slots`) — gerechnet
+  // wird er deshalb hier, mit DERSELBEN puren Regel wie auf dem Server
+  // (`resolveNextStop`) und aus den soeben gespeicherten Fakten. Eine eigene
+  // Rechnung wäre die zweite Antwort auf „was kommt jetzt".
+  if (stepKey.value) await autoAdvance(slotId, resolveNextStop(stepKey.value, slotFacts.value))
 }
 
 /**
@@ -547,8 +857,13 @@ async function reviseSlot(slotId: string): Promise<void> {
 const hints = ref<Record<string, string>>({})
 const hintOpen = ref(false)
 
-/** Die Bedien-Zustände der Bühne hängen am BAUSTEIN und fallen mit ihm. */
-watch(routeStepKey, () => {
+/**
+ * Die Bedien-Zustände der Bühne hängen am BAUSTEIN und fallen mit ihm — und
+ * seit BW2 3c-i genauso an der SESSION: ein halb getippter Satz, der beim
+ * Umschalten stehen bliebe, gehörte plötzlich zu einer anderen Frage, und ein
+ * offenes Korrektur-Feld zeigte auf ein Feld, das gar nicht mehr dasteht.
+ */
+watch([routeStepKey, activeSessionKey], () => {
   hints.value = {}
   hintOpen.value = false
   promptDraft.value = ''
@@ -681,8 +996,21 @@ const generationNotice = computed<string | null>(() => {
  */
 type StageModule = 'answer' | 'options' | 'draft' | 'confirm' | 'gate' | 'none'
 
-/** Der erste Pflicht-Slot ohne Bestätigung — in Registry-Reihenfolge. */
+/**
+ * WELCHE KARTE DIE BÜHNE ZEIGT — die AKTIVE Session, sonst der erste
+ * Pflicht-Slot ohne Bestätigung (Registry-Reihenfolge).
+ *
+ * Dieselbe Begründung wie bei `nextSlot`: wer in der Leiste den Entwurf
+ * `b.mission` anklickt, will ihn sehen und nicht den ersten offenen Slot des
+ * Kapitels. Bestätigt und nicht bestätigbar fallen durch — eine Karte mit
+ * „Übernehmen" für ein Feld, das niemand bestätigen kann (`d.pairs`), wäre ein
+ * Knopf ohne Wirkung (Audit A4).
+ */
 const pendingCard = computed<BrandSlotCard | null>(() => {
+  const active = activeSlot.value
+  if (active && slotIsConfirmable(active) && !store.slotConfirmed(active.id)) {
+    return cardFor(active.id)
+  }
   const first = completion.value?.missingRequired[0]
   return first ? cardFor(first) : null
 })
@@ -1085,20 +1413,121 @@ function railInfo(entry: BrandJourneyStep): BwRailStepInfo {
     description: t(`brand.stepInfo.${entry.stepKey}`),
     bausteine: slotsForStep(entry.stepKey)
       .filter(slot => slot.required)
-      .map(slot => ({ label: slotLabel(slot), note: slotNote(slot), done: done.has(slot.id) })),
+      // „Wofür brauchen wir das?" (§3a) steht am FELD, nicht am Kapitel: der
+      // Mensch fragt es, während er antwortet.
+      .map(slot => ({
+        label: slotLabel(slot),
+        note: slotNote(slot),
+        done: done.has(slot.id),
+        affects: affectsLine(slot.id),
+      })),
   }
+}
+
+/**
+ * DIE UNTERPUNKTE EINES KAPITELS (§11) — nur für das OFFENE, denn „nur das
+ * aktive Kapitel aufgeklappt" ist eine Aussage über die DATEN und keine
+ * zweite Regel in der Leiste.
+ *
+ * Der ZUSTAND einer Zeile hat drei Quellen, in dieser Rangfolge: die Session,
+ * in der der Mensch gerade steht (`active`), das Merkzeichen „vertagt" und
+ * erst dann der abgeleitete Server-Zustand. Vertagt schlägt `open`, weil es
+ * genau die Auskunft ist, die jemand sucht, der die Zeile wiederfindet.
+ *
+ * GESPERRT heisst NICHT ANKLICKBAR (3a-Befund 3): der Server wiese den Zug mit
+ * 409 `session_locked` ab, und ein Knopf, der garantiert in eine Absage läuft,
+ * ist kein Angebot.
+ */
+function railSessions(entry: BrandJourneyStep): BwRailSession[] {
+  const list: BwRailSession[] = slotsForStep(entry.stepKey).map((slot) => {
+    const view = store.sessions[slot.id]
+    const state = view?.state ?? 'locked'
+    return {
+      id: slot.id,
+      label: slotLabel(slot),
+      effort: t('brand.session.minutes', { minutes: slot.effort.minutes }),
+      state: slot.id === activeSessionKey.value
+        ? 'active'
+        : view?.deferred ? 'deferred' : state,
+      disabled: state === 'locked',
+      ...(state === 'locked' ? { title: t('brand.nav.sessionLocked') } : {}),
+    }
+  })
+  // DER PLATZHALTER (§11): die Finale Abnahme ist der letzte Eintrag jedes
+  // Kapitels. Ihr ZIEL und ihre Freischaltung kommen mit Paket 3c-ii — hier
+  // steht sie gesperrt, damit die Ordnung der Leiste schon stimmt und niemand
+  // sie später an anderer Stelle sucht.
+  list.push({
+    id: `${entry.stepKey}:acceptance`,
+    label: t('brand.nav.acceptance'),
+    state: 'locked',
+    kind: 'acceptance',
+    disabled: true,
+    highlight: completion.value?.slotsReady === true,
+    title: t('brand.nav.acceptancePending'),
+  })
+  return list
+}
+
+/**
+ * DER ZÄHLER EINES KAPITELS („7 von 11 bestätigt · 2 neu besprechen", §11).
+ *
+ * ── ZWEI QUELLEN, WEIL DER BROWSER ZWEI WISSENSSTÄNDE HAT ────────────────
+ * Für das OFFENE Kapitel liegt die `sessions`-Karte vor: dort steht jeder
+ * Zustand, also auch „veraltet". Über die anderen weiss der Browser nur, was
+ * die Journey sagt — die Zahl der noch offenen PFLICHT-Felder. Der Nenner
+ * bleibt in beiden Fällen die Zahl der Sessions; „neu besprechen" gibt es nur
+ * dort, wo es auch bekannt ist.
+ *
+ * Die Ungenauigkeit ist damit einseitig: ein bestätigtes OPTIONALES Feld eines
+ * fremden Kapitels zählt nicht mit. Zu wenig zu zeigen ist die richtige
+ * Richtung — ein Zähler, der zu viel behauptet, schickt niemanden mehr hin.
+ * Neun Abrufe beim Betreten der Werkstatt, nur damit die Leiste vollständig
+ * ist, wären der falsche Preis (dieselbe Regel wie im Log: fremde Kapitel
+ * werden beim AUFKLAPPEN gelesen).
+ */
+function railCounter(entry: BrandJourneyStep, current: boolean): string {
+  if (current) {
+    const counts = countChapterSessions(entry.stepKey, navSessions.value)
+    // Als LITERAL und nicht als Objekt weitergereicht: `t()` verlangt einen
+    // Index-Signatur-Typ, ein Interface hat keine.
+    const values = { confirmed: counts.confirmed, total: counts.total, stale: counts.stale }
+    return counts.stale > 0
+      ? t('brand.nav.chapterCountStale', values)
+      : t('brand.nav.chapterCount', values)
+  }
+  return t('brand.nav.chapterCount', {
+    confirmed: entry.progress.requiredTotal - entry.missingRequired.length,
+    total: slotsForStep(entry.stepKey).length,
+  })
 }
 
 const railLayers = computed<BwRailLayer[]>(() => [{
   id: 'foundation',
   label: t('brand.workspace.railLayer'),
-  steps: store.railSteps.map((entry): BwRailStep => ({
-    id: entry.stepKey,
-    label: t(`brand.steps.${entry.stepKey}`),
-    icon: '',
-    state: entry.stepKey === stepKey.value && entry.state !== 'done' ? 'active' : railState(entry.state),
-    info: railInfo(entry),
-  })),
+  steps: store.railSteps.map((entry): BwRailStep => {
+    const current = entry.stepKey === stepKey.value
+    return {
+      id: entry.stepKey,
+      label: t(`brand.steps.${entry.stepKey}`),
+      icon: '',
+      state: current && entry.state !== 'done' ? 'active' : railState(entry.state),
+      info: railInfo(entry),
+      counter: railCounter(entry, current),
+      // Die Unterpunkte und der Umfang gehören dem OFFENEN Kapitel: „nur das
+      // aktive aufgeklappt" (§11) ist damit eine Aussage über die Daten und
+      // keine zweite Regel in der Leiste.
+      ...(current
+        ? {
+            sessions: railSessions(entry),
+            effort: t('brand.nav.chapterEffort', {
+              count: slotsForStep(entry.stepKey).length,
+              minutes: chapterEffortMinutes(entry.stepKey),
+            }),
+          }
+        : {}),
+    }
+  }),
 }])
 
 /** Die Marken des Kontos für den Wähler oben in der Sidebar. */
@@ -1202,6 +1631,17 @@ async function goToStep(key: string | null): Promise<void> {
   // Komponente, `onBeforeRouteLeave` feuert dafür NICHT.
   await autosave.flush()
   await navigateTo(localePath(`/brand/${profileId.value}/${key}`))
+}
+
+/**
+ * DER KLICK AUS DER LEISTE — er schliesst zusätzlich das mobile Overlay
+ * (dieselbe Regel wie bei `goToStep`: wer angetippt hat, hat gewählt). Der
+ * Auto-Weiter ruft `goToSession` direkt: dort ist nie ein Overlay offen.
+ */
+async function selectSession(payload: { stepId: string, sessionId: string }): Promise<void> {
+  navOverlayOpen.value = false
+  if (payload.stepId !== routeStepKey.value) return
+  await goToSession(payload.sessionId)
 }
 
 /**
@@ -1379,6 +1819,7 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
         :sync-label="workspaceSyncLabel"
         @select="goToStep"
         @select-brand="goToBrand"
+        @select-session="selectSession"
       />
     </template>
 
@@ -1726,6 +2167,45 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
             </template>
           </div>
         </div>
+
+        <!-- DIE SESSION-ZEILE (BW2 3c-i): wofür das Feld gebraucht wird, und
+             der vierte Ausgang „Später". Sie steht UNTER dem Gespräch und auf
+             dessen Text-Flucht — über den Zügen wäre sie ein Kopf, und die
+             Bühne hat bewusst keinen (Umbau-Plan §2). -->
+        <div v-if="activeSlot" class="flex flex-col gap-2" style="padding-left: 2.65rem">
+          <p class="bw-label" style="color: var(--bw-muted)">{{ affectsLine(activeSlot.id) }}</p>
+
+          <!-- VERTAGT: der Zwischenstand bleibt sichtbar, aber nicht
+               bearbeitbar — der Wert entsteht im Gespräch. -->
+          <div v-if="activeSession?.deferred" class="rounded-2xl px-4 py-3" style="background: var(--bw-surface)">
+            <p class="text-sm" style="color: var(--bw-ink-soft)">{{ t('brand.session.deferredNote') }}</p>
+            <ul v-if="activeCollected.length" class="mt-2 space-y-1">
+              <li v-for="part in activeCollected" :key="part.label" class="bw-label" style="color: var(--bw-muted)">
+                {{ part.label }}: {{ part.value }}
+              </li>
+            </ul>
+            <UButton
+              size="sm" variant="ghost" color="neutral" class="mt-2 rounded-full"
+              icon="i-ph-arrow-counter-clockwise" :loading="deferring"
+              :label="t('brand.session.resume')" @click="setDeferred(false)"
+            />
+          </div>
+          <div v-else-if="activeAllowsDefer">
+            <UButton
+              size="sm" variant="ghost" color="neutral" class="rounded-full"
+              icon="i-ph-clock" :loading="deferring"
+              :label="t('brand.session.defer')" @click="setDeferred(true)"
+            />
+          </div>
+        </div>
+
+        <!-- KAPITELENDE (§5): in 3c-i wird NICHT gesprungen — die Finale
+             Abnahme ist Paket 3c-ii. Statt eines Sprungs ins Leere steht hier
+             ein ruhiger Satz, und in der Leiste hebt sich ihr Eintrag hervor. -->
+        <p
+          v-if="completion?.slotsReady" class="bw-pending"
+          style="padding-left: 2.65rem"
+        >{{ t('brand.workspace.chapterReady') }}</p>
 
         <!-- NOCH NICHT SO WEIT: eingerückt auf die Text-Flucht des Gesprächs
              (Avatar 2rem + Lücke 0.65rem). -->
