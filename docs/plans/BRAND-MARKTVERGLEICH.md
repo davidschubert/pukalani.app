@@ -3,9 +3,9 @@
 Stand 2026-09-05 (abends) · Status: **Strategie + Konzept FREIGEGEBEN (2026-09-05, §6);
 Prototyp M0/M0b von David ABGENOMMEN (2026-09-05, Playground Port 3012); Prototyp-Runde 1
 hat das Konzept ERWEITERT (§7: ein Motor, drei Ansichten; vier Quellen; Brand-Score;
-erweiterter Abruf; KI-Suche). Paket M1 „Layer + Vertrag" ist GEBAUT (Layer-Gerüst, Vertrag
-zu `brand`, drei Tabellen — Schema-Anhang B); als Nächstes M2 (Abruf + Extraktion).**
-Alles ab M2 ist noch nicht im Produkt.
+erweiterter Abruf; KI-Suche). Paket M1 „Layer + Vertrag" ist GEBAUT (Schema-Anhang B),
+Paket M2 „Abruf + Extraktion" ist GEBAUT (Anhang C); als Nächstes M3 (Vergleich +
+Befunde).** Alles ab M3 ist noch nicht im Produkt.
 
 ## 0. Was das hier ist
 
@@ -448,10 +448,18 @@ haben, das Marktprofil steht in der Inhaltssprache der Marke).
 | --- | --- | --- | --- |
 | M0 | Prototyp | §2.11 im Playground | **ABGENOMMEN** (David, 2026-09-05; M0b mit der §7-Erweiterung inbegriffen) |
 | M1 | Layer + Vertrag | packages/market, Manifeste, `marketProfile.ts`, Schema-Anhang (3 Tabellen), Abruf-Vertrag geteilt | **GEBAUT** (2026-09-05) — Schema-Anhang B unten, David liest gegen |
-| M2 | Abruf + Extraktion | robots/TDM, Pfad-Sperrliste, PII-Filter, Rohtext-Retention, Extraktions-Prompt `market-x-1`, Beleg-Riegel, Stub | Beweis-Skript mit erfundenen Seiten |
+| M2 | Abruf + Extraktion | robots/TDM, Pfad-Sperrliste, PII-Filter, Rohtext-Retention, Extraktions-Prompt `market-x-1`, Beleg-Riegel, Stub, KI-Aussensicht `market-ai-1` | **GEBAUT** (2026-09-05) — Vertrag Anhang C; `verify-market-fetch.mjs` 33/33 |
 | M3 | Vergleich + Befunde | Bericht-Prompt, Idempotenz, Befund-Art `market`, George-Block | Beweis + Gegenproben (Herabsetzungs-Filter) |
 | M4 | Oberfläche | Seite „Markt", Leiste, Schranke, Chips | Klick-Beweis |
-| M5 | Betrieb | Eimer, Sweep, Wächter (Parität, Bilanz), Messung, Doku/Changelog | Live-Build |
+| M5 | Betrieb | ~~Eimer~~ (vorgezogen, s. u.), Sweep, Wächter (Parität, Bilanz), Messung, Doku/Changelog | Live-Build |
+
+**Abweichung von dieser Skizze (M2, 2026-09-05):** Der **Eimer** (§2.8, „3 Läufe je
+Branding und Tag" plus Instanz-Deckel) war für M5 vorgesehen und ist mit M2 VORGEZOGEN —
+`packages/market/shared/marketLimits.ts` + `server/utils/marketQuota.ts`, dazu zwei
+IP-Zeilen in `05.rate-limit.ts` des Core. Grund: ab M2 gibt es echte Modell-Aufrufe (je
+Wettbewerber eine Extraktion plus zwei Aussensicht-Antworten, also bis zu fünfzehn je
+Lauf). Ein Kostendeckel, der erst NACH der ersten Rechnung eingebaut wird, ist keiner.
+Bei M5 bleiben Sweep (Rohtext-Frist), Messung und die Wächter.
 
 ## 6. Entscheidungen (David, 2026-09-05 — alle nach Empfehlung)
 
@@ -887,3 +895,172 @@ Fragenden.
 
 Schema-Parität: Soll-Block `MARKET_TABLES` in
 `scripts/ops/verify-schema-parity.mjs`, aufgenommen in `BRANDING_SOLL`.
+
+---
+
+## Anhang C — Abruf- und Extraktions-Vertrag (M2, Stand 2026-09-05)
+
+Gebaut in Paket **M2 „Abruf + Extraktion"**. Was hier steht, ist der Vertrag —
+die Begründungen stehen im Kopf der jeweiligen Datei.
+
+### Wo was liegt
+
+| Sache | Ort |
+| --- | --- |
+| Geteilter Mehrseiten-Abruf (§7.4) | `packages/brand/server/utils/brandSiteCrawl.ts` + `packages/brand/shared/brandSiteCrawlParse.ts` |
+| Generischer SSRF-fester Abruf | `packages/brand/server/utils/brandSiteFetch.ts` (`fetchBrandDocument`, additiv; `fetchBrandSite` ist seither eine Hülle darum) |
+| robots.txt | `packages/market/shared/marketRobots.ts` |
+| Sperrliste, Seitenwahl, TDM, Deckel, URL-Normalisierung | `packages/market/shared/marketCrawlRules.ts` |
+| PII-Filter | `packages/market/shared/marketPii.ts` |
+| Beleg-Riegel, Häufigkeit, Konsens | `packages/market/shared/marketExtractRules.ts` |
+| Drossel | `packages/market/shared/marketLimits.ts` + `server/utils/marketQuota.ts` |
+| Pipeline / Extraktion / Aussensicht | `packages/market/server/utils/marketFetch.ts`, `marketExtract.ts`, `marketAiView.ts` |
+| Routen | `packages/market/server/api/market/profiles/[id]/**` |
+
+Der market-Layer greift auf `brand` AUSSCHLIESSLICH über
+`packages/market/server/contracts/brandContract.ts` zu (CONCEPT A14). Das rohe
+HTML verlässt den brand-Layer NICHT: über die Grenze reisen ausgewertete Seiten
+(Titel, Text, interne Adressen, Meta-Anweisungen, JSON-LD), nie Quelltext —
+`fetchBrandDocument` steht deshalb bewusst nicht im Vertrag.
+
+### Prompt-Versionen
+
+| Version | Zweck | Datei |
+| --- | --- | --- |
+| `market-x-1` | Extraktion des Marktprofils aus dem Rohtext, EIN Aufruf je Wettbewerber | `server/prompts/marketExtractPrompt.ts` |
+| `market-ai-1` | KI-Aussensicht (§7.5), je Modell EIN Aufruf, nur fünf Felder | `server/prompts/marketAiViewPrompt.ts` |
+
+Beide stehen in `market_profiles.promptVersion`. Wer den Text ändert, hebt die
+Nummer. Das Modell antwortet in der INHALTSSPRACHE der Website und übersetzt
+nichts — ein übersetztes Zitat fiele durch den Beleg-Riegel.
+
+### Absender und Erlaubnis
+
+`PukalaniMarketBot/1.0 (+https://branding.supply/market-bot)` — ein EIGENER
+Absender neben dem des Wizards (`PukalaniBrandWizard/1.0`): wer uns in seiner
+`robots.txt` etwas erlauben oder verbieten will, muss die zwei Vorgänge trennen
+können. Geprüft wird gegen dasselbe Token, mit dem angefragt wird.
+
+Der robots-Parser kennt `User-agent`, `Allow`, `Disallow`, `*` und `$`; die
+eigene Gruppe schlägt `*` vollständig, die längste passende Regel gewinnt, bei
+Gleichstand gewinnt `Allow` (RFC 9309 §2.2.2). Keine `robots.txt` ⇒ erlaubt.
+
+### Nutzungsvorbehalt — die vier anerkannten Formen (§2.9 Nr. 1)
+
+1. Kopfzeile `TDM-Reservation: 1`
+2. `/.well-known/tdmrep.json` mit `"tdm-reservation": 1` (pfadgenau über `location`)
+3. `<meta name="robots" content="noai">` / `noimageai` / `notrain` / `noml`
+   (auch in `googlebot`/`bingbot`)
+4. `<meta name="tdm-reservation" content="1">`
+
+**Fail-closed bei Zweifel:** eine vorhandene, aber nicht parsebare
+`tdmrep.json` gilt als Vorbehalt (BGH I ZR 281/25 ist offen). Ein Vorbehalt auf
+IRGENDEINER gelesenen Seite schliesst den ganzen Wettbewerber aus — er ist eine
+Willenserklärung des Betreibers, keine Eigenschaft einer Unterseite.
+
+### Sperrliste und Seitenwahl
+
+Gesperrt, segmentweise (deutsch + englisch): Personenbezug (`team`,
+`impressum`, `kontakt`, `jobs`, `presse`, …), Rechtstexte (`datenschutz`,
+`agb`, `terms`, `cookies`, …), Funktionsseiten (`login`, `account`, `cart`,
+`checkout`, `search`, …) und Tagesaktuelles (`blog`, `news`, `magazin`,
+`events`) — Blog/News, weil sie das Seiten-Budget mit Momentaufnahmen füllen
+und die Häufigkeits-Rechnung verzerren. Dazu Nicht-Seiten (`.pdf`, Bilder,
+Archive). Volle Liste: `MARKET_BLOCKED_PATH_SEGMENTS`.
+
+Gewählt werden Startseite + bis zu sieben weitere, aus `sitemap.xml` (aus der
+`Sitemap:`-Zeile der robots.txt, sonst `/sitemap.xml`; ein Index eine Ebene
+tief) und den internen Links der Startseite, geordnet nach Pfad-Heuristik
+(über-uns → werte/mission → leistungen/produkte → preise → faq → referenzen).
+Sitemap vor Links: bei gleichem Rang gewinnt, was die Website selbst als
+wichtig ausweist.
+
+### Grenzen (§2.8)
+
+| Grenze | Wert |
+| --- | --- |
+| Seiten je Wettbewerber | 8 (Startseite + 7) |
+| Bytes je Seite | 2 MB (Draht UND entpackt) |
+| Zeichen je Seite | 20 000 |
+| Zeichen je LAUF an die Modelle | 60 000 (§2.8 schlägt §7.4s 80 000/Marke — die engere Zahl gilt) |
+| Zeitgrenze je Abruf | 10 s |
+| Rohtext-Aufbewahrung | 24 h (`rawExpiresAt`; der Sweep kommt mit M5) |
+
+### Drossel (aus M5 vorgezogen)
+
+3 Läufe je Branding und Tag, Instanz-Deckel 50/Tag
+(`pukalani.market.runDailyInstanceCap`), rollierendes 24-h-Fenster. Dazu je IP
+in `05.rate-limit.ts`: `market:run` 5/min, `market:competitors` 60/min.
+Ablehnungs-Codes `market_run_limit` / `market_instance_limit` als `data.code`
+in einer 429 mit `Retry-After`.
+
+### Fehler- und Ablehnungscodes der Routen
+
+| Code | Status | Wann |
+| --- | --- | --- |
+| `market_locked` | 409 | Kapitel B (`pvm`) noch nicht abgenommen — nur der Lauf |
+| `competitor_limit` | 409 | mehr als fünf Kandidaten |
+| `competitor_duplicate` | 409 | derselbe Host (inkl. abweichendem Port) schon eingetragen |
+| `competitor_url_invalid` | 400 | keine brauchbare Website-Adresse |
+| `market_run_limit` / `market_instance_limit` | 429 | Tages-Deckel |
+| — | 404 | fremdes/unbekanntes Branding, fehlende Beta-Zulassung, keine Session |
+
+### Extraktion und ihre drei deterministischen Riegel
+
+1. **Zod** auf die Modell-Antwort, fail-soft JE FELD.
+2. **Beleg-Riegel:** `evidence.quote` muss (whitespace- und typografie-
+   normalisiert, **case-sensitiv**) wörtlich im Rohtext GENAU DER genannten
+   Seite stehen. Sonst wird das Feld VERWORFEN. `sourceUrl` muss eine gelesene
+   Seite sein.
+3. **Häufigkeit** wird im Code gezählt (Kern des Zitats ab 25 Zeichen, über die
+   Seiten des Rohtexts), nie vom Modell übernommen.
+
+`inputHash` = sha256 über den Rohtext. Gleicher Hash ⇒ keine erneute
+Extraktion (der Abruf läuft trotzdem — das Feststellen der Unverändertheit ist
+sein Zweck).
+
+### KI-Aussensicht (§7.5)
+
+Fünf Felder (Kategorie, Pitch, Zielgruppe, Erste Wahl, Werte), ≥ 2
+VERSCHIEDENE Modelle aus `pukalani.market.ai.outsideViewModels` (Default LEER =
+keine Aussensicht — das ist die Leitplanke, nicht eine fehlende Einstellung).
+Übernommen wird nur, was inhaltlich übereinstimmt (normalisierte Gleichheit
+oder Token-Jaccard ≥ 0,5); der Wert ist die WÖRTLICHE Antwort des ersten
+Modells der grössten übereinstimmenden Gruppe. Ablage in der EIGENEN Spalte
+`market_profiles.aiOutsideView`, nie in `fields`; kein Einfluss auf irgendeinen
+Score.
+
+### Stub-Verhalten (`MARKET_DEV_STUB=1`)
+
+Ersetzt den ANBIETER, nicht die Prüfung. Die Extraktion baut aus dem Rohtext
+eine Modell-förmige Antwort (erster brauchbarer Satz je Seite als Beleg) und
+schickt sie durch dieselbe Zod-Form, denselben Beleg-Riegel und dieselbe
+Zählung. EIN Feld (`distinctiveAsset`) trägt absichtlich ein ERFUNDENES Zitat
+und muss verworfen werden — das ist die Gegenprobe des Riegels ohne
+Anbieter-Kosten. Die Aussensicht liefert zwei erfundene „Modelle", die in einem
+Feld (`firstChoice`) uneinig sind, damit auch der Konsens-Filter beweisbar
+etwas WEGLÄSST.
+
+Dazu `BRAND_SITE_FETCH_ALLOW_LOOPBACK=1` (nur ausserhalb `production`): die
+einzige Ausnahme im SSRF-Vertrag, ausschliesslich für Loopback, damit ein
+Beweis gegen eigene Demo-Server überhaupt möglich ist.
+
+### Beweise
+
+- Unit (`pnpm --filter @pukalani/market test`, 101): robots-Parser,
+  TDM-Erkennung, Sperrliste, Seitenwahl, URL-Normalisierung, PII-Filter,
+  Beleg-Riegel, Häufigkeit, Konsens-Filter, Pipeline-Reihenfolge mit
+  eingesetztem Abruf — jeder mit Gegenprobe.
+- Unit brand (`tests/brandSiteCrawlParse.test.ts`): Links, Meta-Anweisungen,
+  JSON-LD, Sitemap-Index.
+- End-to-end: `packages/market/scripts/verify-market-fetch.mjs` — **33/33**
+  gegen echte Route, echte Ablage und fünf erfundene Websites auf eigenen
+  node:http-Servern (2026-09-05).
+
+**Gelernt:** Zwei Regeln waren beim ersten Anlauf zu grob, und BEIDE fand erst
+eine Gegenprobe. (1) Der Dubletten-Schlüssel liess den Port weg — im Beweis
+lagen fünf Websites auf `127.0.0.1` und galten als EINE Marke; der Port gehört
+dazu, sobald er abweicht. (2) Der Stub gab fertige Felder zurück und lief damit
+am Beleg-Riegel VORBEI: der Beweis hätte eine Kette geprüft, deren teuerstes
+Glied im Ersatz-Betrieb gar nicht mitlief. Ein Ersatz gehört durch dieselbe
+Prüfung wie das Echte, sonst prüft er sich selbst.

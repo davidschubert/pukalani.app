@@ -53,6 +53,26 @@
 export { BrandSiteFetchError, fetchBrandSite } from '../../../brand/server/utils/brandSiteFetch'
 export type { BrandSiteFetchResult } from '../../../brand/server/utils/brandSiteFetch'
 
+// ── Der geteilte MEHRSEITEN-Abruf (§7.4, gebaut in M2) ─────────────────────
+// Er liegt in `packages/brand/server/utils/brandSiteCrawl.ts` — genau dort, wo
+// der Absatz darüber ihn hinbestellt hat. Was hier durchgereicht wird, sind
+// AUSGEWERTETE Seiten (Titel, Text, interne Adressen, Meta-Anweisungen,
+// JSON-LD) und Textressourcen; das rohe HTML bleibt im brand-Layer, und
+// `fetchBrandDocument` steht deshalb BEWUSST NICHT in dieser Liste.
+//
+// Der ABSENDER reist mit (`BRAND_MARKET_USER_AGENT`/`BRAND_MARKET_BOT_TOKEN`):
+// er ist Teil desselben Vertrags wie der Abruf — wer eine `robots.txt` gegen
+// einen anderen Namen prüft als den, mit dem er anfragt, prüft nichts.
+export {
+  BRAND_MARKET_BOT_TOKEN,
+  BRAND_MARKET_USER_AGENT,
+  crawlBrandPage,
+  crawlBrandSitemap,
+  crawlBrandTextResource,
+} from '../../../brand/server/utils/brandSiteCrawl'
+export type { BrandCrawledPage, BrandCrawledText } from '../../../brand/server/utils/brandSiteCrawl'
+export { sitemapUrlsFromRobots } from '../../../brand/shared/brandSiteCrawlParse'
+
 // ── Besitz: „gehört dieses Branding dem Aufrufer?" ─────────────────────────
 // `market` hat KEINE eigene Autorisierung und soll auch keine bekommen: alle
 // market_*-Tabellen sind server-only (Permissions `[]`), die einzige Grenze
@@ -79,3 +99,37 @@ export type { BrandProfileCascade } from '../../../brand/server/utils/brandProfi
 // Gegenprobe im Test gebraucht.
 export { BRAND_SLOTS, slotById } from '../../../brand/shared/slotRegistry'
 export type { BrandSlot } from '../../../brand/shared/slotRegistry'
+
+// ── Das Zugangs-Gate der Beta (§2.4) ───────────────────────────────────────
+// `market` bekommt KEIN eigenes Gate. Der Marktvergleich ist ein Zusatz zum
+// Wizard; wer nicht in dessen Beta ist, hat kein Branding, gegen das er
+// vergleichen könnte. `requireBrandAccess` wirft 404 (Datentür-Muster) und
+// liefert die `userId`, mit der `loadOwnedProfile` weiterarbeitet.
+export { requireBrandAccess } from '../../../brand/server/utils/brandAccess'
+
+// ── Die FREISCHALTUNG: „ist Kapitel B abgenommen?" (§2.4) ──────────────────
+// Ein Kapitel ist abgenommen, wenn seine `brand_steps`-Zeile auf `done` steht
+// (das setzt `…/steps/:stepKey/complete`). `market` liest diese Zeile über den
+// Vertrag statt die Tabelle selbst abzufragen — sonst gäbe es eine zweite
+// Wahrheit darüber, was „abgenommen" heisst, sobald sich die Regel im
+// brand-Layer ändert.
+//
+// `confirmedSlotValues` ist die zweite Hälfte derselben Sache und wird für die
+// Quelle `foundation` gebraucht (§7.2 Nr. 2): das Marktprofil der EIGENEN
+// Marke entsteht aus den BESTÄTIGTEN Feldern, ohne Abruf und ohne Beleg.
+export { confirmedSlotValues, loadStepRow, loadStepRows } from '../../../brand/server/utils/brandStore'
+export type { BrandStepRow } from '../../../brand/server/utils/brandStore'
+
+// ── Der KI-Kill-Switch der Laufzeit (§2.8) ─────────────────────────────────
+// `app_config.brandAiEnabled` schaltet die KI der ganzen Instanz ab — auch die
+// des Marktvergleichs. EIN Schalter und nicht zwei: der Betreiber, der die
+// Rechnung stoppt, will alle Anbieter-Aufrufe stoppen, nicht überlegen, welche
+// Produkte er einzeln umlegen muss.
+export { readBrandAiEnabled } from '../../../brand/server/utils/brandGenerators'
+
+// ── Die Datenschutz-Bedingungen jedes Anbieter-Aufrufs (§2.7) ──────────────
+// ZDR, `dataCollection: 'deny'`, keine Ausweich-Anbieter. Fremder
+// Website-Text ist Markeninhalt wie jeder andere und bekommt wörtlich
+// dieselben Bedingungen — eine eigene Konstante hier wäre die vierte Kopie
+// derselben drei Felder, gegen die `brandProviderRouting.ts` argumentiert.
+export { BRAND_PROVIDER_ROUTING } from '../../../brand/server/utils/brandProviderRouting'

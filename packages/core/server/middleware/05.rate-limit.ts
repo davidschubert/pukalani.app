@@ -536,6 +536,40 @@ const WRITE_LIMITED: { re: RegExp, bucket: string, max?: number }[] = [
    */
   { re: /^POST \/api\/brand\/check\/[^/]+\/correction$/, bucket: 'brand:correction', max: 3 },
   /**
+   * DER MARKTVERGLEICHS-LAUF (MV1 M2, Plan §2.9 Nr. 8: „Rate-Limit je IP auf
+   * den Abruf-Endpunkt") — die teuerste Route dieses Servers.
+   *
+   * EIN Klick holt bis zu FÜNF fremde Websites mit je bis zu ACHT Seiten und
+   * bezahlt danach bis zu fünf Extraktionen und zehn Aussensicht-Antworten.
+   * Er ist damit ungefähr das Vierzigfache der Brand-Analyse — und die Last
+   * trifft fremde Server, aus unserem Rechenzentrum, uns zugerechnet.
+   *
+   * 5/min je IP ist deutlich enger als `TOKEN_MAX` und passt zum Gebrauch: ein
+   * Mensch stösst einen Vergleich an und liest dann ein Ergebnis. Der WIRKSAME
+   * Deckel sitzt ohnehin IN der Route (3/Tag je Branding plus Instanz-Deckel —
+   * `packages/market/shared/marketLimits.ts`); diese Zeile zählt je IP und
+   * DAVOR, bevor die erste fremde Verbindung aufgebaut wird.
+   *
+   * WARUM NICHT 2/min, wie zuerst gesetzt: hier zählt JEDER Aufruf, auch der
+   * abgewiesene (die Middleware läuft vor jedem Handler). Ein 409
+   * `market_locked` und ein 404 auf ein fremdes Branding verbrauchen dasselbe
+   * Budget wie ein echter Lauf — bei 2/min sperrte sich aus, wer einmal zu
+   * früh klickt und es dann richtig macht. Der Tages-Deckel von 3 macht die
+   * Minute ohnehin zur zweiten Reihe.
+   */
+  { re: /^POST \/api\/market\/profiles\/[^/]+\/run$/, bucket: 'market:run', max: 5 },
+  /**
+   * DAS FÜHREN DER KANDIDATENLISTE (anlegen, ändern, entfernen). Sie kostet
+   * keinen Anbieter-Cent und keine fremde Verbindung — aber jeder Aufruf
+   * schreibt über den Admin-Client, an dem Appwrites eigene Bremse nicht
+   * greift. `WRITE_MAX` ist hier richtig: eine Liste mit fünf Einträgen
+   * zusammenzustellen sind ein paar Klicks, kein Dauerbetrieb.
+   *
+   * EIN gemeinsamer Bucket für alle drei Methoden, weil es EIN Vorgang ist.
+   * Die GET-Routen stehen bewusst NICHT hier: sie lesen fertige Zeilen.
+   */
+  { re: /^(POST|PATCH|DELETE) \/api\/market\/profiles\/[^/]+\/competitors/, bucket: 'market:competitors', max: WRITE_MAX },
+  /**
    * INHALTE ÜBERSETZEN (2026-08-17) — dieselbe Kostenklasse wie eine Zeile
    * darüber, nur häufiger erreichbar: jeder Klick schickt bis zu 10.000 Zeichen
    * an den KI-Anbieter und bezahlt die Antwort. Beide Routen haben SCHON eine

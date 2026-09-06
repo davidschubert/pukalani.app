@@ -26,6 +26,36 @@ export default defineAppConfig({
   pukalani: {
     market: {
       enabled: false,
+      /**
+       * DIE MODELLE DES MARKTVERGLEICHS (MV1 M2).
+       *
+       * `extractModel` LEER heisst „nimm das Stufe-1-Modell des Wizards"
+       * (`pukalani.brand.ai.reviewModel`, s. `server/utils/marketAi.ts`). Ein
+       * hier abgeschriebener Modellname wäre eine zweite Wahrheit, die beim
+       * nächsten Wechsel im brand-Layer stehen bleibt — und weil
+       * `allowFallbacks: false` gilt, wäre ein ungeprüftes Modell kein
+       * langsamerer Lauf, sondern gar keiner.
+       *
+       * `outsideViewModels` ist die KI-Aussensicht (§7.5). LEER ist der
+       * Default, und das ist die Leitplanke, nicht eine fehlende Einstellung:
+       * die Aussensicht verlangt Übereinstimmung zwischen ZWEI VERSCHIEDENEN
+       * Modellen — ohne zwei Einträge gibt es sie nicht, und das ist besser
+       * als eine ungeprüfte Einzelantwort neben belegten Feldern. Wer sie
+       * einschaltet, trägt hier zwei Modelle VERSCHIEDENER Anbieter ein, die
+       * beide durch `BRAND_PROVIDER_ROUTING` (ZDR) erreichbar sind.
+       */
+      ai: {
+        extractModel: '',
+        outsideViewModels: [] as string[],
+      },
+      /**
+       * Der instanzweite Tages-Deckel für Läufe (§2.8, vorgezogen aus M5).
+       * Zahl und Prüfung stehen in `shared/marketLimits.ts` — nur eine ganze
+       * Zahl > 0 gilt. ABSCHALTEN geht hierüber bewusst nicht: dafür gibt es
+       * `app_config.products.market.enabled` (Produkt) und
+       * `app_config.brandAiEnabled` (KI).
+       */
+      runDailyInstanceCap: 50,
     },
   },
 })

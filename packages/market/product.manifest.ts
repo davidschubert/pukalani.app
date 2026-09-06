@@ -11,9 +11,10 @@ import type { ProductManifest } from '../core/shared/types/manifest'
  * (`market_competitors`, `market_profiles`, `market_reports`, Migrationen
  * market-001…003, Schema-Anhang B des Plans), der explizite Vertrag zum
  * brand-Layer (`server/utils/brandContract.ts`), der Store, der
- * GDPR-Contributor und die Profil-Kaskade. Es gibt weiterhin KEINE Route und
- * KEINEN KI-Aufruf — die kommen mit M2 (Abruf + Extraktion) und M3
- * (Vergleich + Befunde).
+ * GDPR-Contributor und die Profil-Kaskade. Seit **M2 „Abruf + Extraktion"** stehen darauf die
+ * Routen unter `/api/market/profiles/:id/*` (Kandidaten führen, Lauf), der
+ * geteilte Mehrseiten-Abruf im brand-Layer (§7.4), der Beleg-Riegel und die
+ * KI-Aussensicht (§7.5). Der VERGLEICH (Bericht, Befunde) kommt mit M3.
  *
  * `hasMigrations: true` seit M1: der Layer steht damit in der LAYER_ORDER von
  * `scripts/migrate.mjs` (NACH `brand` — seine Tabellen hängen an
@@ -28,15 +29,21 @@ import type { ProductManifest } from '../core/shared/types/manifest'
  * sondern in der Zuteilung (`entitlementKey`, hier = key) und in der
  * Schranke der Oberfläche (§1.9: „frei bauen, bezahlt anwenden").
  *
- * `apiPrefixes` bleibt LEER, solange es keine Route gibt: ein Präfix, hinter
- * dem nichts liegt, ist ein Versprechen an die Produkt-Gate-Middleware, das
- * niemand einlöst. Er kommt mit der ersten Route in M2 (`/api/market`).
+ * `apiPrefixes: ['/api/market']` seit **M2**: die erste Route steht, und damit
+ * ist das Versprechen eingelöst. Die Middleware `04.product-gate.ts` (core)
+ * matcht JEDE `/api/market/**`-Route gegen den Produkt-Schalter — die
+ * Notabschaltung `app_config.products.market.enabled = false` antwortet danach
+ * mit 404 für alles, ohne dass ein Handler etwas davon wissen muss.
+ *
+ * EIN Präfix und nicht mehrere: alle Routen liegen darunter, und ein zweiter
+ * Eintrag wäre die Stelle, an der man den einen künftig vergisst.
  */
 export default {
   key: 'market',
   tier: 'optional',
   requires: ['brand'],
   hasMigrations: true,
+  apiPrefixes: ['/api/market'],
   title: { en: 'Market comparison', de: 'Marktvergleich' },
   description: {
     en: 'Puts your brand foundation next to what competitors publicly say — field by field, every statement with a quote and its source.',
