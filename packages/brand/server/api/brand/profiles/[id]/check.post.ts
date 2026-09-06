@@ -28,7 +28,7 @@ import {
 } from '../../../../utils/brandStore'
 
 /**
- * DER FUNDAMENT-CHECK (docs/plans/BRAND-CHECK-SEITE.md §5b, Davids
+ * DER FUNDAMENT-CHECK (docs/archiv/BRAND-CHECK-SEITE.md §5b, Davids
  * Entscheidung 3 vom 2026-09-05: „sofort mit").
  *
  * Er beantwortet die Frage, die eine Brand OHNE Website sonst gar nicht

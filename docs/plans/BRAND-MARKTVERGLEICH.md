@@ -503,7 +503,7 @@ gleichem Input und verschiedenem Output — KEINE drei Produkte:
 
 **Korrektur nach Blick auf `main` (2026-09-05, abends, David bestätigt):** Der **Brand-Check
 existiert bereits** — gebaut von einer parallelen Sitzung (docs/archiv/BRAND-CHECK.md,
-docs/plans/BRAND-CHECK-SEITE.md, Migrationen brand-016/017, Tabelle `brand_checks`,
+docs/archiv/BRAND-CHECK-SEITE.md, Migrationen brand-016/017, Tabelle `brand_checks`,
 `/brand-check` mit Start/Ranking/Quartett-Vergleich/„Meine Brands"/Dokument-Check).
 Er misst mit 40 Kriterien in 8 Kategorien, **wie gut ein Auftritt gemacht ist** (Reifegrad,
 Score 0–100, öffentliches Ranking mit Opt-in des Prüfers). Der Marktvergleich misst etwas

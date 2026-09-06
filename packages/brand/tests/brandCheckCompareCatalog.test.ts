@@ -6,7 +6,7 @@ import { BRAND_CHECK_CATEGORIES } from '../shared/brandCheck'
 
 /**
  * DIE VERGLEICHS-SEITE UND DER MARKENABDRUCK RENDERN REINEN KATALOG-TEXT
- * (docs/plans/BRAND-CHECK-SEITE.md §4 und §10, Paket P4).
+ * (docs/archiv/BRAND-CHECK-SEITE.md §4 und §10, Paket P4).
  *
  * Muster und Begründung wie `brandCheckRankingCatalog.test.ts`: vue-i18n gibt
  * bei einem fehlenden Schlüssel den SCHLÜSSEL zurück — ohne Fehler, ohne roten

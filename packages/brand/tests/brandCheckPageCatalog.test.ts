@@ -7,7 +7,7 @@ import { BRAND_CHECK_CATEGORIES } from '../shared/brandCheck'
 /**
  * DIE START-SEITE DES BRAND-CHECKS RENDERT REINEN KATALOG-TEXT
  * (`packages/brand/app/pages/brand-check/index.vue`, Plan
- * docs/plans/BRAND-CHECK-SEITE.md §2) — und vue-i18n gibt bei einem fehlenden
+ * docs/archiv/BRAND-CHECK-SEITE.md §2) — und vue-i18n gibt bei einem fehlenden
  * Schlüssel den SCHLÜSSEL zurück, ohne Fehler und ohne roten Build. Auf einer
  * SEO-Seite hiesse das: `brand.checkPage.faq.q3A` steht wörtlich im FAQPage-
  * JSON-LD, das an Google geht. Genau das fängt dieser Test.

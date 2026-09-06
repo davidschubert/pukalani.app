@@ -4,7 +4,7 @@ import type { BrandCheckCriterionResult } from '../../shared/types/brand'
 
 /**
  * DIE AMPEL-MATRIX 8 × 5 — die dritte Zoomstufe („Diagnose",
- * docs/plans/BRAND-CHECK-SEITE.md §10).
+ * docs/archiv/BRAND-CHECK-SEITE.md §10).
  *
  * Acht Zeilen (die Kategorien in Katalog-Reihenfolge), fünf Zellen je Zeile
  * (ihre Kriterien, ebenfalls in Katalog-Reihenfolge). VIER Zustände, mehr

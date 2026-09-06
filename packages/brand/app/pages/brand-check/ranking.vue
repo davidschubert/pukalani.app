@@ -12,7 +12,7 @@ import type { BrandCheckRankingItem, BrandCheckRankingResponse } from '../../../
 
 /**
  * DAS RANKING — `/brand-check/ranking`
- * (Konzept: docs/plans/BRAND-CHECK-SEITE.md §3, Paket P3).
+ * (Konzept: docs/archiv/BRAND-CHECK-SEITE.md §3, Paket P3).
  *
  * Alle Auftritte, deren Prüfer sie ins Ranking aufgenommen haben (Opt-in,
  * Davids Entscheidung §8.1), filter- und sortierbar. Die Seite RECHNET nichts:

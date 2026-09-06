@@ -34,7 +34,7 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 **Was:** Davids Auftrag nach dem ersten Live-Check („eigene Seite, Teaser zeigen dorthin, Archiv/
 Ranking, Quartett-Vergleich, Score neu ermitteln mit Gegenüberstellung, To-dos") — Konzept
-docs/plans/BRAND-CHECK-SEITE.md, vier Entscheidungen per Fragenrunde (Ranking nur mit Opt-in,
+docs/archiv/BRAND-CHECK-SEITE.md, vier Entscheidungen per Fragenrunde (Ranking nur mit Opt-in,
 Branche per KI + Korrekturvorschlag, Dokument-Check sofort, Konto-Deckel 10/Tag; DECISION-LOG
 2026-09-05), Visualisierung nach externem Input festgezogen (Markenabdruck, Ampel-Matrix,
 Stärke · Chance · Nächster Schritt; §10). Sechs Opus-Läufe, meist zu zweit/dritt parallel im
@@ -54,6 +54,8 @@ selben Worktree (i18n nur per Edit, Dateibesitz je Lauf), jeder im Fable-Hauptlo
   gerechnetem „+X Punkte" je Kriterium), Vergleichs-Insights-Bento (Gesamtbild, Bilanz,
   Abstände ≥ 25 mit Kriterien-Belegen beider Seiten), Brand-Scores-Liste `/dashboard/brand-scores`.
 
+**Abgenommen 2026-09-06 (David):** Ranking, Vergleich und Ergebnisseite live getestet — „hat
+geklappt"; Plan nach docs/archiv/BRAND-CHECK-SEITE.md verschoben.
 **Live-Beweise:** pukalani.app (89, Branche `software` vom Judge) und freelancer.supply (61,
 `personal`) mit Opt-in im Ranking; Vergleich beider 200 mit Markenabdruck; Korrektur- und
 Score-Routen registriert. Nicht live durchgespielt (Login + echte KI-Kosten): Dokument-Check,

@@ -2,7 +2,7 @@ import { BRAND_CHECK_CATEGORIES, type BrandCheckCategoryKey } from './brandCheck
 import type { BrandCheckRankingItem } from './types/brand'
 
 /**
- * DIE AUSWAHL-REGELN DES RANKINGS (docs/plans/BRAND-CHECK-SEITE.md §3) — pur,
+ * DIE AUSWAHL-REGELN DES RANKINGS (docs/archiv/BRAND-CHECK-SEITE.md §3) — pur,
  * ohne h3, ohne Appwrite, ohne Vue.
  *
  * Die Route holt ein FENSTER aus der Ablage und wendet dann genau diese vier

@@ -13,7 +13,7 @@ import {
 
 /**
  * „DA STIMMT ETWAS NICHT" — der Korrekturvorschlag zu einem Check
- * (docs/plans/BRAND-CHECK-SEITE.md §3b, Davids Idee „wie Google Business
+ * (docs/archiv/BRAND-CHECK-SEITE.md §3b, Davids Idee „wie Google Business
  * Profile").
  *
  * Die zweite öffentliche SCHREIB-Route des Layers nach der Warteliste, und wie

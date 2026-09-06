@@ -482,7 +482,7 @@ describe('GET /api/brand/check/[id]', () => {
 
 /**
  * DAS RANKING-HÄKCHEN, DIE BRANCHE UND „NEU ERMITTELN"
- * (docs/plans/BRAND-CHECK-SEITE.md §3/§5/§8, Davids Entscheidungen 1, 2 und 4).
+ * (docs/archiv/BRAND-CHECK-SEITE.md §3/§5/§8, Davids Entscheidungen 1, 2 und 4).
  *
  * Vier Aussagen, die in der REIHENFOLGE der Route stecken:
  *  1. Ein frischer Check trägt das Häkchen des Prüfers, die Branche aus dem

@@ -5,7 +5,7 @@ import type { BrandCheckResult } from '../../shared/types/brand'
 
 /**
  * DIE ERKENNTNISSE ZUM VERGLEICH — das Bento unter den acht Duell-Zeilen
- * (Davids Auftrag 2026-09-06, Paket P6b; Plan docs/plans/BRAND-CHECK-SEITE.md
+ * (Davids Auftrag 2026-09-06, Paket P6b; Plan docs/archiv/BRAND-CHECK-SEITE.md
  * §4 und §10).
  *
  * ── DIESE KOMPONENTE ENTSCHEIDET NICHTS ───────────────────────────────────

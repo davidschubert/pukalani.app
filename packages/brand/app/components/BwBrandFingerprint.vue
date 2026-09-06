@@ -3,7 +3,7 @@ import { BRAND_CHECK_CATEGORIES } from '../../shared/brandCheck'
 
 /**
  * DER MARKENABDRUCK — acht Kategorie-Werte als Netz
- * (docs/plans/BRAND-CHECK-SEITE.md §10, „Markenabdruck = Profil").
+ * (docs/archiv/BRAND-CHECK-SEITE.md §10, „Markenabdruck = Profil").
  *
  * ── DAS WORT „RADAR" KOMMT HIER NICHT VOR ─────────────────────────────────
  * Es ist die Technik, nicht das Feature. Im UI heisst es überall

@@ -4,7 +4,7 @@ import { brandJsonLdScript } from '../../utils/brandJsonLd'
 
 /**
  * DIE START-SEITE DES BRAND-CHECKS — `/brand-check`
- * (Konzept: docs/plans/BRAND-CHECK-SEITE.md §1 und §2).
+ * (Konzept: docs/archiv/BRAND-CHECK-SEITE.md §1 und §2).
  *
  * Bis heute gab es unter `/brand-check` nur `[id].vue`; die Adresse selbst
  * antwortete 404, und das Formular lebte auf der Startseite der App. Jetzt

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /**
  * DER BRAND-CHECK-TEASER — die Karte, die auf `/brand-check` verweist
- * (Konzept: docs/plans/BRAND-CHECK-SEITE.md §1 „Teaser werden Teaser").
+ * (Konzept: docs/archiv/BRAND-CHECK-SEITE.md §1 „Teaser werden Teaser").
  *
  * ── DAS FORMULAR LEBT GENAU EINMAL ────────────────────────────────────────
  * Bis 2026-09-05 trug die Startseite den Check selbst (`BwBrandCheckForm

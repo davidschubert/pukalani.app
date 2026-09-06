@@ -16,7 +16,7 @@ import type {
 
 /**
  * DIE WARTESCHLANGE DER KORREKTURVORSCHLÄGE — `/dashboard/brand-check/corrections`
- * (Konzept: docs/plans/BRAND-CHECK-SEITE.md §3b, Paket P3).
+ * (Konzept: docs/archiv/BRAND-CHECK-SEITE.md §3b, Paket P3).
  *
  * Wer im Ranking eine falsch zugeordnete Branche sieht, schlägt sie hier zur
  * Korrektur vor; diese Seite ist die andere Hälfte davon: annehmen (der Wert
