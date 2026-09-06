@@ -922,20 +922,14 @@
         "copyFailed": "Kopieren hat nicht geklappt",
         "loading": "Wir holen euer Ergebnis …",
         "categoriesTitle": "Acht Kategorien",
-        "points": "{points} von {weight}",
         "locked": "Von außen nicht prüfbar — wir raten hier nicht, sondern lassen es aus der Rechnung.",
-        "findingsTitle": "Die drei wichtigsten Befunde",
-        "findingsLead": "Was wir zuerst angehen würden — jeder Befund mit dem Beleg, auf dem er steht.",
-        "nextLabel": "Nächster Schritt",
         "relaunchEyebrow": "Der Weg weiter",
         "relaunchTitle": "Marken-Relaunch starten",
         "relaunchBody": "Euer Markenberater kennt euren Auftritt schon — ihr steigt mit diesem Ergebnis ein statt bei null. Aus den Befunden wird die Reihenfolge der Arbeit.",
         "relaunchCta": "Relaunch starten",
         "reportEyebrow": "Zum Nachlesen",
         "reportTitle": "Vollständigen Report per Mail",
-        "reportBody": "Alle 40 Kriterien mit ihren Belegen als Dokument — sobald der Report-Versand freigeschaltet ist. Die Bewertungen selbst stehen schon unten auf dieser Seite.",
-        "allTitle": "Alle 40 Kriterien",
-        "allLead": "Jedes Kriterium mit Punkten und Beleg — aufklappen, wenn ihr es genau wissen wollt.",
+        "reportBody": "Alle 40 Kriterien mit ihren Belegen als Dokument — sobald der Report-Versand freigeschaltet ist. Die Bewertungen selbst stehen schon auf dieser Seite.",
         "criterionPoints": "{score} von 2",
         "notAssessable": "nicht bewertbar",
         "criterionFallback": "Weiteres Kriterium",
@@ -1192,6 +1186,31 @@
         "open": "Score ansehen",
         "addUrl": "Website hinterlegen"
       },
+      "list": {
+        "nav": "Brand-Scores",
+        "all": "Alle Brand-Scores",
+        "title": "Brand-Scores",
+        "subtitle": "Alle eure Brands mit ihren zwei Zahlen — von außen gemessen und im Fundament geprüft.",
+        "summary": "{count} Brands · Ø Website-Score {avg}",
+        "summaryEmpty": "{count} Brands · noch kein Website-Score",
+        "col": {
+          "brand": "Brand",
+          "website": "Website",
+          "websiteScore": "Website-Score",
+          "documentScore": "Fundament-Reife",
+          "lastCheck": "Letzte Prüfung"
+        },
+        "sortBy": "Nach {column} sortieren",
+        "addUrl": "Website hinterlegen",
+        "never": "noch nie geprüft",
+        "runWebsite": "Neu ermitteln",
+        "runDocument": "Fundament prüfen",
+        "done": "Der neue Stand ist da.",
+        "failed": "Das hat nicht geklappt",
+        "emptyTitle": "Noch keine Brand",
+        "empty": "Legt eure erste an — danach steht hier ihr Score.",
+        "emptyCta": "Brand anlegen"
+      },
       "errors": {
         "accountLimit": "Heute sind eure 10 Neu-Ermittlungen aufgebraucht. Morgen geht es weiter.",
         "documentEmpty": "Bestätigt zuerst Felder im Fundament. Ohne bestätigte Antworten gibt es nichts zu prüfen.",
@@ -1202,6 +1221,52 @@
         "unavailable": "Der Check ist gerade nicht erreichbar. Versucht es in ein paar Minuten noch einmal.",
         "generic": "Das hat gerade nicht geklappt. Versucht es in einem Moment noch einmal."
       }
+    },
+    "checkResult": {
+      "deltaUp": "+{points} seit {date}",
+      "deltaDown": "−{points} seit {date}",
+      "deltaSame": "unverändert seit {date}",
+      "rank": "Platz {position} von {total} im Ranking",
+      "verdictTitle": "Das Fazit",
+      "verdictLead": "Die wichtigsten Fakten aus 40 Kriterien — jede Karte steht auf dem, was wir wirklich gesehen haben.",
+      "strengthTitle": "Größte Stärke",
+      "opportunityTitle": "Größte Chance",
+      "nextStepTitle": "Nächster Schritt",
+      "nextStepChapter": "Im Relaunch ist das das Kapitel {chapter}.",
+      "nextStepPlain": "Das gehört in die Umsetzung eures Auftritts — im Relaunch ordnen wir es ein.",
+      "nextStepCta": "Marken-Relaunch starten",
+      "strongestTitle": "Stärkste Kategorie",
+      "weakestTitle": "Schwächste Kategorie",
+      "categoryValue": "{score} von 100",
+      "categoryWeight": "Gewicht {weight}",
+      "categoriesLead": "Acht Kategorien, jede mit ihrem Gewicht. Klickt eine an, dann seht ihr ihre fünf Kriterien.",
+      "coverageTitle": "Bewertet",
+      "coverageValue": "{assessed} von {total} bewertet",
+      "coverageLocked": "{count} sind von außen nicht prüfbar — die lassen wir aus der Rechnung.",
+      "coverageComplete": "Alles, was von außen prüfbar ist, hat einen Wert.",
+      "coverageGrades": "{full} mal volle Punktzahl · {partial} mal halb · {none} mal offen",
+      "industryTitle": "Branche",
+      "sourceTitle": "Quelle und Stand",
+      "sourceWebsite": "Außen-Check der Startseite",
+      "sourceDocument": "Check des Fundament-Dokuments",
+      "matrixTitle": "Alle 40 Kriterien auf einen Blick",
+      "matrixLead": "Acht Zeilen, je fünf Kriterien. Klickt eine Zelle an, dann springt ihr zur passenden Zeile im Plan darunter.",
+      "matrixCell": "{criterion}: {state}",
+      "matrixLegend": {
+        "full": "volle Punktzahl",
+        "partial": "halbe Punktzahl",
+        "none": "offen",
+        "locked": "nicht bewertbar"
+      },
+      "planTitle": "Das würde euren Score am meisten heben",
+      "planLead": "Jedes Kriterium unter der vollen Punktzahl, sortiert nach dem, was es am Gesamtwert ausmacht — jedes mit dem Beleg, auf dem es steht.",
+      "planTotal": "Gesamt möglich: +{points} Punkte bis 100",
+      "planEmpty": "Nichts offen: jedes bewertbare Kriterium hat die volle Punktzahl.",
+      "planChapter": "Passt ins Kapitel {chapter}",
+      "planShowAll": "Alle {count} anzeigen",
+      "planShowLess": "Weniger anzeigen",
+      "gain": "+{points} Punkte",
+      "gainNone": "unter einem Punkt"
     },
     "checkPage": {
       "seoTitle": "Brand-Check — euren Markenauftritt prüfen und den Brand Score erhalten",
@@ -1323,6 +1388,7 @@
         "category": "Die Besten in {category}"
       },
       "col": {
+        "pick": "Auswahl",
         "rank": "Rang",
         "host": "Auftritt",
         "score": "Score",
@@ -1422,6 +1488,53 @@
         "ties": "Kein Gleichstand. | Ein Gleichstand. | {count} Gleichstände.",
         "notAssessable": "Eine Kategorie war auf mindestens einer Seite nicht bewertbar. | {count} Kategorien waren auf mindestens einer Seite nicht bewertbar.",
         "basis": "Bewertbare Kategorien: {a} auf Seite A, {b} auf Seite B."
+      },
+      "insights": {
+        "eyebrow": "Erkenntnisse",
+        "title": "Was der Vergleich zeigt",
+        "lead": "Nach Wichtigkeit sortiert — vom Gesamtbild bis zu den Stellen, an denen die großen Abstände entstehen.",
+        "pointsGap": "{count} Punkt Unterschied | {count} Punkte Unterschied",
+        "overall": {
+          "title": "Das Gesamtbild",
+          "close": "{leader} und {other} liegen dicht beieinander — {gap}.",
+          "clear": "{leader} liegt vor {other} — {gap}, ein deutlicher Abstand.",
+          "wide": "{leader} liegt weit vor {other} — {gap}.",
+          "tie": "Beide kommen auf denselben Gesamtwert.",
+          "note": "Der Gesamtwert wiegt alle acht Kategorien. Wie oft jemand gewinnt, steht in der Bilanz daneben — beides darf auseinanderfallen."
+        },
+        "wins": {
+          "title": "Kategorie-Bilanz",
+          "count": "keine von {total} | eine von {total} | {count} von {total}",
+          "tieLabel": "Gleichstand",
+          "none": "keine"
+        },
+        "gap": {
+          "titleTop": "Größter Abstand: {category}",
+          "title": "Großer Abstand: {category}",
+          "line": "{leader} {leaderValue}, {other} {otherValue} — {gap}.",
+          "why": "Woran das liegt",
+          "noReasons": "Der Abstand verteilt sich über die fünf Kriterien — kein einzelnes sticht heraus.",
+          "noEvidence": "ohne Beleg"
+        },
+        "ties": {
+          "title": "Gleichstand",
+          "lead": "Diese Kategorien trennt nichts.",
+          "value": "beide {value}"
+        },
+        "strengths": {
+          "title": "Stärkste und schwächste Kategorie",
+          "lead": "Je Seite gerechnet — nicht gegeneinander.",
+          "best": "Stärkste",
+          "worst": "Schwächste",
+          "none": "nichts bewertbar"
+        },
+        "notAssessable": {
+          "title": "Nicht bewertbar",
+          "lead": "Was wir von außen nicht prüfen konnten, gewinnt und verliert nichts.",
+          "line": "{host}: {categories}, {criteria}",
+          "categories": "keine Kategorie | eine Kategorie | {count} Kategorien",
+          "criteria": "kein Kriterium | ein Kriterium | {count} Kriterien"
+        }
       }
     },
     "fingerprint": {

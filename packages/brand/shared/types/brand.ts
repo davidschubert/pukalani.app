@@ -1083,6 +1083,43 @@ export interface BrandCheckResult {
   categories: BrandCheckCategoryResult[]
   criteria: BrandCheckCriterionResult[]
   findings: BrandCheckFinding[]
+  /**
+   * DER UNMITTELBARE VORGÄNGER derselben Adresse — die Grundlage der Zeile
+   * „↑ +7 seit dem 12. August" (§10 „Score = Urteil … mit Delta zum Vorgänger").
+   *
+   * `null` heisst „es gibt keinen": der erste Check dieser Adresse, ein
+   * Vorgänger, der ausgeblendet wurde (dann sagen wir NICHTS, statt weiter
+   * zurückzugreifen — ein Delta gegen einen entfernten Eintrag wäre eine
+   * Aussage über etwas, das nicht mehr gezeigt werden darf), oder eine Ablage,
+   * die gerade nicht antwortet. Eine Nebenangabe darf die Seite nie kosten.
+   */
+  previous: BrandCheckPrevious | null
+  /**
+   * DER PLATZ IM RANKING — nur für Checks, die dort überhaupt erscheinen
+   * (Häkchen gesetzt, nicht ausgeblendet, Wert über 0). `null` für alle
+   * anderen: eine Platzierung zu nennen, die auf der Ranking-Seite niemand
+   * findet, wäre eine erfundene Zahl.
+   */
+  rank: BrandCheckRank | null
+}
+
+/** Schmal mit Absicht: mehr als Zahl, Band und Datum braucht eine Delta-Pille nicht. */
+export interface BrandCheckPrevious {
+  id: string
+  score: number
+  band: string
+  createdAt: string
+}
+
+/**
+ * `position` ist 1-basiert, `total` die Zahl der Auftritte im Lesefenster des
+ * Rankings (`BRAND_CHECK_RANKING_SCAN_LIMIT`) — dieselbe Zahl, die die
+ * Ranking-Seite oben nennt, damit „Platz 3 von 12" an beiden Stellen dasselbe
+ * bedeutet.
+ */
+export interface BrandCheckRank {
+  position: number
+  total: number
 }
 
 // ── Ranking, Korrekturen, Betreiber-Fläche (BRAND-CHECK-SEITE §3/§3b/§7) ────
@@ -1254,6 +1291,24 @@ export interface BrandProfileScoreEntry {
  */
 export interface BrandProfileScores {
   profileId: string
+  /**
+   * DIE DREI STAMMFELDER STEHEN HIER MIT, WEIL SIE NICHTS KOSTEN (P6c).
+   *
+   * `scores.get.ts` LIEST die `brand_profiles`-Zeilen ohnehin — ohne sie wüsste
+   * es nicht, welche Brands diesem Konto gehören. Titel, Adresse und Branche
+   * mitzugeben kostet also keine zusätzliche Abfrage, erspart der Liste
+   * `/dashboard/brand-scores` aber die zweite Rundreise zu
+   * `GET /api/brand/profiles` — und damit den Zustand, in dem eine Zeile ihre
+   * Zahl schon hat und ihren Namen noch nicht.
+   *
+   * Es ist bewusst KEINE zweite Wahrheit über das Profil: es sind drei
+   * Anzeige-Felder, keine Bearbeitungsfläche. Wer ein Branding ändert, tut das
+   * über `PATCH /api/brand/profiles/:id`, und die Karten-Übersicht liest
+   * weiterhin die volle `BrandProfileSummary`.
+   */
+  title: string
+  websiteUrl: string
+  industry: string
   website: BrandProfileScoreEntry | null
   document: BrandProfileScoreEntry | null
 }
