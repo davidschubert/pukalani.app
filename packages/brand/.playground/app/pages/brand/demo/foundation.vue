@@ -2,6 +2,7 @@
 import type { BwRailLayer, BwRailStep } from '../../../../../app/components/BwProgressRail.vue'
 import type { BwSidebarBrand } from '../../../../../app/components/BwWorkspaceSidebar.vue'
 import { demoRail } from '../../../utils/demoRail'
+import type { ContentTocLink } from '@nuxt/ui'
 import { demoDirectionChapter, demoFoundation } from '../../../utils/demoFoundation'
 
 /**
@@ -100,7 +101,36 @@ function copyShareUrl(): void {
   window.setTimeout(() => { shareCopied.value = false }, 1600)
 }
 
-function tocGlyph(state: 'done' | 'pending' | 'locked'): { name: string, style: string } {
+/**
+ * DAS INHALTSVERZEICHNIS ist `UContentToc` in einer `UPageAside` (Davids
+ * Wunsch 2026-09-05): Sprungmarken + automatische Hervorhebung des Kapitels,
+ * das gerade im Bild ist — `useScrollspy` beobachtet die Elemente mit den
+ * `links[].id`, also unsere `<section :id="anchor">`. Die Links tragen
+ * ZUSÄTZLICH Zustand und Nummer, damit der `link`-Slot Haken · Kreis · Schloss
+ * zeigen kann (der Vertrag ist generisch: `T extends ContentTocLink`).
+ */
+interface FdTocLink extends ContentTocLink {
+  state: FdTocState
+  num: string
+}
+type FdTocState = (typeof demoFoundation.chapters)[number]['state']
+const tocLinks = computed<FdTocLink[]>(() => chapters.value.map((chapter, i) => ({
+  id: chapter.anchor,
+  depth: 2,
+  text: chapter.title,
+  state: chapter.state,
+  num: String(i).padStart(2, '0'),
+})))
+
+/* Der Klick im Verzeichnis: `UContentToc` schiebt den Hash in den Router,
+ * und der scrollt das FENSTER — hier scrollt aber die Bühne (`main.bw-stage`,
+ * §3e „der äussere Workspace scrollt nie"). Deshalb springen wir selbst zum
+ * Kapitel; `scrollIntoView` findet den nächsten scrollenden Vorfahren. */
+function scrollToChapter(id: string): void {
+  document.getElementById(id)?.scrollIntoView({ block: 'start', behavior: 'smooth' })
+}
+
+function tocGlyph(state: FdTocState): { name: string, style: string } {
   if (state === 'locked') return { name: 'i-ph-lock-simple', style: 'color: var(--bw-muted)' }
   if (state === 'pending') return { name: 'i-ph-circle', style: 'color: var(--bw-draft)' }
   return { name: 'i-ph-check-circle-fill', style: 'color: var(--bw-accent)' }
@@ -231,26 +261,48 @@ useHead({ title: `Brand Foundation · ${demoFoundation.brand.title}` })
          Kapitel-Liste (Haken · Kreis · Schloss), unten der Zähler. -->
     <template #george>
       <div class="flex min-h-0 flex-1 flex-col">
-        <div class="min-h-0 flex-1 overflow-y-auto px-6 py-4">
-          <p class="bw-label uppercase tracking-wider" style="color: var(--bw-muted)">Inhalt</p>
-          <ul class="mt-3 flex flex-col gap-0.5">
-            <li v-for="(chapter, i) in chapters" :key="chapter.id">
-              <a
-                :href="`#${chapter.anchor}`"
-                class="flex items-start gap-2 rounded-xl px-2 py-1.5 text-left"
-                style="color: var(--bw-ink-soft)"
-              >
-                <UIcon :name="tocGlyph(chapter.state).name" class="mt-0.5 size-4 flex-none" :style="tocGlyph(chapter.state).style" />
-                <span class="min-w-0 flex-1 leading-tight">
-                  <span class="block text-sm">{{ chapter.title }}</span>
-                  <span class="bw-label block tabular-nums" style="color: var(--bw-muted)">
-                    Kapitel {{ String(i).padStart(2, '0') }}<template v-if="chapter.state === 'pending'"> · offen</template>
-                  </span>
+        <!-- UPageAside ist im Vorbild ein sticky Seitenrand unter dem Header;
+             hier lebt sie in der scrollenden Spalte des Workspace — deshalb
+             `static` statt `sticky` und keine Header-Höhe. -->
+        <UPageAside
+          :ui="{
+            root: 'block static min-h-0 flex-1 overflow-y-auto max-h-none px-6 py-4 lg:ps-6 lg:ms-0 lg:pe-6 lg:max-h-none lg:static',
+            container: 'relative',
+          }"
+        >
+          <UContentToc
+            title="Inhalt"
+            :links="tocLinks"
+            color="neutral"
+            highlight
+            highlight-color="neutral"
+            default-open
+            :ui="{
+              root: 'static max-h-none mx-0 px-0 sm:mx-0 sm:px-0 bg-transparent backdrop-blur-none',
+              container: 'pt-0 sm:pt-0 lg:py-0 pb-0 sm:pb-0 border-0',
+              trigger: 'bw-label uppercase tracking-wider font-normal',
+              title: 'text-(--bw-muted)',
+              link: 'rounded-md',
+              list: 'border-(--bw-line)',
+              indicatorActive: 'bg-(--bw-ink)',
+            }"
+            @move="scrollToChapter"
+          >
+            <!-- EINZEILIG, und das ist Pflicht: die Hervorhebungs-Linie rechnet
+                 mit der festen Zeilenhöhe des Vorbilds (1,75 rem je Link) —
+                 ein zweizeiliger Eintrag setzt sie an den falschen Eintrag
+                 (live erwischt). Nummer und „offen" stehen deshalb rechts. -->
+            <template #link="{ link }">
+              <span class="flex w-full min-w-0 items-center gap-2">
+                <UIcon :name="tocGlyph(link.state).name" class="size-4 flex-none" :style="tocGlyph(link.state).style" />
+                <span class="min-w-0 flex-1 truncate">{{ link.text }}</span>
+                <span class="bw-label flex-none tabular-nums" style="color: var(--bw-muted)">
+                  {{ link.num }}<template v-if="link.state === 'pending'"> · offen</template>
                 </span>
-              </a>
-            </li>
-          </ul>
-        </div>
+              </span>
+            </template>
+          </UContentToc>
+        </UPageAside>
 
         <div class="flex-none border-t px-6 pb-5" style="border-color: var(--bw-line)">
           <BwRailFooter
