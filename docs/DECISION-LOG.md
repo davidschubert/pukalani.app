@@ -7,6 +7,34 @@ die kleinen, verstreuten Beschlüsse.
 
 ---
 
+## 2026-09-06 — Bibliothek: erfundene Einträge raus aus dem Produkt, echte nur mit Handzeichen
+
+**Davids Entscheidung.** Die kuratierte Bibliothek des Marktvergleichs lieferte seit dem
+Gate-Flip zwei ERFUNDENE Marken an zahlende Kunden aus (`.example`-Adressen, `status:
+'verified'` ohne dass jemand geprüft hatte) — richtig als Platzhalter der Mechanik,
+falsch, sobald das Produkt läuft. Sie sind aus `shared/library/index.ts` heraus und leben
+als Testvorlage weiter; die Test-Sperre ist UMGEDREHT und verlangt jetzt echte Hosts,
+ein Prüfdatum, das nicht in der Zukunft liegt, und einen Beleg vom Auftritt der Marke
+selbst (je Regel mit Gegenprobe). Übernommen wurden die zwei Einträge, die David am
+selben Tag von Hand geprüft hat: **The Barn** (9 Felder) und **Apple** (5; `purpose`
+gestrichen). `nike`, `anthropic`, `meta` bleiben Entwürfe.
+
+**Der Rechts-Check bleibt offen — und das ist Teil der Entscheidung.** Die Anwaltsfragen
+aus Plan Anhang G (Namensnennung im bezahlten Produkt, Zitatzweck, § 44b UrhG, § 6 UWG,
+DSGVO, § 87b UrhG) sind unbeantwortet. David hat die Übernahme trotzdem entschieden; das
+wird dokumentiert, nicht umgangen. Gezeigt wird das Minimum aus Anhang G (a): Wortname und
+Kategorie, keine Logos, keine Bildmarken, keine Favicons — der Beweis prüft das jetzt als
+ERLAUBNISLISTE der Options-Felder, nicht als Sperrliste. Rücknahme = ein Diff (Runbook 6).
+
+**Gelernt:** eine gedruckte Erinnerung ist keine Sicherung. `--promote` sagte bisher „jetzt
+bitte `MARKET_LIBRARY_VERSION` heben" — beim ersten echten Durchgang hebt es sie selbst
+(die Fassung geht in `market_reports.revisionKey` ein; ohne Erhöhung halten sich
+gespeicherte Berichte für aktuell). Zweitens: `frequency` fiel beim Vorrechnen weg, obwohl
+der Lauf sie GEMESSEN hatte — sie reist jetzt in den Entwurf und durch die Bibliothek
+durch; erfunden wird sie nach wie vor nirgends.
+
+---
+
 ## 2026-09-06 — Marktvergleich: Pakete M1–M6 auf main; vier Beschlüsse aus dem Bau
 
 **Stand:** alle sechs Pakete liegen auf `main` (M1 475aeabd · M2 1bb5c55f · M3 11be1ef4 ·

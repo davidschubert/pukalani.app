@@ -489,10 +489,15 @@ async function startDemoSite(slug) {
  *
  * Übernommen wird NUR, was einen Beleg trägt: die Bibliothek verlangt je Feld
  * eine Quell-Adresse, und ein Feld ohne Beleg wäre genau die
- * unbelegte Zusammenfassung, die §1.4 dem Produkt verbietet. `frequency` und
- * `source` fallen weg — die Bibliothek kennt beides nicht (ein handgeprüfter
- * Eintrag hat nichts gezählt), und `marketLibraryFields()` setzt `source:
- * 'library'` beim Lesen selbst.
+ * unbelegte Zusammenfassung, die §1.4 dem Produkt verbietet. `source` fällt
+ * weg — `marketLibraryFields()` setzt `source: 'library'` beim Lesen selbst.
+ *
+ * `frequency` REIST SEIT M6b MIT (§7.6). Sie ist eine MESSUNG dieses Laufs
+ * („auf 2 von 3 gelesenen Seiten"), und sie hier wegzuwerfen hiess, eine
+ * bereits gezählte Zahl zu verlieren, die die Oberfläche in jeder anderen
+ * Quelle zeigt. Die Handprüfung sieht sie damit ebenfalls — sie gehört zu dem,
+ * was ein Mensch beglaubigt. Was das Werkzeug NICHT tut: sie erfinden. Ein
+ * Feld ohne gemessene Häufigkeit bekommt keine.
  */
 function toDraft(brand, profile, mode) {
   const fields = []
@@ -506,6 +511,11 @@ function toDraft(brand, profile, mode) {
     }
     if (field.items?.length) draftField.items = field.items
     if (field.evidence.quote) draftField.quote = field.evidence.quote
+    // Nur wenn wirklich gezählt wurde — `of: 0` hiesse „keine Seite gelesen"
+    // und wäre keine Messung, sondern eine Null in einer Zelle.
+    if (field.frequency && Number(field.frequency.of) > 0) {
+      draftField.frequency = { pages: Number(field.frequency.pages), of: Number(field.frequency.of) }
+    }
     fields.push(draftField)
   }
   return {
@@ -718,6 +728,38 @@ function toTsLiteral(value, depth) {
 }
 
 /**
+ * DIE FASSUNG HEBEN — seit M6b MASCHINELL, nicht mehr als Merkzettel.
+ *
+ * `MARKET_LIBRARY_VERSION` geht in `market_reports.revisionKey` ein: wer einen
+ * Eintrag ändert und die Zahl stehen lässt, hinterlässt gespeicherte Berichte,
+ * die sich für aktuell halten, obwohl sich ihre Grundlage bewegt hat. Bis M6b
+ * druckte das Werkzeug dazu eine ERINNERUNG — und eine Erinnerung ist genau
+ * die Sorte Sicherung, die beim ersten echten Durchgang vergessen wird (der
+ * erste war der 2026-09-06). Sicherungen gehören in die Schnittstelle, nicht
+ * in die Disziplin (dieselbe Lehre wie bei `createIndexSteps`, CLAUDE.md).
+ *
+ * Kann die Zahl nicht gelesen werden, bricht die Übernahme ab, statt still
+ * weiterzulaufen: eine unlesbare Fassung ist ein Fall für einen Menschen.
+ *
+ * WER MEHRERE EINTRÄGE IN EINEM COMMIT übernimmt, hebt sie damit mehrfach.
+ * Das ist nicht falsch (jede Übernahme IST eine inhaltliche Änderung), aber
+ * unnötig — am Ende genügt EINE Fassung je Commit; sie darf von Hand wieder
+ * zusammengezogen werden, solange sie höher ist als die vorherige.
+ */
+function bumpLibraryVersion(source) {
+  const pattern = /(export const MARKET_LIBRARY_VERSION = ')([^']*)(')/
+  const found = source.match(pattern)
+  if (!found) fail('MARKET_LIBRARY_VERSION steht nicht in index.ts — bitte von Hand heben')
+  const [, , current] = found
+  const parts = current.match(/^(.*?)(\d+)$/)
+  if (!parts) {
+    fail(`MARKET_LIBRARY_VERSION ist '${current}' und endet nicht auf einer Zahl — bitte von Hand heben`)
+  }
+  const next = `${parts[1]}${Number(parts[2]) + 1}`
+  return { source: source.replace(pattern, `$1${next}$3`), from: current, to: next }
+}
+
+/**
  * EINEN GEPRÜFTEN ENTWURF IN DIE BIBLIOTHEK SCHREIBEN.
  *
  * ── DAS TOR IST DIE HANDPRÜFUNG, NICHT DIE MECHANIK ──────────────────────
@@ -758,11 +800,12 @@ async function runPromote(key) {
   // (Trailing-Comma-Stil des Repos). Ein zweites erzeugte ein LOCH im Array —
   // die Bibliothek fiele fail-closed auf leer zurück, und zwar lautlos
   // (2026-09-05 beim Bau genau so erwischt, gefunden vom Schema-Test).
-  const next = before.replace(/\n\]\n?$/, `\n${literal},\n]\n`)
-  if (next === before) fail('index.ts endet nicht auf einer Liste — bitte von Hand übernehmen')
-  await writeFile(INDEX_FILE, next, 'utf8')
+  const withEntry = before.replace(/\n\]\n?$/, `\n${literal},\n]\n`)
+  if (withEntry === before) fail('index.ts endet nicht auf einer Liste — bitte von Hand übernehmen')
+  const bumped = bumpLibraryVersion(withEntry)
+  await writeFile(INDEX_FILE, bumped.source, 'utf8')
 
-  console.log(`\n${draft.key} nach index.ts geschrieben. Prüfe das Schema …`)
+  console.log(`\n${draft.key} nach index.ts geschrieben, Fassung ${bumped.from} → ${bumped.to}. Prüfe das Schema …`)
   const test = spawnSync('npx', ['vitest', 'run', 'tests/marketLibrary.test.ts'], {
     cwd: resolve(HERE, '..'), stdio: 'inherit', shell: false,
   })
@@ -770,7 +813,7 @@ async function runPromote(key) {
     await writeFile(INDEX_FILE, before, 'utf8')
     fail('Das Schema hat den Eintrag abgelehnt — index.ts ist zurückgesetzt.')
   }
-  console.log('\n✔ Übernommen. Jetzt MARKET_LIBRARY_VERSION in shared/library/index.ts heben (Regel im Kopf der Datei).')
+  console.log(`\n✔ Übernommen, Fassung steht auf ${bumped.to}. Entwurf aus drafts/ löschen und committen (Runbook Schritt 5).`)
 }
 
 // ── Einstieg ────────────────────────────────────────────────────────────────

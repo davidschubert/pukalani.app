@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import type { MarketProfileField } from './marketProfile'
+import type { MarketFrequency, MarketProfileField } from './marketProfile'
 import { MARKET_EVIDENCE_MAX, MARKET_FIELD_IDS } from './marketProfile'
 import { MARKET_MAX_PAGES } from './marketCrawlRules'
 import { MARKET_LIBRARY_ENTRIES, MARKET_LIBRARY_VERSION } from './library'
@@ -37,14 +37,18 @@ import { MARKET_LIBRARY_ENTRIES, MARKET_LIBRARY_VERSION } from './library'
  * Verfügung — es gibt keinen Rohtext mehr, gegen den er prüfen könnte —, und
  * deshalb ist die Handprüfung Pflichtfeld statt Kür.
  *
- * ── WAS HIER BEWUSST NICHT STEHT ──────────────────────────────────────────
- * ECHTE MARKEN. Die Einträge in `shared/library/index.ts` sind erfunden
- * (`.example`-Adressen). Die Paare aus §7.2 (adidas/Nike, Anthropic/OpenAI, …)
- * kommen erst, wenn ein MENSCH ihre Zitate am Original geprüft hat — eine
- * reale Marke einzutragen, bevor das passiert ist, wäre genau die Behauptung,
- * die der Marktvergleich nicht aufstellt.
+ * ── WAS HIER STEHT: NUR ECHTE, VON HAND GEPRÜFTE MARKEN (M6b) ────────────
+ * Bis zum 2026-09-06 lagen in `shared/library/index.ts` zwei ERFUNDENE
+ * Einträge (`.example`-Adressen) als Platzhalter der Mechanik. Seit dem
+ * Gate-Flip läuft der Marktvergleich in Produktion — damit standen zwei
+ * Marken im Quellen-Wähler zahlender Kunden, die es nicht gibt. Sie sind
+ * herausgenommen und leben als Testvorlage weiter
+ * (`tests/fixtures/marketLibraryFixture.ts`); die ausgelieferte Datei enthält
+ * nur noch Einträge, deren Zitate ein Mensch am Original geprüft hat.
+ * `tests/marketLibrary.test.ts` dreht die alte Sperre um und verlangt
+ * ausdrücklich ECHTE Hosts.
  *
- * ── DER WEG DAHIN IST SEIT M6 GEBAUT, NICHT GEGANGEN ──────────────────────
+ * ── DER WEG DAHIN (seit M6 gebaut, seit M6b gegangen) ─────────────────────
  * `scripts/market-library-compute.mjs` rechnet Einträge vor (`--check`
  * Machbarkeit, `--compute` Rechnen, `--promote` Übernahme), das Runbook
  * `docs/runbooks/MARKTVERGLEICH-BIBLIOTHEK.md` führt die Handprüfung. Was das
@@ -54,6 +58,21 @@ import { MARKET_LIBRARY_ENTRIES, MARKET_LIBRARY_VERSION } from './library'
  */
 
 const fieldIdSchema = z.enum(MARKET_FIELD_IDS)
+
+/**
+ * DIE HÄUFIGKEIT — dieselbe Form wie im Marktprofil.
+ *
+ * Sie steht hier als eigenes kleines Schema und nicht als Import aus
+ * `shared/types/market.ts`: jene Datei ist der ABLAGE-Vertrag und zieht
+ * `node-appwrite` herein, diese hier ist reiner Produkt-Inhalt. Damit daraus
+ * trotzdem keine zweite Wahrheit wird, ist das Schema an den Produkt-Typ
+ * `MarketFrequency` GENAGELT — laufen die beiden auseinander, bricht der
+ * Typecheck, nicht erst ein Test.
+ */
+const frequencySchema: z.ZodType<MarketFrequency> = z.object({
+  pages: z.number().int().min(0),
+  of: z.number().int().min(0),
+})
 
 /**
  * EIN FELD EINES BIBLIOTHEKS-EINTRAGS.
@@ -70,6 +89,19 @@ export const marketLibraryFieldSchema = z.object({
   sourceUrl: z.url().max(512),
   quote: z.string().trim().min(1).max(MARKET_EVIDENCE_MAX).optional(),
   confidence: z.enum(['stated', 'implied']).optional(),
+  /**
+   * AUF WIE VIELEN DER GELESENEN SEITEN DIE AUSSAGE STAND (§7.6, seit M6b).
+   *
+   * OPTIONAL, und zwar mit derselben Bedeutung wie überall im Marktprofil:
+   * fehlt sie, wurde NICHT gezählt. Beides kommt hier vor — ein Eintrag aus
+   * `--compute` trägt die Zahl aus dem Lauf, ein von Hand geschriebener
+   * Eintrag hat nichts gezählt. Was es NICHT geben darf, ist eine Zahl ohne
+   * Messung: sie sähe in der Oberfläche aus wie eine (`MkCellMeta` zeigt
+   * „auf 2 von 3 Seiten"), und eine erfundene Messung ist genau die
+   * Behauptung, die §1.4 dem Produkt verbietet. Deshalb reicht das Werkzeug
+   * sie durch, statt sie zu setzen.
+   */
+  frequency: frequencySchema.optional(),
 })
 
 export const marketLibraryEntrySchema = z.object({
@@ -195,9 +227,11 @@ export function marketLibraryEntries(): readonly MarketLibraryEntry[] {
  * Quelle (Plan §7.1: „ein Motor, drei Ansichten"; die gemeinsame Währung ist
  * das Marktprofil).
  *
- * OHNE `frequency`: „auf wie vielen Seiten steht das" hat ein handgeprüfter
- * Eintrag nicht gemessen, und eine erfundene Zahl sähe aus wie eine Messung
- * (dieselbe Begründung wie bei der Foundation-Quelle).
+ * `frequency` REICHT DURCH, WENN SIE DASTEHT (M6b): sie ist eine MESSUNG des
+ * Laufs, der den Eintrag vorgerechnet hat (§7.6), und ein Eintrag, der sie
+ * mitbringt, hat sie gezählt. Fehlt sie, wird KEINE erfunden — eine Zahl ohne
+ * Messung sähe in der Zelle aus wie eine (dieselbe Begründung wie bei der
+ * Foundation-Quelle, die nichts wiederholt, sondern beschliesst).
  *
  * `fetchedAt` ist das PRÜFDATUM. Es ist kein Abrufdatum, aber es beantwortet
  * dieselbe Frage — „wie alt ist diese Aussage" —, und ein leeres Feld an der
@@ -210,6 +244,7 @@ export function marketLibraryFields(entry: MarketLibraryEntry): MarketProfileFie
       value: field.value,
       ...(field.items?.length ? { items: field.items } : {}),
       source: 'library',
+      ...(field.frequency ? { frequency: field.frequency } : {}),
     }
     if (!field.quote) return base
     return {

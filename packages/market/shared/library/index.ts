@@ -2,40 +2,57 @@
  * DIE BIBLIOTHEKS-DATEI (Plan §7.2 Nr. 3) — versioniert im Repo, nie in der
  * Datenbank (Anhang B).
  *
- * ── HIER STEHEN NUR ERFUNDENE MARKEN ──────────────────────────────────────
- * Alle Einträge tragen `.example`-Adressen und existieren nicht. Das ist keine
- * Übergangslösung, sondern die Reihenfolge aus dem Plan: die MECHANIK gehört
- * zu M3, der INHALT zu **M6** — „Rechnen + Handprüfung der ersten Paare,
- * Rechts-Check der Namensnennung" (§7.6). Eine reale Marke einzutragen, bevor
- * jemand ihre Zitate am Original geprüft und die Namensnennung rechtlich
- * abgeklärt hat, wäre eine Behauptung über einen Dritten ohne Beleg — genau
- * das, was §1.4 dem Produkt verbietet.
+ * ── HIER STEHEN NUR ECHTE, VON HAND GEPRÜFTE MARKEN ───────────────────────
+ * Stand 2026-09-06 (MV1 M6b): ZWEI Einträge — `the-barn` (alle neun belegten
+ * Felder) und `apple` (fünf; `purpose` hat David bei der Prüfung gestrichen).
+ * Beide sind am 2026-09-06 von David Schubert VON HAND geprüft: jedes Zitat
+ * gegen die genannte Quellseite gehalten, jede Zuordnung bestätigt, keine
+ * personenbezogenen Daten, keine Wertung (Runbook Schritt 4). Das steht als
+ * `verifiedAt`/`verifiedBy` an jedem Eintrag, und `status: 'verified'` ist der
+ * eine Wert, den kein Werkzeug setzt.
  *
- * ── SEIT M6 IST DAS WERKZEUG DA, DER INHALT NOCH NICHT ────────────────────
- * `scripts/market-library-compute.mjs` rechnet vor, das Runbook
- * `docs/runbooks/MARKTVERGLEICH-BIBLIOTHEK.md` führt die Handprüfung, und
- * `--promote <schlüssel>` schreibt einen geprüften Entwurf HIER hinein. Was
- * das Werkzeug erzeugt, liegt bis dahin unter `drafts/` und trägt `status:
- * 'draft'`; das Bibliotheks-Schema kennt nur `'verified'` und weist einen
- * Entwurf ab. Deshalb steht das Feld an JEDEM Eintrag — auch an den beiden
- * erfundenen: eine Ausnahme „die zwei sind ja Testdaten" wäre die eine Zeile,
- * die die Prüfung später umgeht.
+ * ── WAS HIER BIS ZUM 2026-09-06 STAND UND WARUM ES WEG IST ────────────────
+ * Zwei ERFUNDENE Einträge (`demo-atlas-roasters`, `demo-northline-supply`,
+ * `.example`-Adressen). Sie waren richtig, solange die Mechanik ohne Inhalt
+ * lief — mit dem Gate-Flip lief der Marktvergleich aber in PRODUKTION, und
+ * damit boten wir zahlenden Kunden zwei Marken an, die es nicht gibt, mit
+ * einem Prüfsiegel, das niemand geleistet hat. Sie leben als Testvorlage
+ * weiter: `packages/market/tests/fixtures/marketLibraryFixture.ts`.
+ *
+ * ── DER RECHTS-CHECK IST OFFEN, DIE ÜBERNAHME IST TROTZDEM ENTSCHIEDEN ────
+ * Die anwaltlichen Fragen aus Plan Anhang G (Namensnennung im bezahlten
+ * Produkt, Zitatzweck, TDM, § 6 UWG, DSGVO, § 87b UrhG) sind zum Stand dieser
+ * Datei NICHT beantwortet. David hat die Übernahme am 2026-09-06 dennoch
+ * entschieden — festgehalten, nicht umgangen: die Laien-Einschätzungen stehen
+ * im Plan, die Fragen bleiben dort offen, und die Rücknahme eines Eintrags ist
+ * ein Handgriff (Runbook Abschnitt 6). Was das PRODUKT davon zeigt, ist
+ * bewusst wenig: Wortname und Kategorie, keine Logos, keine Favicons, keine
+ * Bildmarken.
  *
  * ── DIE FASSUNG IST TEIL DES BERICHT-SCHLÜSSELS ───────────────────────────
  * `MARKET_LIBRARY_VERSION` geht in `market_reports.revisionKey` ein. Wer einen
  * Eintrag ÄNDERT und die Fassung stehen lässt, hinterlässt gespeicherte
  * Berichte, die sich für aktuell halten, obwohl sich ihre Grundlage bewegt
  * hat. Die Regel lautet deshalb: jede inhaltliche Änderung hebt die Zahl.
+ * Seit M6b hebt `--promote` sie SELBST — die Regel hing vorher an einer
+ * gedruckten Erinnerung, und das ist keine Sicherung. Die zwei Übernahmen vom
+ * 2026-09-06 hoben sie deshalb zweimal (lib-2 → lib-4); zusammengezogen auf
+ * `lib-3`, weil sie EINE inhaltliche Änderung der ausgelieferten Datei sind
+ * (erfundene raus, zwei echte rein) und in EINEM Commit liegen. Wichtig ist
+ * nur, dass die Zahl STEIGT — sonst hielten sich gespeicherte Berichte für
+ * aktuell.
  *
  * ── DIE FORM WIRD GEPRÜFT, NICHT GEGLAUBT ─────────────────────────────────
  * `shared/marketLibrary.ts` hält diese Datei gegen ein Zod-Schema (Pflichtfeld
  * `verifiedAt`/`verifiedBy` je Eintrag, Quell-Adresse je Feld, Zitatschranke
- * ≤ 200 Zeichen), und `tests/marketLibrary.test.ts` tut dasselbe im CI. Eine
- * Bibliothek, die durchfällt, ist LEER — nicht „so gut wie möglich".
+ * ≤ 200 Zeichen), und `tests/marketLibrary.test.ts` tut dasselbe im CI — dazu
+ * die Redaktionsregel: echter Host, Prüfdatum nicht in der Zukunft, Beleg vom
+ * Auftritt der Marke selbst. Eine Bibliothek, die durchfällt, ist LEER — nicht
+ * „so gut wie möglich".
  */
 
-/** Fassung dieser Datei. Jede inhaltliche Änderung hebt sie. */
-export const MARKET_LIBRARY_VERSION = 'lib-2'
+/** Fassung dieser Datei. Jede inhaltliche Änderung hebt sie (`--promote` tut es selbst). */
+export const MARKET_LIBRARY_VERSION = 'lib-3'
 
 /**
  * Die Einträge. Bewusst `unknown[]`-frei getypt gelassen: die WAHRHEIT über
@@ -45,112 +62,153 @@ export const MARKET_LIBRARY_VERSION = 'lib-2'
  */
 export const MARKET_LIBRARY_ENTRIES = [
   {
-    key: 'demo-atlas-roasters',
+    key: 'the-barn',
     status: 'verified',
-    name: 'Atlas Roasters',
-    homepage: 'https://atlas-roasters.example',
+    name: 'The Barn',
+    homepage: 'https://thebarn.de',
     category: 'Kaffeerösterei',
-    verifiedAt: '2026-09-05',
-    verifiedBy: 'MV1 M3 (Testeintrag)',
+    verifiedAt: '2026-09-06',
+    verifiedBy: 'David Schubert',
     fields: [
       {
         fieldId: 'categoryLanguage',
-        value: 'Specialty coffee roastery',
-        sourceUrl: 'https://atlas-roasters.example/about',
-        quote: 'Atlas Roasters is a specialty coffee roastery.',
+        value: 'Specialty Coffee Roasters',
+        sourceUrl: 'https://thebarn.de/',
         confidence: 'stated',
+        quote: 'THE BARN Coffee Roasters are one of the leading Specialty Coffee Roasters in Europe.',
       },
       {
         fieldId: 'pitch',
-        value: 'Single-origin coffee, roasted to order and shipped the same week.',
-        sourceUrl: 'https://atlas-roasters.example',
-        quote: 'Single-origin coffee, roasted to order and shipped the same week.',
+        value: 'We roast the best coffees available on this planet and deliver freshly roasted coffee to your door.',
+        sourceUrl: 'https://thebarn.de/',
         confidence: 'stated',
+        quote: 'We roast the best coffees available on this planet.',
       },
       {
         fieldId: 'audience',
-        value: 'Independent cafes and their regulars',
-        sourceUrl: 'https://atlas-roasters.example',
-        quote: 'We roast for independent cafes and the people who sit in them.',
-        confidence: 'stated',
+        value: 'Coffee lovers and specialty coffee enthusiasts seeking high-quality, freshly roasted coffee and brewing equipment.',
+        sourceUrl: 'https://thebarn.de/',
+        confidence: 'implied',
+        quote: 'Perfect present for every coffee lover',
       },
       {
         fieldId: 'firstChoice',
-        value: 'Roasting to order instead of to stock',
-        sourceUrl: 'https://atlas-roasters.example/about',
-        quote: 'We roast to order, never to stock.',
+        value: 'As one of the leading specialty coffee roasters in Europe, THE BARN offers the best coffees available and beautifully designed, durable brewing equipment.',
+        sourceUrl: 'https://thebarn.de/',
         confidence: 'stated',
+        quote: 'THE BARN Coffee Roasters are one of the leading Specialty Coffee Roasters in Europe.',
+      },
+      {
+        fieldId: 'purpose',
+        value: 'To share exciting coffee experiences and push the boundaries of specialty coffee quality.',
+        sourceUrl: 'https://thebarn.de/',
+        confidence: 'stated',
+        quote: 'Over the years, we have pushed ourselves to share the most exciting coffee experiences with you.',
       },
       {
         fieldId: 'values',
-        value: 'Origin, Craft, Patience',
-        items: ['Origin', 'Craft', 'Patience'],
-        sourceUrl: 'https://atlas-roasters.example/about',
-        quote: 'Origin, craft and patience. In that order.',
-        confidence: 'stated',
+        value: 'Quality, Design, Control, Craftsmanship, Specialty',
+        sourceUrl: 'https://thebarn.de/products/hario-scale',
+        confidence: 'implied',
+        items: [
+          'Quality',
+          'Design',
+          'Control',
+          'Craftsmanship',
+          'Specialty',
+        ],
+        quote: 'Not only are they beautifully designed and made to last, but they give us full control resulting in perfectly brewed coffees.',
+      },
+      {
+        fieldId: 'toneWords',
+        value: 'Informative, Passionate, Accessible, Descriptive, Engaging',
+        sourceUrl: 'https://thebarn.de/',
+        confidence: 'implied',
+        items: [
+          'Informative',
+          'Passionate',
+          'Accessible',
+          'Descriptive',
+          'Engaging',
+        ],
+        quote: 'The Art of Experiencing Coffee',
       },
       {
         fieldId: 'tagline',
-        value: 'Roasted to order.',
-        sourceUrl: 'https://atlas-roasters.example',
-        quote: 'Roasted to order.',
+        value: 'Freshly Roasted Coffee to your door',
+        sourceUrl: 'https://thebarn.de/',
         confidence: 'stated',
+        quote: 'Freshly Roasted Coffee to your door',
+      },
+      {
+        fieldId: 'keyMessages',
+        value: 'We roast the best coffees on the planet, Specialty coffee equipment for home brewing, Subscribe for seasonal single origins',
+        sourceUrl: 'https://thebarn.de/',
+        confidence: 'stated',
+        items: [
+          'We roast the best coffees on the planet',
+          'Specialty coffee equipment for home brewing',
+          'Subscribe for seasonal single origins',
+        ],
+        quote: 'We roast the best coffees on the planet',
       },
     ],
   },
   {
-    key: 'demo-northline-supply',
+    key: 'apple',
     status: 'verified',
-    name: 'Northline Supply',
-    homepage: 'https://northline-supply.example',
-    category: 'Grosshandel',
-    verifiedAt: '2026-09-05',
-    verifiedBy: 'MV1 M3 (Testeintrag)',
+    name: 'Apple',
+    homepage: 'https://www.apple.com',
+    category: 'Technologie-Plattform',
+    verifiedAt: '2026-09-06',
+    verifiedBy: 'David Schubert',
     fields: [
       {
         fieldId: 'categoryLanguage',
-        value: 'Wholesale beverage supplier',
-        sourceUrl: 'https://northline-supply.example/about',
-        quote: 'Northline Supply is a wholesale beverage supplier.',
+        value: 'Technology products and services',
+        sourceUrl: 'https://www.apple.com/',
         confidence: 'stated',
+        quote: 'Discover the innovative world of Apple and shop everything iPhone, iPad, Apple Watch, Mac, and Apple TV, plus explore accessories, entertainment, and expert device support.',
       },
       {
         fieldId: 'pitch',
-        value: 'One order desk for every product a cafe needs, delivered weekly.',
-        sourceUrl: 'https://northline-supply.example',
-        quote: 'One order desk for everything a cafe needs, delivered every week.',
+        value: 'Discover the innovative world of Apple and shop everything iPhone, iPad, Apple Watch, Mac, and Apple TV, plus explore accessories, entertainment, and expert device support.',
+        sourceUrl: 'https://www.apple.com/',
         confidence: 'stated',
+        quote: 'Discover the innovative world of Apple and shop everything iPhone, iPad, Apple Watch, Mac, and Apple TV, plus explore accessories, entertainment, and expert device support.',
       },
       {
-        fieldId: 'audience',
-        value: 'Cafes, hotels and canteens',
-        sourceUrl: 'https://northline-supply.example',
-        quote: 'We supply cafes, hotels and canteens.',
+        fieldId: 'values',
+        value: 'Accessibility, Education, Environment, Inclusion and Diversity, Privacy',
+        sourceUrl: 'https://www.apple.com/',
         confidence: 'stated',
-      },
-      {
-        fieldId: 'firstChoice',
-        value: 'Fixed delivery windows and one contact person',
-        sourceUrl: 'https://northline-supply.example/about',
-        quote: 'Fixed delivery windows and one contact person for everything.',
-        confidence: 'stated',
-      },
-      {
-        // OHNE Zitat und ausdrücklich als Beobachtung eingestuft: nicht jedes
-        // Feld steht wörtlich auf einer Seite (§2.2, `implied`). Die
-        // Quell-Adresse bleibt trotzdem Pflicht.
-        fieldId: 'toneWords',
-        value: 'plain, orderly, unexcited',
-        items: ['plain', 'orderly', 'unexcited'],
-        sourceUrl: 'https://northline-supply.example',
-        confidence: 'implied',
+        items: [
+          'Accessibility',
+          'Education',
+          'Environment',
+          'Inclusion and Diversity',
+          'Privacy',
+        ],
+        quote: 'Apple Values Accessibility Education Environment Inclusion and Diversity Privacy Racial Equity and Justice Supply Chain Innovation',
       },
       {
         fieldId: 'tagline',
-        value: 'Everything on one delivery note.',
-        sourceUrl: 'https://northline-supply.example',
-        quote: 'Everything on one delivery note.',
+        value: 'Think different',
+        sourceUrl: 'https://www.apple.com/mac/',
         confidence: 'stated',
+        quote: 'Think different',
+      },
+      {
+        fieldId: 'keyMessages',
+        value: 'Innovative world of Apple, Advanced AI performance and game-changing capabilities, The most advanced Mac laptops for demanding tasks',
+        sourceUrl: 'https://www.apple.com/',
+        confidence: 'stated',
+        items: [
+          'Innovative world of Apple',
+          'Advanced AI performance and game-changing capabilities',
+          'The most advanced Mac laptops for demanding tasks',
+        ],
+        quote: 'Discover the innovative world of Apple',
       },
     ],
   },

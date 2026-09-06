@@ -68,6 +68,13 @@ import { readFile } from 'node:fs/promises'
 import { dirname, join, normalize, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { Client, ID, Query, TablesDB, Users } from 'node-appwrite'
+// Die BIBLIOTHEK selbst — Node 22 entfernt die Typen beim Laden, die Datei
+// ist reine Daten ohne Import. Eine Schlüssel-Liste in diesem Skript wäre
+// eine zweite Wahrheit über den Inhalt der Bibliothek (M6b).
+import { MARKET_LIBRARY_ENTRIES } from '../shared/library/index.ts'
+
+/** Die Schlüssel der ausgelieferten Bibliothek — höchstens die zehn der Liste. */
+const LIBRARY_KEYS = MARKET_LIBRARY_ENTRIES.slice(0, 10).map(entry => entry.key)
 
 const PORT = Number(process.env.BRANDING_PORT || 3016)
 const HOST = process.env.BRANDING_HOST || 'localhost'
@@ -402,8 +409,12 @@ try {
 
   const library = await call(`${base}/candidates?source=library`, { cookie: owner.cookie })
   const libraryIds = (library.json?.options ?? []).map(o => o.id)
-  check('Bibliothek: die geprüften Testeinträge stehen da',
-    library.status === 200 && libraryIds.includes('demo-atlas-roasters'),
+  // Seit M6b (2026-09-06) stehen dort ECHTE, von Hand geprüfte Marken statt
+  // der zwei erfundenen Testeinträge — die Liste darf also nicht mehr auf
+  // `demo-*` prüfen. Geprüft wird gegen die Bibliothek SELBST, damit ein
+  // weiterer redaktioneller Eintrag den Beweis nicht rot macht.
+  check('Bibliothek: die von Hand geprüften Einträge stehen da',
+    library.status === 200 && LIBRARY_KEYS.length > 0 && LIBRARY_KEYS.every(key => libraryIds.includes(key)),
     `${library.status} ${libraryIds.join(',')}`)
 
   const sharedBefore = await call(`${base}/candidates?source=shared`, { cookie: owner.cookie })

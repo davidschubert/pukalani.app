@@ -27,7 +27,10 @@
  * 10. STALE: eine Korrektur an einem beteiligten EIGENEN Feld macht den
  *     gespeicherten Bericht `stale` — mit GEGENPROBE (davor `false`).
  * 11. BIBLIOTHEK: ein `library`-Kandidat steht im Bericht, OHNE dass sein
- *     Server je angefasst wurde.
+ *     Server je angefasst wurde — seit M6b ein ECHTER Eintrag (`the-barn`).
+ *     Dazu: der Quellen-Wähler führt ihn mit Wortname UND Kategorie und mit
+ *     SONST NICHTS (Erlaubnisliste der Options-Felder — kein Logo, kein
+ *     Favicon, kein Bild; Plan Anhang G a).
  * 12. BRAND-CHECK: ein vorhandener Check erscheint als `brandCheck` am
  *     Kandidaten — mit GEGENPROBE (ein Kandidat ohne Check hat keinen).
  *
@@ -62,6 +65,22 @@ import { readFile } from 'node:fs/promises'
 import { dirname, join, normalize, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { Client, ID, Query, TablesDB, Users } from 'node-appwrite'
+// Die BIBLIOTHEK selbst — Node 22 entfernt die Typen beim Laden, und die Datei
+// ist reine Daten ohne Import. So steht das Prüfdatum genau einmal im Repo
+// (M6b); eine Zahl in diesem Skript daneben wäre beim nächsten geprüften
+// Eintrag rot, ohne dass am Produkt etwas falsch wäre.
+import { MARKET_LIBRARY_ENTRIES } from '../shared/library/index.ts'
+
+/** Der Bibliotheks-Eintrag, gegen den dieser Beweis läuft — ein ECHTER (M6b). */
+const LIBRARY_KEY = 'the-barn'
+const LIBRARY_ENTRY = MARKET_LIBRARY_ENTRIES.find(entry => entry.key === LIBRARY_KEY)
+if (!LIBRARY_ENTRY) {
+  console.error(`Die Bibliothek kennt '${LIBRARY_KEY}' nicht — Beweis abgebrochen.`)
+  process.exit(1)
+}
+const LIBRARY_VERIFIED_AT = LIBRARY_ENTRY.verifiedAt
+/** Der ANZEIGE-Name des Kandidaten; die Lauf-Schritte werden darüber gefunden. */
+const LIBRARY_CANDIDATE_NAME = `${LIBRARY_ENTRY.name} (Bibliothek)`
 
 const PORT = Number(process.env.BRANDING_PORT || 3016)
 const HOST = process.env.BRANDING_HOST || 'localhost'
@@ -337,7 +356,11 @@ try {
 
   const addLib = await call(`${base}/competitors`, {
     method: 'POST', cookie: owner.cookie,
-    body: { name: 'Atlas (Bibliothek)', sourceKind: 'library', sourceRef: 'demo-atlas-roasters' },
+    // EIN ECHTER Bibliotheks-Eintrag (M6b): seit dem 2026-09-06 enthält die
+    // ausgelieferte Bibliothek nur noch von Hand geprüfte Marken, und ein
+    // Beweis gegen einen Testeintrag prüfte ab hier etwas, das es nicht mehr
+    // gibt. ABGERUFEN wird trotzdem nichts — genau das steht in Schritt 3.
+    body: { name: LIBRARY_CANDIDATE_NAME, sourceKind: 'library', sourceRef: LIBRARY_KEY },
   })
   const libId = addLib.json?.competitor?.id
   check('ein BIBLIOTHEKS-Kandidat wird angenommen',
@@ -380,7 +403,7 @@ try {
   const run = await call(`${base}/run`, { method: 'POST', cookie: owner.cookie })
   check('der Lauf läuft ⇒ 200', run.status === 200 && run.json?.ran === true,
     `${run.status} ${run.text.slice(0, 200)}`)
-  const libStep = (run.json?.steps ?? []).find(step => step.name === 'Atlas (Bibliothek)')
+  const libStep = (run.json?.steps ?? []).find(step => step.name === LIBRARY_CANDIDATE_NAME)
   check('der Bibliotheks-Kandidat ist `fetched`, OHNE eine Seite gelesen zu haben',
     libStep?.status === 'fetched' && libStep?.pagesRead === 0 && libStep?.robotsChecked === false,
     JSON.stringify(libStep ?? {}))
@@ -561,14 +584,35 @@ try {
     '')
 
   // ── 13 · Der Bibliotheks-Kandidat im Bericht ────────────────────────────
+  //
+  // Das Prüfdatum kommt aus der BIBLIOTHEK selbst, nicht aus einer zweiten
+  // Zahl in diesem Skript: sonst wäre der Beweis beim nächsten geprüften
+  // Eintrag rot, ohne dass am Produkt etwas falsch wäre.
   console.log('\n13 · Die Bibliothek steht im Bericht')
   const libProfile = profileOf(libId)
   check('der Bibliotheks-Kandidat hat ein Marktprofil mit Quelle `library`',
     libProfile.length > 0 && libProfile.every(field => field.source === 'library'),
     `${libProfile.length} Felder`)
   check('seine Belege tragen das PRÜFDATUM der Handprüfung',
-    libProfile.some(field => field.evidence?.fetchedAt === '2026-09-05'),
+    libProfile.some(field => field.evidence?.fetchedAt === LIBRARY_VERIFIED_AT),
     JSON.stringify(libProfile.map(field => field.evidence?.fetchedAt).filter(Boolean)))
+
+  // Der Quellen-Wähler zeigt von einer ECHTEN Marke nur Wortname und
+  // Kategorie (Plan §7.2 Nr. 3, Anhang G a). Ein Logo, eine Bildmarke oder
+  // ein Favicon wäre eine andere Art der Benutzung eines fremden Zeichens als
+  // die referenzierende — deshalb steht hier eine ERLAUBNISLISTE der Felder
+  // und keine Sperrliste: ein neues Feld ist damit automatisch rot.
+  const libList = await call(`${base}/candidates?source=library`, { cookie: owner.cookie })
+  const libOptions = libList.json?.options ?? []
+  const libOption = libOptions.find(option => option.id === LIBRARY_KEY)
+  check('der Quellen-Wähler führt den ECHTEN Eintrag mit Name und Kategorie',
+    libList.status === 200 && libOption?.label === LIBRARY_ENTRY.name && libOption?.hint === LIBRARY_ENTRY.category,
+    `${libList.status} ${JSON.stringify(libOption ?? {})}`)
+  const erlaubteFelder = new Set(['id', 'label', 'hint', 'url'])
+  const fremdeFelder = libOptions.flatMap(option => Object.keys(option).filter(key => !erlaubteFelder.has(key)))
+  check('… und sonst NICHTS — kein Logo, kein Favicon, kein Bild',
+    libOptions.length > 0 && fremdeFelder.length === 0,
+    fremdeFelder.join(', '))
 
   // ── 14 · Der Lauf MIT Bericht (das Flag) ────────────────────────────────
   console.log('\n14 · Ein Klick, zwei Schritte (`withReport`)')

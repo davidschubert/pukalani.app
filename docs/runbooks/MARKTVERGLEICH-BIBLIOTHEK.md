@@ -5,6 +5,8 @@
 ein Mensch macht und mit seinem Zeichen unterschreibt.
 
 **Wer:** David (Redaktion). **Wie oft:** je Marke einmal, danach nur bei Auffrischung.
+**Stand 2026-09-06:** zwei Einträge sind durch — `the-barn` und `apple` (Abschnitt 4);
+`nike`, `anthropic`, `meta` liegen als Entwurf. Rechts-Check offen.
 **Konzept:** [BRAND-MARKTVERGLEICH.md](../plans/BRAND-MARKTVERGLEICH.md) §7.2 und Anhang G.
 
 ---
@@ -141,6 +143,28 @@ Dann im Entwurf setzen:
 "verifiedBy": "DS"              // Zeichen des Prüfenden
 ```
 
+### Geleistete Handprüfungen
+
+Was hier steht, ist ein PROTOKOLL: je Zeile eine Prüfung, die stattgefunden hat.
+Ein Häkchen ohne Datum und Namen wäre keins.
+
+- [x] **`the-barn`** — 2026-09-06, David Schubert. Alle **9** belegten Felder
+      übernommen (`categoryLanguage`, `pitch`, `audience`, `firstChoice`,
+      `purpose`, `values`, `toneWords`, `tagline`, `keyMessages`); Quellen
+      `thebarn.de/` und `thebarn.de/products/hario-scale`.
+- [x] **`apple`** — 2026-09-06, David Schubert. **5** Felder übernommen;
+      **`purpose` bei der Prüfung GESTRICHEN** (das Zitat trug das Feld nicht).
+      Ein gestrichenes Feld ist der Normalfall, kein Fehler des Laufs.
+- [ ] `nike`, `anthropic`, `meta` — gerechnet (2026-09-06), Entwürfe liegen
+      unter `drafts/`, **Handprüfung offen**.
+
+**Rechts-Check offen.** Die anwaltlichen Fragen aus Plan
+[Anhang G](../plans/BRAND-MARKTVERGLEICH.md) (Namensnennung im bezahlten
+Produkt, Zitatzweck, § 44b UrhG, § 6 UWG, DSGVO, § 87b UrhG) sind **nicht
+beantwortet**. Die Übernahme der beiden Einträge geschah trotzdem — auf **Davids
+Entscheidung vom 2026-09-06**, festgehalten und nicht umgangen. Bleibt die
+Antwort aus oder fällt sie anders aus, ist Abschnitt 6 („Zurücknehmen") der Weg.
+
 ---
 
 ## 5. Übernehmen
@@ -155,9 +179,13 @@ Das Werkzeug verweigert die Übernahme, solange `status` auf `draft` steht oder
 wird `index.ts` **zurückgesetzt**.
 
 - [ ] `--promote` grün.
-- [ ] **`MARKET_LIBRARY_VERSION` in `shared/library/index.ts` gehoben.** Sie geht in
+- [ ] **`MARKET_LIBRARY_VERSION` steht höher als vorher.** Sie geht in
       `market_reports.revisionKey` ein; ohne Erhöhung halten sich gespeicherte Berichte
-      für aktuell, obwohl sich ihre Grundlage bewegt hat.
+      für aktuell, obwohl sich ihre Grundlage bewegt hat. **Seit M6b hebt `--promote`
+      sie SELBST** (vorher stand hier nur eine Erinnerung — und genau die wurde beim
+      ersten echten Durchgang gebraucht). Wer wie am 2026-09-06 ZWEI Einträge in EINEM
+      Commit übernimmt, bekommt zwei Erhöhungen (lib-2 → lib-4) und darf sie am Ende
+      auf EINE zusammenziehen (lib-3); wichtig ist nur, dass die Zahl steigt.
 - [ ] Entwurf aus `drafts/` gelöscht (er ist jetzt in `index.ts`, und zwei Fassungen
       derselben Aussage laufen auseinander).
 - [ ] `pnpm --filter @pukalani/market test` grün.

@@ -13,8 +13,8 @@ import { MARKET_UNLOCK_STEP, requireMarketProfile } from '../../../../utils/mark
  * drei anderen schon:
  *
  *  · `foundation` — die eigenen Brandings des Kontos. Der Relaunch-Fall.
- *  · `library`    — die handgeprüfte Bibliothek aus dem Repo (heute nur
- *                   erfundene Testeinträge; die echten kommen mit M6).
+ *  · `library`    — die handgeprüfte Bibliothek aus dem Repo (seit M6b echte
+ *                   Marken: `the-barn`, `apple`).
  *  · `shared`     — die freigegebenen Marken FREMDER Konten (Opt-in, §7.2
  *                   Nr. 4), Name-Präfix-Suche über `q`.
  *
@@ -78,6 +78,16 @@ export default defineEventHandler(async (event): Promise<MarketCandidateOptionsR
   }
 
   if (source === 'library') {
+    // WORTNAME UND KATEGORIE — mehr nicht (Plan §7.2 Nr. 3, Anhang G a).
+    //
+    // Seit M6b stehen hier ECHTE Marken. Was von ihnen sichtbar wird, ist
+    // deshalb eine rechtliche Entscheidung und keine Gestaltungsfrage: der
+    // NAME, wie die Marke ihn selbst schreibt, und die grobe Einordnung, die
+    // das Paar erklärt („Kaffeerösterei"). KEIN Logo, KEINE Bildmarke, KEIN
+    // Favicon — auch nicht über einen Umweg wie einen Favicon-Dienst, dem man
+    // die `homepage` hinreicht. `hint` ist dasselbe Feld, in dem die anderen
+    // beiden Quellen ihre Branche zeigen; der Wähler rendert daraus zwei
+    // Textzeilen und sonst nichts.
     const entries = marketLibraryEntries()
       .filter(entry => !prefix || entry.name.toLowerCase().startsWith(prefix))
       .slice(0, OPTIONS_LIMIT)
@@ -86,6 +96,7 @@ export default defineEventHandler(async (event): Promise<MarketCandidateOptionsR
       options: entries.map((entry): MarketSourceOption => ({
         id: entry.key,
         label: entry.name,
+        ...(entry.category ? { hint: entry.category } : {}),
         url: entry.homepage,
       })),
     }

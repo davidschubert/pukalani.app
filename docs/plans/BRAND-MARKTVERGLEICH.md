@@ -452,7 +452,7 @@ haben, das Marktprofil steht in der Inhaltssprache der Marke).
 | M3 | Vergleich + Befunde | Bericht-Prompt `market-r-1`, Idempotenz + `stale`, Befund-Art `market`, § 6 UWG-Riegel, Bibliotheks-Mechanik, Brand-Check-Anbindung, George-Block | **GEBAUT** (2026-09-05) — Vertrag Anhang D; `verify-market-report.mjs` 43/43 |
 | M4 | Oberfläche | Seite „Markt“, Leiste, Schranke, Chips, Quellen-Wähler, Opt-in, Relaunch-Ansicht | **GEBAUT** (2026-09-05) — Vertrag Anhang E; `verify-market-ui.mjs` 46/46; Klick-Beweis + Seiten-Abnahme durch David offen |
 | M5 | Betrieb | ~~Eimer~~ (vorgezogen, s. u.), Rohtext-Sweep, Erklärseite `/market-bot`, Vertraulichkeits-Nachweis, Bewertung, Runbook, Doku | **GEBAUT** (2026-09-05) — Vertrag Anhang F; `verify-market-retention.mjs`; Prod-Migration + Gate-Flip offen (Davids Ja) |
-| M6 | Bibliothek | Rechnen + Handprüfung der ersten Paare, Rechts-Check der Namensnennung (§7.6) | **WERKZEUG GEBAUT** (2026-09-05) — Vertrag Anhang G; Trockenlauf 9/10 auswertbar, `--compute --stub` 2 Entwürfe + 2 begründete Ausschlüsse, Entwurf fällt durch das Schema (206 Unit-Tests). **Inhalt wartet auf Davids Ja (bezahlte Läufe), die Handprüfung und den Rechts-Check** |
+| M6 | Bibliothek | Rechnen + Handprüfung der ersten Paare, Rechts-Check der Namensnennung (§7.6) | **WERKZEUG GEBAUT** (2026-09-05) — Vertrag Anhang G; Trockenlauf 9/10 auswertbar, `--compute --stub` 2 Entwürfe + 2 begründete Ausschlüsse, Entwurf fällt durch das Schema (206 Unit-Tests). **M6b (2026-09-06): bezahlter Lauf gelaufen, `the-barn` + `apple` von David handgeprüft und ÜBERNOMMEN, erfundene Einträge aus dem Produkt entfernt (Fassung `lib-3`, 213 Unit-Tests). Rechts-Check weiter OFFEN** |
 
 **Abweichung von dieser Skizze (M2, 2026-09-05):** Der **Eimer** (§2.8, „3 Läufe je
 Branding und Tag" plus Instanz-Deckel) war für M5 vorgesehen und ist mit M2 VORGEZOGEN —
@@ -1680,6 +1680,32 @@ Gebaut in Paket **M6 „Bibliothek"**: das WERKZEUG und die VORLAGE. Der INHALT
 bezahlte Läufe und die Handprüfung. **Keine neue Migration, kein neuer
 Modell-Aufruf in diesem Paket.**
 
+> ### Stand 2026-09-06 (M6b): die ersten zwei Einträge sind LIVE, die
+> ### Anwalts-Fragen sind OFFEN
+>
+> Der bezahlte Lauf ist gelaufen (≈ $0,11, fünf Entwürfe). David hat am
+> 2026-09-06 zwei davon von Hand geprüft und beglaubigt — **`the-barn`** (alle
+> neun belegten Felder) und **`apple`** (fünf; `purpose` gestrichen) —, und
+> beide stehen seither in `shared/library/index.ts` (Fassung `lib-3`).
+> `nike`, `anthropic`, `meta` bleiben Entwürfe.
+>
+> **Zugleich sind die zwei ERFUNDENEN Einträge aus dem Produkt heraus.** Sie
+> waren als Platzhalter richtig, solange die Mechanik ohne Inhalt lief; mit dem
+> Gate-Flip standen sie im Quellen-Wähler zahlender Kunden — zwei Marken, die
+> es nicht gibt, mit einem Prüfsiegel, das niemand geleistet hat. Sie leben als
+> Testvorlage weiter (`tests/fixtures/marketLibraryFixture.ts`), und die alte
+> Test-Sperre („AUSSCHLIESSLICH erfundene Marken") ist UMGEDREHT: geprüft wird
+> jetzt auf echten Host, Prüfdatum nicht in der Zukunft, Beleg vom Auftritt der
+> Marke selbst — je Regel mit Gegenprobe.
+>
+> **Die Fragen unten an den Anwalt sind zum Stand dieser Zeile UNBEANTWORTET.**
+> Die Übernahme geschah auf **Davids Entscheidung vom 2026-09-06** — bewusst
+> und festgehalten, nicht umgangen. Was das Produkt zeigt, bleibt das Minimum
+> aus (a): Wortname und Kategorie, keine Logos, keine Bildmarken, keine
+> Favicons (im Beweis `verify-market-report.mjs` jetzt als ERLAUBNISLISTE der
+> Felder gesichert, nicht als Sperrliste). Fällt die anwaltliche Antwort
+> anders aus, ist die Rücknahme ein Diff: Runbook Abschnitt 6.
+
 ### Wo was liegt
 
 | Baustein | Ort |
@@ -1903,8 +1929,10 @@ einer laufend gepflegten Sammlung wird?
 
 - **Keinen einzigen bezahlten Modell-Aufruf.** Der `--compute`-Modus bricht ohne
   `MARKET_LIBRARY_ALLOW_PAID=1` ab; Davids Ja steht aus.
-- **Keinen echten Bibliotheks-Eintrag.** `index.ts` enthält weiter genau die
+- **Keinen echten Bibliotheks-Eintrag.** `index.ts` enthielt weiter genau die
   zwei erfundenen Testeinträge (jetzt mit `status: 'verified'`).
+  *Überholt seit M6b (2026-09-06): zwei echte Einträge sind drin, die
+  erfundenen draussen — siehe der Kasten oben.*
 - **Keine Auffrischungs-Automatik.** Ein Eintrag altert, und die 90-Tage-Regel
   steht heute im Runbook, nicht im Code. Sobald echte Einträge liegen, gehört
   sie in einen Wächter.
