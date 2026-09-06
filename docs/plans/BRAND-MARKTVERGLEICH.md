@@ -452,7 +452,7 @@ haben, das Marktprofil steht in der Inhaltssprache der Marke).
 | M3 | Vergleich + Befunde | Bericht-Prompt `market-r-1`, Idempotenz + `stale`, Befund-Art `market`, § 6 UWG-Riegel, Bibliotheks-Mechanik, Brand-Check-Anbindung, George-Block | **GEBAUT** (2026-09-05) — Vertrag Anhang D; `verify-market-report.mjs` 43/43 |
 | M4 | Oberfläche | Seite „Markt“, Leiste, Schranke, Chips, Quellen-Wähler, Opt-in, Relaunch-Ansicht | **GEBAUT** (2026-09-05) — Vertrag Anhang E; `verify-market-ui.mjs` 46/46; Klick-Beweis + Seiten-Abnahme durch David offen |
 | M5 | Betrieb | ~~Eimer~~ (vorgezogen, s. u.), Rohtext-Sweep, Erklärseite `/market-bot`, Vertraulichkeits-Nachweis, Bewertung, Runbook, Doku | **GEBAUT** (2026-09-05) — Vertrag Anhang F; `verify-market-retention.mjs`; Prod-Migration + Gate-Flip offen (Davids Ja) |
-| M6 | Bibliothek | Rechnen + Handprüfung der ersten Paare, Rechts-Check der Namensnennung (§7.6) | offen |
+| M6 | Bibliothek | Rechnen + Handprüfung der ersten Paare, Rechts-Check der Namensnennung (§7.6) | **WERKZEUG GEBAUT** (2026-09-05) — Vertrag Anhang G; Trockenlauf 9/10 auswertbar, `--compute --stub` 2 Entwürfe + 2 begründete Ausschlüsse, Entwurf fällt durch das Schema (206 Unit-Tests). **Inhalt wartet auf Davids Ja (bezahlte Läufe), die Handprüfung und den Rechts-Check** |
 
 **Abweichung von dieser Skizze (M2, 2026-09-05):** Der **Eimer** (§2.8, „3 Läufe je
 Branding und Tag" plus Instanz-Deckel) war für M5 vorgesehen und ist mit M2 VORGEZOGEN —
@@ -1670,3 +1670,273 @@ tragen).
    gehören.** Alle anderen Sweeps dieses Repos löschen im Zweifel NICHT. Hier
    wäre das die teure Richtung: was stehen bleibt, ist fremder Seitentext ohne
    Ablaufdatum.
+
+---
+
+## Anhang G — Bibliothek und Namensnennung (M6, Stand 2026-09-05)
+
+Gebaut in Paket **M6 „Bibliothek"**: das WERKZEUG und die VORLAGE. Der INHALT
+(echte Marken) wartet auf zwei Dinge, die nicht im Code liegen — Davids Ja für
+bezahlte Läufe und die Handprüfung. **Keine neue Migration, kein neuer
+Modell-Aufruf in diesem Paket.**
+
+### Wo was liegt
+
+| Baustein | Ort |
+| --- | --- |
+| Werkzeug (4 Modi) | `packages/market/scripts/market-library-compute.mjs` |
+| Kandidatenliste | `packages/market/shared/library/candidates.json` |
+| Machbarkeits-Bericht | `packages/market/shared/library/feasibility.2026-09-05.json` |
+| Entwürfe (nicht im Repo) | `packages/market/shared/library/drafts/` (`.gitignore`) |
+| Zustandsfeld + Entwurfs-Schema | `packages/market/shared/marketLibrary.ts` |
+| Handprüfungs-Ablauf | `docs/runbooks/MARKTVERGLEICH-BIBLIOTHEK.md` |
+
+### Das Werkzeug — vier Modi, ein Tor
+
+`--check` (Trockenlauf, kostenlos) · `--compute --stub` (Rechnen gegen die
+Demo-Websites) · `--compute` (echter Lauf, verlangt
+`MARKET_LIBRARY_ALLOW_PAID=1` und druckt vorher die Kostenschätzung) ·
+`--promote <schlüssel>` (Übernahme eines geprüften Entwurfs).
+
+**Es benutzt den KUNDENWEG, nicht eine eigene Pipeline.** Das Werkzeug legt ein
+Wegwerf-Konto und ein Wegwerf-Branding an, trägt die Marken als Kandidaten ein
+und ruft `POST /api/market/profiles/:id/run` — dieselbe Kette mit robots, TDM,
+Sperrliste, PII-Filter, Beleg-Riegel und Drossel, die auch ein Kunde durchläuft.
+Eine Betreiber-Route `/api/market/ops/library-compute` wäre eine dauerhafte
+Produktionsfläche für einen Handgriff, den es eine Handvoll Mal gibt (der
+Sweep-Knopf aus M5 hat seinen Platz, weil ihn der BETRIEB braucht, nicht die
+Redaktion). Die REGELN importiert das Skript aus dem Produkt selbst
+(`marketRobots.ts`, `marketCrawlRules.ts`, `brandSiteCrawlParse.ts`) — Node 22
+entfernt die Typen beim Laden, die drei Module sind pur und importfrei. Eine
+JS-Kopie des robots-Parsers wäre eine zweite Wahrheit über die Frage, ob wir
+einen fremden Server anfassen dürfen.
+
+**Das Tor ist ein Zustand, keine Zusage.** `marketLibraryEntrySchema` verlangt
+seit M6 `status: 'verified'`; das Werkzeug schreibt `status: 'draft'`,
+`verifiedAt: null`, `verifiedBy: null`. Ein Entwurf fällt damit durch das
+Bibliotheks-Schema — auch dann, wenn jemand Datum und Zeichen nachträgt und den
+Zustand vergisst. Vorher hingen `verifiedAt`/`verifiedBy` an der Disziplin: ein
+Werkzeug, das sie mit dem heutigen Datum und seinem eigenen Namen füllt, hätte
+das Schema bestanden.
+
+### Der Trockenlauf (2026-09-05, 10 Marken)
+
+Höchstens **drei Anfragen je Host** — `robots.txt`, `/.well-known/tdmrep.json`,
+Startseite —, keine Unterseite, kein gespeicherter Seiteninhalt. `sitemap.xml`
+kommt gratis aus der `Sitemap:`-Zeile der robots.txt; **`llms.txt` bleibt
+ungeprüft**, weil das Budget den rechtlichen Fragen gehört und „was gäbe es zu
+holen?" erst dran ist, wenn „dürfen wir?" mit ja beantwortet ist.
+
+| Marke | robots (unser Agent) | TDM | sitemap | Urteil |
+| --- | --- | --- | --- | --- |
+| adidas | Bot-Abwehr (403 auf `robots.txt`) | ungeprüft | ungeprüft | **bot-abwehr** |
+| Nike | erlaubt | kein Vorbehalt | 5× in robots.txt | erlaubt |
+| Anthropic | erlaubt | kein Vorbehalt | 1× in robots.txt | erlaubt |
+| OpenAI | erlaubt | kein Vorbehalt | 1× in robots.txt | erlaubt |
+| Meta (`www.meta.com`) | erlaubt | kein Vorbehalt | 5× in robots.txt | erlaubt |
+| Apple | erlaubt | kein Vorbehalt | 5× in robots.txt | erlaubt |
+| The Barn (DE) | erlaubt | kein Vorbehalt | 1× in robots.txt | erlaubt |
+| Counter Culture Coffee (US) | erlaubt | kein Vorbehalt | nicht in robots.txt | erlaubt |
+| sevDesk (DE) | erlaubt | kein Vorbehalt | 1× in robots.txt | erlaubt |
+| FreshBooks (US) | erlaubt | kein Vorbehalt | 1× in robots.txt | erlaubt |
+
+**Neun von zehn sind auswertbar — die Erwartung „die Grossen sperren" hat sich
+NICHT bestätigt.** Was sich stattdessen zeigte: gesperrt wird nicht per Regel,
+sondern per Bot-Abwehr. `www.adidas.com` antwortet unserem Absender schon auf
+die `robots.txt` mit 403; das Werkzeug behandelt das fail-closed als Nein und
+stellt nach der ERSTEN Anfrage ein. Zweiter Befund: `about.meta.com` leitet auf
+`www.meta.com` um — dort gilt eine andere `robots.txt`, deshalb meldet das
+Werkzeug `erlaubt (Ursprung prüfen)` und die Kandidatenliste wurde auf den
+Zielhost korrigiert und erneut geprüft.
+
+### Der Stub-Lauf (Beweis, 2026-09-05)
+
+Vier Demo-Websites des Playgrounds, `MARKET_DEV_STUB=1`, Dev-Server aus dem
+Worktree auf 3016. Ergebnis: **zwei Entwürfe mit je neun belegten Feldern**
+(`demo-upcountry-roast`, `demo-pacificbean`), **zwei Kandidaten ohne Entwurf**
+(`demo-island-grind` ⇒ `excluded/tdm`, `demo-kona-trading` ⇒ `excluded/robots`).
+Das zehnte Feld (`distinctiveAsset`) fehlt in beiden Entwürfen — es ist das
+Feld, dem der Stub absichtlich ein erfundenes Zitat gibt, und der Beleg-Riegel
+verwirft es. Der Beweis zeigt damit beides: dass das Werkzeug gültige Entwürfe
+erzeugt UND dass es ausgeschlossene Kandidaten ohne Eintrag lässt.
+
+### Kostenschätzung für den echten Lauf
+
+Modell `anthropic/claude-haiku-4.5` (der Default der Extraktion), Preise Stand
+2026-09-05: $1/M ein, $5/M aus. Je Marke ein eigener Lauf, also greift der
+Lauf-Deckel je Marke: 60 000 Zeichen ≈ 15 000 Token plus ~1 500 Token Prompt,
+Antwort ~1 200 Token ⇒ **~$0,023 je Marke**, für neun auswertbare Marken
+**~$0,21**. Ohne KI-Aussensicht (§7.5, Default leer); sie käme mit 2–3 weiteren
+Aufrufen je Marke dazu. Die Zahl steht als Konstante im Skript, damit sie
+nachrechenbar ist — sie ist keine Zusage des Anbieters.
+
+---
+
+### Rechts-Check der Namensnennung — Stand, Laien-Einschätzung, Anwaltsfragen
+
+**Das ist KEINE Rechtsberatung.** Was hier steht, ist der Stand des Produkts,
+eine ausdrücklich als LAIENEINSCHÄTZUNG gekennzeichnete Risikoeinordnung und je
+Punkt die Frage, die ein Anwalt beantworten soll. Quellen aus Anhang A.
+
+#### (a) Fremde Markennamen in einem bezahlten Produkt
+
+*Stand:* Die Bibliothek nennt **Wortnamen** (`adidas`, `Nike`) als Bezeichnung
+für die Marke, über die etwas gesagt wird. **Keine Logos, keine Bildmarken,
+keine Favicons** — geprüft: der market-Layer lädt in `app/**` kein einziges
+Bild einer fremden Marke (Grep über `<img`, `NuxtImg`, `favicon`, `logo`,
+Favicon-Dienste: null Treffer). Kein Herkunftsbezug: die Oberfläche sagt nie,
+eine fremde Marke stehe mit uns in Verbindung.
+
+*Laien-Einschätzung (kein Anwalt):* niedriges Risiko. Referenzierende
+Benutzung eines fremden Zeichens ist nach § 23 Abs. 1 Nr. 2/3 MarkenG bzw.
+Art. 14 UMV zulässig, soweit sie zur Bezeichnung erforderlich ist und den
+anständigen Gepflogenheiten entspricht — genau das ist eine Aussage der Form
+„diese Marke sagt auf ihrer Website X".
+
+*Frage an den Anwalt:* Bleibt die referenzierende Benutzung zulässig, wenn die
+Namen (1) in einem KOSTENPFLICHTIGEN Produkt erscheinen und (2) im MARKETING
+dieses Produkts als Beispiel-Paare genannt würden? Siehe auch (d).
+
+#### (b) Zitate ≤ 200 Zeichen mit Quelle
+
+*Stand:* Je Feld ein wörtliches Zitat, hart auf `MARKET_EVIDENCE_MAX = 200`
+Zeichen begrenzt, immer mit Quell-Adresse und Abruf- bzw. Prüfdatum, immer als
+BELEG neben einer Aussage — nie als eigenständiger Inhalt und nie als Volltext.
+`MkEvidence.vue` zeigt das Zitat ausschliesslich zusammen mit dem Link auf die
+Originalseite.
+
+*Laien-Einschätzung (kein Anwalt):* niedriges Risiko. § 51 UrhG verlangt einen
+Zitatzweck (Beleg, Auseinandersetzung), nicht Schmuck — die UI ist genau so
+gebaut: das Zitat begründet einen Eintrag im Marktprofil.
+
+*Frage an den Anwalt:* Trägt der Zitatzweck auch dann, wenn dieselbe Seite
+zehn Zitate DERSELBEN Quelle zeigt (ein Marktprofil hat zehn Felder)? Und
+genügt der Link als Quellenangabe nach § 63 UrhG?
+
+#### (c) TDM-Vorbehalt (§ 44b UrhG)
+
+*Stand:* Vier maschinenlesbare Formen werden erkannt und respektiert
+(`TDM-Reservation`-Kopfzeile, `/.well-known/tdmrep.json`, `noai`/`noimageai`/
+`notrain`/`noml` in robots-Metas, `<meta name="tdm-reservation">`), dazu
+robots.txt für unseren eigenen Absender. **Fail-closed:** eine vorhandene, aber
+unlesbare `tdmrep.json` gilt als Vorbehalt, ein 401/403 auf die `robots.txt`
+gilt als Nein. Ein Vorbehalt auf IRGENDEINER gelesenen Seite schliesst den
+ganzen Wettbewerber aus. Rohtext lebt 24 Stunden.
+
+*Laien-Einschätzung (kein Anwalt):* mittleres Risiko, weil die Rechtslage offen
+ist. OLG Hamburg 5 U 104/24 (LAION) verlangt ein automatisiert interpretierbares
+Signal; die Revision liegt beim BGH (I ZR 281/25, Verhandlung war für den
+2026-09-03 terminiert, Ausgang zum Berichtsstand offen). Unsere Regel ist
+strenger als das Urteil verlangt.
+
+*Frage an den Anwalt:* Ist der BGH inzwischen entschieden — und wenn ja, ändert
+sich etwas für einen Vorbehalt in NATÜRLICHER Sprache (AGB/Impressum), den wir
+heute NICHT auswerten? Zweitens: Greift § 44b überhaupt, wenn wir gar kein
+Modell trainieren, sondern nur einmalig auswerten und zitieren?
+
+#### (d) § 6 UWG — vergleichende Werbung
+
+*Stand im PRODUKT:* Wir vergleichen nicht uns mit ihnen. Der Kunde sieht
+Aussagen Dritter neben seinen eigenen; es gibt kein Ranking, keinen Score je
+Wettbewerber und keine Wertung. Der Herabsetzungs-Filter (M3) und der
+Namens-/Domain-Filter über jeden Vorschlag verhindern, dass ein Satz, den WIR
+formulieren, einen Dritten nennt oder erkennbar macht.
+
+*Stand im MARKETING:* Der Prototyp nannte „adidas vs. Nike" als Beispiel-Paar.
+**Geprüft: heute steht kein realer Markenname in einem Kunden-Text des
+market-Layers** — nicht in `MkPaywall.vue`, nicht in `market.paywall.*`, nicht
+im Quellen-Wähler (`market.source.libraryHint` sagt „Bibliothek", nicht
+„adidas"). Reale Namen stehen ausschliesslich in `candidates.json` (einer
+Redaktions-Datei, die keine Oberfläche liest) und in Code-Kommentaren.
+
+*Laien-Einschätzung (kein Anwalt):* im Produkt niedrig, im Marketing spürbar
+höher. Ein Werbetext, der fremde Marken als Aufhänger nennt, ist Werbung MIT
+fremden Namen und nicht mehr nur Beleg.
+
+***Empfehlung, die daraus folgt:*** **im Marketing nur Kategorien nennen**
+(„zwei Sportartikel-Marken", „zwei KI-Labore"), Namen erst im Produkt nach der
+Freischaltung. Diese Regel gilt ab sofort für jeden Schranken-, Landing- und
+Katalog-Text.
+
+*Frage an den Anwalt:* Wäre die Nennung realer Marken im Marketing („Beispiel:
+adidas gegen Nike") als vergleichende Werbung nach § 6 UWG einzuordnen, obwohl
+wir mit keiner der beiden im Wettbewerb stehen — und ändert das etwas an der
+Zulässigkeit?
+
+#### (e) DSGVO
+
+*Stand:* Gelesen werden Firmen-Websites, nicht Personen-Websites (Regel in
+`candidates.json`). Team-, Impressum-, Kontakt- und Presseseiten werden gar
+nicht erst abgerufen (Pfad-Sperrliste), und der Text läuft vor jedem
+Modell-Aufruf durch `filterMarketPii` (E-Mail, Telefon, Namensmuster nahe
+„Geschäftsführer/CEO/Gründer"). Rohtext wird nach 24 Stunden gelöscht (Sweep,
+M5). Die Handprüfung hat „keine PII" als eigenes Häkchen.
+
+*Laien-Einschätzung (kein Anwalt):* niedriges Risiko. Der EDSA hat mit den
+Leitlinien 3/2026 Scraping nicht verboten, wertet aber das IGNORIEREN
+technischer Signale in der Interessenabwägung negativ — wir ignorieren keines.
+
+*Frage an den Anwalt:* Reicht der PII-Filter, oder braucht ein
+Bibliotheks-Eintrag (der dauerhaft und für alle Kunden sichtbar ist) eine
+zusätzliche Zusage gegenüber dem Website-Betreiber — etwa eine
+Widerspruchsmöglichkeit, die über „schreibt uns an" hinausgeht?
+
+#### (f) Datenbank-Herstellerrecht (§ 87b UrhG)
+
+*Stand:* Je Marke höchstens **8 Seiten** und 20 000 Zeichen je Seite, einmalig,
+ohne systematische Wiederholung; gespeichert bleiben zehn Felder mit je einem
+Zitat von höchstens 200 Zeichen. Das ist nach jedem Massstab ein unwesentlicher
+Teil einer Website, und es entsteht keine Sammlung, die den Ursprung ersetzt.
+
+*Laien-Einschätzung (kein Anwalt):* niedriges Risiko. § 87b verbietet die
+Vervielfältigung wesentlicher Teile sowie die wiederholte Entnahme
+unwesentlicher Teile, die einer normalen Auswertung zuwiderläuft — beides
+liegt hier fern.
+
+*Frage an den Anwalt:* Kippt die Einordnung, wenn wir denselben Kandidaten
+regelmässig auffrischen (etwa vierteljährlich) und die Bibliothek dadurch zu
+einer laufend gepflegten Sammlung wird?
+
+---
+
+### Was M6 NICHT gebaut hat
+
+- **Keinen einzigen bezahlten Modell-Aufruf.** Der `--compute`-Modus bricht ohne
+  `MARKET_LIBRARY_ALLOW_PAID=1` ab; Davids Ja steht aus.
+- **Keinen echten Bibliotheks-Eintrag.** `index.ts` enthält weiter genau die
+  zwei erfundenen Testeinträge (jetzt mit `status: 'verified'`).
+- **Keine Auffrischungs-Automatik.** Ein Eintrag altert, und die 90-Tage-Regel
+  steht heute im Runbook, nicht im Code. Sobald echte Einträge liegen, gehört
+  sie in einen Wächter.
+
+### Beweise
+
+- Unit (`pnpm --filter @pukalani/market test`, **206**, vorher 201): fünf neue
+  Zusagen um den Entwurf — er ist ein gültiger Entwurf (Gegenprobe), fällt durch
+  das Bibliotheks-Schema, kommt auch mit nachgetragenem Datum und Zeichen nicht
+  durch, wird mit `status: 'verified'` zum Eintrag (Gegenprobe), und ein
+  geprüfter Eintrag ist umgekehrt kein Entwurf.
+- Trockenlauf gegen zehn echte Hosts (2026-09-05), Bericht im Repo.
+- `--compute --stub` gegen vier Demo-Websites: 2 Entwürfe, 2 begründete
+  Ausschlüsse.
+- `--promote` beidseitig: ein Entwurf wird ABGELEHNT (`status: 'draft'`), ein
+  beglaubigter Entwurf wird übernommen und der Schema-Test läuft grün.
+- `verify-market-report.mjs` bleibt **43/43**.
+
+**Gelernt (zwei Dinge, beide erst beim Ausprobieren sichtbar):**
+
+1. **Ein Werkzeug, das Quelltext schreibt, braucht einen echten
+   Serialisierer.** Die erste Fassung von `--promote` setzte den Eintrag mit
+   `JSON.stringify` plus Ersetzungen zusammen und hängte ihn hinter das
+   Trailing-Komma des letzten Eintrags — ein **Loch im Array**. Die Bibliothek
+   fiel fail-closed auf leer zurück, und zwar lautlos; sichtbar wurde es nur,
+   weil `--promote` den Schema-Test SELBST laufen lässt und zurückrollt. Die
+   zweite Falle stand daneben und wäre erst bei einem echten Zitat
+   aufgeschlagen: `We're` hätte die Datei zerrissen. Wer fremde Zitate in
+   Quelltext schreibt, maskiert sie.
+2. **Die Erwartung „die Grossen sperren" war falsch — und der Befund ist
+   trotzdem derselbe.** Acht von neun Konzern-Websites erlauben unserem
+   Absender alles. Wer sperrt, tut es nicht mit einer Regel, sondern mit einer
+   Bot-Abwehr, die schon die `robots.txt` mit 403 beantwortet. Ein Werkzeug,
+   das nur `Disallow` liest, hielte das für einen Netzwerkfehler und würde es
+   beim nächsten Lauf erneut versuchen.

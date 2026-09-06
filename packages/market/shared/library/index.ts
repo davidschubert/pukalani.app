@@ -11,6 +11,16 @@
  * abgeklärt hat, wäre eine Behauptung über einen Dritten ohne Beleg — genau
  * das, was §1.4 dem Produkt verbietet.
  *
+ * ── SEIT M6 IST DAS WERKZEUG DA, DER INHALT NOCH NICHT ────────────────────
+ * `scripts/market-library-compute.mjs` rechnet vor, das Runbook
+ * `docs/runbooks/MARKTVERGLEICH-BIBLIOTHEK.md` führt die Handprüfung, und
+ * `--promote <schlüssel>` schreibt einen geprüften Entwurf HIER hinein. Was
+ * das Werkzeug erzeugt, liegt bis dahin unter `drafts/` und trägt `status:
+ * 'draft'`; das Bibliotheks-Schema kennt nur `'verified'` und weist einen
+ * Entwurf ab. Deshalb steht das Feld an JEDEM Eintrag — auch an den beiden
+ * erfundenen: eine Ausnahme „die zwei sind ja Testdaten" wäre die eine Zeile,
+ * die die Prüfung später umgeht.
+ *
  * ── DIE FASSUNG IST TEIL DES BERICHT-SCHLÜSSELS ───────────────────────────
  * `MARKET_LIBRARY_VERSION` geht in `market_reports.revisionKey` ein. Wer einen
  * Eintrag ÄNDERT und die Fassung stehen lässt, hinterlässt gespeicherte
@@ -25,7 +35,7 @@
  */
 
 /** Fassung dieser Datei. Jede inhaltliche Änderung hebt sie. */
-export const MARKET_LIBRARY_VERSION = 'lib-1'
+export const MARKET_LIBRARY_VERSION = 'lib-2'
 
 /**
  * Die Einträge. Bewusst `unknown[]`-frei getypt gelassen: die WAHRHEIT über
@@ -36,6 +46,7 @@ export const MARKET_LIBRARY_VERSION = 'lib-1'
 export const MARKET_LIBRARY_ENTRIES = [
   {
     key: 'demo-atlas-roasters',
+    status: 'verified',
     name: 'Atlas Roasters',
     homepage: 'https://atlas-roasters.example',
     category: 'Kaffeerösterei',
@@ -89,6 +100,7 @@ export const MARKET_LIBRARY_ENTRIES = [
   },
   {
     key: 'demo-northline-supply',
+    status: 'verified',
     name: 'Northline Supply',
     homepage: 'https://northline-supply.example',
     category: 'Grosshandel',

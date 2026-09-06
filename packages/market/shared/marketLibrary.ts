@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import type { MarketProfileField } from './marketProfile'
 import { MARKET_EVIDENCE_MAX, MARKET_FIELD_IDS } from './marketProfile'
+import { MARKET_MAX_PAGES } from './marketCrawlRules'
 import { MARKET_LIBRARY_ENTRIES, MARKET_LIBRARY_VERSION } from './library'
 
 /**
@@ -39,9 +40,17 @@ import { MARKET_LIBRARY_ENTRIES, MARKET_LIBRARY_VERSION } from './library'
  * ── WAS HIER BEWUSST NICHT STEHT ──────────────────────────────────────────
  * ECHTE MARKEN. Die Einträge in `shared/library/index.ts` sind erfunden
  * (`.example`-Adressen). Die Paare aus §7.2 (adidas/Nike, Anthropic/OpenAI, …)
- * kommen mit **M6**, nach Handprüfung und Rechts-Check der Namensnennung —
- * eine reale Marke einzutragen, bevor jemand ihre Zitate geprüft hat, wäre
- * genau die Behauptung, die der Marktvergleich nicht aufstellt.
+ * kommen erst, wenn ein MENSCH ihre Zitate am Original geprüft hat — eine
+ * reale Marke einzutragen, bevor das passiert ist, wäre genau die Behauptung,
+ * die der Marktvergleich nicht aufstellt.
+ *
+ * ── DER WEG DAHIN IST SEIT M6 GEBAUT, NICHT GEGANGEN ──────────────────────
+ * `scripts/market-library-compute.mjs` rechnet Einträge vor (`--check`
+ * Machbarkeit, `--compute` Rechnen, `--promote` Übernahme), das Runbook
+ * `docs/runbooks/MARKTVERGLEICH-BIBLIOTHEK.md` führt die Handprüfung. Was das
+ * Werkzeug erzeugt, ist ein ENTWURF (`marketLibraryDraftSchema`) und fällt
+ * durch das Bibliotheks-Schema — `status: 'verified'` ist der eine Wert, den
+ * kein Werkzeug setzt.
  */
 
 const fieldIdSchema = z.enum(MARKET_FIELD_IDS)
@@ -66,6 +75,23 @@ export const marketLibraryFieldSchema = z.object({
 export const marketLibraryEntrySchema = z.object({
   /** Der stabile Schlüssel — er steht in `market_competitors.sourceRef`. */
   key: z.string().trim().regex(/^[a-z0-9][a-z0-9-]{1,62}$/),
+  /**
+   * DER ZUSTAND — und er kennt hier genau EINEN erlaubten Wert (MV1 M6).
+   *
+   * Das Werkzeug `scripts/market-library-compute.mjs` rechnet Einträge
+   * MASCHINELL vor und legt sie als ENTWURF unter `shared/library/drafts/`
+   * ab (`status: 'draft'`, `verifiedAt`/`verifiedBy` null). Ein Entwurf ist
+   * eine Behauptung über einen Dritten, die noch niemand am Original geprüft
+   * hat — er darf die Bibliothek deshalb nicht erreichen, auch nicht durch
+   * ein versehentliches Kopieren der Datei in `index.ts`.
+   *
+   * Vor M6 hing genau das an der Disziplin: `verifiedAt`/`verifiedBy` waren
+   * Pflicht, aber ein Werkzeug, das sie mit dem heutigen Datum und seinem
+   * eigenen Namen füllt, hätte das Schema bestanden. Ein Wert, den nur ein
+   * MENSCH setzen darf, macht aus der Zusage eine Prüfung: `--promote`
+   * verweigert die Übernahme, solange er auf `draft` steht.
+   */
+  status: z.literal('verified'),
   name: z.string().trim().min(1).max(200),
   /** Die Adresse der Marke — Herkunft der Belege, kein Abruf-Ziel. */
   homepage: z.url().max(512),
@@ -76,6 +102,34 @@ export const marketLibraryEntrySchema = z.object({
   /** WER — ein Kürzel genügt, aber niemand darf es leer lassen. */
   verifiedBy: z.string().trim().min(2).max(80),
   fields: z.array(marketLibraryFieldSchema).min(1).max(MARKET_FIELD_IDS.length),
+})
+
+/**
+ * DER ENTWURF — dieselbe Form, aber ausdrücklich UNGEPRÜFT (MV1 M6).
+ *
+ * Er ist das, was `scripts/market-library-compute.mjs --compute` schreibt: die
+ * Felder stehen schon in Bibliotheks-Form, die Handprüfung fehlt. Die drei
+ * Unterschiede sind ABSICHTLICH keine Auslassungen, sondern gesetzte Werte —
+ * `null` sagt „hier war noch niemand", ein fehlendes Feld sagt nur „unbekannt",
+ * und im Entwurf ist der Unterschied das Wesentliche.
+ *
+ * `computed` trägt die Herkunft der Rechnung (wann, womit, aus welchen
+ * Seiten). Sie ist für die HANDPRÜFUNG da — wer ein Zitat gegen die Quelle
+ * hält, will wissen, welcher Lauf es geholt hat — und wird beim Übernehmen
+ * verworfen: in der Bibliothek steht, wer GEPRÜFT hat, nicht wer gerechnet hat.
+ */
+export const marketLibraryDraftSchema = marketLibraryEntrySchema.extend({
+  status: z.literal('draft'),
+  verifiedAt: z.null(),
+  verifiedBy: z.null(),
+  computed: z.object({
+    at: z.string().min(1).max(40),
+    /** `stub` = ohne bezahlten Aufruf gerechnet, `paid` = echter Modell-Lauf. */
+    mode: z.enum(['stub', 'paid']),
+    tool: z.string().min(1).max(120),
+    /** Die Seiten, aus denen die Belege stammen — der Prüfpfad des Menschen. */
+    pages: z.array(z.url().max(512)).max(MARKET_MAX_PAGES),
+  }),
 })
 
 export const marketLibrarySchema = z.object({
@@ -90,6 +144,7 @@ export const marketLibrarySchema = z.object({
 
 export type MarketLibraryField = z.infer<typeof marketLibraryFieldSchema>
 export type MarketLibraryEntry = z.infer<typeof marketLibraryEntrySchema>
+export type MarketLibraryDraft = z.infer<typeof marketLibraryDraftSchema>
 export type MarketLibrary = z.infer<typeof marketLibrarySchema>
 
 /**

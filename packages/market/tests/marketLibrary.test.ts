@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { MARKET_LIBRARY_ENTRIES, MARKET_LIBRARY_VERSION } from '../shared/library'
 import {
   marketLibrary,
+  marketLibraryDraftSchema,
   marketLibraryEntry,
   marketLibraryFields,
   marketLibrarySchema,
@@ -48,6 +49,7 @@ describe('die ausgelieferte Bibliothek', () => {
 
   it('hat je Eintrag eine HANDPRÜFUNG mit Datum und Zeichen', () => {
     for (const entry of marketLibrary().entries) {
+      expect(entry.status).toBe('verified')
       expect(entry.verifiedAt).toMatch(/^\d{4}-\d{2}-\d{2}$/)
       expect(entry.verifiedBy.length).toBeGreaterThanOrEqual(2)
     }
@@ -71,6 +73,7 @@ describe('die ausgelieferte Bibliothek', () => {
 describe('das Schema weist zurück, was es soll', () => {
   const gut = {
     key: 'demo-x',
+    status: 'verified',
     name: 'X',
     homepage: 'https://x.example',
     category: '',
@@ -106,6 +109,60 @@ describe('das Schema weist zurück, was es soll', () => {
   it('lehnt eine erfundene Feld-Id ab', () => {
     const falschesFeld = { ...gut, fields: [{ ...gut.fields[0], fieldId: 'erfunden' }] }
     expect(marketLibrarySchema.safeParse({ version: 'v1', entries: [falschesFeld] }).success).toBe(false)
+  })
+})
+
+/**
+ * DER ENTWURF (MV1 M6) — die Grenze zwischen „gerechnet" und „geprüft".
+ *
+ * `scripts/market-library-compute.mjs` schreibt Entwürfe, und ein Entwurf ist
+ * eine unbeglaubigte Aussage über eine fremde Marke. Er DARF die Bibliothek
+ * nicht erreichen — auch nicht durch ein Kopieren der Datei nach `index.ts`,
+ * auch nicht, wenn jemand `verifiedAt`/`verifiedBy` nachträglich füllt und den
+ * Zustand vergisst.
+ */
+describe('ein Entwurf ist keine Bibliothek', () => {
+  const entwurf = {
+    key: 'demo-x',
+    status: 'draft',
+    name: 'X',
+    homepage: 'https://x.example',
+    category: '',
+    verifiedAt: null,
+    verifiedBy: null,
+    fields: [{ fieldId: 'pitch', value: 'Etwas.', sourceUrl: 'https://x.example' }],
+    computed: {
+      at: '2026-09-05T10:00:00.000Z',
+      mode: 'stub',
+      tool: 'packages/market/scripts/market-library-compute.mjs',
+      pages: ['https://x.example'],
+    },
+  }
+
+  it('IST ein gültiger Entwurf (GEGENPROBE zu allem darunter)', () => {
+    expect(marketLibraryDraftSchema.safeParse(entwurf).success).toBe(true)
+  })
+
+  it('fällt durch das BIBLIOTHEKS-Schema', () => {
+    expect(marketLibrarySchema.safeParse({ version: 'v1', entries: [entwurf] }).success).toBe(false)
+  })
+
+  it('kommt auch mit nachgetragenem Datum und Zeichen nicht durch, solange `status` auf draft steht', () => {
+    // Genau der Fall, den ein Werkzeug erzeugen könnte: alles ausgefüllt, nur
+    // niemand hat wirklich geprüft. `status` ist der eine Wert, den kein
+    // Werkzeug setzt.
+    const halbfertig = { ...entwurf, verifiedAt: '2026-09-05', verifiedBy: 'DS' }
+    expect(marketLibrarySchema.safeParse({ version: 'v1', entries: [halbfertig] }).success).toBe(false)
+  })
+
+  it('wird zum Eintrag, sobald ein Mensch ihn beglaubigt (GEGENPROBE)', () => {
+    const { computed: _computed, ...rest } = entwurf
+    const geprueft = { ...rest, status: 'verified', verifiedAt: '2026-09-05', verifiedBy: 'DS' }
+    expect(marketLibrarySchema.safeParse({ version: 'v1', entries: [geprueft] }).success).toBe(true)
+  })
+
+  it('ein GEPRÜFTER Eintrag ist umgekehrt kein Entwurf', () => {
+    expect(marketLibraryDraftSchema.safeParse({ ...entwurf, status: 'verified' }).success).toBe(false)
   })
 })
 
