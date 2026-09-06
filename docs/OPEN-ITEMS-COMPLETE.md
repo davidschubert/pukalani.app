@@ -206,7 +206,7 @@ selben Worktree (i18n nur per Edit, Dateibesitz je Lauf), jeder im Fable-Hauptlo
   gerechnetem „+X Punkte" je Kriterium), Vergleichs-Insights-Bento (Gesamtbild, Bilanz,
   Abstände ≥ 25 mit Kriterien-Belegen beider Seiten), Brand-Scores-Liste `/dashboard/brand-scores`.
 
-**Abgenommen 2026-09-06 (David):** Ranking, Vergleich, Ergebnisseite und der Dokument-Check („Fundament prüfen" auf /dashboard/brand-scores, echter KI-Aufruf gegen ein bestätigtes Fundament) live getestet — „hat
+**Abgenommen 2026-09-06 (David):** Ranking, Vergleich, Ergebnisseite , der Dokument-Check („Fundament prüfen") und „Neu ermitteln" (Cache-Umgehung gegen den Konto-Deckel) auf /dashboard/brand-scores live getestet — damit ist jeder Pfad des Pakets einmal echt gelaufen — „hat
 geklappt"; Plan nach docs/archiv/BRAND-CHECK-SEITE.md verschoben.
 **Live-Beweise:** pukalani.app (89, Branche `software` vom Judge) und freelancer.supply (61,
 `personal`) mit Opt-in im Ranking; Vergleich beider 200 mit Markenabdruck; Korrektur- und
