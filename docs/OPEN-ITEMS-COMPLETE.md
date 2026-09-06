@@ -30,6 +30,33 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### H1: Leere `UTable`-Spaltenköpfe (stille Hydration-Fehler) — 40 Stellen in 15 Layern behoben ✅ 2026-09-06
+
+**Was:** Folgepunkt aus dem Brand-Check-Ranking: `header: () => ''` in einer `UTable`-Spalte
+meldet im Browser „Hydration completed but contains mismatches" OHNE Knoten-Warnung — Vue
+schreibt leeren Text beim SSR nicht (`<th><!--[--><!--]--></th>`), legt beim Hydrieren aber
+einen leeren Textknoten an, und `hydrateFragment` loggt ohne `warn`. Statt 40 Einzel-
+korrekturen EIN Helfer im Core: `srOnlyHeader(label)` (`packages/core/app/utils/tableHeader.ts`,
+auto-importiert in allen Layern) rendert `<span class="sr-only">` — behebt den Fehler und gibt
+Screenreadern den Spaltennamen. Leeres Label WIRFT im Dev (ein Fallback auf ein Leerzeichen
+würde die Falle nur umbenennen), fällt in Prod still auf ein echtes Leerzeichen zurück. Vier
+generische Schlüssel `ui.table.actions/select/drag/vote` (de+en). 40 Spalten in 36 Dateien
+umgestellt (admin 4 · brand 4 · control 6 · posts 4 · comments/courses/events/onboarding/pages/
+themes je 2 · billing/core/feedback/media/runner je 1). Gates: `pnpm -r lint` 0 Fehler,
+`pnpm -r typecheck` 12 Pakete grün, core 1430 Tests, i18n-Wächter grün.
+
+**Beweis (echtes Vorher/Nachher, comments-Dev-Server aus dem Worktree, Seed-Konto):**
+`/de/dashboard/comments` nachher ohne Meldung und mit `<span class="sr-only">Aktionen</span>`
+im letzten `<th>`; dieselbe Zeile testweise auf `header: () => ''` zurück ⇒ die Meldung 2× und
+`<th><!--[--><!--]--><!--]--></th>`; wieder behoben ⇒ weg. Drei SSR-Ladungen (comments,
+core-SessionsTable mit bedingtem Spread, themes) mit 0 Konsolen-Fehlern.
+
+**Gelernt:** (1) Ein Hydration-Fehler ohne Knoten-Warnung heisst nicht „Datum/Locale", sondern
+oft „leerer Text aus einer Renderfunktion" — Bisektion über Spalten/Slots findet ihn. (2) Bei
+`select`-Spalten rendert Nuxt UI den `#select-header`-Slot, die `header`-Funktion greift dort
+nicht — die Umstellung ist trotzdem richtig (konsistent, wirkt bei Slot-Wegfall). (3) Ein
+Wiederholungs-Muster über viele Layer gehört als EIN Helfer ins Fundament, nicht als 40 Kopien.
+
 ### Brand-Check als Produktseite (BC1 P1–P6): Startseite, Ranking, Vergleich, Meine Brands, Ergebnisseite v2 ✅ 2026-09-05/06
 
 **Was:** Davids Auftrag nach dem ersten Live-Check („eigene Seite, Teaser zeigen dorthin, Archiv/

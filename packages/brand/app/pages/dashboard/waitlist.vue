@@ -215,7 +215,7 @@ const columns = computed<TableColumn<BrandWaitlistAdminItem>[]>(() => [
   { accessorKey: 'source', header: () => t('brand.admin.waitlist.col.source'), meta: { class: HIDE_LG } },
   { accessorKey: 'status', header: () => t('brand.admin.waitlist.col.status') },
   { accessorKey: 'createdAt', header: () => t('brand.admin.waitlist.col.date'), meta: { class: HIDE_MD } },
-  { id: 'actions', header: () => '' },
+  { id: 'actions', header: srOnlyHeader(() => t('ui.table.actions')) },
 ])
 
 /**

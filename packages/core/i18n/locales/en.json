@@ -162,6 +162,12 @@
     "sortBy": "Sort by {label}",
     "sortedAsc": "{label}, sorted ascending",
     "sortedDesc": "{label}, sorted descending",
+    "table": {
+      "actions": "Actions",
+      "select": "Select",
+      "drag": "Reorder",
+      "vote": "Vote"
+    },
     "confirm": {
       "confirm": "Confirm"
     },

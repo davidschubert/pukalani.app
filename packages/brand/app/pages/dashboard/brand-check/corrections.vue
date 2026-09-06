@@ -254,7 +254,7 @@ const columns = computed<TableColumn<BrandCheckCorrection>[]>(() => [
   { accessorKey: 'reporterEmail', header: () => t('brand.admin.checkCorrections.col.reporter'), meta: { class: HIDE_LG } },
   { accessorKey: 'status', header: () => t('brand.admin.checkCorrections.col.status') },
   { accessorKey: 'createdAt', header: () => t('brand.admin.checkCorrections.col.date'), meta: { class: HIDE_MD } },
-  { id: 'actions', header: () => '' },
+  { id: 'actions', header: srOnlyHeader(() => t('ui.table.actions')) },
 ])
 </script>
 
