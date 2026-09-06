@@ -16,6 +16,19 @@ export default defineNuxtConfig({
   // relativ zu sich selbst auf)
   css: [join(currentDir, './app/assets/css/brand.css')],
 
+  // Das Dokument („Euer Branding") trägt sein Inhaltsverzeichnis in einer
+  // `UPageAside` mit `UContentToc` (Davids Wunsch 2026-09-05). Nuxt UI
+  // registriert die Content-Komponenten NUR mit diesem Schalter oder mit
+  // installiertem @nuxt/content — ohne ihn bleibt `<UContentToc>` ein
+  // unaufgelöstes Element: leere Spalte, im Browser nur eine Vue-Warnung
+  // („Failed to resolve component"), kein Build- und kein Typfehler. Im
+  // Playground am 2026-09-05 live erwischt. Der Schalter steht deshalb im
+  // LAYER (wie die `image`-Optionen im Core), damit ihn jede App erbt, die
+  // die Wizard-Seiten mitnimmt — heute `apps/branding`.
+  ui: {
+    content: true,
+  },
+
   // Layer-stores werden nicht auto-gescannt (Stolperfalle, CLAUDE.md)
   imports: {
     dirs: [join(currentDir, './app/stores')],
