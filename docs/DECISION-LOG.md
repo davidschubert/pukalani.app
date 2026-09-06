@@ -7,6 +7,25 @@ die kleinen, verstreuten Beschlüsse.
 
 ---
 
+## 2026-09-05 (spät) — Marktvergleich: Prototyp M0/M0b FREIGEGEBEN, Pakete M1–M6 laufen selbstständig
+
+**Entscheidung (David):** Der Prototyp (fünf Screens im Playground: Markt mit Quellen-Wähler
+und Brand-Check-Score je Kandidat · Lauf mit robots/sitemap/llms.txt/JSON-LD · Ergebnis mit
+Umschalter „Website sagt / KI-Antworten sagen", Konventionen, Überschneidungen, freie Stellen,
+KI-Außensicht mit Konsens-Filter · Markt-Befund in der Werkstatt · Relaunch alte Website gegen
+neue Foundation) ist ohne Änderungswunsch freigegeben. Die Pakete M1–M6 (Plan §5 + §7.6)
+starten nacheinander selbstständig, sobald das vorige grün ist (Regel vom 2026-09-05).
+
+**Gates bleiben:** Prod-Migrationen (market-001…003, später brand-Spalte `marketVisibility`)
+nur mit Davids Ja; Schema-Anhang (M1) zur Durchsicht; Klick-Beweis der Oberfläche (M4);
+Abstimmung mit der BC1-Sitzung für den geteilten Abruf, das Opt-in-Feld und die
+Score-Anbindung — nichts davon wird zweimal gebaut.
+
+**Verworfen:** eine zweite Korrekturrunde am Prototyp (David: passt), ein eigener Klarheits-
+Score (schon am Abend gestrichen).
+
+---
+
 ## 2026-09-05 — branding.supply: fünf Ebenen als Karte, „Brand Context" als Export, Strang „Brand System"
 
 **Anlass (David):** eigene Auswertung der Guidelines-Referenzen (Frontify, Corebook°,
