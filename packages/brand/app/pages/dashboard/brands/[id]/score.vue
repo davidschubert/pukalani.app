@@ -319,7 +319,7 @@ const historyColumns = computed<TableColumn<BrandCheckHistoryItem>[]>(() => [
   { accessorKey: 'createdAt', header: () => t('brand.myScores.history.date') },
   { accessorKey: 'source', header: () => t('brand.myScores.history.source') },
   { accessorKey: 'score', header: () => t('brand.myScores.history.score') },
-  { id: 'actions', header: () => '' },
+  { id: 'actions', header: srOnlyHeader(() => t('ui.table.actions')) },
 ])
 
 useBrandTitle(() => t('brand.myScores.title'))

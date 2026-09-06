@@ -141,7 +141,7 @@ const columns = computed<TableColumn<PageGroup>[]>(() => [
   { accessorKey: 'slug', header: () => t('pages.admin.col.address') },
   { id: 'title', header: () => t('pages.admin.col.pageTitle') },
   { id: 'locales', header: () => t('pages.admin.col.languages') },
-  { id: 'actions', header: () => '' },
+  { id: 'actions', header: srOnlyHeader(() => t('ui.table.actions')) },
 ])
 
 /** Anzeige-Titel: die Sprachversion der Oberfläche, sonst die erste vorhandene. */

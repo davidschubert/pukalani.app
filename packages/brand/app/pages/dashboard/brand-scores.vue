@@ -259,7 +259,7 @@ const columns = computed<TableColumn<BrandProfileScores>[]>(() => [
   { id: 'websiteScore', accessorFn: row => row.website?.score ?? NO_SCORE },
   { id: 'documentScore', accessorFn: row => row.document?.score ?? NO_SCORE },
   { id: 'lastCheck', accessorFn: row => lastCheckAt(row), enableSorting: false },
-  { id: 'actions', header: () => '', enableSorting: false },
+  { id: 'actions', header: srOnlyHeader(() => t('ui.table.actions')), enableSorting: false },
 ])
 
 /** Aufsteigend → absteigend → aus; dasselbe Verhalten wie überall im Dashboard. */
