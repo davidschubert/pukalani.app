@@ -144,16 +144,31 @@ const pageSize = computed(() => data.value?.pageSize ?? BRAND_CHECK_RANKING_PAGE
  */
 type SelectItem = { value: string, label: string }
 
+/**
+ * „Alle" ist im Select NICHT die leere Zeichenkette: Reka verbietet ein
+ * `<SelectItem>` mit `''` (sein Wert für „nichts gewählt") und wirft beim
+ * Hydrieren — die Seite stand am 2026-09-06 kurz und sprang dann auf die
+ * 500-Seite. In der ADRESSE bleibt „alle" das Fehlen des Parameters; übersetzt
+ * wird an genau zwei Stellen: `*Select` hinein, `fromSelect` hinaus.
+ */
+const ALL = 'all'
+
 /** Alle Branchen samt `unknown` — die Liste ist der Katalog, nicht das Ergebnis. */
 const industryItems = computed<SelectItem[]>(() => [
-  { value: '', label: t('brand.checkRanking.filter.allIndustries') },
+  { value: ALL, label: t('brand.checkRanking.filter.allIndustries') },
   ...BRAND_INDUSTRY_VALUES.map(id => ({ value: id, label: t(`brand.industry.${id}`) })),
 ])
 
 const bandItems = computed<SelectItem[]>(() => [
-  { value: '', label: t('brand.checkRanking.filter.allBands') },
+  { value: ALL, label: t('brand.checkRanking.filter.allBands') },
   ...BRAND_SCORE_BANDS.map(id => ({ value: id, label: t(`brand.check.bands.${id}`) })),
 ])
+
+const industrySelect = computed(() => industry.value || ALL)
+const bandSelect = computed(() => band.value || ALL)
+function fromSelect(value: string): string {
+  return value === ALL ? '' : value
+}
 
 /** Score · Datum · die acht Kategorien — dieselbe Menge wie `BRAND_CHECK_RANKING_SORTS`. */
 const sortItems = computed<SelectItem[]>(() => [
@@ -275,20 +290,20 @@ function rankOf(index: number): number {
         <div class="flex flex-wrap items-end gap-4">
           <UFormField :label="t('brand.checkRanking.filter.industry')" class="w-full sm:w-56">
             <USelect
-              :model-value="industry"
+              :model-value="industrySelect"
               :items="industryItems"
               class="w-full"
               data-ranking-industry
-              @update:model-value="(value: string) => apply({ industry: value })"
+              @update:model-value="(value: string) => apply({ industry: fromSelect(value) })"
             />
           </UFormField>
           <UFormField :label="t('brand.checkRanking.filter.band')" class="w-full sm:w-48">
             <USelect
-              :model-value="band"
+              :model-value="bandSelect"
               :items="bandItems"
               class="w-full"
               data-ranking-band
-              @update:model-value="(value: string) => apply({ band: value })"
+              @update:model-value="(value: string) => apply({ band: fromSelect(value) })"
             />
           </UFormField>
           <UFormField :label="t('brand.checkRanking.filter.sort')" class="w-full sm:w-72">
