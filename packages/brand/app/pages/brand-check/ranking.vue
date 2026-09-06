@@ -255,7 +255,22 @@ const HIDE_MD = { td: 'hidden md:table-cell', th: 'hidden md:table-cell' }
 const HIDE_LG = { td: 'hidden lg:table-cell', th: 'hidden lg:table-cell' }
 
 const columns = computed<TableColumn<BrandCheckRankingItem>[]>(() => [
-  { id: 'pick', header: () => '' },
+  /**
+   * EINE LEERE ÜBERSCHRIFT IST KEINE ÜBERSCHRIFT (2026-09-06, P6b).
+   *
+   * Die Haken-Spalte trug `header: () => ''`. Vue schreibt einen LEEREN Text
+   * beim Server-Rendern gar nicht erst hin (`<th><!--[--><!--]--></th>`),
+   * legt beim Hydrieren aber einen leeren Textknoten an — das Fragment findet
+   * seinen Schluss-Anker damit an der falschen Stelle. Diesen einen Fall
+   * meldet Vue OHNE Knoten-Warnung, nur mit „Hydration completed but contains
+   * mismatches" (runtime-core: `hydrateFragment` ruft `logMismatchError()`
+   * ohne `warn`) — deshalb war er so schwer zu finden.
+   *
+   * Der Ersatz ist kein Platzhalter, sondern die fehlende Beschriftung: eine
+   * Spalte braucht einen Namen, und ein Screenreader liest ihn zu jedem
+   * Kästchen mit. Sichtbar bleibt sie leer (`sr-only`).
+   */
+  { id: 'pick', header: () => h('span', { class: 'sr-only' }, t('brand.checkRanking.col.pick')) },
   { id: 'rank', header: () => t('brand.checkRanking.col.rank') },
   { accessorKey: 'host', header: () => t('brand.checkRanking.col.host') },
   { accessorKey: 'score', header: () => t('brand.checkRanking.col.score') },

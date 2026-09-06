@@ -120,6 +120,74 @@ describe('Brand-Vergleich und Markenabdruck: i18n-Katalog', () => {
     expect(gapsFor(keys)).toEqual([])
   })
 
+  it('trägt die Beschriftung der Erkenntnis-Kacheln vollständig (P6b)', () => {
+    // Jede Kachel-Sorte aus `compareBrandCheckInsights` braucht ihren Text —
+    // fehlt einer, steht der SCHLÜSSEL im Bento, ohne dass etwas rot wird.
+    const keys = [
+      'brand.checkCompare.insights.eyebrow',
+      'brand.checkCompare.insights.title',
+      'brand.checkCompare.insights.lead',
+      'brand.checkCompare.insights.pointsGap',
+      'brand.checkCompare.insights.overall.title',
+      'brand.checkCompare.insights.overall.close',
+      'brand.checkCompare.insights.overall.clear',
+      'brand.checkCompare.insights.overall.wide',
+      'brand.checkCompare.insights.overall.tie',
+      'brand.checkCompare.insights.overall.note',
+      'brand.checkCompare.insights.wins.title',
+      'brand.checkCompare.insights.wins.count',
+      'brand.checkCompare.insights.wins.tieLabel',
+      'brand.checkCompare.insights.wins.none',
+      'brand.checkCompare.insights.gap.titleTop',
+      'brand.checkCompare.insights.gap.title',
+      'brand.checkCompare.insights.gap.line',
+      'brand.checkCompare.insights.gap.why',
+      'brand.checkCompare.insights.gap.noReasons',
+      'brand.checkCompare.insights.gap.noEvidence',
+      'brand.checkCompare.insights.ties.title',
+      'brand.checkCompare.insights.ties.lead',
+      'brand.checkCompare.insights.ties.value',
+      'brand.checkCompare.insights.strengths.title',
+      'brand.checkCompare.insights.strengths.lead',
+      'brand.checkCompare.insights.strengths.best',
+      'brand.checkCompare.insights.strengths.worst',
+      'brand.checkCompare.insights.strengths.none',
+      'brand.checkCompare.insights.notAssessable.title',
+      'brand.checkCompare.insights.notAssessable.lead',
+      'brand.checkCompare.insights.notAssessable.line',
+      'brand.checkCompare.insights.notAssessable.categories',
+      'brand.checkCompare.insights.notAssessable.criteria',
+    ]
+    expect(gapsFor(keys)).toEqual([])
+  })
+
+  it('JEDE Nähe-Stufe und JEDE Kachel-Sorte hat ihren Schlüssel — auch eine künftige', () => {
+    // Die Sorten kommen aus dem TYP, nicht aus einer zweiten Liste: eine neue
+    // Erkenntnis fällt hier auf, statt in der Bento-Kachel als Schlüssel zu
+    // erscheinen. `gap` trägt zwei Überschriften und steht deshalb schon oben.
+    const kinds = ['overall', 'wins', 'ties', 'strengths', 'notAssessable']
+    expect(gapsFor(kinds.map(kind => `brand.checkCompare.insights.${kind}.title`))).toEqual([])
+    const closeness = ['close', 'clear', 'wide']
+    expect(gapsFor(closeness.map(step => `brand.checkCompare.insights.overall.${step}`))).toEqual([])
+  })
+
+  it('die Pluralformen der Erkenntnisse sind vollständig', () => {
+    const shapes: Record<string, number> = {
+      // Zwei Formen: einen Punkt gibt es, null Punkte Abstand heisst Gleichstand.
+      'brand.checkCompare.insights.pointsGap': 2,
+      // Drei Formen: „keine von 8" ist ein echter Fall.
+      'brand.checkCompare.insights.wins.count': 3,
+      'brand.checkCompare.insights.notAssessable.categories': 3,
+      'brand.checkCompare.insights.notAssessable.criteria': 3,
+    }
+    for (const [key, forms] of Object.entries(shapes)) {
+      for (const locale of LOCALES) {
+        const message = catalogs[locale].get(key) ?? ''
+        expect(message.split('|').length, `${key} (${locale})`).toBe(forms)
+      }
+    }
+  })
+
   it('die Pluralformen des Fazits sind vollständig', () => {
     // Drei Formen, wo die Null vorkommen kann (keine gewonnene Kategorie, kein
     // Gleichstand) — zwei, wo die Zeile nur ab eins gerendert wird.

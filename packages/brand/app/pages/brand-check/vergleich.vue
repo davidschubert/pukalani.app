@@ -1,5 +1,9 @@
 <script setup lang="ts">
-import { compareBrandChecks, brandCheckCompareLeader } from '../../../shared/brandCheckCompare'
+import {
+  brandCheckCompareLeader,
+  compareBrandCheckInsights,
+  compareBrandChecks,
+} from '../../../shared/brandCheckCompare'
 import { brandCheckCategoryScores } from '../../../shared/brandCheck'
 import type {
   BrandCheckResult,
@@ -100,6 +104,12 @@ useSeoMeta({
 const comparison = computed(() => compareBrandChecks(checkA.value, checkB.value))
 const bothThere = computed(() => !!checkA.value && !!checkB.value)
 const leader = computed(() => brandCheckCompareLeader(comparison.value.summary))
+
+/**
+ * Die Erkenntnisse unter dem Fazit (P6b). Die Reihenfolge kommt aus der puren
+ * Regel — die Seite reicht sie nur durch und sortiert nichts nach.
+ */
+const insights = computed(() => compareBrandCheckInsights(checkA.value, checkB.value))
 
 /** Die acht Werte einer Seite in Katalog-Reihenfolge — die Serie des Abdrucks. */
 function seriesValues(side: 'a' | 'b'): (number | null)[] {
@@ -440,6 +450,12 @@ function categoryCount(check: BrandCheckResult | null): number {
           />
         </div>
       </section>
+
+      <!-- 5 · Die Erkenntnisse (P6b) — das Bento unter dem Fazit -->
+      <BwBrandCompareInsights
+        v-if="bothThere && insights.length"
+        :a="checkA!" :b="checkB!" :insights="insights"
+      />
     </div>
 
     <!-- Die Auswahl aus dem Ranking -->
