@@ -34,12 +34,12 @@ export default defineAppConfig({
      */
     auth: { providers: ['google'] },
     /**
-     * DER MARKTVERGLEICH GEHÖRT AUF DIESE SITE — NOCH NICHT ANGESCHALTET
+     * DER MARKTVERGLEICH GEHÖRT AUF DIESE SITE — ANGESCHALTET SEIT 2026-09-06
      * (MV1 M1/M4, Plan docs/plans/BRAND-MARKTVERGLEICH.md §2.1).
      *
      * Der Layer-Default ist `false` und bleibt es (Begründung dort): market
      * ist ein ZUSATZ zum Wizard, kein Teil von ihm, und die Site entscheidet
-     * ausdrücklich selbst (heute noch mit `false`, s. unten). Damit steht an
+     * ausdrücklich selbst (mit diesem `true`). Damit steht an
      * EINER Stelle, wer dieses Produkt anbietet — bei einer zweiten Brand-Site wäre das eine echte
      * Entscheidung und keine Nebenwirkung des `extends`.
      *
@@ -48,15 +48,17 @@ export default defineAppConfig({
      * Notfall kann der Betreiber über `app_config.products.market.enabled`
      * ohne Deploy.
      *
-     * ── ER STEHT VORERST AUF `false`, UND ZWAR AUS BETRIEBSGRÜNDEN ────────
-     * AN erst, wenn die Prod-Migrationen market-001…004 + brand-018/019 auf
-     * der Instanz `branding` gelaufen sind (Davids Ja, Runbook: Migration VOR
-     * dem Code-Deploy — sonst laufen die Routen in fehlende Tabellen). Bis
-     * dahin hält dieser Schalter die App komplett dunkel: Seite, Leiste UND
+     * ── SEIT 2026-09-06 AUF `true` — DIE REIHENFOLGE WAR MIGRATION, DANN SCHALTER
+     * Die Prod-Migrationen brand-018/019 und market-001…004 sind am 2026-09-06
+     * mit Davids Ja auf der Instanz `branding` gelaufen (zweiter Lauf komplett
+     * idempotent, Schema-Parität grün) — erst danach dieses `true`, in einem
+     * eigenen Commit (Runbook docs/runbooks/MARKTVERGLEICH-EINFUEHRUNG.md).
+     * Der Schalter hält bei `false` die App komplett dunkel: Seite, Leiste UND
      * Routen lesen ihn (`market.vue`, `resolveWorkspaceNavExtras`,
-     * `requireMarketEnabled`). Das Umlegen ist eine Zeile und ein Commit.
+     * `requireMarketEnabled`). Rückweg ohne Deploy: der Runtime-Kill
+     * `app_config.products.market.enabled = false` (Produkt-Registry).
      */
-    market: { enabled: false },
+    market: { enabled: true },
   },
   ui: {},
 })
