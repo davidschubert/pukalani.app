@@ -20,6 +20,7 @@
  * antworten 404 — Datentür).
  */
 
+import type { BrandFoundationView } from '../brandFoundation'
 import type { BrandGenerationOutcome } from '../brandGeneration'
 import type { BrandWaitlistStatus } from '../brandWaitlistAdmin'
 import type {
@@ -696,6 +697,51 @@ export interface BrandDocumentResponse {
   /** ALLE offenen Befunde des Brandings — kapitelübergreifend, wie die Tabelle. */
   findings: BrandFindingView[]
   review: BrandDocumentReviewState
+}
+
+/**
+ * DER ABNAHME-STAND EINES WERKSTATT-KAPITELS, wie ihn die Leseansicht braucht
+ * (Konzept BF-Leseansicht §2.6, Paket G2).
+ *
+ * Bewusst WENIGER als `BrandDocumentChapter`: die Foundation zeigt keine
+ * Sessions, keine Notizen, keine Befunde — sie braucht von einem Kapitel genau
+ * zwei Auskünfte, „ist es abgenommen" und „wie weit ist es". Die volle
+ * Dokument-Zeile mitzuschicken hiesse, Rohantworten in eine Antwort zu legen,
+ * die sie nie zeigt.
+ */
+export interface BrandFoundationStepState {
+  stepKey: BrandStepKey
+  /** Der GESPEICHERTE Zustand — `done` heisst „Finale Abnahme gelaufen". */
+  storedState: BrandStoredStepState
+  /** Derselbe Zähler wie im Dokument („7 von 11 abgenommen"). */
+  acceptance: { accepted: number, total: number }
+}
+
+/**
+ * DIE PRIVATE LESEANSICHT (`GET /api/brand/profiles/:id/foundation`).
+ *
+ * `view` ist das Ergebnis von `buildBrandFoundation` — dieselbe reine Regel,
+ * die später die Share-Seite auf dem eingefrorenen Snapshot fährt (§2.1). Die
+ * Route rechnet daran nichts nach: sie legt die LIVE-Werte in dieselbe Form,
+ * die ein Snapshot hat, und reicht sie hinein.
+ *
+ * `chapters` und `accepted` stehen DANEBEN und nicht darin, weil der Renderer
+ * die Abnahme bewusst nicht kennt (Kopf von `brandFoundation.ts`): sie sind
+ * die Auskunft der PRIVATEN Ansicht — der eine Zähler der Seite und der
+ * Vermerk „noch nicht abgenommen" (§2.6). Der Share-Snapshot trägt sie nie.
+ *
+ * `accepted.total` zählt die Kapitel des WEGES (ohne übersprungene), nicht die
+ * Kapitel des Handbuchs: abgenommen wird in der Werkstatt, und ein Zähler über
+ * Handbuch-Kapitel behauptete eine Abnahme, die es dort nicht gibt.
+ */
+export interface BrandFoundationResponse {
+  profileId: string
+  title: string
+  /** Die Sprache der MARKENWERTE — nicht die des Handbuchs (§2.6). */
+  contentLocale: string
+  view: BrandFoundationView
+  chapters: BrandFoundationStepState[]
+  accepted: { chapters: number, total: number }
 }
 
 /**

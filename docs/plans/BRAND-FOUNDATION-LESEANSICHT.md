@@ -441,7 +441,7 @@ Nuxt-UI-Komponenten, echter Inhalt (Kailua Coffee Co.):
 | # | Paket | Inhalt | Gate | Beweis |
 | --- | --- | --- | --- | --- |
 | G1 ✅ 2026-09-06 | **Regel + Renderer** | `audience` in der Registry, Regel `sensitivity ≠ public ⇒ internal`, `brandShareableSlotValues` (MV1 M5) um `audience` erweitert — reist = public UND foundation, `buildBrandFoundation` (pur), Do/Don't-Paarung, KI-Rahmen-Slots | — | Unit: jede Session hat `audience`; Gegenprobe `internal` verschwindet; Snapshot v1 von heute rendert ohne Rohantworten und ohne die vier `internal`-Sessions; Route-Test: neuer Snapshot enthält a.complaints nicht; Hash-Inputs unverändert |
-| G2 | **Private Leseansicht + Print** | `/brand/:id/foundation`, Rail-Eintrag, Knopf im Dokument, `@media print` | Davids Blick auf die Seite | Playwright: 404 bei fremdem Branding; Kapitel-Reihenfolge = Registry; Druck-Snapshot |
+| G2 ✅ 2026-09-06 (Davids Blick offen) | **Private Leseansicht + Print** | `/brand/:id/foundation`, Rail-Eintrag, Knopf im Dokument, `@media print` | Davids Blick auf die Seite | Playwright: 404 bei fremdem Branding; Kapitel-Reihenfolge = Registry; Druck-Snapshot |
 | G3 | **Teilen sichtbar** | Share-Dialog, `/brand/share/:token`, og-Meta, Fuß, Ereignisse | Davids Blick auf die Empfänger-Ansicht | verify-Skript: veröffentlichen → Seite 200 → widerrufen → 404; abgelaufen → 404; kein Token im Log; `internal`-Werte nie im HTML (Gegenprobe) |
 | G4 | **Schranke + Richtung** (= P7-Rest) | Kapitel 10 gesperrt mit CTA; danach `result.direction` mit 2–3 Richtungen in Preview-iframes | **David:** Schranken-Text + Preisanker; Richtungen-Katalog | Playwright: Richtung wählen ⇒ Kapitel 10 zeigt Preset; Share-Snapshot trägt Preset |
 | G5 | **Beispiel Kailua** (optional) | öffentliche Beispiel-Foundation über denselben Renderer, `index` erlaubt | David: Inhalt der Beispiel-Marke | Seite rendert aus festem Snapshot |
@@ -520,3 +520,38 @@ neue Block-Art `choice` (Archetyp, Architektur-Modell als Ids, die UI löst per
 i18n auf); `locked` trägt nur das Element. G2 übernimmt `FdChapter` und
 ergänzt den `choice`-Zweig sowie die Schlüssel `brand.foundation.chapter.*`,
 `.label.*`, `.column.*`, `.visual.*`.
+
+## 8. Nachtrag G2 (2026-09-06) — Leseansicht gebaut, drei Verträge, eine Druck-Falle
+
+Gebaut: Route `GET /api/brand/profiles/:id/foundation` (404 bei fremdem/
+unbekanntem Branding, Werte UNGEFILTERT in den Renderer — das Doppelnetz
+§2.8 sitzt im Renderer), Seite `/brand/:id/foundation` mit dem Chrome der
+Dokument-Seite, `BwFoundationChapter` (Übernahme des Dummys `FdChapter`
+inkl. neuem `choice`-Zweig), „Auf einer Seite", Export-Menü (Drucken frei,
+drei Formen gesperrt), Kapitel 10 mit CTA-Paar OHNE Preisanker, Pending-
+Vermerk mit Sprung zur Abnahme, 60+ i18n-Schlüssel in de/en mit Wächter
+(die Schlüssel werden aus einem echten Renderer-Lauf eingesammelt). Beweis am
+Dev-Server mit der Testmarke: eigene Marke 200, fremde 404, ohne Cookie 404,
+keine Rohantwort in Antwort oder DOM, Verzeichnis-Sprung + Hervorhebung,
+Druck-Emulation ohne Leiste/Verzeichnis/Knöpfe.
+
+Drei Verträge, die dabei entstanden sind:
+1. **`BwReadingToc`** ersetzt `BwDocumentToc`: EINE generische Link-Liste
+   (`{ id, text, state, counter? }`) für Dokument- UND Foundation-Seite.
+2. **Rail-Einstieg** über `useBrandFoundationRailStep` (eine Quelle für
+   Werkstatt, Dokument und Foundation): der Ergebnis-Punkt heißt „Brand
+   Foundation", hängt hinter „Euer Branding" und ist IMMER erreichbar —
+   `BwWorkspaceSidebar` lässt einen `result`-Punkt MIT eigenem `to` immer zu;
+   sein Zustand bleibt ehrlich `open`/`active`, kein behauptetes `done`.
+3. **`BRAND_FOUNDATION_SOURCE_STEPS`** ordnet jedem Foundation-Kapitel seine
+   Quell-Kapitel zu (Story und Visuell leer) — daraus kommen Pending-Vermerk
+   und der EINE Zähler.
+
+**Druck-Falle (live erwischt, nicht im Dummy sichtbar):** das Layout
+`brand-workspace` setzt `100dvh` + `overflow: hidden`, und das gilt auch auf
+Papier — der Druck endete nach der ERSTEN Seite (gemessen 800 px bei 6102 px
+Inhalt). Der Dummy hatte kein Layout. Behoben mit einer `@media print`-Regel
+IM LAYOUT (height auto, overflow visible); die Seite bleibt für Umbrüche und
+Ausblendungen zuständig. Bewusst noch offen (G3): die Ereignisse
+`foundation.viewed`/`print.started`, ein „Stand"-Datum im Kopf (die Antwort
+trägt keins — nichts erfinden).
