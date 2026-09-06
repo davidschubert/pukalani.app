@@ -89,7 +89,10 @@ function parseSlots(raw: string | undefined): string[] {
 }
 
 function toKind(value: string): BrandFindingKind {
-  return value === 'affected' || value === 'gap' ? value : 'conflict'
+  // Der Rückfall bleibt `conflict` und wird BEWUSST nicht zu „unbekannt": eine
+  // Zeile mit kaputter Art ist im Zweifel die strengste, nicht die
+  // harmloseste — sie steht dann sichtbar da, statt still zu verschwinden.
+  return value === 'affected' || value === 'gap' || value === 'market' ? value : 'conflict'
 }
 
 function toStatus(value: string | undefined): BrandFindingStatus {
@@ -319,6 +322,79 @@ export async function markBrandFindingsMentioned(
       })
     }
   }
+}
+
+/**
+ * DIE OFFENEN BEFUNDE EINER ART WEGRÄUMEN — der Weg, auf dem ein NEUER
+ * Bericht seine Vorgänger ablöst (MV1 M3, additiv für den market-Layer).
+ *
+ * ── WARUM „ERSETZEN" UND NICHT „DAZULEGEN" ────────────────────────────────
+ * Ein Markt-Befund ist die Aussage EINES Berichtsstandes: „euer Satz klingt
+ * wie zwei andere im Feld — nach dem Abrufstand von heute". Kommt ein neuer
+ * Bericht (weil ein eigenes Feld korrigiert wurde oder eine Website sich
+ * geändert hat), ist die alte Aussage nicht falsch geworden, sondern
+ * ÜBERHOLT — und zwei Chips am selben Feld, die dasselbe mit verschiedenen
+ * Zahlen sagen, sind für den Menschen davor nicht auflösbar. Bei den
+ * `conflict`-Befunden stellt sich die Frage nicht: dort greift die
+ * Deduplizierung über `brandFindingKey`, weil derselbe Konflikt auch derselbe
+ * Schlüssel ist. Ein Markt-Befund an demselben Feld hat denselben Schlüssel,
+ * aber einen anderen INHALT — die Deduplizierung liesse also ausgerechnet die
+ * NEUE, aktuelle Fassung fallen.
+ *
+ * ── ENTSCHIEDENE BLEIBEN ──────────────────────────────────────────────────
+ * Gelöscht wird nur `status: 'open'`. Ein angenommener oder mit Grund
+ * abgelehnter Befund ist eine ENTSCHEIDUNG eines Menschen und damit ein
+ * Protokoll — es zu löschen hiesse, die Spur seiner Arbeit zu tilgen, und der
+ * nächste Prüfblick fände „nie gesehen" statt „schon entschieden".
+ *
+ * ── GEFILTERT WIRD IM CODE, NICHT IN DER ABFRAGE ──────────────────────────
+ * `brand_findings` hat Indizes auf `(profileId, status)` und
+ * `(profileId, stepKey)` — auf `kind` KEINEN, und Appwrite verlangt für jede
+ * Filter-Spalte einen. Die Art hier in die Abfrage zu schreiben, hiesse also
+ * entweder eine Migration für ein Zusatzprodukt oder einen Lauf, der mit
+ * „Index nicht gefunden" endet. Die indizierte Hälfte holt der Server, die
+ * andere rechnet er — bei höchstens 200 Zeilen je Branding ist das keine
+ * Frage der Kosten.
+ *
+ * FAIL-SOFT wie das Lesen: ein Bericht, der an einer Aufräum-Zeile scheitert,
+ * hätte gerechnet und trotzdem nichts geliefert.
+ */
+export async function purgeOpenBrandFindingsOfKind(
+  event: H3Event,
+  profileId: string,
+  kind: BrandFindingKind,
+): Promise<number> {
+  let removed = 0
+  try {
+    const { tablesDB, databaseId } = brandDb(event)
+    const res = await tablesDB.listRows<BrandFindingRow>({
+      databaseId,
+      tableId: BRAND_FINDINGS_TABLE,
+      queries: [
+        Query.equal('profileId', profileId),
+        Query.equal('status', 'open'),
+        Query.limit(BRAND_FINDINGS_LIMIT),
+      ],
+    })
+    for (const row of res.rows.filter(entry => toKind(entry.kind) === kind)) {
+      try {
+        await tablesDB.deleteRow({ databaseId, tableId: BRAND_FINDINGS_TABLE, rowId: row.$id })
+        removed++
+      }
+      catch (error) {
+        if (!isAppwriteNotFound(error)) throw error
+      }
+    }
+  }
+  catch (error) {
+    if (!isAppwriteNotFound(error)) {
+      logEvent('warn', 'brand.findings_purge_failed', {
+        kind,
+        message: error instanceof Error ? error.message : String(error),
+      })
+    }
+  }
+  return removed
 }
 
 /**

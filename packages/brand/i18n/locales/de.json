@@ -1546,7 +1546,8 @@
       "kind": {
         "conflict": "Konflikt",
         "affected": "Betroffen",
-        "gap": "Lücke"
+        "gap": "Lücke",
+        "market": "Markt"
       },
       "fields": "Felder",
       "accept": "Annehmen",

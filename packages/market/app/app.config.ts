@@ -46,6 +46,15 @@ export default defineAppConfig({
        */
       ai: {
         extractModel: '',
+        /**
+         * DAS MODELL DES VERGLEICHS (MV1 M3). LEER heisst „das George-Modell"
+         * — die Laufzeit-Kette des Core (`app_config.aiModel >
+         * pukalani.ai.model`), aus der auch das Gespräch im Wizard sein Modell
+         * nimmt; erst danach fällt es auf das Stufe-1-Modell des Spezialisten
+         * zurück (s. `server/utils/marketAi.ts`). Ein hier eingetragener Name
+         * wäre eine dritte Wahrheit über dasselbe Modell.
+         */
+        reportModel: '',
         outsideViewModels: [] as string[],
       },
       /**

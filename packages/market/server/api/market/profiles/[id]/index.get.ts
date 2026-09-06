@@ -3,6 +3,7 @@ import type { MarketAiView, MarketProfile } from '../../../../../shared/marketPr
 import { readBrandAiEnabled } from '../../../../contracts/brandContract'
 import { requireMarketProfile } from '../../../../utils/marketAccess'
 import { listMarketCompetitors, listMarketProfiles } from '../../../../utils/marketStore'
+import { loadMarketBrandChecks } from '../../../../utils/marketBrandCheck'
 import {
   latestProfilesByCompetitor,
   toMarketAiView,
@@ -42,8 +43,12 @@ export default defineEventHandler(async (event): Promise<MarketOverviewResponse>
     if (view) aiViews.push(view)
   }
 
+  // Der BESTEHENDE Brand-Check-Score je Website-Kandidat (§7.3, MV1 M3) —
+  // gelesen, nie gerechnet.
+  const checks = await loadMarketBrandChecks(event, competitors)
+
   return {
-    competitors: competitors.map(toMarketCompetitor),
+    competitors: competitors.map(row => toMarketCompetitor(row, checks.get(row.$id) ?? null)),
     profiles,
     aiViews,
     aiEnabled,

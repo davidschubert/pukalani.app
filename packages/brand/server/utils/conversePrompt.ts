@@ -102,8 +102,16 @@ import { BRAND_CONVERSE_HISTORY_CHARS, formatStartCard } from './georgePrompt'
  * gelesen, dass ein Feld davor sich geändert hat — bekäme er dann denselben
  * Eröffnungssatz wie beim ersten Mal, wäre die Warteschlange eine Schleife
  * ohne Anlass.
+ *
+ * `converse-10` (MV1 M3): der Block „Der Markt sagt …" — offene Markt-Befunde
+ * an diesem Feld (Plan §2.5). Er reist im SELBEN Brief wie die Konflikte und
+ * gehorcht derselben Regel: EINMAL, dann nie wieder (`mentionedAt`). Er steht
+ * bewusst NICHT im Konflikt-Absatz: ein Konflikt ist eine Spannung ZWISCHEN
+ * zwei eigenen Feldern, ein Markt-Befund eine Beobachtung über EIN eigenes
+ * Feld im Verhältnis zum Feld draussen — „a tension between X and Y" wäre für
+ * ihn schlicht falsch.
  */
-export const BRAND_CONVERSE_PROMPT_VERSION = 'converse-9'
+export const BRAND_CONVERSE_PROMPT_VERSION = 'converse-10'
 
 /**
  * Was ein Mensch in EINEM Zug schreiben darf. Grosszügiger als der Hinweis
@@ -246,6 +254,23 @@ export interface BrandConverseBriefOptions {
   missing: readonly string[]
   /** Offene Konflikt-Befunde an DIESEM Feld — je einer mit zwei Beschriftungen. */
   conflicts: readonly { fields: readonly string[], why: string, suggestion?: string }[]
+  /**
+   * OFFENE MARKT-BEFUNDE an DIESEM Feld (MV1 M3, Plan §2.5) — je einer mit
+   * EINER Beschriftung, weil ein Markt-Befund immer genau ein EIGENES Feld
+   * adressiert (§2.9 Nr. 5).
+   *
+   * ── WAS HIER SCHON NICHT MEHR DRINSTEHEN KANN ─────────────────────────
+   * Kein Wettbewerber-Name, keine Domain, kein Werturteil über einen Dritten.
+   * Das ist keine Bitte an den Prompt, sondern bereits erledigt: der
+   * Herabsetzungs-Riegel des Marktvergleichs
+   * (`packages/market/shared/marketDisparagement.ts`) verwirft einen Befund,
+   * der so etwas enthielte, BEVOR er je eine Zeile wird. George bekommt
+   * deshalb nur Sätze, die er aussprechen darf.
+   *
+   * OPTIONAL, weil dieser Brief auch aus Apps kommt, die den market-Layer gar
+   * nicht führen — dort bleibt das Feld schlicht weg.
+   */
+  market?: readonly { field: string, why: string, suggestion?: string }[]
 }
 
 export interface BrandConverseInstructionOptions {
@@ -508,7 +533,8 @@ function sessionLines(options: BrandConverseInstructionOptions): string[] {
  */
 function briefLines(brief: BrandConverseBriefOptions | null | undefined): string[] {
   if (!brief) return []
-  if (!brief.missing.length && !brief.conflicts.length) return []
+  const market = brief.market ?? []
+  if (!brief.missing.length && !brief.conflicts.length && !market.length) return []
 
   const lines: string[] = ['', 'WHAT A COLLEAGUE NOTICED WHILE READING ALONG:']
 
@@ -539,6 +565,28 @@ function briefLines(brief: BrandConverseBriefOptions | null | undefined): string
       'Name that tension ONCE, in one sentence, and ask whether they want to touch one of the two — '
       + 'then let it go. It stays visible next to the conversation either way, so you never bring it '
       + 'up a second time.',
+    )
+  }
+
+  /**
+   * DER MARKT-BLOCK. Er nennt das eigene Feld und sagt, was im Feld draussen
+   * steht — nie, WER es sagt: der Satz „two other sites in the field" ist die
+   * Grenze, die § 6 UWG dem Produkt setzt (Plan §2.9 Nr. 5). Die Regel steht
+   * hier ein zweites Mal im Klartext, weil ein Modell, das sie kennt, sie
+   * meistens einhält — durchgesetzt wird sie im market-Layer.
+   */
+  for (const entry of market) {
+    lines.push(
+      `The market comparison noticed something about "${entry.field}": `
+      + entry.why
+      + (entry.suggestion ? ` A possible way forward: ${entry.suggestion}` : ''),
+    )
+  }
+  if (market.length) {
+    lines.push(
+      'Bring that up ONCE, in one sentence, as an observation about THEIR field — never name, quote '
+      + 'or describe another company, never say who else says it, and never draft a sentence that '
+      + 'would identify a competitor. Then ask whether they want to touch it, and let it go.',
     )
   }
 

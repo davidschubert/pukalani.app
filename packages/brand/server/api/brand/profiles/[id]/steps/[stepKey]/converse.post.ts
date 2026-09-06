@@ -452,11 +452,24 @@ export default defineEventHandler(async (event): Promise<BrandConverseResponse |
       if (!latest || at > latest.at) latest = { slotId, at, missing }
     }
 
-    const conflicts = (await listBrandFindings(event, profile.$id, 'open'))
+    const open = (await listBrandFindings(event, profile.$id, 'open'))
       .map(toBrandFindingView)
-      .filter(view => view.kind === 'conflict' && !view.mentionedAt && view.slots.includes(session.id))
+      .filter(view => !view.mentionedAt && view.slots.includes(session.id))
+    const conflicts = open.filter(view => view.kind === 'conflict')
+    /**
+     * DIE MARKT-BEFUNDE (MV1 M3, Plan §2.5: „George bekommt den Bericht als
+     * Block in der nächsten Session der betroffenen Felder — einmal, wie bei
+     * Konflikten").
+     *
+     * Sie laufen durch DIESELBE Klammer wie die Konflikte: derselbe Brief,
+     * dieselbe `mentionedAt`-Marke, dieselbe Beschränkung auf das Feld, an dem
+     * der Mensch gerade sitzt. Genau deshalb steht hier nur ein zweiter
+     * Filter und kein zweiter Weg — ein eigener Kanal hätte eine zweite
+     * Antwort auf „wurde das schon gesagt?" gebraucht.
+     */
+    const market = open.filter(view => view.kind === 'market')
 
-    if (!latest && !conflicts.length) return null
+    if (!latest && !conflicts.length && !market.length) return null
 
     // '' in Georges eigenen Bausteinen — dort hat er selbst noch einmal
     // darüber gelesen (Begründung am Vertrag in `conversePrompt.ts`).
@@ -471,9 +484,18 @@ export default defineEventHandler(async (event): Promise<BrandConverseResponse |
           why: view.why,
           ...(view.suggestion ? { suggestion: view.suggestion } : {}),
         })),
+        market: market.map(view => ({
+          // EIN Feld — ein Markt-Befund adressiert immer genau ein eigenes
+          // (Plan §2.9 Nr. 5). `slots[0]` ist deshalb kein „das erste von
+          // mehreren", sondern das einzige; ohne Slot bliebe die Beschriftung
+          // die der laufenden Session, und das wäre geraten.
+          field: brandSlotPromptLabel(view.slots[0] ?? session.id, contentLocale, pathKind, team),
+          why: view.why,
+          ...(view.suggestion ? { suggestion: view.suggestion } : {}),
+        })),
       },
       slotId: latest?.slotId ?? null,
-      findingIds: conflicts.map(view => view.id),
+      findingIds: [...conflicts, ...market].map(view => view.id),
     }
   }
 

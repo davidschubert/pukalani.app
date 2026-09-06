@@ -449,7 +449,7 @@ haben, das Marktprofil steht in der Inhaltssprache der Marke).
 | M0 | Prototyp | §2.11 im Playground | **ABGENOMMEN** (David, 2026-09-05; M0b mit der §7-Erweiterung inbegriffen) |
 | M1 | Layer + Vertrag | packages/market, Manifeste, `marketProfile.ts`, Schema-Anhang (3 Tabellen), Abruf-Vertrag geteilt | **GEBAUT** (2026-09-05) — Schema-Anhang B unten, David liest gegen |
 | M2 | Abruf + Extraktion | robots/TDM, Pfad-Sperrliste, PII-Filter, Rohtext-Retention, Extraktions-Prompt `market-x-1`, Beleg-Riegel, Stub, KI-Aussensicht `market-ai-1` | **GEBAUT** (2026-09-05) — Vertrag Anhang C; `verify-market-fetch.mjs` 33/33 |
-| M3 | Vergleich + Befunde | Bericht-Prompt, Idempotenz, Befund-Art `market`, George-Block | Beweis + Gegenproben (Herabsetzungs-Filter) |
+| M3 | Vergleich + Befunde | Bericht-Prompt `market-r-1`, Idempotenz + `stale`, Befund-Art `market`, § 6 UWG-Riegel, Bibliotheks-Mechanik, Brand-Check-Anbindung, George-Block | **GEBAUT** (2026-09-05) — Vertrag Anhang D; `verify-market-report.mjs` 43/43 |
 | M4 | Oberfläche | Seite „Markt", Leiste, Schranke, Chips | Klick-Beweis |
 | M5 | Betrieb | ~~Eimer~~ (vorgezogen, s. u.), Sweep, Wächter (Parität, Bilanz), Messung, Doku/Changelog | Live-Build |
 
@@ -1064,3 +1064,211 @@ dazu, sobald er abweicht. (2) Der Stub gab fertige Felder zurück und lief damit
 am Beleg-Riegel VORBEI: der Beweis hätte eine Kette geprüft, deren teuerstes
 Glied im Ersatz-Betrieb gar nicht mitlief. Ein Ersatz gehört durch dieselbe
 Prüfung wie das Echte, sonst prüft er sich selbst.
+
+---
+
+## Anhang D — Vergleichs- und Befund-Vertrag (M3, Stand 2026-09-05)
+
+Gebaut in Paket **M3 „Vergleich + Befunde"**. Was hier steht, ist der Vertrag —
+die Begründungen stehen im Kopf der jeweiligen Datei.
+
+### Wo was liegt
+
+| Sache | Ort |
+| --- | --- |
+| Bericht-Prompt `market-r-1` | `packages/market/server/prompts/marketReportPrompt.ts` |
+| Vergleich (Modell-Aufruf + die vier Prüfungen) | `packages/market/server/utils/marketReport.ts` |
+| Stand laden, speichern, `stale`, Befunde schreiben | `packages/market/server/utils/marketReportService.ts` |
+| Eigenes Marktprofil aus der Foundation | `packages/market/server/utils/marketOwnProfile.ts` |
+| Brand-Check je Kandidat (nur lesen) | `packages/market/server/utils/marketBrandCheck.ts` |
+| § 6 UWG-Riegel (pur) | `packages/market/shared/marketDisparagement.ts` |
+| Matrix, Quote, Belegprüfung, Schlüssel-Zutaten (pur) | `packages/market/shared/marketReportRules.ts` |
+| Bibliothek: Schema + Lader / die Datei | `packages/market/shared/marketLibrary.ts` / `shared/library/index.ts` |
+| Routen | `packages/market/server/api/market/profiles/[id]/report.{post,get}.ts` |
+| Brand-Naht (nur lesend ergänzt) | `packages/brand/server/utils/brandCheckLookup.ts` (NEU), Re-Exporte im Vertrag |
+
+### Prompt-Versionen
+
+| Version | Zweck | Datei |
+| --- | --- | --- |
+| `market-r-1` | Der Vergleich, EIN Aufruf über eigenes Profil + N Marktprofile | `server/prompts/marketReportPrompt.ts` |
+| `converse-10` | Der George-Block „Der Markt sagt …" im Gespräch (war `converse-9`) | `packages/brand/server/utils/conversePrompt.ts` |
+
+Modell: `pukalani.market.ai.reportModel` (Default LEER) > das **George-Modell**
+(`getEffectiveAiConfig`, also `app_config.aiModel > pukalani.ai.model`) > das
+Stufe-1-Modell des Spezialisten. Temperatur 0, ZDR-Routing wie überall.
+
+### Was das Modell darf und was der Code entscheidet
+
+Das Modell liefert **vier Listen** und sonst nichts: Konventionen,
+Überschneidungen, freie Stellen, Befunde. Es liefert **keine Zahl**.
+
+1. **Die Gegenüberstellung** (Matrix) baut der CODE aus den Profilen
+   (`marketMatrixRows`) — Zeile Feld × Spalte Marke, die eigene zuerst. Jede
+   Zelle ist buchstäblich ein Marktprofil-Feld; eine leere Zelle trägt ihren
+   GRUND (`own` = bei euch noch nicht bestätigt · `field` = sagt öffentlich
+   nichts · `excluded` = wir durften nicht nachsehen).
+2. **Die Quote** einer Konvention rechnet der Code nach: `sharedBy / of ≥ 0,6`
+   UND `sharedBy ≥ 2`. Nenner ist, wer in diesem Feld überhaupt etwas sagt —
+   bei Konventionen INKLUSIVE der eigenen Marke, bei Überschneidungen ohne sie
+   (Prototyp-Vertrag: 3 von 3 gegen 1 von 2).
+3. **Jedes Zitat** muss ein BELEG des Marktprofils GENAU DER genannten Marke
+   sein (`citationIsGrounded`): Gleichheit oder Kürzung, nie Erweiterung, nie
+   Übersetzung, mindestens zwölf Zeichen. Eine Marke ohne gültigen Beleg fällt
+   still weg und senkt die Quote.
+
+### Der § 6 UWG-Riegel (§2.9 Nr. 5)
+
+Drei Lagen, in dieser Reihenfolge wirksam:
+
+1. **Anonymisierung im Prompt** — das Modell sieht die Wettbewerber nur als
+   `c1 … c5`, nie mit Namen oder Adresse. Es KANN keinen Namen in einen
+   Vorschlag schreiben. Das ist die stärkste Lage und kostet nichts.
+2. **Prompt-Regel** — „describe, never judge the third party; never write a
+   sentence that names or identifies another company".
+3. **Filter im Code** (`marketDisparagement.ts`, pur + Gegenproben) über
+   JEDES erzeugte Element (Befunde, Konventionen, Überschneidungen, freie
+   Stellen): (a) Wettbewerber-Name inkl. Teil-Token ≥ 4 Zeichen,
+   umlaut-normalisiert (`Müller` = `Mueller`), (b) Domain und Domain-Label,
+   (c) Wortliste herabsetzender Ausdrücke de+en. Rechtsformen (`GmbH`, `Ltd`,
+   `Company`) und Endungen (`com`, `de`, `example`) sind ausgenommen — sie
+   identifizieren niemanden.
+
+**Ein Treffer VERWIRFT das Element** (nicht umformulieren: das wäre dasselbe
+Modell, das den Satz gerade falsch gebaut hat), und `market.report_filtered`
+zählt — je Grund eine Zahl, nie ein Text.
+
+### Befunde
+
+`kind: 'market'` in `brand_findings` (Migration **brand-018** erweitert das
+Enum `kind` um `market` — ADDITIV, mit Guard gegen Wegnahme). Genau EIN eigenes
+Slot-Feld je Befund, `why` UND `suggestion` PFLICHT, höchstens drei je Bericht.
+`stepKey` ist das Kapitel des betroffenen FELDES (`slotById(...).stepId`),
+`sourceSession` der Marker `market:_own` — ein Markt-Befund hat keine
+Quell-Session.
+
+**Er sperrt NICHTS** (`blockingFindingSlots` fragt nach `conflict`) und löst
+keine zweite Prüfstufe aus (`needsStageTwo`). `BRAND_REVIEW_FINDING_KINDS`
+hält `market` aus der Menge heraus, die der Spezialist selbst antworten darf.
+
+**ERSETZEN statt dazulegen:** ein neuer Bericht löscht die OFFENEN
+`market`-Befunde des Profils (`purgeOpenBrandFindingsOfKind`); ENTSCHIEDENE
+bleiben als Protokoll. Grund: ein Markt-Befund ist die Aussage EINES
+Berichtsstandes, und zwei Chips am selben Feld mit anderen Zahlen sind für den
+Menschen davor nicht auflösbar.
+
+### `revisionKey` und `stale`
+
+`sha256(brandGenerationHashInput('market.report', 'market-r-1', entries))` —
+derselbe kanonische Bauer wie `sourcesHash` und der `inputHash` der
+Generationen (er trägt die Registry-Fassung mit). Zutaten:
+
+- die **Werte aller zehn eigenen Felder** (auch der leeren, in Registry-Folge),
+- je Kandidat, **nach Id sortiert**: `sourceKind | sourceRef | url | inputHash`
+  (der Stand seiner Auswertung),
+- die **Bibliotheks-Fassung** (`MARKET_LIBRARY_VERSION`).
+
+Gleicher Schlüssel ⇒ gespeicherter Bericht (`reused: true`), kein Modellaufruf,
+keine Buchung. `stale` ist DIESELBE Rechnung, nicht eine zweite: die GET-Route
+vergleicht den Schlüssel von JETZT mit dem in der Zeile. Bewegt haben ihn
+entweder eine eigene Korrektur oder ein neuer Abrufstand. **Anzeige-Wort, kein
+Löschen** — ein überholter Bericht bleibt vollständig lesbar.
+
+### Bibliothek
+
+`packages/market/shared/library/index.ts` (`MARKET_LIBRARY_VERSION` + Einträge),
+Zod-Schema und Lader in `shared/marketLibrary.ts`, **fail-closed**: fällt die
+Datei durch das Schema, ist die Bibliothek LEER. Je Eintrag Pflicht:
+`key`, `name`, `homepage`, `verifiedAt`, `verifiedBy`; je Feld Pflicht:
+`sourceUrl`, optional `quote` (≤ 200 Zeichen). Die Handprüfung ist damit ein
+DATENFELD, nicht eine Zusage im Kopf — der Unterschied zur Website-Quelle ist
+nicht die Beweislast, sondern WER geprüft hat (dort eine Maschine gegen den
+Rohtext, hier ein Mensch mit Datum und Zeichen).
+
+Ein `library`-Kandidat wird beim Lauf **nicht abgerufen**; sein Profil kommt
+aus der Datei (`source: 'library'`, `fetchedAt` = Prüfdatum, keine
+`frequency`). **Inhalt heute: nur erfundene Testeinträge** (`.example`) — die
+echten Paare kommen mit **M6** nach Handprüfung und Rechts-Check.
+
+### Brand-Check-Anbindung (§7.3)
+
+Der Marktvergleich **liest** den bestehenden Score und rechnet keinen.
+`findBrandCheckForUrl` (neu in `packages/brand/server/utils/brandCheckLookup.ts`)
+sucht über `brandCheckUrlKey(origin)` — den indizierten Schlüssel, mit dem der
+Check selbst seinen Zwischenspeicher findet. Ausgeblendete Checks (`hidden`)
+zählen nicht. Ergebnis: `brandCheck: { score, band, checkId }` am Kandidaten,
+`market_competitors.brandCheckId` als Adresse (nie der Score — der ändert sich).
+Nur Website-Kandidaten; Foundation und Bibliothek haben keinen eigenen Auftritt.
+
+**NICHT gebaut: das ANSTOSSEN eines fehlenden Checks.** Die Check-Mechanik liegt
+vollständig im Handler von `packages/brand/server/api/brand/check.post.ts` und
+ist nirgends als Funktion herausgezogen; von aussen zu rufen hiesse kopieren —
+und dann hätte der Marktvergleich seinen eigenen, langsam abweichenden Score,
+also genau die zweite Zahl, die §7.3 streicht. Ohne Check bleibt `brandCheck`
+leer, die Oberfläche zeigt `market.score.pending`. **Für BC1:** eine
+herausgezogene `runBrandCheck()` unter dem Konto-Deckel (10/Tag, `force`)
+genügt, danach ist es hier ein zweiter Aufruf.
+
+### Routen und Codes
+
+| Route | Was | Codes |
+| --- | --- | --- |
+| `POST /api/market/profiles/:id/report` | rechnet den Bericht auf dem aktuellen Stand | 409 `market_locked` (Kapitel B) · 409 `market_no_profiles` · 409 `ai_disabled` · 429 `market_run_limit`/`market_instance_limit` · 404 (fremd/ohne Session) |
+| `GET /api/market/profiles/:id/report` | letzter Bericht + `stale` + Befunde + `brandCheck` | 404 (fremd/ohne Session) — **keine** Freischaltungs-Schranke: Ansehen kostet nichts |
+| `POST …/run?report=1` (oder `{ withReport: true }`) | Lauf UND Bericht in einem Klick | wie der Lauf; der Bericht ist hier fail-soft (`report: null`) |
+
+**Der Eimer:** eigener Tages-Eimer `market-report-day:<profileId>` (3/Tag) NEBEN
+dem des Laufs, aber GETEILTER Instanz-Deckel. Grund: aus Kundensicht ist „Markt
+vergleichen" EIN Knopf, technisch sind es zwei Schritte — ein gemeinsamer Eimer
+legte den Deckel faktisch bei eineinhalb. Der Instanz-Deckel zählt dagegen
+KOSTEN, und jeder Bericht ist ein Modell-Aufruf.
+
+**Warum `run` den Bericht nicht automatisch anhängt:** ein Flag mit Default
+`false`. So bleibt M2s Beweis unverändert gültig (der Lauf antwortet weiter in
+seiner Form), ein reiner Abruf-Lauf kostet keinen Modell-Aufruf, und M4 hat
+trotzdem den EINEN Knopf.
+
+### Ereignisse (§2.10)
+
+`market.report` (Dauer, Kandidatenzahl, Zähler je Teil, Befunde, gefiltert,
+`reused`, Modell, Fassung, `failure`) · `market.report_filtered` (Zahl je Grund,
+NIE der Text) · `market.finding_accepted` / `market.finding_dismissed` (EINE
+Zeile in der bestehenden brand-Entscheidungs-Route, benannt nach der `kind` des
+Befundes) · `market.run_report_failed` (nur der Status).
+
+### Stub (`MARKET_DEV_STUB=1`)
+
+Deterministisch aus den Profilen: eine Konvention, eine Überschneidung, eine
+freie Stelle, ein SAUBERER Befund — und **zwei absichtlich verbotene**: einer
+mit herabsetzender Formulierung, einer mit einem Wettbewerber-Namen im
+Vorschlag. Beide MÜSSEN vom Riegel verworfen werden; das ist die Gegenprobe im
+Beweis, ohne einen bezahlten Aufruf. Ein Ersatz, der nur Erlaubtes liefert,
+prüfte sich selbst.
+
+### Beweise
+
+- Unit (`pnpm --filter @pukalani/market test`, **164**): Herabsetzungs-Filter
+  mit Gegenprobe an jeder Stelle, Namens-/Domain-Filter inkl. Teil-Token und
+  Umlaut, Matrix, Konventions-Quote, Belegprüfung, Schlüssel-Zutaten
+  (stabil/beweglich), Bibliotheks-Schema.
+- Unit brand: `tests/brandFindings.test.ts` (`market` sperrt nichts — mit
+  Gegenprobe am `conflict`), `tests/conversePrompt.test.ts` (der George-Block).
+- End-to-end: `packages/market/scripts/verify-market-report.mjs` — **43/43**
+  (2026-09-05), Vorbedingungen wie bei `verify-market-fetch.mjs`.
+  `verify-market-fetch.mjs` bleibt **33/33**.
+
+**Gelernt (drei Dinge, alle erst im Beweis sichtbar):**
+1. **Eine neue Enum-Wert braucht eine Migration, und fail-soft verschluckt den
+   Beleg dafür.** Der Bericht war fertig, der Riegel hatte gearbeitet, und die
+   Befund-Tabelle blieb leer — Appwrite lehnte `kind: 'market'` ab, das
+   Schreiben ist fail-soft, und die einzige Spur stand als `warn` im Log. Ohne
+   den E2E-Beweis wäre das erst einem Kunden aufgefallen.
+2. **`updateEnumColumn` verlangt `xdefault`, obwohl der Typ es optional nennt**
+   (node-appwrite 26.2): der Client wirft „Missing required parameter", bevor
+   er die Anfrage stellt. Für ein Pflichtfeld ist `null` der richtige Wert.
+3. **Ein Beweis darf nicht den ganzen Umschlag durchsuchen.** Die erste Fassung
+   der UWG-Gegenprobe suchte den Wettbewerber-Namen im GESAMTEN Bericht und war
+   rot — obwohl der Riegel richtig gearbeitet hatte: die Namen stehen
+   selbstverständlich in den Spaltenköpfen und an jedem Beleg. Verboten ist,
+   dass ein Satz, den WIR formulieren, einen Dritten nennt; genau das prüft die
+   Fassung jetzt.

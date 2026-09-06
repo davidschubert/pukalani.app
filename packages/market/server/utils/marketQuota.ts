@@ -4,6 +4,7 @@ import {
   MARKET_RUN_DAY_WINDOW_MS,
   MARKET_RUN_LIMITS,
   decideMarketRunQuota,
+  marketReportDayKey,
   marketRunDayKey,
   marketRunInstanceDayKey,
   resolveMarketInstanceCap,
@@ -51,6 +52,21 @@ export async function bookMarketRun(
   event: H3Event,
   profileId: string,
 ): Promise<MarketRunRejection | null> {
+  return await book(event, marketRunDayKey(profileId))
+}
+
+/**
+ * DER VERGLEICH (MV1 M3) — eigener Tages-Eimer je Branding, GETEILTER
+ * Instanz-Deckel. Begründung an `marketReportDayKey`.
+ */
+export async function bookMarketReport(
+  event: H3Event,
+  profileId: string,
+): Promise<MarketRunRejection | null> {
+  return await book(event, marketReportDayKey(profileId))
+}
+
+async function book(event: H3Event, profileKey: string): Promise<MarketRunRejection | null> {
   const limits = {
     ...MARKET_RUN_LIMITS,
     instanceDay: resolveMarketInstanceCap(instanceCapFromConfig()),
@@ -58,7 +74,7 @@ export async function bookMarketRun(
   const counts: MarketRunCounts = { profileDay: 0, instanceDay: 0 }
   const { store, prefix } = useRateLimitStore(event)
 
-  const profileState = await store.hit(`${prefix}${marketRunDayKey(profileId)}`, MARKET_RUN_DAY_WINDOW_MS)
+  const profileState = await store.hit(`${prefix}${profileKey}`, MARKET_RUN_DAY_WINDOW_MS)
   counts.profileDay = profileState.count
   const narrow = decideMarketRunQuota(counts, limits)
   if (narrow) return { code: narrow, retryAfterSec: retryAfter(profileState.resetInMs) }

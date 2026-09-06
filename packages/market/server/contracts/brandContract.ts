@@ -133,3 +133,49 @@ export { readBrandAiEnabled } from '../../../brand/server/utils/brandGenerators'
 // dieselben Bedingungen — eine eigene Konstante hier wäre die vierte Kopie
 // derselben drei Felder, gegen die `brandProviderRouting.ts` argumentiert.
 export { BRAND_PROVIDER_ROUTING } from '../../../brand/server/utils/brandProviderRouting'
+
+// ── MV1 M3: Vergleich, Befunde, Brand-Check ───────────────────────────────
+
+/**
+ * DER BEFUND-SPEICHER (Plan §2.7: „Befund-Speicher + Chips — neue Art
+ * `market`"). Der Marktvergleich legt seine Befunde in DIESELBE Tabelle wie
+ * der Spezialist, weil sie an denselben Feldern erscheinen sollen und dieselbe
+ * Entscheidung (annehmen/ablehnen) tragen. Eine eigene Tabelle hätte zwei
+ * Chip-Sorten, zwei Entscheidungs-Routen und zwei Antworten auf „was hängt an
+ * diesem Feld".
+ *
+ * `purgeOpenBrandFindingsOfKind` ist der Weg, auf dem ein NEUER Bericht seine
+ * Vorgänger ablöst — Begründung an der Funktion.
+ */
+export {
+  listBrandFindings,
+  purgeOpenBrandFindingsOfKind,
+  toBrandFindingView,
+  writeBrandFindings,
+} from '../../../brand/server/utils/brandFindingsStore'
+export type { BrandFindingRow } from '../../../brand/server/utils/brandFindingsStore'
+export type { BrandFindingView } from '../../../brand/shared/types/brand'
+
+/**
+ * Die Zuordnung eines Befundes zu einem KAPITEL. Ein Markt-Befund stammt aus
+ * keinem Kapitel — er stammt aus einem Bericht —, aber die Spalte `stepKey`
+ * ist Pflicht und die Kapitel-Sperre rechnet ohnehin über die SLOTS. Der
+ * market-Layer stempelt deshalb das Kapitel des betroffenen FELDES; die
+ * Auskunft dazu liefert `slotById(...).stepId` (oben re-exportiert), hier
+ * steht nur ihr Typ.
+ */
+export type { BrandStepKey } from '../../../brand/shared/slotRegistry'
+
+/**
+ * DER KANONISCHE HASH-BAUER des brand-Layers (`sourcesHash`, `inputHash` der
+ * Generationen). Der Bericht-Schlüssel benutzt ihn, statt eine zweite
+ * Hash-Regel zu erfinden — Begründung in `server/utils/marketReport.ts`.
+ */
+export { brandGenerationHashInput } from '../../../brand/shared/brandGeneration'
+
+/**
+ * DER BESTEHENDE BRAND-CHECK ZU EINER ADRESSE (§7.3). Nur LESEN: der
+ * Marktvergleich rechnet keinen Score und beeinflusst keinen.
+ */
+export { findBrandCheckForUrl } from '../../../brand/server/utils/brandCheckLookup'
+export type { BrandCheckLookupResult } from '../../../brand/server/utils/brandCheckLookup'

@@ -1,12 +1,12 @@
 import { z } from 'zod'
 import {
   BRAND_FINDING_DECISIONS,
-  BRAND_FINDING_KINDS,
   BRAND_FINDING_REASON_MAX,
   BRAND_FINDING_REASON_MIN,
   BRAND_FINDING_STATUSES,
   BRAND_FINDING_TEXT_MAX,
   BRAND_REVIEW_FINDINGS_MAX,
+  BRAND_REVIEW_FINDING_KINDS,
   BRAND_REVIEW_LIST_MAX,
   type BrandFinding,
   type BrandReviewMode,
@@ -48,7 +48,10 @@ import type { BrandSessionReview } from '../shared/types/brand'
 
 /** Ein einzelner Befund, bevor seine Feld-Ids geprüft sind. */
 const rawFindingSchema = z.object({
-  kind: z.enum(BRAND_FINDING_KINDS),
+  // NUR die drei Arten, die aus einem Schliess-Aufruf stammen KÖNNEN:
+  // `market` gehört zwar zu den Befund-ARTEN, entsteht aber im Marktvergleich
+  // (Begründung an `BRAND_REVIEW_FINDING_KINDS`).
+  kind: z.enum(BRAND_REVIEW_FINDING_KINDS),
   slots: z.array(z.string()),
   why: z.string().trim().min(1).max(BRAND_FINDING_TEXT_MAX),
   suggestion: z.string().trim().max(BRAND_FINDING_TEXT_MAX).optional(),

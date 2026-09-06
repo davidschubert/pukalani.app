@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import { createBrandSessionReviewSchema, brandFindingIsUsable } from '../schemas/brandReview'
 import {
+  BRAND_FINDING_KINDS,
   BRAND_REVIEW_FINDINGS_MAX,
+  BRAND_REVIEW_FINDING_KINDS,
   BRAND_REVIEW_LIST_MAX,
   blockingFindingSlots,
   brandFindingKey,
@@ -230,5 +232,55 @@ describe('createBrandSessionReviewSchema — der Umschlag ist streng, die Befund
   it('ein leerer `nextSession`-String ist `null`', () => {
     const result = parse({ ...good, nextSession: '  ' })
     expect(result.success && result.data.nextSession).toBeNull()
+  })
+})
+
+/**
+ * DIE ART `market` (MV1 M3) — sie ist ein HINWEIS, kein Zwang.
+ *
+ * Der Plan sagt es zweimal (§2.3 Nr. 4, §2.7): Markt-Befunde „erscheinen als
+ * Chips an den eigenen Feldern wie Konflikte, sperren aber NICHTS". Weil das
+ * eine Zusage über eine ABWESENHEIT ist, braucht sie einen eigenen Wächter:
+ * ein zusätzliches `||` in `blockingFindingSlots` fiele sonst niemandem auf —
+ * bis ein Kunde vor einer Abnahme steht, die er nicht öffnen kann.
+ */
+describe('market-Befunde sperren nichts', () => {
+  const slots = ['b.positioningFirstChoice', 'a.pitch']
+
+  it('ist eine bekannte Art', () => {
+    expect(BRAND_FINDING_KINDS).toContain('market')
+  })
+
+  it('steht NICHT in der Menge, die der Spezialist antworten darf', () => {
+    // Sonst könnte ein Schliess-Aufruf einen „Markt-Befund" behaupten, ohne je
+    // einen Markt gesehen zu haben.
+    expect(BRAND_REVIEW_FINDING_KINDS).not.toContain('market')
+  })
+
+  it('sperrt die Abnahme nicht — auch nicht offen', () => {
+    expect(blockingFindingSlots(
+      [{ kind: 'market', status: 'open', slots: ['b.positioningFirstChoice'] }],
+      slots,
+    )).toEqual([])
+  })
+
+  it('GEGENPROBE: ein offener `conflict` an DENSELBEN Feldern sperrt sehr wohl', () => {
+    expect(blockingFindingSlots(
+      [{ kind: 'conflict', status: 'open', slots: ['b.positioningFirstChoice', 'a.pitch'] }],
+      slots,
+    )).toEqual(['b.positioningFirstChoice', 'a.pitch'])
+  })
+
+  it('löst auch keine zweite Stufe aus — er entsteht gar nicht im Schliessen', () => {
+    expect(needsStageTwo([{ kind: 'market' }])).toBe(false)
+    // GEGENPROBE: die zwei Arten, die etwas kosten, tun es.
+    expect(needsStageTwo([{ kind: 'conflict' }])).toBe(true)
+  })
+
+  it('dedupliziert wie jede andere Art — Art plus sortierte Felder', () => {
+    expect(brandFindingKey({ kind: 'market', slots: ['a.pitch'] }))
+      .toBe(brandFindingKey({ kind: 'market', slots: ['a.pitch'] }))
+    expect(brandFindingKey({ kind: 'market', slots: ['a.pitch'] }))
+      .not.toBe(brandFindingKey({ kind: 'gap', slots: ['a.pitch'] }))
   })
 })

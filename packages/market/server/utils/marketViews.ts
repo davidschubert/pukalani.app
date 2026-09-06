@@ -1,8 +1,7 @@
-import type { H3Event } from 'h3'
-import { confirmedSlotValues, loadStepRows } from '../contracts/brandContract'
 import type {
   MarketAiStatement,
   MarketAiView,
+  MarketBrandCheck,
   MarketCandidateSource,
   MarketCompetitor,
   MarketCompetitorStatus,
@@ -10,7 +9,7 @@ import type {
   MarketProfile,
   MarketProfileField,
 } from '../../shared/marketProfile'
-import { MARKET_CANDIDATE_SOURCES, MARKET_FIELDS } from '../../shared/marketProfile'
+import { MARKET_CANDIDATE_SOURCES } from '../../shared/marketProfile'
 import type { MarketCompetitorRow, MarketProfileRow } from '../../shared/types/market'
 import {
   marketAiViewSchema,
@@ -72,7 +71,10 @@ function parsePagesFetched(raw: string | undefined): string[] {
   }
 }
 
-export function toMarketCompetitor(row: MarketCompetitorRow): MarketCompetitor {
+export function toMarketCompetitor(
+  row: MarketCompetitorRow,
+  brandCheck?: MarketBrandCheck | null,
+): MarketCompetitor {
   const pagesRead = parsePagesFetched(row.pagesFetched)
   const reason = asReason(row.excludedReason)
   return {
@@ -85,8 +87,11 @@ export function toMarketCompetitor(row: MarketCompetitorRow): MarketCompetitor {
     ...(row.fetchedAt ? { fetchedAt: row.fetchedAt } : {}),
     source: asSource(row.sourceKind),
     ...(row.sourceRef ? { sourceRefId: row.sourceRef } : {}),
-    // `brandCheck` bleibt leer: der Score kommt mit M3 (§7.3) — eine Hülle
-    // mit Nullen sähe aus wie ein gemessener Wert.
+    // `brandCheck` reicht der Aufrufer herein (MV1 M3, §7.3): der BESTEHENDE
+    // Brand-Check-Score, nachgeschlagen über die Adresse. Liegt keiner vor,
+    // bleibt das Feld WEG — eine Hülle mit Nullen sähe aus wie ein gemessener
+    // Wert, und der Marktvergleich rechnet keinen Score.
+    ...(brandCheck ? { brandCheck } : {}),
   }
 }
 
@@ -115,56 +120,4 @@ export function latestProfilesByCompetitor(rows: readonly MarketProfileRow[]): M
     if (!latest.has(row.competitorId)) latest.set(row.competitorId, row)
   }
   return latest
-}
-
-// ── Die EIGENE Marke als Marktprofil (§7.2 Nr. 2, Quelle `foundation`) ─────
-
-/**
- * DIE BESTÄTIGTEN FELDER EINES BRANDINGS ALS MARKTPROFIL.
- *
- * ── OHNE BELEG, UND ZWAR ABSICHTLICH ──────────────────────────────────────
- * Eine Foundation ist BESCHLOSSEN, nicht zitiert (s. `MarketCandidateSource`
- * im Produktvertrag) — ein Beleg wäre eine Quellenangabe auf sich selbst. Das
- * Ablage-Schema lässt für `source: 'foundation'` deshalb ausdrücklich ein Feld
- * ohne `evidence` zu.
- *
- * ── OHNE HÄUFIGKEIT ───────────────────────────────────────────────────────
- * „Auf wie vielen Seiten steht das?" hat hier keine Antwort: eine Foundation
- * bestätigt, sie wiederholt nicht. Eine erfundene `1 von 1` sähe aus wie eine
- * Messung.
- *
- * ── MEHRERE SLOTS JE FELD ─────────────────────────────────────────────────
- * `categoryLanguage` liest `a.category` UND `b.positioningCategory`. Genommen
- * wird der ERSTE bestätigte in der Reihenfolge der Abbildung — sie ist im
- * Produktvertrag festgelegt, und „der spätere überschreibt" wäre eine zweite,
- * ungeschriebene Regel.
- */
-export async function foundationMarketFields(
-  event: H3Event,
-  profileId: string,
-): Promise<MarketProfileField[]> {
-  const rows = await loadStepRows(event, profileId)
-  const values = new Map<string, string>()
-  for (const row of rows) {
-    for (const entry of confirmedSlotValues(row)) {
-      if (!values.has(entry.slotId)) values.set(entry.slotId, entry.value)
-    }
-  }
-
-  return MARKET_FIELDS.map((field) => {
-    const raw = field.slotIds.map(slotId => values.get(slotId) ?? '').find(value => value.trim()) ?? ''
-    const value = raw.trim()
-    if (!value) return { fieldId: field.id, value: '', source: 'foundation' as const }
-    if (field.form !== 'list') {
-      return { fieldId: field.id, value: value.slice(0, 2000), source: 'foundation' as const }
-    }
-    // Listen-Felder liegen im Wizard als eine Zeile („Handwerk, Nähe, Ruhe").
-    const items = value.split(/[,\n]/).map(part => part.trim()).filter(Boolean).slice(0, field.maxItems ?? 5)
-    return {
-      fieldId: field.id,
-      value: items.join(', '),
-      items,
-      source: 'foundation' as const,
-    }
-  })
 }

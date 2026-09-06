@@ -1,9 +1,13 @@
 import type {
   MarketAiView,
+  MarketClaimList,
   MarketCompetitor,
+  MarketFinding,
   MarketProfile,
+  MarketProfileField,
   MarketRunStep,
 } from '../marketProfile'
+import type { MarketMatrixRow } from '../marketReportRules'
 
 /**
  * DIE ANTWORT-TYPEN DER `/api/market`-ROUTEN (MV1 M2).
@@ -47,8 +51,9 @@ export interface MarketOverviewResponse {
 }
 
 /**
- * Das Ergebnis EINES Laufs (§2.11 Nr. 2). Der VERGLEICH steht bewusst nicht
- * darin — er kommt mit M3; M2 liefert Abrufstand und Profile.
+ * Das Ergebnis EINES Laufs (§2.11 Nr. 2). Der VERGLEICH steht seit MV1 M3
+ * darin, aber nur AUF ANSAGE (`withReport`, Default aus) — Begründung im Kopf
+ * von `run.post.ts`.
  */
 export interface MarketRunResponse {
   /** `false`, wenn es nichts zu tun gab (alle Kandidaten schon aktuell). */
@@ -64,4 +69,45 @@ export interface MarketRunResponse {
   extracted: number
   /** Wie viele Kandidaten ihr vorhandenes Profil behalten haben (Idempotenz). */
   reused: number
+  /**
+   * Der Bericht, falls der Lauf mit `withReport` gerufen wurde (MV1 M3). Ohne
+   * das Flag steht hier `null` — der Beweis von M2 prüft genau diese Form
+   * weiter, und ein automatisch angehängter Bericht hätte ihn geändert.
+   */
+  report?: MarketReportView | null
+}
+
+/**
+ * DER BERICHT, WIE ER DEN SERVER VERLÄSST (MV1 M3).
+ *
+ * Er trägt genau die Formen, die die Prototyp-Komponenten erwarten
+ * (`MkComparisonTable` baut aus `own`/`competitors`/`profiles`, `MkClaimList`
+ * aus `claims`, `MkFindingChip` aus `findings`) — plus die SERVERSEITIG
+ * gebaute Matrix, damit die Gegenüberstellung nachrechenbar ist und nicht nur
+ * nachgebaut.
+ */
+export interface MarketReportView {
+  createdAt: string
+  revisionKey: string
+  own: MarketProfileField[]
+  competitors: MarketCompetitor[]
+  profiles: MarketProfile[]
+  matrix: MarketMatrixRow[]
+  claims: MarketClaimList[]
+  findings: MarketFinding[]
+  aiViews: MarketAiView[]
+  /** Die eigenen Felder, die bei uns noch nicht bestätigt sind (Plan §2.4). */
+  missingOwnFields: string[]
+}
+
+export interface MarketReportResponse {
+  report: MarketReportView | null
+  /**
+   * Passt der gespeicherte Bericht noch zum aktuellen Stand? `true` heisst
+   * „überholt" — ein ANZEIGE-Wort, kein Löschen (Plan §2.4).
+   */
+  stale: boolean
+  /** Kam er aus der Ablage statt aus einem Modell-Aufruf (§2.3 Nr. 5)? */
+  reused: boolean
+  aiEnabled: boolean
 }

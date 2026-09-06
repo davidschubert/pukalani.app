@@ -25,9 +25,30 @@
  *  · `affected`  — eine Korrektur trifft dieses Feld inhaltlich (§9). Wird vom
  *    `correct`-Modus erzeugt; der ist Paket 6.
  *  · `gap`       — hier fehlt etwas (§10, Prüfblick). Rein beratend.
+ *  · `market`    — der Marktvergleich hat an einem eigenen Feld etwas gesehen
+ *    (MV1 M3, docs/plans/BRAND-MARKTVERGLEICH.md §2.3 Nr. 4). Rein beratend
+ *    wie `gap`: er sperrt NICHTS (`blockingFindingSlots` fragt nach
+ *    `conflict`), und er löst auch keine zweite Stufe aus (`needsStageTwo`) —
+ *    er entsteht gar nicht in einem Schliess-Aufruf.
  */
-export const BRAND_FINDING_KINDS = ['conflict', 'affected', 'gap'] as const
+export const BRAND_FINDING_KINDS = ['conflict', 'affected', 'gap', 'market'] as const
 export type BrandFindingKind = (typeof BRAND_FINDING_KINDS)[number]
+
+/**
+ * WAS DER SPEZIALIST SELBST MELDEN DARF — die drei Arten, die aus einem
+ * `review`-Aufruf stammen KÖNNEN.
+ *
+ * ── WARUM DAS EINE ZWEITE LISTE IST UND KEINE DOPPELUNG ───────────────────
+ * `market` ist eine Art von Befund, aber KEINE Antwort des Spezialisten: sie
+ * entsteht im Marktvergleich aus einem ganz anderen Modell-Aufruf mit ganz
+ * anderem Material. Stünde sie in der Menge, die das Antwort-Schema
+ * (`schemas/brandReview.ts`) zulässt, könnte ein Modell im Schliess-Aufruf
+ * einen „Markt-Befund" behaupten, ohne je einen Markt gesehen zu haben — und
+ * er stünde ununterscheidbar neben den echten. Die ARTEN sind eine Menge, die
+ * ERLAUBTE EINGABE ist eine andere; zwei Fragen, zwei Listen.
+ */
+export const BRAND_REVIEW_FINDING_KINDS = ['conflict', 'affected', 'gap'] as const
+export type BrandReviewFindingKind = (typeof BRAND_REVIEW_FINDING_KINDS)[number]
 
 /**
  * DER ZUSTAND EINES BEFUNDS (§8). `accepted` heisst „ich nehme ihn an" — und

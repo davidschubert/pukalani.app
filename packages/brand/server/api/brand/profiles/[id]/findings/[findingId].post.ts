@@ -76,7 +76,23 @@ export default defineEventHandler(async (event): Promise<BrandFindingDecisionRes
     ? await appendDismissNote(event, profile.$id, row.sourceSession, reason)
     : null
 
-  return { finding: toBrandFindingView(decided), revision: revision ?? 0 }
+  const view = toBrandFindingView(decided)
+
+  /**
+   * DAS EREIGNIS TRÄGT DEN NAMEN SEINER ART (MV1 M3, Plan §2.10:
+   * `market.finding_accepted/dismissed`).
+   *
+   * Ein Befund weiss selbst, aus welchem Produkt er stammt (`kind`) — der
+   * Marktvergleich braucht deshalb keine zweite Entscheidungs-Route, nur diese
+   * eine Zeile. Gezählt werden ART und KAPITEL, nie ein Text: `why`,
+   * `suggestion` und der Ablehnungsgrund sind Kundeninhalt (Log-Regel).
+   */
+  logEvent('info', view.kind === 'market' ? `market.finding_${body.status}` : `brand.finding_${body.status}`, {
+    kind: view.kind,
+    stepKey: view.stepKey,
+  })
+
+  return { finding: view, revision: revision ?? 0 }
 })
 
 /**

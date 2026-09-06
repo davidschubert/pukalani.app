@@ -85,13 +85,14 @@ describe('Die Zug-Regel steht im Auftrag', () => {
     expect(instruction).toMatch(/Never invent options where the question is open/)
   })
 
-  it('die Fassung steigt mit — converse-9', () => {
+  it('die Fassung steigt mit — converse-10', () => {
     // Ohne den Anstieg behaupteten Züge aus converse-3, aus diesem Auftrag zu
     // stammen (dieselbe Regel wie bei GEORGE_PROMPT_VERSION). converse-6 war
     // der Session-Block (BW2 Paket 3a); converse-7 die Gegenlese-Runde
     // (Paket 2b); converse-8 ist der „hat mitgelesen"-Block (Paket 4);
-    // converse-9 der Eröffnungszug einer VERALTETEN Session (Paket 6, §9).
-    expect(BRAND_CONVERSE_PROMPT_VERSION).toBe('converse-9')
+    // converse-9 der Eröffnungszug einer VERALTETEN Session (Paket 6, §9);
+    // converse-10 der Markt-Block (MV1 M3).
+    expect(BRAND_CONVERSE_PROMPT_VERSION).toBe('converse-10')
   })
 
   it('würdigt Substanz — aber verbietet das Lob ohne Deckung', () => {
@@ -541,5 +542,75 @@ describe('countSessionProbes', () => {
       { role: 'user', body: 'Wir haben 2019 angefangen.' },
       { role: 'system', body: 'Baustein gewechselt.' },
     ])).toBe(0)
+  })
+})
+
+/**
+ * DER MARKT-BLOCK (MV1 M3, Plan §2.5: „George bekommt den Bericht als Block
+ * ‚Der Markt sagt …' in der nächsten Session der betroffenen Felder —
+ * einmal, wie bei Konflikten").
+ *
+ * Geprüft wird der PROMPT-BAUER, nicht die Route: dass ein Markt-Befund nur
+ * EINMAL erscheint, entscheidet `mentionedAt` in der Route (dieselbe Marke wie
+ * bei den Konflikten, `tests/brandConverseRoute.test.ts`). Hier steht die
+ * andere Hälfte — dass der Block überhaupt existiert, seinen eigenen Absatz
+ * hat und die Grenze mitträgt, die § 6 UWG dem Produkt setzt.
+ */
+describe('der Markt-Block', () => {
+  const MARKT = {
+    colleague: '',
+    field: 'Warum zuerst',
+    missing: [] as const,
+    conflicts: [] as const,
+    market: [{
+      field: 'Warum zuerst',
+      why: 'Euer Satz klingt wie zwei andere im Feld.',
+      suggestion: 'Schärft ihn mit dem Teil, den nur ihr macht.',
+    }],
+  }
+
+  it('bringt ihn in den Zug — mit Feld, Beobachtung und Vorschlag', () => {
+    const instruction = brandConverseInstruction({ ...BOTH, brief: MARKT })
+    expect(instruction).toContain('The market comparison noticed something about "Warum zuerst"')
+    expect(instruction).toContain('Euer Satz klingt wie zwei andere im Feld.')
+    expect(instruction).toContain('Schärft ihn mit dem Teil, den nur ihr macht.')
+  })
+
+  it('sagt EINMAL und gibt die Sache dann frei', () => {
+    const instruction = brandConverseInstruction({ ...BOTH, brief: MARKT })
+    expect(instruction).toMatch(/Bring that up ONCE/)
+    expect(instruction).toMatch(/and let it go/)
+  })
+
+  it('trägt die UWG-Grenze mit: kein Dritter wird genannt', () => {
+    const instruction = brandConverseInstruction({ ...BOTH, brief: MARKT })
+    expect(instruction).toMatch(/never name, quote or describe another company/)
+    expect(instruction).toMatch(/never say who else says it/)
+  })
+
+  it('steht NICHT im Konflikt-Absatz — er meint etwas anderes', () => {
+    // „a tension between X and Y" wäre für einen Markt-Befund schlicht falsch:
+    // er hat EIN eigenes Feld, kein Paar.
+    const instruction = brandConverseInstruction({ ...BOTH, brief: MARKT })
+    expect(instruction).not.toMatch(/a tension between/)
+  })
+
+  it('GEGENPROBE: ohne Markt-Befund gibt es den Block nicht', () => {
+    const ohne = brandConverseInstruction({
+      ...BOTH,
+      brief: { ...MARKT, market: [] },
+    })
+    expect(ohne).not.toMatch(/market comparison noticed/)
+    // Und ein Brief, in dem GAR NICHTS steht, erzeugt keine Überschrift.
+    expect(ohne).not.toMatch(/WHAT A COLLEAGUE NOTICED/)
+  })
+
+  it('GEGENPROBE: ein Brief OHNE `market` bleibt gültig (Apps ohne den Layer)', () => {
+    const alt = brandConverseInstruction({
+      ...BOTH,
+      brief: { colleague: 'Vera', field: 'Warum zuerst', missing: ['die Zielgruppe'], conflicts: [] },
+    })
+    expect(alt).toMatch(/WHAT A COLLEAGUE NOTICED/)
+    expect(alt).not.toMatch(/market comparison noticed/)
   })
 })

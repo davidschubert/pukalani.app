@@ -73,6 +73,28 @@ export function marketRunInstanceDayKey(): string {
   return 'market-run-instance-day'
 }
 
+/**
+ * DER EIGENE TAGES-EIMER DES VERGLEICHS (MV1 M3) — neben dem des Laufs, nicht
+ * darin.
+ *
+ * ── WARUM NICHT DERSELBE ──────────────────────────────────────────────────
+ * Aus Kundensicht ist „Markt vergleichen" EIN Knopf; technisch sind es zwei
+ * Schritte (`run` holt und wertet aus, `report` vergleicht), und die
+ * Oberfläche ruft beide nacheinander. Teilten sie einen Eimer, verbrauchte ein
+ * einziger Klick zwei von drei Tages-Läufen — der Deckel läge faktisch bei
+ * eineinhalb. Ausserdem ist ein Bericht OHNE Lauf ein normaler Vorgang: wer
+ * ein eigenes Feld korrigiert, will den Vergleich neu rechnen, ohne fünf
+ * fremde Websites erneut zu belästigen.
+ *
+ * ── DER INSTANZ-DECKEL BLEIBT GETEILT ─────────────────────────────────────
+ * Er zählt keine Klicks, sondern KOSTEN: jeder Bericht ist ein Modell-Aufruf,
+ * und ein zweiter Instanz-Zähler daneben verdoppelte die Rechnung, die er
+ * begrenzen soll (`marketRunInstanceDayKey`).
+ */
+export function marketReportDayKey(profileId: string): string {
+  return `market-report-day:${profileId}`
+}
+
 // ── Die Ablehnungsgründe ───────────────────────────────────────────────────
 
 /**
@@ -116,3 +138,10 @@ export const MARKET_COMPETITOR_LIMIT_CODE = 'competitor_limit'
 export const MARKET_COMPETITOR_DUPLICATE_CODE = 'competitor_duplicate'
 export const MARKET_INVALID_URL_CODE = 'competitor_url_invalid'
 export const MARKET_AI_DISABLED_CODE = 'ai_disabled'
+/**
+ * KEIN VERGLEICHBARES MATERIAL (MV1 M3): kein einziger Kandidat trägt ein
+ * Marktprofil. Ein Bericht über null Marken wäre kein leerer Bericht, sondern
+ * eine erfundene Aussage über ein Feld, das niemand gelesen hat — und ein
+ * bezahlter Modell-Aufruf dafür.
+ */
+export const MARKET_NO_PROFILES_CODE = 'market_no_profiles'

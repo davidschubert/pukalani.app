@@ -1,3 +1,5 @@
+import type { H3Event } from 'h3'
+
 /**
  * DIE MODELLWAHL DES MARKTVERGLEICHS — und der Ersatz für die Entwicklung.
  *
@@ -27,6 +29,7 @@
 
 interface MarketAiConfig {
   extractModel?: unknown
+  reportModel?: unknown
   outsideViewModels?: unknown
 }
 
@@ -53,6 +56,36 @@ export function marketExtractModel(): string {
  * Modells sind EIN Modell und würden aus dem Konsens eine Selbstbestätigung
  * machen.
  */
+/**
+ * DAS MODELL DES VERGLEICHS (MV1 M3, Plan §2.8: „1 Vergleich (George-Modell)").
+ *
+ * ── DIE KETTE, UND WARUM SIE SO HERUM LÄUFT ───────────────────────────────
+ * `pukalani.market.ai.reportModel` (leer als Default) > DAS GEORGE-MODELL >
+ * das Stufe-1-Modell des Spezialisten.
+ *
+ * Das George-Modell ist NICHT abgeschrieben, sondern gefragt:
+ * `getEffectiveAiConfig` ist die bestehende Laufzeit-Kette des Core
+ * (`app_config.aiModel > pukalani.ai.model`), aus der auch der Wizard sein
+ * Gesprächsmodell nimmt (`advisorGenerator.ts`). Ein hier eingetragener
+ * Modellname wäre eine zweite Wahrheit, die beim nächsten Wechsel stehen
+ * bliebe — und weil `allowFallbacks: false` gilt, wäre ein ungeprüftes Modell
+ * kein langsamerer Bericht, sondern gar keiner.
+ *
+ * Der Vergleich ist der EINE teure Aufruf je Lauf; er soll auf der Stufe
+ * laufen, auf der auch das Gespräch läuft, nicht auf der günstigen der
+ * Extraktion. Deshalb ist das Stufe-1-Modell hier nur der LETZTE Rückfall.
+ *
+ * ASYNC, weil die Laufzeit-Einstellung in der Datenbank steht — dieselbe
+ * Eigenart wie bei `isAiConfigured`.
+ */
+export async function marketReportModel(event: H3Event): Promise<string> {
+  const configured = marketAiConfig().reportModel
+  const model = typeof configured === 'string' ? configured.trim() : ''
+  if (model) return model
+  const george = (await getEffectiveAiConfig(event)).model
+  return (typeof george === 'string' ? george.trim() : '') || brandReviewModel()
+}
+
 export function marketOutsideViewModels(): string[] {
   const configured = marketAiConfig().outsideViewModels
   if (!Array.isArray(configured)) return []

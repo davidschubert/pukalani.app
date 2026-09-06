@@ -74,6 +74,10 @@ const KIND: Record<BrandFindingKind, { icon: string, key: string }> = {
   conflict: { icon: 'i-ph-warning', key: 'brand.finding.kind.conflict' },
   affected: { icon: 'i-ph-clock-counter-clockwise', key: 'brand.finding.kind.affected' },
   gap: { icon: 'i-ph-circle-dashed', key: 'brand.finding.kind.gap' },
+  // MV1 M3: der Marktvergleich hängt seine Befunde in dieselbe Liste. Der
+  // Kompass ist die Glyphe des Marktes (Plan §2.5) — dieselbe wie in der
+  // Leiste, damit ein Chip verrät, woher er kommt, ohne es zu erklären.
+  market: { icon: 'i-ph-compass', key: 'brand.finding.kind.market' },
 }
 
 const kind = computed(() => KIND[props.finding.kind])

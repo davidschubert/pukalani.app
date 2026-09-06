@@ -1,6 +1,6 @@
 import type { H3Event } from 'h3'
 import type { MarketRunResponse } from '../../../../../shared/types/marketApi'
-import type { MarketRunStep } from '../../../../../shared/marketProfile'
+import type { MarketProfileField, MarketRunStep } from '../../../../../shared/marketProfile'
 import { MARKET_MAX_CHARS_PER_RUN } from '../../../../../shared/marketCrawlRules'
 import { readBrandAiEnabled } from '../../../../contracts/brandContract'
 import { requireMarketProfile, requireMarketUnlocked } from '../../../../utils/marketAccess'
@@ -14,7 +14,10 @@ import {
 import { fetchMarketCompetitor } from '../../../../utils/marketFetch'
 import { extractMarketProfile, marketInputHash } from '../../../../utils/marketExtract'
 import { collectMarketAiView } from '../../../../utils/marketAiView'
-import { foundationMarketFields, latestProfilesByCompetitor } from '../../../../utils/marketViews'
+import { latestProfilesByCompetitor } from '../../../../utils/marketViews'
+import { loadMarketFoundationCandidate } from '../../../../utils/marketOwnProfile'
+import { marketLibraryEntry, marketLibraryFields } from '../../../../../shared/marketLibrary'
+import { loadMarketReportState, produceMarketReport } from '../../../../utils/marketReportService'
 import type { MarketCompetitorRow } from '../../../../../shared/types/market'
 
 /**
@@ -22,9 +25,20 @@ import type { MarketCompetitorRow } from '../../../../../shared/types/market'
  *
  * ── WAS ER TUT UND WAS NICHT ──────────────────────────────────────────────
  * Er holt (Schritt 2), wertet aus (Schritt 3) und fragt die KI-Aussensicht
- * (§7.5). Den VERGLEICH (Bericht, Konventionen, Überschneidungen, freie
- * Stellen, Befunde) macht er NICHT — der ist M3. Wer ihn hier einbaute, hätte
- * zwei halbe Pakete statt eines ganzen.
+ * (§7.5). Den VERGLEICH macht er NUR AUF ANSAGE (`withReport`, MV1 M3).
+ *
+ * ── WARUM EIN FLAG UND KEIN AUTOMATISMUS ──────────────────────────────────
+ * Aus Kundensicht gibt es EINEN Knopf („Markt vergleichen"), technisch sind es
+ * zwei Schritte. Drei Wege wären denkbar gewesen, und zwei sind falsch:
+ * (a) der Lauf hängt den Bericht IMMER an — dann kostet jeder Abruf-Lauf
+ * einen Modell-Aufruf, auch wenn niemand einen Vergleich sehen will, und der
+ * Beweis von M2 misst plötzlich eine andere Antwortform; (b) die Oberfläche
+ * ruft immer beide Routen — dann muss sie den Fall „Lauf gut, Bericht kaputt"
+ * selbst zusammensetzen, und zwei Knöpfe wären nur noch eine Frage der Zeit.
+ * Gewählt ist (c): `withReport` ist ein FLAG mit Default `false`. Der Lauf
+ * bleibt, was er war (M2s Beweis läuft unverändert weiter), und M4 setzt das
+ * Flag für den einen Knopf. Fällt der Bericht aus, steht der Abruf trotzdem —
+ * `report` ist dann schlicht `null`.
  *
  * ── SEQUENTIELL, NICHT PARALLEL ───────────────────────────────────────────
  * Fünf Wettbewerber nacheinander. Parallel wäre schneller und wäre falsch:
@@ -52,8 +66,15 @@ interface CandidateOutcome {
 }
 
 export default defineEventHandler(async (event): Promise<MarketRunResponse> => {
-  const { profileId, profile } = await requireMarketProfile(event)
+  const { userId, profileId, profile } = await requireMarketProfile(event)
   await requireMarketUnlocked(event, profileId)
+
+  // Das Flag darf aus der Adresszeile ODER dem Rumpf kommen: M4 ruft die Route
+  // per `$fetch` mit Rumpf, ein Beweis bequemer mit `?report=1`. Beides meint
+  // dasselbe, und eine zweite Route dafür wäre eine zweite Freischaltung.
+  const query = getQuery(event)
+  const body = await readBody(event).catch(() => null) as { withReport?: unknown } | null
+  const withReport = query.report === '1' || query.report === 'true' || body?.withReport === true
 
   const competitors = await listMarketCompetitors(event, profileId)
   if (!competitors.length) {
@@ -81,8 +102,8 @@ export default defineEventHandler(async (event): Promise<MarketRunResponse> => {
   let budget = MARKET_MAX_CHARS_PER_RUN
 
   for (const competitor of competitors) {
-    const outcome = competitor.sourceKind === 'foundation'
-      ? await runFoundationCandidate(event, profileId, competitor)
+    const outcome = competitor.sourceKind === 'foundation' || competitor.sourceKind === 'library'
+      ? await runStoredCandidate(event, userId, profileId, competitor, previousProfiles.get(competitor.$id)?.inputHash ?? '')
       : await runWebsiteCandidate(event, profileId, competitor, {
           aiEnabled,
           budget,
@@ -106,33 +127,116 @@ export default defineEventHandler(async (event): Promise<MarketRunResponse> => {
     aiEnabled,
   })
 
-  return { ran: true, steps, aiEnabled, extracted, reused }
+  // ── Der Vergleich, nur auf Ansage (s. Kopf) ──────────────────────────────
+  let report: MarketRunResponse['report'] = null
+  if (withReport) {
+    try {
+      const state = await loadMarketReportState(event, profileId)
+      if (state.withProfile > 0) {
+        report = (await produceMarketReport(event, profileId, state, {
+          locale: profile.contentLocale,
+          aiEnabled,
+        })).view
+      }
+    }
+    catch (error) {
+      // FAIL-SOFT — und zwar bewusst anders als in der eigenen Bericht-Route:
+      // dort ist der Bericht der ZWECK des Aufrufs, hier ist er eine Zugabe.
+      // Ein Deckel oder ein ausgefallener Anbieter darf einen gelungenen Abruf
+      // nicht in eine Fehlermeldung verwandeln — der Kunde holt den Vergleich
+      // dann über `POST /report` nach und erfährt DORT den Grund.
+      logEvent('warn', 'market.run_report_failed', {
+        status: typeof (error as { statusCode?: unknown })?.statusCode === 'number'
+          ? (error as { statusCode: number }).statusCode
+          : 0,
+      })
+    }
+  }
+
+  return { ran: true, steps, aiEnabled, extracted, reused, report }
 })
 
 /**
- * DIE EIGENE MARKE (§7.2 Nr. 2) — kein Abruf, kein Modell, keine Kosten.
+ * DIE ZWEI QUELLEN OHNE ABRUF (§7.2 Nr. 2 und 3) — kein Netz, kein Modell,
+ * keine Kosten.
  *
- * Sie wird bei JEDEM Lauf neu geschrieben, und das ist Absicht: die
- * Foundation ändert sich, während der Kunde arbeitet, und ein eingefrorenes
- * eigenes Profil wäre im Relaunch-Vergleich genau die Hälfte, die veraltet.
+ * ── `foundation`: DIE EIGENE MARKE ────────────────────────────────────────
+ * Sie wird bei JEDEM Lauf neu geschrieben, und das ist Absicht: die Foundation
+ * ändert sich, während der Kunde arbeitet, und ein eingefrorenes eigenes
+ * Profil wäre im Relaunch-Vergleich genau die Hälfte, die veraltet. Der
+ * BESITZ wird dabei erneut geprüft (`loadMarketFoundationCandidate`) — er kann
+ * sich zwischen Anlegen und Lauf geändert haben.
+ *
+ * ── `library`: EIN HANDGEPRÜFTER EINTRAG ──────────────────────────────────
+ * Er wird NICHT abgerufen (Plan §7.2 Nr. 3: „von uns mit demselben Motor
+ * gerechnet und VON HAND GEPRÜFT, versioniert im Repo"). Ein Abruf wäre hier
+ * sogar schädlich: die Bibliothek ist eine redaktionelle Aussage mit Datum und
+ * Namenszeichen, und ein Lauf, der sie stillschweigend durch frischen
+ * Maschinentext ersetzte, nähme ihr genau das, wofür es sie gibt.
+ *
+ * Ein Eintrag, den es NICHT MEHR GIBT (die Datei ist versioniert, Einträge
+ * dürfen verschwinden), wird `failed` — nicht still übersprungen: der Kandidat
+ * steht in der Liste des Kunden, und „da war mal was" ist eine Auskunft.
  */
-async function runFoundationCandidate(
+async function runStoredCandidate(
   event: H3Event,
+  userId: string,
   profileId: string,
   competitor: MarketCompetitorRow,
+  previousHash: string,
 ): Promise<CandidateOutcome> {
-  const source = competitor.sourceRef || profileId
-  const fields = await foundationMarketFields(event, source)
+  let fields: MarketProfileField[]
 
-  await createMarketProfile(event, profileId, competitor.$id, {
-    fields: JSON.stringify(fields),
-    aiOutsideView: '',
-    extractedAt: new Date().toISOString(),
-    model: '',
-    promptVersion: '',
-    // Der Hash über die WERTE, nicht über einen Rohtext — es gibt keinen.
-    inputHash: marketInputHash(JSON.stringify(fields)),
-  })
+  if (competitor.sourceKind === 'library') {
+    const entry = marketLibraryEntry(competitor.sourceRef ?? '')
+    if (!entry) {
+      await updateMarketCompetitor(event, profileId, competitor.$id, {
+        status: 'failed',
+        excludedReason: 'noText',
+      })
+      return {
+        step: {
+          competitorId: competitor.$id,
+          name: competitor.name,
+          status: 'failed',
+          robotsChecked: false,
+          pagesRead: 0,
+          excludedReason: 'noText',
+        },
+        extracted: false,
+        reused: false,
+        charsUsed: 0,
+      }
+    }
+    fields = marketLibraryFields(entry)
+  }
+  else {
+    fields = [...(await loadMarketFoundationCandidate(
+      event,
+      userId,
+      competitor.sourceRef ?? '',
+      profileId,
+    )).fields]
+  }
+
+  // DIESELBE IDEMPOTENZ WIE BEIM WEBSITE-KANDIDATEN, nur über die WERTE statt
+  // über einen Rohtext — es gibt hier keinen. Unveränderte Foundation,
+  // unveränderte Bibliothek ⇒ keine zweite Zeile. Ohne das wüchse die
+  // Verlaufs-Tabelle bei jedem Lauf um Kopien, und `market_profiles` ist ein
+  // VERLAUF und keine Protokolldatei.
+  const inputHash = marketInputHash(JSON.stringify(fields))
+  const unchanged = Boolean(inputHash) && inputHash === previousHash
+
+  if (!unchanged) {
+    await createMarketProfile(event, profileId, competitor.$id, {
+      fields: JSON.stringify(fields),
+      aiOutsideView: '',
+      extractedAt: new Date().toISOString(),
+      model: '',
+      promptVersion: '',
+      inputHash,
+    })
+  }
   await updateMarketCompetitor(event, profileId, competitor.$id, {
     status: 'fetched',
     excludedReason: '',
@@ -149,8 +253,8 @@ async function runFoundationCandidate(
       robotsChecked: false,
       pagesRead: 0,
     },
-    extracted: true,
-    reused: false,
+    extracted: !unchanged,
+    reused: unchanged,
     charsUsed: 0,
   }
 }

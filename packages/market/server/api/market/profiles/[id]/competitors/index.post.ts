@@ -7,6 +7,7 @@ import {
   MARKET_INVALID_URL_CODE,
 } from '../../../../../../shared/marketLimits'
 import { normalizeMarketUrl } from '../../../../../../shared/marketCrawlRules'
+import { marketLibraryEntry } from '../../../../../../shared/marketLibrary'
 import { requireMarketProfile } from '../../../../../utils/marketAccess'
 import { createMarketCompetitor, listMarketCompetitors } from '../../../../../utils/marketStore'
 import { toMarketCompetitor } from '../../../../../utils/marketViews'
@@ -14,15 +15,20 @@ import { toMarketCompetitor } from '../../../../../utils/marketViews'
 /**
  * EINEN KANDIDATEN ANLEGEN (Plan §2.3 Schritt 1, §2.9 Nr. 8).
  *
- * ── ZWEI QUELLEN IN M2, NICHT VIER ────────────────────────────────────────
+ * ── DREI QUELLEN SEIT M3, NICHT VIER ──────────────────────────────────────
  * `website` (der Normalfall: der Kunde trägt die Adresse ein — sie wird NIE
- * geraten, Davids Entscheidung 4) und `foundation` (die eigene Marke aus dem
- * Konto, §7.2 Nr. 2 — der Relaunch-Fall, kein Abruf). `library` und `shared`
- * werden vom Zod-Schema ABGELEHNT, obwohl der Ablage-Vertrag sie kennt: die
- * Bibliothek kommt mit M6, die freigegebene Fremdmarke mit M4 samt ihrem
+ * geraten, Davids Entscheidung 4), `foundation` (die eigene Marke aus dem
+ * Konto, §7.2 Nr. 2 — der Relaunch-Fall, kein Abruf) und seit MV1 M3
+ * `library` (ein handgeprüfter Eintrag aus `shared/library/`, ebenfalls ohne
+ * Abruf). `shared` wird vom Zod-Schema weiter ABGELEHNT, obwohl der
+ * Ablage-Vertrag es kennt: die freigegebene Fremdmarke kommt mit M4 samt ihrem
  * Opt-in (`marketVisibility`, Anhang B „Was NICHT in M1 steckt"). Eine Quelle
  * anzunehmen, hinter der nichts liegt, hiesse einen Kandidaten anzulegen, den
  * kein Lauf je bedienen kann.
+ *
+ * Die Bibliothek ist ab jetzt bedienbar, weil ihre MECHANIK steht (M3); ihr
+ * INHALT sind bis M6 ausschliesslich erfundene Testeinträge, und genau deshalb
+ * wird der Schlüssel hier gegen die geladene Datei geprüft statt geglaubt.
  *
  * ── DIE ZUGEHÖRIGKEIT KOMMT NIE AUS DEM RUMPF ─────────────────────────────
  * `profileId` steht im PFAD und wird vom Store gestempelt — dieselbe Regel wie
@@ -33,8 +39,11 @@ import { toMarketCompetitor } from '../../../../../utils/marketViews'
 const bodySchema = z.object({
   name: z.string().trim().min(1).max(200),
   url: z.string().trim().max(512).optional().default(''),
-  sourceKind: z.enum(['website', 'foundation']).optional().default('website'),
-  /** Bei `foundation`: das eigene Branding, dessen bestätigte Felder gelten. */
+  sourceKind: z.enum(['website', 'foundation', 'library']).optional().default('website'),
+  /**
+   * Bei `foundation` das eigene Branding, dessen bestätigte Felder gelten; bei
+   * `library` der Schlüssel des Eintrags.
+   */
   sourceRef: z.string().trim().max(128).optional().default(''),
 })
 
@@ -81,6 +90,26 @@ export default defineEventHandler(async (event): Promise<MarketCompetitorRespons
       })
     }
     url = normalized.url
+  }
+  else if (body.sourceKind === 'library') {
+    // DER SCHLÜSSEL MUSS ES GEBEN. Ein erfundener Schlüssel ergäbe einen
+    // Kandidaten, den jeder Lauf als `failed` vermerkt — eine Zeile, die nie
+    // etwas werden kann. 404 statt 400 wäre hier falsch: die Bibliothek ist
+    // öffentlich (sie liegt im Repo), es gibt nichts zu verbergen.
+    const entry = marketLibraryEntry(body.sourceRef.trim())
+    if (!entry) throw createError({ status: 400, statusText: 'Unknown library entry' })
+    if (existing.some(row => row.sourceKind === 'library' && row.sourceRef === entry.key)) {
+      throw createError({
+        status: 409,
+        statusText: 'Competitor already exists',
+        data: { code: MARKET_COMPETITOR_DUPLICATE_CODE },
+      })
+    }
+    sourceRef = entry.key
+    // Die HOMEPAGE wird mitgeschrieben, aber NICHT abgerufen: sie ist die
+    // Herkunft der handgeprüften Belege und der Link, den die Oberfläche
+    // anbietet. Der Lauf rührt sie nicht an (s. `runStoredCandidate`).
+    url = entry.homepage
   }
   else {
     // DIE EIGENE MARKE — und zwar EINE, DIE DEM AUFRUFER GEHÖRT. Ohne diese
