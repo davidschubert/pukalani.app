@@ -413,7 +413,7 @@ export const BRAND_CHECK_INSTANCE_DAILY_DEFAULT = 200
 
 /**
  * ZEHN CHECKS JE KONTO UND TAG — der Deckel des „neu ermitteln" (Davids
- * Entscheidung 4 vom 2026-09-05, docs/plans/BRAND-CHECK-SEITE.md §8.4).
+ * Entscheidung 4 vom 2026-09-05, docs/archiv/BRAND-CHECK-SEITE.md §8.4).
  *
  * ── ER GILT NUR MIT `force` ───────────────────────────────────────────────
  * Ein eingeloggter Mensch, der einfach eine Adresse eintippt, zählt weiter

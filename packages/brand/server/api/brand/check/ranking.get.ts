@@ -23,7 +23,7 @@ import {
 } from '../../../utils/brandStore'
 
 /**
- * DAS RANKING (docs/plans/BRAND-CHECK-SEITE.md §3) — öffentlich, ohne Konto,
+ * DAS RANKING (docs/archiv/BRAND-CHECK-SEITE.md §3) — öffentlich, ohne Konto,
  * ohne KI, ohne einen einzigen Schreibvorgang.
  *
  * ── WAS HIER DRINSTEHT, IST EINE AUSSAGE ÜBER FREMDE MARKEN ───────────────

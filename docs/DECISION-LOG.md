@@ -128,7 +128,7 @@ zeigt ins Wizard-Kapitel (Analyse → Erkenntnis → Empfehlung → Handlung →
 Zoomstufen derselben Daten: Score = Urteil, Markenabdruck = Profil, Matrix = Diagnose.
 **Verworfen:** Treemap/Sunburst, Radial Bars, Benchmark-Bullet (erst mit Ranking-Perzentil),
 Chart-Framework (Inline-SVG aus Tokens). Bauplan: P4 mit überlagerten Markenabdrücken, P6
-Ergebnisseite v2 — docs/plans/BRAND-CHECK-SEITE.md §10.
+Ergebnisseite v2 — docs/archiv/BRAND-CHECK-SEITE.md §10.
 
 ---
 
@@ -138,7 +138,7 @@ Ergebnisseite v2 — docs/plans/BRAND-CHECK-SEITE.md §10.
 Seite (`/brand-check`, heute 404), alle Teaser zeigen dorthin; dazu ein Archiv/Ranking aller
 geprüften Auftritte, ein Quartett-Vergleich zweier Brands (links/rechts, Kategorie für
 Kategorie) und für eigene Brands „Score neu ermitteln" mit Gegenüberstellung zum Vorgänger
-und Experten-To-do-Liste. Konzept: docs/plans/BRAND-CHECK-SEITE.md.
+und Experten-To-do-Liste. Konzept: docs/archiv/BRAND-CHECK-SEITE.md.
 
 **Entscheidungen (David, Fragenrunde):** (1) **Ranking nur mit Opt-in des Prüfers** — ohne
 Häkchen bleibt ein Check privat; verworfen: alle Checks öffentlich (Bewertung Dritter ohne

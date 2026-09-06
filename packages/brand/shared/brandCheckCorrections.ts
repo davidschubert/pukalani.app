@@ -1,5 +1,5 @@
 /**
- * DIE REGELN DER KORREKTURVORSCHLÄGE (docs/plans/BRAND-CHECK-SEITE.md §3b,
+ * DIE REGELN DER KORREKTURVORSCHLÄGE (docs/archiv/BRAND-CHECK-SEITE.md §3b,
  * Davids Idee „wie Google Business Profile") — pur, ohne h3, ohne Appwrite.
  *
  * Wer im Ranking einen Fehler sieht, schlägt eine Korrektur vor; der Betreiber

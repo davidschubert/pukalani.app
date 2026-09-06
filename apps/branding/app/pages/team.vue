@@ -395,7 +395,7 @@ const crew = BRAND_ADVISORS.filter(a => a.key !== 'george').map(a => ({
       </section>
 
       <!-- 6 · Brand-Check: der kostenlose Einstieg NEBEN der Warteliste
-           (Plan docs/plans/BRAND-CHECK-SEITE.md §1 — ergänzend, nicht
+           (Plan docs/archiv/BRAND-CHECK-SEITE.md §1 — ergänzend, nicht
            ersetzend). Das Formular selbst lebt genau einmal, auf
            /brand-check; hier steht nur der Verweis. -->
       <BwBrandCheckTeaser source="team" class="mt-28" />

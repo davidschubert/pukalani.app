@@ -11,7 +11,7 @@ import { BRAND_CHECKS_TABLE, brandDb } from '../../../../utils/brandStore'
 /**
  * BETREIBER: EINEN CHECK AUS- ODER WIEDER EINBLENDEN (`users.manage`).
  *
- * Der Entfernen-Weg aus docs/plans/BRAND-CHECK-SEITE.md §3 („Betreiber?
+ * Der Entfernen-Weg aus docs/archiv/BRAND-CHECK-SEITE.md §3 („Betreiber?
  * Eintrag entfernen") und §7 — und die Bedingung dafür, dass ein öffentliches
  * Ranking über FREMDE Websites überhaupt tragfähig ist: eine Bewertung
  * Dritter ist zulässig, wenn sie faktenbasiert ist UND der Betroffene sich

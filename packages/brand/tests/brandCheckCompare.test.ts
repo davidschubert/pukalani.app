@@ -16,7 +16,7 @@ import {
 } from '../shared/brandCheckCompare'
 
 /**
- * DER QUARTETT-VERGLEICH (docs/plans/BRAND-CHECK-SEITE.md §4, Paket P4).
+ * DER QUARTETT-VERGLEICH (docs/archiv/BRAND-CHECK-SEITE.md §4, Paket P4).
  *
  * Geprüft wird die Regel, nicht die Zeichnung: wer eine Kategorie gewinnt, was
  * ein `null` bedeutet und dass das Vertauschen der Seiten niemanden bevorzugt.

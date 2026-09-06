@@ -1,5 +1,13 @@
 # Brand-Check als Produktseite — Start, Ranking, Vergleich, Verlauf (Konzept, 2026-09-05)
 
+> **AUSGEFÜHRT 2026-09-05/06, ABGENOMMEN 2026-09-06** (David: Ranking, Vergleich,
+> Ergebnisseite live getestet). Pakete P1–P6 (§9) sind auf branding.supply, Migration
+> brand-017 gefahren. Davids Zuschnitte während des Baus: Kategorie-Karten in eigener
+> Section und dauerhaft offen (kein Auf-/Zuklappen); Fazit als Bento; Befund-Liste
+> nach Punktgewinn. Nicht live durchgespielt (Login + KI-Kosten): Dokument-Check,
+> Neu-ermitteln, Korrektur-Annahme — per Route-Tests abgesichert. Erledigt-Eintrag:
+> docs/OPEN-ITEMS-COMPLETE.md. Dieses Dokument ist Archiv, keine Arbeitsliste.
+
 Davids Auftrag nach dem ersten gelungenen Live-Check (2026-09-05): „der brand-check
 muss immer auf einer eigenen seite stattfinden … teaser verweisen immer auf diese
 eine seite … ein brand-check archiv … ranking … zwei brands miteinander

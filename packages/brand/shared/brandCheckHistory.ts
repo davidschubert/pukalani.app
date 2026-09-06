@@ -2,7 +2,7 @@ import { BRAND_CHECK_CATEGORIES } from './brandCheck'
 import type { BrandCheckDiff, BrandCheckDiffCategory, BrandCheckHistoryItem } from './types/brand'
 
 /**
- * DIE GEGENÜBERSTELLUNG ZWEIER CHECKS (docs/plans/BRAND-CHECK-SEITE.md §5) —
+ * DIE GEGENÜBERSTELLUNG ZWEIER CHECKS (docs/archiv/BRAND-CHECK-SEITE.md §5) —
  * pur, ohne h3, ohne Appwrite, ohne Vue.
  *
  * ── SIE VERGLEICHT NUR, WAS VERGLEICHBAR IST ──────────────────────────────

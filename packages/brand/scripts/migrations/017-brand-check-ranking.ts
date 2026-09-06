@@ -8,7 +8,7 @@
  * `git fetch origin main`).
  *
  * ── WOFÜR ─────────────────────────────────────────────────────────────────
- * docs/plans/BRAND-CHECK-SEITE.md macht aus dem einzelnen Check eine
+ * docs/archiv/BRAND-CHECK-SEITE.md macht aus dem einzelnen Check eine
  * PRODUKTSEITE: ein öffentliches Ranking (§3), Korrekturvorschläge dazu (§3b),
  * „Meine Brands" mit Verlauf (§5) und — schon vorgesehen — der Check eines
  * Fundament-DOKUMENTS statt einer Website (§5b). Diese Migration legt dafür

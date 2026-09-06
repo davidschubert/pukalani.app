@@ -27,7 +27,7 @@ import { jsonLdScript } from '../utils/jsonLd'
  * Erst stand hier die Warteliste mit `source: 'brand-check'`, dann (seit dem
  * Bau des Instruments) das Formular selbst. Seit dem Teaser-Umbau steht hier
  * `BwBrandCheckTeaser`: das Formular lebt GENAU EINMAL, auf `/brand-check`
- * (Plan docs/plans/BRAND-CHECK-SEITE.md §1). Grund: die Seite mit dem
+ * (Plan docs/archiv/BRAND-CHECK-SEITE.md §1). Grund: die Seite mit dem
  * Formular ist die indexierbare Produkt-Seite des Checks; drei Formulare an
  * drei Stellen wären drei Erklärungen und trotzdem keine Seite, die jemand
  * findet. Der Report per Mail bleibt die Warteliste — er steht auf der

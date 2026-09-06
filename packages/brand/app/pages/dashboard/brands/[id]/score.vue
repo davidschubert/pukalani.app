@@ -10,7 +10,7 @@ import type {
 } from '../../../../../shared/types/brand'
 
 /**
- * „MEINE BRANDS & SCORES" (docs/plans/BRAND-CHECK-SEITE.md §5) —
+ * „MEINE BRANDS & SCORES" (docs/archiv/BRAND-CHECK-SEITE.md §5) —
  * `/dashboard/brands/<id>/score`.
  *
  * Vier Abschnitte, in der Reihenfolge, in der man sie braucht: die zwei Zahlen

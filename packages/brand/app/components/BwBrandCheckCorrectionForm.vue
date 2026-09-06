@@ -8,7 +8,7 @@ import type { BrandCheckCorrectionResponse } from '../../shared/types/brand'
 
 /**
  * „STIMMT NICHT?" — der Korrekturvorschlag zu einem Check
- * (Konzept: docs/plans/BRAND-CHECK-SEITE.md §3b, Davids Idee „wie Google
+ * (Konzept: docs/archiv/BRAND-CHECK-SEITE.md §3b, Davids Idee „wie Google
  * Business Profile").
  *
  * Wer im Ranking oder auf einer Ergebnisseite eine falsch zugeordnete Branche

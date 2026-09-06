@@ -13,7 +13,7 @@ import type {
 
 /**
  * DER VERGLEICH — `/brand-check/vergleich?a=…&b=…`
- * (Konzept: docs/plans/BRAND-CHECK-SEITE.md §4 und §10, Paket P4).
+ * (Konzept: docs/archiv/BRAND-CHECK-SEITE.md §4 und §10, Paket P4).
  *
  * Zwei Checks als Quartett-Karten: Kopf links/rechts, ein Markenabdruck mit
  * beiden Serien übereinander, acht Kategorie-Zeilen gegeneinander, ein Fazit.

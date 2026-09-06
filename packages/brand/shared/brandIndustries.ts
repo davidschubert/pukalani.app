@@ -1,5 +1,5 @@
 /**
- * DIE BRANCHEN DES BRAND-CHECKS (docs/plans/BRAND-CHECK-SEITE.md §3 und §8.2) —
+ * DIE BRANCHEN DES BRAND-CHECKS (docs/archiv/BRAND-CHECK-SEITE.md §3 und §8.2) —
  * eine GESCHLOSSENE Liste, pur, ohne h3, ohne Appwrite, ohne Vue.
  *
  * ── WARUM GESCHLOSSEN, OBWOHL DIE STARTKARTE FREITEXT NIMMT ───────────────

@@ -11,7 +11,7 @@ import type { BrandCheckCriterionResult, BrandCheckResult } from '../../../share
 /**
  * DIE ERGEBNISSEITE DES BRAND-CHECKS — `/brand-check/<id>`
  * (Konzept: docs/archiv/BRAND-CHECK.md §4, Fassung v2 nach
- * docs/plans/BRAND-CHECK-SEITE.md §10).
+ * docs/archiv/BRAND-CHECK-SEITE.md §10).
  *
  * ── DREI ZOOMSTUFEN DERSELBEN DATEN, IN DIESER REIHENFOLGE ────────────────
  *  1. **Score = Urteil.** Der Ring, das Band, die Herkunft — dazu das Delta

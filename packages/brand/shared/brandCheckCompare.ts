@@ -7,7 +7,7 @@ import {
 
 /**
  * DER VERGLEICH ZWEIER CHECKS — „das Quartett"
- * (docs/plans/BRAND-CHECK-SEITE.md §4, Paket P4). Pur: ohne h3, ohne Appwrite,
+ * (docs/archiv/BRAND-CHECK-SEITE.md §4, Paket P4). Pur: ohne h3, ohne Appwrite,
  * ohne Vue.
  *
  * ── ES WIRD NICHT NEU GERECHNET, NUR GEGENÜBERGESTELLT ────────────────────

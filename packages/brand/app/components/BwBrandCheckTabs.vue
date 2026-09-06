@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /**
  * DIE REITER DES BRAND-CHECKS — Start · Ranking · Vergleich
- * (Konzept: docs/plans/BRAND-CHECK-SEITE.md §1).
+ * (Konzept: docs/archiv/BRAND-CHECK-SEITE.md §1).
  *
  * ── JEDER REITER IST EINE EIGENE ADRESSE, KEIN ZUSTAND ────────────────────
  * Deshalb LINKS und kein `UTabs` mit `v-model`: die drei Ansichten sind

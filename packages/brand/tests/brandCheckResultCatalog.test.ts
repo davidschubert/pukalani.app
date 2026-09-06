@@ -7,7 +7,7 @@ import { BRAND_CHECK_CATEGORIES, BRAND_CHECK_CRITERIA } from '../shared/brandChe
 /**
  * DIE ERGEBNISSEITE V2 RENDERT REINEN KATALOG-TEXT
  * (`packages/brand/app/pages/brand-check/[id].vue` und
- * `BwBrandCheckMatrix.vue`, docs/plans/BRAND-CHECK-SEITE.md §10) — und
+ * `BwBrandCheckMatrix.vue`, docs/archiv/BRAND-CHECK-SEITE.md §10) — und
  * vue-i18n gibt bei einem fehlenden Schlüssel den SCHLÜSSEL zurück, ohne
  * Fehler und ohne roten Build. Auf einer geteilten Ergebnisseite stünde dann
  * wörtlich `brand.checkResult.planTotal` neben dem Score.

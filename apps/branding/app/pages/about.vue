@@ -25,7 +25,7 @@ import { jsonLdScript } from '../utils/jsonLd'
  * Artefakte und Beispiel-Branding gehören der Startseite (abgenommener Dummy
  * `packages/brand/.playground/app/pages/start.vue`) — About wiederholt sie
  * nicht. Der Brand-Check steht seit dem Teaser-Umbau (Plan
- * docs/plans/BRAND-CHECK-SEITE.md §1) auch hier, aber NUR als Verweis: das
+ * docs/archiv/BRAND-CHECK-SEITE.md §1) auch hier, aber NUR als Verweis: das
  * Formular lebt genau einmal, auf /brand-check. Preise nennt nur die FAQ, und zwar den Stand
  * der Produktentscheidung vom 2026-08-27: Fundament frei, Ableitung bezahlt.
  *
@@ -206,7 +206,7 @@ const openFaq = ref<string | null>(null)
       </section>
 
       <!-- 7 · Brand-Check: der kostenlose Einstieg NEBEN der Warteliste
-           (Plan docs/plans/BRAND-CHECK-SEITE.md §1 — ergänzend, nicht
+           (Plan docs/archiv/BRAND-CHECK-SEITE.md §1 — ergänzend, nicht
            ersetzend: wer noch nichts hinterlassen will, kann trotzdem etwas
            mitnehmen). -->
       <BwBrandCheckTeaser source="about" class="mt-28" />

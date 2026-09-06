@@ -15,7 +15,7 @@ import {
 } from '../shared/brandCheckInsights'
 
 /**
- * DIE ERGEBNISSEITE V2 VERSPRICHT ZAHLEN (docs/plans/BRAND-CHECK-SEITE.md §10):
+ * DIE ERGEBNISSEITE V2 VERSPRICHT ZAHLEN (docs/archiv/BRAND-CHECK-SEITE.md §10):
  * „+3 Punkte", „Gesamt möglich: +28", „38 von 40 bewertet". Ein Versprechen
  * über Punkte, das nicht dieselbe Rechnung benutzt wie die Punkte selbst, ist
  * eine Schätzung im Gewand einer Messung — und niemand würde es merken, weil

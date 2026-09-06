@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /**
  * DER SCORE ALS TABELLEN-ZELLE — Zahl plus Band, in einer Zeile
- * (Konzept: docs/plans/BRAND-CHECK-SEITE.md §3).
+ * (Konzept: docs/archiv/BRAND-CHECK-SEITE.md §3).
  *
  * `BwScoreRing` ist der Kopf einer Ergebnisseite: 132 px, ein Wert, viel Luft.
  * Eine Ranking-Tabelle zeigt fünfundzwanzig davon untereinander — dort ist ein

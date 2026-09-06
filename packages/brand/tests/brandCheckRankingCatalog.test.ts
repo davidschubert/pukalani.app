@@ -8,7 +8,7 @@ import { BRAND_CHECK_CORRECTION_FILTERS, BRAND_CHECK_CORRECTION_STATUSES } from 
 
 /**
  * DAS RANKING, DAS KORREKTUR-FORMULAR UND DIE BETREIBER-WARTESCHLANGE RENDERN
- * REINEN KATALOG-TEXT (Plan docs/plans/BRAND-CHECK-SEITE.md §3/§3b, Paket P3).
+ * REINEN KATALOG-TEXT (Plan docs/archiv/BRAND-CHECK-SEITE.md §3/§3b, Paket P3).
  *
  * vue-i18n gibt bei einem fehlenden Schlüssel den SCHLÜSSEL zurück — ohne
  * Fehler, ohne roten Build. Das Ranking ist eine INDEXIERBARE Seite: dort hiesse

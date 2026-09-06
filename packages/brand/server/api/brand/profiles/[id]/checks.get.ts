@@ -17,7 +17,7 @@ import {
 } from '../../../../utils/brandStore'
 
 /**
- * DER VERLAUF EINER BRAND (docs/plans/BRAND-CHECK-SEITE.md §5) — alle Checks,
+ * DER VERLAUF EINER BRAND (docs/archiv/BRAND-CHECK-SEITE.md §5) — alle Checks,
  * die zu dieser Marke gehören, und die Gegenüberstellung der zwei jüngsten
  * derselben Quelle.
  *
