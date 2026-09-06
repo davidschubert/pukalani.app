@@ -16,7 +16,7 @@ import type {
   MarketProfile,
   MarketProfileField,
 } from '../../shared/marketProfile'
-import { MARKET_OWN_ID } from '../../shared/marketProfile'
+import { MARKET_OWN_ID, marketFieldCandidates, marketIsSelfCandidate } from '../../shared/marketProfile'
 import type { MarketRevisionCandidate } from '../../shared/marketReportRules'
 import { marketMatrixRows } from '../../shared/marketReportRules'
 import { marketLibraryVersion } from '../../shared/marketLibrary'
@@ -65,7 +65,13 @@ export interface MarketReportState {
   readonly aiViews: readonly MarketAiView[]
   readonly brandChecks: ReadonlyMap<string, MarketBrandCheck>
   readonly revisionKey: string
-  /** Wie viele Kandidaten überhaupt ein Marktprofil tragen. */
+  /**
+   * Wie viele Kandidaten DES FELDES ein Marktprofil tragen — die eigene alte
+   * Website (`role: 'self'`) zählt NICHT mit (§2.3: „Feld = Wettbewerber",
+   * MV1 M4). Sonst liefe ein Relaunch-Branding ohne einen einzigen
+   * Wettbewerber in einen Modell-Aufruf, dessen Material aus genau einer
+   * eigenen Quelle bestünde.
+   */
   readonly withProfile: number
 }
 
@@ -104,7 +110,9 @@ export async function loadMarketReportState(
     if (profileRow) {
       const fields = parseMarketJson<MarketProfileField[]>(profileRow.fields, marketFieldsSchema) ?? []
       profiles.push({ competitorId: row.$id, fields })
-      if (fields.some(field => field.value.trim())) withProfile++
+      if (!marketIsSelfCandidate(row) && fields.some(field => field.value.trim())) {
+        withProfile++
+      }
       const view = toMarketAiView(profileRow)
       if (view) aiViews.push(view)
     }
@@ -291,9 +299,12 @@ export function toMarketReportView(
     createdAt: row.$createdAt,
     revisionKey: row.revisionKey,
     own: stored.own,
+    // Die LISTEN bleiben vollständig — die eigene alte Website steht darin,
+    // weil die Relaunch-Gegenüberstellung sie braucht. Die MATRIX ist „das
+    // Feld" und lässt sie weg (§2.3, MV1 M4).
     competitors: stored.competitors,
     profiles: stored.profiles,
-    matrix: marketMatrixRows(stored.own, stored.competitors, stored.profiles),
+    matrix: marketMatrixRows(stored.own, marketFieldCandidates(stored.competitors), stored.profiles),
     claims: stored.claims,
     findings: [...findings],
     aiViews: stored.aiViews,
@@ -448,7 +459,11 @@ export async function produceMarketReport(
   const startedAt = Date.now()
   const report = await buildMarketReport(event, {
     own: state.own.fields,
-    candidates: state.competitors
+    // DIE EIGENE ALTE WEBSITE GEHT DEM MODELL GAR NICHT ERST ZU (§2.3,
+    // MV1 M4): sie ist keine Stimme im Feld, und jede Quote („3 von 4 sagen
+    // das") zählte uns sonst selbst mit. Der Riegel bekommt sie aus demselben
+    // Grund nicht — ihr Name ist unser eigener.
+    candidates: marketFieldCandidates(state.competitors)
       .filter(competitor => competitor.status !== 'excluded')
       .map(competitor => ({
         competitor,
@@ -510,7 +525,7 @@ export async function produceMarketReport(
       own: [...state.own.fields],
       competitors: [...state.competitors],
       profiles: [...state.profiles],
-      matrix: marketMatrixRows(state.own.fields, state.competitors, state.profiles),
+      matrix: marketMatrixRows(state.own.fields, marketFieldCandidates(state.competitors), state.profiles),
       claims: report.claims,
       findings,
       aiViews: [...state.aiViews],

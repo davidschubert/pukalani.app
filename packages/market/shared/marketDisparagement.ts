@@ -33,14 +33,33 @@
  * ÜBER DEN ROHTEXT ins Modell gelangt ist (ein Zitat nennt oft die eigene
  * Marke) oder dass jemand die Anonymisierung später „vereinfacht".
  *
- * ── LIEBER ZU VIEL ALS ZU WENIG ───────────────────────────────────────────
- * Ein Wettbewerber „Kailua Coffee" macht das Token `coffee` gesperrt, und ein
- * Vorschlag über Kaffee fällt damit weg. Das ist der bewusste Preis: der
- * Riegel ist fail-closed, weil die eine Seite einen Hinweis kostet und die
- * andere Geld. Ausgenommen sind nur RECHTSFORMEN und Bindewörter (`GmbH`,
- * `Ltd`, `Company`, `und`, …) — sie identifizieren niemanden, und ohne diese
- * Ausnahme sperrte ein einziger Kandidat „Müller GmbH" jedes Wort `gmbh` in
- * jedem Vorschlag.
+ * ── GESPERRT WIRD, WAS UNTERSCHEIDET (nachgeschärft in MV1 M4) ────────────
+ * Bis M3 galt: JEDES Namens-Token ab vier Zeichen ist gesperrt. Der Preis war
+ * als „lieber zu viel als zu wenig" verbucht, und in der Praxis war er zu
+ * hoch: ein Wettbewerber „Kailua Coffee" sperrte `coffee` in JEDEM Vorschlag
+ * — in der Kaffee-Kategorie also das Wort, um das es geht. Der Riegel
+ * verwarf damit systematisch die brauchbarsten Befunde und liess ausgerechnet
+ * die Kategorie-Sprache nicht mehr benennen (Befund aus M3, Anhang D).
+ *
+ * Gesperrt sind seither drei Dinge:
+ *  (a) der VOLLE normalisierte Name (auch zusammengezogen: `kailuacoffee`),
+ *  (b) die Domain und ihre Labels (`pacificbean`),
+ *  (c) UNTERSCHEIDENDE Tokens — Namens-Teile ab vier Zeichen, die WEDER in
+ *      der generischen Wortliste stehen (Rechtsformen, Kategorie- und
+ *      Branchenwörter de/en) NOCH in den eigenen bestätigten Texten des
+ *      Kunden vorkommen (Kategorie, Pitch, Zielgruppe).
+ *
+ * Die zweite Hälfte von (c) ist der eigentliche Zuschnitt: ein Wort, das der
+ * Kunde SELBST über seine eigene Marke sagt, kann keinen Dritten erkennbar
+ * machen. Sagt seine Kategorie „Rösterei", darf ein Befund „Rösterei" sagen —
+ * auch wenn ein Wettbewerber so heisst. Was NUR im fremden Namen vorkommt,
+ * bleibt gesperrt: genau das ist die Unterscheidungskraft, um die es § 6 UWG
+ * geht.
+ *
+ * Fail-closed bleibt der Riegel trotzdem: ohne eigene Texte (leerer Kunde,
+ * früher Stand) fällt (c) auf die generische Liste zurück, und der volle Name
+ * ist IMMER gesperrt — auch wenn er kurz ist und auch, wenn er zufällig in
+ * einem eigenen Satz vorkommt.
  */
 
 /**
@@ -68,16 +87,45 @@ export function normalizeForFilter(value: string): string {
 export const MARKET_NAME_TOKEN_MIN = 4
 
 /**
- * Was in einem Firmennamen niemanden identifiziert: Rechtsformen,
- * Gesellschafts- und Bindewörter. Sie fliegen aus der Sperrliste, sonst
- * sperrte ein Kandidat „Müller GmbH & Co. KG" die halbe deutsche Sprache.
- * Bewusst KURZ gehalten — jedes Wort hier ist ein Loch im Netz.
+ * WAS IN EINEM FIRMENNAMEN NIEMANDEN IDENTIFIZIERT — Rechtsformen,
+ * Bindewörter UND Kategorie-/Branchenwörter (de + en).
+ *
+ * ── WARUM DIE KATEGORIEWÖRTER DAZUGEHÖREN (M4) ───────────────────────────
+ * „Coffee", „Studio", „Agentur", „Supply" sind die Wörter, mit denen eine
+ * BRANCHE sich selbst benennt — und deshalb stehen sie in jedem zweiten
+ * Firmennamen dieser Branche. Ein Wettbewerber, der eines davon im Namen
+ * trägt, macht es nicht zu seinem Erkennungszeichen; er macht es nur
+ * unbrauchbar für jeden Satz über die Kategorie. Genau dieser Fall hat den
+ * Riegel in M3 zu scharf gemacht.
+ *
+ * Bewusst KURZ und WÖRTLICH gehalten: jedes Wort hier ist ein Loch im Netz,
+ * und die Liste darf nur Wörter enthalten, die für sich genommen NIEMANDEN
+ * bezeichnen. Ein Markenname, der AUS EINEM SOLCHEN WORT ALLEIN besteht
+ * („Supply"), bleibt trotzdem gesperrt — über den vollen Namen (s. Kopf), der
+ * diese Liste gar nicht erst befragt.
  */
-const NAME_STOP_TOKENS = new Set([
+export const MARKET_GENERIC_TOKENS: ReadonlySet<string> = new Set([
+  // Rechtsformen und Gesellschaftswörter
   'gmbh', 'mbh', 'ohg', 'kgaa', 'gbr', 'ug', 'ltd', 'limited', 'inc', 'incorporated',
   'corp', 'corporation', 'llc', 'plc', 'company', 'holding', 'holdings', 'group',
-  'gruppe', 'und', 'and', 'the', 'der', 'die', 'das', 'von', 'for', 'with',
+  'gruppe', 'partner', 'partners', 'sohn', 'soehne', 'sons',
+  // Bindewörter und Artikel
+  'und', 'and', 'the', 'der', 'die', 'das', 'von', 'for', 'with',
+  // Adress- und Technikwörter
   'www', 'com', 'net', 'org', 'info', 'shop', 'online', 'example', 'test',
+  // Kategorie- und Branchenwörter (de + en) — s. Kopf
+  'coffee', 'kaffee', 'kaffeeroesterei', 'roesterei', 'roast', 'roasters', 'roastery',
+  'cafe', 'kaffeehaus', 'bakery', 'baeckerei', 'kitchen', 'kueche',
+  'studio', 'atelier', 'werkstatt', 'agency', 'agentur', 'design', 'branding',
+  'marketing', 'werbung', 'media', 'medien', 'creative', 'kreativ',
+  'supply', 'trading', 'handel', 'store', 'markt', 'market', 'goods', 'waren',
+  'consulting', 'beratung', 'coaching', 'training', 'akademie', 'academy',
+  'software', 'digital', 'labs', 'lab', 'tech', 'technik', 'systems', 'solutions',
+  'praxis', 'klinik', 'clinic', 'care', 'pflege', 'health', 'gesundheit',
+  'immobilien', 'realestate', 'bau', 'build', 'haus', 'home', 'wohnen',
+  'reisen', 'travel', 'tours', 'hotel', 'restaurant', 'bistro', 'bar',
+  'sport', 'fitness', 'yoga', 'schule', 'school', 'institut', 'institute',
+  'verlag', 'press', 'foto', 'photo', 'photography', 'film', 'music', 'musik',
 ])
 
 /**
@@ -139,19 +187,46 @@ export interface MarketDisparagementGuard {
   readonly domainTokens: ReadonlySet<string>
 }
 
-function nameTokensOf(name: string): string[] {
+/**
+ * DIE WÖRTER, DIE DER KUNDE SELBST ÜBER SEINE MARKE SAGT (M4).
+ *
+ * Aus ihnen entsteht die zweite Ausnahme von (c): was in der eigenen
+ * Kategorie, im eigenen Pitch oder in der eigenen Zielgruppen-Skizze steht,
+ * kann keinen Dritten erkennbar machen — der Kunde hat es über SICH gesagt.
+ *
+ * Kurze Wörter fallen raus (unter der Token-Schwelle sperrt der Riegel
+ * ohnehin nicht), damit die Menge klein und die Ausnahme scharf bleibt.
+ */
+function ownTokensOf(texts: readonly string[]): Set<string> {
+  const tokens = new Set<string>()
+  for (const text of texts) {
+    for (const part of normalizeForFilter(text).split(' ')) {
+      if (part.length >= MARKET_NAME_TOKEN_MIN) tokens.add(part)
+    }
+  }
+  return tokens
+}
+
+/**
+ * DIE SPERRLISTE EINES NAMENS — voller Name IMMER, Teile nur, wenn sie
+ * UNTERSCHEIDEN (s. Kopf, Regel (a) und (c)).
+ */
+function nameTokensOf(name: string, generic: ReadonlySet<string>): string[] {
   const normalized = normalizeForFilter(name)
   if (!normalized) return []
   const tokens: string[] = []
-  // Der GANZE Name (ohne Trenner) zählt immer — auch wenn er kurz ist:
+  // (a) Der GANZE Name (ohne Trenner) zählt immer — auch wenn er kurz ist:
   // „Ada" identifiziert eine Marke, obwohl das Token unter der Mindestlänge
-  // liegt. Nur die TEILE tragen die Vier-Zeichen-Schwelle.
+  // liegt, und „Nike" ist ein Wort, das nur diese eine Marke meint. Er wird
+  // BEWUSST nicht gegen die generische Liste geprüft: eine Marke, die sich
+  // genau wie ihre Kategorie nennt, hat diesen Namen trotzdem.
   const whole = normalized.replace(/\s+/g, '')
   if (whole.length >= 3) tokens.push(whole)
   if (normalized.includes(' ')) tokens.push(normalized)
+  // (c) Die TEILE: Vier-Zeichen-Schwelle UND Unterscheidungskraft.
   for (const part of normalized.split(' ')) {
     if (part.length < MARKET_NAME_TOKEN_MIN) continue
-    if (NAME_STOP_TOKENS.has(part)) continue
+    if (generic.has(part)) continue
     tokens.push(part)
   }
   return tokens
@@ -178,20 +253,37 @@ function domainTokensOf(rawUrl: string): string[] {
   return tokens.map(normalizeForFilter).filter(token => token.length >= 3)
 }
 
+export interface MarketGuardOptions {
+  /**
+   * Die eigenen BESTÄTIGTEN Texte des Kunden (Kategorie, Pitch, Zielgruppe).
+   * Ihre Wörter sind von der Namens-Sperre ausgenommen — s. Kopf, Regel (c).
+   */
+  readonly ownTexts?: readonly string[]
+}
+
 /**
  * DEN RIEGEL AUS DEN KANDIDATEN BAUEN.
  *
- * Die EIGENE Marke gehört ausdrücklich NICHT hinein: der Bericht redet über
- * sie, und ein Befund, der ihren Namen nennt, ist genau richtig.
+ * Die EIGENE Marke gehört ausdrücklich NICHT in `candidates`: der Bericht
+ * redet über sie, und ein Befund, der ihren Namen nennt, ist genau richtig.
+ * Ihre TEXTE gehören dagegen sehr wohl herein (`ownTexts`) — sie entscheiden
+ * mit, welches Wort eines fremden Namens überhaupt unterscheidet.
  */
 export function createMarketDisparagementGuard(
   candidates: readonly MarketGuardCandidate[],
+  options: MarketGuardOptions = {},
 ): MarketDisparagementGuard {
   const nameTokens = new Set<string>()
   const domainTokens = new Set<string>()
 
+  // Generische Wörter UND eigene Wörter bilden zusammen die Ausnahme — die
+  // eine Menge ist gepflegt, die andere kommt vom Kunden. Sie wird EINMAL je
+  // Bericht gebaut, nicht je Kandidat.
+  const generic = new Set(MARKET_GENERIC_TOKENS)
+  for (const token of ownTokensOf(options.ownTexts ?? [])) generic.add(token)
+
   for (const candidate of candidates) {
-    for (const token of nameTokensOf(candidate.name)) nameTokens.add(token)
+    for (const token of nameTokensOf(candidate.name, generic)) nameTokens.add(token)
     if (candidate.url) for (const token of domainTokensOf(candidate.url)) domainTokens.add(token)
   }
 

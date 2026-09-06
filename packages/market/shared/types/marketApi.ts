@@ -1,12 +1,15 @@
 import type {
   MarketAiView,
+  MarketCandidateSource,
   MarketClaimList,
   MarketCompetitor,
   MarketFinding,
   MarketProfile,
   MarketProfileField,
   MarketRunStep,
+  MarketSourceOption,
 } from '../marketProfile'
+import type { MarketPaywallState } from '../marketPaywall'
 import type { MarketMatrixRow } from '../marketReportRules'
 
 /**
@@ -48,6 +51,40 @@ export interface MarketOverviewResponse {
   aiViews: MarketAiView[]
   /** Ist die KI zur Laufzeit an? (`app_config.brandAiEnabled`, Kill-Switch.) */
   aiEnabled: boolean
+  /**
+   * IST DAS PRODUKT FÜR DIESES BRANDING FREIGESCHALTET? (§2.4 — Kapitel B
+   * abgenommen.) Die Seite braucht die Auskunft, weil sie den GESPERRTEN
+   * Zustand freundlich erklären soll statt 404 zu antworten: es ist der
+   * eigene Kunde, und ihm fehlt nur ein Schritt (MV1 M4).
+   */
+  unlocked: boolean
+  /** WELCHES Kapitel das ist — damit die Seite den Link nicht raten muss. */
+  unlockStepKey: string
+  /** Die bezahlte Schranke (§1.9) — beide Zustände, s. `shared/marketPaywall.ts`. */
+  paywall: MarketPaywallState
+  /** Höchstzahl WETTBEWERBER (§2.9 Nr. 8); `self` zählt nicht mit. */
+  max: number
+  /** Das Opt-in dieses Brandings (§7.2 Nr. 4) — der Schalter in „Stand". */
+  marketVisibility: 'private' | 'shared'
+}
+
+/**
+ * DIE WÄHLBAREN EINTRÄGE EINER NICHT-WEBSITE-QUELLE (§7.2 Nr. 2–4, MV1 M4).
+ *
+ * Eine eigene Route statt eines Feldes an der Übersicht: die Liste hängt an
+ * einer SUCHE (`q`) und an einer Quelle, sie ändert sich beim Tippen, und sie
+ * kostet je Quelle eine andere Abfrage. In der Übersicht mitzuliefern hiesse,
+ * bei jedem Seitenaufbau drei Listen zu holen, von denen der Kunde meistens
+ * keine öffnet.
+ */
+export interface MarketCandidateOptionsResponse {
+  source: MarketCandidateSource
+  options: MarketSourceOption[]
+}
+
+/** Die Antwort des Opt-in-Schalters — der GESPEICHERTE Stand, nie der Wunsch. */
+export interface MarketVisibilityResponse {
+  marketVisibility: 'private' | 'shared'
 }
 
 /**

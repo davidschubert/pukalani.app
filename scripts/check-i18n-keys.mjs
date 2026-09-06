@@ -175,6 +175,17 @@ const FIELDS = [
     keys: p => str(p.brand?.completionCta?.labelKey),
   },
   {
+    // MV1 M4 (2026-09-05): die Zusatz-Einträge der Werkstatt-Leiste. Genau
+    // dieselbe Klasse Versprechen wie die Reiter-Registries — die LEISTE
+    // gehört dem brand-Layer, der TEXT dem Layer, der sich einträgt (heute
+    // `market` mit „Markt"). Ohne diesen Eintrag stünde in der Leiste
+    // wörtlich `market.nav.market`, sobald jemand den Schlüssel umbenennt,
+    // und Typecheck, Lint und Unit-Tests sähen davon nichts.
+    pfad: 'pukalani.brand.workspaceNavExtras[].labelKey',
+    quelle: 'packages/brand/app/composables/useBrandWorkspaceNavExtras.ts',
+    keys: p => arr(p.brand?.workspaceNavExtras).flatMap(e => str(e?.labelKey)),
+  },
+  {
     pfad: 'pukalani.billing.plans[].labelKey',
     quelle: 'packages/billing/app/components/BillingPricingTable.vue · BillingCompareTable.vue · pages/dashboard/billing.vue',
     keys: p => arr(p.billing?.plans).flatMap(pl => str(pl?.labelKey)),

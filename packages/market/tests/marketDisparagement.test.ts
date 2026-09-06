@@ -79,7 +79,51 @@ describe('Wettbewerber-Namen', () => {
 
   it('GEGENPROBE: Rechtsformen identifizieren niemanden', () => {
     expect(guard.check('Nennt eure GmbH nicht in der ersten Zeile.')).toBeNull()
-    expect(guard.check('Die Supply chain ist nicht euer Thema.')).toBe('competitor_name')
+  })
+
+  /**
+   * DIE NACHSCHÄRFUNG AUS MV1 M4 (Befund aus M3, Plan Anhang D).
+   *
+   * Bis M3 sperrte JEDES Namens-Token ab vier Zeichen. Für „Pacific Bean
+   * Supply" hiess das: `supply` war in jedem Vorschlag verboten, und in der
+   * Kaffee-Welt `coffee` — also ausgerechnet das Wort, um das es geht. Der
+   * Riegel verwarf damit systematisch die brauchbarsten Befunde.
+   *
+   * Neue Regel: gesperrt sind der volle Name, die Domain und die
+   * UNTERSCHEIDENDEN Tokens. Generische Kategorie- und Branchenwörter sind es
+   * nicht — und die eigenen bestätigten Texte des Kunden auch nicht.
+   */
+  it('lässt generische Branchenwörter aus einem Namen durch (M4)', () => {
+    // `supply` steht in der generischen Liste; der Name selbst bleibt gesperrt.
+    expect(guard.check('Die Supply chain ist nicht euer Thema.')).toBeNull()
+    expect(guard.check('Schreibt es anders als Pacific Bean Supply.')).not.toBeNull()
+  })
+
+  it('sperrt „Kailua", lässt „coffee" (M4, der Anlass-Fall)', () => {
+    const kaffee = createMarketDisparagementGuard([{ name: 'Kailua Coffee' }])
+    expect(kaffee.check('Sagt, wie euer coffee geröstet wird.')).toBeNull()
+    expect(kaffee.check('Anders als Kailua klingt eure Zeile konkreter.')).toBe('competitor_name')
+    expect(kaffee.check('Nicht wie Kailua Coffee klingen.')).toBe('competitor_name')
+  })
+
+  it('ein EIN-WORT-Name bleibt gesperrt, auch wenn er kurz ist (M4)', () => {
+    const nike = createMarketDisparagementGuard([{ name: 'Nike' }])
+    expect(nike.check('Sagt es klarer als Nike.')).toBe('competitor_name')
+  })
+
+  it('die eigenen bestätigten Texte entschärfen die Sperre (M4)', () => {
+    const ohne = createMarketDisparagementGuard([{ name: 'Bergwerk Studio' }])
+    // Ohne eigene Texte ist `bergwerk` unterscheidend — und gesperrt.
+    expect(ohne.check('Euer Bergwerk-Vergleich trägt nicht.')).toBe('competitor_name')
+
+    // GEGENPROBE: sagt der Kunde selbst „Bergwerk" über seine Kategorie, ist
+    // das Wort keine Kennzeichnung eines Dritten mehr.
+    const mit = createMarketDisparagementGuard([{ name: 'Bergwerk Studio' }], {
+      ownTexts: ['Wir bauen Marken für das Bergwerk von morgen.'],
+    })
+    expect(mit.check('Euer Bergwerk-Vergleich trägt nicht.')).toBeNull()
+    // Der volle Name bleibt trotzdem gesperrt.
+    expect(mit.check('Anders als Bergwerk Studio.')).toBe('competitor_name')
   })
 
   it('GEGENPROBE: ein harmloser Vorschlag bleibt stehen', () => {

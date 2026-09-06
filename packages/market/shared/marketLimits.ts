@@ -137,6 +137,19 @@ export const MARKET_LOCKED_CODE = 'market_locked'
 export const MARKET_COMPETITOR_LIMIT_CODE = 'competitor_limit'
 export const MARKET_COMPETITOR_DUPLICATE_CODE = 'competitor_duplicate'
 export const MARKET_INVALID_URL_CODE = 'competitor_url_invalid'
+/**
+ * Es gibt nur EINE eigene alte Website je Branding (§7.2 Nr. 2, MV1 M4).
+ * Eigener Code neben `competitor_limit`, weil es ein anderer Deckel mit einer
+ * anderen Zahl ist — ein gemeinsamer Code führte zu dem Satz „höchstens fünf",
+ * wo „höchstens eine" gemeint ist.
+ */
+export const MARKET_SELF_LIMIT_CODE = 'self_limit'
+/**
+ * Die gewählte fremde Marke ist nicht (mehr) freigegeben (§7.2 Nr. 4, MV1 M4)
+ * — beim ANLEGEN. Der LAUF sagt dasselbe anders: er schliesst den Kandidaten
+ * mit `excludedReason: 'withdrawn'` aus, statt den ganzen Lauf abzubrechen.
+ */
+export const MARKET_SHARED_UNAVAILABLE_CODE = 'shared_unavailable'
 export const MARKET_AI_DISABLED_CODE = 'ai_disabled'
 /**
  * KEIN VERGLEICHBARES MATERIAL (MV1 M3): kein einziger Kandidat trägt ein

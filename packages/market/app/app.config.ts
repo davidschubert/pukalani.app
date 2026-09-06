@@ -24,6 +24,45 @@
  */
 export default defineAppConfig({
   pukalani: {
+    /**
+     * DER EINTRAG „MARKT" IN DER WERKSTATT-LEISTE (MV1 M4, Plan §2.5).
+     *
+     * ── WARUM ER HIER STEHT UND NICHT IM brand-LAYER ────────────────────
+     * `brand` ist ein Fundament und darf kein Produkt kennen, das darauf
+     * aufsetzt (CONCEPT A14). Es beschreibt deshalb nur die FORM eines
+     * zusätzlichen Ebene-1-Eintrags (`BrandWorkspaceNavExtra`) und liest sie
+     * aus dieser Konfiguration; defu verkettet Arrays über die Layer, also
+     * meldet sich das Produkt SELBST an. Eine Silo-App ohne `market` bekommt
+     * damit keinen Menüpunkt ins Leere — genau der Fehler, den die
+     * Mitglieder-Verwaltung des onboarding-Layers 2026-07-29 vermieden hat.
+     *
+     * ── DREI FELDER, DREI ZUSAGEN ───────────────────────────────────────
+     * `lockedUntil` = die Freischaltung aus §2.4 (Kapitel B abgenommen); die
+     * Leiste zeigt den Eintrag dann SICHTBAR-GESPERRT, denn eine unsichtbare
+     * Schranke erklärt sich nie. `counterKind: 'market'` zählt die OFFENEN
+     * Markt-Befunde („2 Befunde") — dieselbe Art, die `BwFindingChip` seit
+     * M3 kennt. `to` ist eine Vorlage mit `:profileId`, weil `app.config`
+     * Daten sind und keine Funktionen.
+     */
+    brand: {
+      workspaceNavExtras: [
+        {
+          key: 'market',
+          labelKey: 'market.nav.market',
+          icon: 'i-ph-compass',
+          to: '/brand/:profileId/market',
+          // WÖRTLICH und nicht importiert: `pnpm check:i18n-keys` lädt diese
+          // Datei mit Nodes Typ-Strippung, und die kann einen relativen Import
+          // ohne Endung nicht auflösen — ein `import` hier machte den Wächter
+          // rot, der die Beschriftungen dieses Eintrags prüft. Der Preis ist
+          // eine zweite Stelle für dasselbe Wort; bezahlt wird er mit einem
+          // Test, der beide gegeneinander hält
+          // (`tests/marketNavConfig.test.ts`).
+          lockedUntil: 'pvm',
+          counterKind: 'market',
+        },
+      ],
+    },
     market: {
       enabled: false,
       /**

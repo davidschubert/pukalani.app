@@ -57,6 +57,12 @@ export type MarketCompetitorRow = Models.Row & {
   excludedReason?: string
   sourceKind?: string
   sourceRef?: string
+  /**
+   * `competitor` | `self` (market-004). OPTIONAL getypt, weil die Spalte
+   * ADDITIV dazukam — eine Zeile von vor der Migration liest `undefined`, und
+   * das ist genau der Default `competitor`.
+   */
+  role?: string
   brandCheckId?: string
   /** JSON-Liste der gelesenen Adressen (`string[]`). */
   pagesFetched?: string

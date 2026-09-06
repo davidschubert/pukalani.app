@@ -3,7 +3,7 @@ import type { MarketRunResponse } from '../../../../../shared/types/marketApi'
 import type { MarketProfileField, MarketRunStep } from '../../../../../shared/marketProfile'
 import { MARKET_MAX_CHARS_PER_RUN } from '../../../../../shared/marketCrawlRules'
 import { readBrandAiEnabled } from '../../../../contracts/brandContract'
-import { requireMarketProfile, requireMarketUnlocked } from '../../../../utils/marketAccess'
+import { MARKET_UNLOCK_STEP, requireMarketProfile, requireMarketUnlocked } from '../../../../utils/marketAccess'
 import { bookMarketRun } from '../../../../utils/marketQuota'
 import {
   createMarketProfile,
@@ -15,7 +15,7 @@ import { fetchMarketCompetitor } from '../../../../utils/marketFetch'
 import { extractMarketProfile, marketInputHash } from '../../../../utils/marketExtract'
 import { collectMarketAiView } from '../../../../utils/marketAiView'
 import { latestProfilesByCompetitor } from '../../../../utils/marketViews'
-import { loadMarketFoundationCandidate } from '../../../../utils/marketOwnProfile'
+import { loadMarketFoundationCandidate, loadMarketSharedCandidate } from '../../../../utils/marketOwnProfile'
 import { marketLibraryEntry, marketLibraryFields } from '../../../../../shared/marketLibrary'
 import { loadMarketReportState, produceMarketReport } from '../../../../utils/marketReportService'
 import type { MarketCompetitorRow } from '../../../../../shared/types/market'
@@ -102,7 +102,9 @@ export default defineEventHandler(async (event): Promise<MarketRunResponse> => {
   let budget = MARKET_MAX_CHARS_PER_RUN
 
   for (const competitor of competitors) {
-    const outcome = competitor.sourceKind === 'foundation' || competitor.sourceKind === 'library'
+    const outcome = competitor.sourceKind === 'foundation'
+      || competitor.sourceKind === 'library'
+      || competitor.sourceKind === 'shared'
       ? await runStoredCandidate(event, userId, profileId, competitor, previousProfiles.get(competitor.$id)?.inputHash ?? '')
       : await runWebsiteCandidate(event, profileId, competitor, {
           aiEnabled,
@@ -167,6 +169,16 @@ export default defineEventHandler(async (event): Promise<MarketRunResponse> => {
  * BESITZ wird dabei erneut geprüft (`loadMarketFoundationCandidate`) — er kann
  * sich zwischen Anlegen und Lauf geändert haben.
  *
+ * ── `shared`: DIE FREIGEGEBENE MARKE EINES FREMDEN KONTOS (§7.2 Nr. 4) ───
+ * Ebenfalls ohne Abruf — ihr Marktprofil entsteht aus IHREN bestätigten
+ * Feldern, eingeschränkt auf die öffentlichen (`loadMarketSharedCandidate`).
+ * Die Freigabe wird bei JEDEM Lauf neu geprüft: sie ist jederzeit
+ * widerrufbar, und ein Lauf, der den Ja-Stand vom Anlegen benutzte, machte
+ * den Widerruf wirkungslos. Ist sie weg, wird der Kandidat AUSGESCHLOSSEN
+ * (`withdrawn`) statt still übersprungen — der Kunde soll erfahren, warum
+ * eine Spalte fehlt, und ein bereits geschriebener Bericht bleibt, was er
+ * war: ein Schnappschuss.
+ *
  * ── `library`: EIN HANDGEPRÜFTER EINTRAG ──────────────────────────────────
  * Er wird NICHT abgerufen (Plan §7.2 Nr. 3: „von uns mit demselben Motor
  * gerechnet und VON HAND GEPRÜFT, versioniert im Repo"). Ein Abruf wäre hier
@@ -187,7 +199,34 @@ async function runStoredCandidate(
 ): Promise<CandidateOutcome> {
   let fields: MarketProfileField[]
 
-  if (competitor.sourceKind === 'library') {
+  if (competitor.sourceKind === 'shared') {
+    const shared = await loadMarketSharedCandidate(
+      event,
+      competitor.sourceRef ?? '',
+      MARKET_UNLOCK_STEP,
+    )
+    if (!shared) {
+      await updateMarketCompetitor(event, profileId, competitor.$id, {
+        status: 'excluded',
+        excludedReason: 'withdrawn',
+      })
+      return {
+        step: {
+          competitorId: competitor.$id,
+          name: competitor.name,
+          status: 'excluded',
+          robotsChecked: false,
+          pagesRead: 0,
+          excludedReason: 'withdrawn',
+        },
+        extracted: false,
+        reused: false,
+        charsUsed: 0,
+      }
+    }
+    fields = [...shared.fields]
+  }
+  else if (competitor.sourceKind === 'library') {
     const entry = marketLibraryEntry(competitor.sourceRef ?? '')
     if (!entry) {
       await updateMarketCompetitor(event, profileId, competitor.$id, {

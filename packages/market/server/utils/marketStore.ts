@@ -107,9 +107,15 @@ export async function listMarketCompetitors(
       Query.equal('profileId', profileId),
       Query.orderAsc('$createdAt'),
       // Der Deckel ist die PRODUKTREGEL, nicht eine Seitengrösse: mehr als
-      // `MARKET_COMPETITORS_MAX` darf es gar nicht geben. Wäre er höher,
-      // verschwiege die Liste einen Verstoss, statt ihn zu zeigen.
-      Query.limit(MARKET_COMPETITORS_MAX),
+      // `MARKET_COMPETITORS_MAX` WETTBEWERBER darf es gar nicht geben. Wäre er
+      // höher, verschwiege die Liste einen Verstoss, statt ihn zu zeigen.
+      //
+      // SEIT MV1 M4 EINE ZEILE MEHR: die eigene alte Website (`role: 'self'`,
+      // §7.2 Nr. 2) zählt NICHT gegen den Deckel — sie ist kein Mitbewerber.
+      // Ohne das Plus verschwände sie bei fünf Wettbewerbern still aus der
+      // Liste, und „still" ist bei einer Abfrage-Grenze immer die falsche Art
+      // zu fehlen.
+      Query.limit(MARKET_COMPETITORS_MAX + 1),
     ],
   })
   return rows

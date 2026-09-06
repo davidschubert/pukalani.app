@@ -88,8 +88,15 @@ export interface BwRailStep {
    * den Kapiteln, mit eigener Adresse (`to`) und IMMER klickbar — Lesen ist
    * immer erlaubt, und ein Dokument, das erst am Ende aufgeht, sähe man nie
    * wachsen. Es ist bewusst KEIN 'result': das ist die gesperrte Ergebnis-Kachel
-   * der Übersicht (R35), eine andere Sache mit einer anderen Regel. */
-  kind?: 'result' | 'document'
+   * der Übersicht (R35), eine andere Sache mit einer anderen Regel.
+   *
+   * 'extra' = ein Eintrag, den ein ANDERER Layer angemeldet hat (MV1 M4,
+   * `pukalani.brand.workspaceNavExtras`) — z. B. „Markt". Er trägt seine
+   * eigene Glyphe in `icon` (die anderen Arten lassen das Feld leer und
+   * bekommen ihre Glyphe aus dem Zustand) und darf als EINZIGER `locked`
+   * sein, ohne dass ein Kapitel davor läge: seine Sperre ist eine
+   * PRODUKT-Freischaltung, keine Wegstrecke. */
+  kind?: 'result' | 'document' | 'extra'
   to?: string
   /**
    * DIE SESSIONS DIESES KAPITELS (§11) — nur die Sidebar rendert sie, und nur

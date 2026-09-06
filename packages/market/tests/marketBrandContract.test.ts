@@ -139,3 +139,38 @@ describe('JSON-Spalten', () => {
     expect(parseMarketJson('[]', marketFieldsSchema)).toEqual([])
   })
 })
+
+/**
+ * DIE VERTRAULICHKEITS-ZUSAGE (MV1 M4, Plan §2.9 Nr. 7 + §7.2 Nr. 4).
+ *
+ * Eine FREIGEGEBENE fremde Marke liefert ihr Marktprofil aus denselben
+ * bestätigten Feldern wie die eigene — aber ausschliesslich aus ÖFFENTLICHEN
+ * (`loadMarketOwnProfile(..., { publicOnly: true })`). Zwei Dinge sichern
+ * das ab, und beide werden hier geprüft:
+ *
+ *  1. KEIN Marktprofil-Feld zeigt heute auf eine nicht-öffentliche Session.
+ *     Diese Prüfung ist der Wächter über die Abbildung selbst: fügte jemand
+ *     `a.complaints` (Beschwerden, `internal`) zu `MARKET_FIELDS` hinzu,
+ *     reiste die Aussage eines Kunden über seine unzufriedenen Kunden in das
+ *     Werkzeug eines Fremden.
+ *  2. Es GIBT nicht-öffentliche Sessions — sonst prüfte Nr. 1 nichts
+ *     (Gegenprobe; ohne sie wäre der Test grün, wenn `sensitivity` eines
+ *     Tages verschwände).
+ */
+describe('Vertraulichkeit fremder Marken (M4)', () => {
+  it('kein Marktprofil-Feld zeigt auf eine nicht-öffentliche Session', () => {
+    const leaks: string[] = []
+    for (const field of MARKET_FIELDS) {
+      for (const slotId of field.slotIds) {
+        const slot = slotById(slotId)
+        if (slot && slot.sensitivity !== 'public') leaks.push(`${field.id} → ${slotId} (${slot.sensitivity})`)
+      }
+    }
+    expect(leaks).toEqual([])
+  })
+
+  it('GEGENPROBE: es gibt überhaupt nicht-öffentliche Sessions', () => {
+    const internal = BRAND_SLOTS.filter(slot => slot.sensitivity !== 'public')
+    expect(internal.length).toBeGreaterThan(0)
+  })
+})

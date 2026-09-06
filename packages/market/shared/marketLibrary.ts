@@ -123,6 +123,19 @@ export function marketLibraryEntry(key: string): MarketLibraryEntry | undefined 
 }
 
 /**
+ * ALLE EINTRÄGE — für den Quellen-Wähler (MV1 M4).
+ *
+ * Er braucht die LISTE, nicht einen Schlüssel; sie ist dieselbe geprüfte
+ * Menge wie überall (`marketLibrary()` ist fail-closed: fällt die Datei durch
+ * das Schema, ist die Bibliothek leer, und der Wähler zeigt dann eben
+ * nichts). Eine zweite Leseroutine daneben wäre der zweite Ort, an dem eine
+ * kaputte Datei anders behandelt wird.
+ */
+export function marketLibraryEntries(): readonly MarketLibraryEntry[] {
+  return marketLibrary().entries
+}
+
+/**
  * EIN BIBLIOTHEKS-EINTRAG ALS MARKTPROFIL — dieselbe Form wie jede andere
  * Quelle (Plan §7.1: „ein Motor, drei Ansichten"; die gemeinsame Währung ist
  * das Marktprofil).

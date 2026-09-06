@@ -358,6 +358,22 @@ function stubAnswer(input: MarketReportInput, index: CandidateIndex): Record<str
 
 // ── Der Bericht ────────────────────────────────────────────────────────────
 
+/**
+ * DIE DREI EIGENEN FELDER, DIE DIE KATEGORIE BESCHREIBEN (MV1 M4).
+ *
+ * `categoryLanguage`, `pitch` und `audience` — genau die Felder, in denen ein
+ * Kunde die Wörter seiner Branche benutzt. Sie werden dem Riegel als
+ * Ausnahme-Wortschatz gereicht; die restlichen sieben bleiben draussen, damit
+ * ein zufällig gleichlautendes Wort in einer Tagline nicht die Sperre über
+ * einen fremden Markennamen aufhebt.
+ */
+function ownCategoryTexts(own: readonly MarketProfileField[]): string[] {
+  const wanted: readonly MarketFieldId[] = ['categoryLanguage', 'pitch', 'audience']
+  return wanted
+    .map(fieldId => marketField(own, fieldId)?.value ?? '')
+    .filter(value => value.trim().length > 0)
+}
+
 const EMPTY_FILTERED: Record<MarketFilterReason, number> = {
   competitor_name: 0,
   competitor_domain: 0,
@@ -374,6 +390,12 @@ export async function buildMarketReport(
       name: candidate.competitor.name,
       url: candidate.competitor.url,
     })),
+    // DIE EIGENEN WORTE ENTSCHÄRFEN DIE SPERRE (MV1 M4, s. Kopf von
+    // `marketDisparagement.ts`): was der Kunde selbst über seine Marke sagt,
+    // macht keinen Dritten erkennbar. Genommen werden die drei Felder, die
+    // die KATEGORIE beschreiben — Purpose und Tagline sind Eigenaussagen und
+    // taugen nicht als Freibrief für ein fremdes Namenswort.
+    { ownTexts: ownCategoryTexts(input.own) },
   )
 
   let raw: unknown

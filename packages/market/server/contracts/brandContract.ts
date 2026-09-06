@@ -179,3 +179,43 @@ export { brandGenerationHashInput } from '../../../brand/shared/brandGeneration'
  */
 export { findBrandCheckForUrl } from '../../../brand/server/utils/brandCheckLookup'
 export type { BrandCheckLookupResult } from '../../../brand/server/utils/brandCheckLookup'
+
+// ── MV1 M4: das Opt-in fremder Marken (§7.2 Nr. 4) ────────────────────────
+
+/**
+ * DIE FREIGABE EINER MARKE FÜR DEN MARKTVERGLEICH ANDERER (`brand_profiles.
+ * marketVisibility`, Migration brand-019).
+ *
+ * Sie hängt an einer brand-TABELLE und wird deshalb dort gelesen und
+ * geschrieben — `market` fragt an, statt selbst zuzugreifen. Das ist dieselbe
+ * Arbeitsteilung wie bei `loadOwnedProfile`: eine zweite Stelle, die über
+ * fremde Brandings entscheidet, wäre eine zweite Wahrheit über Zustimmung,
+ * und die wäre genau dort falsch, wo sie am meisten kostet.
+ *
+ * `listSharedMarketProfiles` bekommt das verlangte Kapitel als ARGUMENT
+ * (`requiredStepKey`) — `brand` soll nicht wissen müssen, wovon ein fremdes
+ * Produkt seine Freischaltung abhängig macht.
+ */
+export {
+  BRAND_MARKET_VISIBILITIES,
+  brandMarketVisibilityOf,
+  isBrandProfileSharedForMarket,
+  listSharedMarketProfiles,
+  setBrandProfileMarketVisibility,
+} from '../../../brand/server/utils/brandMarketVisibility'
+export type {
+  BrandMarketVisibility,
+  BrandSharedProfileHit,
+} from '../../../brand/server/utils/brandMarketVisibility'
+
+/**
+ * DIE BRANDINGS DES KONTOS FÜR DEN QUELLEN-WÄHLER (§7.2 Nr. 2).
+ *
+ * `listOwnedBrandProfileIds` (oben) liefert nur Ids und ist für den
+ * GDPR-Contributor gebaut; der Wähler braucht Titel und Branche, um eine
+ * Auswahlliste zu beschriften. `listBrandProfilesForOwner` ist dieselbe
+ * Abfrage mit den ZWEI zusätzlichen Feldern — und bleibt im brand-Layer, weil
+ * die Tabelle ihm gehört.
+ */
+export { listBrandProfilesForOwner } from '../../../brand/server/utils/brandStore'
+export type { BrandOwnedProfileHit } from '../../../brand/server/utils/brandStore'

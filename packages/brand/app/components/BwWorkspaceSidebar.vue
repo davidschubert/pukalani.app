@@ -175,6 +175,16 @@ function glyph(layer: BwRailLayer, step: BwRailStep): { name: string, style: str
       style: step.state === 'active' ? 'color: var(--bw-accent)' : 'color: var(--bw-ink-soft)',
     }
   }
+  // Ein FREMDER Eintrag (MV1 M4) trägt seine eigene Glyphe — die Leiste hat
+  // über „Markt" keine Vorstellung. Gesperrt zeigt er trotzdem das Schloss:
+  // die Sperre ist die Auskunft, nicht die Sache.
+  if (step.kind === 'extra') {
+    if (step.state === 'locked') return { name: 'i-ph-lock-simple', style: 'color: var(--bw-muted)' }
+    return {
+      name: step.icon || 'i-ph-circle',
+      style: step.state === 'active' ? 'color: var(--bw-accent)' : 'color: var(--bw-ink-soft)',
+    }
+  }
   // Gesperrt ist ein Punkt durch seine SCHICHT oder durch sich selbst (A9).
   if (layer.locked || step.state === 'locked') return { name: 'i-ph-lock-simple', style: 'color: var(--bw-muted)' }
   if (step.kind === 'result') return { name: 'i-ph-sparkle', style: step.state === 'done' ? 'color: var(--bw-accent)' : 'color: var(--bw-muted)' }
@@ -193,6 +203,10 @@ function stepDisabled(layer: BwRailLayer, step: BwRailStep): boolean {
   // „Euer Branding" ist IMMER erreichbar (§10): es zeigt ausschliesslich
   // bestätigte Werte, und die hat der Mensch selbst gesagt.
   if (step.kind === 'document') return false
+  // Ein fremder Eintrag hängt an SEINER eigenen Freischaltung (MV1 M4) und
+  // nicht an der Schicht: die Kapitel-Kette sagt nichts darüber, ob ein
+  // Zusatzprodukt offen ist.
+  if (step.kind === 'extra') return step.state === 'locked'
   if (layer.locked || step.state === 'locked') return true
   return step.kind === 'result' ? step.state !== 'done' : step.state === 'open'
 }

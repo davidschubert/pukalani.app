@@ -118,6 +118,15 @@ export type BrandProfileRow = Models.Row & {
   siteAnalysis?: string | null
   siteAnalyzedAt?: string
   siteAnalysisUrl?: string
+  /**
+   * DAS OPT-IN „diese Marke darf im Marktvergleich anderer Kunden als Kandidat
+   * erscheinen" (Migration brand-019, MV1 M4). Optional getypt, weil die
+   * Spalte ADDITIV dazukam — eine Zeile von vorher liest `undefined`, und das
+   * ist genau der Default `private`. Gelesen und geschrieben wird sie
+   * ausschliesslich über `brandMarketVisibility.ts`; die FAIL-CLOSED-Regel
+   * steht dort (`brandMarketVisibilityOf`).
+   */
+  marketVisibility?: string
   progressPct: number
   currentStepKey?: string
   lastActivityAt: string
@@ -826,6 +835,50 @@ export async function listOwnedBrandProfileIds(event: H3Event, userId: string): 
       Query.equal('ownerId', userId),
     ])
     return rows.map(row => row.$id)
+  }
+  catch (error) {
+    if (isAppwriteNotFound(error)) return []
+    throw error
+  }
+}
+
+/** Ein Branding des Kontos, so wie eine AUSWAHLLISTE es braucht (MV1 M4). */
+export interface BrandOwnedProfileHit {
+  id: string
+  title: string
+  /** Die Branche aus der Startkarte — Zweitzeile im Wähler, sonst leer. */
+  industry: string
+}
+
+/**
+ * DIE BRANDINGS EINES KONTOS MIT TITEL UND BRANCHE.
+ *
+ * ── WARUM NEBEN `listOwnedBrandProfileIds` ────────────────────────────────
+ * Die Funktion darüber liefert bewusst nur Ids: ihr Aufrufer ist der
+ * GDPR-Contributor, und der braucht keine Beschriftung. Der Quellen-Wähler
+ * des Marktvergleichs (§7.2 Nr. 2) braucht genau die: eine Auswahlliste aus
+ * Ids ist keine. Sie um zwei Felder zu ERWEITERN hiesse, dem Löschpfad Daten
+ * mitzugeben, die er nicht braucht — zwei Fragen, zwei Antworten.
+ *
+ * `ownerType: 'user'` wie dort: der community-Zweig ist in Phase 1 tot
+ * geschaltet. Fehlt die Tabelle, gibt es nichts.
+ */
+export async function listBrandProfilesForOwner(
+  event: H3Event,
+  userId: string,
+): Promise<BrandOwnedProfileHit[]> {
+  const { tablesDB, databaseId } = brandDb(event)
+  try {
+    const rows = await listAllRows<BrandProfileRow>(tablesDB, databaseId, BRAND_PROFILES_TABLE, [
+      Query.equal('ownerType', 'user'),
+      Query.equal('ownerId', userId),
+      Query.orderDesc('lastActivityAt'),
+    ])
+    return rows.map(row => ({
+      id: row.$id,
+      title: row.title ?? '',
+      industry: row.industry ?? '',
+    }))
   }
   catch (error) {
     if (isAppwriteNotFound(error)) return []

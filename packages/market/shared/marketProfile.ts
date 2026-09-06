@@ -84,6 +84,20 @@ export const MARKET_EVIDENCE_MAX = 200
 export const MARKET_COMPETITORS_MAX = 5
 
 /**
+ * DAS KAPITEL, DESSEN ABNAHME DEN MARKTVERGLEICH FREISCHALTET (§2.4).
+ *
+ * ── WARUM DIESE ZEILE IM PRODUKTVERTRAG STEHT UND NICHT NUR IM SERVER ────
+ * Drei Stellen brauchen sie, und zwei davon laufen im Browser: das Gate der
+ * Routen (`server/utils/marketAccess.ts`), der Leisten-Eintrag „Markt", der
+ * bis dahin gesperrt ist (`app/app.config.ts`), und die Seite, die den
+ * gesperrten Zustand ERKLÄRT und in genau dieses Kapitel verlinkt. Drei
+ * getippte `'pvm'` wären drei Stellen, an denen eine spätere Verschiebung der
+ * Freischaltung halb ankommt — und die halb angekommene Fassung sieht in der
+ * Leiste richtig aus und antwortet an der Route 409.
+ */
+export const MARKET_UNLOCK_STEP = 'pvm'
+
+/**
  * WIE SICHER IST DIE AUSSAGE? `stated` = wörtlich so gesagt, `implied` = aus
  * mehreren Stellen abgeleitet. Ein drittes Wort gibt es bewusst nicht:
  * „geraten" wäre kein Zustand, sondern ein Grund zum Verwerfen.
@@ -188,7 +202,34 @@ export type MarketCompetitorStatus = 'pending' | 'reading' | 'fetched' | 'exclud
  * weil der Kunde sie in ehrlichen Worten lesen soll (§2.3) — ein freier Text
  * vom Server wäre in der zweiten Sprache nicht übersetzt.
  */
-export type MarketExclusionReason = 'robots' | 'tdm' | 'noText' | 'unreachable'
+export type MarketExclusionReason = 'robots' | 'tdm' | 'noText' | 'unreachable' | 'withdrawn'
+
+/**
+ * WOFÜR EIN KANDIDAT IM VERGLEICH STEHT (MV1 M4, Plan §7.2 Nr. 2).
+ *
+ * `competitor` ist der Normalfall und zählt gegen `MARKET_COMPETITORS_MAX`.
+ * `self` ist die EIGENE alte Website im Relaunch-Fall — dieselbe Mechanik
+ * (Abruf, Marktprofil, Belege), aber eine andere ROLLE: sie ist kein
+ * Mitbewerber, sondern der Vorher-Zustand derselben Marke.
+ *
+ * ── WARUM DAS NICHT `sourceKind` SEIN KANN ────────────────────────────────
+ * `sourceKind` sagt, WOHER die Aussagen kommen (Website, Foundation,
+ * Bibliothek, freigegebene Marke). Die Rolle sagt, WESSEN Aussagen es sind.
+ * Beide Fragen sind unabhängig: die alte eigene Website ist `website` +
+ * `self`, ein zweites eigenes Branding ist `foundation` + `self`, und die
+ * Website eines Mitbewerbers ist `website` + `competitor`. Ein Wert, der
+ * beides gleichzeitig ausdrücken müsste, ginge beim ersten dieser drei Fälle
+ * kaputt.
+ *
+ * FOLGEN, die an dieser Zeile hängen (§2.3 „Feld = Wettbewerber"):
+ * `self` zählt NICHT gegen den Fünfer-Deckel, erscheint NICHT in
+ * Konventionen/Überschneidungen/freien Stellen und geht dem Modell gar nicht
+ * erst zu — sonst wäre die eigene alte Website eine Stimme im Feld, und jede
+ * Quote („3 von 4 sagen das") zählte uns selbst mit.
+ */
+export type MarketCandidateRole = 'competitor' | 'self'
+
+export const MARKET_CANDIDATE_ROLES: readonly MarketCandidateRole[] = ['competitor', 'self']
 
 export interface MarketCompetitor {
   readonly id: string
@@ -204,8 +245,39 @@ export interface MarketCompetitor {
   readonly source?: MarketCandidateSource
   /** Bei `foundation`/`library`/`shared`: der gewählte Eintrag. */
   readonly sourceRefId?: string
+  /** Wettbewerber oder eigene alte Website (§7.2 Nr. 2). Fehlt = `competitor`. */
+  readonly role?: MarketCandidateRole
   /** Der Brand-Check dieser Marke (§7.3) — fehlt, solange keiner vorliegt. */
   readonly brandCheck?: MarketBrandCheck
+}
+
+/**
+ * IST DAS DIE EIGENE ALTE WEBSITE? Fehlt die Rolle, ist es ein Wettbewerber —
+ * das ist der Bestand aus M1–M3 und der Normalfall.
+ */
+export function marketIsSelfCandidate(candidate: { readonly role?: string }): boolean {
+  return candidate.role === 'self'
+}
+
+/**
+ * DAS FELD — alle Kandidaten OHNE die eigene alte Website (§2.3: „Feld =
+ * Wettbewerber").
+ *
+ * Sie steht an EINER Stelle und wird von vier Aufrufern gebraucht (Deckel,
+ * Modell-Eingabe, Matrix, Quoten). Vier eigene `filter`-Zeilen wären vier
+ * Stellen, an denen die Regel beim nächsten Feld vergessen wird — und ein
+ * vergessener Filter fällt nicht auf: die Zahlen sind dann nur um eins zu
+ * gross.
+ *
+ * `role?: string` und nicht `MarketCandidateRole`: die Funktion wird auch auf
+ * ROHE Appwrite-Zeilen angewandt (dort ist die Spalte ein varchar), und ein
+ * `as`-Cast an der Aufrufstelle wäre eine Behauptung über einen Wert, den
+ * genau diese Funktion gerade prüft.
+ */
+export function marketFieldCandidates<T extends { readonly role?: string }>(
+  candidates: readonly T[],
+): T[] {
+  return candidates.filter(candidate => !marketIsSelfCandidate(candidate))
 }
 
 /**

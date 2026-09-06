@@ -2,6 +2,7 @@ import type {
   MarketAiStatement,
   MarketAiView,
   MarketBrandCheck,
+  MarketCandidateRole,
   MarketCandidateSource,
   MarketCompetitor,
   MarketCompetitorStatus,
@@ -9,7 +10,7 @@ import type {
   MarketProfile,
   MarketProfileField,
 } from '../../shared/marketProfile'
-import { MARKET_CANDIDATE_SOURCES } from '../../shared/marketProfile'
+import { MARKET_CANDIDATE_ROLES, MARKET_CANDIDATE_SOURCES } from '../../shared/marketProfile'
 import type { MarketCompetitorRow, MarketProfileRow } from '../../shared/types/market'
 import {
   marketAiViewSchema,
@@ -50,6 +51,16 @@ function asSource(value: string | undefined): MarketCandidateSource {
   return MARKET_CANDIDATE_SOURCES.find(source => source === value) ?? 'website'
 }
 
+/**
+ * Die ROLLE (MV1 M4, market-004). Ein unbekannter oder fehlender Wert ist
+ * `competitor` — das ist der Bestand aus M1–M3 und die sichere Richtung: eine
+ * Zeile, die versehentlich als `self` gälte, verschwände aus dem Feld und
+ * senkte jede Quote, ohne dass irgendwo etwas fehlte.
+ */
+function asRole(value: string | undefined): MarketCandidateRole {
+  return MARKET_CANDIDATE_ROLES.find(role => role === value) ?? 'competitor'
+}
+
 /** Die JSON-Liste `pagesFetched` — kaputt heisst „keine", nie „Fehler". */
 function parsePagesFetched(raw: string | undefined): string[] {
   if (!raw) return []
@@ -86,6 +97,7 @@ export function toMarketCompetitor(
     ...(pagesRead.length ? { pagesRead } : {}),
     ...(row.fetchedAt ? { fetchedAt: row.fetchedAt } : {}),
     source: asSource(row.sourceKind),
+    role: asRole(row.role),
     ...(row.sourceRef ? { sourceRefId: row.sourceRef } : {}),
     // `brandCheck` reicht der Aufrufer herein (MV1 M3, §7.3): der BESTEHENDE
     // Brand-Check-Score, nachgeschlagen über die Adresse. Liegt keiner vor,

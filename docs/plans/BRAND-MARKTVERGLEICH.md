@@ -450,7 +450,7 @@ haben, das Marktprofil steht in der Inhaltssprache der Marke).
 | M1 | Layer + Vertrag | packages/market, Manifeste, `marketProfile.ts`, Schema-Anhang (3 Tabellen), Abruf-Vertrag geteilt | **GEBAUT** (2026-09-05) — Schema-Anhang B unten, David liest gegen |
 | M2 | Abruf + Extraktion | robots/TDM, Pfad-Sperrliste, PII-Filter, Rohtext-Retention, Extraktions-Prompt `market-x-1`, Beleg-Riegel, Stub, KI-Aussensicht `market-ai-1` | **GEBAUT** (2026-09-05) — Vertrag Anhang C; `verify-market-fetch.mjs` 33/33 |
 | M3 | Vergleich + Befunde | Bericht-Prompt `market-r-1`, Idempotenz + `stale`, Befund-Art `market`, § 6 UWG-Riegel, Bibliotheks-Mechanik, Brand-Check-Anbindung, George-Block | **GEBAUT** (2026-09-05) — Vertrag Anhang D; `verify-market-report.mjs` 43/43 |
-| M4 | Oberfläche | Seite „Markt", Leiste, Schranke, Chips | Klick-Beweis |
+| M4 | Oberfläche | Seite „Markt“, Leiste, Schranke, Chips, Quellen-Wähler, Opt-in, Relaunch-Ansicht | **GEBAUT** (2026-09-05) — Vertrag Anhang E; `verify-market-ui.mjs` 46/46; Klick-Beweis + Seiten-Abnahme durch David offen |
 | M5 | Betrieb | ~~Eimer~~ (vorgezogen, s. u.), Sweep, Wächter (Parität, Bilanz), Messung, Doku/Changelog | Live-Build |
 
 **Abweichung von dieser Skizze (M2, 2026-09-05):** Der **Eimer** (§2.8, „3 Läufe je
@@ -1272,3 +1272,205 @@ prüfte sich selbst.
    selbstverständlich in den Spaltenköpfen und an jedem Beleg. Verboten ist,
    dass ein Satz, den WIR formulieren, einen Dritten nennt; genau das prüft die
    Fassung jetzt.
+
+---
+
+## Anhang E — Oberfläche (M4, Stand 2026-09-05)
+
+Gebaut in Paket **M4 „Oberfläche"**. Was hier steht, ist der Vertrag — die
+Begründungen stehen im Kopf der jeweiligen Datei. Die fünf abgenommenen
+Prototyp-Screens (M0/M0b) sind übernommen: Optik, Wortwahl und Aufbau
+unverändert, nur an echten Routen. Der Playground bleibt unangetastet.
+
+### Wo was liegt
+
+| Sache | Ort |
+| --- | --- |
+| Die Seite „Markt" (fünf Zustände) | `packages/market/app/pages/brand/[profileId]/market.vue` |
+| Beschriftungen aus dem brand-Katalog | `packages/market/app/composables/useMarketBrandLabels.ts` |
+| Der Oberflächen-Vertrag zu `brand` (nur Typen) | `packages/market/app/contracts/brandUi.ts` |
+| Der Leisten-Eintrag (Anmeldung) | `packages/market/app/app.config.ts` |
+| Der Erweiterungspunkt (Form + Rechnung) | `packages/brand/shared/brandWorkspaceNav.ts` |
+| Der Erweiterungspunkt (Anwendung) | `packages/brand/app/composables/useBrandWorkspaceNavExtras.ts` |
+| Die Schranke (pur) | `packages/market/shared/marketPaywall.ts` |
+| Das Opt-in (lesen/schreiben/suchen) | `packages/brand/server/utils/brandMarketVisibility.ts` |
+| Routen | `packages/market/server/api/market/profiles/[id]/{candidates.get,visibility.patch}.ts` |
+
+### Die Seite und ihre fünf Zustände
+
+`/brand/:profileId/market` — EINE Adresse, kein Reiter unter `/brand-check`
+(Davids Entscheidung, §7.1). Nuxt sortiert statische Segmente vor dynamische,
+`market` gewinnt also gegen `[stepKey]` des brand-Layers.
+
+| Zustand | Wann | Was steht da |
+| --- | --- | --- |
+| **(a) gesperrt** | Kapitel B nicht abgenommen (§2.4) | 200 mit freundlicher Erklärung und Knopf ins Kapitel — **kein 404**: das ist der eigene Kunde, ihm fehlt ein Schritt |
+| **(b) Kandidaten** | freigeschaltet | Liste, Quellen-Wähler, Schranke; Kandidaten darf man auch gesperrt pflegen |
+| **(c) Lauf** | nach dem Klick | EIN synchroner `POST …/run?report=1`; während des Wartens der GESPEICHERTE Stand je Kandidat, danach die Kette aus der Antwort — **keine erfundenen Zwischenschritte** |
+| **(d) Bericht** | ein Bericht liegt vor | Gegenüberstellung (UTable-Vorlage `MkComparisonTable`), drei Listen, Profil-Karten, KI-Aussensicht, Befund-Chips; `stale` als Hinweis mit „Erneut vergleichen" |
+| **(e) Relaunch** | ein Kandidat mit `role: 'self'` hat ein Profil | `MkRelaunchCompare`: alte Website links, bestätigte Foundation rechts |
+
+Datentür wie überall: fremdes oder unbekanntes Branding ⇒ 404, ohne Session
+⇒ 404 (nie 403). Das Produkt-Gate `pukalani.market.enabled` wirft ebenfalls
+404, bevor irgendetwas geladen wird.
+
+### Der Leisten-Erweiterungspunkt
+
+`brand` kennt kein Produkt, das auf ihm aufsetzt (CONCEPT A14) — es kennt nur
+die FORM eines zusätzlichen Ebene-1-Eintrags:
+`pukalani.brand.workspaceNavExtras: BrandWorkspaceNavExtra[]`
+(`key`, `labelKey`, `icon`, `to` mit `:profileId`, `lockedUntil`,
+`counterKind`), Default `[]`. defu verkettet Arrays über die Layer, das
+Produkt meldet sich also SELBST an; eine Silo-App ohne `market` bekommt keinen
+Menüpunkt ins Leere. Gerechnet wird in `resolveWorkspaceNavExtras` (pur,
+getestet), angewandt über `useBrandWorkspaceNavExtras` in allen drei Seiten
+(Werkstatt, Dokument, Markt). `BwRailStep.kind: 'extra'` trägt die eigene
+Glyphe; gesperrt ist der Eintrag SICHTBAR und ohne `to` — eine unsichtbare
+Schranke erklärt sich nie.
+
+**Der Zähler** („2 Befunde offen") kommt aus den Befunden, die die jeweilige
+Seite ohnehin geladen hat, gefiltert auf `kind: 'market'` und `status: 'open'`.
+Das Feld `pukalani.brand.workspaceNavExtras[].labelKey` steht in der
+`FIELDS`-Tabelle von `scripts/check-i18n-keys.mjs`.
+
+**Eine Doppelung mit Grund:** `lockedUntil` steht in `app/app.config.ts`
+WÖRTLICH als `'pvm'` und nicht als Import — `pnpm check:i18n-keys` lädt jede
+`app.config.ts` mit Nodes Typ-Strippung, und die kann einen relativen Import
+ohne Endung nicht auflösen. Bezahlt wird der Preis mit
+`packages/market/tests/marketNavConfig.test.ts`, der beide Stellen
+gegeneinander hält.
+
+### Der Quellen-Wähler (§7.2)
+
+`GET /api/market/profiles/:id/candidates?source=foundation|library|shared&q=`
+liefert höchstens zehn `MarketSourceOption` (Id, Name, Kategorie-Feld als
+Zweitzeile). Drei Zusagen:
+
+1. **`foundation`** — die eigenen Brandings des Kontos, OHNE das aktuelle
+   (es mit sich selbst zu vergleichen ergäbe zehn Zeilen „gleich").
+2. **`library`** — die handgeprüften Repo-Einträge (bis M6 nur erfundene).
+3. **`shared`** — freigegebene Marken FREMDER Konten: Opt-in gesetzt UND
+   Kapitel B abgenommen UND nicht das eigene Konto. Zurück gehen Id, Name und
+   Branche — **nie eine `ownerId`**.
+
+Die Liste wird erst geholt, wenn eine Quelle gewählt ist; drei Listen im
+Voraus wären drei Abfragen je Seitenaufbau, von denen der Kunde meistens keine
+braucht.
+
+### Das Opt-in (§7.2 Nr. 4)
+
+Spalte `brand_profiles.marketVisibility` (`private` | `shared`, Default
+`private`, Migration **brand-019**, Index `idx_market_visibility`). Semantik
+ausdrücklich die des Brand-Check-Rankings (`rankingOptIn`) — keine zweite
+Schalter-Semantik. Gesetzt wird sie an GENAU EINER Stelle: dem Schalter in der
+rechten Spalte „Stand" der Markt-Seite, über
+`PATCH /api/market/profiles/:id/visibility` (market-Route, die über den
+Vertrag die brand-Zeile schreibt — so bleibt `brand` fast unberührt).
+
+Text (de): „Meine Marke darf im Marktvergleich anderer Kunden erscheinen" ·
+„Sichtbar wird dann nur das Marktprofil aus euren bestätigten Feldern — nie
+Gespräche, Entwürfe, Notizen oder eure eigenen Wettbewerber. Jederzeit
+widerrufbar: neue Läufe schliessen eure Marke danach aus, schon geschriebene
+Berichte bleiben als Schnappschuss bestehen."
+
+**Vertraulichkeit:** das Marktprofil einer fremden Marke entsteht über
+denselben Motor wie die eigene Foundation, aber mit `publicOnly: true` — Slots
+mit `sensitivity !== 'public'` (Wettbewerber, Beschwerden, Schmerzpunkt,
+Zahlen) fallen raus. Zusätzlich nagelt
+`packages/market/tests/marketBrandContract.test.ts` fest, dass KEIN
+Marktprofil-Feld auf eine nicht-öffentliche Session zeigt — mit Gegenprobe.
+
+**Widerruf:** die Freigabe wird bei JEDEM Lauf neu geprüft. Ist sie weg,
+schliesst der Lauf den Kandidaten mit `excludedReason: 'withdrawn'` aus
+(neuer Wert in `MarketExclusionReason`, keine Migration — die Spalte ist ein
+varchar); ein bereits geschriebener Bericht bleibt vollständig lesbar.
+
+### Die Rolle `self` (§7.2 Nr. 2)
+
+Spalte `market_competitors.role` (`competitor` | `self`, Default
+`competitor`, Migration **market-004**, kein Index). Sie ist eine ANDERE Frage
+als `sourceKind`: der eine sagt, WOHER die Aussagen kommen, die andere, WESSEN
+Aussagen es sind. Folgen, alle über die eine Funktion `marketFieldCandidates`:
+
+- zählt NICHT gegen `MARKET_COMPETITORS_MAX` (die Kandidaten-Abfrage holt
+  deshalb `MAX + 1` Zeilen), höchstens EINE je Branding (`self_limit`),
+- geht dem Modell gar nicht erst zu (sonst zählte jede Quote uns selbst mit),
+- steht nicht in der Matrix und in keiner der drei Listen,
+- steht sehr wohl in `report.competitors` — die Relaunch-Gegenüberstellung
+  braucht sie.
+
+### Der Namensfilter, nachgeschärft (Befund aus M3, Anhang D)
+
+Bis M3 sperrte der § 6 UWG-Riegel JEDES Namens-Token ab vier Zeichen. Bei
+„Kailua Coffee" hiess das: `coffee` war in jedem Vorschlag verboten — in der
+Kaffee-Kategorie also das Wort, um das es geht. Neue Regel in
+`shared/marketDisparagement.ts`: gesperrt sind
+
+  (a) der volle normalisierte Name (auch zusammengezogen),
+  (b) Domain und Domain-Label,
+  (c) UNTERSCHEIDENDE Tokens — Namens-Teile ab vier Zeichen, die weder in
+      `MARKET_GENERIC_TOKENS` (Rechtsformen, Kategorie- und Branchenwörter
+      de/en) noch in den eigenen bestätigten Texten des Kunden vorkommen
+      (`categoryLanguage`, `pitch`, `audience`).
+
+`MARKET_NAME_TOKEN_MIN` bleibt als Untergrenze. Fail-closed bleibt es
+trotzdem: ohne eigene Texte greift nur die generische Liste, und der volle
+Name ist IMMER gesperrt. Tests mit Gegenprobe: „Kailua Coffee" ⇒ `coffee`
+erlaubt / `Kailua` gesperrt · „Nike" ⇒ gesperrt · `pacificbean.example` ⇒
+`pacificbean` gesperrt · eigenes Wort im Pitch entschärft die Sperre.
+
+### Die Schranke (§1.9) und ihre Messung
+
+`resolveMarketPaywall({ betaAccess })` — pur, beide Zustände getestet. Heute
+ist `betaAccess` immer wahr (der einzige Weg auf die Seite führt durch
+`requireBrandAccess`), der gesperrte Zweig bleibt trotzdem eine TATSACHE und
+kein toter Code; die Zuteilung je Branding aus §1.9 erweitert später die
+EINGABE, nicht die Oberfläche. Der Prototyp-Schalter fällt weg — ein Kunde,
+der seine eigene Schranke umlegen kann, hat keine.
+
+Der Klick auf die Schranke meldet `studio_cta_erstgespraech` mit
+`source: 'market_paywall'` über `useFunnelEvent()` (Plausible, §2.10). Kein
+NEUES Ereignis: das Ziel IST das Erstgespräch, und ein zweiter Name für
+denselben Klick hiesse zwei Goals zu pflegen, die dasselbe zählen. Das Ziel
+kommt aus `pukalani.brand.completionCta.to`.
+
+### Befund-Chips (§2.5)
+
+Die Markt-Befunde werden mit `BwFindingChip` gerendert — demselben Chip wie in
+Session, Log, Abnahme und Dokument (die Art `market` kennt er seit M3, Glyphe
+Kompass, Bernstein, sperrt nichts). Die Seite holt sie über
+`GET /api/brand/profiles/:id/findings` und filtert auf `kind: 'market'`: der
+Chip entscheidet selbst per `$fetch`, und eine zweite Entscheidungs-Mechanik
+wäre die zweite Stelle, an der ein 409 anders behandelt wird.
+
+### Beweise
+
+- Unit (`pnpm --filter @pukalani/market test`, **181**): Rolle `self` und der
+  Feld-Filter mit Gegenproben, die Schranke in beiden Zuständen, der
+  nachgeschärfte Namensfilter (vier neue Fälle), die Vertraulichkeits-Zusage
+  gegen die Registry, der Leisten-Eintrag gegen den Produktvertrag.
+- Unit brand (`pnpm --filter @pukalani/brand test`, **1784**):
+  `tests/brandWorkspaceNavExtras.test.ts` — Adress-Vorlage, Sperre mit
+  Gegenprobe, Zähler je Art, halb ausgefüllte Zeilen.
+- End-to-end: `packages/market/scripts/verify-market-ui.mjs` — **46/46**
+  (2026-09-05), Vorbedingungen wie bei `verify-market-report.mjs`; `KEEP=1`
+  lässt das Test-Branding für den Klick-Beweis stehen.
+  `verify-market-fetch.mjs` bleibt **33/33**, `verify-market-report.mjs`
+  **43/43** (je frischer Serverprozess — die Eimer leben im Prozess).
+
+**Gelernt (drei Dinge):**
+1. **Ein Import in einer `app.config.ts` kostet einen Wächter.**
+   `pnpm check:i18n-keys` lädt diese Dateien mit Nodes Typ-Strippung; ein
+   relativer Import ohne Endung ist dort nicht auflösbar, und der Wächter wird
+   ROT — nicht wegen eines fehlenden Schlüssels, sondern weil er die Datei
+   nicht mehr lesen kann. Konstanten gehören dort wörtlich hinein, mit einem
+   Test als Netz.
+2. **Eine generische Funktion, die auf rohe Appwrite-Zeilen trifft, darf
+   keinen Literal-Typ verlangen.** `marketFieldCandidates` hatte
+   `role?: MarketCandidateRole`, und die Kandidaten-Route reicht ein
+   `role?: string` aus der Zeile herein — ein `as`-Cast an der Aufrufstelle
+   wäre eine Behauptung über genau den Wert gewesen, den die Funktion prüft.
+3. **Der Beweis darf nicht das ganze HTML durchsuchen.** Der SSR-Payload
+   trägt die rohen Antwort-Daten; ein Grep nach `market.` über die ganze
+   Seite fände dort jeden Schlüssel, der irgendwo als Wert vorkommt. Geprüft
+   wird der SICHTBARE Text — dieselbe Lehre wie bei der UWG-Gegenprobe in M3.

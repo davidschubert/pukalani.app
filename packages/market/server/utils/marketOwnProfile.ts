@@ -1,6 +1,11 @@
 import type { H3Event } from 'h3'
-import { confirmedSlotValues, loadStepRows } from '../contracts/brandContract'
-import type { MarketFieldId, MarketProfileField } from '../../shared/marketProfile'
+import {
+  confirmedSlotValues,
+  isBrandProfileSharedForMarket,
+  loadStepRows,
+  slotById,
+} from '../contracts/brandContract'
+import type { MarketCandidateSource, MarketFieldId, MarketProfileField } from '../../shared/marketProfile'
 import { MARKET_FIELDS } from '../../shared/marketProfile'
 import { requireOwnedMarketProfile } from './marketStore'
 
@@ -53,14 +58,38 @@ export interface MarketOwnProfile {
   readonly missingFieldIds: readonly MarketFieldId[]
 }
 
+export interface MarketOwnProfileOptions {
+  /**
+   * NUR ÖFFENTLICHE FELDER — die Regel für eine FREMDE Marke (§7.2 Nr. 4,
+   * BF1-Vertraulichkeit).
+   *
+   * Die Slot-Registry führt je Session eine `sensitivity`
+   * (`public | internal | private`); `internal` heisst „reist nicht per
+   * Share-Link und nicht im Export" — vier Sessions tragen das heute
+   * (Wettbewerber-Notizen, Beschwerden, Schmerzpunkt, Zahlen). Keine davon
+   * liegt in den zehn Marktfeldern, und genau deshalb steht die Prüfung hier
+   * und nicht als Kommentar: die Abbildung `MARKET_FIELDS` kann sich ändern,
+   * die Zusage nicht. Ein unbekannter Slot fällt ebenfalls raus — was die
+   * Registry nicht kennt, kann sie auch nicht als öffentlich zusagen.
+   *
+   * Für die EIGENE Marke bleibt der Schalter aus: dort ist nichts fremd.
+   */
+  readonly publicOnly?: boolean
+  /** Die Herkunft, die an jedem Feld steht. Default `foundation`. */
+  readonly source?: MarketCandidateSource
+}
+
 export async function loadMarketOwnProfile(
   event: H3Event,
   profileId: string,
+  options: MarketOwnProfileOptions = {},
 ): Promise<MarketOwnProfile> {
+  const source: MarketCandidateSource = options.source ?? 'foundation'
   const rows = await loadStepRows(event, profileId)
   const values = new Map<string, string>()
   for (const row of rows) {
     for (const entry of confirmedSlotValues(row)) {
+      if (options.publicOnly && slotById(entry.slotId)?.sensitivity !== 'public') continue
       if (!values.has(entry.slotId)) values.set(entry.slotId, entry.value)
     }
   }
@@ -78,7 +107,7 @@ export async function loadMarketOwnProfile(
       .find(entry => entry.value)
 
     if (!hit) {
-      fields.push({ fieldId: definition.id, value: '', source: 'foundation' })
+      fields.push({ fieldId: definition.id, value: '', source })
       missingFieldIds.push(definition.id)
       continue
     }
@@ -88,7 +117,7 @@ export async function loadMarketOwnProfile(
     // Befund-Zuordnung leerer Felder — ein Befund an einem leeren Feld ist
     // möglich („hier steht bei euch nichts, im Feld aber überall etwas").
     if (definition.form !== 'list') {
-      fields.push({ fieldId: definition.id, value: hit.value.slice(0, 2000), source: 'foundation' })
+      fields.push({ fieldId: definition.id, value: hit.value.slice(0, 2000), source })
       continue
     }
     // Listen-Felder liegen im Wizard als EINE Zeile („Handwerk, Nähe, Ruhe")
@@ -102,7 +131,7 @@ export async function loadMarketOwnProfile(
       fieldId: definition.id,
       value: items.join(', '),
       items,
-      source: 'foundation',
+      source,
     })
   }
 
@@ -145,4 +174,38 @@ export function marketOwnSlotId(own: MarketOwnProfile, fieldId: MarketFieldId): 
   const confirmed = own.slotByField.get(fieldId)
   if (confirmed) return confirmed
   return MARKET_FIELDS.find(definition => definition.id === fieldId)?.slotIds[0] ?? ''
+}
+
+/**
+ * DAS MARKTPROFIL EINER FREIGEGEBENEN FREMDEN MARKE (§7.2 Nr. 4, MV1 M4).
+ *
+ * ── DERSELBE MOTOR, ZWEI ZUSÄTZLICHE RIEGEL ──────────────────────────────
+ * Gerechnet wird wie bei jeder Foundation (`loadMarketOwnProfile`) — „ein
+ * Motor, drei Ansichten" (§7.1). Davor stehen zwei Prüfungen, die es bei der
+ * eigenen Marke nicht gibt:
+ *
+ *  1. **Die Freigabe gilt JETZT** (`isBrandProfileSharedForMarket`). Sie wird
+ *     bei JEDEM Lauf neu gestellt und nicht beim Anlegen des Kandidaten
+ *     beantwortet: eine Zustimmung ist jederzeit widerrufbar, und ein Lauf,
+ *     der einen alten Ja-Stand benutzte, machte den Widerruf wirkungslos.
+ *  2. **Nur öffentliche Felder** (`publicOnly`). Interne Sessions
+ *     (Wettbewerber-Notizen, Beschwerden, Schmerzpunkt, Zahlen) reisen weder
+ *     per Share-Link noch im Export — und schon gar nicht in das Werkzeug
+ *     eines fremden Kunden.
+ *
+ * ── WARUM „WIDERRUFEN" EINE ANTWORT IST UND KEIN FEHLER ──────────────────
+ * `null` heisst: die Marke steht nicht mehr zur Verfügung. Der Lauf macht
+ * daraus einen Ausschluss mit dem GRUND `withdrawn` (§2.3: der Kunde soll
+ * ehrliche Worte lesen, kein leeres Feld) — und ein SCHON geschriebener
+ * Bericht bleibt, was er war: ein Schnappschuss.
+ */
+export async function loadMarketSharedCandidate(
+  event: H3Event,
+  sourceRef: string,
+  requiredStepKey: string,
+): Promise<MarketOwnProfile | null> {
+  const reference = sourceRef.trim()
+  if (!reference) return null
+  if (!await isBrandProfileSharedForMarket(event, reference, requiredStepKey)) return null
+  return await loadMarketOwnProfile(event, reference, { publicOnly: true, source: 'shared' })
 }

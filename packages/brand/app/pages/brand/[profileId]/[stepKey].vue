@@ -1937,6 +1937,16 @@ function railDocumentStep(): BwRailStep {
   }
 }
 
+/**
+ * DIE ZUSATZ-EINTRÄGE (MV1 M4) — angemeldet von fremden Layern über
+ * `pukalani.brand.workspaceNavExtras`, gerechnet an EINER Stelle. Ohne einen
+ * solchen Layer ist die Liste leer und die Leiste sieht aus wie vorher.
+ */
+const navExtras = useBrandWorkspaceNavExtras({
+  profileId,
+  findings: () => store.findings,
+})
+
 const railLayers = computed<BwRailLayer[]>(() => [{
   id: 'foundation',
   label: t('brand.workspace.railLayer'),
@@ -1965,6 +1975,10 @@ const railLayers = computed<BwRailLayer[]>(() => [{
       }
     }),
     railDocumentStep(),
+    // Zusatz-Einträge fremder Layer (MV1 M4) — heute „Markt". Sie stehen
+    // NACH dem Dokument: das Dokument ist der Abschluss der Foundation, ein
+    // Zusatzprodukt kommt danach.
+    ...navExtras.value,
   ],
 }])
 

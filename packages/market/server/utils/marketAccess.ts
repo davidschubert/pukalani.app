@@ -2,6 +2,7 @@ import type { H3Event } from 'h3'
 import type { BrandProfileRow } from '../contracts/brandContract'
 import { loadStepRow, requireBrandAccess, requireProfileIdParam } from '../contracts/brandContract'
 import { MARKET_LOCKED_CODE } from '../../shared/marketLimits'
+import { MARKET_UNLOCK_STEP } from '../../shared/marketProfile'
 import { requireOwnedMarketProfile } from './marketStore'
 
 /**
@@ -27,8 +28,14 @@ import { requireOwnedMarketProfile } from './marketStore'
  * gibt es keine eigene Behauptung, die man vergleichen könnte", §2.4).
  */
 
-/** Das Kapitel, dessen Abnahme den Marktvergleich freischaltet (§2.4). */
-export const MARKET_UNLOCK_STEP = 'pvm'
+/**
+ * Das Kapitel, dessen Abnahme den Marktvergleich freischaltet (§2.4).
+ *
+ * Die WAHRHEIT steht seit MV1 M4 im Produktvertrag (`shared/marketProfile.ts`)
+ * — auch Leiste und Seite brauchen sie, und die laufen im Browser. Hier steht
+ * nur der Name, unter dem die Server-Seite sie kennt.
+ */
+export { MARKET_UNLOCK_STEP } from '../../shared/marketProfile'
 
 export interface MarketRouteContext {
   userId: string

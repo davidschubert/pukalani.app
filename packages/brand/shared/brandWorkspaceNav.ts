@@ -3,7 +3,11 @@ import type {
   BrandSessionState,
   BrandStoredStepState,
 } from './brandJourney'
-import { BRAND_FINDING_REASON_MIN, type BrandFindingStatus } from './brandFindings'
+import {
+  BRAND_FINDING_REASON_MIN,
+  type BrandFindingKind,
+  type BrandFindingStatus,
+} from './brandFindings'
 import { type BrandStepKey, slotById, slotsForStep } from './slotRegistry'
 
 /**
@@ -401,4 +405,105 @@ export function acceptTargets(finding: { slots: readonly string[] }): string[] {
     targets.push(slotId)
   }
   return targets
+}
+
+// ── 7 · Fremde Ebene-1-Einträge in der Leiste (MV1 M4) ────────────────────
+
+/**
+ * EIN ZUSÄTZLICHER EBENE-1-EINTRAG, DEN EIN ANDERER LAYER ANMELDET.
+ *
+ * ── WARUM ES DIESEN ERWEITERUNGSPUNKT GIBT ────────────────────────────────
+ * Der Marktvergleich (Layer `market`) braucht in der Werkstatt-Leiste einen
+ * Eintrag „Markt" unter „Euer Branding" (docs/plans/BRAND-MARKTVERGLEICH.md
+ * §2.5). Ihn hier hart einzutragen wäre die Kopplung, die CONCEPT A14
+ * ausschliesst: `brand` ist ein Fundament für Produkte und darf keines davon
+ * kennen — eine Silo-App ohne `market` bekäme sonst einen Menüpunkt ins Leere.
+ *
+ * Der Vertrag ist deshalb umgekehrt: `brand` beschreibt die FORM eines
+ * solchen Eintrags und liest sie aus `pukalani.brand.workspaceNavExtras`;
+ * WELCHE es gibt, sagt die App-Konfiguration (defu verkettet Arrays über
+ * Layer, ein Produkt-Layer trägt sich also selbst ein). Ohne diesen Layer ist
+ * die Liste leer und die Leiste sieht aus wie vorher.
+ *
+ * ── WARUM `to` EINE VORLAGE IST UND KEINE FUNKTION ────────────────────────
+ * `app.config` ist Daten, die über Layer gemergt werden; eine Funktion darin
+ * überlebt zwar den Build, ist aber weder vergleichbar noch überschreibbar
+ * und in einem Diff nicht zu lesen. `'/brand/:profileId/market'` sagt
+ * dasselbe und wird von `resolveWorkspaceNavExtras` eingesetzt.
+ */
+export interface BrandWorkspaceNavExtra {
+  /** Stabiler Schlüssel — er wird die `id` des Leisten-Eintrags. */
+  key: string
+  /** i18n-Schlüssel der Beschriftung (der EIGENE Layer liefert den Text). */
+  labelKey: string
+  /** Glyphe, z. B. `i-ph-compass` — die Leiste hat keine eigene Vorstellung. */
+  icon: string
+  /** Adress-Vorlage mit dem Platzhalter `:profileId`. */
+  to: string
+  /**
+   * Das Kapitel, dessen ABNAHME den Eintrag freigibt. Fehlt es, ist der
+   * Eintrag immer offen. Gesperrt heisst hier wie überall: sichtbar, aber
+   * nicht anklickbar — eine unsichtbare Sperre erklärt sich nie.
+   */
+  lockedUntil?: string
+  /**
+   * Die Befund-ART, deren OFFENE Zahl als Zähler erscheint („2 Befunde").
+   * Fehlt sie, trägt der Eintrag keinen Zähler.
+   */
+  counterKind?: BrandFindingKind
+}
+
+/** Der gerechnete Zustand eines solchen Eintrags — Zahlen und Schlüssel, keine Sätze. */
+export interface BrandWorkspaceNavExtraState {
+  key: string
+  labelKey: string
+  icon: string
+  /** Fertige Adresse (ohne Locale-Präfix — das setzt die Seite mit `localePath`). */
+  to: string
+  locked: boolean
+  /** Offene Befunde der genannten Art; 0 heisst „kein Zähler". */
+  count: number
+}
+
+/**
+ * DIE ZUSATZ-EINTRÄGE FÜR EINE KONKRETE LEISTE RECHNEN.
+ *
+ * PUR, wie alles in dieser Datei: die SEITE übersetzt danach `labelKey` und
+ * legt den Locale-Pfad um `to`. Eine Funktion, die hier schon Sätze baute,
+ * wäre in der zweiten Sprache falsch und im Test grün (s. Kopf).
+ *
+ * Ein Eintrag ohne `key`, `labelKey` oder `to` fällt still weg: die Liste
+ * kommt aus einer Konfiguration, und eine halb ausgefüllte Zeile soll keinen
+ * Knopf ohne Ziel erzeugen.
+ */
+export function resolveWorkspaceNavExtras(
+  extras: readonly BrandWorkspaceNavExtra[],
+  input: {
+    profileId: string
+    /** Die Kapitel, die ABGENOMMEN sind (`brand_steps.state === 'done'`). */
+    doneStepKeys: readonly string[]
+    findings: readonly { kind: BrandFindingKind, status: BrandFindingStatus }[]
+  },
+): BrandWorkspaceNavExtraState[] {
+  const done = new Set(input.doneStepKeys)
+  const states: BrandWorkspaceNavExtraState[] = []
+
+  for (const extra of extras) {
+    if (!extra?.key || !extra.labelKey || !extra.to) continue
+    const counterKind = extra.counterKind
+    states.push({
+      key: extra.key,
+      labelKey: extra.labelKey,
+      icon: extra.icon || '',
+      to: extra.to.replace(':profileId', input.profileId),
+      locked: Boolean(extra.lockedUntil) && !done.has(extra.lockedUntil as string),
+      count: counterKind
+        ? input.findings.filter(
+            finding => finding.kind === counterKind && finding.status === 'open',
+          ).length
+        : 0,
+    })
+  }
+
+  return states
 }

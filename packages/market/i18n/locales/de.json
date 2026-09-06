@@ -22,7 +22,12 @@
       "max": "Höchstens {count} Wettbewerber je Branding.",
       "add": "Wettbewerber ergänzen",
       "remove": "{name} entfernen",
-      "suggested": "Vorschlag aus eurem Kontext-Kapitel"
+      "suggested": "Vorschlag aus eurem Kontext-Kapitel",
+      "newTitle": "Neuer Kandidat",
+      "save": "Als Wettbewerber speichern",
+      "saveSelf": "Als eure alte Website speichern",
+      "cancel": "Verwerfen",
+      "selfHint": "Eure alte Website zählt nicht zu den fünf Wettbewerbern und erscheint nicht im Feld — sie steht in der Relaunch-Gegenüberstellung."
     },
     "source": {
       "label": "Quelle",
@@ -91,7 +96,8 @@
       "robots": "Die Website untersagt die Auswertung (robots.txt).",
       "tdm": "Die Website behält sich ihre Texte gegen automatisierte Auswertung vor.",
       "noText": "Diese Seite gibt ohne Browser nichts preis.",
-      "unreachable": "Die Adresse war nicht erreichbar."
+      "unreachable": "Die Adresse war nicht erreichbar.",
+      "withdrawn": "Die Eigentümerin hat die Freigabe zurückgezogen."
     },
     "paywall": {
       "title": "Der Marktvergleich ist ein bezahlter Schritt",
@@ -101,13 +107,15 @@
       "unlockedTitle": "Für euer Beta-Konto freigeschaltet",
       "unlockedBody": "Drei Läufe je Branding und Tag. Ein Lauf auf unverändertem Stand kostet nichts.",
       "toggle": "Beta-Konto",
-      "toggleHint": "Schalter des Prototyps — zeigt beide Zustände der Schranke."
+      "toggleHint": "Schalter des Prototyps — zeigt beide Zustände der Schranke.",
+      "cta": "Im Erstgespräch besprechen"
     },
     "action": {
       "compare": "Markt vergleichen",
       "again": "Erneut vergleichen",
       "toResult": "Bericht öffnen",
-      "back": "Zurück zur Markt-Seite"
+      "back": "Zurück zur Markt-Seite",
+      "needsCandidate": "Tragt zuerst einen Wettbewerber ein."
     },
     "run": {
       "title": "Vergleichs-Lauf",
@@ -134,7 +142,8 @@
       "excluded": "ausgeschlossen",
       "empty": "nicht öffentlich formuliert",
       "missingOwn": "Bei euch noch nicht bestätigt",
-      "meta": "Bericht vom {date}"
+      "meta": "Bericht vom {date}",
+      "none": "Noch kein Bericht. Tragt Kandidaten ein und lasst den Vergleich laufen."
     },
     "field": {
       "categoryLanguage": "Kategorie-Sprache",
@@ -191,7 +200,8 @@
       "dismiss": "Ablehnen",
       "accepted": "Angenommen",
       "dismissed": "Abgelehnt",
-      "open": "Feld öffnen"
+      "open": "Feld öffnen",
+      "none": "Zu diesem Bericht gibt es keine offenen Befunde."
     },
     "stand": {
       "title": "Stand",
@@ -203,7 +213,8 @@
       "never": "nie",
       "missingOwn": "Eure Kernbotschaften sind bei euch noch nicht bestätigt — diese Zeile vergleicht nur, was das Feld sagt.",
       "limits": "Drei Läufe je Branding und Tag. Rohtext wird nach 24 Stunden gelöscht; im Profil bleiben die kurzen Zitate und ihre Quelle.",
-      "confidential": "Vertraulich wie eure Wettbewerber-Notizen: nie in einem Teilen-Link, nie im Export."
+      "confidential": "Vertraulich wie eure Wettbewerber-Notizen: nie in einem Teilen-Link, nie im Export.",
+      "visibility": "Freigabe"
     },
     "workshop": {
       "chapter": "Purpose, Vision und Mission",
@@ -223,6 +234,40 @@
       "screen5": "5 · Relaunch: eure Marke gegen eure alte Website",
       "sites": "Die erfundenen Wettbewerber-Websites",
       "checkNote": "Die Links „Zum Brand-Check\" sind Platzhalter: der Brand-Check ist gebaut, aber er lebt in seiner eigenen App — dieser Playground zeigt nur, wo sein Score im Marktvergleich steht."
+    },
+    "locked": {
+      "title": "Der Marktvergleich wartet auf Kapitel B",
+      "body": "Verglichen wird eure eigene Behauptung mit der des Feldes. Solange Purpose, Vision und Mission nicht abgenommen sind, gibt es diese Behauptung noch nicht — und ein Vergleich hätte auf eurer Seite eine leere Spalte. Kandidaten könnt ihr trotzdem schon vorbereiten.",
+      "cta": "Zu Purpose, Vision und Mission"
+    },
+    "stale": {
+      "notice": "Seit diesem Bericht hat sich etwas bewegt — ein eigenes Feld oder ein Abrufstand. Er bleibt lesbar; ein neuer Lauf bringt ihn auf den Stand von heute."
+    },
+    "optIn": {
+      "label": "Meine Marke darf im Marktvergleich anderer Kunden erscheinen",
+      "hint": "Sichtbar wird dann nur das Marktprofil aus euren bestätigten Feldern — nie Gespräche, Entwürfe, Notizen oder eure eigenen Wettbewerber. Jederzeit widerrufbar: neue Läufe schliessen eure Marke danach aus, schon geschriebene Berichte bleiben als Schnappschuss bestehen."
+    },
+    "error": {
+      "load": "Der Stand konnte nicht geladen werden.",
+      "options": "Die Auswahl konnte nicht geladen werden.",
+      "competitorAdd": "Der Kandidat konnte nicht gespeichert werden.",
+      "competitorUpdate": "Die Änderung konnte nicht gespeichert werden.",
+      "competitorRemove": "Der Kandidat konnte nicht entfernt werden.",
+      "run": "Der Vergleich konnte nicht laufen.",
+      "visibility": "Die Freigabe konnte nicht gespeichert werden.",
+      "aiOff": "Die KI ist zurzeit abgeschaltet — die Websites wurden gelesen, ausgewertet wurde nichts."
+    },
+    "rejected": {
+      "market_locked": "Der Marktvergleich ist frei, sobald Kapitel B abgenommen ist.",
+      "market_no_profiles": "Es gibt noch kein Marktprofil, das man vergleichen könnte — lasst zuerst einen Lauf durchlaufen.",
+      "ai_disabled": "Die KI ist zurzeit abgeschaltet. Der Vergleich braucht sie.",
+      "market_run_limit": "Drei Läufe je Branding und Tag sind erreicht. Morgen geht es weiter.",
+      "market_instance_limit": "Heute sind alle Läufe aufgebraucht. Bitte morgen erneut versuchen.",
+      "competitor_limit": "Mehr als fünf Wettbewerber führt ein Branding nicht.",
+      "competitor_duplicate": "Diese Marke steht schon in eurer Liste.",
+      "competitor_url_invalid": "Diese Adresse können wir nicht lesen — bitte mit Domain angeben.",
+      "self_limit": "Eine eigene alte Website je Branding, nicht zwei.",
+      "shared_unavailable": "Diese Marke ist nicht (mehr) für den Marktvergleich freigegeben."
     }
   }
 }

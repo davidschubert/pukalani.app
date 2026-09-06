@@ -282,6 +282,17 @@ const openFindingsTotal = computed(
  * aktive Kapitel aufgeklappt"). Der letzte Eintrag ist DIESE Seite — er trägt
  * kein `to`, sondern steht auf `active`.
  */
+/**
+ * DIE ZUSATZ-EINTRÄGE (MV1 M4). Die Befunde kommen aus DER DOKUMENT-Antwort
+ * und nicht aus dem Store: diese Seite lädt keinen Baustein, `store.findings`
+ * wäre hier leer — und ein Zähler, der auf einer Seite fehlt und auf der
+ * anderen steht, sieht wie ein Fehler aus.
+ */
+const navExtras = useBrandWorkspaceNavExtras({
+  profileId,
+  findings: () => view.value?.findings ?? [],
+})
+
 const railLayers = computed<BwRailLayer[]>(() => [{
   id: 'foundation',
   label: t('brand.workspace.railLayer'),
@@ -314,6 +325,8 @@ const railLayers = computed<BwRailLayer[]>(() => [{
           }
         : {}),
     },
+    // Zusatz-Einträge fremder Layer (MV1 M4) — heute „Markt".
+    ...navExtras.value,
   ],
 }])
 

@@ -1,3 +1,5 @@
+import type { BrandWorkspaceNavExtra } from '../shared/brandWorkspaceNav'
+
 /**
  * Die Config-FORM des Brand-Wizards (Plan §3e). Sie liegt in `app/` und nicht
  * im Package-Root — dort wird eine `app.config.ts` stillschweigend ignoriert.
@@ -182,6 +184,19 @@ export default defineAppConfig({
        * Mail-Fehler ändert die Antwort der Route nie (fail-soft).
        */
       waitlistNotify: '',
+      /**
+       * ZUSÄTZLICHE EBENE-1-EINTRÄGE DER WERKSTATT-LEISTE (MV1 M4).
+       *
+       * LEER ist der Default und die richtige Aussage: `brand` ist ein
+       * Fundament und kennt kein Produkt, das darauf aufsetzt (CONCEPT A14).
+       * Wer einen Eintrag will, trägt ihn in SEINER `app.config` ein — defu
+       * verkettet Arrays über die Layer, der Produkt-Layer meldet sich also
+       * selbst an, und eine Silo-App ohne ihn bekommt keinen Menüpunkt ins
+       * Leere. Die FORM steht in `shared/brandWorkspaceNav.ts`
+       * (`BrandWorkspaceNavExtra`), gerechnet wird sie dort ebenfalls
+       * (`resolveWorkspaceNavExtras`).
+       */
+      workspaceNavExtras: [] as BrandWorkspaceNavExtra[],
     },
   },
 })
