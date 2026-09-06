@@ -32,16 +32,22 @@ Instanz-Kontext: docs/runbooks/BRANDING-SUPPLY-SETUP.md.
 
 ## Vorher prüfen
 
-- [ ] `main` ist grün: Test, Lint, Typecheck, E2E.
-- [ ] Das Code-Paket M1–M5 ist auf `main` und deployt. Beweis ist der
+> **Durchlauf 2026-09-06 (Hauptloop, mit Davids Ja):** Migrationen brand-018/019 +
+> market-001…004 auf `branding` gefahren (Lauf 2 komplett `↷`), `ops:schema-parity`
+> grün (branding 29/29), Gate-Flip f7bd9fe4. Schritt 4 (Rauchtest mit echtem Konto)
+> macht David; die Häkchen dort bleiben offen, bis er meldet.
+
+
+- [x] `main` ist grün: Test, Lint, Typecheck, E2E.
+- [x] Das Code-Paket M1–M5 ist auf `main` und deployt. Beweis ist der
       Live-Build-SHA, nicht die Actions-Ansicht:
       `curl -s https://branding.supply/api/health | jq -r .build`
-- [ ] Der Schalter steht noch auf `false`:
+- [x] Der Schalter steht noch auf `false`:
       `grep -n "market:" apps/branding/app/app.config.ts`
-- [ ] Die Migrations-Env liegt bereit:
+- [x] Die Migrations-Env liegt bereit:
       `ls -l ~/.appwrite-secrets/migrations/branding.env`
       (Datei NICHT öffnen, nicht kopieren, nicht ins Repo.)
-- [ ] Vier Beweise sind lokal grün (Vorbedingungen in den Skript-Köpfen):
+- [x] Vier Beweise sind lokal grün (Vorbedingungen in den Skript-Köpfen):
       `verify-market-fetch` · `verify-market-report` · `verify-market-ui` ·
       `verify-market-retention`.
 
@@ -60,9 +66,9 @@ pnpm migrate --env-file ~/.appwrite-secrets/migrations/branding.env --layer bran
 pnpm migrate --env-file ~/.appwrite-secrets/migrations/branding.env --layer market
 ```
 
-- [ ] brand-Lauf durch, jede Zeile `✔` oder `↷ (existiert bereits)`.
-- [ ] market-Lauf durch, dito.
-- [ ] **Zweiter Lauf zur Kontrolle:** beide Befehle noch einmal. Jetzt MUSS
+- [x] brand-Lauf durch, jede Zeile `✔` oder `↷ (existiert bereits)`.
+- [x] market-Lauf durch, dito.
+- [x] **Zweiter Lauf zur Kontrolle:** beide Befehle noch einmal. Jetzt MUSS
       alles `↷` sein. Eine `✔`-Zeile im zweiten Lauf heisst, dass etwas nicht
       idempotent ist — dann anhalten und nachsehen, nicht weitermachen.
 
@@ -80,8 +86,8 @@ Satzlänge und den PII-gefilterten Satz.
 pnpm ops:schema-parity
 ```
 
-- [ ] Der Soll-Block `market` (drei Tabellen) ist auf `branding` erfüllt.
-- [ ] Kein Fehler bei den anderen Instanzen (der Lauf geht über alle
+- [x] Der Soll-Block `market` (drei Tabellen) ist auf `branding` erfüllt.
+- [x] Kein Fehler bei den anderen Instanzen (der Lauf geht über alle
       ausgerollten; eine fehlende Env-Datei einer ausgerollten Instanz macht
       ihn seit 2026-08-31 ROT, nicht still).
 
@@ -96,10 +102,10 @@ pnpm ops:schema-parity
 +    market: { enabled: true },
 ```
 
-- [ ] Der Kommentar darüber wird MITGEZOGEN — er begründet heute das `false`
+- [x] Der Kommentar darüber wird MITGEZOGEN — er begründet heute das `false`
       und muss danach das `true` begründen (mit Datum des Migrations-Laufs).
-- [ ] Commit: `feat(branding): Marktvergleich freigeschaltet (MV1)`.
-- [ ] Push auf `main`, vier Checks abwarten.
+- [x] Commit: `feat(branding): Marktvergleich freigeschaltet (MV1)`.
+- [x] Push auf `main`, vier Checks abwarten.
 - [ ] Deploy: er feuert per `workflow_run` auf Test UND E2E, startet also
       ZWEIMAL — einer der Läufe endet per Concurrency „cancelled", das ist KEIN
       Fehler.
