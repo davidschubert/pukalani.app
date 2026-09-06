@@ -5,9 +5,12 @@ import { demoFoundation } from '../../../utils/demoFoundation'
  * KLICKDUMMY „BRAND FOUNDATION" — die ÖFFENTLICHE Empfänger-Ansicht
  * (Screen 5 aus §2.11; im Echtbetrieb `/brand/share/:token`).
  *
- * DERSELBE Renderer wie die private Seite (`FdChapter`), aber kein Workspace,
- * keine Sidebar, kein Inhaltsverzeichnis, kein Zähler — der zweite Leser will
- * wissen, WAS gilt, nicht wie weit die Abnahme ist (§1.1).
+ * DERSELBE Renderer wie die private Seite (`FdChapter`) und DASSELBE
+ * Inhaltsverzeichnis (`FdToc`, Davids Wunsch 2026-09-05) — aber kein
+ * Workspace, keine Sidebar, kein Zähler: der zweite Leser will wissen, WAS
+ * gilt, nicht wie weit die Abnahme ist (§1.1). Das Verzeichnis sitzt als
+ * `UPageAside` rechts in einer `UPage` und scrollt mit dem FENSTER; ohne
+ * Kopfzeile ist `--ui-header-height` hier 0, sonst klebte es 4 rem zu tief.
  *
  * Drei Unterschiede, alle aus dem Konzept:
  *  1. Der Snapshot enthält nur BESTÄTIGTES — das offene Kapitel „Name" fehlt
@@ -42,8 +45,8 @@ function print(): void {
 </script>
 
 <template>
-  <div class="bw-root fd-share min-h-dvh px-6 pb-16">
-    <div class="mx-auto max-w-3xl">
+  <div class="bw-root fd-share min-h-dvh px-6 pb-16" style="--ui-header-height: 0px">
+    <div class="mx-auto max-w-5xl">
       <!-- Schlanker Kopf statt Seiten-Navigation: der Empfänger hat hier
            nichts zu bedienen ausser dem Druck. -->
       <header class="fd-share-head flex flex-wrap items-end justify-between gap-4 border-b py-8" style="border-color: var(--bw-line)">
@@ -58,12 +61,19 @@ function print(): void {
         />
       </header>
 
-      <div class="mt-10 flex flex-col gap-10">
-        <FdChapter
-          v-for="(chapter, i) in chapters" :key="chapter.id"
-          :chapter="chapter" :index="i" variant="share"
-        />
-      </div>
+      <UPage :ui="{ root: 'lg:gap-12', center: 'lg:col-span-8 min-w-0', right: 'lg:col-span-2' }">
+        <div class="mt-10 flex flex-col gap-10">
+          <FdChapter
+            v-for="(chapter, i) in chapters" :key="chapter.id"
+            :chapter="chapter" :index="i" variant="share"
+          />
+        </div>
+        <template #right>
+          <UPageAside class="fd-noprint" :ui="{ root: 'py-10 lg:pe-0' }">
+            <FdToc :chapters="chapters" />
+          </UPageAside>
+        </template>
+      </UPage>
 
       <!-- Der einzige Marketing-Zug, dezent (§2.6). -->
       <footer class="fd-noprint mt-14 border-t pt-6" style="border-color: var(--bw-line)">
