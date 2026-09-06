@@ -61,7 +61,9 @@ function print(): void {
         />
       </header>
 
-      <UPage :ui="{ root: 'lg:gap-12', center: 'lg:col-span-8 min-w-0', right: 'lg:col-span-2' }">
+      <!-- 7 + 3 Spalten statt 8 + 2: bei zwei Spalten kürzt das Verzeichnis
+           „Kontext & Zielgruppe“ auf „Kontext & Zie…“ (Playwright-Screenshot). -->
+      <UPage :ui="{ root: 'lg:gap-12', center: 'lg:col-span-7 min-w-0', right: 'lg:col-span-3' }">
         <div class="mt-10 flex flex-col gap-10">
           <FdChapter
             v-for="(chapter, i) in chapters" :key="chapter.id"
