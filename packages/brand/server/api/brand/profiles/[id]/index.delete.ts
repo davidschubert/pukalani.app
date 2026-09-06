@@ -2,6 +2,7 @@ import type { Models } from 'node-appwrite'
 import { Query } from 'node-appwrite'
 import type { BrandProfileDeleteResponse } from '../../../../../shared/types/brand'
 import { BRAND_FINDINGS_TABLE } from '../../../../utils/brandFindingsStore'
+import { runBrandProfileCascades } from '../../../../utils/brandProfileCascade'
 import {
   BRAND_EVENTS_TABLE,
   BRAND_MESSAGES_TABLE,
@@ -78,6 +79,12 @@ export default defineEventHandler(async (event): Promise<BrandProfileDeleteRespo
   // alles andere — ohne diese Zeile bliebe unsichtbarer Inhalt liegen, den
   // keine Route mehr erreicht (die Begründung im Kopf gilt wörtlich).
   const findings = await purge(BRAND_FINDINGS_TABLE)
+  // Die Mitläufer ANDERER Layer (MV1 M1): heute `market` mit seinen drei
+  // Tabellen an derselben `profileId`. Sie laufen NACH den eigenen Kindern und
+  // VOR dem Kopf — dieselbe Reihenfolge-Begründung wie oben. Fail-soft: ein
+  // Zusatzprodukt darf das Löschen eines Brandings nicht verhindern
+  // (`brandProfileCascade.ts`).
+  const cascades = await runBrandProfileCascades(event, profileId)
 
   try {
     await tablesDB.deleteRow({ databaseId, tableId: BRAND_PROFILES_TABLE, rowId: profileId })
@@ -89,7 +96,7 @@ export default defineEventHandler(async (event): Promise<BrandProfileDeleteRespo
   // Das Löschen selbst schreibt KEIN brand_event: der Funnel hängt an
   // `profileId`, und dessen Zeilen sind gerade Teil der Kaskade gewesen — ein
   // Ereignis über ein gelöschtes Profil wäre der einzige Rest, der bliebe.
-  logEvent('info', 'brand.profile_deleted', { profileId, steps, messages, shares, events, findings })
+  logEvent('info', 'brand.profile_deleted', { profileId, steps, messages, shares, events, findings, ...cascades })
 
   return { deleted: true, removed: { steps, messages, shares, events, findings } }
 })

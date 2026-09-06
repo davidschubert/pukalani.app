@@ -1,10 +1,11 @@
 # Marktvergleich — Strategie und Konzept
 
 Stand 2026-09-05 (abends) · Status: **Strategie + Konzept FREIGEGEBEN (2026-09-05, §6);
-Prototyp M0 gebaut (Commit 81552629, Playground Port 3012); Prototyp-Runde 1 mit David hat
-das Konzept ERWEITERT (§7: ein Motor, drei Ansichten; vier Quellen; Brand-Score; erweiterter
-Abruf; KI-Suche) — Prototyp M0b setzt die Erweiterung um, danach Davids Prototyp-Abnahme.**
-Nichts hiervon ist im Produkt gebaut.
+Prototyp M0/M0b von David ABGENOMMEN (2026-09-05, Playground Port 3012); Prototyp-Runde 1
+hat das Konzept ERWEITERT (§7: ein Motor, drei Ansichten; vier Quellen; Brand-Score;
+erweiterter Abruf; KI-Suche). Paket M1 „Layer + Vertrag" ist GEBAUT (Layer-Gerüst, Vertrag
+zu `brand`, drei Tabellen — Schema-Anhang B); als Nächstes M2 (Abruf + Extraktion).**
+Alles ab M2 ist noch nicht im Produkt.
 
 ## 0. Was das hier ist
 
@@ -445,8 +446,8 @@ haben, das Marktprofil steht in der Inhaltssprache der Marke).
 
 | # | Paket | Inhalt | Gate |
 | --- | --- | --- | --- |
-| M0 | Prototyp | §2.11 im Playground | **David** (Design + Bedienung) |
-| M1 | Layer + Vertrag | packages/market, Manifeste, `marketProfile.ts`, Schema-Anhang (3 Tabellen), Abruf-Vertrag geteilt | Schema-Anhang zur Durchsicht |
+| M0 | Prototyp | §2.11 im Playground | **ABGENOMMEN** (David, 2026-09-05; M0b mit der §7-Erweiterung inbegriffen) |
+| M1 | Layer + Vertrag | packages/market, Manifeste, `marketProfile.ts`, Schema-Anhang (3 Tabellen), Abruf-Vertrag geteilt | **GEBAUT** (2026-09-05) — Schema-Anhang B unten, David liest gegen |
 | M2 | Abruf + Extraktion | robots/TDM, Pfad-Sperrliste, PII-Filter, Rohtext-Retention, Extraktions-Prompt `market-x-1`, Beleg-Riegel, Stub | Beweis-Skript mit erfundenen Seiten |
 | M3 | Vergleich + Befunde | Bericht-Prompt, Idempotenz, Befund-Art `market`, George-Block | Beweis + Gegenproben (Herabsetzungs-Filter) |
 | M4 | Oberfläche | Seite „Markt", Leiste, Schranke, Chips | Klick-Beweis |
@@ -772,3 +773,117 @@ Verkaufsargument gegenüber „ChatGPT kann das auch".
 | Tracksuit / Latana | echte Wahrnehmung per Panel-Befragung | Awareness/Consideration-Dashboards | ~25 k$/J. bzw. 20–50 k$/J. **[unsicher]** | Wachstumsmarken | Sample zu klein für Nischen, für Solo-Marken unbezahlbar | [koji.so](https://www.koji.so/blog/best-brand-tracking-software-2026) |
 | IdeaProof | Website→Strategie; Wettbewerbsanalyse separat | Archetyp, Mission, UVP, Voice-Achsen, Taglines, Positioning-Map | Credit-basiert (Strategie 50, Competitor 70) | Gründer/Startups | Vergleich ist Zusatzmodul, Tiefe unklar **[unsicher]** | [ideaproof.io](https://ideaproof.io/brand-strategy) |
 | ChatGPT/Perplexity direkt | alles und nichts | Prosa | ~20 $/Mon. | jeder | halluziniert Preise, Logos, Fakten; veraltet | [klue.com](https://klue.com/blog/how-to-do-competitive-analysis-with-ai) |
+
+---
+
+## Anhang B — Schema (M1, Stand 2026-09-05)
+
+Gebaut in Paket **M1 „Layer + Vertrag"**. Drei Tabellen, alle **server-only**
+(`permissions: []`, `rowSecurity: false`), alle **ohne `communityId`** — der
+market-Layer ist wie `brand` ein Silo-Layer und läuft ausschliesslich auf der
+`branding`-Instanz. Migrationen `packages/market/scripts/migrations/001…003`,
+Aufruf `pnpm migrate --app branding --layer market`, idempotent (409 → skip),
+Indizes nur über `createIndexSteps`. Lokal gegen die Dev-Appwrite gefahren
+(2026-09-05, 40 Schritte; zweiter Lauf 40× „existiert bereits").
+
+Die **Zugehörigkeit** ist überall `profileId` = `brand_profiles.$id`. Sie ist
+zugleich die einzige Zugriffsgrenze: alle drei Tabellen sind server-only, es
+gibt keine Row-Permission, die im Zweifel abfinge — jede spätere Route lädt
+deshalb erst über den brand-Vertrag (`loadOwnedProfile`, 404 statt 403) und
+filtert danach.
+
+### `market_competitors` — die Kandidaten (market-001)
+
+| Spalte | Typ | Pflicht | Bedeutung |
+| --- | --- | --- | --- |
+| `profileId` | varchar 64 | ja | `brand_profiles.$id` — die Zugriffsgrenze |
+| `name` | varchar 200 | ja | Vorschlag aus `a.competitors`, eingetragen vom Menschen |
+| `url` | varchar 512 | nein (`''`) | normalisiert; leer bei den drei Nicht-Website-Quellen |
+| `status` | varchar 16 | nein (`pending`) | `pending · reading · fetched · excluded · failed` |
+| `excludedReason` | varchar 32 | nein (`''`) | `robots · tdm · noText · unreachable` — aufzählbar, weil übersetzt |
+| `sourceKind` | varchar 20 | nein (`website`) | die vier Quellen aus §7.2: `website · foundation · library · shared` |
+| `sourceRef` | varchar 128 | nein (`''`) | Profil-Id, Bibliotheks-Schlüssel oder freigegebene Profil-Id |
+| `brandCheckId` | varchar 64 | nein (`''`) | Adresse des Brand-Check-Ergebnisses (§7.3) — **nicht** der Score |
+| `pagesFetched` | varchar 5000 | nein (`''`) | JSON-Liste der gelesenen Adressen (Deckel 8 Seiten, §7.4) |
+| `fetchedAt` | datetime | nein | wann zuletzt gelesen |
+| `rawText` | **MEDIUMTEXT** | nein | gefilterter Seitentext — Zwischenstand, kein Bestand |
+| `rawExpiresAt` | datetime | nein | Ende der 24-h-Frist (§2.9 Nr. 6) |
+
+Indizes: `idx_profile` (profileId) · `idx_profile_status` (profileId, status) ·
+`idx_raw_expires` (rawExpiresAt). Der dritte steht **zusätzlich** zu §2.6: der
+Aufräum-Lauf aus M5 filtert auf die Frist, und Appwrite verlangt für eine
+Filter-Spalte einen Index — eine Aufbewahrungsfrist ohne Lesepfad wäre ein
+Versprechen ohne Einlösung.
+
+### `market_profiles` — das Marktprofil je Kandidat (market-002)
+
+| Spalte | Typ | Pflicht | Bedeutung |
+| --- | --- | --- | --- |
+| `competitorId` | varchar 64 | ja | `market_competitors.$id` |
+| `profileId` | varchar 64 | ja | redundant, damit Kaskade und Besitz-Prüfung nicht über zwei Tabellen springen |
+| `fields` | **MEDIUMTEXT** | nein | die zehn Felder aus §2.2 als JSON (Wert, Beleg, Quelle, `source`, `frequency`) |
+| `aiOutsideView` | **MEDIUMTEXT** | nein | die KI-Aussensicht (§7.5) — **eigene Spalte**, nie mit `fields` vermischt |
+| `extractedAt` | datetime | nein | wann ausgewertet |
+| `model` | varchar 120 | nein (`''`) | welches Modell geantwortet hat |
+| `promptVersion` | varchar 64 | nein (`''`) | Fassung der Fragen (`market-x-1`) |
+| `inputHash` | varchar 64 | nein (`''`) | Stand des Rohtexts — entscheidet über Neu-Rechnen |
+
+Indizes: `idx_profile` (profileId) · `idx_competitor` (competitorId). Beide
+KEY, nicht UNIQUE: ein neuer Abrufstand legt ein neues Profil an, die alten
+sind der Verlauf.
+
+### `market_reports` — der Vergleich je Stand (market-003)
+
+| Spalte | Typ | Pflicht | Bedeutung |
+| --- | --- | --- | --- |
+| `profileId` | varchar 64 | ja | das Branding |
+| `revisionKey` | varchar 64 | ja | Hash über Foundation-Revisionen + URL-Liste + Abrufstände (§2.3 Nr. 5) — der Kostendeckel |
+| `ownProfile` | **MEDIUMTEXT** | nein | das eingefrorene eigene Profil (wie `brand_shares.snapshot`) |
+| `matrix` | **MEDIUMTEXT** | nein | die Gegenüberstellung Wir × W1..W5 mit Zitaten |
+| `conventions` | **MEDIUMTEXT** | nein | was alle sagen (Eintrittskarte) |
+| `overlaps` | **MEDIUMTEXT** | nein | was wir sagen und mindestens ein anderer auch |
+| `whitespace` | **MEDIUMTEXT** | nein | was niemand besetzt — als Frage formuliert |
+| `findingIds` | varchar 2000 | nein (`''`) | JSON-Liste von `brand_findings.$id` (Art `market`) |
+| `model` / `promptVersion` | varchar 120 / 64 | nein (`''`) | wer und mit welcher Fassung |
+
+Indizes: `idx_profile_revision` (profileId, revisionKey) · `idx_profile`
+(profileId). Ein Zeitstempel `createdAt` gibt es nicht als eigene Spalte —
+`$createdAt` ist die Wahrheit, eine Kopie daneben wäre eine zweite.
+
+**Warum so viele MEDIUMTEXT:** MariaDB zählt bei utf8mb4 vier Byte je Zeichen
+gegen ein Zeilenbudget von ~65 KB; MEDIUMTEXT liegt off-row und zählt nicht
+mit (CLAUDE.md, `createMediumtextColumn`). Die drei Listen tragen Zitate mit
+Quell-Adresse und wachsen mit der Zahl der Kandidaten — sie gehören nicht in
+das Budget.
+
+### Was NICHT in M1 steckt
+
+- **`brand_profiles.marketVisibility`** (§7.6, Opt-in fremder Wizard-Marken)
+  ist bewusst **nicht** gebaut. Sie gehört zum Quellen-Wähler und kommt mit
+  **M4**; ihre Semantik ist ausdrücklich die des Brand-Check-Ranking-Opt-ins
+  (`rankingOptIn`, BRAND-CHECK-SEITE.md §5b/§8) — keine zweite
+  Schalter-Semantik, und ob das Feld am Profil oder am Check hängt, wird mit
+  der BC1-Sitzung abgestimmt. Eine Spalte, die vor ihrer Oberfläche in der
+  Datenbank steht, ist ein Opt-in, das niemand geben kann.
+- **`market_library`** bleibt versioniert im Repo (`packages/market/library/`)
+  und geht nie in die Datenbank (§7.6) — M6.
+- **Keine Route, kein KI-Aufruf, keine Oberfläche.** M1 legt Layer, Verträge
+  und Schema; M2/M3/M4 füllen sie.
+
+### Kaskade und Auskunft
+
+Ein gelöschtes Branding nimmt seine market-Zeilen mit. Weil `brand` den
+market-Layer nicht kennen darf (CONCEPT A14), läuft das über eine **Registry**:
+`registerBrandProfileCascade` (`packages/brand/server/utils/brandProfileCascade.ts`),
+in die sich `market` per Nitro-Plugin einträgt. Gerufen wird sie an beiden
+Stellen, an denen ein Branding verschwindet — der Löschroute und dem
+GDPR-Contributor von `brand` —, jeweils **nach** den eigenen Kindern und
+**vor** dem Profil; fail-soft, damit ein Zusatzprodukt das Löschen nie
+blockiert. Der eigene GDPR-Contributor des market-Layers
+(`registerUserDataContributor`, id `market`) beantwortet die andere Frage
+(„dieses Konto geht") über die Brandings des Kontos; `rawText` bleibt aus dem
+Auskunftspaket heraus — es ist fremder Seitentext, kein Datum über den
+Fragenden.
+
+Schema-Parität: Soll-Block `MARKET_TABLES` in
+`scripts/ops/verify-schema-parity.mjs`, aufgenommen in `BRANDING_SOLL`.

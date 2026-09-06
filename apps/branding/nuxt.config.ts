@@ -23,7 +23,17 @@ export default defineNuxtConfig({
    * sein Vollbild-Workspace bringt seinen Rahmen über `BwWorkspace` + das
    * eigene Layout `brand-workspace` selbst mit.
    *
-   * REIHENFOLGE: themes/admin vorn (kanonische EXTENDS_ORDER), dann brand —
+   * SEIT MV1 M1 (2026-09-05) MIT `market`: der Marktvergleich (Plan
+   * docs/plans/BRAND-MARKTVERGLEICH.md) ist ein EIGENER Produkt-Layer, der
+   * per `requires` an `brand` hängt und ihn über EINEN expliziten Vertrag
+   * kennt (`packages/market/server/utils/brandContract.ts`, CONCEPT A14) —
+   * nicht über die extends-Kette. Seine drei Tabellen (market-001…003)
+   * gehören damit auf die branding-Instanz; die Soll-Liste im
+   * Schema-Parity-Wächter zieht mit.
+   *
+   * REIHENFOLGE: themes/admin vorn (kanonische EXTENDS_ORDER), dann brand,
+   * dann market (beide kennt die EXTENDS_ORDER nicht, sie landen in der
+   * Reihenfolge des Site-Manifests am Ende der Produkte) —
    * die Werkstatt-Optik kollidiert mit keiner admin-Datei (eigene
    * Bw-Präfixe, eigene Routen); das frühere App-Layout `dashboard.vue`
    * (Ersatz-Durchreiche) ist GELÖSCHT, damit die echte Shell des
@@ -31,7 +41,7 @@ export default defineNuxtConfig({
    * fordern seit demselben Tag das default-Layout an (Wizard-Nav) — sie
    * sind Kunden-Fläche, keine Betreiber-Fläche.
    */
-  extends: ['../../packages/themes', '../../packages/admin', '../../packages/brand', '../../packages/core', '../../packages/system'],
+  extends: ['../../packages/themes', '../../packages/admin', '../../packages/brand', '../../packages/market', '../../packages/core', '../../packages/system'],
 
   // Port pro App eindeutig vergeben (3000–3009 vergeben — 3006 hält platform,
   // 3009 der brand-Playground; die erste Wahl 3006 kollidierte damit und ist

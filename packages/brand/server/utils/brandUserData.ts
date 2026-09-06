@@ -4,6 +4,7 @@ import { Query } from 'node-appwrite'
 import { BRAND_ACCESS_TABLE } from './brandAccess'
 import type { BrandInviteRow } from './brandInvites'
 import { BRAND_FINDINGS_TABLE } from './brandFindingsStore'
+import { runBrandProfileCascades } from './brandProfileCascade'
 import {
   BRAND_EVENTS_TABLE,
   BRAND_MESSAGES_TABLE,
@@ -148,6 +149,12 @@ export async function brandDeleteUserData(event: H3Event, userId: string): Promi
       for (const row of await safeListAll<Models.Row>(event, tableId, filter)) {
         await remove(tableId, row.$id)
       }
+    }
+    // Die Mitläufer anderer Layer an derselben `profileId` (MV1 M1) — dieselbe
+    // Registry und dieselbe Stelle wie in der Löschroute. Ohne sie bliebe nach
+    // einer Konto-Löschung Inhalt liegen, den keine Route mehr erreicht.
+    for (const count of Object.values(await runBrandProfileCascades(event, profile.$id))) {
+      if (count > 0) deleted += count
     }
     await remove(BRAND_PROFILES_TABLE, profile.$id)
   }

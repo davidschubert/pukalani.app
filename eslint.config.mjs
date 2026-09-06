@@ -264,6 +264,43 @@ export default createConfigForNuxt({
     }],
   },
 }).append({
+  /**
+   * DIE ZWEITE PRODUKT-AUSNAHME: market → brand (MV1 M1, Plan
+   * docs/plans/BRAND-MARKTVERGLEICH.md §2.1 + Davids Entscheidungen 1 und 7).
+   *
+   * `market` ist ein eigener Produkt-Layer mit eigenen Tabellen — und trotzdem
+   * hängt er an `brand`: der Vergleich läuft gegen die BESTÄTIGTEN Felder der
+   * Foundation, benutzt deren Slot-Registry als Adressraum und teilt sich den
+   * SSRF-festen Abruf. Davids Entscheidung 7 sagt ausdrücklich, dass der
+   * Abruf-Vertrag in `brand` BLEIBT und `market` ihn importiert; ihn nach
+   * `core` zu ziehen wäre sauberer, aber ein Schritt mehr als nötig (§6,
+   * „verworfen und warum").
+   *
+   * Die Richtung ist EINSEITIG: brand kennt market nicht und darf es nicht —
+   * dafür sorgt der Block über diesem hier (PRODUCTS), der für
+   * `packages/brand/**` unverändert gilt. Was brand von market braucht (die
+   * Profil-Kaskade), läuft über eine Registry, in die market sich einträgt.
+   *
+   * Und sie ist GEBÜNDELT: im market-Layer greift genau EINE Datei über die
+   * Paketgrenze (`server/utils/brandContract.ts`), alle anderen importieren
+   * von dort. Die Regel hier kann das nicht erzwingen — sie erlaubt den
+   * Ziel-Layer, nicht die Quelldatei —, aber der Kopf jener Datei sagt es,
+   * und eine zweite Sprungstelle fällt in der Durchsicht auf.
+   */
+  files: ['packages/market/**'],
+  rules: {
+    'no-restricted-imports': ['error', {
+      patterns: [
+        { group: otherLayers(['brand']),
+          message: 'market darf NUR den brand-Vertrag kennen (MV1 §2.1) — sonst keine Layer-Imports (CONCEPT.md A14).' },
+      ],
+    }],
+    'pukalani/no-cross-layer-relative': ['error', {
+      allow: alsoAllowed(['brand']),
+      hint: 'market darf NUR den brand-Vertrag kennen (MV1 §2.1) — gebündelt in server/utils/brandContract.ts (CONCEPT.md A14).',
+    }],
+  },
+}).append({
   // Fundament-Layer dürfen NIE von Produkten abhängen (azyklisch).
   // moderation zählt dazu (CLAUDE.md/A14) — ohne diesen Scope wäre es der
   // einzige Layer ganz ohne Import-Backstop. admin/billing stehen ebenfalls

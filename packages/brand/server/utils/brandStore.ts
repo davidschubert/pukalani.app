@@ -804,6 +804,35 @@ export async function loadOwnedProfile(
   return row
 }
 
+/**
+ * DIE BRANDINGS EINES KONTOS — nur ihre Ids.
+ *
+ * Ergänzt für den Vertrag zum market-Layer (MV1 M1): dessen GDPR-Contributor
+ * und seine Kaskade müssen wissen, welche `profileId`s einem Konto gehören,
+ * ohne `brand_profiles` selbst abzufragen. Eine fremde Tabelle direkt zu
+ * lesen wäre genau die implizite Kopplung, die CONCEPT A14 verbietet — und
+ * die zweite Wahrheit über Besitz, sobald die Regel hier sich ändert.
+ *
+ * Nur `ownerType: 'user'`: der community-Zweig ist in Phase 1 tot geschaltet
+ * (`assertBrandOwnerAccess`), und ein Konto ist nicht Eigentümer eines
+ * Community-Brandings. Fehlt die Tabelle (Instanz ohne brand-Migration),
+ * gibt es nichts — ein GDPR-Lauf darf daran nicht scheitern.
+ */
+export async function listOwnedBrandProfileIds(event: H3Event, userId: string): Promise<string[]> {
+  const { tablesDB, databaseId } = brandDb(event)
+  try {
+    const rows = await listAllRows<BrandProfileRow>(tablesDB, databaseId, BRAND_PROFILES_TABLE, [
+      Query.equal('ownerType', 'user'),
+      Query.equal('ownerId', userId),
+    ])
+    return rows.map(row => row.$id)
+  }
+  catch (error) {
+    if (isAppwriteNotFound(error)) return []
+    throw error
+  }
+}
+
 /** Die Profil-Id aus dem Pfad — vorhanden und plausibel, sonst 404. */
 export function requireProfileIdParam(event: H3Event): string {
   const id = getRouterParam(event, 'id')

@@ -12,7 +12,9 @@
   "dependencies": {
     "@nuxt/ui": "catalog:",
     "@nuxtjs/i18n": "catalog:",
-    "nuxt": "catalog:"
+    "node-appwrite": "catalog:",
+    "nuxt": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@nuxt/eslint-config": "catalog:",

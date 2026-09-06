@@ -33,6 +33,22 @@ export default defineAppConfig({
      * Bis dahin ändert diese Zeile nichts Sichtbares; das ist Absicht.
      */
     auth: { providers: ['google'] },
+    /**
+     * DER MARKTVERGLEICH IST AUF DIESER SITE AN (MV1 M1, Plan
+     * docs/plans/BRAND-MARKTVERGLEICH.md §2.1).
+     *
+     * Der Layer-Default ist `false` und bleibt es (Begründung dort): market
+     * ist ein ZUSATZ zum Wizard, kein Teil von ihm, und die Site sagt
+     * ausdrücklich Ja. Damit steht an EINER Stelle, wer dieses Produkt
+     * anbietet — bei einer zweiten Brand-Site wäre das eine echte
+     * Entscheidung und keine Nebenwirkung des `extends`.
+     *
+     * Der Schalter sagt „dieses Deployment kann es". WER es benutzen darf,
+     * entscheidet die Zuteilung je Branding (§1.9), und ausschalten im
+     * Notfall kann der Betreiber über `app_config.products.market.enabled`
+     * ohne Deploy.
+     */
+    market: { enabled: true },
   },
   ui: {},
 })

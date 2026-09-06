@@ -1,18 +1,29 @@
 /**
  * market-Layer — Marktvergleich (Plan: docs/plans/BRAND-MARKTVERGLEICH.md).
  *
- * STAND: **PROTOTYP (Paket M0)**. Der Layer trägt heute AUSSCHLIESSLICH die
- * Komponenten-Vorlagen (`app/components`, `Mk*`) und den Vertrags-Anfang
- * (`shared/marketProfile.ts`). Es gibt KEIN `server/`, KEINE Tabellen, KEINE
- * Migrationen und keinen KI-Aufruf — die kommen mit M1–M4, und sie übernehmen
- * genau diese Komponenten („nichts wird zweimal gebaut", §2.11).
+ * STAND: **M1 „Layer + Vertrag"**. Der Layer trägt die Komponenten-Vorlagen
+ * aus dem Prototyp (`app/components`, `Mk*`), den Produkt-Vertrag
+ * (`shared/marketProfile.ts`), den Ablage-Vertrag (`shared/types/market.ts`),
+ * die drei Migrationen (`scripts/migrations`) und den Server-Unterbau
+ * (`server/utils`, `server/plugins`). Es gibt weiterhin KEINE Route und
+ * KEINEN KI-Aufruf — sie kommen mit M2/M3 und übernehmen genau diese
+ * Bausteine („nichts wird zweimal gebaut", §2.11).
  *
- * KEIN `extends`: der Layer hängt am brand-Layer über einen EXPLIZITEN Vertrag
- * (Plan §2.1, CONCEPT A14) und nicht über die Kette. Solange dieser Vertrag
- * nicht gebaut ist, kennt `market` `brand` gar nicht — die Beschriftung der
- * EIGENEN Felder reicht die Seite als Prop herein (`fieldLabels`), statt dass
- * eine Komponente die brand-Registry auflöst. Der Prototyp macht die Grenze
- * damit sichtbar, statt sie zu verschieben.
+ * ── WARUM HIER FÜR `server/` NICHTS STEHT ────────────────────────────────
+ * Nitro scannt `server/api`, `server/utils` und `server/plugins` eines
+ * erweiterten Layers von selbst — der brand-Layer hat dafür ebenfalls keine
+ * Zeile Konfiguration. Eine Angabe wäre nicht falsch, aber sie behauptete,
+ * hier gäbe es etwas zu entscheiden.
+ *
+ * KEIN `extends`: der Layer hängt am brand-Layer über einen EXPLIZITEN
+ * Vertrag (Plan §2.1, CONCEPT A14) und nicht über die Kette. Der Vertrag ist
+ * seit M1 gebaut und liegt an EINER Stelle
+ * (`server/utils/brandContract.ts`) — nur sie greift über die Paketgrenze,
+ * alle anderen market-Dateien importieren von dort. Die Komponenten bleiben
+ * unberührt: die Beschriftung der EIGENEN Felder reicht die Seite weiterhin
+ * als Prop herein (`fieldLabels`), statt dass eine Komponente die
+ * brand-Registry auflöst — die Grenze bleibt damit auch in der Oberfläche
+ * sichtbar.
  *
  * DER KOMPONENTEN-PRÄFIX `Mk` STEHT IM DATEINAMEN, nicht in einer
  * `components`-Angabe — dieselbe Lösung wie `Bw*` im brand-Layer. Eine
@@ -21,7 +32,8 @@
  * KEIN eigenes Stylesheet: die Werkstatt-Optik ist der Token-Satz `.bw-root`
  * aus `packages/brand/app/assets/css/brand.css`. Zwei Token-Sätze für dieselbe
  * Werkstatt wären zwei Wahrheiten über dieselbe Farbe — der Prototyp erbt sie
- * über das `extends` seines Playgrounds, die Umsetzung über die App.
+ * über das `extends` seines Playgrounds, die Umsetzung über die App
+ * (`apps/branding` listet `brand` und `market` gemeinsam).
  *
  * Der Prototyp läuft im `.playground` — Punkt-Ordner erfasst weder der
  * Manifest-Scan noch `extends`.

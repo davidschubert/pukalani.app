@@ -4,13 +4,20 @@ import type { ProductManifest } from '../core/shared/types/manifest'
  * Marktvergleich — die Behauptungen der Wettbewerber in DERSELBEN Feldstruktur
  * wie die eigene Brand Foundation, jede mit Zitat und Quelle.
  * Plan: docs/plans/BRAND-MARKTVERGLEICH.md (Strategie + Konzept freigegeben
- * 2026-09-05, alle acht Entscheidungen in §6).
+ * 2026-09-05, alle acht Entscheidungen in §6; Prototyp M0/M0b von David
+ * freigegeben 2026-09-05).
  *
- * STAND: **PROTOTYP (M0)** — vier Screens im `.playground`, sonst nichts.
- * `hasMigrations: false` ist deshalb WAHR und nicht vorläufig: die drei
- * Tabellen (`market_competitors`, `market_profiles`, `market_reports`, §2.6)
- * kommen mit M1; erst dann steht der Layer auch in der LAYER_ORDER von
- * `scripts/migrate.mjs` und im Soll von `pnpm ops:schema-parity`.
+ * STAND: **M1 „Layer + Vertrag"** — das Fundament steht: die drei Tabellen
+ * (`market_competitors`, `market_profiles`, `market_reports`, Migrationen
+ * market-001…003, Schema-Anhang B des Plans), der explizite Vertrag zum
+ * brand-Layer (`server/utils/brandContract.ts`), der Store, der
+ * GDPR-Contributor und die Profil-Kaskade. Es gibt weiterhin KEINE Route und
+ * KEINEN KI-Aufruf — die kommen mit M2 (Abruf + Extraktion) und M3
+ * (Vergleich + Befunde).
+ *
+ * `hasMigrations: true` seit M1: der Layer steht damit in der LAYER_ORDER von
+ * `scripts/migrate.mjs` (NACH `brand` — seine Tabellen hängen an
+ * `brand_profiles`) und im BRANDING_SOLL von `pnpm ops:schema-parity`.
  *
  * `requires: ['brand']` ist keine Höflichkeit, sondern die Bedingung: ohne
  * Foundation gibt es keine eigene Behauptung, gegen die man vergleichen
@@ -23,13 +30,13 @@ import type { ProductManifest } from '../core/shared/types/manifest'
  *
  * `apiPrefixes` bleibt LEER, solange es keine Route gibt: ein Präfix, hinter
  * dem nichts liegt, ist ein Versprechen an die Produkt-Gate-Middleware, das
- * niemand einlöst. Er kommt mit der ersten Route in M2.
+ * niemand einlöst. Er kommt mit der ersten Route in M2 (`/api/market`).
  */
 export default {
   key: 'market',
   tier: 'optional',
   requires: ['brand'],
-  hasMigrations: false,
+  hasMigrations: true,
   title: { en: 'Market comparison', de: 'Marktvergleich' },
   description: {
     en: 'Puts your brand foundation next to what competitors publicly say — field by field, every statement with a quote and its source.',

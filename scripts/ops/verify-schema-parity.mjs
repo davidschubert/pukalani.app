@@ -309,6 +309,31 @@ const BRAND_TABLES = [
   'brand_check_corrections',
 ]
 
+/**
+ * market (packages/market) — der Marktvergleich (MV1 M1, Plan
+ * docs/plans/BRAND-MARKTVERGLEICH.md §2.6, Schema-Anhang B). Wie die
+ * brand_*-Tabellen laufen die drei AUSSCHLIESSLICH auf `branding` und stehen
+ * deshalb NUR im BRANDING_SOLL — nicht in der instanzweiten Spalten-Parität.
+ *
+ * Sie hängen an `brand_profiles.$id` (Spalte `profileId`) und fallen mit dem
+ * Branding: die Kaskade läuft über `registerBrandProfileCascade`
+ * (packages/brand/server/utils/brandProfileCascade.ts), der GDPR-Contributor
+ * des Layers über die Brandings des Kontos. Wer die Tabellen hier einträgt,
+ * ohne `pnpm migrate --app branding --layer market` zu fahren, bekommt genau
+ * das gemeldet — das ist die Absicht.
+ */
+const MARKET_TABLES = [
+  // market-001: die Kandidaten (Adresse, Status, Rohtext mit 24-h-Frist,
+  // Quelle nach §7.2, Adresse des Brand-Check-Ergebnisses nach §7.3).
+  'market_competitors',
+  // market-002: das Marktprofil je Kandidat — die zehn Aussen-Felder mit
+  // Beleg (§2.2), die KI-Aussensicht getrennt daneben (§7.5).
+  'market_profiles',
+  // market-003: der Bericht je Stand — Gegenüberstellung, Konventionen,
+  // Überschneidungen, freie Stellen; `revisionKey` ist der Kostendeckel.
+  'market_reports',
+]
+
 const PORTFOLIO_SOLL = [
   ...SYSTEM_TABLES,
   ...ADMIN_TABLES,
@@ -337,10 +362,11 @@ const PORTFOLIO_SOLL = [
 
 /**
  * branding (apps/branding) = branding.supply, das neue Zuhause des
- * Brand-Wizards (docs/plans/BRANDING-SUPPLY-INFRA.md §3). Layer: brand + core +
- * system — mehr nicht, deshalb steht hier NUR der system-Block plus die sieben
- * brand_*-Tabellen. KEIN `admin`: die App zieht den Layer nicht, es gibt dort
- * also auch keinen Betreiber-Changelog.
+ * Brand-Wizards (docs/plans/BRANDING-SUPPLY-INFRA.md §3). Layer laut
+ * Site-Manifest: themes + admin + brand + market (+ core/system als
+ * Fundament) — deshalb steht hier der system-Block plus die brand_*- und die
+ * market_*-Tabellen. `themes` besitzt keine eigenen Tabellen (die
+ * custom_themes/custom_fonts gehören `system`).
  *
  * NOCH NICHT AUSGEROLLT (Plan §6 Schritt 1–4 stehen aus): der Eintrag trägt
  * `ausgerollt: false` und WARNT deshalb nur, wenn die Env-Datei fehlt —
@@ -353,7 +379,9 @@ const PORTFOLIO_SOLL = [
 // Seit 2026-09-03 MIT admin (Davids Dashboard-Entscheidung): die
 // changelog-Tabelle gehört auf die branding-Instanz, sobald
 // `pnpm migrate --app branding` die admin-Migrationen gefahren hat.
-const BRANDING_SOLL = [...SYSTEM_TABLES, ...ADMIN_TABLES, ...BRAND_TABLES]
+// Seit MV1 M1 (2026-09-05) zusätzlich mit `market`: der Marktvergleich ist
+// ein eigener Produkt-Layer im Site-Manifest dieser App.
+const BRANDING_SOLL = [...SYSTEM_TABLES, ...ADMIN_TABLES, ...BRAND_TABLES, ...MARKET_TABLES]
 
 /**
  * photos (apps/photos) = themes admin media core system. NICHT ausgerollt

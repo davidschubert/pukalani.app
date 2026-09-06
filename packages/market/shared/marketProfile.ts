@@ -2,19 +2,24 @@
  * DER VERGLEICHS-VERTRAG — das Marktprofil (Plan §2.2,
  * docs/plans/BRAND-MARKTVERGLEICH.md).
  *
- * PROTOTYP (M0) — ERSTE FASSUNG, die M1 fortführt: hier stehen die TYPEN und
- * die Abbildung `MARKET_FIELDS` auf die Slot-Ids der brand-Registry. Was
- * BEWUSST noch fehlt und mit M1 kommt: das Zod-Schema, die Prüfung
- * `evidence ⊂ rawText` und der Test, der jede Abbildung gegen die
- * brand-Registry hält (jede Id muss auf einen existierenden, nicht
- * deaktivierten Slot zeigen).
+ * STAND M1: hier stehen die TYPEN und die Abbildung `MARKET_FIELDS` auf die
+ * Slot-Ids der brand-Registry. Die ZOD-Schemas der Ablage stehen daneben in
+ * `shared/types/market.ts` (sie prüfen, was aus der Datenbank zurückkommt);
+ * die deterministische Prüfung `evidence ⊂ rawText` kommt mit M2 — sie braucht
+ * den Rohtext und gehört deshalb an die Extraktion, nicht in ein Schema.
  *
- * ── WARUM DIE SLOT-IDS HIER ALS ZEICHENKETTEN STEHEN ──────────────────────
- * `market` importiert `brand` NICHT (CONCEPT A14, Plan §2.1): die Kopplung
- * wird ein EXPLIZITER Vertrag, kein relativer Sprung in ein fremdes Paket.
- * Bis der Vertrag steht, ist die Id eine Zeichenkette — und der Test aus M1
- * ist genau die Sicherung, die eine Zeichenkette braucht. Ein Tippfehler wäre
- * sonst eine Zeile, die im Vergleich einfach leer bleibt.
+ * ── WARUM DIE SLOT-IDS HIER ZEICHENKETTEN BLEIBEN ─────────────────────────
+ * Diese Datei importiert `brand` NICHT, obwohl sie es seit M1 dürfte (Plan
+ * §2.2). Der Grund ist nicht Vorsicht, sondern Zuschnitt: sie ist der PURE
+ * Produktvertrag und wird auch dort gelesen, wo es keinen brand-Layer gibt
+ * (Komponenten, Tests, später der Prompt-Bau). Ein Wert-Import machte aus
+ * einem Vertrag eine Abhängigkeit.
+ *
+ * Der Preis einer Zeichenkette ist eine Sicherung, und die steht:
+ * `tests/marketBrandContract.test.ts` hält JEDE Abbildung gegen die
+ * brand-Registry (existiert der Slot, ist er nicht `deactivated`?) — mit
+ * Gegenprobe. Ein Tippfehler wäre sonst eine Zeile, die im Vergleich einfach
+ * leer bleibt, und die sieht aus wie ein Ergebnis.
  *
  * ── WAS NICHT INS MARKTPROFIL GEHÖRT (§2.2, Absatz „Nicht im Marktprofil") ─
  * Gründungsimpuls, Beschwerden, Konfliktregel, Vision-Zehnjahres-Bild und
