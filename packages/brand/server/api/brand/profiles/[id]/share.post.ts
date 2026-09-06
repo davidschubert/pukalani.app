@@ -39,7 +39,14 @@ import { recordBrandEvent } from '../../../../utils/brandEvents'
  * ── UND SEIT MV1 M5: NICHTS `internal` (BF1 §3a Nr. 7) ────────────────────
  * `brandShareableSlotValues` wirft raus, was die Registry als nicht-öffentlich
  * führt — heute die vier Sessions `a.competitors`, `a.complaints`,
- * `a.challenge`, `a.facts`. Die Zusage stand seit BF1 im Typ
+ * `a.challenge`, `a.facts`. SEIT PAKET G1 kommt die zweite Bedingung dazu
+ * (`sessionTravels`: öffentlich UND `audience: 'foundation'`): auch jede
+ * ROHANTWORT bleibt draussen — `a.origin` ist nicht vertraulich und trotzdem
+ * kein Inhalt eines Abbilds, das die MARKE beschreibt (BF-Leseansicht §2.3).
+ * Der Snapshot trägt damit dasselbe, was die Leseansicht zeigt; die zweite
+ * Hälfte des Doppelnetzes ist der Renderer (`shared/brandFoundation.ts`), der
+ * dieselbe Frage noch einmal stellt — Snapshots von VOR dieser Zeile tragen
+ * alles Bestätigte. Die Zusage stand seit BF1 im Typ
  * (`sensitivity`: „Was per Share-Link und Export standardmässig NICHT
  * reist"), gelesen hat sie hier niemand: ein Schnappschuss trug bis dahin die
  * NAMEN der Wettbewerber samt notierter Schwäche in einen dreissig Tage lang

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { techniqueForStep } from '../shared/brandAdvisors'
+import { computeSourcesHash } from '../shared/brandSessions'
 import {
   BRAND_SLOTS,
   BRAND_SLOT_MAX_LENGTH,
@@ -15,6 +16,7 @@ import {
   questionKeyFor,
   requiredSlotsForStep,
   sessionKindFor,
+  sessionTravels,
   slotById,
   slotIsConfirmable,
   slotIsFilled,
@@ -508,6 +510,88 @@ describe('Session-Vertrag', () => {
     // `b2.rule` darauf verweist.
     expect(BRAND_SLOTS.filter(session => session.sensitivity !== 'public').map(session => session.id))
       .toEqual(['a.competitors', 'a.complaints', 'a.challenge', 'a.facts'])
+  })
+
+  it('gibt jeder Session eine Zielgruppe (BF-Leseansicht §2.3)', () => {
+    for (const session of BRAND_SLOTS) {
+      expect(['foundation', 'internal'], session.id).toContain(session.audience)
+    }
+    // Und beide Werte kommen vor — sonst prüfte die Zeile oben nichts.
+    expect(BRAND_SLOTS.some(session => session.audience === 'foundation')).toBe(true)
+    expect(BRAND_SLOTS.some(session => session.audience === 'internal')).toBe(true)
+  })
+
+  it('macht aus jeder Menschenfrage Material und aus jedem Entwurf eine Festlegung — bis auf die Ausnahmen', () => {
+    // Die Ausnahmen sind namentlich in `slotRegistry.ts` begründet; hier steht,
+    // dass es genau DIESE sind. Eine neue Ausnahme muss also durch diesen Test.
+    const abweichend = BRAND_SLOTS
+      .filter((session) => {
+        const default_ = session.type === 'question' || session.type === 'special' ? 'internal' : 'foundation'
+        return session.audience !== default_
+      })
+      .map(session => session.id)
+    expect(abweichend).toEqual([
+      // vertraulich ⇒ intern (Verbindungsregel, s. u.)
+      'a.competitors',
+      'a.toneAnalysis',
+      'a.facts',
+      // Menschenfragen, die eine Festlegung sind
+      'b.positioningFirstChoice',
+      'c.candidates',
+      'c.livedExamples',
+      'c.conflictRule',
+      'c.teamFilter',
+      'd.hypothesis',
+      'd.gapReveal',
+      'd.emotion',
+      'd.vocabulary',
+      'e.statements',
+      'f.nameType',
+      'f.candidates',
+      'f.shortlist',
+      'result.direction',
+      'result.rating',
+    ])
+  })
+
+  it('DIE VERBINDUNGSREGEL: was nicht reisen darf, ist auch keine Festlegung', () => {
+    for (const session of BRAND_SLOTS.filter(session => session.sensitivity !== 'public')) {
+      expect(session.audience, session.id).toBe('internal')
+    }
+    // GEGENPROBE 1: eine Fassung, die beides behauptet, wird gemeldet.
+    expect(validateSlotRegistry(mutate('a.complaints', { audience: 'foundation' })))
+      .toContain('a.complaints: sensitivity "internal" verlangt audience "internal"')
+    // GEGENPROBE 2: umgekehrt gilt sie NICHT — `a.origin` ist öffentlich und
+    // trotzdem intern (eine Rohantwort, kein Handbuch-Inhalt). Das ist der
+    // ganze Grund für das zweite Feld.
+    expect(slotById('a.origin')!.sensitivity).toBe('public')
+    expect(slotById('a.origin')!.audience).toBe('internal')
+    expect(validateSlotRegistry()).toEqual([])
+  })
+
+  it('`sessionTravels` verlangt BEIDES — öffentlich und Festlegung', () => {
+    expect(sessionTravels(slotById('b.purpose')!)).toBe(true)
+    expect(sessionTravels(slotById('a.origin')!), 'öffentliche Rohantwort').toBe(false)
+    expect(sessionTravels(slotById('a.competitors')!), 'vertraulich').toBe(false)
+    expect(
+      sessionTravels({ sensitivity: 'public', audience: 'foundation', deactivated: true }),
+      'abgeschaltet',
+    ).toBe(false)
+  })
+
+  it('lässt `audience` in KEINEN Hash-Input einfliessen (Registry-Fassung bleibt 1)', () => {
+    // §2.7: das Feld berührt weder Prompt noch Quell-Stand. Liefe es in den
+    // Hash, färbte der Deploy jedes bestätigte Feld eines fertigen Brandings
+    // bernstein.
+    expect(REGISTRY_VERSION).toBe(1)
+    const facts = { 'a.pitch': { value: 'Wir rösten eine Sorte pro Saison.' } }
+    for (const session of BRAND_SLOTS) {
+      const gedreht: BrandSlot = {
+        ...session,
+        audience: session.audience === 'foundation' ? 'internal' : 'foundation',
+      }
+      expect(computeSourcesHash(gedreht, facts), session.id).toBe(computeSourcesHash(session, facts))
+    }
   })
 
   it('lässt Invarianten nur auf Sessions zeigen, die VOR ihnen stehen', () => {

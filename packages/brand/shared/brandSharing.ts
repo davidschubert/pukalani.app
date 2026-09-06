@@ -1,4 +1,4 @@
-import { slotById } from './slotRegistry'
+import { sessionTravels, slotById } from './slotRegistry'
 
 /**
  * WAS DAS KONTO VERLASSEN DARF — PUR (BF1 §3a Nr. 7; eingelöst in MV1 M5).
@@ -35,6 +35,16 @@ import { slotById } from './slotRegistry'
  * ANDERE Frage — „was darf das Konto verlassen?" — und deshalb steht sie
  * daneben und nicht darin.
  *
+ * ── ZWEI FRAGEN, EINE REGEL (Paket G1, BF-Leseansicht §2.3) ───────────────
+ * Seit G1 hängt hier eine ZWEITE Bedingung: `audience: 'foundation'`.
+ * `sensitivity` sagt „darf es raus", `audience` sagt „ist es eine Festlegung
+ * oder nur Material" — `a.origin` (die Gründungsgeschichte) ist nicht
+ * vertraulich und gehört trotzdem nicht in ein Abbild, das die Marke
+ * beschreibt. Beides zusammen ist `sessionTravels` in der Registry, und diese
+ * Datei ruft GENAU DIESE Funktion: der Renderer der Leseansicht
+ * (`brandFoundation.ts`) stellt dieselbe Frage, und zwei Antworten darauf
+ * wären der Anfang eines Lecks, das nur eine der beiden Ansichten zeigt.
+ *
  * ── FAIL-CLOSED ───────────────────────────────────────────────────────────
  * Ein Slot, den die Registry nicht kennt, reist NICHT. Das ist die teure
  * Richtung des Zweifels und hier die richtige: eine unbekannte Id kann eine
@@ -50,13 +60,14 @@ export interface BrandShareableSlotValue {
 }
 
 /**
- * Darf dieser Slot das Konto verlassen? Nur `sensitivity: 'public'` und nur
- * aktive, bekannte Slots (s. Kopf, „Fail-closed").
+ * Darf dieser Slot das Konto verlassen? Nur bekannte, aktive Slots, die
+ * `sessionTravels` bejaht — öffentlich UND Festlegung (s. Kopf,
+ * „Fail-closed" und „Zwei Fragen").
  */
 export function isBrandSlotShareable(slotId: string): boolean {
   const slot = slotById(slotId)
-  if (!slot || slot.deactivated) return false
-  return slot.sensitivity === 'public'
+  if (!slot) return false
+  return sessionTravels(slot)
 }
 
 /**

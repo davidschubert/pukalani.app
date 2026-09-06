@@ -241,6 +241,30 @@ export type BrandPathKind = 'new' | 'relaunch'
 export type BrandTeamKind = 'solo' | 'team'
 
 /**
+ * IST DIESER WERT EINE FESTLEGUNG? (BF-Leseansicht §2.3, Paket G1)
+ *
+ * ── ZWEI FRAGEN, ZWEI FELDER — Muster `as`/`actor` der Datentür ───────────
+ * `sensitivity` beantwortet „DARF es reisen?" (Vertraulichkeit). `audience`
+ * beantwortet die ANDERE Frage: „ist es eine Festlegung, die ins Handbuch
+ * gehört — oder eine Rohantwort, aus der George etwas gemacht hat?"
+ *
+ * `a.origin` (die Gründungsgeschichte) ist nicht vertraulich und trotzdem
+ * kein Guidelines-Inhalt; sie über `sensitivity` zu verschärfen wäre das
+ * falsche Werkzeug, weil das auch den Export und die Werkstatt-Anzeige meint
+ * — der Eigentümer soll seine eigene Antwort im Arbeits-Dokument sehr wohl
+ * sehen. Deshalb ein eigenes Feld statt einer dritten Stufe.
+ *
+ * `foundation` = steht in der Brand Foundation (Leseansicht, geteilter Link,
+ * Druck). `internal` = Material, nie Handbuch-Inhalt.
+ *
+ * DIE REGEL, DIE BEIDE FELDER VERBINDET (`validateSlotRegistry` prüft sie):
+ * `sensitivity !== 'public'` ⇒ `audience: 'internal'`. Ein Feld darf nie
+ * gleichzeitig „Festlegung" heissen und „reist nicht" — `audienceFor` klemmt
+ * das schon beim Bauen, der Wächter fängt jede von Hand gebaute Fassung.
+ */
+export type BrandSessionAudience = 'foundation' | 'internal'
+
+/**
  * DER SESSION-VERTRAG (Plan §3 + §3a) — eine deklarative Beschreibung je Feld,
  * PUR (kein i18n, kein H3, kein Appwrite).
  *
@@ -328,6 +352,8 @@ export interface BrandSessionConfig {
   readonly invariants: readonly BrandInvariant[]
   /** Was per Share-Link und Export standardmässig NICHT reist. */
   readonly sensitivity: BrandSessionSensitivity
+  /** Ob der Wert eine FESTLEGUNG ist (Handbuch) oder Material (s. o.). */
+  readonly audience: BrandSessionAudience
   /** Was der Mensch vorher über den Umfang erfährt. */
   readonly effort: BrandSessionEffort
 }
@@ -452,6 +478,111 @@ const KIND_DEFAULTS: Readonly<Record<BrandSessionKind, {
   },
 }
 
+/**
+ * DER DEFAULT JE FÜLLWEG (§2.3): was George ABLEITET, ENTWIRFT oder was ein
+ * Mensch AUSWÄHLT, ist eine Festlegung; was er frei ANTWORTET, ist Material.
+ *
+ * Die Richtung ist kein Zufall: ein `derivation`/`stage-edit`/`choice`-Wert
+ * hat den Weg durch Entwurf und Bestätigung genommen und steht danach als
+ * Satz da, den man zitieren kann. Eine `question` ist die Rohantwort, aus der
+ * genau das gemacht wurde — sie doppelt zu zeigen, machte aus dem Handbuch
+ * ein Protokoll. `special` (heute nur `d.pairs`) ist ein Instrument, sein
+ * Wert ist eine Messung.
+ */
+const AUDIENCE_BY_TYPE: Readonly<Record<BrandSlotType, BrandSessionAudience>> = {
+  derivation: 'foundation',
+  'stage-edit': 'foundation',
+  choice: 'foundation',
+  question: 'internal',
+  special: 'internal',
+}
+
+/**
+ * DIE AUSNAHMEN VON DER TYP-REGEL (§2.3) — namentlich, mit Grund.
+ *
+ * Sie stehen als TABELLE und nicht als 18 Zusätze in den Katalog-Zeilen: die
+ * Frage „warum steht das im Handbuch und jenes nicht?" wird an EINER Stelle
+ * beantwortet, und wer eine Session hinzufügt, sieht hier, welche Fälle es
+ * überhaupt gibt.
+ *
+ * NICHT AUFGEFÜHRT sind die vier `sensitivity: 'internal'`-Sessions
+ * (`a.competitors`, `a.complaints`, `a.challenge`, `a.facts`): sie kommen
+ * über die Verbindungsregel in `audienceFor` auf `internal`, und sie hier ein
+ * zweites Mal zu nennen hiesse, zwei Stellen gleichzeitig richtig halten zu
+ * müssen.
+ */
+const AUDIENCE_EXCEPTIONS: Readonly<Record<string, BrandSessionAudience>> = {
+  // ── Menschenfragen, die trotzdem eine FESTLEGUNG sind ──────────────────
+  // Sie beantworten keine Vorfrage, sondern legen etwas fest, das ein Leser
+  // anwenden muss: für wen wir erste Wahl sind, was ein Wert konkret heisst,
+  // welcher Wert im Konflikt gewinnt, wonach eingestellt wird, welche Wörter
+  // wir nie benutzen.
+  'b.positioningFirstChoice': 'foundation',
+  'c.livedExamples': 'foundation',
+  'c.conflictRule': 'foundation',
+  'c.teamFilter': 'foundation',
+  'd.vocabulary': 'foundation',
+  // Das ZIEL-GEFÜHL ist eine Festlegung der Stimme (Konzept §2.2 nennt es
+  // als Quelle von Kapitel 6): was der Leser beim Kontakt empfinden soll,
+  // muss jeder wissen, der im Namen der Marke schreibt.
+  'd.emotion': 'foundation',
+
+  // ── Entwürfe und Auswahlen, die trotzdem MATERIAL sind ─────────────────
+  // Rohanalyse der bestehenden Website — eine Beobachtung über das Gestern.
+  'a.toneAnalysis': 'internal',
+  // Kandidaten sind der Vorrat, aus dem gewählt wurde; die Wahl ist `c.final`
+  // bzw. `f.shortlist`/`f.decision`.
+  'c.candidates': 'internal',
+  'f.candidates': 'internal',
+  'f.shortlist': 'internal',
+  // Die Namens-ART und der GESCHMACK steuern die Kandidaten; im Handbuch
+  // steht der Name, nicht wie man auf ihn gekommen ist.
+  'f.nameType': 'internal',
+  // Zwischenschritte des Archetyps: Hypothese aus der Aussenansicht und die
+  // Abweichung zwischen Selbst- und Aussenbild. Die Festlegung sind
+  // `d.primary`/`d.secondary`.
+  'd.hypothesis': 'internal',
+  'd.gapReveal': 'internal',
+  // Baustein des Manifests: die Aussagen-Sammlung ist die Werkbank; im
+  // Handbuch stehen das Manifest, die Zeile für die Wand — und die
+  // Komposition (Ton/Länge/Verwendung, `e.composition`, per Typ-Regel
+  // Festlegung: Konzept §2.2 nennt sie als Quelle von Kapitel 7).
+  'e.statements': 'internal',
+  // Die RICHTUNG rendert Kapitel 10 gesondert (Paket G4, mit Preset-Tokens),
+  // nicht als Wert-Block; die Bewertung ist Betriebs-Rückmeldung.
+  'result.direction': 'internal',
+  'result.rating': 'internal',
+}
+
+/**
+ * Die Zielgruppe EINER Session — Ausnahme vor Typ-Default, und über beidem
+ * die Verbindungsregel zu `sensitivity` (s. `BrandSessionAudience`).
+ */
+function audienceFor(
+  definition: Pick<BrandSlotDefinition, 'id' | 'type'>,
+  sensitivity: BrandSessionSensitivity,
+): BrandSessionAudience {
+  if (sensitivity !== 'public') return 'internal'
+  return AUDIENCE_EXCEPTIONS[definition.id] ?? AUDIENCE_BY_TYPE[definition.type]
+}
+
+/**
+ * REIST DIESE SESSION? — die EINE Frage hinter Share-Link, Export und
+ * Leseansicht (§2.3/§2.8): öffentlich UND Festlegung.
+ *
+ * Sie ist eine UND-Verknüpfung und keine Wahl zwischen zwei Feldern: „darf
+ * es raus" und „gehört es ins Handbuch" sind verschiedene Fragen, und beide
+ * müssen mit Ja beantwortet sein. Deaktivierte Sessions reisen ebenfalls
+ * nicht — sie gehören nicht mehr zum Bauplan der Marke, also auch nicht in
+ * ihr Abbild.
+ */
+export function sessionTravels(
+  session: Pick<BrandSlot, 'sensitivity' | 'audience' | 'deactivated'>,
+): boolean {
+  if (session.deactivated) return false
+  return session.sensitivity === 'public' && session.audience === 'foundation'
+}
+
 const EMPTY_STRINGS: readonly string[] = []
 const EMPTY_EXAMPLES: BrandSessionExamples = {
   new: { de: EMPTY_STRINGS, en: EMPTY_STRINGS },
@@ -475,6 +606,7 @@ function defineSession(definition: BrandSlotDefinition): BrandSessionConfig {
   const defaults = KIND_DEFAULTS[kind]
   const dependencies = definition.dependencies ?? []
   const schema: BrandSlotSchema = { kind: definition.kind, maxLength: definition.maxLength }
+  const sensitivity: BrandSessionSensitivity = content?.sensitivity ?? 'public'
 
   return {
     id: definition.id,
@@ -533,7 +665,11 @@ function defineSession(definition: BrandSlotDefinition): BrandSessionConfig {
       ...content?.form,
     },
     invariants: content?.invariants ?? [],
-    sensitivity: content?.sensitivity ?? 'public',
+    sensitivity,
+    // STRUKTUR, nicht Inhalt: `audience` steht bewusst nicht in
+    // `sessionContent.ts` (dort lebt der Prompt-Text) — es beschreibt, wo ein
+    // Wert HINGEHÖRT, und das entscheidet der Katalog.
+    audience: audienceFor(definition, sensitivity),
     effort: content?.effort ?? defaults.effort,
   }
 }
@@ -890,6 +1026,14 @@ export function validateSlotRegistry(slots: readonly BrandSlot[] = BRAND_SLOTS):
         `${slot.id}: ${slot.effort.turns} Züge tragen keine Eröffnung `
         + `plus ${slot.answers.maxProbes} Nachfragen`,
       )
+    }
+    // WAS NICHT REISEN DARF, IST AUCH KEINE FESTLEGUNG (§2.3). `audienceFor`
+    // klemmt das beim Bauen; hier steht der Wächter für jede Fassung, die
+    // NICHT durch `defineSession` gegangen ist — ein von Hand gepatchter Slot,
+    // ein künftiger Upcaster, ein Test mit eigener Liste. Ohne ihn wäre die
+    // Zusage „intern reist nicht" eine Eigenschaft genau EINER Funktion.
+    if (slot.sensitivity !== 'public' && slot.audience !== 'internal') {
+      problems.push(`${slot.id}: sensitivity "${slot.sensitivity}" verlangt audience "internal"`)
     }
     // Vier Fragefassungen je Slot (Pfad × Weiche W3) liest niemand mehr gegen.
     if (slot.teamVariant && slot.pathVariants) {

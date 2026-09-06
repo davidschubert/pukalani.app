@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import { brandShareableSlotValues, isBrandSlotShareable } from '../shared/brandSharing'
 import { BRAND_SLOTS, slotById } from '../shared/slotRegistry'
@@ -76,5 +77,45 @@ describe('brandShareableSlotValues', () => {
 
   it('eine leere Liste bleibt leer (kein Sonderweg)', () => {
     expect(brandShareableSlotValues([])).toEqual([])
+  })
+})
+
+/**
+ * SEIT PAKET G1 HÄNGT EINE ZWEITE BEDINGUNG DARAN (BF-Leseansicht §2.3):
+ * `audience: 'foundation'`. Ohne sie fror der Snapshot auch jede ROHANTWORT
+ * ein — nicht vertraulich, aber Material und kein Handbuch-Inhalt.
+ */
+describe('der Snapshot trägt nur Festlegungen', () => {
+  const confirmed = [
+    { slotId: 'a.complaints', value: 'Zweimal war die Suppe um 13 Uhr alle.' },
+    { slotId: 'a.competitors', value: 'Kona Trading — teuer, langsam' },
+    { slotId: 'a.origin', value: 'Angefangen hat es mit einer geliehenen Maschine.' },
+    { slotId: 'a.pitch', value: 'Eine Rösterei mit Ausschank auf Oʻahu.' },
+  ]
+
+  it('lässt von vier bestätigten Werten genau EINEN durch', () => {
+    // GEGENPROBE ist die Zeile darunter: ohne Filter wären es vier — die
+    // Beschwerde, das Wettbewerber-Profil und die Gründungsgeschichte
+    // eingeschlossen, dreissig Tage lang öffentlich abrufbar.
+    expect(confirmed).toHaveLength(4)
+    expect(brandShareableSlotValues(confirmed).map(entry => entry.slotId)).toEqual(['a.pitch'])
+  })
+
+  it('hält die ROHANTWORT zurück, obwohl sie öffentlich ist', () => {
+    // `a.origin` ist `sensitivity: 'public'` — das allein hätte sie
+    // durchgelassen. Zurück hält sie `audience: 'internal'`.
+    expect(slotById('a.origin')?.sensitivity).toBe('public')
+    expect(isBrandSlotShareable('a.origin')).toBe(false)
+  })
+
+  it('DER SCHREIBWEG BENUTZT DIESEN FILTER (Doppelnetz §2.8)', () => {
+    // Der Filter ist wertlos, solange ihn niemand ruft — genau das war der
+    // Zustand vor MV1 M5. Der Lesepfad (`brandFoundation.ts`) hat seinen
+    // eigenen Beweis; hier steht der Schreibpfad.
+    const route = readFileSync(
+      new URL('../server/api/brand/profiles/[id]/share.post.ts', import.meta.url),
+      'utf8',
+    )
+    expect(route).toContain('brandShareableSlotValues(confirmedSlotValues(row))')
   })
 })

@@ -213,7 +213,13 @@ zwei Felder — nach dem Muster `as`/`actor` der Datentür:
    `confirmedSlotValues` ALLE bestätigten Werte ein, Wettbewerber-Schwächen
    und Beschwerden eingeschlossen. Der Vertrag steht, der Code hält ihn nicht;
    sichtbar ist es nur deshalb nicht, weil es die Share-Seite noch nicht gibt.
-   G1 schliesst das (Filter im Snapshot UND im Renderer, Gegenprobe).
+   **GESCHLOSSEN 2026-09-06 durch die Nachbar-Sitzung (MV1 M5, Commit
+   ae3b70d7):** `brandShareableSlotValues` in `shared/brandSharing.ts` wirft
+   beim Veröffentlichen alles heraus, was nicht `public` ist — aufgefallen am
+   Massstab des Marktvergleichs („vertraulich wie a.competitors"). G1 baut
+   darauf auf: die `audience`-Bedingung wird in DIESE Regel integriert (eine
+   Wahrheit, kein zweiter Filter), der Renderer filtert zusätzlich nach
+   Registry (Doppelnetz §2.8).
 2. **Ist es eine Festlegung?** — ein NEUES, additives Feld `audience:
    'foundation' | 'internal'` je Session (Muster `defineSession`). Eine
    Rohantwort wie a.origin ist nicht vertraulich und trotzdem kein
@@ -434,7 +440,7 @@ Nuxt-UI-Komponenten, echter Inhalt (Kailua Coffee Co.):
 
 | # | Paket | Inhalt | Gate | Beweis |
 | --- | --- | --- | --- | --- |
-| G1 | **Regel + Renderer** | `audience` in der Registry, Regel `sensitivity ≠ public ⇒ internal`, `share.post.ts` filtert den Snapshot (Befund §2.3), `buildBrandFoundation` (pur), Do/Don't-Paarung, KI-Rahmen-Slots | — | Unit: jede Session hat `audience`; Gegenprobe `internal` verschwindet; Snapshot v1 von heute rendert ohne Rohantworten und ohne die vier `internal`-Sessions; Route-Test: neuer Snapshot enthält a.complaints nicht; Hash-Inputs unverändert |
+| G1 ✅ 2026-09-06 | **Regel + Renderer** | `audience` in der Registry, Regel `sensitivity ≠ public ⇒ internal`, `brandShareableSlotValues` (MV1 M5) um `audience` erweitert — reist = public UND foundation, `buildBrandFoundation` (pur), Do/Don't-Paarung, KI-Rahmen-Slots | — | Unit: jede Session hat `audience`; Gegenprobe `internal` verschwindet; Snapshot v1 von heute rendert ohne Rohantworten und ohne die vier `internal`-Sessions; Route-Test: neuer Snapshot enthält a.complaints nicht; Hash-Inputs unverändert |
 | G2 | **Private Leseansicht + Print** | `/brand/:id/foundation`, Rail-Eintrag, Knopf im Dokument, `@media print` | Davids Blick auf die Seite | Playwright: 404 bei fremdem Branding; Kapitel-Reihenfolge = Registry; Druck-Snapshot |
 | G3 | **Teilen sichtbar** | Share-Dialog, `/brand/share/:token`, og-Meta, Fuß, Ereignisse | Davids Blick auf die Empfänger-Ansicht | verify-Skript: veröffentlichen → Seite 200 → widerrufen → 404; abgelaufen → 404; kein Token im Log; `internal`-Werte nie im HTML (Gegenprobe) |
 | G4 | **Schranke + Richtung** (= P7-Rest) | Kapitel 10 gesperrt mit CTA; danach `result.direction` mit 2–3 Richtungen in Preview-iframes | **David:** Schranken-Text + Preisanker; Richtungen-Katalog | Playwright: Richtung wählen ⇒ Kapitel 10 zeigt Preset; Share-Snapshot trägt Preset |
@@ -483,3 +489,34 @@ Katalog für `result.direction` (G4) — beides erst nach dem Prototyp.
 | lovable.dev/templates/…/brand-kit-brand-extraction-design-system-template | Generator/Extraktor | URL oder Assets rein → Farben (WCAG), Schriften, Voice & Tone, Tokens (JSON/CSS/Tailwind), PDF, `design.md` für KI-Agenten; öffentliche Share-Links |
 | looka.com/blog/15-brand-guidelines-examples… | Ratgeber + Generator | nicht abrufbar (Cloudflare-Sperre); Looka verkauft Logo-Generator + Brand Kit — Sorte 2 |
 | squarespace.com/designer/home · …/graphic-designers | Marktplatz/Werkzeug | Designer-Vermittlung bzw. Portfolio/Kundenabwicklung; keine Guidelines — Nähe zur „Creator beauftragen"-Idee |
+
+---
+
+## 7. Nachtrag G1 (2026-09-06) — die `audience`-Zuordnung und drei Entscheidungen
+
+G1 ist gebaut (Registry-Feld `audience`, `sessionTravels` = public UND
+foundation als EINE Regel hinter `brandShareableSlotValues`, purer Renderer
+`buildBrandFoundation` in `shared/brandFoundation.ts`, 21 neue Prüfungen;
+Live-Beweis an der Dev-Instanz: ein frischer Snapshot trägt nur noch
+reisefähige Festlegungen). Zuordnung: 31 Sessions `foundation`, 37 `internal`
+— Typ-Regel (question/special ⇒ internal, sonst foundation) plus die
+Ausnahmetabelle `AUDIENCE_EXCEPTIONS` in `slotRegistry.ts`, die der Test
+„bis auf die Ausnahmen" namentlich nagelt. Drei Fälle, die der Agent als
+unsicher meldete, entschieden nach dem Konzept:
+
+1. **`d.emotion` (Ziel-Gefühl) ⇒ `foundation`** — §2.2 nennt es als Quelle
+   von Kapitel 6; wer im Namen der Marke schreibt, muss es kennen.
+2. **`e.composition` (Ton, Länge & Verwendung des Manifests) ⇒ `foundation`**
+   — §2.2 nennt es für Kapitel 7; als `choice` ist es ohnehin die Typ-Regel.
+3. **`b2.roleOfMaster` ⇒ `internal`** — der alte Registry-Test hielt es auf
+   `sensitivity: public`, „weil `b2.rule` darauf verweist"; die FESTLEGUNG ist
+   `b2.rule` selbst, die Antwort ist Herleitung. Es darf reisen (public),
+   steht aber nicht im Handbuch (audience) — genau die Trennung aus §2.3.
+
+Bewusste Abweichungen des Renderers von der Dummy-Form (Begründung im
+Dateikopf): Texte reisen als i18n-SCHLÜSSEL (`labelKey`/`titleKey`,
+`brand.foundation.*`), weil Inhaltssprache der Marke ≠ Sprache des Handbuchs;
+neue Block-Art `choice` (Archetyp, Architektur-Modell als Ids, die UI löst per
+i18n auf); `locked` trägt nur das Element. G2 übernimmt `FdChapter` und
+ergänzt den `choice`-Zweig sowie die Schlüssel `brand.foundation.chapter.*`,
+`.label.*`, `.column.*`, `.visual.*`.
