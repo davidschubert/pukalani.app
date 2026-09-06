@@ -3,9 +3,10 @@
  * Datenbank (Anhang B).
  *
  * ── HIER STEHEN NUR ECHTE, VON HAND GEPRÜFTE MARKEN ───────────────────────
- * Stand 2026-09-06 (MV1 M6b): ZWEI Einträge — `the-barn` (alle neun belegten
- * Felder) und `apple` (fünf; `purpose` hat David bei der Prüfung gestrichen).
- * Beide sind am 2026-09-06 von David Schubert VON HAND geprüft: jedes Zitat
+ * Stand 2026-09-06 (MV1 M6b, lib-4): DREI Einträge — `the-barn` (alle neun
+ * belegten Felder), `apple` (fünf; `purpose` hat David bei der Prüfung
+ * gestrichen) und `nike` (alle sieben belegten Felder).
+ * Alle drei sind am 2026-09-06 von David Schubert VON HAND geprüft: jedes Zitat
  * gegen die genannte Quellseite gehalten, jede Zuordnung bestätigt, keine
  * personenbezogenen Daten, keine Wertung (Runbook Schritt 4). Das steht als
  * `verifiedAt`/`verifiedBy` an jedem Eintrag, und `status: 'verified'` ist der
@@ -52,7 +53,7 @@
  */
 
 /** Fassung dieser Datei. Jede inhaltliche Änderung hebt sie (`--promote` tut es selbst). */
-export const MARKET_LIBRARY_VERSION = 'lib-3'
+export const MARKET_LIBRARY_VERSION = 'lib-4'
 
 /**
  * Die Einträge. Bewusst `unknown[]`-frei getypt gelassen: die WAHRHEIT über
@@ -209,6 +210,77 @@ export const MARKET_LIBRARY_ENTRIES = [
           'The most advanced Mac laptops for demanding tasks',
         ],
         quote: 'Discover the innovative world of Apple',
+      },
+    ],
+  },
+{
+    key: 'nike',
+    status: 'verified',
+    name: 'Nike',
+    homepage: 'https://www.nike.com',
+    category: 'Sportartikel',
+    verifiedAt: '2026-09-06',
+    verifiedBy: 'David Schubert',
+    fields: [
+      {
+        fieldId: 'categoryLanguage',
+        value: 'Athletic footwear and apparel',
+        sourceUrl: 'https://www.nike.com/',
+        confidence: 'stated',
+        quote: 'Inspiring the world\'s athletes, Nike delivers innovative products, experiences and services.',
+      },
+      {
+        fieldId: 'pitch',
+        value: 'Nike delivers innovative products, experiences and services to inspire the world\'s athletes.',
+        sourceUrl: 'https://www.nike.com/',
+        confidence: 'stated',
+        quote: 'Inspiring the world\'s athletes, Nike delivers innovative products, experiences and services.',
+      },
+      {
+        fieldId: 'audience',
+        value: 'Athletes of all levels, from professional to casual sports enthusiasts.',
+        sourceUrl: 'https://www.nike.com/',
+        confidence: 'implied',
+        quote: 'Inspiring the world\'s athletes',
+      },
+      {
+        fieldId: 'values',
+        value: 'Innovation',
+        sourceUrl: 'https://www.nike.com/',
+        confidence: 'stated',
+        items: [
+          'Innovation',
+        ],
+        quote: 'Nike delivers innovative products, experiences and services.',
+      },
+      {
+        fieldId: 'toneWords',
+        value: 'Inspirational, energetic, action-oriented',
+        sourceUrl: 'https://www.nike.com/',
+        confidence: 'implied',
+        items: [
+          'Inspirational',
+          'energetic',
+          'action-oriented',
+        ],
+        quote: 'Inspiring the world\'s athletes, Nike delivers innovative products, experiences and services.',
+      },
+      {
+        fieldId: 'tagline',
+        value: 'Just Do It',
+        sourceUrl: 'https://www.nike.com/',
+        confidence: 'stated',
+        quote: 'Nike. Just Do It. Nike.com',
+      },
+      {
+        fieldId: 'keyMessages',
+        value: 'Classic silhouettes and cutting-edge innovation',
+        sourceUrl: 'https://www.nike.com/',
+        confidence: 'stated',
+        items: [
+          'Classic silhouettes and cutting-edge innovation',
+        ],
+        quote: 'Classic silhouettes and cutting-edge innovation to build your game from the ground up.',
       },
     ],
   },
