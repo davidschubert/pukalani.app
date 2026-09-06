@@ -434,6 +434,22 @@ export function acceptTargets(finding: { slots: readonly string[] }): string[] {
 export interface BrandWorkspaceNavExtra {
   /** Stabiler Schlüssel — er wird die `id` des Leisten-Eintrags. */
   key: string
+  /**
+   * DER PRODUKT-SCHALTER, UNTER DEM DIESER EINTRAG STEHT (`pukalani.<key>.
+   * enabled`) — PFLICHT, und das ist die eigentliche Sicherung.
+   *
+   * Ein Produkt-Layer bringt zwei Dinge mit: eine Seite und ein Build-Gate,
+   * das sie abschaltet. Bis MV1 M4 las nur die SEITE ihr Gate — der
+   * Leisten-Eintrag stand auch bei ausgeschaltetem Produkt da und führte auf
+   * ein 404. „Ein Wähler ohne Wirkung wäre eine Lüge" (CLAUDE.md, B5) gilt
+   * für einen Menüpunkt genauso.
+   *
+   * Das Feld ist PFLICHT statt optional, weil ein fehlender Schalter sonst
+   * „immer sichtbar" hiesse: der nächste Eintrag wäre wieder ungedeckt, und
+   * zwar lautlos. `brand` liest den Wert nur als NAMEN — welcher Schalter
+   * dahinter steht, weiss allein die Konfiguration (CONCEPT A14).
+   */
+  productKey: string
   /** i18n-Schlüssel der Beschriftung (der EIGENE Layer liefert den Text). */
   labelKey: string
   /** Glyphe, z. B. `i-ph-compass` — die Leiste hat keine eigene Vorstellung. */
@@ -472,9 +488,18 @@ export interface BrandWorkspaceNavExtraState {
  * legt den Locale-Pfad um `to`. Eine Funktion, die hier schon Sätze baute,
  * wäre in der zweiten Sprache falsch und im Test grün (s. Kopf).
  *
- * Ein Eintrag ohne `key`, `labelKey` oder `to` fällt still weg: die Liste
- * kommt aus einer Konfiguration, und eine halb ausgefüllte Zeile soll keinen
- * Knopf ohne Ziel erzeugen.
+ * Ein Eintrag ohne `key`, `labelKey`, `to` oder `productKey` fällt still weg:
+ * die Liste kommt aus einer Konfiguration, und eine halb ausgefüllte Zeile
+ * soll keinen Knopf ohne Ziel erzeugen.
+ *
+ * ── AUS HEISST WEG, NICHT GESPERRT (MV1 M4-Nachfix) ──────────────────────
+ * `productEnabled` beantwortet „bietet dieses Deployment das Produkt an?".
+ * Ist die Antwort Nein, verschwindet der Eintrag GANZ — anders als bei
+ * `lockedUntil`, wo er sichtbar-gesperrt bleibt. Die zwei Fälle sind
+ * verschiedene Sätze: eine Sperre sagt „noch nicht, hol dir erst Kapitel B",
+ * ein ausgeschaltetes Produkt sagt „hier gibt es das nicht". Einen Eintrag
+ * für etwas zu zeigen, das diese App gar nicht kennt, wäre Werbung für eine
+ * Adresse, die 404 antwortet.
  */
 export function resolveWorkspaceNavExtras(
   extras: readonly BrandWorkspaceNavExtra[],
@@ -483,13 +508,21 @@ export function resolveWorkspaceNavExtras(
     /** Die Kapitel, die ABGENOMMEN sind (`brand_steps.state === 'done'`). */
     doneStepKeys: readonly string[]
     findings: readonly { kind: BrandFindingKind, status: BrandFindingStatus }[]
+    /**
+     * Steht `pukalani.<productKey>.enabled` auf `true`? Hereingereicht statt
+     * hier gelesen, weil diese Datei PUR ist und keine Nuxt-Konfiguration
+     * kennt — und weil der Aufrufer so gezwungen ist, die Frage überhaupt zu
+     * stellen.
+     */
+    productEnabled: (productKey: string) => boolean
   },
 ): BrandWorkspaceNavExtraState[] {
   const done = new Set(input.doneStepKeys)
   const states: BrandWorkspaceNavExtraState[] = []
 
   for (const extra of extras) {
-    if (!extra?.key || !extra.labelKey || !extra.to) continue
+    if (!extra?.key || !extra.labelKey || !extra.to || !extra.productKey) continue
+    if (!input.productEnabled(extra.productKey)) continue
     const counterKind = extra.counterKind
     states.push({
       key: extra.key,

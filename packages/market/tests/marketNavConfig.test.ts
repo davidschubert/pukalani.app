@@ -40,6 +40,21 @@ describe('pukalani.brand.workspaceNavExtras', () => {
     expect(CONFIG).toContain(`to: '/brand/:profileId/market'`)
   })
 
+  /**
+   * DER EINTRAG NENNT SEINEN PRODUKT-SCHALTER (MV1 M4-Nachfix).
+   *
+   * Ohne `productKey` liesse `resolveWorkspaceNavExtras` den Eintrag weg —
+   * die Leiste wäre also nicht falsch, sondern leer, und das fiele erst
+   * jemandem auf, der „Markt" sucht. Der Wert muss ausserdem der Schalter
+   * DIESER Datei sein: zeigte er auf ein fremdes Produkt, stünde der Eintrag
+   * genau dann da, wenn etwas anderes angeschaltet ist.
+   */
+  it('nennt den Produkt-Schalter, den diese Datei selbst deklariert', () => {
+    expect(CONFIG).toContain(`productKey: 'market'`)
+    // `market: { enabled: … }` — der Schalter, auf den `productKey` zeigt.
+    expect(CONFIG).toMatch(/\n\s{4}market:\s*\{[\s\S]*?enabled:/)
+  })
+
   it('GEGENPROBE: der Vertrag nennt wirklich ein Kapitel', () => {
     expect(MARKET_UNLOCK_STEP.length).toBeGreaterThan(0)
   })

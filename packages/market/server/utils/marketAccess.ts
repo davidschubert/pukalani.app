@@ -6,11 +6,15 @@ import { MARKET_UNLOCK_STEP } from '../../shared/marketProfile'
 import { requireOwnedMarketProfile } from './marketStore'
 
 /**
- * DIE TÜR JEDER `/api/market`-ROUTE — drei Fragen in dieser Reihenfolge, und
+ * DIE TÜR JEDER `/api/market`-ROUTE — vier Fragen in dieser Reihenfolge, und
  * die Reihenfolge ist selbst eine Regel.
  *
+ *  0. BIETET DIESE APP DAS PRODUKT ÜBERHAUPT AN? (`requireMarketEnabled`,
+ *     Build-Gate `pukalani.market.enabled`, 404.) Ganz vorn, weil sie ohne
+ *     jede Auskunft beantwortbar ist — eine App ohne dieses Produkt hat diese
+ *     Adressen nicht.
  *  1. DARF DIESES KONTO ÜBERHAUPT? (`requireBrandAccess`, Beta-Gate des
- *     Wizards, 404 statt 403.) Zuerst, weil die Antwort keinen Datenzugriff
+ *     Wizards, 404 statt 403.) Dann, weil die Antwort keinen Datenzugriff
  *     braucht: ohne Session ist sie fest.
  *  2. GEHÖRT IHM DIESES BRANDING? (`loadOwnedProfile` über den Store, 404.)
  *     Alle market_*-Tabellen sind server-only; das hier IST die
@@ -55,8 +59,42 @@ export function requireCompetitorIdParam(event: H3Event): string {
   return id
 }
 
-/** Schritt 1 und 2 — für jede Route. */
+/**
+ * SCHRITT 0 — DAS BUILD-GATE DES PRODUKTS (`pukalani.market.enabled`).
+ *
+ * ── ZWEI EBENEN, ZWEI FRAGEN, KEIN DOPPEL (MV1 M4-Nachfix) ───────────────
+ * Der Core hat mit `04.product-gate.ts` schon einen Wächter vor diesen
+ * Routen — der prüft aber etwas ANDERES: den LAUFZEIT-Zustand
+ * `app_config.products.market.enabled`, also die Notabschaltung des
+ * Betreibers ohne Deploy. Fehlt dort ein Eintrag, gilt das Produkt als AN
+ * (`isProductStateEnabled`), und genau das war die Lücke: eine App, die den
+ * Layer montiert, das Produkt in ihrer `app.config` aber auf `false` lässt,
+ * beantwortete jede `/api/market`-Route trotzdem.
+ *
+ * Diese Zeile prüft die andere Ebene: „bietet dieses DEPLOYMENT das Produkt
+ * an?". Dieselbe Frage stellt die Seite (`market.vue`) vor ihrem ersten
+ * Abruf, und sie muss dieselbe Antwort geben — sonst hätte eine dunkle App
+ * eine unsichtbare, aber bediente API.
+ *
+ * 404, nicht 403: eine App ohne dieses Produkt hat diese Adresse nicht, und
+ * das ist die ehrliche Antwort auf eine unbekannte Adresse.
+ */
+export function requireMarketEnabled(): void {
+  // OHNE `event` — wie überall sonst im Layer (`marketAi`, `marketQuota`):
+  // die App-Config ist eine Eigenschaft des Builds, nicht des Requests.
+  const appConfig = useAppConfig() as { pukalani?: { market?: { enabled?: boolean } } }
+  if (appConfig.pukalani?.market?.enabled === true) return
+  throw createError({ status: 404, statusText: 'Not Found' })
+}
+
+/**
+ * Schritt 0, 1 und 2 — für jede Route. ALLE zehn `/api/market`-Handler gehen
+ * hier durch (geprüft beim Nachfix); eine neue Route, die es nicht täte,
+ * stünde ohne Produkt-Gate und ohne Eigentums-Beleg da — sie gehört deshalb
+ * ebenfalls hierher und nicht an eine eigene Prüfkette.
+ */
 export async function requireMarketProfile(event: H3Event): Promise<MarketRouteContext> {
+  requireMarketEnabled()
   const { userId } = await requireBrandAccess(event)
   const profileId = requireProfileIdParam(event)
   const profile = await requireOwnedMarketProfile(event, userId, profileId)

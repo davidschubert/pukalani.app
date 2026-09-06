@@ -48,6 +48,13 @@ export default defineAppConfig({
       workspaceNavExtras: [
         {
           key: 'market',
+          // DER SCHALTER, UNTER DEM DIESER EINTRAG STEHT: `pukalani.market
+          // .enabled` (unten in dieser Datei, Default `false`). Ohne dieses
+          // Feld stünde „Markt" auch in einer App, die den Layer zwar montiert
+          // hat, das Produkt aber ausgeschaltet lässt — und der Klick landete
+          // auf dem 404, das die Seite selbst wirft. WÖRTLICH wie `lockedUntil`
+          // und aus demselben Grund (s. Kommentar dort).
+          productKey: 'market',
           labelKey: 'market.nav.market',
           icon: 'i-ph-compass',
           to: '/brand/:profileId/market',

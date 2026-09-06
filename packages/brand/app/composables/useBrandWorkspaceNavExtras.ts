@@ -32,6 +32,23 @@ import { useBrandWorkspaceStore } from '../stores/brandWorkspace'
  * (`resolveBrandJourney` reicht das als `state: 'done'` durch). Dieselbe
  * Tatsache prüft der Server an der Route (`marketUnlocked`) — die Leiste
  * ERKLÄRT die Sperre, sie setzt sie nicht durch.
+ *
+ * ── DAS PRODUKT-GATE WIRD HIER GELESEN, UND ZWAR GENERISCH (MV1 M4-Nachfix) ─
+ * Jeder Eintrag nennt seinen eigenen Schalter (`productKey`), diese Stelle
+ * schlägt ihn nach: `pukalani.<productKey>.enabled === true`. Ein Eintrag
+ * ohne eingeschaltetes Produkt fällt weg — vorher stand „Markt" auch in einer
+ * App, die den Layer zwar montiert, das Produkt aber ausgeschaltet hat, und
+ * der Klick landete auf dem 404 der Seite (die ihr Gate schon las).
+ *
+ * `brand` nennt dabei NIRGENDS ein Produkt: es liest einen Namen aus der
+ * Konfiguration und fragt die Konfiguration nach ihm (CONCEPT A14). Deshalb
+ * die Sicht als `Record` — ein fest getippter Zugriff `appConfig.pukalani
+ * .market` wäre genau die Kopplung, die dieser Erweiterungspunkt vermeidet.
+ *
+ * FAIL-CLOSED: fehlt der Schlüssel, gilt das Produkt als AUS. Der Layer, dem
+ * der Eintrag gehört, bringt seinen Default selbst mit (`app/app.config.ts`);
+ * fehlt er trotzdem, ist „nicht anbieten" die harmlosere Antwort als ein
+ * Menüpunkt ins Leere.
  */
 export interface BrandWorkspaceNavExtrasInput {
   profileId: MaybeRefOrGetter<string>
@@ -53,6 +70,7 @@ export function useBrandWorkspaceNavExtras(
     const configured = (appConfig.pukalani?.brand?.workspaceNavExtras ?? []) as BrandWorkspaceNavExtra[]
     if (!configured.length) return []
 
+    const products = (appConfig.pukalani ?? {}) as Record<string, { enabled?: boolean } | undefined>
     const active = toValue(input.activeKey) ?? ''
     const states = resolveWorkspaceNavExtras(configured, {
       profileId: toValue(input.profileId),
@@ -60,6 +78,7 @@ export function useBrandWorkspaceNavExtras(
         .filter(entry => entry.state === 'done')
         .map(entry => entry.stepKey),
       findings: toValue(input.findings),
+      productEnabled: productKey => products[productKey]?.enabled === true,
     })
 
     return states.map((state): BwRailStep => ({

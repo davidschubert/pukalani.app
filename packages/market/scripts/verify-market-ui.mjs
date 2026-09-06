@@ -54,6 +54,14 @@
  *
  * `KEEP=1` lässt das Test-Branding stehen (für den Klick-Beweis im Browser);
  * ohne das Flag räumt der Lauf alles wieder weg.
+ *
+ * ── DAS PRODUKT-GATE MUSS DAFÜR AN SEIN ──────────────────────────────────
+ * `apps/branding/app/app.config.ts` steht auf `market: { enabled: false }`,
+ * bis die Prod-Migrationen gelaufen sind (Begründung dort). AUS heisst seit
+ * dem M4-Nachfix wirklich AUS: Seite, Leiste UND Routen antworten 404 — der
+ * Beweis meldet dann lauter „nicht gefunden" und das ist der Schalter, kein
+ * Fehler. Vor dem Lauf die eine Zeile lokal auf `true` stellen (und danach
+ * NICHT mitcommitten, solange die Migration aussteht).
  */
 import { createServer, request } from 'node:http'
 import { readFile } from 'node:fs/promises'

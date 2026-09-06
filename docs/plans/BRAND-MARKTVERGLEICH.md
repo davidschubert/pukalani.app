@@ -1292,6 +1292,7 @@ unverändert, nur an echten Routen. Der Playground bleibt unangetastet.
 | Der Leisten-Eintrag (Anmeldung) | `packages/market/app/app.config.ts` |
 | Der Erweiterungspunkt (Form + Rechnung) | `packages/brand/shared/brandWorkspaceNav.ts` |
 | Der Erweiterungspunkt (Anwendung) | `packages/brand/app/composables/useBrandWorkspaceNavExtras.ts` |
+| Das Produkt-Gate an den Routen | `packages/market/server/utils/marketAccess.ts` (`requireMarketEnabled`) |
 | Die Schranke (pur) | `packages/market/shared/marketPaywall.ts` |
 | Das Opt-in (lesen/schreiben/suchen) | `packages/brand/server/utils/brandMarketVisibility.ts` |
 | Routen | `packages/market/server/api/market/profiles/[id]/{candidates.get,visibility.patch}.ts` |
@@ -1314,12 +1315,32 @@ Datentür wie überall: fremdes oder unbekanntes Branding ⇒ 404, ohne Session
 ⇒ 404 (nie 403). Das Produkt-Gate `pukalani.market.enabled` wirft ebenfalls
 404, bevor irgendetwas geladen wird.
 
+**Das Gate schaltet ALLE DREI Flächen (Nachfix 2026-09-05).** Bis dahin las es
+nur die Seite: die Leiste zeigte „Markt" auch bei ausgeschaltetem Produkt (Klick
+⇒ 404), und vor `/api/market/**` stand allein die core-Middleware
+`04.product-gate.ts` — die prüft aber den LAUFZEIT-Zustand
+`app_config.products.market.enabled` und lässt ein fehlendes Eintrag-Feld
+bewusst als „an" durch. Jetzt liest die LEISTE den Schalter über
+`BrandWorkspaceNavExtra.productKey` (`resolveWorkspaceNavExtras` lässt Einträge
+ohne eingeschaltetes Produkt WEG — anders als bei `lockedUntil`, wo der Eintrag
+sichtbar-gesperrt bleibt), und die ROUTEN über `requireMarketEnabled()` in
+`requireMarketProfile`, durch das alle zehn Handler gehen. Zwei Ebenen, zwei
+Fragen, kein Doppel: der Core prüft den Notaus des Betreibers, der Layer das
+Build-Gate des Deployments.
+
+**`apps/branding` steht deshalb vorerst auf `market: { enabled: false }`** — an
+geht der Schalter erst, wenn die Prod-Migrationen `market-001…004` und
+`brand-018`/`brand-019` auf der Instanz `branding` gelaufen sind (Davids Ja;
+Migration IMMER vor dem Code-Deploy). Bis dahin ist das Produkt auf der Live-Site
+komplett dunkel — Seite, Leiste und Routen antworten, als gäbe es es nicht. Das
+Umlegen ist eine Zeile und ein Commit.
+
 ### Der Leisten-Erweiterungspunkt
 
 `brand` kennt kein Produkt, das auf ihm aufsetzt (CONCEPT A14) — es kennt nur
 die FORM eines zusätzlichen Ebene-1-Eintrags:
 `pukalani.brand.workspaceNavExtras: BrandWorkspaceNavExtra[]`
-(`key`, `labelKey`, `icon`, `to` mit `:profileId`, `lockedUntil`,
+(`key`, `productKey`, `labelKey`, `icon`, `to` mit `:profileId`, `lockedUntil`,
 `counterKind`), Default `[]`. defu verkettet Arrays über die Layer, das
 Produkt meldet sich also SELBST an; eine Silo-App ohne `market` bekommt keinen
 Menüpunkt ins Leere. Gerechnet wird in `resolveWorkspaceNavExtras` (pur,
