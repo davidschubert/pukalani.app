@@ -116,30 +116,32 @@ pnpm ops:schema-parity
 
 ## 4 · Rauchtest in Produktion (Davids Konto)
 
+> **2026-09-06: von David durchgeführt und als „passt" gemeldet** (Build 92b39f14).
+
 Vorbedingung: ein Branding mit **abgenommenem Kapitel B** (Purpose, Vision,
 Mission). Ohne das ist die Seite absichtlich gesperrt (§2.4).
 
-- [ ] `https://branding.supply/market-bot` und `/de/market-bot` antworten 200.
+- [x] `https://branding.supply/market-bot` und `/de/market-bot` antworten 200.
       (Diese Seite hängt NICHT am Schalter und war schon vorher erreichbar —
       hier wird nur bestätigt, dass sie es geblieben ist.)
-- [ ] In der Werkstatt steht links der Eintrag **„Markt"** und ist klickbar.
-- [ ] Die Seite `/brand/<id>/market` lädt: Kopf, ehrliche Grenze
+- [x] In der Werkstatt steht links der Eintrag **„Markt"** und ist klickbar.
+- [x] Die Seite `/brand/<id>/market` lädt: Kopf, ehrliche Grenze
       („nicht, wie erfolgreich sie damit sind"), Kandidatenliste, Schranke.
-- [ ] EINEN Kandidaten eintragen. **Eine eigene Adresse nehmen** — die eigene
+- [x] EINEN Kandidaten eintragen. **Eine eigene Adresse nehmen** — die eigene
       alte Website oder eine Marke, deren Betreiber man kennt. Kein fremdes
       Unternehmen für einen Rauchtest.
-- [ ] **Ein Lauf.** Erwartung: 20–60 Sekunden, bis acht Seiten gelesen, eine
+- [x] **Ein Lauf.** Erwartung: 20–60 Sekunden, bis acht Seiten gelesen, eine
       Extraktion, ein Vergleich; **Kosten im niedrigen Cent-Bereich** (§2.8:
       0,10–0,30 € bei fünf Wettbewerbern, hier also deutlich weniger).
       Es gibt in Produktion **keinen Stub** — `MARKET_DEV_STUB` ist eine
       Dev-Variable und steht auf dem Server nicht.
-- [ ] Die Gegenüberstellung, die drei Listen und mindestens ein Befund-Chip
+- [x] Die Gegenüberstellung, die drei Listen und mindestens ein Befund-Chip
       erscheinen. Ein Befund sperrt nichts (nur `conflict` tut das).
-- [ ] Der zweite Klick auf „Erneut vergleichen" ist **billig**: gleicher Stand
+- [x] Der zweite Klick auf „Erneut vergleichen" ist **billig**: gleicher Stand
       ⇒ derselbe `revisionKey` ⇒ kein Modell-Aufruf.
-- [ ] Die Frage „War der Vergleich brauchbar?" steht unter dem Bericht.
+- [x] Die Frage „War der Vergleich brauchbar?" steht unter dem Bericht.
       Beantworten — und danach ist sie weg.
-- [ ] Danach im Log nachsehen: `market.run`, `market.report`, `market.rating`.
+- [x] Danach im Log nachsehen: `market.run`, `market.report`, `market.rating`.
       Alle drei tragen ZAHLEN, keinen Inhalt.
 
 ### Am nächsten Tag
