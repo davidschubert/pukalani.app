@@ -39,6 +39,14 @@
  * liefert, prüfte sich selbst; dieser liefert zwei ABSICHTLICH verbotene
  * Elemente (6 und 7).
  *
+ * ── EIN SERVERPROZESS JE BEWEIS ──────────────────────────────────────────
+ * Die Eimer (3 Läufe und 3 Berichte je Branding und Tag, Instanz-Deckel,
+ * IP-Bucket der Rate-Limit-Middleware) leben ohne Redis IM PROZESS. Läuft
+ * dieses Skript direkt nach `verify-market-fetch.mjs` gegen DENSELBEN
+ * Dev-Server, kippt Schritt 14 mit 429 (2026-09-05 im Hauptloop gemessen:
+ * 42/43, nach Neustart 43/43). Das ist der Deckel, kein Fehler — vor jedem
+ * Beweis den Dev-Server frisch starten.
+ *
  * ── VORBEDINGUNGEN ───────────────────────────────────────────────────────
  * Lokale Dev-Appwrite mit den `brand_*`- UND `market_*`-Tabellen und ein
  * Dev-Server der branding-App AUS DEM WORKTREE (CLAUDE.md, „Worktree-Beweise":
