@@ -52,7 +52,7 @@ import {
  * den Quelltext: es gibt gar keinen Aufrufer, der ihn speichern KÖNNTE.
  *
  * ── WAS SEIT MV1 M2 DANEBEN STEHT: `fetchBrandDocument` ───────────────────
- * Der Marktvergleich (docs/plans/BRAND-MARKTVERGLEICH.md §7.4) liest MEHRERE
+ * Der Marktvergleich (docs/archiv/BRAND-MARKTVERGLEICH.md §7.4) liest MEHRERE
  * Seiten je Marke und dazu `robots.txt`, `sitemap.xml` und `llms.txt`. Beides
  * kann `fetchBrandSite` nicht: es klemmt den Content-Type hart auf HTML und
  * gibt den Quelltext nicht heraus — aus ihm kommen aber die internen Links,

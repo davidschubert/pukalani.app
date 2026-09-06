@@ -1,6 +1,6 @@
 /**
  * DIE AUFBEWAHRUNGSFRIST DES ROHTEXTS — PUR (Plan
- * docs/plans/BRAND-MARKTVERGLEICH.md §1.7 Nr. 4, §2.6, §2.9 Nr. 6; MV1 M5).
+ * docs/archiv/BRAND-MARKTVERGLEICH.md §1.7 Nr. 4, §2.6, §2.9 Nr. 6; MV1 M5).
  *
  * ── DIE ZUSAGE, UM DIE ES GEHT ────────────────────────────────────────────
  * „Rohtext ist Zwischenprodukt, kein Bestand: gespeichert höchstens 24

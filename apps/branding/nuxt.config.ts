@@ -24,7 +24,7 @@ export default defineNuxtConfig({
    * eigene Layout `brand-workspace` selbst mit.
    *
    * SEIT MV1 M1 (2026-09-05) MIT `market`: der Marktvergleich (Plan
-   * docs/plans/BRAND-MARKTVERGLEICH.md) ist ein EIGENER Produkt-Layer, der
+   * docs/archiv/BRAND-MARKTVERGLEICH.md) ist ein EIGENER Produkt-Layer, der
    * per `requires` an `brand` hängt und ihn über EINEN expliziten Vertrag
    * kennt (`packages/market/server/utils/brandContract.ts`, CONCEPT A14) —
    * nicht über die extends-Kette. Seine drei Tabellen (market-001…003)

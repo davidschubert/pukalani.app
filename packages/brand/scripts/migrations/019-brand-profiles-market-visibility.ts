@@ -9,7 +9,7 @@
  * packages/brand/scripts/migrations` gegen ein frisches `git fetch origin`).
  *
  * ── WOFÜR ─────────────────────────────────────────────────────────────────
- * docs/plans/BRAND-MARKTVERGLEICH.md §7.2 Nr. 4: eine Marke eines ANDEREN
+ * docs/archiv/BRAND-MARKTVERGLEICH.md §7.2 Nr. 4: eine Marke eines ANDEREN
  * Kontos darf im Marktvergleich nur erscheinen, wenn ihre Eigentümerin sie
  * ausdrücklich freigegeben hat. Anhang B hat die Spalte bewusst NICHT in M1
  * gebaut („eine Spalte, die vor ihrer Oberfläche in der Datenbank steht, ist

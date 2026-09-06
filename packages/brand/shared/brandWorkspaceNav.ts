@@ -414,7 +414,7 @@ export function acceptTargets(finding: { slots: readonly string[] }): string[] {
  *
  * ── WARUM ES DIESEN ERWEITERUNGSPUNKT GIBT ────────────────────────────────
  * Der Marktvergleich (Layer `market`) braucht in der Werkstatt-Leiste einen
- * Eintrag „Markt" unter „Euer Branding" (docs/plans/BRAND-MARKTVERGLEICH.md
+ * Eintrag „Markt" unter „Euer Branding" (docs/archiv/BRAND-MARKTVERGLEICH.md
  * §2.5). Ihn hier hart einzutragen wäre die Kopplung, die CONCEPT A14
  * ausschliesst: `brand` ist ein Fundament für Produkte und darf keines davon
  * kennen — eine Silo-App ohne `market` bekäme sonst einen Menüpunkt ins Leere.

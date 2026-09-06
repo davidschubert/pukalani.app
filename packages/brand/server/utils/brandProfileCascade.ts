@@ -7,7 +7,7 @@ import type { H3Event } from 'h3'
  * Ein Branding zu löschen heisst bis heute: `steps → messages → shares →
  * events → findings → profile` (Löschroute und GDPR-Contributor, beide im
  * brand-Layer). Seit dem market-Layer (MV1 M1, Plan
- * docs/plans/BRAND-MARKTVERGLEICH.md §2.6 „Retention") hängen an derselben
+ * docs/archiv/BRAND-MARKTVERGLEICH.md §2.6 „Retention") hängen an derselben
  * `profileId` auch Zeilen, die brand NICHT kennen darf: `market_competitors`,
  * `market_profiles`, `market_reports`. Ohne diese Registry gäbe es genau zwei
  * Auswege, und beide sind falsch — brand die market-Tabellennamen beibringen

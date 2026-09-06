@@ -215,7 +215,7 @@ kein Score je Wettbewerber, keine Aussage über Markterfolg, keine veröffentlic
 Vergleichs-Claims (§ 6 UWG). Eigener Layer `market` mit Vertrag zu `brand`; freigeschaltet
 nach Kapitel B; bezahlt ab Tag eins (Beta frei); Adressen vom Kunden; Ausgabe Tabelle +
 Listen + Befunde; nur Websites als Quelle; Abruf-Vertrag bleibt in `brand` und wird
-exportiert. Plan: docs/plans/BRAND-MARKTVERGLEICH.md (Recherche im Anhang).
+exportiert. Plan: docs/archiv/BRAND-MARKTVERGLEICH.md (Recherche im Anhang).
 
 **Verworfen:** Vergleichs-Score, Websuche nach Adressen, Zwei-Achsen-Karte mit
 Modell-Achsen, Bewertungs-/Social-Quellen in Phase 1.

@@ -1,6 +1,6 @@
 /**
  * DIE PUREN LESE-REGELN DES MEHRSEITEN-ABRUFS (Plan
- * docs/plans/BRAND-MARKTVERGLEICH.md §7.4, Paket MV1 M2).
+ * docs/archiv/BRAND-MARKTVERGLEICH.md §7.4, Paket MV1 M2).
  *
  * ── WARUM SIE IN `brand` LIEGEN UND NICHT IN `market` ─────────────────────
  * §7.4 ist ausdrücklich: „Die Mehrseiten-/Sitemap-/llms.txt-Erweiterung ist

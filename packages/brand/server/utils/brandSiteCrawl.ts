@@ -22,7 +22,7 @@ import {
 } from './brandSiteFetch'
 
 /**
- * DER GETEILTE MEHRSEITEN-ABRUF (Plan docs/plans/BRAND-MARKTVERGLEICH.md §7.4,
+ * DER GETEILTE MEHRSEITEN-ABRUF (Plan docs/archiv/BRAND-MARKTVERGLEICH.md §7.4,
  * gebaut in MV1 M2).
  *
  * ── WARUM ER IN `brand` LIEGT UND NICHT IN `market` ───────────────────────

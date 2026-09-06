@@ -3,7 +3,7 @@
 **Vorgang:** das Produkt `market` geht auf der Instanz `branding` in Betrieb.
 Sechs Migrationen laufen, danach kippt EIN Schalter, danach ein Rauchtest.
 
-Plan und Begründungen: docs/plans/BRAND-MARKTVERGLEICH.md (M1–M5, Anhänge B–F).
+Plan und Begründungen: docs/archiv/BRAND-MARKTVERGLEICH.md (M1–M5, Anhänge B–F).
 Instanz-Kontext: docs/runbooks/BRANDING-SUPPLY-SETUP.md.
 
 ---

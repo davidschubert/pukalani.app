@@ -11,7 +11,7 @@ import {
 
 /**
  * DAS OPT-IN „MEINE MARKE DARF IM MARKTVERGLEICH ANDERER ERSCHEINEN"
- * (Migration brand-019, Plan docs/plans/BRAND-MARKTVERGLEICH.md §7.2 Nr. 4).
+ * (Migration brand-019, Plan docs/archiv/BRAND-MARKTVERGLEICH.md §7.2 Nr. 4).
  *
  * ── WARUM DAS IM brand-LAYER WOHNT UND NICHT IN `market` ──────────────────
  * Die Spalte hängt an `brand_profiles`, und die Tabelle gehört diesem Layer.

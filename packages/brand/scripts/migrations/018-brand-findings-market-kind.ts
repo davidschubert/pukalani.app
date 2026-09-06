@@ -8,7 +8,7 @@
  * `git fetch origin main`).
  *
  * ── WOFÜR ─────────────────────────────────────────────────────────────────
- * Der Marktvergleich (docs/plans/BRAND-MARKTVERGLEICH.md, MV1 M3) legt seine
+ * Der Marktvergleich (docs/archiv/BRAND-MARKTVERGLEICH.md, MV1 M3) legt seine
  * Befunde in DIESELBE Tabelle wie der Spezialist: sie erscheinen an denselben
  * eigenen Feldern, tragen dieselbe Entscheidung (annehmen/ablehnen) und
  * dieselben Chips (§2.7 „Befund-Speicher + Chips — neue Art `market`"). Eine

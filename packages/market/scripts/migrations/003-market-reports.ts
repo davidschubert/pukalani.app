@@ -1,7 +1,7 @@
 /**
  * Migration market-003: `market_reports` — DER VERGLEICH JE STAND.
  *
- * Paket M1, Plan docs/plans/BRAND-MARKTVERGLEICH.md §2.6. Gemeinsame Regeln
+ * Paket M1, Plan docs/archiv/BRAND-MARKTVERGLEICH.md §2.6. Gemeinsame Regeln
  * wie market-001 (server-only, kein `communityId`, Indizes nur über
  * `createIndexSteps`, idempotent).
  *

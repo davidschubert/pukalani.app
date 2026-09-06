@@ -266,7 +266,7 @@ export default createConfigForNuxt({
 }).append({
   /**
    * DIE ZWEITE PRODUKT-AUSNAHME: market → brand (MV1 M1, Plan
-   * docs/plans/BRAND-MARKTVERGLEICH.md §2.1 + Davids Entscheidungen 1 und 7).
+   * docs/archiv/BRAND-MARKTVERGLEICH.md §2.1 + Davids Entscheidungen 1 und 7).
    *
    * `market` ist ein eigener Produkt-Layer mit eigenen Tabellen — und trotzdem
    * hängt er an `brand`: der Vergleich läuft gegen die BESTÄTIGTEN Felder der

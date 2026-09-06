@@ -1,6 +1,6 @@
 /**
  * DER VERGLEICHS-VERTRAG — das Marktprofil (Plan §2.2,
- * docs/plans/BRAND-MARKTVERGLEICH.md).
+ * docs/archiv/BRAND-MARKTVERGLEICH.md).
  *
  * STAND M1: hier stehen die TYPEN und die Abbildung `MARKET_FIELDS` auf die
  * Slot-Ids der brand-Registry. Die ZOD-Schemas der Ablage stehen daneben in

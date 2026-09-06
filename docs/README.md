@@ -63,6 +63,8 @@ gepflegt).
 | [runbooks/APPWRITE-KEYS.md](runbooks/APPWRITE-KEYS.md) | Wer hält welchen Schlüssel im Projekt `control` — und wie man das nachmisst |
 | [runbooks/CUSTOM-DOMAIN-ERSTAKTIVIERUNG.md](runbooks/CUSTOM-DOMAIN-ERSTAKTIVIERUNG.md) | Erste echte Kundendomain freischalten (Pool-Community **und** Silo-Site) |
 | [runbooks/GOOGLE-LOGIN.md](runbooks/GOOGLE-LOGIN.md) | „Anmelden mit Google" scharfschalten (Google-Console, Appwrite-Console, die zwei Schalter) |
+| [runbooks/MARKTVERGLEICH-EINFUEHRUNG.md](runbooks/MARKTVERGLEICH-EINFUEHRUNG.md) | Produkt `market` auf `branding` einschalten: sechs Migrationen, ein Schalter, Rauchtest (Durchlauf 2026-09-06 abgehakt) |
+| [runbooks/MARKTVERGLEICH-BIBLIOTHEK.md](runbooks/MARKTVERGLEICH-BIBLIOTHEK.md) | Bibliotheks-Einträge rechnen und von Hand prüfen (bezahlter Lauf, Handzeichen, Auffrischung nach 90 Tagen) |
 
 Die Häkchen in Runbooks sind **echt** — sie werden pro Durchlauf abgehakt und
 gehören dort hin.
@@ -72,7 +74,7 @@ gehören dort hin.
 | Datei | Zustand |
 | --- | --- |
 | [archiv/BRAND-WIZARD-SESSIONS.md](archiv/BRAND-WIZARD-SESSIONS.md) | Branding-Atome (BW2): Pakete 1–8 ausgeführt 2026-09-04/05 — Lese-Fassung der 68 Session-Inhalte: [referenz/BRAND-WIZARD-SESSION-INHALTE.md](referenz/BRAND-WIZARD-SESSION-INHALTE.md) (generiert) |
-| [plans/BRAND-MARKTVERGLEICH.md](plans/BRAND-MARKTVERGLEICH.md) | Marktvergleich: Strategie + Konzept 2026-09-05, wartet auf Davids Freigabe, nichts gebaut (MV1) |
+| [archiv/BRAND-MARKTVERGLEICH.md](archiv/BRAND-MARKTVERGLEICH.md) | Marktvergleich (MV1): **ausgeführt** — M0–M6b live seit 2026-09-06; offen nur noch Davids Rechts-Check und die Handprüfung der Rest-Entwürfe (OPEN-ITEMS Zeile 9) |
 | [plans/PRIVATE-NACHRICHTEN-KONZEPT.md](plans/PRIVATE-NACHRICHTEN-KONZEPT.md) | Stufe 1 komplett (inkl. F56, 2026-08-13); ungebaut nur Stufen 2/3 — bewusst keine offenen Punkte |
 | [plans/DASHBOARD-IA.md](plans/DASHBOARD-IA.md) | Schritt 3 + Community-Hub gebaut; **12 der 14 Schritt-4-Seiten fehlen** — als U15 jetzt in OPEN-ITEMS geführt |
 | [plans/ANALYTICS-V2.md](plans/ANALYTICS-V2.md) | Pakete 1–4 live; Rest = Optionales (F47) |
@@ -84,7 +86,7 @@ Reste nach `OPEN-ITEMS.md`. Ein Plan-Dokument ist nie eine To-do-Liste.
 
 ## Archiv — ausgeführt, nur noch Historie
 
-`archiv/` enthält 33 abgearbeitete Pläne (M1–M10, Phase 17, Themes-Vollausbau,
+`archiv/` enthält 38 abgearbeitete Pläne (M1–M10, Phase 17, Themes-Vollausbau,
 Embed-Widget, Landingpage, SaaS-Roadmap, zuletzt das
 [Discussions-Konzept](archiv/DISCUSSIONS-KONZEPT.md) und den [Pool/Silo-Blueprint](archiv/HORIZONT-3-POOL-SILO-BLUEPRINT.md), …) und `archiv/audits/` die sechs
 Audits (Gesamtaudit 05.07., Pool-Audit 27.07., Dashboard-Audit 28.07. sowie

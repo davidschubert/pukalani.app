@@ -7,7 +7,7 @@ import { useBrandWorkspaceStore } from '../stores/brandWorkspace'
 
 /**
  * DIE ZUSATZ-EINTRÄGE DER WERKSTATT-LEISTE ALS FERTIGE LEISTEN-ZEILEN
- * (MV1 M4, Plan docs/plans/BRAND-MARKTVERGLEICH.md §2.5).
+ * (MV1 M4, Plan docs/archiv/BRAND-MARKTVERGLEICH.md §2.5).
  *
  * ── WARUM EIN COMPOSABLE UND NICHT DREIMAL DIESELBEN ZEHN ZEILEN ─────────
  * Drei Seiten zeigen dieselbe Leiste: die Werkstatt (`[stepKey].vue`), das

@@ -26,7 +26,7 @@
  *    `correct`-Modus erzeugt; der ist Paket 6.
  *  · `gap`       — hier fehlt etwas (§10, Prüfblick). Rein beratend.
  *  · `market`    — der Marktvergleich hat an einem eigenen Feld etwas gesehen
- *    (MV1 M3, docs/plans/BRAND-MARKTVERGLEICH.md §2.3 Nr. 4). Rein beratend
+ *    (MV1 M3, docs/archiv/BRAND-MARKTVERGLEICH.md §2.3 Nr. 4). Rein beratend
  *    wie `gap`: er sperrt NICHTS (`blockingFindingSlots` fragt nach
  *    `conflict`), und er löst auch keine zweite Stufe aus (`needsStageTwo`) —
  *    er entsteht gar nicht in einem Schliess-Aufruf.

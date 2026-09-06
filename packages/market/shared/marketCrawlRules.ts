@@ -1,5 +1,5 @@
 /**
- * DIE REINEN REGELN DES ABRUFS (Plan docs/plans/BRAND-MARKTVERGLEICH.md §2.8,
+ * DIE REINEN REGELN DES ABRUFS (Plan docs/archiv/BRAND-MARKTVERGLEICH.md §2.8,
  * §2.9 Nr. 1/2/8 und §7.4) — Adress-Normalisierung, Pfad-Sperrliste,
  * Seitenwahl, Nutzungsvorbehalt, Deckel.
  *

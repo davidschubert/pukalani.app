@@ -35,7 +35,7 @@ export default defineAppConfig({
     auth: { providers: ['google'] },
     /**
      * DER MARKTVERGLEICH GEHÖRT AUF DIESE SITE — ANGESCHALTET SEIT 2026-09-06
-     * (MV1 M1/M4, Plan docs/plans/BRAND-MARKTVERGLEICH.md §2.1).
+     * (MV1 M1/M4, Plan docs/archiv/BRAND-MARKTVERGLEICH.md §2.1).
      *
      * Der Layer-Default ist `false` und bleibt es (Begründung dort): market
      * ist ein ZUSATZ zum Wizard, kein Teil von ihm, und die Site entscheidet

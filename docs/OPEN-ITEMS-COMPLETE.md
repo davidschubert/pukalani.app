@@ -30,6 +30,131 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### Marktvergleich (MV1): Layer `market`, Behauptungs-Raum einer Kategorie mit Beleg, Bericht mit UWG-Riegel ✅ 2026-09-06
+
+**Was:** Davids Produktgedanke vom 2026-09-04 („Konkurrenzanalysen … wo sich unsere Marke am
+Markt am besten positionieren sollte") — geplant, freigegeben, gebaut und auf branding.supply
+in Betrieb genommen. Strategie + Konzept mit acht Entscheidungen (DECISION-LOG 2026-09-05),
+Prototyp M0/M0b abgenommen, §7 als Erweiterung aus der Prototyp-Runde (ein Motor drei
+Ansichten · vier Kandidaten-Quellen · KEIN zweiter Score · erweiterter Abruf · KI-Aussensicht);
+Plan jetzt [archiv/BRAND-MARKTVERGLEICH.md](archiv/BRAND-MARKTVERGLEICH.md).
+Das Produkt zeigt den **Behauptungs-Raum** einer Kategorie — was Wettbewerber auf ihren
+Websites SAGEN, übersetzt in die Feldstruktur der Brand Foundation, jede Aussage mit Zitat und
+Quelle. Bewusst KEIN Ranking, kein Score je Wettbewerber, keine Aussage über Markterfolg.
+
+- **M1 `475aeabd` — Layer + Vertrag.** `market` montiert in `apps/branding` (Manifest,
+  `extends`, `LAYER_ORDER`, Schema-Parity-Soll), Gate `pukalani.market.enabled`.
+  Der EINZIGE Griff über die Paketgrenze ist `packages/market/server/contracts/brandContract.ts`
+  (Abruf, Besitz mit 404 statt 403, Slot-Registry, Kaskade), ESLint kennt dafür einen benannten
+  Block. Drei Tabellen `market_competitors` / `market_profiles` / `market_reports`
+  (market-001…003, server-only, MEDIUMTEXT, Indizes über `createIndexSteps`), Lösch-Kaskade als
+  Registry in `brand` und ein eigener `registerUserDataContributor` (Rohtext bleibt aus der Auskunft).
+- **M2 `1bb5c55f` — Abruf, Extraktion, Aussensicht.** Geteilter Mehrseiten-Abruf im brand-Layer
+  (`brandSiteCrawl.ts`, `fetchBrandDocument` additiv), eigener Absender
+  `PukalaniMarketBot/1.0`, robots-Parser nach RFC 9309, **vier anerkannte Formen des
+  Nutzungsvorbehalts** (TDM-Kopfzeile, `tdmrep.json`, `noai`-Meta, `tdm-reservation`-Meta;
+  fail-closed bei Zweifel, ein Vorbehalt schliesst den ganzen Wettbewerber aus), Pfad-Sperrliste
+  (Personenbezug, Rechtstexte, Funktions- und Tagesaktuelles), PII-Filter, 8 Seiten / 2 MB /
+  20 000 Zeichen je Seite / 60 000 je Lauf. Extraktion mit **drei deterministischen Riegeln**:
+  Zod fail-soft je Feld · Beleg-Riegel (Zitat muss wörtlich im Rohtext GENAU der genannten Seite
+  stehen, sonst fliegt das Feld) · Häufigkeit wird im Code gezählt, nie vom Modell übernommen.
+  KI-Aussensicht (`market-ai-1`) nur mit Konsens ≥ 2 verschiedener Modelle, in eigener Spalte,
+  ohne Einfluss auf irgendeinen Score.
+- **M3 `11be1ef4` — Vergleich + Befunde.** Ein Modellaufruf (`market-r-1`) über eigenes Profil
+  + N Marktprofile ⇒ Matrix, Konventionen, Überschneidungen, freie Stellen. **§ 6 UWG-Riegel in
+  drei Lagen:** Anonymisierung im Prompt (das Modell sieht `c1…c5`, nie einen Namen),
+  Prompt-Regel, Filter im Code über JEDES erzeugte Element (Name inkl. Teil-Token,
+  umlaut-normalisiert, Domain, Wortliste herabsetzender Ausdrücke) — ein Treffer VERWIRFT das
+  Element. Markt-Befunde als `kind: 'market'` in `brand_findings` (Migration **brand-018**,
+  additiv), höchstens drei je Bericht, sperren nichts, ERSETZEN statt dazulegen.
+  `revisionKey`/`stale` aus derselben Rechnung — ein überholter Bericht bleibt lesbar.
+- **M4 `8e936691` + `0add6133` — Oberfläche.** Seite „Markt" als Ebene-1-Seite der Werkstatt in
+  fünf Zuständen, Quellen-Wähler über vier Quellen (Website · eigene Brandings · Bibliothek ·
+  freigegebene fremde Marken), Opt-in `brand_profiles.marketVisibility` (**brand-019**, Semantik
+  wie das Brand-Check-Ranking, nie eine `ownerId` in der Antwort), Leisten-Erweiterungspunkt
+  generisch in `brand` (nennt nirgends ein Produkt), Schranke `resolveMarketPaywall` mit
+  `studio_cta_erstgespraech`. Der Nachfix zog das Gate auf alle drei Flächen.
+- **M5 `ae3b70d7` — Betrieb.** Rohtext-Frist 24 h mit Sweep alle 30 min (Takt hängt am Layer,
+  nicht am Produkt-Gate; Fail-Richtung umgekehrt: kein Stempel ⇒ löschen; der Sweep fasst die
+  Belege NIE an), Erklärseite `/market-bot` (bewusst ohne Produkt-Gate), Vertraulichkeits-Nachweis
+  als Typ-Form, Bewertungs-Route, Runbook + interne Doku-Seite.
+- **M6 `0c2070bc` + M6b `66377315` — Bibliothek.** Werkzeug mit vier Modi, das den KUNDENWEG
+  benutzt (Wegwerf-Konto, echte Route, dieselbe Kette) statt einer zweiten Pipeline; das Tor ist
+  ein ZUSTAND (`status: 'verified'`), keine Zusage. Trockenlauf gegen zehn echte Hosts,
+  Kostenschätzung, Rechts-Check-Memo (Anhang G, sechs Anwaltsfragen). M6b: die zwei ERFUNDENEN
+  Einträge sind aus dem Produkt heraus, `the-barn` (9 Felder) und `apple` (5, `purpose`
+  gestrichen) nach Davids Handprüfung übernommen — Fassung `lib-3`.
+
+**Beweise:** `packages/market/scripts/verify-market-fetch.mjs` **33/33** ·
+`verify-market-report.mjs` **45/45** · `verify-market-ui.mjs` **46/46** ·
+`verify-market-retention.mjs` **51/51** (je gegen echte Routen, echte Ablage und erfundene
+Websites auf eigenen `node:http`-Servern) · **213 Unit-Tests** im market-Layer, dazu
+`brandSiteCrawlParse`, `brandFindings`, `brandWorkspaceNavExtras`, `brandSharing`,
+`conversePrompt` im brand-Layer — jeder mit Gegenprobe.
+
+**In Betrieb (2026-09-06):** Prod-Migrationen `brand-018/019` + `market-001…004` auf der Instanz
+`branding` mit Davids ausdrücklichem Ja gefahren (zweiter Lauf komplett „existiert bereits",
+`ops:schema-parity` grün), Gate-Flip als eigener Commit `9e984253` (auf `main` als Merge
+`f7bd9fe4`), Rauchtest in Produktion von David bestanden, Seiten abgenommen. Erster bezahlter
+Bibliothekslauf ≈ $0,11 für fünf Extraktionen. Runbooks:
+[MARKTVERGLEICH-EINFUEHRUNG.md](runbooks/MARKTVERGLEICH-EINFUEHRUNG.md) (Durchlauf abgehakt) und
+[MARKTVERGLEICH-BIBLIOTHEK.md](runbooks/MARKTVERGLEICH-BIBLIOTHEK.md).
+
+**Gelernt: Cross-Layer-Re-Exporte gehören in `server/contracts/`, nie in `server/utils/`** —
+Nitro auto-importiert `server/utils/**`, und die Re-Exporte des Vertrags hätten dort die
+gleichnamigen Symbole des eigenen Layers geschattet. Ein Vertrag, den man versehentlich
+benutzt, ist keiner.
+
+**Gelernt: ein Gate muss ALLE Flächen schalten — Seite, Leiste und Routen.**
+`pukalani.market.enabled` schaltete zuerst nur die Seite: die Leiste zeigte „Markt" weiter
+(Klick ⇒ 404), und vor `/api/market/**` stand allein die core-Middleware `04.product-gate.ts`,
+die den LAUFZEIT-Zustand prüft und einen fehlenden Eintrag bewusst als „an" durchlässt. Ohne
+den Nachfix wäre mit dem Deploy etwas SICHTBAR geworden, bevor die Migration lief — genau die
+Reihenfolge, die das Runbook verbietet.
+
+**Gelernt: je Beweis-Skript ein FRISCHER Dev-Server-Prozess.** Die Drossel-Eimer leben im
+Prozess; ein zweiter Beweis gegen denselben Server erbt die Zählerstände des ersten und meldet
+in einem beliebigen Schritt eine 429. Genau so stand `verify-market-report.mjs` bei 42/43 — mit
+eigenem Prozess 43/43. Ein Beweis, der die Reihenfolge seiner Nachbarn mitmisst, misst nicht das
+Produkt.
+
+**Gelernt: `aiEnabled` ist ein KONFIG-Flag, kein Schlüssel-Beweis.** Der erste bezahlte
+Bibliothekslauf lief mit eingeschaltetem Gate, aber ohne `NUXT_AI_KEY` in der Dev-Env — fünf
+Extraktionen kamen leer zurück, und im Log stand fünfmal `message: ""`. Grund: H3-Fehler
+(`createError`) tragen die Aussage in `status`/`statusText`, nicht in `message` („AI not
+configured" ist ein 503). Wer eine Anbieter-Meldung protokolliert, protokolliert beide Felder
+(`describeProviderError` in `marketExtract.ts`, Commit `4fbb1a79`).
+
+**Gelernt: erfundene „verified"-Einträge waren in PRODUKTION sichtbar — Fixtures gehören nach
+`tests/`, nie in ausgelieferte Daten.** Die zwei `.example`-Marken waren als Platzhalter
+richtig, solange die Mechanik ohne Inhalt lief; mit dem Gate-Flip standen sie im Quellen-Wähler
+zahlender Kunden, mit einem Prüfsiegel, das niemand geleistet hatte. Sie leben jetzt als
+`tests/fixtures/marketLibraryFixture.ts`, und die Test-Sperre ist UMGEDREHT: echter Host,
+Prüfdatum nicht in der Zukunft, Beleg vom Auftritt der Marke selbst.
+
+**Gelernt: Konzeptarbeit braucht denselben Blick auf `main` wie Code.** §7 wurde geschrieben,
+während der Brand-Check (BC1) längst gebaut auf `main` lag — die Erweiterung plante einen
+zweiten „Klarheits-Score" neben einem Score, den es schon gab. Der Blick auf `main` noch am
+selben Abend hat ihn gestrichen und daraus „ein Motor, drei Ansichten" gemacht. Davids Regel
+vom 2026-08-02 gilt nicht nur für Codemods.
+
+**Gelernt: „die Grossen sperren" stimmt per BOT-ABWEHR, nicht per `Disallow` — und
+JS-Seiten liefern ohne Headless-Browser keinen Text.** Acht von neun Konzern-Websites erlauben
+unserem Absender alles; wer sperrt, antwortet schon auf die `robots.txt` mit 403 (adidas,
+OpenAI, Counter Culture). Ein Werkzeug, das nur `Disallow` liest, hielte das für einen
+Netzwerkfehler und versuchte es beim nächsten Lauf erneut. Umgekehrt sind sevDesk und
+FreshBooks technisch offen und trotzdem unbrauchbar: ihr Text entsteht erst im Browser.
+
+**Gelernt: der Share-Link las `sensitivity` nie — das BF1-Versprechen wurde erst durch M5
+eingelöst.** `BrandSessionConfig.sensitivity` trug seit BF1 wörtlich „was per Share-Link und
+Export standardmässig NICHT reist", und `confirmedSlotValues` lief beim Veröffentlichen über
+ALLE bestätigten Slots: vier interne Sessions (`a.competitors` mit Wettbewerber-Namen und
+notierter Schwäche, `a.complaints`, `a.challenge`, `a.facts`) waren dreissig Tage lang für
+jeden mit dem Token lesbar. Gefunden hat das kein brand-Audit, sondern der Versuch, einen SATZ
+AUS EINEM ANDEREN PLAN zu beweisen („vertraulich wie `a.competitors`") — ein Beweis, der einen
+fremden Massstab benutzt, prüft auch den Massstab. Fix additiv in `brandSharing.ts`
+(fail-closed), nicht in `confirmedSlotValues`.
+
 ### H1: Leere `UTable`-Spaltenköpfe (stille Hydration-Fehler) — 40 Stellen in 15 Layern behoben ✅ 2026-09-06
 
 **Was:** Folgepunkt aus dem Brand-Check-Ranking: `header: () => ''` in einer `UTable`-Spalte

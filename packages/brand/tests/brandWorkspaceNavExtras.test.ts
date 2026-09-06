@@ -4,7 +4,7 @@ import { resolveWorkspaceNavExtras } from '../shared/brandWorkspaceNav'
 
 /**
  * DER ERWEITERUNGSPUNKT DER WERKSTATT-LEISTE (MV1 M4,
- * docs/plans/BRAND-MARKTVERGLEICH.md §2.5).
+ * docs/archiv/BRAND-MARKTVERGLEICH.md §2.5).
  *
  * `brand` kennt kein Produkt, das auf ihm aufsetzt (CONCEPT A14) — es kennt
  * nur die FORM eines zusätzlichen Ebene-1-Eintrags. Diese Rechnung ist die

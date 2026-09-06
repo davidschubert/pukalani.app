@@ -2,7 +2,7 @@
  * Migration market-001: `market_competitors` — DIE KANDIDATEN EINES VERGLEICHS.
  *
  * ERSTE Migration des market-Layers (Paket M1, Plan
- * docs/plans/BRAND-MARKTVERGLEICH.md §2.6 + §7.6). Sie läuft AUSSCHLIESSLICH
+ * docs/archiv/BRAND-MARKTVERGLEICH.md §2.6 + §7.6). Sie läuft AUSSCHLIESSLICH
  * auf der `branding`-Instanz — der Layer steht deshalb nur im BRANDING_SOLL
  * von scripts/ops/verify-schema-parity.mjs, nicht in der instanzweiten
  * Spalten-Parität.

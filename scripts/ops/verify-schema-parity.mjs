@@ -311,7 +311,7 @@ const BRAND_TABLES = [
 
 /**
  * market (packages/market) — der Marktvergleich (MV1 M1, Plan
- * docs/plans/BRAND-MARKTVERGLEICH.md §2.6, Schema-Anhang B). Wie die
+ * docs/archiv/BRAND-MARKTVERGLEICH.md §2.6, Schema-Anhang B). Wie die
  * brand_*-Tabellen laufen die drei AUSSCHLIESSLICH auf `branding` und stehen
  * deshalb NUR im BRANDING_SOLL — nicht in der instanzweiten Spalten-Parität.
  *

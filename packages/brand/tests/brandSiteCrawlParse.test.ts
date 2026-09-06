@@ -9,7 +9,7 @@ import {
 
 /**
  * DIE PUREN LESE-REGELN DES GETEILTEN MEHRSEITEN-ABRUFS (MV1 M2, Plan
- * docs/plans/BRAND-MARKTVERGLEICH.md §7.4) — je mit GEGENPROBE.
+ * docs/archiv/BRAND-MARKTVERGLEICH.md §7.4) — je mit GEGENPROBE.
  *
  * Sie liegen im brand-Layer, weil der Abruf geteilt ist (der Brand-Check darf
  * sie später nutzen); geprüft werden sie deshalb auch hier.

@@ -36,7 +36,7 @@ import type {
 import { useMarketBandLabel, useMarketFieldLabels } from '../../../composables/useMarketBrandLabels'
 
 /**
- * DIE SEITE „MARKT" (MV1 M4, Plan docs/plans/BRAND-MARKTVERGLEICH.md §2.5).
+ * DIE SEITE „MARKT" (MV1 M4, Plan docs/archiv/BRAND-MARKTVERGLEICH.md §2.5).
  *
  * Sie setzt die fünf abgenommenen Prototyp-Screens (M0/M0b) an die echten
  * Routen — als EINE Adresse mit fünf Zuständen und nicht als fünf Seiten:

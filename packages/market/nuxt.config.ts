@@ -1,5 +1,5 @@
 /**
- * market-Layer — Marktvergleich (Plan: docs/plans/BRAND-MARKTVERGLEICH.md).
+ * market-Layer — Marktvergleich (Plan: docs/archiv/BRAND-MARKTVERGLEICH.md).
  *
  * STAND: **M1 „Layer + Vertrag"**. Der Layer trägt die Komponenten-Vorlagen
  * aus dem Prototyp (`app/components`, `Mk*`), den Produkt-Vertrag

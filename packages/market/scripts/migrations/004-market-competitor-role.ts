@@ -3,7 +3,7 @@
  * EIGENE ALTE WEBSITE.
  *
  * Vierte Migration des market-Layers (Paket M4, Plan
- * docs/plans/BRAND-MARKTVERGLEICH.md §7.2 Nr. 2). Sie läuft AUSSCHLIESSLICH
+ * docs/archiv/BRAND-MARKTVERGLEICH.md §7.2 Nr. 2). Sie läuft AUSSCHLIESSLICH
  * auf der `branding`-Instanz — der Layer steht deshalb nur im BRANDING_SOLL
  * von scripts/ops/verify-schema-parity.mjs, nicht in der instanzweiten
  * Spalten-Parität.

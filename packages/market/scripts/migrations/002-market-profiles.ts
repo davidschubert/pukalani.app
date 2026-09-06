@@ -1,7 +1,7 @@
 /**
  * Migration market-002: `market_profiles` — DAS MARKTPROFIL EINES KANDIDATEN.
  *
- * Paket M1, Plan docs/plans/BRAND-MARKTVERGLEICH.md §2.6 + §7.6. Gemeinsame
+ * Paket M1, Plan docs/archiv/BRAND-MARKTVERGLEICH.md §2.6 + §7.6. Gemeinsame
  * Regeln wie market-001 (server-only, kein `communityId`, Indizes nur über
  * `createIndexSteps`, idempotent).
  *

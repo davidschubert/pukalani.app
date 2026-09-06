@@ -7,7 +7,7 @@ ein Mensch macht und mit seinem Zeichen unterschreibt.
 **Wer:** David (Redaktion). **Wie oft:** je Marke einmal, danach nur bei Auffrischung.
 **Stand 2026-09-06:** zwei Einträge sind durch — `the-barn` und `apple` (Abschnitt 4);
 `nike`, `anthropic`, `meta` liegen als Entwurf. Rechts-Check offen.
-**Konzept:** [BRAND-MARKTVERGLEICH.md](../plans/BRAND-MARKTVERGLEICH.md) §7.2 und Anhang G.
+**Konzept:** [BRAND-MARKTVERGLEICH.md](../archiv/BRAND-MARKTVERGLEICH.md) §7.2 und Anhang G.
 
 ---
 
@@ -159,7 +159,7 @@ Ein Häkchen ohne Datum und Namen wäre keins.
       unter `drafts/`, **Handprüfung offen**.
 
 **Rechts-Check offen.** Die anwaltlichen Fragen aus Plan
-[Anhang G](../plans/BRAND-MARKTVERGLEICH.md) (Namensnennung im bezahlten
+[Anhang G](../archiv/BRAND-MARKTVERGLEICH.md) (Namensnennung im bezahlten
 Produkt, Zitatzweck, § 44b UrhG, § 6 UWG, DSGVO, § 87b UrhG) sind **nicht
 beantwortet**. Die Übernahme der beiden Einträge geschah trotzdem — auf **Davids
 Entscheidung vom 2026-09-06**, festgehalten und nicht umgangen. Bleibt die

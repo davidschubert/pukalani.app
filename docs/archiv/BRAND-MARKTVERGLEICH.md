@@ -1,11 +1,35 @@
-# Marktvergleich — Strategie und Konzept
+# Marktvergleich — Strategie und Konzept (ausgeführt)
 
-Stand 2026-09-05 (abends) · Status: **Strategie + Konzept FREIGEGEBEN (2026-09-05, §6);
-Prototyp M0/M0b von David ABGENOMMEN (2026-09-05, Playground Port 3012); Prototyp-Runde 1
-hat das Konzept ERWEITERT (§7: ein Motor, drei Ansichten; vier Quellen; Brand-Score;
-erweiterter Abruf; KI-Suche). Paket M1 „Layer + Vertrag" ist GEBAUT (Schema-Anhang B),
-Paket M2 „Abruf + Extraktion" ist GEBAUT (Anhang C); als Nächstes M3 (Vergleich +
-Befunde).** Alles ab M3 ist noch nicht im Produkt.
+Status: **AUSGEFÜHRT — M0–M6b live (2026-09-06).** Dieses Dokument ist ein
+PROTOKOLL, keine Arbeitsliste: es hält fest, was entschieden und warum es so
+gebaut wurde. Was von MV1 noch offen ist, steht ausschliesslich in
+[OPEN-ITEMS.md](../OPEN-ITEMS.md); der vollständige Erledigt-Eintrag samt
+**Gelernt** steht in [OPEN-ITEMS-COMPLETE.md](../OPEN-ITEMS-COMPLETE.md).
+
+**Der Weg in Commits:** Strategie + Konzept freigegeben 2026-09-05 (§6, acht
+Entscheidungen), Prototyp M0/M0b von David abgenommen 2026-09-05, §7 als
+Erweiterung aus der Prototyp-Runde — dann
+
+| Paket | Commit | Was |
+| --- | --- | --- |
+| M1 | `475aeabd` | Layer `market`, Vertrag zu `brand`, drei Tabellen (Anhang B) |
+| M2 | `1bb5c55f` | Abruf, Extraktion, KI-Aussensicht mit Beleg-Riegel (Anhang C) |
+| M3 | `11be1ef4` | Vergleich, Markt-Befunde, Brand-Check-Anbindung, § 6 UWG-Riegel (Anhang D) |
+| M4 | `8e936691` + `0add6133` | Seite „Markt", Quellen-Wähler, Leiste, Schranke; Gate-Nachfix (Anhang E) |
+| M5 | `ae3b70d7` | Betrieb: Frist-Sweep, `/market-bot`, Vertraulichkeit, Bewertung, Runbook (Anhang F) |
+| M6 | `0c2070bc` | Bibliotheks-Werkzeug, Trockenlauf, Handprüfungs-Runbook, Rechts-Check-Memo (Anhang G) |
+| M6b | `66377315` | Bibliothek scharf: erfundene Einträge raus, `the-barn` + `apple` nach Davids Handprüfung |
+
+**In Betrieb:** Prod-Migrationen `brand-018/019` + `market-001…004` auf der
+Instanz `branding` am 2026-09-06 mit Davids Ja gefahren, Gate-Flip `9e984253`
+(auf `main` als Merge `f7bd9fe4`), Rauchtest in Produktion von David bestanden.
+Erster bezahlter Bibliothekslauf ≈ $0,11 (fünf Extraktionen); Bibliothek in der
+Fassung `lib-3`. Runbooks: [MARKTVERGLEICH-EINFUEHRUNG.md](../runbooks/MARKTVERGLEICH-EINFUEHRUNG.md)
+(Durchlauf abgehakt) und [MARKTVERGLEICH-BIBLIOTHEK.md](../runbooks/MARKTVERGLEICH-BIBLIOTHEK.md).
+
+**Der Text unten steht im Stand vom 2026-09-05/06** und wird nicht auf heute
+umgeschrieben — Zukunftsformen („als Nächstes M3") sind als Momentaufnahme zu
+lesen.
 
 ## 0. Was das hier ist
 

@@ -3,7 +3,7 @@ import type { ProductManifest } from '../core/shared/types/manifest'
 /**
  * Marktvergleich — die Behauptungen der Wettbewerber in DERSELBEN Feldstruktur
  * wie die eigene Brand Foundation, jede mit Zitat und Quelle.
- * Plan: docs/plans/BRAND-MARKTVERGLEICH.md (Strategie + Konzept freigegeben
+ * Plan: docs/archiv/BRAND-MARKTVERGLEICH.md (Strategie + Konzept freigegeben
  * 2026-09-05, alle acht Entscheidungen in §6; Prototyp M0/M0b von David
  * freigegeben 2026-09-05).
  *

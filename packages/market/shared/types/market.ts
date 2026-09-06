@@ -9,7 +9,7 @@ import {
 
 /**
  * DIE ZEILEN DER DREI market_*-TABELLEN UND DIE PRÜFUNG IHRER JSON-SPALTEN
- * (Paket M1, Plan docs/plans/BRAND-MARKTVERGLEICH.md §2.6 + §7.6).
+ * (Paket M1, Plan docs/archiv/BRAND-MARKTVERGLEICH.md §2.6 + §7.6).
  *
  * ── ZWEI EBENEN, ZWEI DATEIEN ────────────────────────────────────────────
  * `shared/marketProfile.ts` ist der PRODUKT-Vertrag: was ein Marktprofil IST
