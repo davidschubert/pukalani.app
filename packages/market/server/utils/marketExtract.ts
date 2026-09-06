@@ -68,6 +68,25 @@ const answerSchema = z.object({
   fields: z.array(z.unknown()).max(40),
 })
 
+
+/**
+ * Status und Statustext eines H3-Fehlers, sonst die Meldung — nie der Prompt,
+ * nie der Rohtext (Log-Regel). Ohne Status („AI not configured" kommt als 503,
+ * „AI provider unavailable" als 502) wäre die Zeile eine leere Warnung.
+ */
+function describeProviderError(error: unknown): string {
+  if (error && typeof error === 'object') {
+    const status = 'statusCode' in error ? (error as { statusCode?: unknown }).statusCode
+      : 'status' in error ? (error as { status?: unknown }).status : undefined
+    const text = 'statusMessage' in error ? (error as { statusMessage?: unknown }).statusMessage
+      : 'statusText' in error ? (error as { statusText?: unknown }).statusText : undefined
+    const message = error instanceof Error ? error.message : ''
+    const parts = [status, text, message].filter(part => typeof part === 'string' ? part.length > 0 : typeof part === 'number')
+    if (parts.length) return parts.join(' ')
+  }
+  return error instanceof Error ? error.message : String(error)
+}
+
 export interface MarketExtractInput {
   competitorName: string
   /** Die gelesenen Adressen — `sourceUrl` muss eine davon sein. */
@@ -295,7 +314,12 @@ export async function extractMarketProfile(
     logEvent('warn', 'market.extract_provider_error', {
       // Die MELDUNG des Anbieters — nie der Prompt, nie der Rohtext, nie ein
       // Zitat (Log-Regel).
-      message: error instanceof Error ? error.message : String(error),
+      // Der Transport wirft H3-Fehler (`createError`), deren `message` LEER
+      // ist — die Aussage steckt in `status` + `statusText` („AI not
+      // configured", „AI provider unavailable"). Beim ersten bezahlten
+      // Bibliothekslauf (2026-09-06) stand hier fünfmal `message: ""`, und die
+      // Ursache (kein Schlüssel in der Dev-Env) war nur aus dem Code zu erraten.
+      message: describeProviderError(error),
     })
     return { fields: [], model, promptVersion: MARKET_EXTRACT_PROMPT_VERSION, failure: 'provider_error' }
   }
