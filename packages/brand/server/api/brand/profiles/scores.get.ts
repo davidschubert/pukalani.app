@@ -13,6 +13,7 @@ import {
   brandCheckRankingFacts,
   brandDb,
   isAppwriteNotFound,
+  profileStartCard,
 } from '../../../utils/brandStore'
 
 /**
@@ -48,6 +49,16 @@ import {
  * `hidden` ist der Entfernen-Weg des Betreibers (§3 „Recht"); seine
  * Ergebnis-Seite antwortet 404. Eine Karte, die auf eine 404 verlinkt, wäre
  * eine Sackgasse mit Zahl.
+ *
+ * ── DREI STAMMFELDER REISEN MIT (P6c, 2026-09-06) ─────────────────────────
+ * Die Liste `/dashboard/brand-scores` („kann ich die auch im Dashboard sehen
+ * als Liste?") braucht je Zeile Titel, Adresse und Branche NEBEN den Zahlen.
+ * Sie stehen seither in der Antwort, und das ist keine Bequemlichkeit: die
+ * `brand_profiles`-Zeilen liegen hier ohnehin schon vor (ohne sie wüsste diese
+ * Route gar nicht, welche Brands zu fragen sind). Ein zweiter Abruf von
+ * `GET /api/brand/profiles` wäre also eine Rundreise für Daten, die diese
+ * Antwort in der Hand hält — und dazwischen ein Zwischenzustand, in dem eine
+ * Zeile ihre Zahl schon zeigt und ihren Namen noch nicht.
  */
 
 /**
@@ -129,8 +140,21 @@ export default defineEventHandler(async (event): Promise<BrandProfileScoresRespo
     }
   }
 
+  // Die Stammfelder kommen aus derselben Zeile, die oben schon gelesen wurde;
+  // `profileStartCard()` ist die EINE Stelle, an der aus `undefined` ein ''
+  // wird (Bestands-Zeilen von vor brand-009).
   const items = new Map<string, BrandProfileScores>(
-    ids.map(id => [id, { profileId: id, website: null, document: null }]),
+    profiles.map((profile) => {
+      const startCard = profileStartCard(profile)
+      return [profile.$id, {
+        profileId: profile.$id,
+        title: profile.title ?? '',
+        websiteUrl: startCard.websiteUrl,
+        industry: startCard.industry,
+        website: null,
+        document: null,
+      }]
+    }),
   )
 
   // Absteigend nach Zeit durchgehen und je Brand+Quelle den ERSTEN Treffer

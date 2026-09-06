@@ -70,6 +70,13 @@ const APPEARANCE = [
 ] as const
 const userMenu = computed(() => [[
   { label: t('brand.brands.title'), icon: 'i-ph-squares-four', to: localePath('/dashboard/brands') },
+  /* „Brand-Scores" (P6c, Davids Auftrag 2026-09-06) steht DIREKT unter den
+   * Brandings: es ist dieselbe Menge Brands, nur als Liste mit ihren Zahlen.
+   * Er wohnt HIER und nicht in `pukalani.admin.modules` — die Registry rendert
+   * ausschliesslich in der Betreiber-Shell (`layout: 'dashboard'`), und ein
+   * Beta-Kunde hat keine `dashboard.access`-Capability. Sein Menüpunkt wäre
+   * dort für genau die Menschen unsichtbar, für die die Seite gebaut ist. */
+  { label: t('brand.myScores.list.nav'), icon: 'i-ph-gauge', to: localePath('/dashboard/brand-scores') },
   { label: t('brand.brands.new'), icon: 'i-ph-plus', onSelect: () => { newBrandOpen.value = true } },
 ], [
   {

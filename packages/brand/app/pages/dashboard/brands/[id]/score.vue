@@ -334,10 +334,19 @@ useBrandTitle(() => t('brand.myScores.title'))
           <h1 class="mt-2 text-2xl font-semibold">{{ brandTitle || t('brand.brands.card.untitled') }}</h1>
           <p class="mt-1 text-sm" style="color: var(--bw-muted)">{{ t('brand.myScores.subtitle') }}</p>
         </div>
-        <UButton
-          :to="localePath('/dashboard/brands')" icon="i-ph-arrow-left" variant="ghost" color="neutral"
-          :label="t('brand.myScores.back')"
-        />
+        <div class="flex flex-wrap items-center gap-2">
+          <!-- Der Rückweg in die LISTE (P6c): wer hier gelandet ist, kam
+               entweder von einer Karte oder aus der Tabelle — beide Wege
+               stehen offen, damit keiner in einer Sackgasse endet. -->
+          <UButton
+            :to="localePath('/dashboard/brand-scores')" icon="i-ph-gauge" variant="ghost" color="neutral"
+            :label="t('brand.myScores.list.all')"
+          />
+          <UButton
+            :to="localePath('/dashboard/brands')" icon="i-ph-arrow-left" variant="ghost" color="neutral"
+            :label="t('brand.myScores.back')"
+          />
+        </div>
       </div>
 
       <div v-if="detailStatus === 'pending'" class="bw-card p-10 text-center" data-score-loading>
