@@ -44,17 +44,44 @@ let routerId: string
 
 const CLIENT_IP = '203.0.113.7'
 
+/**
+ * DIE ATTRAPPE LIEST DIE ABFRAGE, statt einen Wert herauszufischen.
+ *
+ * Vorher zog ein regulärer Ausdruck den ERSTEN Zeichenketten-Wert aus den
+ * Abfragen und filterte damit auf `urlKey`. Das trug, solange es genau eine
+ * Abfrage gab — seit die Ergebnis-Route zusätzlich ihren Vorgänger und ihren
+ * Ranking-Platz holt (BRAND-CHECK-SEITE §10), fragt derselbe Test drei
+ * verschiedene Dinge, und eine Attrappe, die alle drei gleich beantwortet,
+ * prüft nichts mehr. `equal`, `lessThan`, `greaterThan`, `orderDesc` und
+ * `limit` reichen dafür; alles andere kommt in diesen Routen nicht vor.
+ */
+interface FakeQuery { method: string, attribute?: string, values?: unknown[] }
+
+function applyQueries(rows: FakeRow[], queries: string[]): FakeRow[] {
+  const parsed = queries.map(query => JSON.parse(query) as FakeQuery)
+  let result = [...rows]
+  let limit = rows.length
+
+  for (const query of parsed) {
+    const field = query.attribute ?? ''
+    const value = query.values?.[0]
+    if (query.method === 'equal') result = result.filter(row => row[field] === value)
+    else if (query.method === 'lessThan') result = result.filter(row => String(row[field] ?? '') < String(value))
+    else if (query.method === 'greaterThan') result = result.filter(row => Number(row[field] ?? 0) > Number(value))
+    else if (query.method === 'orderDesc') result.sort((a, b) => String(b[field] ?? '').localeCompare(String(a[field] ?? '')))
+    else if (query.method === 'limit') limit = Number(value ?? rows.length)
+  }
+
+  return result.slice(0, limit)
+}
+
 const tablesDB = {
   // Die Ablage FILTERT — sonst fände der Zwischenspeicher jede Zeile für jede
   // Adresse, und ein Test über zwei verschiedene Websites prüfte am Ende nur
   // noch, dass die Attrappe alles zurückgibt.
   listRows: vi.fn(async ({ queries }: { queries: string[] }) => {
     if (storeBroken) throw new AppwriteException('Table not found', 404)
-    const wanted = /"values":\["([^"]*)"\]/.exec(queries.join(' '))?.[1] ?? ''
-    const rows = stored
-      .filter(row => row.urlKey === wanted)
-      .sort((a, b) => b.$createdAt.localeCompare(a.$createdAt))
-      .slice(0, 1)
+    const rows = applyQueries(stored, queries)
     return { rows, total: rows.length }
   }),
   createRow: vi.fn(async ({ data }: { data: Record<string, unknown> }) => {
@@ -596,6 +623,117 @@ describe('POST /api/brand/check · die eigene Brand', () => {
     await postHandler(event)
 
     expect(lastWrite().profileId).toBe('')
+  })
+})
+
+/**
+ * VORGÄNGER UND RANKING-PLATZ (BRAND-CHECK-SEITE §10) — zwei Nebenangaben, die
+ * die Ergebnisseite v2 zu „↑ +7 seit dem 12. August" und „Platz 2 von 3"
+ * macht. Beide sind ZUGABEN: sie dürfen fehlen, aber sie dürfen nie etwas
+ * Falsches behaupten — ein Delta gegen den Check SELBST oder gegen einen
+ * ausgeblendeten Vorgänger wäre genau das.
+ */
+describe('GET /api/brand/check/<id> · Vorgänger und Ranking-Platz', () => {
+  function checkRow(id: string, overrides: Record<string, unknown> = {}): FakeRow {
+    return {
+      $id: id,
+      $createdAt: '2026-09-01T00:00:00.000Z',
+      urlKey: 'kailua.coffee',
+      url: 'https://kailua.coffee/',
+      host: 'kailua.coffee',
+      locale: 'de',
+      score: 70,
+      band: 'strong',
+      scoreVersion: 'score-1',
+      hidden: false,
+      rankingOptIn: true,
+      categories: '[]',
+      criteria: '[]',
+      findings: '[]',
+      ...overrides,
+    }
+  }
+
+  it('nennt den unmittelbaren Vorgänger derselben Adresse', async () => {
+    stored = [
+      checkRow('alt', { $createdAt: '2026-08-12T00:00:00.000Z', score: 63, band: 'average' }),
+      checkRow('neu', { $createdAt: '2026-09-01T00:00:00.000Z', score: 70 }),
+    ]
+    routerId = 'neu'
+
+    const result = await getHandler(event)
+    expect(result.previous).toEqual({
+      id: 'alt',
+      score: 63,
+      band: 'average',
+      createdAt: '2026-08-12T00:00:00.000Z',
+    })
+  })
+
+  it('der ERSTE Check einer Adresse hat keinen Vorgänger — und ist nie sein eigener', async () => {
+    stored = [checkRow('nur-einer')]
+    routerId = 'nur-einer'
+
+    const result = await getHandler(event)
+    expect(result.previous).toBeNull()
+  })
+
+  it('ein AUSGEBLENDETER Vorgänger ergibt null — es wird nicht weiter zurückgegriffen', async () => {
+    stored = [
+      checkRow('ganz-alt', { $createdAt: '2026-07-01T00:00:00.000Z', score: 40 }),
+      checkRow('alt', { $createdAt: '2026-08-12T00:00:00.000Z', score: 63, hidden: true }),
+      checkRow('neu', { $createdAt: '2026-09-01T00:00:00.000Z' }),
+    ]
+    routerId = 'neu'
+
+    const result = await getHandler(event)
+    expect(result.previous).toBeNull()
+  })
+
+  it('nennt den Platz nach derselben Rangfolge wie das Ranking', async () => {
+    stored = [
+      checkRow('a', { urlKey: 'a.example', score: 90 }),
+      checkRow('b', { urlKey: 'b.example', score: 70 }),
+      checkRow('c', { urlKey: 'c.example', score: 50 }),
+    ]
+    routerId = 'b'
+
+    const result = await getHandler(event)
+    expect(result.rank).toEqual({ position: 2, total: 3 })
+  })
+
+  it('ohne Häkchen gibt es keinen Platz — und keine zweite Abfrage', async () => {
+    stored = [checkRow('a', { rankingOptIn: false })]
+    routerId = 'a'
+
+    const result = await getHandler(event)
+    expect(result.rank).toBeNull()
+    // Genau eine Abfrage: die des Vorgängers. Der Ranking-Lauf liest ein
+    // Fenster von 500 Zeilen und wird deshalb gar nicht erst begonnen.
+    expect(tablesDB.listRows).toHaveBeenCalledTimes(1)
+  })
+
+  it('ein älterer Check derselben Adresse hat keinen eigenen Platz (je Adresse der jüngste)', async () => {
+    stored = [
+      checkRow('alt', { $createdAt: '2026-08-12T00:00:00.000Z', score: 63 }),
+      checkRow('neu', { $createdAt: '2026-09-01T00:00:00.000Z', score: 70 }),
+    ]
+    routerId = 'alt'
+
+    const result = await getHandler(event)
+    expect(result.rank).toBeNull()
+  })
+
+  it('eine kaputte Ablage kostet die Nebenangaben, nicht das Ergebnis', async () => {
+    stored = [checkRow('a')]
+    routerId = 'a'
+    tablesDB.listRows.mockRejectedValueOnce(new AppwriteException('boom', 500))
+    tablesDB.listRows.mockRejectedValueOnce(new AppwriteException('boom', 500))
+
+    const result = await getHandler(event)
+    expect(result.id).toBe('a')
+    expect(result.previous).toBeNull()
+    expect(result.rank).toBeNull()
   })
 })
 

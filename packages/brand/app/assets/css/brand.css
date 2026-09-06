@@ -564,3 +564,22 @@
 @supports (corner-shape: superellipse(1.7)) {
   .bw-tile, .bw-tile--lg { corner-shape: superellipse(1.7); }
 }
+
+/* Ampel-Matrix der Ergebnisseite (BRAND-CHECK-SEITE §10, „Diagnose"): 8 × 5
+ * Zellen mit VIER Zuständen. Die Farbe setzt die Komponente aus den
+ * bestehenden Signal-Tokens (--bw-accent / --bw-draft / --bw-stale); hier
+ * steht nur die Form. Jede Zelle bleibt ein `button` — Tastatur und
+ * Screenreader brauchen den Weg zur Notiz, und ein Klick springt in den Plan. */
+.bw-matrix-cell {
+  display: grid; place-items: center;
+  block-size: 1.75rem; flex: 1 1 0; min-inline-size: 1.75rem;
+  border-radius: 6px; cursor: pointer;
+  transition: transform 120ms ease-out;
+}
+.bw-matrix-cell:hover { transform: translateY(-1px); }
+.bw-matrix-cell:focus-visible { outline: 2px solid var(--bw-ink); outline-offset: 2px; }
+.bw-matrix-cell--locked { box-shadow: inset 0 0 0 1px var(--bw-line-strong); }
+.bw-matrix-cell--legend {
+  flex: none; block-size: 1rem; inline-size: 1rem; min-inline-size: 1rem; cursor: default;
+}
+.bw-matrix-cell--legend:hover { transform: none; }

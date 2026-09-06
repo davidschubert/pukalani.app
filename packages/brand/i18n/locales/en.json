@@ -922,20 +922,14 @@
         "copyFailed": "Copying did not work",
         "loading": "Fetching your result …",
         "categoriesTitle": "Eight categories",
-        "points": "{points} of {weight}",
         "locked": "Not verifiable from the outside — we do not guess here, we leave it out of the calculation.",
-        "findingsTitle": "The three most important findings",
-        "findingsLead": "What we would tackle first — each finding with the evidence it rests on.",
-        "nextLabel": "Next step",
         "relaunchEyebrow": "Where to go from here",
         "relaunchTitle": "Start your brand relaunch",
         "relaunchBody": "Your brand advisor already knows your presence — you start from this result instead of from zero. The findings become the order of the work.",
         "relaunchCta": "Start the relaunch",
         "reportEyebrow": "To read at leisure",
         "reportTitle": "Full report by email",
-        "reportBody": "All 40 criteria with their evidence as a document — as soon as report delivery is switched on. The ratings themselves are already further down this page.",
-        "allTitle": "All 40 criteria",
-        "allLead": "Every criterion with its points and evidence — open it up if you want the detail.",
+        "reportBody": "All 40 criteria with their evidence as a document — as soon as report delivery is switched on. The ratings themselves are already on this page.",
         "criterionPoints": "{score} of 2",
         "notAssessable": "not assessable",
         "criterionFallback": "Further criterion",
@@ -1192,6 +1186,31 @@
         "open": "View score",
         "addUrl": "Add a website"
       },
+      "list": {
+        "nav": "Brand Scores",
+        "all": "All brand scores",
+        "title": "Brand Scores",
+        "subtitle": "All your brands with their two numbers — measured from the outside and graded in the foundation.",
+        "summary": "{count} brands · avg. website score {avg}",
+        "summaryEmpty": "{count} brands · no website score yet",
+        "col": {
+          "brand": "Brand",
+          "website": "Website",
+          "websiteScore": "Website score",
+          "documentScore": "Foundation maturity",
+          "lastCheck": "Last check"
+        },
+        "sortBy": "Sort by {column}",
+        "addUrl": "Add a website",
+        "never": "never checked",
+        "runWebsite": "Run again",
+        "runDocument": "Check the foundation",
+        "done": "The new result is in.",
+        "failed": "That did not work",
+        "emptyTitle": "No brand yet",
+        "empty": "Start your first one — its score will show up here.",
+        "emptyCta": "Create a brand"
+      },
       "errors": {
         "accountLimit": "Your 10 re-runs for today are used up. It continues tomorrow.",
         "documentEmpty": "Confirm a few fields in your foundation first. Without confirmed answers there is nothing to grade.",
@@ -1202,6 +1221,52 @@
         "unavailable": "The check is unavailable right now. Try again in a few minutes.",
         "generic": "That did not work just now. Give it another try in a moment."
       }
+    },
+    "checkResult": {
+      "deltaUp": "+{points} since {date}",
+      "deltaDown": "−{points} since {date}",
+      "deltaSame": "unchanged since {date}",
+      "rank": "Rank {position} of {total} in the ranking",
+      "verdictTitle": "The verdict",
+      "verdictLead": "The facts that matter, out of 40 criteria — every card stands on something we actually saw.",
+      "strengthTitle": "Biggest strength",
+      "opportunityTitle": "Biggest opportunity",
+      "nextStepTitle": "Next step",
+      "nextStepChapter": "In a relaunch this is the {chapter} chapter.",
+      "nextStepPlain": "This belongs to how your presence is built — we place it during the relaunch.",
+      "nextStepCta": "Start a brand relaunch",
+      "strongestTitle": "Strongest category",
+      "weakestTitle": "Weakest category",
+      "categoryValue": "{score} out of 100",
+      "categoryWeight": "Weight {weight}",
+      "categoriesLead": "Eight categories, each with its weight. Open one to see its five criteria.",
+      "coverageTitle": "Assessed",
+      "coverageValue": "{assessed} of {total} assessed",
+      "coverageLocked": "{count} cannot be judged from the outside — we leave those out of the calculation.",
+      "coverageComplete": "Everything that can be judged from the outside has a value.",
+      "coverageGrades": "{full} at full marks · {partial} halfway · {none} open",
+      "industryTitle": "Industry",
+      "sourceTitle": "Source and date",
+      "sourceWebsite": "Outside check of the home page",
+      "sourceDocument": "Check of the foundation document",
+      "matrixTitle": "All 40 criteria at a glance",
+      "matrixLead": "Eight rows, five criteria each. Click a cell to jump to its line in the plan below.",
+      "matrixCell": "{criterion}: {state}",
+      "matrixLegend": {
+        "full": "full marks",
+        "partial": "half marks",
+        "none": "open",
+        "locked": "not assessable"
+      },
+      "planTitle": "This would lift your score the most",
+      "planLead": "Every criterion below full marks, sorted by what it is worth on the overall score — each with the evidence it stands on.",
+      "planTotal": "Available in total: +{points} points up to 100",
+      "planEmpty": "Nothing open: every assessable criterion is at full marks.",
+      "planChapter": "Fits the {chapter} chapter",
+      "planShowAll": "Show all {count}",
+      "planShowLess": "Show fewer",
+      "gain": "+{points} points",
+      "gainNone": "under one point"
     },
     "checkPage": {
       "seoTitle": "Brand check — audit your brand presence and get your Brand Score",
@@ -1323,6 +1388,7 @@
         "category": "Best in {category}"
       },
       "col": {
+        "pick": "Selection",
         "rank": "Rank",
         "host": "Site",
         "score": "Score",
@@ -1422,6 +1488,53 @@
         "ties": "No tie. | One tie. | {count} ties.",
         "notAssessable": "One category was not assessable on at least one side. | {count} categories were not assessable on at least one side.",
         "basis": "Assessable categories: {a} on side A, {b} on side B."
+      },
+      "insights": {
+        "eyebrow": "Insights",
+        "title": "What the comparison shows",
+        "lead": "Sorted by relevance — from the overall picture down to the places where the big gaps come from.",
+        "pointsGap": "{count} point apart | {count} points apart",
+        "overall": {
+          "title": "The overall picture",
+          "close": "{leader} and {other} are close together — {gap}.",
+          "clear": "{leader} is ahead of {other} — {gap}, a clear lead.",
+          "wide": "{leader} is far ahead of {other} — {gap}.",
+          "tie": "Both end up on the same overall score.",
+          "note": "The overall score weighs all eight categories. How often someone wins is the balance next to it — the two may well disagree."
+        },
+        "wins": {
+          "title": "Category balance",
+          "count": "none of {total} | one of {total} | {count} of {total}",
+          "tieLabel": "Tie",
+          "none": "none"
+        },
+        "gap": {
+          "titleTop": "Biggest gap: {category}",
+          "title": "Large gap: {category}",
+          "line": "{leader} {leaderValue}, {other} {otherValue} — {gap}.",
+          "why": "Where it comes from",
+          "noReasons": "The gap is spread across the five criteria — no single one stands out.",
+          "noEvidence": "no quote"
+        },
+        "ties": {
+          "title": "Tied",
+          "lead": "Nothing separates these categories.",
+          "value": "both {value}"
+        },
+        "strengths": {
+          "title": "Strongest and weakest category",
+          "lead": "Per side, not against each other.",
+          "best": "Strongest",
+          "worst": "Weakest",
+          "none": "nothing assessable"
+        },
+        "notAssessable": {
+          "title": "Not assessable",
+          "lead": "What we could not check from the outside wins and loses nothing.",
+          "line": "{host}: {categories}, {criteria}",
+          "categories": "no category | one category | {count} categories",
+          "criteria": "no criterion | one criterion | {count} criteria"
+        }
       }
     },
     "fingerprint": {

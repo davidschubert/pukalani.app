@@ -1,7 +1,17 @@
+import { Query } from 'node-appwrite'
+import { brandCheckCategoryScores } from '../../../../shared/brandCheck'
+import {
+  BRAND_CHECK_RANKING_SCAN_LIMIT,
+  pickLatestPerUrlKey,
+  sortBrandCheckRankingItems,
+} from '../../../../shared/brandCheckRanking'
 import type {
   BrandCheckCategoryResult,
   BrandCheckCriterionResult,
   BrandCheckFinding,
+  BrandCheckPrevious,
+  BrandCheckRank,
+  BrandCheckRankingItem,
   BrandCheckResult,
 } from '../../../../shared/types/brand'
 import {
@@ -32,6 +42,15 @@ import {
  * `getRow` ist eine Zeichenkette, die jemand ausprobiert — deshalb erst die
  * Form (Appwrite-Zeilen-Ids: bis 36 Zeichen aus Buchstaben, Ziffern, `_`,
  * `-`), dann die Abfrage.
+ *
+ * ── ZWEI NEBENANGABEN, ZWEI ABFRAGEN — UND BEIDE DÜRFEN AUSFALLEN ─────────
+ * Seit der Ergebnisseite v2 (BRAND-CHECK-SEITE §10) trägt die Antwort den
+ * unmittelbaren VORGÄNGER derselben Adresse („↑ +7 seit dem 12. August") und
+ * den PLATZ im Ranking. Beide kosten je eine Abfrage, beide laufen parallel
+ * zum eigentlichen Ergebnis, und beide ergeben `null`, wenn irgendetwas
+ * dazwischenkommt: ein Delta ist eine Zugabe, ein 503 auf einem geteilten Link
+ * wäre ein Verlust. Den Platz holt die Route nur für Checks, die im Ranking
+ * überhaupt erscheinen — ohne Häkchen wird dort nichts gelesen.
  *
  * ── EINE KAPUTTE ZEILE IST EIN 404, KEIN 500 ──────────────────────────────
  * `JSON.parse` über eine Spalte, die jemand von Hand editiert hat, wirft. Für
@@ -86,6 +105,11 @@ export default defineEventHandler(async (event): Promise<BrandCheckResult> => {
   }
 
   const facts = brandCheckRankingFacts(row)
+  const [previous, rank] = await Promise.all([
+    loadPrevious(tablesDB, databaseId, row),
+    loadRank(tablesDB, databaseId, row, facts.rankingOptIn),
+  ])
+
   return {
     id: row.$id,
     url: row.url,
@@ -106,8 +130,139 @@ export default defineEventHandler(async (event): Promise<BrandCheckResult> => {
     categories,
     criteria,
     findings,
+    previous,
+    rank,
   }
 })
+
+/** Der Datenbank-Griff aus `brandDb` — hier nur zum Weiterreichen benannt. */
+type BrandTablesDb = ReturnType<typeof brandDb>['tablesDB']
+
+/**
+ * DER UNMITTELBARE VORGÄNGER DERSELBEN ADRESSE — eine Abfrage, eine Zeile.
+ *
+ * ── WARUM `hidden` NICHT IN DER ABFRAGE STEHT ─────────────────────────────
+ * Weil „der vorige Stand" genau EIN Eintrag ist. Filterte die Abfrage
+ * ausgeblendete Zeilen weg, griffe sie automatisch weiter zurück und die Seite
+ * sagte „+7 seit dem 3. Juli" über einen Vergleichswert, den der Betreiber
+ * gerade aus der Welt genommen hat. Also: den einen holen — und wenn er
+ * ausgeblendet ist, GAR NICHTS sagen.
+ *
+ * Ein Dokument-Check kann hier nie mit einem Website-Check verglichen werden:
+ * die Schlüssel sind verschieden gebaut (`doc:<profileId>` gegen Host+Pfad),
+ * die Gleichheit auf `urlKey` trennt beide Welten von selbst (§5b).
+ *
+ * FAIL-SOFT: eine Nebenangabe darf das Ergebnis nie kosten. Jeder Fehler und
+ * jede fehlende Spalte (Bestand vor brand-016) ergeben `null`.
+ */
+async function loadPrevious(
+  tablesDB: BrandTablesDb,
+  databaseId: string,
+  row: BrandCheckRow,
+): Promise<BrandCheckPrevious | null> {
+  if (!row.urlKey) return null
+  try {
+    const res = await tablesDB.listRows<BrandCheckRow>({
+      databaseId,
+      tableId: BRAND_CHECKS_TABLE,
+      queries: [
+        Query.equal('urlKey', row.urlKey),
+        Query.lessThan('$createdAt', row.$createdAt),
+        Query.orderDesc('$createdAt'),
+        Query.limit(1),
+      ],
+    })
+    const candidate = res.rows[0]
+    // Der Vergleich steht NOCH EINMAL im Code, obwohl die Abfrage ihn schon
+    // enthält: eine Ablage, die `lessThan` auf einem Systemfeld nicht
+    // anwendet, lieferte sonst den Check SICH SELBST als seinen Vorgänger —
+    // „+0 seit heute" wäre das plausibelste aller falschen Ergebnisse.
+    if (!candidate || candidate.$id === row.$id || candidate.$createdAt >= row.$createdAt) return null
+    if (candidate.hidden === true) return null
+    return {
+      id: candidate.$id,
+      score: candidate.score ?? 0,
+      band: candidate.band ?? '',
+      createdAt: candidate.$createdAt,
+    }
+  }
+  catch {
+    return null
+  }
+}
+
+/**
+ * DER PLATZ IM RANKING — gerechnet mit DERSELBEN Auswahl wie die Ranking-Seite.
+ *
+ * Vier Grenzen in der Abfrage (Häkchen, nicht ausgeblendet, Wert über 0,
+ * jüngster je Adresse) und die Sortierung nach Gesamtwert kommen wörtlich aus
+ * `ranking.get.ts` bzw. `shared/brandCheckRanking.ts`. Eine zweite Rangfolge
+ * daneben hiesse, dass diese Seite „Platz 3" sagt und die Ranking-Seite den
+ * Auftritt auf Platz 4 zeigt.
+ *
+ * `null` heisst „steht dort nicht": ohne Häkchen, ausgeblendet, mit Wert 0 —
+ * oder weil ein NEUERER Check derselben Adresse ihn im Ranking vertritt (die
+ * Regel „je Adresse der jüngste"). Auch das ist wahr und keine Panne: dieser
+ * Check hat dann keinen eigenen Platz.
+ *
+ * FAIL-SOFT wie der Vorgänger; der Preis (ein Lesefenster) ist derselbe wie
+ * auf der Ranking-Seite und wird nur für Checks bezahlt, die überhaupt in
+ * Frage kommen.
+ */
+async function loadRank(
+  tablesDB: BrandTablesDb,
+  databaseId: string,
+  row: BrandCheckRow,
+  rankingOptIn: boolean,
+): Promise<BrandCheckRank | null> {
+  if (!rankingOptIn || row.hidden === true || (row.score ?? 0) <= 0) return null
+  try {
+    const res = await tablesDB.listRows<BrandCheckRow>({
+      databaseId,
+      tableId: BRAND_CHECKS_TABLE,
+      queries: [
+        Query.equal('rankingOptIn', true),
+        Query.equal('hidden', false),
+        Query.greaterThan('score', 0),
+        Query.orderDesc('$createdAt'),
+        Query.limit(BRAND_CHECK_RANKING_SCAN_LIMIT),
+      ],
+    })
+    const latest = pickLatestPerUrlKey(res.rows.map(toRankingRow))
+    const sorted = sortBrandCheckRankingItems(latest.map(entry => entry.item), 'score')
+    const index = sorted.findIndex(item => item.id === row.$id)
+    if (index < 0) return null
+    return { position: index + 1, total: sorted.length }
+  }
+  catch {
+    return null
+  }
+}
+
+/** Dieselbe Übersetzung wie in `ranking.get.ts` — Sicht plus Gruppier-Schlüssel. */
+function toRankingRow(row: BrandCheckRow): { urlKey: string, createdAt: string, item: BrandCheckRankingItem } {
+  const facts = brandCheckRankingFacts(row)
+  return {
+    urlKey: row.urlKey,
+    createdAt: row.$createdAt,
+    item: {
+      id: row.$id,
+      host: row.host ?? '',
+      score: row.score ?? 0,
+      band: row.band ?? '',
+      industry: facts.industry,
+      source: facts.source,
+      createdAt: row.$createdAt,
+      categories: toCategoryScores(row.categories),
+    },
+  }
+}
+
+/** Kaputtes JSON ⇒ leere Liste: eine Nebenangabe darf die Seite nicht kosten. */
+function toCategoryScores(raw: string): { id: string, score: number | null }[] {
+  const parsed = parseJson<BrandCheckCategoryResult[]>(raw)
+  return parsed ? brandCheckCategoryScores(parsed) : []
+}
 
 /** `null` statt eines Wurfs — der Aufrufer entscheidet, was ein Loch bedeutet. */
 function parseJson<T>(value: string): T | null {
