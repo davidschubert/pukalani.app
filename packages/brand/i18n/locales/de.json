@@ -1615,6 +1615,7 @@
       "loadFailed": "Das Dokument konnte nicht geladen werden.",
       "empty": "Hier steht noch nichts — sobald ihr ein Kapitel besprochen habt, füllt es sich.",
       "standTitle": "Stand",
+      "toc": "Inhalt",
       "standProgress": "Abgenommen",
       "state": {
         "done": "abgenommen",

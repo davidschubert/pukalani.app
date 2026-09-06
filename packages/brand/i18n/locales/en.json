@@ -1615,6 +1615,7 @@
       "loadFailed": "The document could not be loaded.",
       "empty": "Nothing here yet — it fills up as soon as you have talked through a chapter.",
       "standTitle": "Progress",
+      "toc": "Contents",
       "standProgress": "Accepted",
       "state": {
         "done": "accepted",

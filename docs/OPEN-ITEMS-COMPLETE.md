@@ -30,6 +30,51 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### Brand-Check als Produktseite (BC1 P1–P6): Startseite, Ranking, Vergleich, Meine Brands, Ergebnisseite v2 ✅ 2026-09-05/06
+
+**Was:** Davids Auftrag nach dem ersten Live-Check („eigene Seite, Teaser zeigen dorthin, Archiv/
+Ranking, Quartett-Vergleich, Score neu ermitteln mit Gegenüberstellung, To-dos") — Konzept
+docs/plans/BRAND-CHECK-SEITE.md, vier Entscheidungen per Fragenrunde (Ranking nur mit Opt-in,
+Branche per KI + Korrekturvorschlag, Dokument-Check sofort, Konto-Deckel 10/Tag; DECISION-LOG
+2026-09-05), Visualisierung nach externem Input festgezogen (Markenabdruck, Ampel-Matrix,
+Stärke · Chance · Nächster Schritt; §10). Sechs Opus-Läufe, meist zu zweit/dritt parallel im
+selben Worktree (i18n nur per Edit, Dateibesitz je Lauf), jeder im Fable-Hauptloop geprüft:
+- **P1** `/brand-check` (Formular, Reiter, Marketing, FAQ+JSON-LD, Opt-in-Häkchen), Teaser auf
+  Start/About/Team · **P2** Migration **brand-017** (industry, rankingOptIn, hidden, userId,
+  profileId, source; Tabelle `brand_check_corrections`), Branche im Judge (check-judge-2),
+  force/Konto-Deckel, Ranking-API (je urlKey der jüngste Opt-in-Check, Microcache 60 s),
+  Korrektur-Routen, hidden-Flag · **P3** Ranking-Seite (Filter, Sortierung je Kategorie,
+  Zwei-Häkchen-Vergleich), Korrekturvorschlag auf der Ergebnisseite, Betreiber-Warteschlange
+  `/dashboard/brand-check/corrections` · **P4** Vergleich mit zwei überlagerten Markenabdrücken
+  (`BwBrandFingerprint`, Inline-SVG) + acht Duell-Zeilen · **P5** Dokument-Check
+  (`POST /api/brand/profiles/:id/check`, Fundament-Reife `doc-score-1`, urlKey `doc:<profileId>`),
+  Verlauf + `diffBrandChecks`, `pickBrandCheckTodos`, Score-Seite je Brand · **P6** Ergebnisseite
+  v2 (Fazit-Bento, Delta zum Vorgänger, Rang, Markenabdruck, acht OFFENE Kategorie-Karten in
+  eigener Section — Davids Zuschnitt —, Ampel-Matrix 8×5, Verbesserungsplan mit exakt
+  gerechnetem „+X Punkte" je Kriterium), Vergleichs-Insights-Bento (Gesamtbild, Bilanz,
+  Abstände ≥ 25 mit Kriterien-Belegen beider Seiten), Brand-Scores-Liste `/dashboard/brand-scores`.
+
+**Live-Beweise:** pukalani.app (89, Branche `software` vom Judge) und freelancer.supply (61,
+`personal`) mit Opt-in im Ranking; Vergleich beider 200 mit Markenabdruck; Korrektur- und
+Score-Routen registriert. Nicht live durchgespielt (Login + echte KI-Kosten): Dokument-Check,
+Neu-ermitteln, Korrektur-Annahme — per Route-Tests mit Attrappen abgesichert.
+
+**Zwei Live-Fehler danach:** (1) Ranking sprang nach dem SSR auf 500 — `''` als Wert für „Alle
+Branchen" im `USelect` (Reka verbietet leere `SelectItem`-Werte, die bekannte Falle) ⇒ Sentinel
+`all`. (2) Stille Hydration-Fehler im Ranking: `header: () => ''` in einer `UTable`-Spalte — Vue
+schreibt leeren Text beim SSR nicht, legt beim Hydrieren aber einen Textknoten an; der Zweig
+loggt ohne Knoten-Warnung. Kur: echte `sr-only`-Beschriftung. Dasselbe Muster steht ~40-mal in
+anderen Layern (comments, posts, core/SessionsTable, runner) — als Folgeaufgabe notiert.
+
+**Gelernt:** (1) Parallel-Läufe im selben Worktree funktionieren, wenn jeder Lauf einen
+Dateibesitz hat und geteilte Dateien (i18n) nur per Edit angefasst werden — ein Lauf hat trotzdem
+eine Datei des anderen verwaist (`createdAt` nach Ersatz durch eine Komponente); das fängt nur
+der Lint auf dem GESAMTSTAND. (2) Ein Lauf, der `.env`/Vorschauseiten anlegt, muss sie löschen —
+und der Nachbar darf sie nicht „reparieren"; der eine TS-Fehler in `cmp-preview.vue` war genau
+das. (3) Eine `''`-Option in einem Reka-Select ist kein Build-Fehler, sondern eine 500-Seite
+NACH dem SSR — die Seite „steht kurz und springt". (4) Leere Spaltenköpfe in `UTable` erzeugen
+Hydration-Fehler ohne Knoten-Warnung; Bisektion (Spalten einzeln ausschalten) findet sie.
+
 ### Brand-Check als Instrument: Website → Brand Score, 8 Kategorien, 3 Befunde ✅ 2026-09-05
 
 **Was:** Davids Auftrag „mach mit dem brand-check instrument weiter" — der kostenlose

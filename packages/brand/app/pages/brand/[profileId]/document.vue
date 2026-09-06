@@ -446,7 +446,15 @@ useBrandTitle(() => (store.profile?.title || view.value?.title || t('brand.docum
         <p v-if="doc.error.value" class="bw-pending">{{ t('brand.document.loadFailed') }}</p>
         <p v-else-if="!chapters.length" class="bw-pending">{{ t('brand.document.empty') }}</p>
 
-        <section v-for="chapter in chapters" :key="chapter.stepKey" class="flex flex-col gap-3">
+        <!-- Die `id` ist die SPRUNGMARKE des Inhaltsverzeichnisses (rechts) —
+             `BwDocumentToc` beobachtet genau diese Elemente. KEIN
+             `scroll-mt-*`: der Bühnen-Balken ist ein Geschwister der
+             scrollenden `main.bw-stage` (flex-none), nicht sticky — er
+             verdeckt also nichts. -->
+        <section
+          v-for="chapter in chapters" :id="chapter.stepKey" :key="chapter.stepKey"
+          class="flex flex-col gap-3"
+        >
           <div class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
             <h2 class="text-[20px] font-extralight leading-tight tracking-tight">
               {{ t(`brand.steps.${chapter.stepKey}`) }}
@@ -524,37 +532,25 @@ useBrandTitle(() => (store.profile?.title || view.value?.title || t('brand.docum
       </div>
     </template>
 
-    <!-- RECHTS: der STAND. Nicht der Log — der zeigte hier dasselbe wie die
-         Mitte (s. Kopf). Je Kapitel eine Zeile mit seinem Abnahme-Zähler,
-         unten der Gesamtstand. -->
+    <!-- RECHTS: das INHALTSVERZEICHNIS, das zugleich der Stand ist (Davids
+         Wunsch 2026-09-05). Nicht der Log — der zeigte hier dasselbe wie die
+         Mitte (s. Kopf). Je Kapitel eine Zeile mit Glyphe und Abnahme-Zähler,
+         wie zuvor; NEU ist der Sprung in den Abschnitt statt in die
+         Kapitel-Abnahme. Der alte Weg geht nicht verloren: jedes Kapitel trägt
+         in der Mitte seinen Knopf „Zur Abnahme". Unten der Gesamtstand. -->
     <template #george>
       <div class="flex min-h-0 flex-1 flex-col">
-        <div class="min-h-0 flex-1 overflow-y-auto px-6 py-4">
-          <p class="bw-label uppercase tracking-wider" style="color: var(--bw-muted)">
-            {{ t('brand.document.standTitle') }}
-          </p>
-          <ul class="mt-3 flex flex-col gap-2">
-            <li v-for="chapter in chapters" :key="chapter.stepKey">
-              <button
-                type="button"
-                class="flex w-full items-start gap-2 rounded-xl px-2 py-1.5 text-left"
-                @click="goToAcceptance(chapter)"
-              >
-                <UIcon
-                  :name="chapter.storedState === 'done' ? 'i-ph-check-circle-fill' : 'i-ph-circle'"
-                  class="mt-0.5 size-4 flex-none"
-                  :style="chapter.storedState === 'done' ? 'color: var(--bw-accent)' : 'color: var(--bw-muted)'"
-                />
-                <span class="min-w-0 flex-1 leading-tight">
-                  <span class="block text-sm">{{ t(`brand.steps.${chapter.stepKey}`) }}</span>
-                  <span class="bw-label block tabular-nums" style="color: var(--bw-muted)">
-                    {{ counterLine(chapter) }}
-                  </span>
-                </span>
-              </button>
-            </li>
-          </ul>
-        </div>
+        <!-- `UPageAside` ist im Vorbild ein sticky Seitenrand unter dem
+             Header; hier lebt sie in der scrollenden Spalte des Workspace —
+             deshalb `static` statt `sticky` und keine Header-Höhe. -->
+        <UPageAside
+          :ui="{
+            root: 'block static min-h-0 flex-1 overflow-y-auto max-h-none px-6 py-4 lg:ps-6 lg:ms-0 lg:pe-6 lg:max-h-none lg:static',
+            container: 'relative',
+          }"
+        >
+          <BwDocumentToc :chapters="chapters" />
+        </UPageAside>
 
         <div class="flex-none border-t px-6 pb-5" style="border-color: var(--bw-line)">
           <BwRailFooter
