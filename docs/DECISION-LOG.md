@@ -7,6 +7,37 @@ die kleinen, verstreuten Beschlüsse.
 
 ---
 
+## 2026-09-06 — Marktvergleich: Pakete M1–M6 auf main; vier Beschlüsse aus dem Bau
+
+**Stand:** alle sechs Pakete liegen auf `main` (M1 475aeabd · M2 1bb5c55f · M3 11be1ef4 ·
+M4 8e936691 + Gate-Nachfix 0add6133 · M5 ae3b70d7 · M6 0c2070bc). Prod-Tabellen fehlen
+noch (Davids Ja steht aus), deshalb steht `pukalani.market.enabled` in `apps/branding`
+auf AUS.
+
+**Beschlüsse (Hauptloop, nach Prüfung — keine Davids-Entscheidung, aber festgehalten, weil
+nicht aus dem Code ablesbar):** (1) **Ein Gate schaltet alles oder nichts:** das
+Build-Gate wirkte nur auf der Seite, Leiste und Routen ignorierten es — jetzt prüfen alle
+drei Flächen denselben Schalter, und ein Deploy vor der Migration macht nichts sichtbar.
+(2) **Teilen-Link filtert nach `sensitivity`:** BF1 versprach „reist nicht per Share-Link",
+gelesen wurde das Feld beim Veröffentlichen nie — jetzt reisen nur `public`-Felder;
+bestehende Share-Links zeigen ab dem Deploy weniger (u. a. keine Wettbewerber-Notizen).
+(3) **Die Bot-Erklärseite `/market-bot` steht NICHT hinter dem Produkt-Gate:** der
+Bot-Name steht nach dem ersten Lauf in fremden Logs, unser Schalter nimmt ihn nicht
+zurück. (4) **Bibliothek: Entwürfe bleiben aus dem Repo, `status: 'verified'` ist Pflicht** —
+eine maschinell gerechnete Aussage über eine fremde Marke bekommt erst mit Davids
+Handzeichen einen Platz.
+
+**Befund aus dem Trockenlauf (M6):** 9 von 10 Kandidaten-Marken erlauben den Abruf per
+robots.txt und tragen keinen TDM-Vorbehalt; adidas wehrt den Bot per 403 schon auf der
+robots.txt ab (fail-closed behandelt). Die Erwartung „die Grossen sperren per Regel" hat sich
+nicht bestätigt — gesperrt wird per Bot-Abwehr.
+
+**Gelernt:** zwei Beweis-Skripte gegen DENSELBEN Dev-Server-Prozess erschöpfen die
+prozessweiten Eimer (429 in Schritt 14 — kein Fehler, ein Deckel); je Beweis ein frischer
+Prozess.
+
+---
+
 ## 2026-09-05 (spät) — Marktvergleich: Prototyp M0/M0b FREIGEGEBEN, Pakete M1–M6 laufen selbstständig
 
 **Entscheidung (David):** Der Prototyp (fünf Screens im Playground: Markt mit Quellen-Wähler
