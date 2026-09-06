@@ -2,6 +2,7 @@ import { randomBytes } from 'node:crypto'
 import { ID } from 'node-appwrite'
 import { createBrandSharePublishSchema } from '../../../../../schemas/brandAccess'
 import { resolveBrandJourney } from '../../../../../shared/brandJourney'
+import { brandShareableSlotValues } from '../../../../../shared/brandSharing'
 import type { BrandShareSnapshot, BrandSharePublishResponse } from '../../../../../shared/types/brand'
 import {
   BRAND_SHARES_TABLE,
@@ -34,6 +35,21 @@ import { recordBrandEvent } from '../../../../utils/brandEvents'
  * Metriken. `confirmedSlotValues` liest deshalb ausschliesslich das Feld
  * `confirmed` — `latestDraft` steht direkt daneben und wäre der eine Griff, mit
  * dem ein halbfertiger Gedanke öffentlich würde.
+ *
+ * ── UND SEIT MV1 M5: NICHTS `internal` (BF1 §3a Nr. 7) ────────────────────
+ * `brandShareableSlotValues` wirft raus, was die Registry als nicht-öffentlich
+ * führt — heute die vier Sessions `a.competitors`, `a.complaints`,
+ * `a.challenge`, `a.facts`. Die Zusage stand seit BF1 im Typ
+ * (`sensitivity`: „Was per Share-Link und Export standardmässig NICHT
+ * reist"), gelesen hat sie hier niemand: ein Schnappschuss trug bis dahin die
+ * NAMEN der Wettbewerber samt notierter Schwäche in einen dreissig Tage lang
+ * öffentlich abrufbaren Link. Begründung und Fail-closed-Regel stehen in
+ * `shared/brandSharing.ts`.
+ *
+ * BEFUNDE reisen weiterhin GAR NICHT mit — auch keine der Art `market`. Das
+ * ist keine Auslassung, sondern die Form dieses Snapshots: er zeigt die
+ * bestätigte Marke, nicht die Arbeit daran. Ein Feld dafür gibt es in
+ * `BrandShareSnapshot` nicht, und `tests/brandSharing.test.ts` nagelt das fest.
  *
  * ÜBERSPRUNGENE BAUSTEINE FEHLEN, ihre Daten bleiben aber liegen: die Kapitel
  * kommen aus der JOURNEY, nicht aus der Zeilenmenge.
@@ -83,7 +99,10 @@ export default defineEventHandler(async (event): Promise<BrandSharePublishRespon
       .filter(step => step.state !== 'skipped')
       .map((step) => {
         const row = byStepKey.get(step.stepKey)
-        return { stepKey: step.stepKey, slots: row ? confirmedSlotValues(row) : [] }
+        return {
+          stepKey: step.stepKey,
+          slots: row ? brandShareableSlotValues(confirmedSlotValues(row)) : [],
+        }
       })
       // Ein Kapitel ohne bestätigten Inhalt hat nichts zu zeigen — es fehlt,
       // statt als leere Überschrift dazustehen.

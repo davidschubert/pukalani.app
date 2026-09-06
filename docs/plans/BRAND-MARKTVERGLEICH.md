@@ -451,7 +451,8 @@ haben, das Marktprofil steht in der Inhaltssprache der Marke).
 | M2 | Abruf + Extraktion | robots/TDM, Pfad-Sperrliste, PII-Filter, Rohtext-Retention, Extraktions-Prompt `market-x-1`, Beleg-Riegel, Stub, KI-Aussensicht `market-ai-1` | **GEBAUT** (2026-09-05) — Vertrag Anhang C; `verify-market-fetch.mjs` 33/33 |
 | M3 | Vergleich + Befunde | Bericht-Prompt `market-r-1`, Idempotenz + `stale`, Befund-Art `market`, § 6 UWG-Riegel, Bibliotheks-Mechanik, Brand-Check-Anbindung, George-Block | **GEBAUT** (2026-09-05) — Vertrag Anhang D; `verify-market-report.mjs` 43/43 |
 | M4 | Oberfläche | Seite „Markt“, Leiste, Schranke, Chips, Quellen-Wähler, Opt-in, Relaunch-Ansicht | **GEBAUT** (2026-09-05) — Vertrag Anhang E; `verify-market-ui.mjs` 46/46; Klick-Beweis + Seiten-Abnahme durch David offen |
-| M5 | Betrieb | ~~Eimer~~ (vorgezogen, s. u.), Sweep, Wächter (Parität, Bilanz), Messung, Doku/Changelog | Live-Build |
+| M5 | Betrieb | ~~Eimer~~ (vorgezogen, s. u.), Rohtext-Sweep, Erklärseite `/market-bot`, Vertraulichkeits-Nachweis, Bewertung, Runbook, Doku | **GEBAUT** (2026-09-05) — Vertrag Anhang F; `verify-market-retention.mjs`; Prod-Migration + Gate-Flip offen (Davids Ja) |
+| M6 | Bibliothek | Rechnen + Handprüfung der ersten Paare, Rechts-Check der Namensnennung (§7.6) | offen |
 
 **Abweichung von dieser Skizze (M2, 2026-09-05):** Der **Eimer** (§2.8, „3 Läufe je
 Branding und Tag" plus Instanz-Deckel) war für M5 vorgesehen und ist mit M2 VORGEZOGEN —
@@ -1495,3 +1496,177 @@ wäre die zweite Stelle, an der ein 409 anders behandelt wird.
    trägt die rohen Antwort-Daten; ein Grep nach `market.` über die ganze
    Seite fände dort jeden Schlüssel, der irgendwo als Wert vorkommt. Geprüft
    wird der SICHTBARE Text — dieselbe Lehre wie bei der UWG-Gegenprobe in M3.
+
+---
+
+## Anhang F — Betrieb (M5, Stand 2026-09-05)
+
+Gebaut in Paket **M5 „Betrieb"**. Der Eimer stand schon (aus M2 vorgezogen,
+s. §5); hier kommen Frist, Erklärseite, Vertraulichkeits-Nachweis, Bewertung
+und das Einführungs-Runbook dazu. **Keine neue Migration.**
+
+### Wo was liegt
+
+| Baustein | Ort |
+| --- | --- |
+| Frist-Regel (pur) | `packages/market/shared/marketRetention.ts` |
+| Der Sweep | `packages/market/server/utils/marketRawSweep.ts` |
+| Der Takt (30 min, erster Lauf +45 s) | `packages/market/server/plugins/raw-text-sweep.ts` |
+| Betreiber-Knopf (`system.manage`) | `packages/market/server/api/market/ops/sweep.post.ts` |
+| Erklärseite des Bots | `packages/market/app/pages/market-bot.vue` |
+| Bewertung (Vertrag + Route) | `packages/market/shared/marketRating.ts` · `server/api/market/profiles/[id]/rating.post.ts` |
+| Teilen-Filter (brand, additiv) | `packages/brand/shared/brandSharing.ts` |
+| Produkt-Ereignis (brand, additiv) | `recordBrandProductEvent` in `packages/brand/server/utils/brandEvents.ts` |
+| Runbook | `docs/runbooks/MARKTVERGLEICH-EINFUEHRUNG.md` |
+| Interne Doku | `docs/content/3.features/7.marktvergleich.md` |
+
+### Die Frist (§2.9 Nr. 6)
+
+Gestempelt beim Abruf (`marketRawExpiresAt`, seit M2 — die 24 stand dort als
+Rechnung mitten im Schreibvorgang und ist jetzt EINE Konstante), eingelöst vom
+Sweep. Drei Entscheidungen, die man nicht „vereinfachen" darf:
+
+1. **Der Takt hängt NICHT am Produkt-Gate**, sondern nur an
+   `getProductRegistry().has('market')` — also an „ist der Layer
+   einkompiliert?". Wer das Produkt abschaltet (Build-Schalter oder
+   Notabschaltung), stellt das SAMMELN ein; er darf damit nicht die
+   Lebensdauer des schon gesammelten fremden Seitentextes verlängern. Der
+   Betreiber-Knopf daneben liegt unter `/api/market` und fällt sehr wohl mit
+   der Notabschaltung — er ist der Handgriff, der Takt ist die Zusage.
+2. **Die Fail-Richtung ist umgekehrt** zu allen anderen Sweeps des Repos: ein
+   fehlender oder unlesbarer Stempel heisst „löschen". Sonst wäre fremder
+   Seitentext ohne Ablaufdatum genau der Zustand, den §1.7 Nr. 4 ausschliesst.
+   Ein zu früh geleerter Rohtext kostet dagegen nichts — das Marktprofil ist
+   längst geschrieben.
+3. **Der Sweep fasst `market_profiles` NIE an.** `marketRawSweepPatch()` gibt
+   genau zwei Felder zurück (`rawText: ''`, `rawExpiresAt: null`), und der Test
+   nagelt die Schlüssel-Liste fest. Ein Sweep, der auch die Belege nähme, würde
+   die Zusage nicht einlösen, sondern das Produkt löschen.
+
+30 Minuten und nicht stündlich, weil diese Frist in STUNDEN rechnet und nach
+aussen genannt wird: bei stündlichem Takt stünde auf `/market-bot` faktisch
+„bis zu 25 Stunden".
+
+### Die Erklärseite `/market-bot` (§2.9 Nr. 1)
+
+Der User-Agent verspricht sie (`PukalaniMarketBot/1.0
+(+https://branding.supply/market-bot)`), also muss sie antworten. Vier
+Auskünfte in dieser Reihenfolge: was gelesen wird, was gar nicht erst
+abgerufen wird (die vollständige Pfad-Sperrliste als BELEG statt als
+Behauptung), was mit dem Gelesenen passiert, wie man uns aussperrt (robots.txt
+plus die vier TDM-Formen). Kein Marketing, kein CTA.
+
+**Sie steht bewusst NICHT hinter dem Produkt-Gate.** Sobald ein einziger Lauf
+passiert ist, steht der Name in einem fremden Log — und der wird nicht mit
+unserem Schalter zurückgenommen. Eine Erklärseite, die nur existiert, solange
+das Produkt an ist, wäre genau dann weg, wenn jemand sie am dringendsten sucht.
+
+Alle Zahlen (Seiten, Zeichen, Bytes, Zitatschranke, Frist, Sperrliste) kommen
+aus den Verträgen, nicht aus der Übersetzungsdatei: eine abgetippte Zahl wäre
+beim ersten Ändern eine öffentliche Falschaussage über unser eigenes Verhalten.
+Die Code-Beispiele stehen im MARKUP, weil Locale-Messages in diesem Repo keine
+spitzen Klammern tragen dürfen (CLAUDE.md).
+
+### Vertraulichkeit (§2.9 Nr. 7) — Befund und Fix
+
+Der Nachweis hat einen echten Befund gebracht, und zwar nicht im market-Layer:
+
+- **Markt-Daten reisen heute schon nicht.** `BrandShareSnapshot` trägt sieben
+  Felder (Story, bestätigte Kapitel, Preset) und **überhaupt keine Befunde** —
+  auch keine der Art `market`. Kandidaten, Marktprofile und Berichte haben
+  keinen Weg dorthin. Ein Export existiert nicht (es gibt keine Route, keinen
+  Renderer, kein `@media print`). Das ist als FORM festgenagelt
+  (`packages/market/tests/marketConfidentiality.test.ts`): ein neues
+  Pflichtfeld im Snapshot bricht den Typecheck genau dort, wo die Zusage
+  gemacht wurde.
+- **Der Massstab der Zusage reiste aber sehr wohl mit.** §2.9 Nr. 7 sagt
+  „vertraulich wie `a.competitors`" — und `a.competitors` selbst stand im
+  Teilen-Link. `BrandSessionConfig.sensitivity` trägt seit BF1 wörtlich den
+  Satz „Was per Share-Link und Export standardmässig NICHT reist", vier
+  Sessions stehen auf `internal` (`a.competitors`, `a.complaints`,
+  `a.challenge`, `a.facts`), und GELESEN hat das Feld beim Veröffentlichen
+  niemand: `confirmedSlotValues` lief über alle bestätigten Slots. Dreissig
+  Tage lang lesbar für jeden mit dem Token — inklusive der Wettbewerber-NAMEN
+  samt notierter Schwäche, also genau der Angabe, die der § 6 UWG-Riegel des
+  Marktvergleichs aus jedem Vorschlag heraushält.
+- **Fix (additiv, im brand-Layer):** `shared/brandSharing.ts` mit
+  `isBrandSlotShareable` (fail-closed: unbekannt und `deactivated` reisen
+  nicht) und `brandShareableSlotValues`; `share.post.ts` legt es über
+  `confirmedSlotValues`. **Nicht** in `confirmedSlotValues` selbst — die
+  beantwortet „was hat dieser Mensch bestätigt?", und diese Antwort schliesst
+  die internen Sessions ein (Werkstatt, Abnahme, Dokument, und der market-Layer
+  baut daraus das eigene Marktprofil mit seinem eigenen `publicOnly` obendrauf).
+- **Der DOKUMENT-Verweis in §2.9 Nr. 7 meint den Dokument-EXPORT** (so steht es
+  in §1.7 Nr. 6 ausführlich). Die Dokument-ANSICHT zeigt Markt-Befunde weiter,
+  und das ist Anhang E so beschlossen („derselbe Chip wie in Session, Log,
+  Abnahme und Dokument") — sie ist Eigentümer-Fläche. Wird ein Export gebaut,
+  gehört derselbe Filter davor.
+
+### Messung (§2.10)
+
+Log-Ereignisse: `market.run` · `market.report` · `market.report_filtered` ·
+`market.run_report_failed` · `market.competitor_excluded` (als
+`excludedReason` in Zeile und Lauf-Schritt) · `market.raw_swept` ·
+`market.raw_sweep_failed` · `market.rating`. Alle tragen Zahlen, keinen Inhalt.
+
+**`market.rating` liegt in `brand_events`, NICHT in einer neuen Tabelle.**
+§2.10 liess beides zu; den Ausschlag gab die Migration: `brand_events.type` ist
+ein varchar, kein Enum (brand-007 begründet das ausdrücklich) — die neue
+Ereignis-Art kostet also keine Prod-Migration, und Aufbewahrung (24 Monate) und
+Löschkaskade gelten ohne Zutun. Damit `brand` dafür kein Produkt kennen muss
+(A14), gibt es `recordBrandProductEvent`: es kennt die FORM `<produkt>.<name>`,
+nicht den Namen `market`. Die geschlossene Aufzählung `BrandEventType` bleibt
+geschlossen — sie zu einem Template-Literal zu öffnen hätte sie für alle
+eigenen Ereignisse wertlos gemacht.
+
+Zwei Dinge daran sind Vertrag: der Satz (≤ 200 Zeichen) wird mit demselben
+`filterMarketPii` gefiltert, der vor jedem Modell-Aufruf läuft — er ist die eng
+gefasste Ausnahme von „`payload` trägt nie Inhaltstext", dieselbe Sorte wie
+`step.restarted`. Und „genau einmal je Branding" hält eine DETERMINISTISCHE
+Zeilen-Id (`mkr-<profileId>`, 409 ⇒ `counted: false`), nicht der
+`localStorage`-Marker der Seite: der lässt den Block nur sofort verschwinden.
+
+### Kunden-Text
+
+Ein kurzes „Was der Vergleich tut und was nicht" (fünf Zeilen: zeigt Aussagen
+mit Beleg · misst keinen Erfolg · formuliert keinen Werbesatz mit fremdem Namen
+· eigene Marke nur mit Opt-in · Rohtext 24 h, Profile fallen mit dem Branding)
+steht **zugeklappt auf der Seite „Markt"** mit einem Verweis auf `/market-bot`.
+
+Er liegt dort und nicht in einer Hilfe-Site, weil branding.supply keine hat:
+`apps/help` ist die Kunden-Hilfe der Pukalani-Communities, ein anderes Produkt
+mit anderer Zielgruppe. Bekommt branding.supply eine eigene Hilfe- oder
+FAQ-Fläche, zieht dieser Text dorthin (und die Seite verlinkt ihn, statt ihn zu
+tragen).
+
+### Beweise
+
+- Unit (`pnpm --filter @pukalani/market test`, **201**): die Frist-Regel mit
+  Gegenprobe an jedem der vier Fälle (inkl. „Rohtext ohne Stempel ist fällig"
+  und „eine Millisekunde vor Ablauf steht die Zeile noch"), der
+  Vertraulichkeits-Nachweis gegen die Snapshot-FORM.
+- Unit brand (`pnpm --filter @pukalani/brand test`, **1797**):
+  `tests/brandSharing.test.ts` — die vier internen Sessions mit Gegenprobe,
+  fail-closed bei unbekanntem und abgeschaltetem Slot.
+- End-to-end: `packages/market/scripts/verify-market-retention.mjs` —
+  Vorbedingungen wie bei `verify-market-ui.mjs`, plus ein zweiter Lauf mit
+  `BOT_ONLY=1` gegen einen Server im COMMITTETEN Zustand (Gate aus): nur so
+  lässt sich zeigen, dass die Erklärseite nicht am Produkt-Gate hängt.
+
+**Gelernt (drei Dinge):**
+1. **Eine Zusage, die nur im Typ steht, ist keine.** `sensitivity` trug seit
+   BF1 den Satz „reist nicht per Share-Link" und wurde beim Veröffentlichen
+   nie gelesen — vier interne Sessions gingen dreissig Tage lang an jeden mit
+   dem Token. Gefunden hat das nicht ein brand-Audit, sondern der Versuch,
+   einen SATZ AUS EINEM ANDEREN PLAN zu beweisen („vertraulich wie
+   `a.competitors`"). Ein Beweis, der einen fremden Massstab benutzt, prüft
+   auch den Massstab.
+2. **Eine geschlossene Aufzählung öffnet man nicht, man stellt eine zweite Tür
+   daneben.** `BrandEventType` um `` `${string}.${string}` `` zu erweitern
+   hätte den Tippfehler-Schutz für ALLE brand-Ereignisse mit entfernt — bei
+   einer Spalte, die ein varchar ist, wäre danach nichts mehr übrig, das den
+   Namen prüft.
+3. **Ein Sweep braucht die umgekehrte Fail-Richtung, wenn die Daten nicht uns
+   gehören.** Alle anderen Sweeps dieses Repos löschen im Zweifel NICHT. Hier
+   wäre das die teure Richtung: was stehen bleibt, ist fremder Seitentext ohne
+   Ablaufdatum.

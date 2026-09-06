@@ -148,3 +148,19 @@ export interface MarketReportResponse {
   reused: boolean
   aiEnabled: boolean
 }
+
+// ── Die freiwillige Bewertung (§2.10, MV1 M5) ──────────────────────────────
+
+/**
+ * DIE ANTWORT AUF „WAR DER VERGLEICH BRAUCHBAR?" (Plan §2.10: „eine
+ * freiwillige Frage nach dem ersten Bericht").
+ *
+ * `counted: false` heisst „gab es schon" und ist KEIN Fehler: die Frage wird
+ * je Branding genau einmal gezählt, und ein zweiter Klick (anderer Browser,
+ * geleerter `localStorage`, zwei offene Tabs) soll dieselbe freundliche
+ * Antwort bekommen wie der erste. Die Oberfläche bedankt sich in beiden
+ * Fällen — ein „das haben Sie schon" wäre eine Belehrung für eine Gefälligkeit.
+ */
+export interface MarketRatingResponse {
+  counted: boolean
+}

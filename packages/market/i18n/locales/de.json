@@ -268,6 +268,71 @@
       "competitor_url_invalid": "Diese Adresse können wir nicht lesen — bitte mit Domain angeben.",
       "self_limit": "Eine eigene alte Website je Branding, nicht zwei.",
       "shared_unavailable": "Diese Marke ist nicht (mehr) für den Marktvergleich freigegeben."
+    },
+    "about": {
+      "title": "Was der Vergleich tut und was nicht",
+      "does": "Er zeigt Feld für Feld, was andere Marken öffentlich über sich sagen — jede Aussage mit wörtlichem Zitat und der Seite, auf der sie steht.",
+      "doesNot": "Er misst keinen Erfolg. Kein Ranking, keine Punktzahl je Wettbewerber, keine Aussage darüber, wem der Markt gehört.",
+      "noClaim": "Er formuliert keinen Werbesatz, der einen Wettbewerber nennt. Befunde richten sich immer an euer eigenes Feld.",
+      "optIn": "Eure Marke erscheint im Vergleich anderer nur, wenn ihr sie ausdrücklich freigebt. Ohne Freigabe sieht sie niemand.",
+      "deletion": "Der gelesene Seitentext wird nach 24 Stunden geleert; es bleiben die kurzen Zitate mit Quelle. Marktprofile und Berichte fallen mit eurem Branding.",
+      "bot": "Wie wir fremde Websites lesen und wie man uns aussperrt"
+    },
+    "rating": {
+      "title": "War der Vergleich brauchbar?",
+      "hint": "Eine Frage, einmal. Die Antwort hilft uns zu entscheiden, was als Nächstes daran gebaut wird.",
+      "score": "{score} von 5",
+      "notePlaceholder": "Optional: ein Satz dazu",
+      "send": "Absenden",
+      "thanks": "Danke — angekommen.",
+      "failed": "Die Bewertung konnte nicht gespeichert werden."
+    }
+  },
+  "marketBot": {
+    "seoTitle": "PukalaniMarketBot — was er liest und wie man ihn aussperrt",
+    "seoDescription": "Auskunft über den Abruf-Bot von branding.supply: welche Seiten er liest, was er nicht anfasst, wie lange er Text behält und wie man ihn ausschließt.",
+    "eyebrow": "Auskunft für Website-Betreiber",
+    "title": "PukalaniMarketBot",
+    "lead": "Wenn dieser Name in eurem Zugriffs-Protokoll steht, hat unser Marktvergleich eine öffentliche Seite eurer Website gelesen. Diese Seite sagt, was dabei passiert — und wie ihr es abstellt.",
+    "reads": {
+      "title": "Was gelesen wird",
+      "body": "Ausschließlich öffentlich erreichbare Marketing-Seiten: Startseite, Über-uns, Leistungen, Preise und Ähnliches. Gefunden werden sie über eure Startseite, eure Sitemap und, falls vorhanden, eure llms.txt.",
+      "pages": "Höchstens {max} Seiten je Website und Lauf.",
+      "size": "Höchstens {chars} Zeichen Text und {mb} MB je Seite.",
+      "noJs": "Kein Browser, kein JavaScript, keine Formulare, keine Downloads — nur das ausgelieferte HTML.",
+      "sequential": "Eine Seite nach der anderen, nie parallel. Der Abruf ist ein Lesevorgang, keine Last."
+    },
+    "skips": {
+      "title": "Was gar nicht erst abgerufen wird",
+      "body": "Seiten mit diesen Pfad-Segmenten werden übersprungen, bevor eine Anfrage gestellt wird — Personenbezug, Rechtstexte, Funktionsseiten und Tagesaktuelles:",
+      "pii": "Aus dem verbleibenden Text werden E-Mail-Adressen, Telefonnummern und Personennamen entfernt, bevor ihn ein Sprachmodell sieht. Login-Bereiche fasst der Bot nicht an; er meldet sich nirgends an."
+    },
+    "keeps": {
+      "title": "Was mit dem Gelesenen passiert",
+      "ttl": "Der Seitentext wird nach höchstens {hours} Stunden geleert. Er ist ein Zwischenprodukt, kein Bestand.",
+      "quote": "Was bleibt, sind kurze Zitate von höchstens {max} Zeichen, jedes mit der Adresse der Seite, auf der es steht.",
+      "noRanking": "Es entsteht kein Ranking und keine Bewertung eurer Marke. Wir stellen dar, was Marken sagen — nicht, wie erfolgreich sie damit sind.",
+      "noClaim": "Aus dem Ergebnis entsteht kein Werbesatz, der euch nennt oder erkennbar macht.",
+      "noTraining": "Nichts davon wird zum Training von Modellen verwendet. Die genutzten Anbieter laufen ohne Datenspeicherung."
+    },
+    "optOut": {
+      "title": "Wie ihr uns aussperrt",
+      "body": "Zwei Wege, beide wirken sofort beim nächsten Lauf. Ein Ausschluss heißt: eure Website wird nicht ausgewertet, und der Kunde, der den Vergleich gestartet hat, bekommt genau das als Grund angezeigt.",
+      "robotsTitle": "1. robots.txt",
+      "robotsBody": "Wir holen eure robots.txt vor jedem Zugriff und halten uns daran — auch an allgemeinen Regeln für alle Bots.",
+      "tdmTitle": "2. Nutzungsvorbehalt (Text und Data Mining)",
+      "tdmBody": "Einen maschinenlesbaren Vorbehalt nach § 44b UrhG erkennen wir in diesen vier Formen. Eine davon genügt:",
+      "form": {
+        "header": "Als HTTP-Kopfzeile",
+        "meta": "Als Meta-Angabe im HTML",
+        "robotsMeta": "Als robots-Meta-Angabe",
+        "tdmrep": "Als tdmrep.json unter /.well-known/"
+      },
+      "doubt": "Im Zweifel entscheiden wir gegen die Auswertung: lässt sich ein Vorbehalt nicht sicher ausschließen, wird eure Website ausgeschlossen."
+    },
+    "contact": {
+      "title": "Fragen, Widerspruch, Löschung",
+      "body": "Schreibt uns. Wir nehmen eure Domain auf Wunsch dauerhaft aus, auch ohne dass ihr etwas an eurer Website ändert."
     }
   }
 }

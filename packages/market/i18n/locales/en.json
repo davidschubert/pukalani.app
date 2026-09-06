@@ -268,6 +268,71 @@
       "competitor_url_invalid": "We cannot read that address — please include the domain.",
       "self_limit": "One old site of your own per brand, not two.",
       "shared_unavailable": "That brand is not (or no longer) shared for market comparisons."
+    },
+    "about": {
+      "title": "What the comparison does and does not do",
+      "does": "It shows, field by field, what other brands publicly say about themselves — every statement with a verbatim quote and the page it stands on.",
+      "doesNot": "It does not measure success. No ranking, no score per competitor, no claim about who owns the market.",
+      "noClaim": "It never writes an advertising line that names a competitor. Findings always address a field of your own.",
+      "optIn": "Your brand appears in someone else's comparison only if you explicitly release it. Without that, nobody sees it.",
+      "deletion": "The page text we read is cleared after 24 hours; the short quotes with their source remain. Market profiles and reports die with your branding.",
+      "bot": "How we read other websites — and how to shut us out"
+    },
+    "rating": {
+      "title": "Was this comparison useful?",
+      "hint": "One question, once. Your answer decides what gets built next.",
+      "score": "{score} out of 5",
+      "notePlaceholder": "Optional: one sentence",
+      "send": "Send",
+      "thanks": "Thank you — received.",
+      "failed": "The rating could not be saved."
+    }
+  },
+  "marketBot": {
+    "seoTitle": "PukalaniMarketBot — what it reads and how to block it",
+    "seoDescription": "Information for site owners about the branding.supply market crawler: which pages it reads, what it never touches, how long it keeps text and how to exclude it.",
+    "eyebrow": "Information for site owners",
+    "title": "PukalaniMarketBot",
+    "lead": "If this name appears in your access log, our market comparison has read a public page of your website. This page explains what happens — and how to stop it.",
+    "reads": {
+      "title": "What it reads",
+      "body": "Publicly reachable marketing pages only: home, about, services, pricing and the like. They are found through your home page, your sitemap and, if present, your llms.txt.",
+      "pages": "At most {max} pages per website and run.",
+      "size": "At most {chars} characters of text and {mb} MB per page.",
+      "noJs": "No browser, no JavaScript, no forms, no downloads — only the HTML you serve.",
+      "sequential": "One page after another, never in parallel. Fetching is a read, not a load test."
+    },
+    "skips": {
+      "title": "What is never requested",
+      "body": "Pages carrying these path segments are skipped before any request is made — personal data, legal texts, functional pages and dated content:",
+      "pii": "From the remaining text, e-mail addresses, phone numbers and personal names are removed before any language model sees it. The bot never touches login areas and never signs in anywhere."
+    },
+    "keeps": {
+      "title": "What happens to what was read",
+      "ttl": "Page text is cleared after at most {hours} hours. It is an intermediate product, not a record.",
+      "quote": "What remains are short quotes of at most {max} characters, each with the address of the page it stands on.",
+      "noRanking": "No ranking and no rating of your brand is produced. We show what brands say — not how successful they are with it.",
+      "noClaim": "No advertising line naming you or making you identifiable is derived from the result.",
+      "noTraining": "None of it is used to train models. The providers we use run without data retention."
+    },
+    "optOut": {
+      "title": "How to shut us out",
+      "body": "Two ways, both effective on the next run. Being excluded means your website is not analysed, and the customer who started the comparison is shown exactly that as the reason.",
+      "robotsTitle": "1. robots.txt",
+      "robotsBody": "We fetch your robots.txt before every access and obey it — including rules addressed to all bots.",
+      "tdmTitle": "2. Usage reservation (text and data mining)",
+      "tdmBody": "We recognise a machine-readable reservation under EU DSM Article 4 in these four forms. Any one of them is enough:",
+      "form": {
+        "header": "As an HTTP header",
+        "meta": "As an HTML meta tag",
+        "robotsMeta": "As a robots meta tag",
+        "tdmrep": "As tdmrep.json under /.well-known/"
+      },
+      "doubt": "In case of doubt we decide against analysis: if a reservation cannot be safely ruled out, your website is excluded."
+    },
+    "contact": {
+      "title": "Questions, objection, deletion",
+      "body": "Write to us. On request we exclude your domain permanently, without you having to change anything on your website."
     }
   }
 }

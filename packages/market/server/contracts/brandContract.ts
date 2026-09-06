@@ -219,3 +219,24 @@ export type {
  */
 export { listBrandProfilesForOwner } from '../../../brand/server/utils/brandStore'
 export type { BrandOwnedProfileHit } from '../../../brand/server/utils/brandStore'
+
+// ── MV1 M5: Messung ────────────────────────────────────────────────────────
+
+/**
+ * DER FUNNEL DES WIZARDS (`brand_events`) — für Ereignisse, die ein MENSCH
+ * ausgelöst hat und die man später zählen will.
+ *
+ * `market` bekommt KEINE eigene Ereignis-Tabelle (Plan §2.10 lässt beides zu:
+ * „bestehendes `brand_events`-Muster ODER eigenes `market_events`"). Die
+ * bestehende gewinnt aus drei Gründen: die Spalte `type` ist ein varchar und
+ * nicht ein Enum (Migration brand-007 sagt es im Kopf: „ein neuer
+ * Funnel-Schritt soll keine Migration kosten") — es kostet also keine
+ * Prod-Migration; die Aufbewahrung (24 Monate) und die Löschkaskade gelten
+ * damit ohne Zutun; und eine zweite Tabelle wäre eine zweite Antwort auf „wie
+ * weit kommen die Leute?".
+ *
+ * `recordBrandProductEvent` ist die Tür für AUFSETZENDE Layer: `brand` kennt
+ * dort die FORM `<produkt>.<name>`, nicht das Produkt (CONCEPT A14).
+ * Begründung im Kopf der Funktion.
+ */
+export { recordBrandProductEvent } from '../../../brand/server/utils/brandEvents'

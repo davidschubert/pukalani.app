@@ -2,6 +2,7 @@ import type { H3Event } from 'h3'
 import type { MarketRunResponse } from '../../../../../shared/types/marketApi'
 import type { MarketProfileField, MarketRunStep } from '../../../../../shared/marketProfile'
 import { MARKET_MAX_CHARS_PER_RUN } from '../../../../../shared/marketCrawlRules'
+import { marketRawExpiresAt } from '../../../../../shared/marketRetention'
 import { readBrandAiEnabled } from '../../../../contracts/brandContract'
 import { MARKET_UNLOCK_STEP, requireMarketProfile, requireMarketUnlocked } from '../../../../utils/marketAccess'
 import { bookMarketRun } from '../../../../utils/marketQuota'
@@ -343,10 +344,12 @@ async function runWebsiteCandidate(
     pagesFetched: JSON.stringify(outcome.pages),
     fetchedAt: now.toISOString(),
     rawText: outcome.rawText || null,
-    // DIE 24-STUNDEN-FRIST (§2.9 Nr. 6). Der Sweep, der sie einlöst, kommt mit
-    // M5; der Stempel steht ab jetzt, denn eine Frist, die erst später
-    // gesetzt wird, gilt für den heutigen Rohtext nie.
-    rawExpiresAt: outcome.rawText ? new Date(now.getTime() + 24 * 60 * 60_000).toISOString() : null,
+    // DIE 24-STUNDEN-FRIST (§2.9 Nr. 6). Der Stempel steht seit M2, den Sweep,
+    // der ihn einlöst, gibt es seit M5 — und seither kommt die Zahl aus
+    // `shared/marketRetention.ts` statt als Rechnung an dieser Stelle: die
+    // Frist wird HIER gesetzt und DORT eingelöst, und zwei Stellen mit
+    // derselben 24 sind beim ersten Ändern zwei verschiedene Fristen.
+    rawExpiresAt: marketRawExpiresAt(Boolean(outcome.rawText), now),
   })
 
   const step: MarketRunStep = {

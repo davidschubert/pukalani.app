@@ -12,10 +12,16 @@ import {
   MARKET_UNLOCK_STEP,
   marketFieldCandidates,
 } from '../../../../shared/marketProfile'
+import {
+  MARKET_RATING_NOTE_MAX,
+  MARKET_RATING_SCORES,
+  marketRatingSeenKey,
+} from '../../../../shared/marketRating'
 import type {
   MarketCandidateOptionsResponse,
   MarketCompetitorResponse,
   MarketOverviewResponse,
+  MarketRatingResponse,
   MarketReportResponse,
   MarketRunResponse,
   MarketVisibilityResponse,
@@ -429,6 +435,64 @@ async function openBooking(): Promise<void> {
   await navigateTo(localePath(bookingTarget.value))
 }
 
+// ── Die eine freiwillige Frage (§2.10, MV1 M5) ───────────────────────────
+
+/**
+ * SIE ERSCHEINT NACH DEM ERSTEN BERICHT UND GENAU EINMAL.
+ *
+ * Der `localStorage`-Marker ist BEQUEMLICHKEIT — er lässt den Block sofort
+ * verschwinden. Die ZUSAGE „einmal je Branding" hält der Server über eine
+ * deterministische Zeilen-Id (`marketRatingEventRowId`); ein zweiter Browser
+ * bekommt die Frage also noch einmal zu sehen, seine Antwort zählt aber nicht
+ * doppelt. Andersherum wäre es falsch: eine Zusage, die nur im Browser lebt,
+ * ist keine.
+ *
+ * GELESEN WIRD ERST IN `onMounted`. Im SSR gibt es keinen `localStorage`, und
+ * ein Zweig, der auf Server und Client verschieden ausfällt, ist ein
+ * Hydration-Fehler (Repo-Regel). Der Block steht deshalb kurz da und
+ * verschwindet dann — das ist ein normales reaktives Update, kein Sprung.
+ */
+const ratingDone = ref(false)
+const ratingScore = ref<number | null>(null)
+const ratingNote = ref('')
+const ratingPending = ref(false)
+
+onMounted(() => {
+  try {
+    ratingDone.value = localStorage.getItem(marketRatingSeenKey(profileId.value)) === '1'
+  }
+  catch {
+    // Privates Fenster, geräumte Site-Daten, Browser mit gesperrtem Speicher:
+    // dann wird eben gefragt. Der Server zählt trotzdem nur einmal.
+  }
+})
+
+async function sendRating(): Promise<void> {
+  if (ratingScore.value === null || ratingPending.value) return
+  ratingPending.value = true
+  try {
+    await $fetch<MarketRatingResponse>(`${base.value}/rating`, {
+      method: 'POST',
+      body: { score: ratingScore.value, note: ratingNote.value.trim() || undefined },
+    })
+    ratingDone.value = true
+    try {
+      localStorage.setItem(marketRatingSeenKey(profileId.value), '1')
+    }
+    catch { /* s. oben — der Marker ist Bequemlichkeit, nicht die Zusage. */ }
+    toast.add({ color: 'success', title: t('market.rating.thanks') })
+  }
+  catch {
+    // KEIN Grund-Code: es gibt hier keinen fachlichen Ablehnungsgrund, den der
+    // Mensch beheben könnte. Eine Rückmeldung, die man nicht loswird, ist
+    // ärgerlich genug ohne eine Fehlermeldung, die nach Schuld klingt.
+    toast.add({ color: 'warning', title: t('market.rating.failed') })
+  }
+  finally {
+    ratingPending.value = false
+  }
+}
+
 // ── Das Opt-in (§7.2 Nr. 4) ──────────────────────────────────────────────
 
 const visibilityPending = ref(false)
@@ -734,6 +798,51 @@ useBrandTitle(() => `${t('market.page.title')} — ${brandTitle.value}`)
 
           <p class="text-sm leading-relaxed" style="color: var(--bw-muted)">{{ t('market.page.sources') }}</p>
 
+          <!--
+            WAS DER VERGLEICH TUT UND WAS NICHT (MV1 M5).
+
+            Der ehrliche Kunden-Text steht ZUGEKLAPPT auf der Seite, an der der
+            Kunde das Produkt trifft — nicht in einer Hilfe-Site, denn
+            branding.supply hat keine (apps/help ist die Hilfe der
+            Pukalani-Communities, ein anderes Produkt). Zugeklappt, weil die
+            fünf Sätze eine Auskunft sind und kein Verkaufstext: wer sie
+            braucht, sucht sie; wer sie gelesen hat, will sie nicht bei jedem
+            Besuch wieder überspringen. Der Verweis am Fuss führt auf die
+            Erklärseite des Bots — dieselbe Auskunft aus der Gegenrichtung.
+          -->
+          <UCollapsible>
+            <button type="button" class="flex w-full items-center gap-2 text-left">
+              <UIcon name="i-ph-info" class="size-4 flex-none" style="color: var(--bw-muted)" />
+              <span class="text-sm font-medium">{{ t('market.about.title') }}</span>
+            </button>
+            <template #content>
+              <ul class="mt-3 space-y-2">
+                <li
+                  v-for="line in [
+                    t('market.about.does'),
+                    t('market.about.doesNot'),
+                    t('market.about.noClaim'),
+                    t('market.about.optIn'),
+                    t('market.about.deletion'),
+                  ]"
+                  :key="line"
+                  class="flex gap-2 text-sm leading-relaxed"
+                  style="color: var(--bw-ink-soft)"
+                >
+                  <span class="flex-none" style="color: var(--bw-line-strong)">—</span>{{ line }}
+                </li>
+              </ul>
+              <ULink
+                :to="localePath('/market-bot')" target="_blank"
+                class="bw-label mt-3 inline-flex items-center gap-1 underline underline-offset-4"
+                style="color: var(--bw-muted)"
+              >
+                {{ t('market.about.bot') }}
+                <UIcon name="i-ph-arrow-up-right" class="size-3 flex-none" />
+              </ULink>
+            </template>
+          </UCollapsible>
+
           <!-- DIE SCHRANKE (§1.9) — beide Zustände, kein Schalter. -->
           <MkPaywall :unlocked="paywallUnlocked">
             <template #action>
@@ -869,6 +978,48 @@ useBrandTitle(() => `${t('market.page.title')} — ${brandTitle.value}`)
                 </dl>
                 <p class="bw-label mt-3" style="color: var(--bw-muted)">{{ t('market.ai.disclaimer') }}</p>
               </div>
+            </section>
+
+            <!--
+              DIE EINE FREIWILLIGE FRAGE (§2.10, MV1 M5) — unter dem Bericht,
+              weil sie sich auf ihn bezieht, und knapp, weil sie eine
+              Gefälligkeit erbittet: fünf Knöpfe, ein optionales Feld, ein
+              Absenden. Kein Modal, kein „später erinnern", kein zweiter
+              Anlauf — wer sie wegklickt, hat sie beantwortet, indem er sie
+              nicht beantwortet hat.
+            -->
+            <section v-if="!ratingDone" class="bw-card p-4">
+              <p class="text-sm font-medium">{{ t('market.rating.title') }}</p>
+              <p class="bw-label mt-1" style="color: var(--bw-muted)">{{ t('market.rating.hint') }}</p>
+              <div class="mt-3 flex flex-wrap items-center gap-2">
+                <UButton
+                  v-for="score in MARKET_RATING_SCORES"
+                  :key="score"
+                  size="sm"
+                  class="rounded-full"
+                  color="neutral"
+                  :variant="ratingScore === score ? 'solid' : 'outline'"
+                  :aria-label="t('market.rating.score', { score })"
+                  :label="String(score)"
+                  :disabled="ratingPending"
+                  @click="ratingScore = score"
+                />
+              </div>
+              <UInput
+                v-model="ratingNote"
+                class="mt-3 w-full"
+                size="sm"
+                :maxlength="MARKET_RATING_NOTE_MAX"
+                :placeholder="t('market.rating.notePlaceholder')"
+                :disabled="ratingPending"
+              />
+              <UButton
+                class="mt-3 rounded-full" size="sm" color="neutral" icon="i-ph-paper-plane-tilt"
+                :label="t('market.rating.send')"
+                :loading="ratingPending"
+                :disabled="ratingScore === null || ratingPending"
+                @click="sendRating"
+              />
             </section>
           </template>
 

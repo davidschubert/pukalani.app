@@ -1,5 +1,5 @@
 import type { H3Event } from 'h3'
-import { ID } from 'node-appwrite'
+import { AppwriteException, ID } from 'node-appwrite'
 import { BRAND_EVENTS_TABLE, brandDb } from './brandStore'
 
 /**
@@ -95,5 +95,93 @@ export async function recordBrandEvent(event: H3Event, input: BrandEventInput): 
       type: input.type,
       message: error instanceof Error ? error.message : String(error),
     })
+  }
+}
+
+/**
+ * EIN EREIGNIS EINES AUFSETZENDEN PRODUKT-LAYERS (MV1 M5).
+ *
+ * ── WARUM ES DIESE ZWEITE FUNKTION GIBT ───────────────────────────────────
+ * `BrandEventType` ist eine GESCHLOSSENE Aufzählung, und das ist ihr Wert: sie
+ * fängt den Tippfehler in einem Ereignis-Namen, den sonst niemand bemerkt (die
+ * Spalte ist ein varchar, s. Migration brand-007 — die Datenbank hilft hier
+ * nicht). Ein Produkt-Layer wie `market` kann seinen Namen aber nicht in diese
+ * Liste eintragen: `brand` ist Fundament und darf kein Produkt KENNEN, das
+ * darauf aufsetzt (CONCEPT A14). Und die Liste zu einem Template-Literal zu
+ * öffnen (`${string}.${string}`) hätte sie für ALLE Ereignisse wertlos
+ * gemacht — inklusive der eigenen.
+ *
+ * Deshalb die zweite Tür: `brand` kennt hier die FORM eines Produkt-
+ * Ereignisses (`<produkt>.<name>`), nicht das Produkt. Dasselbe Muster wie bei
+ * `BrandWorkspaceNavExtra` und `registerBrandProfileCascade` — die Richtung
+ * der Abhängigkeit bleibt, wo sie hingehört.
+ *
+ * ── DER RÜCKGABEWERT IST DIE IDEMPOTENZ ───────────────────────────────────
+ * `recordBrandEvent` daneben ist reine Beobachtung und darf still scheitern.
+ * Hier gibt es einen Aufrufer, der WISSEN muss, ob es das Ereignis schon gab —
+ * die freiwillige Bewertung nach dem ersten Marktbericht soll genau einmal je
+ * Branding zählen. Der Weg dahin ist derselbe wie bei `notify()` im core: eine
+ * DETERMINISTISCHE Zeilen-Id, und ein 409 heisst „gab es schon". Kein „erst
+ * nachsehen, dann schreiben" — das wäre bei zwei gleichzeitigen Klicks zwei
+ * Zeilen.
+ *
+ * Ohne `rowId` verhält sich die Funktion wie ihre Nachbarin: eine neue Zeile,
+ * `true` zurück. FAIL-SOFT bleibt sie in beiden Fällen — ein Ereignis, das
+ * nicht geschrieben werden konnte, darf die Handlung nicht mitnehmen; es
+ * meldet das nur als `false`.
+ */
+export interface BrandProductEventInput {
+  /** Der Manifest-Schlüssel des Produkts, z. B. `market`. */
+  product: string
+  /** Der Ereignis-Name innerhalb des Produkts, z. B. `rating`. */
+  name: string
+  profileId?: string
+  userId?: string
+  /**
+   * Deterministische Zeilen-Id für „genau einmal". Weglassen heisst „jedes Mal
+   * eine neue Zeile". Appwrite erlaubt bis 36 Zeichen aus `a-zA-Z0-9._-` und
+   * kein führendes Sonderzeichen.
+   */
+  rowId?: string
+  /** Klein halten. Wird beim Überschreiten der Spaltengrösse VERWORFEN, nie gekappt. */
+  payload?: Record<string, string | number | boolean>
+}
+
+/** `false` = nicht geschrieben (gab es schon, oder es ist schiefgegangen). */
+export async function recordBrandProductEvent(
+  event: H3Event,
+  input: BrandProductEventInput,
+): Promise<boolean> {
+  const type = `${input.product}.${input.name}`
+  try {
+    const { tablesDB, databaseId } = brandDb(event)
+    let payload = ''
+    if (input.payload) {
+      const json = JSON.stringify(input.payload)
+      payload = json.length <= PAYLOAD_MAX ? json : ''
+    }
+    await tablesDB.createRow({
+      databaseId,
+      tableId: BRAND_EVENTS_TABLE,
+      rowId: input.rowId ?? ID.unique(),
+      data: {
+        type,
+        profileId: input.profileId ?? '',
+        userId: input.userId ?? '',
+        payload,
+      },
+    })
+    return true
+  }
+  catch (error) {
+    // 409 ist KEIN Fehler, sondern die Antwort: dieses Ereignis gab es schon.
+    // Es wird deshalb auch nicht geloggt — sonst stünde bei jedem zweiten
+    // Seitenaufruf eine Warnung im Log, die nichts bedeutet.
+    if (error instanceof AppwriteException && error.code === 409) return false
+    logEvent('warn', 'brand.event_write_failed', {
+      type,
+      message: error instanceof Error ? error.message : String(error),
+    })
+    return false
   }
 }
