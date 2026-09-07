@@ -36,10 +36,10 @@
         {
           "key": "anthropic",
           "name": "Anthropic",
-          "homepage": "https://www.anthropic.com",
+          "homepage": "https://www.anthropic.com/company",
           "country": "US",
           "size": "gross",
-          "note": "Paar-Beispiel aus Plan §7.2. Ausführliche Selbstbeschreibung auf der eigenen Website."
+          "note": "Paar-Beispiel aus Plan §7.2. Startadresse seit 2026-09-06 die Unternehmensseite (Davids Entscheidung nach Lauf 1: Startseite lieferte nur fünf Felder)."
         },
         {
           "key": "openai",
@@ -58,10 +58,10 @@
         {
           "key": "meta",
           "name": "Meta",
-          "homepage": "https://www.meta.com",
+          "homepage": "https://www.meta.com/about/",
           "country": "US",
           "size": "gross",
-          "note": "Paar-Beispiel aus Plan §7.2. `www.meta.com` ist die Unternehmens-Selbstbeschreibung (`about.meta.com` leitet dorthin um — im Trockenlauf 2026-09-05 gefunden); die Produkt-Hosts sind Login-Flächen und gehören nicht in den Abruf."
+          "note": "Paar-Beispiel aus Plan §7.2. Startadresse seit 2026-09-06 die Unternehmensseite `/about/` (`about.meta.com` leitet dorthin um); Lauf 1 von der Shop-Startseite brachte nur zwei Felder. Die Produkt-Hosts sind Login-Flächen und gehören nicht in den Abruf."
         },
         {
           "key": "apple",
