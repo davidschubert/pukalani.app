@@ -136,6 +136,22 @@ const chapters = computed<FoundationChapterView[]>(() => (view.value?.view.chapt
   }
 }))
 
+/**
+ * DER WEG ZUR RICHTUNGSWAHL (Paket G4) — die Ergebnis-Session der Werkstatt,
+ * als Ansicht desselben Route-Records (`?s=result.direction`, dieselbe
+ * Adress-Konvention wie `?s=acceptance`).
+ *
+ * `null`, solange das Ergebnis-Kapitel nicht betretbar ist: dann steht der
+ * Knopf grau da und sagt darunter, warum. GEFRAGT WIRD DIE JOURNEY und nicht
+ * `chapters[].storedState` — „gesperrt" ist eine Aussage über die VORGÄNGER
+ * (`canEnterBrandStep`), und der gespeicherte Zustand einer Zeile kennt sie
+ * nicht: ein Kapitel, das nie begonnen wurde, steht dort genauso auf `open`
+ * wie eines, das offen und erreichbar ist.
+ */
+const directionTo = computed<string | null>(() => (store.canEnter('result')
+  ? `${localePath(`/brand/${profileId.value}/result`)}?s=result.direction`
+  : null))
+
 const accepted = computed(() => view.value?.accepted ?? { chapters: 0, total: 0 })
 const acceptedPct = computed(() => (accepted.value.total === 0
   ? 0
@@ -598,6 +614,7 @@ useBrandTitle(() => (title.value || t('brand.foundation.title')))
           v-for="(entry, index) in chapters" :key="entry.chapter.id"
           :chapter="entry.chapter" :index="index"
           :acceptance-to="entry.acceptanceTo"
+          :direction-to="directionTo"
           variant="private"
         />
       </div>

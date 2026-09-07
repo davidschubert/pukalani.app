@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
+import { BRAND_DIRECTIONS, BRAND_DIRECTIONS_VERSION } from '../shared/brandDirections'
 import { type BrandFoundationInput, buildBrandFoundation } from '../shared/brandFoundation'
 import { formatBrandSlotList, formatBrandSlotStructured } from '../shared/brandSlotFormat'
 import {
@@ -302,6 +303,10 @@ describe('Brand Foundation — jeder erzeugte Schlüssel hat seinen Text', () =>
     title: 'Kailua Coffee Co.',
     contentLocale: 'en',
     story: 'Ein Absatz.',
+    // MIT gewählter Richtung (Paket G4): sonst blieben die Schlüssel des
+    // Richtungs- und des Swatch-Blocks ungeprüft — sie entstehen nur, wenn
+    // eine gültige Richtung anliegt.
+    direction: { id: BRAND_DIRECTIONS[0]!.id, version: String(BRAND_DIRECTIONS_VERSION) },
     chapters: [{
       stepKey: 'context',
       slots: BRAND_SLOTS
@@ -322,6 +327,12 @@ describe('Brand Foundation — jeder erzeugte Schlüssel hat seinen Text', () =>
           keys.add(`brand.foundation.visual.${block.element}.title`)
           keys.add(`brand.foundation.visual.${block.element}.text`)
         }
+        // Paket G4: Name und Begründung der Richtung, die Rolle jeder Farbe.
+        if (block.kind === 'direction') {
+          keys.add(block.nameKey)
+          keys.add(block.reasonKey)
+        }
+        if (block.kind === 'swatches') block.items.forEach(item => keys.add(item.roleKey))
       }
     }
     return [...keys]
@@ -332,6 +343,22 @@ describe('Brand Foundation — jeder erzeugte Schlüssel hat seinen Text', () =>
     // Ohne diese Zeile wäre der Test auch für eine leere Menge grün.
     expect(produced.length).toBeGreaterThan(25)
     expect(produced.filter(key => missingIn(key).length)).toEqual([])
+  })
+
+  it('kennt Name, Begründung und Farbrollen JEDER Richtung (Paket G4)', () => {
+    // Der Lauf oben rendert nur EINE Richtung — die anderen fünf stehen im
+    // Katalog und werden erst sichtbar, wenn jemand sie wählt. Ein fehlender
+    // Name wäre dann ein Schlüssel auf der Seite eines zahlenden Kunden.
+    const gaps: string[] = []
+    for (const direction of BRAND_DIRECTIONS) {
+      for (const key of [direction.nameKey, direction.reasonKey, ...direction.roles]) {
+        const missing = missingIn(key)
+        if (missing.length) gaps.push(`${direction.id}: ${key} fehlt in ${missing.join(', ')}`)
+      }
+    }
+    expect(gaps).toEqual([])
+    // Ohne diese Zeile wäre der Test auch für einen leeren Katalog grün.
+    expect(BRAND_DIRECTIONS).toHaveLength(6)
   })
 
   it('kennt die festen Texte der Seite in BEIDEN Sprachen', () => {
@@ -373,8 +400,24 @@ describe('Brand Foundation — jeder erzeugte Schlüssel hat seinen Text', () =>
       'brand.foundation.visual.follows',
       'brand.foundation.visual.shareLine',
       'brand.foundation.visual.product',
-      'brand.foundation.visual.ctaDesign',
       'brand.foundation.visual.ctaCall',
+      // Die Schranke und die Richtungswahl (Paket G4). `visual.offer` ist der
+      // Schranken-Satz OHNE Preis (Davids Entscheidung §11 c) — steht er
+      // nicht im Katalog, stünde an der teuersten Stelle des Dokuments
+      // wörtlich sein Schlüssel.
+      'brand.foundation.visual.offer',
+      'brand.foundation.direction.chosen',
+      'brand.foundation.direction.choose',
+      'brand.foundation.direction.change',
+      'brand.foundation.direction.lockedHint',
+      'brand.foundation.direction.fontsLabel',
+      'brand.foundation.direction.colors',
+      'brand.foundation.direction.previewLine',
+      'brand.foundation.direction.previewButton',
+      'brand.foundation.direction.reason.both',
+      'brand.foundation.direction.reason.primary',
+      'brand.foundation.direction.reason.secondary',
+      'brand.foundation.direction.reason.fallback',
       // Der Share-Dialog und die Empfänger-Seite (Paket G3). Beide sind die
       // Stellen, an denen ein fehlender Schlüssel am teuersten wäre: der
       // Dialog verspricht, WAS reist, und die Seite liest ein Fremder.

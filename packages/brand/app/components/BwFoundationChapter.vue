@@ -51,9 +51,17 @@ const props = withDefaults(defineProps<{
    * und Locale-Pfad). `null` heisst: kein Sprung anbieten.
    */
   acceptanceTo?: string | null
+  /**
+   * Ziel von „Richtung wählen" (Paket G4) — die Ergebnis-Session der
+   * Werkstatt. `null` heisst: das Kapitel liegt noch nicht auf dem Weg, der
+   * Knopf steht sichtbar da und ist AUS (mit Begründung darunter). Ein Knopf,
+   * der ins Leere führte, wäre schlimmer als ein grauer.
+   */
+  directionTo?: string | null
 }>(), {
   variant: 'private',
   acceptanceTo: null,
+  directionTo: null,
 })
 
 const { t, te, locale } = useI18n()
@@ -76,6 +84,18 @@ const CALL_URL = 'https://pukalani.studio/erstgespraech'
 function choiceLabels(slotId: string, optionIds: readonly string[]): string[] {
   return optionIds.map(id => brandChoiceDisplayLabel(slotId, id, locale.value))
 }
+
+/** Steht in diesem Kapitel schon eine gewählte Richtung? (Paket G4) */
+const hasDirection = computed(() => props.chapter.blocks.some(block => block.kind === 'direction'))
+
+/**
+ * WAS DER FREMDLESER VON DER SCHRANKE SIEHT (§2.6, seit G4 zweigeteilt): die
+ * gewählte RICHTUNG ja — sie ist eine Festlegung dieser Marke —, der Zoo aus
+ * fünf gesperrten Elementen nein. Statt seiner steht ein Satz (s. Markup).
+ */
+const renderedBlocks = computed(() => (props.chapter.state === 'locked' && !isPrivate.value
+  ? props.chapter.blocks.filter(block => block.kind !== 'locked')
+  : props.chapter.blocks))
 </script>
 
 <template>
@@ -96,14 +116,18 @@ function choiceLabels(slotId: string, optionIds: readonly string[]): string[] {
     <h2 class="mt-1 text-[26px] font-extralight leading-tight tracking-tight">{{ t(chapter.titleKey) }}</h2>
     <p v-if="note" class="bw-label mt-1.5" style="color: var(--bw-muted)">{{ note }}</p>
 
-    <!-- GESPERRT BEIM FREMDLESER: ein Satz, kein Angebot (§2.6). -->
+    <!-- DAS ANGEBOT AN DER SCHRANKE (§11 c, Davids Entscheidung: KEIN PREIS).
+         Brand Design ist Studio-Arbeit, das Erstgespräch ist der Weg — eine
+         Zahl ohne Selbstbedienung dahinter wäre ein Versprechen, das dieses
+         Produkt heute nicht einlösen kann. Nur privat: der Fremdleser bekommt
+         seinen einen Satz unten. -->
     <p
-      v-if="chapter.state === 'locked' && !isPrivate"
+      v-if="chapter.state === 'locked' && isPrivate"
       class="mt-4 text-sm leading-relaxed" style="color: var(--bw-ink-soft)"
-    >{{ t('brand.foundation.visual.shareLine') }}</p>
+    >{{ t('brand.foundation.visual.offer') }}</p>
 
-    <div v-else class="mt-5 flex flex-col gap-7">
-      <template v-for="(block, i) in chapter.blocks" :key="`${chapter.id}-${i}`">
+    <div class="mt-5 flex flex-col gap-7">
+      <template v-for="(block, i) in renderedBlocks" :key="`${chapter.id}-${i}`">
         <!-- Leitsatz: der eine Satz, der gross stehen darf. -->
         <div v-if="block.kind === 'lead'">
           <p v-if="block.labelKey" class="bw-label" style="color: var(--bw-muted)">{{ t(block.labelKey) }}</p>
@@ -247,14 +271,33 @@ function choiceLabels(slotId: string, optionIds: readonly string[]): string[] {
           </p>
         </div>
 
-        <!-- Farbrampe der gewählten Richtung (kommt mit Paket G4). -->
+        <!-- DIE GEWÄHLTE RICHTUNG (Paket G4): Name, Begründung, Schriftpaar —
+             und ein Streifen der Farbwelt, damit „Warm & Editorial" nicht nur
+             ein Wort ist. Die Ausarbeitung bleibt darunter gesperrt: gewählt
+             ist eine Welt, gebaut wird sie in Brand Design. -->
+        <div v-else-if="block.kind === 'direction'">
+          <p class="bw-label" style="color: var(--bw-muted)">{{ t('brand.foundation.direction.chosen') }}</p>
+          <div
+            class="fd-dir-strip mt-2 h-8 rounded-xl"
+            :style="`background: linear-gradient(90deg, ${block.gradient[2]}, ${block.gradient[1]} 60%, ${block.gradient[0]})`"
+          />
+          <p class="mt-3 text-[22px] font-extralight leading-snug tracking-tight">{{ t(block.nameKey) }}</p>
+          <p class="mt-1.5 text-sm leading-relaxed" style="color: var(--bw-ink-soft)">{{ t(block.reasonKey) }}</p>
+          <p class="bw-label mt-3" style="color: var(--bw-muted)">
+            {{ t('brand.foundation.direction.fontsLabel') }}: {{ block.fonts.heading }} · {{ block.fonts.body }}
+          </p>
+        </div>
+
+        <!-- Farbrampe der gewählten Richtung — die ROLLE ist ein Schlüssel
+             (sie steht in der Sprache des Lesers), der Hex-Wert ist der Wert
+             (ihn schreibt jemand ab). -->
         <div v-else-if="block.kind === 'swatches'">
           <p v-if="block.labelKey" class="bw-label" style="color: var(--bw-muted)">{{ t(block.labelKey) }}</p>
-          <div class="mt-3 flex flex-wrap gap-4">
+          <div class="mt-3 flex flex-wrap gap-5">
             <div v-for="color in block.items" :key="color.hex" class="flex flex-col gap-1.5">
               <div class="bw-swatch rounded-full" :style="`background: ${color.hex}; width: 2.75rem; height: 2.75rem`" />
-              <p class="bw-label" style="color: var(--bw-muted)">{{ color.name }}</p>
-              <p class="bw-label" style="color: var(--bw-muted)">{{ color.role }}</p>
+              <p class="bw-label" style="color: var(--bw-ink-soft)">{{ t(color.roleKey) }}</p>
+              <p class="bw-label font-mono" style="color: var(--bw-muted)">{{ color.hex }}</p>
             </div>
           </div>
         </div>
@@ -279,6 +322,14 @@ function choiceLabels(slotId: string, optionIds: readonly string[]): string[] {
       </template>
     </div>
 
+    <!-- GESPERRT BEIM FREMDLESER: ein Satz, kein Angebot (§2.6). Er steht
+         seit G4 UNTER der Richtung, nicht mehr an ihrer Stelle: „was gilt"
+         gehört ihm, „was das kostet" nicht. -->
+    <p
+      v-if="chapter.state === 'locked' && !isPrivate"
+      class="mt-5 text-sm leading-relaxed" style="color: var(--bw-ink-soft)"
+    >{{ t('brand.foundation.visual.shareLine') }}</p>
+
     <!-- Der Vermerk am offenen Kapitel — NUR privat, und der EINZIGE Knopf im
          Text: korrigiert und abgenommen wird in der Werkstatt, nie hier (§2.6). -->
     <p v-if="chapter.state === 'pending' && isPrivate" class="fd-noprint mt-5 flex flex-wrap items-center gap-2">
@@ -294,8 +345,15 @@ function choiceLabels(slotId: string, optionIds: readonly string[]): string[] {
          G4), und ein erfundener Preis wäre teurer als eine fehlende Zahl. -->
     <div v-if="chapter.state === 'locked' && isPrivate" class="fd-noprint mt-5 flex flex-wrap items-center gap-2">
       <UButton
+        v-if="directionTo"
+        :to="directionTo"
+        class="rounded-full" trailing-icon="i-ph-arrow-right"
+        :label="t(hasDirection ? 'brand.foundation.direction.change' : 'brand.foundation.direction.choose')"
+      />
+      <UButton
+        v-else
         class="rounded-full" trailing-icon="i-ph-arrow-right" disabled
-        :label="t('brand.foundation.visual.ctaDesign')"
+        :label="t('brand.foundation.direction.choose')"
       />
       <UButton
         :to="CALL_URL" target="_blank" rel="noopener noreferrer"
@@ -303,7 +361,7 @@ function choiceLabels(slotId: string, optionIds: readonly string[]): string[] {
         :label="t('brand.foundation.visual.ctaCall')"
       />
       <p class="bw-label basis-full" style="color: var(--bw-muted)">
-        {{ t('brand.foundation.visual.product') }}
+        {{ directionTo ? t('brand.foundation.visual.product') : t('brand.foundation.direction.lockedHint') }}
       </p>
     </div>
   </section>

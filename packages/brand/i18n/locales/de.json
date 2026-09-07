@@ -1726,7 +1726,6 @@
         "follows": "folgt in Brand Design",
         "shareLine": "Visuelle Identität: folgt in Brand Design.",
         "product": "Brand Design",
-        "ctaDesign": "Im Brand Design entscheiden",
         "ctaCall": "Erstgespräch buchen",
         "logo": {
           "title": "Logo",
@@ -1747,7 +1746,8 @@
         "motion": {
           "title": "Motion",
           "text": "Tempo und Ruhe der Bewegung — hergeleitet aus den Ton-Wörtern."
-        }
+        },
+        "offer": "Brand Design entsteht mit eurem Markenberater im Studio-Angebot — wir besprechen es im Erstgespräch."
       },
       "chapter": {
         "story": "Brand Story",
@@ -1801,6 +1801,51 @@
         "rank": "Rang",
         "check": "Prüfung",
         "criteria": "Kriterium"
+      },
+      "direction": {
+        "chosen": "Gewählte Richtung",
+        "choose": "Richtung wählen",
+        "change": "Richtung ändern",
+        "lockedHint": "Die Richtung wählt ihr im Ergebnis-Kapitel — es öffnet sich, sobald die Kapitel davor stehen.",
+        "fontsLabel": "Schriftpaar",
+        "colors": "Farbwelt",
+        "previewLine": "So liest sich eine Seite in dieser Welt.",
+        "previewButton": "Mehr erfahren",
+        "role": {
+          "ground": "Grund & Text",
+          "warmth": "Wärme & Flächen",
+          "light": "Helle Flächen"
+        },
+        "reason": {
+          "both": "Passt zu eurem Haupt- und eurem Neben-Archetyp.",
+          "primary": "Passt zu eurem Haupt-Archetyp.",
+          "secondary": "Passt zu eurem Neben-Archetyp.",
+          "fallback": "Eine dritte Möglichkeit zum Vergleich."
+        },
+        "warmEditorial": {
+          "name": "Warm & Editorial",
+          "reason": "Viel Papierweiß, ruhige Zeilen, Farbe als Erdton statt als Signal. Eine Serif für Überschriften macht daraus eher ein Heft als eine Anzeige."
+        },
+        "clearTechnical": {
+          "name": "Klar & Technisch",
+          "reason": "Kühles Blaugrau, eine einzige Grotesk, alles auf einem Raster. Nichts schmückt, jede Fläche hat eine Aufgabe."
+        },
+        "calmNatural": {
+          "name": "Ruhig & Natürlich",
+          "reason": "Grüne Erdtöne, weiche Kanten, viel Luft. Wirkt gewachsen statt gemacht — und ruft nie."
+        },
+        "boldContrast": {
+          "name": "Kraftvoll & Kontrastreich",
+          "reason": "Tiefer Grund, warmes Signal, große Überschriften. Diese Welt bezieht Position, bevor jemand den ersten Satz gelesen hat."
+        },
+        "lightPlayful": {
+          "name": "Leicht & Verspielt",
+          "reason": "Helle Flächen, frisches Petrol, runde Formen. Nimmt sich selbst nicht zu ernst, ohne albern zu werden."
+        },
+        "classicSerious": {
+          "name": "Klassisch & Ernst",
+          "reason": "Schiefer, eine klassische Serif, breite Ränder. Sieht in zehn Jahren so aus wie heute — das ist der Punkt."
+        }
       }
     },
     "session": {

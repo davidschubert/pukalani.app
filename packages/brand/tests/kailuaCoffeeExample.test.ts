@@ -5,6 +5,7 @@ import {
   type BrandFoundationInput,
   buildBrandFoundation,
 } from '../shared/brandFoundation'
+import { BRAND_DIRECTIONS_VERSION, brandDirectionById } from '../shared/brandDirections'
 import { brandSlotValueMatchesFormat } from '../shared/brandSlotFormat'
 import { KAILUA_COFFEE_EXAMPLE, KAILUA_COFFEE_EXAMPLE_META } from '../shared/examples/kailuaCoffee'
 import { sessionTravels, slotById } from '../shared/slotRegistry'
@@ -73,7 +74,10 @@ function allTexts(input: BrandFoundationInput): string[] {
           texts.push(...block.optionIds)
           break
         case 'swatches':
-          for (const item of block.items) texts.push(item.hex, item.name, item.role)
+          for (const item of block.items) texts.push(item.hex, item.roleKey)
+          break
+        case 'direction':
+          texts.push(block.directionId, block.nameKey, block.reasonKey, block.fonts.heading, block.fonts.body)
           break
         case 'aiRules':
           texts.push(...block.tone, ...block.avoid, ...block.stands)
@@ -139,6 +143,17 @@ describe('Kailua Coffee Co. — der feste Beispiel-Snapshot', () => {
     }
   })
 
+  it('nennt die gewählte Richtung — mit der Fassung des heutigen Katalogs', () => {
+    // Kailua steht auf „Warm & Editorial" (Roast · Crema · Milk ist wörtlich
+    // die Farbwelt dieser Richtung, s. Kopf des Snapshots). Eine ALTE Fassung
+    // renderte still keine Richtung mehr, und niemand sähe es der Seite an.
+    expect(KAILUA_COFFEE_EXAMPLE.direction).toEqual({
+      id: 'warm-editorial',
+      version: String(BRAND_DIRECTIONS_VERSION),
+    })
+    expect(brandDirectionById(KAILUA_COFFEE_EXAMPLE.direction!.id)).not.toBeNull()
+  })
+
   it('hat eine Story aus drei Absätzen', () => {
     const paragraphs = (KAILUA_COFFEE_EXAMPLE.story ?? '').split(/\n{2,}/).filter(part => part.trim())
     expect(paragraphs).toHaveLength(3)
@@ -169,9 +184,13 @@ describe('Kailua Coffee Co. — was der Renderer daraus baut', () => {
       expect(chapter.blocks.length, `${chapter.id} ist leer`).toBeGreaterThan(0)
       const locked = chapter.blocks.filter(block => block.kind === 'locked')
       if (chapter.id === 'visuell') {
+        // DIE SCHRANKE BLEIBT, AUCH MIT RICHTUNG (Paket G4): gewählt ist eine
+        // WELT, gebaut wird sie in Brand Design. Was davor steht, sind genau
+        // zwei Blöcke — die Richtung und ihre drei Farben.
         expect(chapter.state).toBe('locked')
-        // Die Schranke IST der Inhalt: nichts als gesperrte Elemente.
-        expect(locked).toHaveLength(chapter.blocks.length)
+        expect(locked).toHaveLength(5)
+        expect(chapter.blocks.map(block => block.kind))
+          .toEqual(['direction', 'swatches', 'locked', 'locked', 'locked', 'locked', 'locked'])
       }
       else {
         expect(chapter.state).toBe('done')

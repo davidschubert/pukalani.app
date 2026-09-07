@@ -1726,7 +1726,6 @@
         "follows": "follows in Brand Design",
         "shareLine": "Visual identity: follows in Brand Design.",
         "product": "Brand Design",
-        "ctaDesign": "Decide in Brand Design",
         "ctaCall": "Book an intro call",
         "logo": {
           "title": "Logo",
@@ -1747,7 +1746,8 @@
         "motion": {
           "title": "Motion",
           "text": "Pace and calm of movement — derived from your tone words."
-        }
+        },
+        "offer": "Brand Design happens with your brand adviser as part of the studio offering — we talk it through in the first call."
       },
       "chapter": {
         "story": "Brand story",
@@ -1801,6 +1801,51 @@
         "rank": "Rank",
         "check": "Check",
         "criteria": "Criterion"
+      },
+      "direction": {
+        "chosen": "Chosen direction",
+        "choose": "Choose a direction",
+        "change": "Change direction",
+        "lockedHint": "You choose the direction in the result chapter — it opens once the chapters before it are settled.",
+        "fontsLabel": "Type pairing",
+        "colors": "Colour world",
+        "previewLine": "This is how a page reads in this world.",
+        "previewButton": "Find out more",
+        "role": {
+          "ground": "Ground & text",
+          "warmth": "Warmth & surfaces",
+          "light": "Light surfaces"
+        },
+        "reason": {
+          "both": "Fits both your primary and your secondary archetype.",
+          "primary": "Fits your primary archetype.",
+          "secondary": "Fits your secondary archetype.",
+          "fallback": "A third option, for comparison."
+        },
+        "warmEditorial": {
+          "name": "Warm & Editorial",
+          "reason": "Plenty of paper white, quiet lines, colour as an earth tone rather than a signal. A serif for headings makes it read like a magazine, not an advert."
+        },
+        "clearTechnical": {
+          "name": "Clear & Technical",
+          "reason": "Cool grey-blue, a single grotesque, everything on a grid. Nothing decorates, every surface has a job."
+        },
+        "calmNatural": {
+          "name": "Calm & Natural",
+          "reason": "Green earth tones, soft edges, room to breathe. It feels grown rather than made — and it never shouts."
+        },
+        "boldContrast": {
+          "name": "Bold & High-Contrast",
+          "reason": "Deep ground, warm signal, large headings. This world takes a stand before anyone has read the first sentence."
+        },
+        "lightPlayful": {
+          "name": "Light & Playful",
+          "reason": "Bright surfaces, fresh petrol, rounded shapes. It does not take itself too seriously without turning silly."
+        },
+        "classicSerious": {
+          "name": "Classic & Serious",
+          "reason": "Slate, a classic serif, wide margins. It will look in ten years the way it looks today — that is the point."
+        }
       }
     },
     "session": {

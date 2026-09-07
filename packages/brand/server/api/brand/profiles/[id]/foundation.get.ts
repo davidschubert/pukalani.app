@@ -1,5 +1,6 @@
 import { brandStepAcceptance } from '../../../../../shared/brandJourney'
 import { blockingFindingSlots } from '../../../../../shared/brandFindings'
+import { BRAND_DIRECTIONS_VERSION, brandDirectionById } from '../../../../../shared/brandDirections'
 import { buildBrandFoundation } from '../../../../../shared/brandFoundation'
 import { type BrandStepKey, slotsForStep } from '../../../../../shared/slotRegistry'
 import type {
@@ -78,6 +79,30 @@ export default defineEventHandler(async (event): Promise<BrandFoundationResponse
     values.push({ stepKey: entry.stepKey, slots: row ? confirmedSlotValues(row) : [] })
   }
 
+  /**
+   * DIE GEWÄHLTE RICHTUNG — DIE EINE WAHRHEIT IST DER BESTÄTIGTE SLOT-WERT
+   * (Paket G4, Konzept §11 d).
+   *
+   * `brand_profiles.designPresetId/designPresetVersion` gibt es als Spalten
+   * seit Migration 001, geschrieben hat sie NIE jemand. Sie zu spiegeln hiesse,
+   * zwei Stellen zu haben, die dieselbe Frage beantworten — und die eine, die
+   * jemand später ändert, ist garantiert nicht die, die noch gelesen wird
+   * (dieselbe Regel wie beim Doppelnetz oben: EINE Wahrheit, mehrere Netze,
+   * nie zwei Quellen). Gelesen wird deshalb hier wie beim Veröffentlichen der
+   * bestätigte Wert der Session `result.direction`; die zwei Spalten bleiben
+   * unbeschrieben, bis die Themes-Engine-Presets sie wirklich brauchen.
+   *
+   * NUR EINE BEKANNTE ID REIST WEITER: `result.direction` ist
+   * `audience: 'internal'` und wird vom Renderer gesondert gerendert (s.
+   * `BrandFoundationInput.direction`) — stünde hier ein beliebiger Text, ginge
+   * er als roher Wert durch die Antwort, an genau dem Tor vorbei, das die
+   * Leseansicht ausmacht.
+   */
+  const chosenDirection = values
+    .find(chapter => chapter.stepKey === 'result')?.slots
+    .find(slot => slot.slotId === 'result.direction')?.value ?? ''
+  const direction = brandDirectionById(chosenDirection.trim())
+
   await recordBrandEvent(event, {
     type: 'foundation.viewed',
     profileId: profile.$id,
@@ -100,6 +125,9 @@ export default defineEventHandler(async (event): Promise<BrandFoundationResponse
       chapters: values,
       pathKind: profile.pathKind === 'relaunch' ? 'relaunch' : 'new',
       team: profile.team === 'team' ? 'team' : 'solo',
+      ...(direction
+        ? { direction: { id: direction.id, version: String(BRAND_DIRECTIONS_VERSION) } }
+        : {}),
     }),
     chapters,
     accepted: {

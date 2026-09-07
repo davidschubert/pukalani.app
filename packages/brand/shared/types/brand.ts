@@ -372,6 +372,22 @@ export interface BrandStepDetailResponse {
   generations: BrandGenerationsView
   progress: BrandStepProgress
   missingRequired: string[]
+  /**
+   * BESTÄTIGTE WERTE AUS FREMDEN KAPITELN, die die BÜHNE dieses Kapitels
+   * braucht (Paket G4).
+   *
+   * Der Browser lädt immer nur EIN Kapitel (`slots` trägt genau dessen
+   * Sessions). Das Ergebnis-Kapitel rechnet seine drei Richtungs-Vorschläge
+   * aber aus den beiden Archetypen, und die wohnen in `archetype` — ohne diese
+   * Karte stünde dort entweder gar nichts oder eine zweite Abfrage.
+   *
+   * ES REIST NUR, WAS EINE BÜHNE NAMENTLICH BRAUCHT (heute: `d.primary` und
+   * `d.secondary` für `result`, s. `BRAND_STAGE_SOURCE_SLOTS`) — nicht „alle
+   * Abhängigkeiten": eine Antwort, die den halben Wertevorrat mitschickt, wäre
+   * ein zweiter Weg an der Datentür vorbei, sobald jemand sie irgendwo anders
+   * ausliest. Leer, wo eine Bühne nichts braucht.
+   */
+  sourceValues: Record<string, string>
 }
 
 /** Antwort des Autosave — die NORMALISIERTE Serverfassung, nicht das Echo. */

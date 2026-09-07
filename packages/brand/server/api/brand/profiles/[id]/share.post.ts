@@ -1,11 +1,13 @@
 import { randomBytes } from 'node:crypto'
 import { ID } from 'node-appwrite'
 import { createBrandSharePublishSchema } from '../../../../../schemas/brandAccess'
+import { BRAND_DIRECTIONS_VERSION, brandDirectionById } from '../../../../../shared/brandDirections'
 import { resolveBrandJourney } from '../../../../../shared/brandJourney'
 import { brandShareableSlotValues } from '../../../../../shared/brandSharing'
 import type { BrandShareSnapshot, BrandSharePublishResponse } from '../../../../../shared/types/brand'
 import {
   BRAND_SHARES_TABLE,
+  type BrandStepRow,
   brandDb,
   confirmedSlotValues,
   listActiveShares,
@@ -87,6 +89,33 @@ const SHARE_SCHEMA_VERSION = 1
 /** Zod-Zusage aus Schema-Anhang §4. */
 const SNAPSHOT_MAX = 400_000
 
+/**
+ * DIE GEWÄHLTE RICHTUNG IN DEN SNAPSHOT (Paket G4).
+ *
+ * DIE EINE WAHRHEIT IST DER BESTÄTIGTE SLOT-WERT `result.direction` — nicht
+ * `brand_profiles.designPresetId`. Die zwei Spalten stehen seit Migration 001
+ * in der Tabelle und wurden NIE geschrieben; sie hier zu lesen hiess bis G4,
+ * dass `presetId` in jedem Snapshot leer war. Sie zusätzlich zu SPIEGELN wäre
+ * die zweite Stelle, an der dieselbe Frage beantwortet wird — und die eine,
+ * die jemand später ändert, ist garantiert nicht die, die noch gelesen wird.
+ * Sie bleiben deshalb unbeschrieben, bis die Themes-Engine-Presets sie
+ * wirklich brauchen (dann sind sie der Ort für DEREN Id, nicht für diese).
+ *
+ * Eingefroren wird nur eine Id, die der Katalog KENNT: ein Snapshot ist 30
+ * Tage lang öffentlich abrufbar, und ein durchgereichter Freitext aus einem
+ * von Hand korrigierten Feld hätte dort nichts verloren. Die FASSUNG reist
+ * mit, damit ein späterer Katalog das Eingefrorene nicht umfärbt (§2.5).
+ */
+function directionPreset(resultRow: BrandStepRow | undefined): { presetId: string, presetVersion: string } {
+  const chosen = resultRow
+    ? confirmedSlotValues(resultRow).find(slot => slot.slotId === 'result.direction')?.value ?? ''
+    : ''
+  const direction = brandDirectionById(chosen.trim())
+  return direction
+    ? { presetId: direction.id, presetVersion: String(BRAND_DIRECTIONS_VERSION) }
+    : { presetId: '', presetVersion: '' }
+}
+
 export default defineEventHandler(async (event): Promise<BrandSharePublishResponse> => {
   const { userId } = await requireBrandAccess(event)
   const profileId = requireProfileIdParam(event)
@@ -114,8 +143,7 @@ export default defineEventHandler(async (event): Promise<BrandSharePublishRespon
       // Ein Kapitel ohne bestätigten Inhalt hat nichts zu zeigen — es fehlt,
       // statt als leere Überschrift dazustehen.
       .filter(chapter => chapter.slots.length > 0),
-    presetId: profile.designPresetId ?? '',
-    presetVersion: profile.designPresetVersion ?? '',
+    ...directionPreset(byStepKey.get('result')),
   }
 
   const payload = JSON.stringify(snapshot)

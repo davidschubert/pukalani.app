@@ -1,3 +1,4 @@
+import { BRAND_DIRECTIONS_VERSION } from '../brandDirections'
 import type { BrandFoundationInput } from '../brandFoundation'
 import { formatBrandSlotList, formatBrandSlotStructured } from '../brandSlotFormat'
 
@@ -59,6 +60,20 @@ export const KAILUA_COFFEE_EXAMPLE: BrandFoundationInput = {
   contentLocale: 'de',
   pathKind: 'new',
   team: 'team',
+
+  /**
+   * DIE GEWÄHLTE RICHTUNG (Paket G4) — „Warm & Editorial", dieselbe, die der
+   * abgenommene Klickdummy für Kailua zeigte (Roast · Crema · Milk ist wörtlich
+   * die Farbwelt dieser Richtung). Kapitel 10 des Beispiels zeigt damit den
+   * Zustand, den ein Besucher NACH dem Gespräch sieht: die Richtung steht, die
+   * Ausarbeitung ist die Schranke. Ohne diesen Eintrag zeigte die öffentliche
+   * Beispiel-Seite als einzige Fläche des Produkts nur die leere Schranke.
+   *
+   * Die Fassung kommt aus dem Katalog statt als `'1'` daneben zu stehen: ein
+   * Beispiel, das auf einer ALTEN Fassung stehen bliebe, renderte nach dem
+   * ersten Katalog-Schritt keine Richtung mehr — und niemand hätte es gemerkt.
+   */
+  direction: { id: 'warm-editorial', version: String(BRAND_DIRECTIONS_VERSION) },
 
   // Georges Synthese — drei Absätze, der erste trägt als Leitsatz.
   story: [

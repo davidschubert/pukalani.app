@@ -8,6 +8,7 @@ import {
   brandFoundationPendingStep,
   buildBrandFoundation,
 } from '../shared/brandFoundation'
+import { BRAND_DIRECTIONS, BRAND_DIRECTIONS_VERSION } from '../shared/brandDirections'
 import { formatBrandSlotList, formatBrandSlotStructured } from '../shared/brandSlotFormat'
 import {
   BRAND_SLOTS,
@@ -422,5 +423,88 @@ describe('buildBrandFoundation — Markdown reist markiert', () => {
     // Die Story ist Georges Prosa, kein `richtext`-Slot — sie bleibt wörtlich.
     const story = view.chapters.find(chapter => chapter.id === 'story')!
     expect(story.blocks.every(block => block.kind !== 'text' || block.markdown === undefined)).toBe(true)
+  })
+})
+
+/**
+ * KAPITEL 10 MIT UND OHNE RICHTUNG (Paket G4, Konzept §2.5/§11 d).
+ *
+ * Die Richtung ist die EINZIGE Eingabe, die nicht durch das Tor
+ * `travellingValues` läuft: `result.direction` ist `audience: 'internal'` und
+ * wird gesondert gerendert (Farbwelt und Schriftpaar statt einer Textzeile).
+ * Genau deshalb braucht sie ihre eigene Gegenprobe — eine unbekannte oder eine
+ * ALTE Id darf nicht heissen „irgendeine Welt", sondern „keine".
+ */
+describe('buildBrandFoundation — die gewählte Richtung', () => {
+  const empty: BrandFoundationInput = { title: '', contentLocale: 'de', story: null, chapters: [] }
+
+  function visual(input: BrandFoundationInput): BrandFoundationBlock[] {
+    const chapter = buildBrandFoundation(input).chapters.find(entry => entry.id === 'visuell')!
+    return [...chapter.blocks]
+  }
+
+  it('OHNE Richtung: nur die fünf gesperrten Elemente', () => {
+    expect(visual(empty).map(block => block.kind))
+      .toEqual(BRAND_FOUNDATION_VISUAL_ELEMENTS.map(() => 'locked'))
+  })
+
+  it('MIT Richtung: Richtung, Farben, dann dieselbe Schranke — und `locked` bleibt', () => {
+    const direction = BRAND_DIRECTIONS[0]!
+    const view = buildBrandFoundation({
+      ...empty,
+      direction: { id: direction.id, version: String(BRAND_DIRECTIONS_VERSION) },
+    })
+    const chapter = view.chapters.find(entry => entry.id === 'visuell')!
+    // Die Schranke steht, nur die Richtung ist gewählt (§11 d).
+    expect(chapter.state).toBe('locked')
+    expect(chapter.blocks.map(block => block.kind))
+      .toEqual(['direction', 'swatches', 'locked', 'locked', 'locked', 'locked', 'locked'])
+
+    const first = chapter.blocks[0]!
+    expect(first.kind === 'direction' && first.directionId).toBe(direction.id)
+    expect(first.kind === 'direction' && first.nameKey).toBe(direction.nameKey)
+    expect(first.kind === 'direction' && first.fonts).toEqual({
+      heading: direction.fonts.heading.family,
+      body: direction.fonts.body.family,
+    })
+  })
+
+  it('DIE FARBEN LAUFEN VON TIEF NACH HELL — der Grund zuerst', () => {
+    const direction = BRAND_DIRECTIONS[0]!
+    const [light, mid, deep] = direction.gradient
+    const swatches = visual({
+      ...empty,
+      direction: { id: direction.id, version: String(BRAND_DIRECTIONS_VERSION) },
+    }).find(block => block.kind === 'swatches')!
+    expect(swatches.kind === 'swatches' && swatches.items).toEqual([
+      { hex: deep, roleKey: direction.roles[0] },
+      { hex: mid, roleKey: direction.roles[1] },
+      { hex: light, roleKey: direction.roles[2] },
+    ])
+  })
+
+  it('UNBEKANNTE ID: rendert wie ohne Richtung', () => {
+    expect(visual({ ...empty, direction: { id: 'gibt-es-nicht', version: '1' } }).map(block => block.kind))
+      .toEqual(BRAND_FOUNDATION_VISUAL_ELEMENTS.map(() => 'locked'))
+  })
+
+  it('FREMDE FASSUNG: rendert wie ohne Richtung — ein alter Link färbt nicht um', () => {
+    const direction = BRAND_DIRECTIONS[0]!
+    for (const version of ['0', '2', '', 'eins']) {
+      expect(visual({ ...empty, direction: { id: direction.id, version } }).map(block => block.kind), version)
+        .toEqual(BRAND_FOUNDATION_VISUAL_ELEMENTS.map(() => 'locked'))
+    }
+  })
+
+  it('DIE ROHE ID REIST NIE ALS WERT MIT — auch nicht, wenn sie bestätigt in der Zeile steht', () => {
+    // `result.direction` ist `audience: 'internal'`: der bestätigte Wert im
+    // Kapitel `result` darf in KEINEM Block als Text auftauchen. Gezeigt wird
+    // er nur über den Umweg `direction` — und dann als Schlüssel, nicht als Id
+    // in einer Liste.
+    const rendered = JSON.stringify(buildBrandFoundation({
+      ...empty,
+      chapters: [{ stepKey: 'result', slots: [{ slotId: 'result.direction', value: 'wert-result.direction' }] }],
+    }))
+    expect(rendered).not.toContain('wert-result.direction')
   })
 })

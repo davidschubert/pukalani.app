@@ -443,7 +443,7 @@ Nuxt-UI-Komponenten, echter Inhalt (Kailua Coffee Co.):
 | G1 ✅ 2026-09-06 | **Regel + Renderer** | `audience` in der Registry, Regel `sensitivity ≠ public ⇒ internal`, `brandShareableSlotValues` (MV1 M5) um `audience` erweitert — reist = public UND foundation, `buildBrandFoundation` (pur), Do/Don't-Paarung, KI-Rahmen-Slots | — | Unit: jede Session hat `audience`; Gegenprobe `internal` verschwindet; Snapshot v1 von heute rendert ohne Rohantworten und ohne die vier `internal`-Sessions; Route-Test: neuer Snapshot enthält a.complaints nicht; Hash-Inputs unverändert |
 | G2 ✅ 2026-09-06 (Davids Blick offen) | **Private Leseansicht + Print** | `/brand/:id/foundation`, Rail-Eintrag, Knopf im Dokument, `@media print` | Davids Blick auf die Seite | Playwright: 404 bei fremdem Branding; Kapitel-Reihenfolge = Registry; Druck-Snapshot |
 | G3 ✅ 2026-09-07 (Davids Blick offen) | **Teilen sichtbar** | Share-Dialog, `/brand/share/:token`, og-Meta, Fuß, Ereignisse | Davids Blick auf die Empfänger-Ansicht | verify-Skript: veröffentlichen → Seite 200 → widerrufen → 404; abgelaufen → 404; kein Token im Log; `internal`-Werte nie im HTML (Gegenprobe) |
-| G4 | **Schranke + Richtung** (= P7-Rest) | Kapitel 10 gesperrt mit CTA; danach `result.direction` mit 2–3 Richtungen in Preview-iframes | **David:** Schranken-Text + Preisanker; Richtungen-Katalog | Playwright: Richtung wählen ⇒ Kapitel 10 zeigt Preset; Share-Snapshot trägt Preset |
+| G4 ✅ 2026-09-07 (Davids Blick offen) | **Schranke + Richtung** (= P7-Rest) | Kapitel 10 gesperrt mit CTA; danach `result.direction` mit 2–3 Richtungen in Preview-iframes | **David:** Schranken-Text + Preisanker; Richtungen-Katalog | Playwright: Richtung wählen ⇒ Kapitel 10 zeigt Preset; Share-Snapshot trägt Preset |
 | G5 ✅ 2026-09-07 (Davids Inhalts-Gate offen) | **Beispiel Kailua** (optional) | öffentliche Beispiel-Foundation über denselben Renderer, `index` erlaubt | David: Inhalt der Beispiel-Marke | Seite rendert aus festem Snapshot |
 
 Reihenfolge: G1 vor allem; G2 und G3 parallel; G4 zuletzt (hängt am
@@ -611,3 +611,41 @@ Davids Gate bleibt der INHALT der Beispielmarke — die Texte stammen aus dem
 abgenommenen Dummy und wurden im selben Ton ergänzt. Bewusst ohne Bilder (nur
 der Kailua-Farbverlauf), ohne Sitemap (die App hat keine — Vermerk im
 Seitenkopf), ohne `result.direction` (G4).
+
+## 11. G4 — Entscheidungen (David, 2026-09-07, alle nach Empfehlung)
+
+| # | Frage | Entscheidung |
+| --- | --- | --- |
+| a | Richtungen-Katalog | kuratierter Katalog im brand-Layer: sechs Richtungen (Name, Begründungsregel je Archetyp, Farbwelt aus den 12 Dreiklängen, Schriftpaar aus der Font-Registry), Vorschau als Anwendungs-Ausschnitt mit lokalen CSS-Variablen, keine iframes; `presetId`/`presetVersion` reisen mit, damit Themes-Engine-Presets später ersetzen können |
+| b | Auswahl | drei Richtungen, passend zu Haupt-/Nebenarchetyp, pure Regel mit Begründung |
+| c | Preisanker | keiner — Studio-Angebot, Erstgespräch ist der Weg |
+| d | Ort der Wahl | Ergebnis-Kapitel der Werkstatt (`result.direction`, Karten-Editor); Kapitel 10 der Foundation zeigt die Wahl (`swatches`-Block) und gibt sie in den Snapshot |
+
+## 12. Nachtrag G4 (2026-09-07) — die Richtung ist gewählt, die Schranke steht
+
+Gebaut nach §11: Katalog `shared/brandDirections.ts` (sechs Richtungen,
+Farbwelt aus den kuratierten Dreiklängen, Schriftpaare als eigene Strings —
+KEIN Import aus themes, A14), pure Regel `suggestBrandDirections` (drei je
+Archetyp-Paar: beide → Haupt → Neben → Katalog-Reihenfolge; jeder der zwölf
+Archetypen in genau drei Richtungen — die Paket-Skizze „3–5 je Richtung" war
+mit sechs Richtungen arithmetisch unerfüllbar, jetzt 5–7 je Richtung), Karten
+`BwDirectionCard` als Anwendungs-Ausschnitt mit lokalen CSS-Variablen ohne
+Web-Schriften, Weiche im bestehenden Karten-Editor der Werkstatt, Werkstatt
+kennt die Archetypen des Profils über das neue Feld `sourceValues`
+(`BRAND_STAGE_SOURCE_SLOTS`). **Eine Wahrheit:** der bestätigte Slot-Wert
+`result.direction`; `foundation.get` und `share.post` lesen ihn und lassen nur
+Katalog-bekannte Ids durch; `brand_profiles.designPresetId/-Version` bleiben
+unbeschrieben, bis Themes-Engine-Presets sie brauchen. Kapitel 10 rendert
+`direction` + `swatches` VOR den fünf gesperrten Elementen und bleibt `locked`;
+der Knopf heißt „Richtung wählen"/„Richtung ändern" (Ziel
+`/brand/:id/result?s=result.direction`, gesperrt mit Hinweis, solange die
+Vorgänger nicht abgeschlossen sind — Zustand aus der Journey, nicht aus
+`storedState`), daneben das Erstgespräch; Schranken-Satz ohne Preis (§11 c).
+Beispiel Kailua trägt `warm-editorial`. Beweis am Dev-Server: Karten mit
+Begründung („passt zu Haupt- und Neben-Archetyp") → Bestätigen → Kapitel 10
+zeigt Richtung, Farbwelt, Schriftpaar, Angebotssatz und „Richtung ändern" →
+Snapshot `presetId: warm-editorial, presetVersion: 1` → Share-Seite zeigt die
+Richtung. 1967 Tests grün.
+
+**Damit ist BF1 vollständig gebaut (G1–G5).** Offen sind Davids Blicke auf
+Leseansicht, Teilen, Beispiel-Inhalt und Richtungswahl.

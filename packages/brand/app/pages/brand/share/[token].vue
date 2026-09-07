@@ -87,6 +87,14 @@ const chapters = computed(() => {
     contentLocale: source.contentLocale,
     story: source.story,
     chapters: source.chapters,
+    // DIE EINGEFRORENE RICHTUNG (Paket G4): `presetId`/`presetVersion` trägt
+    // der Snapshot seit BF1 — gefüllt sind sie erst seit G4. Kennt der Katalog
+    // die Id nicht mehr oder ist die Fassung eine andere, rendert der Renderer
+    // die Schranke ohne Richtung; ein alter Link zeigt dann WENIGER, aber
+    // nichts Falsches (Kopf von `BrandFoundationInput.direction`).
+    ...(source.presetId
+      ? { direction: { id: source.presetId, version: source.presetVersion } }
+      : {}),
   }).chapters
 })
 

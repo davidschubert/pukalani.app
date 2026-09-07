@@ -7,6 +7,25 @@ die kleinen, verstreuten Beschlüsse.
 
 ---
 
+## 2026-09-07 — Brand Foundation G4: Richtungen-Katalog, drei Richtungen je Archetyp, kein Preis an der Schranke, Wahl in der Werkstatt
+
+**Anlass:** „Starte Paket G4" — das Paket hing an zwei Gates, die das Konzept
+(docs/plans/BRAND-FOUNDATION-LESEANSICHT.md §5) David zuweist: Richtungen-Katalog und
+Schranken-Text mit Preisanker. **Entscheidungen (Fragenrunde, alle nach Empfehlung):**
+(1) Die Richtungen kommen aus einem **kuratierten Katalog im brand-Layer** (sechs
+Richtungen mit Name, Begründungsregel je Archetyp, Farbwelt aus den zwölf kuratierten
+Dreiklängen, Schriftpaar aus der Font-Registry), Vorschau als Anwendungs-Ausschnitt mit
+lokalen CSS-Variablen — KEINE Themes-Engine-Presets mit Vorschau-iframes (der Phase-1-Plan
+sah sie vor; sie bleiben der spätere Ersatz, der Katalog trägt dafür `presetId` +
+`presetVersion`). (2) Angeboten werden **drei Richtungen, passend zu Haupt- und
+Nebenarchetyp**, per purer Regel mit Begründung. (3) An der Schranke steht **kein Preis**:
+Brand Design ist Studio-Angebot, das Erstgespräch der Weg — Enterprise = Studio, solange
+Produkt 02 keine Selbstbedienung ist. (4) Gewählt wird **im Ergebnis-Kapitel der
+Werkstatt** (`result.direction` mit Karten-Editor); die Leseansicht zeigt die Wahl in
+Kapitel 10, entscheidet aber nicht („gelesen wird hier, abgenommen im Kapitel").
+
+---
+
 ## 2026-09-06 — Bibliothek: erfundene Einträge raus aus dem Produkt, echte nur mit Handzeichen
 
 **Davids Entscheidung.** Die kuratierte Bibliothek des Marktvergleichs lieferte seit dem

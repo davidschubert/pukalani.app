@@ -1,3 +1,4 @@
+import { type BrandDirection, brandDirectionById, BRAND_DIRECTIONS_VERSION } from './brandDirections'
 import { brandListEntries } from './brandSessions'
 import { isBrandSlotShareable } from './brandSharing'
 import { type BrandSlotValueView, brandSlotValueView } from './brandSlotFormat'
@@ -34,7 +35,7 @@ import { type BrandPathKind, type BrandStepKey, type BrandTeamKind, slotById } f
  * ── DIE FORM IST DER ABGENOMMENE KLICKDUMMY ───────────────────────────────
  * Block-Arten und Feldnamen folgen `.playground/app/utils/demoFoundation.ts`
  * (Phase 3, von David gesehen), damit Paket G2 die Komponente `FdChapter.vue`
- * übernehmen kann statt sie nachzubauen. DREI bewusste Abweichungen, jede mit
+ * übernehmen kann statt sie nachzubauen. VIER bewusste Abweichungen, jede mit
  * Grund:
  *  1. `label`/`title`/`note` heissen `labelKey`/`titleKey`/`noteKey` — s. o.
  *  2. Der gesperrte Block trägt nur seine Id (`element`); Überschrift, Satz
@@ -46,6 +47,11 @@ import { type BrandPathKind, type BrandStepKey, type BrandTeamKind, slotById } f
  *     hiesse, sie in der INHALTSsprache der Marke aufzulösen — der Leser
  *     liest aber in seiner eigenen. Also reisen die Ids, und die Oberfläche
  *     löst sie auf (`brandChoiceDisplayLabel` bzw. `brand.choice.*`).
+ *  4. Die gewählte RICHTUNG ist eine eigene Art `direction` statt dreier
+ *     Text-Blöcke (Paket G4). Der Dummy schrieb Name, Begründung und
+ *     Schriftpaar als fertige Sätze; hier reisen Schlüssel und Familien-Namen,
+ *     und die Farbwelt reist als Verlauf — die Oberfläche baut daraus den
+ *     Streifen, den der Dummy als Bild hatte.
  *
  * ── WAS NICHT PARSBAR IST, WIRD NICHT VERWORFEN ───────────────────────────
  * Ein Wert kann formfremd sein (ein Mensch hat im Textfeld nachgebessert, ein
@@ -101,12 +107,36 @@ export type BrandFoundationBlock =
   /** Die sichtbare Schranke (§2.5) — Texte im Katalog, hier nur die Id. */
   | { kind: 'locked', element: BrandFoundationVisualElement }
   /**
-   * Farbrampe der gewählten Richtung. G1 erzeugt sie NIE: `result.direction`
-   * ist `audience: 'internal'`, bis Paket G4 den Richtungen-Katalog und die
-   * Preset-Tokens mitbringt. Die Art steht schon hier, damit die Oberfläche
-   * dieselbe Union kennt wie der Klickdummy.
+   * DIE GEWÄHLTE RICHTUNG (Paket G4, §2.5) — Kapitel 10, VOR der Schranke.
+   *
+   * Sie trägt nur Ids und Schlüssel: `directionId` ist der gespeicherte Wert
+   * (`result.direction`, zugleich `presetId` im Snapshot), Name und Begründung
+   * lösen sich in der Sprache des LESERS auf, die Schriften sind Familien-
+   * Namen und CSS-Stacks aus dem Katalog (keine Übersetzung — eine Schrift
+   * heisst überall gleich).
+   *
+   * Das Kapitel bleibt trotzdem `locked`: gewählt ist eine RICHTUNG, gebaut
+   * wird sie in Brand Design (§11 d).
    */
-  | { kind: 'swatches', labelKey?: string, items: { hex: string, name: string, role: string }[] }
+  | {
+    kind: 'direction'
+    directionId: string
+    nameKey: string
+    reasonKey: string
+    fonts: { heading: string, body: string }
+    gradient: readonly [string, string, string]
+  }
+  /**
+   * Farbrampe der gewählten Richtung — drei Swatches, TIEF zuerst (Grund vor
+   * Fläche). `roleKey` ist ein i18n-Schlüssel und kein Farbname: die drei
+   * Rollen beschreiben, WOFÜR die Farbe da ist, und das steht in der Sprache
+   * des Lesers. Der Hex-Wert steht daneben, weil ihn jemand abschreibt.
+   *
+   * Bis G4 erzeugte diese Art niemand (G1 legte sie mit `name`/`role` als
+   * Texten an, weil der Klickdummy sie so hatte); mit dem ersten echten
+   * Erzeuger sind daraus Schlüssel geworden.
+   */
+  | { kind: 'swatches', labelKey?: string, items: { hex: string, roleKey: string }[] }
   /**
    * Der FESTE Rahmen der KI-Regeln (§2.4): „Schreibt in diesem Ton · Vermeidet
    * · Steht für" — gefüllt aus vorhandenen Werten. Keine Generierung, kein
@@ -238,6 +268,25 @@ export interface BrandFoundationInput {
    */
   readonly pathKind?: BrandPathKind
   readonly team?: BrandTeamKind
+  /**
+   * DIE GEWÄHLTE RICHTUNG (Paket G4) — additiv, `undefined` heisst „keine".
+   *
+   * ── WOHER SIE KOMMT, UND WARUM SIE NICHT IN `chapters` STEHT ────────────
+   * Die WAHRHEIT ist der bestätigte Slot-Wert `result.direction`. Er reist
+   * aber nicht als gewöhnlicher Wert: `result.direction` ist
+   * `audience: 'internal'` (Registry), fällt also durch das eine Tor
+   * (`travellingValues`) — und das ist Absicht, denn Kapitel 10 rendert ihn
+   * GESONDERT als Farbwelt und Schriftpaar, nicht als Textzeile in einer
+   * Liste. Die Route bzw. die Share-Seite reicht ihn deshalb hier herein.
+   *
+   * `version` ist eine ZEICHENKETTE, weil sie aus dem Snapshot kommt
+   * (`presetVersion`), und der ist ein JSON-Abbild von Spalten. Passt sie
+   * nicht zu `BRAND_DIRECTIONS_VERSION` — oder ist die Id unbekannt —, rendert
+   * das Kapitel, als wäre nichts gewählt: lieber die ehrliche Schranke als
+   * eine Farbwelt, die inzwischen eine andere ist als die, die jemand
+   * verschickt hat.
+   */
+  readonly direction?: { readonly id: string, readonly version: string }
 }
 
 // ── Schlüssel-Konventionen ──────────────────────────────────────────────────
@@ -622,9 +671,54 @@ function manifestoBlocks(values: Map<string, string>): BrandFoundationBlock[] {
   return blocks
 }
 
-/** Kapitel 10 — die Schranke. Sie steht IMMER (§2.5), auch ohne einen Wert. */
-function visualBlocks(): BrandFoundationBlock[] {
-  return BRAND_FOUNDATION_VISUAL_ELEMENTS.map((element): BrandFoundationBlock => ({ kind: 'locked', element }))
+/**
+ * DIE GEWÄHLTE RICHTUNG AUFLÖSEN — `null` bei unbekannter Id ODER fremder
+ * Fassung (s. `BrandFoundationInput.direction`). Beides ist derselbe Fall:
+ * „ich weiss nicht, was hier gemeint war", und darauf gibt es genau eine
+ * ehrliche Antwort — die Schranke ohne Richtung.
+ */
+function resolveDirection(input: BrandFoundationInput): BrandDirection | null {
+  const chosen = input.direction
+  if (!chosen || chosen.version !== String(BRAND_DIRECTIONS_VERSION)) return null
+  return brandDirectionById(chosen.id)
+}
+
+/**
+ * Kapitel 10 — die Schranke. Sie steht IMMER (§2.5), auch ohne einen Wert;
+ * MIT gewählter Richtung stehen ihre Farbwelt und ihr Schriftpaar DAVOR
+ * (Paket G4). Die fünf gesperrten Elemente bleiben in beiden Fällen: die
+ * Ausarbeitung entsteht in Brand Design, gewählt ist nur die Welt.
+ *
+ * DIE SWATCHES LAUFEN RÜCKWÄRTS durch den Verlauf (tief → mittel → hell): der
+ * Verlauf ist von hell nach tief sortiert, die ROLLEN beginnen aber beim
+ * Grund. Wer das „aufräumt", vertauscht Grundfarbe und Fläche.
+ */
+function visualBlocks(direction: BrandDirection | null): BrandFoundationBlock[] {
+  const locked = BRAND_FOUNDATION_VISUAL_ELEMENTS
+    .map((element): BrandFoundationBlock => ({ kind: 'locked', element }))
+  if (!direction) return locked
+
+  const [light, mid, deep] = direction.gradient
+  return [
+    {
+      kind: 'direction',
+      directionId: direction.id,
+      nameKey: direction.nameKey,
+      reasonKey: direction.reasonKey,
+      fonts: { heading: direction.fonts.heading.family, body: direction.fonts.body.family },
+      gradient: [light, mid, deep],
+    },
+    {
+      kind: 'swatches',
+      labelKey: 'brand.foundation.direction.colors',
+      items: [
+        { hex: deep, roleKey: direction.roles[0] },
+        { hex: mid, roleKey: direction.roles[1] },
+        { hex: light, roleKey: direction.roles[2] },
+      ],
+    },
+    ...locked,
+  ]
 }
 
 // ── Die Regel ───────────────────────────────────────────────────────────────
@@ -699,7 +793,7 @@ export function buildBrandFoundation(input: BrandFoundationInput): BrandFoundati
     { id: 'manifest', blocks: manifestoBlocks(values) },
     { id: 'messaging', blocks: messagingBlocks(values) },
     { id: 'name', blocks: nameBlocks(values) },
-    { id: 'visuell', blocks: visualBlocks(), state: 'locked' },
+    { id: 'visuell', blocks: visualBlocks(resolveDirection(input)), state: 'locked' },
     { id: 'ki-texte', blocks: aiRules },
   ]
 

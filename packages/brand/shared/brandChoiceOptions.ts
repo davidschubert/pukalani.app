@@ -53,6 +53,8 @@
  * DIESE DATEI IST PUR: kein i18n, kein H3, kein Appwrite.
  */
 
+import { BRAND_DIRECTION_OPTIONS } from './brandDirections'
+
 /** Eine legale Option einer GESCHLOSSENEN Auswahl. */
 export interface BrandChoiceOption {
   /**
@@ -285,7 +287,7 @@ export type BrandChoiceContract =
     readonly fallbackQuestion: BrandChoiceFallbackQuestion
   }
 
-const CONTRACTS: readonly BrandChoiceContract[] = [
+const BASE_CONTRACTS: readonly BrandChoiceContract[] = [
   {
     slotId: 'b.positioningCategory',
     kind: 'open',
@@ -358,6 +360,34 @@ const CONTRACTS: readonly BrandChoiceContract[] = [
     },
   },
 ]
+
+const CONTRACTS: readonly BrandChoiceContract[] = [...BASE_CONTRACTS, {
+  /**
+   * DIE RICHTUNG (Paket G4) — geschlossen wie die Architektur-Modelle.
+   *
+   * Der Vertrag steht hier und die Menge in `brandDirections.ts`, weil dort
+   * noch mehr an einer Richtung hängt (Farbwelt, Schriftpaar, Archetypen-
+   * Zuordnung) als in eine Option passt. Er ist trotzdem nötig: ohne ihn stünde
+   * in der Log-Karte und im Chat die rohe Id `warm-editorial`, und George
+   * dürfte sich eine siebte Welt ausdenken.
+   *
+   * ANGEBOTEN werden dem Menschen nur DREI davon (`suggestBrandDirections`);
+   * der Vertrag kennt alle sechs, denn er beschreibt, was in dem Feld STEHEN
+   * darf — nicht, was gerade auf dem Bildschirm liegt. Wer seine Marke von
+   * Hand auf eine vierte Welt setzt, hat keinen Verstoss begangen.
+   */
+  slotId: 'result.direction',
+  kind: 'closed',
+  options: BRAND_DIRECTION_OPTIONS,
+  strayRule: 'Do not invent a seventh direction, do not merge two into one, and do not describe a look '
+    + 'in your own words — the field holds one id and nothing else.',
+  fallbackQuestion: {
+    de: 'Ich kann euch die Richtung nicht abnehmen — sie ist eine Entscheidung, keine Ableitung. '
+      + 'Welche der drei Welten fühlt sich nach euch an?',
+    en: 'I cannot settle the direction for you — it is a decision, not a derivation. '
+      + 'Which of the three worlds feels like you?',
+  },
+}]
 
 const CONTRACTS_BY_SLOT = new Map<string, BrandChoiceContract>(
   CONTRACTS.map(contract => [contract.slotId, contract]),

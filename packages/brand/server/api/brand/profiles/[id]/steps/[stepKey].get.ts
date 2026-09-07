@@ -1,9 +1,10 @@
 import { stripBrandGenerationDrafts } from '../../../../../../shared/brandGeneration'
-import { sessionsAffectedBy } from '../../../../../../shared/brandSessions'
+import { brandStageSourceSlots, sessionsAffectedBy } from '../../../../../../shared/brandSessions'
 import { slotsForStep } from '../../../../../../shared/slotRegistry'
 import type { BrandSessionView, BrandStepDetailResponse } from '../../../../../../shared/types/brand'
 import { listBrandFindings, toBrandFindingView } from '../../../../../utils/brandFindingsStore'
 import {
+  confirmedSlotValues,
   loadBrandStepContext,
   parseCollectedParts,
   parseGenerations,
@@ -110,6 +111,25 @@ export default defineEventHandler(async (event): Promise<BrandStepDetailResponse
    * FAIL-SOFT (`listBrandFindings`): ohne Befund-Tabelle ist die Liste leer
    * und die Werkstatt verhält sich wie vor Paket 4.
    */
+  /**
+   * DIE QUELL-WERTE DER BÜHNE (Paket G4) — bestätigt, aus FREMDEN Kapiteln,
+   * und nur die, die eine Bühne namentlich braucht (`brandStageSourceSlots`).
+   * Heute sind das die zwei Archetypen des Ergebnis-Kapitels, aus denen die
+   * drei Richtungs-Vorschläge folgen.
+   *
+   * Gelesen wird `confirmed`, nie `latestDraft`: ein Vorschlag, der auf einem
+   * Entwurf steht, wechselt beim Bestätigen die Karten unter der Hand.
+   */
+  const wanted = new Set(brandStageSourceSlots(stepKey))
+  const sourceValues: Record<string, string> = {}
+  if (wanted.size > 0) {
+    for (const row of stepRows) {
+      for (const slot of confirmedSlotValues(row)) {
+        if (wanted.has(slot.slotId)) sourceValues[slot.slotId] = slot.value
+      }
+    }
+  }
+
   const own = new Set(slotsForStep(stepKey).map(entry => entry.id))
   const findings = (await listBrandFindings(event, stepRow.profileId, 'open'))
     .map(toBrandFindingView)
@@ -133,5 +153,6 @@ export default defineEventHandler(async (event): Promise<BrandStepDetailResponse
     generations: { items: stripBrandGenerationDrafts(generations.items), count: generations.count },
     progress: step.progress,
     missingRequired: [...step.missingRequired],
+    sourceValues,
   }
 })

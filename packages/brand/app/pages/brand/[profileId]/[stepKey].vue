@@ -47,6 +47,11 @@ import {
 } from '../../../../shared/brandChoiceOptions'
 import type { BwChoiceCard } from '../../../components/BwChoiceCards.vue'
 import {
+  type BrandDirection,
+  brandDirectionById,
+  suggestBrandDirections,
+} from '../../../../shared/brandDirections'
+import {
   BRAND_ADVISORS,
   BRAND_VOICE,
   type BrandAdvisorKey,
@@ -1349,6 +1354,9 @@ async function submitChoice(): Promise<void> {
   await answerFromGeorge(said)
 }
 
+/** Die eine Session, die statt Text-Karten eine Farbwelt zeigt (Paket G4). */
+const DIRECTION_SLOT = 'result.direction'
+
 /**
  * DIE GESCHLOSSENE AUSWAHL BEKOMMT KARTEN (P4, Infografik §12.3).
  *
@@ -1365,6 +1373,12 @@ async function submitChoice(): Promise<void> {
  * sein Textfeld — dort IST der Text die Antwort.
  */
 function choiceCardsFor(slotId: string): BwChoiceCard[] {
+  // DIE RICHTUNG HAT IHRE EIGENE KARTE (Paket G4): `result.direction` ist ein
+  // geschlossener Vertrag mit `editor: 'cards'` und fiele deshalb hier
+  // hinein — sie zeigt aber eine Farbwelt und ein Schriftpaar, nicht drei
+  // Zeilen Text (`BwDirectionCard`, s. dessen Kopf). Ohne diese Zeile stünden
+  // die drei Textzeilen ihrer nicht vorhandenen Karten-Copy im Markup.
+  if (slotId === DIRECTION_SLOT) return []
   if (slotById(slotId)?.editor !== 'cards') return []
   const contract = brandChoiceContract(slotId)
   if (!contract || contract.kind !== 'closed') return []
@@ -1378,6 +1392,49 @@ function choiceCardsFor(slotId: string): BwChoiceCard[] {
 
 const choiceCards = computed<BwChoiceCard[]>(() =>
   (nextSlot.value ? choiceCardsFor(nextSlot.value.id) : []))
+
+// ── Die drei Richtungen (Paket G4) ────────────────────────────────────────
+
+interface BwDirectionChoice {
+  direction: BrandDirection
+  name: string
+  reason: string
+  match: string
+}
+
+/**
+ * DREI RICHTUNGEN, PASSEND ZU HAUPT- UND NEBEN-ARCHETYP (Konzept §11 b).
+ *
+ * Die Menge kommt aus der PUREN Regel (`suggestBrandDirections`), nicht aus
+ * dem Markup — dieselbe Arbeitsteilung wie bei den Architektur-Karten: was in
+ * dem Feld stehen DARF, sagt der Vertrag; welche drei ANGEBOTEN werden, sagt
+ * die Regel; wie sie aussehen, sagt der Katalog.
+ *
+ * DIE ZWEI ARCHETYPEN LIEGEN IN EINEM FREMDEN KAPITEL. Der Browser lädt immer
+ * nur eines, deshalb reisen sie als `sourceValues` in der Kapitel-Antwort mit
+ * (`brandStageSourceSlots`, Paket G4). Fehlen sie — weil der Archetyp noch
+ * nicht bestätigt ist oder ein alter Server antwortet —, greift der Rückfall
+ * der Regel: die ersten drei des Katalogs. Ein leerer Bildschirm wäre die
+ * teuerste Antwort auf eine fehlende Quelle.
+ */
+function directionChoicesFor(slotId: string): BwDirectionChoice[] {
+  if (slotId !== DIRECTION_SLOT) return []
+  const primary = store.sourceValues['d.primary'] ?? ''
+  const secondary = store.sourceValues['d.secondary'] ?? ''
+  return suggestBrandDirections(primary, secondary || null).flatMap((suggestion) => {
+    const direction = brandDirectionById(suggestion.id)
+    if (!direction) return []
+    return [{
+      direction,
+      name: t(direction.nameKey),
+      reason: t(direction.reasonKey),
+      match: t(suggestion.reasonKey),
+    }]
+  })
+}
+
+const directionChoices = computed<BwDirectionChoice[]>(() =>
+  (nextSlot.value ? directionChoicesFor(nextSlot.value.id) : []))
 
 /**
  * Der Klick auf eine Karte geht denselben Weg wie die getippte Antwort — nur
@@ -2455,8 +2512,22 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
                        die stabile Id, „Übermitteln" entfällt — eine Karte IST
                        die Entscheidung. Offene Auswahl (Positionierungs-
                        Kategorie) behält ihr Feld. -->
+                  <!-- DIE RICHTUNG (Paket G4): drei Welten statt sechs, und
+                       eine Karte zeigt die Welt statt sie zu beschreiben. Sie
+                       steht VOR dem Text-Karten-Zweig, weil `result.direction`
+                       einen geschlossenen Vertrag HAT und sonst dort landete. -->
+                  <div v-if="directionChoices.length" class="mt-3 grid gap-2 sm:grid-cols-3">
+                    <BwDirectionCard
+                      v-for="choice in directionChoices" :key="choice.direction.id"
+                      :direction="choice.direction"
+                      :name="choice.name" :reason="choice.reason" :match="choice.match"
+                      :selected="nextSlot ? store.slotValue(nextSlot.id) === choice.direction.id : false"
+                      :disabled="conversation.pending.value"
+                      @pick="pickChoice"
+                    />
+                  </div>
                   <BwChoiceCards
-                    v-if="choiceCards.length"
+                    v-else-if="choiceCards.length"
                     class="mt-3"
                     :options="choiceCards"
                     :selected="nextSlot ? store.slotValue(nextSlot.id) : ''"
@@ -2471,7 +2542,7 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
                     @keydown.enter="submitChoice"
                   />
                 </div>
-                <div v-if="!choiceCards.length" class="mt-3 flex items-center justify-end gap-2">
+                <div v-if="!choiceCards.length && !directionChoices.length" class="mt-3 flex items-center justify-end gap-2">
                   <UButton
                     color="neutral" variant="ghost" class="bw-send rounded-full"
                     :label="t('brand.workspace.submitChoice')"
@@ -2822,8 +2893,24 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
                 <!-- GESCHLOSSENE AUSWAHL: „Korrigieren" führt zurück auf die
                      KARTEN, nie in ein Textfeld — dort stünde die rohe Id
                      (`branded-house`) zur Bearbeitung (P4-Restkante). -->
+                <!-- KORRIGIEREN FÜHRT AUF DIESELBEN KARTEN wie die Bühne —
+                     die Richtung auf ihre Welten (G4), jede andere geschlossene
+                     Auswahl auf ihre Text-Karten, nie in ein Textfeld mit der
+                     rohen Id (P4-Restkante). -->
+                <div
+                  v-if="card.controls && editingSlotId === card.id && card.controls.editable && directionChoicesFor(card.id).length"
+                  class="mt-1.5 grid gap-2 sm:grid-cols-3"
+                >
+                  <BwDirectionCard
+                    v-for="choice in directionChoicesFor(card.id)" :key="choice.direction.id"
+                    :direction="choice.direction"
+                    :name="choice.name" :reason="choice.reason" :match="choice.match"
+                    :selected="card.value === choice.direction.id"
+                    @pick="id => { onInput(card.id, id); autosave.flush() }"
+                  />
+                </div>
                 <BwChoiceCards
-                  v-if="card.controls && editingSlotId === card.id && card.controls.editable && choiceCardsFor(card.id).length"
+                  v-else-if="card.controls && editingSlotId === card.id && card.controls.editable && choiceCardsFor(card.id).length"
                   class="mt-1.5"
                   :options="choiceCardsFor(card.id)"
                   :selected="card.value"

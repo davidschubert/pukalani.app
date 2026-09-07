@@ -181,6 +181,34 @@ describe('GET …/foundation — was die Leseansicht zeigt', () => {
     expect(values.acceptance.total).toBeGreaterThan(0)
   })
 
+  /**
+   * DIE GEWÄHLTE RICHTUNG (Paket G4) — die eine Wahrheit ist der BESTÄTIGTE
+   * Slot-Wert `result.direction`, nicht `brand_profiles.designPresetId`
+   * (Kopf der Route). Der Aufbau oben setzt in jedes Kapitel den Marker-Wert
+   * `wert-<slot>-text`, also auch in `result.direction`: die Route darf ihn
+   * NICHT durchreichen, denn er ist keine Katalog-Id.
+   */
+  it('OHNE gültige Wahl steht die Schranke ohne Richtung — der rohe Wert reist nicht', async () => {
+    const result = await foundationRoute(event) as unknown as FoundationResponse
+    const visual = result.view.chapters.find(chapter => chapter.id === 'visuell')!
+    expect(visual.blocks.every(block => (block as { kind: string }).kind === 'locked')).toBe(true)
+    expect(JSON.stringify(result)).not.toContain('wert-result.direction')
+  })
+
+  it('MIT bestätigter Katalog-Id trägt Kapitel 10 die Richtung', async () => {
+    stepRows = stepRows.map(row => (row.stepKey === 'result'
+      ? { ...row, slots: JSON.stringify({ 'result.direction': { confirmed: 'calm-natural', accepted: true } }) }
+      : row))
+    const result = await foundationRoute(event) as unknown as FoundationResponse
+    const visual = result.view.chapters.find(chapter => chapter.id === 'visuell')!
+    expect(visual.blocks.map(block => (block as { kind: string }).kind))
+      .toEqual(['direction', 'swatches', 'locked', 'locked', 'locked', 'locked', 'locked'])
+    expect(visual.blocks[0]).toMatchObject({ directionId: 'calm-natural' })
+    // Das Kapitel bleibt gesperrt: gewählt ist eine Welt, gebaut wird sie in
+    // Brand Design (§11 d).
+    expect(visual.state).toBe('locked')
+  })
+
   it('FREMDES BRANDING: 404, wie das Dokument (DECISION-LOG 2026-09-05)', async () => {
     profileRow.ownerId = 'jemand-anderes'
     await expect(foundationRoute(event)).rejects.toMatchObject({ status: 404 })

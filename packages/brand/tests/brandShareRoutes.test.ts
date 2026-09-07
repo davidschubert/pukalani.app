@@ -32,6 +32,8 @@ const profileRow: FakeRow = {
 
 /** Die Zeilen von `brand_shares` — jeder Test setzt sie selbst. */
 let shareRows: FakeRow[]
+/** Die Zeilen von `brand_steps` — nur das Veröffentlichen liest sie. */
+let stepRows: FakeRow[]
 let createdRows: { tableId: string, data: Record<string, string> }[]
 
 const tablesDB = {
@@ -41,9 +43,11 @@ const tablesDB = {
     // ein blosses `{ code: 404 }` liefe an ihm vorbei und würde als 500 enden.
     throw new AppwriteException('not found', 404)
   }),
-  listRows: vi.fn(async ({ tableId }: { tableId: string }) => (
-    tableId === 'brand_shares' ? { rows: shareRows } : { rows: [] }
-  )),
+  listRows: vi.fn(async ({ tableId }: { tableId: string }) => {
+    if (tableId === 'brand_shares') return { rows: shareRows }
+    if (tableId === 'brand_steps') return { rows: stepRows }
+    return { rows: [] }
+  }),
   createRow: vi.fn(async ({ tableId, data }: { tableId: string, data: Record<string, string> }) => {
     createdRows.push({ tableId, data })
     return { $id: 'e1' }
@@ -67,6 +71,8 @@ vi.stubGlobal('assertBrandOwnerAccess', (_event: H3Event, row: FakeRow, userId: 
   if (row.ownerId !== userId) throw Object.assign(new Error('Not Found'), { status: 404, statusCode: 404 })
 })
 vi.stubGlobal('getRouterParam', (_event: H3Event, name: string) => routerParams[name] ?? '')
+// Das Veröffentlichen liest einen leeren Rumpf gegen sein Zod-Schema.
+vi.stubGlobal('readValidatedBody', async (_event: H3Event, parse: (value: unknown) => unknown) => parse({}))
 vi.stubGlobal('setResponseHeaders', (_event: H3Event, headers: Record<string, string>) => {
   responseHeaders = { ...responseHeaders, ...headers }
 })
@@ -75,6 +81,9 @@ const statusRoute = (await import('../server/api/brand/profiles/[id]/share.get')
   .default as unknown as (event: H3Event) => Promise<{
     active: null | { shareId: string, publishedAt: string, expiresAt: string }
   }>
+
+const publishRoute = (await import('../server/api/brand/profiles/[id]/share.post'))
+  .default as unknown as (event: H3Event) => Promise<{ shareId: string, token: string }>
 
 const viewRoute = (await import('../server/api/brand/share/[token].get'))
   .default as unknown as (event: H3Event) => Promise<{
@@ -121,10 +130,29 @@ function shareRow(extra: Record<string, unknown> = {}): FakeRow {
   }
 }
 
+/**
+ * Ein Ergebnis-Kapitel mit bestätigter Richtung. Die anderen Kapitel des Weges
+ * fehlen bewusst: der Snapshot baut seine Kapitel aus der JOURNEY, und ein
+ * Kapitel ohne bestätigten Inhalt fällt ohnehin weg.
+ */
+function resultRow(confirmed: string): FakeRow {
+  return {
+    $id: 'p1_result',
+    profileId: 'p1',
+    stepKey: 'result',
+    state: 'done',
+    slots: JSON.stringify({ 'result.direction': { confirmed, accepted: true } }),
+    generations: '{"items":[],"count":0}',
+    revision: 1,
+    activeSeconds: 0,
+  }
+}
+
 beforeEach(() => {
   profileRow.ownerId = 'u1'
   routerParams = { id: 'p1', token: 'geheim' }
   shareRows = []
+  stepRows = []
   createdRows = []
   responseHeaders = {}
   tablesDB.createRow.mockClear()
@@ -252,5 +280,53 @@ describe('GET /api/brand/share/:token — was der zweite Leser bekommt', () => {
     await expect(viewRoute(event)).rejects.toMatchObject({ status: 404 })
     routerParams = { token: 'x'.repeat(10_000) }
     await expect(viewRoute(event)).rejects.toMatchObject({ status: 404 })
+  })
+})
+
+/**
+ * WAS DAS VERÖFFENTLICHEN AN PRESET-DATEN EINFRIERT (Paket G4).
+ *
+ * Bis G4 las `share.post.ts` `brand_profiles.designPresetId` — zwei Spalten,
+ * die seit Migration 001 existieren und NIE geschrieben wurden: `presetId` war
+ * in jedem Snapshot leer. Die eine Wahrheit ist seither der bestätigte Wert
+ * der Session `result.direction`; die Spalten bleiben unbeschrieben (Kopf der
+ * Route). Der Beweis dafür ist die Gegenprobe unten: ein gesetztes
+ * `designPresetId` am Profil darf NICHTS mehr bewirken.
+ */
+describe('POST …/profiles/:id/share — die Richtung reist als Preset mit', () => {
+  function snapshotOf(): Record<string, unknown> {
+    const created = createdRows.find(row => row.tableId === 'brand_shares')!
+    return JSON.parse(created.data.snapshot!) as Record<string, unknown>
+  }
+
+  it('friert die bestätigte Richtung als `presetId` samt Fassung ein', async () => {
+    stepRows = [resultRow('bold-contrast')]
+    await publishRoute(event)
+    expect(snapshotOf()).toMatchObject({ presetId: 'bold-contrast', presetVersion: '1' })
+  })
+
+  it('OHNE Wahl bleibt beides leer — nichts wird erfunden', async () => {
+    await publishRoute(event)
+    expect(snapshotOf()).toMatchObject({ presetId: '', presetVersion: '' })
+  })
+
+  it('EIN UNBEKANNTER WERT reist NICHT mit — ein Snapshot ist 30 Tage öffentlich', async () => {
+    // Ein von Hand korrigiertes Feld kann jeden Text tragen. Er hätte in einem
+    // öffentlich abrufbaren Abbild nichts verloren.
+    stepRows = [resultRow('meine-eigene-welt')]
+    await publishRoute(event)
+    const snapshot = snapshotOf()
+    expect(snapshot).toMatchObject({ presetId: '', presetVersion: '' })
+    expect(JSON.stringify(snapshot)).not.toContain('meine-eigene-welt')
+  })
+
+  it('GEGENPROBE: die alte Profil-Spalte wirkt nicht mehr', async () => {
+    profileRow.designPresetId = 'aus-der-spalte'
+    profileRow.designPresetVersion = '9'
+    stepRows = [resultRow('calm-natural')]
+    await publishRoute(event)
+    expect(snapshotOf()).toMatchObject({ presetId: 'calm-natural', presetVersion: '1' })
+    delete profileRow.designPresetId
+    delete profileRow.designPresetVersion
   })
 })

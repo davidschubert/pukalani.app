@@ -1,3 +1,4 @@
+import { BRAND_DIRECTION_SOURCE_SLOTS } from './brandDirections'
 import { brandGenerationHashInput } from './brandGeneration'
 import {
   BRAND_SLOTS,
@@ -533,4 +534,28 @@ export const BRAND_SUBSTANCE_MIN_WORDS: Readonly<Record<BrandSessionSubstance, n
   short: 12,
   medium: 40,
   long: 100,
+}
+
+/**
+ * WAS DIE BÜHNE EINES KAPITELS AUS FREMDEN KAPITELN BRAUCHT (Paket G4).
+ *
+ * Der Browser lädt immer nur EIN Kapitel; `slots` trägt genau dessen Sessions
+ * (s. Kopf von `BrandStepDetailResponse.sourceValues`). Das reicht überall —
+ * bis auf eine Stelle: das Ergebnis-Kapitel schlägt seine drei
+ * Richtungs-Vorschläge aus Haupt- und Neben-Archetyp auf, und die stehen in
+ * `archetype`.
+ *
+ * GEPFLEGT UND NAMENTLICH, nicht aus `dependencies` gerechnet: eine Ableitung
+ * schickte für jedes Kapitel den halben Wertevorrat mit (`ep.taglines` allein
+ * hängt an fünf fremden Sessions), und was eine ANTWORT trägt, soll man einer
+ * Liste ansehen können. Der Test nagelt fest, dass jede Id hier eine echte
+ * Session ist und aus einem ANDEREN Kapitel stammt.
+ */
+export const BRAND_STAGE_SOURCE_SLOTS: Readonly<Partial<Record<BrandStepKey, readonly string[]>>> = {
+  result: BRAND_DIRECTION_SOURCE_SLOTS,
+}
+
+/** Die Quell-Slots einer Bühne — leer, wo sie keine braucht. */
+export function brandStageSourceSlots(stepKey: BrandStepKey): readonly string[] {
+  return BRAND_STAGE_SOURCE_SLOTS[stepKey] ?? []
 }

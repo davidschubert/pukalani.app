@@ -156,6 +156,13 @@ const setup = () => {
   const localConfidence = ref<BrandConfidence | null>(null)
   const progress = ref<BrandStepProgress>({ ...EMPTY_PROGRESS })
   const missingRequired = ref<string[]>([])
+  /**
+   * BESTÄTIGTE WERTE AUS FREMDEN KAPITELN, die die Bühne dieses Kapitels
+   * braucht (Paket G4) — heute die zwei Archetypen für die drei
+   * Richtungs-Vorschläge. Sie fallen mit dem Kapitel, wie `serverSlots`: sie
+   * gehören zu DIESEM Abruf und nicht zum Branding.
+   */
+  const sourceValues = ref<Record<string, string>>({})
 
   /**
    * DER STAND JE SESSION dieses Kapitels (BW2 §5) — abgeleitet vom Server,
@@ -718,6 +725,9 @@ const setup = () => {
   function applyStepDetail(detail: BrandStepDetailResponse): void {
     stepKey.value = detail.stepKey
     serverSlots.value = detail.slots
+    // Fehlt das Feld (alter Server während eines Deploys), ist die Karte leer
+    // — die Bühne fällt dann auf ihren Rückfall zurück, statt zu brechen.
+    sourceValues.value = detail.sourceValues ?? {}
     revision.value = detail.revision
     serverConfidence.value = detail.confidence
     localConfidence.value = null
@@ -926,6 +936,7 @@ const setup = () => {
     localConfidence.value = null
     progress.value = { ...EMPTY_PROGRESS }
     missingRequired.value = []
+    sourceValues.value = {}
     sessions.value = {}
     findings.value = []
     activeSessionKey.value = ''
@@ -959,6 +970,7 @@ const setup = () => {
     localConfidence,
     progress,
     missingRequired,
+    sourceValues,
     sessions,
     findings,
     activeSessionKey,
