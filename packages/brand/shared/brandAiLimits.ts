@@ -517,6 +517,22 @@ export function decideBrandCheckQuota(
  * IP-Deckel). Ein 401 wäre die falsche Auskunft: er hat nichts Verbotenes
  * versucht, sondern einen Knopf gedrückt, den es für ihn nicht gibt — und die
  * Antwortform (`cached: true`) sagt ihm genau das.
+ *
+ * ── DER DRITTE EINGANG: `quota` (BC1) ─────────────────────────────────────
+ * Bis hierher waren „Zwischenspeicher umgehen" und „das Konto zahlt" EIN
+ * Ereignis: nur `force` konnte den Konto-Eimer wählen. Der Marktvergleich
+ * braucht die andere Hälfte — er stösst fehlende Checks fremder Adressen an
+ * und will sie AUS DEM KONTINGENT DES MENSCHEN bezahlen, der den Lauf
+ * ausgelöst hat, aber er will den Zwischenspeicher ausdrücklich GELTEN lassen
+ * (ein Lauf, der jede fremde Startseite neu prüfte, wäre der teuerste Knopf
+ * des Produkts). Deshalb ein eigener Eingang statt eines zweiten `force`:
+ * `quota: 'account'` sagt „das Konto zahlt", `force` sagt „neu ermitteln", und
+ * die zwei sind seitdem unabhängig kombinierbar.
+ *
+ * OHNE Konto fällt `'account'` auf `'auto'` zurück. Das ist keine Nachsicht,
+ * sondern die einzige mögliche Antwort: `brandCheckAccountDayKey('')` wäre ein
+ * Eimer, den sich alle Gäste der Welt teilen — also entweder ein Deckel für
+ * niemanden oder eine Sperre für alle.
  */
 export interface BrandCheckMode {
   /** Den 7-Tage-Zwischenspeicher überspringen (nur mit Konto UND `force`). */
@@ -525,7 +541,18 @@ export interface BrandCheckMode {
   quota: 'ip' | 'account'
 }
 
-export function decideBrandCheckMode(input: { userId: string, force: boolean }): BrandCheckMode {
+/**
+ * `'auto'` = die Weiche entscheidet allein aus `force` (Verhalten der
+ * öffentlichen Route). `'account'` = der Aufrufer WILL den Konto-Eimer.
+ */
+export type BrandCheckQuotaChoice = 'auto' | 'account'
+
+export function decideBrandCheckMode(input: {
+  userId: string
+  force: boolean
+  quota?: BrandCheckQuotaChoice
+}): BrandCheckMode {
   const forced = input.force && !!input.userId
-  return { bypassCache: forced, quota: forced ? 'account' : 'ip' }
+  const chosen = input.quota === 'account' && !!input.userId
+  return { bypassCache: forced, quota: forced || chosen ? 'account' : 'ip' }
 }
