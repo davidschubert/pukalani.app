@@ -155,6 +155,27 @@ AUS EINEM ANDEREN PLAN zu beweisen („vertraulich wie `a.competitors`") — ein
 fremden Massstab benutzt, prüft auch den Massstab. Fix additiv in `brandSharing.ts`
 (fail-closed), nicht in `confirmedSlotValues`.
 
+**Nachzug 2026-09-06 (BC1-Rest + 90-Tage-Regel, zwei Opus-Läufe parallel):** (a) Die
+Check-Mechanik ist aus `check.post.ts` als `runBrandCheck(event, input)` herausgezogen
+(`packages/brand/server/utils/brandCheckRun.ts`; Reihenfolge Cache → Profil → Buchung →
+Abruf → Urteil → Zeile byteweise erhalten; `profileId` darf eine Funktion sein, damit ein
+Cache-Treffer keine Besitz-Abfrage kostet; `Retry-After` setzt nur noch die Route, weil ein
+zweiter Aufrufer es sonst auf eine 200 stempelte). `decideBrandCheckMode` hat den dritten
+Eingang `quota: 'account'` (Konto-Eimer OHNE Cache-Umgehung — vorher hing beides an
+`force`). Der Marktvergleich-Lauf stösst für jeden GELESENEN Website-Kandidaten ohne Check
+einen an — synchron vor dem Bericht (h3 1.15 exportiert kein `waitUntil`, ein schwebendes
+Promise nähme unter pm2 den Prozess mit), Wanduhr 120 s, fail-soft je Kandidat; per robots.txt
+Ausgeschlossene und ausgeblendete Zeilen bleiben ohne Score. brand 1906 / market 232 Tests.
+(b) 90-Tage-Regel als pure Datei `marketLibraryAge.ts` (eigene Datei, weil das Werkzeug
+Produkt-Regeln als `.ts` lädt und `marketLibrary.ts` über zod/marketProfile für Node-ESM
+unerreichbar ist), `now` immer Parameter (Grenze 90 = frisch, 91 = stale, unlesbares Datum =
+stale), `--check` zeigt das Alter, `--stale` (Exit 1) als Andockstelle für einen Cron,
+`--now` zum Vorführen; Quellen-Wähler zeigt „Handgeprüft am …“ (UTC-Datum, `stale` vom
+Server). **Bewusst nicht gebaut:** Mehrseiten-Abruf im Brand-Check (Produktfrage, Empfehlung
+„Startseite bleibt“), Zeitplan für `--stale`. **Gelernt:** ein Nachzug, der eine Route in
+eine Funktion zerlegt, ist nur dann keine Verhaltensänderung, wenn die Reihenfolge der
+Kostenstellen als Test festgenagelt ist — deshalb `profileId` als Funktion statt als Wert.
+
 ### H1: Leere `UTable`-Spaltenköpfe (stille Hydration-Fehler) — 40 Stellen in 15 Layern behoben ✅ 2026-09-06
 
 **Was:** Folgepunkt aus dem Brand-Check-Ranking: `header: () => ''` in einer `UTable`-Spalte

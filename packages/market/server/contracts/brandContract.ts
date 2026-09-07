@@ -180,6 +180,30 @@ export { brandGenerationHashInput } from '../../../brand/shared/brandGeneration'
 export { findBrandCheckForUrl } from '../../../brand/server/utils/brandCheckLookup'
 export type { BrandCheckLookupResult } from '../../../brand/server/utils/brandCheckLookup'
 
+/**
+ * DAS ANSTOSSEN EINES FEHLENDEN CHECKS (§7.3, BC1).
+ *
+ * ── WARUM DAS EIN RE-EXPORT IST UND KEINE ZWEITE MECHANIK ─────────────────
+ * §7.3 sagt: „der BESTEHENDE Score, kein zweiter". Genau daran wäre das
+ * Anstossen bis heute gescheitert — die ganze Check-Mechanik lag im Handler
+ * von `packages/brand/server/api/brand/check.post.ts`, und von hier zu rufen
+ * hiesse kopieren. Ein kopierter Check driftet: eine neue Prompt-Fassung, ein
+ * geänderter Kriterienkatalog, eine andere Normalisierung der Adresse — und
+ * der Marktvergleich zeigte eine Zahl, die zwar „Brand-Check" heisst, aber
+ * etwas anderes misst als der Brand-Check. BC1 hat die Mechanik deshalb ZUERST
+ * nach `brand/server/utils/brandCheckRun.ts` gezogen; hier steht nur noch der
+ * Zeiger darauf.
+ *
+ * ── WO DER DECKEL LIEGT ───────────────────────────────────────────────────
+ * Beim BRAND-Check, nicht beim Marktvergleich: `quota: 'account'` bucht den
+ * Konto-Deckel (10/Tag, `BRAND_CHECK_ACCOUNT_DAILY_LIMIT`) des Menschen, der
+ * den Lauf ausgelöst hat. `market` bekommt dafür KEINEN eigenen Eimer — ein
+ * zweiter Zähler über dieselben Anbieter-Aufrufe wäre eine zweite Buchhaltung
+ * und beim ersten Ändern zwei verschiedene Deckel.
+ */
+export { runBrandCheck } from '../../../brand/server/utils/brandCheckRun'
+export type { RunBrandCheckInput, RunBrandCheckResult } from '../../../brand/server/utils/brandCheckRun'
+
 // ── MV1 M4: das Opt-in fremder Marken (§7.2 Nr. 4) ────────────────────────
 
 /**

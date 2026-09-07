@@ -1233,6 +1233,14 @@ also genau die zweite Zahl, die §7.3 streicht. Ohne Check bleibt `brandCheck`
 leer, die Oberfläche zeigt `market.score.pending`. **Für BC1:** eine
 herausgezogene `runBrandCheck()` unter dem Konto-Deckel (10/Tag, `force`)
 genügt, danach ist es hier ein zweiter Aufruf.
+*Überholt seit 2026-09-06 (BC1-Nachzug): `runBrandCheck()` ist aus der Route
+herausgezogen (`packages/brand/server/utils/brandCheckRun.ts`) und über den
+Brand-Vertrag exportiert; der Lauf stösst für jeden GELESENEN Website-Kandidaten
+ohne Check einen an — synchron vor dem Bericht (h3 1.15 hat kein `waitUntil`),
+unter dem Konto-Deckel des Nutzers mit `quota: 'account'` (Cache bleibt, kein
+`force`), fail-soft je Kandidat, Wanduhr 120 s über den ganzen Anstoss,
+`rankingOptIn: false`. Ausgeblendete oder per robots.txt ausgeschlossene
+Kandidaten bleiben ohne Score. Siehe OPEN-ITEMS-COMPLETE.*
 
 ### Routen und Codes
 
@@ -1960,6 +1968,12 @@ einer laufend gepflegten Sammlung wird?
 - **Keine Auffrischungs-Automatik.** Ein Eintrag altert, und die 90-Tage-Regel
   steht heute im Runbook, nicht im Code. Sobald echte Einträge liegen, gehört
   sie in einen Wächter.
+  *Überholt seit 2026-09-06: die Regel ist im Code
+  (`shared/marketLibraryAge.ts`, `now` immer als Parameter), das Werkzeug zeigt
+  das Alter je Eintrag (`--check`, Warnung) und listet die Überfälligen mit
+  Exit 1 (`--stale`), und der Quellen-Wähler nennt „Handgeprüft am …" samt
+  Hinweis bei über 90 Tagen. Was weiter FEHLT, ist der Zeitplan, der `--stale`
+  von selbst fährt — siehe COMPLETE.*
 
 ### Beweise
 
