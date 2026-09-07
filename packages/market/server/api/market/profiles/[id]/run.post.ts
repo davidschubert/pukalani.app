@@ -69,7 +69,19 @@ interface CandidateOutcome {
 
 export default defineEventHandler(async (event): Promise<MarketRunResponse> => {
   const { userId, profileId, profile } = await requireMarketProfile(event)
-  await requireMarketUnlocked(event, profileId)
+
+  // JEDER Ausgang vor dem Lauf hinterlässt eine Zeile (2026-09-07): ein Lauf,
+  // der an einer Vorprüfung scheitert, antwortet 4xx — und 4xx protokolliert
+  // der zentrale Handler nicht. Davids erster Live-Lauf endete so ohne jede
+  // Spur, und die Frage „ist der Klick überhaupt angekommen?" war aus dem Log
+  // nicht zu beantworten. Geloggt wird der CODE, nie ein Inhalt.
+  try {
+    await requireMarketUnlocked(event, profileId)
+  }
+  catch (error) {
+    logEvent('info', 'market.run_rejected', { code: rejectionCodeOf(error) })
+    throw error
+  }
 
   // Das Flag darf aus der Adresszeile ODER dem Rumpf kommen: M4 ruft die Route
   // per `$fetch` mit Rumpf, ein Beweis bequemer mit `?report=1`. Beides meint
@@ -80,6 +92,7 @@ export default defineEventHandler(async (event): Promise<MarketRunResponse> => {
 
   const competitors = await listMarketCompetitors(event, profileId)
   if (!competitors.length) {
+    logEvent('info', 'market.run_rejected', { code: 'no_competitors' })
     return { ran: false, steps: [], aiEnabled: await readBrandAiEnabled(event), extracted: 0, reused: 0 }
   }
 
@@ -89,6 +102,7 @@ export default defineEventHandler(async (event): Promise<MarketRunResponse> => {
   // Ein Lauf ohne Kandidaten hat nichts gekostet und kostet kein Kontingent.
   const rejection = await bookMarketRun(event, profileId)
   if (rejection) {
+    logEvent('info', 'market.run_rejected', { code: rejection.code })
     setResponseHeader(event, 'Retry-After', rejection.retryAfterSec)
     throw createError({
       status: 429,
@@ -96,6 +110,10 @@ export default defineEventHandler(async (event): Promise<MarketRunResponse> => {
       data: { code: rejection.code },
     })
   }
+
+  // Der Lauf BEGINNT — mit dieser Zeile ist im Log sichtbar, dass ab jetzt
+  // Abrufe und Modell-Aufrufe laufen, auch wenn der Prozess mittendrin stirbt.
+  logEvent('info', 'market.run_started', { competitors: competitors.length, withReport, aiEnabled })
 
   const previousProfiles = latestProfilesByCompetitor(await listMarketProfiles(event, profileId))
   const steps: MarketRunStep[] = []
@@ -447,6 +465,15 @@ async function runWebsiteCandidate(
   })
 
   return { step, extracted: true, reused: false, charsUsed }
+}
+
+/** Der fachliche Grund einer Ablehnung (`data.code`) — sonst der HTTP-Status. */
+function rejectionCodeOf(error: unknown): string {
+  const data = (error as { data?: { code?: unknown } } | null)?.data
+  if (data && typeof data.code === 'string') return data.code
+  const status = (error as { status?: unknown, statusCode?: unknown } | null)
+  const code = status?.status ?? status?.statusCode
+  return typeof code === 'number' ? `http_${code}` : 'unknown'
 }
 
 function hostOf(url: string): string {
