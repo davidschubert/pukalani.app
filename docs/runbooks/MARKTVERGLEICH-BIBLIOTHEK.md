@@ -5,8 +5,8 @@
 ein Mensch macht und mit seinem Zeichen unterschreibt.
 
 **Wer:** David (Redaktion). **Wie oft:** je Marke einmal, danach nur bei Auffrischung.
-**Stand 2026-09-06:** drei Einträge sind durch — `the-barn`, `apple` und `nike` (Abschnitt 4);
-`anthropic`, `meta` liegen als Entwurf. Rechts-Check offen.
+**Stand 2026-09-06:** vier Einträge sind durch — `the-barn`, `apple`, `nike` und `anthropic` (Abschnitt 4);
+`meta` liegt als Entwurf. Rechts-Check offen.
 **Konzept:** [BRAND-MARKTVERGLEICH.md](../archiv/BRAND-MARKTVERGLEICH.md) §7.2 und Anhang G.
 
 ---
@@ -158,9 +158,13 @@ Ein Häkchen ohne Datum und Namen wäre keins.
 - [x] **`nike`** — 2026-09-06, David Schubert. Alle **7** belegten Felder
       übernommen (`categoryLanguage`, `pitch`, `audience`, `values`, `toneWords`,
       `tagline`, `keyMessages`); Fassung `lib-4`.
-- [ ] `anthropic`, `meta` — gerechnet (2026-09-06), Entwürfe liegen unter
-      `drafts/`, **von David bewusst liegen gelassen** (Meta nur zwei Felder,
-      Anthropic fünf — eine bessere Startadresse wäre der nächste Versuch).
+- [x] **`anthropic`** — 2026-09-06, David Schubert. Lauf 3 mit der
+      Unternehmensseite `/company` als Startadresse: alle **6** belegten Felder
+      übernommen; Fassung `lib-5`.
+- [ ] `meta` — Lauf 3 mit `/about/` (2026-09-06): 4 Felder, nur eine Seite
+      lesbar; Entwurf liegt unter `drafts/`, **von David bewusst liegen
+      gelassen** — nächster Versuch bei der 90-Tage-Auffrischung, ggf. mit
+      `/about/company-info/` als dritter Adresse.
 
 **Rechts-Check offen.** Die anwaltlichen Fragen aus Plan
 [Anhang G](../archiv/BRAND-MARKTVERGLEICH.md) (Namensnennung im bezahlten

@@ -3,10 +3,11 @@
  * Datenbank (Anhang B).
  *
  * ── HIER STEHEN NUR ECHTE, VON HAND GEPRÜFTE MARKEN ───────────────────────
- * Stand 2026-09-06 (MV1 M6b, lib-4): DREI Einträge — `the-barn` (alle neun
+ * Stand 2026-09-06 (MV1 M6b, lib-5): VIER Einträge — `the-barn` (alle neun
  * belegten Felder), `apple` (fünf; `purpose` hat David bei der Prüfung
- * gestrichen) und `nike` (alle sieben belegten Felder).
- * Alle drei sind am 2026-09-06 von David Schubert VON HAND geprüft: jedes Zitat
+ * gestrichen), `nike` (alle sieben) und `anthropic` (alle sechs, Lauf 3 mit
+ * der Unternehmensseite als Startadresse). `meta` bleibt bewusst Entwurf.
+ * Alle vier sind am 2026-09-06 von David Schubert VON HAND geprüft: jedes Zitat
  * gegen die genannte Quellseite gehalten, jede Zuordnung bestätigt, keine
  * personenbezogenen Daten, keine Wertung (Runbook Schritt 4). Das steht als
  * `verifiedAt`/`verifiedBy` an jedem Eintrag, und `status: 'verified'` ist der
@@ -53,7 +54,7 @@
  */
 
 /** Fassung dieser Datei. Jede inhaltliche Änderung hebt sie (`--promote` tut es selbst). */
-export const MARKET_LIBRARY_VERSION = 'lib-4'
+export const MARKET_LIBRARY_VERSION = 'lib-5'
 
 /**
  * Die Einträge. Bewusst `unknown[]`-frei getypt gelassen: die WAHRHEIT über
@@ -281,6 +282,90 @@ export const MARKET_LIBRARY_ENTRIES = [
           'Classic silhouettes and cutting-edge innovation',
         ],
         quote: 'Classic silhouettes and cutting-edge innovation to build your game from the ground up.',
+      },
+    ],
+  },
+{
+    key: 'anthropic',
+    status: 'verified',
+    name: 'Anthropic',
+    homepage: 'https://www.anthropic.com/company',
+    category: 'KI-Labor',
+    verifiedAt: '2026-09-06',
+    verifiedBy: 'David Schubert',
+    fields: [
+      {
+        fieldId: 'categoryLanguage',
+        value: 'AI safety and research company',
+        sourceUrl: 'https://www.anthropic.com/company',
+        confidence: 'stated',
+        quote: 'Anthropic is an AI safety and research company that\'s working to build reliable, interpretable, and steerable AI systems.',
+        frequency: {
+          pages: 4,
+          of: 8,
+        },
+      },
+      {
+        fieldId: 'audience',
+        value: 'Businesses, nonprofits, civil society groups, researchers, policymakers, and people around the globe who benefit from AI tools and research.',
+        sourceUrl: 'https://www.anthropic.com/company',
+        confidence: 'stated',
+        quote: 'We translate our research into tangible, practical tools like Claude that benefit businesses, nonprofits and civil society groups and their clients and people around the globe.',
+        frequency: {
+          pages: 1,
+          of: 8,
+        },
+      },
+      {
+        fieldId: 'firstChoice',
+        value: 'Anthropic treats AI safety as a systematic science and aims to set the industry bar for AI safety and security. The company conducts frontier research, applies safety techniques to products, and regularly shares insights with the world.',
+        sourceUrl: 'https://www.anthropic.com/company',
+        confidence: 'stated',
+        quote: 'Safety Is a Science We treat AI safety as a systematic science, conducting research, applying it to our products, feeding those insights back into our research, and regularly sharing what we learn wit',
+        frequency: {
+          pages: 1,
+          of: 8,
+        },
+      },
+      {
+        fieldId: 'toneWords',
+        value: 'factual, direct, thoughtful, collaborative, mission-driven',
+        sourceUrl: 'https://www.anthropic.com/company',
+        confidence: 'implied',
+        items: [
+          'factual',
+          'direct',
+          'thoughtful',
+          'collaborative',
+          'mission-driven',
+        ],
+        quote: 'We communicate kindly and directly, assuming good intentions even in disagreement. We are thoughtful about our actions, avoiding harm and repairing relationships when needed.',
+        frequency: {
+          pages: 1,
+          of: 8,
+        },
+      },
+      {
+        fieldId: 'tagline',
+        value: 'Making AI systems you can rely on',
+        sourceUrl: 'https://www.anthropic.com/company',
+        confidence: 'stated',
+        quote: 'Making AI systems you can rely on',
+        frequency: {
+          pages: 1,
+          of: 8,
+        },
+      },
+      {
+        fieldId: 'distinctiveAsset',
+        value: 'reliable, interpretable, and steerable',
+        sourceUrl: 'https://www.anthropic.com/company',
+        confidence: 'implied',
+        quote: 'reliable, interpretable, and steerable AI systems',
+        frequency: {
+          pages: 5,
+          of: 8,
+        },
       },
     ],
   },
