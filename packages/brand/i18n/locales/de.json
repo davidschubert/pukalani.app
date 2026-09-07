@@ -175,7 +175,8 @@
       "chapterCount": "{confirmed} von {total} bestätigt",
       "chapterCountStale": "{confirmed} von {total} bestätigt · {stale} neu besprechen",
       "chapterEffort": "{count} Sessions, ~{minutes} Min",
-      "document": "Euer Branding"
+      "document": "Euer Branding",
+      "foundation": "Brand Foundation"
     },
     "legal": {
       "imprint": "Impressum",
@@ -1634,7 +1635,132 @@
       "reviewResult": "{caughtUp} Sessions nachgeholt, {findings} Befunde.",
       "stillUnreviewed": "{count} Session bleibt noch offen — der nächste Blick holt sie nach. | {count} Sessions bleiben noch offen — der nächste Blick holt sie nach.",
       "noFindings": "Nichts gefunden, was sich reibt.",
-      "reviewFailed": "Der Blick kam gerade nicht zustande. Euer Dokument steht trotzdem — versucht es später noch einmal."
+      "reviewFailed": "Der Blick kam gerade nicht zustande. Euer Dokument steht trotzdem — versucht es später noch einmal.",
+      "readFoundation": "Als Foundation lesen"
+    },
+    "foundation": {
+      "title": "Brand Foundation",
+      "toc": "Inhalt",
+      "counter": "{accepted} von {total} Kapiteln abgenommen",
+      "contentLocale": "Inhaltssprache {locale}",
+      "standProgress": "Kapitel",
+      "loadFailed": "Die Brand Foundation konnte nicht geladen werden.",
+      "empty": "Hier steht noch nichts. Sobald ihr die ersten Felder bestätigt habt, füllt sich dieses Handbuch.",
+      "showToc": "Inhalt einblenden",
+      "hideToc": "Inhalt ausblenden",
+      "chapterNumber": "Kapitel {num}",
+      "pending": "noch nicht abgenommen",
+      "pendingNote": "Dieses Kapitel steht noch nicht fest.",
+      "toAcceptance": "Zur Abnahme",
+      "onePage": {
+        "title": "Auf einer Seite",
+        "values": "Werte",
+        "archetype": "Archetyp",
+        "tagline": "Tagline",
+        "wallLine": "Zeile für die Wand"
+      },
+      "export": {
+        "label": "Exportieren",
+        "print": "Drucken / PDF",
+        "printSub": "Browser-Druck mit Print-Layout",
+        "context": "brand.md · brand.json",
+        "contextSub": "Brand Context für KI-Agenten",
+        "tokens": "Design-Tokens",
+        "tokensSub": "CSS, Tailwind, JSON",
+        "assets": "Assets.zip",
+        "assetsSub": "Logos, Vorlagen, Pressekit",
+        "kit": "Brand Book & Kit"
+      },
+      "ai": {
+        "tone": "Schreibt in diesem Ton:",
+        "avoid": "Vermeidet:",
+        "stands": "Steht für:",
+        "hint": "Zum Kopieren in ChatGPT, Claude oder das Redaktionssystem."
+      },
+      "note": {
+        "visuell": "Gehört zum Fundament dazu, entsteht aber erst im Brand Design — hergeleitet aus dem, was oben steht.",
+        "ki-texte": "Ein fester Rahmen, gefüllt aus euren Werten — keine eigene Erfindung, so aktuell wie die Kapitel darüber."
+      },
+      "visual": {
+        "follows": "folgt in Brand Design",
+        "shareLine": "Visuelle Identität: folgt in Brand Design.",
+        "product": "Brand Design",
+        "ctaDesign": "Im Brand Design entscheiden",
+        "ctaCall": "Erstgespräch buchen",
+        "logo": {
+          "title": "Logo",
+          "text": "Wort- oder Bildmarke samt Schutzraum und Mindestgröße — hergeleitet aus Archetyp und Wiedererkennungs-Anker."
+        },
+        "color": {
+          "title": "Farbwelt",
+          "text": "Eine Grundfarbe mit zwei bis vier Begleitern, kontrastgeprüft — hergeleitet aus Archetyp und Positionierung."
+        },
+        "typography": {
+          "title": "Typografie",
+          "text": "Ein Schriftpaar für Überschrift und Text plus eine Mono für Herkunft und Preise — hergeleitet aus den Ton-Wörtern."
+        },
+        "imagery": {
+          "title": "Bildsprache",
+          "text": "Was auf ein Foto darf und was nie — hergeleitet aus Werten und Zielgruppen."
+        },
+        "motion": {
+          "title": "Motion",
+          "text": "Tempo und Ruhe der Bewegung — hergeleitet aus den Ton-Wörtern."
+        }
+      },
+      "chapter": {
+        "story": "Brand Story",
+        "kontext": "Kontext & Zielgruppe",
+        "purpose": "Purpose, Vision, Mission",
+        "positionierung": "Positionierung",
+        "architektur": "Markenarchitektur",
+        "werte": "Werte",
+        "stimme": "Persönlichkeit & Stimme",
+        "manifest": "Manifest",
+        "messaging": "Tagline & Messaging",
+        "name": "Name",
+        "visuell": "Visuelle Identität",
+        "ki-texte": "Regeln für KI-Texte"
+      },
+      "label": {
+        "pitch": "In einem Satz",
+        "category": "Kategorie",
+        "audience": "Zielgruppen",
+        "purpose": "Purpose",
+        "vision": "Vision",
+        "mission": "Mission",
+        "positioningCategory": "Positionierungs-Kategorie",
+        "firstChoice": "Erste Wahl für",
+        "model": "Architektur-Modell",
+        "namingRule": "Namensregel",
+        "values": "Eure Werte",
+        "definitions": "Definitionen",
+        "livedExamples": "Gelebte Beispiele",
+        "conflictRule": "Konfliktregel",
+        "teamFilter": "Einstellungs-Filter",
+        "archetype": "Archetyp",
+        "emotion": "Ziel-Gefühl",
+        "toneWords": "Ton-Wörter",
+        "voiceSamples": "Stimmproben",
+        "doDont": "Do & Don't",
+        "vocabulary": "Wort-Leitfaden",
+        "anchorLine": "Zeile für die Wand",
+        "composition": "Ton, Länge & Verwendung",
+        "tagline": "Tagline",
+        "boilerplates": "Boilerplates",
+        "keyMessages": "Kernbotschaften",
+        "distinctiveAsset": "Verbales Erkennungszeichen",
+        "nameDecision": "Top drei",
+        "nameChecks": "Verfügbarkeits-Check",
+        "nameCriteria": "Acht Kriterien"
+      },
+      "column": {
+        "name": "Name",
+        "note": "Notiz",
+        "rank": "Rang",
+        "check": "Prüfung",
+        "criteria": "Kriterium"
+      }
     },
     "session": {
       "minutes": "~{minutes} Min",

@@ -187,7 +187,12 @@ function glyph(layer: BwRailLayer, step: BwRailStep): { name: string, style: str
   }
   // Gesperrt ist ein Punkt durch seine SCHICHT oder durch sich selbst (A9).
   if (layer.locked || step.state === 'locked') return { name: 'i-ph-lock-simple', style: 'color: var(--bw-muted)' }
-  if (step.kind === 'result') return { name: 'i-ph-sparkle', style: step.state === 'done' ? 'color: var(--bw-accent)' : 'color: var(--bw-muted)' }
+  // Der Funke leuchtet, sobald der Punkt etwas ZEIGT — abgeschlossen, gerade
+  // offen oder mit eigenem Ziel (die Brand Foundation, s. `stepDisabled`).
+  if (step.kind === 'result') {
+    const lit = step.state === 'done' || step.state === 'active' || Boolean(step.to)
+    return { name: 'i-ph-sparkle', style: lit ? 'color: var(--bw-accent)' : 'color: var(--bw-muted)' }
+  }
   if (step.state === 'done') return { name: 'i-ph-check-circle-fill', style: 'color: var(--bw-accent)' }
   if (step.state === 'active') return { name: 'i-ph-circle-half-fill', style: 'color: var(--bw-ink)' }
   return { name: 'i-ph-circle', style: 'color: var(--bw-muted)' }
@@ -208,7 +213,12 @@ function stepDisabled(layer: BwRailLayer, step: BwRailStep): boolean {
   // Zusatzprodukt offen ist.
   if (step.kind === 'extra') return step.state === 'locked'
   if (layer.locked || step.state === 'locked') return true
-  return step.kind === 'result' ? step.state !== 'done' : step.state === 'open'
+  // EIN ERGEBNIS-PUNKT MIT EIGENEM ZIEL IST IMMER ERREICHBAR (Paket G2): die
+  // Brand Foundation liest auch Zwischenstände, sie darf also nicht an einer
+  // Abnahme hängen (§2.6). Ohne `to` bleibt es bei der alten Regel — ein Punkt
+  // ohne Ziel wäre ein Knopf, der nichts tut.
+  if (step.kind === 'result') return !step.to && step.state !== 'done'
+  return step.state === 'open'
 }
 
 /**
@@ -354,7 +364,7 @@ function selectStep(layer: BwRailLayer, step: BwRailStep): void {
                     </span>
                     <span v-if="step.info && !layer.locked" class="size-6 flex-none" aria-hidden="true" />
                     <UIcon
-                      v-if="step.kind === 'result' && step.state === 'done'"
+                      v-if="step.kind === 'result' && !stepDisabled(layer, step)"
                       name="i-ph-arrow-right" class="size-4 flex-none" style="color: var(--bw-ink-soft)"
                     />
                   </button>
@@ -362,7 +372,7 @@ function selectStep(layer: BwRailLayer, step: BwRailStep): void {
                     v-if="step.info && !layer.locked"
                     type="button"
                     class="bw-info-btn bw-nav-info absolute top-1/2 grid size-6 -translate-y-1/2 place-items-center rounded-full"
-                    :class="step.kind === 'result' && step.state === 'done' ? 'right-8' : 'right-2.5'"
+                    :class="step.kind === 'result' && !stepDisabled(layer, step) ? 'right-8' : 'right-2.5'"
                     :aria-label="t('brand.workspace.rail.whatMeans', { label: step.label })"
                     @click="infoStep = { step, layerLabel: layer.label }"
                   >

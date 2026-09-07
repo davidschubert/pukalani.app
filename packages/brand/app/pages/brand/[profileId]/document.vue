@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { BwSidebarBrand } from '../../../components/BwWorkspaceSidebar.vue'
+import type { BwTocLink } from '../../../components/BwReadingToc.vue'
 import type { BwRailLayer, BwRailStep } from '../../../components/BwProgressRail.vue'
 import { brandAiRejectionMessageKey } from '../../../../shared/brandAiLimits'
 import type {
@@ -13,6 +14,7 @@ import type {
 import { BRAND_ACCEPTANCE_VIEW } from '../../../../shared/brandWorkspaceNav'
 import { slotById } from '../../../../shared/slotRegistry'
 import { useBrandWorkspaceStore } from '../../../stores/brandWorkspace'
+import { BRAND_FOUNDATION_RAIL_STEP, useBrandFoundationRailStep } from '../../../composables/useBrandFoundationRailStep'
 import { useBrandImpactConsent } from '../../../composables/useBrandImpactConsent'
 
 /**
@@ -134,6 +136,24 @@ function counterLine(chapter: BrandDocumentChapter): string {
 function chapterState(chapter: BrandDocumentChapter): string {
   return t(`brand.document.state.${chapter.storedState === 'done' ? 'done' : chapter.state}`)
 }
+
+/**
+ * DIE ZEILEN DES INHALTSVERZEICHNISSES (`BwReadingToc`, seit Paket G2 geteilt
+ * mit der Leseansicht). Der GESPEICHERTE Zustand schlägt den geltenden — er
+ * ist die Tatsache, an der die Finale Abnahme hängt —, und rechts steht die
+ * KURZFORM `7/11`: die Langform bricht in dieser Spalte um (s. Komponente).
+ */
+const tocLinks = computed<BwTocLink[]>(() => chapters.value.map(chapter => ({
+  // Die Sprungmarke IST der Kapitel-Schlüssel — die Seite stempelt ihn als
+  // `id` an ihre Abschnitte; ein zweiter Anker-Begriff wäre eine zweite
+  // Wahrheit.
+  id: chapter.stepKey,
+  text: t(`brand.steps.${chapter.stepKey}`),
+  state: chapter.storedState === 'done'
+    ? 'done'
+    : chapter.state === 'active' ? 'active' : chapter.state === 'locked' ? 'locked' : 'open',
+  counter: `${chapter.acceptance.accepted}/${chapter.acceptance.total}`,
+})))
 
 const overall = computed(() => {
   let accepted = 0
@@ -293,22 +313,33 @@ const navExtras = useBrandWorkspaceNavExtras({
   findings: () => view.value?.findings ?? [],
 })
 
+/**
+ * DER EINSTIEG IN DIE LESEANSICHT (Paket G2) — er ersetzt den Ergebnis-Punkt
+ * der Leiste, hier wie in der Werkstatt (eine Quelle, s. Composable).
+ */
+const foundationStep = useBrandFoundationRailStep({ profileId })
+
 const railLayers = computed<BwRailLayer[]>(() => [{
   id: 'foundation',
   label: t('brand.workspace.railLayer'),
   steps: [
-    ...store.railSteps.map((entry): BwRailStep => ({
-      id: entry.stepKey,
-      label: t(`brand.steps.${entry.stepKey}`),
-      icon: '',
-      state: entry.state === 'done'
-        ? 'done'
-        : entry.state === 'active' ? 'active' : entry.state === 'locked' ? 'locked' : 'open',
-      counter: t('brand.nav.chapterCount', {
-        confirmed: entry.progress.requiredTotal - entry.missingRequired.length,
-        total: entry.progress.requiredTotal,
-      }),
-    })),
+    // Der Ergebnis-Punkt wandert ans ENDE: er ist seit Paket G2 der Einstieg
+    // in die Leseansicht und steht dort, wo das Konzept ihn hinstellt —
+    // Dokument, dann Foundation (§2.6).
+    ...store.railSteps
+      .filter(entry => entry.stepKey !== BRAND_FOUNDATION_RAIL_STEP)
+      .map((entry): BwRailStep => ({
+        id: entry.stepKey,
+        label: t(`brand.steps.${entry.stepKey}`),
+        icon: '',
+        state: entry.state === 'done'
+          ? 'done'
+          : entry.state === 'active' ? 'active' : entry.state === 'locked' ? 'locked' : 'open',
+        counter: t('brand.nav.chapterCount', {
+          confirmed: entry.progress.requiredTotal - entry.missingRequired.length,
+          total: entry.progress.requiredTotal,
+        }),
+      })),
     {
       id: 'document',
       label: t('brand.nav.document'),
@@ -325,6 +356,7 @@ const railLayers = computed<BwRailLayer[]>(() => [{
           }
         : {}),
     },
+    foundationStep.value,
     // Zusatz-Einträge fremder Layer (MV1 M4) — heute „Markt".
     ...navExtras.value,
   ],
@@ -441,13 +473,23 @@ useBrandTitle(() => (store.profile?.title || view.value?.title || t('brand.docum
           <p class="mt-2 text-sm leading-relaxed" style="color: var(--bw-ink-soft)">
             {{ t('brand.document.lead') }}
           </p>
+          <!-- DIE ZWEITE ANSICHT DESSELBEN DOKUMENTS (Paket G2, §2.6): hier
+               wird abgenommen, dort wird gelesen. Ein Link und kein Ersatz —
+               die Arbeitsansicht bleibt, was sie ist. -->
+          <UButton
+            class="mt-4 rounded-full" size="sm" color="neutral" variant="outline"
+            style="background: var(--bw-surface-hi)"
+            trailing-icon="i-ph-arrow-right"
+            :to="localePath(`/brand/${profileId}/foundation`)"
+            :label="t('brand.document.readFoundation')"
+          />
         </div>
 
         <p v-if="doc.error.value" class="bw-pending">{{ t('brand.document.loadFailed') }}</p>
         <p v-else-if="!chapters.length" class="bw-pending">{{ t('brand.document.empty') }}</p>
 
         <!-- Die `id` ist die SPRUNGMARKE des Inhaltsverzeichnisses (rechts) —
-             `BwDocumentToc` beobachtet genau diese Elemente. KEIN
+             `BwReadingToc` beobachtet genau diese Elemente. KEIN
              `scroll-mt-*`: der Bühnen-Balken ist ein Geschwister der
              scrollenden `main.bw-stage` (flex-none), nicht sticky — er
              verdeckt also nichts. -->
@@ -549,7 +591,7 @@ useBrandTitle(() => (store.profile?.title || view.value?.title || t('brand.docum
             container: 'relative',
           }"
         >
-          <BwDocumentToc :chapters="chapters" />
+          <BwReadingToc :links="tocLinks" :title="t('brand.document.toc')" />
         </UPageAside>
 
         <div class="flex-none border-t px-6 pb-5" style="border-color: var(--bw-line)">

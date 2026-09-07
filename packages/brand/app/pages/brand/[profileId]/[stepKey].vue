@@ -77,6 +77,7 @@ import { useBrandAutosave } from '../../../composables/useBrandAutosave'
 import { useBrandFieldLabel } from '../../../composables/useBrandFieldLabel'
 import { useBrandConversation } from '../../../composables/useBrandConversation'
 import { useBrandGeneration } from '../../../composables/useBrandGeneration'
+import { BRAND_FOUNDATION_RAIL_STEP, useBrandFoundationRailStep } from '../../../composables/useBrandFoundationRailStep'
 
 /**
  * DIE WERKSTATT — „GESPRÄCH ALS BÜHNE" (Davids Konzept-Revision 2026-09-02,
@@ -1947,11 +1948,17 @@ const navExtras = useBrandWorkspaceNavExtras({
   findings: () => store.findings,
 })
 
+/** Der Einstieg in die Brand Foundation — s. Composable (Paket G2). */
+const foundationStep = useBrandFoundationRailStep({ profileId })
+
 const railLayers = computed<BwRailLayer[]>(() => [{
   id: 'foundation',
   label: t('brand.workspace.railLayer'),
   steps: [
-    ...store.railSteps.map((entry): BwRailStep => {
+    // Der Ergebnis-Punkt fehlt hier und steht unten als „Brand Foundation":
+    // er IST seit Paket G2 der Einstieg in die Leseansicht (Konzept §6 d),
+    // und die kommt NACH dem Dokument (§2.6).
+    ...store.railSteps.filter(entry => entry.stepKey !== BRAND_FOUNDATION_RAIL_STEP).map((entry): BwRailStep => {
       const current = entry.stepKey === stepKey.value
       return {
         id: entry.stepKey,
@@ -1975,6 +1982,9 @@ const railLayers = computed<BwRailLayer[]>(() => [{
       }
     }),
     railDocumentStep(),
+    // Die Leseansicht desselben Dokuments (Paket G2) — gebaut an EINER Stelle,
+    // damit sie hier, im Dokument und in ihr selbst dieselbe bleibt.
+    foundationStep.value,
     // Zusatz-Einträge fremder Layer (MV1 M4) — heute „Markt". Sie stehen
     // NACH dem Dokument: das Dokument ist der Abschluss der Foundation, ein
     // Zusatzprodukt kommt danach.

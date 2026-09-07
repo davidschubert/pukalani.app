@@ -1,13 +1,22 @@
 import { describe, expect, it } from 'vitest'
 import {
   BRAND_FOUNDATION_CHAPTER_IDS,
+  BRAND_FOUNDATION_SOURCE_STEPS,
   BRAND_FOUNDATION_VISUAL_ELEMENTS,
   type BrandFoundationBlock,
   type BrandFoundationInput,
+  brandFoundationPendingStep,
   buildBrandFoundation,
 } from '../shared/brandFoundation'
 import { formatBrandSlotList, formatBrandSlotStructured } from '../shared/brandSlotFormat'
-import { BRAND_SLOTS, type BrandSlot, type BrandStepKey, sessionTravels, slotById } from '../shared/slotRegistry'
+import {
+  BRAND_SLOTS,
+  BRAND_STEP_KEYS,
+  type BrandSlot,
+  type BrandStepKey,
+  sessionTravels,
+  slotById,
+} from '../shared/slotRegistry'
 
 /**
  * DER RENDERER DER LESEANSICHT (Konzept §2.2/§2.3, Paket G1).
@@ -333,5 +342,85 @@ describe('buildBrandFoundation — die Blöcke', () => {
       labelKey: 'brand.foundation.label.boilerplates',
       text: 'Kailua Coffee Co. röstet eine Sorte pro Saison.',
     }])
+  })
+})
+
+/**
+ * DIE ZUORDNUNG HANDBUCH-KAPITEL → WERKSTATT-KAPITEL (Paket G2).
+ *
+ * Sie ist gepflegt und nicht gerechnet (Begründung an der Tabelle), also ist
+ * der Test die einzige Sicherung: ein neues Kapitel ohne Eintrag hiesse „nie
+ * offen", und der Vermerk „noch nicht abgenommen" fehlte lautlos genau dort,
+ * wo er gebraucht wird.
+ */
+describe('BRAND_FOUNDATION_SOURCE_STEPS — woher ein Kapitel kommt', () => {
+  it('nennt für JEDE Kapitel-Id ihre Quell-Kapitel', () => {
+    for (const id of BRAND_FOUNDATION_CHAPTER_IDS) {
+      expect(BRAND_FOUNDATION_SOURCE_STEPS[id], id).toBeDefined()
+    }
+    expect(Object.keys(BRAND_FOUNDATION_SOURCE_STEPS).sort())
+      .toEqual([...BRAND_FOUNDATION_CHAPTER_IDS].sort())
+  })
+
+  it('nennt nur ECHTE Kapitel der Registry', () => {
+    for (const [id, steps] of Object.entries(BRAND_FOUNDATION_SOURCE_STEPS)) {
+      for (const stepKey of steps) {
+        expect(BRAND_STEP_KEYS, `${id} → ${stepKey}`).toContain(stepKey)
+      }
+    }
+  })
+
+  it('lässt GENAU zwei Kapitel ohne Quelle: Story und die Schranke', () => {
+    const empty = BRAND_FOUNDATION_CHAPTER_IDS
+      .filter(id => BRAND_FOUNDATION_SOURCE_STEPS[id].length === 0)
+    expect(empty).toEqual(['story', 'visuell'])
+  })
+})
+
+describe('brandFoundationPendingStep — was noch nicht abgenommen ist', () => {
+  const accepted = (overrides: Partial<Record<BrandStepKey, boolean>> = {}) =>
+    (['context', 'pvm', 'values', 'archetype', 'manifesto', 'verbal', 'result'] as BrandStepKey[])
+      .map(stepKey => ({ stepKey, accepted: overrides[stepKey] ?? true }))
+
+  it('nennt das erste offene Quell-Kapitel', () => {
+    expect(brandFoundationPendingStep('stimme', accepted({ archetype: false }))).toBe('archetype')
+    expect(brandFoundationPendingStep('stimme', accepted({ verbal: false }))).toBe('verbal')
+  })
+
+  it('GEGENPROBE: alles abgenommen ⇒ null', () => {
+    expect(brandFoundationPendingStep('stimme', accepted())).toBeNull()
+    expect(brandFoundationPendingStep('werte', accepted())).toBeNull()
+  })
+
+  it('zählt ein Kapitel NICHT als offen, das gar nicht auf dem Weg liegt', () => {
+    // `naming` fehlt in der Liste (übersprungen) — das Kapitel „Name" entfällt
+    // dann ohnehin, es darf aber nie als „offen" erscheinen.
+    expect(brandFoundationPendingStep('name', accepted())).toBeNull()
+  })
+
+  it('die Schranke und die Story kennen keine Abnahme', () => {
+    const nothing = accepted({ context: false, pvm: false, values: false, archetype: false, manifesto: false, verbal: false })
+    expect(brandFoundationPendingStep('visuell', nothing)).toBeNull()
+    expect(brandFoundationPendingStep('story', nothing)).toBeNull()
+  })
+})
+
+describe('buildBrandFoundation — Markdown reist markiert', () => {
+  it('markiert NUR die Absätze des Manifests (der einzige richtext-Slot)', () => {
+    const view = buildBrandFoundation({
+      title: '', contentLocale: 'de', story: 'Eine Story mit *Sternchen*.',
+      chapters: [{
+        stepKey: 'manifesto',
+        slots: [
+          { slotId: 'e.manifesto', value: 'Wir **rösten** eine Sorte.\n\nJede Saison.' },
+          { slotId: 'e.anchorLine', value: 'Eine Sorte. Eine Saison.' },
+        ],
+      }],
+    })
+    const manifest = view.chapters.find(chapter => chapter.id === 'manifest')!
+    expect(manifest.blocks.filter(block => block.kind === 'text' && block.markdown === true)).toHaveLength(2)
+    // Die Story ist Georges Prosa, kein `richtext`-Slot — sie bleibt wörtlich.
+    const story = view.chapters.find(chapter => chapter.id === 'story')!
+    expect(story.blocks.every(block => block.kind !== 'text' || block.markdown === undefined)).toBe(true)
   })
 })

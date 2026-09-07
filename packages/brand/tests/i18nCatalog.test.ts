@@ -2,6 +2,8 @@ import { readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
+import { type BrandFoundationInput, buildBrandFoundation } from '../shared/brandFoundation'
+import { formatBrandSlotList, formatBrandSlotStructured } from '../shared/brandSlotFormat'
 import {
   BRAND_SLOTS,
   type BrandSlot,
@@ -267,5 +269,124 @@ describe('brand i18n-Katalog', () => {
       expect(values.filter(value => /[<>]/.test(value)), locale).toEqual([])
       expect(values.filter(value => value.includes('@')), locale).toEqual([])
     }
+  })
+})
+
+/**
+ * DIE LESEANSICHT SPRICHT NUR IN SCHLÜSSELN (Paket G2).
+ *
+ * `buildBrandFoundation` ist pur und schickt `titleKey`, `labelKey` und
+ * `columnKeys` statt Text (Kopf von `shared/brandFoundation.ts`); die visuelle
+ * Schranke schickt nur Element-Ids. Fehlt einer dieser Schlüssel im Katalog,
+ * steht im Handbuch wörtlich `brand.foundation.label.pitch` — vue-i18n meldet
+ * das nie, und Typecheck und Lint sehen davon nichts.
+ *
+ * GEPRÜFT WIRD DER ECHTE LAUF: die Schlüssel werden nicht aufgezählt, sondern
+ * aus einer Foundation über ALLE Sessions eingesammelt. Ein neuer Block-Bauer
+ * mit neuem Label ist damit automatisch mitgeprüft.
+ */
+describe('Brand Foundation — jeder erzeugte Schlüssel hat seinen Text', () => {
+  /** Ein formgültiger Wert je Art — sonst fielen Karten und Tabellen aus. */
+  function slotValue(slot: BrandSlot): string {
+    switch (slot.schema.kind) {
+      case 'list':
+        return formatBrandSlotList([`${slot.id}-eins`, `${slot.id}-zwei`])
+      case 'structured':
+        return formatBrandSlotStructured([{ label: `${slot.id}-etikett`, body: `${slot.id}-inhalt` }])
+      default:
+        return `${slot.id}-text`
+    }
+  }
+
+  const input: BrandFoundationInput = {
+    title: 'Kailua Coffee Co.',
+    contentLocale: 'en',
+    story: 'Ein Absatz.',
+    chapters: [{
+      stepKey: 'context',
+      slots: BRAND_SLOTS
+        .filter(slot => !slot.deactivated)
+        .map(slot => ({ slotId: slot.id, value: slotValue(slot) })),
+    }],
+  }
+
+  /** Alles, was die Oberfläche an `t()` reicht — eingesammelt am Ergebnis. */
+  function producedKeys(): string[] {
+    const keys = new Set<string>()
+    for (const chapter of buildBrandFoundation(input).chapters) {
+      keys.add(chapter.titleKey)
+      for (const block of chapter.blocks) {
+        if ('labelKey' in block && block.labelKey) keys.add(block.labelKey)
+        if (block.kind === 'table') block.columnKeys.forEach(key => keys.add(key))
+        if (block.kind === 'locked') {
+          keys.add(`brand.foundation.visual.${block.element}.title`)
+          keys.add(`brand.foundation.visual.${block.element}.text`)
+        }
+      }
+    }
+    return [...keys]
+  }
+
+  it('kennt jeden Kapitel-, Beschriftungs- und Spalten-Schlüssel in BEIDEN Sprachen', () => {
+    const produced = producedKeys()
+    // Ohne diese Zeile wäre der Test auch für eine leere Menge grün.
+    expect(produced.length).toBeGreaterThan(25)
+    expect(produced.filter(key => missingIn(key).length)).toEqual([])
+  })
+
+  it('kennt die festen Texte der Seite in BEIDEN Sprachen', () => {
+    const fixed = [
+      'brand.nav.foundation',
+      'brand.document.readFoundation',
+      'brand.foundation.title',
+      'brand.foundation.toc',
+      'brand.foundation.counter',
+      'brand.foundation.contentLocale',
+      'brand.foundation.standProgress',
+      'brand.foundation.loadFailed',
+      'brand.foundation.empty',
+      'brand.foundation.showToc',
+      'brand.foundation.hideToc',
+      'brand.foundation.chapterNumber',
+      'brand.foundation.pending',
+      'brand.foundation.pendingNote',
+      'brand.foundation.toAcceptance',
+      'brand.foundation.onePage.title',
+      'brand.foundation.onePage.values',
+      'brand.foundation.onePage.archetype',
+      'brand.foundation.onePage.tagline',
+      'brand.foundation.onePage.wallLine',
+      'brand.foundation.export.label',
+      'brand.foundation.export.print',
+      'brand.foundation.export.printSub',
+      'brand.foundation.export.context',
+      'brand.foundation.export.contextSub',
+      'brand.foundation.export.tokens',
+      'brand.foundation.export.tokensSub',
+      'brand.foundation.export.assets',
+      'brand.foundation.export.assetsSub',
+      'brand.foundation.export.kit',
+      'brand.foundation.ai.tone',
+      'brand.foundation.ai.avoid',
+      'brand.foundation.ai.stands',
+      'brand.foundation.ai.hint',
+      'brand.foundation.visual.follows',
+      'brand.foundation.visual.shareLine',
+      'brand.foundation.visual.product',
+      'brand.foundation.visual.ctaDesign',
+      'brand.foundation.visual.ctaCall',
+      // Die optionalen Kapitel-Vermerke — die Seite fragt sie mit `te()` ab,
+      // vorhanden sein sollen sie trotzdem in beiden Sprachen.
+      'brand.foundation.note.visuell',
+      'brand.foundation.note.ki-texte',
+      // Die Spaltenköpfe der Tabellen — je nach gespeicherter Form erzeugt die
+      // Regel nur einen Teil davon, gebraucht werden sie alle.
+      'brand.foundation.column.name',
+      'brand.foundation.column.note',
+      'brand.foundation.column.rank',
+      'brand.foundation.column.check',
+      'brand.foundation.column.criteria',
+    ]
+    expect(fixed.filter(key => missingIn(key).length)).toEqual([])
   })
 })

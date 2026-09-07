@@ -65,8 +65,19 @@ export type BrandFoundationVisualElement = (typeof BRAND_FOUNDATION_VISUAL_ELEME
 export type BrandFoundationBlock =
   /** EIN Leitsatz, gross gesetzt (Pitch, Purpose, Tagline, Zeile für die Wand). */
   | { kind: 'lead', text: string, labelKey?: string }
-  /** Fliesstext mit optionaler Beschriftung. */
-  | { kind: 'text', text: string, labelKey?: string }
+  /**
+   * Fliesstext mit optionaler Beschriftung.
+   *
+   * `markdown` steht NUR an einem Wert, dessen Slot in der Registry
+   * `kind: 'richtext'` trägt — heute genau `e.manifesto` (Paket G2). Die
+   * Oberfläche schickt einen so markierten Absatz durch den Subset-Parser aus
+   * `core/shared/markdown.ts` (vnode-Ausgabe, kein `v-html`, sichere Ziele),
+   * jeden anderen als wörtlichen Text. Das Flag ist die einzige Stelle, an der
+   * die Herkunft eines Absatzes noch ablesbar ist: nach dem Bauen sind alle
+   * Blöcke gleich, und ein Renderer, der ALLES als Markdown läse, machte aus
+   * dem Sternchen in einer Tagline eine Kursivierung.
+   */
+  | { kind: 'text', text: string, labelKey?: string, markdown?: true }
   /** Aufzählung. */
   | { kind: 'list', labelKey?: string, items: string[] }
   /** Karten: Zielgruppen-Segmente, Werte, Boilerplates, Kernbotschaften. */
@@ -144,6 +155,65 @@ export interface BrandFoundationChapter {
 
 export interface BrandFoundationView {
   readonly chapters: readonly BrandFoundationChapter[]
+}
+
+/**
+ * WELCHES KAPITEL DER WERKSTATT FÜLLT WELCHES KAPITEL DES HANDBUCHS (G2).
+ *
+ * Die private Ansicht darf sagen „noch nicht abgenommen" (§2.6) — dafür muss
+ * sie ein Handbuch-Kapitel auf die Kapitel zurückrechnen, in denen abgenommen
+ * WIRD. Der Renderer selbst kann das nicht: er kennt die Abnahme nicht (s.
+ * `state` oben), und nach dem Bauen steht an keinem Block mehr, aus welcher
+ * Session er kam.
+ *
+ * GEPFLEGT, nicht gerechnet: eine Ableitung aus den Slot-Ids im Renderer wäre
+ * eine zweite Wahrheit, die bei jedem neuen Block still veraltet. Der Test
+ * nagelt dafür fest, dass JEDE Kapitel-Id einen Eintrag hat und jeder Eintrag
+ * ein echtes Kapitel nennt.
+ *
+ * ZWEI LEERE EINTRÄGE, beide mit Grund: `story` hängt am Profil (Georges
+ * Synthese, sie wird nicht abgenommen), und `visuell` ist die Schranke — sie
+ * kann nicht offen sein, weil es dort nichts zu bestätigen gibt.
+ */
+export const BRAND_FOUNDATION_SOURCE_STEPS: Readonly<
+  Record<BrandFoundationChapterId, readonly BrandStepKey[]>
+> = {
+  story: [],
+  kontext: ['context'],
+  purpose: ['pvm'],
+  positionierung: ['pvm'],
+  architektur: ['architecture'],
+  werte: ['values'],
+  // Ton-Wörter und Stimmproben stehen in `archetype`, der Wort-Leitfaden
+  // (`ep.vocabulary`, die Do-Seite) in `verbal`.
+  stimme: ['archetype', 'verbal'],
+  manifest: ['manifesto'],
+  messaging: ['verbal'],
+  name: ['naming'],
+  visuell: [],
+  // Der KI-Rahmen ist eine Zusammenfassung dreier Kapitel — solange eines
+  // davon offen ist, kann sich sein Inhalt noch ändern.
+  'ki-texte': ['values', 'archetype', 'verbal'],
+}
+
+/**
+ * DAS ERSTE QUELL-KAPITEL, DAS NOCH NICHT ABGENOMMEN IST — `null`, wenn alle
+ * stehen. Es ist zugleich das Sprungziel des Vermerks „Zur Abnahme" (§2.6).
+ *
+ * Übergeben werden die Kapitel DIESES Brandings; ein Quell-Kapitel, das nicht
+ * darin vorkommt, liegt nicht auf dem Weg (übersprungenes Naming) und zählt
+ * deshalb NICHT als offen — seine Werte fehlen dem Renderer ohnehin, das
+ * Handbuch-Kapitel entfällt dann ganz.
+ */
+export function brandFoundationPendingStep(
+  chapterId: BrandFoundationChapterId,
+  steps: readonly { readonly stepKey: BrandStepKey, readonly accepted: boolean }[],
+): BrandStepKey | null {
+  for (const stepKey of BRAND_FOUNDATION_SOURCE_STEPS[chapterId]) {
+    const step = steps.find(candidate => candidate.stepKey === stepKey)
+    if (step && !step.accepted) return stepKey
+  }
+  return null
 }
 
 /**
@@ -544,7 +614,9 @@ function manifestoBlocks(values: Map<string, string>): BrandFoundationBlock[] {
     .split(/\n{2,}/)
     .map(part => part.trim())
     .filter(part => part.length > 0)
-    .map((text): BrandFoundationBlock => ({ kind: 'text', text }))
+    // `e.manifesto` ist der EINZIGE `richtext`-Slot der Registry (s. Flag am
+    // `text`-Block) — nur seine Absätze reisen als Markdown.
+    .map((text): BrandFoundationBlock => ({ kind: 'text', text, markdown: true }))
   blocks.push(...leadBlock(textOf(values, 'e.anchorLine'), `${LABEL}.anchorLine`))
   blocks.push(...textBlock(textOf(values, 'e.composition'), `${LABEL}.composition`))
   return blocks

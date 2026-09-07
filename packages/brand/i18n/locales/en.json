@@ -175,7 +175,8 @@
       "chapterCount": "{confirmed} of {total} confirmed",
       "chapterCountStale": "{confirmed} of {total} confirmed · {stale} to revisit",
       "chapterEffort": "{count} sessions, ~{minutes} min",
-      "document": "Your branding"
+      "document": "Your branding",
+      "foundation": "Brand Foundation"
     },
     "legal": {
       "imprint": "Imprint",
@@ -1634,7 +1635,132 @@
       "reviewResult": "{caughtUp} sessions caught up, {findings} findings.",
       "stillUnreviewed": "{count} session is still waiting — the next look will catch it up. | {count} sessions are still waiting — the next look will catch them up.",
       "noFindings": "Nothing found that rubs.",
-      "reviewFailed": "The look did not come through just now. Your document stands either way — try again later."
+      "reviewFailed": "The look did not come through just now. Your document stands either way — try again later.",
+      "readFoundation": "Read as foundation"
+    },
+    "foundation": {
+      "title": "Brand Foundation",
+      "toc": "Contents",
+      "counter": "{accepted} of {total} chapters signed off",
+      "contentLocale": "Content language {locale}",
+      "standProgress": "Chapters",
+      "loadFailed": "The brand foundation could not be loaded.",
+      "empty": "Nothing here yet. This handbook fills up as soon as you confirm your first fields.",
+      "showToc": "Show contents",
+      "hideToc": "Hide contents",
+      "chapterNumber": "Chapter {num}",
+      "pending": "not signed off yet",
+      "pendingNote": "This chapter is not settled yet.",
+      "toAcceptance": "Go to sign-off",
+      "onePage": {
+        "title": "On one page",
+        "values": "Values",
+        "archetype": "Archetype",
+        "tagline": "Tagline",
+        "wallLine": "Line for the wall"
+      },
+      "export": {
+        "label": "Export",
+        "print": "Print / PDF",
+        "printSub": "Browser print with print layout",
+        "context": "brand.md · brand.json",
+        "contextSub": "Brand context for AI agents",
+        "tokens": "Design tokens",
+        "tokensSub": "CSS, Tailwind, JSON",
+        "assets": "Assets.zip",
+        "assetsSub": "Logos, templates, press kit",
+        "kit": "Brand Book & Kit"
+      },
+      "ai": {
+        "tone": "Write in this tone:",
+        "avoid": "Avoid:",
+        "stands": "Stands for:",
+        "hint": "Copy this into ChatGPT, Claude or your editorial system."
+      },
+      "note": {
+        "visuell": "Part of the foundation, but it takes shape in Brand Design — derived from everything above.",
+        "ki-texte": "A fixed frame filled with your own values — nothing invented, as current as the chapters above."
+      },
+      "visual": {
+        "follows": "follows in Brand Design",
+        "shareLine": "Visual identity: follows in Brand Design.",
+        "product": "Brand Design",
+        "ctaDesign": "Decide in Brand Design",
+        "ctaCall": "Book an intro call",
+        "logo": {
+          "title": "Logo",
+          "text": "Word or picture mark including clear space and minimum size — derived from archetype and recognition anchor."
+        },
+        "color": {
+          "title": "Colour world",
+          "text": "One base colour with two to four companions, contrast-checked — derived from archetype and positioning."
+        },
+        "typography": {
+          "title": "Typography",
+          "text": "A type pair for headings and body plus a mono for origin and prices — derived from your tone words."
+        },
+        "imagery": {
+          "title": "Imagery",
+          "text": "What may go into a photo and what never does — derived from values and audiences."
+        },
+        "motion": {
+          "title": "Motion",
+          "text": "Pace and calm of movement — derived from your tone words."
+        }
+      },
+      "chapter": {
+        "story": "Brand story",
+        "kontext": "Context & audience",
+        "purpose": "Purpose, vision, mission",
+        "positionierung": "Positioning",
+        "architektur": "Brand architecture",
+        "werte": "Values",
+        "stimme": "Personality & voice",
+        "manifest": "Manifesto",
+        "messaging": "Tagline & messaging",
+        "name": "Name",
+        "visuell": "Visual identity",
+        "ki-texte": "Rules for AI copy"
+      },
+      "label": {
+        "pitch": "In one sentence",
+        "category": "Category",
+        "audience": "Audiences",
+        "purpose": "Purpose",
+        "vision": "Vision",
+        "mission": "Mission",
+        "positioningCategory": "Positioning category",
+        "firstChoice": "First choice for",
+        "model": "Architecture model",
+        "namingRule": "Naming rule",
+        "values": "Your values",
+        "definitions": "Definitions",
+        "livedExamples": "Lived examples",
+        "conflictRule": "Conflict rule",
+        "teamFilter": "Hiring filter",
+        "archetype": "Archetype",
+        "emotion": "Target feeling",
+        "toneWords": "Tone words",
+        "voiceSamples": "Voice samples",
+        "doDont": "Do & don't",
+        "vocabulary": "Word guide",
+        "anchorLine": "Line for the wall",
+        "composition": "Tone, length & use",
+        "tagline": "Tagline",
+        "boilerplates": "Boilerplates",
+        "keyMessages": "Key messages",
+        "distinctiveAsset": "Verbal signature",
+        "nameDecision": "Top three",
+        "nameChecks": "Availability check",
+        "nameCriteria": "Eight criteria"
+      },
+      "column": {
+        "name": "Name",
+        "note": "Note",
+        "rank": "Rank",
+        "check": "Check",
+        "criteria": "Criterion"
+      }
     },
     "session": {
       "minutes": "~{minutes} min",
