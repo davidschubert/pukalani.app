@@ -191,6 +191,7 @@ const postHandler = (await import('../server/api/brand/check.post'))
   .default as unknown as (event: H3Event) => Promise<BrandCheckStartResponse>
 const getHandler = (await import('../server/api/brand/check/[id].get'))
   .default as unknown as (event: H3Event) => Promise<BrandCheckResult>
+const { runBrandCheck } = await import('../server/utils/brandCheckRun')
 
 const event = { context: {} } as unknown as H3Event
 
@@ -734,6 +735,117 @@ describe('GET /api/brand/check/<id> · Vorgänger und Ranking-Platz', () => {
     expect(result.id).toBe('a')
     expect(result.previous).toBeNull()
     expect(result.rank).toBeNull()
+  })
+})
+
+/**
+ * DIE MECHANIK OHNE ROUTE (BC1) — `runBrandCheck` direkt gerufen, mit
+ * denselben Attrappen.
+ *
+ * Sie hat seit BC1 einen ZWEITEN Aufrufer (der Lauf des Marktvergleichs über
+ * `packages/market/server/contracts/brandContract.ts`), und der schickt weder
+ * einen Rumpf noch eine Session mit einem Häkchen. Vier Aussagen hängen
+ * deshalb an der Funktion und nicht mehr am Handler:
+ *
+ *  1. Ein Zwischenspeicher-Treffer bucht auch hier NICHTS — was nichts kostet,
+ *     kostet kein Kontingent, egal wer ruft.
+ *  2. `quota: 'account'` bucht den KONTO-Eimer, OHNE den Zwischenspeicher zu
+ *     umgehen. Das ist der ganze Grund, warum es den dritten Eingang gibt.
+ *  3. Ohne Konto fällt `'account'` auf den Anschluss-Eimer zurück.
+ *  4. Ein Anbieter-Fehler speichert NICHTS — sonst läge ein halber Check
+ *     sieben Tage als „Ergebnis" im Zwischenspeicher.
+ */
+describe('runBrandCheck · die Mechanik ohne Route', () => {
+  it('Zwischenspeicher-Treffer: keine Zeile, keine Buchung', async () => {
+    stored = [{ $id: 'c9', $createdAt: new Date(Date.now() - 60_000).toISOString(), urlKey: 'kailua.coffee', score: 71 }]
+
+    const result = await runBrandCheck(event, {
+      url: 'https://kailua.coffee/',
+      locale: 'de',
+      userId: 'u-1',
+      quota: 'account',
+    })
+
+    expect(result).toEqual({ id: 'c9', cached: true })
+    expect(tablesDB.createRow).not.toHaveBeenCalled()
+    expect(buckets.size).toBe(0)
+  })
+
+  it('`quota: account` bucht den Konto-Eimer, ohne den Zwischenspeicher zu umgehen', async () => {
+    const result = await runBrandCheck(event, {
+      url: 'https://kailua.coffee/',
+      locale: 'de',
+      userId: 'u-7',
+      quota: 'account',
+    })
+
+    expect(result.cached).toBe(false)
+    expect(buckets.has('rl:brand-check-account-day:u-7')).toBe(true)
+    expect([...buckets.keys()].some(key => key.startsWith('rl:brand-check-ip-day:'))).toBe(false)
+    expect(buckets.get('rl:brand-check-instance-day')).toBe(1)
+  })
+
+  it('`quota: account` OHNE Konto zahlt vom Anschluss — nicht aus einem Gäste-Eimer', async () => {
+    await runBrandCheck(event, {
+      url: 'https://kailua.coffee/',
+      locale: 'de',
+      userId: '',
+      quota: 'account',
+    })
+
+    expect([...buckets.keys()].some(key => key.startsWith('rl:brand-check-ip-day:'))).toBe(true)
+    expect([...buckets.keys()].some(key => key.startsWith('rl:brand-check-account-day'))).toBe(false)
+  })
+
+  it('der elfte Aufruf eines Kontos ist ein 429 — mit Sekunden im Fehler statt im Kopf', async () => {
+    for (let i = 1; i <= 10; i++) {
+      await runBrandCheck(event, { url: `https://k-${i}.coffee/`, locale: 'de', userId: 'u-2', quota: 'account' })
+    }
+
+    // Die Sekunden reisen als `data.retryAfterSec` mit: den `Retry-After`-Kopf
+    // setzt die Route, weil ein Dienst nicht in eine fremde Antwort schreibt.
+    await expect(runBrandCheck(event, {
+      url: 'https://k-11.coffee/',
+      locale: 'de',
+      userId: 'u-2',
+      quota: 'account',
+    })).rejects.toMatchObject({
+      status: 429,
+      data: { code: 'brand_check_account_limit', retryAfterSec: expect.any(Number) },
+    })
+  })
+
+  it('Anbieter kaputt ⇒ 503 und KEINE Zeile', async () => {
+    judgeBroken = true
+
+    await expect(runBrandCheck(event, {
+      url: 'https://kailua.coffee/',
+      locale: 'de',
+      userId: 'u-1',
+      quota: 'account',
+    })).rejects.toMatchObject({ status: 503, data: { code: 'check_unavailable' } })
+    expect(tablesDB.createRow).not.toHaveBeenCalled()
+    expect(stored).toHaveLength(0)
+  })
+
+  it('ein angestossener Check gehört niemandem: kein Häkchen, keine Brand', async () => {
+    // Der Marktvergleich prüft FREMDE Auftritte. Ein `rankingOptIn: true` von
+    // hier machte uns zum Anmelder einer Marke, die uns nicht gehört (§8.1).
+    await runBrandCheck(event, {
+      url: 'https://kailua.coffee/',
+      locale: 'en',
+      userId: 'u-3',
+      quota: 'account',
+    })
+
+    expect(lastWrite()).toMatchObject({
+      rankingOptIn: false,
+      profileId: '',
+      hidden: false,
+      source: 'website',
+      locale: 'en',
+      userId: 'u-3',
+    })
   })
 })
 

@@ -29,14 +29,17 @@ import { buildMarketReport, marketRevisionKey } from './marketReport'
 import { bookMarketReport } from './marketQuota'
 import type { MarketOwnProfile } from './marketOwnProfile'
 import { loadMarketOwnProfile, marketOwnSlotId } from './marketOwnProfile'
-import { loadMarketBrandChecks } from './marketBrandCheck'
+import {
+  loadMarketBrandChecks,
+  marketBrandCheckIds,
+  stampMarketBrandCheckIds,
+} from './marketBrandCheck'
 import {
   createMarketReport,
   findMarketReport,
   listMarketCompetitors,
   listMarketProfiles,
   listMarketReports,
-  updateMarketCompetitor,
 } from './marketStore'
 import { latestProfilesByCompetitor, toMarketAiView, toMarketCompetitor } from './marketViews'
 
@@ -379,27 +382,22 @@ export async function writeMarketFindings(
  * DEN ABRUFSTAND EINES KANDIDATEN UM DIE CHECK-ID ERGÄNZEN
  * (`market_competitors.brandCheckId`, Anhang B).
  *
- * FAIL-SOFT: eine Zeile, die sich nicht schreiben lässt, kostet den LINK, nie
- * den Bericht. Geschrieben wird nur, was sich geändert hat — ein Bericht auf
- * unverändertem Stand soll keine Schreibvorgänge auslösen.
+ * Die REGEL (fail-soft, nur schreiben was sich geändert hat) liegt seit BC1 in
+ * `marketBrandCheck.ts` — der Lauf stempelt jetzt auch, und zwei Fassungen
+ * derselben Regel wären beim ersten Ändern zwei verschiedene Regeln. Hier
+ * bleibt nur die Übersetzung „Bericht-Stand ⇒ Id-Karte".
  */
-export async function stampMarketBrandCheckIds(
+export async function stampMarketBrandCheckIdsOfState(
   event: H3Event,
   profileId: string,
   state: MarketReportState,
 ): Promise<void> {
-  for (const row of state.competitorRows) {
-    const checkId = state.brandChecks.get(row.$id)?.checkId ?? ''
-    if ((row.brandCheckId ?? '') === checkId) continue
-    try {
-      await updateMarketCompetitor(event, profileId, row.$id, { brandCheckId: checkId })
-    }
-    catch (error) {
-      logEvent('warn', 'market.brand_check_stamp_failed', {
-        message: error instanceof Error ? error.message : String(error),
-      })
-    }
-  }
+  await stampMarketBrandCheckIds(
+    event,
+    profileId,
+    state.competitorRows,
+    marketBrandCheckIds(state.brandChecks),
+  )
 }
 
 // ── Der ganze Vorgang, einmal ─────────────────────────────────────────────
@@ -499,7 +497,7 @@ export async function produceMarketReport(
       model: report.model,
       promptVersion: report.promptVersion,
     })
-    await stampMarketBrandCheckIds(event, profileId, state)
+    await stampMarketBrandCheckIdsOfState(event, profileId, state)
   }
 
   logEvent('info', 'market.report', {

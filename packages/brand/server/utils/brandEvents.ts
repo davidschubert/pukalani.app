@@ -24,6 +24,20 @@ export type BrandEventType =
   | 'profile.created'
   | 'step.completed'
   | 'share.published'
+  /**
+   * DIE LESEANSICHT UND IHR GETEILTES GEGENSTÜCK (Brand-Foundation-Konzept
+   * §2.7/§2.10, Paket G3). Sie beantworten die Frage der Startseite — „arbeitet
+   * jemand am nächsten Tag mit dem Ergebnis?" — und die zweite dahinter: gibt
+   * es den zweiten Leser überhaupt?
+   *
+   * `share.viewed` trägt die `shareId`, NIE den Token (er ist das ganze
+   * Geheimnis; eine Zeile in einer Tabelle wäre eine Kopie davon an einer
+   * Stelle, die andere lesen dürfen) und NIE eine IP. Regel 1 im Kopf gilt
+   * unverändert: kein Inhalt, nur Kennzahlen.
+   */
+  | 'foundation.viewed'
+  | 'share.viewed'
+  | 'share.revoked'
   | 'invite.redeemed'
   // Der Generierungs-Trichter (§3e). `payload` trägt Slot-Id, Modell, Dauer und
   // Fehlercode — NIE Prompt und NIE den erzeugten Text (Regel 1 im Kopf).

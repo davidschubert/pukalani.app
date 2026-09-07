@@ -295,6 +295,22 @@ export interface MarketSourceOption {
   readonly hint?: string
   /** Nur bei Einträgen, die eine echte Adresse haben (eigene alte Website). */
   readonly url?: string
+  /**
+   * NUR BEI `library`: der Tag der Handprüfung (`YYYY-MM-DD`).
+   *
+   * Er ist der Grund, warum man einem Bibliotheks-Eintrag glauben darf — ein
+   * Mensch hat seine Zitate am Original gehalten (`marketLibrary.ts`). Die
+   * anderen beiden Quellen haben nichts dergleichen: eine eigene Marke ist
+   * BESCHLOSSEN, eine freigegebene gehört jemand anderem.
+   */
+  readonly verifiedAt?: string
+  /**
+   * NUR BEI `library`: die Prüfung ist älter als 90 Tage (Runbook Schritt 4).
+   *
+   * Gerechnet vom SERVER (`marketLibrarySourceOption`), nicht im Browser: an
+   * der Tagesgrenze kämen SSR und Client sonst zu zwei verschiedenen Antworten.
+   */
+  readonly stale?: boolean
 }
 
 /** Das Marktprofil EINES Wettbewerbers. */

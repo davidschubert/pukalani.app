@@ -49,6 +49,8 @@ dort eingetragen, nicht im Werkzeug.
 node packages/market/scripts/market-library-compute.mjs --check
 # eine einzelne Marke:
 node packages/market/scripts/market-library-compute.mjs --check --only the-barn
+# nur das Alter der ausgelieferten Einträge (keine Anfrage, Exit 1 bei Überfälligen):
+node packages/market/scripts/market-library-compute.mjs --stale
 ```
 
 Höchstens **drei Anfragen je Host** (`robots.txt`, `/.well-known/tdmrep.json`,
@@ -126,7 +128,10 @@ Für **jedes** Feld im Entwurf:
       sagt. Er bewertet nicht, und er vergleicht nicht.
 - [ ] **Zitat ≤ 200 Zeichen** und nicht der ganze Absatz (Zitatzweck, Anhang G b).
 - [ ] **Nichts älter als 90 Tage.** Ein `computed.at`, das älter ist, wird nicht
-      geprüft, sondern neu gerechnet.
+      geprüft, sondern neu gerechnet. Seit 2026-09-06 sagt das auch das Werkzeug:
+      `--check` druckt je ausgeliefertem Eintrag sein Alter und markiert die
+      überfälligen (Warnung, der Lauf bleibt grün), `--stale` listet nur sie und
+      endet mit Exit 1 — für einen späteren Cron.
 
 Für den **Eintrag**:
 

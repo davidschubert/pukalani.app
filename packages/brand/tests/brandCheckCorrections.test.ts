@@ -66,6 +66,39 @@ describe('decideBrandCheckMode', () => {
     expect(decideBrandCheckMode({ userId: 'u1', force: true }))
       .toEqual({ bypassCache: true, quota: 'account' })
   })
+
+  /**
+   * DER DRITTE EINGANG (BC1): „das Konto zahlt" OHNE „neu ermitteln".
+   *
+   * Der Marktvergleich stösst fehlende Checks fremder Adressen an und will sie
+   * aus dem Kontingent des Menschen bezahlen, der den Lauf ausgelöst hat — aber
+   * er will den Zwischenspeicher ausdrücklich GELTEN lassen. Vor BC1 hingen
+   * beide Dinge an `force` und liessen sich nicht trennen.
+   */
+  it('`quota: account` zahlt vom Konto, lässt den Zwischenspeicher aber gelten', () => {
+    expect(decideBrandCheckMode({ userId: 'u1', force: false, quota: 'account' }))
+      .toEqual({ bypassCache: false, quota: 'account' })
+  })
+
+  it('`quota: account` OHNE Konto fällt auf den Anschluss zurück', () => {
+    // Ein Konto-Eimer ohne Konto wäre `brand-check-account-day:` — ein Eimer,
+    // den sich alle Gäste der Welt teilen, also entweder ein Deckel für
+    // niemanden oder eine Sperre für alle.
+    expect(decideBrandCheckMode({ userId: '', force: false, quota: 'account' }))
+      .toEqual({ bypassCache: false, quota: 'ip' })
+  })
+
+  it('`quota: auto` ist das bisherige Verhalten — und der Default', () => {
+    expect(decideBrandCheckMode({ userId: 'u1', force: false, quota: 'auto' }))
+      .toEqual(decideBrandCheckMode({ userId: 'u1', force: false }))
+    expect(decideBrandCheckMode({ userId: 'u1', force: true, quota: 'auto' }))
+      .toEqual({ bypassCache: true, quota: 'account' })
+  })
+
+  it('force UND `quota: account` schliessen sich nicht aus', () => {
+    expect(decideBrandCheckMode({ userId: 'u1', force: true, quota: 'account' }))
+      .toEqual({ bypassCache: true, quota: 'account' })
+  })
 })
 
 describe('decideBrandCheckQuota · der Konto-Deckel', () => {

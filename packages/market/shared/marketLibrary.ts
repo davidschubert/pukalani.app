@@ -1,8 +1,9 @@
 import { z } from 'zod'
-import type { MarketFrequency, MarketProfileField } from './marketProfile'
+import type { MarketFrequency, MarketProfileField, MarketSourceOption } from './marketProfile'
 import { MARKET_EVIDENCE_MAX, MARKET_FIELD_IDS } from './marketProfile'
 import { MARKET_MAX_PAGES } from './marketCrawlRules'
 import { MARKET_LIBRARY_ENTRIES, MARKET_LIBRARY_VERSION } from './library'
+import { marketLibraryEntryIsStale } from './marketLibraryAge'
 
 /**
  * DIE KURATIERTE BIBLIOTHEK (Plan §7.2 Nr. 3) — die MECHANIK, nicht der
@@ -220,6 +221,56 @@ export function marketLibraryEntry(key: string): MarketLibraryEntry | undefined 
  */
 export function marketLibraryEntries(): readonly MarketLibraryEntry[] {
   return marketLibrary().entries
+}
+
+/**
+ * DIE 90-TAGE-REGEL (seit 2026-09-06) — hier ist ihre TÜR, ihr Zuhause ist
+ * `marketLibraryAge.ts`.
+ *
+ * Sie liegt in einer eigenen, IMPORTFREIEN Datei, weil
+ * `scripts/market-library-compute.mjs` sie direkt als `.ts` lädt und Nodes
+ * ESM-Auflösung die erweiterungslosen Pfade dieses Baums nicht kennt (die
+ * Begründung steht dort ausführlich). Alles im Nuxt-Baum importiert sie von
+ * HIER — eine zweite Adresse für dieselbe Regel wäre der Anfang zweier
+ * Antworten auf die Frage, ob ein Eintrag noch gilt.
+ */
+export {
+  MARKET_LIBRARY_MAX_AGE_DAYS,
+  marketLibraryEntryAge,
+  marketLibraryEntryIsStale,
+} from './marketLibraryAge'
+
+/** Die überfälligen Einträge der ausgelieferten Bibliothek — für den Wächter. */
+export function staleMarketLibraryEntries(
+  library: MarketLibrary,
+  now: Date,
+): readonly MarketLibraryEntry[] {
+  return library.entries.filter(entry => marketLibraryEntryIsStale(entry, now))
+}
+
+/**
+ * EIN EINTRAG ALS WÄHLBARE ZEILE DES QUELLEN-WÄHLERS (M4) — MIT Alter.
+ *
+ * Sie steht hier und nicht in der Route, aus zwei Gründen. Erstens ist sie
+ * PRÜFBAR, ohne einen Nitro-Kontext zu bauen; zweitens beantwortet sie die
+ * Frage „was zeigen wir von einer fremden Marke?" an EINER Stelle — Wortname,
+ * Kategorie, Adresse und seit heute das Prüfdatum. Kein Logo, keine Bildmarke
+ * (Anhang G a).
+ *
+ * `stale` WIRD HIER GERECHNET und nicht im Browser: SSR und Client stünden
+ * sonst an der Tagesgrenze auf zwei verschiedenen Antworten, und der Kunde
+ * bekäme einen Hydration-Fehler für eine Frage, die der Server längst
+ * beantwortet hat. Der Client formatiert nur noch das Datum.
+ */
+export function marketLibrarySourceOption(entry: MarketLibraryEntry, now: Date): MarketSourceOption {
+  return {
+    id: entry.key,
+    label: entry.name,
+    ...(entry.category ? { hint: entry.category } : {}),
+    url: entry.homepage,
+    verifiedAt: entry.verifiedAt,
+    ...(marketLibraryEntryIsStale(entry, now) ? { stale: true } : {}),
+  }
 }
 
 /**

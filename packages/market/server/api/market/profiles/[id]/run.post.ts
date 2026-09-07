@@ -17,6 +17,7 @@ import { extractMarketProfile, marketInputHash } from '../../../../utils/marketE
 import { collectMarketAiView } from '../../../../utils/marketAiView'
 import { latestProfilesByCompetitor } from '../../../../utils/marketViews'
 import { loadMarketFoundationCandidate, loadMarketSharedCandidate } from '../../../../utils/marketOwnProfile'
+import { triggerMarketBrandChecks } from '../../../../utils/marketBrandCheck'
 import { marketLibraryEntry, marketLibraryFields } from '../../../../../shared/marketLibrary'
 import { loadMarketReportState, produceMarketReport } from '../../../../utils/marketReportService'
 import type { MarketCompetitorRow } from '../../../../../shared/types/market'
@@ -129,6 +130,41 @@ export default defineEventHandler(async (event): Promise<MarketRunResponse> => {
     failed: steps.filter(step => step.status === 'failed').length,
     aiEnabled,
   })
+
+  // ── Fehlende Brand-Checks anstossen (§7.3, BC1) ──────────────────────────
+  //
+  // NACH der Schleife, weil erst hier feststeht, welche Kandidaten überhaupt
+  // eine erreichbare Adresse haben — und VOR dem Bericht, damit der Stand, den
+  // `loadMarketReportState` gleich liest, die frischen Scores schon trägt.
+  //
+  // ANGESTOSSEN WIRD NUR, WAS WIR LESEN DURFTEN (`eligible`). Ein Kandidat,
+  // dessen `robots.txt` uns ausgeschlossen hat, bekommt keinen Check über die
+  // Hintertür — sonst hiesse „ausgeschlossen, weil die Website die Auswertung
+  // untersagt" (§2.3) nur noch „ausgeschlossen aus der Tabelle". Ein
+  // unerreichbarer bekommt auch keinen: sein Check liefe in denselben Fehler
+  // und kostete dafür ein Kontingent.
+  //
+  // FAIL-SOFT im GANZEN, nicht nur je Kandidat: der Score ist eine ZUGABE am
+  // Kandidaten (der Bericht rechnet nicht damit). Ein Anstoss, der scheitert,
+  // darf einen gelungenen Abruf nicht in eine Fehlermeldung verwandeln —
+  // dieselbe Regel wie beim Bericht ein paar Zeilen weiter unten. Deckel,
+  // Budget und die Log-Zeilen sitzen in `triggerMarketBrandChecks`.
+  try {
+    await triggerMarketBrandChecks(event, {
+      profileId,
+      userId,
+      locale: profile.contentLocale,
+      competitors,
+      eligible: new Set(
+        steps.filter(step => step.status === 'fetched').map(step => step.competitorId),
+      ),
+    })
+  }
+  catch (error) {
+    logEvent('warn', 'market.brand_checks_failed', {
+      message: error instanceof Error ? error.message : String(error),
+    })
+  }
 
   // ── Der Vergleich, nur auf Ansage (s. Kopf) ──────────────────────────────
   let report: MarketRunResponse['report'] = null

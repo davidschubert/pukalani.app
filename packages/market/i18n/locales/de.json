@@ -40,8 +40,12 @@
       "libraryPlaceholder": "Bekannte Marke wählen",
       "sharedPlaceholder": "Freigegebene Marke wählen",
       "foundationHint": "Aus euren bestätigten Feldern. Kein Abruf, kein Zitat — diese Sätze sind beschlossen, nicht abgelesen.",
-      "libraryHint": "Marktprofil folgt in M6 — von uns gerechnet und geprüft. Bis dahin steht hier nur der Name: ein erfundenes Zitat unter einem echten Markennamen gibt es bei uns nie.",
+      "libraryHint": "Marktprofil aus unserer Bibliothek — von uns gerechnet und von Hand gegen die Quelle geprüft. Ein erfundenes Zitat unter einem echten Markennamen gibt es bei uns nie.",
       "sharedHint": "Nur mit Zustimmung der Eigentümerin sichtbar, und nur die zehn Außen-Felder. Nichts aus ihrer Werkstatt."
+    },
+    "library": {
+      "verifiedAt": "Handgeprüft am {date}",
+      "stale": "Stand älter als 90 Tage"
     },
     "score": {
       "link": "Zum Brand-Check",

@@ -7,12 +7,20 @@
  * herauskommt, heisst deshalb ENTWURF, trägt `status: 'draft'` und fällt
  * durch das Bibliotheks-Schema.
  *
- * ── DIE VIER MODI ─────────────────────────────────────────────────────────
+ * ── DIE FÜNF MODI ─────────────────────────────────────────────────────────
  *
  *   --check                 Trockenlauf: DÜRFEN wir diese Marke überhaupt
  *                           auswerten? Höchstens DREI Anfragen je Host, keine
  *                           Unterseite, kein gespeicherter Rohtext. Ergebnis:
  *                           Tabelle + `shared/library/feasibility.<datum>.json`.
+ *                           Dazu das ALTER der ausgelieferten Einträge (90
+ *                           Tage, s. unten) — als Warnung, nicht als Tor.
+ *   --stale [--now TT]      NUR die überfälligen Einträge, und ein Exit-Code:
+ *                           1, wenn welche da sind, sonst 0. Für einen Cron
+ *                           oder einen Wächter-Lauf, der nicht mitlesen kann.
+ *                           `--now JJJJ-MM-TT` verschiebt den Stichtag — so
+ *                           lässt sich die Warnung vorführen, solange nichts
+ *                           überfällig ist.
  *   --compute --stub        Voller Lauf über die ECHTE Pipeline, aber gegen
  *                           die erfundenen Demo-Websites des Playgrounds und
  *                           mit `MARKET_DEV_STUB=1`. Beweist, dass das
@@ -42,6 +50,22 @@
  * für einen Handgriff, den es eine Handvoll Mal gibt; der Sweep-Knopf aus M5
  * hat seinen Platz, weil ihn der BETRIEB braucht, nicht die Redaktion.
  *
+ * ── DIE 90-TAGE-REGEL, UND WARUM SIE `--check` NICHT ROT MACHT ────────────
+ * Das Runbook sagt seit jeher „Nichts älter als 90 Tage" (Schritt 4). Seit
+ * 2026-09-06 steht die Regel als pure Funktion im Code
+ * (`shared/marketLibraryAge.ts`), und dieses Werkzeug zeigt sie an: `--check`
+ * druckt je ausgeliefertem Eintrag sein Alter und markiert die überfälligen.
+ *
+ * ÜBERFÄLLIGE MACHEN `--check` TROTZDEM NICHT ROT (Exit 0). `--check` ist der
+ * Trockenlauf VOR einer Handprüfung — er läuft, wenn ein Mensch ohnehin am
+ * Terminal sitzt und liest. Ein Tor an dieser Stelle bestrafte den, der gerade
+ * arbeitet, für einen Eintrag, mit dem er nichts zu tun hat, und stünde
+ * ausserdem zwischen ihm und der Antwort, die er gesucht hat („darf ich diese
+ * neue Marke auswerten?"). Die WARNUNG ist hier der Wächter.
+ *
+ * Wer ein Tor braucht — eine geplante Aufgabe, eine CI-Stufe —, nimmt
+ * `--stale`: derselbe Befund, aber als Exit-Code, weil niemand mitliest.
+ *
  * ── WAS DAS WERKZEUG NIE TUT ──────────────────────────────────────────────
  *  · Es setzt `status: 'verified'`, `verifiedAt` oder `verifiedBy` NICHT.
  *    Ein Werkzeug, das sein eigenes Prüfsiegel vergibt, prüft nichts.
@@ -61,7 +85,7 @@
  *   BRANDING_PORT=3016 node --env-file=apps/branding/.env \
  *     packages/market/scripts/market-library-compute.mjs --compute --stub
  *
- * `--check` und `--promote` brauchen weder Server noch Appwrite.
+ * `--check`, `--stale` und `--promote` brauchen weder Server noch Appwrite.
  */
 import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises'
 import { createServer, request } from 'node:http'
@@ -70,10 +94,15 @@ import { fileURLToPath } from 'node:url'
 import { spawnSync } from 'node:child_process'
 
 // DIE REGELN KOMMEN AUS DEM PRODUKT, NICHT AUS DIESER DATEI.
-// Node 22 entfernt TypeScript-Typen beim Laden; die drei Module sind pur und
-// importfrei, also laufen sie hier unverändert. Eine JS-Kopie des
-// robots-Parsers wäre eine zweite Wahrheit über eine Frage, an der hängt, ob
-// wir einen fremden Server anfassen dürfen.
+// Node 22 entfernt TypeScript-Typen beim Laden; die Module hier sind pur und
+// IMPORTFREI, also laufen sie unverändert — Nodes ESM-Auflösung kennt die
+// erweiterungslosen Pfade des Nuxt-Baums nicht, ein Modul mit eigenen Importen
+// wäre von hier aus unerreichbar. Genau darum liegt die 90-Tage-Regel in
+// `shared/marketLibraryAge.ts` und nicht in `marketLibrary.ts` (das zod zieht);
+// die App importiert sie trotzdem von dort, denn `marketLibrary.ts` reicht sie
+// weiter. Eine JS-Kopie des robots-Parsers oder der Alters-Rechnung wäre je
+// eine zweite Wahrheit über eine Frage, an der etwas hängt — ob wir einen
+// fremden Server anfassen dürfen, und ob ein Eintrag noch gilt.
 import { MARKET_ROBOTS_ABSENT, marketRobotsAllows, parseMarketRobots } from '../shared/marketRobots.ts'
 import {
   MARKET_MAX_CHARS_PER_PAGE,
@@ -83,6 +112,12 @@ import {
 } from '../shared/marketCrawlRules.ts'
 import { extractMetaDirectives, sitemapUrlsFromRobots } from '../../brand/shared/brandSiteCrawlParse.ts'
 import { MARKET_COMPETITORS_MAX } from '../shared/marketProfile.ts'
+import {
+  MARKET_LIBRARY_MAX_AGE_DAYS,
+  marketLibraryEntryAge,
+  marketLibraryEntryIsStale,
+} from '../shared/marketLibraryAge.ts'
+import { MARKET_LIBRARY_ENTRIES, MARKET_LIBRARY_VERSION } from '../shared/library/index.ts'
 
 const HERE = dirname(fileURLToPath(import.meta.url))
 const LIBRARY_DIR = resolve(HERE, '../shared/library')
@@ -351,6 +386,10 @@ async function runCheck() {
     console.log('Die übrigen bleiben draussen — das ist das Produkt, nicht ein Fehler des Werkzeugs.')
   }
 
+  // Die 90-Tage-Regel — WARNUNG, nicht Tor: `--check` bleibt grün, auch wenn
+  // ein Eintrag überfällig ist (Begründung im Kopf dieser Datei).
+  printLibraryAges(stichtag())
+
   const file = join(LIBRARY_DIR, `feasibility.${today()}.json`)
   await writeFile(file, `${JSON.stringify({
     checkedAt: new Date().toISOString(),
@@ -361,6 +400,115 @@ async function runCheck() {
   }, null, 2)}\n`, 'utf8')
   console.log(`\nBericht: ${file}`)
   return rows
+}
+
+// ── Der Wächter der 90-Tage-Regel ───────────────────────────────────────────
+
+/**
+ * DAS ALTER DER AUSGELIEFERTEN EINTRÄGE.
+ *
+ * Gelesen wird die ROHE Liste (`MARKET_LIBRARY_ENTRIES`), nicht die
+ * schema-geprüfte `marketLibrary()`. Zwei Gründe: die geprüfte Fassung ist
+ * fail-closed und wäre bei einer kaputten Datei LEER — ausgerechnet der
+ * Wächter schwiege dann —, und sie hängt an zod, das dieses Werkzeug nicht
+ * laden kann (Kopf von `shared/marketLibraryAge.ts`). Ein Eintrag ohne
+ * lesbares Prüfdatum gilt hier als überfällig, genau wie in der Regel.
+ *
+ * `--only` wirkt hier ABSICHTLICH nicht: die Auswahl gehört zur Frage „welche
+ * Marke prüfe ich gerade?", das Alter der Bibliothek ist eine Frage an die
+ * Bibliothek als Ganzes.
+ */
+function libraryAges(now) {
+  return MARKET_LIBRARY_ENTRIES.map((entry) => {
+    const age = marketLibraryEntryAge(entry, now)
+    return {
+      key: String(entry.key ?? '(ohne Schlüssel)'),
+      name: String(entry.name ?? ''),
+      verifiedAt: String(entry.verifiedAt ?? ''),
+      age,
+      stale: marketLibraryEntryIsStale(entry, now),
+    }
+  })
+}
+
+/**
+ * DER STICHTAG — normalerweise jetzt, mit `--now 2027-01-01` ein anderer.
+ *
+ * Nicht Kosmetik, sondern die einzige Art, die WARNUNG selbst vorzuführen:
+ * heute ist nichts überfällig, und ein Wächter, den man nie hat rot werden
+ * sehen, ist ein Wächter auf Zuruf. Die Regel nimmt `now` ohnehin als
+ * Parameter (`shared/marketLibraryAge.ts`); hier steht nur, wer ihn füllt.
+ */
+function stichtag() {
+  const raw = valueOf('--now')
+  if (!raw) return new Date()
+  const parsed = new Date(`${raw}T00:00:00.000Z`)
+  if (Number.isNaN(parsed.getTime())) fail(`--now ist kein Datum (${raw}) — erwartet JJJJ-MM-TT`)
+  return parsed
+}
+
+/**
+ * „vor 112 Tagen" / „heute" / „ohne lesbares Prüfdatum".
+ *
+ * GEZÄHLT WIRD IN UTC-TAGEN — anders als der Dateiname des Trockenlaufs
+ * (`today()`, bewusst Ortsdatum). Ein Eintrag von „heute" kann hier deshalb am
+ * späten Abend einer westlichen Zeitzone schon „vor 1 Tag" heissen. Das ist
+ * gewollt: die Regel gilt gleich für Werkzeug, Route und Oberfläche, und dort
+ * MUSS sie UTC sein (SSR und Browser stünden sonst an der Tagesgrenze auf zwei
+ * Antworten). Bei einer Frist von 90 Tagen kostet der eine Tag nichts.
+ */
+function ageText(row) {
+  if (row.age === null) return 'ohne lesbares Prüfdatum'
+  if (row.age === 0) return 'heute geprüft'
+  if (row.age < 0) return `Prüfdatum ${Math.abs(row.age)} Tag(e) in der ZUKUNFT`
+  return `geprüft vor ${row.age} Tag(en)`
+}
+
+/**
+ * DIE ANZEIGE FÜR `--check` — eine WARNUNG, kein Tor (Begründung im Kopf).
+ * Gibt die überfälligen Zeilen zurück, damit `--stale` dieselbe Rechnung
+ * benutzt und nicht eine zweite daneben.
+ */
+function printLibraryAges(now, { onlyStale = false } = {}) {
+  const rows = libraryAges(now)
+  console.log(`\nALTER DER BIBLIOTHEK (${MARKET_LIBRARY_VERSION}) · Regel: nichts älter als ${MARKET_LIBRARY_MAX_AGE_DAYS} Tage`)
+  if (!rows.length) {
+    console.log('  (keine Einträge)')
+    return []
+  }
+  if (!onlyStale) {
+    for (const row of rows) {
+      const mark = row.stale ? '⚠' : '·'
+      console.log(`  ${mark} ${pad(row.key, 24)} ${pad(row.verifiedAt || '—', 12)} ${ageText(row)}`)
+    }
+  }
+  const stale = rows.filter(row => row.stale)
+  if (stale.length) {
+    console.log(`\n${stale.length} Eintrag/Einträge sind überfällig — neu rechnen und von Hand prüfen:`)
+    for (const row of stale) {
+      console.log(`  ⚠ ${row.key}: ${ageText(row)} — neu rechnen: --compute --only ${row.key}`)
+    }
+    console.log('  (Steht der Schlüssel nicht in candidates.json, gehört er zuerst dorthin.)')
+    console.log('  Danach: Handprüfung (Runbook Schritt 4), --promote, Fassung steigt.')
+  }
+  else {
+    console.log(`\nNichts überfällig (${rows.length} Eintrag/Einträge geprüft).`)
+  }
+  return stale
+}
+
+/**
+ * MODUS `--stale`: derselbe Befund, aber als EXIT-CODE.
+ *
+ * Für eine geplante Aufgabe oder eine CI-Stufe, die keinen Menschen am
+ * Terminal hat. Es gibt dafür heute noch keinen Zeitplan — den Wächter
+ * einzurichten ist ein eigener Handgriff (docs/OPEN-ITEMS.md); dieses Werkzeug
+ * ist die Stelle, an der er andocken kann, ohne dass jemand die Rechnung ein
+ * zweites Mal schreibt.
+ */
+function runStale() {
+  const stale = printLibraryAges(stichtag(), { onlyStale: true })
+  if (stale.length) process.exit(1)
 }
 
 // ── Modus 2/3: rechnen ──────────────────────────────────────────────────────
@@ -826,6 +974,9 @@ async function listDrafts() {
 if (has('--check')) {
   await runCheck()
 }
+else if (has('--stale')) {
+  runStale()
+}
 else if (has('--compute')) {
   await runCompute({ stub: has('--stub') })
 }
@@ -838,6 +989,8 @@ else {
 DAS WERKZEUG DER KURATIERTEN BIBLIOTHEK (MV1 M6)
 
   --check [--only a,b]    Machbarkeit je Marke (Trockenlauf, ≤ ${CHECK_MAX_REQUESTS} Anfragen je Host)
+                          + Alter der Bibliothek (Warnung, bleibt grün)
+  --stale [--now TT]      Nur die überfälligen Einträge (> ${MARKET_LIBRARY_MAX_AGE_DAYS} Tage), Exit 1 wenn welche
   --compute --stub        Rechnen gegen die Demo-Websites, ohne bezahlten Aufruf
   --compute [--only a,b]  Echter Lauf — braucht MARKET_LIBRARY_ALLOW_PAID=1
   --promote <schlüssel>   Geprüften Entwurf nach shared/library/index.ts übernehmen

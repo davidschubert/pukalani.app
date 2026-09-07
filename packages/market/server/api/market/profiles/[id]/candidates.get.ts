@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import type { MarketCandidateOptionsResponse } from '../../../../../shared/types/marketApi'
 import type { MarketSourceOption } from '../../../../../shared/marketProfile'
-import { marketLibraryEntries } from '../../../../../shared/marketLibrary'
+import { marketLibraryEntries, marketLibrarySourceOption } from '../../../../../shared/marketLibrary'
 import { listBrandProfilesForOwner, listSharedMarketProfiles } from '../../../../contracts/brandContract'
 import { MARKET_UNLOCK_STEP, requireMarketProfile } from '../../../../utils/marketAccess'
 
@@ -88,17 +88,18 @@ export default defineEventHandler(async (event): Promise<MarketCandidateOptionsR
     // die `homepage` hinreicht. `hint` ist dasselbe Feld, in dem die anderen
     // beiden Quellen ihre Branche zeigen; der Wähler rendert daraus zwei
     // Textzeilen und sonst nichts.
+    //
+    // DAZU SEIT 2026-09-06 DAS PRÜFDATUM UND SEIN ALTER (`stale`). Die Zeile
+    // baut `marketLibrarySourceOption()` — eine pure Funktion neben der
+    // Bibliothek, damit sie ohne Nitro-Kontext prüfbar ist. Die UHR liest
+    // ausdrücklich DIESE Stelle: die Regel selbst kennt kein „heute".
+    const now = new Date()
     const entries = marketLibraryEntries()
       .filter(entry => !prefix || entry.name.toLowerCase().startsWith(prefix))
       .slice(0, OPTIONS_LIMIT)
     return {
       source,
-      options: entries.map((entry): MarketSourceOption => ({
-        id: entry.key,
-        label: entry.name,
-        ...(entry.category ? { hint: entry.category } : {}),
-        url: entry.homepage,
-      })),
+      options: entries.map((entry): MarketSourceOption => marketLibrarySourceOption(entry, now)),
     }
   }
 

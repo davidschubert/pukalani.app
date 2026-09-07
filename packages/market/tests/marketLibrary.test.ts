@@ -1,11 +1,16 @@
 import { describe, expect, it } from 'vitest'
 import { MARKET_LIBRARY_ENTRIES, MARKET_LIBRARY_VERSION } from '../shared/library'
 import {
+  MARKET_LIBRARY_MAX_AGE_DAYS,
   marketLibrary,
   marketLibraryDraftSchema,
+  marketLibraryEntryAge,
+  marketLibraryEntryIsStale,
   marketLibraryFields,
   marketLibrarySchema,
+  marketLibrarySourceOption,
   marketLibraryVersion,
+  staleMarketLibraryEntries,
   type MarketLibraryEntry,
 } from '../shared/marketLibrary'
 import { MARKET_EVIDENCE_MAX, MARKET_FIELD_IDS } from '../shared/marketProfile'
@@ -339,5 +344,124 @@ describe('marketLibraryFields', () => {
 
   it('kennt einen erfundenen Schlüssel nicht', () => {
     expect(() => marketLibraryFixtureEntry('gibt-es-nicht')).toThrow()
+  })
+})
+
+/**
+ * DIE 90-TAGE-REGEL (2026-09-06) — das Runbook sagt sie seit jeher, seit heute
+ * sagt sie auch der Code.
+ *
+ * JEDER Test hier reicht `now` HEREIN. Ein Test, der die Uhr des Rechners
+ * liest, wäre heute grün und im Dezember rot, ohne dass sich eine Zeile Code
+ * geändert hätte — und dann misst er den Kalender, nicht die Regel. Deshalb
+ * nimmt auch die Regel selbst `now` als Parameter (siehe
+ * `shared/marketLibraryAge.ts`); die Uhr liest, wer handelt.
+ */
+describe('die 90-Tage-Regel', () => {
+  const geprueft = (verifiedAt: string) => ({ verifiedAt })
+  const am = (date: string) => new Date(`${date}T00:00:00.000Z`)
+
+  it('zählt ganze Kalendertage seit der Handprüfung', () => {
+    expect(marketLibraryEntryAge(geprueft('2026-09-06'), am('2026-09-06'))).toBe(0)
+    expect(marketLibraryEntryAge(geprueft('2026-09-06'), am('2026-09-07'))).toBe(1)
+    expect(marketLibraryEntryAge(geprueft('2026-06-08'), am('2026-09-06'))).toBe(90)
+    // Über die Sommerzeit-Umstellung hinweg (Europa: 2026-10-25) bleibt ein Tag
+    // ein Tag — beide Seiten rechnen UTC.
+    expect(marketLibraryEntryAge(geprueft('2026-10-24'), am('2026-10-26'))).toBe(2)
+  })
+
+  it('nennt die TAGESZEIT nicht mit — dasselbe Datum ergibt dasselbe Alter', () => {
+    const frueh = new Date('2026-09-07T00:14:00.000Z')
+    const spaet = new Date('2026-09-07T23:41:00.000Z')
+    expect(marketLibraryEntryAge(geprueft('2026-09-06'), frueh)).toBe(1)
+    expect(marketLibraryEntryAge(geprueft('2026-09-06'), spaet)).toBe(1)
+  })
+
+  it('hält die GRENZE bei genau 90 Tagen — 90 ist frisch, 91 ist überfällig', () => {
+    // Die eine Zeile, um die es geht. `>` und nicht `>=`: „nichts älter als 90
+    // Tage" heisst, dass der 90. Tag noch dazugehört.
+    expect(MARKET_LIBRARY_MAX_AGE_DAYS).toBe(90)
+    expect(marketLibraryEntryIsStale(geprueft('2026-06-08'), am('2026-09-06'))).toBe(false)
+    expect(marketLibraryEntryIsStale(geprueft('2026-06-07'), am('2026-09-06'))).toBe(true)
+    expect(marketLibraryEntryAge(geprueft('2026-06-07'), am('2026-09-06'))).toBe(91)
+  })
+
+  it('nennt ein Prüfdatum, das niemand lesen kann, ÜBERFÄLLIG', () => {
+    // Kein „im Zweifel frisch": ohne lesbares Datum kann niemand sagen, wann
+    // zuletzt jemand hingesehen hat, und das ist genau der Zustand, vor dem
+    // die Regel warnt. Das Schema verbietet solche Einträge — es ist die eine
+    // Sicherung, nicht die einzige.
+    for (const kaputt of ['', '   ', '06.09.2026', '2026-9-6', 'gestern', '2026-02-31']) {
+      expect(marketLibraryEntryAge(geprueft(kaputt), am('2026-09-06')), kaputt).toBeNull()
+      expect(marketLibraryEntryIsStale(geprueft(kaputt), am('2026-09-06')), kaputt).toBe(true)
+    }
+    // GEGENPROBE zu allem darüber: ein gültiges Datum ist NICHT überfällig.
+    expect(marketLibraryEntryIsStale(geprueft('2026-09-06'), am('2026-09-06'))).toBe(false)
+    // Auch eine kaputte Uhr beantwortet die Frage nicht.
+    expect(marketLibraryEntryAge(geprueft('2026-09-06'), new Date('unfug'))).toBeNull()
+  })
+
+  it('nimmt ein Prüfdatum in der ZUKUNFT nicht für überfällig — es ist ein anderer Fehler', () => {
+    expect(marketLibraryEntryAge(geprueft('2026-09-10'), am('2026-09-06'))).toBe(-4)
+    expect(marketLibraryEntryIsStale(geprueft('2026-09-10'), am('2026-09-06'))).toBe(false)
+    // Gefunden wird er woanders: der Block „hat je Eintrag eine HANDPRÜFUNG"
+    // verbietet ihn für die ausgelieferte Datei.
+  })
+
+  it('sammelt die überfälligen Einträge einer Bibliothek — und nur die', () => {
+    const eintrag = (key: string, verifiedAt: string): MarketLibraryEntry => ({
+      key,
+      status: 'verified',
+      name: key,
+      homepage: 'https://x.example',
+      category: '',
+      verifiedAt,
+      verifiedBy: 'DS',
+      fields: [{ fieldId: 'pitch', value: 'Etwas.', sourceUrl: 'https://x.example' }],
+    })
+    const bibliothek = {
+      version: 'lib-test',
+      entries: [
+        eintrag('frisch', '2026-09-01'),
+        eintrag('genau-90', '2026-06-08'),
+        eintrag('alt', '2026-01-01'),
+      ],
+    }
+    const ueberfaellig = staleMarketLibraryEntries(bibliothek, am('2026-09-06'))
+    expect(ueberfaellig.map(entry => entry.key)).toEqual(['alt'])
+    // GEGENPROBE: ein späterer Stichtag holt alle drei.
+    expect(staleMarketLibraryEntries(bibliothek, am('2027-01-01')).length).toBe(3)
+    // Und eine leere Bibliothek meldet nichts, statt zu werfen.
+    expect(staleMarketLibraryEntries({ version: 'lib-test', entries: [] }, am('2026-09-06')).length).toBe(0)
+  })
+})
+
+/**
+ * DIE ZEILE IM QUELLEN-WÄHLER — was der Kunde von einer fremden Marke sieht.
+ *
+ * Sie ist eine PURE Funktion und wird deshalb hier geprüft und nicht an der
+ * Route: `candidates.get.ts` liest nur die Uhr und ruft sie auf.
+ */
+describe('marketLibrarySourceOption', () => {
+  const entry: MarketLibraryEntry = marketLibraryFixtureEntry('demo-atlas-roasters')
+  const am = (date: string) => new Date(`${date}T00:00:00.000Z`)
+
+  it('trägt Name, Kategorie, Adresse UND das Prüfdatum', () => {
+    const option = marketLibrarySourceOption(entry, am('2026-09-06'))
+    expect(option.id).toBe(entry.key)
+    expect(option.label).toBe(entry.name)
+    expect(option.hint).toBe(entry.category)
+    expect(option.url).toBe(entry.homepage)
+    expect(option.verifiedAt).toBe(entry.verifiedAt)
+  })
+
+  it('meldet `stale` erst jenseits der 90 Tage — und lässt es sonst WEG', () => {
+    // Weglassen statt `false`: die drei anderen Quellen haben kein Prüfdatum,
+    // und ein `stale: false` an einer eigenen Marke wäre eine Antwort auf eine
+    // Frage, die dort niemand gestellt hat.
+    expect(marketLibrarySourceOption(entry, am('2026-09-06')).stale).toBeUndefined()
+    // 2026-09-05 + 90 Tage = 2026-12-04 (noch frisch), + 91 = 2026-12-05.
+    expect(marketLibrarySourceOption(entry, am('2026-12-04')).stale).toBeUndefined()
+    expect(marketLibrarySourceOption(entry, am('2026-12-05')).stale).toBe(true)
   })
 })

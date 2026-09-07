@@ -442,7 +442,7 @@ Nuxt-UI-Komponenten, echter Inhalt (Kailua Coffee Co.):
 | --- | --- | --- | --- | --- |
 | G1 ✅ 2026-09-06 | **Regel + Renderer** | `audience` in der Registry, Regel `sensitivity ≠ public ⇒ internal`, `brandShareableSlotValues` (MV1 M5) um `audience` erweitert — reist = public UND foundation, `buildBrandFoundation` (pur), Do/Don't-Paarung, KI-Rahmen-Slots | — | Unit: jede Session hat `audience`; Gegenprobe `internal` verschwindet; Snapshot v1 von heute rendert ohne Rohantworten und ohne die vier `internal`-Sessions; Route-Test: neuer Snapshot enthält a.complaints nicht; Hash-Inputs unverändert |
 | G2 ✅ 2026-09-06 (Davids Blick offen) | **Private Leseansicht + Print** | `/brand/:id/foundation`, Rail-Eintrag, Knopf im Dokument, `@media print` | Davids Blick auf die Seite | Playwright: 404 bei fremdem Branding; Kapitel-Reihenfolge = Registry; Druck-Snapshot |
-| G3 | **Teilen sichtbar** | Share-Dialog, `/brand/share/:token`, og-Meta, Fuß, Ereignisse | Davids Blick auf die Empfänger-Ansicht | verify-Skript: veröffentlichen → Seite 200 → widerrufen → 404; abgelaufen → 404; kein Token im Log; `internal`-Werte nie im HTML (Gegenprobe) |
+| G3 ✅ 2026-09-07 (Davids Blick offen) | **Teilen sichtbar** | Share-Dialog, `/brand/share/:token`, og-Meta, Fuß, Ereignisse | Davids Blick auf die Empfänger-Ansicht | verify-Skript: veröffentlichen → Seite 200 → widerrufen → 404; abgelaufen → 404; kein Token im Log; `internal`-Werte nie im HTML (Gegenprobe) |
 | G4 | **Schranke + Richtung** (= P7-Rest) | Kapitel 10 gesperrt mit CTA; danach `result.direction` mit 2–3 Richtungen in Preview-iframes | **David:** Schranken-Text + Preisanker; Richtungen-Katalog | Playwright: Richtung wählen ⇒ Kapitel 10 zeigt Preset; Share-Snapshot trägt Preset |
 | G5 | **Beispiel Kailua** (optional) | öffentliche Beispiel-Foundation über denselben Renderer, `index` erlaubt | David: Inhalt der Beispiel-Marke | Seite rendert aus festem Snapshot |
 
@@ -555,3 +555,44 @@ IM LAYOUT (height auto, overflow visible); die Seite bleibt für Umbrüche und
 Ausblendungen zuständig. Bewusst noch offen (G3): die Ereignisse
 `foundation.viewed`/`print.started`, ein „Stand"-Datum im Kopf (die Antwort
 trägt keins — nichts erfinden).
+
+## 9. Nachtrag G3 (2026-09-07) — Teilen sichtbar, vier Fallen am Rand
+
+Gebaut: Zustands-Route `GET …/share` (nie ein Token), Teilen-Dialog auf der
+Foundation-Seite (Link genau einmal sichtbar, Kopieren, Widerrufen, Rotation
+mit echtem Ablaufdatum), öffentliche Seite `/brand/share/:token` (Layout
+`false`, schlanker Kopf mit Stand, derselbe Renderer + `BwFoundationChapter
+variant="share"`, `BwReadingToc` in `UPageAside`, Drucken, Fuß, `noindex`
++ og aus dem ersten Story-Satz), Ereignisse `foundation.viewed` /
+`share.viewed` / `share.revoked` (ohne Token, ohne Inhalt), Alt-Snapshots
+werden beim LESEN zusätzlich gefiltert. Beweis: `packages/brand/scripts/
+verify-brand-share.mjs` — **36/36**, Gegenprobe `VERIFY_EXPECT_LEAK=1` ⇒
+**31/36 rot** (das Skript beißt). Prod-Bestand `brand_shares` vor dem
+Deploy: **0 Zeilen** — nichts zu widerrufen (§4 erledigt).
+
+Vier Fallen, alle live erwischt:
+1. **`frame-ancestors 'none'` ist über `registerEmbeddableRoute` nicht
+   ausdrückbar**, und ein Header aus Seite oder Middleware verliert gegen den
+   Core-Default `'self'` im `render:response`-Hook. Lösung: eine zweite,
+   gleichrangige Registry `registerFrameDeniedRoute(prefix)` in
+   `core/server/utils/frameAncestors.ts`, im Resolver ZUERST geprüft (Verbot
+   schlägt Erlaubnis; Locale-Präfix wird abgestreift). Unit-Test in core +
+   Live-Zusage im Skript, mit Gegenprobe: die private Seite behält `'self'`.
+2. **`Cache-Control: no-store` kam nicht an**: `core/server/plugins/
+   html-no-cache.ts` setzt im Render-Hook `no-cache`, wenn `response.headers`
+   nichts trägt — ein per Middleware am EVENT gesetzter Header stand dort
+   nicht und verlor. Der Plugin übernimmt jetzt, was am Event steht, und
+   greift erst ohne alles zum Default. (Core-Änderung, eigener Commit.)
+3. **Zwei Schreibweisen für denselben Augenblick**: Appwrite gibt
+   Zeitstempel als `+00:00` zurück, die Publish-Antwort schreibt `Z`. Die
+   Zustands-Route normalisiert auf `toISOString()`, sonst vergleicht ein
+   Client Zeichenketten und sieht zwei Fristen.
+4. **`print.started` gibt es nicht**: der brand-Layer hat keinen
+   Telemetrie-Endpunkt, und eine POST-Route nur für einen Zähler wäre mehr
+   Tür als Nutzen — bewusst weggelassen; das Drucken zählt über
+   `foundation.viewed` mit.
+
+Bewusst offen: ein „Stand"-Datum im Kopf der PRIVATEN Seite (die Antwort
+trägt keins, nichts erfinden) — kommt, sobald die Route die letzte Abnahme
+meldet. Nächstes Paket G4 (Schranke + Richtung) bleibt an Davids Gate:
+Schranken-Text mit Preisanker und Richtungen-Katalog.

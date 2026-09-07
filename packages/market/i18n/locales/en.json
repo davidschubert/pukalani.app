@@ -190,8 +190,12 @@
       "libraryPlaceholder": "Pick a known brand",
       "sharedPlaceholder": "Pick a released brand",
       "foundationHint": "From your accepted fields. No fetching, no quote — these sentences are decided, not read off.",
-      "libraryHint": "Market profile follows in M6 — computed by us and checked by hand. Until then only the name stands here: an invented quote under a real brand name is something we never write.",
+      "libraryHint": "Market profile from our library — computed by us and checked by hand against the source. An invented quote under a real brand name is something we never write.",
       "sharedHint": "Visible only with the owner’s consent, and only the ten outward fields. Nothing from her workshop."
+    },
+    "library": {
+      "verifiedAt": "Checked by hand on {date}",
+      "stale": "Older than 90 days"
     },
     "score": {
       "link": "Open the brand check",
