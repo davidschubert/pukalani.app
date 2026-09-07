@@ -1017,6 +1017,27 @@ export interface BrandShareRevokeResponse {
   revoked: number
 }
 
+/**
+ * DER ZUSTAND DES TEILENS (Paket G3) — die Frage, die der Dialog beim Öffnen
+ * stellt: „gibt es gerade einen Link?"
+ *
+ * `active: null` heisst „keiner" (widerrufen, abgelaufen oder nie erzeugt);
+ * die drei Fälle sind hier bewusst NICHT unterscheidbar, weil der Mensch
+ * dieselbe Antwort braucht — einen neuen Link.
+ *
+ * DER TOKEN STEHT NICHT DARIN, und das ist keine Auslassung: er existiert
+ * genau einmal, in der Antwort des Veröffentlichens (`BrandSharePublish
+ * Response`), danach nur noch als Hash. Eine Statusroute, die ihn nachreichen
+ * könnte, machte aus einem Geheimnis eine Abfrage.
+ */
+export interface BrandShareStatusResponse {
+  active: null | {
+    shareId: string
+    publishedAt: string
+    expiresAt: string
+  }
+}
+
 export interface BrandShareViewResponse {
   snapshot: BrandShareSnapshot
   publishedAt: string

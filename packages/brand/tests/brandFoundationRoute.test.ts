@@ -186,11 +186,34 @@ describe('GET …/foundation — was die Leseansicht zeigt', () => {
     await expect(foundationRoute(event)).rejects.toMatchObject({ status: 404 })
   })
 
-  it('ruft NICHTS an und schreibt NICHTS — sie ist eine Leseroute (§2.9)', async () => {
+  it('ÄNDERT NICHTS am Branding — die einzige geschriebene Zeile ist das Ereignis (§2.9/§2.7)', async () => {
     tablesDB.updateRow.mockClear()
     tablesDB.createRow.mockClear()
     await foundationRoute(event)
     expect(tablesDB.updateRow).not.toHaveBeenCalled()
+    // Seit Paket G3 zählt der Funnel den Aufruf (`foundation.viewed`). Alles
+    // andere bleibt unangetastet: die Zusage ist „keine Wirkung auf die Marke",
+    // nicht „kein Schreibzugriff überhaupt" — sonst wäre sie mit dem ersten
+    // Messpunkt still verloren.
+    const written = tablesDB.createRow.mock.calls.map(([args]) => (args as { tableId: string }).tableId)
+    expect(written).toEqual(['brand_events'])
+  })
+
+  it('das Ereignis trägt Umfang, KEINEN Inhalt (Regel 1 des Ereignis-Kopfs)', async () => {
+    tablesDB.createRow.mockClear()
+    await foundationRoute(event)
+    const [args] = tablesDB.createRow.mock.calls[0] as unknown as [{ data: Record<string, string> }]
+    expect(args.data.type).toBe('foundation.viewed')
+    // GEGENPROBE: derselbe wiedererkennbare Wert, der in der Antwort steht,
+    // darf im Ereignis nicht auftauchen.
+    expect(args.data.payload).not.toContain('wert-')
+    expect(JSON.parse(args.data.payload)).toMatchObject({ chapters: expect.any(Number) })
+  })
+
+  it('FREMDES BRANDING schreibt auch kein Ereignis', async () => {
+    profileRow.ownerId = 'jemand-anderes'
+    tablesDB.createRow.mockClear()
+    await expect(foundationRoute(event)).rejects.toMatchObject({ status: 404 })
     expect(tablesDB.createRow).not.toHaveBeenCalled()
   })
 })

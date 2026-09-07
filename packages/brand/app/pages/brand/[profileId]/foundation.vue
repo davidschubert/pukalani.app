@@ -10,7 +10,12 @@ import {
   brandFoundationPendingStep,
 } from '../../../../shared/brandFoundation'
 import { BRAND_ACCEPTANCE_VIEW } from '../../../../shared/brandWorkspaceNav'
-import type { BrandFoundationResponse } from '../../../../shared/types/brand'
+import type {
+  BrandFoundationResponse,
+  BrandSharePublishResponse,
+  BrandShareRevokeResponse,
+  BrandShareStatusResponse,
+} from '../../../../shared/types/brand'
 import { useBrandWorkspaceStore } from '../../../stores/brandWorkspace'
 import { BRAND_FOUNDATION_RAIL_STEP, useBrandFoundationRailStep } from '../../../composables/useBrandFoundationRailStep'
 
@@ -40,8 +45,16 @@ import { BRAND_FOUNDATION_RAIL_STEP, useBrandFoundationRailStep } from '../../..
  * ── DER DRUCK IST DER EXPORT (§2.6 e) ────────────────────────────────────
  * Kein Server-PDF: `window.print()` auf einer Seite mit `@media print`. Das
  * Export-Menü zeigt trotzdem ALLE Ausgabeformen der Suite, frei und gesperrt
- * nebeneinander — dieselbe Ehrlichkeit wie Kapitel 10. Der TEILEN-Knopf fehlt
- * hier bewusst: er kommt mit Paket G3 samt Empfänger-Ansicht.
+ * nebeneinander — dieselbe Ehrlichkeit wie Kapitel 10.
+ *
+ * ── TEILEN (Paket G3, §2.6 „Share-Dialog") ───────────────────────────────
+ * Der Dialog sagt VOR dem Erzeugen, was reist und was nicht — zwei Listen
+ * nebeneinander, weil „was bleibt drin" die eigentliche Frage des Menschen
+ * ist, der gleich einen Link an einen Fremden schickt. Er fragt seinen Zustand
+ * erst beim ÖFFNEN ab (eine Seite, die niemand teilt, soll dafür keine
+ * Abfrage kosten), und er zeigt den Link GENAU EINMAL: gespeichert ist nur
+ * dessen Hash, ein zweites Anzeigen gäbe es nur mit einer Route, die ein
+ * Geheimnis nachreicht.
  */
 definePageMeta({ layout: 'brand-workspace' })
 
@@ -172,6 +185,126 @@ const hasOnePage = computed(() => Boolean(
   onePage.value.purpose || onePage.value.values.length || onePage.value.archetype
   || onePage.value.tagline || onePage.value.wallLine,
 ))
+
+// ── Teilen (§2.6, Paket G3) ───────────────────────────────────────────────
+
+const toast = useToast()
+const shareOpen = ref(false)
+/** EINE Handlung zur Zeit — sonst rotiert ein Doppelklick zwei Links. */
+const shareBusy = ref(false)
+const shareLoading = ref(false)
+const shareActive = ref<BrandShareStatusResponse['active']>(null)
+/**
+ * Der rohe Token — er lebt NUR in dieser Variablen und nur bis zum nächsten
+ * Seitenaufbau. Nicht im Store, nicht in der Adresse, nicht im Log.
+ */
+const shareToken = ref('')
+const shareCopied = ref(false)
+
+/**
+ * Der Ursprung kommt aus dem REQUEST, nicht aus `window`: so steht im Feld
+ * derselbe Host, unter dem der Mensch gerade arbeitet (Dev-Port eingeschlossen),
+ * und die Zeile ist beim ersten Rendern schon richtig.
+ */
+const origin = useRequestURL().origin
+
+const shareUrl = computed(() => (shareToken.value
+  ? `${origin}${localePath(`/brand/share/${shareToken.value}`)}`
+  : ''))
+
+const dateFormat = computed(() => new Intl.DateTimeFormat(locale.value, { dateStyle: 'medium' }))
+
+function formatDate(iso: string): string {
+  const value = Date.parse(iso)
+  // Ein kaputtes Datum wird zur leeren Zeile, nie zu „Invalid Date".
+  return Number.isFinite(value) ? dateFormat.value.format(value) : ''
+}
+
+async function loadShareStatus(): Promise<void> {
+  shareLoading.value = true
+  try {
+    const status = await $fetch<BrandShareStatusResponse>(`/api/brand/profiles/${profileId.value}/share`)
+    shareActive.value = status.active
+  }
+  catch {
+    toast.add({ title: t('brand.foundation.share.failed'), color: 'error' })
+  }
+  finally {
+    shareLoading.value = false
+  }
+}
+
+async function openShare(): Promise<void> {
+  shareOpen.value = true
+  // Der Token eines FRÜHEREN Erzeugens gilt nicht mehr als „gerade gezeigt":
+  // beim zweiten Öffnen steht wieder nur der Zustand da.
+  shareToken.value = ''
+  shareCopied.value = false
+  await loadShareStatus()
+}
+
+/** Erzeugen UND Rotieren — das Backend widerruft die Vorgänger selbst. */
+async function createShareLink(): Promise<void> {
+  if (shareBusy.value) return
+  shareBusy.value = true
+  try {
+    const created = await $fetch<BrandSharePublishResponse>(
+      `/api/brand/profiles/${profileId.value}/share`,
+      { method: 'POST', body: {} },
+    )
+    shareToken.value = created.token
+    shareCopied.value = false
+    shareActive.value = {
+      shareId: created.shareId,
+      publishedAt: created.publishedAt,
+      expiresAt: created.expiresAt,
+    }
+    toast.add({ title: t('brand.foundation.share.createdToast') })
+  }
+  catch {
+    toast.add({ title: t('brand.foundation.share.failed'), color: 'error' })
+  }
+  finally {
+    shareBusy.value = false
+  }
+}
+
+async function revokeShareLink(): Promise<void> {
+  if (shareBusy.value) return
+  shareBusy.value = true
+  try {
+    await $fetch<BrandShareRevokeResponse>('/api/brand/share/revoke', {
+      method: 'POST',
+      body: { profileId: profileId.value },
+    })
+    shareToken.value = ''
+    toast.add({ title: t('brand.foundation.share.revokedToast') })
+    // Neu FRAGEN statt lokal auf `null` setzen: der Widerruf nimmt alle
+    // aktiven Zeilen, und was danach gilt, weiss der Server.
+    await loadShareStatus()
+  }
+  catch {
+    toast.add({ title: t('brand.foundation.share.failed'), color: 'error' })
+  }
+  finally {
+    shareBusy.value = false
+  }
+}
+
+async function copyShareUrl(): Promise<void> {
+  if (!shareUrl.value) return
+  try {
+    await navigator.clipboard.writeText(shareUrl.value)
+    shareCopied.value = true
+    toast.add({ title: t('brand.foundation.share.copyToast') })
+    window.setTimeout(() => { shareCopied.value = false }, 1600)
+  }
+  catch {
+    // Ohne Zwischenablage-Recht (unsicherer Ursprung, verweigerte Erlaubnis)
+    // bleibt das Feld stehen — es ist auswählbar, das ist der Ausweg.
+    toast.add({ title: t('brand.foundation.share.copyFailed'), color: 'error' })
+  }
+}
 
 // ── Exportieren (§2.6) ────────────────────────────────────────────────────
 
@@ -367,9 +500,13 @@ useBrandTitle(() => (title.value || t('brand.foundation.title')))
           <p class="truncate font-semibold">{{ title }}</p>
         </div>
 
-        <!-- KEIN „Bearbeiten" (§2.6): korrigiert wird in der Werkstatt.
-             KEIN „Teilen": die Empfänger-Ansicht kommt mit Paket G3. -->
+        <!-- KEIN „Bearbeiten" (§2.6): korrigiert wird in der Werkstatt. -->
         <div class="ml-auto flex flex-none items-center gap-1.5">
+          <UButton
+            size="sm" color="neutral" variant="ghost" icon="i-ph-share-network"
+            :label="t('brand.foundation.share.button')" class="max-sm:hidden"
+            @click="openShare"
+          />
           <UDropdownMenu
             :items="exportItems" :content="{ align: 'end' }"
             :ui="{ content: 'bw-root bw-overlay w-72' }"
@@ -493,6 +630,102 @@ useBrandTitle(() => (title.value || t('brand.foundation.title')))
       </div>
     </template>
   </BwWorkspace>
+
+  <!-- DER SHARE-DIALOG (§2.6). `bw-root` sitzt am INHALT, nicht am Wirt: das
+       Modal rendert in einem Teleport ausserhalb des Werkstatt-Baums, und ohne
+       den Token-Wirt stünde es dort ohne Farben da. Kein `v-if` am offenen
+       Dialog (Reka-Regel) — `v-model:open` schaltet ihn. -->
+  <UModal v-model:open="shareOpen">
+    <template #content>
+      <div class="bw-root relative max-h-[85vh] overflow-y-auto p-8" style="background: var(--bw-surface-hi)">
+        <button
+          class="absolute right-5 top-5 grid size-8 place-items-center rounded-full"
+          :aria-label="t('brand.foundation.share.close')"
+          @click="shareOpen = false"
+        >
+          <UIcon name="i-ph-x" class="size-4.5" style="color: var(--bw-ink-soft)" />
+        </button>
+        <p class="bw-label uppercase tracking-widest" style="color: var(--bw-muted)">
+          {{ t('brand.foundation.share.eyebrow') }}
+        </p>
+        <h2 class="mt-1 text-[28px] font-extralight leading-tight tracking-tight">
+          {{ t('brand.foundation.share.title') }}
+        </h2>
+        <p class="mt-3 text-sm leading-relaxed" style="color: var(--bw-ink-soft)">
+          {{ t('brand.foundation.share.intro') }}
+        </p>
+
+        <!-- ZWEI LISTEN, WEIL ES ZWEI FRAGEN SIND. „Bleibt drin" ist die
+             wichtigere: sie ist die Zusage, die der Filter beim Einfrieren
+             und der Renderer beim Lesen halten (§2.8). -->
+        <div class="mt-6 grid gap-4 sm:grid-cols-2">
+          <div class="rounded-2xl px-5 py-4" style="background: var(--bw-surface)">
+            <p class="bw-label" style="color: var(--bw-accent)">{{ t('brand.foundation.share.visible.title') }}</p>
+            <ul class="mt-2 space-y-1.5 text-sm" style="color: var(--bw-ink-soft)">
+              <li>{{ t('brand.foundation.share.visible.story') }}</li>
+              <li>{{ t('brand.foundation.share.visible.chapters') }}</li>
+              <li>{{ t('brand.foundation.share.visible.stand') }}</li>
+            </ul>
+          </div>
+          <div class="rounded-2xl px-5 py-4" style="background: var(--bw-surface)">
+            <p class="bw-label" style="color: var(--bw-stale)">{{ t('brand.foundation.share.hidden.title') }}</p>
+            <ul class="mt-2 space-y-1.5 text-sm" style="color: var(--bw-ink-soft)">
+              <li>{{ t('brand.foundation.share.hidden.chats') }}</li>
+              <li>{{ t('brand.foundation.share.hidden.drafts') }}</li>
+              <li>{{ t('brand.foundation.share.hidden.competitors') }}</li>
+              <li>{{ t('brand.foundation.share.hidden.meta') }}</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Das Ablaufdatum ist ECHT, sobald es einen Link gibt; vorher steht
+             dort nur die Frist. Ein erfundenes Datum wäre eine Zusage. -->
+        <p class="bw-label mt-5" style="color: var(--bw-muted)">
+          <template v-if="shareActive">{{ t('brand.foundation.share.activeUntil', { date: formatDate(shareActive.expiresAt) }) }}</template>
+          <template v-else>{{ t('brand.foundation.share.expires') }}</template>
+        </p>
+
+        <!-- Der Link steht NUR direkt nach dem Erzeugen (s. Kopf). -->
+        <div v-if="shareUrl" class="mt-4 flex flex-wrap items-center gap-2">
+          <input
+            :value="shareUrl" readonly
+            :aria-label="t('brand.foundation.share.linkLabel')"
+            class="min-w-0 flex-1 truncate rounded-full px-4 py-2 text-sm"
+            style="background: var(--bw-surface); color: var(--bw-ink-soft)"
+          >
+          <UButton
+            :label="shareCopied ? t('brand.foundation.share.copied') : t('brand.foundation.share.copy')"
+            :icon="shareCopied ? 'i-ph-check' : 'i-ph-copy'"
+            color="neutral" variant="outline" class="rounded-full" style="background: var(--bw-surface-hi)"
+            @click="copyShareUrl"
+          />
+        </div>
+
+        <div class="mt-4 flex flex-wrap items-center gap-2">
+          <UButton
+            class="rounded-full" icon="i-ph-link"
+            :label="shareActive ? t('brand.foundation.share.rotate') : t('brand.foundation.share.create')"
+            :loading="shareBusy || shareLoading" :disabled="shareBusy || shareLoading"
+            @click="createShareLink"
+          />
+          <UButton
+            v-if="shareUrl" :to="shareUrl" target="_blank" rel="noopener noreferrer"
+            color="neutral" variant="outline" class="rounded-full" style="background: var(--bw-surface-hi)"
+            trailing-icon="i-ph-arrow-up-right" :label="t('brand.foundation.share.open')"
+          />
+          <UButton
+            v-if="shareActive" color="neutral" variant="ghost"
+            :label="t('brand.foundation.share.revoke')"
+            :disabled="shareBusy || shareLoading"
+            @click="revokeShareLink"
+          />
+        </div>
+
+        <p v-if="shareUrl" class="bw-pending mt-4">{{ t('brand.foundation.share.onceHint') }}</p>
+        <p class="bw-pending mt-2">{{ t('brand.foundation.share.replacesHint') }}</p>
+      </div>
+    </template>
+  </UModal>
 </template>
 
 <style>

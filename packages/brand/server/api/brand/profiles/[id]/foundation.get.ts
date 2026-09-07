@@ -7,6 +7,7 @@ import type {
   BrandFoundationStepState,
 } from '../../../../../shared/types/brand'
 import { loadBrandDocumentContext } from '../../../../utils/brandAcceptance'
+import { recordBrandEvent } from '../../../../utils/brandEvents'
 import { confirmedSlotValues, toStoryView } from '../../../../utils/brandStore'
 
 /**
@@ -37,11 +38,15 @@ import { confirmedSlotValues, toStoryView } from '../../../../utils/brandStore'
  * überall in diesem Silo-Layer (DECISION-LOG 2026-09-05). Die Seite wirft
  * daraufhin ihre Fehlerseite, keine halbe Werkstatt.
  *
- * ── SIE RUFT NICHTS AN UND SCHREIBT NICHTS ───────────────────────────────
+ * ── SIE RUFT NICHTS AN UND ÄNDERT NICHTS ─────────────────────────────────
  * Null KI-Aufrufe (§2.9): die Story steht am Profil, der Prüfblick bleibt im
  * Dokument. Der Zähler und die Abnahme-Zustände sind Rechnung über dem, was
  * `loadBrandDocumentContext` ohnehin geladen hat — zwei Abfragen, wie beim
- * Dokument.
+ * Dokument. Am BRANDING ändert sie nichts; die einzige Zeile, die sie
+ * schreibt, ist `foundation.viewed` im Funnel (Paket G3) — fail-soft, und sie
+ * beantwortet die Frage aus §2.10: arbeitet jemand am nächsten Tag mit dem
+ * Ergebnis? Sie steht am ENDE, nach jeder Prüfung: ein fremdes Branding darf
+ * nicht einmal einen Zähler bewegen.
  */
 export default defineEventHandler(async (event): Promise<BrandFoundationResponse> => {
   const { userId } = await requireBrandAccess(event)
@@ -72,6 +77,17 @@ export default defineEventHandler(async (event): Promise<BrandFoundationResponse
     })
     values.push({ stepKey: entry.stepKey, slots: row ? confirmedSlotValues(row) : [] })
   }
+
+  await recordBrandEvent(event, {
+    type: 'foundation.viewed',
+    profileId: profile.$id,
+    userId,
+    // Umfang, nicht Inhalt (Regel 1 des Ereignis-Kopfs).
+    payload: {
+      chapters: chapters.length,
+      accepted: chapters.filter(chapter => chapter.storedState === 'done').length,
+    },
+  })
 
   return {
     profileId: profile.$id,
