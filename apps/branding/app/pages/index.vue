@@ -12,16 +12,19 @@ import { jsonLdScript } from '../utils/jsonLd'
  *      der Brand-Check wird unten beworben) · rechts „George bei der Arbeit"
  *   2. Artefakte „Was am Ende auf dem Tisch liegt" — jede Karte trägt einen
  *      kleinen visuellen Beweis (Runde 140: zeigen statt beschreiben)
- *   3. Fähigkeiten „Mehr als ein Generator"
- *   4. Brand-Check als Lead-Magnet
- *   5. Abschluss-CTA
+ *   3. Beispiel-Branding „Kailua Coffee Co." — der Beweis zu 2
+ *   4. Fähigkeiten „Mehr als ein Generator"
+ *   5. Brand-Check als Lead-Magnet
+ *   6. Abschluss-CTA
  *
- * ── WAS VOM DUMMY BEWUSST NICHT MITKOMMT (Davids 404-Audit 2026-09-03) ────
- * Nur echte Ziele: „Brand Insights" (Artikel/Profile/Duelle) und das
- * Beispiel-Branding „Kailua Coffee Co." zeigten auf Klickdummy-Pfade
- * (`/brand/demo/*`). Beide kommen zurück, sobald es die Seiten gibt — sie
- * stehen in OPEN-ITEMS. Im Fähigkeiten-Block rücken dafür zwei Zusagen auf,
- * die es HEUTE gibt (begründet statt behauptet · Inhalte bleiben eure).
+ * ── DAS BEISPIEL-BRANDING IST SEIT PAKET G5 (2026-09-07) ZURÜCK ───────────
+ * Davids 404-Audit (2026-09-03) hatte es entfernt, weil die Kachel auf einen
+ * Klickdummy-Pfad zeigte (`/brand/demo/beispiel`); jetzt gibt es die Seite:
+ * `/beispiel/kailua-coffee` rendert einen festen Snapshot durch DENSELBEN
+ * Renderer wie jedes echte Handbuch. Sie steht direkt hinter den Artefakten,
+ * weil sie deren Beweis ist — „was am Ende auf dem Tisch liegt" und dann: hier
+ * liegt es. Noch offen und weiter in OPEN-ITEMS: „Brand Insights"
+ * (Artikel/Profile/Duelle).
  *
  * ── DER BRAND-CHECK IST SEIT 2026-09-05 ECHT — UND WOHNT WOANDERS ─────────
  * Erst stand hier die Warteliste mit `source: 'brand-check'`, dann (seit dem
@@ -198,7 +201,34 @@ const KIT_FILES = ['logo.svg', 'wortmarke.svg', 'boilerplate.md', 'gruender.jpg'
         </div>
       </section>
 
-      <!-- 3 · Fähigkeiten -->
+      <!-- 3 · Beispiel-Branding: der Beweis zu den Artefakten (s. Kopf) -->
+      <section class="mt-24">
+        <NuxtLink
+          :to="localePath('/beispiel/kailua-coffee')"
+          class="bw-card bw-card--hover grid items-center gap-8 p-8 sm:grid-cols-[12rem_minmax(0,1fr)]"
+        >
+          <div
+            class="bw-tile relative hidden overflow-hidden sm:block"
+            style="aspect-ratio: 1 / 1; background: linear-gradient(165deg, #e8d3b8 0%, #b98a5e 45%, #4a3123 100%)"
+          >
+            <p
+              class="absolute inset-0 grid place-items-center p-4 text-center text-base font-extralight leading-snug tracking-tight"
+              style="color: #f7f2ea; text-shadow: 0 1px 12px rgb(20 20 20 / 0.3)"
+            >Kailua Coffee Co.</p>
+          </div>
+          <div class="min-w-0">
+            <p class="bw-label" style="color: var(--bw-muted)">{{ t('home.exampleLabel') }}</p>
+            <h2 class="mt-2 text-2xl font-medium tracking-tight">{{ t('home.exampleTitle') }}</h2>
+            <p class="mt-3 max-w-2xl text-sm leading-relaxed" style="color: var(--bw-ink-soft)">{{ t('home.exampleBody') }}</p>
+            <p class="bw-label mt-5 inline-flex items-center gap-1.5" style="color: var(--bw-muted)">
+              {{ t('home.exampleLink') }}
+              <UIcon name="i-ph-arrow-right" class="size-3.5" />
+            </p>
+          </div>
+        </NuxtLink>
+      </section>
+
+      <!-- 4 · Fähigkeiten -->
       <section class="mt-24">
         <h2 class="text-center text-balance text-3xl font-extralight tracking-tight sm:text-4xl">{{ t('home.capTitle') }}</h2>
         <p class="bw-label mt-2 text-center" style="color: var(--bw-muted)">{{ t('home.capLead') }}</p>
@@ -211,11 +241,11 @@ const KIT_FILES = ['logo.svg', 'wortmarke.svg', 'boilerplate.md', 'gruender.jpg'
         </div>
       </section>
 
-      <!-- 4 · Brand-Check: der Relaunch-Lead-Magnet, jetzt als TEASER
+      <!-- 5 · Brand-Check: der Relaunch-Lead-Magnet, jetzt als TEASER
            (s. Kopf) — das Formular steht auf /brand-check. -->
       <BwBrandCheckTeaser source="home" class="mt-24" />
 
-      <!-- 5 · Abschluss-CTA -->
+      <!-- 6 · Abschluss-CTA -->
       <section class="bw-card mt-24 px-8 py-14 text-center sm:py-16">
         <h2 class="mx-auto max-w-2xl text-balance text-3xl font-medium tracking-tight sm:text-4xl">{{ t('home.ctaTitle') }}</h2>
         <p class="mx-auto mt-4 max-w-xl text-base leading-relaxed" style="color: var(--bw-ink-soft)">{{ t('home.ctaBody') }}</p>

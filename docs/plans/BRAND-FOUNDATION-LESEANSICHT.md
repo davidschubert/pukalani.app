@@ -444,7 +444,7 @@ Nuxt-UI-Komponenten, echter Inhalt (Kailua Coffee Co.):
 | G2 ✅ 2026-09-06 (Davids Blick offen) | **Private Leseansicht + Print** | `/brand/:id/foundation`, Rail-Eintrag, Knopf im Dokument, `@media print` | Davids Blick auf die Seite | Playwright: 404 bei fremdem Branding; Kapitel-Reihenfolge = Registry; Druck-Snapshot |
 | G3 ✅ 2026-09-07 (Davids Blick offen) | **Teilen sichtbar** | Share-Dialog, `/brand/share/:token`, og-Meta, Fuß, Ereignisse | Davids Blick auf die Empfänger-Ansicht | verify-Skript: veröffentlichen → Seite 200 → widerrufen → 404; abgelaufen → 404; kein Token im Log; `internal`-Werte nie im HTML (Gegenprobe) |
 | G4 | **Schranke + Richtung** (= P7-Rest) | Kapitel 10 gesperrt mit CTA; danach `result.direction` mit 2–3 Richtungen in Preview-iframes | **David:** Schranken-Text + Preisanker; Richtungen-Katalog | Playwright: Richtung wählen ⇒ Kapitel 10 zeigt Preset; Share-Snapshot trägt Preset |
-| G5 | **Beispiel Kailua** (optional) | öffentliche Beispiel-Foundation über denselben Renderer, `index` erlaubt | David: Inhalt der Beispiel-Marke | Seite rendert aus festem Snapshot |
+| G5 ✅ 2026-09-07 (Davids Inhalts-Gate offen) | **Beispiel Kailua** (optional) | öffentliche Beispiel-Foundation über denselben Renderer, `index` erlaubt | David: Inhalt der Beispiel-Marke | Seite rendert aus festem Snapshot |
 
 Reihenfolge: G1 vor allem; G2 und G3 parallel; G4 zuletzt (hängt am
 Richtungen-Katalog, der ein eigenes Gate ist); G5 jederzeit nach G1.
@@ -596,3 +596,18 @@ Bewusst offen: ein „Stand"-Datum im Kopf der PRIVATEN Seite (die Antwort
 trägt keins, nichts erfinden) — kommt, sobald die Route die letzte Abnahme
 meldet. Nächstes Paket G4 (Schranke + Richtung) bleibt an Davids Gate:
 Schranken-Text mit Preisanker und Richtungen-Katalog.
+
+## 10. Nachtrag G5 (2026-09-07) — die Beispiel-Foundation ist eine echte Seite
+
+`/beispiel/kailua-coffee` auf branding.supply (indexierbar, Marketing-Layout
+mit Site-Nav, SEO-Meta, Drucken, CTA „Starte dein Branding") rendert den
+festen Snapshot `packages/brand/shared/examples/kailuaCoffee.ts`
+(`BrandFoundationInput`, 27 reisefähige Slots in sechs Kapiteln, Werte über
+die Format-Schreiber gebaut, keine internen Slots — 14 Prüfungen inkl.
+Schmuggel-Gegenprobe) über DENSELBEN Renderer und dieselben Komponenten wie
+Share- und Foundation-Seite (`variant="share"`). Die Startseite hat ihren
+Beispiel-Teaser zurück (Sektion 3, hinter den Artefakten als deren Beweis).
+Davids Gate bleibt der INHALT der Beispielmarke — die Texte stammen aus dem
+abgenommenen Dummy und wurden im selben Ton ergänzt. Bewusst ohne Bilder (nur
+der Kailua-Farbverlauf), ohne Sitemap (die App hat keine — Vermerk im
+Seitenkopf), ohne `result.direction` (G4).

@@ -43,6 +43,10 @@
     "art6P2": "Content rhythm",
     "art6W3": "Weeks 7–12",
     "art6P3": "Visibility & GEO",
+    "exampleLabel": "Example branding · built with your brand advisor",
+    "exampleTitle": "What finished looks like: Kailua Coffee Co.",
+    "exampleBody": "A complete Brand Foundation to read — story, purpose, values, voice, manifesto and messaging. Exactly the page that stands at the end of your conversation.",
+    "exampleLink": "View the example branding",
     "capTitle": "More than a generator",
     "capLead": "Brands are not templates — so your brand advisor does not build any.",
     "cap1Name": "Guided conversation",
@@ -67,6 +71,18 @@
       "invite": "Redeem invitation code"
     },
     "beta": "Branding Supply is in closed beta. For your own branding you need an invitation code — or a spot on the waitlist."
+  },
+  "example": {
+    "seoTitle": "Example branding: the Brand Foundation of Kailua Coffee Co.",
+    "seoDescription": "A complete result to read: story, purpose, values, voice, manifesto and messaging of an example brand — built with your brand advisor at Branding Supply.",
+    "eyebrow": "Example branding · what a finished result looks like",
+    "lead": "Kailua Coffee Co. is an invented brand that went the whole way: every chapter here came out of a conversation with the brand advisor, and every decision carries its reasoning. Your Brand Foundation looks exactly like this — only with your words in it.",
+    "stand": "As of {date}",
+    "print": "Print",
+    "ctaTitle": "Your foundation stands in about 45 minutes.",
+    "ctaBody": "Same process, same page at the end — only with your brand in it. Create an account, pick a working title, the rest is a conversation.",
+    "ctaStart": "Start your branding",
+    "ctaHome": "Back to the home page"
   },
   "about": {
     "seoTitle": "About Branding Supply — personal brand advice in a conversation, from a team of brand experts",

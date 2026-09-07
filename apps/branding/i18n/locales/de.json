@@ -43,6 +43,10 @@
     "art6P2": "Content-Rhythmus",
     "art6W3": "Woche 7–12",
     "art6P3": "Sichtbarkeit & GEO",
+    "exampleLabel": "Beispiel-Branding · mit eurem Markenberater gebaut",
+    "exampleTitle": "So sieht fertig aus: Kailua Coffee Co.",
+    "exampleBody": "Eine vollständige Brand Foundation zum Lesen — Story, Purpose, Werte, Stimme, Manifest und Messaging. Genau die Seite, die am Ende eures Gesprächs steht.",
+    "exampleLink": "Beispiel-Branding ansehen",
     "capTitle": "Mehr als ein Generator",
     "capLead": "Marken sind keine Vorlagen — deshalb baut euer Markenberater keine.",
     "cap1Name": "Geführtes Gespräch",
@@ -67,6 +71,18 @@
       "invite": "Einladungscode einlösen"
     },
     "beta": "Branding Supply ist in geschlossener Beta. Für ein eigenes Branding braucht ihr einen Einladungscode — oder einen Platz auf der Warteliste."
+  },
+  "example": {
+    "seoTitle": "Beispiel-Branding: die Brand Foundation von Kailua Coffee Co.",
+    "seoDescription": "Ein vollständiges Ergebnis zum Lesen: Story, Purpose, Werte, Stimme, Manifest und Messaging einer Beispiel-Marke — gebaut mit eurem Markenberater bei Branding Supply.",
+    "eyebrow": "Beispiel-Branding · so sieht ein fertiges Ergebnis aus",
+    "lead": "Kailua Coffee Co. ist eine erfundene Marke, die den ganzen Weg gegangen ist: jedes Kapitel hier entstand im Gespräch mit dem Markenberater, jede Festlegung trägt ihre Begründung. Eure Brand Foundation sieht genauso aus — nur mit euren Worten darin.",
+    "stand": "Stand {date}",
+    "print": "Drucken",
+    "ctaTitle": "Euer Fundament steht in etwa 45 Minuten.",
+    "ctaBody": "Gleicher Ablauf, gleiche Seite am Ende — nur mit eurer Marke darin. Konto anlegen, Arbeitstitel wählen, der Rest ist ein Gespräch.",
+    "ctaStart": "Starte dein Branding",
+    "ctaHome": "Zur Startseite"
   },
   "about": {
     "seoTitle": "Über Branding Supply — persönliche Markenberatung im Gespräch, von einem Team aus Markenexperten",
