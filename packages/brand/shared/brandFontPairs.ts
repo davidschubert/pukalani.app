@@ -16,13 +16,25 @@
  * beweisen soll. Kein Fehler, keine Warnung, kein roter Build.
  *
  * Deshalb steht neben dem Katalog `BRAND_DECLARED_FONT_FAMILIES`: die Liste
- * der Familien, die DEKLARIERT SIND. Sie ist von Hand gepflegt und spiegelt
- * seit D2c das LAYER-CSS `app/assets/css/brand-fonts.css` (vorher den Stand
- * des Playground-CSS) — es hängt über `nuxt.config.ts` im `css`-Array und
- * gilt damit für jede App, die den brand-Layer erbt, heute `apps/branding`.
- * **D4 macht dieses CSS zur QUELLE der Liste** (daraus gelesen oder gegen sie
- * geprüft). Bis dahin ist der Test in `tests/brandFontPairs.test.ts` der
- * Wächter: jede Familie des Katalogs muss in der Liste stehen.
+ * der Familien, die DEKLARIERT SIND, und seit D4 daneben
+ * `BRAND_DECLARED_FONT_WEIGHTS` — welche SCHNITTE je Familie deklariert sind.
+ * Beide spiegeln das LAYER-CSS `app/assets/css/brand-fonts.css` — es hängt
+ * über `nuxt.config.ts` im `css`-Array und gilt damit für jede App, die den
+ * brand-Layer erbt, heute `apps/branding`.
+ *
+ * **SEIT D4 IST DAS CSS DIE QUELLE, NICHT MEHR NUR DAS VORBILD:** der Test in
+ * `tests/brandFontPairs.test.ts` LIEST die Datei und hält beide Listen
+ * wörtlich an ihr fest (Familie und Schnitt). Von Hand gepflegt bleiben die
+ * Listen trotzdem — sie müssen ohne Dateisystem lesbar sein (Browser, Prompt,
+ * Preset). Neu ist, dass ein Auseinanderlaufen jetzt ROT wird, statt nur
+ * gegen eine zweite handgepflegte Liste zu prüfen.
+ *
+ * WARUM DIE SCHNITTE ZÄHLEN (D4): die Typografie-Bühne lässt das
+ * Überschriften-Gewicht stellen. Ein Schnitt, den es nicht gibt, malt der
+ * Browser SELBST (synthetic bold/light) — die Konturen werden aufgeblasen
+ * oder ausgedünnt, und beurteilt würde eine Schrift, die es nicht gibt. PT
+ * Sans und PT Serif haben genau zwei Schnitte; das ist keine Nachlässigkeit,
+ * sondern ihr Lieferumfang.
  *
  * ── DIESE DATEI IST PUR ───────────────────────────────────────────────────
  * Kein i18n, kein H3, kein Appwrite, keine Layer-Importe. Die Namen sind
@@ -127,13 +139,23 @@ export const BRAND_FONT_PAIRS: readonly BrandFontPair[] = [
 export const BRAND_MONO_STACK = "'Geist Mono', ui-monospace, SFMono-Regular, monospace"
 
 /**
+ * Die Familie der Mono-Rolle als NAME — sie zählt bei der Drei-Schriften-Regel
+ * mit (`brandTypeFamilies`, D4) und darf deshalb nicht aus dem Stack geraten
+ * werden. Sie steht bewusst NICHT in `BRAND_DECLARED_FONT_FAMILIES`:
+ * deklariert wird sie schon woanders — in `app/assets/css/brand.css` als
+ * `--bw-font-mono`, der Mono der WERKSTATT selbst. Eine zweite Deklaration
+ * derselben Familie in `brand-fonts.css` wäre eine zweite Wahrheit über
+ * dieselbe Datei; die Liste dort trägt genau die Familien der PAARE.
+ */
+export const BRAND_MONO_FAMILY = 'Geist Mono'
+
+/**
  * DIE FAMILIEN, DIE WIRKLICH GELADEN WERDEN.
  *
- * Von Hand gepflegt (s. Kopf): sie spiegelt seit D2c die Deklaration im
- * Layer-CSS `app/assets/css/brand-fonts.css`. **D4 macht dieses CSS zur
- * Quelle** — die Liste wird daraus abgeleitet bzw. gegen sie geprüft. Bis
- * dahin gilt: wer ein Paar in den Katalog legt, trägt seine Familien HIER ein
- * UND deklariert sie dort — sonst zeigt die Vorschau still den Systemstack.
+ * Von Hand gepflegt (s. Kopf), aber seit D4 gegen die QUELLE geprüft: der
+ * Test liest `app/assets/css/brand-fonts.css` und vergleicht wörtlich. Wer
+ * ein Paar in den Katalog legt, trägt seine Familien HIER ein UND deklariert
+ * sie dort — sonst zeigt die Vorschau still den Systemstack.
  */
 export const BRAND_DECLARED_FONT_FAMILIES: readonly string[] = [
   'Inter',
@@ -144,6 +166,27 @@ export const BRAND_DECLARED_FONT_FAMILIES: readonly string[] = [
   'PT Sans',
   'PT Serif',
 ]
+
+/**
+ * WELCHE SCHNITTE JE FAMILIE DEKLARIERT SIND (D4).
+ *
+ * Dieselbe Datei, dieselbe Pflege, dieselbe Prüfung wie die Familien-Liste —
+ * nur eine Ebene genauer. Sie ist die Antwort auf „darf ich Gewicht 500 an
+ * dieser Überschrift einstellen?": steht der Schnitt nicht hier, malt ihn der
+ * Browser selbst, und die Bühne sagt es (`brandTypeWeightWarning`).
+ *
+ * PT Sans und PT Serif haben genau 400 und 700 — das ist ihr Lieferumfang bei
+ * Google Fonts und nicht eine Lücke in dieser Liste.
+ */
+export const BRAND_DECLARED_FONT_WEIGHTS: Readonly<Record<string, readonly number[]>> = {
+  'Inter': [300, 400, 500, 600, 700],
+  'Source Sans 3': [300, 400, 500, 600, 700],
+  'Source Serif 4': [300, 400, 500, 600, 700],
+  'Nunito Sans': [300, 400, 500, 600, 700],
+  'Sora': [300, 400, 500, 600, 700],
+  'PT Sans': [400, 700],
+  'PT Serif': [400, 700],
+}
 
 const PAIRS_BY_ID = new Map(BRAND_FONT_PAIRS.map(pair => [pair.id, pair]))
 

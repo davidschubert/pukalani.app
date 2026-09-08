@@ -459,7 +459,7 @@ function checkOne(
   const source = invariant.of === undefined ? undefined : slotFacts[invariant.of]?.value
   // FAIL-OPEN: ohne Quelle gibt es nichts zu vergleichen (s. Kopf).
   const needsSource = invariant.kind !== 'count' && invariant.kind !== 'mentionsNone'
-    && invariant.kind !== 'hex'
+    && invariant.kind !== 'hex' && invariant.kind !== 'oneOf'
   if (needsSource && !source?.trim()) return true
 
   /** Vergleichsformen der Quell-Einträge, leere weggeworfen. */
@@ -473,6 +473,13 @@ function checkOne(
       // (`brandDesign.ts`) — ein zweiter Ausdruck daneben wäre eine zweite
       // Auslegung derselben sechs Zeichen.
       return BRAND_HEX_RE.test(value.trim())
+    }
+    case 'oneOf': {
+      // Die MENGE steht in `terms` und kommt aus einem Katalog des Layers
+      // (D4) — nicht aus dem Wert eines anderen Slots. Eine leere Menge
+      // erlaubt nichts: eine Invariante ohne Vorrat ist ein Fehler im
+      // Katalog, und still durchzulassen hiesse, ihn zu verstecken.
+      return (invariant.terms ?? []).some(term => comparable(term) === comparable(value))
     }
     case 'count': {
       const count = brandListEntries(value).length
@@ -613,6 +620,21 @@ export const BRAND_STAGE_SOURCE_SLOTS: Readonly<Partial<Record<BrandStepKey, rea
    */
   dna: ['result.direction'],
   color: ['g.mix', 'result.direction'],
+  /**
+   * DIE TYPOGRAFIE BRAUCHT DIE FERTIGE FARBWELT (D4).
+   *
+   * Die Vorschau-Szene des Kapitels zeigt die Schrift IN der Marke — auf ihrem
+   * Papierton, mit ihrem Akzent. Die drei Werte stehen im Kapitel davor
+   * (`color`), und ohne sie fiele die Szene auf die Notfarbe zurück
+   * (`BRAND_SCENE_FALLBACK_BASE`): ein Schiefergrau, das über die Wirkung
+   * einer Schrift in DIESER Marke nichts sagt.
+   *
+   * `g.mix` trägt die Vorbelegung (DNA „Typografie" ⇒ Paar), `result.direction`
+   * nur den RÜCKFALL: ist die Farbwelt noch nicht bestätigt — von Hand
+   * korrigiert, oder das Kapitel wieder geöffnet —, rechnet dieselbe Regel wie
+   * in D3 einen Vorschlag daraus, statt die Szene grau zu lassen.
+   */
+  type: ['g.mix', 'h.base', 'h.neutral', 'h.accent', 'result.direction'],
 }
 
 /** Die Quell-Slots einer Bühne — leer, wo sie keine braucht. */

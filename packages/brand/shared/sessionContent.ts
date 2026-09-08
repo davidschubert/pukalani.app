@@ -234,6 +234,23 @@ export type BrandInvariantKind =
    * zurück (die ganze Farbwelt wäre weg, ohne dass irgendwo etwas rot würde).
    */
   | 'hex'
+  /**
+   * DER WERT IST EINE ID AUS EINER GESCHLOSSENEN MENGE (`terms`) — Brand
+   * Design D4.
+   *
+   * Die zweite Invariante ohne Quell-Slot (wie `hex`): die Menge steht nicht
+   * in einem anderen Feld, sondern in einem KATALOG des Layers
+   * (`BRAND_FONT_PAIRS`, `BRAND_TYPE_SCALES`). `memberOf` kann das nicht — es
+   * liest seine erlaubten Werte aus dem Wert eines anderen Slots, und einen
+   * solchen Slot gibt es hier nicht.
+   *
+   * Nötig aus demselben Grund wie `hex`: `i.pair` und `i.scale` sind
+   * ANZEIGE-lose Ids, die Bühne hat ein Korrigieren-Feld, und ein dort
+   * hineingeschriebener Satz stünde sonst bestätigt im Slot — `buildBrandDesign`
+   * gäbe von da an stumm `null` zurück (die ganze Typografie wäre weg, ohne
+   * dass irgendwo etwas rot würde).
+   */
+  | 'oneOf'
 
 export interface BrandInvariant {
   readonly kind: BrandInvariantKind
@@ -241,7 +258,8 @@ export interface BrandInvariant {
    * Quell-Slot — MUSS in der Registry VOR dieser Session stehen. Bei
    * `mentionsNone` ist er OPTIONAL und ergänzt `terms` um die Einträge des
    * Quell-Werts (so wird aus „nennt keines dieser Wörter" ohne neue
-   * Invarianten-Art auch „ist nicht dasselbe wie dort").
+   * Invarianten-Art auch „ist nicht dasselbe wie dort"); bei `hex` und
+   * `oneOf` gibt es ihn nicht (beide prüfen die FORM eines Wertes).
    */
   readonly of?: string
   readonly min?: number
@@ -3465,6 +3483,17 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
     },
     answers: { maxProbes: 1 },
     form: { person: 'none', tense: 'present' },
+    /**
+     * DIE SECHS PAAR-IDS WÖRTLICH (D4) — diese Datei hat keine Importe (s.
+     * Kopf), der Katalog steht in `shared/brandFontPairs.ts`. Dass beide
+     * dasselbe sagen, nagelt `tests/brandDesignType.test.ts` fest; ohne diese
+     * Invariante stünde ein von Hand korrigierter Satz bestätigt im Slot und
+     * `buildBrandDesign` gäbe stumm `null` zurück.
+     */
+    invariants: [{
+      kind: 'oneOf',
+      terms: ['editorial', 'humanist', 'inter', 'geometric', 'classic', 'contrast'],
+    }],
   },
   'i.scale': {
     goal: 'derive the size and weight hierarchy from the DNA: calm, dense or bold.',
@@ -3484,10 +3513,12 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
         en: 'Calm, 1 : 2.6 — few sizes, generous leading: the hierarchy of "calm and airy".',
       },
       {
-        de: 'Dicht, 1 : 2,0 — kleinere Sprünge, mehr Text je Bildschirm: redaktionell statt plakativ.',
-        en: 'Dense, 1 : 2.0 — smaller steps, more text per screen: editorial instead of poster-like.',
+        de: 'Dicht, 1 : 2,2 — kleinere Sprünge, mehr Text je Bildschirm: redaktionell statt plakativ.',
+        en: 'Dense, 1 : 2.2 — smaller steps, more text per screen: editorial instead of poster-like.',
       },
     ),
+    /** Die drei Hierarchien wörtlich — dieselbe Begründung wie bei `i.pair`. */
+    invariants: [{ kind: 'oneOf', terms: ['calm', 'dense', 'loud'] }],
   },
   'i.rules': {
     goal: 'settle the typographic rules: heading weight, tracking, capitals and what the mono role is for.',

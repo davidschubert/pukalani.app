@@ -2314,7 +2314,8 @@
       "subsetOf": "In „{field}\" darf nur stehen, was auch in „{source}\" steht.",
       "sentenceOf": "„{field}\" muss wörtlich ein Satz aus „{source}\" sein.",
       "mentionsFrom": "„{field}\" muss die Einträge aus „{source}\" auch nennen.",
-      "mentionsNone": "„{field}\" darf nichts aus „{source}\" wiederholen."
+      "mentionsNone": "„{field}\" darf nichts aus „{source}\" wiederholen.",
+    "oneOf": "„{field}\" muss eine der angebotenen Möglichkeiten sein — wählt eine Karte statt eigenen Text zu schreiben."
     },
     "discoverAdmin": {
       "title": "Veröffentlichungen",

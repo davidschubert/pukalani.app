@@ -905,10 +905,15 @@ export const BRAND_SLOTS: readonly BrandSlot[] = [
   defineSession({ id: 'h.contrast', stepId: 'color', type: 'derivation', required: true, kind: 'structured', maxLength: LONG, editor: 'none', generator: 'none', dependencies: ['h.ramp', 'h.roles'] }),
 
   // ── I · Typografie (§2.4) — 3 ───────────────────────────────────────────
-  defineSession({ id: 'i.pair', stepId: 'type', type: 'choice', required: true, kind: 'choice', maxLength: SHORT, editor: 'cards', generator: 'derive', dependencies: ['g.mix'] }),
+  // `generator: 'none'` FÜR ALLE DREI (D4, dieselbe Begründung wie bei `h.base`
+  // in D3): Paar, Hierarchie und Regeln sind eine WAHL bzw. eine Rechnung auf
+  // der Werkbank — mit `derive`/`draft` trüge die Bühne einen Entwurfs-Knopf,
+  // und der schriebe Prosa in Felder, die eine Katalog-Id, eine zweite
+  // Katalog-Id und vier beschriftete Blöcke halten.
+  defineSession({ id: 'i.pair', stepId: 'type', type: 'choice', required: true, kind: 'choice', maxLength: SHORT, editor: 'cards', generator: 'none', dependencies: ['g.mix'] }),
   // PUR: die Hierarchie folgt aus DNA „Typografie" und „Komposition".
   defineSession({ id: 'i.scale', stepId: 'type', type: 'derivation', required: true, kind: 'choice', maxLength: SHORT, editor: 'chips', generator: 'none', dependencies: ['g.mix', 'i.pair'] }),
-  defineSession({ id: 'i.rules', stepId: 'type', type: 'stage-edit', required: true, kind: 'structured', maxLength: LONG, editor: 'stage', generator: 'draft', dependencies: ['i.pair', 'i.scale'] }),
+  defineSession({ id: 'i.rules', stepId: 'type', type: 'stage-edit', required: true, kind: 'structured', maxLength: LONG, editor: 'stage', generator: 'none', dependencies: ['i.pair', 'i.scale'] }),
 
   // ── J · Zeichen (§2.5, drei Stufen) — 5 ─────────────────────────────────
   defineSession({ id: 'j.kind', stepId: 'mark', type: 'choice', required: true, kind: 'choice', maxLength: SHORT, editor: 'cards', generator: 'derive', dependencies: ['g.mix'] }),

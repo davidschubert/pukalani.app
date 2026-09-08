@@ -2314,7 +2314,8 @@
       "subsetOf": "“{field}” may only contain what is also in “{source}”.",
       "sentenceOf": "“{field}” has to be one sentence from “{source}”, word for word.",
       "mentionsFrom": "“{field}” has to name the entries from “{source}” as well.",
-      "mentionsNone": "“{field}” must not repeat anything from “{source}”."
+      "mentionsNone": "“{field}” must not repeat anything from “{source}”.",
+    "oneOf": "“{field}” has to be one of the options offered — pick a card instead of writing your own text."
     },
     "discoverAdmin": {
       "title": "Publications",

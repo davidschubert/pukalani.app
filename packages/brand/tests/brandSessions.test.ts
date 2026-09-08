@@ -388,7 +388,25 @@ describe('evaluateInvariants — was ein Test prüfen kann (§3a Nr. 6)', () => 
       // (`#rrggbb`), nicht sein Verhältnis zu einem anderen Feld.
       ['h.base', [{ kind: 'hex' }]],
       ['h.accent', [{ kind: 'hex' }]],
+      // Brand Design D4: die zwei Typografie-Wahlen. Auch sie haben keinen
+      // Quell-Slot — ihre Menge steht in einem KATALOG des Layers, nicht im
+      // Wert eines anderen Feldes (`memberOf` könnte das nicht).
+      ['i.pair', [{
+        kind: 'oneOf',
+        terms: ['editorial', 'humanist', 'inter', 'geometric', 'classic', 'contrast'],
+      }]],
+      ['i.scale', [{ kind: 'oneOf', terms: ['calm', 'dense', 'loud'] }]],
     ])
+  })
+
+  it('i.pair: eine Katalog-Id geht durch, ein Satz nicht (D4)', () => {
+    const session = slotById('i.pair')!
+    expect(evaluateInvariants(session, 'editorial').ok).toBe(true)
+    expect(evaluateInvariants(session, '  Editorial  ').ok).toBe(true)
+    const broken = evaluateInvariants(session, 'Eine warme Serif mit humanistischer Grotesk')
+    expect(broken.ok).toBe(false)
+    expect(broken.ok === false && broken.code).toBe('invariant_violated')
+    expect(evaluateInvariants(slotById('i.scale')!, 'gigantisch').ok).toBe(false)
   })
 
   it('h.base: eine Farbe geht durch, ein Satz nicht (D3)', () => {

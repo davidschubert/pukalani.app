@@ -133,6 +133,12 @@ function invariantText(session: BrandSlot): string {
         return invariant.min === undefined
           ? `nennt JEDEN Eintrag aus \`${invariant.of}\``
           : `nennt mindestens ${invariant.min} Einträge aus \`${invariant.of}\``
+      // Die zwei Invarianten OHNE Quell-Slot (Brand Design D3/D4). `hex` fehlte
+      // hier seit D3: der Zweig gab `undefined` zurück, und im Baum stand für
+      // `h.base` eine LEERE Zeile statt der Regel — sichtbar erst, als D4 die
+      // zweite quellenlose Art dazulegte.
+      case 'hex': return 'der Wert ist eine Farbe (`#rrggbb`)'
+      case 'oneOf': return `der Wert ist eine Id aus: ${(invariant.terms ?? []).join(', ')}`
     }
   }).join(' · ')
 }

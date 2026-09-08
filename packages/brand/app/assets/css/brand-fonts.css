@@ -7,11 +7,17 @@
  * bestehen:
  *   Inter · Source Sans 3 · Source Serif 4 · Nunito Sans · Sora ·
  *   PT Sans · PT Serif
- * Je Familie die Schnitte 400 / 500 / 600 / 700 — die Typografie-Seite lässt
- * das Überschriften-Gewicht bis 700 stellen, und ein NICHT geladener Schnitt
- * würde vom Browser gefälscht (aufgeblasene Konturen), also genau das
- * verfälschen, was hier beurteilt werden soll. (PT Sans und PT Serif gibt es
- * nur in 400 und 700 — mehr kann man nicht deklarieren.)
+ * Je Familie die Schnitte 300 / 400 / 500 / 600 / 700 — die Typografie-Seite
+ * (D4) lässt das Überschriften-Gewicht von 300 bis 700 stellen, und ein NICHT
+ * geladener Schnitt würde vom Browser gefälscht (aufgeblasene oder
+ * ausgedünnte Konturen), also genau das verfälschen, was hier beurteilt
+ * werden soll. (PT Sans und PT Serif gibt es nur in 400 und 700 — mehr kann
+ * man nicht deklarieren; die Bühne sagt es an der Stellschraube.)
+ *
+ * WELCHE SCHNITTE HIER STEHEN, sagt `BRAND_DECLARED_FONT_WEIGHTS` in
+ * `shared/brandFontPairs.ts` noch einmal — dort, wo der Browser und der
+ * Prompt es lesen können. Seit D4 ist DIESE DATEI die Quelle: der Test
+ * `tests/brandFontPairs.test.ts` liest sie und hält beide Listen an ihr fest.
  *
  * WARUM DIE DEKLARATION IM BUILD STEHEN MUSS: `@nuxt/fonts` (kommt über
  * @nuxt/ui mit) self-hostet ausschliesslich Familien, die es im BUILD in
@@ -33,26 +39,31 @@
  */
 
 .bw-face-inter { font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif; font-weight: 400; }
+.bw-face-inter-300 { font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif; font-weight: 300; }
 .bw-face-inter-500 { font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif; font-weight: 500; }
 .bw-face-inter-600 { font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif; font-weight: 600; }
 .bw-face-inter-700 { font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif; font-weight: 700; }
 
 .bw-face-source-sans { font-family: 'Source Sans 3', 'Helvetica Neue', Arial, sans-serif; font-weight: 400; }
+.bw-face-source-sans-300 { font-family: 'Source Sans 3', 'Helvetica Neue', Arial, sans-serif; font-weight: 300; }
 .bw-face-source-sans-500 { font-family: 'Source Sans 3', 'Helvetica Neue', Arial, sans-serif; font-weight: 500; }
 .bw-face-source-sans-600 { font-family: 'Source Sans 3', 'Helvetica Neue', Arial, sans-serif; font-weight: 600; }
 .bw-face-source-sans-700 { font-family: 'Source Sans 3', 'Helvetica Neue', Arial, sans-serif; font-weight: 700; }
 
 .bw-face-source-serif { font-family: 'Source Serif 4', Georgia, 'Times New Roman', serif; font-weight: 400; }
+.bw-face-source-serif-300 { font-family: 'Source Serif 4', Georgia, 'Times New Roman', serif; font-weight: 300; }
 .bw-face-source-serif-500 { font-family: 'Source Serif 4', Georgia, 'Times New Roman', serif; font-weight: 500; }
 .bw-face-source-serif-600 { font-family: 'Source Serif 4', Georgia, 'Times New Roman', serif; font-weight: 600; }
 .bw-face-source-serif-700 { font-family: 'Source Serif 4', Georgia, 'Times New Roman', serif; font-weight: 700; }
 
 .bw-face-nunito-sans { font-family: 'Nunito Sans', 'Trebuchet MS', 'Helvetica Neue', Arial, sans-serif; font-weight: 400; }
+.bw-face-nunito-sans-300 { font-family: 'Nunito Sans', 'Trebuchet MS', 'Helvetica Neue', Arial, sans-serif; font-weight: 300; }
 .bw-face-nunito-sans-500 { font-family: 'Nunito Sans', 'Trebuchet MS', 'Helvetica Neue', Arial, sans-serif; font-weight: 500; }
 .bw-face-nunito-sans-600 { font-family: 'Nunito Sans', 'Trebuchet MS', 'Helvetica Neue', Arial, sans-serif; font-weight: 600; }
 .bw-face-nunito-sans-700 { font-family: 'Nunito Sans', 'Trebuchet MS', 'Helvetica Neue', Arial, sans-serif; font-weight: 700; }
 
 .bw-face-sora { font-family: 'Sora', 'Avenir Next', 'Helvetica Neue', Arial, sans-serif; font-weight: 400; }
+.bw-face-sora-300 { font-family: 'Sora', 'Avenir Next', 'Helvetica Neue', Arial, sans-serif; font-weight: 300; }
 .bw-face-sora-500 { font-family: 'Sora', 'Avenir Next', 'Helvetica Neue', Arial, sans-serif; font-weight: 500; }
 .bw-face-sora-600 { font-family: 'Sora', 'Avenir Next', 'Helvetica Neue', Arial, sans-serif; font-weight: 600; }
 .bw-face-sora-700 { font-family: 'Sora', 'Avenir Next', 'Helvetica Neue', Arial, sans-serif; font-weight: 700; }

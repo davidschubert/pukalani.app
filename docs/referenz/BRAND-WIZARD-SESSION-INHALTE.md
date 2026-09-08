@@ -3485,7 +3485,7 @@ Interview-Technik: **Frida** (Design Directorin). Gesprochen wird alles von Geor
 
 **Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
 
-**Invarianten (im Code geprüft):** 
+**Invarianten (im Code geprüft):** der Wert ist eine Farbe (`#rrggbb`)
 
 **Fliesst später in:** 9 Felder in 2 Kapiteln (Farbwelt · Zeichen)
 
@@ -3598,7 +3598,7 @@ Interview-Technik: **Frida** (Design Directorin). Gesprochen wird alles von Geor
 
 **Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
 
-**Invarianten (im Code geprüft):** 
+**Invarianten (im Code geprüft):** der Wert ist eine Farbe (`#rrggbb`)
 
 **Fliesst später in:** 4 Felder in 2 Kapiteln (Farbwelt · Zeichen)
 
@@ -3714,7 +3714,7 @@ Interview-Technik: **Frida** (Design Directorin). Gesprochen wird alles von Geor
 
 **Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
 
-**Invarianten (im Code geprüft):** —
+**Invarianten (im Code geprüft):** der Wert ist eine Id aus: editorial, humanist, inter, geometric, classic, contrast
 
 **Fliesst später in:** 8 Felder in 3 Kapiteln (Typografie · Zeichen · Bildsprache)
 
@@ -3739,7 +3739,7 @@ Interview-Technik: **Frida** (Design Directorin). Gesprochen wird alles von Geor
 
 **Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
 
-**Invarianten (im Code geprüft):** —
+**Invarianten (im Code geprüft):** der Wert ist eine Id aus: calm, dense, loud
 
 **Fliesst später in:** 1 Felder in 1 Kapiteln (Typografie)
 
@@ -3752,9 +3752,9 @@ Interview-Technik: **Frida** (Design Directorin). Gesprochen wird alles von Geor
   > Calm, 1 : 2.6 — few sizes, generous leading: the hierarchy of "calm and airy".
 - **Marken-Relaunch**
   - de:
-  > Dicht, 1 : 2,0 — kleinere Sprünge, mehr Text je Bildschirm: redaktionell statt plakativ.
+  > Dicht, 1 : 2,2 — kleinere Sprünge, mehr Text je Bildschirm: redaktionell statt plakativ.
   - en:
-  > Dense, 1 : 2.0 — smaller steps, more text per screen: editorial instead of poster-like.
+  > Dense, 1 : 2.2 — smaller steps, more text per screen: editorial instead of poster-like.
 
 ### `i.rules` — Schrift-Regeln
 
