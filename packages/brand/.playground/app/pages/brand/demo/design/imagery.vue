@@ -139,7 +139,7 @@ const palette = DS_BRAND.palette
           <h2 class="text-xl font-medium">Illustration</h2>
           <span class="bw-label ms-auto" style="color: var(--bw-muted)">k.illustration</span>
         </div>
-        <div class="mt-3 grid gap-2 sm:grid-cols-2">
+        <div class="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
           <button
             v-for="option in DS_ILLUSTRATION_OPTIONS" :key="option.id"
             type="button"
