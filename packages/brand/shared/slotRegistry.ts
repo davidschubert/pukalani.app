@@ -891,7 +891,11 @@ export const BRAND_SLOTS: readonly BrandSlot[] = [
   defineSession({ id: 'g.mix', stepId: 'dna', type: 'stage-edit', required: true, kind: 'structured', maxLength: LONG, editor: 'stage', generator: 'draft', dependencies: ['g.dna', 'g.board'] }),
 
   // ── H · Farbwelt (§2.3) — 6 ─────────────────────────────────────────────
-  defineSession({ id: 'h.base', stepId: 'color', type: 'derivation', required: true, kind: 'text', maxLength: SHORT, editor: 'text', generator: 'candidates', dependencies: ['g.mix'] }),
+  // `generator: 'none'` (D3): die drei Kandidaten sind eine DETERMINISTISCHE
+  // Rechnung aus Richtung und Farbwelt (`brandBaseCandidates`), kein
+  // Modell-Lauf. Mit `candidates` trüge die Bühne einen Entwurfs-Knopf, und der
+  // schriebe Prosa in ein Feld, das genau einen Hex-Wert hält.
+  defineSession({ id: 'h.base', stepId: 'color', type: 'derivation', required: true, kind: 'text', maxLength: SHORT, editor: 'text', generator: 'none', dependencies: ['g.mix'] }),
   // PUR: die Ramp-Mathematik der Themes-Engine (`buildBrandDesign`), kein Modell.
   defineSession({ id: 'h.ramp', stepId: 'color', type: 'derivation', required: true, kind: 'structured', maxLength: LONG, editor: 'none', generator: 'none', dependencies: ['h.base'] }),
   defineSession({ id: 'h.neutral', stepId: 'color', type: 'choice', required: true, kind: 'choice', maxLength: SHORT, editor: 'chips', generator: 'none', dependencies: ['h.base'] }),

@@ -36,7 +36,7 @@
  * Ausnahme steht als ZEILEN-Ausnahme, damit der Wächter für alles andere
  * scharf bleibt. */
 // eslint-disable-next-line pukalani/no-cross-layer-relative -- Brand Design §2.3: pure Ramp-/Kontrast-Mathematik aus themes/shared, kein anderer themes-Zugriff.
-import { contrastRatio, generateNeutralRamp, generateRamp, wcagLevel } from '../../themes/shared/ramp'
+import { contrastRatio, generateNeutralRamp, generateRamp, hexToRgb, wcagLevel } from '../../themes/shared/ramp'
 import { brandFontPairForDnaTypography } from './brandDesignDna'
 import {
   BRAND_DNA_DIMENSION_IDS,
@@ -90,6 +90,16 @@ export function brandNeutralRamp(hex: string): BrandRamp | null {
   return generateNeutralRamp(hex)
 }
 
+/**
+ * DIE ZERLEGUNG EINES HEX — durchgereicht aus der Engine (A14: der Import oben
+ * ist der EINE). Wer eine Farbe VERGLEICHEN will (`brandDesignColor.ts`),
+ * braucht ihre Kanäle; ein zweiter Parser daneben wäre eine zweite Auslegung
+ * derselben sechs Zeichen.
+ */
+export function brandHexToRgb(hex: string): [number, number, number] | null {
+  return hexToRgb(hex)
+}
+
 export interface BrandContrastVerdict {
   ratio: number
   level: 'AAA' | 'AA' | 'AA18' | 'fail'
@@ -112,7 +122,12 @@ export function brandContrast(foreground: string, background: string): BrandCont
 const NEUTRAL_WARM = '#8a7a68'
 const NEUTRAL_COOL = '#68767a'
 
-function neutralSourceFor(option: string | undefined, base: string): string {
+/**
+ * Aus WELCHEM Hex die Neutral-Rampe getönt wird. EXPORTIERT, weil die Bühne
+ * dieselbe Antwort braucht: rechnete die Vorschau ihre Rampe anders als das
+ * Preset, sähe der Mensch eine Farbwelt und bekäme eine andere.
+ */
+export function brandNeutralSource(option: string | undefined, base: string): string {
   if (option === 'warm') return NEUTRAL_WARM
   if (option === 'cool') return NEUTRAL_COOL
   return base
@@ -126,14 +141,19 @@ function neutralSourceFor(option: string | undefined, base: string): string {
  * Stufe im HINTERGRUND aus der NEUTRAL-Rampe (Flächen tragen sie nicht). Wer
  * das vertauscht, misst Paare, die auf keiner Seite vorkommen.
  */
-interface ContrastPairSpec {
+export interface BrandContrastPairSpec {
   readonly id: string
   readonly scheme: 'light' | 'dark'
   readonly fg: number | 'accent' | 'paper'
   readonly bg: number | 'paper' | 'ground' | 'accent'
 }
 
-const CONTRAST_PAIRS: readonly ContrastPairSpec[] = [
+/**
+ * DIE SECHS PAARE — EINE Liste, zwei Leser (Preset und Kapitel `color`).
+ * Ihre BESCHRIFTUNGEN stehen im Vokabular (`BRAND_CONTRAST_PAIR_TERMS`), weil
+ * sie in der Inhaltssprache der Marke in den Slot-Wert wandern.
+ */
+export const BRAND_CONTRAST_PAIR_SPECS: readonly BrandContrastPairSpec[] = [
   { id: 'body-light', scheme: 'light', fg: 900, bg: 'paper' },
   { id: 'heading-light', scheme: 'light', fg: 800, bg: 'paper' },
   { id: 'button-light', scheme: 'light', fg: 'paper', bg: 'accent' },
@@ -155,7 +175,7 @@ function shadeOf(ramp: BrandRamp, shade: number): string | null {
 }
 
 function resolveEnd(
-  end: ContrastPairSpec['fg'] | ContrastPairSpec['bg'],
+  end: BrandContrastPairSpec['fg'] | BrandContrastPairSpec['bg'],
   scheme: 'light' | 'dark',
   colors: ResolvedColors,
 ): string | null {
@@ -170,7 +190,7 @@ function resolveEnd(
 
 function buildContrastPairs(colors: ResolvedColors): BrandContrastPair[] {
   const pairs: BrandContrastPair[] = []
-  for (const spec of CONTRAST_PAIRS) {
+  for (const spec of BRAND_CONTRAST_PAIR_SPECS) {
     const foreground = resolveEnd(spec.fg, spec.scheme, colors)
     const background = resolveEnd(spec.bg, spec.scheme, colors)
     if (!foreground || !background) continue
@@ -186,6 +206,32 @@ function buildContrastPairs(colors: ResolvedColors): BrandContrastPair[] {
     })
   }
   return pairs
+}
+
+/**
+ * DIE SECHS GEPRÜFTEN PAARE ZU EINER FARBWELT — dieselbe Rechnung wie im
+ * Preset, nur aus den drei Entscheidungen statt aus einem `BrandDesignValues`.
+ *
+ * Das Kapitel `color` zeigt die Matrix, LANGE bevor ein Preset entstehen kann
+ * (Schrift, Zeichen und Bewegung fehlen dann noch). Es rechnet sie trotzdem
+ * NICHT selbst: zwei Rechenwege für dieselbe Tabelle wären zwei Wahrheiten,
+ * und die Zahl auf dem Bildschirm ist genau die, die später im Preset steht.
+ *
+ * `null`, sobald eine der drei Farben kein gültiger Hex ist — beim Tippen ist
+ * das der Normalfall, und eine Matrix aus Notfarben wäre eine Auskunft über
+ * nichts.
+ */
+export function brandColorContrastPairs(
+  base: string,
+  accent: string,
+  neutralOption: string | undefined,
+): BrandContrastPair[] | null {
+  if (!isBrandHex(base) || !isBrandHex(accent)) return null
+  const rampLight = brandRampLight(base)
+  const rampDark = brandRampDark(base)
+  const neutral = brandNeutralRamp(brandNeutralSource(neutralOption, base))
+  if (!rampLight || !rampDark || !neutral) return null
+  return buildContrastPairs({ rampLight, rampDark, neutral, accent })
 }
 
 /**
@@ -326,7 +372,7 @@ export function buildBrandDesign(values: BrandDesignValues): BrandDesignPreset |
 
   const rampLight = brandRampLight(values.base)
   const rampDark = brandRampDark(values.base)
-  const neutral = brandNeutralRamp(neutralSourceFor(values.neutral, values.base))
+  const neutral = brandNeutralRamp(brandNeutralSource(values.neutral, values.base))
   if (!rampLight || !rampDark || !neutral) return null
 
   const pair = values.pair ? brandFontPair(values.pair) : undefined

@@ -1,3 +1,4 @@
+import { BRAND_HEX_RE } from './brandDesign'
 import { BRAND_DIRECTION_SOURCE_SLOTS } from './brandDirections'
 import { brandGenerationHashInput } from './brandGeneration'
 import {
@@ -458,6 +459,7 @@ function checkOne(
   const source = invariant.of === undefined ? undefined : slotFacts[invariant.of]?.value
   // FAIL-OPEN: ohne Quelle gibt es nichts zu vergleichen (s. Kopf).
   const needsSource = invariant.kind !== 'count' && invariant.kind !== 'mentionsNone'
+    && invariant.kind !== 'hex'
   if (needsSource && !source?.trim()) return true
 
   /** Vergleichsformen der Quell-Einträge, leere weggeworfen. */
@@ -465,6 +467,13 @@ function checkOne(
     brandListEntries(source ?? '').map(comparable).filter(entry => entry.length > 0)
 
   switch (invariant.kind) {
+    case 'hex': {
+      // Die FORM eines Wertes, nicht sein Verhältnis zu einem anderen: dieselbe
+      // Prüfung wie in der Themes-Engine, aus der EINEN Stelle des Layers
+      // (`brandDesign.ts`) — ein zweiter Ausdruck daneben wäre eine zweite
+      // Auslegung derselben sechs Zeichen.
+      return BRAND_HEX_RE.test(value.trim())
+    }
     case 'count': {
       const count = brandListEntries(value).length
       if (invariant.min !== undefined && count < invariant.min) return false
@@ -592,6 +601,18 @@ export const BRAND_SUBSTANCE_MIN_WORDS: Readonly<Record<BrandSessionSubstance, n
  */
 export const BRAND_STAGE_SOURCE_SLOTS: Readonly<Partial<Record<BrandStepKey, readonly string[]>>> = {
   result: BRAND_DIRECTION_SOURCE_SLOTS,
+  /**
+   * SCHICHT 2 BRAUCHT DIE GEWÄHLTE RICHTUNG (Brand Design D2c/D3).
+   *
+   * Die drei Moodboards und die Farb-Kandidaten schöpfen ihren Dreiklang aus
+   * `result.direction` — und die steht im Kapitel `result`. Ohne diese zwei
+   * Zeilen kam sie nie in der Bühne an, und BEIDE Rechnungen fielen still auf
+   * die erste Richtung des Katalogs zurück (in D2c gebaut, hier beim Bau von
+   * D3 am eigenen Klick gefunden: die Boards zeigten für jede Marke dieselbe
+   * Farbwelt).
+   */
+  dna: ['result.direction'],
+  color: ['g.mix', 'result.direction'],
 }
 
 /** Die Quell-Slots einer Bühne — leer, wo sie keine braucht. */

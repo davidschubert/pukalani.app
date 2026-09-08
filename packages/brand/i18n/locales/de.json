@@ -249,6 +249,83 @@
         }
       }
     },
+    "color": {
+      "base": {
+        "title": "Basisfarbe",
+        "tag": "h.base · drei Kandidaten",
+        "intro": "Das ist die einzige Farbe, die ihr wirklich wählt — alles andere rechne ich daraus. Geprüft wird sie als Textfarbe auf dem Papierton, den sie selbst erzeugt.",
+        "onPaper": "{ratio} auf Papier · {level}",
+        "blocked": "Als Textfarbe nicht wählbar — unter 4,5:1. Als Fläche bleibt sie erlaubt.",
+        "pickerLabel": "Basisfarbe im Farb-Picker wählen",
+        "hexLabel": "Eigene Basisfarbe als Hex-Wert",
+        "hexHint": "Picker öffnen oder eigenen Hex-Wert eingeben (sechs Zeichen)."
+      },
+      "candidate": {
+        "direction-deep": "Die Tiefe eurer Richtung",
+        "palette-deep": "Die Tiefe eurer Farbwelt",
+        "direction-mid": "Der Mittelton eurer Richtung",
+        "signal-deep": "Ein zweiter Farbton als Signal",
+        "signal-alt": "Noch ein Signal-Ton"
+      },
+      "reason": {
+        "base": {
+          "directionDeep": "Die tiefste Farbe der Richtung, für die ihr euch entschieden habt — tief genug, um Text zu tragen.",
+          "paletteDeep": "Ein anderer Farbton aus derselben kuratierten Welt: eigenständiger, ohne die Richtung zu verlassen.",
+          "directionMid": "Der freundlichste der drei — und meistens der, der als Textfarbe durchfällt."
+        },
+        "accent": {
+          "directionMid": "Aus eurer eigenen Welt und damit harmonisch — für hellen Knopf-Text ist er meistens zu hell.",
+          "signalDeep": "Ein anderer Farbton, tief genug für hellen Text: das Signal, das man auch von weitem sieht.",
+          "signalAlt": "Dieselbe Idee in einer zweiten Farbe — falls die erste zu nah an eurem Umfeld liegt."
+        }
+      },
+      "scheme": {
+        "light": "Hell",
+        "dark": "Dunkel"
+      },
+      "ramp": {
+        "title": "Hell- und Dunkel-Rampe",
+        "tag": "h.ramp · gerechnet, nicht gewählt",
+        "intro": "Elf Stufen je Welt, wahrgenommen gleichmäßig. Die dunkle Rampe ist dieselbe Mathematik mit anderen Enden — auf dunklem Grund braucht die Marke oben mehr Luft.",
+        "pair": "Text {ink} auf Grund {ground}",
+        "note": "Beide Welten sind dieselbe Basisfarbe — nur die Enden der Rampe sind andere. Wer die dunkle Welt nicht will, hat trotzdem eine: Betriebssysteme schalten sie ein."
+      },
+      "neutral": {
+        "title": "Grundton",
+        "tag": "h.neutral",
+        "intro": "Flächen und Linien tragen einen Hauch Farbe — oder bewusst einen anderen Ton.",
+        "note": {
+          "tinted": "Flächen tragen einen Hauch eurer Marke — die Vorgabe.",
+          "warm": "Papierfarben mit Gelbstich, wie ungestrichenes Papier.",
+          "cool": "Ruhiger, technischer — nimmt der Wärme etwas Süße."
+        }
+      },
+      "accent": {
+        "title": "Akzent",
+        "tag": "h.accent",
+        "intro": "Ein Signal, kein Zweitgrund: ein Pop je Fläche.",
+        "tooClose": "Zu nah an eurer Basisfarbe — als Signal würde ihn niemand lesen."
+      },
+      "roles": {
+        "title": "Rollen",
+        "tag": "h.roles · wofür welche Farbe steht"
+      },
+      "contrast": {
+        "title": "Kontrast-Prüfung",
+        "tag": "h.contrast · WCAG 2.1",
+        "intro": "Sechs Paare, hell und dunkel. Sie sind Teil des Vorschlags und nicht ein Prüfschritt danach — was hier durchfällt, wird gar nicht erst angeboten.",
+        "sample": "Ein Satz zur Probe",
+        "note": "Die Zahlen sind live gerechnet: eine andere Basisfarbe oben ändert diese Tabelle sofort.",
+        "blocked": "So lässt sich die Prüfung nicht bestätigen: {pairs} bleiben unter AA. Ändert die Basisfarbe, den Grundton oder den Akzent — die Zahlen folgen sofort.",
+        "column": {
+          "pair": "Paar",
+          "scheme": "Welt",
+          "sample": "Probe",
+          "ratio": "Verhältnis",
+          "verdict": "Urteil"
+        }
+      }
+    },
     "cta": {
       "book": "Erstgespräch buchen"
     },
@@ -2231,6 +2308,7 @@
     "invariant": {
       "title": "Das passt so noch nicht",
       "generic": "„{field}\" hält eine Regel dieses Feldes noch nicht ein.",
+      "hex": "„{field}“ muss eine Farbe sein — sechs Zeichen mit Raute, zum Beispiel #4a3123.",
       "count": "„{field}\" braucht zwischen {min} und {max} Einträge — je Eintrag eine Zeile oder mit Komma getrennt.",
       "memberOf": "„{field}\" muss einer der Einträge aus „{source}\" sein.",
       "subsetOf": "In „{field}\" darf nur stehen, was auch in „{source}\" steht.",

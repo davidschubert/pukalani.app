@@ -417,6 +417,39 @@ export const BRAND_DNA_BOARD_OPTIONS: readonly BrandChoiceOption[] = BRAND_DNA_B
     copyKey: `brand.choice.dnaBoard.${kind.id}`,
   }))
 
+/**
+ * DIE DREI GRUNDTÖNE ALS OPTIONEN (`h.neutral`, Brand Design D3) — AUS dem
+ * Vokabular gebaut, nicht daneben gepflegt (wie die Boards).
+ *
+ * Die KARTEN dieses Slots stehen im Farbwelt-Abschnitt und zeigen je eine
+ * gerechnete Neutral-Rampe; `copyKey` zeigt deshalb — wie bei `g.board` — auf
+ * eine Copy, die die Bühne nicht rendert. Der Vertrag ist trotzdem nötig: ohne
+ * ihn stünde im Handbuch die rohe Id `tinted`.
+ */
+export const BRAND_NEUTRAL_CHOICE_OPTIONS: readonly BrandChoiceOption[] = [
+  {
+    id: 'tinted',
+    label: 'Tinted from the base colour',
+    hint: 'surfaces carry a hint of the brand — the engine default',
+    display: { de: 'Aus der Basisfarbe getönt', en: 'Tinted from the base colour' },
+    copyKey: 'brand.choice.neutral.tinted',
+  },
+  {
+    id: 'warm',
+    label: 'Warm',
+    hint: 'paper-like surfaces with a yellow cast',
+    display: { de: 'Warm', en: 'Warm' },
+    copyKey: 'brand.choice.neutral.warm',
+  },
+  {
+    id: 'cool',
+    label: 'Cool',
+    hint: 'quieter, more technical surfaces',
+    display: { de: 'Kühl', en: 'Cool' },
+    copyKey: 'brand.choice.neutral.cool',
+  },
+]
+
 const CONTRACTS: readonly BrandChoiceContract[] = [...BASE_CONTRACTS, {
   /**
    * DIE WEICHE (`g.source`) — geschlossen, zwei Optionen (s.
@@ -493,6 +526,23 @@ const CONTRACTS: readonly BrandChoiceContract[] = [...BASE_CONTRACTS, {
       + 'hier geht es nur darum, womit wir anfangen.',
     en: 'Which of the three boards is your starting point? You can mix straight afterwards — '
       + 'this is only about where we begin.',
+  },
+}, {
+  /**
+   * DER GRUNDTON (`h.neutral`, Brand Design D3) — geschlossen, drei Optionen.
+   *
+   * Er ist die einzige Session der Farbwelt, deren Wert eine ID ist (Basis und
+   * Akzent sind Hex-Werte, alles andere ist gerechnet). Genau deshalb braucht
+   * sie den Vertrag: „tinted" im Handbuch wäre kein Satz, sondern ein Feldname.
+   */
+  slotId: 'h.neutral',
+  kind: 'closed',
+  options: BRAND_NEUTRAL_CHOICE_OPTIONS,
+  strayRule: 'Do not invent a fourth tint, do not name a colour, and do not answer "both" — the field '
+    + 'holds one id and nothing else.',
+  fallbackQuestion: {
+    de: 'Sollen eure Flächen einen Hauch eurer Marken-Farbe tragen — oder bewusst warm oder kühl sein?',
+    en: 'Should your surfaces carry a hint of your brand colour — or be deliberately warm or cool?',
   },
 }]
 

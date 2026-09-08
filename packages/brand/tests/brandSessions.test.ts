@@ -360,7 +360,7 @@ describe('evaluateInvariants — was ein Test prüfen kann (§3a Nr. 6)', () => 
     invariants,
   })
 
-  it('registriert in der echten Registry genau die sicheren sieben', () => {
+  it('registriert in der echten Registry genau die sicheren neun', () => {
     // `f.decision` kam mit Paket 2 dazu, nachdem die WERT-FORM entschieden war
     // („top three, in order" = eine Liste, jede Zeile ein Name aus der
     // Shortlist — Paket-1-Befund (b)). Paket 2b hat vier weitere gesetzt
@@ -383,7 +383,27 @@ describe('evaluateInvariants — was ein Test prüfen kann (§3a Nr. 6)', () => 
       ['d.secondary', [{ kind: 'mentionsNone', of: 'd.primary' }]],
       ['e.anchorLine', [{ kind: 'sentenceOf', of: 'e.manifesto' }]],
       ['f.decision', [{ kind: 'subsetOf', of: 'f.shortlist' }]],
+      // Brand Design D3: die zwei Farb-Felder. Sie sind die einzigen
+      // Invarianten OHNE Quell-Slot — geprüft wird die FORM eines Wertes
+      // (`#rrggbb`), nicht sein Verhältnis zu einem anderen Feld.
+      ['h.base', [{ kind: 'hex' }]],
+      ['h.accent', [{ kind: 'hex' }]],
     ])
+  })
+
+  it('h.base: eine Farbe geht durch, ein Satz nicht (D3)', () => {
+    const session = slotById('h.base')!
+    expect(evaluateInvariants(session, '#4a3123').ok).toBe(true)
+    expect(evaluateInvariants(session, '  #4A3123  ').ok).toBe(true)
+    const broken = evaluateInvariants(session, 'Das warme Braun unserer Röstung')
+    expect(broken.ok).toBe(false)
+    expect(broken.ok === false && broken.code).toBe('invariant_violated')
+    // Halbe Eingaben und Drei-Zeichen-Kurzformen zählen nicht: das Preset
+    // rechnet mit sechs Zeichen (`BRAND_HEX_RE`).
+    expect(evaluateInvariants(session, '#4a3').ok).toBe(false)
+    // Ein LEERER Wert bleibt offen — dafür gibt es `slot_empty`, nicht die
+    // Invariante (`evaluateInvariants` steigt vorher aus).
+    expect(evaluateInvariants(session, '').ok).toBe(true)
   })
 
   it('c.definitions: jeder gewählte Wert kommt vor, keiner fehlt', () => {

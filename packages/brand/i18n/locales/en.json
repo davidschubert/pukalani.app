@@ -249,6 +249,83 @@
         }
       }
     },
+    "color": {
+      "base": {
+        "title": "Base colour",
+        "tag": "h.base · three candidates",
+        "intro": "This is the one colour you really choose — everything else is calculated from it. It is checked as a text colour on the paper tone it produces itself.",
+        "onPaper": "{ratio} on paper · {level}",
+        "blocked": "Not available as a text colour — below 4.5:1. As a surface it stays allowed.",
+        "pickerLabel": "Choose the base colour in the colour picker",
+        "hexLabel": "Your own base colour as a hex value",
+        "hexHint": "Open the picker or type your own hex value (six characters)."
+      },
+      "candidate": {
+        "direction-deep": "The deep tone of your direction",
+        "palette-deep": "The deep tone of your colour world",
+        "direction-mid": "The mid tone of your direction",
+        "signal-deep": "A second hue as the signal",
+        "signal-alt": "Another signal tone"
+      },
+      "reason": {
+        "base": {
+          "directionDeep": "The deepest colour of the direction you chose — deep enough to carry text.",
+          "paletteDeep": "A different hue from the same curated world: more distinctive, without leaving the direction.",
+          "directionMid": "The friendliest of the three — and usually the one that fails as a text colour."
+        },
+        "accent": {
+          "directionMid": "From your own world and therefore harmonious — usually too light to carry light button text.",
+          "signalDeep": "A different hue, deep enough for light text: the signal people see from across the room.",
+          "signalAlt": "The same idea in a second colour — in case the first one sits too close to your field."
+        }
+      },
+      "scheme": {
+        "light": "Light",
+        "dark": "Dark"
+      },
+      "ramp": {
+        "title": "Light and dark ramp",
+        "tag": "h.ramp · calculated, not chosen",
+        "intro": "Eleven steps per world, evenly perceived. The dark ramp is the same maths with different ends — on a dark ground the brand needs more air at the top.",
+        "pair": "Text {ink} on ground {ground}",
+        "note": "Both worlds are the same base colour — only the ends of the ramp differ. Even if you do not want the dark world, you have one: operating systems switch it on."
+      },
+      "neutral": {
+        "title": "Neutral tint",
+        "tag": "h.neutral",
+        "intro": "Surfaces and lines carry a hint of colour — or a deliberately different tone.",
+        "note": {
+          "tinted": "Surfaces carry a hint of your brand — the default.",
+          "warm": "Paper-like tones with a yellow cast, like uncoated stock.",
+          "cool": "Quieter, more technical — it takes some sweetness out of the warmth."
+        }
+      },
+      "accent": {
+        "title": "Accent",
+        "tag": "h.accent",
+        "intro": "A signal, not a second ground: one pop per surface.",
+        "tooClose": "Too close to your base colour — nobody would read it as a signal."
+      },
+      "roles": {
+        "title": "Roles",
+        "tag": "h.roles · what each colour stands for"
+      },
+      "contrast": {
+        "title": "Contrast check",
+        "tag": "h.contrast · WCAG 2.1",
+        "intro": "Six pairs, light and dark. They are part of the proposal, not a check afterwards — whatever fails here is not offered in the first place.",
+        "sample": "A sentence for the test",
+        "note": "The numbers are calculated live: a different base colour above changes this table immediately.",
+        "blocked": "The check cannot be confirmed like this: {pairs} stay below AA. Change the base colour, the neutral tint or the accent — the numbers follow immediately.",
+        "column": {
+          "pair": "Pair",
+          "scheme": "World",
+          "sample": "Sample",
+          "ratio": "Ratio",
+          "verdict": "Verdict"
+        }
+      }
+    },
     "cta": {
       "book": "Book your intro call"
     },
@@ -2231,6 +2308,7 @@
     "invariant": {
       "title": "Not quite there yet",
       "generic": "“{field}” does not meet a rule of this field yet.",
+      "hex": "“{field}” has to be a colour — six characters with a hash, for example #4a3123.",
       "count": "“{field}” needs between {min} and {max} entries — one per line, or separated by commas.",
       "memberOf": "“{field}” has to be one of the entries in “{source}”.",
       "subsetOf": "“{field}” may only contain what is also in “{source}”.",

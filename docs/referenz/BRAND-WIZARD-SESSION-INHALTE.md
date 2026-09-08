@@ -3485,7 +3485,7 @@ Interview-Technik: **Frida** (Design Directorin). Gesprochen wird alles von Geor
 
 **Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
 
-**Invarianten (im Code geprüft):** —
+**Invarianten (im Code geprüft):** 
 
 **Fliesst später in:** 9 Felder in 2 Kapiteln (Farbwelt · Zeichen)
 
@@ -3598,7 +3598,7 @@ Interview-Technik: **Frida** (Design Directorin). Gesprochen wird alles von Geor
 
 **Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
 
-**Invarianten (im Code geprüft):** —
+**Invarianten (im Code geprüft):** 
 
 **Fliesst später in:** 4 Felder in 2 Kapiteln (Farbwelt · Zeichen)
 

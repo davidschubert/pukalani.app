@@ -377,6 +377,107 @@ export const BRAND_MOTION_TOKENS: readonly { readonly id: string, readonly facto
 /** Versatz zwischen Geschwistern (Listen, Karten) in ms — bei jedem Tempo gleich. */
 export const BRAND_MOTION_STAGGER_MS = 60
 
+/**
+ * DIE FÜNF FARB-ROLLEN (§2.3, `h.roles`) — „wofür welche Farbe steht".
+ *
+ * ── DIE QUELLE IST EIN TOKEN, KEIN SATZ ───────────────────────────────────
+ * `source` steht später im Preset (`BrandColorRole.source`) und Produkt 03
+ * macht daraus Tokens. Ein deutscher Satz („Rampe 900 auf Papier", so im
+ * Prototyp) wäre dort eine Zeichenkette, die niemand auflösen kann — und in
+ * einer englischen Marke wäre sie schlicht falsch. Deshalb: eine stabile
+ * Kennung, die `brandColorRoleSource` in einen Hex und
+ * `brandColorRoleSourceLabel` in einen Lesetext übersetzt.
+ *
+ * ── JEDE ROLLE HAT IHRE EIGENE QUELLE ─────────────────────────────────────
+ * `sessionContent.ts` nennt „zwei Rollen mit derselben Quelle und
+ * verschiedenen Namen" ausdrücklich ein Anti-Muster; `validateBrandColorRoles`
+ * nagelt es fest. Der Prototyp hatte hier zwei Papiertöne (Neutral 50 und den
+ * festen Kailua-Papierton) — den zweiten gibt es im Produkt nicht, also trägt
+ * „Helle Flächen" jetzt die 100er-Stufe.
+ */
+export interface BrandColorRoleTerm extends BrandDesignTerm {
+  /** Woraus die Rolle gefüllt wird — stabile Kennung, kein Anzeigetext. */
+  readonly source: string
+  readonly noteDe: string
+  readonly noteEn: string
+}
+
+export const BRAND_COLOR_ROLES: readonly BrandColorRoleTerm[] = [
+  {
+    id: 'ground',
+    de: 'Grund & Text',
+    en: 'Ground and text',
+    source: 'ramp.900',
+    noteDe: 'Alles Gelesene. Nie die 500er-Stufe — die ist Fläche, nicht Schrift.',
+    noteEn: 'Everything that gets read. Never step 500 — that one is surface, not type.',
+  },
+  {
+    id: 'surface',
+    de: 'Wärme & Flächen',
+    en: 'Warmth and surfaces',
+    source: 'ramp.100',
+    noteDe: 'Karten, Einschübe, Tabellen-Zebra — die Marke als Fläche.',
+    noteEn: 'Cards, call-outs, table stripes — the brand as a surface.',
+  },
+  {
+    id: 'light',
+    de: 'Helle Flächen',
+    en: 'Light areas',
+    source: 'neutral.100',
+    noteDe: 'Ruhige Flächen ohne Marken-Ton: Kopfzeilen, Fußbereiche, Trennfelder.',
+    noteEn: 'Quiet areas without the brand tint: headers, footers, dividers.',
+  },
+  {
+    id: 'accent',
+    de: 'Akzent & Signal',
+    en: 'Accent and signal',
+    source: 'accent',
+    noteDe: 'Knöpfe, aktive Zustände, genau ein Pop je Fläche.',
+    noteEn: 'Buttons, active states, exactly one pop per surface.',
+  },
+  {
+    id: 'paper',
+    de: 'Papier & Ruhe',
+    en: 'Paper and calm',
+    source: 'neutral.50',
+    noteDe: 'Der Grund, auf dem alles liegt — im Druck wie am Bildschirm.',
+    noteEn: 'The ground everything sits on — in print as on screen.',
+  },
+]
+
+/**
+ * DIE BESCHRIFTUNGEN DER KONTRAST-PAARE (§2.3, `h.contrast`).
+ *
+ * Die PAARE selbst (welche Stufe auf welcher Fläche) stehen in
+ * `brandDesign.ts` — dort rechnet `buildBrandDesign` sie ins Preset, und eine
+ * zweite Liste daneben wäre die zweite Meinung darüber, was überhaupt geprüft
+ * wird. Hier stehen nur ihre Namen, in beiden Sprachen, weil ein Slot-Wert in
+ * der Inhaltssprache der Marke geschrieben wird. `validateBrandColorRoles`
+ * prüft, dass beide Listen dieselben Ids tragen.
+ */
+export const BRAND_CONTRAST_PAIR_TERMS: readonly BrandDesignTerm[] = [
+  { id: 'body-light', de: 'Fließtext auf Papier', en: 'Body text on paper' },
+  { id: 'heading-light', de: 'Überschrift auf Papier', en: 'Heading on paper' },
+  { id: 'button-light', de: 'Knopf-Text auf Akzent', en: 'Button text on the accent' },
+  { id: 'muted-light', de: 'Nebentext auf Fläche', en: 'Secondary text on a surface' },
+  { id: 'body-dark', de: 'Fließtext auf dunklem Grund', en: 'Body text on a dark ground' },
+  { id: 'accent-dark', de: 'Akzent auf dunklem Grund', en: 'The accent on a dark ground' },
+]
+
+/**
+ * DIE VIER WCAG-URTEILE ALS LESEFASSUNG (§2.3, `h.contrast`).
+ *
+ * Die Ids sind die der Themes-Engine (`wcagLevel`) und bleiben es — sie stehen
+ * im Preset. Im Slot-Wert steht die Lesefassung, weil ein Handbuch-Satz
+ * „3,1:1 · fail" niemandem sagt, was zu tun ist.
+ */
+export const BRAND_CONTRAST_LEVEL_TERMS: readonly BrandDesignTerm[] = [
+  { id: 'AAA', de: 'AAA', en: 'AAA' },
+  { id: 'AA', de: 'AA', en: 'AA' },
+  { id: 'AA18', de: 'AA nur für große Schrift', en: 'AA for large text only' },
+  { id: 'fail', de: 'unter AA', en: 'below AA' },
+]
+
 /** Bewegt sich das Zeichen? (§2.7, `l.logo`) */
 export const BRAND_LOGO_MOTION_OPTIONS: readonly BrandDesignTerm[] = [
   { id: 'no', de: 'Nein — das Zeichen steht still', en: 'No — the mark stands still' },

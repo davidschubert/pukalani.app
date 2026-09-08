@@ -223,6 +223,17 @@ export type BrandInvariantKind =
    * Test nicht entscheiden kann, bleibt beim Spezialisten (§7).
    */
   | 'mentionsFrom'
+  /**
+   * DER WERT IST EINE FARBE (`#rrggbb`) — Brand Design D3.
+   *
+   * Die einzige Invariante ohne Quell-Slot und ohne Zahl: sie prüft die FORM
+   * eines Wertes, nicht sein Verhältnis zu einem anderen. Nötig, weil `h.base`
+   * und `h.accent` als `text` gespeichert werden und die Bühne ein
+   * Korrigieren-Feld hat — ein dort hineingeschriebener Satz stünde sonst
+   * bestätigt im Slot, und `buildBrandDesign` gäbe von da an stumm `null`
+   * zurück (die ganze Farbwelt wäre weg, ohne dass irgendwo etwas rot würde).
+   */
+  | 'hex'
 
 export interface BrandInvariant {
   readonly kind: BrandInvariantKind
@@ -3284,6 +3295,9 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
 
   // ── H · Farbwelt (§2.3) ─────────────────────────────────────────────────
   'h.base': {
+    // Die Farbe ist der WERT dieses Feldes (§2.3) — ein Satz darin wäre eine
+    // Farbwelt, die nicht gerechnet werden kann.
+    invariants: [{ kind: 'hex' }],
     goal: 'settle the one base colour everything else is calculated from.',
     quality: [
       'It is a single colour with a hex value, not a palette.',
@@ -3356,6 +3370,7 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
     form: { person: 'none', tense: 'present' },
   },
   'h.accent': {
+    invariants: [{ kind: 'hex' }],
     goal: 'settle one accent colour: the signal, not a second ground.',
     quality: [
       'Exactly one accent is chosen.',
