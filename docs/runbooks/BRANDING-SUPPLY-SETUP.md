@@ -92,7 +92,7 @@ Sonst zeigt der Fuß auf eine Route, deren Tabelle es nicht gibt.
          die Ausgabe ist nur nicht still. Kein Datenrisiko: 006 backfillt
          zuerst und prüft gegen.
 
-- [ ] **`brand-021` — die Erstgespräch-Anfragen (BS1 Z0, wartet auf Davids Ja):**
+- [x] **`brand-021` — die Erstgespräch-Anfragen (BS1 Z0, wartet auf Davids Ja):**
 
       ```
       pnpm migrate --app branding --layer brand    # legt brand_intro_requests an
