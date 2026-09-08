@@ -7,6 +7,28 @@ die kleinen, verstreuten Beschlüsse.
 
 ---
 
+## 2026-09-07 — Brand Design (Produkt 02): Strategie freigegeben — fünf Schritte tief, Zeichen in drei Stufen inkl. KI-Bildlogos, Studio-begleitet, Schicht 2 der Werkstatt
+
+**Anlass:** „Starte die Strategie für Produkt 02 Brand Design" — Phase 1 des Workflows
+(docs/plans/BRAND-DESIGN.md §1: Bestandsaufnahme, Zielbild „Design-System statt
+Bildergalerie, hergeleitet aus der Strategie", Konkurrenz Looka/Brandmark/LogoAI/Tailor
+Brands · Huemint/Fontjoy/Realtime Colors · Canva/Frontify, Hypothesen H1–H7).
+**Entscheidungen (David, Fragenrunde):** (1) **Alle fünf Schritte gleich tief** — Moodboard,
+Farbwelt, Typografie, Zeichen, Bildsprache, Motion je mit eigener Vorschau (GEGEN die
+Empfehlung „vier Schritte, Bild/Motion nur als Regeln"). (2) **Zeichen in drei Stufen:**
+Richtung + Briefing → gesetzte Beispiele für Wortmarke + Monogramm → ein Bereich für
+KI-Bildlogos auf den zuvor erstellten Inhalten (Stufe 3 GEGEN die Empfehlung; Leitplanken:
+als Entwurf gekennzeichnet, Herkunft sichtbar, nicht im Snapshot/Share, derselbe KI-Transport
+mit ZDR-Routing und Drosseln, Markenrechts-Hinweis statt -Prüfung). (3) **Studio-begleitet
+ohne Preis** — Freischaltung je Marke nach dem Erstgespräch, kein Stripe im brand-Layer.
+(4) **Schicht 2 derselben Werkstatt** statt eines eigenen Layers: Brand Design setzt dieselbe
+Werkstatt, dasselbe Dokument und dieselbe Zustandsmaschine fort — die Silo-Regel „neues
+Produkt ⇒ eigener Layer" greift hier bewusst nicht (zwei Zustandsmaschinen für ein Dokument
+wären der teurere Fehler). Annahme ohne Widerspruch: Vorschau als Anwendungs-Szenen mit
+lokalen CSS-Variablen und echten Schriften. Nächster Schritt: Konzeption (§2).
+
+---
+
 ## 2026-09-07 — Brand Foundation (BF1) abgenommen: alle vier Blicke, Vorhaben nach COMPLETE
 
 **Entscheidung (David):** „Alle vier abgenommen, zieh BF1 nach COMPLETE." — Leseansicht (G2),
