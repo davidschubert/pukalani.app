@@ -2315,7 +2315,7 @@
       "sentenceOf": "“{field}” has to be one sentence from “{source}”, word for word.",
       "mentionsFrom": "“{field}” has to name the entries from “{source}” as well.",
       "mentionsNone": "“{field}” must not repeat anything from “{source}”.",
-    "oneOf": "“{field}” has to be one of the options offered — pick a card instead of writing your own text."
+      "oneOf": "“{field}” has to be one of the options offered — pick a card instead of writing your own text."
     },
     "discoverAdmin": {
       "title": "Publications",
@@ -2779,6 +2779,77 @@
         "title": "In the product",
         "intro": "The same typography in your confirmed colour world — the way it arrives on a page.",
         "note": "The scene runs on the same values as the specimen above: a different choice up there changes it at once."
+      }
+    },
+    "mark": {
+      "kind": {
+        "title": "Step 1 · Direction",
+        "tag": "j.kind · four options",
+        "intro": "What kind of mark this should be — and why. The proposal follows from your DNA dimension “visual style” and from your name. What stands here is the direction for the person who will draw the mark.",
+        "proposed": "From your DNA",
+        "reason": {
+          "word": "Your name carries the message. A wordmark needs no explanation and ages most slowly — for a young brand it is almost always the honest answer.",
+          "pictorial": "A mark without a name only works after many contacts. If you are seen rarely, that recognition is expensive.",
+          "combination": "Wordmark plus symbol: flexible for avatar and shop sign — but two things that have to be kept and thought of together.",
+          "monogram": "The initial as an avatar and app icon. As the main mark it says little; as a variant you need it anyway."
+        }
+      },
+      "brief": {
+        "title": "Step 1 · Briefing",
+        "tag": "j.brief · the task for a human",
+        "intro": "This is the text a designer gets — and the yardstick for every draft. It is editable: a briefing you could not say yourself does not carry.",
+        "derived": "computed",
+        "empty": "No briefing yet. Frida derives it from your foundation, the DNA, the colour world and your type pair.",
+        "running": "Frida is writing the briefing …",
+        "limits": "Up to {max} briefings a day.",
+        "remaining": "{count} of {max} briefings left today.",
+        "run": {
+          "first": "Write the briefing",
+          "again": "Write it again"
+        },
+        "error": {
+          "unavailable": "The briefing cannot be written right now. Try again later — your chapter stays as it is.",
+          "noFoundation": "The foundation is still missing. Confirm values, archetype, tone and direction first — the briefing is derived from them.",
+          "rateLimited": "That was too quick in a row. Wait a moment and try again.",
+          "notFound": "This brand no longer exists.",
+          "generic": "That did not work. Please try again."
+        }
+      },
+      "examples": {
+        "title": "Step 2 · Settings",
+        "tag": "j.examples · computed, no AI call",
+        "intro": "Wordmark and monogram from your type pair ({family}) and your colour world, in four variants. The dashed frame is the clear space — the area that stays empty.",
+        "notALogo": "This is typesetting, not invention: settings as examples, not a logo. They show how your name looks in your type and your colours — the mark itself is drawn by a human.",
+        "clearSpace": {
+          "show": "Show clear space",
+          "hide": "Hide clear space"
+        }
+      },
+      "variant": {
+        "note": {
+          "primary": "The normal case: brand tone on your paper.",
+          "inverted": "The other way round — for dark surfaces, packaging and photos.",
+          "mono": "One ink, for embossing, stamps and engraving. There is no second colour here.",
+          "icon": "A surface instead of paper: avatar, app icon, favicon."
+        }
+      },
+      "setting": {
+        "title": {
+          "wordmark": "Wordmark {brand}",
+          "monogram": "Monogram of {brand}"
+        },
+        "note": {
+          "wordmark": "The full name, set in your heading typeface.",
+          "monogram": "The initial in a tile — for everything small and square."
+        }
+      },
+      "scene": {
+        "title": "In context",
+        "intro": "The same wordmark in the header of an application — in your colour world and your type."
+      },
+      "drafts": {
+        "title": "Step 3 · AI drafts",
+        "later": "Coming as its own step: drafts generated from the briefing, the DNA and the colour world as ideas for the design work — labelled, with their origin, and private. The chapter works without them."
       }
     },
     "scene": {

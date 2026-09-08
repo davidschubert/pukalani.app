@@ -2315,7 +2315,7 @@
       "sentenceOf": "„{field}\" muss wörtlich ein Satz aus „{source}\" sein.",
       "mentionsFrom": "„{field}\" muss die Einträge aus „{source}\" auch nennen.",
       "mentionsNone": "„{field}\" darf nichts aus „{source}\" wiederholen.",
-    "oneOf": "„{field}\" muss eine der angebotenen Möglichkeiten sein — wählt eine Karte statt eigenen Text zu schreiben."
+      "oneOf": "„{field}\" muss eine der angebotenen Möglichkeiten sein — wählt eine Karte statt eigenen Text zu schreiben."
     },
     "discoverAdmin": {
       "title": "Veröffentlichungen",
@@ -2779,6 +2779,77 @@
         "title": "In der Anwendung",
         "intro": "Dieselbe Typografie in eurer bestätigten Farbwelt — so, wie sie auf einer Seite ankommt.",
         "note": "Die Szene rechnet mit denselben Werten wie das Specimen darüber: eine andere Wahl oben ändert sie sofort."
+      }
+    },
+    "mark": {
+      "kind": {
+        "title": "Stufe 1 · Richtung",
+        "tag": "j.kind · vier Möglichkeiten",
+        "intro": "Was für ein Zeichen soll es werden — und warum. Der Vorschlag kommt aus eurer DNA-Dimension „Visueller Stil“ und aus eurem Namen. Was hier steht, ist die Richtung für den Menschen, der das Zeichen später zeichnet.",
+        "proposed": "Aus eurer DNA",
+        "reason": {
+          "word": "Euer Name trägt die Aussage. Eine Wortmarke braucht keine Erklärung und altert am langsamsten — sie ist fast immer die ehrliche Antwort für eine junge Marke.",
+          "pictorial": "Ein Zeichen ohne Namen wirkt erst nach vielen Kontakten. Wer selten gesehen wird, bezahlt diese Wiedererkennung teuer.",
+          "combination": "Wortmarke plus Zeichen: flexibel für Avatar und Schild — aber zwei Dinge, die gepflegt und zusammen gedacht werden wollen.",
+          "monogram": "Der Anfangsbuchstabe als Avatar und App-Icon. Als Hauptzeichen sagt er wenig, als Variante ist er ohnehin Pflicht."
+        }
+      },
+      "brief": {
+        "title": "Stufe 1 · Briefing",
+        "tag": "j.brief · der Auftrag an den Menschen",
+        "intro": "Das ist der Text, den ein Designer bekommt — und der Prüfstein für jeden Entwurf. Er ist bearbeitbar: ein Briefing, das ihr nicht selbst sagen könnt, trägt nicht.",
+        "derived": "gerechnet",
+        "empty": "Noch kein Briefing. Frida leitet es aus eurer Foundation, der DNA, der Farbwelt und eurem Schriftpaar ab.",
+        "running": "Frida schreibt das Briefing …",
+        "limits": "Bis {max} Briefings je Tag.",
+        "remaining": "Noch {count} von {max} Briefings heute.",
+        "run": {
+          "first": "Briefing erzeugen",
+          "again": "Briefing neu erzeugen"
+        },
+        "error": {
+          "unavailable": "Das Briefing lässt sich gerade nicht erzeugen. Versucht es später noch einmal — euer Kapitel bleibt, wie es ist.",
+          "noFoundation": "Dafür fehlt noch die Foundation. Bestätigt zuerst Werte, Archetyp, Ton und Richtung — daraus wird das Briefing abgeleitet.",
+          "rateLimited": "Das ging zu schnell hintereinander. Wartet einen Moment und versucht es noch einmal.",
+          "notFound": "Diese Marke gibt es nicht mehr.",
+          "generic": "Das hat nicht geklappt. Versucht es bitte noch einmal."
+        }
+      },
+      "examples": {
+        "title": "Stufe 2 · Gesetzte Beispiele",
+        "tag": "j.examples · gerechnet, kein KI-Aufruf",
+        "intro": "Wortmarke und Monogramm aus eurem Schriftpaar ({family}) und eurer Farbwelt, in vier Varianten. Der gestrichelte Rahmen ist der Schutzraum — die Fläche, die frei bleibt.",
+        "notALogo": "Das ist Satz, keine Erfindung: gesetzte Beispiele, kein Logo. Sie zeigen, wie euer Name in eurer Schrift und euren Farben aussieht — das Zeichen selbst zeichnet ein Mensch.",
+        "clearSpace": {
+          "show": "Schutzraum einblenden",
+          "hide": "Schutzraum ausblenden"
+        }
+      },
+      "variant": {
+        "note": {
+          "primary": "Der Normalfall: Marken-Ton auf eurem Papier.",
+          "inverted": "Umgekehrt — für dunkle Flächen, Verpackung und Fotos.",
+          "mono": "Ein Ton, für Prägung, Stempel und Gravur. Hier gibt es keine zweite Farbe.",
+          "icon": "Fläche statt Papier: Avatar, App-Icon, Favicon."
+        }
+      },
+      "setting": {
+        "title": {
+          "wordmark": "Wortmarke {brand}",
+          "monogram": "Monogramm von {brand}"
+        },
+        "note": {
+          "wordmark": "Der ganze Name, gesetzt in eurer Überschriften-Schrift.",
+          "monogram": "Der Anfangsbuchstabe in der Kachel — für alles, was klein und quadratisch ist."
+        }
+      },
+      "scene": {
+        "title": "Im Zusammenhang",
+        "intro": "Dieselbe Wortmarke im Kopf einer Anwendung — in eurer Farbwelt und eurer Schrift."
+      },
+      "drafts": {
+        "title": "Stufe 3 · KI-Entwürfe",
+        "later": "Folgt in einem eigenen Schritt: aus Briefing, DNA und Farbwelt erzeugte Entwürfe als Ideen für die Designer-Arbeit — gekennzeichnet, mit Herkunft und privat. Das Kapitel funktioniert ohne sie."
       }
     },
     "scene": {

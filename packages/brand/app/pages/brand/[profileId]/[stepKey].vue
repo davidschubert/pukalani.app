@@ -2491,6 +2491,56 @@ function applyTypePick(slotId: string, value: string): void {
   onInput(slotId, value)
 }
 
+// ── Das Zeichen (D5a/D5b, §2.5) ───────────────────────────────────────────
+
+/**
+ * DIESELBE ARBEITSTEILUNG WIE IN FARBWELT UND TYPOGRAFIE: `useBrandMarkWorld()`
+ * rechnet, die SEITE schreibt.
+ */
+const markWorld = useBrandMarkWorld()
+
+const showMarkPanel = computed(() => stepKey.value === 'mark')
+
+/**
+ * DREI der vier Sessions belegt das Kapitel selbst vor — `j.brief` NICHT.
+ *
+ * Das Briefing ist die einzige Session dieses Kapitels, die weder gerechnet
+ * noch gewählt wird: sie entsteht im Lauf (server-seitig, `POST …/mark/brief`)
+ * oder von Hand. Stünde sie in dieser Liste, überschriebe der Autosave beim
+ * nächsten Rendern genau den Text, den der Mensch gerade bekommen hat.
+ * `j.drafts` (Stufe 3) fehlt, weil es sie noch nicht gibt (D5c).
+ */
+const MARK_SLOTS = ['j.kind', 'j.examples', 'j.pick'] as const
+/** Bestätigt sein kann auch `j.brief` — das Panel sperrt dann seinen Lauf. */
+const MARK_PANEL_SLOTS = ['j.kind', 'j.brief', 'j.examples', 'j.pick'] as const
+
+const confirmedMarkSlots = computed(() =>
+  MARK_PANEL_SLOTS.filter(slotId => store.slotConfirmed(slotId)))
+
+/**
+ * DAS KAPITEL BELEGT SICH SELBST VOR (H5) — dieselbe Mechanik und dieselben
+ * vier Sicherungen wie Farbwelt und Typografie darüber (Gleichheits-Prüfung,
+ * Bestätigtes bleibt unberührt, ein fehlender Wert löscht, erst NACH dem
+ * Mount).
+ */
+onMounted(() => {
+  watch(markWorld.slotValues, (values) => {
+    if (stepKey.value !== 'mark') return
+    for (const slotId of MARK_SLOTS) {
+      if (store.slotConfirmed(slotId)) continue
+      const value = values[slotId] ?? ''
+      if (store.slotValue(slotId) === value) continue
+      onInput(slotId, value)
+    }
+  }, { immediate: true })
+})
+
+/** Eine Wahl aus dem Zeichen-Panel — derselbe Weg wie jede Eingabe. */
+function applyMarkPick(slotId: string, value: string): void {
+  if (store.slotConfirmed(slotId)) return
+  onInput(slotId, value)
+}
+
 /** Die Marken des Kontos für den Wähler oben in der Sidebar. */
 const LOCALE_FLAGS: Record<string, string> = { en: 'i-circle-flags-us', de: 'i-circle-flags-de' }
 
@@ -2936,6 +2986,18 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
           v-if="showTypePanel"
           :confirmed="confirmedTypeSlots"
           @pick="applyTypePick"
+        />
+
+        <!-- DAS ZEICHEN (Kapitel `mark`, D5a/D5b) — Richtung, Briefing und die
+             gesetzten Beispiele auf EINER Werkbank. Wie Farbwelt und
+             Typografie steht sie ÜBER dem Gespräch; bestätigt wird jede
+             Session unten auf ihrer Karte (`RENDERED_ABOVE`). Stufe 3 (die
+             KI-Entwürfe) ist dort nur ein Platzhalter — sie kommt mit D5c. -->
+        <BwMarkPanel
+          v-if="showMarkPanel"
+          :profile-id="profileId"
+          :confirmed="confirmedMarkSlots"
+          @pick="applyMarkPick"
         />
 
         <p v-if="phaseIntro" class="bw-label" style="color: var(--bw-muted); padding-left: 2.65rem">{{ phaseIntro }}</p>
