@@ -597,6 +597,24 @@ Baustein, Relaunch-Einstieg, nach dieser Fassung).
 
 ### 2.18 Pakete (VERBINDLICH seit Prototyp-Freigabe 2026-09-08)
 
+**Stand:** D0 GEBAUT und geprüft 2026-09-08 (Opus-Agent, Fable-Prüfung;
+Commits 18d95a37 + Klemme). Gelernt: (1) die Registry-Erweiterung sickert in
+vier LESER (Rail, Dokument, Leseansicht, Fortschritts-Cache) und in den
+Impact-Hinweis „fließt in N Felder ein" — alle fünf sind bis D1/D8 auf die
+Foundation geklemmt, der Hinweis über die pure Regel `affectsView` (nur
+erreichbare Kapitel); der Klick-Beweis auf der echten Dokument-Seite fand
+den fünften, die 2 299 Unit-Tests nicht. (2) Migrations-Nummern: brand-020
+und 021 sind inzwischen vergeben (Publications, Discover) — Freischaltung
+= **brand-022**, KI-Entwürfe = **brand-023**, Vorbilder = **brand-024**
+(§2.10/§2.11 nennen noch die alten Nummern; die Dateinamen entscheiden).
+(3) Der Worktree hat nur eine Teil-Installation: `nuxi typecheck` meldet
+dort ~13 000 Auto-Import-Fehler über alle Layer (vorbestehend, 0 in
+`packages/brand/shared`); Beweis lief per `tsc --strict` über die neuen
+Dateien und in der CI. (4) `/brand/:id/dna` zeigt Bestandsmarken die
+Sperr-Fläche mit dem Satz „Schließ das Kapitel davor ab" — D1 gibt
+`design_locked` seinen eigenen Satz. (5) `j.pick` steht im Konzept, nicht
+im Prototyp — angelegt nach Konzept; D5 entscheidet, ob es bleibt.
+
 | # | Paket | Inhalt | Gate |
 | --- | --- | --- | --- |
 | D0 | Verträge | Registry-Steps + Sessions (Struktur), Vokabulare, Font-Paar-Katalog, `BrandDesignPreset`, `buildBrandDesign`, Ramp-Import als Vertrag, Journey mit Freischaltung | — |
