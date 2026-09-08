@@ -80,6 +80,19 @@
  *     Fläche (200 — er ist erklärbar), und dieselbe Regel gilt für das
  *     Dokument (Paket 8).
  *
+ * Seit Brand Design D2b (§2.2 Schritt 3) kommen die Zusagen der LESUNG dazu:
+ *
+ * 23. DER LAUF: `POST …/inspiration/read` liest alle Vorbilder, schreibt je
+ *     Bild eine geklemmte Lesung (Vokabular-Ids, Urteil, Foundation-Anker,
+ *     Begründung), legt Fazit und Lauf-Zeile als Slot-Wert von `g.reading` ab
+ *     (unbestätigt) und nennt das Rest-Kontingent. Der VIERTE Lauf am selben
+ *     Tag ⇒ 429; ein neues oder ein entferntes Bild macht die Lesung `stale`;
+ *     ohne Vorbild ⇒ 409; fremdes Konto ⇒ 404; und der Schnappschuss trägt
+ *     die Lesung NICHT — mit Anlauf (der Slot wird von Hand bestätigt).
+ *     Er braucht `BRAND_DEV_STUB_VISION=1`, sonst kostete jeder Lauf Geld;
+ *     ohne die Variable prüft der Abschnitt stattdessen die 503
+ *     `vision_unavailable`.
+ *
  * ── WAS DIESER BEWEIS NICHT BEWEIST ──────────────────────────────────────
  * Den Anbieter. Ohne `NUXT_AI_KEY` wirft `aiCompleteStream` (503), die Route
  * schickt `generation.failed` mit `provider_error` — und genau das ist hier
@@ -98,7 +111,8 @@
  * ohne KI-Schlüssel kein Urteil (fail-soft, §7) — `BRAND_DEV_STUB_REVIEW=1`
  * schaltet ihn ein und wirkt NUR dort (`server/utils/brandReview.ts`):
  *
- *   BRAND_DEV_STUB_REVIEW=1 pnpm --filter branding exec nuxi dev --port 3016
+ *   BRAND_DEV_STUB_REVIEW=1 BRAND_DEV_STUB_VISION=1 \
+ *     pnpm --filter branding exec nuxi dev --port 3016
  *   BRANDING_PORT=3016 node --env-file=apps/branding/.env \
  *     packages/brand/scripts/verify-brand-sessions.mjs
  */
@@ -1660,6 +1674,248 @@ try {
     added.every(row => !String(row.payload ?? '').includes('roesterei')
       && !String(row.payload ?? '').includes('Weißraum')),
     JSON.stringify(added[0]?.payload ?? null))
+
+  console.log('\n23 · Brand Design: die Lesung der Vorbilder (D2b)')
+
+  /**
+   * ── WARUM DIESER ABSCHNITT MIT DEM ERSATZ LÄUFT ───────────────────────────
+   * Ein echter Lauf schickt bis zu zwölf Bilder an ein multimodales Modell und
+   * kostet Geld. `BRAND_DEV_STUB_VISION=1` liefert stattdessen eine
+   * deterministische Lesung AUS DEM VOKABULAR — Ids, die die Klemmung
+   * durchlässt, und je Bereich ein anderes Urteil, damit `fits`, `tension` und
+   * `off` alle drei vorkommen. Dieselbe Bauform wie `BRAND_DEV_STUB_REVIEW`
+   * (s. Kopf).
+   *
+   * Der Ersatz BUCHT die Drossel mit (anders als der Entwurfs-Stub) — nur
+   * deshalb lässt sich der vierte Lauf des Tages überhaupt prüfen.
+   */
+  const readPath = `${inspBase}/read`
+
+  /**
+   * ZWEI BILDER BEKOMMEN EINEN ANDEREN BEREICH — direkt in der Zeile, an der
+   * Route vorbei (wie die neun Füll-Zeilen oben und aus demselben Grund: die
+   * eigene Drossel `brand:inspiration` würde 429 statt der fachlichen Antwort
+   * liefern).
+   *
+   * Er ist die STELLSCHRAUBE des Ersatzes: sein Urteil hängt am Bereich, und
+   * ohne diesen Griff trügen alle elf Bilder `color` oder `type` — der Lauf
+   * ergäbe elfmal `fits`, und die Zusage „alle drei Urteile kommen vor" wäre
+   * unbewiesen (mit einem grünen Haken davor).
+   */
+  const spreadIds = (await call(inspBase, { cookie: account.cookie })).json?.items ?? []
+  for (const [index, area] of [[1, 'mark'], [2, 'composition']]) {
+    const target = spreadIds[index]?.id
+    if (!target) continue
+    await tablesDB.updateRow({
+      databaseId, tableId: 'brand_inspiration', rowId: target, data: { area },
+    }).catch(() => {})
+  }
+
+  // Elf Bilder liegen noch da (zwölf minus das eine entfernte). Der Lauf soll
+  // sie alle lesen.
+  const beforeRun = await call(inspBase, { cookie: account.cookie })
+  const beforeCount = beforeRun.json?.items?.length ?? 0
+  check('vor dem Lauf: die Bilder liegen da und NICHTS ist gelesen',
+    beforeCount > 0 && beforeRun.json?.reading?.state === 'none'
+    && (beforeRun.json?.items ?? []).every(item => item.reading === null),
+    `${beforeCount} Bilder · ${beforeRun.json?.reading?.state}`)
+
+  /**
+   * OB DER ERSATZ LÄUFT, SAGT DER SERVER — nicht `process.env` DIESES
+   * Prozesses: `BRAND_DEV_STUB_VISION` wirkt im DEV-SERVER, und das Skript
+   * spricht ihn über HTTP an. Die eigene Umgebung abzufragen hiesse, eine
+   * Variable zu prüfen, die für die Antwort gar nicht zuständig ist — beim
+   * ersten Lauf stand der Zweig deshalb genau falsch herum (200 statt der
+   * erwarteten 503, und der Beweis meldete einen Fehlschlag, den es nicht gab).
+   *
+   * 503 `vision_unavailable` ist die vollständige, richtige Antwort einer
+   * Instanz OHNE Vision-Modell (Leitplanke „Stufe 1+2 pur") — und damit selbst
+   * eine geprüfte Zusage, keine Ausrede.
+   */
+  const run1 = await call(readPath, { method: 'POST', cookie: account.cookie })
+  const readingStub = run1.status === 200
+  if (!readingStub) {
+    check('ohne Vision-Modell antwortet der Lauf ruhig mit 503 `vision_unavailable`',
+      run1.status === 503 && run1.json?.reason === 'vision_unavailable',
+      `${run1.status} ${JSON.stringify(run1.json?.reason ?? null)}`)
+  }
+  else {
+    check('der Lauf antwortet 200 und nennt das Rest-Kontingent',
+      run1.status === 200 && run1.json?.quota?.limit === 3 && run1.json?.quota?.remaining === 2,
+      `${run1.status} ${JSON.stringify(run1.json?.quota ?? null)}`)
+
+    check('… jedes Bild hat danach eine Lesung mit Vokabular-Ids, Urteil, Anker und Begründung',
+      (run1.json?.items ?? []).length === beforeCount
+      && (run1.json?.items ?? []).every(item => item.reading
+        && item.reading.observed.length >= 1
+        && item.reading.observed.every(o => typeof o.dimension === 'string' && typeof o.value === 'string')
+        && ['fits', 'tension', 'off'].includes(item.reading.verdict)
+        && item.reading.anchor.length > 0
+        && item.reading.reason.length > 0),
+      JSON.stringify((run1.json?.items ?? [])[0]?.reading ?? null))
+
+    check('… und der Zustand ist `read`, das Fazit steht in zwei Listen',
+      run1.json?.reading?.state === 'read'
+      && (run1.json?.reading?.summary?.keeps ?? []).length > 0
+      && (run1.json?.reading?.summary?.improves ?? []).length > 0
+      && String(run1.json?.reading?.runLine ?? '').includes('gelesen'),
+      `${run1.json?.reading?.state} · ${JSON.stringify(run1.json?.reading?.runLine ?? null)}`)
+
+    // Der Ersatz vergibt das Urteil nach dem BEREICH — die Vorbilder tragen
+    // `color` (fits) und `composition` (off), also müssen beide vorkommen.
+    const verdicts = new Set((run1.json?.items ?? []).map(item => item.reading?.verdict))
+    check('… die Urteile sind nicht alle gleich — fits, tension UND off in EINEM Lauf',
+      verdicts.has('fits') && verdicts.has('tension') && verdicts.has('off'),
+      JSON.stringify([...verdicts]))
+
+    // ── Der Slot-Wert von `g.reading` ─────────────────────────────────────
+    const readSlots = JSON.parse((await tablesDB.getRow({
+      databaseId, tableId: 'brand_steps', rowId: `${profileId}_dna`,
+    })).slots || '{}')
+    const readingSlot = readSlots['g.reading'] ?? null
+    check('der Slot `g.reading` trägt Fazit und Lauf als beschriftete Blöcke',
+      typeof readingSlot?.latestDraft === 'string'
+      && readingSlot.latestDraft.startsWith('## Trägt schon · ')
+      && readingSlot.latestDraft.includes('## Geht besser · ')
+      && readingSlot.latestDraft.includes('## Lauf'),
+      JSON.stringify(readingSlot?.latestDraft ?? null))
+    check('… und er ist noch NICHT bestätigt — das tut der Mensch (Derivation)',
+      !readingSlot?.confirmed, JSON.stringify(readingSlot?.confirmed ?? null))
+
+    // ── Die Werkstatt zeigt den Abschnitt ─────────────────────────────────
+    const readingPage = await call(`/de/brand/${profileId}/dna`, { cookie: account.cookie })
+    check('die Werkstatt zeigt den Lesungs-Abschnitt',
+      readingPage.status === 200 && readingPage.text.includes('data-brand-reading'),
+      `${readingPage.status} ${readingPage.text.length} Zeichen`)
+
+    // ── Ein neues Bild macht die Lesung VERALTET ──────────────────────────
+    const staleId = ID.unique()
+    await storage.createFile({
+      bucketId: 'brand-inspiration',
+      fileId: staleId,
+      file: InputFile.fromBuffer(TINY.png, 'neu.png'),
+    })
+    await tablesDB.createRow({
+      databaseId,
+      tableId: 'brand_inspiration',
+      rowId: staleId,
+      data: { profileId, area: 'color', note: '', number: 99, filename: 'neu.png' },
+    })
+    cleanup.inspiration.push(staleId)
+    const afterAdd = await call(inspBase, { cookie: account.cookie })
+    check('ein NEUES Bild macht die Lesung veraltet (`stale`)',
+      afterAdd.json?.reading?.state === 'stale', String(afterAdd.json?.reading?.state))
+
+    // … und ein ENTFERNTES ebenso: der Lauf war grösser als der heutige Stand.
+    await tablesDB.deleteRow({ databaseId, tableId: 'brand_inspiration', rowId: staleId })
+      .catch(() => {})
+    await storage.deleteFile({ bucketId: 'brand-inspiration', fileId: staleId }).catch(() => {})
+    const removedOne = (afterAdd.json?.items ?? []).find(item => item.reading)?.id
+    await tablesDB.deleteRow({ databaseId, tableId: 'brand_inspiration', rowId: removedOne })
+      .catch(() => {})
+    await storage.deleteFile({ bucketId: 'brand-inspiration', fileId: removedOne }).catch(() => {})
+    const afterRemove = await call(inspBase, { cookie: account.cookie })
+    check('… ein ENTFERNTES Bild ebenso — der Lauf war grösser als der Stand',
+      afterRemove.json?.reading?.state === 'stale'
+      && (afterRemove.json?.items ?? []).every(item => item.reading),
+      `${afterRemove.json?.reading?.state} · ${afterRemove.json?.items?.length} Bilder`)
+
+    // ── Die Drossel: drei Läufe je Marke und Tag ──────────────────────────
+    const run2 = await call(readPath, { method: 'POST', cookie: account.cookie })
+    const run3 = await call(readPath, { method: 'POST', cookie: account.cookie })
+    check('zweiter und dritter Lauf gehen — und das Kontingent zählt herunter',
+      run2.status === 200 && run2.json?.quota?.remaining === 1
+      && run3.status === 200 && run3.json?.quota?.remaining === 0,
+      `${run2.status}/${run2.json?.quota?.remaining} · ${run3.status}/${run3.json?.quota?.remaining}`)
+
+    const run4 = await call(readPath, { method: 'POST', cookie: account.cookie })
+    check('GEGENPROBE Drossel: der VIERTE Lauf am selben Tag ⇒ 429 `brand_reading_limit`',
+      run4.status === 429 && run4.json?.reason === 'brand_reading_limit',
+      `${run4.status} ${JSON.stringify(run4.json?.reason ?? null)}`)
+
+    // ── Die Ereignisse: Kennzahlen, kein Inhalt ───────────────────────────
+    const runEvents = await tablesDB.listRows({
+      databaseId,
+      tableId: 'brand_events',
+      queries: [Query.equal('profileId', profileId), Query.equal('type', 'design.reading.run'), Query.limit(20)],
+    }).catch(() => ({ rows: [] }))
+    check('jeder Lauf steht im Funnel — drei Läufe, drei Zeilen',
+      runEvents.rows.length === 3, String(runEvents.rows.length))
+    check('… und keine Zeile trägt Anker, Begründung oder ein Bild',
+      runEvents.rows.every(row => {
+        const payload = String(row.payload ?? '')
+        return payload.includes('model')
+          && !payload.includes('Ersatz-Lesung')
+          && !payload.includes('base64')
+      }),
+      JSON.stringify(runEvents.rows[0]?.payload ?? null))
+  }
+
+  // ── LEITPLANKE c gilt auch für die LESUNG ────────────────────────────────
+  //
+  // GEGENPROBE MIT ANLAUF wie bei den Bildern: der Slot wird von Hand
+  // BESTÄTIGT — genau der Fehler, den D8 machen könnte. Reiste er danach in
+  // den Schnappschuss, wäre „die Lesung bleibt intern" eine Behauptung.
+  const leakReading = JSON.parse((await tablesDB.getRow({
+    databaseId, tableId: 'brand_steps', rowId: `${profileId}_dna`,
+  })).slots || '{}')
+  leakReading['g.reading'] = {
+    ...leakReading['g.reading'],
+    latestDraft: leakReading['g.reading']?.latestDraft ?? '## Trägt schon · 1\nErsatz-Fazit.',
+    confirmed: leakReading['g.reading']?.latestDraft ?? '## Trägt schon · 1\nErsatz-Fazit.',
+  }
+  await tablesDB.updateRow({
+    databaseId, tableId: 'brand_steps', rowId: `${profileId}_dna`,
+    data: { slots: JSON.stringify(leakReading) },
+  })
+  const sharedAgain = await call(`${base}/share`, { method: 'POST', cookie: account.cookie, body: {} })
+  check('Vorprobe: der Share-Link lässt sich neu veröffentlichen',
+    sharedAgain.status === 200 || sharedAgain.status === 201,
+    `${sharedAgain.status} ${sharedAgain.text.slice(0, 120)}`)
+  const shareRows2 = await tablesDB.listRows({
+    databaseId,
+    tableId: 'brand_shares',
+    queries: [Query.equal('profileId', profileId), Query.limit(5)],
+  }).catch(() => ({ rows: [] }))
+  const snapshot2 = shareRows2.rows.map(row => String(row.snapshot ?? '')).join('\n')
+  check('LEITPLANKE: der Schnappschuss trägt WEDER `g.reading` NOCH eine Lesung',
+    snapshot2.length > 0
+    && !snapshot2.includes('g.reading')
+    && !snapshot2.includes('Trägt schon')
+    && !snapshot2.includes('Ersatz-Lesung'),
+    `${snapshot2.length} Zeichen`)
+
+  // ── Ein fremdes Konto sieht auch hier NICHTS ─────────────────────────────
+  const foreignRead = await call(readPath, { method: 'POST', cookie: stranger.cookie })
+  check('fremdes Konto: der Lauf antwortet 404 (Datentür, nicht 403)',
+    foreignRead.status === 404, String(foreignRead.status))
+  const guestRead = await call(readPath, { method: 'POST' })
+  check('… ohne Anmeldung: 401/404, nie ein Lauf',
+    guestRead.status === 401 || guestRead.status === 404, String(guestRead.status))
+
+  // ── OHNE VORBILD gibt es nichts zu lesen ─────────────────────────────────
+  //
+  // DIE PRÜFREIHENFOLGE IST DER PUNKT: die Bilder-Frage steht in der Route VOR
+  // der Drossel, also antwortet dieselbe Marke mit ERSCHÖPFTEM Tageskontingent
+  // trotzdem 409 und nicht 429. Genau deshalb braucht diese Gegenprobe keine
+  // zweite Marke — der erste Anlauf legte eine an und bekam 429 aus der
+  // Anlege-Drossel, also die falsche Ablehnung für die falsche Frage.
+  //
+  // Geleert wird an der Route vorbei (`brand:inspiration`, 12/min).
+  const restRows = await tablesDB.listRows({
+    databaseId,
+    tableId: 'brand_inspiration',
+    queries: [Query.equal('profileId', profileId), Query.limit(50)],
+  }).catch(() => ({ rows: [] }))
+  for (const row of restRows.rows) {
+    await tablesDB.deleteRow({ databaseId, tableId: 'brand_inspiration', rowId: row.$id })
+      .catch(() => {})
+    await storage.deleteFile({ bucketId: 'brand-inspiration', fileId: row.$id }).catch(() => {})
+  }
+  const bareRead = await call(readPath, { method: 'POST', cookie: account.cookie })
+  check('GEGENPROBE: ohne ein einziges Vorbild ⇒ 409 `reading_no_images` (nicht 429)',
+    bareRead.status === 409 && bareRead.json?.reason === 'reading_no_images',
+    `${bareRead.status} ${JSON.stringify(bareRead.json?.reason ?? null)}`)
 }
 catch (error) {
   fail++

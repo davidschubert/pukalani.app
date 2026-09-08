@@ -874,6 +874,30 @@ describe('resolveSessionStates (§5)', () => {
     expect(states['b.purpose']).toBe('locked')
   })
 
+  /**
+   * Der D2b-Befund: `g.reading` hing an `g.inspiration`, und das ist ein
+   * `special`-Slot, den weder die Werkstatt noch der Server je bestätigt
+   * (D2a). Die Session stand damit für immer auf `locked` — der Lauf lief, das
+   * Ergebnis war nicht abnehmbar. GEGENPROBE unten: eine BESTÄTIGBARE Quelle
+   * sperrt unverändert.
+   */
+  it('wartet NICHT auf eine Quelle, die nie bestätigt werden kann (`special`)', () => {
+    const design: BrandProfileFacts = { ...BASE_PROFILE, designUnlocked: true }
+    const withSource = stepFacts({ 'g.source': { hasValue: true, confirmed: true } })
+    expect(resolveSessionStates(design, withSource)['g.reading']).toBe('open')
+    // Die Quelle steht trotzdem in der Kette — sonst verlöre der Impact-Hinweis
+    // seinen Weg und die Lesung würde bei neuen Bildern nie veraltet.
+    expect(slotById('g.reading')!.inputs.slots).toContain('g.inspiration')
+  })
+
+  it('GEGENPROBE: das Instrument reicht seine EIGENE Quelle durch — ohne die Weiche bleibt zu', () => {
+    const design: BrandProfileFacts = { ...BASE_PROFILE, designUnlocked: true }
+    expect(resolveSessionStates(design, stepFacts({}))['g.reading']).toBe('locked')
+    // Ein blosser Entwurf an der Weiche reicht nicht — bestätigt muss sie sein.
+    const draftOnly = stepFacts({ 'g.source': { hasValue: true } })
+    expect(resolveSessionStates(design, draftOnly)['g.reading']).toBe('locked')
+  })
+
   it('öffnet sie, sobald ALLE Eingaben bestätigt sind — nicht schon bei Entwürfen', () => {
     const drafts = stepFacts({
       'a.pitch': { hasValue: true },
