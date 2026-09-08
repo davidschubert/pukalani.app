@@ -533,6 +533,27 @@ export function brandPublicationKeepsPublicStand(
   return action === 'submit' && previous === 'published'
 }
 
+/**
+ * IST DIESE ZEILE SICHTBAR? — die Lese-Seite der Regel oben (`brandPublicationIsPublic` oben sagt nur, ob ein ZUSTAND öffentlich ist — Featured fragt so) (2026-09-08,
+ * live erwischt: Krume & Gold verschwand aus Galerie und Anatomie, sobald ein
+ * neuer Stand eingereicht war).
+ *
+ * `published` ist öffentlich. `pending` ist es NUR dann, wenn ein alter,
+ * freigegebener Stand in `snapshot` liegt — das ist genau der Fall „neuer
+ * Stand wartet, der alte bleibt sichtbar". Ein erstes Einreichen hat kein
+ * `snapshot` und ist unsichtbar; abgelehnt, ausgeblendet, zurückgezogen sind
+ * es immer. Galerie und Anatomie fragen NUR hier — nicht am Status allein.
+ */
+export function brandPublicationIsVisible(row: { status?: string | null, snapshot?: string | null }): boolean {
+  // Bewusst NICHT über `normalizeBrandPublicationStatus`: die macht aus einem
+  // unbekannten Wert `pending` (fail-closed für den Betreiber) — hier hiesse
+  // das „sichtbar, falls ein Stand da ist", und ein Datenfehler darf nie
+  // veröffentlichen.
+  const status = (row.status ?? '').trim()
+  if (status === 'published') return true
+  return status === 'pending' && typeof row.snapshot === 'string' && row.snapshot.length > 0
+}
+
 // ── 4 · Der Tages-Deckel ────────────────────────────────────────────────────
 
 /**

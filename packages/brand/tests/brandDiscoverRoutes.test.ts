@@ -209,7 +209,9 @@ describe('GET /api/discover · wer überhaupt vorkommt', () => {
   it('zeigt AUSSCHLIESSLICH freigegebene Veröffentlichungen', async () => {
     publications = [
       publication({ $id: 'ja', slug: 'ja' }),
-      publication({ $id: 'wartet', slug: 'wartet', status: 'pending' }),
+      // Erstes Einreichen: kein alter Stand ⇒ unsichtbar. (Ein wartender NEUER
+      // Stand mit altem `snapshot` bleibt sichtbar — eigener Test unten.)
+      publication({ $id: 'wartet', slug: 'wartet', status: 'pending', snapshot: '' }),
       publication({ $id: 'weg', slug: 'weg', status: 'withdrawn' }),
       publication({ $id: 'aus', slug: 'aus', status: 'hidden' }),
       publication({ $id: 'nein', slug: 'nein', status: 'declined' }),
@@ -366,6 +368,25 @@ describe('GET /api/discover/:slug · die Anatomie', () => {
     expect(JSON.stringify(result)).not.toContain('schemaVersion')
   })
 
+  it('ein NEUER Stand in Prüfung lässt den alten öffentlich — Anatomie zeigt den alten, Galerie führt die Marke', async () => {
+    // 2026-09-08 live erwischt: nach „Stand aktualisieren" stand die Zeile auf
+    // `pending`, und Galerie wie Anatomie hielten sie für unsichtbar.
+    publications = [publication({
+      status: 'pending',
+      snapshot: snapshot('Kailua — alter Stand'),
+      pendingSnapshot: snapshot('Kailua — neuer Stand'),
+    })]
+    routeSlug = 'kailua-coffee'
+
+    const entry = await entryHandler(event)
+    expect(entry.preview).toBeUndefined()
+    expect(entry.foundation.chapters.length).toBeGreaterThan(0)
+
+    for (const cache of microcaches) cache.clear()
+    const list = await listHandler(event)
+    expect(list.total).toBe(1)
+  })
+
   it('Betreiber-Vorschau: der EINGEREICHTE Stand einer wartenden Marke, noindex-markiert, nie im Cache', async () => {
     publications = [publication({ status: 'pending', snapshot: '', pendingSnapshot: snapshot('Kailua — neuer Stand') })]
     routeSlug = 'kailua-coffee'
@@ -410,8 +431,9 @@ describe('GET /api/discover/:slug · die Anatomie', () => {
   })
 
   it('alles, was nicht freigegeben ist, ist DASSELBE 404', async () => {
+    // Ein ERSTES Einreichen hat noch keinen öffentlichen Stand (`snapshot` leer).
     for (const status of ['pending', 'declined', 'hidden', 'withdrawn']) {
-      publications = [publication({ status })]
+      publications = [publication({ status, snapshot: status === 'pending' ? '' : snapshot() })]
       routeSlug = 'kailua-coffee'
       for (const cache of microcaches) cache.clear()
       await expect(entryHandler(event)).rejects.toMatchObject({ status: 404 })

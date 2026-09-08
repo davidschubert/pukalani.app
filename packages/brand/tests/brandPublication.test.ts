@@ -10,6 +10,7 @@ import {
   type BrandPublicationStatus,
   brandPublicationCanSubmit,
   brandPublicationIsPublic,
+  brandPublicationIsVisible,
   brandPublicationKeepsPublicStand,
   brandPublicationPath,
   brandPublicationSlug,
@@ -326,5 +327,20 @@ describe('Veröffentlichen: i18n-Katalog', () => {
 
   it('GEGENPROBE: ein erfundener Schlüssel fehlt sehr wohl', () => {
     expect(gapsFor(['brand.publication.gibtsnicht']).length).toBe(1)
+  })
+})
+
+describe('brandPublicationIsVisible — die Lese-Seite von „alter Stand bleibt öffentlich"', () => {
+  it('published ist öffentlich; pending nur MIT altem Stand', () => {
+    expect(brandPublicationIsVisible({ status: 'published', snapshot: '' })).toBe(true)
+    expect(brandPublicationIsVisible({ status: 'pending', snapshot: '{"chapters":[]}' })).toBe(true)
+    expect(brandPublicationIsVisible({ status: 'pending', snapshot: '' })).toBe(false)
+    expect(brandPublicationIsVisible({ status: 'pending' })).toBe(false)
+  })
+
+  it('abgelehnt, ausgeblendet, zurückgezogen sind nie öffentlich — auch mit altem Stand', () => {
+    for (const status of ['declined', 'hidden', 'withdrawn', 'kaputt', null]) {
+      expect(brandPublicationIsVisible({ status, snapshot: '{"chapters":[]}' })).toBe(false)
+    }
   })
 })

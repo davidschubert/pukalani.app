@@ -7,7 +7,7 @@ import {
   type BrandDiscoverCheckFact,
   pickDiscoverScores,
 } from '../../shared/brandDiscover'
-import { normalizeBrandPublicationStatus } from '../../shared/brandPublication'
+import { brandPublicationIsVisible } from '../../shared/brandPublication'
 import type {
   BrandDiscoverCheck,
   BrandDiscoverItem,
@@ -68,12 +68,15 @@ export async function listPublishedBrandPublications(
       databaseId,
       tableId: BRAND_PUBLICATIONS_TABLE,
       queries: [
-        Query.equal('status', 'published'),
+        // `pending` MIT altem Stand ist weiter öffentlich (Regel
+        // `brandPublicationIsVisible`) — die Abfrage holt beide Zustände, die
+        // Regel entscheidet je Zeile.
+        Query.equal('status', ['published', 'pending']),
         Query.orderDesc('publishedAt'),
         Query.limit(limit),
       ],
     })
-    return res.rows
+    return res.rows.filter(brandPublicationIsVisible)
   }
   catch (error) {
     if (isAppwriteNotFound(error)) return []
@@ -105,7 +108,7 @@ export async function loadPublishedBrandPublication(
   slug: string,
 ): Promise<BrandPublicationRow | null> {
   const row = await loadBrandPublicationBySlug(event, slug)
-  if (!row || normalizeBrandPublicationStatus(row.status) !== 'published') return null
+  if (!row || !brandPublicationIsVisible(row)) return null
   return row
 }
 
