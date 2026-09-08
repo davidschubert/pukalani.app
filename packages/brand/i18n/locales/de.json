@@ -1631,7 +1631,8 @@
         "removalBody": "Auf begründete Anfrage nehmen wir ein Ergebnis vom Netz. Es verschwindet aus dem Ranking und auch von seiner eigenen Adresse — dort steht danach dasselbe wie bei einem Ergebnis, das es nie gab. Die Entfernung ist dauerhaft: sie wird nicht dadurch aufgehoben, dass jemand anderes dieselbe Adresse erneut prüft.",
         "contactTitle": "Wie ihr uns erreicht",
         "contactBody": "Für eine Korrektur genügt das Formular am Ergebnis. Für eine Entfernung, eine Sperre eurer Adresse oder eine Rückfrage zu einem Urteil schreibt uns über die Kontaktangaben im Impressum.",
-        "imprint": "Zum Impressum"
+        "imprint": "Zum Impressum",
+        "contactMail": "Oder direkt per E-Mail an"
       },
       "limits": {
         "title": "Grenzen und Fairness",

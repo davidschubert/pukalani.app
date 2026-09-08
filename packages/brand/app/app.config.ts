@@ -314,6 +314,12 @@ export default defineAppConfig({
        */
       introCallNotify: '',
       /**
+       * ÖFFENTLICHE KONTAKTADRESSE DER SITE (BS1 R2a) — leer im Layer: die
+       * Methodik-Seite zeigt dann nur den Impressum-Link. Eine Site setzt sie
+       * bewusst; ein Layer-Default wäre eine erfundene Adresse.
+       */
+      contactEmail: '',
+      /**
        * ZUSÄTZLICHE EBENE-1-EINTRÄGE DER WERKSTATT-LEISTE (MV1 M4).
        *
        * LEER ist der Default und die richtige Aussage: `brand` ist ein

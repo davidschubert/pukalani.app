@@ -1631,7 +1631,8 @@
         "removalBody": "On a substantiated request we take a result offline. It disappears from the ranking and from its own address as well — what stands there afterwards is the same as for a result that never existed. The removal is permanent: it is not undone by someone else checking the same address again.",
         "contactTitle": "How to reach us",
         "contactBody": "For a correction the form on the result is enough. For a removal, to have your address blocked, or to query a judgement, write to us using the contact details in the imprint.",
-        "imprint": "To the imprint"
+        "imprint": "To the imprint",
+        "contactMail": "Or by e-mail to"
       },
       "limits": {
         "title": "Limits and fairness",

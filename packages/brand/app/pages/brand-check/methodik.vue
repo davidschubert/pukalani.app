@@ -116,6 +116,12 @@ const bands = computed(() => BRAND_SCORE_BAND_RANGES.map((range, index) => {
   }
 }))
 
+/** Die öffentliche Kontaktadresse der Site, falls gesetzt (`pukalani.brand.contactEmail`). */
+const contactEmail = computed(() => {
+  const value = appConfig.pukalani?.brand?.contactEmail
+  return typeof value === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim()) ? value.trim() : ''
+})
+
 /** Das Impressum, falls die App eines hat (`pukalani.brand.legalLinks`). */
 const imprint = computed(() =>
   resolveBrandLegalLinks(appConfig.pukalani?.brand?.legalLinks).find(link => link.id === 'imprint') ?? null)
@@ -305,6 +311,10 @@ useHead({
 
         <h3 class="mt-8 text-lg font-medium tracking-tight">{{ t('brand.checkMethod.public.contactTitle') }}</h3>
         <p class="mt-2 leading-relaxed" style="color: var(--bw-ink-soft)">{{ t('brand.checkMethod.public.contactBody') }}</p>
+        <p v-if="contactEmail" class="mt-3">
+          {{ t('brand.checkMethod.public.contactMail') }}
+          <a :href="`mailto:${contactEmail}`" class="underline underline-offset-4">{{ contactEmail }}</a>
+        </p>
         <p v-if="imprint" class="mt-3">
           <ULink :to="localePath(imprint.to)" class="underline underline-offset-4">
             {{ t('brand.checkMethod.public.imprint') }}

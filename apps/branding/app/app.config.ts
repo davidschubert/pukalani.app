@@ -60,12 +60,19 @@ export default defineAppConfig({
        * trotzdem nicht verloren: sie steht in `brand_intro_requests` und unter
        * /dashboard/intro-calls, und der Absender bekommt seine Bestätigung.
        *
-       * DAVID TRÄGT HIER SEINE ADRESSE EIN, wenn er die Anfrage im Postfach
-       * haben will — z. B. `introCallNotify: 'hallo@pukalani.app'`. Ein
+       * DAVIDS ADRESSE (gesetzt 2026-09-07: hello@branding.supply). Ein
        * erfundener Standard-Empfänger wäre schlimmer als keiner: eine
        * Zustellung ins Nichts sieht wie eine Zustellung aus.
        */
-      introCallNotify: '',
+      introCallNotify: 'hello@branding.supply',
+      /**
+       * DIE ÖFFENTLICHE KONTAKTADRESSE (BS1 R2a/R2, David 2026-09-07):
+       * dieselbe wie `introCallNotify` — die Methodik-Seite des Brand-Checks
+       * nennt sie für Entfernung, Sperre und Rückfragen, statt nur aufs
+       * Impressum zu zeigen. Zwei Schlüssel, weil Postfach (intern) und
+       * Anzeige (öffentlich) getrennte Fragen sind.
+       */
+      contactEmail: 'hello@branding.supply',
       /**
        * DIE DREI RECHTSWÖRTER IM FUSS SIND SEIT BS1 R1 ECHTE LINKS
        * (2026-09-07). Bis dahin standen sie hier bewusst leer — der
