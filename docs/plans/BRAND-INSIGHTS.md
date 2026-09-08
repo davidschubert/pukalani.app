@@ -1,10 +1,14 @@
 # Brand Insights — Redaktionskonzept (BI1)
 
 Status: **Redaktionskonzept ENTSCHIEDEN 2026-09-07** (Davids zwölf Antworten,
-§1); die Strategie-/Konzept-Runde nach [referenz/WORKFLOW.md](../referenz/WORKFLOW.md)
-folgt **nach DB1** („Discover Brands"). Dieses Dokument hält fest, WAS entschieden
-ist und welche Leitplanken daran hängen — es ist keine Arbeitsliste. Was von BI1
-offen ist, steht ausschliesslich in [OPEN-ITEMS.md](../OPEN-ITEMS.md) (Zeile `BI1`).
+§1) · **Konzeptrunde GESCHRIEBEN 2026-09-08** — §9 hält die Vorschläge, §10 die
+acht Fragen, die David beantworten muss. Die Runde war an DB1 gebunden
+(Entscheidung 12); DB1 ist mit D0–D3 live, also fand sie statt. Nach
+[referenz/WORKFLOW.md](../referenz/WORKFLOW.md) ist das Phase 2 (Konzeption) —
+die Freigabe steht aus, gebaut wird nichts davor. Dieses Dokument hält fest, WAS
+entschieden ist, welche Leitplanken daran hängen und was jetzt zur Entscheidung
+liegt — es ist keine Arbeitsliste. Was von BI1 offen ist, steht ausschliesslich
+in [OPEN-ITEMS.md](../OPEN-ITEMS.md) (Zeile `BI1`).
 
 ## 0. Was das hier ist
 
@@ -169,6 +173,12 @@ Lehre wie das `status: 'verified'`-Tor der Marktvergleichs-Bibliothek, Anhang G)
 `übersetzt` heisst: die zweite Sprachfassung liegt vor und ist redigiert — eine
 maschinell erzeugte, unredigierte Fassung ist NIE öffentlich.
 
+> **Nachtrag 2026-09-08 (§9.3):** die Konzeptrunde schlägt vor, `übersetzt` aus
+> der Kette zu NEHMEN und zur Eigenschaft der zweiten Fassung zu machen. Grund:
+> ein Beitrag kann auf Deutsch freigegeben sein, während die englische Fassung
+> noch redigiert wird — „halb veröffentlicht" kann eine lineare Kette nicht
+> ausdrücken. Das Versprechen im Satz darüber bleibt dabei wörtlich erfüllt.
+
 ### 3.3 Launch-Paket und Wochentakt
 
 **Launch-Paket (Entscheidung 5):** ≈ 10 Markenprofile · 3 Duelle · 5 Artikel ·
@@ -282,6 +292,11 @@ Entscheidung 8: **eigene Tabellen im brand-Layer, Redaktion im Dashboard.** Das
 Folgende ist eine SKIZZE für die Konzeptrunde, keine Schema-Zusage; ob BI1 im
 brand-Layer oder in einem eigenen Layer wohnt, ist offen (§8).
 
+> **Seit dem 2026-09-08 gilt hier §9.3.** Die Skizze bleibt als Ausgangspunkt
+> stehen; **gebaut wird nach §9.3** (Spalten mit Typ und Größe, Indizes,
+> Retention, Kaskaden) und nach §9.1 (Ort im Code). Wer aus diesem Abschnitt
+> eine Migration ableitet, baut die verworfene Fassung.
+
 ### 5.1 `insights_posts` — der Beitrag
 
 Server-only, Permissions `[]` wie alle brand-Tabellen. Ein Beitrag JEDES Formats
@@ -374,32 +389,773 @@ für Kunden (die Redaktion ist unsere, nicht ihre).
 ## 8. Offene Fragen für die Konzeptrunde
 
 Die Runde findet nach DB1 statt (Entscheidung 12); dies sind die Fragen, die
-sie beantworten muss:
+sie beantworten muss. **Sie hat am 2026-09-08 stattgefunden** — dieser Abschnitt
+bleibt als PROTOKOLL der Fragestellung stehen und wird nicht umgeschrieben; jede
+Frage trägt jetzt den Zeiger auf ihren Vorschlag in §9, die davon übrigen
+Entscheidungen liegen in §10.
 
 1. **Wo wohnt BI1?** Eigener Layer `insights` (Silo-Regel „neues Produkt ⇒
    eigener Layer") oder Tabellen im brand-Layer wie in Entscheidung 8 skizziert
    — Brand Design hat 2026-09-07 den Gegen-Präzedenzfall gesetzt (Schicht 2
-   derselben Werkstatt statt eigener Layer).
+   derselben Werkstatt statt eigener Layer). → **Vorschlag in §9.1**, Entscheidung
+   in §10 Frage 1.
 2. **Adressen.** Die Informationsarchitektur nennt `/brands/<name>` ·
    `/rankings/` · `/topics/` · `/journal/`, die Navigation heisst „Brand
    Insights" — welche URL-Basis gilt, und wie trägt sie das i18n-Präfix
-   (Muster: Slug oder Id)?
+   (Muster: Slug oder Id)? → **Vorschlag in §9.2**, Entscheidung in §10 Frage 2.
 3. **Profil (BI1) und Anatomie (DB1)** sind im Dummy zwei Seitenarten für
    dieselbe Frage („wie ist diese Marke gebaut?") — zwei Vorlagen oder eine mit
-   zwei Datenquellen?
+   zwei Datenquellen? → **Vorschlag in §9.3** (zwei Datensätze, eine Vorlage),
+   Entscheidung in §10 Frage 2.
 4. **Wer stösst den Brand-Check einer fremden Marke an**, auf wessen Deckel
    (Kosten, 7-Tage-Cache, Konto-Deckel 10/Tag) — und ist dieser Score öffentlich,
-   obwohl `rankingOptIn` für Kundenschecks gilt?
+   obwohl `rankingOptIn` für Kundenschecks gilt? → **Vorschlag in §9.3**: die
+   Redaktion stösst ihn an, auf unseren Deckel und im Zuge des Profils; der Score
+   einer FREMDEN Website ist öffentlich, `rankingOptIn` bleibt die Regel für
+   KUNDEN-Checks und für jede Kunden-Marke in einer redaktionellen Liste.
 5. **Duell-Fakten** („Agentur-Beziehung", „Zeichen seit …") sind nicht aus einer
    Website ableitbar: von Hand gepflegt mit Belegpflicht, oder Format ohne diese
-   Zeile?
+   Zeile? → **Vorschlag in §9.3** (`facts` mit Pflicht-Beleg): von Hand mit
+   Beleg — und wo keiner zu finden ist, fehlt die ZEILE, nicht das Format.
 6. **Ranking-Regeln:** wie viele Marken je Liste, welcher Auffrischungs-Rhythmus,
    und was passiert mit einer veröffentlichten Liste, wenn sich ein Score ändert?
+   → **Vorschlag in §10 Frage 7**: zehn Plätze, eingefroren mit sichtbarem Stand,
+   Auffrischung als neue Ausgabe.
 7. **Farbwelt-Kacheln:** aus der Brand-Check-Extraktion gerechnet oder von Hand
-   gesetzt (Entscheidung 10 erlaubt beides)?
+   gesetzt (Entscheidung 10 erlaubt beides)? → **Vorschlag in §9.0/§9.3**:
+   gerechnet aus der Marken-Id über die zwölf kuratierten Dreiklänge (wie
+   Discover), von Hand nur als Ausnahme über `paletteId` — so sieht jedes Profil
+   ohne Zutun richtig aus und keins zufällig.
 8. **Übersetzen-Knopf:** eigener Redaktions-Endpunkt oder der bestehende
    UGC-Übersetzungs-Weg — und welche Drossel gilt für einen Betreiber?
+   → **Vorschlag in §9.4**, Entscheidung in §10 Frage 4.
 9. **Notausgang „Entfernen":** gilt er auch für ein Ranking, in dem die Marke
    steht — Platz löschen, Liste neu rechnen, oder Liste einfrieren?
+   → **Vorschlag in §10 Frage 7**: Platz heraus, NICHT neu rechnen, die Lücke als
+   „auf Wunsch entfernt" ausweisen.
 10. **Newsletter:** Anbieter, wo die Adressen liegen (Warteliste weiternutzen?),
     und ob der Eintrag je Format oder nur zentral angeboten wird.
+    → **Vorschlag in §9.3a**, Entscheidung in §10 Frage 5.
+
+---
+
+## 9. Konzept zur Entscheidung (2026-09-08)
+
+Die Runde aus §8 — sie war an DB1 gebunden (Entscheidung 12), und DB1 ist seit
+dem 2026-09-08 mit D0–D3 live. Dieser Abschnitt macht aus den zehn Fragen von
+§8 **Vorschläge mit Begründung**; die Fragen, die David entscheiden muss, stehen
+gebündelt in §10. §8 bleibt als Protokoll stehen und trägt je Frage den Zeiger
+auf ihren Vorschlag.
+
+### 9.0 Was DB1 auf `main` gebaut hat — und was BI1 davon erbt
+
+Nachgesehen am Code-Stand vom 2026-09-08 (nicht am Plan):
+
+| Baustein auf `main` | Wo | Was BI1 davon nimmt |
+| --- | --- | --- |
+| Migration **brand-020** (`brand_profiles.publicationVisibility`, `brand_publications`, `brand_publication_reports`) | `brand/scripts/migrations/020-brand-publications.ts` | die **Form** einer öffentlichen Marken-Zeile: `slug` unique, `status`, `decisionNote` ≤ 300, `featuredAt`, `reportCount`, `example` — BI1 baut dieselbe Tabelle für FREMDE Marken, nicht dieselbe Zeile |
+| Zustandsmaschine + Slug-Regel, pur | `brand/shared/brandPublication.ts` (`brandPublicationSlug`, `brandPublicationSlugCandidate`, `decideBrandPublication`) | die **Slug-Funktion wird geteilt** (Umlaute, Diakritika, Deckel 80, Kandidaten `name`, `name-2`, …) — der Namensraum bleibt getrennt |
+| Galerie-Rechnungen, pur | `brand/shared/brandDiscover.ts` (Facetten, `sortDiscoverItems`, `pickDiscoverFeatured`, `similarDiscoverEntries`, Fenster 500 / Seite 25 / Zahlen-Lookup 100) | die **Blätter- und Sortier-Mechanik** einer öffentlichen Liste, inkl. der ehrlichen Grenze „`total` zählt das Fenster, nicht die Tabelle" |
+| Öffentliche Routen + Seiten | `brand/server/api/discover/index.get.ts`, `brand/server/api/discover/[slug].get.ts`, `brand/server/api/discover/[slug]/report.post.ts`, `brand/app/pages/discover/index.vue`, `brand/app/pages/discover/[slug].vue` | die **Anatomie-Form** (sticky Steckbrief + Dossier), der 404-als-Zustand, der Teilen-Knopf mit `navigator.share`, das Melden mit Honeypot + Drossel |
+| Betreiber-Warteschlange | `brand/app/pages/dashboard/discover.vue` (`requiredCapability: 'users.manage'`), die Admin-Routen unter `/api/brand/admin/publications` | die **Freigabe VOR Veröffentlichung** als Muster — BI1 braucht sie nicht (die Redaktion IST der Betreiber), wohl aber den Melde- und Entscheidungs-Weg |
+| Score-Regel | `brand/shared/brandDiscover.ts` (`pickDiscoverScores`, `discoverScoreOf`) + `brand_checks.source` (`website`\|`document`) | **Entscheidung 3 von DB1 gilt für BI1 unverändert**: Website-Score gewinnt den Ring, Fundament-Reife ist die Zweitzeile. Für eine FREMDE Marke gibt es nur den Website-Score — die Zweitzeile entfällt dort, sie wird nicht erfunden |
+| Farbwelt | `brand/shared/brandPalette.ts` (12 Dreiklänge, `brandGradientFor`, `brandPaletteId`, `brandPaletteName`) | Kachel, Hero und og:image jedes Insights-Beitrags |
+| Richtungen/Archetypen | `brand/shared/brandDirections.ts`, `brand/shared/brandChoiceOptions.ts` (`BRAND_ARCHETYPES`) | die Archetyp-Achse der Profile und Duelle |
+
+**Ein Befund aus dem Abgleich, der BI1 betrifft.** DISCOVER-BRANDS.md §4.2 sagt
+zum Slug: „Umbenennung ⇒ neuer Slug + 301 vom alten". Im Schema steht dafür
+nichts — `brand_publications` trägt `slug` (unique) und keine Historie, und im
+Code gibt es keine Weiterleitung. Für DB1 ist das heute folgenlos (es gibt eine
+Veröffentlichung, und ihr Titel hat sich nicht geändert); für BI1 wäre es
+teuer, weil ein Markenprofil genau die Seite ist, die verlinkt wird. BI1 nimmt
+die Regel deshalb **mit Schema** (`slugHistory`, s. §9.3) und trägt den
+DB1-Befund nach OPEN-ITEMS, statt ihn stillschweigend zu erben.
+
+### 9.1 Ort im Code — Empfehlung: **eigener Layer `insights`**
+
+**Vorschlag:** ein eigener Produkt-Layer mit `product.manifest.ts`
+(`key: 'insights'`, `tier: 'optional'`, `requires: ['brand']`,
+`apiPrefixes: ['/api/insights']`, `hasMigrations: true`), montiert in
+`apps/branding/site.manifest.ts`, und **genau ein** expliziter Vertrag zum
+brand-Layer nach dem Muster `market/server/contracts/brandContract.ts`.
+
+Begründung, in der Reihenfolge ihres Gewichts:
+
+1. **Der Gegen-Präzedenzfall trägt hier nicht.** Brand Design ist „Schicht 2
+   derselben Werkstatt" ([DECISION-LOG](../DECISION-LOG.md) 2026-09-07,
+   Entscheidung 4) — und die Begründung dort war eine SEHR bestimmte: „zwei
+   Zustandsmaschinen für ein Dokument wären der teurere Fehler". Brand Design
+   schreibt in dasselbe Dokument, dieselbe Werkstatt, denselben Zustand wie
+   das Fundament. BI1 tut das Gegenteil: eigenes Dokument (Beitrag), eigene
+   Zustandsmaschine (Entwurf → Redaktion → veröffentlicht), eigenes Publikum
+   (anonyme Leser statt eingeloggter Eigentümer) und eigener Gegenstand
+   (FREMDE Marken, nicht die des Kunden). Es gibt kein Dokument, das sich zwei
+   Layer teilen würden.
+2. **Der Präzedenzfall, der trägt, ist `market`.** Derselbe Zuschnitt, dieselbe
+   Abhängigkeitsrichtung, dieselbe Naht: `requires: ['brand']`, ein Vertrag in
+   `server/contracts/` und nicht in `server/utils/` (Nitro AUTO-IMPORTIERT
+   `server/utils` — ein Re-Export dort stünde ZWEIMAL im Auto-Import und der
+   spätere Layer gewönne; der Kopf von `market/server/contracts/brandContract.ts`
+   erklärt die Falle ausführlich). Was der Vertrag für BI1 führen muss: der
+   Lesezugriff auf `brand_checks` (Score, Band, acht Kategorien), die Farbwelt
+   (`brandGradientFor`, `brandPaletteId`, `brandPaletteName`), der
+   Archetyp-Katalog, die Slug-Funktion und der SSRF-feste Abruf samt
+   `robots.txt`- und TDM-Prüfung (seit BS1 R2b in `brand/shared/brandRobots.ts`
+   und `brand/shared/brandTdm.ts`).
+3. **Die Notabschaltung kommt geschenkt.** Mit `apiPrefixes: ['/api/insights']`
+   greift die Produkt-Middleware `core/server/middleware/04.product-gate.ts`:
+   `app_config.products.insights.enabled = false` ⇒ 404 für die ganze
+   Redaktion, ohne dass ein Handler davon weiß. Läge BI1 unter `/api/brand`,
+   schaltete dieselbe Bewegung den Wizard mit ab.
+4. **Die Silo-Regel wird eingehalten, nicht überdehnt.** „Neues Produkt ⇒ immer
+   eigener Layer, aber standardmäßig KEINE eigene Site" (CLAUDE.md): BI1
+   bekommt den Layer und **keine** neue Site — es lebt auf branding.supply.
+5. **Was es kostet, und was davon Pflicht ist.** Ein neuer Layer heißt:
+   `product.manifest.ts` + Eintrag in `apps/branding/site.manifest.ts` +
+   `scripts/migrate.mjs`-`LAYER_ORDER` (`pnpm check:manifests`), ein Block in
+   der Produkt-Bilanz (`pnpm check:bilanz`), das BRANDING-Soll in
+   `scripts/ops/verify-schema-parity.mjs` (die Soll-Listen sind GEPFLEGT, nicht
+   geparst — neue Tabelle ⇒ dort eintragen), ein benannter Block in der
+   ESLint-Regel `pukalani/no-cross-layer-relative` (wie `packages/market/**`)
+   und ein GDPR-Contributor, sobald eine Tabelle personenbezogene Daten trägt
+   (hier: die Kontakt-Adresse eines Korrekturvorschlags, §9.3). Das ist die
+   volle Rechnung — sie ist bekannt und wiederholbar, weil `market` sie schon
+   einmal bezahlt hat.
+
+**Die Gegenoption** (Entscheidung 8 skizzierte sie: „eigene Tabellen im
+brand-Layer") bleibt vertretbar und ist billiger — kein Manifest, kein Vertrag,
+keine Bilanz-Zeile. Ihr Preis ist, dass der brand-Layer dann BEIDES trägt: die
+private Werkstatt eines Kunden und eine öffentliche Redaktion über fremde
+Marken. Genau die Vermischung, wegen der `market` seinerzeit ausgezogen ist.
+Weil Entscheidung 8 die Technik meinte („eigene Tabellen, Redaktion im
+Dashboard") und §8 Frage 1 die Layer-Frage ausdrücklich offen gelassen hat,
+gehört sie David — §10 Frage 1.
+
+### 9.2 Adressen
+
+**Vorschlag** (fünf Basen, alle unter dem i18n-Muster
+`prefix_except_default`: `en` ohne Präfix, `de` unter `/de/…`):
+
+| Adresse | Was | Anmerkung |
+| --- | --- | --- |
+| `/insights` | die Journal-Liste über alle vier Formate, Filter nach Format und Thema | der Nav-Punkt „Brand Insights" zeigt hierhin. **`/journal/` entfällt** — es wäre ein zweiter Name für dieselbe Liste, und zwar der ALTE (die Umbenennung „Journal" → „Brand Insights" fiel am 2026-08-30). Eine Adresse, die eine verworfene Benennung einzementiert, ist die teuerste Sorte Altlast |
+| `/insights/<slug>` | der Artikel | |
+| `/brands/<slug>` | das Markenprofil einer FREMDEN Marke | **von DB1 reserviert** (DISCOVER-BRANDS.md §9 Entscheidung 2) — die Reservierung wird hier eingelöst |
+| `/duels/<a>-vs-<b>` | das Duell | eigene Basis, weil ein Duell ein BEITRAG ist und keine Marke. Der Slug entsteht aus den zwei Marken-Slugs in **alphabetischer Reihenfolge**, damit `nike-vs-adidas` und `adidas-vs-nike` nicht zwei Seiten mit demselben Inhalt werden; die andere Richtung antwortet 301 |
+| `/rankings` · `/rankings/<slug>` | Ranking-Übersicht und Liste | |
+| `/topics/<slug>` | ein Themencluster quer über alle Formate | die acht Cluster aus §2, als kuratierter Katalog im Code (wie `BRAND_ARCHETYPES`), nicht als Tabelle — sie ändern sich seltener als ein Deploy |
+
+**Slugs bleiben einsprachig.** Ein Beitrag hat EINEN Slug, die Sprache trägt das
+i18n-Präfix — dasselbe Muster wie Kategorien und Kurse (Memory-Notiz „Adressen:
+Slug oder Id"; U16 entschieden 2026-08-20: so lassen). Zwei Slugs je Zeile
+hießen zwei Unique-Indizes, zwei Kollisionsprüfungen und bei jeder Umbenennung
+zwei Weiterleitungen.
+
+**Kollision mit DB1: keine, aber Gleichnamigkeit ist möglich.** `/discover/<slug>`
+und `/brands/<slug>` sind getrennte Namensräume mit je eigener Tabelle und
+eigenem `uq_slug` — dieselbe Marke KANN unter beiden Adressen stehen (als
+Kunden-Veröffentlichung und als redaktionelles Profil). Das ist kein Fehler,
+sondern der Normalfall aus §9.3; welche Seite dann was zeigt, steht dort.
+Geteilt wird nur die FUNKTION `brandPublicationSlug` über den Vertrag — nie der
+Index.
+
+**Umbenennung.** Beide Marken-Tabellen bekommen `slugHistory` (Liste alter
+Slugs, ≤ 5), die Route schlägt bei einem Fehlschlag dort nach und antwortet
+301. Das ist die Regel, die DB1 versprochen und nicht gebaut hat (§9.0).
+
+### 9.3 Datenmodell — konkret
+
+Alles server-only (`permissions: []`, `rowSecurity: false`) wie jede
+brand-Tabelle; alle Texte über `createMediumtextColumn`, wo sie ein
+MariaDB-Zeilenbudget sprengen könnten (Memory „MariaDB/utf8mb4-Zeilenbudget":
+Varchar max 16.381, Zeile ~65 KB — ein Artikel passt dort nicht).
+Migrationsnummer beim Anlegen gegen `origin/main` prüfen (im brand-Layer ist
+`023` heute frei und `024` vergeben — ein Zeichen paralleler Sitzungen).
+
+#### `insights_posts` — der Beitrag (alle vier Formate, eine Zeile)
+
+| Spalte | Typ | Zweck |
+| --- | --- | --- |
+| `format` | varchar 16 | `profile` · `duel` · `article` · `ranking` |
+| `slug` | varchar 160 | Adresse, einsprachig |
+| `slugHistory` | varchar 1000 | alte Slugs für die 301 |
+| `state` | varchar 16 | `draft` · `review` · `published` · `updated` |
+| `baseLocale` | varchar 8 | `de` oder `en` — die REDIGIERTE Grundfassung (Entscheidung 3) |
+| `titleDe` / `titleEn` | varchar 200 | |
+| `dekDe` / `dekEn` | varchar 400 | Vorspann |
+| `bodyDe` / `bodyEn` | MEDIUMTEXT | Markdown aus `UEditor` |
+| `translatedAt` | datetime | wann die zweite Fassung entstand |
+| `translationModel` / `translationPromptVersion` | varchar 120 / 64 | Herkunft der zweiten Fassung |
+| `translationReviewed` | boolean, Default `false` | **erst `true` ist die zweite Fassung öffentlich** |
+| `topics` | varchar 200 | kommagetrennte Schlüssel aus dem Cluster-Katalog |
+| `sources` | MEDIUMTEXT (JSON) | s. u. |
+| `brandRefs` | varchar 2000 (JSON) | `[{ brandId, checkId, libraryKey, publicationId }]` |
+| `facts` | varchar 4000 (JSON) | Duell-Zeilen bzw. Ranking-Plätze, s. u. |
+| `readingMinutes` | integer 0–120 | gerechnet aus der Grundfassung (Wörter ÷ 200, aufgerundet), beim Speichern, nicht beim Lesen |
+| `publishedAt` · `reviewedAt` | datetime | |
+| `reviewedBy` | varchar 64 | userId — wer das Zeichen gegeben hat |
+| `noteInternal` | varchar 500 | Redaktionsnotiz, nie öffentlich |
+| `draftModel` · `draftPromptVersion` | varchar 120 / 64 | Herkunft des KI-Entwurfs |
+
+Indizes: `uq_slug` (Unique) · `idx_state_published` (`state`, `publishedAt`) ·
+`idx_format` · `idx_slug_history` (Key, für die 301-Suche).
+
+**Vier Zustände statt fünf — und warum das ein Vorschlag ist, keine
+Vereinfachung.** §3.2 nennt die Kette `entwurf → redaktion → freigegeben →
+übersetzt → aktualisieren`. Das trägt nicht: ein Beitrag kann auf Deutsch
+freigegeben sein, während die englische Fassung noch redigiert wird — eine
+lineare Kette kann „halb veröffentlicht" nicht ausdrücken, sie müsste den
+Beitrag entweder zurücknehmen oder eine unredigierte Übersetzung öffentlich
+machen. Deshalb: `übersetzt` ist **kein Zustand, sondern eine Eigenschaft der
+zweiten Fassung** (`translationReviewed`). Die öffentliche Route liest
+`state ∈ {published, updated}` UND — für die Nicht-Grundsprache —
+`translationReviewed === true`; sonst zeigt sie die Grundfassung mit einem
+Hinweis, dass diese Sprache noch fehlt. Das Versprechen aus §3.2 („eine
+maschinell erzeugte, unredigierte Fassung ist NIE öffentlich") bleibt damit
+wörtlich erfüllt und wird sogar prüfbarer.
+
+**`sources` (JSON, Zitatschranke im Schema).** Je Eintrag:
+`{ url, publisher, date: 'YYYY-MM-DD', kind: 'brand-site' | 'press' | 'wikipedia' | 'youtube' | 'own-data', quote (≤ 200 Zeichen), license? }`.
+`kind !== 'own-data'` erzwingt `publisher` + `date`; `kind === 'wikipedia'`
+erzwingt zusätzlich `license` (CC-BY-SA-Link, §4.1 (3)). Die Prüfung sitzt im
+Zod-Schema UND im Übergang nach `review` (§9.4) — eine Regel, die nur im
+Formular steht, ist keine.
+
+**`insights_sources` als eigene Tabelle: weiterhin nein** (§5.1 bleibt gültig).
+Die Kippfrage ist unverändert, ob eine Quelle EIGENE Fristen bekommt; das
+passiert erstmals mit dem Themenradar — und der bekommt aus einem anderen Grund
+eine eigene Tabelle (§9.6).
+
+**`facts` (JSON), zwei Formen mit Belegpflicht.** Duell:
+`[{ key, labelDe, labelEn, left, right, winner: 'left'|'right'|'tie', sourceIndex }]`.
+Ranking: `[{ rank, brandId, checkId, score, reasonDe, reasonEn }]`.
+`sourceIndex` zeigt in `sources` — eine Faktenzeile OHNE Beleg lässt sich nicht
+speichern. Damit ist §8 Frage 5 („Agentur-Beziehung") beantwortet, ohne die
+Zeile zu streichen: sie ist **von Hand gepflegt mit Belegpflicht**, und wo kein
+Beleg zu finden ist, fehlt die Zeile — nicht das Format.
+
+#### `insights_brands` — die Marken-Entität
+
+`slug` (varchar 160, unique) · `slugHistory` (1000) · `name` (200) ·
+`homepage` (512) · `libraryKey` (64, Schlüssel der Marktvergleichs-Bibliothek,
+`''` wenn keiner) · `checkId` (64, jüngster Brand-Check DIESER Website) ·
+`publicationId` (64, s. u.) · `industry` (40, aus dem 16er-Katalog des
+Brand-Checks) · `country` (2) · `foundedYear` (integer) · `archetype` /
+`archetypeSecondary` (40) · `paletteId` (40) · `marks` (varchar 4000, JSON:
+Symbol/Claim/Typografie/Farbe, je ein Satz + `sourceIndex`) · `history` (4000,
+JSON: Jahr + Satz + `sourceIndex`) · `relations` (2000, JSON: brandIds der
+Wettbewerber) · `sources` (MEDIUMTEXT, dieselbe Form wie oben) · `state`
+(`draft` · `published` · `removed`) · `removedAt` (datetime) · `removalReason`
+(300) · `claimedBy` (64).
+Indizes: `uq_slug` · `idx_state` · `idx_industry` · `idx_library_key` ·
+`idx_slug_history`.
+
+**§8 Frage 3 — Insights-Profil (fremd) und Discover-Anatomie (eigen):
+ZWEI Datensätze, EINE Vorlage.** Der Vorschlag und seine drei Gründe:
+
+1. **Die Rechtsgrundlage ist entgegengesetzt.** Eine Discover-Publikation steht
+   dort, weil ihr Eigentümer ausdrücklich zugestimmt hat (Opt-in, eingefrorener
+   Snapshot, Widerruf per Klick). Ein Insights-Profil steht dort, weil wir uns
+   auf Zitatrecht und Meinungsfreiheit stützen — die Marke hat nie zugestimmt
+   und wird nie gefragt. Eine Zeile mit zwei Rechtsgrundlagen hätte auf die
+   Frage „darf das weg?" zwei Antworten.
+2. **Der Notausgang ist entgegengesetzt.** Discover zurückziehen ist eine
+   Kunden-Handlung; Insights entfernen ist eine Zusage von uns, „ohne
+   Diskussion gewährt" (Entscheidung 11). Das eine ist ein Knopf, das andere
+   ein protokollierter Vorgang mit Datum und Grund.
+3. **Der Inhalt ist entgegengesetzt.** Die Discover-Anatomie zeigt Purpose,
+   Werte, Stimme — Dinge, die eine Marke über sich selbst FESTGELEGT hat. Bei
+   einer fremden Marke wissen wir das nicht und dürften es nicht behaupten;
+   dort stehen stattdessen Zeichen, Historie und Beziehungen, jeweils mit
+   Beleg. Dieselben Kapitel in einer Tabelle zu führen hieße, die eine Hälfte
+   dauerhaft leer zu lassen.
+
+**Die Vorlage ist trotzdem dieselbe** — das Dossier der Anatomie-Seite aus dem brand-Layer (sticky Steckbrief,
+fliessendes Dokument rechts, 404 als Zustand, Farbwelt-Hero, Score-Ring). Sie wird in den blueprint-freien Teil
+gehoben oder im Vertrag als Baustein geführt; abgeschrieben wird sie nicht.
+
+**Und wenn eine Marke BEIDES ist?** Ein Kunde, über den wir auch redaktionell
+schreiben: dann trägt `insights_brands.publicationId` die Verknüpfung, und die
+Regel lautet **das Kundenprofil gewinnt** — `/brands/<slug>` zeigt die
+redaktionelle Einordnung und verlinkt die Anatomie, wiederholt aber keine
+Fundament-Kapitel. Umgekehrt gilt §2.4 unverändert: **eine Kunden-Marke
+erscheint in einer redaktionellen Liste nur mit demselben Opt-in wie im
+Ranking** (`brand_checks.rankingOptIn`).
+
+#### `insights_corrections` — Korrekturvorschlag UND Entfernen-Wunsch
+
+Eine Tabelle, zwei Anlässe (Muster: `brand_check_corrections`, Migration
+brand-017): `targetKind` (`brand` | `post`) · `targetId` (64) · `kind`
+(`correction` | `removal`) · `field` (32) · `proposed` (300) · `reason` (300) ·
+`contactEmail` (254, freiwillig) · `status` (`open` · `accepted` · `declined`) ·
+`decisionNote` (300) · `decidedAt` · `ipHash` (64). Indizes: `idx_status` ·
+`idx_target` (`targetKind`, `targetId`).
+
+**Retention und Kaskaden.** Der ENTSCHEIDUNGS-Eintrag bleibt dauerhaft — er ist
+der Nachweis, dass der Korrekturweg funktioniert, und genau danach fragt
+Anwaltsfrage 3. Was NICHT bleibt: `contactEmail` und `ipHash` werden nach
+12 Monaten geleert (ein Sweep nach dem Muster `brand/server/utils/
+brandEventsSweep.ts`, Frist als EINE Konstante). Ein Beitrag gelöscht ⇒ seine
+Quellen gehen mit (sie stehen in der Zeile). Eine Marke entfernt ⇒ ihre Zeile
+geht auf `state: 'removed'` und wird nirgends mehr gelesen, die BEITRÄGE
+bleiben (der Text ist der Beitrag) und verlieren nur den Verweis — außer der
+Entfernungs-Wunsch nennt den Beitrag selbst, dann geht der Beitrag.
+**GDPR-Contributor:** `contactEmail` ist das einzige personenbezogene Feld des
+Layers; sobald die Tabelle steht, registriert der Layer einen
+`registerUserDataContributor` (Nitro-Plugin) — sonst fehlt sie in Export und
+Löschung.
+
+#### Zwei Tabellen hinter eigenen Gates
+
+`insights_topics` (Themenradar, §9.6) und `insights_subscribers` (Newsletter,
+§9.3a) entstehen erst mit ihren Paketen — sie stehen hier, damit die Form beim
+ersten Schema-Wurf mitgedacht ist, nicht damit sie mitkommen.
+
+#### 9.3a Newsletter — Vorschlag: eigene Liste, eigenes Double-Opt-in
+
+`insights_subscribers`: `emailLower` (256, unique) · `email` (256) · `locale`
+(8) · `tokenHash` (128) · `tokenExpiresAt` (32) · `confirmedAt` (32) ·
+`unsubscribedAt` (32) · `source` (64) · `ipHash` (64). Das ist **wörtlich das
+Muster der Warteliste** (`brand_waitlist`, Migrationen brand-012 und brand-015):
+Adresse, Sprache, Token-HASH mit Frist, Bestätigungs-Stempel.
+
+**Die Warteliste selbst wird NICHT weiterbenutzt** — und das ist keine
+Bequemlichkeit, sondern dieselbe Regel, die DB1 für `marketVisibility` gezogen
+hat: *eine Zustimmung gilt nur für das, wofür sie gegeben wurde.* „Sag mir
+Bescheid, wenn das Produkt öffnet" ist keine Einwilligung in einen
+redaktionellen Newsletter. Wer beides will, trägt sich zweimal ein.
+
+**Anbieter** — drei belegte Optionen, Vorschlag: **Transport über den
+bestehenden `sendMail()`-Weg (Resend als SMTP), Liste und Double-Opt-in bei
+uns**, weil das DOI dann exakt so aussieht wie das der Warteliste (ein Muster
+statt zwei) und keine Adresse das Haus verlässt, bevor sie bestätigt ist. Die
+Alternativen stehen mit Quelle im Anhang und in §10 Frage 5.
+
+### 9.4 Redaktions-Dashboard
+
+**Seiten** unter `/dashboard/insights` (Liste, **`UTable`** nach der B6-Regel —
+Sortierung, Auswahl und Blättern kommen mitgeliefert),
+`/dashboard/insights/<id>` (Editor als Vollseite, Muster: der Themes-Editor und
+`/dashboard/pages`), `/dashboard/insights/brands` (die Marken-Entitäten),
+`/dashboard/insights/corrections` (Vorschläge und Entfernungs-Wünsche, Zähler
+im Menü wie bei der Warteliste).
+
+**Capability: `insights.manage`, nur admin** — eine neue Zeile in
+`core/shared/authz.ts`, nach dem Muster `runner.manage` (bewusst NICHT in der
+moderator-Liste). Die DB1-Seite nutzt `users.manage`; das ist dort eine
+Dehnung (eine Freigabe-Warteschlange hat mit Nutzerverwaltung nichts zu tun)
+und sollte sich nicht fortpflanzen. Kosten: eine Core-Änderung, also ein
+eigener Commit (Git-Regel).
+
+**Der Editor.** `UEditor` mit den Regeln aus CLAUDE.md — der Werkzeug-Vorrat
+ist an `core/shared/markdown.ts` gekoppelt (fett/kursiv/`code`/Link/h2+h3/
+Listen/Zitat/Codeblock, mehr kann der Parser nicht), `enableInputRules` und
+`enablePasteRules` bleiben ERLAUBNISLISTEN, `gfm: false` beim Lesen,
+`bodyToSave` aus `core/shared/editorBody.ts` (Öffnen und Speichern ohne
+Tastendruck darf nichts ändern). Zwei Sprach-Reiter, die Grundfassung sichtbar
+markiert; die zweite Fassung trägt über dem Feld den Stempel „maschinell
+erzeugt am …, noch nicht redigiert", bis `translationReviewed` steht.
+
+**Das Quellen-Panel** neben dem Text: je Quelle URL, Herausgeber, Datum, Art,
+Zitat. Jede Zeile hat einen Knopf „Beleg prüfen", und der prüft
+**deterministisch**, nicht mit KI: der Server holt die Seite über den
+SSRF-festen Abruf des brand-Layers (inkl. `robots.txt` und TDM-Vorbehalt seit
+BS1 R2b) und lässt `evidenceIsGrounded` aus `market/shared/marketExtractRules.ts`
+entscheiden, ob das Zitat wörtlich in der Quelle steht. Das ist derselbe
+Beleg-Riegel wie im Marktvergleich — kein zweiter, kein weicherer.
+
+**Die Prüfregeln vor dem Übergang nach `review`** (alle blockierend, alle als
+pure Funktion im Layer, alle mit Gegenprobe im Beweis):
+
+1. jedes Zitat ≤ 200 Zeichen **und** wörtlich in seiner Quelle
+   (`evidenceIsGrounded`);
+2. jede Quelle mit `kind !== 'own-data'` trägt Herausgeber und Datum;
+   `wikipedia` zusätzlich den Lizenz-Link;
+3. jede Faktenzeile (`facts`) zeigt auf eine Quelle;
+4. **Namens- und Herabsetzungsfilter** aus dem Marktvergleich —
+   `createMarketDisparagementGuard` / `checkMarketTexts` aus
+   `market/shared/marketDisparagement.ts`, angewandt auf Titel, Vorspann und
+   Fliesstext; ein Treffer blockiert nicht stumm, sondern zeigt die Stelle;
+5. jeder gezeigte Score verlinkt `/brand-check/methodik` (Entscheidung 7/11);
+6. jede genannte Marke hat eine `insights_brands`-Zeile — sonst gibt es keinen
+   Ort, an dem ein Korrekturvorschlag ankommen könnte.
+
+**Der KI-Entwurf.** Brief → Entwurf über `aiCompleteJson`
+(`core/server/utils/aiComplete.ts`), Modell über die bestehende Kette
+(`app_config` schlägt `pukalani.ai`), Transport mit demselben ZDR-Filter, den
+`core/server/utils/aiVision.ts` seit dem 2026-09-08 fest verdrahtet.
+Prompt-Fassung als benannte Konstante `insights-d-1` (Muster:
+`BRAND_CHECK_PROMPT_VERSION = 'check-judge-2'`, `ARCHETYPE_PROMPT_VERSION`),
+gespeichert je Beitrag — ohne sie ist ein alter Entwurf nicht mehr einzuordnen.
+Ereignisse im `brand_events`-Muster (`insights.draft.requested` /
+`.completed` / `.failed` mit Slot, Modell, Dauer, Fehlercode — **nie Prompt,
+nie Text**, Regel 1 aus `brand/server/utils/brandEvents.ts`). Der Entwurf
+landet IMMER als `draft`; es gibt keinen Weg von der KI direkt nach `review`.
+
+**Der Übersetzen-Knopf.** Vorschlag: **eigener Redaktions-Endpunkt**, nicht der
+UGC-Weg. Der UGC-Weg (`core`, `translations`-Spalte, 10/10 min + 100/Tag,
+Same-Language-Marker) ist für ein LESER-Publikum gebaut: Cache je Sprache auf
+der Zeile, Knopf beim Leser, Drossel gegen Missbrauch. Hier übersetzt der
+BETREIBER, das Ergebnis wird REDIGIERT und dann GESPEICHERT — es ist kein
+Cache, sondern eine Fassung, und sie muss bearbeitbar sein. Ein Cache, den
+jemand von Hand nachbessert, ist keiner mehr. Die Drossel bleibt trotzdem
+(10/Stunde je Konto, Tages-Eimer 50 — dieselbe Bauart wie
+`brand/shared/brandAiLimits.ts`), weil auch ein Betreiber einen Knopf
+verklemmen kann. Der Same-Language-Fall entfällt: die Zielsprache ist immer die
+andere.
+
+### 9.5 Öffentliche Seiten
+
+- **`/insights` (Journal-Liste):** Filterzeile nach Format und Thema,
+  Sortierung **Neueste** (Default) · **Kürzeste Lesezeit**; „Meistgelesen"
+  **nicht in Runde 1** (§9.7 sagt warum). Grid/Liste über `?display=` wie in
+  der Discover-Galerie, Facetten und Seite als Query-Parameter (teilbar).
+  Leerer Zustand über `CoreEmptyState`. Microcache 60 s auf der API — die Liste
+  ist nutzer-agnostisch.
+- **Artikel:** der Aufbau aus dem Dummy, mit stickyem Inhaltsverzeichnis nach
+  dem `UContentToc`-Muster; die Überschriften kommen aus dem gerenderten
+  Markdown (h2/h3 — mehr kennt der Parser nicht, das begrenzt die Tiefe
+  automatisch auf zwei Ebenen).
+- **Profil · Duell · Ranking:** nach dem Dummy, Dossier-Form aus §9.3.
+- **Korrektur- und Entfernungsweg** auf jeder Profil-, Duell- und
+  Ranking-Seite: ein Formular mit Honeypot und Drossel (3/Std je IP,
+  Tages-Eimer) — dieselbe Bauart wie das Melden in
+  `brand/server/api/discover/[slug]/report.post.ts`. Daneben die Methodik-Zeile
+  mit Link auf `/brand-check/methodik`.
+- **SEO.** `useLocaleSeoHead()` bleibt der EINZIGE Aufruf; og:image je Beitrag
+  aus der Farbwelt-Kachel über das bestehende PNG-Rezept (`/og/<key>.png`,
+  1200×630, gerastert aus dem committeten Zeichen-Atlas — **PNG, nicht SVG**,
+  weil Facebook/WhatsApp/LinkedIn SVG als og:image nicht zeigen). DB1-Paket D4
+  baut das gerade für die Anatomie; BI1 erbt es.
+- **JSON-LD:** `Article` + `BreadcrumbList` für alle vier Formate, `ItemList`
+  zusätzlich für Rankings. **Bewusst NICHT `Organization`** — DB1 hat das für
+  die eigene Anatomie schon abgelehnt, und bei einer FREMDEN Marke wäre es
+  ungleich schlimmer: wir würden Google gegenüber behaupten, strukturierte
+  Stammdaten einer fremden Firma zu führen. Ebenso **nicht `Review` /
+  `AggregateRating`** — genau die Auszeichnung, die aus einer Einordnung im
+  Meinungs-Stil eine maschinenlesbare Bewertung machte, und damit die
+  Zuspitzung von Anwaltsfrage 3.
+- **`noindex`** auf jedem Entwurf und auf der Betreiber-Vorschau (`?preview=1`,
+  DB1-Schnittstelle). **hreflang nur auf vorhandene Fassungen:** ein Beitrag
+  ohne redigierte Übersetzung darf keine Alternate-Adresse melden, die 404
+  antwortet.
+- **Eine Falle aus der Hausordnung:** keine spitzen Klammern in
+  Locale-Nachrichten. Platzhalter wie `/brands/adresse` schreiben, nie
+  `/brands/<adresse>` — nuxt-i18n hält das für HTML, der Nachrichten-Compiler
+  steigt im BROWSER aus, und die ganze Client-Seite wird unzuverlässig
+  (2026-08-04 live erwischt).
+
+### 9.6 Themenradar — Vorschlag: **nach dem Launch**, und in anderer Form
+
+Beim Konkretisieren sind drei belegte Tatsachen aufgetaucht, die den Zuschnitt
+aus §3.4 ändern (Quellen im Anhang):
+
+1. **`search.list` hat einen eigenen, sehr kleinen Eimer.** Die
+   Google-Dokumentation nennt für ein Projekt „100 `search.list` calls" pro Tag
+   — getrennt von den 10.000 Einheiten, die sich alle anderen Endpunkte teilen.
+   Ein Radar, der über Suche entdeckt, ist damit bei ~100 Abfragen am Tag
+   gedeckelt.
+2. **Gespeichert werden darf fast nichts, und nicht lange.** Die YouTube API
+   Services Developer Policies begrenzen die Speicherung von API-Daten (außer
+   Analytics/Statistiken) auf **30 Kalendertage** (III.E.4).
+3. **Und die Leitplanke aus §4.1 (d) trifft genau auf ein Verbot.** Dieselben
+   Policies sagen in **III.E.2**: API-Daten NICHT aggregieren, außer über
+   Kanäle desselben Content Owners. Unsere Schutzmaßnahme — „Kommentare nur
+   aggregiert auswerten" — ist also möglicherweise genau das, was die
+   Nutzungsbedingungen untersagen. Das ist kein Detail: es dreht die
+   Anwaltsfrage BI1-2 von „ist das DSGVO-konform?" zu „ist das nach den
+   API-Bedingungen überhaupt erlaubt, und wenn ja, in welcher Form?".
+
+**Vorschlag daraus:** der Radar bleibt ein eigenes Teilpaket, rückt aber
+**hinter den Launch** und wird **lesend-und-verwerfend** gebaut:
+
+- **Entdeckt wird über eine kuratierte Kanalliste**, nicht über Suche: je Kanal
+  die Uploads-Playlist (`playlistItems.list`) und dann `videos.list` — beide
+  je 1 Einheit, damit reichen die 10.000 für einen täglichen Lauf über weit
+  mehr Kanäle, als wir je pflegen. `search.list` bleibt die Ausnahme für
+  gezielte Stichproben.
+- **Gespeichert wird nur, was wir selbst gerechnet haben:** der Themen-Begriff
+  und unsere abgeleiteten Zahlen. **Nie** eine Video-Id, ein Titel, ein
+  Kanalname, ein Kommentar oder ein Nutzername. Damit ist die 30-Tage-Frist
+  eingehalten, ohne sie zu verwalten — es liegt nichts da, das sie beträfe.
+  `insights_topics` trägt trotzdem `expiresAt` und einen Sweep, weil eine
+  Themenzahl von vor einem Jahr keine Aussage mehr ist.
+- **Kommentare werden gelesen und nicht gespeichert** — auch nicht aggregiert,
+  bis die Anwaltsantwort zu III.E.2 vorliegt. Bis dahin rechnet der Radar aus
+  Metadaten (Aufrufe, Alter, Kanalgröße).
+
+**Die Formel, konkretisiert.** Popularity = Aufrufe ÷ Abonnenten des Kanals,
+über den Lauf normalisiert auf 0–100 (ein Video mit 50k Aufrufen auf einem
+Kanal mit 20k Abonnenten schlägt eines mit 200k auf einem Kanal mit 5 Mio).
+Content Opportunity Score = fünf Signale zu je 0–20: **Performance**
+(Popularity) · **Alter** (jünger = höher, Halbwertszeit 90 Tage) ·
+**Suchnachfrage** · **Konkurrenz** (wie viele gute Antworten gibt es schon) ·
+**Relevanz** (Nähe zu unseren acht Themenclustern, per Schlagwortliste).
+**Ehrlich dazu:** für **Suchnachfrage** und **Konkurrenz** gibt es heute keine
+Datenquelle — kein Ahrefs, keine Search Console auf branding.supply. Bis es
+eine gibt, sind es faktisch drei Signale, und der Score heißt besser so, als
+dass er fünf behauptet. Das ist ein weiterer Grund, den Radar nach hinten zu
+stellen: sein bester Teil hängt an Daten, die wir noch nicht haben.
+
+**Gate bleibt:** Davids Ja + die Anwaltsantwort zu BI1-2 (jetzt in der
+geschärften Form) + ein Google-Cloud-Projekt mit API-Schlüssel.
+
+### 9.7 Messung — drei Ziele, drei Zahlen
+
+Entscheidung 9 gewichtet die drei Ziele gleich. Je Ziel EINE Kennzahl, und
+jede muss aus etwas kommen, das es gibt:
+
+| Ziel | Die eine Kennzahl | Woher |
+| --- | --- | --- |
+| **Umwandlung** | gestartete Brand-Checks und Wizard-Läufe **aus Insights heraus**, je Woche | `brand_events` — `insights.cta_click` mit Format und Ziel; server-seitig, kein Cookie, gedeckt von der 24-Monats-Frist |
+| **Reichweite** | Seitenaufrufe der Insights-Seiten je Woche | **existiert heute nicht** — s. u. |
+| **Newsletter** | **bestätigte** Eintragungen je Woche (`confirmedAt`) | `insights_subscribers`; die unbestätigte Zahl wird nie berichtet, sie ist keine |
+
+**Die Lücke ist echt und sie ist protokolliert.** branding.supply hat **keine
+Reichweitenmessung** — kein Plausible, kein Matomo, `analytics.enabled: false`
+per Core-Default und die App setzt nichts
+([BRANDING-SUPPLY-FAKTENBLATT.md](BRANDING-SUPPLY-FAKTENBLATT.md) Zeile 13,
+[BRANDING-SUPPLY-RECHT-UND-BEZAHLUNG.md](BRANDING-SUPPLY-RECHT-UND-BEZAHLUNG.md)
+§1.1 „Aus."). Damit ist eines der drei gleich gewichteten Ziele heute
+unmessbar — und die Sortierung „Meistgelesen" aus dem Dummy hat keine
+Datengrundlage. Drei Wege, Vorschlag in §10 Frage 3:
+
+- **Plausible einschalten** (selbst gehostet unter `plausible.hawaii.studio`,
+  cookielos, ohne Banner — genau wie pukalani.studio es fährt). Ehrlichste
+  Zahl, kein Schreibvorgang je Aufruf, Bot-Filter eingebaut. Preis: die
+  Datenschutzerklärung von branding.supply muss den Abschnitt tragen — sie ist
+  **heute noch Entwurf** (BS1 R2), die Ergänzung ist also gerade jetzt billig
+  und wäre nach der Veröffentlichung eine Änderung mit Ankündigung. Und:
+  Faktenblatt-Zeile 13 („findet nicht statt") wird falsch und muss mit.
+- **Eigener serverseitiger Zähler** (`brand_events`-Zeile `insights.view` je
+  Aufruf, ohne IP). Keine Rechtsänderung, aber ein Schreibvorgang je Aufruf
+  inklusive Bots — und eine Zahl, die Bots enthält, ist als „Reichweite"
+  irreführender als gar keine.
+- **Weglassen** und Reichweite indirekt am Umwandlungs-Ziel ablesen. Ehrlich,
+  aber dann ist eines von Davids drei Zielen unbeobachtet.
+
+„Meistgelesen" als Sortierung bleibt in jedem Fall aus Runde 1 draußen: selbst
+mit Plausible liegen die Zahlen nicht in unserer Datenbank, eine Sortierung
+daraus bräuchte einen täglichen Abgleich über die Stats-API — ein eigenes
+kleines Vorhaben, kein Nebenprodukt.
+
+### 9.8 Launch-Paket — ein Vorschlag zum Streichen
+
+Entscheidung 5: ≈ 10 Profile · 3 Duelle · 5 Artikel · 1 Ranking. Konkret, mit
+Herkunft — David streicht und ergänzt:
+
+**Zehn Markenprofile.** Vier davon sind **schon handgeprüft** und liegen in der
+Marktvergleichs-Bibliothek (`market/shared/library/index.ts`, `status:
+'verified'` mit Prüfdatum und Beleg): **Nike · Apple · Anthropic · The Barn**.
+Sechs kommen dazu, alle aus dem Dummy und alle mit öffentlicher Website, die
+der Brand-Check prüfen kann: **IKEA · Rolex · adidas · On · Puma · Patagonia**.
+Reihenfolge des Baus: erst die vier belegten (sie brauchen keine neue
+Recherche), dann die sechs.
+
+**Drei Duelle**, alle aus vorhandenen Profilen, alle mit echtem
+Erkenntniswert — nicht drei Varianten desselben Vergleichs:
+**Nike vs. adidas** (der Klassiker aus dem Dummy, Aufsteiger gegen
+Titelverteidiger) · **On vs. Puma** (junge Marke gegen Bestand, derselbe Markt)
+· **Apple vs. IKEA** (zwei Wege zu „Konsistenz über Jahrzehnte", verschiedene
+Branchen — das Duell, das die acht Dimensionen am besten erklärt).
+
+**Fünf Artikel** aus der Themenliste des Dummys, je einer je Cluster und je
+einer mit eigenem Datenbeleg: **„Was kostet ein Rebranding wirklich?"**
+(Rebranding) · **„Warum Banken blau sind — und wann du es nicht sein solltest"**
+(Brand Psychology) · **„Tagline vs. Slogan"** (Brand Language) ·
+**„llms.txt: Wie KI-Assistenten deine Marke zitieren"** (SEO & GEO) ·
+**„IKEA: Wie ein Möbelhaus zur Weltmarke wurde"** (Brand Analysis, zugleich der
+Beweis, dass Profil und Artikel zusammenspielen).
+
+**Ein Ranking:** **„Die zehn Marken mit dem stärksten Auftritt"** — genau die
+zehn Profile, sortiert nach Brand Score, mit Methodik-Zeile und je einem Satz
+Begründung. Es ist die Liste, die sich teilen lässt, und sie kostet keine
+zusätzliche Recherche.
+
+**Die Mengen-Bremse aus Entscheidung 1 bleibt:** kein Format geht live, bevor
+es EINEN vollständig redigierten Beispiel-Beitrag hat. Der Launch beginnt also
+mit vier Stücken — einem je Format —, nicht mit neunzehn.
+
+### 9.9 Pakete I0–I6
+
+| # | Paket | Inhalt | Gate |
+| --- | --- | --- | --- |
+| **I0** | **Prototyp am Dummy mit echten Datenformen** | die vier Formate im brand-Playground an das Konzept angeglichen: Journal-Liste mit Format-/Themenfilter, Artikel mit TOC, Profil als Dossier, Duell mit `facts`-Zeilen inkl. Belegspalte, Ranking mit Methodik-Zeile; Redaktions-Editor als Skizze (zwei Sprach-Reiter, Quellen-Panel, Prüfregeln als Liste) | **Davids Abnahme** (Phase 4 des Workflows) |
+| **I1** | **Layer + Schema + Vertrag** | Layer `insights` mit Manifest, Eintrag in `apps/branding/site.manifest.ts`, `LAYER_ORDER`, Bilanz-Block, ESLint-Block; Migration (`insights_posts`, `insights_brands`, `insights_corrections`); Vertrag zum brand-Layer; `insights.manage` in `core/shared/authz.ts` (eigener Commit); GDPR-Contributor; Schema-Parität-Soll | **Davids Ja zur Prod-Migration** (vor dem Code-Deploy) · §10 Frage 1 |
+| **I2** | **Dashboard + KI-Entwurf** | Liste (`UTable`), Editor mit `UEditor` und zwei Sprach-Reitern, Quellen-Panel mit deterministischer Beleg-Prüfung, die sechs Prüfregeln vor `review`, Zustands-Umschalter, Vorschau, Übersetzen-Endpunkt mit Drossel, `aiCompleteJson`-Entwurf mit `insights-d-1` | I1 · §10 Fragen 4 und 7 |
+| **I3** | **Öffentliche Seiten** | `/insights`, `/insights/<slug>`, `/brands/<slug>`, `/duels/<a>-vs-<b>`, `/rankings`, `/topics/<slug>`; Korrektur-/Entfernungs-Formular; SEO (og:image, JSON-LD, hreflang, `noindex` für Entwürfe), Sitemap, Nav-Punkt, 301 aus `slugHistory` | I2 · **Anwaltsantworten BI1-3 und BI1-4** (ohne sie geht kein Markenprofil live, §6) |
+| **I4** | **Themenradar** | kuratierte Kanalliste, `playlistItems.list` + `videos.list`, `insights_topics` mit Sweep, Opportunity-Score, Betreiber-Ansicht in der Themen-Liste | **eigenes Gate:** Davids Ja · Anwaltsantwort BI1-2 in der geschärften Form (§9.6) · Google-Cloud-Projekt mit Schlüssel |
+| **I5** | **Newsletter** | `insights_subscribers` mit Double-Opt-in nach dem Warteliste-Muster, Bestätigungs- und Abmelde-Weg, Eintrags-Formular je Format und zentral, Versand | **eigenes Gate:** Rechtstexte (A1/BS1 R2) · §10 Frage 5 |
+| **I6** | **Launch-Paket** | die vier Beispiel-Beiträge (einer je Format), dann die restlichen fünfzehn Stücke aus §9.8; danach der Wochentakt | I3 · Davids Redaktionszeit |
+
+**Reihenfolge-Regel:** I4 und I5 hängen an keinem der anderen Pakete und an
+keinem Termin — sie können jederzeit vor oder nach I6 kommen, aber nie VOR I3.
+Ein Newsletter ohne Beiträge hat nichts zu versenden, ein Radar ohne Redaktion
+niemanden, der auf seine Themen reagiert.
+
+---
+
+## 10. Entscheidungsfragen für David (2026-09-08)
+
+Acht Fragen. Bei jeder steht die Empfehlung zuerst; die Optionen sind das, was
+sonst noch vertretbar ist, nicht eine Sammlung von Möglichkeiten.
+
+### Frage 1 — Wo wohnt Brand Insights im Code?
+
+**Empfehlung: A (eigener Layer `insights`).** Insights hat ein eigenes
+Dokument, eine eigene Zustandsmaschine, ein eigenes Publikum und einen eigenen
+Gegenstand (fremde Marken) — die Bedingung, unter der Brand Design bewusst
+KEIN eigener Layer wurde („zwei Zustandsmaschinen für ein Dokument"), liegt
+hier nicht vor. Der passende Präzedenzfall ist `market`.
+
+- **A — eigener Layer `insights`, `requires: ['brand']`, ein Vertrag:** saubere
+  Grenze, eigene Notabschaltung über `/api/insights`, der Wizard bleibt
+  unberührt; kostet Manifest, Bilanz-Block, ESLint-Block und Schema-Parität-Soll.
+- **B — Tabellen im brand-Layer (wie Entscheidung 8 skizziert):** heute
+  schneller, kein neuer Layer; der brand-Layer trägt dann Kunden-Werkstatt und
+  öffentliche Redaktion in einem, und eine Produkt-Abschaltung träfe beide.
+- **C — Layer `insights`, aber ohne eigenen Produkt-Schalter** (im Manifest
+  `tier: 'foundation'`): spart die Gate-Arbeit, nimmt uns aber die Möglichkeit,
+  die Redaktion im Notfall in einer Zeile abzuschalten.
+
+### Frage 2 — Adressen und das Verhältnis zu Discover
+
+**Empfehlung: A (fünf Basen, zwei Datensätze, eine Vorlage).**
+`/insights` als Journal-Hub, `/insights/<slug>` für Artikel, `/brands/<slug>`
+für Profile fremder Marken (von DB1 reserviert), `/duels/<a>-vs-<b>`,
+`/rankings`, `/topics/<slug>` — und ein Insights-Profil ist ein EIGENER
+Datensatz neben einer Discover-Publikation, weil die beiden entgegengesetzte
+Rechtsgrundlagen, Notausgänge und Inhalte haben (§9.3). Die Seitenvorlage
+(Dossier) wird geteilt, nicht abgeschrieben.
+
+- **A — getrennte Datensätze, geteilte Vorlage, `/brands/` für fremde Marken.**
+- **B — ein Datensatz, zwei Sichten:** eine Tabelle für „Marke" mit einem Feld
+  „eigen/fremd"; weniger Code, aber zwei Rechtsgrundlagen und zwei Löschregeln
+  in einer Zeile.
+- **C — gar keine eigene Profil-Adresse:** fremde Marken erscheinen nur
+  INNERHALB von Artikeln und Duellen. Am wenigsten Angriffsfläche, aber die
+  Datenautorität aus §2.1 fällt weg — und damit der Kern von Entscheidung 1.
+
+*Nebenfrage, die keine Option braucht:* die 301 bei Umbenennung ist in
+DISCOVER-BRANDS.md versprochen und nicht gebaut (kein `slugHistory` im Schema).
+BI1 baut sie mit; für DB1 kommt eine Zeile nach OPEN-ITEMS.
+
+### Frage 3 — Reichweitenmessung auf branding.supply
+
+**Empfehlung: A (Plausible einschalten, jetzt).** Eines von Davids drei gleich
+gewichteten Zielen (Entscheidung 9) ist heute unmessbar. Die Datenschutz-
+erklärung von branding.supply ist gerade noch Entwurf (BS1 R2) — der Abschnitt
+lässt sich jetzt ohne Ankündigung ergänzen, später nicht mehr.
+
+- **A — selbst gehostetes Plausible einschalten** (cookielos, ohne Banner, wie
+  pukalani.studio): ehrliche Zahlen inkl. Bot-Filter; Datenschutzerklärung und
+  Faktenblatt-Zeile 13 müssen mit („findet nicht statt" wird falsch).
+- **B — eigener serverseitiger Zähler** (`brand_events`): keine
+  Rechtsänderung, aber ein Schreibvorgang je Aufruf und eine Zahl inklusive
+  Bots.
+- **C — weiterhin nicht messen:** null Aufwand, null Rechtsfläche; das
+  Reichweiten-Ziel bleibt dann unbeobachtet und „Meistgelesen" fällt dauerhaft
+  aus.
+
+### Frage 4 — Der Übersetzen-Weg
+
+**Empfehlung: A (eigener Redaktions-Endpunkt).** Der UGC-Weg cacht eine
+Übersetzung für LESER; hier entsteht eine FASSUNG, die redigiert, gespeichert
+und später bearbeitet wird. Ein Cache, den jemand von Hand nachbessert, ist
+keiner mehr.
+
+- **A — eigener Endpunkt**, Ergebnis als bearbeitbarer Entwurf der zweiten
+  Fassung, Drossel 10/Stunde + 50/Tag je Konto, öffentlich erst mit
+  `translationReviewed`.
+- **B — der bestehende UGC-Weg** (`translations`-Spalte, Knopf, 10/10 min +
+  100/Tag): kein neuer Code; aber die Fassung wäre ein Cache, den Redigieren
+  bei der nächsten Änderung verwirft.
+- **C — gar keine Maschinen-Übersetzung:** beide Fassungen von Hand. Höchste
+  Qualität, halbe Geschwindigkeit — bei zwei Stücken je Woche sind das vier.
+
+### Frage 5 — Newsletter: Liste, Anbieter, Zeitpunkt
+
+**Empfehlung: A (eigene Liste, eigenes DOI, Versand über den bestehenden
+Mail-Weg) — und erst nach dem Launch (Paket I5).** Das Double-Opt-in der
+Warteliste (brand-015) ist gebaut, geprüft und passt eins zu eins; die
+Warteliste SELBST wird nicht weiterbenutzt, weil eine Zustimmung nur für das
+gilt, wofür sie gegeben wurde.
+
+- **A — eigene Tabelle `insights_subscribers` nach dem Warteliste-Muster,**
+  Versand über `sendMail()`: ein DOI-Muster im Haus, keine Adresse verlässt es
+  vor der Bestätigung; Versandlisten und Abmelde-Verwaltung bauen wir selbst.
+- **B — Resend Broadcasts** (die Adressen liegen dann bei Resend, es gibt eine
+  API und Segmente): weniger Eigenbau; Double-Opt-in ist in der Dokumentation
+  nicht beschrieben, wir müssten es trotzdem selbst davorsetzen.
+- **C — listmonk selbst hosten** (AGPLv3, braucht Postgres, kennt
+  Double-Opt-in-Listen von Haus aus): der Funktionsumfang eines echten
+  Newsletter-Werkzeugs; dafür ein weiterer Dienst mit eigener Datenbank,
+  eigenem Backup und eigenem Update-Pfad.
+
+### Frage 6 — Themenradar: jetzt oder nach dem Launch?
+
+**Empfehlung: B (nach dem Launch, und lesend-und-verwerfend).** Beim
+Konkretisieren ist aufgefallen, dass die YouTube-Policies das AGGREGIEREN von
+API-Daten untersagen (III.E.2) — also genau die Schutzmaßnahme, mit der §4.1 (d)
+den Datenschutz auffangen wollte. Solange das nicht anwaltlich geklärt ist,
+wäre der Radar eine Wette; und seine zwei besten Signale (Suchnachfrage,
+Konkurrenz) haben ohnehin noch keine Datenquelle.
+
+- **A — jetzt** (wie Entscheidung 6 es vorsah): Themen kommen vom ersten Tag
+  aus Daten; Preis ist ein offenes Rechtsrisiko und ein Score, der drei von
+  fünf Signalen erfindet.
+- **B — nach dem Launch, lesend-und-verwerfend:** kuratierte Kanalliste statt
+  Suche, gespeichert wird nur unsere eigene Zahl, Kommentare erst nach der
+  Anwaltsantwort. Themen kommen bis dahin von Hand — BI1 ist ohne Radar
+  lieferbar (§3.4 sagt das bereits).
+- **C — ganz streichen** und die Themen dauerhaft redaktionell setzen: null
+  Risiko, null Kontingent, null API-Abhängigkeit; dafür fehlt das Signal, das
+  branding.supply von einem gewöhnlichen Blog unterscheiden sollte.
+
+### Frage 7 — Ranking-Regeln
+
+**Empfehlung: A (zehn Plätze, eingefrorene Liste, sichtbarer Stand,
+vierteljährliche Auffrischung als neue Ausgabe).** Ein Ranking ist ein Beitrag
+mit Datum, kein Live-Widget — sonst ändert sich unter einem geteilten Link der
+Inhalt, und die Begründungssätze passen nicht mehr zu den Zahlen daneben.
+
+- **A — eingefroren:** die Plätze und Scores stehen in `facts`, der Kopf trägt
+  „Stand: …"; ändert sich ein Score, entsteht eine NEUE Ausgabe (neuer Slug),
+  die alte bleibt mit Hinweis und Link. Ein Entfernen-Wunsch nimmt den Platz
+  heraus und rechnet die Liste NICHT neu — die Lücke wird als „auf Wunsch
+  entfernt" ausgewiesen (das ist ehrlicher als eine stille Neunummerierung,
+  und es beantwortet §8 Frage 9).
+- **B — lebend:** die Liste rechnet bei jedem Aufruf aus den aktuellen Scores.
+  Immer richtig, nie zitierbar; die redaktionellen Begründungssätze müssten
+  entfallen.
+- **C — eingefroren, aber an Ort und Stelle aktualisiert** (ein Slug, Inhalt
+  wird überschrieben): am einfachsten zu pflegen; ein Link von außen zeigt
+  dann auf etwas anderes als das, worauf verwiesen wurde.
+
+### Frage 8 — Launch-Inhalt
+
+**Empfehlung: A (der Vorschlag aus §9.8, mit den vier belegten Marken zuerst).**
+Nike, Apple, Anthropic und The Barn liegen schon handgeprüft in der
+Bibliothek — sie kosten keine neue Recherche und beweisen trotzdem alle vier
+Formate.
+
+- **A — 10 Profile (4 belegt + 6 neu) · 3 Duelle · 5 Artikel · 1 Ranking,**
+  begonnen mit EINEM Beispiel-Beitrag je Format (Bremse aus Entscheidung 1).
+- **B — kleiner starten:** 4 Profile (nur die belegten) · 1 Duell · 3 Artikel ·
+  1 Ranking. Schneller live, weniger Recherche; das Ranking wird dünn.
+- **C — anders zuschneiden:** David streicht und ergänzt die Namen und Themen
+  direkt in §9.8 — die Mengen bleiben, die Auswahl ist seine.
+
+---
+
+## Anhang — Quellen dieser Runde
+
+Nur Belege, keine Empfehlung ohne Quelle. Abgerufen am 2026-09-08.
+
+| Aussage in diesem Dokument | Quelle |
+| --- | --- |
+| YouTube Data API v3: die genannten Endpunkte kosten je 1 Einheit; ein Projekt hat „100 `search.list` calls, 100 `videos.insert` calls, and 10,000 units per day combined for all other endpoints" | https://developers.google.com/youtube/v3/determine_quota_cost |
+| Speicherfrist für API-Daten außer Analytics/Statistiken: höchstens 30 Kalendertage (III.E.4); **Aggregations-Verbot** außer über Kanäle desselben Content Owners (III.E.2) | https://developers.google.com/youtube/terms/developer-policies |
+| Resend Broadcasts: Massen-Mails mit Segmenten und eigener API; Double-Opt-in in der Dokumentation nicht beschrieben | https://resend.com/docs/dashboard/broadcasts/introduction |
+| listmonk: selbst gehostet, einzelne Binärdatei + Postgres, AGPLv3 | https://listmonk.app/docs/ |
+| listmonk: Listen wahlweise Single- oder **Double-Opt-in**, Abonnenten-Zustände unconfirmed/confirmed/unsubscribed | https://listmonk.app/docs/concepts/ |
