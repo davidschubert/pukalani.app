@@ -230,10 +230,19 @@ Anwaltsfragen — **zum Stand dieser Zeile unbeantwortet**).
   Betreiber prüft → annehmen/ablehnen mit Begründung) · „Profil beanspruchen"
   mit bestätigten Feldern · **Entfernen auf Wunsch als Notausgang**, mit Datum
   und Grund dokumentiert.
-- **Methodik-Seite:** öffentlich, verlinkt von jedem Score und jedem Ranking —
-  sie erklärt die 40 Kriterien in 8 Kategorien, das Band, „nicht von aussen
-  prüfbar" und den Korrekturweg. Sie ist zugleich die Antwort auf die Frage
-  „warum dürft ihr das".
+- **Methodik-Seite:** **GEBAUT und live seit 2026-09-07** — vorgezogen als
+  Paket **BS1 R2a**, weil auch der Datenschutz-Abschnitt §4c des Faktenblatts
+  zweimal auf sie verweist. Sie steht unter **`/brand-check/methodik`**
+  (`packages/brand/app/pages/brand-check/methodik.vue`), de + en, öffentlich,
+  ohne Konto und ohne Produkt-Gate, verlinkt als vierter Reiter des
+  Brand-Checks (damit von jeder Ergebnisseite) und im Lesefluss von Startseite,
+  Ranking und Ergebnis. Sie erklärt die 40 Kriterien in 8 Kategorien, die
+  Bänder, „nicht bewertbar", den Korrektur- und den Entfernungsweg — und ist
+  damit die Antwort auf „warum dürft ihr das". **BI1 legt hier nichts Neues an,
+  sondern ergänzt:** sobald ein Insights-Beitrag einen Score zeigt, verlinkt er
+  dieselbe Seite. Details und die zwei Befunde daraus:
+  [BRANDING-SUPPLY-RECHT-UND-BEZAHLUNG.md](BRANDING-SUPPLY-RECHT-UND-BEZAHLUNG.md)
+  §7.4.
 
 ### 4.3 Neue Fragen an den Anwalt (zusätzlich zu Anhang G (a)–(f))
 

@@ -488,16 +488,40 @@ export const BRAND_SCORE_BANDS: readonly string[] = [
 
 /**
  * DIE SIEBEN BÄNDER aus dem Bewertungsmodell v2 (94+ · 88–93 · 80–87 · 70–79 ·
- * 60–69 · 50–59 · <50). Sie sind REIFEGRAD, kein Zeugnis — die Wörter dazu
- * liegen beim Client, hier steht nur die Grenze.
+ * 60–69 · 50–59 · <50) — als TABELLE, absteigend, mit der UNTERGRENZE jedes
+ * Bandes. Sie sind REIFEGRAD, kein Zeugnis; die Wörter dazu liegen beim
+ * Client, hier steht nur die Grenze.
+ *
+ * ── WARUM DIE ZAHLEN SEIT DER METHODIK-SEITE DATEN SIND (BS1 R2a) ─────────
+ * `/brand-check/methodik` sagt öffentlich zu, ab welchem Wert welches Band
+ * gilt. Stünden die Grenzen nur als sieben `if`-Zeilen da, müsste die Seite
+ * sie abtippen — und eine abgetippte Grenze ist beim ersten Verschieben eine
+ * öffentliche Falschaussage über die eigene Rechnung. Die Funktion LIEST
+ * jetzt dieselbe Tabelle, die die Seite rendert; es gibt keine zweite Wahrheit
+ * mehr, die auseinanderlaufen könnte.
  */
+export interface BrandScoreBandRange {
+  band: BrandScoreBand
+  /** Ab diesem Wert (einschliesslich) gilt das Band. Das letzte trägt 0. */
+  min: number
+}
+
+export const BRAND_SCORE_BAND_RANGES: readonly BrandScoreBandRange[] = [
+  { band: 'exceptional', min: 94 },
+  { band: 'outstanding', min: 88 },
+  { band: 'excellent', min: 80 },
+  { band: 'strong', min: 70 },
+  { band: 'average', min: 60 },
+  { band: 'weak', min: 50 },
+  { band: 'poor', min: 0 },
+] as const
+
 export function brandScoreBand(score: number): BrandScoreBand {
-  if (score >= 94) return 'exceptional'
-  if (score >= 88) return 'outstanding'
-  if (score >= 80) return 'excellent'
-  if (score >= 70) return 'strong'
-  if (score >= 60) return 'average'
-  if (score >= 50) return 'weak'
+  for (const range of BRAND_SCORE_BAND_RANGES) {
+    if (score >= range.min) return range.band
+  }
+  // Unerreichbar, solange der letzte Eintrag 0 trägt — ein negativer Wert
+  // (den `computeBrandCheck` nie erzeugt) landet hier statt in `undefined`.
   return 'poor'
 }
 

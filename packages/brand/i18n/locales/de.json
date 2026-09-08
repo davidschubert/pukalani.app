@@ -1394,6 +1394,7 @@
         "start": "Start",
         "ranking": "Ranking",
         "compare": "Vergleich",
+        "method": "Methodik",
         "soon": "bald"
       },
       "hero": {
@@ -1480,6 +1481,111 @@
         "cta": "Brand-Check starten",
         "sampleLabel": "Beispiel",
         "sampleNote": "So sieht ein Ergebnis aus: ein Wert mit Band und acht Kategorien darunter."
+      }
+    },
+    "checkMethod": {
+      "seoTitle": "So rechnen wir — die Methodik hinter dem Brand Score",
+      "seoDescription": "Was der Brand Score misst und was nicht: welche Seite wir lesen, wie die {criteria} Kriterien in {categories} Kategorien bewertet werden, wo die Grenzen liegen und wie ihr ein Ergebnis korrigieren oder entfernen lasst.",
+      "eyebrow": "Methodik",
+      "title": "So rechnen wir",
+      "lead": "Diese Seite erklärt, wie ein Brand Score entsteht. Es gibt sie, weil der Brand-Check auch Auftritte bewertet, die uns nicht gehören — und wer bewertet wird, hat ein Recht darauf, die Rechnung nachzurechnen.",
+      "updated": "Sie beschreibt den Stand, der heute läuft. Ändert sich die Rechnung, ändert sich diese Seite mit.",
+      "what": {
+        "title": "Was der Brand Score ist",
+        "body": "Der Brand Score ist eine Zahl zwischen 0 und 100. Er beschreibt, wie klar ein öffentlich zugänglicher Webauftritt seine Marke ausdrückt. Grundlage ist die öffentliche Selbstdarstellung: der Text, den jeder Besucher auch sieht, dazu die technischen Angaben im Seitenkopf.",
+        "opinion": "Er ist eine Einordnung, keine Tatsachenbehauptung — eine begründete Meinung darüber, wie ein Auftritt von außen wirkt. Jedes Einzelurteil trägt seinen Beleg aus dem Auftritt selbst, damit man ihm widersprechen kann.",
+        "notTitle": "Was er ausdrücklich nicht ist",
+        "not1": "Keine Aussage über geschäftlichen Erfolg, Umsatz oder Zahlungsfähigkeit.",
+        "not2": "Keine Aussage über die Qualität der Produkte oder Leistungen dahinter. Ein hervorragendes Handwerk kann sich schlecht darstellen — und umgekehrt.",
+        "not3": "Keine Aussage über Seriosität oder Vertrauenswürdigkeit.",
+        "not4": "Kein Urteil über Geschmack. Wir prüfen, ob eine Entscheidung erkennbar getroffen wurde, nicht ob sie uns gefällt.",
+        "bandsTitle": "Die sieben Bänder",
+        "bandsLead": "Aus der Zahl wird ein Wort. Die Grenzen stehen fest und gelten für jedes Ergebnis gleich.",
+        "bandFrom": "ab {min}",
+        "bandUnder": "unter {max}"
+      },
+      "reads": {
+        "title": "Was wir lesen",
+        "body": "Genau eine Seite: die eingetragene Adresse, nach allen Weiterleitungen. Kein Durchsuchen der Website, kein zweiter Abruf.",
+        "l1": "Den sichtbaren Fließtext dieser einen Seite, höchstens {chars} Zeichen. Was darüber hinausgeht, wird abgeschnitten und nicht bewertet.",
+        "l2": "Die Angaben im Seitenkopf: Titel, Beschreibung, Sprachangabe, Favicon, Vorschaubild, Farb- und Darstellungsangaben, strukturierte Daten, Überschriften-Aufbau.",
+        "l3": "Die Beschriftungen von Bildern. Die Bilder selbst laden wir nicht und speichern wir nicht.",
+        "l4": "Ob die Adresse auf eine verschlüsselte Verbindung führt.",
+        "skipsTitle": "Was wir nicht lesen",
+        "s1": "Keine Unterseiten. Ob ein Impressum, eine Kontakt- oder eine Über-uns-Seite verlinkt ist, sehen wir auf dieser einen Seite — geöffnet wird sie nicht.",
+        "s2": "Nichts hinter einer Anmeldung. Wir melden uns nirgends an und füllen keine Formulare aus.",
+        "s3": "Keine Profile in sozialen Netzwerken, keine Bewertungsportale, keine Register, keine Presseberichte.",
+        "s4": "Kein JavaScript. Wir lesen das ausgelieferte Dokument, nicht das, was ein Browser daraus nachbaut.",
+        "keepsTitle": "Was davon bleibt",
+        "keepsBody": "Der Seitentext wird nach der Auswertung verworfen. Gespeichert bleiben die geprüfte Adresse, die Zahlenwerte, die kurzen Belege, das Datum und ein Prüfwert des Textes, an dem wir erkennen, ob sich seither etwas geändert hat. Dazu ein täglich wechselnder Prüfwert des anfragenden Anschlusses — nur für den Tagesdeckel, nie die Adresse selbst.",
+        "agentTitle": "Woran ihr uns im Zugriffsprotokoll erkennt",
+        "robotsTitle": "Eine Einschränkung, die wir nicht verschweigen",
+        "robotsBody": "Dieser eine Abruf fragt keine robots.txt ab und wertet keinen Nutzungsvorbehalt aus. Entworfen war er für den Fall, dass jemand die eigene Startseite einträgt — dann fordert der Auftritt den Abruf selbst an. Eintragen kann eine Adresse aber auch ein Fremder, und dann trägt diese Begründung nicht. Wer nicht gelesen werden will, schreibt uns: wir sperren die Adresse. Unser Marktvergleich, der mehrere Seiten am Stück liest, wertet robots.txt und Nutzungsvorbehalt dagegen vollständig aus.",
+        "botLink": "Wie unser Marktvergleich-Bot arbeitet"
+      },
+      "judge": {
+        "title": "Wie bewertet wird",
+        "body": "{criteria} Kriterien in {categories} Kategorien. Jedes Kriterium hat eine feste Regel und gibt 0, 1 oder 2 Punkte. Die Kategorien tragen unterschiedliches Gewicht; zusammen ergeben sie die {total} Punkte des Gesamtwerts.",
+        "criteriaCount": "{count} Kriterien",
+        "weight": "{weight} von {total} Punkten",
+        "categories": {
+          "distinctiveness": "Sagt der Auftritt etwas, das nur diese Marke sagen könnte — mit eigener Haltung statt Füllwörtern?",
+          "visual": "Ist eine eigene Bildwelt erkennbar, und sind die sichtbaren Zeichen der Marke gesetzt: Favicon, Vorschaubild, Überschriften-Aufbau?",
+          "consistency": "Sprechen Titel, Überschrift und Text mit einer Stimme, und wird der Markenname überall gleich geschrieben?",
+          "experience": "Findet sich jemand zurecht, der zum ersten Mal hier ist: eine klare nächste Handlung, auffindbare Angaben, ein erkennbarer Absender?",
+          "clarity": "Steht in klaren Worten und ohne Fachjargon, was angeboten wird, für wen — und was anders ist als bei anderen?",
+          "emotion": "Spricht der Auftritt ein Gefühl an: eine Herkunft, eine menschliche Stimme, ein Ton, der zur Sache passt?",
+          "adaptability": "Trägt die Marke auch anderswo: auf dem Telefon, im dunklen Modus, in der Vorschau beim Teilen, in einem einzigen Satz?",
+          "craft": "Stimmen die Details: Rechtschreibung, keine Platzhaltertexte, verschlüsselte Verbindung, saubere Angaben im Seitenkopf?"
+        },
+        "splitTitle": "Gerechnet und beurteilt",
+        "splitBody": "{measured} der {criteria} Kriterien werden deterministisch aus dem Dokument gerechnet — Favicon, Vorschaubild, Überschriften-Aufbau, Sprachangabe, verschlüsselte Verbindung und Ähnliches. Dieselbe Seite ergibt dort immer dieselben Punkte. Die übrigen {judged} beurteilt ein Sprachmodell, in einem Durchgang, mit Pflicht-Beleg für jedes Urteil.",
+        "modelTitle": "Welches Modell, und unter welchen Bedingungen",
+        "modelBody": "Wir rufen ein großes Sprachmodell über einen Vermittler auf — und ausschließlich bei Anbietern, die sich zur Nichtspeicherung der Anfrage verpflichtet haben. Die Verwendung zu Trainingszwecken ist untersagt, und das Ausweichen auf Anbieter außerhalb dieser Bedingungen ist abgeschaltet: lieber sagt der Check, dass er gerade nicht verfügbar ist. Welches Modell ein bestimmtes Ergebnis beurteilt hat, halten wir bei diesem Ergebnis fest; es kann sich mit der Zeit ändern, und deshalb steht hier kein fester Name.",
+        "varianceTitle": "Warum zwei Läufe leicht abweichen können",
+        "varianceBody": "Der gerechnete Teil ist reproduzierbar. Der beurteilte Teil ist es fast: wir fahren das Modell so kalt wie möglich, aber ein Sprachmodell ist kein Rechenwerk. Vor allem ändert sich die Grundlage — die Website von heute ist nicht die von letzter Woche. Deshalb trägt jedes Ergebnis sein Datum, und dieselbe Adresse liefert innerhalb von {days} Tagen bewusst dasselbe gespeicherte Ergebnis, statt eine zweite Zahl daneben zu stellen.",
+        "nullTitle": "Was von außen nicht prüfbar ist, raten wir nicht",
+        "nullBody": "Ein Kriterium, zu dem sich ehrlich nichts sagen lässt, wird als nicht bewertbar ausgewiesen und fällt aus der Rechnung — es zählt weder im Zähler noch im Nenner. Null Punkte wären eine Behauptung über etwas, das wir nicht angesehen haben."
+      },
+      "maturity": {
+        "title": "Fundament-Reife — die zweite Zahl",
+        "body": "Wer bei uns ein Branding erarbeitet, kann statt einer Website das eigene Fundament prüfen lassen: die bestätigten Antworten aus dem Wizard. Gerechnet wird mit derselben Formel und demselben Kriterienkatalog.",
+        "labelBody": "Diese Zahl heißt deshalb anders und wird überall getrennt beschriftet. Die {measured} gerechneten Kriterien sind dort durchweg nicht bewertbar — Favicon und Überschriften-Aufbau sind Eigenschaften einer Seite, nicht eines Fundaments. Eine Fundament-Reife von 78 und ein Website-Score von 78 sagen Verschiedenes; die Gegenüberstellung verweigert den Vergleich über diese Grenze hinweg.",
+        "note": "Die Fundament-Reife gibt es nur zur eigenen Brand. Über einen fremden Auftritt lässt sie sich nicht erheben."
+      },
+      "public": {
+        "title": "Was öffentlich ist — und was nicht",
+        "privateTitle": "Ein Ergebnis ist zunächst privat",
+        "privateBody": "In unser öffentliches Ranking kommt ein Check nur, wenn die prüfende Person das beim Start ausdrücklich angehakt hat. Ohne Häkchen steht er in keiner Liste, in keiner Sortierung und in keinem Ranking-Platz.",
+        "linkTitle": "Die Ergebnisseite selbst",
+        "linkBody": "Jedes Ergebnis bekommt eine eigene, teilbare Adresse. Wer sie kennt, kann das Ergebnis öffnen — sie ist zum Weiterschicken gedacht. Von Suchmaschinen wird sie nicht aufgenommen, und sie zeigt nichts, was nicht ohnehin öffentlich wäre: die geprüfte Adresse und Urteile über eine öffentlich erreichbare Seite.",
+        "ownerTitle": "Uns ist bewusst, dass die prüfende Person nicht immer der Markeninhaber ist",
+        "ownerBody": "Deshalb gibt es zwei Wege zurück. Beide kosten nichts und brauchen kein Konto.",
+        "correctionTitle": "Korrektur vorschlagen",
+        "correctionBody": "Zu jedem Ergebnis lässt sich ein Korrekturvorschlag einreichen: betroffenes Feld, Vorschlag, Begründung. Eine Kontaktadresse ist freiwillig. Wir prüfen von Hand und nehmen an oder lehnen mit Begründung ab. Korrigierbar ist heute die Branche — sie ist ein Vorschlag des Modells über einen fremden Auftritt. Dem Score selbst widerspricht man nicht mit einer Korrektur, sondern über den Weg darunter.",
+        "correctionLimit": "{limit} Vorschläge je Stunde und Anschluss.",
+        "removalTitle": "Entfernen lassen",
+        "removalBody": "Auf begründete Anfrage nehmen wir ein Ergebnis vom Netz. Es verschwindet aus dem Ranking und auch von seiner eigenen Adresse — dort steht danach dasselbe wie bei einem Ergebnis, das es nie gab. Die Entfernung ist dauerhaft: sie wird nicht dadurch aufgehoben, dass jemand anderes dieselbe Adresse erneut prüft.",
+        "contactTitle": "Wie ihr uns erreicht",
+        "contactBody": "Für eine Korrektur genügt das Formular am Ergebnis. Für eine Entfernung, eine Sperre eurer Adresse oder eine Rückfrage zu einem Urteil schreibt uns über die Kontaktangaben im Impressum.",
+        "imprint": "Zum Impressum"
+      },
+      "limits": {
+        "title": "Grenzen und Fairness",
+        "l1Title": "Ein Modell kann irren",
+        "l1Body": "Die beurteilten Kriterien sind ein maschinelles Urteil. Es trägt seinen Beleg und ist damit überprüfbar, aber es ist nicht unfehlbar. Wer einen Fehler sieht, soll ihn uns sagen.",
+        "l2Title": "Der Score ist eine Momentaufnahme",
+        "l2Body": "Er gilt für eine Seite an einem Tag. Ein Relaunch, ein neuer Text, eine geänderte Startseite — und die Zahl stimmt nicht mehr. Deshalb steht an jedem Ergebnis sein Datum, und deshalb ist für uns ein alter Wert kein gültiger Wert.",
+        "l3Title": "Wir stellen keine zwei Marken gegeneinander",
+        "l3Body": "Es gibt eine Gegenüberstellung, aber sie ist beschreibend: zwei Ergebnisse nebeneinander, Kategorie für Kategorie, ohne Sieger und ohne Herabsetzung. Wir behaupten nicht, eine Marke sei besser als eine andere.",
+        "l4Title": "Keine fremden Logos",
+        "l4Body": "Wir zeigen Wortnamen, Branche und kurze Belegzitate vom Auftritt selbst. Keine Logos, keine Bildmarken, keine Favicons, keine Bildschirmfotos.",
+        "l5Title": "Eine Startseite ist nicht die ganze Marke",
+        "l5Body": "Eine Marke lebt auch im Produkt, im Laden, im Gespräch und im Service. Nichts davon sieht dieser Check. Er misst den ersten Eindruck im Netz — der ist wichtig, aber er ist nicht alles."
+      },
+      "back": {
+        "check": "Zum Brand-Check",
+        "ranking": "Zum Ranking"
       }
     },
     "checkRanking": {

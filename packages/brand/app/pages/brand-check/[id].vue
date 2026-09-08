@@ -379,6 +379,17 @@ const CARD_UI = {
               :to="localePath({ path: '/brand-check/vergleich', query: { a: result.id } })"
               data-check-compare
             />
+            <!-- „So rechnen wir" (BS1 R2a): das Faktenblatt §4c sagt zu, die
+                 Methodik sei VON JEDEM ERGEBNIS AUS verlinkt. Der Reiter oben
+                 erfüllt das schon; dieser Knopf steht trotzdem hier, weil die
+                 Frage „wie kommt ihr auf diese Zahl?" beim Wert entsteht und
+                 nicht in der Kopfleiste. -->
+            <UButton
+              icon="i-ph-scales" size="sm" color="neutral" variant="ghost" class="rounded-full"
+              :label="t('brand.checkMethod.title')"
+              :to="localePath('/brand-check/methodik')"
+              data-check-method
+            />
           </div>
         </section>
 

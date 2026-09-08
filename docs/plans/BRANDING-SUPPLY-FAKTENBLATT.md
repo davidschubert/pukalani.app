@@ -301,10 +301,24 @@ der Code belegbar tut.
 > The legal basis is our legitimate interest in a transparent, evidence-based
 > classification (Art. 6(1)(f) GDPR).
 
-**Was für 4c noch fehlt:** Die **Methodik-Seite**, auf die dieser Abschnitt
-zweimal verweist, ist **noch nicht gebaut** (vorgesehen in BI1 §4.2, aufgeführt
-in Plan §2.2 Nr. 6). Der Absatz darf erst live gehen, wenn es die Seite gibt —
-sonst wiederholt er den Fehler der drei Footer-Wörter: eine Zusage ohne Ziel.
+**Verweis-Ziel (ERLEDIGT 2026-09-07, Paket R2a):** Die **Methodik-Seite**, auf
+die dieser Abschnitt zweimal verweist, ist **gebaut** und steht unter
+**`/brand-check/methodik`** (de: `/de/brand-check/methodik`) — öffentlich, ohne
+Konto, ohne Produkt-Gate, indexierbar. Verlinkt ist sie als vierter Reiter des
+Brand-Checks (damit auch von jeder Ergebnisseite) und zusätzlich im Lesefluss
+von Startseite, Ranking und Ergebnis. Damit ist der frühere Befund 2 — „eine
+Zusage ohne Ziel, wie die drei Footer-Wörter" — geschlossen; der Absatz darf
+live gehen.
+
+**Ein Befund, den die Seite mitbringt:** Der Einseiten-Abruf des Brand-Checks
+(`server/utils/brandSiteFetch.ts`, Absender
+`PukalaniBrandWizard/1.0 (+https://pukalani.app)`) wertet **weder `robots.txt`
+noch einen TDM-Nutzungsvorbehalt** aus — das tut nur der Marktvergleich
+(`brandSiteCrawl.ts`, eigener Absender). Begründet war das mit „der Betreiber
+trägt seine eigene Startseite ein"; bei einer FREMDEN Adresse trägt diese
+Begründung nicht. Die Methodik-Seite nennt es ausdrücklich und benennt den
+Ausweg (Sperre auf Zuruf). Ob das genügt oder der Abruf `robots.txt` lesen
+muss, gehört als Zusatzfrage in den Anwaltstermin R3, Block (3).
 
 ---
 
@@ -484,6 +498,14 @@ kann; ohne sie bleibt die entsprechende Stelle im Text ein Platzhalter.
   `packages/brand/scripts/verify-brand-events-sweep.mjs` (15/15) — eine Zeile
   mit 25 Monaten fällt, eine mit 23 Monaten bleibt. Der Satz im Text darf jetzt
   „24 Monate" sagen.
-- **Die Methodik-Seite für den Brand Score fehlt** (BI1 §4.2, Plan §2.2 Nr. 6).
-  §4c verweist zweimal darauf; der Abschnitt darf erst live gehen, wenn die
-  Seite steht.
+- ~~**Die Methodik-Seite für den Brand Score fehlt**~~ (BI1 §4.2, Plan §2.2
+  Nr. 6). **ERLEDIGT mit BS1 R2a (2026-09-07):** `/brand-check/methodik`
+  (`packages/brand/app/pages/brand-check/methodik.vue`) steht in de und en —
+  was der Score ist und was nicht, was gelesen wird und was nicht, die acht
+  Kategorien mit Gewicht und Kriterienzahl, gerechnet gegen beurteilt,
+  Modell-Bedingungen, Fundament-Reife als zweite Zahl, Korrektur- und
+  Entfernungsweg, Grenzen. Keine Zahl ist abgetippt: Kriterien, Kategorien,
+  Gewichte, Bandgrenzen, Zeichendeckel, Zwischenspeicher-Frist und
+  Korrektur-Drossel kommen aus den Verträgen, die Locale-Texte tragen
+  Platzhalter. Beweis mit Gegenprobe:
+  `packages/brand/tests/brandCheckMethod.test.ts`. §4c darf damit live gehen.

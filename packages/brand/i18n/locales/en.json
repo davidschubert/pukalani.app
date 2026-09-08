@@ -1394,6 +1394,7 @@
         "start": "Start",
         "ranking": "Ranking",
         "compare": "Compare",
+        "method": "Methodology",
         "soon": "soon"
       },
       "hero": {
@@ -1480,6 +1481,111 @@
         "cta": "Start the brand check",
         "sampleLabel": "Example",
         "sampleNote": "This is what a result looks like: one number with a band and eight categories below it."
+      }
+    },
+    "checkMethod": {
+      "seoTitle": "How we calculate — the methodology behind the Brand Score",
+      "seoDescription": "What the Brand Score measures and what it does not: which page we read, how the {criteria} criteria in {categories} categories are scored, where the limits are, and how to have a result corrected or removed.",
+      "eyebrow": "Methodology",
+      "title": "How we calculate",
+      "lead": "This page explains how a Brand Score comes about. It exists because the brand check also rates presences that are not ours — and anyone who is rated has a right to redo the maths.",
+      "updated": "It describes what is running today. If the calculation changes, this page changes with it.",
+      "what": {
+        "title": "What the Brand Score is",
+        "body": "The Brand Score is a number between 0 and 100. It describes how clearly a publicly available web presence expresses its brand. The basis is the public self-presentation: the text every visitor sees, plus the technical declarations in the page head.",
+        "opinion": "It is a classification, not a statement of fact — a reasoned opinion about how a presence comes across from the outside. Every single judgement carries its evidence from the presence itself, so that it can be contradicted.",
+        "notTitle": "What it explicitly is not",
+        "not1": "Not a statement about commercial success, revenue or solvency.",
+        "not2": "Not a statement about the quality of the products or services behind it. Excellent craft can present itself badly — and the other way round.",
+        "not3": "Not a statement about integrity or trustworthiness.",
+        "not4": "Not a judgement of taste. We check whether a decision was recognisably made, not whether we like it.",
+        "bandsTitle": "The seven bands",
+        "bandsLead": "The number turns into a word. The thresholds are fixed and apply to every result alike.",
+        "bandFrom": "from {min}",
+        "bandUnder": "below {max}"
+      },
+      "reads": {
+        "title": "What we read",
+        "body": "Exactly one page: the address that was entered, after all redirects. No crawling of the site, no second request.",
+        "l1": "The visible body text of that one page, at most {chars} characters. Anything beyond that is cut off and not scored.",
+        "l2": "The declarations in the page head: title, description, language, favicon, preview image, colour and appearance declarations, structured data, heading hierarchy.",
+        "l3": "The alt texts of images. We do not load the images themselves and we do not store them.",
+        "l4": "Whether the address leads to an encrypted connection.",
+        "skipsTitle": "What we do not read",
+        "s1": "No sub-pages. Whether an imprint, a contact or an about page is linked is something we see on that one page — we do not open it.",
+        "s2": "Nothing behind a login. We do not sign in anywhere and we do not fill in forms.",
+        "s3": "No social media profiles, no review sites, no registers, no press coverage.",
+        "s4": "No JavaScript. We read the document as delivered, not what a browser rebuilds from it.",
+        "keepsTitle": "What is kept",
+        "keepsBody": "The page text is discarded after the evaluation. What remains stored is the checked address, the numeric values, the short pieces of evidence, the date, and a checksum of the text that tells us whether anything has changed since. Plus a daily rotating checksum of the requesting connection — for the daily cap only, never the address itself.",
+        "agentTitle": "How to recognise us in your access log",
+        "robotsTitle": "One limitation we are not hiding",
+        "robotsBody": "This single request does not consult robots.txt and does not evaluate a text and data mining reservation. It was designed for the case where someone enters their own home page — the presence then asks for the request itself. But a stranger can enter an address just as easily, and then that reasoning does not hold. If you do not want to be read, write to us and we will block the address. Our market comparison, which reads several pages in a row, does evaluate robots.txt and the mining reservation in full.",
+        "botLink": "How our market comparison bot works"
+      },
+      "judge": {
+        "title": "How it is scored",
+        "body": "{criteria} criteria in {categories} categories. Every criterion has a fixed rule and awards 0, 1 or 2 points. The categories carry different weights; together they make up the {total} points of the overall score.",
+        "criteriaCount": "{count} criteria",
+        "weight": "{weight} of {total} points",
+        "categories": {
+          "distinctiveness": "Does the presence say something only this brand could say — with a stance of its own instead of filler words?",
+          "visual": "Is a visual world of its own recognisable, and are the visible marks in place: favicon, preview image, heading hierarchy?",
+          "consistency": "Do title, heading and body speak with one voice, and is the brand name spelled the same way throughout?",
+          "experience": "Can a first-time visitor find their way: one clear next action, findable declarations, a recognisable sender?",
+          "clarity": "Does it say in plain words, without jargon, what is offered, for whom — and what is different here?",
+          "emotion": "Does the presence speak to a feeling: an origin, a human voice, a tone that fits the subject?",
+          "adaptability": "Does the brand carry elsewhere too: on a phone, in dark mode, in the sharing preview, in a single sentence?",
+          "craft": "Are the details right: spelling, no placeholder text, an encrypted connection, clean declarations in the page head?"
+        },
+        "splitTitle": "Measured and judged",
+        "splitBody": "{measured} of the {criteria} criteria are computed deterministically from the document — favicon, preview image, heading hierarchy, language declaration, encrypted connection and the like. The same page always yields the same points there. The remaining {judged} are judged by a language model, in one pass, with mandatory evidence for every judgement.",
+        "modelTitle": "Which model, and under which conditions",
+        "modelBody": "We call a large language model through a router — and only providers who have committed to not storing the request. Use for training purposes is prohibited, and falling back to providers outside those conditions is switched off: we would rather have the check say it is currently unavailable. Which model judged a given result is recorded with that result; it can change over time, which is why no fixed name is given here.",
+        "varianceTitle": "Why two runs can differ slightly",
+        "varianceBody": "The measured part is reproducible. The judged part almost is: we run the model as cold as possible, but a language model is not an adding machine. Above all the basis changes — today's website is not last week's. That is why every result carries its date, and why the same address deliberately returns the same stored result within {days} days instead of putting a second number next to the first.",
+        "nullTitle": "What cannot be checked from outside, we do not guess",
+        "nullBody": "A criterion about which nothing can honestly be said is marked not assessable and drops out of the calculation — it counts neither in the numerator nor in the denominator. Zero points would be a claim about something we never looked at."
+      },
+      "maturity": {
+        "title": "Foundation maturity — the second number",
+        "body": "Anyone building a branding with us can have their foundation checked instead of a website: the confirmed answers from the wizard. It is calculated with the same formula and the same catalogue of criteria.",
+        "labelBody": "That is why this number has a different name and is labelled separately everywhere. The {measured} measured criteria are all not assessable there — a favicon and a heading hierarchy are properties of a page, not of a foundation. A foundation maturity of 78 and a website score of 78 say different things; the side-by-side view refuses to compare across that line.",
+        "note": "Foundation maturity exists only for your own brand. It cannot be established for someone else's presence."
+      },
+      "public": {
+        "title": "What is public — and what is not",
+        "privateTitle": "A result is private to begin with",
+        "privateBody": "A check enters our public ranking only if the person running it explicitly ticked the box at the start. Without that tick it appears in no list, no sorting and no ranking position.",
+        "linkTitle": "The result page itself",
+        "linkBody": "Every result gets its own shareable address. Anyone who knows it can open the result — it is meant to be passed on. Search engines do not index it, and it shows nothing that would not be public anyway: the checked address, and judgements about a publicly reachable page.",
+        "ownerTitle": "We are aware that the person running a check is not always the brand owner",
+        "ownerBody": "That is why there are two ways back. Both are free and need no account.",
+        "correctionTitle": "Suggest a correction",
+        "correctionBody": "A correction can be submitted for any result: the field concerned, the suggestion, and a reason. A contact address is optional. We review by hand and either accept or decline with a reason. What can be corrected today is the industry — it is a model's suggestion about someone else's presence. The score itself is not contradicted by a correction, but through the route below.",
+        "correctionLimit": "{limit} suggestions per hour and connection.",
+        "removalTitle": "Have it removed",
+        "removalBody": "On a substantiated request we take a result offline. It disappears from the ranking and from its own address as well — what stands there afterwards is the same as for a result that never existed. The removal is permanent: it is not undone by someone else checking the same address again.",
+        "contactTitle": "How to reach us",
+        "contactBody": "For a correction the form on the result is enough. For a removal, to have your address blocked, or to query a judgement, write to us using the contact details in the imprint.",
+        "imprint": "To the imprint"
+      },
+      "limits": {
+        "title": "Limits and fairness",
+        "l1Title": "A model can be wrong",
+        "l1Body": "The judged criteria are a machine judgement. It carries its evidence and is therefore verifiable, but it is not infallible. If you see a mistake, tell us.",
+        "l2Title": "The score is a snapshot",
+        "l2Body": "It holds for one page on one day. A relaunch, a new text, a changed home page — and the number no longer holds. That is why every result carries its date, and why an old value is not a valid value to us.",
+        "l3Title": "We do not pit two brands against each other",
+        "l3Body": "There is a side-by-side view, but it is descriptive: two results next to each other, category by category, with no winner and no disparagement. We do not claim that one brand is better than another.",
+        "l4Title": "No third-party logos",
+        "l4Body": "We show word marks, industry and short supporting quotes from the presence itself. No logos, no figurative marks, no favicons, no screenshots.",
+        "l5Title": "A home page is not the whole brand",
+        "l5Body": "A brand also lives in the product, in the shop, in conversation and in service. This check sees none of that. It measures the first impression online — that matters, but it is not everything."
+      },
+      "back": {
+        "check": "To the brand check",
+        "ranking": "To the ranking"
       }
     },
     "checkRanking": {

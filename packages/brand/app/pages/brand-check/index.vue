@@ -182,6 +182,14 @@ const faqItems = computed(() => FAQ_IDS.map(id => ({
         </ul>
         <p class="mx-auto mt-10 max-w-3xl text-sm leading-relaxed" style="color: var(--bw-ink-soft)">{{ t('brand.checkPage.basis.note') }}</p>
         <p class="bw-label mx-auto mt-3 max-w-3xl leading-relaxed" style="color: var(--bw-muted)">{{ t('brand.checkPage.basis.lockedNote') }}</p>
+        <!-- Der Weg in die volle Rechnung (BS1 R2a). Er steht GENAU hier, wo
+             die Gewichte stehen: wer sich für die Zahlen interessiert, ist an
+             dieser Stelle der Seite und nirgends sonst. -->
+        <p class="mx-auto mt-6 max-w-3xl">
+          <ULink :to="localePath('/brand-check/methodik')" class="text-sm underline underline-offset-4" data-check-method>
+            {{ t('brand.checkMethod.title') }}
+          </ULink>
+        </p>
       </section>
 
       <!-- 6 · Features rund um den Check -->

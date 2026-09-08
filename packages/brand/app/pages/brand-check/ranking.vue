@@ -289,6 +289,15 @@ function rankOf(index: number): number {
         <p class="bw-label uppercase tracking-widest" style="color: var(--bw-muted)">{{ t('brand.checkRanking.eyebrow') }}</p>
         <h1 class="mt-3 text-balance text-4xl font-extralight tracking-tight sm:text-5xl">{{ t('brand.checkRanking.title') }}</h1>
         <p class="mx-auto mt-5 max-w-2xl text-base leading-relaxed" style="color: var(--bw-ink-soft)">{{ t('brand.checkRanking.lead') }}</p>
+        <!-- „So rechnen wir" (BS1 R2a): eine Liste, die fremde Auftritte
+             ordnet, muss ihre Rechnung von genau dieser Stelle aus offenlegen
+             — Faktenblatt §4c. Der Reiter oben tut es auch; hier steht der
+             Weg im Lesefluss. -->
+        <p class="mt-5">
+          <ULink :to="localePath('/brand-check/methodik')" class="text-sm underline underline-offset-4" data-ranking-method>
+            {{ t('brand.checkMethod.title') }}
+          </ULink>
+        </p>
       </header>
 
       <!-- Filterleiste: Branche · Band · Sortierung -->

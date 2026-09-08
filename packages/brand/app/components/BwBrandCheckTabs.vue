@@ -1,7 +1,14 @@
 <script setup lang="ts">
 /**
- * DIE REITER DES BRAND-CHECKS — Start · Ranking · Vergleich
+ * DIE REITER DES BRAND-CHECKS — Start · Ranking · Vergleich · Methodik
  * (Konzept: docs/archiv/BRAND-CHECK-SEITE.md §1).
+ *
+ * ── WARUM „METHODIK" EIN REITER IST UND KEIN FUSSNOTEN-LINK (BS1 R2a) ─────
+ * Das Faktenblatt (§4c) sagt öffentlich zu, die Methodik sei „von jedem
+ * Ergebnis aus verlinkt". Ein Reiter ist die einzige Stelle, an der das für
+ * ALLE vier Ansichten auf einmal gilt — die Ergebnisseite trägt dieselbe
+ * Leiste (mit `current="start"` als Rückweg). Ein Link, den man je Seite
+ * einzeln setzen muss, fehlt irgendwann auf der fünften.
  *
  * ── JEDER REITER IST EINE EIGENE ADRESSE, KEIN ZUSTAND ────────────────────
  * Deshalb LINKS und kein `UTabs` mit `v-model`: die drei Ansichten sind
@@ -25,14 +32,14 @@
  */
 const props = withDefaults(defineProps<{
   /** Welcher Reiter die aktuelle Ansicht ist. */
-  current?: 'start' | 'ranking' | 'compare'
+  current?: 'start' | 'ranking' | 'compare' | 'method'
 }>(), { current: 'start' })
 
 const { t } = useI18n()
 const localePath = useLocalePath()
 
 interface TabDefinition {
-  key: 'start' | 'ranking' | 'compare'
+  key: 'start' | 'ranking' | 'compare' | 'method'
   path: string
   soon: boolean
 }
@@ -42,6 +49,7 @@ const TABS: readonly TabDefinition[] = [
   { key: 'start', path: '/brand-check', soon: false },
   { key: 'ranking', path: '/brand-check/ranking', soon: false },
   { key: 'compare', path: '/brand-check/vergleich', soon: false },
+  { key: 'method', path: '/brand-check/methodik', soon: false },
 ] as const
 
 const tabs = computed(() => TABS.map(tab => ({

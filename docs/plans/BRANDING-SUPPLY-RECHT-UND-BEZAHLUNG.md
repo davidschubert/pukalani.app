@@ -496,7 +496,8 @@ heutige `Z1`. Wer ältere Notizen liest: es gilt diese Tabelle.
 | **R0 — Sofort** *(GEBAUT 2026-09-07)* | Der 404 verschwindet: Wizard-Ende (`completionCta`) und die Marktvergleich-Schranke zeigen auf die **Studio-Erstgespräch-Seite** mit Herkunft `?source=branding-supply`. Die drei Fußzeilen-Wörter ohne Ziel werden **ausgeblendet**, bis es Seiten gibt (Links kommen in R1). | keins | Nein |
 | **R1 — Technik** *(GEBAUT 2026-09-08)* | `pages` in `apps/branding` montieren (`site.manifest.ts` + `extends`), Migrationen auf der Instanz `branding`, `seed:legal` · die drei Seiten als **Entwurf** mit Hinweis „Entwurf, in anwaltlicher Prüfung" als ERSTEM Block und `noindex` · Fuß bekommt echte Links mit hartem Rückfall · `pukalani.auth.termsUrl` gesetzt, Hinweis neben dem Häkchen · **AGB-Fassung am Konto speichern** (s. Befund unten) | **Davids Ja zur Prod-Migration auf `branding`**; Migration **vor** Code-Deploy (§2.3) | Ja — nur die Migrations-Freigabe |
 | **R1b — Nachpaket zu R1** *(GEBAUT 2026-09-07)* | Zwei Befunde aus dem Faktenblatt: (1) die **24-Monats-Frist der Funnel-Ereignisse** bekommt ihre Mechanik — pure Regel `brandEventsRetention.ts` (EINE Konstante), Sweep in `server/utils`, Tagestakt als Nitro-Plugin, Betreiber-Handgriff `POST /api/brand/ops/events-sweep`; **keine Migration nötig** (`$createdAt` ist ohne eigenen Index abfragbar, gemessen). (2) Der **Env-Wächter** verlangt für `apps/branding` jetzt `NUXT_GEO_CITY_DB_PATH` + `NUXT_GEO_CITIES_PATH` — seit dem `admin`-Layer (2026-09-03) sind Sitzungsliste und Orts-Picker dort erreichbar; der Lauf meldet beide als auf dem Server fehlend. Beweise: 14 Unit-Prüfungen + `verify-brand-events-sweep.mjs` (15/15, mit Mutations-Gegenprobe) | keins für den Code; die **Server-`.env` von branding.supply setzt David** (zwei Zeilen + Reload, s. §7.2) | Ja — nur die zwei Env-Zeilen |
-| **R2 — Inhalt** | Davids Generator-Texte für Impressum, Datenschutz, AGB · dazu **meine drei Abschnitte**, die kein Generator kennt: KI-Verarbeitung von Kundentexten (OpenRouter/ZDR) · Abruf fremder Websites samt `/market-bot` und TDM-Vorbehalt · öffentliche Bewertung fremder Marken mit Korrekturweg · **Faktenblatt** aus §1.2 + §1.6 · Subprozessoren-Liste · Methodik-Seite für den Brand-Score · alles de + en; die drei Abschnitte sind für den Anwalt als **Prüfpunkte markiert** | David liefert die Generator-Texte; **David liest gegen** | Ja |
+| **R2 — Inhalt** | Davids Generator-Texte für Impressum, Datenschutz, AGB · dazu **meine drei Abschnitte**, die kein Generator kennt: KI-Verarbeitung von Kundentexten (OpenRouter/ZDR) · Abruf fremder Websites samt `/market-bot` und TDM-Vorbehalt · öffentliche Bewertung fremder Marken mit Korrekturweg · **Faktenblatt** aus §1.2 + §1.6 · Subprozessoren-Liste · ~~Methodik-Seite für den Brand-Score~~ **(vorgezogen und GEBAUT als R2a)** · alles de + en; die drei Abschnitte sind für den Anwalt als **Prüfpunkte markiert** | David liefert die Generator-Texte; **David liest gegen** | Ja |
+| **R2a — Methodik-Seite** *(GEBAUT 2026-09-07, s. §7.4)* | **Vorgezogen aus R2**, weil §4c ohne sie nicht live darf (Faktenblatt-Befund „eine Zusage ohne Ziel"). `/brand-check/methodik` im `brand`-Layer, de + en, öffentlich, ohne Konto, ohne Produkt-Gate, indexierbar: was der Score ist und was nicht (Bänder, Meinungscharakter) · was gelesen wird und was nicht, samt der **ehrlichen robots-Einschränkung** des Einseiten-Abrufs · die acht Kategorien mit Gewicht und Kriterienzahl, gerechnet gegen beurteilt, Modell-Bedingungen (ZDR, kein Training, kein Ausweichen) · Fundament-Reife als getrennt beschriftete zweite Zahl · Korrektur- und Entfernungsweg · Grenzen und Fairness. Verlinkt als vierter Reiter (damit von JEDER Ergebnisseite) plus im Lesefluss von Start, Ranking und Ergebnis. **Keine Zahl abgetippt** — alles aus den Verträgen, Locale-Texte mit Platzhaltern; Beweis `tests/brandCheckMethod.test.ts` mit Gegenprobe | keins | Nein — bis auf eine Kontaktadresse, falls die Seite mehr nennen soll als „über das Impressum" |
 | **R3 — Anwalt** | EIN Termin, **drei Blöcke**: (1) Studio-Rest aus A1 · (2) branding-Texte mit den drei markierten Prüfpunkten · (3) die Anhang-G/BI1-Fragen aus §1.6 (b)(c)(d). Danach **Fassung 2** einsetzen, Art.-27- und § 36-VSBG-Abschnitte füllen (bis dahin als benannte leere Plätze vorgebaut), **Entwurfs-Hinweis weg, `noindex` weg**. Beweis: sechs Routen 200 in beiden Sprachen · Fuß verlinkt · Häkchen in allen drei Anmeldewegen, mit Gegenprobe (`termsUrl` entfernen ⇒ rot) | **Anwaltstermin** | Ja — Termin und Abnahme |
 | **Z0 — Erstgespräch-Seite** *(GEBAUT 2026-09-07, s. §7.3)* | `/erstgespraech` im `brand`-Layer: fünf Felder (Name · E-Mail · welches Branding, vorbelegt · Anliegen · optional Telefon) · **zwei entkoppelte Zustellwege** (Mail an David UND Zeile in `brand_intro_requests`, Erfolg = mindestens einer) · drei Bremsen (Rate-Limit-Bucket, Honeypot, enge Zod-Längen) · Betreiber-Sicht im Dashboard · Ereignisse `intro.viewed` / `intro.submitted`. **Ersetzt die R0-Weiterleitung** | R1 durch (dieselbe Migrations-Freigabe); Migration vor Deploy | Nein (ausser Migrations-Freigabe) |
 | **Z1 — Stripe** | `billing` ins Manifest · **eigener Preis-Katalog für branding.supply** (NICHT die Community-Preise) · Checkout **je Branding** an der Schranke · Webhook schreibt das **Freischalt-Feld an `brand_profiles`** (Migration) · der **Betreiber-Schalter im Dashboard bleibt** für Handfälle · `automatic_tax` wie bei den Communities, Rechnung und Portal · AGB tragen die **Widerrufsbelehrung für digitale Inhalte** (§ 356 Abs. 5 BGB: Verzicht beim Start der Ausführung) | **A2 live** (Bank, Steuer, Live-Key, Portal) **UND** R3 durch; ausserdem Name + Betrag des Kaufgegenstands (offen, §9) | Ja — A2, Name und Preis |
@@ -716,6 +717,70 @@ gefahren, zweiter Lauf idempotent.
    keine Mail; die Anfrage steht trotzdem in der Liste). Ein erfundener
    Standard-Empfänger wäre eine Zustellung ins Nichts, die wie eine Zustellung
    aussieht — deshalb bleibt der Default leer.
+
+---
+
+### 7.4 R2a — die Methodik-Seite, am 2026-09-07 gebaut
+
+**Warum sie vor R2 kam.** §4c des Faktenblatts verspricht zweimal, die Methodik
+sei „öffentlich einsehbar und von jedem Ergebnis aus verlinkt". Solange die
+Seite fehlte, war der Abschnitt genau das, was R0 an den drei Fußzeilen-Wörtern
+repariert hat: eine Zusage ohne Ziel. Sie hängt an keinem der offenen Gates von
+R2 (Generator-Texte, Anwalt) — sie beschreibt nur, was der Code ohnehin tut.
+
+**Was gebaut wurde.** `packages/brand/app/pages/brand-check/methodik.vue`
+(Route `/brand-check/methodik`, de `/de/brand-check/methodik`), Site-Layout,
+`useSeoMeta` + WebPage-JSON-LD, indexierbar, ohne Session und ohne
+Produkt-Gate. Sieben Abschnitte: was der Score ist und ausdrücklich nicht ist
+(inkl. der sieben Bänder mit Spanne) · was gelesen wird und was nicht · wie
+bewertet wird (acht Kategorien mit Gewicht, Kriterienzahl und je einem Satz;
+gerechnet gegen beurteilt; Modell-Bedingungen; warum zwei Läufe abweichen;
+„nicht bewertbar") · Fundament-Reife als getrennt beschriftete zweite Zahl ·
+was öffentlich ist, Korrekturweg und Entfernungsweg · Grenzen und Fairness ·
+zurück ins Instrument. Locale-Block `brand.checkMethod.*` in de und en.
+
+**Verlinkt an vier Stellen, und drei davon sind keine Kür.** `BwBrandCheckTabs`
+bekommt einen vierten Reiter — das ist die Stelle, an der „von JEDEM Ergebnis
+aus verlinkt" für alle Ansichten auf einmal gilt (die Ergebnisseite trägt
+dieselbe Leiste). Dazu je ein Link im Lesefluss: auf der Startseite bei den
+Gewichten, im Kopf des Rankings, und als Knopf neben Score und Vergleich auf
+der Ergebnisseite.
+
+**Keine Zahl ist abgetippt.** Kriterien- und Kategorienzahl, die Gewichte, der
+gerechnete/beurteilte Anteil, die Bandgrenzen, der Zeichendeckel, die
+Sieben-Tage-Frist und die Korrektur-Drossel kommen aus `shared/brandCheck.ts`,
+`shared/brandSiteAnalysis.ts` und `shared/brandCheckCorrections.ts`; die
+Locale-Texte tragen Platzhalter (`{criteria}`, `{measured}`, `{min}`, …). Dafür
+sind die sieben Bandgrenzen aus den `if`-Zeilen von `brandScoreBand()` in eine
+Tabelle `BRAND_SCORE_BAND_RANGES` gewandert — die Funktion liest sie jetzt,
+also gibt es keine zweite Wahrheit, die auseinanderlaufen könnte.
+
+**Zwei Befunde, die die Seite ans Licht gebracht hat.**
+
+1. **Der Einseiten-Abruf achtet keine `robots.txt`** und keinen
+   TDM-Nutzungsvorbehalt (`server/utils/brandSiteFetch.ts`, Absender
+   `PukalaniBrandWizard/1.0 (+https://pukalani.app)`) — das tut nur der
+   Marktvergleich. Die Begründung im Code („der Betreiber trägt seine eigene
+   Startseite ein") trägt bei einer FREMDEN Adresse nicht. Die Seite nennt es
+   ausdrücklich, statt es zu verschweigen, und benennt den Ausweg. Ob das
+   genügt, gehört als Zusatzfrage in R3 Block (3).
+2. **Es gibt keine Kontaktadresse in der Config.** `introCallNotify` ist leer,
+   und `/market-bot` nennt `hello@branding.supply` als Literal. Die Seite
+   verweist deshalb auf das Impressum (`pukalani.brand.legalLinks.imprint`)
+   statt eine Adresse zu erfinden. Will David hier eine direkte Adresse, ist
+   das eine Zeile im Locale-Block.
+
+**Beweise.** `packages/brand/tests/brandCheckMethod.test.ts` — Bandtabelle
+gegen `brandScoreBand()` (jede Grenze und der Wert darunter, 0–100 lückenlos),
+Zahlen aus dem Katalog statt aus Literalen (mit Gegenprobe an einem
+absichtlich kaputten Satz), Katalog-Vollständigkeit in beiden Sprachen (mit
+Gegenprobe auf einen nicht existierenden Eintrag), Absender wörtlich gegen
+`BRAND_SITE_USER_AGENT`, kein `robots`-Kopf (Gegenprobe: die Ergebnisseite hat
+einen), Reiter und die drei Lesefluss-Links. Dazu am Dev-Server aus dem
+Worktree: `/brand-check/methodik` und `/de/brand-check/methodik` je 200, keine
+rohen `brand.`-Schlüssel im HTML, acht Kategorien und sieben Bänder im
+gerenderten Text, 16/40 · 24 · 100 Punkte · 20.000 Zeichen · 7 Tage · 3
+Vorschläge alle aus dem Katalog.
 
 ---
 
