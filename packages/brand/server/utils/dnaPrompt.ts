@@ -129,7 +129,14 @@ export function brandDnaPrompt(input: BrandDnaPromptInput): string {
         `- inspirationReason: ONLY with origin "both", and it names the reference NUMBER `
         + `(for example "as in reference 3, but warmer") — max `
         + `${BRAND_DNA_INSPIRATION_REASON_MAX} characters. "both" without it is downgraded to `
-        + '"foundation".',
+        + '"foundation".'
+        // DER KUNDE KENNT SEIN BILD ALS „VORBILD 3" (echter Lauf 2026-09-08: das
+        // Modell schrieb auf Deutsch „wie in reference 1") — das Etikett der
+        // Liste ist die interne Sprache des Prompts, der Satz gehört in die
+        // Sprache des Kunden.
+        + (language === 'German'
+          ? ' In the German text, call a reference „Vorbild N" (for example „wie in Vorbild 3, aber wärmer"), never "reference".'
+          : ''),
       ]
     : [
         '- origin: always "foundation". "both" and "inspiration" are not allowed here — there are '
