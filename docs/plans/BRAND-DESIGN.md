@@ -716,6 +716,35 @@ Foundation-Muster, in `dna` nun sauber; Board-Karten im Auswahl-Modul
 schmal; `g.boards` wird ohne sichtbare Boards bestätigt (Karten im
 Folge-Schritt).
 
+**Stand D3 (Farbwelt):** GEBAUT und geprüft 2026-09-08 (Commits a8f42a97,
+eacdf464, 363c51a8). Pure Regeln in `shared/brandDesignColor.ts`: Basis-
+und Akzent-Kandidaten deterministisch aus `result.direction` + Kachel-
+Farbwelt (kein KI-Lauf), AA-Gate der Basisfarbe gegen ihren eigenen
+Papierton, Akzent-Abstand als normierter Kanal-Abstand (0,06 — der
+naheliegende „Kontrast zur Basis" ist falsch: Kontrast misst Helligkeit,
+zwei tiefe Töne verschiedener Farbe haben fast keinen), fünf Rollen (Grund
+& Text = Rampe 900, Wärme & Flächen = Rampe 100, Helle Flächen =
+Grundton 100, Akzent & Signal, Papier & Ruhe = Grundton 50 — abweichend vom
+Prototyp, weil zwei Rollen nie dieselbe Quelle haben dürfen), Kontrast-
+Matrix (fünf Pflicht-Paare mind. AA, `accent-dark` nur Auskunft; sonst
+bleibt `h.contrast` leer statt eines ausgegrauten Knopfs). Bühne
+`BwColorPanel` + `useBrandColorWorld`: sechs Abschnitte, Hex-Feld UND
+`UColorPicker` im `UPopover` als ein Wert mit zwei Griffen, Hell/Dunkel als
+zwei feste Szenen mit Urteil je Welt. Beweis 232/232 (Abschnitt 25), 2 483
+Tests; eigener Klick: Hex `#b98a5e` und Picker `#311b07` rechnen Rampen,
+Rollen, Paare und beide Szenen live um (14,5 → 15,1 → 15,7:1), 0 Fehler.
+Zwei Klemmen mit D2c-Wirkung: `BRAND_STAGE_SOURCE_SLOTS` kannte `dna` nicht
+(die Boards fielen für JEDE Marke auf `warm-editorial` zurück — jetzt
+`dna: [result.direction]`, `color: [g.mix, result.direction]`); `watch(…,
+{ immediate })` mit `import.meta.client` läuft vor dem ersten Rendern ⇒
+drei Hydration-Mismatches, Kur `onMounted` (auch für `g.boards`/`g.mix`).
+Offen: Knopf-Paar `button-light` misst Papier auf Akzent, die Szene rechnet
+die Schriftfarbe adaptiv (bei hellem Akzent sagt die Tabelle „fällt durch",
+die Szene zeigt lesbaren dunklen Text) — D8 oder eigene Entscheidung; der
+zweite Basis-Kandidat aus der Kachel-Farbwelt ist produktseitig dünn.
+Inhalts-Gate: Rollen-Namen/-Quellen, Kandidaten-Begründungen, Absage-Satz
+der Kontrast-Regel, Frida-Leitern `h.*`.
+
 | # | Paket | Inhalt | Gate |
 | --- | --- | --- | --- |
 | D0 | Verträge | Registry-Steps + Sessions (Struktur), Vokabulare, Font-Paar-Katalog, `BrandDesignPreset`, `buildBrandDesign`, Ramp-Import als Vertrag, Journey mit Freischaltung | — |
