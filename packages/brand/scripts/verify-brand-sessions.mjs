@@ -2281,6 +2281,186 @@ try {
     && !snapshot3.includes('g.boards')
     && !snapshot3.includes('Beweis-Lesung'),
     `${snapshot3.length} Zeichen`)
+
+  // ══ 25 · Farbwelt: das Kapitel `color` (Brand Design D3, §2.3) ═══════════
+  //
+  // ── WAS DIESER ABSCHNITT PRÜFT — UND WAS NICHT ─────────────────────────
+  // Die Farb-MATHEMATIK gehört der Themes-Engine, die Regeln darüber
+  // (Kandidaten, AA-Gate, Abstands-Regel, Rollen, Kontrast-Urteil, Rundlauf
+  // der drei Slot-Werte) sind vollständig in `tests/brandDesignColor.test.ts`
+  // belegt. HIER wird geprüft, was ein Unit-Test nicht sehen kann: dass die
+  // BÜHNE dieselben Zahlen zeigt, dass ein von Hand hineingeschriebener Satz
+  // als Basisfarbe abgewiesen wird — und dass das Kapitel bis zur Abnahme
+  // durchläuft.
+  //
+  // Die VORBELEGUNG entsteht im Browser (die Seite schreibt sie über den
+  // Autosave, s. `useBrandColorWorld`); ein HTTP-Skript ohne Browser kann sie
+  // nicht auslösen. Sichtbar ist sie trotzdem: SSR RECHNET sie und malt sie
+  // hin, und genau daran hängen die Prüfungen unten.
+  console.log('\n25 · Brand Design: die Farbwelt (D3)')
+
+  const colorBase = `${base}/steps/color`
+
+  const colorDetail = await call(colorBase, { cookie: account.cookie })
+  check('das Kapitel `color` steht offen und seine erste Session auch',
+    colorDetail.status === 200 && colorDetail.json?.sessions?.['h.base']?.state === 'open',
+    `${colorDetail.status} h.base=${colorDetail.json?.sessions?.['h.base']?.state}`)
+  check('… und die Bühne bekommt ihre zwei fremden Quellen (DNA + Richtung)',
+    typeof colorDetail.json?.sourceValues?.['g.mix'] === 'string'
+    && colorDetail.json?.sourceValues?.['result.direction'] === 'warm-editorial',
+    JSON.stringify(Object.keys(colorDetail.json?.sourceValues ?? {})))
+
+  /** Die Seite so lesen, wie ein Besucher sie bekommt. */
+  const colorPage = async () => call(`/de/brand/${profileId}/color`, { cookie: account.cookie })
+
+  const firstView = await colorPage()
+  const hexesIn = text => new Set((text.match(/#[0-9a-f]{6}/gi) ?? []).map(hex => hex.toLowerCase()))
+  check('die Werkstatt zeigt den Farbwelt-Abschnitt',
+    firstView.status === 200 && firstView.text.includes('data-brand-color'),
+    `${firstView.status} ${firstView.text.length} Zeichen`)
+  check('… mit der VORBELEGUNG aus der Richtung `warm-editorial` (Tiefe = #4a3123)',
+    firstView.text.includes('#4a3123'), 'Basisfarbe der Richtung nicht gefunden')
+  check('… und mit gerechneten Rampen: weit über 22 Farbwerte auf der Seite',
+    hexesIn(firstView.text).size > 22, String(hexesIn(firstView.text).size))
+  check('… und mit einem WCAG-Urteil an den zwei Szenen',
+    firstView.text.includes('AAA') || firstView.text.includes('AA'),
+    'kein Urteil in der Seite')
+
+  // ── EIN EIGENER HEX GILT ───────────────────────────────────────────────
+  const OWN_BASE = '#2f4a3a'
+  const ownBase = await call(colorBase, {
+    method: 'PATCH',
+    cookie: account.cookie,
+    body: { revision: await stepRevision('color'), slots: { 'h.base': { value: OWN_BASE, confirmed: true } } },
+  })
+  check('eine eigene Basisfarbe lässt sich schreiben UND bestätigen',
+    ownBase.status === 200, `${ownBase.status} ${ownBase.text.slice(0, 160)}`)
+
+  const ownView = await colorPage()
+  /* Die Kandidaten-Karten zeigen weiterhin die Töne der Richtung — sie sind
+   * der VORRAT, nicht die Wahl. Was sich ändern MUSS, sind die gerechneten
+   * Farben: zwei Rampen, die Neutral-Rampe, fünf Rollen, sechs Paare. */
+  const firstHexes = hexesIn(firstView.text)
+  const ownHexes = hexesIn(ownView.text)
+  const fresh = [...ownHexes].filter(hex => !firstHexes.has(hex))
+  check('… und die ganze Seite rechnet mit ihr weiter (Rampen, Rollen, Paare neu)',
+    ownView.text.includes(OWN_BASE) && fresh.length > 15,
+    `eigene Farbe: ${ownView.text.includes(OWN_BASE)} · neue Farbwerte: ${fresh.length}`)
+
+  // ── EIN SATZ IST KEINE FARBE (Invariante `hex`, D3) ────────────────────
+  //
+  // Die Korrektur-Kette zuerst: `h.base` ist gerade bestätigt, und ein
+  // bestätigter Slot ist zu (409 `slot_confirmed`).
+  const reopen = await call(colorBase, {
+    method: 'PATCH',
+    cookie: account.cookie,
+    body: { revision: await stepRevision('color'), slots: { 'h.base': { confirmed: false } } },
+  })
+  check('Vorprobe: „Korrigieren" öffnet die Basisfarbe wieder',
+    reopen.status === 200, `${reopen.status} ${reopen.text.slice(0, 200)}`)
+
+  const prose = await call(colorBase, {
+    method: 'PATCH',
+    cookie: account.cookie,
+    body: {
+      revision: await stepRevision('color'),
+      slots: { 'h.base': { value: 'Das warme Braun unserer Röstung', confirmed: true } },
+    },
+  })
+  check('ein SATZ als Basisfarbe wird abgewiesen — 409 `invariant_violated`',
+    prose.status === 409 && prose.json?.reason === 'invariant_violated',
+    `${prose.status} ${prose.text.slice(0, 200)}`)
+  const afterProse = await call(colorBase, { cookie: account.cookie })
+  check('… und der bestätigte Stand bleibt der alte, nicht der Satz',
+    afterProse.json?.slots?.['h.base']?.confirmed !== 'Das warme Braun unserer Röstung',
+    JSON.stringify(afterProse.json?.slots?.['h.base']?.confirmed ?? null))
+
+  // ── DIE ZWEI REGELN, DIE MAN SEHEN MUSS ────────────────────────────────
+  //
+  // Basisfarbe = Crema (der Mittelton der Richtung). Damit steht der erste
+  // Akzent-Kandidat auf DERSELBEN Farbe: die Abstands-Regel muss greifen und
+  // es SAGEN — genau der Fall, den der Prototyp mitführt.
+  const cremaSet = await call(colorBase, {
+    method: 'PATCH',
+    cookie: account.cookie,
+    body: { revision: await stepRevision('color'), slots: { 'h.base': { value: '#b98a5e' } } },
+  })
+  check('Vorprobe: die Basisfarbe steht auf dem Mittelton der Richtung',
+    cremaSet.status === 200, `${cremaSet.status} ${cremaSet.text.slice(0, 160)}`)
+  const cremaView = await colorPage()
+  check('DIE ABSTANDS-REGEL steht auf der Seite: „zu nah an eurer Basisfarbe"',
+    cremaView.text.includes('Zu nah an eurer Basisfarbe'), 'Hinweis nicht gefunden')
+
+  // Und jetzt ein Akzent, der den Knopf-Text nicht trägt: die Kontrast-
+  // Prüfung fällt durch, sagt WELCHES Paar es ist — und `h.contrast` bleibt
+  // leer, ist also nicht bestätigbar (§2.3: „wird gar nicht erst angeboten").
+  const lightAccent = await call(colorBase, {
+    method: 'PATCH',
+    cookie: account.cookie,
+    body: {
+      revision: await stepRevision('color'),
+      slots: { 'h.base': { value: '#4a3123' }, 'h.accent': { value: '#e8d3b8' } },
+    },
+  })
+  check('Vorprobe: ein zu heller Akzent lässt sich eintragen',
+    lightAccent.status === 200, `${lightAccent.status} ${lightAccent.text.slice(0, 160)}`)
+  const failView = await colorPage()
+  check('DIE KONTRAST-REGEL steht auf der Seite und nennt das Paar',
+    failView.text.includes('So lässt sich die Prüfung nicht bestätigen')
+    && failView.text.includes('Knopf-Text auf Akzent'),
+    'Absage oder Paar-Name nicht gefunden')
+  const contrastSlot = (await call(colorBase, { cookie: account.cookie })).json?.slots?.['h.contrast']
+  check('… und `h.contrast` trägt dabei KEINEN Wert (leer heisst: nicht bestätigbar)',
+    !(contrastSlot?.value ?? contrastSlot?.confirmed ?? ''),
+    JSON.stringify(contrastSlot ?? null))
+
+  // ── DAS KAPITEL LÄSST SICH ZU ENDE GEHEN ───────────────────────────────
+  //
+  // Die abgeleiteten Werte schreibt sonst der Browser (s. Kopf); hier stehen
+  // Platzhalter in der FORM, die die Regeln erzeugen — geprüft wird die Kette
+  // darum herum, nicht ihr Inhalt.
+  const rampPlaceholder = '## Hell\n50 #ffffff · 950 #000000\n\n## Dunkel\n50 #ffffff · 950 #000000'
+  const rolesPlaceholder = ['Grund & Text', 'Wärme & Flächen', 'Helle Flächen', 'Akzent & Signal', 'Papier & Ruhe']
+    .map(label => `## ${label}\n#4a3123 · Rampe 900 · Platzhalter`).join('\n\n')
+  const contrastPlaceholder = ['Fließtext auf Papier', 'Überschrift auf Papier']
+    .map(label => `## ${label}\n#4a3123 · #ffffff · 13,5:1 · AAA`).join('\n\n')
+  await seedConfirmed('color', {
+    'h.base': '#4a3123',
+    'h.ramp': rampPlaceholder,
+    'h.neutral': 'warm',
+    'h.accent': '#22392f',
+    'h.roles': rolesPlaceholder,
+    'h.contrast': contrastPlaceholder,
+  })
+
+  const colorAcceptance = await call(`${colorBase}/acceptance`, { cookie: account.cookie })
+  const colorPending = (colorAcceptance.json?.sessions ?? []).filter(entry => entry.required && !entry.confirmed)
+  check('nach den sechs Bestätigungen steht keine Pflicht-Session mehr offen',
+    colorAcceptance.status === 200 && colorPending.length === 0,
+    `${colorAcceptance.status} · offen: ${JSON.stringify(colorPending.map(entry => entry.slotId))}`)
+
+  let colorRevision = colorAcceptance.json?.revision ?? 0
+  for (const entry of (colorAcceptance.json?.sessions ?? []).filter(row => row.confirmed && !row.accepted)) {
+    const taken = await call(`${colorBase}/sessions/${entry.slotId}/accept`, {
+      method: 'POST', cookie: account.cookie, body: { revision: colorRevision },
+    })
+    if (taken.status !== 200) {
+      check(`Abnahme ${entry.slotId}`, false, `${taken.status} ${taken.text.slice(0, 160)}`)
+      break
+    }
+    colorRevision = taken.json?.revision ?? colorRevision
+  }
+  const colorDone = await call(`${colorBase}/complete`, {
+    method: 'POST', cookie: account.cookie, body: { confidence: 'fits' },
+  })
+  check('das Kapitel `color` lässt sich abnehmen und schliessen',
+    colorDone.status === 200, `${colorDone.status} ${colorDone.text.slice(0, 160)}`)
+
+  const typeChapter = await call(`${base}/steps/type`, { cookie: account.cookie })
+  check('… und das nächste Kapitel `type` ist danach erreichbar',
+    typeChapter.status === 200 && typeChapter.json?.sessions?.['i.pair']?.state === 'open',
+    `${typeChapter.status} i.pair=${typeChapter.json?.sessions?.['i.pair']?.state}`)
+
 }
 catch (error) {
   fail++
