@@ -97,6 +97,10 @@ Tag ≈ 0,40–0,60 €). Vor dem Bau wird geprüft, ob das Modell unter `data_c
 geroutet wird — sonst antwortet die Stufe ruhig 503 und das Kapitel läuft ohne sie. Die
 Prod-Migration **brand-023** (Tabelle `brand_mark_drafts`, Bucket `brand-drafts`) darf nach der
 Prüfung von D5c gefahren werden, vor dem Push (wie brand-022/024).
+**Nachtrag (Fable, echter Lauf am selben Tag):** der Preview-Slug hat bei OpenRouter keine
+Endpunkte mehr („No endpoints found"); gesetzt ist das freigegebene Nachfolgemodell derselben
+Familie `google/gemini-2.5-flash-image` — unter der ZDR-Klemme geroutet, vier Bilder, ~0,03 ct je
+Bild. brand-023 ist auf `branding` gefahren.
 
 ---
 
