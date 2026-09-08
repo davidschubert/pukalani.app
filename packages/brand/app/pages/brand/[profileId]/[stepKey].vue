@@ -1352,7 +1352,50 @@ const pendingCard = computed<BrandSlotCard | null>(() => {
   return first ? cardFor(first) : null
 })
 
+/**
+ * DIE AKTIVE ABLEITUNG GEHT VOR (Brand Design D2c, am Klick-Beweis gefunden).
+ *
+ * `nextSlot` liefert immer die erste unbeantwortete FRAGE des Kapitels, und
+ * solange es eine gibt, zeigt die Bühne deren Modul. Für eine Ableitung, die
+ * WEITER VORNE steht, hiess das: sie bekam nie ihren Übernehmen-Knopf. Im
+ * Kapitel `dna` ist das kein Sonderfall, sondern die Regel — `g.dna`,
+ * `g.boards` und `g.reading` stehen alle vor der Board-Wahl, und der Mensch
+ * kam an keiner davon vorbei.
+ *
+ * Die Bedingung ist eng gehalten, damit sie nichts Bestehendes verschiebt:
+ * sie greift NUR, wenn der Mensch die Session selbst angesteuert hat (`?s=`),
+ * sie bestätigbar und KEINE Frage ist (Fragen haben ihr eigenes Modul), sie
+ * schon einen Wert trägt und noch nicht bestätigt ist. Ohne Wert bleibt es bei
+ * der nächsten Frage — eine leere Karte mit einem Knopf, der nichts übernimmt,
+ * wäre der schlechtere Zustand.
+ */
+const activeAwaitsConfirm = computed(() => {
+  const active = activeSlot.value
+  if (!active || !slotIsConfirmable(active)) return false
+  if (active.type === 'question' || active.type === 'choice') return false
+  return store.slotValue(active.id).length > 0 && !store.slotConfirmed(active.id)
+})
+
+/**
+ * DREI SESSIONS, DEREN WERT SCHON OBEN STEHT (D2c).
+ *
+ * `g.dna`, `g.boards` und `g.mix` haben eigene Abschnitte auf derselben Bühne
+ * — zehn Zeilen mit Begründung, drei Karten mit Szene, zehn Chip-Reihen. Ihre
+ * Bestätigungs-Karte darf denselben Inhalt nicht ein zweites Mal ausrollen,
+ * diesmal als rohe `## `-Blöcke: der Mensch läse dann eine Wand Text unter der
+ * Ansicht, die er gerade gelesen hat. Sie zeigt stattdessen einen Satz und
+ * behält den Knopf — bestätigt wird, was oben steht.
+ */
+const RENDERED_ABOVE = new Set(['g.dna', 'g.boards', 'g.mix'])
+
+function renderedAbove(slotId: string): boolean {
+  return RENDERED_ABOVE.has(slotId)
+}
+
 const stageModule = computed<StageModule>(() => {
+  if (activeAwaitsConfirm.value && pendingCard.value) {
+    return pendingCard.value.controls.showGenerate ? 'draft' : 'confirm'
+  }
   if (nextSlot.value) return nextSlot.value.type === 'choice' ? 'options' : 'answer'
   if (completion.value && !completion.value.slotsReady) {
     const card = pendingCard.value
@@ -2898,8 +2941,13 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
                     @update:model-value="value => onInput(pendingCard!.slot.id, String(value))"
                     @blur="autosave.flush()"
                   />
-                  <p v-else-if="store.slotValue(pendingCard.slot.id)" class="bw-doc-text mt-3 whitespace-pre-wrap">
-                    {{ slotDisplayValue(pendingCard.slot.id, store.slotValue(pendingCard.slot.id)) }}
+                  <p
+                    v-else-if="store.slotValue(pendingCard.slot.id)"
+                    class="mt-3" :class="renderedAbove(pendingCard.slot.id) ? 'bw-pending' : 'bw-doc-text whitespace-pre-wrap'"
+                  >
+                    {{ renderedAbove(pendingCard.slot.id)
+                      ? t('brand.dna.card.above')
+                      : slotDisplayValue(pendingCard.slot.id, store.slotValue(pendingCard.slot.id)) }}
                   </p>
                   <p v-else class="bw-pending mt-3">{{ t('brand.workspace.stage.pending') }}</p>
                 </div>
@@ -2995,8 +3043,13 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
                     @update:model-value="value => onInput(pendingCard!.slot.id, String(value))"
                     @blur="autosave.flush()"
                   />
-                  <p v-else-if="store.slotValue(pendingCard.slot.id)" class="bw-doc-text mt-2 whitespace-pre-wrap">
-                    {{ slotDisplayValue(pendingCard.slot.id, store.slotValue(pendingCard.slot.id)) }}
+                  <p
+                    v-else-if="store.slotValue(pendingCard.slot.id)"
+                    class="mt-2" :class="renderedAbove(pendingCard.slot.id) ? 'bw-pending' : 'bw-doc-text whitespace-pre-wrap'"
+                  >
+                    {{ renderedAbove(pendingCard.slot.id)
+                      ? t('brand.dna.card.above')
+                      : slotDisplayValue(pendingCard.slot.id, store.slotValue(pendingCard.slot.id)) }}
                   </p>
                   <p v-else class="bw-pending mt-2">{{ t('brand.workspace.stage.pending') }}</p>
                 </div>

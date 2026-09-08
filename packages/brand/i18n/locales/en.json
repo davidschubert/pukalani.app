@@ -2652,6 +2652,9 @@
         "title": "Where you stand",
         "from": "Colour world from \"{color}\" · typography from \"{type}\"",
         "note": "This is what pre-fills every chapter that follows — colour, typography, the mark, imagery and motion all start from here."
+      },
+      "card": {
+        "above": "It is written out in full above — here you confirm it."
       }
     },
     "scene": {

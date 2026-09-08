@@ -2652,6 +2652,9 @@
         "title": "Euer Stand",
         "from": "Farbwelt aus „{color}“ · Typografie aus „{type}“",
         "note": "Diese Belegung ist die Vorbelegung aller folgenden Kapitel — Farbwelt, Typografie, Zeichen, Bildsprache und Bewegung fangen damit an."
+      },
+      "card": {
+        "above": "Der Vorschlag steht oben in voller Länge — hier bestätigt ihr ihn."
       }
     },
     "scene": {
