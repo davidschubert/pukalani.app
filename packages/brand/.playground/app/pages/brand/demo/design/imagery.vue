@@ -129,14 +129,17 @@ const palette = DS_BRAND.palette
       </div>
     </section>
 
-    <!-- ── k.illustration + k.icons ─────────────────────────────────────── -->
-    <section class="grid gap-6 lg:grid-cols-2">
+    <!-- ── k.illustration ────────────────────────────────────────────────
+         Zwei Sessions, zwei Abschnitte (Davids Korrektur 2026-09-08: Icons
+         UNTER der Illustration, nicht daneben) — jede bekommt den vollen
+         Abstand der Bühne, die Optionen laufen als Raster in der Breite. -->
+    <section>
       <div>
         <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
           <h2 class="text-xl font-medium">Illustration</h2>
           <span class="bw-label ms-auto" style="color: var(--bw-muted)">k.illustration</span>
         </div>
-        <div class="mt-3 flex flex-col gap-2">
+        <div class="mt-3 grid gap-2 sm:grid-cols-2">
           <button
             v-for="option in DS_ILLUSTRATION_OPTIONS" :key="option.id"
             type="button"
@@ -156,13 +159,16 @@ const palette = DS_BRAND.palette
           </button>
         </div>
       </div>
+    </section>
 
+    <!-- ── k.icons ──────────────────────────────────────────────────────── -->
+    <section>
       <div>
         <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
           <h2 class="text-xl font-medium">Icons</h2>
           <span class="bw-label ms-auto" style="color: var(--bw-muted)">k.icons · Phosphor</span>
         </div>
-        <div class="mt-3 flex flex-col gap-2">
+        <div class="mt-3 grid gap-2 sm:grid-cols-3">
           <button
             v-for="option in DS_ICON_OPTIONS" :key="option.id"
             type="button"
