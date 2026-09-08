@@ -767,6 +767,33 @@ Doku-Renderer kannte `hex` nicht (leere Invarianten-Zeile seit D3).
 Inhalts-Gate: Paar-Namen/Notizen, `brand.type.*`-Texte, Grenzen (Laufweite
 ±1 px statt +4 im Prototyp), Frida-Leiter `i.pair`, Mono-Specimen-Zeile.
 
+**Stand D5a + D5b (Zeichen: Richtung, Briefing, Setzungen):** GEBAUT und
+geprüft 2026-09-08 (Commits 8a21a7bd, d947c992, a9b235ab, 5493a72a). Pure
+Regeln `shared/brandDesignMark.ts` (Richtungs-Vorbelegung aus der DNA,
+Briefing-Form mit Klemmung: vier geschriebene + zwei GERECHNETE Felder —
+Schutzraum = Versalhöhe, Mindestbreite 96 px digital / 24 mm Druck,
+Monogramm ≥ 24 px; Eckenradius aus DNA `form` weich 34 % / kantig 0),
+`shared/brandMarkSvg.ts` (deterministischer SVG-Satz Wortmarke + Monogramm
+in vier Varianten, Schutzraum gezeichnet, Name XML-escaped), Briefing-Lauf
+`POST …/mark/brief` (Text-KI, Gate = Kill-Switch + Schlüssel, Stub
+`BRAND_DEV_STUB_MARK=1`, 10/Tag), Bühne `BwMarkPanel` (vier Richtungs-
+Karten nebeneinander, Briefing-Blöcke, Setzungen live aus Paar + Farbwelt,
+Stufe 3 als Platzhalter „KI-Entwürfe folgen (D5c)"). Beweis 274/274
+(Abschnitt 27), 2 551 Tests; eigener Klick, gemessen an SVG-Attributen:
+Source Serif 4, Tinte `#352217` auf Papier `#fcfaf9`, „Invertiert" dreht
+beide, Richtungswechsel schreibt `j.kind`, Briefing kommt in Blöcken, 0
+verschachtelte Buttons. Zwei Funde des Agenten behoben: der Lauf las `j.kind`
+nur bestätigt (Briefing für die falsche Richtung); Ersatztext zeigte die Id.
+Offen: `j.pick` folgt der Richtung nur, solange der Slot leer ist; Szene
+bekommt den Namen als Prop, kein SVG im Kopf (D8). Inhalts-Gate: die vier
+Richtungs-Begründungen (Entwurf des Baus), die Maße als Setzung, der Satz
+„gesetzte Beispiele, kein Logo", Frida-Leitern `j.*`. **D5c braucht:** Core
+`aiImage` (ZDR fest), Migration **brand-023** (`brand_mark_drafts` +
+Bucket `brand-drafts`), Davids Bild-Modell (Vorschlag des Baus:
+`google/gemini-2.5-flash-image-preview`, ~3–5 ct je Bild, ≈ 0,40–0,60 €
+je Marke und Tag im Vollausschlag — VORHER prüfen, ob es unter
+`data_collection: deny` geroutet wird).
+
 | # | Paket | Inhalt | Gate |
 | --- | --- | --- | --- |
 | D0 | Verträge | Registry-Steps + Sessions (Struktur), Vokabulare, Font-Paar-Katalog, `BrandDesignPreset`, `buildBrandDesign`, Ramp-Import als Vertrag, Journey mit Freischaltung | — |
