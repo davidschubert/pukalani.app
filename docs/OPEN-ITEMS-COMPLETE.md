@@ -30,6 +30,48 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### AW2: Appwrite 2.0 — Server (dev + prod) und SDKs (node-appwrite 29, appwrite 27) in einem Vorhaben ✅ 2026-09-08
+
+Anlass: die Abhängigkeiten-Seite meldete Appwrite 1.9.6 → 2.0.0 und die SDKs
+26 → 29/27. Davids Entscheidungen (DECISION-LOG 2026-09-08): alles in EINEM
+Vorhaben, Start sofort, Prod-Fenster nach grüner CI-E2E gegen 2.0. Vier Stufen
+in Reihenfolge, weil die SDK-Majors am Server hängen:
+
+1. **SDK 28 + Code** (Commit `2d6dbc0d`): `Health`-Service (seit 27 weg) durch
+   REST-Helfer `core/server/utils/appwriteHealth.ts` ersetzt (gleiche
+   Methodennamen, 5-s-Timeout, nackter 502); `account.createJWT` (seit 28
+   weg) durch `users.createJWT` am Admin-Client, userId NUR aus der bewiesenen
+   Session — Scope `users.write` auf allen vier Prod-Keys vorher per Probe
+   belegt. Läuft gegen 1.9.6 UND 2.0 (Response-Format 1.9.6).
+2. **Dev-Instanz 2.0.0** (OrbStack): Dump + Config-Backup, Upgrade-Werkzeug,
+   Override nachziehen, `migrate`. Beweise: verify-onboarding 28/28,
+   verify-presence-boundary 23/23, verify-site-authz 120/120 (nach Reparatur
+   von zwei Skript-Drifts), Health-Pillen, JWT + WS als Nutzer, Login per Klick.
+3. **CI-Wegwerf-Appwrite 2.0** (Commit `547b3ae7`): Compose aus dem Werkzeug
+   abgeleitet, `-ci`-Netze/-Labels, `appwrite-geo` in der Startliste; E2E
+   danach viermal grün.
+4. **Prod `api.pukalani.app` 2.0.0** (05:00 UTC, Skript auf appwrite-prod,
+   unter 12 min) und **SDK 29 + Web 27** (Commit `03a0bffb`, Response-Format
+   2.0.0). Nachweise: Runbook docs/runbooks/APPWRITE-2-0-UPGRADE.md.
+
+**Gelernt:** (1) Das Upgrade-Werkzeug 2.0.0 ignoriert `--no-start`, startet
+die Container OHNE `docker-compose.override.yml` (explizites `-f`) und lässt
+`migrate` aus — Traefik-XFF und SMTP-Patch waren nach dem Lauf weg, ein
+eigenes `docker compose up -d` + `migrate` gehört IMMER hinterher. (2) Eine
+1.9.6-Patchdatei in einem 2.0.0-Container ist falsch (52 Diff-Zeilen) — je
+Version eine eigene, die Override erst im Fenster umstellen. (3) `MYSQL_ROOT_PASSWORD`, nicht
+`MARIADB_ROOT_PASSWORD`: mit der falschen Variablen ist der Dump 20 Byte groß
+und nur am `ls` zu erkennen — der Prod-Ablauf bricht deshalb unter 100
+Tabellen ab. (4) Beweis-Skripte rosten: `verify-site-authz` war seit der
+Zod-Härtung (Name ≥ 2) und der Einladungs-Drossel (F57, 5/min je IP) bei 117
+von 120, ohne dass es jemand sah — wer ein Skript als Beweis nimmt, liest die
+roten Zeilen, bevor er sie dem Server anlastet. (5) Der Dev-traefik hängt
+CI-Container in seine Router, wenn Label und Netz gleich heißen (beide lesen
+denselben Docker-Socket) — `-ci`-Suffixe sind Pflicht für jeden lokalen
+Nachstell-Versuch. (6) `users.createJWT` braucht `users.write`; vor einem
+Deploy, der ein neues SDK-Verfahren nutzt, die Prod-Keys per Wegwerf-Probe
+(create → jwts → delete) prüfen statt annehmen.
+
 ### Brand Foundation als Guidelines (BF1): Leseansicht, Teilen, Beispiel, Richtung — die Foundation als Markenhandbuch ✅ 2026-09-07
 
 **Was:** Das Ergebnis-Dokument des Brand-Wizards („Euer Branding", die Arbeitsansicht mit

@@ -7,6 +7,19 @@ die kleinen, verstreuten Beschlüsse.
 
 ---
 
+## 2026-09-08 — Brand Design: Prototyp-Nachtrag und Hell/Dunkel-Vergleich abgenommen
+
+**Abgenommen (David):** der Prototyp-Nachtrag im Playground (Weiche Foundation/Vorbilder,
+Vorbilder-Upload je Bereich, KI-Lesung fits/tension/off gegen die Foundation, Herkunft je
+DNA-Zeile, Ergebnis-Board als Kopf von Kapitel 10 und eigene Ansicht) und der Hell/Dunkel-
+Vergleich in der Farbwelt (zwei feste Szenen nebeneinander mit Kontrast-Urteil je Welt).
+Damit sind alle bisher angesprochenen Prototyp-Korrekturen (Abstände, 72-rem-Bühne, Raster,
+Farb-Picker, gestapelte Mix-&-Match-Chips) und beide Nachträge abgenommen. Offen ist die
+FREIGABE des Gesamt-Prototyps als Bauvorlage (Phase 4 nach WORKFLOW.md) — danach werden die
+Pakete D0–D9 in docs/plans/BRAND-DESIGN.md §2.18 verbindlich, beginnend mit D0 (Verträge).
+
+---
+
 ## 2026-09-08 — Brand Design: Richtung aus Foundation UND Vorbildern; Brand Design als eigenständiges Produkt
 
 **Anlass (David, an der Prototyp-Seite „Moodboard"):** Ist die Reihenfolge richtig, oder
@@ -2174,3 +2187,8 @@ Downtime-Fenster; (4) erst danach `node-appwrite` 29 + `appwrite` 27
 Benanntes Risiko: 2.0.0 ist vom 2026-09-04, kein Patch-Release vorhanden;
 `registers.php` trägt weiterhin `keepAlive: true` (Patch erneuern, nicht
 löschen).
+
+**Nachtrag 2026-09-08 (Ausführung):** Prod-Fenster nach Davids zweiter
+Entscheidung „nach grüner CI-E2E auf 2.0" um 05:00 UTC gezogen — unter 12
+Minuten, Nachweise im Runbook. Beide Instanzen und beide SDKs stehen auf der
+2.0-Linie; AW2 ist damit komplett (OPEN-ITEMS-COMPLETE).
