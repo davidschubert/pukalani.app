@@ -77,8 +77,16 @@ const num = computed(() => String(props.index).padStart(2, '0'))
 const noteKey = computed(() => `brand.foundation.note.${props.chapter.id}`)
 const note = computed(() => (te(noteKey.value) ? t(noteKey.value) : ''))
 
-/** Der externe Weg zum Erstgespräch — die Studio-Seite, nicht diese App. */
-const CALL_URL = 'https://pukalani.studio/erstgespraech'
+/**
+ * DER WEG ZUM ERSTGESPRÄCH — AUS DER CONFIG, NICHT GETIPPT (BS1 R0).
+ *
+ * Hier stand die Studio-Adresse als Konstante, während die Schranke des
+ * Marktvergleichs dieselbe Adresse aus `pukalani.brand.completionCta` las:
+ * zwei Wahrheiten über EINEN Conversion-Weg. Jetzt beide über
+ * `useBrandCompletionCta()` — `to` ist fertig (intern mit Sprach-Präfix,
+ * extern ohne), `target`/`rel` kommen mit.
+ */
+const callCta = useBrandCompletionCta()
 
 /** Auswahl-Ids in der Sprache der OBERFLÄCHE (s. Kopf). */
 function choiceLabels(slotId: string, optionIds: readonly string[]): string[] {
@@ -356,7 +364,7 @@ const renderedBlocks = computed(() => (props.chapter.state === 'locked' && !isPr
         :label="t('brand.foundation.direction.choose')"
       />
       <UButton
-        :to="CALL_URL" target="_blank" rel="noopener noreferrer"
+        :to="callCta.to" :target="callCta.target" :rel="callCta.rel" :external="callCta.external"
         color="neutral" variant="outline" class="rounded-full" style="background: var(--bw-surface-hi)"
         :label="t('brand.foundation.visual.ctaCall')"
       />

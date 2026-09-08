@@ -22,7 +22,56 @@ export default defineAppConfig({
      * nicht zu unterscheiden — hier streamt erst, was ein echter Generator
      * (P2, `registerBrandSlotGenerator()`) liefert.
      */
-    brand: { name: 'Branding Supply' },
+    brand: {
+      name: 'Branding Supply',
+      /**
+       * DAS ERSTGESPRÄCH LIEGT (NOCH) AUF pukalani.studio (BS1 R0,
+       * 2026-09-07 — Davids Entscheidung).
+       *
+       * Der Layer-Default ist `type: 'route'` auf `/erstgespraech`. Diese
+       * Seite gibt es ausschliesslich in `apps/portfolio`; auf
+       * branding.supply führten deshalb BEIDE Aufrufer des einen
+       * Conversion-Wegs ins 404 — der Knopf am Ende der Brand Foundation und
+       * die Schranke des Marktvergleichs. Bis die eigene Erstgespräch-Seite im
+       * brand-Layer steht (Paket Z1), zeigt der Trichter dieser Site auf die
+       * Studio-Seite.
+       *
+       * WARUM HIER UND NICHT IM LAYER: die SITE entscheidet, wohin ihr
+       * Trichter zeigt. Der Layer-Default bleibt richtig für pukalani.studio,
+       * wo `brand` später ebenfalls laufen könnte und die Seite im eigenen
+       * Haus liegt.
+       *
+       * `?source=branding-supply` ist die HERKUNFT. Achtung, was sie heute
+       * ist und was nicht: die Studio-Seite liest keine Query, und
+       * `POST /api/intro-call` nimmt sie auch nicht entgegen (das Zod-Schema
+       * ist `.strict()`, ein `source`-Feld gibt es nicht) — die Angabe landet
+       * also NICHT in `intro_requests`, sondern nur in der Web-Analyse der
+       * Studio-Site. Der Name `source` ist frei gewählt, weil es keinen
+       * bestehenden gab; wer die Herkunft später in der Anfrage haben will,
+       * erweitert Seite und Route und behält diesen Namen.
+       *
+       * `target: '_blank'` erhält das bisherige Verhalten des Knopfes in der
+       * Brand Foundation: der Leser verliert sein Dokument nicht. `rel`
+       * ergänzt die pure Regel selbst (`noopener noreferrer`) — ein `_blank`
+       * ohne das gäbe der Zielseite `window.opener` in die Hand.
+       */
+      completionCta: {
+        type: 'url',
+        href: 'https://pukalani.studio/erstgespraech?source=branding-supply',
+        labelKey: 'brand.cta.book',
+        target: '_blank',
+      },
+      /**
+       * DIE RECHTSWÖRTER IM FUSS BLEIBEN WEG, BIS ES DIE SEITEN GIBT.
+       *
+       * Ausdrücklich hier notiert statt stillschweigend geerbt: der
+       * Layer-Default ist leer, die Zeile fällt damit aus dem Fuß — das ist
+       * der gewollte Zustand, nicht ein vergessener Eintrag. BS1 R1 trägt hier
+       * die Pfade der Rechtstexte ein (`/imprint`, `/privacy`, `/terms`), und
+       * mehr braucht es dann nicht.
+       */
+      legalLinks: { imprint: '', privacy: '', terms: '' },
+    },
     /**
      * „Anmelden mit Google" (Davids Auftrag 2026-09-03). Das ist der
      * DESIGN-Schalter (welche Anbieter, in welcher Reihenfolge); der Knopf

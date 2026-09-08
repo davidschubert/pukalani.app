@@ -1,3 +1,5 @@
+import type { BrandCompletionCtaConfig } from '../shared/brandCompletionCta'
+import type { BrandLegalLinksConfig } from '../shared/brandLegalLinks'
 import type { BrandWorkspaceNavExtra } from '../shared/brandWorkspaceNav'
 
 /**
@@ -32,8 +34,24 @@ import type { BrandWorkspaceNavExtra } from '../shared/brandWorkspaceNav'
  * Manifest wäre kein Ergebnis, sondern ein Schaden.
  *
  * ── `completionCta` ───────────────────────────────────────────────────────
- * Was am Ende steht. `type: 'route'` zeigt auf das Erstgespräch — das eine
- * Conversion-Ziel der Studio-Site.
+ * Was am Ende steht: das Erstgespräch — das eine Conversion-Ziel. Zwei Formen
+ * (`type: 'route'` mit `to`, `type: 'url'` mit `href`), gelesen über die eine
+ * pure Regel `resolveBrandCompletionCta()` in `shared/brandCompletionCta.ts`;
+ * die Aufrufer binden das Ergebnis über `useBrandCompletionCta()`.
+ *
+ * DER LAYER-DEFAULT BLEIBT DIE ROUTE (BS1 R0, 2026-09-07). `/erstgespraech`
+ * existiert in `apps/portfolio` (pukalani.studio) — läuft `brand` einmal dort,
+ * ist der Default richtig. Auf branding.supply gibt es die Seite nicht, und
+ * genau deshalb setzt `apps/branding` das Ziel selbst auf die Studio-Adresse:
+ * DIE SITE entscheidet, wohin ihr Trichter zeigt, nicht der Layer. Die eigene
+ * Erstgespräch-Seite kommt mit Paket Z1.
+ *
+ * ── `legalLinks` ──────────────────────────────────────────────────────────
+ * Die drei Rechtswörter im Fuß (`BwSiteFooter`) — PFADE, keine i18n-Schlüssel
+ * (die Beschriftungen stehen fest im Layer-Katalog). Leer heisst: die Zeile
+ * fällt weg. Warum kein blosser Text mehr dort stehen darf, steht ausführlich
+ * im Kopf von `shared/brandLegalLinks.ts`. Der Layer-Default ist leer, weil
+ * kein Layer wissen kann, ob die App diese Seiten hat; BS1 R1 füllt ihn.
  *
  * EINGELÖST MIT P1c (2026-08-31): `labelKey` war ein VERSPRECHEN ohne Deckung —
  * `brand.cta.book` existierte in keiner Locale-Datei, weil der Layer keine
@@ -115,7 +133,16 @@ export default defineAppConfig({
       enabled: true,
       persona: { name: 'George', mark: '' },
       contentLocales: ['en', 'de'],
-      completionCta: { type: 'route', to: '/erstgespraech', labelKey: 'brand.cta.book' },
+      completionCta: {
+        type: 'route',
+        to: '/erstgespraech',
+        labelKey: 'brand.cta.book',
+        /* Die ANNOTATION ist der Punkt: ohne sie leitet TypeScript aus dem
+         * Default den engen Route-Typ ab, und eine App, die `type: 'url'`
+         * setzt, bekäme einen Fehler über eine unbekannte Eigenschaft `href`
+         * — die Site könnte ihr Ziel dann nur noch mit einem `as` setzen. */
+      } as BrandCompletionCtaConfig,
+      legalLinks: { imprint: '', privacy: '', terms: '' } as BrandLegalLinksConfig,
       /**
        * DER ENTWICKLUNGS-ERSATZ FÜR GEORGES ENTWÜRFE (P1c).
        *

@@ -427,12 +427,26 @@ async function goToUnlockChapter(): Promise<void> {
  * Das Ziel kommt aus `pukalani.brand.completionCta` — dieselbe Adresse, die
  * der Wizard am Ende anbietet. Ein hier getippter Pfad wäre die zweite
  * Wahrheit über den einen Conversion-Weg dieser Marke.
+ *
+ * SEIT BS1 R0 (2026-09-07) über `useBrandCompletionCta()` statt über ein
+ * eigenes Lesen der Config: das Ziel kann jetzt auch eine ABSOLUTE Adresse
+ * sein (auf branding.supply zeigt es bis Paket Z1 auf pukalani.studio), und
+ * `localePath()` darf auf eine solche nicht angewandt werden — es hinge ihr
+ * das Sprach-Präfix DIESES Hosts voran. Das Composable entscheidet das; hier
+ * wird nur noch gebunden. Es kommt über den Auto-Import der App, die beide
+ * Layer listet — derselbe Weg wie `BwWorkspace` (s. `app/contracts/brandUi.ts`,
+ * der bewusst nur Typen trägt).
  */
-const bookingTarget = computed(() => String(appConfig.pukalani?.brand?.completionCta?.to ?? '/erstgespraech'))
+const bookingCta = useBrandCompletionCta()
 
 async function openBooking(): Promise<void> {
   trackFunnel('studio_cta_erstgespraech', { source: 'market_paywall' })
-  await navigateTo(localePath(bookingTarget.value))
+  const cta = bookingCta.value
+  // `open` nur, wenn die Site einen Tab wünscht — sonst der gewöhnliche Sprung.
+  await navigateTo(cta.to, {
+    external: cta.external,
+    ...(cta.target ? { open: { target: cta.target } } : {}),
+  })
 }
 
 // ── Die eine freiwillige Frage (§2.10, MV1 M5) ───────────────────────────
