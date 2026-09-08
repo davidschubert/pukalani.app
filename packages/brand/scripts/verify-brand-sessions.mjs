@@ -93,6 +93,20 @@
  *     ohne die Variable prüft der Abschnitt stattdessen die 503
  *     `vision_unavailable`.
  *
+ * Seit Brand Design D2c (§2.2 Schritte 4–5) kommt der DNA-VORSCHLAG dazu:
+ *
+ * 24. DER VORSCHLAG: `POST …/dna/propose` schreibt zehn geklemmte Zeilen als
+ *     Slot-Wert von `g.dna` (unbestätigt) und nennt das Rest-Kontingent. Auf
+ *     dem Weg „Frida schlägt vor" ist `g.dna` OFFEN, obwohl es nie eine Lesung
+ *     gab (die bedingte Quelle, `conditionalInputCounts`) und jede Zeile trägt
+ *     `foundation` — mit GEGENPROBE: mit Vorbildern wartet dieselbe Session
+ *     wieder. Mit Lesung trägt mindestens eine Zeile `both` samt Vorbild-Satz,
+ *     und KEINE trägt `inspiration` allein. Danach ist das Kapitel bis zur
+ *     Abnahme durchlaufbar und `color` geht auf; der Schnappschuss trägt die
+ *     DNA, aber weder Lesung noch Vorbilder noch den Board-Vorrat.
+ *     Er braucht `BRAND_DEV_STUB_DNA=1`, sonst kostete jeder Lauf Geld; ohne
+ *     die Variable prüft der Abschnitt stattdessen die 503 `dna_unavailable`.
+ *
  * ── WAS DIESER BEWEIS NICHT BEWEIST ──────────────────────────────────────
  * Den Anbieter. Ohne `NUXT_AI_KEY` wirft `aiCompleteStream` (503), die Route
  * schickt `generation.failed` mit `provider_error` — und genau das ist hier
@@ -111,7 +125,7 @@
  * ohne KI-Schlüssel kein Urteil (fail-soft, §7) — `BRAND_DEV_STUB_REVIEW=1`
  * schaltet ihn ein und wirkt NUR dort (`server/utils/brandReview.ts`):
  *
- *   BRAND_DEV_STUB_REVIEW=1 BRAND_DEV_STUB_VISION=1 \
+ *   BRAND_DEV_STUB_REVIEW=1 BRAND_DEV_STUB_VISION=1 BRAND_DEV_STUB_DNA=1 \
  *     pnpm --filter branding exec nuxi dev --port 3016
  *   BRANDING_PORT=3016 node --env-file=apps/branding/.env \
  *     packages/brand/scripts/verify-brand-sessions.mjs
@@ -269,6 +283,23 @@ function callBinary(path, { cookie } = {}) {
     req.end()
   })
 }
+
+/**
+ * DIE ZEHN DIMENSIONEN DER VISUAL DNA (Brand Design D2c) — als Liste, damit
+ * Abschnitt 24 die Antwort des Laufs gegen den KATALOG prüfen kann und nicht
+ * gegen sich selbst (Beweis-Regel 1: Erwartungswerte nie aus der geprüften
+ * Antwort ableiten).
+ *
+ * Abgeschrieben aus `shared/brandDesignVocab.ts` statt importiert: die Datei
+ * hat relative Importe ohne Endung, und Node löst die aus einem `.mjs` heraus
+ * nicht auf (dieselbe Grenze, die `verify-market-report.mjs` in seinem Kopf
+ * beschreibt). Läuft sie auseinander, wird dieser Abschnitt rot — das ist der
+ * gewollte Wächter, kein stiller Durchlauf.
+ */
+const DNA_DIMENSIONS = [
+  'style', 'era', 'form', 'typography', 'color',
+  'imagery', 'composition', 'materiality', 'motion', 'mood',
+]
 
 /**
  * DREI ECHTE BILDER — 1 × 1 Pixel, je Format. Sie stehen hier als Bytes und
@@ -1916,6 +1947,340 @@ try {
   check('GEGENPROBE: ohne ein einziges Vorbild ⇒ 409 `reading_no_images` (nicht 429)',
     bareRead.status === 409 && bareRead.json?.reason === 'reading_no_images',
     `${bareRead.status} ${JSON.stringify(bareRead.json?.reason ?? null)}`)
+
+  console.log('\n24 · Brand Design: der DNA-Vorschlag, die Boards und der Mix (D2c)')
+
+  /**
+   * ── WAS DIESER ABSCHNITT PRÜFT — UND WAS ER BEWUSST NICHT PRÜFT ──────────
+   * Er prüft, was an Route, Zustandsmaschine und Ablage hängt: dass `g.dna`
+   * auf BEIDEN Wegen aufgeht (mit und ohne Vorbilder), dass der Lauf zehn
+   * geklemmte Zeilen schreibt, dass die Herkunft am Weg hängt und nicht am
+   * Modell, dass der Slot-Wert die Form des Layers trägt und UNBESTÄTIGT
+   * bleibt, und dass das Kapitel danach vollständig durchlaufbar ist.
+   *
+   * Er prüft NICHT den INHALT von `g.boards` und `g.mix`. Beide entstehen im
+   * BROWSER (die Seite rechnet sie aus `g.dna` und schreibt sie über den
+   * Autosave, s. `useBrandDnaBoards`); ein HTTP-Skript ohne Browser kann sie
+   * nicht auslösen. Ihre Regeln — drei Boards, deterministisch, vier bis sechs
+   * Unterschiede, Hin- und Rückweg des Slot-Wertes, festgehaltene Dimensionen
+   * bleiben beim Neu-Vorschlagen stehen — sind vollständig in
+   * `tests/brandDesignDna.test.ts` belegt, und dass die SEITE sie schreibt, im
+   * Klick-Beweis. Hier stehen deshalb Platzhalter-Werte: geprüft wird die
+   * Kette darum herum.
+   *
+   * Der Lauf braucht `BRAND_DEV_STUB_DNA=1`, sonst kostete jeder Vorschlag
+   * Geld; ohne die Variable prüft der Abschnitt stattdessen die 503
+   * `dna_unavailable` — dieselbe Bauform wie bei der Lesung.
+   */
+  const dnaPath = `${base}/dna/propose`
+
+  /** Den Slot-Zustand des Kapitels frisch lesen. */
+  const dnaSessions = async () =>
+    (await call(`${base}/steps/dna`, { cookie: account.cookie })).json?.sessions ?? {}
+
+  /** Slots der Kapitel-Zeile direkt schreiben (an Route und Drossel vorbei). */
+  const writeDnaSlots = async (mutate) => {
+    const row = await tablesDB.getRow({
+      databaseId, tableId: 'brand_steps', rowId: `${profileId}_dna`,
+    })
+    const slots = JSON.parse(row.slots || '{}')
+    mutate(slots)
+    await tablesDB.updateRow({
+      databaseId, tableId: 'brand_steps', rowId: `${profileId}_dna`,
+      data: { slots: JSON.stringify(slots), revision: (row.revision ?? 0) + 1 },
+    })
+  }
+
+  /**
+   * ── DIE VIER FOUNDATION-STELLEN, GEGEN DIE ABGELEITET WIRD ──────────────
+   * `g.dna` schöpft aus `c.final`, `d.primary`, `d.toneWords` und
+   * `result.direction` — BESTÄTIGT, nicht als Entwurf. Diese Marke hat die vier
+   * nicht: Abschnitt 11 hat mit „Nochmal von vorn" den halben Weg geleert, und
+   * Abschnitt 21 prüft nur, dass die KAPITEL abgeschlossen sind.
+   *
+   * Ohne sie stünde `g.dna` auf `locked` und die Route antwortete 409
+   * `dna_no_foundation` — beides richtig, aber beides eine Aussage über die
+   * fehlende Foundation und nicht über den Vorschlag. Geschrieben wird direkt
+   * in die Kapitel-Zeilen (an Route und Drossel vorbei, wie überall in diesem
+   * Abschnitt).
+   */
+  const seedConfirmed = async (stepKey, values) => {
+    const rowId = `${profileId}_${stepKey}`
+    const row = await tablesDB.getRow({ databaseId, tableId: 'brand_steps', rowId })
+    const slots = JSON.parse(row.slots || '{}')
+    for (const [slotId, value] of Object.entries(values)) {
+      slots[slotId] = { ...slots[slotId], latestDraft: value, confirmed: value }
+    }
+    await tablesDB.updateRow({
+      databaseId, tableId: 'brand_steps', rowId,
+      data: { slots: JSON.stringify(slots), revision: (row.revision ?? 0) + 1 },
+    })
+  }
+  await seedConfirmed('values', { 'c.final': '- Klartext\n- Handwerk\n- Nähe' })
+  await seedConfirmed('archetype', { 'd.primary': 'sage', 'd.toneWords': '- ruhig\n- fundiert\n- warm' })
+  await seedConfirmed('result', { 'result.direction': 'warm-editorial' })
+
+  /**
+   * ── ERST DEN STAND VON ABSCHNITT 23 ZURÜCKNEHMEN ────────────────────────
+   * Dort wurde `g.reading` von Hand BESTÄTIGT (die Leitplanken-Gegenprobe).
+   * Liefe die Weichen-Prüfung darauf, wäre sie tautologisch grün: `g.dna`
+   * ginge auch ohne die neue Regel auf, weil seine Quelle zufällig bestätigt
+   * ist. Beweis-Regel 1 (CLAUDE.md): Erwartungswerte nie aus dem Zustand
+   * ableiten, den man gerade prüft.
+   */
+  await writeDnaSlots((slots) => {
+    slots['g.reading'] = { ...slots['g.reading'], confirmed: undefined }
+    delete slots['g.reading'].confirmed
+    delete slots['g.dna']
+  })
+
+  // ── WEG 1: „Frida schlägt vor" — ohne Vorbilder, ohne Lesung ────────────
+  //
+  // DIE WEICHE WIRD DIREKT UMGELEGT und nicht über den PATCH: `g.source` ist
+  // seit Abschnitt 22 BESTÄTIGT, und ein bestätigter Slot ist zu (Davids
+  // Entscheidung 2026-09-02) — der Autosave weist ihn ohne `impactAck` ab, und
+  // der erste Anlauf dieses Beweises stand deshalb still auf „inspiration",
+  // während die Prüfung „foundation" behauptete. Die Korrektur-Kette hat ihren
+  // eigenen Beweis (Abschnitt 15); hier geht es um den Weg DAHINTER.
+  await writeDnaSlots((slots) => {
+    slots['g.source'] = { ...slots['g.source'], latestDraft: 'foundation', confirmed: 'foundation' }
+  })
+  const foundationStates = await dnaSessions()
+  check('Weg OHNE Vorbilder: `g.dna` ist OFFEN, obwohl es nie eine Lesung gab',
+    foundationStates['g.dna']?.state === 'open'
+    && foundationStates['g.reading']?.state !== 'done',
+    `g.dna=${foundationStates['g.dna']?.state} · g.reading=${foundationStates['g.reading']?.state}`
+    + ` · g.source=${foundationStates['g.source']?.state}`)
+
+  const run1Dna = await call(dnaPath, { method: 'POST', cookie: account.cookie })
+  const dnaStub = run1Dna.status === 200
+  if (!dnaStub) {
+    check('ohne Text-Modell antwortet der Lauf ruhig mit 503 `dna_unavailable`',
+      run1Dna.status === 503 && run1Dna.json?.reason === 'dna_unavailable',
+      `${run1Dna.status} ${JSON.stringify(run1Dna.json?.reason ?? null)}`)
+  }
+  else {
+    check('der Lauf antwortet 200, nennt das Rest-Kontingent und sagt „ohne Vorbilder"',
+      run1Dna.json?.entries?.length === 10
+      && run1Dna.json?.hasInspiration === false
+      && run1Dna.json?.quota?.limit === 10,
+      `${run1Dna.status} ${JSON.stringify(run1Dna.json?.quota ?? null)} · ${run1Dna.json?.entries?.length} Zeilen`)
+
+    check('… jede der zehn Zeilen trägt eine Vokabular-Id, eine Herkunft und eine Begründung',
+      (run1Dna.json?.entries ?? []).every(entry =>
+        DNA_DIMENSIONS.includes(entry.dimension)
+        && typeof entry.value === 'string' && entry.value.length > 0
+        && ['foundation', 'both'].includes(entry.origin)
+        && typeof entry.reason === 'string' && entry.reason.length > 0)
+      && new Set((run1Dna.json?.entries ?? []).map(e => e.dimension)).size === 10,
+      JSON.stringify((run1Dna.json?.entries ?? [])[0] ?? null))
+
+    check('… und OHNE Vorbilder ist JEDE Zeile `foundation`, ohne Vorbild-Satz',
+      (run1Dna.json?.entries ?? []).every(entry =>
+        entry.origin === 'foundation' && !entry.inspirationReason),
+      JSON.stringify((run1Dna.json?.entries ?? []).map(e => e.origin)))
+
+    const dnaSlotsAfter = JSON.parse((await tablesDB.getRow({
+      databaseId, tableId: 'brand_steps', rowId: `${profileId}_dna`,
+    })).slots || '{}')
+    const dnaSlot = dnaSlotsAfter['g.dna'] ?? null
+    check('der Slot `g.dna` trägt zehn beschriftete Blöcke',
+      typeof dnaSlot?.latestDraft === 'string'
+      && dnaSlot.latestDraft.startsWith('## ')
+      && dnaSlot.latestDraft.split('\n\n').length === 10,
+      `${(dnaSlot?.latestDraft ?? '').split('\n\n').length} Blöcke`)
+    check('… und er ist noch NICHT bestätigt — das tut der Mensch (Derivation)',
+      !dnaSlot?.confirmed, JSON.stringify(dnaSlot?.confirmed ?? null))
+  }
+
+  // ── GEGENPROBE ZUR WEICHE: mit Vorbildern wartet `g.dna` wieder ─────────
+  await writeDnaSlots((slots) => {
+    slots['g.source'] = { ...slots['g.source'], confirmed: 'inspiration', latestDraft: 'inspiration' }
+    delete slots['g.reading'].confirmed
+  })
+  const inspirationStates = await dnaSessions()
+  check('GEGENPROBE: mit „wir haben Vorbilder" wartet `g.dna` wieder auf die Lesung',
+    inspirationStates['g.dna']?.state === 'locked',
+    `g.dna=${inspirationStates['g.dna']?.state}`)
+
+  // ── WEG 2: mit Vorbildern und einer Lesung ─────────────────────────────
+  //
+  // Zwei Zeilen MIT fertiger Lesung, direkt geschrieben: die Lese-Route hat
+  // ihr Tageskontingent in Abschnitt 23 aufgebraucht (drei Läufe), und ein
+  // vierter käme als 429 zurück. Geprüft wird hier ohnehin der VORSCHLAG,
+  // nicht die Lesung.
+  const readingJson = (dimension, value, verdict) => JSON.stringify({
+    v: 1,
+    observed: [{ dimension, value }],
+    verdict,
+    anchor: 'Beweis-Anker aus der Foundation',
+    reason: 'Beweis-Lesung.',
+    at: new Date().toISOString(),
+    runSize: 2,
+  })
+  for (const [index, spec] of [
+    ['color', 'earthy', 'fits'],
+    ['composition', 'calm', 'tension'],
+  ].entries()) {
+    const fileId = ID.unique()
+    await storage.createFile({
+      bucketId: 'brand-inspiration',
+      fileId,
+      file: InputFile.fromBuffer(TINY.png, `dna-${index}.png`),
+    })
+    await tablesDB.createRow({
+      databaseId,
+      tableId: 'brand_inspiration',
+      rowId: fileId,
+      data: {
+        profileId,
+        area: index === 0 ? 'color' : 'composition',
+        note: '',
+        number: 90 + index,
+        filename: `dna-${index}.png`,
+        reading: readingJson(spec[0], spec[1], spec[2]),
+      },
+    })
+    cleanup.inspiration.push(fileId)
+  }
+  await writeDnaSlots((slots) => {
+    slots['g.reading'] = {
+      ...slots['g.reading'],
+      latestDraft: slots['g.reading']?.latestDraft ?? '## Trägt schon · 1\nBeweis.',
+      confirmed: slots['g.reading']?.latestDraft ?? '## Trägt schon · 1\nBeweis.',
+    }
+  })
+  const readStates = await dnaSessions()
+  check('… und mit bestätigter Lesung geht `g.dna` auf demselben Weg wieder auf',
+    readStates['g.dna']?.state === 'open' || readStates['g.dna']?.state === 'stale',
+    `g.dna=${readStates['g.dna']?.state}`)
+
+  if (dnaStub) {
+    const run2Dna = await call(dnaPath, { method: 'POST', cookie: account.cookie })
+    check('der Lauf MIT Vorbildern sagt es — und das Kontingent zählt herunter',
+      run2Dna.status === 200 && run2Dna.json?.hasInspiration === true
+      && run2Dna.json?.quota?.remaining === 8,
+      `${run2Dna.status} ${JSON.stringify(run2Dna.json?.quota ?? null)}`)
+    check('… mindestens EINE Zeile kommt aus beidem und nennt ein Vorbild',
+      (run2Dna.json?.entries ?? []).some(entry =>
+        entry.origin === 'both'
+        && typeof entry.inspirationReason === 'string'
+        && entry.inspirationReason.length > 0),
+      JSON.stringify((run2Dna.json?.entries ?? []).filter(e => e.origin === 'both')))
+    check('… und KEINE Zeile trägt `inspiration` allein — die Foundation bleibt der Massstab',
+      (run2Dna.json?.entries ?? []).every(entry => entry.origin !== 'inspiration'),
+      JSON.stringify(new Set((run2Dna.json?.entries ?? []).map(e => e.origin))))
+
+    // Die Ereignisse: Kennzahlen, kein Inhalt.
+    const dnaEvents = await tablesDB.listRows({
+      databaseId,
+      tableId: 'brand_events',
+      queries: [Query.equal('profileId', profileId), Query.equal('type', 'design.dna.run'), Query.limit(20)],
+    }).catch(() => ({ rows: [] }))
+    check('jeder Lauf steht im Funnel — zwei Läufe, zwei Zeilen',
+      dnaEvents.rows.length === 2, String(dnaEvents.rows.length))
+    check('… und keine Zeile trägt eine Begründung',
+      dnaEvents.rows.every(row => {
+        const payload = String(row.payload ?? '')
+        return payload.includes('model') && !payload.includes('Foundation-Stelle')
+      }),
+      JSON.stringify(dnaEvents.rows[0]?.payload ?? null))
+  }
+
+  // ── Die Werkstatt zeigt den Abschnitt ──────────────────────────────────
+  const dnaPageView = await call(`/de/brand/${profileId}/dna`, { cookie: account.cookie })
+  check('die Werkstatt zeigt den DNA-Abschnitt',
+    dnaPageView.status === 200 && dnaPageView.text.includes('data-brand-dna'),
+    `${dnaPageView.status} ${dnaPageView.text.length} Zeichen`)
+
+  // ── Fremd und ohne Anmeldung ───────────────────────────────────────────
+  const foreignDna = await call(dnaPath, { method: 'POST', cookie: stranger.cookie })
+  check('fremdes Konto: der Lauf antwortet 404 (Datentür, nicht 403)',
+    foreignDna.status === 404, String(foreignDna.status))
+  const guestDna = await call(dnaPath, { method: 'POST' })
+  check('… ohne Anmeldung: 401/404, nie ein Lauf',
+    guestDna.status === 401 || guestDna.status === 404, String(guestDna.status))
+
+  // ── DAS KAPITEL LÄSST SICH ZU ENDE GEHEN ───────────────────────────────
+  //
+  // Die Werte von `g.boards` und `g.mix` sind hier PLATZHALTER (s. Kopf des
+  // Abschnitts): geprüft wird, dass die Kette aufgeht — bestätigen ⇒ nächste
+  // Session offen ⇒ Kapitel abnehmbar ⇒ `color` offen.
+  const placeholder = ['style', 'era', 'form'].map(id => `## ${id}\nPlatzhalter`).join('\n\n')
+  await writeDnaSlots((slots) => {
+    const dnaValue = slots['g.dna']?.latestDraft ?? placeholder
+    slots['g.dna'] = { ...slots['g.dna'], latestDraft: dnaValue, confirmed: dnaValue }
+  })
+  const afterDna = await dnaSessions()
+  check('bestätigtes `g.dna` öffnet die drei Boards',
+    afterDna['g.boards']?.state === 'open', `g.boards=${afterDna['g.boards']?.state}`)
+
+  await writeDnaSlots((slots) => {
+    slots['g.boards'] = { latestDraft: placeholder, confirmed: placeholder }
+    slots['g.board'] = { latestDraft: 'calmer', confirmed: 'calmer' }
+  })
+  const afterBoard = await dnaSessions()
+  check('… die Wahl eines Boards öffnet Mix & Match',
+    afterBoard['g.mix']?.state === 'open', `g.mix=${afterBoard['g.mix']?.state}`)
+
+  await writeDnaSlots((slots) => {
+    slots['g.mix'] = { latestDraft: placeholder, confirmed: placeholder }
+  })
+  const acceptance = await call(`${base}/steps/dna/acceptance`, { cookie: account.cookie })
+  const dnaPending = (acceptance.json?.sessions ?? []).filter(entry => entry.required && !entry.confirmed)
+  check('… und danach steht keine Pflicht-Session des Kapitels mehr offen',
+    acceptance.status === 200 && dnaPending.length === 0,
+    `${acceptance.status} · offen: ${JSON.stringify(dnaPending.map(entry => entry.slotId))}`)
+
+  /**
+   * ABNEHMEN UND SCHLIESSEN — erst danach lässt `canEnterBrandStep` das
+   * nächste Kapitel zu. Bestätigen ist die Session, ABNEHMEN das Kapitel
+   * (§5a): ohne den zweiten Schritt antwortet `color` mit 403 `step_locked`,
+   * und das wäre kein Befund über D2c, sondern der normale Weg.
+   */
+  let dnaRevision = acceptance.json?.revision ?? 0
+  for (const entry of (acceptance.json?.sessions ?? []).filter(row => row.confirmed && !row.accepted)) {
+    const taken = await call(`${base}/steps/dna/sessions/${entry.slotId}/accept`, {
+      method: 'POST', cookie: account.cookie, body: { revision: dnaRevision },
+    })
+    if (taken.status !== 200) {
+      check(`Abnahme ${entry.slotId}`, false, `${taken.status} ${taken.text.slice(0, 160)}`)
+      break
+    }
+    dnaRevision = taken.json?.revision ?? dnaRevision
+  }
+  const dnaDone = await call(`${base}/steps/dna/complete`, {
+    method: 'POST', cookie: account.cookie, body: { confidence: 'fits' },
+  })
+  check('das Kapitel `dna` lässt sich abnehmen und schliessen',
+    dnaDone.status === 200, `${dnaDone.status} ${dnaDone.text.slice(0, 160)}`)
+
+  const nextChapter = await call(`${base}/steps/color`, { cookie: account.cookie })
+  check('das nächste Kapitel `color` ist danach erreichbar und seine erste Session offen',
+    nextChapter.status === 200 && nextChapter.json?.sessions?.['h.base']?.state === 'open',
+    `${nextChapter.status} h.base=${nextChapter.json?.sessions?.['h.base']?.state}`)
+
+  // ── LEITPLANKE: die DNA DARF reisen, Lesung und Vorbilder nicht ────────
+  const shared3 = await call(`${base}/share`, { method: 'POST', cookie: account.cookie, body: {} })
+  check('Vorprobe: der Share-Link lässt sich ein drittes Mal veröffentlichen',
+    shared3.status === 200 || shared3.status === 201,
+    `${shared3.status} ${shared3.text.slice(0, 120)}`)
+  const shareRows3 = await tablesDB.listRows({
+    databaseId,
+    tableId: 'brand_shares',
+    queries: [Query.equal('profileId', profileId), Query.limit(5)],
+  }).catch(() => ({ rows: [] }))
+  const snapshot3 = shareRows3.rows.map(row => String(row.snapshot ?? '')).join('\n')
+  check('der Schnappschuss trägt die DNA (öffentliche Festlegung) …',
+    snapshot3.includes('g.dna'), `${snapshot3.length} Zeichen`)
+  check('… aber WEDER die Lesung NOCH die Vorbilder NOCH den Vorrat der Boards',
+    snapshot3.length > 0
+    && !snapshot3.includes('g.reading')
+    && !snapshot3.includes('g.inspiration')
+    && !snapshot3.includes('g.source')
+    && !snapshot3.includes('g.boards')
+    && !snapshot3.includes('Beweis-Lesung'),
+    `${snapshot3.length} Zeichen`)
 }
 catch (error) {
   fail++
