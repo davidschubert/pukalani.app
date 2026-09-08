@@ -5,7 +5,7 @@ import type { BrandShareViewResponse } from '../../../../shared/types/brand'
 
 /**
  * DIE ÖFFENTLICHE LESEANSICHT — was der zweite Leser sieht (Konzept
- * docs/plans/BRAND-FOUNDATION-LESEANSICHT.md §2.6 „Öffentliche Ansicht",
+ * docs/archiv/BRAND-FOUNDATION-LESEANSICHT.md §2.6 „Öffentliche Ansicht",
  * Paket G3; Form abgenommen am Klickdummy `/brand/demo/share`).
  *
  * ── DERSELBE RENDERER, DERSELBE BAUSTEIN ─────────────────────────────────

@@ -4,7 +4,7 @@ import type { BrandFoundationChapter } from '../../shared/brandFoundation'
 
 /**
  * EIN KAPITEL DER BRAND FOUNDATION (Konzept
- * docs/plans/BRAND-FOUNDATION-LESEANSICHT.md §2.2/§2.5/§2.6, Paket G2).
+ * docs/archiv/BRAND-FOUNDATION-LESEANSICHT.md §2.2/§2.5/§2.6, Paket G2).
  *
  * ── EIN RENDERER, ZWEI ANSICHTEN (§2.1) ──────────────────────────────────
  * Dieselbe Komponente rendert das Kapitel privat (`/brand/:id/foundation`) und

@@ -4,7 +4,7 @@ import { formatBrandSlotList, formatBrandSlotStructured } from '../brandSlotForm
 
 /**
  * DIE BEISPIEL-MARKE „KAILUA COFFEE CO." ALS FESTER SNAPSHOT (Konzept
- * docs/plans/BRAND-FOUNDATION-LESEANSICHT.md §4 und §5 Paket G5).
+ * docs/archiv/BRAND-FOUNDATION-LESEANSICHT.md §4 und §5 Paket G5).
  *
  * ── WARUM EIN SNAPSHOT UND KEINE SEITE MIT TEXTEN ────────────────────────
  * Die öffentliche Beispiel-Seite `/beispiel/kailua-coffee` soll zeigen, was am

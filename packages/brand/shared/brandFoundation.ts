@@ -6,7 +6,7 @@ import { type BrandPathKind, type BrandStepKey, type BrandTeamKind, slotById } f
 
 /**
  * DER RENDERER DER BRAND FOUNDATION (Konzept
- * docs/plans/BRAND-FOUNDATION-LESEANSICHT.md §2.1/§2.2, Paket G1).
+ * docs/archiv/BRAND-FOUNDATION-LESEANSICHT.md §2.1/§2.2, Paket G1).
  *
  * EINE Quelle, EIN Renderer, ZWEI Ansichten: `/brand/:id/foundation` (privat,
  * Live-Werte) und `/brand/share/:token` (öffentlich, eingefrorener Snapshot)

@@ -1,6 +1,6 @@
 /**
  * Beweis für Paket G3 „Teilen sichtbar" (Konzept
- * docs/plans/BRAND-FOUNDATION-LESEANSICHT.md §5, Zeile G3) — gegen einen
+ * docs/archiv/BRAND-FOUNDATION-LESEANSICHT.md §5, Zeile G3) — gegen einen
  * echten Server, weil keine pure Funktion belegen kann, was an Route, Ablage
  * und Kopfzeilen hängt:
  *

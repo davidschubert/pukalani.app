@@ -6,7 +6,7 @@ import { demoDirectionChapter, demoFoundation } from '../../../utils/demoFoundat
 
 /**
  * KLICKDUMMY „BRAND FOUNDATION" — die PRIVATE Leseansicht (Konzept
- * docs/plans/BRAND-FOUNDATION-LESEANSICHT.md §2.11, Screens 1–4 und 6).
+ * docs/archiv/BRAND-FOUNDATION-LESEANSICHT.md §2.11, Screens 1–4 und 6).
  *
  * Sie ist NICHT der Ersatz für `/brand/demo/ergebnis` (Iteration 2, bleibt als
  * Protokoll stehen), sondern die zweite Ansicht desselben Dokuments: „Euer

@@ -1,6 +1,6 @@
 /**
  * KLICKDUMMY „BRAND FOUNDATION" (Phase 3 zum Konzept
- * docs/plans/BRAND-FOUNDATION-LESEANSICHT.md, §2.11) — statische Demo-Daten
+ * docs/archiv/BRAND-FOUNDATION-LESEANSICHT.md, §2.11) — statische Demo-Daten
  * in der FORM des künftigen Renderer-Ergebnisses `BrandFoundationView`
  * (§2.1: eine Quelle, EIN Renderer, zwei Ansichten).
  *

@@ -1,6 +1,6 @@
 /**
  * DIE GETEILTE FOUNDATION WIRD NIE EINGEBETTET (Konzept
- * docs/plans/BRAND-FOUNDATION-LESEANSICHT.md §2.8, Paket G3).
+ * docs/archiv/BRAND-FOUNDATION-LESEANSICHT.md §2.8, Paket G3).
  *
  * Die API-Antwort (`/api/brand/share/:token`) sagt das seit BF1 selbst; die
  * SEITE konnte es bis G3 nicht sagen: `security-headers.ts` des Core setzt

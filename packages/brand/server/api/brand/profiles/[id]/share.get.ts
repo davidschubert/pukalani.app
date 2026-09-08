@@ -3,7 +3,7 @@ import { listActiveShares, loadOwnedProfile, requireProfileIdParam } from '../..
 
 /**
  * GIBT ES GERADE EINEN LESE-LINK? (Konzept
- * docs/plans/BRAND-FOUNDATION-LESEANSICHT.md §2.6 „Share-Dialog", Paket G3.)
+ * docs/archiv/BRAND-FOUNDATION-LESEANSICHT.md §2.6 „Share-Dialog", Paket G3.)
  *
  * ── WARUM ES DIESE ROUTE ÜBERHAUPT BRAUCHT ────────────────────────────────
  * Der Dialog hat zwei Gesichter — „Link erzeugen" und „aktiv bis …, widerrufen

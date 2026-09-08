@@ -8,7 +8,7 @@ import {
 
 /**
  * DAS ÖFFENTLICHE BEISPIEL-BRANDING „Kailua Coffee Co." (Konzept
- * docs/plans/BRAND-FOUNDATION-LESEANSICHT.md §4 und §5 Paket G5; Davids Go
+ * docs/archiv/BRAND-FOUNDATION-LESEANSICHT.md §4 und §5 Paket G5; Davids Go
  * 2026-09-07 „Starte Paket G5").
  *
  * ── SIE ZEIGT NICHT, SIE IST ─────────────────────────────────────────────

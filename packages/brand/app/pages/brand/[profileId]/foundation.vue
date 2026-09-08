@@ -21,7 +21,7 @@ import { BRAND_FOUNDATION_RAIL_STEP, useBrandFoundationRailStep } from '../../..
 
 /**
  * „BRAND FOUNDATION" — DIE PRIVATE LESEANSICHT (Konzept
- * docs/plans/BRAND-FOUNDATION-LESEANSICHT.md §2.6, Paket G2; Form abgenommen
+ * docs/archiv/BRAND-FOUNDATION-LESEANSICHT.md §2.6, Paket G2; Form abgenommen
  * am Klickdummy `/brand/demo/foundation`).
  *
  * ── EIN DOKUMENT, ZWEI ANSICHTEN ─────────────────────────────────────────

@@ -12,7 +12,7 @@ import { sessionTravels, slotById } from '../shared/slotRegistry'
 
 /**
  * DER FESTE SNAPSHOT DER BEISPIEL-MARKE (Konzept
- * docs/plans/BRAND-FOUNDATION-LESEANSICHT.md §4/§5 G5).
+ * docs/archiv/BRAND-FOUNDATION-LESEANSICHT.md §4/§5 G5).
  *
  * Die öffentliche Seite `/beispiel/kailua-coffee` behauptet „so sieht euer
  * Ergebnis aus". Diese Behauptung ist nur wahr, solange der Snapshot durch

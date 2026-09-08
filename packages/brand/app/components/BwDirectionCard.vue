@@ -3,7 +3,7 @@ import type { BrandDirection } from '../../shared/brandDirections'
 
 /**
  * EINE RICHTUNG ALS ANWENDUNGS-AUSSCHNITT (Konzept
- * docs/plans/BRAND-FOUNDATION-LESEANSICHT.md §11 a, Paket G4).
+ * docs/archiv/BRAND-FOUNDATION-LESEANSICHT.md §11 a, Paket G4).
  *
  * ── WARUM NICHT `BwChoiceCards` ──────────────────────────────────────────
  * Die Architektur-Karte beantwortet ihre Frage mit drei Zeilen Text (Name ·

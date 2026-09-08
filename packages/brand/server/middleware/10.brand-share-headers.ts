@@ -1,6 +1,6 @@
 /**
  * DIE KÖPFE DER GETEILTEN SEITE (Konzept
- * docs/plans/BRAND-FOUNDATION-LESEANSICHT.md §2.8, Paket G3).
+ * docs/archiv/BRAND-FOUNDATION-LESEANSICHT.md §2.8, Paket G3).
  *
  * Die API-Antwort `/api/brand/share/:token` setzt dieselben drei Köpfe selbst
  * (s. deren Kopf) — die SEITE `/brand/share/:token` bekommt sie davon NICHT:

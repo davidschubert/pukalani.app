@@ -14,7 +14,7 @@ import { slotById } from '../shared/slotRegistry'
 
 /**
  * DER RICHTUNGS-KATALOG UND SEINE EINE REGEL (Konzept
- * docs/plans/BRAND-FOUNDATION-LESEANSICHT.md §11 a/b, Paket G4).
+ * docs/archiv/BRAND-FOUNDATION-LESEANSICHT.md §11 a/b, Paket G4).
  *
  * Drei Zusagen hängen daran, und alle drei sind teuer, wenn sie brechen:
  *  1. Der Katalog ist GESCHLOSSEN und stabil — seine Ids stehen in

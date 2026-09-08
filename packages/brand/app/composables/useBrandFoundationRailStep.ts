@@ -4,7 +4,7 @@ import type { BrandStepKey } from '../../shared/slotRegistry'
 
 /**
  * DER EINSTIEG IN DIE BRAND FOUNDATION IN DER WERKSTATT-LEISTE (Konzept
- * docs/plans/BRAND-FOUNDATION-LESEANSICHT.md §2.6 und Entscheidung §6 d,
+ * docs/archiv/BRAND-FOUNDATION-LESEANSICHT.md §2.6 und Entscheidung §6 d,
  * Paket G2).
  *
  * ── AUS „ERGEBNIS" WIRD „BRAND FOUNDATION" ───────────────────────────────

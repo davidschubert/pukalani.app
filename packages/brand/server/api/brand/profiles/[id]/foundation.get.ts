@@ -13,7 +13,7 @@ import { confirmedSlotValues, toStoryView } from '../../../../utils/brandStore'
 
 /**
  * „BRAND FOUNDATION" — DIE PRIVATE LESEANSICHT (Konzept
- * docs/plans/BRAND-FOUNDATION-LESEANSICHT.md §2.1/§2.6, Paket G2).
+ * docs/archiv/BRAND-FOUNDATION-LESEANSICHT.md §2.1/§2.6, Paket G2).
  *
  * ── SIE BAUT EINEN SNAPSHOT, DEN NIEMAND SPEICHERT ───────────────────────
  * `buildBrandFoundation` nimmt wörtlich die Form des `BrandShareSnapshot`

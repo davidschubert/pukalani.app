@@ -1044,7 +1044,7 @@ im Footer). Profilbilder folgen (Platzhalter: Initialen).
 > **NACHTRAG 2026-09-05 — fünf Ebenen als KARTE über den sieben Produkten
 > (David, Fragenrunde; Anlass: seine Auswertung der Guidelines-Referenzen
 > Frontify/Corebook°/standards.site/Brandkit/Lovable, Quellen in
-> docs/plans/BRAND-FOUNDATION-LESEANSICHT.md Anhang A).** Die Produkte 01–07
+> docs/archiv/BRAND-FOUNDATION-LESEANSICHT.md Anhang A).** Die Produkte 01–07
 > und ihre Namen bleiben; die Ebenen sagen, WOFÜR ein Produkt da ist, und
 > ordnen auch das, was kein eigenes Produkt ist:
 > **Discover** (Insights/Artikel, Brand Library, Rankings — die SEO-Maschine)

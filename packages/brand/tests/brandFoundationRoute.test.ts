@@ -4,7 +4,7 @@ import { BRAND_SLOTS, sessionTravels } from '../shared/slotRegistry'
 
 /**
  * DIE ROUTE DER LESEANSICHT (`GET …/foundation`, Konzept
- * docs/plans/BRAND-FOUNDATION-LESEANSICHT.md §2.6, Paket G2).
+ * docs/archiv/BRAND-FOUNDATION-LESEANSICHT.md §2.6, Paket G2).
  *
  * ── WAS HIER GEPRÜFT WIRD UND IN `brandFoundation.test.ts` NICHT ─────────
  * Dort steht die reine Regel (was reist, welche Kapitel es gibt). Hier läuft,

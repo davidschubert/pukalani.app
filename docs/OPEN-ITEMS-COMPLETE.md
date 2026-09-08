@@ -30,6 +30,82 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### Brand Foundation als Guidelines (BF1): Leseansicht, Teilen, Beispiel, Richtung — die Foundation als Markenhandbuch ✅ 2026-09-07
+
+**Was:** Das Ergebnis-Dokument des Brand-Wizards („Euer Branding", die Arbeitsansicht mit
+Abnahme und Prüfblick) hat eine zweite Ansicht bekommen: die **Brand Foundation** liest dieselben
+bestätigten Werte als Markenhandbuch — zwölf Kapitel im klassischen Guidelines-Aufbau (Story,
+Kontext, Purpose/Vision/Mission, Positionierung, Architektur, Werte, Stimme mit Do & Don't,
+Manifest, Tagline & Messaging, Name, visuelle Schranke, Regeln für KI-Texte), teilbar per Link,
+druckbar, ohne einen neuen KI-Aufruf. Anlass war Davids eingefügte Brand-Guidelines-Definition
+(2026-09-05); Konzept, Prototyp (Playground, Davids Abnahme), fünf Pakete, Abnahme aller vier Blicke
+am 2026-09-07. Plan (ausgeführt): [archiv/BRAND-FOUNDATION-LESEANSICHT.md](archiv/BRAND-FOUNDATION-LESEANSICHT.md).
+
+**Davids Entscheidungen** (alle nach Empfehlung, DECISION-LOG 2026-09-05/07): Name „Brand
+Foundation" (kein Konflikt mit dem bezahlten „Brand Book"), nur Festlegungen (Registry-Feld
+`audience` neben `sensitivity`), visuelle Kapitel sichtbar gesperrt mit Begründung, Browser-Druck
+statt Server-PDF; für G4 kuratierter Richtungen-Katalog, drei Richtungen je Archetyp, kein Preis
+an der Schranke (Studio-Angebot), Wahl in der Werkstatt.
+
+**Pakete (alle auf main, alle in Prod):**
+- **Konzept + Prototyp** `418c5bd0`, `b54ba7e1`, `8fc82e21`, `fa686cac` — Konkurrenzanalyse mit
+  Quellen (Frontify, Corebook°, standards.site, Brandkit, Lovable …), Dummy im Playground mit EINEM
+  Renderer (`FdChapter`) für private und geteilte Ansicht, Inhaltsverzeichnis als `UPageAside` +
+  `UContentToc` (Davids Wunsch), dann auch auf der echten Dokument-Seite `26bd2378`.
+- **G1 `daa5eec0` — Regel + Renderer.** `audience: 'foundation' | 'internal'` je Session
+  (31/37, Ausnahmetabelle per Test genagelt), `sessionTravels` = public UND foundation als EINE
+  Regel hinter `brandShareableSlotValues` (den `sensitivity`-Filter hatte die Nachbar-Sitzung mit
+  MV1 M5 am selben Tag geschlossen — kein zweiter daneben), purer Renderer `buildBrandFoundation`
+  in `shared/brandFoundation.ts` (Snapshot-Form rein, Kapitel + Blöcke raus, Texte als
+  i18n-Schlüssel). Drei Zuordnungen nach dem Konzept entschieden (d.emotion, e.composition
+  foundation; b2.roleOfMaster internal).
+- **G2 `6f2020e5` — private Leseansicht + Print.** Route + Seite `/brand/:id/foundation`,
+  `BwFoundationChapter` (aus dem Dummy, plus `choice`-Zweig), generische `BwReadingToc` für
+  Dokument UND Foundation, Rail-Einstieg „Brand Foundation" (immer erreichbar, ehrlicher Zustand),
+  „Auf einer Seite", Export-Menü mit drei gesperrten Formen, 60+ i18n-Schlüssel mit Wächter aus
+  einem echten Renderer-Lauf.
+- **G3 `59516f76` + Core `f51b88d2` — Teilen sichtbar.** Zustands-Route, Teilen-Dialog (Link
+  genau einmal, Kopieren, Widerrufen, Rotation), öffentliche Seite `/brand/share/:token` (Layout
+  `false`, Schutz-Köpfe, `noindex` + og), Ereignisse ohne Token/Inhalt, Alt-Snapshot-Filter beim
+  Lesen; Beweis `packages/brand/scripts/verify-brand-share.mjs` 36/36, Gegenprobe
+  `VERIFY_EXPECT_LEAK=1` ⇒ 31/36 rot. Prod-Bestand `brand_shares` vor dem Deploy: 0.
+- **G5 `e1d513d0` — Beispiel Kailua.** `/beispiel/kailua-coffee` auf branding.supply,
+  indexierbar, fester Snapshot `shared/examples/kailuaCoffee.ts` (27 reisefähige Slots, 14
+  Prüfungen inkl. Schmuggel-Gegenprobe), Startseiten-Teaser zurück.
+- **G4 `65a9af3d` — Schranke + Richtung.** Katalog `shared/brandDirections.ts` (sechs
+  Richtungen, jeder Archetyp in genau drei), `suggestBrandDirections`, `BwDirectionCard` mit
+  lokalen CSS-Variablen ohne Web-Schriften, Weiche im Karten-Editor der Werkstatt
+  (`result.direction`, Werkstatt kennt die Archetypen über `sourceValues`), Kapitel 10 zeigt
+  Richtung + Farbwelt vor der Schranke; Wahrheit = bestätigter Slot, `presetId/presetVersion` im
+  Snapshot daraus.
+
+**Beweise:** je Paket Lint, brand-Tests (am Ende 1967), Typecheck der branding-App, i18n- und
+Sessions-Wächter; Live-Durchspielungen am Dev-Server mit einer geseedeten Testmarke (eigene Marke
+200, fremde 404, keine Rohantwort in Antwort/DOM, Druck-Emulation, Richtung wählen → Kapitel 10 →
+Snapshot); Prod-Beweis je Paket der Live-Build-SHA von branding.supply.
+
+**Gelernt:** (1) Nuxt UI registriert die Content-Komponenten (`UContentToc`, `UPageAside`) NUR mit
+`ui.content: true` oder installiertem `@nuxt/content` — ohne den Schalter bleibt `<UContentToc>`
+ein unaufgelöstes Element mit leerer Spalte und nur einer Vue-Warnung; ein laufender Dev-Server
+übernimmt eine Layer-`nuxt.config`-Änderung nicht (Neustart). (2) `UContentToc` schiebt beim Klick
+den Hash in den Router, der scrollt das FENSTER — in einer scrollenden Bühne muss die Seite selbst
+per `scrollIntoView` springen; die Hervorhebungs-Linie rechnet mit fester Zeilenhöhe (1,75 rem),
+zweizeilige Einträge setzen sie an den falschen Eintrag. (3) Das Workspace-Layout hält `100dvh` +
+`overflow: hidden` auch auf Papier — der Druck endete nach der ersten Seite; der Dummy hatte kein
+Layout, deshalb fiel es erst an der echten Seite auf (`@media print` im Layout). (4)
+`frame-ancestors 'none'` war über `registerEmbeddableRoute` nicht ausdrückbar und verlor gegen den
+Core-Default `'self'` im `render:response`-Hook — jetzt eine Verbots-Registry, Verbot schlägt
+Erlaubnis; ebenso setzte `html-no-cache` sein `no-cache` über einen am Event gesetzten `no-store`.
+(5) Appwrite schreibt Zeitstempel als `+00:00`, `toISOString()` als `Z` — wer Zeichenketten
+vergleicht, sieht zwei Fristen. (6) Ein Befund im Konzept war schon geschlossen, bevor G1 begann
+(MV1 M5) — „erst main prüfen" gilt auch mitten im Paket, sonst entsteht ein zweiter Filter für
+dieselbe Frage. (7) Beweise mit dem versteckten Browser-Pane liefern widersprüchliche Messwerte
+(JS-Scroll wird beim Screenshot zurückgesetzt) — für Mess-Beweise den Playwright-Browser mit festem
+Viewport nehmen. (8) Ein Agent hat einmal ins Hauptrepo statt in den Worktree geschrieben — der
+Auftrag nennt seither den Worktree-Pfad ausdrücklich und verbietet den Wechsel.
+
+---
+
 ### Marktvergleich (MV1): Layer `market`, Behauptungs-Raum einer Kategorie mit Beleg, Bericht mit UWG-Riegel ✅ 2026-09-06
 
 **Was:** Davids Produktgedanke vom 2026-09-04 („Konkurrenzanalysen … wo sich unsere Marke am

@@ -3,7 +3,7 @@ import { type BrandGradient, BRAND_GRADIENTS } from './brandPalette'
 
 /**
  * DER KURATIERTE RICHTUNGS-KATALOG (Konzept
- * docs/plans/BRAND-FOUNDATION-LESEANSICHT.md §2.5 und §11 a/b, Paket G4).
+ * docs/archiv/BRAND-FOUNDATION-LESEANSICHT.md §2.5 und §11 a/b, Paket G4).
  *
  * ── WAS EINE „RICHTUNG" IST — UND WAS SIE NICHT IST ───────────────────────
  * Sie ist die ENTSCHEIDUNG, in welche Welt die visuelle Ausarbeitung laufen

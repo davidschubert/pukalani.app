@@ -4,7 +4,7 @@ import { AppwriteException } from 'node-appwrite'
 
 /**
  * DIE ZWEI ROUTEN DES TEILENS, DIE PAKET G3 ANFASST (Konzept
- * docs/plans/BRAND-FOUNDATION-LESEANSICHT.md §2.6/§2.8).
+ * docs/archiv/BRAND-FOUNDATION-LESEANSICHT.md §2.6/§2.8).
  *
  *  1. `GET …/profiles/:id/share` — der ZUSTAND für den Dialog: gibt es einen
  *     aktiven Link, und bis wann? Fremdes Branding 404, und der Token steht

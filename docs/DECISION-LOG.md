@@ -7,10 +7,22 @@ die kleinen, verstreuten Beschlüsse.
 
 ---
 
+## 2026-09-07 — Brand Foundation (BF1) abgenommen: alle vier Blicke, Vorhaben nach COMPLETE
+
+**Entscheidung (David):** „Alle vier abgenommen, zieh BF1 nach COMPLETE." — Leseansicht (G2),
+Teilen-Dialog und Empfänger-Seite (G3), Inhalt der Beispielmarke Kailua Coffee Co. (G5) und die
+Richtungswahl mit Schranke (G4) sind abgenommen. Der Plan wandert nach
+docs/archiv/BRAND-FOUNDATION-LESEANSICHT.md, der Eintrag mit acht Gelernt-Punkten nach
+OPEN-ITEMS-COMPLETE. Offen bleibt aus dem Konzept nur, was bewusst später kommt: Themes-Engine-
+Presets als Ersatz des kuratierten Katalogs, `print.started`, ein „Stand"-Datum im Kopf der
+privaten Seite — alles ohne eigene Zeile, weil es beim nächsten Produkt (02 Brand Design) mitgeht.
+
+---
+
 ## 2026-09-07 — Brand Foundation G4: Richtungen-Katalog, drei Richtungen je Archetyp, kein Preis an der Schranke, Wahl in der Werkstatt
 
 **Anlass:** „Starte Paket G4" — das Paket hing an zwei Gates, die das Konzept
-(docs/plans/BRAND-FOUNDATION-LESEANSICHT.md §5) David zuweist: Richtungen-Katalog und
+(docs/archiv/BRAND-FOUNDATION-LESEANSICHT.md §5) David zuweist: Richtungen-Katalog und
 Schranken-Text mit Preisanker. **Entscheidungen (Fragenrunde, alle nach Empfehlung):**
 (1) Die Richtungen kommen aus einem **kuratierten Katalog im brand-Layer** (sechs
 Richtungen mit Name, Begründungsregel je Archetyp, Farbwelt aus den zwölf kuratierten
@@ -159,7 +171,7 @@ weil es die Share-Seite noch nicht gibt; Paket G1 schliesst es beidseitig
 (Snapshot-Schreiben UND Renderer filtern, Gegenprobe), bestehende Prod-Shares
 werden beim G3-Deploy widerrufen.
 
-Plan: docs/plans/BRAND-FOUNDATION-LESEANSICHT.md (Pakete G1–G5; Davids Gates:
+Plan: docs/archiv/BRAND-FOUNDATION-LESEANSICHT.md (Pakete G1–G5; Davids Gates:
 Schranken-Text + Preisanker, Richtungen-Katalog).
 
 ## 2026-09-05 — Brand-Check: „Markenabdruck", Ampel-Matrix statt Heatmap, Befunde als Stärke · Chance · Nächster Schritt
