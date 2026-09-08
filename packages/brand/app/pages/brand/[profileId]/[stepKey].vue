@@ -1393,6 +1393,11 @@ const RENDERED_ABOVE = new Set([
   // ROHEN Werte wären hier elf Hex-Stufen mal zwei und sechs Messungen —
   // eine Wand aus Zahlen unter der Ansicht, die sie gerade erklärt hat.
   'h.base', 'h.ramp', 'h.neutral', 'h.accent', 'h.roles', 'h.contrast',
+  // Die drei Sessions der Typografie (D4): Paar-Karten mit echten Schriften,
+  // die drei Hierarchie-Karten und die Chip-Reihen stehen im Panel darüber.
+  // Der ROHE Wert von `i.rules` wären vier beschriftete Blöcke unter dem
+  // Specimen, das sie gerade gezeigt hat.
+  'i.pair', 'i.scale', 'i.rules',
 ])
 
 function renderedAbove(slotId: string): boolean {
@@ -2443,6 +2448,49 @@ function applyColorPick(slotId: string, value: string): void {
   onInput(slotId, value)
 }
 
+// ── Die Typografie (D4, §2.4) ─────────────────────────────────────────────
+
+/**
+ * DIESELBE ARBEITSTEILUNG WIE BEI DER FARBWELT: `useBrandTypeWorld()`
+ * rechnet, die SEITE schreibt.
+ */
+const typeWorld = useBrandTypeWorld()
+
+const showTypePanel = computed(() => stepKey.value === 'type')
+
+/** Die drei Sessions des Kapitels — in Registry-Reihenfolge. */
+const TYPE_SLOTS = ['i.pair', 'i.scale', 'i.rules'] as const
+
+const confirmedTypeSlots = computed(() =>
+  TYPE_SLOTS.filter(slotId => store.slotConfirmed(slotId)))
+
+/**
+ * DAS KAPITEL BELEGT SICH SELBST VOR (H5) — dieselbe Mechanik und dieselben
+ * vier Sicherungen wie die Farbwelt darüber (Gleichheits-Prüfung, Bestätigtes
+ * bleibt unberührt, ein fehlender Wert löscht, erst NACH dem Mount).
+ *
+ * Der `onMounted`-Teil ist hier so wichtig wie dort: ein `immediate`-Watcher
+ * im Setup füllte die Karten im Browser eine Runde früher als auf dem Server
+ * — Hydration-Mismatch, gefunden am eigenen Klick in D3.
+ */
+onMounted(() => {
+  watch(typeWorld.slotValues, (values) => {
+    if (stepKey.value !== 'type') return
+    for (const slotId of TYPE_SLOTS) {
+      if (store.slotConfirmed(slotId)) continue
+      const value = values[slotId] ?? ''
+      if (store.slotValue(slotId) === value) continue
+      onInput(slotId, value)
+    }
+  }, { immediate: true })
+})
+
+/** Eine Wahl aus dem Typografie-Panel — derselbe Weg wie jede Eingabe. */
+function applyTypePick(slotId: string, value: string): void {
+  if (store.slotConfirmed(slotId)) return
+  onInput(slotId, value)
+}
+
 /** Die Marken des Kontos für den Wähler oben in der Sidebar. */
 const LOCALE_FLAGS: Record<string, string> = { en: 'i-circle-flags-us', de: 'i-circle-flags-de' }
 
@@ -2877,6 +2925,17 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
           v-if="showColorPanel"
           :confirmed="confirmedColorSlots"
           @pick="applyColorPick"
+        />
+
+        <!-- DIE TYPOGRAFIE (Kapitel `type`, D4) — Paar, Hierarchie, Regeln
+             auf EINER Werkbank, mit den echten Schriften. Sie steht wie die
+             Farbwelt ÜBER dem Gespräch: was hier passiert, ist kein Zug,
+             sondern eine Wahl, die man sofort sieht. Bestätigt wird jede der
+             drei Sessions unten auf ihrer Karte (`RENDERED_ABOVE`). -->
+        <BwTypePanel
+          v-if="showTypePanel"
+          :confirmed="confirmedTypeSlots"
+          @pick="applyTypePick"
         />
 
         <p v-if="phaseIntro" class="bw-label" style="color: var(--bw-muted); padding-left: 2.65rem">{{ phaseIntro }}</p>

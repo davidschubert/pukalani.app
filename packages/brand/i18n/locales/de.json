@@ -2736,6 +2736,51 @@
         "above": "Der Vorschlag steht oben in voller Länge — hier bestätigt ihr ihn."
       }
     },
+    "type": {
+      "pair": {
+        "title": "Schriftpaar",
+        "tag": "i.pair · sechs kuratierte Paare",
+        "intro": "Zwei Rollen: eine Schrift für Überschriften, eine für den Fließtext. Die Mono steht fest daneben und gehört Herkunft, Preisen und Zahlen — mehr als drei Schriften hat keine Marke nötig. Alle Familien sind selbst gehostet; hier lädt nichts von einem fremden Server.",
+        "proposed": "Aus eurer DNA",
+        "specimenBody": "So liest sich ein Absatz, den eure Kundschaft wirklich liest — zehn Zeilen weiter klingt er hoffentlich immer noch nach euch.",
+        "specimenMono": "Bestellnummer 4711 · 38,00 € · 07/2026"
+      },
+      "scale": {
+        "title": "Hierarchie",
+        "tag": "i.scale · {ratio}",
+        "intro": "Wie weit Überschrift und Fließtext auseinanderliegen. Der Vorschlag kommt aus eurer DNA-Dimension „Komposition“; die Zahl daneben ist das Verhältnis der größten Überschrift zum Fließtext.",
+        "note": {
+          "calm": "Wenige Größen, viel Zeilenabstand — der ruhige Fall, der fast überall trägt.",
+          "dense": "Redaktionell: kleinere Sprünge, mehr Text je Bildschirm.",
+          "loud": "Große Sprünge — gut für Kampagnen, unruhig in einem Handbuch."
+        }
+      },
+      "rules": {
+        "title": "Schrift-Regeln",
+        "tag": "i.rules · Wirkung sofort im Specimen",
+        "intro": "Drei Stellschrauben, alle nur an der Überschrift. Der Fließtext bleibt unangetastet: an ihm zu drehen kostet Lesbarkeit und gibt der Marke nichts.",
+        "weight": "Überschrift-Gewicht",
+        "tracking": "Laufweite",
+        "uppercase": "Versalien",
+        "on": "An",
+        "off": "Aus",
+        "uppercaseHint": "Versalien sind eine Ausnahme, kein Stil — sie kosten Lesbarkeit.",
+        "weightWarning": "{family} gibt es nicht in diesem Schnitt — der Browser malt ihn dann selbst, und ihr beurteilt eine Schrift, die es nicht gibt. Nehmt 400 oder 700, oder ein anderes Paar."
+      },
+      "specimen": {
+        "title": "Specimen · {pair} ({heading} · {body})",
+        "heading": "Eine Überschrift in eurer Schrift",
+        "subheading": "Die zweite Ebene, eine Stufe kleiner",
+        "body": "Hier steht der Absatz, an dem sich ein Schriftpaar wirklich entscheidet: nicht die Schlagzeile, sondern die sechs Zeilen darunter. Wer nach zehn Zeilen noch mühelos liest, hat die richtige Wahl getroffen.",
+        "mono": "Bestellnummer 4711 · 38,00 € · Ernte 07/2026 · 1 200 m",
+        "monoNote": "Die Mono ist FEST (Regel „höchstens drei Schriften“) und trägt Herkunft, Preise und Zahlen — sonst nirgends."
+      },
+      "scene": {
+        "title": "In der Anwendung",
+        "intro": "Dieselbe Typografie in eurer bestätigten Farbwelt — so, wie sie auf einer Seite ankommt.",
+        "note": "Die Szene rechnet mit denselben Werten wie das Specimen darüber: eine andere Wahl oben ändert sie sofort."
+      }
+    },
     "scene": {
       "wordmarkFallback": "Eure Marke",
       "eyebrow": "Neu · Ausgabe 01",

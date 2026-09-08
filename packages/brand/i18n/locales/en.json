@@ -2736,6 +2736,51 @@
         "above": "It is written out in full above — here you confirm it."
       }
     },
+    "type": {
+      "pair": {
+        "title": "Type pair",
+        "tag": "i.pair · six curated pairs",
+        "intro": "Two roles: one typeface for headings, one for body text. The mono sits beside them, fixed, and belongs to origin details, prices and figures — no brand needs more than three typefaces. Every family here is self-hosted; nothing loads from someone else's server.",
+        "proposed": "From your DNA",
+        "specimenBody": "This is how a paragraph reads that your customers actually read — ten lines further on it should still sound like you.",
+        "specimenMono": "Order no. 4711 · €38.00 · 07/2026"
+      },
+      "scale": {
+        "title": "Hierarchy",
+        "tag": "i.scale · {ratio}",
+        "intro": "How far the heading and the body text sit apart. The suggestion comes from your DNA dimension “composition”; the figure beside it is the ratio of the largest heading to body text.",
+        "note": {
+          "calm": "Few sizes, generous leading — the quiet case that carries almost anywhere.",
+          "dense": "Editorial: smaller steps, more text per screen.",
+          "loud": "Big jumps — good for campaigns, restless in a manual."
+        }
+      },
+      "rules": {
+        "title": "Typographic rules",
+        "tag": "i.rules · visible in the specimen at once",
+        "intro": "Three settings, all of them on the heading. Body text stays untouched: adjusting it costs legibility and gives the brand nothing.",
+        "weight": "Heading weight",
+        "tracking": "Tracking",
+        "uppercase": "Capitals",
+        "on": "On",
+        "off": "Off",
+        "uppercaseHint": "Capitals are an exception, not a style — they cost legibility.",
+        "weightWarning": "{family} does not come in this cut — the browser paints it itself, and you would be judging a typeface that does not exist. Take 400 or 700, or another pair."
+      },
+      "specimen": {
+        "title": "Specimen · {pair} ({heading} · {body})",
+        "heading": "A heading in your typeface",
+        "subheading": "The second level, one step down",
+        "body": "This is the paragraph where a type pair is really decided: not the headline, but the six lines beneath it. If you still read it effortlessly after ten lines, the choice was right.",
+        "mono": "Order no. 4711 · €38.00 · harvest 07/2026 · 1,200 m",
+        "monoNote": "The mono is FIXED (the rule “no more than three typefaces”) and carries origin details, prices and figures — nowhere else."
+      },
+      "scene": {
+        "title": "In the product",
+        "intro": "The same typography in your confirmed colour world — the way it arrives on a page.",
+        "note": "The scene runs on the same values as the specimen above: a different choice up there changes it at once."
+      }
+    },
     "scene": {
       "wordmarkFallback": "Your brand",
       "eyebrow": "New · Issue 01",
