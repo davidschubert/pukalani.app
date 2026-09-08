@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { isBrandIndustryValue } from '../shared/brandIndustries'
 
 /**
  * DIE ÖFFENTLICHEN RÜMPFE: Einladungs-Code, Veröffentlichung, Widerruf,
@@ -53,6 +54,11 @@ export function createBrandSharePublishSchema() {
 export function createBrandPublicationSubmitSchema() {
   return z.object({
     consent: z.literal(true),
+    // Die Branche für Galerie-Facette und Steckbrief — eine Katalog-Id aus
+    // `BRAND_INDUSTRIES` (Nachzug 2026-09-08: der Freitext der Startkarte trifft
+    // den Katalog selten, „Nicht zugeordnet" wäre die Regel). Fehlt sie, gilt
+    // die Normalisierung des Freitexts wie bisher.
+    industry: z.string().trim().min(1).max(40).refine(isBrandIndustryValue).optional(),
   }).strict()
 }
 

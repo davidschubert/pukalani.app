@@ -66,7 +66,6 @@ export default defineEventHandler(async (event): Promise<BrandPublicationFlagRes
     : ''
 
   logEvent('info', 'brand.publication_featured', {
-    rowId: row.$id,
     slug: row.slug,
     featured: body.featured,
     replacedId,

@@ -71,7 +71,7 @@ export default defineEventHandler(async (event): Promise<BrandPublicationAdminDe
     throw brandPublicationAdminUnavailable(error, { rowId: row.$id, stage: 'hide' })
   }
 
-  logEvent('info', 'brand.publication_hidden', { rowId: row.$id, slug: row.slug })
+  logEvent('info', 'brand.publication_hidden', { slug: row.slug })
 
   return { ok: true, status: transition.next, keepsPublicStand: false }
 })

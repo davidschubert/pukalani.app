@@ -87,7 +87,7 @@ export default defineEventHandler(async (event): Promise<BrandPublicationRespons
     payload: { previous: previous ?? 'none' },
   })
   logEvent('info', 'brand.publication_withdrawn', {
-    profileId, slug: existing.slug, previous: previous ?? 'none',
+    slug: existing.slug, previous: previous ?? 'none',
   })
 
   // Die Bereitschaft reist mit, damit der Dialog nach dem Zurückziehen sofort

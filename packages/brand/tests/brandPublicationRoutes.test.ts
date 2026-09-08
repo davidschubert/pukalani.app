@@ -240,6 +240,19 @@ describe('POST …/publication — einreichen', () => {
     expect(row.data.pathKind).toBe('new')
     // Freitext „Rösterei" ist keine Katalog-Id ⇒ `unknown`, ohne KI.
     expect(row.data.industry).toBe('unknown')
+  })
+
+  it('die Branche aus dem Dialog schlägt den Freitext — aber nur als Katalog-Id', async () => {
+    body = { consent: true, industry: 'food' }
+    await postRoute(event)
+    const row = created.find(entry => entry.tableId === 'brand_publications')!
+    expect(row.data.industry).toBe('food')
+
+    // Eine erfundene Id fällt am Schema, nicht erst an der Galerie.
+    created.length = 0
+    body = { consent: true, industry: 'bakery-of-doom' }
+    await expect(postRoute(event)).rejects.toBeTruthy()
+    expect(created.find(entry => entry.tableId === 'brand_publications')).toBeUndefined()
     expect(row.data.archetype).toBe('creator')
     expect(row.data.archetypeSecondary).toBe('sage')
     expect(row.data.locale).toBe('de')

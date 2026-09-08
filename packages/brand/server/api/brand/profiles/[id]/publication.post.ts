@@ -70,7 +70,7 @@ export default defineEventHandler(async (event): Promise<BrandPublicationRespons
   const { userId } = await requireBrandAccess(event)
   const profileId = requireProfileIdParam(event)
   const profile = await loadOwnedProfile(event, userId, profileId)
-  await readValidatedBody(event, createBrandPublicationSubmitSchema().parse)
+  const body = await readValidatedBody(event, createBrandPublicationSubmitSchema().parse)
 
   const limited = await bookBrandPublicationQuota(event, userId)
   if (limited) {
@@ -139,9 +139,10 @@ export default defineEventHandler(async (event): Promise<BrandPublicationRespons
     updatedAt: now,
     status: transition.next,
     pathKind: profile.pathKind === 'relaunch' ? 'relaunch' : 'new',
-    // Freitext ⇒ Katalog-Id, sonst `unknown` (§4.1). KEINE KI: die Normalisierung
-    // ist ein Nachschlagen, kein Urteil.
-    industry: normalizeBrandIndustry(profile.industry),
+    // Die Wahl aus dem Dialog (Katalog-Id, im Schema geprüft) schlägt den
+    // Freitext der Startkarte; ohne Wahl: Freitext ⇒ Katalog-Id, sonst `unknown`
+    // (§4.1). KEINE KI: die Normalisierung ist ein Nachschlagen, kein Urteil.
+    industry: body.industry ?? normalizeBrandIndustry(profile.industry),
     archetype,
     archetypeSecondary,
     paletteId: brandPaletteId(profileId),
@@ -188,7 +189,7 @@ export default defineEventHandler(async (event): Promise<BrandPublicationRespons
     payload: { bytes: payload.length, previous: previous ?? 'none', keepsPublic },
   })
   logEvent('info', 'brand.publication_submitted', {
-    profileId, slug, status: transition.next, keepsPublic,
+    slug, status: transition.next, keepsPublic,
   })
 
   return { publication: toBrandPublicationState(row), readiness }

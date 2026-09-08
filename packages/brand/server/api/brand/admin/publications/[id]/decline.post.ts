@@ -82,7 +82,6 @@ export default defineEventHandler(async (event): Promise<BrandPublicationAdminDe
   }
 
   logEvent('info', 'brand.publication_declined', {
-    rowId: row.$id,
     slug: row.slug,
     status: outcome.next,
     keepsPublicStand: outcome.keepsPublicStand,

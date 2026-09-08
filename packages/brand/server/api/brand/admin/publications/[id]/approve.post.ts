@@ -75,7 +75,7 @@ export default defineEventHandler(async (event): Promise<BrandPublicationAdminDe
   }
 
   // LOG-REGEL §6: Slug und Code, nie Inhalte.
-  logEvent('info', 'brand.publication_approved', { rowId: row.$id, slug: row.slug })
+  logEvent('info', 'brand.publication_approved', { slug: row.slug })
 
   return { ok: true, status: transition.next, keepsPublicStand: false }
 })

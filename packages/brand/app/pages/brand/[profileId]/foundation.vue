@@ -10,7 +10,7 @@ import {
   brandFoundationPendingStep,
 } from '../../../../shared/brandFoundation'
 import { BRAND_ACCEPTANCE_VIEW } from '../../../../shared/brandWorkspaceNav'
-import { normalizeBrandIndustry } from '../../../../shared/brandIndustries'
+import { BRAND_INDUSTRY_VALUES, normalizeBrandIndustry } from '../../../../shared/brandIndustries'
 import { brandPublicationPath, brandPublicationSlug } from '../../../../shared/brandPublication'
 import type {
   BrandFoundationResponse,
@@ -478,9 +478,17 @@ const publishScore = ref<number | null>(null)
 const publicationAddress = computed(() => publication.value.path
   || brandPublicationPath(brandPublicationSlug(title.value, profileId.value)))
 
-const publicationIndustry = computed(() => t(
-  `brand.industry.${normalizeBrandIndustry(store.profile?.startCard.industry ?? '')}`,
-))
+/**
+ * Die Branche WÄHLT der Eigentümer im Dialog (Nachzug 2026-09-08): der Freitext
+ * der Startkarte („Handwerksbäckerei") trifft den 16er-Katalog fast nie, und
+ * „Nicht zugeordnet" wäre in der Galerie die Regel. Vorbelegt mit dem, was die
+ * Normalisierung aus dem Freitext macht; reist als Katalog-Id mit.
+ */
+const publishIndustry = ref(normalizeBrandIndustry(store.profile?.startCard.industry ?? ''))
+const publishIndustryItems = computed(() => BRAND_INDUSTRY_VALUES.map(id => ({
+  value: id,
+  label: t(`brand.industry.${id}`),
+})))
 
 const publicationPathKind = computed(() => t(
   `brand.brands.card.path.${store.profile?.pathKind === 'relaunch' ? 'relaunch' : 'new'}`,
@@ -512,7 +520,7 @@ async function submitPublication(): Promise<void> {
       `/api/brand/profiles/${profileId.value}/publication`,
       // Das Häkchen reist MIT: es ist die Zustimmung selbst, nicht ihre Anzeige
       // (Schema `createBrandPublicationSubmitSchema`).
-      { method: 'POST', body: { consent: true } },
+      { method: 'POST', body: { consent: true, industry: publishIndustry.value } },
     )
     publicationRequest.data.value = result
     publishOpen.value = false
@@ -1095,7 +1103,15 @@ useBrandTitle(() => (title.value || t('brand.foundation.title')))
             </div>
             <div>
               <dt class="bw-label" style="color: var(--bw-muted)">{{ t('brand.publication.summary.industry') }}</dt>
-              <dd class="text-sm">{{ publicationIndustry }}</dd>
+              <dd class="text-sm">
+                <USelect
+                  v-model="publishIndustry"
+                  :items="publishIndustryItems"
+                  size="sm"
+                  class="w-full"
+                  data-publish-industry
+                />
+              </dd>
             </div>
             <div>
               <dt class="bw-label" style="color: var(--bw-muted)">{{ t('brand.publication.summary.path') }}</dt>
