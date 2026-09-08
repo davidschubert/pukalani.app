@@ -2611,6 +2611,24 @@
         "notFound": "Diese Marke gibt es nicht mehr.",
         "generic": "Das hat nicht geklappt. Versucht es bitte noch einmal."
       }
+    },
+    "scene": {
+      "wordmarkFallback": "Eure Marke",
+      "eyebrow": "Neu · Ausgabe 01",
+      "nav1": "Angebot",
+      "nav2": "Über uns",
+      "nav3": "Kontakt",
+      "heading": "Ein Satz, der sagt, wofür ihr steht.",
+      "body": "Hier steht der Absatz, den Besucher wirklich lesen: was ihr macht, für wen — und warum es so aussieht und nicht anders.",
+      "button": "Mehr erfahren",
+      "link": "Zur Übersicht",
+      "cardTitle": "Eine Karte, eine Aussage",
+      "cardText": "So sehen Flächen aus, die auf dem Grund liegen: Rand, Abstand und Kontrast kommen aus derselben Rampe.",
+      "cardMeta": "Stand heute · 12 Einträge",
+      "quote": "Ein Zitat zeigt, wie die Überschriften-Schrift in längeren Sätzen läuft.",
+      "toggleToDark": "Dunkle Ansicht zeigen",
+      "toggleToLight": "Helle Ansicht zeigen",
+      "reducedMotion": "Weniger Bewegung eingestellt — Übergänge stehen still. Werte: {duration} ms · {easing} · Versatz {stagger} ms."
     }
   }
 }

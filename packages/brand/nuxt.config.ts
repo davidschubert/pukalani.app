@@ -14,7 +14,17 @@ const currentDir = dirname(fileURLToPath(import.meta.url))
 export default defineNuxtConfig({
   // absoluter Pfad wie im Core-Layer (relative css-Pfade lösen Apps sonst
   // relativ zu sich selbst auf)
-  css: [join(currentDir, './app/assets/css/brand.css')],
+  //
+  // ZWEITE DATEI, kein Anhang an brand.css: `brand-fonts.css` ist keine
+  // Gestaltung, sondern eine DEKLARATION für den Build — `@nuxt/fonts`
+  // self-hostet nur Familien, die es im CSS sieht (§2.17). Sie steht
+  // getrennt, damit niemand sie beim Aufräumen für toten CSS-Code hält:
+  // ihre Klassen werden nirgends benutzt, und ohne sie fiele die
+  // Vorschau-Szene still auf Georgia/Arial zurück.
+  css: [
+    join(currentDir, './app/assets/css/brand.css'),
+    join(currentDir, './app/assets/css/brand-fonts.css'),
+  ],
 
   // Das Dokument („Euer Branding") trägt sein Inhaltsverzeichnis in einer
   // `UPageAside` mit `UContentToc` (Davids Wunsch 2026-09-05). Nuxt UI

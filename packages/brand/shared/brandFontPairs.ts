@@ -16,12 +16,13 @@
  * beweisen soll. Kein Fehler, keine Warnung, kein roter Build.
  *
  * Deshalb steht neben dem Katalog `BRAND_DECLARED_FONT_FAMILIES`: die Liste
- * der Familien, die DEKLARIERT SIND. Heute ist sie von Hand gepflegt und
- * spiegelt den Stand des Playground-CSS (`app/assets/css/demo-fonts.css`);
- * **D4 macht das App-CSS zur QUELLE dieser Liste** (die Deklaration einmal in
- * `apps/branding`, die Liste daraus gelesen oder gegen sie geprüft). Bis dahin
- * ist der Test in `tests/brandFontPairs.test.ts` der Wächter: jede Familie des
- * Katalogs muss in der Liste stehen.
+ * der Familien, die DEKLARIERT SIND. Sie ist von Hand gepflegt und spiegelt
+ * seit D2c das LAYER-CSS `app/assets/css/brand-fonts.css` (vorher den Stand
+ * des Playground-CSS) — es hängt über `nuxt.config.ts` im `css`-Array und
+ * gilt damit für jede App, die den brand-Layer erbt, heute `apps/branding`.
+ * **D4 macht dieses CSS zur QUELLE der Liste** (daraus gelesen oder gegen sie
+ * geprüft). Bis dahin ist der Test in `tests/brandFontPairs.test.ts` der
+ * Wächter: jede Familie des Katalogs muss in der Liste stehen.
  *
  * ── DIESE DATEI IST PUR ───────────────────────────────────────────────────
  * Kein i18n, kein H3, kein Appwrite, keine Layer-Importe. Die Namen sind
@@ -128,12 +129,11 @@ export const BRAND_MONO_STACK = "'Geist Mono', ui-monospace, SFMono-Regular, mon
 /**
  * DIE FAMILIEN, DIE WIRKLICH GELADEN WERDEN.
  *
- * Heute von Hand gepflegt (s. Kopf): sie spiegelt den Stand der
- * Playground-Deklaration. **D4 macht das App-CSS zur Quelle** — dort wird die
- * Deklaration für `apps/branding` angelegt und diese Liste daraus abgeleitet
- * bzw. gegen sie geprüft. Bis dahin gilt: wer ein Paar in den Katalog legt,
- * trägt seine Familien HIER ein UND deklariert sie im CSS — sonst zeigt die
- * Vorschau still den Systemstack.
+ * Von Hand gepflegt (s. Kopf): sie spiegelt seit D2c die Deklaration im
+ * Layer-CSS `app/assets/css/brand-fonts.css`. **D4 macht dieses CSS zur
+ * Quelle** — die Liste wird daraus abgeleitet bzw. gegen sie geprüft. Bis
+ * dahin gilt: wer ein Paar in den Katalog legt, trägt seine Familien HIER ein
+ * UND deklariert sie dort — sonst zeigt die Vorschau still den Systemstack.
  */
 export const BRAND_DECLARED_FONT_FAMILIES: readonly string[] = [
   'Inter',

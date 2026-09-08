@@ -2611,6 +2611,24 @@
         "notFound": "This brand no longer exists.",
         "generic": "That did not work. Please try again."
       }
+    },
+    "scene": {
+      "wordmarkFallback": "Your brand",
+      "eyebrow": "New · Issue 01",
+      "nav1": "What we do",
+      "nav2": "About",
+      "nav3": "Contact",
+      "heading": "One sentence that says what you stand for.",
+      "body": "This is the paragraph visitors actually read: what you do, for whom — and why it looks like this and not otherwise.",
+      "button": "Find out more",
+      "link": "To the overview",
+      "cardTitle": "One card, one statement",
+      "cardText": "This is how surfaces on the background look: border, spacing and contrast all come from the same ramp.",
+      "cardMeta": "As of today · 12 entries",
+      "quote": "A quote shows how the heading typeface runs across longer sentences.",
+      "toggleToDark": "Show the dark view",
+      "toggleToLight": "Show the light view",
+      "reducedMotion": "Reduced motion is set — transitions stand still. Values: {duration} ms · {easing} · offset {stagger} ms."
     }
   }
 }
