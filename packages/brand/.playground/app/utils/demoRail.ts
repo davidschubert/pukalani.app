@@ -532,7 +532,9 @@ export function demoRailWithDesign(options: {
       label: 'Visuelle Identität',
       icon: '',
       state: done ? 'done' : 'open',
-      to: '/brand/demo/foundation?design=done',
+      /* Das Ergebnis-Board (§2.8) — Kapitel 10 der Foundation trägt dasselbe
+       * Board als Kopf, die eigene Ansicht ist die druckbare Fläche. */
+      to: '/brand/demo/design/board',
     })
     return {
       ...layer,

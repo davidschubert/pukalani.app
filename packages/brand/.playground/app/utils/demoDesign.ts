@@ -191,9 +191,15 @@ export const DS_CHAPTERS: readonly DsChapter[] = [
   {
     key: 'dna',
     label: 'Moodboard',
-    note: 'Visual DNA und drei Boards',
-    minutes: '~8 Min',
+    note: 'Vorbilder, Visual DNA und drei Boards',
+    minutes: '~12 Min',
     sessions: [
+      /* Die Weiche und die zwei Vorbilder-Sessions (Davids Entscheidung
+       * 2026-09-08, Konzept §2.2): Richtung aus Foundation UND Vorbildern.
+       * Ohne Vorbilder überspringt der Weg `g.inspiration` und `g.reading`. */
+      { id: 'g.source', label: 'Woher die Richtung kommt', effort: '~1 Min' },
+      { id: 'g.inspiration', label: 'Vorbilder hochladen', effort: '~2 Min' },
+      { id: 'g.reading', label: 'Lesung gegen die Foundation', effort: '~1 Min' },
       { id: 'g.dna', label: 'Visual DNA', effort: '~3 Min' },
       { id: 'g.boards', label: 'Drei Moodboards', effort: '~2 Min' },
       { id: 'g.board', label: 'Board wählen', effort: '~1 Min' },
@@ -422,25 +428,36 @@ export const DS_DNA_DIMENSIONS: readonly DsDnaDimension[] = [
 /** Eine Belegung: Dimensions-Id → Wert-Id (alle zehn, nie Teilmenge). */
 export type DsDnaValues = Record<string, string>
 
+export type DsDnaOrigin = 'foundation' | 'inspiration' | 'both'
+
 export interface DsDnaProposalEntry {
   dimension: string
   value: string
   /** Die Herleitung aus der Foundation — das PRODUKT, nicht die Wahl selbst. */
   reason: string
+  /**
+   * HERKUNFT (§2.2 Leitplanke e): Foundation, Vorbild oder beides. Auf dem
+   * Weg OHNE Vorbilder gilt für jede Zeile `foundation` — `inspirationReason`
+   * wird dann nicht gezeigt. Eine Zeile kommt NIE allein aus einem Vorbild
+   * ohne Foundation-Bezug: die Foundation ist der Maßstab, nicht das Bild.
+   */
+  origin: DsDnaOrigin
+  /** Der Satz, der auf ein Vorbild zeigt („wie in Bild 3, aber wärmer"). */
+  inspirationReason?: string
 }
 
 /** Fridas Vorschlag für Kailua, je Dimension mit Begründung (§2.2 `g.dna`). */
 export const DS_DNA_PROPOSAL: readonly DsDnaProposalEntry[] = [
-  { dimension: 'style', value: 'editorial', reason: 'Die Herkunftstafel ist euer Kernstück — eine Marke, die etwas ERKLÄRT, braucht redaktionelle Ruhe statt Werbe-Optik.' },
-  { dimension: 'era', value: 'craft', reason: 'Anbau, Röstung und Ausschank in einer Hand: das ist Handwerk, kein Start-up-Versprechen.' },
-  { dimension: 'form', value: 'soft', reason: 'Zum Archetyp „Der Weise" mit Rest Schöpfer passt Milde in den Kanten — kantig wäre der Rebell.' },
-  { dimension: 'typography', value: 'bookish', reason: 'Ton-Wort „fundiert": eine buchhafte Serif in den Überschriften trägt Wissen, ohne laut zu werden.' },
-  { dimension: 'color', value: 'earthy', reason: 'Roast, Crema, Milk — eure Palette kommt aus dem Produkt selbst, nicht aus einer Farbmode.' },
-  { dimension: 'imagery', value: 'craftClose', reason: 'Wert „Nähe": Hände, Tafel, Maschine — nie Stock-Lächeln (Foundation, Kapitel 06).' },
-  { dimension: 'composition', value: 'calm', reason: 'Tagline „One honest, quiet moment a day" — Ruhe muss auf der Fläche sichtbar sein, sonst ist sie Behauptung.' },
-  { dimension: 'materiality', value: 'paper', reason: 'Die Tafel wird jede Saison neu geschrieben: Papier, matt, mit Spuren — kein Hochglanz.' },
-  { dimension: 'motion', value: 'calmMotion', reason: 'Aus dem Ton-Wort „ruhig": langsamere Übergänge, kein Federn, kein Zappeln.' },
-  { dimension: 'mood', value: 'honest', reason: 'Wert „Klartext": lieber nüchtern und überprüfbar als warm und ungenau.' },
+  { dimension: 'style', value: 'editorial', reason: 'Die Herkunftstafel ist euer Kernstück — eine Marke, die etwas ERKLÄRT, braucht redaktionelle Ruhe statt Werbe-Optik.', origin: 'both', inspirationReason: 'Vorbild 1 zeigt genau diese Haltung: Text zuerst, Bild als Beleg.' },
+  { dimension: 'era', value: 'craft', reason: 'Anbau, Röstung und Ausschank in einer Hand: das ist Handwerk, kein Start-up-Versprechen.', origin: 'foundation' },
+  { dimension: 'form', value: 'soft', reason: 'Zum Archetyp „Der Weise" mit Rest Schöpfer passt Milde in den Kanten — kantig wäre der Rebell.', origin: 'foundation' },
+  { dimension: 'typography', value: 'bookish', reason: 'Ton-Wort „fundiert": eine buchhafte Serif in den Überschriften trägt Wissen, ohne laut zu werden.', origin: 'both', inspirationReason: 'Wie in Vorbild 2 — aber eine Stufe leichter im Schnitt, die Tafel ist kein Buchtitel.' },
+  { dimension: 'color', value: 'earthy', reason: 'Roast, Crema, Milk — eure Palette kommt aus dem Produkt selbst, nicht aus einer Farbmode.', origin: 'both', inspirationReason: 'Vorbild 1 bestätigt die Erdtöne; das Neon-Grün aus Vorbild 4 bleibt draußen (Lesung: Spannung).' },
+  { dimension: 'imagery', value: 'craftClose', reason: 'Wert „Nähe": Hände, Tafel, Maschine — nie Stock-Lächeln (Foundation, Kapitel 06).', origin: 'both', inspirationReason: 'Vorbild 5 trifft es fast — nur näher ran, das Detail soll das Bild füllen.' },
+  { dimension: 'composition', value: 'calm', reason: 'Tagline „One honest, quiet moment a day" — Ruhe muss auf der Fläche sichtbar sein, sonst ist sie Behauptung.', origin: 'foundation', inspirationReason: 'Gegen Vorbild 4: dessen Dichte widerspricht dem Ton-Wort „ruhig" (Lesung: passt nicht).' },
+  { dimension: 'materiality', value: 'paper', reason: 'Die Tafel wird jede Saison neu geschrieben: Papier, matt, mit Spuren — kein Hochglanz.', origin: 'foundation' },
+  { dimension: 'motion', value: 'calmMotion', reason: 'Aus dem Ton-Wort „ruhig": langsamere Übergänge, kein Federn, kein Zappeln.', origin: 'foundation' },
+  { dimension: 'mood', value: 'honest', reason: 'Wert „Klartext": lieber nüchtern und überprüfbar als warm und ungenau.', origin: 'both', inspirationReason: 'Vorbild 3 ist wärmer, als eure Werte hergeben — die Wärme bleibt in der Farbe, nicht im Ton.' },
 ]
 
 export interface DsBoard {
@@ -515,6 +532,145 @@ export function dsDnaLabel(dimensionId: string, valueId: string): string {
   const dimension = DS_DNA_DIMENSIONS.find(d => d.id === dimensionId)
   return dimension?.values.find(v => v.id === valueId)?.label ?? valueId
 }
+
+// ── Kapitel `dna`, die zweite Quelle: Vorbilder und ihre Lesung (§2.2) ─────
+
+/**
+ * VORBILDER (Davids Entscheidung 2026-09-08): „Niemand fängt mit der Palette
+ * an — vor Farbe und Schrift steht immer eine Richtung, aus der Strategie UND
+ * aus Vorbildern." Der Kunde lädt Screenshots hoch, je Bild EIN Bereich, die
+ * KI liest sie GEGEN die Foundation.
+ *
+ * DIE BILDER SIND ATTRAPPEN: abstrakte Kompositionen (`FdInspirationThumb`),
+ * keine echten Screenshots fremder Marken — ein Klickdummy, der fremde
+ * Websites zeigt, wäre schon das Urheberrechts-Problem, vor dem die
+ * Leitplanke (a) im Konzept warnt. Die Form des Bereichs ist trotzdem
+ * vollständig: Zähler, Bereich-Chip, Notiz, Fremdwerk-Hinweis, Privatheit.
+ */
+export type DsInspirationArea = 'color' | 'type' | 'mark' | 'imagery' | 'composition'
+
+export const DS_INSPIRATION_AREAS: readonly { id: DsInspirationArea, label: string }[] = [
+  { id: 'color', label: 'Farbwelt' },
+  { id: 'type', label: 'Typografie' },
+  { id: 'mark', label: 'Zeichen' },
+  { id: 'imagery', label: 'Bildsprache' },
+  { id: 'composition', label: 'Komposition' },
+]
+
+export function dsAreaLabel(area: DsInspirationArea): string {
+  return DS_INSPIRATION_AREAS.find(entry => entry.id === area)?.label ?? area
+}
+
+export interface DsInspiration {
+  id: string
+  /** Laufende Nummer in der Anzeige („Vorbild 3") — die Lesung zeigt darauf. */
+  number: number
+  /** Was der Kunde hochgeladen hat (Dateiname, wie er ankommt). */
+  filename: string
+  area: DsInspirationArea
+  /** Der optionale Satz des Kunden: warum es gefällt. */
+  note: string
+  /** Welche Attrappe gezeichnet wird. */
+  kind: 'site' | 'palette' | 'type' | 'mark' | 'photo'
+  /** Die Farben der Attrappe — Fremdfarben sind hier ERLAUBT: es sind ja Vorbilder. */
+  colors: readonly string[]
+}
+
+export const DS_INSPIRATIONS: readonly DsInspiration[] = [
+  { id: 'v1', number: 1, filename: 'roesterei-startseite.png', area: 'composition', note: 'Ruhig, viel Weißraum, Text zuerst — so wollen wir wirken.', kind: 'site', colors: ['#f4efe6', '#3b2a20', '#8c6a4a', '#5b6b52'] },
+  { id: 'v2', number: 2, filename: 'buch-verlag-typo.png', area: 'type', note: 'Die Serif in den Überschriften, sehr souverän.', kind: 'type', colors: ['#faf7f1', '#1f1a16', '#b5895a'] },
+  { id: 'v3', number: 3, filename: 'cafe-instagram.jpg', area: 'color', note: 'Warm und einladend, die Farben mögen wir sehr.', kind: 'palette', colors: ['#e2b07a', '#c2653a', '#f3dcc2', '#6e3b25', '#fbf4ea'] },
+  { id: 'v4', number: 4, filename: 'specialty-brand-shop.png', area: 'mark', note: 'Das Zeichen: knallig, jung, fällt auf.', kind: 'mark', colors: ['#111111', '#b7ff3c', '#ffffff'] },
+  { id: 'v5', number: 5, filename: 'farm-fotos.jpg', area: 'imagery', note: 'Echte Menschen bei der Arbeit, kein Studio.', kind: 'photo', colors: ['#7a6a55', '#c9b08a', '#3f4a38', '#efe6d6'] },
+]
+
+/** Die Drossel des Bereichs (§2.2 Leitplanke d) — wie bei den KI-Entwürfen als Zeile sichtbar. */
+export const DS_INSPIRATION_LIMITS = 'Bis 12 Bilder je Lauf · 3 Läufe je Tag · 2 übrig'
+
+export const DS_INSPIRATION_PRIVACY = 'Eure Vorbilder bleiben privat: sie erscheinen weder im Dokument noch im geteilten Link noch im Beispiel. Sie sind Fremdwerke — wir lesen sie, wir bauen sie nicht nach.'
+
+/**
+ * DIE LESUNG (§2.2 `g.reading`): je Bild eine strukturierte Belegung in der
+ * DNA-Sprache plus das Urteil GEGEN die Foundation — `fits` (trägt schon),
+ * `tension` (Spannung, mit Vorschlag, was man übernimmt) oder `off`
+ * (widerspricht). JEDES Urteil nennt seine Foundation-Stelle: das ist
+ * Davids „Verbesserungsvorschläge ODER sagen, was bereits sehr gut ist".
+ */
+export type DsReadingVerdict = 'fits' | 'tension' | 'off'
+
+export interface DsReading {
+  inspirationId: string
+  /** Was das Bild zeigt — zwei bis drei DNA-Belegungen. */
+  observed: readonly { dimension: string, value: string }[]
+  verdict: DsReadingVerdict
+  /** Die Foundation-Stelle, an der gemessen wurde („Wert „Klartext\""). */
+  anchor: string
+  /** Die Begründung — bei `fits`, was daran gut funktioniert. */
+  reason: string
+  /** Bei `tension`/`off`: was man übernimmt und was nicht. */
+  suggestion?: string
+}
+
+export const DS_READINGS: readonly DsReading[] = [
+  {
+    inspirationId: 'v1',
+    observed: [{ dimension: 'composition', value: 'calm' }, { dimension: 'style', value: 'editorial' }, { dimension: 'color', value: 'earthy' }],
+    verdict: 'fits',
+    anchor: 'Tagline „One honest, quiet moment a day" · Ton-Wort „ruhig"',
+    reason: 'Text vor Bild, Weißraum als Haltung, keine Werbe-Optik: das ist eure Positionierung, schon gestaltet. Der Vorschlag übernimmt Komposition und Stil daraus.',
+  },
+  {
+    inspirationId: 'v2',
+    observed: [{ dimension: 'typography', value: 'bookish' }, { dimension: 'era', value: 'timeless' }],
+    verdict: 'fits',
+    anchor: 'Ton-Wort „fundiert" · Archetyp „Der Weise"',
+    reason: 'Eine buchhafte Serif trägt Wissen, ohne laut zu werden — genau, was der Weise braucht. Ich schlage sie für die Überschriften vor, eine Stufe leichter im Schnitt: eure Tafel ist kein Buchtitel.',
+  },
+  {
+    inspirationId: 'v3',
+    observed: [{ dimension: 'color', value: 'vivid' }, { dimension: 'mood', value: 'warm' }],
+    verdict: 'tension',
+    anchor: 'Wert „Klartext" · Ton-Wort „nüchtern"',
+    reason: 'Die Wärme passt zu „Nähe" — aber diese Sättigung verkauft, statt zu erklären. Eure Werte sagen „lieber nüchtern und überprüfbar als warm und ungenau".',
+    suggestion: 'Übernehmen: den warmen Grundton (er sitzt zwischen Crema und Milk). Nicht übernehmen: die Sättigung — die Wärme bleibt in der Farbe, nicht im Ton.',
+  },
+  {
+    inspirationId: 'v4',
+    observed: [{ dimension: 'color', value: 'vivid' }, { dimension: 'mood', value: 'confident' }, { dimension: 'form', value: 'geometric' }],
+    verdict: 'off',
+    anchor: 'Archetyp „Der Weise" · Ton-Wort „ruhig"',
+    reason: 'Neon auf Schwarz, hart gesetzt: das ist der Rebell, nicht der Weise. Es fällt auf — aber es widerspricht drei Stellen eurer Foundation zugleich (Archetyp, Ton, Wert „Klartext").',
+    suggestion: 'Nichts übernehmen. Wenn ihr auffallen wollt, ist das eine Frage an die Positionierung, nicht an die Farbe — ich gebe sie an George zurück.',
+  },
+  {
+    inspirationId: 'v5',
+    observed: [{ dimension: 'imagery', value: 'documentary' }, { dimension: 'materiality', value: 'paper' }],
+    verdict: 'fits',
+    anchor: 'Wert „Nähe" · Foundation, Kapitel 06 „nie Stock-Lächeln"',
+    reason: 'Menschen bei der Arbeit, Tageslicht, nichts gestellt — das ist die Bild-Regel, die Kapitel 06 schon fordert. Ich schlage eine Stufe näher vor: Hände, Tafel, Maschine sollen das Bild füllen.',
+  },
+]
+
+export const DS_READING_VERDICTS: Record<DsReadingVerdict, { label: string, icon: string, tone: 'confirmed' | 'draft' | 'stale' }> = {
+  fits: { label: 'Trägt schon', icon: 'i-ph-check-circle-fill', tone: 'confirmed' },
+  tension: { label: 'Spannung', icon: 'i-ph-warning-circle-fill', tone: 'draft' },
+  off: { label: 'Passt nicht', icon: 'i-ph-x-circle-fill', tone: 'stale' },
+}
+
+/** Das Fazit der Lesung — zwei Listen, wie David es gesagt hat. */
+export const DS_READING_SUMMARY = {
+  keeps: [
+    'Ruhige, redaktionelle Komposition — Text zuerst (Vorbild 1).',
+    'Buchhafte Serif in den Überschriften (Vorbild 2).',
+    'Dokumentarische Bilder von Menschen bei der Arbeit (Vorbild 5).',
+  ],
+  improves: [
+    'Die Wärme aus Vorbild 3 in den Grundton nehmen, die Sättigung nicht.',
+    'Das Zeichen aus Vorbild 4 nicht verfolgen — es widerspricht Archetyp und Ton.',
+    'Bilder eine Stufe näher als Vorbild 5: das Detail füllt die Fläche.',
+  ],
+  run: 'Lauf 1 von 3 · 5 Bilder gelesen · 7. Sept. 2026, 15:41',
+} as const
 
 // ── Kapitel `color`: Farbwelt (§2.3) ───────────────────────────────────────
 
@@ -930,7 +1086,8 @@ export const DS_ADVISOR = {
 /** Zwei bis drei Züge je Kapitel — sie BEGRÜNDEN den Vorschlag, mehr nicht. */
 export const DS_ADVISOR_MOVES: Record<DsChapterKey, readonly DsAdvisorMove[]> = {
   dna: [
-    { id: 'dna-1', text: 'Ich habe eure Foundation gelesen, nicht eure Branche. Der Vorschlag unten hängt an vier Stellen: Archetyp „Der Weise", Wert „Klartext", Ton-Wort „ruhig" und der Herkunftstafel — die vier tauchen in jeder Begründung wieder auf.' },
+    { id: 'dna-0', text: 'Bevor ich etwas vorschlage: Habt ihr Vorbilder? Screenshots, ein Pinterest-Board, drei Websites, die euch gefallen — je Bild sagt ihr mir nur, WAS daran (Farbe, Schrift, Zeichen, Bild). Ich lese sie gegen eure Foundation und sage euch, was davon schon trägt und was besser geht.', help: 'Ohne Vorbilder geht es direkt zum Vorschlag — die Foundation reicht.' },
+    { id: 'dna-1', text: 'Ich habe eure Foundation gelesen, nicht eure Branche — und eure Vorbilder an ihr gemessen, nicht umgekehrt. Der Vorschlag unten hängt an vier Stellen: Archetyp „Der Weise", Wert „Klartext", Ton-Wort „ruhig" und der Herkunftstafel; jede Zeile sagt, ob sie aus der Foundation, einem Vorbild oder beidem kommt.' },
     { id: 'dna-2', text: 'Drei Boards, nicht dreißig: einmal genau so, einmal eine Stufe ruhiger, einmal eine Stufe mutiger. Wählt eines als Ausgangspunkt — und nehmt euch danach einzelne Eigenschaften aus den anderen.', help: 'Festgehaltene Eigenschaften bleiben beim Neu-Vorschlagen stehen.' },
     { id: 'dna-3', text: 'Wenn ihr euch zwischen „ruhiger" und „mutiger" nicht entscheiden könnt, ist das kein Geschmacksproblem: dann steht in eurer Positionierung noch beides. Sagt es mir, ich gebe die Frage an George zurück.' },
   ],

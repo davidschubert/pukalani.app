@@ -114,6 +114,16 @@ const LOCKED_LINES = [
     <!-- ── DAS VOLLE KAPITEL ───────────────────────────────────────────── -->
     <template v-else>
       <div class="mt-5 flex flex-col gap-8">
+        <!-- DAS ERGEBNIS-BOARD ALS KOPF (§2.8, 2026-09-08): alles auf einer
+             Fläche, bevor die Abschnitte darunter es erklären. -->
+        <div>
+          <FdDesignBoard compact />
+          <p class="fd-noprint mt-2 flex flex-wrap items-center gap-2">
+            <span class="bw-pending">Dasselbe Board als eigene Ansicht, druckbar:</span>
+            <NuxtLink to="/brand/demo/design/board" class="bw-label underline" style="color: var(--bw-ink-soft)">Visuelle Identität öffnen</NuxtLink>
+          </p>
+        </div>
+
         <!-- Farbwelt -->
         <div>
           <p class="bw-label" style="color: var(--bw-muted)">Farbwelt · Basisfarbe {{ colors.base }}</p>

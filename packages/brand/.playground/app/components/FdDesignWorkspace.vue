@@ -133,7 +133,7 @@ useHead({ title: `Brand Design · ${chapter.value.label}` })
             class="ml-auto rounded-full" style="background: var(--bw-surface-hi)"
           />
           <UButton
-            v-else to="/brand/demo/foundation?design=done" label="Visuelle Identität ansehen"
+            v-else to="/brand/demo/design/board" label="Visuelle Identität ansehen"
             color="neutral" variant="outline" trailing-icon="i-ph-arrow-right"
             class="ml-auto rounded-full" style="background: var(--bw-surface-hi)"
           />
