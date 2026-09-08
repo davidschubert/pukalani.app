@@ -1,7 +1,8 @@
 # Brand Design (Produkt 02) — Strategie
 
-Phase 1 des Workflows (docs/referenz/WORKFLOW.md), Stand 2026-09-07. Noch
-kein Konzept, kein Code. Endet mit den Fragen, die die Konzeption braucht.
+Phase 1 des Workflows (docs/referenz/WORKFLOW.md), Stand 2026-09-07 —
+FREIGEGEBEN mit Davids Entscheidungen in §1.11. Noch kein Konzept, kein Code;
+die Konzeption folgt als §2.
 
 ---
 
@@ -121,14 +122,15 @@ Vorlagen").
 
 ### 1.4 Was das Produkt BEWUSST NICHT behauptet
 
-- **Kein fertiges Logo per KI-Bild.** Bildlogos aus Diffusionsmodellen sind
-  markenrechtlich riskant (Ähnlichkeit, Schutzfähigkeit), qualitativ
-  unberechenbar und genau das, was Looka/LogoAI/Brandmark millionenfach
-  verkaufen. Brand Design liefert die RICHTUNG des Zeichens (Wortmarke,
-  Monogramm oder Bildmarke; Charakter; Schutzraum; Varianten) und setzt
-  Wortmarke/Monogramm aus dem Schriftpaar — die Ausarbeitung eines Bildlogos
-  bleibt Designer-Arbeit (Studio, Erstgespräch). Ob die Setzung schon in
-  Phase 1 gehört, ist Frage §1.10 b.
+- **Kein fertiges Logo per KI-Bild als „euer Logo".** Bildlogos aus
+  Diffusionsmodellen sind markenrechtlich riskant (Ähnlichkeit,
+  Schutzfähigkeit) und qualitativ unberechenbar — die Empfehlung war, sie
+  wegzulassen. **David hat anders entschieden (§1.11 b, Stufe 3):** es gibt
+  einen Bereich für KI-Bildlogos auf Basis von Richtung und Briefing — als
+  gekennzeichnete ENTWÜRFE für die Designer-Arbeit, mit Herkunft, außerhalb
+  von Snapshot und Share, mit Markenrechts-Hinweis. Was das Produkt weiterhin
+  nicht behauptet: dass ein solcher Entwurf ein schutzfähiges, fertiges Logo
+  ist. Die Ausarbeitung bleibt Designer-Arbeit (Studio, Erstgespräch).
 - **Keine generierten Fotos.** Bildsprache sind Prinzipien und Do/Don't
   (plus Prompt-Vorlagen für Produkt 03/04), keine Stock- oder KI-Bilder.
 - **Kein DAM, keine Vorlagen, keine Website** — Produkt 03/04.
