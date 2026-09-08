@@ -26,6 +26,27 @@ export default defineNuxtConfig({
     join(currentDir, './app/assets/css/brand-fonts.css'),
   ],
 
+  /**
+   * DER SCHNITT 300 MUSS EXTRA BESTELLT WERDEN (Brand Design D4, am eigenen
+   * Klick gefunden).
+   *
+   * `@nuxt/fonts` lädt per Voreinstellung nur den BEREICH `400 700` — eine
+   * `.bw-face-*-300`-Deklaration im CSS wird zwar gesehen, aber nicht
+   * beschafft. Das ist der teuerste Fall dieser ganzen Falle: die Seite sieht
+   * richtig aus, der Browser malt den leichten Schnitt SELBST (ausgedünnte
+   * Konturen), und beurteilt würde eine Schrift, die es nicht gibt. Gemessen:
+   * `document.fonts` kannte NULL Faces mit Gewicht 300, obwohl die Typografie-
+   * Bühne es anbot.
+   *
+   * Der Bereich steht deshalb im LAYER (wie `css` darüber): wer die
+   * Typografie-Bühne erbt, erbt auch ihre Schnitte. Familien ohne leichten
+   * Schnitt (PT Sans, PT Serif) bleiben davon unberührt — es gibt dort nichts
+   * zu holen, und `BRAND_DECLARED_FONT_WEIGHTS` sagt es der Bühne.
+   */
+  fonts: {
+    defaults: { weights: [300, 400, 500, 600, 700] },
+  },
+
   // Das Dokument („Euer Branding") trägt sein Inhaltsverzeichnis in einer
   // `UPageAside` mit `UContentToc` (Davids Wunsch 2026-09-05). Nuxt UI
   // registriert die Content-Komponenten NUR mit diesem Schalter oder mit
