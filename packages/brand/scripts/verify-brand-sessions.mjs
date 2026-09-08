@@ -2461,6 +2461,188 @@ try {
     typeChapter.status === 200 && typeChapter.json?.sessions?.['i.pair']?.state === 'open',
     `${typeChapter.status} i.pair=${typeChapter.json?.sessions?.['i.pair']?.state}`)
 
+  // ══ 26 · Typografie: das Kapitel `type` (Brand Design D4, §2.4) ══════════
+  //
+  // ── WAS DIESER ABSCHNITT PRÜFT — UND WAS NICHT ─────────────────────────
+  // Die REGELN (Vorbelegung aus der DNA, Hierarchie-Faktoren, Grenzen der
+  // Stellschrauben, Rundlauf des `i.rules`-Wertes, Drei-Schriften-Invariante)
+  // sind vollständig in `tests/brandDesignType.test.ts` belegt. HIER wird
+  // geprüft, was ein Unit-Test nicht sehen kann: dass die Bühne die fertige
+  // FARBWELT des Kapitels davor bekommt, dass die Seite die ECHTEN
+  // Schrift-Stacks ausliefert (und nicht nur Schrift-NAMEN wie G4), dass ein
+  // Satz als Paar-Id abgewiesen wird — und dass das Kapitel durchläuft.
+  //
+  // Wie in Abschnitt 25 gilt: die VORBELEGUNG schreibt der Browser (Autosave,
+  // s. `useBrandTypeWorld`). Ein HTTP-Skript ohne Browser kann sie nicht
+  // auslösen; SSR RECHNET sie aber und malt sie hin, und daran hängen die
+  // Prüfungen unten.
+  console.log('\n26 · Brand Design: die Typografie (D4)')
+
+  const typeBase = `${base}/steps/type`
+  const typePage = async () => call(`/de/brand/${profileId}/type`, { cookie: account.cookie })
+
+  /**
+   * DER KATALOG STEHT HIER NOCH EINMAL — und das ist Absicht.
+   *
+   * Dieses Skript ist `.mjs` und importiert den TypeScript-Katalog nicht.
+   * Es KÖNNTE ihn über jiti holen; dann prüfte es aber die Seite gegen die
+   * Liste, aus der die Seite gebaut ist — eine Prüfung, die eine Umbenennung
+   * mitmacht, statt sie zu melden. Sechs Ids und sechs Stacks von Hand sind
+   * der Preis dafür, dass eine Änderung am Katalog hier auffällt.
+   */
+  const TYPE_PAIRS = [
+    { id: 'editorial', stack: "'Source Serif 4', Georgia, 'Times New Roman', serif" },
+    { id: 'humanist', stack: "'Source Sans 3', 'Helvetica Neue', Arial, sans-serif" },
+    { id: 'inter', stack: "Inter, 'Helvetica Neue', Arial, sans-serif" },
+    { id: 'geometric', stack: "Sora, 'Avenir Next', 'Helvetica Neue', Arial, sans-serif" },
+    { id: 'classic', stack: "'PT Serif', Georgia, 'Times New Roman', serif" },
+    { id: 'contrast', stack: "Sora, 'Avenir Next', 'Helvetica Neue', Arial, sans-serif" },
+  ]
+
+  check('die Bühne bekommt die DNA UND die drei Werte der Farbwelt',
+    typeof typeChapter.json?.sourceValues?.['g.mix'] === 'string'
+    && typeChapter.json?.sourceValues?.['h.base'] === '#4a3123'
+    && typeChapter.json?.sourceValues?.['h.neutral'] === 'warm'
+    && typeChapter.json?.sourceValues?.['h.accent'] === '#22392f',
+    JSON.stringify(typeChapter.json?.sourceValues ?? {}).slice(0, 200))
+
+  const typeView = await typePage()
+  check('die Werkstatt zeigt den Typografie-Abschnitt',
+    typeView.status === 200 && typeView.text.includes('data-brand-type'),
+    `${typeView.status} ${typeView.text.length} Zeichen`)
+  check('… mit allen sechs Paaren des Katalogs',
+    TYPE_PAIRS.every(pair => typeView.text.includes(`data-type-pair="${pair.id}"`)),
+    TYPE_PAIRS.filter(pair => !typeView.text.includes(`data-type-pair="${pair.id}"`)).map(p => p.id).join(', '))
+  check('… und mit einem markierten Vorschlag aus der DNA (genau einer)',
+    typeView.text.split('Aus eurer DNA').length - 1 === 1,
+    `${typeView.text.split('Aus eurer DNA').length - 1}× gefunden`)
+
+  /**
+   * DER UNTERSCHIED ZU G4, GEMESSEN: die Seite liefert die ECHTEN
+   * Schrift-STACKS aus, nicht nur die Namen. Der Richtungs-Katalog zeigt
+   * bewusst nur Namen („eine Richtung, kein Rendering-Beweis") — hier wird
+   * eine Schrift entschieden, also muss der Stack im Markup stehen.
+   */
+  /* Im Markup stehen die Stacks HTML-maskiert (`&#39;` statt `'`) — sie
+   * stecken in einem `style`-Attribut. Wer hier ohne Maskierung sucht,
+   * bekommt eine Prüfung, die IMMER rot ist (beim Bau erwischt: 0 von 6). */
+  const escaped = value => value.replaceAll("'", '&#39;')
+  const stacksInPage = TYPE_PAIRS.filter(pair => typeView.text.includes(escaped(pair.stack))).length
+  check('… und mit den ECHTEN Schrift-Stacks jedes Paares (nicht nur Namen)',
+    stacksInPage === TYPE_PAIRS.length, `${stacksInPage} von ${TYPE_PAIRS.length}`)
+
+  // ── EIN ANDERES PAAR ÄNDERT DAS SPECIMEN ───────────────────────────────
+  const pickPair = await call(typeBase, {
+    method: 'PATCH',
+    cookie: account.cookie,
+    body: { revision: await stepRevision('type'), slots: { 'i.pair': { value: 'geometric', confirmed: true } } },
+  })
+  check('ein anderes Paar lässt sich wählen UND bestätigen',
+    pickPair.status === 200, `${pickPair.status} ${pickPair.text.slice(0, 160)}`)
+
+  const geometricView = await typePage()
+  check('… und die Seite setzt das Specimen wirklich um (Sora · Nunito Sans)',
+    geometricView.text.includes('Specimen · Geometrisch (Sora · Nunito Sans)'),
+    'Specimen-Zeile des gewählten Paares nicht gefunden')
+
+  // ── EIN SATZ IST KEINE PAAR-ID (Invariante `oneOf`, D4) ────────────────
+  const reopenPair = await call(typeBase, {
+    method: 'PATCH',
+    cookie: account.cookie,
+    body: { revision: await stepRevision('type'), slots: { 'i.pair': { confirmed: false } } },
+  })
+  check('Vorprobe: „Korrigieren" öffnet das Paar wieder',
+    reopenPair.status === 200, `${reopenPair.status} ${reopenPair.text.slice(0, 200)}`)
+
+  const prosePair = await call(typeBase, {
+    method: 'PATCH',
+    cookie: account.cookie,
+    body: {
+      revision: await stepRevision('type'),
+      slots: { 'i.pair': { value: 'Eine warme Serif mit humanistischer Grotesk', confirmed: true } },
+    },
+  })
+  check('eine erfundene Paar-Id wird abgewiesen — `invariant_violated`',
+    prosePair.status >= 400 && prosePair.json?.reason === 'invariant_violated',
+    `${prosePair.status} ${prosePair.text.slice(0, 200)}`)
+  const afterProsePair = await call(typeBase, { cookie: account.cookie })
+  const confirmedPair = String(afterProsePair.json?.slots?.['i.pair']?.confirmed ?? '')
+  check('… und der bestätigte Stand ist keine Prosa',
+    confirmedPair === '' || TYPE_PAIRS.some(pair => pair.id === confirmedPair),
+    JSON.stringify(confirmedPair))
+
+  const proseScale = await call(typeBase, {
+    method: 'PATCH',
+    cookie: account.cookie,
+    body: { revision: await stepRevision('type'), slots: { 'i.scale': { value: 'gigantisch', confirmed: true } } },
+  })
+  check('dasselbe für eine erfundene Hierarchie',
+    proseScale.status >= 400 && proseScale.json?.reason === 'invariant_violated',
+    `${proseScale.status} ${proseScale.text.slice(0, 200)}`)
+
+  // ── DIE REGELN: derselbe Wert, den die Bühne schreibt ──────────────────
+  /* Wörtlich die Form, die `brandTypeRulesSlotValue` erzeugt (s. Kopf des
+   * Katalogs oben): vier beschriftete Blöcke, je Wert · Erklärung. */
+  const rulesValue = [
+    '## Überschrift-Gewicht\n600 · Gilt für Überschriften und die Wortmarke; der Fliesstext bleibt im Normalschnitt.',
+    '## Laufweite\n-0,5 px · Feinkorrektur der Überschrift. Der Fliesstext wird nie gesperrt.',
+    '## Versalien\nNein · Versalien sind eine Ausnahme, kein Stil — sie kosten Lesbarkeit.',
+    "## Mono-Rolle\n'Geist Mono', ui-monospace, SFMono-Regular, monospace · Fest: Herkunftsangaben, Preise, Zahlen und Code — sonst nirgends.",
+  ].join('\n\n')
+  const saveRules = await call(typeBase, {
+    method: 'PATCH',
+    cookie: account.cookie,
+    body: {
+      revision: await stepRevision('type'),
+      slots: {
+        'i.pair': { value: 'editorial', confirmed: true },
+        'i.scale': { value: 'calm', confirmed: true },
+        'i.rules': { value: rulesValue, confirmed: true },
+      },
+    },
+  })
+  check('Paar, Hierarchie und Regeln lassen sich zusammen bestätigen',
+    saveRules.status === 200, `${saveRules.status} ${saveRules.text.slice(0, 200)}`)
+
+  const rulesView = await typePage()
+  check('die Seite zeigt die Regeln als Wirkung, nicht als Text (Gewicht 600)',
+    rulesView.text.includes('font-weight: 600') && rulesView.text.includes('letter-spacing: -0.5px'),
+    'Gewicht oder Laufweite nicht im Markup')
+  const storedRules = String(
+    (await call(typeBase, { cookie: account.cookie })).json?.slots?.['i.rules']?.confirmed ?? '')
+  check('… und der gespeicherte Wert kommt unverändert zurück (vier Blöcke)',
+    storedRules === rulesValue && storedRules.split('\n\n').length === 4,
+    `${storedRules.length} Zeichen, ${storedRules.split('\n\n').length} Blöcke`)
+
+  // ── DAS KAPITEL LÄSST SICH ZU ENDE GEHEN ───────────────────────────────
+  const typeAcceptance = await call(`${typeBase}/acceptance`, { cookie: account.cookie })
+  const typePending = (typeAcceptance.json?.sessions ?? []).filter(entry => entry.required && !entry.confirmed)
+  check('nach den drei Bestätigungen steht keine Pflicht-Session mehr offen',
+    typeAcceptance.status === 200 && typePending.length === 0,
+    `${typeAcceptance.status} · offen: ${JSON.stringify(typePending.map(entry => entry.slotId))}`)
+
+  let typeRevision = typeAcceptance.json?.revision ?? 0
+  for (const entry of (typeAcceptance.json?.sessions ?? []).filter(row => row.confirmed && !row.accepted)) {
+    const taken = await call(`${typeBase}/sessions/${entry.slotId}/accept`, {
+      method: 'POST', cookie: account.cookie, body: { revision: typeRevision },
+    })
+    if (taken.status !== 200) {
+      check(`Abnahme ${entry.slotId}`, false, `${taken.status} ${taken.text.slice(0, 160)}`)
+      break
+    }
+    typeRevision = taken.json?.revision ?? typeRevision
+  }
+  const typeDone = await call(`${typeBase}/complete`, {
+    method: 'POST', cookie: account.cookie, body: { confidence: 'fits' },
+  })
+  check('das Kapitel `type` lässt sich abnehmen und schliessen',
+    typeDone.status === 200, `${typeDone.status} ${typeDone.text.slice(0, 160)}`)
+
+  const markChapter = await call(`${base}/steps/mark`, { cookie: account.cookie })
+  check('… und das nächste Kapitel `mark` ist danach erreichbar',
+    markChapter.status === 200 && markChapter.json?.sessions?.['j.kind']?.state === 'open',
+    `${markChapter.status} j.kind=${markChapter.json?.sessions?.['j.kind']?.state}`)
+
 }
 catch (error) {
   fail++
