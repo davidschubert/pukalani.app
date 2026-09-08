@@ -279,7 +279,9 @@ async function share(): Promise<void> {
     </div>
 
     <div v-else-if="publication" class="mx-auto mt-10 max-w-7xl">
-      <div class="mx-auto max-w-4xl">
+      <!-- Volle 1280 px wie die Galerie (Davids Zuschnitt 2026-09-08) — der
+           Dummy hatte das Dossier auf 896 px eingeengt. -->
+      <div class="mx-auto max-w-7xl">
         <NuxtLink
           :to="localePath('/discover')" class="bw-label inline-flex items-center gap-1.5"
           style="color: var(--bw-muted)" data-discover-back
