@@ -63,9 +63,15 @@ export default defineEventHandler(async (event): Promise<BrandDnaProposeResponse
 
   const stub = brandDnaStubEnabled()
   if (!stub) {
+    // DER SCHLÜSSEL, NICHT DAS CORE-GATE (Prüf-Befund D2c, 2026-09-08):
+    // `isAiConfigured` verlangt `pukalani.ai.enabled`, und das setzt die
+    // branding-App nirgends — der Layer hat seinen eigenen Kill-Switch
+    // (`brandAiEnabled`, eine Zeile drüber) und seine Generatoren fragen nur
+    // nach dem Schlüssel (`resolveAiKey`, wie `generate.post.ts`). Mit dem
+    // Core-Gate antwortete dieser Lauf auf branding.supply IMMER 503.
     const [aiEnabled, textReady] = await Promise.all([
       readBrandAiEnabled(event),
-      isAiConfigured(event),
+      resolveAiKey(event).then(key => key.length > 0),
     ])
     if (!aiEnabled || !textReady) {
       logEvent('info', 'brand.dna_unavailable', {
