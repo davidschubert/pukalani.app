@@ -1,8 +1,9 @@
 # Brand Design (Produkt 02) — Strategie und Konzept
 
 Phase 1 des Workflows (docs/referenz/WORKFLOW.md), Stand 2026-09-07 —
-FREIGEGEBEN mit Davids Entscheidungen in §1.11. Phase 2 (Konzeption) steht in
-§2 und wartet auf Davids Freigabe; kein Code.
+FREIGEGEBEN mit Davids Entscheidungen in §1.11. Phase 2 (Konzeption, §2) ist
+seit 2026-09-07 FREIGEGEBEN (§2.19 nach Empfehlung); Phase 3 (Prototyp im
+Playground) läuft.
 
 ---
 

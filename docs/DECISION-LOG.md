@@ -7,6 +7,18 @@ die kleinen, verstreuten Beschlüsse.
 
 ---
 
+## 2026-09-07 — Brand Design (Produkt 02): Konzept freigegeben, Prototyp beauftragt
+
+**Entscheidung (David):** „Konzept freigegeben, bau den Prototyp im Playground." Damit ist
+docs/plans/BRAND-DESIGN.md §2 verbindlich; die drei offenen Punkte aus §2.19 gelten nach
+Empfehlung: Bild-Anbieter mit ZDR wird vor D5c geprüft (bis dahin Stufe 3 hinter dem
+Config-Gate aus), Freischaltung per Skript UND Dashboard-Knopf, Kapitel-Namen im UI
+„Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung" (Ids bleiben englisch).
+Phase 3 läuft wie bei BF1: Klickdummy im Playground (acht Screens nach §2.15), Davids
+Abnahme, dann Pakete D0–D9.
+
+---
+
 ## 2026-09-07 — Brand Design (Produkt 02): Strategie freigegeben — fünf Schritte tief, Zeichen in drei Stufen inkl. KI-Bildlogos, Studio-begleitet, Schicht 2 der Werkstatt
 
 **Anlass:** „Starte die Strategie für Produkt 02 Brand Design" — Phase 1 des Workflows
