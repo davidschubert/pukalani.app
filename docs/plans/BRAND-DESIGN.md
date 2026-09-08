@@ -663,6 +663,39 @@ Dokument und Foundation-Leseansicht bleiben bei der Lesebreite. Gemessen:
 
 ---
 
+### 3.x Nachtrag 2026-09-08 — Weiche, Vorbilder, Lesung, Ergebnis-Board (Davids Entscheidung, §2.2/§2.8)
+
+Gebaut im Playground (Commit dieser Zeile):
+
+- **Kapitel 1 `/brand/demo/design/dna`** beginnt mit der Weiche `g.source`
+  (zwei Karten: „Wir haben Vorbilder" · „Frida schlägt vor"); der zweite Weg
+  ist über `?quelle=foundation` direkt erreichbar und überspringt nur Upload
+  und Lesung. `g.inspiration`: fünf Attrappen-Vorbilder (`FdInspirationThumb`,
+  abstrakte SVGs — KEINE echten Screenshots fremder Marken), je Karte Bereich
+  als `USelect` (Farbwelt · Typografie · Zeichen · Bildsprache · Komposition),
+  Notiz-Feld, Entfernen, Ablagefläche mit echtem Datei-Wähler (Object-URL im
+  Tab, kein Upload), Drossel-Zeile und Privatheits-/Fremdwerk-Hinweis.
+  `g.reading`: Fazit in zwei Listen („Trägt schon · 3" / „Geht besser · 2"),
+  dann je Vorbild Urteil `fits`/`tension`/`off` als `bw-state`, die
+  Foundation-Stelle („gemessen an: …"), die beobachteten DNA-Belegungen als
+  Chips, Begründung und bei Spannung/Widerspruch der Übernehmen-/Nicht-
+  übernehmen-Satz. `g.dna` zeigt je Zeile die Herkunft (Foundation ·
+  Foundation + Vorbild) und den Vorbild-Satz.
+- **Ergebnis-Board** `FdDesignBoard`: eine Fläche mit Farbwelt (Rampe + fünf
+  Rollen), Bewegung (Tokens), Typografie (Specimen), Zeichen (Wortmarke +
+  Monogramm, Schutzraum-Satz), Bildsprache (drei abstrahierte Kacheln + vier
+  Regeln). Als Kopf von Kapitel 10 (`?design=done`, kompakt) UND als eigene
+  Leseansicht `/brand/demo/design/board` (72 rem, Druck-CSS, rechts der Weg
+  zurück in die sechs Kapitel; Rail-Ergebnispunkt und letzter Weiter-Knopf
+  zeigen dorthin).
+- **Beweise:** SSR 200 auf beiden Wegen (Herkunft 5×Foundation + 5×beides
+  bzw. 10×Foundation), 0 Konsolenfehler auf dna/board/foundation, Typecheck
+  und ESLint grün.
+- **Gelernt:** der Bereich je Karte war zuerst fünf Chips — in der Dreier-
+  Reihe fünf Zeilen hoch; eine Wahl je Bild ist ein Select. Der Dev-Server
+  hielt nach dem Entfernen eines `<style>`-Blocks eine tote CSS-Referenz und
+  zeigte das Vite-Overlay auf JEDER Seite — Neustart, kein Code-Fehler.
+
 ## Anhang A — Recherche-Quellen (2026-09-07)
 
 | Quelle | Sorte | Kernaussage |

@@ -127,6 +127,34 @@ export default defineAppConfig({
           group: 'management',
           order: 131,
         },
+        /**
+         * DIE MODERATION DER ÖFFENTLICHEN GALERIE (Paket D3,
+         * docs/plans/DISCOVER-BRANDS.md §4.4) — der dritte Betreiber-Eintrag
+         * dieses Layers, direkt unter den Korrekturen (`order: 132`): alle
+         * drei sind Arbeitslisten desselben Menschen, und zwischen ihnen
+         * gehört keine fremde Sache.
+         *
+         * Dieselbe Capability wie die zwei darüber: `users.manage`. Sie ist
+         * die Betreiber-Klammer dieses Layers — wer über den Beta-Zugang
+         * entscheidet, entscheidet auch, welche Marke öffentlich unter
+         * unserer Adresse steht (Begründung ausgeschrieben im Kopf von
+         * `server/utils/brandPublications.ts`).
+         *
+         * KEIN `productKey`, aus demselben Grund wie oben: das Produkt-Gate
+         * `brand` schaltet den WIZARD ab, nicht die Pflichten, die aus einer
+         * öffentlichen Galerie folgen — im Gegenteil, gerade dann muss eine
+         * gemeldete Marke noch aus ihr genommen werden können.
+         */
+        {
+          id: 'brand-discover',
+          scope: 'operator',
+          labelKey: 'brand.admin.discover.nav',
+          icon: 'i-ph-globe-hemisphere-west',
+          to: '/dashboard/discover',
+          requiredCapability: 'users.manage',
+          group: 'management',
+          order: 132,
+        },
       ],
     },
     brand: {

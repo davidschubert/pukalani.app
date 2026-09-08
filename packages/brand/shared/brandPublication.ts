@@ -224,10 +224,17 @@ export const BRAND_PUBLICATION_NOT_READY = 'publication_not_ready'
 // ── 3 · Die Zustandsmaschine ────────────────────────────────────────────────
 
 /**
- * DIE FÜNF HANDLUNGEN. `submit`/`withdraw` gehören dem KUNDEN,
- * `approve`/`decline`/`hide` dem BETREIBER (D3).
+ * DIE SECHS HANDLUNGEN. `submit`/`withdraw` gehören dem KUNDEN,
+ * `approve`/`decline`/`hide`/`unhide` dem BETREIBER (D3).
  */
-export const BRAND_PUBLICATION_ACTIONS = ['submit', 'withdraw', 'approve', 'decline', 'hide'] as const
+export const BRAND_PUBLICATION_ACTIONS = [
+  'submit',
+  'withdraw',
+  'approve',
+  'decline',
+  'hide',
+  'unhide',
+] as const
 export type BrandPublicationAction = typeof BRAND_PUBLICATION_ACTIONS[number]
 
 export type BrandPublicationTransition =
@@ -241,9 +248,23 @@ export type BrandPublicationTransition =
  * │ submit     │ (keine) · declined · withdrawn · published → pending      │
  * │ withdraw   │ pending · published · declined            → withdrawn     │
  * │ approve    │ pending                                    → published    │
- * │ decline    │ pending                                    → declined     │
+ * │ decline    │ pending                                    → declined *   │
  * │ hide       │ published                                  → hidden       │
+ * │ unhide     │ hidden                                     → published    │
  * └────────────┴──────────────────────────────────────────────────────────┘
+ *
+ * (*) `decline` hat einen zweiten Halbsatz, wenn schon ein FREIGEGEBENER Stand
+ * draussen steht — dann bleibt die Zeile `published`. Das entscheidet
+ * `brandPublicationDeclineOutcome()` unten; diese Funktion beantwortet nur die
+ * Vorfrage „darf jetzt überhaupt abgelehnt werden?".
+ *
+ * ── `unhide` IST DIE HAND DES BETREIBERS, NICHT DIE DES KUNDEN ────────────
+ * `hidden` bleibt für den Kunden eine Sackgasse (s. unten) — genau deshalb
+ * braucht der Betreiber einen Weg zurück, sonst wäre jede Ausblendung
+ * endgültig und die einzige Korrektur eines Fehlgriffs bestünde darin, den
+ * Kunden neu einreichen zu lassen (was er nicht kann). Zurück geht es OHNE
+ * neue Freigabe: der Stand war schon einmal freigegeben, und ihn ein zweites
+ * Mal zu prüfen prüfte nichts Neues.
  *
  * ── „ERNEUT EINREICHEN" AUS `published` IST DER INTERESSANTE FALL ─────────
  * Er setzt den Zustand auf `pending` zurück, und trotzdem BLEIBT die Marke
@@ -285,7 +306,217 @@ export function decideBrandPublication(
       return status === 'pending' ? { action: 'apply', next: 'declined' } : refuse
     case 'hide':
       return status === 'published' ? { action: 'apply', next: 'hidden' } : refuse
+    case 'unhide':
+      return status === 'hidden' ? { action: 'apply', next: 'published' } : refuse
   }
+}
+
+/**
+ * ABGELEHNT — ABER WAS PASSIERT MIT DEM STAND, DER SCHON DRAUSSEN STEHT?
+ *
+ * Zwei Fälle, und sie sind wirklich verschieden:
+ *
+ *  · OHNE freigegebenen Stand (Erst-Einreichung) ⇒ `declined`. Es gibt nichts
+ *    zu schützen; der Kunde sieht die Begründung und reicht erneut ein.
+ *  · MIT freigegebenem Stand (§3.4 „bis dahin bleibt der freigegebene alte
+ *    Stand öffentlich") ⇒ die Zeile BLEIBT `published`. Abgelehnt wurde die
+ *    AKTUALISIERUNG, nicht die Marke — sie deswegen aus der Galerie zu nehmen
+ *    wäre eine Strafe für einen Verbesserungsversuch, und der geteilte Link
+ *    stürbe an einem Vorgang, der ihn gar nicht betraf.
+ *
+ * Der `pendingSnapshot` wird in BEIDEN Fällen geleert (er ist entschieden) und
+ * die `decisionNote` gesetzt. Daraus folgt die Regel, an der die Oberfläche
+ * den zweiten Fall ERKENNT, ohne dass es dafür eine Spalte gäbe:
+ *
+ *   `published` + nicht-leere `decisionNote`  ⇔  „Aktualisierung abgelehnt".
+ *
+ * Sie trägt nur, wenn die anderen Übergänge die Notiz sauber hinterlassen:
+ * `approve` LEERT sie (die Ablehnung von gestern ist erledigt), `unhide`
+ * ebenso (die Ausblende-Begründung ist mit dem Einblenden gegenstandslos),
+ * `hide` setzt sie zusammen mit `status: 'hidden'`. Alle vier Routen tun das,
+ * `brandPublicationPendingDeclined()` unten liest es — und der Test nagelt
+ * beides zusammen fest.
+ */
+export interface BrandPublicationDeclineOutcome {
+  /** Der Zustand, den die Zeile danach trägt. */
+  next: BrandPublicationStatus
+  /** Bleibt der zuvor freigegebene Stand öffentlich? */
+  keepsPublicStand: boolean
+}
+
+export function brandPublicationDeclineOutcome(hasPublicStand: boolean): BrandPublicationDeclineOutcome {
+  return hasPublicStand
+    ? { next: 'published', keepsPublicStand: true }
+    : { next: 'declined', keepsPublicStand: false }
+}
+
+/**
+ * „AKTUALISIERUNG ABGELEHNT" — die Lesung der Regel von oben.
+ *
+ * Bewusst BERECHNET und nicht gespeichert: es ist dieselbe Tatsache aus zwei
+ * Feldern, und ein drittes Feld daneben wäre das, das eines Tages nicht
+ * mitgeführt wird (dieselbe Begründung wie bei `pendingUpdate`). Es spart
+ * ausserdem eine Migration auf einer Tabelle, die schon steht.
+ */
+export function brandPublicationPendingDeclined(
+  status: BrandPublicationViewStatus,
+  decisionNote: string,
+): boolean {
+  return status === 'published' && decisionNote.trim().length > 0
+}
+
+// ── 5 · Brand of the Day: genau EINE, letzte gewinnt ────────────────────────
+
+/**
+ * WELCHE ZEILEN VERLIEREN IHR `featuredAt`, wenn eine neue gesetzt wird?
+ * (Davids Entscheidung 6, §9.)
+ *
+ * Die Regel steht hier und nicht in der Route, weil sie eine AUSSAGE ist und
+ * keine Datenbank-Bewegung: „nach dieser Handlung trägt höchstens eine Zeile
+ * ein `featuredAt`". Die Route führt die Liste aus, dieser Test beweist sie.
+ *
+ * ── DIE ZIEL-ZEILE STEHT NIE IN DER ANTWORT ───────────────────────────────
+ * Auch dann nicht, wenn sie schon featured WAR. Sonst löschte die Route erst
+ * den Stempel, den sie im selben Zug setzt — und ein Fehlschlag dazwischen
+ * liesse gar keine Brand of the Day zurück. Beim ENTFERNEN (`featured: false`)
+ * gibt es nichts abzulösen: dort räumt die Route genau ihre eigene Zeile.
+ */
+export function brandPublicationFeatureLosers(
+  currentlyFeaturedIds: readonly string[],
+  targetId: string,
+  featured: boolean,
+): string[] {
+  if (!featured) return []
+  return [...new Set(currentlyFeaturedIds)].filter(id => id && id !== targetId)
+}
+
+// ── 6 · Die Meldungen (§3.4 „öffentliches Melden", §6) ──────────────────────
+
+/** `open` = wartet auf den Betreiber, `done` = erledigt. Mehr braucht es nicht. */
+export const BRAND_PUBLICATION_REPORT_STATUSES = ['open', 'done'] as const
+export type BrandPublicationReportStatus = typeof BRAND_PUBLICATION_REPORT_STATUSES[number]
+
+/** Die Reiter der Betreiber-Liste — die zwei Zustände plus „alles". */
+export const BRAND_PUBLICATION_REPORT_FILTERS = ['open', 'done', 'all'] as const
+export type BrandPublicationReportFilter = typeof BRAND_PUBLICATION_REPORT_FILTERS[number]
+export const BRAND_PUBLICATION_REPORT_DEFAULT_FILTER: BrandPublicationReportFilter = 'open'
+
+export function normalizeBrandPublicationReportStatus(
+  value: string | null | undefined,
+): BrandPublicationReportStatus {
+  return (value ?? '').trim() === 'done' ? 'done' : 'open'
+}
+
+/** `null` heisst „nicht filtern" — genau die Form, die `Query.equal` braucht. */
+export function brandPublicationReportStatusValues(
+  filter: BrandPublicationReportFilter,
+): BrandPublicationReportStatus[] | null {
+  return filter === 'all' ? null : [filter]
+}
+
+/**
+ * DER GRUND IST PFLICHT, anders als beim Korrekturvorschlag.
+ *
+ * Dort sagt schon die AUSWAHL („Branche X statt Y"), worum es geht; hier gibt
+ * es nichts ausser dem Satz. Eine Meldung ohne Begründung wäre für den
+ * Betreiber ein Zeiger auf eine Seite und die Aufforderung, selbst zu suchen —
+ * und die Untergrenze von zehn Zeichen hält „test" und „!!!" heraus.
+ */
+export const BRAND_PUBLICATION_REPORT_REASON_MIN = 10
+export const BRAND_PUBLICATION_REPORT_REASON_MAX = 300
+export const BRAND_PUBLICATION_REPORT_EMAIL_MAX = 254
+
+/** Der Deckel der Betreiber-Begründung = die Spaltengrösse aus brand-020. */
+export const BRAND_PUBLICATION_NOTE_MAX = 300
+
+/**
+ * DREI MELDUNGEN JE ANSCHLUSS UND STUNDE (§6).
+ *
+ * Wie bei den Korrekturvorschlägen: der Minuten-Eimer `brand:report` in
+ * `05.rate-limit.ts` schützt den Server, diese Stunde die Arbeitsliste des
+ * Betreibers. Und wie dort ist die Zahl aus dem Gebrauch abgeleitet — wer
+ * mehr als drei Marken pro Stunde beanstandet, meldet nicht, sondern flutet.
+ */
+export const BRAND_PUBLICATION_REPORT_HOUR_LIMIT = 3
+export const BRAND_PUBLICATION_REPORT_WINDOW_MS = 60 * 60_000
+export const BRAND_PUBLICATION_REPORT_LIMIT_CODE = 'report_limit'
+/** Eine offene Meldung derselben IP zur selben Marke ⇒ 409, keine Dublette. */
+export const BRAND_PUBLICATION_REPORT_OPEN_CODE = 'report_open'
+
+export function brandPublicationReportHourKey(ipHash: string): string {
+  return `brand-publication-report-hour:${ipHash}`
+}
+
+/** `>` statt `>=` — `store.hit()` zählt diese Meldung schon mit. */
+export function decideBrandPublicationReportQuota(
+  count: number,
+  limit: number = BRAND_PUBLICATION_REPORT_HOUR_LIMIT,
+): typeof BRAND_PUBLICATION_REPORT_LIMIT_CODE | null {
+  return count > limit ? BRAND_PUBLICATION_REPORT_LIMIT_CODE : null
+}
+
+// ── 7 · Die Reiter der Betreiber-Liste ──────────────────────────────────────
+
+/**
+ * DIE REITER DER BETREIBER-LISTE (§4.4) — und zwar DREI FRAGEN, nicht fünf
+ * Zustände.
+ *
+ *   pending — was will veröffentlicht werden?
+ *   live    — was steht draussen? (`published` UND `hidden`)
+ *   closed  — was ist erledigt?   (`declined` UND `withdrawn`)
+ *
+ * ── WARUM NICHT EIN REITER JE ZUSTAND ─────────────────────────────────────
+ * Weil der Betreiber nicht in Zuständen arbeitet, sondern in Stapeln. `hidden`
+ * gehört zu dem, was einmal draussen stand (die Seite dämpft es und bietet
+ * „Wieder einblenden" an) — ein eigener Reiter dafür wäre eine Liste, die man
+ * nur nach einem Fehlgriff öffnet und die deshalb nie jemand öffnet. Und
+ * `withdrawn` ist der Zwilling von `declined`: beides ist entschieden, nur von
+ * verschiedenen Menschen.
+ *
+ * Die drei plus `all` decken zusammen ALLE fünf Zustände ab — es gibt keine
+ * Zeile, die von dieser Seite aus unerreichbar wäre. Genau das ist die Zusage,
+ * die `BRAND_PUBLICATION_FILTER_STATUSES` unten mit ihrer Vollständigkeit
+ * einlöst und die der Test nachrechnet.
+ *
+ * Der Vorgabewert ist `pending`: das ist die ARBEITSLISTE. Wer die Seite
+ * öffnet, soll sehen, was noch zu entscheiden ist (dieselbe Entscheidung wie
+ * bei den Korrekturen).
+ */
+export const BRAND_PUBLICATION_FILTERS = ['pending', 'live', 'closed', 'all'] as const
+export type BrandPublicationFilter = typeof BRAND_PUBLICATION_FILTERS[number]
+export const BRAND_PUBLICATION_DEFAULT_FILTER: BrandPublicationFilter = 'pending'
+
+/** `null` heisst „nicht filtern" — genau die Form, die `Query.equal` braucht. */
+export const BRAND_PUBLICATION_FILTER_STATUSES: Readonly<
+  Record<BrandPublicationFilter, readonly BrandPublicationStatus[] | null>
+> = {
+  pending: ['pending'],
+  live: ['published', 'hidden'],
+  closed: ['declined', 'withdrawn'],
+  all: null,
+}
+
+export function brandPublicationStatusValues(
+  filter: BrandPublicationFilter,
+): BrandPublicationStatus[] | null {
+  const values = BRAND_PUBLICATION_FILTER_STATUSES[filter]
+  return values ? [...values] : null
+}
+
+/**
+ * DIE ZAHL AM REITER, aus den Zählern je Zustand.
+ *
+ * Sie wird gerechnet und nicht abgefragt: die Route zählt die fünf Zustände
+ * (das ist die Wahrheit), die Reiter fassen sie zusammen. Eine vierte
+ * Zähl-Abfrage für „live" wäre eine zweite Quelle für dieselbe Zahl — und die
+ * eine, die eines Tages nicht mitgeführt wird.
+ */
+export function brandPublicationFilterCount(
+  filter: BrandPublicationFilter,
+  counts: Readonly<Record<string, number>>,
+): number {
+  const values = BRAND_PUBLICATION_FILTER_STATUSES[filter] ?? BRAND_PUBLICATION_STATUSES
+  return values.reduce((sum, status) => sum + (counts[status] ?? 0), 0)
 }
 
 /**

@@ -68,6 +68,9 @@
         "emptyTitle": "Nothing in this view",
         "empty": "Nobody here yet. Switch the filter to see the other states."
       },
+      "discover": {
+        "nav": "Discover"
+      },
       "checkCorrections": {
         "nav": "Corrections",
         "title": "Correction proposals",
@@ -1920,6 +1923,115 @@
       "mentionsFrom": "“{field}” has to name the entries from “{source}” as well.",
       "mentionsNone": "“{field}” must not repeat anything from “{source}”."
     },
+    "discoverAdmin": {
+      "title": "Publications",
+      "subtitle": "A brand only goes public once it is approved here. A rejection needs a reason — the customer sees it in their reading view and can submit again.",
+      "refresh": "Reload",
+      "more": "Load more",
+      "shown": "{count} of {total} shown",
+      "actionFailed": "That did not work",
+      "tab": {
+        "pending": "Queue",
+        "live": "Published",
+        "closed": "Declined & withdrawn",
+        "reports": "Reports"
+      },
+      "status": {
+        "pending": "Waiting",
+        "published": "Public",
+        "declined": "Declined",
+        "hidden": "Hidden",
+        "withdrawn": "Withdrawn"
+      },
+      "reportStatus": {
+        "open": "Open",
+        "done": "Resolved"
+      },
+      "col": {
+        "brand": "Brand",
+        "submitted": "Submitted",
+        "published": "Public since",
+        "score": "Number",
+        "reports": "Reports",
+        "featured": "Brand of the Day",
+        "example": "Example",
+        "status": "Status",
+        "reason": "Reason",
+        "received": "Received"
+      },
+      "score": {
+        "website": "Brand Score",
+        "document": "Foundation maturity",
+        "none": "no check yet"
+      },
+      "owner": "Account {id}",
+      "ownerUnknown": "Account unknown",
+      "pendingUpdate": "New state waiting",
+      "action": {
+        "preview": "Preview",
+        "approve": "Approve",
+        "decline": "Decline",
+        "hide": "Hide",
+        "unhide": "Show again",
+        "resolve": "Resolve"
+      },
+      "declineTitle": "Decline submission",
+      "declineText": "“{title}” will not be published. The reason appears in the customer's reading view.",
+      "declineUpdateText": "The update to “{title}” will be declined. The approved state stays public.",
+      "hideTitle": "Take out of the gallery",
+      "hideText": "“{title}” will answer 404 afterwards. The row and the state remain — you can show it again.",
+      "noteLabel": "Reason",
+      "noteHint": "Required. Write it so the customer knows what to change.",
+      "notePlaceholder": "The values chapter shows someone else's logo …",
+      "approved": "Approved — the brand is public now.",
+      "declined": "Declined.",
+      "declinedKept": "Update declined — the previous state stays public.",
+      "hiddenToast": "Taken out of the gallery.",
+      "unhiddenToast": "Public again.",
+      "featuredOn": "Brand of the Day set.",
+      "featuredReplaced": "Brand of the Day set — the previous one was replaced.",
+      "featuredOff": "Brand of the Day removed.",
+      "exampleOn": "Marked as an example.",
+      "exampleOff": "Example marking removed.",
+      "reportResolved": "Report resolved.",
+      "reporterAnonymous": "anonymous",
+      "emptyTitle": "Nothing to decide",
+      "empty": "As soon as someone submits a brand, it waits here for approval.",
+      "reportsEmptyTitle": "No reports",
+      "reportsEmpty": "If someone objects to a public brand, it shows up here.",
+      "error": {
+        "already_decided": "This submission has already been decided. Reload the list.",
+        "publication_state": "The state of this brand no longer allows that.",
+        "not_published": "Only a public brand can be Brand of the Day.",
+        "publication_not_found": "This publication no longer exists.",
+        "not_found": "This entry no longer exists.",
+        "publication_admin_unavailable": "The store is not answering right now. Please try again later.",
+        "generic": "Please try again."
+      }
+    },
+    "discoverReport": {
+      "trigger": "Report",
+      "title": "Report this brand",
+      "lead": "Tell us what is wrong here — someone else's logo, real personal data, abuse. We will look into it.",
+      "reasonLabel": "What is wrong?",
+      "reasonHint": "Required, at least {min} characters.",
+      "reasonPlaceholder": "The logo in the header belongs to another company …",
+      "counter": "{count}/{max}",
+      "emailLabel": "Email (optional)",
+      "emailHint": "Only so we can ask back. It is never published.",
+      "emailPlaceholder": "Your email address",
+      "submit": "Report",
+      "cancel": "Cancel",
+      "thanks": "Thank you — we will look into it.",
+      "errors": {
+        "reportOpen": "You already have a report open for this brand. We are on it.",
+        "rateLimited": "That is enough reports for now. Please try again later.",
+        "notFound": "This brand does not exist here (any more).",
+        "tooShort": "Please write in a few words what is wrong.",
+        "unavailable": "That did not work right now. Please try again later.",
+        "generic": "That did not work. Please try again."
+      }
+    },
     "publication": {
       "button": "Publish",
       "eyebrow": "Publish",
@@ -1954,6 +2066,7 @@
         "pending": "Waiting for approval",
         "pendingAddress": "Once approved it lives at {address}",
         "pendingUpdate": "New state waiting for approval",
+        "updateDeclined": "Update declined",
         "public": "Public",
         "publicSince": "since {date}",
         "update": "Update state",
@@ -1976,6 +2089,99 @@
       "notReady": "Not yet — something is missing.",
       "limited": "Enough submissions for today. Please try again tomorrow.",
       "failed": "That did not work. Please try again."
-    }
+    },
+      "discover": {
+        "seoTitle": "Discover Brands — brands built with your own brand advisor",
+        "seoDescription": "Public brand foundations from Branding Supply: purpose, values, archetype, voice and colour world — every brand with its full anatomy.",
+        "eyebrow": "Discover Brands",
+        "title": "Brands built with your own brand advisor",
+        "lead": "Each one with its full anatomy: purpose, values, archetype, voice, colour world.",
+        "featured": {
+          "label": "Brand of the Day",
+          "cta": "See the anatomy",
+          "prev": "Previous brand",
+          "next": "Next brand"
+        },
+        "filter": {
+          "path": "Track",
+          "allPaths": "All",
+          "archetype": "Archetype",
+          "palette": "Colour world",
+          "industry": "Industry",
+          "allIndustries": "All industries",
+          "sort": "Sort",
+          "reset": "Clear filters"
+        },
+        "path": {
+          "new": "New brand",
+          "relaunch": "Relaunch"
+        },
+        "sort": {
+          "newest": "Newest",
+          "score": "Brand Score",
+          "maturity": "Foundation maturity"
+        },
+        "score": {
+          "website": "Brand Score",
+          "document": "Foundation maturity",
+          "secondary": "{label} {value}"
+        },
+        "badge": {
+          "example": "Example",
+          "relaunch": "Relaunch",
+          "preview": "Preview — awaiting approval"
+        },
+        "total": "{count} brands",
+        "emptyTitle": "No published brand yet — the first one could be yours.",
+        "emptyCta": "Start your own",
+        "note": "Every brand here is public by choice and released by the team.",
+        "entry": {
+          "seoTitle": "{brand} — anatomy of a brand · Discover Brands",
+          "seoDescription": "The anatomy of {brand}: purpose, values, archetype, voice and colour world — shown publicly with the brand's consent.",
+          "eyebrow": "Anatomy",
+          "back": "Discover Brands",
+          "profile": "Profile",
+          "field": {
+            "industry": "Industry",
+            "path": "Track",
+            "archetype": "Archetype",
+            "voice": "Voice",
+            "language": "Language",
+            "published": "Published"
+          },
+          "archetypePair": "{primary} · with {secondary}",
+          "language": {
+            "de": "German",
+            "en": "English"
+          },
+          "fingerprint": {
+            "title": "Brand fingerprint",
+            "lead": "From the check that applied when this was published — eight categories, weighted into the score {score}.",
+            "link": "To the Brand Check"
+          },
+          "similar": {
+            "title": "Similar brands",
+            "all": "See all",
+            "archetype": "same archetype",
+            "palette": "same colour world"
+          },
+          "cta": {
+            "body": "Like how this is built? Brands are not templates — but the road there is open to you.",
+            "button": "Start your own"
+          },
+          "share": "Share",
+          "copy": "Copy link",
+          "copied": "Link copied",
+          "notFoundTitle": "This brand does not exist here.",
+          "notFoundBody": "The address may be wrong — or the brand is no longer public.",
+          "notFoundCta": "To the gallery"
+        },
+        "teaser": {
+          "eyebrow": "Discover Brands",
+          "title": "See what a brand foundation looks like",
+          "body": "Brands built on Branding Supply that show their anatomy by choice — purpose, values, archetype, voice, colour world.",
+          "cta": "See all brands"
+        }
+      }
   }
 }

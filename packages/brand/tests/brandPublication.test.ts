@@ -137,6 +137,10 @@ describe('decideBrandPublication', () => {
     approve: ['pending'],
     decline: ['pending'],
     hide: ['published'],
+    // `unhide` ist die Hand des BETREIBERS (D3): `hidden` bleibt für den
+    // Kunden eine Sackgasse, sonst wäre der Entzug einen Knopfdruck von
+    // seiner Aufhebung entfernt.
+    unhide: ['hidden'],
   }
 
   const NEXT: Record<string, BrandPublicationStatus> = {
@@ -145,6 +149,7 @@ describe('decideBrandPublication', () => {
     approve: 'published',
     decline: 'declined',
     hide: 'hidden',
+    unhide: 'published',
   }
 
   it('jede erlaubte Kombination führt in genau EINEN Folgezustand', () => {

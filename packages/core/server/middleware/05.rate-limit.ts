@@ -559,6 +559,28 @@ const WRITE_LIMITED: { re: RegExp, bucket: string, max?: number }[] = [
    */
   { re: /^(POST|DELETE) \/api\/brand\/profiles\/[^/]+\/publication$/, bucket: 'brand:publish', max: TOKEN_MAX },
   /**
+   * „HIER STIMMT ETWAS NICHT" — die Meldung zu einer Marke in der öffentlichen
+   * Galerie (docs/plans/DISCOVER-BRANDS.md §3.4/§6, Paket D3).
+   *
+   * Dieselbe Bauform und dieselbe Zahl wie beim Korrekturvorschlag zwei Zeilen
+   * höher, und aus denselben Gründen: die Route hat KEIN Gate davor (gemeldet
+   * wird von jemandem, der eine fremde Marke sieht und hier kein Konto hat),
+   * jeder Versuch kostet eine Abfrage UND beim ersten Mal je Marke einen
+   * Schreibvorgang über den Admin-Client, an dem Appwrites eigene Bremse nicht
+   * greift. 3/min je IP passt zum Gebrauch: ein Mensch sieht EINE Marke und
+   * meldet sie.
+   *
+   * DIESE ZEILE IST DER MINUTEN-DECKEL, NICHT DER GANZE. §6 verlangt 3/Stunde
+   * je Anschluss; ein Stundenfenster kennt diese Middleware nicht (`WINDOW_MS`
+   * ist eine Minute für alle). Den Rest zählt die Route selbst
+   * (`bookBrandPublicationReportQuota`,
+   * `packages/brand/shared/brandPublication.ts`) — die Minute schützt den
+   * Server, die Stunde die Arbeitsliste des Betreibers. Den Bot fängt daneben
+   * der Honigtopf im Rumpf, die Dublette der 409 auf eine bereits offene
+   * Meldung derselben IP zur selben Marke.
+   */
+  { re: /^POST \/api\/discover\/[^/]+\/report$/, bucket: 'brand:report', max: 3 },
+  /**
    * DER MARKTVERGLEICHS-LAUF (MV1 M2, Plan §2.9 Nr. 8: „Rate-Limit je IP auf
    * den Abruf-Endpunkt") — die teuerste Route dieses Servers.
    *

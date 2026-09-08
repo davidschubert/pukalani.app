@@ -1092,6 +1092,20 @@ export interface BrandPublicationState {
    * zum zweiten Mal anstellt.
    */
   pendingUpdate: boolean
+  /**
+   * „AKTUALISIERUNG ABGELEHNT" (§3.4, Paket D3) — die Marke steht weiter
+   * öffentlich, der EINGEREICHTE Stand wurde aber abgelehnt.
+   *
+   * Ein eigenes Feld und nicht bloss `decisionNote`, weil die Oberfläche sonst
+   * dieselbe Rechnung ein zweites Mal anstellen müsste: bei `status:
+   * 'declined'` gehört die Notiz zur MARKE („nicht veröffentlicht, weil …"),
+   * bei `status: 'published'` gehört sie zur AKTUALISIERUNG („draussen steht
+   * weiter der alte Stand, weil …"). Zwei verschiedene Sätze für den Kunden,
+   * und die Unterscheidung gehört an die Stelle, die die Regel kennt.
+   *
+   * `null` heisst „es liegt keine abgelehnte Aktualisierung vor".
+   */
+  pendingDecision: { note: string, at: string } | null
 }
 
 /**
@@ -1119,6 +1133,133 @@ export interface BrandPublicationResponse {
 export interface BrandPublicationNotReadyData {
   code: 'publication_not_ready'
   blockers: BrandPublicationBlocker[]
+}
+
+// ── Moderation (docs/plans/DISCOVER-BRANDS.md §4.4, Paket D3) ───────────────
+
+/**
+ * EINE ZEILE DER BETREIBER-LISTE.
+ *
+ * ── WAS HIER NICHT DRINSTEHT, IST DER HALBE ZWECK ─────────────────────────
+ * Kein Snapshot (die Vorschau ist ein LINK auf die Anatomie, nicht ein Abbild
+ * in einer Tabellenzeile), kein `pendingSnapshot`, kein `ipHash`. Und keine
+ * E-MAIL des Eigentümers: die Warteliste zeigt eine Adresse, weil die Adresse
+ * dort der Eintrag IST; eine Veröffentlichung trägt keine, und sie über die
+ * Users-API nachzuschlagen hiesse, für eine Randspalte je Zeile eine Abfrage
+ * zu stellen (fünfzig Zeilen, fünfzig Fragen) und dabei eine Mailadresse in
+ * ein Browser-Fenster zu holen, die für die Entscheidung nichts beiträgt. Was
+ * bleibt, ist die KONTO-ID — sie genügt, um in der Konsole nachzusehen, und
+ * sie sagt zuverlässig, ob zwei Einreichungen von derselben Person kommen.
+ */
+export interface BrandPublicationAdminItem {
+  /** = die Profil-Id (rowId der Veröffentlichung). */
+  id: string
+  title: string
+  slug: string
+  path: string
+  status: BrandPublicationViewStatus
+  submittedAt: string
+  publishedAt: string
+  decidedAt: string
+  decisionNote: string
+  /** '' = niemand hinterlegt (alte Zeile). Nie eine Mailadresse (s. oben). */
+  ownerId: string
+  /**
+   * DIE ZAHL UND WAS SIE MISST (Entscheidung 3/5): der Website-Score, sonst
+   * die Fundament-Reife. Beide klar beschriftet — sie messen nicht dasselbe
+   * und dürfen nie in einer Spalte verglichen werden.
+   */
+  score: number | null
+  scoreSource: 'website' | 'document' | ''
+  checkId: string
+  reportCount: number
+  featured: boolean
+  example: boolean
+  industry: string
+  archetype: string
+  locale: string
+}
+
+export interface BrandPublicationAdminListResponse {
+  items: BrandPublicationAdminItem[]
+  total: number
+  nextCursor: string
+  /** Je Zustand, UNABHÄNGIG vom gewählten Filter (sonst zählte die Ansicht sich selbst). */
+  counts: Record<string, number>
+}
+
+/** Die Antwort jeder Entscheidungs-Route — der neue Zustand, mehr nicht. */
+export interface BrandPublicationAdminDecisionResponse {
+  ok: true
+  status: BrandPublicationStatusValue
+  /** Bleibt der alte, freigegebene Stand öffentlich? (nur beim Ablehnen) */
+  keepsPublicStand: boolean
+}
+
+/** Der Spaltenwert — die fünf Zustände, ohne das `'none'` der Oberfläche. */
+export type BrandPublicationStatusValue = Exclude<BrandPublicationViewStatus, 'none'>
+
+/** Die Antwort der zwei Schalter (Brand of the Day, Beispiel-Badge). */
+export interface BrandPublicationFlagResponse {
+  ok: true
+  featured: boolean
+  example: boolean
+  /**
+   * Die Zeile, die ihr `featuredAt` an diese hier verloren hat — '' wenn es
+   * keine gab. Die Seite sagt damit „X hat Y abgelöst" statt bloss „gesetzt";
+   * ohne diese Auskunft sähe der Betreiber die Ablösung erst beim nächsten
+   * Laden der Liste und hielte sie womöglich für einen Fehler.
+   */
+  replacedId: string
+}
+
+/**
+ * EINE MELDUNG, wie sie der Betreiber sieht.
+ *
+ * `ipHash` wird NICHT durchgereicht — die Auslassung ist der halbe Zweck von
+ * `toBrandPublicationReport()`, und weil jede Route durch sie hindurch muss,
+ * kann sie keine einzelne vergessen (dasselbe Muster wie bei den Korrekturen).
+ * `reporterEmail` geht sehr wohl hinaus: sie ist der Rückfrage-Weg, und sie
+ * erreicht ausschliesslich diese Betreiber-Liste.
+ */
+export interface BrandPublicationReport {
+  id: string
+  publicationId: string
+  /** Titel und Adresse der gemeldeten Marke — '' wenn die Zeile fort ist. */
+  title: string
+  slug: string
+  path: string
+  reason: string
+  reporterEmail: string
+  status: 'open' | 'done'
+  decidedAt: string
+  createdAt: string
+}
+
+export interface BrandPublicationReportListResponse {
+  items: BrandPublicationReport[]
+  total: number
+  nextCursor: string
+  counts: Record<string, number>
+}
+
+export interface BrandPublicationReportResolveResponse {
+  ok: true
+  status: 'open' | 'done'
+  /** `false` = war schon erledigt; zweimal erledigen ist kein Fehler. */
+  changed: boolean
+}
+
+/**
+ * DIE ANTWORT AUF EINE ÖFFENTLICHE MELDUNG — bewusst nur `ok`.
+ *
+ * Nichts über den Zustand der Marke, nichts über frühere Meldungen: „ist
+ * eingegangen" ist alles, was der Absender in diesem Moment wirklich weiss,
+ * und jede weitere Auskunft wäre eine über eine fremde Marke an jeden, der sie
+ * abfragt (dieselbe Zurückhaltung wie beim Korrekturvorschlag).
+ */
+export interface BrandPublicationReportResponse {
+  ok: true
 }
 
 // ── Brand-Check (docs/archiv/BRAND-CHECK.md) ────────────────────────────────
@@ -1476,4 +1617,118 @@ export interface BrandProfileScores {
 
 export interface BrandProfileScoresResponse {
   items: BrandProfileScores[]
+}
+
+// ── Discover Brands (docs/plans/DISCOVER-BRANDS.md §4.1/§4.2, Paket D2) ──────
+
+/**
+ * WELCHE MESSUNG EINE ZAHL IST (Entscheidung 5): der Auftritt („Brand Score")
+ * oder das Dokument („Fundament-Reife"). Es sind dieselben zwei Quellen, die
+ * `brand_checks.source` kennt — hier ohne den Umweg über die Check-Typen, weil
+ * die Galerie sonst die halbe Check-Welt mitschleppte.
+ */
+export type BrandDiscoverScoreKind = 'website' | 'document'
+
+export interface BrandDiscoverScore {
+  kind: BrandDiscoverScoreKind
+  value: number
+  /** Das Band der Zahl ('strong', …) — die Kachel schreibt es unter den Ring. */
+  band: string
+}
+
+/**
+ * Die ZWEITE Zahl, wenn eine Marke beide hat. Ohne `band`: sie steht als kleine
+ * Zeile da und nicht als Urteil, und ein zweites Band neben dem ersten wäre die
+ * Einladung, sie zu vergleichen — zwei verschiedene Messungen.
+ */
+export interface BrandDiscoverSecondary {
+  kind: BrandDiscoverScoreKind
+  value: number
+}
+
+/**
+ * EINE KACHEL — und zugleich der STECKBRIEF der Anatomie (§4.2).
+ *
+ * Bewusst EIN Typ für beide: der Steckbrief nennt genau die Felder, die auch
+ * die Kachel trägt (Branche · Weiche · Archetyp · Sprache · Veröffentlicht),
+ * und zwei Typen mit denselben Feldern wären zwei Stellen, an denen ein neues
+ * Feld nachgetragen werden müsste.
+ *
+ * WAS NICHT DRINSTEHT: die Profil-Id (die Adresse ist der Slug), der Snapshot
+ * (er wird server-seitig zum Fundament gerechnet), `featuredAt`, `reportCount`,
+ * `decisionNote` — Kuration und Moderation sind keine Auskunft an die
+ * Öffentlichkeit. `featured` steht als BOOLEAN da, weil die Galerie den
+ * Aufmacher markieren muss, nicht weil jemand das Datum braucht.
+ */
+export interface BrandDiscoverItem {
+  slug: string
+  title: string
+  /** `new` oder `relaunch` — die Weiche, als Facette und als Badge. */
+  pathKind: string
+  /** Normalisierte Katalog-Id oder `unknown` (§4.1). */
+  industry: string
+  /** Archetyp-Ids (`d.primary`/`d.secondary`); '' heisst „nicht gesetzt". */
+  archetype: string
+  archetypeSecondary: string
+  paletteId: string
+  /** Die Inhaltssprache der Marke — nicht die des Lesers. */
+  locale: string
+  publishedAt: string
+  /** Das redaktionelle Beispiel-Branding trägt sein Etikett offen (§9.4). */
+  example: boolean
+  featured: boolean
+  score: BrandDiscoverScore | null
+  secondary: BrandDiscoverSecondary | null
+}
+
+export interface BrandDiscoverListResponse {
+  items: BrandDiscoverItem[]
+  /** Einträge im Fenster nach dem Filtern — nicht die Zeilen der Tabelle. */
+  total: number
+  page: number
+  pageSize: number
+  /** Brand of the Day: genau eine, die letzte gewinnt (Entscheidung 6). */
+  featured: BrandDiscoverItem | null
+  /**
+   * Ohne Kuration blättert der Aufmacher die drei NEUESTEN (Entscheidung 6).
+   * Er ist auch dann gefüllt, wenn `featured` steht — die Seite entscheidet,
+   * was sie zeigt, und eine Antwort mit einem Feld, das je nach anderem Feld
+   * fehlt, zwänge sie zu zwei Abfragen.
+   */
+  spotlight: BrandDiscoverItem[]
+}
+
+/** Der GRUND als Id, nie als Satz — die Kachel schreibt ihn in ihrer Sprache. */
+export interface BrandDiscoverSimilar {
+  slug: string
+  title: string
+  paletteId: string
+  reason: 'archetype' | 'palette'
+}
+
+/** Der Markenabdruck der Anatomie — der Check, der beim Einreichen galt. */
+export interface BrandDiscoverCheck {
+  id: string
+  score: number
+  band: string
+  categories: { id: string, score: number | null }[]
+}
+
+export interface BrandDiscoverEntryResponse {
+  /**
+   * Nur in der Betreiber-Vorschau (`?preview=1`, users.manage): die Antwort
+   * zeigt den EINGEREICHTEN Stand einer wartenden Marke und ist `noindex`.
+   */
+  preview?: boolean
+  publication: BrandDiscoverItem
+  /**
+   * Das Fundament, SERVER-SEITIG aus dem eingefrorenen Snapshot gerechnet
+   * (`buildBrandFoundation`) — derselbe Renderer wie die Leseansicht und der
+   * geteilte Link. Der ROHE Snapshot verlässt den Server nicht: er trägt
+   * Slot-Ids und Kapitel, die niemand ausserhalb braucht, und was einmal in
+   * einer Antwort steht, steht in jedem Cache.
+   */
+  foundation: BrandFoundationView
+  check: BrandDiscoverCheck | null
+  similar: BrandDiscoverSimilar[]
 }

@@ -245,7 +245,15 @@ const KIT_FILES = ['logo.svg', 'wortmarke.svg', 'boilerplate.md', 'gruender.jpg'
            (s. Kopf) — das Formular steht auf /brand-check. -->
       <BwBrandCheckTeaser source="home" class="mt-24" />
 
-      <!-- 6 · Abschluss-CTA -->
+      <!-- 6 · Discover Brands: der BEWEIS neben dem Versprechen (Paket D2).
+           Er steht NACH dem Brand-Check-Teaser und VOR dem Abschluss-CTA: erst
+           „was ihr bekommt", dann „so sieht es fertig aus", dann der Knopf.
+           Der Abschnitt VERSCHWINDET, solange keine Marke freigegeben ist —
+           die Komponente entscheidet das selbst (fail-soft, ihr Kopf sagt
+           warum), die Startseite kennt die Galerie nicht. -->
+      <BwDiscoverTeaser class="mt-24" />
+
+      <!-- 7 · Abschluss-CTA -->
       <section class="bw-card mt-24 px-8 py-14 text-center sm:py-16">
         <h2 class="mx-auto max-w-2xl text-balance text-3xl font-medium tracking-tight sm:text-4xl">{{ t('home.ctaTitle') }}</h2>
         <p class="mx-auto mt-4 max-w-xl text-base leading-relaxed" style="color: var(--bw-ink-soft)">{{ t('home.ctaBody') }}</p>

@@ -68,6 +68,9 @@
         "emptyTitle": "Nichts in dieser Ansicht",
         "empty": "Hier steht noch niemand. Wechselt den Filter, um die anderen Zustände zu sehen."
       },
+      "discover": {
+        "nav": "Discover"
+      },
       "checkCorrections": {
         "nav": "Korrekturen",
         "title": "Korrekturvorschläge",
@@ -1920,6 +1923,115 @@
       "mentionsFrom": "„{field}\" muss die Einträge aus „{source}\" auch nennen.",
       "mentionsNone": "„{field}\" darf nichts aus „{source}\" wiederholen."
     },
+    "discoverAdmin": {
+      "title": "Veröffentlichungen",
+      "subtitle": "Jede Marke wird erst öffentlich, wenn sie hier freigegeben ist. Eine Ablehnung braucht eine Begründung — der Kunde sieht sie in seiner Leseansicht und kann erneut einreichen.",
+      "refresh": "Neu laden",
+      "more": "Mehr laden",
+      "shown": "{count} von {total} angezeigt",
+      "actionFailed": "Das hat nicht geklappt",
+      "tab": {
+        "pending": "Warteschlange",
+        "live": "Veröffentlicht",
+        "closed": "Abgelehnt & zurückgezogen",
+        "reports": "Meldungen"
+      },
+      "status": {
+        "pending": "Wartet",
+        "published": "Öffentlich",
+        "declined": "Abgelehnt",
+        "hidden": "Ausgeblendet",
+        "withdrawn": "Zurückgezogen"
+      },
+      "reportStatus": {
+        "open": "Offen",
+        "done": "Erledigt"
+      },
+      "col": {
+        "brand": "Marke",
+        "submitted": "Eingereicht",
+        "published": "Öffentlich seit",
+        "score": "Zahl",
+        "reports": "Meldungen",
+        "featured": "Brand of the Day",
+        "example": "Beispiel",
+        "status": "Status",
+        "reason": "Grund",
+        "received": "Eingegangen"
+      },
+      "score": {
+        "website": "Brand Score",
+        "document": "Fundament-Reife",
+        "none": "noch kein Check"
+      },
+      "owner": "Konto {id}",
+      "ownerUnknown": "Konto unbekannt",
+      "pendingUpdate": "Neuer Stand wartet",
+      "action": {
+        "preview": "Vorschau",
+        "approve": "Freigeben",
+        "decline": "Ablehnen",
+        "hide": "Ausblenden",
+        "unhide": "Wieder einblenden",
+        "resolve": "Erledigen"
+      },
+      "declineTitle": "Einreichung ablehnen",
+      "declineText": "„{title}“ wird nicht veröffentlicht. Die Begründung steht in der Leseansicht des Kunden.",
+      "declineUpdateText": "Die Aktualisierung von „{title}“ wird abgelehnt. Der freigegebene Stand bleibt öffentlich.",
+      "hideTitle": "Aus der Galerie nehmen",
+      "hideText": "„{title}“ antwortet danach 404. Die Zeile und der Stand bleiben erhalten, ihr könnt sie wieder einblenden.",
+      "noteLabel": "Begründung",
+      "noteHint": "Pflicht. Schreibt sie so, dass der Kunde weiß, was zu ändern ist.",
+      "notePlaceholder": "Im Kapitel Werte steht ein fremdes Logo …",
+      "approved": "Freigegeben — die Marke steht jetzt öffentlich.",
+      "declined": "Abgelehnt.",
+      "declinedKept": "Aktualisierung abgelehnt — der alte Stand bleibt öffentlich.",
+      "hiddenToast": "Aus der Galerie genommen.",
+      "unhiddenToast": "Wieder öffentlich.",
+      "featuredOn": "Brand of the Day gesetzt.",
+      "featuredReplaced": "Brand of the Day gesetzt — die vorige wurde abgelöst.",
+      "featuredOff": "Brand of the Day entfernt.",
+      "exampleOn": "Als Beispiel markiert.",
+      "exampleOff": "Beispiel-Markierung entfernt.",
+      "reportResolved": "Meldung erledigt.",
+      "reporterAnonymous": "anonym",
+      "emptyTitle": "Nichts zu entscheiden",
+      "empty": "Sobald jemand eine Marke einreicht, wartet sie hier auf die Freigabe.",
+      "reportsEmptyTitle": "Keine Meldungen",
+      "reportsEmpty": "Wenn jemand eine öffentliche Marke beanstandet, steht sie hier.",
+      "error": {
+        "already_decided": "Diese Einreichung wurde schon entschieden. Ladet die Liste neu.",
+        "publication_state": "Der Zustand dieser Marke erlaubt das nicht mehr.",
+        "not_published": "Nur eine öffentliche Marke kann Brand of the Day sein.",
+        "publication_not_found": "Diese Veröffentlichung gibt es nicht mehr.",
+        "not_found": "Diesen Eintrag gibt es nicht mehr.",
+        "publication_admin_unavailable": "Die Ablage antwortet gerade nicht. Bitte später noch einmal.",
+        "generic": "Bitte noch einmal versuchen."
+      }
+    },
+    "discoverReport": {
+      "trigger": "Melden",
+      "title": "Diese Marke melden",
+      "lead": "Sagt uns, was hier nicht stimmt — ein fremdes Logo, echte Personendaten, Beleidigungen. Wir sehen es uns an.",
+      "reasonLabel": "Was stimmt nicht?",
+      "reasonHint": "Pflicht, mindestens {min} Zeichen.",
+      "reasonPlaceholder": "Das Logo im Kopf gehört einer anderen Firma …",
+      "counter": "{count}/{max}",
+      "emailLabel": "E-Mail (freiwillig)",
+      "emailHint": "Nur für eine Rückfrage. Sie wird nicht veröffentlicht.",
+      "emailPlaceholder": "Eure E-Mail-Adresse",
+      "submit": "Melden",
+      "cancel": "Abbrechen",
+      "thanks": "Danke — wir sehen es uns an.",
+      "errors": {
+        "reportOpen": "Zu dieser Marke liegt schon eine Meldung von euch. Wir sind dran.",
+        "rateLimited": "Gerade genug gemeldet. Versucht es später noch einmal.",
+        "notFound": "Diese Marke gibt es hier nicht (mehr).",
+        "tooShort": "Bitte schreibt in ein paar Worten, was nicht stimmt.",
+        "unavailable": "Das ging gerade nicht. Bitte später noch einmal.",
+        "generic": "Hat nicht geklappt. Bitte noch einmal versuchen."
+      }
+    },
     "publication": {
       "button": "Veröffentlichen",
       "eyebrow": "Veröffentlichen",
@@ -1954,6 +2066,7 @@
         "pending": "Wartet auf Freigabe",
         "pendingAddress": "Nach der Freigabe erreichbar unter {address}",
         "pendingUpdate": "Neuer Stand wartet auf Freigabe",
+        "updateDeclined": "Aktualisierung abgelehnt",
         "public": "Öffentlich",
         "publicSince": "seit {date}",
         "update": "Stand aktualisieren",
@@ -1976,6 +2089,99 @@
       "notReady": "So noch nicht — es fehlt etwas.",
       "limited": "Heute genug eingereicht. Versucht es morgen wieder.",
       "failed": "Hat nicht geklappt. Bitte noch einmal versuchen."
-    }
+    },
+      "discover": {
+        "seoTitle": "Discover Brands — Marken, gebaut mit eurem persönlichen Markenberater",
+        "seoDescription": "Öffentliche Markenfundamente aus Branding Supply: Purpose, Werte, Archetyp, Stimme und Farbwelt — jede Marke mit ihrer ganzen Anatomie.",
+        "eyebrow": "Discover Brands",
+        "title": "Marken, gebaut mit eurem persönlichen Markenberater",
+        "lead": "Jede mit ihrer ganzen Anatomie: Purpose, Werte, Archetyp, Stimme, Farbwelt.",
+        "featured": {
+          "label": "Brand of the Day",
+          "cta": "Anatomie ansehen",
+          "prev": "Vorheriges Branding",
+          "next": "Nächstes Branding"
+        },
+        "filter": {
+          "path": "Weiche",
+          "allPaths": "Alle",
+          "archetype": "Archetyp",
+          "palette": "Farbwelt",
+          "industry": "Branche",
+          "allIndustries": "Alle Branchen",
+          "sort": "Sortierung",
+          "reset": "Filter zurücksetzen"
+        },
+        "path": {
+          "new": "Neue Marke",
+          "relaunch": "Relaunch"
+        },
+        "sort": {
+          "newest": "Neueste",
+          "score": "Brand Score",
+          "maturity": "Fundament-Reife"
+        },
+        "score": {
+          "website": "Brand Score",
+          "document": "Fundament-Reife",
+          "secondary": "{label} {value}"
+        },
+        "badge": {
+          "example": "Beispiel",
+          "relaunch": "Relaunch",
+          "preview": "Vorschau — wartet auf Freigabe"
+        },
+        "total": "{count} Marken",
+        "emptyTitle": "Noch keine veröffentlichte Marke — die erste könnte eure sein.",
+        "emptyCta": "Starte deine eigene",
+        "note": "Jedes Branding hier ist freiwillig öffentlich und vom Team freigegeben.",
+        "entry": {
+          "seoTitle": "{brand} — Anatomie einer Marke · Discover Brands",
+          "seoDescription": "Die Anatomie von {brand}: Purpose, Werte, Archetyp, Stimme und Farbwelt — öffentlich gezeigt mit Zustimmung der Marke.",
+          "eyebrow": "Anatomie",
+          "back": "Discover Brands",
+          "profile": "Steckbrief",
+          "field": {
+            "industry": "Branche",
+            "path": "Weiche",
+            "archetype": "Archetyp",
+            "voice": "Stimme",
+            "language": "Sprache",
+            "published": "Veröffentlicht"
+          },
+          "archetypePair": "{primary} · Rest {secondary}",
+          "language": {
+            "de": "Deutsch",
+            "en": "Englisch"
+          },
+          "fingerprint": {
+            "title": "Markenabdruck",
+            "lead": "Aus der Prüfung, die beim Veröffentlichen galt — acht Kategorien, gewichtet zum Wert {score}.",
+            "link": "Zum Brand-Check"
+          },
+          "similar": {
+            "title": "Ähnliche Marken",
+            "all": "Alle ansehen",
+            "archetype": "gleicher Archetyp",
+            "palette": "gleiche Farbwelt"
+          },
+          "cta": {
+            "body": "Gefällt euch, wie das gebaut ist? Marken sind keine Vorlagen — aber der Weg dorthin steht euch offen.",
+            "button": "Starte deine eigene"
+          },
+          "share": "Teilen",
+          "copy": "Link kopieren",
+          "copied": "Link kopiert",
+          "notFoundTitle": "Diese Marke gibt es hier nicht.",
+          "notFoundBody": "Vielleicht ist die Adresse falsch — oder das Branding ist nicht mehr öffentlich.",
+          "notFoundCta": "Zur Galerie"
+        },
+        "teaser": {
+          "eyebrow": "Discover Brands",
+          "title": "Seht, wie ein Markenfundament aussieht",
+          "body": "Marken, die auf Branding Supply gebaut wurden und ihre Anatomie freiwillig zeigen — Purpose, Werte, Archetyp, Stimme, Farbwelt.",
+          "cta": "Alle Marken ansehen"
+        }
+      }
   }
 }
