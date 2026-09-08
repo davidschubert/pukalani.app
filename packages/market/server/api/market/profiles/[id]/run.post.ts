@@ -4,7 +4,7 @@ import type { MarketProfileField, MarketRunStep } from '../../../../../shared/ma
 import { MARKET_MAX_CHARS_PER_RUN } from '../../../../../shared/marketCrawlRules'
 import { marketRawExpiresAt } from '../../../../../shared/marketRetention'
 import { readBrandAiEnabled } from '../../../../contracts/brandContract'
-import { MARKET_UNLOCK_STEP, requireMarketProfile, requireMarketUnlocked } from '../../../../utils/marketAccess'
+import { MARKET_UNLOCK_STEP, type MarketRouteContext, requireMarketProfile, requireMarketUnlocked } from '../../../../utils/marketAccess'
 import { bookMarketRun } from '../../../../utils/marketQuota'
 import {
   createMarketProfile,
@@ -68,14 +68,18 @@ interface CandidateOutcome {
 }
 
 export default defineEventHandler(async (event): Promise<MarketRunResponse> => {
-  const { userId, profileId, profile } = await requireMarketProfile(event)
-
   // JEDER Ausgang vor dem Lauf hinterlässt eine Zeile (2026-09-07): ein Lauf,
   // der an einer Vorprüfung scheitert, antwortet 4xx — und 4xx protokolliert
-  // der zentrale Handler nicht. Davids erster Live-Lauf endete so ohne jede
+  // der zentrale Handler nicht. Davids erste Live-Läufe endeten so ohne jede
   // Spur, und die Frage „ist der Klick überhaupt angekommen?" war aus dem Log
-  // nicht zu beantworten. Geloggt wird der CODE, nie ein Inhalt.
+  // nicht zu beantworten. Deshalb ZUERST die Ankunft (noch vor Gate und
+  // Session — nur die Tatsache, ob eine Session dranhängt), dann jeder
+  // Ablehnungsgrund als CODE. Nie ein Inhalt, nie eine Id.
+  logEvent('info', 'market.run_requested', { session: typeof event.context.user?.$id === 'string' })
+
+  let userId: string, profileId: string, profile: MarketRouteContext['profile']
   try {
+    ({ userId, profileId, profile } = await requireMarketProfile(event))
     await requireMarketUnlocked(event, profileId)
   }
   catch (error) {
