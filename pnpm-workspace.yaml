@@ -112,9 +112,9 @@ catalog:
   appwrite: ^26.2.0
   node-appwrite: ^26.2.0
   '@types/node': ^22.18.0
-  nuxt: ^4.5.1
-  # 4.11.0 bringt USplitter (Werkstatt-Zonen im brand-Layer).
-  '@nuxt/ui': ^4.11.0
+  nuxt: ^4.5.2
+  # 4.11.1 (Patch: Link-Prefetch unter Nuxt 4.5, Table-colspan, Form-method) — 4.11.0 bringt USplitter (Werkstatt-Zonen im brand-Layer).
+  '@nuxt/ui': ^4.11.1
   # EXAKT gepinnt, ohne Caret — und das ist hier keine Vorsicht, sondern die
   # Bedingung. Tiptap liegt bereits als auto-installierter optionaler Peer von
   # @nuxt/ui im Baum (3.27.1, genau eine Kopie je Paket). Wir nehmen NUR
@@ -149,18 +149,18 @@ catalog:
   '@nuxtjs/mdc': ^0.22.2
   # Fest gekoppelt: @pinia/nuxt 0.11.x verlangt pinia ^3, 1.0.x verlangt ^4 —
   # einzeln bewegt sich keines von beiden ohne unerfuellten Peer.
-  '@pinia/nuxt': ^1.0.1
-  pinia: ^4.0.2
+  '@pinia/nuxt': ^1.0.2
+  pinia: ^4.0.3
   # MUSS zu dem mitwandern, was nuxt intern verlangt (4.5.1 → @vue/shared
   # ^3.5.40). Bleibt der Katalog darunter, hält pnpm für die Workspace-Pakete
   # die alte vue-Version und nuxt zieht daneben die neue: mit ZWEI vue-Kopien
   # läuft der Nitro-Externals-Tracer im Zyklus vue → @vue/server-renderer → vue
   # und der Prod-Build stirbt an ENAMETOOLONG.
-  vue: ^3.5.40
+  vue: ^3.5.42
   typescript: ^5.9.3
   vitest: ^4.1.8
   vue-tsc: ^3.3.8
-  zod: ^4.4.3
+  zod: ^4.5.4
   jiti: ^2.7.0
   nodemailer: ^7.0.0
   ioredis: ^5.9.0
