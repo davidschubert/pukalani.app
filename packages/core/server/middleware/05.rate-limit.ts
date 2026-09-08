@@ -596,6 +596,29 @@ const WRITE_LIMITED: { re: RegExp, bucket: string, max?: number }[] = [
    * zwölf Karten holt zwölf Bilder, das wäre eine Bremse gegen die eigene
    * Anzeige.
    */
+  /**
+   * DIE LESUNG DER VORBILDER (§2.2 Schritt 3, Paket D2b) — der Vision-Lauf.
+   *
+   * SIE STEHT VOR DER ZEILE DARUNTER, UND ZWAR ZWINGEND: `find()` nimmt den
+   * ERSTEN passenden Eintrag, und `…/inspiration/[^/]+` deckt `…/read` mit ab.
+   * Andersherum liefe der teuerste Aufruf dieser Fläche im Eimer des
+   * billigsten und hätte zwölf Züge je Minute.
+   *
+   * DER EIGENTLICHE DECKEL IST FACHLICH und liegt in der Route: 3 Läufe je
+   * Marke und Tag (`brandAiLimits.ts`). Diese Zeile schützt nur den Server vor
+   * dem Fall, in dem jemand ohne Konto-Deckel dagegenhämmert, und greift VOR
+   * jeder Datenbank-Abfrage.
+   *
+   * DESHALB MUSS SIE WEITER SEIN ALS DER FACHLICHE DECKEL, und 3/min wäre
+   * genau das nicht: der Eimer zählt JEDEN Aufruf des Pfades — auch die, die
+   * die Route mit 404 (fremde Marke), 409 (kein Vorbild) oder 429 (Tag voll)
+   * beantwortet. Mit derselben Zahl wie der Tages-Deckel bekäme der Mensch
+   * beim vierten Klick „zu schnell" statt „heute genug", und das ist die
+   * falsche Auskunft — beim ersten Beweislauf fielen dadurch vier Prüfungen
+   * auf einmal. TOKEN_MAX (10/min) ist dieselbe Zahl wie beim Veröffentlichen
+   * und lässt jede fachliche Antwort durch, bevor sie greift.
+   */
+  { re: /^POST \/api\/brand\/profiles\/[^/]+\/inspiration\/read$/, bucket: 'brand:reading', max: TOKEN_MAX },
   { re: /^(POST|PATCH|DELETE) \/api\/brand\/profiles\/[^/]+\/inspiration(\/[^/]+)?$/, bucket: 'brand:inspiration', max: 12 },
   /**
    * „HIER STIMMT ETWAS NICHT" — die Meldung zu einer Marke in der öffentlichen

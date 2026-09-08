@@ -189,6 +189,22 @@ export default defineAppConfig({
       enabled: false,
       /** Model-Id der OpenAI-kompatiblen Chat-Completions-API (Default: OpenRouter) */
       model: 'anthropic/claude-haiku-4.5',
+      /**
+       * BILDER LESEN (`aiVision`, docs/plans/BRAND-DESIGN.md §2.12) — LEER
+       * heisst AUS, und das ist der Core-Default.
+       *
+       * Der Modell-Name IST das Gate: es gibt keinen zweiten Schalter daneben
+       * (Begründung im Kopf von `server/utils/aiVision.ts`). Wer ihn setzt,
+       * schickt Bilder an einen fremden Anbieter — der Transport klemmt
+       * deshalb JEDEN Vision-Aufruf fest auf `provider.data_collection:
+       * 'deny'` (OpenRouter-Provider-Routing, Davids ZDR-Entscheidung
+       * 2026-09-08), und das lässt sich von aussen nicht abschalten.
+       *
+       * Zu wählen ist ein MULTIMODALES Modell, das unter dieser Bedingung
+       * überhaupt Anbieter findet — sonst antwortet OpenRouter mit einem
+       * Routing-Fehler statt mit einer Lesung.
+       */
+      visionModel: '',
       baseUrl: 'https://openrouter.ai/api/v1',
     },
     auth: {
