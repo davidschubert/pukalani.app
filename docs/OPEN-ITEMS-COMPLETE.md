@@ -252,6 +252,24 @@ Server). **Bewusst nicht gebaut:** Mehrseiten-Abruf im Brand-Check (Produktfrage
 eine Funktion zerlegt, ist nur dann keine Verhaltensänderung, wenn die Reihenfolge der
 Kostenstellen als Test festgenagelt ist — deshalb `profileId` als Funktion statt als Wert.
 
+**Live-Beweis 2026-09-08 (selbst geklickt, Davids freigegebener Chrome):** Krume & Gold ist die
+einzige Brand mit abgenommenem Kapitel B und hatte KEINEN Wettbewerber — der Knopf „Markt
+vergleichen“ war deaktiviert, Davids drei Klicks lösten nie einen Request aus, das Log blieb
+leer. Wettbewerber `zeitfuerbrot.com` eingetragen → Lauf 42 s: `market.run_started` (1
+Kandidat) → `market.extracted` (6 Seiten, 5 belegte Felder) → `market.run` →
+**`brand.check_completed` Score 82** → `market.brand_checks` (open 1, ran 1, skipped 0) →
+`market.report` (4 Konventionen, 3 freie Stellen, 3 Befunde). Kandidatenkarte zeigt „82 ·
+Ausgezeichnet · Zum Brand-Check“. Dazu die Lauf-Route mit `market.run_requested` (vor jeder
+Prüfung, nur Session ja/nein), `market.run_rejected` (Gate/Session/Besitz/locked/no_competitors/
+Drossel als Code) und `market.run_started` — 4xx protokolliert der zentrale Handler nicht, und
+genau das machte die Diagnose drei Runden lang unmöglich.
+
+**Gelernt (Davids Rückfrage „wieso testest du das nicht immer direkt mit?“):** Eine
+Live-Meldung ohne selbst durchgeführten Klick — auch hinter dem Login, Davids Chrome ist
+freigegeben — verlagert den Test auf David und lässt Bedien-Ursachen (deaktivierter Knopf)
+unsichtbar, weil sie nie den Server erreichen. Regel: den entscheidenden Klick selbst machen,
+Netzwerk + Konsole + Server-Log zusammen lesen; nur vor echten Geld-Aktionen fragen.
+
 ### H1: Leere `UTable`-Spaltenköpfe (stille Hydration-Fehler) — 40 Stellen in 15 Layern behoben ✅ 2026-09-06
 
 **Was:** Folgepunkt aus dem Brand-Check-Ranking: `header: () => ''` in einer `UTable`-Spalte
