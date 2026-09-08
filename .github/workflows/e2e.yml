@@ -1,6 +1,6 @@
 # E2E gegen eine ECHTE Appwrite-Instanz (OPEN-ITEMS Idee 4): der Runner
 # startet den geschnittenen Appwrite-Stack (ci/appwrite/ — traefik, appwrite,
-# realtime, databases-/deletes-Worker, mariadb, redis; Rest des offiziellen
+# realtime, geo, databases-/deletes-Worker, mariadb, redis; Rest des offiziellen
 # Compose bleibt aus), scripts/ci/appwrite-setup.mjs erledigt die Console-
 # Schritte (Account/Projekt/Key/Platform + .env), dann bootstrap --seed und
 # die Playwright-Suite — inklusive Realtime-Spec (env-gated, läuft hier,
@@ -77,7 +77,7 @@ jobs:
         run: |
           (
             docker compose --env-file ci.env --project-name appwrite-ci up -d \
-              traefik appwrite appwrite-realtime \
+              traefik appwrite appwrite-realtime appwrite-geo \
               appwrite-worker-databases appwrite-worker-deletes \
               mariadb redis
             echo $? > "$RUNNER_TEMP/stack.rc"
