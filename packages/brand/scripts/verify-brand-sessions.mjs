@@ -124,6 +124,22 @@
  *     die Variable prüft der Abschnitt stattdessen die 503
  *     `mark_brief_unavailable`.
  *
+ * Seit Brand Design D6 (§2.6) kommt die BILDSPRACHE dazu:
+ *
+ * 28. PRINZIP, ILLUSTRATION, ICONS, DO & DON'T: die Bühne von `imagery`
+ *     bekommt Farbwelt UND Schriftpaar aus zwei fremden Kapiteln; die Seite
+ *     zeichnet die drei Prinzip-Skizzen AUS der bestätigten Farbwelt (kein
+ *     `img`, kein Bild-Pfad — §1.4) und markiert genau das Prinzip, das die
+ *     DNA-Bildwelt vorgibt. Die Strichstärke jedes Icon-Satzes steht als
+ *     echtes `stroke-width` im Dokument, die Regel dazu nennt Zahl und
+ *     Schriftfamilie — und sie SPERRT nichts: ein zu kräftiger Satz lässt sich
+ *     bestätigen und bekommt trotzdem seinen Hinweis. Ein anderes Prinzip
+ *     dreht das Do & Don't mit (mit GEGENPROBE: die alten Zeilen sind weg).
+ *     Eine erfundene Icon- oder Illustrations-Wahl ⇒ 409
+ *     `invariant_violated`. Danach ist das Kapitel bis zur Abnahme
+ *     durchlaufbar und `motion` geht auf. KEIN Stub nötig: dieses Kapitel
+ *     rechnet jeden seiner vier Werte.
+ *
  * ── WAS DIESER BEWEIS NICHT BEWEIST ──────────────────────────────────────
  * Den Anbieter. Ohne `NUXT_AI_KEY` wirft `aiCompleteStream` (503), die Route
  * schickt `generation.failed` mit `provider_error` — und genau das ist hier
@@ -2881,6 +2897,257 @@ try {
   check('… und das nächste Kapitel `imagery` ist danach erreichbar',
     imageryChapter.status === 200 && imageryChapter.json?.sessions?.['k.photo']?.state === 'open',
     `${imageryChapter.status} k.photo=${imageryChapter.json?.sessions?.['k.photo']?.state}`)
+
+  // ══ 28 · Die Bildsprache: das Kapitel `imagery` (Brand Design D6, §2.6) ══
+  //
+  // ── WAS DIESER ABSCHNITT PRÜFT — UND WAS NICHT ─────────────────────────
+  // Die REGELN (Vorbelegung aus der DNA, die vier Achsen mit ihren
+  // Gegenstücken, beide Slot-Werte hin und zurück, die Strichstärke-Rechnung)
+  // sind vollständig in `tests/brandDesignImagery.test.ts` belegt. HIER wird
+  // geprüft, was ein Unit-Test nicht sehen kann: dass die Bühne Farbwelt UND
+  // Schriftpaar zugeliefert bekommt, dass die drei Skizzen wirklich aus der
+  // BESTÄTIGTEN Farbwelt gezeichnet werden (und keine Bilddatei laden), dass
+  // die Strichstärke als `stroke-width` im Dokument steht, dass die
+  // Invarianten an der Route greifen — und dass das Kapitel durchläuft.
+  //
+  // Wie in 25 bis 27 gilt: die VORBELEGUNG schreibt der Browser (Autosave,
+  // s. `useBrandImageryWorld`). SSR RECHNET sie aber und malt sie hin, und
+  // daran hängen die Prüfungen unten.
+  //
+  // DIE ERWARTETEN WERTE STEHEN ALS LITERAL und werden nicht aus der Antwort
+  // abgeleitet (Beweis-Regel 1): die Tinte der Skizzen ist dieselbe `#352217`
+  // wie in Abschnitt 27, und der Linien-Satz hat 1,5 px.
+  console.log('\n28 · Brand Design: die Bildsprache (D6)')
+
+  const imageryBase = `${base}/steps/imagery`
+  const imageryPage = async () => call(`/de/brand/${profileId}/imagery`, { cookie: account.cookie })
+  const sketchInk = '#352217'
+  const principles = ['daylight', 'contrast', 'closeup']
+
+  /**
+   * ERST EINE ECHTE DNA, DANN DIE VORBELEGUNG PRÜFEN.
+   *
+   * `g.mix` steht seit Abschnitt 24 als PLATZHALTER in der Ablage (drei Blöcke
+   * „Platzhalter") — für die Ketten davor reichte das, weil sie nur `stale`
+   * und Zustände prüfen. Hier nicht: die Vorbelegung dieses Kapitels HÄNGT an
+   * der Bildwelt, und gegen einen Platzhalter fiele jede Karte auf den
+   * Rückfall zurück. Ein Beweis, der das nicht merkt, prüft den Rückfall und
+   * nennt ihn DNA. Deshalb steht hier ein echter Mix-Wert (Kailua: Bildwelt
+   * „Nah am Handwerk", Formsprache „Weich gerundet") — geschrieben wie in
+   * Abschnitt 24 direkt in die Ablage, weil das Kapitel `dna` längst
+   * abgeschlossen ist.
+   */
+  const realMix = [
+    '## Visueller Stil\nRedaktionell · Eine Stufe ruhiger · Aus eurer Foundation',
+    '## Ästhetische Epoche\nZeitlos · Eine Stufe ruhiger · Aus eurer Foundation',
+    '## Formsprache\nWeich gerundet · Eine Stufe ruhiger · Aus eurer Foundation',
+    '## Typografie-Charakter\nBuchhafte Serif · Eine Stufe ruhiger · Aus eurer Foundation',
+    '## Farb-Charakter\nErdig gedämpft · Eine Stufe ruhiger · Aus eurer Foundation',
+    '## Bildwelt\nNah am Handwerk · Eine Stufe ruhiger · Aus eurer Foundation',
+    '## Komposition\nRuhig und luftig · Eine Stufe ruhiger · Aus eurer Foundation',
+    '## Materialität\nPapier, matt · Eine Stufe ruhiger · Aus eurer Foundation',
+    '## Bewegungs-Charakter\nRuhig · Eine Stufe ruhiger · Aus eurer Foundation',
+    '## Grundstimmung\nWarm einladend · Eine Stufe ruhiger · Aus eurer Foundation',
+  ].join('\n\n')
+  await writeDnaSlots((slots) => {
+    slots['g.mix'] = { ...slots['g.mix'], latestDraft: realMix, confirmed: realMix }
+  })
+
+  const imageryDetail = await call(imageryBase, { cookie: account.cookie })
+  check('die Bühne bekommt Farbwelt UND Schriftpaar aus zwei fremden Kapiteln',
+    String(imageryDetail.json?.sourceValues?.['g.mix'] ?? '').includes('Nah am Handwerk')
+    && imageryDetail.json?.sourceValues?.['h.base'] === '#4a3123'
+    && imageryDetail.json?.sourceValues?.['h.neutral'] === 'warm'
+    && imageryDetail.json?.sourceValues?.['h.accent'] === '#22392f'
+    && imageryDetail.json?.sourceValues?.['i.pair'] === 'editorial',
+    JSON.stringify(imageryDetail.json?.sourceValues ?? {}).slice(0, 240))
+
+  const imageryView = await imageryPage()
+  check('die Werkstatt zeigt den Bildsprache-Abschnitt',
+    imageryView.status === 200 && imageryView.text.includes('data-brand-imagery'),
+    `${imageryView.status} ${imageryView.text.length} Zeichen`)
+  check('… mit allen drei Prinzipien des Katalogs',
+    principles.every(id => imageryView.text.includes(`data-imagery-principle="${id}"`)),
+    principles.filter(id => !imageryView.text.includes(`data-imagery-principle="${id}"`)).join(', '))
+
+  /**
+   * Der Ausschnitt EINER Karte: von ihrem Haken bis zum nächsten
+   * `data-imagery-`. Ohne diese Grenze fände ein `includes` den Chip
+   * irgendwo auf der Seite und nicht auf DIESER Karte.
+   */
+  const cardChunk = (html, id) => {
+    const start = html.indexOf(`data-imagery-principle="${id}"`)
+    if (start < 0) return ''
+    const next = html.indexOf('data-imagery-', start + 1)
+    return html.slice(start, next < 0 ? html.length : next)
+  }
+
+  /**
+   * DIE VORBELEGUNG AUS DER DNA: Bildwelt „Nah am Handwerk" ⇒ Prinzip
+   * `closeup`, Formsprache „Weich gerundet" ⇒ Icon-Satz `regular`. Der Chip
+   * steht dreimal auf der Seite — einmal je Abschnitt (Prinzip, Illustration,
+   * Icons), nicht einmal insgesamt.
+   */
+  check('… und mit genau drei markierten Vorschlägen — einer je Abschnitt',
+    imageryView.text.split('Aus eurer DNA').length - 1 === 3,
+    `${imageryView.text.split('Aus eurer DNA').length - 1}× gefunden`)
+  check('der Vorschlag ist das Prinzip der DNA-Bildwelt („Nah am Handwerk" ⇒ `closeup`)',
+    cardChunk(imageryView.text, 'closeup').includes('Aus eurer DNA')
+    && !cardChunk(imageryView.text, 'daylight').includes('Aus eurer DNA'),
+    'der Chip steht nicht auf der Karte „closeup"')
+
+  /**
+   * KEINE FOTOS, SONDERN GEZEICHNETE FLÄCHEN (§1.4) — und sie tragen die
+   * gerechneten Farben der BESTÄTIGTEN Farbwelt, nicht die Notfarbe.
+   */
+  check('die Skizzen sind gezeichnet, nicht geladen — kein `img`, kein Bild-Pfad',
+    imageryView.text.includes('viewBox="0 0 160 100"')
+    && !/data-brand-imagery[\s\S]*?<img/.test(imageryView.text),
+    'ein Bild-Element im Bildsprache-Abschnitt')
+  check('… und sie sind in der gerechneten Tinte der bestätigten Farbwelt gezeichnet',
+    imageryView.text.includes(sketchInk), `Tinte ${sketchInk} nicht gefunden`)
+
+  // ── DIE STRICHSTÄRKE IST MESSBAR, NICHT BEHAUPTET ──────────────────────
+  check('jeder Icon-Satz trägt seine Probe mit echtem `stroke-width`',
+    imageryView.text.includes('data-imagery-stroke="regular"')
+    && imageryView.text.includes('stroke-width="1.5"')
+    && imageryView.text.includes('stroke-width="2.25"'),
+    'keine Probe mit 1.5 und 2.25 gefunden')
+  check('die Strichstärke-Regel steht auf der Seite und nennt die Schrift',
+    imageryView.text.includes('data-imagery-stroke-rule')
+    && imageryView.text.includes('Source Serif 4')
+    && imageryView.text.includes('1,5 px'),
+    'Regel, Familie oder Zahl fehlen')
+
+  // ── EIN ANDERES PRINZIP ÄNDERT DIE KARTEN UND DAS DO & DON'T ───────────
+  //
+  // Die Zeile „Gestellte Gruppenbilder mit Daumen hoch" gehört zur Achse
+  // „Menschen" von `daylight`; unter `closeup` steht dort etwas anderes.
+  const dodontBefore = imageryView.text.includes('Menschen als Staffage neben dem Produkt')
+  check('Vorprobe: das Do & Don’t zeigt die Achsen des vorbelegten Prinzips',
+    dodontBefore, 'die Don’t-Zeile von „closeup" fehlt')
+
+  const pickPrinciple = await call(imageryBase, {
+    method: 'PATCH',
+    cookie: account.cookie,
+    body: {
+      revision: await stepRevision('imagery'),
+      slots: { 'k.photo': { value: [
+        '## Prinzip\nTageslicht, nichts gestellt · Aus der Bildwelt „dokumentarisch": weiches Fensterlicht zeigt, was da ist — Studioblitz zeigt, was inszeniert wurde.',
+        '## Licht\nWeiches Seitenlicht, sichtbare Schatten, keine Aufheller.',
+        '## Ausschnitt\nWeiter Ausschnitt, Raum um das Motiv.',
+        '## Menschen\nMenschen bei der Arbeit, nie in die Kamera lächelnd.',
+        '## Farbigkeit\nGedämpfte Töne aus eurer Farbwelt, der Akzent sparsam.',
+      ].join('\n\n') } },
+    },
+  })
+  check('ein anderes Prinzip lässt sich wählen',
+    pickPrinciple.status === 200, `${pickPrinciple.status} ${pickPrinciple.text.slice(0, 160)}`)
+  const daylightView = await imageryPage()
+  check('… die Seite zeigt es als gewählt',
+    /data-imagery-principle="daylight"[^>]*aria-pressed="true"/.test(daylightView.text),
+    'die Karte „daylight" ist nicht als gewählt markiert')
+  check('… und das Do & Don’t hat sich mitgedreht',
+    daylightView.text.includes('Gestellte Gruppenbilder mit Daumen hoch')
+    && !daylightView.text.includes('Menschen als Staffage neben dem Produkt'),
+    'die Zeilen des neuen Prinzips fehlen oder die alten stehen noch da')
+
+  // ── DIE REGEL IST EINE AUSKUNFT, KEIN TOR (§2.6) ───────────────────────
+  const heavyIcons = await call(imageryBase, {
+    method: 'PATCH',
+    cookie: account.cookie,
+    body: { revision: await stepRevision('imagery'), slots: { 'k.icons': { value: 'bold', confirmed: true } } },
+  })
+  check('ein kräftiger Icon-Satz lässt sich wählen UND bestätigen',
+    heavyIcons.status === 200, `${heavyIcons.status} ${heavyIcons.text.slice(0, 160)}`)
+  const heavyView = await imageryPage()
+  check('… die Seite meldet die Strichstärke gegen die Schrift, ohne zu sperren',
+    heavyView.text.includes('Kräftiger als eure Schrift') && heavyView.text.includes('2,25 px'),
+    'der Hinweis zur zu kräftigen Strichstärke fehlt')
+
+  // ── EINE ERFUNDENE ID IST KEINE WAHL (Invariante `oneOf`, D6) ──────────
+  const reopenIcons = await call(imageryBase, {
+    method: 'PATCH',
+    cookie: account.cookie,
+    body: { revision: await stepRevision('imagery'), slots: { 'k.icons': { confirmed: false } } },
+  })
+  check('Vorprobe: „Korrigieren" öffnet die Icon-Wahl wieder',
+    reopenIcons.status === 200, `${reopenIcons.status} ${reopenIcons.text.slice(0, 200)}`)
+  const proseIcons = await call(imageryBase, {
+    method: 'PATCH',
+    cookie: account.cookie,
+    body: {
+      revision: await stepRevision('imagery'),
+      slots: { 'k.icons': { value: 'Feine Linien, wie in der Schrift', confirmed: true } },
+    },
+  })
+  check('eine erfundene Icon-Wahl wird abgewiesen — `invariant_violated`',
+    proseIcons.status >= 400 && proseIcons.json?.reason === 'invariant_violated',
+    `${proseIcons.status} ${proseIcons.text.slice(0, 200)}`)
+  const proseIllustration = await call(imageryBase, {
+    method: 'PATCH',
+    cookie: account.cookie,
+    body: {
+      revision: await stepRevision('imagery'),
+      slots: { 'k.illustration': { value: 'gezeichnet, aber sparsam', confirmed: true } },
+    },
+  })
+  check('dasselbe für eine erfundene Illustrations-Sprache',
+    proseIllustration.status >= 400 && proseIllustration.json?.reason === 'invariant_violated',
+    `${proseIllustration.status} ${proseIllustration.text.slice(0, 200)}`)
+
+  // ── DAS KAPITEL LÄSST SICH ZU ENDE GEHEN ───────────────────────────────
+  //
+  // `k.photo` und `k.dodont` schreibt sonst der Browser (s. Kopf); hier stehen
+  // Werte in der FORM, die die Regeln erzeugen — fünf Blöcke und sechs Zeilen.
+  const dodontPlaceholder = [
+    'Weiches Seitenlicht, sichtbare Schatten, keine Aufheller. — Don’t: Studioblitz und ausgeleuchtete Flächen ohne einen einzigen Schatten.',
+    'Weiter Ausschnitt, Raum um das Motiv. — Don’t: Enge Ausschnitte, die den Ort verschweigen.',
+    'Menschen bei der Arbeit, nie in die Kamera lächelnd. — Don’t: Gestellte Gruppenbilder mit Daumen hoch.',
+    'Gedämpfte Töne aus eurer Farbwelt, der Akzent sparsam. — Don’t: Farbfilter und Sättigungs-Regler, die eure Töne verschieben.',
+    'Feine Konturzeichnungen in EINER Strichstärke. — Don’t: Zeichnungen aus fremden Bibliotheken mit anderem Strich.',
+    'Icons als Linie, 1,5 px stark — dieselbe Stärke überall. — Don’t: Icons aus zwei Sätzen auf einer Seite.',
+  ].map(line => `- Do: ${line}`).join('\n')
+  await seedConfirmed('imagery', {
+    'k.photo': [
+      '## Prinzip\nNah am Handwerk · Textur statt Szene: Material, Werkzeug, Spur der Arbeit.',
+      '## Licht\nDiffuses, gleichmäßiges Licht ohne Drama.',
+      '## Ausschnitt\nSehr nah: das Detail füllt das Bild.',
+      '## Menschen\nHände im Bild, Gesicht optional.',
+      '## Farbigkeit\nNur Töne aus eurer Farbwelt, keine Fremdfarbe.',
+    ].join('\n\n'),
+    'k.illustration': 'line',
+    'k.icons': 'regular',
+    'k.dodont': dodontPlaceholder,
+  })
+
+  const imageryAcceptance = await call(`${imageryBase}/acceptance`, { cookie: account.cookie })
+  const imageryPending = (imageryAcceptance.json?.sessions ?? []).filter(entry => entry.required && !entry.confirmed)
+  check('nach den vier Bestätigungen steht keine Pflicht-Session mehr offen',
+    imageryAcceptance.status === 200 && imageryPending.length === 0,
+    `${imageryAcceptance.status} · offen: ${JSON.stringify(imageryPending.map(entry => entry.slotId))}`)
+
+  let imageryRevision = imageryAcceptance.json?.revision ?? 0
+  for (const entry of (imageryAcceptance.json?.sessions ?? []).filter(row => row.confirmed && !row.accepted)) {
+    const taken = await call(`${imageryBase}/sessions/${entry.slotId}/accept`, {
+      method: 'POST', cookie: account.cookie, body: { revision: imageryRevision },
+    })
+    if (taken.status !== 200) {
+      check(`Abnahme ${entry.slotId}`, false, `${taken.status} ${taken.text.slice(0, 160)}`)
+      break
+    }
+    imageryRevision = taken.json?.revision ?? imageryRevision
+  }
+  const imageryDone = await call(`${imageryBase}/complete`, {
+    method: 'POST', cookie: account.cookie, body: { confidence: 'fits' },
+  })
+  check('das Kapitel `imagery` lässt sich abnehmen und schliessen',
+    imageryDone.status === 200, `${imageryDone.status} ${imageryDone.text.slice(0, 160)}`)
+
+  const motionChapter = await call(`${base}/steps/motion`, { cookie: account.cookie })
+  check('… und das letzte Kapitel `motion` ist danach erreichbar',
+    motionChapter.status === 200 && motionChapter.json?.sessions?.['l.tempo']?.state === 'open',
+    `${motionChapter.status} l.tempo=${motionChapter.json?.sessions?.['l.tempo']?.state}`)
 
 }
 catch (error) {
