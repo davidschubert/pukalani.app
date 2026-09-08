@@ -99,6 +99,13 @@ nicht, während synthetische Ereignisfolgen und andere Knöpfe derselben Tabelle
 Verdacht ist der mit der Browser-Fernsteuerung GETEILTE Chrome-Tab (Navigation kurz vor dem Klick).
 Nächster Test: neuer Tab, keine Fernsteuerung. Nebenbefund Nuxt UI: `UDashboardSearchButton`
 rendert `⌘k` erst im Client — Hydration-Mismatch auf jeder Dashboard-Seite (Bestand, nicht D3).
+**Geklärt (2026-09-08, 23:43 UTC):** im sauberen Test — neuer Tab, Fernsteuerung aus, zuerst nur
+„siehst du die Zeile?", dann der Klick — kamen `publication_approved`, drei `publication_featured`
+und zwei `publication_example` an. Die zwei verlorenen Klicks davor waren der GETEILTE Chrome-Tab:
+die Fernsteuerung navigiert genau den Tab, in dem David klickt. **Gelernt:** Wenn David in seinem
+Chrome testet, fasse ich den Browser nicht an — Fernsteuerung und Mensch teilen sich eine Tab-Gruppe,
+und ein Navigate der Fernsteuerung frisst den Klick des Menschen lautlos. Beweis vor Vermutung: erst
+„was siehst du?", dann „klick", dann Log.
 
 ---
 

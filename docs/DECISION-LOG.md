@@ -348,6 +348,9 @@ Ring, Reife als Zweitzeile; Brand of the Day genau eine (Server-Regel „letzte 
 Teilen auf dem Telefon über das native Teilen-Blatt (`navigator.share`, Davids Wunsch),
 „Veröffentlichen" mobil im Export-Menü. Davids Arbeitsregel, erneut eingeschärft:
 Entscheidungen IMMER als Fragen mit Antwortmöglichkeiten und Empfehlung, nie als Fließtext.
+**Bezeichnung des Muster-Brandings (2026-09-08, Fragenrunde): „Beispiel" / „Example"** — nicht
+„Demo" (klingt nach Produkt-Vorführung, nicht nach einer vollständigen Marke) und nicht
+„Musterbeispiel" (zu lang für eine Kachel). Badge, Schalter und i18n bleiben wie gebaut.
 
 ---
 
