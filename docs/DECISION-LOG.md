@@ -2136,3 +2136,20 @@ optional · Erfolgsseite mit cal.com-Sofortbuchung UND 24-h-Rückfallzeile ·
 Speicherung Mail + App-lokale Tabelle `intro_requests` (kein Produkt-Layer —
 Eigenschaft der Marketing-Site, nicht der Plattform).
 Plan: docs/plans/STUDIO-ERSTGESPRAECH-FUNNEL.md.
+
+## 2026-09-08 — Appwrite 2.0: Server und SDKs in EINEM Vorhaben (AW2)
+
+Davids Entscheidung (strukturierte Frage nach der Dependency-Runde; die
+Empfehlung „Stufe 1 jetzt, Server nach dem ersten 2.0.x-Patch" hat er
+BEWUSST NICHT genommen): **alles jetzt, Start sofort.** Reihenfolge, weil die
+SDK-Majors am Server hängen: (1) `node-appwrite` 26 → 28 mit Code (Health-
+Pillen auf REST, `account.createJWT` → `users.createJWT`) — Response-Format
+1.9.6, läuft gegen den heutigen Server, wird deployt; (2) Dev-Instanz
+(OrbStack `appwrite-maria`) 1.9.6 → 2.0.0 mit Dump + Config-Backup,
+Override-Patches (SMTP-KeepAlive, Traefik-XFF) gegen das neue Compose
+nachziehen, Beweise fahren; (3) Prod `api.pukalani.app` genauso, mit
+Downtime-Fenster; (4) erst danach `node-appwrite` 29 + `appwrite` 27
+(Response-Format 2.0.0) und die CI-Wegwerf-Appwrite auf 2.0.
+Benanntes Risiko: 2.0.0 ist vom 2026-09-04, kein Patch-Release vorhanden;
+`registers.php` trägt weiterhin `keepAlive: true` (Patch erneuern, nicht
+löschen).
