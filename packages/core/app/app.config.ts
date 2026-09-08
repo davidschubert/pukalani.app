@@ -205,6 +205,21 @@ export default defineAppConfig({
        * Routing-Fehler statt mit einer Lesung.
        */
       visionModel: '',
+      /**
+       * BILDER ERZEUGEN (`aiImage`, docs/plans/BRAND-DESIGN.md §2.12, Paket
+       * D5c) — LEER heisst AUS, und das ist der Core-Default.
+       *
+       * Dieselbe Bauform und dieselbe Begründung wie beim Vision-Modell eine
+       * Zeile darüber: der Modell-Name IST das Gate, und der Transport klemmt
+       * JEDEN Aufruf fest auf `provider.data_collection: 'deny'` (Davids
+       * ZDR-Entscheidung 2026-09-08).
+       *
+       * Zu wählen ist ein Modell mit BILD-AUSGABE, das unter dieser Bedingung
+       * Anbieter findet (Davids Wahl: `google/gemini-2.5-flash-image-preview`)
+       * — sonst antwortet OpenRouter mit einem Routing-Fehler statt mit einem
+       * Bild, und die Werkstatt sagt „gerade nicht verfügbar".
+       */
+      imageModel: '',
       baseUrl: 'https://openrouter.ai/api/v1',
     },
     auth: {

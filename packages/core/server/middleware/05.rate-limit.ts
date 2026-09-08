@@ -638,6 +638,36 @@ const WRITE_LIMITED: { re: RegExp, bucket: string, max?: number }[] = [
    */
   { re: /^POST \/api\/brand\/profiles\/[^/]+\/dna\/propose$/, bucket: 'brand:dna', max: TOKEN_MAX },
   /**
+   * DIE KI-ENTWÜRFE DES ZEICHENS (§2.5 Stufe 3, Paket D5c) — der teuerste Lauf
+   * dieses Layers: VIER Bild-Aufrufe an ein Bildmodell in einem Klick.
+   *
+   * EIGENER EIMER, nicht `brand:dna` oder `brand:reading`: drei verschiedene
+   * Rechnungen, und geteilt bremste ein Bildlauf das Vorschlagen im Kapitel
+   * davor. Der LESE-Pfad (`GET …/mark/drafts`, die Bild-Auslieferung) steht
+   * BEWUSST NICHT in dieser Zeile — eine Seite mit vier Karten holt vier
+   * Bilder, und ein Deckel auf dem Ansehen wäre ein Deckel auf dem Anschauen
+   * der eigenen Entwürfe.
+   *
+   * DER EIGENTLICHE DECKEL IST FACHLICH und liegt in der Route: 3 Läufe je
+   * Marke und Tag (`BRAND_DESIGN_DRAFTS_DAILY_LIMIT`). Diese Zeile schützt nur
+   * den Server, greift VOR jeder Datenbank-Abfrage und muss deshalb WEITER
+   * sein als der fachliche Deckel — sonst bekäme der Mensch „zu schnell" zu
+   * hören, wo „heute genug" die richtige Auskunft wäre (dieselbe Begründung
+   * und dieselbe Zahl wie bei `brand:reading`).
+   */
+  { re: /^POST \/api\/brand\/profiles\/[^/]+\/mark\/drafts$/, bucket: 'brand:drafts', max: TOKEN_MAX },
+  /**
+   * EIGENER EIMER FÜR DIE HANDGRIFFE („Behalten", umbenennen, verwerfen) — er
+   * heisst NICHT `brand:drafts`, obwohl er daneben steht.
+   *
+   * Der Grund ist der SCHLÜSSEL, nicht die Zahl: zwei Regeln mit demselben
+   * `bucket` zählen in denselben Eimer, und die kleinere Obergrenze verliert.
+   * Mit einem gemeinsamen Eimer nähmen drei Klicks auf „Behalten" dem Menschen
+   * einen Lauf weg — im ersten Beweislauf war genau das die Ursache einer 429
+   * an einer Stelle, an der eine 401 stehen sollte.
+   */
+  { re: /^(PATCH|DELETE) \/api\/brand\/profiles\/[^/]+\/mark\/drafts\/[^/]+$/, bucket: 'brand:drafts-edit', max: 12 },
+  /**
    * „HIER STIMMT ETWAS NICHT" — die Meldung zu einer Marke in der öffentlichen
    * Galerie (docs/plans/DISCOVER-BRANDS.md §3.4/§6, Paket D3).
    *
