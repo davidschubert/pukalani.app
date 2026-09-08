@@ -53,18 +53,32 @@ async function warteAufSpalte(tableId, key) {
 
 /** Dreht die Spalte im gecachten Collection-Dokument auf 'processing' zurück. */
 function vergifte(tableId, spalte) {
-  const key = redis('--scan', '--pattern', `*collection*${tableId}*`).split('\n').filter(Boolean)[0]
-  if (!key) return false
-  const feld = redis('HKEYS', key).split('\n').filter(Boolean)[0]
-  const eintrag = JSON.parse(redis('HGET', key, feld))
-  let getroffen = false
-  for (const a of eintrag.data.attributes) {
-    if (a.key === spalte) { a.status = 'processing'; getroffen = true }
+  // ALLE Treffer prüfen, nicht den ersten (2026-09-08, zweimal in der CI rot
+  // seit der Wegwerf-Appwrite auf 2.0.0): seit 2.0 liegen je Tabelle MEHRERE
+  // Cache-Einträge unter `*collection*<tableId>*`, und nicht jeder trägt die
+  // Spaltenliste — welcher zuerst kommt, entscheidet der SCAN-Zufall. Der
+  // erste ohne `data.attributes` warf `Cannot read properties of undefined`,
+  // und der Deploy stand, obwohl niemand etwas geändert hatte. Appwrite 2.0
+  // nennt die Liste im Cache-Dokument teils `columns` — beides gilt.
+  const keys = redis('--scan', '--pattern', `*collection*${tableId}*`).split('\n').filter(Boolean)
+  for (const key of keys) {
+    for (const feld of redis('HKEYS', key).split('\n').filter(Boolean)) {
+      let eintrag
+      try { eintrag = JSON.parse(redis('HGET', key, feld)) }
+      catch { continue }
+      const liste = eintrag?.data?.attributes ?? eintrag?.data?.columns
+      if (!Array.isArray(liste)) continue
+      let getroffen = false
+      for (const a of liste) {
+        if (a.key === spalte) { a.status = 'processing'; getroffen = true }
+      }
+      if (!getroffen) continue
+      execFileSync('docker', ['exec', '-i', redisContainer, 'redis-cli', '-x', 'HSET', key, feld],
+        { input: JSON.stringify(eintrag) })
+      return true
+    }
   }
-  if (!getroffen) return false
-  execFileSync('docker', ['exec', '-i', redisContainer, 'redis-cli', '-x', 'HSET', key, feld],
-    { input: JSON.stringify(eintrag) })
-  return true
+  return false
 }
 
 const tableId = `f19_nudge_${Date.now().toString(36)}`
