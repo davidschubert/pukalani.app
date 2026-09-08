@@ -621,6 +621,23 @@ const WRITE_LIMITED: { re: RegExp, bucket: string, max?: number }[] = [
   { re: /^POST \/api\/brand\/profiles\/[^/]+\/inspiration\/read$/, bucket: 'brand:reading', max: TOKEN_MAX },
   { re: /^(POST|PATCH|DELETE) \/api\/brand\/profiles\/[^/]+\/inspiration(\/[^/]+)?$/, bucket: 'brand:inspiration', max: 12 },
   /**
+   * DER DNA-VORSCHLAG (§2.2 Schritt 4, Paket D2c) — der Text-Lauf, der aus der
+   * Foundation zehn Zeilen ableitet.
+   *
+   * EIGENER EIMER, nicht `brand:reading`: das sind zwei verschiedene Deckel auf
+   * zwei verschiedenen Rechnungen (ein Vision-Lauf über zwölf Bilder gegen
+   * einen Text-Lauf), und geteilt würde das Lesen der Vorbilder das Vorschlagen
+   * bremsen, obwohl beides im selben Kapitel direkt nacheinander passiert.
+   *
+   * DER EIGENTLICHE DECKEL IST FACHLICH und liegt in der Route: 10 Anläufe je
+   * Marke, Feld und Tag (`BRAND_AI_SLOT_DAILY_LIMIT`). Diese Zeile schützt nur
+   * den Server, greift VOR jeder Datenbank-Abfrage und muss deshalb WEITER sein
+   * als der fachliche Deckel — sonst bekäme der Mensch „zu schnell" zu hören,
+   * wo „heute genug" die richtige Auskunft wäre (dieselbe Begründung wie bei
+   * `brand:reading` weiter oben).
+   */
+  { re: /^POST \/api\/brand\/profiles\/[^/]+\/dna\/propose$/, bucket: 'brand:dna', max: TOKEN_MAX },
+  /**
    * „HIER STIMMT ETWAS NICHT" — die Meldung zu einer Marke in der öffentlichen
    * Galerie (docs/plans/DISCOVER-BRANDS.md §3.4/§6, Paket D3).
    *

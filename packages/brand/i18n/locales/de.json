@@ -2612,6 +2612,15 @@
         "generic": "Das hat nicht geklappt. Versucht es bitte noch einmal."
       }
     },
+    "dna": {
+      "error": {
+        "unavailable": "Der Vorschlag lässt sich gerade nicht rechnen. Versucht es später noch einmal — euer Kapitel bleibt, wie es ist.",
+        "noFoundation": "Dafür fehlt noch die Foundation. Bestätigt zuerst Werte, Archetyp, Ton und Richtung — daraus wird die DNA abgeleitet.",
+        "rateLimited": "Das ging zu schnell hintereinander. Wartet einen Moment und versucht es noch einmal.",
+        "notFound": "Diese Marke gibt es nicht mehr.",
+        "generic": "Das hat nicht geklappt. Versucht es bitte noch einmal."
+      }
+    },
     "scene": {
       "wordmarkFallback": "Eure Marke",
       "eyebrow": "Neu · Ausgabe 01",

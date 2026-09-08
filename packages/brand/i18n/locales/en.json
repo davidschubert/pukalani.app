@@ -2612,6 +2612,15 @@
         "generic": "That did not work. Please try again."
       }
     },
+    "dna": {
+      "error": {
+        "unavailable": "The proposal cannot be derived right now. Try again later — your chapter stays as it is.",
+        "noFoundation": "The foundation is not there yet. Confirm your values, archetype, tone and direction first — the DNA is derived from them.",
+        "rateLimited": "That was too quick. Wait a moment and try again.",
+        "notFound": "This brand no longer exists.",
+        "generic": "That did not work. Please try again."
+      }
+    },
     "scene": {
       "wordmarkFallback": "Your brand",
       "eyebrow": "New · Issue 01",

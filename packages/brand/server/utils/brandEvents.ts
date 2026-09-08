@@ -117,6 +117,17 @@ export type BrandEventType =
    * nie ein Prompt, nie eine Begründung.
    */
   | 'design.reading.run'
+  /**
+   * DER DNA-VORSCHLAG (D2c, §2.2 Schritt 4). Kennzahlen: Zeilenzahl, wie viele
+   * davon auch auf ein Vorbild zeigen, ob der Lauf überhaupt Vorbilder hatte,
+   * Modell-Kennung, Dauer — nie eine Begründung, nie ein Prompt, nie eine
+   * Foundation-Stelle.
+   *
+   * Der Anteil `both` ist die Zahl, an der die WEICHE des Kapitels hängt:
+   * Vorbilder bringt nur, wer welche hochlädt, und ob sie den Vorschlag
+   * wirklich tragen, sagt keine Upload-Zahl.
+   */
+  | 'design.dna.run'
 
 export interface BrandEventInput {
   type: BrandEventType
