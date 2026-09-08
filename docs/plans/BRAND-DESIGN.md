@@ -595,7 +595,7 @@ Baustein, Relaunch-Einstieg, nach dieser Fassung).
 - **Zeit (H5):** das Moodboard belegt alle Kapitel vor — jede Session muss
   als BESTÄTIGUNG durchlaufbar sein; die Beta misst die Dauer je Kapitel.
 
-### 2.18 Pakete (Skizze — verbindlich nach Prototyp-Freigabe)
+### 2.18 Pakete (VERBINDLICH seit Prototyp-Freigabe 2026-09-08)
 
 | # | Paket | Inhalt | Gate |
 | --- | --- | --- | --- |

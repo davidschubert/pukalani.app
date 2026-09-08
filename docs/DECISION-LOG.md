@@ -7,6 +7,22 @@ die kleinen, verstreuten Beschlüsse.
 
 ---
 
+## 2026-09-08 — Brand Design: Prototyp FREIGEGEBEN (Phase 4), Pakete D0–D9 verbindlich; Vision/Bild über OpenRouter mit ZDR-Filter
+
+**Entscheidung 1 (David):** Der Playground-Prototyp ist als Bauvorlage freigegeben. Die
+Pakete in docs/plans/BRAND-DESIGN.md §2.18 sind damit verbindlich, Start mit **D0
+„Verträge"** (Registry-Steps + Sessions, Vokabulare, Font-Paar-Katalog, `BrandDesignPreset`,
+`buildBrandDesign`, Ramp-Import als A14-Vertrag, Journey mit Freischaltung — Struktur, noch
+keine Inhalte, keine Migration). Empfehlung angenommen.
+**Entscheidung 2 (David):** Vision (D2 Vorbilder-Lesung) und Bild-Erzeugung (D5c KI-Entwürfe)
+laufen über **OpenRouter** — derselbe Transport wie die Text-KI, Modell per Config
+(`pukalani.ai.visionModel` / `pukalani.ai.imageModel`, Core-Default aus), **nur Anbieter mit
+Zero-Data-Retention-Zusage** (OpenRouter-Provider-Filter; die Modellwahl ist damit auf
+ZDR-Provider beschränkt, kein Fallback auf Nicht-ZDR). Kein neuer Vertrag, eine Rechnung.
+Beantwortet §2.19 Frage 1. Empfehlung angenommen.
+
+---
+
 ## 2026-09-08 — Brand Design: Prototyp-Nachtrag und Hell/Dunkel-Vergleich abgenommen
 
 **Abgenommen (David):** der Prototyp-Nachtrag im Playground (Weiche Foundation/Vorbilder,
