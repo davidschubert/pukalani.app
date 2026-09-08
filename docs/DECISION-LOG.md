@@ -7,6 +7,19 @@ die kleinen, verstreuten Beschlüsse.
 
 ---
 
+## 2026-09-08 — Brand Design: Prototyp-Nachtrag und Hell/Dunkel-Vergleich abgenommen
+
+**Abgenommen (David):** der Prototyp-Nachtrag im Playground (Weiche Foundation/Vorbilder,
+Vorbilder-Upload je Bereich, KI-Lesung fits/tension/off gegen die Foundation, Herkunft je
+DNA-Zeile, Ergebnis-Board als Kopf von Kapitel 10 und eigene Ansicht) und der Hell/Dunkel-
+Vergleich in der Farbwelt (zwei feste Szenen nebeneinander mit Kontrast-Urteil je Welt).
+Damit sind alle bisher angesprochenen Prototyp-Korrekturen (Abstände, 72-rem-Bühne, Raster,
+Farb-Picker, gestapelte Mix-&-Match-Chips) und beide Nachträge abgenommen. Offen ist die
+FREIGABE des Gesamt-Prototyps als Bauvorlage (Phase 4 nach WORKFLOW.md) — danach werden die
+Pakete D0–D9 in docs/plans/BRAND-DESIGN.md §2.18 verbindlich, beginnend mit D0 (Verträge).
+
+---
+
 ## 2026-09-08 — Brand Design: Richtung aus Foundation UND Vorbildern; Brand Design als eigenständiges Produkt
 
 **Anlass (David, an der Prototyp-Seite „Moodboard"):** Ist die Reihenfolge richtig, oder
