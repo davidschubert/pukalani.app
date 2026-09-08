@@ -843,6 +843,12 @@ Vollständiges Konzept: docs/CONCEPT.md
   2026-07-30) — Sortierung, Auswahl und Paginierung kommen mitgeliefert und
   verhalten sich überall gleich. Handgebaute Listen nur mit Grund, und der
   gehört an die Stelle geschrieben. Leerer Zustand über `CoreEmptyState`.
+- KEINE globale `app.pageTransition` in einer App mit Dashboard (2026-09-08 live
+  erwischt, pukalani.studio): `UDashboardPanel` ist mehrwurzelig, Vue gibt
+  Fragmenten inerte Transition-Hooks, und mit `mode: 'out-in'` parkt Suspense die
+  neue Seite im versteckten Container — leerer Seitenbereich nach dem ersten
+  Klick, ohne Fehler, nur im Prod-Build. Übergänge je Route über
+  `<NuxtPage :transition>` (portfolio: nur Layout `site`).
 - <script setup lang="ts">, Nuxt UI Komponenten bevorzugen. FÜR EDITOR-
   FUNKTIONEN sind sie GESETZT (Davids Vorgabe 2026-08-04): `UEditor`
   (inkl. Blockquote fürs Zitieren), `UEditorToolbar`, `UEditorEmojiMenu`,

@@ -102,6 +102,56 @@ rendert `⌘k` erst im Client — Hydration-Mismatch auf jeder Dashboard-Seite (
 
 ---
 
+### S3: Zweiter Faktor auf allen vier Betreiber-Konten + Google-Login für die Betreiber-Konsole ✅ 2026-09-08
+
+Anlass (nachgemessen 2026-08-23): `mail@davidschubert.com` war in `admin`,
+`account`, `portfolio` und `branding` das einzige Admin-Konto, überall ohne
+MFA; Google-Login gab es nur für `account` und `branding`. Heute, direkt nach
+AW2 (Appwrite 2.0), abgeschlossen:
+
+- **MFA-Flow auf Appwrite 2.0 bewiesen** (`verify-mfa.mjs` 39/39 gegen die
+  2.0-Dev-Instanz — Einrichten, Code, Drossel, Wiederherstellungs-Code in
+  camelCase, Abschalten, Gast-Abwehr), dann hat David den Zweitfaktor auf
+  allen vier Konten eingerichtet; Users-API zeigt je Projekt `mfa=true`.
+- **Google für Projekt `admin`**: David hat die Redirect-URI
+  `…/oauth2/callback/google/admin` am bestehenden Client ergänzt und den
+  Provider in der Appwrite-Konsole angeschaltet (dritter Schlüssel war nicht
+  nötig — ein Client bedient alle Projekte); Claude hat
+  `NUXT_PUBLIC_AUTH_OAUTH_PROVIDERS=google` auf der admin-Site gesetzt, per
+  `workflow_dispatch` ausgerollt und gemessen: Knopf auf `/login`,
+  `/api/auth/oauth?provider=google` → 302 zu accounts.google.com.
+- **Nebenbefund 1, gefixt (Commit 215fb1ae):** auf `account.pukalani.app`
+  `/settings → Sicherheit` fehlte die Zwei-Faktor-Karte (sie hing nur im
+  Dashboard-Reiter des admin-Layers, den der Kontroll-Host nicht hat).
+- **Nebenbefund 2, Davids Entscheidung (Commit cd383bc4):** die Online-Karte
+  auf dem Kontroll-Host-Dashboard zeigte seit jeher „0 online" (Presence-
+  Routen stehen bewusst nicht in `controlApiPrefixes`) — jetzt ausgeblendet.
+- **Nebenbefund 3, gefixt (Commit cc330ce7):** im Dashboard von
+  pukalani.studio blieb nach dem ersten Sidebar-Klick der Seitenbereich leer
+  (nur harter Reload half). Ursache nach Bisektion mit identischen Versionen:
+  die globale `app.pageTransition` (out-in) der portfolio-App über dem
+  mehrwurzeligen `UDashboardPanel` — Vue gibt Fragmenten inerte
+  Transition-Hooks, `afterLeave` feuert nie, Suspense parkt die neue Seite im
+  versteckten Container. Seit 2026-07-17 so, kein heutiges Update beteiligt.
+  Fade jetzt nur noch per `<NuxtPage :transition>` auf Layout `site`.
+
+**Gelernt:** (1) Eine globale `app.pageTransition` mit `mode: 'out-in'`
+verträgt sich nicht mit Seiten, deren Wurzel ein Fragment ist
+(`UDashboardPanel`, jede Seite mit zwei Wurzelknoten) — es gibt keinen
+Fehler, keine Warnung im Prod-Build, nur eine leere Seite; im Vite-Dev tritt
+es fast nie auf, weil die Seite dort ohne eigenen Chunk vor dem Fallback
+aufgelöst ist. Transitionen gehören je Route gesetzt, nie global über ein
+Dashboard. (2) Ein per Extension gesteuerter Chrome-Tab liegt in einem
+VERSTECKTEN Fenster: `requestAnimationFrame` und damit jede CSS-Transition
+stehen dort still — „hängende" Übergänge in so einem Tab sind ein Messfehler,
+kein Befund. Für Übergänge und Animationen Playwright headless nehmen (dort
+läuft rAF). (3) Wenn man selbst als derselbe Nutzer in einem zweiten
+(versteckten) Tab eingeloggt ist, überschreibt dessen `away`-Heartbeat die
+sichtbare Presence desselben Mandanten (Letzter-gewinnt) — „0 online" war
+einmal ich selbst. (4) Google erlaubt zwei Client-Secrets je OAuth-Client;
+für ein weiteres Appwrite-Projekt braucht es keinen neuen Schlüssel, nur die
+gespeicherte Kopie oder einen sauberen Tausch in allen Projekten.
+
 ### AW2: Appwrite 2.0 — Server (dev + prod) und SDKs (node-appwrite 29, appwrite 27) in einem Vorhaben ✅ 2026-09-08
 
 Anlass: die Abhängigkeiten-Seite meldete Appwrite 1.9.6 → 2.0.0 und die SDKs
