@@ -103,7 +103,12 @@ useHead({ title: `Brand Design · ${chapter.value.label}` })
     </template>
 
     <template #default>
-      <div class="flex flex-col gap-8 pb-4">
+      <!-- ABSTAND DER ABSCHNITTE (Davids Korrektur am Prototyp, 2026-09-08):
+           4 rem statt 2 rem zwischen den Sessions eines Kapitels — jede
+           Session ist ein eigener Entscheidungsblock mit Text UND Optionen;
+           mit 2 rem lasen sie sich als eine Textwüste. Gilt für alle sechs
+           Kapitel, weil sie direkte Kinder dieser Spalte sind. -->
+      <div class="flex flex-col gap-16 pb-4">
         <div>
           <p class="bw-label uppercase tracking-widest" style="color: var(--bw-muted)">
             Kapitel {{ index + 1 }} von {{ DS_CHAPTERS.length }} · {{ chapter.minutes }}
