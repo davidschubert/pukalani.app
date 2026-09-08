@@ -24,12 +24,21 @@ const localePath = useLocalePath()
  * Dropdown-Kinder), „Discover Brands" und „Brand Insights" zeigten auf
  * `/products` (404) bzw. die Klickdummy-Pfade `/brand/demo/*` — die fängt in
  * der echten App die Werkstatt-Route als profileId='demo' und rendert eine
- * leere „Namenloses Branding"-Hülle. Die drei Punkte kommen zurück, SOBALD
- * ihre Marketing-Seiten existieren (die i18n-Schlüssel `brand.nav.products`
- * etc. bleiben dafür stehen). Links IMMER über `localePath()` — nackte Pfade
- * warfen den Besucher von /de auf die englische Fassung.
+ * leere „Namenloses Branding"-Hülle.
+ *
+ * „DISCOVER BRANDS" IST SEIT PAKET D2 (2026-09-08) ZURÜCK: `/discover` und
+ * `/discover/<slug>` gibt es wirklich, samt öffentlicher Lese-API. Products
+ * und Insights bleiben draussen, bis ihre Marketing-Seiten existieren (die
+ * i18n-Schlüssel `brand.nav.products` etc. bleiben dafür stehen).
+ *
+ * Links IMMER über `localePath()` — nackte Pfade warfen den Besucher von /de
+ * auf die englische Fassung.
  */
 const menuItems = computed(() => [
+  // `includes` und nicht `endsWith`: die Anatomie `/discover/<slug>` gehört
+  // zu diesem Punkt, und ein Menü, das auf der Unterseite ausgeht, sieht wie
+  // ein anderer Bereich aus.
+  { label: t('brand.nav.discover'), to: localePath('/discover'), active: route.path.includes('/discover') },
   // Seit der Aufteilung (Davids Entscheidung 2026-09-04) sind das ZWEI
   // Seiten: /about = wer wir sind, /team = die Menschen dahinter.
   { label: t('brand.nav.about'), to: localePath('/about'), active: route.path.endsWith('/about') },

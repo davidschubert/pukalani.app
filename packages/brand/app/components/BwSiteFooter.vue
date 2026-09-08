@@ -8,9 +8,12 @@ import { resolveBrandLegalLinks } from '../../shared/brandLegalLinks'
 const { t } = useI18n()
 const localePath = useLocalePath()
 /* NUR ECHTE ZIELE (Davids 404-Audit 2026-09-03): Products/Discover/Insights
- * zeigten auf /products (404) bzw. die Klickdummy-Pfade /brand/demo/* —
- * sie kommen mit ihren Marketing-Seiten zurück (s. BwSiteNav). */
+ * zeigten auf /products (404) bzw. die Klickdummy-Pfade /brand/demo/*.
+ * „Discover Brands" IST seit Paket D2 (2026-09-08) zurück — die Galerie
+ * `/discover` gibt es wirklich; Products und Insights bleiben draussen, bis
+ * es ihre Marketing-Seiten gibt (s. BwSiteNav). */
 const nav = computed(() => [
+  { label: t('brand.nav.discover'), to: localePath('/discover') },
   // Zwei Seiten seit der Aufteilung (Davids Entscheidung 2026-09-04).
   { label: t('brand.nav.about'), to: localePath('/about') },
   { label: t('brand.nav.team'), to: localePath('/team') },
