@@ -159,7 +159,8 @@
  * schaltet ihn ein und wirkt NUR dort (`server/utils/brandReview.ts`):
  *
  *   BRAND_DEV_STUB_REVIEW=1 BRAND_DEV_STUB_VISION=1 BRAND_DEV_STUB_DNA=1 \
- *     BRAND_DEV_STUB_MARK=1 pnpm --filter branding exec nuxi dev --port 3016
+ *     BRAND_DEV_STUB_MARK=1 BRAND_DEV_STUB_IMAGE=1 \
+ *     pnpm --filter branding exec nuxi dev --port 3016
  *   BRANDING_PORT=3016 node --env-file=apps/branding/.env \
  *     packages/brand/scripts/verify-brand-sessions.mjs
  */
@@ -187,7 +188,7 @@ const users = new Users(client)
 
 let pass = 0
 let fail = 0
-const cleanup = { users: [], profiles: [], access: [], messages: [], inspiration: [], aiFlag: null }
+const cleanup = { users: [], profiles: [], access: [], messages: [], inspiration: [], drafts: [], aiFlag: null }
 
 function check(label, ok, detail = '') {
   if (ok) {
@@ -3149,6 +3150,309 @@ try {
     motionChapter.status === 200 && motionChapter.json?.sessions?.['l.tempo']?.state === 'open',
     `${motionChapter.status} l.tempo=${motionChapter.json?.sessions?.['l.tempo']?.state}`)
 
+  // ══ 29 · Das Zeichen, Stufe 3: die KI-Entwürfe (Brand Design D5c, §2.5) ══
+  //
+  // ── WARUM DIESER ABSCHNITT MIT DEM ERSATZ LÄUFT ────────────────────────
+  // Ein echter Lauf sind VIER Bild-Aufrufe an ein Bildmodell und kostet Geld.
+  // `BRAND_DEV_STUB_IMAGE=1` erzeugt stattdessen vier ECHTE, deterministische
+  // PNGs aus der bestätigten Farbwelt (`brandMarkDraftStubPng`) — echte Bytes
+  // und kein Platzhalter, weil sonst genau die Kette ungeprüft bliebe, um die
+  // es geht: Klemmung, Bucket, Zeile, Ausliefer-Route.
+  //
+  // Der Ersatz BUCHT die Drossel mit (anders als der Entwurfs-Stub) — nur
+  // deshalb lässt sich der vierte Lauf des Tages überhaupt prüfen.
+  //
+  // ── WAS EIN UNIT-TEST NICHT SEHEN KANN ─────────────────────────────────
+  // Die REGELN (Slot-Wert, Prompt-Hash, Namen, die Interna der Session) sind
+  // in `tests/brandMarkDrafts.test.ts` belegt. HIER wird geprüft, was nur eine
+  // laufende Kette zeigt: dass vier Dateien wirklich im Bucket liegen, dass
+  // sie NUR beim Besitzer ankommen und mit `private, no-store`, dass die
+  // Herkunft an der Zeile steht, dass „Behalten" den Slot bewegt und ihn NIE
+  // bestätigt — und dass von alldem NICHTS in den Schnappschuss reist.
+  console.log('\n29 · Brand Design: die KI-Entwürfe des Zeichens (D5c)')
+
+  const draftsBase = `${base}/mark/drafts`
+
+  const draftsEmpty = await call(draftsBase, { cookie: account.cookie })
+  check('vor dem ersten Lauf: die Liste ist leer und nennt den Deckel',
+    draftsEmpty.status === 200 && (draftsEmpty.json?.items ?? []).length === 0
+    && draftsEmpty.json?.max === 12,
+    `${draftsEmpty.status} ${JSON.stringify(draftsEmpty.json ?? null)}`)
+
+  /**
+   * OB DER ERSATZ LÄUFT, SAGT DER SERVER — nicht `process.env` DIESES
+   * Prozesses: `BRAND_DEV_STUB_IMAGE` wirkt im DEV-SERVER, und das Skript
+   * spricht ihn über HTTP an (dieselbe Falle wie in Abschnitt 23).
+   *
+   * 503 `image_unavailable` ist die vollständige, richtige Antwort einer
+   * Instanz OHNE Bild-Modell (§2.19 Frage 1: „bis dahin Stufe 3 hinter dem
+   * Config-Gate aus — das Kapitel funktioniert ohne sie") und damit selbst
+   * eine geprüfte Zusage, keine Ausrede.
+   */
+  const draftRun1 = await call(draftsBase, { method: 'POST', cookie: account.cookie })
+  const draftsStub = draftRun1.status === 200
+  if (!draftsStub) {
+    check('ohne Bild-Modell antwortet der Lauf ruhig mit 503 `image_unavailable`',
+      draftRun1.status === 503 && draftRun1.json?.reason === 'image_unavailable',
+      `${draftRun1.status} ${JSON.stringify(draftRun1.json?.reason ?? null)}`)
+    check('… und die Liste bleibt leer — das Kapitel läuft mit Stufe 1 und 2 weiter',
+      ((await call(draftsBase, { cookie: account.cookie })).json?.items ?? []).length === 0,
+      'es liegen doch Entwürfe da')
+  }
+  else {
+    const firstItems = draftRun1.json?.items ?? []
+    for (const item of firstItems) cleanup.drafts.push(item.id)
+
+    check('der Lauf antwortet 200, legt VIER Entwürfe an und nennt das Rest-Kontingent',
+      draftRun1.json?.created === 4 && firstItems.length === 4
+      && draftRun1.json?.quota?.limit === 3 && draftRun1.json?.quota?.remaining === 2,
+      `${draftRun1.json?.created} · ${firstItems.length} · ${JSON.stringify(draftRun1.json?.quota ?? null)}`)
+
+    // DIE HERKUNFT IST DIE LEITPLANKE (§1.11 b) — sie steht an der ZEILE, nicht
+    // nur im Ereignis-Funnel, und alle vier tragen denselben Prompt-Hash: sie
+    // stammen aus EINEM Lauf, und genau das soll die Karte sagen können.
+    const hashes = new Set(firstItems.map(item => item.promptHash))
+    check('… jeder Entwurf trägt Modell, Prompt-Hash und einen Namen',
+      firstItems.every(item => item.model === 'dev-stub'
+        && /^[0-9a-f]{16}$/.test(String(item.promptHash))
+        && /^Entwurf \d+$/.test(String(item.title))
+        && item.kept === false
+        && typeof item.createdAt === 'string' && item.createdAt.length > 0),
+      JSON.stringify(firstItems[0] ?? null))
+    check('… und alle vier denselben Hash — sie stammen aus EINEM Lauf',
+      hashes.size === 1, `${hashes.size} verschiedene Hashes`)
+
+    // ── VIER ZEILEN, VIER DATEIEN ─────────────────────────────────────────
+    const draftRows = await tablesDB.listRows({
+      databaseId,
+      tableId: 'brand_mark_drafts',
+      queries: [Query.equal('profileId', profileId), Query.limit(50)],
+    }).catch(() => ({ rows: [] }))
+    check('vier Zeilen stehen in `brand_mark_drafts`', draftRows.rows.length === 4,
+      String(draftRows.rows.length))
+
+    let filesFound = 0
+    for (const item of firstItems) {
+      const file = await storage.getFile({ bucketId: 'brand-drafts', fileId: item.id })
+        .catch(() => null)
+      if (file) filesFound += 1
+    }
+    check('… und vier Dateien im Bucket `brand-drafts`', filesFound === 4, String(filesFound))
+
+    // ── DIE AUSLIEFERUNG: NUR DER BESITZER, UND NIE AUS DEM CACHE ─────────
+    const firstDraft = firstItems[0]
+    const imagePath = `${draftsBase}/${firstDraft.id}/image`
+    const ownImage = await callBinary(imagePath, { cookie: account.cookie })
+    check('das Bild kommt beim Besitzer an — als PNG, mit `private, no-store`',
+      ownImage.status === 200
+      && String(ownImage.headers['content-type']).startsWith('image/png')
+      && String(ownImage.headers['cache-control']) === 'private, no-store'
+      && ownImage.body.length > 0
+      && ownImage.body.subarray(0, 4).equals(Buffer.from([0x89, 0x50, 0x4E, 0x47])),
+      `${ownImage.status} ${ownImage.headers['content-type']} · ${ownImage.headers['cache-control']} · ${ownImage.body.length} Bytes`)
+
+    const strangerImage = await callBinary(imagePath, { cookie: stranger.cookie })
+    check('fremdes Konto: 404 (Datentür, nicht 403)', strangerImage.status === 404,
+      String(strangerImage.status))
+    const guestImage = await callBinary(imagePath)
+    check('ohne Anmeldung: 401/404, nie ein Bild',
+      guestImage.status === 401 || guestImage.status === 404, String(guestImage.status))
+    const inventedImage = await callBinary(`${draftsBase}/${inventedId}/image`, { cookie: account.cookie })
+    check('eine erfundene Entwurfs-Id: 404', inventedImage.status === 404,
+      String(inventedImage.status))
+
+    // ── „BEHALTEN" IST DIE EINZIGE ENTSCHEIDUNG — UND SIE BEWEGT DEN SLOT ──
+    const keepRes = await call(`${draftsBase}/${firstDraft.id}`, {
+      method: 'PATCH', cookie: account.cookie, body: { kept: true },
+    })
+    check('„Behalten" wird angenommen und steht danach an der Zeile',
+      keepRes.status === 200 && keepRes.json?.item?.kept === true
+      && (keepRes.json?.items ?? []).filter(item => item.kept).length === 1,
+      `${keepRes.status} ${JSON.stringify(keepRes.json?.item ?? null)}`)
+
+    const renameRes = await call(`${draftsBase}/${firstDraft.id}`, {
+      method: 'PATCH', cookie: account.cookie, body: { title: '  Bogen \n über  Grundlinie ' },
+    })
+    check('… ein Name lässt sich setzen und wird auf EINE Zeile geklemmt',
+      renameRes.status === 200 && renameRes.json?.item?.title === 'Bogen über Grundlinie',
+      `${renameRes.status} ${JSON.stringify(renameRes.json?.item?.title ?? null)}`)
+
+    const emptyPatch = await call(`${draftsBase}/${firstDraft.id}`, {
+      method: 'PATCH', cookie: account.cookie, body: {},
+    })
+    check('GEGENPROBE: ein PATCH ohne Feld ⇒ 400, nicht 200',
+      emptyPatch.status === 400, String(emptyPatch.status))
+
+    const markRow = await tablesDB.getRow({
+      databaseId, tableId: 'brand_steps', rowId: `${profileId}_mark`,
+    })
+    const draftSlot = JSON.parse(markRow.slots || '{}')['j.drafts'] ?? null
+    check('der Slot `j.drafts` nennt den behaltenen Entwurf mit seiner Herkunft',
+      typeof draftSlot?.latestDraft === 'string'
+      && draftSlot.latestDraft.includes('## Behalten 1 · Bogen über Grundlinie')
+      && draftSlot.latestDraft.includes('Modell: dev-stub')
+      && draftSlot.latestDraft.includes('Prompt: '),
+      JSON.stringify(draftSlot?.latestDraft ?? null))
+    check('… und er ist NICHT bestätigt — sonst reiste er über `confirmedSlotValues` ins Dokument',
+      !draftSlot?.confirmed, JSON.stringify(draftSlot?.confirmed ?? null))
+    check('… und er trägt WEDER ein Bild NOCH eine Adresse',
+      !String(draftSlot?.latestDraft ?? '').includes('data:')
+      && !String(draftSlot?.latestDraft ?? '').includes('http')
+      && !String(draftSlot?.latestDraft ?? '').includes('brand-drafts'),
+      'im Slot-Wert steht eine Adresse oder ein Bild')
+
+    // ── DIE WERKSTATT ZEIGT DIE FLÄCHE — MIT BEIDEN HINWEISEN ─────────────
+    const markWithDrafts = await call(`/de/brand/${profileId}/mark`, { cookie: account.cookie })
+    check('die Werkstatt zeigt den Entwürfe-Abschnitt',
+      markWithDrafts.status === 200 && markWithDrafts.text.includes('data-brand-drafts'),
+      `${markWithDrafts.status} ${markWithDrafts.text.length} Zeichen`)
+    /**
+     * DER MARKENRECHTS-HINWEIS STEHT IM SSR — ER HÄNGT AN KEINER KARTE.
+     *
+     * Der Vermerk „Entwurf, kein geprüftes Logo" hängt dagegen an JEDER Karte,
+     * und die Karten entstehen erst nach dem Laden der Liste im Browser
+     * (`onMounted`). Er ist deshalb NICHT im SSR-Text und wird im eigenen
+     * Klick geprüft, nicht hier — eine Prüfung, die ihn im SSR suchte, wäre
+     * entweder rot oder zwänge dazu, den Satz aus der Karte zu lösen, an die
+     * er gehört. Was das SSR sehr wohl trägt, ist die Nicht-Behauptung im
+     * Einleitungssatz („kein fertiges Logo, keine Prüfung, kein Anspruch auf
+     * Schutzfähigkeit") — und die wird hier mitgeprüft.
+     */
+    check('… mit dem Markenrechts-Hinweis und der Nicht-Behauptung im Einleitungssatz',
+      markWithDrafts.text.includes('data-drafts-trademark')
+      && markWithDrafts.text.includes('kein fertiges Logo')
+      && markWithDrafts.text.includes('Schutzfähigkeit'),
+      'einer der zwei Pflicht-Sätze fehlt auf der Seite')
+
+    // ── LEITPLANKE §1.11 b: ENTWÜRFE REISEN NICHT ────────────────────────
+    //
+    // GEGENPROBE MIT ANLAUF wie bei der Lesung (Abschnitt 23): der Slot wird
+    // von Hand BESTÄTIGT — genau der Fehler, den D8 machen könnte. Reiste er
+    // danach in den Schnappschuss, wäre „Entwürfe bleiben privat" eine
+    // Behauptung.
+    const leakRow = await tablesDB.getRow({
+      databaseId, tableId: 'brand_steps', rowId: `${profileId}_mark`,
+    })
+    const leakSlots = JSON.parse(leakRow.slots || '{}')
+    leakSlots['j.drafts'] = {
+      ...leakSlots['j.drafts'],
+      confirmed: leakSlots['j.drafts']?.latestDraft ?? '## Behalten 1 · Bogen über Grundlinie',
+    }
+    await tablesDB.updateRow({
+      databaseId, tableId: 'brand_steps', rowId: `${profileId}_mark`,
+      data: { slots: JSON.stringify(leakSlots) },
+    })
+    const sharedWithDrafts = await call(`${base}/share`, {
+      method: 'POST', cookie: account.cookie, body: {},
+    })
+    check('Vorprobe: der Share-Link lässt sich neu veröffentlichen',
+      sharedWithDrafts.status === 200 || sharedWithDrafts.status === 201,
+      `${sharedWithDrafts.status} ${sharedWithDrafts.text.slice(0, 120)}`)
+    const shareRows3 = await tablesDB.listRows({
+      databaseId,
+      tableId: 'brand_shares',
+      queries: [Query.equal('profileId', profileId), Query.limit(5)],
+    }).catch(() => ({ rows: [] }))
+    const snapshot3 = shareRows3.rows.map(row => String(row.snapshot ?? '')).join('\n')
+    check('LEITPLANKE: der Schnappschuss trägt WEDER `j.drafts` NOCH einen Entwurf',
+      snapshot3.length > 0
+      && !snapshot3.includes('j.drafts')
+      && !snapshot3.includes('Bogen über Grundlinie')
+      && !snapshot3.includes('dev-stub')
+      && !firstItems.some(item => snapshot3.includes(item.id)),
+      `${snapshot3.length} Zeichen`)
+
+    // Auch das DOKUMENT der Werkstatt zeigt keinen Entwurf.
+    const documentWithDrafts = await call(`${base}/document`, { cookie: account.cookie })
+    check('… und das Dokument ebenso wenig',
+      documentWithDrafts.status === 200
+      && !documentWithDrafts.text.includes('Bogen über Grundlinie')
+      && !documentWithDrafts.text.includes('dev-stub'),
+      `${documentWithDrafts.status} ${documentWithDrafts.text.length} Zeichen`)
+
+    // ── VERWERFEN LÖSCHT WIRKLICH — ZEILE UND DATEI ──────────────────────
+    const doomed = firstItems[3]
+    const discarded = await call(`${draftsBase}/${doomed.id}`, {
+      method: 'DELETE', cookie: account.cookie,
+    })
+    check('Verwerfen antwortet 200 und die Liste ist einen kürzer',
+      discarded.status === 200 && (discarded.json?.items ?? []).length === 3,
+      `${discarded.status} ${(discarded.json?.items ?? []).length}`)
+    const goneFile = await storage.getFile({ bucketId: 'brand-drafts', fileId: doomed.id })
+      .catch(error => ({ code: error?.code ?? 0 }))
+    check('… und die DATEI ist aus dem Bucket weg (404)', goneFile?.code === 404,
+      JSON.stringify(goneFile?.code ?? 'existiert noch'))
+
+    // ── DIE DROSSEL: DREI LÄUFE JE MARKE UND TAG ─────────────────────────
+    const draftRun2 = await call(draftsBase, { method: 'POST', cookie: account.cookie })
+    for (const item of draftRun2.json?.items ?? []) cleanup.drafts.push(item.id)
+    const draftRun3 = await call(draftsBase, { method: 'POST', cookie: account.cookie })
+    for (const item of draftRun3.json?.items ?? []) cleanup.drafts.push(item.id)
+    check('zweiter und dritter Lauf gehen — und das Kontingent zählt herunter',
+      draftRun2.status === 200 && draftRun2.json?.quota?.remaining === 1
+      && draftRun3.status === 200 && draftRun3.json?.quota?.remaining === 0,
+      `${draftRun2.status}/${draftRun2.json?.quota?.remaining} · ${draftRun3.status}/${draftRun3.json?.quota?.remaining}`)
+
+    /**
+     * DIE PRÜFREIHENFOLGE IST DER PUNKT: der Platz-Deckel steht in der Route
+     * VOR der Drossel. Nach drei Läufen liegen elf Entwürfe, für einen vierten
+     * Lauf ist kein Platz — die Antwort ist deshalb 409 und nicht 429, obwohl
+     * auch das Tageskontingent erschöpft ist.
+     */
+    const noRoom = await call(draftsBase, { method: 'POST', cookie: account.cookie })
+    check('GEGENPROBE Platz-Deckel: kein Raum für vier weitere ⇒ 409 `drafts_limit_reached`',
+      noRoom.status === 409 && noRoom.json?.reason === 'drafts_limit_reached',
+      `${noRoom.status} ${JSON.stringify(noRoom.json?.reason ?? null)}`)
+
+    // Geleert wird AN DER ROUTE VORBEI (der eigene Eimer `brand:drafts` lässt
+    // 12 Schreibvorgänge je Minute, und dieser Beweis braucht seine für die
+    // Läufe). Danach ist Platz — und nur der Tages-Deckel steht noch im Weg.
+    const leftovers = await tablesDB.listRows({
+      databaseId,
+      tableId: 'brand_mark_drafts',
+      queries: [Query.equal('profileId', profileId), Query.limit(50)],
+    }).catch(() => ({ rows: [] }))
+    for (const row of leftovers.rows) {
+      await tablesDB.deleteRow({ databaseId, tableId: 'brand_mark_drafts', rowId: row.$id })
+        .catch(() => {})
+      await storage.deleteFile({ bucketId: 'brand-drafts', fileId: row.$id }).catch(() => {})
+    }
+    const draftRun4 = await call(draftsBase, { method: 'POST', cookie: account.cookie })
+    check('GEGENPROBE Drossel: der VIERTE Lauf am selben Tag ⇒ 429 `brand_drafts_limit`',
+      draftRun4.status === 429 && draftRun4.json?.reason === 'brand_drafts_limit',
+      `${draftRun4.status} ${JSON.stringify(draftRun4.json?.reason ?? null)}`)
+
+    // ── DIE EREIGNISSE: KENNZAHLEN, KEIN INHALT ──────────────────────────
+    const draftEvents = await tablesDB.listRows({
+      databaseId,
+      tableId: 'brand_events',
+      queries: [Query.equal('profileId', profileId), Query.equal('type', 'design.drafts.run'), Query.limit(20)],
+    }).catch(() => ({ rows: [] }))
+    check('jeder Lauf steht im Funnel — drei Läufe, drei Zeilen',
+      draftEvents.rows.length === 3, String(draftEvents.rows.length))
+    check('… und keine Zeile trägt einen Prompt, ein Bild oder ein Briefing-Feld',
+      draftEvents.rows.every((row) => {
+        const payload = String(row.payload ?? '')
+        return payload.includes('model')
+          && payload.includes('promptHash')
+          && !payload.includes('base64')
+          && !payload.includes('Charakter')
+          && !payload.includes('logo draft')
+      }),
+      JSON.stringify(draftEvents.rows[0]?.payload ?? null))
+  }
+
+  // ── EIN FREMDES KONTO SIEHT AUCH HIER NICHTS ───────────────────────────
+  const foreignDrafts = await call(draftsBase, { method: 'POST', cookie: stranger.cookie })
+  check('fremdes Konto: der Lauf antwortet 404 (Datentür, nicht 403)',
+    foreignDrafts.status === 404, String(foreignDrafts.status))
+  const guestDrafts = await call(draftsBase, { method: 'POST' })
+  check('… ohne Anmeldung: 401/404, nie ein Lauf',
+    guestDrafts.status === 401 || guestDrafts.status === 404, String(guestDrafts.status))
+  const foreignDraftList = await call(draftsBase, { cookie: stranger.cookie })
+  check('… und die Liste ebenso: 404 für ein fremdes Konto',
+    foreignDraftList.status === 404, String(foreignDraftList.status))
+
 }
 catch (error) {
   fail++
@@ -3171,6 +3475,23 @@ finally {
     for (const row of rest.rows) {
       await tablesDB.deleteRow({ databaseId, tableId: 'brand_inspiration', rowId: row.$id }).catch(() => {})
       await storage.deleteFile({ bucketId: 'brand-inspiration', fileId: row.$id }).catch(() => {})
+    }
+  }
+  // Die KI-Entwürfe (D5c) — dieselbe Regel wie eine Zeile darüber: an jeder
+  // Zeile hängt eine Datei im Bucket `brand-drafts` (Zeilen-Id = Datei-Id).
+  for (const id of cleanup.drafts) {
+    await tablesDB.deleteRow({ databaseId, tableId: 'brand_mark_drafts', rowId: id }).catch(() => {})
+    await storage.deleteFile({ bucketId: 'brand-drafts', fileId: id }).catch(() => {})
+  }
+  for (const id of cleanup.profiles) {
+    const rest = await tablesDB.listRows({
+      databaseId,
+      tableId: 'brand_mark_drafts',
+      queries: [Query.equal('profileId', id), Query.limit(100)],
+    }).catch(() => ({ rows: [] }))
+    for (const row of rest.rows) {
+      await tablesDB.deleteRow({ databaseId, tableId: 'brand_mark_drafts', rowId: row.$id }).catch(() => {})
+      await storage.deleteFile({ bucketId: 'brand-drafts', fileId: row.$id }).catch(() => {})
     }
   }
   for (const id of cleanup.messages) {
