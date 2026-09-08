@@ -56,6 +56,20 @@ const base = computed(() => {
   if (customValid.value) return customHex.value.trim()
   return DS_BASE_CANDIDATES.find(candidate => candidate.id === baseId.value)?.hex ?? DS_BRAND.palette.roast
 })
+/* FARB-PICKER UND HEX-FELD SIND EIN WERT (Davids Korrektur 2026-09-08: „beides
+ * muss gegeben sein"). Der Picker zeigt die wirksame Basisfarbe (eigener Wert,
+ * sonst der gewählte Kandidat); jede Bewegung im Picker schreibt ins Hex-Feld,
+ * jedes gültige Hex im Feld stellt den Picker. Kein zweiter Zustand. */
+const pickerHex = computed<string>({
+  get: () => (customValid.value ? customHex.value.trim() : base.value).toLowerCase(),
+  set: (value) => { customHex.value = (value ?? '').toLowerCase() },
+})
+const pickerOpen = ref(false)
+/** Icon-Farbe auf dem Picker-Knopf: hell auf dunkler Basis, sonst Tinte. */
+function inkOn(hex: string): string {
+  const ratio = dsContrast('#ffffff', hex)?.ratio ?? 0
+  return ratio >= 3 ? '#ffffff' : 'var(--bw-ink)'
+}
 const accent = computed(() => DS_ACCENT_CANDIDATES.find(candidate => candidate.id === accentId.value)?.hex ?? DS_BRAND.palette.palm)
 const neutralSource = computed(() => DS_NEUTRAL_OPTIONS.find(option => option.id === neutralId.value)?.source ?? base.value)
 
@@ -141,12 +155,26 @@ const levelStyle: Record<string, string> = {
       </div>
 
       <div class="mt-3 flex flex-wrap items-center gap-2">
+        <!-- Picker (Nuxt UI) + Hex-Feld: derselbe Wert, zwei Griffe. `bw-root` am
+             Popover-Inhalt ist Pflicht — er teleportiert an den Body. -->
+        <UPopover v-model:open="pickerOpen" :content="{ align: 'start' }" :ui="{ content: 'bw-root bw-overlay p-3' }">
+          <button
+            type="button" class="bw-swatch flex size-9 items-center justify-center rounded-full"
+            :style="`background: ${pickerHex}`" aria-label="Basisfarbe im Farb-Picker wählen"
+          >
+            <UIcon name="i-ph-eyedropper" class="size-4" :style="`color: ${inkOn(pickerHex)}`" />
+          </button>
+          <template #content>
+            <UColorPicker v-model="pickerHex" format="hex" :throttle="80" />
+            <p class="bw-label mt-2 font-mono" style="color: var(--bw-muted)">{{ pickerHex }}</p>
+          </template>
+        </UPopover>
         <UInput
           v-model="customHex" size="sm" placeholder="#4a3123" aria-label="Eigene Basisfarbe als Hex"
           class="w-40" :ui="{ base: 'font-mono' }"
         />
         <span class="bw-label" style="color: var(--bw-muted)">
-          {{ customValid ? `Eigener Wert übernommen: ${customHex.trim()}` : 'Oder eigenen Hex-Wert eingeben (sechs Zeichen).' }}
+          {{ customValid ? `Eigener Wert übernommen: ${customHex.trim()}` : 'Picker öffnen oder eigenen Hex-Wert eingeben (sechs Zeichen).' }}
         </span>
       </div>
     </section>
