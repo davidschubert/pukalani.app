@@ -686,6 +686,36 @@ antwortet Prod ruhig 503, das Kapitel läuft ohne Lesung. Offen für D2c:
 `g.dna` hängt an `g.reading`; auf dem Weg „Frida schlägt vor" muss der
 Vorschlag ohne Lesung entstehen.
 
+**Stand D2c (DNA, Boards, Mix & Match, Szene):** GEBAUT und geprüft
+2026-09-08 (Opus-Agent, Fable-Prüfung; Commits ab cd913e85 + drei Klemmen).
+Pure Regeln in `shared/brandDesignDna.ts` (Klemmung: nur Vokabular-Ids,
+Begründung Pflicht, `inspiration` ⇒ `both`, ohne Vorbilder alles
+`foundation`; Boards als deterministische Achsen-Rechnung; Mix & Match;
+`brandDesignDefaultsFromDna` = H5-Vorbelegung), Weg ohne Vorbilder über
+`conditionalInputCounts` (`g.reading` zählt nur bei `g.source =
+inspiration`), Route `POST …/dna/propose` (10/Tag), Szene `BwDesignScene` +
+`brand-fonts.css` (sieben Familien self-gehostet, Build bewiesen), Panels
+`BwDnaPanel`/`BwBoardCard`/`BwDnaMixPanel`. Beweis 213/213 (Abschnitt 24),
+2 450 Tests. **Drei Klemmen aus dem eigenen Klick:** (1)
+`resolveNextSession` fragt nur ERREICHBARE Sessions — nach dem Karten-Klick
+auf die Weiche sprang das Gespräch zur gesperrten Board-Wahl, der
+Bestätigen-Knopf der Weiche kam nie (Stillstand des Kapitels); (2) die
+DNA-Route prüfte die Text-KI über `isAiConfigured` (Core-Gate
+`pukalani.ai.enabled`, das branding nie setzt) und hätte auf Prod IMMER 503
+geantwortet — jetzt wie die Foundation-Generatoren nur der Schlüssel;
+(3) die Prompts nennen ein Bild im deutschen Satz „Vorbild N" (das Modell
+schrieb „wie in reference 1"). **Echter Lauf (gemini-2.5-flash + Text-
+Modell, lokal mit Prod-Schlüssel):** zwei Test-Bilder — gedämpftes Braun ⇒
+`color=earthy`, „Trägt schon", Anker „Warm & Editorial"; Neongrün ⇒
+`vivid`, „Passt nicht" mit Vorschlag; DNA: zehn Zeilen, alle Vokabular-Ids,
+neun `foundation`, eine `both` mit Vorbild-Bezug. Nebenbefunde (Inhalts-
+Gate/D-Folgepakete): Entwurfs-Knopf heißt in Design-Kapiteln „George,
+entwirf das" (generischer i18n-Text, gehört Frida); nach dem Karten-Klick
+gilt eine Wahl als „gefüllt" und wird erst am Kapitelende bestätigt —
+Foundation-Muster, in `dna` nun sauber; Board-Karten im Auswahl-Modul
+schmal; `g.boards` wird ohne sichtbare Boards bestätigt (Karten im
+Folge-Schritt).
+
 | # | Paket | Inhalt | Gate |
 | --- | --- | --- | --- |
 | D0 | Verträge | Registry-Steps + Sessions (Struktur), Vokabulare, Font-Paar-Katalog, `BrandDesignPreset`, `buildBrandDesign`, Ramp-Import als Vertrag, Journey mit Freischaltung | — |
