@@ -430,13 +430,13 @@ try {
     && sessions['a.facts']?.sensitivity === 'internal'
     && typeof sessions['a.facts']?.effort?.minutes === 'number',
     JSON.stringify(sessions['a.facts'] ?? null))
-  // 55 Felder in 13 Kapiteln seit Brand Design D0: 29 in 7 Kapiteln der
-  // Foundation (unverändert, Anhang A des Plans) plus die 26 der Schicht 2 in
-  // ihren sechs. Schicht 2 hängt an `c.final`, `d.primary`, `d.toneWords` und
-  // `result.direction` — und `a.customerPraise` liegt vor allen vieren.
+  // 29 Felder in 7 Kapiteln — auch nach Brand Design D0: die Registry zählt
+  // seither 55 in 13 (26 Design-Sessions hängen an `c.final`, `d.primary`,
+  // `d.toneWords`, `result.direction`), aber der HINWEIS nennt nur erreichbare
+  // Kapitel (`affectsView`), und diese Marke ist nicht freigeschaltet.
   check('„wohin fliesst das später" ist gerechnet, nicht gepflegt',
-    sessions['a.customerPraise']?.affects?.count === 55
-    && (sessions['a.customerPraise']?.affects?.steps ?? []).length === 13,
+    sessions['a.customerPraise']?.affects?.count === 29
+    && (sessions['a.customerPraise']?.affects?.steps ?? []).length === 7,
     JSON.stringify(sessions['a.customerPraise']?.affects ?? null))
   check('GEGENPROBE: ein Feld ganz unten berührt nichts',
     sessions['a.challenge']?.affects?.count === 0,

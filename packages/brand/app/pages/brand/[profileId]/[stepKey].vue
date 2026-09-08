@@ -19,7 +19,7 @@ import {
   needsOpeningTurn,
   resolveActiveSession,
 } from '../../../../shared/brandWorkspaceNav'
-import { sessionsAffectedBy } from '../../../../shared/brandSessions'
+import { affectsView } from '../../../../shared/brandSessions'
 import {
   BRAND_STEP_KEYS,
   type BrandInvariant,
@@ -927,18 +927,14 @@ const activeCollected = computed<{ label: string, value: string }[]>(() => {
  *
  * Für das OFFENE Kapitel steht die Antwort schon in der `sessions`-Karte (der
  * Server hat sie mit derselben Funktion gerechnet); für jedes andere rechnet
- * der Browser sie selbst — `sessionsAffectedBy` ist pur und liegt im Bündel.
+ * der Browser sie selbst — `affectsView` ist pur und liegt im Bündel.
  * Zwei Quellen, EIN Ergebnis: die Karte ist die Abkürzung, nicht eine zweite
  * Wahrheit.
  */
 function affectsLine(sessionId: string): string {
-  const known = store.sessions[sessionId]?.affects
-  const steps = known
-    ? known.steps
-    : store.railSteps
-        .map(entry => entry.stepKey)
-        .filter(candidate => sessionsAffectedBy(sessionId).byStep[candidate]?.length)
-  const count = known ? known.count : sessionsAffectedBy(sessionId).transitive.length
+  // Dieselbe pure Regel wie der Server (`affectsView`): nur ERREICHBARE
+  // Kapitel — gesperrtes Brand Design steht nicht im Hinweis.
+  const { count, steps } = store.sessions[sessionId]?.affects ?? affectsView(sessionId, store.railSteps)
   if (count === 0) return t('brand.session.affectsNone')
   return t('brand.session.affects', {
     count,

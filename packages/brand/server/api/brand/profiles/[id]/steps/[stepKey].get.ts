@@ -1,5 +1,5 @@
 import { stripBrandGenerationDrafts } from '../../../../../../shared/brandGeneration'
-import { brandStageSourceSlots, sessionsAffectedBy } from '../../../../../../shared/brandSessions'
+import { affectsView, brandStageSourceSlots } from '../../../../../../shared/brandSessions'
 import { slotsForStep } from '../../../../../../shared/slotRegistry'
 import type { BrandSessionView, BrandStepDetailResponse } from '../../../../../../shared/types/brand'
 import { listBrandFindings, toBrandFindingView } from '../../../../../utils/brandFindingsStore'
@@ -70,21 +70,15 @@ export default defineEventHandler(async (event): Promise<BrandStepDetailResponse
   const states = resolveBrandSessionStates(profileFacts(profile), toStepFacts(stepRows))
   const sessions: Record<string, BrandSessionView> = {}
   for (const session of slotsForStep(stepKey)) {
-    const affected = sessionsAffectedBy(session.id)
     const collected = parseCollectedParts(records[session.id])
     sessions[session.id] = {
       state: states[session.id] ?? 'locked',
       kind: session.kind,
       effort: session.effort,
       sensitivity: session.sensitivity,
-      affects: {
-        count: affected.transitive.length,
-        // Die Kapitel in Registry-Reihenfolge — `byStep` ist ein Objekt, seine
-        // Schlüssel-Reihenfolge ist keine Zusage.
-        steps: journey
-          .map(entry => entry.stepKey)
-          .filter(candidate => affected.byStep[candidate]?.length),
-      },
+      // Nur ERREICHBARE Kapitel (gesperrtes Brand Design fällt heraus) —
+      // pure Regel `affectsView`, s. dort.
+      affects: affectsView(session.id, journey),
       // Die zwei Flags der Finalen Abnahme (Paket 3b) — IMMER gesetzt, auch als
       // `false`: ein fehlendes Feld hiesse für den Leser „unbekannt", und die
       // Abnahme-Seite hat keinen dritten Zustand.

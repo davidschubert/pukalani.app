@@ -8,10 +8,13 @@ import {
   confirmedDependents,
   correctionNeedsAck,
   evaluateInvariants,
+  affectsView,
   nextCollectPart,
   sessionsAffectedBy,
 } from '../shared/brandSessions'
 import {
+  BRAND_DESIGN_STEP_KEYS,
+  BRAND_FOUNDATION_STEP_KEYS,
   BRAND_SLOTS,
   type BrandSessionConfig,
   type BrandSlotStateFacts,
@@ -200,6 +203,34 @@ describe('sessionsAffectedBy — die Umkehrung der Abhängigkeiten (§9)', () =>
       .toEqual(['c.final', 'd.primary', 'd.toneWords', 'result.direction'])
     // Und umgekehrt: `c.final` reicht wirklich bis in die Design-Kapitel.
     expect(sessionsAffectedBy('c.final').transitive).toContain('g.dna')
+  })
+
+  /**
+   * DER HINWEIS NENNT NUR ERREICHBARE KAPITEL (D0, Prüf-Befund): für eine
+   * nicht freigeschaltete Marke stand unter jedem Foundation-Feld „… in 53
+   * weitere Felder — … Moodboard · Farbwelt …". `affectsView` klemmt die
+   * Anzeige an der Journey, `sessionsAffectedBy` bleibt die volle Wahrheit.
+   */
+  it('affectsView: gesperrtes Brand Design fällt aus dem Hinweis, freigeschaltet zählt es mit', () => {
+    const locked = [
+      ...BRAND_FOUNDATION_STEP_KEYS.map(stepKey => ({ stepKey, reason: 'completed' })),
+      ...BRAND_DESIGN_STEP_KEYS.map(stepKey => ({ stepKey, reason: 'design_locked' })),
+    ]
+    const unlocked = locked.map(entry => ({ ...entry, reason: 'unlocked' }))
+    const full = sessionsAffectedBy('a.customerPraise')
+
+    const view = affectsView('a.customerPraise', locked)
+    expect(view.steps.some(stepKey => isBrandDesignStep(stepKey))).toBe(false)
+    // Die Zahlen des Plan-Anhangs (Spalte „berührt"), wie vor D0 — und der
+    // Beweis-Zähler in verify-brand-sessions.mjs.
+    expect(view).toEqual({ count: 29, steps: view.steps })
+    expect(view.steps).toHaveLength(7)
+
+    const open = affectsView('a.customerPraise', unlocked)
+    expect(open.count).toBe(full.transitive.length)
+    expect(open.count).toBe(55)
+    expect(open.steps).toHaveLength(13)
+    expect(open.steps.filter(stepKey => isBrandDesignStep(stepKey))).toEqual([...BRAND_DESIGN_STEP_KEYS])
   })
 
   it('trennt direkt von der vollen Hülle — und `direct` ist deren Teilmenge', () => {

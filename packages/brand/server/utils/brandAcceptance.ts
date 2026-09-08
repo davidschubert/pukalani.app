@@ -13,7 +13,7 @@ import { blockingFindingSlots } from '../../shared/brandFindings'
 import {
   type BrandRestartImpact,
   brandRestartImpact,
-  sessionsAffectedBy,
+  affectsView,
 } from '../../shared/brandSessions'
 import {
   type BrandPathKind,
@@ -180,7 +180,6 @@ export function brandAcceptanceSessions(
 ): BrandAcceptanceSessionView[] {
   return slotsForStep(input.stepKey).map((session) => {
     const record = input.records[session.id]
-    const affected = sessionsAffectedBy(session.id)
     return {
       slotId: session.id,
       kind: session.kind,
@@ -211,14 +210,9 @@ export function brandAcceptanceSessions(
         de: [...session.examples[input.pathKind].de],
         en: [...session.examples[input.pathKind].en],
       },
-      affects: {
-        count: affected.transitive.length,
-        // Die Kapitel in Registry-Reihenfolge — `byStep` ist ein Objekt, seine
-        // Schlüssel-Reihenfolge ist keine Zusage.
-        steps: input.journey
-          .map(entry => entry.stepKey)
-          .filter(candidate => affected.byStep[candidate]?.length),
-      },
+      // Nur ERREICHBARE Kapitel (gesperrtes Brand Design fällt heraus) —
+      // pure Regel `affectsView`, s. dort.
+      affects: affectsView(session.id, input.journey),
     }
   })
 }

@@ -112,6 +112,45 @@ export function sessionsAffectedBy(
   return { direct, transitive, byStep }
 }
 
+/**
+ * DIE HÜLLE, WIE DER MENSCH SIE SIEHT (Brand Design D0, Prüf-Befund).
+ *
+ * `sessionsAffectedBy` ist die WAHRHEIT der Registry — seit Schicht 2 zählt
+ * sie auch die 26 Design-Sessions, die an `c.final`, `d.primary`,
+ * `d.toneWords` und `result.direction` hängen. Für eine Marke OHNE
+ * Freischaltung stünde damit unter jedem Foundation-Feld „fließt in 53
+ * weitere Felder ein — … Moodboard · Farbwelt · …": Kapitel, die es in ihrer
+ * Oberfläche nicht gibt. Der Hinweis beschreibt deshalb nur Kapitel, die der
+ * Journey nach ERREICHBAR sind: gesperrte Design-Kapitel (`design_locked`)
+ * fallen samt ihren Sessions heraus. Nach der Freischaltung zählen sie mit —
+ * ohne zweite Regel, weil die Journey dann keinen `design_locked` mehr trägt.
+ *
+ * Bewusst KEINE Änderung an `sessionsAffectedBy`: Korrektur-Kaskade und
+ * Neustart-Kosten rechnen weiter mit der vollen Hülle (ein gesperrtes
+ * Design-Feld ist leer, eine Kaskade dorthin kostet nichts).
+ */
+export interface BrandAffectsView {
+  count: number
+  /** Kapitel in Journey-Reihenfolge — nur die, die etwas berühren UND erreichbar sind. */
+  steps: BrandStepKey[]
+}
+
+export function affectsView(
+  sessionId: string,
+  journey: readonly { stepKey: BrandStepKey, reason: string | null }[],
+  sessions: readonly BrandSessionConfig[] = BRAND_SLOTS,
+): BrandAffectsView {
+  const affected = sessionsAffectedBy(sessionId, sessions)
+  const hidden = new Set(journey.filter(entry => entry.reason === 'design_locked').map(entry => entry.stepKey))
+  const steps = journey
+    .map(entry => entry.stepKey)
+    .filter(candidate => !hidden.has(candidate) && affected.byStep[candidate]?.length)
+  const count = (Object.entries(affected.byStep) as [BrandStepKey, readonly string[]][])
+    .filter(([stepKey]) => !hidden.has(stepKey))
+    .reduce((sum, [, ids]) => sum + ids.length, 0)
+  return { count, steps }
+}
+
 // ── 1b · Was kostet „Nochmal von vorn"? ───────────────────────────────────
 
 export interface BrandRestartImpact {
