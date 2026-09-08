@@ -23,6 +23,7 @@
 import type { BrandFoundationView } from '../brandFoundation'
 import type { BrandGenerationOutcome } from '../brandGeneration'
 import type { BrandInspirationEntry } from '../brandInspiration'
+import type { BrandMarkDraftEntry } from '../brandMarkDrafts'
 import type { BrandReadingState } from '../brandReading'
 import type { BrandPublicationBlocker, BrandPublicationViewStatus } from '../brandPublication'
 import type { BrandWaitlistStatus } from '../brandWaitlistAdmin'
@@ -2128,4 +2129,47 @@ export interface BrandMarkBriefResponse {
   /** Modell-Kennung ohne Schlüssel — sie steht unter dem Briefing. */
   model: string
   quota: { used: number, limit: number, remaining: number }
+}
+
+/**
+ * DIE KI-ENTWÜRFE DES ZEICHENS (`…/mark/drafts`, Brand Design D5c,
+ * §2.5 Stufe 3).
+ *
+ * ── JEDE ANTWORT TRÄGT DIE GANZE LISTE ────────────────────────────────────
+ * Wie bei den Vorbildern (D2a) und aus demselben Grund: die Werkstatt hält
+ * keine eigene Liste, die sie fortschreibt. Ein Lauf legt vier Zeilen an, ein
+ * „Behalten" ändert eine, ein Entfernen nimmt eine weg — und jedes Mal ist die
+ * Antwort der ganze Stand. Zwei Zählungen (hier und im Browser) wären
+ * spätestens nach dem ersten Entfernen zwei verschiedene.
+ *
+ * KEIN BILD und KEINE Bucket-Adresse: das Bild holt die Ausliefer-Route
+ * einzeln, und zwar nur für den Besitzer (§2.13).
+ */
+export interface BrandMarkDraftsListResponse {
+  items: BrandMarkDraftEntry[]
+  /** Der Deckel je Marke — die Werkstatt schreibt „n von 12" darunter. */
+  max: number
+}
+
+/**
+ * DIE ANTWORT EINES LAUFS (`POST …/mark/drafts`).
+ *
+ * `created` ist die Zahl der WIRKLICH entstandenen Entwürfe und kann kleiner
+ * als vier sein: Teilerfolg ist Erfolg (Kopf von
+ * `server/utils/brandMarkDrafts.ts`). Das REST-KONTINGENT steht darin, weil der
+ * Mensch unter dem Knopf sehen soll, wie oft er heute noch erzeugen kann, ohne
+ * es zählen zu müssen.
+ */
+export interface BrandMarkDraftsRunResponse extends BrandMarkDraftsListResponse {
+  ok: true
+  created: number
+  /** Modell-Kennung ohne Schlüssel — sie steht auf jeder Karte. */
+  model: string
+  quota: { used: number, limit: number, remaining: number }
+}
+
+/** Die Antwort von `PATCH`/`DELETE` — `item` ist beim Entfernen `null`. */
+export interface BrandMarkDraftWriteResponse extends BrandMarkDraftsListResponse {
+  ok: true
+  item: BrandMarkDraftEntry | null
 }

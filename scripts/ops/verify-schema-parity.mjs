@@ -329,6 +329,13 @@ const BRAND_TABLES = [
   // Vision-Modells. Sie steht hier, damit eine fehlende Migration auffällt,
   // BEVOR der erste Kunde auf „Screenshots hinzufügen" klickt.
   'brand_inspiration',
+  // brand-023: die KI-Entwürfe des Zeichens (docs/plans/BRAND-DESIGN.md §2.5
+  // Stufe 3). EINE Zeile je Entwurf, Zeilen-Id = Datei-Id im Bucket
+  // `brand-drafts`; sie trägt die HERKUNFT (Modell, Prompt-Hash) und das
+  // `kept` des Menschen. Sie steht hier aus demselben Grund wie die Zeile
+  // darüber: eine fehlende Migration soll auffallen, BEVOR der erste Kunde auf
+  // „Entwürfe erzeugen" klickt — der Lauf antwortete sonst 503.
+  'brand_mark_drafts',
 ]
 
 /**
