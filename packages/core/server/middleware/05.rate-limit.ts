@@ -435,6 +435,22 @@ const WRITE_LIMITED: { re: RegExp, bucket: string, max?: number }[] = [
    */
   { re: /^POST \/api\/brand\/waitlist(\/confirm)?$/, bucket: 'brand:waitlist', max: 5 },
   /**
+   * DAS ERSTGESPRÄCH (BS1 Z0) — die zweite öffentliche Route dieses Layers,
+   * die MAIL VERSCHICKT, und deshalb dieselbe Zahl wie die Warteliste: 5/min
+   * je IP.
+   *
+   * Sie ist von den drei Bremsen der Route die EINZIGE, die serverseitig
+   * misst: der Honigtopf und die Mindestzeit hängen beide an Werten, die der
+   * Client schickt. Wer sie fälscht, steht trotzdem vor dieser Zeile.
+   *
+   * EIGENER EIMER, nicht der `brand:waitlist` daneben: das sind zwei
+   * verschiedene Vorgänge, und wer sich gerade eingetragen hat, soll nicht mit
+   * einem 429 bestraft werden, wenn er danach ein Gespräch anfragt. Ein
+   * geteilter Eimer koppelte zwei Trichter, die nichts miteinander zu tun
+   * haben.
+   */
+  { re: /^POST \/api\/brand\/intro-call$/, bucket: 'brand:intro-call', max: 5 },
+  /**
    * GEORGES ENTWÜRFE (P2.1) — die teuerste Route des Wizards: jeder Lauf ist
    * ein Anbieter-Aufruf mit Streaming-Antwort. Die eigentlichen Deckel sind
    * feiner und sitzen IN der Route (Burst 2 je Konto, 10/Tag je Brand ×
