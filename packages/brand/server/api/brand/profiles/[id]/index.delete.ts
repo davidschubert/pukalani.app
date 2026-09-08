@@ -2,6 +2,7 @@ import type { Models } from 'node-appwrite'
 import { Query } from 'node-appwrite'
 import type { BrandProfileDeleteResponse } from '../../../../../shared/types/brand'
 import { BRAND_FINDINGS_TABLE } from '../../../../utils/brandFindingsStore'
+import { purgeBrandInspiration } from '../../../../utils/brandInspirationStore'
 import { runBrandProfileCascades } from '../../../../utils/brandProfileCascade'
 import {
   BRAND_PUBLICATIONS_TABLE,
@@ -94,6 +95,15 @@ export default defineEventHandler(async (event): Promise<BrandProfileDeleteRespo
    * der Kopf dieser Route geschrieben ist.
    */
   const publicationReports = await purge(BRAND_PUBLICATION_REPORTS_TABLE, 'publicationId', profileId)
+  /**
+   * DIE VORBILDER (brand-024, Brand Design D2a) — ZEILEN **UND** DATEIEN.
+   *
+   * Sie laufen nicht durch `purge()`, weil an jeder Zeile eine Datei im Bucket
+   * `brand-inspiration` hängt (Zeilen-Id = Datei-Id). Ein `deleteRow` allein
+   * liesse Fremdwerke im Speicher liegen, die keine Route mehr erreicht — der
+   * teuerste Rest, den dieses Produkt hinterlassen kann (§2.13).
+   */
+  const inspiration = await purgeBrandInspiration(event, profileId)
   let publications = 0
   try {
     await tablesDB.deleteRow({ databaseId, tableId: BRAND_PUBLICATIONS_TABLE, rowId: profileId })
@@ -120,7 +130,8 @@ export default defineEventHandler(async (event): Promise<BrandProfileDeleteRespo
   // `profileId`, und dessen Zeilen sind gerade Teil der Kaskade gewesen — ein
   // Ereignis über ein gelöschtes Profil wäre der einzige Rest, der bliebe.
   logEvent('info', 'brand.profile_deleted', {
-    profileId, steps, messages, shares, events, findings, publications, publicationReports, ...cascades,
+    profileId, steps, messages, shares, events, findings, publications, publicationReports,
+    inspiration, ...cascades,
   })
 
   return { deleted: true, removed: { steps, messages, shares, events, findings } }
