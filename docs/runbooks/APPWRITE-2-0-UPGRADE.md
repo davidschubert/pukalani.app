@@ -153,8 +153,9 @@ ERSTE Instanz-Mail nach Leerlauf, also genau der KeepAlive-Fall) ·
 Realtime-/Mail-/Databases-Worker 0 Fehlerzeilen; im `appwrite`-Container nur
 Anwendungs-404 (Row/Datei nicht gefunden, Gast ohne presences.read).
 
-**Rest, bewusst liegen gelassen:** der alte Container `appwrite-embedding`
-(Image 0.1.0) läuft auf beiden Instanzen weiter — im 2.0-Compose liegt der
-Dienst im Profil `embedding` und wird nicht mehr gestartet, das Werkzeug hat
-den Alt-Container nicht als Waise erkannt. Ungenutzt (kein Embeddings-Aufruf im
-Repo); `docker rm -f appwrite-embedding` räumt ihn, sobald man mag.
+**Aufgeräumt (2026-09-08, Davids Anweisung):** der alte Container
+`appwrite-embedding` (Image 0.1.0) lief auf beiden Instanzen als Waise weiter —
+im 2.0-Compose liegt der Dienst im Profil `embedding` und wird nicht mehr
+gestartet, das Werkzeug erkennt den Alt-Container nicht als Waise. Entfernt mit
+`docker rm -f appwrite-embedding` + `docker rmi appwrite/embedding:0.1.0`
+(1,5 GB), Version danach weiter 2.0.0.
