@@ -332,6 +332,33 @@ describe('resolveBrandJourney — Brand Design ist gesperrt, bis beides stimmt',
     const journey = resolveBrandJourney({ ...FULL_PROFILE, designUnlockedAt: null }, foundationDone)
     expect(stateOf(journey, 'dna')).toMatchObject({ state: 'locked', reason: 'design_locked' })
   })
+
+  /**
+   * DER GRUND REIST BIS AN DIE TÜR (D1). Ohne diesen Fall wäre die Werkstatt
+   * für ein nicht freigeschaltetes Kapitel weiterhin bei „Schließ das Kapitel
+   * davor ab" gelandet — einem Satz über etwas, das gar nicht fehlt.
+   */
+  it('`canEnterBrandStep` unterscheidet „nicht freigeschaltet" von „Vorgänger offen"', () => {
+    const locked = resolveBrandJourney(FULL_PROFILE, foundationDone)
+    expect(canEnterBrandStep(locked, 'dna')).toEqual({ allowed: false, reason: 'design_locked' })
+
+    // GEGENPROBE: dasselbe Kapitel, freigeschaltet — jetzt hängt `color` am
+    // Vorgänger und bekommt den ANDEREN Grund.
+    const open = resolveBrandJourney(UNLOCKED, foundationDone)
+    expect(canEnterBrandStep(open, 'color')).toEqual({ allowed: false, reason: 'locked' })
+    expect(canEnterBrandStep(open, 'dna')).toEqual({ allowed: true, reason: null })
+  })
+
+  /**
+   * DIE RÜCKNAHME SPERRT AUCH ERARBEITETES (§2.10 / D1): die Sperre steht in
+   * `resolveBrandJourney` VOR dem gespeicherten `done`. Ohne diese Reihenfolge
+   * liesse eine zurückgenommene Freischaltung offene Türen zurück.
+   */
+  it('nach der Rücknahme ist auch ein fertiges Design-Kapitel wieder zu', () => {
+    const journey = resolveBrandJourney(FULL_PROFILE, [...foundationDone, completedStep('dna')])
+    expect(stateOf(journey, 'dna')).toMatchObject({ state: 'locked', reason: 'design_locked' })
+    expect(canEnterBrandStep(journey, 'dna').allowed).toBe(false)
+  })
 })
 
 describe('canEnterBrandStep', () => {

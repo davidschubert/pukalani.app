@@ -182,7 +182,7 @@ const stamp = Date.now()
  * ZWEITES Konto, das ebenfalls Zugang hat — nur so beweist ein 404 dort den
  * BESITZ und nicht bloss das geschlossene Tor.
  */
-async function makeAccount(tag = 'owner') {
+async function makeAccount(tag = 'owner', { labels } = {}) {
   const user = await users.create({
     userId: ID.unique(),
     email: `bw2-sessions-${stamp}-${tag}@example.test`,
@@ -192,6 +192,11 @@ async function makeAccount(tag = 'owner') {
   cleanup.users.push(user.$id)
   // Der Zugang hängt an einer verifizierten Adresse (`decideBrandAccess`).
   await users.updateEmailVerification({ userId: user.$id, emailVerification: true })
+  // `labels: ['admin']` macht daraus einen BETREIBER (`users.manage` liegt im
+  // Wildcard der admin-Rolle) — gebraucht von Zusage 21, wo eine
+  // Betreiber-Handlung geprüft wird. Ohne das Argument bleibt es ein
+  // gewöhnliches Beta-Konto, und genau das ist die Gegenprobe.
+  if (labels) await users.updateLabels({ userId: user.$id, labels })
   const access = await tablesDB.createRow({
     databaseId,
     tableId: 'brand_access',
@@ -1137,6 +1142,153 @@ try {
   check('GEGENPROBE: das Dokument antwortet genauso (fremd 404, Besitzer 200)',
     docForeign.status === 404 && docOwn.status === 200,
     `${docForeign.status}/${docOwn.status}`)
+
+  /**
+   * 21 · BRAND DESIGN: DIE FREISCHALTUNG (Konzept §2.10, Paket D1).
+   *
+   * Geprüft wird die GANZE Kette an einer echten Marke: gesperrt mit eigenem
+   * Satz · die Betreiber-Route hinter ihrer Capability · die Gegenprobe „ohne
+   * fertige Foundation bleibt zu" · freigeschaltet öffnet GENAU das erste
+   * Kapitel · die Rücknahme schliesst wieder · die Ereignis-Zeilen stehen da.
+   *
+   * DIE GEGENPROBE IST DER KERN: eine Prüfung, die nur „gesperrt" und
+   * „offen" kennt, wäre auch für eine Regel grün, die nur EINE der beiden
+   * Bedingungen aus §2.1 liest.
+   */
+  console.log('\n21 · Brand Design: Freischaltung, Rücknahme und die zwei Bedingungen')
+
+  const designStep = () => call(`${base}/steps/dna`, { cookie: account.cookie })
+  const colorStep = () => call(`${base}/steps/color`, { cookie: account.cookie })
+
+  const lockedDna = await designStep()
+  check('ohne Freischaltung: `dna` antwortet 403 mit EIGENEM Grund `design_locked`',
+    lockedDna.status === 403 && lockedDna.json?.reason === 'design_locked',
+    `${lockedDna.status} ${JSON.stringify(lockedDna.json?.reason ?? null)}`)
+
+  const lockedPage = await call(`/de/brand/${profileId}/dna`, { cookie: account.cookie })
+  check('… und die Seite zeigt den Satz für Brand Design, nicht „Schließ das Kapitel davor ab"',
+    lockedPage.status === 200
+    && lockedPage.text.includes('Brand Design ist noch nicht freigeschaltet')
+    && !lockedPage.text.includes('Schließ das Kapitel davor ab'),
+    `${lockedPage.status} ${lockedPage.text.length} Zeichen`)
+
+  const lockedJourney = await call(base, { cookie: account.cookie })
+  const journeyEntry = key => (lockedJourney.json?.journey ?? []).find(e => e.stepKey === key)
+  check('die Journey nennt alle sechs Kapitel gesperrt mit `design_locked`',
+    ['dna', 'color', 'type', 'mark', 'imagery', 'motion']
+      .every(key => journeyEntry(key)?.state === 'locked'
+        && journeyEntry(key)?.reason === 'design_locked'),
+    JSON.stringify((lockedJourney.json?.journey ?? []).slice(9)))
+
+  // ── Die Betreiber-Route hängt an ihrer Capability ────────────────────────
+  const adminPath = `/api/brand/admin/profiles/${profileId}/design-unlock`
+  const guestUnlock = await call(adminPath, { method: 'POST' })
+  check('ohne Anmeldung: die Betreiber-Route antwortet 401', guestUnlock.status === 401,
+    String(guestUnlock.status))
+
+  const strangerUnlock = await call(adminPath, { method: 'POST', cookie: stranger.cookie })
+  check('ein FREMDES Konto ohne Betreiber-Label: 403 (kein `users.manage`)',
+    strangerUnlock.status === 403, String(strangerUnlock.status))
+
+  const ownerUnlock = await call(adminPath, { method: 'POST', cookie: account.cookie })
+  check('auch der EIGENTÜMER kann sich Brand Design nicht selbst freischalten: 403',
+    ownerUnlock.status === 403, String(ownerUnlock.status))
+
+  const operator = await makeAccount('design-operator', { labels: ['admin'] })
+
+  // ── GEGENPROBE: Freischalten OHNE fertige Foundation ─────────────────────
+  const unlockTooEarly = await call(adminPath, { method: 'POST', cookie: operator.cookie })
+  check('GEGENPROBE: Freischalten vor dem Foundation-Ergebnis ⇒ 409 `foundation_incomplete`',
+    unlockTooEarly.status === 409 && unlockTooEarly.json?.reason === 'foundation_incomplete',
+    `${unlockTooEarly.status} ${JSON.stringify(unlockTooEarly.json?.reason ?? null)}`)
+  const stillLocked = await designStep()
+  check('… und `dna` bleibt gesperrt', stillLocked.status === 403
+    && stillLocked.json?.reason === 'design_locked', String(stillLocked.status))
+
+  // Das Ergebnis-Kapitel von Hand auf `done` — der Weg dorthin ist Zusage 1–20,
+  // hier geht es um die zweite Bedingung und nicht um den Weg.
+  await tablesDB.updateRow({
+    databaseId, tableId: 'brand_steps', rowId: `${profileId}_result`, data: { state: 'done' },
+  })
+
+  const unlocked = await call(adminPath, { method: 'POST', cookie: operator.cookie })
+  check('mit fertiger Foundation: die Freischaltung greift (200, Datum gesetzt)',
+    unlocked.status === 200 && typeof unlocked.json?.item?.designUnlockedAt === 'string'
+    && unlocked.json.item.designUnlockedAt.length > 0,
+    `${unlocked.status} ${JSON.stringify(unlocked.json?.item?.designUnlockedAt ?? null)}`)
+  check('… und sie nennt den Betreiber, nicht den Eigentümer',
+    unlocked.json?.item?.designUnlockedBy === operator.id,
+    `${unlocked.json?.item?.designUnlockedBy} ≠ ${operator.id}`)
+
+  const openDna = await designStep()
+  check('jetzt ist `dna` offen (200)', openDna.status === 200, String(openDna.status))
+  const lockedColor = await colorStep()
+  check('… und `color` wartet auf den Vorgänger, nicht auf die Freischaltung',
+    lockedColor.status === 403 && lockedColor.json?.reason === 'locked',
+    `${lockedColor.status} ${JSON.stringify(lockedColor.json?.reason ?? null)}`)
+
+  const openJourney = await call(base, { cookie: account.cookie })
+  const openEntry = key => (openJourney.json?.journey ?? []).find(e => e.stepKey === key)
+  check('die Journey: `dna` offen, `color` `awaiting_previous`',
+    openEntry('dna')?.state === 'open'
+    && openEntry('color')?.state === 'locked'
+    && openEntry('color')?.reason === 'awaiting_previous',
+    JSON.stringify([openEntry('dna'), openEntry('color')]))
+
+  // Kapitel 10 der Leseansicht trägt jetzt den EINSTIEG statt des Angebots.
+  const foundationPage = await call(`/de/brand/${profileId}/foundation`, { cookie: account.cookie })
+  check('Kapitel 10 der Leseansicht zeigt „Brand Design starten" statt des Erstgesprächs',
+    foundationPage.status === 200
+    && foundationPage.text.includes('Brand Design starten')
+    && foundationPage.text.includes('Freigeschaltet vom Studio am'),
+    `${foundationPage.status} ${foundationPage.text.length} Zeichen`)
+
+  // Der zweite Klick ist kein Fehler und kein neues Datum.
+  const unlockAgain = await call(adminPath, { method: 'POST', cookie: operator.cookie })
+  check('zweiter Klick: 200 mit UNVERÄNDERTEM Datum (keine wandernde Zahl)',
+    unlockAgain.status === 200
+    && unlockAgain.json?.item?.designUnlockedAt === unlocked.json?.item?.designUnlockedAt,
+    `${unlockAgain.json?.item?.designUnlockedAt} ≠ ${unlocked.json?.item?.designUnlockedAt}`)
+
+  // ── Die Rücknahme ───────────────────────────────────────────────────────
+  const relocked = await call(`/api/brand/admin/profiles/${profileId}/design-lock`, {
+    method: 'POST', cookie: operator.cookie,
+  })
+  check('die Rücknahme leert BEIDE Spalten',
+    relocked.status === 200 && relocked.json?.item?.designUnlockedAt === null
+    && relocked.json?.item?.designUnlockedBy === '',
+    `${relocked.status} ${JSON.stringify(relocked.json?.item ?? null)}`)
+  const lockedAgain = await designStep()
+  check('… und `dna` ist wieder gesperrt, mit demselben Grund',
+    lockedAgain.status === 403 && lockedAgain.json?.reason === 'design_locked',
+    `${lockedAgain.status} ${JSON.stringify(lockedAgain.json?.reason ?? null)}`)
+
+  // ── Die Ereignis-Zeilen ─────────────────────────────────────────────────
+  const designEvents = await tablesDB.listRows({
+    databaseId,
+    tableId: 'brand_events',
+    queries: [Query.equal('profileId', profileId), Query.limit(200)],
+  }).catch(() => ({ rows: [] }))
+  const types = designEvents.rows.map(row => row.type)
+  check('beide Handlungen stehen im Funnel — genau einmal je Klick',
+    types.filter(type => type === 'design.unlocked').length === 1
+    && types.filter(type => type === 'design.locked').length === 1,
+    JSON.stringify(types.filter(type => type.startsWith('design.'))))
+  const unlockedEvent = designEvents.rows.find(row => row.type === 'design.unlocked')
+  check('… und die Ereignis-Zeile trägt den Betreiber und keinen Inhalt',
+    unlockedEvent?.userId === operator.id
+    && !String(unlockedEvent?.payload ?? '').includes('Kailua'),
+    `${unlockedEvent?.userId} · ${unlockedEvent?.payload}`)
+
+  // Die Liste des Betreibers sieht dieselbe Marke — und ein Fremder gar nichts.
+  const list = await call('/api/brand/admin/design-unlocks', { cookie: operator.cookie })
+  const listed = (list.json?.items ?? []).find(item => item.id === profileId)
+  check('die Betreiber-Liste führt die Marke mit fertiger Foundation und gesperrtem Design',
+    list.status === 200 && listed?.foundationDone === true && listed?.designUnlockedAt === null,
+    `${list.status} ${JSON.stringify(listed ?? null)}`)
+  const listForeign = await call('/api/brand/admin/design-unlocks', { cookie: stranger.cookie })
+  check('GEGENPROBE: ohne `users.manage` bleibt die Liste zu (403)',
+    listForeign.status === 403, String(listForeign.status))
 }
 catch (error) {
   fail++
@@ -1151,6 +1303,10 @@ finally {
     await tablesDB.deleteRow({ databaseId, tableId: 'brand_profiles', rowId: id }).catch(() => {})
     for (const stepKey of [
       'context', 'pvm', 'architecture', 'values', 'archetype', 'manifesto', 'verbal', 'naming', 'result',
+      // Schicht 2 (Brand Design D1): sechs weitere Zeilen. Sie entstehen bei
+      // der Anlage (Journey) UND beim Freischalten — wer sie hier vergisst,
+      // lässt nach jedem Lauf sechs Waisen in `brand_steps` liegen.
+      'dna', 'color', 'type', 'mark', 'imagery', 'motion',
     ]) {
       await tablesDB.deleteRow({ databaseId, tableId: 'brand_steps', rowId: `${id}_${stepKey}` })
         .catch(() => {})
