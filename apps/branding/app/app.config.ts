@@ -13,6 +13,17 @@ export default defineAppConfig({
      */
     ai: {
       visionModel: 'google/gemini-2.5-flash',
+      /**
+       * BILDER ERZEUGEN (Zeichen, Stufe 3 — KI-Entwürfe, D5c): Davids
+       * Entscheidung vom 2026-09-08 (DECISION-LOG). Dieselbe Anbieter-Familie
+       * wie die Lesung; die ZDR-Klemme sitzt im Core-Transport `aiImage`.
+       * Der zuerst genannte Preview-Slug (`…-image-preview`) hat bei OpenRouter
+       * seit 2026-09 keine Endpunkte mehr („No endpoints found", echter Lauf
+       * 2026-09-08) — dies ist das freigegebene Nachfolgemodell derselben
+       * Familie; der Lauf unter `data_collection: deny` + `zdr` lieferte
+       * vier Bilder.
+       */
+      imageModel: 'google/gemini-2.5-flash-image',
     },
     /**
      * DER NAME, DEN DER BESUCHER SIEHT.
