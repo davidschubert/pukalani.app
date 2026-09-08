@@ -103,6 +103,52 @@ function copyShareUrl(): void {
 /* Das Inhaltsverzeichnis (UContentToc) ist der Baustein `FdToc` — geteilt mit
  * der Share-Seite; hier bekommt er nur seine Hülle (UPageAside, s. Template). */
 
+/**
+ * VERÖFFENTLICHEN (docs/plans/DISCOVER-BRANDS.md §4.3, Davids Entscheidung
+ * §9.1) — der Weg der Marke in die öffentliche Galerie.
+ *
+ * WARUM ER NEBEN „TEILEN" WOHNT UND NICHT DARIN: beide frieren denselben
+ * Snapshot ein, aber sie beantworten verschiedene Fragen. Teilen heisst „EINE
+ * Person soll das lesen, 30 Tage, `noindex`". Veröffentlichen heisst „ALLE
+ * dürfen das lesen, dauerhaft, indexierbar" — und geht deshalb erst durch die
+ * Freigabe des Betreibers. Ein gemeinsamer Dialog mit einem Häkchen darin
+ * würde die grössere Zustimmung im Schatten der kleineren einsammeln.
+ *
+ * VIER ZUSTÄNDE, die der Kunde HIER sieht (§3.4):
+ *   none      — noch nie eingereicht
+ *   pending   — „Wartet auf Freigabe" mit der künftigen Adresse
+ *   public    — „Öffentlich · seit …" mit Stand aktualisieren / Zurückziehen
+ *   declined  — die Begründung des Betreibers + „Erneut einreichen"
+ * Im Dummy schaltet ein kleiner Wähler zwischen ihnen; im Echtbetrieb kommt
+ * der Zustand aus `brand_publications.status`.
+ */
+type PublicationState = 'none' | 'pending' | 'public' | 'declined'
+const publicationState = ref<PublicationState>('none')
+const PUBLICATION_SLUG = '/discover/kailua-coffee-co'
+const DECLINE_NOTE = 'Auf dem Bild im Kapitel „Visuelle Identität" ist ein fremdes Logo zu sehen. Bitte tauscht es aus und reicht erneut ein.'
+
+const publishOpen = ref(false)
+const publishConsent = ref(false)
+
+function openPublish(): void {
+  publishConsent.value = false
+  publishOpen.value = true
+}
+
+function submitPublication(): void {
+  publicationState.value = 'pending'
+  publishOpen.value = false
+}
+
+/* Der Zustands-Wähler ist DUMMY-MÖBEL — er steht sichtbar als solches da,
+ * damit niemand ihn für ein Produkt-Element hält. */
+const stateChoices: { value: PublicationState, label: string }[] = [
+  { value: 'none', label: 'nicht eingereicht' },
+  { value: 'pending', label: 'wartet auf Freigabe' },
+  { value: 'public', label: 'öffentlich' },
+  { value: 'declined', label: 'abgelehnt' },
+]
+
 useHead({ title: `Brand Foundation · ${demoFoundation.brand.title}` })
 </script>
 
@@ -148,6 +194,11 @@ useHead({ title: `Brand Foundation · ${demoFoundation.brand.title}` })
             size="sm" color="neutral" variant="ghost" icon="i-ph-share-network"
             label="Teilen" class="max-sm:hidden" @click="shareOpen = true"
           />
+          <!-- Veröffentlichen steht NEBEN Teilen, nicht darin (s. Kopf). -->
+          <UButton
+            size="sm" color="neutral" variant="ghost" icon="i-ph-globe-hemisphere-west"
+            label="Veröffentlichen" class="max-sm:hidden" @click="openPublish"
+          />
           <UDropdownMenu :items="exportItems" :content="{ align: 'end' }" :ui="{ content: 'bw-root bw-overlay w-72' }">
             <UButton size="sm" color="neutral" variant="ghost" icon="i-ph-export" label="Exportieren" class="max-sm:hidden" />
             <template #item="{ item }">
@@ -181,6 +232,42 @@ useHead({ title: `Brand Foundation · ${demoFoundation.brand.title}` })
           <p class="bw-label mt-3" style="color: var(--bw-muted)">
             Stand {{ demoFoundation.brand.standDate }} · {{ acceptedCount }} von {{ counted.length }} Kapiteln abgenommen · Inhaltssprache {{ demoFoundation.brand.locale }}
           </p>
+
+          <!-- DER VERÖFFENTLICHUNGS-ZUSTAND (§4.3) — er steht im KOPF des
+               Dokuments, weil er über das ganze Dokument etwas aussagt. -->
+          <div v-if="publicationState === 'pending'" class="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1">
+            <span class="bw-state bw-state--draft">Wartet auf Freigabe</span>
+            <p class="bw-label" style="color: var(--bw-muted)">Nach der Freigabe erreichbar unter {{ PUBLICATION_SLUG }}</p>
+          </div>
+          <div v-else-if="publicationState === 'public'" class="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2">
+            <span class="bw-state bw-state--confirmed">Öffentlich</span>
+            <p class="bw-label" style="color: var(--bw-muted)">seit 8. September 2026 ·
+              <NuxtLink to="/brand/demo/anatomie" class="underline underline-offset-4">{{ PUBLICATION_SLUG }}</NuxtLink>
+            </p>
+            <span class="flex flex-wrap items-center gap-2">
+              <UButton size="xs" color="neutral" variant="outline" label="Stand aktualisieren" class="rounded-full" @click="publicationState = 'pending'" />
+              <UButton size="xs" color="neutral" variant="ghost" label="Zurückziehen" @click="publicationState = 'none'" />
+            </span>
+          </div>
+          <div v-else-if="publicationState === 'declined'" class="mt-4">
+            <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+              <span class="bw-state bw-state--stale">Abgelehnt</span>
+              <p class="bw-label" style="color: var(--bw-muted)">am 8. September 2026</p>
+            </div>
+            <p class="mt-2 max-w-xl text-sm leading-relaxed" style="color: var(--bw-ink-soft)">{{ DECLINE_NOTE }}</p>
+            <UButton size="xs" color="neutral" variant="outline" label="Erneut einreichen" class="mt-3 rounded-full" @click="openPublish" />
+          </div>
+
+          <!-- DUMMY-MÖBEL: im Echtbetrieb kommt der Zustand aus der Tabelle. -->
+          <div class="mt-6 flex flex-wrap items-center gap-2 border-t pt-4" style="border-color: var(--bw-line)">
+            <span class="bw-pending">Dummy — Zustand zeigen:</span>
+            <button
+              v-for="choice in stateChoices" :key="choice.value"
+              class="bw-select-card rounded-full px-3 py-1 text-xs"
+              :class="publicationState === choice.value ? 'bw-select-card--on' : ''"
+              @click="publicationState = choice.value"
+            >{{ choice.label }}</button>
+          </div>
         </div>
 
         <!-- „AUF EINER SEITE" (§1.5, HubSpot-Muster): der Schnellzugriff über
@@ -309,6 +396,54 @@ useHead({ title: `Brand Foundation · ${demoFoundation.brand.title}` })
           <UButton class="mt-4 rounded-full" icon="i-ph-link" label="Link erzeugen" @click="shareLive = true" />
           <p class="bw-pending mt-4">Ein neuer Link ersetzt den alten — der alte antwortet danach nicht mehr.</p>
         </template>
+      </div>
+    </template>
+  </UModal>
+
+  <!-- VERÖFFENTLICHEN (§4.3). Der Dialog zeigt VORHER den Steckbrief, der in
+       der Galerie stehen wird: was öffentlich wird, soll man vor dem Häkchen
+       sehen und nicht danach. -->
+  <UModal v-model:open="publishOpen">
+    <template #content>
+      <div class="bw-root relative max-h-[85vh] overflow-y-auto p-8" style="background: var(--bw-surface-hi)">
+        <button
+          class="absolute right-5 top-5 grid size-8 place-items-center rounded-full"
+          aria-label="Schließen" @click="publishOpen = false"
+        >
+          <UIcon name="i-ph-x" class="size-4.5" style="color: var(--bw-ink-soft)" />
+        </button>
+        <p class="bw-label uppercase tracking-widest" style="color: var(--bw-muted)">Veröffentlichen</p>
+        <h2 class="mt-1 text-[28px] font-extralight leading-tight tracking-tight">In Discover Brands zeigen</h2>
+        <p class="mt-3 text-sm leading-relaxed" style="color: var(--bw-ink-soft)">
+          Wir frieren den bestätigten Stand ein und legen ihn dem Team zur Freigabe vor. Erst danach ist die Marke öffentlich und für Suchmaschinen sichtbar.
+        </p>
+
+        <div class="mt-6 rounded-2xl px-5 py-4" style="background: var(--bw-surface)">
+          <p class="bw-label" style="color: var(--bw-muted)">So steht sie in der Galerie</p>
+          <dl class="mt-3 grid gap-x-6 gap-y-2 sm:grid-cols-2">
+            <div><dt class="bw-label" style="color: var(--bw-muted)">Titel</dt><dd class="text-sm">{{ demoFoundation.brand.title }}</dd></div>
+            <div><dt class="bw-label" style="color: var(--bw-muted)">Adresse</dt><dd class="text-sm">{{ PUBLICATION_SLUG }}</dd></div>
+            <div><dt class="bw-label" style="color: var(--bw-muted)">Branche</dt><dd class="text-sm">Lebensmittel und Getränke</dd></div>
+            <div><dt class="bw-label" style="color: var(--bw-muted)">Weiche</dt><dd class="text-sm">Neue Marke</dd></div>
+            <div><dt class="bw-label" style="color: var(--bw-muted)">Archetyp</dt><dd class="text-sm">{{ demoFoundation.brand.archetype }}</dd></div>
+            <div><dt class="bw-label" style="color: var(--bw-muted)">Sprache</dt><dd class="text-sm">{{ demoFoundation.brand.locale }}</dd></div>
+            <div><dt class="bw-label" style="color: var(--bw-muted)">Stand</dt><dd class="text-sm">{{ demoFoundation.brand.standDate }}</dd></div>
+            <div><dt class="bw-label" style="color: var(--bw-muted)">Brand Score</dt><dd class="text-sm">87 (Auftritt vom 3. September 2026)</dd></div>
+          </dl>
+        </div>
+
+        <p class="bw-pending mt-4">Nicht veröffentlicht werden: Gespräche, Entwürfe, Wettbewerber, Beschwerden — genau wie beim Teilen.</p>
+
+        <UCheckbox
+          v-model="publishConsent"
+          class="mt-5"
+          label="Ich darf diese Marke veröffentlichen und weiß, dass sie nach Freigabe öffentlich und indexierbar ist"
+        />
+
+        <div class="mt-6 flex flex-wrap items-center gap-2">
+          <UButton label="Zur Freigabe einreichen" class="rounded-full" :disabled="!publishConsent" @click="submitPublication" />
+          <UButton label="Abbrechen" color="neutral" variant="ghost" @click="publishOpen = false" />
+        </div>
       </div>
     </template>
   </UModal>
