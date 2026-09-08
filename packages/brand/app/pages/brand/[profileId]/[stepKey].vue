@@ -54,6 +54,7 @@ import {
 } from '../../../../shared/brandDirections'
 import {
   BRAND_ADVISORS,
+  BRAND_DESIGN_VOICE,
   BRAND_VOICE,
   type BrandAdvisorKey,
   advisorIsVoice,
@@ -270,8 +271,29 @@ function slotNote(slot: BrandSlot): string {
  * Der Avatar öffnet den Steckbrief; eine eigene Berater-Zeile gibt es seit dem
  * Werkstatt-Umbau nicht mehr.
  */
-const voice = BRAND_VOICE
-const voiceRole = computed(() => t(`brand.advisors.${voice.key}.role`))
+/**
+ * ZWEI STIMMEN, EINE STELLE (Brand Design D2a). George führt durch die
+ * Foundation, Frida durch Schicht 2 — `BRAND_DESIGN_VOICE`, so wie im
+ * Prototyp abgenommen (§2.1: „George bleibt Gastgeber").
+ *
+ * DIE ENTSCHEIDUNG FÄLLT GENAU HIER und nirgends sonst: Kopfzeile, Avatar,
+ * Steckbrief, das Phasen-Intro und der Satz „mir fehlt noch …" lesen alle
+ * dieses eine `voice`. Ein zweiter Vergleich `isBrandDesignStep(...)` im
+ * Markup wäre die erste Stelle, an der Frida spricht und George daneben im
+ * Avatar steht.
+ *
+ * DIE EINE-STIMME-ENTSCHEIDUNG (2026-09-02) BLEIBT: sie galt gegen vier
+ * Sprecherwechsel INNERHALB einer Sitzung. Brand Design ist ein eigenes,
+ * extra freigeschaltetes Produkt — der Wechsel passiert an einer Grenze, die
+ * der Mensch selbst überschreitet, nicht mitten im Gespräch.
+ *
+ * Die GENERATOR-Prompts der Design-Sessions kennen Frida noch nicht; das ist
+ * D2b/D2c. Hier geht es ausschliesslich um die Anzeige.
+ */
+const voice = computed(() => (
+  stepKey.value && isBrandDesignStep(stepKey.value) ? BRAND_DESIGN_VOICE : BRAND_VOICE
+))
+const voiceRole = computed(() => t(`brand.advisors.${voice.value.key}.role`))
 const advisorInfoOpen = ref(false)
 
 /**
@@ -302,7 +324,7 @@ const voiceTeam = computed(() => BRAND_ADVISORS
  * gibt nichts ab, er sagt nur, mit wessen Blick er dieses Kapitel angeht.
  */
 const phaseIntro = ref<string | null>(null)
-const introKey = computed(() => colleagueForStep(stepKey.value ?? 'context')?.key ?? voice.key)
+const introKey = computed(() => colleagueForStep(stepKey.value ?? 'context')?.key ?? voice.value.key)
 let previousIntroKey: BrandAdvisorKey | null = null
 watch(introKey, (next) => {
   phaseIntro.value = previousIntroKey && previousIntroKey !== next
@@ -1217,7 +1239,7 @@ const READINESS_KEYS: Record<BrandReadinessNeed, string> = {
 function readinessNote(readiness: BrandSlotReadiness): string | null {
   if (readiness.ready) return null
   return t('brand.workspace.ready.needs', {
-    advisor: voice.name,
+    advisor: voice.value.name,
     needs: readiness.missing.map(need => t(`brand.workspace.ready.need.${READINESS_KEYS[need]}`)).join(' · '),
   })
 }
@@ -2171,6 +2193,44 @@ const lockedTextKey = computed(() => (store.blocked === 'design_locked'
   ? 'brand.workspace.designLocked'
   : 'brand.workspace.stepLocked'))
 
+/**
+ * ZEIGT DIE BÜHNE DAS UPLOAD-INSTRUMENT? (Brand Design D2a, §2.2)
+ *
+ * Genau dann, wenn wir im Kapitel `dna` stehen UND die Weiche `g.source` auf
+ * „wir haben Vorbilder" steht. Der andere Weg („Frida schlägt vor") lässt
+ * `g.inspiration` ENTFALLEN — und zwar ohne eine einzige neue Regel in der
+ * Zustandsmaschine (§2.1: „NICHTS Neues"):
+ *
+ *  · `g.inspiration` ist `required: false` UND `type: 'special'`, also nach
+ *    `slotIsConfirmable` nicht bestätigbar. Es steht damit in KEINER
+ *    Abschluss-Bedingung (`brandStepCompletion`), in keinem Fortschritts-
+ *    Nenner (`brandChapterProgress`) und auf keiner Bühne als Karte.
+ *  · Es zu überspringen heisst deshalb: es nicht zeigen. Ein `deferred`-Flag
+ *    oder ein `skipped`-Zustand für einen Slot, den niemand einfordert, wäre
+ *    ein zweiter Weg, dasselbe zu sagen.
+ *
+ * GELESEN WIRD DER ROHE SLOT-WERT, nicht nur der bestätigte: die Karte
+ * schreibt die Id, sobald sie geklickt wird, und das Instrument soll direkt
+ * danach dastehen — nicht erst nach „Übernehmen".
+ */
+const showInspiration = computed(() => (
+  stepKey.value === 'dna' && store.slotValue('g.source') === 'inspiration'
+))
+
+/**
+ * DER ANDERE WEG SAGT, DASS ER DER ANDERE IST.
+ *
+ * Auf „Frida schlägt vor" entfällt `g.inspiration` — aber die Session steht
+ * weiter in der Leiste (die Zustandsmaschine kennt kein „übersprungen" JE
+ * SESSION, nur je Kapitel, und §2.1 sagt ausdrücklich: nichts Neues daran).
+ * Wer dort klickt, landete sonst auf einer leeren Fläche. Ein Satz statt des
+ * Instruments ist die billigste ehrliche Antwort — und er nennt den Weg
+ * zurück, weil die Weiche jederzeit korrigierbar ist.
+ */
+const showInspirationSkipped = computed(() => (
+  stepKey.value === 'dna' && store.slotValue('g.source') === 'foundation'
+))
+
 /** Die Marken des Kontos für den Wähler oben in der Sidebar. */
 const LOCALE_FLAGS: Record<string, string> = { en: 'i-circle-flags-us', de: 'i-circle-flags-de' }
 
@@ -2569,6 +2629,17 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
             {{ t('brand.workspace.site.stale') }}
           </p>
         </div>
+
+        <!-- DAS INSTRUMENT `uploads` (Brand Design D2a, §2.2 Schritt 2) — die
+             Vorbilder. Es steht ÜBER dem Gespräch und nicht als Antwort-Modul
+             darunter, weil `g.inspiration` `type: 'special'` ist: es beantwortet
+             keine Frage, es nimmt entgegen (`sessionContent.ts`: „das Instrument
+             fragt nicht"). Sichtbar wird es erst nach der Weiche — s.
+             `showInspiration`. -->
+        <BwUploadsEditor v-if="showInspiration" :profile-id="profileId" />
+        <p v-else-if="showInspirationSkipped" class="bw-pending">
+          {{ t('brand.inspiration.skipped') }}
+        </p>
 
         <p v-if="phaseIntro" class="bw-label" style="color: var(--bw-muted); padding-left: 2.65rem">{{ phaseIntro }}</p>
 

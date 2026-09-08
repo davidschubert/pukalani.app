@@ -361,7 +361,67 @@ const BASE_CONTRACTS: readonly BrandChoiceContract[] = [
   },
 ]
 
+/**
+ * DIE WEICHE VON KAPITEL 1 „MOODBOARD" (`g.source`, Brand Design §2.2,
+ * Davids Entscheidung 2026-09-08) — woher die visuelle Richtung kommt.
+ *
+ * ZWEI Optionen und keine dritte: „wir haben Vorbilder" und „Frida schlägt
+ * vor". Ein „vielleicht später" wäre keine Weiche, sondern ein Kapitel, das
+ * auf nichts wartet — die Leiter in `sessionContent.ts` sagt das ausdrücklich
+ * („A yes that means 'we will collect some later'").
+ *
+ * BEIDE WEGE ENDEN IN DERSELBEN DNA. Der Unterschied ist die QUELLE, nicht die
+ * Reihenfolge: das Moodboard steht in beiden Fällen vor Farbwelt und
+ * Typografie. Deshalb ist die zweite Option auch keine Absage — sie sagt, wer
+ * den ersten Vorschlag macht.
+ *
+ * `label`/`hint` sind ENGLISCH wie der ganze Prompt-Kern; `display` und die
+ * Karten-Copy (`copyKey`) tragen den deutschen und englischen Wortlaut aus dem
+ * freigegebenen Prototyp (`.playground/…/design/dna.vue`).
+ */
+export const BRAND_DNA_SOURCES: readonly BrandChoiceOption[] = [
+  {
+    id: 'inspiration',
+    label: 'With references',
+    hint: 'they bring screenshots, a pinboard, sites they like; Frida reads them against the foundation',
+    display: { de: 'Wir haben Vorbilder', en: 'We have references' },
+    copyKey: 'brand.choice.dnaSource.inspiration',
+  },
+  {
+    id: 'foundation',
+    label: 'From the foundation alone',
+    hint: 'no references; the direction comes from archetype, values, tone words and positioning',
+    display: { de: 'Frida schlägt vor', en: 'Frida suggests' },
+    copyKey: 'brand.choice.dnaSource.foundation',
+  },
+]
+
 const CONTRACTS: readonly BrandChoiceContract[] = [...BASE_CONTRACTS, {
+  /**
+   * DIE WEICHE (`g.source`) — geschlossen, zwei Optionen (s.
+   * `BRAND_DNA_SOURCES`).
+   *
+   * Ohne Vertrag stünde in der Log-Karte die rohe Id `inspiration`, und
+   * „Korrigieren" führte in ein Textfeld statt zurück auf die zwei Karten
+   * (die P4-Restkante, die `choiceCardsFor` schliesst).
+   *
+   * `fallbackQuestion` steht da, obwohl `g.source` `generator: 'none'` hat und
+   * heute niemand entwirft: der Vertrag beschreibt, was in dem Feld stehen
+   * DARF, nicht wer es hineinschreibt — und die Frage ist dieselbe, die die
+   * Karte stellt.
+   */
+  slotId: 'g.source',
+  kind: 'closed',
+  options: BRAND_DNA_SOURCES,
+  strayRule: 'Do not invent a third way, do not answer "maybe later", and do not describe a look — '
+    + 'the field holds one id and nothing else.',
+  fallbackQuestion: {
+    de: 'Habt ihr Vorbilder — Screenshots, eine Pinnwand, drei Seiten, die euch gefallen? '
+      + 'Beides ist in Ordnung; ohne Vorbilder komme ich aus eurer Foundation zur Richtung.',
+    en: 'Do you have references — screenshots, a pinboard, three sites you like? '
+      + 'Either is fine; without them I get to the direction from your foundation.',
+  },
+}, {
   /**
    * DIE RICHTUNG (Paket G4) — geschlossen wie die Architektur-Modelle.
    *
