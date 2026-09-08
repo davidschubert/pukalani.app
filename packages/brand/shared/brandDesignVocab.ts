@@ -219,6 +219,22 @@ export const BRAND_DNA_ORIGINS = ['foundation', 'inspiration', 'both'] as const
 export type BrandDnaOrigin = (typeof BRAND_DNA_ORIGINS)[number]
 
 /**
+ * DIE LESEFASSUNG DER HERKUNFT (D2c) — sie steht im Slot-Wert von `g.dna` und
+ * `g.mix`, also im Handbuch, und muss von dort auch wieder zurückgelesen
+ * werden (`brandDesignDna.ts`). Deshalb hier zweisprachig wie jeder andere
+ * Vokabular-Eintrag und nicht als i18n-Schlüssel (s. Kopf).
+ *
+ * `inspiration` steht in der Liste, obwohl die Klemmung sie nie durchlässt
+ * (eine Zeile ohne Foundation-Bezug fällt vorher weg, §2.2 Leitplanke b): ein
+ * späterer Leser muss die Id kennen, statt an ihr zu scheitern.
+ */
+export const BRAND_DNA_ORIGIN_TERMS: readonly BrandDesignTerm[] = [
+  { id: 'foundation', de: 'Aus eurer Foundation', en: 'From your foundation' },
+  { id: 'inspiration', de: 'Aus einem Vorbild', en: 'From a reference' },
+  { id: 'both', de: 'Aus Foundation und Vorbild', en: 'From foundation and reference' },
+]
+
+/**
  * DIE BEREICHE, denen ein hochgeladenes Vorbild zugeordnet wird (§2.2 Schritt
  * 2). Je Bild GENAU EINER — ein Bild, das für alles steht, wird für nichts
  * gelesen.

@@ -37,6 +37,7 @@
  * scharf bleibt. */
 // eslint-disable-next-line pukalani/no-cross-layer-relative -- Brand Design §2.3: pure Ramp-/Kontrast-Mathematik aus themes/shared, kein anderer themes-Zugriff.
 import { contrastRatio, generateNeutralRamp, generateRamp, wcagLevel } from '../../themes/shared/ramp'
+import { brandFontPairForDnaTypography } from './brandDesignDna'
 import {
   BRAND_DNA_DIMENSION_IDS,
   BRAND_MOTION_STAGGER_MS,
@@ -213,6 +214,100 @@ export function brandMotionTransitions(
     easing: tempo.easing,
   }))
   return [...tokens, { id: 'stagger', durationMs: BRAND_MOTION_STAGGER_MS, easing: tempo.easing }]
+}
+
+/**
+ * DIE VORBELEGUNG ALLER FOLGENDEN KAPITEL AUS DER BESTÄTIGTEN DNA (Brand
+ * Design D2c, §2.17 „Zeit (H5)").
+ *
+ * ── WARUM ES SIE GIBT ─────────────────────────────────────────────────────
+ * H5 sagt: „das Moodboard belegt alle Kapitel vor — jede Session muss als
+ * BESTÄTIGUNG durchlaufbar sein". Ohne diese Regel wäre Schicht 2 fünfzehn
+ * weitere Entscheidungen von vorn; mit ihr ist sie ein Durchgang, in dem der
+ * Mensch nur widerspricht, wo er will. Sie ist die Einlösung des Versprechens
+ * „~35 Minuten" aus dem Phase-1-Plan.
+ *
+ * ── SIE IST EIN VORSCHLAG, KEIN WERT ─────────────────────────────────────
+ * Sie schreibt nichts. D3 bis D7 legen ihr Ergebnis in ihre eigenen Slots —
+ * diese Tabelle sagt nur, was in einem leeren Feld VORGESCHLAGEN wird. Deshalb
+ * fehlen hier `base` und `accent`: eine Farbe ist eine Entscheidung mit einem
+ * Hex, und die trifft `h.base` aus der Richtung und dem Farb-Charakter, nicht
+ * eine Zuordnungstabelle.
+ *
+ * ── UNBEKANNTES BLEIBT LEER ──────────────────────────────────────────────
+ * Eine Dimension ohne Eintrag ergibt kein Feld statt eines geratenen — ein
+ * vorbelegtes Feld, das niemand herleiten kann, ist schlechter als ein leeres.
+ */
+const NEUTRAL_BY_COLOR: Readonly<Record<string, string>> = {
+  earthy: 'warm',
+  airy: 'cool',
+  deep: 'tinted',
+  monochrome: 'tinted',
+  vivid: 'cool',
+}
+const SCALE_BY_COMPOSITION: Readonly<Record<string, string>> = {
+  calm: 'calm',
+  centered: 'calm',
+  grid: 'dense',
+  dense: 'dense',
+  asymmetric: 'loud',
+}
+const MARK_KIND_BY_STYLE: Readonly<Record<string, string>> = {
+  minimal: 'word',
+  editorial: 'word',
+  technical: 'monogram',
+  organic: 'combination',
+  playful: 'pictorial',
+}
+const ILLUSTRATION_BY_IMAGERY: Readonly<Record<string, string>> = {
+  documentary: 'none',
+  still: 'none',
+  craftClose: 'line',
+  people: 'line',
+  abstract: 'organic',
+}
+const ICONS_BY_FORM: Readonly<Record<string, string>> = {
+  soft: 'regular',
+  geometric: 'regular',
+  irregular: 'regular',
+  sharp: 'bold',
+  mixed: 'fill',
+}
+const TEMPO_BY_MOTION: Readonly<Record<string, string>> = {
+  none: 'calm',
+  calmMotion: 'calm',
+  precise: 'snappy',
+  springy: 'lively',
+  playfulMotion: 'lively',
+}
+const LOGO_MOTION_BY_MOTION: Readonly<Record<string, string>> = {
+  none: 'no',
+  calmMotion: 'no',
+  precise: 'no',
+  springy: 'yes',
+  playfulMotion: 'yes',
+}
+
+export function brandDesignDefaultsFromDna(
+  dna: Readonly<Record<string, string>> | undefined,
+): Partial<BrandDesignValues> {
+  if (!dna) return {}
+  const pick = (
+    table: Readonly<Record<string, string>>,
+    dimensionId: string,
+  ): string | undefined => table[dna[dimensionId] ?? '']
+
+  const pair = brandFontPairForDnaTypography(dna.typography ?? '')
+  return {
+    ...(pick(NEUTRAL_BY_COLOR, 'color') ? { neutral: pick(NEUTRAL_BY_COLOR, 'color') } : {}),
+    ...(brandFontPair(pair) ? { pair } : {}),
+    ...(pick(SCALE_BY_COMPOSITION, 'composition') ? { scale: pick(SCALE_BY_COMPOSITION, 'composition') } : {}),
+    ...(pick(MARK_KIND_BY_STYLE, 'style') ? { markKind: pick(MARK_KIND_BY_STYLE, 'style') } : {}),
+    ...(pick(ILLUSTRATION_BY_IMAGERY, 'imagery') ? { illustration: pick(ILLUSTRATION_BY_IMAGERY, 'imagery') } : {}),
+    ...(pick(ICONS_BY_FORM, 'form') ? { icons: pick(ICONS_BY_FORM, 'form') } : {}),
+    ...(pick(TEMPO_BY_MOTION, 'motion') ? { tempo: pick(TEMPO_BY_MOTION, 'motion') } : {}),
+    ...(pick(LOGO_MOTION_BY_MOTION, 'motion') ? { logoMotion: pick(LOGO_MOTION_BY_MOTION, 'motion') } : {}),
+  }
 }
 
 /**

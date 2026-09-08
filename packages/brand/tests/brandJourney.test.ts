@@ -11,6 +11,7 @@ import {
   brandStepAcceptance,
   brandStepCompletion,
   canEnterBrandStep,
+  conditionalInputCounts,
   includedBrandSteps,
   pickNextSession,
   resolveBrandJourney,
@@ -888,6 +889,66 @@ describe('resolveSessionStates (§5)', () => {
     // Die Quelle steht trotzdem in der Kette — sonst verlöre der Impact-Hinweis
     // seinen Weg und die Lesung würde bei neuen Bildern nie veraltet.
     expect(slotById('g.reading')!.inputs.slots).toContain('g.inspiration')
+  })
+
+  /**
+   * Der D2c-Befund (Konzept §2.18, „offen für D2c"): `g.dna` hängt an
+   * `g.reading`. Auf dem Weg „Frida schlägt vor" gibt es nie Vorbilder und nie
+   * eine Lesung — der Vorschlag stünde dort für immer auf `locked` und das
+   * halbe Kapitel wäre unerreichbar.
+   */
+  it('öffnet `g.dna` ohne Lesung, sobald die Weiche „Frida schlägt vor" sagt', () => {
+    const design: BrandProfileFacts = { ...BASE_PROFILE, designUnlocked: true }
+    const confirmed = (value: string): BrandSlotStateFacts =>
+      ({ hasValue: true, confirmed: true, value })
+    const foundationPath = stepFacts({
+      'c.final': confirmed('Klartext'),
+      'd.primary': confirmed('sage'),
+      'd.toneWords': confirmed('ruhig'),
+      'result.direction': confirmed('warm-editorial'),
+      'g.source': confirmed('foundation'),
+    })
+    expect(resolveSessionStates(design, foundationPath)['g.dna']).toBe('open')
+
+    // GEGENPROBE: derselbe Stand mit „wir haben Vorbilder" wartet weiter auf
+    // die Lesung — die Bedingung darf die Sperre nicht generell aufheben.
+    const inspirationPath = stepFacts({
+      'c.final': confirmed('Klartext'),
+      'd.primary': confirmed('sage'),
+      'd.toneWords': confirmed('ruhig'),
+      'result.direction': confirmed('warm-editorial'),
+      'g.source': confirmed('inspiration'),
+    })
+    expect(resolveSessionStates(design, inspirationPath)['g.dna']).toBe('locked')
+
+    // GEGENPROBE 2: ein Weichen-ENTWURF „foundation" reicht nicht — solange
+    // niemand zugestimmt hat, ist der Vorschlag nicht an der Reihe.
+    const draftSwitch = stepFacts({
+      'c.final': confirmed('Klartext'),
+      'd.primary': confirmed('sage'),
+      'd.toneWords': confirmed('ruhig'),
+      'result.direction': confirmed('warm-editorial'),
+      'g.source': { hasValue: true, value: 'foundation' },
+    })
+    expect(resolveSessionStates(design, draftSwitch)['g.dna']).toBe('locked')
+
+    // Die Quelle bleibt in der Kette: der Impact-Hinweis und die
+    // Veraltet-Rechnung behalten ihren Weg.
+    expect(slotById('g.dna')!.inputs.slots).toContain('g.reading')
+  })
+
+  it('die bedingte Quelle ist eine EIGENE Regel, prüfbar ohne die Zustandsmaschine', () => {
+    expect(conditionalInputCounts('g.reading', {})).toBe(true)
+    expect(conditionalInputCounts('g.reading', {
+      'g.source': { confirmed: true, value: 'inspiration' },
+    })).toBe(true)
+    expect(conditionalInputCounts('g.reading', {
+      'g.source': { confirmed: true, value: 'foundation' },
+    })).toBe(false)
+    // Jede andere Quelle ist unbedingt.
+    expect(conditionalInputCounts('c.final', {
+      'g.source': { confirmed: true, value: 'foundation' },
+    })).toBe(true)
   })
 
   it('GEGENPROBE: das Instrument reicht seine EIGENE Quelle durch — ohne die Weiche bleibt zu', () => {

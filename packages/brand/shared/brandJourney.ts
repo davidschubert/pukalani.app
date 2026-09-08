@@ -909,6 +909,63 @@ export type BrandSourcesHasher = (
  * `seen` bricht einen versehentlichen Zyklus ab, statt hängen zu bleiben
  * (dieselbe Vorsicht wie in `dependencyClosure`).
  */
+/**
+ * QUELLEN, DIE NUR AUF EINEM WEG ZÄHLEN (Brand Design D2c, Konzept §2.2).
+ *
+ * ── DAS PROBLEM, DAS SIE LÖST ────────────────────────────────────────────
+ * `g.dna` schöpft aus der Lesung der Vorbilder (`g.reading`). Auf dem Weg
+ * „Frida schlägt vor" (`g.source` = `foundation`) gibt es aber keine Vorbilder
+ * und deshalb nie eine Lesung — `g.dna` stünde dort für IMMER auf `locked`,
+ * und das halbe Kapitel wäre unerreichbar. Genau dieselbe Falle wie bei
+ * `g.reading` selbst (s. `inputSatisfied`), nur eine Ebene höher.
+ *
+ * ── WARUM EINE TABELLE UND KEIN NEUER SESSION-ZUSTAND ────────────────────
+ * §2.1 sagt es ausdrücklich: an der Zustandsmaschine ändert Schicht 2 NICHTS.
+ * Ein `skipped` je Session wäre ein vierter Zustand, den Rail, Fortschritt,
+ * Abschluss-Formel und Abnahme alle kennen müssten — für eine Auskunft, die
+ * schon in einem bestätigten Feld steht. Die Bedingung liest deshalb den
+ * WEICHEN-Wert und sonst nichts.
+ *
+ * ── DREI FÄLLE, UND DER DRITTE IST DER WICHTIGE ──────────────────────────
+ *  · Weiche steht auf `inspiration` ⇒ die Quelle zählt wie jede andere.
+ *  · Weiche steht auf `foundation`  ⇒ die Quelle entfällt (erfüllt).
+ *  · Weiche ist NOCH NICHT bestätigt ⇒ die Quelle zählt. Das ist kein
+ *    Nebeneffekt, sondern die richtige Antwort: solange niemand gesagt hat,
+ *    woher die Richtung kommt, ist der Vorschlag nicht an der Reihe.
+ *
+ * ── GELESEN WIRD DER BESTÄTIGTE WERT, NICHT DER ENTWURF ──────────────────
+ * `BrandSlotStateFacts` trägt `confirmed` (Flag) und `value` (bestätigt ODER
+ * Entwurf, `brandSlotStoredValue`). Beide zusammen sind hier Pflicht: ein
+ * angeklickter, aber nicht übernommener Weg darf ein halbes Kapitel nicht
+ * aufschliessen. Die Rechnung läuft ausschliesslich auf dem SERVER
+ * (`resolveBrandSessionStates` über `toSlotFacts`), wo `value` immer gefüllt
+ * ist — der Browser baut seine Tatsachen ohne Wert und ruft sie nicht auf.
+ */
+const CONDITIONAL_INPUTS: Readonly<Record<string, {
+  readonly switchSlot: string
+  /** Nur bei diesen bestätigten Werten zählt die Quelle. */
+  readonly countsWhen: readonly string[]
+}>> = {
+  'g.reading': { switchSlot: 'g.source', countsWhen: ['inspiration'] },
+}
+
+/**
+ * Zählt diese Quelle auf dem Weg, den der Mensch gewählt hat? Ohne Eintrag in
+ * der Tabelle: immer.
+ */
+export function conditionalInputCounts(
+  inputId: string,
+  slots: Readonly<Record<string, BrandSlotStateFacts | undefined>>,
+): boolean {
+  const condition = CONDITIONAL_INPUTS[inputId]
+  if (!condition) return true
+  const facts = slots[condition.switchSlot]
+  if (!facts?.confirmed) return true
+  const chosen = (facts.value ?? '').trim()
+  if (!chosen) return true
+  return condition.countsWhen.includes(chosen)
+}
+
 function inputSatisfied(
   inputId: string,
   slots: Readonly<Record<string, BrandSlotStateFacts | undefined>>,
@@ -916,6 +973,8 @@ function inputSatisfied(
 ): boolean {
   if (seen.has(inputId)) return true
   seen.add(inputId)
+  // Eine Quelle, die auf diesem Weg gar nicht vorkommt, blockiert nicht.
+  if (!conditionalInputCounts(inputId, slots)) return true
   const input = slotById(inputId)
   if (input && !slotIsConfirmable(input)) {
     return input.inputs.slots.every(sourceId => inputSatisfied(sourceId, slots, seen))
