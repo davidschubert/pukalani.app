@@ -648,6 +648,21 @@ export const BRAND_STAGE_SOURCE_SLOTS: Readonly<Partial<Record<BrandStepKey, rea
    * Farbwelt.
    */
   mark: ['g.mix', 'h.base', 'h.neutral', 'h.accent', 'i.pair', 'i.rules', 'result.direction'],
+  /**
+   * DIE BILDSPRACHE BRAUCHT DIE FARBWELT UND DIE TEXTSCHRIFT (D6).
+   *
+   * Die drei Prinzip-Karten zeigen ABSTRAHIERTE Kompositionen statt Fotos
+   * (§1.4) — und die bestehen aus nichts als der bestätigten Farbwelt; ohne
+   * `h.*` stünden dort drei Skizzen in der Notfarbe. `i.pair` entscheidet die
+   * Spanne der Icon-Strichstärke („passt die Strichstärke zur Textschrift?"),
+   * `g.mix` belegt Prinzip, Illustration und Icons vor (DNA „Bildwelt" und
+   * „Formsprache"), `result.direction` trägt wie überall nur den Rückfall der
+   * Farbwelt.
+   *
+   * `i.rules` fehlt bewusst: Gewicht, Laufweite und Versalien gelten für
+   * Überschrift und Wortmarke — ein Icon hat weder das eine noch das andere.
+   */
+  imagery: ['g.mix', 'h.base', 'h.neutral', 'h.accent', 'i.pair', 'result.direction'],
 }
 
 /** Die Quell-Slots einer Bühne — leer, wo sie keine braucht. */

@@ -4039,7 +4039,7 @@ Interview-Technik: **Frida** (Design Directorin). Gesprochen wird alles von Geor
 
 **Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 0 · „weiss nicht" gilt hier nicht · nicht vertagbar
 
-**Invarianten (im Code geprüft):** —
+**Invarianten (im Code geprüft):** der Wert ist eine Id aus: none, line, area, organic
 
 **Fliesst später in:** 1 Felder in 1 Kapiteln (Bildsprache)
 
@@ -4069,7 +4069,7 @@ Interview-Technik: **Frida** (Design Directorin). Gesprochen wird alles von Geor
 
 **Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 0 · „weiss nicht" gilt hier nicht · nicht vertagbar
 
-**Invarianten (im Code geprüft):** —
+**Invarianten (im Code geprüft):** der Wert ist eine Id aus: regular, fill, bold
 
 **Fliesst später in:** 1 Felder in 1 Kapiteln (Bildsprache)
 

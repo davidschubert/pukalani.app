@@ -3723,6 +3723,15 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
       reframes: ['if they want everything, ask who will draw the second one'],
     },
     form: { person: 'none', tense: 'present' },
+    /**
+     * DIE VIER OPTIONS-IDS WÖRTLICH (D6, Muster `i.pair` aus D4) — diese Datei
+     * hat keine Importe (s. Kopf), der Katalog steht in
+     * `shared/brandDesignVocab.ts` (`BRAND_ILLUSTRATION_OPTIONS`). Dass beide
+     * dasselbe sagen, nagelt `tests/brandDesignImagery.test.ts` fest; ohne diese
+     * Invariante stünde ein von Hand hineingeschriebener Satz bestätigt im Slot
+     * und `buildBrandDesign` trüge ihn als Illustrations-Sprache ins Preset.
+     */
+    invariants: [{ kind: 'oneOf', terms: ['none', 'line', 'area', 'organic'] }],
   },
   'k.icons': {
     goal: 'settle the icon set: line or filled, and the stroke weight beside the body type.',
@@ -3742,6 +3751,8 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
       reframes: ['if it comes down to taste, say that the only question here is the stroke weight'],
     },
     form: { person: 'none', tense: 'present' },
+    /** Die drei Icon-Sätze wörtlich — dieselbe Begründung wie bei `k.illustration`. */
+    invariants: [{ kind: 'oneOf', terms: ['regular', 'fill', 'bold'] }],
   },
   'k.dodont': {
     goal: 'write the do and do-not list of the picture language, in the form of the foundation.',

@@ -401,7 +401,21 @@ describe('evaluateInvariants — was ein Test prüfen kann (§3a Nr. 6)', () => 
       // `brandDesignVocab.ts`, nicht im Wert eines anderen Feldes.
       ['j.kind', [{ kind: 'oneOf', terms: ['word', 'pictorial', 'combination', 'monogram'] }]],
       ['j.pick', [{ kind: 'oneOf', terms: ['wordmark', 'monogram'] }]],
+      // Brand Design D6: die zwei Wahlen der Bildsprache. Wieder derselbe Fall
+      // — beide halten eine Katalog-Id, und ein von Hand hineingeschriebener
+      // Satz stünde sonst bestätigt im Slot und im Preset.
+      ['k.illustration', [{ kind: 'oneOf', terms: ['none', 'line', 'area', 'organic'] }]],
+      ['k.icons', [{ kind: 'oneOf', terms: ['regular', 'fill', 'bold'] }]],
     ])
+  })
+
+  it('k.icons: eine Katalog-Id geht durch, ein Satz nicht (D6)', () => {
+    const session = slotById('k.icons')!
+    expect(evaluateInvariants(session, 'regular').ok).toBe(true)
+    const broken = evaluateInvariants(session, 'Feine Linien, wie in der Schrift')
+    expect(broken.ok).toBe(false)
+    expect(broken.ok === false && broken.code).toBe('invariant_violated')
+    expect(evaluateInvariants(slotById('k.illustration')!, 'gezeichnet').ok).toBe(false)
   })
 
   it('i.pair: eine Katalog-Id geht durch, ein Satz nicht (D4)', () => {

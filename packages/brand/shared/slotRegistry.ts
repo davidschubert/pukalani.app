@@ -925,10 +925,18 @@ export const BRAND_SLOTS: readonly BrandSlot[] = [
   defineSession({ id: 'j.drafts', stepId: 'mark', type: 'special', required: false, kind: 'structured', maxLength: LONG, editor: 'drafts', generator: 'none', dependencies: ['j.brief'] }),
 
   // ── K · Bildsprache (§2.6) — 4 ──────────────────────────────────────────
-  defineSession({ id: 'k.photo', stepId: 'imagery', type: 'derivation', required: true, kind: 'structured', maxLength: LONG, editor: 'cards', generator: 'derive', dependencies: ['g.mix'] }),
+  // `generator: 'none'` FÜR ALLE VIER (D6, dieselbe Begründung wie bei `h.base`
+  // in D3 und dem Typografie-Block darüber): Prinzip, Illustration, Icons und
+  // das Do & Don't sind eine WAHL bzw. eine Rechnung auf der Werkbank
+  // (`shared/brandDesignImagery.ts`) — mit `derive`/`draft` trüge die Bühne
+  // einen Entwurfs-Knopf, und der schriebe Prosa in Felder, die fünf
+  // beschriftete Blöcke, zwei Katalog-Ids und sechs geprüfte Paare halten.
+  // §1.4 gilt hier doppelt: Bildsprache sind REGELN, kein Modell-Text.
+  defineSession({ id: 'k.photo', stepId: 'imagery', type: 'derivation', required: true, kind: 'structured', maxLength: LONG, editor: 'cards', generator: 'none', dependencies: ['g.mix'] }),
   defineSession({ id: 'k.illustration', stepId: 'imagery', type: 'choice', required: true, kind: 'choice', maxLength: SHORT, editor: 'chips', generator: 'none', dependencies: ['g.mix'] }),
   defineSession({ id: 'k.icons', stepId: 'imagery', type: 'choice', required: true, kind: 'choice', maxLength: SHORT, editor: 'cards', generator: 'none', dependencies: ['i.pair'] }),
-  defineSession({ id: 'k.dodont', stepId: 'imagery', type: 'stage-edit', required: true, kind: 'list', maxLength: LONG, editor: 'stage', generator: 'draft', dependencies: ['k.photo', 'k.illustration', 'k.icons'] }),
+  // PUR: vier Achsen des Prinzips plus je ein Paar aus Illustration und Icons.
+  defineSession({ id: 'k.dodont', stepId: 'imagery', type: 'stage-edit', required: true, kind: 'list', maxLength: LONG, editor: 'stage', generator: 'none', dependencies: ['k.photo', 'k.illustration', 'k.icons'] }),
 
   // ── L · Bewegung (§2.7) — 4 ─────────────────────────────────────────────
   defineSession({ id: 'l.tempo', stepId: 'motion', type: 'choice', required: true, kind: 'choice', maxLength: SHORT, editor: 'cards', generator: 'derive', dependencies: ['g.mix'] }),
