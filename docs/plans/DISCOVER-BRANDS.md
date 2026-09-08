@@ -1,5 +1,10 @@
 # Discover Brands — die öffentliche Markengalerie (Strategie + Konzept, 2026-09-08)
 
+> **STAND 2026-09-08: D0–D3 LIVE, erste Freigabe durch** (Krume & Gold öffentlich). Offen: D4
+> (Ähnliche/Sitemap/OG-Bild), D5 (Beispiel-Branding Kailua über den Wizard) und die Nachzüge aus
+> OPEN-ITEMS. Bleibt in `plans/`, bis D4/D5 gebaut sind; Erledigt-Eintrag in
+> OPEN-ITEMS-COMPLETE.
+
 OPEN-ITEMS 10 · DB1, von David vorgezogen („mach mit discover brands weiter",
 2026-09-08). Grundlage: Phase-1-Plan „Discover-Seite" (Davids Idee 2026-08-27/29),
 die Fünf-Ebenen-Karte (Discover → Audit → Compare → Build → Supply), der Klickdummy

@@ -30,6 +30,61 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### Discover Brands (DB1 D0–D3): Galerie, Anatomie, Veröffentlichen mit Freigabe, Betreiber-Seite ✅ 2026-09-08
+
+**Was:** Davids Vorziehen von DB1 („mach mit discover brands weiter"). Strategie + Konzept
+(docs/plans/DISCOVER-BRANDS.md) auf dem abgenommenen Klickdummy, der BF1-Leseansicht
+(Veröffentlichung = eingefrorener Snapshot mit `sensitivity`-Filter, derselbe Renderer) und den
+BC1/MV1-Daten; acht Entscheidungen per Fragenrunde (DECISION-LOG 2026-09-08: Freigabe VOR
+Veröffentlichung, `/discover`, Website-Score sonst Fundament-Reife, Kailua-Beispiel; nach dem
+Prototyp: Score im Ring + Reife als Zweitzeile, genau ein Featured, natives Teilen-Blatt,
+Veröffentlichen mobil im Export-Menü). Vier Opus-Läufe (D0 Prototyp im Playground, D1 Backend,
+D2 + D3 parallel), jeder im Fable-Hauptloop geprüft:
+- **D0** Dummy an das Konzept angeglichen (Facetten Weiche/Archetyp/Farbwelt/Branche, beschriftete
+  Scores, Badges Beispiel/Relaunch, Anatomie Kailua mit Markenabdruck, Veröffentlichen-Dialog mit
+  drei Zuständen, Betreiber-Skizze) — von David abgenommen.
+- **D1** Migration **brand-020** (`brand_profiles.publicationVisibility`, `brand_publications`
+  mit `status` pending/published/declined/hidden/withdrawn und ZWEI Snapshot-Spalten — der
+  öffentliche Stand bleibt sichtbar, bis über einen neuen entschieden ist —,
+  `brand_publication_reports`), Snapshot-Bau in `brandSnapshot.ts` herausgezogen (Share-Link
+  und Veröffentlichung rufen dieselbe Funktion), Slug-Regel (Umlaute, Deckel, Kollisions-Suffix),
+  `brandPublicationCanSubmit` (Titel, Kapitel A+B, Archetyp), Dialog in der Leseansicht,
+  Zustand auf der Brands-Karte, `navigator.share` im Teilen-Dialog, Kaskaden (Löschen, GDPR).
+- **D2** Lese-API `GET /api/discover` (+`/<slug>`, Microcache 60 s, Zahlen gebündelt über
+  `profileId` — beide Arten in einer Abfrage), Galerie, Anatomie (Fundament SERVER-seitig aus dem
+  Snapshot gerechnet, der rohe Snapshot verlässt den Server nie), Nav-Punkt „Discover Brands",
+  Startseiten-Teaser (unsichtbar ohne Veröffentlichungen), Betreiber-Vorschau `?preview=1`
+  (users.manage, eingereichter Stand, nie im Cache, noindex).
+- **D3** Betreiber-Routen approve/decline/hide/unhide/feature/example, Meldungen (öffentlich mit
+  Honeypot + 3/Std je IP + Minuten-Eimer; Betreiber erledigt), Seite `/dashboard/discover` mit
+  Reitern Warteschlange/Veröffentlicht/Abgelehnt/Meldungen; Regel-Erweiterungen: Ablehnung eines
+  NEUEN Stands bei bestehendem öffentlichen (bleibt published, Begründung als „Aktualisierung
+  abgelehnt"), Featured „genau eine, letzte gewinnt", Reiter decken alle fünf Zustände
+  lückenlos ab (Test).
+
+**Live-Beweise (Davids Chrome):** Einreichen an Krume & Gold → `POST …/publication` 200,
+Pille „Wartet auf Freigabe", Log `publication_submitted`; Betreiber-Seite Warteschlange 1;
+Vorschau `/discover/krume-gold?preview=1` mit Badge und sieben Kapiteln; Freigabe →
+`POST …/approve` 200, Log `publication_approved`, Galerie „1 Marke", `/discover/krume-gold`
+200 (indexierbar). Gates: brand 2158 Tests, Lint/Typecheck, i18n 283, Bilanz, Manifeste.
+
+**Befund, offen:** Davids erster Klick auf „Freigeben" (und zwei eigene Klicks per Element-
+Referenz/Koordinate) erreichten den Server NICHT — kein Request, kein Toast; ein Klick über die
+Seite selbst (`button.click()`) und ein späterer physischer Klick auf „Ausblenden" derselben
+Tabelle funktionierten. Nicht reproduzierbar, sobald die Warteschlange leer war; als
+Beobachtungspunkt in OPEN-ITEMS. Weitere Nachzüge dort: Branche im Dialog aus dem Katalog wählen
+(Freitext „Handwerksbäckerei" ⇒ „Nicht zugeordnet"), Hero-Farbwelt, Log ohne Ids.
+
+**Gelernt:** (1) „Hat geklappt" ist erst bewiesen, wenn der Server es sagt — Galerie-API,
+Anatomie-Status und Log-Zeile gehören zu jedem Freigabe-Beweis; Davids Meldung und die leere
+Galerie widersprachen sich, und nur das Log entschied. (2) Zwei Snapshot-Spalten statt eines
+Zustands-Flags: „alter Stand bleibt öffentlich, bis entschieden ist" braucht ZWEI Wahrheiten
+nebeneinander, kein Feld kann beides tragen. (3) Parallel-Läufe mit klarem Dateibesitz und
+i18n-nur-per-Edit tragen auch zu dritt; die Naht (Vorschau-Parameter) blieb trotzdem beim
+Hauptloop — wer zwei Läufe koppelt, baut die Kopplung selbst.
+
+---
+
 ### AW2: Appwrite 2.0 — Server (dev + prod) und SDKs (node-appwrite 29, appwrite 27) in einem Vorhaben ✅ 2026-09-08
 
 Anlass: die Abhängigkeiten-Seite meldete Appwrite 1.9.6 → 2.0.0 und die SDKs
