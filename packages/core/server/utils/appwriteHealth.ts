@@ -2,8 +2,8 @@
  * Health-Abfragen gegen die Appwrite-Instanz — als schlanker REST-Helfer
  * statt über das SDK.
  *
- * GRUND: node-appwrite 28 kennt den `Health`-Service nicht mehr (seit 27
- * entfernt). Die Endpunkte selbst gibt es auf unserem Server (1.9.6)
+ * GRUND: node-appwrite kennt den `Health`-Service nicht mehr (seit 27
+ * entfernt). Die Endpunkte selbst gibt es auf unserem Server (2.0)
  * unverändert, sie sind nur nicht mehr im SDK abgebildet. Der Helfer ersetzt
  * deshalb GENAU die fünf Methoden, die dieses Repo je benutzt hat
  * (`get`/`getDB`/`getCache`/`getStorage`/`getTime`) — gleiche Namen, gleiche
@@ -47,14 +47,14 @@ export interface AppwriteHealthTime {
 const TIMEOUT_MS = 5_000
 
 /**
- * Antwort-Format, das node-appwrite 28 selbst mitschickt. Explizit gesetzt,
+ * Antwort-Format, das node-appwrite 29 selbst mitschickt. Explizit gesetzt,
  * damit dieser Helfer und das SDK GARANTIERT dieselben Formen sehen: ohne den
- * Header wendet der Server sein NEUESTES Format an — nach einem
- * Server-Upgrade (Appwrite 2.0) läge der Helfer damit auf einem anderen Stand
- * als jeder SDK-Aufruf daneben, und zwar lautlos. Beim nächsten SDK-Bump
- * mitziehen (Wert steht in dessen `dist/client.js`).
+ * Header wendet der Server sein NEUESTES Format an — läge der Helfer damit auf
+ * einem anderen Stand als jeder SDK-Aufruf daneben, und zwar lautlos. Beim
+ * nächsten SDK-Bump mitziehen (Wert steht in dessen `dist/client.js`; das
+ * Web-SDK 27 sendet denselben).
  */
-const RESPONSE_FORMAT = '1.9.6'
+const RESPONSE_FORMAT = '2.0.0'
 
 async function fetchHealth<T>(endpoint: string, projectId: string, apiKey: string, path: string): Promise<T> {
   let response: Response
