@@ -307,6 +307,14 @@ const BRAND_TABLES = [
   // Vorschlag hat einen eigenen Status, einen freiwilligen Absender und es
   // kann mehrere je Check geben; deshalb eine Tabelle und keine Spalte.
   'brand_check_corrections',
+  // brand-020: die öffentliche Markengalerie (docs/plans/DISCOVER-BRANDS.md
+  // §5). EINE Zeile je Branding (rowId = profileId) mit dem eingefrorenen
+  // Stand, dem Steckbrief der Galerie und dem Freigabe-Zustand.
+  'brand_publications',
+  // brand-020: die Meldungen zu einer veröffentlichten Marke. Eigene Tabelle
+  // aus demselben Grund wie `brand_check_corrections`: eigener Status, eigener
+  // (freiwilliger) Absender, mehrere je Veröffentlichung möglich.
+  'brand_publication_reports',
 ]
 
 /**

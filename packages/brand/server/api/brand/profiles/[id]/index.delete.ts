@@ -4,6 +4,10 @@ import type { BrandProfileDeleteResponse } from '../../../../../shared/types/bra
 import { BRAND_FINDINGS_TABLE } from '../../../../utils/brandFindingsStore'
 import { runBrandProfileCascades } from '../../../../utils/brandProfileCascade'
 import {
+  BRAND_PUBLICATIONS_TABLE,
+  BRAND_PUBLICATION_REPORTS_TABLE,
+} from '../../../../utils/brandPublications'
+import {
   BRAND_EVENTS_TABLE,
   BRAND_MESSAGES_TABLE,
   BRAND_PROFILES_TABLE,
@@ -48,11 +52,11 @@ export default defineEventHandler(async (event): Promise<BrandProfileDeleteRespo
 
   const { tablesDB, databaseId } = brandDb(event)
 
-  async function purge(tableId: string): Promise<number> {
+  async function purge(tableId: string, field = 'profileId', value = profileId): Promise<number> {
     let removed = 0
     let rows: Models.Row[]
     try {
-      rows = await listAllRows<Models.Row>(tablesDB, databaseId, tableId, [Query.equal('profileId', profileId)])
+      rows = await listAllRows<Models.Row>(tablesDB, databaseId, tableId, [Query.equal(field, value)])
     }
     catch (error) {
       // Tabelle fehlt (Deploy vor der Migration) ⇒ es gibt nichts zu löschen.
@@ -79,6 +83,25 @@ export default defineEventHandler(async (event): Promise<BrandProfileDeleteRespo
   // alles andere — ohne diese Zeile bliebe unsichtbarer Inhalt liegen, den
   // keine Route mehr erreicht (die Begründung im Kopf gilt wörtlich).
   const findings = await purge(BRAND_FINDINGS_TABLE)
+  /**
+   * DIE VERÖFFENTLICHUNG UND IHRE MELDUNGEN (brand-020, Discover D1).
+   *
+   * Sie hängen NICHT an einer `profileId`-Spalte: die Zeile der Veröffentlichung
+   * TRÄGT die Profil-Id als ihre eigene (Kopf von brand-020), die Meldungen
+   * zeigen mit `publicationId` darauf. Ohne diese zwei Zeilen bliebe nach dem
+   * Löschen eines Brandings eine öffentlich ausgelieferte Seite ohne Eigentümer
+   * stehen — der teuerste denkbare Rest, und genau die Fehlerklasse, gegen die
+   * der Kopf dieser Route geschrieben ist.
+   */
+  const publicationReports = await purge(BRAND_PUBLICATION_REPORTS_TABLE, 'publicationId', profileId)
+  let publications = 0
+  try {
+    await tablesDB.deleteRow({ databaseId, tableId: BRAND_PUBLICATIONS_TABLE, rowId: profileId })
+    publications = 1
+  }
+  catch (error) {
+    if (!isAppwriteNotFound(error)) throw toH3Error(error, 'Brand profile could not be deleted')
+  }
   // Die Mitläufer ANDERER Layer (MV1 M1): heute `market` mit seinen drei
   // Tabellen an derselben `profileId`. Sie laufen NACH den eigenen Kindern und
   // VOR dem Kopf — dieselbe Reihenfolge-Begründung wie oben. Fail-soft: ein
@@ -96,7 +119,9 @@ export default defineEventHandler(async (event): Promise<BrandProfileDeleteRespo
   // Das Löschen selbst schreibt KEIN brand_event: der Funnel hängt an
   // `profileId`, und dessen Zeilen sind gerade Teil der Kaskade gewesen — ein
   // Ereignis über ein gelöschtes Profil wäre der einzige Rest, der bliebe.
-  logEvent('info', 'brand.profile_deleted', { profileId, steps, messages, shares, events, findings, ...cascades })
+  logEvent('info', 'brand.profile_deleted', {
+    profileId, steps, messages, shares, events, findings, publications, publicationReports, ...cascades,
+  })
 
   return { deleted: true, removed: { steps, messages, shares, events, findings } }
 })

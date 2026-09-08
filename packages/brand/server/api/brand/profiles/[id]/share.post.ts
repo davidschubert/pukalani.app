@@ -1,23 +1,16 @@
 import { randomBytes } from 'node:crypto'
 import { ID } from 'node-appwrite'
 import { createBrandSharePublishSchema } from '../../../../../schemas/brandAccess'
-import { BRAND_DIRECTIONS_VERSION, brandDirectionById } from '../../../../../shared/brandDirections'
-import { resolveBrandJourney } from '../../../../../shared/brandJourney'
-import { brandShareableSlotValues } from '../../../../../shared/brandSharing'
-import type { BrandShareSnapshot, BrandSharePublishResponse } from '../../../../../shared/types/brand'
+import type { BrandSharePublishResponse } from '../../../../../shared/types/brand'
 import {
   BRAND_SHARES_TABLE,
-  type BrandStepRow,
   brandDb,
-  confirmedSlotValues,
   listActiveShares,
   loadOwnedProfile,
   loadStepRows,
-  profileFacts,
   requireProfileIdParam,
-  toStepFacts,
-  toStoryView,
 } from '../../../../utils/brandStore'
+import { buildBrandSnapshot } from '../../../../utils/brandSnapshot'
 import { hashBrandShareToken } from '../../../../utils/brandShares'
 import { recordBrandEvent } from '../../../../utils/brandEvents'
 
@@ -80,41 +73,12 @@ import { recordBrandEvent } from '../../../../utils/brandEvents'
 const SHARE_TTL_MS = 30 * 24 * 60 * 60 * 1000
 
 /**
- * Fassung der Snapshot-FORM — steigt, wenn sich der Aufbau ändert. Ein alter
- * Link muss danach weiter lesbar bleiben; deshalb steht die Zahl IM Snapshot
- * und nicht in einer Spalte, die man beim Lesen erst nachschlagen müsste.
+ * DIE RECHNUNG SELBST WOHNT IN `server/utils/brandSnapshot.ts` (Discover D1) —
+ * Fassung, Deckel und Filter stehen dort, weil die VERÖFFENTLICHUNG dasselbe
+ * Abbild einfriert. Zwei Kopien wären die Stelle, an der eines Tages der eine
+ * Snapshot einen neuen Filter bekommt und der andere nicht — und der andere
+ * ist der dauerhaft indexierbare.
  */
-const SHARE_SCHEMA_VERSION = 1
-
-/** Zod-Zusage aus Schema-Anhang §4. */
-const SNAPSHOT_MAX = 400_000
-
-/**
- * DIE GEWÄHLTE RICHTUNG IN DEN SNAPSHOT (Paket G4).
- *
- * DIE EINE WAHRHEIT IST DER BESTÄTIGTE SLOT-WERT `result.direction` — nicht
- * `brand_profiles.designPresetId`. Die zwei Spalten stehen seit Migration 001
- * in der Tabelle und wurden NIE geschrieben; sie hier zu lesen hiess bis G4,
- * dass `presetId` in jedem Snapshot leer war. Sie zusätzlich zu SPIEGELN wäre
- * die zweite Stelle, an der dieselbe Frage beantwortet wird — und die eine,
- * die jemand später ändert, ist garantiert nicht die, die noch gelesen wird.
- * Sie bleiben deshalb unbeschrieben, bis die Themes-Engine-Presets sie
- * wirklich brauchen (dann sind sie der Ort für DEREN Id, nicht für diese).
- *
- * Eingefroren wird nur eine Id, die der Katalog KENNT: ein Snapshot ist 30
- * Tage lang öffentlich abrufbar, und ein durchgereichter Freitext aus einem
- * von Hand korrigierten Feld hätte dort nichts verloren. Die FASSUNG reist
- * mit, damit ein späterer Katalog das Eingefrorene nicht umfärbt (§2.5).
- */
-function directionPreset(resultRow: BrandStepRow | undefined): { presetId: string, presetVersion: string } {
-  const chosen = resultRow
-    ? confirmedSlotValues(resultRow).find(slot => slot.slotId === 'result.direction')?.value ?? ''
-    : ''
-  const direction = brandDirectionById(chosen.trim())
-  return direction
-    ? { presetId: direction.id, presetVersion: String(BRAND_DIRECTIONS_VERSION) }
-    : { presetId: '', presetVersion: '' }
-}
 
 export default defineEventHandler(async (event): Promise<BrandSharePublishResponse> => {
   const { userId } = await requireBrandAccess(event)
@@ -123,37 +87,7 @@ export default defineEventHandler(async (event): Promise<BrandSharePublishRespon
   await readValidatedBody(event, createBrandSharePublishSchema().parse)
 
   const stepRows = await loadStepRows(event, profileId)
-  const journey = resolveBrandJourney(profileFacts(profile), toStepFacts(stepRows))
-  const byStepKey = new Map(stepRows.map(row => [row.stepKey, row]))
-
-  const snapshot: BrandShareSnapshot = {
-    schemaVersion: SHARE_SCHEMA_VERSION,
-    title: profile.title ?? '',
-    contentLocale: profile.contentLocale,
-    story: toStoryView(profile).body,
-    chapters: journey
-      .filter(step => step.state !== 'skipped')
-      .map((step) => {
-        const row = byStepKey.get(step.stepKey)
-        return {
-          stepKey: step.stepKey,
-          slots: row ? brandShareableSlotValues(confirmedSlotValues(row)) : [],
-        }
-      })
-      // Ein Kapitel ohne bestätigten Inhalt hat nichts zu zeigen — es fehlt,
-      // statt als leere Überschrift dazustehen.
-      .filter(chapter => chapter.slots.length > 0),
-    ...directionPreset(byStepKey.get('result')),
-  }
-
-  const payload = JSON.stringify(snapshot)
-  if (payload.length > SNAPSHOT_MAX) {
-    throw createError({
-      status: 413,
-      statusText: 'Snapshot too large',
-      data: { code: 'snapshot_too_large' },
-    })
-  }
+  const { snapshot, payload } = buildBrandSnapshot(profile, stepRows)
 
   const now = new Date()
   const expiresAt = new Date(now.getTime() + SHARE_TTL_MS).toISOString()

@@ -37,6 +37,26 @@ export function createBrandSharePublishSchema() {
 }
 
 /**
+ * IN DIE ÖFFENTLICHE GALERIE EINREICHEN (docs/plans/DISCOVER-BRANDS.md §4.3).
+ *
+ * ── DAS HÄKCHEN MUSS AM SERVER ANKOMMEN ───────────────────────────────────
+ * „Ich darf diese Marke veröffentlichen und weiss, dass sie nach Freigabe
+ * öffentlich und indexierbar ist" ist eine RECHTLICH gemeinte Zustimmung (§3.5:
+ * eigene Kunden-Inhalte mit ausdrücklicher Zustimmung). Ein Häkchen, das nur
+ * einen Knopf entgrauen würde, wäre Zierde — die Zustimmung muss Teil der
+ * Anfrage sein, sonst gibt es sie nicht. `literal(true)`: ein `false` ist keine
+ * Zustimmung und deshalb kein gültiger Rumpf.
+ *
+ * WIE beim Teilen KEINE Inhaltsfelder: WAS veröffentlicht wird, entscheidet
+ * der Server aus den bestätigten Slots (Audit 3).
+ */
+export function createBrandPublicationSubmitSchema() {
+  return z.object({
+    consent: z.literal(true),
+  }).strict()
+}
+
+/**
  * Widerruf. Ohne `shareId` werden ALLE aktiven Veröffentlichungen des Profils
  * widerrufen — das ist der Knopf „Link deaktivieren", und er soll nicht die
  * Hälfte stehen lassen, wenn zwischendurch rotiert wurde.

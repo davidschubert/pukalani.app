@@ -10,8 +10,12 @@ import {
   brandFoundationPendingStep,
 } from '../../../../shared/brandFoundation'
 import { BRAND_ACCEPTANCE_VIEW } from '../../../../shared/brandWorkspaceNav'
+import { normalizeBrandIndustry } from '../../../../shared/brandIndustries'
+import { brandPublicationPath, brandPublicationSlug } from '../../../../shared/brandPublication'
 import type {
   BrandFoundationResponse,
+  BrandProfileScoresResponse,
+  BrandPublicationResponse,
   BrandSharePublishResponse,
   BrandShareRevokeResponse,
   BrandShareStatusResponse,
@@ -97,6 +101,23 @@ const shell = await useAsyncData<{ found: boolean } | null>(
 if (shell.data.value && !shell.data.value.found) {
   throw createError({ status: 404, statusText: 'Unknown brand profile' })
 }
+
+/**
+ * DER VERÖFFENTLICHUNGS-ZUSTAND (Discover §4.3) — er steht im KOPF des
+ * Dokuments und wird deshalb beim Aufbau geladen, nicht erst beim Öffnen des
+ * Dialogs: „diese Marke steht öffentlich" ist eine Aussage über das ganze
+ * Dokument und darf nicht erst nach einem Klick erscheinen.
+ *
+ * FAIL-SOFT (`.catch(() => null)`): ist die Route nicht da (Deploy vor D1) oder
+ * antwortet sie nicht, zeigt der Kopf einfach keine Pille. Ein Zustand, den man
+ * nicht lesen kann, darf die Leseansicht nicht kosten.
+ */
+const publicationRequest = await useAsyncData<BrandPublicationResponse | null>(
+  () => `brand-publication-${profileId.value}`,
+  () => request<BrandPublicationResponse>(`/api/brand/profiles/${profileId.value}/publication`)
+    .catch(() => null),
+  { watch: [profileId], default: () => null },
+)
 
 const view = computed(() => doc.data.value)
 const title = computed(() => store.profile?.title || view.value?.title || '')
@@ -307,6 +328,34 @@ async function revokeShareLink(): Promise<void> {
   }
 }
 
+/**
+ * DAS NATIVE TEILEN-BLATT (Discover-Entscheidung 7, Davids Wunsch „wie die
+ * iPhone-Share-Funktion").
+ *
+ * Es steht NEBEN „Link kopieren", nicht an dessen Stelle: `navigator.share`
+ * gibt es auf dem Telefon fast überall und auf dem Schreibtisch fast nirgends,
+ * und ein Knopf, der auf dem Desktop nichts tut, ist schlimmer als keiner.
+ * Deshalb wird er nur gerendert, wenn es die Funktion GIBT — und die Frage
+ * lässt sich erst im Browser stellen (`import.meta.client`): beim SSR gibt es
+ * keinen `navigator`, und ein serverseitig gerateter Wert würde beim
+ * Hydratisieren zum Sprung.
+ */
+const canNativeShare = ref(false)
+onMounted(() => {
+  canNativeShare.value = import.meta.client && typeof navigator.share === 'function'
+})
+
+async function nativeShare(url: string, shareTitle: string): Promise<void> {
+  try {
+    await navigator.share({ title: shareTitle, url })
+  }
+  catch {
+    // Abbruch durch den Menschen (er tippt neben das Blatt) und ein verweigerter
+    // Aufruf sehen gleich aus. Beides ist kein Fehler und bekommt deshalb auch
+    // keine Meldung — der Link steht weiterhin da.
+  }
+}
+
 async function copyShareUrl(): Promise<void> {
   if (!shareUrl.value) return
   try {
@@ -379,6 +428,134 @@ const exportItems = computed<FdExportItem[][]>(() => {
   ]
 })
 
+// ── Veröffentlichen (Discover §4.3) ───────────────────────────────────────
+
+/**
+ * VERÖFFENTLICHEN WOHNT NEBEN TEILEN, NICHT DARIN.
+ *
+ * Beide frieren denselben Stand ein, aber sie beantworten verschiedene Fragen.
+ * Teilen heisst „EINE Person soll das lesen, 30 Tage, `noindex`".
+ * Veröffentlichen heisst „ALLE dürfen das lesen, dauerhaft, indexierbar" — und
+ * geht deshalb erst durch die Freigabe des Betreibers (§9.1). Ein gemeinsamer
+ * Dialog mit einem Häkchen darin würde die grössere Zustimmung im Schatten der
+ * kleineren einsammeln.
+ */
+const publication = computed(() => publicationRequest.data.value?.publication ?? {
+  status: 'none' as const,
+  slug: '',
+  path: '',
+  submittedAt: '',
+  publishedAt: '',
+  decidedAt: '',
+  decisionNote: '',
+  pendingUpdate: false,
+})
+
+/**
+ * WAS FEHLT NOCH? — die Antwort kommt vom SERVER (er liest die Kapitel-Zeilen
+ * ohnehin), nicht aus einer zweiten Rechnung hier.
+ *
+ * Ist sie unbekannt (Route nicht erreichbar), gilt „darf es versuchen": der
+ * Server setzt die Regel ohnehin durch, und ein grau gestellter Knopf ohne
+ * Begründung wäre die schlechtere Auskunft von beiden.
+ */
+const publicationReadiness = computed(() => publicationRequest.data.value?.readiness
+  ?? { allowed: true, blockers: [] })
+
+const publishOpen = ref(false)
+const publishConsent = ref(false)
+const publishBusy = ref(false)
+/** Der Brand Score für den Steckbrief — erst beim Öffnen geholt (s. u.). */
+const publishScore = ref<number | null>(null)
+
+/**
+ * DIE ADRESSE IM DIALOG. Steht schon eine Veröffentlichung, ist es IHRE (der
+ * Slug bleibt stabil, §4.2). Sonst die aus dem Titel gerechnete — dieselbe
+ * pure Regel, die der Server benutzt. Bei Namensgleichheit hängt er eine Zahl
+ * an; das sagt der Hinweis darunter, statt hier eine Zahl zu erfinden.
+ */
+const publicationAddress = computed(() => publication.value.path
+  || brandPublicationPath(brandPublicationSlug(title.value, profileId.value)))
+
+const publicationIndustry = computed(() => t(
+  `brand.industry.${normalizeBrandIndustry(store.profile?.startCard.industry ?? '')}`,
+))
+
+const publicationPathKind = computed(() => t(
+  `brand.brands.card.path.${store.profile?.pathKind === 'relaunch' ? 'relaunch' : 'new'}`,
+))
+
+const publicationStand = computed(() => formatDate(store.profile?.lastActivityAt ?? ''))
+
+async function openPublish(): Promise<void> {
+  publishConsent.value = false
+  publishOpen.value = true
+  // Der Score ist eine ANGABE im Steckbrief und kein Recht: er wird erst beim
+  // Öffnen geholt (eine Seite, die niemand veröffentlicht, soll dafür keine
+  // Abfrage kosten) und sein Ausbleiben kostet nur eine Zeile.
+  try {
+    const scores = await $fetch<BrandProfileScoresResponse>('/api/brand/profiles/scores')
+    const entry = scores.items.find(item => item.profileId === profileId.value)
+    publishScore.value = entry?.website?.score ?? entry?.document?.score ?? null
+  }
+  catch {
+    publishScore.value = null
+  }
+}
+
+async function submitPublication(): Promise<void> {
+  if (publishBusy.value) return
+  publishBusy.value = true
+  try {
+    const result = await $fetch<BrandPublicationResponse>(
+      `/api/brand/profiles/${profileId.value}/publication`,
+      // Das Häkchen reist MIT: es ist die Zustimmung selbst, nicht ihre Anzeige
+      // (Schema `createBrandPublicationSubmitSchema`).
+      { method: 'POST', body: { consent: true } },
+    )
+    publicationRequest.data.value = result
+    publishOpen.value = false
+    toast.add({ title: t('brand.publication.submittedToast') })
+  }
+  catch (error) {
+    const reason = (error as { data?: { reason?: string } }).data?.reason
+    if (reason === 'publication_not_ready') {
+      // Der Server weiss mehr als der Dialog (jemand hat inzwischen eine
+      // Abnahme zurückgenommen) — also neu fragen, statt zu raten.
+      await publicationRequest.refresh()
+      toast.add({ title: t('brand.publication.notReady'), color: 'error' })
+    }
+    else if (reason === 'publication_limit') {
+      toast.add({ title: t('brand.publication.limited'), color: 'error' })
+    }
+    else {
+      toast.add({ title: t('brand.publication.failed'), color: 'error' })
+    }
+  }
+  finally {
+    publishBusy.value = false
+  }
+}
+
+async function withdrawPublication(): Promise<void> {
+  if (publishBusy.value) return
+  publishBusy.value = true
+  try {
+    const result = await $fetch<BrandPublicationResponse>(
+      `/api/brand/profiles/${profileId.value}/publication`,
+      { method: 'DELETE' },
+    )
+    publicationRequest.data.value = result
+    toast.add({ title: t('brand.publication.withdrawnToast') })
+  }
+  catch {
+    toast.add({ title: t('brand.publication.failed'), color: 'error' })
+  }
+  finally {
+    publishBusy.value = false
+  }
+}
+
 // ── Die Leiste (§11) ──────────────────────────────────────────────────────
 
 /**
@@ -447,17 +624,53 @@ const railCollapsed = ref(false)
 const tocCollapsed = ref(false)
 const navOverlayOpen = ref(false)
 const isNarrow = ref(false)
+/**
+ * DER ZWEITE UMBRUCH — genau der, an dem die Kopfknöpfe verschwinden
+ * (`max-sm:hidden`, also < 640 px). Er ist NICHT derselbe wie `isNarrow`
+ * (< 768 px, dort klappt die Navigation um): mit nur einer Messung stünden
+ * zwischen 640 und 768 px „Teilen" und „Veröffentlichen" doppelt da — einmal
+ * als Knopf, einmal im Menü.
+ */
+const isCompact = ref(false)
 let narrowMq: MediaQueryList | null = null
+let compactMq: MediaQueryList | null = null
 const onNarrow = (event: MediaQueryListEvent | MediaQueryList): void => {
   isNarrow.value = event.matches
   if (!event.matches) navOverlayOpen.value = false
+}
+const onCompact = (event: MediaQueryListEvent | MediaQueryList): void => {
+  isCompact.value = event.matches
 }
 onMounted(() => {
   narrowMq = window.matchMedia('(max-width: 767px)')
   onNarrow(narrowMq)
   narrowMq.addEventListener('change', onNarrow)
+  compactMq = window.matchMedia('(max-width: 639px)')
+  onCompact(compactMq)
+  compactMq.addEventListener('change', onCompact)
 })
-onBeforeUnmount(() => narrowMq?.removeEventListener('change', onNarrow))
+onBeforeUnmount(() => {
+  narrowMq?.removeEventListener('change', onNarrow)
+  compactMq?.removeEventListener('change', onCompact)
+})
+
+/**
+ * DAS MENÜ AUF KLEINEN BILDSCHIRMEN (Discover-Entscheidung 7: „Veröffentlichen
+ * wandert auf kleinen Bildschirmen ins Export-Menü — erreichbar, aber eine
+ * bewusste Entscheidung, kein Schnellklick").
+ *
+ * „Teilen" wandert mit: es verschwindet an derselben Kante, und ein Menü, das
+ * die eine Handlung auffängt und die andere fallen lässt, wäre willkürlich.
+ */
+const exportMenuItems = computed<FdExportItem[][]>(() => (isCompact.value
+  ? [
+      [
+        { label: t('brand.foundation.share.button'), icon: 'i-ph-share-network', onSelect: openShare },
+        { label: t('brand.publication.button'), icon: 'i-ph-globe-hemisphere-west', onSelect: openPublish },
+      ],
+      ...exportItems.value,
+    ]
+  : exportItems.value))
 
 const navVisible = computed(() => (isNarrow.value ? navOverlayOpen.value : !railCollapsed.value))
 
@@ -523,13 +736,23 @@ useBrandTitle(() => (title.value || t('brand.foundation.title')))
             :label="t('brand.foundation.share.button')" class="max-sm:hidden"
             @click="openShare"
           />
+          <!-- Veröffentlichen steht NEBEN Teilen, nicht darin (s. Kopf des
+               Abschnitts im Skript). Auf kleinen Bildschirmen wandert es ins
+               Menü rechts (Entscheidung 7). -->
+          <UButton
+            size="sm" color="neutral" variant="ghost" icon="i-ph-globe-hemisphere-west"
+            :label="t('brand.publication.button')" class="max-sm:hidden"
+            @click="openPublish"
+          />
           <UDropdownMenu
-            :items="exportItems" :content="{ align: 'end' }"
+            :items="exportMenuItems" :content="{ align: 'end' }"
             :ui="{ content: 'bw-root bw-overlay w-72' }"
           >
+            <!-- Das Menü bleibt auf kleinen Bildschirmen SICHTBAR: dort ist es
+                 der einzige Weg zu Teilen und Veröffentlichen. -->
             <UButton
               size="sm" color="neutral" variant="ghost" icon="i-ph-export"
-              :label="t('brand.foundation.export.label')" class="max-sm:hidden"
+              :label="t('brand.foundation.export.label')"
             />
             <template #item="{ item }">
               <UIcon v-if="item.icon" :name="item.icon" class="size-4 flex-none" style="color: var(--bw-muted)" />
@@ -566,6 +789,72 @@ useBrandTitle(() => (title.value || t('brand.foundation.title')))
             ·
             {{ t('brand.foundation.contentLocale', { locale: contentLocale.toUpperCase() }) }}
           </p>
+
+          <!-- DER VERÖFFENTLICHUNGS-ZUSTAND (§4.3) — er steht im KOPF des
+               Dokuments, weil er über das GANZE Dokument etwas aussagt.
+               `pendingUpdate` ist der Fall „öffentlich, und ein neuer Stand
+               wartet": beides ist wahr, also steht auch beides da. -->
+          <div v-if="publication.status === 'pending' && !publication.pendingUpdate" class="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1">
+            <span class="bw-state bw-state--draft">{{ t('brand.publication.state.pending') }}</span>
+            <p class="bw-label" style="color: var(--bw-muted)">
+              {{ t('brand.publication.state.pendingAddress', { address: publication.path }) }}
+            </p>
+            <UButton
+              size="xs" color="neutral" variant="ghost" :label="t('brand.publication.state.withdraw')"
+              :disabled="publishBusy" @click="withdrawPublication"
+            />
+          </div>
+          <div v-else-if="publication.status === 'published' || publication.pendingUpdate" class="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2">
+            <span class="bw-state bw-state--confirmed">{{ t('brand.publication.state.public') }}</span>
+            <p class="bw-label" style="color: var(--bw-muted)">
+              {{ t('brand.publication.state.publicSince', { date: formatDate(publication.publishedAt) }) }} ·
+              <!-- Die Anatomie-Seite gibt es erst mit Paket D2; der Link zeigt
+                   schon dorthin, weil die Adresse ab der Freigabe gilt. -->
+              <NuxtLink :to="localePath(publication.path)" class="underline underline-offset-4">{{ publication.path }}</NuxtLink>
+            </p>
+            <span v-if="publication.pendingUpdate" class="bw-state bw-state--draft">
+              {{ t('brand.publication.state.pendingUpdate') }}
+            </span>
+            <span class="flex flex-wrap items-center gap-2">
+              <UButton
+                v-if="!publication.pendingUpdate"
+                size="xs" color="neutral" variant="outline" class="rounded-full"
+                :label="t('brand.publication.state.update')" :disabled="publishBusy"
+                @click="openPublish"
+              />
+              <UButton
+                size="xs" color="neutral" variant="ghost" :label="t('brand.publication.state.withdraw')"
+                :disabled="publishBusy" @click="withdrawPublication"
+              />
+            </span>
+          </div>
+          <div v-else-if="publication.status === 'declined'" class="mt-4">
+            <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+              <span class="bw-state bw-state--stale">{{ t('brand.publication.state.declined') }}</span>
+              <p v-if="publication.decidedAt" class="bw-label" style="color: var(--bw-muted)">
+                {{ t('brand.publication.state.decidedAt', { date: formatDate(publication.decidedAt) }) }}
+              </p>
+            </div>
+            <p v-if="publication.decisionNote" class="mt-2 max-w-xl text-sm leading-relaxed" style="color: var(--bw-ink-soft)">
+              {{ publication.decisionNote }}
+            </p>
+            <UButton
+              size="xs" color="neutral" variant="outline" class="mt-3 rounded-full"
+              :label="t('brand.publication.state.resubmit')" :disabled="publishBusy"
+              @click="openPublish"
+            />
+          </div>
+          <!-- AUSGEBLENDET ist eine Sackgasse (Regel in `brandPublication.ts`):
+               kein „erneut einreichen", sondern der Weg über den Betreiber. -->
+          <div v-else-if="publication.status === 'hidden'" class="mt-4">
+            <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+              <span class="bw-state bw-state--stale">{{ t('brand.publication.state.hidden') }}</span>
+            </div>
+            <p v-if="publication.decisionNote" class="mt-2 max-w-xl text-sm leading-relaxed" style="color: var(--bw-ink-soft)">
+              {{ publication.decisionNote }}
+            </p>
+            <p class="bw-pending mt-2">{{ t('brand.publication.state.hiddenHint') }}</p>
+          </div>
         </div>
 
         <p v-if="doc.error.value" class="bw-pending">{{ t('brand.foundation.loadFailed') }}</p>
@@ -716,6 +1005,14 @@ useBrandTitle(() => (title.value || t('brand.foundation.title')))
             color="neutral" variant="outline" class="rounded-full" style="background: var(--bw-surface-hi)"
             @click="copyShareUrl"
           />
+          <!-- DAS NATIVE TEILEN-BLATT (Entscheidung 7). Nur dort, wo es das
+               gibt — sonst bleibt es bei „Link kopieren" daneben. -->
+          <UButton
+            v-if="canNativeShare"
+            :label="t('brand.foundation.share.native')" icon="i-ph-share-fat"
+            color="neutral" variant="outline" class="rounded-full" style="background: var(--bw-surface-hi)"
+            @click="nativeShare(shareUrl, title)"
+          />
         </div>
 
         <div class="mt-4 flex flex-wrap items-center gap-2">
@@ -740,6 +1037,109 @@ useBrandTitle(() => (title.value || t('brand.foundation.title')))
 
         <p v-if="shareUrl" class="bw-pending mt-4">{{ t('brand.foundation.share.onceHint') }}</p>
         <p class="bw-pending mt-2">{{ t('brand.foundation.share.replacesHint') }}</p>
+      </div>
+    </template>
+  </UModal>
+
+  <!-- VERÖFFENTLICHEN (§4.3). Der Dialog zeigt VORHER den Steckbrief, der in
+       der Galerie stehen wird: was öffentlich wird, soll man vor dem Häkchen
+       sehen und nicht danach. -->
+  <UModal v-model:open="publishOpen">
+    <template #content>
+      <div class="bw-root relative max-h-[85vh] overflow-y-auto p-8" style="background: var(--bw-surface-hi)">
+        <button
+          class="absolute right-5 top-5 grid size-8 place-items-center rounded-full"
+          :aria-label="t('brand.publication.close')"
+          @click="publishOpen = false"
+        >
+          <UIcon name="i-ph-x" class="size-4.5" style="color: var(--bw-ink-soft)" />
+        </button>
+        <p class="bw-label uppercase tracking-widest" style="color: var(--bw-muted)">
+          {{ t('brand.publication.eyebrow') }}
+        </p>
+        <h2 class="mt-1 text-[28px] font-extralight leading-tight tracking-tight">
+          {{ t('brand.publication.title') }}
+        </h2>
+        <p class="mt-3 text-sm leading-relaxed" style="color: var(--bw-ink-soft)">
+          {{ t('brand.publication.intro') }}
+        </p>
+
+        <div class="mt-6 rounded-2xl px-5 py-4" style="background: var(--bw-surface)">
+          <p class="bw-label" style="color: var(--bw-muted)">{{ t('brand.publication.summary.title') }}</p>
+          <dl class="mt-3 grid gap-x-6 gap-y-2 sm:grid-cols-2">
+            <div>
+              <dt class="bw-label" style="color: var(--bw-muted)">{{ t('brand.publication.summary.brandTitle') }}</dt>
+              <dd class="text-sm">{{ title || t('brand.brands.card.untitled') }}</dd>
+            </div>
+            <div>
+              <dt class="bw-label" style="color: var(--bw-muted)">{{ t('brand.publication.summary.address') }}</dt>
+              <dd class="text-sm">{{ publicationAddress }}</dd>
+            </div>
+            <div>
+              <dt class="bw-label" style="color: var(--bw-muted)">{{ t('brand.publication.summary.industry') }}</dt>
+              <dd class="text-sm">{{ publicationIndustry }}</dd>
+            </div>
+            <div>
+              <dt class="bw-label" style="color: var(--bw-muted)">{{ t('brand.publication.summary.path') }}</dt>
+              <dd class="text-sm">{{ publicationPathKind }}</dd>
+            </div>
+            <div v-if="onePage.archetype">
+              <dt class="bw-label" style="color: var(--bw-muted)">{{ t('brand.publication.summary.archetype') }}</dt>
+              <dd class="text-sm">{{ onePage.archetype }}</dd>
+            </div>
+            <div>
+              <dt class="bw-label" style="color: var(--bw-muted)">{{ t('brand.publication.summary.locale') }}</dt>
+              <dd class="text-sm">{{ contentLocale.toUpperCase() }}</dd>
+            </div>
+            <div v-if="publicationStand">
+              <dt class="bw-label" style="color: var(--bw-muted)">{{ t('brand.publication.summary.stand') }}</dt>
+              <dd class="text-sm">{{ publicationStand }}</dd>
+            </div>
+            <div>
+              <dt class="bw-label" style="color: var(--bw-muted)">{{ t('brand.publication.summary.score') }}</dt>
+              <!-- Zwei Zahlen wären hier eine zu viel: gezeigt wird der
+                   Website-Score, sonst der des Fundaments (Entscheidung 3);
+                   ohne Check steht ein Strich statt einer erfundenen Zahl. -->
+              <dd class="text-sm">
+                {{ publishScore === null ? t('brand.publication.summary.scoreEmpty') : publishScore }}
+              </dd>
+            </div>
+          </dl>
+        </div>
+
+        <p class="bw-pending mt-4">{{ t('brand.publication.hidden') }}</p>
+        <p class="bw-pending mt-2">{{ t('brand.publication.addressHint') }}</p>
+
+        <!-- WAS NOCH FEHLT (§3.3) — die Liste steht VOR dem Häkchen, weil sie
+             die Antwort auf „warum kann ich nicht?" ist. -->
+        <div v-if="!publicationReadiness.allowed" class="mt-5 rounded-2xl px-5 py-4" style="background: var(--bw-surface)">
+          <p class="bw-label" style="color: var(--bw-stale)">{{ t('brand.publication.blocker.title') }}</p>
+          <ul class="mt-2 space-y-1.5 text-sm" style="color: var(--bw-ink-soft)">
+            <li v-for="blocker in publicationReadiness.blockers" :key="blocker">
+              {{ t(`brand.publication.blocker.${blocker}`) }}
+            </li>
+          </ul>
+        </div>
+
+        <UCheckbox
+          v-model="publishConsent"
+          class="mt-5"
+          :disabled="!publicationReadiness.allowed"
+          :label="t('brand.publication.consent')"
+        />
+
+        <div class="mt-6 flex flex-wrap items-center gap-2">
+          <UButton
+            class="rounded-full" :label="t('brand.publication.submit')"
+            :loading="publishBusy"
+            :disabled="!publishConsent || publishBusy || !publicationReadiness.allowed"
+            @click="submitPublication"
+          />
+          <UButton
+            color="neutral" variant="ghost" :label="t('brand.publication.cancel')"
+            @click="publishOpen = false"
+          />
+        </div>
       </div>
     </template>
   </UModal>

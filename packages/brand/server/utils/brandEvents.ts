@@ -62,6 +62,17 @@ export type BrandEventType =
    * (`payload` wird sonst KOMPLETT verworfen, s. u.).
    */
   | 'step.restarted'
+  /**
+   * DER WEG IN DIE ÖFFENTLICHE GALERIE (Discover D1, §4.3). Er beantwortet die
+   * Frage hinter „Discover": reichen Menschen ihre Marke überhaupt ein, und
+   * ziehen sie sie wieder zurück?
+   *
+   * `payload` trägt Umfang und Vorzustand — nie den Snapshot, nie den Titel
+   * (Regel 1 im Kopf). Die FREIGABE selbst schreibt hier nichts: sie ist eine
+   * Handlung des Betreibers und gehört in dessen Protokoll (Paket D3).
+   */
+  | 'publication.submitted'
+  | 'publication.withdrawn'
 
 export interface BrandEventInput {
   type: BrandEventType
