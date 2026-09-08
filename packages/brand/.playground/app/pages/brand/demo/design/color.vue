@@ -76,6 +76,20 @@ const neutralSource = computed(() => DS_NEUTRAL_OPTIONS.find(option => option.id
 /* Die eine Rechnung der Seite — Szene, Streifen, Rollen und Matrix lesen
  * dasselbe Ergebnis. Zwei Rechenwege wären zwei Wahrheiten. */
 const colors = computed(() => dsSceneColors(base.value, accent.value, neutralSource.value))
+
+/**
+ * Die zwei Welten nebeneinander (h.ramp): dieselben Paare wie in der Szene
+ * (`FdDesignScene`: hell = Rampe 900 auf Papier, dunkel = Neutral 50 auf
+ * Neutral 950) — hier nur benannt und mit dem WCAG-Urteil versehen.
+ */
+const schemeSides = computed(() => {
+  const c = colors.value
+  const pairs = [
+    { scheme: 'light' as const, label: 'Hell', ink: c.rampLight[900], ground: c.paper },
+    { scheme: 'dark' as const, label: 'Dunkel', ink: c.neutral[50], ground: c.neutral[950] },
+  ]
+  return pairs.map(pair => ({ ...pair, contrast: dsContrast(pair.ink, pair.ground) }))
+})
 const fonts = dsSceneFonts('editorial')
 
 function neutralPreview(source: string): string[] {
@@ -205,10 +219,26 @@ const levelStyle: Record<string, string> = {
         </div>
       </div>
 
-      <div class="mt-4">
-        <FdDesignScene :colors="colors" :fonts="fonts" />
-        <p class="bw-pending mt-2">Der Umschalter oben rechts in der Szene zeigt dieselbe Farbwelt dunkel.</p>
+      <!-- HELL UND DUNKEL NEBENEINANDER (Davids Entscheidung 2026-09-08):
+           dieselbe Szene zweimal, fest gestellt — ein Umschalter zeigt immer
+           nur eine Hälfte der Entscheidung. Unter jeder Szene das Kontrast-
+           Urteil ihres Text-auf-Grund-Paars, gerechnet aus den Rampen. -->
+      <div class="mt-4 grid gap-4 lg:grid-cols-2">
+        <div v-for="side in schemeSides" :key="side.scheme" class="min-w-0">
+          <p class="bw-label" style="color: var(--bw-muted)">{{ side.label }}</p>
+          <div class="mt-2">
+            <FdDesignScene compact :colors="colors" :fonts="fonts" :scheme="side.scheme" />
+          </div>
+          <p class="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm" style="color: var(--bw-ink-soft)">
+            <span class="bw-swatch size-4 flex-none rounded-full" :style="`background: ${side.ink}; box-shadow: inset 0 0 0 1px var(--bw-line-strong)`" />
+            <span>Text {{ side.ink }} auf Grund {{ side.ground }}</span>
+            <span v-if="side.contrast" class="bw-state" :class="side.contrast.level === 'fail' ? 'bw-state--stale' : 'bw-state--confirmed'">
+              {{ dsRatioText(side.contrast.ratio) }} · {{ side.contrast.level === 'fail' ? 'fällt durch' : side.contrast.level }}
+            </span>
+          </p>
+        </div>
       </div>
+      <p class="bw-pending mt-3">Beide Welten sind dieselbe Basisfarbe — nur die Enden der Rampe sind andere. Wer die dunkle Welt nicht will, hat trotzdem eine: Betriebssysteme schalten sie ein.</p>
     </section>
 
     <!-- ── h.neutral + h.accent ─────────────────────────────────────────── -->

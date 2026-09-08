@@ -696,6 +696,16 @@ Gebaut im Playground (Commit dieser Zeile):
   hielt nach dem Entfernen eines `<style>`-Blocks eine tote CSS-Referenz und
   zeigte das Vite-Overlay auf JEDER Seite — Neustart, kein Code-Fehler.
 
+### 3.y Nachtrag 2026-09-08 — Hell/Dunkel-Vergleich in der Farbwelt (Davids Entscheidung)
+
+Im Abschnitt `h.ramp` steht die Anwendungs-Szene jetzt ZWEIMAL nebeneinander,
+fest gestellt (links hell, rechts dunkel) statt einmal mit Umschalter — ein
+Umschalter zeigt immer nur eine Hälfte der Entscheidung. Unter jeder Szene das
+Text-auf-Grund-Paar ihrer Welt mit WCAG-Urteil (Kailua: 13,5:1 hell, 19,0:1
+dunkel, beide AAA), gerechnet aus denselben Rampen wie die Szene. Die Paare
+sind die der Szene selbst (hell = Rampe 900 auf Papier, dunkel = Neutral 50
+auf Neutral 950). Beweis: SSR 200, 0 Konsolenfehler, Lint/Typecheck grün.
+
 ## Anhang A — Recherche-Quellen (2026-09-07)
 
 | Quelle | Sorte | Kernaussage |
