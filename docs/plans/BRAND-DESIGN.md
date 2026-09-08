@@ -615,6 +615,29 @@ Sperr-Fläche mit dem Satz „Schließ das Kapitel davor ab" — D1 gibt
 `design_locked` seinen eigenen Satz. (5) `j.pick` steht im Konzept, nicht
 im Prototyp — angelegt nach Konzept; D5 entscheidet, ob es bleibt.
 
+**Stand D1:** GEBAUT und geprüft 2026-09-08 (Opus-Agent, Fable-Prüfung; vier
+Commits ab 47efafa4) — Migration **brand-022** (`designUnlockedAt`,
+`designUnlockedBy`, kein Index), Betreiber-Routen `POST /api/brand/admin/
+profiles/:id/design-unlock|design-lock` + Liste `GET …/design-unlocks`,
+Betreiber-Seite `/dashboard/brand-design` (UTable, Bestätigung, Chip „Frei
+seit …"), Ereignisse `design.unlocked`/`design.locked`, echter Rail-Layer
+„Brand Design" (gesperrt mit Info-Layer, freigeschaltet sechs Kapitel + eigener
+Stand „x von 6"), eigener Sperrsatz auf `/brand/:id/dna`, Kapitel 10 zeigt
+nach Freischaltung „Brand Design starten". Beweis 139/139 (Abschnitt 21:
+Freischaltung, Rücknahme, Gegenprobe ohne fertige Foundation, 401/403 fremd).
+Abweichungen vom Konzept, entschieden im Bau: (a) Capability **`users.manage`**
+statt `brand.manage` — die gibt es im RBAC nicht, und `users.manage` ist die
+Betreiber-Klammer dieses Layers (Warteliste, Ranking, Discover); (b) es gab
+KEINE Betreiber-Liste „Brandings" (`/dashboard/brands` ist Kundenfläche) ⇒
+eigene Seite; (c) fremdes Konto an der Admin-Route antwortet 401/403 wie jede
+Nachbar-Betreiberroute, nicht 404; (d) die Freischaltung LEGT die sechs
+`brand_steps`-Zeilen an (Bestandsmarken haben neun) — sonst 404 auf `dna`;
+(e) Design zählt NICHT in „Schritt x von 9"/Marken-Karte (Foundation), der
+eigene Stand steht am Layer. Deploy-Reihenfolge: **Migration VOR Code** —
+`profiles/index.post.ts` nennt die Spalten explizit. Frida spricht noch nicht
+(Werkstatt liest `BRAND_VOICE`; Wechsel mit D2); Leseansicht/Dokument haben
+weiter einlagige Rails (D8).
+
 | # | Paket | Inhalt | Gate |
 | --- | --- | --- | --- |
 | D0 | Verträge | Registry-Steps + Sessions (Struktur), Vokabulare, Font-Paar-Katalog, `BrandDesignPreset`, `buildBrandDesign`, Ramp-Import als Vertrag, Journey mit Freischaltung | — |
