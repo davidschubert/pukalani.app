@@ -566,6 +566,14 @@ Browser schließt beim Parsen den äußeren, die Hydration findet einen
 anderen Baum vor (0 Fehler nur nach dem Umbau: bei festem Schema ist der
 Umschalter ein `<span>`). Gilt für den echten `BwDesignScene` (§2.9).
 
+**Davids Korrekturen am lebenden Objekt (2026-09-08):** (1) Abstand zwischen
+den Sessions eines Kapitels 4 rem statt 2 rem („Textwüste"). (2) Die Bühne
+läuft breiter: `BwWorkspace` hat dafür die neue Prop `stageWidth`
+(`--bw-stage-max`, Default 46 rem = Lesebreite); die Werkstatt-Kapitel —
+Foundation UND Design, Dummy UND echte Seite `[stepKey].vue` — setzen 72 rem,
+Dokument und Foundation-Leseansicht bleiben bei der Lesebreite. Gemessen:
+1152 px auf der Werkstatt, 736 px auf den Leseseiten.
+
 ---
 
 ## Anhang A — Recherche-Quellen (2026-09-07)

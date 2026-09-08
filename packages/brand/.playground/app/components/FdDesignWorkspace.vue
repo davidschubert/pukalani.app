@@ -54,6 +54,7 @@ useHead({ title: `Brand Design · ${chapter.value.label}` })
 
 <template>
   <BwWorkspace
+    stage-width="72rem"
     :progress-pct="progressPct"
     content-locale="de"
     :locale-in-topbar="false"
