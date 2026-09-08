@@ -133,6 +133,67 @@
         "unhide": "Wieder einblenden",
         "hiddenOn": "Der Check ist ausgeblendet",
         "hiddenOff": "Der Check ist wieder sichtbar"
+      },
+      "introCalls": {
+        "nav": "Erstgespräche",
+        "title": "Erstgespräche",
+        "subtitle": "Wer um ein Gespräch gebeten hat. Jede Anfrage steht hier, auch wenn keine Mail hinausgegangen ist.",
+        "refresh": "Neu laden",
+        "filterLabel": "Nach Zustand filtern",
+        "shown": "{count} angezeigt",
+        "rowActions": "Aktionen für diese Anfrage",
+        "emptyTitle": "Noch keine Anfrage",
+        "empty": "Sobald jemand über die Erstgespräch-Seite schreibt, steht die Anfrage hier.",
+        "actionFailed": "Das hat nicht geklappt",
+        "noteTitle": "Notiz zur Anfrage",
+        "notePlaceholder": "Was ihr euch zu dieser Anfrage merken wollt",
+        "noteSaved": "Notiz gespeichert",
+        "replySubject": "Euer Erstgespräch",
+        "close": "Schliessen",
+        "filter": {
+          "new": "Offen",
+          "contacted": "Beantwortet",
+          "closed": "Erledigt",
+          "all": "Alle"
+        },
+        "status": {
+          "new": "Offen",
+          "contacted": "Beantwortet",
+          "closed": "Erledigt"
+        },
+        "counts": {
+          "new": "Offen",
+          "contacted": "Beantwortet",
+          "closed": "Erledigt"
+        },
+        "col": {
+          "who": "Wer",
+          "email": "E-Mail",
+          "phone": "Telefon",
+          "company": "Marke",
+          "brand": "Branding",
+          "message": "Anliegen",
+          "source": "Herkunft",
+          "status": "Zustand",
+          "date": "Eingegangen"
+        },
+        "action": {
+          "read": "Anfrage lesen",
+          "reply": "Per Mail antworten",
+          "note": "Notiz",
+          "new": "Als offen markieren",
+          "contacted": "Als beantwortet markieren",
+          "closed": "Als erledigt markieren"
+        },
+        "set": {
+          "new": "Wieder offen",
+          "contacted": "Als beantwortet markiert",
+          "closed": "Als erledigt markiert"
+        },
+        "error": {
+          "not_found": "Diese Anfrage gibt es nicht mehr.",
+          "generic": "Das hat gerade nicht geklappt. Versucht es in einer Minute noch einmal."
+        }
       }
     },
     "cta": {
@@ -2090,98 +2151,150 @@
       "limited": "Heute genug eingereicht. Versucht es morgen wieder.",
       "failed": "Hat nicht geklappt. Bitte noch einmal versuchen."
     },
-      "discover": {
-        "seoTitle": "Discover Brands — Marken, gebaut mit eurem persönlichen Markenberater",
-        "seoDescription": "Öffentliche Markenfundamente aus Branding Supply: Purpose, Werte, Archetyp, Stimme und Farbwelt — jede Marke mit ihrer ganzen Anatomie.",
-        "eyebrow": "Discover Brands",
-        "title": "Marken, gebaut mit eurem persönlichen Markenberater",
-        "lead": "Jede mit ihrer ganzen Anatomie: Purpose, Werte, Archetyp, Stimme, Farbwelt.",
-        "featured": {
-          "label": "Brand of the Day",
-          "cta": "Anatomie ansehen",
-          "prev": "Vorheriges Branding",
-          "next": "Nächstes Branding"
-        },
-        "filter": {
-          "path": "Weiche",
-          "allPaths": "Alle",
-          "archetype": "Archetyp",
-          "palette": "Farbwelt",
+    "discover": {
+      "seoTitle": "Discover Brands — Marken, gebaut mit eurem persönlichen Markenberater",
+      "seoDescription": "Öffentliche Markenfundamente aus Branding Supply: Purpose, Werte, Archetyp, Stimme und Farbwelt — jede Marke mit ihrer ganzen Anatomie.",
+      "eyebrow": "Discover Brands",
+      "title": "Marken, gebaut mit eurem persönlichen Markenberater",
+      "lead": "Jede mit ihrer ganzen Anatomie: Purpose, Werte, Archetyp, Stimme, Farbwelt.",
+      "featured": {
+        "label": "Brand of the Day",
+        "cta": "Anatomie ansehen",
+        "prev": "Vorheriges Branding",
+        "next": "Nächstes Branding"
+      },
+      "filter": {
+        "path": "Weiche",
+        "allPaths": "Alle",
+        "archetype": "Archetyp",
+        "palette": "Farbwelt",
+        "industry": "Branche",
+        "allIndustries": "Alle Branchen",
+        "sort": "Sortierung",
+        "reset": "Filter zurücksetzen"
+      },
+      "path": {
+        "new": "Neue Marke",
+        "relaunch": "Relaunch"
+      },
+      "sort": {
+        "newest": "Neueste",
+        "score": "Brand Score",
+        "maturity": "Fundament-Reife"
+      },
+      "score": {
+        "website": "Brand Score",
+        "document": "Fundament-Reife",
+        "secondary": "{label} {value}"
+      },
+      "badge": {
+        "example": "Beispiel",
+        "relaunch": "Relaunch",
+        "preview": "Vorschau — wartet auf Freigabe"
+      },
+      "total": "{count} Marken",
+      "emptyTitle": "Noch keine veröffentlichte Marke — die erste könnte eure sein.",
+      "emptyCta": "Starte deine eigene",
+      "note": "Jedes Branding hier ist freiwillig öffentlich und vom Team freigegeben.",
+      "entry": {
+        "seoTitle": "{brand} — Anatomie einer Marke · Discover Brands",
+        "seoDescription": "Die Anatomie von {brand}: Purpose, Werte, Archetyp, Stimme und Farbwelt — öffentlich gezeigt mit Zustimmung der Marke.",
+        "eyebrow": "Anatomie",
+        "back": "Discover Brands",
+        "profile": "Steckbrief",
+        "field": {
           "industry": "Branche",
-          "allIndustries": "Alle Branchen",
-          "sort": "Sortierung",
-          "reset": "Filter zurücksetzen"
+          "path": "Weiche",
+          "archetype": "Archetyp",
+          "voice": "Stimme",
+          "language": "Sprache",
+          "published": "Veröffentlicht"
         },
-        "path": {
-          "new": "Neue Marke",
-          "relaunch": "Relaunch"
+        "archetypePair": "{primary} · Rest {secondary}",
+        "language": {
+          "de": "Deutsch",
+          "en": "Englisch"
         },
-        "sort": {
-          "newest": "Neueste",
-          "score": "Brand Score",
-          "maturity": "Fundament-Reife"
+        "fingerprint": {
+          "title": "Markenabdruck",
+          "lead": "Aus der Prüfung, die beim Veröffentlichen galt — acht Kategorien, gewichtet zum Wert {score}.",
+          "link": "Zum Brand-Check"
         },
-        "score": {
-          "website": "Brand Score",
-          "document": "Fundament-Reife",
-          "secondary": "{label} {value}"
+        "similar": {
+          "title": "Ähnliche Marken",
+          "all": "Alle ansehen",
+          "archetype": "gleicher Archetyp",
+          "palette": "gleiche Farbwelt"
         },
-        "badge": {
-          "example": "Beispiel",
-          "relaunch": "Relaunch",
-          "preview": "Vorschau — wartet auf Freigabe"
+        "cta": {
+          "body": "Gefällt euch, wie das gebaut ist? Marken sind keine Vorlagen — aber der Weg dorthin steht euch offen.",
+          "button": "Starte deine eigene"
         },
-        "total": "{count} Marken",
-        "emptyTitle": "Noch keine veröffentlichte Marke — die erste könnte eure sein.",
-        "emptyCta": "Starte deine eigene",
-        "note": "Jedes Branding hier ist freiwillig öffentlich und vom Team freigegeben.",
-        "entry": {
-          "seoTitle": "{brand} — Anatomie einer Marke · Discover Brands",
-          "seoDescription": "Die Anatomie von {brand}: Purpose, Werte, Archetyp, Stimme und Farbwelt — öffentlich gezeigt mit Zustimmung der Marke.",
-          "eyebrow": "Anatomie",
-          "back": "Discover Brands",
-          "profile": "Steckbrief",
-          "field": {
-            "industry": "Branche",
-            "path": "Weiche",
-            "archetype": "Archetyp",
-            "voice": "Stimme",
-            "language": "Sprache",
-            "published": "Veröffentlicht"
-          },
-          "archetypePair": "{primary} · Rest {secondary}",
-          "language": {
-            "de": "Deutsch",
-            "en": "Englisch"
-          },
-          "fingerprint": {
-            "title": "Markenabdruck",
-            "lead": "Aus der Prüfung, die beim Veröffentlichen galt — acht Kategorien, gewichtet zum Wert {score}.",
-            "link": "Zum Brand-Check"
-          },
-          "similar": {
-            "title": "Ähnliche Marken",
-            "all": "Alle ansehen",
-            "archetype": "gleicher Archetyp",
-            "palette": "gleiche Farbwelt"
-          },
-          "cta": {
-            "body": "Gefällt euch, wie das gebaut ist? Marken sind keine Vorlagen — aber der Weg dorthin steht euch offen.",
-            "button": "Starte deine eigene"
-          },
-          "share": "Teilen",
-          "copy": "Link kopieren",
-          "copied": "Link kopiert",
-          "notFoundTitle": "Diese Marke gibt es hier nicht.",
-          "notFoundBody": "Vielleicht ist die Adresse falsch — oder das Branding ist nicht mehr öffentlich.",
-          "notFoundCta": "Zur Galerie"
-        },
-        "teaser": {
-          "eyebrow": "Discover Brands",
-          "title": "Seht, wie ein Markenfundament aussieht",
-          "body": "Marken, die auf Branding Supply gebaut wurden und ihre Anatomie freiwillig zeigen — Purpose, Werte, Archetyp, Stimme, Farbwelt.",
-          "cta": "Alle Marken ansehen"
-        }
+        "share": "Teilen",
+        "copy": "Link kopieren",
+        "copied": "Link kopiert",
+        "notFoundTitle": "Diese Marke gibt es hier nicht.",
+        "notFoundBody": "Vielleicht ist die Adresse falsch — oder das Branding ist nicht mehr öffentlich.",
+        "notFoundCta": "Zur Galerie"
+      },
+      "teaser": {
+        "eyebrow": "Discover Brands",
+        "title": "Seht, wie ein Markenfundament aussieht",
+        "body": "Marken, die auf Branding Supply gebaut wurden und ihre Anatomie freiwillig zeigen — Purpose, Werte, Archetyp, Stimme, Farbwelt.",
+        "cta": "Alle Marken ansehen"
       }
+    },
+    "introCall": {
+      "seoTitle": "Erstgespräch — Branding Supply",
+      "seoDescription": "Ein Gespräch über eure Marke: wo ihr steht, was fehlt und was der nächste Schritt wäre. Kostenlos und unverbindlich.",
+      "hero": {
+        "eyebrow": "Erstgespräch",
+        "title": "Reden wir über eure Marke.",
+        "lead": "Ein Gespräch, in dem wir uns anschauen, wo ihr steht und was der nächste sinnvolle Schritt ist. Kostenlos, unverbindlich und ohne Verkaufsgespräch."
+      },
+      "steps": {
+        "s1Title": "Ihr schreibt uns",
+        "s1Body": "Drei Angaben und ein paar Sätze zu eurem Anliegen. Mehr brauchen wir für den Anfang nicht.",
+        "s2Title": "Wir melden uns",
+        "s2Body": "Mit ein paar Terminvorschlägen — per Mail, oder telefonisch, wenn ihr eine Nummer hinterlasst.",
+        "s3Title": "Wir sprechen",
+        "s3Body": "Dreissig bis vierzig Minuten. Danach wisst ihr, was wir empfehlen — auch wenn das heisst: noch nicht jetzt."
+      },
+      "form": {
+        "name": "Name",
+        "namePlaceholder": "Euer Name",
+        "email": "E-Mail-Adresse",
+        "emailPlaceholder": "Eure E-Mail-Adresse",
+        "company": "Unternehmen oder Marke (optional)",
+        "companyPlaceholder": "Wie heisst eure Marke?",
+        "brand": "Um welches Branding geht es?",
+        "noBrand": "Keine bestimmte Marke",
+        "untitledBrand": "Branding ohne Namen",
+        "message": "Euer Anliegen",
+        "messagePlaceholder": "Woran arbeitet ihr gerade, und wo hakt es?",
+        "remaining": "Noch {count} Zeichen",
+        "phone": "Telefon (optional)",
+        "phonePlaceholder": "Telefonnummer, falls ihr lieber telefoniert",
+        "submit": "Gespräch anfragen",
+        "sending": "Wird gesendet …",
+        "consent": "Wir nutzen eure Angaben ausschliesslich, um auf diese Anfrage zu antworten. Mehr dazu:",
+        "error": {
+          "too_fast": "Einen Moment noch — dann schickt es bitte erneut ab.",
+          "rate_limited": "Das waren gerade viele Anfragen. Versucht es in einer Minute noch einmal.",
+          "unavailable": "Das hat gerade nicht geklappt. Versucht es in einer Minute noch einmal — oder schreibt uns direkt."
+        }
+      },
+      "done": {
+        "title": "Angekommen — danke.",
+        "body": "Wir haben eure Anfrage und melden uns mit ein paar Terminvorschlägen.",
+        "bodyMailed": "Wir haben eure Anfrage und melden uns mit ein paar Terminvorschlägen. Eine Bestätigung liegt in eurem Postfach."
+      },
+      "what": {
+        "eyebrow": "Worum es geht",
+        "title": "Ein Gespräch, kein Angebotstermin.",
+        "body": "Wir hören zu, stellen Fragen und sagen euch ehrlich, was wir sehen. Wenn ihr danach allein weiterarbeitet, ist das ein gutes Ergebnis — dann wisst ihr wenigstens, woran ihr seid.",
+        "honest": "Was ein Brand Design kostet, hängt davon ab, was ihr braucht. Deshalb steht hier keine Zahl: eine erfundene wäre teurer als eine fehlende."
+      }
+    }
   }
 }

@@ -498,7 +498,7 @@ heutige `Z1`. Wer ältere Notizen liest: es gilt diese Tabelle.
 | **R1b — Nachpaket zu R1** *(GEBAUT 2026-09-07)* | Zwei Befunde aus dem Faktenblatt: (1) die **24-Monats-Frist der Funnel-Ereignisse** bekommt ihre Mechanik — pure Regel `brandEventsRetention.ts` (EINE Konstante), Sweep in `server/utils`, Tagestakt als Nitro-Plugin, Betreiber-Handgriff `POST /api/brand/ops/events-sweep`; **keine Migration nötig** (`$createdAt` ist ohne eigenen Index abfragbar, gemessen). (2) Der **Env-Wächter** verlangt für `apps/branding` jetzt `NUXT_GEO_CITY_DB_PATH` + `NUXT_GEO_CITIES_PATH` — seit dem `admin`-Layer (2026-09-03) sind Sitzungsliste und Orts-Picker dort erreichbar; der Lauf meldet beide als auf dem Server fehlend. Beweise: 14 Unit-Prüfungen + `verify-brand-events-sweep.mjs` (15/15, mit Mutations-Gegenprobe) | keins für den Code; die **Server-`.env` von branding.supply setzt David** (zwei Zeilen + Reload, s. §7.2) | Ja — nur die zwei Env-Zeilen |
 | **R2 — Inhalt** | Davids Generator-Texte für Impressum, Datenschutz, AGB · dazu **meine drei Abschnitte**, die kein Generator kennt: KI-Verarbeitung von Kundentexten (OpenRouter/ZDR) · Abruf fremder Websites samt `/market-bot` und TDM-Vorbehalt · öffentliche Bewertung fremder Marken mit Korrekturweg · **Faktenblatt** aus §1.2 + §1.6 · Subprozessoren-Liste · Methodik-Seite für den Brand-Score · alles de + en; die drei Abschnitte sind für den Anwalt als **Prüfpunkte markiert** | David liefert die Generator-Texte; **David liest gegen** | Ja |
 | **R3 — Anwalt** | EIN Termin, **drei Blöcke**: (1) Studio-Rest aus A1 · (2) branding-Texte mit den drei markierten Prüfpunkten · (3) die Anhang-G/BI1-Fragen aus §1.6 (b)(c)(d). Danach **Fassung 2** einsetzen, Art.-27- und § 36-VSBG-Abschnitte füllen (bis dahin als benannte leere Plätze vorgebaut), **Entwurfs-Hinweis weg, `noindex` weg**. Beweis: sechs Routen 200 in beiden Sprachen · Fuß verlinkt · Häkchen in allen drei Anmeldewegen, mit Gegenprobe (`termsUrl` entfernen ⇒ rot) | **Anwaltstermin** | Ja — Termin und Abnahme |
-| **Z0 — Erstgespräch-Seite** | `/erstgespraech` im `brand`-Layer: fünf Felder (Name · E-Mail · welches Branding, vorbelegt · Anliegen · optional Telefon) · **zwei entkoppelte Zustellwege** (Mail an David UND Zeile in `brand_intro_requests`, Erfolg = mindestens einer) · drei Bremsen (Rate-Limit-Bucket, Honeypot, enge Zod-Längen) · Betreiber-Sicht im Dashboard · Ereignisse `intro.viewed` / `intro.submitted`. **Ersetzt die R0-Weiterleitung** | R1 durch (dieselbe Migrations-Freigabe); Migration vor Deploy | Nein (ausser Migrations-Freigabe) |
+| **Z0 — Erstgespräch-Seite** *(GEBAUT 2026-09-07, s. §7.3)* | `/erstgespraech` im `brand`-Layer: fünf Felder (Name · E-Mail · welches Branding, vorbelegt · Anliegen · optional Telefon) · **zwei entkoppelte Zustellwege** (Mail an David UND Zeile in `brand_intro_requests`, Erfolg = mindestens einer) · drei Bremsen (Rate-Limit-Bucket, Honeypot, enge Zod-Längen) · Betreiber-Sicht im Dashboard · Ereignisse `intro.viewed` / `intro.submitted`. **Ersetzt die R0-Weiterleitung** | R1 durch (dieselbe Migrations-Freigabe); Migration vor Deploy | Nein (ausser Migrations-Freigabe) |
 | **Z1 — Stripe** | `billing` ins Manifest · **eigener Preis-Katalog für branding.supply** (NICHT die Community-Preise) · Checkout **je Branding** an der Schranke · Webhook schreibt das **Freischalt-Feld an `brand_profiles`** (Migration) · der **Betreiber-Schalter im Dashboard bleibt** für Handfälle · `automatic_tax` wie bei den Communities, Rechnung und Portal · AGB tragen die **Widerrufsbelehrung für digitale Inhalte** (§ 356 Abs. 5 BGB: Verzicht beim Start der Ausführung) | **A2 live** (Bank, Steuer, Live-Key, Portal) **UND** R3 durch; ausserdem Name + Betrag des Kaufgegenstands (offen, §9) | Ja — A2, Name und Preis |
 | **Z2 — Beta-Regel** | „**Beta-Konten dauerhaft frei**" im Code — je **KONTO** (`brand_access` / Beta-Zulassung), nicht als unbegrenzte Branding-Zahl · als benannter Abschnitt „Beta-Konten" in den AGB · Widerruf je Konto durch den Betreiber bei Missbrauch · die bestehenden Eimer (3 Läufe/Tag je Branding, Instanz-Deckel) bleiben die Kostenbremse | R2 (AGB-Abschnitt) + Z1 (die Zuteilung ist das Gegenstück, gegen das die Ausnahme greift) | Nein |
 
@@ -631,6 +631,91 @@ liefert (`formatSessionLocation` fällt auf das Land zurück, nicht auf
 „Unbekannt"; geprüft in `packages/core/tests/sessionLocation.test.ts`). Der
 Wächter läuft aber täglich in der CI (`production-watch.yml`) und bleibt bis
 zum Setzen ROT — genau dafür ist er da.
+
+---
+
+### 7.3 Z0 — was am 2026-09-07 gebaut wurde
+
+**Der Trichter bleibt in der Marke.** R0 hatte den 404 abgestellt, indem es den
+Abschluss-Knopf auf `https://pukalani.studio/erstgespraech` schickte — in einem
+neuen Tab, auf eine fremde Marke, mitten im Trichter. Seit Z0 gibt es die Seite
+im `brand`-Layer, und die R0-Notlösung ist aus `apps/branding/app/app.config.ts`
+ENTFERNT: der Layer-Default (`type: 'route'`, `/erstgespraech`) ist für diese
+Site jetzt die richtige Antwort, und ein Eintrag in der Site wäre nur eine
+zweite Kopie davon. Beide Aufrufer (`BwFoundationChapter`, die
+Marktvergleich-Schranke) lesen unverändert `useBrandCompletionCta()` — an den
+zwei Komponenten war nichts zu ändern, und genau dafür wurde R0 so gebaut.
+
+**Die Seite** (`packages/brand/app/pages/erstgespraech.vue`) ist öffentlich,
+zweisprachig und schlank: Name · E-Mail · Marke · Anliegen (≤ 1000 Zeichen) ·
+Telefon (freiwillig). Wer angemeldet ist, bekommt Name und Adresse aus dem
+Konto und statt des Textfelds eine AUSWAHL seiner eigenen Brandings — aber nur,
+wenn die Liste wirklich etwas hergibt. `?profileId=` wählt vor.
+
+**Sie liegt im LAYER und nicht in der App** (anders als `/about` und `/team`):
+sie ist das Ziel zweier Layer-Komponenten, und ihr Pfad steht als Layer-Default
+in `app.config.ts`. Läge sie in der App, wäre der Default wieder ein
+Versprechen, das jede App einlösen müsste — genau der Zustand, den R0
+abstellen musste.
+
+**Zwei entkoppelte Zustellwege**, wie im Konzept: Zeile in
+`brand_intro_requests` (Migration **brand-021**) UND zwei Mails (Betreiber +
+Bestätigung an den Absender). Erfolg = mindestens einer. Die REIHENFOLGE ist
+umgekehrt zur Einladung und das mit Grund: bei einer Einladung ist die Mail der
+Vorgang (kein Link ⇒ keine Einladung), bei einer Anfrage ist sie nur die
+Benachrichtigung — der Gegenstand ist die Anfrage, und die ist vollständig,
+sobald sie abgelegt ist. Deshalb erst schreiben, dann mailen.
+
+**Drei Bremsen**: der IP-Eimer `brand:intro-call` (5/min, eigener Eimer neben
+`brand:waitlist` — zwei Trichter, die nichts miteinander zu tun haben), der
+Honigtopf `hp` (Antwort ununterscheidbar vom Erfolg) und eine Mindestzeit von
+3 s zwischen Aufbau und Absenden (⇒ 422 `too_fast`). Die Mindestzeit ist
+BEWUSST schwach: der Wert kommt vom Client und ist fälschbar. Sie kostet
+stumpfe Formular-Skripte und keinen Menschen etwas; die Bremse gegen jemanden,
+der es ernst meint, ist der IP-Eimer.
+
+**Die Datentür der Herkunft**: `profileId` reist über die Adresszeile und wird
+gegen den Besitz geprüft. Passt sie nicht, wird sie VERWORFEN, nicht abgelehnt —
+ein 403 unterschiede „unbekannt" von „fremd" und kostete eine echte Anfrage mit
+veraltetem Link.
+
+**Betreiber-Sicht** `/dashboard/intro-calls` (`users.manage`, dritter Eintrag
+neben Warteliste und Korrekturen). Sie ist nicht optional: `introCallNotify` ist
+per Default leer, und ohne die Liste hinge das Bemerken einer Anfrage an einer
+Konfigurationszeile, die niemand gesetzt haben muss.
+
+**GDPR**: der Contributor des Layers findet die Zeilen über ZWEI Wege — `userId`
+(aus der Werkstatt) und `emailLower` (als Gast gefragt, bevor es das Konto gab).
+Gelöscht wird, nicht anonymisiert: anders als eine Einladung beweist eine
+Anfrage nichts und schaltet nichts frei; sie IST die Nachricht dieses Menschen.
+
+**`intro.viewed` ist bewusst NICHT gebaut.** Das Konzept nennt zwei Ereignisse;
+gebaut ist `intro.submitted` (Zähler in `brand_events`, ohne Inhalt). Das zweite
+bräuchte eine ÖFFENTLICHE Schreib-Route, die auf einer anonymen Seite bei jedem
+Aufbau feuert — eine neue Angriffsfläche und ein neuer Drossel-Eimer, um eine
+Zahl zu zählen, die heute niemand auswertet (branding.supply hat bewusst keine
+Reichweitenmessung, §1.1). Wer den Trichter messen will, führt zuerst die
+Messung ein, nicht ihr Ereignis.
+
+**Beweise**: 47 Unit-Prüfungen (`brandIntroCall.test.ts`,
+`brandIntroCallRoute.test.ts`, jede Regel mit Gegenprobe; Mutationsprobe: die
+Datentür entfernt ⇒ rot) und `packages/brand/scripts/verify-brand-intro-call.mjs`
+**26/26** gegen einen Worktree-Dev-Server mit lokaler Appwrite und Mailpit —
+inklusive Gegenprobe `VERIFY_EXPECT_OPEN=1` (4 von 26 fallen). Migration lokal
+gefahren, zweiter Lauf idempotent.
+
+**Was David tun muss:**
+
+1. **Die Prod-Migration `brand-021` auf `branding` freigeben und fahren** —
+   VOR dem Code-Deploy. Ohne die Tabelle bleibt die Route zwar am Leben (die
+   Mail ist der zweite Weg), aber jede Anfrage lebte nur in einem Postfach.
+   `pnpm migrate --app branding --layer brand`, Env aus
+   `~/.appwrite-secrets/migrations/branding.env`.
+2. **Die Betreiber-Adresse eintragen**, wenn die Anfrage ins Postfach soll:
+   `introCallNotify: '…'` in `apps/branding/app/app.config.ts` (heute `''` =
+   keine Mail; die Anfrage steht trotzdem in der Liste). Ein erfundener
+   Standard-Empfänger wäre eine Zustellung ins Nichts, die wie eine Zustellung
+   aussieht — deshalb bleibt der Default leer.
 
 ---
 

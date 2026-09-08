@@ -92,6 +92,27 @@ Sonst zeigt der Fuß auf eine Route, deren Tabelle es nicht gibt.
          die Ausgabe ist nur nicht still. Kein Datenrisiko: 006 backfillt
          zuerst und prüft gegen.
 
+- [ ] **`brand-021` — die Erstgespräch-Anfragen (BS1 Z0, wartet auf Davids Ja):**
+
+      ```
+      pnpm migrate --app branding --layer brand    # legt brand_intro_requests an
+      pnpm ops:schema-parity                       # die Tabelle steht im BRAND_TABLES-Soll
+      ```
+
+      Gate-Reihenfolge wie immer: **Davids Ja** → Migration → Code-Deploy →
+      `curl https://branding.supply/api/health` (Build-SHA) → `/erstgespraech`
+      und `/de/erstgespraech` einmal aufrufen und eine Testanfrage abschicken.
+
+      Ohne die Tabelle ANTWORTET die Route trotzdem (die Bestätigungs-Mail ist
+      der zweite, entkoppelte Zustellweg) — die Anfrage lebte dann aber nur in
+      einem Postfach und stünde nicht unter `/dashboard/intro-calls`. Genau
+      deshalb Migration zuerst.
+
+      **Danach ein Handgriff für David, wenn er die Anfragen im Postfach will:**
+      `introCallNotify: 'seine@adresse'` in `apps/branding/app/app.config.ts`
+      (Default `''` = keine Betreiber-Mail). Der Absender bekommt seine
+      Bestätigung unabhängig davon.
+
 ## 3 · Monorepo (Claude — läuft bereits parallel)
 
 - [x] apps/branding (**Dev**-Port 3010 — anfangs 3006, das kollidierte

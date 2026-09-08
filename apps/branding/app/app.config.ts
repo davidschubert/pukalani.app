@@ -25,42 +25,47 @@ export default defineAppConfig({
     brand: {
       name: 'Branding Supply',
       /**
-       * DAS ERSTGESPRÄCH LIEGT (NOCH) AUF pukalani.studio (BS1 R0,
-       * 2026-09-07 — Davids Entscheidung).
+       * DAS ERSTGESPRÄCH IST ZURÜCK IN DER MARKE (BS1 Z0, 2026-09-07) —
+       * DESHALB STEHT HIER KEIN `completionCta` MEHR.
        *
-       * Der Layer-Default ist `type: 'route'` auf `/erstgespraech`. Diese
-       * Seite gibt es ausschliesslich in `apps/portfolio`; auf
-       * branding.supply führten deshalb BEIDE Aufrufer des einen
-       * Conversion-Wegs ins 404 — der Knopf am Ende der Brand Foundation und
-       * die Schranke des Marktvergleichs. Bis die eigene Erstgespräch-Seite im
-       * brand-Layer steht (Paket Z1), zeigt der Trichter dieser Site auf die
-       * Studio-Seite.
+       * Bis Z0 stand an dieser Stelle die R0-Notlösung: `type: 'url'` auf
+       * `https://pukalani.studio/erstgespraech?source=branding-supply`, mit
+       * `target: '_blank'`. Sie hat den 404 abgestellt und dafür einen
+       * Markenbruch mitten im Trichter gekauft — wer gerade eine halbe Stunde
+       * an SEINER Marke gearbeitet hatte, landete in einem neuen Tab auf einer
+       * FREMDEN.
        *
-       * WARUM HIER UND NICHT IM LAYER: die SITE entscheidet, wohin ihr
-       * Trichter zeigt. Der Layer-Default bleibt richtig für pukalani.studio,
-       * wo `brand` später ebenfalls laufen könnte und die Seite im eigenen
-       * Haus liegt.
+       * Seit Z0 gibt es `/erstgespraech` im `brand`-Layer. Der Layer-Default
+       * (`type: 'route'`, `to: '/erstgespraech'`, `labelKey:
+       * 'brand.cta.book'`) ist damit für diese Site die richtige Antwort, und
+       * ein Eintrag hier wäre nur eine zweite Kopie davon. Der tiefe Merge der
+       * `app.config` liefert ihn unverändert durch — weglassen ist die
+       * Entscheidung, nicht das Vergessen.
        *
-       * `?source=branding-supply` ist die HERKUNFT. Achtung, was sie heute
-       * ist und was nicht: die Studio-Seite liest keine Query, und
-       * `POST /api/intro-call` nimmt sie auch nicht entgegen (das Zod-Schema
-       * ist `.strict()`, ein `source`-Feld gibt es nicht) — die Angabe landet
-       * also NICHT in `intro_requests`, sondern nur in der Web-Analyse der
-       * Studio-Site. Der Name `source` ist frei gewählt, weil es keinen
-       * bestehenden gab; wer die Herkunft später in der Anfrage haben will,
-       * erweitert Seite und Route und behält diesen Namen.
+       * WER IHN WIEDER SETZT, setzt ihn ganz: `type: 'url'` verlangt `href`
+       * (nicht `to`), und ohne `target` bleibt es derselbe Tab
+       * (`packages/brand/shared/brandCompletionCta.ts`).
        *
-       * `target: '_blank'` erhält das bisherige Verhalten des Knopfes in der
-       * Brand Foundation: der Leser verliert sein Dokument nicht. `rel`
-       * ergänzt die pure Regel selbst (`noopener noreferrer`) — ein `_blank`
-       * ohne das gäbe der Zielseite `window.opener` in die Hand.
+       * Die Herkunft `?source=branding-supply` ist damit ebenfalls Geschichte
+       * und wird nicht gebraucht: die eigene Seite kennt ihre Herkunft aus dem
+       * `?source=`-Parameter ihrer eigenen Aufrufer und legt sie in
+       * `brand_intro_requests.source` ab — sie steht jetzt also in der
+       * Anfrage, nicht nur in einer fremden Web-Analyse.
        */
-      completionCta: {
-        type: 'url',
-        href: 'https://pukalani.studio/erstgespraech?source=branding-supply',
-        labelKey: 'brand.cta.book',
-        target: '_blank',
-      },
+      /**
+       * WOHIN DIE ERSTGESPRÄCH-ANFRAGEN GEMELDET WERDEN (BS1 Z0).
+       *
+       * LEER ist der Default und heisst „keine Betreiber-Mail" — dieselbe
+       * Entscheidung wie bei `waitlistNotify` daneben. Die Anfrage geht dann
+       * trotzdem nicht verloren: sie steht in `brand_intro_requests` und unter
+       * /dashboard/intro-calls, und der Absender bekommt seine Bestätigung.
+       *
+       * DAVID TRÄGT HIER SEINE ADRESSE EIN, wenn er die Anfrage im Postfach
+       * haben will — z. B. `introCallNotify: 'hallo@pukalani.app'`. Ein
+       * erfundener Standard-Empfänger wäre schlimmer als keiner: eine
+       * Zustellung ins Nichts sieht wie eine Zustellung aus.
+       */
+      introCallNotify: '',
       /**
        * DIE DREI RECHTSWÖRTER IM FUSS SIND SEIT BS1 R1 ECHTE LINKS
        * (2026-09-07). Bis dahin standen sie hier bewusst leer — der

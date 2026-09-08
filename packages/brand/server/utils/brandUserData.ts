@@ -8,10 +8,12 @@ import { runBrandProfileCascades } from './brandProfileCascade'
 import { BRAND_PUBLICATIONS_TABLE, BRAND_PUBLICATION_REPORTS_TABLE } from './brandPublications'
 import {
   BRAND_EVENTS_TABLE,
+  BRAND_INTRO_REQUESTS_TABLE,
   BRAND_MESSAGES_TABLE,
   BRAND_PROFILES_TABLE,
   BRAND_SHARES_TABLE,
   BRAND_STEPS_TABLE,
+  type BrandIntroRequestRow,
   type BrandProfileRow,
   brandDb,
   isAppwriteNotFound,
@@ -140,7 +142,51 @@ export async function brandExportUserData(event: H3Event, userId: string): Promi
       ? await safeListAll<BrandInviteRow>(event, BRAND_INVITES_TABLE, [Query.equal('emailLower', emailLower)])
       : [],
     events: await safeListAll(event, BRAND_EVENTS_TABLE, [Query.equal('userId', userId)]),
+    /**
+     * DIE GESPRÄCHSANFRAGEN (brand-021, BS1 Z0) — auf ZWEI Wegen gesucht und
+     * zu EINER Liste vereinigt.
+     *
+     * Der Grund steht im Kopf der Migration: eine Anfrage kann VOR der
+     * Anmeldung entstanden sein (dann trägt sie nur die Adresse) oder aus der
+     * Werkstatt heraus (dann trägt sie die `userId`). Nur nach `userId` zu
+     * suchen verschwiege dem Menschen die Anfrage, die er als Gast gestellt
+     * hat — und genau die ist die ältere.
+     *
+     * Doppelte werden über die Zeilen-Id entfernt: eine Zeile mit BEIDEN
+     * Merkmalen (angemeldet gefragt) kommt sonst zweimal im Export vor und
+     * sähe wie zwei Anfragen aus.
+     */
+    introRequests: await introRequestRows(event, userId, emailLower),
   }
+}
+
+/**
+ * Die Anfrage-Zeilen dieses Menschen — über `userId` UND über die Adresse.
+ * Geteilt von Export und Löschung, damit beide dieselbe Menge meinen; eine
+ * Löschung, die weniger findet als der Export zeigt, wäre der schlimmere der
+ * beiden Fehler.
+ */
+async function introRequestRows(
+  event: H3Event,
+  userId: string,
+  emailLower: string | null,
+): Promise<BrandIntroRequestRow[]> {
+  const byUser = await safeListAll<BrandIntroRequestRow>(
+    event,
+    BRAND_INTRO_REQUESTS_TABLE,
+    [Query.equal('userId', userId)],
+  )
+  const byEmail = emailLower
+    ? await safeListAll<BrandIntroRequestRow>(
+        event,
+        BRAND_INTRO_REQUESTS_TABLE,
+        [Query.equal('emailLower', emailLower)],
+      )
+    : []
+
+  const seen = new Map<string, BrandIntroRequestRow>()
+  for (const row of [...byUser, ...byEmail]) seen.set(row.$id, row)
+  return [...seen.values()]
 }
 
 export async function brandDeleteUserData(event: H3Event, userId: string): Promise<UserDataDeleteResult> {
@@ -226,6 +272,25 @@ export async function brandDeleteUserData(event: H3Event, userId: string): Promi
         if (!isAppwriteNotFound(error)) throw error
       }
     }
+  }
+
+  /**
+   * DIE GESPRÄCHSANFRAGEN (brand-021) WERDEN GELÖSCHT, NICHT ANONYMISIERT.
+   *
+   * Das ist der bewusste Unterschied zu den Einladungen darüber. Eine
+   * Einladungs-Zeile ist der NACHWEIS eines Vorgangs — gelöscht liesse sich
+   * derselbe Code ein zweites Mal einlösen, der 409 auf die Zeilen-Id fiele
+   * weg. Eine Anfrage-Zeile beweist nichts und schaltet nichts frei: sie IST
+   * die Nachricht dieses Menschen, samt Name, Adresse, Telefonnummer und
+   * einem frei geschriebenen Anliegen. Ein anonymisierter Rest davon wäre ein
+   * Text ohne Absender in einer Betreiber-Liste — nutzlos für uns und für ihn
+   * eine Zumutung.
+   *
+   * Gesucht wird über BEIDE Wege (`introRequestRows`, s. Export): eine
+   * Anfrage aus der Zeit vor der Anmeldung trägt nur die Adresse.
+   */
+  for (const row of await introRequestRows(event, userId, emailLower)) {
+    await remove(BRAND_INTRO_REQUESTS_TABLE, row.$id)
   }
 
   return { deleted, anonymized }

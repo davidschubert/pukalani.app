@@ -1732,3 +1732,57 @@ export interface BrandDiscoverEntryResponse {
   check: BrandDiscoverCheck | null
   similar: BrandDiscoverSimilar[]
 }
+
+/* ── ERSTGESPRÄCH (BS1 Paket Z0) ─────────────────────────────────────────── */
+
+/**
+ * DIE ANTWORT DER ÖFFENTLICHEN ANFRAGE-ROUTE.
+ *
+ * `ok` ist immer `true`: die Route antwortet 200 oder wirft (400 bei kaputtem
+ * Rumpf, 422 wenn zu schnell abgeschickt, 429 aus der Drossel, 503 wenn WEDER
+ * Zeile NOCH Mail durchkamen). Ein `ok: false` gäbe es nie.
+ *
+ * `stored` und `mailed` sagen, welcher der beiden entkoppelten Zustellwege
+ * geklappt hat. Sie stehen in der Antwort, weil das Formular sonst nicht
+ * ehrlich sein könnte: ohne Bestätigungs-Mail („schaut in euer Postfach") wäre
+ * der Erfolgstext ein Versprechen auf etwas, das nicht kommt. Sie verraten
+ * nichts — dass eine Anfrage abgelegt wurde, weiss der Absender ohnehin, weil
+ * er sie gerade abgeschickt hat.
+ */
+export interface BrandIntroCallResponse {
+  ok: true
+  stored: boolean
+  mailed: boolean
+}
+
+/** Eine Anfrage in der Betreiber-Liste. */
+export interface BrandIntroRequestItem {
+  id: string
+  name: string
+  email: string
+  company: string
+  message: string
+  phone: string
+  locale: string
+  source: string
+  /** Leer, wenn die Anfrage von der öffentlichen Seite kam. */
+  profileId: string
+  userId: string
+  status: string
+  note: string
+  createdAt: string
+}
+
+export interface BrandIntroListResponse {
+  items: BrandIntroRequestItem[]
+  total: number
+  /** Leer heisst „letzte Seite" (s. Begründung in der Warteliste). */
+  nextCursor: string
+  counts: Record<string, number>
+}
+
+/** Die Antwort auf eine Änderung — die ganze Zeile, damit die Liste nicht neu lädt. */
+export interface BrandIntroPatchResponse {
+  ok: true
+  item: BrandIntroRequestItem
+}

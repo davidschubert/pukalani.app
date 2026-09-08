@@ -128,6 +128,31 @@ export default defineAppConfig({
           order: 131,
         },
         /**
+         * DIE GESPRÄCHSANFRAGEN (BS1 Z0) — der dritte Betreiber-Eintrag
+         * dieses Layers, direkt unter den beiden anderen (`order: 132`).
+         * Alle drei sind Arbeitslisten desselben Menschen, und zwischen ihnen
+         * gehört keine fremde Sache.
+         *
+         * Dieselbe Capability wie Warteliste und Korrekturen: `users.manage`.
+         * Sie ist die Betreiber-Klammer dieses Layers — die ausführliche
+         * Begründung steht in `server/utils/brandWaitlistAdmin.ts` und gilt
+         * hier unverändert.
+         *
+         * KEIN `productKey`: das Produkt-Gate `brand` schaltet den WIZARD ab.
+         * Eine Anfrage, die jemand gestellt hat, muss auch dann noch lesbar
+         * sein — sie ist eine Zusage an einen Menschen, kein Produktteil.
+         */
+        {
+          id: 'brand-intro-calls',
+          scope: 'operator',
+          labelKey: 'brand.admin.introCalls.nav',
+          icon: 'i-ph-phone-call',
+          to: '/dashboard/intro-calls',
+          requiredCapability: 'users.manage',
+          group: 'management',
+          order: 132,
+        },
+        /**
          * DIE MODERATION DER ÖFFENTLICHEN GALERIE (Paket D3,
          * docs/plans/DISCOVER-BRANDS.md §4.4) — der dritte Betreiber-Eintrag
          * dieses Layers, direkt unter den Korrekturen (`order: 132`): alle
@@ -239,6 +264,25 @@ export default defineAppConfig({
        * Mail-Fehler ändert die Antwort der Route nie (fail-soft).
        */
       waitlistNotify: '',
+      /**
+       * WOHIN DAS ERSTGESPRÄCH MELDET (BS1 Z0) — die Adresse des Betreibers,
+       * an die `POST /api/brand/intro-call` eine neue Anfrage schickt.
+       *
+       * EIGENER SCHLÜSSEL NEBEN `waitlistNotify` UND KEIN GETEILTER: das sind
+       * zwei verschiedene Postfächer-Fragen. „Wer will in die Beta?" ist eine
+       * Liste, die man einmal die Woche durchgeht; „wer will reden?" ist ein
+       * Lead, der heute eine Antwort braucht. Wer beides an dieselbe Adresse
+       * will, schreibt sie zweimal hin — das kostet eine Zeile und lässt die
+       * Wahl offen.
+       *
+       * LEER ist der Default und heisst „keine Mail". Anders als bei der
+       * Warteliste geht dabei NICHTS verloren: die Anfrage steht in
+       * `brand_intro_requests` und unter /dashboard/intro-calls, und der
+       * Absender bekommt seine Bestätigung unabhängig davon. Ein erfundener
+       * Standard-Empfänger wäre schlimmer als keiner — eine Zustellung ins
+       * Nichts sieht wie eine Zustellung aus.
+       */
+      introCallNotify: '',
       /**
        * ZUSÄTZLICHE EBENE-1-EINTRÄGE DER WERKSTATT-LEISTE (MV1 M4).
        *

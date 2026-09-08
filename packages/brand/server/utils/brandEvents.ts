@@ -63,6 +63,16 @@ export type BrandEventType =
    */
   | 'step.restarted'
   /**
+   * DIE GESPRÄCHSANFRAGE (BS1 Z0). `payload` trägt Herkunft, Sprache und die
+   * zwei Zustell-Ergebnisse — NIE Name, Adresse oder Anliegen (Regel 1 im
+   * Kopf). Die Anfrage selbst steht vollständig in `brand_intro_requests`;
+   * dieser Eintrag beantwortet nur „wie viele fragen, und von wo?".
+   *
+   * `profileId` und `userId` sind LEER, wenn ein Gast von der öffentlichen
+   * Seite fragt — das ist der erwartete Normalfall und kein Mangel.
+   */
+  | 'intro.submitted'
+  /**
    * DER WEG IN DIE ÖFFENTLICHE GALERIE (Discover D1, §4.3). Er beantwortet die
    * Frage hinter „Discover": reichen Menschen ihre Marke überhaupt ein, und
    * ziehen sie sie wieder zurück?

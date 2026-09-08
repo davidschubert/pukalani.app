@@ -79,6 +79,14 @@ export const BRAND_CHECKS_TABLE = 'brand_checks'
  * einen eigenen Absender und es kann mehrere je Check geben.
  */
 export const BRAND_CHECK_CORRECTIONS_TABLE = 'brand_check_corrections'
+/**
+ * DIE ERSTGESPRÄCH-ANFRAGEN (brand-021, BS1 Paket Z0). Wie `brand_waitlist`
+ * eine Tabelle, in die jemand OHNE Konto schreibt — anders als sie trägt eine
+ * Zeile hier aber optional eine `userId` und eine `profileId`, weil der Weg
+ * aus der Werkstatt der wahrscheinlichere ist. Beides ist `''`, wenn die
+ * Anfrage von der öffentlichen Seite kommt.
+ */
+export const BRAND_INTRO_REQUESTS_TABLE = 'brand_intro_requests'
 
 export type BrandProfileRow = Models.Row & {
   createdByUserId: string
@@ -224,6 +232,35 @@ export type BrandWaitlistRow = Models.Row & {
   tokenHash?: string
   tokenExpiresAt?: string
   confirmedAt?: string
+}
+
+/**
+ * EINE ERSTGESPRÄCH-ANFRAGE (brand-021).
+ *
+ * `emailLower` steht NEBEN `email` aus demselben Grund wie in der Warteliste:
+ * verglichen wird technisch (klein), angeschrieben wird so, wie jemand sich
+ * selbst geschrieben hat. Anders als dort trägt der Vergleichswert hier KEINEN
+ * Unique-Index — zwei Anfragen derselben Person sind zwei verschiedene
+ * Anliegen, kein Duplikat. Er ist der Lesepfad der GDPR-Löschung
+ * (`brandUserData.ts`) und sonst nichts.
+ *
+ * `userId` und `profileId` sind `''`, wenn die Anfrage von der öffentlichen
+ * Seite kommt. `profileId` steht nur da, wenn die Datentür der Route sie
+ * bestätigt hat — eine fremde Id wird verworfen, nicht gespeichert.
+ */
+export type BrandIntroRequestRow = Models.Row & {
+  name: string
+  email: string
+  emailLower: string
+  company: string
+  message: string
+  phone: string
+  locale: string
+  source: string
+  profileId: string
+  userId: string
+  status: string
+  note: string
 }
 
 /**

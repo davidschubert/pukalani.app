@@ -317,6 +317,12 @@ const BRAND_TABLES = [
   // aus demselben Grund wie `brand_check_corrections`: eigener Status, eigener
   // (freiwilliger) Absender, mehrere je Veröffentlichung möglich.
   'brand_publication_reports',
+  // brand-021: die Erstgespräch-Anfragen (BS1 Z0,
+  // docs/plans/BRANDING-SUPPLY-RECHT-UND-BEZAHLUNG.md §7 Zeile Z0). Der
+  // Gesprächs-Einstieg von branding.supply — wie `brand_waitlist` eine
+  // Tabelle, in die jemand OHNE Konto schreibt, aber mit optionaler `userId`
+  // und optionalem Branding-Bezug.
+  'brand_intro_requests',
 ]
 
 /**
