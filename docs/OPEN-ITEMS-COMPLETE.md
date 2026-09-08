@@ -73,7 +73,7 @@ Referenz/Koordinate) erreichten den Server NICHT — kein Request, kein Toast; e
 Seite selbst (`button.click()`) und ein späterer physischer Klick auf „Ausblenden" derselben
 Tabelle funktionierten. Nicht reproduzierbar, sobald die Warteschlange leer war; als
 Beobachtungspunkt in OPEN-ITEMS. Weitere Nachzüge dort: Branche im Dialog aus dem Katalog wählen
-(Freitext „Handwerksbäckerei" ⇒ „Nicht zugeordnet"), Hero-Farbwelt, Log ohne Ids.
+(Freitext „Handwerksbäckerei" ⇒ „Nicht zugeordnet"), Log ohne Ids. Die graue Kachel von Krume & Gold ist KEIN Fehler: ihr Dreiklang ist „Schiefer" (`slate`), derselbe wie auf der Brands-Übersicht.
 
 **Gelernt:** (1) „Hat geklappt" ist erst bewiesen, wenn der Server es sagt — Galerie-API,
 Anatomie-Status und Log-Zeile gehören zu jedem Freigabe-Beweis; Davids Meldung und die leere
