@@ -2310,6 +2310,7 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
   <BwWorkspace
     v-else
     v-model:rail-overlay="navOverlayOpen"
+    stage-width="72rem"
     :progress-pct="overallProgress.pct"
     :content-locale="store.profile?.contentLocale ?? locale"
     :locale-in-topbar="false"

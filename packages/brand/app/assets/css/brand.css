@@ -116,7 +116,11 @@
 /* Runde 23 (David): fester Bühnen-Fuß fürs Chat-Prompt — gleiche
    horizontale Flucht wie die Bühne, unten mit Luft zum Rand. */
 .bw-stage-foot { padding: 0.5rem clamp(1.2rem, 4vw, 3.5rem) 1rem; }
-.bw-stage-inner { max-width: 46rem; margin: 0 auto; }
+/* BÜHNENBREITE: Lesebreite als Default (Gespräch, Dokument, Leseansicht);
+   eine Seite mit Auswahl-Flächen (Karten zu dritt, Rampen, Specimen) setzt
+   `--bw-stage-max` über die Prop `stageWidth` von BwWorkspace (Davids
+   Korrektur am Brand-Design-Prototyp 2026-09-08: „alles so schmal"). */
+.bw-stage-inner { max-width: var(--bw-stage-max, 46rem); margin: 0 auto; }
 /* `overflow: hidden` gehört dazu, seit die Spur auf null gehen kann (B3) —
    sonst steht der Log-Inhalt neben seiner eigenen, leeren Spalte. */
 .bw-george { display: flex; flex-direction: column; min-height: 0; overflow: hidden; background: var(--bw-surface); border-radius: 0; margin: 0; }

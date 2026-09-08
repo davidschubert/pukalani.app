@@ -34,15 +34,29 @@ const newBrandOpen = ref(false)
             result-to="/brand/demo/ergebnis" :result-ready="false"
           />
         </NuxtLink>
-        <NuxtLink to="/brand/demo/foundation" class="block">
-          <BwBrandCard
-            title="Hafenkontor" path="Neue Marke" flag="i-circle-flags-de"
-            :gradient="['#dfe8e4', '#6f9184', '#22392f']"
-            step="Brand Foundation abgeschlossen" progress="21 von 21 Entscheidungen" remaining="fertig" :pct="100" :activity="[3, 5, 2, 7, 9, 6, 10, 8, 12, 9, 14, 11, 8, 6]" :score="88"
-            edited="zuletzt vor 3 Tagen"
-            result-to="/brand/demo/foundation" :result-ready="true"
-          />
-        </NuxtLink>
+        <!-- Klickdummy Produkt 02 (docs/plans/BRAND-DESIGN.md §2.15): der
+             Einstieg in Schicht 2 hängt an der FERTIGEN Marke — vorher gibt es
+             nichts freizuschalten. Die zwei Links stehen NEBEN der Kachel und
+             nicht darin: ein `<a>` in einem `<a>` ist kein gültiges HTML. -->
+        <div>
+          <NuxtLink to="/brand/demo/foundation" class="block">
+            <BwBrandCard
+              title="Hafenkontor" path="Neue Marke" flag="i-circle-flags-de"
+              :gradient="['#dfe8e4', '#6f9184', '#22392f']"
+              step="Brand Foundation abgeschlossen" progress="21 von 21 Entscheidungen" remaining="fertig" :pct="100" :activity="[3, 5, 2, 7, 9, 6, 10, 8, 12, 9, 14, 11, 8, 6]" :score="88"
+              edited="zuletzt vor 3 Tagen"
+              result-to="/brand/demo/foundation" :result-ready="true"
+            />
+          </NuxtLink>
+          <div class="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1">
+            <NuxtLink to="/brand/demo/design/dna" class="bw-label inline-flex items-center gap-1.5 underline" style="color: var(--bw-ink-soft)">
+              Brand Design (Dummy) <UIcon name="i-ph-arrow-right" class="size-3.5" />
+            </NuxtLink>
+            <NuxtLink to="/brand/demo/design/unlock" class="bw-label underline" style="color: var(--bw-muted)">
+              Freischaltung
+            </NuxtLink>
+          </div>
+        </div>
       </div>
       <!-- Beispiel-Brand-Teaser + Leerzustand nebeneinander (Runde 134) -->
       <div class="mt-20 grid items-stretch gap-6 lg:grid-cols-2">

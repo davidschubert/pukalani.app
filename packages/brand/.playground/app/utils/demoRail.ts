@@ -1,4 +1,5 @@
-import type { BwRailLayer } from '../../../app/components/BwProgressRail.vue'
+import type { BwRailLayer, BwRailSession, BwRailStep } from '../../../app/components/BwProgressRail.vue'
+import { type DsChapterKey, DS_CHAPTERS, dsChapterPath } from './demoDesign'
 
 /** Statische Dummy-Daten (P0b): die fünf Schichten, Baustein C aktiv.
  *  Runde 45 (David): JEDER Schritt trägt sein Info-Paket für den
@@ -459,3 +460,86 @@ export const demoRail: BwRailLayer[] = [
     ],
   },
 ]
+
+/**
+ * DIE RAIL DER SCHICHT 2 (Brand Design, Konzept docs/plans/BRAND-DESIGN.md
+ * §2.1 und Screen 8 aus §2.15).
+ *
+ * Der Layer „Brand Design" oben in dieser Datei ist der GESPERRTE Zustand —
+ * er bleibt unverändert, weil er heute überall so aussieht. Diese Funktion
+ * baut daraus die zwei anderen Zustände: freigeschaltet (sechs Kapitel, eines
+ * aktiv, Sessions darunter) und fertig.
+ *
+ * Zwei Dinge sind Absicht:
+ *  1. Die Foundation-Schritte stehen dabei IMMER auf `done` — Schicht 2 öffnet
+ *     laut §2.1 erst nach dem Foundation-Ergebnis; eine offene Foundation
+ *     neben einem laufenden Brand Design wäre eine Auskunft, die nicht stimmt.
+ *  2. Die Kapitel-Beschriftungen kommen aus `DS_CHAPTERS` (§2.19 Frage 3:
+ *     Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung),
+ *     NICHT aus dem gesperrten Layer oben — dort stehen noch die alten Namen
+ *     („Logo & Zeichen", „Motion"), und zwei Namenslisten für dieselben
+ *     Kapitel wären die erste Stelle, an der etwas altert.
+ */
+export function demoRailWithDesign(options: {
+  active?: DsChapterKey | null
+  /** false = heutiger Zustand (Schranke + Erklär-Text). */
+  unlocked?: boolean
+  /** true = alle sechs Kapitel abgenommen, Ergebnis-Punkt erreichbar. */
+  done?: boolean
+} = {}): BwRailLayer[] {
+  const { active = null, unlocked = true, done = false } = options
+
+  return demoRail.map((layer) => {
+    if (layer.id === 'foundation' && layer.steps) {
+      const steps: BwRailStep[] = layer.steps.map(step => step.kind === 'result'
+        ? { ...step, label: 'Brand Foundation', state: 'done', to: '/brand/demo/foundation' }
+        : { ...step, state: 'done', slots: undefined, minutes: undefined })
+      return { ...layer, steps }
+    }
+    if (layer.id !== 'design' || !unlocked) return layer
+
+    const activeIndex = DS_CHAPTERS.findIndex(chapter => chapter.key === active)
+    const steps: BwRailStep[] = DS_CHAPTERS.map((chapter, i) => {
+      const state: BwRailStep['state'] = done || (activeIndex >= 0 && i < activeIndex)
+        ? 'done'
+        : i === activeIndex ? 'active' : 'open'
+      return {
+        id: `design-${chapter.key}`,
+        label: chapter.label,
+        icon: '',
+        state,
+        to: dsChapterPath(chapter.key),
+        minutes: chapter.minutes,
+        /* Nur das AKTIVE Kapitel zeigt seine Sessions — die Sidebar rendert
+         * sie ohnehin nur dort (BwWorkspaceSidebar), und eine zweite offene
+         * Liste wäre Lärm. */
+        /* Rückgabetyp annotiert statt `as const` am Ausdruck: ein `as const`
+         * auf einem Bedingungs-Ausdruck ist kein gültiges TypeScript
+         * (TS1355), und der Union-Typ kommt hier ohnehin aus der Rail. */
+        sessions: i === activeIndex
+          ? chapter.sessions.map((session, s): BwRailSession => ({
+              id: session.id,
+              label: session.label,
+              effort: session.effort,
+              state: s === 0 ? 'active' : 'open',
+            }))
+          : undefined,
+      }
+    })
+    steps.push({
+      id: 'design-result',
+      kind: 'result',
+      label: 'Visuelle Identität',
+      icon: '',
+      state: done ? 'done' : 'open',
+      to: '/brand/demo/foundation?design=done',
+    })
+    return {
+      ...layer,
+      locked: false,
+      lockedNote: undefined,
+      note: done ? 'Abgeschlossen am 7. September 2026' : 'Freigeschaltet am 7. September 2026',
+      steps,
+    }
+  })
+}

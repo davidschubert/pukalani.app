@@ -3,7 +3,7 @@
 Phase 1 des Workflows (docs/referenz/WORKFLOW.md), Stand 2026-09-07 —
 FREIGEGEBEN mit Davids Entscheidungen in §1.11. Phase 2 (Konzeption, §2) ist
 seit 2026-09-07 FREIGEGEBEN (§2.19 nach Empfehlung); Phase 3 (Prototyp im
-Playground) läuft.
+Playground) ist gebaut (§3) und wartet auf Davids Abnahme.
 
 ---
 
@@ -530,6 +530,49 @@ Baustein, Relaunch-Einstieg, nach dieser Fassung).
 | 1 | Bild-Anbieter für Stufe 3 und Bildsprache-Beispiele: welcher Anbieter über OpenRouter erfüllt die ZDR-Bedingung des Wizards für BILDER? | Vor D5c prüfen; bis dahin Stufe 3 hinter dem Config-Gate aus — das Kapitel funktioniert ohne sie |
 | 2 | Freischaltung: Betreiber-Dashboard (Knopf je Branding) oder auch per Skript (`brand:unlock-design`)? | beides — Skript für den Anfang wie `brand:invite`, Knopf im Dashboard mit D1 |
 | 3 | Kapitel-Namen (de): Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung? | so, „Bewegung" statt „Motion" im UI, `motion` bleibt Id |
+
+---
+
+## 3. Prototyp (Phase 3) — gebaut 2026-09-08, Davids Abnahme offen
+
+Klickdummy im Playground (`packages/brand/.playground`, Port 3009), acht
+Screens nach §2.15: `/brand/demo/design/dna` (DNA mit Begründung, drei
+Boards als Szenen, Mix & Match), `/color` (Kandidaten mit AA-Gate, Ramp
+hell/dunkel ECHT über `themes/shared/ramp.ts` gerechnet, Grundton, Akzent,
+Rollen, Kontrast-Matrix live), `/type` (sechs Paare mit ECHTEN Schriften —
+Inter, Source Sans 3, Source Serif 4, Nunito Sans, Sora, PT Sans, PT Serif
+über `demo-fonts.css` self-hosted, Specimen mit Live-Regeln), `/mark`
+(Richtung → Briefing → SVG-Setzungen mit Varianten und Schutzraum →
+vier KI-Attrappen mit Vermerk, Herkunft, Behalten/Verwerfen, Markenrechts-
+Hinweis, Drossel-Zeile), `/imagery` (Stil-Karten ohne Fotos, Illustration,
+Icon-Vergleich mit echten Phosphor-Varianten, Do/Don't, ausklappbare KI-
+Attrappen), `/motion` (Tempo, Token-Tabelle, Szene mit „Übergang abspielen",
+reduced-motion-Simulation), `/unlock` (Betreiber-Liste mit Freischaltung +
+Ereigniszeile) und `/brand/demo/foundation?design=locked|unlocked|done`
+(Kapitel 10 gesperrt / Einstieg / VOLL). Bausteine: `FdDesignScene`
+(lokale `--ds-*`-Variablen, Hell/Dunkel je Szene, Motion-Tokens,
+prefers-reduced-motion), `FdDesignWorkspace` (Werkstatt-Hülle mit Frida),
+`FdDesignChapter`, `demoDesign.ts` in der Form von `BrandDesignPreset`.
+
+Beweis (Playwright, fester Viewport): alle acht Seiten ohne Konsolen-Fehler,
+alle sieben Schriftfamilien geladen (`document.fonts.check` je Familie ok),
+Kontrast-Urteile AA/AAA mit Zahlen sichtbar, ein Kandidat fällt begründet
+durch, Zeichen-Seite trägt Vermerk + Markenrecht + Drossel, Kapitel 10 voll
+ohne „folgt in Brand Design", privater Hinweis für Entwürfe. Lint grün.
+
+**Gelernt beim Bau:** ein `<button>` (Board-Karte) mit einer Szene darin,
+die selbst einen `<button>` (Hell/Dunkel) trägt, ist ungültiges HTML — der
+Browser schließt beim Parsen den äußeren, die Hydration findet einen
+anderen Baum vor (0 Fehler nur nach dem Umbau: bei festem Schema ist der
+Umschalter ein `<span>`). Gilt für den echten `BwDesignScene` (§2.9).
+
+**Davids Korrekturen am lebenden Objekt (2026-09-08):** (1) Abstand zwischen
+den Sessions eines Kapitels 4 rem statt 2 rem („Textwüste"). (2) Die Bühne
+läuft breiter: `BwWorkspace` hat dafür die neue Prop `stageWidth`
+(`--bw-stage-max`, Default 46 rem = Lesebreite); die Werkstatt-Kapitel —
+Foundation UND Design, Dummy UND echte Seite `[stepKey].vue` — setzen 72 rem,
+Dokument und Foundation-Leseansicht bleiben bei der Lesebreite. Gemessen:
+1152 px auf der Werkstatt, 736 px auf den Leseseiten.
 
 ---
 

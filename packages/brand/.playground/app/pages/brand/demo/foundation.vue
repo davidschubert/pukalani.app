@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import type { BwRailLayer, BwRailStep } from '../../../../../app/components/BwProgressRail.vue'
 import type { BwSidebarBrand } from '../../../../../app/components/BwWorkspaceSidebar.vue'
-import { demoRail } from '../../../utils/demoRail'
+import { demoRailWithDesign } from '../../../utils/demoRail'
 import { demoDirectionChapter, demoFoundation } from '../../../utils/demoFoundation'
 
 /**
@@ -23,6 +22,10 @@ import { demoDirectionChapter, demoFoundation } from '../../../utils/demoFoundat
  *   2  Kapitel „Persönlichkeit & Stimme" (Do & Don't) + „Regeln für KI-Texte"
  *   3a Kapitel „Visuelle Identität" als Schranke
  *   3b dasselbe MIT gewählter Richtung — `?richtung=warm`
+ *   3c die DREI Zustände von Brand Design (Produkt 02, Screen 7+8):
+ *      `?design=locked` (Vorgabe, heutiger Stand) · `?design=unlocked`
+ *      (freigeschaltet, Einstieg statt Angebot) · `?design=done` (Kapitel 10
+ *      VOLL — Rampen, Specimen, Zeichen, Bild-Prinzipien, Bewegung)
  *   4  Share-Dialog (Knopf „Teilen")
  *   6  Druck-Vorschau (Knopf „Drucken / PDF" im Export-Menü)
  */
@@ -33,8 +36,24 @@ const route = useRoute()
  * Schranke. Im Echtbetrieb hängt das an `result.direction` (G4). */
 const directionChosen = computed(() => route.query.richtung === 'warm')
 
-const chapters = computed(() => demoFoundation.chapters.map(chapter =>
-  chapter.id === 'visuell' && directionChosen.value ? demoDirectionChapter : chapter))
+/* Screen 7/8 des Brand-Design-Prototyps (docs/plans/BRAND-DESIGN.md §2.8,
+ * §2.10): derselbe Ort, drei Zustände. Unbekannte Werte fallen auf `locked`
+ * zurück — der heutige Stand ist die Vorgabe, nicht der Sonderfall. */
+const designState = computed<'locked' | 'unlocked' | 'done'>(() =>
+  route.query.design === 'unlocked' ? 'unlocked' : route.query.design === 'done' ? 'done' : 'locked')
+/* Eigenes Computed für das Prop: `FdDesignChapter` kennt nur die zwei
+ * Zustände, in denen es überhaupt gerendert wird. */
+const designChapterState = computed<'unlocked' | 'done'>(() => (designState.value === 'done' ? 'done' : 'unlocked'))
+
+const chapters = computed(() => demoFoundation.chapters.map((chapter) => {
+  if (chapter.id !== 'visuell') return chapter
+  /* Nach Brand Design ist das Kapitel ABGENOMMEN — es zählt dann mit, und die
+   * Überschrift trägt kein „folgt in Brand Design" mehr. */
+  if (designState.value === 'done') {
+    return { ...chapter, state: 'done' as const, note: `Im Brand Design entschieden — Stand ${demoFoundation.brand.standDate}.` }
+  }
+  return directionChosen.value ? demoDirectionChapter : chapter
+}))
 
 /* DER EINZIGE ZÄHLER DER SEITE (§2.6) — und er zählt, was abnehmbar IST:
  * das gesperrte Kapitel gehört der Schranke, nicht der Abnahme. */
@@ -45,13 +64,12 @@ const acceptedPct = computed(() => Math.round((acceptedCount.value / counted.val
 /* Die Rail der Werkstatt, einmal umgestellt: die Foundation ist FERTIG, und
  * die vormals gesperrte `result`-Kachel ist jetzt der Einstieg in diese Seite
  * (Entscheidung §6 d). „Erreichbar" heisst für einen Ergebnis-Punkt `done` —
- * die Sidebar sperrt jeden anderen Zustand (BwWorkspaceSidebar.stepDisabled). */
-const railLayers = computed<BwRailLayer[]>(() => demoRail.map((layer) => {
-  if (layer.id !== 'foundation' || !layer.steps) return layer
-  const steps: BwRailStep[] = layer.steps.map(step => step.kind === 'result'
-    ? { ...step, label: 'Brand Foundation', state: 'done', to: '/brand/demo/foundation' }
-    : { ...step, state: 'done', slots: undefined, minutes: undefined })
-  return { ...layer, steps }
+ * die Sidebar sperrt jeden anderen Zustand (BwWorkspaceSidebar.stepDisabled).
+ * Die SCHICHT 2 hängt am `?design=`-Zweig: gesperrt bleibt sie der heutige
+ * Erklär-Layer, freigeschaltet wird sie zur echten Gruppe mit sechs Kapiteln. */
+const railLayers = computed(() => demoRailWithDesign({
+  unlocked: designState.value !== 'locked',
+  done: designState.value === 'done',
 }))
 
 const sidebarBrands: BwSidebarBrand[] = [
@@ -302,11 +320,16 @@ useHead({ title: `Brand Foundation · ${demoFoundation.brand.title}` })
           </div>
         </div>
 
-        <!-- Die Kapitel — EIN Renderer für beide Ansichten (§2.1). -->
-        <FdChapter
-          v-for="(chapter, i) in chapters" :key="chapter.id"
-          :chapter="chapter" :index="i" variant="private"
-        />
+        <!-- Die Kapitel — EIN Renderer für beide Ansichten (§2.1). Die eine
+             Ausnahme ist Kapitel 10 nach Brand Design: es ist dann keine
+             Text-Sammlung mehr, sondern eine Vitrine (s. FdDesignChapter). -->
+        <template v-for="(chapter, i) in chapters" :key="chapter.id">
+          <FdDesignChapter
+            v-if="chapter.id === 'visuell' && designState !== 'locked'"
+            :index="i" :state="designChapterState"
+          />
+          <FdChapter v-else :chapter="chapter" :index="i" variant="private" />
+        </template>
       </div>
     </template>
 
