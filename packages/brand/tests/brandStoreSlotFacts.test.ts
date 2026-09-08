@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { toSlotFacts } from '../server/utils/brandStore'
+import type { BrandJourneyStep } from '../shared/brandJourney'
+import { BRAND_DESIGN_STEP_KEYS, type BrandStepKey } from '../shared/slotRegistry'
+import { resolveProfileProgress, toSlotFacts } from '../server/utils/brandStore'
 
 /**
  * `toSlotFacts` MUSS rechnen wie die Anzeige (`brandSlotDisplayValue`:
@@ -67,5 +69,56 @@ describe('toSlotFacts — die Flags der Finalen Abnahme (Paket 3b)', () => {
     expect(facts.hashed).toMatchObject({ sourcesHash: 'abc' })
     // Ohne gespeicherten Hash gilt die Session als AKTUELL (Migrationsvertrag).
     expect(toSlotFacts({ old: { confirmed: 'ja' } }).old).not.toHaveProperty('sourcesHash')
+  })
+})
+
+/**
+ * DER FORTSCHRITTS-CACHE ZÄHLT DIE FOUNDATION (Brand Design D0).
+ *
+ * `resolveProfileProgress` füttert die Marken-Karte („Schritt 3 von 9",
+ * Prozentwert) und den `currentStepKey`-Cache. Seit D0 liegen sechs weitere
+ * Kapitel in der Journey; zählten sie mit, fiele der Wert jedes FERTIGEN
+ * Brandings im Deploy-Moment unter 100 — und `currentStepKey` rutschte hinter
+ * `result`, womit der „Euer Branding"-Einstieg auf `/dashboard/brands`
+ * lautlos aufginge (Audit-Befund C4). Wie Schicht 2 gezählt wird, entscheidet
+ * D1; bis dahin nagelt diese Prüfung fest, dass sie es NICHT tut.
+ */
+describe('resolveProfileProgress — Brand Design zählt (noch) nicht mit', () => {
+  const step = (
+    stepKey: BrandStepKey,
+    state: BrandJourneyStep['state'],
+    requiredTotal: number,
+    requiredFilled: number,
+  ): BrandJourneyStep => ({
+    stepKey,
+    state,
+    reason: state === 'done' ? 'completed' : 'design_locked',
+    optional: false,
+    progress: { requiredTotal, requiredFilled, pct: 100 },
+    missingRequired: [],
+    confidence: null,
+  })
+
+  it('eine fertige Foundation steht auf 100 %, obwohl Schicht 2 gesperrt danebensteht', () => {
+    const journey: BrandJourneyStep[] = [
+      step('context', 'done', 11, 11),
+      step('result', 'done', 2, 2),
+      ...BRAND_DESIGN_STEP_KEYS.map(key => step(key, 'locked', 6, 0)),
+    ]
+    expect(resolveProfileProgress(journey))
+      .toEqual({ progressPct: 100, currentStepKey: 'result' })
+  })
+
+  it('GEGENPROBE: ohne die Regel wäre es ein Drittel und der falsche Schritt', () => {
+    // Dieselbe Rechnung über ALLE Kapitel — sie steht hier, damit die Zeile
+    // oben nicht auch für eine Fassung grün wäre, die gar nichts filtert.
+    const all = [
+      { requiredTotal: 11, requiredFilled: 11 },
+      { requiredTotal: 2, requiredFilled: 2 },
+      ...BRAND_DESIGN_STEP_KEYS.map(() => ({ requiredTotal: 6, requiredFilled: 0 })),
+    ]
+    const total = all.reduce((sum, entry) => sum + entry.requiredTotal, 0)
+    const filled = all.reduce((sum, entry) => sum + entry.requiredFilled, 0)
+    expect(Math.round((filled / total) * 100)).toBe(27)
   })
 })

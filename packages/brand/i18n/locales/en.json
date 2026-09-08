@@ -343,6 +343,47 @@
       "result": {
         "direction": "Which direction fits your brand?",
         "rating": "How helpful was this result?"
+      },
+      "g": {
+        "source": "Do you have references — screenshots, a pinboard, three sites you like?",
+        "inspiration": "Your references",
+        "reading": "Reading against your foundation",
+        "dna": "Your visual DNA",
+        "boards": "Three moodboards",
+        "board": "Which board is your starting point?",
+        "mix": "Mix and match"
+      },
+      "h": {
+        "base": "Your base colour",
+        "ramp": "Light and dark ramp",
+        "neutral": "What ground tone should your surfaces have?",
+        "accent": "Which colour is your signal?",
+        "roles": "Colour roles",
+        "contrast": "Contrast check"
+      },
+      "i": {
+        "pair": "Which type pair suits you?",
+        "scale": "Size hierarchy",
+        "rules": "Typographic rules"
+      },
+      "j": {
+        "kind": "What kind of mark do you need?",
+        "brief": "Briefing for the mark",
+        "examples": "Settings as examples",
+        "pick": "Which setting do you take as the preferred example?",
+        "drafts": "Image drafts"
+      },
+      "k": {
+        "photo": "Your picture principles",
+        "illustration": "Do you want illustration — and if so, which kind?",
+        "icons": "Which icon set suits your type?",
+        "dodont": "Do and do not of the picture language"
+      },
+      "l": {
+        "tempo": "How fast should your brand move?",
+        "transitions": "Transition tokens",
+        "logo": "Should your mark move?",
+        "rules": "Motion rules"
       }
     },
     "labels": {
@@ -846,7 +887,13 @@
       "manifesto": "Manifesto",
       "verbal": "Tagline & Messaging",
       "naming": "Name",
-      "result": "Result"
+      "result": "Result",
+      "dna": "Moodboard",
+      "color": "Colour world",
+      "type": "Typography",
+      "mark": "Mark",
+      "imagery": "Imagery",
+      "motion": "Motion"
     },
     "advisors": {
       "george": {
@@ -873,6 +920,11 @@
         "role": "Naming advisor",
         "focus": "survive first, charm second",
         "intro": "On names I keep to Otto — our naming advisor: survive first, charm second."
+      },
+      "frida": {
+        "role": "Design director",
+        "focus": "strategy becomes form",
+        "intro": "From here I work with Frida — our design director. She turns your foundation into form and justifies every decision against it."
       }
     },
     "invite": {

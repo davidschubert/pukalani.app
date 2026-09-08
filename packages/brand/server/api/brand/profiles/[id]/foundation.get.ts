@@ -2,7 +2,7 @@ import { brandStepAcceptance } from '../../../../../shared/brandJourney'
 import { blockingFindingSlots } from '../../../../../shared/brandFindings'
 import { BRAND_DIRECTIONS_VERSION, brandDirectionById } from '../../../../../shared/brandDirections'
 import { buildBrandFoundation } from '../../../../../shared/brandFoundation'
-import { type BrandStepKey, slotsForStep } from '../../../../../shared/slotRegistry'
+import { type BrandStepKey, isBrandDesignStep, slotsForStep } from '../../../../../shared/slotRegistry'
 import type {
   BrandFoundationResponse,
   BrandFoundationStepState,
@@ -63,6 +63,11 @@ export default defineEventHandler(async (event): Promise<BrandFoundationResponse
     // Übersprungene Kapitel sind nicht das, was diese Marke IST (§2.2) — sie
     // fehlen hier wie im Dokument und wie im Snapshot.
     if (entry.state === 'skipped') continue
+    // Und Brand Design ist (noch) nicht Teil der Leseansicht: Kapitel 10 zeigt
+    // bis **D8** die Schranke, nicht sechs leere Abschnitte. Stünden sie hier,
+    // zählte die Kopfzeile „x von 12 abgenommen" plötzlich Kapitel mit, die
+    // niemand öffnen kann.
+    if (isBrandDesignStep(entry.stepKey)) continue
     const row = byStepKey.get(entry.stepKey)
     const openConflicts = blockingFindingSlots(
       findings,

@@ -79,6 +79,7 @@ import {
   type BrandStepKey,
   type BrandStepProgress,
   confirmableRequiredSlotsForStep,
+  isBrandDesignStep,
   slotById,
   slotIsConfirmable,
   slotIsFilled,
@@ -130,6 +131,20 @@ export interface BrandProfileFacts {
    * Naming beim Neuschnitt trotz vorhandenem Namen.
    */
   namingOpted?: boolean
+  /**
+   * DIE FREISCHALTUNG VON BRAND DESIGN (Konzept §2.10) — ein Zeitstempel oder
+   * `null`. Sie ist eine BETREIBER-Handlung, nichts, was der Kunde setzen
+   * kann, und sie steht am Profil, nicht an einer Zeile: die Schicht wird als
+   * GANZES freigeschaltet.
+   *
+   * OPTIONAL getypt und Default `null`, weil die Spalte erst mit der
+   * Design-Migration in D1 kommt (das Konzept nennt sie „brand-020"; die
+   * Nummer ist inzwischen von den Publications belegt — frei ist ab
+   * brand-022). Der Leser muss also OHNE die Spalte laufen, und ohne sie ist
+   * Schicht 2 gesperrt: das ist genau der Zustand, den jede Bestands-Marke
+   * heute hat.
+   */
+  designUnlockedAt?: string | null
 }
 
 /** Der gelesene Stand EINER `brand_steps`-Zeile. */
@@ -154,6 +169,14 @@ export type BrandStepStateReason =
   | 'junction_off'
   /** Weiche noch unbeantwortet (nur `subBrands: 'unknown'`). */
   | 'junction_undecided'
+  /**
+   * SCHICHT 2 IST NICHT FREIGESCHALTET (Konzept §2.10) — eigener Grund neben
+   * `awaiting_previous`, weil er etwas ANDERES sagt: nicht „arbeite den
+   * Vorgänger ab", sondern „dieses Produkt ist für diese Marke noch nicht
+   * geöffnet". Die Leiste erklärt es entsprechend anders, und ein Log, das
+   * beide Fälle `awaiting_previous` nennte, könnte sie nie auseinanderhalten.
+   */
+  | 'design_locked'
 
 export interface BrandJourneyStep {
   stepKey: BrandStepKey
@@ -374,6 +397,16 @@ export function resolveBrandJourney(
   let previousDone = true
   let firstOnPath = true
 
+  /**
+   * DIE ZWEI BEDINGUNGEN VON SCHICHT 2 (Konzept §2.1): die Foundation hat ihr
+   * Ergebnis-Kapitel abgeschlossen UND die Marke ist freigeschaltet. Beides,
+   * nicht eines von beidem — eine freigeschaltete Marke mit halber Foundation
+   * hätte nichts, woraus Frida ableiten könnte, und eine fertige Foundation
+   * ohne Freischaltung ist der Normalfall jeder Bestands-Marke.
+   */
+  const designOpen = Boolean(profile.designUnlockedAt)
+    && factsByStep.get('result')?.state === 'done'
+
   return BRAND_STEP_KEYS.map((stepKey): BrandJourneyStep => {
     const inclusion = includeStep(profile, stepKey)
     const facts = factsByStep.get(stepKey)
@@ -389,6 +422,20 @@ export function resolveBrandJourney(
     if (!inclusion.included) {
       // Daten bleiben liegen (§3e) — der Weg geht daran vorbei, ohne zu stocken.
       return { ...base, state: 'skipped', reason: inclusion.reason ?? 'junction_off' }
+    }
+
+    // ── SCHICHT 2 VOR ALLEM ANDEREN ────────────────────────────────────────
+    // Die Sperre steht VOR dem gespeicherten `done`, und das ist kein
+    // Widerspruch zu „ein `done` wird nie herabgestuft": jene Regel schützt
+    // ERARBEITETES gegen einen Weichen-Wechsel. Hier geht es um ein Produkt,
+    // das für diese Marke (noch) nicht geöffnet ist — wäre die Reihenfolge
+    // umgekehrt, könnte eine zurückgenommene Freischaltung eine offene Tür
+    // hinterlassen. `previousDone` fällt mit, damit die folgenden
+    // Design-Kapitel nicht plötzlich als „offen" gelten.
+    if (isBrandDesignStep(stepKey) && !designOpen) {
+      previousDone = false
+      firstOnPath = false
+      return { ...base, state: 'locked', reason: 'design_locked' }
     }
 
     const stored = facts?.state ?? 'open'

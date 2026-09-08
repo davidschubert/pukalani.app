@@ -40,7 +40,7 @@ Interview-Technik: **George** (Markenberater). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 27 Felder in 7 Kapiteln (Purpose, Vision & Mission · Markenarchitektur · Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis)
+**Fliesst später in:** 53 Felder in 13 Kapiteln (Purpose, Vision & Mission · Markenarchitektur · Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -160,7 +160,7 @@ Interview-Technik: **George** (Markenberater). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 14 Felder in 5 Kapiteln (Purpose, Vision & Mission · Manifest · Tagline & Messaging · Name · Ergebnis)
+**Fliesst später in:** 40 Felder in 11 Kapiteln (Purpose, Vision & Mission · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -228,7 +228,7 @@ Interview-Technik: **George** (Markenberater). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 22 Felder in 5 Kapiteln (Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis)
+**Fliesst später in:** 48 Felder in 11 Kapiteln (Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -276,7 +276,7 @@ Interview-Technik: **George** (Markenberater). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 23 Felder in 7 Kapiteln (Purpose, Vision & Mission · Werte · Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis)
+**Fliesst später in:** 49 Felder in 13 Kapiteln (Purpose, Vision & Mission · Werte · Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -324,7 +324,7 @@ Interview-Technik: **George** (Markenberater). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 29 Felder in 7 Kapiteln (Purpose, Vision & Mission · Werte · Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis)
+**Fliesst später in:** 55 Felder in 13 Kapiteln (Purpose, Vision & Mission · Werte · Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -372,7 +372,7 @@ Interview-Technik: **George** (Markenberater). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 19 Felder in 6 Kapiteln (Werte · Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis)
+**Fliesst später in:** 45 Felder in 12 Kapiteln (Werte · Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -420,7 +420,7 @@ Interview-Technik: **George** (Markenberater). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 10 Felder in 4 Kapiteln (Purpose, Vision & Mission · Manifest · Tagline & Messaging · Ergebnis)
+**Fliesst später in:** 36 Felder in 10 Kapiteln (Purpose, Vision & Mission · Manifest · Tagline & Messaging · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -572,7 +572,7 @@ Interview-Technik: **Vera** (Strategin). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 15 Felder in 5 Kapiteln (Purpose, Vision & Mission · Manifest · Tagline & Messaging · Name · Ergebnis)
+**Fliesst später in:** 41 Felder in 11 Kapiteln (Purpose, Vision & Mission · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -620,7 +620,7 @@ Interview-Technik: **Vera** (Strategin). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 15 Felder in 5 Kapiteln (Purpose, Vision & Mission · Manifest · Tagline & Messaging · Name · Ergebnis)
+**Fliesst später in:** 41 Felder in 11 Kapiteln (Purpose, Vision & Mission · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -668,7 +668,7 @@ Interview-Technik: **Vera** (Strategin). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 22 Felder in 7 Kapiteln (Purpose, Vision & Mission · Werte · Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis)
+**Fliesst später in:** 48 Felder in 13 Kapiteln (Purpose, Vision & Mission · Werte · Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -716,7 +716,7 @@ Interview-Technik: **Vera** (Strategin). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 8 Felder in 4 Kapiteln (Purpose, Vision & Mission · Manifest · Tagline & Messaging · Ergebnis)
+**Fliesst später in:** 34 Felder in 10 Kapiteln (Purpose, Vision & Mission · Manifest · Tagline & Messaging · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -764,7 +764,7 @@ Interview-Technik: **Vera** (Strategin). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 8 Felder in 4 Kapiteln (Purpose, Vision & Mission · Manifest · Tagline & Messaging · Ergebnis)
+**Fliesst später in:** 34 Felder in 10 Kapiteln (Purpose, Vision & Mission · Manifest · Tagline & Messaging · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -805,7 +805,7 @@ Interview-Technik: **Vera** (Strategin). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 14 Felder in 5 Kapiteln (Purpose, Vision & Mission · Manifest · Tagline & Messaging · Name · Ergebnis)
+**Fliesst später in:** 40 Felder in 11 Kapiteln (Purpose, Vision & Mission · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -845,7 +845,7 @@ Interview-Technik: **Vera** (Strategin). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 7 Felder in 3 Kapiteln (Manifest · Tagline & Messaging · Ergebnis)
+**Fliesst später in:** 33 Felder in 9 Kapiteln (Manifest · Tagline & Messaging · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -885,7 +885,7 @@ Interview-Technik: **Vera** (Strategin). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 8 Felder in 3 Kapiteln (Manifest · Tagline & Messaging · Ergebnis)
+**Fliesst später in:** 34 Felder in 9 Kapiteln (Manifest · Tagline & Messaging · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -1259,7 +1259,7 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 19 Felder in 6 Kapiteln (Werte · Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis)
+**Fliesst später in:** 45 Felder in 12 Kapiteln (Werte · Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -1307,7 +1307,7 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 19 Felder in 6 Kapiteln (Werte · Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis)
+**Fliesst später in:** 45 Felder in 12 Kapiteln (Werte · Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -1357,7 +1357,7 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 19 Felder in 6 Kapiteln (Werte · Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis)
+**Fliesst später in:** 45 Felder in 12 Kapiteln (Werte · Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -1397,7 +1397,7 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 18 Felder in 6 Kapiteln (Werte · Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis)
+**Fliesst später in:** 44 Felder in 12 Kapiteln (Werte · Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -1447,7 +1447,7 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** zwischen 3 und 5 Einträgen
 
-**Fliesst später in:** 17 Felder in 6 Kapiteln (Werte · Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis)
+**Fliesst später in:** 43 Felder in 12 Kapiteln (Werte · Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -1497,7 +1497,7 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** nennt JEDEN Eintrag aus `c.final`
 
-**Fliesst später in:** 6 Felder in 3 Kapiteln (Manifest · Tagline & Messaging · Ergebnis)
+**Fliesst später in:** 32 Felder in 9 Kapiteln (Manifest · Tagline & Messaging · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -1685,7 +1685,7 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 21 Felder in 5 Kapiteln (Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis)
+**Fliesst später in:** 47 Felder in 11 Kapiteln (Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -1725,7 +1725,7 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 20 Felder in 5 Kapiteln (Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis)
+**Fliesst später in:** 46 Felder in 11 Kapiteln (Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
 
 ### `d.primary` — Primärer Archetyp
 
@@ -1752,7 +1752,7 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 18 Felder in 5 Kapiteln (Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis)
+**Fliesst später in:** 44 Felder in 11 Kapiteln (Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -2022,7 +2022,7 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 17 Felder in 5 Kapiteln (Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis)
+**Fliesst später in:** 43 Felder in 11 Kapiteln (Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -2122,7 +2122,7 @@ Interview-Technik: **Milo** (Werte-Berater). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 10 Felder in 4 Kapiteln (Archetyp und Stimme · Manifest · Tagline & Messaging · Ergebnis)
+**Fliesst später in:** 36 Felder in 10 Kapiteln (Archetyp und Stimme · Manifest · Tagline & Messaging · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -2244,7 +2244,7 @@ Interview-Technik: **Nika** (Sprach-Beraterin). Gesprochen wird alles von George
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 6 Felder in 3 Kapiteln (Manifest · Tagline & Messaging · Ergebnis)
+**Fliesst später in:** 32 Felder in 9 Kapiteln (Manifest · Tagline & Messaging · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -2291,7 +2291,7 @@ Interview-Technik: **Nika** (Sprach-Beraterin). Gesprochen wird alles von George
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 6 Felder in 3 Kapiteln (Manifest · Tagline & Messaging · Ergebnis)
+**Fliesst später in:** 32 Felder in 9 Kapiteln (Manifest · Tagline & Messaging · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -2332,7 +2332,7 @@ Interview-Technik: **Nika** (Sprach-Beraterin). Gesprochen wird alles von George
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 5 Felder in 3 Kapiteln (Manifest · Tagline & Messaging · Ergebnis)
+**Fliesst später in:** 31 Felder in 9 Kapiteln (Manifest · Tagline & Messaging · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -2383,7 +2383,7 @@ Interview-Technik: **Nika** (Sprach-Beraterin). Gesprochen wird alles von George
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 5 Felder in 3 Kapiteln (Manifest · Tagline & Messaging · Ergebnis)
+**Fliesst später in:** 31 Felder in 9 Kapiteln (Manifest · Tagline & Messaging · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -2423,7 +2423,7 @@ Interview-Technik: **Nika** (Sprach-Beraterin). Gesprochen wird alles von George
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** 4 Felder in 3 Kapiteln (Manifest · Tagline & Messaging · Ergebnis)
+**Fliesst später in:** 30 Felder in 9 Kapiteln (Manifest · Tagline & Messaging · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -2477,7 +2477,7 @@ Interview-Technik: **Nika** (Sprach-Beraterin). Gesprochen wird alles von George
 
 **Invarianten (im Code geprüft):** der Wert ist ein Satz aus `e.manifesto`
 
-**Fliesst später in:** 3 Felder in 2 Kapiteln (Tagline & Messaging · Ergebnis)
+**Fliesst später in:** 29 Felder in 8 Kapiteln (Tagline & Messaging · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -3164,7 +3164,7 @@ Interview-Technik: **George** (Markenberater). Gesprochen wird alles von George.
 
 **Invarianten (im Code geprüft):** —
 
-**Fliesst später in:** nichts — eine Korrektur hier löst keine Warteschlange aus
+**Fliesst später in:** 26 Felder in 6 Kapiteln (Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
 
 **Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
 
@@ -3209,10 +3209,1055 @@ Interview-Technik: **George** (Markenberater). Gesprochen wird alles von George.
 
 **Fliesst später in:** nichts — eine Korrektur hier löst keine Warteschlange aus
 
+## Moodboard (`dna`) — 7 Sessions, **Σ ~10 Min** (14 Züge)
+
+Interview-Technik: **Frida** (Design Directorin). Gesprochen wird alles von George.
+
+### `g.source` — Habt ihr Vorbilder — Screenshots, ein Pinnwand-Board, drei Seiten, die euch gefallen?
+
+**Art:** Auswahl · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
+
+**Ziel:** settle where the visual direction comes from: from the foundation alone, or from the foundation plus reference images the customer brings.
+
+**Woran man einen guten Wert erkennt:**
+
+- The answer is one of the two offered ways, not a description of a look.
+- If they say yes, they actually have images at hand — not the intention to look for some.
+- Nobody is talked into uploading anything: no is a complete answer.
+
+**Was zurückgewiesen wird:**
+
+- A yes that means "we will collect some later" — the chapter would then wait for nothing.
+- A description of a favourite website instead of a choice between the two ways.
+
+**Gesprächsleiter:**
+
+- Eröffnung: ask plainly whether they have references — screenshots, a pinboard, three sites they like — and say in one sentence what happens either way.
+- Umdeutung: if they start describing a look in words, say that words belong in the next session and ask only for the yes or no
+
+**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
+
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 0 · „weiss nicht" gilt hier nicht · nicht vertagbar
+
+**Invarianten (im Code geprüft):** —
+
+**Fliesst später in:** 28 Felder in 6 Kapiteln (Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
+
+### `g.inspiration` — Eure Vorbilder
+
+**Art:** Instrument (optional) · **Umfang:** ~3 Min, 1 Züge · **Vertraulichkeit:** intern — reist nicht per Share-Link
+
+**Ziel:** collect three to twelve reference images, each tagged with the one area it is meant to show.
+
+**Woran man einen guten Wert erkennt:**
+
+- Every image carries exactly one area: colour, type, mark, imagery or composition.
+- The images are theirs to show, and the screen says plainly that they stay private.
+- A note, where there is one, says what they like about it — not what it is.
+
+**Was zurückgewiesen wird:**
+
+- An image without an area — it could then be read for anything and would be read for nothing.
+- One image tagged with three areas at once.
+- A reference uploaded as "our new logo" instead of as an example.
+
+**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
+
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 0 · „weiss nicht" gilt hier nicht · nicht vertagbar
+
+**Invarianten (im Code geprüft):** —
+
+**Fliesst später in:** 27 Felder in 6 Kapiteln (Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
+
+### `g.reading` — Lesung gegen eure Foundation
+
+**Art:** Ableitung (optional) · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** intern — reist nicht per Share-Link
+
+**Ziel:** read each reference image in the language of the visual DNA and measure it against the foundation: does it already carry, is there tension, or does it contradict.
+
+**Woran man einen guten Wert erkennt:**
+
+- Every reading names two or three DNA dimensions it observed, not a mood.
+- Every verdict names the place in the foundation it was measured against.
+- A tension says what to take from the image and what to leave.
+- Praise is as concrete as criticism: what works is named, not applauded.
+
+**Was zurückgewiesen wird:**
+
+- A verdict without a foundation anchor — that is taste, not a reading.
+- A reading that copies the image instead of describing it as DNA.
+- Calling an image wrong because it is unusual, rather than because it contradicts something.
+
+**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
+
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
+
+**Invarianten (im Code geprüft):** —
+
+**Fliesst später in:** 26 Felder in 6 Kapiteln (Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
+
+**Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
+
+- **Neue Marke**
+  - de:
+  > Beobachtet: ruhige Komposition, redaktioneller Stil, erdige Farben. Trägt schon — Tagline „ein ehrlicher Moment am Tag" und Ton-Wort „ruhig": Text vor Bild, Weissraum als Haltung.
+  - en:
+  > Observed: calm composition, editorial style, earthy colour. Already carries — tagline "one honest moment a day" and the tone word "quiet": text before image, white space as a stance.
+- **Marken-Relaunch**
+  - de:
+  > Beobachtet: sehr hoher Kontrast, geometrische Formen. Spannung — Wert „Handarbeit": die Klarheit dürft ihr übernehmen, die Härte der Kanten nicht.
+  - en:
+  > Observed: very high contrast, geometric shapes. Tension — value "handmade": take the clarity, leave the hardness of the edges.
+
+### `g.dna` — Eure Visual DNA
+
+**Art:** Ableitung · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
+
+**Ziel:** settle the visual DNA of this brand: one controlled value for each of the ten dimensions, each with the reason it follows from the foundation.
+
+**Woran man einen guten Wert erkennt:**
+
+- All ten dimensions carry a value from the vocabulary — none is left open.
+- Every reason points at something in the foundation: archetype, a value, a tone word or the positioning.
+- Where references exist, the line says whether it comes from the foundation, from an image, or from both.
+- No reason is a matter of taste alone.
+
+**Was zurückgewiesen wird:**
+
+- A value invented outside the vocabulary — a preset could not carry it later.
+- A reason that only repeats the value in other words.
+- A DNA taken from a reference image without any foundation anchor.
+
+**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
+
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
+
+**Invarianten (im Code geprüft):** —
+
+**Fliesst später in:** 25 Felder in 6 Kapiteln (Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
+
+**Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
+
+- **Neue Marke**
+  - de:
+  > Farb-Charakter: erdig gedämpft — eure Palette kommt aus dem Produkt selbst, nicht aus einer Farbmode.
+  - en:
+  > Colour character: earthy and muted — your palette comes from the product itself, not from a colour trend.
+- **Marken-Relaunch**
+  - de:
+  > Formsprache: weich gerundet — zum Archetyp „Der Weise" passt Milde in den Kanten; kantig wäre der Rebell.
+  - en:
+  > Form language: softly rounded — mildness in the edges suits the archetype "the sage"; hard edges would be the rebel.
+
+### `g.boards` — Drei Moodboards
+
+**Art:** Ableitung · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
+
+**Ziel:** lay out three moodboards as variants of the settled DNA: as proposed, one step quieter, one step bolder.
+
+**Woran man einen guten Wert erkennt:**
+
+- All three boards fill the same ten dimensions — they differ in four or five, not in everything.
+- Each board says in one sentence what it does differently from the proposal.
+- The quieter and the bolder board are both defensible for this brand, not straw men.
+
+**Was zurückgewiesen wird:**
+
+- A board that is simply worse so that the proposal wins.
+- Three boards that differ in a single dimension — that is not a choice.
+- A fourth board, because three is the number a human being can hold at once.
+
+**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
+
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
+
+**Invarianten (im Code geprüft):** —
+
+**Fliesst später in:** 24 Felder in 6 Kapiteln (Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
+
+**Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
+
+- **Neue Marke**
+  - de:
+  > Eine Stufe ruhiger: weniger Wärme, mehr Weiss — humanistische Grotesk statt Serif, monochromere Flächen.
+  - en:
+  > One step quieter: less warmth, more white — a humanist sans instead of a serif, more monochrome surfaces.
+- **Marken-Relaunch**
+  - de:
+  > Eine Stufe mutiger: die zweite Farbe als tragende Fläche, kontrastreiche Schriftmischung, dichtere Komposition.
+  - en:
+  > One step bolder: the second colour as the carrying surface, a high-contrast type mix, a denser composition.
+
+### `g.board` — Welches Board ist euer Ausgangspunkt?
+
+**Art:** Auswahl · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
+
+**Ziel:** pick one of the three boards as the starting point.
+
+**Woran man einen guten Wert erkennt:**
+
+- One board is chosen, not a mixture — mixing is the next session.
+- The reason names a dimension, not a colour they happen to like.
+- They could explain the choice to somebody who was not in the room.
+
+**Was zurückgewiesen wird:**
+
+- A choice made because one board looks more expensive.
+- A mixture presented as a choice.
+
+**Gesprächsleiter:**
+
+- Eröffnung: show the three boards side by side, name the one that follows from the DNA, and say in one sentence what the other two would cost them.
+- Nachfrage: which of the three would still feel right on an invoice?
+- Umdeutung: if they cannot choose between quieter and bolder, say that this is a question about their positioning and hand it back to George
+
+**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
+
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
+
+**Invarianten (im Code geprüft):** —
+
+**Fliesst später in:** 23 Felder in 6 Kapiteln (Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
+
+### `g.mix` — Mix und Match
+
+**Art:** Entwurf · **Umfang:** ~2 Min, 3 Züge · **Vertraulichkeit:** öffentlich
+
+**Ziel:** settle the final DNA: hold what fits from the chosen board and take single dimensions from the other two.
+
+**Woran man einen guten Wert erkennt:**
+
+- The result fills all ten dimensions and says for each one where it came from.
+- Held dimensions stay untouched when the rest is proposed again.
+- The mixture is still one direction, not a list of favourites.
+
+**Was zurückgewiesen wird:**
+
+- A mixture that takes the loudest value from every board.
+- A regeneration that quietly moves a dimension the human held.
+- A dimension left empty because two boards disagreed.
+
+**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
+
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
+
+**Invarianten (im Code geprüft):** —
+
+**Fliesst später in:** 22 Felder in 5 Kapiteln (Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
+
+**Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
+
+- **Neue Marke**
+  - de:
+  > Farbwelt aus Board 1, Typografie aus Board 3 — festgehalten: Komposition „ruhig und luftig".
+  - en:
+  > Colour world from board 1, typography from board 3 — held: composition "calm and airy".
+- **Marken-Relaunch**
+  - de:
+  > Alles wie gewählt, nur die Materialität aus dem mutigen Board: glatt statt Papier.
+  - en:
+  > Everything as chosen, only materiality from the bolder board: smooth instead of paper.
+
+## Farbwelt (`color`) — 6 Sessions, **Σ ~7 Min** (13 Züge)
+
+Interview-Technik: **Frida** (Design Directorin). Gesprochen wird alles von George.
+
+### `h.base` — Eure Basisfarbe
+
+**Art:** Ableitung · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
+
+**Ziel:** settle the one base colour everything else is calculated from.
+
+**Woran man einen guten Wert erkennt:**
+
+- It is a single colour with a hex value, not a palette.
+- It follows from the DNA dimension "colour character" and the archetype.
+- It is deep enough to carry text, or it is explicitly meant as a surface and says so.
+- The reason names something of this brand, not a colour trend.
+
+**Was zurückgewiesen wird:**
+
+- Three base colours, because nobody wanted to decide.
+- A colour chosen because a competitor uses it.
+- A base colour that fails the contrast check and is offered anyway.
+
+**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
+
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
+
+**Invarianten (im Code geprüft):** —
+
+**Fliesst später in:** 9 Felder in 2 Kapiteln (Farbwelt · Zeichen)
+
+**Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
+
+- **Neue Marke**
+  - de:
+  > Roast — die Farbe des Produkts nach der Röstung: tief genug für Text, warm genug für „Nähe".
+  - en:
+  > Roast — the colour of the product after roasting: deep enough for text, warm enough for "closeness".
+- **Marken-Relaunch**
+  - de:
+  > Das Eichenbraun der Werkstatt statt des alten Blaus — es steht seit zwanzig Jahren im Laden, nur nie in der Marke.
+  - en:
+  > The oak brown of the workshop instead of the old blue — it has stood in the shop for twenty years, just never in the brand.
+
+### `h.ramp` — Hell- und Dunkel-Rampe
+
+**Art:** Ableitung · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
+
+**Ziel:** derive the light and the dark ramp from the base colour, eleven steps each.
+
+**Woran man einen guten Wert erkennt:**
+
+- Both ramps carry all eleven steps and anchor the base colour where it belongs.
+- The dark ramp is its own calculation, not the light one reversed.
+- Nothing here is a matter of taste: the same base colour always gives the same ramps.
+
+**Was zurückgewiesen wird:**
+
+- A ramp with a step corrected by hand — the next recalculation would silently drop it.
+- A dark ramp whose deepest step disappears into the dark ground.
+
+**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
+
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
+
+**Invarianten (im Code geprüft):** —
+
+**Fliesst später in:** 4 Felder in 2 Kapiteln (Farbwelt · Zeichen)
+
+**Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
+
+- **Neue Marke**
+  - de:
+  > Elf Stufen hell, elf Stufen dunkel — die 500er ist eure Basisfarbe, alles andere ist gerechnet.
+  - en:
+  > Eleven steps light, eleven steps dark — step 500 is your base colour, everything else is calculated.
+- **Marken-Relaunch**
+  - de:
+  > Dieselbe Rechnung wie bisher, nur mit der neuen Basisfarbe: die alten Zwischentöne entfallen.
+  - en:
+  > The same calculation as before, only with the new base colour: the old in-between tones fall away.
+
+### `h.neutral` — Welchen Grundton sollen eure Flächen haben?
+
+**Art:** Auswahl · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
+
+**Ziel:** settle the tint of the neutral ramp: tinted from the base colour, warm or cool.
+
+**Woran man einen guten Wert erkennt:**
+
+- One of the offered options is chosen.
+- The reason says what the surfaces should feel like, not which one looks nicer.
+- The choice still works on paper as well as on screen.
+
+**Was zurückgewiesen wird:**
+
+- A neutral ramp so strongly tinted that it competes with the base colour.
+- A choice made without ever looking at a surface.
+
+**Gesprächsleiter:**
+
+- Eröffnung: show the three neutral ramps under the same scene and name the one the DNA suggests.
+- Umdeutung: if they call it a detail, show the same card on all three grounds
+
+**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
+
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 0 · „weiss nicht" gilt hier nicht · nicht vertagbar
+
+**Invarianten (im Code geprüft):** —
+
+**Fliesst später in:** 4 Felder in 2 Kapiteln (Farbwelt · Zeichen)
+
+### `h.accent` — Welche Farbe ist euer Signal?
+
+**Art:** Auswahl · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
+
+**Ziel:** settle one accent colour: the signal, not a second ground.
+
+**Woran man einen guten Wert erkennt:**
+
+- Exactly one accent is chosen.
+- It is far enough from the base colour to read as a signal.
+- It passes the contrast check in the role it is meant for.
+
+**Was zurückgewiesen wird:**
+
+- Two accents, so that neither is one.
+- An accent used as a surface all over the page.
+- A signal colour too light for the text that sits on it.
+
+**Gesprächsleiter:**
+
+- Eröffnung: offer three harmonic candidates, say which one reads as a signal and why the others do not.
+- Nachfrage: where would this colour appear on a page, and where never?
+- Umdeutung: if they want two accents, show what one page looks like with both
+
+**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
+
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
+
+**Invarianten (im Code geprüft):** —
+
+**Fliesst später in:** 4 Felder in 2 Kapiteln (Farbwelt · Zeichen)
+
+### `h.roles` — Farb-Rollen
+
+**Art:** Entwurf · **Umfang:** ~2 Min, 3 Züge · **Vertraulichkeit:** öffentlich
+
+**Ziel:** settle which colour fills which role: ground and text, surfaces, light areas, accent and signal, paper.
+
+**Woran man einen guten Wert erkennt:**
+
+- Every role names its source: a ramp step or a colour from the palette.
+- Text never sits on a step that was meant as a surface.
+- Somebody who was not in the room could apply the roles to a new page.
+- The roles work in light and in dark.
+
+**Was zurückgewiesen wird:**
+
+- A role filled with "the brand colour" without saying which step.
+- Two roles with the same source and different names.
+- A role that only exists on one page.
+
+**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
+
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
+
+**Invarianten (im Code geprüft):** —
+
+**Fliesst später in:** 3 Felder in 2 Kapiteln (Farbwelt · Zeichen)
+
+**Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
+
+- **Neue Marke**
+  - de:
+  > Grund und Text: Stufe 900 auf Papier. Nie die 500er — die ist Fläche, nicht Schrift.
+  - en:
+  > Ground and text: step 900 on paper. Never step 500 — that one is surface, not type.
+- **Marken-Relaunch**
+  - de:
+  > Akzent und Signal: nur Knöpfe und aktive Zustände, genau ein Pop je Fläche.
+  - en:
+  > Accent and signal: buttons and active states only, exactly one pop per surface.
+
+### `h.contrast` — Kontrast-Prüfung
+
+**Art:** Ableitung · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
+
+**Ziel:** check the text and ground pairs in light and dark and record the WCAG verdict for each.
+
+**Woran man einen guten Wert erkennt:**
+
+- Every pair that really appears on a page is checked, in light and in dark.
+- Each pair carries its ratio and its verdict.
+- A pair that fails AA is not offered as a settled decision.
+
+**Was zurückgewiesen wird:**
+
+- A check run only on the light side.
+- A pair measured between two colours that never meet on a page.
+- A failing pair waved through because it looks good.
+
+**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
+
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
+
+**Invarianten (im Code geprüft):** —
+
+**Fliesst später in:** nichts — eine Korrektur hier löst keine Warteschlange aus
+
+**Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
+
+- **Neue Marke**
+  - de:
+  > Fliesstext auf Papier: 11,4:1, AAA. Knopf-Text auf Akzent: 4,9:1, AA.
+  - en:
+  > Body text on paper: 11.4:1, AAA. Button text on the accent: 4.9:1, AA.
+- **Marken-Relaunch**
+  - de:
+  > Die alte Kombination Grau auf Beige reisst AA (3,1:1) — sie fällt raus, nicht die Marke.
+  - en:
+  > The old grey-on-beige combination fails AA (3.1:1) — it goes, not the brand.
+
+## Typografie (`type`) — 3 Sessions, **Σ ~4 Min** (7 Züge)
+
+Interview-Technik: **Frida** (Design Directorin). Gesprochen wird alles von George.
+
+### `i.pair` — Welches Schriftpaar passt zu euch?
+
+**Art:** Auswahl · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
+
+**Ziel:** settle the type pair: one family for headings, one for body text, with the fixed mono role beside them.
+
+**Woran man einen guten Wert erkennt:**
+
+- The pair comes from the curated catalogue, so the preview really loads it.
+- The reason names the DNA dimension "typography", not a personal favourite.
+- Together with the fixed mono role there are never more than three families.
+- Body text stays readable at small sizes.
+
+**Was zurückgewiesen wird:**
+
+- A family named but not declared, so the preview quietly falls back to the system stack.
+- A third display family added "just for headlines".
+- A pair chosen on the headline alone, with nobody looking at a paragraph.
+
+**Gesprächsleiter:**
+
+- Eröffnung: show the pairs with real type and a real specimen, and name the one that follows from the DNA.
+- Nachfrage: read one paragraph in it — does it still sound like you after ten lines?
+- Umdeutung: if the choice is about the headline only, show the price list in both
+
+**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
+
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
+
+**Invarianten (im Code geprüft):** —
+
+**Fliesst später in:** 8 Felder in 3 Kapiteln (Typografie · Zeichen · Bildsprache)
+
+### `i.scale` — Grössen-Hierarchie
+
+**Art:** Ableitung · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
+
+**Ziel:** derive the size and weight hierarchy from the DNA: calm, dense or bold.
+
+**Woran man einen guten Wert erkennt:**
+
+- The hierarchy carries a ratio between the largest heading and body text.
+- It follows from the DNA dimensions "typography" and "composition".
+- It works on a phone as well as on a wide screen.
+
+**Was zurückgewiesen wird:**
+
+- A hierarchy with so many sizes that nobody can keep them apart.
+- Steps so small that the levels stop reading as levels.
+
+**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
+
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
+
+**Invarianten (im Code geprüft):** —
+
+**Fliesst später in:** 1 Felder in 1 Kapiteln (Typografie)
+
+**Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
+
+- **Neue Marke**
+  - de:
+  > Ruhig, 1 : 2,6 — wenige Grössen, viel Zeilenabstand: die Hierarchie aus „ruhig und luftig".
+  - en:
+  > Calm, 1 : 2.6 — few sizes, generous leading: the hierarchy of "calm and airy".
+- **Marken-Relaunch**
+  - de:
+  > Dicht, 1 : 2,0 — kleinere Sprünge, mehr Text je Bildschirm: redaktionell statt plakativ.
+  - en:
+  > Dense, 1 : 2.0 — smaller steps, more text per screen: editorial instead of poster-like.
+
+### `i.rules` — Schrift-Regeln
+
+**Art:** Entwurf · **Umfang:** ~2 Min, 3 Züge · **Vertraulichkeit:** öffentlich
+
+**Ziel:** settle the typographic rules: heading weight, tracking, capitals and what the mono role is for.
+
+**Woran man einen guten Wert erkennt:**
+
+- Every rule can be applied by somebody who was not in the room.
+- The mono role has exactly one job, and the rule says which.
+- Capitals, where they are allowed, are named by place, not by mood.
+- No rule contradicts the chosen hierarchy.
+
+**Was zurückgewiesen wird:**
+
+- A rule that only says "use it tastefully".
+- Capitals allowed everywhere, which is the same as no rule.
+- A mono role that turns into a third brand voice.
+
+**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
+
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
+
+**Invarianten (im Code geprüft):** —
+
+**Fliesst später in:** nichts — eine Korrektur hier löst keine Warteschlange aus
+
+**Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
+
+- **Neue Marke**
+  - de:
+  > Mono gehört den Herkunftsangaben und Preisen — sonst nirgends. Versalien nur im Ladenschild.
+  - en:
+  > Mono belongs to origin details and prices — nowhere else. Capitals only on the shop sign.
+- **Marken-Relaunch**
+  - de:
+  > Überschriften im halbfetten Schnitt, Laufweite minus zwei; Fliesstext bleibt unangetastet.
+  - en:
+  > Headings in the semibold cut, tracking minus two; body text stays untouched.
+
+## Zeichen (`mark`) — 5 Sessions, **Σ ~8 Min** (10 Züge)
+
+Interview-Technik: **Frida** (Design Directorin). Gesprochen wird alles von George.
+
+### `j.kind` — Welche Art Zeichen braucht ihr?
+
+**Art:** Auswahl · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
+
+**Ziel:** settle the kind of mark: wordmark, pictorial mark, combination or monogram.
+
+**Woran man einen guten Wert erkennt:**
+
+- One kind is chosen, and the reason names the DNA dimension "form language" or the name itself.
+- The reason says what the other kinds would cost this brand.
+- The choice fits how often people actually meet this brand.
+
+**Was zurückgewiesen wird:**
+
+- A pictorial mark for a young brand with one shop and few contacts.
+- A choice made because a competitor has a symbol.
+- A monogram picked as the main mark because it is the easiest to draw.
+
+**Gesprächsleiter:**
+
+- Eröffnung: name the kind that follows from the name and the form language, and say in one sentence what each of the others would cost.
+- Nachfrage: where will this mark be smallest — and does it still work there?
+- Umdeutung: if they want a symbol because everyone has one, ask how often somebody sees their brand in a year
+
+**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
+
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
+
+**Invarianten (im Code geprüft):** —
+
+**Fliesst später in:** 6 Felder in 2 Kapiteln (Zeichen · Bewegung)
+
+### `j.brief` — Briefing für das Zeichen
+
+**Art:** Entwurf · **Umfang:** ~2 Min, 3 Züge · **Vertraulichkeit:** öffentlich
+
+**Ziel:** write the briefing a designer would get: character, form language, clear space, variants, no-gos and the places the mark has to work in.
+
+**Woran man einen guten Wert erkennt:**
+
+- Every section is concrete enough to be checked against a draft.
+- The clear space is a measure, not an adjective.
+- The no-gos name things that would really be done wrong here.
+- The places are the ones this brand actually has.
+
+**Was zurückgewiesen wird:**
+
+- A briefing that describes a mood instead of a task.
+- A clear space given as "enough room".
+- A list of places copied from a template — an app icon for a brand without an app.
+
+**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
+
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
+
+**Invarianten (im Code geprüft):** —
+
+**Fliesst später in:** 1 Felder in 1 Kapiteln (Zeichen)
+
+**Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
+
+- **Neue Marke**
+  - de:
+  > Schutzraum ringsum gleich der Höhe des Versals; Mindestbreite der Wortmarke 96 px digital, 24 mm im Druck.
+  - en:
+  > Clear space all round equal to the cap height; minimum wordmark width 96 px on screen, 24 mm in print.
+- **Marken-Relaunch**
+  - de:
+  > Nicht verzerren, nicht schräg stellen, keinen Schatten — das Zeichen ist eine Datei, kein Textfeld.
+  - en:
+  > Do not distort it, do not tilt it, no shadow — the mark is a file, not a text field.
+
+### `j.examples` — Gesetzte Beispiele
+
+**Art:** Ableitung · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
+
+**Ziel:** set the wordmark and the monogram from the chosen type pair and colour world, in the four variants.
+
+**Woran man einen guten Wert erkennt:**
+
+- The settings use the real type pair and the real colour roles, nothing invented.
+- All four variants exist: primary, inverted, single colour, icon area.
+- The clear space is drawn, not described.
+- They are shown as settings, never as a finished logo.
+
+**Was zurückgewiesen wird:**
+
+- A setting in a font nobody chose.
+- A variant that only works on white.
+- A setting presented as the finished mark.
+
+**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
+
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
+
+**Invarianten (im Code geprüft):** —
+
+**Fliesst später in:** 1 Felder in 1 Kapiteln (Zeichen)
+
+**Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
+
+- **Neue Marke**
+  - de:
+  > Wortmarke in der Überschriften-Schrift, Roast auf Paper; Monogramm im Quadrat für Avatar und Favicon.
+  - en:
+  > Wordmark in the heading family, roast on paper; monogram in a square for avatar and favicon.
+- **Marken-Relaunch**
+  - de:
+  > Dieselbe Wortmarke einfarbig für Prägung und Stempel — dort gibt es keine zweite Farbe.
+  - en:
+  > The same wordmark in a single colour for embossing and stamps — there is no second colour there.
+
+### `j.pick` — Welche Setzung nehmt ihr als Vorzugs-Beispiel?
+
+**Art:** Auswahl · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
+
+**Ziel:** pick one setting as the preferred example for the briefing.
+
+**Woran man einen guten Wert erkennt:**
+
+- Exactly one setting is picked.
+- The reason names a place it has to work in.
+- The pick is understood as an example for the designer, not as the final mark.
+
+**Was zurückgewiesen wird:**
+
+- A pick made on the largest size only.
+- Two settings picked, so the briefing carries two directions.
+
+**Gesprächsleiter:**
+
+- Eröffnung: show the settings side by side and ask which one they would put on the smallest surface they have.
+- Umdeutung: if they treat it as the final logo, say plainly that this is an example for the designer
+
+**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
+
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 0 · „weiss nicht" gilt hier nicht · nicht vertagbar
+
+**Invarianten (im Code geprüft):** —
+
+**Fliesst später in:** nichts — eine Korrektur hier löst keine Warteschlange aus
+
+### `j.drafts` — KI-Entwürfe
+
+**Art:** Instrument (optional) · **Umfang:** ~3 Min, 1 Züge · **Vertraulichkeit:** intern — reist nicht per Share-Link
+
+**Ziel:** generate image drafts from the briefing and let the human keep or discard them — as ideas for the design work, never as a logo.
+
+**Woran man einen guten Wert erkennt:**
+
+- Every draft carries its origin: model, date and prompt hash.
+- Every draft carries the note that it is a draft, not a checked logo.
+- Kept drafts stay private: they never travel into a snapshot or a shared link.
+- The trademark note is on the screen, not in a help page.
+
+**Was zurückgewiesen wird:**
+
+- A draft shown without its origin.
+- A draft that leaves the workshop as "the logo".
+- A statement about protectability or similarity to existing marks.
+
+**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
+
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 0 · „weiss nicht" gilt hier nicht · nicht vertagbar
+
+**Invarianten (im Code geprüft):** —
+
+**Fliesst später in:** nichts — eine Korrektur hier löst keine Warteschlange aus
+
+## Bildsprache (`imagery`) — 4 Sessions, **Σ ~5 Min** (9 Züge)
+
+Interview-Technik: **Frida** (Design Directorin). Gesprochen wird alles von George.
+
+### `k.photo` — Eure Bild-Prinzipien
+
+**Art:** Ableitung · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
+
+**Ziel:** settle the picture principles: light, crop, people and colour — with the reason each follows from the DNA.
+
+**Woran man einen guten Wert erkennt:**
+
+- All four axes are answered: light, crop, people, colour.
+- A photographer could work from it without asking back.
+- The reason points at a value or a tone word, not at a mood board.
+- It says what is never photographed here.
+
+**Was zurückgewiesen wird:**
+
+- A principle that only says "authentic".
+- A rule that no camera can follow.
+- Stock photography described as the house style.
+
+**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
+
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
+
+**Invarianten (im Code geprüft):** —
+
+**Fliesst später in:** 1 Felder in 1 Kapiteln (Bildsprache)
+
+**Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
+
+- **Neue Marke**
+  - de:
+  > Weiches Seitenlicht, sichtbare Schatten, keine Aufheller; Menschen bei der Arbeit, nie in die Kamera lächelnd.
+  - en:
+  > Soft side light, visible shadows, no fill; people at work, never smiling into the camera.
+- **Marken-Relaunch**
+  - de:
+  > Sehr naher Ausschnitt, das Detail füllt das Bild — Werkstatt statt Ausstellungsraum.
+  - en:
+  > A very close crop, the detail fills the frame — workshop instead of showroom.
+
+### `k.illustration` — Wollt ihr Illustration — und wenn ja, welche?
+
+**Art:** Auswahl · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
+
+**Ziel:** settle whether there is illustration at all, and if so in which language: line, area or organic.
+
+**Woran man einen guten Wert erkennt:**
+
+- One of the offered options is chosen, and "none" is a full answer.
+- The reason says who would keep this consistent.
+- The option fits the form language of the DNA.
+
+**Was zurückgewiesen wird:**
+
+- An illustration style chosen although nobody can draw or commission it.
+- Two styles side by side.
+
+**Gesprächsleiter:**
+
+- Eröffnung: show the options with the settled colours and say plainly that "none" is the rule nobody can break.
+- Umdeutung: if they want everything, ask who will draw the second one
+
+**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
+
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 0 · „weiss nicht" gilt hier nicht · nicht vertagbar
+
+**Invarianten (im Code geprüft):** —
+
+**Fliesst später in:** 1 Felder in 1 Kapiteln (Bildsprache)
+
+### `k.icons` — Welcher Icon-Satz passt zu eurer Schrift?
+
+**Art:** Auswahl · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
+
+**Ziel:** settle the icon set: line or filled, and the stroke weight beside the body type.
+
+**Woran man einen guten Wert erkennt:**
+
+- One set is chosen and shown next to the real body type.
+- The stroke weight sits with the type, not against it.
+- Icons stay legible at the smallest size this brand uses.
+
+**Was zurückgewiesen wird:**
+
+- A heavy icon set next to a light serif.
+- Two sets mixed on one page.
+
+**Gesprächsleiter:**
+
+- Eröffnung: show the same five icons in each set next to a line of the body type and ask which stroke weight belongs to it.
+- Umdeutung: if it comes down to taste, say that the only question here is the stroke weight
+
+**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
+
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 0 · „weiss nicht" gilt hier nicht · nicht vertagbar
+
+**Invarianten (im Code geprüft):** —
+
+**Fliesst später in:** 1 Felder in 1 Kapiteln (Bildsprache)
+
+### `k.dodont` — Do und Don’t der Bildsprache
+
+**Art:** Entwurf · **Umfang:** ~2 Min, 3 Züge · **Vertraulichkeit:** öffentlich
+
+**Ziel:** write the do and do-not list of the picture language, in the form of the foundation.
+
+**Woran man einen guten Wert erkennt:**
+
+- Every do has its matching do-not — the pair is what makes it checkable.
+- Each line names something visible in a picture, not an intention.
+- The list is short enough to be remembered before a shoot.
+
+**Was zurückgewiesen wird:**
+
+- A do-not that forbids a whole medium instead of a treatment.
+- A pair in which both halves say the same thing.
+- A list so long that nobody reads it twice.
+
+**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
+
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
+
+**Invarianten (im Code geprüft):** —
+
+**Fliesst später in:** nichts — eine Korrektur hier löst keine Warteschlange aus
+
+**Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
+
+- **Neue Marke**
+  - de:
+  > Do: Hände, Werkzeug, Arbeit im Bild. Don’t: gestellte Gruppenbilder mit Daumen hoch.
+  - en:
+  > Do: hands, tools, work in the frame. Do not: staged group shots with thumbs up.
+- **Marken-Relaunch**
+  - de:
+  > Do: Tageslicht mit sichtbaren Schatten. Don’t: Weichzeichner und Lens Flare.
+  - en:
+  > Do: daylight with visible shadows. Do not: soft focus and lens flare.
+
+## Bewegung (`motion`) — 4 Sessions, **Σ ~5 Min** (9 Züge)
+
+Interview-Technik: **Frida** (Design Directorin). Gesprochen wird alles von George.
+
+### `l.tempo` — Wie schnell soll sich eure Marke bewegen?
+
+**Art:** Auswahl · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
+
+**Ziel:** settle the tempo of movement: calm, lively or snappy.
+
+**Woran man einen guten Wert erkennt:**
+
+- One tempo is chosen and it follows from the DNA dimension "motion character".
+- The reason says what the movement should feel like, not how modern it looks.
+- The tempo is the same everywhere, not one per page.
+
+**Was zurückgewiesen wird:**
+
+- A tempo chosen because it looks impressive in a demo.
+- Two tempos "depending on the context".
+
+**Gesprächsleiter:**
+
+- Eröffnung: play the same transition in all three tempos and name the one the DNA suggests.
+- Umdeutung: if they cannot tell them apart, play the slowest and the fastest one after the other
+
+**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
+
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 0 · „weiss nicht" gilt hier nicht · nicht vertagbar
+
+**Invarianten (im Code geprüft):** —
+
+**Fliesst später in:** 3 Felder in 1 Kapiteln (Bewegung)
+
+### `l.transitions` — Übergangs-Tokens
+
+**Art:** Ableitung · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
+
+**Ziel:** derive the transition tokens from the tempo: durations, easing and the offset between siblings.
+
+**Woran man einen guten Wert erkennt:**
+
+- There are three durations and one offset — fast, base, slow.
+- Every token says what it is for.
+- The values follow from the tempo, they are not typed in by hand.
+
+**Was zurückgewiesen wird:**
+
+- A dozen tokens nobody can keep apart.
+- A duration corrected by hand, which the next recalculation would drop.
+
+**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
+
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
+
+**Invarianten (im Code geprüft):** —
+
+**Fliesst später in:** 1 Felder in 1 Kapiteln (Bewegung)
+
+**Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
+
+- **Neue Marke**
+  - de:
+  > Schnell 120 ms für Hover und Fokus, normal 240 ms für Karten, langsam 384 ms für Seitenwechsel; Versatz 60 ms.
+  - en:
+  > Fast 120 ms for hover and focus, base 240 ms for cards, slow 384 ms for page changes; offset 60 ms.
+- **Marken-Relaunch**
+  - de:
+  > Dieselben drei Tokens, nur aus dem knappen Tempo: 60, 120 und 192 ms.
+  - en:
+  > The same three tokens, only from the snappy tempo: 60, 120 and 192 ms.
+
+### `l.logo` — Soll sich euer Zeichen bewegen?
+
+**Art:** Auswahl · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
+
+**Ziel:** settle whether the mark moves at all, and under which rule.
+
+**Woran man einen guten Wert erkennt:**
+
+- The answer is yes or no, not "maybe later".
+- A yes names the one place it is used and comes with a reduced-motion version.
+- A no is recorded as a decision, not as an omission.
+
+**Was zurückgewiesen wird:**
+
+- A moving mark for a brand whose tone word is "quiet".
+- An animation without a reduced-motion answer.
+
+**Gesprächsleiter:**
+
+- Eröffnung: ask plainly whether the mark should move, and say what a yes costs: one more file that somebody has to maintain.
+- Umdeutung: if the yes is about a video intro only, say that this is a film question, not a brand one
+
+**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
+
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 0 · „weiss nicht" gilt hier nicht · nicht vertagbar
+
+**Invarianten (im Code geprüft):** —
+
+**Fliesst später in:** 1 Felder in 1 Kapiteln (Bewegung)
+
+### `l.rules` — Bewegungs-Regeln
+
+**Art:** Entwurf · **Umfang:** ~2 Min, 3 Züge · **Vertraulichkeit:** öffentlich
+
+**Ziel:** write the motion rules: where movement is allowed, where never, and what happens with reduced motion.
+
+**Woran man einen guten Wert erkennt:**
+
+- Every rule can be checked on a real page.
+- There is a rule for reduced motion, and it says the end state simply stands.
+- The rules name which properties may move at all.
+- Nothing decorative moves.
+
+**Was zurückgewiesen wird:**
+
+- A rule that says "use animation sparingly".
+- A replacement animation for reduced motion, which is the same problem at half speed.
+- A rule that allows any property to move.
+
+**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
+
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
+
+**Invarianten (im Code geprüft):** —
+
+**Fliesst später in:** nichts — eine Korrektur hier löst keine Warteschlange aus
+
+**Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
+
+- **Neue Marke**
+  - de:
+  > Bewegung erklärt einen Zusammenhang oder sie entfällt — Dekoration bewegt sich nie.
+  - en:
+  > Movement explains a relationship or it does not happen — decoration never moves.
+- **Marken-Relaunch**
+  - de:
+  > Nur zwei Eigenschaften gleichzeitig: Deckkraft und eine Verschiebung. Keine Rotation, keine Skalierung von Text.
+  - en:
+  > Only two properties at a time: opacity and one shift. No rotation, no scaling of text.
+
 ## Umfang insgesamt
 
-- **Basispfad** (ohne Markenarchitektur, ohne Name): ~78 Min · 170 Züge
-- **Vollpfad** (mit beiden): ~96 Min · 208 Züge
+- **Basispfad** (ohne Markenarchitektur, ohne Name): ~117 Min · 232 Züge
+- **Vollpfad** (mit beiden): ~135 Min · 270 Züge
 
 Die Zahl je Session ist eine SCHÄTZUNG der aktiven Zeit, nicht der Sitzungsdauer;
 kommuniziert wird sie als Kapitel-Etappe („11 Sessions, ~14 Min"), damit sichtbar

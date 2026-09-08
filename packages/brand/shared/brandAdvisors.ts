@@ -1,7 +1,7 @@
 import type { BrandStepKey } from './slotRegistry'
 
 /**
- * DAS BERATERTEAM — fünf Steckbriefe, eine STIMME.
+ * DAS BERATERTEAM — sechs Steckbriefe, eine STIMME JE SCHICHT.
  *
  * ── EINE STIMME, DAS TEAM IM RÜCKEN (Davids Entscheidung 2026-09-02) ──────
  * George ist der EINZIGE Sprecher durch den ganzen Wizard. Vera, Milo, Nika
@@ -11,8 +11,16 @@ import type { BrandStepKey } from './slotRegistry'
  * (DECISION-LOG 2026-09-02): vier Sprecherwechsel in einer 45-Minuten-Sitzung
  * heissen viermal Beziehung neu aufbauen — Aufstückelung statt Beratung.
  *
+ * ── DIE ZWEITE STIMME: FRIDA, AB SCHICHT 2 (Brand Design D0) ──────────────
+ * Die Eine-Stimme-Regel gilt INNERHALB der Foundation und bleibt unangetastet.
+ * Brand Design (Konzept docs/plans/BRAND-DESIGN.md §2.1) ist aber keine Phase
+ * derselben Sitzung, sondern ein eigenes, extra freigeschaltetes Produkt mit
+ * eigener Beraterin — `BRAND_DESIGN_VOICE`. `advisorIsVoice()` ist die eine
+ * Stelle, die „spricht selbst" beantwortet; ein `key !== 'george'` an den
+ * Aufrufstellen wäre seither still falsch.
+ *
  * Damit trägt diese Datei ZWEI Dinge, die man nicht verwechseln darf:
- *   · WER SPRICHT → `BRAND_VOICE`. Immer George, in jedem Baustein.
+ *   · WER SPRICHT → `BRAND_VOICE` (Foundation) bzw. `BRAND_DESIGN_VOICE`.
  *   · WIE GEFRAGT WIRD → `techniqueForStep()`. Die Facette des Kapitels, und
  *     `colleagueForStep()` sagt, welche Kollegin bzw. welcher Kollege dahinter
  *     steht (`null` in Georges eigenen Bausteinen).
@@ -53,7 +61,7 @@ import type { BrandStepKey } from './slotRegistry'
  * (`brandAdvisors.test.ts`), und der ist die richtige Stelle dafür.
  */
 
-export const BRAND_ADVISOR_KEYS = ['george', 'vera', 'milo', 'nika', 'otto'] as const
+export const BRAND_ADVISOR_KEYS = ['george', 'vera', 'milo', 'nika', 'otto', 'frida'] as const
 export type BrandAdvisorKey = (typeof BRAND_ADVISOR_KEYS)[number]
 
 /** Rollen-Titel in beiden Oberflächen-Sprachen (kurz — er steht im Chat-Kopf). */
@@ -227,6 +235,36 @@ export const BRAND_ADVISORS: readonly BrandAdvisor[] = [
       'never state availability or trademark facts you have not been given',
     ],
   },
+  {
+    // D1: Inhalte sind Davids Gate. Die Steckbrief-Zeilen sind aus dem
+    // freigegebenen Prototyp (`demoDesign.ts`, `DS_ADVISOR`) übernommen; die
+    // englischen Prompt-Felder sind eine erste Fassung.
+    key: 'frida',
+    name: 'Frida',
+    fullName: 'Frida Martens',
+    personal: 'Design Directorin — übersetzt Strategie in Gestalt und begründet jede Entscheidung am Fundament.',
+    role: { de: 'Design Directorin', en: 'Design director' },
+    avatar: '',
+    // SCHICHT 2 GEHÖRT IHR (Konzept §2.1): die sechs Kapitel von Brand Design.
+    steps: ['dna', 'color', 'type', 'mark', 'imagery', 'motion'],
+    strengths: 'You turn a strategy into a form and you can say why. You never present taste as a '
+      + 'fact: every colour, every typeface, every rule is tied back to something the foundation '
+      + 'already settled.',
+    interviewTechnique: 'Propose first, then justify — never the other way round. Show at most three '
+      + 'options, name the one that follows from the foundation and say in one sentence what the '
+      + 'others would cost. Hand strategy questions back to George instead of answering them in '
+      + 'colour.',
+    toneTraits: ['decisive', 'concrete', 'unimpressed by trends', 'explains before it asks'],
+    openers: {
+      de: ['Aus eurer Foundation folgt:', 'Drei Möglichkeiten, eine Empfehlung:', 'Das ist keine Geschmacksfrage:'],
+      en: ['From your foundation it follows:', 'Three options, one recommendation:', 'This is not a matter of taste:'],
+    },
+    neverDo: [
+      'never recommend something because it is current — only because it follows from the foundation',
+      'never answer a positioning question with a colour; hand it back to George',
+      'never present an image draft as a finished, protectable logo',
+    ],
+  },
 ]
 
 const ADVISORS_BY_KEY = new Map<string, BrandAdvisor>(BRAND_ADVISORS.map(advisor => [advisor.key, advisor]))
@@ -245,6 +283,33 @@ const ADVISOR_BY_STEP = new Map<BrandStepKey, BrandAdvisor>(
  * Werkstatt, den Avatar oder die Identität im System-Prompt füllt, liest hier.
  */
 export const BRAND_VOICE: BrandAdvisor = ADVISORS_BY_KEY.get('george')!
+
+/**
+ * DIE STIMME VON SCHICHT 2 — Frida (Konzept §2.1: „Beraterin Frida Martens,
+ * Tonalität wie die Crew, eine Stimme; George bleibt Gastgeber").
+ *
+ * Sie steht NEBEN `BRAND_VOICE` und nicht darin: die Eine-Stimme-Entscheidung
+ * (2026-09-02) gilt unverändert INNERHALB der Foundation — vier
+ * Sprecherwechsel in einer Sitzung sind Aufstückelung. Brand Design ist keine
+ * Phase derselben Sitzung, sondern ein eigenes, extra freigeschaltetes
+ * Produkt; dort spricht Frida, so wie im Prototyp abgenommen.
+ */
+export const BRAND_DESIGN_VOICE: BrandAdvisor = ADVISORS_BY_KEY.get('frida')!
+
+const VOICE_KEYS: readonly BrandAdvisorKey[] = ['george', 'frida']
+
+/**
+ * SPRICHT DIESE PERSON SELBST? — die Frage hinter jeder Liste „das Team hinter
+ * der Stimme" (Steckbrief in der Werkstatt, Crew-Abschnitt auf /team).
+ *
+ * Sie steht hier und nicht als `key !== 'george'` an den zwei Aufrufstellen:
+ * seit es eine zweite Stimme gibt, wäre dieser Vergleich an beiden Stellen
+ * falsch — und zwar still, mit einer Beraterin, die plötzlich zweimal auf
+ * derselben Seite steht.
+ */
+export function advisorIsVoice(key: BrandAdvisorKey): boolean {
+  return VOICE_KEYS.includes(key)
+}
 
 export function advisorByKey(key: string): BrandAdvisor | undefined {
   return ADVISORS_BY_KEY.get(key)

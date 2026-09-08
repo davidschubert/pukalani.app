@@ -15,6 +15,7 @@ import {
   BRAND_STEP_KEYS,
   type BrandSlot,
   type BrandStepKey,
+  isBrandDesignStep,
   sessionTravels,
   slotById,
 } from '../shared/slotRegistry'
@@ -80,9 +81,22 @@ describe('buildBrandFoundation — was reist und was nicht', () => {
     const rendered = payload(ALL)
     // Ohne diese Zeile bestünde die Prüfung oben auch für einen Renderer, der
     // gar nichts ausgibt.
-    for (const slot of BRAND_SLOTS.filter(slot => sessionTravels(slot))) {
+    //
+    // NUR SCHICHT 1: die reisefähigen Sessions von Brand Design (D0) haben
+    // noch keinen Block-Bauer — Kapitel 10 rendert bis **D8** die Schranke.
+    // Sie hier zu verlangen hiesse, einen Renderer zu prüfen, den es
+    // absichtlich noch nicht gibt; die Zeile darunter hält fest, dass ihre
+    // Werte solange auch NICHT still irgendwo auftauchen.
+    const travelling = BRAND_SLOTS.filter(slot => sessionTravels(slot))
+    for (const slot of travelling.filter(slot => !isBrandDesignStep(slot.stepId))) {
       expect(rendered, `${slot.id} fehlt in der Leseansicht`).toContain(`wert-${slot.id}`)
     }
+    for (const slot of travelling.filter(slot => isBrandDesignStep(slot.stepId))) {
+      expect(rendered, `${slot.id} steht schon in der Leseansicht — D8 baut das`)
+        .not.toContain(`wert-${slot.id}`)
+    }
+    // Und es gibt sie wirklich, sonst prüfte die zweite Schleife nichts.
+    expect(travelling.filter(slot => isBrandDesignStep(slot.stepId)).length).toBeGreaterThan(0)
   })
 
   it('GEGENPROBE am Paar: der Pitch steht da, die Gründungsgeschichte daneben nicht', () => {

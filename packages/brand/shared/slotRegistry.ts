@@ -189,8 +189,19 @@ export type {
   BrandSessionSubstance,
 } from './sessionContent'
 
-/** Die neun Bausteine (Schema-Anhang §2 `brand_steps.stepKey`), in Reihenfolge. */
-export const BRAND_STEP_KEYS = [
+/**
+ * SCHICHT 1 — die neun Bausteine der Brand Foundation (Schema-Anhang §2
+ * `brand_steps.stepKey`), in Reihenfolge.
+ *
+ * Eigene Konstante NEBEN `BRAND_STEP_KEYS` seit Brand Design D0, und nicht
+ * bloss ein `slice`: mehrere Rechnungen meinen ausdrücklich das FUNDAMENT und
+ * nicht „alle Kapitel" — der Fortschritts-Cache am Profil
+ * (`resolveProfileProgress`), die Zeile „Schritt 3 von 9" auf der Marken-Karte
+ * und die Zusage „`result` steht am Ende" (Audit-Befund C4). Ein `slice(0, 9)`
+ * an diesen Stellen wäre eine Zahl, die beim nächsten Kapitel still falsch
+ * wird.
+ */
+export const BRAND_FOUNDATION_STEP_KEYS = [
   'context',
   'pvm',
   'architecture',
@@ -201,13 +212,59 @@ export const BRAND_STEP_KEYS = [
   'naming',
   'result',
 ] as const
+
+/**
+ * SCHICHT 2 — die sechs Kapitel von Brand Design (Konzept
+ * docs/plans/BRAND-DESIGN.md §2.1, Paket D0), ADDITIV hinter der Foundation.
+ *
+ * Die Ids sind so unveränderlich wie die der Foundation: sie stehen in
+ * `brand_steps.stepKey` und in der Adresse der Werkstatt (`/brand/:id/dna`).
+ * Die UI-Namen (§2.19 Frage 3: Moodboard · Farbwelt · Typografie · Zeichen ·
+ * Bildsprache · Bewegung) stehen im Locale-Katalog, nicht hier — `motion`
+ * bleibt die Id, „Bewegung" ist ihr deutscher Name.
+ */
+export const BRAND_DESIGN_STEP_KEYS = [
+  'dna',
+  'color',
+  'type',
+  'mark',
+  'imagery',
+  'motion',
+] as const
+
+/** Alle Kapitel beider Schichten, in Weg-Reihenfolge. */
+export const BRAND_STEP_KEYS = [
+  ...BRAND_FOUNDATION_STEP_KEYS,
+  ...BRAND_DESIGN_STEP_KEYS,
+] as const
 export type BrandStepKey = (typeof BRAND_STEP_KEYS)[number]
+
+export type BrandFoundationStepKey = (typeof BRAND_FOUNDATION_STEP_KEYS)[number]
+export type BrandDesignStepKey = (typeof BRAND_DESIGN_STEP_KEYS)[number]
+
+/**
+ * Gehört dieses Kapitel zu Brand Design (Schicht 2)? — die EINE Stelle, die
+ * das entscheidet. Ein `startsWith`- oder Index-Vergleich an den Aufrufstellen
+ * wäre dieselbe Frage, dreimal beantwortet.
+ */
+export function isBrandDesignStep(stepKey: string): stepKey is BrandDesignStepKey {
+  return (BRAND_DESIGN_STEP_KEYS as readonly string[]).includes(stepKey)
+}
 
 /** Füllweg des Slots — die Buchstaben F/K/A/B des Katalogs §3, plus `special`. */
 export type BrandSlotType = 'question' | 'derivation' | 'choice' | 'stage-edit' | 'special'
 
-/** Womit der Mensch den Slot anfasst. `none` = nur lesen (berechnete Slots). */
-export type BrandSlotEditor = 'chips' | 'text' | 'textarea' | 'stage' | 'cards' | 'none'
+/**
+ * Womit der Mensch den Slot anfasst. `none` = nur lesen (berechnete Slots).
+ *
+ * `uploads` und `drafts` kommen mit Brand Design D0 dazu und sind heute NUR
+ * eine Deklaration: gebaut werden die zwei Instrumente in D2 (Vorbilder) und
+ * D5c (KI-Entwürfe). Bis dahin gilt für sie dasselbe wie für `d.pairs` — sie
+ * sind `type: 'special'` und damit nicht bestätigbar (`slotIsConfirmable`),
+ * stehen also in keiner Abschluss-Bedingung.
+ */
+export type BrandSlotEditor =
+  | 'chips' | 'text' | 'textarea' | 'stage' | 'cards' | 'none' | 'uploads' | 'drafts'
 
 /** Ob und wie George entwirft. `none` = reine Menschenfrage bzw. reine Auswahl. */
 export type BrandSlotGenerator = 'none' | 'derive' | 'draft' | 'candidates'
@@ -552,6 +609,15 @@ const AUDIENCE_EXCEPTIONS: Readonly<Record<string, BrandSessionAudience>> = {
   // nicht als Wert-Block; die Bewertung ist Betriebs-Rückmeldung.
   'result.direction': 'internal',
   'result.rating': 'internal',
+
+  // ── Brand Design, Schicht 2 (D0) ───────────────────────────────────────
+  // Die WEICHE „Habt ihr Vorbilder?" steuert den Weg durch das Kapitel; sie
+  // ist keine Festlegung über die Marke, sondern eine Auskunft über diese
+  // Sitzung — dasselbe Muster wie `f.nameType`.
+  'g.source': 'internal',
+  // Der VORRAT, aus dem gewählt wird (`g.board`) — wie `c.candidates` und
+  // `f.candidates`. Im Handbuch steht das gewählte Board, nicht die drei.
+  'g.boards': 'internal',
 }
 
 /**
@@ -794,6 +860,69 @@ export const BRAND_SLOTS: readonly BrandSlot[] = [
   defineSession({ id: 'result.direction', stepId: 'result', type: 'choice', required: true, kind: 'choice', maxLength: SHORT, editor: 'cards', generator: 'none', dependencies: ['d.primary', 'd.toneWords', 'e.anchorLine'] }),
   // „freiwillige Abschlussfrage" (Katalog §11) — nie Pflicht.
   defineSession({ id: 'result.rating', stepId: 'result', type: 'choice', required: false, kind: 'choice', maxLength: SHORT, editor: 'chips', generator: 'none' }),
+
+  // ══ SCHICHT 2 · BRAND DESIGN (Konzept §2.2–§2.7, Paket D0) ═══════════════
+  // Sie stehen NACH dem Ergebnis, weil sie danach kommen — und weil die
+  // Rückwärts-Regel der `dependencies` sonst nicht hielte: jede Design-Session
+  // schöpft aus bestätigten Foundation-Werten (Archetyp, Ton-Wörter, Werte,
+  // Richtung), nie umgekehrt.
+  //
+  // ── WAS HIER HEUTE NOCH NICHT STEHT ─────────────────────────────────────
+  // Die Instrumente. `g.inspiration` (Vorbilder hochladen) und `j.drafts`
+  // (KI-Entwürfe) sind `type: 'special'` wie `d.pairs` — deklariert, aber
+  // nicht bedienbar (`slotIsConfirmable`), und deshalb `required: false`:
+  // ein Pflicht-Feld ohne Bedienung wäre eine stumme Sackgasse (Audit A4).
+  // Gebaut werden sie in D2 bzw. D5c.
+
+  // ── G · Moodboard (§2.2) — 7 ────────────────────────────────────────────
+  defineSession({ id: 'g.source', stepId: 'dna', type: 'choice', required: true, kind: 'choice', maxLength: SHORT, editor: 'chips', generator: 'none' }),
+  // Vorbilder sind FREMDWERKE und bleiben privat (§2.13) — `sensitivity:
+  // 'internal'` in `sessionContent.ts`, `audience` folgt daraus.
+  defineSession({ id: 'g.inspiration', stepId: 'dna', type: 'special', required: false, kind: 'structured', maxLength: LONG, editor: 'uploads', generator: 'none', dependencies: ['g.source'] }),
+  defineSession({ id: 'g.reading', stepId: 'dna', type: 'derivation', required: false, kind: 'structured', maxLength: LONG, editor: 'none', generator: 'derive', dependencies: ['g.inspiration'] }),
+  defineSession({ id: 'g.dna', stepId: 'dna', type: 'derivation', required: true, kind: 'structured', maxLength: LONG, editor: 'stage', generator: 'derive', dependencies: ['c.final', 'd.primary', 'd.toneWords', 'result.direction', 'g.reading'] }),
+  // PURE Regel, kein KI-Aufruf (§2.2): drei Varianten derselben Belegung.
+  defineSession({ id: 'g.boards', stepId: 'dna', type: 'derivation', required: true, kind: 'structured', maxLength: LONG, editor: 'cards', generator: 'none', dependencies: ['g.dna'] }),
+  defineSession({ id: 'g.board', stepId: 'dna', type: 'choice', required: true, kind: 'choice', maxLength: SHORT, editor: 'cards', generator: 'none', dependencies: ['g.boards'] }),
+  defineSession({ id: 'g.mix', stepId: 'dna', type: 'stage-edit', required: true, kind: 'structured', maxLength: LONG, editor: 'stage', generator: 'draft', dependencies: ['g.dna', 'g.board'] }),
+
+  // ── H · Farbwelt (§2.3) — 6 ─────────────────────────────────────────────
+  defineSession({ id: 'h.base', stepId: 'color', type: 'derivation', required: true, kind: 'text', maxLength: SHORT, editor: 'text', generator: 'candidates', dependencies: ['g.mix'] }),
+  // PUR: die Ramp-Mathematik der Themes-Engine (`buildBrandDesign`), kein Modell.
+  defineSession({ id: 'h.ramp', stepId: 'color', type: 'derivation', required: true, kind: 'structured', maxLength: LONG, editor: 'none', generator: 'none', dependencies: ['h.base'] }),
+  defineSession({ id: 'h.neutral', stepId: 'color', type: 'choice', required: true, kind: 'choice', maxLength: SHORT, editor: 'chips', generator: 'none', dependencies: ['h.base'] }),
+  defineSession({ id: 'h.accent', stepId: 'color', type: 'choice', required: true, kind: 'text', maxLength: SHORT, editor: 'cards', generator: 'none', dependencies: ['h.base'] }),
+  defineSession({ id: 'h.roles', stepId: 'color', type: 'stage-edit', required: true, kind: 'structured', maxLength: LONG, editor: 'stage', generator: 'draft', dependencies: ['h.ramp', 'h.neutral', 'h.accent'] }),
+  // PUR: Kontrast-Paare mit WCAG-Urteil, gerechnet aus den Hex-Werten.
+  defineSession({ id: 'h.contrast', stepId: 'color', type: 'derivation', required: true, kind: 'structured', maxLength: LONG, editor: 'none', generator: 'none', dependencies: ['h.ramp', 'h.roles'] }),
+
+  // ── I · Typografie (§2.4) — 3 ───────────────────────────────────────────
+  defineSession({ id: 'i.pair', stepId: 'type', type: 'choice', required: true, kind: 'choice', maxLength: SHORT, editor: 'cards', generator: 'derive', dependencies: ['g.mix'] }),
+  // PUR: die Hierarchie folgt aus DNA „Typografie" und „Komposition".
+  defineSession({ id: 'i.scale', stepId: 'type', type: 'derivation', required: true, kind: 'choice', maxLength: SHORT, editor: 'chips', generator: 'none', dependencies: ['g.mix', 'i.pair'] }),
+  defineSession({ id: 'i.rules', stepId: 'type', type: 'stage-edit', required: true, kind: 'structured', maxLength: LONG, editor: 'stage', generator: 'draft', dependencies: ['i.pair', 'i.scale'] }),
+
+  // ── J · Zeichen (§2.5, drei Stufen) — 5 ─────────────────────────────────
+  defineSession({ id: 'j.kind', stepId: 'mark', type: 'choice', required: true, kind: 'choice', maxLength: SHORT, editor: 'cards', generator: 'derive', dependencies: ['g.mix'] }),
+  defineSession({ id: 'j.brief', stepId: 'mark', type: 'stage-edit', required: true, kind: 'structured', maxLength: LONG, editor: 'stage', generator: 'draft', dependencies: ['g.mix', 'h.roles', 'i.pair', 'j.kind'] }),
+  // PUR: Wortmarke und Monogramm als SVG aus Schriftpaar und Farbwelt.
+  defineSession({ id: 'j.examples', stepId: 'mark', type: 'derivation', required: true, kind: 'structured', maxLength: LONG, editor: 'none', generator: 'none', dependencies: ['h.base', 'i.pair', 'j.kind'] }),
+  defineSession({ id: 'j.pick', stepId: 'mark', type: 'choice', required: true, kind: 'choice', maxLength: SHORT, editor: 'cards', generator: 'none', dependencies: ['j.examples'] }),
+  // Entwürfe reisen NIE in Snapshot oder Share (§1.11 b) — `internal`.
+  defineSession({ id: 'j.drafts', stepId: 'mark', type: 'special', required: false, kind: 'structured', maxLength: LONG, editor: 'drafts', generator: 'none', dependencies: ['j.brief'] }),
+
+  // ── K · Bildsprache (§2.6) — 4 ──────────────────────────────────────────
+  defineSession({ id: 'k.photo', stepId: 'imagery', type: 'derivation', required: true, kind: 'structured', maxLength: LONG, editor: 'cards', generator: 'derive', dependencies: ['g.mix'] }),
+  defineSession({ id: 'k.illustration', stepId: 'imagery', type: 'choice', required: true, kind: 'choice', maxLength: SHORT, editor: 'chips', generator: 'none', dependencies: ['g.mix'] }),
+  defineSession({ id: 'k.icons', stepId: 'imagery', type: 'choice', required: true, kind: 'choice', maxLength: SHORT, editor: 'cards', generator: 'none', dependencies: ['i.pair'] }),
+  defineSession({ id: 'k.dodont', stepId: 'imagery', type: 'stage-edit', required: true, kind: 'list', maxLength: LONG, editor: 'stage', generator: 'draft', dependencies: ['k.photo', 'k.illustration', 'k.icons'] }),
+
+  // ── L · Bewegung (§2.7) — 4 ─────────────────────────────────────────────
+  defineSession({ id: 'l.tempo', stepId: 'motion', type: 'choice', required: true, kind: 'choice', maxLength: SHORT, editor: 'cards', generator: 'derive', dependencies: ['g.mix'] }),
+  // PUR: Dauern, Easing und Versatz als Token-Satz aus dem Tempo.
+  defineSession({ id: 'l.transitions', stepId: 'motion', type: 'derivation', required: true, kind: 'structured', maxLength: LONG, editor: 'none', generator: 'none', dependencies: ['l.tempo'] }),
+  defineSession({ id: 'l.logo', stepId: 'motion', type: 'choice', required: true, kind: 'choice', maxLength: SHORT, editor: 'cards', generator: 'none', dependencies: ['j.kind', 'l.tempo'] }),
+  defineSession({ id: 'l.rules', stepId: 'motion', type: 'stage-edit', required: true, kind: 'list', maxLength: LONG, editor: 'stage', generator: 'draft', dependencies: ['l.tempo', 'l.transitions', 'l.logo'] }),
 ]
 
 const SLOTS_BY_ID = new Map<string, BrandSlot>(BRAND_SLOTS.map(slot => [slot.id, slot]))

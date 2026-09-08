@@ -12,7 +12,7 @@ import type {
   BrandStepKey,
   BrandStepProgress,
 } from '../../shared/slotRegistry'
-import { slotById } from '../../shared/slotRegistry'
+import { isBrandDesignStep, slotById } from '../../shared/slotRegistry'
 import {
   type BrandLocalSlotEdit,
   type BrandSlotPatch,
@@ -311,9 +311,20 @@ const setup = () => {
     () => journey.value.find(entry => entry.stepKey === stepKey.value) ?? null,
   )
 
-  /** Die Bausteine, die auf dem Weg liegen — `skipped` gehört nicht in die Leiste. */
+  /**
+   * Die Bausteine, die auf dem Weg liegen — `skipped` gehört nicht in die
+   * Leiste, und BRAND DESIGN heute auch noch nicht.
+   *
+   * Seit Brand Design D0 trägt die Journey sechs Kapitel mehr (Schicht 2) —
+   * sie sind ohne Freischaltung `locked` und hätten in der Leiste als sechs
+   * graue Zeilen gestanden, ohne Erklärung und ohne Ziel. Der echte Layer
+   * „Brand Design" mit seinem Erklär-Text kommt mit **D1**; bis dahin sieht
+   * die Leiste aus wie vorher. `journey` selbst bleibt vollständig — wer die
+   * Schicht braucht (Freischaltung, Route), liest sie dort.
+   */
   const railSteps = computed<BrandJourneyStep[]>(
-    () => journey.value.filter(entry => entry.state !== 'skipped'),
+    () => journey.value.filter(entry =>
+      entry.state !== 'skipped' && !isBrandDesignStep(entry.stepKey)),
   )
 
   function canEnter(candidate: string): boolean {

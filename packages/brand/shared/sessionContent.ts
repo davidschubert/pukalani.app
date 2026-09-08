@@ -3089,4 +3089,718 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
     // sondern nur eine Zahl — und eine gezeigte Zahl ist ein Anker auf genau
     // die Antwort, die hier unverfälscht gebraucht wird.
   },
+
+  // ══ SCHICHT 2 · BRAND DESIGN (Konzept §2.2–§2.7, Paket D0) ═══════════════
+  //
+  // D1: Inhalte sind Davids Gate. Ziele, Leitern, Qualitätsmerkmale und
+  // Beispiele stehen hier in einer BRAUCHBAREN, aber PROVISORISCHEN Fassung —
+  // sie sind aus dem freigegebenen Prototyp (`.playground/app/utils/
+  // demoDesign.ts`) und dem Konzept abgeleitet, nicht gegengelesen. Paket D1
+  // fasst genau diese Texte an; die Struktur darüber bleibt unberührt (dasselbe
+  // Verhältnis wie BW2 Paket 1 zu Paket 2).
+  //
+  // Beispiel-Betriebe dieser Schicht: Rösterei mit eigenem Laden (neue Marke) /
+  // Möbeltischlerei im Relaunch — bewusst zwei Branchen, die in Schicht 1 nicht
+  // vorkommen (s. Kopf, „Die Beispielwelt").
+
+  // ── G · Moodboard (§2.2) ────────────────────────────────────────────────
+  'g.source': {
+    goal: 'settle where the visual direction comes from: from the foundation alone, or from the '
+      + 'foundation plus reference images the customer brings.',
+    quality: [
+      'The answer is one of the two offered ways, not a description of a look.',
+      'If they say yes, they actually have images at hand — not the intention to look for some.',
+      'Nobody is talked into uploading anything: no is a complete answer.',
+    ],
+    antiPatterns: [
+      'A yes that means "we will collect some later" — the chapter would then wait for nothing.',
+      'A description of a favourite website instead of a choice between the two ways.',
+    ],
+    ladder: {
+      opening: 'ask plainly whether they have references — screenshots, a pinboard, three sites they '
+        + 'like — and say in one sentence what happens either way.',
+      probes: [],
+      reframes: ['if they start describing a look in words, say that words belong in the next session and '
+        + 'ask only for the yes or no'],
+    },
+    form: { person: 'none', tense: 'present' },
+  },
+  'g.inspiration': {
+    goal: 'collect three to twelve reference images, each tagged with the one area it is meant to show.',
+    quality: [
+      'Every image carries exactly one area: colour, type, mark, imagery or composition.',
+      'The images are theirs to show, and the screen says plainly that they stay private.',
+      'A note, where there is one, says what they like about it — not what it is.',
+    ],
+    antiPatterns: [
+      'An image without an area — it could then be read for anything and would be read for nothing.',
+      'One image tagged with three areas at once.',
+      'A reference uploaded as "our new logo" instead of as an example.',
+    ],
+    // KEINE LEITER: das Instrument fragt nicht, es nimmt entgegen (D2).
+    form: { person: 'none', tense: 'present' },
+    // FREMDWERKE, und sie bleiben es (§2.13): die Bilder reisen nie in
+    // Snapshot, Share, Beispiel oder Dokument.
+    sensitivity: 'internal',
+  },
+  'g.reading': {
+    goal: 'read each reference image in the language of the visual DNA and measure it against the '
+      + 'foundation: does it already carry, is there tension, or does it contradict.',
+    quality: [
+      'Every reading names two or three DNA dimensions it observed, not a mood.',
+      'Every verdict names the place in the foundation it was measured against.',
+      'A tension says what to take from the image and what to leave.',
+      'Praise is as concrete as criticism: what works is named, not applauded.',
+    ],
+    antiPatterns: [
+      'A verdict without a foundation anchor — that is taste, not a reading.',
+      'A reading that copies the image instead of describing it as DNA.',
+      'Calling an image wrong because it is unusual, rather than because it contradicts something.',
+    ],
+    form: { person: 'none', tense: 'present' },
+    sensitivity: 'internal',
+    examples: pathExamples(
+      {
+        de: 'Beobachtet: ruhige Komposition, redaktioneller Stil, erdige Farben. Trägt schon — Tagline '
+          + '„ein ehrlicher Moment am Tag" und Ton-Wort „ruhig": Text vor Bild, Weissraum als Haltung.',
+        en: 'Observed: calm composition, editorial style, earthy colour. Already carries — tagline "one '
+          + 'honest moment a day" and the tone word "quiet": text before image, white space as a stance.',
+      },
+      {
+        de: 'Beobachtet: sehr hoher Kontrast, geometrische Formen. Spannung — Wert „Handarbeit": die '
+          + 'Klarheit dürft ihr übernehmen, die Härte der Kanten nicht.',
+        en: 'Observed: very high contrast, geometric shapes. Tension — value "handmade": take the '
+          + 'clarity, leave the hardness of the edges.',
+      },
+    ),
+  },
+  'g.dna': {
+    goal: 'settle the visual DNA of this brand: one controlled value for each of the ten dimensions, '
+      + 'each with the reason it follows from the foundation.',
+    quality: [
+      'All ten dimensions carry a value from the vocabulary — none is left open.',
+      'Every reason points at something in the foundation: archetype, a value, a tone word or the '
+        + 'positioning.',
+      'Where references exist, the line says whether it comes from the foundation, from an image, or '
+        + 'from both.',
+      'No reason is a matter of taste alone.',
+    ],
+    antiPatterns: [
+      'A value invented outside the vocabulary — a preset could not carry it later.',
+      'A reason that only repeats the value in other words.',
+      'A DNA taken from a reference image without any foundation anchor.',
+    ],
+    form: { person: 'none', tense: 'present' },
+    examples: pathExamples(
+      {
+        de: 'Farb-Charakter: erdig gedämpft — eure Palette kommt aus dem Produkt selbst, nicht aus einer '
+          + 'Farbmode.',
+        en: 'Colour character: earthy and muted — your palette comes from the product itself, not from a '
+          + 'colour trend.',
+      },
+      {
+        de: 'Formsprache: weich gerundet — zum Archetyp „Der Weise" passt Milde in den Kanten; kantig '
+          + 'wäre der Rebell.',
+        en: 'Form language: softly rounded — mildness in the edges suits the archetype "the sage"; hard '
+          + 'edges would be the rebel.',
+      },
+    ),
+  },
+  'g.boards': {
+    goal: 'lay out three moodboards as variants of the settled DNA: as proposed, one step quieter, one '
+      + 'step bolder.',
+    quality: [
+      'All three boards fill the same ten dimensions — they differ in four or five, not in everything.',
+      'Each board says in one sentence what it does differently from the proposal.',
+      'The quieter and the bolder board are both defensible for this brand, not straw men.',
+    ],
+    antiPatterns: [
+      'A board that is simply worse so that the proposal wins.',
+      'Three boards that differ in a single dimension — that is not a choice.',
+      'A fourth board, because three is the number a human being can hold at once.',
+    ],
+    form: { person: 'none', tense: 'present' },
+    examples: pathExamples(
+      {
+        de: 'Eine Stufe ruhiger: weniger Wärme, mehr Weiss — humanistische Grotesk statt Serif, '
+          + 'monochromere Flächen.',
+        en: 'One step quieter: less warmth, more white — a humanist sans instead of a serif, more '
+          + 'monochrome surfaces.',
+      },
+      {
+        de: 'Eine Stufe mutiger: die zweite Farbe als tragende Fläche, kontrastreiche Schriftmischung, '
+          + 'dichtere Komposition.',
+        en: 'One step bolder: the second colour as the carrying surface, a high-contrast type mix, a '
+          + 'denser composition.',
+      },
+    ),
+  },
+  'g.board': {
+    goal: 'pick one of the three boards as the starting point.',
+    quality: [
+      'One board is chosen, not a mixture — mixing is the next session.',
+      'The reason names a dimension, not a colour they happen to like.',
+      'They could explain the choice to somebody who was not in the room.',
+    ],
+    antiPatterns: [
+      'A choice made because one board looks more expensive.',
+      'A mixture presented as a choice.',
+    ],
+    ladder: {
+      opening: 'show the three boards side by side, name the one that follows from the DNA, and say in '
+        + 'one sentence what the other two would cost them.',
+      probes: ['which of the three would still feel right on an invoice?'],
+      reframes: ['if they cannot choose between quieter and bolder, say that this is a question about '
+        + 'their positioning and hand it back to George'],
+    },
+    answers: { maxProbes: 1 },
+    form: { person: 'none', tense: 'present' },
+  },
+  'g.mix': {
+    goal: 'settle the final DNA: hold what fits from the chosen board and take single dimensions from '
+      + 'the other two.',
+    quality: [
+      'The result fills all ten dimensions and says for each one where it came from.',
+      'Held dimensions stay untouched when the rest is proposed again.',
+      'The mixture is still one direction, not a list of favourites.',
+    ],
+    antiPatterns: [
+      'A mixture that takes the loudest value from every board.',
+      'A regeneration that quietly moves a dimension the human held.',
+      'A dimension left empty because two boards disagreed.',
+    ],
+    form: { person: 'none', tense: 'present' },
+    examples: pathExamples(
+      {
+        de: 'Farbwelt aus Board 1, Typografie aus Board 3 — festgehalten: Komposition „ruhig und luftig".',
+        en: 'Colour world from board 1, typography from board 3 — held: composition "calm and airy".',
+      },
+      {
+        de: 'Alles wie gewählt, nur die Materialität aus dem mutigen Board: glatt statt Papier.',
+        en: 'Everything as chosen, only materiality from the bolder board: smooth instead of paper.',
+      },
+    ),
+  },
+
+  // ── H · Farbwelt (§2.3) ─────────────────────────────────────────────────
+  'h.base': {
+    goal: 'settle the one base colour everything else is calculated from.',
+    quality: [
+      'It is a single colour with a hex value, not a palette.',
+      'It follows from the DNA dimension "colour character" and the archetype.',
+      'It is deep enough to carry text, or it is explicitly meant as a surface and says so.',
+      'The reason names something of this brand, not a colour trend.',
+    ],
+    antiPatterns: [
+      'Three base colours, because nobody wanted to decide.',
+      'A colour chosen because a competitor uses it.',
+      'A base colour that fails the contrast check and is offered anyway.',
+    ],
+    form: { person: 'none', tense: 'present' },
+    examples: pathExamples(
+      {
+        de: 'Roast — die Farbe des Produkts nach der Röstung: tief genug für Text, warm genug für „Nähe".',
+        en: 'Roast — the colour of the product after roasting: deep enough for text, warm enough for '
+          + '"closeness".',
+      },
+      {
+        de: 'Das Eichenbraun der Werkstatt statt des alten Blaus — es steht seit zwanzig Jahren im Laden, '
+          + 'nur nie in der Marke.',
+        en: 'The oak brown of the workshop instead of the old blue — it has stood in the shop for twenty '
+          + 'years, just never in the brand.',
+      },
+    ),
+  },
+  'h.ramp': {
+    goal: 'derive the light and the dark ramp from the base colour, eleven steps each.',
+    quality: [
+      'Both ramps carry all eleven steps and anchor the base colour where it belongs.',
+      'The dark ramp is its own calculation, not the light one reversed.',
+      'Nothing here is a matter of taste: the same base colour always gives the same ramps.',
+    ],
+    antiPatterns: [
+      'A ramp with a step corrected by hand — the next recalculation would silently drop it.',
+      'A dark ramp whose deepest step disappears into the dark ground.',
+    ],
+    form: { person: 'none', tense: 'present' },
+    examples: pathExamples(
+      {
+        de: 'Elf Stufen hell, elf Stufen dunkel — die 500er ist eure Basisfarbe, alles andere ist '
+          + 'gerechnet.',
+        en: 'Eleven steps light, eleven steps dark — step 500 is your base colour, everything else is '
+          + 'calculated.',
+      },
+      {
+        de: 'Dieselbe Rechnung wie bisher, nur mit der neuen Basisfarbe: die alten Zwischentöne entfallen.',
+        en: 'The same calculation as before, only with the new base colour: the old in-between tones fall '
+          + 'away.',
+      },
+    ),
+  },
+  'h.neutral': {
+    goal: 'settle the tint of the neutral ramp: tinted from the base colour, warm or cool.',
+    quality: [
+      'One of the offered options is chosen.',
+      'The reason says what the surfaces should feel like, not which one looks nicer.',
+      'The choice still works on paper as well as on screen.',
+    ],
+    antiPatterns: [
+      'A neutral ramp so strongly tinted that it competes with the base colour.',
+      'A choice made without ever looking at a surface.',
+    ],
+    ladder: {
+      opening: 'show the three neutral ramps under the same scene and name the one the DNA suggests.',
+      probes: [],
+      reframes: ['if they call it a detail, show the same card on all three grounds'],
+    },
+    form: { person: 'none', tense: 'present' },
+  },
+  'h.accent': {
+    goal: 'settle one accent colour: the signal, not a second ground.',
+    quality: [
+      'Exactly one accent is chosen.',
+      'It is far enough from the base colour to read as a signal.',
+      'It passes the contrast check in the role it is meant for.',
+    ],
+    antiPatterns: [
+      'Two accents, so that neither is one.',
+      'An accent used as a surface all over the page.',
+      'A signal colour too light for the text that sits on it.',
+    ],
+    ladder: {
+      opening: 'offer three harmonic candidates, say which one reads as a signal and why the others do '
+        + 'not.',
+      probes: ['where would this colour appear on a page, and where never?'],
+      reframes: ['if they want two accents, show what one page looks like with both'],
+    },
+    answers: { maxProbes: 1 },
+    form: { person: 'none', tense: 'present' },
+  },
+  'h.roles': {
+    goal: 'settle which colour fills which role: ground and text, surfaces, light areas, accent and '
+      + 'signal, paper.',
+    quality: [
+      'Every role names its source: a ramp step or a colour from the palette.',
+      'Text never sits on a step that was meant as a surface.',
+      'Somebody who was not in the room could apply the roles to a new page.',
+      'The roles work in light and in dark.',
+    ],
+    antiPatterns: [
+      'A role filled with "the brand colour" without saying which step.',
+      'Two roles with the same source and different names.',
+      'A role that only exists on one page.',
+    ],
+    form: { person: 'none', tense: 'present' },
+    examples: pathExamples(
+      {
+        de: 'Grund und Text: Stufe 900 auf Papier. Nie die 500er — die ist Fläche, nicht Schrift.',
+        en: 'Ground and text: step 900 on paper. Never step 500 — that one is surface, not type.',
+      },
+      {
+        de: 'Akzent und Signal: nur Knöpfe und aktive Zustände, genau ein Pop je Fläche.',
+        en: 'Accent and signal: buttons and active states only, exactly one pop per surface.',
+      },
+    ),
+  },
+  'h.contrast': {
+    goal: 'check the text and ground pairs in light and dark and record the WCAG verdict for each.',
+    quality: [
+      'Every pair that really appears on a page is checked, in light and in dark.',
+      'Each pair carries its ratio and its verdict.',
+      'A pair that fails AA is not offered as a settled decision.',
+    ],
+    antiPatterns: [
+      'A check run only on the light side.',
+      'A pair measured between two colours that never meet on a page.',
+      'A failing pair waved through because it looks good.',
+    ],
+    form: { person: 'none', tense: 'present' },
+    examples: pathExamples(
+      {
+        de: 'Fliesstext auf Papier: 11,4:1, AAA. Knopf-Text auf Akzent: 4,9:1, AA.',
+        en: 'Body text on paper: 11.4:1, AAA. Button text on the accent: 4.9:1, AA.',
+      },
+      {
+        de: 'Die alte Kombination Grau auf Beige reisst AA (3,1:1) — sie fällt raus, nicht die Marke.',
+        en: 'The old grey-on-beige combination fails AA (3.1:1) — it goes, not the brand.',
+      },
+    ),
+  },
+
+  // ── I · Typografie (§2.4) ───────────────────────────────────────────────
+  'i.pair': {
+    goal: 'settle the type pair: one family for headings, one for body text, with the fixed mono role '
+      + 'beside them.',
+    quality: [
+      'The pair comes from the curated catalogue, so the preview really loads it.',
+      'The reason names the DNA dimension "typography", not a personal favourite.',
+      'Together with the fixed mono role there are never more than three families.',
+      'Body text stays readable at small sizes.',
+    ],
+    antiPatterns: [
+      'A family named but not declared, so the preview quietly falls back to the system stack.',
+      'A third display family added "just for headlines".',
+      'A pair chosen on the headline alone, with nobody looking at a paragraph.',
+    ],
+    ladder: {
+      opening: 'show the pairs with real type and a real specimen, and name the one that follows from '
+        + 'the DNA.',
+      probes: ['read one paragraph in it — does it still sound like you after ten lines?'],
+      reframes: ['if the choice is about the headline only, show the price list in both'],
+    },
+    answers: { maxProbes: 1 },
+    form: { person: 'none', tense: 'present' },
+  },
+  'i.scale': {
+    goal: 'derive the size and weight hierarchy from the DNA: calm, dense or bold.',
+    quality: [
+      'The hierarchy carries a ratio between the largest heading and body text.',
+      'It follows from the DNA dimensions "typography" and "composition".',
+      'It works on a phone as well as on a wide screen.',
+    ],
+    antiPatterns: [
+      'A hierarchy with so many sizes that nobody can keep them apart.',
+      'Steps so small that the levels stop reading as levels.',
+    ],
+    form: { person: 'none', tense: 'present' },
+    examples: pathExamples(
+      {
+        de: 'Ruhig, 1 : 2,6 — wenige Grössen, viel Zeilenabstand: die Hierarchie aus „ruhig und luftig".',
+        en: 'Calm, 1 : 2.6 — few sizes, generous leading: the hierarchy of "calm and airy".',
+      },
+      {
+        de: 'Dicht, 1 : 2,0 — kleinere Sprünge, mehr Text je Bildschirm: redaktionell statt plakativ.',
+        en: 'Dense, 1 : 2.0 — smaller steps, more text per screen: editorial instead of poster-like.',
+      },
+    ),
+  },
+  'i.rules': {
+    goal: 'settle the typographic rules: heading weight, tracking, capitals and what the mono role is for.',
+    quality: [
+      'Every rule can be applied by somebody who was not in the room.',
+      'The mono role has exactly one job, and the rule says which.',
+      'Capitals, where they are allowed, are named by place, not by mood.',
+      'No rule contradicts the chosen hierarchy.',
+    ],
+    antiPatterns: [
+      'A rule that only says "use it tastefully".',
+      'Capitals allowed everywhere, which is the same as no rule.',
+      'A mono role that turns into a third brand voice.',
+    ],
+    form: { person: 'none', tense: 'present' },
+    examples: pathExamples(
+      {
+        de: 'Mono gehört den Herkunftsangaben und Preisen — sonst nirgends. Versalien nur im Ladenschild.',
+        en: 'Mono belongs to origin details and prices — nowhere else. Capitals only on the shop sign.',
+      },
+      {
+        de: 'Überschriften im halbfetten Schnitt, Laufweite minus zwei; Fliesstext bleibt unangetastet.',
+        en: 'Headings in the semibold cut, tracking minus two; body text stays untouched.',
+      },
+    ),
+  },
+
+  // ── J · Zeichen (§2.5) ──────────────────────────────────────────────────
+  'j.kind': {
+    goal: 'settle the kind of mark: wordmark, pictorial mark, combination or monogram.',
+    quality: [
+      'One kind is chosen, and the reason names the DNA dimension "form language" or the name itself.',
+      'The reason says what the other kinds would cost this brand.',
+      'The choice fits how often people actually meet this brand.',
+    ],
+    antiPatterns: [
+      'A pictorial mark for a young brand with one shop and few contacts.',
+      'A choice made because a competitor has a symbol.',
+      'A monogram picked as the main mark because it is the easiest to draw.',
+    ],
+    ladder: {
+      opening: 'name the kind that follows from the name and the form language, and say in one sentence '
+        + 'what each of the others would cost.',
+      probes: ['where will this mark be smallest — and does it still work there?'],
+      reframes: ['if they want a symbol because everyone has one, ask how often somebody sees their brand '
+        + 'in a year'],
+    },
+    answers: { maxProbes: 1 },
+    form: { person: 'none', tense: 'present' },
+  },
+  'j.brief': {
+    goal: 'write the briefing a designer would get: character, form language, clear space, variants, '
+      + 'no-gos and the places the mark has to work in.',
+    quality: [
+      'Every section is concrete enough to be checked against a draft.',
+      'The clear space is a measure, not an adjective.',
+      'The no-gos name things that would really be done wrong here.',
+      'The places are the ones this brand actually has.',
+    ],
+    antiPatterns: [
+      'A briefing that describes a mood instead of a task.',
+      'A clear space given as "enough room".',
+      'A list of places copied from a template — an app icon for a brand without an app.',
+    ],
+    form: { person: 'none', tense: 'present' },
+    examples: pathExamples(
+      {
+        de: 'Schutzraum ringsum gleich der Höhe des Versals; Mindestbreite der Wortmarke 96 px digital, '
+          + '24 mm im Druck.',
+        en: 'Clear space all round equal to the cap height; minimum wordmark width 96 px on screen, '
+          + '24 mm in print.',
+      },
+      {
+        de: 'Nicht verzerren, nicht schräg stellen, keinen Schatten — das Zeichen ist eine Datei, kein '
+          + 'Textfeld.',
+        en: 'Do not distort it, do not tilt it, no shadow — the mark is a file, not a text field.',
+      },
+    ),
+  },
+  'j.examples': {
+    goal: 'set the wordmark and the monogram from the chosen type pair and colour world, in the four '
+      + 'variants.',
+    quality: [
+      'The settings use the real type pair and the real colour roles, nothing invented.',
+      'All four variants exist: primary, inverted, single colour, icon area.',
+      'The clear space is drawn, not described.',
+      'They are shown as settings, never as a finished logo.',
+    ],
+    antiPatterns: [
+      'A setting in a font nobody chose.',
+      'A variant that only works on white.',
+      'A setting presented as the finished mark.',
+    ],
+    form: { person: 'none', tense: 'present' },
+    examples: pathExamples(
+      {
+        de: 'Wortmarke in der Überschriften-Schrift, Roast auf Paper; Monogramm im Quadrat für Avatar und '
+          + 'Favicon.',
+        en: 'Wordmark in the heading family, roast on paper; monogram in a square for avatar and favicon.',
+      },
+      {
+        de: 'Dieselbe Wortmarke einfarbig für Prägung und Stempel — dort gibt es keine zweite Farbe.',
+        en: 'The same wordmark in a single colour for embossing and stamps — there is no second colour '
+          + 'there.',
+      },
+    ),
+  },
+  'j.pick': {
+    goal: 'pick one setting as the preferred example for the briefing.',
+    quality: [
+      'Exactly one setting is picked.',
+      'The reason names a place it has to work in.',
+      'The pick is understood as an example for the designer, not as the final mark.',
+    ],
+    antiPatterns: [
+      'A pick made on the largest size only.',
+      'Two settings picked, so the briefing carries two directions.',
+    ],
+    ladder: {
+      opening: 'show the settings side by side and ask which one they would put on the smallest surface '
+        + 'they have.',
+      probes: [],
+      reframes: ['if they treat it as the final logo, say plainly that this is an example for the '
+        + 'designer'],
+    },
+    form: { person: 'none', tense: 'present' },
+  },
+  'j.drafts': {
+    goal: 'generate image drafts from the briefing and let the human keep or discard them — as ideas for '
+      + 'the design work, never as a logo.',
+    quality: [
+      'Every draft carries its origin: model, date and prompt hash.',
+      'Every draft carries the note that it is a draft, not a checked logo.',
+      'Kept drafts stay private: they never travel into a snapshot or a shared link.',
+      'The trademark note is on the screen, not in a help page.',
+    ],
+    antiPatterns: [
+      'A draft shown without its origin.',
+      'A draft that leaves the workshop as "the logo".',
+      'A statement about protectability or similarity to existing marks.',
+    ],
+    // KEINE LEITER: der Bereich erzeugt auf Knopfdruck, er fragt nicht (D5c).
+    form: { person: 'none', tense: 'present' },
+    sensitivity: 'internal',
+  },
+
+  // ── K · Bildsprache (§2.6) ──────────────────────────────────────────────
+  'k.photo': {
+    goal: 'settle the picture principles: light, crop, people and colour — with the reason each follows '
+      + 'from the DNA.',
+    quality: [
+      'All four axes are answered: light, crop, people, colour.',
+      'A photographer could work from it without asking back.',
+      'The reason points at a value or a tone word, not at a mood board.',
+      'It says what is never photographed here.',
+    ],
+    antiPatterns: [
+      'A principle that only says "authentic".',
+      'A rule that no camera can follow.',
+      'Stock photography described as the house style.',
+    ],
+    form: { person: 'none', tense: 'present' },
+    examples: pathExamples(
+      {
+        de: 'Weiches Seitenlicht, sichtbare Schatten, keine Aufheller; Menschen bei der Arbeit, nie in die '
+          + 'Kamera lächelnd.',
+        en: 'Soft side light, visible shadows, no fill; people at work, never smiling into the camera.',
+      },
+      {
+        de: 'Sehr naher Ausschnitt, das Detail füllt das Bild — Werkstatt statt Ausstellungsraum.',
+        en: 'A very close crop, the detail fills the frame — workshop instead of showroom.',
+      },
+    ),
+  },
+  'k.illustration': {
+    goal: 'settle whether there is illustration at all, and if so in which language: line, area or '
+      + 'organic.',
+    quality: [
+      'One of the offered options is chosen, and "none" is a full answer.',
+      'The reason says who would keep this consistent.',
+      'The option fits the form language of the DNA.',
+    ],
+    antiPatterns: [
+      'An illustration style chosen although nobody can draw or commission it.',
+      'Two styles side by side.',
+    ],
+    ladder: {
+      opening: 'show the options with the settled colours and say plainly that "none" is the rule nobody '
+        + 'can break.',
+      probes: [],
+      reframes: ['if they want everything, ask who will draw the second one'],
+    },
+    form: { person: 'none', tense: 'present' },
+  },
+  'k.icons': {
+    goal: 'settle the icon set: line or filled, and the stroke weight beside the body type.',
+    quality: [
+      'One set is chosen and shown next to the real body type.',
+      'The stroke weight sits with the type, not against it.',
+      'Icons stay legible at the smallest size this brand uses.',
+    ],
+    antiPatterns: [
+      'A heavy icon set next to a light serif.',
+      'Two sets mixed on one page.',
+    ],
+    ladder: {
+      opening: 'show the same five icons in each set next to a line of the body type and ask which stroke '
+        + 'weight belongs to it.',
+      probes: [],
+      reframes: ['if it comes down to taste, say that the only question here is the stroke weight'],
+    },
+    form: { person: 'none', tense: 'present' },
+  },
+  'k.dodont': {
+    goal: 'write the do and do-not list of the picture language, in the form of the foundation.',
+    quality: [
+      'Every do has its matching do-not — the pair is what makes it checkable.',
+      'Each line names something visible in a picture, not an intention.',
+      'The list is short enough to be remembered before a shoot.',
+    ],
+    antiPatterns: [
+      'A do-not that forbids a whole medium instead of a treatment.',
+      'A pair in which both halves say the same thing.',
+      'A list so long that nobody reads it twice.',
+    ],
+    form: { person: 'none', tense: 'present' },
+    examples: pathExamples(
+      {
+        de: 'Do: Hände, Werkzeug, Arbeit im Bild. Don’t: gestellte Gruppenbilder mit Daumen hoch.',
+        en: 'Do: hands, tools, work in the frame. Do not: staged group shots with thumbs up.',
+      },
+      {
+        de: 'Do: Tageslicht mit sichtbaren Schatten. Don’t: Weichzeichner und Lens Flare.',
+        en: 'Do: daylight with visible shadows. Do not: soft focus and lens flare.',
+      },
+    ),
+  },
+
+  // ── L · Bewegung (§2.7) ─────────────────────────────────────────────────
+  'l.tempo': {
+    goal: 'settle the tempo of movement: calm, lively or snappy.',
+    quality: [
+      'One tempo is chosen and it follows from the DNA dimension "motion character".',
+      'The reason says what the movement should feel like, not how modern it looks.',
+      'The tempo is the same everywhere, not one per page.',
+    ],
+    antiPatterns: [
+      'A tempo chosen because it looks impressive in a demo.',
+      'Two tempos "depending on the context".',
+    ],
+    ladder: {
+      opening: 'play the same transition in all three tempos and name the one the DNA suggests.',
+      probes: [],
+      reframes: ['if they cannot tell them apart, play the slowest and the fastest one after the other'],
+    },
+    form: { person: 'none', tense: 'present' },
+  },
+  'l.transitions': {
+    goal: 'derive the transition tokens from the tempo: durations, easing and the offset between '
+      + 'siblings.',
+    quality: [
+      'There are three durations and one offset — fast, base, slow.',
+      'Every token says what it is for.',
+      'The values follow from the tempo, they are not typed in by hand.',
+    ],
+    antiPatterns: [
+      'A dozen tokens nobody can keep apart.',
+      'A duration corrected by hand, which the next recalculation would drop.',
+    ],
+    form: { person: 'none', tense: 'present' },
+    examples: pathExamples(
+      {
+        de: 'Schnell 120 ms für Hover und Fokus, normal 240 ms für Karten, langsam 384 ms für '
+          + 'Seitenwechsel; Versatz 60 ms.',
+        en: 'Fast 120 ms for hover and focus, base 240 ms for cards, slow 384 ms for page changes; offset '
+          + '60 ms.',
+      },
+      {
+        de: 'Dieselben drei Tokens, nur aus dem knappen Tempo: 60, 120 und 192 ms.',
+        en: 'The same three tokens, only from the snappy tempo: 60, 120 and 192 ms.',
+      },
+    ),
+  },
+  'l.logo': {
+    goal: 'settle whether the mark moves at all, and under which rule.',
+    quality: [
+      'The answer is yes or no, not "maybe later".',
+      'A yes names the one place it is used and comes with a reduced-motion version.',
+      'A no is recorded as a decision, not as an omission.',
+    ],
+    antiPatterns: [
+      'A moving mark for a brand whose tone word is "quiet".',
+      'An animation without a reduced-motion answer.',
+    ],
+    ladder: {
+      opening: 'ask plainly whether the mark should move, and say what a yes costs: one more file that '
+        + 'somebody has to maintain.',
+      probes: [],
+      reframes: ['if the yes is about a video intro only, say that this is a film question, not a brand '
+        + 'one'],
+    },
+    form: { person: 'none', tense: 'present' },
+  },
+  'l.rules': {
+    goal: 'write the motion rules: where movement is allowed, where never, and what happens with reduced '
+      + 'motion.',
+    quality: [
+      'Every rule can be checked on a real page.',
+      'There is a rule for reduced motion, and it says the end state simply stands.',
+      'The rules name which properties may move at all.',
+      'Nothing decorative moves.',
+    ],
+    antiPatterns: [
+      'A rule that says "use animation sparingly".',
+      'A replacement animation for reduced motion, which is the same problem at half speed.',
+      'A rule that allows any property to move.',
+    ],
+    form: { person: 'none', tense: 'present' },
+    examples: pathExamples(
+      {
+        de: 'Bewegung erklärt einen Zusammenhang oder sie entfällt — Dekoration bewegt sich nie.',
+        en: 'Movement explains a relationship or it does not happen — decoration never moves.',
+      },
+      {
+        de: 'Nur zwei Eigenschaften gleichzeitig: Deckkraft und eine Verschiebung. Keine Rotation, keine '
+          + 'Skalierung von Text.',
+        en: 'Only two properties at a time: opacity and one shift. No rotation, no scaling of text.',
+      },
+    ),
+  },
 }

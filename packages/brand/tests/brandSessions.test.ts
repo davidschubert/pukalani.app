@@ -15,6 +15,7 @@ import {
   BRAND_SLOTS,
   type BrandSessionConfig,
   type BrandSlotStateFacts,
+  isBrandDesignStep,
   slotById,
 } from '../shared/slotRegistry'
 
@@ -32,9 +33,22 @@ import {
  *
  * Mit GEGENPROBE — eine Rechnung, die nur die richtige Registry kennt, ist
  * immer grün und beweist nichts.
+ *
+ * ── SEIT BRAND DESIGN D0 WERDEN ZWEI HÜLLEN GEMESSEN ──────────────────────
+ * Schicht 2 hängt an vier Foundation-Feldern (`c.final`, `d.primary`,
+ * `d.toneWords`, `result.direction`), und damit reicht die Hülle fast jeder
+ * A- und B-Session jetzt bis in die sechs Design-Kapitel. Die Zahlen des
+ * Plan-Anhangs bleiben trotzdem GÜLTIG und werden weiter festgenagelt — sie
+ * beschreiben die FOUNDATION-Hülle, und die hat sich um kein Feld bewegt. Das
+ * ist die Aussage, die dieser Test halten soll: Schicht 2 hat der Foundation
+ * nichts weggenommen.
+ *
+ * Die zweite Tabelle (`AFFECTED_DESIGN`) misst die volle Hülle der
+ * Design-Sessions. Sie ist ebenfalls von Hand nachzuziehen, wer dort eine
+ * Abhängigkeit ändert.
  */
 
-/** id → [Felder in der Hülle, Kapitel darin]. Anhang A des Plans. */
+/** id → [Felder in der FOUNDATION-Hülle, Kapitel darin]. Anhang A des Plans. */
 const AFFECTED: Readonly<Record<string, readonly [number, number]>> = {
   'a.pitch': [27, 7],
   'a.category': [9, 4],
@@ -112,15 +126,80 @@ function facts(values: Record<string, string>): Record<string, BrandSlotStateFac
   )
 }
 
+/**
+ * id → [Felder in der VOLLEN Hülle, Kapitel darin] für die Sessions von
+ * Schicht 2 (Brand Design D0). Sie berühren nur einander — die Foundation
+ * liegt vor ihnen und kann von ihnen nicht getroffen werden.
+ */
+const AFFECTED_DESIGN: Readonly<Record<string, readonly [number, number]>> = {
+  'g.source': [28, 6],
+  'g.inspiration': [27, 6],
+  'g.reading': [26, 6],
+  'g.dna': [25, 6],
+  'g.boards': [24, 6],
+  'g.board': [23, 6],
+  'g.mix': [22, 5],
+  'h.base': [9, 2],
+  'h.ramp': [4, 2],
+  'h.neutral': [4, 2],
+  'h.accent': [4, 2],
+  'h.roles': [3, 2],
+  'h.contrast': [0, 0],
+  'i.pair': [8, 3],
+  'i.scale': [1, 1],
+  'i.rules': [0, 0],
+  'j.kind': [6, 2],
+  'j.brief': [1, 1],
+  'j.examples': [1, 1],
+  'j.pick': [0, 0],
+  'j.drafts': [0, 0],
+  'k.photo': [1, 1],
+  'k.illustration': [1, 1],
+  'k.icons': [1, 1],
+  'k.dodont': [0, 0],
+  'l.tempo': [3, 1],
+  'l.transitions': [1, 1],
+  'l.logo': [1, 1],
+  'l.rules': [0, 0],
+}
+
+/** Die Hülle, auf die FOUNDATION eingeschränkt (s. Kopf). */
+function foundationHull(sessionId: string): { fields: string[], steps: Set<string> } {
+  const affected = sessionsAffectedBy(sessionId)
+  const fields = affected.transitive.filter(id => !isBrandDesignStep(slotById(id)!.stepId))
+  return { fields, steps: new Set(fields.map(id => slotById(id)!.stepId)) }
+}
+
 describe('sessionsAffectedBy — die Umkehrung der Abhängigkeiten (§9)', () => {
   it('kennt jede Session der Registry und keine mehr', () => {
-    expect(Object.keys(AFFECTED)).toEqual(BRAND_SLOTS.map(session => session.id))
+    expect([...Object.keys(AFFECTED), ...Object.keys(AFFECTED_DESIGN)])
+      .toEqual(BRAND_SLOTS.map(session => session.id))
   })
 
-  it.each(Object.entries(AFFECTED))('%s berührt die zugesagte Menge', (sessionId, [fields, chapters]) => {
+  it.each(Object.entries(AFFECTED))('%s berührt die zugesagte Foundation-Menge', (sessionId, [fields, chapters]) => {
+    const hull = foundationHull(sessionId)
+    expect(hull.fields.length, 'Felder').toBe(fields)
+    expect(hull.steps.size, 'Kapitel').toBe(chapters)
+  })
+
+  it.each(Object.entries(AFFECTED_DESIGN))('%s berührt die zugesagte Menge', (sessionId, [fields, chapters]) => {
     const affected = sessionsAffectedBy(sessionId)
     expect(affected.transitive.length, 'Felder').toBe(fields)
     expect(Object.keys(affected.byStep).length, 'Kapitel').toBe(chapters)
+  })
+
+  it('SCHICHT 2 HÄNGT AN GENAU VIER FOUNDATION-FELDERN', () => {
+    // `g.dna` ist die einzige Design-Session, die überhaupt in die Foundation
+    // greift — alles Weitere hängt an ihr. Ohne diese Zeile wäre der
+    // Foundation-Filter oben nicht zu prüfen: er könnte auch dann grün sein,
+    // wenn Schicht 2 gar nicht angeschlossen wäre.
+    const design = BRAND_SLOTS.filter(session => isBrandDesignStep(session.stepId))
+    const intoFoundation = design.flatMap(session => session.dependencies
+      .filter(id => !isBrandDesignStep(slotById(id)!.stepId)))
+    expect([...new Set(intoFoundation)].sort())
+      .toEqual(['c.final', 'd.primary', 'd.toneWords', 'result.direction'])
+    // Und umgekehrt: `c.final` reicht wirklich bis in die Design-Kapitel.
+    expect(sessionsAffectedBy('c.final').transitive).toContain('g.dna')
   })
 
   it('trennt direkt von der vollen Hülle — und `direct` ist deren Teilmenge', () => {
@@ -142,7 +221,7 @@ describe('sessionsAffectedBy — die Umkehrung der Abhängigkeiten (§9)', () =>
 
   it('gruppiert je Kapitel, ohne leere Kapitel zu erfinden', () => {
     const affected = sessionsAffectedBy('c.final')
-    expect(Object.keys(affected.byStep).sort()).toEqual(
+    expect(Object.keys(affected.byStep).filter(key => !isBrandDesignStep(key)).sort()).toEqual(
       ['archetype', 'manifesto', 'naming', 'result', 'values', 'verbal'],
     )
     const grouped = Object.values(affected.byStep).flatMap(ids => ids ?? [])
@@ -159,8 +238,13 @@ describe('sessionsAffectedBy — die Umkehrung der Abhängigkeiten (§9)', () =>
       : session))
     const after = sessionsAffectedBy('f.decision', mutated)
     expect(after.direct).toEqual(['result.direction'])
-    expect(after.transitive).toEqual(['result.direction'])
-    expect(after.byStep).toEqual({ result: ['result.direction'] })
+    // `result.direction` zieht seit Brand Design D0 die ganze Schicht 2 mit —
+    // geprüft wird deshalb, dass sie VORHER leer war und danach genau diese
+    // eine Session DIREKT dranhängt.
+    expect(after.transitive[0]).toBe('result.direction')
+    expect(after.transitive.filter(id => !isBrandDesignStep(slotById(id)!.stepId)))
+      .toEqual(['result.direction'])
+    expect(after.byStep.result).toEqual(['result.direction'])
   })
 
   /** GEGENPROBE 2: eine gelöschte Abhängigkeit MUSS aus der Hülle verschwinden. */
@@ -460,10 +544,12 @@ describe('confirmedDependents — was kostet diese Korrektur? (§9)', () => {
     Object.fromEntries(ids.map(id => [id, { hasValue: true, confirmed: true }]))
 
   it('zählt NUR bestätigte Abhängige — ohne Bestätigungen ist die Hülle leer', () => {
-    // `a.customerPraise` berührt strukturell 29 Felder (Anhang A). Am zweiten
-    // Tag eines Brandings ist davon nichts bestätigt, und genau das soll der
+    // `a.customerPraise` berührt strukturell 55 Felder — 29 in der Foundation
+    // (Anhang A) und seit Brand Design D0 die 26 dahinter. Am zweiten Tag
+    // eines Brandings ist davon nichts bestätigt, und genau das soll der
     // Hinweis sagen: hier hängt (noch) nichts dran.
-    expect(sessionsAffectedBy('a.customerPraise').transitive.length).toBe(29)
+    expect(sessionsAffectedBy('a.customerPraise').transitive.length).toBe(55)
+    expect(foundationHull('a.customerPraise').fields.length).toBe(29)
     expect(confirmedDependents('a.customerPraise', {}).count).toBe(0)
   })
 

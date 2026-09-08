@@ -1,6 +1,6 @@
 import { brandStepAcceptance } from '../../../../../shared/brandJourney'
 import { blockingFindingSlots } from '../../../../../shared/brandFindings'
-import { BRAND_SLOTS, slotsForStep } from '../../../../../shared/slotRegistry'
+import { BRAND_SLOTS, isBrandDesignStep, slotsForStep } from '../../../../../shared/slotRegistry'
 import type {
   BrandDocumentChapter,
   BrandDocumentResponse,
@@ -63,6 +63,11 @@ export default defineEventHandler(async (event): Promise<BrandDocumentResponse> 
   const chapters: BrandDocumentChapter[] = []
   for (const entry of journey) {
     if (entry.state === 'skipped') continue
+    // BRAND DESIGN STEHT (NOCH) NICHT IM DOKUMENT (D0). Die sechs Kapitel von
+    // Schicht 2 liegen seit D0 in der Journey und wären hier als sechs leere
+    // Abschnitte erschienen — Kapitel ohne Inhalt und ohne Erklärung. Ihre
+    // Darstellung baut **D8** (Kapitel 10 voll, Ergebnis-Board, Snapshot v2).
+    if (isBrandDesignStep(entry.stepKey)) continue
     const row = stepRows.find(candidate => candidate.stepKey === entry.stepKey)
     const records = recordsByStep.get(entry.stepKey) ?? {}
     const openConflicts = blockingFindingSlots(

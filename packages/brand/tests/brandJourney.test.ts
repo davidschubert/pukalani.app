@@ -22,11 +22,13 @@ import {
 } from '../shared/brandJourney'
 import { brandRestartImpact, computeSourcesHash, sessionsAffectedBy } from '../shared/brandSessions'
 import {
+  BRAND_DESIGN_STEP_KEYS,
   BRAND_SLOTS,
   BRAND_STEP_KEYS,
   type BrandSlotStateFacts,
   type BrandStepKey,
   confirmableRequiredSlotsForStep,
+  isBrandDesignStep,
   requiredSlotsForStep,
   slotById,
   slotsForStep,
@@ -85,11 +87,16 @@ function filledActiveStep(stepKey: BrandStepKey): BrandStepFacts {
 
 describe('includedBrandSteps — die Weichen', () => {
   it('Basispfad: sieben Bausteine, ohne architecture und naming', () => {
-    expect(includedBrandSteps(BASE_PROFILE))
+    // Die WEICHEN kennen Brand Design nicht: Schicht 2 liegt auf JEDEM Weg und
+    // wird über die FREISCHALTUNG gesperrt, nicht über eine Weiche (s. u.).
+    // `includedBrandSteps` beantwortet nur die erste Frage.
+    expect(includedBrandSteps(BASE_PROFILE).filter(key => !isBrandDesignStep(key)))
       .toEqual(['context', 'pvm', 'values', 'archetype', 'manifesto', 'verbal', 'result'])
+    expect(includedBrandSteps(BASE_PROFILE).filter(isBrandDesignStep))
+      .toEqual([...BRAND_DESIGN_STEP_KEYS])
   })
 
-  it('Vollpfad: alle neun', () => {
+  it('Vollpfad: alle neun der Foundation plus die sechs von Brand Design', () => {
     expect(includedBrandSteps(FULL_PROFILE)).toEqual([...BRAND_STEP_KEYS])
   })
 
@@ -217,7 +224,9 @@ describe('resolveBrandJourney — Reihenfolge und Freischaltung', () => {
 describe('resolveBrandJourney — Happy-Path über den ganzen Vollpfad', () => {
   it('läuft Baustein für Baustein bis zum Ergebnis', () => {
     const done: BrandStepFacts[] = []
-    for (const stepKey of includedBrandSteps(FULL_PROFILE)) {
+    // NUR SCHICHT 1: Brand Design steht ohne Freischaltung gesperrt und ist
+    // damit kein Teil dieses Durchlaufs (eigener Block weiter unten).
+    for (const stepKey of includedBrandSteps(FULL_PROFILE).filter(key => !isBrandDesignStep(key))) {
       const journey = resolveBrandJourney(FULL_PROFILE, done)
       // Der nächste Baustein ist offen und betretbar …
       expect(stateOf(journey, stepKey).state).toBe('open')
@@ -252,15 +261,76 @@ describe('resolveBrandJourney — Happy-Path über den ganzen Vollpfad', () => {
 
     const final = resolveBrandJourney(FULL_PROFILE, done)
     expect(final.filter(step => step.state === 'done')).toHaveLength(9)
-    expect(final.every(step => step.progress.pct === 100)).toBe(true)
+    expect(final.filter(step => !isBrandDesignStep(step.stepKey))
+      .every(step => step.progress.pct === 100)).toBe(true)
+    // Und die zweite Schicht bleibt dahinter zu — ohne Freischaltung.
+    expect(final.filter(step => isBrandDesignStep(step.stepKey))
+      .every(step => step.state === 'locked' && step.reason === 'design_locked')).toBe(true)
   })
 
   it('endet auf dem Basispfad mit sieben done und zwei skipped', () => {
-    const done = includedBrandSteps(BASE_PROFILE).map(stepKey => completedStep(stepKey))
+    const done = includedBrandSteps(BASE_PROFILE)
+      .filter(stepKey => !isBrandDesignStep(stepKey))
+      .map(stepKey => completedStep(stepKey))
     const journey = resolveBrandJourney(BASE_PROFILE, done)
     expect(journey.filter(step => step.state === 'done')).toHaveLength(7)
     expect(journey.filter(step => step.state === 'skipped').map(step => step.stepKey))
       .toEqual(['architecture', 'naming'])
+  })
+})
+
+/**
+ * DIE FREISCHALTUNG VON BRAND DESIGN (Konzept §2.10, Paket D0).
+ *
+ * ZWEI Bedingungen, und beide werden hier einzeln fallen gelassen — eine
+ * Prüfung, die nur den gesperrten und den offenen Normalfall kennt, wäre auch
+ * für eine Regel grün, die nur eine der beiden liest.
+ */
+describe('resolveBrandJourney — Brand Design ist gesperrt, bis beides stimmt', () => {
+  const UNLOCKED: BrandProfileFacts = { ...FULL_PROFILE, designUnlockedAt: '2026-09-07T10:00:00.000Z' }
+  const foundationDone = includedBrandSteps(FULL_PROFILE)
+    .filter(stepKey => !isBrandDesignStep(stepKey))
+    .map(stepKey => completedStep(stepKey))
+
+  it('ohne Freischaltung: alle sechs gesperrt, mit eigenem Grund', () => {
+    const journey = resolveBrandJourney(FULL_PROFILE, foundationDone)
+    for (const stepKey of BRAND_DESIGN_STEP_KEYS) {
+      expect(stateOf(journey, stepKey), stepKey)
+        .toMatchObject({ state: 'locked', reason: 'design_locked' })
+      expect(canEnterBrandStep(journey, stepKey).allowed, stepKey).toBe(false)
+    }
+  })
+
+  it('ohne fertige Foundation: auch mit Freischaltung gesperrt', () => {
+    // Die zweite Bedingung allein trägt nicht — sonst stünde Frida vor einer
+    // Foundation, aus der sie nichts ableiten kann.
+    const journey = resolveBrandJourney(UNLOCKED, [completedStep('context')])
+    for (const stepKey of BRAND_DESIGN_STEP_KEYS) {
+      expect(stateOf(journey, stepKey), stepKey)
+        .toMatchObject({ state: 'locked', reason: 'design_locked' })
+    }
+  })
+
+  it('mit beidem: `dna` ist offen, der Rest wartet auf seinen Vorgänger', () => {
+    const journey = resolveBrandJourney(UNLOCKED, foundationDone)
+    expect(stateOf(journey, 'dna')).toMatchObject({ state: 'open', reason: 'unlocked' })
+    expect(canEnterBrandStep(journey, 'dna').allowed).toBe(true)
+    for (const stepKey of BRAND_DESIGN_STEP_KEYS.filter(key => key !== 'dna')) {
+      expect(stateOf(journey, stepKey), stepKey)
+        .toMatchObject({ state: 'locked', reason: 'awaiting_previous' })
+    }
+  })
+
+  it('und dann Kapitel für Kapitel — wie in der Foundation', () => {
+    const journey = resolveBrandJourney(UNLOCKED, [...foundationDone, completedStep('dna')])
+    expect(stateOf(journey, 'dna').state).toBe('done')
+    expect(stateOf(journey, 'color')).toMatchObject({ state: 'open', reason: 'unlocked' })
+    expect(stateOf(journey, 'type').state).toBe('locked')
+  })
+
+  it('`designUnlockedAt: null` ist dasselbe wie „gar nicht gesetzt"', () => {
+    const journey = resolveBrandJourney({ ...FULL_PROFILE, designUnlockedAt: null }, foundationDone)
+    expect(stateOf(journey, 'dna')).toMatchObject({ state: 'locked', reason: 'design_locked' })
   })
 })
 
@@ -1193,7 +1263,14 @@ describe('brandRestartImpact — was ein Neustart kostet', () => {
   })
 
   it('GEGENPROBE: das letzte Kapitel berührt nichts mehr', () => {
-    expect(brandRestartImpact('result', allConfirmed).count).toBe(0)
+    // Seit Brand Design D0 ist das `motion` und nicht mehr `result`: Schicht 2
+    // hängt an `result.direction`, ein Neustart des Ergebnis-Kapitels kostet
+    // also die 26 bestätigten Design-Felder dahinter. Beides steht hier, damit
+    // die Zeile nicht bloss auf einen neuen Schlüssel umgebogen aussieht.
+    expect(brandRestartImpact('motion', allConfirmed).count).toBe(0)
+    const fromResult = brandRestartImpact('result', allConfirmed)
+    expect(fromResult.count).toBe(26)
+    expect(fromResult.sessions.every(id => isBrandDesignStep(slotById(id)!.stepId))).toBe(true)
   })
 
   it('ist die VEREINIGUNG über alle Sessions des Kapitels', () => {

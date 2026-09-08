@@ -1006,12 +1006,194 @@ export interface BrandWaitlistNoteResponse {
   ok: true
 }
 
+// ── Brand Design: das Preset (docs/plans/BRAND-DESIGN.md §2.8, Paket D0) ────
+
+/**
+ * DIE ELF STUFEN EINER RAMPE — dieselben wie in der Themes-Engine.
+ *
+ * Sie stehen hier NOCH EINMAL und nicht als Import: der A14-Vertrag erlaubt
+ * GENAU EINE Stelle, die relativ nach `packages/themes` greift, und das ist
+ * `shared/brandDesign.ts` (die reine Ramp-Mathematik). Eine zweite Datei mit
+ * demselben Import wäre eine zweite Grenzüberschreitung für einen Typ.
+ *
+ * DIE ZWEI LISTEN KÖNNEN TROTZDEM NICHT AUSEINANDERLAUFEN, und zwar zur
+ * ÜBERSETZUNGSZEIT: `buildBrandDesign` weist das Ergebnis von `generateRamp`
+ * (`Record<Shade, string>`) einer `BrandRamp` zu. Fehlte hier eine Stufe oder
+ * käme dort eine dazu, wäre das ein Typfehler — kein Test, der es vielleicht
+ * bemerkt. `tests/brandDesign.test.ts` zählt sie zusätzlich.
+ */
+export const BRAND_RAMP_SHADES = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950] as const
+export type BrandRampShade = (typeof BRAND_RAMP_SHADES)[number]
+export type BrandRamp = Readonly<Record<BrandRampShade, string>>
+
+/** Ein geprüftes Text/Grund-Paar mit seinem WCAG-Urteil (§2.3 `h.contrast`). */
+export interface BrandContrastPair {
+  /** Stabile Id des Paares — sie steht im Preset und in der Matrix. */
+  id: string
+  /** In welcher Welt geprüft wurde. */
+  scheme: 'light' | 'dark'
+  /** Vordergrund und Hintergrund als Hex — die WERTE, nicht ihre Herkunft. */
+  foreground: string
+  background: string
+  ratio: number
+  level: 'AAA' | 'AA' | 'AA18' | 'fail'
+}
+
+/** Eine Farb-Rolle des Systems (§2.3 `h.roles`). */
+export interface BrandColorRole {
+  id: string
+  /** Woraus die Rolle gefüllt wird (Rampen-Stufe, Akzent, Papier). */
+  source: string
+  /** Der aufgelöste Hex — damit Produkt 03 Tokens daraus machen kann. */
+  hex: string
+}
+
+/**
+ * DAS ERGEBNIS VON BRAND DESIGN (§2.8) — gebaut von der PUREN Regel
+ * `buildBrandDesign(values)` aus den bestätigten Slot-Werten.
+ *
+ * DIESELBE WAHRHEIT WIE BEI `buildBrandFoundation`, KEIN SPIEGEL: es gibt
+ * keine zweite Ablage, aus der das Preset gelesen würde — es entsteht bei
+ * jedem Aufruf neu aus den Werten, und ein eingefrorenes Abbild davon steht
+ * nur im Snapshot (§2.8), wo es eingefroren GEHÖRT.
+ */
+export interface BrandDesignPreset {
+  /**
+   * Fassung des PRESET-FORMATS (nicht die der Registry). Sie steigt, wenn sich
+   * die FORM ändert — ein alter Snapshot bleibt dadurch lesbar.
+   */
+  version: number
+  /** Die bestätigte Visual DNA: alle zehn Dimensionen (`brandDesignVocab.ts`). */
+  dna: Readonly<Record<string, string>>
+  color: {
+    /** Die eine Basisfarbe, aus der alles gerechnet ist. */
+    base: string
+    rampLight: BrandRamp
+    rampDark: BrandRamp
+    neutral: BrandRamp
+    accent: string
+    roles: BrandColorRole[]
+    contrastPairs: BrandContrastPair[]
+  }
+  type: {
+    /** Id aus `BRAND_FONT_PAIRS`. */
+    pair: string
+    /** Id aus `BRAND_TYPE_SCALES`. */
+    scale: string
+    /** Die Schrift-Regeln als Zeilen (`i.rules`). */
+    rules: string[]
+  }
+  mark: {
+    /** Id aus `BRAND_MARK_KINDS`. */
+    kind: string
+    /** Das Briefing als Zeilen (`j.brief`). */
+    brief: string[]
+    /** Die gesetzten Beispiele als SVG-Quelltext (`j.examples`, D5b). */
+    examples: string[]
+    /**
+     * Referenzen auf BEHALTENE KI-Entwürfe (`j.drafts`).
+     *
+     * Sie stehen im Preset der WERKSTATT und fallen im Snapshot heraus
+     * (§1.11 b) — deshalb ist das Feld im v2-Zweig des Snapshots
+     * ausdrücklich weggelassen (`BrandDesignSnapshotPreset`), nicht bloss
+     * leer gelassen: ein leeres Array wäre eine Zusage, die jeder Schreiber
+     * einzeln einhalten müsste.
+     */
+    keptDrafts: string[]
+  }
+  imagery: {
+    /** Die Bild-Prinzipien (`k.photo`). */
+    principles: string[]
+    /** Id aus `BRAND_ILLUSTRATION_OPTIONS`. */
+    illustration: string
+    /** Id aus `BRAND_ICON_OPTIONS`. */
+    icons: string
+    dodont: { doText: string, dontText: string }[]
+  }
+  motion: {
+    /** Id aus `BRAND_TEMPO_OPTIONS`. */
+    tempo: string
+    /** Die Übergangs-Tokens in ms, plus der Versatz. */
+    transitions: { id: string, durationMs: number, easing: string }[]
+    /** Bewegt sich das Zeichen? Id aus `BRAND_LOGO_MOTION_OPTIONS`. */
+    logo: string
+    rules: string[]
+  }
+}
+
+/**
+ * DIE EINGABE VON `buildBrandDesign` — die BESTÄTIGTEN Slot-Werte der sechs
+ * Kapitel, in der Form, in der sie gespeichert sind.
+ *
+ * Sie ist eine eigene Form und nicht `Record<string, string>`: die Regel muss
+ * an jedem Feld sehen können, welche ART Wert dort steht (eine Hex-Farbe, eine
+ * Id aus einem Vokabular, eine Liste von Zeilen). Alles ist OPTIONAL — ein
+ * unvollständiger Stand ist der Normalfall, solange die Schicht läuft, und
+ * `buildBrandDesign` antwortet darauf mit `null` statt mit einem halben Preset.
+ */
+export interface BrandDesignValues {
+  /** `g.mix` — die bestätigte DNA, alle zehn Dimensionen. */
+  dna?: Readonly<Record<string, string>>
+  /** `h.base` — Hex. */
+  base?: string
+  /** `h.neutral` — Id aus `BRAND_NEUTRAL_OPTIONS`. */
+  neutral?: string
+  /** `h.accent` — Hex. */
+  accent?: string
+  /** `h.roles` — Rolle plus Quelle; den Hex löst die Regel auf. */
+  roles?: readonly { readonly id: string, readonly source: string, readonly hex?: string }[]
+  /** `i.pair` / `i.scale` / `i.rules`. */
+  pair?: string
+  scale?: string
+  typeRules?: readonly string[]
+  /** `j.kind` / `j.brief` / `j.examples` / `j.drafts`. */
+  markKind?: string
+  markBrief?: readonly string[]
+  markExamples?: readonly string[]
+  keptDrafts?: readonly string[]
+  /** `k.photo` / `k.illustration` / `k.icons` / `k.dodont`. */
+  imageryPrinciples?: readonly string[]
+  illustration?: string
+  icons?: string
+  dodont?: readonly { readonly doText: string, readonly dontText: string }[]
+  /** `l.tempo` / `l.logo` / `l.rules`. */
+  tempo?: string
+  logoMotion?: string
+  motionRules?: readonly string[]
+}
+
 /** Der eingefrorene Inhalt einer Veröffentlichung (nie Chats/Entwürfe). */
 export interface BrandShareChapter {
   stepKey: BrandStepKey
   slots: { slotId: string, value: string }[]
 }
 
+/**
+ * DAS PRESET IM SNAPSHOT — dasselbe wie in der Werkstatt, OHNE die behaltenen
+ * KI-Entwürfe.
+ *
+ * `Omit` statt eines eigenen Typs: so kann das Feld nicht versehentlich
+ * wieder mitwandern, wenn jemand das Preset erweitert — und ein Schreiber, der
+ * `keptDrafts` setzen will, bekommt einen Typfehler statt eines stillen Lecks
+ * (§1.11 b: Entwürfe reisen nie in Snapshot oder Share).
+ */
+export interface BrandDesignSnapshotPreset extends Omit<BrandDesignPreset, 'mark'> {
+  mark: Omit<BrandDesignPreset['mark'], 'keptDrafts'>
+}
+
+/**
+ * DER SNAPSHOT — v1 heute, v2 mit Brand Design (§2.8).
+ *
+ * `schemaVersion` ist eine Zahl und bleibt es; `design` ist OPTIONAL, weil ein
+ * v1-Snapshot es nie hatte und weil auch eine v2-Marke ohne freigeschaltetes
+ * Brand Design keines hat. Der Renderer liest BEIDE Fassungen (BF1-Konzept
+ * §2.7) — er fragt nach dem FELD, nicht nach der Zahl.
+ *
+ * D0 legt nur den TYP an: GESCHRIEBEN wird weiter v1 (`brandSnapshot.ts`),
+ * Renderer und Schreiber kommen mit **D8**. Der Typ steht trotzdem schon hier,
+ * damit die Kapitel dazwischen ihre Werte gegen die Zielform bauen statt gegen
+ * eine Vermutung.
+ */
 export interface BrandShareSnapshot {
   schemaVersion: number
   title: string
@@ -1020,6 +1202,8 @@ export interface BrandShareSnapshot {
   chapters: BrandShareChapter[]
   presetId: string
   presetVersion: string
+  /** Nur ab `schemaVersion: 2` und nur mit abgeschlossener Schicht 2 (D8). */
+  design?: BrandDesignSnapshotPreset
 }
 
 /** Der rohe Token steht GENAU EINMAL hier — danach nur noch sein Hash. */

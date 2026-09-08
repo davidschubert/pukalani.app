@@ -343,6 +343,47 @@
       "result": {
         "direction": "Welche Richtung passt zu eurer Marke?",
         "rating": "Wie hilfreich war das Ergebnis?"
+      },
+      "g": {
+        "source": "Habt ihr Vorbilder — Screenshots, ein Pinnwand-Board, drei Seiten, die euch gefallen?",
+        "inspiration": "Eure Vorbilder",
+        "reading": "Lesung gegen eure Foundation",
+        "dna": "Eure Visual DNA",
+        "boards": "Drei Moodboards",
+        "board": "Welches Board ist euer Ausgangspunkt?",
+        "mix": "Mix und Match"
+      },
+      "h": {
+        "base": "Eure Basisfarbe",
+        "ramp": "Hell- und Dunkel-Rampe",
+        "neutral": "Welchen Grundton sollen eure Flächen haben?",
+        "accent": "Welche Farbe ist euer Signal?",
+        "roles": "Farb-Rollen",
+        "contrast": "Kontrast-Prüfung"
+      },
+      "i": {
+        "pair": "Welches Schriftpaar passt zu euch?",
+        "scale": "Grössen-Hierarchie",
+        "rules": "Schrift-Regeln"
+      },
+      "j": {
+        "kind": "Welche Art Zeichen braucht ihr?",
+        "brief": "Briefing für das Zeichen",
+        "examples": "Gesetzte Beispiele",
+        "pick": "Welche Setzung nehmt ihr als Vorzugs-Beispiel?",
+        "drafts": "KI-Entwürfe"
+      },
+      "k": {
+        "photo": "Eure Bild-Prinzipien",
+        "illustration": "Wollt ihr Illustration — und wenn ja, welche?",
+        "icons": "Welcher Icon-Satz passt zu eurer Schrift?",
+        "dodont": "Do und Don’t der Bildsprache"
+      },
+      "l": {
+        "tempo": "Wie schnell soll sich eure Marke bewegen?",
+        "transitions": "Übergangs-Tokens",
+        "logo": "Soll sich euer Zeichen bewegen?",
+        "rules": "Bewegungs-Regeln"
       }
     },
     "labels": {
@@ -846,7 +887,13 @@
       "manifesto": "Manifest",
       "verbal": "Tagline & Messaging",
       "naming": "Name",
-      "result": "Ergebnis"
+      "result": "Ergebnis",
+      "dna": "Moodboard",
+      "color": "Farbwelt",
+      "type": "Typografie",
+      "mark": "Zeichen",
+      "imagery": "Bildsprache",
+      "motion": "Bewegung"
     },
     "advisors": {
       "george": {
@@ -873,6 +920,11 @@
         "role": "Namens-Berater",
         "focus": "erst überleben, dann gefallen",
         "intro": "Beim Namen halte ich mich an Otto — unseren Namens-Berater: erst überleben, dann gefallen."
+      },
+      "frida": {
+        "role": "Design Directorin",
+        "focus": "Strategie wird Gestalt",
+        "intro": "Ab hier arbeite ich mit Frida — unserer Design Directorin. Sie macht aus eurer Foundation eine Gestalt und begründet jede Entscheidung am Fundament."
       }
     },
     "invite": {

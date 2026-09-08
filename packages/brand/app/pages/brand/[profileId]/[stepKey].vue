@@ -55,6 +55,7 @@ import {
   BRAND_ADVISORS,
   BRAND_VOICE,
   type BrandAdvisorKey,
+  advisorIsVoice,
   colleagueForStep,
 } from '../../../../shared/brandAdvisors'
 import {
@@ -272,9 +273,17 @@ const voice = BRAND_VOICE
 const voiceRole = computed(() => t(`brand.advisors.${voice.key}.role`))
 const advisorInfoOpen = ref(false)
 
-/** Das Team im Steckbrief — alle ausser George, in Registry-Reihenfolge. */
+/**
+ * Das Team im Steckbrief — alle, die NICHT selbst sprechen, in
+ * Registry-Reihenfolge.
+ *
+ * `advisorIsVoice` statt `key !== voice.key` (Brand Design D0): seit Frida
+ * gibt es eine zweite Stimme, und ein Vergleich gegen George allein hätte sie
+ * hier als „Kollegin hinter George" gelistet — sie ist aber die Beraterin von
+ * Schicht 2, nicht seine Technik-Geberin.
+ */
 const voiceTeam = computed(() => BRAND_ADVISORS
-  .filter(member => member.key !== voice.key)
+  .filter(member => !advisorIsVoice(member.key))
   .map(member => ({
     key: member.key,
     line: `${member.fullName} — ${t(`brand.advisors.${member.key}.role`)} · ${t(`brand.advisors.${member.key}.focus`)}`,

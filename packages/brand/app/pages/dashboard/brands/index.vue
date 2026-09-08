@@ -1,6 +1,11 @@
 <script setup lang="ts">
 import type { BwNewBrandSubmit } from '../../../components/BwNewBrandModal.vue'
-import { BRAND_STEP_KEYS, type BrandStepKey } from '../../../../shared/slotRegistry'
+import {
+  BRAND_FOUNDATION_STEP_KEYS,
+  BRAND_STEP_KEYS,
+  type BrandFoundationStepKey,
+  type BrandStepKey,
+} from '../../../../shared/slotRegistry'
 import { brandGradientFor } from '../../../../shared/brandPalette'
 import type { BrandProfileScoresResponse, BrandProfileSummary } from '../../../../shared/types/brand'
 import { useBrandWorkspaceStore } from '../../../stores/brandWorkspace'
@@ -59,11 +64,19 @@ function stepLabel(key: string): string {
     : t('brand.steps.context')
 }
 
+/**
+ * „Schritt 3 von 9" — die Zahl der FOUNDATION (Brand Design D0).
+ *
+ * `BRAND_STEP_KEYS` trägt seit D0 auch die sechs Kapitel von Schicht 2; die
+ * Zeile hier meint aber den Weg, den diese Karte anzeigt, und der endet bei
+ * `result` (`resolveProfileProgress` rechnet über dieselbe Menge). Wie Brand
+ * Design auf der Karte erscheint, entscheidet **D1**.
+ */
 function stepPosition(profile: BrandProfileSummary): string {
-  const index = BRAND_STEP_KEYS.indexOf(profile.currentStepKey as BrandStepKey)
+  const index = BRAND_FOUNDATION_STEP_KEYS.indexOf(profile.currentStepKey as BrandFoundationStepKey)
   return t('brand.brands.card.stepOf', {
     index: index < 0 ? 1 : index + 1,
-    total: BRAND_STEP_KEYS.length,
+    total: BRAND_FOUNDATION_STEP_KEYS.length,
   })
 }
 

@@ -31,6 +31,7 @@ import {
   type BrandSlot,
   type BrandSlotStateFacts,
   type BrandStepKey,
+  isBrandDesignStep,
   slotById,
 } from '../../shared/slotRegistry'
 import { computeSourcesHash } from '../../shared/brandSessions'
@@ -135,6 +136,13 @@ export type BrandProfileRow = Models.Row & {
    * steht dort (`brandMarketVisibilityOf`).
    */
   marketVisibility?: string
+  /**
+   * DIE FREISCHALTUNG VON BRAND DESIGN (Konzept §2.10, Spalte kommt mit D1).
+   * Optional getypt, weil sie ADDITIV dazukommt — `undefined` ist genau der
+   * Default „gesperrt"; `profileFacts()` macht daraus das `null`, mit dem die
+   * pure Regel rechnet.
+   */
+  designUnlockedAt?: string | null
   /**
    * DAS OPT-IN „diese Marke darf als öffentliche Seite in der Galerie stehen"
    * (Migration brand-020, Discover D1). EIGENE Spalte neben `marketVisibility`
@@ -736,6 +744,11 @@ export function profileFacts(row: BrandProfileRow): BrandProfileFacts {
     team: row.team === 'team' ? 'team' : 'solo',
     subBrands: row.subBrands === 'yes' || row.subBrands === 'no' ? row.subBrands : 'unknown',
     namingOpted: row.namingOpted === true,
+    // BRAND DESIGN, SCHICHT 2 (Konzept §2.10): die Spalte kommt erst mit der
+    // Design-Migration in D1 — eine Zeile von heute liest `undefined`, und das
+    // ist genau der Default „nicht freigeschaltet". Der Leser muss ohne die
+    // Spalte laufen, sonst wäre der Code vor der Migration nicht deploybar.
+    designUnlockedAt: row.designUnlockedAt ?? null,
   }
 }
 
@@ -1082,6 +1095,16 @@ export function resolveProfileProgress(journey: readonly BrandJourneyStep[]): Br
 
   for (const step of journey) {
     if (step.state === 'skipped') continue
+    // BRAND DESIGN ZÄHLT HIER (NOCH) NICHT MIT (D0).
+    //
+    // Der Cache füttert die Marken-Karte und die Zeile „Schritt 3 von 9" —
+    // beides Aussagen über die FOUNDATION. Zählte Schicht 2 mit, fiele der
+    // Prozentwert jedes fertigen Brandings im Deploy-Moment von 100 auf rund
+    // 70, ohne dass sich an der Marke etwas geändert hätte, und
+    // `currentStepKey` rutschte hinter `result` — womit der „Euer
+    // Branding"-Einstieg auf `/dashboard/brands` lautlos aufginge (Audit C4).
+    // Wie die zweite Schicht gezählt und angezeigt wird, entscheidet **D1**.
+    if (isBrandDesignStep(step.stepKey)) continue
     lastOnPath = step.stepKey
     total += step.progress.requiredTotal
     filled += step.progress.requiredFilled

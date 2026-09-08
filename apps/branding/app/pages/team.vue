@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { BRAND_ADVISORS } from '../../../../packages/brand/shared/brandAdvisors'
+import { BRAND_ADVISORS, advisorIsVoice } from '../../../../packages/brand/shared/brandAdvisors'
 import { jsonLdScript } from '../utils/jsonLd'
 
 /**
@@ -284,7 +284,15 @@ const crewCopy: Record<string, { desc: Record<L, string>, asks: Record<L, string
     personalEn: 'Naming advisor — checks pronunciation, spelling and availability before a name is allowed to charm.',
   },
 }
-const crew = BRAND_ADVISORS.filter(a => a.key !== 'george').map(a => ({
+/**
+ * DIE CREW HINTER DER STIMME — alle, die NICHT selbst sprechen.
+ *
+ * `advisorIsVoice` statt `key !== 'george'` (Brand Design D0): Frida ist seit
+ * D0 in der Berater-Registry und ist die STIMME von Schicht 2 — sie steht
+ * oben in `productTeam` mit ihrer eigenen Karte. Ohne diesen Filter stünde sie
+ * ein zweites Mal auf derselben Seite, im Abschnitt „hinter George".
+ */
+const crew = BRAND_ADVISORS.filter(a => !advisorIsVoice(a.key)).map(a => ({
   advisor: a,
   copy: crewCopy[a.key] ?? { desc: { de: '', en: '' }, asks: { de: '', en: '' }, personalEn: a.personal },
 }))

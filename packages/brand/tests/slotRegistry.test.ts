@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest'
 import { techniqueForStep } from '../shared/brandAdvisors'
 import { computeSourcesHash } from '../shared/brandSessions'
 import {
+  BRAND_DESIGN_STEP_KEYS,
+  BRAND_FOUNDATION_STEP_KEYS,
   BRAND_SLOTS,
   BRAND_SLOT_MAX_LENGTH,
   BRAND_STEP_KEYS,
@@ -12,6 +14,7 @@ import {
   confirmableRequiredSlotsForStep,
   dependencyClosure,
   exampleKeyFor,
+  isBrandDesignStep,
   partKeyFor,
   questionKeyFor,
   requiredSlotsForStep,
@@ -52,14 +55,26 @@ describe('Registry-Invarianten (die echte Liste)', () => {
     expect(new Set(ids).size).toBe(ids.length)
   })
 
-  it('kennt nur die neun stepKeys des Schema-Anhangs §2', () => {
-    expect([...BRAND_STEP_KEYS]).toEqual([
+  it('kennt die neun Bausteine der Foundation und die sechs von Brand Design', () => {
+    expect([...BRAND_FOUNDATION_STEP_KEYS]).toEqual([
       'context', 'pvm', 'architecture', 'values',
       'archetype', 'manifesto', 'verbal', 'naming', 'result',
     ])
+    // Schicht 2 (Konzept §2.1) — ADDITIV und IMMER hinter der Foundation.
+    expect([...BRAND_DESIGN_STEP_KEYS]).toEqual([
+      'dna', 'color', 'type', 'mark', 'imagery', 'motion',
+    ])
+    expect([...BRAND_STEP_KEYS])
+      .toEqual([...BRAND_FOUNDATION_STEP_KEYS, ...BRAND_DESIGN_STEP_KEYS])
     for (const slot of BRAND_SLOTS) {
       expect(BRAND_STEP_KEYS).toContain(slot.stepId)
     }
+  })
+
+  it('`isBrandDesignStep` trennt die zwei Schichten — und nur sie', () => {
+    for (const stepKey of BRAND_DESIGN_STEP_KEYS) expect(isBrandDesignStep(stepKey)).toBe(true)
+    for (const stepKey of BRAND_FOUNDATION_STEP_KEYS) expect(isBrandDesignStep(stepKey)).toBe(false)
+    expect(isBrandDesignStep('gibt-es-nicht')).toBe(false)
   })
 
   it('lässt jede Abhängigkeit auf einen existierenden Slot zeigen', () => {
@@ -103,8 +118,13 @@ describe('Registry-Invarianten (die echte Liste)', () => {
     }
   })
 
-  it('kennt genau EIN eigenes Instrument (d.pairs) — die Konfidenz ist kein Slot', () => {
-    expect(BRAND_SLOTS.filter(slot => slot.type === 'special').map(slot => slot.id)).toEqual(['d.pairs'])
+  it('kennt genau DREI eigene Instrumente — die Konfidenz ist kein Slot', () => {
+    // `d.pairs` (Paarvergleich, P4) und seit Brand Design D0 die zwei
+    // Instrumente der Schicht 2: Vorbilder hochladen (D2) und KI-Entwürfe
+    // (D5c). Alle drei sind DEKLARIERT und noch nicht gebaut — deshalb sind
+    // sie `special` und fallen aus der bedienbaren Pflicht-Menge (s. u.).
+    expect(BRAND_SLOTS.filter(slot => slot.type === 'special').map(slot => slot.id))
+      .toEqual(['d.pairs', 'g.inspiration', 'j.drafts'])
     expect(BRAND_SLOTS.some(slot => slot.id.includes('confidence'))).toBe(false)
   })
 
@@ -187,6 +207,15 @@ describe('Slot-Zählung je Baustein (der Katalog ist die Quelle)', () => {
     verbal: 5,
     naming: 8,
     result: 2,
+    // Schicht 2 (Konzept §2.2–§2.7): Moodboard 7 (mit Weiche, Vorbildern und
+    // Lesung) · Farbwelt 6 · Typografie 3 · Zeichen 5 (`j.pick` ist die Wahl
+    // unter den Setzungen) · Bildsprache 4 · Bewegung 4.
+    dna: 7,
+    color: 6,
+    type: 3,
+    mark: 5,
+    imagery: 4,
+    motion: 4,
   }
 
   for (const stepKey of BRAND_STEP_KEYS) {
@@ -195,9 +224,14 @@ describe('Slot-Zählung je Baustein (der Katalog ist die Quelle)', () => {
     })
   }
 
-  it('sind zusammen 68 Slots', () => {
-    expect(BRAND_SLOTS.length).toBe(68)
-    expect(Object.values(expected).reduce((a, b) => a + b, 0)).toBe(68)
+  it('sind zusammen 97 Slots — 68 Foundation, 29 Brand Design', () => {
+    expect(BRAND_SLOTS.length).toBe(97)
+    expect(Object.values(expected).reduce((a, b) => a + b, 0)).toBe(97)
+    const foundation = BRAND_SLOTS.filter(slot => !isBrandDesignStep(slot.stepId))
+    expect(foundation).toHaveLength(68)
+    // 29, nicht die „~27" des Konzepts §2.11: die Zahl dort ist eine Schätzung
+    // vor dem Schnitt — gezählt sind 7 + 6 + 3 + 5 + 4 + 4.
+    expect(BRAND_SLOTS.length - foundation.length).toBe(29)
   })
 
   it('trägt die Ids des Katalogs wörtlich', () => {
@@ -206,9 +240,14 @@ describe('Slot-Zählung je Baustein (der Katalog ist die Quelle)', () => {
     }
   })
 
-  it('kennt genau drei nicht-pflichtige Slots, jeder mit Grund', () => {
+  it('kennt genau sechs nicht-pflichtige Slots, jeder mit Grund', () => {
+    // Drei in der Foundation (keine Texte zu analysieren · nur im Team gefragt ·
+    // ausdrücklich freiwillig) und drei in Brand Design: die Vorbilder und ihre
+    // Lesung gibt es nur auf dem Weg MIT Vorbildern (`g.source`), die
+    // KI-Entwürfe sind ein Angebot und keine Station.
     expect(BRAND_SLOTS.filter(slot => !slot.required).map(slot => slot.id))
-      .toEqual(['a.toneAnalysis', 'c.teamFilter', 'result.rating'])
+      .toEqual(['a.toneAnalysis', 'c.teamFilter', 'result.rating',
+        'g.inspiration', 'g.reading', 'j.drafts'])
   })
 })
 
@@ -250,16 +289,22 @@ describe('slotsForStep / requiredSlotsForStep / slotById', () => {
  * (`resolveProfileProgress` nimmt den ersten offenen, sonst den letzten).
  * Rutschte ein neuer Baustein dahinter, ginge das Schloss lautlos auf.
  */
-describe('BRAND_STEP_KEYS — das Ergebnis steht am Ende', () => {
-  it('hat `result` als letzten Eintrag', () => {
-    expect(BRAND_STEP_KEYS.at(-1)).toBe('result')
+describe('BRAND_FOUNDATION_STEP_KEYS — das Ergebnis steht am Ende der Foundation', () => {
+  it('hat `result` als letzten Eintrag der SCHICHT 1', () => {
+    // Seit Brand Design D0 ist `result` nicht mehr der letzte Eintrag von
+    // `BRAND_STEP_KEYS` — dahinter liegen die sechs Design-Kapitel. Die
+    // Zusage der Kachel hängt aber an der FOUNDATION, und genau die steht
+    // jetzt in einer eigenen Liste; `resolveProfileProgress` rechnet über sie.
+    expect(BRAND_FOUNDATION_STEP_KEYS.at(-1)).toBe('result')
+    expect(BRAND_STEP_KEYS.at(-1)).toBe('motion')
+    expect(isBrandDesignStep(BRAND_STEP_KEYS.at(-1)!)).toBe(true)
   })
 })
 
 describe('slotIsConfirmable / confirmableRequiredSlotsForStep', () => {
-  it('nennt genau den Paarvergleich unbestätigbar', () => {
+  it('nennt genau die drei Instrumente unbestätigbar', () => {
     const unconfirmable = BRAND_SLOTS.filter(slot => !slot.deactivated && !slotIsConfirmable(slot))
-    expect(unconfirmable.map(slot => slot.id)).toEqual(['d.pairs'])
+    expect(unconfirmable.map(slot => slot.id)).toEqual(['d.pairs', 'g.inspiration', 'j.drafts'])
   })
 
   it('nimmt d.pairs aus der Pflicht-Menge von archetype, sonst nichts', () => {
@@ -274,6 +319,8 @@ describe('slotIsConfirmable / confirmableRequiredSlotsForStep', () => {
   })
 
   it('lässt jeden anderen Baustein unverändert', () => {
+    // `dna` und `mark` tragen ihre Instrumente als NICHT-Pflicht — sie fallen
+    // schon aus `requiredSlotsForStep` und ändern die Gleichheit nicht.
     for (const stepKey of BRAND_STEP_KEYS.filter(key => key !== 'archetype')) {
       expect(confirmableRequiredSlotsForStep(stepKey)).toEqual(requiredSlotsForStep(stepKey))
     }
@@ -445,7 +492,7 @@ describe('Session-Vertrag', () => {
     // `a.facts` steht als `choice` im Katalog und ist trotzdem eine SAMMLUNG.
     expect(byKind('collect')).toEqual(['a.facts'])
     expect(slotById('a.facts')!.type).toBe('choice')
-    expect(byKind('instrument')).toEqual(['d.pairs'])
+    expect(byKind('instrument')).toEqual(['d.pairs', 'g.inspiration', 'j.drafts'])
   })
 
   it('meldet ein `kind`, das nicht zum Füllweg passt', () => {
@@ -501,15 +548,20 @@ describe('Session-Vertrag', () => {
     }
   })
 
-  it('hält genau die vier heiklen Sessions zurück (Plan §3a Nr. 7)', () => {
+  it('hält genau die sieben heiklen Sessions zurück (Plan §3a Nr. 7)', () => {
     // Drei nennt der Plan (Beschwerden, Herausforderung, Zahlen); die vierte ist
     // Davids Entscheidung vom 2026-09-04 (Audit Punkt 8): `a.competitors` nennt
     // NAMENTLICH Dritte und zu jedem eine Schwäche — das Erste, was ein Kunde
     // nicht teilen will. Umgekehrt ist `b2.roleOfMaster` zurück auf `public`:
     // die Architektur-Aussage wird im geteilten Dokument gebraucht, sobald
     // `b2.rule` darauf verweist.
+    // Drei kommen mit Brand Design D0 dazu (Konzept §2.13): die hochgeladenen
+    // VORBILDER sind Fremdwerke, ihre LESUNG beschreibt fremde Werke, und die
+    // KI-ENTWÜRFE sind ausdrücklich privat (§1.11 b) — keines von dreien reist
+    // je in Snapshot, Share oder Beispiel.
     expect(BRAND_SLOTS.filter(session => session.sensitivity !== 'public').map(session => session.id))
-      .toEqual(['a.competitors', 'a.complaints', 'a.challenge', 'a.facts'])
+      .toEqual(['a.competitors', 'a.complaints', 'a.challenge', 'a.facts',
+        'g.inspiration', 'g.reading', 'j.drafts'])
   })
 
   it('gibt jeder Session eine Zielgruppe (BF-Leseansicht §2.3)', () => {
@@ -551,6 +603,12 @@ describe('Session-Vertrag', () => {
       'f.shortlist',
       'result.direction',
       'result.rating',
+      // Brand Design D0: die Weiche „Habt ihr Vorbilder?" ist eine Auskunft
+      // über die Sitzung, `g.boards` der Vorrat vor der Wahl (`g.board`).
+      'g.source',
+      // vertraulich ⇒ intern (Verbindungsregel)
+      'g.reading',
+      'g.boards',
     ])
   })
 
@@ -635,9 +693,12 @@ describe('Session-Vertrag', () => {
       if (asks(session)) expect(session.ladder.opening.trim(), session.id).not.toBe('')
       else expect(session.ladder.opening, session.id).toBe('')
     }
-    // 29 Fragen + 1 Sammlung (a.facts) + 15 Auswahlen = 45. Die Registry führt
-    // 16 `choice`-Slots, aber `a.facts` ist davon die Sammlung (Plan, Anhang A).
-    expect(BRAND_SLOTS.filter(asks)).toHaveLength(45)
+    // Foundation: 29 Fragen + 1 Sammlung (a.facts) + 15 Auswahlen = 45. Die
+    // Registry führt dort 16 `choice`-Slots, aber `a.facts` ist davon die
+    // Sammlung (Plan, Anhang A). Brand Design legt 11 Auswahlen dazu.
+    expect(BRAND_SLOTS.filter(asks)).toHaveLength(56)
+    expect(BRAND_SLOTS.filter(session => asks(session) && isBrandDesignStep(session.stepId)))
+      .toHaveLength(11)
 
     expect(validateSlotRegistry(mutate('a.origin', {
       ladder: { opening: '', probes: [], reframes: [] },
@@ -650,8 +711,10 @@ describe('Session-Vertrag', () => {
   it('gibt jeder Entwurfs-Session ein Beispiel je Pfad UND je Sprache', () => {
     const drafts = BRAND_SLOTS.filter(session =>
       session.kind === 'derive' || session.kind === 'draft' || session.generator === 'candidates')
-    // 11 Ableitungen + 11 Entwürfe + `ep.taglines` (Auswahl mit Kandidaten-Generator).
-    expect(drafts).toHaveLength(23)
+    // Foundation: 11 Ableitungen + 11 Entwürfe + `ep.taglines` (Auswahl mit
+    // Kandidaten-Generator) = 23. Brand Design legt 10 Ableitungen und 6
+    // Entwürfe dazu.
+    expect(drafts).toHaveLength(39)
     for (const session of drafts) {
       for (const pathKind of ['new', 'relaunch'] as const) {
         expect(session.examples[pathKind].de.length, `${session.id}/${pathKind}/de`).toBeGreaterThan(0)
@@ -669,10 +732,23 @@ describe('Session-Vertrag', () => {
     // `d.pairs` ist ein Instrument (der Wert entsteht Karte gegen Karte) und
     // `result.rating` eine freiwillige Zahl — beides sind Fälle, in denen ein
     // Beispiel keine Form zeigte, sondern nur ein Ergebnis vorwegnähme.
+    //
+    // Brand Design legt dieselbe Sorte dazu: die zwei Instrumente (`g.inspiration`
+    // nimmt Dateien entgegen, `j.drafts` erzeugt auf Knopfdruck) und neun reine
+    // AUSWAHLEN, die aus einer geschlossenen Menge gewählt werden — dort zeigte
+    // ein Beispiel keine Form, sondern nähme die Wahl vorweg.
     const withoutExamples = BRAND_SLOTS
       .filter(session => session.examples.new.de.length === 0 && session.examples.relaunch.de.length === 0)
       .map(session => session.id)
-    expect(withoutExamples).toEqual(['d.pairs', 'result.rating'])
+    expect(withoutExamples).toEqual([
+      'd.pairs', 'result.rating',
+      'g.source', 'g.inspiration', 'g.board',
+      'h.neutral', 'h.accent',
+      'i.pair',
+      'j.kind', 'j.pick', 'j.drafts',
+      'k.illustration', 'k.icons',
+      'l.tempo', 'l.logo',
+    ])
   })
 
   it('meldet einen unbrauchbaren Umfang', () => {
@@ -698,7 +774,13 @@ describe('Session-Vertrag', () => {
     // Kapitel-Etappen kommunizieren". Die SPANNE steht hier und nicht die
     // genaue Zahl: eine einzelne Session darf sich bewegen, die Zusage nicht.
     const OPTIONAL: readonly string[] = ['architecture', 'naming']
-    const active = BRAND_SLOTS.filter(session => !session.deactivated)
+    // NUR die FOUNDATION: die Zusage „~45 Minuten, halbiert auf ~77" ist die
+    // des Fundaments (Content-Spec §16). Brand Design ist eine eigene, extra
+    // freigeschaltete Schicht mit eigener Uhr — sie hier mitzuzählen hiesse,
+    // eine Kommunikationslinie an einem Produkt zu messen, das der Kunde ohne
+    // Freischaltung gar nicht sieht.
+    const active = BRAND_SLOTS.filter(session =>
+      !session.deactivated && !isBrandDesignStep(session.stepId))
     const minutes = (sessions: readonly BrandSlot[]) =>
       sessions.reduce((sum, session) => sum + session.effort.minutes, 0)
     const base = minutes(active.filter(session => !OPTIONAL.includes(session.stepId)))
