@@ -875,7 +875,11 @@ export const BRAND_SLOTS: readonly BrandSlot[] = [
   // Gebaut werden sie in D2 bzw. D5c.
 
   // ── G · Moodboard (§2.2) — 7 ────────────────────────────────────────────
-  defineSession({ id: 'g.source', stepId: 'dna', type: 'choice', required: true, kind: 'choice', maxLength: SHORT, editor: 'chips', generator: 'none' }),
+  // `editor: 'cards'` (D2a): die Weiche hat einen GESCHLOSSENEN Vertrag
+  // (`brandChoiceOptions.ts`), und `choiceCardsFor` in der Werkstatt verlangt
+  // beides — Vertrag UND `cards`. Mit `chips` stand hier ein Textfeld, in das
+  // der Mensch die rohe Id `inspiration` hätte tippen müssen.
+  defineSession({ id: 'g.source', stepId: 'dna', type: 'choice', required: true, kind: 'choice', maxLength: SHORT, editor: 'cards', generator: 'none' }),
   // Vorbilder sind FREMDWERKE und bleiben privat (§2.13) — `sensitivity:
   // 'internal'` in `sessionContent.ts`, `audience` folgt daraus.
   defineSession({ id: 'g.inspiration', stepId: 'dna', type: 'special', required: false, kind: 'structured', maxLength: LONG, editor: 'uploads', generator: 'none', dependencies: ['g.source'] }),

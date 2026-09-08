@@ -654,6 +654,18 @@
           "hint": "The brands stand alone, the parent stays invisible.",
           "example": "Procter and Gamble: Ariel, Pampers, Gillette."
         }
+      },
+      "dnaSource": {
+        "inspiration": {
+          "label": "We have references",
+          "hint": "Screenshots, a pinboard, three websites you like. Frida reads them against your foundation.",
+          "example": "A roastery home page, a book cover, an Instagram feed."
+        },
+        "foundation": {
+          "label": "Frida suggests",
+          "hint": "The direction comes from the foundation alone — archetype, values, tone words, positioning.",
+          "example": "Archetype, values, tone words, positioning — nothing else needed."
+        }
       }
     },
     "workspace": {
@@ -2543,6 +2555,32 @@
       "info": "The visual identity of your brand — derived from foundation and brand language, not from a catalogue. Colour, type and mark follow from archetype, values and voice; every decision carries its reason. Brand Design is unlocked by the studio after the intro call.",
       "progress": "{done} of {total} chapters",
       "result": "Visual identity"
+    },
+    "inspiration": {
+      "title": "Your references",
+      "intro": "Screenshots of anything you like — for each one you only say what it is about: colour world, typography, mark, imagery or composition. A sentence about it helps, but is not required.",
+      "counter": "{count} of {max}",
+      "loading": "Loading your references …",
+      "add": "Add screenshots",
+      "formats": "PNG, JPG, WebP · up to 5 MB each",
+      "itemLabel": "Reference {number}",
+      "areaLabel": "Area of reference {number}",
+      "noteLabel": "Note on reference {number}",
+      "notePlaceholder": "What do you like about it? (optional)",
+      "remove": "Remove reference {number}",
+      "limits": "Up to {max} images per brand · 5 MB each at most",
+      "privacy": "Your references stay private: they appear neither in the document nor in the shared link nor in the example. They are other people's work — we read them, we do not copy them.",
+      "error": {
+        "tooLarge": "That image is larger than 5 MB. A screen-sized screenshot is plenty.",
+        "unsupportedType": "PNG, JPG and WebP only. What you sent is none of those.",
+        "limitReached": "We do not take more than {max} references — remove one if you need another.",
+        "areaInvalid": "That area does not exist. Pick colour world, typography, mark, imagery or composition.",
+        "noteTooLong": "The note is too long — one sentence is enough.",
+        "rateLimited": "That was too fast in a row. Wait a minute and try again.",
+        "notFound": "That reference no longer exists.",
+        "generic": "That did not work. Please try again."
+      },
+      "skipped": "You went with Frida’s suggestion — references are not part of this chapter. You can change that choice above at any time."
     }
   }
 }

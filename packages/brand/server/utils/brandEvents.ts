@@ -99,6 +99,18 @@ export type BrandEventType =
    */
   | 'design.unlocked'
   | 'design.locked'
+  /**
+   * DIE VORBILDER (Konzept §2.2 Schritt 2, Paket D2a) — die zwei Handlungen am
+   * Upload-Instrument. Sie beantworten die Frage, an der die ganze Weiche
+   * hängt: bringen Kunden überhaupt Vorbilder mit, und WOFÜR (Bereich)?
+   *
+   * `payload` trägt Bereich, Bytes, Format, ob eine Notiz dabei war und die
+   * neue Anzahl. NIE den Dateinamen, nie die Notiz, nie ein Bild (Regel 1 im
+   * Kopf) — ein Vorbild ist ein FREMDWERK und bleibt privat (§2.13); der
+   * Funnel ist der letzte Ort, an dem etwas davon stehen dürfte.
+   */
+  | 'design.inspiration.added'
+  | 'design.inspiration.removed'
 
 export interface BrandEventInput {
   type: BrandEventType

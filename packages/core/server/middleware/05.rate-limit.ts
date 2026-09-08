@@ -575,6 +575,29 @@ const WRITE_LIMITED: { re: RegExp, bucket: string, max?: number }[] = [
    */
   { re: /^(POST|DELETE) \/api\/brand\/profiles\/[^/]+\/publication$/, bucket: 'brand:publish', max: TOKEN_MAX },
   /**
+   * DIE VORBILDER — Hochladen, Ändern, Entfernen (docs/plans/BRAND-DESIGN.md
+   * §2.2 Schritt 2, Paket D2a).
+   *
+   * DER TEUERSTE SCHREIBWEG DIESES LAYERS, DER KEIN MODELL RUFT: jeder Aufruf
+   * schiebt bis zu 5 MB durch den Server in den Appwrite-Speicher. Ohne Bremse
+   * ist die Route der bequemste Weg, die Platte einer Instanz zu füllen — der
+   * FACHLICHE Deckel (12 Bilder je Marke) greift erst NACH dem Lesen des
+   * Rumpfes, und wer die Grenze erreicht hat, kann weiter löschen und
+   * hochladen.
+   *
+   * EIN gemeinsamer Eimer für alle drei Methoden, weil es EIN Vorgang ist
+   * (Muster: `brand:publish` eine Zeile höher). 12/min je IP ist genau das
+   * Kontingent einer Marke am Stück: wer zwölf Screenshots auf einmal auswählt,
+   * kommt in einem Zug durch (die Werkstatt schickt sie einzeln), und danach
+   * geht es um Korrekturen einzelner Karten.
+   *
+   * DAS GET STEHT BEWUSST NICHT HIER: es liest höchstens zwölf Zeilen und
+   * hängt am Aufbau des Kapitels. Die BILD-Route ebenso wenig — eine Seite mit
+   * zwölf Karten holt zwölf Bilder, das wäre eine Bremse gegen die eigene
+   * Anzeige.
+   */
+  { re: /^(POST|PATCH|DELETE) \/api\/brand\/profiles\/[^/]+\/inspiration(\/[^/]+)?$/, bucket: 'brand:inspiration', max: 12 },
+  /**
    * „HIER STIMMT ETWAS NICHT" — die Meldung zu einer Marke in der öffentlichen
    * Galerie (docs/plans/DISCOVER-BRANDS.md §3.4/§6, Paket D3).
    *

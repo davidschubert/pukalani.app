@@ -5,6 +5,7 @@ import { describe, expect, it } from 'vitest'
 import {
   BRAND_ARCHETYPES,
   BRAND_ARCHITECTURE_MODELS,
+  BRAND_DNA_SOURCES,
   brandChoiceContract,
   brandChoiceDisplayLabel,
   brandChoiceFallbackQuestion,
@@ -345,7 +346,11 @@ describe('Was der Mensch statt der rohen Id liest', () => {
     const localesDir = join(dirname(fileURLToPath(import.meta.url)), '..', 'i18n', 'locales')
     for (const locale of ['de', 'en'] as const) {
       const catalog = JSON.parse(readFileSync(join(localesDir, `${locale}.json`), 'utf8')) as Record<string, unknown>
-      for (const option of BRAND_ARCHITECTURE_MODELS) {
+      // BEIDE Karten-Verträge: die vier Architektur-Modelle und die zwei Wege
+      // der Weiche `g.source` (Brand Design D2a). Sie stehen zusammen hier,
+      // weil beide `editor: 'cards'` tragen und dieselbe Copy-Dreiheit
+      // rendern — ein zweiter Test daneben wäre dieselbe Prüfung zweimal.
+      for (const option of [...BRAND_ARCHITECTURE_MODELS, ...BRAND_DNA_SOURCES]) {
         const copy = option.copyKey.split('.').reduce<unknown>(
           (node, key) => (node && typeof node === 'object' ? (node as Record<string, unknown>)[key] : undefined),
           catalog,

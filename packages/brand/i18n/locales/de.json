@@ -654,6 +654,18 @@
           "hint": "Die Marken stehen allein, die Mutter bleibt unsichtbar.",
           "example": "Procter und Gamble: Ariel, Pampers, Gillette."
         }
+      },
+      "dnaSource": {
+        "inspiration": {
+          "label": "Wir haben Vorbilder",
+          "hint": "Screenshots, Pinterest, drei Websites, die euch gefallen. Frida liest sie gegen eure Foundation.",
+          "example": "Die Startseite einer Rösterei, ein Buch-Cover, ein Instagram-Feed."
+        },
+        "foundation": {
+          "label": "Frida schlägt vor",
+          "hint": "Die Richtung kommt allein aus der Foundation — Archetyp, Werte, Ton-Wörter, Positionierung.",
+          "example": "Archetyp, Werte, Ton-Wörter, Positionierung — mehr braucht es nicht."
+        }
       }
     },
     "workspace": {
@@ -2543,6 +2555,32 @@
       "info": "Die visuelle Identität eurer Marke — hergeleitet aus Foundation und Brand Language, nicht aus dem Katalog. Farben, Schrift und Zeichen entstehen aus Archetyp, Werten und Stimme; jede Entscheidung trägt ihre Begründung. Freigeschaltet wird Brand Design vom Studio nach dem Erstgespräch.",
       "progress": "{done} von {total} Kapiteln",
       "result": "Visuelle Identität"
+    },
+    "inspiration": {
+      "title": "Eure Vorbilder",
+      "intro": "Screenshots von allem, was euch gefällt — je Bild sagt ihr nur, was daran: Farbwelt, Typografie, Zeichen, Bildsprache oder Komposition. Ein Satz dazu hilft, ist aber nicht Pflicht.",
+      "counter": "{count} von {max}",
+      "loading": "Eure Vorbilder werden geladen …",
+      "add": "Screenshots hinzufügen",
+      "formats": "PNG, JPG, WebP · bis 5 MB je Bild",
+      "itemLabel": "Vorbild {number}",
+      "areaLabel": "Bereich von Vorbild {number}",
+      "noteLabel": "Notiz zu Vorbild {number}",
+      "notePlaceholder": "Was gefällt euch daran? (optional)",
+      "remove": "Vorbild {number} entfernen",
+      "limits": "Bis {max} Bilder je Marke · höchstens 5 MB je Bild",
+      "privacy": "Eure Vorbilder bleiben privat: sie erscheinen weder im Dokument noch im geteilten Link noch im Beispiel. Sie sind Fremdwerke — wir lesen sie, wir bauen sie nicht nach.",
+      "error": {
+        "tooLarge": "Das Bild ist größer als 5 MB. Ein Screenshot in Bildschirmgröße reicht völlig.",
+        "unsupportedType": "Nur PNG, JPG und WebP. Was ihr geschickt habt, ist keines davon.",
+        "limitReached": "Mehr als {max} Vorbilder nehmen wir nicht — entfernt eines, wenn ihr noch eines braucht.",
+        "areaInvalid": "Diesen Bereich gibt es nicht. Wählt Farbwelt, Typografie, Zeichen, Bildsprache oder Komposition.",
+        "noteTooLong": "Die Notiz ist zu lang — ein Satz genügt.",
+        "rateLimited": "Das ging zu schnell hintereinander. Wartet eine Minute und versucht es noch einmal.",
+        "notFound": "Dieses Vorbild gibt es nicht mehr.",
+        "generic": "Das hat nicht geklappt. Versucht es bitte noch einmal."
+      },
+      "skipped": "Ihr habt euch für Fridas Vorschlag entschieden — Vorbilder entfallen in diesem Kapitel. Ihr könnt die Weiche oben jederzeit korrigieren."
     }
   }
 }

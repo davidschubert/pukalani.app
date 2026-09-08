@@ -4,6 +4,10 @@ import { Query } from 'node-appwrite'
 import { BRAND_ACCESS_TABLE } from './brandAccess'
 import type { BrandInviteRow } from './brandInvites'
 import { BRAND_FINDINGS_TABLE } from './brandFindingsStore'
+import {
+  BRAND_INSPIRATION_TABLE,
+  purgeBrandInspiration,
+} from './brandInspirationStore'
 import { runBrandProfileCascades } from './brandProfileCascade'
 import { BRAND_PUBLICATIONS_TABLE, BRAND_PUBLICATION_REPORTS_TABLE } from './brandPublications'
 import {
@@ -130,6 +134,19 @@ export async function brandExportUserData(event: H3Event, userId: string): Promi
        * öffentlich steht.
        */
       publication: await safeGet(event, BRAND_PUBLICATIONS_TABLE, profile.$id),
+      /**
+       * DIE VORBILDER (brand-024, Brand Design D2a) — NUR die Metadaten:
+       * Bereich, Notiz, Nummer, Dateiname und (ab D2b) die Lesung. Die BILDER
+       * selbst reisen NICHT mit.
+       *
+       * Das ist kein Versehen und keine Lücke im Export: der GDPR-Export ist
+       * eine JSON-Antwort, und ein Fremdwerk von 5 MB je Zeile gehört nicht
+       * hinein. Was hier steht, ist die vollständige Auskunft darüber, WAS wir
+       * über diese Bilder gespeichert haben — und die Bilder selbst hat der
+       * Mensch hochgeladen, er hat sie also. Die LÖSCHUNG nimmt sie sehr wohl
+       * mit (`purgeBrandInspiration`, s. u.).
+       */
+      inspiration: await safeListAll(event, BRAND_INSPIRATION_TABLE, filter),
     })
   }
 
@@ -237,6 +254,16 @@ export async function brandDeleteUserData(event: H3Event, userId: string): Promi
       await remove(BRAND_PUBLICATION_REPORTS_TABLE, row.$id)
     }
     await remove(BRAND_PUBLICATIONS_TABLE, profile.$id)
+    /**
+     * DIE VORBILDER (brand-024) — ZEILEN **UND** DATEIEN.
+     *
+     * Sie stehen nicht in der Tabellen-Schleife darüber, weil an jeder Zeile
+     * eine DATEI im Bucket `brand-inspiration` hängt (Zeilen-Id = Datei-Id).
+     * Ein `deleteRow` allein liesse die Bilder liegen — Fremdwerke, die keine
+     * Route mehr erreicht und die niemand mehr einsammeln kann. Genau der
+     * Rest, gegen den §2.13 geschrieben ist.
+     */
+    deleted += await purgeBrandInspiration(event, profile.$id)
     // Die Mitläufer anderer Layer an derselben `profileId` (MV1 M1) — dieselbe
     // Registry und dieselbe Stelle wie in der Löschroute. Ohne sie bliebe nach
     // einer Konto-Löschung Inhalt liegen, den keine Route mehr erreicht.

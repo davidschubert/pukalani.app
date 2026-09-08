@@ -323,6 +323,12 @@ const BRAND_TABLES = [
   // Tabelle, in die jemand OHNE Konto schreibt, aber mit optionaler `userId`
   // und optionalem Branding-Bezug.
   'brand_intro_requests',
+  // brand-024: die Vorbilder des Kunden (docs/plans/BRAND-DESIGN.md §2.2
+  // Schritt 2). EINE Zeile je Bild, Zeilen-Id = Datei-Id im Bucket
+  // `brand-inspiration`; an ihr hängt ab D2b auch die Lesung des
+  // Vision-Modells. Sie steht hier, damit eine fehlende Migration auffällt,
+  // BEVOR der erste Kunde auf „Screenshots hinzufügen" klickt.
+  'brand_inspiration',
 ]
 
 /**

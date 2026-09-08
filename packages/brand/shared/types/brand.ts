@@ -22,6 +22,7 @@
 
 import type { BrandFoundationView } from '../brandFoundation'
 import type { BrandGenerationOutcome } from '../brandGeneration'
+import type { BrandInspirationEntry } from '../brandInspiration'
 import type { BrandPublicationBlocker, BrandPublicationViewStatus } from '../brandPublication'
 import type { BrandWaitlistStatus } from '../brandWaitlistAdmin'
 import type {
@@ -2015,4 +2016,26 @@ export interface BrandDesignUnlockListResponse {
 export interface BrandDesignUnlockResponse {
   ok: true
   item: BrandDesignUnlockItem
+}
+
+/**
+ * DIE VORBILDER (Konzept §2.2 Schritt 2, Paket D2a) — die Antworten der vier
+ * Routen unter `/api/brand/profiles/:id/inspiration`.
+ *
+ * Sie tragen NIE einen Bild-Inhalt und nie eine Bucket-Adresse: das Bild holt
+ * die Werkstatt einzeln über `…/inspiration/:id/image`, und nur der Besitzer
+ * bekommt es (§2.13). Ein Feld `url` hier wäre der kürzeste Weg zu genau dem
+ * Leck, das die eigene Ausliefer-Route verhindert.
+ */
+export interface BrandInspirationListResponse {
+  items: BrandInspirationEntry[]
+  /** Wie viele noch gehen — die Werkstatt schreibt daraus „n von 12". */
+  max: number
+}
+
+/** Anlegen und Ändern antworten mit der GANZEN Liste, damit die Karte nicht nachlädt. */
+export interface BrandInspirationWriteResponse extends BrandInspirationListResponse {
+  ok: true
+  /** Der gerade angelegte bzw. geänderte Eintrag — `null` beim Entfernen. */
+  item: BrandInspirationEntry | null
 }
