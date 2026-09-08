@@ -792,7 +792,31 @@ Richtungs-Begründungen (Entwurf des Baus), die Maße als Setzung, der Satz
 Bucket `brand-drafts`), Davids Bild-Modell (Vorschlag des Baus:
 `google/gemini-2.5-flash-image-preview`, ~3–5 ct je Bild, ≈ 0,40–0,60 €
 je Marke und Tag im Vollausschlag — VORHER prüfen, ob es unter
-`data_collection: deny` geroutet wird).
+`data_collection: deny` geroutet wird). **Entschieden (David, 2026-09-08):**
+Bild-Modell `google/gemini-2.5-flash-image-preview`, Migration brand-023
+darf nach der Prüfung von D5c gefahren werden.
+
+**Stand D6 (Bildsprache & Ikonografie):** GEBAUT und geprüft 2026-09-08
+(Commits 0204de2b, 1f9611e5, 88688d31). Pure Regeln
+`shared/brandDesignImagery.ts`: drei Prinzipien mit vier Achsen als
+Do/Don't-PAAR (das Do ist der Kartentext — eine Fassung, nicht zwei),
+Vorbelegung aus DNA `imagery` (Rückfall `daylight`), Illustration/Icons
+über die EINE D0-Tabelle (`materiality` wird NICHT gelesen — Abweichung
+vom Auftrag, damit Produkt 03 keine zweite Zuordnung sieht), Strichstärken-
+Regel gegen das Schriftpaar (Serif 1,25–1,5 px, Grotesk 1,5–2 px; Phosphor
+`regular` 1,5 / `bold` 2,25 / `fill` Fläche — `bold` bekommt bei jedem
+Katalog-Paar den Hinweis, Auskunft, keine Sperre), alle vier `k.*` ohne
+Generator (reine Ableitung, KEINE Fotos, KEIN Bild-Modell). Bühne
+`BwImageryPanel` (Prinzip-Karten mit abstrahierten SVG-Kompositionen aus der
+Farbwelt, Illustration in einer Reihe, Icons darunter mit Strichstärke-
+Probe, Do & Don't). Beweis 295/295 (Abschnitt 28), 2 580 Tests; eigener
+Klick: Icon „Kräftig" misst `stroke-width` 2,25 px, Regeltext springt auf
+„Kräftiger als eure Schrift", 0 Bilder, 0 verschachtelte Buttons. Drei
+Funde des Agenten behoben: Prinzip-Karte schickte die Id statt der Blöcke
+(Wahl fiel still zurück); Icons in Marken-Tinte auf dunklem Grund
+unsichtbar; `g.mix` stand im Beweis als Platzhalter. Inhalts-Gate:
+Prinzip-Namen/Achsen-Texte (Don't-Hälften sind Entwurf des Baus), Do &
+Don't-Wortlaut, Strichstärke-Regel (ggf. vierte Option `light` 1,125 px).
 
 | # | Paket | Inhalt | Gate |
 | --- | --- | --- | --- |

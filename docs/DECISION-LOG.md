@@ -7,6 +7,18 @@ die kleinen, verstreuten Beschlüsse.
 
 ---
 
+## 2026-09-08 — Brand Design: Bild-Modell für die KI-Entwürfe = google/gemini-2.5-flash-image-preview; brand-023 freigegeben
+
+**Entscheidung (David, Empfehlung angenommen):** Stufe 3 des Zeichen-Kapitels (D5c, KI-Bildlogos
+als Entwürfe) nutzt bei OpenRouter `google/gemini-2.5-flash-image-preview` unter dem festen
+ZDR-Filter des Core-Transports (Kosten grob 3–5 ct je Bild; 4 Entwürfe × 3 Läufe je Marke und
+Tag ≈ 0,40–0,60 €). Vor dem Bau wird geprüft, ob das Modell unter `data_collection: deny`
+geroutet wird — sonst antwortet die Stufe ruhig 503 und das Kapitel läuft ohne sie. Die
+Prod-Migration **brand-023** (Tabelle `brand_mark_drafts`, Bucket `brand-drafts`) darf nach der
+Prüfung von D5c gefahren werden, vor dem Push (wie brand-022/024).
+
+---
+
 ## 2026-09-08 — Brand Design: Vision-Modell für die Vorbilder-Lesung = google/gemini-2.5-flash
 
 **Entscheidung (David, Empfehlung angenommen):** `pukalani.ai.visionModel` auf branding.supply
