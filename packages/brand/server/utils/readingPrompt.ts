@@ -84,7 +84,10 @@ export function brandReadingPrompt(input: BrandReadingPromptInput): string {
     `Read ${input.images.length} reference image(s) the client uploaded and measure each one against `
     + 'their brand foundation. The foundation is the yardstick — the images are evidence, not a target. '
     + 'Never copy: do not name brands, fonts, colour values or products you recognise, and do not '
-    + 'describe how to rebuild the design. Describe only in vocabulary ids.',
+    + 'describe how to rebuild the design. Describe only in vocabulary ids.'
+    // Siehe dnaPrompt.ts: das Listen-Etikett „reference N" ist Prompt-Sprache,
+    // der Satz an den Kunden nennt sein Bild in seiner Sprache.
+    + (language === 'German' ? ' In the German text, call an image „Vorbild N", never "reference".' : ''),
     '',
     'BRAND FOUNDATION (the yardstick)',
     foundation,

@@ -119,6 +119,8 @@ describe('Mit Vorbildern', () => {
   it('erlaubt „both" NUR mit einem Satz, der die Vorbild-Nummer nennt', () => {
     expect(prompt).toMatch(/inspirationReason: ONLY with origin "both"/)
     expect(prompt).toMatch(/names the reference NUMBER/)
+    // Der Kunde kennt sein Bild als „Vorbild 3": der deutsche Satz darf nicht „reference" sagen.
+    expect(prompt).toContain('call a reference „Vorbild N"')
     expect(prompt).toContain(`max ${BRAND_DNA_INSPIRATION_REASON_MAX} characters`)
     expect(prompt).toMatch(/"both" without it is downgraded to "foundation"/)
   })
