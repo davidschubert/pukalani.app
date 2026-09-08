@@ -137,12 +137,11 @@ export interface BrandProfileFacts {
    * kann, und sie steht am Profil, nicht an einer Zeile: die Schicht wird als
    * GANZES freigeschaltet.
    *
-   * OPTIONAL getypt und Default `null`, weil die Spalte erst mit der
-   * Design-Migration in D1 kommt (das Konzept nennt sie „brand-020"; die
-   * Nummer ist inzwischen von den Publications belegt — frei ist ab
-   * brand-022). Der Leser muss also OHNE die Spalte laufen, und ohne sie ist
-   * Schicht 2 gesperrt: das ist genau der Zustand, den jede Bestands-Marke
-   * heute hat.
+   * OPTIONAL getypt und Default `null`, weil die Spalte ADDITIV dazukam
+   * (Migration **brand-022**; das Konzept nennt noch „brand-020", die Nummer
+   * ist inzwischen von den Publications belegt — die Dateinamen entscheiden).
+   * Der Leser läuft also auch OHNE die Spalte, und ohne sie ist Schicht 2
+   * gesperrt: das ist genau der Zustand, den jede Bestands-Marke hat.
    */
   designUnlockedAt?: string | null
 }
@@ -460,7 +459,16 @@ export function resolveBrandJourney(
   })
 }
 
-export type BrandStepEntryDenial = 'unknown_step' | 'locked' | 'skipped'
+/**
+ * `design_locked` steht NEBEN `locked` und nicht darin (Brand Design D1): die
+ * zwei sagen etwas anderes. „Gesperrt" heisst „arbeite den Vorgänger ab" —
+ * eine Aufforderung, die der Mensch selbst erfüllen kann. „Brand Design ist
+ * nicht freigeschaltet" heisst „dieses Produkt ist für diese Marke noch nicht
+ * geöffnet", und daran ändert kein Klick etwas; dort gehört ein anderer Satz
+ * hin (die Werkstatt zeigte sonst „Schließ das Kapitel davor ab" für ein
+ * Kapitel, vor dem gar nichts fehlt).
+ */
+export type BrandStepEntryDenial = 'unknown_step' | 'locked' | 'skipped' | 'design_locked'
 
 export interface BrandStepEntryDecision {
   allowed: boolean
@@ -479,7 +487,11 @@ export function canEnterBrandStep(
 ): BrandStepEntryDecision {
   const step = journey.find(entry => entry.stepKey === stepKey)
   if (!step) return { allowed: false, reason: 'unknown_step' }
-  if (step.state === 'locked') return { allowed: false, reason: 'locked' }
+  if (step.state === 'locked') {
+    // Der GRUND reist mit (s. `BrandStepEntryDenial`) — die Route hängt ihn als
+    // `data.code` an ihr 403, und die Werkstatt macht daraus den richtigen Satz.
+    return { allowed: false, reason: step.reason === 'design_locked' ? 'design_locked' : 'locked' }
+  }
   if (step.state === 'skipped') return { allowed: false, reason: 'skipped' }
   return { allowed: true, reason: null }
 }

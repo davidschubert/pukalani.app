@@ -106,6 +106,13 @@ export default defineEventHandler(async (event): Promise<BrandProfileDetailRespo
         industry: body.industry,
         about: body.about,
         audience: body.audience,
+        // BRAND DESIGN IST BEIM ANLEGEN IMMER ZU (Konzept §2.10, brand-022).
+        // Explizit `null` statt weggelassen, weil `createRow` im Layer jede
+        // Spalte ausdrücklich verlangt (CLAUDE.md) — und weil genau hier die
+        // Entscheidung sichtbar sein soll: eine neue Marke bekommt Schicht 2
+        // nie automatisch, sie bekommt sie vom Studio.
+        designUnlockedAt: null,
+        designUnlockedBy: null,
         progressPct: progress.progressPct,
         currentStepKey: progress.currentStepKey,
         lastActivityAt: now,

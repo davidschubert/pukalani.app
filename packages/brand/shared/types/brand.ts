@@ -136,6 +136,15 @@ export interface BrandProfileSummary {
   updatedAt: string
   /** Abgeleitet aus `brand_shares` — es gibt bewusst kein `visibility`-Feld. */
   hasActiveShare: boolean
+  /**
+   * SEIT WANN BRAND DESIGN FÜR DIESE MARKE OFFEN IST (Konzept §2.10, D1) —
+   * `null` heisst gesperrt. Der ZEITPUNKT und kein Ja/Nein: Rail und Kapitel
+   * 10 sagen „freigeschaltet am …", und wer nur die Frage stellt, fragt
+   * `Boolean(...)`. Es ist nur die HÄLFTE der Bedingung: die Journey öffnet
+   * Schicht 2 erst, wenn zusätzlich `result` abgeschlossen ist — wer wissen
+   * will, ob ein Kapitel betretbar ist, fragt sie und nicht dieses Feld.
+   */
+  designUnlockedAt: string | null
 }
 
 export interface BrandProfileListResponse {
@@ -1969,4 +1978,41 @@ export interface BrandIntroListResponse {
 export interface BrandIntroPatchResponse {
   ok: true
   item: BrandIntroRequestItem
+}
+
+/**
+ * EINE ZEILE DER BETREIBER-LISTE „BRAND DESIGN" (Konzept §2.10, Paket D1).
+ *
+ * Sie trägt genau das, was für die EINE Entscheidung nötig ist: darf diese
+ * Marke Schicht 2 bekommen, und hat sie sie schon? Kein Snapshot, keine Slots,
+ * kein Inhalt — die Betreiber-Liste ist eine Arbeitsliste, kein Einblick in
+ * fremde Markenarbeit.
+ */
+export interface BrandDesignUnlockItem {
+  id: string
+  title: string
+  pathKind: BrandPathKind
+  contentLocale: string
+  /** Der Cache-Wert der FOUNDATION (Schicht 2 zählt dort bewusst nicht mit). */
+  progressPct: number
+  /** Ist `result` abgeschlossen? Ohne das bleibt Schicht 2 zu — auch nach dem Klick. */
+  foundationDone: boolean
+  /** `null` = gesperrt. Der Zeitpunkt, weil die Liste „seit …" sagt. */
+  designUnlockedAt: string | null
+  /** Betreiber-Id, leer wenn gesperrt. Kein Name — die Liste ist kein Personenverzeichnis. */
+  designUnlockedBy: string
+  createdAt: string
+}
+
+export interface BrandDesignUnlockListResponse {
+  items: BrandDesignUnlockItem[]
+  total: number
+  /** Leer heisst „letzte Seite" (s. Begründung in der Warteliste). */
+  nextCursor: string
+}
+
+/** Die Antwort beider Entscheidungs-Routen — die ganze Zeile, damit die Liste nicht neu lädt. */
+export interface BrandDesignUnlockResponse {
+  ok: true
+  item: BrandDesignUnlockItem
 }

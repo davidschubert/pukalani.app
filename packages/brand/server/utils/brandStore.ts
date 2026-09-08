@@ -137,12 +137,21 @@ export type BrandProfileRow = Models.Row & {
    */
   marketVisibility?: string
   /**
-   * DIE FREISCHALTUNG VON BRAND DESIGN (Konzept §2.10, Spalte kommt mit D1).
-   * Optional getypt, weil sie ADDITIV dazukommt — `undefined` ist genau der
+   * DIE FREISCHALTUNG VON BRAND DESIGN (Konzept §2.10, Migration brand-022).
+   * Optional getypt, weil sie ADDITIV dazukam — `undefined` ist genau der
    * Default „gesperrt"; `profileFacts()` macht daraus das `null`, mit dem die
    * pure Regel rechnet.
    */
   designUnlockedAt?: string | null
+  /**
+   * WER FREIGESCHALTET HAT (brand-022) — die Betreiber-Id, nicht der Name.
+   * Sie steht NEBEN dem Ereignis `design.unlocked` und nicht statt seiner:
+   * das Ereignis ist die Geschichte, diese Spalte der ZUSTAND, den die
+   * Betreiber-Liste je Zeile zeigt, ohne den Funnel zu durchsuchen. Sie wird
+   * mit `designUnlockedAt` zusammen gesetzt UND zusammen geleert — eine Id
+   * ohne Datum wäre die Behauptung einer Freischaltung, die es nicht gibt.
+   */
+  designUnlockedBy?: string | null
   /**
    * DAS OPT-IN „diese Marke darf als öffentliche Seite in der Galerie stehen"
    * (Migration brand-020, Discover D1). EIGENE Spalte neben `marketVisibility`
@@ -744,10 +753,10 @@ export function profileFacts(row: BrandProfileRow): BrandProfileFacts {
     team: row.team === 'team' ? 'team' : 'solo',
     subBrands: row.subBrands === 'yes' || row.subBrands === 'no' ? row.subBrands : 'unknown',
     namingOpted: row.namingOpted === true,
-    // BRAND DESIGN, SCHICHT 2 (Konzept §2.10): die Spalte kommt erst mit der
-    // Design-Migration in D1 — eine Zeile von heute liest `undefined`, und das
-    // ist genau der Default „nicht freigeschaltet". Der Leser muss ohne die
-    // Spalte laufen, sonst wäre der Code vor der Migration nicht deploybar.
+    // BRAND DESIGN, SCHICHT 2 (Konzept §2.10, Migration brand-022): eine
+    // Zeile aus der Zeit davor liest `undefined`, und das ist genau der
+    // Default „nicht freigeschaltet". Der Leser läuft bewusst weiter ohne die
+    // Spalte — sonst wäre der Code vor der Migration nicht deploybar.
     designUnlockedAt: row.designUnlockedAt ?? null,
   }
 }
@@ -811,6 +820,11 @@ export function toProfileSummary(row: BrandProfileRow, hasActiveShare: boolean):
     createdAt: row.$createdAt,
     updatedAt: row.$updatedAt,
     hasActiveShare,
+    // Der ZEITPUNKT, nicht bloss ein Ja/Nein (Brand Design D1): das Rail und
+    // Kapitel 10 sagen „freigeschaltet am …", und ein Boolean könnte das nicht
+    // — es hätte ein zweites Feld daneben verlangt, das dasselbe noch einmal
+    // behauptet. Wer nur die Frage stellt, fragt `Boolean(...)`.
+    designUnlockedAt: facts.designUnlockedAt ?? null,
   }
 }
 
@@ -1095,7 +1109,7 @@ export function resolveProfileProgress(journey: readonly BrandJourneyStep[]): Br
 
   for (const step of journey) {
     if (step.state === 'skipped') continue
-    // BRAND DESIGN ZÄHLT HIER (NOCH) NICHT MIT (D0).
+    // BRAND DESIGN ZÄHLT HIER NICHT MIT — ENTSCHIEDEN (D1), NICHT VERTAGT.
     //
     // Der Cache füttert die Marken-Karte und die Zeile „Schritt 3 von 9" —
     // beides Aussagen über die FOUNDATION. Zählte Schicht 2 mit, fiele der
@@ -1103,7 +1117,12 @@ export function resolveProfileProgress(journey: readonly BrandJourneyStep[]): Br
     // 70, ohne dass sich an der Marke etwas geändert hätte, und
     // `currentStepKey` rutschte hinter `result` — womit der „Euer
     // Branding"-Einstieg auf `/dashboard/brands` lautlos aufginge (Audit C4).
-    // Wie die zweite Schicht gezählt und angezeigt wird, entscheidet **D1**.
+    //
+    // Schicht 2 hat ihren EIGENEN Fortschritt, und zwar dort, wo sie stattfindet:
+    // im Rail-Fuss der Werkstatt („Brand Design 0/6", Prototyp Screen 8). Zwei
+    // Zahlen für zwei Produkte sind ehrlicher als eine gemischte, die weder die
+    // Foundation noch das Design beschreibt — und die Marken-Karte bleibt die
+    // Karte der Foundation.
     if (isBrandDesignStep(step.stepKey)) continue
     lastOnPath = step.stepKey
     total += step.progress.requiredTotal
