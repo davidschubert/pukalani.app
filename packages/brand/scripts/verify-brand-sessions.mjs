@@ -103,7 +103,8 @@
  *     packages/brand/scripts/verify-brand-sessions.mjs
  */
 import { request } from 'node:http'
-import { Client, ID, Query, TablesDB, Users } from 'node-appwrite'
+import { Client, ID, Query, Storage, TablesDB, Users } from 'node-appwrite'
+import { InputFile } from 'node-appwrite/file'
 
 const PORT = Number(process.env.BRANDING_PORT || 3016)
 const HOST = process.env.BRANDING_HOST || 'localhost'
@@ -120,11 +121,12 @@ if (!endpoint || !projectId || !databaseId || !apiKey) {
 
 const client = new Client().setEndpoint(endpoint).setProject(projectId).setKey(apiKey)
 const tablesDB = new TablesDB(client)
+const storage = new Storage(client)
 const users = new Users(client)
 
 let pass = 0
 let fail = 0
-const cleanup = { users: [], profiles: [], access: [], messages: [], aiFlag: null }
+const cleanup = { users: [], profiles: [], access: [], messages: [], inspiration: [], aiFlag: null }
 
 function check(label, ok, detail = '') {
   if (ok) {
@@ -173,6 +175,115 @@ function call(path, { method = 'GET', body, cookie } = {}) {
     if (payload) req.write(payload)
     req.end()
   })
+}
+
+/**
+ * DERSELBE WEG WIE `call`, nur mit einem multipart-Rumpf — gebraucht von
+ * Zusage 22 (Vorbild-Upload). Er wird VON HAND gebaut und nicht über
+ * `FormData`: Node's `fetch` scheidet hier aus (es verwirft einen eigenen
+ * Host-Header, s. Kopf von `call`), und `node:http` nimmt nur Bytes.
+ *
+ * `file: null` schickt KEIN Dateifeld — genau das braucht die Gegenprobe
+ * „Datei fehlt".
+ */
+function callUpload(path, { method = 'POST', fields = {}, file = null, cookie } = {}) {
+  const boundary = `----pukalani${Math.random().toString(16).slice(2)}`
+  const parts = []
+  for (const [name, value] of Object.entries(fields)) {
+    parts.push(Buffer.from(
+      `--${boundary}\r\nContent-Disposition: form-data; name="${name}"\r\n\r\n${value}\r\n`,
+    ))
+  }
+  if (file) {
+    parts.push(Buffer.from(
+      `--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="${file.name}"\r\n`
+      + `Content-Type: ${file.type}\r\n\r\n`,
+    ))
+    parts.push(file.data)
+    parts.push(Buffer.from('\r\n'))
+  }
+  parts.push(Buffer.from(`--${boundary}--\r\n`))
+  const payload = Buffer.concat(parts)
+
+  return new Promise((resolve, reject) => {
+    const req = request({
+      host: '::1',
+      port: PORT,
+      path,
+      method,
+      headers: {
+        host: HOST,
+        'content-type': `multipart/form-data; boundary=${boundary}`,
+        'content-length': payload.length,
+        ...(cookie ? { cookie } : {}),
+      },
+    }, (res) => {
+      let text = ''
+      res.on('data', chunk => text += chunk)
+      res.on('end', () => {
+        let json = null
+        try { json = JSON.parse(text) }
+        catch { /* kein JSON */ }
+        resolve({ status: res.statusCode, headers: res.headers, json, text })
+      })
+    })
+    req.on('error', reject)
+    req.write(payload)
+    req.end()
+  })
+}
+
+/**
+ * Ein Bild-Abruf, der die BYTES behält — `call` sammelt Text und macht aus
+ * einem PNG Unsinn. Gebraucht für „das Bild kommt beim Besitzer wirklich an".
+ */
+function callBinary(path, { cookie } = {}) {
+  return new Promise((resolve, reject) => {
+    const req = request({
+      host: '::1', port: PORT, path, method: 'GET',
+      headers: { host: HOST, ...(cookie ? { cookie } : {}) },
+    }, (res) => {
+      const chunks = []
+      res.on('data', chunk => chunks.push(chunk))
+      res.on('end', () => resolve({
+        status: res.statusCode,
+        headers: res.headers,
+        body: Buffer.concat(chunks),
+      }))
+    })
+    req.on('error', reject)
+    req.end()
+  })
+}
+
+/**
+ * DREI ECHTE BILDER — 1 × 1 Pixel, je Format. Sie stehen hier als Bytes und
+ * nicht als Datei im Repo: der Beweis soll ohne Anhänge laufen, und die
+ * Magic-Bytes sind genau das, was geprüft wird.
+ */
+const TINY = {
+  png: Buffer.from(
+    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
+    'base64',
+  ),
+  jpg: Buffer.from(
+    '/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwc'
+    + 'KDcpLDAxNDQ0Hyc5PTgyPC4zNDL/wAALCAABAAEBAREA/8QAFAABAAAAAAAAAAAAAAAAAAAACf/EABQQAQAAAAAAAAAA'
+    + 'AAAAAAAAAAD/2gAIAQEAAD8AKp//2Q==',
+    'base64',
+  ),
+  webp: Buffer.from('UklGRiQAAABXRUJQVlA4IBgAAAAwAQCdASoBAAEAAwA0JaQAA3AA/vuUAAA=', 'base64'),
+}
+
+/**
+ * EIN NEUES DROSSEL-FENSTER ABWARTEN. `05.rate-limit.ts` zählt je IP und
+ * Minute (`WINDOW_MS`); der Eimer `brand:inspiration` lässt 12 Schreibvorgänge
+ * durch, und dieser Beweis braucht mehr. Gewartet wird deshalb EINMAL, an der
+ * Stelle, an der es sonst 429 statt der fachlichen Antwort gäbe — die Drossel
+ * abzuschalten hiesse, sie nicht mehr zu beweisen.
+ */
+function waitForRateWindow() {
+  return new Promise(resolve => setTimeout(resolve, 62_000))
 }
 
 const stamp = Date.now()
@@ -1289,12 +1400,290 @@ try {
   const listForeign = await call('/api/brand/admin/design-unlocks', { cookie: stranger.cookie })
   check('GEGENPROBE: ohne `users.manage` bleibt die Liste zu (403)',
     listForeign.status === 403, String(listForeign.status))
+
+  console.log('\n22 · Brand Design: die Weiche und die Vorbilder (D2a)')
+
+  // Zusage 21 hat am Ende ZURÜCKGENOMMEN — für dieses Kapitel muss wieder
+  // aufgeschlossen sein. Ohne das antwortet jede Vorbild-Route 404, und der
+  // Beweis wäre grün aus dem falschen Grund.
+  await call(adminPath, { method: 'POST', cookie: operator.cookie })
+
+  const inspBase = `${base}/inspiration`
+  const upload = (fields, file, cookie = account.cookie) =>
+    callUpload(inspBase, { fields, file, cookie })
+
+  // ── Die Weiche `g.source` ────────────────────────────────────────────────
+  const dnaStep = await call(`${base}/steps/dna`, { cookie: account.cookie })
+  const sourceSaved = await call(`${base}/steps/dna`, {
+    method: 'PATCH',
+    cookie: account.cookie,
+    body: {
+      revision: dnaStep.json?.step?.revision ?? 0,
+      slots: { 'g.source': { value: 'inspiration', confirmed: true } },
+    },
+  })
+  check('die Weiche `g.source` nimmt die Id „inspiration" und bestätigt sie',
+    sourceSaved.status === 200 && sourceSaved.json?.slots?.['g.source']?.confirmed === 'inspiration',
+    `${sourceSaved.status} ${JSON.stringify(sourceSaved.json?.slots?.['g.source'] ?? null)}`)
+
+  // Die Werkstatt-Seite zeigt daraufhin das Instrument. Sie wird HIER geprüft
+  // und nicht nur im Browser: der Haken hängt am handelnden Element
+  // (`data-brand-inspiration`), nicht an einer Überschrift.
+  const dnaPage = await call(`/de/brand/${profileId}/dna`, { cookie: account.cookie })
+  check('… und die Werkstatt zeigt das Upload-Instrument',
+    dnaPage.status === 200 && dnaPage.text.includes('data-brand-inspiration'),
+    `${dnaPage.status} ${dnaPage.text.length} Zeichen`)
+
+  // ── Die drei zugesagten Formate ──────────────────────────────────────────
+  const up1 = await upload({ area: 'composition', note: 'Ruhig, viel Weißraum.' },
+    { name: 'roesterei.png', type: 'image/png', data: TINY.png })
+  check('PNG: 201, Nummer 1, Bereich und Notiz stehen',
+    up1.status === 201 && up1.json?.item?.number === 1
+    && up1.json?.item?.area === 'composition'
+    && up1.json?.item?.note === 'Ruhig, viel Weißraum.',
+    `${up1.status} ${JSON.stringify(up1.json?.item ?? null)}`)
+
+  const up2 = await upload({ area: 'type', note: '' },
+    { name: 'verlag.jpg', type: 'image/jpeg', data: TINY.jpg })
+  check('JPEG: 201, Nummer 2', up2.status === 201 && up2.json?.item?.number === 2,
+    `${up2.status} ${JSON.stringify(up2.json?.item ?? null)}`)
+
+  const up3 = await upload({ area: 'color', note: 'Warm und einladend.' },
+    { name: 'cafe.webp', type: 'image/webp', data: TINY.webp })
+  check('WebP: 201, Nummer 3', up3.status === 201 && up3.json?.item?.number === 3,
+    `${up3.status} ${JSON.stringify(up3.json?.item ?? null)}`)
+
+  for (const id of (up3.json?.items ?? []).map(item => item.id)) cleanup.inspiration.push(id)
+
+  // ── Der Slot-Wert zieht mit — und wird NIE bestätigt ─────────────────────
+  const dnaRow = await tablesDB.getRow({
+    databaseId, tableId: 'brand_steps', rowId: `${profileId}_dna`,
+  })
+  const dnaSlots = JSON.parse(dnaRow.slots || '{}')
+  const inspSlot = dnaSlots['g.inspiration'] ?? null
+  check('der Slot `g.inspiration` trägt die Auswahl als beschriftete Blöcke',
+    typeof inspSlot?.latestDraft === 'string'
+    && inspSlot.latestDraft.startsWith('## 1 · Komposition')
+    && inspSlot.latestDraft.includes('## 2 · Typografie')
+    && inspSlot.latestDraft.includes('Ohne Notiz.'),
+    JSON.stringify(inspSlot?.latestDraft ?? null))
+  check('… und er ist NICHT bestätigt — sonst reiste er über `confirmedSlotValues` ins Dokument',
+    !inspSlot?.confirmed, JSON.stringify(inspSlot?.confirmed ?? null))
+
+  // ── Die Gegenproben der Annahme ──────────────────────────────────────────
+  const fake = await upload({ area: 'color' },
+    { name: 'trojaner.png', type: 'image/png', data: Buffer.from('<svg>kein Bild</svg>') })
+  check('GEGENPROBE Magic-Bytes: Text als .png ⇒ 415, nicht 201',
+    fake.status === 415 && fake.json?.reason === 'inspiration_unsupported_type',
+    `${fake.status} ${JSON.stringify(fake.json?.reason ?? null)}`)
+
+  const tooBig = Buffer.concat([TINY.png, Buffer.alloc(5_000_001 - TINY.png.length, 0x20)])
+  const big = await upload({ area: 'color' },
+    { name: 'gross.png', type: 'image/png', data: tooBig })
+  check('GEGENPROBE Grösse: über 5 MB ⇒ 413',
+    big.status === 413 && big.json?.reason === 'inspiration_too_large',
+    `${big.status} ${JSON.stringify(big.json?.reason ?? null)}`)
+
+  const noArea = await upload({ note: 'ohne Bereich' },
+    { name: 'x.png', type: 'image/png', data: TINY.png })
+  check('GEGENPROBE Bereich: ohne Bereich ⇒ 400',
+    noArea.status === 400 && noArea.json?.reason === 'inspiration_area_invalid',
+    `${noArea.status} ${JSON.stringify(noArea.json?.reason ?? null)}`)
+
+  const badArea = await upload({ area: 'motion' },
+    { name: 'x.png', type: 'image/png', data: TINY.png })
+  check('… und ein Bereich AUSSERHALB des Vokabulars ebenso (400)',
+    badArea.status === 400 && badArea.json?.reason === 'inspiration_area_invalid',
+    `${badArea.status} ${JSON.stringify(badArea.json?.reason ?? null)}`)
+
+  const noFile = await upload({ area: 'color' }, null)
+  check('… und ohne Datei ⇒ 400', noFile.status === 400
+    && noFile.json?.reason === 'inspiration_missing_file',
+    `${noFile.status} ${JSON.stringify(noFile.json?.reason ?? null)}`)
+
+  const listAfterRejects = await call(inspBase, { cookie: account.cookie })
+  check('… und keine dieser Ablehnungen hat eine Zeile hinterlassen (weiter 3)',
+    listAfterRejects.status === 200 && listAfterRejects.json?.items?.length === 3,
+    `${listAfterRejects.status} ${listAfterRejects.json?.items?.length}`)
+
+  // ── Ändern ───────────────────────────────────────────────────────────────
+  const firstId = up1.json.item.id
+  const patched = await call(`${inspBase}/${firstId}`, {
+    method: 'PATCH', cookie: account.cookie, body: { area: 'imagery', note: 'Echte Menschen.' },
+  })
+  check('Bereich und Notiz lassen sich ändern',
+    patched.status === 200 && patched.json?.item?.area === 'imagery'
+    && patched.json?.item?.note === 'Echte Menschen.',
+    `${patched.status} ${JSON.stringify(patched.json?.item ?? null)}`)
+
+  const longNote = await call(`${inspBase}/${firstId}`, {
+    method: 'PATCH', cookie: account.cookie, body: { note: 'x'.repeat(241) },
+  })
+  check('GEGENPROBE: eine Notiz über 240 Zeichen ⇒ 400',
+    longNote.status === 400 && longNote.json?.reason === 'inspiration_note_too_long',
+    `${longNote.status} ${JSON.stringify(longNote.json?.reason ?? null)}`)
+
+  // ── Die Auslieferung: nur der Besitzer, und nie aus dem Zwischenspeicher ──
+  const image = await callBinary(`${inspBase}/${firstId}/image`, { cookie: account.cookie })
+  check('das Bild kommt beim Besitzer an — 200, image/png, Bytes identisch',
+    image.status === 200
+    && String(image.headers['content-type']).startsWith('image/png')
+    && image.body.equals(TINY.png),
+    `${image.status} ${image.headers['content-type']} ${image.body.length} Bytes`)
+  check('… mit `Cache-Control: private, no-store` (Fremdwerk, §2.13)',
+    String(image.headers['cache-control']) === 'private, no-store',
+    String(image.headers['cache-control']))
+
+  // ── Ein fremdes Konto sieht NICHTS — dreimal 404 ─────────────────────────
+  const foreignList = await call(inspBase, { cookie: stranger.cookie })
+  check('fremdes Konto: die Liste antwortet 404 (Datentür, nicht 403)',
+    foreignList.status === 404, String(foreignList.status))
+  const foreignImage = await callBinary(`${inspBase}/${firstId}/image`, { cookie: stranger.cookie })
+  check('… das Bild ebenso (404)', foreignImage.status === 404, String(foreignImage.status))
+  const foreignDelete = await call(`${inspBase}/${firstId}`, {
+    method: 'DELETE', cookie: stranger.cookie,
+  })
+  check('… und Löschen ebenso (404)', foreignDelete.status === 404, String(foreignDelete.status))
+  const guestImage = await callBinary(`${inspBase}/${firstId}/image`)
+  check('… ohne Anmeldung: 401/404, nie ein Bild',
+    guestImage.status === 401 || guestImage.status === 404, String(guestImage.status))
+
+  // ── Der Deckel bei zwölf ─────────────────────────────────────────────────
+  //
+  // DIE NEUN FEHLENDEN BILDER ENTSTEHEN OHNE ROUTE — wie `setSlots` weiter
+  // oben und aus demselben Grund: geprüft wird der DECKEL, nicht der Upload
+  // (den beweisen die drei Formate schon). Über die Route gefüllt liefe der
+  // Beweis ausserdem in die eigene Drossel (`brand:inspiration`, 12/min je
+  // IP) und meldete 429 statt 409 — eine Zeitüberschreitung an beliebiger
+  // Stelle statt der echten Ursache (CLAUDE.md, „Tests").
+  for (let i = 4; i <= 12; i++) {
+    const fileId = ID.unique()
+    await storage.createFile({
+      bucketId: 'brand-inspiration',
+      fileId,
+      file: InputFile.fromBuffer(TINY.png, `f${i}.png`),
+    })
+    await tablesDB.createRow({
+      databaseId,
+      tableId: 'brand_inspiration',
+      rowId: fileId,
+      data: { profileId, area: 'color', note: '', number: i, filename: `f${i}.png` },
+    })
+    cleanup.inspiration.push(fileId)
+  }
+  const listFull = await call(inspBase, { cookie: account.cookie })
+  check('zwölf Bilder liegen da', listFull.json?.items?.length === 12,
+    String(listFull.json?.items?.length))
+
+  // Die Drossel schützt den Server, nicht den Beweis: ein neues Fenster, damit
+  // die letzten drei Aufrufe die FACHLICHEN Antworten zeigen (409, 200, 200)
+  // und nicht die 429 der eigenen Bremse.
+  await waitForRateWindow()
+
+  const thirteenth = await upload({ area: 'color' },
+    { name: 'dreizehn.png', type: 'image/png', data: TINY.png })
+  check('GEGENPROBE Deckel: das dreizehnte ⇒ 409 `inspiration_limit_reached`',
+    thirteenth.status === 409 && thirteenth.json?.reason === 'inspiration_limit_reached',
+    `${thirteenth.status} ${JSON.stringify(thirteenth.json?.reason ?? null)}`)
+
+  // ── LEITPLANKE c: Bilder sind Eingabe, nie Ausgabe ───────────────────────
+  //
+  // GEGENPROBE MIT ANLAUF: der Slot wird von Hand BESTÄTIGT — genau der
+  // Fehler, den ein künftiges Kapitel (D8) machen könnte. Bliebe der Wert
+  // danach im Schnappschuss stehen, wäre die Zusage „reist nie" eine
+  // Behauptung. Ohne diesen Anlauf wäre der Test tautologisch grün, weil der
+  // Server `confirmed` gar nicht erst schreibt.
+  const leakSlots = JSON.parse((await tablesDB.getRow({
+    databaseId, tableId: 'brand_steps', rowId: `${profileId}_dna`,
+  })).slots || '{}')
+  leakSlots['g.inspiration'] = {
+    ...leakSlots['g.inspiration'],
+    confirmed: leakSlots['g.inspiration']?.latestDraft ?? '',
+  }
+  leakSlots['g.source'] = { ...leakSlots['g.source'], confirmed: 'inspiration' }
+  await tablesDB.updateRow({
+    databaseId, tableId: 'brand_steps', rowId: `${profileId}_dna`,
+    data: { slots: JSON.stringify(leakSlots) },
+  })
+  check('Vorprobe: der bestätigte Wert steht wirklich in der Zeile',
+    String(leakSlots['g.inspiration'].confirmed).includes('Echte Menschen.'),
+    String(leakSlots['g.inspiration'].confirmed).slice(0, 60))
+
+  const shared = await call(`${base}/share`, { method: 'POST', cookie: account.cookie, body: {} })
+  check('der Share-Link lässt sich veröffentlichen', shared.status === 200 || shared.status === 201,
+    `${shared.status} ${shared.text.slice(0, 120)}`)
+  const shareRows = await tablesDB.listRows({
+    databaseId,
+    tableId: 'brand_shares',
+    queries: [Query.equal('profileId', profileId), Query.limit(5)],
+  }).catch(() => ({ rows: [] }))
+  const snapshot = shareRows.rows.map(row => String(row.snapshot ?? '')).join('\n')
+  check('LEITPLANKE c: der Schnappschuss trägt WEDER den Slot NOCH die Notiz',
+    snapshot.length > 0
+    && !snapshot.includes('g.inspiration')
+    && !snapshot.includes('g.source')
+    && !snapshot.includes('Echte Menschen.')
+    && !snapshot.includes('Ohne Notiz.'),
+    `${snapshot.length} Zeichen`)
+
+  // ── Entfernen nimmt die DATEI mit ────────────────────────────────────────
+  const removed = await call(`${inspBase}/${firstId}`, { method: 'DELETE', cookie: account.cookie })
+  check('Entfernen: 200 und die Liste ist um eines kürzer',
+    removed.status === 200 && removed.json?.items?.length === 11,
+    `${removed.status} ${removed.json?.items?.length}`)
+  const fileGone = await storage
+    .getFile({ bucketId: 'brand-inspiration', fileId: firstId })
+    .then(() => false)
+    .catch(error => error?.code === 404)
+  check('… und die DATEI ist wirklich weg (Bucket antwortet 404)', fileGone === true,
+    String(fileGone))
+  const rowGone = await tablesDB
+    .getRow({ databaseId, tableId: 'brand_inspiration', rowId: firstId })
+    .then(() => false)
+    .catch(error => error?.code === 404)
+  check('… die Zeile ebenso', rowGone === true, String(rowGone))
+
+  // ── Die Ereignisse: Kennzahlen, kein Inhalt ──────────────────────────────
+  const inspEvents = await tablesDB.listRows({
+    databaseId,
+    tableId: 'brand_events',
+    queries: [Query.equal('profileId', profileId), Query.limit(200)],
+  }).catch(() => ({ rows: [] }))
+  const added = inspEvents.rows.filter(row => row.type === 'design.inspiration.added')
+  const removedEvents = inspEvents.rows.filter(row => row.type === 'design.inspiration.removed')
+  // DREI, nicht zwölf: die neun Füll-Zeilen sind an der Route vorbei entstanden
+  // (s. o.) und haben deshalb zu Recht kein Ereignis.
+  check('jeder Upload UND jedes Entfernen über die Route steht im Funnel',
+    added.length === 3 && removedEvents.length === 1,
+    `${added.length} hinzugefügt · ${removedEvents.length} entfernt`)
+  check('… und keine Ereignis-Zeile trägt Dateiname oder Notiz',
+    added.every(row => !String(row.payload ?? '').includes('roesterei')
+      && !String(row.payload ?? '').includes('Weißraum')),
+    JSON.stringify(added[0]?.payload ?? null))
 }
 catch (error) {
   fail++
   console.error('\n✗ Abbruch:', error instanceof Error ? error.message : error)
 }
 finally {
+  // Vorbilder zuerst: an jeder Zeile hängt eine DATEI im Bucket, und die
+  // Löschroute des Profils läuft hier ohne Cookie (401). Ein Beweis, der
+  // Fremdwerke im Speicher liegen lässt, räumt nicht auf.
+  for (const id of cleanup.inspiration) {
+    await tablesDB.deleteRow({ databaseId, tableId: 'brand_inspiration', rowId: id }).catch(() => {})
+    await storage.deleteFile({ bucketId: 'brand-inspiration', fileId: id }).catch(() => {})
+  }
+  for (const id of cleanup.profiles) {
+    const rest = await tablesDB.listRows({
+      databaseId,
+      tableId: 'brand_inspiration',
+      queries: [Query.equal('profileId', id), Query.limit(100)],
+    }).catch(() => ({ rows: [] }))
+    for (const row of rest.rows) {
+      await tablesDB.deleteRow({ databaseId, tableId: 'brand_inspiration', rowId: row.$id }).catch(() => {})
+      await storage.deleteFile({ bucketId: 'brand-inspiration', fileId: row.$id }).catch(() => {})
+    }
+  }
   for (const id of cleanup.messages) {
     await tablesDB.deleteRow({ databaseId, tableId: 'brand_messages', rowId: id }).catch(() => {})
   }
@@ -1318,6 +1707,16 @@ finally {
     }).catch(() => ({ rows: [] }))
     for (const row of rest.rows) {
       await tablesDB.deleteRow({ databaseId, tableId: 'brand_messages', rowId: row.$id }).catch(() => {})
+    }
+  }
+  for (const id of cleanup.profiles) {
+    const shares = await tablesDB.listRows({
+      databaseId,
+      tableId: 'brand_shares',
+      queries: [Query.equal('profileId', id), Query.limit(100)],
+    }).catch(() => ({ rows: [] }))
+    for (const row of shares.rows) {
+      await tablesDB.deleteRow({ databaseId, tableId: 'brand_shares', rowId: row.$id }).catch(() => {})
     }
   }
   for (const id of cleanup.profiles) {
