@@ -62,7 +62,7 @@ Und: `migrate` läuft NICHT automatisch (Flag `--migrate` steht auf false).
 
 ## Ablauf
 
-- [ ] **Backup.** Im `appwrite/`-Verzeichnis:
+- [x] **Backup.** Im `appwrite/`-Verzeichnis:
   ```bash
   TS=$(date +%Y%m%d-%H%M); mkdir -p ../backups
   docker exec appwrite-mariadb sh -c 'mariadb-dump -uroot -p"$MYSQL_ROOT_PASSWORD" --single-transaction --quick --all-databases' | gzip > ../backups/appwrite-pre-2.0.0-$TS.sql.gz
@@ -71,18 +71,18 @@ Und: `migrate` läuft NICHT automatisch (Flag `--migrate` steht auf false).
   ```
   Die Variable heißt `MYSQL_ROOT_PASSWORD` (nicht `MARIADB_ROOT_PASSWORD`) —
   mit der falschen ist der Dump 20 Byte groß und sieht nur im `ls` verdächtig aus.
-- [ ] **Patchdatei bereitlegen** (aus dem Image, eine Zeile geändert):
+- [x] **Patchdatei bereitlegen** (aus dem Image, eine Zeile geändert):
   ```bash
   docker run --rm --entrypoint=cat appwrite/appwrite:2.0.0 /usr/src/code/app/init/registers.php > patches/registers-2.0.0.orig.php
   sed 's/keepAlive: true,/keepAlive: false,/' patches/registers-2.0.0.orig.php > patches/registers-2.0.0-keepalive-off.php
   diff patches/registers-2.0.0.orig.php patches/registers-2.0.0-keepalive-off.php   # genau Zeile 443
   ```
-- [ ] **Images vorziehen** (verkürzt das Fenster): `appwrite/appwrite:2.0.0`,
+- [x] **Images vorziehen** (verkürzt das Fenster): `appwrite/appwrite:2.0.0`,
   `appwrite/new:1.1.16`, `appwrite/geo:0.3.1`, `appwrite/browser:0.3.4`,
   `appwrite/embedding:0.3.1`, `clickhouse/clickhouse-server:26.4.3-alpine`,
   `ghcr.io/open-runtimes/orchestrator/orchestrator:1.9.2`,
   `openruntimes/executor:0.29.0`.
-- [ ] **Upgrade-Werkzeug** im ELTERN-Verzeichnis (das mit dem Ordner `appwrite/`):
+- [x] **Upgrade-Werkzeug** im ELTERN-Verzeichnis (das mit dem Ordner `appwrite/`):
   ```bash
   docker run --rm --volume /var/run/docker.sock:/var/run/docker.sock \
     --volume "$(pwd)"/appwrite:/usr/src/code/appwrite:rw \
@@ -92,7 +92,7 @@ Und: `migrate` läuft NICHT automatisch (Flag `--migrate` steht auf false).
   daneben), kopiert das Builds-Volume um (`appwrite_appwrite-builds` →
   `appwrite-builds`, Original bleibt) und STARTET die Container (Falle 1+2).
   Erwartet: „Appwrite installed successfully".
-- [ ] **Override umstellen + eigenes `up`:**
+- [x] **Override umstellen + eigenes `up`:**
   ```bash
   cd appwrite
   sed -i 's#registers-1.9.6-keepalive-off.php#registers-2.0.0-keepalive-off.php#' docker-compose.override.yml
@@ -100,19 +100,19 @@ Und: `migrate` läuft NICHT automatisch (Flag `--migrate` steht auf false).
   docker inspect appwrite-traefik --format '{{json .Config.Cmd}}' | tr ',' '\n' | grep -c trustedIPs   # 2
   docker exec appwrite-worker-mails grep -n keepAlive /usr/src/code/app/init/registers.php          # false
   ```
-- [ ] **Migration:** `docker compose exec -T appwrite migrate` → endet mit
+- [x] **Migration:** `docker compose exec -T appwrite migrate` → endet mit
   „Migration completed" (dev: ~1 min, alle Collections + Documents).
-- [ ] **Beweise:** `curl -s http://localhost/v1/health/version` → `2.0.0`;
+- [x] **Beweise:** `curl -s http://localhost/v1/health/version` → `2.0.0`;
   mit Projekt-Key `health/db`, `health/cache`, `health/storage` → `pass`;
   `users?limit=1` und `tablesdb/main/tables` liefern die alten Bestände;
   Console (`/console`) antwortet 302 → Login. Realtime-Log: „JWT expired"-
   Zeilen sind offene Tabs mit altem Token, KEIN Befund — Subscriptions
   müssen `realtime.success true` melden.
-- [ ] **.env-Diff lesen** (`diff .env.*.backup .env`): 2.0 ergänzt ~60
+- [x] **.env-Diff lesen** (`diff .env.*.backup .env`): 2.0 ergänzt ~60
   Schlüssel (VCS, DocumentsDB/VectorsDB, Jobs, Geo, ClickHouse), entfernt
   `_APP_USAGE_*_INTERVAL`, quotet Werte neu. Eigene Werte (SMTP, Domain,
   Keys) bleiben — nachprüfen.
-- [ ] **Aufräumen:** `docker-compose.yml.<epoch>.backup` und `.env.<epoch>.backup`
+- [x] **Aufräumen:** `docker-compose.yml.<epoch>.backup` und `.env.<epoch>.backup`
   behalten, bis prod eine Woche stabil läuft; das alte Volume
   `appwrite_appwrite-builds` erst dann löschen.
 
@@ -135,3 +135,26 @@ Und: `migrate` läuft NICHT automatisch (Flag `--migrate` steht auf false).
 (`_APP_VERSION=1.9.6`), Override auf die 1.9.6-Patchdatei, `docker compose
 up -d --remove-orphans`, Dump zurückspielen (`mariadb < dump.sql` im
 mariadb-Container). Das umkopierte Builds-Volume stört den Rückweg nicht.
+
+## Durchläufe
+
+| Instanz | Datum (UTC) | Dump | Migration | Fenster | Besonderheiten |
+| --- | --- | --- | --- | --- | --- |
+| dev (OrbStack) | 2026-09-08 ~03:30 | 10,8 MB, 669 Tabellen | „Migration completed" | — | alle drei Fallen hier entdeckt |
+| prod (`api.pukalani.app`) | 2026-09-08 05:00 | 22,2 MB | „Migration completed" (providerBranches/-Paths-Skips wie bei 1.9.6) | Skript-Start bis Version-Check unter 12 min | Skript `~/appwrite-upgrade-2.0.sh` auf appwrite-prod, Log daneben |
+
+Nachweise prod (2026-09-08): `health/version` 2.0.0 · `health`, `health/db`,
+`health/cache`, `health/storage` je Projekt (account, admin, portfolio,
+branding) `pass` · alle neun Hosts `/api/health ok:true` · SSR-Seiten 200 ·
+Console 302 → Login · Realtime-Handshake `connected` · `pnpm ops:schema-parity`
+69/42/41/32 Soll-Tabellen, Spalten deckungsgleich · Mail-Beweis: OTP auf
+`account.pukalani.app` → mails-Worker `1.7s … mail.status success` (die
+ERSTE Instanz-Mail nach Leerlauf, also genau der KeepAlive-Fall) ·
+Realtime-/Mail-/Databases-Worker 0 Fehlerzeilen; im `appwrite`-Container nur
+Anwendungs-404 (Row/Datei nicht gefunden, Gast ohne presences.read).
+
+**Rest, bewusst liegen gelassen:** der alte Container `appwrite-embedding`
+(Image 0.1.0) läuft auf beiden Instanzen weiter — im 2.0-Compose liegt der
+Dienst im Profil `embedding` und wird nicht mehr gestartet, das Werkzeug hat
+den Alt-Container nicht als Waise erkannt. Ungenutzt (kein Embeddings-Aufruf im
+Repo); `docker rm -f appwrite-embedding` räumt ihn, sobald man mag.
