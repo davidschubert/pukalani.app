@@ -803,7 +803,18 @@ export function resolveNextSession(
   const next = slotsForStep(stepKey).find(session =>
     session.required
     && ASKABLE_KINDS.includes(session.kind)
-    && !slotIsFilled(slotStates[session.id]),
+    && !slotIsFilled(slotStates[session.id])
+    // NUR ERREICHBARE FRAGEN (Brand-Design-D2c-Prüfbefund, 2026-09-08): eine
+    // Frage, deren Quellen noch nicht bestätigt sind, ist `locked` — und wer
+    // sie trotzdem stellt, stellt sie ins Leere. Im Kapitel `dna` war das der
+    // Stillstand: nach dem Karten-Klick auf die Weiche (`g.source`, Entwurf,
+    // noch nicht bestätigt) galt sie als gefüllt, die nächste Frage war die
+    // gesperrte Board-Wahl (`g.board`, wartet auf `g.boards`) — die Bühne
+    // zeigte deren leeres Options-Modul, und der Bestätigen-Knopf der Weiche
+    // (er erscheint erst, wenn KEINE Frage mehr offen ist) kam nie. In der
+    // Foundation stehen offene Fragen fast immer ohne Quellen, dort fiel es
+    // nicht auf. Dieselbe Erreichbarkeits-Regel wie `resolveSessionStates`.
+    && session.inputs.slots.every(inputId => inputSatisfied(inputId, slotStates)),
   )
   if (!next) return null
   return {

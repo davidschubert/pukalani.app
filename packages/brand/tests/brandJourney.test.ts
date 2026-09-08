@@ -287,6 +287,34 @@ describe('resolveBrandJourney — Happy-Path über den ganzen Vollpfad', () => {
  * Prüfung, die nur den gesperrten und den offenen Normalfall kennt, wäre auch
  * für eine Regel grün, die nur eine der beiden liest.
  */
+describe('resolveNextSession — fragt nur, was erreichbar ist (D2c-Prüfbefund)', () => {
+  const facts = (entries: Record<string, { confirmed?: boolean, hasValue?: boolean }>) =>
+    Object.fromEntries(Object.entries(entries).map(([id, f]) => [id, { confirmed: f.confirmed ?? false, hasValue: f.hasValue ?? f.confirmed ?? false, accepted: false, deferred: false }])) as never
+
+  it('die Weiche im Entwurf: die nächste Frage ist NICHT die gesperrte Board-Wahl', () => {
+    // Karte geklickt, noch nicht bestätigt — vorher sprang die Bühne zu
+    // `g.board`, das auf `g.boards` wartet; der Bestätigen-Knopf der Weiche
+    // erscheint aber erst, wenn keine Frage mehr offen ist.
+    expect(resolveNextSession('dna', facts({ 'g.source': { hasValue: true } }))).toBeNull()
+  })
+
+  it('ohne Entwurf ist die Weiche selbst die Frage', () => {
+    expect(resolveNextSession('dna', facts({}))?.slotId).toBe('g.source')
+  })
+
+  it('GEGENPROBE: sind die Quellen der Board-Wahl bestätigt, wird sie gefragt', () => {
+    const ready = facts({ 'g.source': { confirmed: true }, 'g.dna': { confirmed: true }, 'g.boards': { confirmed: true } })
+    expect(resolveNextSession('dna', ready)?.slotId).toBe('g.board')
+  })
+
+  it('Foundation: eine Wahl mit unbestätigter Quelle wird übersprungen, nicht ins Leere gestellt', () => {
+    // `c.final` wartet auf die Ableitung `c.candidates`; solange die nicht
+    // bestätigt ist, darf die Werte-Wahl nicht die nächste Frage sein.
+    const next = resolveNextSession('values', facts({ 'c.candidates': { hasValue: true } }))
+    expect(next?.slotId).not.toBe('c.final')
+  })
+})
+
 describe('resolveBrandJourney — Brand Design ist gesperrt, bis beides stimmt', () => {
   const UNLOCKED: BrandProfileFacts = { ...FULL_PROFILE, designUnlockedAt: '2026-09-07T10:00:00.000Z' }
   const foundationDone = includedBrandSteps(FULL_PROFILE)
