@@ -168,6 +168,25 @@ formuliert — als Facette erst nach Normalisierung).
    bezahlte KI-Aufrufe im Rahmen der Drosseln) statt als handgeschriebenen
    Datensatz: so ist das Beispiel zugleich ein Beweis des Produktwegs.
 
+### Prototyp-Abnahme D0 (David, 2026-09-08) — vier weitere Entscheidungen
+
+5. **Kachel mit zwei Zahlen:** Brand Score gewinnt den Ring, die Fundament-Reife
+   steht als kleine Zweitzeile („Fundament-Reife 78"); nur eine Zahl ⇒ diese.
+6. **Brand of the Day: genau eine, letzte gewinnt** — Server-Regel beim Setzen
+   von `featuredAt` (das vorige Featured wird gelöscht), Betreiber-Seite zeigt
+   die aktuelle hervorgehoben; die Galerie blättert bei Bedarf die drei
+   neuesten Veröffentlichungen, nicht mehrere Featured.
+7. **Teilen auf dem Telefon = das native Teilen-Blatt** (Davids Wunsch: „wie
+   die iPhone-Share-Funktion"): `navigator.share` mit Titel + Adresse, wo es
+   ihn gibt (Leseansicht-Share-Link, später die öffentliche Discover-Adresse und
+   die Brand-Check-Ergebnisseite); ohne Web Share API bleibt „Link kopieren".
+   „Veröffentlichen" selbst wandert auf kleinen Bildschirmen ins Export-Menü
+   (erreichbar, aber eine bewusste Entscheidung, kein Schnellklick).
+8. **D0 abgenommen** — D1 startet. Nach Empfehlung gesetzt: leerer Zustand
+   ersetzt die Wand; „Ausblenden" mit Begründungs-Dialog wie „Ablehnen";
+   „Ähnliche Marken" mit fester Regel-Beschriftung; Farbwelt-Namen in den
+   Katalog (de+en).
+
 ### Bauplan (aktualisiert)
 
 | # | Paket | Braucht |

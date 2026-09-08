@@ -86,6 +86,11 @@ Remix (CTA immer „Starte deine eigene"), keine Creator-Profile (AH-7), Rechtst
 als Gate für die Öffnung an fremde Nutzer, nicht für den Bau. **Verworfen für Runde 1:**
 Bewertung in Dimensionen, Trending, Collections, Vorher/Nachher-Slider, Stil-/
 Positionierungs-Facetten (Daten fehlen bis Brand Design 02).
+**Prototyp D0 abgenommen (2026-09-08, Fragenrunde):** Kachel mit zwei Zahlen ⇒ Score im
+Ring, Reife als Zweitzeile; Brand of the Day genau eine (Server-Regel „letzte gewinnt");
+Teilen auf dem Telefon über das native Teilen-Blatt (`navigator.share`, Davids Wunsch),
+„Veröffentlichen" mobil im Export-Menü. Davids Arbeitsregel, erneut eingeschärft:
+Entscheidungen IMMER als Fragen mit Antwortmöglichkeiten und Empfehlung, nie als Fließtext.
 
 ---
 
