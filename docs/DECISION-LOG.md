@@ -7,6 +7,87 @@ die kleinen, verstreuten Beschlüsse.
 
 ---
 
+## 2026-09-08 — Brand Insights (BI1): Konzeptrunde — acht Entscheidungen
+
+**Anlass:** Die Konzeptrunde vom 2026-09-08 hat aus den zehn offenen Fragen des Redaktions-
+konzepts acht Entscheidungsfragen mit Empfehlung gemacht ([plans/BRAND-INSIGHTS.md](plans/BRAND-INSIGHTS.md)
+§9 die Vorschläge, §10 die Fragen). David hat sie am selben Tag beantwortet — die Tabelle
+Frage · Entscheidung · Empfehlung war · Leitplanke steht in **§11**. Damit ist Phase 2
+(Konzeption) abgeschlossen: **Prototyp I0 kann starten, der Bau I1+ wartet auf DB1 und den
+Anwalt.**
+
+**Entscheidungen (David, sieben von acht nach Empfehlung):** (1) **Eigener Layer `insights`**,
+`requires: ['brand']`, genau EIN Vertrag zum brand-Layer — der Präzedenzfall ist `market`, nicht
+Brand Design (dort war „zwei Zustandsmaschinen für ein Dokument" die Begründung, und die liegt
+hier nicht vor). (2) **Getrennte Datensätze, geteilte Vorlage:** `/insights`, `/insights/<slug>`,
+`/brands/<slug>`, `/duels/<a>-vs-<b>`, `/rankings`, `/topics/<slug>`; `/journal/` entfällt.
+(3) **Plausible einschalten** — selbst gehostet, cookielos, ohne Banner, wie pukalani.studio.
+(4) **Eigener Redaktions-Endpunkt** für die Übersetzung, Ergebnis als bearbeitbarer Entwurf,
+Drossel 10/Stunde + 50/Tag je Konto. (5) **Newsletter als eigene Liste `insights_subscribers`**
+nach dem Warteliste-Muster (brand-015) — **erst nach dem Launch**. (6) **Themenradar JETZT**
+(einzige Abweichung, s. u.). (7) **Rankings mit zehn Plätzen, eingefroren mit sichtbarem Stand**,
+Auffrischung = neue Ausgabe mit neuem Slug, Entfernen-Wunsch hinterlässt eine als „auf Wunsch
+entfernt" ausgewiesene Lücke statt einer stillen Neunummerierung. (8) **Launch-Paket
+10 Profile · 3 Duelle · 5 Artikel · 1 Ranking** mit den Namen aus §9.8, die vier belegten Marken
+zuerst.
+
+**Die eine Abweichung — (6) Themenradar jetzt statt nach dem Launch.** Die Empfehlung wollte
+warten, weil beim Konkretisieren zwei Dinge auffielen: die **YouTube API Services Developer
+Policies untersagen in III.E.2 das Aggregieren von API-Daten** — also ausgerechnet die
+Schutzmaßnahme „Kommentare nur aggregiert auswerten", mit der §4.1 (d) den Datenschutz auffangen
+wollte —, und zwei der fünf Signale des Opportunity-Scores (Suchnachfrage, Konkurrenz) haben
+noch keine Datenquelle. David hat anders entschieden, weil genau dieses Signal branding.supply
+von einem gewöhnlichen Blog unterscheiden soll. **Vier Leitplanken, ausformuliert in §9.6:**
+
+- **(a) Kein abgeleiteter Datensatz.** Gespeichert werden je Video nur die öffentlichen Zahlen,
+  die die API liefert (Aufrufe, Likes, Kommentar-ZAHL, Datum, Kanal), **höchstens 30 Kalendertage**
+  (Policies III.E.4) oder täglich neu geholt. **Unsere Opportunity-Zahl wird aus diesen Werten
+  gerechnet und ist unsere Zahl** — sie fällt nicht unter das Aggregations-Verbot für API-Daten.
+- **(b) Keine Kommentar-Texte, keine Nutzernamen**, bis Block 3 der BS1-Anwaltsfragen (BI1-2,
+  in der geschärften Form) beantwortet ist. Der Radar rechnet bis dahin aus Metadaten. Die
+  Kommentar-ZAHL bleibt erlaubt: sie ist eine öffentliche Kennzahl des Videos, keine Auswertung.
+- **(c) Kuratierte Kanalliste statt `search.list`** (100 Einheiten je Aufruf und eigener
+  Tages-Eimer) — `playlistItems.list` + `videos.list` kosten je 1 Einheit, das Tagesbudget von
+  10.000 reicht damit für rund 50 Kanäle täglich.
+- **(d) Der Radar blockiert den Launch nicht.** Paket **I4 rückt vor I3** oder läuft parallel;
+  geht sein Gate nicht auf, geht I3 trotzdem live und die Themen kommen von Hand. Die alte
+  Regel „I4 nie VOR I3" ist damit aufgehoben, die Umkehrung gilt weiter.
+
+**Folge von (3), über BI1 hinaus:** die Zusage „Webanalyse findet nicht statt" wird falsch. Am
+selben Tag nachgezogen: [plans/BRANDING-SUPPLY-FAKTENBLATT.md](plans/BRANDING-SUPPLY-FAKTENBLATT.md)
+Zeile 13, §3 „Webanalyse/Statistik", der Cookie-Banner-Satz in §2 und eine neue Lücke „Plausible-Site
+anlegen" · [plans/BRANDING-SUPPLY-RECHT-UND-BEZAHLUNG.md](plans/BRANDING-SUPPLY-RECHT-UND-BEZAHLUNG.md)
+§1.1, §1.2 (Zeile 12), §2.2 Nr. 5, das Paket **R2** (der Datenschutz-Abschnitt
+„Reichweitenmessung" kommt hinzu) und das **neue Paket R2c** (der Schalter). Der Schalter liegt
+bewusst in BS1 und **nicht** in BI1: er misst die ganze Site, nicht nur die Redaktion, und Text
+und Schalter dürfen nicht in zwei Plänen auseinanderlaufen — die Reihenfolge „erst Text, dann
+Schalter" ist dieselbe wie bei `auth.termsUrl` in R1.
+
+**Nebenbefund aus dem Abgleich mit dem Code (DB1).** [plans/DISCOVER-BRANDS.md](plans/DISCOVER-BRANDS.md)
+§4.2 verspricht bei Umbenennung „neuer Slug + 301 vom alten" — gebaut ist das nicht:
+`brand_publications` trägt `slug` (unique) und **keine Slug-Historie**, und es gibt keine
+Weiterleitung. Heute folgenlos (eine Veröffentlichung, unveränderter Titel), für ein verlinktes
+Markenprofil aber teuer. **BI1 baut `slugHistory` (≤ 5) für die eigenen Tabellen; DB1 sollte mit
+derselben Form nachziehen** — notiert in Plan §9.2 und in OPEN-ITEMS unter `BI1` (nicht in der
+DB1-Zeile, die eine andere Sitzung bearbeitet).
+
+**Verworfen:** Tabellen im brand-Layer statt eigenem Layer (der brand-Layer trüge dann
+Kunden-Werkstatt und öffentliche Redaktion in einem, und eine Produkt-Abschaltung träfe beide) ·
+ein Layer ohne eigenen Produkt-Schalter · ein gemeinsamer Datensatz für eigene und fremde Marken
+(zwei Rechtsgrundlagen und zwei Löschregeln in einer Zeile) · gar keine Profil-Adresse ·
+ein eigener serverseitiger Zähler statt Plausible (ein Schreibvorgang je Aufruf, Bots
+eingeschlossen — eine Zahl mit Bots ist als „Reichweite" irreführender als gar keine) ·
+weiterhin nicht messen · der UGC-Übersetzungsweg für Redaktionstexte (ein Cache, den jemand von
+Hand nachbessert, ist keiner mehr) · Resend Broadcasts und ein selbst gehostetes listmonk ·
+lebende oder an Ort und Stelle überschriebene Rankings · den Themenradar ganz zu streichen.
+
+**Bei David:** Google-Cloud-Projekt mit YouTube-Data-API-Schlüssel (Gate von I4) · neue
+Plausible-Site für `branding.supply` (die CE-Ausgabe hat keine Sites-API) · Anwaltstermin
+(ohne die Antworten zu BI1-3 und BI1-4 geht kein Markenprofil live) · DB1-Rest D4/D5 ·
+Abnahme des Prototyps I0.
+
+---
+
 ## 2026-09-08 — Brand Design: Bild-Modell für die KI-Entwürfe = google/gemini-2.5-flash-image-preview; brand-023 freigegeben
 
 **Entscheidung (David, Empfehlung angenommen):** Stufe 3 des Zeichen-Kapitels (D5c, KI-Bildlogos

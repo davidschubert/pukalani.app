@@ -1,14 +1,15 @@
 # Brand Insights — Redaktionskonzept (BI1)
 
-Status: **Redaktionskonzept ENTSCHIEDEN 2026-09-07** (Davids zwölf Antworten,
-§1) · **Konzeptrunde GESCHRIEBEN 2026-09-08** — §9 hält die Vorschläge, §10 die
-acht Fragen, die David beantworten muss. Die Runde war an DB1 gebunden
-(Entscheidung 12); DB1 ist mit D0–D3 live, also fand sie statt. Nach
-[referenz/WORKFLOW.md](../referenz/WORKFLOW.md) ist das Phase 2 (Konzeption) —
-die Freigabe steht aus, gebaut wird nichts davor. Dieses Dokument hält fest, WAS
-entschieden ist, welche Leitplanken daran hängen und was jetzt zur Entscheidung
-liegt — es ist keine Arbeitsliste. Was von BI1 offen ist, steht ausschliesslich
-in [OPEN-ITEMS.md](../OPEN-ITEMS.md) (Zeile `BI1`).
+Status: **Konzept ENTSCHIEDEN 2026-09-08** — der **Prototyp I0 kann starten**;
+der **Bau I1+** wartet auf DB1 und den Anwalt (§6). Vorgeschichte:
+Redaktionskonzept ENTSCHIEDEN 2026-09-07 (Davids zwölf Antworten, §1) ·
+Konzeptrunde GESCHRIEBEN 2026-09-08 (§9 die Vorschläge, §10 die acht Fragen) ·
+**am 2026-09-08 beantwortet — die acht Entscheidungen stehen in §11**. Nach
+[referenz/WORKFLOW.md](../referenz/WORKFLOW.md) ist damit Phase 2 (Konzeption)
+abgeschlossen und Phase 3 (Prototyp) frei; vor Davids Prototyp-Abnahme wird
+nichts gebaut. Dieses Dokument hält fest, WAS entschieden ist und welche
+Leitplanken daran hängen — es ist keine Arbeitsliste. Was von BI1 offen ist,
+steht ausschliesslich in [OPEN-ITEMS.md](../OPEN-ITEMS.md) (Zeile `BI1`).
 
 ## 0. Was das hier ist
 
@@ -221,12 +222,18 @@ Anwaltsfragen — **zum Stand dieser Zeile unbeantwortet**).
    die Originalseite.
 3. **Wikipedia** nur unter **CC BY-SA mit Namensnennung** (Artikel + Lizenzlink),
    **keine Volltextübernahme** — Fakten und Daten, keine übernommenen Absätze.
-4. **YouTube** nur **Metadaten und Kommentare über die offizielle Data API** als
-   Signal; **kein Transkript-Scraping**. Das Quellvideo wird eingebettet
+4. **YouTube** nur **Metadaten über die offizielle Data API** als Signal;
+   **kein Transkript-Scraping**. Das Quellvideo wird eingebettet
    („Further watching") — Traffic für den Creator statt Content-Klau.
-   Kommentare sind **personenbezogene Daten**: sie werden nur **aggregiert**
-   ausgewertet und **nie mit Nutzernamen gespeichert**. API-Quoten und
-   Datenschutz sind Teil des Gates (§3.4).
+   API-Quoten und Datenschutz sind Teil des Gates (§3.4).
+   > **Der zweite Halbsatz dieser Leitplanke ist am 2026-09-08 GEFALLEN.**
+   > Er lautete: „Kommentare sind personenbezogene Daten: sie werden nur
+   > **aggregiert** ausgewertet und nie mit Nutzernamen gespeichert."
+   > Genau dieses Aggregieren untersagen die YouTube API Services Developer
+   > Policies in **III.E.2** — die Schutzmaßnahme war selbst regelwidrig. An
+   > ihre Stelle treten die vier Leitplanken aus **§9.6** (§11 Frage 6):
+   > **keine Kommentar-Texte und keine Nutzernamen**, bis die Anwaltsfrage
+   > BI1-2 beantwortet ist.
 
 ### 4.2 Bewertung, Bilder, Reaktionen
 
@@ -563,6 +570,21 @@ Index.
 Slugs, ≤ 5), die Route schlägt bei einem Fehlschlag dort nach und antwortet
 301. Das ist die Regel, die DB1 versprochen und nicht gebaut hat (§9.0).
 
+**Abhängigkeit in die andere Richtung — der Befund DB1 (2026-09-08).**
+[DISCOVER-BRANDS.md](DISCOVER-BRANDS.md) §4.2 sagt zur Umbenennung „neuer Slug
++ 301 vom alten". Gebaut ist das nicht: `brand_publications` trägt `slug`
+(unique) und **keine Slug-Historie**, und im Code gibt es **keine
+Weiterleitung** — eine Umbenennung bricht heute jeden Link auf
+`/discover/<slug>` still. Für DB1 ist das folgenlos, solange es eine einzige
+Veröffentlichung gibt, deren Titel sich nicht geändert hat; es bleibt aber ein
+Versprechen ohne Mechanik. **BI1 baut `slugHistory` für die eigenen Tabellen
+(oben) — DB1 sollte nachziehen**, und zwar mit derselben Form (Liste ≤ 5,
+Nachschlag bei 404, 301), damit nicht zwei Weiterleitungs-Mechaniken
+nebeneinander stehen. Die Zeile dazu steht in
+[OPEN-ITEMS.md](../OPEN-ITEMS.md) unter `BI1`; sie gehört fachlich zu DB1,
+wird dort aber nicht eingetragen, solange DB1 in einer anderen Sitzung
+bearbeitet wird.
+
 ### 9.3 Datenmodell — konkret
 
 Alles server-only (`permissions: []`, `rowSecurity: false`) wie jede
@@ -845,44 +867,69 @@ andere.
   steigt im BROWSER aus, und die ganze Client-Seite wird unzuverlässig
   (2026-08-04 live erwischt).
 
-### 9.6 Themenradar — Vorschlag: **nach dem Launch**, und in anderer Form
+### 9.6 Themenradar — ENTSCHIEDEN: **jetzt**, mit vier Leitplanken
 
-Beim Konkretisieren sind drei belegte Tatsachen aufgetaucht, die den Zuschnitt
-aus §3.4 ändern (Quellen im Anhang):
+**Davids Entscheidung vom 2026-09-08 (§11 Frage 6) weicht von der Empfehlung
+ab:** der Radar wird JETZT gebaut, wie Entscheidung 6 vom 2026-09-07 es vorsah,
+nicht nach dem Launch. Der Abschnitt hält deshalb fest, was beim Konkretisieren
+gefunden wurde — die drei Tatsachen bleiben wahr, sie verschieben das Vorhaben
+nur nicht mehr, sondern **formen es**.
+
+Drei belegte Tatsachen (Quellen im Anhang):
 
 1. **`search.list` hat einen eigenen, sehr kleinen Eimer.** Die
    Google-Dokumentation nennt für ein Projekt „100 `search.list` calls" pro Tag
    — getrennt von den 10.000 Einheiten, die sich alle anderen Endpunkte teilen.
    Ein Radar, der über Suche entdeckt, ist damit bei ~100 Abfragen am Tag
    gedeckelt.
-2. **Gespeichert werden darf fast nichts, und nicht lange.** Die YouTube API
+2. **Gespeichert werden darf wenig, und nicht lange.** Die YouTube API
    Services Developer Policies begrenzen die Speicherung von API-Daten (außer
    Analytics/Statistiken) auf **30 Kalendertage** (III.E.4).
-3. **Und die Leitplanke aus §4.1 (d) trifft genau auf ein Verbot.** Dieselben
+3. **Die Leitplanke aus §4.1 (d) traf genau auf ein Verbot.** Dieselben
    Policies sagen in **III.E.2**: API-Daten NICHT aggregieren, außer über
    Kanäle desselben Content Owners. Unsere Schutzmaßnahme — „Kommentare nur
-   aggregiert auswerten" — ist also möglicherweise genau das, was die
-   Nutzungsbedingungen untersagen. Das ist kein Detail: es dreht die
-   Anwaltsfrage BI1-2 von „ist das DSGVO-konform?" zu „ist das nach den
-   API-Bedingungen überhaupt erlaubt, und wenn ja, in welcher Form?".
+   aggregiert auswerten" — ist also selbst regelwidrig. Das ist kein Detail:
+   es dreht die Anwaltsfrage BI1-2 von „ist das DSGVO-konform?" zu „ist das
+   nach den API-Bedingungen überhaupt erlaubt, und wenn ja, in welcher Form?".
 
-**Vorschlag daraus:** der Radar bleibt ein eigenes Teilpaket, rückt aber
-**hinter den Launch** und wird **lesend-und-verwerfend** gebaut:
+#### Die vier Leitplanken des Radars (Davids Zuschnitt, 2026-09-08)
 
-- **Entdeckt wird über eine kuratierte Kanalliste**, nicht über Suche: je Kanal
-  die Uploads-Playlist (`playlistItems.list`) und dann `videos.list` — beide
-  je 1 Einheit, damit reichen die 10.000 für einen täglichen Lauf über weit
-  mehr Kanäle, als wir je pflegen. `search.list` bleibt die Ausnahme für
-  gezielte Stichproben.
-- **Gespeichert wird nur, was wir selbst gerechnet haben:** der Themen-Begriff
-  und unsere abgeleiteten Zahlen. **Nie** eine Video-Id, ein Titel, ein
-  Kanalname, ein Kommentar oder ein Nutzername. Damit ist die 30-Tage-Frist
-  eingehalten, ohne sie zu verwalten — es liegt nichts da, das sie beträfe.
-  `insights_topics` trägt trotzdem `expiresAt` und einen Sweep, weil eine
-  Themenzahl von vor einem Jahr keine Aussage mehr ist.
-- **Kommentare werden gelesen und nicht gespeichert** — auch nicht aggregiert,
-  bis die Anwaltsantwort zu III.E.2 vorliegt. Bis dahin rechnet der Radar aus
-  Metadaten (Aufrufe, Alter, Kanalgröße).
+**(a) Kein abgeleiteter Datensatz — je Video nur die öffentlichen Zahlen der
+API.** Gespeichert werden ausschliesslich die Werte, die die API zu EINEM Video
+liefert: **Aufrufe, Likes, Kommentar-ZAHL, Veröffentlichungsdatum, Kanal**.
+Keine Zusammenfassung über mehrere Kanäle, kein Verdichten zu einem eigenen
+Bestand — das untersagt **III.E.2**. Für die Aufbewahrung gilt **III.E.4**:
+**höchstens 30 Kalendertage**, oder der Lauf holt die Zahlen täglich neu und
+überschreibt sie. Beides ist erlaubt, eines von beidem wird gebaut — die
+Entscheidung fällt in I4, weil sie an der Lauf-Frequenz hängt, nicht am Recht.
+**Unsere Opportunity-Zahl ist UNSERE Zahl:** sie wird aus diesen Werten
+gerechnet, ist ein eigenes Ergebnis und fällt damit nicht unter das
+Aggregations-Verbot für API-Daten. Sie darf bleiben, auch wenn die Zahlen
+darunter ablaufen — dann steht sie mit ihrem Stand da, wie jede andere Messung.
+
+**(b) Keine Kommentar-Texte, keine Nutzernamen — bis die Anwaltsantwort da
+ist.** Der Radar liest bis dahin **nur Metadaten** (Aufrufe, Alter,
+Kanalgröße). Kommentare kommen erst wieder ins Spiel, wenn Block 3 der
+BS1-Anwaltsfragen (§4.3 Frage 2, in der geschärften Form) beantwortet ist —
+und dann in der Form, die die Antwort erlaubt, nicht in der, die wir uns
+vorgestellt hatten. **Die Kommentar-ZAHL ist keine Kommentar-Auswertung**: sie
+ist eine öffentliche Kennzahl des Videos und bleibt erlaubt.
+
+**(c) Kuratierte Kanalliste statt `search.list`.** Entdeckt wird über eine von
+Hand gepflegte Kanalliste: je Kanal die Uploads-Playlist
+(`playlistItems.list`), dann `videos.list` — **beide je 1 Einheit**. Damit
+reicht das Tagesbudget von **10.000 Einheiten für rund 50 Kanäle täglich** mit
+großem Abstand; `search.list` (100 Einheiten je Aufruf, eigener Tages-Eimer)
+bleibt die Ausnahme für gezielte Stichproben und ist im Normalbetrieb nicht
+Teil des Laufs.
+
+**(d) Der Radar blockiert den Launch nicht.** Paket **I4 rückt vor I3** oder
+läuft parallel dazu (§9.9) — es hängt an einem eigenen Gate (Schlüssel,
+Anwalt), und ein Gate, das nicht aufgeht, darf keine öffentliche Seite
+aufhalten. **BI1 ist ohne Radar lieferbar**: die Themen des Launch-Pakets
+stehen im Dummy und in §9.8, sie kommen von Hand. Geht das Gate zuerst auf,
+liefert der Radar die Themen vom ersten Tag — das war der Zweck von
+Entscheidung 6.
 
 **Die Formel, konkretisiert.** Popularity = Aufrufe ÷ Abonnenten des Kanals,
 über den Lauf normalisiert auf 0–100 (ein Video mit 50k Aufrufen auf einem
@@ -893,12 +940,15 @@ Content Opportunity Score = fünf Signale zu je 0–20: **Performance**
 **Relevanz** (Nähe zu unseren acht Themenclustern, per Schlagwortliste).
 **Ehrlich dazu:** für **Suchnachfrage** und **Konkurrenz** gibt es heute keine
 Datenquelle — kein Ahrefs, keine Search Console auf branding.supply. Bis es
-eine gibt, sind es faktisch drei Signale, und der Score heißt besser so, als
-dass er fünf behauptet. Das ist ein weiterer Grund, den Radar nach hinten zu
-stellen: sein bester Teil hängt an Daten, die wir noch nicht haben.
+eine gibt, rechnet der Score aus **drei** Signalen, und er heißt und zeigt
+auch drei. Ein Score, der fünf behauptet und drei rechnet, ist die teurere
+Variante — die zwei fehlenden Signale kommen dazu, wenn ihre Quelle da ist,
+nicht vorher. (Plausible allein liefert sie NICHT: es misst unsere Seiten,
+nicht die Suchnachfrage.)
 
-**Gate bleibt:** Davids Ja + die Anwaltsantwort zu BI1-2 (jetzt in der
-geschärften Form) + ein Google-Cloud-Projekt mit API-Schlüssel.
+**Gate bleibt:** Davids Ja (gegeben) + die Anwaltsantwort zu BI1-2 in der
+geschärften Form — sie ist Gate für **alles über Metadaten hinaus**, nicht für
+den Radar als solchen + ein **Google-Cloud-Projekt mit API-Schlüssel (David)**.
 
 ### 9.7 Messung — drei Ziele, drei Zahlen
 
@@ -908,31 +958,54 @@ jede muss aus etwas kommen, das es gibt:
 | Ziel | Die eine Kennzahl | Woher |
 | --- | --- | --- |
 | **Umwandlung** | gestartete Brand-Checks und Wizard-Läufe **aus Insights heraus**, je Woche | `brand_events` — `insights.cta_click` mit Format und Ziel; server-seitig, kein Cookie, gedeckt von der 24-Monats-Frist |
-| **Reichweite** | Seitenaufrufe der Insights-Seiten je Woche | **existiert heute nicht** — s. u. |
+| **Reichweite** | Seitenaufrufe der Insights-Seiten je Woche | **Plausible**, selbst gehostet — eingeschaltet mit BS1 R2/R2c (§11 Frage 3); bis dahin gibt es die Zahl nicht |
 | **Newsletter** | **bestätigte** Eintragungen je Woche (`confirmedAt`) | `insights_subscribers`; die unbestätigte Zahl wird nie berichtet, sie ist keine |
 
-**Die Lücke ist echt und sie ist protokolliert.** branding.supply hat **keine
-Reichweitenmessung** — kein Plausible, kein Matomo, `analytics.enabled: false`
-per Core-Default und die App setzt nichts
+**Die Lücke war echt, und sie wird geschlossen.** branding.supply hatte zum
+Stand dieser Runde **keine Reichweitenmessung** — kein Plausible, kein Matomo,
+`analytics.enabled: false` per Core-Default und die App setzte nichts
 ([BRANDING-SUPPLY-FAKTENBLATT.md](BRANDING-SUPPLY-FAKTENBLATT.md) Zeile 13,
 [BRANDING-SUPPLY-RECHT-UND-BEZAHLUNG.md](BRANDING-SUPPLY-RECHT-UND-BEZAHLUNG.md)
-§1.1 „Aus."). Damit ist eines der drei gleich gewichteten Ziele heute
-unmessbar — und die Sortierung „Meistgelesen" aus dem Dummy hat keine
-Datengrundlage. Drei Wege, Vorschlag in §10 Frage 3:
+§1.1). Damit war eines von Davids drei gleich gewichteten Zielen unmessbar.
+**Davids Entscheidung vom 2026-09-08 (§11 Frage 3): Plausible wird
+eingeschaltet** — selbst gehostet unter `plausible.hawaii.studio`, **cookielos
+und ohne Banner**, genau wie pukalani.studio es fährt
+(`apps/portfolio/app/app.config.ts`, `analytics.provider: 'plausible'`,
+`snippet: 'v3'`).
 
-- **Plausible einschalten** (selbst gehostet unter `plausible.hawaii.studio`,
-  cookielos, ohne Banner — genau wie pukalani.studio es fährt). Ehrlichste
-  Zahl, kein Schreibvorgang je Aufruf, Bot-Filter eingebaut. Preis: die
-  Datenschutzerklärung von branding.supply muss den Abschnitt tragen — sie ist
-  **heute noch Entwurf** (BS1 R2), die Ergänzung ist also gerade jetzt billig
-  und wäre nach der Veröffentlichung eine Änderung mit Ankündigung. Und:
-  Faktenblatt-Zeile 13 („findet nicht statt") wird falsch und muss mit.
-- **Eigener serverseitiger Zähler** (`brand_events`-Zeile `insights.view` je
-  Aufruf, ohne IP). Keine Rechtsänderung, aber ein Schreibvorgang je Aufruf
-  inklusive Bots — und eine Zahl, die Bots enthält, ist als „Reichweite"
-  irreführender als gar keine.
-- **Weglassen** und Reichweite indirekt am Umwandlungs-Ziel ablesen. Ehrlich,
-  aber dann ist eines von Davids drei Zielen unbeobachtet.
+**Was daran hängt, in der Reihenfolge, in der es passieren muss:**
+
+1. **Erst der Text.** Der Datenschutz-Abschnitt „Reichweitenmessung" gehört in
+   die Entwurfs-Fassung von branding.supply, BEVOR ein Script eingebunden wird
+   — dieselbe Regel, die BS1 schon für `auth.termsUrl` fährt („erst Text, dann
+   Schalter"). Die Texte sind heute Entwurf (BS1 **R2**), die Ergänzung ist
+   also gerade jetzt billig; nach der Veröffentlichung wäre sie eine Änderung
+   mit Ankündigung. **Drei Stellen ziehen mit** und sind am 2026-09-08
+   nachgezogen: Faktenblatt Zeile 13 und §4c („findet nicht statt" wurde
+   falsch), BS1 §1.1 (Ist-Stand) und §1.2 (Verarbeitungstabelle, Nr. 12).
+2. **Dann der Schalter.** Er ist ein eigenes kleines Paket im BS1-Plan
+   (**R2c**), nicht in BI1 — Begründung unten.
+3. **Davids Handgriff:** eine **neue Plausible-Site für `branding.supply`**
+   anlegen. Die CE-Ausgabe hat keine Sites-API (Memory-Notiz
+   „Pukalani-Analytics/Plausible"), das klickt David; heraus kommt eine neue
+   Script-Id `pa-…`, die in `apps/branding/app/app.config.ts` steht. Ohne sie
+   gibt es nichts einzuschalten.
+
+**Warum der Schalter zu BS1 gehört und nicht zu BI1** — drei Gründe, in der
+Reihenfolge ihres Gewichts: (1) **Er misst die ganze Site**, nicht nur
+Insights: Startseite, Wizard-Trichter, Brand-Check, Discover. Eine
+seitenweite Änderung in einem Insights-Paket zu verstecken, wäre die falsche
+Ablage. (2) **Text und Schalter dürfen nicht auseinanderlaufen**; sie stehen
+dann in EINEM Plan, dessen Paket-Kette (R2 → R2c → R3) die Reihenfolge schon
+erzwingt. (3) **BI1 kann ihn ohnehin nicht ziehen**: er hängt an Davids
+Plausible-Site und an einem Text, den BI1 nicht schreibt. BI1 führt ihn
+deshalb als **fremde Abhängigkeit** (§9.9) — nötig, wenn die öffentlichen
+Seiten (I3) live gehen, nicht früher.
+
+**Nicht gewählt** wurde ein eigener serverseitiger Zähler (`brand_events`-Zeile
+je Aufruf): keine Rechtsänderung, aber ein Schreibvorgang je Aufruf inklusive
+Bots — und eine Zahl, die Bots enthält, ist als „Reichweite" irreführender als
+gar keine. Ebenso nicht: weiter nicht messen.
 
 „Meistgelesen" als Sortierung bleibt in jedem Fall aus Runde 1 draußen: selbst
 mit Plausible liegen die Zahlen nicht in unserer Datenbank, eine Sortierung
@@ -981,21 +1054,39 @@ mit vier Stücken — einem je Format —, nicht mit neunzehn.
 | # | Paket | Inhalt | Gate |
 | --- | --- | --- | --- |
 | **I0** | **Prototyp am Dummy mit echten Datenformen** | die vier Formate im brand-Playground an das Konzept angeglichen: Journal-Liste mit Format-/Themenfilter, Artikel mit TOC, Profil als Dossier, Duell mit `facts`-Zeilen inkl. Belegspalte, Ranking mit Methodik-Zeile; Redaktions-Editor als Skizze (zwei Sprach-Reiter, Quellen-Panel, Prüfregeln als Liste) | **Davids Abnahme** (Phase 4 des Workflows) |
-| **I1** | **Layer + Schema + Vertrag** | Layer `insights` mit Manifest, Eintrag in `apps/branding/site.manifest.ts`, `LAYER_ORDER`, Bilanz-Block, ESLint-Block; Migration (`insights_posts`, `insights_brands`, `insights_corrections`); Vertrag zum brand-Layer; `insights.manage` in `core/shared/authz.ts` (eigener Commit); GDPR-Contributor; Schema-Parität-Soll | **Davids Ja zur Prod-Migration** (vor dem Code-Deploy) · §10 Frage 1 |
-| **I2** | **Dashboard + KI-Entwurf** | Liste (`UTable`), Editor mit `UEditor` und zwei Sprach-Reitern, Quellen-Panel mit deterministischer Beleg-Prüfung, die sechs Prüfregeln vor `review`, Zustands-Umschalter, Vorschau, Übersetzen-Endpunkt mit Drossel, `aiCompleteJson`-Entwurf mit `insights-d-1` | I1 · §10 Fragen 4 und 7 |
+| **I1** | **Layer + Schema + Vertrag** | Layer `insights` mit Manifest, Eintrag in `apps/branding/site.manifest.ts`, `LAYER_ORDER`, Bilanz-Block, ESLint-Block; Migration (`insights_posts`, `insights_brands`, `insights_corrections`); Vertrag zum brand-Layer; `insights.manage` in `core/shared/authz.ts` (eigener Commit); GDPR-Contributor; Schema-Parität-Soll | **Davids Ja zur Prod-Migration** (vor dem Code-Deploy) · Zuschnitt entschieden: §11 Frage 1 |
+| **I2** | **Dashboard + KI-Entwurf** | Liste (`UTable`), Editor mit `UEditor` und zwei Sprach-Reitern, Quellen-Panel mit deterministischer Beleg-Prüfung, die sechs Prüfregeln vor `review`, Zustands-Umschalter, Vorschau, Übersetzen-Endpunkt mit Drossel, `aiCompleteJson`-Entwurf mit `insights-d-1` | I1 · Zuschnitt entschieden: §11 Fragen 4 und 7 |
+| **I4** | **Themenradar** *(vorgezogen 2026-09-08, §11 Frage 6)* | kuratierte Kanalliste, `playlistItems.list` + `videos.list`, `insights_topics` (nur die API-Zahlen je Video, ≤ 30 Tage oder täglich neu) mit Sweep, unsere Opportunity-Zahl aus drei Signalen, Betreiber-Ansicht in der Themen-Liste; **keine Kommentar-Texte, keine Nutzernamen** | **eigenes Gate:** Davids Ja (gegeben) · **Google-Cloud-Projekt mit API-Schlüssel (David)** · die Anwaltsantwort BI1-2 gilt für **alles über Metadaten hinaus**, nicht für den Radar als solchen (§9.6) |
 | **I3** | **Öffentliche Seiten** | `/insights`, `/insights/<slug>`, `/brands/<slug>`, `/duels/<a>-vs-<b>`, `/rankings`, `/topics/<slug>`; Korrektur-/Entfernungs-Formular; SEO (og:image, JSON-LD, hreflang, `noindex` für Entwürfe), Sitemap, Nav-Punkt, 301 aus `slugHistory` | I2 · **Anwaltsantworten BI1-3 und BI1-4** (ohne sie geht kein Markenprofil live, §6) |
-| **I4** | **Themenradar** | kuratierte Kanalliste, `playlistItems.list` + `videos.list`, `insights_topics` mit Sweep, Opportunity-Score, Betreiber-Ansicht in der Themen-Liste | **eigenes Gate:** Davids Ja · Anwaltsantwort BI1-2 in der geschärften Form (§9.6) · Google-Cloud-Projekt mit Schlüssel |
-| **I5** | **Newsletter** | `insights_subscribers` mit Double-Opt-in nach dem Warteliste-Muster, Bestätigungs- und Abmelde-Weg, Eintrags-Formular je Format und zentral, Versand | **eigenes Gate:** Rechtstexte (A1/BS1 R2) · §10 Frage 5 |
+| **I5** | **Newsletter** | `insights_subscribers` mit Double-Opt-in nach dem Warteliste-Muster, Bestätigungs- und Abmelde-Weg, Eintrags-Formular je Format und zentral, Versand | **eigenes Gate:** Rechtstexte (A1/BS1 R2) · Zuschnitt entschieden: §11 Frage 5 |
 | **I6** | **Launch-Paket** | die vier Beispiel-Beiträge (einer je Format), dann die restlichen fünfzehn Stücke aus §9.8; danach der Wochentakt | I3 · Davids Redaktionszeit |
 
-**Reihenfolge-Regel:** I4 und I5 hängen an keinem der anderen Pakete und an
-keinem Termin — sie können jederzeit vor oder nach I6 kommen, aber nie VOR I3.
-Ein Newsletter ohne Beiträge hat nichts zu versenden, ein Radar ohne Redaktion
-niemanden, der auf seine Themen reagiert.
+**Reihenfolge-Regel (geändert am 2026-09-08).** **I4 steht jetzt VOR I3** und
+darf auch parallel dazu laufen: Davids Entscheidung ist, dass die Themen von
+Anfang an aus Daten kommen (§9.6). Die Regel dahinter bleibt aber beidseitig —
+**der Radar blockiert den Launch nicht, und der Launch blockiert den Radar
+nicht.** I4 hängt an einem eigenen Gate (API-Schlüssel, Anwalt für alles über
+Metadaten hinaus); geht es nicht auf, geht I3 trotzdem live und die Themen
+kommen von Hand aus §9.8. Kein anderes Paket wartet auf I4.
+
+**I5 (Newsletter) bleibt hinter I3** (§11 Frage 5): ein Newsletter ohne
+Beiträge hat nichts zu versenden, und sein Gate sind die Rechtstexte (BS1 R2).
+
+**Fremde Abhängigkeit, die kein BI1-Paket ist:** **Plausible einschalten**
+(§11 Frage 3) liegt als Paket **R2c** im BS1-Plan
+([BRANDING-SUPPLY-RECHT-UND-BEZAHLUNG.md](BRANDING-SUPPLY-RECHT-UND-BEZAHLUNG.md)
+§7), weil es die ganze Site misst und an Davids neuer Plausible-Site hängt.
+Es sollte stehen, wenn **I3** live geht — sonst ist Davids Reichweiten-Ziel ab
+dem ersten öffentlichen Beitrag wieder unbeobachtet. Es ist aber **kein Gate**
+von I3: eine Seite, die niemand zählt, ist immer noch eine Seite.
 
 ---
 
 ## 10. Entscheidungsfragen für David (2026-09-08)
+
+> **Beantwortet am 2026-09-08 — die Entscheidungen stehen in [§11](#11-entscheidungen-david-2026-09-08).**
+> Dieser Abschnitt bleibt als Protokoll stehen: hier stehen die Optionen und
+> die Empfehlungen, dort steht, was gilt.
 
 Acht Fragen. Bei jeder steht die Empfehlung zuerst; die Optionen sind das, was
 sonst noch vertretbar ist, nicht eine Sammlung von Möglichkeiten.
@@ -1145,6 +1236,65 @@ Formate.
   1 Ranking. Schneller live, weniger Recherche; das Ranking wird dünn.
 - **C — anders zuschneiden:** David streicht und ergänzt die Namen und Themen
   direkt in §9.8 — die Mengen bleiben, die Auswahl ist seine.
+
+---
+
+## 11. Entscheidungen (David, 2026-09-08)
+
+Die acht Fragen aus §10, beantwortet. §10 bleibt als Protokoll stehen — dort
+stehen die Optionen, hier steht, was gilt. **Sieben von acht Antworten folgen
+der Empfehlung; eine weicht ab (6, Themenradar) und trägt dafür vier
+ausdrückliche Leitplanken.** Damit ist Phase 2 (Konzeption) abgeschlossen:
+**Prototyp I0 kann starten, der Bau I1+ wartet auf DB1 und den Anwalt (§6).**
+
+| # | Frage | Entscheidung | Empfehlung war | Leitplanke |
+| --- | --- | --- | --- | --- |
+| 1 | Ort im Code | **Eigener Layer `insights`**, `requires: ['brand']`, genau EIN Vertrag zum brand-Layer | nach Empfehlung (A) | Die volle Rechnung aus §9.1 (5) wird bezahlt, nicht abgekürzt: `product.manifest.ts` · `apps/branding/site.manifest.ts` · `LAYER_ORDER` · Bilanz-Block · ESLint-Block · Schema-Parität-Soll · GDPR-Contributor. Der Vertrag liegt in `server/contracts/`, **nie** in `server/utils/` (Nitro auto-importiert das Verzeichnis; ein Re-Export dort stünde zweimal im Auto-Import) |
+| 2 | Adressen | **Getrennte Datensätze, geteilte Vorlage:** `/insights` · `/insights/<slug>` · `/brands/<slug>` · `/duels/<a>-vs-<b>` · `/rankings` · `/topics/<slug>` | nach Empfehlung (A) | `/journal/` entfällt (alte, verworfene Benennung) · Duell-Slug **alphabetisch**, die Gegenrichtung antwortet 301 · Slugs bleiben einsprachig, die Sprache trägt das i18n-Präfix · `slugHistory` (≤ 5) in BEIDEN Marken-Tabellen ⇒ 301 bei Umbenennung. **DB1-Befund:** dieselbe Regel fehlt in `brand_publications` — s. §9.2 |
+| 3 | Reichweitenmessung | **Plausible einschalten**, selbst gehostet unter `plausible.hawaii.studio`, **cookielos und ohne Banner** — wie pukalani.studio | nach Empfehlung (A) | **Erst Text, dann Schalter.** Der Datenschutz-Abschnitt gehört in die Entwurfs-Fassung (BS1 **R2**), der Schalter ist BS1 **R2c**; Faktenblatt-Zeile 13 + §4c und BS1 §1.1/§1.2 sind am 2026-09-08 nachgezogen („findet nicht statt" war falsch geworden). **Davids Handgriff:** neue Plausible-Site für `branding.supply` anlegen (die CE hat keine Sites-API) ⇒ neue Script-Id. „Meistgelesen" bleibt aus Runde 1 draußen |
+| 4 | Übersetzen-Weg | **Eigener Redaktions-Endpunkt**, Ergebnis als bearbeitbarer Entwurf der zweiten Fassung; Drossel **10/Stunde + 50/Tag je Konto** | nach Empfehlung (A) | Öffentlich wird die zweite Fassung erst mit `translationReviewed === true`. Bewusst **nicht** der UGC-Weg: dessen `translations`-Spalte ist ein Cache für LESER, und ein Cache, den jemand von Hand nachbessert, ist keiner mehr — die nächste Änderung verwürfe die Redaktion |
+| 5 | Newsletter | **Eigene Liste `insights_subscribers`** nach dem Warteliste-Muster (brand-015), Versand über `sendMail()` — **erst nach dem Launch** (Paket I5) | nach Empfehlung (A) | Die Warteliste SELBST wird nicht weiterbenutzt: eine Einwilligung gilt nur für das, wofür sie gegeben wurde. Berichtet wird ausschliesslich die **bestätigte** Zahl (`confirmedAt`) — die unbestätigte ist keine. Gate: Rechtstexte (BS1 R2) |
+| 6 | Themenradar | **JETZT** — wie Entscheidung 6 vom 2026-09-07 es vorsah, nicht nach dem Launch | **abweichend** — B (nach dem Launch, lesend-und-verwerfend) | Vier Leitplanken, ausformuliert in **§9.6**: **(a)** kein Aggregieren von API-Daten (Policies **III.E.2**) — gespeichert werden je Video nur die öffentlichen Zahlen der API (Aufrufe, Likes, Kommentar-Zahl, Datum, Kanal), höchstens **30 Tage** (**III.E.4**) oder täglich neu; **unsere** Opportunity-Zahl wird daraus gerechnet und ist unsere Zahl · **(b)** **keine Kommentar-Texte, keine Nutzernamen** bis zur Anwaltsantwort (Block 3 der BS1-Anwaltsfragen) · **(c)** kuratierte Kanalliste statt `search.list` (100 Einheiten je Aufruf gegen 1 für `videos.list`/`playlistItems.list` — 10.000/Tag reichen für ~50 Kanäle) · **(d)** **I4 rückt vor I3** oder läuft parallel, **blockiert den Launch aber nicht**: ohne Radar kommen die Themen aus §9.8 von Hand |
+| 7 | Ranking-Regeln | **Zehn Plätze, eingefroren, mit sichtbarem Stand**; eine Auffrischung ist eine **neue Ausgabe** (neuer Slug), die alte bleibt mit Hinweis und Link | nach Empfehlung (A) | Ein **Entfernen-Wunsch** nimmt den Platz heraus und rechnet die Liste **nicht** neu — die Lücke wird als **„auf Wunsch entfernt"** ausgewiesen. Das ist ehrlicher als eine stille Neunummerierung und beantwortet §8 Frage 9 |
+| 8 | Launch-Inhalt | **10 Profile · 3 Duelle · 5 Artikel · 1 Ranking** — die Namen aus §9.8, die vier belegten Marken zuerst | nach Empfehlung (A) | Die Mengen-Bremse aus Entscheidung 1 bleibt: **kein Format geht live, bevor es EINEN vollständig redigierten Beispiel-Beitrag hat.** Der Launch beginnt mit vier Stücken — einem je Format —, nicht mit neunzehn |
+
+### 11.1 Die eine Abweichung, und was sie im Dokument ändert
+
+**Frage 6 — Themenradar jetzt statt nach dem Launch.** Die Empfehlung wollte
+warten, weil beim Konkretisieren zwei Dinge auffielen: das Aggregations-Verbot
+der YouTube-Policies (III.E.2) traf ausgerechnet unsere eigene Schutzmaßnahme,
+und zwei der fünf Signale des Opportunity-Scores haben noch keine Datenquelle.
+David hat anders entschieden — mit der Begründung, dass genau dieses Signal
+branding.supply von einem gewöhnlichen Blog unterscheiden soll. Was daraus
+folgt, steht nicht als Vorsatz da, sondern als Zuschnitt:
+
+1. **§4.1 (d) ist geändert.** Der Halbsatz „Kommentare … nur aggregiert
+   ausgewertet" ist gefallen — er beschrieb genau das, was III.E.2 untersagt.
+   An seiner Stelle steht: keine Kommentar-Texte, keine Nutzernamen, bis die
+   Anwaltsantwort da ist. Die Kommentar-**Zahl** bleibt erlaubt; sie ist eine
+   öffentliche Kennzahl des Videos, keine Auswertung von Kommentaren.
+2. **Der Score rechnet drei Signale und heißt auch so.** Suchnachfrage und
+   Konkurrenz kommen dazu, wenn ihre Quelle existiert — nicht vorher.
+3. **§9.9 ist umsortiert.** I4 steht vor I3 und darf parallel laufen; die alte
+   Regel „nie VOR I3" ist damit aufgehoben. Der Ersatz ist beidseitig: der
+   Radar hält den Launch nicht auf, und der Launch hält den Radar nicht auf.
+4. **Das Gate ist geschärft, nicht entfernt.** Die Anwaltsantwort BI1-2 gilt
+   für **alles über Metadaten hinaus**. Der Metadaten-Radar darf davor laufen;
+   was er nicht darf, steht in (a) und (b).
+
+### 11.2 Was jetzt bei David liegt
+
+Nichts davon hält den Prototyp I0 auf — er läuft im Playground gegen Dummy-Daten.
+
+- **Google-Cloud-Projekt mit YouTube-Data-API-Schlüssel** — Gate von I4.
+- **Neue Plausible-Site für `branding.supply`** — Gate von BS1 R2c (die CE-
+  Ausgabe hat keine Sites-API, das ist ein Klick in der Oberfläche).
+- **Anwaltstermin** — die sechs Fragen aus Marktvergleich Anhang G plus die
+  vier aus §4.3; ohne die Antworten zu 3 (Score fremder Marken) und 4
+  (Verantwortlicher) geht **kein Markenprofil live** (§6). Die YouTube-Frage
+  (BI1-2) ist Gate nur für alles über Metadaten hinaus.
+- **DB1-Rest** (D4/D5) — BI1 erbt von dort die öffentlichen Marken-Seiten.
+- **Prototyp-Abnahme I0** — Phase 4 des Workflows.
 
 ---
 
