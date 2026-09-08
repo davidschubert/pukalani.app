@@ -83,6 +83,23 @@ nebeneinander, kein Feld kann beides tragen. (3) Parallel-Läufe mit klarem Date
 i18n-nur-per-Edit tragen auch zu dritt; die Naht (Vorschau-Parameter) blieb trotzdem beim
 Hauptloop — wer zwei Läufe koppelt, baut die Kopplung selbst.
 
+**Nachzüge 2026-09-08 (nach Davids Test):** (1) **Branche im Veröffentlichen-Dialog** aus dem
+16er-Katalog wählen (vorbelegt aus dem Freitext; Schema lässt nur Katalog-Ids durch) — Krume &
+Gold stand als „Nicht zugeordnet" in der Galerie, jetzt „Lebensmittel und Getränke". (2) Log-Zeilen
+der Veröffentlichung ohne Profil-/Zeilen-Id. (3) **Live erwischt und behoben:** nach „Stand
+aktualisieren" wechselt die Zeile auf `pending`, und Galerie wie Anatomie lasen nur
+`status = published` — Krume & Gold war 404, obwohl die Regel „alter Stand bleibt öffentlich, bis
+entschieden ist" beim SCHREIBEN galt. Pure Lese-Regel `brandPublicationIsVisible` (published, oder
+pending MIT altem `snapshot`; unbekannter Status veröffentlicht nie), Galerie-Abfrage holt beide
+Zustände. Beweis: Anatomie 200 während der Prüfung, Freigabe des neuen Stands → Galerie mit Branche.
+**Gelernt:** eine Regel, die zwei Wahrheiten nebeneinander legt (öffentlicher + eingereichter Stand),
+braucht ZWEI Leser — den Schreiber und den Leser; wer nur den Schreiber testet, sieht die Lücke
+nicht. **Offen geblieben:** Davids echte Mausklicks auf „Freigeben" (zweimal) erreichten den Server
+nicht, während synthetische Ereignisfolgen und andere Knöpfe derselben Tabelle funktionieren;
+Verdacht ist der mit der Browser-Fernsteuerung GETEILTE Chrome-Tab (Navigation kurz vor dem Klick).
+Nächster Test: neuer Tab, keine Fernsteuerung. Nebenbefund Nuxt UI: `UDashboardSearchButton`
+rendert `⌘k` erst im Client — Hydration-Mismatch auf jeder Dashboard-Seite (Bestand, nicht D3).
+
 ---
 
 ### AW2: Appwrite 2.0 — Server (dev + prod) und SDKs (node-appwrite 29, appwrite 27) in einem Vorhaben ✅ 2026-09-08
