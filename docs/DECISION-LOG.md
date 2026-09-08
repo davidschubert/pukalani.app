@@ -7,6 +7,78 @@ die kleinen, verstreuten Beschlüsse.
 
 ---
 
+## 2026-09-07 — branding.supply Recht + Bezahlweg (BS1): acht Entscheidungen
+
+**Anlass:** Die Site ist seit 2026-09-01 öffentlich, nimmt Konten auf, verschickt Mails und
+veröffentlicht Bewertungen fremder Marken — und hatte weder Impressum noch Datenschutz noch
+AGB (der Fuß zeigte drei Wörter ohne Link); zugleich gab es keinen Weg, Geld zu nehmen, und
+der CTA an der Schranke lief auf einen 404. Strategie + Konzept stehen als
+[plans/BRANDING-SUPPLY-RECHT-UND-BEZAHLUNG.md](plans/BRANDING-SUPPLY-RECHT-UND-BEZAHLUNG.md);
+die Fragenrunde (acht Fragen) ist dort §8, die Antworten §9 (Tabelle Frage · Entscheidung ·
+Empfehlung war · Leitplanke), der verbindliche Paketschnitt §7.
+
+**Entscheidungen (David, Fragenrunde):** (1) Rechtstexte im **`pages`-Layer wie auf
+pukalani.studio** — jede Anwaltskorrektur ist eine Texteingabe statt eines Deploys.
+(2) **Generator-Entwurf plus Anwaltsprüfung**, David bedient den Generator selbst.
+(3) Die fünf ungeklärten A1-Punkte (Art. 27 · Drittland · § 5 DDG/§ 18 MStV · § 36 VSBG ·
+Umsatzsteuer) werden **im selben Termin als eigener Block** mitgefragt. (4) Bezahlmodell
+Phase 1 = **Einmalpreis je Branding über Stripe Checkout**. (5) **Eigene schlanke
+Erstgespräch-Seite im `brand`-Layer**, bis dahin Weiterleitung auf die Studio-Seite.
+(6) **Beta-Konten dauerhaft frei.** (7) **AGB-Checkbox sofort**, mit Entwurf und sichtbarem
+Hinweis. (8) Reihenfolge: **Recht zuerst, Stripe direkt danach.**
+
+**Abweichungen von der Empfehlung — vier, jede mit Leitplanke:**
+
+- **(2) Generator + Prüfung statt „der Anwalt schreibt".** Leitplanke: der Generator-Text ist
+  ein ENTWURF. Die drei Dinge, die kein Generator kennt, werden aus dem Faktenblatt des Plans
+  (§1.2) als eigene Abschnitte geschrieben — KI-Verarbeitung von Kundentexten über
+  OpenRouter/ZDR · Abruf fremder Websites inkl. Bot-Seite und TDM-Vorbehalt · öffentliche
+  Bewertung fremder Marken mit Korrekturweg — und dem Anwalt ausdrücklich als **Prüfpunkte
+  markiert**. Bis zur Prüfung tragen alle Seiten „Entwurf, in anwaltlicher Prüfung" +
+  `noindex`.
+- **(4) Stripe Checkout statt Erstgespräch + Rechnung von Hand.** Leitplanken: braucht **A2
+  live** (Bank, Steuer, Live-Key, Portal — bei David) · **eigener Preis-Katalog für
+  branding.supply**, nicht die Community-Preise · AGB mit **Widerrufsbelehrung für digitale
+  Inhalte** (§ 356 Abs. 5 BGB, Verzicht beim Start der Ausführung) · Rechnung/USt über Stripe
+  mit `automatic_tax` wie bei den Communities · die Freischaltung ist ein **FELD an
+  `brand_profiles`** (Migration), das der Webhook schreibt — der Betreiber-Schalter im
+  Dashboard bleibt ZUSÄTZLICH für Handfälle. Erstgespräch + Angebot bleibt daneben der Weg
+  für Studio-Leistungen; **G4 gilt für Brand Design unverändert**. Damit ist die eigene
+  Tabelle `brand_entitlements` aus §4.1 (b) des Plans verworfen.
+- **(6) Beta-Konten dauerhaft frei statt Bestandsschutz mit Acht-Wochen-Frist.** Leitplanken:
+  gilt je **KONTO** (`brand_access` / Beta-Zulassung), nicht als unbegrenzte Zahl von
+  Brandings · die bestehenden Eimer (3 Läufe/Tag je Branding, Instanz-Deckel) bleiben die
+  Kostenbremse · in den AGB als „Beta-Konten" benannt · der Betreiber kann die Zusage je
+  Konto widerrufen (Missbrauch).
+- **(7) Häkchen sofort statt erst mit den fertigen Texten.** Leitplanken: Hinweis „Entwurf, in
+  anwaltlicher Prüfung" auf der AGB-Seite UND im Registrierformular neben dem Häkchen ·
+  `noindex` · die **Fassungsnummer wird beim Konto gespeichert**. Letzteres ist Bauarbeit,
+  kein Schalter: der Core speichert die Zustimmung heute NICHT — `pukalani.auth.termsUrl`
+  schaltet nur Häkchen und Link frei, das Feld `terms` ist ausdrücklich ein „reiner
+  UI-Belang" (`packages/core/schemas/auth.ts:53`) und erreicht weder Route noch Konto.
+
+**Paketschnitt, damit verbindlich (Plan §7):** **R0** Sofort (CTA-404 weg, Weiterleitung mit
+`?source=branding-supply`, Fuß-Wörter ohne Ziel ausgeblendet) · **R1** Technik (`pages`
+montieren, Migrationen auf `branding`, Seed als Entwurf, Fuß-Links, `termsUrl`,
+AGB-Fassung am Konto) · **R2** Inhalt (Generator-Texte + die drei Abschnitte + Faktenblatt,
+de/en) · **R3** Anwalt (ein Termin, drei Blöcke; danach Fassung 2, Hinweis und `noindex` weg) ·
+**Z0** Erstgespräch-Seite · **Z1** Stripe (Gate: A2 live UND R3) · **Z2** Beta-Regel im Code
+und in den AGB. Die Namen weichen von der alten Skizze ab — das frühere `Z1` ist auf `Z0`
+und `Z1` verteilt.
+
+**Verworfen:** geteilte Rechtstexte über beide Sites (die Verarbeitungen unterscheiden sich
+grundlegend — ein gemeinsamer Text wäre auf beiden Seiten teilweise falsch) · Studio-Antworten
+1:1 übernehmen · Abo je Konto und Credits je Lauf als Bezahlmodell · den Portfolio-Wizard in
+einen Layer heben und auf beiden Sites betreiben · Beta-Bestandsschutz mit Frist ·
+„weiter ohne Häkchen" · Consent-Banner (es läuft kein Tracking).
+
+**Offen und ausdrücklich nicht heute entschieden:** **Name und Betrag des Kaufgegenstands**
+(Vorschlag: EIN Preis je Branding für „die Ableitung" = Marktvergleich + später Book & Kit) ·
+welcher Generator die Grundfassung liefert · ob ein Art.-27-Vertreter jetzt beauftragt wird
+oder auf die Anwaltsantwort gewartet wird (grob 200–400 €/Jahr) — Plan §9.2.
+
+---
+
 ## 2026-09-07 — Brand Insights (BI1): Redaktionskonzept — zwölf Entscheidungen
 
 **Anlass:** BI1 war seit dem Eintrag von heute früh („Discover Brands und Brand Insights als

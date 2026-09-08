@@ -1,8 +1,10 @@
 # branding.supply — Rechtstexte und Bezahlweg (BS1)
 
-Status: **STRATEGIE + KONZEPT ZUR ENTSCHEIDUNG — geschrieben 2026-09-07.**
-Nichts davon ist gebaut. Die Entscheidungen stehen als Fragenrunde in §8;
-sie fallen HIER und nicht während der Umsetzung (WORKFLOW.md Phase 2).
+Status: **ENTSCHIEDEN — Fragenrunde 2026-09-07 beantwortet, Umsetzung läuft.**
+Die acht Entscheidungen stehen in **§9**; **§8 bleibt als Protokoll stehen**
+(Fragen samt Empfehlungen — nur so ist nachlesbar, wovon abgewichen wurde).
+Damit ist der Paketschnitt in **§7 verbindlich**: R0 läuft, alles Weitere in
+der dort genannten Reihenfolge.
 
 **Dies ist keine Rechtsberatung.** Wo unten eine juristische Einordnung steht,
 ist sie als *Laien-Einschätzung* gekennzeichnet und mündet in eine FRAGE an den
@@ -366,6 +368,15 @@ Modell 1 nötig, weil sonst „freigeschaltet" bedeutet „hat ein Beta-Konto".
 
 **Empfohlener Zuschnitt: Modell 1, mit drei gebauten Teilen und keinem Stripe.**
 
+> **Teilweise überholt durch §9 (2026-09-07).** David hat **Modell 2** gewählt
+> (Einmalpreis je Branding über Stripe Checkout) und die Freischaltung als
+> **Feld an `brand_profiles`** statt als eigene Tabelle. Es gilt weiter: **(a)**
+> der Gesprächs-Einstieg — er ist jetzt Paket **Z0**. Ersetzt sind **(b)**
+> `brand_entitlements` und **(c)** „der Preis bleibt Text" für die
+> Selbstbedienungs-Ableitung; für Studio-Leistungen (Brand Design, G4) bleibt
+> „Preis im Erstgespräch" unverändert. Der Rest steht hier als Begründungs-
+> Protokoll.
+
 ### 4.1 Die drei Teile
 
 **(a) Ein Gesprächs-Einstieg, der existiert.** Heute 404. Drei Wege in §8
@@ -426,6 +437,10 @@ Widerrufs-Prozess, kein Guthabenkonto. Alles davon ist Paket Z2 und wartet auf
 zwei Dinge, die nicht im Code liegen: **A2 (Stripe live)** und **ein Produkt,
 das ohne Designer trägt.**
 
+> **Überholt durch §9 Frage 4.** Genau das wird gebaut — als Paket **Z1**, mit
+> denselben zwei Vorbedingungen als Gate. Guthabenkonto und Abo bleiben
+> abgelehnt.
+
 ### 4.3 Messung
 
 Drei Ereignisse reichen, alle über den bestehenden `trackFunnel`/`brand_events`-Weg:
@@ -456,23 +471,45 @@ Abstand zwischen den letzten beiden — er ist die Verkaufsdauer.
 - **Kein AVV/DPA für branding.supply-Kunden in Phase 1** — ob einer nötig ist,
   ist §1.6 (d) Frage 1. (Für pukalani.app ist er ein eigener offener Punkt.)
 - **Kein Consent-Banner** — es läuft kein Tracking.
-- **Kein Stripe, kein Widerrufs-/Rückerstattungsprozess**, solange es keinen
-  Selbstbedienungs-Kauf gibt.
+- ~~**Kein Stripe, kein Widerrufs-/Rückerstattungsprozess**, solange es keinen
+  Selbstbedienungs-Kauf gibt.~~ **Überholt durch §9 Frage 4** — der
+  Selbstbedienungs-Kauf ist entschieden; beides gehört zu Paket Z1.
 - **Keine Rechtstexte auf Vorrat für andere Sites.** pukalani.app bleibt A1b.
 - **Keine dritte Sprache.** de + en, wie überall.
 - **Keine Änderung an der G4-Entscheidung.** Der Preis bleibt im Gespräch.
 
 ---
 
-## 7. Pakete (Skizze — verbindlich erst nach der Entscheidungsrunde)
+## 7. Pakete (VERBINDLICH — Paketschnitt nach der Entscheidungsrunde 2026-09-07)
 
-| Paket | Inhalt | Gate |
-| --- | --- | --- |
-| **R1 — Gerüst** | Ort nach §8 Frage 1 herstellen (bei Option 1: `pages` ins Manifest + `extends`, Migrationen auf `branding`, `seed:legal`) · Fuß bekommt echte Links mit Rückfall · `noindex`/Entwurfs-Hinweis · deutsche Adressen | Davids Wahl F1; bei Option 1 Prod-Migration **vor** Code-Deploy |
-| **R2 — Inhalt** | Faktenblatt für den Termin (aus §1.2 + §1.6) · Texte einsetzen · Subprozessoren-Liste · Methodik-Seite für den Brand-Score · `/market-bot` verlinken | Anwaltstermin |
-| **R3 — Scharf** | Veröffentlichen · `pukalani.auth.termsUrl` setzen · Beweis: sechs Routen 200 in beiden Sprachen, Fuß verlinkt, Checkbox erscheint in allen drei Anmeldewegen (mit Gegenprobe: Schlüssel entfernen ⇒ rot) | Texte final |
-| **Z1 — Gespräch + Zuteilung** | `/erstgespraech` im `brand`-Layer + `brand_intro_requests` · `brand_entitlements` + zweite Eingabe für `resolveMarketPaywall` · Betreiber-Schalter im Dashboard · drei Ereignisse | Davids Wahl F4/F5; Migration vor Deploy |
-| **Z2 — Stripe** *(später)* | `billing` ins Manifest · Preis-Katalog für dieses Produkt · Checkout an der Schranke · `grantedVia: 'purchase'` | **A2 live** + ein Selbstbedienungs-Produkt |
+Die Reihenfolge ist Entscheidung §9 Frage 8: **Recht zuerst, Stripe direkt
+danach.** Zwei Stränge — `R*` ist Recht, `Z*` ist Bezahlweg — und sie laufen
+NICHT parallel: `Z1` fängt erst an, wenn `R3` durch ist. `R0` ist die Ausnahme,
+weil es nur einen kaputten Knopf repariert.
+
+**Die Namen weichen von der alten Skizze ab.** Was dort `Z1` hiess, ist jetzt
+auf `Z0` (Erstgespräch) und `Z1` (Stripe) verteilt; das alte `Z2` ist das
+heutige `Z1`. Wer ältere Notizen liest: es gilt diese Tabelle.
+
+| Paket | Inhalt | Gate | Braucht David? |
+| --- | --- | --- | --- |
+| **R0 — Sofort** *(läuft)* | Der 404 verschwindet: Wizard-Ende (`completionCta`) und die Marktvergleich-Schranke zeigen auf die **Studio-Erstgespräch-Seite** mit Herkunft `?source=branding-supply`. Die drei Fußzeilen-Wörter ohne Ziel werden **ausgeblendet**, bis es Seiten gibt (Links kommen in R1). | keins | Nein |
+| **R1 — Technik** | `pages` in `apps/branding` montieren (`site.manifest.ts` + `extends`), Migrationen auf der Instanz `branding`, `seed:legal` · die drei Seiten als **Entwurf** mit Hinweis „Entwurf, in anwaltlicher Prüfung" als ERSTEM Block und `noindex` · Fuß bekommt echte Links mit hartem Rückfall · `pukalani.auth.termsUrl` gesetzt, Hinweis neben dem Häkchen · **AGB-Fassung am Konto speichern** (s. Befund unten) | **Davids Ja zur Prod-Migration auf `branding`**; Migration **vor** Code-Deploy (§2.3) | Ja — nur die Migrations-Freigabe |
+| **R2 — Inhalt** | Davids Generator-Texte für Impressum, Datenschutz, AGB · dazu **meine drei Abschnitte**, die kein Generator kennt: KI-Verarbeitung von Kundentexten (OpenRouter/ZDR) · Abruf fremder Websites samt `/market-bot` und TDM-Vorbehalt · öffentliche Bewertung fremder Marken mit Korrekturweg · **Faktenblatt** aus §1.2 + §1.6 · Subprozessoren-Liste · Methodik-Seite für den Brand-Score · alles de + en; die drei Abschnitte sind für den Anwalt als **Prüfpunkte markiert** | David liefert die Generator-Texte; **David liest gegen** | Ja |
+| **R3 — Anwalt** | EIN Termin, **drei Blöcke**: (1) Studio-Rest aus A1 · (2) branding-Texte mit den drei markierten Prüfpunkten · (3) die Anhang-G/BI1-Fragen aus §1.6 (b)(c)(d). Danach **Fassung 2** einsetzen, Art.-27- und § 36-VSBG-Abschnitte füllen (bis dahin als benannte leere Plätze vorgebaut), **Entwurfs-Hinweis weg, `noindex` weg**. Beweis: sechs Routen 200 in beiden Sprachen · Fuß verlinkt · Häkchen in allen drei Anmeldewegen, mit Gegenprobe (`termsUrl` entfernen ⇒ rot) | **Anwaltstermin** | Ja — Termin und Abnahme |
+| **Z0 — Erstgespräch-Seite** | `/erstgespraech` im `brand`-Layer: fünf Felder (Name · E-Mail · welches Branding, vorbelegt · Anliegen · optional Telefon) · **zwei entkoppelte Zustellwege** (Mail an David UND Zeile in `brand_intro_requests`, Erfolg = mindestens einer) · drei Bremsen (Rate-Limit-Bucket, Honeypot, enge Zod-Längen) · Betreiber-Sicht im Dashboard · Ereignisse `intro.viewed` / `intro.submitted`. **Ersetzt die R0-Weiterleitung** | R1 durch (dieselbe Migrations-Freigabe); Migration vor Deploy | Nein (ausser Migrations-Freigabe) |
+| **Z1 — Stripe** | `billing` ins Manifest · **eigener Preis-Katalog für branding.supply** (NICHT die Community-Preise) · Checkout **je Branding** an der Schranke · Webhook schreibt das **Freischalt-Feld an `brand_profiles`** (Migration) · der **Betreiber-Schalter im Dashboard bleibt** für Handfälle · `automatic_tax` wie bei den Communities, Rechnung und Portal · AGB tragen die **Widerrufsbelehrung für digitale Inhalte** (§ 356 Abs. 5 BGB: Verzicht beim Start der Ausführung) | **A2 live** (Bank, Steuer, Live-Key, Portal) **UND** R3 durch; ausserdem Name + Betrag des Kaufgegenstands (offen, §9) | Ja — A2, Name und Preis |
+| **Z2 — Beta-Regel** | „**Beta-Konten dauerhaft frei**" im Code — je **KONTO** (`brand_access` / Beta-Zulassung), nicht als unbegrenzte Branding-Zahl · als benannter Abschnitt „Beta-Konten" in den AGB · Widerruf je Konto durch den Betreiber bei Missbrauch · die bestehenden Eimer (3 Läufe/Tag je Branding, Instanz-Deckel) bleiben die Kostenbremse | R2 (AGB-Abschnitt) + Z1 (die Zuteilung ist das Gegenstück, gegen das die Ausnahme greift) | Nein |
+
+**Ein Befund, der R1 grösser macht als eine Konfigzeile.** Der Core **speichert
+die AGB-Zustimmung heute nicht**. `pukalani.auth.termsUrl` schaltet nur Häkchen
+und Link frei; das Feld `terms` ist ausdrücklich ein „reiner UI-Belang"
+(`packages/core/schemas/auth.ts:53`, Kommentar im Code) und erreicht weder die
+Route noch das Konto — es gibt weder `termsAcceptedAt` noch `termsVersion`,
+nirgends. Weil Frage 7 ein Häkchen auf einen **Entwurf** setzt, ist die
+Fassungsnummer am Konto keine Kür, sondern der Grund, warum das Häkchen später
+noch etwas wert ist: nur so lässt sich sagen, WELCHEM Text jemand zugestimmt
+hat. Gehört deshalb in R1 und nicht in R3.
 
 ---
 
@@ -600,6 +637,55 @@ gebaut ist.)*
   zwei offene Entscheidungsstränge gleichzeitig, beide mit David als Engpass.
 - **C — Bezahlweg zuerst.** Nur sinnvoll, wenn ein zahlender Kunde konkret
   wartet — dann aber über Modell 1 (Rechnung von Hand), was A2 nicht braucht.
+
+---
+
+## 9. Entscheidungen (David, 2026-09-07)
+
+Alle acht Fragen aus §8 sind beantwortet. **§8 bleibt unverändert stehen** —
+ohne die Empfehlungen wäre nicht mehr nachvollziehbar, wovon abgewichen wurde.
+**Vier Entscheidungen weichen von der Empfehlung ab** (2, 4, 6, 7); jede trägt
+eine Leitplanke, die den Preis der Abweichung bezahlt.
+
+| # | Frage | Entscheidung | Empfehlung war | Leitplanke |
+| --- | --- | --- | --- | --- |
+| 1 | Ort der Rechtstexte | **`pages`-Layer, wie auf pukalani.studio** | A (dieselbe) | Migration auf `branding` **vor** dem Code-Deploy (§2.3); die AGB haben keine Vorlage in `LEGAL_TEMPLATE_SLUGS` und entstehen als leere Seite |
+| 2 | Wer schreibt die Texte | **Generator + Anwaltsprüfung.** David bedient den Generator selbst (welchen, ist seine Wahl) und liefert die Texte | A — „Anwalt schreibt Datenschutz und AGB" | Der Generator-Text ist ein **Entwurf**. Die drei Dinge, die kein Generator kennt, werden aus dem Faktenblatt (§1.2) als **eigene Abschnitte** geschrieben — KI-Verarbeitung von Kundentexten über OpenRouter/ZDR · Abruf fremder Websites inkl. Bot-Seite und TDM · öffentliche Bewertung fremder Marken mit Korrekturweg — und dem Anwalt **ausdrücklich als Prüfpunkte markiert**. Bis zur Prüfung tragen alle Seiten „Entwurf, in anwaltlicher Prüfung" + `noindex` |
+| 3 | Die fünf ungeklärten A1-Punkte | **Im selben Termin als eigener Block mitfragen** | A (dieselbe) | **Art. 27** und **§ 36 VSBG** werden als *benannte leere Abschnitte* vorgebaut — die Antwort ist dann ein eingesetzter Satz und kein Umbau |
+| 4 | Bezahlmodell Phase 1 | **Einmalpreis je Branding über Stripe Checkout** | A — „Erstgespräch + Angebot, Freischaltung von Hand" | Braucht **A2 live** · **eigener Preis-Katalog für branding.supply**, nicht die Community-Preise · AGB mit **Widerrufsbelehrung für digitale Inhalte** (§ 356 Abs. 5 BGB: Verzicht beim Start der Ausführung) · Rechnung/USt über Stripe mit `automatic_tax` wie bei den Communities · Freischaltung als **FELD an `brand_profiles`** (Migration), geschrieben vom Webhook — der **Betreiber-Schalter bleibt zusätzlich** für Handfälle. **Erstgespräch + Angebot bleibt daneben** der Weg für Studio-Leistungen; **G4 gilt für Brand Design unverändert** |
+| 5 | Erstgespräch auf branding.supply | **Eigene schlanke Seite im `brand`-Layer; bis dahin Weiterleitung** | A (dieselbe, mit dem B-Sofortpflaster davor) | Die Weiterleitung ist **R0** und trägt die Herkunft `?source=branding-supply`; die eigene Seite ist **Z0** und ersetzt sie |
+| 6 | Beta-Konten nach der Öffnung | **Dauerhaft frei** | A — „Bestandsschutz mit Frist (acht Wochen)" | Gilt je **KONTO** (`brand_access` / Beta-Zulassung), **nicht** als unbegrenzte Zahl von Brandings · die bestehenden Eimer (3 Läufe/Tag je Branding, Instanz-Deckel) bleiben die Kostenbremse · in den AGB als „**Beta-Konten**" benannt · der Betreiber kann die Zusage **je Konto widerrufen** (Missbrauch) |
+| 7 | AGB-Checkbox | **Sofort, mit Entwurf und sichtbarem Hinweis** | A — „mit den fertigen Texten" | Hinweis „Entwurf, in anwaltlicher Prüfung" **auf der AGB-Seite UND im Registrierformular neben dem Häkchen** · `noindex` · die **Fassungsnummer wird beim Konto gespeichert** (heute nicht vorhanden, s. §7-Befund — deshalb Bauarbeit in R1) · nach der Prüfung neue Fassung, Hinweis weg |
+| 8 | Reihenfolge zu A2 | **Recht zuerst, Stripe direkt danach** | A (dieselbe) | „Direkt danach" heisst: `Z1` startet, sobald `R3` durch ist — nicht parallel, David ist in beiden Strängen der Engpass |
+
+### 9.1 Was diese Entscheidungen im Dokument überholen
+
+- **§4.1 (b)** — die eigene Tabelle `brand_entitlements` ist ersetzt durch ein
+  **Feld an `brand_profiles`** (Frage 4). Die Begründung für eine Tabelle
+  (Herkunft, Datum, Vermerk, Entzug) bleibt lesenswert; sie ist gegen den
+  einfacheren Weg entschieden worden, weil der Webhook genau ein Häkchen
+  schreiben muss und der Vermerk am Betreiber-Schalter hängt.
+- **§4.1 (c)** — „der Preis-Anker bleibt Text" gilt nur noch für
+  Studio-Leistungen (G4/BD1), nicht mehr für die Selbstbedienungs-Ableitung.
+- **§4.2** und der Stripe-Punkt in **§6** — beides ist jetzt Paket **Z1**, mit
+  denselben zwei Vorbedingungen als Gate.
+- **§7** ist kein Vorschlag mehr, sondern der verbindliche Schnitt.
+
+### 9.2 Offen — das muss David noch benennen
+
+Nicht geraten, weil es Preisangaben und Vertragsgegenstand sind:
+
+1. **Name des Kaufgegenstands.** Vorschlag: **ein** Preis je Branding für „die
+   Ableitung" = Marktvergleich + später Book & Kit. Wie das auf der Seite und
+   auf der Rechnung heisst, legt David fest.
+2. **Der Betrag** — und ob es beim EINEN Preis bleibt oder später nach Produkt
+   (`market`, `design`) getrennt wird. Beides sind Eingaben für den
+   Preis-Katalog in Z1.
+3. **Welcher Generator** die Grundfassung liefert (Frage 2) — für R2 nur
+   insofern wichtig, als die drei Zusatz-Abschnitte in dessen Gliederung
+   passen müssen.
+4. **Art.-27-Vertreter jetzt beauftragen oder auf die Anwaltsantwort warten?**
+   (§8 Frage 3, Zusatz — Dienstleister grob 200–400 €/Jahr.)
 
 ---
 
