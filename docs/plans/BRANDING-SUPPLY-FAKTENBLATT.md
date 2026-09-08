@@ -1,6 +1,6 @@
 # Faktenblatt branding.supply — für den Rechtstext-Generator und den Anwalt
 
-Stand: **2026-09-07** · Paket **BS1 R2**, Entscheidungen 2 und 3 in
+Stand: **2026-09-07** · Paket **BS1 R2** (Baubefund 1 mit **R1b** geschlossen), Entscheidungen 2 und 3 in
 [BRANDING-SUPPLY-RECHT-UND-BEZAHLUNG.md](BRANDING-SUPPLY-RECHT-UND-BEZAHLUNG.md) §9.
 
 **Wozu dieses Blatt.** David bedient den Rechtstext-Generator selbst
@@ -45,7 +45,7 @@ die Vorarbeit für den Anwalt.
 | # | Verarbeitung | Zweck | Datenarten | Betroffene | Empfänger / Auftragsverarbeiter | Drittland + Grundlage | Speicherdauer | Rechtsgrundlage (Kandidat) | Beleg |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | 1 | **Konto / Registrierung** | Zugang zur Beta und zur Werkstatt | E-Mail, Anzeigename, Passwort-Hash bzw. Google-Kennung, Registrierungszeitpunkt | Kunden | Appwrite self-hosted auf eigenem Server (Hetzner); **nur bei Google-Login** zusätzlich Google | USA nur bei Google-Login — **Grundlage LÜCKE** | bis Löschung des Kontos | Art. 6 I b | `docs/runbooks/BRANDING-SUPPLY-SETUP.md` §1 · `apps/branding/app/app.config.ts` |
-| 2 | **Sitzungen + Standort** | Anmeldung halten, Sitzungsliste unter `/dashboard/settings/sessions` | IP-Adresse, User-Agent, **Land** (Appwrite-Session). **Stadt/Region NUR**, wenn `NUXT_GEO_CITY_DB_PATH` gesetzt ist — auf branding ist der Pfad **nicht** Pflichtfeld der Server-`.env`, die Liste zeigt dort also Land | Kunden | keiner (lokale MMDB, kein Abruf nach außen) | — | bis Abmeldung bzw. Ablauf der Session | Art. 6 I b / f | `packages/core/server/utils/geoCity.ts:27,90` · `scripts/ops/verify-site-env.mjs:341-347` |
+| 2 | **Sitzungen + Standort** | Anmeldung halten, Sitzungsliste unter `/dashboard/settings/sessions` | IP-Adresse, User-Agent, **Land** (Appwrite-Session). **Stadt/Region NUR**, wenn `NUXT_GEO_CITY_DB_PATH` gesetzt ist — auf branding ist der Pfad heute **nicht gesetzt**, die Liste zeigt dort also nur das Land (und zwar ehrlich: `formatSessionLocation` fällt auf das Land zurück, nicht auf „Unbekannt"). Seit BS1 R1b ist er im Env-Wächter **Pflicht**, der Lauf am 2026-09-07 meldet ihn als fehlend — mit dem Setzen wird aus der Zeile „Land" ein „Stadt, Region · Land" | Kunden | keiner (lokale MMDB, kein Abruf nach außen) | — | bis Abmeldung bzw. Ablauf der Session | Art. 6 I b / f | `packages/core/server/utils/geoCity.ts:27,90` · `scripts/ops/verify-site-env.mjs:341-347` |
 | 3 | **Wizard-Inhalte** | das Produkt selbst | Antworten, Gesprächsverlauf, Entwürfe, bestätigte Kapitel (`brand_profiles`, `brand_steps`, `brand_messages`, `brand_findings`) | Kunden | keiner (server-only Tabellen, `permissions: []`) | — | bis Löschung des Kontos oder des Brandings | Art. 6 I b | `packages/brand/scripts/migrations/001-003,011,014` |
 | 4 | **KI-Verarbeitung von Kundentexten** | Entwürfe, Rückfragen, Prüfblick, Brand-Check-Urteil, Markt-Extraktion | alles, was der Kunde über seine Marke schreibt; Website-Text Dritter (PII-gefiltert) | Kunden; mittelbar fremde Website-Betreiber | **OpenRouter** als Router → Modellanbieter | **USA — Grundlage LÜCKE (AVV / SCC nicht geprüft)**. Technische Schutzmaßnahme belegt: `zdr: true` (nur Anbieter mit Zero-Data-Retention), `dataCollection: 'deny'`, `allowFallbacks: false` — bei Last lieber „gerade nicht verfügbar" als ein Anbieter außerhalb dieser Bedingungen | beim Anbieter laut ZDR keine Speicherung; **das Ergebnis bei uns dauerhaft** | Art. 6 I b | `packages/brand/server/utils/brandProviderRouting.ts` |
 | 5 | **Abruf fremder Websites** | Brand-Check und Marktvergleich | öffentlich abrufbare Marketing-Texte; unser Abruf hinterlässt beim fremden Server **unsere IP und unseren Absender** | fremde Website-Betreiber | — | — | s. #6/#7 | Art. 6 I f | `packages/market/server/utils/marketFetch.ts` · `packages/brand/server/utils/brandSiteFetch.ts` |
@@ -56,7 +56,7 @@ die Vorarbeit für den Anwalt.
 | 9 | **Share-Links** | ein Ergebnis teilen | Token-**Hash** (sha256, der rohe Token steht nur im Link), eingefrorener Schnappschuss der bestätigten Kapitel — nie Chats, nie Entwürfe, nie Metriken | Kunden; Empfänger des Links | jeder, der den Link hat | — | **30 Tage** (`SHARE_TTL_MS`), Widerruf jederzeit; Erneuern = neue Zeile, alte gestempelt | Art. 6 I b | `packages/brand/server/api/brand/profiles/[id]/share.post.ts:80` · `004-brand-shares.ts` |
 | 10 | **Mailversand** | Verifizierung, Einladung, Warteliste-Bestätigung, Betreiber-Meldung | E-Mail-Adresse, Mailinhalt | Kunden, Wartende | **SMTP-Anbieter laut Server-`.env`** — im Monorepo ist das durchgängig **Resend** (`smtp.resend.com`) | **LÜCKE — bestätigen, dass auch branding.supply Resend nutzt**; Drittland/AVV ungeprüft | Zustellprotokoll beim Anbieter | Art. 6 I b | `docs/runbooks/DEPLOYMENT.md:36,201` · `scripts/ops/verify-site-env.mjs:310-314` |
 | 11 | **Warteliste** | Beta-Zugang vergeben | E-Mail (Original + kleingeschrieben), Status, Token-Hash, Bestätigungszeitpunkt | Interessenten | SMTP-Anbieter (#10) | s. #10 | bis Einladung oder Löschung; **unbestätigte Zeilen bleiben bewusst liegen** (Token nach 24 h wertlos), Löschung ist ein Handgriff des Betreibers | Art. 6 I a (Einwilligung, **Double-Opt-in**) | `012-brand-waitlist.ts:20-23` · `015-brand-waitlist-doi.ts` |
-| 12 | **Betreiber-Ereignisse (Funnel)** | Messung des Trichters | Ereignistyp, Branding-Id, User-Id, kleine Nutzlast — **nie der getippte Text und nie die Antwort**; EINE benannte Ausnahme: `step.restarted` trägt den Slot-Text (≤ 4096 Zeichen) als Audit-Eintrag | Kunden | intern | — | **Migration nennt 24 Monate — der zugehörige Sweep ist NICHT gebaut** (Suche nach „sweep" im brand-Layer: kein Treffer). Faktisch also unbefristet | Art. 6 I f | `007-brand-events.ts:23-26` · `packages/brand/server/utils/brandEvents.ts:45-63` |
+| 12 | **Betreiber-Ereignisse (Funnel)** | Messung des Trichters | Ereignistyp, Branding-Id, User-Id, kleine Nutzlast — **nie der getippte Text und nie die Antwort**; EINE benannte Ausnahme: `step.restarted` trägt den Slot-Text (≤ 4096 Zeichen) als Audit-Eintrag | Kunden | intern | — | **24 Monate ab dem Ereignis — seit BS1 R1b (2026-09-07) mit Mechanik:** Sweep täglich (erster Lauf 60 s nach dem Start), er LÖSCHT die Zeile; Frist als EINE Konstante `BRAND_EVENTS_RETENTION_MONTHS`. Bis dahin stand die Zahl nur als Kommentar in der Migration und war faktisch unbefristet | Art. 6 I f | `packages/brand/shared/brandEventsRetention.ts` · `packages/brand/server/utils/brandEventsSweep.ts` · `server/plugins/brand-events-sweep.ts` · `packages/brand/server/utils/brandEvents.ts:45-63` |
 | 13 | **Reichweitenmessung** | — | — | — | — | — | **findet nicht statt** — branding.supply hat kein Plausible (anders als pukalani.studio); Core-Default `analytics.enabled: false`, die App setzt nichts | — | `apps/branding/app/app.config.ts` · `packages/core/app/app.config.ts:223` |
 | 14 | **Fehler-Telemetrie** | — | — | — | — | — | **aus.** `pukalani.observability` ist Core-Default `enabled: false` / `clientErrors: false` und wird von branding nicht gesetzt; `POST /api/telemetry/error` bekommt also nichts | — | `packages/core/app/app.config.ts:564-571` |
 | 15 | **Server-Protokolle** | Betrieb, Sicherheit | nginx/ploi-Zugriffsprotokolle mit IP, Zeit, Adresse, Browserkennung | alle Besucher | Hetzner (Serverbetrieb), ploi.io (Verwaltung) | Server in Deutschland — **genauer Standort LÜCKE** | **offen — kein logrotate konfiguriert** (derselbe Befund wie für pukalani.app) | Art. 6 I f | Plan §1.2 Zeile 10 · `docs/runbooks/DEPLOYMENT.md` |
@@ -474,12 +474,16 @@ kann; ohne sie bleibt die entsprechende Stelle im Text ein Platzhalter.
 
 ### Zwei Baubefunde, die vor der Veröffentlichung zu klären sind
 
-- **Die 24-Monats-Frist der Funnel-Ereignisse existiert nur als Kommentar.**
-  `007-brand-events.ts:23-26` sagt „Ein Sweep im Layer räumt Älteres weg" — im
-  brand-Layer gibt es keinen. Entweder den Sweep bauen oder die Frist im Text
-  ehrlich als „bis auf Weiteres" beschreiben. Eine genannte Frist ohne
-  Mechanik ist eine öffentliche Falschaussage über das eigene Verhalten (die
-  Bot-Seite hält es genau umgekehrt: Zahlen aus dem Vertrag, nie abgetippt).
+- ~~**Die 24-Monats-Frist der Funnel-Ereignisse existiert nur als Kommentar.**~~
+  **ERLEDIGT mit BS1 R1b (2026-09-07):** die Frist hat ihre Mechanik — pure
+  Regel `packages/brand/shared/brandEventsRetention.ts`
+  (`BRAND_EVENTS_RETENTION_MONTHS`, die EINE Zahl, von Migrationskopf und
+  Verzeichnis-Zeile 12 zitiert), Sweep `server/utils/brandEventsSweep.ts`,
+  Takt `server/plugins/brand-events-sweep.ts`, Betreiber-Handgriff
+  `POST /api/brand/ops/events-sweep`. Beweis mit Gegenprobe:
+  `packages/brand/scripts/verify-brand-events-sweep.mjs` (15/15) — eine Zeile
+  mit 25 Monaten fällt, eine mit 23 Monaten bleibt. Der Satz im Text darf jetzt
+  „24 Monate" sagen.
 - **Die Methodik-Seite für den Brand Score fehlt** (BI1 §4.2, Plan §2.2 Nr. 6).
   §4c verweist zweimal darauf; der Abschnitt darf erst live gehen, wenn die
   Seite steht.

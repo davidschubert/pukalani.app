@@ -495,6 +495,7 @@ heutige `Z1`. Wer ältere Notizen liest: es gilt diese Tabelle.
 | --- | --- | --- | --- |
 | **R0 — Sofort** *(GEBAUT 2026-09-07)* | Der 404 verschwindet: Wizard-Ende (`completionCta`) und die Marktvergleich-Schranke zeigen auf die **Studio-Erstgespräch-Seite** mit Herkunft `?source=branding-supply`. Die drei Fußzeilen-Wörter ohne Ziel werden **ausgeblendet**, bis es Seiten gibt (Links kommen in R1). | keins | Nein |
 | **R1 — Technik** *(GEBAUT 2026-09-08)* | `pages` in `apps/branding` montieren (`site.manifest.ts` + `extends`), Migrationen auf der Instanz `branding`, `seed:legal` · die drei Seiten als **Entwurf** mit Hinweis „Entwurf, in anwaltlicher Prüfung" als ERSTEM Block und `noindex` · Fuß bekommt echte Links mit hartem Rückfall · `pukalani.auth.termsUrl` gesetzt, Hinweis neben dem Häkchen · **AGB-Fassung am Konto speichern** (s. Befund unten) | **Davids Ja zur Prod-Migration auf `branding`**; Migration **vor** Code-Deploy (§2.3) | Ja — nur die Migrations-Freigabe |
+| **R1b — Nachpaket zu R1** *(GEBAUT 2026-09-07)* | Zwei Befunde aus dem Faktenblatt: (1) die **24-Monats-Frist der Funnel-Ereignisse** bekommt ihre Mechanik — pure Regel `brandEventsRetention.ts` (EINE Konstante), Sweep in `server/utils`, Tagestakt als Nitro-Plugin, Betreiber-Handgriff `POST /api/brand/ops/events-sweep`; **keine Migration nötig** (`$createdAt` ist ohne eigenen Index abfragbar, gemessen). (2) Der **Env-Wächter** verlangt für `apps/branding` jetzt `NUXT_GEO_CITY_DB_PATH` + `NUXT_GEO_CITIES_PATH` — seit dem `admin`-Layer (2026-09-03) sind Sitzungsliste und Orts-Picker dort erreichbar; der Lauf meldet beide als auf dem Server fehlend. Beweise: 14 Unit-Prüfungen + `verify-brand-events-sweep.mjs` (15/15, mit Mutations-Gegenprobe) | keins für den Code; die **Server-`.env` von branding.supply setzt David** (zwei Zeilen + Reload, s. §7.2) | Ja — nur die zwei Env-Zeilen |
 | **R2 — Inhalt** | Davids Generator-Texte für Impressum, Datenschutz, AGB · dazu **meine drei Abschnitte**, die kein Generator kennt: KI-Verarbeitung von Kundentexten (OpenRouter/ZDR) · Abruf fremder Websites samt `/market-bot` und TDM-Vorbehalt · öffentliche Bewertung fremder Marken mit Korrekturweg · **Faktenblatt** aus §1.2 + §1.6 · Subprozessoren-Liste · Methodik-Seite für den Brand-Score · alles de + en; die drei Abschnitte sind für den Anwalt als **Prüfpunkte markiert** | David liefert die Generator-Texte; **David liest gegen** | Ja |
 | **R3 — Anwalt** | EIN Termin, **drei Blöcke**: (1) Studio-Rest aus A1 · (2) branding-Texte mit den drei markierten Prüfpunkten · (3) die Anhang-G/BI1-Fragen aus §1.6 (b)(c)(d). Danach **Fassung 2** einsetzen, Art.-27- und § 36-VSBG-Abschnitte füllen (bis dahin als benannte leere Plätze vorgebaut), **Entwurfs-Hinweis weg, `noindex` weg**. Beweis: sechs Routen 200 in beiden Sprachen · Fuß verlinkt · Häkchen in allen drei Anmeldewegen, mit Gegenprobe (`termsUrl` entfernen ⇒ rot) | **Anwaltstermin** | Ja — Termin und Abnahme |
 | **Z0 — Erstgespräch-Seite** | `/erstgespraech` im `brand`-Layer: fünf Felder (Name · E-Mail · welches Branding, vorbelegt · Anliegen · optional Telefon) · **zwei entkoppelte Zustellwege** (Mail an David UND Zeile in `brand_intro_requests`, Erfolg = mindestens einer) · drei Bremsen (Rate-Limit-Bucket, Honeypot, enge Zod-Längen) · Betreiber-Sicht im Dashboard · Ereignisse `intro.viewed` / `intro.submitted`. **Ersetzt die R0-Weiterleitung** | R1 durch (dieselbe Migrations-Freigabe); Migration vor Deploy | Nein (ausser Migrations-Freigabe) |
@@ -572,6 +573,64 @@ nirgends. Weil Frage 7 ein Häkchen auf einen **Entwurf** setzt, ist die
 Fassungsnummer am Konto keine Kür, sondern der Grund, warum das Häkchen später
 noch etwas wert ist: nur so lässt sich sagen, WELCHEM Text jemand zugestimmt
 hat. Gehört deshalb in R1 und nicht in R3.
+
+---
+
+### 7.2 R1b — was am 2026-09-07 gebaut wurde, und der EINE Handgriff für David
+
+**Teil 1 — die Frist der Funnel-Ereignisse hat eine Mechanik.** `brand_events`
+trägt den Trichter (und mit `step.restarted` einen Audit-Eintrag mit Slot-Text).
+Der Kopf von `007-brand-events.ts` versprach seit Tag eins „24 Monate"; einen
+Sweep gab es nie — gefunden hat es das Faktenblatt, als aus dem Kommentar eine
+Aussage in einer Datenschutzerklärung werden sollte. Jetzt:
+
+- **EINE Zahl**: `BRAND_EVENTS_RETENTION_MONTHS` in
+  `packages/brand/shared/brandEventsRetention.ts`. Migrationskopf und
+  Verzeichnis-Zeile 12 zitieren sie, der Sweep rechnet mit ihr. Kalender-Monate,
+  nicht 24 × 30 Tage; der Schaltjahr-Fall rollt bewusst in die kürzere Richtung.
+- **Gelöscht, nicht geleert** — es sind Ereignisse, keine Belege (dieselbe Wahl
+  wie bei `pruneGuestAuthors`). Die Arbeit liegt in `server/utils`, nicht in
+  `server/plugins`: der richtige Ort statt einer `eslint-disable`-Zeile.
+- **Takt** täglich, erster Lauf 60 s nach dem Start (ein Deploy darf die fällige
+  Runde nicht verschieben), Produkt-Gate `getProductRegistry().has('brand')`.
+- **Betreiber-Handgriff** `POST /api/brand/ops/events-sweep` (`system.manage`),
+  ohne Zeit-Argument — ein `now` von aussen wäre eine Waffe.
+- **Keine Migration.** `Query.lessThan('$createdAt', …)` antwortet auf
+  `brand_events` ohne eigenen Index (gemessen gegen Appwrite 1.9.6; dieselbe
+  Abfrage fährt comments seit 2026-08-01 in Produktion).
+
+**Teil 2 — der Env-Wächter kennt die Sitzungsliste auf branding.** Seit
+`apps/branding` den `admin`-Layer führt (2026-09-03), sind
+`/dashboard/settings/sessions` (Sitzungsliste) und `/dashboard/settings`
+(Orts-Picker im Profil) dort erreichbar. Die alte Begründung im Wächter („nur
+brand + core + system") war damit überholt; beide `GEO_*`-Pfade stehen jetzt in
+der Pflicht-Liste von `branding`. Der Lauf am 2026-09-07 meldet sie als auf dem
+Server FEHLEND — das ist der Befund, nicht ein Fehler des Wächters.
+
+**Der Handgriff (David, 5 Minuten).** Der Code ändert daran nichts; die Datei
+liegt auf dem Server:
+
+1. ploi → Site **402929** (`branding.supply`) → *Environment*, zwei Zeilen
+   ergänzen (die Dateien liegen dort schon — sie versorgen platform, control und
+   portfolio, gepflegt von `update-geodb.sh` per ploi-Cron 327622, 5. je Monat):
+
+   ```
+   NUXT_GEO_CITY_DB_PATH=/home/ploi/geodb/dbip-city-lite.mmdb
+   NUXT_GEO_CITIES_PATH=/home/ploi/geodb/geonames-cities.tsv
+   ```
+
+2. **Reload ist Pflicht.** pm2 liest die `.env` nur beim (Re-)Load — ohne ihn ist
+   das Schreiben unbewiesen (Memory „Server-.env-Reload-Zeitbombe"). Doppelte
+   Schlüssel in der Datei sind ein Alarmsignal: der letzte gewinnt.
+3. Beweis: `pnpm ops:site-env` meldet `branding` grün, und
+   `/dashboard/settings/sessions` zeigt statt „Deutschland" ein „Hamburg,
+   Hamburg · Deutschland".
+
+**Bis dahin lügt die Liste NICHT** — sie zeigt das Land, das Appwrite ohnehin
+liefert (`formatSessionLocation` fällt auf das Land zurück, nicht auf
+„Unbekannt"; geprüft in `packages/core/tests/sessionLocation.test.ts`). Der
+Wächter läuft aber täglich in der CI (`production-watch.yml`) und bleibt bis
+zum Setzen ROT — genau dafür ist er da.
 
 ---
 
