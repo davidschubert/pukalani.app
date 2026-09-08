@@ -95,7 +95,7 @@ function discard(id: string): void {
       <p class="bw-doc-text mt-2">
         Was für ein Zeichen soll es werden — und warum. Die Begründung kommt aus DNA „Formsprache" und aus eurem Namen.
       </p>
-      <div class="mt-4 grid gap-3 sm:grid-cols-2">
+      <div class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <button
           v-for="kind in DS_MARK_KINDS" :key="kind.id"
           type="button"

@@ -112,10 +112,25 @@ describe('der Snapshot trägt nur Festlegungen', () => {
     // Der Filter ist wertlos, solange ihn niemand ruft — genau das war der
     // Zustand vor MV1 M5. Der Lesepfad (`brandFoundation.ts`) hat seinen
     // eigenen Beweis; hier steht der Schreibpfad.
-    const route = readFileSync(
-      new URL('../server/api/brand/profiles/[id]/share.post.ts', import.meta.url),
+    //
+    // SEIT DISCOVER D1 steht die Rechnung in `server/utils/brandSnapshot.ts`:
+    // der Share-Link UND die öffentliche Veröffentlichung frieren dasselbe
+    // Abbild ein, und zwei Kopien wären die Stelle, an der eines Tages die eine
+    // einen neuen Filter bekommt und die andere nicht. Geprüft wird deshalb der
+    // Bauer — plus die zwei Routen, die ihn wirklich rufen (ein Bauer, den
+    // niemand aufruft, ist genau der Zustand von vor MV1 M5).
+    const builder = readFileSync(
+      new URL('../server/utils/brandSnapshot.ts', import.meta.url),
       'utf8',
     )
-    expect(route).toContain('brandShareableSlotValues(confirmedSlotValues(row))')
+    expect(builder).toContain('brandShareableSlotValues(confirmedSlotValues(row))')
+
+    for (const route of ['share.post.ts', 'publication.post.ts']) {
+      const source = readFileSync(
+        new URL(`../server/api/brand/profiles/[id]/${route}`, import.meta.url),
+        'utf8',
+      )
+      expect(source).toContain('buildBrandSnapshot(profile, stepRows)')
+    }
   })
 })

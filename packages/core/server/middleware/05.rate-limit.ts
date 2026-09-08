@@ -536,6 +536,29 @@ const WRITE_LIMITED: { re: RegExp, bucket: string, max?: number }[] = [
    */
   { re: /^POST \/api\/brand\/check\/[^/]+\/correction$/, bucket: 'brand:correction', max: 3 },
   /**
+   * IN DIE ÖFFENTLICHE GALERIE EINREICHEN UND WIEDER ZURÜCKZIEHEN
+   * (docs/plans/DISCOVER-BRANDS.md §6: „Drossel 10/Tag je Konto").
+   *
+   * Jeder Aufruf friert ein bis zu 400 KB grosses Abbild ein, schreibt es über
+   * den Admin-Client (an dem Appwrites eigene Bremse nicht greift) und legt
+   * dem Betreiber Arbeit auf den Tisch. `TOKEN_MAX` (10/min je IP) ist dafür
+   * reichlich: ein Mensch veröffentlicht seine Marke einmal und aktualisiert
+   * den Stand gelegentlich.
+   *
+   * DIESE ZEILE IST DER MINUTEN-DECKEL, NICHT DER GANZE. Der Plan verlangt
+   * 10/Tag je KONTO; ein Tagesfenster kennt diese Middleware nicht (`WINDOW_MS`
+   * ist eine Minute für alle), und eine IP ist kein Konto. Den Rest zählt die
+   * Route selbst (`bookBrandPublicationQuota`,
+   * `packages/brand/shared/brandPublication.ts`) — die Minute schützt den
+   * Server, der Tag die Warteschlange des Betreibers. Dieselbe Arbeitsteilung
+   * wie bei den Korrekturvorschlägen eine Zeile höher.
+   *
+   * EIN gemeinsamer Eimer für beide Methoden, weil es EIN Vorgang ist
+   * (Muster: `market:competitors`). Das GET steht bewusst nicht hier: es liest
+   * eine einzelne Zeile und hängt am SSR-Aufbau der Leseansicht.
+   */
+  { re: /^(POST|DELETE) \/api\/brand\/profiles\/[^/]+\/publication$/, bucket: 'brand:publish', max: TOKEN_MAX },
+  /**
    * DER MARKTVERGLEICHS-LAUF (MV1 M2, Plan §2.9 Nr. 8: „Rate-Limit je IP auf
    * den Abruf-Endpunkt") — die teuerste Route dieses Servers.
    *

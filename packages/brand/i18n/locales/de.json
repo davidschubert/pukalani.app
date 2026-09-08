@@ -1680,7 +1680,8 @@
         "print": "Drucken",
         "madeWith": "Erstellt mit",
         "product": "Branding Supply",
-        "seoTitle": "Brand Foundation · {brand}"
+        "seoTitle": "Brand Foundation · {brand}",
+        "native": "Teilen …"
       },
       "toc": "Inhalt",
       "counter": "{accepted} von {total} Kapiteln abgenommen",
@@ -1918,6 +1919,63 @@
       "sentenceOf": "„{field}\" muss wörtlich ein Satz aus „{source}\" sein.",
       "mentionsFrom": "„{field}\" muss die Einträge aus „{source}\" auch nennen.",
       "mentionsNone": "„{field}\" darf nichts aus „{source}\" wiederholen."
+    },
+    "publication": {
+      "button": "Veröffentlichen",
+      "eyebrow": "Veröffentlichen",
+      "title": "In Discover Brands zeigen",
+      "intro": "Wir frieren den bestätigten Stand ein und legen ihn dem Team zur Freigabe vor. Erst danach ist die Marke öffentlich und für Suchmaschinen sichtbar.",
+      "summary": {
+        "title": "So steht sie in der Galerie",
+        "brandTitle": "Titel",
+        "address": "Adresse",
+        "industry": "Branche",
+        "path": "Weiche",
+        "archetype": "Archetyp",
+        "locale": "Sprache",
+        "stand": "Stand",
+        "score": "Brand Score",
+        "scoreEmpty": "noch kein Check"
+      },
+      "hidden": "Nicht veröffentlicht werden: Gespräche, Entwürfe, Wettbewerber, Beschwerden — genau wie beim Teilen.",
+      "addressHint": "Trägt eine andere Marke denselben Namen, bekommt die Adresse eine Nummer.",
+      "consent": "Ich darf diese Marke veröffentlichen und weiß, dass sie nach Freigabe öffentlich und indexierbar ist",
+      "submit": "Zur Freigabe einreichen",
+      "cancel": "Abbrechen",
+      "close": "Schließen",
+      "blocker": {
+        "title": "Das fehlt noch",
+        "title_missing": "Die Marke braucht einen Titel.",
+        "context_open": "Kapitel A ist noch nicht abgenommen.",
+        "pvm_open": "Kapitel B ist noch nicht abgenommen.",
+        "archetype_missing": "Der Archetyp ist noch nicht bestätigt."
+      },
+      "state": {
+        "pending": "Wartet auf Freigabe",
+        "pendingAddress": "Nach der Freigabe erreichbar unter {address}",
+        "pendingUpdate": "Neuer Stand wartet auf Freigabe",
+        "public": "Öffentlich",
+        "publicSince": "seit {date}",
+        "update": "Stand aktualisieren",
+        "withdraw": "Zurückziehen",
+        "declined": "Abgelehnt",
+        "decidedAt": "am {date}",
+        "resubmit": "Erneut einreichen",
+        "hidden": "Ausgeblendet",
+        "hiddenHint": "Diese Marke wurde vom Team aus der Galerie genommen. Schreibt uns, wenn ihr das klären möchtet."
+      },
+      "card": {
+        "public": "Öffentlich in Discover",
+        "publicSince": "Öffentlich in Discover · seit {date}",
+        "pending": "Wartet auf Freigabe",
+        "declined": "Veröffentlichung abgelehnt",
+        "hidden": "Aus der Galerie genommen"
+      },
+      "submittedToast": "Eingereicht — wir melden uns nach der Prüfung.",
+      "withdrawnToast": "Zurückgezogen. Die Marke ist nicht mehr öffentlich.",
+      "notReady": "So noch nicht — es fehlt etwas.",
+      "limited": "Heute genug eingereicht. Versucht es morgen wieder.",
+      "failed": "Hat nicht geklappt. Bitte noch einmal versuchen."
     }
   }
 }

@@ -127,6 +127,15 @@ export type BrandProfileRow = Models.Row & {
    * steht dort (`brandMarketVisibilityOf`).
    */
   marketVisibility?: string
+  /**
+   * DAS OPT-IN „diese Marke darf als öffentliche Seite in der Galerie stehen"
+   * (Migration brand-020, Discover D1). EIGENE Spalte neben `marketVisibility`
+   * und nicht dieselbe: eine Zustimmung gilt nur für das, wofür sie gegeben
+   * wurde, und „indexierbar im offenen Netz" ist der grössere Satz (Kopf von
+   * brand-020). Optional getypt, weil sie ADDITIV dazukam — `undefined` ist
+   * genau der Default `private`.
+   */
+  publicationVisibility?: string
   progressPct: number
   currentStepKey?: string
   lastActivityAt: string

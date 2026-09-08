@@ -1,10 +1,18 @@
 import { Query } from 'node-appwrite'
 import { brandCheckUrlKey } from '../../../../shared/brandCheck'
+import {
+  type BrandPublicationViewStatus,
+  normalizeBrandPublicationStatus,
+} from '../../../../shared/brandPublication'
 import type {
   BrandProfileScoreEntry,
   BrandProfileScores,
   BrandProfileScoresResponse,
 } from '../../../../shared/types/brand'
+import {
+  BRAND_PUBLICATIONS_TABLE,
+  type BrandPublicationRow,
+} from '../../../utils/brandPublications'
 import {
   BRAND_CHECKS_TABLE,
   BRAND_PROFILES_TABLE,
@@ -143,6 +151,44 @@ export default defineEventHandler(async (event): Promise<BrandProfileScoresRespo
   // Die Stammfelder kommen aus derselben Zeile, die oben schon gelesen wurde;
   // `profileStartCard()` ist die EINE Stelle, an der aus `undefined` ein ''
   // wird (Bestands-Zeilen von vor brand-009).
+  /**
+   * DER VERÖFFENTLICHUNGS-ZUSTAND, EBENFALLS GEBÜNDELT (Discover D1).
+   *
+   * EINE Abfrage über die Zeilen-Ids: `brand_publications` trägt die Profil-Id
+   * ALS Zeilen-Id (Kopf von brand-020), `Query.equal('$id', ids)` ist damit der
+   * direkte Weg — dasselbe Muster wie beim Kapitel-Filter des Marktvergleichs.
+   *
+   * FAIL-SOFT: fehlende Tabelle (Deploy vor brand-020) oder Lesefehler ⇒ keine
+   * Zustände. Die Karte zeigt dann keine Zeile — sie ist eine ANGABE, kein
+   * Recht, und die Übersicht darf daran nicht scheitern (dieselbe Haltung wie
+   * bei „geteilt" und beim Score).
+   */
+  const publications = new Map<
+    string,
+    { status: BrandPublicationViewStatus, slug: string, publishedAt: string }
+  >()
+  try {
+    const res = await tablesDB.listRows<BrandPublicationRow>({
+      databaseId,
+      tableId: BRAND_PUBLICATIONS_TABLE,
+      queries: [Query.equal('$id', ids), Query.limit(ids.length)],
+    })
+    for (const row of res.rows) {
+      publications.set(row.$id, {
+        status: normalizeBrandPublicationStatus(row.status),
+        slug: row.slug,
+        publishedAt: row.publishedAt ?? '',
+      })
+    }
+  }
+  catch (error) {
+    if (!isAppwriteNotFound(error)) {
+      logEvent('warn', 'brand.publication_states_unavailable', {
+        message: error instanceof Error ? error.message : 'unknown',
+      })
+    }
+  }
+
   const items = new Map<string, BrandProfileScores>(
     profiles.map((profile) => {
       const startCard = profileStartCard(profile)
@@ -153,6 +199,7 @@ export default defineEventHandler(async (event): Promise<BrandProfileScoresRespo
         industry: startCard.industry,
         website: null,
         document: null,
+        publication: publications.get(profile.$id) ?? null,
       }]
     }),
   )

@@ -161,6 +161,52 @@ function scorePath(profile: BrandProfileSummary): string {
 }
 
 /**
+ * DER VERÖFFENTLICHUNGS-ZUSTAND JE KARTE (Discover §4.3: „Zustand auch auf der
+ * Brands-Übersichtskarte").
+ *
+ * Er kommt aus DERSELBEN gebündelten Antwort wie der Score — eine eigene Route
+ * je Karte wäre wieder das N+1, das diese Seite schon zweimal vermieden hat
+ * (`activeShareProfileIds`, `scores`). `null` heisst „nie eingereicht", und
+ * dann steht hier gar nichts: eine Zeile „nicht veröffentlicht" an jeder Kachel
+ * wäre Lärm über eine Nicht-Handlung.
+ *
+ * Der Link führt in die LESEANSICHT und nicht auf die öffentliche Seite: dort
+ * steht die Begründung einer Ablehnung, dort sind die Knöpfe, und bei „wartet
+ * auf Freigabe" gibt es öffentlich noch nichts zu sehen.
+ */
+function publicationOf(profile: BrandProfileSummary) {
+  return scores.value?.items.find(item => item.profileId === profile.id)?.publication ?? null
+}
+
+/** Ein kaputtes Datum wird zur leeren Zeile, nie zu „Invalid Date". */
+function publicationDate(iso: string): string {
+  const value = Date.parse(iso)
+  return Number.isFinite(value)
+    ? new Intl.DateTimeFormat(locale.value, { dateStyle: 'medium' }).format(value)
+    : ''
+}
+
+function publicationLine(profile: BrandProfileSummary): string {
+  const publication = publicationOf(profile)
+  if (!publication) return ''
+  switch (publication.status) {
+    case 'published': return publication.publishedAt
+      ? t('brand.publication.card.publicSince', { date: publicationDate(publication.publishedAt) })
+      : t('brand.publication.card.public')
+    case 'pending': return t('brand.publication.card.pending')
+    case 'declined': return t('brand.publication.card.declined')
+    case 'hidden': return t('brand.publication.card.hidden')
+    // Zurückgezogen ist der Zustand NACH einer eigenen Entscheidung — die Karte
+    // meldet ihn nicht, sie meldet, was gerade gilt.
+    default: return ''
+  }
+}
+
+function foundationPath(profile: BrandProfileSummary): string {
+  return localePath(`/brand/${profile.id}/foundation`)
+}
+
+/**
  * Der Submit des Modals — seit P2.5 eine ÜBERGABE, keine Anlage mehr.
  *
  * Das Modal erhebt drei Dinge (Weiche, Titel, Sprache). Seit die STARTKARTE
@@ -282,6 +328,13 @@ useBrandTitle(() => t('brand.brands.title'))
               class="bw-label hover:underline" style="color: var(--bw-muted)"
             >
               {{ t('brand.myScores.card.addUrl') }}
+            </NuxtLink>
+            <NuxtLink
+              v-if="publicationLine(profile)" :to="foundationPath(profile)"
+              class="bw-label hover:underline" style="color: var(--bw-muted)"
+              data-brand-publication-line
+            >
+              {{ publicationLine(profile) }}
             </NuxtLink>
           </div>
         </div>

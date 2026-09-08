@@ -167,7 +167,10 @@ const boardScenes = computed(() => boards.map(board => ({
             <p class="text-sm font-medium">{{ dimension.label }}</p>
             <p class="bw-label" style="color: var(--bw-muted)">{{ dimension.hint }}</p>
           </div>
-          <div class="flex flex-wrap items-center gap-1.5">
+          <!-- Untereinander statt umbrechend (Davids Korrektur 2026-09-08): drei
+               Optionen je Dimension lesen sich als Liste, nicht als Zeile —
+               so steht „wie vorgeschlagen" immer an derselben Stelle. -->
+          <div class="flex flex-col items-start gap-1.5">
             <button
               v-for="board in boards" :key="board.id"
               type="button"

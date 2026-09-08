@@ -7,6 +7,27 @@ die kleinen, verstreuten Beschlüsse.
 
 ---
 
+## 2026-09-08 — Brand Design: Richtung aus Foundation UND Vorbildern; Brand Design als eigenständiges Produkt
+
+**Anlass (David, an der Prototyp-Seite „Moodboard"):** Ist die Reihenfolge richtig, oder
+gehört das Moodboard ans Ende? Zwei Wege denkbar — Vorbilder hochladen und daraus die
+Kapitel ableiten, oder alle Kapitel selbst durchgehen und am Ende ein Moodboard bekommen.
+**Entscheidung (David):** „Niemand fängt mit der Palette an — vor Farbe und Schrift steht
+immer eine Richtung, aus der Strategie UND aus Vorbildern." Kapitel 1 nimmt deshalb beide
+Quellen: die Brand Foundation und **Vorbilder je Bereich** (Screenshots für Farbwelt,
+Typografie, Zeichen, Bildsprache). Die KI LIEST die Vorbilder gegen die Foundation und
+sagt, was daran schon trägt und was besser geht (fits/tension/off mit Begründung an der
+Foundation-Stelle); daraus entsteht der DNA-Vorschlag, danach Farbwelt → Typografie →
+Zeichen → Bildsprache → Bewegung wie geplant. Der Weg ohne Vorbilder überspringt nur den
+Upload; das „Moodboard am Ende" ist in beiden Wegen dasselbe Ergebnis-Board. Leitplanken:
+lesen, nie nachbauen; Bilder sind Eingabe, nie Ausgabe (kein Snapshot/Share); Foundation ist
+der Maßstab; Vision-Transport mit ZDR wie die Bild-KI. **Produkt:** Brand Design wird als
+eigenständiges Produkt neben der Foundation verkauft — die Foundation bleibt Voraussetzung,
+Fassung 1 Studio-begleitet, Selbstbedienung später. Konzept: docs/plans/BRAND-DESIGN.md §2.2,
+§2.8, §1.8-Nachtrag; Paket D2 erweitert.
+
+---
+
 ## 2026-09-07 — branding.supply Recht + Bezahlweg (BS1): acht Entscheidungen
 
 **Anlass:** Die Site ist seit 2026-09-01 öffentlich, nimmt Konten auf, verschickt Mails und
@@ -2136,3 +2157,20 @@ optional · Erfolgsseite mit cal.com-Sofortbuchung UND 24-h-Rückfallzeile ·
 Speicherung Mail + App-lokale Tabelle `intro_requests` (kein Produkt-Layer —
 Eigenschaft der Marketing-Site, nicht der Plattform).
 Plan: docs/plans/STUDIO-ERSTGESPRAECH-FUNNEL.md.
+
+## 2026-09-08 — Appwrite 2.0: Server und SDKs in EINEM Vorhaben (AW2)
+
+Davids Entscheidung (strukturierte Frage nach der Dependency-Runde; die
+Empfehlung „Stufe 1 jetzt, Server nach dem ersten 2.0.x-Patch" hat er
+BEWUSST NICHT genommen): **alles jetzt, Start sofort.** Reihenfolge, weil die
+SDK-Majors am Server hängen: (1) `node-appwrite` 26 → 28 mit Code (Health-
+Pillen auf REST, `account.createJWT` → `users.createJWT`) — Response-Format
+1.9.6, läuft gegen den heutigen Server, wird deployt; (2) Dev-Instanz
+(OrbStack `appwrite-maria`) 1.9.6 → 2.0.0 mit Dump + Config-Backup,
+Override-Patches (SMTP-KeepAlive, Traefik-XFF) gegen das neue Compose
+nachziehen, Beweise fahren; (3) Prod `api.pukalani.app` genauso, mit
+Downtime-Fenster; (4) erst danach `node-appwrite` 29 + `appwrite` 27
+(Response-Format 2.0.0) und die CI-Wegwerf-Appwrite auf 2.0.
+Benanntes Risiko: 2.0.0 ist vom 2026-09-04, kein Patch-Release vorhanden;
+`registers.php` trägt weiterhin `keepAlive: true` (Patch erneuern, nicht
+löschen).

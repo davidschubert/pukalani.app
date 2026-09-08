@@ -22,6 +22,7 @@
 
 import type { BrandFoundationView } from '../brandFoundation'
 import type { BrandGenerationOutcome } from '../brandGeneration'
+import type { BrandPublicationBlocker, BrandPublicationViewStatus } from '../brandPublication'
 import type { BrandWaitlistStatus } from '../brandWaitlistAdmin'
 import type {
   BrandFinding,
@@ -1060,6 +1061,66 @@ export interface BrandShareViewResponse {
   expiresAt: string
 }
 
+// ── Veröffentlichen (docs/plans/DISCOVER-BRANDS.md §4.3) ────────────────────
+
+/**
+ * DER ZUSTAND EINER VERÖFFENTLICHUNG, wie ihn Leseansicht und Brands-Karte
+ * brauchen — und NICHTS darüber hinaus.
+ *
+ * Kein Snapshot (den zeigt die öffentliche Anatomie, D2), keine Meldungen,
+ * kein `featuredAt`: die Kuration des Betreibers ist keine Auskunft an den
+ * Kunden. `decisionNote` steht sehr wohl darin — sie ist für ihn geschrieben
+ * (§3.4).
+ *
+ * `status: 'none'` heisst „noch nie eingereicht". Es ist ein WERT und kein
+ * `null`, weil die Oberfläche genau eine Frage stellt (Begründung in
+ * `shared/brandPublication.ts`).
+ */
+export interface BrandPublicationState {
+  status: BrandPublicationViewStatus
+  /** Leer, solange es keine Zeile gibt. */
+  slug: string
+  /** `/discover/<slug>` — die künftige bzw. geltende Adresse. */
+  path: string
+  submittedAt: string
+  publishedAt: string
+  decidedAt: string
+  decisionNote: string
+  /**
+   * Öffentlich UND ein neuer Stand wartet auf die Freigabe (§3.4). Zwei
+   * Tatsachen in einem Feld, damit die Oberfläche nicht dieselbe Rechnung
+   * zum zweiten Mal anstellt.
+   */
+  pendingUpdate: boolean
+}
+
+/**
+ * Antwort aller drei Publication-Routen: der Zustand UND die Frage „darf
+ * überhaupt eingereicht werden?".
+ *
+ * Die zweite steht mit darin, weil der Dialog sie VOR dem Klick beantworten
+ * muss und ihre Eingaben (bestätigter Archetyp, abgenommene Kapitel) auf der
+ * Seite nur über Umwege zu haben wären. Der 409 der POST-Route bleibt die
+ * Durchsetzung — der Fehler-Envelope trägt nur den `reason`, nie diese Liste.
+ */
+export interface BrandPublicationResponse {
+  publication: BrandPublicationState
+  readiness: {
+    allowed: boolean
+    blockers: BrandPublicationBlocker[]
+  }
+}
+
+/**
+ * DIE ABSAGE „so noch nicht" (§3.3). Sie reist als `data` im 409; der zentrale
+ * Handler hebt `code` als `reason` ins Envelope, die Liste liest der Dialog
+ * über `error.data.blockers`.
+ */
+export interface BrandPublicationNotReadyData {
+  code: 'publication_not_ready'
+  blockers: BrandPublicationBlocker[]
+}
+
 // ── Brand-Check (docs/archiv/BRAND-CHECK.md) ────────────────────────────────
 
 /**
@@ -1394,6 +1455,23 @@ export interface BrandProfileScores {
   industry: string
   website: BrandProfileScoreEntry | null
   document: BrandProfileScoreEntry | null
+  /**
+   * DER VERÖFFENTLICHUNGS-ZUSTAND FÜR DIE KARTE (Discover D1, §4.3).
+   *
+   * `null` heisst „nie eingereicht". Er reist in DIESER Antwort mit und nicht
+   * in einer eigenen Route, aus demselben Grund wie die drei Stammfelder
+   * darüber: die Übersicht fragt einmal für ALLE Karten, und eine Abfrage je
+   * Karte wäre das N+1, das `activeShareProfileIds` schon einmal verhindert hat.
+   *
+   * Nur Zustand, Adresse und das Datum — die BEGRÜNDUNG einer Ablehnung steht
+   * in der Leseansicht, nicht auf einer Kachel neben elf anderen.
+   */
+  publication: {
+    status: BrandPublicationViewStatus
+    slug: string
+    /** Leer, solange nichts freigegeben wurde. */
+    publishedAt: string
+  } | null
 }
 
 export interface BrandProfileScoresResponse {
