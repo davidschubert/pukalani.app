@@ -55,6 +55,43 @@ Konsole der Prod-Appwrite öffnen (dieselbe wie für portfolio/admin).
       system-Spalten (brandAdmissionMode/brandAiEnabled) auf
       account/admin/portfolio nachgefahren.
 
+### 2b · Nachzügler-Migrationen (je Produkt, mit Davids Ja)
+
+Neue Produkt-Layer im Site-Manifest kommen NICHT durch Schritt 2 mit — jeder
+bringt seine eigenen Migrationen mit, und die REIHENFOLGE ist nicht
+verhandelbar: **erst die Migration auf `branding`, dann der Code-Deploy.**
+Sonst zeigt der Fuß auf eine Route, deren Tabelle es nicht gibt.
+
+- [x] `market` (MV1 M1, 2026-09-06): brand-018/019 + market-001…004.
+- [ ] **`pages` (BS1 R1, gebaut am 2026-09-08 — Prod-Migration OFFEN):**
+
+      ```
+      pnpm migrate --app branding --layer pages    # sechs Migrationen
+      pnpm --filter branding seed:legal            # das Entwurfs-Gerüst
+      pnpm ops:schema-parity                       # `pages` steht im BRANDING_SOLL
+      ```
+
+      Gate-Reihenfolge: **Davids Ja** → Migration → Seed → Code-Deploy →
+      `curl https://branding.supply/api/health` (Build-SHA) → die sechs Routen
+      (`/imprint`, `/privacy`, `/terms` und `/de/*`) einmal aufrufen.
+
+      Drei Dinge, die dabei nicht überraschen sollen:
+
+      1. **Der Seed ist ein eigenes Skript der App**
+         (`apps/branding/scripts/seed-legal-pages.ts`), nicht das des Layers:
+         dessen Vorlagen sprechen einen Community-Betreiber an und kennen
+         keine AGB. Idempotent je slug+locale — ein zweiter Lauf lässt
+         gefüllte Seiten unberührt.
+      2. **Die Zeilen entstehen `published`**, mit dem Hinweis „Entwurf, in
+         anwaltlicher Prüfung" und `noindex` (`pukalani.pages.draftNotice`).
+         Das ist Davids Entscheidung 7 und beabsichtigt: der AGB-Link am
+         Registrier-Häkchen darf nicht ins 404 zeigen.
+      3. **pages-003 und pages-006 sind ein PAAR.** 003 legt `tenantId` an,
+         006 zieht `communityId` nach und löscht `tenantId` wieder — bei jedem
+         Lauf. Das Ergebnis konvergiert (Zweitlauf endet im selben Zustand),
+         die Ausgabe ist nur nicht still. Kein Datenrisiko: 006 backfillt
+         zuerst und prüft gegen.
+
 ## 3 · Monorepo (Claude — läuft bereits parallel)
 
 - [x] apps/branding (**Dev**-Port 3010 — anfangs 3006, das kollidierte

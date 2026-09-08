@@ -31,9 +31,20 @@ export default defineNuxtConfig({
    * gehören damit auf die branding-Instanz; die Soll-Liste im
    * Schema-Parity-Wächter zieht mit.
    *
+   * SEIT BS1 R1 (2026-09-07) MIT `pages`: die Rechtstexte (Impressum,
+   * Datenschutz, AGB) leben als CMS-Zeilen wie auf pukalani.studio — Davids
+   * Entscheidung zu Frage 1 des Plans
+   * docs/plans/BRANDING-SUPPLY-RECHT-UND-BEZAHLUNG.md. Der Grund ist der
+   * Anwaltsdurchlauf: eine Korrektur ist damit eine Bearbeitung unter
+   * /dashboard/pages und kein Deploy. Die sechs pages-Migrationen gehören auf
+   * die branding-Instanz (Migration VOR dem Code-Deploy, §2.3 des Plans); die
+   * Soll-Liste im Schema-Parity-Wächter zieht mit. `pages` steht ZULETZT unter
+   * den Produkten: seine dynamische Route `/[slug]` soll die niedrigste
+   * Priorität haben und keine Wizard-Seite überlagern.
+   *
    * REIHENFOLGE: themes/admin vorn (kanonische EXTENDS_ORDER), dann brand,
-   * dann market (beide kennt die EXTENDS_ORDER nicht, sie landen in der
-   * Reihenfolge des Site-Manifests am Ende der Produkte) —
+   * dann market, dann pages (die drei kennt die EXTENDS_ORDER nicht, sie
+   * landen in der Reihenfolge des Site-Manifests am Ende der Produkte) —
    * die Werkstatt-Optik kollidiert mit keiner admin-Datei (eigene
    * Bw-Präfixe, eigene Routen); das frühere App-Layout `dashboard.vue`
    * (Ersatz-Durchreiche) ist GELÖSCHT, damit die echte Shell des
@@ -41,7 +52,7 @@ export default defineNuxtConfig({
    * fordern seit demselben Tag das default-Layout an (Wizard-Nav) — sie
    * sind Kunden-Fläche, keine Betreiber-Fläche.
    */
-  extends: ['../../packages/themes', '../../packages/admin', '../../packages/brand', '../../packages/market', '../../packages/core', '../../packages/system'],
+  extends: ['../../packages/themes', '../../packages/admin', '../../packages/brand', '../../packages/market', '../../packages/pages', '../../packages/core', '../../packages/system'],
 
   // Port pro App eindeutig vergeben (3000–3009 vergeben — 3006 hält platform,
   // 3009 der brand-Playground; die erste Wahl 3006 kollidierte damit und ist

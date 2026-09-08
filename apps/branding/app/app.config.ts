@@ -62,15 +62,19 @@ export default defineAppConfig({
         target: '_blank',
       },
       /**
-       * DIE RECHTSWÖRTER IM FUSS BLEIBEN WEG, BIS ES DIE SEITEN GIBT.
+       * DIE DREI RECHTSWÖRTER IM FUSS SIND SEIT BS1 R1 ECHTE LINKS
+       * (2026-09-07). Bis dahin standen sie hier bewusst leer — der
+       * Layer-Default lässt die Zeile dann ganz weg, weil ein Wort ohne Ziel
+       * schlechter ist als kein Wort (Begründung in
+       * `packages/brand/shared/brandLegalLinks.ts`).
        *
-       * Ausdrücklich hier notiert statt stillschweigend geerbt: der
-       * Layer-Default ist leer, die Zeile fällt damit aus dem Fuß — das ist
-       * der gewollte Zustand, nicht ein vergessener Eintrag. BS1 R1 trägt hier
-       * die Pfade der Rechtstexte ein (`/imprint`, `/privacy`, `/terms`), und
-       * mehr braucht es dann nicht.
+       * Die Pfade sind die Routen des `pages`-Layers (`app/pages/[slug].vue`);
+       * das Sprach-Präfix legt `BwSiteFooter` per `localePath()` darum, auf
+       * /de also `/de/imprint`. Sie zeigen ab R1 auf ein ENTWURFS-Gerüst —
+       * dass das kein fertiger Text ist, sagt `pukalani.pages.draftNotice`
+       * unten, nicht ein fehlender Link.
        */
-      legalLinks: { imprint: '', privacy: '', terms: '' },
+      legalLinks: { imprint: '/imprint', privacy: '/privacy', terms: '/terms' },
     },
     /**
      * „Anmelden mit Google" (Davids Auftrag 2026-09-03). Das ist der
@@ -81,7 +85,50 @@ export default defineAppConfig({
      * docs/runbooks/GOOGLE-LOGIN.md (Redirect-URI endet auf `/branding`).
      * Bis dahin ändert diese Zeile nichts Sichtbares; das ist Absicht.
      */
-    auth: { providers: ['google'] },
+    auth: {
+      providers: ['google'],
+      /**
+       * DAS AGB-HÄKCHEN STEHT AB SOFORT — MIT DEM ENTWURF (Davids
+       * Entscheidung 7 vom 2026-09-07, Plan
+       * docs/plans/BRANDING-SUPPLY-RECHT-UND-BEZAHLUNG.md §9).
+       *
+       * Die Empfehlung war „erst die fertigen Texte, dann der Schalter".
+       * Dagegen entschieden, weil die Site seit dem 2026-09-01 Konten aufnimmt
+       * und jedes Konto ohne Häkchen eines ohne jede Zusage ist. Der Preis der
+       * Abweichung wird an drei Stellen bezahlt:
+       *
+       *   1. `termsDraft` — „Entwurf, in anwaltlicher Prüfung" steht NEBEN dem
+       *      Häkchen, in allen drei Anmeldewegen (Passwort, Code, Google).
+       *   2. `pages.draftNotice` (unten) — derselbe Hinweis als erster Block
+       *      der Seite, dazu `noindex`.
+       *   3. `termsVersion` — die Fassung wird beim Konto gespeichert
+       *      (`termsAcceptedAt`/`termsVersion` in den Prefs). Ohne sie wäre
+       *      „hat zugestimmt" nach der Prüfung wertlos: man wüsste nicht mehr,
+       *      WELCHEM Text.
+       *
+       * `/terms` ist die Route des `pages`-Layers; `localePath()` im Formular
+       * schickt einen deutschen Leser nach `/de/terms`. NACH DER PRÜFUNG (R3):
+       * neue `termsVersion`, `termsDraft` weg, `draftNotice` weg.
+       */
+      termsUrl: '/terms',
+      termsVersion: '2026-09-draft-1',
+      termsDraft: true,
+    },
+    /**
+     * DIE DREI RECHTSSEITEN SIND VERÖFFENTLICHT UND TROTZDEM ENTWÜRFE
+     * (BS1 R1). Der Kasten „Entwurf, in anwaltlicher Prüfung" steht als
+     * ERSTER Block über dem Text, und die Seiten tragen `noindex, follow` —
+     * ein Impressums-Platzhalter im Suchindex wäre schlimmer als keiner.
+     * Warum das eine App-Ansage ist und keine neue Spalte, steht im Kopf von
+     * `packages/pages/shared/pageDraftNotice.ts`.
+     *
+     * DIESE ZEILE FÄLLT MIT PAKET R3, zusammen mit `auth.termsDraft` — und
+     * zwar erst dann: sie ist die einzige Stelle, an der ein Besucher erfährt,
+     * dass er einen ungeprüften Text vor sich hat.
+     */
+    pages: {
+      draftNotice: ['imprint', 'privacy', 'terms'],
+    },
     /**
      * DER MARKTVERGLEICH GEHÖRT AUF DIESE SITE — ANGESCHALTET SEIT 2026-09-06
      * (MV1 M1/M4, Plan docs/archiv/BRAND-MARKTVERGLEICH.md §2.1).

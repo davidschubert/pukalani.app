@@ -27,5 +27,14 @@ export default {
     'admin',
     'brand',
     'market',
+    // Rechtsseiten als CMS (BS1 R1, 2026-09-07 — Plan
+    // docs/plans/BRANDING-SUPPLY-RECHT-UND-BEZAHLUNG.md §9 Frage 1): Impressum,
+    // Datenschutz und AGB entstehen als Entwurfs-Zeilen in der Tabelle `pages`
+    // (`pnpm --filter branding seed:legal`) und werden unter /dashboard/pages
+    // gefüllt — eine Korrektur des Anwalts ist damit eine Bearbeitung und kein
+    // Deploy. Steht ZULETZT unter den Produkten: seine dynamische Route
+    // `/[slug]` hat die niedrigste Priorität und darf keine Wizard-Seite
+    // überlagern (früher gelistet = höhere Priorität).
+    'pages',
   ],
 } satisfies SiteManifest

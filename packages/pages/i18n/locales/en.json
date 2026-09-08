@@ -59,6 +59,10 @@
         "de": "German"
       }
     },
+    "draftNotice": {
+      "title": "Draft, under review by our lawyers",
+      "body": "This page carries the required structure, but no binding text yet. The reviewed version will replace it before branding.supply opens to everyone. Until then: nothing here is something you can rely on."
+    },
     "validation": {
       "slugInvalid": "Invalid slug (lowercase letters, digits, hyphens)",
       "localeInvalid": "Invalid language code",

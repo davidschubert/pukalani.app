@@ -59,6 +59,10 @@
         "de": "Deutsch"
       }
     },
+    "draftNotice": {
+      "title": "Entwurf, in anwaltlicher Prüfung",
+      "body": "Diese Seite trägt die nötige Struktur, aber noch keinen verbindlichen Text. Die geprüfte Fassung ersetzt sie, bevor branding.supply für alle öffnet. Bis dahin gilt: hier steht nichts, worauf du dich verlassen kannst."
+    },
     "validation": {
       "slugInvalid": "Ungültiger Slug (Kleinbuchstaben, Ziffern, Bindestriche)",
       "localeInvalid": "Ungültiger Sprachcode",

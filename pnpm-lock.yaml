@@ -280,6 +280,9 @@ importers:
       '@pukalani/market':
         specifier: workspace:*
         version: link:../../packages/market
+      '@pukalani/pages':
+        specifier: workspace:*
+        version: link:../../packages/pages
       '@pukalani/system':
         specifier: workspace:*
         version: link:../../packages/system

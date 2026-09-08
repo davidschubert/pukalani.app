@@ -493,13 +493,75 @@ heutige `Z1`. Wer ältere Notizen liest: es gilt diese Tabelle.
 
 | Paket | Inhalt | Gate | Braucht David? |
 | --- | --- | --- | --- |
-| **R0 — Sofort** *(läuft)* | Der 404 verschwindet: Wizard-Ende (`completionCta`) und die Marktvergleich-Schranke zeigen auf die **Studio-Erstgespräch-Seite** mit Herkunft `?source=branding-supply`. Die drei Fußzeilen-Wörter ohne Ziel werden **ausgeblendet**, bis es Seiten gibt (Links kommen in R1). | keins | Nein |
-| **R1 — Technik** | `pages` in `apps/branding` montieren (`site.manifest.ts` + `extends`), Migrationen auf der Instanz `branding`, `seed:legal` · die drei Seiten als **Entwurf** mit Hinweis „Entwurf, in anwaltlicher Prüfung" als ERSTEM Block und `noindex` · Fuß bekommt echte Links mit hartem Rückfall · `pukalani.auth.termsUrl` gesetzt, Hinweis neben dem Häkchen · **AGB-Fassung am Konto speichern** (s. Befund unten) | **Davids Ja zur Prod-Migration auf `branding`**; Migration **vor** Code-Deploy (§2.3) | Ja — nur die Migrations-Freigabe |
+| **R0 — Sofort** *(GEBAUT 2026-09-07)* | Der 404 verschwindet: Wizard-Ende (`completionCta`) und die Marktvergleich-Schranke zeigen auf die **Studio-Erstgespräch-Seite** mit Herkunft `?source=branding-supply`. Die drei Fußzeilen-Wörter ohne Ziel werden **ausgeblendet**, bis es Seiten gibt (Links kommen in R1). | keins | Nein |
+| **R1 — Technik** *(GEBAUT 2026-09-08)* | `pages` in `apps/branding` montieren (`site.manifest.ts` + `extends`), Migrationen auf der Instanz `branding`, `seed:legal` · die drei Seiten als **Entwurf** mit Hinweis „Entwurf, in anwaltlicher Prüfung" als ERSTEM Block und `noindex` · Fuß bekommt echte Links mit hartem Rückfall · `pukalani.auth.termsUrl` gesetzt, Hinweis neben dem Häkchen · **AGB-Fassung am Konto speichern** (s. Befund unten) | **Davids Ja zur Prod-Migration auf `branding`**; Migration **vor** Code-Deploy (§2.3) | Ja — nur die Migrations-Freigabe |
 | **R2 — Inhalt** | Davids Generator-Texte für Impressum, Datenschutz, AGB · dazu **meine drei Abschnitte**, die kein Generator kennt: KI-Verarbeitung von Kundentexten (OpenRouter/ZDR) · Abruf fremder Websites samt `/market-bot` und TDM-Vorbehalt · öffentliche Bewertung fremder Marken mit Korrekturweg · **Faktenblatt** aus §1.2 + §1.6 · Subprozessoren-Liste · Methodik-Seite für den Brand-Score · alles de + en; die drei Abschnitte sind für den Anwalt als **Prüfpunkte markiert** | David liefert die Generator-Texte; **David liest gegen** | Ja |
 | **R3 — Anwalt** | EIN Termin, **drei Blöcke**: (1) Studio-Rest aus A1 · (2) branding-Texte mit den drei markierten Prüfpunkten · (3) die Anhang-G/BI1-Fragen aus §1.6 (b)(c)(d). Danach **Fassung 2** einsetzen, Art.-27- und § 36-VSBG-Abschnitte füllen (bis dahin als benannte leere Plätze vorgebaut), **Entwurfs-Hinweis weg, `noindex` weg**. Beweis: sechs Routen 200 in beiden Sprachen · Fuß verlinkt · Häkchen in allen drei Anmeldewegen, mit Gegenprobe (`termsUrl` entfernen ⇒ rot) | **Anwaltstermin** | Ja — Termin und Abnahme |
 | **Z0 — Erstgespräch-Seite** | `/erstgespraech` im `brand`-Layer: fünf Felder (Name · E-Mail · welches Branding, vorbelegt · Anliegen · optional Telefon) · **zwei entkoppelte Zustellwege** (Mail an David UND Zeile in `brand_intro_requests`, Erfolg = mindestens einer) · drei Bremsen (Rate-Limit-Bucket, Honeypot, enge Zod-Längen) · Betreiber-Sicht im Dashboard · Ereignisse `intro.viewed` / `intro.submitted`. **Ersetzt die R0-Weiterleitung** | R1 durch (dieselbe Migrations-Freigabe); Migration vor Deploy | Nein (ausser Migrations-Freigabe) |
 | **Z1 — Stripe** | `billing` ins Manifest · **eigener Preis-Katalog für branding.supply** (NICHT die Community-Preise) · Checkout **je Branding** an der Schranke · Webhook schreibt das **Freischalt-Feld an `brand_profiles`** (Migration) · der **Betreiber-Schalter im Dashboard bleibt** für Handfälle · `automatic_tax` wie bei den Communities, Rechnung und Portal · AGB tragen die **Widerrufsbelehrung für digitale Inhalte** (§ 356 Abs. 5 BGB: Verzicht beim Start der Ausführung) | **A2 live** (Bank, Steuer, Live-Key, Portal) **UND** R3 durch; ausserdem Name + Betrag des Kaufgegenstands (offen, §9) | Ja — A2, Name und Preis |
 | **Z2 — Beta-Regel** | „**Beta-Konten dauerhaft frei**" im Code — je **KONTO** (`brand_access` / Beta-Zulassung), nicht als unbegrenzte Branding-Zahl · als benannter Abschnitt „Beta-Konten" in den AGB · Widerruf je Konto durch den Betreiber bei Missbrauch · die bestehenden Eimer (3 Läufe/Tag je Branding, Instanz-Deckel) bleiben die Kostenbremse | R2 (AGB-Abschnitt) + Z1 (die Zuteilung ist das Gegenstück, gegen das die Ausnahme greift) | Nein |
+
+### 7.1 R1 — was am 2026-09-08 tatsächlich gebaut wurde
+
+Zwei Commits, beide additiv; jede App ohne die neuen Schalter verhält sich
+unverändert.
+
+**Im Core** (`feat(core)`), weil der Befund weiter unten in diesem Abschnitt
+genau das verlangt: `pukalani.auth.termsVersion` + `termsDraft` (Defaults `''`
+bzw. `false`), die pure Regel `core/shared/termsAcceptance.ts` und der
+Schreiber `core/server/utils/termsAcceptance.ts`. Er hängt an ALLEN DREI
+Anlagewegen — `signup.post.ts`, `otp/verify.post.ts` (`isFirstJoin`),
+`oauth/callback.get.ts` (`isNewAccount`) —, jeweils dort, wo schon der
+A5-Beitritt ausgelöst wird. Geschrieben werden `termsAcceptedAt` +
+`termsVersion` in die Account-Prefs, MIT MERGE, best-effort. Der AGB-Link
+folgt seither `localePath()`: ein deutscher Leser landete sonst bei genau dem
+Text, dem er zustimmt, auf der englischen Fassung.
+
+**Im `pages`-Layer + `apps/branding`** (`feat(branding)`):
+
+| Was | Wo |
+| --- | --- |
+| Layer montiert | `apps/branding/site.manifest.ts` (`pages` ZULETZT — die `/[slug]`-Route soll die niedrigste Priorität haben), `nuxt.config.ts`, `package.json` |
+| Der dritte Zustand „veröffentlicht, aber Entwurf" | `packages/pages/shared/pageDraftNotice.ts` + `app/pages/[slug].vue` (Kasten als ERSTER Block, `robots: noindex, follow`), Schalter `pukalani.pages.draftNotice` — Layer-Default LEER |
+| AGB-Häkchen | `apps/branding/app/app.config.ts`: `termsUrl: '/terms'`, `termsVersion: '2026-09-draft-1'`, `termsDraft: true` |
+| Fuß-Links | `pukalani.brand.legalLinks` auf `/imprint`, `/privacy`, `/terms` (R0 hatte sie bewusst leer gelassen) |
+| Gerüst der drei Seiten | `apps/branding/scripts/seed-legal-pages.ts`, `pnpm --filter branding seed:legal` |
+| Soll-Liste des Wächters | `scripts/ops/verify-schema-parity.mjs` (`BRANDING_SOLL` + `PAGES_TABLES`) |
+
+**Warum ein EIGENES Seed-Skript neben dem des Layers.** Das Layer-Skript legt
+die Vorlagen einer KUNDEN-Community an („du bist Betreiber und damit der
+Verantwortliche") und kennt nur `imprint` und `privacy`. Hier ist der Betreiber
+wir, und es fehlen die drei Abschnitte, die kein Generator kennt. Das Gerüst
+trägt deshalb NUR Überschriften und `[AUSFÜLLEN: …]`-Marker — kein erfundener
+Rechtstext, keine geratene Anschrift. Zwei Abschnitte sind bewusst benannt und
+leer („Vertreter in der Union (Art. 27 DSGVO)", „Verbraucherstreitbeilegung
+(§ 36 VSBG)"), damit die Antwort des Anwalts ein eingesetzter Satz ist.
+
+**Die eine bewusste Abweichung: `status: 'published'`.** Das Layer-Skript legt
+`draft` an, und für eine Kunden-Community stimmt das. Hier nicht: das
+AGB-Häkchen VERLINKT die AGB-Seite, der Fuß verlinkt alle drei. Ein 404 hinter
+dem Häkchen wäre schlechter als ein ehrlicher Entwurf — das ist Entscheidung 7.
+Die Ehrlichkeit trägt `draftNotice`: Hinweis plus `noindex`.
+
+**Was R1 NICHT tut.** Keine Nachfrage bei Bestandskonten — wer sein Konto vor
+dem 2026-09-08 angelegt hat, trägt keinen Vermerk. Das ist Absicht: die
+Nachfrage gehört zur Fassung 2 und damit in **R3**, sonst fragte man zweimal.
+
+**Beweis (Dev-Server aus dem Worktree, Port 3016, Instanz `portfolio-g4ml`).**
+`/imprint`, `/privacy`, `/terms` und ihre `/de/*`-Gegenstücke: sechsmal 200,
+jeweils mit `<meta name="robots" content="noindex, follow">` und dem Hinweis
+als erstem Block · Fuß auf `/de` mit drei Links samt Sprach-Präfix
+(`/de/imprint`, `/de/privacy`, `/de/terms`), auf `/` ohne · Registrierformular
+mit Häkchen und Hinweis, AGB-Link auf `/de/terms` · ein Wegwerf-Konto trug
+danach `{"termsAcceptedAt":"…","termsVersion":"2026-09-draft-1"}` in den Prefs.
+**Zwei Gegenproben:** ohne `termsUrl` weder Häkchen noch Prefs (`{}`), ohne
+`draftNotice` weder Kasten noch robots-Tag. `apps/portfolio` startet unverändert
+(`/`, `/de` = 200; `/de/imprint` bleibt 404, weil die Vorlagen dort `draft`
+sind). Die sechs `pages`-Migrationen liefen lokal, zweiter Lauf ohne Änderung
+am Ergebnis — **die Prod-Migration auf `branding` steht aus und braucht Davids
+Ja** (Migration VOR dem Code-Deploy, §2.3).
+
+---
 
 **Ein Befund, der R1 grösser macht als eine Konfigzeile.** Der Core **speichert
 die AGB-Zustimmung heute nicht**. `pukalani.auth.termsUrl` schaltet nur Häkchen

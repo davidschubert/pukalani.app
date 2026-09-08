@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { pageExcerpt } from '../../shared/pageExcerpt'
+import { PAGE_DRAFT_ROBOTS, pageHasDraftNotice } from '../../shared/pageDraftNotice'
 import type { PublicPage } from '../../shared/types/page'
 
 /**
@@ -15,7 +16,7 @@ import type { PublicPage } from '../../shared/types/page'
 definePageMeta({ key: route => route.fullPath })
 
 const route = useRoute()
-const { locale } = useI18n()
+const { locale, t } = useI18n()
 const slug = computed(() => String(route.params.slug ?? ''))
 
 // useRequestFetch statt $fetch: der SSR-interne Aufruf MUSS den Host-Header
@@ -42,12 +43,32 @@ if (error.value || !page.value) {
 useBrandTitle(() => page.value?.title ?? '', {
   description: () => pageExcerpt(page.value?.body ?? ''),
 })
+
+/**
+ * DER DRITTE ZUSTAND: veröffentlicht, aber noch ein ENTWURF (BS1 R1).
+ * Begründung, warum das eine App-Ansage ist und keine Spalte, steht im Kopf
+ * von `shared/pageDraftNotice.ts`. Leere Liste (Layer-Default) ⇒ diese Seite
+ * verhält sich exakt wie bisher: kein Kasten, kein robots-Tag.
+ */
+const appConfig = useAppConfig() as { pukalani?: { pages?: { draftNotice?: unknown } } }
+const isDraftNotice = computed(() => pageHasDraftNotice(appConfig.pukalani?.pages?.draftNotice, slug.value))
+useSeoMeta({ robots: () => (isDraftNotice.value ? PAGE_DRAFT_ROBOTS : undefined) })
 </script>
 
 <template>
   <UContainer class="py-8 sm:py-12">
     <article v-if="page" class="mx-auto max-w-3xl space-y-3">
       <h1 class="text-2xl font-bold">{{ page.title }}</h1>
+      <!-- Der Hinweis ist der ERSTE Block, nicht das Kleingedruckte. -->
+      <UAlert
+        v-if="isDraftNotice"
+        color="warning"
+        variant="subtle"
+        icon="i-ph-warning-bold"
+        :title="t('pages.draftNotice.title')"
+        :description="t('pages.draftNotice.body')"
+        data-page-draft-notice
+      />
       <MarkdownContent :source="page.body" />
     </article>
   </UContainer>

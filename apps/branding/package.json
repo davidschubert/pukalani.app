@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "nuxi dev --port 3010",
     "build": "nuxi build",
+    "seed:legal": "node --experimental-strip-types --env-file=.env scripts/seed-legal-pages.ts",
     "lint": "eslint .",
     "preview": "nuxi preview",
     "typecheck": "nuxi typecheck"
@@ -17,6 +18,7 @@
     "@pukalani/brand": "workspace:*",
     "@pukalani/core": "workspace:*",
     "@pukalani/market": "workspace:*",
+    "@pukalani/pages": "workspace:*",
     "@pukalani/system": "workspace:*",
     "@pukalani/themes": "workspace:*",
     "@nuxt/image": "catalog:",
