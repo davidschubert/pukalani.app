@@ -7,6 +7,70 @@ die kleinen, verstreuten Beschlüsse.
 
 ---
 
+## 2026-09-07 — Brand Insights (BI1): Redaktionskonzept — zwölf Entscheidungen
+
+**Anlass:** BI1 war seit dem Eintrag von heute früh („Discover Brands und Brand Insights als
+eigene Vorhaben notiert") an ein Redaktionskonzept gebunden — wer schreibt, wie oft, woher die
+Quellen kommen und was mit Bewertungen fremder Marken rechtlich zulässig ist. Fragenrunde mit
+zwölf Fragen; das Ergebnis steht als Plan in [plans/BRAND-INSIGHTS.md](plans/BRAND-INSIGHTS.md)
+(§1 die Tabelle Frage · Entscheidung · Empfehlung war · Leitplanke).
+
+**Entscheidungen (David, Fragenrunde):** (1) **alle vier Formate zum Start** — Markenprofile,
+Brand-Duelle, Artikel, Rankings. (2) **KI entwirft, David redigiert und veröffentlicht** —
+nichts geht ohne sein Zeichen live (wie die Marktvergleichs-Bibliothek). (3) **Grundfassung je
+Beitrag frei wählbar (de ODER en)**, am Ende ein Knopf zur Übersetzung in die jeweils andere
+Sprache. (4) **Wir-Stimme ohne Namen** als Autor. (5) **Launch-Paket ≈ 10 Profile · 3 Duelle ·
+5 Artikel · 1 Ranking**, danach zwei Stücke je Woche. (6) **Quellen:** eigene Websites der
+Marken, eigene Daten (Brand-Check, Bibliothek, Marktvergleich), **YouTube-Data-API als
+Themenradar von Anfang an**, Presse und Wikipedia. (7) **Bewertung fremder Marken nur über den
+BESTEHENDEN Brand-Check-Score** mit offengelegter Methodik, Text als Einordnung im
+Kritik-/Meinungs-Stil — keine zweite Skala (deckt sich mit Marktvergleich §7.3). (8) **Eigene
+Tabellen im brand-Layer, Redaktion im Dashboard** (UEditor, Sprachfassungen, Übersetzung per
+Knopf nach dem UGC-Muster, Freigabe als Zustand). (9) **Ziel und Messung: alle drei gleich
+gewichtet** — Umwandlung, Reichweite/Suchmaschinen, Newsletter. (10) **Bilder: nur eigene
+Grafiken und Farbwelt-Kacheln** — keine fremden Logos, keine Screenshots. (11) **Reaktionen der
+Marken:** Korrekturweg wie im Brand-Check plus öffentliche Methodik-Seite; Entfernen auf Wunsch
+als Notausgang. (12) **Reihenfolge: erst Discover Brands (DB1), dann Insights.**
+
+**Abweichungen von der Empfehlung — fünf, jede mit Leitplanke:**
+
+- **(1) Alle vier Formate statt Profile + Duelle zuerst.** Leitplanke: das Launch-Paket ist die
+  Mengen-Bremse, und kein Format geht live, bevor es EINEN vollständig redigierten
+  Beispiel-Beitrag hat.
+- **(3) Grundsprache frei statt fest Deutsch.** Ohne Leitplanke, aber mit einer Folge fürs
+  Datenmodell: die Grundsprache wird je Beitrag GESPEICHERT (anders als beim UGC-Muster, das
+  bewusst keine Ausgangssprache kennt) — sonst weiss niemand, welche Fassung die redigierte ist.
+- **(4) Wir-Stimme ohne Namen statt David namentlich.** Leitplanke: keine erfundenen Autoren,
+  und das Beraterteam des Wizards ist NIE Autor; die Autorenprofil-Verknüpfung zu Davids Site
+  aus dem Phase-1-Plan entfällt, verantwortlich zeichnet ein Redaktions-Impressum (neue
+  Anwaltsfrage zu § 18 Abs. 2 MStV).
+- **(6) YouTube von Anfang an, dazu Presse und Wikipedia** statt „YouTube später, keine
+  Fremdmedien". Leitplanken: Fremdquellen immer mit Quelle + Datum und als „Fremdquelle"
+  gekennzeichnet (die Bibliotheksregel „nur die eigene Website" gilt für Marktprofil und
+  Bibliothek weiter, Insights darf darüber hinaus zitieren) · Zitatschranke ≤ 200 Zeichen mit
+  Belegpflicht (§ 51 UrhG) · Wikipedia nur mit CC-BY-SA-Namensnennung, keine Volltextübernahme ·
+  YouTube nur Metadaten/Kommentare über die offizielle Data API, kein Transkript-Scraping,
+  Quellvideo eingebettet, Kommentare nur aggregiert und nie mit Nutzernamen gespeichert —
+  als Teilprojekt „Themenradar" mit eigenem Gate (API-Schlüssel + Kontingent).
+- **(9) Alle drei Ziele gleich gewichtet statt Umwandlung zuerst.** Leitplanke: je Format
+  trotzdem EIN klarer Einstieg (Profil → Brand-Check, Duell → Vergleich, Artikel → Wizard), und
+  der Newsletter ist ein eigenes Teilpaket mit Versand, Double-Opt-in und Rechtstexten —
+  nicht im Launch.
+
+**Verworfen:** ein zweiter „Insights-Score" neben dem Brand-Check (Scheinpräzision und zweite
+UWG-Fläche — dieselbe Begründung wie beim gestrichenen Klarheits-Score des Marktvergleichs) ·
+Gastautoren und erfundene Autorennamen · Transkript-Scraping als Content-Grundlage · fremde
+Logos, Favicons und Screenshots · Kommentare unter den Beiträgen · automatische Veröffentlichung
+ohne Davids Zeichen · Newsletter im Launch.
+
+**Offen und ausdrücklich nicht heute entschieden:** die zehn Fragen der Konzeptrunde
+(Plan §8, u. a. eigener Layer oder brand-Layer, URL-Basis, wer den Brand-Check einer fremden
+Marke anstösst) sowie vier NEUE Anwaltsfragen neben den sechs aus Marktvergleich Anhang G
+(Presse-/Wikipedia-Zitate, YouTube-Kommentare und API-Bedingungen, Score fremder Marken als
+Kritik/Meinung, Verantwortlicher bei namenloser Wir-Stimme) — Plan §4.3.
+
+---
+
 ## 2026-09-07 — Brand Design (Produkt 02): Konzept freigegeben, Prototyp beauftragt
 
 **Entscheidung (David):** „Konzept freigegeben, bau den Prototyp im Playground." Damit ist
