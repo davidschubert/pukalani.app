@@ -20,7 +20,8 @@ import { useBrandWorkspaceStore } from '../stores/brandWorkspace'
  *   1. Richtung + Briefing → was für ein Zeichen, und wofür
  *   2. Gesetzte Beispiele  → Wortmarke und Monogramm aus Schriftpaar und
  *                            Farbwelt, als SVG, in vier Varianten
- *   3. KI-Entwürfe         → D5c; hier steht nur der ruhige Platzhalter
+ *   3. KI-Entwürfe         → vier Bilder aus Briefing, DNA und Farbwelt
+ *                            (`BwDraftsPanel`, D5c)
  *
  * DIE REIHENFOLGE IST DAS PRODUKT. Wer bei den Bildern anfängt, bekommt ein
  * Logo ohne Begründung — genau das, was der Markt schon verkauft (§1.7).
@@ -28,8 +29,8 @@ import { useBrandWorkspaceStore } from '../stores/brandWorkspace'
  * ── ES IST SATZ, KEIN LOGO ────────────────────────────────────────────────
  * §1.4 und §1.11 b: das Produkt verspricht kein Logo. Der Satz „gesetzte
  * Beispiele, kein Logo" steht deshalb SICHTBAR über Stufe 2 und nicht in
- * einer Hilfeseite. Der Markenrechts-Hinweis kommt erst mit D5c — er gehört
- * zu den KI-Entwürfen, und hier gäbe es nichts, wovor er warnen könnte.
+ * einer Hilfeseite. Der Markenrechts-Hinweis gehört zu den KI-Entwürfen und
+ * steht deshalb dort — in `BwDraftsPanel`, immer sichtbar.
  *
  * ── DAS SVG KOMMT AUS DER PUREN REGEL, NICHT AUS DIESEM TEMPLATE ─────────
  * `brandMarkSettingSvg()` erzeugt dieselbe Zeichenkette, die später im Preset
@@ -308,15 +309,12 @@ async function runBrief(): Promise<void> {
       </div>
     </div>
 
-    <!-- ── STUFE 3: j.drafts — der Platzhalter (D5c) ────────────────────── -->
-    <div class="bw-frame flex items-start gap-3 px-5 py-4" style="background: var(--bw-surface)">
-      <UIcon name="i-ph-sparkle" class="mt-0.5 size-4 flex-none" style="color: var(--bw-muted)" />
-      <div class="min-w-0">
-        <p class="text-sm font-medium">{{ t('brand.mark.drafts.title') }}</p>
-        <p class="mt-1 text-sm leading-relaxed" style="color: var(--bw-ink-soft)">
-          {{ t('brand.mark.drafts.later') }}
-        </p>
-      </div>
-    </div>
+    <!-- ── STUFE 3: j.drafts — die KI-Entwürfe (D5c) ────────────────────── -->
+    <!-- EIGENE KOMPONENTE, weil sie eine eigene ROUTE, einen eigenen
+         Lade-Zustand und einen eigenen Lauf hat (dieselbe Trennung wie
+         `BwUploadsEditor`/`BwReadingPanel` im Kapitel `dna`). Sie schreibt
+         KEINEN Slot: `j.drafts` zieht der Server nach, wenn jemand einen
+         Entwurf behält. -->
+    <BwDraftsPanel :profile-id="profileId" :disabled="disabled" />
   </section>
 </template>

@@ -926,7 +926,8 @@
         "dismiss": "Verstanden",
         "notReady": "Dafür ist noch zu wenig da — oben steht, was fehlt.",
         "slotConfirmed": "Das hast du schon bestätigt. Wenn du es ändern willst, klick auf Korrigieren.",
-        "readingLimit": "Für heute sind die Lese-Läufe aufgebraucht. Morgen geht es weiter — eure Vorbilder und die bisherige Lesung bleiben stehen."
+        "readingLimit": "Für heute sind die Lese-Läufe aufgebraucht. Morgen geht es weiter — eure Vorbilder und die bisherige Lesung bleiben stehen.",
+        "draftsLimit": "Heute keine Entwürfe mehr — morgen wieder drei Läufe."
       },
       "versions": {
         "open": "Frühere Fassungen",
@@ -2849,7 +2850,35 @@
       },
       "drafts": {
         "title": "Stufe 3 · KI-Entwürfe",
-        "later": "Folgt in einem eigenen Schritt: aus Briefing, DNA und Farbwelt erzeugte Entwürfe als Ideen für die Designer-Arbeit — gekennzeichnet, mit Herkunft und privat. Das Kapitel funktioniert ohne sie."
+        "tag": "j.drafts · {count} behalten",
+        "intro": "Erzeugt aus Briefing, Visual DNA und Farbwelt. Das sind IDEEN für die Designer-Arbeit — kein fertiges Logo, keine Prüfung, kein Anspruch auf Schutzfähigkeit.",
+        "loading": "Entwürfe werden geladen …",
+        "empty": "Noch keine Entwürfe. Ein Lauf erzeugt vier auf einmal.",
+        "running": "Die Entwürfe entstehen … das dauert einen Moment.",
+        "limits": "{max} Läufe je Tag, {per} Entwürfe je Lauf.",
+        "remaining": "Noch {count} von {max} Läufen heute.",
+        "full": "Mehr als {max} Entwürfe hält eine Marke nicht. Verwerft ein paar, dann geht der nächste Lauf.",
+        "disclaimer": "Entwurf — Idee für die Designer-Arbeit, kein geprüftes Logo.",
+        "promptHash": "Prompt {hash}",
+        "alt": "Entwurf: {title}",
+        "keep": "Behalten",
+        "kept": "Wird behalten",
+        "discard": "Verwerfen",
+        "trademark": "Markenrecht: Ein Entwurf sagt nichts über Schutzfähigkeit oder Ähnlichkeit zu bestehenden Marken. Vor der Anmeldung prüft das eine Anwältin — wir prüfen es nicht.",
+        "private": "Behaltene Entwürfe bleiben privat: sie stehen in diesem Kapitel und im Briefing — nie im Foundation-Snapshot und nie im geteilten Link.",
+        "run": {
+          "first": "Vier Entwürfe erzeugen",
+          "again": "Vier weitere Entwürfe"
+        },
+        "error": {
+          "unavailable": "Entwürfe lassen sich hier gerade nicht erzeugen. Das Kapitel läuft ohne sie weiter — Richtung, Briefing und die gesetzten Beispiele bleiben, wie sie sind.",
+          "noBrief": "Dafür fehlt noch das Briefing. Erzeugt es eine Stufe weiter oben — daraus entstehen die Entwürfe.",
+          "limitReached": "Es liegen schon genug Entwürfe. Verwerft ein paar, dann geht der nächste Lauf.",
+          "failed": "Der Lauf hat kein brauchbares Bild geliefert. Versucht es später noch einmal.",
+          "rateLimited": "Das ging zu schnell hintereinander. Wartet einen Moment und versucht es noch einmal.",
+          "notFound": "Diesen Entwurf gibt es nicht mehr.",
+          "generic": "Das hat nicht geklappt. Versucht es bitte noch einmal."
+        }
       }
     },
     "imagery": {
@@ -2892,9 +2921,9 @@
         }
       },
       "dodont": {
-        "title": "Do & Don\u2019t",
+        "title": "Do & Don’t",
         "tag": "k.dodont · gerechnet aus euren drei Entscheidungen",
-        "intro": "Sechs Paare: die vier Achsen eures Prinzips, dazu Illustration und Icons. Jedes Do hat sein Don\u2019t — erst das Paar macht die Regel prüfbar."
+        "intro": "Sechs Paare: die vier Achsen eures Prinzips, dazu Illustration und Icons. Jedes Do hat sein Don’t — erst das Paar macht die Regel prüfbar."
       }
     },
     "scene": {
