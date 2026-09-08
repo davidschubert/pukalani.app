@@ -207,6 +207,19 @@ Wahl prägt das Konzept (Frage §1.10 d):
   und Startseite. Skaliert, verlangt aber Rechtstexte, Rückerstattung,
   Support — und eine Qualität, die ohne Designer trägt.
 
+**Nachtrag 2026-09-08 (David):** Brand Design wird als **eigenständiges
+Produkt neben der Brand Foundation** angeboten und verkauft — die
+Vorbilder-Lesung gegen die Foundation gibt es so am Markt nicht (§1.7: die
+Generatoren starten bei Name + Branche, die Werkzeuge kennen keine
+Strategie, die Container bewerten nichts). Was daraus folgt: (1) die
+Foundation bleibt Voraussetzung — „die Grundlage für alles"; wer nur Brand
+Design kauft, durchläuft die Foundation zuerst (frei, ~45 Min; bei
+Bestandsmarken der Relaunch-Weg mit Brand-Check als Einstieg). (2) Fassung
+1 bleibt Studio-begleitet ohne Preis (§1.11 d); der Verkauf als
+Selbstbedienung ist der zweite Schritt und braucht Stripe im brand-Layer,
+Rechtstexte und die Qualität, die ohne Designer trägt — eigene Zeile in
+OPEN-ITEMS, sobald die Beta die Hypothesen H1–H7 beantwortet hat.
+
 ### 1.9 Risiken und Hypothesen (was die Konzeption/Beta klären muss)
 
 - **H1 Sehen schlägt Wählen:** Nutzer entscheiden erst, wenn sie ihre Marke in
@@ -288,7 +301,63 @@ Fragen in §2.19, nicht als Vorbehalt im Text.
   Einträgen), dasselbe Dokument („Euer Branding" bekommt die sechs Kapitel),
   dieselbe Foundation-Leseansicht (Kapitel 10 wird VOLL, §2.8).
 
-### 2.2 Kapitel `dna` — Moodboard aus der Visual DNA
+### 2.2 Kapitel `dna` — Richtung aus zwei Quellen: Foundation und Vorbilder (Davids Entscheidung 2026-09-08)
+
+**Der Grundsatz (David):** „Niemand fängt mit der Palette an. Vor Farbe und
+Schrift steht immer eine Richtung — aus der Strategie UND aus Vorbildern, die
+der Kunde mitbringt." Kunden haben heute Pinterest-Boards und Screenshots
+und wissen, welche Visualität ihre Marke annehmen soll. Kapitel 1 nimmt
+deshalb BEIDE Quellen: die Brand Foundation (Archetyp, Werte, Ton-Wörter,
+Positionierung) und **Vorbilder je Bereich** (Farbwelt, Typografie, Zeichen,
+Bildsprache — optional Komposition/Motion). Die Foundation bleibt die
+Grundlage für alles: Vorbilder werden AN IHR GEMESSEN, nicht übernommen.
+
+**Ablauf des Kapitels:**
+
+1. **`g.source`** (choice): „Habt ihr Vorbilder?" — Ja ⇒ Upload, Nein ⇒
+   direkt zum Vorschlag. Beide Wege enden in derselben DNA; der Unterschied
+   ist die Quelle, nicht die Reihenfolge (das Moodboard steht in beiden
+   Fällen VOR Farbwelt und Typografie; ein „Moodboard am Ende" ist kein
+   Entscheidungsschritt, sondern das Ergebnis-Board, §2.8).
+2. **`g.inspiration`** (special, Editor `uploads`): 3–12 Screenshots (PNG/
+   JPG/WebP, ≤ 5 MB, Magic-Bytes), je Bild ein BEREICH als Chip (Farbwelt ·
+   Typografie · Zeichen · Bildsprache · Komposition) und optional ein Satz,
+   warum es gefällt. Ablage im Bucket `brand-inspiration` (permissions [],
+   server-only, Auslieferung nur an den Besitzer), Tabelle
+   `brand_inspiration` (profileId, fileId, area, note, `reading` JSON,
+   createdAt). Die Bilder bleiben PRIVAT: sie reisen nie in Snapshot, Share,
+   Beispiel oder Dokument.
+3. **`g.reading`** (derivation, Vision-Modell): je Bild eine strukturierte
+   LESUNG in der DNA-Sprache — beobachtete Werte je Dimension (z. B. „Farb-
+   Charakter: erdig gedämpft", „Typografie: buchhafte Serif"), erkannte
+   Merkmale (Kontrast, Rundung, Bildstil), und die **Bewertung gegen die
+   Foundation**: `fits` (passt zum Archetyp/zu den Werten — mit Begründung,
+   was daran gut funktioniert), `tension` (Spannung — z. B. laut, während die
+   Ton-Wörter „ruhig" sagen; mit Vorschlag, was man übernimmt und was nicht),
+   `off` (widerspricht der Foundation — mit Begründung). Das ist Davids
+   „Verbesserungsvorschläge ODER sagen, was bereits sehr gut ist".
+4. **`g.dna`** (derivation, Text-KI): der DNA-Vorschlag je Dimension aus
+   BEIDEN Quellen, mit Begründung, die auf Vorbilder verweist („wie in Bild
+   3, aber wärmer — eure Werte sagen Nähe, nicht Distanz"). Ohne Vorbilder
+   wie bisher aus der Foundation allein.
+5. **`g.boards`** / **`g.board`** / **`g.mix`** wie bisher (drei Boards,
+   Wahl, Mix & Match mit Festhalten).
+
+**Leitplanken, die man nicht „vereinfachen" darf:** (a) **Lesen, nie
+nachbauen** — die Lesung ist eine DNA-Belegung, kein Abbild; Vorbilder sind
+Fremdwerke (Urheber-/Markenrecht), Hinweis im UI wie bei den KI-Entwürfen.
+(b) **Die Foundation ist der Maßstab** — ein Vorbild ohne Bezug zur Foundation
+wird nicht „schöner gefunden", sondern eingeordnet (fits/tension/off); die
+Begründung nennt immer die Foundation-Stelle (Archetyp, Wert, Ton-Wort).
+(c) **Bilder sind Eingabe, keine Ausgabe** — sie erscheinen nur im Kapitel
+und in Fridas Begründungen, nie im Ergebnis. (d) **Vision-Transport** =
+derselbe Core-Weg wie die KI-Bilder (§2.12), ZDR-Bedingung gilt auch für das
+LESEN von Bildern (Kunden-Screenshots reisen zum Anbieter); Drossel je
+Marke (12 Bilder je Lauf, 3 Läufe/Tag). (e) **Herkunft am Vorschlag**: jede
+DNA-Zeile sagt, ob sie aus Foundation, Vorbild oder beidem kommt.
+
+**Frühere Fassung (2026-09-07, zur Nachlese):** Kapitel 1 kannte nur die
+Foundation als Quelle:
 
 - **Vokabulare** als pure Datei `shared/brandVisualDna.ts`: die zehn
   Dimensionen aus Davids Notiz (Visual Style, Aesthetic Era, Form Language,
@@ -407,6 +476,12 @@ Fragen in §2.19, nicht als Vorbehalt im Text.
   KI-Entwürfe). Der Renderer liest v1 UND v2 (§2.7 des BF1-Konzepts).
 - **Produkt 03** liest dasselbe Preset für Tokens — Brand Design erzeugt die
   Werte, exportiert sie aber nicht (Nicht-Ziel).
+- **Ergebnis-Board (2026-09-08):** am Ende der Schicht ein zusammengesetztes
+  Board — Farbwelt, Schriftpaar, Zeichen-Setzung, Bild-Prinzipien, Bewegung
+  auf EINER Fläche, druckbar, als Kopf von Kapitel 10 und als eigene Ansicht
+  `/brand/:id/design` (Lesen, nicht entscheiden). Es ist das „Moodboard am
+  Ende", das David für den Weg ohne Vorbilder meinte — in beiden Wegen
+  dasselbe Artefakt.
 
 ### 2.9 Vorschau-Szenen (§1.11 c)
 
@@ -437,7 +512,12 @@ in JEDEM Kapitel — eine Komponente, sechs Zustände.
   server-only) + Bucket `brand-drafts` (permissions [], Auslieferung NUR über
   eine Route mit `requireBrandAccess` + Besitzprüfung, `Cache-Control:
   private`).
-- Registry: sechs Steps, ~24 Sessions (Typ/Kind/audience/sensitivity), Frida.
+- brand-022: Tabelle `brand_inspiration` (profileId, fileId, area, note,
+  reading JSON, createdAt; permissions [], server-only) + Bucket
+  `brand-inspiration` (permissions []; Ausliefer-Route mit Besitzprüfung,
+  `private, no-store`).
+- Registry: sechs Steps, ~27 Sessions (Kapitel 1 mit `g.source`,
+  `g.inspiration`, `g.reading` — die zwei letzten `internal`) (Typ/Kind/audience/sensitivity), Frida.
   `audience`: alle Festlegungen `foundation`, Entwürfe (`j.drafts`,
   `k.photo`-KI-Bilder) `internal`.
 - Journey: `includeStep` kennt die Freischaltung (Schicht 2 ohne
@@ -448,7 +528,11 @@ in JEDEM Kapitel — eine Komponente, sechs Zustände.
 
 - Text (DNA, Briefing, Bild-Prinzipien): derselbe Transport
   (`advisorGenerator`, ZDR-Routing, Eimer wie der Wizard).
-- **Bilder — NEU im Core:** `aiImage(event, prompt, options)` in
+- **Bilder LESEN — NEU im Core:** `aiVision(event, images, prompt, options)`
+  (dieselbe Familie, Bild-Eingabe an ein multimodales Modell, Antwort als
+  JSON über `aiCompleteJson`-Regeln), Modell aus `pukalani.ai.visionModel`
+  (Core-Default aus), ZDR-Routing wie Text. Konsument: `g.reading`.
+- **Bilder ERZEUGEN — NEU im Core:** `aiImage(event, prompt, options)` in
   `core/server/utils/aiComplete.ts`-Familie (eigener Commit): OpenAI-
   kompatibler `images/generations`-Weg über denselben Schlüssel, Modell aus
   `pukalani.ai.imageModel` (Core-Default aus), `providerRouting` mit
@@ -460,6 +544,9 @@ in JEDEM Kapitel — eine Komponente, sechs Zustände.
 
 ### 2.13 Sicherheit
 
+- Vorbilder liegen server-only im Bucket `brand-inspiration`, nur der
+  Besitzer bekommt sie ausgeliefert; sie reisen nie in Snapshot, Share,
+  Beispiel, Dokument oder Prompt-Logs; Fremdwerk-Hinweis im UI.
 - Entwürfe liegen server-only; die Ausliefer-Route prüft Besitz und setzt
   `private, no-store`; kein Bild reist in Snapshot, Share oder Beispiel.
 - Prompts an das Bildmodell enthalten Foundation-Werte (wie der Text-Weg),
@@ -514,13 +601,13 @@ Baustein, Relaunch-Einstieg, nach dieser Fassung).
 | --- | --- | --- | --- |
 | D0 | Verträge | Registry-Steps + Sessions (Struktur), Vokabulare, Font-Paar-Katalog, `BrandDesignPreset`, `buildBrandDesign`, Ramp-Import als Vertrag, Journey mit Freischaltung | — |
 | D1 | Freischaltung + Rail + Frida | brand-020, Betreiber-Knopf, Ereignis, Layer im Rail, Beraterin mit Leitern | **David:** Inhalte (Leitern, Zielsätze) |
-| D2 | DNA + Moodboards | `g.*`, Szene `BwDesignScene`, Mix & Match | Davids Blick |
+| D2 | Richtung: Weiche + Vorbilder + DNA + Moodboards | `g.source`, Upload-Editor (brand-022, Bucket), **Core `aiVision`** (eigener Commit, Config-Gate aus), `g.reading` mit fits/tension/off gegen die Foundation, `g.dna` aus beiden Quellen, Boards, Mix & Match, Szene `BwDesignScene` | **David:** Vision-Anbieter/ZDR (dieselbe Frage wie D5c), Davids Blick |
 | D3 | Farbwelt | `h.*`, Ramp/Kontrast über den Vertrag | — |
 | D4 | Typografie | `i.*`, Schriften im App-CSS, Specimen | — |
 | D5 | Zeichen | D5a Richtung+Briefing, D5b SVG-Setzungen, D5c **Core** `aiImage` + Bucket/Tabelle (brand-021) + Entwürfe-Bereich | **David:** Bild-Anbieter/ZDR, Kosten |
 | D6 | Bildsprache | `k.*`, Stil-Karten, optional KI-Beispiele | — |
 | D7 | Motion | `l.*`, Live-Übergänge, reduced-motion | — |
-| D8 | Kapitel 10 voll + Snapshot v2 + Beispiel Kailua mit Design | Renderer, Share, `/beispiel` | Davids Blick |
+| D8 | Kapitel 10 voll + Ergebnis-Board + Snapshot v2 + Beispiel Kailua mit Design | Renderer, `/brand/:id/design`, Share, `/beispiel` | Davids Blick |
 | D9 | Beweis-Skript | verify-brand-design: Freischaltung → sechs Kapitel → Preset → Kapitel 10 → Snapshot v2 → kein Entwurf im Share (Gegenprobe) | — |
 
 ### 2.19 Offene Entscheidungen für die Freigabe

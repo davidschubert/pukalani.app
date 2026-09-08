@@ -7,6 +7,27 @@ die kleinen, verstreuten Beschlüsse.
 
 ---
 
+## 2026-09-08 — Brand Design: Richtung aus Foundation UND Vorbildern; Brand Design als eigenständiges Produkt
+
+**Anlass (David, an der Prototyp-Seite „Moodboard"):** Ist die Reihenfolge richtig, oder
+gehört das Moodboard ans Ende? Zwei Wege denkbar — Vorbilder hochladen und daraus die
+Kapitel ableiten, oder alle Kapitel selbst durchgehen und am Ende ein Moodboard bekommen.
+**Entscheidung (David):** „Niemand fängt mit der Palette an — vor Farbe und Schrift steht
+immer eine Richtung, aus der Strategie UND aus Vorbildern." Kapitel 1 nimmt deshalb beide
+Quellen: die Brand Foundation und **Vorbilder je Bereich** (Screenshots für Farbwelt,
+Typografie, Zeichen, Bildsprache). Die KI LIEST die Vorbilder gegen die Foundation und
+sagt, was daran schon trägt und was besser geht (fits/tension/off mit Begründung an der
+Foundation-Stelle); daraus entsteht der DNA-Vorschlag, danach Farbwelt → Typografie →
+Zeichen → Bildsprache → Bewegung wie geplant. Der Weg ohne Vorbilder überspringt nur den
+Upload; das „Moodboard am Ende" ist in beiden Wegen dasselbe Ergebnis-Board. Leitplanken:
+lesen, nie nachbauen; Bilder sind Eingabe, nie Ausgabe (kein Snapshot/Share); Foundation ist
+der Maßstab; Vision-Transport mit ZDR wie die Bild-KI. **Produkt:** Brand Design wird als
+eigenständiges Produkt neben der Foundation verkauft — die Foundation bleibt Voraussetzung,
+Fassung 1 Studio-begleitet, Selbstbedienung später. Konzept: docs/plans/BRAND-DESIGN.md §2.2,
+§2.8, §1.8-Nachtrag; Paket D2 erweitert.
+
+---
+
 ## 2026-09-07 — branding.supply Recht + Bezahlweg (BS1): acht Entscheidungen
 
 **Anlass:** Die Site ist seit 2026-09-01 öffentlich, nimmt Konten auf, verschickt Mails und
