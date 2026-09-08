@@ -1,10 +1,10 @@
 import {
+  BRAND_DNA_BOARD_KINDS,
   BRAND_DNA_DIMENSION_IDS,
   BRAND_DNA_DIMENSIONS,
   BRAND_DNA_ORIGIN_TERMS,
   type BrandDnaOrigin,
   type BrandDnaValues,
-  type BrandDesignTerm,
   brandDnaDimension,
   brandTermById,
   brandTermLabel,
@@ -287,43 +287,11 @@ export function parseBrandDnaSlotValue(value: string): readonly BrandDnaProposal
 }
 
 // ── Die drei Boards (`g.boards`) ───────────────────────────────────────────
-
-/**
- * DIE DREI BOARDS — Ids unveränderlich, sie stehen in `g.board`.
- *
- * Namen und Notizen stehen HIER zweisprachig und nicht als i18n-Schlüssel:
- * sie reisen in den GESPEICHERTEN Slot-Wert von `g.boards` und `g.mix`
- * („Typografie aus ‚Eine Stufe mutiger'"), also dieselbe Begründung wie beim
- * Vokabular (`brandDesignVocab.ts`, Kopf).
- */
-export interface BrandDnaBoardKind extends BrandDesignTerm {
-  readonly noteDe: string
-  readonly noteEn: string
-}
-
-export const BRAND_DNA_BOARD_KINDS: readonly BrandDnaBoardKind[] = [
-  {
-    id: 'proposed',
-    de: 'Wie vorgeschlagen',
-    en: 'As proposed',
-    noteDe: 'Die Ableitung aus eurer Foundation, Zeile für Zeile begründet.',
-    noteEn: 'The derivation from your foundation, reasoned line by line.',
-  },
-  {
-    id: 'calmer',
-    de: 'Eine Stufe ruhiger',
-    en: 'One step quieter',
-    noteDe: 'Weniger Kontrast, ruhigere Flächen, zurückhaltendere Schrift.',
-    noteEn: 'Less contrast, quieter surfaces, a more restrained typeface.',
-  },
-  {
-    id: 'bolder',
-    de: 'Eine Stufe mutiger',
-    en: 'One step bolder',
-    noteDe: 'Mehr Kontrast, dichtere Fläche, kontrastreiche Schriftmischung.',
-    noteEn: 'More contrast, a denser surface, a high-contrast type mix.',
-  },
-]
+//
+// Die drei Ids, Namen und Notizen stehen im VOKABULAR (`BRAND_DNA_BOARD_KINDS`)
+// — dort, wo auch `brandChoiceOptions.ts` sie erreicht, ohne einen Import-Ring
+// über `brandDirections.ts` zu legen. Hier steht die REGEL, die aus einer DNA
+// drei davon macht.
 
 /** Die Lesefassung eines Board-Namens. */
 export function brandDnaBoardName(boardId: string, locale: string): string {

@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest'
 import {
-  BRAND_DNA_BOARD_KINDS,
   BRAND_DNA_CALM_ORDER,
   type BrandDnaProposalEntry,
   brandDnaBoardDifferences,
@@ -21,6 +20,7 @@ import {
 } from '../shared/brandDesignDna'
 import { brandDesignDefaultsFromDna } from '../shared/brandDesign'
 import {
+  BRAND_DNA_BOARD_KINDS,
   BRAND_DNA_DIMENSION_IDS,
   BRAND_DNA_ORIGIN_TERMS,
   isBrandDnaValue,

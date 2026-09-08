@@ -235,6 +235,50 @@ export const BRAND_DNA_ORIGIN_TERMS: readonly BrandDesignTerm[] = [
 ]
 
 /**
+ * DIE DREI MOODBOARDS (§2.2 Schritt 5, D2c) — Ids unveränderlich, sie stehen
+ * in `g.board` und in jedem Slot-Wert von `g.mix`.
+ *
+ * Namen und Notizen stehen HIER zweisprachig und nicht als i18n-Schlüssel:
+ * sie reisen in GESPEICHERTE Werte („Typografie aus ‚Eine Stufe mutiger'") und
+ * müssen von dort zurückgelesen werden — dieselbe Begründung wie beim
+ * Vokabular überhaupt (s. Kopf).
+ *
+ * Sie stehen in DIESER Datei und nicht bei der Board-Regel
+ * (`brandDesignDna.ts`), weil `brandChoiceOptions.ts` sie als geschlossene
+ * Auswahl braucht: von dort nach `brandDesignDna.ts` zu greifen legte einen
+ * Import-Ring über `brandDirections.ts`. Das Vokabular ist das Blatt ohne
+ * eigene Importe — hier kann jeder schöpfen.
+ */
+export interface BrandDnaBoardKind extends BrandDesignTerm {
+  readonly noteDe: string
+  readonly noteEn: string
+}
+
+export const BRAND_DNA_BOARD_KINDS: readonly BrandDnaBoardKind[] = [
+  {
+    id: 'proposed',
+    de: 'Wie vorgeschlagen',
+    en: 'As proposed',
+    noteDe: 'Die Ableitung aus eurer Foundation, Zeile für Zeile begründet.',
+    noteEn: 'The derivation from your foundation, reasoned line by line.',
+  },
+  {
+    id: 'calmer',
+    de: 'Eine Stufe ruhiger',
+    en: 'One step quieter',
+    noteDe: 'Weniger Kontrast, ruhigere Flächen, zurückhaltendere Schrift.',
+    noteEn: 'Less contrast, quieter surfaces, a more restrained typeface.',
+  },
+  {
+    id: 'bolder',
+    de: 'Eine Stufe mutiger',
+    en: 'One step bolder',
+    noteDe: 'Mehr Kontrast, dichtere Fläche, kontrastreiche Schriftmischung.',
+    noteEn: 'More contrast, a denser surface, a high-contrast type mix.',
+  },
+]
+
+/**
  * DIE BEREICHE, denen ein hochgeladenes Vorbild zugeordnet wird (§2.2 Schritt
  * 2). Je Bild GENAU EINER — ein Bild, das für alles steht, wird für nichts
  * gelesen.

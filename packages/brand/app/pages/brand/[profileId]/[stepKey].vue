@@ -53,6 +53,14 @@ import {
   suggestBrandDirections,
 } from '../../../../shared/brandDirections'
 import {
+  type BrandDnaBoard,
+  type BrandDnaMixSources,
+  brandDnaBoardDifferences,
+  brandDnaBoardName,
+  brandDnaBoardNote,
+  brandDnaDimensionLabel,
+} from '../../../../shared/brandDesignDna'
+import {
   BRAND_ADVISORS,
   BRAND_DESIGN_VOICE,
   BRAND_VOICE,
@@ -1384,6 +1392,8 @@ async function submitChoice(): Promise<void> {
 
 /** Die eine Session, die statt Text-Karten eine Farbwelt zeigt (Paket G4). */
 const DIRECTION_SLOT = 'result.direction'
+/** Und die eine, die statt Text-Karten drei gerenderte Szenen zeigt (D2c). */
+const BOARD_SLOT = 'g.board'
 
 /**
  * DIE GESCHLOSSENE AUSWAHL BEKOMMT KARTEN (P4, Infografik §12.3).
@@ -1407,6 +1417,11 @@ function choiceCardsFor(slotId: string): BwChoiceCard[] {
   // Zeilen Text (`BwDirectionCard`, s. dessen Kopf). Ohne diese Zeile stünden
   // die drei Textzeilen ihrer nicht vorhandenen Karten-Copy im Markup.
   if (slotId === DIRECTION_SLOT) return []
+  // DASSELBE FÜR DIE MOODBOARDS (D2c): `g.board` ist ein geschlossener Vertrag
+  // mit `editor: 'cards'` — seine Karten zeigen aber eine gerenderte SZENE
+  // (`BwBoardCard`), nicht drei Zeilen Text. Der Vertrag steht trotzdem, damit
+  // im Handbuch „Wie vorgeschlagen" steht und nicht die rohe Id `proposed`.
+  if (slotId === BOARD_SLOT) return []
   if (slotById(slotId)?.editor !== 'cards') return []
   const contract = brandChoiceContract(slotId)
   if (!contract || contract.kind !== 'closed') return []
@@ -2231,6 +2246,90 @@ const showInspirationSkipped = computed(() => (
   stepKey.value === 'dna' && store.slotValue('g.source') === 'foundation'
 ))
 
+// ── Der DNA-Vorschlag, die drei Boards und der Mix (D2c, §2.2 Schritte 4–5) ─
+
+/**
+ * DIE RECHNUNG STEHT IM COMPOSABLE, DAS SCHREIBEN HIER.
+ *
+ * `useBrandDnaBoards()` leitet Vorschlag, Boards und Mischung aus den
+ * Slot-Werten ab und hält keinen eigenen Zustand (s. dessen Kopf). Die SEITE
+ * ist die einzige Stelle, die `setSlotValue` ruft und den Autosave spült —
+ * dieselbe Arbeitsteilung wie bei jeder anderen Komponente dieser Werkstatt
+ * (die Komponente zeigt, die Seite entscheidet).
+ */
+const dna = useBrandDnaBoards()
+
+/** Der Vorschlag steht, sobald die Weiche beantwortet ist — auf beiden Wegen. */
+const showDnaPanel = computed(() => stepKey.value === 'dna' && store.slotValue('g.source').length > 0)
+
+/** Mischen kann nur, wer ein Board gewählt hat. */
+const showDnaMix = computed(() => (
+  stepKey.value === 'dna' && dna.boards.value.length > 0 && dna.chosenBoardId.value.length > 0
+))
+
+/**
+ * DIE DREI BOARD-KARTEN als Auswahl von `g.board` — dasselbe Muster wie die
+ * Richtungs-Karten aus G4: was in dem Feld stehen DARF, sagt der geschlossene
+ * Vertrag; welche drei ANGEBOTEN werden, sagt die pure Regel; wie sie aussehen,
+ * sagt die Karte. Ein leeres Array heisst „hier gibt es keine Boards", und die
+ * Bühne behält ihr Textfeld.
+ */
+interface BwBoardChoice {
+  board: BrandDnaBoard
+  name: string
+  note: string
+  differences: string[]
+}
+
+const boardChoices = computed<BwBoardChoice[]>(() => {
+  if (nextSlot.value?.id !== 'g.board') return []
+  return dna.boards.value.map(board => ({
+    board,
+    name: brandDnaBoardName(board.id, locale.value),
+    note: brandDnaBoardNote(board.id, locale.value),
+    differences: brandDnaBoardDifferences(dna.boards.value, board.id)
+      .map(id => brandDnaDimensionLabel(id, locale.value)),
+  }))
+})
+
+/**
+ * ZWEI ABGELEITETE FELDER, DIE SICH SELBST FÜLLEN (H5: „jede Session muss als
+ * BESTÄTIGUNG durchlaufbar sein").
+ *
+ * `g.boards` und `g.mix` sind RECHNUNGEN, keine Eingaben — es gibt für sie
+ * nichts zu tippen und (bewusst) keinen Generator. Die Bühne braucht trotzdem
+ * einen Wert, sonst stünde dort eine Karte ohne Inhalt mit einem
+ * Übernehmen-Knopf, der nichts übernimmt.
+ *
+ * DIE GLEICHHEITS-PRÜFUNG IST DIE GANZE SICHERUNG: ohne sie schriebe jeder
+ * Renderdurchlauf denselben Text und der Autosave liefe im Kreis. Sie hält
+ * auch, wenn sich der Vorschlag ÄNDERT — dann rechnet dieselbe Regel neue
+ * Werte, der Vergleich schlägt an, und der Stand heilt sich selbst.
+ *
+ * NUR IM BROWSER: der Server rendert diese Seite mit, und ein Autosave im SSR
+ * schriebe eine Änderung, die niemand ausgelöst hat.
+ */
+watch(dna.boardsSlotValue, (value) => {
+  if (!import.meta.client || stepKey.value !== 'dna' || !value) return
+  if (store.slotValue('g.boards') === value) return
+  onInput('g.boards', value)
+}, { immediate: true })
+
+const dnaMixValue = computed(() => (dna.chosenBoardId.value ? dna.mixSlotValue() : ''))
+
+watch(dnaMixValue, (value) => {
+  if (!import.meta.client || stepKey.value !== 'dna' || !value) return
+  if (store.slotValue('g.mix') === value) return
+  onInput('g.mix', value)
+}, { immediate: true })
+
+/** Eine neue Mischung aus dem Panel — sie geht denselben Weg wie jede Eingabe. */
+function applyMixSources(next: BrandDnaMixSources): void {
+  const value = dna.mixSlotValue(next)
+  if (!value) return
+  onInput('g.mix', value)
+}
+
 /** Die Marken des Kontos für den Wähler oben in der Sidebar. */
 const LOCALE_FLAGS: Record<string, string> = { en: 'i-circle-flags-us', de: 'i-circle-flags-de' }
 
@@ -2646,6 +2745,16 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
           {{ t('brand.inspiration.skipped') }}
         </p>
 
+        <!-- DER DNA-VORSCHLAG (`g.dna`, D2c) — er steht unter der Lesung und
+             auf BEIDEN Wegen: ohne Vorbilder leitet Frida ihn aus der
+             Foundation allein ab (§2.2 Schritt 4). Kein Chat, sondern ein
+             LAUF, wie die Lesung darüber. -->
+        <BwDnaPanel
+          v-if="showDnaPanel"
+          :profile-id="profileId"
+          :with-inspiration="showInspiration"
+        />
+
         <p v-if="phaseIntro" class="bw-label" style="color: var(--bw-muted); padding-left: 2.65rem">{{ phaseIntro }}</p>
 
         <div v-for="(turn, index) in turns" :key="turn.id" class="bw-msg" :class="turn.role === 'user' ? 'bw-msg--user' : ''">
@@ -2730,6 +2839,21 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
                       @pick="pickChoice"
                     />
                   </div>
+                  <!-- DIE DREI MOODBOARDS (D2c): dieselbe Stelle, dieselbe
+                       Mechanik wie die Richtungen — der Klick übermittelt die
+                       stabile Board-Id. Die Karten zeigen eine gerenderte
+                       SZENE, deshalb stehen sie hier und nicht in
+                       `choiceCards`. -->
+                  <div v-else-if="boardChoices.length" class="mt-3 grid gap-3 lg:grid-cols-3">
+                    <BwBoardCard
+                      v-for="choice in boardChoices" :key="choice.board.id"
+                      :board="choice.board"
+                      :name="choice.name" :note="choice.note" :differences="choice.differences"
+                      :selected="nextSlot ? store.slotValue(nextSlot.id) === choice.board.id : false"
+                      :disabled="conversation.pending.value"
+                      @pick="pickChoice"
+                    />
+                  </div>
                   <BwChoiceCards
                     v-else-if="choiceCards.length"
                     class="mt-3"
@@ -2746,7 +2870,7 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
                     @keydown.enter="submitChoice"
                   />
                 </div>
-                <div v-if="!choiceCards.length && !directionChoices.length" class="mt-3 flex items-center justify-end gap-2">
+                <div v-if="!choiceCards.length && !directionChoices.length && !boardChoices.length" class="mt-3 flex items-center justify-end gap-2">
                   <UButton
                     color="neutral" variant="ghost" class="bw-send rounded-full"
                     :label="t('brand.workspace.submitChoice')"
@@ -2977,6 +3101,11 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
             />
           </div>
         </div>
+
+        <!-- MIX & MATCH UND „EUER STAND" (`g.mix`, D2c) — sie stehen UNTER dem
+             Gespräch, weil sie erst nach der Board-Wahl einen Sinn haben: was
+             man mischt, muss man vorher gewählt haben. -->
+        <BwDnaMixPanel v-if="showDnaMix" @sources="applyMixSources" />
 
         <!-- KAPITELENDE (§5): der ruhige Satz IST seit Paket 3c-ii der Weg —
              ein Hinweis auf eine Seite, die man nicht anklicken kann, wäre eine

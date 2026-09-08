@@ -2619,6 +2619,39 @@
         "rateLimited": "Das ging zu schnell hintereinander. Wartet einen Moment und versucht es noch einmal.",
         "notFound": "Diese Marke gibt es nicht mehr.",
         "generic": "Das hat nicht geklappt. Versucht es bitte noch einmal."
+      },
+      "title": "Visual DNA",
+      "intro": "Zehn Eigenschaften, die sich nicht gegenseitig erklären. Jede ist aus eurer Foundation hergeleitet — die Begründung steht daneben, damit ihr widersprechen könnt.",
+      "introWithReferences": "Zehn Eigenschaften, die sich nicht gegenseitig erklären. Jede ist aus eurer Foundation hergeleitet, und wo ein Vorbild sie bestätigt oder korrigiert, steht das dabei. Die Begründung steht daneben, damit ihr widersprechen könnt.",
+      "state": {
+        "ready": "Vorschlag steht"
+      },
+      "origin": "Herkunft: {origin}",
+      "empty": "Noch kein Vorschlag. Frida leitet ihn aus eurer Foundation ab.",
+      "running": "Frida leitet die Richtung ab …",
+      "limits": "Bis {max} Vorschläge je Tag.",
+      "remaining": "Noch {count} von {max} Vorschlägen heute.",
+      "run": {
+        "first": "Richtung vorschlagen",
+        "again": "Neu vorschlagen"
+      },
+      "board": {
+        "differs": "Anders als der Vorschlag: {dimensions}",
+        "same": "Der Vorschlag selbst"
+      },
+      "mix": {
+        "title": "Mix & Match",
+        "intro": "Haltet fest, was sitzt — den Rest schlage ich neu vor. „Farbwelt aus Board 1, Typografie aus Board 3“ ist hier kein Sonderfall, sondern der Normalweg.",
+        "held": "{count} von {total} festgehalten",
+        "hold": "Festhalten",
+        "holding": "Festgehalten",
+        "resuggest": "Nicht festgehaltene neu vorschlagen",
+        "resuggestHint": "Jede offene Zeile rückt ein Board weiter — dreimal geklickt seid ihr wieder am Anfang."
+      },
+      "stand": {
+        "title": "Euer Stand",
+        "from": "Farbwelt aus „{color}“ · Typografie aus „{type}“",
+        "note": "Diese Belegung ist die Vorbelegung aller folgenden Kapitel — Farbwelt, Typografie, Zeichen, Bildsprache und Bewegung fangen damit an."
       }
     },
     "scene": {

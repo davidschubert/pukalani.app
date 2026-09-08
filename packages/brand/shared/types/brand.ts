@@ -2070,3 +2070,34 @@ export interface BrandInspirationReadResponse extends BrandInspirationListRespon
   ok: true
   quota: { used: number, limit: number, remaining: number }
 }
+
+/**
+ * DIE ANTWORT DES DNA-VORSCHLAGS (`POST …/dna/propose`, Brand Design D2c,
+ * §2.2 Schritt 4).
+ *
+ * ── WARUM SIE DIE ZEILEN MITSCHICKT UND NICHT NUR „ok" ───────────────────
+ * Der Lauf schreibt den Slot-Wert SERVER-seitig (wie die Lesung, D2b). Die
+ * Werkstatt könnte ihn danach aus dem nachgeladenen Baustein zurücklesen —
+ * und tut es auch —, aber sie soll den Vorschlag ZEIGEN können, bevor der
+ * zweite Ruf zurück ist. Die Zeilen hier sind dieselben, die im Slot-Wert
+ * stehen; sie sind eine Abkürzung, keine zweite Wahrheit.
+ *
+ * `hasInspiration` sagt, ob der Lauf mit Vorbildern gerechnet hat — die
+ * Oberfläche blendet den Herkunfts-Chip und den Vorbild-Satz danach aus, statt
+ * auf jeder Zeile „Aus eurer Foundation" zu wiederholen, wo es gar keine
+ * zweite Quelle gibt.
+ */
+export interface BrandDnaProposeResponse {
+  ok: true
+  entries: {
+    dimension: string
+    value: string
+    origin: string
+    reason: string
+    inspirationReason?: string
+  }[]
+  hasInspiration: boolean
+  /** Modell-Kennung ohne Schlüssel — sie steht unter dem Vorschlag. */
+  model: string
+  quota: { used: number, limit: number, remaining: number }
+}

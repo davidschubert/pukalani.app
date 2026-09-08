@@ -53,6 +53,7 @@
  * DIESE DATEI IST PUR: kein i18n, kein H3, kein Appwrite.
  */
 
+import { BRAND_DNA_BOARD_KINDS } from './brandDesignVocab'
 import { BRAND_DIRECTION_OPTIONS } from './brandDirections'
 
 /** Eine legale Option einer GESCHLOSSENEN Auswahl. */
@@ -396,6 +397,26 @@ export const BRAND_DNA_SOURCES: readonly BrandChoiceOption[] = [
   },
 ]
 
+/**
+ * DIE DREI MOODBOARDS ALS OPTIONEN (`g.board`, Brand Design D2c) — AUS dem
+ * Vokabular gebaut, nicht daneben gepflegt.
+ *
+ * Eine zweite, abgeschriebene Liste wäre beim ersten neuen Board genau die
+ * Stelle, an der sich Name und Regel auseinanderleben (dieselbe Begründung wie
+ * bei `BRAND_GRADIENTS` in `brandPalette.ts`). `label`/`hint` sind ENGLISCH wie
+ * der ganze Prompt-Kern; `copyKey` zeigt bewusst ins Leere, weil die Karten
+ * dieses Slots eine gerenderte Szene zeigen und keine Text-Copy (s. Vertrag
+ * unten und den Kopf von `BrandChoiceOption.copyKey`).
+ */
+export const BRAND_DNA_BOARD_OPTIONS: readonly BrandChoiceOption[] = BRAND_DNA_BOARD_KINDS
+  .map(kind => ({
+    id: kind.id,
+    label: kind.en,
+    hint: kind.noteEn,
+    display: { de: kind.de, en: kind.en },
+    copyKey: `brand.choice.dnaBoard.${kind.id}`,
+  }))
+
 const CONTRACTS: readonly BrandChoiceContract[] = [...BASE_CONTRACTS, {
   /**
    * DIE WEICHE (`g.source`) — geschlossen, zwei Optionen (s.
@@ -446,6 +467,32 @@ const CONTRACTS: readonly BrandChoiceContract[] = [...BASE_CONTRACTS, {
       + 'Welche der drei Welten fühlt sich nach euch an?',
     en: 'I cannot settle the direction for you — it is a decision, not a derivation. '
       + 'Which of the three worlds feels like you?',
+  },
+}, {
+  /**
+   * DAS GEWÄHLTE MOODBOARD (`g.board`, Brand Design D2c) — geschlossen, drei
+   * Optionen.
+   *
+   * Die Menge steht in `brandDesignDna.ts` (`BRAND_DNA_BOARD_KINDS`), weil an
+   * einem Board mehr hängt als ein Name: die Achsen-Regel, aus der es entsteht,
+   * seine Farbrollen und sein Schriftpaar. Der Vertrag hier ist trotzdem nötig
+   * — ohne ihn stünde im Handbuch und in der Log-Karte die rohe Id `proposed`.
+   *
+   * ANGEZEIGT werden sie NICHT als Text-Karten (`choiceCardsFor` blendet den
+   * Slot aus, wie `result.direction`): drei gerenderte Szenen sagen mehr über
+   * drei Welten als drei Absätze. `copyKey` zeigt deshalb ins Leere, und das
+   * ist ausdrücklich erlaubt (s. Kopf von `BrandChoiceOption.copyKey`).
+   */
+  slotId: 'g.board',
+  kind: 'closed',
+  options: BRAND_DNA_BOARD_OPTIONS,
+  strayRule: 'Do not invent a fourth board, do not mix two into one — mixing is the next session, and '
+    + 'the field holds one id and nothing else.',
+  fallbackQuestion: {
+    de: 'Welches der drei Boards ist euer Ausgangspunkt? Mischen könnt ihr gleich danach — '
+      + 'hier geht es nur darum, womit wir anfangen.',
+    en: 'Which of the three boards is your starting point? You can mix straight afterwards — '
+      + 'this is only about where we begin.',
   },
 }]
 

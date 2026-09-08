@@ -2619,6 +2619,39 @@
         "rateLimited": "That was too quick. Wait a moment and try again.",
         "notFound": "This brand no longer exists.",
         "generic": "That did not work. Please try again."
+      },
+      "title": "Visual DNA",
+      "intro": "Ten properties that do not explain one another. Each one is derived from your foundation — the reason stands next to it, so that you can disagree.",
+      "introWithReferences": "Ten properties that do not explain one another. Each one is derived from your foundation, and where a reference confirms or corrects it, that is written next to it. The reason stands beside it, so that you can disagree.",
+      "state": {
+        "ready": "Proposal ready"
+      },
+      "origin": "Origin: {origin}",
+      "empty": "No proposal yet. Frida derives it from your foundation.",
+      "running": "Frida is deriving the direction …",
+      "limits": "Up to {max} proposals a day.",
+      "remaining": "{count} of {max} proposals left today.",
+      "run": {
+        "first": "Propose a direction",
+        "again": "Propose again"
+      },
+      "board": {
+        "differs": "Different from the proposal: {dimensions}",
+        "same": "The proposal itself"
+      },
+      "mix": {
+        "title": "Mix & match",
+        "intro": "Hold what fits — I will propose the rest again. \"Colour world from board 1, typography from board 3\" is not a special case here, it is the normal way.",
+        "held": "{count} of {total} held",
+        "hold": "Hold",
+        "holding": "Held",
+        "resuggest": "Propose the unheld ones again",
+        "resuggestHint": "Every open line moves on one board — click three times and you are back where you started."
+      },
+      "stand": {
+        "title": "Where you stand",
+        "from": "Colour world from \"{color}\" · typography from \"{type}\"",
+        "note": "This is what pre-fills every chapter that follows — colour, typography, the mark, imagery and motion all start from here."
       }
     },
     "scene": {
