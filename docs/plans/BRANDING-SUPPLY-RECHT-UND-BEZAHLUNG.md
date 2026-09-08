@@ -499,6 +499,7 @@ heutige `Z1`. Wer ältere Notizen liest: es gilt diese Tabelle.
 | **R2 — Inhalt** | Davids Generator-Texte für Impressum, Datenschutz, AGB · dazu **meine drei Abschnitte**, die kein Generator kennt: KI-Verarbeitung von Kundentexten (OpenRouter/ZDR) · Abruf fremder Websites samt `/market-bot` und TDM-Vorbehalt · öffentliche Bewertung fremder Marken mit Korrekturweg · **Faktenblatt** aus §1.2 + §1.6 · Subprozessoren-Liste · ~~Methodik-Seite für den Brand-Score~~ **(vorgezogen und GEBAUT als R2a)** · alles de + en; die drei Abschnitte sind für den Anwalt als **Prüfpunkte markiert** | David liefert die Generator-Texte; **David liest gegen** | Ja |
 | **R2a — Methodik-Seite** *(GEBAUT 2026-09-07, s. §7.4)* | **Vorgezogen aus R2**, weil §4c ohne sie nicht live darf (Faktenblatt-Befund „eine Zusage ohne Ziel"). `/brand-check/methodik` im `brand`-Layer, de + en, öffentlich, ohne Konto, ohne Produkt-Gate, indexierbar: was der Score ist und was nicht (Bänder, Meinungscharakter) · was gelesen wird und was nicht, samt der **ehrlichen robots-Einschränkung** des Einseiten-Abrufs · die acht Kategorien mit Gewicht und Kriterienzahl, gerechnet gegen beurteilt, Modell-Bedingungen (ZDR, kein Training, kein Ausweichen) · Fundament-Reife als getrennt beschriftete zweite Zahl · Korrektur- und Entfernungsweg · Grenzen und Fairness. Verlinkt als vierter Reiter (damit von JEDER Ergebnisseite) plus im Lesefluss von Start, Ranking und Ergebnis. **Keine Zahl abgetippt** — alles aus den Verträgen, Locale-Texte mit Platzhaltern; Beweis `tests/brandCheckMethod.test.ts` mit Gegenprobe | keins | Nein — bis auf eine Kontaktadresse, falls die Seite mehr nennen soll als „über das Impressum" |
 | **R3 — Anwalt** | EIN Termin, **drei Blöcke**: (1) Studio-Rest aus A1 · (2) branding-Texte mit den drei markierten Prüfpunkten · (3) die Anhang-G/BI1-Fragen aus §1.6 (b)(c)(d). Danach **Fassung 2** einsetzen, Art.-27- und § 36-VSBG-Abschnitte füllen (bis dahin als benannte leere Plätze vorgebaut), **Entwurfs-Hinweis weg, `noindex` weg**. Beweis: sechs Routen 200 in beiden Sprachen · Fuß verlinkt · Häkchen in allen drei Anmeldewegen, mit Gegenprobe (`termsUrl` entfernen ⇒ rot) | **Anwaltstermin** | Ja — Termin und Abnahme |
+| **R2b — robots/TDM im Brand-Check** *(GEBAUT 2026-09-08, s. §7.5)* | **Davids Entscheidung 2026-09-08**, ausgelöst vom Befund aus R2a: der Einseiten-Abruf des Brand-Checks holt jetzt `robots.txt` und prüft den TDM-Nutzungsvorbehalt — mit DENSELBEN Regeln wie der Marktvergleich (dafür nach `packages/brand/shared/{brandRobots,brandTdm}.ts` gezogen, `market` re-exportiert sie) und unter EIGENEM Absender `PukalaniBrandCheck/1.0 (+https://branding.supply/brand-check/methodik)`. Verbot ⇒ 409 `site_blocked`, kein Score, KEINE Zeile, nur Ereignis `brand.check_blocked` mit Grund. Der WIZARD-Weg (eigene Website des Betreibers) bleibt bewusst ausgenommen. Methodik-Seite umgeschrieben: Zusage statt Befund, drei Wege zum Aussperren, benannte Grenze. Beweise: `verify-brand-check-robots.mjs` (29/29, mit Mutations-Gegenprobe), `verify-market-fetch.mjs` weiter 33/33 | keins | Nein |
 | **Z0 — Erstgespräch-Seite** *(GEBAUT 2026-09-07, s. §7.3)* | `/erstgespraech` im `brand`-Layer: fünf Felder (Name · E-Mail · welches Branding, vorbelegt · Anliegen · optional Telefon) · **zwei entkoppelte Zustellwege** (Mail an David UND Zeile in `brand_intro_requests`, Erfolg = mindestens einer) · drei Bremsen (Rate-Limit-Bucket, Honeypot, enge Zod-Längen) · Betreiber-Sicht im Dashboard · Ereignisse `intro.viewed` / `intro.submitted`. **Ersetzt die R0-Weiterleitung** | R1 durch (dieselbe Migrations-Freigabe); Migration vor Deploy | Nein (ausser Migrations-Freigabe) |
 | **Z1 — Stripe** | `billing` ins Manifest · **eigener Preis-Katalog für branding.supply** (NICHT die Community-Preise) · Checkout **je Branding** an der Schranke · Webhook schreibt das **Freischalt-Feld an `brand_profiles`** (Migration) · der **Betreiber-Schalter im Dashboard bleibt** für Handfälle · `automatic_tax` wie bei den Communities, Rechnung und Portal · AGB tragen die **Widerrufsbelehrung für digitale Inhalte** (§ 356 Abs. 5 BGB: Verzicht beim Start der Ausführung) | **A2 live** (Bank, Steuer, Live-Key, Portal) **UND** R3 durch; ausserdem Name + Betrag des Kaufgegenstands (offen, §9) | Ja — A2, Name und Preis |
 | **Z2 — Beta-Regel** | „**Beta-Konten dauerhaft frei**" im Code — je **KONTO** (`brand_access` / Beta-Zulassung), nicht als unbegrenzte Branding-Zahl · als benannter Abschnitt „Beta-Konten" in den AGB · Widerruf je Konto durch den Betreiber bei Missbrauch · die bestehenden Eimer (3 Läufe/Tag je Branding, Instanz-Deckel) bleiben die Kostenbremse | R2 (AGB-Abschnitt) + Z1 (die Zuteilung ist das Gegenstück, gegen das die Ausnahme greift) | Nein |
@@ -757,13 +758,14 @@ also gibt es keine zweite Wahrheit, die auseinanderlaufen könnte.
 
 **Zwei Befunde, die die Seite ans Licht gebracht hat.**
 
-1. **Der Einseiten-Abruf achtet keine `robots.txt`** und keinen
-   TDM-Nutzungsvorbehalt (`server/utils/brandSiteFetch.ts`, Absender
-   `PukalaniBrandWizard/1.0 (+https://pukalani.app)`) — das tut nur der
-   Marktvergleich. Die Begründung im Code („der Betreiber trägt seine eigene
-   Startseite ein") trägt bei einer FREMDEN Adresse nicht. Die Seite nennt es
-   ausdrücklich, statt es zu verschweigen, und benennt den Ausweg. Ob das
-   genügt, gehört als Zusatzfrage in R3 Block (3).
+1. ~~**Der Einseiten-Abruf achtet keine `robots.txt`**~~ — **ERLEDIGT mit R2b
+   am 2026-09-08** (s. §7.5). Der Befund lautete: der Abruf des Checks
+   (`server/utils/brandSiteFetch.ts`, Absender `PukalaniBrandWizard`) wertete
+   weder `robots.txt` noch einen TDM-Nutzungsvorbehalt aus — das tat nur der
+   Marktvergleich —, und die Begründung im Code („der Betreiber trägt seine
+   eigene Startseite ein") trägt bei einer FREMDEN Adresse nicht. Der Check tut
+   jetzt beides; der WIZARD-Weg bleibt bewusst ausgenommen. Die Zusatzfrage für
+   R3 Block (3) ist damit erledigt.
 2. **Es gibt keine Kontaktadresse in der Config.** `introCallNotify` ist leer,
    und `/market-bot` nennt `hello@branding.supply` als Literal. Die Seite
    verweist deshalb auf das Impressum (`pukalani.brand.legalLinks.imprint`)
@@ -781,6 +783,91 @@ Worktree: `/brand-check/methodik` und `/de/brand-check/methodik` je 200, keine
 rohen `brand.`-Schlüssel im HTML, acht Kategorien und sieben Bänder im
 gerenderten Text, 16/40 · 24 · 100 Punkte · 20.000 Zeichen · 7 Tage · 3
 Vorschläge alle aus dem Katalog.
+
+---
+
+### 7.5 R2b — der Brand-Check respektiert robots.txt und TDM, am 2026-09-08 gebaut
+
+**Warum.** Davids Entscheidung vom 2026-09-08, ausgelöst durch den ersten
+Befund aus R2a: der öffentliche Brand-Check liest eine BELIEBIGE Adresse, die
+irgendwer eingetragen hat. „Der Betreiber trägt seine eigene Startseite ein" ist
+dort keine Begründung mehr, und ein Ausweg „auf Zuruf" ist für einen Vorgang,
+der ohne Konto ausgelöst werden kann, zu wenig. Der Marktvergleich fragt seit
+MV1 M2 vor jedem Abruf — der Check tut es jetzt auch, mit DENSELBEN Regeln.
+
+**Die Regeln sind umgezogen, nicht kopiert.** `brand` darf `market` nicht kennen
+(CONCEPT.md A14, die Richtung ist einseitig), also sind der robots-Parser und
+die Vorbehalts-Erkennung nach `packages/brand/shared/brandRobots.ts` und
+`packages/brand/shared/brandTdm.ts` gezogen. `packages/market/shared/marketRobots.ts`
+und der Vorbehalts-Abschnitt von `marketCrawlRules.ts` sind seither dünne
+RE-EXPORTE unter den alten Namen: kein Aufrufer im market-Layer ändert sich,
+und es gibt keine zweite Fassung, die auseinanderlaufen könnte. Die
+Bündelungs-Regel des market-Vertrags gilt weiter für `server/utils` (dort ist
+sie eine Notwendigkeit wegen Nitros Auto-Import); `shared/` wird nicht gescannt,
+und das Bibliotheks-Skript lädt diese Dateien direkt.
+
+**Der Abruf.** `packages/brand/server/utils/brandCheckFetch.ts` mit
+`fetchBrandSiteForCheck()` — eine eigene Hülle statt eines Schalters an
+`fetchBrandSite`, weil der Unterschied kein Häkchen ist, sondern die Begründung;
+ein vergessenes Häkchen wäre hier kein sichtbarer Fehler, sondern ein Abruf
+gegen eine Ansage. Budget: **zwei zusätzliche Anfragen, beide vorher** —
+`robots.txt` und (nur wenn `robots.txt` sie nicht verbietet)
+`/.well-known/tdmrep.json`. Die drei übrigen Formen des Vorbehalts (Kopfzeile,
+`tdm-reservation`-Meta, `noai`/`noimageai`) kommen aus der Antwort der Seite,
+die ohnehin geholt wird. Fail-closed wie im Marktvergleich.
+
+**Eigener Absender.** `PukalaniBrandCheck/1.0
+(+https://branding.supply/brand-check/methodik)` neben `PukalaniBrandWizard`
+und `PukalaniMarketBot`: ein Betreiber muss den Vorgang benennen können, den er
+verbieten will — und er darf den Check zulassen und den Marktvergleich
+aussperren (oder umgekehrt). Die `+`-Adresse zeigt auf eine Seite, die
+tatsächlich erklärt, was gelesen wird.
+
+**Die Antwort.** 409 `site_blocked` (nicht 403: nicht WIR verweigern, die fremde
+Website tut es). Es entsteht **kein Score und keine Zeile** in `brand_checks` —
+die Tabelle kennt keinen Zustand „abgewiesen", und eine Zeile ohne Ergebnis
+wäre eine Messung, die nie stattgefunden hat. Was bleibt, ist ein Log-Ereignis
+`brand.check_blocked` mit Host, Grund (`robots` / `tdm`) und Dauer. Der GRUND
+steht nur dort: der zentrale Fehler-Handler hebt genau EINEN Schlüssel ins
+Envelope (`domainReasonFrom`), und für den Menschen davor ist die Auskunft
+ohnehin dieselbe — „diese Website untersagt die automatische Auswertung, wir
+respektieren das" (`brand.check.form.errors.siteBlocked`, de + en; derselbe Satz
+in „Meine Brands").
+
+**Die Gegenrichtung, die bewusst offen bleibt.** Der WIZARD
+(`POST /api/brand/profiles/:id/analyze`) liest weiter ohne Vorabfrage: dort
+trägt ein eingeloggter Betreiber die Adresse SEINER EIGENEN Website ein und
+drückt selbst auf den Knopf. `robots.txt` regelt, was Crawler bei einem fremden
+Auftritt dürfen, nicht was ein Werkzeug darf, das sein Besitzer auf sein eigenes
+Haus richtet. Steht als Kommentar an beiden Routen — wer diesen Weg eines Tages
+für fremde Adressen öffnet, stellt ihn auf `fetchBrandSiteForCheck` um.
+
+**Die benannte Grenze.** Gefragt wird der Ursprung der EINGETRAGENEN Adresse.
+Springt sie per Weiterleitung auf einen anderen Wirt, wird dessen `robots.txt`
+nicht zusätzlich geholt — der Marktvergleich verhält sich genauso, und zwei
+verschiedene Antworten auf dieselbe Frage wären schlimmer als diese eine
+benannte Lücke. Bleibt der Wirt derselbe und ändert sich nur der Pfad, wird
+dieselbe (bereits gelesene) `robots.txt` noch einmal gegen den Zielpfad
+gehalten — das kostet nichts.
+
+**Die Methodik-Seite sagt jetzt das Gegenteil von vorher.** Aus „eine
+Einschränkung, die wir nicht verschweigen" ist eine Zusage geworden, dazu die
+drei Wege zum Aussperren (robots-Zeile · die vier Formen des Vorbehalts als
+Code-Beispiele · Zuruf) und ein eigener Abschnitt „Die Grenze dieser Zusage".
+Der Absender steht wörtlich auf der Seite und ist per Test an die Konstante
+genagelt.
+
+**Beweise.** `packages/brand/tests/brandCheckRobots.test.ts` (Absender-Trennung,
+robots je Absender mit Gegenproben, vier Formen des Vorbehalts, Locale-Sätze in
+beiden Sprachen) · drei neue Fälle in `brandCheckRoutes.test.ts` (409 mit
+Ereignis-Grund, beide Gründe, Gegenprobe „ohne Verbot wird normal gespeichert")
+· `packages/brand/tests/brandCheckMethod.test.ts` erweitert. Am Dev-Server aus
+dem Worktree: **`packages/brand/scripts/verify-brand-check-robots.mjs` 29/29**
+gegen drei erfundene Websites, deren Zugriffsprotokoll mitgeschrieben wird —
+inkl. der Gegenprobe, dass der Wizard dieselbe gesperrte Adresse weiter liest,
+und einer **Mutations-Gegenprobe** (holt der Abruf die `robots.txt` nicht mehr,
+fallen 7 der 29 Prüfungen). `packages/market/scripts/verify-market-fetch.mjs`
+weiterhin **33/33** — der Marktvergleich bezieht seine Regeln jetzt aus `brand`.
 
 ---
 

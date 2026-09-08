@@ -37,11 +37,13 @@ import {
  *
  * ── ER IST TRANSPORT, KEINE POLITIK ───────────────────────────────────────
  * Diese Datei holt, was man ihr sagt, und wertet aus, was zurückkommt. Sie
- * entscheidet NICHT, welche Pfade gelesen werden dürfen (Sperrliste), was ein
- * Nutzungsvorbehalt bedeutet (robots/TDM) oder was ein Modell sehen darf
- * (PII-Filter) — das sind Produktregeln des Marktvergleichs und liegen in
- * `packages/market/shared/*`. Der Schnitt hält diese Datei für den Brand-Check
- * brauchbar, der andere Regeln haben darf.
+ * entscheidet NICHT, welche Pfade gelesen werden dürfen (Sperrliste
+ * `packages/market/shared/marketCrawlRules.ts`), ob ein Absender lesen darf
+ * (`../../shared/brandRobots.ts`), was ein Nutzungsvorbehalt bedeutet
+ * (`../../shared/brandTdm.ts`) oder was ein Modell sehen darf (PII-Filter im
+ * market-Layer). Der Schnitt hält diese Datei für BEIDE Abrufe brauchbar —
+ * seit BS1 R2b liest der Brand-Check über `brandCheckFetch.ts` mit demselben
+ * Transport, aber mit eigenem Absender und eigenem Umfang.
  *
  * ── DAS ROHE HTML BLEIBT HIER ─────────────────────────────────────────────
  * `fetchBrandDocument` gibt den Quelltext heraus (er muss, sonst gäbe es keine
@@ -158,14 +160,24 @@ function textResourceAccepted(value: string | undefined): boolean {
  * erwartbare Auskunft und kein Fehler. Ein Wurf zwänge jeden Aufrufer zu einem
  * `try`, dessen einziger Zweck das Weiterlaufen wäre.
  */
-export async function crawlBrandTextResource(url: string): Promise<BrandCrawledText | null> {
+export async function crawlBrandTextResource(
+  url: string,
+  /**
+   * WER FRAGT. Default ist der Marktvergleich — sein Absender war bis BS1 R2b
+   * der einzige, der Textressourcen las. Seither holt auch der Brand-Check
+   * seine `robots.txt` und `tdmrep.json` hierüber und reicht dafür
+   * `BRAND_CHECK_USER_AGENT` durch: wer eine `robots.txt` gegen einen ANDEREN
+   * Namen prüft als den, mit dem er sie holt, prüft nichts.
+   */
+  userAgent: string = BRAND_MARKET_USER_AGENT,
+): Promise<BrandCrawledText | null> {
   try {
     const document = await fetchBrandDocument(url, {
       accept: 'text/plain,application/xml,text/xml,application/json;q=0.9,*/*;q=0.8',
       acceptsContentType: textResourceAccepted,
       maxBytes: BRAND_CRAWL_TEXT_MAX_BYTES,
       timeoutMs: BRAND_CRAWL_TIMEOUT_MS,
-      userAgent: BRAND_MARKET_USER_AGENT,
+      userAgent,
     })
     return {
       url,

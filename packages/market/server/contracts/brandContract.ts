@@ -34,6 +34,19 @@
  * kennt dafür einen benannten Block für `packages/market/**` — eine
  * AUSNAHME MIT NAMEN statt einer stillen Lücke, wie feedback ↔ control.
  *
+ * ── DIE ZWEI PUREN AUSNAHMEN IN `shared/` (BS1 R2b, 2026-09-08) ──────────
+ * `shared/marketRobots.ts` und der Vorbehalts-Abschnitt von
+ * `shared/marketCrawlRules.ts` greifen seit R2b ebenfalls über die Grenze —
+ * und das ist kein Loch in der Bündelung oben, sondern ihr Gegenstück. Die
+ * Bündelung existiert wegen Nitros AUTO-IMPORT von `server/utils` (s. o.);
+ * `shared/` wird nicht gescannt, dort gibt es nichts zu beschatten. Beide
+ * Dateien sind reine RE-EXPORTE der Regeln, die seit R2b im brand-Layer leben
+ * (`brandRobots.ts`, `brandTdm.ts`) — der Brand-Check achtet `robots.txt` und
+ * Nutzungsvorbehalt jetzt auch, und `brand` darf `market` nicht kennen. Der
+ * Umweg über DIESE Datei wäre teurer als der Gewinn: er machte aus einer puren
+ * Regel eine Server-Abhängigkeit, und `packages/market/scripts/
+ * market-library-compute.mjs` lädt sie direkt.
+ *
  * ── WAS HIER BEWUSST NICHT STEHT ──────────────────────────────────────────
  * Der Befund-SCHREIBER (`writeBrandFindings`) und die Extraktions-Naht kommen
  * mit M3, wenn es Befunde zu schreiben gibt; ein Re-Export, hinter dem noch

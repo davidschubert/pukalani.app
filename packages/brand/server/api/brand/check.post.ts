@@ -36,6 +36,16 @@ import {
  * Gast, der `force` schickt, bekommt schlicht den gewöhnlichen Check; die eine
  * Weiche dafür ist `decideBrandCheckMode` und steht pur im Vertrag.
  *
+ * ── SEIT BS1 R2b: DIE WEBSITE DARF NEIN SAGEN ────────────────────────────
+ * Der Abruf holt `robots.txt` und prüft den TDM-Nutzungsvorbehalt, mit
+ * DENSELBEN Regeln wie der Marktvergleich und unter einem eigenen Absender
+ * (`PukalaniBrandCheck`, `server/utils/brandCheckFetch.ts`). Untersagt die
+ * Website die Auswertung, antwortet die Route 409 `site_blocked` — es
+ * entsteht kein Score und KEINE Zeile in `brand_checks`, nur ein
+ * Log-Ereignis `brand.check_blocked` mit dem Grund. Der Weg des WIZARDS
+ * (`profiles/[id]/analyze.post.ts`) bleibt bewusst unberührt: dort trägt der
+ * eingeloggte Betreiber seine EIGENE Startseite ein.
+ *
  * ── DER ZWISCHENSPEICHER TRÄGT SEIN HÄKCHEN MIT SICH ──────────────────────
  * Ein Treffer gibt die GESPEICHERTE Zeile zurück, mitsamt ihrem
  * `rankingOptIn` — er läuft nichts und ändert nichts. Wer heute ein Häkchen

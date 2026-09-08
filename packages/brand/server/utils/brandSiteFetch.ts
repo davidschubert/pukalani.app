@@ -473,6 +473,24 @@ async function fetchHop(
  */
 export const BRAND_SITE_USER_AGENT = 'PukalaniBrandWizard/1.0 (+https://pukalani.app)'
 
+/**
+ * DER ABSENDER DES BRAND-CHECKS (BS1 R2b, Davids Entscheidung 2026-09-08) —
+ * ein EIGENER neben dem des Wizards, aus demselben Grund wie
+ * `BRAND_MARKET_USER_AGENT`: ein Betreiber muss den Vorgang benennen können,
+ * den er erlauben oder verbieten will. „Ich trage meine eigene Startseite in
+ * einen Wizard ein" ist etwas anderes als „ein Fremder lässt meine Startseite
+ * bewerten" — zwei Vorgänge, zwei Namen, zwei Entscheidungen.
+ *
+ * Die `+`-Adresse zeigt auf die METHODIK-SEITE, weil dort schon steht, was
+ * gelesen wird, was davon bleibt und wie man uns aussperrt. Eine
+ * Absender-Adresse, die auf eine Seite ohne diese Auskunft zeigt, ist eine
+ * Höflichkeitsfloskel; genagelt in `tests/brandCheckMethod.test.ts`.
+ */
+export const BRAND_CHECK_USER_AGENT = 'PukalaniBrandCheck/1.0 (+https://branding.supply/brand-check/methodik)'
+
+/** Das Token, das eine `robots.txt`-Gruppe für den Brand-Check adressiert (klein). */
+export const BRAND_CHECK_BOT_TOKEN = 'pukalanibrandcheck'
+
 /** Was ein Aufrufer am generischen Abruf einstellen darf (s. `HopPolicy`). */
 export interface BrandDocumentFetchOptions {
   /** Der `Accept`-Kopf. Default: HTML. */

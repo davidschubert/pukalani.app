@@ -182,16 +182,20 @@ der Code belegbar tut.
 > Für den Brand-Check und den Marktvergleich rufen unsere Server öffentlich
 > zugängliche Seiten der angegebenen Adresse ab. Dabei sieht der Server der
 > abgerufenen Website — wie bei jedem Seitenaufruf — unsere IP-Adresse und
-> unsere Absenderkennung
-> `PukalaniMarketBot/1.0 (+https://branding.supply/market-bot)`. Unter dieser
-> Adresse erklären wir dauerhaft, was wir lesen, was wir nicht lesen, wie lange
-> wir es behalten und wie man uns aussperrt.
+> unsere Absenderkennung. Es sind **zwei**, weil es zwei Vorgänge sind:
+> `PukalaniBrandCheck/1.0 (+https://branding.supply/brand-check/methodik)` für
+> den Brand-Check (eine Seite) und
+> `PukalaniMarketBot/1.0 (+https://branding.supply/market-bot)` für den
+> Marktvergleich (mehrere Seiten). Unter beiden Adressen erklären wir dauerhaft,
+> was wir lesen, was wir nicht lesen, wie lange wir es behalten und wie man uns
+> aussperrt — jeden Vorgang einzeln.
 >
 > Wir halten uns dabei an folgende Regeln:
 >
 > - Wir lesen nur **öffentlich zugängliche Marketing-Seiten**. Keine
 >   Login-Bereiche, keine Formulare, keine Downloads.
-> - Wir werten **`robots.txt`** aus und halten uns daran.
+> - Wir werten **`robots.txt`** aus und halten uns daran — bei **beiden**
+>   Vorgängen, und je Absenderkennung getrennt.
 > - Wir respektieren maschinenlesbare **Nutzungsvorbehalte** für Text- und
 >   Data-Mining (§ 44b UrhG) in den gängigen Formen: `TDM-Reservation`-Header,
 >   `/.well-known/tdmrep.json`, `tdm-reservation`-Meta sowie `noai`/`noimageai`
@@ -219,14 +223,18 @@ der Code belegbar tut.
 >
 > For the brand check and the market comparison, our servers retrieve publicly
 > available pages of the address you provide. In doing so, the website's server
-> sees — as with any page view — our IP address and our user agent,
-> `PukalaniMarketBot/1.0 (+https://branding.supply/market-bot)`. That page
-> permanently explains what we read, what we do not read, how long we keep it
-> and how to block us.
+> sees — as with any page view — our IP address and our user agent. There are
+> **two**, because there are two operations:
+> `PukalaniBrandCheck/1.0 (+https://branding.supply/brand-check/methodik)` for
+> the brand check (one page) and
+> `PukalaniMarketBot/1.0 (+https://branding.supply/market-bot)` for the market
+> comparison (several pages). Both pages permanently explain what we read, what
+> we do not read, how long we keep it and how to block us — for each operation
+> separately.
 >
 > We follow these rules: we read only **publicly available marketing pages**
 > (no login areas, no forms, no downloads); we fetch and **honour
-> `robots.txt`**; we respect machine-readable **text and data mining
+> `robots.txt`** for both operations, per user agent; we respect machine-readable **text and data mining
 > reservations** (§ 44b UrhG) in their common forms (`TDM-Reservation` header,
 > `/.well-known/tdmrep.json`, `tdm-reservation` meta, `noai`/`noimageai`) and
 > exclude the site if one is present; we **never fetch** team, imprint,
@@ -310,15 +318,26 @@ von Startseite, Ranking und Ergebnis. Damit ist der frühere Befund 2 — „ein
 Zusage ohne Ziel, wie die drei Footer-Wörter" — geschlossen; der Absatz darf
 live gehen.
 
-**Ein Befund, den die Seite mitbringt:** Der Einseiten-Abruf des Brand-Checks
-(`server/utils/brandSiteFetch.ts`, Absender
-`PukalaniBrandWizard/1.0 (+https://pukalani.app)`) wertet **weder `robots.txt`
-noch einen TDM-Nutzungsvorbehalt** aus — das tut nur der Marktvergleich
-(`brandSiteCrawl.ts`, eigener Absender). Begründet war das mit „der Betreiber
-trägt seine eigene Startseite ein"; bei einer FREMDEN Adresse trägt diese
-Begründung nicht. Die Methodik-Seite nennt es ausdrücklich und benennt den
-Ausweg (Sperre auf Zuruf). Ob das genügt oder der Abruf `robots.txt` lesen
-muss, gehört als Zusatzfrage in den Anwaltstermin R3, Block (3).
+**Der Befund, den die Seite mitbrachte — ERLEDIGT mit BS1 R2b (2026-09-08,
+Davids Entscheidung):** Der Einseiten-Abruf des Brand-Checks wertete **weder
+`robots.txt` noch einen TDM-Nutzungsvorbehalt** aus; begründet war das mit „der
+Betreiber trägt seine eigene Startseite ein", und bei einer FREMDEN Adresse
+trägt diese Begründung nicht. Seit R2b holt der Check vor jedem Abruf die
+`robots.txt` und prüft den Vorbehalt in allen vier anerkannten Formen — mit
+DENSELBEN Regeln wie der Marktvergleich (`packages/brand/shared/brandRobots.ts`
+und `brandTdm.ts`, aus dem market-Layer dorthin gezogen) und unter einem
+EIGENEN Absender `PukalaniBrandCheck/1.0
+(+https://branding.supply/brand-check/methodik)`, den ein Betreiber getrennt
+vom Marktvergleich aussperren kann. Verbietet eines von beidem die Auswertung,
+antwortet die Route 409 `site_blocked`: kein Score, **keine gespeicherte
+Zeile**, nur ein Log-Ereignis mit dem Grund. Die Methodik-Seite sagt das zu,
+zeigt die Aussperr-Zeile und nennt die verbliebene Grenze. **Ausgenommen bleibt
+bewusst der Wizard-Weg** (`profiles/:id/analyze`): dort trägt ein eingeloggter
+Betreiber seine EIGENE Website ein. Die Zusatzfrage für den Anwaltstermin R3,
+Block (3) („genügt die Sperre auf Zuruf?") ist damit gegenstandslos; offen
+bleibt dort nur die allgemeine Frage 16 zu § 44b UrhG.
+Beweise: `packages/brand/scripts/verify-brand-check-robots.mjs` (29/29, mit
+Mutations-Gegenprobe), `packages/brand/tests/brandCheckRobots.test.ts`.
 
 ---
 

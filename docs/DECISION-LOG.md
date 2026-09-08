@@ -7,6 +7,35 @@ die kleinen, verstreuten Beschlüsse.
 
 ---
 
+## 2026-09-08 — Brand-Check achtet robots.txt und TDM-Vorbehalt; Wizard-Weg bewusst ausgenommen (BS1 R2b)
+
+**Entscheidung (David):** Der öffentliche Brand-Check holt vor jedem Abruf die
+`robots.txt` und prüft den maschinenlesbaren Nutzungsvorbehalt (§ 44b UrhG) —
+mit denselben Regeln, die der Marktvergleich seit MV1 M2 fährt. Damit ist der
+Befund aus R2a erledigt: die alte Begründung („der Betreiber trägt seine eigene
+Startseite ein") trug bei einer FREMDEN Adresse nicht, und ein Ausweg „auf
+Zuruf" ist für einen Vorgang, den jeder ohne Konto auslösen kann, zu wenig.
+
+**Was daraus folgt.** Die Regeln sind aus `packages/market/shared/` nach
+`packages/brand/shared/{brandRobots,brandTdm}.ts` GEZOGEN (nicht kopiert —
+`brand` darf `market` nicht kennen, A14; `market` re-exportiert sie unter den
+alten Namen). Der Check bekommt einen EIGENEN Absender `PukalaniBrandCheck/1.0
+(+https://branding.supply/brand-check/methodik)` neben Wizard und MarketBot:
+ein Betreiber soll den Vorgang benennen können, den er verbieten will. Ein
+Verbot ergibt 409 `site_blocked` — kein Score und KEINE Zeile in `brand_checks`
+(die Tabelle kennt keinen Zustand „abgewiesen"; eine leere Zeile wäre eine
+Messung, die nie stattfand), nur ein Log-Ereignis `brand.check_blocked` mit dem
+Grund.
+
+**Bewusst NICHT mitgeändert:** der Wizard-Weg
+(`POST /api/brand/profiles/:id/analyze`). Dort trägt ein eingeloggter Betreiber
+die Adresse SEINER EIGENEN Website ein — `robots.txt` regelt, was Crawler bei
+einem fremden Auftritt dürfen, nicht was ein Werkzeug darf, das sein Besitzer
+auf sein eigenes Haus richtet. Der Unterschied steht als Kommentar an beiden
+Routen, damit ihn niemand für eine Nachlässigkeit hält.
+
+---
+
 ## 2026-09-08 — Brand Design: Prototyp FREIGEGEBEN (Phase 4), Pakete D0–D9 verbindlich; Vision/Bild über OpenRouter mit ZDR-Filter
 
 **Entscheidung 1 (David):** Der Playground-Prototyp ist als Bauvorlage freigegeben. Die

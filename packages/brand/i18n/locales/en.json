@@ -1066,6 +1066,7 @@
           "invalidUrl": "We cannot read that address. Please write it the way you would type it into a browser — for example your-website.com.",
           "blockedTarget": "We are not allowed to fetch that address. Please give us the public address of your website.",
           "fetchFailed": "The site did not answer. Check the address and try again in a moment.",
+          "siteBlocked": "This website does not allow automated evaluation — we respect that. So there is no result here.",
           "rateLimited": "The free checks for today are used up. Tomorrow it continues — or sign up for the full report.",
           "unavailable": "The check is not reachable right now. Please try again in a few minutes.",
           "generic": "That did not work just now. Please try again in a moment."
@@ -1399,6 +1400,7 @@
         "invalidUrl": "We cannot read that address. Please write it the way you type it into a browser.",
         "blockedTarget": "We are not allowed to fetch that address. Please give us the public address of your website.",
         "fetchFailed": "The page did not answer. Check the address and try again in a moment.",
+        "siteBlocked": "This website does not allow automated evaluation — we respect that. So there is no result here.",
         "unavailable": "The check is unavailable right now. Try again in a few minutes.",
         "generic": "That did not work just now. Give it another try in a moment."
       }
@@ -1582,8 +1584,22 @@
         "keepsTitle": "What is kept",
         "keepsBody": "The page text is discarded after the evaluation. What remains stored is the checked address, the numeric values, the short pieces of evidence, the date, and a checksum of the text that tells us whether anything has changed since. Plus a daily rotating checksum of the requesting connection — for the daily cap only, never the address itself.",
         "agentTitle": "How to recognise us in your access log",
-        "robotsTitle": "One limitation we are not hiding",
-        "robotsBody": "This single request does not consult robots.txt and does not evaluate a text and data mining reservation. It was designed for the case where someone enters their own home page — the presence then asks for the request itself. But a stranger can enter an address just as easily, and then that reasoning does not hold. If you do not want to be read, write to us and we will block the address. Our market comparison, which reads several pages in a row, does evaluate robots.txt and the mining reservation in full.",
+        "robotsTitle": "robots.txt and mining reservation",
+        "robotsBody": "Before we fetch a page we read your robots.txt and abide by it — including rules addressed to all bots. We also check for a machine-readable text and data mining reservation (§ 44b UrhG). If either forbids the evaluation, we stop: there is no score, no result and no stored entry — whoever started the check is told exactly that. Until 8 September 2026 this applied only to our market comparison; since then it applies here too.",
+        "blockTitle": "How to block us",
+        "blockBody": "Three ways, each effective with the next check. The first is one line in your robots.txt:",
+        "tdmTitle": "Mining reservation (text and data mining)",
+        "tdmBody": "The second way: we recognise a machine-readable reservation under § 44b UrhG in these four forms. One of them is enough:",
+        "doubt": "When in doubt we decide against the evaluation: if a reservation cannot be safely ruled out, we stop.",
+        "blockContact": "The third way needs no file: write to us and we will block your address on our side. That also applies retroactively to a result that already exists.",
+        "limitTitle": "The limit of this promise",
+        "limitBody": "We ask the origin of the address that was entered. If it redirects to a different host, we do not additionally fetch that host’s robots.txt — our market comparison behaves the same way. And the website that a signed-in operator enters as their own in the brand wizard is still read without this preliminary request: there, the owner of the page is the one giving the order.",
+        "form": {
+          "header": "As an HTTP header",
+          "meta": "As a meta declaration in the HTML",
+          "robotsMeta": "As a robots meta declaration",
+          "tdmrep": "As tdmrep.json under /.well-known/"
+        },
         "botLink": "How our market comparison bot works"
       },
       "judge": {

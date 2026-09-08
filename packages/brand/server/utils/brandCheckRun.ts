@@ -18,7 +18,8 @@ import { type BrandCheckQuotaChoice, decideBrandCheckMode } from '../../shared/b
 import { bookBrandCheckQuota, brandCheckIpHash } from './brandAiQuota'
 import { BRAND_CHECK_PROMPT_VERSION, judgeBrandCheck } from './brandCheckJudge'
 import { measureBrandCheck } from './brandCheckMeasure'
-import { BrandSiteFetchError, fetchBrandSite } from './brandSiteFetch'
+import { BrandSiteBlockedError, fetchBrandSiteForCheck } from './brandCheckFetch'
+import { BrandSiteFetchError } from './brandSiteFetch'
 import { BRAND_CHECKS_TABLE, type BrandCheckRow, brandDb } from './brandStore'
 
 /**
@@ -46,6 +47,15 @@ import { BRAND_CHECKS_TABLE, type BrandCheckRow, brandDb } from './brandStore'
  *     200/Tag je Instanz).
  *  4. Erst DANN lesen, messen, urteilen, speichern.
  * Was nichts kostet, kostet kein Kontingent — dieselbe Regel wie beim Wizard.
+ *
+ * ── DIE ERLAUBNIS-FRAGE SITZT IN SCHRITT 4, NICHT DAVOR (BS1 R2b) ─────────
+ * Seit dem 2026-09-08 fragt der Abruf `robots.txt` und den TDM-Vorbehalt
+ * (`brandCheckFetch.ts`). Beides kostet zwei winzige Anfragen an einen FREMDEN
+ * Server — und deshalb steht die Frage HINTER der Buchung, nicht davor: sonst
+ * hätte jeder Vorbeikommende einen ungedeckelten Weg, unsere Server auf
+ * beliebige fremde Adressen zeigen zu lassen. Ein abgewiesener Check kostet
+ * damit ein Kontingent; das ist der richtige Preis für einen Vorgang, der
+ * tatsächlich hinausgegangen ist.
  *
  * ── WAS DIESE FUNKTION BEWUSST NICHT TUT: AN DIE ANTWORT SCHREIBEN ────────
  * Der `Retry-After`-Kopf wird NICHT hier gesetzt, sondern von der Route, die
@@ -191,13 +201,34 @@ export async function runBrandCheck(
     })
   }
 
-  // (4a) Die Seite lesen — SSRF-Vertrag aus `shared/brandSiteAnalysis.ts`.
+  // (4a) Die Seite lesen — SSRF-Vertrag aus `shared/brandSiteAnalysis.ts`,
+  // und seit BS1 R2b MIT der Erlaubnis-Frage davor (`brandCheckFetch.ts`).
   const started = Date.now()
-  let site: Awaited<ReturnType<typeof fetchBrandSite>>
+  let site: Awaited<ReturnType<typeof fetchBrandSiteForCheck>>
   try {
-    site = await fetchBrandSite(input.url)
+    site = await fetchBrandSiteForCheck(input.url)
   }
   catch (error) {
+    // ZUERST das Nein der Website (R2b). Es ist kein Fehlschlag: der Abruf lief,
+    // die Antwort lautet „nicht ihr" — und daraus wird nie eine Zeile.
+    if (error instanceof BrandSiteBlockedError) {
+      logEvent('info', 'brand.check_blocked', {
+        host: hostOf(input.url),
+        // Der GRUND steht nur hier. Nach aussen reist genau EIN Schlüssel
+        // (`domainReasonFrom` lässt nur `data.code` durch), und für den
+        // Menschen davor ist die Auskunft dieselbe: diese Website will das
+        // nicht. Der Betreiber, den es angeht, findet den Grund im Log.
+        reason: error.reason,
+        ms: Date.now() - started,
+      })
+      throw createError({
+        // 409 und nicht 403: nicht WIR verweigern den Zugriff, sondern der
+        // Zustand der fremden Website steht dem Ergebnis entgegen.
+        status: 409,
+        statusText: 'Website opted out',
+        data: { code: 'site_blocked' },
+      })
+    }
     const code = error instanceof BrandSiteFetchError ? error.code : 'fetch_failed'
     logEvent('info', 'brand.check_fetch_failed', {
       code,

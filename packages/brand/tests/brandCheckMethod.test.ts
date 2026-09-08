@@ -10,7 +10,12 @@ import {
   brandCheckCriteriaOf,
   brandScoreBand,
 } from '../shared/brandCheck'
-import { BRAND_SITE_USER_AGENT } from '../server/utils/brandSiteFetch'
+import { brandTdmReserved } from '../shared/brandTdm'
+import {
+  BRAND_CHECK_BOT_TOKEN,
+  BRAND_CHECK_USER_AGENT,
+  BRAND_SITE_USER_AGENT,
+} from '../server/utils/brandSiteFetch'
 
 /**
  * DIE METHODIK-SEITE IST EINE ÖFFENTLICHE ZUSAGE ÜBER DIE EIGENE RECHNUNG
@@ -32,7 +37,7 @@ import { BRAND_SITE_USER_AGENT } from '../server/utils/brandSiteFetch'
  *     auf einer indexierbaren Seite stünde dann `brand.checkMethod.what.body`
  *     im Text und im JSON-LD (dieselbe Falle, die
  *     `brandCheckPageCatalog.test.ts` für die Startseite fängt).
- *  3. EIN ABSENDER, DER NICHT MEHR STIMMT. `BRAND_SITE_USER_AGENT` lebt in
+ *  3. EIN ABSENDER, DER NICHT MEHR STIMMT. `BRAND_CHECK_USER_AGENT` lebt in
  *     `server/utils/` und ist für eine Seite unerreichbar; die Zeichenkette
  *     steht deshalb als Literal im Markup. Ein Test darf `server/` lesen und
  *     hält beide aneinander — sonst nennt die Seite einen Namen, der in
@@ -203,6 +208,16 @@ describe('Methodik-Seite: der i18n-Katalog ist vollständig', () => {
       'brand.checkMethod.reads.agentTitle',
       'brand.checkMethod.reads.robotsTitle',
       'brand.checkMethod.reads.robotsBody',
+      // BS1 R2b: die drei Wege zum Aussperren und die benannte Grenze.
+      'brand.checkMethod.reads.blockTitle',
+      'brand.checkMethod.reads.blockBody',
+      'brand.checkMethod.reads.tdmTitle',
+      'brand.checkMethod.reads.tdmBody',
+      'brand.checkMethod.reads.doubt',
+      'brand.checkMethod.reads.blockContact',
+      'brand.checkMethod.reads.limitTitle',
+      'brand.checkMethod.reads.limitBody',
+      ...['header', 'meta', 'robotsMeta', 'tdmrep'].map(key => `brand.checkMethod.reads.form.${key}`),
       'brand.checkMethod.reads.botLink',
       'brand.checkMethod.judge.title',
       'brand.checkMethod.judge.splitTitle',
@@ -278,14 +293,53 @@ describe('Methodik-Seite: der i18n-Katalog ist vollständig', () => {
 
 describe('Methodik-Seite: die Zusagen, die man nicht brechen darf', () => {
   it('nennt den Absender wörtlich so, wie er auf fremden Servern ankommt', () => {
-    expect(pageSource).toContain(BRAND_SITE_USER_AGENT)
+    expect(pageSource).toContain(BRAND_CHECK_USER_AGENT)
   })
 
-  it('nennt die robots-Einschränkung, statt sie wegzulassen', () => {
+  it('die +-Adresse des Absenders zeigt auf DIESE Seite — sonst ist sie eine Floskel', () => {
+    expect(BRAND_CHECK_USER_AGENT).toContain('/brand-check/methodik')
+  })
+
+  it('GEGENPROBE: der Absender des WIZARDS steht hier nicht — er liest anders', () => {
+    expect(pageSource).not.toContain(BRAND_SITE_USER_AGENT)
+    expect(BRAND_CHECK_USER_AGENT).not.toBe(BRAND_SITE_USER_AGENT)
+  })
+
+  it('sagt zu, dass robots.txt und Nutzungsvorbehalt geachtet werden (BS1 R2b)', () => {
     for (const locale of LOCALES) {
       const body = catalogs[locale].get('brand.checkMethod.reads.robotsBody') ?? ''
       expect(body, locale).toContain('robots.txt')
+      // Die Zusage ist wertlos ohne den zweiten Halbsatz: was passiert, wenn
+      // eines von beidem nein sagt.
+      expect(body.length, locale).toBeGreaterThan(120)
     }
+  })
+
+  it('nennt die Grenze der Zusage, statt sie zu verschweigen', () => {
+    for (const locale of LOCALES) {
+      const body = catalogs[locale].get('brand.checkMethod.reads.limitBody') ?? ''
+      expect(body, locale).toContain('robots.txt')
+    }
+  })
+
+  it('zeigt die Aussperr-Zeile mit dem TOKEN, den der Server wirklich prüft', () => {
+    // Der Absender heisst `PukalaniBrandCheck/1.0 (…)`, das robots-Token ist
+    // sein kleingeschriebener Präfix. Eine Zeile mit einem anderen Namen wäre
+    // eine Anleitung, die nicht wirkt.
+    expect(pageSource).toContain('User-agent: PukalaniBrandCheck')
+    expect(BRAND_CHECK_USER_AGENT.toLowerCase().startsWith(BRAND_CHECK_BOT_TOKEN)).toBe(true)
+  })
+
+  it('zeigt alle vier Formen des Vorbehalts — genau die, die der Server prüft', () => {
+    for (const snippet of ['TDM-Reservation: 1', 'tdm-reservation', 'noai', 'tdmrep.json']) {
+      expect(pageSource, snippet).toContain(snippet)
+    }
+    expect(brandTdmReserved({ headers: { 'tdm-reservation': '1' } })).toBe(true)
+    expect(brandTdmReserved({ metaTdm: ['1'] })).toBe(true)
+    expect(brandTdmReserved({ metaRobots: ['noai'] })).toBe(true)
+    expect(brandTdmReserved({ tdmrepJson: '[{ "location": "/", "tdm-reservation": 1 }]', path: '/' })).toBe(true)
+    // GEGENPROBE: ohne Vorbehalt bleibt es beim Nein zum Nein.
+    expect(brandTdmReserved({ metaRobots: ['index', 'follow'] })).toBe(false)
   })
 
   it('ist indexierbar — kein robots-Kopf, anders als die Ergebnisseite', () => {

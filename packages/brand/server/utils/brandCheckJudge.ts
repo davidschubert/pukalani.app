@@ -337,6 +337,7 @@ export async function judgeBrandCheck(
   event: H3Event,
   input: BrandCheckJudgeInput,
 ): Promise<BrandCheckJudgeResult> {
+  if (judgeStubEnabled()) return stubJudgement()
   const model = (await getEffectiveAiConfig(event)).model
   const kind = brandCheckJudgeKind(input)
   const raw = await aiCompleteJson<unknown>(event, brandCheckJudgePrompt(input), {
@@ -352,4 +353,47 @@ export async function judgeBrandCheck(
     providerRouting: { ...BRAND_PROVIDER_ROUTING },
   })
   return { ...parseBrandCheckJudgement(raw), model }
+}
+
+/**
+ * DER ERSATZ FÜR BEWEIS-LÄUFE — dasselbe Muster wie `BRAND_DEV_STUB_REVIEW`
+ * beim Spezialisten (`brandReview.ts`), aus demselben Grund und mit derselben
+ * Sicherung.
+ *
+ * ── WARUM ES IHN GIBT (BS1 R2b) ───────────────────────────────────────────
+ * Der Beweis für die Erlaubnis-Frage (`scripts/verify-brand-check-robots.mjs`)
+ * muss zeigen, dass eine ERLAUBTE Website ganz normal durchläuft — nicht nur,
+ * dass eine verbotene abgewiesen wird. Ohne Ersatz endete genau dieser Fall
+ * auf der Entwicklungs-Maschine bei 503 `check_unavailable` (dort liegt kein
+ * KI-Schlüssel), und die Gegenprobe des Beweises wäre keine.
+ *
+ * ── WARUM ER UNGEFÄHRLICH IST ─────────────────────────────────────────────
+ * ZWEI Bedingungen, beide nötig: `NODE_ENV !== 'production'` UND die
+ * ausdrücklich gesetzte Variable. Sie trägt bewusst kein `NUXT_`-Präfix (sie
+ * ist keine Runtime-Config), `pnpm ops:site-env` kennt sie nicht, und auf
+ * einem Server ist die erste Bedingung falsch. Strenger als bei
+ * `BRAND_DEV_STUB_REVIEW` — und das mit Grund: ein Ersatz-Urteil würde als
+ * SCORE gespeichert und läge sieben Tage im Zwischenspeicher.
+ */
+function judgeStubEnabled(): boolean {
+  return process.env.NODE_ENV !== 'production'
+    && process.env.BRAND_DEV_STUB_CHECK === '1'
+}
+
+/**
+ * Ein vollständiges, aber ehrlich beschriftetes Urteil: jedes beurteilte
+ * Kriterium bekommt denselben mittleren Wert und eine Notiz, die sagt, woher
+ * sie kommt. Ein Ersatz, der wie ein echtes Urteil aussieht, landet
+ * irgendwann in einem Screenshot.
+ */
+function stubJudgement(): BrandCheckJudgeResult {
+  const judgements: Record<string, BrandCheckJudgement> = {}
+  for (const id of BRAND_CHECK_JUDGED_IDS) {
+    judgements[id] = {
+      score: 1,
+      evidence: '',
+      note: 'Ersatz-Urteil — kein Sprachmodell beteiligt.',
+    }
+  }
+  return { judgements, industry: 'unknown', model: 'dev-stub' }
 }

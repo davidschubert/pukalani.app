@@ -43,18 +43,23 @@ import { brandJsonLdScript } from '../../utils/brandJsonLd'
  * Genagelt in `tests/brandCheckMethod.test.ts`.
  *
  * ── DER ABSENDER STEHT ALS LITERAL DA, UND DAS IST GEWOLLT ────────────────
- * `BRAND_SITE_USER_AGENT` lebt in `server/utils/brandSiteFetch.ts`; eine
+ * `BRAND_CHECK_USER_AGENT` lebt in `server/utils/brandSiteFetch.ts`; eine
  * Seite darf dort nicht hineingreifen. Dieselbe Lage wie bei `/market-bot`,
  * dieselbe Lösung: die Zeichenkette steht hier, und der Unit-Test vergleicht
  * sie mit der Konstanten (Tests dürfen `server/` lesen). Weicht sie ab, wird
  * der Test rot, nicht die Seite still falsch.
  *
- * ── DER ROBOTS-ABSATZ IST EIN BEFUND, KEINE WERBUNG ───────────────────────
- * Der Einseiten-Abruf des Brand-Checks wertet WEDER `robots.txt` NOCH einen
- * Nutzungsvorbehalt aus (nur der Marktvergleich tut das,
- * `server/utils/brandSiteCrawl.ts`). Das steht auf der Seite, weil eine
- * Methodik-Seite, die die unbequeme Hälfte weglässt, das Gegenteil dessen
- * ist, wofür es sie gibt.
+ * ── DER ROBOTS-ABSATZ WAR EIN BEFUND — SEIT R2b IST ER EINE ZUSAGE ───────
+ * Bis zum 2026-09-08 stand hier, dass der Einseiten-Abruf WEDER `robots.txt`
+ * NOCH einen Nutzungsvorbehalt auswertet; die Seite nannte das ausdrücklich,
+ * weil eine Methodik-Seite, die die unbequeme Hälfte weglässt, das Gegenteil
+ * dessen ist, wofür es sie gibt. Mit BS1 R2b (Davids Entscheidung) tut der
+ * Check beides — `server/utils/brandCheckFetch.ts`, mit denselben Regeln wie
+ * der Marktvergleich (`shared/brandRobots.ts`, `shared/brandTdm.ts`) und einem
+ * eigenen Absender. Der Abschnitt sagt jetzt, was gilt, nennt die drei Wege
+ * zum Aussperren UND die eine verbliebene Grenze (Wirt-Wechsel per
+ * Weiterleitung, eigene Website im Wizard). Eine Zusage ohne ihre Grenze wäre
+ * wieder dieselbe Halbwahrheit, nur andersherum.
  *
  * SEO: `useLocaleSeoHead()` läuft einmal in `app.vue` — hier nur Titel,
  * Beschreibung und das JSON-LD.
@@ -66,12 +71,37 @@ const localePath = useLocalePath()
 const appConfig = useAppConfig()
 
 /**
- * DER ABSENDER DES EINSEITEN-ABRUFS — wörtlich `BRAND_SITE_USER_AGENT`
+ * DER ABSENDER DES BRAND-CHECKS — wörtlich `BRAND_CHECK_USER_AGENT`
  * (`server/utils/brandSiteFetch.ts`). Er steht in den Zugriffsprotokollen
  * aller Auftritte, die wir lesen; wer dort nachschlägt, soll die Zeile hier
  * wiederfinden. Der Test nagelt beide aneinander.
+ *
+ * Seit BS1 R2b ist es ein EIGENER Name, nicht mehr der des Wizards: der
+ * Betreiber soll den Vorgang, den er verbieten will, benennen können — und
+ * „ein Fremder lässt meine Startseite bewerten" ist etwas anderes als „ich
+ * trage meine eigene Seite in einen Wizard ein". Die `+`-Adresse zeigt genau
+ * hierher.
  */
-const USER_AGENT = 'PukalaniBrandWizard/1.0 (+https://pukalani.app)'
+const USER_AGENT = 'PukalaniBrandCheck/1.0 (+https://branding.supply/brand-check/methodik)'
+
+/**
+ * DIE ROBOTS-ZEILE, mit der man uns aussperrt — der TOKEN-Teil des Absenders,
+ * wie ihn `BRAND_CHECK_BOT_TOKEN` erwartet. Wörtlich wie auf `/market-bot`.
+ */
+const ROBOTS_BLOCK = 'User-agent: PukalaniBrandCheck\nDisallow: /'
+
+/**
+ * DIE VIER ANERKANNTEN FORMEN DES NUTZUNGSVORBEHALTS — Schlüssel für die
+ * Beschriftung, Beispiel als wörtlicher Code (dasselbe Muster und dieselben
+ * vier Formen wie auf `/market-bot`, weil `brandTdmReserved` genau diese
+ * vier prüft: `shared/brandTdm.ts`).
+ */
+const RESERVATION_FORMS = [
+  { key: 'header', code: 'TDM-Reservation: 1' },
+  { key: 'meta', code: '<meta name="tdm-reservation" content="1">' },
+  { key: 'robotsMeta', code: '<meta name="robots" content="noai, noimageai">' },
+  { key: 'tdmrep', code: '/.well-known/tdmrep.json\n[{ "location": "/", "tdm-reservation": 1 }]' },
+] as const
 
 // ── Die Zahlen, alle aus dem Katalog ───────────────────────────────────────
 
@@ -227,6 +257,26 @@ useHead({
         <h3 class="mt-8 text-lg font-medium tracking-tight">{{ t('brand.checkMethod.reads.robotsTitle') }}</h3>
         <p class="mt-2 leading-relaxed" style="color: var(--bw-ink-soft)" data-method-robots>
           {{ t('brand.checkMethod.reads.robotsBody') }}
+        </p>
+
+        <h3 class="mt-8 text-lg font-medium tracking-tight">{{ t('brand.checkMethod.reads.blockTitle') }}</h3>
+        <p class="mt-2 leading-relaxed" style="color: var(--bw-ink-soft)">{{ t('brand.checkMethod.reads.blockBody') }}</p>
+        <pre class="bw-card mt-3 overflow-x-auto p-4 text-sm" data-method-block><code>{{ ROBOTS_BLOCK }}</code></pre>
+
+        <h4 class="mt-6 text-lg tracking-tight">{{ t('brand.checkMethod.reads.tdmTitle') }}</h4>
+        <p class="mt-2 leading-relaxed" style="color: var(--bw-ink-soft)">{{ t('brand.checkMethod.reads.tdmBody') }}</p>
+        <ul class="mt-4 space-y-4" data-method-tdm-forms>
+          <li v-for="form in RESERVATION_FORMS" :key="form.key">
+            <p class="bw-label" style="color: var(--bw-muted)">{{ t(`brand.checkMethod.reads.form.${form.key}`) }}</p>
+            <pre class="bw-card mt-2 overflow-x-auto p-4 text-sm"><code>{{ form.code }}</code></pre>
+          </li>
+        </ul>
+        <p class="mt-4 leading-relaxed" style="color: var(--bw-ink-soft)">{{ t('brand.checkMethod.reads.doubt') }}</p>
+        <p class="mt-4 leading-relaxed" style="color: var(--bw-ink-soft)">{{ t('brand.checkMethod.reads.blockContact') }}</p>
+
+        <h3 class="mt-8 text-lg font-medium tracking-tight">{{ t('brand.checkMethod.reads.limitTitle') }}</h3>
+        <p class="mt-2 leading-relaxed" style="color: var(--bw-ink-soft)" data-method-robots-limit>
+          {{ t('brand.checkMethod.reads.limitBody') }}
         </p>
         <p class="mt-3">
           <ULink :to="localePath('/market-bot')" class="underline underline-offset-4">

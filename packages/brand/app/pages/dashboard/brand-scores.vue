@@ -167,6 +167,9 @@ function messageKey(error: unknown): string {
   if (reason === 'document_empty') return 'documentEmpty'
   if (reason === 'profile_not_found') return 'notFound'
   if (reason === 'blocked_target') return 'blockedTarget'
+  // BS1 R2b: die geprüfte Website untersagt die automatische Auswertung. VOR
+  // dem 409-Rückfall, der hier sonst „Dokument leer" sagen würde.
+  if (reason === 'site_blocked') return 'siteBlocked'
   if (reason === 'fetch_failed') return 'fetchFailed'
   if (reason === 'check_unavailable') return 'unavailable'
   if (code === 429) return 'accountLimit'

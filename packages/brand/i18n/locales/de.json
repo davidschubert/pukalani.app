@@ -1066,6 +1066,7 @@
           "invalidUrl": "Diese Adresse können wir nicht lesen. Schreibt sie bitte so, wie ihr sie im Browser eingebt — zum Beispiel eure-website.de.",
           "blockedTarget": "Diese Adresse dürfen wir nicht abrufen. Nennt uns bitte die öffentliche Adresse eurer Website.",
           "fetchFailed": "Die Seite hat nicht geantwortet. Prüft die Adresse und versucht es gleich noch einmal.",
+          "siteBlocked": "Diese Website untersagt die automatische Auswertung — wir respektieren das. Deshalb gibt es hier kein Ergebnis.",
           "rateLimited": "Für heute sind die kostenlosen Checks aufgebraucht. Morgen geht es weiter — oder tragt euch für den vollständigen Report ein.",
           "unavailable": "Der Check ist gerade nicht erreichbar. Versucht es in ein paar Minuten noch einmal.",
           "generic": "Das hat gerade nicht geklappt. Versucht es in einem Moment noch einmal."
@@ -1399,6 +1400,7 @@
         "invalidUrl": "Diese Adresse können wir nicht lesen. Schreibt sie bitte so, wie ihr sie im Browser eingebt.",
         "blockedTarget": "Diese Adresse dürfen wir nicht abrufen. Nennt uns bitte die öffentliche Adresse eurer Website.",
         "fetchFailed": "Die Seite hat nicht geantwortet. Prüft die Adresse und versucht es gleich noch einmal.",
+        "siteBlocked": "Diese Website untersagt die automatische Auswertung — wir respektieren das. Deshalb gibt es hier kein Ergebnis.",
         "unavailable": "Der Check ist gerade nicht erreichbar. Versucht es in ein paar Minuten noch einmal.",
         "generic": "Das hat gerade nicht geklappt. Versucht es in einem Moment noch einmal."
       }
@@ -1582,8 +1584,22 @@
         "keepsTitle": "Was davon bleibt",
         "keepsBody": "Der Seitentext wird nach der Auswertung verworfen. Gespeichert bleiben die geprüfte Adresse, die Zahlenwerte, die kurzen Belege, das Datum und ein Prüfwert des Textes, an dem wir erkennen, ob sich seither etwas geändert hat. Dazu ein täglich wechselnder Prüfwert des anfragenden Anschlusses — nur für den Tagesdeckel, nie die Adresse selbst.",
         "agentTitle": "Woran ihr uns im Zugriffsprotokoll erkennt",
-        "robotsTitle": "Eine Einschränkung, die wir nicht verschweigen",
-        "robotsBody": "Dieser eine Abruf fragt keine robots.txt ab und wertet keinen Nutzungsvorbehalt aus. Entworfen war er für den Fall, dass jemand die eigene Startseite einträgt — dann fordert der Auftritt den Abruf selbst an. Eintragen kann eine Adresse aber auch ein Fremder, und dann trägt diese Begründung nicht. Wer nicht gelesen werden will, schreibt uns: wir sperren die Adresse. Unser Marktvergleich, der mehrere Seiten am Stück liest, wertet robots.txt und Nutzungsvorbehalt dagegen vollständig aus.",
+        "robotsTitle": "robots.txt und Nutzungsvorbehalt",
+        "robotsBody": "Bevor wir eine Seite holen, lesen wir eure robots.txt und halten uns daran — auch an allgemeinen Regeln für alle Bots. Ebenso prüfen wir einen maschinenlesbaren Nutzungsvorbehalt für Text und Data Mining (§ 44b UrhG). Verbietet uns eines von beidem die Auswertung, brechen wir ab: es gibt dann keinen Score, kein Ergebnis und keinen gespeicherten Eintrag — wer den Check gestartet hat, bekommt genau das als Grund angezeigt. Bis zum 8. September 2026 galt das nur für unseren Marktvergleich; seither auch hier.",
+        "blockTitle": "Wie ihr uns aussperrt",
+        "blockBody": "Drei Wege, jeder wirkt sofort beim nächsten Check. Der erste ist eine Zeile in eurer robots.txt:",
+        "tdmTitle": "Nutzungsvorbehalt (Text und Data Mining)",
+        "tdmBody": "Der zweite Weg: einen maschinenlesbaren Vorbehalt nach § 44b UrhG erkennen wir in diesen vier Formen. Eine davon genügt:",
+        "doubt": "Im Zweifel entscheiden wir gegen die Auswertung: lässt sich ein Vorbehalt nicht sicher ausschließen, brechen wir ab.",
+        "blockContact": "Der dritte Weg braucht keine Datei: schreibt uns, dann sperren wir eure Adresse bei uns. Das gilt auch rückwirkend für ein Ergebnis, das schon entstanden ist.",
+        "limitTitle": "Die Grenze dieser Zusage",
+        "limitBody": "Gefragt wird der Ursprung der eingetragenen Adresse. Springt sie per Weiterleitung auf einen anderen Wirt, holen wir dessen robots.txt nicht zusätzlich — unser Marktvergleich verhält sich genauso. Und die eigene Website, die ein eingeloggter Betreiber im Brand-Wizard selbst einträgt, lesen wir weiterhin ohne diese Vorabfrage: dort erteilt den Auftrag, wem die Seite gehört.",
+        "form": {
+          "header": "Als HTTP-Kopfzeile",
+          "meta": "Als Meta-Angabe im HTML",
+          "robotsMeta": "Als robots-Meta-Angabe",
+          "tdmrep": "Als tdmrep.json unter /.well-known/"
+        },
         "botLink": "Wie unser Marktvergleich-Bot arbeitet"
       },
       "judge": {

@@ -128,8 +128,12 @@ function messageKey(error: unknown): string {
   if (code === 429) return 'rateLimited'
   if (reason === 'invalid_url') return 'invalidUrl'
   if (reason === 'blocked_target') return 'blockedTarget'
+  // BS1 R2b: die Website untersagt die automatische Auswertung. VOR dem
+  // Status-Rückfall, denn 409 heisst hier nichts anderes.
+  if (reason === 'site_blocked') return 'siteBlocked'
   if (reason === 'fetch_failed') return 'fetchFailed'
   if (reason === 'check_unavailable') return 'unavailable'
+  if (code === 409) return 'siteBlocked'
   if (code === 503) return 'unavailable'
   if (code === 422) return 'fetchFailed'
   if (code === 400) return 'invalidUrl'

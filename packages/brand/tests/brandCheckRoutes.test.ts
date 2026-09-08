@@ -32,7 +32,7 @@ let stored: FakeRow[]
 let profiles: FakeRow[]
 let storeBroken: boolean
 let createBroken: boolean
-let fetchOutcome: 'ok' | 'blocked' | 'failed'
+let fetchOutcome: 'ok' | 'blocked' | 'failed' | 'robots' | 'tdm'
 let judgeBroken: boolean
 /** Was das Modell als Branche liefert (seit `check-judge-2` im selben Aufruf). */
 let judgeIndustry: string
@@ -133,13 +133,22 @@ const SITE = {
   httpsUpgraded: false,
 }
 
-vi.mock('../server/utils/brandSiteFetch', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('../server/utils/brandSiteFetch')>()
+/**
+ * DER ABRUF DES CHECKS ist seit BS1 R2b `fetchBrandSiteForCheck`
+ * (`brandCheckFetch.ts`) — dieselbe Rückgabe wie `fetchBrandSite`, aber mit
+ * der Erlaubnis-Frage davor. Zwei neue Ausgänge kommen dazu: `robots` und
+ * `tdm`, beide als `BrandSiteBlockedError`.
+ */
+vi.mock('../server/utils/brandCheckFetch', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../server/utils/brandCheckFetch')>()
+  const fetchError = await import('../server/utils/brandSiteFetch')
   return {
     ...actual,
-    fetchBrandSite: vi.fn(async () => {
-      if (fetchOutcome === 'blocked') throw new actual.BrandSiteFetchError('blocked_target', 'nope')
-      if (fetchOutcome === 'failed') throw new actual.BrandSiteFetchError('not_html', 'nope')
+    fetchBrandSiteForCheck: vi.fn(async () => {
+      if (fetchOutcome === 'blocked') throw new fetchError.BrandSiteFetchError('blocked_target', 'nope')
+      if (fetchOutcome === 'failed') throw new fetchError.BrandSiteFetchError('not_html', 'nope')
+      if (fetchOutcome === 'robots') throw new actual.BrandSiteBlockedError('robots', 'nope')
+      if (fetchOutcome === 'tdm') throw new actual.BrandSiteBlockedError('tdm', 'nope')
       return SITE
     }),
   }
@@ -280,6 +289,41 @@ describe('POST /api/brand/check · Abwehr', () => {
       data: { code: 'blocked_target' },
     })
     expect(tablesDB.createRow).not.toHaveBeenCalled()
+  })
+
+  it('robots.txt sagt nein ⇒ 409 `site_blocked`, keine Zeile, ein Ereignis mit Grund (BS1 R2b)', async () => {
+    fetchOutcome = 'robots'
+
+    await expect(postHandler(event)).rejects.toMatchObject({
+      // 409 und nicht 403: nicht WIR verweigern, die fremde Website tut es.
+      status: 409,
+      data: { code: 'site_blocked' },
+    })
+    expect(tablesDB.createRow).not.toHaveBeenCalled()
+    const blocked = logs.find(entry => entry.event === 'brand.check_blocked')
+    expect(blocked?.data.reason).toBe('robots')
+    // Der HOST darf ins Log, der Pfad nie (Log-Regel §6).
+    expect(blocked?.data.host).toBe('kailua.coffee')
+  })
+
+  it('Nutzungsvorbehalt ⇒ 409 `site_blocked` mit dem anderen Grund im Log', async () => {
+    fetchOutcome = 'tdm'
+
+    await expect(postHandler(event)).rejects.toMatchObject({
+      status: 409,
+      data: { code: 'site_blocked' },
+    })
+    expect(tablesDB.createRow).not.toHaveBeenCalled()
+    expect(logs.find(entry => entry.event === 'brand.check_blocked')?.data.reason).toBe('tdm')
+  })
+
+  it('GEGENPROBE: eine Website ohne Verbot wird ganz normal gemessen und gespeichert', async () => {
+    fetchOutcome = 'ok'
+
+    await postHandler(event)
+
+    expect(tablesDB.createRow).toHaveBeenCalled()
+    expect(logs.map(entry => entry.event)).not.toContain('brand.check_blocked')
   })
 
   it('unlesbare Seite ⇒ 422 `fetch_failed` (kein 502 — nicht WIR sind ausgefallen)', async () => {
