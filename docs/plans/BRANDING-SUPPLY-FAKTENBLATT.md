@@ -1,0 +1,485 @@
+# Faktenblatt branding.supply — für den Rechtstext-Generator und den Anwalt
+
+Stand: **2026-09-07** · Paket **BS1 R2**, Entscheidungen 2 und 3 in
+[BRANDING-SUPPLY-RECHT-UND-BEZAHLUNG.md](BRANDING-SUPPLY-RECHT-UND-BEZAHLUNG.md) §9.
+
+**Wozu dieses Blatt.** David bedient den Rechtstext-Generator selbst
+(Entscheidung 2); ein Generator fragt aber nur nach dem, was er kennt —
+Hosting, Cookies, Newsletter, Kontaktformular. Was branding.supply
+BESONDERS macht (Kundentexte an ein Sprachmodell, Abruf fremder Websites,
+öffentliche Bewertung fremder Marken), fragt er nicht. Dieses Blatt liefert
+beides: die Antworten für die Generator-Maske (§3) und die drei Abschnitte,
+die kein Generator kennt, als fertigen Entwurf de/en (§4).
+
+**Dies ist keine Rechtsberatung.** Jede Einordnung hier ist eine
+*Laien-Einschätzung* und mündet in eine Frage an den Anwalt (§6). Die drei
+Abschnitte in §4 sind **Vorlage und Prüfpunkt**, kein fertiger Text.
+
+**Belegregel.** Jede Tatsachenaussage trägt eine Belegstelle im Code oder in
+einem Dokument. Was nicht belegbar ist, steht als **LÜCKE — David** (§7) und
+wurde NICHT geraten — auch dann nicht, wenn eine plausible Antwort naheliegt.
+
+---
+
+## 1. Steckbrief
+
+| Feld | Antwort | Beleg |
+| --- | --- | --- |
+| **Anbieter (Name, Rechtsform, Anschrift)** | **LÜCKE — David.** Nicht aus dem Repo belegbar: die Rechtstexte von pukalani.studio leben als CMS-Zeilen auf der `portfolio`-Instanz, nicht im Code (`apps/portfolio/app/pages/[slug].vue` ist die Hülle des `pages`-Layers). Im Repo steht nur die **Vorlage** mit `[AUSFÜLLEN: …]`-Markern; die Marketing-Site sagt es sogar ausdrücklich: „Name, Anschrift und Rechtsform des Anbieters folgen mit den verbindlichen Texten." | `packages/pages/shared/legalTemplates.ts:62-79` · `apps/marketing/i18n/locales/de.json:789` |
+| **Verantwortlicher sitzt** | in den **USA** (bei DACH-Ausrichtung) — daraus folgen Art. 27 DSGVO und die Umsatzsteuerfrage | Plan §3.5, §1.6 (a) |
+| **Domain / Host** | `branding.supply` (+ `www.` → 301 auf den Apex), eigene ploi-Site **402929**, Server `app-prod` **49.13.211.173** (Hetzner CX23), App-Port 3007 | `docs/runbooks/BRANDING-SUPPLY-SETUP.md` §4/§5 · `docs/content/2.architektur/6.hosts-und-ports.md:16` |
+| **Angebot in einem Absatz** | branding.supply ist eine **Werkstatt für Markenfundamente**: im Gespräch mit einem KI-Markenberater entstehen Purpose, Werte, Archetyp, Positionierung und Stimme als zusammenhängendes Dokument („Brand Foundation"); dazu ein **kostenloser Brand-Check**, der eine beliebige Website in Sekunden auf acht Kategorien misst und einen Brand Score 0–100 vergibt, und ein **Marktvergleich**, der bis zu fünf Wettbewerber-Websites liest und dem eigenen Fundament gegenüberstellt. Das Fundament ist frei, die Ableitung (Marktvergleich, später Book & Kit) wird bezahlt. | `apps/branding/site.manifest.ts` · Plan §3.2 · `docs/archiv/BRAND-CHECK.md`, `docs/archiv/BRAND-MARKTVERGLEICH.md` |
+| **Betriebsstatus** | **Beta, Zugang nur auf Einladung** (`brandAdmissionMode: 'invite'`): Warteliste mit Double-Opt-in → Einladungscode (mail-gebunden, 30 Tage) → Konto. Öffentlich und ohne Konto erreichbar sind: Startseite, About, Team, Beispielseite, **Brand-Check + Ranking**, `/market-bot`. | `packages/brand/shared/brandAccess.ts` · `packages/system/scripts/migrations/038-brand-flags.ts` · Runbook §6 |
+| **Sprachen** | **de + en**. EN ohne Präfix, DE unter `/de/*` (Monorepo-Konvention `prefix_except_default`) | `apps/branding/nuxt.config.ts` (i18n) · `packages/core/nuxt.config.ts:109-125` |
+| **Zielgruppe** | Gründerinnen, Selbstständige und kleine Unternehmen im **DACH-Raum**; das Angebot richtet sich überwiegend an **Unternehmer**, Verbraucher sind nicht ausgeschlossen | Plan §3.5 („Verbraucher oder Unternehmer?" — offen) |
+| **Konten** | ja — E-Mail + Passwort mit Verifizierungs-Mail; „Anmelden mit Google" ist im Design-Schalter vorbereitet, erscheint aber erst mit Server-Env + Google-Client im Appwrite-Projekt | `apps/branding/app/app.config.ts` (`auth.providers`) · `docs/runbooks/GOOGLE-LOGIN.md` |
+| **Bezahlung heute** | **keine.** Kein Stripe, kein `billing`-Layer, kein Preis im Produkt; der einzige Conversion-Weg zeigt derzeit auf das Erstgespräch von pukalani.studio | Plan §3.1 · `apps/branding/app/app.config.ts` (`completionCta`) |
+
+---
+
+## 2. Verarbeitungsverzeichnis (Vorarbeit — Rechtsgrundlagen sind KANDIDATEN)
+
+Die Spalte „Rechtsgrundlage" ist ein **Kandidat, keine Feststellung**. Sie ist
+die Vorarbeit für den Anwalt.
+
+| # | Verarbeitung | Zweck | Datenarten | Betroffene | Empfänger / Auftragsverarbeiter | Drittland + Grundlage | Speicherdauer | Rechtsgrundlage (Kandidat) | Beleg |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | **Konto / Registrierung** | Zugang zur Beta und zur Werkstatt | E-Mail, Anzeigename, Passwort-Hash bzw. Google-Kennung, Registrierungszeitpunkt | Kunden | Appwrite self-hosted auf eigenem Server (Hetzner); **nur bei Google-Login** zusätzlich Google | USA nur bei Google-Login — **Grundlage LÜCKE** | bis Löschung des Kontos | Art. 6 I b | `docs/runbooks/BRANDING-SUPPLY-SETUP.md` §1 · `apps/branding/app/app.config.ts` |
+| 2 | **Sitzungen + Standort** | Anmeldung halten, Sitzungsliste unter `/dashboard/settings/sessions` | IP-Adresse, User-Agent, **Land** (Appwrite-Session). **Stadt/Region NUR**, wenn `NUXT_GEO_CITY_DB_PATH` gesetzt ist — auf branding ist der Pfad **nicht** Pflichtfeld der Server-`.env`, die Liste zeigt dort also Land | Kunden | keiner (lokale MMDB, kein Abruf nach außen) | — | bis Abmeldung bzw. Ablauf der Session | Art. 6 I b / f | `packages/core/server/utils/geoCity.ts:27,90` · `scripts/ops/verify-site-env.mjs:341-347` |
+| 3 | **Wizard-Inhalte** | das Produkt selbst | Antworten, Gesprächsverlauf, Entwürfe, bestätigte Kapitel (`brand_profiles`, `brand_steps`, `brand_messages`, `brand_findings`) | Kunden | keiner (server-only Tabellen, `permissions: []`) | — | bis Löschung des Kontos oder des Brandings | Art. 6 I b | `packages/brand/scripts/migrations/001-003,011,014` |
+| 4 | **KI-Verarbeitung von Kundentexten** | Entwürfe, Rückfragen, Prüfblick, Brand-Check-Urteil, Markt-Extraktion | alles, was der Kunde über seine Marke schreibt; Website-Text Dritter (PII-gefiltert) | Kunden; mittelbar fremde Website-Betreiber | **OpenRouter** als Router → Modellanbieter | **USA — Grundlage LÜCKE (AVV / SCC nicht geprüft)**. Technische Schutzmaßnahme belegt: `zdr: true` (nur Anbieter mit Zero-Data-Retention), `dataCollection: 'deny'`, `allowFallbacks: false` — bei Last lieber „gerade nicht verfügbar" als ein Anbieter außerhalb dieser Bedingungen | beim Anbieter laut ZDR keine Speicherung; **das Ergebnis bei uns dauerhaft** | Art. 6 I b | `packages/brand/server/utils/brandProviderRouting.ts` |
+| 5 | **Abruf fremder Websites** | Brand-Check und Marktvergleich | öffentlich abrufbare Marketing-Texte; unser Abruf hinterlässt beim fremden Server **unsere IP und unseren Absender** | fremde Website-Betreiber | — | — | s. #6/#7 | Art. 6 I f | `packages/market/server/utils/marketFetch.ts` · `packages/brand/server/utils/brandSiteFetch.ts` |
+| 6 | **Brand-Check (Score)** | kostenloser Einstieg + Marketing | geprüfte URL, acht Kategorie-Werte, 40 Kriterien mit Beleg (≤ 160 Zeichen), drei Befunde, `textHash`, **`ipHash`** (sha256 aus IP + täglich wechselndem Salz, ausschließlich für den 3/Tag-Deckel — die rohe IP wird nie geschrieben und nie geloggt) | Prüfende (auch ohne Konto); bewertete Marken | keiner außer #4 | s. #4 | **Ergebnis-Cache 7 Tage je URL**; Ranking-Eintrag bis Entfernen | Art. 6 I b (eigene Marke) / Art. 6 I f (fremde) | `packages/brand/scripts/migrations/016-brand-checks.ts` · `check.post.ts` |
+| 6b | **Öffentliches Ranking + Korrekturvorschlag** | Sichtbarkeit + Gegenrecht | `rankingOptIn` (gesetzt vom **Prüfenden**), `hidden` (gesetzt vom **Betreiber** nach einem Entfernungswunsch); Korrekturvorschlag mit Feld, Vorschlag, Begründung und **freiwilliger** E-Mail | bewertete Marken; Melder | keiner | — | Vorschlag bis Bearbeitung; Ranking-Eintrag bis Entfernen | Art. 6 I f | `017-brand-check-ranking.ts` · `check/[id]/correction.post.ts` · `check/ranking.get.ts` |
+| 7 | **Marktvergleich** | Vergleich der eigenen Marke gegen das Feld | Rohtext fremder Seiten (PII-gefiltert, gedeckelt), Marktprofile mit **Belegzitaten ≤ 200 Zeichen**, Quell-URL, Ausschlussgründe | fremde Website-Betreiber; Kunden | keiner außer #4 | s. #4 | **Rohtext ≤ 24 h** (Sweep alle 30 min, erster Lauf 45 s nach dem Start); **Marktprofil dauerhaft** | Art. 6 I f | `packages/market/server/utils/marketRawSweep.ts` · `server/plugins/raw-text-sweep.ts` |
+| 8 | **Bibliothek** | Vergleichs-Maßstäbe ohne eigenen Lauf | Wortname und Kategorie fremder Marken, belegte Felder, Prüfdatum — **keine Logos, keine Bildmarken, keine Favicons** (als Erlaubnisliste im Beweis gesichert) | fremde Markeninhaber | keiner | — | dauerhaft, bis Entfernen | Art. 6 I f | `docs/archiv/BRAND-MARKTVERGLEICH.md` Anhang G |
+| 9 | **Share-Links** | ein Ergebnis teilen | Token-**Hash** (sha256, der rohe Token steht nur im Link), eingefrorener Schnappschuss der bestätigten Kapitel — nie Chats, nie Entwürfe, nie Metriken | Kunden; Empfänger des Links | jeder, der den Link hat | — | **30 Tage** (`SHARE_TTL_MS`), Widerruf jederzeit; Erneuern = neue Zeile, alte gestempelt | Art. 6 I b | `packages/brand/server/api/brand/profiles/[id]/share.post.ts:80` · `004-brand-shares.ts` |
+| 10 | **Mailversand** | Verifizierung, Einladung, Warteliste-Bestätigung, Betreiber-Meldung | E-Mail-Adresse, Mailinhalt | Kunden, Wartende | **SMTP-Anbieter laut Server-`.env`** — im Monorepo ist das durchgängig **Resend** (`smtp.resend.com`) | **LÜCKE — bestätigen, dass auch branding.supply Resend nutzt**; Drittland/AVV ungeprüft | Zustellprotokoll beim Anbieter | Art. 6 I b | `docs/runbooks/DEPLOYMENT.md:36,201` · `scripts/ops/verify-site-env.mjs:310-314` |
+| 11 | **Warteliste** | Beta-Zugang vergeben | E-Mail (Original + kleingeschrieben), Status, Token-Hash, Bestätigungszeitpunkt | Interessenten | SMTP-Anbieter (#10) | s. #10 | bis Einladung oder Löschung; **unbestätigte Zeilen bleiben bewusst liegen** (Token nach 24 h wertlos), Löschung ist ein Handgriff des Betreibers | Art. 6 I a (Einwilligung, **Double-Opt-in**) | `012-brand-waitlist.ts:20-23` · `015-brand-waitlist-doi.ts` |
+| 12 | **Betreiber-Ereignisse (Funnel)** | Messung des Trichters | Ereignistyp, Branding-Id, User-Id, kleine Nutzlast — **nie der getippte Text und nie die Antwort**; EINE benannte Ausnahme: `step.restarted` trägt den Slot-Text (≤ 4096 Zeichen) als Audit-Eintrag | Kunden | intern | — | **Migration nennt 24 Monate — der zugehörige Sweep ist NICHT gebaut** (Suche nach „sweep" im brand-Layer: kein Treffer). Faktisch also unbefristet | Art. 6 I f | `007-brand-events.ts:23-26` · `packages/brand/server/utils/brandEvents.ts:45-63` |
+| 13 | **Reichweitenmessung** | — | — | — | — | — | **findet nicht statt** — branding.supply hat kein Plausible (anders als pukalani.studio); Core-Default `analytics.enabled: false`, die App setzt nichts | — | `apps/branding/app/app.config.ts` · `packages/core/app/app.config.ts:223` |
+| 14 | **Fehler-Telemetrie** | — | — | — | — | — | **aus.** `pukalani.observability` ist Core-Default `enabled: false` / `clientErrors: false` und wird von branding nicht gesetzt; `POST /api/telemetry/error` bekommt also nichts | — | `packages/core/app/app.config.ts:564-571` |
+| 15 | **Server-Protokolle** | Betrieb, Sicherheit | nginx/ploi-Zugriffsprotokolle mit IP, Zeit, Adresse, Browserkennung | alle Besucher | Hetzner (Serverbetrieb), ploi.io (Verwaltung) | Server in Deutschland — **genauer Standort LÜCKE** | **offen — kein logrotate konfiguriert** (derselbe Befund wie für pukalani.app) | Art. 6 I f | Plan §1.2 Zeile 10 · `docs/runbooks/DEPLOYMENT.md` |
+| 16 | **Backups** | Wiederherstellbarkeit | vollständige MariaDB-Dumps aller Appwrite-Projekte | alle Betroffenen | Hetzner **Storage Box `pukalani-backup`** (Offsite) | Standort und Aufbewahrungsdauer **LÜCKE** | LÜCKE | Art. 6 I f | `docs/runbooks/DEPLOYMENT.md:37-39` |
+| 17 | **Auskunft, Export, Löschung** | Betroffenenrechte | alles zu einem Konto | Kunden | — | — | Löschung auf Wunsch | Art. 15/17 DSGVO | `packages/brand/server/utils/brandUserData.ts`, `packages/market/server/utils/marketUserData.ts` |
+| 18 | **Zahlungsdaten** | — | — | — | **Stripe (geplant, Paket Z1)** | USA — offen | — | Art. 6 I b (künftig) | Plan §7 Z1, §9 Frage 4 |
+
+**Zwei Eigenheiten von #17, die in den Text gehören:** Der automatische Export
+und die automatische Löschung hängen an einer **User-Id**. `brand_waitlist` und
+`brand_checks` tragen keine — dort ist die Löschung heute ein **Handgriff des
+Betreibers in der Appwrite-Konsole**, und genau so sollte es die
+Datenschutzerklärung sagen (`012-brand-waitlist.ts:20-23`,
+`016-brand-checks.ts`). Und: **Einladungen werden anonymisiert, nicht gelöscht**
+— die Zeile ist der Nachweis, dass ein Code ausgegeben wurde; aus der Adresse
+wird `deleted@invalid` (`brandUserData.ts`).
+
+**Was NICHT stattfindet** — gehört ausdrücklich in den Text, weil es Vertrauen
+schafft und jede dieser Aussagen belegbar ist:
+
+- kein Werbenetzwerk, kein Retargeting, kein Profiling zu Werbezwecken;
+- **kein eingebetteter Drittinhalt** (keine YouTube-Videos, keine Karten, keine
+  Social-Buttons, keine externen Kommentar-Widgets);
+- **keine fremden Schriften** — Schriften sind selbst gehostet
+  (`@nuxt/fonts`, build-prozessiert, nie aus `public/`),
+  `packages/themes/nuxt.config.ts:13`;
+- **kein Cookie-Banner**, weil es nichts einzuwilligen gibt: es läuft kein
+  Tracking (`consent.enabled: false`, `analytics.enabled: false`);
+- **kein Training fremder Modelle mit Kundentexten** (`zdr`,
+  `dataCollection: 'deny'`);
+- **keine Personendaten aus fremden Websites**: Team-, Impressums-, Kontakt-,
+  Datenschutz-, AGB-, Login-, Konto- und Warenkorb-Pfade werden **gar nicht
+  erst geholt** (Pfad-Sperrliste), und was auf anderen Seiten übrig bleibt,
+  läuft vor dem Modell durch einen PII-Filter (E-Mail, Telefon, Namensmuster
+  nahe „Geschäftsführer/CEO/Gründer") — `packages/market/shared/marketPii.ts`,
+  `marketCrawlRules.ts`.
+
+---
+
+## 3. Antworten für die typischen Generator-Fragen
+
+Reihenfolge und Wortwahl orientieren sich an den Masken von eRecht24,
+Datenschutz-Generator.de und activeMind.
+
+| Frage des Generators | Antwort für branding.supply |
+| --- | --- |
+| **Hosting-Anbieter** | Eigener Server bei **Hetzner**, verwaltet über **ploi.io**. Die Anwendung läuft auf `49.13.211.173`, die Datenbank (Appwrite, self-hosted) auf `188.245.61.155`. **Standort des Rechenzentrums: LÜCKE — David** (Hetzner betreibt Standorte in DE und FI; im Repo steht nur „Hetzner"). |
+| **Content-Delivery-Network / Proxy** | **Keines.** `branding.supply` und `www.branding.supply` sind im DNS „grau" (nicht proxied) — der Browser spricht direkt mit unserem Server. Nur der fremde Apex `pukalani.app` läuft proxied über Cloudflare; branding.supply ist davon nicht berührt. Cloudflare ist damit — wenn die Zone dort liegt — **DNS-Dienst ohne Datenfluss**. *Belegt: „grau (nicht proxied)" im Runbook; **LÜCKE — David:** wo die Zone `branding.supply` verwaltet wird und wer Registrar ist.* |
+| **Cookies — Liste** | (1) **`a_session_branding`** — Anmeldung; httpOnly, secure, sameSite; technisch notwendig; Laufzeit = Sitzungsdauer der Appwrite-Session. (2) **`i18n_redirected`** — merkt die gewählte Sprache. (3) **`pukalani-theme`**, **`pukalani-theme-variant`**, **`pukalani-neutral`** — Farbwelt/Variante/Grundton der Oberfläche, `maxAge` 365 Tage, `sameSite: 'lax'`. (4) Hell/Dunkel über `@nuxtjs/color-mode` (kommt mit Nuxt UI) — der Speicherort ist im Monorepo **nicht** konfiguriert, es gilt der Modul-Default; **kleine LÜCKE: vor Veröffentlichung im Browser nachsehen**. Alle genannten sind **notwendig oder reine Komforteinstellungen; keiner dient der Analyse oder Werbung.** |
+| **Webanalyse / Statistik** | **Findet nicht statt.** Kein Plausible, kein Google Analytics, kein Matomo. (Zum Vergleich: pukalani.studio misst mit **selbst gehostetem Plausible** unter `plausible.hawaii.studio`, cookielos — sollte branding.supply später messen, bleibt es cookielos und ohne Banner.) |
+| **Newsletter** | **Nein.** Es gibt eine **Warteliste** mit Double-Opt-in; sie dient ausschließlich der Vergabe von Beta-Zugängen, nicht dem Versand von Werbung. Wer bestätigt, bekommt eine Einladung — keine Serienmail. |
+| **Kontaktformular** | Auf branding.supply selbst **derzeit keines**. Der Knopf „Erstgespräch" führt heute auf das Formular von **pukalani.studio** (mit Herkunftsvermerk `?source=branding-supply`). Dessen Felder: Ziele (Mehrfachauswahl), Projektart, Branche (frei, ≤ 200), Budget, Teamgröße, Markt (frei, ≤ 200), aktuelle Technik, Zeitrahmen, Nachricht (≤ 5000), **Name (Pflicht)**, **Firma (Pflicht)**, **E-Mail (Pflicht)**, Telefon (freiwillig, ≤ 40), Sprache. Eine eigene Seite auf branding.supply ist als Paket **Z0** geplant. |
+| **Registrierung / Nutzerkonto** | **Ja.** E-Mail + Passwort mit Bestätigungs-Mail; Beta-Zugang nur mit Einladungscode. „Anmelden mit Google" ist vorbereitet, aber erst aktiv, wenn Server-Env und Google-Client gesetzt sind — **im Text nur erwähnen, wenn er live geht** (sonst steht dort eine Datenübermittlung an Google, die es nicht gibt). |
+| **Zahlungsanbieter** | **Heute keiner.** Geplant: **Stripe** (Einmalpreis je Branding, Paket Z1) — mit Rechnung, Steuerberechnung und Kundenportal. Der Abschnitt gehört als **leerer, benannter Platz** vorgebaut, damit er später ein eingesetzter Satz ist und kein Umbau. |
+| **KI-Dienste** | **Ja** — der Kern des Produkts. Router: **OpenRouter**; dahinter wechselnde Modellanbieter, **beschränkt auf solche mit Zero-Data-Retention**. Eingesetzt für: Gespräch und Entwürfe („George"), Prüfblick/Review, Urteil des Brand-Checks, Extraktion beim Marktvergleich. Drittland **USA**. Technische Zusagen: `zdr: true`, `dataCollection: 'deny'`, `allowFallbacks: false`. |
+| **Social Media / Embeds** | **Nein.** Keine Buttons, keine Pixel, keine eingebetteten Inhalte. YouTube-Auswertung ist **geplant** (BI1) und dann eigens zu behandeln. |
+| **Schriften** | **Selbst gehostet.** Keine Verbindung zu Google Fonts oder einem Font-CDN; `@nuxt/fonts` lädt die Dateien beim Build und liefert sie vom eigenen Server. |
+| **Karten** | **Nein.** |
+| **Bewertungen / Inhalte Dritter** | **Ja, und das ist der ungewöhnliche Teil**: der Brand-Check bewertet fremde Websites mit einem Score 0–100; mit Häkchen des Prüfenden erscheint das Ergebnis in einem **öffentlichen Ranking**; die **Bibliothek** zeigt Wortnamen und kurze Belegzitate fremder Marken. Dafür gibt es einen Korrekturweg und einen Entfernungsweg (§4c). |
+| **Auftragsverarbeiter / Subprozessoren** | Hetzner (Server, Backups) · ploi.io (Server-Verwaltung) · OpenRouter und die dahinter tatsächlich zugelassenen Modellanbieter · der SMTP-Anbieter (voraussichtlich Resend) · **nur beim Google-Login** Google · **künftig** Stripe. Als eigener Abschnitt der Datenschutzerklärung führen. |
+| **Betroffenenrechte / Löschung** | Konto-Löschung entfernt Brandings, Schritte, Nachrichten, Share-Links, Funnel-Ereignisse und die Marktvergleichs-Daten daran; Einladungen werden **anonymisiert** statt gelöscht. Warteliste und Brand-Check-Ergebnisse hängen an keiner User-Id und werden auf Anfrage **von Hand** entfernt. |
+
+---
+
+## 4. Die drei Sonderabschnitte — Textentwurf de/en
+
+**Alle drei sind Prüfpunkte für den Anwalt** (Entscheidung 2). Sie sind
+sachlich formuliert, ohne Rechtsberatung, und beschreiben ausschließlich, was
+der Code belegbar tut.
+
+### 4a. KI-Verarbeitung von Kundentexten
+
+> **Verarbeitung durch ein Sprachmodell**
+>
+> Was Sie in der Werkstatt schreiben — Antworten im Gespräch, Notizen,
+> Entwürfe —, wird zur Erzeugung Ihrer Ergebnisse an ein Sprachmodell
+> übermittelt. Der Weg dorthin führt über den Vermittlungsdienst OpenRouter mit
+> Sitz in den USA, der die Anfrage an einen Modellanbieter weiterreicht.
+>
+> Wir haben diesen Weg technisch eingeschränkt, und zwar bei jeder einzelnen
+> Anfrage: Es werden ausschließlich Anbieter zugelassen, die sich zur
+> **Nichtspeicherung der Anfrage verpflichtet haben** („Zero Data Retention"),
+> und die Verwendung Ihrer Inhalte **zu Trainingszwecken ist untersagt**. Steht
+> kein solcher Anbieter zur Verfügung, wird die Anfrage **nicht** an einen
+> anderen weitergereicht, sondern schlägt fehl — die Funktion ist dann
+> vorübergehend nicht verfügbar.
+>
+> Das Ergebnis der Verarbeitung (Ihr Entwurf, Ihre Bewertung) speichern wir bei
+> uns, damit Sie damit weiterarbeiten können. Die Verarbeitung ist zur
+> Erfüllung unseres Vertrags mit Ihnen erforderlich (Art. 6 Abs. 1 lit. b
+> DSGVO). Bitte geben Sie in der Werkstatt keine besonderen Kategorien
+> personenbezogener Daten und keine Daten Dritter ein, die dort nicht
+> hingehören.
+>
+> *[PRÜFPUNKT ANWALT: Rolle bei dieser Verarbeitung (Verantwortlicher oder
+> Auftragsverarbeitung), Grundlage der Drittlandsübermittlung, Notwendigkeit
+> eines AVV mit Firmenkunden.]*
+
+> **Processing by a language model**
+>
+> What you write in the workshop — answers in the conversation, notes, drafts —
+> is sent to a language model in order to produce your results. It travels via
+> the routing service OpenRouter, based in the USA, which forwards the request
+> to a model provider.
+>
+> We have restricted this path technically, on every single request: only
+> providers that commit to **not retaining the request** ("zero data
+> retention") are permitted, and the use of your content **for training is
+> denied**. If no such provider is available, the request is **not** handed to
+> another one — it fails, and the feature is temporarily unavailable.
+>
+> We store the result of the processing (your draft, your score) so that you
+> can keep working with it. The processing is necessary to perform our contract
+> with you (Art. 6(1)(b) GDPR). Please do not enter special categories of
+> personal data, or third-party data that does not belong there.
+>
+> *[LAWYER CHECKPOINT: controller vs. processor, basis for the transfer, DPA
+> for business customers.]*
+
+### 4b. Abruf fremder Websites
+
+> **Abruf öffentlich zugänglicher Websites**
+>
+> Für den Brand-Check und den Marktvergleich rufen unsere Server öffentlich
+> zugängliche Seiten der angegebenen Adresse ab. Dabei sieht der Server der
+> abgerufenen Website — wie bei jedem Seitenaufruf — unsere IP-Adresse und
+> unsere Absenderkennung
+> `PukalaniMarketBot/1.0 (+https://branding.supply/market-bot)`. Unter dieser
+> Adresse erklären wir dauerhaft, was wir lesen, was wir nicht lesen, wie lange
+> wir es behalten und wie man uns aussperrt.
+>
+> Wir halten uns dabei an folgende Regeln:
+>
+> - Wir lesen nur **öffentlich zugängliche Marketing-Seiten**. Keine
+>   Login-Bereiche, keine Formulare, keine Downloads.
+> - Wir werten **`robots.txt`** aus und halten uns daran.
+> - Wir respektieren maschinenlesbare **Nutzungsvorbehalte** für Text- und
+>   Data-Mining (§ 44b UrhG) in den gängigen Formen: `TDM-Reservation`-Header,
+>   `/.well-known/tdmrep.json`, `tdm-reservation`-Meta sowie `noai`/`noimageai`
+>   in den robots-Metas. Liegt ein Vorbehalt vor, wird die Seite **nicht**
+>   ausgewertet; der Nutzer erhält eine ehrliche Meldung.
+> - **Seiten mit Personenbezug rufen wir gar nicht erst ab**: Team-,
+>   Impressums-, Kontakt-, Datenschutz-, AGB-, Login-, Konto- und
+>   Warenkorbseiten sind gesperrt.
+> - Was auf den übrigen Seiten steht, durchläuft vor jeder weiteren
+>   Verarbeitung einen **Filter für E-Mail-Adressen, Telefonnummern und
+>   Personennamen**.
+> - Der abgerufene **Rohtext wird höchstens 24 Stunden gespeichert** und danach
+>   automatisch gelöscht. Was bleibt, ist eine strukturierte Zusammenfassung mit
+>   **kurzen Belegzitaten (höchstens 200 Zeichen)** und der Quelladresse.
+>
+> Rechtsgrundlage ist unser berechtigtes Interesse an einer belegten
+> Marktbetrachtung (Art. 6 Abs. 1 lit. f DSGVO). Betreiber, die nicht gelesen
+> werden möchten, sperren uns über `robots.txt` aus oder schreiben uns an.
+>
+> *[PRÜFPUNKT ANWALT: Bindungswirkung der Bot-Seite; Reichweite von § 44b UrhG
+> bei einmaliger Auswertung ohne Training; Zitatzweck bei mehreren Zitaten
+> derselben Quelle.]*
+
+> **Retrieval of publicly available websites**
+>
+> For the brand check and the market comparison, our servers retrieve publicly
+> available pages of the address you provide. In doing so, the website's server
+> sees — as with any page view — our IP address and our user agent,
+> `PukalaniMarketBot/1.0 (+https://branding.supply/market-bot)`. That page
+> permanently explains what we read, what we do not read, how long we keep it
+> and how to block us.
+>
+> We follow these rules: we read only **publicly available marketing pages**
+> (no login areas, no forms, no downloads); we fetch and **honour
+> `robots.txt`**; we respect machine-readable **text and data mining
+> reservations** (§ 44b UrhG) in their common forms (`TDM-Reservation` header,
+> `/.well-known/tdmrep.json`, `tdm-reservation` meta, `noai`/`noimageai`) and
+> exclude the site if one is present; we **never fetch** team, imprint,
+> contact, privacy, terms, login, account or cart pages; everything else passes
+> a **filter for e-mail addresses, phone numbers and personal names** before any
+> further processing; and the retrieved **raw text is stored for at most 24
+> hours** and then deleted automatically, leaving only a structured summary with
+> **short supporting quotes (max. 200 characters)** and the source URL.
+>
+> The legal basis is our legitimate interest in an evidence-based market view
+> (Art. 6(1)(f) GDPR). Operators who prefer not to be read can block us via
+> `robots.txt` or contact us.
+
+### 4c. Öffentliche Bewertung fremder Marken
+
+> **Brand Score, Ranking und Bibliothek**
+>
+> Der Brand-Check misst einen öffentlich zugänglichen Webauftritt anhand eines
+> festen Kriterienkatalogs und vergibt einen **Brand Score zwischen 0 und
+> 100** sowie acht Kategoriewerte. Jeder Wert stützt sich auf einen **Beleg aus
+> dem Auftritt selbst**; die vollständige **Methodik ist öffentlich einsehbar**
+> und von jedem Ergebnis aus verlinkt.
+>
+> Ein Ergebnis ist zunächst **privat**. Es erscheint nur dann in unserem
+> öffentlichen Ranking, wenn die prüfende Person dies beim Start ausdrücklich
+> gewählt hat. Uns ist bewusst, dass die prüfende Person nicht immer der
+> Markeninhaber ist. Deshalb gilt:
+>
+> - **Korrekturweg:** Zu jedem Ergebnis kann **ohne Konto und kostenlos** ein
+>   Korrekturvorschlag eingereicht werden — mit Angabe des betroffenen Feldes,
+>   des Vorschlags und einer Begründung. Eine Kontaktadresse ist freiwillig.
+> - **Entfernungsweg:** Auf begründete Anfrage entfernen wir ein Ergebnis aus
+>   dem öffentlichen Ranking. Diese Entfernung ist dauerhaft und wird nicht
+>   dadurch aufgehoben, dass jemand anderes dieselbe Adresse erneut prüft.
+> - **Kein Werturteil über den Anbieter:** Der Score beschreibt, wie klar ein
+>   Auftritt seine Marke ausdrückt. Er ist keine Aussage über Qualität,
+>   Zahlungsfähigkeit oder Seriosität eines Unternehmens; Vergleiche werden
+>   **beschreibend** dargestellt, nicht herabsetzend.
+> - In unserer **Bibliothek** zeigen wir Wortnamen und Kategorie bekannter
+>   Marken sowie kurze Belegzitate von deren eigenen Auftritten — **keine
+>   Logos, keine Bildmarken, keine Favicons**. Jeder Eintrag ist von Hand
+>   geprüft und mit Prüfdatum versehen.
+>
+> Rechtsgrundlage ist unser berechtigtes Interesse an einer nachvollziehbar
+> belegten, öffentlich überprüfbaren Einordnung (Art. 6 Abs. 1 lit. f DSGVO).
+>
+> *[PRÜFPUNKT ANWALT: Genügen offengelegte Methodik + Korrekturweg + freiwilliges
+> Opt-in des Prüfenden, oder braucht es eine Anhörung des Bewerteten bzw. eine
+> Beschränkung auf die eigene Marke? § 824 BGB, § 6 UWG,
+> Unternehmenspersönlichkeitsrecht.]*
+
+> **Brand score, ranking and library**
+>
+> The brand check measures a publicly available web presence against a fixed
+> catalogue of criteria and assigns a **brand score between 0 and 100** plus
+> eight category values. Every value is backed by **evidence taken from the
+> presence itself**; the full **methodology is public** and linked from every
+> result.
+>
+> A result is **private by default**. It appears in our public ranking only if
+> the person running the check explicitly chose so. We are aware that this
+> person is not always the brand owner. Therefore: anyone can submit a
+> **correction — free of charge and without an account**; on a substantiated
+> request we **remove** a result from the public ranking permanently, and that
+> removal is not undone by someone else checking the same address again; the
+> score describes **how clearly a presence expresses its brand** and is not a
+> statement about a company's quality, solvency or integrity; and our
+> **library** shows word marks, categories and short supporting quotes from the
+> brands' own presences — **no logos, no figurative marks, no favicons** — each
+> entry verified by hand and dated.
+>
+> The legal basis is our legitimate interest in a transparent, evidence-based
+> classification (Art. 6(1)(f) GDPR).
+
+**Was für 4c noch fehlt:** Die **Methodik-Seite**, auf die dieser Abschnitt
+zweimal verweist, ist **noch nicht gebaut** (vorgesehen in BI1 §4.2, aufgeführt
+in Plan §2.2 Nr. 6). Der Absatz darf erst live gehen, wenn es die Seite gibt —
+sonst wiederholt er den Fehler der drei Footer-Wörter: eine Zusage ohne Ziel.
+
+---
+
+## 5. AGB — die Punkte, die branding.supply braucht
+
+Liste für Generator und Anwalt. Reihenfolge = Gliederungsvorschlag.
+
+1. **Vertragsgegenstand und Leistungsumfang.** Was das Fundament ist (frei) und
+   was die Ableitung ist (bezahlt) — Davids Entscheidung 2026-08-27 „frei
+   bauen, bezahlt anwenden".
+2. **Beta-Betrieb.** Die Software befindet sich in Erprobung; Funktionen können
+   sich ändern oder entfallen, es gibt **keine Verfügbarkeitszusage**, und
+   Ergebnisse sollten gesichert werden. Ausdrücklicher Abschnitt, weil aus
+   einer kostenlosen Beta ein bezahltes Angebot wird.
+3. **Beta-Konten dauerhaft frei** (Entscheidung 6). Wörtlich zu regeln: die
+   Zusage gilt **je Konto**, nicht als unbegrenzte Zahl von Brandings; die
+   bestehenden Nutzungsgrenzen (u. a. drei Läufe je Tag und Branding) bleiben;
+   der Betreiber kann die Zusage **bei Missbrauch je Konto widerrufen**.
+4. **KI-Ergebnisse ohne Gewähr.** Entwürfe eines Sprachmodells können falsch,
+   unvollständig oder unpassend sein; sie ersetzen keine Rechts-, Marken- oder
+   Steuerberatung. Der Kunde prüft vor Verwendung — insbesondere auf
+   Markenrechte Dritter.
+5. **Nutzungsrechte an den Ergebnissen.** *Empfehlung (Laien-Einschätzung, zu
+   prüfen): dem Kunden ein umfassendes, zeitlich und räumlich unbeschränktes
+   Nutzungsrecht an seinem Fundament einräumen; im Gegenzug ein Recht des
+   Anbieters, das Ergebnis anonymisiert zur Verbesserung des Dienstes und —
+   nur mit ausdrücklicher Freigabe — öffentlich zu zeigen.* Der zweite Teil ist
+   die AGB-Seite von **Discover** (`publicationVisibility`, Opt-in je Brand,
+   Default `private`) und von `marketVisibility` — **eine Zustimmung gilt nur
+   für das, wofür sie gegeben wurde**.
+6. **Pflichten des Kunden.** Keine rechtswidrigen Inhalte; keine Daten Dritter
+   ohne Grundlage; keine Umgehung der Nutzungsgrenzen; keine automatisierte
+   Massennutzung.
+7. **Abruf fremder Websites durch den Kunden veranlasst.** Klarstellen, dass
+   der Kunde eine Adresse benennt und wir abrufen — und welche Grenzen dabei
+   gelten (§4b).
+8. **Digitale Inhalte und Widerruf (§ 356 Abs. 5 BGB).** Für den künftigen
+   Einmalkauf (Paket Z1): Widerrufsbelehrung mit ausdrücklicher Zustimmung zum
+   sofortigen Beginn der Ausführung und Kenntnisnahme des Erlöschens des
+   Widerrufsrechts. Gilt für Verbraucher; ob Verbraucher überhaupt kaufen
+   können, ist Anwaltsfrage.
+9. **Preise, Steuern, Rechnung.** Platzhalter — **LÜCKE: Name des
+   Kaufgegenstands und Betrag** (§9.2). Im Code bereits unveränderlich
+   festgelegt: `tax_behavior: 'inclusive'` an jedem Preis, also **brutto
+   gedacht**; `automatic_tax` aktiv; **Erhebung der USt-ID (B2B) ist nicht
+   gebaut**.
+10. **Laufzeit, Kündigung, Löschung.** Konto jederzeit kündbar; was bei
+    Kündigung mit Inhalten geschieht; Frist bis zur Löschung.
+11. **Änderungen der AGB** und wie zugestimmt wird. **Baubefund:** Der Core
+    speichert die Zustimmung heute **nicht** — `terms` ist ausdrücklich „reiner
+    UI-Belang" (`packages/core/schemas/auth.ts:53`), es gibt weder
+    `termsAcceptedAt` noch `termsVersion`. Weil das Häkchen zunächst auf einen
+    **Entwurf** gesetzt wird, ist die Fassungsnummer am Konto keine Kür
+    (Paket R1).
+12. **Haftung.** Einschränkung im gesetzlich zulässigen Rahmen; Datenverlust in
+    der Beta ausdrücklich ansprechen.
+13. **Anwendbares Recht, Gerichtsstand, Verbraucherstreitbeilegung
+    (§ 36 VSBG).** Als **benannter leerer Abschnitt** vorbauen (Entscheidung 3),
+    ebenso der Vertreter nach Art. 27 DSGVO in der Datenschutzerklärung.
+
+---
+
+## 6. Anwaltsfragen — drei Blöcke für EINEN Termin
+
+### Block 1 — Studio-Rest (aus A1/A1b, hier erneut zu stellen)
+
+1. **Art. 27 DSGVO:** Braucht ein Verantwortlicher mit Sitz in den USA, der
+   sich an DACH-Kunden richtet, einen Vertreter in der EU — und ab wann?
+2. **Drittland:** Auf welcher Grundlage darf aus den USA auf die in Deutschland
+   gespeicherten Kundendaten zugegriffen werden?
+3. **§ 5 DDG / § 18 Abs. 2 MStV:** Welche Impressumsangaben schuldet dieses
+   Angebot, und wird es durch die geplanten redaktionellen Inhalte (BI1)
+   journalistisch-redaktionell?
+4. **§ 36 VSBG:** Muss zur Teilnahme an einer Verbraucherschlichtung Stellung
+   genommen werden — auch schon ohne Bezahlfunktion?
+5. **Umsatzsteuer:** Wie ist ein US-Anbieter mit digitalen Leistungen an
+   DACH-Kunden zu behandeln (Kleinunternehmerregelung und OSS setzen eine
+   EU-Ansässigkeit bzw. -Registrierung voraus)?
+
+### Block 2 — die branding.supply-Texte
+
+6. **Rolle bei der KI-Verarbeitung:** Verarbeiten wir Kundentexte als
+   Verantwortlicher zur Vertragserfüllung, oder ist es Auftragsverarbeitung mit
+   AVV-Pflicht gegenüber Firmenkunden? *(Laien-Einschätzung: der Kunde
+   beauftragt keine Verarbeitung fremder Endnutzerdaten — spricht gegen
+   Auftragsverarbeitung; belastbar ist das nicht.)*
+7. **Prüfpunkt 4a:** Trägt der Abschnitt zur KI-Verarbeitung, oder fehlt eine
+   Angabe (Drittland-Grundlage, Empfängerliste, Widerspruchsrecht)?
+8. **Prüfpunkt 4b:** Ist die Bot-Seite `/market-bot` eine **bindende Zusage**,
+   und muss sie aus der Datenschutzerklärung verlinkt sein?
+9. **Prüfpunkt 4c:** Genügen offengelegte Methodik, Korrekturweg und Opt-in des
+   Prüfenden — oder braucht es eine Anhörung des Bewerteten bzw. eine
+   Beschränkung auf die eigene Marke?
+10. **Beta ohne Entgelt:** Braucht eine unentgeltliche Beta AGB, und was muss
+    darin über Verfügbarkeit, Datenverlust, Kündigung und den Übergang in ein
+    bezahltes Angebot stehen?
+11. **Nutzungsrechte:** Ist die Zuordnung aus §5 Nr. 5 tragfähig — insbesondere
+    die Trennung zwischen „Kunde nutzt frei" und „Veröffentlichung nur mit
+    ausdrücklicher Freigabe je Marke"?
+12. **Entwurfs-Häkchen-Praxis:** Ist ein AGB-Häkchen auf einen sichtbar als
+    Entwurf gekennzeichneten Text wirksam — und genügt es, die zugestimmte
+    Fassung am Konto zu speichern und nach der Prüfung erneut zustimmen zu
+    lassen?
+13. **Widerruf digitaler Inhalte (§ 356 Abs. 5 BGB):** Reicht die geplante
+    Gestaltung (ausdrückliche Zustimmung + Kenntnisnahme beim Kauf), und
+    dürfen Verbraucher überhaupt kaufen — oder soll das Angebot auf Unternehmer
+    beschränkt werden (dann: wie wirksam)?
+
+### Block 3 — Anhang G (Marktvergleich) und BI1 §4.3
+
+14. **(a) Fremde Markennamen:** Bleibt die referenzierende Benutzung zulässig,
+    wenn die Namen (1) in einem **kostenpflichtigen** Produkt erscheinen und
+    (2) im **Marketing** als Beispiel-Paare genannt würden?
+15. **(b) Zitate ≤ 200 Zeichen:** Trägt der Zitatzweck auch, wenn dieselbe
+    Seite **zehn Zitate derselben Quelle** zeigt — und genügt der Link als
+    Quellenangabe nach § 63 UrhG?
+16. **(c) TDM-Vorbehalt (§ 44b UrhG):** Ist der BGH entschieden
+    (I ZR 281/25), und ändert das etwas für Vorbehalte in **natürlicher
+    Sprache** (AGB/Impressum), die wir heute nicht auswerten? Greift § 44b
+    überhaupt, wenn wir nicht trainieren, sondern einmalig auswerten und
+    zitieren?
+17. **(d) § 6 UWG:** Wäre die Nennung realer Marken im Marketing
+    („Beispiel: adidas gegen Nike") vergleichende Werbung, obwohl wir mit
+    keiner der beiden im Wettbewerb stehen?
+18. **(e) DSGVO beim Abruf:** Reicht der PII-Filter, oder braucht ein
+    dauerhaft sichtbarer **Bibliothekseintrag** eine zusätzliche Zusage
+    gegenüber dem Website-Betreiber — etwa eine Widerspruchsmöglichkeit, die
+    über „schreibt uns an" hinausgeht?
+19. **(f) Datenbank-Herstellerrecht (§ 87b UrhG):** Kippt die Einordnung, wenn
+    wir dieselben Kandidaten regelmäßig auffrischen und die Bibliothek dadurch
+    zu einer laufend gepflegten Sammlung wird?
+20. **BI1-1 Presse- und Wikipedia-Zitate:** Trägt § 51 UrhG auch im
+    redaktionellen Beitrag eines **gewerblichen** Anbieters, der auf das eigene
+    Bezahlprodukt führt — und färbt **CC BY-SA** auf unseren Beitrag ab?
+21. **BI1-2 YouTube-Kommentare:** Ist die aggregierte Auswertung über die Data
+    API als Marktforschung zulässig (Art. 6 I f), wenn Nutzernamen nie
+    gespeichert werden — und was verlangen die API-Bedingungen
+    (Speicherfristen, abgeleitete Datensätze)? Genügt die reguläre Einbettung
+    des Quellvideos?
+22. **BI1-3 Score fremder Marken:** identisch mit Frage 9 — hier ist er
+    **schon heute live**, nicht erst mit BI1.
+23. **BI1-4 Wir-Stimme ohne Autor:** Genügt ein Redaktions-Impressum
+    („Verantwortlich i. S. d. § 18 Abs. 2 MStV: …"), wenn unter den Beiträgen
+    nur die namenlose Wir-Stimme steht?
+
+---
+
+## 7. Lücken — David
+
+Nichts davon wurde geraten. Jede Zeile ist eine Eingabe, die nur David liefern
+kann; ohne sie bleibt die entsprechende Stelle im Text ein Platzhalter.
+
+| # | Lücke | Wofür gebraucht | Blockiert |
+| --- | --- | --- | --- |
+| 1 | **Anbieterblock:** Name, Rechtsform, ladungsfähige Anschrift, E-Mail, Telefon, ggf. Register/USt-IdNr., Vertretungsberechtigte | Impressum (§ 5 DDG), Kopf der Datenschutzerklärung, Stripe-Portal | R2 komplett |
+| 2 | **Standort des Rechenzentrums** (Hetzner: welcher Standort für `app-prod` und `appwrite-prod`?) | Abschnitt „Hosting" | §3 Zeile 1 |
+| 3 | **DNS/Registrar der Zone `branding.supply`** — liegt die Zone bei Cloudflare (die Runbook-Wörter „grau/nicht proxied" sind Cloudflare-Begriffe)? Wer ist Registrar? | Subprozessoren-Liste | §3 Zeile 2 |
+| 4 | **SMTP-Anbieter dieser Site bestätigen** (im Monorepo überall Resend — für `branding` steht in der Server-`.env` nur, DASS Host/User/Pass gesetzt sind) + **AVV** | Subprozessoren-Liste, Mail-Abschnitt | Zeile 10 der Tabelle |
+| 5 | **OpenRouter: Vertragsstand** — AVV/DPA vorhanden? Welche Modellanbieter sind faktisch zugelassen? | KI-Abschnitt, Subprozessoren-Liste | §4a |
+| 6 | **Aufbewahrung der Backups** auf der Storage Box (Frist, Standort, Verschlüsselung) | Abschnitt „Speicherdauer" | Zeile 16 |
+| 7 | **Aufbewahrung der Server-Protokolle** — heute kein logrotate; eine Frist muss gesetzt UND umgesetzt werden | Abschnitt „Server-Protokolle" | Zeile 15 |
+| 8 | **Art.-27-Vertreter jetzt beauftragen oder auf die Anwaltsantwort warten?** (Dienstleister grob 200–400 €/Jahr) | Impressum + Datenschutz | Frage 1 |
+| 9 | **Welcher Generator** die Grundfassung liefert | damit die drei Zusatz-Abschnitte in dessen Gliederung passen | R2 |
+| 10 | **Name des Kaufgegenstands** und **Betrag** (ein Preis je Branding oder je Produkt getrennt) | AGB §5 Nr. 9, Preis-Katalog Z1 | Z1 |
+| 11 | **Verbraucher zulassen — ja oder nein?** | entscheidet über Widerrufsbelehrung, Button-Lösung, Preisangaben | AGB, Z1 |
+| 12 | **Steuernummer / USt-Behandlung** (Kleinunternehmer und OSS setzen EU-Ansässigkeit voraus) | Rechnung, Impressum | Z1, Frage 5 |
+
+### Zwei Baubefunde, die vor der Veröffentlichung zu klären sind
+
+- **Die 24-Monats-Frist der Funnel-Ereignisse existiert nur als Kommentar.**
+  `007-brand-events.ts:23-26` sagt „Ein Sweep im Layer räumt Älteres weg" — im
+  brand-Layer gibt es keinen. Entweder den Sweep bauen oder die Frist im Text
+  ehrlich als „bis auf Weiteres" beschreiben. Eine genannte Frist ohne
+  Mechanik ist eine öffentliche Falschaussage über das eigene Verhalten (die
+  Bot-Seite hält es genau umgekehrt: Zahlen aus dem Vertrag, nie abgetippt).
+- **Die Methodik-Seite für den Brand Score fehlt** (BI1 §4.2, Plan §2.2 Nr. 6).
+  §4c verweist zweimal darauf; der Abschnitt darf erst live gehen, wenn die
+  Seite steht.
