@@ -355,7 +355,9 @@ async function share(): Promise<void> {
           </aside>
 
           <article class="min-w-0">
-            <div class="flex flex-col gap-10">
+            <!-- Kapitel weit auseinander (Davids Zuschnitt 2026-09-08): ein
+                 Dossier liest sich in Abschnitten, nicht als eine Textwand. -->
+            <div class="flex flex-col gap-20">
               <BwFoundationChapter
                 v-for="(chapter, index) in chapters" :key="chapter.id"
                 :chapter="chapter" :index="index" variant="share"
