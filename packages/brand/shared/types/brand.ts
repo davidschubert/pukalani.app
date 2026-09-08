@@ -2101,3 +2101,31 @@ export interface BrandDnaProposeResponse {
   model: string
   quota: { used: number, limit: number, remaining: number }
 }
+
+/**
+ * DIE ANTWORT DES ZEICHEN-BRIEFINGS (`POST …/mark/brief`, Brand Design D5a,
+ * §2.5 Stufe 1).
+ *
+ * Wie beim DNA-Vorschlag (D2c) schreibt der Lauf den Slot-Wert SERVER-seitig;
+ * die sechs Felder hier sind eine Abkürzung, damit die Bühne das Briefing
+ * zeigen kann, bevor der Nachlade-Ruf zurück ist — keine zweite Wahrheit.
+ *
+ * ZWEI der sechs Felder hat kein Modell geschrieben (Schutzraum, Varianten):
+ * sie sind gerechnet. Die Antwort unterscheidet sie NICHT, weil der Leser sie
+ * nicht unterscheiden muss — welches Feld woher kommt, sagt
+ * `BRAND_MARK_BRIEF_FIELDS.written`.
+ */
+export interface BrandMarkBriefResponse {
+  ok: true
+  brief: {
+    character: string
+    formLanguage: string
+    clearSpace: string
+    variants: string
+    noGos: string
+    places: string
+  }
+  /** Modell-Kennung ohne Schlüssel — sie steht unter dem Briefing. */
+  model: string
+  quota: { used: number, limit: number, remaining: number }
+}

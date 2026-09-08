@@ -128,6 +128,16 @@ export type BrandEventType =
    * wirklich tragen, sagt keine Upload-Zahl.
    */
   | 'design.dna.run'
+  /**
+   * DAS ZEICHEN-BRIEFING (D5a, §2.5 Stufe 1). Kennzahlen: Zahl der Felder,
+   * Modell-Kennung, Dauer — und im Fehlerfall der Grund. NIE ein Feld des
+   * Briefings, nie der Prompt, nie eine Foundation-Stelle.
+   *
+   * Es ist das Ereignis, an dem hängt, ob Stufe 1 überhaupt benutzt wird: ein
+   * Kapitel, in dem alle sofort zu den Setzungen springen, sagt etwas über
+   * die Reihenfolge, die das Produkt behauptet (§2.5).
+   */
+  | 'design.mark.brief'
 
 export interface BrandEventInput {
   type: BrandEventType
