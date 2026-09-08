@@ -32,7 +32,11 @@
  * ── VORBEDINGUNGEN ───────────────────────────────────────────────────────
  * Lokale Dev-Appwrite mit `brand_intro_requests` (Migration brand-021 gelaufen)
  * und ein Dev-Server der branding-App AUS DEM WORKTREE (CLAUDE.md „Tests" —
- * ein Server aus dem Haupt-Repo misst fremden Code). Mailpit auf :1025 ist
+ * ein Server aus dem Haupt-Repo misst fremden Code). Der Dev-Server braucht
+ * SMTP auf Mailpit — die kopierte portfolio-.env trägt KEIN NUXT_SMTP_*, also
+ * beim Start mitgeben (sonst 24/26: „Mail liegt im Postfach" fällt):
+ *   NUXT_SMTP_HOST=localhost NUXT_SMTP_PORT=1025 NUXT_SMTP_FROM=noreply@branding.test
+ * Mailpit auf :1025 ist
  * OPTIONAL: fehlt er, wird Zusage 2 auf den Zeilen-Beweis reduziert und das
  * Skript sagt das laut.
  *

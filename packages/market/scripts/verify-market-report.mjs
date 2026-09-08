@@ -608,7 +608,10 @@ try {
   check('der Quellen-Wähler führt den ECHTEN Eintrag mit Name und Kategorie',
     libList.status === 200 && libOption?.label === LIBRARY_ENTRY.name && libOption?.hint === LIBRARY_ENTRY.category,
     `${libList.status} ${JSON.stringify(libOption ?? {})}`)
-  const erlaubteFelder = new Set(['id', 'label', 'hint', 'url'])
+  // `verifiedAt` kam mit 16eabfdc („Handgeprüft am" im Quellen-Wähler) dazu —
+  // ein Datum, kein Bild; die Erlaubnisliste bleibt die Sicherung gegen
+  // Logo/Favicon/Bild (MV1 M6b), nicht gegen Text.
+  const erlaubteFelder = new Set(['id', 'label', 'hint', 'url', 'verifiedAt'])
   const fremdeFelder = libOptions.flatMap(option => Object.keys(option).filter(key => !erlaubteFelder.has(key)))
   check('… und sonst NICHTS — kein Logo, kein Favicon, kein Bild',
     libOptions.length > 0 && fremdeFelder.length === 0,
