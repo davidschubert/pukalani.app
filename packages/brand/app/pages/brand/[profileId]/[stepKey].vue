@@ -2637,6 +2637,11 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
              fragt nicht"). Sichtbar wird es erst nach der Weiche — s.
              `showInspiration`. -->
         <BwUploadsEditor v-if="showInspiration" :profile-id="profileId" />
+        <!-- DIE LESUNG (`g.reading`, D2b) steht DIREKT unter dem Instrument und
+             unter derselben Bedingung: sie liest genau die Bilder darüber, und
+             ohne Vorbilder gibt es nichts zu lesen. Kein Chat — dieser
+             Abschnitt ist ein LAUF (s. Kopf der Komponente). -->
+        <BwReadingPanel v-if="showInspiration" :profile-id="profileId" />
         <p v-else-if="showInspirationSkipped" class="bw-pending">
           {{ t('brand.inspiration.skipped') }}
         </p>

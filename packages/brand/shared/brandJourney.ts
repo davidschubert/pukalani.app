@@ -882,6 +882,47 @@ export type BrandSourcesHasher = (
   slotFacts: Readonly<Record<string, BrandSlotStateFacts | undefined>>,
 ) => string
 
+/**
+ * IST DIESE QUELLE ERFÜLLT? — normalerweise „ist sie bestätigt".
+ *
+ * ── EIN INSTRUMENT IST DURCHSICHTIG (Brand-Design-D2b-Befund, 2026-09-08 am
+ *    Klick-Beweis gefunden) ───────────────────────────────────────────────
+ * Ein `special`-Slot ist ein INSTRUMENT, keine Entscheidung
+ * (`slotIsConfirmable() === false`): die Werkstatt hat für ihn gar keinen
+ * Übernehmen-Knopf, und der Speicher schreibt ihm bewusst nie ein `confirmed`
+ * — bei den Vorbildern (`g.inspiration`, D2a) wäre das der Weg, über
+ * `confirmedSlotValues` ins Dokument zu reisen. Wartete eine Session auf diese
+ * Bestätigung, stünde sie für IMMER auf `locked`. Genau das passierte
+ * `g.reading`: der Lauf lief (die Route prüft das KAPITEL, nicht die Session),
+ * und sein Ergebnis konnte niemand abnehmen.
+ *
+ * Deshalb wird ein Instrument nicht ÜBERSPRUNGEN, sondern DURCHGEREICHT: es
+ * gibt seine eigenen Quellen weiter. `g.reading` wartet damit auf das, worauf
+ * `g.inspiration` wartet — die bestätigte Weiche `g.source` —, und nicht auf
+ * eine Zustimmung, die es nicht geben kann.
+ *
+ * Die Quelle bleibt in `inputs.slots`, und das ist der Punkt: der
+ * `sourcesHash` rechnet weiter über sie, eine bestätigte Lesung wird also
+ * VERALTET, sobald sich die Vorbilder ändern — und der Impact-Hinweis
+ * („fliesst später in N Felder ein") behält seine Kette.
+ *
+ * `seen` bricht einen versehentlichen Zyklus ab, statt hängen zu bleiben
+ * (dieselbe Vorsicht wie in `dependencyClosure`).
+ */
+function inputSatisfied(
+  inputId: string,
+  slots: Readonly<Record<string, BrandSlotStateFacts | undefined>>,
+  seen: Set<string> = new Set(),
+): boolean {
+  if (seen.has(inputId)) return true
+  seen.add(inputId)
+  const input = slotById(inputId)
+  if (input && !slotIsConfirmable(input)) {
+    return input.inputs.slots.every(sourceId => inputSatisfied(sourceId, slots, seen))
+  }
+  return Boolean(slots[inputId]?.confirmed)
+}
+
 export function resolveSessionStates(
   profile: BrandProfileFacts,
   stepFacts: readonly BrandStepFacts[] = [],
@@ -906,7 +947,7 @@ export function resolveSessionStates(
       states[session.id] = 'locked'
       continue
     }
-    const inputsReady = session.inputs.slots.every(inputId => slots[inputId]?.confirmed)
+    const inputsReady = session.inputs.slots.every(inputId => inputSatisfied(inputId, slots))
     states[session.id] = inputsReady ? 'open' : 'locked'
   }
   return states

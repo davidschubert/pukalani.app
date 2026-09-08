@@ -848,7 +848,8 @@
         "failed": "Das hat gerade nicht geklappt. Versuch es gleich nochmal.",
         "dismiss": "Verstanden",
         "notReady": "Dafür ist noch zu wenig da — oben steht, was fehlt.",
-        "slotConfirmed": "Das hast du schon bestätigt. Wenn du es ändern willst, klick auf Korrigieren."
+        "slotConfirmed": "Das hast du schon bestätigt. Wenn du es ändern willst, klick auf Korrigieren.",
+        "readingLimit": "Für heute sind die Lese-Läufe aufgebraucht. Morgen geht es weiter — eure Vorbilder und die bisherige Lesung bleiben stehen."
       },
       "versions": {
         "open": "Frühere Fassungen",
@@ -2581,6 +2582,35 @@
         "generic": "Das hat nicht geklappt. Versucht es bitte noch einmal."
       },
       "skipped": "Ihr habt euch für Fridas Vorschlag entschieden — Vorbilder entfallen in diesem Kapitel. Ihr könnt die Weiche oben jederzeit korrigieren."
+    },
+    "reading": {
+      "title": "Was Frida darin liest",
+      "intro": "Jedes Vorbild wird an eurer Foundation gemessen, nicht umgekehrt: Was trägt schon, weil es zu Archetyp, Werten und Ton passt — und was geht besser? Die Stelle, an der gemessen wurde, steht bei jedem Urteil.",
+      "state": {
+        "read": "gelesen",
+        "stale": "veraltet"
+      },
+      "keeps": "Trägt schon · {count}",
+      "improves": "Geht besser · {count}",
+      "anchor": "gemessen an: {anchor}",
+      "unread": "Noch nicht gelesen",
+      "unreadHint": "Kommt mit dem nächsten Lauf dazu.",
+      "empty": "Legt zuerst Vorbilder ab — dann liest Frida sie gegen eure Foundation.",
+      "running": "Frida liest eure Vorbilder …",
+      "run": {
+        "first": "Vorbilder lesen",
+        "more": "{count} neue Vorbilder lesen",
+        "again": "Vorbilder erneut lesen"
+      },
+      "limits": "Bis {max} Läufe je Marke und Tag",
+      "remaining": "Heute noch {count} von {max} Läufen",
+      "error": {
+        "unavailable": "Das Lesen von Bildern ist auf dieser Instanz gerade nicht eingerichtet. Das Kapitel geht trotzdem weiter — Frida schlägt euch die Richtung aus eurer Foundation vor.",
+        "noImages": "Es liegt kein Vorbild da, das gelesen werden könnte.",
+        "rateLimited": "Das ging zu schnell hintereinander. Wartet einen Moment und versucht es noch einmal.",
+        "notFound": "Diese Marke gibt es nicht mehr.",
+        "generic": "Das hat nicht geklappt. Versucht es bitte noch einmal."
+      }
     }
   }
 }

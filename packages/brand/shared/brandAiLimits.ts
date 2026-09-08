@@ -104,6 +104,28 @@ export const BRAND_AI_TALK_DAILY_LIMIT = 40
 export const BRAND_AI_REVIEW_DAILY_LIMIT = 120
 
 /**
+ * DIE LESUNG DER VORBILDER je Branding (Brand Design D2b, §2.2 Leitplanke d):
+ * DREI Läufe an einem Tag.
+ *
+ * ── WARUM SO WENIG ────────────────────────────────────────────────────────
+ * Ein Lauf schickt bis zu ZWÖLF Bilder an ein multimodales Modell — er ist der
+ * teuerste einzelne Aufruf dieses Layers, um eine Grössenordnung teurer als
+ * ein Entwurf. Und er ist ein SELTENER Vorgang: der Kunde legt seine Vorbilder
+ * ab und lässt sie lesen. Drei decken den Normalfall vollständig — einmal
+ * lesen, einmal nach dem Nachlegen, einmal für einen Irrtum — und der vierte
+ * Lauf am selben Tag wäre keine neue Erkenntnis, sondern dieselbe Frage.
+ *
+ * Der Eimer hängt am BRANDING (wie Gespräch und Spezialist): wer zwei Marken
+ * baut, hat zwei Moodboards. Die Rechnung des Menschen deckelt weiterhin
+ * `brandAiAccountDayKey` (200), die des Betreibers der Instanz-Deckel.
+ *
+ * §2.2 nennt daneben „12 Bilder je Lauf" — die Zahl steht schon in
+ * `brandInspiration.ts` als harte Grenze der ABLAGE und wird hier bewusst
+ * nicht wiederholt: mehr als zwölf Bilder kann eine Marke gar nicht haben.
+ */
+export const BRAND_DESIGN_READING_DAILY_LIMIT = 3
+
+/**
  * WAS EIN AUFRUF IM REVIEW-EIMER KOSTET (Plan §13) — nicht jeder gleich viel.
  *
  * Stufe 1 ist der Normalfall und kostet 1. Stufe 2 läuft auf dem TEUREN
@@ -161,6 +183,7 @@ export interface BrandAiLimits {
   slotDay: number
   talkDay: number
   reviewDay: number
+  readingDay: number
   accountDay: number
   instanceDay: number
 }
@@ -170,6 +193,7 @@ export const BRAND_AI_LIMITS: BrandAiLimits = {
   slotDay: BRAND_AI_SLOT_DAILY_LIMIT,
   talkDay: BRAND_AI_TALK_DAILY_LIMIT,
   reviewDay: BRAND_AI_REVIEW_DAILY_LIMIT,
+  readingDay: BRAND_DESIGN_READING_DAILY_LIMIT,
   accountDay: BRAND_AI_ACCOUNT_DAILY_LIMIT,
   instanceDay: BRAND_AI_INSTANCE_DAILY_DEFAULT,
 }
@@ -230,6 +254,20 @@ export function brandAiReviewDayKey(profileId: string): string {
  * geteilten Rate-Limit-Store und ist damit auch über mehrere Prozesse hinweg
  * EIN Deckel (mit Redis; ohne Redis zählt jede Instanz für sich, wie überall).
  */
+/**
+ * DIE VORBILDER-LESUNG EINES BRANDINGS (D2b) — ohne Slot und ohne Konto, aus
+ * denselben zwei Gründen wie beim Gespräch und beim Spezialisten.
+ *
+ * Ohne SLOT, obwohl der Lauf genau eine Session bedient (`g.reading`): der
+ * Slot-Eimer zählt ANLÄUFE AN EINER FRAGE (10/Tag) und wäre hier drei Mal zu
+ * gross. Ein eigener Eimer sagt ausserdem im Log die Wahrheit — „zu oft
+ * entworfen" an einer Stelle, an der niemand entworfen hat, wäre die falsche
+ * Auskunft an den Betreiber.
+ */
+export function brandDesignReadingDayKey(profileId: string): string {
+  return `brand-reading-day:${profileId}`
+}
+
 export function brandAiInstanceDayKey(): string {
   return 'brand-ai-instance-day'
 }
@@ -254,6 +292,13 @@ export const BRAND_AI_TALK_LIMIT_CODE = 'brand_ai_talk_limit'
  * an der niemand geredet hat, wäre die falsche Auskunft an den Betreiber.
  */
 export const BRAND_AI_REVIEW_LIMIT_CODE = 'brand_ai_review_limit'
+/**
+ * Der Deckel der Vorbilder-Lesung (D2b). Er erreicht die Oberfläche WIRKLICH:
+ * anders als beim Spezialisten ist der Lauf kein fail-softes Nebenher, sondern
+ * das, was der Mensch gerade angeklickt hat — er bekommt eine 429 mit Grund
+ * und die Zeile „heute keine Läufe mehr".
+ */
+export const BRAND_DESIGN_READING_LIMIT_CODE = 'brand_reading_limit'
 export const BRAND_AI_DAILY_LIMIT_CODE = 'brand_ai_daily_limit'
 export const BRAND_AI_INSTANCE_LIMIT_CODE = 'brand_ai_instance_limit'
 
@@ -262,6 +307,7 @@ export type BrandAiRejectionCode =
   | typeof BRAND_AI_SLOT_LIMIT_CODE
   | typeof BRAND_AI_TALK_LIMIT_CODE
   | typeof BRAND_AI_REVIEW_LIMIT_CODE
+  | typeof BRAND_DESIGN_READING_LIMIT_CODE
   | typeof BRAND_AI_DAILY_LIMIT_CODE
   | typeof BRAND_AI_INSTANCE_LIMIT_CODE
 
@@ -270,6 +316,7 @@ const REJECTION_CODES: readonly string[] = [
   BRAND_AI_SLOT_LIMIT_CODE,
   BRAND_AI_TALK_LIMIT_CODE,
   BRAND_AI_REVIEW_LIMIT_CODE,
+  BRAND_DESIGN_READING_LIMIT_CODE,
   BRAND_AI_DAILY_LIMIT_CODE,
   BRAND_AI_INSTANCE_LIMIT_CODE,
 ]
@@ -297,6 +344,7 @@ export function brandAiRejectionMessageKey(value: unknown): string | null {
   // bleibt trotzdem vollständig — eine Lücke hier wäre ein Nein ohne Satz,
   // sobald irgendwann eine Route den Code doch weiterreicht.
   if (value === BRAND_AI_REVIEW_LIMIT_CODE) return 'brand.workspace.generate.reviewLimit'
+  if (value === BRAND_DESIGN_READING_LIMIT_CODE) return 'brand.workspace.generate.readingLimit'
   if (value === BRAND_AI_DAILY_LIMIT_CODE) return 'brand.workspace.generate.dailyLimit'
   return 'brand.workspace.generate.instanceLimit'
 }
@@ -324,6 +372,13 @@ export interface BrandAiQuotaCounts {
    * Gesprächszug `talkDay`, ein Schliess-Aufruf `reviewDay`.
    */
   reviewDay: number
+  /**
+   * Zählerstand des Lesungs-Eimers nach dieser Buchung (Brand Design D2b).
+   *
+   * Der VIERTE enge Zähler, und wie die drei anderen ist in EINEM Aufruf immer
+   * nur einer belegt.
+   */
+  readingDay: number
   /** Zählerstand des Konto-Eimers nach dieser Buchung. */
   accountDay: number
   /** Zählerstand des Instanz-Eimers nach dieser Buchung. */
@@ -357,6 +412,7 @@ export function decideBrandAiQuota(
   if (counts.slotDay > limits.slotDay) return BRAND_AI_SLOT_LIMIT_CODE
   if (counts.talkDay > limits.talkDay) return BRAND_AI_TALK_LIMIT_CODE
   if (counts.reviewDay > limits.reviewDay) return BRAND_AI_REVIEW_LIMIT_CODE
+  if (counts.readingDay > limits.readingDay) return BRAND_DESIGN_READING_LIMIT_CODE
   if (counts.accountDay > limits.accountDay) return BRAND_AI_DAILY_LIMIT_CODE
   if (counts.instanceDay > limits.instanceDay) return BRAND_AI_INSTANCE_LIMIT_CODE
   return null

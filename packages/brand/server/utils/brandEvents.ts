@@ -111,6 +111,12 @@ export type BrandEventType =
    */
   | 'design.inspiration.added'
   | 'design.inspiration.removed'
+  /**
+   * EIN VISION-LAUF ÜBER DIE VORBILDER (D2b, §2.14). Kennzahlen: Bildzahl,
+   * gelesene Zeilen, Urteils-Verteilung, Modell-Kennung, Dauer — nie ein Bild,
+   * nie ein Prompt, nie eine Begründung.
+   */
+  | 'design.reading.run'
 
 export interface BrandEventInput {
   type: BrandEventType

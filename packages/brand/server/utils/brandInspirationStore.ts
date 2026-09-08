@@ -8,6 +8,7 @@ import {
   brandInspirationSlotValue,
 } from '../../shared/brandInspiration'
 import { canEnterBrandStep, resolveBrandJourney } from '../../shared/brandJourney'
+import { type BrandReadingEntry, parseBrandReading, serializeBrandReading } from '../../shared/brandReading'
 import {
   BRAND_STEPS_TABLE,
   type BrandProfileRow,
@@ -94,7 +95,64 @@ export function toBrandInspirationEntry(row: BrandInspirationRow): BrandInspirat
     note: row.note ?? '',
     filename: row.filename ?? '',
     createdAt: row.$createdAt,
+    // FAIL-SOFT (s. `parseBrandReading`): eine unlesbare Lesung ist „noch
+    // nicht gelesen" — der nächste Lauf schreibt sie neu.
+    reading: parseBrandReading(row.reading),
   }
+}
+
+/**
+ * DIE LESUNG EINER ZEILE SCHREIBEN (D2b). Sie steht in der Zeile des BILDES
+ * und nicht im Slot-Wert: zwölf Lesungen mit je drei Belegungen, Anker,
+ * Begründung und Vorschlag sprengen jedes Slot-Feld (Kopf dieser Datei), und
+ * sie gehören dem Bild — wird es entfernt, ist auch seine Lesung weg, ohne
+ * dass irgendwo aufgeräumt werden müsste.
+ *
+ * FAIL-SOFT je Zeile: scheitert eine, bleiben die anderen. Der Lauf meldet
+ * hinterher, wie viele wirklich geschrieben wurden, und die Veraltet-Rechnung
+ * (`brandReadingState`) sieht die Lücke von selbst.
+ */
+export async function writeBrandInspirationReading(
+  event: H3Event,
+  fileId: string,
+  reading: BrandReadingEntry,
+): Promise<boolean> {
+  const { tablesDB, databaseId } = brandDb(event)
+  try {
+    await tablesDB.updateRow({
+      databaseId,
+      tableId: BRAND_INSPIRATION_TABLE,
+      rowId: fileId,
+      data: { reading: serializeBrandReading(reading) },
+    })
+    return true
+  }
+  catch (error) {
+    logEvent('warn', 'brand.inspiration_reading_write_failed', {
+      fileId,
+      message: error instanceof Error ? error.message : 'unknown',
+    })
+    return false
+  }
+}
+
+/**
+ * DIE BYTES EINES VORBILDS — server-only, für den Vision-Lauf.
+ *
+ * Sie gehen NIE an einen Browser (dafür ist die Ausliefer-Route da, die Besitz
+ * prüft und `private, no-store` setzt) und NIE in ein Log. Der Aufrufer prüft
+ * VORHER die Zugehörigkeit der Marke; hier steht nur das Holen.
+ */
+export async function readBrandInspirationBytes(
+  event: H3Event,
+  fileId: string,
+): Promise<Buffer> {
+  const admin = createAdminClient(event)
+  const bytes = await admin.storage.getFileView({
+    bucketId: BRAND_INSPIRATION_BUCKET,
+    fileId,
+  })
+  return Buffer.from(bytes as ArrayBuffer)
 }
 
 /**

@@ -1,4 +1,5 @@
 import { BRAND_INSPIRATION_AREAS } from './brandDesignVocab'
+import type { BrandReadingEntry } from './brandReading'
 import { formatBrandSlotStructured } from './brandSlotFormat'
 
 /**
@@ -128,6 +129,16 @@ export interface BrandInspirationEntry {
   /** Wie die Datei beim Hochladen hiess. Anzeige-Hilfe, nie ein Pfad. */
   readonly filename: string
   readonly createdAt: string
+  /**
+   * DIE LESUNG DIESES BILDES (D2b) — `null` heisst „noch nicht gelesen".
+   *
+   * Sie reist mit der LISTE und nicht über eine zweite Route: es ist dieselbe
+   * Zeile, und eine eigene Abfrage je Bild wären zwölf Aufrufe für eine
+   * Ansicht, die ohnehin alle zwölf Karten zeigt. Wie die Notiz und der
+   * Bereich ist sie INTERN (`g.reading`, `sensitivity: 'internal'`) — sie
+   * beschreibt ein Fremdwerk und verlässt das Kapitel nie.
+   */
+  readonly reading: BrandReadingEntry | null
 }
 
 /**

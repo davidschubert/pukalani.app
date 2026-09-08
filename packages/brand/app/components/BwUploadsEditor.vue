@@ -7,10 +7,7 @@ import {
   BRAND_INSPIRATION_NOTE_MAX,
   type BrandInspirationEntry,
 } from '../../shared/brandInspiration'
-import type {
-  BrandInspirationListResponse,
-  BrandInspirationWriteResponse,
-} from '../../shared/types/brand'
+import type { BrandInspirationWriteResponse } from '../../shared/types/brand'
 
 /**
  * DAS INSTRUMENT `uploads` — die Vorbilder des Kunden (`g.inspiration`,
@@ -22,6 +19,13 @@ import type {
  * Karte je Bild mit Vorschau, „Vorbild n", Dateiname, Bereich als Auswahl,
  * Notiz, Entfernen; darunter die Ablagefläche, der Zähler, die Drossel-Zeile
  * und der Privatheits-Hinweis.
+ *
+ * ── SEIT D2b GEHÖRT DIE LISTE NICHT MEHR DIESER KOMPONENTE ───────────────
+ * Sie liegt in `useBrandInspiration(profileId)`, weil der Abschnitt DARUNTER
+ * (`BwReadingPanel`) dieselben Zeilen meint: wer hier ein Bild ablegt, macht
+ * die Lesung dort veraltet. Zwei eigene Listen wären zwei Stände, und der
+ * zweite behauptete weiter, alles sei gelesen. Alles andere unten gilt
+ * unverändert.
  *
  * ── DIE WAHRHEIT LIEGT AUF DEM SERVER, NICHT HIER ─────────────────────────
  * Anders als der Klickdummy hält diese Komponente KEINE Object-URLs und keine
@@ -58,8 +62,9 @@ const props = defineProps<{
 
 const { t, locale } = useI18n()
 
-const items = ref<BrandInspirationEntry[]>([])
-const loading = ref(true)
+const inspiration = useBrandInspiration(props.profileId)
+const { items } = inspiration
+const loading = ref(!inspiration.loaded.value)
 const busy = ref(false)
 const errorKey = ref('')
 
@@ -81,7 +86,7 @@ const areaItems = computed(() => BRAND_INSPIRATION_AREAS.map(area => ({
   value: area.id,
 })))
 
-const full = computed(() => items.value.length >= BRAND_INSPIRATION_MAX)
+const full = inspiration.full
 const canAct = computed(() => !props.disabled && !busy.value)
 
 interface FetchErrorLike {
@@ -111,13 +116,12 @@ function messageKey(error: unknown): string {
   return 'generic'
 }
 
-const base = computed(() => `/api/brand/profiles/${encodeURIComponent(props.profileId)}/inspiration`)
+const base = computed(() => inspiration.base)
 
 async function load(): Promise<void> {
   loading.value = true
   try {
-    const res = await $fetch<BrandInspirationListResponse>(base.value)
-    items.value = res.items
+    await inspiration.load()
     errorKey.value = ''
   }
   catch (error) {
@@ -176,7 +180,7 @@ async function addFiles(files: readonly File[]): Promise<void> {
           method: 'POST',
           body: form,
         })
-        items.value = res.items
+        inspiration.setItems(res.items)
       }
       catch (error) {
         errorKey.value = messageKey(error)
@@ -196,7 +200,7 @@ async function patchItem(id: string, body: { area?: string, note?: string }): Pr
       `${base.value}/${encodeURIComponent(id)}`,
       { method: 'PATCH', body },
     )
-    items.value = res.items
+    inspiration.setItems(res.items)
     errorKey.value = ''
   }
   catch (error) {
@@ -215,7 +219,7 @@ async function removeItem(id: string): Promise<void> {
       `${base.value}/${encodeURIComponent(id)}`,
       { method: 'DELETE' },
     )
-    items.value = res.items
+    inspiration.setItems(res.items)
     errorKey.value = ''
   }
   catch (error) {

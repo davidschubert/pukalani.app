@@ -15,6 +15,7 @@ import {
   brandCheckAccountDayKey,
   brandCheckInstanceDayKey,
   brandCheckIpDayKey,
+  brandDesignReadingDayKey,
   decideBrandAiQuota,
   decideBrandCheckQuota,
   resolveBrandAiInstanceCap,
@@ -32,9 +33,10 @@ import { countActiveBrandGenerations } from './brandGenerators'
  * ersten Nein. Die Zahlen, die Schlüssel und die Entscheidung stehen pur in
  * `shared/brandAiLimits.ts`; hier steht nur, WANN gezählt wird.
  *
- * Der ENGE Zähler ist seit Paket 4 einer von DREIEN (`kind`): der Slot-Eimer
- * für einen Entwurf, der Gesprächs-Eimer für einen Berater-Zug, der
- * Review-Eimer für den Schliess-Aufruf. Nie zwei davon.
+ * Der ENGE Zähler ist seit Brand Design D2b einer von VIEREN (`kind`): der
+ * Slot-Eimer für einen Entwurf, der Gesprächs-Eimer für einen Berater-Zug, der
+ * Review-Eimer für den Schliess-Aufruf, der Lesungs-Eimer für den Vision-Lauf
+ * über die Vorbilder. Nie zwei davon.
  *
  * ── GEBUCHT WIRD BEIM START, NICHT BEIM ERFOLG ────────────────────────────
  * Ein Lauf, der beim Anbieter scheitert oder den der Mensch abbricht, ist
@@ -67,7 +69,7 @@ export interface BrandAiQuotaRequest {
    * Slot-Typ, ein Gesprächszug auf das Gespräch DIESES Brandings. Warum das
    * zwei Eimer sind und kein geteilter, steht im Kopf von `brandAiLimits.ts`.
    */
-  kind: 'slot' | 'talk' | 'review'
+  kind: 'slot' | 'talk' | 'review' | 'reading'
   /** Nur bei `kind: 'slot'` — der Slot-TYP, dessen Anläufe gezählt werden. */
   slotId?: string
   /**
@@ -102,9 +104,27 @@ export interface BrandAiQuotaRejection {
   retryAfterSec: number
 }
 
+/**
+ * DER ZÄHLERSTAND ALS NEBENPRODUKT — für Aufrufer, die dem Menschen sein
+ * REST-KONTINGENT nennen (die Vorbilder-Lesung, D2b: „noch 2 von 3 Läufen").
+ *
+ * Als optionales Mitschreib-Objekt und nicht als Rückgabewert: die Rückgabe
+ * ist heute `null` = „darf laufen", und daraus ein Objekt zu machen hiesse,
+ * drei bestehende Aufrufer (Entwurf, Gespräch, Spezialist) für eine Zahl
+ * umzubauen, die keiner von ihnen zeigt. Gefüllt wird das ENGE Fenster —
+ * genau das, dessen Deckel der Mensch sieht.
+ */
+export interface BrandAiQuotaMeasurement {
+  /** Stand des engen Eimers NACH dieser Buchung (0, wenn nicht gebucht wurde). */
+  narrowCount: number
+  /** Sekunden bis zum Ende seines Fensters. */
+  narrowResetSec: number
+}
+
 export async function bookBrandAiQuota(
   event: H3Event,
   request: BrandAiQuotaRequest,
+  measurement?: BrandAiQuotaMeasurement,
 ): Promise<BrandAiQuotaRejection | null> {
   const limits = {
     ...BRAND_AI_LIMITS,
@@ -117,6 +137,7 @@ export async function bookBrandAiQuota(
     slotDay: 0,
     talkDay: 0,
     reviewDay: 0,
+    readingDay: 0,
     accountDay: 0,
     instanceDay: 0,
   }
@@ -137,7 +158,9 @@ export async function bookBrandAiQuota(
     ? brandAiTalkDayKey(request.profileId)
     : request.kind === 'review'
       ? brandAiReviewDayKey(request.profileId)
-      : brandAiSlotDayKey(request.profileId, request.slotId ?? '')
+      : request.kind === 'reading'
+        ? brandDesignReadingDayKey(request.profileId)
+        : brandAiSlotDayKey(request.profileId, request.slotId ?? '')
   // Das GEWICHT (s. `weight`): mehrere Treffer auf denselben Schlüssel, aber
   // EIN Aufruf — entschieden wird nach dem letzten Stand, nicht nach jedem.
   const weight = Math.max(1, Math.trunc(request.weight ?? 1))
@@ -145,8 +168,13 @@ export async function bookBrandAiQuota(
   for (let extra = 1; extra < weight; extra++) {
     narrowState = await store.hit(`${prefix}${narrowKey}`, BRAND_AI_DAY_WINDOW_MS)
   }
+  if (measurement) {
+    measurement.narrowCount = narrowState.count
+    measurement.narrowResetSec = retryAfter(narrowState.resetInMs)
+  }
   if (request.kind === 'talk') counts.talkDay = narrowState.count
   else if (request.kind === 'review') counts.reviewDay = narrowState.count
+  else if (request.kind === 'reading') counts.readingDay = narrowState.count
   else counts.slotDay = narrowState.count
   const narrow = decideBrandAiQuota(counts, limits)
   if (narrow) return { code: narrow, retryAfterSec: retryAfter(narrowState.resetInMs) }

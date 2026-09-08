@@ -23,6 +23,7 @@
 import type { BrandFoundationView } from '../brandFoundation'
 import type { BrandGenerationOutcome } from '../brandGeneration'
 import type { BrandInspirationEntry } from '../brandInspiration'
+import type { BrandReadingState } from '../brandReading'
 import type { BrandPublicationBlocker, BrandPublicationViewStatus } from '../brandPublication'
 import type { BrandWaitlistStatus } from '../brandWaitlistAdmin'
 import type {
@@ -2027,15 +2028,45 @@ export interface BrandDesignUnlockResponse {
  * bekommt es (§2.13). Ein Feld `url` hier wäre der kürzeste Weg zu genau dem
  * Leck, das die eigene Ausliefer-Route verhindert.
  */
-export interface BrandInspirationListResponse {
+export interface BrandInspirationItemsResponse {
   items: BrandInspirationEntry[]
   /** Wie viele noch gehen — die Werkstatt schreibt daraus „n von 12". */
   max: number
 }
 
 /** Anlegen und Ändern antworten mit der GANZEN Liste, damit die Karte nicht nachlädt. */
-export interface BrandInspirationWriteResponse extends BrandInspirationListResponse {
+export interface BrandInspirationWriteResponse extends BrandInspirationItemsResponse {
   ok: true
   /** Der gerade angelegte bzw. geänderte Eintrag — `null` beim Entfernen. */
   item: BrandInspirationEntry | null
+}
+
+/**
+ * DAS FAZIT DES LETZTEN LAUFS (D2b) — es steht im Slot-Wert von `g.reading`,
+ * nicht in der Tabelle, und wird für die Werkstatt daraus zurückgelesen.
+ *
+ * `state` ist GERECHNET (`brandReadingState`), nicht gespeichert: ein zweiter
+ * Stempel könnte von den Bildern abweichen, und die Frage „passt die Lesung
+ * noch zu dem, was da liegt" hat genau eine richtige Antwort — die aus den
+ * Zeilen. Der Client rechnet dieselbe Regel nach jedem Upload selbst nach.
+ */
+export interface BrandInspirationReadingView {
+  state: BrandReadingState
+  summary: { keeps: string[], improves: string[] }
+  /** Zeit, Anzahl und Modell des letzten Laufs — fertiger Satz, kein Datensatz. */
+  runLine: string
+}
+
+export interface BrandInspirationListResponse extends BrandInspirationItemsResponse {
+  reading: BrandInspirationReadingView
+}
+
+/**
+ * DIE ANTWORT EINES LAUFS (`POST …/inspiration/read`, D2b) — dieselbe Liste
+ * wie beim GET, plus das REST-KONTINGENT: der Mensch soll unter dem Knopf
+ * sehen, wie oft er heute noch lesen lassen kann, ohne es zählen zu müssen.
+ */
+export interface BrandInspirationReadResponse extends BrandInspirationListResponse {
+  ok: true
+  quota: { used: number, limit: number, remaining: number }
 }
