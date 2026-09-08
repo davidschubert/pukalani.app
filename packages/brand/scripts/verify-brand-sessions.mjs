@@ -107,6 +107,23 @@
  *     Er braucht `BRAND_DEV_STUB_DNA=1`, sonst kostete jeder Lauf Geld; ohne
  *     die Variable prüft der Abschnitt stattdessen die 503 `dna_unavailable`.
  *
+ * Seit Brand Design D5a/D5b (§2.5 Stufen 1 und 2) kommt das ZEICHEN dazu:
+ *
+ * 27. RICHTUNG, BRIEFING, SETZUNGEN: die Bühne von `mark` bekommt DNA,
+ *     Farbwelt UND Schriftpaar aus drei fremden Kapiteln; die Seite liefert
+ *     die gesetzte Wortmarke als SVG mit den BESTÄTIGTEN Farben, der
+ *     bestätigten Schrift und den bestätigten Schrift-Regeln aus (nicht nur
+ *     Namen). Eine erfundene Richtung ⇒ 409 `invariant_violated`, dieselbe
+ *     Antwort für eine erfundene Setzungs-Wahl. `POST …/mark/brief` schreibt
+ *     sechs Blöcke als unbestätigten Slot-Wert von `j.brief` und nennt das
+ *     Rest-Kontingent — die ZWEI gerechneten Blöcke (Schutzraum, Varianten)
+ *     stehen dabei wörtlich so da, wie die Regel sie rechnet, egal was der
+ *     Lauf geantwortet hat. Fremdes Konto ⇒ 404. Danach ist das Kapitel bis
+ *     zur Abnahme durchlaufbar und `imagery` geht auf.
+ *     Er braucht `BRAND_DEV_STUB_MARK=1`, sonst kostete jeder Lauf Geld; ohne
+ *     die Variable prüft der Abschnitt stattdessen die 503
+ *     `mark_brief_unavailable`.
+ *
  * ── WAS DIESER BEWEIS NICHT BEWEIST ──────────────────────────────────────
  * Den Anbieter. Ohne `NUXT_AI_KEY` wirft `aiCompleteStream` (503), die Route
  * schickt `generation.failed` mit `provider_error` — und genau das ist hier
@@ -126,7 +143,7 @@
  * schaltet ihn ein und wirkt NUR dort (`server/utils/brandReview.ts`):
  *
  *   BRAND_DEV_STUB_REVIEW=1 BRAND_DEV_STUB_VISION=1 BRAND_DEV_STUB_DNA=1 \
- *     pnpm --filter branding exec nuxi dev --port 3016
+ *     BRAND_DEV_STUB_MARK=1 pnpm --filter branding exec nuxi dev --port 3016
  *   BRANDING_PORT=3016 node --env-file=apps/branding/.env \
  *     packages/brand/scripts/verify-brand-sessions.mjs
  */
@@ -2642,6 +2659,228 @@ try {
   check('… und das nächste Kapitel `mark` ist danach erreichbar',
     markChapter.status === 200 && markChapter.json?.sessions?.['j.kind']?.state === 'open',
     `${markChapter.status} j.kind=${markChapter.json?.sessions?.['j.kind']?.state}`)
+
+  // ══ 27 · Das Zeichen: das Kapitel `mark` (Brand Design D5a/D5b, §2.5) ════
+  //
+  // ── WAS DIESER ABSCHNITT PRÜFT — UND WAS NICHT ─────────────────────────
+  // Die REGELN (Vorbelegung der Richtung, Klemmung des Briefings, beide
+  // Slot-Werte hin und zurück, der SVG-Satz Zeichen für Zeichen) sind
+  // vollständig in `tests/brandDesignMark.test.ts` belegt. HIER wird geprüft,
+  // was ein Unit-Test nicht sehen kann: dass die Bühne DREI fremde Kapitel
+  // zugeliefert bekommt, dass die Seite die gesetzte Wortmarke mit den
+  // BESTÄTIGTEN Farben und der BESTÄTIGTEN Schrift ausliefert, dass die
+  // Invarianten an der Route greifen, dass der Briefing-Lauf einen
+  // unbestätigten Slot-Wert schreibt — und dass das Kapitel durchläuft.
+  //
+  // Wie in 25 und 26 gilt: die VORBELEGUNG schreibt der Browser (Autosave,
+  // s. `useBrandMarkWorld`). SSR RECHNET sie aber und malt sie hin, und daran
+  // hängen die Prüfungen unten.
+  //
+  // DIE ERWARTETEN FARBEN STEHEN HIER ALS LITERAL und werden nicht aus der
+  // Antwort abgeleitet (Beweis-Regel 1): `#4a3123` (Abschnitt 25) ergibt über
+  // die Themes-Rampe die Tinte `#352217`, die warme Neutral-Rampe das Papier
+  // `#fcfaf9`. Rechnet der Layer anders, soll das hier auffallen.
+  console.log('\n27 · Brand Design: das Zeichen (D5a/D5b)')
+
+  const markBase = `${base}/steps/mark`
+  const markPage = async () => call(`/de/brand/${profileId}/mark`, { cookie: account.cookie })
+  const markInk = '#352217'
+  const markPaper = '#fcfaf9'
+  const markKinds = ['word', 'pictorial', 'combination', 'monogram']
+
+  check('die Bühne bekommt DNA, Farbwelt UND Schriftpaar aus drei fremden Kapiteln',
+    typeof markChapter.json?.sourceValues?.['g.mix'] === 'string'
+    && markChapter.json?.sourceValues?.['h.base'] === '#4a3123'
+    && markChapter.json?.sourceValues?.['h.neutral'] === 'warm'
+    && markChapter.json?.sourceValues?.['h.accent'] === '#22392f'
+    && markChapter.json?.sourceValues?.['i.pair'] === 'editorial'
+    && String(markChapter.json?.sourceValues?.['i.rules'] ?? '').includes('600'),
+    JSON.stringify(markChapter.json?.sourceValues ?? {}).slice(0, 240))
+
+  const markView = await markPage()
+  check('die Werkstatt zeigt den Zeichen-Abschnitt',
+    markView.status === 200 && markView.text.includes('data-brand-mark'),
+    `${markView.status} ${markView.text.length} Zeichen`)
+  check('… mit allen vier Richtungen des Katalogs',
+    markKinds.every(kind => markView.text.includes(`data-mark-kind="${kind}"`)),
+    markKinds.filter(kind => !markView.text.includes(`data-mark-kind="${kind}"`)).join(', '))
+  check('… und mit genau einem markierten Vorschlag',
+    markView.text.split('Aus eurer DNA').length - 1 === 1,
+    `${markView.text.split('Aus eurer DNA').length - 1}× gefunden`)
+
+  /**
+   * DER UNTERSCHIED ZU EINER BESCHREIBUNG, GEMESSEN: die Seite liefert die
+   * gesetzte Wortmarke als SVG aus — mit der bestätigten Schrift, den
+   * gerechneten Farben und den bestätigten Schrift-Regeln aus Kapitel 3.
+   */
+  check('die Setzung steht als SVG auf der Seite — mit der bestätigten Schrift',
+    markView.text.includes('Source Serif 4') && markView.text.includes('<text'),
+    'kein <text> in der Überschriften-Schrift gefunden')
+  check('… mit den gerechneten Farben der bestätigten Farbwelt',
+    markView.text.includes(markInk) && markView.text.includes(markPaper),
+    `Tinte ${markView.text.includes(markInk)} · Papier ${markView.text.includes(markPaper)}`)
+  check('… und mit den bestätigten Schrift-Regeln (Gewicht 600, Laufweite -0,5)',
+    markView.text.includes('font-weight="600"') && markView.text.includes('letter-spacing="-0.5"'),
+    'Gewicht oder Laufweite nicht in der Setzung')
+  check('… der Schutzraum ist GEZEICHNET, nicht beschrieben',
+    markView.text.includes('stroke-dasharray="4 4"'), 'keine Schutzraum-Linie gefunden')
+
+  // ── EINE ANDERE RICHTUNG ÄNDERT DIE VORBELEGUNG DER WAHL ───────────────
+  const pickKind = await call(markBase, {
+    method: 'PATCH',
+    cookie: account.cookie,
+    body: { revision: await stepRevision('mark'), slots: { 'j.kind': { value: 'monogram', confirmed: true } } },
+  })
+  check('eine andere Richtung lässt sich wählen UND bestätigen',
+    pickKind.status === 200, `${pickKind.status} ${pickKind.text.slice(0, 160)}`)
+  const monogramView = await markPage()
+  check('… und die Seite zeigt sie als gewählt',
+    monogramView.text.includes('data-mark-kind="monogram" aria-pressed="true"')
+    || /data-mark-kind="monogram"[^>]*aria-pressed="true"/.test(monogramView.text),
+    'die Monogramm-Karte ist nicht als gewählt markiert')
+
+  // ── EIN SATZ IST KEINE RICHTUNG (Invariante `oneOf`, D5a) ──────────────
+  const reopenKind = await call(markBase, {
+    method: 'PATCH',
+    cookie: account.cookie,
+    body: { revision: await stepRevision('mark'), slots: { 'j.kind': { confirmed: false } } },
+  })
+  check('Vorprobe: „Korrigieren" öffnet die Richtung wieder',
+    reopenKind.status === 200, `${reopenKind.status} ${reopenKind.text.slice(0, 200)}`)
+  const proseKind = await call(markBase, {
+    method: 'PATCH',
+    cookie: account.cookie,
+    body: {
+      revision: await stepRevision('mark'),
+      slots: { 'j.kind': { value: 'Eine Wortmarke mit einem Wellenpunkt über dem i', confirmed: true } },
+    },
+  })
+  check('eine erfundene Richtung wird abgewiesen — `invariant_violated`',
+    proseKind.status >= 400 && proseKind.json?.reason === 'invariant_violated',
+    `${proseKind.status} ${proseKind.text.slice(0, 200)}`)
+  const proseSetting = await call(markBase, {
+    method: 'PATCH',
+    cookie: account.cookie,
+    body: { revision: await stepRevision('mark'), slots: { 'j.pick': { value: 'die linke', confirmed: true } } },
+  })
+  check('dasselbe für eine erfundene Setzungs-Wahl',
+    proseSetting.status >= 400 && proseSetting.json?.reason === 'invariant_violated',
+    `${proseSetting.status} ${proseSetting.text.slice(0, 200)}`)
+
+  // ── DER BRIEFING-LAUF ──────────────────────────────────────────────────
+  const briefPath = `${base}/mark/brief`
+  const runBrief = await call(briefPath, { method: 'POST', cookie: account.cookie })
+  const briefStub = runBrief.status === 200
+  if (!briefStub) {
+    check('ohne Text-Modell antwortet der Lauf ruhig mit 503 `mark_brief_unavailable`',
+      runBrief.status === 503 && runBrief.json?.reason === 'mark_brief_unavailable',
+      `${runBrief.status} ${JSON.stringify(runBrief.json?.reason ?? null)}`)
+  }
+  else {
+    const brief = runBrief.json?.brief ?? {}
+    check('der Lauf antwortet 200, nennt das Rest-Kontingent und liefert sechs Felder',
+      Object.keys(brief).length === 6 && runBrief.json?.quota?.limit === 10,
+      `${runBrief.status} ${JSON.stringify(runBrief.json?.quota ?? null)} · ${Object.keys(brief).length} Felder`)
+    check('… die vier geschriebenen Felder tragen Text',
+      ['character', 'formLanguage', 'noGos', 'places']
+        .every(field => typeof brief[field] === 'string' && brief[field].length > 0),
+      JSON.stringify(brief).slice(0, 200))
+
+    /**
+     * DIE ZWEI GERECHNETEN FELDER — die Zusage von D5a: was das Modell zu
+     * Schutzraum und Varianten sagt, wird VERWORFEN. Der Ersatz schreibt sie
+     * gar nicht erst; hier steht trotzdem, was dann dort stehen MUSS.
+     */
+    check('… Schutzraum und Mindestgrössen sind GERECHNET, nicht geschrieben',
+      String(brief.clearSpace ?? '').includes('Versal-K')
+      && brief.clearSpace.includes('96 px')
+      && brief.clearSpace.includes('24 mm')
+      && brief.clearSpace.includes('24 px'),
+      String(brief.clearSpace ?? '').slice(0, 200))
+    check('… und die Varianten kommen aus dem Vokabular (alle vier)',
+      ['Primär', 'Invertiert', 'Einfarbig', 'Icon-Fläche']
+        .every(label => String(brief.variants ?? '').includes(label)),
+      String(brief.variants ?? '').slice(0, 200))
+
+    const markSlotsAfter = JSON.parse((await tablesDB.getRow({
+      databaseId, tableId: 'brand_steps', rowId: `${profileId}_mark`,
+    })).slots || '{}')
+    const briefSlot = markSlotsAfter['j.brief'] ?? null
+    check('der Slot `j.brief` trägt sechs beschriftete Blöcke',
+      typeof briefSlot?.latestDraft === 'string'
+      && briefSlot.latestDraft.startsWith('## ')
+      && briefSlot.latestDraft.split('\n\n').length === 6,
+      `${(briefSlot?.latestDraft ?? '').split('\n\n').length} Blöcke`)
+    check('… und er ist noch NICHT bestätigt — das tut der Mensch',
+      !briefSlot?.confirmed, JSON.stringify(briefSlot?.confirmed ?? null))
+    const briefView = await markPage()
+    check('… die Werkstatt zeigt das Briefing Feld für Feld',
+      ['character', 'formLanguage', 'clearSpace', 'variants', 'noGos', 'places']
+        .every(field => briefView.text.includes(`data-mark-brief="${field}"`)),
+      'nicht alle sechs Briefing-Felder auf der Seite')
+  }
+
+  // ── Fremd und ohne Anmeldung ───────────────────────────────────────────
+  const foreignBrief = await call(briefPath, { method: 'POST', cookie: stranger.cookie })
+  check('fremdes Konto: der Lauf antwortet 404 (Datentür, nicht 403)',
+    foreignBrief.status === 404, String(foreignBrief.status))
+  const guestBrief = await call(briefPath, { method: 'POST' })
+  check('… ohne Anmeldung: 401/404, nie ein Lauf',
+    guestBrief.status === 401 || guestBrief.status === 404, String(guestBrief.status))
+
+  // ── DAS KAPITEL LÄSST SICH ZU ENDE GEHEN ───────────────────────────────
+  //
+  // `j.examples` schreibt sonst der Browser (s. Kopf); hier steht ein
+  // Platzhalter in der FORM, die die Regel erzeugt — sechs Blöcke.
+  const examplesPlaceholder = [
+    '## Setzungen\nWortmarke: Kailua Coffee · Monogramm: K · Schrift: Source Serif 4',
+    `## Primär\nTinte ${markInk} · Grund ${markPaper} · Schutzraum-Linie #a9836e`,
+    `## Invertiert\nTinte ${markPaper} · Grund ${markInk} · Schutzraum-Linie #c8a694`,
+    '## Einfarbig\nTinte #0c0a09 · Grund #ffffff · Schutzraum-Linie #aba49c',
+    `## Icon-Fläche\nTinte ${markPaper} · Grund #5f4130 · Schutzraum-Linie #e8e6e3`,
+    '## Maße\nSchutzraum = Höhe des Versal-K · Wortmarke mind. 96 px / 24 mm · Monogramm mind. 24 px · Eckenradius 18 %',
+  ].join('\n\n')
+  await seedConfirmed('mark', {
+    'j.kind': 'word',
+    'j.brief': [
+      '## Charakter\nRuhig, handwerklich, überprüfbar.',
+      '## Formsprache\nWeiche Kanten, eine Idee statt einer Szene.',
+      '## Schutzraum & Mindestgrößen\nSchutzraum ringsum = Höhe des Versal-K. Mindestbreite der Wortmarke 96 px digital, 24 mm im Druck; das Monogramm nie unter 24 px.',
+      '## Varianten\nPrimär, Invertiert, Einfarbig, Icon-Fläche.',
+      '## No-Gos\nNicht verzerren, nicht schräg stellen, keinen Schatten.',
+      '## Einsatzorte\nLadenschild, Tüte, Website-Kopf, Rechnung.',
+    ].join('\n\n'),
+    'j.examples': examplesPlaceholder,
+    'j.pick': 'wordmark',
+  })
+
+  const markAcceptance = await call(`${markBase}/acceptance`, { cookie: account.cookie })
+  const markPending = (markAcceptance.json?.sessions ?? []).filter(entry => entry.required && !entry.confirmed)
+  check('nach den vier Bestätigungen steht keine Pflicht-Session mehr offen',
+    markAcceptance.status === 200 && markPending.length === 0,
+    `${markAcceptance.status} · offen: ${JSON.stringify(markPending.map(entry => entry.slotId))}`)
+
+  let markRevision = markAcceptance.json?.revision ?? 0
+  for (const entry of (markAcceptance.json?.sessions ?? []).filter(row => row.confirmed && !row.accepted)) {
+    const taken = await call(`${markBase}/sessions/${entry.slotId}/accept`, {
+      method: 'POST', cookie: account.cookie, body: { revision: markRevision },
+    })
+    if (taken.status !== 200) {
+      check(`Abnahme ${entry.slotId}`, false, `${taken.status} ${taken.text.slice(0, 160)}`)
+      break
+    }
+    markRevision = taken.json?.revision ?? markRevision
+  }
+  const markDone = await call(`${markBase}/complete`, {
+    method: 'POST', cookie: account.cookie, body: { confidence: 'fits' },
+  })
+  check('das Kapitel `mark` lässt sich abnehmen und schliessen',
+    markDone.status === 200, `${markDone.status} ${markDone.text.slice(0, 160)}`)
+
+  const imageryChapter = await call(`${base}/steps/imagery`, { cookie: account.cookie })
+  check('… und das nächste Kapitel `imagery` ist danach erreichbar',
+    imageryChapter.status === 200 && imageryChapter.json?.sessions?.['k.photo']?.state === 'open',
+    `${imageryChapter.status} k.photo=${imageryChapter.json?.sessions?.['k.photo']?.state}`)
 
 }
 catch (error) {
