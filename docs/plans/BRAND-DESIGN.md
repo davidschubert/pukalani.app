@@ -745,6 +745,28 @@ zweite Basis-Kandidat aus der Kachel-Farbwelt ist produktseitig dünn.
 Inhalts-Gate: Rollen-Namen/-Quellen, Kandidaten-Begründungen, Absage-Satz
 der Kontrast-Regel, Frida-Leitern `h.*`.
 
+**Stand D4 (Typografie):** GEBAUT und geprüft 2026-09-08 (Commits a2a30c15,
+b2927d44, d8441b3d, fe3c1b43). Pure Regeln `shared/brandDesignType.ts`
+(Vorbelegung Paar + Hierarchie aus der DNA, Hierarchie als EIN Faktor
+ruhig 1 · dicht 0,85 · plakativ 1,25, Regeln Gewicht 300–700, Laufweite
+−1…+1 px, Versalien, „nie mehr als drei Schriften" als Rechnung), Bühne
+`BwTypePanel` + `useBrandTypeWorld` (Paar-Karten mit echten Schriften,
+Specimen, Szene in der bestätigten Farbwelt), Registry `i.pair`/`i.rules`
+ohne Entwurfs-Generator (Katalog-Id, keine Prosa), neue Invariante `oneOf`.
+**`brand-fonts.css` ist jetzt die Quelle des Katalog-Tests** (Familien UND
+Schnitte). Fund am Klick: `@nuxt/fonts` beschafft nur `400 700` — Schnitt 300
+war nie geladen, der Browser hätte ihn selbst gemalt; Kur
+`fonts.defaults.weights = [300,400,500,600,700]` im Layer (ein Bereich
+`'300 700'` endet bei 400). Beweis 249/249 (Abschnitt 26), 2 518 Tests;
+eigener Klick, gemessen per `getComputedStyle`: Paar Klassisch → Geometrisch
+schaltet alle Überschriften von PT Serif auf Sora, Gewicht 600 und
+Hierarchie Plakativ (52/42 px) greifen, `document.fonts` hält Schnitt 300
+für fünf Familien. Abweichung: ungültige Paar-Id ⇒ 409 `invariant_violated`
+(Layer-Antwort für Formverstöße), nicht 400. Nebenbefund behoben: der
+Doku-Renderer kannte `hex` nicht (leere Invarianten-Zeile seit D3).
+Inhalts-Gate: Paar-Namen/Notizen, `brand.type.*`-Texte, Grenzen (Laufweite
+±1 px statt +4 im Prototyp), Frida-Leiter `i.pair`, Mono-Specimen-Zeile.
+
 | # | Paket | Inhalt | Gate |
 | --- | --- | --- | --- |
 | D0 | Verträge | Registry-Steps + Sessions (Struktur), Vokabulare, Font-Paar-Katalog, `BrandDesignPreset`, `buildBrandDesign`, Ramp-Import als Vertrag, Journey mit Freischaltung | — |
