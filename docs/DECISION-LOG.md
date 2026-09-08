@@ -66,6 +66,22 @@ durch; erfunden wird sie nach wie vor nirgends.
 
 ---
 
+## 2026-09-07 — branding.supply: „Discover Brands" und „Brand Insights" als eigene Vorhaben notiert
+
+**Anlass (David):** Beide Bereiche waren Teil des Klickdummys (Discover-Seite Runde 97,
+Journal Runde 103, dazu Artikel/Profil/Duell/Anatomie) mit Filtern und Sortierung, sind aber
+nie ins Produkt gewandert; seit dem 404-Audit vom 2026-09-03 zeigt die Navigation nur echte
+Ziele, und nirgends stand, dass die beiden geparkt sind.
+
+**Festgehalten:** „Discover Brands" (DB1) kommt in „Jetzt dran" hinter BF1 und den Strang
+„Brand System" — die Daten dafür existieren seit Brand-Check und Marktvergleich (Score mit
+Opt-in, Archetyp, Kategorie, Freigabe fremder Marken). „Brand Insights" (BI1, früher „Journal",
+umbenannt 2026-08-30) wartet auf ein Redaktionskonzept und baut auf DB1 auf. Beide gehen den
+Weg Strategie → Konzept → Prototyp → Freigabe → Pakete; der Dummy bleibt als Vorlage im
+brand-Playground.
+
+---
+
 ## 2026-09-06 — Marktvergleich: Pakete M1–M6 auf main; vier Beschlüsse aus dem Bau
 
 **Stand:** alle sechs Pakete liegen auf `main` (M1 475aeabd · M2 1bb5c55f · M3 11be1ef4 ·
