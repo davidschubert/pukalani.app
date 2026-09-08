@@ -69,8 +69,13 @@ function stepLabel(key: string): string {
  *
  * `BRAND_STEP_KEYS` trägt seit D0 auch die sechs Kapitel von Schicht 2; die
  * Zeile hier meint aber den Weg, den diese Karte anzeigt, und der endet bei
- * `result` (`resolveProfileProgress` rechnet über dieselbe Menge). Wie Brand
- * Design auf der Karte erscheint, entscheidet **D1**.
+ * `result` (`resolveProfileProgress` rechnet über dieselbe Menge).
+ *
+ * SO BLEIBT ES (Brand Design D1, entschieden statt vertagt): die Marken-Karte
+ * ist die Karte der FOUNDATION. Schicht 2 hat ihren eigenen Fortschritt dort,
+ * wo sie stattfindet — im Rail der Werkstatt („N von 6 Kapiteln"). Zwei Zahlen
+ * für zwei Produkte sind ehrlicher als eine gemischte, und ein fertiges
+ * Branding fiele sonst im Deploy-Moment von 100 % auf rund 70 %.
  */
 function stepPosition(profile: BrandProfileSummary): string {
   const index = BRAND_FOUNDATION_STEP_KEYS.indexOf(profile.currentStepKey as BrandFoundationStepKey)

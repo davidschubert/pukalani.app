@@ -194,6 +194,59 @@
           "not_found": "Diese Anfrage gibt es nicht mehr.",
           "generic": "Das hat gerade nicht geklappt. Versucht es in einer Minute noch einmal."
         }
+      },
+      "designUnlock": {
+        "nav": "Brand Design",
+        "title": "Brand Design freischalten",
+        "subtitle": "Brand Design ist studio-begleitet: eine Marke bekommt Schicht 2, wenn das Erstgespräch gelaufen ist. Vorher bleiben die sechs Kapitel gesperrt.",
+        "refresh": "Neu laden",
+        "rowActions": "Aktionen für dieses Branding",
+        "emptyTitle": "Noch kein Branding",
+        "empty": "Sobald jemand eine Marke anlegt, steht sie hier — mit dem Knopf, sobald ihre Foundation steht.",
+        "actionFailed": "Das hat nicht geklappt",
+        "counts": {
+          "all": "Brandings",
+          "ready": "Bereit zum Freischalten",
+          "unlocked": "Freigeschaltet"
+        },
+        "col": {
+          "brand": "Marke",
+          "foundation": "Foundation",
+          "design": "Brand Design",
+          "created": "Angelegt"
+        },
+        "foundation": {
+          "done": "Abgeschlossen",
+          "open": "Offen · {pct} %"
+        },
+        "state": {
+          "locked": "Gesperrt",
+          "unlocked": "Frei seit {date}"
+        },
+        "action": {
+          "unlock": "Brand Design freischalten",
+          "lock": "Freischaltung zurücknehmen"
+        },
+        "done": {
+          "unlock": "Brand Design ist freigeschaltet",
+          "lock": "Freischaltung zurückgenommen"
+        },
+        "confirm": {
+          "unlock": {
+            "title": "Brand Design freischalten?",
+            "body": "„{brand}\" bekommt damit die sechs Kapitel von Schicht 2 — Moodboard, Farbwelt, Typografie, Zeichen, Bildsprache, Bewegung. Ihr könnt das jederzeit zurücknehmen.",
+            "action": "Freischalten"
+          },
+          "lock": {
+            "title": "Freischaltung zurücknehmen?",
+            "body": "Brand Design wird für „{brand}\" wieder gesperrt. Nichts wird gelöscht: bereits erarbeitete Kapitel bleiben liegen und stehen nach einer erneuten Freischaltung wieder da.",
+            "action": "Zurücknehmen"
+          }
+        },
+        "error": {
+          "foundation_incomplete": "Die Brand Foundation dieser Marke ist noch nicht abgeschlossen — Schicht 2 setzt das Ergebnis-Kapitel voraus.",
+          "generic": "Bitte noch einmal versuchen."
+        }
       }
     },
     "cta": {
@@ -465,7 +518,13 @@
       "manifesto": "Das Manifest verdichtet die ganze Foundation in einen Text mit Haltung — das Stück, das man laut vorlesen kann: auf der Website, im Pitch, beim Onboarding neuer Leute. Es entsteht aus Purpose, Werten und Stimme, nicht umgekehrt.",
       "verbal": "Die Tagline ist der eine Satz neben eurem Namen; das Messaging sind die Kernbotschaften dahinter — was ihr wem sagt, damit es hängen bleibt. Beides baut auf der Foundation auf: Ohne geklärte Werte klingt jede Tagline beliebig.",
       "naming": "Ob neue Marke oder Prüfstand für den Bestandsnamen: Hier wird der Name an der Foundation gemessen — passt er zu Purpose, Werten und Archetyp? Dazu die nüchterne Prüfung: Ist er frei, ist er aussprechbar, funktioniert er auch auf Englisch?",
-      "result": "Das Ergebnis bündelt alle bestätigten Entscheidungen der Foundation zu eurem Markendokument — mit einer Richtung für alles Weitere. Von hier aus geht es in Design, Texte und den Auftritt; und je ehrlicher die Kapitel davor, desto tragfähiger ist, was hier steht."
+      "result": "Das Ergebnis bündelt alle bestätigten Entscheidungen der Foundation zu eurem Markendokument — mit einer Richtung für alles Weitere. Von hier aus geht es in Design, Texte und den Auftritt; und je ehrlicher die Kapitel davor, desto tragfähiger ist, was hier steht.",
+      "dna": "Vor Farbe und Schrift steht eine Richtung. Frida liest eure Foundation und — wenn ihr welche mitbringt — eure Vorbilder, und macht daraus zehn benannte Eigenschaften eurer Gestalt statt einer Stimmung.",
+      "color": "Eure Farben kommen nicht aus dem Katalog: aus Archetyp und Werten wird eine Basisfarbe hergeleitet und daraus eine geprüfte Hell- und Dunkel-Rampe mit barrierefreien Kontrast-Paaren.",
+      "type": "Schrift ist Stimme in Form. Aus eurer Tonalität folgt ein Paar für Überschrift und Text, dazu Grade, Hierarchie und die Regeln, wo welcher Schnitt gilt.",
+      "mark": "Die Richtung eures Zeichens — Wortmarke, Monogramm oder Bildmarke — mit Briefing und gesetzten Beispielen. Ein Entwurf ist ein Entwurf, kein fertiges, schützbares Logo.",
+      "imagery": "Wie eure Marke aussieht, wenn sie nicht spricht: Fotografie-Stil, Illustration und Icons — mit Do & Don’t zum Fühlen statt einer Liste von Adjektiven.",
+      "motion": "Bewegung mit Charakter: Tempo und Übergänge, ob euer Zeichen sich bewegt — und was passiert, wenn jemand reduzierte Bewegung eingestellt hat."
     },
     "part": {
       "a": {
@@ -803,7 +862,11 @@
         }
       },
       "progressConfirmed": "{confirmed} von {total} bestätigt",
-      "chapterReady": "Alle Felder dieses Kapitels sind bestätigt — weiter zur Finalen Abnahme."
+      "chapterReady": "Alle Felder dieses Kapitels sind bestätigt — weiter zur Finalen Abnahme.",
+      "designLocked": {
+        "title": "Brand Design ist noch nicht freigeschaltet",
+        "description": "Diese Schicht schaltet das Studio nach dem Erstgespräch für eure Marke frei. Eure Brand Foundation bleibt unverändert offen."
+      }
     },
     "brands": {
       "title": "Brandings",
@@ -1971,7 +2034,10 @@
           "title": "Motion",
           "text": "Tempo und Ruhe der Bewegung — hergeleitet aus den Ton-Wörtern."
         },
-        "offer": "Brand Design entsteht mit eurem Markenberater im Studio-Angebot — wir besprechen es im Erstgespräch."
+        "offer": "Brand Design entsteht mit eurem Markenberater im Studio-Angebot — wir besprechen es im Erstgespräch.",
+        "ctaDesign": "Brand Design starten",
+        "unlocked": "Brand Design ist für diese Marke freigeschaltet.",
+        "unlockedOn": "Freigeschaltet vom Studio am {date}."
       },
       "chapter": {
         "story": "Brand Story",
@@ -2453,6 +2519,13 @@
         "body": "Wir hören zu, stellen Fragen und sagen euch ehrlich, was wir sehen. Wenn ihr danach allein weiterarbeitet, ist das ein gutes Ergebnis — dann wisst ihr wenigstens, woran ihr seid.",
         "honest": "Was ein Brand Design kostet, hängt davon ab, was ihr braucht. Deshalb steht hier keine Zahl: eine erfundene wäre teurer als eine fehlende."
       }
+    },
+    "designLayer": {
+      "label": "Brand Design",
+      "lockedNote": "Baut auf eurer Foundation auf",
+      "info": "Die visuelle Identität eurer Marke — hergeleitet aus Foundation und Brand Language, nicht aus dem Katalog. Farben, Schrift und Zeichen entstehen aus Archetyp, Werten und Stimme; jede Entscheidung trägt ihre Begründung. Freigeschaltet wird Brand Design vom Studio nach dem Erstgespräch.",
+      "progress": "{done} von {total} Kapiteln",
+      "result": "Visuelle Identität"
     }
   }
 }

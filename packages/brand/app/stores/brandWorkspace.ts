@@ -312,28 +312,57 @@ const setup = () => {
   )
 
   /**
-   * Die Bausteine, die auf dem Weg liegen — `skipped` gehört nicht in die
-   * Leiste, und BRAND DESIGN heute auch noch nicht.
+   * ZWEI WEGE, ZWEI LISTEN (Brand Design D1) — und das ist keine Klemme mehr,
+   * sondern der Zuschnitt.
    *
-   * Seit Brand Design D0 trägt die Journey sechs Kapitel mehr (Schicht 2) —
-   * sie sind ohne Freischaltung `locked` und hätten in der Leiste als sechs
-   * graue Zeilen gestanden, ohne Erklärung und ohne Ziel. Der echte Layer
-   * „Brand Design" mit seinem Erklär-Text kommt mit **D1**; bis dahin sieht
-   * die Leiste aus wie vorher. `journey` selbst bleibt vollständig — wer die
-   * Schicht braucht (Freischaltung, Route), liest sie dort.
+   * `railSteps` = die BRAND FOUNDATION (`skipped` gehört nicht in die Leiste).
+   * Sie ist die Menge, über die der Gesamt-Fortschritt, der Impact-Hinweis
+   * („fließt in N Felder ein"), das Dokument und die Leseansicht rechnen —
+   * alles Aussagen über Schicht 1. Zählte Schicht 2 dort mit, fiele der
+   * Prozentwert jedes fertigen Brandings im Deploy-Moment von 100 auf rund 70
+   * (dieselbe Begründung wie in `resolveProfileProgress`).
+   *
+   * `designSteps` = die sechs Kapitel von BRAND DESIGN. Sie stehen in der
+   * Leiste als EIGENER Layer mit eigenem Fortschritt, weil sie ein eigenes,
+   * extra freigeschaltetes Produkt sind (Davids Leitplanke „Produkte sind
+   * eigenständig"). Sie sind IMMER da — ohne Freischaltung als gesperrte
+   * Schicht mit Erklär-Text, denn auch die nicht freigeschaltete Marke soll
+   * die Auskunft bekommen, was dort auf sie wartet.
    */
   const railSteps = computed<BrandJourneyStep[]>(
     () => journey.value.filter(entry =>
       entry.state !== 'skipped' && !isBrandDesignStep(entry.stepKey)),
   )
 
+  const designSteps = computed<BrandJourneyStep[]>(
+    () => journey.value.filter(entry => isBrandDesignStep(entry.stepKey)),
+  )
+
+  /**
+   * IST BRAND DESIGN FÜR DIESE MARKE OFFEN? — gefragt wird die JOURNEY, nicht
+   * `profile.designUnlockedAt`. Die Freischaltung ist nur die HÄLFTE der
+   * Bedingung (§2.1: zusätzlich muss `result` abgeschlossen sein), und die
+   * ganze Rechnung steht genau einmal, in der puren Regel.
+   */
+  const designOpen = computed(
+    () => designSteps.value.some(entry => entry.reason !== 'design_locked'),
+  )
+
   function canEnter(candidate: string): boolean {
     return canEnterBrandStep(journey.value, candidate).allowed
   }
 
-  /** Nachbar-Baustein in Weg-Reihenfolge, sofern betretbar. */
+  /**
+   * Nachbar-Baustein in Weg-Reihenfolge, sofern betretbar — INNERHALB DER
+   * EIGENEN SCHICHT (D1). Wer in „Farbwelt" steht, geht vor nach „Typografie"
+   * und zurück nach „Moodboard"; „zurück" aus dem ersten Design-Kapitel führt
+   * NICHT in die Foundation. Beides sind eigene Produkte, und ein „weiter",
+   * das aus dem Ergebnis der Foundation in ein anderes Produkt fällt, wäre ein
+   * Übergang, den niemand angeboten hat (der Einstieg steht im Rail und in
+   * Kapitel 10).
+   */
   function neighbourStep(direction: -1 | 1): BrandStepKey | null {
-    const path = railSteps.value
+    const path = isBrandDesignStep(stepKey.value) ? designSteps.value : railSteps.value
     const index = path.findIndex(entry => entry.stepKey === stepKey.value)
     if (index < 0) return null
     const target = path[index + direction]
@@ -1003,6 +1032,8 @@ const setup = () => {
     autosaveAllowed,
     currentJourneyStep,
     railSteps,
+    designSteps,
+    designOpen,
     slotValue,
     slotConfirmed,
     canEnter,

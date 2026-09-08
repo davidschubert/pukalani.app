@@ -29,6 +29,7 @@ import {
   type BrandStepKey,
   type BrandTeamKind,
   exampleKeyFor,
+  isBrandDesignStep,
   partLabelKeyFor,
   questionKeyFor,
   slotById,
@@ -2052,7 +2053,123 @@ const railLayers = computed<BwRailLayer[]>(() => [{
     // Zusatzprodukt kommt danach.
     ...navExtras.value,
   ],
-}])
+}, designRailLayer.value])
+
+/**
+ * DER ZWEITE LAYER: BRAND DESIGN (Konzept §2.1/§2.10, Paket D1, Prototyp
+ * `demoRail.ts` + `demoRailWithDesign`).
+ *
+ * ── ER STEHT BEI JEDER MARKE DA ──────────────────────────────────────────
+ * Auch bei einer, die ihn nicht hat. Gesperrt ist er dann mit Erklär-Text und
+ * Info-Layer — genau das abgenommene Verhalten des Prototyps: eine Schicht,
+ * die nicht existiert, kann man nicht wollen, und die Auskunft „das gibt es,
+ * so kommt ihr dran" ist die halbe Produktseite. `store.designOpen` fragt die
+ * JOURNEY (Freischaltung UND `result` fertig), nicht das Profil-Feld allein.
+ *
+ * ── ZWEI FORTSCHRITTE, WEIL ES ZWEI PRODUKTE SIND ────────────────────────
+ * `note` trägt „N von 6 Kapiteln" — der eigene Stand der Schicht. Der grosse
+ * Balken unten rechts (`overallProgress`) bleibt die FOUNDATION; die
+ * Begründung steht bei `resolveProfileProgress` und im Store.
+ *
+ * ── DER ERGEBNIS-PUNKT ZEIGT HEUTE AUF KAPITEL 10 ────────────────────────
+ * „Visuelle Identität" bekommt mit **D8** seine eigene Ansicht
+ * (`/brand/:id/design`). Bis dahin führt er auf den Anker `#visuell` der
+ * Foundation-Leseansicht: dort steht, was gilt (heute die Schranke, nach D8
+ * das volle Kapitel). Ein Punkt ohne Ziel wäre ein toter Knopf, eine Adresse
+ * ohne Seite ein 404.
+ */
+const designRailLayer = computed<BwRailLayer>(() => {
+  const doneCount = store.designSteps.filter(entry => entry.state === 'done').length
+  const info: BwRailStepInfo = {
+    description: t('brand.designLayer.info'),
+    minutes: t('brand.session.minutes', {
+      minutes: store.designSteps.reduce((sum, entry) => sum + chapterEffortMinutes(entry.stepKey), 0),
+    }),
+    bausteine: store.designSteps.map(entry => ({
+      label: t(`brand.steps.${entry.stepKey}`),
+      note: t(`brand.stepInfo.${entry.stepKey}`),
+    })),
+  }
+
+  if (!store.designOpen) {
+    return {
+      id: 'design',
+      label: t('brand.designLayer.label'),
+      locked: true,
+      lockedNote: t('brand.designLayer.lockedNote'),
+      info,
+      // Die Punkte stehen auch gesperrt komplett da (Runde 85, David): mit
+      // Schloss im Status-Kreis statt versteckter Liste.
+      steps: store.designSteps.map((entry): BwRailStep => ({
+        id: entry.stepKey,
+        label: t(`brand.steps.${entry.stepKey}`),
+        icon: '',
+        state: 'locked',
+        info: railInfo(entry),
+      })),
+    }
+  }
+
+  return {
+    id: 'design',
+    label: t('brand.designLayer.label'),
+    note: t('brand.designLayer.progress', { done: doneCount, total: store.designSteps.length }),
+    info,
+    steps: [
+      ...store.designSteps.map((entry): BwRailStep => {
+        const current = entry.stepKey === stepKey.value
+        return {
+          id: entry.stepKey,
+          label: t(`brand.steps.${entry.stepKey}`),
+          icon: '',
+          state: current && entry.state !== 'done' ? 'active' : railState(entry.state),
+          info: railInfo(entry),
+          counter: railCounter(entry, current),
+          ...(canEnterStep(entry) ? { to: localePath(`/brand/${profileId.value}/${entry.stepKey}`) } : {}),
+          // Dieselbe Regel wie in der Foundation: die Unterpunkte gehören dem
+          // OFFENEN Kapitel.
+          ...(current
+            ? {
+                sessions: railSessions(entry),
+                effort: t('brand.nav.chapterEffort', {
+                  count: slotsForStep(entry.stepKey).length,
+                  minutes: chapterEffortMinutes(entry.stepKey),
+                }) + railFindingSuffix(entry.stepKey),
+              }
+            : {}),
+        }
+      }),
+      {
+        id: 'design-result',
+        kind: 'result',
+        label: t('brand.designLayer.result'),
+        icon: '',
+        state: doneCount === store.designSteps.length ? 'done' : 'open',
+        to: `${localePath(`/brand/${profileId.value}/foundation`)}#visuell`,
+      },
+    ],
+  }
+})
+
+/** Ein Kapitel ist anklickbar, sobald die pure Regel den Eintritt erlaubt. */
+function canEnterStep(entry: BrandJourneyStep): boolean {
+  return store.canEnter(entry.stepKey)
+}
+
+/**
+ * DIE SPERR-FLÄCHE HAT ZWEI SÄTZE (Brand Design D1) — die Fläche bleibt eine.
+ *
+ * „Schließ das Kapitel davor ab" ist für einen gesperrten FOUNDATION-Baustein
+ * richtig und für ein Design-Kapitel eine Irreführung: davor fehlt nichts, das
+ * Produkt ist für diese Marke schlicht nicht freigeschaltet. Der Server nennt
+ * den Grund (`data.code: 'design_locked'`, `canEnterBrandStep`), der Store
+ * reicht ihn als `blocked` durch, hier wird ein Text daraus. Jeder andere
+ * Grund behält den alten Satz — ein unbekannter Code darf nie in einer leeren
+ * Fläche enden.
+ */
+const lockedTextKey = computed(() => (store.blocked === 'design_locked'
+  ? 'brand.workspace.designLocked'
+  : 'brand.workspace.stepLocked'))
 
 /** Die Marken des Kontos für den Wähler oben in der Sidebar. */
 const LOCALE_FLAGS: Record<string, string> = { en: 'i-circle-flags-us', de: 'i-circle-flags-de' }
@@ -2296,10 +2413,10 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
     <div class="max-w-md text-center">
       <BwIllustration variant="journey" class="mx-auto h-16 w-auto" style="color: var(--bw-ink-soft)" />
       <p class="mt-4 font-medium">
-        {{ t('brand.workspace.stepLocked.title') }}
+        {{ t(`${lockedTextKey}.title`) }}
       </p>
       <p class="mt-1 text-sm" style="color: var(--bw-muted)">
-        {{ t('brand.workspace.stepLocked.description') }}
+        {{ t(`${lockedTextKey}.description`) }}
       </p>
       <UButton
         class="mt-5 rounded-full" variant="outline" :to="localePath('/dashboard/brands')"
@@ -2355,7 +2472,12 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
           @click="toggleNav"
         />
         <div class="min-w-0 leading-tight">
-          <p class="bw-label uppercase tracking-wider" style="color: var(--bw-muted)">{{ t('brand.workspace.railLayer') }}</p>
+          <!-- DIE SCHICHT ÜBER DEM KAPITEL-NAMEN (Brand Design D1): sie sagt,
+               in WELCHEM Produkt man gerade steht. Fest verdrahtet auf „Brand
+               Foundation" stand über „Moodboard" der Name der falschen Schicht
+               — die eine Stelle, an der die Werkstatt behauptet hätte, Brand
+               Design sei ein Kapitel der Foundation. -->
+          <p class="bw-label uppercase tracking-wider" style="color: var(--bw-muted)">{{ t(isBrandDesignStep(stepKey) ? 'brand.designLayer.label' : 'brand.workspace.railLayer') }}</p>
           <p class="truncate font-semibold">{{ stepKey ? t(`brand.steps.${stepKey}`) : '' }}</p>
         </div>
         <!-- Der Log-Toggle wirkt nur, wo es eine Log-SPALTE gibt: unter 768 px

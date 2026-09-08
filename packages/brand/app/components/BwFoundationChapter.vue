@@ -58,10 +58,25 @@ const props = withDefaults(defineProps<{
    * der ins Leere führte, wäre schlimmer als ein grauer.
    */
   directionTo?: string | null
+  /**
+   * Ziel von „Brand Design starten" (Konzept §2.10, Paket D1) — das erste
+   * Kapitel von Schicht 2. `null` heisst: für diese Marke ist Brand Design
+   * nicht offen, und dann steht hier weiter das ANGEBOT (Erstgespräch), denn
+   * genau das ist der Weg zur Freischaltung.
+   *
+   * Die Seite entscheidet es über die pure Regel (`canEnter('dna')`) und damit
+   * über BEIDE Bedingungen aus §2.1 — Freischaltung UND fertige Foundation.
+   * Ein Knopf, der auf die Sperr-Fläche führte, wäre schlimmer als keiner.
+   */
+  designTo?: string | null
+  /** Für den Satz „Freigeschaltet vom Studio am …". Leer = kein Datum nennen. */
+  designUnlockedAt?: string | null
 }>(), {
   variant: 'private',
   acceptanceTo: null,
   directionTo: null,
+  designTo: null,
+  designUnlockedAt: null,
 })
 
 const { t, te, locale } = useI18n()
@@ -95,6 +110,18 @@ function choiceLabels(slotId: string, optionIds: readonly string[]): string[] {
 
 /** Steht in diesem Kapitel schon eine gewählte Richtung? (Paket G4) */
 const hasDirection = computed(() => props.chapter.blocks.some(block => block.kind === 'direction'))
+
+/**
+ * Das Freischalt-Datum in der Sprache des LESERS. Leer, wenn es keins gibt
+ * oder es unlesbar ist — dann steht der Satz ohne Datum da statt mit einem
+ * „Invalid Date".
+ */
+const designUnlockedDate = computed(() => {
+  const parsed = Date.parse(props.designUnlockedAt ?? '')
+  return Number.isFinite(parsed)
+    ? new Intl.DateTimeFormat(locale.value, { dateStyle: 'long' }).format(parsed)
+    : ''
+})
 
 /**
  * WAS DER FREMDLESER VON DER SCHRANKE SIEHT (§2.6, seit G4 zweigeteilt): die
@@ -363,13 +390,29 @@ const renderedBlocks = computed(() => (props.chapter.state === 'locked' && !isPr
         class="rounded-full" trailing-icon="i-ph-arrow-right" disabled
         :label="t('brand.foundation.direction.choose')"
       />
+      <!-- FREIGESCHALTET: der EINSTIEG statt des ANGEBOTS (§2.10, D1). Das
+           Erstgespräch ist der Weg ZUR Freischaltung — wer sie hat, braucht
+           kein zweites Mal danach zu fragen. Der Kapitel-INHALT bleibt bis D8
+           die Schranken-Liste: „was hier entsteht" ist auch freigeschaltet
+           eine wahre Auskunft, solange nichts entschieden ist. -->
       <UButton
+        v-if="designTo"
+        :to="designTo"
+        class="rounded-full" trailing-icon="i-ph-arrow-right"
+        :label="t('brand.foundation.visual.ctaDesign')"
+      />
+      <UButton
+        v-else
         :to="callCta.to" :target="callCta.target" :rel="callCta.rel" :external="callCta.external"
         color="neutral" variant="outline" class="rounded-full" style="background: var(--bw-surface-hi)"
         :label="t('brand.foundation.visual.ctaCall')"
       />
       <p class="bw-label basis-full" style="color: var(--bw-muted)">
-        {{ directionTo ? t('brand.foundation.visual.product') : t('brand.foundation.direction.lockedHint') }}
+        {{ designTo
+          ? (designUnlockedDate
+            ? t('brand.foundation.visual.unlockedOn', { date: designUnlockedDate })
+            : t('brand.foundation.visual.unlocked'))
+          : directionTo ? t('brand.foundation.visual.product') : t('brand.foundation.direction.lockedHint') }}
       </p>
     </div>
   </section>

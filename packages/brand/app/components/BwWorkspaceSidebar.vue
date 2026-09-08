@@ -218,6 +218,16 @@ function stepDisabled(layer: BwRailLayer, step: BwRailStep): boolean {
   // Abnahme hängen (§2.6). Ohne `to` bleibt es bei der alten Regel — ein Punkt
   // ohne Ziel wäre ein Knopf, der nichts tut.
   if (step.kind === 'result') return !step.to && step.state !== 'done'
+  // EIN KAPITEL MIT EIGENEM ZIEL IST ERREICHBAR, SOLANGE ES NICHT GESPERRT IST
+  // (Brand Design D1) — dieselbe Regel wie beim Ergebnis-Punkt eine Zeile
+  // höher, aus demselben Grund: `to` heisst „dieser Punkt hat eine Adresse".
+  //
+  // Ohne sie wäre der EINSTIEG in Brand Design tot: nach der Freischaltung
+  // steht „Moodboard" auf `open` (es ist der erste Punkt seiner Schicht, nicht
+  // der gerade offene der Foundation), und die Regel darunter macht aus jedem
+  // `open` einen ausgeschalteten Knopf. Die Foundation ist unberührt — ihre
+  // Kapitel tragen bewusst kein `to` und werden weiter über `select` geöffnet.
+  if (step.to) return false
   return step.state === 'open'
 }
 
@@ -327,7 +337,20 @@ function selectStep(layer: BwRailLayer, step: BwRailStep): void {
             :style="layer.locked ? 'color: var(--bw-muted)' : ''"
           >
             <UIcon v-if="layer.locked" name="i-ph-lock-simple" class="size-4 flex-none" style="color: var(--bw-muted)" />
-            <span class="min-w-0 flex-1 truncate">{{ layer.label }}</span>
+            <!-- DIE ZWEITE ZEILE DER SCHICHT (Brand Design D1): gesperrt ihr
+                 Erklär-Halbsatz, offen ihr eigener Stand („2 von 6 Kapiteln").
+                 Sie steht hier, weil eine Schicht ihren Fortschritt DORT zeigen
+                 muss, wo sie steht — die Zahl unten rechts gehört der Brand
+                 Foundation und darf nicht zwei Produkte vermischen. Ohne `note`
+                 und ohne `lockedNote` (Brand Foundation) sieht die Zeile aus
+                 wie vorher. -->
+            <span class="min-w-0 flex-1 leading-tight">
+              <span class="block truncate">{{ layer.label }}</span>
+              <span
+                v-if="layer.locked ? layer.lockedNote : layer.note"
+                class="bw-label block truncate font-normal tabular-nums" style="color: var(--bw-muted)"
+              >{{ layer.locked ? layer.lockedNote : layer.note }}</span>
+            </span>
             <span v-if="layer.info" class="size-6 flex-none" aria-hidden="true" />
             <UIcon
               name="i-ph-caret-down" class="size-4 flex-none transition-transform group-data-[state=closed]/section:-rotate-90"

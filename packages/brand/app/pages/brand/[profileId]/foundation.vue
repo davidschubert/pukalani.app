@@ -173,6 +173,20 @@ const directionTo = computed<string | null>(() => (store.canEnter('result')
   ? `${localePath(`/brand/${profileId.value}/result`)}?s=result.direction`
   : null))
 
+/**
+ * DER EINSTIEG IN BRAND DESIGN (Konzept §2.10, Paket D1) — Kapitel 10 zeigt
+ * ihn statt des Erstgespräch-Angebots, sobald Schicht 2 für diese Marke offen
+ * ist.
+ *
+ * GEFRAGT WIRD DIE JOURNEY, nicht `profile.designUnlockedAt`: die
+ * Freischaltung ist nur die HÄLFTE der Bedingung (§2.1 verlangt zusätzlich das
+ * abgeschlossene Ergebnis-Kapitel), und `canEnter` ist genau die Regel, die
+ * der Server danach durchsetzt. Dasselbe Muster wie `directionTo` darüber.
+ */
+const designTo = computed<string | null>(() => (store.canEnter('dna')
+  ? localePath(`/brand/${profileId.value}/dna`)
+  : null))
+
 const accepted = computed(() => view.value?.accepted ?? { chapters: 0, total: 0 })
 const acceptedPct = computed(() => (accepted.value.total === 0
   ? 0
@@ -930,6 +944,8 @@ useBrandTitle(() => (title.value || t('brand.foundation.title')))
           :chapter="entry.chapter" :index="index"
           :acceptance-to="entry.acceptanceTo"
           :direction-to="directionTo"
+          :design-to="designTo"
+          :design-unlocked-at="store.profile?.designUnlockedAt ?? null"
           variant="private"
         />
       </div>
