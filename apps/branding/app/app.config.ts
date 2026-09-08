@@ -2,6 +2,19 @@ export default defineAppConfig({
   // App-spezifische Overrides (tiefer Merge, App > Layer > Core).
   pukalani: {
     /**
+     * BILDER LESEN (Brand Design, Vorbilder-Lesung — docs/plans/BRAND-DESIGN.md
+     * §2.2/§2.12): das Vision-Modell ist Davids Entscheidung vom 2026-09-08
+     * (DECISION-LOG). Nur hier gesetzt, weil branding.supply der einzige
+     * Konsument ist; der Core-Default bleibt leer (= aus). Der ZDR-Filter
+     * (`provider.data_collection = 'deny'`) sitzt fest im Core-Transport,
+     * nicht in dieser Wahl. Ein Laufzeit-Override (`app_config.aiVisionModel`)
+     * ist im Core vorbereitet, die Spalte gibt es noch nicht — bis dahin gilt
+     * dieser Wert.
+     */
+    ai: {
+      visionModel: 'google/gemini-2.5-flash',
+    },
+    /**
      * DER NAME, DEN DER BESUCHER SIEHT.
      *
      * `useBrandName()` im Core geht die Kette Mandanten-Name → App-Marke →

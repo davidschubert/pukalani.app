@@ -7,6 +7,19 @@ die kleinen, verstreuten Beschlüsse.
 
 ---
 
+## 2026-09-08 — Brand Design: Vision-Modell für die Vorbilder-Lesung = google/gemini-2.5-flash
+
+**Entscheidung (David, Empfehlung angenommen):** `pukalani.ai.visionModel` auf branding.supply
+= `google/gemini-2.5-flash` — liest Screenshots gut genug für eine Belegung aus 50 kontrollierten
+Vokabular-Ids, unter dem festen ZDR-Filter des Core-Transports verfügbar, grob 20 000 Tokens je
+Lauf (Cent-Bereich; 3 Läufe je Marke und Tag). Alternative bei Qualitätsproblemen:
+`anthropic/claude-sonnet-4.5` (~10× teurer). Gesetzt als Build-Default in
+`apps/branding/app/app.config.ts` (einziger Konsument); der Laufzeit-Override braucht eine
+`app_config.aiVisionModel`-Spalte (system-Migration), die es noch nicht gibt — bewusst
+vertagt, bis die Admin-Config-Seite ihn bedient.
+
+---
+
 ## 2026-09-08 — Brand-Check achtet robots.txt und TDM-Vorbehalt; Wizard-Weg bewusst ausgenommen (BS1 R2b)
 
 **Entscheidung (David):** Der öffentliche Brand-Check holt vor jedem Abruf die
