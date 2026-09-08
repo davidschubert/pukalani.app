@@ -116,6 +116,16 @@ export default defineEventHandler(async (event) => {
    */
   await joinCommunity(event, 'registration', { sessionSecret: session.secret, userId: session.userId })
 
+  /**
+   * AGB-ZUSTIMMUNG MIT FASSUNG (BS1 R1) — hier ist die Zustimmung eine
+   * Tatsache: ohne das Häkchen kommt dieses Formular gar nicht bis zum POST
+   * (`createRegisterFormSchema`, `requireTerms`). Der Server prüft sie nicht
+   * nach (er bekommt sie bewusst nicht, s. `RegisterForm.vue`), er hält fest,
+   * WELCHE Fassung diese App zum Zeitpunkt der Anlage ausgeliefert hat.
+   * No-Op in jeder App ohne `pukalani.auth.termsUrl`. Best-effort.
+   */
+  await recordTermsAcceptance(event, session.userId)
+
   // Nicht-blockierende E-Mail-Verifizierung (pukalani.auth.verification): die
   // Bestätigungs-Mail geht über die Instanz-SMTP raus, der User ist trotzdem
   // sofort eingeloggt. Best-effort — ein Mail-Fehler darf den Signup nie

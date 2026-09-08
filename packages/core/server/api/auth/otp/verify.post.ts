@@ -35,6 +35,15 @@ export default defineEventHandler(async (event) => {
        */
       await joinCommunity(event, 'registration', { sessionSecret: session.secret, userId: session.userId })
 
+      /**
+       * AGB-ZUSTIMMUNG MIT FASSUNG (BS1 R1) — an derselben Stelle wie der
+       * A5-Beitritt und aus demselben Grund: die VERIFIZIERTE Code-Anmeldung
+       * ist der Moment, in dem aus einem Auto-Signup ein Konto mit Absicht
+       * wird. `isFirstJoin` grenzt es exakt ab; wer sein Konto schon hatte,
+       * bekommt keinen neuen Vermerk. No-Op ohne `pukalani.auth.termsUrl`.
+       */
+      await recordTermsAcceptance(event, session.userId)
+
       // Activity-Feed: der verifizierte OTP-Beitritt ist der Beitritts-Moment
       // (das Anlegen beim Token-Versand wäre verfrüht — unverifizierte E-Mail).
       await recordActivity(event, {

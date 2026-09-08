@@ -32,6 +32,11 @@ const errorMessage = ref<string | null>(null)
 // AGB nur im register-Modus erzwingen — Login bestehender User bleibt friktionsfrei
 const termsUrl = computed(() => appConfig.pukalani?.auth?.termsUrl ?? '')
 const requireTerms = computed(() => props.register === true && termsUrl.value.length > 0)
+const localePath = useLocalePath()
+/** Wie im Register-Formular: der AGB-Link folgt der Sprache (BS1 R1). */
+const termsHref = computed(() => (termsUrl.value.startsWith('/') ? localePath(termsUrl.value) : termsUrl.value))
+/** Der Entwurfs-Hinweis am Häkchen — dieselbe Regel wie dort (BS1 R1). */
+const termsDraft = computed(() => requireTerms.value && appConfig.pukalani?.auth?.termsDraft === true)
 
 const schema = computed(() => createOtpRequestSchema(t, {
   requireTerms: requireTerms.value,
@@ -201,10 +206,11 @@ async function verify() {
       </UFormField>
       <UFormField v-if="requireTerms" name="terms">
         <UCheckbox v-model="state.terms" :label="t('auth.register.termsLabel')" />
+        <p v-if="termsDraft" class="mt-1 text-xs text-muted" data-terms-draft>{{ t('auth.register.termsDraftNotice') }}</p>
       </UFormField>
       <UButton type="submit" block size="lg" :loading="loading">{{ t('auth.otp.requestCode') }}</UButton>
       <p v-if="requireTerms" class="text-center">
-        <ULink :to="termsUrl" target="_blank" class="text-sm text-muted hover:text-primary">
+        <ULink :to="termsHref" target="_blank" class="text-sm text-muted hover:text-primary">
           {{ t('auth.register.termsLink') }}
         </ULink>
       </p>

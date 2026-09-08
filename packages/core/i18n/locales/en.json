@@ -27,6 +27,7 @@
       "hasAccount": "Already have an account?",
       "loginLink": "Sign in",
       "termsLabel": "I accept the Terms and Conditions",
+      "termsDraftNotice": "Draft, under review by our lawyers — the binding version will replace it after the review. We record which version you agreed to.",
       "termsLink": "Read Terms and Conditions",
       "invitedEmailNote": "This address is fixed: the invitation was sent to it."
     },

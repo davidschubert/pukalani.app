@@ -16,6 +16,15 @@ export interface PukalaniUserPrefs extends Models.Preferences {
   avatarUrl?: string
   /** IANA-Zone für die Datums-/Zeit-Anzeige; '' oder fehlend = automatisch */
   timezone?: string
+  /**
+   * Wann diesem Konto die AGB vorgelegt wurden und es zugestimmt hat (ISO) —
+   * gesetzt bei der Anlage, nur in Apps mit `pukalani.auth.termsUrl`
+   * (BS1 R1, Regel in shared/termsAcceptance.ts). Fehlt bei jedem Konto von
+   * VOR dieser Änderung; die Nachfrage dafür kommt mit Fassung 2 (R3).
+   */
+  termsAcceptedAt?: string
+  /** Die Fassung dazu (`pukalani.auth.termsVersion`); '' = keine benannt. */
+  termsVersion?: string
 }
 
 export type CurrentUser = Models.User<PukalaniUserPrefs>

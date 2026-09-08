@@ -197,6 +197,34 @@ export default defineAppConfig({
       providers: [] as string[],
       /** AGB-URL — gesetzt = Pflicht-Checkbox im Register-Formular */
       termsUrl: '',
+      /**
+       * DIE FASSUNG, DER JEMAND ZUSTIMMT (BS1 R1, 2026-09-07) — z. B.
+       * '2026-09-draft-1'. Wird bei der Konto-ANLAGE zusammen mit
+       * `termsAcceptedAt` in die Account-Prefs geschrieben (alle drei Wege:
+       * Passwort, Code, Google — `server/utils/termsAcceptance.ts`).
+       *
+       * Leer ist erlaubt und heißt „wir wissen wann, nicht welcher Text";
+       * geschrieben wird ohnehin nur, wenn `termsUrl` gesetzt ist. Wer die
+       * AGB inhaltlich ändert, ÄNDERT DIESEN WERT — sonst behauptet der
+       * Vermerk am Konto eine Zustimmung zu einem Text, den es nicht mehr
+       * gibt. (Die Nachfrage bei Bestandskonten kommt mit Fassung 2, R3.)
+       */
+      termsVersion: '',
+      /**
+       * „Entwurf, in anwaltlicher Prüfung" NEBEN dem Häkchen (BS1 R1, Davids
+       * Entscheidung 7 vom 2026-09-07).
+       *
+       * Ein BOOLEAN und kein i18n-Schlüssel: der Satz gehört dem Core und
+       * steht in seinen Locale-Dateien (`auth.register.termsDraftNotice`),
+       * damit ihn jede App in beiden Sprachen hat. Ein Schlüssel in der Config
+       * wäre ein Versprechen, das `pnpm check:i18n-keys` einlösen müsste —
+       * für einen Satz, der überall derselbe ist.
+       *
+       * Core-Default AUS: eine App mit fertigen AGB darf diesen Hinweis nicht
+       * zeigen. Er sagt nichts über die Pflicht (das tut `termsUrl`), sondern
+       * über den Reifegrad des Textes dahinter.
+       */
+      termsDraft: false,
       /** Passwortloser Login per E-Mail-Code (Appwrite Email-OTP) —
        *  Ergänzung zum Passwort-Login, kein Ersatz */
       otp: false,

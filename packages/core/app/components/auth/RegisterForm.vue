@@ -69,6 +69,22 @@ const showPasswordConfirm = ref(false)
 // AGB-Checkbox nur, wenn die App eine termsUrl konfiguriert (config-gated)
 const termsUrl = computed(() => appConfig.pukalani?.auth?.termsUrl ?? '')
 const requireTerms = computed(() => !!termsUrl.value)
+const localePath = useLocalePath()
+/**
+ * DER AGB-LINK FOLGT DER SPRACHE (BS1 R1). `termsUrl` ist ein App-PFAD
+ * (`/terms`, `/agb`) — ohne `localePath()` landet ein deutscher Leser auf der
+ * englischen Fassung, und zwar bei genau dem Text, dem er gerade zustimmt.
+ * Eine absolute Adresse (falls eine App je eine setzt) bleibt unberührt.
+ */
+const termsHref = computed(() => (termsUrl.value.startsWith('/') ? localePath(termsUrl.value) : termsUrl.value))
+/**
+ * „Entwurf, in anwaltlicher Prüfung" NEBEN dem Häkchen (Davids Entscheidung 7
+ * vom 2026-09-07, BS1 R1): auf branding.supply steht das Häkchen ab sofort,
+ * obwohl die AGB noch ein Entwurf sind. Wer zustimmt, soll das WISSEN — der
+ * Hinweis steht deshalb am Häkchen und nicht nur auf der Seite dahinter.
+ * Ohne Häkchen kein Hinweis: er hinge sonst an nichts.
+ */
+const termsDraft = computed(() => requireTerms.value && appConfig.pukalani?.auth?.termsDraft === true)
 const schema = computed(() => createRegisterFormSchema(t, { requireTerms: requireTerms.value }))
 
 // Eingegebene E-Mail + Name überleben den Wechsel Login ↔ Register ↔ Code
@@ -206,6 +222,7 @@ async function onSubmit(event: FormSubmitEvent<RegisterFormInput>) {
 
       <UFormField v-if="requireTerms" name="terms">
         <UCheckbox v-model="state.terms" :label="t('auth.register.termsLabel')" />
+        <p v-if="termsDraft" class="mt-1 text-xs text-muted" data-terms-draft>{{ t('auth.register.termsDraftNotice') }}</p>
       </UFormField>
 
       <UButton type="submit" block size="lg" :loading="loading">{{ t('auth.register.submit') }}</UButton>
@@ -228,7 +245,7 @@ async function onSubmit(event: FormSubmitEvent<RegisterFormInput>) {
     />
 
     <p v-if="termsUrl" class="text-center">
-      <ULink :to="termsUrl" target="_blank" class="text-sm text-muted hover:text-primary">
+      <ULink :to="termsHref" target="_blank" class="text-sm text-muted hover:text-primary">
         {{ t('auth.register.termsLink') }}
       </ULink>
     </p>
