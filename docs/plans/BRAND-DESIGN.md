@@ -660,6 +660,32 @@ David: Karten-Texte der Weiche, Präfix „Bekannt:" vor der Beispielzeile
 (geteilt mit den Architektur-Modellen — liest sich bei „Frida schlägt vor"
 schief), Privatheits-/Fremdwerk-Satz.
 
+**Stand D2b (Lesung gegen die Foundation):** GEBAUT und geprüft 2026-09-08
+(Core `aiVision` als eigener Commit — Transport neben `aiComplete`, Gate
+`pukalani.ai.visionModel` leer = aus, Laufzeit-Override `app_config.
+aiVisionModel`, **ZDR fest im Transport**: `provider.data_collection = 'deny'`
+wird immer gesetzt und lässt sich nur verschärfen; Bilder nie im Log). Brand:
+`POST …/inspiration/read` (Besitzer, Kapitel offen, 503 `vision_unavailable`
+ohne Modell, 429 mit Retry-After), Prompt aus den vier Foundation-Feldern +
+DNA-Vokabular (nur Ids), Klemmung in `shared/brandReading.ts`, je Bild
+`reading` in der Tabelle, Fazit + Lauf-Metadaten als Slot-Wert `g.reading`
+(intern, reist nie), Drossel 3 Läufe/Tag je Marke + IP-Eimer `brand:reading`,
+Stub `BRAND_DEV_STUB_VISION=1`, UI `BwReadingPanel`. Beweis 189/189
+(Abschnitt 23). **Regel-Änderung mit Foundation-Wirkung (Prüf-Befund):**
+`resolveSessionStates` reicht ein nicht bestätigbares Instrument (`special`)
+an seine Quellen durch statt auf sein `confirmed` zu warten — nötig, weil
+`g.reading` an `g.inspiration` hängt und sonst nie abnehmbar wäre. Dieselbe
+Regel trifft `d.pairs` → `d.primary`/`d.secondary` im Archetyp-Kapitel:
+die standen unter der alten Regel FÜR IMMER auf `locked` (Vergleichslauf
+alt/neu: „nur d.hypothesis bestätigt ⇒ d.primary locked → open") — die
+Abschluss-Formel hatte das für die Abnahme schon 2026-09 (Audit A4)
+korrigiert, die Session-Zustände nicht; jetzt sind beide konsistent.
+Modellwahl für Prod ist Davids Entscheidung (Vorschlag des Baus:
+`google/gemini-2.5-flash`, ~20 000 Tokens je Lauf, Cent-Bereich); bis dahin
+antwortet Prod ruhig 503, das Kapitel läuft ohne Lesung. Offen für D2c:
+`g.dna` hängt an `g.reading`; auf dem Weg „Frida schlägt vor" muss der
+Vorschlag ohne Lesung entstehen.
+
 | # | Paket | Inhalt | Gate |
 | --- | --- | --- | --- |
 | D0 | Verträge | Registry-Steps + Sessions (Struktur), Vokabulare, Font-Paar-Katalog, `BrandDesignPreset`, `buildBrandDesign`, Ramp-Import als Vertrag, Journey mit Freischaltung | — |
