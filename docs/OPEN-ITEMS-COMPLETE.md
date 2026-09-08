@@ -134,6 +134,13 @@ AW2 (Appwrite 2.0), abgeschlossen:
   Transition-Hooks, `afterLeave` feuert nie, Suspense parkt die neue Seite im
   versteckten Container. Seit 2026-07-17 so, kein heutiges Update beteiligt.
   Fade jetzt nur noch per `<NuxtPage :transition>` auf Layout `site`.
+- **Nebenbefund 4, gefixt (Davids Auftrag, 2026-09-08):** die Dashboard-
+  Übersicht fragte `/api/admin/comments?status=reported` auch in Apps ohne
+  comments-Layer ab (404 in der Konsole von pukalani.studio) — die Capability
+  hatte der Admin, die Route nicht die App. Die Schnellmoderations-Karte hängt
+  jetzt am Registry-Eintrag `pukalani.admin.modules` (id `comments`), dem
+  expliziten Vertrag statt eines Layer-Imports. Playwright gegen den lokalen
+  Prod-Build: 0 Konsolenfehler, 0 Anfragen ≥ 400, Karte weg, Navigation intakt.
 
 **Gelernt:** (1) Eine globale `app.pageTransition` mit `mode: 'out-in'`
 verträgt sich nicht mit Seiten, deren Wurzel ein Fragment ist

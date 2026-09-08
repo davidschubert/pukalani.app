@@ -72,7 +72,16 @@ onMounted(() => {
 const { capabilities: siteCaps } = useCommunityRole()
 const can = (capability: Capability) =>
   userHasCapability(auth.user, capability) || siteCaps.value.has(capability)
-const canModerateComments = computed(() => can('comments.moderate'))
+// Die Kommentar-Schnellmoderation gibt es nur, wenn der comments-Layer in
+// dieser App überhaupt montiert ist — erkennbar an seinem Eintrag in der
+// Modul-Registry (`pukalani.admin.modules`, id `comments`), dem expliziten
+// Vertrag statt eines Layer-Imports (A14). Vorher lief die Anfrage an
+// `/api/admin/comments` auf jeder Silo-Site ohne Kommentare ins 404
+// (pukalani.studio, 2026-09-08 erwischt): die Capability hatte der Admin,
+// die Route nicht die App.
+const commentsHere = ((appConfig.pukalani as { admin?: { modules?: { id?: string }[] } }).admin?.modules ?? [])
+  .some(module => module.id === 'comments')
+const canModerateComments = computed(() => commentsHere && can('comments.moderate'))
 const canReadAudit = computed(() => can('audit.read'))
 const canManageStorage = computed(() => can('storage.manage'))
 // S5: die Schnellmoderation ist für JEDEN Site-Moderator sichtbar, ihr
