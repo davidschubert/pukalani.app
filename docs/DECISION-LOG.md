@@ -68,6 +68,24 @@ ohne Davids Zeichen · Newsletter im Launch.
 Marke anstösst) sowie vier NEUE Anwaltsfragen neben den sechs aus Marktvergleich Anhang G
 (Presse-/Wikipedia-Zitate, YouTube-Kommentare und API-Bedingungen, Score fremder Marken als
 Kritik/Meinung, Verantwortlicher bei namenloser Wir-Stimme) — Plan §4.3.
+## 2026-09-08 — Discover Brands: Konzept freigegeben — Freigabe vor Veröffentlichung, /discover, beide Scores, Beispiel-Branding Kailua
+
+**Anlass:** David zieht DB1 vor („mach mit discover brands weiter"). Konzept
+docs/plans/DISCOVER-BRANDS.md auf dem abgenommenen Klickdummy (Runde 97/176), der
+BF1-Leseansicht (Veröffentlichung = eingefrorener Snapshot mit `sensitivity`-Filter,
+derselbe Renderer) und den BC1/MV1-Daten. **Entscheidungen (David, Fragenrunde):**
+(1) **Freigabe VOR Veröffentlichung** — gegen die Empfehlung „sofort öffentlich +
+Ausblenden": Zustände pending/published/declined/hidden/withdrawn, Betreiber-Warteschlange;
+(2) Adresse **`/discover` + `/discover/<slug>`** (`/brands/<slug>` bleibt den Insights-Seiten
+externer Marken); (3) **Website-Score, sonst Fundament-Reife**, klar beschriftet;
+(4) Start mit eigenen Brands **plus Beispiel-Branding „Kailua Coffee Co."**, gebaut über den
+Wizard (echtes Fundament, als Beispiel markiert) statt als handgeschriebener Datensatz.
+**Festgezogen:** eigenes Opt-in-Feld `publicationVisibility` (keine Wiederverwendung von
+`marketVisibility` — eine Zustimmung gilt nur für das, wofür sie gegeben wurde), kein
+Remix (CTA immer „Starte deine eigene"), keine Creator-Profile (AH-7), Rechtstexte (A1)
+als Gate für die Öffnung an fremde Nutzer, nicht für den Bau. **Verworfen für Runde 1:**
+Bewertung in Dimensionen, Trending, Collections, Vorher/Nachher-Slider, Stil-/
+Positionierungs-Facetten (Daten fehlen bis Brand Design 02).
 
 ---
 
