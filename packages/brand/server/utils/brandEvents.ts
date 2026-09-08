@@ -83,6 +83,22 @@ export type BrandEventType =
    */
   | 'publication.submitted'
   | 'publication.withdrawn'
+  /**
+   * DIE FREISCHALTUNG VON BRAND DESIGN (Konzept §2.10, Paket D1) — die EINZIGE
+   * Handlung des Betreibers in diesem Funnel, und sie steht hier, weil sie
+   * Folgen für den KUNDEN hat: Schicht 2 ist ab dieser Zeile für seine Marke
+   * offen. Die Freigabe einer Veröffentlichung (`publication.*`) hat das
+   * bewusst nicht — dort entsteht nichts Neues für den Kunden, dort wird nur
+   * sichtbar, was er schon eingereicht hat.
+   *
+   * `payload` trägt Kennzahlen: beim Freischalten, wie viele `brand_steps`-
+   * Zeilen nachgezogen wurden (Bestandsmarke aus der Zeit vor D0) und den
+   * Foundation-Fortschritt; beim Zurücknehmen die Zahl der Tage, die das
+   * Produkt offen war. `userId` ist hier der BETREIBER, nicht der Eigentümer —
+   * die Marke steht in `profileId`. Kein Titel, keine Adresse (Regel 1 im Kopf).
+   */
+  | 'design.unlocked'
+  | 'design.locked'
 
 export interface BrandEventInput {
   type: BrandEventType

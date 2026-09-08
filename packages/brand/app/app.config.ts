@@ -180,6 +180,36 @@ export default defineAppConfig({
           group: 'management',
           order: 132,
         },
+        /**
+         * DIE FREISCHALTUNG VON BRAND DESIGN (Konzept
+         * docs/plans/BRAND-DESIGN.md §2.10, Paket D1) — der fünfte
+         * Betreiber-Eintrag dieses Layers, unter den anderen (`order: 133`).
+         * Alle sind Arbeitslisten desselben Menschen, und zwischen ihnen
+         * gehört keine fremde Sache.
+         *
+         * Dieselbe Capability wie die vier darüber: `users.manage`. §2.10
+         * nennt eine Capability `brand.manage` — die gibt es hier nicht, und
+         * sie zu ERFINDEN wäre eine neue RBAC-Rolle für genau einen Knopf.
+         * `users.manage` ist die Betreiber-Klammer dieses Layers (Begründung
+         * ausgeschrieben in `server/utils/brandDesignUnlock.ts`): wer über den
+         * Beta-Zugang entscheidet, entscheidet auch, welche Marke das
+         * begleitete Produkt bekommt.
+         *
+         * KEIN `productKey`, aus demselben Grund wie oben: das Produkt-Gate
+         * `brand` schaltet den WIZARD ab. Eine Zusage, die das Studio einem
+         * Kunden im Erstgespräch gegeben hat, muss auch dann noch
+         * zurücknehmbar sein.
+         */
+        {
+          id: 'brand-design-unlock',
+          scope: 'operator',
+          labelKey: 'brand.admin.designUnlock.nav',
+          icon: 'i-ph-palette',
+          to: '/dashboard/brand-design',
+          requiredCapability: 'users.manage',
+          group: 'management',
+          order: 133,
+        },
       ],
     },
     brand: {
