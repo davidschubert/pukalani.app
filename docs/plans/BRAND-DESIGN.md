@@ -638,6 +638,28 @@ eigene Stand steht am Layer. Deploy-Reihenfolge: **Migration VOR Code** —
 (Werkstatt liest `BRAND_VOICE`; Wechsel mit D2); Leseansicht/Dokument haben
 weiter einlagige Rails (D8).
 
+**Stand D2a (Weiche + Vorbilder-Upload):** GEBAUT und geprüft 2026-09-08
+(vier Commits, Core-Drossel `brand:inspiration` 12/min als eigener Commit) —
+Migration **brand-024** (Tabelle `brand_inspiration`: Zeilen-Id = Datei-Id,
+`area` varchar aus dem Vokabular, `filename`, `note`, `number`, `reading` für
+D2b; Bucket `brand-inspiration` permissions [], 5 MB, png/jpg/webp), Routen
+`GET/POST /api/brand/profiles/:id/inspiration`, `PATCH/DELETE …/:fileId`,
+`GET …/:fileId/image` (nur Besitzer, `private, no-store`), Magic-Bytes
+(WebP = RIFF + WEBP), 12 je Marke, GDPR-Export/Löschung, Ereignisse
+`design.inspiration.added|removed`; Weiche `g.source` als Karten, Instrument
+`uploads` (`BwUploadsEditor`), Frida als Stimme der Design-Kapitel. Beweis
+170/170 (Abschnitt 22: Formate, Gegenproben 400/413/409, fremd 404, Share
+ohne Vorbilder, Löschen ⇒ Bucket 404). Entschieden im Bau: (a) kein
+`fileId`/`createdAt` — Zeilen-Id und `$createdAt` sind die Wahrheit; (b) der
+Slot `g.inspiration` wird NIE `confirmed` (härtere Fassung von Leitplanke c:
+`confirmedSlotValues` trüge ihn sonst ab D8 ins Dokument); (c) „Frida schlägt
+vor" ist Anzeige (Instrument weg, Entfällt-Satz), kein neuer Session-Zustand
+(§2.1); (d) Bereichs-Vorgabe beim Ablegen = Farbwelt, an der Karte änderbar.
+Deploy-Reihenfolge: **Migration VOR Code** (Upload sonst 503). Inhalts-Gate
+David: Karten-Texte der Weiche, Präfix „Bekannt:" vor der Beispielzeile
+(geteilt mit den Architektur-Modellen — liest sich bei „Frida schlägt vor"
+schief), Privatheits-/Fremdwerk-Satz.
+
 | # | Paket | Inhalt | Gate |
 | --- | --- | --- | --- |
 | D0 | Verträge | Registry-Steps + Sessions (Struktur), Vokabulare, Font-Paar-Katalog, `BrandDesignPreset`, `buildBrandDesign`, Ramp-Import als Vertrag, Journey mit Freischaltung | — |
