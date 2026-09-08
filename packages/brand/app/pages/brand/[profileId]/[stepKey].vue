@@ -2541,6 +2541,50 @@ function applyMarkPick(slotId: string, value: string): void {
   onInput(slotId, value)
 }
 
+// ── Die Bildsprache (D6, §2.6) ────────────────────────────────────────────
+
+/**
+ * DIESELBE ARBEITSTEILUNG WIE IN DEN DREI KAPITELN DAVOR:
+ * `useBrandImageryWorld()` rechnet, die SEITE schreibt.
+ */
+const imageryWorld = useBrandImageryWorld()
+
+const showImageryPanel = computed(() => stepKey.value === 'imagery')
+
+/**
+ * ALLE VIER Sessions belegt das Kapitel selbst vor — anders als beim Zeichen,
+ * wo `j.brief` aus einem Lauf kommt. Hier gibt es keinen Modell-Text, den ein
+ * Autosave überschreiben könnte (§1.4: „Regeln statt Bilder").
+ */
+const IMAGERY_SLOTS = ['k.photo', 'k.illustration', 'k.icons', 'k.dodont'] as const
+
+const confirmedImagerySlots = computed(() =>
+  IMAGERY_SLOTS.filter(slotId => store.slotConfirmed(slotId)))
+
+/**
+ * DAS KAPITEL BELEGT SICH SELBST VOR (H5) — dieselbe Mechanik und dieselben
+ * vier Sicherungen wie Farbwelt, Typografie und Zeichen darüber
+ * (Gleichheits-Prüfung, Bestätigtes bleibt unberührt, ein fehlender Wert
+ * löscht, erst NACH dem Mount).
+ */
+onMounted(() => {
+  watch(imageryWorld.slotValues, (values) => {
+    if (stepKey.value !== 'imagery') return
+    for (const slotId of IMAGERY_SLOTS) {
+      if (store.slotConfirmed(slotId)) continue
+      const value = values[slotId] ?? ''
+      if (store.slotValue(slotId) === value) continue
+      onInput(slotId, value)
+    }
+  }, { immediate: true })
+})
+
+/** Eine Wahl aus dem Bildsprache-Panel — derselbe Weg wie jede Eingabe. */
+function applyImageryPick(slotId: string, value: string): void {
+  if (store.slotConfirmed(slotId)) return
+  onInput(slotId, value)
+}
+
 /** Die Marken des Kontos für den Wähler oben in der Sidebar. */
 const LOCALE_FLAGS: Record<string, string> = { en: 'i-circle-flags-us', de: 'i-circle-flags-de' }
 
@@ -2998,6 +3042,17 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
           :profile-id="profileId"
           :confirmed="confirmedMarkSlots"
           @pick="applyMarkPick"
+        />
+
+        <!-- DIE BILDSPRACHE (Kapitel `imagery`, D6) — Prinzip, Illustration,
+             Icons und das gerechnete Do & Don't auf EINER Werkbank. Wie die
+             drei Kapitel davor steht sie ÜBER dem Gespräch; bestätigt wird
+             jede Session unten auf ihrer Karte (`RENDERED_ABOVE`). Keine
+             Fotos, keine KI-Bilder — §1.4. -->
+        <BwImageryPanel
+          v-if="showImageryPanel"
+          :confirmed="confirmedImagerySlots"
+          @pick="applyImageryPick"
         />
 
         <p v-if="phaseIntro" class="bw-label" style="color: var(--bw-muted); padding-left: 2.65rem">{{ phaseIntro }}</p>

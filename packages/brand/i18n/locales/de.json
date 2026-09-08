@@ -2852,6 +2852,51 @@
         "later": "Folgt in einem eigenen Schritt: aus Briefing, DNA und Farbwelt erzeugte Entwürfe als Ideen für die Designer-Arbeit — gekennzeichnet, mit Herkunft und privat. Das Kapitel funktioniert ohne sie."
       }
     },
+    "imagery": {
+      "photo": {
+        "title": "Bild-Prinzipien",
+        "tag": "k.photo · drei Vorschläge",
+        "intro": "Vier Achsen entscheiden alles Weitere: Licht, Ausschnitt, Menschen, Farbigkeit. Daraus wird der Satz, den ihr eurer Fotografin schickt.",
+        "proposed": "Aus eurer DNA",
+        "sketch": "Stil-Skizze: {name}",
+        "noPhotos": "Die Skizzen sind aus eurer Farbwelt gezeichnet, keine Fotos. Ein Beispielbild würde die Entscheidung verkaufen, um die es hier geht — ihr wählt ein Prinzip, kein Motiv."
+      },
+      "illustration": {
+        "title": "Illustration",
+        "tag": "k.illustration",
+        "intro": "Gibt es überhaupt Illustration — und wenn ja, in welcher Sprache? „Keine\" ist eine vollwertige Antwort und die einzige Regel, die niemand brechen kann.",
+        "note": {
+          "none": "Fotos und Typografie tragen alles — die einfachste Regel, die man nicht brechen kann.",
+          "line": "Feine Konturzeichnungen für Herkunft und Ablauf — ruhig, gut erweiterbar.",
+          "area": "Farbflächen ohne Kontur — plakativ, näher an Verpackung als an Handbuch.",
+          "organic": "Gezeichnete, unregelmäßige Formen — warm, aber schwer konsistent zu halten."
+        }
+      },
+      "icons": {
+        "title": "Icons",
+        "tag": "k.icons · Phosphor",
+        "intro": "Dieselben fünf Icons in drei Stärken, daneben die Probe mit der echten Strichstärke. Die einzige Frage hier ist, ob der Strich zu eurer Textschrift passt.",
+        "sample": "Strichstärke-Probe: {stroke}",
+        "strokeLabel": "Strichstärke {stroke} bei 24 px",
+        "line": "So steht ein Icon neben eurer Textschrift.",
+        "note": {
+          "regular": "Gleiche Strichstärke wie eine Textschrift — ruhig, unauffällig.",
+          "fill": "Gefüllt: gut lesbar auf kleinen Flächen, wirkt schwerer.",
+          "bold": "Dicker Strich — laut, und neben einer Serif sehr laut."
+        },
+        "rule": {
+          "fits": "Passt: {stroke} liegt in der Spanne eurer Schrift ({family}: {range}).",
+          "heavy": "Kräftiger als eure Schrift: {stroke} liegt über der Spanne ({family}: {range}). Das ist kein Fehler, nur lauter — bestätigen könnt ihr es trotzdem.",
+          "light": "Feiner als eure Schrift: {stroke} liegt unter der Spanne ({family}: {range}) — die Icons verschwinden neben der Zeile.",
+          "area": "Eine Fläche hat keine Strichstärke. Neben {family} wirkt sie schwerer als jede Linie — prüft sie in der kleinsten Größe, die ihr benutzt."
+        }
+      },
+      "dodont": {
+        "title": "Do & Don\u2019t",
+        "tag": "k.dodont · gerechnet aus euren drei Entscheidungen",
+        "intro": "Sechs Paare: die vier Achsen eures Prinzips, dazu Illustration und Icons. Jedes Do hat sein Don\u2019t — erst das Paar macht die Regel prüfbar."
+      }
+    },
     "scene": {
       "wordmarkFallback": "Eure Marke",
       "eyebrow": "Neu · Ausgabe 01",

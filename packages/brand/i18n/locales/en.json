@@ -2852,6 +2852,51 @@
         "later": "Coming as its own step: drafts generated from the briefing, the DNA and the colour world as ideas for the design work — labelled, with their origin, and private. The chapter works without them."
       }
     },
+    "imagery": {
+      "photo": {
+        "title": "Picture principles",
+        "tag": "k.photo · three proposals",
+        "intro": "Four axes decide everything that follows: light, crop, people and colour. They become the brief you send to your photographer.",
+        "proposed": "From your DNA",
+        "sketch": "Style sketch: {name}",
+        "noPhotos": "The sketches are drawn from your colour world, they are not photos. A sample picture would sell the very decision at stake here — you are choosing a principle, not a motif."
+      },
+      "illustration": {
+        "title": "Illustration",
+        "tag": "k.illustration",
+        "intro": "Is there illustration at all — and if so, in which language? \"None\" is a full answer, and the only rule nobody can break.",
+        "note": {
+          "none": "Photography and type carry everything — the simplest rule there is.",
+          "line": "Fine outline drawings for origin and process — quiet, easy to extend.",
+          "area": "Colour areas without outlines — poster-like, closer to packaging than to a manual.",
+          "organic": "Drawn, irregular shapes — warm, but hard to keep consistent."
+        }
+      },
+      "icons": {
+        "title": "Icons",
+        "tag": "k.icons · Phosphor",
+        "intro": "The same five icons in three weights, with a probe drawn at the real stroke width. The only question here is whether the stroke sits with your body type.",
+        "sample": "Stroke probe: {stroke}",
+        "strokeLabel": "Stroke {stroke} at 24 px",
+        "line": "This is how an icon sits beside your body type.",
+        "note": {
+          "regular": "The same stroke weight as body type — quiet and unobtrusive.",
+          "fill": "Filled: legible on small surfaces, reads as heavier.",
+          "bold": "A thick stroke — loud, and very loud beside a serif."
+        },
+        "rule": {
+          "fits": "It fits: {stroke} sits inside the range of your type ({family}: {range}).",
+          "heavy": "Heavier than your type: {stroke} is above the range ({family}: {range}). That is not a mistake, only louder — you can still confirm it.",
+          "light": "Finer than your type: {stroke} is below the range ({family}: {range}) — the icons disappear beside the line.",
+          "area": "An area has no stroke width. Beside {family} it reads as heavier than any line — check it at the smallest size you use."
+        }
+      },
+      "dodont": {
+        "title": "Do & Don\u2019t",
+        "tag": "k.dodont · computed from your three decisions",
+        "intro": "Six pairs: the four axes of your principle plus illustration and icons. Every do has its do-not — the pair is what makes the rule checkable."
+      }
+    },
     "scene": {
       "wordmarkFallback": "Your brand",
       "eyebrow": "New · Issue 01",
