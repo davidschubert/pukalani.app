@@ -63,7 +63,7 @@ verhandelbar: **erst die Migration auf `branding`, dann der Code-Deploy.**
 Sonst zeigt der Fuß auf eine Route, deren Tabelle es nicht gibt.
 
 - [x] `market` (MV1 M1, 2026-09-06): brand-018/019 + market-001…004.
-- [ ] **`pages` (BS1 R1, gebaut am 2026-09-08 — Prod-Migration OFFEN):**
+- [x] **`pages` (BS1 R1; Prod-Migration GEFAHREN 2026-09-07 mit Davids Ja — pages-001…006, Kontrolllauf identisch, Seed 6 Gerüst-Seiten, Parität 30/30):**
 
       ```
       pnpm migrate --app branding --layer pages    # sechs Migrationen
