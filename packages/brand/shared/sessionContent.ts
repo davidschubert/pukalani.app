@@ -3568,6 +3568,15 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
     },
     answers: { maxProbes: 1 },
     form: { person: 'none', tense: 'present' },
+    /**
+     * DIE VIER RICHTUNGS-IDS WÖRTLICH (D5a) — dieselbe Begründung wie bei
+     * `i.pair` (D4): diese Datei hat keine Importe, der Katalog steht in
+     * `shared/brandDesignVocab.ts`, und dass beide dasselbe sagen, nagelt
+     * `tests/brandDesignMark.test.ts` fest. Ohne die Invariante stünde ein
+     * von Hand korrigierter Satz bestätigt im Slot, und weder die Setzungen
+     * noch `buildBrandDesign` könnten etwas damit anfangen.
+     */
+    invariants: [{ kind: 'oneOf', terms: ['word', 'pictorial', 'combination', 'monogram'] }],
   },
   'j.brief': {
     goal: 'write the briefing a designer would get: character, form language, clear space, variants, '
@@ -3645,6 +3654,8 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
         + 'designer'],
     },
     form: { person: 'none', tense: 'present' },
+    /** Die zwei gesetzten Beispiele wörtlich (`BRAND_MARK_SETTINGS`, D5b). */
+    invariants: [{ kind: 'oneOf', terms: ['wordmark', 'monogram'] }],
   },
   'j.drafts': {
     goal: 'generate image drafts from the briefing and let the human keep or discard them — as ideas for '

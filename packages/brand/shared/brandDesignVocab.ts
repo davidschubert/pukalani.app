@@ -317,6 +317,21 @@ export const BRAND_MARK_VARIANTS: readonly BrandDesignTerm[] = [
   { id: 'icon', de: 'Icon-Fläche', en: 'Icon area' },
 ]
 
+/**
+ * DIE ZWEI GESETZTEN BEISPIELE (§2.5 Stufe 2, `j.pick`).
+ *
+ * Sie sind NICHT dieselbe Liste wie `BRAND_MARK_KINDS`, auch wenn zwei Ids
+ * sich ähneln: dort steht, was für ein Zeichen die Marke bekommen soll (eine
+ * Richtung für den Designer), hier steht, welche der beiden gerechneten
+ * SETZUNGEN als Vorzugs-Beispiel im Briefing landet. Eine Marke mit der
+ * Richtung „Kombination" hat trotzdem genau diese zwei Setzungen — eine
+ * Bildmarke wird hier bewusst nicht gesetzt (§1.4: kein Logo-Versprechen).
+ */
+export const BRAND_MARK_SETTINGS: readonly BrandDesignTerm[] = [
+  { id: 'wordmark', de: 'Wortmarke', en: 'Wordmark' },
+  { id: 'monogram', de: 'Monogramm', en: 'Monogram' },
+]
+
 /** Die Tönung der Neutral-Rampe (§2.3, `h.neutral`). */
 export const BRAND_NEUTRAL_OPTIONS: readonly BrandDesignTerm[] = [
   { id: 'tinted', de: 'Aus der Basisfarbe getönt', en: 'Tinted from the base colour' },

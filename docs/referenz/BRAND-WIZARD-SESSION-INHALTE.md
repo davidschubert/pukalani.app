@@ -3828,7 +3828,7 @@ Interview-Technik: **Frida** (Design Directorin). Gesprochen wird alles von Geor
 
 **Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
 
-**Invarianten (im Code geprüft):** —
+**Invarianten (im Code geprüft):** der Wert ist eine Id aus: word, pictorial, combination, monogram
 
 **Fliesst später in:** 6 Felder in 2 Kapiteln (Zeichen · Bewegung)
 
@@ -3938,7 +3938,7 @@ Interview-Technik: **Frida** (Design Directorin). Gesprochen wird alles von Geor
 
 **Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 0 · „weiss nicht" gilt hier nicht · nicht vertagbar
 
-**Invarianten (im Code geprüft):** —
+**Invarianten (im Code geprüft):** der Wert ist eine Id aus: wordmark, monogram
 
 **Fliesst später in:** nichts — eine Korrektur hier löst keine Warteschlange aus
 

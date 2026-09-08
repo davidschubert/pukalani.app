@@ -396,6 +396,11 @@ describe('evaluateInvariants — was ein Test prüfen kann (§3a Nr. 6)', () => 
         terms: ['editorial', 'humanist', 'inter', 'geometric', 'classic', 'contrast'],
       }]],
       ['i.scale', [{ kind: 'oneOf', terms: ['calm', 'dense', 'loud'] }]],
+      // Brand Design D5a/D5b: die Richtung des Zeichens und die Wahl der
+      // Setzung. Derselbe Fall wie die zwei darüber — die Menge steht in
+      // `brandDesignVocab.ts`, nicht im Wert eines anderen Feldes.
+      ['j.kind', [{ kind: 'oneOf', terms: ['word', 'pictorial', 'combination', 'monogram'] }]],
+      ['j.pick', [{ kind: 'oneOf', terms: ['wordmark', 'monogram'] }]],
     ])
   })
 

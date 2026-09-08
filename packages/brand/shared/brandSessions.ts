@@ -635,6 +635,19 @@ export const BRAND_STAGE_SOURCE_SLOTS: Readonly<Partial<Record<BrandStepKey, rea
    * in D3 einen Vorschlag daraus, statt die Szene grau zu lassen.
    */
   type: ['g.mix', 'h.base', 'h.neutral', 'h.accent', 'result.direction'],
+  /**
+   * DAS ZEICHEN BRAUCHT BEIDES: FARBWELT UND SCHRIFT (D5b).
+   *
+   * Eine gesetzte Wortmarke IST das Schriftpaar in der Farbwelt — ohne
+   * `i.pair` stünde sie in der ersten Schrift des Katalogs, ohne `h.base` auf
+   * der Notfarbe, und beides wäre eine Setzung einer anderen Marke.
+   * `i.rules` kommt mit, weil Gewicht, Laufweite und Versalien laut D4
+   * ausdrücklich auch für die Wortmarke gelten; `g.mix` trägt die Vorbelegung
+   * der Richtung (DNA „Visueller Stil") und die Eckenrundung (DNA
+   * „Formsprache"), `result.direction` wie überall nur den Rückfall der
+   * Farbwelt.
+   */
+  mark: ['g.mix', 'h.base', 'h.neutral', 'h.accent', 'i.pair', 'i.rules', 'result.direction'],
 }
 
 /** Die Quell-Slots einer Bühne — leer, wo sie keine braucht. */
