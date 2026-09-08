@@ -1386,7 +1386,14 @@ const activeAwaitsConfirm = computed(() => {
  * Ansicht, die er gerade gelesen hat. Sie zeigt stattdessen einen Satz und
  * behält den Knopf — bestätigt wird, was oben steht.
  */
-const RENDERED_ABOVE = new Set(['g.dna', 'g.boards', 'g.mix'])
+const RENDERED_ABOVE = new Set([
+  'g.dna', 'g.boards', 'g.mix',
+  // Die sechs Sessions der Farbwelt (D3): Kandidaten, Rampen-Streifen, zwei
+  // Szenen, Rollen-Liste und Kontrast-Tabelle stehen im Panel darüber. Ihre
+  // ROHEN Werte wären hier elf Hex-Stufen mal zwei und sechs Messungen —
+  // eine Wand aus Zahlen unter der Ansicht, die sie gerade erklärt hat.
+  'h.base', 'h.ramp', 'h.neutral', 'h.accent', 'h.roles', 'h.contrast',
+])
 
 function renderedAbove(slotId: string): boolean {
   return RENDERED_ABOVE.has(slotId)
@@ -2349,28 +2356,91 @@ const boardChoices = computed<BwBoardChoice[]>(() => {
  * auch, wenn sich der Vorschlag ÄNDERT — dann rechnet dieselbe Regel neue
  * Werte, der Vergleich schlägt an, und der Stand heilt sich selbst.
  *
- * NUR IM BROWSER: der Server rendert diese Seite mit, und ein Autosave im SSR
- * schriebe eine Änderung, die niemand ausgelöst hat.
+ * NUR NACH DEM MOUNT — `import.meta.client` allein reicht NICHT (Brand Design
+ * D3, am eigenen Klick gefunden): ein `watch(..., { immediate: true })` läuft
+ * im Browser schon im SETUP, also VOR dem ersten Rendern. Der Server malt die
+ * Karte dann leer („Noch offen — kommt im Gespräch"), der Client malt sie im
+ * selben Augenblick gefüllt — drei Hydration-Mismatches, darunter ein
+ * `disabled`-Attribut am Bestätigen-Knopf. Dieselbe Falle und dieselbe Kur wie
+ * beim Eröffnungszug oben: `onMounted` ist die kleinste ehrliche Klammer, und
+ * der Server schreibt so ohnehin nichts.
  */
-watch(dna.boardsSlotValue, (value) => {
-  if (!import.meta.client || stepKey.value !== 'dna' || !value) return
-  if (store.slotValue('g.boards') === value) return
-  onInput('g.boards', value)
-}, { immediate: true })
-
 const dnaMixValue = computed(() => (dna.chosenBoardId.value ? dna.mixSlotValue() : ''))
 
-watch(dnaMixValue, (value) => {
-  if (!import.meta.client || stepKey.value !== 'dna' || !value) return
-  if (store.slotValue('g.mix') === value) return
-  onInput('g.mix', value)
-}, { immediate: true })
+onMounted(() => {
+  watch(dna.boardsSlotValue, (value) => {
+    if (stepKey.value !== 'dna' || !value) return
+    if (store.slotValue('g.boards') === value) return
+    onInput('g.boards', value)
+  }, { immediate: true })
+
+  watch(dnaMixValue, (value) => {
+    if (stepKey.value !== 'dna' || !value) return
+    if (store.slotValue('g.mix') === value) return
+    onInput('g.mix', value)
+  }, { immediate: true })
+})
 
 /** Eine neue Mischung aus dem Panel — sie geht denselben Weg wie jede Eingabe. */
 function applyMixSources(next: BrandDnaMixSources): void {
   const value = dna.mixSlotValue(next)
   if (!value) return
   onInput('g.mix', value)
+}
+
+// ── Die Farbwelt (D3, §2.3) ───────────────────────────────────────────────
+
+/**
+ * DIESELBE ARBEITSTEILUNG WIE BEI DER DNA: `useBrandColorWorld()` rechnet,
+ * die SEITE schreibt.
+ */
+const colorWorld = useBrandColorWorld()
+
+const showColorPanel = computed(() => stepKey.value === 'color')
+
+/** Die sechs Sessions des Kapitels — in Registry-Reihenfolge. */
+const COLOR_SLOTS = ['h.base', 'h.ramp', 'h.neutral', 'h.accent', 'h.roles', 'h.contrast'] as const
+
+/** Was der Mensch schon bestätigt hat — das Panel sperrt genau diese Abschnitte. */
+const confirmedColorSlots = computed(() =>
+  COLOR_SLOTS.filter(slotId => store.slotConfirmed(slotId)))
+
+/**
+ * DAS KAPITEL BELEGT SICH SELBST VOR (H5: „jede Session muss als BESTÄTIGUNG
+ * durchlaufbar sein") — dieselbe Mechanik wie `g.boards`/`g.mix` in D2c.
+ *
+ * DREI SICHERUNGEN, die man nicht „vereinfachen" darf:
+ *  1. Die GLEICHHEITS-Prüfung. Ohne sie schriebe jeder Renderdurchlauf
+ *     denselben Text und der Autosave liefe im Kreis.
+ *  2. BESTÄTIGTES bleibt unberührt. Ein bestätigter Slot ist zu; ein Schreiber
+ *     darauf holte sich `slot_confirmed` vom Server — für eine Änderung, die
+ *     niemand ausgelöst hat. Wer eine Ableitung nach der Bestätigung ändern
+ *     will, geht durch „Korrigieren" (und der Veraltet-Hinweis sagt es ihm).
+ *  3. Ein FEHLENDER Wert LÖSCHT. `h.contrast` steht nur da, solange die
+ *     Pflicht-Paare AA halten (§2.3) — reisst eine spätere Basisfarbe sie,
+ *     muss die alte, grüne Tabelle weg und nicht stehen bleiben.
+ *
+ *  4. ERST NACH DEM MOUNT. Der Server rendert diese Seite mit; ein
+ *     `immediate`-Watcher im Setup füllte die Karte im Browser eine Runde
+ *     früher als auf dem Server — drei Hydration-Mismatches (s. den Zwilling
+ *     im DNA-Kapitel oben).
+ */
+onMounted(() => {
+  watch(colorWorld.slotValues, (values) => {
+    if (stepKey.value !== 'color') return
+    for (const slotId of COLOR_SLOTS) {
+      if (store.slotConfirmed(slotId)) continue
+      const value = values[slotId] ?? ''
+      if (store.slotValue(slotId) === value) continue
+      onInput(slotId, value)
+    }
+  }, { immediate: true })
+})
+
+/** Eine Wahl aus dem Farb-Panel — sie geht denselben Weg wie jede Eingabe. */
+function applyColorPick(slotId: string, value: string): void {
+  if (store.slotConfirmed(slotId)) return
+  onInput(slotId, value)
 }
 
 /** Die Marken des Kontos für den Wähler oben in der Sidebar. */
@@ -2796,6 +2866,17 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
           v-if="showDnaPanel"
           :profile-id="profileId"
           :with-inspiration="showInspiration"
+        />
+
+        <!-- DIE FARBWELT (Kapitel `color`, D3) — sechs Abschnitte auf EINER
+             Werkbank. Sie steht ÜBER dem Gespräch wie der DNA-Vorschlag: was
+             hier passiert, ist kein Zug, sondern eine Rechnung, die man
+             ansieht. Bestätigt wird jede der sechs Sessions unten auf ihrer
+             Karte (`RENDERED_ABOVE`). -->
+        <BwColorPanel
+          v-if="showColorPanel"
+          :confirmed="confirmedColorSlots"
+          @pick="applyColorPick"
         />
 
         <p v-if="phaseIntro" class="bw-label" style="color: var(--bw-muted); padding-left: 2.65rem">{{ phaseIntro }}</p>
