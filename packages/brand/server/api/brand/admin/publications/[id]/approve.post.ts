@@ -42,6 +42,10 @@ export default defineEventHandler(async (event): Promise<BrandPublicationAdminDe
   const row = await loadBrandPublicationRow(event, id)
   const transition = decideBrandPublication(brandPublicationStatusOf(row), 'approve')
   if (transition.action === 'refuse') {
+    // Auch die ABLEHNUNG hinterlässt eine Zeile (2026-09-08): 4xx protokolliert
+    // der zentrale Handler nicht, und ein Klick auf eine schon entschiedene
+    // Zeile sah im Log genauso aus wie gar kein Klick.
+    logEvent('info', 'brand.publication_action_rejected', { action: 'approve', slug: row.slug, status: row.status ?? '' })
     throw createError({
       status: 409,
       statusText: 'Already decided',

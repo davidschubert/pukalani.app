@@ -45,6 +45,7 @@ export default defineEventHandler(async (event): Promise<BrandPublicationAdminDe
   const row = await loadBrandPublicationRow(event, id)
   const transition = decideBrandPublication(brandPublicationStatusOf(row), 'decline')
   if (transition.action === 'refuse') {
+    logEvent('info', 'brand.publication_action_rejected', { action: 'decline', slug: row.slug, status: row.status ?? '' })
     throw createError({
       status: 409,
       statusText: 'Already decided',
