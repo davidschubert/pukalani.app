@@ -5,16 +5,31 @@ import { brandCheckUrlKey } from '../../shared/brandCheck'
 import {
   BRAND_PUBLICATION_ARCHETYPE_SLOT,
   BRAND_PUBLICATION_DAY_WINDOW_MS,
+  BRAND_PUBLICATION_REPORT_WINDOW_MS,
+  BRAND_PUBLICATION_STATUSES,
+  type BrandPublicationFilter,
+  type BrandPublicationReportFilter,
   type BrandPublicationStatus,
   type BrandPublicationSubmitDecision,
   brandPublicationCanSubmit,
   brandPublicationDayKey,
+  brandPublicationFeatureLosers,
   brandPublicationPath,
+  brandPublicationPendingDeclined,
+  brandPublicationReportHourKey,
+  brandPublicationReportStatusValues,
   brandPublicationSlugCandidate,
+  brandPublicationStatusValues,
   decideBrandPublicationQuota,
+  decideBrandPublicationReportQuota,
+  normalizeBrandPublicationReportStatus,
   normalizeBrandPublicationStatus,
 } from '../../shared/brandPublication'
-import type { BrandPublicationState } from '../../shared/types/brand'
+import type {
+  BrandPublicationAdminItem,
+  BrandPublicationReport,
+  BrandPublicationState,
+} from '../../shared/types/brand'
 import {
   BRAND_CHECKS_TABLE,
   BRAND_PROFILES_TABLE,
@@ -117,9 +132,11 @@ export function toBrandPublicationState(row: BrandPublicationRow | null): BrandP
       decidedAt: '',
       decisionNote: '',
       pendingUpdate: false,
+      pendingDecision: null,
     }
   }
   const status = normalizeBrandPublicationStatus(row.status)
+  const decisionNote = row.decisionNote ?? ''
   return {
     status,
     slug: row.slug,
@@ -127,7 +144,16 @@ export function toBrandPublicationState(row: BrandPublicationRow | null): BrandP
     submittedAt: row.submittedAt ?? '',
     publishedAt: row.publishedAt ?? '',
     decidedAt: row.decidedAt ?? '',
-    decisionNote: row.decisionNote ?? '',
+    decisionNote,
+    /**
+     * „Aktualisierung abgelehnt" — öffentlich UND eine Begründung, die zu
+     * keiner Ablehnung der MARKE gehört (die Regel steht in
+     * `brandPublicationPendingDeclined`, ihre Voraussetzung ist, dass
+     * `approve` und `unhide` die Notiz leeren).
+     */
+    pendingDecision: brandPublicationPendingDeclined(status, decisionNote)
+      ? { note: decisionNote, at: row.decidedAt ?? '' }
+      : null,
     /**
      * „Öffentlich, und ein neuer Stand wartet" — die Marke ist erreichbar
      * (`publishedAt` steht, der alte Snapshot ist da) UND es liegt etwas zur
@@ -351,4 +377,540 @@ export async function setBrandProfilePublicationVisibility(
     rowId: profileId,
     data: { publicationVisibility: visibility },
   })
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+ * DIE BETREIBER-SEITE (docs/plans/DISCOVER-BRANDS.md §4.4, Paket D3)
+ *
+ * Alles ab hier hängt an `users.manage` und läuft über den Admin-Client. Es
+ * steht in DERSELBEN Datei wie das Lesen des Kunden, weil es dieselbe Tabelle
+ * ist und dieselben zwei Snapshot-Spalten: eine zweite Datei „…Admin.ts" hätte
+ * die Regel „`snapshot` ist der freigegebene, `pendingSnapshot` der
+ * eingereichte Stand" ein zweites Mal erklären müssen, und das ist genau die
+ * Sorte Wissen, die beim zweiten Erklären auseinanderläuft.
+ * ══════════════════════════════════════════════════════════════════════════ */
+
+/**
+ * DAS GATE: `users.manage` — dasselbe wie Warteliste und Korrekturen.
+ *
+ * Begründung ausgeschrieben im Kopf von `brandCheckAdmin.ts`: `sites.manage`
+ * verspräche etwas, das es auf einer Single-Tenant-Instanz nicht gibt. Wer
+ * über den Beta-Zugang entscheidet, entscheidet auch, welche Marke öffentlich
+ * unter unserer Adresse steht — es ist derselbe Kreis.
+ *
+ * KEIN `requireBrandAccess`: das Beta-Gate der Kunden-Fläche wäre hier falsch
+ * (der Betreiber baut die Beta, er nimmt nicht an ihr teil).
+ */
+export function requireBrandPublicationOperator(event: H3Event) {
+  return requirePermission(event, 'users.manage')
+}
+
+/** Der EINE 503 dieser Fläche — gleiche Sprache wie die öffentlichen Routen. */
+export function brandPublicationAdminUnavailable(error: unknown, data: Record<string, unknown> = {}) {
+  logEvent('warn', 'brand.publication_admin_unavailable', {
+    ...data,
+    message: error instanceof Error ? error.message : 'unknown',
+  })
+  return createError({
+    status: 503,
+    statusText: 'Publication administration unavailable',
+    data: { code: 'publication_admin_unavailable' },
+  })
+}
+
+/** Die Zeilen-Id aus dem Pfad — fehlt sie, ist die Route falsch aufgerufen. */
+export function requireBrandPublicationRouteId(event: H3Event): string {
+  const id = getRouterParam(event, 'id')
+  if (!id || id.length > 64) throw createError({ status: 400, statusText: 'Missing id' })
+  return id
+}
+
+/**
+ * EINE VERÖFFENTLICHUNG ÜBER IHRE ID — oder ein 404.
+ *
+ * Der 404 ist hier keine Tarnung: wer bis hierher kommt, hat `users.manage`
+ * und darf wissen, dass es diese Zeile nicht (mehr) gibt. AUSGEBLENDETES kommt
+ * zurück — sonst wäre `hidden` eine Einbahnstrasse und `unhide` unerreichbar.
+ */
+export async function loadBrandPublicationRow(
+  event: H3Event,
+  id: string,
+): Promise<BrandPublicationRow> {
+  const { tablesDB, databaseId } = brandDb(event)
+  try {
+    return await tablesDB.getRow<BrandPublicationRow>({
+      databaseId, tableId: BRAND_PUBLICATIONS_TABLE, rowId: id,
+    })
+  }
+  catch (error) {
+    if (isAppwriteNotFound(error)) {
+      throw createError({
+        status: 404,
+        statusText: 'Publication not found',
+        data: { code: 'publication_not_found' },
+      })
+    }
+    throw brandPublicationAdminUnavailable(error, { rowId: id })
+  }
+}
+
+/**
+ * EINE SEITE DER BETREIBER-LISTE. Neueste zuerst — eine Arbeitsliste liest man
+ * von oben, und `$createdAt` ist der einzige Zeitpunkt, den JEDE Zeile trägt
+ * (`publishedAt` ist bei `pending` leer, `decidedAt` bei einer Erst-Einreichung
+ * ebenso).
+ */
+export async function listBrandPublicationRows(
+  event: H3Event,
+  input: { filter: BrandPublicationFilter, limit: number, cursor?: string },
+): Promise<{ rows: BrandPublicationRow[], total: number }> {
+  const { tablesDB, databaseId } = brandDb(event)
+  const values = brandPublicationStatusValues(input.filter)
+
+  const res = await tablesDB.listRows<BrandPublicationRow>({
+    databaseId,
+    tableId: BRAND_PUBLICATIONS_TABLE,
+    queries: [
+      ...(values ? [Query.equal('status', values)] : []),
+      Query.orderDesc('$createdAt'),
+      Query.limit(input.limit),
+      ...(input.cursor ? [Query.cursorAfter(input.cursor)] : []),
+    ],
+  })
+  return { rows: res.rows, total: res.total }
+}
+
+/**
+ * DIE ZÄHLER DER REITER — unabhängig vom gewählten Filter, sonst wären sie
+ * eine Funktion der gerade gewählten Ansicht („0 wartend", weil man die
+ * abgelehnten anschaut) statt eine Aussage über die Liste.
+ *
+ * FAIL-SOFT: schlägt eine Zählung fehl, steht dort `0`. Die Reiter sind eine
+ * Auskunft, keine Arbeitsgrundlage — die Liste darunter würde für eine kaputte
+ * Zahl nicht ausfallen (dieselbe Entscheidung wie bei Warteliste und
+ * Korrekturen).
+ */
+export async function countBrandPublications(
+  event: H3Event,
+): Promise<Record<BrandPublicationStatus, number>> {
+  const { tablesDB, databaseId } = brandDb(event)
+
+  const entries = await Promise.all(BRAND_PUBLICATION_STATUSES.map(async (status) => {
+    try {
+      const res = await tablesDB.listRows<BrandPublicationRow>({
+        databaseId,
+        tableId: BRAND_PUBLICATIONS_TABLE,
+        queries: [Query.equal('status', status), Query.limit(1)],
+      })
+      return [status, res.total] as const
+    }
+    catch {
+      return [status, 0] as const
+    }
+  }))
+
+  return Object.fromEntries(entries) as Record<BrandPublicationStatus, number>
+}
+
+/**
+ * DIE EIGENTÜMER VIELER MARKEN IN EINER ABFRAGE.
+ *
+ * Ohne sie stellte die Liste je Zeile eine Frage (N+1 über eine Fläche, die
+ * fünfzig Zeilen zeigt). Zurück kommt die KONTO-ID, nicht die Mailadresse —
+ * Begründung am Typ `BrandPublicationAdminItem`.
+ *
+ * FAIL-SOFT: was sich nicht lesen lässt, bleibt leer. Ein gelöschtes Profil
+ * darf die Arbeitsliste nicht kosten; der Betreiber sieht dann eine Zeile ohne
+ * Eigentümer und kann sie trotzdem entscheiden.
+ */
+export async function loadBrandPublicationOwners(
+  event: H3Event,
+  profileIds: readonly string[],
+): Promise<Map<string, string>> {
+  const unique = [...new Set(profileIds.filter(Boolean))]
+  if (!unique.length) return new Map()
+
+  const { tablesDB, databaseId } = brandDb(event)
+  try {
+    const res = await tablesDB.listRows<BrandProfileRow>({
+      databaseId,
+      tableId: BRAND_PROFILES_TABLE,
+      // Der Deckel ist die Seitengrösse der Liste (100) — mehr Ids kann sie
+      // gar nicht mitbringen. Explizit, weil `Query.limit()` hier Pflicht ist.
+      queries: [Query.equal('$id', unique), Query.limit(100)],
+    })
+    return new Map(res.rows.map(row => [row.$id, row.ownerId ?? '']))
+  }
+  catch (error) {
+    logEvent('warn', 'brand.publication_admin_owners_failed', {
+      message: error instanceof Error ? error.message : 'unknown',
+    })
+    return new Map()
+  }
+}
+
+/**
+ * DIE ZAHLEN DER BETROFFENEN CHECKS, gebündelt (Entscheidung 3/5).
+ *
+ * Dieselbe Bauform wie `loadBrandCheckSummaries` und aus demselben Grund: eine
+ * Liste mit fünfzig Zeilen darf nicht fünfzig Fragen stellen. FAIL-SOFT, weil
+ * eine fehlende Zahl eine Nebenangabe ist — eine Veröffentlichung daran
+ * scheitern zu lassen wäre eine Randspalte mit Vetorecht.
+ */
+export async function loadBrandPublicationScores(
+  event: H3Event,
+  checkIds: readonly string[],
+): Promise<Map<string, BrandCheckRow>> {
+  const unique = [...new Set(checkIds.filter(Boolean))]
+  if (!unique.length) return new Map()
+
+  const { tablesDB, databaseId } = brandDb(event)
+  try {
+    const res = await tablesDB.listRows<BrandCheckRow>({
+      databaseId,
+      tableId: BRAND_CHECKS_TABLE,
+      queries: [Query.equal('$id', unique), Query.limit(100)],
+    })
+    return new Map(res.rows.map(row => [row.$id, row]))
+  }
+  catch (error) {
+    logEvent('warn', 'brand.publication_admin_scores_failed', {
+      message: error instanceof Error ? error.message : 'unknown',
+    })
+    return new Map()
+  }
+}
+
+/**
+ * Die Zeile, wie sie in die Betreiber-Liste geht. Jede Route muss durch diese
+ * Funktion — so kann keine einzelne vergessen, den Snapshot draussen zu
+ * lassen.
+ */
+export function toBrandPublicationAdminItem(
+  row: BrandPublicationRow,
+  ownerId: string,
+  check: BrandCheckRow | undefined,
+): BrandPublicationAdminItem {
+  const status = normalizeBrandPublicationStatus(row.status)
+  const source = check ? brandCheckRankingFacts(check).source : ''
+  return {
+    id: row.$id,
+    title: row.title ?? '',
+    slug: row.slug,
+    path: brandPublicationPath(row.slug),
+    status,
+    submittedAt: row.submittedAt ?? '',
+    publishedAt: row.publishedAt ?? '',
+    decidedAt: row.decidedAt ?? '',
+    decisionNote: row.decisionNote ?? '',
+    ownerId,
+    score: check ? check.score : null,
+    // Ein Check ohne `source` ist ein Website-Check (die Spalte kam additiv
+    // dazu) — dieselbe Vorgabe, die `brandCheckRankingFacts` setzt.
+    scoreSource: source === 'document' ? 'document' : source ? 'website' : '',
+    checkId: row.checkId ?? '',
+    reportCount: row.reportCount ?? 0,
+    featured: Boolean(row.featuredAt),
+    example: row.example === true,
+    industry: row.industry ?? '',
+    archetype: row.archetype ?? '',
+    locale: row.locale ?? '',
+  }
+}
+
+/**
+ * GENAU EINE BRAND OF THE DAY — die vorige verliert ihren Stempel
+ * (Davids Entscheidung 6).
+ *
+ * Welche Zeilen es trifft, entscheidet die pure Regel
+ * (`brandPublicationFeatureLosers`); hier steht nur, wie man sie findet und
+ * abräumt. Der Deckel ist bewusst klein: mehr als eine featured Zeile ist ein
+ * Datenfehler, und wenn es je zwanzig gäbe, wäre das Aufräumen der zwanzig
+ * immer noch die richtige Antwort.
+ *
+ * FEHLSCHLAG IST HIER KEIN 503: die neue Zeile trägt ihren Stempel bereits,
+ * und zwei Featured sind schlimmer als eine — aber nicht so schlimm, dass die
+ * Handlung des Betreibers deswegen scheitern soll. Der nächste Klick heilt es.
+ */
+export async function clearOtherFeaturedBrandPublications(
+  event: H3Event,
+  keepId: string,
+): Promise<string> {
+  const { tablesDB, databaseId } = brandDb(event)
+  let losers: string[]
+  try {
+    const res = await tablesDB.listRows<BrandPublicationRow>({
+      databaseId,
+      tableId: BRAND_PUBLICATIONS_TABLE,
+      queries: [Query.isNotNull('featuredAt'), Query.limit(20)],
+    })
+    losers = brandPublicationFeatureLosers(res.rows.map(row => row.$id), keepId, true)
+  }
+  catch (error) {
+    logEvent('warn', 'brand.publication_feature_sweep_failed', {
+      keepId,
+      message: error instanceof Error ? error.message : 'unknown',
+    })
+    return ''
+  }
+
+  for (const id of losers) {
+    try {
+      await tablesDB.updateRow({
+        databaseId, tableId: BRAND_PUBLICATIONS_TABLE, rowId: id, data: { featuredAt: null },
+      })
+    }
+    catch (error) {
+      logEvent('warn', 'brand.publication_feature_clear_failed', {
+        rowId: id,
+        message: error instanceof Error ? error.message : 'unknown',
+      })
+    }
+  }
+  // Die Seite sagt „X hat Y abgelöst" — bei mehreren die erste; mehr als eine
+  // gab es ohnehin nur als Datenfehler.
+  return losers[0] ?? ''
+}
+
+/**
+ * DIE VERÖFFENTLICHUNG ZU EINER ADRESSE — für die öffentliche Melde-Route.
+ *
+ * Sie steht hier und nicht in der Galerie-Lesehilfe (D2), weil sie eine ANDERE
+ * Frage beantwortet: die Galerie will den Snapshot rendern, das Melden will
+ * nur wissen, ob es diese Adresse öffentlich gibt. `null` heisst 404 — und
+ * zwar auch bei `hidden`, `pending` und einer fehlenden Tabelle: was nicht
+ * öffentlich steht, kann niemand beanstanden.
+ */
+export async function findPublishedBrandPublicationBySlug(
+  event: H3Event,
+  slug: string,
+): Promise<BrandPublicationRow | null> {
+  const { tablesDB, databaseId } = brandDb(event)
+  try {
+    const res = await tablesDB.listRows<BrandPublicationRow>({
+      databaseId,
+      tableId: BRAND_PUBLICATIONS_TABLE,
+      queries: [Query.equal('slug', slug), Query.limit(1)],
+    })
+    const row = res.rows[0]
+    return row && normalizeBrandPublicationStatus(row.status) === 'published' ? row : null
+  }
+  catch (error) {
+    if (isAppwriteNotFound(error)) return null
+    throw brandPublicationAdminUnavailable(error, { stage: 'slug' })
+  }
+}
+
+// ── Meldungen ───────────────────────────────────────────────────────────────
+
+export type BrandPublicationReportRow = Models.Row & {
+  publicationId: string
+  reason?: string
+  reporterEmail?: string
+  status?: string
+  ipHash?: string
+  decidedAt?: string | null
+}
+
+/**
+ * DER STUNDEN-DECKEL JE ANSCHLUSS (§6: 3/Std).
+ *
+ * Er steht NEBEN dem Minuten-Eimer `brand:report` aus `05.rate-limit.ts`: die
+ * Minute schützt den Server, die Stunde die Arbeitsliste des Betreibers.
+ * Gebucht wird VOR dem ersten Appwrite-Ruf — ein Deckel, der erst nach der
+ * Arbeit greift, ist keiner.
+ */
+export async function bookBrandPublicationReportQuota(
+  event: H3Event,
+  ipHash: string,
+): Promise<{ code: string, retryAfterSec: number } | null> {
+  const { store, prefix } = useRateLimitStore(event)
+  const state = await store.hit(
+    `${prefix}${brandPublicationReportHourKey(ipHash)}`,
+    BRAND_PUBLICATION_REPORT_WINDOW_MS,
+  )
+  const code = decideBrandPublicationReportQuota(state.count)
+  return code
+    ? { code, retryAfterSec: Math.max(1, Math.ceil(state.resetInMs / 1000)) }
+    : null
+}
+
+/**
+ * HAT DIESER ANSCHLUSS ZU DIESER MARKE SCHON ETWAS OFFENES GEMELDET?
+ *
+ * Die Frage, die den 409 trägt. Sie fragt ausdrücklich nach OFFEN und nicht
+ * nach „irgendetwas": eine erledigte Meldung darf eine neue nicht auf ewig
+ * sperren — vielleicht ist der Verstoss zurückgekehrt.
+ *
+ * FAIL-SOFT ist hier FALSCH: könnte die Frage nicht beantwortet werden und
+ * schriebe die Route trotzdem, entstünden bei jedem Klick neue Dubletten in
+ * der Arbeitsliste. Ein Lesefehler wirft deshalb — mit EINER Ausnahme, der
+ * fehlenden Tabelle: dort gibt es sicher keine offene Meldung.
+ */
+export async function hasOpenBrandPublicationReport(
+  event: H3Event,
+  publicationId: string,
+  ipHash: string,
+): Promise<boolean> {
+  const { tablesDB, databaseId } = brandDb(event)
+  try {
+    const res = await tablesDB.listRows<BrandPublicationReportRow>({
+      databaseId,
+      tableId: BRAND_PUBLICATION_REPORTS_TABLE,
+      queries: [
+        Query.equal('publicationId', publicationId),
+        Query.equal('ipHash', ipHash),
+        Query.equal('status', 'open'),
+        Query.limit(1),
+      ],
+    })
+    return res.rows.length > 0
+  }
+  catch (error) {
+    if (isAppwriteNotFound(error)) return false
+    throw brandPublicationAdminUnavailable(error, { publicationId, stage: 'duplicate' })
+  }
+}
+
+/**
+ * DER ZÄHLER AN DER MARKE — FAIL-SOFT, und das ist eine Entscheidung.
+ *
+ * `reportCount` ist eine Anzeige in der Betreiber-Liste, die WAHRHEIT sind die
+ * Zeilen in `brand_publication_reports`. Scheitert das Hochzählen, ist die
+ * Meldung trotzdem angekommen und erscheint im Reiter „Meldungen" — eine
+ * Meldung wegen einer Randspalte zu verwerfen wäre der teurere Fehler.
+ */
+export async function bumpBrandPublicationReportCount(
+  event: H3Event,
+  row: BrandPublicationRow,
+): Promise<void> {
+  const { tablesDB, databaseId } = brandDb(event)
+  try {
+    await tablesDB.updateRow({
+      databaseId,
+      tableId: BRAND_PUBLICATIONS_TABLE,
+      rowId: row.$id,
+      data: { reportCount: (row.reportCount ?? 0) + 1 },
+    })
+  }
+  catch (error) {
+    logEvent('warn', 'brand.publication_report_count_failed', {
+      rowId: row.$id,
+      message: error instanceof Error ? error.message : 'unknown',
+    })
+  }
+}
+
+export async function loadBrandPublicationReportRow(
+  event: H3Event,
+  id: string,
+): Promise<BrandPublicationReportRow> {
+  const { tablesDB, databaseId } = brandDb(event)
+  try {
+    return await tablesDB.getRow<BrandPublicationReportRow>({
+      databaseId, tableId: BRAND_PUBLICATION_REPORTS_TABLE, rowId: id,
+    })
+  }
+  catch (error) {
+    if (isAppwriteNotFound(error)) {
+      throw createError({ status: 404, statusText: 'Report not found', data: { code: 'not_found' } })
+    }
+    throw brandPublicationAdminUnavailable(error, { rowId: id })
+  }
+}
+
+export async function listBrandPublicationReportRows(
+  event: H3Event,
+  input: { filter: BrandPublicationReportFilter, limit: number, cursor?: string },
+): Promise<{ rows: BrandPublicationReportRow[], total: number }> {
+  const { tablesDB, databaseId } = brandDb(event)
+  const values = brandPublicationReportStatusValues(input.filter)
+
+  const res = await tablesDB.listRows<BrandPublicationReportRow>({
+    databaseId,
+    tableId: BRAND_PUBLICATION_REPORTS_TABLE,
+    queries: [
+      ...(values ? [Query.equal('status', values)] : []),
+      Query.orderDesc('$createdAt'),
+      Query.limit(input.limit),
+      ...(input.cursor ? [Query.cursorAfter(input.cursor)] : []),
+    ],
+  })
+  return { rows: res.rows, total: res.total }
+}
+
+/** Zwei Zähler, unabhängig vom Filter — dieselbe Begründung wie oben. */
+export async function countBrandPublicationReports(
+  event: H3Event,
+): Promise<Record<'open' | 'done', number>> {
+  const { tablesDB, databaseId } = brandDb(event)
+
+  const entries = await Promise.all((['open', 'done'] as const).map(async (status) => {
+    try {
+      const res = await tablesDB.listRows<BrandPublicationReportRow>({
+        databaseId,
+        tableId: BRAND_PUBLICATION_REPORTS_TABLE,
+        queries: [Query.equal('status', status), Query.limit(1)],
+      })
+      return [status, res.total] as const
+    }
+    catch {
+      return [status, 0] as const
+    }
+  }))
+
+  return Object.fromEntries(entries) as Record<'open' | 'done', number>
+}
+
+/**
+ * DIE GEMELDETEN MARKEN ZU EINER SEITE MELDUNGEN, gebündelt.
+ *
+ * Ohne sie stünde in der Liste eine Row-Id statt eines Markennamens — und eine
+ * Meldung, deren Ziel man erst nachschlagen muss, ist keine Arbeitsliste.
+ */
+export async function loadBrandPublicationTitles(
+  event: H3Event,
+  ids: readonly string[],
+): Promise<Map<string, BrandPublicationRow>> {
+  const unique = [...new Set(ids.filter(Boolean))]
+  if (!unique.length) return new Map()
+
+  const { tablesDB, databaseId } = brandDb(event)
+  try {
+    const res = await tablesDB.listRows<BrandPublicationRow>({
+      databaseId,
+      tableId: BRAND_PUBLICATIONS_TABLE,
+      queries: [Query.equal('$id', unique), Query.limit(100)],
+    })
+    return new Map(res.rows.map(row => [row.$id, row]))
+  }
+  catch (error) {
+    logEvent('warn', 'brand.publication_report_titles_failed', {
+      message: error instanceof Error ? error.message : 'unknown',
+    })
+    return new Map()
+  }
+}
+
+/**
+ * Die Meldung, wie sie nach draussen geht. `ipHash` wird NICHT durchgereicht —
+ * die Auslassung ist der halbe Zweck dieser Funktion, und weil jede Route
+ * durch sie hindurch muss, kann sie keine einzelne vergessen.
+ */
+export function toBrandPublicationReport(
+  row: BrandPublicationReportRow,
+  publication: BrandPublicationRow | undefined,
+): BrandPublicationReport {
+  return {
+    id: row.$id,
+    publicationId: row.publicationId,
+    title: publication?.title ?? '',
+    slug: publication?.slug ?? '',
+    path: publication?.slug ? brandPublicationPath(publication.slug) : '',
+    reason: row.reason ?? '',
+    reporterEmail: row.reporterEmail ?? '',
+    status: normalizeBrandPublicationReportStatus(row.status),
+    decidedAt: row.decidedAt ?? '',
+    createdAt: row.$createdAt,
+  }
 }

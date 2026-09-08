@@ -449,6 +449,7 @@ const publication = computed(() => publicationRequest.data.value?.publication ??
   decidedAt: '',
   decisionNote: '',
   pendingUpdate: false,
+  pendingDecision: null,
 })
 
 /**
@@ -815,6 +816,23 @@ useBrandTitle(() => (title.value || t('brand.foundation.title')))
             <span v-if="publication.pendingUpdate" class="bw-state bw-state--draft">
               {{ t('brand.publication.state.pendingUpdate') }}
             </span>
+            <!-- „Aktualisierung abgelehnt" (Paket D3): die Marke steht weiter
+                 öffentlich, der eingereichte Stand wurde abgelehnt. Das ist
+                 ein ANDERER Satz als „Abgelehnt" weiter unten — dort ist die
+                 Marke nicht draussen, hier ist sie es. Der Server unterscheidet
+                 die zwei Fälle in `pendingDecision`; die Seite rechnet nicht
+                 selbst nach. -->
+            <span v-if="publication.pendingDecision" class="bw-state bw-state--stale">
+              {{ t('brand.publication.state.updateDeclined') }}
+            </span>
+            <p
+              v-if="publication.pendingDecision"
+              class="w-full max-w-xl text-sm leading-relaxed"
+              style="color: var(--bw-ink-soft)"
+              data-publication-update-declined
+            >
+              {{ publication.pendingDecision.note }}
+            </p>
             <span class="flex flex-wrap items-center gap-2">
               <UButton
                 v-if="!publication.pendingUpdate"
