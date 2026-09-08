@@ -1,5 +1,5 @@
 import type { H3Event } from 'h3'
-import { Query } from 'node-appwrite'
+import { Query, type Models } from 'node-appwrite'
 import { resolveBrandJourney } from '../../shared/brandJourney'
 import { BRAND_DESIGN_STEP_KEYS } from '../../shared/slotRegistry'
 import type { BrandDesignUnlockItem } from '../../shared/types/brand'
@@ -229,7 +229,9 @@ export async function loadBrandFoundationDone(
   if (profileIds.length === 0) return done
   const { tablesDB, databaseId } = brandDb(event)
   try {
-    const res = await tablesDB.listRows<{ profileId: string, state: string }>({
+    // node-appwrite 29 verlangt für den Zeilen-Generic die Row-Basis
+    // (`$id`, `$createdAt`, …) — sonst TS2344 (Typecheck auf main rot, 2026-09-08).
+    const res = await tablesDB.listRows<Models.Row & { profileId: string, state: string }>({
       databaseId,
       tableId: BRAND_STEPS_TABLE,
       queries: [

@@ -2477,7 +2477,7 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
                Foundation" stand über „Moodboard" der Name der falschen Schicht
                — die eine Stelle, an der die Werkstatt behauptet hätte, Brand
                Design sei ein Kapitel der Foundation. -->
-          <p class="bw-label uppercase tracking-wider" style="color: var(--bw-muted)">{{ t(isBrandDesignStep(stepKey) ? 'brand.designLayer.label' : 'brand.workspace.railLayer') }}</p>
+          <p class="bw-label uppercase tracking-wider" style="color: var(--bw-muted)">{{ t(stepKey && isBrandDesignStep(stepKey) ? 'brand.designLayer.label' : 'brand.workspace.railLayer') }}</p>
           <p class="truncate font-semibold">{{ stepKey ? t(`brand.steps.${stepKey}`) : '' }}</p>
         </div>
         <!-- Der Log-Toggle wirkt nur, wo es eine Log-SPALTE gibt: unter 768 px

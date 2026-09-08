@@ -362,7 +362,7 @@ const setup = () => {
    * Kapitel 10).
    */
   function neighbourStep(direction: -1 | 1): BrandStepKey | null {
-    const path = isBrandDesignStep(stepKey.value) ? designSteps.value : railSteps.value
+    const path = stepKey.value && isBrandDesignStep(stepKey.value) ? designSteps.value : railSteps.value
     const index = path.findIndex(entry => entry.stepKey === stepKey.value)
     if (index < 0) return null
     const target = path[index + direction]
