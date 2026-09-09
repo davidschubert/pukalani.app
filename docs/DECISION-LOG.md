@@ -60,6 +60,19 @@ Konflikt-Dialog gegen leere Serverfassung, optimistischer Zähler, Fakten-Karte,
 dem Gespräch) sind Fehler ohne Produktfrage — außer bei 5 stellt sich heraus, dass ein getippter
 Chat-Text heute keine Antwort auf die offene Katalog-Frage ist; dann wird gefragt.
 
+**Zweiter Nachtrag — Befund 5 gemessen und entschieden (David, nach Empfehlung):** die vier
+Kontext-Felder (Pitch, Kategorie, Wettbewerber, Zielgruppen-Skizze) sind Entwurfs-Slots ohne
+Katalog-Frage; nach den echten Fragen des Kapitels lief jede Eingabe als freie Frage ohne Feld,
+George trieb das Feld an, nichts wurde gespeichert. (6) **Weg B — sichtbares Antwort-Modul für die
+Entwurfs-Session:** Georges Frage plus Eingabefeld, der Text geht als Hinweis in den Entwurf und
+löst „George, entwirf das" direkt aus; kein neuer Schreibpfad, der Vertrag „ein Gesprächszug
+schreibt kein Feld" bleibt. Verworfen: Weg A (Chat-Text als Antwort speichern — Klassifikation
+oder Material-Speicher, ein roher Chat-Satz ist kein Pitch, 2–4 Tage) und „später". (7) **Der
+Gesprächs-Prompt sieht die beantworteten Fragen des ganzen Kapitels** (Nebenbefund: der Verlauf ist
+per Session geschnitten, der Generator liest kapitelweit — George konnte Fragen früherer Sessions
+wiederholen): nur die Liste Frage + Kurzantwort reist mit, der Session-Schnitt des Chat-Verlaufs
+(brand-011) bleibt. Verworfen: Session-Schnitt auch für die Wiederholungs-Regel.
+
 ---
 
 ## 2026-09-08 — branding.supply/Brand Insights: vier Entscheidungen (I0 freigegeben, Art. 27 verschoben, B2B, activeMind → eRecht24)

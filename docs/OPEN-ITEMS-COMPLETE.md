@@ -30,6 +30,56 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### Kailua-Befunde 1–6: kein 409 gegen leere Serverfassung, Zähler aus dem Server-Stand, Sammel-Wert gehört dem Server, Anlage-Modal springt in die Werkstatt ✅ 2026-09-09
+
+**Was:** Die sieben Bedien-Befunde aus dem ERSTEN Kailua-Wizard-Lauf (2026-09-08). Davids
+Entscheidungen per Fragenrunde (DECISION-LOG 2026-09-09): Befund 6 Modal legt an und springt in die
+Werkstatt, Befund 7 (Chat-Sprache = Oberflächensprache) ist gewollt. Ein Opus-Lauf, im Hauptloop
+geprüft, Commit `5f4f5af3` — jede Ursache GEMESSEN, drei davon waren nicht die vermuteten:
+- **1 — Pillen winzig:** kein Klick-Abfänger, nur `size="xs"` (≈24 px). Jetzt 32 px, Innenabstand,
+  eigener Fokus-Ring (der Nuxt-UI-Ghost-Ring war auf `--bw-stale-soft` unsichtbar).
+- **2 — 409 gegen leere Serverfassung, in EINEM Tab:** zwei Wurzeln. (a) Die Konversation warf die
+  vom Server gemeldete `revision` weg — ein Gesprächszug bewegt sie aber (Sammel-Session schreibt
+  Zwischenstand, „hat mitgelesen"-Stempel); der nächste Autosave war damit veraltet. (b) `flush()`
+  kehrte bei laufendem Speichern sofort um — `await autosave.flush()` war an zwölf Stellen eine
+  Lüge, der Nachzügler kam 750 ms später mitten in den Zug. Fix: `applyGenerationRevision` aus jedem
+  Zug, `flush()` wartet den Lauf wirklich ab (Deckel 3), pure Regel `brandConflictNeedsDecision`
+  (leere Serverfassung, gleicher Wortlaut oder reine Bestätigung auf unverändertem Text ⇒ KEIN
+  Dialog: Server-Revision übernehmen, eigene Eingabe behalten, erneut senden; ab dem vierten stillen
+  Anlauf wird der Dialog erzwungen). Der Dialog bleibt für echte Text-Kollisionen. 8 Tests.
+- **3 — Zähler optimistisch (10/10 → 1/10):** dieselbe Wurzel plus zwei eigene: `completion`
+  zählte die ABSICHT (`slotConfirmed`), und jedes unbehandelte Nein fiel in `mark('error')` ohne
+  Toast. Jetzt zählt `serverSlotFacts` (die EINE Fortschritts-Wahrheit = Server-Stand), „wird
+  gespeichert" hängt an der Zeile, endgültige Neins werden zum Toast mit Feldnamen (`rejectSave`),
+  429/5xx werden weiter wiederholt.
+- **4 — nur ein Fakt von drei:** NICHT der Renderer — der Client schrieb den ersten Teil einer
+  `collect`-Session als Slot-Wert, damit galt `a.facts` als gefüllt, die Bühne verließ das
+  Sammel-Modul, Teil 2/3 wurden „freie Fragen", und der Autosave überschrieb den vom Server
+  zusammengelegten Wert mit dem Rohtext von Teil 1. Pure Regel `brandAnswerWritesSlot` (der
+  Sammel-Wert gehört dem Server), `store.refreshStep()` lädt nach, ohne das Gespräch zu leeren;
+  ohne KI-Zug (`noTurn`) schreibt der Browser doch, sonst wäre `a.facts` unbedienbar.
+- **5 — Kontext-Felder aus dem Gespräch:** gemessen eine Produktfrage (Entwurfs-Slots hatten NIE
+  eine Katalog-Frage), nicht gebaut — David hat danach Weg B gewählt (eigener Lauf). Gebaut wurde
+  das Mindestmaß: die Wiederholungs-Regel `george-a-9` stand nur im Entwurfs-Prompt, jetzt auch im
+  Gesprächs-Prompt.
+- **6 — doppelte Anlage:** das Modal navigierte auf `new.vue` mit Query, dort standen die drei Felder
+  erneut; das Modal hängt an DREI Orten. Jetzt `BwNewBrandDetails` einmal für Modal und Seite,
+  Regeln pur in `brandStartCard.ts`, `useBrandCreate()` legt an und springt über
+  `firstOpenBrandStep(journey)` ins erste offene Kapitel; Fehler bleiben im Modal; `new.vue` bleibt
+  für direkte Links (`?path=relaunch`).
+Gates: brand 2725 Tests (+20 aus dem Lauf, Rest Nachbar-Merges), Lint, Typecheck branding,
+i18n-Keys, Bilanz. **Live:** Build `5f4f5af3` auf branding.supply (Health-SHA, Seiten 200) — die
+Fixes liegen hinter dem Login, Davids Klick-Test steht in OPEN-ITEMS BW1.
+
+**Gelernt:** (1) Bei drei von sechs Befunden lag die Ursache woanders als vermutet (Renderer vs.
+Client-Schreibpfad, Pillen vs. Klick-Abfänger, Zähler vs. Absicht) — „Ursache gemessen, nicht
+vermutet" als Pflicht im Auftrag zahlt sich aus. (2) Ein `await flush()`, das bei laufendem Lauf
+sofort zurückkehrt, ist an jeder Aufrufstelle eine falsche Zusage; Serialisierung gehört in die
+Funktion, nicht in die Disziplin der Aufrufer. (3) Eine Revision, die der Server meldet, gehört
+IMMER in den Store — aus jeder Antwort, nicht nur aus dem Autosave.
+
+---
+
 ### Kailua-Wizard-Befunde 8/9/10/12: George behauptet nichts, leere Bestätigung erklärt sich, „Alle abnehmen", Handbuch-Kapitel „Stimme" geteilt ✅ 2026-09-09
 
 **Was:** Der D5-Durchlauf (Beispiel-Branding Kailua Coffee Co. über den echten Wizard) brachte fünf
