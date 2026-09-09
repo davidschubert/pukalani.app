@@ -7,6 +7,33 @@ die kleinen, verstreuten Beschlüsse.
 
 ---
 
+## 2026-09-09 — Wizard-Befunde aus dem Kailua-Lauf: Befunde bleiben Hinweise, George behauptet nichts, Handbuch-Kapitel „Stimme" wird geteilt
+
+**Anlass:** Das Beispiel-Branding Kailua Coffee Co. wurde über den echten Wizard gebaut (Discover
+D5). Der Lauf brachte fünf Bedien-Befunde (OPEN-ITEMS BW1, 8–12); drei davon waren
+Produktfragen. David hat sie per Fragenrunde entschieden, zwei nach Empfehlung, eine dagegen.
+
+**Entscheidungen (David):** (1) **Ein offener Befund blockiert weder Abnahme noch
+Veröffentlichung** (Befund 11, nach Empfehlung): Befunde sind Hinweise, wer abnimmt entscheidet —
+es wird KEIN Tor gebaut, weder an der Kapitel-Abnahme noch an Discover. (2) **George behauptet
+nie, etwas eingetragen zu haben** (Befund 8, nach Empfehlung): ein Gesprächszug bleibt ganz
+Nachricht (kein Marker, kein Feld-Schreiben — die Trennung aus `conversePrompt.ts` steht). Statt
+dessen eine Prompt-Regel (`converse-11`): Nennt der Mensch eine Entscheidung, bestätigt George sie
+in Worten und verweist auf „George, entwirf das"; die Bühne hebt den Knopf nach so einem Zug
+hervor. Verworfen: Entwurf automatisch anstoßen (zweiter KI-Zug je Feld, braucht ein
+„entschieden"-Signal) und ein Chat-Marker, der das Feld schreibt (zieht Fassung, inputHash und
+Bereitschafts-Gate in die Chat-Route). (3) **Das Handbuch-Kapitel „Persönlichkeit & Stimme" wird
+GETEILT** (Befund 12, GEGEN die Empfehlung „Zuordnung behalten, Vermerk nennt das wartende
+Kapitel"): es hängt nur noch am Werkstatt-Kapitel Archetyp; der Wort-Leitfaden (`ep.vocabulary`)
+wandert ins Messaging-Kapitel. Grund für Davids Wahl: ein Kapitel, das „abgenommen" heißt und im
+Handbuch trotzdem offen steht, ist für den Kunden falsch, egal wie ehrlich die Regel dahinter ist.
+Der Renderer ist geteilt (Leseansicht, Share, Discover-Anatomie) und rechnet zur Lesezeit —
+alte Snapshots brauchen keine Migration. Dazu ohne Frage gebaut: Befund 9 (stiller No-op von
+„Übernehmen & bestätigen" ohne Entwurf ⇒ deaktiviert + Hinweis) und Befund 10 („Alle abnehmen" in
+der Finalen Abnahme).
+
+---
+
 ## 2026-09-08 — Brand Insights (BI1): Prototyp-Runde 1 — fünf Entscheidungen; Products-Seite als eigenes Vorhaben
 
 **Anlass:** Der Prototyp I0 steht seit dem 2026-09-08 im eigenen Playground (Port 3013, sechs
