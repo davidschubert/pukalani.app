@@ -54,7 +54,10 @@ weg), `apps/branding/app/pages/index.vue` (`description` + `ogDescription` in `u
 (Person-Knoten) und `serviceDescription` (ProfessionalService) — die beschreiben die Person und
 das Angebot, nicht die Site.
 
-**Beweis:** siehe unten.
+**Beweis:** lokal (branding :3010 im Worktree, Session per Server-SDK, 8/8): PATCH /api/pages/seo
+mit eigener Beschreibung ⇒ 200; Startseite trägt sie in meta description, og:description und im
+JSON-LD-WebSite-Knoten; Gegenprobe /about behält seine eigene; PATCH leer ⇒ i18n-Fallback de und en
+steht wieder. Gemergt 4a544a03.
 
 ---
 
