@@ -7,6 +7,22 @@ die kleinen, verstreuten Beschlüsse.
 
 ---
 
+## 2026-09-09 — Brand Design: Abnahme durch Vertrauen, Vorhaben geschlossen
+
+**Kontext:** Nach A1 lag David die Abnahme-Liste der Inhalts-Gates D1–D8 mit Fundstellen vor
+(Frida-Steckbrief und Leitern, Weiche-Karten + „Bekannt"-Präfix, Rollen und
+Kandidaten-Begründungen, Paar-Notizen, Richtungs-Sätze und Maße, Do & Don't und
+Strichstärke, Tempo-Namen und Regel-Sätze, Kapitel 10, Board, Beispiel, Rückfragen).
+
+**Entscheidung (David):** „ich vertraue dir erstmal hier" — die Inhalts-Gates gelten als
+abgenommen, ohne Zeile-für-Zeile-Lesung. **Folge:** BD1 ist GESCHLOSSEN (COMPLETE-Eintrag,
+Plan ins Archiv); Wortlaut-Korrekturen kommen ab jetzt als gewöhnliche Befunde aus dem
+Gebrauch (Kailua-Läufe), nicht als Gate. Die zwei Nebenbefunde des Audits (`aiComplete`-Log,
+413-Satz) stehen in OPEN-ITEMS unter „Bewusst zurückgestellt". Offen bleibt die Option
+„vierte Strichstärke `light` 1,125 px" — kein Aufgabenpunkt, bis sie jemand vermisst.
+
+---
+
 ## 2026-09-09 — Brand Design: Audit-Befunde (A1) — zwei Entscheidungen
 
 **Kontext:** Audit der Design-Schicht nach D9 (docs/archiv/audits/BRAND-DESIGN-AUDIT-2026-09-09.md):
@@ -410,7 +426,7 @@ Routen, damit ihn niemand für eine Nachlässigkeit hält.
 ## 2026-09-08 — Brand Design: Prototyp FREIGEGEBEN (Phase 4), Pakete D0–D9 verbindlich; Vision/Bild über OpenRouter mit ZDR-Filter
 
 **Entscheidung 1 (David):** Der Playground-Prototyp ist als Bauvorlage freigegeben. Die
-Pakete in docs/plans/BRAND-DESIGN.md §2.18 sind damit verbindlich, Start mit **D0
+Pakete in docs/archiv/BRAND-DESIGN.md §2.18 sind damit verbindlich, Start mit **D0
 „Verträge"** (Registry-Steps + Sessions, Vokabulare, Font-Paar-Katalog, `BrandDesignPreset`,
 `buildBrandDesign`, Ramp-Import als A14-Vertrag, Journey mit Freischaltung — Struktur, noch
 keine Inhalte, keine Migration). Empfehlung angenommen.
@@ -432,7 +448,7 @@ Vergleich in der Farbwelt (zwei feste Szenen nebeneinander mit Kontrast-Urteil j
 Damit sind alle bisher angesprochenen Prototyp-Korrekturen (Abstände, 72-rem-Bühne, Raster,
 Farb-Picker, gestapelte Mix-&-Match-Chips) und beide Nachträge abgenommen. Offen ist die
 FREIGABE des Gesamt-Prototyps als Bauvorlage (Phase 4 nach WORKFLOW.md) — danach werden die
-Pakete D0–D9 in docs/plans/BRAND-DESIGN.md §2.18 verbindlich, beginnend mit D0 (Verträge).
+Pakete D0–D9 in docs/archiv/BRAND-DESIGN.md §2.18 verbindlich, beginnend mit D0 (Verträge).
 
 ---
 
@@ -452,7 +468,7 @@ Upload; das „Moodboard am Ende" ist in beiden Wegen dasselbe Ergebnis-Board. L
 lesen, nie nachbauen; Bilder sind Eingabe, nie Ausgabe (kein Snapshot/Share); Foundation ist
 der Maßstab; Vision-Transport mit ZDR wie die Bild-KI. **Produkt:** Brand Design wird als
 eigenständiges Produkt neben der Foundation verkauft — die Foundation bleibt Voraussetzung,
-Fassung 1 Studio-begleitet, Selbstbedienung später. Konzept: docs/plans/BRAND-DESIGN.md §2.2,
+Fassung 1 Studio-begleitet, Selbstbedienung später. Konzept: docs/archiv/BRAND-DESIGN.md §2.2,
 §2.8, §1.8-Nachtrag; Paket D2 erweitert.
 
 ---
@@ -622,7 +638,7 @@ Entscheidungen IMMER als Fragen mit Antwortmöglichkeiten und Empfehlung, nie al
 ## 2026-09-07 — Brand Design (Produkt 02): Konzept freigegeben, Prototyp beauftragt
 
 **Entscheidung (David):** „Konzept freigegeben, bau den Prototyp im Playground." Damit ist
-docs/plans/BRAND-DESIGN.md §2 verbindlich; die drei offenen Punkte aus §2.19 gelten nach
+docs/archiv/BRAND-DESIGN.md §2 verbindlich; die drei offenen Punkte aus §2.19 gelten nach
 Empfehlung: Bild-Anbieter mit ZDR wird vor D5c geprüft (bis dahin Stufe 3 hinter dem
 Config-Gate aus), Freischaltung per Skript UND Dashboard-Knopf, Kapitel-Namen im UI
 „Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung" (Ids bleiben englisch).
@@ -634,7 +650,7 @@ Abnahme, dann Pakete D0–D9.
 ## 2026-09-07 — Brand Design (Produkt 02): Strategie freigegeben — fünf Schritte tief, Zeichen in drei Stufen inkl. KI-Bildlogos, Studio-begleitet, Schicht 2 der Werkstatt
 
 **Anlass:** „Starte die Strategie für Produkt 02 Brand Design" — Phase 1 des Workflows
-(docs/plans/BRAND-DESIGN.md §1: Bestandsaufnahme, Zielbild „Design-System statt
+(docs/archiv/BRAND-DESIGN.md §1: Bestandsaufnahme, Zielbild „Design-System statt
 Bildergalerie, hergeleitet aus der Strategie", Konkurrenz Looka/Brandmark/LogoAI/Tailor
 Brands · Huemint/Fontjoy/Realtime Colors · Canva/Frontify, Hypothesen H1–H7).
 **Entscheidungen (David, Fragenrunde):** (1) **Alle fünf Schritte gleich tief** — Moodboard,

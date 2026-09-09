@@ -1,10 +1,16 @@
 # Brand Design (Produkt 02) — Strategie und Konzept
 
+> **AUSGEFÜHRT — Archiv seit 2026-09-09.** Strategie freigegeben 2026-09-07, Konzept
+> freigegeben 2026-09-07, Prototyp freigegeben 2026-09-08, Pakete D0–D9 + Nachschnitt +
+> Audit-Paket A1 gebaut, geprüft und live (Build d4f17df6), **von David abgenommen
+> 2026-09-09** („ich vertraue dir erstmal hier" — Inhalts-Gates D1–D8 gelten als
+> abgenommen, Korrekturen laufen als gewöhnliche Befunde über OPEN-ITEMS). Eintrag mit
+> Gelernt: docs/OPEN-ITEMS-COMPLETE.md. Offene Reste gibt es hier keine.
+
 Phase 1 des Workflows (docs/referenz/WORKFLOW.md), Stand 2026-09-07 —
 FREIGEGEBEN mit Davids Entscheidungen in §1.11. Phase 2 (Konzeption, §2) ist
 seit 2026-09-07 FREIGEGEBEN (§2.19 nach Empfehlung); Phase 3 (Prototyp im
-Playground) ist gebaut (§3) und wartet auf Davids Abnahme.
-
+Playground) ist gebaut (§3) und seit 2026-09-08 freigegeben, eingefroren.
 ---
 
 ## 0. Was das hier ist
@@ -957,6 +963,10 @@ eigenen UI-Satz (unter den Produkt-Deckeln unerreichbar). **Es folgt
 Davids Abnahme** (Inhalts-Gates D1–D8), dann OPEN-ITEMS-COMPLETE und dieser
 Plan ins Archiv.
 
+**Abgenommen 2026-09-09 (David):** die Inhalts-Gates D1–D8 (Fundstellen-Liste in
+der Sitzung) gelten als abgenommen — „ich vertraue dir erstmal hier". Korrekturen am
+Wortlaut laufen ab jetzt als gewöhnliche Befunde. Vorhaben GESCHLOSSEN, Plan im Archiv.
+
 | # | Paket | Inhalt | Gate |
 | --- | --- | --- | --- |
 | D0 | Verträge | Registry-Steps + Sessions (Struktur), Vokabulare, Font-Paar-Katalog, `BrandDesignPreset`, `buildBrandDesign`, Ramp-Import als Vertrag, Journey mit Freischaltung | — |
@@ -980,7 +990,7 @@ Plan ins Archiv.
 
 ---
 
-## 3. Prototyp (Phase 3) — gebaut 2026-09-08, Davids Abnahme offen
+## 3. Prototyp (Phase 3) — gebaut 2026-09-08, freigegeben 2026-09-08 (eingefroren, Davids Entscheidung 2026-09-09)
 
 Klickdummy im Playground (`packages/brand/.playground`, Port 3009), acht
 Screens nach §2.15: `/brand/demo/design/dna` (DNA mit Begründung, drei

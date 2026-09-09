@@ -30,6 +30,54 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### Brand Design (Produkt 02, BD1): sechs Werkstatt-Kapitel, Vorbilder + Lesung, Farbwelt aus der Ramp-Mathematik, Zeichen in drei Stufen, Ergebnis-Board ✅ 2026-09-09
+
+**Was:** Die erste bezahlte Ableitung aus der Foundation — Schicht 2 derselben Werkstatt mit
+Beraterin Frida: `dna` (Weiche „Vorbilder oder Frida schlägt vor", bis 16 Screenshots je Marke,
+KI-Lesung gegen die Foundation, Visual DNA aus zehn Dimensionen, drei Boards + Mix & Match),
+`color` (Basis-/Akzent-Kandidaten mit Begründung, Hell- UND Dunkel-Rampe aus
+`themes/shared/ramp.ts`, Rollen, Kontrast-Matrix mit adaptiver Knopf-Schriftfarbe), `type`
+(sechs Paare, sieben self-gehostete Familien, Hierarchie-Faktor, Regeln), `mark` (Richtung,
+Briefing mit gerechnetem Schutzraum, gesetzte Wortmarke/Monogramm als SVG, Stufe 3 KI-Entwürfe
+über `aiImage` mit ZDR), `imagery` (drei Prinzipien mit Do & Don't, Icon-Satz mit
+Strichstärken-Auskunft), `motion` (drei Tempi, Token-Satz, sechs Regel-Sätze, 800 ms
+Zeichen-Aufbau). Ergebnis: `BrandDesignPreset` → Kapitel 10 der Foundation, Ergebnis-Board
+`/brand/:id/design`, Snapshot v2 (Design-Kapitel reisen NIE roh — Vorbilder, Lesung und
+Entwürfe sind `internal`), Beispiel Kailua Coffee. Freischaltung je Marke durch den Betreiber
+(brand-022), Buckets `brand-inspiration` (5 MB) + `brand-drafts` (2 MB) server-only mit
+Magic-Bytes und Owner-Auslieferung `no-store`; Core bekam zwei neue Transporte `aiVision` +
+`aiImage` (OpenRouter, `data_collection: deny` fest und nur verschärfbar, Gates leer = aus).
+Modelle (David): Vision `google/gemini-2.5-flash`, Bild `google/gemini-2.5-flash-image`
+(Preview-Slug hatte unter ZDR keinen Endpunkt). Weg: Strategie (Konkurrenz Looka/Brandmark/
+Huemint/Frontify) → Konzept (§2, Davids vier Entscheidungen, zwei gegen die Empfehlung) →
+Prototyp im Playground (acht Screens + Nachtrag Weiche/Upload/Lesung/Board + Hell/Dunkel,
+abgenommen 2026-09-08, eingefroren) → Pakete D0–D9 (Opus baut, Fable prüft; jedes Paket mit
+eigenem Klick hinter Login: getComputedStyle, `--ds-dur`, SVG-Attribute, Kontrastwerte) →
+Nachschnitt (Snapshot ohne rohe Design-Werte) → Audit ohne hohe Befunde
+(docs/archiv/audits/BRAND-DESIGN-AUDIT-2026-09-09.md) → A1 (IP-Eimer `brand:brief`,
+Vision-Eingangsklemme 16 Bilder/64 MB vor dem Netz, GDPR-Purges werfen bei Nicht-404,
+Burst-Deckel `retainBrandGeneration`) → Davids Abnahme 2026-09-09 („ich vertraue dir erstmal
+hier"; Fundstellen-Liste D1–D8 in der Sitzung). Drei Prod-Migrationen mit Davids Ja
+(brand-022, brand-024, brand-023). Beweise: `verify-brand-design.mjs` 130/130 (Gegenprobe 108),
+`verify-brand-share.mjs` 51/51 (Gegenprobe 36), `verify-brand-sessions.mjs` 383/383; 2 705
+brand-Tests, 1 597 Core-Tests. **Live:** Build `d4f17df6` auf branding.supply. Plan:
+[archiv/BRAND-DESIGN.md](archiv/BRAND-DESIGN.md); Entscheidungen DECISION-LOG 2026-09-07…09.
+
+**Gelernt:** (1) `isAiConfigured` verlangt `pukalani.ai.enabled`, das die branding-App nie setzt —
+eine Brand-Route damit zu gaten heißt immer 503; Brand-Konsumenten gaten über `readBrandAiEnabled`
++ `resolveAiKey`. (2) Ein Special-Slot, der nie `confirmed` wird, sperrt alles hinter sich für
+immer, wenn `inputSatisfied` ihn wie einen Antwort-Slot behandelt — Durchreich-Regel, getestet.
+(3) Nach einem Karten-Klick darf `resolveNextSession` nur ERREICHBARE Sessions nennen, sonst
+springt der Chat in ein gesperrtes Kapitel. (4) Ein Modell-Slug „Preview" kann unter ZDR ohne
+Endpunkt sein („No endpoints found") — immer den GA-Slug prüfen, bevor er in die Config geht.
+(5) Ein Wirkungs-Hinweis („fließt in 53 Felder") darf nur ERREICHBARE Kapitel zählen, sonst
+verrät er Sperren. (6) Klick-Beweise auf Werkstatt-Seiten per DOM-Messung statt Screenshot —
+die Animation lässt Playwright-Screenshots verhungern. (7) Eine gerechnete Setzung
+(Schutzraum, Strichstärke) gehört an EINE Stelle als Zahl, der Satz wird daraus gebaut — sonst
+widersprechen sich Text und Maß beim ersten Nachschnitt.
+
+---
+
 ### Kailua-Befunde 1–6: kein 409 gegen leere Serverfassung, Zähler aus dem Server-Stand, Sammel-Wert gehört dem Server, Anlage-Modal springt in die Werkstatt ✅ 2026-09-09
 
 **Was:** Die sieben Bedien-Befunde aus dem ERSTEN Kailua-Wizard-Lauf (2026-09-08). Davids

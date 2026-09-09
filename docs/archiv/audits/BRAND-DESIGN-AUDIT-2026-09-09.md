@@ -1,6 +1,6 @@
 # Audit Brand Design (Produkt 02) — 2026-09-09
 
-Phase „Audit" nach WORKFLOW.md, nach Abschluss der Pakete D0–D9 (docs/plans/BRAND-DESIGN.md §2.18).
+Phase „Audit" nach WORKFLOW.md, nach Abschluss der Pakete D0–D9 (docs/archiv/BRAND-DESIGN.md §2.18).
 Zwei Aufklärer (audit-scout) und zwei Prüfer (audit-worker), read-only, Stand main bb39e223.
 Grundlage: CLAUDE.md, BRAND-DESIGN.md §2.13 (Sicherheit), §2.16 (Nicht-Ziele), §2.17 (Fallen),
 Leitplanken a–e (§2.2), DECISION-LOG 2026-09-08/09.
