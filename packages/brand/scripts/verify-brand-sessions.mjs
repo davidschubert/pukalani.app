@@ -3453,6 +3453,281 @@ try {
   check('… und die Liste ebenso: 404 für ein fremdes Konto',
     foreignDraftList.status === 404, String(foreignDraftList.status))
 
+  // ══ 30 · Die Bewegung: das Kapitel `motion` (Brand Design D7, §2.7) ══════
+  //
+  // ── WAS DIESER ABSCHNITT PRÜFT — UND WAS NICHT ─────────────────────────
+  // Die REGELN (Vorbelegung aus der DNA, die vier Tokens, beide Slot-Werte hin
+  // und zurück, die sechs Sätze mit ihrem gerechneten Deckel) sind vollständig
+  // in `tests/brandDesignMotion.test.ts` belegt. HIER wird geprüft, was ein
+  // Unit-Test nicht sehen kann: dass die Bühne die GANZE Marke zugeliefert
+  // bekommt (Farbwelt, Paar UND `i.rules` — die Wortmarke im Kopf der Szene),
+  // dass die Szene wirklich mit der gerechneten Dauer läuft (`--ds-dur` steht
+  // im Markup), dass ein Tempo-Wechsel jede Zahl auf der Seite mitzieht, dass
+  // die Invarianten an der Route greifen — und dass das SECHSTE Kapitel
+  // durchläuft und die Schicht damit „6 von 6" steht.
+  //
+  // Wie in 25 bis 28 gilt: die VORBELEGUNG schreibt der Browser (Autosave, s.
+  // `useBrandMotionWorld`). SSR RECHNET sie aber und malt sie hin.
+  //
+  // DIE ERWARTETEN WERTE STEHEN ALS LITERAL und werden nicht aus der Antwort
+  // abgeleitet (Beweis-Regel 1): ruhig ist 240 ms (120/240/384/60), knapp ist
+  // 120 ms (60/120/192/60) — dieselben Zahlen wie im Katalog von D0.
+  console.log('\n30 · Brand Design: die Bewegung (D7)')
+
+  const motionBase = `${base}/steps/motion`
+  const motionPage = async () => call(`/de/brand/${profileId}/motion`, { cookie: account.cookie })
+
+  const motionDetail = await call(motionBase, { cookie: account.cookie })
+  check('die Bühne bekommt die ganze Marke aus drei fremden Kapiteln',
+    String(motionDetail.json?.sourceValues?.['g.mix'] ?? '').includes('Bewegungs-Charakter')
+    && motionDetail.json?.sourceValues?.['h.base'] === '#4a3123'
+    && motionDetail.json?.sourceValues?.['i.pair'] === 'editorial'
+    && String(motionDetail.json?.sourceValues?.['i.rules'] ?? '').includes('600'),
+    JSON.stringify(motionDetail.json?.sourceValues ?? {}).slice(0, 240))
+
+  const motionView = await motionPage()
+  check('die Werkstatt zeigt den Bewegungs-Abschnitt',
+    motionView.status === 200 && motionView.text.includes('data-brand-motion'),
+    `${motionView.status} ${motionView.text.length} Zeichen`)
+  check('… mit allen drei Tempos des Katalogs',
+    ['calm', 'lively', 'snappy'].every(id => motionView.text.includes(`data-motion-tempo="${id}"`)),
+    'ein Tempo fehlt auf der Seite')
+
+  /**
+   * DIE VORBELEGUNG AUS DER DNA: Bewegungs-Charakter „Ruhig" (Abschnitt 28
+   * hat den echten Mix geschrieben) ⇒ Tempo `calm` UND ein stillstehendes
+   * Zeichen. Der Chip steht deshalb zweimal auf der Seite — einmal am Tempo,
+   * einmal an der Zeichen-Antwort.
+   */
+  /**
+   * DER AUSSCHNITT EINER KARTE — vom eigenen Merkmal bis zum nächsten Merkmal
+   * DERSELBEN Art, spätestens aber bis `stop`.
+   *
+   * ZWEI FALLEN, beide beim Bau am eigenen Lauf gefunden: (1) bis zum nächsten
+   * `data-motion-` zu schneiden ergäbe drei Zeichen — auf der Tempo-Karte folgt
+   * sofort `data-motion-base`; (2) die LETZTE Karte hätte ohne `stop` den Rest
+   * der Seite geschluckt, und die Gegenprobe „auf dieser Karte steht der Chip
+   * NICHT" fände ihn im nächsten Abschnitt wieder.
+   */
+  const motionChunk = (html, attr, id, stop) => {
+    const start = html.indexOf(`${attr}="${id}"`)
+    if (start < 0) return ''
+    const sibling = html.indexOf(`${attr}=`, start + 1)
+    const limit = html.indexOf(stop, start + 1)
+    const ends = [sibling, limit].filter(index => index > 0)
+    return html.slice(start, ends.length ? Math.min(...ends) : html.length)
+  }
+  check('der Vorschlag ist das Tempo der DNA („Ruhig" ⇒ `calm`)',
+    motionChunk(motionView.text, 'data-motion-tempo', 'calm', 'data-motion-token').includes('Aus eurer DNA')
+    && !motionChunk(motionView.text, 'data-motion-tempo', 'snappy', 'data-motion-token').includes('Aus eurer DNA'),
+    'der Chip steht nicht auf der Karte „calm"')
+  check('… und das stillstehende Zeichen ist der Vorschlag dazu',
+    motionChunk(motionView.text, 'data-motion-logo', 'no', 'data-motion-rules').includes('Aus eurer DNA')
+    && !motionChunk(motionView.text, 'data-motion-logo', 'yes', 'data-motion-rules').includes('Aus eurer DNA'),
+    'der Chip steht nicht auf der Karte „nein"')
+
+  // ── DIE SZENE LÄUFT MIT DER GERECHNETEN DAUER, NICHT MIT EINER ZAHL AUS
+  //    DEM MARKUP ──────────────────────────────────────────────────────────
+  //
+  // `--ds-dur` ist der Wert, mit dem die Szene wirklich rechnet (s.
+  // `BwDesignScene`): steht dort 240ms, läuft dort auch 240 ms.
+  /**
+   * DIE GROSSE SZENE ist die im GEWÄHLTEN Tempo; die drei Karten darüber
+   * behalten je ihre eigene Dauer (das ist ihr ganzer Zweck). Geprüft wird
+   * deshalb ihr Ausschnitt und nicht die Seite — sonst stünde „240ms" auch
+   * dann noch da, wenn die Wahl längst eine andere ist.
+   */
+  const bigScene = (html) => {
+    const start = html.indexOf('data-motion-scene')
+    return start < 0 ? '' : html.slice(start, start + 4000)
+  }
+  check('die Szene trägt die Grunddauer des ruhigen Tempos als `--ds-dur`',
+    bigScene(motionView.text).includes('--ds-dur:240ms')
+    && bigScene(motionView.text).includes('--ds-stagger:60ms'),
+    'Dauer oder Versatz stehen nicht im Markup')
+  check('… und die Schrift-Regeln des Kapitels davor sind mitgekommen',
+    motionView.text.includes('--ds-heading-weight:600')
+    && motionView.text.includes('--ds-heading-tracking:-0.5px'),
+    'Gewicht oder Laufweite fehlen in der Szene')
+
+  // ── DIE TOKEN-TABELLE IST DIE RECHNUNG, NICHT EINE ZWEITE MEINUNG ──────
+  const tokenRow = (html, id) => {
+    const start = html.indexOf(`data-motion-token="${id}"`)
+    if (start < 0) return ''
+    const next = html.indexOf('data-motion-token=', start + 1)
+    return html.slice(start, next < 0 ? Math.min(html.length, start + 1200) : next)
+  }
+  check('die vier Tokens stehen mit den Zahlen des ruhigen Tempos da',
+    tokenRow(motionView.text, 'fast').includes('data-motion-duration="120"')
+    && tokenRow(motionView.text, 'base').includes('data-motion-duration="240"')
+    && tokenRow(motionView.text, 'slow').includes('data-motion-duration="384"')
+    && tokenRow(motionView.text, 'stagger').includes('data-motion-duration="60"'),
+    '120/240/384/60 nicht vollständig in der Tabelle')
+  check('… jedes mit seinem Namen und seinem Zweck',
+    motionView.text.includes('motion.slow') && motionView.text.includes('Seitenwechsel, große Flächen.'),
+    'Token-Name oder Zweck fehlen')
+
+  // ── DIE REGELN FOLGEN AUS DEN ZWEI ENTSCHEIDUNGEN ──────────────────────
+  check('die sechs Regeln stehen auf der Seite — mit dem gerechneten Deckel',
+    motionView.text.includes('data-motion-rules')
+    && motionView.text.includes('federt nie')
+    && motionView.text.includes('Nichts läuft länger als 384 ms'),
+    'Kurven-Regel oder Dauer-Deckel fehlen')
+  check('… und der Satz zu „weniger Bewegung" ist immer dabei',
+    motionView.text.includes('Endzustand sofort') && motionView.text.includes('Ersatz-Animation'),
+    'der reduced-motion-Satz fehlt')
+  check('der Schalter „weniger Bewegung simulieren" ist da',
+    motionView.text.includes('data-motion-reduced') && motionView.text.includes('data-motion-play'),
+    'Schalter oder Abspiel-Knopf fehlen')
+
+  // ── EIN ANDERES TEMPO ZIEHT ALLES MIT ──────────────────────────────────
+  const pickSnappy = await call(motionBase, {
+    method: 'PATCH',
+    cookie: account.cookie,
+    body: { revision: await stepRevision('motion'), slots: { 'l.tempo': { value: 'snappy' } } },
+  })
+  check('ein anderes Tempo lässt sich wählen',
+    pickSnappy.status === 200, `${pickSnappy.status} ${pickSnappy.text.slice(0, 160)}`)
+  const snappyView = await motionPage()
+  check('… die Seite zeigt es als gewählt',
+    /data-motion-tempo="snappy"[^>]*aria-pressed="true"/.test(snappyView.text),
+    'die Karte „snappy" ist nicht als gewählt markiert')
+  check('… die Tabelle rechnet neu (60/120/192)',
+    tokenRow(snappyView.text, 'fast').includes('data-motion-duration="60"')
+    && tokenRow(snappyView.text, 'base').includes('data-motion-duration="120"')
+    && tokenRow(snappyView.text, 'slow').includes('data-motion-duration="192"'),
+    'die Tabelle steht noch auf dem ruhigen Tempo')
+  check('… die Szene läuft mit der neuen Dauer',
+    bigScene(snappyView.text).includes('--ds-dur:120ms')
+    && !bigScene(snappyView.text).includes('--ds-dur:240ms'),
+    'in der Szene steht noch die alte Dauer')
+  check('… und der Dauer-Deckel der Regeln wandert mit',
+    snappyView.text.includes('Nichts läuft länger als 192 ms')
+    && snappyView.text.includes('Kein Anlauf und kein Ausklang'),
+    'Deckel oder Kurven-Regel stehen noch auf „ruhig"')
+
+  // ── EIN KINETISCHES ZEICHEN SCHREIBT SEINE EIGENE REGEL ────────────────
+  const pickKinetic = await call(motionBase, {
+    method: 'PATCH',
+    cookie: account.cookie,
+    body: { revision: await stepRevision('motion'), slots: { 'l.logo': { value: 'yes' } } },
+  })
+  check('das kinetische Zeichen lässt sich wählen',
+    pickKinetic.status === 200, `${pickKinetic.status} ${pickKinetic.text.slice(0, 160)}`)
+  const kineticView = await motionPage()
+  check('… und die Regel dazu nennt den Aufbau von 800 ms',
+    kineticView.text.includes('800 ms') && kineticView.text.includes('Fassung ohne Bewegung'),
+    'die Regel zum kinetischen Zeichen fehlt')
+
+  // ── EINE ERFUNDENE ID IST KEINE WAHL (Invariante `oneOf`, D7) ──────────
+  const proseTempo = await call(motionBase, {
+    method: 'PATCH',
+    cookie: account.cookie,
+    body: {
+      revision: await stepRevision('motion'),
+      slots: { 'l.tempo': { value: 'zügig, aber nicht hektisch', confirmed: true } },
+    },
+  })
+  check('ein erfundenes Tempo wird abgewiesen — `invariant_violated`',
+    proseTempo.status >= 400 && proseTempo.json?.reason === 'invariant_violated',
+    `${proseTempo.status} ${proseTempo.text.slice(0, 200)}`)
+  const proseLogo = await call(motionBase, {
+    method: 'PATCH',
+    cookie: account.cookie,
+    body: {
+      revision: await stepRevision('motion'),
+      slots: { 'l.logo': { value: 'vielleicht später', confirmed: true } },
+    },
+  })
+  check('dasselbe für ein „vielleicht" beim Zeichen',
+    proseLogo.status >= 400 && proseLogo.json?.reason === 'invariant_violated',
+    `${proseLogo.status} ${proseLogo.text.slice(0, 200)}`)
+
+  // ── DAS KAPITEL LÄSST SICH ZU ENDE GEHEN ───────────────────────────────
+  //
+  // `l.transitions` und `l.rules` schreibt sonst der Browser (s. Kopf); hier
+  // stehen die Werte in der FORM, die die Regeln erzeugen — vier beschriftete
+  // Blöcke und sechs Zeilen, zum ruhigen Tempo.
+  const calmEasing = 'cubic-bezier(0.22, 0.61, 0.36, 1)'
+  const transitionsValue = [
+    `## motion.fast\n120 ms · ${calmEasing} · Hover, Fokus, kleine Zustände.`,
+    `## motion.base\n240 ms · ${calmEasing} · Karten, Einblendungen, Menüs.`,
+    `## motion.slow\n384 ms · ${calmEasing} · Seitenwechsel, große Flächen.`,
+    `## motion.stagger\n60 ms · ${calmEasing} · Versatz zwischen Geschwistern (Listen, Karten).`,
+  ].join('\n\n')
+  const motionRulesValue = [
+    'Bewegung erklärt einen Zusammenhang oder sie entfällt — Dekoration bewegt sich nie.',
+    'Nur zwei Eigenschaften gleichzeitig: Deckkraft und eine Verschiebung. Keine Rotation, keine Skalierung von Text.',
+    'Kein Überschwingen: die Kurve läuft aus, sie federt nie — das ruhige Tempo lebt vom Ausklang.',
+    'Das Zeichen steht still — auch im Vorspann eines Videos. Es gibt keine bewegte Fassung, die jemand pflegen müsste.',
+    'Nichts läuft länger als 384 ms — das ist motion.slow. Wer mehr braucht, hat eine Animation und keinen Übergang.',
+    'Bei „weniger Bewegung" im Betriebssystem steht der Endzustand sofort — keine langsamere Ersatz-Animation, kein Ausblenden „light".',
+  ].map(line => `- ${line}`).join('\n')
+  await seedConfirmed('motion', {
+    'l.tempo': 'calm',
+    'l.transitions': transitionsValue,
+    'l.logo': 'no',
+    'l.rules': motionRulesValue,
+  })
+
+  const motionAcceptance = await call(`${motionBase}/acceptance`, { cookie: account.cookie })
+  const motionPending = (motionAcceptance.json?.sessions ?? []).filter(entry => entry.required && !entry.confirmed)
+  check('nach den vier Bestätigungen steht keine Pflicht-Session mehr offen',
+    motionAcceptance.status === 200 && motionPending.length === 0,
+    `${motionAcceptance.status} · offen: ${JSON.stringify(motionPending.map(entry => entry.slotId))}`)
+
+  let motionRevision = motionAcceptance.json?.revision ?? 0
+  for (const entry of (motionAcceptance.json?.sessions ?? []).filter(row => row.confirmed && !row.accepted)) {
+    const taken = await call(`${motionBase}/sessions/${entry.slotId}/accept`, {
+      method: 'POST', cookie: account.cookie, body: { revision: motionRevision },
+    })
+    if (taken.status !== 200) {
+      check(`Abnahme ${entry.slotId}`, false, `${taken.status} ${taken.text.slice(0, 160)}`)
+      break
+    }
+    motionRevision = taken.json?.revision ?? motionRevision
+  }
+  const motionDone = await call(`${motionBase}/complete`, {
+    method: 'POST', cookie: account.cookie, body: { confidence: 'fits' },
+  })
+  check('das letzte Kapitel `motion` lässt sich abnehmen und schliessen',
+    motionDone.status === 200, `${motionDone.status} ${motionDone.text.slice(0, 160)}`)
+
+  // ── DIE SCHICHT IST DAMIT VOLL ─────────────────────────────────────────
+  //
+  // Der eigene Stand der Schicht steht am Rail-Layer („N von 6 Kapiteln",
+  // D1) — er ist der einzige Ort, an dem sich „fertig" ablesen lässt, solange
+  // Kapitel 10 noch die Schranke zeigt (das volle Kapitel kommt mit D8).
+  const fullView = await motionPage()
+  check('die Leiste zeigt die Schicht als „6 von 6 Kapiteln"',
+    fullView.status === 200 && fullView.text.includes('6 von 6 Kapiteln'),
+    `${fullView.status} — ${(fullView.text.match(/\d von 6 Kapiteln/) ?? ['nichts gefunden'])[0]}`)
+  /**
+   * DER ERGEBNIS-PUNKT IST FREI, SOBALD SECHS KAPITEL FERTIG SIND.
+   *
+   * Er trägt im Markup KEINE Adresse: `BwProgressRail` rendert ihn als Knopf,
+   * der beim Klick navigiert, und gibt ihn genau bei `state === 'done'` frei —
+   * und dieser Zustand ist `doneCount === 6`. Geprüft wird deshalb die
+   * TATSACHE dahinter (sechs `done` in der Journey) plus die Beschriftung auf
+   * der Seite; eine Prüfung auf `href` suchte etwas, das es nicht gibt.
+   */
+  const designJourney = (await call(`/api/brand/profiles/${profileId}`, { cookie: account.cookie }))
+    .json?.journey ?? []
+  const designStates = ['dna', 'color', 'type', 'mark', 'imagery', 'motion']
+    .map(key => designJourney.find(entry => entry.stepKey === key)?.state)
+  check('… und der Ergebnis-Punkt „Visuelle Identität" ist frei — sechs Kapitel `done`',
+    fullView.text.includes('Visuelle Identität') && designStates.every(state => state === 'done'),
+    JSON.stringify(designStates))
+
+  const motionStep = await call(motionBase, { cookie: account.cookie })
+  check('… das Kapitel steht auf `done` und trägt seine vier Werte',
+    motionStep.json?.storedState === 'done'
+    && motionStep.json?.slots?.['l.tempo']?.confirmed === 'calm'
+    && String(motionStep.json?.slots?.['l.transitions']?.confirmed ?? '').includes('motion.slow')
+    && String(motionStep.json?.slots?.['l.rules']?.confirmed ?? '').split('\n').length === 6,
+    `${motionStep.json?.storedState} ${JSON.stringify(Object.keys(motionStep.json?.slots ?? {}))}`)
+
+
 }
 catch (error) {
   fail++
