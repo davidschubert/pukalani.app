@@ -144,6 +144,15 @@ Verlaufs bleibt. Tests brand 2753 (+28). Auto-Weiter bleibt (David, DECISION-LOG
 `nextSlot`, `stageModule`), hat keinen Ort, an dem sie falsch sein kann — erst die eine pure Regel
 machte den Fehler benennbar und testbar.
 
+**Nachtrag 2026-09-09, Davids erster Klick-Test:** „Neues Branding" aus dem Avatar-Menü landete
+nach dem Modal auf dem Klickdummy `/brand/demo/werte`. Ursache: `BwNewBrandModal` hatte die
+Voreinstellung `mode: 'demo'`, und zwei Aufrufer (BwSiteNav, BwBrandSwitcher) übergaben keinen
+Modus — Altbestand seit dem 2026-09-03, vom Befund-6-Lauf übersehen, der nur die drei Live-Aufrufer
+umbaute. Fix `4413b5cd`: beide über `useBrandCreate`, Voreinstellung `live`, der Playground sagt
+`mode="demo"` ausdrücklich. **Gelernt:** eine Attrappe darf nie die VOREINSTELLUNG sein — wer eine
+Komponente mit Demo-Zweig baut, macht den Demo-Zweig zur ausdrücklichen Wahl; und „an drei Orten"
+in einem Bericht heißt: `grep` über ALLE Render-Stellen, nicht nur die, die schon `mode` sagen.
+
 ---
 
 ### Kailua-Wizard-Befunde 8/9/10/12: George behauptet nichts, leere Bestätigung erklärt sich, „Alle abnehmen", Handbuch-Kapitel „Stimme" geteilt ✅ 2026-09-09
