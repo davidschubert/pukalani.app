@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   type BrandSyncState,
   brandAutosaveAllowed,
+  brandConflictNeedsDecision,
   brandSlotDisplayValue,
   brandSlotIsConfirmed,
   diffBrandSlots,
@@ -155,5 +156,83 @@ describe('nextBrandSyncState', () => {
     for (const state of ['saving', 'saved', 'offline', 'error'] as BrandSyncState[]) {
       expect(brandAutosaveAllowed(state)).toBe(true)
     }
+  })
+})
+
+/**
+ * DER 409-DIALOG DARF NUR STEHEN, WO ES WIRKLICH ETWAS ZU ENTSCHEIDEN GIBT
+ * (Kailua-Befund 2, 2026-09-08).
+ *
+ * Der teure Fall aus dem Live-Lauf ist der erste Test: EIN offener Tab, eine
+ * Serverfassung, die für das getippte Feld leer ist — und ein Dialog, dessen
+ * eine Antwort („Serverfassung laden") die Eingabe wegwarf.
+ */
+describe('brandConflictNeedsDecision', () => {
+  it('LEERE Serverfassung ist keine zweite Fassung — kein Dialog', () => {
+    expect(brandConflictNeedsDecision(
+      { 'a.origin': view() },
+      { 'a.origin': view() },
+      { 'a.origin': { value: 'Wir haben 2019 angefangen.' } },
+    )).toBe(false)
+  })
+
+  it('nur Leerraum auf dem Server zählt ebenfalls als leer', () => {
+    expect(brandConflictNeedsDecision(
+      { 'a.origin': view() },
+      { 'a.origin': view({ latestDraft: '   \n ' }) },
+      { 'a.origin': { value: 'Wir haben 2019 angefangen.' } },
+    )).toBe(false)
+  })
+
+  it('ZWEI verschiedene, nicht-leere Texte sind ein echter Zusammenstoss', () => {
+    expect(brandConflictNeedsDecision(
+      { 'a.origin': view() },
+      { 'a.origin': view({ latestDraft: 'Fassung vom zweiten Tab' }) },
+      { 'a.origin': { value: 'meine Fassung' } },
+    )).toBe(true)
+  })
+
+  it('BESTÄTIGEN eines unveränderten Textes ist kein Konflikt (Befund 3)', () => {
+    // Der Zähler-Fall: die `revision` ist durch einen Gesprächszug gewandert,
+    // der Wortlaut des Feldes nicht. Ein Dialog hier hielte jede Bestätigung
+    // des Kapitels auf — genau das ist im Kailua-Lauf passiert.
+    expect(brandConflictNeedsDecision(
+      { 'a.origin': view({ latestDraft: 'derselbe Satz' }) },
+      { 'a.origin': view({ latestDraft: 'derselbe Satz' }) },
+      { 'a.origin': { confirmed: true } },
+    )).toBe(false)
+  })
+
+  it('GEGENPROBE: bestätigen, nachdem der Wortlaut sich bewegt hat, fragt nach', () => {
+    // Die Bestätigung meinte einen Text, der nicht mehr dasteht.
+    expect(brandConflictNeedsDecision(
+      { 'a.origin': view({ latestDraft: 'der Satz, den ich gelesen habe' }) },
+      { 'a.origin': view({ latestDraft: 'Fassung vom zweiten Tab' }) },
+      { 'a.origin': { confirmed: true } },
+    )).toBe(true)
+  })
+
+  it('gleicher Wortlaut ist nichts zu entscheiden', () => {
+    expect(brandConflictNeedsDecision(
+      { 'a.origin': view() },
+      { 'a.origin': view({ latestDraft: 'derselbe Satz' }) },
+      { 'a.origin': { value: 'derselbe Satz', confirmed: true } },
+    )).toBe(false)
+  })
+
+  it('GEGENPROBE: ein einziges kollidierendes Feld reicht für den Dialog', () => {
+    expect(brandConflictNeedsDecision(
+      { 'a.origin': view(), 'a.oneThing': view() },
+      { 'a.origin': view(), 'a.oneThing': view({ latestDraft: 'fremd' }) },
+      { 'a.origin': { value: 'meins' }, 'a.oneThing': { value: 'auch meins' } },
+    )).toBe(true)
+  })
+
+  it('nichts offen heisst nichts zu entscheiden', () => {
+    expect(brandConflictNeedsDecision(
+      { 'a.origin': view({ latestDraft: 'x' }) },
+      { 'a.origin': view({ latestDraft: 'x' }) },
+      {},
+    )).toBe(false)
   })
 })

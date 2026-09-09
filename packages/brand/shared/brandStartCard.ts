@@ -42,3 +42,87 @@ export function isBrandWebsiteUrl(value: string): boolean {
   }
   return url.protocol === 'http:' || url.protocol === 'https:'
 }
+
+/**
+ * ── DIE ANLAGE ALS EIN DATENSATZ (Kailua-Befund 6, 2026-09-08) ────────────
+ *
+ * Bis heute erhob das Modal auf `/dashboard/brands` drei Dinge (Weiche, Titel,
+ * Sprache) und reichte sie als Query an `/dashboard/brands/new` weiter, wo
+ * dieselben drei Felder ein zweites Mal standen. Davids Entscheidung: das Modal
+ * LEGT AN und springt in die Werkstatt; die Seite bleibt das Ziel direkter
+ * Links und fragt jedes Feld genau einmal.
+ *
+ * Damit gibt es zwei Oberflächen für EINE Anlage — und deshalb liegt hier, was
+ * beide brauchen: die Form des Entwurfs, sein Anfangswert, die Frage „ist er
+ * vollständig" und die Übersetzung in den Rumpf der Route. Ein zweites Mal von
+ * Hand gebaut wäre es die Stelle, an der Modal und Seite auseinanderlaufen —
+ * und die Abweichung sähe man erst an einem Branding, dem ein Feld fehlt.
+ *
+ * PUR, damit ein Test sie ohne Formular prüfen kann.
+ */
+export interface BrandNewDraft {
+  /** W2 (Katalog §2.2) — gilt nur auf dem Relaunch-Pfad. */
+  relaunchScope: 'refine' | 'recut'
+  /** „Name auf den Prüfstand" — nur beim Neuschnitt sichtbar, sonst immer false. */
+  namingOpted: boolean
+  title: string
+  contentLocale: string
+  team: 'solo' | 'team'
+  websiteUrl: string
+  industry: string
+  about: string
+  audience: string
+}
+
+export function emptyBrandNewDraft(contentLocale: string): BrandNewDraft {
+  return {
+    relaunchScope: 'refine',
+    namingOpted: false,
+    title: '',
+    contentLocale,
+    team: 'solo',
+    websiteUrl: '',
+    industry: '',
+    about: '',
+    audience: '',
+  }
+}
+
+/**
+ * Drei Pflichtfelder, eine freiwillige Adresse — und die Adresse muss, WENN sie
+ * dasteht, eine sein. Dieselbe Rechnung wie im Anlage-Schema: der Knopf soll
+ * nicht freigegeben aussehen, um dann mit „konnte nicht angelegt werden" zu
+ * antworten.
+ */
+export function brandNewDraftComplete(draft: BrandNewDraft): boolean {
+  return draft.industry.trim().length > 0
+    && draft.about.trim().length > 0
+    && draft.audience.trim().length > 0
+    && isBrandWebsiteUrl(draft.websiteUrl.trim())
+}
+
+/**
+ * Der Rumpf für `POST /api/brand/profiles`. `relaunchScope` gehört NUR auf den
+ * Relaunch-Pfad (das Schema lehnt ihn sonst ab, statt ihn still zu schlucken),
+ * und `namingOpted` fällt mit dem Feinschliff — die Weiche W2 friert es ein.
+ */
+export function brandNewDraftBody(
+  pathKind: 'new' | 'relaunch',
+  draft: BrandNewDraft,
+): Record<string, unknown> {
+  const recut = pathKind === 'relaunch' && draft.relaunchScope === 'recut'
+  return {
+    title: draft.title.trim(),
+    contentLocale: draft.contentLocale,
+    pathKind,
+    ...(pathKind === 'relaunch' ? { relaunchScope: draft.relaunchScope } : {}),
+    hasName: pathKind === 'relaunch',
+    team: draft.team,
+    subBrands: 'unknown',
+    namingOpted: recut ? draft.namingOpted : false,
+    websiteUrl: draft.websiteUrl.trim(),
+    industry: draft.industry.trim(),
+    about: draft.about.trim(),
+    audience: draft.audience.trim(),
+  }
+}

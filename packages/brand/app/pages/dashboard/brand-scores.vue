@@ -277,20 +277,20 @@ function sortIcon(direction: false | 'asc' | 'desc'): string {
 const newBrandOpen = ref(false)
 
 /**
- * Das Modal erhebt Weiche, Titel und Sprache; die Startkarte ist Pflicht und
- * wird auf `/dashboard/brands/new` erhoben. Wortgleich zur Karten-Übersicht —
- * ein zweiter Anlage-Weg wäre ein zweites Formular für dieselbe Sache.
+ * Das Modal LEGT AN und springt in die Werkstatt (Kailua-Befund 6) —
+ * wortgleich zur Karten-Übersicht und zur Werkstatt-Leiste, und zwar
+ * buchstäblich: alle drei rufen `useBrandCreate`. Ein zweiter Anlage-Weg wäre
+ * ein zweites Formular für dieselbe Sache.
  */
+const {
+  contentLocales: newBrandLocales,
+  creating: newBrandCreating,
+  failed: newBrandFailed,
+  create: createBrand,
+} = useBrandCreate()
+
 async function createFromModal(payload: BwNewBrandSubmit): Promise<void> {
-  newBrandOpen.value = false
-  await navigateTo({
-    path: localePath('/dashboard/brands/new'),
-    query: {
-      path: payload.kind === 'rebrand' ? 'relaunch' : 'new',
-      ...(payload.title ? { title: payload.title } : {}),
-      lang: payload.lang,
-    },
-  })
+  if (await createBrand(payload)) newBrandOpen.value = false
 }
 
 useBrandTitle(() => t('brand.myScores.list.title'))
@@ -464,6 +464,7 @@ useBrandTitle(() => t('brand.myScores.list.title'))
 
     <BwNewBrandModal
       v-model:open="newBrandOpen" mode="live"
+      :content-locales="newBrandLocales" :loading="newBrandCreating" :failed="newBrandFailed"
       @submit="createFromModal"
     />
   </div>

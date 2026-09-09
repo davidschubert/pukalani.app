@@ -787,6 +787,11 @@
       "confirmEmpty": "There is nothing here yet that could be confirmed.",
       "retryWithHint": "Again, with a hint",
       "submitChoice": "Submit",
+      "save": {
+        "rejected": "Not saved",
+        "rejectedField": "“{field}” did not go through. Your text is still here — please confirm it once more.",
+        "rejectedRetry": "The last change did not go through. Your text is still here — please try again."
+      },
       "turnOptions": {
         "label": "Answer options"
       },
@@ -807,7 +812,8 @@
         "confirmedOf": "{confirmed}/{total} confirmed",
         "confirmedOfOptional": "{confirmed}/{total} confirmed + {optional} optional",
         "count": "{confirmed}/{total}",
-        "countOptional": "{confirmed}/{total} + {optional} optional"
+        "countOptional": "{confirmed}/{total} + {optional} optional",
+        "confirmSaving": "saving {count}"
       },
       "advisorInfo": {
         "open": "About {name}",

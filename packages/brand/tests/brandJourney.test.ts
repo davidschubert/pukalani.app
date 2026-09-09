@@ -14,6 +14,7 @@ import {
   brandStepCompletion,
   canEnterBrandStep,
   conditionalInputCounts,
+  firstOpenBrandStep,
   includedBrandSteps,
   pickNextSession,
   resolveBrandJourney,
@@ -1493,5 +1494,50 @@ describe('brandRestartImpact — was ein Neustart kostet', () => {
       && BRAND_STEP_KEYS.indexOf(slotById(id)!.stepId) > BRAND_STEP_KEYS.indexOf('values'))
     expect([...brandRestartImpact('values', allConfirmed).sessions].sort())
       .toEqual(expected.sort())
+  })
+})
+
+/**
+ * WOHIN NACH DER ANLAGE (Kailua-Befund 6, 2026-09-08).
+ *
+ * Zwei Oberflächen legen an (Modal und Seite) und müssen an derselben Stelle
+ * landen — die Regel ist deshalb pur und wird von beiden gelesen.
+ */
+describe('firstOpenBrandStep', () => {
+  function step(stepKey: BrandStepKey, state: BrandJourneyStep['state']): BrandJourneyStep {
+    return {
+      stepKey,
+      state,
+      reason: null,
+      optional: false,
+      progress: { requiredTotal: 0, requiredFilled: 0, pct: 0 },
+      missingRequired: [],
+      confidence: null,
+    }
+  }
+
+  it('nimmt den ersten offenen Baustein', () => {
+    expect(firstOpenBrandStep([
+      step('context', 'open'),
+      step('pvm', 'locked'),
+    ])).toBe('context')
+  })
+
+  it('ein bereits begonnener (`active`) zählt genauso', () => {
+    expect(firstOpenBrandStep([
+      step('context', 'done'),
+      step('pvm', 'active'),
+    ])).toBe('pvm')
+  })
+
+  it('ÜBERSPRUNGENE sind keine Adresse — die Route antwortet dort 403', () => {
+    expect(firstOpenBrandStep([
+      step('architecture', 'skipped'),
+      step('context', 'locked'),
+    ])).toBe('context')
+  })
+
+  it('ohne Journey bleibt der erste Baustein — er ist nie übersprungen', () => {
+    expect(firstOpenBrandStep([])).toBe('context')
   })
 })

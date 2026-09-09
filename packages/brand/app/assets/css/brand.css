@@ -424,6 +424,24 @@
   box-shadow: none; font-weight: 500;
 }
 
+/* ── DIE HANDLUNGEN EINES BEFUND-CHIPS (Kailua-Befund 1, 2026-09-08) ───────
+   „Annehmen"/„Ablehnen" standen als `UButton size="xs"`: rund 24 px hoch, mit
+   4 px Innenabstand oben und unten. Das ist unter jeder Empfehlung für ein
+   Klickziel (32 px), und im Lauf traf der Zeiger sie nur pixelgenau — die
+   Entscheidung über einen Befund ist aber der EINE Weg, ihn loszuwerden.
+
+   Die Fläche wächst NACH INNEN (`min-height` + Innenabstand), nicht über eine
+   grössere Schrift: der Chip ist ein ruhiger Hinweis und soll neben dem Text
+   nicht lauter werden. Der Fokus-Ring steht ausdrücklich hier, weil die
+   Ghost-Variante von Nuxt UI auf der getönten Chip-Fläche (`--bw-stale-soft`)
+   kaum zu sehen war. */
+.bw-chip-action {
+  min-height: 2rem; padding-left: 0.75rem; padding-right: 0.75rem;
+}
+.bw-chip-action:focus-visible {
+  outline: 2px solid var(--bw-stale); outline-offset: 2px;
+}
+
 /* ── WERKSTATT „GESPRÄCH ALS BÜHNE" (2026-09-02) ──────────────────────────
    Die Klassen der neuen Sidebar (`BwWorkspaceSidebar`) und der Log-Spalte
    der Werkstatt. Sie stehen GLOBAL und nicht als scoped CSS der Seite: die

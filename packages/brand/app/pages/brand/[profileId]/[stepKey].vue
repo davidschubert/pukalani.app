@@ -19,7 +19,7 @@ import {
   needsOpeningTurn,
   resolveActiveSession,
 } from '../../../../shared/brandWorkspaceNav'
-import { affectsView } from '../../../../shared/brandSessions'
+import { affectsView, brandAnswerWritesSlot } from '../../../../shared/brandSessions'
 import {
   BRAND_STEP_KEYS,
   type BrandInvariant,
@@ -382,6 +382,46 @@ const slotFacts = computed<Record<string, BrandSlotStateFacts>>(() => {
   return facts
 })
 
+/**
+ * DERSELBE STAND, ABER NUR DAS, WAS DER SERVER BESTÄTIGT HAT (Kailua-Befund 3,
+ * 2026-09-08).
+ *
+ * ── ZWEI FRAGEN, ZWEI RECHNUNGEN ─────────────────────────────────────────
+ * `slotFacts` oben ist OPTIMISTISCH, und das ist dort richtig: „welche Frage
+ * ist als nächstes dran" darf niemanden ein zweites Mal nach etwas fragen, das
+ * er gerade getippt hat — die Eingabe ist ja da, sie ist nur noch nicht
+ * draussen.
+ *
+ * Der FORTSCHRITT ist eine andere Frage. „7 von 10 bestätigt" ist eine Aussage
+ * über das, was gespeichert ist, und nur darüber: im Kailua-Lauf standen zehn
+ * Bestätigungen auf dem Schirm, von denen der Server eine hatte — jede weitere
+ * war an einem 409 hängen geblieben, den niemand sah. Ein Zähler, der die
+ * ABSICHT zählt, kann diesen Unterschied nie zeigen; er ist genau dann falsch,
+ * wenn es darauf ankommt.
+ *
+ * Gerechnet wird deshalb über `store.serverSlots` — dieselbe Quelle, aus der
+ * auch die Leiste zählt (`store.sessions`, vom Server geliefert). Damit sagen
+ * Leiste und Log dasselbe, und beide sagen die Wahrheit.
+ */
+const serverSlotFacts = computed<Record<string, BrandSlotStateFacts>>(() => {
+  const facts: Record<string, BrandSlotStateFacts> = {}
+  for (const slot of slots.value) {
+    facts[slot.id] = {
+      hasValue: brandSlotDisplayValue(store.serverSlots[slot.id]).length > 0,
+      confirmed: brandSlotIsConfirmed(store.serverSlots[slot.id]),
+    }
+  }
+  return facts
+})
+
+/**
+ * WIE VIELE BESTÄTIGUNGEN NOCH UNTERWEGS SIND (Befund 3) — die Zahl, an der
+ * die Zeile „wird gespeichert" hängt. Sie kommt aus `pendingSlots`, also aus
+ * derselben Rechnung, die der Autosave gleich abschickt.
+ */
+const confirmsInFlight = computed(() =>
+  Object.values(store.pendingSlots).filter(patch => patch.confirmed === true).length)
+
 // ── Die aktive Session (BW2 §11) ──────────────────────────────────────────
 
 /**
@@ -469,7 +509,7 @@ const nextQuestion = computed(() =>
  * Fehler, den nur der Browser zeigt.
  */
 const completion = computed(() =>
-  (stepKey.value ? brandStepCompletion(stepKey.value, slotFacts.value) : null))
+  (stepKey.value ? brandStepCompletion(stepKey.value, serverSlotFacts.value) : null))
 
 /**
  * DIE FRAGE AUF DER BÜHNE — und seit BW2 3c-i geht die AKTIVE SESSION VOR.
@@ -694,8 +734,14 @@ function readsLikeQuestion(text: string): boolean {
 async function answerFromGeorge(text: string): Promise<void> {
   const slot = readsLikeQuestion(text) ? null : nextSlot.value
   const question = slot ? t(questionKeyFor(slot, pathKind.value, teamKind.value)) : ''
+  /**
+   * DER SAMMEL-WERT GEHÖRT DEM SERVER (Kailua-Befund 4) — die Regel steht pur
+   * nebenan (`brandAnswerWritesSlot`), samt Begründung. Der Zug reist trotzdem
+   * MIT `slotId`: die Verlaufs-Zeile soll wissen, worüber gesprochen wurde.
+   */
+  const writesSlot = brandAnswerWritesSlot(slot)
 
-  if (slot) store.setSlotValue(slot.id, text)
+  if (slot && writesSlot) store.setSlotValue(slot.id, text)
   /**
    * DIE EIGENE BLASE ZEIGT DIE LESEFASSUNG, DER SLOT BEHÄLT DIE ID (D8).
    *
@@ -710,7 +756,7 @@ async function answerFromGeorge(text: string): Promise<void> {
     `answer-${slot?.id ?? 'free'}-${store.streamMessages.length}`,
     slot ? slotDisplayValue(slot.id, text) : text,
   )
-  if (slot) autosave.schedule()
+  if (slot && writesSlot) autosave.schedule()
 
   const upcoming = nextSlot.value
   // DIE SESSION REIST IMMER MIT (BW2 §6): ohne sie rechnete der Server die
@@ -725,6 +771,29 @@ async function answerFromGeorge(text: string): Promise<void> {
     nextSlotId: upcoming?.id,
     nextQuestion: upcoming ? t(questionKeyFor(upcoming, pathKind.value, teamKind.value)) : '',
   })
+  /**
+   * DER ZUG HAT GESCHRIEBEN — ALSO NACHLESEN (Kailua-Befund 4).
+   *
+   * Nur die Sammel-Session und der „hat mitgelesen"-Stempel bewegen die
+   * Fassung, und nur die erste bewegt dabei einen WERT. Kein Frame trägt ihn:
+   * `slot.ready` kommt aus dieser Route nie. Ohne diesen Abruf sähe die Bühne
+   * den zusammengelegten Wert von `a.facts` erst nach einem Neuladen der Seite.
+   * `refreshStep` lässt das Gespräch stehen (s. dort).
+   */
+  if (conversation.wrote.value && stepKey.value) {
+    await store.refreshStep(profileId.value, stepKey.value)
+  }
+  /**
+   * ES KAM GAR KEIN ZUG (Kill-Switch aus, Sperre belegt, Drossel): dann hat
+   * auch niemand den Sammel-Teil aufgehoben — die Route kommt gar nicht so
+   * weit. Der Browser schreibt ihn deshalb doch, und die Werkstatt verhält
+   * sich wie vor der Konversations-Runde. Ein abgerissener STROM zählt hier
+   * NICHT (s. `noTurn`): dort könnte der Server ihn längst haben.
+   */
+  else if (slot && !writesSlot && conversation.noTurn.value) {
+    store.setSlotValue(slot.id, text)
+    autosave.schedule()
+  }
   await autoAdvance(from, conversation.nextStop.value)
 }
 
@@ -1170,6 +1239,29 @@ watch(() => store.emptyConfirmRejection, (slotId) => {
     color: 'warning',
     title: t('brand.workspace.confirmEmpty'),
     description: t('brand.workspace.confirmNeedsValue'),
+  })
+})
+
+/**
+ * EIN SCHREIBVORGANG IST VERWORFEN WORDEN (Kailua-Befund 3) — der Sammel-Fall.
+ *
+ * Die drei benannten Ablehnungen darüber haben je einen eigenen Satz. Hier
+ * steht der Rest: ein 403 auf einem inzwischen gesperrten Baustein, ein 413,
+ * ein 400 mit einem Grund, den diese Oberfläche nicht kennt. Bis heute
+ * verschwand er lautlos — der Store hat die Bestätigungs-Absicht schon
+ * zurückgenommen, hier steht nur noch die Auskunft, WELCHES Feld es traf.
+ * Der Grund selbst bleibt beim Server (createError-Regel); gesagt wird, was
+ * der Mensch tun kann: es noch einmal versuchen.
+ */
+watch(() => store.saveRejection, (rejection) => {
+  if (!rejection) return
+  store.dismissSaveRejection()
+  toast.add({
+    color: 'warning',
+    title: t('brand.workspace.save.rejected'),
+    description: rejection.slotId
+      ? t('brand.workspace.save.rejectedField', { field: fieldLabel(rejection.slotId) })
+      : t('brand.workspace.save.rejectedRetry'),
   })
 })
 
@@ -1767,7 +1859,15 @@ const logChapters = computed<LogChapter[]>(() => store.railSteps.map((entry) => 
 function chapterCountLine(chapter: LogChapter): string {
   const values = { confirmed: chapter.confirmed, total: chapter.total, optional: chapter.optional }
   if (chapter.current) {
-    return t(chapter.optional > 0 ? 'brand.workspace.log.confirmedOfOptional' : 'brand.workspace.log.confirmedOf', values)
+    const line = t(chapter.optional > 0 ? 'brand.workspace.log.confirmedOfOptional' : 'brand.workspace.log.confirmedOf', values)
+    /**
+     * NOCH UNTERWEGS (Kailua-Befund 3): der Zähler zeigt seit heute nur den
+     * SERVER-Stand — ohne diesen Zusatz sähe der Klick auf „Bestätigen" für
+     * einen Augenblick nach nichts aus, und das wäre die zweite Art zu lügen.
+     */
+    return confirmsInFlight.value > 0
+      ? `${line} · ${t('brand.workspace.log.confirmSaving', { count: confirmsInFlight.value })}`
+      : line
   }
   return t(chapter.optional > 0 ? 'brand.workspace.log.countOptional' : 'brand.workspace.log.count', values)
 }

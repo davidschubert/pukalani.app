@@ -787,6 +787,11 @@
       "confirmEmpty": "Hier steht noch nichts, was sich bestätigen liesse.",
       "retryWithHint": "Nochmal, mit Hinweis",
       "submitChoice": "Übermitteln",
+      "save": {
+        "rejected": "Nicht gespeichert",
+        "rejectedField": "„{field}“ ist nicht angekommen. Der Text steht noch da — bitte noch einmal bestätigen.",
+        "rejectedRetry": "Die letzte Änderung ist nicht angekommen. Der Text steht noch da — bitte noch einmal versuchen."
+      },
       "turnOptions": {
         "label": "Antwortmöglichkeiten"
       },
@@ -807,7 +812,8 @@
         "confirmedOf": "{confirmed}/{total} bestätigt",
         "confirmedOfOptional": "{confirmed}/{total} bestätigt + {optional} optional",
         "count": "{confirmed}/{total}",
-        "countOptional": "{confirmed}/{total} + {optional} optional"
+        "countOptional": "{confirmed}/{total} + {optional} optional",
+        "confirmSaving": "{count} wird gespeichert"
       },
       "advisorInfo": {
         "open": "Über {name}",

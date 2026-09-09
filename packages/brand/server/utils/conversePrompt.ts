@@ -460,6 +460,24 @@ function replyTaskLines(): string[] {
     // Freie Fragen: derselbe Zug, keine zweite Runde.
     'IF THEY ASKED YOU SOMETHING, answer it in this same turn and briefly. A technical term gets its '
     + 'half-sentence explanation in the same breath (rule 6).',
+    /**
+     * NIE ZWEIMAL DIESELBE FRAGE (Kailua-Befund 5, 2026-09-08).
+     *
+     * `george-a-9` steht seit langem im ENTWURFS-Prompt („do NOT ask the same
+     * question again — build the draft on it") und fehlte im GESPRÄCHS-Prompt
+     * genau dort, wo das Gespräch stattfindet. Der erste Kailua-Lauf fragte
+     * deshalb im Kreis.
+     *
+     * Die Auskunft dafür liegt schon im Rumpf: der Block „what has been
+     * captured in this chapter so far" schreibt jeden Slot mit — leere
+     * ausdrücklich als `(not answered yet)`. Was dort einen Wert trägt, ist
+     * beantwortet, und zwar unabhängig davon, ob der Verlauf dieser Session es
+     * zeigt (er ist auf die Session geschnitten, brand-011).
+     */
+    'NEVER ASK AGAIN WHAT IS ALREADY ANSWERED: every field that carries a value in "what has been '
+    + 'captured in this chapter so far" is settled. Build on it, refine it, or challenge it where it '
+    + 'contradicts something — but do not put the same question back on the table. Only fields marked '
+    + '"(not answered yet)" are still open.',
   ]
 }
 

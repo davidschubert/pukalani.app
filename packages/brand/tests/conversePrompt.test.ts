@@ -656,3 +656,49 @@ describe('der Markt-Block', () => {
     expect(alt).not.toMatch(/market comparison noticed/)
   })
 })
+
+/**
+ * KEINE FRAGE ZWEIMAL (Kailua-Befund 5, 2026-09-08).
+ *
+ * `george-a-9` stand bis heute NUR im Entwurfs-Prompt („do NOT ask the same
+ * question again"). Im Gespräch — also genau dort, wo gefragt wird — fehlte
+ * sie: George fragte im ersten Kailua-Lauf im Kreis. Die Auskunft, was schon
+ * beantwortet ist, liegt im Rumpf (der Slot-Block schreibt leere Felder
+ * ausdrücklich als `(not answered yet)`); die Regel verweist darauf, statt eine
+ * zweite Quelle zu erfinden.
+ */
+describe('Beantwortete Fragen kommen nicht zurück (converse-Fassung von a-9)', () => {
+  it('der Auftrag verbietet die Wiederholung und nennt die Quelle', () => {
+    const instruction = brandConverseInstruction(BOTH)
+    expect(instruction).toContain('NEVER ASK AGAIN WHAT IS ALREADY ANSWERED')
+    expect(instruction).toContain('what has been captured in this chapter so far')
+    expect(instruction).toContain('(not answered yet)')
+  })
+
+  it('sie steht in JEDEM gewöhnlichen Zug, nicht nur wenn eine Frage folgt', () => {
+    // Der Kailua-Fall ist genau der ohne offene Katalog-Frage: dort treibt der
+    // Zug ein Ableitungs-Feld voran — und fragte bis heute dabei erneut.
+    const instruction = brandConverseInstruction({
+      hasNextQuestion: false,
+      nextQuestionKnown: false,
+      openFieldLabels: ['Pitch', 'Kategorie'],
+    })
+    expect(instruction).toContain('NEVER ASK AGAIN WHAT IS ALREADY ANSWERED')
+  })
+
+  it('GEGENPROBE: der Rumpf liefert die Auskunft, auf die sie sich beruft', () => {
+    const inputs = formatBrandConverseInputs(inputsFor({
+      slots: [
+        { slotId: 'a.origin', value: 'Wir haben 2019 angefangen.' },
+        { slotId: 'a.oneThing', value: '' },
+      ],
+    }))
+    expect(inputs).toContain('Wir haben 2019 angefangen.')
+    expect(inputs).toContain('(not answered yet)')
+  })
+
+  it('der ERÖFFNUNGSZUG trägt sie NICHT — er reagiert auf nichts', () => {
+    const instruction = brandConverseInstruction({ ...BOTH, opening: true, chapterIntro: false })
+    expect(instruction).not.toContain('NEVER ASK AGAIN WHAT IS ALREADY ANSWERED')
+  })
+})

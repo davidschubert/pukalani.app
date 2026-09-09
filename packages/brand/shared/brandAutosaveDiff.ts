@@ -120,6 +120,71 @@ export function pruneSettledEdits(
   return kept
 }
 
+/**
+ * IST DAS EIN ECHTER ZUSAMMENSTOSS? (Kailua-Befund 2, 2026-09-08)
+ *
+ * ── DER DIALOG IST TEUER, ALSO MUSS ER RECHT HABEN ────────────────────────
+ * „Dieses Kapitel wurde woanders geändert" verlangt eine Entscheidung, und
+ * eine der beiden Antworten („Serverfassung laden") WIRFT die eigene Eingabe
+ * WEG. Im ersten Kailua-Lauf stand er in einem einzigen offenen Tab über einer
+ * Serverfassung, die für das getippte Feld schlicht LEER war: der Mensch hat
+ * eine Entscheidung zwischen seinem Satz und nichts getroffen — und die
+ * falsche getroffen, weil der Dialog behauptete, es gäbe da draussen etwas.
+ *
+ * ── DIE FRAGE IST NICHT „HAT SICH DIE REVISION BEWEGT" ────────────────────
+ * Die Revision bewegt sich aus vielen Gründen, die mit dem getippten Feld
+ * nichts zu tun haben (ein Gesprächszug stempelt „hat mitgelesen", eine
+ * Sammel-Session schreibt ihren Zwischenstand, ein zweiter Tab bestätigt
+ * daneben). Zu entscheiden gibt es nur dort etwas, wo ZWEI TEXTE für DASSELBE
+ * Feld stehen. Deshalb rechnet diese Regel je Slot:
+ *
+ *  - die Serverfassung des Feldes ist LEER ⇒ nichts zu verlieren;
+ *  - mein Text und ihrer sind gleich ⇒ nichts zu entscheiden;
+ *  - ich habe gar keinen Text getippt (nur bestätigt oder aufgehoben) und der
+ *    Wortlaut des Feldes hat sich NICHT bewegt ⇒ meine Bestätigung meint
+ *    genau den Text, der dort steht.
+ *
+ * Bleibt irgendwo ein Feld übrig, an dem zwei VERSCHIEDENE, nicht-leere Texte
+ * stehen, ist es ein echter Zusammenstoss und der Dialog gehört hin.
+ *
+ * ── WARUM `previous` MITKOMMT ─────────────────────────────────────────────
+ * Eine Bestätigung heisst „ich stimme dem zu, was ich gelesen habe". Ob das
+ * noch dasteht, kann nur beantworten, wer BEIDE Serverfassungen kennt: die
+ * gelesene und die neue. Ohne `previous` bliebe nur die Wahl zwischen „jede
+ * Bestätigung ist harmlos" (dann bestätigte man fremden Text ungefragt) und
+ * „jede Bestätigung ist ein Konflikt" (dann stünde der Dialog wieder bei jedem
+ * Klick — der Kailua-Befund 3).
+ *
+ * ── SIE IST DIE ZWEITE STUFE, NICHT DIE ERSTE ─────────────────────────────
+ * `pruneSettledEdits` beantwortet schon „der Server trägt meine Eingabe
+ * bereits" (der Schein-Konflikt aus 2026-09-02). Diese hier beantwortet die
+ * nächste Frage: „er trägt sie nicht, aber er trägt auch nichts anderes."
+ * Beide Male ist die Auflösung dieselbe Bewegung — Serverfassung samt neuer
+ * `revision` übernehmen, die eigene Eingabe stehen lassen, erneut speichern —,
+ * nur bleibt hier etwas zu speichern übrig.
+ */
+export function brandConflictNeedsDecision(
+  previous: Readonly<Record<string, BrandSlotView>>,
+  current: Readonly<Record<string, BrandSlotView>>,
+  local: Readonly<Record<string, BrandLocalSlotEdit>>,
+): boolean {
+  for (const slotId of Object.keys(diffBrandSlots(current, local))) {
+    const theirs = brandSlotDisplayValue(current[slotId])
+    // Leer ist keine zweite Fassung.
+    if (theirs.trim().length === 0) continue
+    const mine = local[slotId]?.value
+    if (mine === undefined) {
+      // Nur bestätigt/aufgehoben: der Wortlaut ist ihrer. Konflikt ist es
+      // genau dann, wenn er sich seit dem Lesen bewegt hat.
+      if (brandSlotDisplayValue(previous[slotId]) !== theirs) return true
+      continue
+    }
+    if (theirs === mine) continue
+    return true
+  }
+  return false
+}
+
 /** Die fünf sichtbaren Zustände (§3e). */
 export type BrandSyncState = 'saving' | 'saved' | 'offline' | 'error' | 'conflict'
 

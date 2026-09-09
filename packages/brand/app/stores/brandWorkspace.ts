@@ -19,6 +19,7 @@ import {
   type BrandSyncEvent,
   type BrandSyncState,
   brandAutosaveAllowed,
+  brandConflictNeedsDecision,
   brandSlotDisplayValue,
   brandSlotIsConfirmed,
   diffBrandSlots,
@@ -524,6 +525,53 @@ const setup = () => {
     emptyConfirmRejection.value = ''
   }
 
+  /**
+   * DER SCHREIBVORGANG IST ENDGÜLTIG VERWORFEN (Kailua-Befund 3) — mit Grund,
+   * damit die Seite ihn SAGEN kann.
+   *
+   * ── WARUM ES DIESEN VIERTEN AUSGANG BRAUCHT ─────────────────────────────
+   * Für die drei benannten Ablehnungen (`invariant_violated`, `slot_empty`,
+   * `impact_unacknowledged`) gibt es je einen Zweig, der die ABSICHT
+   * zurücknimmt und die Auskunft weiterreicht. Alles andere fiel bis hierher
+   * in den Sammel-Ausgang `mark('error')`: die Bestätigungs-Absicht blieb im
+   * Store stehen, der Zähler zeigte sie weiter als „bestätigt", und niemand
+   * erfuhr etwas. Im Kailua-Lauf stand deshalb 10/10 auf dem Schirm und 1/10
+   * in der Datenbank.
+   *
+   * ── ER GILT NUR FÜR DAS, WAS NICHT WIEDERKOMMT ──────────────────────────
+   * Der Autosave ruft ihn ausschliesslich dort, wo er NICHT wiederholt (4xx
+   * ausser 429, und ein 5xx erst nach dem letzten Versuch). Ein Netzfehler
+   * oder ein 502 mitten im Deploy bleibt `offline`/`error` mit Wiederholung —
+   * dort ist die Eingabe nicht verworfen, sie ist unterwegs.
+   *
+   * Die Bewegung ist dieselbe wie bei `rejectEmptyConfirmations`: der TEXT
+   * bleibt stehen (er ist nicht wertlos, er ist nur nicht angekommen), die
+   * Bestätigungs-ABSICHT fällt — sonst behauptete der nächste Tick sie erneut,
+   * und der Zähler bliebe für immer optimistisch.
+   */
+  const saveRejection = ref<{ slotId: string, code: string } | null>(null)
+
+  function rejectSave(code: string): void {
+    const edits = { ...localEdits.value }
+    let first = ''
+    for (const [slotId, patch] of Object.entries(pendingSlots.value)) {
+      if (patch.confirmed === undefined) continue
+      if (!first) first = slotId
+      const edit = edits[slotId]
+      if (edit) {
+        const { confirmed: _dropped, ...rest } = edit
+        edits[slotId] = rest
+      }
+    }
+    localEdits.value = edits
+    saveRejection.value = { slotId: first, code }
+  }
+
+  /** Der Toast steht — die Auskunft hat ihren Zweck erfüllt. */
+  function dismissSaveRejection(): void {
+    saveRejection.value = null
+  }
+
   function clearGeorgeDraft(slotId: string): void {
     if (!(slotId in georgeDrafts.value)) return
     const { [slotId]: _removed, ...rest } = georgeDrafts.value
@@ -879,7 +927,12 @@ const setup = () => {
     mark('ok')
   }
 
-  function applyConflict(current: BrandWorkspaceConflict): void {
+  /**
+   * @returns `true`, wenn der Konflikt STILL aufgelöst wurde — dann darf (und
+   * muss) der Autosave die eigene Eingabe mit der neuen `revision` erneut
+   * senden. `false` heisst: der Dialog steht, es wird nichts mehr geschickt.
+   */
+  function applyConflict(current: BrandWorkspaceConflict, force = false): boolean {
     /**
      * SCHEIN-KONFLIKT STILL AUFLÖSEN (Davids Fund, 2026-09-02): die Revision
      * bewegt sich auch OHNE Textänderung — Bestätigen/Korrigieren in einem
@@ -896,10 +949,29 @@ const setup = () => {
       revision.value = current.revision
       localEdits.value = {}
       mark('ok')
-      return
+      return false
+    }
+    /**
+     * LEER IST KEINE ZWEITE FASSUNG (Kailua-Befund 2, 2026-09-08).
+     *
+     * Ist an keinem offenen Feld ein FREMDER, nicht-leerer Text entstanden,
+     * gibt es nichts zu entscheiden — nur eine `revision`, die uns davongelaufen
+     * ist (ein Gesprächszug, eine Sammel-Session, ein Stempel). Die neue
+     * Fassung wird übernommen, die eigene Eingabe bleibt STEHEN, und der
+     * Aufrufer speichert sie gleich erneut. `force` ist der Notausgang des
+     * Autosave: wiederholt sich das Rennen, steht doch der Dialog — lieber eine
+     * Frage zu viel als eine Schleife.
+     */
+    if (!force && !brandConflictNeedsDecision(serverSlots.value, current.slots, localEdits.value)) {
+      serverSlots.value = current.slots
+      revision.value = current.revision
+      localEdits.value = stillOpen
+      mark('ok')
+      return true
     }
     conflict.value = current
     mark('conflict')
+    return false
   }
 
   /** „Serverfassung laden" — die einzige Auflösung, die etwas überschreibt. */
@@ -984,6 +1056,47 @@ const setup = () => {
   }
 
   /**
+   * DIE FAKTEN DES BAUSTEINS NACHLADEN, OHNE DAS GESPRÄCH ANZUFASSEN
+   * (Kailua-Befund 4, 2026-09-08).
+   *
+   * `loadStep` ist dafür das falsche Werkzeug: `applyStepDetail` LEERT
+   * `streamMessages` (ein Baustein-Wechsel beginnt ein neues Gespräch) — nach
+   * einem Zug gerufen, wischte es genau den Zug weg, der gerade eingetroffen
+   * ist. Hier wird deshalb alles übernommen, was der Server über den STAND
+   * sagt, und nichts, was über das GESPRÄCH gesagt wurde.
+   *
+   * Die lokale Eingabe bleibt stehen und wird nur um das gekürzt, was der
+   * Server inzwischen so trägt (`pruneSettledEdits`, dieselbe Regel wie nach
+   * einem Speichern) — ein Nachladen darf niemandem seinen offenen Satz nehmen.
+   *
+   * FAIL-SOFT: geht der Abruf schief, bleibt der Stand, wie er war. Ein
+   * Fehlerbanner für eine Auffrischung wäre lauter als ihr Ausbleiben.
+   */
+  async function refreshStep(profileId: string, key: string, fetcher: BrandFetcher = $fetch): Promise<boolean> {
+    try {
+      const detail = await fetcher<BrandStepDetailResponse>(
+        `/api/brand/profiles/${profileId}/steps/${key}`,
+      )
+      // Inzwischen woanders: eine Antwort auf einen anderen Baustein wäre hier
+      // eine Vermischung zweier Kapitel.
+      if (detail.stepKey !== stepKey.value) return false
+      serverSlots.value = detail.slots
+      sourceValues.value = detail.sourceValues ?? {}
+      revision.value = detail.revision
+      serverConfidence.value = detail.confidence
+      localEdits.value = pruneSettledEdits(detail.slots, localEdits.value)
+      progress.value = detail.progress
+      missingRequired.value = [...detail.missingRequired]
+      sessions.value = detail.sessions
+      findings.value = detail.findings
+      return true
+    }
+    catch {
+      return false
+    }
+  }
+
+  /**
    * HIER STAND `reopenStep()` — ENTFERNT (Paket 8, 2026-09-05).
    *
    * Die pure Transition `reopen` BLEIBT (`shared/brandJourney.ts`, das
@@ -1048,6 +1161,8 @@ const setup = () => {
     pendingImpactAck.value = ''
     invariantRejection.value = null
     correctionRejected.value = ''
+    emptyConfirmRejection.value = ''
+    saveRejection.value = null
   }
 
   return {
@@ -1087,6 +1202,7 @@ const setup = () => {
     invariantRejection,
     correctionRejected,
     emptyConfirmRejection,
+    saveRejection,
     hasPendingWork,
     autosaveAllowed,
     currentJourneyStep,
@@ -1106,6 +1222,8 @@ const setup = () => {
     dismissCorrectionRejection,
     rejectEmptyConfirmations,
     dismissEmptyConfirmRejection,
+    rejectSave,
+    dismissSaveRejection,
     setActiveSession,
     setConfidence,
     applyGeorgeDraft,
@@ -1132,6 +1250,7 @@ const setup = () => {
     loadProfiles,
     loadProfile,
     loadStep,
+    refreshStep,
     loadSessionMessages,
     completeStep,
     reset,

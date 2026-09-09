@@ -1227,3 +1227,27 @@ export function applyJunctionChange(
     changed: profile[change.junction] !== change.value,
   }
 }
+
+/**
+ * WOHIN NACH DER ANLAGE (Kailua-Befund 6, 2026-09-08) — das erste Kapitel, das
+ * ein frisch angelegtes Branding betreten darf.
+ *
+ * ── WARUM ES DIESE REGEL GIBT ────────────────────────────────────────────
+ * Seit Davids Entscheidung legen ZWEI Oberflächen an (das Modal auf
+ * `/dashboard/brands` und die Seite `/dashboard/brands/new`), und beide müssen
+ * danach an derselben Stelle landen. Zwei Kopien derselben drei Zeilen wären
+ * zwei Meinungen über „das erste Kapitel" — und die Abweichung merkte man erst,
+ * wenn ein Weg in einem gesperrten Baustein endet.
+ *
+ * ── DIE RANGFOLGE ────────────────────────────────────────────────────────
+ * `open`/`active` zuerst (der Weg, den die Journey selbst vorschlägt), sonst
+ * der erste Baustein, der überhaupt auf dem Weg liegt — ein `skipped` ist keine
+ * Adresse, die Route antwortet dort 403. Der Rückfall `context` ist die
+ * Notbremse für eine Antwort ohne Journey: er ist immer der erste Baustein und
+ * nie übersprungen.
+ */
+export function firstOpenBrandStep(journey: readonly BrandJourneyStep[]): BrandStepKey {
+  return journey.find(step => step.state === 'open' || step.state === 'active')?.stepKey
+    ?? journey.find(step => step.state !== 'skipped')?.stepKey
+    ?? 'context'
+}

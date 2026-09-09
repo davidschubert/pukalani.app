@@ -83,7 +83,6 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
-const localePath = useLocalePath()
 
 const SYNC = {
   saving: { key: 'brand.workspace.sync.saving', icon: 'i-ph-circle-notch', spin: true },
@@ -95,21 +94,21 @@ const SYNC = {
 const newBrandOpen = ref(false)
 
 /**
- * „Neues Branding" ist eine ÜBERGABE, keine Anlage — dieselbe Regel wie auf
- * der Übersicht (`/dashboard/brands`): das Modal erhebt Weiche, Titel und
- * Sprache, die Startkarte ist seither Pflicht und wird auf `…/brands/new`
- * erfragt. Ein direkter Anlage-Aufruf von hier bekäme ein 400.
+ * „Neues Branding" LEGT AN — dieselbe Regel wie auf der Übersicht
+ * (`/dashboard/brands`) und auf der Punkte-Seite, und dieselben sechs Zeilen
+ * (`useBrandCreate`). Bis zum Kailua-Lauf war es eine ÜBERGABE an
+ * `…/brands/new`, weil die Startkarte dort erfragt wurde; sie steht jetzt im
+ * Modal, also gibt es nichts mehr zu übergeben (Befund 6).
  */
+const {
+  contentLocales: newBrandLocales,
+  creating: newBrandCreating,
+  failed: newBrandFailed,
+  create: createBrand,
+} = useBrandCreate()
+
 async function startNewBrand(payload: BwNewBrandSubmit): Promise<void> {
-  newBrandOpen.value = false
-  await navigateTo({
-    path: localePath('/dashboard/brands/new'),
-    query: {
-      path: payload.kind === 'rebrand' ? 'relaunch' : 'new',
-      ...(payload.title ? { title: payload.title } : {}),
-      lang: payload.lang,
-    },
-  })
+  if (await createBrand(payload)) newBrandOpen.value = false
 }
 
 const current = computed(() => props.brands.find(brand => brand.current) ?? null)
@@ -477,6 +476,10 @@ function selectStep(layer: BwRailLayer, step: BwRailStep): void {
       :step="infoStep?.step ?? null"
       :layer-label="infoStep?.layerLabel ?? ''"
     />
-    <BwNewBrandModal v-model:open="newBrandOpen" mode="live" @submit="startNewBrand" />
+    <BwNewBrandModal
+      v-model:open="newBrandOpen" mode="live"
+      :content-locales="newBrandLocales" :loading="newBrandCreating" :failed="newBrandFailed"
+      @submit="startNewBrand"
+    />
   </nav>
 </template>
