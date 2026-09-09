@@ -178,6 +178,20 @@ export type BrandEventType =
   | 'design.drafts.run'
   | 'design.drafts.kept'
   | 'design.drafts.discarded'
+  /**
+   * EIN ABGERUFENES KIT (Konzept docs/plans/BRAND-BOOK-KIT.md §2.13, Paket
+   * K2). `payload` trägt die DATEI-ID (`tokens.json`, `tokens.css`, …) und ob
+   * ein Design-Preset dahinterstand — nie einen Dateinamen (er enthält den
+   * Markennamen) und nie einen Inhalt (Regel 1 im Kopf).
+   *
+   * Es ist der Messpunkt, an dem §2.13 zwei Fragen hängt: der Abstand
+   * zwischen `derivation.unlocked` und dem ERSTEN Download (wie lange braucht
+   * das Produkt, bis es benutzt wird?) und der Anteil der Marken ohne Design,
+   * die trotzdem etwas laden (der Beleg für §1.11 d „Design ist keine
+   * Voraussetzung"). Das MANIFEST schreibt hier nichts: es ist die Seite,
+   * nicht die Datei.
+   */
+  | 'kit.downloaded'
 
 export interface BrandEventInput {
   type: BrandEventType

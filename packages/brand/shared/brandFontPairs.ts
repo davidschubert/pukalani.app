@@ -46,6 +46,30 @@
  * und nicht gegengelesen.
  */
 
+/**
+ * DIE LIZENZ EINER SCHRIFTFAMILIE (Konzept docs/plans/BRAND-BOOK-KIT.md §2.6,
+ * Paket K2) — SPDX-Kennung und die Quelle, bei der die Dateien liegen.
+ *
+ * ── WARUM SIE AM KATALOG HÄNGT UND NICHT AN EINER LISTE DANEBEN ──────────
+ * `LICENSES.md` im Kit nennt genau die Familien, die diese Marke benutzt. Eine
+ * zweite Tabelle „Familie → Lizenz" neben dem Katalog wäre die Stelle, an der
+ * ein neues Paar still ohne Lizenz-Zeile ankäme — und eine fehlende Lizenz ist
+ * die eine Auskunft in diesem Bündel, die jemanden in Schwierigkeiten bringt.
+ * `validateBrandFontPairs` verlangt deshalb beide Felder je Paar.
+ *
+ * ── KEINE SCHRIFTDATEIEN IM BÜNDEL ───────────────────────────────────────
+ * Die OFL erlaubt die Weitergabe; wir machen es trotzdem nicht (§2.6): eine
+ * mitgelieferte Datei ist eine zweite Fassung, die irgendwann von der Quelle
+ * abweicht, und sie macht aus einem 40-KB-Bündel ein 4-MB-Bündel. `source` ist
+ * deshalb keine Zierde, sondern der Bezugsweg.
+ */
+export interface BrandFontLicense {
+  /** SPDX-Kennung, z. B. `OFL-1.1` — maschinenlesbar, nicht der Lizenztext. */
+  readonly spdx: string
+  /** Wo die Dateien liegen (Spezimen-Seite, nicht ein Download-Link). */
+  readonly source: string
+}
+
 export interface BrandFontPair {
   /** Stabile Id — sie steht in `i.pair` und im Preset. Nie umbenennen. */
   readonly id: string
@@ -57,9 +81,50 @@ export interface BrandFontPair {
   readonly headingStack: string
   readonly bodyFamily: string
   readonly bodyStack: string
+  /** Lizenz und Quelle der ÜBERSCHRIFTEN-Familie (K2, §2.6). */
+  readonly headingLicense: BrandFontLicense
+  /** Lizenz und Quelle der FLIESSTEXT-Familie — bei `humanist` dieselbe. */
+  readonly bodyLicense: BrandFontLicense
   /** Ein Satz, was dieses Paar tut — und was es kostet. */
   readonly noteDe: string
   readonly noteEn: string
+}
+
+/**
+ * DIE SIEBEN FAMILIEN DES KATALOGS UND IHRE LIZENZ (Recherche 2026-09-09).
+ *
+ * Alle sieben liegen bei Google Fonts unter der SIL Open Font License 1.1 —
+ * die Quelle ist die SPEZIMEN-Seite, weil dort der Lizenztext, die Schnitte
+ * und der Download an einer Stelle stehen. Sie steht als Tabelle DANEBEN und
+ * nicht sechsmal im Katalog: `humanist` benutzt eine Familie zweimal, und
+ * `Sora`/`Inter` kommen in zwei Paaren vor — dieselbe Familie mit zwei
+ * Lizenz-Zeilen wäre die erste Stelle, an der sie auseinanderlaufen.
+ */
+const FONT_LICENSES: Readonly<Record<string, BrandFontLicense>> = {
+  'Source Serif 4': { spdx: 'OFL-1.1', source: 'https://fonts.google.com/specimen/Source+Serif+4' },
+  'Source Sans 3': { spdx: 'OFL-1.1', source: 'https://fonts.google.com/specimen/Source+Sans+3' },
+  'Inter': { spdx: 'OFL-1.1', source: 'https://fonts.google.com/specimen/Inter' },
+  'Nunito Sans': { spdx: 'OFL-1.1', source: 'https://fonts.google.com/specimen/Nunito+Sans' },
+  'Sora': { spdx: 'OFL-1.1', source: 'https://fonts.google.com/specimen/Sora' },
+  'PT Sans': { spdx: 'OFL-1.1', source: 'https://fonts.google.com/specimen/PT+Sans' },
+  'PT Serif': { spdx: 'OFL-1.1', source: 'https://fonts.google.com/specimen/PT+Serif' },
+}
+
+/**
+ * Die Lizenz einer Familie — `undefined`, wenn sie nicht im Katalog steht.
+ * Der Aufrufer entscheidet: `LICENSES.md` lässt die Zeile lieber weg, als
+ * eine Lizenz zu behaupten, die niemand geprüft hat.
+ */
+export function brandFontLicense(family: string): BrandFontLicense | undefined {
+  return FONT_LICENSES[family]
+}
+
+/** Kurz, weil sie sechsmal im Katalog steht. */
+function license(family: string): BrandFontLicense {
+  // Ein Paar mit einer Familie ausserhalb der Tabelle gibt es nicht — und
+  // fiele es je aus, wäre ein leeres SPDX die ehrliche Auskunft, die der
+  // Wächter `validateBrandFontPairs` sofort rot macht.
+  return FONT_LICENSES[family] ?? { spdx: '', source: '' }
 }
 
 export const BRAND_FONT_PAIRS: readonly BrandFontPair[] = [
@@ -71,6 +136,8 @@ export const BRAND_FONT_PAIRS: readonly BrandFontPair[] = [
     headingStack: "'Source Serif 4', Georgia, 'Times New Roman', serif",
     bodyFamily: 'Source Sans 3',
     bodyStack: "'Source Sans 3', 'Helvetica Neue', Arial, sans-serif",
+    headingLicense: license('Source Serif 4'),
+    bodyLicense: license('Source Sans 3'),
     noteDe: 'Serif oben, Grotesk unten — die Buch-Anmutung, die zu „fundiert" gehört.',
     noteEn: 'Serif above, sans below — the book-like feel that belongs to "well-founded".',
   },
@@ -82,6 +149,8 @@ export const BRAND_FONT_PAIRS: readonly BrandFontPair[] = [
     headingStack: "'Source Sans 3', 'Helvetica Neue', Arial, sans-serif",
     bodyFamily: 'Source Sans 3',
     bodyStack: "'Source Sans 3', 'Helvetica Neue', Arial, sans-serif",
+    headingLicense: license('Source Sans 3'),
+    bodyLicense: license('Source Sans 3'),
     noteDe: 'Eine Familie, zwei Rollen: ruhig, unaufdringlich, überall lesbar.',
     noteEn: 'One family, two roles: quiet, unobtrusive, readable everywhere.',
   },
@@ -93,6 +162,8 @@ export const BRAND_FONT_PAIRS: readonly BrandFontPair[] = [
     headingStack: "Inter, 'Helvetica Neue', Arial, sans-serif",
     bodyFamily: 'Inter',
     bodyStack: "Inter, 'Helvetica Neue', Arial, sans-serif",
+    headingLicense: license('Inter'),
+    bodyLicense: license('Inter'),
     noteDe: 'Die Arbeitsschrift des Netzes — sagt nichts über euch, stört aber auch nie.',
     noteEn: 'The working typeface of the web — it says nothing about you, and never gets in the way.',
   },
@@ -104,6 +175,8 @@ export const BRAND_FONT_PAIRS: readonly BrandFontPair[] = [
     headingStack: "Sora, 'Avenir Next', 'Helvetica Neue', Arial, sans-serif",
     bodyFamily: 'Nunito Sans',
     bodyStack: "'Nunito Sans', 'Trebuchet MS', 'Helvetica Neue', Arial, sans-serif",
+    headingLicense: license('Sora'),
+    bodyLicense: license('Nunito Sans'),
     noteDe: 'Konstruierte Formen — moderner, aber weiter weg vom Handwerk.',
     noteEn: 'Constructed shapes — more modern, but further from the craft.',
   },
@@ -115,6 +188,8 @@ export const BRAND_FONT_PAIRS: readonly BrandFontPair[] = [
     headingStack: "'PT Serif', Georgia, 'Times New Roman', serif",
     bodyFamily: 'PT Sans',
     bodyStack: "'PT Sans', 'Trebuchet MS', 'Helvetica Neue', Arial, sans-serif",
+    headingLicense: license('PT Serif'),
+    bodyLicense: license('PT Sans'),
     noteDe: 'Amtlich-solide: gut für Institutionen, etwas streng für kleine Marken.',
     noteEn: 'Officially solid: good for institutions, a little stern for small brands.',
   },
@@ -126,6 +201,8 @@ export const BRAND_FONT_PAIRS: readonly BrandFontPair[] = [
     headingStack: "Sora, 'Avenir Next', 'Helvetica Neue', Arial, sans-serif",
     bodyFamily: 'Inter',
     bodyStack: "Inter, 'Helvetica Neue', Arial, sans-serif",
+    headingLicense: license('Sora'),
+    bodyLicense: license('Inter'),
     noteDe: 'Aus dem Richtungs-Katalog („Mutig & Kontrastreich") — laut, aber wach.',
     noteEn: 'From the directions catalogue ("bold and high-contrast") — loud, but awake.',
   },
@@ -148,6 +225,19 @@ export const BRAND_MONO_STACK = "'Geist Mono', ui-monospace, SFMono-Regular, mon
  * dieselbe Datei; die Liste dort trägt genau die Familien der PAARE.
  */
 export const BRAND_MONO_FAMILY = 'Geist Mono'
+
+/**
+ * DIE LIZENZ DER MONO-ROLLE (K2) — sie steht neben dem Stack, aus demselben
+ * Grund wie der Stack selbst: die Rolle ist eine Setzung und kein Feld eines
+ * Paares, aber sie liegt in JEDEM Kit und braucht deshalb ihre Zeile in
+ * `LICENSES.md`. Geist Mono kommt von Vercel und steht unter der SIL Open
+ * Font License 1.1; die Quelle ist die Seite des Herausgebers, weil dort die
+ * Familie samt Lizenz liegt (Recherche 2026-09-09).
+ */
+export const BRAND_MONO_LICENSE: BrandFontLicense = {
+  spdx: 'OFL-1.1',
+  source: 'https://vercel.com/font',
+}
 
 /**
  * DIE FAMILIEN, DIE WIRKLICH GELADEN WERDEN.
@@ -235,6 +325,16 @@ export function validateBrandFontPairs(
       if (!declaredSet.has(family)) {
         problems.push(`${pair.id}: "${family}" ist nicht deklariert (§2.17 — die Vorschau fiele still zurück)`)
       }
+    }
+    // K2 (§2.6): OHNE LIZENZ KEIN KIT. `LICENSES.md` nennt die Familien dieser
+    // Marke mit Lizenz und Bezugsweg — ein leeres Feld hier wäre im Bündel
+    // eine Schrift, die jemand ohne Auskunft weiterverwendet.
+    for (const [entry, role] of [
+      [pair.headingLicense, 'heading'] as const,
+      [pair.bodyLicense, 'body'] as const,
+    ]) {
+      if (!entry || !entry.spdx.trim()) problems.push(`${pair.id}: ${role} ohne Lizenz (SPDX)`)
+      if (!entry || !entry.source.trim()) problems.push(`${pair.id}: ${role} ohne Lizenz-Quelle`)
     }
   }
   return problems

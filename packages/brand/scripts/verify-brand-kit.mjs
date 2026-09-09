@@ -368,10 +368,16 @@ try {
     && journeyEntry(openDetail, 'presskit')?.state === 'locked'
     && journeyEntry(openDetail, 'presskit')?.reason === 'awaiting_previous',
     JSON.stringify(KIT_STEPS.map(stepKey => journeyEntry(openDetail, stepKey))))
+  // Die Zusage ist „ERBT WÖRTLICH die Weiche von `architecture`" (brandJourney,
+  // §2.20 Nr. 4) — also derselbe Grund wie dort, nicht ein fester. Die Testmarke
+  // hat W4 nie beantwortet: `architecture` steht auf `junction_undecided`, und
+  // genau das muss `nomenclature` auch sagen (erster Lauf gegen Prod 2026-09-09
+  // hatte `junction_off` fest erwartet und war damit strenger als der Vertrag).
   check('… und `nomenclature` bleibt die Weiche der Markenarchitektur (§2.20 Nr. 4)',
     journeyEntry(openDetail, 'nomenclature')?.state === 'skipped'
-    && journeyEntry(openDetail, 'nomenclature')?.reason === 'junction_off',
-    JSON.stringify(journeyEntry(openDetail, 'nomenclature')))
+    && journeyEntry(openDetail, 'architecture')?.state === 'skipped'
+    && journeyEntry(openDetail, 'nomenclature')?.reason === journeyEntry(openDetail, 'architecture')?.reason,
+    JSON.stringify({ nomenclature: journeyEntry(openDetail, 'nomenclature'), architecture: journeyEntry(openDetail, 'architecture') }))
   check('die Marke sagt „Ableitung offen"',
     openDetail.json?.profile?.derivationUnlocked === true)
 
