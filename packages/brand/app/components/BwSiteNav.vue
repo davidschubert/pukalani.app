@@ -31,9 +31,16 @@ const localePath = useLocalePath()
  * leere „Namenloses Branding"-Hülle.
  *
  * „DISCOVER BRANDS" IST SEIT PAKET D2 (2026-09-08) ZURÜCK: `/discover` und
- * `/discover/<slug>` gibt es wirklich, samt öffentlicher Lese-API. Products
- * und Insights bleiben draussen, bis ihre Marketing-Seiten existieren (die
- * i18n-Schlüssel `brand.nav.products` etc. bleiben dafür stehen).
+ * `/discover/<slug>` gibt es wirklich, samt öffentlicher Lese-API.
+ *
+ * „PRODUCTS" IST SEIT PS1 (2026-09-09) ZURÜCK — und zwar mit denselben
+ * Bedingungen, unter denen es gegangen war: die Übersicht `/products` und die
+ * fünf Produktseiten darunter gibt es wirklich (`apps/branding`, deutsche
+ * Slugs unter `/de/produkte/…`). Die Einträge trägt die APP in ihre
+ * `app.config` ein, nicht dieser Layer: ein Layer darf die anderen
+ * Produkt-Layer nicht kennen (A14), die App kennt laut `site.manifest.ts` alle
+ * ihre Produkte. INSIGHTS BLEIBT DRAUSSEN, bis seine Seite existiert (der
+ * i18n-Schlüssel `brand.nav.insights` bleibt dafür stehen).
  *
  * ── DIE LISTE IST SEIT DEM 2026-09-08 NICHT MEHR FEST (U15 Teil 3) ─────────
  * Hier standen drei hartkodierte Einträge, und daneben gab es unter
@@ -88,6 +95,22 @@ function isActive(to: string): boolean {
  * mit (core entscheidet das, damit beide Renderer es gleich tun). `active`
  * rechnet trotzdem den Hauptpunkt UND seine Kinder mit — die Hervorhebung soll
  * nicht verschwinden, nur weil das Ziel eine Etage tiefer steht.
+ *
+ * ── ICON UND BESCHREIBUNG JE KIND (PS1, 2026-09-09) ───────────────────────
+ * Ebenfalls NACHGELESEN in `node_modules/@nuxt/ui` (4.11.1), nicht geraten:
+ * WAAGERECHT rendert `NavigationMenu.vue` je Kind ein `childLinkIcon`
+ * (`childItem.icon`) und unter dem Titel ein `childLinkDescription`
+ * (`childItem.description`) — beides ohne weiteres Zutun, sobald die Felder am
+ * Eintrag stehen. SENKRECHT (mobiles `#body`-Akkordeon) gibt es die
+ * Beschreibung nicht: dort laufen die Kinder durch dieselbe Link-Vorlage wie
+ * Hauptpunkte. Das ist kein Verlust, den man nachbauen müsste — auf einem
+ * Telefon ist die Liste kurz und der Platz knapp.
+ *
+ * Woher die Werte kommen: `icon` stand schon in der Registry, `description` ist
+ * seit PS1 der ÜBERSETZTE `descriptionKey` (core/shared/types/chrome.ts →
+ * `useCommunityNav()`). Die Übersicht als erster Eintrag des Aufklappers trägt
+ * bewusst keine Beschreibung: sie ist der Hauptpunkt selbst, und der hat
+ * keinen `descriptionKey`.
  */
 const menuItems = computed<NavigationMenuItem[]>(() => items.value.map((item) => {
   const children = navMenuChildren(item)
@@ -98,6 +121,8 @@ const menuItems = computed<NavigationMenuItem[]>(() => items.value.map((item) =>
       children: children.map(child => ({
         label: child.label,
         to: child.to,
+        ...(child.icon ? { icon: child.icon } : {}),
+        ...(child.description ? { description: child.description } : {}),
         ...(child.external ? { target: '_blank' as const, rel: 'noopener' } : {}),
       })),
     }
@@ -230,7 +255,7 @@ const userMenu = computed(() => [[
          wenn ihn eine Seite anderswo trägt. So liegen sie versteckt im DOM. -->
     <UNavigationMenu
       :items="menuItems" variant="link" color="neutral" :unmount-on-hide="false"
-      :ui="{ link: 'text-sm text-(--bw-muted) data-active:text-(--bw-ink) hover:text-(--bw-ink)', viewport: 'bw-root', childList: 'grid-cols-1', childLinkDescription: 'text-(--bw-muted)' }"
+      :ui="{ link: 'text-sm text-(--bw-muted) data-active:text-(--bw-ink) hover:text-(--bw-ink)', viewport: 'bw-root', childList: 'grid-cols-1 sm:w-[34rem] sm:grid-cols-2', childLinkDescription: 'text-(--bw-muted)' }"
     />
 
     <template #right>

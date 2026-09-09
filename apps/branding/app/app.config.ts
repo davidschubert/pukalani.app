@@ -2,6 +2,104 @@ export default defineAppConfig({
   // App-spezifische Overrides (tiefer Merge, App > Layer > Core).
   pukalani: {
     /**
+     * DER PRODUCTS-AUFKLAPPER (PS1, 2026-09-09 — Plan
+     * docs/plans/PRODUCTS-SEITE.md §6, Davids Entscheidung e).
+     *
+     * ── WARUM DIE EINTRÄGE HIER STEHEN UND NICHT IM brand-LAYER ───────────
+     * Die fünf Kinder zeigen auf die Marketing-Seiten von FÜNF Produkten, und
+     * zwei davon gehören nicht dem brand-Layer (Marktvergleich = `market`,
+     * Book & Kit = noch keiner). Ein Layer darf die anderen Produkt-Layer
+     * nicht kennen (CONCEPT A14); die APP kennt laut `site.manifest.ts` alle
+     * ihre Produkte und ist damit die einzige Stelle, an der diese Liste
+     * vollständig und richtig sein kann. Genau dafür ist `pukalani.chrome.nav`
+     * eine OBJEKT-Map: der tiefe Merge ergänzt die Layer-Registry, und wo eine
+     * Id doppelt vorkommt, gewinnt die App.
+     *
+     * ── WAS DIESE ZEILEN AM LAYER ÄNDERN ──────────────────────────────────
+     * `products` bekommt sein `to` zurück: der brand-Layer trägt `to: ''` („ein
+     * Wort, das nur aufklappt"), weil es bis heute keine Übersichtsseite gab.
+     * Jetzt gibt es sie, und `navMenuChildren()` stellt sie als ERSTEN Eintrag
+     * in den Aufklapper (core entscheidet das, damit beide Renderer es gleich
+     * tun — Begründung in core/shared/communityNavigation.ts).
+     * `brand-check` bekommt ein neues Ziel: im Menü steht ab jetzt die
+     * PRODUKTSEITE `/products/brand-check`, nicht mehr das Werkzeug
+     * `/brand-check`. Der Weg zum Werkzeug führt über den einen Knopf auf
+     * dieser Seite — sonst stünde ein Produkt im Aufklapper anders da als die
+     * vier anderen, ohne dass jemand das entschieden hätte.
+     *
+     * ── DIE SCHLÜSSEL: DREI ALTE, DREI NEUE ───────────────────────────────
+     * `brand.nav.brandCheck` und `brand.nav.foundation` gibt es im brand-Layer
+     * bereits in beiden Sprachen („Brand-Check", „Brand Foundation"), ebenso
+     * alle fünf Beschreibungen (`brand.nav.product.*` — sie standen seit dem
+     * Klickdummy ungenutzt da und lösen genau hier ihr Versprechen ein). Die
+     * drei Namen, die der Layer nicht kennt, gehören der App
+     * (`products.nav.*`): Marktvergleich, Brand Design, Brand Book & Kit.
+     *
+     * MARKTVERGLEICH IST DIE EINE AUSNAHME VON DER EIGENNAMEN-REGEL, und zwar
+     * dieselbe wie beim Slug: „Marktvergleich"/„Market Comparison" ist kein
+     * Eigenname, sondern ein Wort — Davids Entscheidung b vom 2026-09-09
+     * übersetzt genau dieses eine (und „Produkte"). Die vier anderen heissen
+     * in beiden Sprachen gleich.
+     *
+     * `descriptionKey` ist seit PS1 Teil des Vertrags (core/shared/types/
+     * chrome.ts) und wird von `pnpm check:i18n-keys` gedeckt.
+     *
+     * `insights` fehlt weiterhin bewusst: die Seite gibt es noch nicht, und
+     * ein Registry-Eintrag ist ein Menüpunkt, der sofort erscheint (Davids
+     * 404-Audit 2026-09-03). Ebenso fehlen Brand Experience und Brand
+     * Monitoring: sie stehen als abgeblendete „kommt"-Karten auf der
+     * Übersicht, haben aber keine Seite (Plan §3).
+     *
+     * `order` 11–15 hält die fünf beieinander und in der Reihenfolge des
+     * Kundenwegs (Audit → Build → Compare → Build → Supply); die nächsten
+     * Zehner bleiben für weitere Hauptpunkte frei.
+     */
+    chrome: {
+      nav: {
+        products: { labelKey: 'brand.nav.products', to: '/products', order: 10 },
+        'brand-check': {
+          labelKey: 'brand.nav.brandCheck',
+          descriptionKey: 'brand.nav.product.score',
+          icon: 'i-ph-gauge',
+          to: '/products/brand-check',
+          parent: 'products',
+          order: 11,
+        },
+        'brand-foundation': {
+          labelKey: 'brand.nav.foundation',
+          descriptionKey: 'brand.nav.product.wizard',
+          icon: 'i-ph-compass',
+          to: '/products/brand-foundation',
+          parent: 'products',
+          order: 12,
+        },
+        'market-comparison': {
+          labelKey: 'products.nav.marketComparison',
+          descriptionKey: 'brand.nav.product.benchmark',
+          icon: 'i-ph-scales',
+          to: '/products/market-comparison',
+          parent: 'products',
+          order: 13,
+        },
+        'brand-design': {
+          labelKey: 'products.nav.brandDesign',
+          descriptionKey: 'brand.nav.product.design',
+          icon: 'i-ph-palette',
+          to: '/products/brand-design',
+          parent: 'products',
+          order: 14,
+        },
+        'brand-book-kit': {
+          labelKey: 'products.nav.brandBookKit',
+          descriptionKey: 'brand.nav.product.book',
+          icon: 'i-ph-package',
+          to: '/products/brand-book-kit',
+          parent: 'products',
+          order: 15,
+        },
+      },
+    },
+    /**
      * BILDER LESEN (Brand Design, Vorbilder-Lesung — docs/archiv/BRAND-DESIGN.md
      * §2.2/§2.12): das Vision-Modell ist Davids Entscheidung vom 2026-09-08
      * (DECISION-LOG). Nur hier gesetzt, weil branding.supply der einzige

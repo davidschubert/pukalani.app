@@ -104,6 +104,19 @@ export default defineAppConfig({
      * ihm hängt heute ein Eintrag: „Brand-Check" auf `/brand-check`, die
      * Seite, die es wirklich gibt (`app/pages/brand-check/index.vue`).
      *
+     * ── NACHTRAG PS1 (2026-09-09): DIE APP HAT DIESE ZWEI ÜBERSCHRIEBEN ────
+     * `apps/branding` bringt seit PS1 eine Produkt-Übersicht `/products` und
+     * fünf Produktseiten mit und trägt sie in ihre eigene `app.config` ein
+     * (gleiche Ids ⇒ App-Werte gewinnen): `products` bekommt dort `to:
+     * '/products'`, `brand-check` zeigt dort auf die PRODUKTSEITE
+     * `/products/brand-check` statt auf das Werkzeug. Beide Zeilen BLEIBEN
+     * hier trotzdem stehen, und zwar nicht aus Nachlässigkeit: sie sind das
+     * Standard-Menü einer Site, die nur den brand-Layer hat und keine
+     * Marketing-Seiten — für die ist ein Aufklapper ohne eigene Seite mit dem
+     * Werkzeug darunter weiterhin die richtige Antwort. Die Liste der fünf
+     * Produkte kann dieser Layer gar nicht führen: zwei davon gehören ihm
+     * nicht (A14).
+     *
      * `parent` ist die Registry-Vorgabe (Zusage 9 in
      * core/shared/communityNavigation.ts): sie gilt, solange der Owner im
      * Navigations-Editor nichts anderes gespeichert hat — dann gewinnt seine
