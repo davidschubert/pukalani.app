@@ -15,234 +15,6 @@ in beiden Oberflächen-Sprachen, weil die Abnahme-Seite je Kapitel sie dem Kunde
 
 Interview-Technik: **George** (Markenberater). Gesprochen wird alles von George.
 
-### `a.pitch` — Elevator-Pitch
-
-**Art:** Ableitung · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
-
-**Ziel:** draft the elevator pitch of this brand: what they do, who it is for, and what is different about it, in two or three sentences.
-
-**Woran man einen guten Wert erkennt:**
-
-- Someone from outside the industry understands it after reading it once.
-- It names who it is for, not only what is made.
-- It carries at least one detail that comes from this brand and not from its industry.
-- No sentence of it could be moved to a competitor page unchanged.
-
-**Was zurückgewiesen wird:**
-
-- A list of services instead of a sentence about what the customer gets.
-- Superlatives with nothing behind them: leading, innovative, world-class.
-- Trade jargon that only insiders can decode.
-
-**Form des Werts:** Person: wir · Zeit: Präsens · höchstens 60 Wörter
-
-**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
-
-**Invarianten (im Code geprüft):** —
-
-**Fliesst später in:** 53 Felder in 13 Kapiteln (Purpose, Vision & Mission · Markenarchitektur · Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
-
-**Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
-
-- **Neue Marke**
-  - de:
-  > Wir sind ein Tagescafé mit eigener Backstube: Das Brot vom Vortag geht mittags in die Suppe, weggeworfen wird nichts. Für Leute, die zwischen zwei Terminen zwanzig Minuten sitzen und trotzdem etwas Warmes essen wollen.
-  - en:
-  > We are a daytime café with our own bakery: yesterday's bread goes into the midday soup, and nothing is thrown out. For people who want to sit for twenty minutes between two appointments and still eat something warm.
-- **Marken-Relaunch**
-  - de:
-  > Wir kochen seit 1998 einen Mittagstisch für die Werkstätten und Büros im Viertel — zwei Gerichte am Tag, eines davon ohne Fleisch. Wer um halb eins kommt, sitzt um zehn nach eins wieder draußen.
-  - en:
-  > Since 1998 we have cooked a midday menu for the workshops and offices in this quarter — two dishes a day, one of them meat-free. Whoever arrives at half past twelve is back outside by ten past one.
-
-### `a.category` — Kategorie
-
-**Art:** Ableitung · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
-
-**Ziel:** name the industry / category this brand plays in, normalised to a term the industry itself uses.
-
-**Woran man einen guten Wert erkennt:**
-
-- Five words at most.
-- It is a term the person would find in a trade directory.
-- It excludes at least half of what a word like "agency" or "shop" would include.
-- It says what they DO — the shelf they are compared on comes later.
-
-**Was zurückgewiesen wird:**
-
-- A slogan in place of a category: "we make things people love".
-- A word so broad that every company fits: services, consulting, solutions.
-- An invented category nobody is looking for.
-
-**Form des Werts:** Person: ohne Person · Zeit: Präsens · höchstens 5 Wörter
-
-**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
-
-**Invarianten (im Code geprüft):** —
-
-**Fliesst später in:** 9 Felder in 4 Kapiteln (Purpose, Vision & Mission · Markenarchitektur · Tagline & Messaging · Name)
-
-**Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
-
-- **Neue Marke**
-  - de:
-  > Tagescafé mit eigener Backstube
-  - en:
-  > Café with its own bakery
-- **Marken-Relaunch**
-  - de:
-  > Mittagstisch für Betriebe im Viertel
-  - en:
-  > Midday canteen for local businesses
-
-### `a.competitors` — Wettbewerber
-
-**Art:** Entwurf · **Umfang:** ~2 Min, 3 Züge · **Vertraulichkeit:** intern — reist nicht per Share-Link
-
-**Ziel:** write 3-5 short competitor profiles.
-
-**Woran man einen guten Wert erkennt:**
-
-- Every name in the list appears literally in the inputs.
-- Each line carries one strength and one weakness, both of them things a customer would notice.
-- Anything you could only infer is marked as an assumption in the line itself.
-- The weakness is a fact about the offer, not a judgement about the company.
-
-**Was zurückgewiesen wird:**
-
-- Invented competitors that merely sound plausible for the industry.
-- Filler such as "not stated in the inputs" instead of a point.
-- A strength and a weakness that are the same sentence in two moods.
-
-**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
-
-**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
-
-**Invarianten (im Code geprüft):** —
-
-**Fliesst später in:** 9 Felder in 4 Kapiteln (Purpose, Vision & Mission · Markenarchitektur · Tagline & Messaging · Name)
-
-**Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
-
-- **Neue Marke**
-  - de:
-  > - (Name aus den Eingaben) — stark: mittags in elf Minuten am Tisch — schwach: dieselbe Karte seit Jahren
-  - en:
-  > - (name from the inputs) — strong: lunch on the table in eleven minutes — weak: the same menu for years
-- **Marken-Relaunch**
-  - de:
-  > - (Name aus den Eingaben) — Annahme, bitte prüfen: nach 14 Uhr gibt es nichts Warmes mehr
-  - en:
-  > - (name from the inputs) — assumption, please verify: nothing hot is served after two in the afternoon
-
-### `a.audienceSketch` — Zielgruppen-Skizze
-
-**Art:** Entwurf · **Umfang:** ~2 Min, 3 Züge · **Vertraulichkeit:** öffentlich
-
-**Ziel:** sketch the audience of this brand: who they are, what they want, and what holds them back.
-
-**Woran man einen guten Wert erkennt:**
-
-- Each block says what these people are trying to get done, not how old they are.
-- What holds them back is a real obstacle, not their ignorance of this brand.
-- Three blocks at most — a brand that serves everyone serves nobody.
-- Someone who takes the calls would recognise these people from the description.
-
-**Was zurückgewiesen wird:**
-
-- Demographics standing in for a need: "women, 30 to 45, urban".
-- An audience described as "everyone who needs what we do".
-- "They do not know us yet" as the obstacle.
-
-**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
-
-**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
-
-**Invarianten (im Code geprüft):** —
-
-**Fliesst später in:** 40 Felder in 11 Kapiteln (Purpose, Vision & Mission · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
-
-**Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
-
-- **Neue Marke**
-  - de:
-  > ## Wer
-  > Leute aus den Büros zwei Straßen weiter, die mittags raus wollen
-  > 
-  > ## Was sie wollen
-  > In zwanzig Minuten etwas Warmes, ohne vorher zu bestellen
-  > 
-  > ## Was sie bremst
-  > Die Sorge, um halb eins keinen Platz mehr zu bekommen
-  - en:
-  > ## Who
-  > People from the offices two streets away who want to get out at lunchtime
-  > 
-  > ## What they want
-  > Something warm within twenty minutes, without ordering ahead
-  > 
-  > ## What holds them back
-  > The worry that there will be no table left at half past twelve
-- **Marken-Relaunch**
-  - de:
-  > ## Wer
-  > Handwerker auf dem Weg zur nächsten Baustelle
-  > 
-  > ## Was sie wollen
-  > Ein Essen, das satt macht und nicht nach Diät aussieht
-  > 
-  > ## Was sie bremst
-  > Der Eindruck, mit staubiger Hose hier fehl am Platz zu sein
-  - en:
-  > ## Who
-  > Tradespeople on the way to the next building site
-  > 
-  > ## What they want
-  > A meal that fills them up and does not look like a diet
-  > 
-  > ## What holds them back
-  > The sense that dusty work trousers are out of place here
-
-### `a.toneAnalysis` — Tonalität eurer bestehenden Texte
-
-**Art:** Ableitung (optional) · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
-
-**Ziel:** analyse the tone of the existing texts contained in the inputs below.
-
-**Woran man einen guten Wert erkennt:**
-
-- Every trait carries a short phrase quoted from their own texts.
-- Three to five traits, no more.
-- It describes how they sound TODAY, not how they ought to sound.
-- A reader could find the quoted phrase on their site.
-
-**Was zurückgewiesen wird:**
-
-- A trait with no quote behind it.
-- Advice about how the brand should sound instead of a reading of how it does.
-- A tone analysis written although no existing text was given.
-
-**Form des Werts:** Person: ohne Person · Zeit: Präsens · höchstens 70 Wörter
-
-**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
-
-**Invarianten (im Code geprüft):** —
-
-**Fliesst später in:** 48 Felder in 11 Kapiteln (Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
-
-**Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
-
-- **Neue Marke**
-  - de:
-  > Knapp und ohne Werbung — „Brot vom Vortag geht in die Suppe." Viel Handwerk, keine Adjektive. Distanziert: die Seite spricht niemanden direkt an.
-  - en:
-  > Short and free of advertising — "yesterday's bread goes into the soup". A lot of craft, no adjectives. Distant: the site never addresses anyone directly.
-- **Marken-Relaunch**
-  - de:
-  > Werbend bis laut — „Der beste Mittagstisch der Stadt." Viele Superlative, und nirgends steht, was tatsächlich auf der Karte steht.
-  - en:
-  > Advertising, verging on loud — "the best midday menu in town". Plenty of superlatives, and nowhere does it say what is actually on the menu.
-
 ### `a.origin` — Warum hast du angefangen — was war der Auslöser, welches Problem konntest du nicht ignorieren?
 
 **Art:** Frage · **Umfang:** ~2 Min, 4 Züge · **Vertraulichkeit:** öffentlich
@@ -537,6 +309,234 @@ Interview-Technik: **George** (Markenberater). Gesprochen wird alles von George.
   - en:
   > Team: 7 employees, 3 of them part-time · Since: 1998 · Markets: this quarter, plus lunch deliveries to four firms
 
+### `a.pitch` — Elevator-Pitch
+
+**Art:** Ableitung · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
+
+**Ziel:** draft the elevator pitch of this brand: what they do, who it is for, and what is different about it, in two or three sentences.
+
+**Woran man einen guten Wert erkennt:**
+
+- Someone from outside the industry understands it after reading it once.
+- It names who it is for, not only what is made.
+- It carries at least one detail that comes from this brand and not from its industry.
+- No sentence of it could be moved to a competitor page unchanged.
+
+**Was zurückgewiesen wird:**
+
+- A list of services instead of a sentence about what the customer gets.
+- Superlatives with nothing behind them: leading, innovative, world-class.
+- Trade jargon that only insiders can decode.
+
+**Form des Werts:** Person: wir · Zeit: Präsens · höchstens 60 Wörter
+
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
+
+**Invarianten (im Code geprüft):** —
+
+**Fliesst später in:** 53 Felder in 13 Kapiteln (Purpose, Vision & Mission · Markenarchitektur · Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
+
+**Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
+
+- **Neue Marke**
+  - de:
+  > Wir sind ein Tagescafé mit eigener Backstube: Das Brot vom Vortag geht mittags in die Suppe, weggeworfen wird nichts. Für Leute, die zwischen zwei Terminen zwanzig Minuten sitzen und trotzdem etwas Warmes essen wollen.
+  - en:
+  > We are a daytime café with our own bakery: yesterday's bread goes into the midday soup, and nothing is thrown out. For people who want to sit for twenty minutes between two appointments and still eat something warm.
+- **Marken-Relaunch**
+  - de:
+  > Wir kochen seit 1998 einen Mittagstisch für die Werkstätten und Büros im Viertel — zwei Gerichte am Tag, eines davon ohne Fleisch. Wer um halb eins kommt, sitzt um zehn nach eins wieder draußen.
+  - en:
+  > Since 1998 we have cooked a midday menu for the workshops and offices in this quarter — two dishes a day, one of them meat-free. Whoever arrives at half past twelve is back outside by ten past one.
+
+### `a.category` — Kategorie
+
+**Art:** Ableitung · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
+
+**Ziel:** name the industry / category this brand plays in, normalised to a term the industry itself uses.
+
+**Woran man einen guten Wert erkennt:**
+
+- Five words at most.
+- It is a term the person would find in a trade directory.
+- It excludes at least half of what a word like "agency" or "shop" would include.
+- It says what they DO — the shelf they are compared on comes later.
+
+**Was zurückgewiesen wird:**
+
+- A slogan in place of a category: "we make things people love".
+- A word so broad that every company fits: services, consulting, solutions.
+- An invented category nobody is looking for.
+
+**Form des Werts:** Person: ohne Person · Zeit: Präsens · höchstens 5 Wörter
+
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
+
+**Invarianten (im Code geprüft):** —
+
+**Fliesst später in:** 9 Felder in 4 Kapiteln (Purpose, Vision & Mission · Markenarchitektur · Tagline & Messaging · Name)
+
+**Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
+
+- **Neue Marke**
+  - de:
+  > Tagescafé mit eigener Backstube
+  - en:
+  > Café with its own bakery
+- **Marken-Relaunch**
+  - de:
+  > Mittagstisch für Betriebe im Viertel
+  - en:
+  > Midday canteen for local businesses
+
+### `a.competitors` — Wettbewerber
+
+**Art:** Entwurf · **Umfang:** ~2 Min, 3 Züge · **Vertraulichkeit:** intern — reist nicht per Share-Link
+
+**Ziel:** write 3-5 short competitor profiles.
+
+**Woran man einen guten Wert erkennt:**
+
+- Every name in the list appears literally in the inputs.
+- Each line carries one strength and one weakness, both of them things a customer would notice.
+- Anything you could only infer is marked as an assumption in the line itself.
+- The weakness is a fact about the offer, not a judgement about the company.
+
+**Was zurückgewiesen wird:**
+
+- Invented competitors that merely sound plausible for the industry.
+- Filler such as "not stated in the inputs" instead of a point.
+- A strength and a weakness that are the same sentence in two moods.
+
+**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
+
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
+
+**Invarianten (im Code geprüft):** —
+
+**Fliesst später in:** 9 Felder in 4 Kapiteln (Purpose, Vision & Mission · Markenarchitektur · Tagline & Messaging · Name)
+
+**Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
+
+- **Neue Marke**
+  - de:
+  > - (Name aus den Eingaben) — stark: mittags in elf Minuten am Tisch — schwach: dieselbe Karte seit Jahren
+  - en:
+  > - (name from the inputs) — strong: lunch on the table in eleven minutes — weak: the same menu for years
+- **Marken-Relaunch**
+  - de:
+  > - (Name aus den Eingaben) — Annahme, bitte prüfen: nach 14 Uhr gibt es nichts Warmes mehr
+  - en:
+  > - (name from the inputs) — assumption, please verify: nothing hot is served after two in the afternoon
+
+### `a.audienceSketch` — Zielgruppen-Skizze
+
+**Art:** Entwurf · **Umfang:** ~2 Min, 3 Züge · **Vertraulichkeit:** öffentlich
+
+**Ziel:** sketch the audience of this brand: who they are, what they want, and what holds them back.
+
+**Woran man einen guten Wert erkennt:**
+
+- Each block says what these people are trying to get done, not how old they are.
+- What holds them back is a real obstacle, not their ignorance of this brand.
+- Three blocks at most — a brand that serves everyone serves nobody.
+- Someone who takes the calls would recognise these people from the description.
+
+**Was zurückgewiesen wird:**
+
+- Demographics standing in for a need: "women, 30 to 45, urban".
+- An audience described as "everyone who needs what we do".
+- "They do not know us yet" as the obstacle.
+
+**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
+
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
+
+**Invarianten (im Code geprüft):** —
+
+**Fliesst später in:** 40 Felder in 11 Kapiteln (Purpose, Vision & Mission · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
+
+**Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
+
+- **Neue Marke**
+  - de:
+  > ## Wer
+  > Leute aus den Büros zwei Straßen weiter, die mittags raus wollen
+  > 
+  > ## Was sie wollen
+  > In zwanzig Minuten etwas Warmes, ohne vorher zu bestellen
+  > 
+  > ## Was sie bremst
+  > Die Sorge, um halb eins keinen Platz mehr zu bekommen
+  - en:
+  > ## Who
+  > People from the offices two streets away who want to get out at lunchtime
+  > 
+  > ## What they want
+  > Something warm within twenty minutes, without ordering ahead
+  > 
+  > ## What holds them back
+  > The worry that there will be no table left at half past twelve
+- **Marken-Relaunch**
+  - de:
+  > ## Wer
+  > Handwerker auf dem Weg zur nächsten Baustelle
+  > 
+  > ## Was sie wollen
+  > Ein Essen, das satt macht und nicht nach Diät aussieht
+  > 
+  > ## Was sie bremst
+  > Der Eindruck, mit staubiger Hose hier fehl am Platz zu sein
+  - en:
+  > ## Who
+  > Tradespeople on the way to the next building site
+  > 
+  > ## What they want
+  > A meal that fills them up and does not look like a diet
+  > 
+  > ## What holds them back
+  > The sense that dusty work trousers are out of place here
+
+### `a.toneAnalysis` — Tonalität eurer bestehenden Texte
+
+**Art:** Ableitung (optional) · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
+
+**Ziel:** analyse the tone of the existing texts contained in the inputs below.
+
+**Woran man einen guten Wert erkennt:**
+
+- Every trait carries a short phrase quoted from their own texts.
+- Three to five traits, no more.
+- It describes how they sound TODAY, not how they ought to sound.
+- A reader could find the quoted phrase on their site.
+
+**Was zurückgewiesen wird:**
+
+- A trait with no quote behind it.
+- Advice about how the brand should sound instead of a reading of how it does.
+- A tone analysis written although no existing text was given.
+
+**Form des Werts:** Person: ohne Person · Zeit: Präsens · höchstens 70 Wörter
+
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
+
+**Invarianten (im Code geprüft):** —
+
+**Fliesst später in:** 48 Felder in 11 Kapiteln (Archetyp und Stimme · Manifest · Tagline & Messaging · Name · Ergebnis · Moodboard · Farbwelt · Typografie · Zeichen · Bildsprache · Bewegung)
+
+**Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
+
+- **Neue Marke**
+  - de:
+  > Knapp und ohne Werbung — „Brot vom Vortag geht in die Suppe." Viel Handwerk, keine Adjektive. Distanziert: die Seite spricht niemanden direkt an.
+  - en:
+  > Short and free of advertising — "yesterday's bread goes into the soup". A lot of craft, no adjectives. Distant: the site never addresses anyone directly.
+- **Marken-Relaunch**
+  - de:
+  > Werbend bis laut — „Der beste Mittagstisch der Stadt." Viele Superlative, und nirgends steht, was tatsächlich auf der Karte steht.
+  - en:
+  > Advertising, verging on loud — "the best midday menu in town". Plenty of superlatives, and nowhere does it say what is actually on the menu.
+
 ## Purpose, Vision & Mission (`pvm`) — 10 Sessions, **Σ ~14 Min** (35 Züge)
 
 Interview-Technik: **Vera** (Strategin). Gesprochen wird alles von George.
@@ -779,6 +779,100 @@ Interview-Technik: **Vera** (Strategin). Gesprochen wird alles von George.
   - en:
   > "They never claimed an hour would change your life, and everybody came back anyway."
 
+### `b.positioningCategory` — In welcher Kategorie spielt ihr?
+
+**Art:** Auswahl · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
+
+**Ziel:** propose the CATEGORY this brand plays in — the shelf people mentally put it on.
+
+**Woran man einen guten Wert erkennt:**
+
+- It names the shelf they are compared on, not the trade they practise.
+- Somebody is already looking for that category.
+- It excludes at least half of the industry.
+- It can be said in five words.
+
+**Was zurückgewiesen wird:**
+
+- The industry repeated as a category.
+- A category that exists only inside this one sentence.
+- A category so broad that every competitor is on the same shelf.
+
+**Gesprächsleiter:**
+
+- Eröffnung: name the shelf, say in one sentence why, then append the alternatives as options.
+- Nachfrage: who would you be compared against on that shelf?
+- Umdeutung: if they take the broadest option, ask which half of it they would rather not be measured against
+
+**Form des Werts:** Person: ohne Person · Zeit: Präsens · höchstens 5 Wörter
+
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
+
+**Invarianten (im Code geprüft):** —
+
+**Fliesst später in:** 3 Felder in 2 Kapiteln (Markenarchitektur · Tagline & Messaging)
+
+**Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
+
+- **Neue Marke**
+  - de:
+  > Rückenkurse für Wiedereinsteiger — nicht „Yoga"
+  - en:
+  > Back classes for returners — not "yoga"
+- **Marken-Relaunch**
+  - de:
+  > Übungsraum statt „Wellness-Studio"
+  - en:
+  > A practice room, not "wellness"
+
+### `b.positioningFirstChoice` — Und in dieser Kategorie: Für wen seid ihr die ERSTE Wahl — und gegen wen?
+
+**Art:** Frage · **Umfang:** ~1 Min, 4 Züge · **Vertraulichkeit:** öffentlich
+
+**Ziel:** capture for whom this brand is the FIRST choice inside its category, and against whom.
+
+**Woran man einen guten Wert erkennt:**
+
+- It names one group for whom they are the first call.
+- It names who they are the first choice AGAINST.
+- The group is small enough to be recognisable.
+- Somebody in that group would agree with the description.
+
+**Was zurückgewiesen wird:**
+
+- "Everyone who values quality."
+- A first choice with no competitor named.
+- A group defined by budget alone.
+
+**Gesprächsleiter:**
+
+- Eröffnung: for whom, inside that category, they are the first call — and instead of whom.
+- Nachfrage: who do those people call if not you, and why do they call you first?
+- Nachfrage: which kind of job would you rather send on to somebody else?
+- Umdeutung: if the answer is "everyone", ask who has called twice this year and why
+- Umdeutung: if no competitor is named, ask who else was on the list the last time they were chosen
+
+**Form des Werts:** Person: folgt der Weiche Solo/Team · Zeit: frei · kein Wortdeckel
+
+**Antwort-Regeln:** Mindest-Substanz: mittel · Nachfragen: höchstens 2 · „weiss nicht" gilt · nicht vertagbar
+
+**Invarianten (im Code geprüft):** —
+
+**Fliesst später in:** 1 Felder in 1 Kapiteln (Tagline & Messaging)
+
+**Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
+
+- **Neue Marke**
+  - de:
+  > Für Leute, die nach der Reha weitermachen sollen und sich in ein volles Fitnessstudio nicht trauen — gegen die Volkshochschulkurse mit dreißig Teilnehmern.
+  - en:
+  > For people told to keep going after rehab who do not dare walk into a busy gym — against the adult-education classes with thirty people in the room.
+- **Marken-Relaunch**
+  - de:
+  > Für Berufstätige, die abends eine feste Stunde brauchen — gegen die Studios mit Zehnerkarte, in denen jede Woche jemand anderes unterrichtet.
+  - en:
+  > For working people who need one fixed hour in the evening — against the studios with a ten-class pass where somebody different teaches every week.
+
 ### `b.purpose` — Purpose
 
 **Art:** Entwurf · **Umfang:** ~2 Min, 3 Züge · **Vertraulichkeit:** öffentlich
@@ -899,100 +993,6 @@ Interview-Technik: **Vera** (Strategin). Gesprochen wird alles von George.
   > Wir erklären vor jeder Übung, was sie im Körper tut, und lassen die Sanskrit-Namen weg, bis jemand danach fragt.
   - en:
   > We explain what each pose does in the body before we teach it, and leave the Sanskrit names out until somebody asks.
-
-### `b.positioningCategory` — In welcher Kategorie spielt ihr?
-
-**Art:** Auswahl · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
-
-**Ziel:** propose the CATEGORY this brand plays in — the shelf people mentally put it on.
-
-**Woran man einen guten Wert erkennt:**
-
-- It names the shelf they are compared on, not the trade they practise.
-- Somebody is already looking for that category.
-- It excludes at least half of the industry.
-- It can be said in five words.
-
-**Was zurückgewiesen wird:**
-
-- The industry repeated as a category.
-- A category that exists only inside this one sentence.
-- A category so broad that every competitor is on the same shelf.
-
-**Gesprächsleiter:**
-
-- Eröffnung: name the shelf, say in one sentence why, then append the alternatives as options.
-- Nachfrage: who would you be compared against on that shelf?
-- Umdeutung: if they take the broadest option, ask which half of it they would rather not be measured against
-
-**Form des Werts:** Person: ohne Person · Zeit: Präsens · höchstens 5 Wörter
-
-**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
-
-**Invarianten (im Code geprüft):** —
-
-**Fliesst später in:** 3 Felder in 2 Kapiteln (Markenarchitektur · Tagline & Messaging)
-
-**Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
-
-- **Neue Marke**
-  - de:
-  > Rückenkurse für Wiedereinsteiger — nicht „Yoga"
-  - en:
-  > Back classes for returners — not "yoga"
-- **Marken-Relaunch**
-  - de:
-  > Übungsraum statt „Wellness-Studio"
-  - en:
-  > A practice room, not "wellness"
-
-### `b.positioningFirstChoice` — Und in dieser Kategorie: Für wen seid ihr die ERSTE Wahl — und gegen wen?
-
-**Art:** Frage · **Umfang:** ~1 Min, 4 Züge · **Vertraulichkeit:** öffentlich
-
-**Ziel:** capture for whom this brand is the FIRST choice inside its category, and against whom.
-
-**Woran man einen guten Wert erkennt:**
-
-- It names one group for whom they are the first call.
-- It names who they are the first choice AGAINST.
-- The group is small enough to be recognisable.
-- Somebody in that group would agree with the description.
-
-**Was zurückgewiesen wird:**
-
-- "Everyone who values quality."
-- A first choice with no competitor named.
-- A group defined by budget alone.
-
-**Gesprächsleiter:**
-
-- Eröffnung: for whom, inside that category, they are the first call — and instead of whom.
-- Nachfrage: who do those people call if not you, and why do they call you first?
-- Nachfrage: which kind of job would you rather send on to somebody else?
-- Umdeutung: if the answer is "everyone", ask who has called twice this year and why
-- Umdeutung: if no competitor is named, ask who else was on the list the last time they were chosen
-
-**Form des Werts:** Person: folgt der Weiche Solo/Team · Zeit: frei · kein Wortdeckel
-
-**Antwort-Regeln:** Mindest-Substanz: mittel · Nachfragen: höchstens 2 · „weiss nicht" gilt · nicht vertagbar
-
-**Invarianten (im Code geprüft):** —
-
-**Fliesst später in:** 1 Felder in 1 Kapiteln (Tagline & Messaging)
-
-**Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
-
-- **Neue Marke**
-  - de:
-  > Für Leute, die nach der Reha weitermachen sollen und sich in ein volles Fitnessstudio nicht trauen — gegen die Volkshochschulkurse mit dreißig Teilnehmern.
-  - en:
-  > For people told to keep going after rehab who do not dare walk into a busy gym — against the adult-education classes with thirty people in the room.
-- **Marken-Relaunch**
-  - de:
-  > Für Berufstätige, die abends eine feste Stunde brauchen — gegen die Studios mit Zehnerkarte, in denen jede Woche jemand anderes unterrichtet.
-  - en:
-  > For working people who need one fixed hour in the evening — against the studios with a ten-class pass where somebody different teaches every week.
 
 ## Markenarchitektur (`architecture`) — 5 Sessions, **Σ ~6 Min** (17 Züge)
 
@@ -2542,6 +2542,52 @@ Interview-Technik: **Nika** (Sprach-Beraterin). Gesprochen wird alles von George
   - en:
   > We plan for the Monday.
 
+### `ep.distinctiveAsset` — Welche Zeile wird euer verbales Erkennungszeichen?
+
+**Art:** Auswahl · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
+
+**Ziel:** settle which line becomes the verbal signature of this brand.
+
+**Woran man einen guten Wert erkennt:**
+
+- It is one line that is already confirmed elsewhere in the foundation.
+- It could be recognised without the brand name next to it.
+- It survives being repeated for years.
+- It is not a description of what they sell.
+
+**Was zurückgewiesen wird:**
+
+- A newly invented line.
+- A line that only works next to the logo.
+- A seasonal campaign slogan.
+
+**Gesprächsleiter:**
+
+- Eröffnung: confirm the one line that becomes the verbal signature.
+- Nachfrage: would you still want to say it in five years?
+- Umdeutung: if they want a new line, ask what the anchor line is missing
+
+**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
+
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
+
+**Invarianten (im Code geprüft):** —
+
+**Fliesst später in:** nichts — eine Korrektur hier löst keine Warteschlange aus
+
+**Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
+
+- **Neue Marke**
+  - de:
+  > Erst messen, dann möblieren.
+  - en:
+  > Measure first, furnish second.
+- **Marken-Relaunch**
+  - de:
+  > Wir planen für den Montag.
+  - en:
+  > We plan for the Monday.
+
 ### `ep.boilerplates` — Boilerplates — Bio, Kurzabsatz, Absatz
 
 **Art:** Entwurf · **Umfang:** ~2 Min, 3 Züge · **Vertraulichkeit:** öffentlich
@@ -2688,52 +2734,6 @@ Interview-Technik: **Nika** (Sprach-Beraterin). Gesprochen wird alles von George
   > - use: construction phase
   > - avoid: feel-good atmosphere
   > - avoid: transformation
-
-### `ep.distinctiveAsset` — Welche Zeile wird euer verbales Erkennungszeichen?
-
-**Art:** Auswahl · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
-
-**Ziel:** settle which line becomes the verbal signature of this brand.
-
-**Woran man einen guten Wert erkennt:**
-
-- It is one line that is already confirmed elsewhere in the foundation.
-- It could be recognised without the brand name next to it.
-- It survives being repeated for years.
-- It is not a description of what they sell.
-
-**Was zurückgewiesen wird:**
-
-- A newly invented line.
-- A line that only works next to the logo.
-- A seasonal campaign slogan.
-
-**Gesprächsleiter:**
-
-- Eröffnung: confirm the one line that becomes the verbal signature.
-- Nachfrage: would you still want to say it in five years?
-- Umdeutung: if they want a new line, ask what the anchor line is missing
-
-**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
-
-**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
-
-**Invarianten (im Code geprüft):** —
-
-**Fliesst später in:** nichts — eine Korrektur hier löst keine Warteschlange aus
-
-**Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
-
-- **Neue Marke**
-  - de:
-  > Erst messen, dann möblieren.
-  - en:
-  > Measure first, furnish second.
-- **Marken-Relaunch**
-  - de:
-  > Wir planen für den Montag.
-  - en:
-  > We plan for the Monday.
 
 ## Name (`naming`) — 8 Sessions, **Σ ~12 Min** (21 Züge)
 
@@ -3973,46 +3973,6 @@ Interview-Technik: **Frida** (Design Directorin). Gesprochen wird alles von Geor
 
 Interview-Technik: **Frida** (Design Directorin). Gesprochen wird alles von George.
 
-### `k.photo` — Eure Bild-Prinzipien
-
-**Art:** Ableitung · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
-
-**Ziel:** settle the picture principles: light, crop, people and colour — with the reason each follows from the DNA.
-
-**Woran man einen guten Wert erkennt:**
-
-- All four axes are answered: light, crop, people, colour.
-- A photographer could work from it without asking back.
-- The reason points at a value or a tone word, not at a mood board.
-- It says what is never photographed here.
-
-**Was zurückgewiesen wird:**
-
-- A principle that only says "authentic".
-- A rule that no camera can follow.
-- Stock photography described as the house style.
-
-**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
-
-**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
-
-**Invarianten (im Code geprüft):** —
-
-**Fliesst später in:** 1 Felder in 1 Kapiteln (Bildsprache)
-
-**Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
-
-- **Neue Marke**
-  - de:
-  > Weiches Seitenlicht, sichtbare Schatten, keine Aufheller; Menschen bei der Arbeit, nie in die Kamera lächelnd.
-  - en:
-  > Soft side light, visible shadows, no fill; people at work, never smiling into the camera.
-- **Marken-Relaunch**
-  - de:
-  > Sehr naher Ausschnitt, das Detail füllt das Bild — Werkstatt statt Ausstellungsraum.
-  - en:
-  > A very close crop, the detail fills the frame — workshop instead of showroom.
-
 ### `k.illustration` — Wollt ihr Illustration — und wenn ja, welche?
 
 **Art:** Auswahl · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
@@ -4072,6 +4032,46 @@ Interview-Technik: **Frida** (Design Directorin). Gesprochen wird alles von Geor
 **Invarianten (im Code geprüft):** der Wert ist eine Id aus: regular, fill, bold
 
 **Fliesst später in:** 1 Felder in 1 Kapiteln (Bildsprache)
+
+### `k.photo` — Eure Bild-Prinzipien
+
+**Art:** Ableitung · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
+
+**Ziel:** settle the picture principles: light, crop, people and colour — with the reason each follows from the DNA.
+
+**Woran man einen guten Wert erkennt:**
+
+- All four axes are answered: light, crop, people, colour.
+- A photographer could work from it without asking back.
+- The reason points at a value or a tone word, not at a mood board.
+- It says what is never photographed here.
+
+**Was zurückgewiesen wird:**
+
+- A principle that only says "authentic".
+- A rule that no camera can follow.
+- Stock photography described as the house style.
+
+**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
+
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 1 · „weiss nicht" gilt hier nicht · nicht vertagbar
+
+**Invarianten (im Code geprüft):** —
+
+**Fliesst später in:** 1 Felder in 1 Kapiteln (Bildsprache)
+
+**Beispiele** (erfunden, fremde Branche — für die Form, nie für den Inhalt):
+
+- **Neue Marke**
+  - de:
+  > Weiches Seitenlicht, sichtbare Schatten, keine Aufheller; Menschen bei der Arbeit, nie in die Kamera lächelnd.
+  - en:
+  > Soft side light, visible shadows, no fill; people at work, never smiling into the camera.
+- **Marken-Relaunch**
+  - de:
+  > Sehr naher Ausschnitt, das Detail füllt das Bild — Werkstatt statt Ausstellungsraum.
+  - en:
+  > A very close crop, the detail fills the frame — workshop instead of showroom.
 
 ### `k.dodont` — Do und Don’t der Bildsprache
 
@@ -4146,6 +4146,36 @@ Interview-Technik: **Frida** (Design Directorin). Gesprochen wird alles von Geor
 
 **Fliesst später in:** 3 Felder in 1 Kapiteln (Bewegung)
 
+### `l.logo` — Soll sich euer Zeichen bewegen?
+
+**Art:** Auswahl · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
+
+**Ziel:** settle whether the mark moves at all, and under which rule.
+
+**Woran man einen guten Wert erkennt:**
+
+- The answer is yes or no, not "maybe later".
+- A yes names the one place it is used and comes with a reduced-motion version.
+- A no is recorded as a decision, not as an omission.
+
+**Was zurückgewiesen wird:**
+
+- A moving mark for a brand whose tone word is "quiet".
+- An animation without a reduced-motion answer.
+
+**Gesprächsleiter:**
+
+- Eröffnung: ask plainly whether the mark should move, and say what a yes costs: one more file that somebody has to maintain.
+- Umdeutung: if the yes is about a video intro only, say that this is a film question, not a brand one
+
+**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
+
+**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 0 · „weiss nicht" gilt hier nicht · nicht vertagbar
+
+**Invarianten (im Code geprüft):** der Wert ist eine Id aus: no, yes
+
+**Fliesst später in:** 1 Felder in 1 Kapiteln (Bewegung)
+
 ### `l.transitions` — Übergangs-Tokens
 
 **Art:** Ableitung · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
@@ -4183,36 +4213,6 @@ Interview-Technik: **Frida** (Design Directorin). Gesprochen wird alles von Geor
   > Dieselben drei Tokens, nur aus dem knappen Tempo: 60, 120 und 192 ms.
   - en:
   > The same three tokens, only from the snappy tempo: 60, 120 and 192 ms.
-
-### `l.logo` — Soll sich euer Zeichen bewegen?
-
-**Art:** Auswahl · **Umfang:** ~1 Min, 2 Züge · **Vertraulichkeit:** öffentlich
-
-**Ziel:** settle whether the mark moves at all, and under which rule.
-
-**Woran man einen guten Wert erkennt:**
-
-- The answer is yes or no, not "maybe later".
-- A yes names the one place it is used and comes with a reduced-motion version.
-- A no is recorded as a decision, not as an omission.
-
-**Was zurückgewiesen wird:**
-
-- A moving mark for a brand whose tone word is "quiet".
-- An animation without a reduced-motion answer.
-
-**Gesprächsleiter:**
-
-- Eröffnung: ask plainly whether the mark should move, and say what a yes costs: one more file that somebody has to maintain.
-- Umdeutung: if the yes is about a video intro only, say that this is a film question, not a brand one
-
-**Form des Werts:** Person: ohne Person · Zeit: Präsens · kein Wortdeckel
-
-**Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 0 · „weiss nicht" gilt hier nicht · nicht vertagbar
-
-**Invarianten (im Code geprüft):** der Wert ist eine Id aus: no, yes
-
-**Fliesst später in:** 1 Felder in 1 Kapiteln (Bewegung)
 
 ### `l.rules` — Bewegungs-Regeln
 

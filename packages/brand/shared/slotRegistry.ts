@@ -742,20 +742,27 @@ function defineSession(definition: BrandSlotDefinition): BrandSessionConfig {
 
 /**
  * DER KATALOG. Reihenfolge = Reihenfolge der Bausteine und innerhalb eines
- * Bausteins die des Content-Katalogs; sie ist zugleich die topologische
- * Ordnung der `dependencies` (s. Kopf) und die Reihenfolge, in der
- * `resolveNextQuestion` fragt.
+ * Bausteins ERST DIE FRAGEN, DANN DIE ABLEITUNGEN (Davids Entscheidung
+ * 2026-09-09, Regel und Wächter in `brandSessionGroups.ts`); sie ist zugleich
+ * die topologische Ordnung der `dependencies` (s. Kopf) und die Reihenfolge,
+ * in der `resolveNextQuestion` fragt.
+ *
+ * Wo eine Frage von einer Ableitung DESSELBEN Kapitels schöpft (`c.final` aus
+ * `c.candidates`, `f.shortlist` aus `f.candidates`, `h.neutral` aus `h.base`,
+ * …), bleibt die Katalog-Reihenfolge stehen: die Trennung wäre dort ein
+ * Zyklus. `validateSessionOrder` verlangt für jedes gemischte Kapitel genau
+ * diesen Nachweis — ein Kapitel kann nicht still gemischt bleiben.
  */
 export const BRAND_SLOTS: readonly BrandSlot[] = [
   // ── A · Kontext (Katalog §4) — 11 Slots ─────────────────────────────────
   // Alle A-Slots ohne `dependencies`: sie schöpfen aus der Startkarte, und
   // die ist kein Slot (s. Kopf).
-  defineSession({ id: 'a.pitch', stepId: 'context', type: 'derivation', required: true, kind: 'text', maxLength: SHORT, editor: 'stage', generator: 'derive' }),
-  defineSession({ id: 'a.category', stepId: 'context', type: 'derivation', required: true, kind: 'text', maxLength: SHORT, editor: 'stage', generator: 'derive' }),
-  defineSession({ id: 'a.competitors', stepId: 'context', type: 'stage-edit', required: true, kind: 'list', maxLength: LONG, editor: 'stage', generator: 'draft' }),
-  defineSession({ id: 'a.audienceSketch', stepId: 'context', type: 'stage-edit', required: true, kind: 'structured', maxLength: LONG, editor: 'stage', generator: 'draft' }),
-  // Nicht Pflicht: eine neue Marke hat keine Texte, die man analysieren könnte.
-  defineSession({ id: 'a.toneAnalysis', stepId: 'context', type: 'derivation', required: false, kind: 'text', maxLength: LONG, editor: 'none', generator: 'derive' }),
+  //
+  // ERST DIE FRAGEN, DANN DIE ABLEITUNGEN (Davids Klick-Test 2026-09-09,
+  // s. `brandSessionGroups.ts`): bis dahin standen hier die fünf Ableitungen
+  // VOR den sechs Fragen. George springt an ihnen vorbei (`resolveNextSession`
+  // fragt nur `ask`/`collect`/`choose`) — im Klick-Test las sich das, als
+  // übersprünge die Werkstatt die halbe Leiste.
   // W1 tauscht die Fassung: Ursprungsgeschichte (neu) bzw. R1–R4 (Relaunch, Katalog §2.3).
   defineSession({ id: 'a.origin', stepId: 'context', type: 'question', required: true, kind: 'text', maxLength: LONG, editor: 'textarea', generator: 'none', pathVariants: { new: true, relaunch: true } }),
   defineSession({ id: 'a.customerPraise', stepId: 'context', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'none' }),
@@ -763,6 +770,12 @@ export const BRAND_SLOTS: readonly BrandSlot[] = [
   defineSession({ id: 'a.oneThing', stepId: 'context', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'none' }),
   defineSession({ id: 'a.challenge', stepId: 'context', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'none' }),
   defineSession({ id: 'a.facts', stepId: 'context', type: 'choice', required: true, kind: 'structured', maxLength: SHORT, editor: 'chips', generator: 'none' }),
+  defineSession({ id: 'a.pitch', stepId: 'context', type: 'derivation', required: true, kind: 'text', maxLength: SHORT, editor: 'stage', generator: 'derive' }),
+  defineSession({ id: 'a.category', stepId: 'context', type: 'derivation', required: true, kind: 'text', maxLength: SHORT, editor: 'stage', generator: 'derive' }),
+  defineSession({ id: 'a.competitors', stepId: 'context', type: 'stage-edit', required: true, kind: 'list', maxLength: LONG, editor: 'stage', generator: 'draft' }),
+  defineSession({ id: 'a.audienceSketch', stepId: 'context', type: 'stage-edit', required: true, kind: 'structured', maxLength: LONG, editor: 'stage', generator: 'draft' }),
+  // Nicht Pflicht: eine neue Marke hat keine Texte, die man analysieren könnte.
+  defineSession({ id: 'a.toneAnalysis', stepId: 'context', type: 'derivation', required: false, kind: 'text', maxLength: LONG, editor: 'none', generator: 'derive' }),
 
   // ── B · Purpose · Vision · Mission + Positionierung (Katalog §5) — 10 ───
   // ABWEICHUNG von der Zählung „B: 8": der Katalog führt
@@ -776,11 +789,11 @@ export const BRAND_SLOTS: readonly BrandSlot[] = [
   defineSession({ id: 'b.conviction', stepId: 'pvm', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'none' }),
   defineSession({ id: 'b.tenYears', stepId: 'pvm', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'none' }),
   defineSession({ id: 'b.legacy', stepId: 'pvm', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'none' }),
+  defineSession({ id: 'b.positioningCategory', stepId: 'pvm', type: 'choice', required: true, kind: 'choice', maxLength: SHORT, editor: 'chips', generator: 'derive', help: true, dependencies: ['a.pitch', 'a.category', 'a.competitors'] }),
+  defineSession({ id: 'b.positioningFirstChoice', stepId: 'pvm', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'none' }),
   defineSession({ id: 'b.purpose', stepId: 'pvm', type: 'stage-edit', required: true, kind: 'text', maxLength: SHORT, editor: 'stage', generator: 'draft', help: true, dependencies: ['a.pitch', 'b.whyStarted', 'b.worldLoses', 'b.conviction'] }),
   defineSession({ id: 'b.vision', stepId: 'pvm', type: 'stage-edit', required: true, kind: 'text', maxLength: SHORT, editor: 'stage', generator: 'draft', help: true, dependencies: ['a.oneThing', 'b.tenYears', 'b.legacy'] }),
   defineSession({ id: 'b.mission', stepId: 'pvm', type: 'stage-edit', required: true, kind: 'text', maxLength: SHORT, editor: 'stage', generator: 'draft', help: true, dependencies: ['a.pitch', 'a.audienceSketch', 'a.oneThing', 'a.customerPraise', 'b.purpose'] }),
-  defineSession({ id: 'b.positioningCategory', stepId: 'pvm', type: 'choice', required: true, kind: 'choice', maxLength: SHORT, editor: 'chips', generator: 'derive', help: true, dependencies: ['a.pitch', 'a.category', 'a.competitors'] }),
-  defineSession({ id: 'b.positioningFirstChoice', stepId: 'pvm', type: 'question', required: true, kind: 'text', maxLength: SHORT, editor: 'textarea', generator: 'none' }),
 
   // ── B2 · Markenarchitektur (Katalog §5a, nur bei W4 = ja) — 5 ───────────
   // `required: true` INNERHALB des Bausteins; ob er überhaupt läuft,
@@ -841,10 +854,10 @@ export const BRAND_SLOTS: readonly BrandSlot[] = [
 
   // ── E+ · Verbale Identität (Katalog §9) — 5 ─────────────────────────────
   defineSession({ id: 'ep.taglines', stepId: 'verbal', type: 'choice', required: true, kind: 'list', maxLength: SHORT, editor: 'cards', generator: 'candidates', dependencies: ['b.purpose', 'b.positioningFirstChoice', 'c.final', 'd.primary', 'e.anchorLine'] }),
+  defineSession({ id: 'ep.distinctiveAsset', stepId: 'verbal', type: 'choice', required: true, kind: 'text', maxLength: SHORT, editor: 'chips', generator: 'none', dependencies: ['e.anchorLine'] }),
   defineSession({ id: 'ep.boilerplates', stepId: 'verbal', type: 'stage-edit', required: true, kind: 'structured', maxLength: LONG, editor: 'stage', generator: 'draft', dependencies: ['a.pitch', 'b.purpose', 'b.vision', 'b.mission', 'b.positioningCategory', 'd.toneWords'] }),
   defineSession({ id: 'ep.keyMessages', stepId: 'verbal', type: 'stage-edit', required: true, kind: 'structured', maxLength: LONG, editor: 'stage', generator: 'draft', dependencies: ['a.audienceSketch', 'b.mission', 'c.final', 'd.toneWords'] }),
   defineSession({ id: 'ep.vocabulary', stepId: 'verbal', type: 'derivation', required: true, kind: 'list', maxLength: LONG, editor: 'stage', generator: 'derive', dependencies: ['d.toneWords', 'd.vocabulary'] }),
-  defineSession({ id: 'ep.distinctiveAsset', stepId: 'verbal', type: 'choice', required: true, kind: 'text', maxLength: SHORT, editor: 'chips', generator: 'none', dependencies: ['e.anchorLine'] }),
 
   // ── F · Name (Katalog §10, nur per W2/Neuschnitt) — 8 ───────────────────
   defineSession({ id: 'f.nameType', stepId: 'naming', type: 'choice', required: true, kind: 'choice', maxLength: SHORT, editor: 'chips', generator: 'none', help: true }),
@@ -932,9 +945,9 @@ export const BRAND_SLOTS: readonly BrandSlot[] = [
   // einen Entwurfs-Knopf, und der schriebe Prosa in Felder, die fünf
   // beschriftete Blöcke, zwei Katalog-Ids und sechs geprüfte Paare halten.
   // §1.4 gilt hier doppelt: Bildsprache sind REGELN, kein Modell-Text.
-  defineSession({ id: 'k.photo', stepId: 'imagery', type: 'derivation', required: true, kind: 'structured', maxLength: LONG, editor: 'cards', generator: 'none', dependencies: ['g.mix'] }),
   defineSession({ id: 'k.illustration', stepId: 'imagery', type: 'choice', required: true, kind: 'choice', maxLength: SHORT, editor: 'chips', generator: 'none', dependencies: ['g.mix'] }),
   defineSession({ id: 'k.icons', stepId: 'imagery', type: 'choice', required: true, kind: 'choice', maxLength: SHORT, editor: 'cards', generator: 'none', dependencies: ['i.pair'] }),
+  defineSession({ id: 'k.photo', stepId: 'imagery', type: 'derivation', required: true, kind: 'structured', maxLength: LONG, editor: 'cards', generator: 'none', dependencies: ['g.mix'] }),
   // PUR: vier Achsen des Prinzips plus je ein Paar aus Illustration und Icons.
   defineSession({ id: 'k.dodont', stepId: 'imagery', type: 'stage-edit', required: true, kind: 'list', maxLength: LONG, editor: 'stage', generator: 'none', dependencies: ['k.photo', 'k.illustration', 'k.icons'] }),
 
@@ -946,9 +959,9 @@ export const BRAND_SLOTS: readonly BrandSlot[] = [
   // Entwurfs-Knopf, und der schriebe Prosa in Felder, die eine Katalog-Id, vier
   // Tokens und sechs prüfbare Sätze halten.
   defineSession({ id: 'l.tempo', stepId: 'motion', type: 'choice', required: true, kind: 'choice', maxLength: SHORT, editor: 'cards', generator: 'none', dependencies: ['g.mix'] }),
+  defineSession({ id: 'l.logo', stepId: 'motion', type: 'choice', required: true, kind: 'choice', maxLength: SHORT, editor: 'cards', generator: 'none', dependencies: ['j.kind', 'l.tempo'] }),
   // PUR: Dauern, Easing und Versatz als Token-Satz aus dem Tempo.
   defineSession({ id: 'l.transitions', stepId: 'motion', type: 'derivation', required: true, kind: 'structured', maxLength: LONG, editor: 'none', generator: 'none', dependencies: ['l.tempo'] }),
-  defineSession({ id: 'l.logo', stepId: 'motion', type: 'choice', required: true, kind: 'choice', maxLength: SHORT, editor: 'cards', generator: 'none', dependencies: ['j.kind', 'l.tempo'] }),
   defineSession({ id: 'l.rules', stepId: 'motion', type: 'stage-edit', required: true, kind: 'list', maxLength: LONG, editor: 'stage', generator: 'none', dependencies: ['l.tempo', 'l.transitions', 'l.logo'] }),
 ]
 

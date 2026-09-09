@@ -64,7 +64,7 @@ describe('Jeder entwerfbare Slot hat einen Auftrag', () => {
     const slots = generatableSlots('pvm', 'architecture')
     // Ohne diese Zeile wäre der Test grün, sobald jemand die Registry leert.
     expect(slots).toEqual([
-      'b.whyStarted', 'b.purpose', 'b.vision', 'b.mission', 'b.positioningCategory',
+      'b.whyStarted', 'b.positioningCategory', 'b.purpose', 'b.vision', 'b.mission',
       'b2.model', 'b2.rule',
     ])
     for (const slotId of slots) {

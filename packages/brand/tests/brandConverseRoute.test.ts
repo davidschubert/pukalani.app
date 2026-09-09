@@ -856,13 +856,14 @@ describe('Der Verlaufs-Filter', () => {
   }
 
   it('die ERSTE Session des Kapitels liest auch den Kapitel-Verlauf von vorher mit', async () => {
-    // `a.pitch` ist die erste Session in `context` (Registry-Reihenfolge).
-    body = { ...body, sessionKey: 'a.pitch' }
+    // `a.origin` ist die erste Session in `context` (Registry-Reihenfolge —
+    // seit dem Gruppen-Umbau 2026-09-09 steht die erste FRAGE vorn).
+    body = { ...body, sessionKey: 'a.origin' }
     const { event } = fakeEvent()
     await handler(event)
     expect(historyQuery()).toContain('"sessionKey"')
     expect(historyQuery()).toContain('""')
-    expect(historyQuery()).toContain('"a.pitch"')
+    expect(historyQuery()).toContain('"a.origin"')
   })
 
   it('GEGENPROBE: jede ANDERE Session liest nur ihren eigenen Faden', async () => {

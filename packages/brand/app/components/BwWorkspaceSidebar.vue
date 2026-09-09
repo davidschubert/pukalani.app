@@ -412,6 +412,17 @@ function selectStep(layer: BwRailLayer, step: BwRailStep): void {
                   class="ml-5 mt-0.5 space-y-0.5 border-l pl-1.5" style="border-color: var(--bw-line)"
                 >
                   <li v-for="session in step.sessions" :key="session.id">
+                    <!-- DER GRUPPEN-TRENNER (2026-09-09): ab hier hat George
+                         abgeleitet, gefragt wurde darüber. Er steht nur, wo
+                         das Kapitel beides hat UND sauber zerfällt — die
+                         Regel dazu ist `brandDerivedDividerSlot`, nicht diese
+                         Zeile. Nur Beschriftung, kein Knopf: er ist eine
+                         Überschrift und nichts zum Anklicken. -->
+                    <p
+                      v-if="session.groupLabel"
+                      class="bw-label mt-2 px-2.5 pb-0.5 pt-1 uppercase tracking-wider"
+                      style="color: var(--bw-muted)"
+                    >{{ session.groupLabel }}</p>
                     <button
                       type="button"
                       class="bw-nav-row flex w-full items-center gap-1.5 rounded-md px-2.5 py-1 text-left text-sm"

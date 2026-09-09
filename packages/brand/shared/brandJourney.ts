@@ -67,6 +67,7 @@
  * Mensch für eine Kommakorrektur sein halbes Ergebnis.
  */
 
+import { ASKABLE_SESSION_KINDS } from './brandSessionGroups'
 import { computeSourcesHash, evaluateInvariants } from './brandSessions'
 import {
   BRAND_SLOTS,
@@ -834,7 +835,15 @@ export interface BrandNextSession extends BrandNextQuestion {
   kind: BrandSessionKind
 }
 
-const ASKABLE_KINDS: readonly BrandSessionKind[] = ['ask', 'collect', 'choose']
+/**
+ * DIE FRAGBAREN ARBEITSFORMEN — sie stehen seit dem Gruppen-Umbau
+ * (2026-09-09) in `brandSessionGroups.ts`, weil die Kapitel-Leiste und die
+ * Finale Abnahme DIESELBE Menge brauchen: was George stellt, steht in der
+ * Frage-Gruppe, alles andere unter dem Trenner „Daraus abgeleitet". Zwei
+ * gepflegte Listen liefen genau an dem Tag auseinander, an dem jemand eine
+ * neue Arbeitsform erfindet.
+ */
+const ASKABLE_KINDS: readonly BrandSessionKind[] = ASKABLE_SESSION_KINDS
 
 export function resolveNextSession(
   stepKey: BrandStepKey,

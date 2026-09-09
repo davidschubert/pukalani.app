@@ -19,6 +19,7 @@ import {
   needsOpeningTurn,
   resolveActiveSession,
 } from '../../../../shared/brandWorkspaceNav'
+import { brandDerivedDividerSlot } from '../../../../shared/brandSessionGroups'
 import { affectsView, brandAnswerWritesSlot } from '../../../../shared/brandSessions'
 import {
   BRAND_STEP_KEYS,
@@ -2175,12 +2176,22 @@ function railInfo(entry: BrandJourneyStep): BwRailStepInfo {
  * ist kein Angebot.
  */
 function railSessions(entry: BrandJourneyStep): BwRailSession[] {
+  /**
+   * DER TRENNER „Daraus abgeleitet" (Davids Klick-Test 2026-09-09) — die
+   * Grenze zwischen den Fragen des Kapitels und dem, was George daraus macht.
+   * WELCHE Zeile ihn trägt, rechnet die pure Regel; hier steht nur, wie er
+   * heisst. Kapitel ohne Ableitung, ohne Frage oder mit gemischter Ordnung
+   * bekommen `null` und damit keinen — eine Überschrift, unter der wieder
+   * gefragt wird, wäre eine falsche Zusage.
+   */
+  const divider = brandDerivedDividerSlot(entry.stepKey)
   const list: BwRailSession[] = slotsForStep(entry.stepKey).map((slot) => {
     const view = store.sessions[slot.id]
     const state = view?.state ?? 'locked'
     return {
       id: slot.id,
       label: slotLabel(slot),
+      ...(slot.id === divider ? { groupLabel: t('brand.nav.derivedGroup') } : {}),
       // Die Minuten sind eine VORSCHAU auf Arbeit — eine bestätigte Session hat
       // keine mehr (Davids Klick-Test 2026-09-09: „die Zeit verschwindet dann
       // auch hinten dran"). `stale` behält sie: dort steht Arbeit wieder an.

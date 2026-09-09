@@ -4,6 +4,7 @@ import {
   type BrandConfidence,
 } from '../../shared/brandJourney'
 import { brandSessionAcceptable } from '../../shared/brandJourney'
+import { brandDerivedDividerSlot } from '../../shared/brandSessionGroups'
 import {
   resolveAcceptanceStage,
   restartWordMatches,
@@ -133,6 +134,15 @@ const acceptance = await useAsyncData<BrandStepAcceptanceResponse | null>(
 
 const view = computed(() => acceptance.data.value)
 const sessions = computed<BrandAcceptanceSessionView[]>(() => view.value?.sessions ?? [])
+
+/**
+ * VOR WELCHEM BLOCK STEHT „Daraus abgeleitet"? — dieselbe Regel wie in der
+ * Kapitel-Leiste (2026-09-09). Die Abnahme zeigt die Sessions als EINE Liste
+ * in Registry-Reihenfolge; sie folgt der Gruppierung deshalb automatisch, und
+ * die Überschrift muss sie ebenso automatisch mitnehmen. `null` heisst „kein
+ * Trenner" (Kapitel ohne Ableitung, ohne Frage oder mit gemischter Ordnung).
+ */
+const derivedDivider = computed<string | null>(() => brandDerivedDividerSlot(props.stepKey))
 
 /** Der Stand der Kapitel-Zeile — s. Kopf, „die `revision` ist lokal". */
 const revision = ref(0)
@@ -610,20 +620,30 @@ async function confirmRestart(): Promise<void> {
     <!-- DIE LISTE: ein Block je Session, in Registry-Reihenfolge. Eine
          optionale Session ohne Wert steht grau dabei — mit Beispiel und leerer
          Eingabe (§5a Schritt 1). Die OPTIK des Blocks wohnt in
-         `BwSessionBlock`, weil das Dokument (§10) dieselbe Zeile zeigt. -->
-    <BwSessionBlock
-      v-for="session in sessions" :key="session.slotId"
-      :session="session" :profile-id="profileId"
-      :accepting="accepting === session.slotId"
-      :keeping="keeping === session.slotId"
-      :busy="accepting !== null || acceptingAll"
-      @accept="accept(session)"
-      @keep="keep(session)"
-      @edit="edit(session)"
-      @field="emit('field', $event)"
-      @decided="findingDecided"
-      @stale="acceptance.refresh()"
-    />
+         `BwSessionBlock`, weil das Dokument (§10) dieselbe Zeile zeigt.
+
+         DER TRENNER (2026-09-09) ist DERSELBE wie in der Kapitel-Leiste —
+         dieselbe Regel, derselbe Schlüssel: die Abnahme zeigt die Sessions als
+         EINE Liste, also gilt hier dieselbe Zusage („alles darunter hat George
+         abgeleitet"). Er steht ÜBER dem Block, zu dem er gehört. -->
+    <template v-for="session in sessions" :key="session.slotId">
+      <p
+        v-if="session.slotId === derivedDivider"
+        class="bw-label mt-2 uppercase tracking-wider" style="color: var(--bw-muted)"
+      >{{ t('brand.nav.derivedGroup') }}</p>
+      <BwSessionBlock
+        :session="session" :profile-id="profileId"
+        :accepting="accepting === session.slotId"
+        :keeping="keeping === session.slotId"
+        :busy="accepting !== null || acceptingAll"
+        @accept="accept(session)"
+        @keep="keep(session)"
+        @edit="edit(session)"
+        @field="emit('field', $event)"
+        @decided="findingDecided"
+        @stale="acceptance.refresh()"
+      />
+    </template>
 
     <!-- NOCH NICHT SO WEIT: die Blocker als ruhige Liste, je Zeile der Grund
          und der Weg in seine Session (§5a Schritt 2/3). -->

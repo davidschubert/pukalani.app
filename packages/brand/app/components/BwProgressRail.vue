@@ -44,6 +44,16 @@ export interface BwRailSession {
   state: 'locked' | 'open' | 'active' | 'done' | 'stale' | 'deferred'
   /** Der gesperrte Platzhalter „Finale Abnahme" (Funken-Glyphe, Paket 3c-ii). */
   kind?: 'acceptance'
+  /**
+   * DER GRUPPEN-TRENNER ÜBER DIESER ZEILE („Daraus abgeleitet", 2026-09-09).
+   *
+   * Er steht AM Eintrag und nicht als eigener Listen-Typ: eine Liste aus zwei
+   * Sorten zwänge jeden Leser (Leiste, Abnahme, Tests) zu einer Fallunter-
+   * scheidung für eine Überschrift. Gesetzt wird er von genau einer Regel
+   * (`brandDerivedDividerSlot`) an genau einer Zeile je Kapitel — und nur,
+   * wenn das Kapitel sauber in Fragen und Ableitungen zerfällt.
+   */
+  groupLabel?: string
   /** Gesperrt heisst NICHT anklickbar — kein 409 für den Menschen (3a-Befund 3). */
   disabled?: boolean
   /**

@@ -12,7 +12,8 @@ import type {
   BrandSessionAcceptResponse,
 } from '../../../../shared/types/brand'
 import { BRAND_ACCEPTANCE_VIEW } from '../../../../shared/brandWorkspaceNav'
-import { slotById } from '../../../../shared/slotRegistry'
+import { brandDerivedDividerSlot } from '../../../../shared/brandSessionGroups'
+import { slotById, type BrandStepKey } from '../../../../shared/slotRegistry'
 import { useBrandWorkspaceStore } from '../../../stores/brandWorkspace'
 import { BRAND_FOUNDATION_RAIL_STEP, useBrandFoundationRailStep } from '../../../composables/useBrandFoundationRailStep'
 import { useBrandImpactConsent } from '../../../composables/useBrandImpactConsent'
@@ -130,6 +131,16 @@ function counterLine(chapter: BrandDocumentChapter): string {
     accepted: chapter.acceptance.accepted,
     total: chapter.acceptance.total,
   })
+}
+
+/**
+ * VOR WELCHEM BLOCK STEHT „Daraus abgeleitet"? — dieselbe pure Regel wie in
+ * Leiste und Abnahme (2026-09-09). `null` heisst „kein Trenner in diesem
+ * Kapitel": es hat keine Ableitung, keine Frage, oder die beiden Gruppen sind
+ * durch eine Abhängigkeit ineinander verschränkt.
+ */
+function derivedDivider(stepKey: string): string | null {
+  return brandDerivedDividerSlot(stepKey as BrandStepKey)
 }
 
 /** Der Zustand eines Kapitels in einem Wort — dieselben Schlüssel wie überall. */
@@ -539,19 +550,28 @@ useBrandTitle(() => (store.profile?.title || view.value?.title || t('brand.docum
             {{ chapterState(chapter) }} · {{ counterLine(chapter) }}
           </p>
 
-          <BwSessionBlock
-            v-for="session in chapter.sessions" :key="session.slotId"
-            :session="session" :profile-id="profileId"
-            :show-example="false"
-            :show-accept="false"
-            :keeping="keeping === session.slotId"
-            :busy="keeping !== null"
-            @keep="keep(chapter, session)"
-            @edit="correctThenGo(session)"
-            @field="goToField"
-            @decided="findingDecided"
-            @stale="doc.refresh()"
-          />
+          <!-- DERSELBE TRENNER WIE IN LEISTE UND ABNAHME (2026-09-09): das
+               Dokument zeigt die Sessions eines Kapitels als EINE Liste in
+               Registry-Reihenfolge, also gilt dieselbe Zusage — ab hier hat
+               George abgeleitet. Dieselbe Regel, derselbe Schlüssel. -->
+          <template v-for="session in chapter.sessions" :key="session.slotId">
+            <p
+              v-if="session.slotId === derivedDivider(chapter.stepKey)"
+              class="bw-label mt-2 uppercase tracking-wider" style="color: var(--bw-muted)"
+            >{{ t('brand.nav.derivedGroup') }}</p>
+            <BwSessionBlock
+              :session="session" :profile-id="profileId"
+              :show-example="false"
+              :show-accept="false"
+              :keeping="keeping === session.slotId"
+              :busy="keeping !== null"
+              @keep="keep(chapter, session)"
+              @edit="correctThenGo(session)"
+              @field="goToField"
+              @decided="findingDecided"
+              @stale="doc.refresh()"
+            />
+          </template>
         </section>
 
         <!-- DAS ERGEBNIS VON BRAND DESIGN (D8) — eine Fläche, kein Abnahme-

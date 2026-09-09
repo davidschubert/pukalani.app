@@ -368,6 +368,7 @@
       "sessionLocked": "Erst sind die Felder davor dran.",
       "acceptance": "Finale Abnahme",
       "acceptancePending": "Frei, sobald alle Felder dieses Kapitels bestätigt sind.",
+      "derivedGroup": "Daraus abgeleitet",
       "chapterCount": "{confirmed} von {total} bestätigt",
       "chapterCountStale": "{confirmed} von {total} bestätigt · {stale} neu besprechen",
       "chapterEffort": "{count} Sessions, ~{minutes} Min",

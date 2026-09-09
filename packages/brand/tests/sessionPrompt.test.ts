@@ -75,6 +75,27 @@ function rebuild(key: string): string {
   return sessionInstructionForSlot(slotId, optionsFor(slotId, pathKind, variant === 'full'))
 }
 
+/** Die eine Zeile, die eine LISTE von Feld-Ids aufzählt (`georgePrompt.ts`). */
+const INPUT_FIELDS_LINE = 'Your inputs are the fields: '
+
+/**
+ * DIE EINE ZEILE, DEREN REIHENFOLGE NICHTS BEDEUTET.
+ *
+ * `Your inputs are the fields: a, b, c.` zählt die Abhängigkeits-Hülle auf, und
+ * die kommt in KATALOG-Reihenfolge (`dependencyClosure`). Davids Gruppen-Umbau
+ * vom 2026-09-09 hat genau diese Reihenfolge geändert — die Fragen eines
+ * Kapitels stehen jetzt vor seinen Ableitungen —, an der MENGE aber nichts.
+ * Verglichen wird deshalb die Menge: eine fehlende Quelle fällt weiter auf,
+ * eine getauschte Position nicht mehr. Alle anderen Zeilen bleiben
+ * zeichengleich, sie tragen Regeln und keine Aufzählung.
+ */
+function normalize(line: string): string {
+  const trimmed = line.trim()
+  if (!trimmed.startsWith(INPUT_FIELDS_LINE)) return trimmed
+  const fields = trimmed.slice(INPUT_FIELDS_LINE.length).replace(/\.$/, '').split(', ')
+  return `${INPUT_FIELDS_LINE}${[...fields].sort().join(', ')}.`
+}
+
 describe('Inhaltsgleichheit mit den vier Vorgänger-Tabellen', () => {
   it('das Fixture deckt genau die 21 Sessions mit Entwurfs-Auftrag ab', () => {
     const ids = [...new Set(Object.keys(BEFORE).map(key => key.split('|')[0]!))]
@@ -92,12 +113,12 @@ describe('Inhaltsgleichheit mit den vier Vorgänger-Tabellen', () => {
 
   it.each(Object.keys(BEFORE))('%s: jede alte Zeile ausser TASK steht auch im neuen Prompt', (key) => {
     const after = rebuild(key)
-    const lines = new Set(after.split('\n').map(line => line.trim()))
+    const lines = new Set(after.split('\n').map(normalize))
     for (const line of BEFORE[key]!.split('\n')) {
       if (!line.trim()) continue
       // Die TASK-Zeile trägt das ZIEL, und das durfte Paket 2 schärfen.
       if (line.startsWith('TASK: ')) continue
-      expect(lines, line).toContain(line.trim())
+      expect(lines, line).toContain(normalize(line))
     }
   })
 

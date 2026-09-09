@@ -115,23 +115,40 @@ describe('Gegenprobe: die Katalog-Sessions verhalten sich unverändert', () => {
 
 /**
  * DER BEFUND AN DER ECHTEN REGISTRY — ohne sie wäre der Test oben nur eine
- * Rechnung über erfundenen Zahlen. Im Kapitel `context` stehen VIER
- * Entwurfs-Sessions vor der ersten Frage; genau diese Reihenfolge liess die
- * Bühne auf `a.origin` zeigen, während die Session `a.pitch` hiess.
+ * Rechnung über erfundenen Zahlen.
+ *
+ * ── DER BEFUND SELBST IST SEIT DEM 2026-09-09 BEHOBEN ─────────────────────
+ * Bis dahin standen im Kapitel `context` VIER Entwurfs-Sessions VOR der ersten
+ * Frage; genau diese Reihenfolge liess die Bühne auf `a.origin` zeigen,
+ * während die Session `a.pitch` hiess. Seit Davids Gruppen-Entscheidung
+ * (`brandSessionGroups.ts`) beginnt das Kapitel mit den sechs Fragen — die
+ * Entwurfs-Sessions stehen dahinter. Der Test bleibt und dreht sich um: er
+ * hält jetzt fest, DASS die Fragen vorne stehen und dass die Entwürfe
+ * trotzdem unverändert ihr Bühnen-Modul bekommen.
  */
 describe('Die Registry stützt den Befund', () => {
-  it('das Kapitel `context` beginnt mit vier Feldern, die niemand fragt', () => {
+  it('das Kapitel `context` beginnt mit den Fragen, nicht mit den Entwürfen', () => {
     const order = slotsForStep('context')
-    const leading = order.slice(0, 4).map(slot => slot.id)
-    expect(leading).toEqual(['a.pitch', 'a.category', 'a.competitors', 'a.audienceSketch'])
+    const leading = order.slice(0, 6).map(slot => slot.id)
+    expect(leading).toEqual([
+      'a.origin', 'a.customerPraise', 'a.complaints', 'a.oneThing', 'a.challenge', 'a.facts',
+    ])
     for (const id of leading) {
       const slot = slotById(id)!
-      expect(slot.type === 'question' || slot.type === 'choice').toBe(false)
-      // Bestätigbar sind sie alle — sie zählen im Abschluss-Gate mit.
-      expect(slotIsConfirmable(slot)).toBe(true)
+      expect(slot.type === 'question' || slot.type === 'choice').toBe(true)
     }
-    // Die erste echte Frage steht dahinter — sie war die fremde Bühnen-Frage.
+    // Die Entwurfs-Sessions stehen dahinter — bestätigbar sind sie weiterhin
+    // alle, sie zählen im Abschluss-Gate mit.
+    const trailing = order.slice(6).map(slot => slot.id)
+    expect(trailing).toEqual([
+      'a.pitch', 'a.category', 'a.competitors', 'a.audienceSketch', 'a.toneAnalysis',
+    ])
+    for (const id of trailing) {
+      expect(slotIsConfirmable(slotById(id)!)).toBe(true)
+    }
+    // Die erste Session des Kapitels IST jetzt die erste echte Frage.
     expect(order.find(slot => slot.type === 'question')?.id).toBe('a.origin')
+    expect(order[0]!.id).toBe('a.origin')
   })
 
   it('und jedes dieser vier Felder hat einen Knopf, der es füllen kann', () => {

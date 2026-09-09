@@ -368,6 +368,7 @@
       "sessionLocked": "The fields before this one come first.",
       "acceptance": "Final sign-off",
       "acceptancePending": "Opens once every field in this chapter is confirmed.",
+      "derivedGroup": "Derived from the conversation",
       "chapterCount": "{confirmed} of {total} confirmed",
       "chapterCountStale": "{confirmed} of {total} confirmed · {stale} to revisit",
       "chapterEffort": "{count} sessions, ~{minutes} min",

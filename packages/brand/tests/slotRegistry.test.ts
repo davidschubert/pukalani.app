@@ -560,7 +560,7 @@ describe('Session-Vertrag', () => {
     // KI-ENTWÜRFE sind ausdrücklich privat (§1.11 b) — keines von dreien reist
     // je in Snapshot, Share oder Beispiel.
     expect(BRAND_SLOTS.filter(session => session.sensitivity !== 'public').map(session => session.id))
-      .toEqual(['a.competitors', 'a.complaints', 'a.challenge', 'a.facts',
+      .toEqual(['a.complaints', 'a.challenge', 'a.facts', 'a.competitors',
         'g.inspiration', 'g.reading', 'j.drafts'])
   })
 
@@ -583,10 +583,12 @@ describe('Session-Vertrag', () => {
       })
       .map(session => session.id)
     expect(abweichend).toEqual([
-      // vertraulich ⇒ intern (Verbindungsregel, s. u.)
+      // vertraulich ⇒ intern (Verbindungsregel, s. u.). Seit dem Gruppen-Umbau
+      // (2026-09-09) stehen die Fragen des Kapitels `context` vor seinen
+      // Ableitungen — daher `a.facts` vor `a.competitors`/`a.toneAnalysis`.
+      'a.facts',
       'a.competitors',
       'a.toneAnalysis',
-      'a.facts',
       // Menschenfragen, die eine Festlegung sind
       'b.positioningFirstChoice',
       'c.candidates',
