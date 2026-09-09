@@ -7,6 +7,34 @@ die kleinen, verstreuten Beschlüsse.
 
 ---
 
+## 2026-09-09 — Brand Book & Kit (Produkt 03): Konzeption geschrieben, sechs Konzept-Entscheidungen
+
+**Anlass:** „Starte die Konzeption (Phase 2) für BK1" — §2 in docs/plans/BRAND-BOOK-KIT.md:
+dritte Schicht mit drei Werkstatt-Kapiteln (`nomenclature` Otto, `aiguide` Nika, `presskit`
+Ableitung + Fakten-Freigabe) und einer Lieferseite `/brand/:id/kit`; Book = dieselbe
+Leseansicht mit fünf neuen Ankern (Nomenklatur, Zeichen-/Farb-/Typografie-Anwendung,
+Pressekit; `ki-texte` wächst zu AI-Guidelines); Kit = sieben Dateien, alle bei jedem Abruf
+gerechnet (DTCG-`tokens.json` kanonisch, `tokens.css` abgeleitet mit Deckungsgleichheits-Test,
+`brand.md`/`brand.json` über die Reise-Regel, Zeichen-SVGs, `LICENSES.md`, README, Zip per
+`fflate`); Freischaltung „Ableitung" als EIN Feld an `brand_profiles` (brand-025) mit drei
+Schreibern (Beta-Regel, Betreiber, später Z1-Webhook) — der Marktvergleich liest dieselbe Regel.
+
+**Entscheidungen (David, Fragenrunde §2.19 — fünf nach Empfehlung, eine mit Zuschnitt):**
+(1) Hell/Dunkel in EINER `tokens.json` als Geschwister-Gruppen `color.light.*`/`color.dark.*`
+(die DTCG-Norm kennt keine Modi; Figma/Style Dictionary bilden Gruppen auf Modi/Sets ab).
+(2) Die Lieferseite ist eine EIGENE Seite (Supply, „lesen, laden, kopieren"), kein viertes
+Werkstatt-Kapitel mit gespeicherter Fassung. (3) Presse-Kontakt wird gefragt, optional —
+**Davids Zuschnitt: vorhandene Ansprechpartner-Daten als wählbare Vorlage anbieten** (Konto
+des Besitzers, Erstgespräch-Anfrage), damit der Punkt ein Klick ist, wenn es dieselben Daten
+sind. (4) Nomenklatur nur auf dem B2-Weg (Untermarken); Solo-Marken bekommen Schreibweisen in
+den AI-Guidelines. (5) Betreiber: `/dashboard/brand-design` wird `/dashboard/brand-unlocks`
+mit zwei Spalten (Brand Design, Ableitung), alte Route leitet weiter. (6) Kapitel-Namen wie
+vorgeschlagen; Ids und Anker bleiben (`ki-texte`), die Anzeige wechselt nach Abnahme von
+`aiguide` auf „AI-Guidelines". Nächster Schritt: Konzept-Freigabe + Prototyp (§2.15) auf
+Davids Wort.
+
+---
+
 ## 2026-09-09 — Brand Book & Kit (Produkt 03): Strategie freigegeben — ein Produkt, dritte Schicht, DTCG-Kit, BS1-Einmalpreis 149 € netto
 
 **Anlass:** „Starte die Strategie-Runde für Produkt 03 Book & Kit" — Phase 1 des Workflows

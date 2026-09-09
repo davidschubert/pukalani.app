@@ -1,10 +1,11 @@
 # Brand Book & Kit (Produkt 03) — Strategie
 
-Status: **Phase 1 (Strategie) FREIGEGEBEN 2026-09-09** — geschrieben
-2026-09-08, Davids acht Entscheidungen in **§1.11** (sieben nach Empfehlung,
-der Betrag ist gesetzt: 149 € netto je Branding). Phase 2 (Konzeption, §2)
-ist der nächste Schritt und beginnt erst auf Davids Startwort; kein Code
-vorher. Kürzel in OPEN-ITEMS: **BK1**.
+Status: **Phase 2 (Konzeption, §2) GESCHRIEBEN 2026-09-09 — zur Freigabe;
+sechs Konzept-Fragen in §2.19.** Vorgeschichte: Strategie geschrieben
+2026-09-08, **freigegeben 2026-09-09** mit Davids acht Entscheidungen in
+§1.11 (sieben nach Empfehlung, der Betrag ist gesetzt: 149 € netto je
+Branding). Nach der Konzept-Freigabe folgt der Prototyp (§2.15, Playground);
+kein Code vorher. Kürzel in OPEN-ITEMS: **BK1**.
 
 Arbeitsablauf: docs/referenz/WORKFLOW.md (Strategie ist Phase 1). Vorlage für
 Aufbau und Tiefe: docs/archiv/BRAND-DESIGN.md §1 (Produkt 02).
@@ -350,6 +351,440 @@ Extension), `brand.md`/`brand.json`-Aufbau mit Reise-Regel, die neuen
 Regel-Kapitel als Sessions der Schicht 3 (Otto/Nika-Leitern als Davids
 Inhalts-Gate), Assets-Bündel, Freischaltung über das Z1-Feld, Messung
 (Downloads als Ereignisse, H5-Beweis über den Dokument-Check), Pakete.
+
+---
+
+## 2. Konzeption (Phase 2, 2026-09-09 — zur Freigabe)
+
+Alles hier folgt den Entscheidungen in §1.11. Offene Punkte stehen als
+Fragen in §2.19, nicht als Vorbehalt im Text. Kein Code vor der Freigabe.
+
+### 2.1 Produktform: dritte Schicht derselben Werkstatt + eine Lieferseite
+
+Book & Kit hat ZWEI Gesichter, und beide leben im brand-Layer:
+
+- **Die Werkstatt (Schicht 3, „Book & Kit")** — drei Kapitel, additiv in
+  `BRAND_STEP_KEYS` hinter Brand Design, eigene Konstante
+  `BRAND_KIT_STEP_KEYS` + `isBrandKitStep()` (dieselbe Begründung wie bei
+  `BRAND_DESIGN_STEP_KEYS`: mehrere Rechnungen meinen ausdrücklich EINE
+  Schicht): `nomenclature` (Nomenklatur, Otto), `aiguide` (AI-Guidelines,
+  Nika), `presskit` (Pressekit, reine Ableitung + eine Freigabe). Je Kapitel
+  eine `brand_steps`-Zeile, Sessions nach dem BW2-Vertrag (`defineSession`),
+  Abnahme, Prüfblick, Korrektur-Regel — NICHTS Neues an der Zustandsmaschine.
+  ~8 Sessions, meist Bestätigungen, ~15 Minuten (Phase-1-Plan §5b).
+- **Die Lieferseite `/brand/:id/kit`** (Ebene „Supply") — KEIN Werkstatt-
+  Kapitel, sondern eine Lese-/Download-Seite wie das Ergebnis-Board
+  `/brand/:id/design`: Kacheln je Datei mit Vorschau, Einzel-Downloads, das
+  Bündel, der Stand, und ehrlich, was fehlt. Entschieden wird dort nichts
+  (§1.11 a: „Book & Kit = kuratieren/exportieren").
+- **Das Book** ist DIESELBE Leseansicht `/brand/:id/foundation` mit mehr
+  Kapiteln (§2.5) — kein zweiter Renderer, keine zweite Seite. Für den
+  Fremdleser (Share) und den Druck gilt derselbe Aufbau.
+- **Gating:** Schicht 3 und die Lieferseite öffnen, wenn die Marke
+  **freigeschaltet** ist (§2.8, „Ableitung"). Die Foundation muss ihr
+  Ergebnis-Kapitel abgeschlossen haben (`result` done); Brand Design ist
+  KEINE Voraussetzung (§1.11 d) — was Design braucht, sagt es (§2.6).
+- **Ort in der Oberfläche:** derselbe Rail (Layer „Book & Kit" wird ein
+  echter Layer mit drei Kapiteln + dem Eintrag „Kit"), dasselbe Dokument
+  („Euer Branding" bekommt die drei Kapitel), dieselbe Leseansicht.
+
+### 2.2 Kapitel `nomenclature` — Namensmuster je Produkttyp (Otto)
+
+Ausbau von B2 (Markenarchitektur). **Nur auf dem Weg, den B2 gelaufen ist:**
+`includeStep('nomenclature')` = `includeStep('architecture')`; ohne
+Untermarken ist das Kapitel `junction_off` wie `architecture` selbst.
+
+| Session | Typ | Editor | Generator | Inhalt |
+| --- | --- | --- | --- | --- |
+| `m.types` | choice | chips | none | Welche Produkttypen gibt es (Produkt, Dienstleistung, Programm/Format, Ort/Filiale, Digital)? Mehrfachwahl, Katalog |
+| `m.patterns` | derivation | stage | draft | Je gewähltem Typ EIN Namensmuster mit Beispiel — hergeleitet aus `b2.model`, `b2.rule`, `f.decision` (falls gelaufen), `d.toneWords`. Otto entwirft, der Mensch korrigiert |
+| `m.rules` | stage-edit | stage | none | Die Regeln als Liste (Groß-/Kleinschreibung, Trennzeichen, Reihenfolge Dachmarke/Produkt, was nie) — vorbefüllt aus `m.patterns`, Bestätigung |
+
+Ottos Leiter und Zielsätze sind Davids Inhalts-Gate wie in BW2 Paket 2 und
+BD1 D1. `audience: 'foundation'` für alle drei (Festlegungen).
+
+### 2.3 Kapitel `aiguide` — AI-Guidelines (Nika)
+
+Ausbau von Kapitel 11. Der feste Drei-Zeilen-Rahmen bleibt die kostenlose
+Fassung; hier entstehen die Guidelines, die der Markt als Kernbestandteil
+nennt (§1.7: Guardrails, Freigabe, Tabus, Mensch entscheidet zuletzt).
+
+| Session | Typ | Editor | Generator | Inhalt |
+| --- | --- | --- | --- | --- |
+| `n.scope` | choice | cards | none | Was darf KI im Namen der Marke ERZEUGEN: Entwürfe für alles · nur Text · nur intern · nichts Kundenseitiges. Katalog, eine Wahl |
+| `n.review` | choice | cards | none | Freigabe-Regel: jede Veröffentlichung durch einen Menschen · Stichprobe · Kanal-abhängig. Katalog |
+| `n.guardrails` | derivation | stage | draft | Die Leitplanken als Liste: Ton-Parameter (aus `d.toneWords`, `d.voiceSamples`), Tabus (aus `d.vocabulary` avoid, `ep.vocabulary` avoid), Markenzeichen-Schreibweisen (Titel, Tagline, Produktnamen aus `m.rules`), No-go-Themen. Nika entwirft, Mensch korrigiert |
+| `n.prompts` | derivation | none | none | DREI Prompt-Vorlagen, PUR gerechnet (kein KI-Aufruf): „System-Prompt" (= `brand.md`-Kurzform), „Social-Post", „E-Mail an Kunden" — aus Werten + `n.guardrails`. Ableitung, nur lesen/kopieren |
+
+Kapitel 11 der Leseansicht (`ki-texte`, Anker bleibt) zeigt nach Abnahme
+die Guidelines statt des Rahmens (§2.5). `audience: 'foundation'`.
+
+### 2.4 Kapitel `presskit` — das Pressekit (Ableitung + eine Freigabe)
+
+Nichts Neues entsteht, aber ZWEI Dinge muss ein Mensch sagen:
+
+| Session | Typ | Editor | Generator | Inhalt |
+| --- | --- | --- | --- | --- |
+| `p.facts` | choice | chips | none | **Welche Fakten aus `a.facts` reisen dürfen** — `a.facts` ist `internal` und bleibt es; hier wählt der Mensch je Eintrag „ins Pressekit" (Opt-in je Fakt, Default: keiner). Der gewählte Teil wird als NEUER Wert dieser Session gespeichert (`audience: 'foundation'`, `sensitivity: 'public'`) — die Reise-Regel bleibt unverändert, weil nicht `a.facts` reist, sondern eine bewusste Auswahl daraus |
+| `p.contact` | question | cards + text | none | Presse-Kontakt (Name, Rolle, E-Mail) — neu, reist BY DESIGN (`public`/`foundation`); optional. **Davids Zuschnitt (§2.20 Nr. 3): vorhandene Ansprechpartner-Daten als wählbare VORLAGE** — Karten „Konto-Inhaber (Name, E-Mail des Besitzers)" und, falls es für diese Marke eine Erstgespräch-Anfrage gibt (`brand_intro_requests`: Name, E-Mail, Telefon), „Kontakt aus dem Erstgespräch"; dazu „Anders eingeben". Die Karte FÜLLT das Textfeld vor, gespeichert wird immer der bestätigte Text (kein Verweis auf Konto-Daten, die sich später ändern); der Mensch sieht vor der Abnahme, dass diese Angabe öffentlich reist |
+| `p.summary` | derivation | none | none | Vorschau des Pressekits, PUR: Boilerplates drei Längen (`ep.boilerplates`), Tagline, Zeichen-Setzungen (aus dem Preset, falls da), Fakten (aus `p.facts`), Kontakt. Nur lesen |
+
+Keine KI in diesem Kapitel.
+
+### 2.5 Das Book — die Leseansicht wächst (Regel-Kapitel)
+
+`BRAND_FOUNDATION_CHAPTER_IDS` wird ADDITIV erweitert (Anker sind so
+unveränderlich wie Slot-Ids). Neue Ids und Ort im Inhaltsverzeichnis:
+
+| Anker | Kapitel | Gefüllt aus | Zustand ohne Freischaltung | Zustand ohne Design-Preset |
+| --- | --- | --- | --- | --- |
+| `nomenklatur` (nach `architektur`) | Nomenklatur | `m.types`, `m.patterns`, `m.rules` | entfällt (kein Wert) | — |
+| `zeichen-anwendung` (nach `visuell`) | Zeichen-Anwendung | Preset `mark` (kind, brief, examples), `brandMarkClearSpaceText`, `BRAND_MARK_MIN_WIDTH_*`, Varianten hell/dunkel/mono | `locked` mit CTA „Book & Kit" (wie Kapitel 10 vor Design) | `locked` mit Satz „kommt mit Brand Design" |
+| `farbe-anwendung` (danach) | Farb-Anwendung | Preset `color`: Rollen-Tabelle mit Hex, Ramp hell/dunkel, **Kontrast-Paare mit Urteil**, Neutral, Akzent, Regel „nie Text auf …" aus den fehlgeschlagenen Paaren | `locked` | `locked` |
+| `typografie-anwendung` (danach) | Typografie-Anwendung | Preset `type`: Paar, Skala als Größen-Tabelle (aus `BRAND_TYPE_SCALES` + Rechenregel D4), Regeln `i.rules`, Lizenz-Zeile | `locked` | `locked` |
+| `pressekit` (vor `ki-texte`) | Pressekit | `p.summary`-Quellen | entfällt | steht (ohne Zeichen-Bilder) |
+| `ki-texte` (bestehend) | Regeln für KI-Texte → **AI-Guidelines** | Rahmen wie heute; nach Abnahme von `aiguide` zusätzlich `n.scope`, `n.review`, `n.guardrails`, `n.prompts` als Blöcke | Rahmen (frei) | — |
+
+Neue Block-Arten im Renderer (`BrandFoundationBlock`): `table` (Kopf +
+Zeilen, für Rollen/Kontrast/Skala), `rules` (nummerierte Regel-Liste mit
+optionalem Don't), `prompt` (kopierbarer Vorlagen-Block), `contact`. Der
+`design`-Block von Kapitel 10 bleibt, wie er ist. Die drei Anwendungs-Kapitel
+lesen DASSELBE Preset wie Kapitel 10 — keine zweite Wahrheit, nur eine
+zweite Zoomstufe (Kapitel 10 = Vitrine, Anwendung = Regelwerk).
+
+Print-CSS deckt die neuen Kapitel automatisch (Seitenumbruch je Kapitel);
+Tabellen bekommen `page-break-inside: avoid`. Share-Snapshot: die neuen
+Foundation-Kapitel reisen wie alle anderen über `sessionTravels`; die
+Anwendungs-Kapitel werden beim Lesen aus dem eingefrorenen Preset gerechnet
+(Snapshot bleibt v2 — die FORM ändert sich nicht).
+
+### 2.6 Das Kit — Dateien und Verträge (§1.11 c)
+
+Alles wird bei jedem Abruf aus den bestätigten Werten + Preset GERECHNET.
+Es gibt keine Spalte, keinen Cache, keine gespeicherte Datei. Jede Datei
+trägt Marke, Stand (jüngstes `$updatedAt` der beteiligten Kapitel, wie
+`brandDesignStand`) und Fassung des Formats.
+
+| Datei | Quelle | Pure Regel | Braucht Design? |
+| --- | --- | --- | --- |
+| `brand.md` | `BrandFoundationView` (dieselbe wie das Book) + Preset | `renderBrandContextMarkdown(view, preset, locale)` | nein (visueller Abschnitt entfällt ohne Preset) |
+| `brand.json` | dieselben Quellen | `buildBrandContextJson(view, preset)` | nein |
+| `tokens.json` | Preset | `buildBrandTokens(preset)` → DTCG | **ja** |
+| `tokens.css` | `tokens.json` | `renderBrandTokensCss(tokens)` | **ja** |
+| `marks/*.svg` | Preset `mark.examples` + `brandMarkVariantColors` | `renderBrandMarkFiles(preset)` | **ja** |
+| `LICENSES.md` | `BRAND_FONT_PAIRS` (neue Felder) | `renderBrandLicenses(preset)` | ja (ohne Preset nur der Hinweis) |
+| `README.md` | Manifest | `renderBrandKitReadme(manifest)` | nein |
+
+**`brand.md` — Aufbau** (Sprache = `contentLocale`; nur Werte, die
+`sessionTravels` bejaht; eine H1 mit dem Markennamen, dann Abschnitte):
+1. Kopf: Marke, Stand, „Brand Context aus branding.supply", Hinweis „als
+   System-Prompt einsetzbar".
+2. Wer wir sind — Pitch, Purpose/Vision/Mission, Positionierung
+   (Kategorie, „Erste Wahl für").
+3. Werte — je Wert Definition + gelebtes Beispiel + Konfliktregel.
+4. Stimme — Archetyp (Haupt/Neben), Ziel-Gefühl, Ton-Wörter je mit einer
+   Stimmprobe, Vokabular „Benutzen / Meiden", Tabu-Wörter.
+5. Botschaften — Tagline, Boilerplates (kurz/mittel/lang), Kernbotschaften je
+   Zielgruppe, unverwechselbares Merkmal.
+6. Nomenklatur (wenn gelaufen) — Muster + Regeln.
+7. Regeln für KI — `n.scope`, `n.review`, `n.guardrails`; ohne `aiguide` der
+   Drei-Zeilen-Rahmen.
+8. Visuell in einem Absatz (nur mit Preset) — Basisfarbe + Rollen mit Hex,
+   Schriftpaar, Bild-Prinzipien, Motion-Tempo; Verweis auf `tokens.json`.
+
+**`brand.json` — Aufbau:** `{ schemaVersion: 1, brand: { title, locale,
+stand }, foundation: { story, chapters: [{ id, slots: [{ id, value }] }] },
+nomenclature?, aiGuidelines?, presskit?, design: BrandDesignSnapshotPreset |
+null }`. Die `chapters` sind die Snapshot-Kapitel (dieselbe Auswahl wie
+`share.post.ts`, dieselbe Reise-Regel); `design` ist das Snapshot-Preset ohne
+`keptDrafts`. Typ in `shared/types/brand.ts`, Zod-Schema für den Test.
+
+**`tokens.json` — DTCG 2025.10.** Farben als Objekte (`colorSpace: 'srgb'`,
+`components`, `hex`), Dauern als `{ value, unit: 'ms' }`, Easing als
+`cubicBezier`, Schriften als `fontFamily` (Array mit Rückfall-Stack),
+Typografie-Skala als `typography`-Composite UND als Einzeltokens (Figma
+importiert Composites noch nicht, §1.7). **Hell/Dunkel:** die Norm kennt
+keine Modi (Anhang A) — wir führen sie als GESCHWISTER-GRUPPEN
+`color.light.*` / `color.dark.*` mit Rollen als Aliasse in die Rampen
+(`{color.brand.600}`); Figma bildet sie beim Import auf zwei Modi ab, Style
+Dictionary auf zwei Sets. Kontrast-Paare stehen in
+`$extensions["supply.branding/contrast"]` je Rollen-Token (Paar-Id, Verhältnis,
+Urteil) — sie sind Beleg, kein Token. Aufbau:
+
+```
+color.brand.{50…950}            Ramp hell (aus rampLight)
+color.brand-dark.{50…950}       Ramp dunkel (aus rampDark)
+color.neutral.{50…950}          Neutral-Ramp
+color.accent                    Akzent
+color.light.{role}              Rollen hell → Alias  (primary, surface, text, …)
+color.dark.{role}               Rollen dunkel → Alias
+font.heading / font.body        fontFamily + Stack
+font.weight.heading             fontWeight
+type.scale.{h1…small}           dimension + typography-Composite
+radius.mark                     dimension (aus brandMarkRadiusPercent)
+motion.duration.{fast…}         duration  (aus transitions)
+motion.easing.{…}               cubicBezier
+```
+
+**`tokens.css` — abgeleitet, zwei Blöcke in einer Datei:**
+(1) `:root { --ui-color-primary-<stufe> … --ui-primary … --brand-font-heading
+… --brand-motion-fast }` und `.dark { … }` im Themes-Namensschema
+(`customThemeCss` ist das Vorbild — Namen, nicht Code, werden übernommen);
+(2) ein `@theme { --color-brand-<stufe>; --font-heading; --radius-mark;
+--ease-brand }`-Block für Tailwind v4. Kommentarkopf mit Stand. **Test der
+Deckungsgleichheit:** jeder Hex in `tokens.css` stammt aus `tokens.json`;
+jede Rolle beider Modi kommt in beiden Blöcken vor.
+
+**`marks/`** — je gesetztem Beispiel (Wortmarke, Monogramm; `j.pick`
+markiert das Primäre): `<slug>-wordmark-light.svg`, `-dark.svg`, `-mono.svg`,
+`<slug>-monogram-*.svg`. SVG-Quelltext aus dem Preset (katalog-gebaut, kein
+Nutzer-SVG); Schriften werden in den SVGs als Stack referenziert (keine
+Einbettung, H8). **Kein PNG-Raster** in dieser Fassung (§2.16).
+
+**`LICENSES.md`** — je Familie des Paares: Name, Gewichte, Quelle (URL),
+Lizenz (SPDX), Hinweis „Dateien bei der Quelle laden". Dafür bekommt
+`BrandFontPair` die Felder `headingLicense`/`bodyLicense` (`{ spdx, source }`),
+Test: jedes Paar hat beide.
+
+**Bündel:** `<slug>-brand-kit-<stand>.zip` mit allen vorhandenen Dateien +
+`README.md` (Inhalt, Stand, wie einsetzen). Gebaut in-memory mit `fflate`
+(pure, klein; Katalog-Eintrag), Deckel 5 MB (`413 kit_too_large`, wie
+`snapshot_too_large`). Ohne Design-Preset fehlen Tokens, Marken und
+Lizenzen — die README nennt das.
+
+### 2.7 Oberfläche
+
+- **Rail:** Layer 3 „Book & Kit" — gesperrt mit Info-Layer (Erklär-Text aus
+  dem Dummy, aktualisiert um „Brand Context"), freigeschaltet: drei Kapitel
+  + Eintrag „Kit" (→ `/brand/:id/kit`) + eigener Stand „x von 3".
+- **Werkstatt-Kapitel:** dieselben Instrumente (cards/chips/stage/text);
+  `p.facts` ist eine Chip-Auswahl über die Einträge von `a.facts` (Anzeige
+  der internen Rohwerte NUR dem Besitzer, wie im Dokument heute).
+- **Lieferseite `/brand/:id/kit`:** Kopf mit Marke, Stand, „Bündel laden";
+  darunter Kacheln: Brand Context (`brand.md` mit gerenderter Vorschau +
+  „Kopieren" + „Laden"; `brand.json`), Design-Tokens (Swatch-Tabelle hell/
+  dunkel mit Kontrast-Urteil, `tokens.json`/`tokens.css`), Zeichen (SVG-
+  Varianten), Pressekit (Vorschau, Fakten-Freigabe verlinkt), Lizenzen.
+  Kacheln, die Design brauchen, zeigen ohne Preset die ruhige Sperr-Fläche
+  „kommt mit Brand Design" + CTA (Studio, wie Kapitel 10).
+- **Leseansicht:** die Export-Karte wird echt — Brand Context (Menü:
+  `brand.md`, `brand.json`), Design-Tokens (`tokens.json`, `tokens.css`),
+  Assets (Bündel). Ohne Freischaltung bleiben die drei Einträge gesperrt wie
+  heute; das Etikett „Brand Book & Kit" wird ein Link zur Schranke.
+- **Schranke** (nicht freigeschaltet): Kapitel-Sperrfläche in der Werkstatt
+  und die gesperrten Einträge zeigen „Book & Kit ist Teil der Ableitung" +
+  CTA `useBrandCompletionCta()` (Erstgespräch) — **kein Preis** (§1.11 d,
+  bis Z1). Beim Fremdleser (Share) ein Satz ohne CTA.
+- **Betreiber:** die Seite `/dashboard/brand-design` wird
+  `/dashboard/brand-unlocks` mit ZWEI Spalten je Marke — „Brand Design" und
+  „Ableitung (Book & Kit + Marktvergleich)" — jeweils Knopf, Bestätigung,
+  Chip „Frei seit …/via …". Alte Route bleibt als Weiterleitung.
+- **Beispiel:** die Discover-Anatomie von Kailua bekommt den Abschnitt „Das
+  Kit" mit den echten Dateien aus `KAILUA_COFFEE_EXAMPLE` +
+  `KAILUA_COFFEE_DESIGN` (statisch gerechnet, öffentlich, `Cache-Control:
+  public`), und die Startseiten-Artefakte verlinken dorthin.
+
+### 2.8 Freischaltung „Ableitung" (§1.11 d) — EIN Feld, drei Schreiber
+
+- Migration **brand-025** (additiv): `brand_profiles.derivationUnlockedAt`
+  (datetime | null), `derivationUnlockedVia` (`'operator' | 'purchase'`),
+  `derivationUnlockedBy` (userId | Stripe-Event-Id). Kein Index.
+- **Pure Regel** `resolveDerivationAccess({ betaAccount, unlockedAt })` in
+  `shared/brandDerivation.ts`: `betaAccount` (Konto hat `brand_access`, BS1
+  Entscheidung 6 „dauerhaft frei") ODER `unlockedAt` ⇒ `{ unlocked: true,
+  grant: 'beta' | 'operator' | 'purchase' }`. Die ROUTEN fragen nur diese
+  Regel.
+- **Drei Schreiber:** (1) Beta = keine Schreibung, die Regel liest
+  `brand_access`; (2) Betreiber-Knopf (`POST /api/brand/admin/profiles/:id/
+  derivation-unlock|-lock`, `users.manage`, Ereignis `derivation.unlocked` /
+  `.locked`); (3) BS1 Z1 später: der Stripe-Webhook schreibt dasselbe Feld
+  mit `via: 'purchase'` — BK1 baut das Feld, Z1 den dritten Schreiber.
+- **Der Marktvergleich liest dieselbe Regel:** `resolveMarketPaywall` bekommt
+  die zweite Eingabe `derivationUnlocked` (genau die Erweiterung, die die
+  Datei selbst vorschreibt); BS1 §4.1 (b) ist damit eingelöst — als Feld
+  statt Tabelle (BS1 §9.1).
+- **Journey:** Schicht 3 ohne Freischaltung ⇒ `includeStep` = nicht auf dem
+  Weg (Grund `derivation_locked`), NICHT gesperrt — sonst zählten die Kapitel
+  im Fortschritt mit (D0-Lehre). Die Freischaltung legt die drei
+  `brand_steps`-Zeilen an (D1-Lehre: sonst 404 auf dem Kapitel).
+
+### 2.9 API
+
+Alle Profil-Routen hinter `requireBrandAccess` + Besitz (fremd ⇒ 404 wie die
+Datentür) + `resolveDerivationAccess` (gesperrt ⇒ `403 derivation_locked`
+mit `reason`, damit die Oberfläche die Schranke zeigt).
+
+| Route | Antwort |
+| --- | --- |
+| `GET /api/brand/profiles/:id/kit` | `BrandKitManifest`: Stand, je Datei `{ id, available, reason?, bytes }`, `designReady`, `chapters` (Stand der drei Kapitel) |
+| `GET /api/brand/profiles/:id/kit/:file` | die Datei (`brand.md`, `brand.json`, `tokens.json`, `tokens.css`, `licenses.md`, `marks/<name>.svg`) mit `Content-Disposition: attachment; filename*=…`, `Cache-Control: private, no-store`; fehlende Voraussetzung ⇒ `409 kit_file_unavailable` + `reason` |
+| `GET /api/brand/profiles/:id/kit.zip` | das Bündel; `413 kit_too_large` |
+| `GET /api/brand/example/kit/:file` · `…/kit.zip` | Kailua, öffentlich, `public, max-age=3600` |
+| `POST /api/brand/admin/profiles/:id/derivation-unlock` · `-lock` · `GET …/derivation-unlocks` | wie die Design-Pendants |
+| Kapitel-Routen | die bestehenden `steps/*`-Routen; `nomenclature`/`aiguide` nutzen `advisorGenerator` mit Otto/Nika |
+
+Antworttypen in `shared/types/brand.ts`, an beiden Enden verlangt
+(CLAUDE.md, Nitro-Routen-Typisierung aus).
+
+### 2.10 Datenmodell und Migrationen (additiv)
+
+- **brand-025:** die drei Freischalt-Spalten (§2.8).
+- **Registry:** drei Steps, ~10 Sessions (§2.2–2.4); `audience`/`sensitivity`
+  wie angegeben; `p.facts` ist die EINZIGE Session, deren Wert aus einem
+  `internal`-Slot ABGELEITET und trotzdem `public` ist — der Kopfkommentar
+  erklärt, warum (bewusste Auswahl statt Durchreichung), der Registry-Wächter
+  bekommt eine Ausnahme mit Test.
+- **Berater:** Otto `steps: ['naming', 'nomenclature']`, Nika `steps:
+  ['manifesto', 'verbal', 'aiguide']`, George `steps: ['context', 'result',
+  'presskit']` (Gastgeber liefert aus). Kein neuer Steckbrief.
+- **Schriftpaare:** `headingLicense`/`bodyLicense` je Paar (§2.6).
+- **Kapitel-Ids:** fünf neue Anker (§2.5), Titel-Schlüssel in beiden
+  Sprachen, `check:i18n-keys` grün.
+- Keine neue Tabelle, kein Bucket: Exporte werden nie gespeichert.
+
+### 2.11 KI, Kosten, Drosseln
+
+- Zwei Entwurfs-Sessions (`m.patterns`, `n.guardrails`) über denselben
+  Transport (`advisorGenerator`, ZDR-Routing, Eimer `slot` 10/Tag je Slot,
+  Konto 200/Tag, Instanz-Deckel). Gespräch (`converse`) wie in jedem Kapitel.
+- `n.prompts`, `p.summary`, alle Exporte: **null KI-Aufrufe.**
+- **Download-Eimer (nicht KI, CPU):** `kitDay` 60 Abrufe je Marke und Tag
+  (Zip zählt 5), Code `brand_kit_limit` — die Zip-Bildung ist die einzige
+  teure Rechnung; der Deckel verhindert, dass ein Skript sie im Kreis
+  anstößt.
+- Kosten je Marke: zwei Entwürfe + Gespräch ≈ wie ein Foundation-Kapitel.
+
+### 2.12 Sicherheit (prüfbar)
+
+1. **Reise-Regel ist die Export-Regel.** `renderBrandContextMarkdown`,
+   `buildBrandContextJson` und das Bündel lesen NUR über
+   `brandShareableSlotValues`; Gegenprobe im Test: eine Marke mit
+   `a.competitors` = „ACME hat Schwäche X" — der String erscheint in KEINER
+   Datei (wie G1).
+2. `a.facts` reist nie roh; nur die in `p.facts` gewählten Einträge.
+3. Downloads sind Besitzer-Routen, `private, no-store`; fremde Marke ⇒ 404.
+4. Dateinamen aus `slug` (Allowlist `[a-z0-9-]`), `filename*` RFC 5987 mit
+   ASCII-Rückfall; `:file` gegen eine feste Liste, kein Pfad.
+5. SVGs kommen aus Katalog-Setzungen (kein Nutzer-SVG, kein Upload); Text
+   in SVGs wird XML-escaped (Markenname ist Nutzereingabe!).
+6. `brand.md`/`README.md`: Markdown aus Werten — Werte werden nicht als
+   Markdown interpretiert (Zeilen mit `#`/`>` am Anfang escapen), damit ein
+   Wert keine Überschrift „erzeugt".
+7. Freischaltung nur Betreiber/Webhook; keine Kundenroute schreibt das Feld.
+8. Beispiel-Kit ist statisch aus Code, ohne Konto-Daten.
+
+### 2.13 Messung
+
+`derivation.unlocked` (via) / `.locked`, `kit.viewed`, `kit.downloaded`
+(file, zip), `step.completed` (drei Kapitel, Sekunden), Zeit
+Freischaltung → erster Download, Anteil Design-fertiger Marken mit
+Token-Download, Anteil Foundation-only-Marken mit `brand.md`-Download
+(= Beleg für §1.11 d „Design keine Voraussetzung"). **H5-Beweis** als
+Skript `verify-brand-context.mjs`: ein Modell schreibt NUR mit `brand.md`
+einen Absatz, der Dokument-Check (`brandCheckDocument`) bewertet ihn —
+Erwartung „im Ton" über der Schwelle, Gegenprobe mit fremdem `brand.md`
+darunter.
+
+### 2.14 Copy und Marketing (Folge von §1.11 e/f)
+
+- Startseite: `art1Body` „24 Kapitel …" → „Das vollständige Handbuch —
+  Regel-Kapitel, Do & Don't, AI-Guidelines" (de/en); `art5`/`art6`
+  (Content-Kompass, 90-Tage-Plan) bekommen das Etikett „Brand Experience";
+  `art2Body` nennt `brand.md` neben `brand.json`.
+- Team-Seite: `flow3Body` ohne „Rex" — „Produktion macht das Entschiedene
+  versandfertig: Brand Book, Tokens, brand.md, brand.json, Pressekit — nichts
+  Neues, alles benutzbar."
+- Rail-Text Produkt 03: „Book, Tokens, brand.md + brand.json." (ohne
+  „Strategy Playbook"); Produkt 04 bekommt Kompass + Plan genannt.
+- FAQ-Satz „bezahlt wird erst die Ableitung: Design, Brand Book, Kit" bleibt.
+- Keine neuen Config-Schlüssel; `check:i18n-keys` unverändert grün.
+
+### 2.15 Prototyp (Phase 3, nach Freigabe) — ein Screen je Interaktionstyp
+
+Im Playground mit Kailua: (1) Lieferseite `/brand/:id/kit` voll (alle
+Kacheln, Bündel-Knopf, Stand); (2) dieselbe Seite OHNE Design-Preset
+(Sperrflächen); (3) Leseansicht mit den drei Anwendungs-Kapiteln + aktiver
+Export-Karte; (4) `aiguide` in der Werkstatt (Nika: `n.scope`-Karten,
+`n.guardrails`-Bühne, `n.prompts` zum Kopieren); (5) `nomenclature` (Otto:
+Typen-Chips, Muster-Bühne); (6) `presskit` mit Fakten-Freigabe; (7) Rail
+mit gesperrter/offener Schicht 3 + Betreiber-Seite mit zwei Spalten;
+(8) Kailua-Anatomie mit „Das Kit".
+
+### 2.16 Nicht-Ziele (diese Fassung)
+
+PNG-Raster der Zeichen (kein Rasterer im Haus außer dem og-Atlas) · Figma-
+Plugin oder -Datei · MCP/API („Connect", Phase 3+) · DAM, Vorlagen-Editor,
+Social-Template-Set · Server-PDF · Schriftdateien im Bündel · Content-Kompass
+und 90-Tage-Plan (Produkt 04) · Brand Extract (eigener Baustein danach) ·
+Stripe-Checkout selbst (BS1 Z1) · Änderung am Snapshot-Format (bleibt v2).
+
+### 2.17 Abhängigkeiten und Fallen
+
+- **Kapitel-Ids und Anker sind Verträge:** verschickte Tieflinks dürfen nicht
+  ins Leere zeigen — nur anhängen, nie umbenennen; `ki-texte` bleibt.
+- **Vier Leser der Registry** (Rail, Dokument, Leseansicht, Fortschritts-
+  Cache) + Impact-Hinweis: dieselbe Klemme wie in D0, diesmal für Schicht 3
+  — Klick-Beweis auf der Dokument-Seite, nicht nur Unit-Tests.
+- **A14-Import** aus `themes/shared` bleibt auf `ramp.ts`/`oklch.ts` mit der
+  bestehenden ESLint-Ausnahme; Namensschema von `customThemeCss` wird
+  ÜBERNOMMEN, nicht importiert (themes bleibt unverändert).
+- **DTCG-Farbobjekte:** `components` sind 0–1-Fließkommazahlen aus dem Hex —
+  Rundung auf 4 Stellen, `hex` als Rückfall (Style-Dictionary-5.4-Weg).
+- **`fflate` ins pnpm-Catalog**, `check:single-copy` grün.
+- **Migration vor Deploy** (brand-025), Schema-Parität `branding` eintragen.
+- **Beta-Regel liest `brand_access`:** die Lieferseite braucht denselben
+  Zugriffspfad wie die Werkstatt; ein zweiter Leser der Beta-Wahrheit wäre
+  ein Leck — `resolveDerivationAccess` bekommt die Tatsache übergeben,
+  ermittelt sie nicht selbst.
+- **Zwei Sprachen:** Regel-Kapitel und `brand.md` sind in `contentLocale`;
+  Dateinamen und Token-Namen sind sprachneutral (`motion.fast`-Regel).
+
+### 2.18 Pakete (Skizze — verbindlich erst nach Prototyp-Freigabe)
+
+| Paket | Inhalt | Gate (David) | Beweis |
+| --- | --- | --- | --- |
+| **K0 Gerüst** | `BRAND_KIT_STEP_KEYS`, drei Steps + Sessions in der Registry (Ziele/Leitern als Entwurf), Berater-Zuordnung, Journey `derivation_locked`, Rail-Layer 3 gesperrt, Kapitel-Ids + Titel de/en | — | Registry-Wächter, 4-Leser-Klemme, Klick auf Dokument-Seite |
+| **K1 Freischaltung** | brand-025, `resolveDerivationAccess`, Admin-Routen + Seite `/dashboard/brand-unlocks` (zwei Spalten), Ereignisse, Marktvergleich liest die Regel | — | verify: frei/beta/gesperrt, 401/403 fremd, Rücknahme; Migration auf Prod mit Davids Ja |
+| **K2 Token-Modell** | `buildBrandTokens` (DTCG), `renderBrandTokensCss`, Lizenz-Felder, `LICENSES.md`, Routen für die vier Dateien | — | Unit: Zod gegen DTCG-Form, Deckungsgleichheit CSS↔JSON, Kailua-Fixture; Style-Dictionary-v5-Probelauf im Skript |
+| **K3 Brand Context** | `renderBrandContextMarkdown`, `buildBrandContextJson`, Routen, Kopieren-Knopf | Davids Blick auf Kailuas `brand.md` | Reise-Regel-Gegenprobe (Wettbewerber-String nirgends), H5-Skript |
+| **K4 Book-Kapitel** | fünf Anker, Block-Arten `table`/`rules`/`prompt`/`contact`, Renderer, Leseansicht + Print, Share liest mit | Davids Blick auf die Leseansicht | Playwright: Anker stabil, Print-Snapshot, `locked`-Zustände ohne Freischaltung/ohne Preset |
+| **K5 Werkstatt-Kapitel** | `nomenclature` (Otto), `aiguide` (Nika), `presskit` (Fakten-Freigabe, Kontakt) — Prompts, Formverträge, Eimer, Invarianten | **Davids Inhalts-Gate:** Ottos/Nikas Leitern + Katalog-Karten (`m.types`, `n.scope`, `n.review`) | 672+ brand-Tests, Live-Persona-Audit an Kailua + zwei Testmarken |
+| **K6 Lieferseite + Bündel** | `/brand/:id/kit`, Manifest-Route, `marks/*.svg`, Zip (`fflate`), Download-Eimer, Export-Karte echt | Davids Blick auf die Seite | Playwright: jeder Download 200/`no-store`, 409 ohne Preset, 413-Deckel, fremd 404 |
+| **K7 Beispiel + Copy** | Kailua-Kit öffentlich (Anatomie-Abschnitt, Beispiel-Routen), Startseiten-/Team-/Rail-Copy (§2.14) | Davids Wort zur Copy | `check:i18n-keys`, Live-Klick auf Discover |
+| **K8 Audit + Live** | Code-Audit (Sicherheit §2.12), Live-Beweise auf branding.supply, COMPLETE-Eintrag mit Gelernt | Abnahme | Audit-Bericht, Live-Build-SHA |
+
+Reihenfolge K0 → K1 → K2 → K3 → K4 → K5 → K6 → K7 → K8; K2/K3 sind pur und
+können parallel zu K1 laufen. Pakete starten selbstständig, sobald das
+vorige grün ist (Regel vom 2026-09-05); Inhalts-Gates blockieren nur das
+jeweilige Paket.
+
+### 2.19 Offene Entscheidungen für die Freigabe
+
+| # | Frage | Empfehlung |
+| --- | --- | --- |
+| 1 | Hell/Dunkel in `tokens.json`: Geschwister-Gruppen `color.light.*`/`color.dark.*` in EINER Datei — oder zwei Dateien `tokens.light.json`/`tokens.dark.json`? | **eine Datei mit Gruppen** — ein Download, Aliasse in dieselben Rampen; Figma/Style Dictionary bilden Gruppen auf Modi/Sets ab |
+| 2 | Lieferseite `/brand/:id/kit` als eigene Seite (Supply) — oder als viertes Werkstatt-Kapitel `kit` mit Bestätigung „Stand freigeben"? | **eigene Seite**, nichts wird entschieden; ein Kapitel „freigeben" wäre eine gespeicherte Fassung und widerspräche „gerechnet, nie gespeichert" |
+| 3 | Presse-Kontakt (`p.contact`) als neue Frage — oder weglassen (Pressekit ohne Ansprechperson)? | **fragen, optional** — Brandkit-Regel 5 „Ansprechperson" (BF1 Anhang A); reist by design |
+| 4 | Nomenklatur nur auf dem B2-Weg (Untermarken) — oder immer (auch ohne Architektur, für Produkt-/Angebotsnamen)? | **nur auf dem B2-Weg** — ohne Architektur gibt es kein Muster, das zu bestätigen wäre; Solo-Marken bekommen den Namensteil in `n.guardrails` (Schreibweisen) |
+| 5 | Betreiber-Seite: `/dashboard/brand-design` in `/dashboard/brand-unlocks` mit zwei Spalten überführen — oder zweite Seite daneben? | **eine Seite, zwei Spalten**, alte Route leitet weiter |
+| 6 | Kapitel-Namen (de/en): Nomenklatur · AI-Guidelines · Pressekit · Zeichen-Anwendung · Farb-Anwendung · Typografie-Anwendung; Kapitel 11 heißt nach Abnahme „AI-Guidelines" statt „Regeln für KI-Texte"? | so — Ids bleiben, Anker `ki-texte` bleibt |
+
+### 2.20 Entscheidungen zur Konzeption (David, 2026-09-09, Fragenrunde)
+
+§2.19 bleibt als Protokoll stehen.
+
+| # | Frage | Entscheidung | Einordnung |
+| --- | --- | --- | --- |
+| 1 | Token-Modi | **Eine `tokens.json`, Geschwister-Gruppen `color.light.*` / `color.dark.*`** | nach Empfehlung |
+| 2 | Lieferseite | **Eigene Seite `/brand/:id/kit`**, nichts wird entschieden, nichts gespeichert | nach Empfehlung |
+| 3 | Presse-Kontakt | **Fragen, optional — mit VORLAGE aus vorhandenen Ansprechpartner-Daten** (Konto-Inhaber, Erstgespräch-Anfrage) als wählbare Karten, die das Feld vorfüllen | Davids Zuschnitt (eingearbeitet in §2.4): der Punkt soll ein Klick sein, wenn es dieselben Daten sind. Leitplanke: gespeichert wird der bestätigte TEXT, kein Verweis — die Konto-Daten dürfen sich später ändern, ohne das Pressekit still mitzuändern; und der Mensch sieht vor der Abnahme, dass die Angabe öffentlich reist |
+| 4 | Nomenklatur | **Nur auf dem B2-Weg** (`includeStep` wie `architecture`); Solo-Marken bekommen Schreibweisen in `n.guardrails` | nach Empfehlung |
+| 5 | Betreiber-Seite | **`/dashboard/brand-unlocks` mit zwei Spalten** (Brand Design, Ableitung), alte Route leitet weiter | nach Empfehlung |
+| 6 | Kapitel-Namen | **Wie vorgeschlagen** (de: Nomenklatur · AI-Guidelines · Pressekit · Zeichen-Anwendung · Farb-Anwendung · Typografie-Anwendung; en: Nomenclature · AI guidelines · Press kit · Mark usage · Colour usage · Type usage); Kapitel 11 zeigt nach Abnahme „AI-Guidelines", Id/Anker `ki-texte` bleibt | nach Empfehlung |
+
+Damit sind alle Konzept-Fragen beantwortet. **Die Freigabe des Konzepts und
+der Start des Prototyps (§2.15) sind Davids ausgesprochenes Go** (WORKFLOW
+„Freigaben sind explizit") — bis dahin kein Code.
 
 ---
 
