@@ -96,6 +96,19 @@ nacheinander (Regel vom 2026-09-05), David wird nur an den Gates gebraucht: bran
 Prod-Lauf (K1), Blick auf `brand.md` (K3) und Leseansicht (K4), Inhalts-Gate Otto/Nika (K5),
 Lieferseite (K6), Copy (K7), Abnahme (K8).
 
+**Nachtrag (zweite Abnahme-Runde, Fable, gleicher Tag):** eine parallele Sitzung legte David
+dieselben neun Routen noch einmal vor (Beweisbilder; ein Sichtbefund behoben: die Lizenzen-Tabelle
+der Lieferseite lief bei 1440 px aus der Karte, Zellen brechen jetzt um). Davids Antworten deckten
+sich mit der Freigabe oben; NEU entschieden wurde nur der **Dunkelmodus-Akzent**: Kailuas
+`accent` (#2f4a3a) erreicht auf der dunklen Fläche 1,8:1. `buildBrandTokens` (K2) gibt
+`color.dark.accent` einen eigenen Alias auf die erste Rampenstufe, die AA erreicht; das gemessene
+Urteil bleibt als `$extensions`-Beleg an der Rolle stehen (Beleg, kein Token). Verworfen:
+Markenfarbe wörtlich lassen und nur „unter AA" zeigen (verschiebt die Entscheidung in jede Marke);
+neue Frage im Farbwelt-Kapitel (das Kit dürfte erst nach einer Antwort rechnen — widerspricht
+„gerechnet, nie gespeichert"). Die doppelte Vorlage selbst ist die Lehre vom 2026-08-02 in neuer
+Form: die Fetch-Prüfung vor dem Start lag VOR der Nachbar-Freigabe — vor jeder Fragerunde an David
+noch einmal `main` lesen.
+
 ---
 
 ## 2026-09-09 — Brand Book & Kit (Produkt 03): Konzept freigegeben, Prototyp beauftragt

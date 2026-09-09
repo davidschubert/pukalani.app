@@ -782,6 +782,8 @@ jeweilige Paket.
 | 5 | Betreiber-Seite | **`/dashboard/brand-unlocks` mit zwei Spalten** (Brand Design, Ableitung), alte Route leitet weiter | nach Empfehlung |
 | 6 | Kapitel-Namen | **Wie vorgeschlagen** (de: Nomenklatur · AI-Guidelines · Pressekit · Zeichen-Anwendung · Farb-Anwendung · Typografie-Anwendung; en: Nomenclature · AI guidelines · Press kit · Mark usage · Colour usage · Type usage); Kapitel 11 zeigt nach Abnahme „AI-Guidelines", Id/Anker `ki-texte` bleibt | nach Empfehlung |
 
+| 7 | Abnahme-Runde (2026-09-09): Dunkelmodus-Akzent unter AA (Kailua `accent` 1,8:1 auf dunkler Fläche) | **Automatisch heben** — `buildBrandTokens` (K2) gibt `color.dark.accent` einen eigenen Alias auf die erste Rampenstufe, die AA erreicht; das gemessene Urteil bleibt als `$extensions`-Beleg | nach Empfehlung (DECISION-LOG, Nachtrag) |
+
 Damit sind alle Konzept-Fragen beantwortet. **Die Freigabe des Konzepts und
 der Start des Prototyps (§2.15) sind Davids ausgesprochenes Go** (WORKFLOW
 „Freigaben sind explizit") — bis dahin kein Code.
