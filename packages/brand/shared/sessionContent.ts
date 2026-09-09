@@ -3797,6 +3797,16 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
       reframes: ['if they cannot tell them apart, play the slowest and the fastest one after the other'],
     },
     form: { person: 'none', tense: 'present' },
+    /**
+     * DIE DREI TEMPO-IDS WÖRTLICH (D7, Muster `k.icons` aus D6) — diese Datei
+     * hat keine Importe (s. Kopf), der Katalog steht in
+     * `shared/brandDesignVocab.ts` (`BRAND_TEMPO_OPTIONS`). Dass beide dasselbe
+     * sagen, nagelt `tests/brandDesignMotion.test.ts` fest; ohne diese
+     * Invariante stünde ein von Hand hineingeschriebenes „mittelschnell"
+     * bestätigt im Slot, und `buildBrandDesign` fände dafür weder Dauer noch
+     * Kurve — das Preset wäre `null`, obwohl das Kapitel abgeschlossen ist.
+     */
+    invariants: [{ kind: 'oneOf', terms: ['calm', 'lively', 'snappy'] }],
   },
   'l.transitions': {
     goal: 'derive the transition tokens from the tempo: durations, easing and the offset between '
@@ -3843,6 +3853,13 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
         + 'one'],
     },
     form: { person: 'none', tense: 'present' },
+    /**
+     * JA ODER NEIN, und beides als Katalog-Id — dieselbe Begründung wie bei
+     * `l.tempo`. Die Ids stehen in `BRAND_LOGO_MOTION_OPTIONS`; „vielleicht
+     * später" ist hier ausdrücklich ein Anti-Muster und soll auch technisch
+     * nicht in den Slot passen.
+     */
+    invariants: [{ kind: 'oneOf', terms: ['no', 'yes'] }],
   },
   'l.rules': {
     goal: 'write the motion rules: where movement is allowed, where never, and what happens with reduced '

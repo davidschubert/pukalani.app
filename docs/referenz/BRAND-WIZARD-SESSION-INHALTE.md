@@ -4142,7 +4142,7 @@ Interview-Technik: **Frida** (Design Directorin). Gesprochen wird alles von Geor
 
 **Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 0 · „weiss nicht" gilt hier nicht · nicht vertagbar
 
-**Invarianten (im Code geprüft):** —
+**Invarianten (im Code geprüft):** der Wert ist eine Id aus: calm, lively, snappy
 
 **Fliesst später in:** 3 Felder in 1 Kapiteln (Bewegung)
 
@@ -4210,7 +4210,7 @@ Interview-Technik: **Frida** (Design Directorin). Gesprochen wird alles von Geor
 
 **Antwort-Regeln:** Mindest-Substanz: kurz · Nachfragen: höchstens 0 · „weiss nicht" gilt hier nicht · nicht vertagbar
 
-**Invarianten (im Code geprüft):** —
+**Invarianten (im Code geprüft):** der Wert ist eine Id aus: no, yes
 
 **Fliesst später in:** 1 Felder in 1 Kapiteln (Bewegung)
 

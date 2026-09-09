@@ -939,11 +939,17 @@ export const BRAND_SLOTS: readonly BrandSlot[] = [
   defineSession({ id: 'k.dodont', stepId: 'imagery', type: 'stage-edit', required: true, kind: 'list', maxLength: LONG, editor: 'stage', generator: 'none', dependencies: ['k.photo', 'k.illustration', 'k.icons'] }),
 
   // ── L · Bewegung (§2.7) — 4 ─────────────────────────────────────────────
-  defineSession({ id: 'l.tempo', stepId: 'motion', type: 'choice', required: true, kind: 'choice', maxLength: SHORT, editor: 'cards', generator: 'derive', dependencies: ['g.mix'] }),
+  // `generator: 'none'` FÜR ALLE VIER (D7, dieselbe Begründung wie in D4 und
+  // D6): das Tempo ist eine WAHL, die Übergänge sind eine RECHNUNG
+  // (`brandMotionTransitions`, D0), und die Regeln folgen aus beidem
+  // (`shared/brandDesignMotion.ts`). Mit `derive`/`draft` trüge die Bühne einen
+  // Entwurfs-Knopf, und der schriebe Prosa in Felder, die eine Katalog-Id, vier
+  // Tokens und sechs prüfbare Sätze halten.
+  defineSession({ id: 'l.tempo', stepId: 'motion', type: 'choice', required: true, kind: 'choice', maxLength: SHORT, editor: 'cards', generator: 'none', dependencies: ['g.mix'] }),
   // PUR: Dauern, Easing und Versatz als Token-Satz aus dem Tempo.
   defineSession({ id: 'l.transitions', stepId: 'motion', type: 'derivation', required: true, kind: 'structured', maxLength: LONG, editor: 'none', generator: 'none', dependencies: ['l.tempo'] }),
   defineSession({ id: 'l.logo', stepId: 'motion', type: 'choice', required: true, kind: 'choice', maxLength: SHORT, editor: 'cards', generator: 'none', dependencies: ['j.kind', 'l.tempo'] }),
-  defineSession({ id: 'l.rules', stepId: 'motion', type: 'stage-edit', required: true, kind: 'list', maxLength: LONG, editor: 'stage', generator: 'draft', dependencies: ['l.tempo', 'l.transitions', 'l.logo'] }),
+  defineSession({ id: 'l.rules', stepId: 'motion', type: 'stage-edit', required: true, kind: 'list', maxLength: LONG, editor: 'stage', generator: 'none', dependencies: ['l.tempo', 'l.transitions', 'l.logo'] }),
 ]
 
 const SLOTS_BY_ID = new Map<string, BrandSlot>(BRAND_SLOTS.map(slot => [slot.id, slot]))
