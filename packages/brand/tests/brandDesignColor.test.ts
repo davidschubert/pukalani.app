@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   BRAND_CONTRAST_PAIR_SPECS,
+  brandAccentInk,
   brandColorContrastPairs,
   brandContrast,
   brandNeutralRamp,
@@ -56,6 +57,12 @@ const ROAST = '#4a3123'
 const CREMA = '#b98a5e'
 const MILK = '#e8d3b8'
 const PALM = '#2f4a3a'
+/**
+ * EIN MITTELTON — er ist der Durchfaller der Kontrast-Matrix, seit die
+ * Schriftfarbe auf dem Akzent gerechnet wird (D9): Papier darauf ist zu
+ * schwach, die tiefste Marken-Stufe ebenso.
+ */
+const MIDTONE = '#408080'
 /** Irgendeine stabile Profil-Id — die Kachel-Farbwelt hängt an ihr. */
 const SEED = 'brand-design-d3-proof'
 
@@ -262,11 +269,74 @@ describe('Die Kontrast-Prüfung (`h.contrast`)', () => {
     for (const pair of pairs) expect(pair.ratio).toBeGreaterThan(0)
   })
 
-  it('DER CREMA-FALL: ein zu heller Akzent reisst `button-light`', () => {
-    const pairs = brandColorContrastPairs(ROAST, CREMA, 'tinted')!
+  /**
+   * DIE SCHRIFTFARBE AUF DEM AKZENT WIRD GEMESSEN, NICHT GESETZT (D9).
+   *
+   * Bis D8 mass `button-light` fest Papier auf Akzent — ein HELLER Akzent fiel
+   * damit immer durch, obwohl die Vorschau-Szene daneben längst dunklen Text
+   * darauf setzte (`--ds-accent-ink`). Die Tabelle sagte „fällt durch", das
+   * Produkt zeigte lesbaren Text: zwei Aussagen über dieselbe Fläche.
+   *
+   * Jetzt misst die Matrix, was die Szene setzt. Weich wird sie davon nicht —
+   * die drei Fälle unten stehen genau dafür nebeneinander.
+   */
+  it('heller Akzent: die Matrix misst DUNKLE Schrift und besteht', () => {
+    const pairs = brandColorContrastPairs(ROAST, MILK, 'tinted')!
+    const button = pairs.find(pair => pair.id === 'button-light')!
+    expect(button.foreground).toBe(brandRampLight(ROAST)![950])
+    expect(brandContrastReview(pairs).ok).toBe(true)
+  })
+
+  it('tiefer Akzent: dieselbe Regel wählt PAPIER', () => {
+    const pairs = brandColorContrastPairs(ROAST, PALM, 'tinted')!
+    const button = pairs.find(pair => pair.id === 'button-light')!
+    expect(button.foreground).toBe(brandNeutralRamp(ROAST)![50])
+    expect(brandContrastReview(pairs).ok).toBe(true)
+  })
+
+  it('MITTELTON: er trägt weder helle noch dunkle Schrift und reisst `button-light`', () => {
+    const pairs = brandColorContrastPairs(ROAST, MIDTONE, 'tinted')!
     const review = brandContrastReview(pairs)
     expect(review.ok).toBe(false)
-    expect(review.failing).toContain('button-light')
+    expect(review.failing).toEqual(['button-light'])
+  })
+
+  it('`brandAccentInk` nimmt den HÖHEREN der beiden Kontraste — beide Richtungen', () => {
+    const paper = brandNeutralRamp(ROAST)![50]
+    const ink = brandRampLight(ROAST)![950]
+    expect(brandAccentInk(MILK, paper, ink)).toBe(ink)
+    expect(brandAccentInk(PALM, paper, ink)).toBe(paper)
+    /*
+     * GEGENPROBE gegen eine Regel, die nur zufällig richtig liegt: die
+     * gewählte Farbe trägt bei JEDEM der drei Akzente den höheren Kontrast —
+     * nachgerechnet mit `brandContrast`, nicht mit sich selbst.
+     */
+    for (const accent of [MILK, PALM, MIDTONE]) {
+      const chosen = brandAccentInk(accent, paper, ink)
+      const other = chosen === paper ? ink : paper
+      expect(brandContrast(chosen, accent)!.ratio)
+        .toBeGreaterThanOrEqual(brandContrast(other, accent)!.ratio)
+    }
+  })
+
+  it('das PRESET trägt dieselbe Schriftfarbe wie die Matrix des Kapitels', () => {
+    const values: BrandDesignValues = {
+      dna: KAILUA_DNA,
+      base: ROAST,
+      neutral: 'tinted',
+      accent: MILK,
+      roles: brandColorRoles(ROAST, MILK, 'tinted')!,
+      pair: 'editorial',
+      scale: 'calm',
+      markKind: 'word',
+      tempo: 'calm',
+    }
+    const preset = buildBrandDesign(values)!
+    const fromPreset = preset.color.contrastPairs.find(pair => pair.id === 'button-light')!
+    const fromChapter = brandColorContrastPairs(ROAST, MILK, 'tinted')!
+      .find(pair => pair.id === 'button-light')!
+    expect(fromPreset.foreground).toBe(fromChapter.foreground)
+    expect(fromPreset.foreground).toBe(brandRampLight(ROAST)![950])
   })
 
   it('ein FEHLENDES Pflicht-Paar zählt wie ein durchgefallenes', () => {

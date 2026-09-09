@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { brandContrast } from '../../shared/brandDesign'
+import { brandAccentInk } from '../../shared/brandDesign'
 import type { BrandSceneColors, BrandSceneFonts, BrandSceneMotion } from '../../shared/brandDesignScene'
 import { BRAND_RAMP_SHADES, type BrandRamp } from '../../shared/types/brand'
 
@@ -88,11 +88,11 @@ const ramp = computed<BrandRamp>(() => (dark.value ? props.colors.rampDark : pro
  * in der Vorschau ein Knopf, dessen Beschriftung niemand lesen kann — und
  * genau das soll das Kapitel ja verhindern.
  */
-const accentInk = computed(() => {
-  const onPaper = brandContrast(props.colors.paper, props.colors.accent)?.ratio ?? 0
-  const onInk = brandContrast(ramp.value[950], props.colors.accent)?.ratio ?? 0
-  return onPaper >= onInk ? props.colors.paper : ramp.value[950]
-})
+const accentInk = computed(() => brandAccentInk(
+  props.colors.accent,
+  props.colors.paper,
+  ramp.value[950],
+))
 
 const vars = computed(() => {
   const n = props.colors.neutral

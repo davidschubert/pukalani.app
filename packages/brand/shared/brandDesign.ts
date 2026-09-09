@@ -144,7 +144,7 @@ export function brandNeutralSource(option: string | undefined, base: string): st
 export interface BrandContrastPairSpec {
   readonly id: string
   readonly scheme: 'light' | 'dark'
-  readonly fg: number | 'accent' | 'paper'
+  readonly fg: number | 'accent' | 'paper' | 'accentInk'
   readonly bg: number | 'paper' | 'ground' | 'accent'
 }
 
@@ -156,7 +156,7 @@ export interface BrandContrastPairSpec {
 export const BRAND_CONTRAST_PAIR_SPECS: readonly BrandContrastPairSpec[] = [
   { id: 'body-light', scheme: 'light', fg: 900, bg: 'paper' },
   { id: 'heading-light', scheme: 'light', fg: 800, bg: 'paper' },
-  { id: 'button-light', scheme: 'light', fg: 'paper', bg: 'accent' },
+  { id: 'button-light', scheme: 'light', fg: 'accentInk', bg: 'accent' },
   { id: 'muted-light', scheme: 'light', fg: 700, bg: 100 },
   { id: 'body-dark', scheme: 'dark', fg: 100, bg: 'ground' },
   { id: 'accent-dark', scheme: 'dark', fg: 400, bg: 'ground' },
@@ -174,6 +174,32 @@ function shadeOf(ramp: BrandRamp, shade: number): string | null {
   return known ? ramp[shade as keyof BrandRamp] : null
 }
 
+/**
+ * DIE SCHRIFTFARBE AUF DEM AKZENT — Papier ODER die tiefste Stufe der
+ * Marken-Rampe, je nachdem, was den HÖHEREN Kontrast trägt (Brand Design D9,
+ * offener Punkt aus D3).
+ *
+ * Sie ist die EINE Regel für zwei Leser: die Vorschau-Szene (`BwDesignScene`,
+ * `--ds-accent-ink`) rechnete sie schon so, die Kontrast-Matrix mass dagegen
+ * fest Papier auf Akzent. Bei einem HELLEN Akzent standen damit zwei Aussagen
+ * über dieselbe Fläche nebeneinander: die Tabelle sagte „fällt durch", während
+ * die Szene daneben einen tadellos lesbaren dunklen Knopf-Text zeigte. Wer
+ * das sieht, glaubt danach keiner von beiden mehr.
+ *
+ * Sie macht die Prüfung NICHT weich: ein Akzent im Mittelfeld trägt weder
+ * helle noch dunkle Schrift und fällt weiter durch. Sie misst nur, was das
+ * Produkt tatsächlich setzt.
+ */
+export function brandAccentInk(
+  accent: string,
+  paper: string,
+  deepestBrandShade: string,
+): string {
+  const onPaper = contrastRatio(paper, accent) ?? 0
+  const onInk = contrastRatio(deepestBrandShade, accent) ?? 0
+  return onPaper >= onInk ? paper : deepestBrandShade
+}
+
 function resolveEnd(
   end: BrandContrastPairSpec['fg'] | BrandContrastPairSpec['bg'],
   scheme: 'light' | 'dark',
@@ -184,6 +210,13 @@ function resolveEnd(
   // beides sind Flächen, und Flächen kommen nie aus der Marken-Rampe.
   if (end === 'paper') return colors.neutral[50]
   if (end === 'ground') return colors.neutral[950]
+  if (end === 'accentInk') {
+    return brandAccentInk(
+      colors.accent,
+      colors.neutral[50],
+      (scheme === 'dark' ? colors.rampDark : colors.rampLight)[950],
+    )
+  }
   const ramp = scheme === 'dark' ? colors.rampDark : colors.rampLight
   return shadeOf(ramp, end)
 }

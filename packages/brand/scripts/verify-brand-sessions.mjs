@@ -2426,18 +2426,25 @@ try {
   check('DIE ABSTANDS-REGEL steht auf der Seite: „zu nah an eurer Basisfarbe"',
     cremaView.text.includes('Zu nah an eurer Basisfarbe'), 'Hinweis nicht gefunden')
 
-  // Und jetzt ein Akzent, der den Knopf-Text nicht trägt: die Kontrast-
-  // Prüfung fällt durch, sagt WELCHES Paar es ist — und `h.contrast` bleibt
-  // leer, ist also nicht bestätigbar (§2.3: „wird gar nicht erst angeboten").
+  /*
+   * Und jetzt ein Akzent, der den Knopf-Text nicht trägt: die Kontrast-Prüfung
+   * fällt durch, sagt WELCHES Paar es ist — und `h.contrast` bleibt leer, ist
+   * also nicht bestätigbar (§2.3: „wird gar nicht erst angeboten").
+   *
+   * ES IST EIN MITTELTON, seit D9 die Schriftfarbe auf dem Akzent RECHNET
+   * (`brandAccentInk`): ein HELLER Akzent trägt jetzt dunkle Schrift und
+   * besteht — genau das war der Widerspruch zwischen Tabelle und Szene, den D9
+   * aufgelöst hat. Durch fällt, was weder helle noch dunkle Schrift trägt.
+   */
   const lightAccent = await call(colorBase, {
     method: 'PATCH',
     cookie: account.cookie,
     body: {
       revision: await stepRevision('color'),
-      slots: { 'h.base': { value: '#4a3123' }, 'h.accent': { value: '#e8d3b8' } },
+      slots: { 'h.base': { value: '#4a3123' }, 'h.accent': { value: '#408080' } },
     },
   })
-  check('Vorprobe: ein zu heller Akzent lässt sich eintragen',
+  check('Vorprobe: ein Mittelton als Akzent lässt sich eintragen',
     lightAccent.status === 200, `${lightAccent.status} ${lightAccent.text.slice(0, 160)}`)
   const failView = await colorPage()
   check('DIE KONTRAST-REGEL steht auf der Seite und nennt das Paar',
@@ -2448,6 +2455,28 @@ try {
   check('… und `h.contrast` trägt dabei KEINEN Wert (leer heisst: nicht bestätigbar)',
     !(contrastSlot?.value ?? contrastSlot?.confirmed ?? ''),
     JSON.stringify(contrastSlot ?? null))
+
+  /*
+   * DIE GEGENPROBE ZUM MITTELTON (D9): derselbe Weg mit einem HELLEN Akzent —
+   * die Absage verschwindet, weil die Matrix jetzt dieselbe dunkle Schrift
+   * misst, die die Szene daneben setzt. Ohne diese zwei Zeilen könnte die
+   * Prüfung darüber auch für die alte Regel („immer Papier") grün sein, und
+   * die wies JEDEN hellen Akzent ab.
+   */
+  const brightAccent = await call(colorBase, {
+    method: 'PATCH',
+    cookie: account.cookie,
+    body: {
+      revision: await stepRevision('color'),
+      slots: { 'h.base': { value: '#4a3123' }, 'h.accent': { value: '#e8d3b8' } },
+    },
+  })
+  check('Vorprobe: ein HELLER Akzent lässt sich eintragen', brightAccent.status === 200,
+    `${brightAccent.status} ${brightAccent.text.slice(0, 160)}`)
+  const brightView = await colorPage()
+  check('GEGENPROBE: mit hellem Akzent besteht die Prüfung — dunkle Schrift trägt ihn',
+    !brightView.text.includes('So lässt sich die Prüfung nicht bestätigen'),
+    'die Absage steht noch da, obwohl die Szene lesbaren Text zeigt')
 
   // ── DAS KAPITEL LÄSST SICH ZU ENDE GEHEN ───────────────────────────────
   //

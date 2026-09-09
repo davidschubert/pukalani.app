@@ -196,9 +196,11 @@ export interface BrandAccentCandidate extends BrandColorCandidate {
  * Knopf-Text zu tragen: der sichtbare Beinahe-Treffer) und zwei TIEFE Töne
  * aus anderen kuratierten Welten, weit genug weg, um als Signal zu lesen.
  *
- * Warum tief: `button-light` misst hellen Text AUF dem Akzent (§2.8, Preset).
- * Ein Akzent, der das nicht trägt, macht die Kontrast-Prüfung rot — und ein
- * Vorrat, in dem KEIN Kandidat sie besteht, wäre eine Sackgasse.
+ * Warum tief: `button-light` misst die Schrift AUF dem Akzent (§2.8, Preset).
+ * Seit D9 rechnet die Matrix dieselbe adaptive Schriftfarbe wie die Szene
+ * (`brandAccentInk`) — durch fällt deshalb nicht mehr jeder helle Ton, sondern
+ * der MITTELTON, der weder helle noch dunkle Schrift trägt. Tiefe Signale sind
+ * trotzdem die bessere Wahl: sie lesen als Signal, nicht als zweite Fläche.
  */
 export function brandAccentCandidates(
   directionId: string,
@@ -236,11 +238,12 @@ export function brandAccentCandidates(
  * dann laut.
  *
  * ── WARUM DER AKZENT DIE MATRIX MITRECHNET ────────────────────────────────
- * Der harmonischste Akzent ist oft der MITTELTON der Richtung — und auf dem
- * kann kein heller Knopf-Text stehen (`button-light`). Ein Vorschlag, mit dem
- * das Kapitel von Anfang an rot ist, wäre kein Vorschlag: H5 verspricht einen
- * Durchgang, in dem man nur widerspricht, wo man will. Der Mensch DARF ihn
- * trotzdem wählen — dann sagt die Tabelle, was es kostet.
+ * Der harmonischste Akzent ist oft der MITTELTON der Richtung — und der trägt
+ * weder hellen noch dunklen Knopf-Text (`button-light`, seit D9 adaptiv
+ * gemessen). Ein Vorschlag, mit dem das Kapitel von Anfang an rot ist, wäre
+ * kein Vorschlag: H5 verspricht einen Durchgang, in dem man nur widerspricht,
+ * wo man will. Der Mensch DARF ihn trotzdem wählen — dann sagt die Tabelle,
+ * was es kostet.
  */
 export interface BrandColorDefaults {
   base: string
