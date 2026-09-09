@@ -1,17 +1,19 @@
 # Brand Insights — Redaktionskonzept (BI1)
 
-Status: **Prototyp I0 gebaut, Runde 1 entschieden 2026-09-08 — Freigabe des
-Prototyps offen (David klickt die sechs Screens auf 3013).** Die fünf Fragen der
-Prototyp-Runde 1 sind beantwortet (§9.10, Tabelle in §11); der **Bau I1+** wartet
-auf DB1 und den Anwalt (§6), **I1a (Beleg-Riegel nach `core`) läuft bereits**
-(§9.9). Vorgeschichte:
+Status: **Prototyp I0 FREIGEGEBEN 2026-09-08** (Davids Wort: „so bauen") — Phase 4
+des Workflows ist durch. Der **Bau I1+ startet trotzdem noch nicht**: er hängt an
+**DB1**, an der **Anwaltsantwort** und am **Google-API-Schlüssel** (die Gates aus
+§11.3 und §9.9). **I1a (Beleg-Riegel nach `core`) läuft bereits** (§9.9).
+Vorgeschichte:
 Redaktionskonzept ENTSCHIEDEN 2026-09-07 (Davids zwölf Antworten, §1) ·
 Konzeptrunde GESCHRIEBEN 2026-09-08 (§9 die Vorschläge, §10 die acht Fragen) ·
 **am 2026-09-08 beantwortet — die acht Entscheidungen stehen in §11** ·
-**Prototyp-Runde 1 am 2026-09-08 entschieden (fünf weitere Zeilen in §11)**. Nach
-[referenz/WORKFLOW.md](../referenz/WORKFLOW.md) ist damit Phase 2 (Konzeption)
-abgeschlossen und Phase 3 (Prototyp) ausgeführt; vor Davids Prototyp-Abnahme
-(Phase 4) wird an I1+ nichts gebaut — **einzige Ausnahme ist I1a**, ein
+**Prototyp-Runde 1 am 2026-09-08 entschieden (fünf weitere Zeilen in §11.2)** ·
+**Prototyp am 2026-09-08 freigegeben**. Nach
+[referenz/WORKFLOW.md](../referenz/WORKFLOW.md) sind damit Phase 2 (Konzeption),
+Phase 3 (Prototyp) und Phase 4 (Freigabe) abgeschlossen; die Freigabe ist die
+Freigabe der FORM, kein Startschuss für den Bau — was I1+ noch aufhält, sind die
+drei Gates oben. **I1a bleibt die Ausnahme**, ein
 Fundament-Baustein im `core`-Layer, der von Brand Insights unabhängig
 richtig ist. Dieses Dokument hält fest, WAS entschieden ist und welche
 Leitplanken daran hängen — es ist keine Arbeitsliste. Was von BI1 offen ist,
@@ -1059,7 +1061,7 @@ mit vier Stücken — einem je Format —, nicht mit neunzehn.
 
 | # | Paket | Inhalt | Gate |
 | --- | --- | --- | --- |
-| **I0** ✅ | **Prototyp mit echten Datenformen — GEBAUT 2026-09-08 (§9.10)** | die vier Formate im brand-Playground an das Konzept angeglichen: Journal-Liste mit Format-/Themenfilter, Artikel mit TOC, Profil als Dossier, Duell mit `facts`-Zeilen inkl. Belegspalte, Ranking mit Methodik-Zeile; Redaktions-Editor als Skizze (zwei Sprach-Reiter, Quellen-Panel, Prüfregeln als Liste). GEBAUT im EIGENEN Playground (`packages/insights/.playground`, Port 3013) statt im brand-Playground — dort baut eine andere Sitzung an Discover/Brand Design. **Nachbesserung aus Runde 1: Radar-Zahl auf 100 normiert + Fußnote (läuft)** | **Davids Abnahme** (Phase 4 des Workflows) — offen |
+| **I0** ✅ | **Prototyp mit echten Datenformen — GEBAUT 2026-09-08 (§9.10)** | die vier Formate im brand-Playground an das Konzept angeglichen: Journal-Liste mit Format-/Themenfilter, Artikel mit TOC, Profil als Dossier, Duell mit `facts`-Zeilen inkl. Belegspalte, Ranking mit Methodik-Zeile; Redaktions-Editor als Skizze (zwei Sprach-Reiter, Quellen-Panel, Prüfregeln als Liste). GEBAUT im EIGENEN Playground (`packages/insights/.playground`, Port 3013) statt im brand-Playground — dort baut eine andere Sitzung an Discover/Brand Design. **Nachbesserung aus Runde 1: Radar-Zahl auf 100 normiert + Fußnote (läuft)** | **FREIGEGEBEN 2026-09-08** (Davids Abnahme, Phase 4 des Workflows) |
 | **I1a** ⏳ | **Beleg-Riegel nach `core`** *(neu 2026-09-08, §11 Runde-1-Frage 1 — **läuft**)* | `evidenceIsGrounded` und der Herabsetzungs-/Namensfilter (`createMarketDisparagementGuard`) ziehen aus `packages/market/shared` nach `packages/core/shared`, **Namen ohne `market`-Präfix**; `market` re-exportiert (keine Aufrufstelle bricht), `insights` importiert später aus `core`. Fundament-Baustein, kein Insights-Bau | **kein Gate** — steht VOR I1 und ist auch ohne BI1 richtig; läuft parallel als eigenes Code-Paket |
 | **I1** | **Layer + Schema + Vertrag** | Layer `insights` mit Manifest, Eintrag in `apps/branding/site.manifest.ts`, `LAYER_ORDER`, Bilanz-Block, ESLint-Block; Migration (`insights_posts`, `insights_brands`, `insights_corrections`); Vertrag zum brand-Layer; `insights.manage` in `core/shared/authz.ts` (eigener Commit); GDPR-Contributor; Schema-Parität-Soll | **Davids Ja zur Prod-Migration** (vor dem Code-Deploy) · Zuschnitt entschieden: §11 Frage 1 |
 | **I2** | **Dashboard + KI-Entwurf** | Liste (`UTable`), Editor mit `UEditor` und zwei Sprach-Reitern, Quellen-Panel mit deterministischer Beleg-Prüfung, die sechs Prüfregeln vor `review`, Zustands-Umschalter, Vorschau, Übersetzen-Endpunkt mit Drossel, `aiCompleteJson`-Entwurf mit `insights-d-1` | I1 · Zuschnitt entschieden: §11 Fragen 4 und 7 |
@@ -1068,13 +1070,21 @@ mit vier Stücken — einem je Format —, nicht mit neunzehn.
 | **I5** | **Newsletter** | `insights_subscribers` mit Double-Opt-in nach dem Warteliste-Muster, Bestätigungs- und Abmelde-Weg, Eintrags-Formular je Format und zentral, Versand | **eigenes Gate:** Rechtstexte (A1/BS1 R2) · Zuschnitt entschieden: §11 Frage 5 |
 | **I6** | **Launch-Paket** | die vier Beispiel-Beiträge (einer je Format), dann die restlichen fünfzehn Stücke aus §9.8; danach der Wochentakt | I3 · Davids Redaktionszeit |
 
-**Warum I1a schon läuft, obwohl die Prototyp-Abnahme aussteht.** I1a verschiebt
+**Die Freigabe des Prototyps ist kein Startschuss für I1.** David hat am
+2026-09-08 die FORM abgenommen („so bauen"). Die drei Gates darüber bleiben
+davon unberührt: **DB1** (BI1 erbt die öffentlichen Marken-Seiten, §6), die
+**Anwaltsantworten BI1-3 und BI1-4** (ohne sie geht kein Markenprofil live) und
+der **Google-API-Schlüssel** (Gate von I4). Eine freigegebene Form, die auf
+Zuarbeit wartet, ist kein Widerspruch — sie ist der Normalfall dieses Workflows:
+Phase 4 sagt „so und nicht anders", nicht „ab jetzt".
+
+**Warum I1a schon läuft.** I1a verschiebt
 zwei bestehende, getestete Funktionen des `market`-Layers in den Fundament-Layer
 `core`. Das ist auch dann richtig, wenn Brand Insights nie gebaut würde: heute
 kann nur `market` seinen eigenen Beleg-Riegel benutzen, und ein zweiter Layer
 müsste ihn abschreiben (§9.10 Frage 1 nennt das den teuersten Weg — zwei Riegel
 driften). Deshalb ist I1a **kein** vorgezogener Insights-Bau, sondern
-Fundament-Arbeit, und es darf vor Davids Abnahme laufen.
+Fundament-Arbeit, und es lief schon vor der Freigabe.
 
 **Reihenfolge-Regel (geändert am 2026-09-08).** **I4 steht jetzt VOR I3** und
 darf auch parallel dazu laufen: Davids Entscheidung ist, dass die Themen von
@@ -1357,8 +1367,10 @@ darunter in **§11.2** die **fünf Fragen aus §9.10** (Prototyp-Runde 1). §10 
 §9.10 bleiben als Protokoll stehen — dort stehen die Optionen, hier steht, was
 gilt. **Sieben von acht Antworten folgen
 der Empfehlung; eine weicht ab (6, Themenradar) und trägt dafür vier
-ausdrückliche Leitplanken.** Damit ist Phase 2 (Konzeption) abgeschlossen:
-**Prototyp I0 kann starten, der Bau I1+ wartet auf DB1 und den Anwalt (§6).**
+ausdrückliche Leitplanken.** Damit war Phase 2 (Konzeption) abgeschlossen:
+**Prototyp I0 konnte starten** — er ist gebaut und seit dem 2026-09-08
+**freigegeben** (§11.2); **der Bau I1+ wartet weiter auf DB1, den Anwalt (§6)
+und den Google-API-Schlüssel.**
 
 | # | Frage | Entscheidung | Empfehlung war | Leitplanke |
 | --- | --- | --- | --- | --- |
@@ -1398,9 +1410,11 @@ folgt, steht nicht als Vorsatz da, sondern als Zuschnitt:
 ### 11.2 Prototyp-Runde 1 (David, 2026-09-08)
 
 Die fünf Fragen aus §9.10, beantwortet. **Vier von fünf folgen der Empfehlung;
-eine weicht ab (2, Opportunity-Zahl) und trägt dafür drei Leitplanken.** Das ist
-Runde 1 der Prototyp-Phase — **die Freigabe des Prototyps (Phase 4) steht
-weiterhin aus**, David klickt die sechs Bildschirme auf Port 3013 selbst.
+eine weicht ab (2, Opportunity-Zahl) und trägt dafür drei Leitplanken.** Das war
+Runde 1 der Prototyp-Phase; David hat die sechs Bildschirme auf Port 3013 danach
+selbst geklickt und den Prototyp am **2026-09-08 FREIGEGEBEN** („so bauen") —
+**Phase 4 ist damit durch**. Was den Bau I1+ noch aufhält, sind die drei Gates
+aus §11.3, nicht die Form.
 
 | # | Frage | Entscheidung | Empfehlung war | Leitplanke |
 | --- | --- | --- | --- | --- |
@@ -1412,7 +1426,9 @@ weiterhin aus**, David klickt die sechs Bildschirme auf Port 3013 selbst.
 
 ### 11.3 Was jetzt bei David liegt
 
-Nichts davon hält den Prototyp I0 auf — er läuft im Playground gegen Dummy-Daten.
+Der Prototyp ist freigegeben (2026-09-08). Was hier steht, hält die Form nicht
+mehr auf, wohl aber den Code: **drei dieser Punkte sind die Gates des Baus I1+**
+— der **API-Schlüssel** (I4), der **Anwaltstermin** (I3) und der **DB1-Rest**.
 
 - **Google-Cloud-Projekt mit YouTube-Data-API-Schlüssel** — Gate von I4.
 - **Neue Plausible-Site für `branding.supply`** — Gate von BS1 R2c (die CE-
@@ -1422,8 +1438,9 @@ Nichts davon hält den Prototyp I0 auf — er läuft im Playground gegen Dummy-D
   (Verantwortlicher) geht **kein Markenprofil live** (§6). Die YouTube-Frage
   (BI1-2) ist Gate nur für alles über Metadaten hinaus.
 - **DB1-Rest** (D4/D5) — BI1 erbt von dort die öffentlichen Marken-Seiten.
-- **Prototyp-Abnahme I0** — Phase 4 des Workflows. Runde 1 ist entschieden
-  (§11.2); offen ist die **Freigabe** — die sechs Bildschirme auf Port 3013.
+- ~~**Prototyp-Abnahme I0**~~ — **ERLEDIGT 2026-09-08:** David hat die sechs
+  Bildschirme auf Port 3013 geklickt und freigegeben („so bauen"). Phase 4 des
+  Workflows ist durch; Runde 1 der Korrekturen steht in §11.2.
 - **Products-Seite** — der Nav-Punkt „Products" zeigte im Klickdummy auf
   `/products` und ist seit dem 404-Audit ausgeblendet. Entschieden am
   2026-09-08: **eigenes kleines Vorhaben NACH Insights**, geparkt als **PS1**

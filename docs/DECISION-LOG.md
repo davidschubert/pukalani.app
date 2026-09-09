@@ -34,6 +34,46 @@ der Finalen Abnahme).
 
 ---
 
+## 2026-09-08 — branding.supply/Brand Insights: vier Entscheidungen (I0 freigegeben, Art. 27 verschoben, B2B, activeMind → eRecht24)
+
+**Anlass:** Vier Punkte, die an drei Stellen offen lagen — die Freigabe des Insights-Prototyps
+(Phase 4 des Workflows), zwei Zeilen aus BS1 §9.2 („offen — das muss David noch benennen") und
+eine Lücke aus dem Faktenblatt (§7 Lücke 11). David hat sie am selben Tag gebündelt entschieden.
+
+**Entscheidungen (David):** (1) **Prototyp I0 Brand Insights ist FREIGEGEBEN** („so bauen"). Die
+Freigabe gilt der FORM, nicht dem Startschuss: der **Bau I1+ wartet weiter** auf **DB1**, die
+**Anwaltsantwort** und den **Google-API-Schlüssel** — die drei Gates aus
+[plans/BRAND-INSIGHTS.md](plans/BRAND-INSIGHTS.md) §11.3. Ein freigegebener Prototyp, der auf
+Zuarbeit wartet, ist kein Widerspruch, sondern der Normalfall dieses Workflows. (2) **Der
+EU-Vertreter nach Art. 27 DSGVO ist verschoben** und wird ab jetzt als eigener Punkt **`A27`**
+geführt ([OPEN-ITEMS.md](OPEN-ITEMS.md), „Geparkt / wartet"). Das **OB** beantwortet der Anwalt
+(BS1 R3); die **Anbieterwahl** wird parallel vorbereitet — Vergleich und differenzierte
+Empfehlungen entstehen in [referenz/ART-27-VERTRETER-ANBIETER.md](referenz/ART-27-VERTRETER-ANBIETER.md).
+Im Text bleibt der Abschnitt ein benannter leerer Platz. (3) **Kundenkreis von branding.supply ist
+B2B** — nur Unternehmen und Selbstständige, Verbraucher sind kein Kundenkreis. Vier Folgen, alle
+in den Texten und im Code: **kein Verbraucher-Widerruf** (§ 356 Abs. 5 BGB entfällt inhaltlich) ·
+**keine Verbraucherstreitbeilegung** (§ 36 VSBG entfällt inhaltlich; der Satz „wir nehmen nicht
+teil" darf bleiben und ist der einfachere Weg) · **Preise netto zzgl. USt** (der eigene
+branding-Katalog aus Z1 setzt `tax_behavior: 'exclusive'` — das `'inclusive'` der Community-Preise
+bleibt unangetastet) · die **Unternehmereigenschaft wird bei der Registrierung per Häkchen
+bestätigt** („Ich handle als Unternehmer/in oder Selbstständige/r") und **am Konto gespeichert wie
+die AGB-Fassung** — Code-Paket **R1c**, läuft. **Was die Selbstauskunft rechtlich trägt, ist
+Anwaltsfrage** (Faktenblatt §6 Block 2, Frage 14): bis zur Antwort ist sie die Zusage des Kunden,
+nicht der Beweis des Anbieters. (4) **Rechtstext-Generator: jetzt activeMind (kostenlos), später
+eRecht24 Premium** — der Wechsel kommt mit R3/Fassung 2 oder spätestens vor dem Öffnen der Beta.
+Leitplanke: **activeMind verlangt eine Quellennennung mit Link im Text**; die Bedingung ist am
+Generator selbst zu prüfen und einzuhalten, solange die Erstfassung steht — sie ist einer der
+Gründe für den späteren Wechsel. Die drei Sonderabschnitte und der neue B2B-Absatz kommen
+unverändert aus dem Faktenblatt und müssen in die activeMind-Gliederung passen. Die Maske bedient
+**David — oder ich** mit den Faktenblatt-Antworten und **Platzhaltern** für den Anbieterblock
+(Lücke 1 wird nicht geraten).
+
+**Was damit geschlossen ist:** BS1 §9.2 Punkte 3 und 4 · Faktenblatt-Lücken 9 und 11 · die
+Prototyp-Abnahme in BRAND-INSIGHTS §11.3. **Was neu offen ist:** `A27` (Wahl + Beauftragung,
+wartet auf R3) und die Anwaltsfrage 14 zur Selbstauskunft.
+
+---
+
 ## 2026-09-08 — Brand Insights (BI1): Prototyp-Runde 1 — fünf Entscheidungen; Products-Seite als eigenes Vorhaben
 
 **Anlass:** Der Prototyp I0 steht seit dem 2026-09-08 im eigenen Playground (Port 3013, sechs

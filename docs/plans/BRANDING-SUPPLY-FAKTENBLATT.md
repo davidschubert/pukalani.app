@@ -1,7 +1,8 @@
 # Faktenblatt branding.supply — für den Rechtstext-Generator und den Anwalt
 
 Stand: **2026-09-08** (Zeile 13 und §3 „Webanalyse" nachgezogen: Reichweitenmessung ist
-beschlossen) · Paket **BS1 R2** (Baubefund 1 mit **R1b** geschlossen), Entscheidungen 2 und 3 in
+beschlossen; **Lücken 9 und 11 geschlossen** — Generator = activeMind, Kundenkreis = B2B) ·
+Paket **BS1 R2** (Baubefund 1 mit **R1b** geschlossen), Entscheidungen 2, 3 und 9 in
 [BRANDING-SUPPLY-RECHT-UND-BEZAHLUNG.md](BRANDING-SUPPLY-RECHT-UND-BEZAHLUNG.md) §9.
 
 **Wozu dieses Blatt.** David bedient den Rechtstext-Generator selbst
@@ -32,7 +33,7 @@ wurde NICHT geraten — auch dann nicht, wenn eine plausible Antwort naheliegt.
 | **Angebot in einem Absatz** | branding.supply ist eine **Werkstatt für Markenfundamente**: im Gespräch mit einem KI-Markenberater entstehen Purpose, Werte, Archetyp, Positionierung und Stimme als zusammenhängendes Dokument („Brand Foundation"); dazu ein **kostenloser Brand-Check**, der eine beliebige Website in Sekunden auf acht Kategorien misst und einen Brand Score 0–100 vergibt, und ein **Marktvergleich**, der bis zu fünf Wettbewerber-Websites liest und dem eigenen Fundament gegenüberstellt. Das Fundament ist frei, die Ableitung (Marktvergleich, später Book & Kit) wird bezahlt. | `apps/branding/site.manifest.ts` · Plan §3.2 · `docs/archiv/BRAND-CHECK.md`, `docs/archiv/BRAND-MARKTVERGLEICH.md` |
 | **Betriebsstatus** | **Beta, Zugang nur auf Einladung** (`brandAdmissionMode: 'invite'`): Warteliste mit Double-Opt-in → Einladungscode (mail-gebunden, 30 Tage) → Konto. Öffentlich und ohne Konto erreichbar sind: Startseite, About, Team, Beispielseite, **Brand-Check + Ranking**, `/market-bot`. | `packages/brand/shared/brandAccess.ts` · `packages/system/scripts/migrations/038-brand-flags.ts` · Runbook §6 |
 | **Sprachen** | **de + en**. EN ohne Präfix, DE unter `/de/*` (Monorepo-Konvention `prefix_except_default`) | `apps/branding/nuxt.config.ts` (i18n) · `packages/core/nuxt.config.ts:109-125` |
-| **Zielgruppe** | Gründerinnen, Selbstständige und kleine Unternehmen im **DACH-Raum**; das Angebot richtet sich überwiegend an **Unternehmer**, Verbraucher sind nicht ausgeschlossen | Plan §3.5 („Verbraucher oder Unternehmer?" — offen) |
+| **Zielgruppe / Kundenkreis** | Selbstständige und kleine Unternehmen im **DACH-Raum**. **Seit dem 2026-09-08 ausschliesslich B2B:** Kunden sind **nur Unternehmen und Selbstständige**, Verbraucher sind kein Kundenkreis (Davids Entscheidung). Folgen in §5 Nr. 8/9/13/14, §6 Block 2 und §7 Lücke 11 | Plan §9 Zeile 9 (die alte Formulierung „Verbraucher sind nicht ausgeschlossen" aus §3.5 ist damit überholt) |
 | **Konten** | ja — E-Mail + Passwort mit Verifizierungs-Mail; „Anmelden mit Google" ist im Design-Schalter vorbereitet, erscheint aber erst mit Server-Env + Google-Client im Appwrite-Projekt | `apps/branding/app/app.config.ts` (`auth.providers`) · `docs/runbooks/GOOGLE-LOGIN.md` |
 | **Bezahlung heute** | **keine.** Kein Stripe, kein `billing`-Layer, kein Preis im Produkt; der einzige Conversion-Weg zeigt derzeit auf das Erstgespräch von pukalani.studio | Plan §3.1 · `apps/branding/app/app.config.ts` (`completionCta`) |
 
@@ -101,10 +102,16 @@ schafft und jede dieser Aussagen belegbar ist:
 ## 3. Antworten für die typischen Generator-Fragen
 
 Reihenfolge und Wortwahl orientieren sich an den Masken von eRecht24,
-Datenschutz-Generator.de und activeMind.
+Datenschutz-Generator.de und activeMind. **Entschieden am 2026-09-08 (Plan §9
+Zeile 2): die Erstfassung kommt von activeMind (kostenlos)**, der Wechsel auf
+**eRecht24 Premium** folgt mit R3/Fassung 2 oder spätestens vor dem Öffnen der
+Beta. **Bedingung des kostenlosen Wegs: activeMind verlangt eine Quellennennung
+mit Link im Text** — am Generator selbst prüfen und einhalten, solange die
+Erstfassung steht.
 
 | Frage des Generators | Antwort für branding.supply |
 | --- | --- |
+| **Kundenkreis / Vertragspartner** | **Nur Unternehmen und Selbstständige (B2B).** Verbraucher sind kein Kundenkreis (Davids Entscheidung 2026-09-08, Plan §9 Zeile 9). Für die Maske heißt das: **kein Verbraucher-Widerruf**, **keine Verbraucherstreitbeilegung** (§ 36 VSBG entfällt inhaltlich; der Satz „wir nehmen an einem Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle nicht teil" darf stehen bleiben), **Preise netto zzgl. USt**. Die Unternehmereigenschaft wird **bei der Registrierung per Häkchen bestätigt** und am Konto gespeichert (Paket **R1c**) — ob die Selbstauskunft trägt, ist Anwaltsfrage (§6 Block 2). |
 | **Hosting-Anbieter** | Eigener Server bei **Hetzner**, verwaltet über **ploi.io**. Die Anwendung läuft auf `49.13.211.173`, die Datenbank (Appwrite, self-hosted) auf `188.245.61.155`. **Standort des Rechenzentrums: LÜCKE — David** (Hetzner betreibt Standorte in DE und FI; im Repo steht nur „Hetzner"). |
 | **Content-Delivery-Network / Proxy** | **Keines.** `branding.supply` und `www.branding.supply` sind im DNS „grau" (nicht proxied) — der Browser spricht direkt mit unserem Server. Nur der fremde Apex `pukalani.app` läuft proxied über Cloudflare; branding.supply ist davon nicht berührt. Cloudflare ist damit — wenn die Zone dort liegt — **DNS-Dienst ohne Datenfluss**. *Belegt: „grau (nicht proxied)" im Runbook; **LÜCKE — David:** wo die Zone `branding.supply` verwaltet wird und wer Registrar ist.* |
 | **Cookies — Liste** | (1) **`a_session_branding`** — Anmeldung; httpOnly, secure, sameSite; technisch notwendig; Laufzeit = Sitzungsdauer der Appwrite-Session. (2) **`i18n_redirected`** — merkt die gewählte Sprache. (3) **`pukalani-theme`**, **`pukalani-theme-variant`**, **`pukalani-neutral`** — Farbwelt/Variante/Grundton der Oberfläche, `maxAge` 365 Tage, `sameSite: 'lax'`. (4) Hell/Dunkel über `@nuxtjs/color-mode` (kommt mit Nuxt UI) — der Speicherort ist im Monorepo **nicht** konfiguriert, es gilt der Modul-Default; **kleine LÜCKE: vor Veröffentlichung im Browser nachsehen**. Alle genannten sind **notwendig oder reine Komforteinstellungen; keiner dient der Analyse oder Werbung.** |
@@ -377,16 +384,24 @@ Liste für Generator und Anwalt. Reihenfolge = Gliederungsvorschlag.
 7. **Abruf fremder Websites durch den Kunden veranlasst.** Klarstellen, dass
    der Kunde eine Adresse benennt und wir abrufen — und welche Grenzen dabei
    gelten (§4b).
-8. **Digitale Inhalte und Widerruf (§ 356 Abs. 5 BGB).** Für den künftigen
-   Einmalkauf (Paket Z1): Widerrufsbelehrung mit ausdrücklicher Zustimmung zum
-   sofortigen Beginn der Ausführung und Kenntnisnahme des Erlöschens des
-   Widerrufsrechts. Gilt für Verbraucher; ob Verbraucher überhaupt kaufen
-   können, ist Anwaltsfrage.
+8. ~~**Digitale Inhalte und Widerruf (§ 356 Abs. 5 BGB).**~~ **ENTFÄLLT
+   INHALTLICH seit dem 2026-09-08** (Plan §9 Zeile 9): das Widerrufsrecht der
+   §§ 355 ff. BGB steht **Verbrauchern** zu, und Verbraucher sind kein
+   Kundenkreis von branding.supply. Was an seine Stelle tritt, steht in Nr. 14.
+   *Der ursprüngliche Zuschnitt (Widerrufsbelehrung mit ausdrücklicher
+   Zustimmung zum sofortigen Beginn der Ausführung und Kenntnisnahme des
+   Erlöschens) bleibt hier als Protokoll stehen — er wird gebraucht, falls der
+   Anwalt die Selbstauskunft nicht genügen lässt oder David den Kundenkreis
+   später öffnet.*
 9. **Preise, Steuern, Rechnung.** Platzhalter — **LÜCKE: Name des
-   Kaufgegenstands und Betrag** (§9.2). Im Code bereits unveränderlich
-   festgelegt: `tax_behavior: 'inclusive'` an jedem Preis, also **brutto
-   gedacht**; `automatic_tax` aktiv; **Erhebung der USt-ID (B2B) ist nicht
-   gebaut**.
+   Kaufgegenstands und Betrag** (§7 Lücke 10). **Seit dem 2026-09-08 netto:**
+   weil der Kundenkreis B2B ist, dürfen und sollen die Preise **netto zzgl.
+   USt** ausgewiesen werden — der eigene Katalog aus Z1 setzt dafür
+   `tax_behavior: 'exclusive'`. Das `'inclusive'` im Code gilt für die
+   **Community-Preise** und ist dort unverändert; zwei Kataloge, zwei
+   Verhalten. `automatic_tax` bleibt aktiv; die **Erhebung der USt-ID
+   (`tax_id_collection`) ist nicht gebaut** und wird mit dem B2B-Zuschnitt zur
+   Bauarbeit in Z1, nicht mehr zur Frage.
 10. **Laufzeit, Kündigung, Löschung.** Konto jederzeit kündbar; was bei
     Kündigung mit Inhalten geschieht; Frist bis zur Löschung.
 11. **Änderungen der AGB** und wie zugestimmt wird. **Baubefund:** Der Core
@@ -398,8 +413,27 @@ Liste für Generator und Anwalt. Reihenfolge = Gliederungsvorschlag.
 12. **Haftung.** Einschränkung im gesetzlich zulässigen Rahmen; Datenverlust in
     der Beta ausdrücklich ansprechen.
 13. **Anwendbares Recht, Gerichtsstand, Verbraucherstreitbeilegung
-    (§ 36 VSBG).** Als **benannter leerer Abschnitt** vorbauen (Entscheidung 3),
-    ebenso der Vertreter nach Art. 27 DSGVO in der Datenschutzerklärung.
+    (§ 36 VSBG).** **Seit dem 2026-09-08 entfällt § 36 VSBG inhaltlich** —
+    die Pflicht trifft Unternehmer, die Verträge mit **Verbrauchern**
+    schliessen, und das tun wir nicht. Ein Satz „wir nehmen an einem
+    Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle nicht
+    teil" **darf stehen bleiben** und ist der einfachere Weg: er kostet
+    nichts und beantwortet die Frage, bevor sie jemand stellt. Anwendbares
+    Recht und Gerichtsstand bleiben zu regeln (bei reinem B2B ist eine
+    Gerichtsstandsvereinbarung überhaupt erst möglich — Anwaltspunkt). Der
+    **Vertreter nach Art. 27 DSGVO** in der Datenschutzerklärung bleibt ein
+    **benannter leerer Abschnitt** (Entscheidung 3); die Anbieterwahl läuft als
+    eigener Punkt `A27`, s. §7 Lücke 8.
+
+14. **Unternehmereigenschaft — Selbstauskunft bei der Registrierung.** *(neu
+    2026-09-08)* Der Kundenkreis ist B2B, und das steht nicht nur in den AGB:
+    beim Anlegen des Kontos bestätigt der Kunde per Pflicht-Häkchen
+    „Ich handle als Unternehmer/in oder Selbstständige/r"; die
+    Bestätigung wird **am Konto gespeichert wie die AGB-Fassung** (Paket
+    **R1c**). In den AGB gehört dazu ein Absatz, der (a) den Kundenkreis
+    benennt, (b) auf die Bestätigung Bezug nimmt und (c) die Folge einer
+    falschen Angabe regelt. **Ob die Selbstauskunft rechtlich trägt, ist
+    Anwaltsfrage** (§6 Block 2, Frage 14).
 
 ---
 
@@ -415,7 +449,10 @@ Liste für Generator und Anwalt. Reihenfolge = Gliederungsvorschlag.
    Angebot, und wird es durch die geplanten redaktionellen Inhalte (BI1)
    journalistisch-redaktionell?
 4. **§ 36 VSBG:** Muss zur Teilnahme an einer Verbraucherschlichtung Stellung
-   genommen werden — auch schon ohne Bezahlfunktion?
+   genommen werden — auch schon ohne Bezahlfunktion? *Für branding.supply seit
+   dem 2026-09-08 nur noch die halbe Frage: mit reinem B2B entfällt die Pflicht
+   inhaltlich, offen ist, ob der Satz "wir nehmen nicht teil" trotzdem stehen
+   soll. Für pukalani.studio/pukalani.app bleibt sie ganz offen.*
 5. **Umsatzsteuer:** Wie ist ein US-Anbieter mit digitalen Leistungen an
    DACH-Kunden zu behandeln (Kleinunternehmerregelung und OSS setzen eine
    EU-Ansässigkeit bzw. -Registrierung voraus)?
@@ -445,44 +482,56 @@ Liste für Generator und Anwalt. Reihenfolge = Gliederungsvorschlag.
     Fassung am Konto zu speichern und nach der Prüfung erneut zustimmen zu
     lassen?
 13. **Widerruf digitaler Inhalte (§ 356 Abs. 5 BGB):** Reicht die geplante
-    Gestaltung (ausdrückliche Zustimmung + Kenntnisnahme beim Kauf), und
-    dürfen Verbraucher überhaupt kaufen — oder soll das Angebot auf Unternehmer
-    beschränkt werden (dann: wie wirksam)?
+    Gestaltung (ausdrückliche Zustimmung + Kenntnisnahme beim Kauf)? *Der
+    zweite Teil der Frage — ob Verbraucher überhaupt kaufen dürfen — ist am
+    2026-09-08 entschieden (**nein, B2B**); er lebt als Frage 14 weiter. Die
+    Belehrung bleibt trotzdem eine Frage: sie wird gebraucht, falls Frage 14
+    verneint wird oder David den Kundenkreis später öffnet.*
+14. **Unternehmer-Selbstauskunft (Kundenkreis B2B, seit 2026-09-08):** Reicht die
+    **Selbstauskunft per Häkchen** bei der Registrierung („Ich handle als
+    Unternehmer/in oder Selbstständige/r", am Konto gespeichert wie die
+    AGB-Fassung), um den Kundenkreis wirksam auf Unternehmer zu beschränken —
+    oder bleibt ein Vertrag mit einem Verbraucher trotz falscher Angabe ein
+    Verbrauchervertrag (mit Widerrufsrecht)? Was müsste zusätzlich vorliegen:
+    Abfrage von Firma und USt-IdNr., ein ausdrücklicher Ausschluss in den AGB,
+    ein Hinweis vor dem Kauf? *(Ersetzt den zweiten Teil der alten Frage 13 —
+    dort war noch offen, OB auf Unternehmer beschränkt wird; das ist jetzt
+    entschieden, offen ist nur noch das WIE WIRKSAM.)*
 
 ### Block 3 — Anhang G (Marktvergleich) und BI1 §4.3
 
-14. **(a) Fremde Markennamen:** Bleibt die referenzierende Benutzung zulässig,
+15. **(a) Fremde Markennamen:** Bleibt die referenzierende Benutzung zulässig,
     wenn die Namen (1) in einem **kostenpflichtigen** Produkt erscheinen und
     (2) im **Marketing** als Beispiel-Paare genannt würden?
-15. **(b) Zitate ≤ 200 Zeichen:** Trägt der Zitatzweck auch, wenn dieselbe
+16. **(b) Zitate ≤ 200 Zeichen:** Trägt der Zitatzweck auch, wenn dieselbe
     Seite **zehn Zitate derselben Quelle** zeigt — und genügt der Link als
     Quellenangabe nach § 63 UrhG?
-16. **(c) TDM-Vorbehalt (§ 44b UrhG):** Ist der BGH entschieden
+17. **(c) TDM-Vorbehalt (§ 44b UrhG):** Ist der BGH entschieden
     (I ZR 281/25), und ändert das etwas für Vorbehalte in **natürlicher
     Sprache** (AGB/Impressum), die wir heute nicht auswerten? Greift § 44b
     überhaupt, wenn wir nicht trainieren, sondern einmalig auswerten und
     zitieren?
-17. **(d) § 6 UWG:** Wäre die Nennung realer Marken im Marketing
+18. **(d) § 6 UWG:** Wäre die Nennung realer Marken im Marketing
     („Beispiel: adidas gegen Nike") vergleichende Werbung, obwohl wir mit
     keiner der beiden im Wettbewerb stehen?
-18. **(e) DSGVO beim Abruf:** Reicht der PII-Filter, oder braucht ein
+19. **(e) DSGVO beim Abruf:** Reicht der PII-Filter, oder braucht ein
     dauerhaft sichtbarer **Bibliothekseintrag** eine zusätzliche Zusage
     gegenüber dem Website-Betreiber — etwa eine Widerspruchsmöglichkeit, die
     über „schreibt uns an" hinausgeht?
-19. **(f) Datenbank-Herstellerrecht (§ 87b UrhG):** Kippt die Einordnung, wenn
+20. **(f) Datenbank-Herstellerrecht (§ 87b UrhG):** Kippt die Einordnung, wenn
     wir dieselben Kandidaten regelmäßig auffrischen und die Bibliothek dadurch
     zu einer laufend gepflegten Sammlung wird?
-20. **BI1-1 Presse- und Wikipedia-Zitate:** Trägt § 51 UrhG auch im
+21. **BI1-1 Presse- und Wikipedia-Zitate:** Trägt § 51 UrhG auch im
     redaktionellen Beitrag eines **gewerblichen** Anbieters, der auf das eigene
     Bezahlprodukt führt — und färbt **CC BY-SA** auf unseren Beitrag ab?
-21. **BI1-2 YouTube-Kommentare:** Ist die aggregierte Auswertung über die Data
+22. **BI1-2 YouTube-Kommentare:** Ist die aggregierte Auswertung über die Data
     API als Marktforschung zulässig (Art. 6 I f), wenn Nutzernamen nie
     gespeichert werden — und was verlangen die API-Bedingungen
     (Speicherfristen, abgeleitete Datensätze)? Genügt die reguläre Einbettung
     des Quellvideos?
-22. **BI1-3 Score fremder Marken:** identisch mit Frage 9 — hier ist er
+23. **BI1-3 Score fremder Marken:** identisch mit Frage 9 — hier ist er
     **schon heute live**, nicht erst mit BI1.
-23. **BI1-4 Wir-Stimme ohne Autor:** Genügt ein Redaktions-Impressum
+24. **BI1-4 Wir-Stimme ohne Autor:** Genügt ein Redaktions-Impressum
     („Verantwortlich i. S. d. § 18 Abs. 2 MStV: …"), wenn unter den Beiträgen
     nur die namenlose Wir-Stimme steht?
 
@@ -502,10 +551,10 @@ kann; ohne sie bleibt die entsprechende Stelle im Text ein Platzhalter.
 | 5 | **OpenRouter: Vertragsstand** — AVV/DPA vorhanden? Welche Modellanbieter sind faktisch zugelassen? | KI-Abschnitt, Subprozessoren-Liste | §4a |
 | 6 | **Aufbewahrung der Backups** auf der Storage Box (Frist, Standort, Verschlüsselung) | Abschnitt „Speicherdauer" | Zeile 16 |
 | 7 | **Aufbewahrung der Server-Protokolle** — heute kein logrotate; eine Frist muss gesetzt UND umgesetzt werden | Abschnitt „Server-Protokolle" | Zeile 15 |
-| 8 | **Art.-27-Vertreter jetzt beauftragen oder auf die Anwaltsantwort warten?** (Dienstleister grob 200–400 €/Jahr) | Impressum + Datenschutz | Frage 1 |
-| 9 | **Welcher Generator** die Grundfassung liefert | damit die drei Zusatz-Abschnitte in dessen Gliederung passen | R2 |
+| 8 | ~~**Art.-27-Vertreter jetzt beauftragen oder auf die Anwaltsantwort warten?**~~ **ENTSCHIEDEN 2026-09-08: verschoben.** Das OB beantwortet der Anwalt (Block 1 Frage 1); die **Anbieterwahl** wird parallel vorbereitet — Vergleich und differenzierte Empfehlungen in [referenz/ART-27-VERTRETER-ANBIETER.md](../referenz/ART-27-VERTRETER-ANBIETER.md). Verfolgt als eigener Punkt **`A27`** in [OPEN-ITEMS.md](../OPEN-ITEMS.md) | Impressum + Datenschutz — bis dahin **benannter leerer Abschnitt** | nichts mehr: der Text kann ohne diese Angabe als Entwurf stehen |
+| 9 | ~~**Welcher Generator** die Grundfassung liefert~~ **ERLEDIGT 2026-09-08: activeMind** (kostenlos) für die Erstfassung, **Wechsel zu eRecht24 Premium** mit R3/Fassung 2 oder spätestens vor dem Öffnen der Beta. **Bedingung des kostenlosen Wegs: activeMind verlangt Quellennennung mit Link im Text** — am Generator prüfen und einhalten | die drei Zusatz-Abschnitte (§4) und der B2B-Absatz müssen in die activeMind-Gliederung passen | nichts mehr — R2 kann anfangen, sobald Lücke 1 (Anbieterblock) da ist ODER mit Platzhaltern gearbeitet wird |
 | 10 | **Name des Kaufgegenstands** und **Betrag** (ein Preis je Branding oder je Produkt getrennt) | AGB §5 Nr. 9, Preis-Katalog Z1 | Z1 |
-| 11 | **Verbraucher zulassen — ja oder nein?** | entscheidet über Widerrufsbelehrung, Button-Lösung, Preisangaben | AGB, Z1 |
+| 11 | ~~**Verbraucher zulassen — ja oder nein?**~~ **ERLEDIGT 2026-09-08: nein — nur Unternehmen und Selbstständige (B2B).** Folgen: kein Verbraucher-Widerruf (§5 Nr. 8), keine Verbraucherstreitbeilegung (§5 Nr. 13), Preise netto zzgl. USt (§5 Nr. 9), Unternehmer-Bestätigung bei der Registrierung (§5 Nr. 14, Paket **R1c**) | AGB, Preisangaben, Z1-Katalog | nichts mehr — offen bleibt nur die Anwaltsfrage 14, ob die Selbstauskunft trägt |
 | 12 | **Steuernummer / USt-Behandlung** (Kleinunternehmer und OSS setzen EU-Ansässigkeit voraus) | Rechnung, Impressum | Z1, Frage 5 |
 | 13 | **Plausible-Site für `branding.supply` anlegen** (die CE-Ausgabe hat keine Sites-API — das ist ein Klick in der Oberfläche) ⇒ Script-Id `pa-…` | Abschnitt „Reichweitenmessung", Einbindung in `apps/branding/app/app.config.ts` | Zeile 13 der Tabelle, Paket **R2c** |
 

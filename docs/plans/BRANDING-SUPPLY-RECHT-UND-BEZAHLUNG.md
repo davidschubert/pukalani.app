@@ -145,6 +145,13 @@ weil dieses Angebot Konten, KI und Bewertungen hat):
 Vertreter nach Art. 27 DSGVO · Drittland-Grundlage bei Zugriff aus den USA ·
 Geltung § 5 DDG / § 18 Abs. 2 MStV · Verbraucherstreitbeilegung § 36 VSBG ·
 Umsatzsteuer bei einem US-Anbieter mit DACH-Ausrichtung.
+**Zwei davon haben sich am 2026-09-08 verschoben:** die **Beauftragung** eines
+Art.-27-Vertreters ist ein eigener Punkt geworden (`A27` in
+[OPEN-ITEMS.md](../OPEN-ITEMS.md), Anbietervergleich in
+[referenz/ART-27-VERTRETER-ANBIETER.md](../referenz/ART-27-VERTRETER-ANBIETER.md)) —
+die **Frage** hier bleibt unverändert stehen, denn sie entscheidet das OB. Und
+**§ 36 VSBG** ist mit dem B2B-Zuschnitt (§9 Zeile 9) inhaltlich erledigt; gefragt
+wird nur noch, ob der Satz „wir nehmen nicht teil" stehen bleiben soll.
 
 **(b) Aus Anhang G des Marktvergleichs, unverändert offen:**
 fremde Markennamen im bezahlten Produkt und im Marketing · Zitate ≤ 200 Zeichen ·
@@ -359,15 +366,19 @@ Modell 1 nötig, weil sonst „freigeschaltet" bedeutet „hat ein Beta-Konto".
   eine Ansässigkeit bzw. Registrierung in der EU voraus; sie sind vermutlich
   nicht der richtige Rahmen. *Laien-Einschätzung — genau das ist A1-Frage 5,
   und sie gilt hier erneut.*
-- Im Code ist die Weichenstellung bereits gefallen und **unveränderlich**:
-  `tax_behavior: 'inclusive'` an jedem Price. Ein Preis für branding.supply
-  wird also brutto gedacht.
-- **`tax_id_collection` (USt-ID, B2B) ist nicht gebaut.** Für ein Angebot, das
-  sich überwiegend an Unternehmen richtet, ist das die erste Frage, sobald
-  Modell 2–4 gewählt wird.
-- **Verbraucher oder Unternehmer?** Wenn auch Verbraucher kaufen können:
-  Widerrufsrecht, Button-Lösung, Preisangaben — im Code und in den Texten
-  bisher nirgends behandelt (derselbe offene Punkt wie A1b Frage 2).
+- Im Code ist die Weichenstellung der **Community-Preise** gefallen und dort
+  unveränderlich: `tax_behavior: 'inclusive'` an jedem Price. **Für
+  branding.supply gilt sie seit dem 2026-09-08 NICHT mehr** — der eigene
+  Preis-Katalog aus Z1 rechnet **netto zzgl. USt** (`'exclusive'`), weil der
+  Kundenkreis B2B ist (§9 Zeile 9). Zwei Kataloge, zwei Verhalten; genau dafür
+  ist der Katalog eigen.
+- **`tax_id_collection` (USt-ID, B2B) ist nicht gebaut.** Mit dem B2B-Zuschnitt
+  ist das keine Frage mehr, sondern **Bauarbeit in Z1**.
+- ~~**Verbraucher oder Unternehmer?**~~ **ENTSCHIEDEN 2026-09-08: nur
+  Unternehmen und Selbstständige** (§9 Zeile 9). Damit entfallen
+  Widerrufsbelehrung und Verbraucherstreitbeilegung inhaltlich; dafür kommt die
+  **Unternehmer-Bestätigung bei der Registrierung** (Paket R1c), und der Anwalt
+  beantwortet, ob die Selbstauskunft per Häkchen trägt.
 
 ---
 
@@ -503,13 +514,14 @@ heutige `Z1`. Wer ältere Notizen liest: es gilt diese Tabelle.
 | **R0 — Sofort** *(GEBAUT 2026-09-07)* | Der 404 verschwindet: Wizard-Ende (`completionCta`) und die Marktvergleich-Schranke zeigen auf die **Studio-Erstgespräch-Seite** mit Herkunft `?source=branding-supply`. Die drei Fußzeilen-Wörter ohne Ziel werden **ausgeblendet**, bis es Seiten gibt (Links kommen in R1). | keins | Nein |
 | **R1 — Technik** *(GEBAUT 2026-09-08)* | `pages` in `apps/branding` montieren (`site.manifest.ts` + `extends`), Migrationen auf der Instanz `branding`, `seed:legal` · die drei Seiten als **Entwurf** mit Hinweis „Entwurf, in anwaltlicher Prüfung" als ERSTEM Block und `noindex` · Fuß bekommt echte Links mit hartem Rückfall · `pukalani.auth.termsUrl` gesetzt, Hinweis neben dem Häkchen · **AGB-Fassung am Konto speichern** (s. Befund unten) | **Davids Ja zur Prod-Migration auf `branding`**; Migration **vor** Code-Deploy (§2.3) | Ja — nur die Migrations-Freigabe |
 | **R1b — Nachpaket zu R1** *(GEBAUT 2026-09-07)* | Zwei Befunde aus dem Faktenblatt: (1) die **24-Monats-Frist der Funnel-Ereignisse** bekommt ihre Mechanik — pure Regel `brandEventsRetention.ts` (EINE Konstante), Sweep in `server/utils`, Tagestakt als Nitro-Plugin, Betreiber-Handgriff `POST /api/brand/ops/events-sweep`; **keine Migration nötig** (`$createdAt` ist ohne eigenen Index abfragbar, gemessen). (2) Der **Env-Wächter** verlangt für `apps/branding` jetzt `NUXT_GEO_CITY_DB_PATH` + `NUXT_GEO_CITIES_PATH` — seit dem `admin`-Layer (2026-09-03) sind Sitzungsliste und Orts-Picker dort erreichbar; der Lauf meldet beide als auf dem Server fehlend. Beweise: 14 Unit-Prüfungen + `verify-brand-events-sweep.mjs` (15/15, mit Mutations-Gegenprobe) | keins für den Code; die **Server-`.env` von branding.supply setzt David** (zwei Zeilen + Reload, s. §7.2) | Ja — nur die zwei Env-Zeilen |
-| **R2 — Inhalt** | Davids Generator-Texte für Impressum, Datenschutz, AGB · dazu **meine drei Abschnitte**, die kein Generator kennt: KI-Verarbeitung von Kundentexten (OpenRouter/ZDR) · Abruf fremder Websites samt `/market-bot` und TDM-Vorbehalt · öffentliche Bewertung fremder Marken mit Korrekturweg · **NEU 2026-09-08: „Reichweitenmessung"** (cookielos, selbst gehostetes Plausible, Art. 6 I f, mit Widerspruchsmöglichkeit — Beschluss aus [BRAND-INSIGHTS.md](BRAND-INSIGHTS.md) §11 Frage 3) · **Faktenblatt** aus §1.2 + §1.6 · Subprozessoren-Liste · ~~Methodik-Seite für den Brand-Score~~ **(vorgezogen und GEBAUT als R2a)** · alles de + en; die Abschnitte sind für den Anwalt als **Prüfpunkte markiert** | David liefert die Generator-Texte; **David liest gegen** | Ja |
+| **R1c — Unternehmer-Bestätigung bei der Registrierung** *(Davids Entscheidung 2026-09-08, Zeile 9 in §9 — **läuft**, eigener Agent)* | branding.supply verkauft **nur an Unternehmen und Selbstständige**. Das Registrierformular bekommt neben dem AGB-Häkchen ein zweites: „**Ich handle als Unternehmer/in oder Selbstständige/r**" — Pflicht, in de und en, in **allen** Anmeldewegen der Site. Die Bestätigung wird **am Konto gespeichert wie die AGB-Fassung** (dieselbe Mechanik aus R1, kein zweiter Weg), damit später belegbar ist, WANN und auf WELCHE Fassung hin jemand sie gegeben hat. Nur `apps/branding` — die Community-Plattform verkauft weiter an beide Kreise, der Schalter bleibt deshalb ein Config-Gate mit Core-Default AUS | keins für den Code; die **AGB-Formulierung** dazu kommt aus **R2** (Faktenblatt §5) | Nein |
+| **R2 — Inhalt** | Davids Generator-Texte für Impressum, Datenschutz, AGB · dazu **meine drei Abschnitte**, die kein Generator kennt: KI-Verarbeitung von Kundentexten (OpenRouter/ZDR) · Abruf fremder Websites samt `/market-bot` und TDM-Vorbehalt · öffentliche Bewertung fremder Marken mit Korrekturweg · **NEU 2026-09-08: „Reichweitenmessung"** (cookielos, selbst gehostetes Plausible, Art. 6 I f, mit Widerspruchsmöglichkeit — Beschluss aus [BRAND-INSIGHTS.md](BRAND-INSIGHTS.md) §11 Frage 3) · **NEU 2026-09-08: der B2B-Absatz** — Kundenkreis sind nur Unternehmen und Selbstständige (§9 Zeile 9); daraus folgen in den AGB der Wegfall des Verbraucher-Widerrufs, der VSBG-Satz „wir nehmen nicht teil" und die Netto-Preisangabe · **Faktenblatt** aus §1.2 + §1.6 · Subprozessoren-Liste · ~~Methodik-Seite für den Brand-Score~~ **(vorgezogen und GEBAUT als R2a)** · alles de + en; die Abschnitte sind für den Anwalt als **Prüfpunkte markiert**. **Erster Schritt seit 2026-09-08 benannt: den Generator bedienen — activeMind (kostenlos).** Zwei Wege, beide gangbar: **David** füllt die Maske selbst, **oder ich** fülle sie mit den Antworten aus dem Faktenblatt (§3) und setze für den Anbieterblock **Platzhalter** ein, die David danach ersetzt (Faktenblatt-Lücke 1 ist ungelöst und wird nicht geraten). Bedingung des kostenlosen Wegs: **activeMind verlangt Quellennennung mit Link im Text** — sie steht, solange die Erstfassung gilt | David liefert die Generator-Texte **oder gibt die Maske frei**; **David liest gegen** | Ja |
 | **R2a — Methodik-Seite** *(GEBAUT 2026-09-07, s. §7.4)* | **Vorgezogen aus R2**, weil §4c ohne sie nicht live darf (Faktenblatt-Befund „eine Zusage ohne Ziel"). `/brand-check/methodik` im `brand`-Layer, de + en, öffentlich, ohne Konto, ohne Produkt-Gate, indexierbar: was der Score ist und was nicht (Bänder, Meinungscharakter) · was gelesen wird und was nicht, samt der **ehrlichen robots-Einschränkung** des Einseiten-Abrufs · die acht Kategorien mit Gewicht und Kriterienzahl, gerechnet gegen beurteilt, Modell-Bedingungen (ZDR, kein Training, kein Ausweichen) · Fundament-Reife als getrennt beschriftete zweite Zahl · Korrektur- und Entfernungsweg · Grenzen und Fairness. Verlinkt als vierter Reiter (damit von JEDER Ergebnisseite) plus im Lesefluss von Start, Ranking und Ergebnis. **Keine Zahl abgetippt** — alles aus den Verträgen, Locale-Texte mit Platzhaltern; Beweis `tests/brandCheckMethod.test.ts` mit Gegenprobe | keins | Nein — bis auf eine Kontaktadresse, falls die Seite mehr nennen soll als „über das Impressum" |
 | **R3 — Anwalt** | EIN Termin, **drei Blöcke**: (1) Studio-Rest aus A1 · (2) branding-Texte mit den drei markierten Prüfpunkten · (3) die Anhang-G/BI1-Fragen aus §1.6 (b)(c)(d). Danach **Fassung 2** einsetzen, Art.-27- und § 36-VSBG-Abschnitte füllen (bis dahin als benannte leere Plätze vorgebaut), **Entwurfs-Hinweis weg, `noindex` weg**. Beweis: sechs Routen 200 in beiden Sprachen · Fuß verlinkt · Häkchen in allen drei Anmeldewegen, mit Gegenprobe (`termsUrl` entfernen ⇒ rot) | **Anwaltstermin** | Ja — Termin und Abnahme |
 | **R2b — robots/TDM im Brand-Check** *(GEBAUT 2026-09-08, s. §7.5)* | **Davids Entscheidung 2026-09-08**, ausgelöst vom Befund aus R2a: der Einseiten-Abruf des Brand-Checks holt jetzt `robots.txt` und prüft den TDM-Nutzungsvorbehalt — mit DENSELBEN Regeln wie der Marktvergleich (dafür nach `packages/brand/shared/{brandRobots,brandTdm}.ts` gezogen, `market` re-exportiert sie) und unter EIGENEM Absender `PukalaniBrandCheck/1.0 (+https://branding.supply/brand-check/methodik)`. Verbot ⇒ 409 `site_blocked`, kein Score, KEINE Zeile, nur Ereignis `brand.check_blocked` mit Grund. Der WIZARD-Weg (eigene Website des Betreibers) bleibt bewusst ausgenommen. Methodik-Seite umgeschrieben: Zusage statt Befund, drei Wege zum Aussperren, benannte Grenze. Beweise: `verify-brand-check-robots.mjs` (29/29, mit Mutations-Gegenprobe), `verify-market-fetch.mjs` weiter 33/33 | keins | Nein |
 | **R2c — Reichweitenmessung einschalten** | **Davids Entscheidung 2026-09-08** ([BRAND-INSIGHTS.md](BRAND-INSIGHTS.md) §11 Frage 3): `apps/branding/app/app.config.ts` bekommt den `analytics`-Block wie `apps/portfolio` (`provider: 'plausible'`, `snippet: 'v3'`, `src` mit der neuen Script-Id, `instance: 'https://plausible.hawaii.studio'`) — **cookielos, ohne Banner, `consent` bleibt aus**. Es liegt hier und nicht in BI1, weil es die **ganze** Site misst (Startseite, Wizard-Trichter, Brand-Check, Discover), nicht nur den Redaktionsteil — und weil Text und Schalter in EINEM Plan stehen müssen. **Reihenfolge ist Teil des Pakets:** der Datenschutz-Abschnitt aus **R2** steht zuerst, dann das Script (dieselbe Regel wie „erst Text, dann Schalter" bei `auth.termsUrl` in R1). Beweis: die Script-Zeile im ausgelieferten HTML **und** ein Testaufruf, der in Plausible ankommt | **David legt die Plausible-Site für `branding.supply` an** (die CE-Ausgabe hat keine Sites-API — Klick in der Oberfläche) ⇒ Script-Id `pa-…`; danach **R2** (der Abschnitt) | Ja — Site anlegen, Script-Id liefern |
 | **Z0 — Erstgespräch-Seite** *(GEBAUT 2026-09-07, s. §7.3)* | `/erstgespraech` im `brand`-Layer: fünf Felder (Name · E-Mail · welches Branding, vorbelegt · Anliegen · optional Telefon) · **zwei entkoppelte Zustellwege** (Mail an David UND Zeile in `brand_intro_requests`, Erfolg = mindestens einer) · drei Bremsen (Rate-Limit-Bucket, Honeypot, enge Zod-Längen) · Betreiber-Sicht im Dashboard · Ereignisse `intro.viewed` / `intro.submitted`. **Ersetzt die R0-Weiterleitung** | R1 durch (dieselbe Migrations-Freigabe); Migration vor Deploy | Nein (ausser Migrations-Freigabe) |
-| **Z1 — Stripe** | `billing` ins Manifest · **eigener Preis-Katalog für branding.supply** (NICHT die Community-Preise) · Checkout **je Branding** an der Schranke · Webhook schreibt das **Freischalt-Feld an `brand_profiles`** (Migration) · der **Betreiber-Schalter im Dashboard bleibt** für Handfälle · `automatic_tax` wie bei den Communities, Rechnung und Portal · AGB tragen die **Widerrufsbelehrung für digitale Inhalte** (§ 356 Abs. 5 BGB: Verzicht beim Start der Ausführung) | **A2 live** (Bank, Steuer, Live-Key, Portal) **UND** R3 durch; ausserdem Name + Betrag des Kaufgegenstands (offen, §9) | Ja — A2, Name und Preis |
+| **Z1 — Stripe** | `billing` ins Manifest · **eigener Preis-Katalog für branding.supply** (NICHT die Community-Preise) · Checkout **je Branding** an der Schranke · Webhook schreibt das **Freischalt-Feld an `brand_profiles`** (Migration) · der **Betreiber-Schalter im Dashboard bleibt** für Handfälle · `automatic_tax` wie bei den Communities, Rechnung und Portal · **B2B seit 2026-09-08** (§9 Zeile 9): die Preise des eigenen Katalogs tragen **`tax_behavior: 'exclusive'`** — netto zzgl. USt, NICHT das `'inclusive'` der Community-Preise; die Rechnung trägt die **B2B-Angaben** (Firmenname, Anschrift, USt-IdNr. — deren Erhebung ist heute nicht gebaut, s. Faktenblatt §5 Nr. 9) · ~~AGB tragen die Widerrufsbelehrung für digitale Inhalte (§ 356 Abs. 5 BGB)~~ **entfällt bei B2B**: an ihre Stelle tritt die **Unternehmer-Bestätigung bei der Registrierung** (Paket R1c), auf die der Kauf sich stützt — wie tragfähig die Selbstauskunft ist, beantwortet der Anwalt (Faktenblatt Block 2) | **A2 live** (Bank, Steuer, Live-Key, Portal) **UND** R3 durch; ausserdem Name + Betrag des Kaufgegenstands (offen, §9.2) | Ja — A2, Name und Preis |
 | **Z2 — Beta-Regel** | „**Beta-Konten dauerhaft frei**" im Code — je **KONTO** (`brand_access` / Beta-Zulassung), nicht als unbegrenzte Branding-Zahl · als benannter Abschnitt „Beta-Konten" in den AGB · Widerruf je Konto durch den Betreiber bei Missbrauch · die bestehenden Eimer (3 Läufe/Tag je Branding, Instanz-Deckel) bleiben die Kostenbremse | R2 (AGB-Abschnitt) + Z1 (die Zuteilung ist das Gegenstück, gegen das die Ausnahme greift) | Nein |
 
 ### 7.1 R1 — was am 2026-09-08 tatsächlich gebaut wurde
@@ -1006,23 +1018,29 @@ gebaut ist.)*
 
 ---
 
-## 9. Entscheidungen (David, 2026-09-07)
+## 9. Entscheidungen (David, 2026-09-07 · nachgetragen 2026-09-08)
 
 Alle acht Fragen aus §8 sind beantwortet. **§8 bleibt unverändert stehen** —
 ohne die Empfehlungen wäre nicht mehr nachvollziehbar, wovon abgewichen wurde.
 **Vier Entscheidungen weichen von der Empfehlung ab** (2, 4, 6, 7); jede trägt
 eine Leitplanke, die den Preis der Abweichung bezahlt.
 
+**Zwei Nachträge vom 2026-09-08.** Sie standen nicht in §8, sondern in §9.2
+(„offen — das muss David noch benennen"): **Zeile 2 nennt jetzt den Generator**
+(activeMind, später eRecht24 Premium), und **Zeile 9 ist neu** — der Kundenkreis
+ist **B2B**. Beides sind Eingaben für R2, Zeile 9 zusätzlich für Z1.
+
 | # | Frage | Entscheidung | Empfehlung war | Leitplanke |
 | --- | --- | --- | --- | --- |
 | 1 | Ort der Rechtstexte | **`pages`-Layer, wie auf pukalani.studio** | A (dieselbe) | Migration auf `branding` **vor** dem Code-Deploy (§2.3); die AGB haben keine Vorlage in `LEGAL_TEMPLATE_SLUGS` und entstehen als leere Seite |
-| 2 | Wer schreibt die Texte | **Generator + Anwaltsprüfung.** David bedient den Generator selbst (welchen, ist seine Wahl) und liefert die Texte | A — „Anwalt schreibt Datenschutz und AGB" | Der Generator-Text ist ein **Entwurf**. Die drei Dinge, die kein Generator kennt, werden aus dem Faktenblatt (§1.2) als **eigene Abschnitte** geschrieben — KI-Verarbeitung von Kundentexten über OpenRouter/ZDR · Abruf fremder Websites inkl. Bot-Seite und TDM · öffentliche Bewertung fremder Marken mit Korrekturweg — und dem Anwalt **ausdrücklich als Prüfpunkte markiert**. Bis zur Prüfung tragen alle Seiten „Entwurf, in anwaltlicher Prüfung" + `noindex` |
+| 2 | Wer schreibt die Texte | **Generator + Anwaltsprüfung.** David bedient den Generator selbst und liefert die Texte. **Welcher Generator, ist seit 2026-09-08 entschieden: activeMind (kostenlos) für die Erstfassung, Wechsel zu eRecht24 Premium mit R3/Fassung 2 oder spätestens vor dem Öffnen der Beta** | A — „Anwalt schreibt Datenschutz und AGB" | **Leitplanke zum Generator (2026-09-08): activeMind verlangt eine Quellennennung mit Link im Text** — die Bedingung ist zu prüfen und einzuhalten, solange die Erstfassung steht; sie ist einer der Gründe, warum Fassung 2 auf eRecht24 Premium wechselt (Quelle: activemind.de, Anhang). Der Generator-Text ist ein **Entwurf**. Die drei Dinge, die kein Generator kennt, werden aus dem Faktenblatt (§1.2) als **eigene Abschnitte** geschrieben — KI-Verarbeitung von Kundentexten über OpenRouter/ZDR · Abruf fremder Websites inkl. Bot-Seite und TDM · öffentliche Bewertung fremder Marken mit Korrekturweg — und dem Anwalt **ausdrücklich als Prüfpunkte markiert**. Bis zur Prüfung tragen alle Seiten „Entwurf, in anwaltlicher Prüfung" + `noindex` |
 | 3 | Die fünf ungeklärten A1-Punkte | **Im selben Termin als eigener Block mitfragen** | A (dieselbe) | **Art. 27** und **§ 36 VSBG** werden als *benannte leere Abschnitte* vorgebaut — die Antwort ist dann ein eingesetzter Satz und kein Umbau |
 | 4 | Bezahlmodell Phase 1 | **Einmalpreis je Branding über Stripe Checkout** | A — „Erstgespräch + Angebot, Freischaltung von Hand" | Braucht **A2 live** · **eigener Preis-Katalog für branding.supply**, nicht die Community-Preise · AGB mit **Widerrufsbelehrung für digitale Inhalte** (§ 356 Abs. 5 BGB: Verzicht beim Start der Ausführung) · Rechnung/USt über Stripe mit `automatic_tax` wie bei den Communities · Freischaltung als **FELD an `brand_profiles`** (Migration), geschrieben vom Webhook — der **Betreiber-Schalter bleibt zusätzlich** für Handfälle. **Erstgespräch + Angebot bleibt daneben** der Weg für Studio-Leistungen; **G4 gilt für Brand Design unverändert** |
 | 5 | Erstgespräch auf branding.supply | **Eigene schlanke Seite im `brand`-Layer; bis dahin Weiterleitung** | A (dieselbe, mit dem B-Sofortpflaster davor) | Die Weiterleitung ist **R0** und trägt die Herkunft `?source=branding-supply`; die eigene Seite ist **Z0** und ersetzt sie |
 | 6 | Beta-Konten nach der Öffnung | **Dauerhaft frei** | A — „Bestandsschutz mit Frist (acht Wochen)" | Gilt je **KONTO** (`brand_access` / Beta-Zulassung), **nicht** als unbegrenzte Zahl von Brandings · die bestehenden Eimer (3 Läufe/Tag je Branding, Instanz-Deckel) bleiben die Kostenbremse · in den AGB als „**Beta-Konten**" benannt · der Betreiber kann die Zusage **je Konto widerrufen** (Missbrauch) |
 | 7 | AGB-Checkbox | **Sofort, mit Entwurf und sichtbarem Hinweis** | A — „mit den fertigen Texten" | Hinweis „Entwurf, in anwaltlicher Prüfung" **auf der AGB-Seite UND im Registrierformular neben dem Häkchen** · `noindex` · die **Fassungsnummer wird beim Konto gespeichert** (heute nicht vorhanden, s. §7-Befund — deshalb Bauarbeit in R1) · nach der Prüfung neue Fassung, Hinweis weg |
 | 8 | Reihenfolge zu A2 | **Recht zuerst, Stripe direkt danach** | A (dieselbe) | „Direkt danach" heisst: `Z1` startet, sobald `R3` durch ist — nicht parallel, David ist in beiden Strängen der Engpass |
+| 9 | **Kundenkreis** *(neu 2026-09-08 — beantwortet Faktenblatt-Lücke 11 und §3.5)* | **Nur Unternehmen und Selbstständige (B2B).** Verbraucher sind kein Kundenkreis von branding.supply | keine Empfehlung eingeholt — Davids Festlegung | Vier Folgen, alle in den Texten: **(a)** **kein Verbraucher-Widerruf** — die Belehrung nach § 356 Abs. 5 BGB entfällt inhaltlich (AGB-Punkt 8 im Faktenblatt) · **(b)** **keine Verbraucherstreitbeilegung** — § 36 VSBG entfällt inhaltlich; ein Satz „wir nehmen an einer Verbraucherschlichtung nicht teil" darf stehen bleiben und ist der einfachere Weg · **(c)** **Preise dürfen netto zzgl. USt** ausgewiesen werden (bisher `tax_behavior: 'inclusive'` im Community-Code — der eigene Katalog aus Z1 stellt das um) · **(d)** die **Unternehmereigenschaft wird bei der Registrierung bestätigt** (Häkchen „Ich handle als Unternehmer/in oder Selbstständige/r"), **gespeichert am Konto wie die AGB-Fassung** — Code-Paket **R1c**, §7. **Was die Selbstauskunft rechtlich trägt, ist Anwaltsfrage** (Block 2 des Faktenblatts: „reicht die Selbstauskunft per Checkbox?") — bis zur Antwort ist sie die Zusage des Kunden, nicht der Beweis des Anbieters |
 
 ### 9.1 Was diese Entscheidungen im Dokument überholen
 
@@ -1039,7 +1057,9 @@ eine Leitplanke, die den Preis der Abweichung bezahlt.
 
 ### 9.2 Offen — das muss David noch benennen
 
-Nicht geraten, weil es Preisangaben und Vertragsgegenstand sind:
+Nicht geraten, weil es Preisangaben und Vertragsgegenstand sind. **Zwei der vier
+Punkte sind am 2026-09-08 geschlossen** (3 und 4) und bleiben durchgestrichen
+stehen, damit nachvollziehbar ist, wie sie beantwortet wurden:
 
 1. **Name des Kaufgegenstands.** Vorschlag: **ein** Preis je Branding für „die
    Ableitung" = Marktvergleich + später Book & Kit. Wie das auf der Seite und
@@ -1047,11 +1067,22 @@ Nicht geraten, weil es Preisangaben und Vertragsgegenstand sind:
 2. **Der Betrag** — und ob es beim EINEN Preis bleibt oder später nach Produkt
    (`market`, `design`) getrennt wird. Beides sind Eingaben für den
    Preis-Katalog in Z1.
-3. **Welcher Generator** die Grundfassung liefert (Frage 2) — für R2 nur
-   insofern wichtig, als die drei Zusatz-Abschnitte in dessen Gliederung
-   passen müssen.
-4. **Art.-27-Vertreter jetzt beauftragen oder auf die Anwaltsantwort warten?**
-   (§8 Frage 3, Zusatz — Dienstleister grob 200–400 €/Jahr.)
+3. ~~**Welcher Generator** die Grundfassung liefert (Frage 2)~~ —
+   **BEANTWORTET 2026-09-08: activeMind** für die Erstfassung, **Wechsel zu
+   eRecht24 Premium** mit R3/Fassung 2 oder spätestens vor dem Öffnen der Beta
+   (Zeile 2 der Tabelle oben). Für R2 heisst das: die drei Zusatz-Abschnitte
+   und der B2B-Absatz kommen aus dem Faktenblatt und müssen in die
+   activeMind-Gliederung passen; die **Quellennennung mit Link**, die
+   activeMind verlangt, ist eine Bedingung des kostenlosen Wegs.
+4. ~~**Art.-27-Vertreter jetzt beauftragen oder auf die Anwaltsantwort
+   warten?**~~ — **ENTSCHIEDEN 2026-09-08: verschoben.** Erst die
+   Anwaltsantwort (R3, §1.6 (a)) beantwortet, **ob** ein Vertreter nötig ist;
+   die **Wahl des Anbieters wird parallel vorbereitet** —
+   Vergleich und differenzierte Empfehlungen in
+   [referenz/ART-27-VERTRETER-ANBIETER.md](../referenz/ART-27-VERTRETER-ANBIETER.md).
+   Verfolgt wird der Punkt ab jetzt als eigene Zeile **`A27`** in
+   [OPEN-ITEMS.md](../OPEN-ITEMS.md), nicht mehr hier. Im Text bleibt der
+   Abschnitt ein **benannter leerer Platz** (Entscheidung 3).
 
 ---
 
@@ -1107,3 +1138,11 @@ Umsatzsteuer digitaler Leistungen, OSS und Kleinunternehmergrenze —
 Brandmark, Frontify/Corebook°, IdeaProof: Preisformen zitiert aus den
 Recherche-Anhängen von BD1 §1.7/Anhang A und BF1 §1.5, dort mit den
 Ursprungsquellen.
+
+**Extern (Rechtstext-Generatoren, zur Entscheidung 2 vom 2026-09-08):**
+activeMind — kostenlose Generatoren für Datenschutzerklärung und Impressum;
+**Nutzung an eine Quellennennung mit Link im Text geknüpft** (die Bedingung ist
+vor dem Veröffentlichen der Erstfassung am Generator selbst zu prüfen, nicht aus
+dem Gedächtnis) — [activemind.de](https://www.activemind.de/) ·
+eRecht24 Premium — kostenpflichtige Generatoren ohne Quellennennungs-Auflage,
+Ziel für Fassung 2 — [e-recht24.de](https://www.e-recht24.de/).
