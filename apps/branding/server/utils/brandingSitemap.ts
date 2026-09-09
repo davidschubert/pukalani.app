@@ -58,21 +58,19 @@ export interface BrandingSitemapEntry {
  *    Vermerk — DANN gehören sie hier hinein (Muster: die CMS-Zeilen von
  *    `apps/portfolio/server/routes/sitemap.xml.get.ts`).
  *
- * DABEI, obwohl es eine zweite Fassung derselben Marke gibt:
- *  · `/beispiel/kailua-coffee` — die redaktionelle Beispiel-Seite. Sie ist von
- *    der STARTSEITE verlinkt (`app/pages/index.vue`) und trägt kein `noindex`
- *    (nachgesehen); ihr eigener Kopfkommentar hält sogar fest, sie gehöre in
- *    eine Sitemap, sobald es eine gibt. Dass dieselbe Marke zusätzlich unter
- *    `/discover/kailua-coffee-co` steht, ist kein Duplikat im SEO-Sinn: die
- *    eine ist die Marketing-Fassung mit CTA, die andere die Galerie-Anatomie
- *    mit Steckbrief und Markenabdruck.
+ *  · `/beispiel/kailua-coffee` — GIBT ES NICHT MEHR. Die redaktionelle
+ *    Zweitfassung des Beispiel-Brandings ist gelöscht; ihre Adresse antwortet
+ *    301 auf `/discover/kailua-coffee-co` (`routeRules` in `nuxt.config.ts`).
+ *    Die Anatomie derselben Marke steht bereits DYNAMISCH in dieser Sitemap
+ *    (`brand_publications` → `BRANDING_DISCOVER_PRIORITY`), sie gehört also
+ *    nicht zusätzlich in die feste Liste — und eine Redirect-Quelle in einer
+ *    Sitemap wäre ohnehin ein Widerspruch.
  */
 export const BRANDING_ROUTES: readonly BrandingSitemapEntry[] = [
   { path: '/', priority: 1.0 },
   { path: '/brand-check', priority: 0.9 },
   { path: '/discover', priority: 0.9 },
   { path: '/erstgespraech', priority: 0.8 },
-  { path: '/beispiel/kailua-coffee', priority: 0.7 },
   { path: '/brand-check/ranking', priority: 0.7 },
   { path: '/brand-check/methodik', priority: 0.6 },
   { path: '/about', priority: 0.5 },

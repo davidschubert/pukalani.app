@@ -14,8 +14,10 @@ import { sessionTravels, slotById } from '../shared/slotRegistry'
  * DER FESTE SNAPSHOT DER BEISPIEL-MARKE (Konzept
  * docs/archiv/BRAND-FOUNDATION-LESEANSICHT.md §4/§5 G5).
  *
- * Die öffentliche Seite `/beispiel/kailua-coffee` behauptet „so sieht euer
- * Ergebnis aus". Diese Behauptung ist nur wahr, solange der Snapshot durch
+ * Die Seite `/beispiel/kailua-coffee` ist seit dem 2026-09-09 weg (die Marke
+ * steht als echte Veröffentlichung unter `/discover/kailua-coffee-co`), der
+ * Snapshot bleibt als PRÜFSTAND des Renderers — s. Kopf von
+ * `shared/examples/kailuaCoffee.ts`. Geprüft wird unverändert, dass er durch
  * DIESELBEN Tore passt wie ein echtes Branding: jede Session existiert, reist
  * (`sessionTravels`) und hält die Form ihrer Art ein. Ein Beispiel, das der
  * Renderer nur zur Hälfte lesen kann, wäre die teuerste Art, das Produkt

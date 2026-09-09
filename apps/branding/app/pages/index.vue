@@ -19,12 +19,17 @@ import { jsonLdScript } from '../utils/jsonLd'
  *
  * ── DAS BEISPIEL-BRANDING IST SEIT PAKET G5 (2026-09-07) ZURÜCK ───────────
  * Davids 404-Audit (2026-09-03) hatte es entfernt, weil die Kachel auf einen
- * Klickdummy-Pfad zeigte (`/brand/demo/beispiel`); jetzt gibt es die Seite:
- * `/beispiel/kailua-coffee` rendert einen festen Snapshot durch DENSELBEN
- * Renderer wie jedes echte Handbuch. Sie steht direkt hinter den Artefakten,
- * weil sie deren Beweis ist — „was am Ende auf dem Tisch liegt" und dann: hier
- * liegt es. Noch offen und weiter in OPEN-ITEMS: „Brand Insights"
- * (Artikel/Profile/Duelle).
+ * Klickdummy-Pfad zeigte (`/brand/demo/beispiel`); dann gab es mit
+ * `/beispiel/kailua-coffee` eine redaktionelle Zweitfassung derselben Marke.
+ * SEIT DISCOVER D5 IST DAS ORIGINAL ÖFFENTLICH: die Anatomie unter
+ * `/discover/kailua-coffee-co` (`packages/brand`) rendert dieselbe Marke aus
+ * `brand_publications` — mit Steckbrief, Markenabdruck und eigenem og:image.
+ * Die Kachel zeigt deshalb DORTHIN, und die alte Adresse antwortet 301
+ * (`routeRules` in `nuxt.config.ts`): zwei Seiten für eine Marke waren zwei
+ * Pflegestellen und zwei Kandidaten in derselben Suche. Sie steht direkt
+ * hinter den Artefakten, weil sie deren Beweis ist — „was am Ende auf dem
+ * Tisch liegt" und dann: hier liegt es. Noch offen und weiter in OPEN-ITEMS:
+ * „Brand Insights" (Artikel/Profile/Duelle).
  *
  * ── DER BRAND-CHECK IST SEIT 2026-09-05 ECHT — UND WOHNT WOANDERS ─────────
  * Erst stand hier die Warteliste mit `source: 'brand-check'`, dann (seit dem
@@ -214,7 +219,7 @@ const KIT_FILES = ['logo.svg', 'wortmarke.svg', 'boilerplate.md', 'gruender.jpg'
       <!-- 3 · Beispiel-Branding: der Beweis zu den Artefakten (s. Kopf) -->
       <section class="mt-24">
         <NuxtLink
-          :to="localePath('/beispiel/kailua-coffee')"
+          :to="localePath('/discover/kailua-coffee-co')"
           class="bw-card bw-card--hover grid items-center gap-8 p-8 sm:grid-cols-[12rem_minmax(0,1fr)]"
         >
           <div

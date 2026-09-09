@@ -19,7 +19,7 @@ import { BRAND_RAMP_SHADES, type BrandDesignSnapshotPreset } from '../../shared/
  *
  * ── EIN RENDERER, DREI ANSICHTEN ─────────────────────────────────────────
  * Privat (`/brand/:id/foundation`), öffentlich (`/brand/share/:token`) und
- * das Beispiel (`/beispiel/kailua-coffee`) zeigen dieselbe Fläche aus
+ * die Anatomie (`/discover/<slug>`) zeigen dieselbe Fläche aus
  * demselben Preset. Der EINZIGE Unterschied ist der Hinweis auf die
  * behaltenen Entwürfe: er steht nur, wo es sie gibt — im Snapshot gibt es sie
  * nie (§1.11 b), und die Zahl ist dort deshalb 0.

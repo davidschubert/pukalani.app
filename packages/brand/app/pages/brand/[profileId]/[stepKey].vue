@@ -717,7 +717,7 @@ const turns = computed<StageTurn[]>(() => {
           role: 'george',
           text: t(
             `brand.workspace.george.${hasValue ? 'nextConfirm' : 'nextDraft'}`,
-            { field: slotLabel(slot) },
+            { field: slotLabel(slot), voice: voice.value.name },
           ),
         }]
       }
@@ -746,7 +746,7 @@ const turns = computed<StageTurn[]>(() => {
       : null
     const intro = t('brand.workspace.george.questionsDone')
     const text = actionKey && firstOpen
-      ? `${intro} ${t(`brand.workspace.george.${actionKey}`, { field: slotLabel(firstOpen) })}`
+      ? `${intro} ${t(`brand.workspace.george.${actionKey}`, { field: slotLabel(firstOpen), voice: voice.value.name })}`
       : intro
     return [...spoken, { id: 'done', role: 'george', text }]
   }
@@ -1717,9 +1717,11 @@ const generationNotice = computed<string | null>(() => {
   if (!code) return null
   const throttled = brandAiRejectionMessageKey(code)
   if (throttled) return t(throttled)
-  if (code === 'ai_disabled') return t('brand.workspace.generate.aiDisabled')
-  if (code === 'no_generator') return t('brand.workspace.generate.noGenerator')
-  if (code === 'generation_active') return t('brand.workspace.generate.busy')
+  // Die drei Betriebs-Sätze NENNEN die Stimme — und die ist in Schicht 2 Frida
+  // (D8). Ein hier ausgeschriebenes „George" stand sonst unter Fridas Kapitel.
+  if (code === 'ai_disabled') return t('brand.workspace.generate.aiDisabled', { voice: voice.value.name })
+  if (code === 'no_generator') return t('brand.workspace.generate.noGenerator', { voice: voice.value.name })
+  if (code === 'generation_active') return t('brand.workspace.generate.busy', { voice: voice.value.name })
   if (code === 'aborted') return t('brand.workspace.generate.stopped')
   if (code === 'not_ready') return t('brand.workspace.generate.notReady')
   if (code === 'slot_confirmed') return t('brand.workspace.generate.slotConfirmed')
@@ -3742,7 +3744,7 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
                     <p class="bw-label" style="color: var(--bw-muted)">{{ slotLabel(pendingCard.slot) }}</p>
                     <span v-if="pendingCard.controls.showDraftBadge" class="bw-state bw-state--draft">
                       <UIcon name="i-ph-pen-nib" />
-                      {{ t('brand.workspace.draftBadge') }}
+                      {{ t('brand.workspace.draftBadge', { voice: voice.name }) }}
                     </span>
                   </div>
                   <UTextarea
@@ -3886,14 +3888,14 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
                     size="sm" class="flex-1" maxlength="500"
                     :model-value="hints[pendingCard.slot.id] ?? ''"
                     :placeholder="t('brand.workspace.generate.hintPlaceholder')"
-                    :aria-label="t('brand.workspace.generate.hintLabel')"
+                    :aria-label="t('brand.workspace.generate.hintLabel', { voice: voice.name })"
                     :disabled="generation.streaming.value"
                     @update:model-value="value => hints = { ...hints, [pendingCard!.slot.id]: String(value) }"
                     @keydown.enter="generateSlot(pendingCard!.slot)"
                   />
                   <UButton
                     size="sm" color="neutral" variant="ghost" class="bw-send rounded-full"
-                    icon="i-ph-arrow-right" :aria-label="t('brand.workspace.generate.hintLabel')"
+                    icon="i-ph-arrow-right" :aria-label="t('brand.workspace.generate.hintLabel', { voice: voice.name })"
                     :disabled="generation.streaming.value"
                     @click="generateSlot(pendingCard.slot)"
                   />
@@ -4105,7 +4107,7 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
       <div ref="promptBox" class="w-full">
         <UChatPrompt
           v-if="!acceptanceView"
-          v-model="promptDraft" :placeholder="t('brand.workspace.george.placeholder')"
+          v-model="promptDraft" :placeholder="t('brand.workspace.george.placeholder', { voice: voice.name })"
           :disabled="!promptEnabled" :autofocus="false" class="w-full"
           :ui="{ root: 'has-[textarea:focus-visible]:outline-none has-[textarea:focus-visible]:ring-default' }"
           @submit="submitPrompt" @keydown.tab="promptTab"

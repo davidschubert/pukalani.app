@@ -29,7 +29,6 @@ describe('branding: die feste Routen-Liste', () => {
       '/brand-check',
       '/discover',
       '/erstgespraech',
-      '/beispiel/kailua-coffee',
       '/brand-check/ranking',
       '/brand-check/methodik',
       '/about',
@@ -40,8 +39,11 @@ describe('branding: die feste Routen-Liste', () => {
     // keine Entscheidung: Ergebnis- und Vergleichsseite tragen `noindex`,
     // Einladung und Wartelisten-Bestätigung brauchen einen Token, Wizard und
     // Dashboard liegen hinter der Anmeldung, die Rechtstexte sind bis BS1 R3
-    // Entwürfe (`PAGE_DRAFT_ROBOTS`).
+    // Entwürfe (`PAGE_DRAFT_ROBOTS`). `/beispiel/kailua-coffee` ist gelöscht
+    // und antwortet 301 auf die Anatomie — eine Redirect-Quelle gehört in
+    // keine Sitemap.
     for (const excluded of [
+      '/beispiel/kailua-coffee',
       '/brand-check/vergleich',
       '/invite',
       '/waitlist/confirm',
