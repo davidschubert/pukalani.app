@@ -88,10 +88,10 @@ zahlte 44k, jetzt ~12k. Und: `TaskOutput` auf einen laufenden Agenten kippt sein
 JSONL-Transkript in den Kontext (zweimal ~20k in derselben Session) — auf die
 Benachrichtigung warten.
 
-### Discover Brands (DB1 D0–D3): Galerie, Anatomie, Veröffentlichen mit Freigabe, Betreiber-Seite ✅ 2026-09-08
+### Discover Brands (DB1 D0–D5): Galerie, Anatomie, Veröffentlichen mit Freigabe, Betreiber-Seite, Beispiel-Branding, Sitemap + OG-Bild ✅ 2026-09-08/09
 
 **Was:** Davids Vorziehen von DB1 („mach mit discover brands weiter"). Strategie + Konzept
-(docs/plans/DISCOVER-BRANDS.md) auf dem abgenommenen Klickdummy, der BF1-Leseansicht
+(docs/archiv/DISCOVER-BRANDS.md, seit D4 im Archiv) auf dem abgenommenen Klickdummy, der BF1-Leseansicht
 (Veröffentlichung = eingefrorener Snapshot mit `sensitivity`-Filter, derselbe Renderer) und den
 BC1/MV1-Daten; acht Entscheidungen per Fragenrunde (DECISION-LOG 2026-09-08: Freigabe VOR
 Veröffentlichung, `/discover`, Website-Score sonst Fundament-Reife, Kailua-Beispiel; nach dem
@@ -188,6 +188,34 @@ abgenommen ist. **Gelernt:** (1) Ein Dedup, der „entschieden" mit „angenomme
 jede Ablehnung zur Endlosschleife — der Zustand, den man NICHT wiedersehen will, muss im Filter
 stehen. (2) Ein Bedien-Lauf ohne Screenshot-Pfade ist kein Beweis für David — die Beweisbilder macht
 der Hauptloop selbst (Playwright-CLI gegen die öffentlichen Seiten), nicht der Agent.
+
+**D4 — Sitemap + robots.txt, OG-Bild je Anatomie, Branche als Ähnlichkeits-Grund ✅ 2026-09-09
+(UTC), Commit `919f588c`, Opus-Lauf, im Hauptloop geprüft:** (1) `apps/branding/server/routes/
+sitemap.xml.get.ts` + `robots.txt.get.ts` nach dem Marketing-Muster, pure Bausteine in
+`server/utils/brandingSitemap.ts` (neun feste Seiten, jede sichtbare Anatomie mit ECHTEM `lastmod`
+aus der Zeile, hreflang x-default/en/de, XML-Escaping, fail-soft mit Warn-Log; Rechtsseiten bewusst
+draußen bis BS1 R3, `/beispiel/kailua-coffee` drin, weil von der Startseite verlinkt und ohne
+noindex); Testlauf für `apps/branding` neu eingerichtet (vitest). (2) OG-Bild 1200×630 PNG in der
+Farbwelt der Marke: Route `apps/branding/server/routes/og/discover/[slug].get.ts` (die App
+komponiert — der Rasterizer wohnt in `themes`, ein Produkt-Layer darf ihn nicht importieren, A14;
+`.png` schneidet der Handler ab, ein Nitro-Parameter deckt immer das ganze Segment), Renderer
+`discoverOgImage.ts` mit dem gebackenen Font-Atlas, Verlauf mit früher Tiefe (Kontrast für alle zwölf
+Welten nachgerechnet, Tinte über `brandInkColor`), Ablage unter Hash aus Slug + `$updatedAt` in
+`tmpdir()`, `max-age` ein Tag statt `immutable` (die Adresse wandert bei neuem Stand nicht); nur
+SICHTBARE Veröffentlichungen werden gerendert (404 sonst — niemand füllt die Platte mit erfundenen
+Slugs). Pfad-Wahrheit `brandDiscoverOgPath()` im Layer, die Anatomie-Seite trägt ihn über
+`useBrandOgImage()` ein und setzt beim Verlassen auf `null` zurück (app-weiter State). (3)
+`similarDiscoverEntries`: Archetyp → Farbwelt → Branche (`unknown` zählt nicht), Deckel 4, i18n
+de/en. Gates: brand 2651 Tests, branding 28 (neu), Lint/Typecheck, i18n-Keys 290, Manifeste.
+**Live-Beweis (curl, Build `919f588c`):** `/robots.txt` 200 mit drei Disallow + Sitemap-Zeile;
+`/sitemap.xml` 200, 22 URLs, beide Anatomien en+de mit `lastmod` = Freigabezeit;
+`/og/discover/kailua-coffee-co.png` 200 `image/png` 50 KB, erfundener Slug 404, ohne `.png` 404;
+Anatomie-Quelltext trägt `og:image` absolut + Typ/Maße + `twitter:card`; `/api/discover/
+kailua-coffee-co` liefert Krume & Gold als Ähnliche mit Grund `industry`. **Gelernt:** (1) Ein
+Deploy-Wächter, der auf den EIGENEN SHA wartet, schläft ewig, wenn die Nachbar-Session direkt danach
+pusht — prüfen, ob der Live-Build den eigenen Commit als VORFAHR enthält. (2) `pnpm install
+--filter <app>` erzeugt hier Peer-Hash-Churn im Lockfile und lässt `node_modules` inkonsistent
+zurück (`nuxi prepare` stirbt repo-weit) — immer ungefiltert installieren.
 
 ---
 

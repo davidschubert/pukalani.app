@@ -78,7 +78,7 @@ gehören dort hin.
 | [plans/PRIVATE-NACHRICHTEN-KONZEPT.md](plans/PRIVATE-NACHRICHTEN-KONZEPT.md) | Stufe 1 komplett (inkl. F56, 2026-08-13); ungebaut nur Stufen 2/3 — bewusst keine offenen Punkte |
 | [plans/DASHBOARD-IA.md](plans/DASHBOARD-IA.md) | Schritt 3 + Community-Hub gebaut; **12 der 14 Schritt-4-Seiten fehlen** — als U15 jetzt in OPEN-ITEMS geführt |
 | [plans/ANALYTICS-V2.md](plans/ANALYTICS-V2.md) | Pakete 1–4 live; Rest = Optionales (F47) |
-| [plans/DISCOVER-BRANDS.md](plans/DISCOVER-BRANDS.md) | Discover Brands (DB1): Strategie + Konzept freigegeben 2026-09-08 (Davids vier Entscheidungen) — Pakete D0–D5 in Umsetzung, D0 (Prototyp am Dummy) wartet auf Abnahme |
+| [archiv/DISCOVER-BRANDS.md](archiv/DISCOVER-BRANDS.md) | Discover Brands (DB1): AUSGEFÜHRT 2026-09-08/09 — D0–D5 live (Galerie, Anatomie, Freigabe, Betreiber-Seite, Beispiel Kailua, Sitemap + OG-Bild); Konzept + acht Entscheidungen als Rezept. (Vorher: D0 (Prototyp am Dummy) wartet auf Abnahme |
 | [plans/BRAND-INSIGHTS.md](plans/BRAND-INSIGHTS.md) | Brand Insights (BI1): Redaktionskonzept entschieden 2026-09-07 (Davids zwölf Entscheidungen) — Strategie-/Konzeptrunde folgt nach DB1 |
 | [plans/BRANDING-SUPPLY-RECHT-UND-BEZAHLUNG.md](plans/BRANDING-SUPPLY-RECHT-UND-BEZAHLUNG.md) | branding.supply — Rechtstexte + Bezahlweg (BS1): Strategie + Konzept geschrieben 2026-09-07, acht Entscheidungsfragen offen; Vorbedingung fürs Öffnen der Beta |
 | [plans/F7-PAYMENTS-CONNECT.md](plans/F7-PAYMENTS-CONNECT.md) | Entscheidungsvorlage, nichts gebaut (F7) |

@@ -201,7 +201,7 @@ bewusst in BS1 und **nicht** in BI1: er misst die ganze Site, nicht nur die Reda
 und Schalter dürfen nicht in zwei Plänen auseinanderlaufen — die Reihenfolge „erst Text, dann
 Schalter" ist dieselbe wie bei `auth.termsUrl` in R1.
 
-**Nebenbefund aus dem Abgleich mit dem Code (DB1).** [plans/DISCOVER-BRANDS.md](plans/DISCOVER-BRANDS.md)
+**Nebenbefund aus dem Abgleich mit dem Code (DB1).** [archiv/DISCOVER-BRANDS.md](archiv/DISCOVER-BRANDS.md)
 §4.2 verspricht bei Umbenennung „neuer Slug + 301 vom alten" — gebaut ist das nicht:
 `brand_publications` trägt `slug` (unique) und **keine Slug-Historie**, und es gibt keine
 Weiterleitung. Heute folgenlos (eine Veröffentlichung, unveränderter Titel), für ein verlinktes

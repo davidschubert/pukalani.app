@@ -1,10 +1,11 @@
 # Discover Brands — die öffentliche Markengalerie (Strategie + Konzept, 2026-09-08)
 
-> **STAND 2026-09-08: D0–D3 + D5 LIVE** — Krume & Gold und das Beispiel-Branding Kailua Coffee Co.
-> (`/discover/kailua-coffee-co`, Badge „Beispiel", über den echten Wizard gebaut) sind öffentlich;
-> die Nachzüge (Branche im Dialog, Sichtbarkeit bei neuem Stand, Befund-Dedup) sind drin. Offen:
-> nur noch D4 (Ähnliche/Sitemap/OG-Bild). Bleibt in `plans/`, bis D4 gebaut ist; Erledigt-Eintrag
-> in OPEN-ITEMS-COMPLETE.
+> **ARCHIV — AUSGEFÜHRT 2026-09-08/09: D0–D5 LIVE.** Krume & Gold und das Beispiel-Branding
+> Kailua Coffee Co. (`/discover/kailua-coffee-co`, Badge „Beispiel", über den echten Wizard gebaut)
+> sind öffentlich; D4 (Sitemap + robots.txt, OG-Bild je Anatomie, Branche als dritter
+> Ähnlichkeits-Grund) ist mit `919f588c` live. Dieses Dokument ist Begründung und Rezept, KEINE
+> Arbeitsliste — Erledigt-Eintrag mit Beweisen und Gelernt in OPEN-ITEMS-COMPLETE (DB1); Reste
+> (Slug-301 bei Umbenennung, Rechtstexte als Gate fürs Öffnen) stehen in OPEN-ITEMS/DECISION-LOG.
 
 OPEN-ITEMS 10 · DB1, von David vorgezogen („mach mit discover brands weiter",
 2026-09-08). Grundlage: Phase-1-Plan „Discover-Seite" (Davids Idee 2026-08-27/29),
