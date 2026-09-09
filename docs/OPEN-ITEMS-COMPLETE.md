@@ -10731,3 +10731,80 @@ jeden Batch (`retentionAt <= now`, Limit 200) und neue fällige Zeilen werden ni
 erreicht. Bei der Prüfung erwischt, vor dem Deploy behoben. **Dritte:** Appwrite 2.0
 lehnt einen Index über varchar > 768 Zeichen ab (`column_index_invalid`, MariaDB
 3072 B ÷ 4) — `idx_slug_history` auf einer 1000er-Spalte braucht `lengths: [768]`.
+
+## BI1 I2 — Brand Insights: Redaktions-Dashboard + KI-Entwurf (2026-09-09)
+
+**Was gebaut wurde** (Commit `f6d6da89`, Merge `d1e04658`, Bilanz `9d4dc553`; Live-Build
+`d1e04658` auf branding.supply per /api/health bewiesen): Paket I2 aus
+docs/plans/BRAND-INSIGHTS.md §9.9 — die Redaktion hinter `insights.manage`, gebaut von einem
+Opus-Lauf nach Auftrag, geprüft und nachgeschärft im Hauptloop.
+
+- **Routen `/api/insights/**`** (alle `requirePermission(event, 'insights.manage')`, Admin-Client
+  über `insightsDb`, expliziter `Query.limit`): Liste, Anlegen (Slug über den brand-Vertrag),
+  Lesen mit Editor-Kontext (Marken, Form-Issues), Speichern (`insightsPostEditSchema` ohne
+  Server-Felder, `readingMinutes` beim Speichern, `slugHistory` bei Umbenennung,
+  `translationReviewed` nur mit vorhandener zweiter Fassung), Zustandswechsel
+  (`insightsTransitionAllowed`-Matrix; vor jedem Ziel außer `draft` die **sechs Prüfregeln als
+  Server-Gate MIT Quellen-Abruf** über `fetchBrandSiteForCheck` — robots/TDM-Verbot und
+  Abruf-Fehler zählen als „nicht belegbar", nie als „ungeprüft"; Deckel 20 Quellen je Lauf),
+  Beleg-Ampel je Quelle (deterministisch, `evidenceIsGrounded`, Grund `ok/not_found/
+  fetch_failed/robots_denied/tdm_reserved/no_url`), Übersetzen und KI-Entwurf (Kette
+  Permission → `readBrandAiEnabled` fail-closed → Drossel 10/Stunde + 50/Tag je Konto und Art
+  über `useRateLimitStore` → `aiCompleteJson` mit `BRAND_PROVIDER_ROUTING`; Prompt-Fassungen
+  `insights-t-1`/`insights-d-1` als Konstanten, je Beitrag gespeichert; Entwurf bleibt `draft`),
+  Marken-Liste + Schnellanlage (Prüfregel 6 braucht eine Zeile).
+- **Seiten** `packages/insights/app/pages/dashboard/insights/{index,[id],radar}.vue`
+  (`layout: 'dashboard'`, `['auth','admin']`, `requiredCapability: 'insights.manage'`): Liste als
+  `UTable` mit Anlege-Dialog, Editor aus der I0-Form (`InEditor.vue` ist jetzt die echte
+  Komponente: UEditor nach editor.md, zwei Sprach-Reiter mit Maschinen-Stempel, editierbares
+  Quellen-Panel mit Ampel, Marken-Panel, Fakten als JSON mit Zod, Prüfregeln, Übergänge,
+  Vorschau, Übersetzen, KI-Entwurf), Radar-Platzhalter bis I4. Admin-Modul `insights` in
+  `pukalani.admin.modules` (operator, `productKey`, `configFlag`, zwei Kinder).
+- **brand-Vertrag** um Abschnitt 7 (Kill-Switch, ZDR-Routing) und `fetchBrandSiteForCheck`
+  ergänzt; kein Schreiben in brand-Tabellen — KI-Ereignisse als `logEvent`-Zeilen
+  `insights.{draft,translate}.{requested,completed,failed}` (nie Prompt, nie Text).
+- **Shared:** `insightsAiLimits.ts`, `insightsPrompts.ts`, `types/insightsApi.ts` (an beiden
+  Enden verlangt), Erweiterungen in `insightsPost.ts` (Edit-Schema aus denselben Regeln,
+  Übergangs-Matrix, `insightsMethodologyLinked`). 33 neue Tests (87 → 120).
+
+**Drei Zuschnitte, die vom Auftrag abweichen** (alle im Code begründet): (1) `review_blocked`
+ist **200 mit `changed: false` + `issues`**, kein 409 — der zentrale Fehler-Handler hebt aus
+`data` nur den `code`, eine Liste käme nie an, und der teure Gate-Lauf müsste doppelt laufen.
+(2) Abruf über `fetchBrandSiteForCheck` statt `fetchBrandSite` — nur jener prüft robots/TDM
+(der Wizard-Weg auf die EIGENE Website tut es bewusst nicht); kein eigener
+`PukalaniInsightsBot` in I2. (3) Der Herabsetzungs-Riegel bekommt als Kandidaten die Marken,
+die der Beitrag NICHT verweist — wörtlich umgesetzt hätte jedes Markenprofil an seinem eigenen
+Titel blockiert; ein Treffer heißt jetzt „genannt, aber ohne Verweis" (genau Regel 6).
+
+**Klick-Beweis** (Dev-Server aus dem Worktree, Port 3018, Dev-Instanz `portfolio-g4ml`,
+Admin-Session per Server-SDK als Cookie — kein Passwort getippt): Anlegen → Editor → Text +
+Quelle example.com → Speichern 200 (`readingMinutes: 1`) → Beleg prüfen: erst `not_found`
+(example.com hat 2025 seinen Satz geändert — das Gate hatte RECHT), mit dem echten Satz `ok`
+→ Gate ohne Marken-Verweis: `disparagement competitor_domain` an Titel und Text → Marke
+angelegt + verknüpft → `review` → `published` mit `reviewedBy`/`publishedAt` → Vorschau →
+Übersetzen lokal 503 „AI not configured" (kein Schlüssel lokal; Log-Zeilen requested/failed
+da). Screenshots an David. **Prod-Beweis nach dem Deploy** (Davids freigegebener Chrome,
+branding.supply, Build `d1e04658`): Beitrag „I2-Beweis: Kailua Coffee Co." angelegt → KI-Entwurf
+(Brief, 300 Wörter) liefert Titel/Vorspann/Text mit `[Quelle]`-Platzhaltern, Lesezeit 3 Min,
+Zustand bleibt Entwurf → Übersetzen liefert die englische Fassung mit Stempel „Maschinell
+erzeugt am 09.09.2026, noch nicht redigiert" und Häkchen; der Platzhalter bleibt Platzhalter.
+Der Beitrag steht als Entwurf in Davids Redaktion (I2 hat keinen Löschen-Weg — offen in
+OPEN-ITEMS). Wächter: 120 Tests, Lint insights/branding, Typecheck branding,
+check:i18n-keys, check:manifests, check:bilanz.
+
+**Fünf Befunde aus dem Klick-Beweis, alle vor dem Push behoben:** `i-ph-radar` gibt es in
+Phosphor nicht (→ `i-ph-broadcast`) · Herabsetzungs-Meldung zeigte den rohen Grund
+(`competitor_domain`) statt eines Satzes · „1 Punkte offen" — Plural braucht `t(key, n)`,
+nicht `{ count }` · eine Quelle ohne Herausgeber ließ sich nicht speichern und der Toast sagte
+nur „Das hat nicht geklappt" — die Formregeln rechnen jetzt LOKAL am Entwurf mit (Regel 2 war
+hinter dem Schema-400 unsichtbar), der 400 bekommt einen sprechenden Toast · Fehlercode im
+KI-Log war „Error" statt „503 AI not configured".
+
+**Gelernt:** (1) Ein Schema, das beim SPEICHERN abweist, macht eine Prüfregel im Panel
+unerreichbar — wer beides will (Plan §9.3: Schema UND Übergang), muss die puren Regeln auch am
+unsaved Entwurf rechnen, sonst sieht der Mensch nur einen 400. (2) Ein Beleg-Riegel gegen eine
+LEBENDE Website ist ein Test mit beweglichem Erwartungswert: example.com hat seinen Satz
+geändert; der „Fehler" war die Wahrheit. (3) `check:bilanz` gehört in dieselbe Wächter-Liste
+wie i18n/manifests, sobald ein Layer Routen oder Seiten bekommt — die CI hat es gesehen, die
+lokale Runde nicht. (4) Klick-Beweis hinter Login ohne Passwort: `users.createSession` per
+Server-SDK, Secret als `a_session_<projekt>`-Cookie in den Playwright-Kontext.
