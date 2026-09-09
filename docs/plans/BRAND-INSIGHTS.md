@@ -577,7 +577,7 @@ Slugs, ≤ 5), die Route schlägt bei einem Fehlschlag dort nach und antwortet
 301. Das ist die Regel, die DB1 versprochen und nicht gebaut hat (§9.0).
 
 **Abhängigkeit in die andere Richtung — der Befund DB1 (2026-09-08).**
-[DISCOVER-BRANDS.md](DISCOVER-BRANDS.md) §4.2 sagt zur Umbenennung „neuer Slug
+[DISCOVER-BRANDS.md](../archiv/DISCOVER-BRANDS.md) §4.2 sagt zur Umbenennung „neuer Slug
 + 301 vom alten". Gebaut ist das nicht: `brand_publications` trägt `slug`
 (unique) und **keine Slug-Historie**, und im Code gibt es **keine
 Weiterleitung** — eine Umbenennung bricht heute jeden Link auf
