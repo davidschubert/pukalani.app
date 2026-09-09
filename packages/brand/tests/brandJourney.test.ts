@@ -7,7 +7,9 @@ import {
   type BrandProfileFacts,
   type BrandStepFacts,
   applyJunctionChange,
+  brandAcceptableSessions,
   brandNamingIncluded,
+  brandSessionAcceptable,
   brandStepAcceptance,
   brandStepCompletion,
   canEnterBrandStep,
@@ -1232,6 +1234,42 @@ describe('brandStepAcceptance — die drei neuen Glieder (§5a Schritt 3)', () =
     expect(withOptional.total).toBe(without.total + 1)
     expect(withOptional.ready).toBe(false)
     expect(withOptional.blockers).toEqual([{ slotId: 'c.teamFilter', reason: 'unaccepted' }])
+  })
+
+  /**
+   * „ALLE ABNEHMEN" (Davids Befund 10, 2026-09-09) — die Vorauswahl des
+   * Sammel-Knopfes. Sie MUSS dieselbe Menge treffen wie der Haken je Zeile,
+   * sonst lässt der Sammel-Knopf eine Zeile stehen, die daneben einen Haken
+   * anbietet.
+   */
+  it('brandAcceptableSessions nimmt genau das, was auch der Einzel-Haken nimmt', () => {
+    const slots = ready('values')
+    slots['c.final'] = { hasValue: true, confirmed: true }
+    slots['c.livedExamples'] = { hasValue: true }
+    const acceptable = brandAcceptableSessions('values', slots)
+
+    expect(acceptable).toEqual(['c.final'])
+    // Und die Gegenprobe an der puren Einzel-Regel — beide sagen dasselbe.
+    expect(brandSessionAcceptable(slots['c.final'])).toBe(true)
+    expect(brandSessionAcceptable(slots['c.livedExamples'])).toBe(false)
+    expect(brandSessionAcceptable(slots['c.definitions'])).toBe(false)
+    expect(brandSessionAcceptable(undefined)).toBe(false)
+  })
+
+  it('nimmt eine OPTIONALE Session mit, sobald sie bestätigt ist', () => {
+    const slots = { ...ready('values'), 'c.teamFilter': { hasValue: true, confirmed: true } }
+    expect(brandAcceptableSessions('values', slots)).toEqual(['c.teamFilter'])
+    // Ohne Wert steht sie grau da und wird nicht angefasst.
+    expect(brandAcceptableSessions('values', ready('values'))).toEqual([])
+  })
+
+  it('VERALTET und VERTAGT sperren die Abnahme NICHT — sie sperren den Abschluss', () => {
+    // Der Weg aus `stale` heraus ist „Gilt weiter", nicht ein verbotener Haken:
+    // die Zustände sind in `blockers` sichtbar, und der Einzel-Knopf nimmt sie
+    // genauso an.
+    const slots = ready('values')
+    slots['c.final'] = { hasValue: true, confirmed: true, deferred: true }
+    expect(brandAcceptableSessions('values', slots)).toEqual(['c.final'])
   })
 
   it('LESEN BLEIBT NACHSICHTIG: ein gespeichertes `done` wird nicht herabgestuft', () => {

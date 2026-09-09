@@ -239,9 +239,13 @@ describe('Kailua Coffee Co. — was der Renderer daraus baut', () => {
     expect(chips?.kind === 'chips' && chips.items).toHaveLength(4)
     expect(chips?.kind === 'chips' && chips.items.every(item => item.sample.length > 0)).toBe(true)
 
-    const dodont = voice.blocks.find(block => block.kind === 'dodont')
+    // Der Wort-Leitfaden wohnt seit Befund 12 (2026-09-09) im MESSAGING-Kapitel:
+    // Do & Don't sind der Wortschatz, mit dem die Marke schreibt.
+    const messaging = view.chapters.find(chapter => chapter.id === 'messaging')!
+    const dodont = messaging.blocks.find(block => block.kind === 'dodont')
     expect(dodont?.kind === 'dodont' && dodont.pairs.length).toBeGreaterThan(0)
     expect(dodont?.kind === 'dodont' && dodont.pairs.every(pair => pair.doText && pair.dontText)).toBe(true)
+    expect(voice.blocks.some(block => block.kind === 'dodont')).toBe(false)
 
     const archetype = voice.blocks.find(block => block.kind === 'choice')
     expect(archetype?.kind === 'choice' && archetype.optionIds).toEqual(['sage', 'creator'])

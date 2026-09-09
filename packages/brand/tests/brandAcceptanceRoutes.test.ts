@@ -96,6 +96,8 @@ const accept = (await import('../server/api/brand/profiles/[id]/steps/[stepKey]/
   .default as unknown as (event: H3Event) => Promise<Record<string, unknown>>
 const defer = (await import('../server/api/brand/profiles/[id]/steps/[stepKey]/sessions/[slotId]/defer.post'))
   .default as unknown as (event: H3Event) => Promise<Record<string, unknown>>
+const acceptAll = (await import('../server/api/brand/profiles/[id]/steps/[stepKey]/accept-all.post'))
+  .default as unknown as (event: H3Event) => Promise<Record<string, unknown>>
 const acceptance = (await import('../server/api/brand/profiles/[id]/steps/[stepKey]/acceptance.get'))
   .default as unknown as (event: H3Event) => Promise<Record<string, unknown>>
 const restartImpact = (await import('../server/api/brand/profiles/[id]/steps/[stepKey]/restart-impact.get'))
@@ -196,6 +198,77 @@ describe('POST …/sessions/:slotId/accept', () => {
     routeSlotId = 'a.pitch'
     body = { revision: 2 }
     await expect(accept(event)).rejects.toMatchObject({ status: 404 })
+  })
+})
+
+/**
+ * „ALLE ABNEHMEN" (Davids Befund 10, 2026-09-09) — elf Häkchen in EINEM
+ * Schreibvorgang.
+ *
+ * Was hier gemessen wird, ist genau das, was elf Einzel-Aufrufe NICHT könnten:
+ * eine Fassung statt elf, dieselbe Auswahlregel wie der Einzel-Knopf, und ein
+ * Teilerfolg, der sagt, was liegen geblieben ist.
+ */
+describe('POST …/steps/:stepKey/accept-all', () => {
+  it('nimmt ALLES ab und dreht die Fassung GENAU EINMAL weiter', () => {
+    body = { revision: 2 }
+    return acceptAll(event).then((response) => {
+      const required = confirmableRequiredSlotsForStep('values')
+      expect(response.accepted).toEqual(required.map(slot => slot.id))
+      expect(response.failed).toEqual([])
+      // EINE Fassung, EIN Schreibvorgang — nicht neun.
+      expect(response.revision).toBe(3)
+      expect(tablesDB.updateRow).toHaveBeenCalledTimes(1)
+      expect(response.acceptance).toMatchObject({ ready: true })
+      for (const slot of required) {
+        expect(storedSlots('values')[slot.id]).toMatchObject({ accepted: true })
+      }
+    })
+  })
+
+  it('LÄSST UNBESTÄTIGTES LIEGEN — und meldet es nicht als abgenommen', async () => {
+    const slots = confirmedSlots('values') as Record<string, Record<string, unknown>>
+    delete slots['c.final']!.confirmed
+    slots['c.final']!.latestDraft = 'Entwurf'
+    stepRow('values').slots = JSON.stringify(slots)
+    body = { revision: 2 }
+
+    const response = await acceptAll(event)
+    expect(response.accepted).not.toContain('c.final')
+    expect(storedSlots('values')['c.final']).not.toHaveProperty('accepted')
+    // Der Rest gilt trotzdem — eine Zeile darf die anderen nicht aufhalten.
+    expect((response.accepted as string[]).length).toBeGreaterThan(0)
+    expect(response.acceptance).toMatchObject({ ready: false })
+  })
+
+  it('nimmt eine OPTIONALE Session mit, sobald sie bestätigt ist', async () => {
+    stepRow('values').slots = JSON.stringify({
+      ...confirmedSlots('values'),
+      'c.teamFilter': { confirmed: 'steht' },
+    })
+    body = { revision: 2 }
+    const response = await acceptAll(event)
+    expect(response.accepted).toContain('c.teamFilter')
+  })
+
+  it('ist ein NO-OP, wenn nichts mehr abzunehmen ist — keine Fassung, kein Schreibvorgang', async () => {
+    stepRow('values').slots = JSON.stringify(confirmedSlots('values', true))
+    tablesDB.updateRow.mockClear()
+    body = { revision: 2 }
+
+    const response = await acceptAll(event)
+    expect(response.accepted).toEqual([])
+    expect(response.revision).toBe(2)
+    expect(tablesDB.updateRow).not.toHaveBeenCalled()
+  })
+
+  it('WEIST eine veraltete Fassung mit 409 ab — vor jeder Wirkung', async () => {
+    body = { revision: 1 }
+    await expect(acceptAll(event)).rejects.toMatchObject({
+      status: 409,
+      data: { code: 'revision_conflict', revision: 2 },
+    })
+    expect(tablesDB.updateRow).not.toHaveBeenCalled()
   })
 })
 

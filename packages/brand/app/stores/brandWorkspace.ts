@@ -36,6 +36,7 @@ import type {
   BrandSessionCloseResponse,
   BrandSessionView,
   BrandSlotView,
+  BrandStepAcceptAllResponse,
   BrandStepCompleteResponse,
   BrandStepDetailResponse,
   BrandStepSaveResponse,
@@ -485,6 +486,44 @@ const setup = () => {
     correctionRejected.value = ''
   }
 
+  /**
+   * DER SERVER HAT EINE BESTÄTIGUNG OHNE WERT ABGEWIESEN (400 `slot_empty`,
+   * Befund 9) — welches Feld es war, damit die Seite es SAGEN kann.
+   *
+   * Die Bühne lässt diesen Fall gar nicht erst zu (`confirmEnabled`), aber ein
+   * abgewiesener Rumpf, der stehen bleibt, wäre hier besonders teuer: `400` ist
+   * ein endgültiges Nein zur GLEICHEN Eingabe, der Autosave wiederholt ihn
+   * bewusst nicht — die Werkstatt stünde also auf „Nicht gespeichert", ohne dass
+   * jemand erführe, woran es liegt. Deshalb fällt die ABSICHT „bestätigen"
+   * (dieselbe Bewegung wie bei `invariant_violated`), der Text bleibt stehen.
+   */
+  const emptyConfirmRejection = ref<string>('')
+
+  function rejectEmptyConfirmations(): void {
+    const edits = { ...localEdits.value }
+    let first = ''
+    for (const [slotId, patch] of Object.entries(pendingSlots.value)) {
+      if (patch.confirmed !== true) continue
+      // Nur die WIRKLICH leeren: in einem Rumpf mit mehreren Feldern hat der
+      // Server beim ersten leeren abgebrochen, die anderen sind unschuldig und
+      // dürfen ihre Bestätigung im nächsten Versuch behalten.
+      if (slotValue(slotId).trim().length > 0) continue
+      if (!first) first = slotId
+      const edit = edits[slotId]
+      if (edit) {
+        const { confirmed: _dropped, ...rest } = edit
+        edits[slotId] = rest
+      }
+    }
+    localEdits.value = edits
+    emptyConfirmRejection.value = first
+  }
+
+  /** Der Toast steht — die Auskunft hat ihren Zweck erfüllt. */
+  function dismissEmptyConfirmRejection(): void {
+    emptyConfirmRejection.value = ''
+  }
+
   function clearGeorgeDraft(slotId: string): void {
     if (!(slotId in georgeDrafts.value)) return
     const { [slotId]: _removed, ...rest } = georgeDrafts.value
@@ -681,6 +720,25 @@ const setup = () => {
    * eine Zeile, die gerade grün geworden ist; der nächste Abruf bestätigt ihn
    * ohnehin.
    */
+  /**
+   * „ALLE ABNEHMEN" (Befund 10) — dieselbe Buchung, nur für mehrere Zeilen.
+   *
+   * Sie fasst NUR an, was die Antwort als abgenommen meldet: was in `failed`
+   * steht, bleibt genau so stehen, wie es war — eine Oberfläche, die den ganzen
+   * Stapel grün färbte und danach vom nächsten Abruf korrigiert würde, wäre
+   * schlimmer als eine, die zwei Zeilen offen zeigt.
+   */
+  function applySessionAcceptances(response: BrandStepAcceptAllResponse): void {
+    if (response.revision > revision.value) revision.value = response.revision
+    const next = { ...sessions.value }
+    for (const slotId of response.accepted) {
+      const current = next[slotId]
+      if (!current) continue
+      next[slotId] = { ...current, accepted: true, deferred: false }
+    }
+    sessions.value = next
+  }
+
   function applySessionRestamp(response: BrandSessionAcceptResponse): void {
     applySessionAcceptance(response)
     const current = sessions.value[response.sessionKey]
@@ -1028,6 +1086,7 @@ const setup = () => {
     pendingImpactAck,
     invariantRejection,
     correctionRejected,
+    emptyConfirmRejection,
     hasPendingWork,
     autosaveAllowed,
     currentJourneyStep,
@@ -1045,6 +1104,8 @@ const setup = () => {
     dismissInvariantRejection,
     rejectCorrection,
     dismissCorrectionRejection,
+    rejectEmptyConfirmations,
+    dismissEmptyConfirmRejection,
     setActiveSession,
     setConfidence,
     applyGeorgeDraft,
@@ -1061,6 +1122,7 @@ const setup = () => {
     applyStepDetail,
     applySaveResponse,
     applySessionAcceptance,
+    applySessionAcceptances,
     applySessionRestamp,
     applySessionClose,
     applyFindingDecision,

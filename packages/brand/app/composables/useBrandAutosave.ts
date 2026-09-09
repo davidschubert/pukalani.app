@@ -170,6 +170,23 @@ export function useBrandAutosave(profileId: MaybeRefOrGetter<string>) {
         if (store.hasPendingWork) schedule()
         else store.mark('ok')
       }
+      else if (reason === 'slot_empty') {
+        /**
+         * BESTÄTIGEN OHNE WERT (Befund 9) — dieselbe Bewegung wie bei
+         * `invariant_violated`: die ABSICHT fällt, der Text bleibt.
+         *
+         * Die Bühne lässt diesen Klick gar nicht erst zu (`confirmEnabled`);
+         * hierher kommt nur, wer den Stand aus einem zweiten Tab überholt hat
+         * oder ein Feld leer räumt, während die Bestätigung noch unterwegs ist.
+         * OHNE diesen Zweig fiele der 400 in den Sammel-Ausgang unten: dort
+         * wird nicht wiederholt (richtig — der Rumpf ist derselbe), der
+         * Zustand bliebe aber auf „Nicht gespeichert" stehen, und niemand
+         * erführe, woran es lag. Die SEITE sagt es als Toast (s. dort).
+         */
+        store.rejectEmptyConfirmations()
+        if (store.hasPendingWork) schedule()
+        else store.mark('ok')
+      }
       else if (status === 409 || reason === 'revision_conflict') {
         await loadConflictVersion(id)
       }

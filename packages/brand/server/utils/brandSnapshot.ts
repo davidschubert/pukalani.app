@@ -1,7 +1,7 @@
 import { BRAND_DESIGN_PRESET_VERSION } from '../../shared/brandDesign'
 import { BRAND_DIRECTIONS_VERSION, brandDirectionById } from '../../shared/brandDirections'
 import { resolveBrandJourney } from '../../shared/brandJourney'
-import { brandShareableSlotValues } from '../../shared/brandSharing'
+import { brandShareableSlotValues, isBrandChapterShareable } from '../../shared/brandSharing'
 import type { BrandDesignSnapshotPreset, BrandShareSnapshot } from '../../shared/types/brand'
 import {
   type BrandProfileRow,
@@ -107,8 +107,18 @@ export function buildBrandSnapshot(
     title: profile.title ?? '',
     contentLocale: profile.contentLocale,
     story: toStoryView(profile).body,
+    /**
+     * DIE KAPITEL — OHNE DIE SECHS VON BRAND DESIGN (D9, Davids Entscheidung
+     * 2026-09-09). Ihr Ergebnis reist als `design`-Preset; roh reisen sie
+     * NIE, auch nicht ohne Preset. Die ganze Begründung steht bei
+     * `isBrandChapterShareable` — hier steht nur der Aufruf, damit es die eine
+     * Stelle bleibt.
+     *
+     * `state !== 'skipped'` daneben ist die ANDERE Frage: „liegt das Kapitel
+     * überhaupt auf dem Weg dieser Marke?".
+     */
     chapters: journey
-      .filter(step => step.state !== 'skipped')
+      .filter(step => step.state !== 'skipped' && isBrandChapterShareable(step.stepKey))
       .map((step) => {
         const row = byStepKey.get(step.stepKey)
         return {

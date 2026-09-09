@@ -378,6 +378,46 @@ export function brandStepAcceptance(
 }
 
 /**
+ * IST DIESE EINE SESSION ABNEHMBAR? (Davids Befund 10, 2026-09-09)
+ *
+ * ── DIE REGEL IST DIE DES EINZELNEN KNOPFES, WÖRTLICH ─────────────────────
+ * Bestätigt und noch nicht abgenommen — mehr fragt `BwSessionBlock` nicht, und
+ * mehr fragt `acceptSlot` in `transitionBrandStep` auch nicht. „Alle abnehmen"
+ * darf keine EIGENE Regel haben: ein Sammel-Knopf, der eine Zeile überspringt,
+ * die der Einzel-Knopf annimmt (oder umgekehrt), wäre für den Menschen ein
+ * Zufall — und für die Route ein zweiter Ort, an dem dasselbe entschieden wird.
+ *
+ * VERALTET (`stale`) und VERTAGT sperren die Abnahme deshalb ausdrücklich
+ * NICHT: sie sperren die FINALE Abnahme (s. `blockers` oben), und der Weg
+ * daraus ist „Gilt weiter" bzw. das Gespräch — nicht ein Häkchen, das man nicht
+ * setzen darf.
+ */
+export function brandSessionAcceptable(
+  facts: Pick<BrandSlotStateFacts, 'confirmed' | 'accepted'> | undefined,
+): boolean {
+  return Boolean(facts?.confirmed) && facts?.accepted !== true
+}
+
+/**
+ * WELCHE SESSIONS EINES KAPITELS „ALLE ABNEHMEN" ANFASST — in
+ * Registry-Reihenfolge, damit die Ergebnis-Liste dieselbe Ordnung hat wie die
+ * Seite.
+ *
+ * Nicht-bestätigbare Sessions (der Paarvergleich) fallen heraus: sie haben
+ * keinen Haken, können also auch nicht mitgenommen werden. Optionale MIT Wert
+ * sind dabei — sie stehen mit Knopf auf der Seite (§5a Schritt 1), und ein
+ * „alle" das eine sichtbare Zeile stehen lässt, ist keins.
+ */
+export function brandAcceptableSessions(
+  stepKey: BrandStepKey,
+  slots: Readonly<Record<string, BrandSlotStateFacts | undefined>> = {},
+): string[] {
+  return slotsForStep(stepKey)
+    .filter(session => slotIsConfirmable(session) && brandSessionAcceptable(slots[session.id]))
+    .map(session => session.id)
+}
+
+/**
  * DIE GEORDNETE STEP-LISTE mit Zustand und Begründung.
  *
  * Sequenziell: ein Baustein wird `open`, wenn der Vorgänger `done` ist. Ein

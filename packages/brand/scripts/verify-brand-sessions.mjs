@@ -2295,7 +2295,27 @@ try {
     nextChapter.status === 200 && nextChapter.json?.sessions?.['h.base']?.state === 'open',
     `${nextChapter.status} h.base=${nextChapter.json?.sessions?.['h.base']?.state}`)
 
-  // ── LEITPLANKE: die DNA DARF reisen, Lesung und Vorbilder nicht ────────
+  /**
+   * LEITPLANKE (seit D9 GESCHÄRFT): AUS DIESEM KAPITEL REIST GAR NICHTS ROH.
+   *
+   * Bis D8 stand hier „die DNA DARF reisen" — `g.dna` ist `public` und
+   * Festlegung, also liess der Slot-Filter sie durch. Seit Davids Entscheidung
+   * vom 2026-09-09 fällt das ganze KAPITEL aus `chapters`
+   * (`isBrandChapterShareable`): die DNA erreicht den Leser als Teil des
+   * `design`-Presets, sobald die Schicht fertig ist — und hier ist sie es
+   * nicht, es gibt also nichts zu zeigen und folglich nichts zu übertragen.
+   *
+   * Die NEGATIVE Hälfte (Lesung, Vorbilder, Weiche, Board-Vorrat) bleibt
+   * wörtlich stehen: sie hing nie am Kapitel, sondern am Slot-Filter, und beide
+   * Netze sollen einzeln halten.
+   *
+   * KEINE „nicht einfach leer"-Gegenprobe an dieser Stelle: diese Prüf-Marke
+   * hat gar keine bestätigte Foundation (gemessen: `chapters: []`), die Zusage
+   * wäre also unerfüllbar. Hohl ist die Prüfung trotzdem nicht — die Zeile
+   * darunter behauptete bis D9 wörtlich das GEGENTEIL und war grün. Die
+   * positive Hälfte steht dort, wo eine Marke Inhalte hat: Abschnitt 10 von
+   * `verify-brand-share.mjs` und Abschnitt 8 von `verify-brand-design.mjs`.
+   */
   const shared3 = await call(`${base}/share`, { method: 'POST', cookie: account.cookie, body: {} })
   check('Vorprobe: der Share-Link lässt sich ein drittes Mal veröffentlichen',
     shared3.status === 200 || shared3.status === 201,
@@ -2306,9 +2326,12 @@ try {
     queries: [Query.equal('profileId', profileId), Query.limit(5)],
   }).catch(() => ({ rows: [] }))
   const snapshot3 = shareRows3.rows.map(row => String(row.snapshot ?? '')).join('\n')
-  check('der Schnappschuss trägt die DNA (öffentliche Festlegung) …',
-    snapshot3.includes('g.dna'), `${snapshot3.length} Zeichen`)
-  check('… aber WEDER die Lesung NOCH die Vorbilder NOCH den Vorrat der Boards',
+  check('der Schnappschuss trägt die DNA NICHT mehr roh (D9) — und das Kapitel gar nicht',
+    snapshot3.length > 0
+    && !snapshot3.includes('g.dna')
+    && !snapshot3.includes('"stepKey":"dna"'),
+    `${snapshot3.length} Zeichen`)
+  check('… auch WEDER die Lesung NOCH die Vorbilder NOCH den Vorrat der Boards',
     snapshot3.length > 0
     && !snapshot3.includes('g.reading')
     && !snapshot3.includes('g.inspiration')
@@ -2316,6 +2339,7 @@ try {
     && !snapshot3.includes('g.boards')
     && !snapshot3.includes('Beweis-Lesung'),
     `${snapshot3.length} Zeichen`)
+
 
   // ══ 25 · Farbwelt: das Kapitel `color` (Brand Design D3, §2.3) ═══════════
   //

@@ -110,8 +110,21 @@ import { BRAND_CONVERSE_HISTORY_CHARS, formatStartCard } from './georgePrompt'
  * zwei eigenen Feldern, ein Markt-Befund eine Beobachtung über EIN eigenes
  * Feld im Verhältnis zum Feld draussen — „a tension between X and Y" wäre für
  * ihn schlicht falsch.
+ *
+ * `converse-11` (2026-09-09, Davids Befund 8 aus dem Kailua-Durchlauf): George
+ * behauptete wörtlich „Ich trage Der Weise als primären Archetyp ein und Der
+ * Schöpfer als sekundären" — und trug nichts ein. Er KANN es nicht: ein
+ * Konversations-Zug ist ganz Nachricht und hat keinen Marker, der einen Slot
+ * schriebe (s. oben). Das Feld blieb auf „Noch offen", und der Mensch wartete
+ * auf einen Wert, den niemand schreiben wollte. Neu sind deshalb zwei MUST-
+ * Regeln: NIE behaupten, etwas eingetragen zu haben — und wo eine Entscheidung
+ * fällt, sie in Worten bestätigen und auf den KNOPF verweisen, der den Entwurf
+ * wirklich erzeugt. Sein Name reist mit (`draftButton`), wie jede andere
+ * Beschriftung aus der Oberfläche (`openFieldLabels`): in den Design-Kapiteln
+ * heisst er „Frida, entwirf das", und ein fest verdrahteter George-Satz wäre
+ * dort schlicht falsch.
  */
-export const BRAND_CONVERSE_PROMPT_VERSION = 'converse-10'
+export const BRAND_CONVERSE_PROMPT_VERSION = 'converse-11'
 
 /**
  * Was ein Mensch in EINEM Zug schreiben darf. Grosszügiger als der Hinweis
@@ -328,6 +341,22 @@ export interface BrandConverseInstructionOptions {
    * wäre schlimmer als die ehrliche Unschärfe.
    */
   staleSources?: readonly string[]
+  /**
+   * DER NAME DES ENTWURFS-KNOPFES (converse-11, Befund 8) — wörtlich so, wie er
+   * neben dem Gespräch steht: „George, entwirf das", in den Design-Kapiteln
+   * „Frida, entwirf das".
+   *
+   * Er kommt aus dem LOCALE-KATALOG und nicht aus einem Satz in dieser Datei —
+   * dieselbe Quelle und derselbe Weg wie bei `openFieldLabels` und den Fragen
+   * einer Sammel-Session (`brandDraftButtonLabel`). Ein hier ausgeschriebener
+   * Knopfname wäre eine zweite Wahrheit, die beim ersten Umbenennen still
+   * falsch würde — und in den sechs Design-Kapiteln wäre sie es sofort.
+   *
+   * FEHLT er, bleibt die Regel stehen und nennt den Knopf nur nicht beim Namen:
+   * „ich kann nichts eintragen" ist die wichtigere Hälfte, und die darf nicht
+   * an einem optionalen Feld hängen.
+   */
+  draftButton?: string
 }
 
 /**
@@ -373,6 +402,29 @@ export function brandConverseInstruction(options: BrandConverseInstructionOption
     'Never speak about fields, slots, forms, chapters-as-data, drafts-in-a-box or any other mechanics of '
     + 'this tool, and never mention the names in square brackets from the inputs below. You are talking '
     + 'to a person, not operating software.',
+    // converse-11 (Davids Befund 8, 2026-09-09): das eine Versprechen, das
+    // dieser Zug NIE halten kann. Er hat keinen Marker, der einen Wert
+    // schreibt — „ich trage das ein" ist deshalb keine Höflichkeit, sondern
+    // eine Zusage, auf die ein Mensch wartet, während sein Feld leer bleibt.
+    'YOU CANNOT WRITE ANYTHING DOWN, and you MUST never claim that you did or will: never say that you '
+    + 'are entering, noting, recording, saving, filling in, capturing or writing something into anything. '
+    + 'This turn is only ever spoken words — a promise like "I am putting that down for you" leaves the '
+    + 'person waiting for something that will never appear.',
+    // Die zweite Hälfte: was er STATTDESSEN tut. Ohne sie bliebe eine
+    // Entscheidung unbeantwortet im Raum stehen.
+    ...(options.draftButton
+      ? [
+          'WHEN THEY NAME A CONCRETE DECISION for the matter at hand, say back in one short clause what '
+          + 'you understood, say whether it convinces you — and then tell them plainly that the written '
+          + `version appears when they press "${options.draftButton}" next to this conversation. That `
+          + 'button is the ONE part of this workspace you may name out loud; it is right in front of them, '
+          + 'and naming it is the only way the decision they just made turns into something written.',
+        ]
+      : [
+          'WHEN THEY NAME A CONCRETE DECISION for the matter at hand, say back in one short clause what '
+          + 'you understood, say whether it convinces you — and then tell them plainly that the written '
+          + 'version appears when they ask you to draft it with the button next to this conversation.',
+        ]),
     // Eingabe-Leitplanke (Regel 7) — wortgleich zur Absicht in
     // `brandSlotInstructionTail`, hier auf den Gesprächsfall gemünzt.
     'Never carry over or invent personal data: no customer names, no employee names, no contact details, '

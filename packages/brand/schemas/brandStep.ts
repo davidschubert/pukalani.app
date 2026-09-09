@@ -126,6 +126,23 @@ export function createBrandSessionAcceptSchema() {
   }).strict()
 }
 
+/**
+ * „ALLE ABNEHMEN" (Befund 10) — derselbe Rumpf wie beim einzelnen Abnehmen,
+ * und zwar mit Absicht: es gibt nichts zu wählen. WELCHE Zeilen abnehmbar sind,
+ * rechnet der Server aus seinem eigenen Stand (`brandAcceptableSessions`) — eine
+ * Liste aus dem Rumpf wäre eine Behauptung des Clients darüber, was auf dem
+ * Server gerade bestätigt ist, und die kann beim Absenden schon falsch sein.
+ *
+ * Ein EIGENES Schema und kein `createBrandSessionAcceptSchema()`-Aufruf: die
+ * beiden Verträge sind heute gleich, aber nicht dasselbe Versprechen — der eine
+ * gehört einer Session, der andere einem Kapitel.
+ */
+export function createBrandStepAcceptAllSchema() {
+  return z.object({
+    revision: z.number().int().min(0),
+  }).strict()
+}
+
 export function createBrandSessionDeferSchema() {
   return z.object({
     revision: z.number().int().min(0),

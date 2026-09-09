@@ -1,5 +1,5 @@
 import { Query } from 'node-appwrite'
-import { brandShareableSlotValues } from '../../../../shared/brandSharing'
+import { brandShareableSlotValues, isBrandChapterShareable } from '../../../../shared/brandSharing'
 import type { BrandShareSnapshot, BrandShareViewResponse } from '../../../../shared/types/brand'
 import {
   BRAND_SHARES_TABLE,
@@ -49,6 +49,11 @@ import { recordBrandEvent } from '../../../utils/brandEvents'
  * dritte Masche des Doppelnetzes aus §2.8 — nötig, weil der Renderer nur die
  * SEITE schützt: die API-Antwort steht daneben und ist mit dem Token ohne
  * Browser abrufbar.
+ *
+ * SEIT BRAND DESIGN D9 gilt dasselbe für ganze KAPITEL: die sechs von Brand
+ * Design fallen hier wie dort (`isBrandChapterShareable`). Ein Abbild aus der
+ * Zeit zwischen D8 und D9 trägt sie noch als rohe Slot-Werte; gerendert wurden
+ * sie nie, ausgeliefert schon.
  */
 export default defineEventHandler(async (event): Promise<BrandShareViewResponse> => {
   setResponseHeaders(event, {
@@ -103,7 +108,15 @@ export default defineEventHandler(async (event): Promise<BrandShareViewResponse>
 
   // Ein Kapitel, von dem nach dem Filter nichts übrig bleibt, FÄLLT WEG statt
   // als leere Überschrift dazustehen — dieselbe Regel wie beim Einfrieren.
+  //
+  // DIE SECHS DESIGN-KAPITEL FALLEN GANZ (D9, Davids Entscheidung 2026-09-09).
+  // Auch hier gilt: der Schreibweg lässt sie seit D9 nicht mehr hinein, aber
+  // jede Zeile von VORHER trägt sie noch — dieselbe Lage wie bei den internen
+  // Sessions vor MV1 M5, und deshalb dieselbe Kur. Die Antwort verliert dabei
+  // nichts Sichtbares: die visuelle Identität steht im `design`-Preset, das
+  // unangetastet bleibt.
   const chapters = (snapshot.chapters ?? [])
+    .filter(chapter => isBrandChapterShareable(chapter.stepKey))
     .map(chapter => ({ ...chapter, slots: brandShareableSlotValues(chapter.slots ?? []) }))
     .filter(chapter => chapter.slots.length > 0)
 

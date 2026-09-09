@@ -86,6 +86,24 @@ export interface BrandSlotControls {
   showConfirmedBadge: boolean
   showConfirm: boolean
   confirmEnabled: boolean
+  /**
+   * STEHT DA, WARUM DER BESTÄTIGEN-KNOPF NICHT GEHT? (Davids Befund 9,
+   * 2026-09-09).
+   *
+   * Der Knopf war in diesem Zustand nie klickbar — `confirmEnabled` ist seit
+   * jeher `hasValue`, und das Markup setzt `:disabled` auf ein natives
+   * `<button>`. Er sah nur nicht danach aus: `.bw-confirm--open:disabled` blasst
+   * ihn auf 40 % Deckkraft ab, mehr nicht. Wer auf einer Karte, die „Noch offen
+   * — kommt im Gespräch" sagt, darauf klickt, bekommt also weder eine Wirkung
+   * noch eine Auskunft — der stille No-op aus Davids Durchlauf.
+   *
+   * Die Karte sagt es jetzt in EINER Zeile. Und zwar nur dort, wo es nicht
+   * schon dasteht: solange der Bereitschafts-Hinweis (`showReadinessNote`)
+   * erklärt, was zum ENTWERFEN fehlt, wäre ein zweiter Satz über dasselbe
+   * leere Feld eine Wiederholung — dieselbe Regel wie „entweder der Hinweis
+   * oder die Werkzeuge".
+   */
+  showConfirmBlockedNote: boolean
   /** „Korrigieren" — die EINZIGE Tür zurück in den offenen Zustand. */
   showRevise: boolean
   showReadinessNote: boolean
@@ -131,6 +149,7 @@ export interface BrandSlotControls {
 export function brandSlotControls(input: BrandSlotControlsInput): BrandSlotControls {
   const countsForProgress = input.confirmable
   const showVersions = input.generatable && input.hasHistory
+  const showReadinessNote = input.generatable && !input.ready
 
   if (input.confirmed) {
     return {
@@ -144,6 +163,8 @@ export function brandSlotControls(input: BrandSlotControlsInput): BrandSlotContr
       showConfirmedBadge: true,
       showConfirm: countsForProgress,
       confirmEnabled: false,
+      // Ein bestätigter Slot hat seinen Wert — hier fehlt nichts.
+      showConfirmBlockedNote: false,
       showRevise: countsForProgress,
       // Was fehlt, um zu entwerfen, ist gegenstandslos, solange nicht entworfen
       // werden darf.
@@ -167,10 +188,13 @@ export function brandSlotControls(input: BrandSlotControlsInput): BrandSlotContr
     // Einen leeren Slot zu bestätigen lehnt die Route mit `slot_empty` ab —
     // der Knopf sagt es vorher.
     confirmEnabled: input.hasValue,
+    // … und die Karte sagt WARUM (Befund 9), sofern nicht schon der
+    // Bereitschafts-Hinweis über dasselbe leere Feld spricht.
+    showConfirmBlockedNote: countsForProgress && !input.hasValue && !showReadinessNote,
     showRevise: false,
     // Entweder steht da, WAS fehlt, oder es stehen die Werkzeuge da. Beides
     // nebeneinander wäre ein Knopf neben seiner eigenen Absage.
-    showReadinessNote: input.generatable && !input.ready,
+    showReadinessNote,
     showGenerate: input.generatable && input.ready,
     showHint: input.generatable && input.ready,
     showVersions,

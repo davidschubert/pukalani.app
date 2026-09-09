@@ -2,10 +2,14 @@ import type { H3Event } from 'h3'
 import {
   type BrandStepAction,
   type BrandStepFacts,
+  brandAcceptableSessions,
   resolveNextStop,
   transitionBrandStep,
 } from '../../shared/brandJourney'
-import type { BrandSessionAcceptResponse } from '../../shared/types/brand'
+import type {
+  BrandSessionAcceptResponse,
+  BrandStepAcceptAllResponse,
+} from '../../shared/types/brand'
 import {
   type BrandAcceptanceContext,
   deriveBrandAcceptance,
@@ -143,6 +147,134 @@ export async function writeBrandSessionFlag(
     acceptance: derived.acceptance,
     // Der Wegweiser kennt seit Paket 6 die Warteschlange „neu besprechen" —
     // die Zustände dazu sind gerade neu gerechnet worden (s. `derived`).
+    next: resolveNextStop(
+      stepKey,
+      afterFacts.find(entry => entry.stepKey === stepKey)?.slots ?? {},
+      derived.sessionStates,
+    ),
+  }
+}
+
+/**
+ * „ALLE ABNEHMEN" (Davids Befund 10, 2026-09-09) — EIN Schreibvorgang für ein
+ * ganzes Kapitel.
+ *
+ * ── WARUM EINE ROUTE UND NICHT ELF AUFRUFE ────────────────────────────────
+ * Weil jede Abnahme die `revision` der Kapitel-Zeile weiterdreht: elf
+ * Client-Aufrufe müssten strikt nacheinander laufen und jeder den Rückgabewert
+ * des vorigen mitschleppen — elf Roundtrips, elf Schreibvorgänge auf DIESELBE
+ * Zeile, und beim ersten 409 mittendrin ein halb abgenommenes Kapitel, dessen
+ * Zustand niemand mehr benennen kann. Hier ist es eine Rechnung, eine
+ * Schreibung, eine Fassung.
+ *
+ * ── ALLES ODER NICHTS WÄRE HIER FALSCH ────────────────────────────────────
+ * Die Zeilen sind unabhängig: eine unbestätigte darf zehn andere nicht daran
+ * hindern, abgenommen zu werden. Deshalb sammelt die Schleife die Absagen und
+ * die Antwort trägt sie mit (`failed`) — der Mensch soll sehen, WAS liegen
+ * geblieben ist, nicht bloss, dass etwas nicht ging. Die eine ATOMARE Zusage,
+ * die es gibt, ist die richtige: entweder die Zeile wird geschrieben oder
+ * keines der Häkchen gilt (ein `updateRow`).
+ *
+ * ── DIESELBE REGEL WIE DER EINZEL-KNOPF ───────────────────────────────────
+ * Welche Sessions überhaupt in Frage kommen, sagt `brandAcceptableSessions` —
+ * dieselbe pure Regel, die `BwSessionBlock` seinen Haken zeigen lässt.
+ * Entschieden wird trotzdem je Zeile von `transitionBrandStep`: die Vorauswahl
+ * spart Arbeit, sie ersetzt die Zustandsmaschine nicht.
+ */
+export async function acceptAllBrandSessions(
+  event: H3Event,
+  context: BrandAcceptanceContext,
+  revision: number,
+): Promise<BrandStepAcceptAllResponse> {
+  const { stepKey, stepRow, records, stepFacts } = context
+
+  // `revision` VOR ALLEM ANDEREN — wie beim einzelnen Abnehmen.
+  const current = stepRow.revision ?? 0
+  if (revision !== current) {
+    throw createError({
+      status: 409,
+      statusText: 'Brand step was changed elsewhere',
+      data: { code: 'revision_conflict', revision: current },
+    })
+  }
+
+  // Der GERECHNETE Zustand, nicht der rohe (s. `writeBrandSessionFlag`).
+  const journeyState = context.journey.find(entry => entry.stepKey === stepKey)?.state
+  const resolvedState = journeyState && journeyState !== 'skipped' ? journeyState : stepRow.state
+  let facts: BrandStepFacts = {
+    stepKey,
+    state: resolvedState,
+    confidence: stepRow.confidence ?? null,
+    slots: stepFacts.find(entry => entry.stepKey === stepKey)?.slots ?? {},
+  }
+
+  let stateChanged = false
+  if (facts.state === 'open') {
+    const started = transitionBrandStep(facts, { kind: 'start' })
+    if (!started.ok) {
+      throw createError({ status: 400, statusText: 'Step transition rejected', data: { code: started.code } })
+    }
+    facts = started.step
+    stateChanged = started.changed
+  }
+
+  const nextRecords: Record<string, BrandSlotRecord> = { ...records }
+  const accepted: string[] = []
+  const failed: { slotId: string, code: string }[] = []
+  let changed = false
+  const now = new Date().toISOString()
+
+  for (const slotId of brandAcceptableSessions(stepKey, facts.slots ?? {})) {
+    const result = transitionBrandStep(facts, { kind: 'acceptSlot', slotId })
+    if (!result.ok) {
+      failed.push({ slotId, code: result.code })
+      continue
+    }
+    // Der neue Stand ist die Grundlage der NÄCHSTEN Zeile — sonst rechnete die
+    // Schleife elfmal gegen denselben Anfangszustand.
+    facts = result.step
+    accepted.push(slotId)
+    if (!result.changed) continue
+    changed = true
+    const after = result.step.slots?.[slotId]
+    const candidate: BrandSlotRecord = { ...nextRecords[slotId], updatedAt: now }
+    if (after?.accepted) candidate.accepted = true
+    else delete candidate.accepted
+    // Abnehmen hebt ein Vertagen auf (`acceptSlot`) — gelöscht statt `false`,
+    // wie überall in diesem Datensatz.
+    delete candidate.deferred
+    nextRecords[slotId] = candidate
+  }
+
+  const nextRevision = changed || stateChanged ? current + 1 : current
+  if (changed || stateChanged) {
+    const { tablesDB, databaseId } = brandDb(event)
+    try {
+      await tablesDB.updateRow({
+        databaseId,
+        tableId: BRAND_STEPS_TABLE,
+        rowId: stepRow.$id,
+        data: {
+          ...(changed ? { slots: serializeSlotRecords(nextRecords) } : {}),
+          revision: nextRevision,
+          ...(stateChanged ? { state: facts.state } : {}),
+        },
+      })
+    }
+    catch (error) {
+      throw toH3Error(error, 'Brand sessions could not be updated')
+    }
+  }
+
+  const afterFacts = withStepSlotFacts(stepFacts, stepKey, nextRecords)
+  const derived = deriveBrandAcceptance(context.profile, stepKey, afterFacts, context.openConflicts)
+
+  return {
+    stepKey,
+    revision: nextRevision,
+    accepted,
+    failed,
+    acceptance: derived.acceptance,
     next: resolveNextStop(
       stepKey,
       afterFacts.find(entry => entry.stepKey === stepKey)?.slots ?? {},

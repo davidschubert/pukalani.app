@@ -505,6 +505,33 @@ export interface BrandSessionAcceptResponse {
 }
 
 /**
+ * ANTWORT VON „ALLE ABNEHMEN" (Davids Befund 10, 2026-09-09) — der neue Stand
+ * des KAPITELS, nicht der einer Zeile.
+ *
+ * ── EINE ANTWORT, ZWEI LISTEN ────────────────────────────────────────────
+ * `accepted` sind die Zeilen, die jetzt ein Häkchen tragen; `failed` die, die
+ * es nicht bekamen, je mit ihrem Grund aus der Zustandsmaschine. Ein Sammel-
+ * Knopf, der nur „hat geklappt" meldet, verschweigt genau den Fall, für den er
+ * gebaut wurde — elf Zeilen, von denen eine klemmt.
+ *
+ * ALLES ODER NICHTS gibt es hier bewusst nicht: die Zeilen sind unabhängig
+ * voneinander, und eine einzige unbestätigte dürfte nicht zehn Abnahmen
+ * zurücknehmen. Geschrieben wird trotzdem EINMAL (eine Zeile, eine Fassung) —
+ * s. `acceptAllBrandSessions`.
+ */
+export interface BrandStepAcceptAllResponse {
+  stepKey: BrandStepKey
+  revision: number
+  /** Slot-Ids in Registry-Reihenfolge, die JETZT abgenommen sind. */
+  accepted: string[]
+  /** Was liegen blieb — `code` ist der Ablehnungsgrund der Zustandsmaschine. */
+  failed: { slotId: string, code: string }[]
+  acceptance: BrandStepAcceptance
+  /** Auto-Weiter: dieselbe Auskunft wie beim einzelnen Abnehmen. */
+  next: BrandNextSessionRef | null
+}
+
+/**
  * WAS „NOCHMAL VON VORN" KOSTET (§5a Schritt 1) — der Inhalt des Schutz-Layers.
  *
  * `ack` ist der Hash über GENAU diese Hülle. Der Restart trägt ihn zurück; der

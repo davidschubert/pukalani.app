@@ -72,6 +72,21 @@ unverändert aus dem Faktenblatt und müssen in die activeMind-Gliederung passen
 Prototyp-Abnahme in BRAND-INSIGHTS §11.3. **Was neu offen ist:** `A27` (Wahl + Beauftragung,
 wartet auf R3) und die Anwaltsfrage 14 zur Selbstauskunft.
 
+## 2026-09-09 — Brand Design nach D9: drei Entscheidungen zur Abnahme
+
+**Entscheidung 1 (David, Empfehlung angenommen) — Kontrast-Regel:** das Knopf-Paar der
+Kontrast-Prüfung misst dieselbe adaptive Schriftfarbe, die die Vorschau-Szene setzt (Papier ODER
+tiefste Rampenstufe auf dem Akzent, je nach höherem Kontrast — `brandAccentInk`). Ein heller Akzent
+besteht damit mit dunkler Schrift, durch fällt der Mittelton. Grund: ein Urteil, das nicht zur
+Vorschau passt, wäre eine Lüge im Kapitel. Marken-Knöpfe dürfen dunkle Schrift tragen.
+**Entscheidung 2 (David) — Snapshot ohne rohe Design-Werte:** der Share-Snapshot trägt die Werte
+der sechs Design-Kapitel nur noch als Preset (`design`), nicht mehr zusätzlich als rohe Slot-Werte
+in `chapters`, sobald ein Preset dabei ist. Datensparsamkeit: der Link trägt nur, was er zeigt.
+**Entscheidung 3 (David) — Kleinkram:** der Playground-Klickdummy bleibt der abgenommene
+Phase-3-Stand (rechnet das Knopf-Paar weiter mit festem Papier); das Konzept §2.14 zieht den
+Ereignisnamen nach — gebaut ist das generische `step.completed` mit `stepKey`, kein eigenes
+`design.step.completed`.
+
 ---
 
 ## 2026-09-08 — Brand Insights (BI1): Prototyp-Runde 1 — fünf Entscheidungen; Products-Seite als eigenes Vorhaben

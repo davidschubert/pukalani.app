@@ -26,9 +26,11 @@
  *  8. FREMD: der Zustand eines fremden Brandings ist 404, nicht 403.
  *  9. EREIGNISSE: `share.viewed` und `foundation.viewed` stehen im Funnel —
  *     und KEIN Ereignis dieses Brandings trägt den Token.
- * 10. BRAND DESIGN (D8): jedes neue Abbild trägt `schemaVersion: 2` — und
+ * 10. BRAND DESIGN (D8/D9): jedes neue Abbild trägt `schemaVersion: 2` — und
  *     weder ein KI-Entwurf noch ein Vorbild reist mit, auch dann nicht, wenn
- *     ihre Slots bestätigt in der Ablage stehen (§1.11 b).
+ *     ihre Slots bestätigt in der Ablage stehen (§1.11 b). Seit D9 fällt das
+ *     ganze KAPITEL: auch ein reisefähiger Design-Wert (`h.base`) steht nicht
+ *     mehr roh in `chapters` — die visuelle Identität reist als Preset.
  *
  * ── DIE GEGENPROBE ────────────────────────────────────────────────────────
  * Mit `VERIFY_EXPECT_LEAK=1` dreht das Skript die Zusagen 4, 5 und 10 um: es
@@ -176,6 +178,13 @@ const COMPLAINT = 'Zweimal war die Suppe um 13 Uhr alle G3GEHEIM'
 /** Die zwei privaten Sorten aus Brand Design (D2a/D5c) — sie reisen NIE. */
 const DRAFT_SECRET_DRAFT = 'D8GEHEIM-KI-ENTWURF-SIEGEL'
 const DRAFT_SECRET_REFERENCE = 'D8GEHEIM-VORBILD-PINNWAND'
+/**
+ * EIN REISEFÄHIGER Design-Wert (D9). Anders als die zwei oben ist `h.base`
+ * `public` UND Festlegung — der Slot-Filter lässt ihn also durch. Was ihn
+ * zurückhält, ist allein die KAPITEL-Regel (`isBrandChapterShareable`), und
+ * genau die soll hier gemessen werden.
+ */
+const DESIGN_RAW_VALUE = 'D9ROH-BASISTON-DER-FARBWELT'
 
 try {
   const owner = await makeAccount('owner')
@@ -386,6 +395,7 @@ try {
   for (const [stepKey, slots] of [
     ['dna', { 'g.inspiration': { confirmed: DRAFT_SECRET_REFERENCE, accepted: true } }],
     ['mark', { 'j.drafts': { confirmed: DRAFT_SECRET_DRAFT, accepted: true } }],
+    ['color', { 'h.base': { confirmed: DESIGN_RAW_VALUE, accepted: true } }],
   ]) {
     await tablesDB.updateRow({
       databaseId,
@@ -422,6 +432,19 @@ try {
   checkAbsent('das Vorbild steht NICHT im eingefrorenen Abbild', designRow?.snapshot, DRAFT_SECRET_REFERENCE)
   checkAbsent('… und nicht in der API', designApi.text, DRAFT_SECRET_REFERENCE)
   checkAbsent('… und nicht im HTML', designPage.text, DRAFT_SECRET_REFERENCE)
+
+  /**
+   * D9: AUCH EIN REISEFÄHIGER DESIGN-WERT BLEIBT DRAUSSEN — als Kapitel, nicht
+   * als Slot. Diese Marke hat Brand Design nie freigeschaltet; ihr `color`-
+   * Kapitel steht in der Journey trotzdem (`state: 'locked'`, nicht `skipped`)
+   * und kam vor D9 als rohe `h.base`-Zeile mit. Die Zusage hängt damit an der
+   * Kapitel-Regel und nicht daran, ob eine Schicht offen ist.
+   */
+  checkAbsent('ein roher Design-Wert steht NICHT im Abbild', designRow?.snapshot, DESIGN_RAW_VALUE)
+  checkAbsent('… und sein Slot-Schlüssel auch nicht', designRow?.snapshot, 'h.base')
+  checkAbsent('… und das Kapitel selbst steht nicht in `chapters`',
+    JSON.stringify(JSON.parse(designRow?.snapshot ?? '{}').chapters ?? []), '"stepKey":"color"')
+  checkAbsent('… und nichts davon in der API', designApi.text, DESIGN_RAW_VALUE)
   // Die positive Hälfte desselben Gedankens: das Abbild ist nicht einfach leer.
   check('… die Festlegung steht weiterhin darin', designApi.text.includes(PITCH))
 }
