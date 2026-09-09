@@ -3,6 +3,7 @@ import { brandListEntries } from './brandSessions'
 import { isBrandSlotShareable } from './brandSharing'
 import { type BrandSlotValueView, brandSlotValueView } from './brandSlotFormat'
 import { type BrandPathKind, type BrandStepKey, type BrandTeamKind, slotById } from './slotRegistry'
+import type { BrandDesignPreset, BrandDesignSnapshotPreset } from './types/brand'
 
 /**
  * DER RENDERER DER BRAND FOUNDATION (Konzept
@@ -66,6 +67,45 @@ import { type BrandPathKind, type BrandStepKey, type BrandTeamKind, slotById } f
 /** Die fünf Elemente der visuellen Schranke (§2.5) — Ids, keine Texte. */
 export const BRAND_FOUNDATION_VISUAL_ELEMENTS = ['logo', 'color', 'typography', 'imagery', 'motion'] as const
 export type BrandFoundationVisualElement = (typeof BRAND_FOUNDATION_VISUAL_ELEMENTS)[number]
+
+/**
+ * DIE FÜNF ABSCHNITTE DES VOLLEN KAPITELS 10 (Brand Design D8, §2.8).
+ *
+ * Sie sind SPRUNGMARKEN und deshalb so unveränderlich wie eine Kapitel-Id: das
+ * Inhaltsverzeichnis der Leseansicht listet sie als Unterpunkte, und ein
+ * verschickter Tieflink (`…/foundation#visuell-farbwelt`) darf nicht ins Leere
+ * zeigen. Der Anker ist `visuell-<id>`; die Überschrift steht als
+ * `brand.foundation.design.<id>` im Katalog — sie ist Rahmen, nicht
+ * Marken-Inhalt, und folgt der Sprache des LESERS.
+ *
+ * Die Reihenfolge ist die der Kapitel in der Werkstatt (Farbwelt · Typografie ·
+ * Zeichen · Bildsprache · Bewegung) — wer das Handbuch liest, liest es in
+ * derselben Ordnung, in der es entstanden ist. Die DNA hat bewusst KEINEN
+ * eigenen Abschnitt: sie ist die Herleitung, nicht das Ergebnis, und stünde als
+ * zehn Vokabular-Zeilen zwischen fünf Vitrinen.
+ */
+export const BRAND_FOUNDATION_DESIGN_SECTIONS = [
+  'farbwelt',
+  'typografie',
+  'zeichen',
+  'bildsprache',
+  'bewegung',
+] as const
+export type BrandFoundationDesignSection = (typeof BRAND_FOUNDATION_DESIGN_SECTIONS)[number]
+
+/**
+ * DAS PRESET, WIE ES IN DEN RENDERER KOMMT — beide Fassungen passen hinein.
+ *
+ * Der private Aufrufer reicht ein `BrandDesignPreset` herein (MIT den Ids der
+ * behaltenen Entwürfe), die Share-Seite ein `BrandDesignSnapshotPreset` (OHNE
+ * sie). `keptDrafts` ist deshalb optional — und der Renderer macht daraus eine
+ * ZAHL (s. `design`-Block): eine Entwurfs-Id hat in einem Handbuch-Block nichts
+ * verloren, auch nicht im privaten. Das ist die dritte Masche des Netzes aus
+ * §1.11 b, neben Snapshot-Typ und Schreibweg.
+ */
+export type BrandFoundationDesignInput =
+  | BrandDesignPreset
+  | BrandDesignSnapshotPreset
 
 /** Ein Block ist die kleinste Darstellungs-Einheit eines Kapitels. */
 export type BrandFoundationBlock =
@@ -137,6 +177,35 @@ export type BrandFoundationBlock =
    * Erzeuger sind daraus Schlüssel geworden.
    */
   | { kind: 'swatches', labelKey?: string, items: { hex: string, roleKey: string }[] }
+  /**
+   * DAS VOLLE KAPITEL 10 (Brand Design D8, §2.8) — EIN Block, keine sechs.
+   *
+   * ── WARUM EIN BLOCK UND NICHT SECHS BLOCK-ARTEN ──────────────────────────
+   * Kapitel 10 ist nach Brand Design kein Text mehr, sondern eine VITRINE:
+   * Farbflächen, Schriftproben, SVG-Setzungen, eine Token-Tabelle. Sechs neue
+   * Block-Arten hier würden den Renderer der elf anderen Kapitel für dieses
+   * eine umbauen — dieselbe Begründung, mit der der abgenommene Prototyp
+   * `FdDesignChapter` neben `FdChapter` stellte. Der Block trägt das PRESET,
+   * die Oberfläche zeichnet daraus.
+   *
+   * ── ER TRÄGT NIE EINE ENTWURFS-ID ────────────────────────────────────────
+   * `keptDrafts` ist eine ZAHL. Kapitel 10 nennt die behaltenen KI-Entwürfe
+   * (§1.11 b: „n behaltene Entwürfe — privat"), zeigt sie aber nicht und
+   * verlinkt sie nicht: sie liegen hinter einer Besitzer-Route mit
+   * `no-store`, und eine Id in einem Block, der auch als Snapshot eingefroren
+   * wird, wäre der erste Schritt aus dieser Zusage heraus.
+   *
+   * `title` ist der Markenname für die Wortmarke im Board — er steht schon in
+   * `BrandFoundationInput.title`, hier aber noch einmal, weil ein Block für
+   * sich allein renderbar sein muss (das Ergebnis-Board `/brand/:id/design`
+   * hat kein Kapitel um sich herum).
+   */
+  | {
+    kind: 'design'
+    preset: BrandDesignSnapshotPreset
+    title: string
+    keptDrafts: number
+  }
   /**
    * Der FESTE Rahmen der KI-Regeln (§2.4): „Schreibt in diesem Ton · Vermeidet
    * · Steht für" — gefüllt aus vorhandenen Werten. Keine Generierung, kein
@@ -287,6 +356,22 @@ export interface BrandFoundationInput {
    * verschickt hat.
    */
   readonly direction?: { readonly id: string, readonly version: string }
+  /**
+   * DAS ERGEBNIS VON BRAND DESIGN (Paket D8, §2.8) — additiv, `undefined`
+   * heisst „Schicht 2 ist für diese Marke nicht (fertig) gelaufen".
+   *
+   * Steht es, wird Kapitel 10 VOLL und `done`: die Schranke fällt, die
+   * gewählte Richtung tritt zurück (sie war die Ansage, das Preset ist die
+   * Ausführung). Steht es nicht, bleibt alles wie in G4 — Richtung plus
+   * Schranke.
+   *
+   * Es kommt wie die Richtung von AUSSEN und nicht aus `chapters`: die
+   * Slot-Werte der sechs Design-Kapitel sind `audience: 'internal'` bzw. Ids
+   * eines Vokabulars und fielen durch das eine Tor. Gerechnet wird es aus
+   * genau diesen Werten — `brandDesignPresetFromSlots` (privat) bzw. der
+   * eingefrorene Snapshot (`BrandShareSnapshot.design`).
+   */
+  readonly design?: BrandFoundationDesignInput
 }
 
 // ── Schlüssel-Konventionen ──────────────────────────────────────────────────
@@ -693,7 +778,33 @@ function resolveDirection(input: BrandFoundationInput): BrandDirection | null {
  * Verlauf ist von hell nach tief sortiert, die ROLLEN beginnen aber beim
  * Grund. Wer das „aufräumt", vertauscht Grundfarbe und Fläche.
  */
-function visualBlocks(direction: BrandDirection | null): BrandFoundationBlock[] {
+function visualBlocks(
+  direction: BrandDirection | null,
+  design: BrandFoundationDesignInput | undefined,
+  title: string,
+): BrandFoundationBlock[] {
+  /**
+   * MIT PRESET IST DAS KAPITEL EIN ANDERES (Paket D8, §2.8).
+   *
+   * Nicht „Richtung, Schranke UND Ergebnis": die Richtung war die Ansage vor
+   * dem Bauen, das Preset ist das Gebaute. Beides untereinander zu setzen
+   * hiesse, dem Leser zwei Farbwelten zu zeigen und ihn raten zu lassen,
+   * welche gilt. Und die fünf gesperrten Elemente sind schlicht nicht mehr
+   * wahr — sie sind genau das, was jetzt darüber steht.
+   */
+  if (design) {
+    const mark = design.mark as BrandDesignSnapshotPreset['mark'] & { keptDrafts?: readonly string[] }
+    const { keptDrafts = [], ...markWithoutDrafts } = mark
+    return [{
+      kind: 'design',
+      // Der Block trägt IMMER die Snapshot-Fassung (ohne Entwurfs-Ids), egal
+      // welche Fassung hereinkam — s. Kopf der Block-Art.
+      preset: { ...design, mark: markWithoutDrafts },
+      title,
+      keptDrafts: keptDrafts.length,
+    }]
+  }
+
   const locked = BRAND_FOUNDATION_VISUAL_ELEMENTS
     .map((element): BrandFoundationBlock => ({ kind: 'locked', element }))
   if (!direction) return locked
@@ -793,7 +904,15 @@ export function buildBrandFoundation(input: BrandFoundationInput): BrandFoundati
     { id: 'manifest', blocks: manifestoBlocks(values) },
     { id: 'messaging', blocks: messagingBlocks(values) },
     { id: 'name', blocks: nameBlocks(values) },
-    { id: 'visuell', blocks: visualBlocks(resolveDirection(input)), state: 'locked' },
+    {
+      id: 'visuell',
+      blocks: visualBlocks(resolveDirection(input), input.design, input.title),
+      // MIT PRESET IST DAS KAPITEL ABGENOMMEN, nicht gesperrt: das Preset
+      // entsteht erst, wenn alle sechs Kapitel der Schicht abgenommen sind
+      // (`loadBrandDesignPreset`) — der Zustand ist also kein Anzeige-Trick,
+      // sondern die Tatsache dahinter.
+      ...(input.design ? {} : { state: 'locked' as const }),
+    },
     { id: 'ki-texte', blocks: aiRules },
   ]
 

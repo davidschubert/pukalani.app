@@ -71,12 +71,22 @@ const props = withDefaults(defineProps<{
   designTo?: string | null
   /** Für den Satz „Freigeschaltet vom Studio am …". Leer = kein Datum nennen. */
   designUnlockedAt?: string | null
+  /**
+   * Ziel von „Als eigene Ansicht öffnen" am vollen Kapitel 10 (Paket D8) —
+   * `/brand/:id/design`. `null` heisst: kein Sprung anbieten (Share-Ansicht
+   * und Beispiel-Seite haben diese Route nicht).
+   */
+  designBoardTo?: string | null
+  /** „Stand …" im Ergebnis-Board. Leer = kein Datum nennen. */
+  designStand?: string
 }>(), {
   variant: 'private',
   acceptanceTo: null,
   directionTo: null,
   designTo: null,
   designUnlockedAt: null,
+  designBoardTo: null,
+  designStand: '',
 })
 
 const { t, te, locale } = useI18n()
@@ -89,7 +99,18 @@ const num = computed(() => String(props.index).padStart(2, '0'))
  * erklären müssen (die Schranke, der KI-Rahmen), haben einen — `te` fragt,
  * statt einen Schlüssel als Text auszugeben.
  */
-const noteKey = computed(() => `brand.foundation.note.${props.chapter.id}`)
+/** Steht in diesem Kapitel das volle Brand Design? (Paket D8) */
+const hasDesign = computed(() => props.chapter.blocks.some(block => block.kind === 'design'))
+
+/**
+ * Der Erklär-Satz von Kapitel 10 ist ein ANDERER, sobald das Preset steht:
+ * „entsteht erst im Brand Design" wäre dann eine Auskunft über die
+ * Vergangenheit. Ein zweiter Schlüssel statt einer Verzweigung im Satz — beide
+ * Sätze stehen so vollständig im Katalog und sind einzeln übersetzbar.
+ */
+const noteKey = computed(() => (hasDesign.value
+  ? 'brand.foundation.note.visuellDone'
+  : `brand.foundation.note.${props.chapter.id}`))
 const note = computed(() => (te(noteKey.value) ? t(noteKey.value) : ''))
 
 /**
@@ -336,6 +357,15 @@ const renderedBlocks = computed(() => (props.chapter.state === 'locked' && !isPr
             </div>
           </div>
         </div>
+
+        <!-- DAS VOLLE KAPITEL 10 (Brand Design D8, §2.8): eine Vitrine, kein
+             Text — deshalb eine eigene Komponente (s. deren Kopf). Sie steht
+             an der Stelle, an der sonst die Schranke stünde. -->
+        <BwDesignChapterBody
+          v-else-if="block.kind === 'design'"
+          :preset="block.preset" :title="block.title" :kept-drafts="block.keptDrafts"
+          :stand="designStand" :board-to="designBoardTo"
+        />
 
         <!-- DER FESTE KI-RAHMEN (§2.4): drei Zeilen, gefüllt aus Ton-Wörtern,
              Tabu-Wörtern und Werten. Keine Generierung, kein Cache. -->

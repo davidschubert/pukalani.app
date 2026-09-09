@@ -9,6 +9,8 @@ import {
   brandAcceptanceSessions,
   loadBrandDocumentContext,
 } from '../../../../utils/brandAcceptance'
+import { brandDesignSnapshotPreset } from '../../../../../shared/brandDesignValues'
+import { brandDesignStand, loadBrandDesignPreset } from '../../../../utils/brandDesignPreset'
 import { readBrandDocumentReview } from '../../../../utils/brandReview'
 import { brandSlotRecordConfirmed, parseSlotRecords } from '../../../../utils/brandStore'
 
@@ -63,10 +65,12 @@ export default defineEventHandler(async (event): Promise<BrandDocumentResponse> 
   const chapters: BrandDocumentChapter[] = []
   for (const entry of journey) {
     if (entry.state === 'skipped') continue
-    // BRAND DESIGN STEHT (NOCH) NICHT IM DOKUMENT (D0). Die sechs Kapitel von
-    // Schicht 2 liegen seit D0 in der Journey und wären hier als sechs leere
-    // Abschnitte erschienen — Kapitel ohne Inhalt und ohne Erklärung. Ihre
-    // Darstellung baut **D8** (Kapitel 10 voll, Ergebnis-Board, Snapshot v2).
+    // DIE SECHS DESIGN-KAPITEL SIND HIER EIN ABSCHNITT, KEINE SECHS (D8).
+    // Ihre Werte sind Vokabular-Ids, Hex und gerechnete Tabellen — als
+    // Abnahme-Blöcke gelesen ergäben sie sechs Abschnitte voll `snappy` und
+    // `#4a3123`. Sie erscheinen deshalb unten als PRESET („Visuelle
+    // Identität"), so wie in Kapitel 10 der Leseansicht; abgenommen werden sie
+    // weiterhin in der Werkstatt.
     if (isBrandDesignStep(entry.stepKey)) continue
     const row = stepRows.find(candidate => candidate.stepKey === entry.stepKey)
     const records = recordsByStep.get(entry.stepKey) ?? {}
@@ -106,6 +110,9 @@ export default defineEventHandler(async (event): Promise<BrandDocumentResponse> 
 
   const lastRun = readBrandDocumentReview(profile.$id)
 
+  /* Dasselbe Preset wie in der Leseansicht — eine Quelle, zwei Ansichten. */
+  const design = await loadBrandDesignPreset(event, profile, stepRows)
+
   return {
     profileId: profile.$id,
     title: profile.title ?? '',
@@ -115,5 +122,10 @@ export default defineEventHandler(async (event): Promise<BrandDocumentResponse> 
       unreviewed,
       ...(lastRun ? { lastRunAt: lastRun.at, lastRunRevisionKey: lastRun.revisionKey } : {}),
     },
+    // Auch hier ohne die behaltenen Entwürfe (§1.11 b): das Dokument ist eine
+    // LESE-Ansicht, und was sie nie zeigt, bekommt sie auch nicht geschickt.
+    design: design.preset ? brandDesignSnapshotPreset(design.preset) : null,
+    designStand: design.preset ? brandDesignStand(stepRows) : '',
+    designKeptDrafts: design.preset?.mark.keptDrafts.length ?? 0,
   }
 })

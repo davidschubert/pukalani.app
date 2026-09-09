@@ -907,8 +907,8 @@
         }
       },
       "generate": {
-        "start": "George, draft this",
-        "again": "George, try again",
+        "start": "{voice}, draft this",
+        "again": "{voice}, try again",
         "stop": "Stop",
         "hintPlaceholder": "Hint — e.g. warmer, shorter, less jargon",
         "hintLabel": "Hint for George",
@@ -2115,7 +2115,8 @@
       },
       "note": {
         "visuell": "Part of the foundation, but it takes shape in Brand Design — derived from everything above.",
-        "ki-texte": "A fixed frame filled with your own values — nothing invented, as current as the chapters above."
+        "ki-texte": "A fixed frame filled with your own values — nothing invented, as current as the chapters above.",
+        "visuellDone": "Decided in Brand Design — colour world, type pair, mark, imagery and motion, derived from everything above."
       },
       "visual": {
         "follows": "follows in Brand Design",
@@ -2244,6 +2245,47 @@
           "name": "Classic & Serious",
           "reason": "Slate, a classic serif, wide margins. It will look in ten years the way it looks today — that is the point."
         }
+      },
+      "design": {
+        "title": "Visual identity",
+        "stand": "As of {date}",
+        "farbwelt": "Colour world",
+        "typografie": "Typography",
+        "zeichen": "Mark",
+        "bildsprache": "Imagery",
+        "bewegung": "Motion",
+        "ramp": {
+          "light": "Light",
+          "dark": "Dark"
+        },
+        "board": {
+          "colors": "Colour world",
+          "type": "Typography",
+          "mark": "Mark",
+          "imagery": "Imagery",
+          "motion": "Motion"
+        },
+        "tileAlt": "Imagery principle, abstracted",
+        "markNote": "Settings built from your type pair and colour world — a brief for the design work, not a finished logo.",
+        "drafts": "1 kept AI draft | {count} kept AI drafts",
+        "draftsNote": "Drafts are ideas for the design work, not vetted logos. They stay private: they appear neither in the shared link nor in print.",
+        "boardHint": "The same board as its own view, printable:",
+        "boardLink": "Open visual identity",
+        "correctHint": "This board decides nothing. Corrections happen in the chapters — the way there is on the right.",
+        "eyebrow": "Result board",
+        "headline": "Your visual identity on one surface",
+        "lead": "Colour world, type pair, mark, imagery principles and motion. The same board heads chapter 10 of your brand foundation.",
+        "print": "Print / PDF",
+        "inDocument": "Read in the document",
+        "correctTitle": "Correct",
+        "correctLead": "Every area of the board belongs to a chapter. To change something, go there — the board follows.",
+        "privateTitle": "What is not here",
+        "privateLead": "Your references and the kept AI drafts. Both are private and travel neither into the board nor into the shared link.",
+        "lockedTitle": "Not finished yet",
+        "lockedLead": "The board appears once all six Brand Design chapters are signed off.",
+        "lockedProgress": "{done} of {total} chapters",
+        "toChapter": "Continue in Brand Design",
+        "progressTitle": "Brand Design"
       }
     },
     "session": {

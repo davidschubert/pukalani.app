@@ -57,6 +57,13 @@ export interface BwTocLink {
   state: BwTocState
   /** Kurzform rechts: Abnahme-Zähler (`7/11`) oder Kapitelnummer (`07`). */
   counter?: string
+  /**
+   * Verschachtelungs-Tiefe. 2 = Kapitel (die Vorgabe), 3 = Unterpunkt — heute
+   * die fünf Abschnitte des vollen Kapitels 10 (Brand Design D8). `UContentToc`
+   * rückt Tiefe 3 selbst ein; die Zeilenhöhe bleibt dieselbe, und damit auch
+   * die Rechnung der Hervorhebungs-Linie (s. Kopf, Punkt 1).
+   */
+  depth?: 2 | 3
 }
 
 const props = defineProps<{
@@ -72,7 +79,7 @@ interface BwTocContentLink extends ContentTocLink {
 
 const tocLinks = computed<BwTocContentLink[]>(() => props.links.map(link => ({
   id: link.id,
-  depth: 2,
+  depth: link.depth ?? 2,
   text: link.text,
   state: link.state,
   counter: link.counter ?? '',
