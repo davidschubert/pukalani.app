@@ -782,6 +782,15 @@
       "confirmedBadge": "Confirmed",
       "reviseSlot": "Revise",
       "reviseDone": "Done revising",
+      "answerSlot": "Answer",
+      "draftSlot": "Draft it",
+      "confirmChoice": {
+        "label": "Confirm or add more",
+        "confirm": "That's it, confirm",
+        "more": "I'd like to add something"
+      },
+      "continueTo": "Continue to {field}",
+      "continueAcceptance": "Continue to the final sign-off",
       "confirmQuestion": "Does that work as a basis?",
       "acceptAndConfirm": "Accept & confirm",
       "confirmNeedsValue": "Draft it or write it yourself first — then you can accept it.",

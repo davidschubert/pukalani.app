@@ -152,7 +152,7 @@ describe('Die Zug-Regel steht im Auftrag', () => {
     expect(none).not.toMatch(/AS A TEAM/)
   })
 
-  it('die Fassung steigt mit — converse-13', () => {
+  it('die Fassung steigt mit — converse-14', () => {
     // Ohne den Anstieg behaupteten Züge aus converse-3, aus diesem Auftrag zu
     // stammen (dieselbe Regel wie bei GEORGE_PROMPT_VERSION). converse-6 war
     // der Session-Block (BW2 Paket 3a); converse-7 die Gegenlese-Runde
@@ -162,8 +162,10 @@ describe('Die Zug-Regel steht im Auftrag', () => {
     // Eintrags-Behauptung samt Verweis auf den Entwurfs-Knopf (Befund 8);
     // converse-12 die Kapitel-Antworten im Rumpf, der Abschluss am
     // Entwurfs-Knopf und die eigene Frage einer Entwurfs-Session
-    // (Kailua-Befunde 5 und 7).
-    expect(BRAND_CONVERSE_PROMPT_VERSION).toBe('converse-13')
+    // (Kailua-Befunde 5 und 7); converse-13 die Anrede aus der Team-Weiche;
+    // converse-14 der Session-Abschluss (Zustand im Auftrag, `CONFIRM:`,
+    // Abschlusszug, Spiegel im Eröffnungszug).
+    expect(BRAND_CONVERSE_PROMPT_VERSION).toBe('converse-14')
   })
 
   it('würdigt Substanz — aber verbietet das Lob ohne Deckung', () => {
@@ -346,6 +348,149 @@ describe('Die nächste Frage gehört der Registry', () => {
       ].filter(pattern => pattern.test(text))
       expect(closings).toHaveLength(1)
     }
+  })
+})
+
+/**
+ * DER SESSION-ABSCHLUSS (converse-14, Davids Entscheidung 2026-09-09,
+ * DECISION-LOG Punkt 10).
+ *
+ * Der Widerspruch, den der Klick-Test zeigte: George bohrte nach, während die
+ * Session rechts längst den Haken trug. Rückfrage und Bestätigung wussten
+ * nichts voneinander — und genau das wird hier gemessen: kennt der AUFTRAG den
+ * Zustand, und was folgt daraus.
+ */
+describe('converse-14: der Zustand der Session erreicht den Auftrag', () => {
+  const CONFIRMED = { ...BOTH, sessionConfirmed: true }
+
+  it('BESTÄTIGT ⇒ keine Nachfrage mehr, kein „mir fehlt noch etwas"', () => {
+    const instruction = brandConverseInstruction(CONFIRMED)
+    expect(instruction).toMatch(/THIS SESSION IS ALREADY CONFIRMED/)
+    expect(instruction).toMatch(/Do NOT\s+probe it/)
+    // Der Dünn-Zweig ist der, der im Test danebenstand — er MUSS weg sein.
+    expect(instruction).not.toMatch(/IF THE ANSWER IS THIN/)
+  })
+
+  it('UNBESTÄTIGT ⇒ der Dünn-Zweig steht unverändert da', () => {
+    const instruction = brandConverseInstruction(BOTH)
+    expect(instruction).toMatch(/IF THE ANSWER IS THIN/)
+    expect(instruction).not.toMatch(/THIS SESSION IS ALREADY CONFIRMED/)
+  })
+
+  it('`CONFIRM:` wird NUR angeboten, wo es etwas zu bestätigen gibt', () => {
+    const offered = brandConverseInstruction({ ...BOTH, offerConfirm: true })
+    expect(offered).toMatch(/A LINE THAT READS EXACTLY `CONFIRM:`/)
+    // Der Kern der Entscheidung: der Knopf ist ein Bedienelement, kein Satz —
+    // ein getipptes „passt" bestätigt nichts (converse-11 bleibt gültig).
+    expect(offered).toMatch(/NEVER ask them to type a confirmation/)
+    expect(offered).toMatch(/only the button does/)
+    // GEGENPROBE: ohne Angebot (leeres Feld, nicht bestätigbar, schon
+    // bestätigt) steht der Marker nirgends — sonst stünde ein Knopf da, dessen
+    // Klick in `slot_empty` liefe.
+    expect(brandConverseInstruction(BOTH)).not.toMatch(/CONFIRM:/)
+    expect(brandConverseInstruction({ ...CONFIRMED, offerConfirm: true }))
+      .toMatch(/A LINE THAT READS EXACTLY `CONFIRM:`/)
+  })
+
+  it('nennt den Knopf beim Namen — und kommt ohne ihn aus', () => {
+    const named = brandConverseInstruction({
+      ...BOTH,
+      offerConfirm: true,
+      confirmButton: 'Passt so, bestätigen',
+    })
+    expect(named).toContain('The button reads "Passt so, bestätigen".')
+    const nameless = brandConverseInstruction({ ...BOTH, offerConfirm: true })
+    expect(nameless).toMatch(/A LINE THAT READS EXACTLY `CONFIRM:`/)
+    expect(nameless).not.toContain('The button reads')
+  })
+
+  it('ERÖFFNUNG und ABSCHLUSS bieten nie eine Bestätigung an', () => {
+    // Im Eröffnungszug hat noch niemand etwas gesagt, im Abschluss ist längst
+    // bestätigt — ein Knopf dort wäre in beiden Fällen sinnlos.
+    expect(brandConverseInstruction({ ...BOTH, offerConfirm: true, opening: true }))
+      .not.toMatch(/CONFIRM:/)
+  })
+})
+
+describe('converse-14: der Abschlusszug', () => {
+  const CLOSING = {
+    ...BOTH,
+    closing: {
+      goal: 'Der Gründungsimpuls steht in einem Satz.',
+      nextLabel: 'Kritik & Beschwerden',
+      acceptance: false,
+      skipped: ['Kundenstimmen'],
+    },
+  }
+
+  it('würdigt, nennt das ZIEL und die Übersprungenen — und fragt nichts', () => {
+    const instruction = brandConverseInstruction(CLOSING)
+    expect(instruction).toMatch(/TASK: CLOSE this session/)
+    expect(instruction).toContain('Der Gründungsimpuls steht in einem Satz.')
+    expect(instruction).toContain('"Kritik & Beschwerden"')
+    expect(instruction).toContain('Kundenstimmen')
+    expect(instruction).toMatch(/ASK NOTHING in this turn/)
+    // Die Form-Regel dreht sich mit: ein Abschluss, der mit einer Frage endet,
+    // wäre wieder ein Gespräch statt eines Übergangs.
+    expect(instruction).toMatch(/It ends with the step that follows — NOT with a question/)
+    expect(instruction).not.toMatch(/exactly ONE question/)
+  })
+
+  it('DAS ZIEL IST GEGEBEN, nicht gewählt', () => {
+    // Davids Rückfrage „wohin führt der Knopf, wenn das Nächste schon
+    // beantwortet ist?" — beantwortet von `resolveNextStop`, nie vom Modell.
+    expect(brandConverseInstruction(CLOSING)).toMatch(/never pick a different one/)
+  })
+
+  it('OHNE Ziel verweist er auf die Finale Abnahme', () => {
+    const instruction = brandConverseInstruction({
+      ...BOTH,
+      closing: { goal: 'Ziel', nextLabel: '', acceptance: true, skipped: [] },
+    })
+    expect(instruction).toMatch(/THERE IS NO FURTHER SESSION in this chapter/)
+    expect(instruction).toMatch(/accepting it/)
+    expect(instruction).not.toMatch(/WHERE IT GOES ON/)
+  })
+
+  it('ohne Übersprungene wird auch nichts übersprungen', () => {
+    const instruction = brandConverseInstruction({
+      ...BOTH,
+      closing: { goal: 'Ziel', nextLabel: 'Kundenstimmen', acceptance: false, skipped: [] },
+    })
+    expect(instruction).not.toMatch(/THESE PARTS ARE ALREADY SETTLED/)
+  })
+
+  it('lässt den Session-Block und die nächste Katalog-Frage weg', () => {
+    const instruction = brandConverseInstruction({
+      ...CLOSING,
+      session: sessionOptionsFor(),
+    })
+    // Nachfrage-Deckel und Mindest-Substanz handeln davon, wie man eine Antwort
+    // ENTGEGENNIMMT — in einem Zug, der nichts fragt, wären sie eine Einladung
+    // zum Weiterbohren.
+    expect(instruction).not.toMatch(/THIS SESSION:/)
+    expect(instruction).not.toMatch(/IF THEIR ANSWER IS SHORTER THAN/)
+    expect(instruction).not.toMatch(/CLOSE YOUR TURN WITH THE NEXT OPEN QUESTION/)
+    // Und keine Knöpfe: weder Optionen noch Bestätigung.
+    expect(instruction).toMatch(/Append no OPTION and no CONFIRM line/)
+  })
+})
+
+describe('converse-14: der Eröffnungszug spiegelt', () => {
+  it('verlangt ein bis zwei Sätze Zusammenschau VOR der Frage', () => {
+    const instruction = brandConverseInstruction({ ...BOTH, opening: true, mirror: true })
+    expect(instruction).toMatch(/BEFORE YOUR QUESTION, MIRROR WHAT YOU ALREADY KNOW/)
+    expect(instruction).toMatch(/one or two sentences/)
+    expect(instruction).toMatch(/Then, and only then, comes the question/)
+  })
+
+  it('OHNE Antworten wird nicht gespiegelt — ein leerer Spiegel wird gefüllt', () => {
+    expect(brandConverseInstruction({ ...BOTH, opening: true }))
+      .not.toMatch(/MIRROR WHAT YOU ALREADY KNOW/)
+    // Und im gewöhnlichen Zug gibt es ihn nie: dort steht die Antwort direkt
+    // darüber, eine Zusammenschau wäre ein zweiter Anfang.
+    expect(brandConverseInstruction({ ...BOTH, mirror: true }))
+      .not.toMatch(/MIRROR WHAT YOU ALREADY KNOW/)
   })
 })
 

@@ -19,6 +19,7 @@ import {
   resolveNextQuestion,
   resolveNextSession,
   resolveNextStop,
+  skippedSessionsBetween,
 } from '../../../../../../../shared/brandJourney'
 import { resolveBrandUiLocale } from '../../../../../../../shared/brandUiLocale'
 import {
@@ -72,13 +73,18 @@ import {
 } from '../../../../../../utils/conversePrompt'
 import { georgeSystemPrompt } from '../../../../../../utils/georgePrompt'
 import {
+  brandConfirmButtonLabel,
   brandDraftButtonLabel,
   brandSessionPartLabel,
   brandSessionPartQuestion,
   brandSlotPromptLabel,
   labelSlotDependencies,
 } from '../../../../../../utils/brandSlotPromptLabels'
-import { parseGeorgeOptions, stripGeorgeTurnMarkers } from '../../../../../../utils/georgeTurn'
+import {
+  parseGeorgeConfirm,
+  parseGeorgeOptions,
+  stripGeorgeTurnMarkers,
+} from '../../../../../../utils/georgeTurn'
 import { acquireBrandGenerationLock, readBrandAiEnabled, retainBrandGeneration } from '../../../../../../utils/brandGenerators'
 import { bookBrandAiQuota } from '../../../../../../utils/brandAiQuota'
 import { recordBrandEvent } from '../../../../../../utils/brandEvents'
@@ -166,6 +172,20 @@ import { recordBrandEvent } from '../../../../../../utils/brandEvents'
  *     George spricht zuerst. Er ist IDEMPOTENT — hat die Session schon einen
  *     Zug des Beraters, antwortet die Route `{ conversed: false, skipped:
  *     true }` statt einen zweiten zu erzeugen.
+ *
+ * ── SEIT 2026-09-09: DER DRITTE ZUG, DER ABSCHLUSS (`closing`) ───────────
+ * Davids Bild vom Ablauf einer Session (DECISION-LOG Punkt 10) hat drei
+ * Stationen, und der Server sieht sie alle: ERÖFFNEN (`opening`) · ANTWORTEN
+ * (der Normalfall, jetzt mit `sessionConfirmed`/`offerConfirm` im Auftrag) ·
+ * ABSCHLIESSEN (`closing`, nach der Bestätigung). Der Abschlusszug fragt
+ * nichts, schreibt nichts und trägt kein `askedSlotId`; er nennt, was jetzt
+ * steht, was übersprungen wird und wohin es weitergeht — und WOHIN rechnet
+ * `resolveNextStop`, nicht das Modell. Seine Bedingung ist serverseitig: die
+ * Session muss bestätigt sein, sonst `{ conversed: false, skipped: true }`.
+ *
+ * DER SPRUNG SELBST GEHÖRT NICHT MEHR HIERHER. `next` reist weiter im
+ * Abschluss-Frame — die Bühne macht daraus seit dieser Runde einen KNOPF
+ * („Weiter zu …") statt einer Navigation, die von selbst passiert.
  *
  * ── DIE EINE AUSNAHME VON „SIE SCHREIBT KEINEN SLOT" ─────────────────────
  * Die SAMMEL-Session (`kind: 'collect'`, heute nur `a.facts`) sammelt ihre
@@ -301,10 +321,12 @@ export default defineEventHandler(async (event): Promise<BrandConverseResponse |
    */
   // Beim ERÖFFNUNGSZUG stellt George die Frage SEINER Session — dann gehört
   // ihre Id hierher, damit die Werkstatt den Katalog-Satz nicht ein zweites
-  // Mal darunter setzt.
+  // Mal darunter setzt. Der ABSCHLUSSZUG stellt gar keine Frage: `''`.
   const askedSlotId = body.opening
     ? (session?.id ?? '')
-    : (nextQuestion ? (next?.slotId ?? '') : '')
+    : body.closing
+      ? ''
+      : (nextQuestion ? (next?.slotId ?? '') : '')
 
   const aiEnabled = await readBrandAiEnabled(event)
   if (!aiEnabled) return { conversed: false }
@@ -330,6 +352,28 @@ export default defineEventHandler(async (event): Promise<BrandConverseResponse |
       return { conversed: false, skipped: true }
     }
     chapterIntro = !(await hasBrandStepMessage(event, profile.$id, stepKey))
+  }
+
+  /**
+   * DER ABSCHLUSSZUG HAT EINE BEDINGUNG, UND ZWAR EINE EINZIGE: die Session
+   * IST bestätigt (Davids Entscheidung 2026-09-09).
+   *
+   * Sie wird SERVERSEITIG geprüft und nicht geglaubt — der Rumpf sagt nur, dass
+   * ein Abschlusszug gewünscht ist. Ein Abschluss über einem unbestätigten Wert
+   * wäre genau die Lüge, gegen die diese Runde gebaut ist, nur mit vertauschten
+   * Rollen: „Gründungsimpuls steht" über einem Feld, das noch offen ist.
+   *
+   * ── WARUM HIER KEIN „SCHON PASSIERT"-RIEGEL STEHT ────────────────────────
+   * Der Eröffnungszug hat einen (`hasBrandSessionAdvisorTurn`), weil der Client
+   * ihn bei JEDEM Öffnen ruft. Der Abschlusszug wird an genau EINER Stelle
+   * ausgelöst — dem Klick auf „Bestätigen" — und darf sich wiederholen dürfen:
+   * wer korrigiert und ein zweites Mal bestätigt, bekommt einen zweiten
+   * Abschluss. Gegen den Doppelklick stehen die Baustein-Sperre und der
+   * Idempotenzschlüssel, wie bei jedem anderen Zug.
+   */
+  if (body.closing) {
+    if (!session) return { conversed: false, skipped: true }
+    if (!brandSlotRecordConfirmed(records[session.id])) return { conversed: false, skipped: true }
   }
 
   /** '' NUR beim Eröffnungszug — das Schema weist jeden anderen leeren Zug ab. */
@@ -598,9 +642,10 @@ export default defineEventHandler(async (event): Promise<BrandConverseResponse |
    * nachvollziehbar.
    */
   let userMessageId: string | null = null
-  // Beim ERÖFFNUNGSZUG gibt es keine Antwort des Menschen — eine leere Zeile
-  // im Verlauf wäre eine Äusserung, die niemand getan hat.
-  if (!body.opening) {
+  // Beim ERÖFFNUNGS- und beim ABSCHLUSSZUG gibt es keine Antwort des Menschen —
+  // eine leere Zeile im Verlauf wäre eine Äusserung, die niemand getan hat.
+  // (Der Abschluss folgt auf einen KNOPF, nicht auf einen Satz.)
+  if (!body.opening && !body.closing) {
     try {
       const row = await tablesDB.createRow({
         databaseId,
@@ -739,6 +784,59 @@ export default defineEventHandler(async (event): Promise<BrandConverseResponse |
         )
       : ''
 
+    /**
+     * IST DIE AKTIVE SESSION BESTÄTIGT — UND DARF DIESER ZUG SIE ANBIETEN?
+     * (converse-14, Davids Entscheidung 2026-09-09.)
+     *
+     * Beides aus den SLOT-FAKTEN, nie aus dem Rumpf. Die zweite Frage ist die
+     * engere: bestätigen lässt sich nur, was bestätigbar ist UND schon einen
+     * Wert trägt — sonst wiese die Bestätigungs-Route `slot_empty` ab, und der
+     * Knopf wäre ein Angebot mit garantierter Absage (dieselbe Regel wie
+     * `confirmEnabled` auf der Karte).
+     */
+    const sessionConfirmed = session ? brandSlotRecordConfirmed(sessionRecord) : false
+    const offerConfirm = Boolean(
+      session
+      && slotIsConfirmable(session)
+      && !sessionConfirmed
+      && brandSlotStoredValue(sessionRecord).length > 0,
+    )
+
+    /**
+     * DER ABSCHLUSSZUG BEKOMMT SEINEN WEG FERTIG GERECHNET (converse-14).
+     *
+     * ZIEL aus `resolveNextStop` (die Regel, nicht Georges Urteil — Davids
+     * Rückfrage „wohin führt der Knopf, wenn das Nächste schon beantwortet
+     * ist?"), ÜBERSPRUNGENE aus `skippedSessionsBetween`. Beide beschriftet wie
+     * jedes andere Feld im Prompt (`brandSlotPromptLabel`, Inhaltssprache) —
+     * eine rohe Id im Abschlusssatz wäre der Live-Fund vom 2026-09-03 an genau
+     * der Stelle, an der der Mensch weiterklicken soll.
+     */
+    const closingOptions = body.closing && session
+      ? (() => {
+          const stop = resolveNextStop(stepKey, facts, sessionStates)
+          const label = (slotId: string) => brandSlotPromptLabel(
+            slotId,
+            profile.contentLocale,
+            profileFacts(profile).pathKind,
+            profileFacts(profile).team,
+          )
+          const skipFacts: Record<string, { confirmed: boolean, deferred: boolean }> = {}
+          for (const slot of slotsForStep(stepKey)) {
+            skipFacts[slot.id] = {
+              confirmed: brandSlotRecordConfirmed(currentRecords[slot.id]),
+              deferred: currentRecords[slot.id]?.deferred === true,
+            }
+          }
+          return {
+            goal: session.goal,
+            nextLabel: stop && 'sessionKey' in stop ? label(stop.sessionKey) : '',
+            acceptance: !stop || 'acceptance' in stop,
+            skipped: skippedSessionsBetween(stepKey, session.id, stop, skipFacts).map(label),
+          }
+        })()
+      : null
+
     const prompt = brandConversePrompt(
       {
         hasNextQuestion: Boolean(next),
@@ -772,8 +870,21 @@ export default defineEventHandler(async (event): Promise<BrandConverseResponse |
         // „im Team" heisst ihr — dieselbe Weiche wie bei den Beschriftungen.
         team: profileFacts(profile).team,
         session: sessionOptions,
+        // converse-14: der Zustand der Session erreicht endlich den Auftrag.
+        sessionConfirmed,
+        offerConfirm,
+        // Der Knopf, der wirklich bestätigt — dieselbe Quelle wie `draftButton`.
+        confirmButton: brandConfirmButtonLabel(uiLocale),
+        ...(closingOptions ? { closing: closingOptions } : {}),
         ...(brief ? { brief: brief.options } : {}),
-        ...(body.opening ? { opening: true, chapterIntro } : {}),
+        ...(body.opening
+          ? {
+              opening: true,
+              chapterIntro,
+              // DER SPIEGEL (converse-14) — nur, wo es etwas zu spiegeln gibt.
+              mirror: chapterAnswers.length > 0,
+            }
+          : {}),
         /**
          * EINE VERALTETE SESSION WIRD NEU BESPROCHEN (§9, converse-9): George
          * eröffnet mit dem GRUND, nicht mit der alten Frage. Die Quellen
@@ -859,9 +970,20 @@ export default defineEventHandler(async (event): Promise<BrandConverseResponse |
      * Zügen mit `BASIS:`/`ASK:`), fielen sie hier weg statt in den Verlauf zu
      * wandern.
      */
-    const spoken = parseGeorgeOptions(turn.text)
+    const offered = parseGeorgeConfirm(turn.text)
+    const spoken = parseGeorgeOptions(offered.message)
     const message = stripGeorgeTurnMarkers(spoken.message).trim()
     if (!message) return fail('empty_result')
+
+    /**
+     * EIN ANGEBOT, DAS NICHT GILT, WIRD NICHT WEITERGEREICHT (converse-14).
+     *
+     * Das Modell setzt den Marker auf Zuruf; ob hier überhaupt etwas zu
+     * bestätigen ist, weiss nur der Server (`offerConfirm`). Ohne dieses UND
+     * stünde nach einem übereifrigen `CONFIRM:` ein Knopf unter dem Zug, dessen
+     * Klick in `slot_empty` oder in ein bereits bestätigtes Feld liefe.
+     */
+    const confirmOffered = offered.confirm && offerConfirm
 
     let messageId: string
     try {
@@ -881,9 +1003,15 @@ export default defineEventHandler(async (event): Promise<BrandConverseResponse |
           // Wahl angeboten wurde — der `body` trägt sie bewusst NICHT, denn
           // dort stünden sie als roher Text in der Sprechblase.
           parts: JSON.stringify({
-            kind: 'reply',
+            // `closing` steht NEBEN 'reply'/'draft'/'question' — der Verlauf
+            // soll später lesen können, welcher Zug eine Session geschlossen
+            // hat, ohne ihn am Wortlaut erraten zu müssen.
+            kind: body.closing ? 'closing' : 'reply',
             ...(body.slotId ? { slotId: body.slotId } : {}),
             ...(spoken.options.length ? { options: spoken.options } : {}),
+            // ADDITIV wie `options`: ein nachgeladener Verlauf zeigt die zwei
+            // Knöpfe wieder, statt sie beim Reload zu verlieren.
+            ...(confirmOffered ? { confirm: true } : {}),
           }),
           generationId: turnId,
         },
@@ -971,6 +1099,8 @@ export default defineEventHandler(async (event): Promise<BrandConverseResponse |
       // NUR wenn es welche gibt: ein leeres Array wäre für den Leser dasselbe
       // wie „keine", kostete aber einen Sonderfall im Rückwärts-Vertrag.
       ...(spoken.options.length ? { options: spoken.options } : {}),
+      // Dasselbe für das Bestätigungs-Angebot (converse-14).
+      ...(confirmOffered ? { confirm: true } : {}),
       next: nextSession,
     })
     logEvent('info', 'brand.converse_completed', {

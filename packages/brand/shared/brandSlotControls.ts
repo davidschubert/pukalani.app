@@ -203,6 +203,51 @@ export function brandSlotControls(input: BrandSlotControlsInput): BrandSlotContr
   }
 }
 
+/**
+ * WELCHER KNOPF STEHT AUF EINER KARTE IM NOTIZBLOCK? (Davids Befund 18,
+ * 2026-09-09.)
+ *
+ * ── DER BEFUND ────────────────────────────────────────────────────────────
+ * Jede Karte trug „Korrigieren" — auch die LEEREN. Auf einer Karte, die „Noch
+ * offen — kommt im Gespräch" sagt, ist das das falsche Wort: es gibt nichts zu
+ * korrigieren, es gibt etwas zu TUN. Und was zu tun ist, hängt an der
+ * Arbeitsform: eine Frage wird beantwortet, eine Ableitung wird entworfen.
+ *
+ * ── VIER ANTWORTEN, UND JEDE FÜHRT AN DIESELBE STELLE ────────────────────
+ * 'revise'  es steht etwas da (bestätigt oder nicht) — die bisherige Tür.
+ * 'answer'  leer und fragbar ⇒ „Beantworten", springt in die Session.
+ * 'draft'   leer und entwerfbar ⇒ „Entwerfen", springt in die Session (dort
+ *           beansprucht `brandStageClaim` das Entwurfs-Modul).
+ * 'none'    nichts anzubieten: der Paarvergleich (`d.pairs`, nicht bestätigbar)
+ *           und die deterministisch gerechneten Felder der Design-Kapitel
+ *           (`h.ramp`, `i.scale` …), die von den Panels darüber gefüllt werden.
+ *           Ein Knopf, der auf eine leere Bühne führte, wäre schlimmer als
+ *           keiner.
+ *
+ * BESTÄTIGEN bleibt davon unberührt: der Knopf steht weiter da, deaktiviert,
+ * mit dem Satz daneben (`showConfirmBlockedNote`, Befund 9). Die zwei Befunde
+ * beantworten zwei Fragen — „warum geht das nicht" und „was geht stattdessen".
+ */
+export type BrandCardAction = 'revise' | 'answer' | 'draft' | 'none'
+
+export interface BrandCardActionInput {
+  confirmed: boolean
+  hasValue: boolean
+  /** `slot.type === 'question' | 'choice'` — George stellt diese Session als FRAGE. */
+  askable: boolean
+  /** `slotIsConfirmable(slot)` — der Paarvergleich kennt keine Zustimmung. */
+  confirmable: boolean
+  /** `slot.generator !== 'none'` — es gibt einen Knopf, der dieses Feld füllt. */
+  generatable: boolean
+}
+
+export function brandLogCardAction(input: BrandCardActionInput): BrandCardAction {
+  if (!input.confirmable) return 'none'
+  if (input.confirmed || input.hasValue) return 'revise'
+  if (input.askable) return 'answer'
+  return input.generatable ? 'draft' : 'none'
+}
+
 /** Der Balken EINES Kapitels: bestätigte Entscheidungen von allen möglichen. */
 export interface BrandChapterProgress {
   confirmed: number

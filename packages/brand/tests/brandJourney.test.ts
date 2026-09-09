@@ -22,6 +22,7 @@ import {
   resolveNextSession,
   resolveNextStop,
   resolveSessionStates,
+  skippedSessionsBetween,
   transitionBrandStep,
 } from '../shared/brandJourney'
 import { brandRestartImpact, computeSourcesHash, sessionsAffectedBy } from '../shared/brandSessions'
@@ -1539,5 +1540,77 @@ describe('firstOpenBrandStep', () => {
 
   it('ohne Journey bleibt der erste Baustein — er ist nie übersprungen', () => {
     expect(firstOpenBrandStep([])).toBe('context')
+  })
+})
+
+/**
+ * WAS ZWISCHEN HIER UND DEM ZIEL ÜBERSPRUNGEN WIRD (Davids Entscheidung
+ * 2026-09-09, Session-Abschluss).
+ *
+ * Der Abschlusszug soll den Sprung ERKLÄREN („Kundenstimmen hast du schon
+ * beantwortet, weiter mit Kritik & Beschwerden") — und er darf dabei nur
+ * behaupten, was auch stimmt. Genau das wird hier gemessen: die Menge ist
+ * gerechnet, nicht geraten.
+ */
+describe('skippedSessionsBetween — der Abschlusszug erklärt den Sprung', () => {
+  const CONFIRMED = { confirmed: true, deferred: false }
+  const DEFERRED = { confirmed: false, deferred: true }
+  const OPEN = { confirmed: false, deferred: false }
+
+  it('nennt die bestätigten Sessions zwischen hier und dem Ziel', () => {
+    expect(skippedSessionsBetween(
+      'context',
+      'a.origin',
+      { stepKey: 'context', sessionKey: 'a.complaints' },
+      { 'a.customerPraise': CONFIRMED },
+    )).toEqual(['a.customerPraise'])
+  })
+
+  it('nennt auch die vertagten', () => {
+    expect(skippedSessionsBetween(
+      'context',
+      'a.origin',
+      { stepKey: 'context', sessionKey: 'a.oneThing' },
+      { 'a.customerPraise': CONFIRMED, 'a.complaints': DEFERRED },
+    )).toEqual(['a.customerPraise', 'a.complaints'])
+  })
+
+  it('eine GESPERRTE Session wird still übersprungen — sie ist nicht „erledigt"', () => {
+    // `resolveNextStop` geht an ihr vorbei, George dürfte darüber aber nicht
+    // sagen, der Mensch habe sie beantwortet. Das wäre schlicht falsch.
+    expect(skippedSessionsBetween(
+      'context',
+      'a.origin',
+      { stepKey: 'context', sessionKey: 'a.complaints' },
+      { 'a.customerPraise': OPEN },
+    )).toEqual([])
+  })
+
+  it('geht bis ans Ende des Kapitels, wenn das Ziel die Abnahme ist', () => {
+    expect(skippedSessionsBetween(
+      'context',
+      'a.oneThing',
+      { stepKey: 'context', acceptance: true },
+      { 'a.challenge': CONFIRMED, 'a.facts': DEFERRED },
+    )).toEqual(['a.challenge', 'a.facts'])
+    // Dasselbe ohne Ziel — auch dort ist „dazwischen" der Rest.
+    expect(skippedSessionsBetween('context', 'a.oneThing', null, { 'a.challenge': CONFIRMED }))
+      .toEqual(['a.challenge'])
+  })
+
+  it('RÜCKWÄRTS wird nichts übersprungen (die Warteschlange „neu besprechen")', () => {
+    // Zeigt der Wegweiser auf eine veraltete Session WEITER VORN, wird nicht
+    // übersprungen, sondern zurückgesprungen — und dafür hat der Auftrag den
+    // Grund der Veraltung, nicht diese Liste.
+    expect(skippedSessionsBetween(
+      'context',
+      'a.oneThing',
+      { stepKey: 'context', sessionKey: 'a.origin' },
+      { 'a.customerPraise': CONFIRMED },
+    )).toEqual([])
+  })
+
+  it('eine unbekannte Ausgangs-Session liefert nichts', () => {
+    expect(skippedSessionsBetween('context', 'z.nope', null, {})).toEqual([])
   })
 })

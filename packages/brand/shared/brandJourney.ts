@@ -1104,6 +1104,63 @@ export function resolveNextStop(
   return brandStepCompletion(stepKey, slotStates).slotsReady ? { stepKey, acceptance: true } : null
 }
 
+/** Was der Abschlusszug über eine Session wissen muss, um sie zu nennen. */
+export interface BrandSkipFacts {
+  /** Bestätigt — der Mensch hat sie schon beantwortet und abgeschlossen. */
+  confirmed: boolean
+  /** Auf später vertagt („darauf komme ich zurück"). */
+  deferred: boolean
+}
+
+/**
+ * WAS ZWISCHEN HIER UND DEM ZIEL ÜBERSPRUNGEN WIRD (Davids Entscheidung
+ * 2026-09-09, Session-Abschluss).
+ *
+ * ── WOZU ──────────────────────────────────────────────────────────────────
+ * Der Weiter-Knopf zeigt nicht auf die Session, die in der Leiste als NÄCHSTE
+ * steht, sondern auf die nächste OFFENE (`resolveNextStop`). Für den Menschen
+ * sieht das aus wie ein Sprung: „warum überspringt er Kundenstimmen?". George
+ * bekommt die übergangenen Sessions deshalb in den Auftrag und spricht sie aus
+ * („Kundenstimmen hast du schon beantwortet, weiter mit Kritik & Beschwerden").
+ *
+ * ── DREI ENTSCHEIDUNGEN ───────────────────────────────────────────────────
+ * 1. NUR VORWÄRTS. Liegt das Ziel VOR der eben geschlossenen Session (die
+ *    Warteschlange „neu besprechen" greift zuerst, §9), wird nichts
+ *    übersprungen — es wird zurückgesprungen, und dafür hat der Auftrag den
+ *    Grund der Veraltung.
+ * 2. NUR BESTÄTIGTES UND VERTAGTES. Eine GESPERRTE Session ist nicht „schon
+ *    erledigt", sondern „noch nicht dran"; George dürfte über sie nicht sagen,
+ *    der Mensch habe sie beantwortet — das wäre schlicht falsch. Sie fällt
+ *    deshalb still weg, obwohl `resolveNextStop` sie ebenfalls überspringt.
+ * 3. OHNE ZIEL BIS ANS ENDE. Zeigt der Wegweiser auf die Finale Abnahme (oder
+ *    nirgendwohin), ist „zwischen hier und dort" der REST des Kapitels.
+ *
+ * PUR wie alles hier: sie nimmt Tatsachen entgegen und gibt Slot-Ids zurück —
+ * die Beschriftungen macht der Aufrufer (der Server kennt die Inhaltssprache).
+ */
+export function skippedSessionsBetween(
+  stepKey: BrandStepKey,
+  fromSessionId: string,
+  target: BrandNextSessionRef | null,
+  facts: Readonly<Record<string, BrandSkipFacts | undefined>>,
+): string[] {
+  const order = slotsForStep(stepKey)
+  const start = order.findIndex(session => session.id === fromSessionId)
+  if (start < 0) return []
+
+  const targetKey = target && 'sessionKey' in target ? target.sessionKey : ''
+  const stop = targetKey ? order.findIndex(session => session.id === targetKey) : order.length
+  // Ziel VOR der geschlossenen Session (oder unbekannt) ⇒ nichts dazwischen.
+  if (targetKey && stop <= start) return []
+
+  const skipped: string[] = []
+  for (const session of order.slice(start + 1, stop < 0 ? order.length : stop)) {
+    const fact = facts[session.id]
+    if (fact?.confirmed || fact?.deferred) skipped.push(session.id)
+  }
+  return skipped
+}
+
 /**
  * DIE WARTESCHLANGE „NEU BESPRECHEN" (§9, Paket 6) — die erste VERALTETE
  * Session dieses Kapitels in Registry-Reihenfolge.

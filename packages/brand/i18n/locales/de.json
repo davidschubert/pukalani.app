@@ -782,6 +782,15 @@
       "confirmedBadge": "Bestätigt",
       "reviseSlot": "Korrigieren",
       "reviseDone": "Korrigieren beenden",
+      "answerSlot": "Beantworten",
+      "draftSlot": "Entwerfen",
+      "confirmChoice": {
+        "label": "Bestätigen oder ergänzen",
+        "confirm": "Passt so, bestätigen",
+        "more": "Ich ergänze noch etwas"
+      },
+      "continueTo": "Weiter zu {field}",
+      "continueAcceptance": "Weiter zur Finalen Abnahme",
       "confirmQuestion": "Passt das so als Grundlage?",
       "acceptAndConfirm": "Übernehmen & bestätigen",
       "confirmNeedsValue": "Erst entwerfen oder selbst schreiben — dann lässt sich das übernehmen.",

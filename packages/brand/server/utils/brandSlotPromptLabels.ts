@@ -94,6 +94,21 @@ export function brandDraftButtonLabel(uiLocale: string, voiceName: string): stri
   return template ? template.replace('{voice}', voiceName) : ''
 }
 
+/**
+ * DER NAME DES BESTÄTIGEN-KNOPFES (converse-14, Davids Entscheidung
+ * 2026-09-09) — „Passt so, bestätigen".
+ *
+ * Dieselbe Quelle, dieselbe Sprache und dieselbe Begründung wie bei
+ * `brandDraftButtonLabel`: der Knopf steht in der Oberfläche, George nennt ihn
+ * in einem Chat-Zug, also `uiLocale`. Gelesen wird der Eintrag, den die Bühne
+ * rendert (`brand.workspace.confirmChoice.confirm`) — ein zweiter Satz hier
+ * wäre beim ersten Umbenennen still falsch. Fehlt er, gibt es `''`, und der
+ * Auftrag nennt den Knopf schlicht nicht beim Namen.
+ */
+export function brandConfirmButtonLabel(uiLocale: string): string {
+  return lookup(ROOTS[uiLocale] ?? ROOTS.en, 'brand.workspace.confirmChoice.confirm') ?? ''
+}
+
 /** Dieselbe Beschriftung für eine ganze Dependency-Liste (Prompt-Aufbau). */
 export function labelSlotDependencies<T extends { slotId: string }>(
   dependencies: readonly T[],

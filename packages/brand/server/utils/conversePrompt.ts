@@ -47,6 +47,30 @@ import { BRAND_CONVERSE_HISTORY_CHARS, formatStartCard } from './georgePrompt'
 /**
  * Steht in jeder Gesprächs-Nachricht; steigt bei jeder inhaltlichen Änderung.
  *
+ * `converse-14` (2026-09-09, Davids Entscheidung „Session-Abschluss: George
+ * führt", DECISION-LOG Punkt 10): der Auftrag kennt den ZUSTAND der Session —
+ * und damit endlich das, was rechts längst dastand. Der Test zeigte beides
+ * nebeneinander: George bohrte nach („ich brauche noch etwas Konkretes"),
+ * während die Session den Haken trug. Rückfrage und Bestätigung wussten nichts
+ * voneinander. VIER Änderungen:
+ *
+ *  1. `sessionConfirmed`. Ist die Session bestätigt, wird NICHT mehr
+ *     nachgefragt — der Wert steht, und ein „das reicht mir noch nicht" darüber
+ *     ist ein Widerspruch zum eigenen Häkchen.
+ *  2. `offerConfirm` und der Marker `CONFIRM:`. Unbestätigt endet der Zug mit
+ *     einem BEDIENELEMENT statt mit einer Aufforderung: zwei Knöpfe („Passt so,
+ *     bestätigen" / „Ich ergänze noch etwas"). Bestätigen im Chat ist damit ein
+ *     Knopf und nie Chat-Text — converse-11 bleibt wortgleich stehen.
+ *  3. Der ABSCHLUSSZUG (`closing`). Nach der Bestätigung würdigt George in
+ *     EINEM Satz, nennt, was schon steht (die übersprungenen Sessions), und
+ *     sagt, wohin es weitergeht. Das ZIEL kommt aus der Regel
+ *     (`resolveNextStop`), nie aus seinem Urteil — eine Navigation, die ein
+ *     Modell entscheidet, wäre nichtdeterministisch.
+ *  4. Der ERÖFFNUNGSZUG SPIEGELT (`mirror`). Ein bis zwei Sätze Zusammenschau
+ *     des Bekannten vor der Frage — aber nur, wenn es etwas zu spiegeln gibt
+ *     (converse-12 liefert die Kapitel-Antworten). Beim allerersten Zug eines
+ *     Kapitels wäre der Spiegel leer, und ein Modell füllt leere Spiegel.
+ *
  * `converse-13` (2026-09-09, Davids erster Klick-Test): die ANREDE folgt der
  * Team-Weiche W3. David hatte im Start-Modal „alleine" gewählt, und Georges
  * Eröffnungszug fragte trotzdem „was euch dazu gebracht hat … habt ihr bei
@@ -154,7 +178,7 @@ import { BRAND_CONVERSE_HISTORY_CHARS, formatStartCard } from './georgePrompt'
  * heisst er „Frida, entwirf das", und ein fest verdrahteter George-Satz wäre
  * dort schlicht falsch.
  */
-export const BRAND_CONVERSE_PROMPT_VERSION = 'converse-13'
+export const BRAND_CONVERSE_PROMPT_VERSION = 'converse-14'
 
 /**
  * Was ein Mensch in EINEM Zug schreiben darf. Grosszügiger als der Hinweis
@@ -335,6 +359,35 @@ export interface BrandConverseBriefOptions {
   market?: readonly { field: string, why: string, suggestion?: string }[]
 }
 
+/**
+ * DER ABSCHLUSSZUG, ALS AUFTRAG (converse-14, Davids Entscheidung 2026-09-09).
+ *
+ * ── DAS ZIEL IST GERECHNET, NICHT GEURTEILT ──────────────────────────────
+ * `nextLabel` und `skipped` kommen aus `resolveNextStop` und
+ * `skippedSessionsBetween`, beide pur und beide auf dem SERVER-Stand. George
+ * SPRICHT den Weg aus, er wählt ihn nicht — Davids Rückfrage „wohin führt der
+ * Knopf, wenn das Nächste schon beantwortet ist?" hat genau diese Trennung
+ * entschieden: eine Navigation, die ein Modell entscheidet, wäre
+ * nichtdeterministisch.
+ */
+export interface BrandConverseClosingOptions {
+  /** Das ZIEL dieser Session — ein Satz, was jetzt feststeht. */
+  goal: string
+  /**
+   * Die Beschriftung der Session, in die es weitergeht. `''` heisst: es gibt
+   * keine mehr — dann verweist der Zug auf die Finale Abnahme (`acceptance`).
+   */
+  nextLabel: string
+  /** Das Ziel ist die Finale Abnahme dieses Kapitels (oder es gibt gar keins). */
+  acceptance: boolean
+  /**
+   * Was zwischen hier und dem Ziel übersprungen wird, beschriftet — bestätigte
+   * und vertagte Sessions. Leer heisst: der Weg geht geradeaus weiter, und dann
+   * gibt es auch nichts zu erklären.
+   */
+  skipped: readonly string[]
+}
+
 export interface BrandConverseInstructionOptions {
   /**
    * Hat dieser Baustein laut REGISTRY noch eine offene Frage? Der Server
@@ -424,6 +477,56 @@ export interface BrandConverseInstructionOptions {
    */
   draftField?: string
   /**
+   * IST DIE AKTIVE SESSION SCHON BESTÄTIGT? (converse-14, Davids Entscheidung
+   * 2026-09-09.)
+   *
+   * Serverseitig aus den Slot-Fakten gerechnet, nie aus dem Rumpf. `true`
+   * heisst: der Mensch hat den Wert abgeschlossen, und das Häkchen steht rechts
+   * in der Leiste. George fragt dann NICHT mehr nach — genau dieser Widerspruch
+   * (Nachfrage über einem Häkchen) war der Anlass der Runde.
+   *
+   * FEHLT es, gilt `false` — der Stand von converse-13 und der Normalfall
+   * jeder laufenden Session.
+   */
+  sessionConfirmed?: boolean
+  /**
+   * DARF DIESER ZUG DIE BESTÄTIGUNG ANBIETEN? (converse-14, Marker `CONFIRM:`.)
+   *
+   * Nur wo es etwas zu bestätigen GIBT: die Session ist bestätigbar, noch nicht
+   * bestätigt, und ein Wert steht schon da. Ohne Wert wiese die Route die
+   * Bestätigung mit `slot_empty` ab — ein Knopf, der garantiert eine Absage
+   * kassiert, ist kein Angebot (dieselbe Regel wie `confirmEnabled` auf der
+   * Karte).
+   */
+  offerConfirm?: boolean
+  /**
+   * DIE BESCHRIFTUNG DES BESTÄTIGEN-KNOPFES — wörtlich so, wie sie unter dem
+   * Zug steht („Passt so, bestätigen").
+   *
+   * Aus dem LOCALE-KATALOG, aus demselben Grund und auf demselben Weg wie
+   * `draftButton`: ein hier ausgeschriebener Knopfname wäre beim ersten
+   * Umbenennen still falsch und in der zweiten Sprache sofort. Fehlt er, bleibt
+   * die Regel stehen und nennt den Knopf nur nicht beim Namen.
+   */
+  confirmButton?: string
+  /**
+   * DER ABSCHLUSSZUG (converse-14) — der Zug NACH der Bestätigung.
+   *
+   * Er ist ein eigener Auftrag wie der Eröffnungszug, nicht bloss eine andere
+   * Eingabe: er beantwortet keine Nachricht, er stellt keine Frage, und sein
+   * einziges Ziel ist, den Übergang auszusprechen, den die Bühne darunter als
+   * Knopf rendert.
+   */
+  closing?: BrandConverseClosingOptions | null
+  /**
+   * SPIEGELT DER ERÖFFNUNGSZUG? (converse-14, Nr. 4.)
+   *
+   * Nur beim Eröffnungszug und nur, wenn `chapterAnswers` etwas trägt. Ohne
+   * diese Bedingung verlangte der Auftrag eine Zusammenschau von nichts — und
+   * ein hilfsbereites Modell schreibt sie trotzdem.
+   */
+  mirror?: boolean
+  /**
    * DIE TEAM-WEICHE W3 (converse-13, Davids Klick-Test 2026-09-09): `solo`
    * heisst, EIN Mensch gründet oder führt die Marke — George spricht dann
    * eine Person an, nicht „euch". Im Test hatte David „alleine" gewählt, und
@@ -465,20 +568,31 @@ function addressLines(options: BrandConverseInstructionOptions): string[] {
  * „was soll er tun" ist eine Produktentscheidung, „was weiss er" ein Datenstand).
  */
 export function brandConverseInstruction(options: BrandConverseInstructionOptions): string {
+  const closing = options.closing ?? null
   return [
-    ...(options.opening ? openingTaskLines(options) : replyTaskLines()),
-    ...sessionLines(options),
+    ...(closing
+      ? closingTaskLines(closing)
+      : options.opening ? openingTaskLines(options) : replyTaskLines(options)),
+    // DER ABSCHLUSSZUG BRAUCHT DEN SESSION-BLOCK NICHT: seine Antwort-Regeln
+    // (Mindest-Substanz, Nachfrage-Deckel, „weiss nicht") handeln alle davon,
+    // wie man eine Antwort ENTGEGENNIMMT — in einem Zug, der nichts mehr fragt,
+    // wären sie eine Einladung, doch noch einmal zu bohren. Das ZIEL der
+    // Session reist stattdessen im Abschluss-Block mit.
+    ...(closing ? [] : sessionLines(options)),
     ...briefLines(options.brief),
     // Der Eröffnungszug schliesst mit der Frage SEINER Session (die Leiter sagt
     // welche) — die „nächste offene Frage des Kapitels" ist dort die falsche
-    // Auskunft: sie wäre die Frage NACH dieser.
-    ...(options.opening ? [] : nextQuestionLines(options)),
+    // Auskunft: sie wäre die Frage NACH dieser. Der Abschlusszug schliesst mit
+    // dem WEG, nicht mit einer Frage.
+    ...(options.opening || closing ? [] : nextQuestionLines(options)),
     '',
     'Form:',
     'Two to three sentences, one turn, one paragraph.',
-    'It ends with exactly ONE question — or, where there is nothing left to ask, one clear next step.',
+    closing
+      ? 'It ends with the step that follows — NOT with a question.'
+      : 'It ends with exactly ONE question — or, where there is nothing left to ask, one clear next step.',
     'Plain text only: no markdown, no asterisks, no underscores, no headings, no bullet points, no '
-    + 'numbered lists. The ONE exception are the OPTION lines described next — they are controls for '
+    + 'numbered lists. The ONE exception are the marker lines described next — they are controls for '
     + 'the interface, not text.',
     // converse-4 (Davids Anforderung 2026-09-04): eine Wahl bekommt Knöpfe.
     // DREI Zusagen in einer Zeile, weil sie zusammengehören — die Frage
@@ -487,13 +601,21 @@ export function brandConverseInstruction(options: BrandConverseInstructionOption
     // „Never invent options" ist die Sicherung dahinter: eine OFFENE Frage mit
     // zwei erfundenen Knöpfen darunter verengt die Antwort, statt sie zu
     // erleichtern.
-    'WHENEVER your closing question asks them to choose between two or three NAMED possibilities, you '
-    + 'MUST append one line per choice at the very end, each starting with `OPTION: ` followed by a short '
-    + 'label of at most a few words — without those lines the person has to type the choice out by hand. '
-    + 'Put the question in its own final sentence and state briefly in your prose which one you lean '
-    + 'towards and why. Example of such an ending: "Welcher der beiden fühlt sich mehr nach euch an?" '
-    + 'followed by the two lines "OPTION: Der Handwerker" and "OPTION: Der Gastgeber". The labels '
-    + 'follow the CHAT language of rule 9. Never invent options where the question is open.',
+    // Im ABSCHLUSSZUG entfällt sie: er stellt keine Frage, also gibt es auch
+    // nichts zu wählen.
+    ...(closing
+      ? ['Append no OPTION and no CONFIRM line to this turn: there is nothing left to choose here.']
+      : [
+          'WHENEVER your closing question asks them to choose between two or three NAMED possibilities, you '
+          + 'MUST append one line per choice at the very end, each starting with `OPTION: ` followed by a short '
+          + 'label of at most a few words — without those lines the person has to type the choice out by hand. '
+          + 'Put the question in its own final sentence and state briefly in your prose which one you lean '
+          + 'towards and why. Example of such an ending: "Welcher der beiden fühlt sich mehr nach euch an?" '
+          + 'followed by the two lines "OPTION: Der Handwerker" and "OPTION: Der Gastgeber". The labels '
+          + 'follow the CHAT language of rule 9. Never invent options where the question is open.',
+        ]),
+    // converse-14: die BESTÄTIGUNG ist ein Bedienelement, kein Satz.
+    ...confirmLines(options),
     // Ein Konversations-Zug ist VOLLSTÄNDIG Chat — anders als ein Slot-Entwurf
     // hat er keinen Teil, der in der Inhaltssprache stünde.
     'Everything in this turn is chat and follows the CHAT language of rule 9 — all of it, without '
@@ -540,7 +662,7 @@ export function brandConverseInstruction(options: BrandConverseInstructionOption
 }
 
 /** Der Auftrag des gewöhnlichen Zuges — vier Zweige aus Davids Leitsatz (s. Kopf). */
-function replyTaskLines(): string[] {
+function replyTaskLines(options: BrandConverseInstructionOptions): string[] {
   return [
     'TASK: answer this person\'s latest message in ONE chat turn. This is a conversation, not a form.',
     '',
@@ -550,11 +672,29 @@ function replyTaskLines(): string[] {
     'Open by naming, in one short clause, what you take from what they just wrote and what it gives you '
     + 'to build on later. Do this ONLY where there is real substance: never praise an answer for the sake '
     + 'of praising it, never repeat it back word for word, and never say "great" or "perfect".',
-    // Dünnes benennen (Regel 5, Pflicht zum Widerspruch) — und KLEINER fragen,
-    // statt dieselbe Frage lauter zu wiederholen.
-    'IF THE ANSWER IS THIN, evasive, or answers something other than what was asked: say so plainly and '
-    + 'respectfully, name what exactly is still missing, and ask ONE smaller question that would unlock '
-    + 'it — the kind a person can answer in one sentence. Do not repeat the same question in other words.',
+    /**
+     * DIE BESTÄTIGTE SESSION WIRD NICHT MEHR AUFGEMACHT (converse-14, Davids
+     * Befund aus dem Klick-Test).
+     *
+     * Sie steht VOR dem Dünn-Zweig und hebt ihn auf: „ich brauche noch etwas
+     * Konkretes" über einem Häkchen ist der Widerspruch, der diese Runde
+     * ausgelöst hat. Der Mensch kann eine bestätigte Session weiter betreten
+     * (`done` ist betretbar) — er vertieft dann, er antwortet nicht mehr.
+     */
+    ...(options.sessionConfirmed
+      ? [
+          'THIS SESSION IS ALREADY CONFIRMED — the value stands, they signed it off themselves. Do NOT '
+          + 'probe it, do NOT say that you are missing something concrete, and do NOT ask them to confirm '
+          + 'anything: that has happened. Take their message as a deepening or a question, answer it in one '
+          + 'turn, and leave the settled value alone unless they ask to change it.',
+        ]
+      : [
+          // Dünnes benennen (Regel 5, Pflicht zum Widerspruch) — und KLEINER
+          // fragen, statt dieselbe Frage lauter zu wiederholen.
+          'IF THE ANSWER IS THIN, evasive, or answers something other than what was asked: say so plainly and '
+          + 'respectfully, name what exactly is still missing, and ask ONE smaller question that would unlock '
+          + 'it — the kind a person can answer in one sentence. Do not repeat the same question in other words.',
+        ]),
     // Davids Leitsatz, wörtlich: „Weiß ich nicht" ist erlaubt.
     '"I DO NOT KNOW" IS A LEGITIMATE ANSWER, never a failure. Do not make the person feel bad for it and '
     + 'do not ask again. Either put ONE concrete proposal on the table that they can accept or reject, or '
@@ -586,6 +726,89 @@ function replyTaskLines(): string[] {
 }
 
 /**
+ * DIE ZWEI KNÖPFE STATT DER AUFFORDERUNG (converse-14, Davids Entscheidung
+ * 2026-09-09).
+ *
+ * ── WARUM EIN MARKER UND NICHT EIN SATZ ──────────────────────────────────
+ * „Sag mir Bescheid, wenn das so passt" ist eine Aufforderung, auf die ein
+ * Mensch „passt" tippt — und ein getippter Chat-Text bestätigt nichts
+ * (converse-11: George kann nichts schreiben). Die Antwort landete als WERT im
+ * Feld, und die Bestätigung blieb aus. `CONFIRM:` ist deshalb ein
+ * BEDIENELEMENT wie `OPTION:`: die Bühne rendert zwei Knöpfe, und der erste
+ * löst `confirmSlot()` aus.
+ *
+ * ── ER GILT IN BEIDEN ZWEIGEN, UND DAS IST DER KERN DER ENTSCHEIDUNG ─────
+ * Auch bei einer DÜNNEN Antwort: George fragt nach UND bietet die Wahl an.
+ * „Ist eine Antwort George zu dünn, fragt er nach und bietet ZWEI Knöpfe" —
+ * wer weiterschreiben will, schreibt weiter; wer findet, dass es reicht,
+ * entscheidet das selbst. Die Nachfrage ist ein Angebot, kein Tor.
+ */
+function confirmLines(options: BrandConverseInstructionOptions): string[] {
+  if (options.closing || options.opening || !options.offerConfirm) return []
+  const named = options.confirmButton
+    ? `The button reads "${options.confirmButton}".`
+    : 'The first button confirms, the second keeps the conversation open.'
+  return [
+    'END THIS TURN WITH A LINE THAT READS EXACTLY `CONFIRM:` AND NOTHING ELSE, after any OPTION lines. '
+    + 'It is a control, not a sentence: the interface turns it into two buttons — one that locks this '
+    + `value in, one that keeps this session open for more. ${named} Say in ONE short clause where you `
+    + 'stand — that this would carry as it is, or what you would still like to hear — and then leave the '
+    + 'decision to them.',
+    'NEVER ask them to type a confirmation, never say that you are confirming, locking in, finalising or '
+    + 'accepting anything, and never write the button labels into your text: typed words confirm nothing, '
+    + 'only the button does.',
+  ]
+}
+
+/**
+ * DER ABSCHLUSSZUG (converse-14) — der einzige Zug, der nichts fragt.
+ *
+ * ── DREI SÄTZE, DREI AUFGABEN ────────────────────────────────────────────
+ * Würdigen, was jetzt steht · sagen, was schon erledigt ist und deshalb
+ * übersprungen wird · sagen, wohin es weitergeht. Der KNOPF darunter gehört der
+ * Bühne; George kündigt ihn an, er ersetzt ihn nicht.
+ *
+ * ── DIE ZAHLEN UND NAMEN SIND GERECHNET ──────────────────────────────────
+ * Ziel und Übersprungene kommen fertig herein (s. `BrandConverseClosingOptions`).
+ * Der Auftrag sagt deshalb ausdrücklich, dass er sich keinen anderen Weg
+ * ausdenken darf: das Ziel ist eine Regel, kein Urteil.
+ */
+function closingTaskLines(closing: BrandConverseClosingOptions): string[] {
+  const lines = [
+    'TASK: CLOSE this session with ONE short chat turn. They have just confirmed the value — nothing is '
+    + 'open here any more, and nothing is being asked in this turn.',
+    '',
+    'How to work:',
+    `What this session was for: ${closing.goal}`,
+    'Say in ONE clause what now stands, in their own words. No praise, no summary of the whole chapter, '
+    + 'and never repeat the confirmed value back in full — they just read it.',
+  ]
+
+  if (closing.skipped.length) {
+    lines.push(
+      'THESE PARTS ARE ALREADY SETTLED and are therefore passed over on the way onwards: '
+      + `${closing.skipped.join(' · ')}. Name them in ONE short clause, so it is clear why the next step `
+      + 'is not the one that comes right after this — for example "Kundenstimmen hast du schon '
+      + 'beantwortet, weiter mit …". Never claim they are settled if they are not in this list.',
+    )
+  }
+
+  lines.push(
+    closing.acceptance || !closing.nextLabel
+      ? 'THERE IS NO FURTHER SESSION in this chapter: say plainly that everything here has been talked '
+        + 'through and that the last step is looking over the whole chapter and accepting it. Do not name '
+        + 'a session, do not invent one, and do not promise what comes after the chapter.'
+      : `WHERE IT GOES ON: the next session is "${closing.nextLabel}". Name it and say in half a sentence `
+        + 'what it is about. This target is given to you — never pick a different one, never offer a '
+        + 'choice of where to go, and never claim something is next that is not named here.',
+    'ASK NOTHING in this turn: no question, no follow-up, no invitation to write. A button underneath your '
+    + 'turn takes them onwards — you may say that it is there, in half a clause, but you never claim to '
+    + 'have moved them yourself.',
+  )
+  return lines
+}
+
+/**
  * DER ERÖFFNUNGSZUG EINER SESSION (Plan §6) — der einzige Zug ohne Nachricht
  * davor.
  *
@@ -606,6 +829,24 @@ function openingTaskLines(options: BrandConverseInstructionOptions): string[] {
     'How to work:',
     'YOUR FIRST SENTENCE PICKS UP what was last settled — the value just confirmed, or the last thing '
     + 'they told you — and says in one short clause what follows from it for this session.',
+    /**
+     * DER SPIEGEL (converse-14, Davids Bild vom Ablauf): „George ERÖFFNET mit
+     * kurzem SPIEGEL des Bekannten und der passenden Frage."
+     *
+     * Er steht NUR da, wo es etwas zu spiegeln gibt — die Bedingung rechnet die
+     * Route aus `chapterAnswers`. Beim allerersten Zug eines Kapitels wäre die
+     * Zusammenschau leer, und ein hilfsbereites Modell füllt sie dann mit einer
+     * erfundenen: derselbe Grund, aus dem ein leerer Block hier nie eine
+     * Überschrift bekommt.
+     */
+    ...(options.mirror
+      ? [
+          'BEFORE YOUR QUESTION, MIRROR WHAT YOU ALREADY KNOW: one or two sentences that hold together '
+          + 'what this chapter has settled so far — in their words, as a picture and not as a list, and '
+          + 'without naming every single answer. It shows that you were listening and it gives this '
+          + 'session its footing. Then, and only then, comes the question.',
+        ]
+      : []),
     'NEVER introduce yourself, never greet them again, never explain what this tool does and never '
     + 'summarise what has happened so far. You have been talking to this person all along.',
     /**

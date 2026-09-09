@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   GEORGE_TURN_MARKERS,
   createGeorgeTurnScrubber,
+  parseGeorgeConfirm,
   parseGeorgeOptions,
   parseGeorgeTurn,
   stripGeorgeTurnMarkers,
@@ -220,6 +221,80 @@ describe('parseGeorgeOptions', () => {
   it('versteht CRLF — Windows-Zeilenenden kommen von echten Anbietern', () => {
     const turn = parseGeorgeOptions('Was davon?\r\nOPTION: A\r\nOPTION: B')
     expect(turn.options).toEqual(['A', 'B'])
+  })
+})
+
+/**
+ * `CONFIRM:` — DER SECHSTE MARKER (Davids Entscheidung 2026-09-09,
+ * Session-Abschluss).
+ *
+ * Dieselben drei Zusagen wie bei `OPTION:`, weil es derselbe Vertragstyp ist:
+ * er ist ein BEDIENELEMENT, er fällt aus dem Feldtext, und er fällt aus dem
+ * Chat. Die vierte ist neu und trägt die Produktentscheidung: WAS hinter dem
+ * Doppelpunkt steht, wird nicht gelesen — die Beschriftungen gehören dem
+ * Locale-Katalog, ein vom Modell geschriebenes Etikett wäre in der zweiten
+ * Sprache erfunden.
+ */
+describe('parseGeorgeConfirm', () => {
+  it('erkennt die Zeile und lässt den Zug ohne sie stehen', () => {
+    const turn = parseGeorgeConfirm([
+      'Das trägt für mich. Sag Bescheid, wenn du magst.',
+      'CONFIRM:',
+    ].join('\n'))
+    expect(turn.confirm).toBe(true)
+    expect(turn.message).toBe('Das trägt für mich. Sag Bescheid, wenn du magst.')
+  })
+
+  it('liest keine Beschriftung — der Knopf gehört dem Katalog', () => {
+    const turn = parseGeorgeConfirm('Passt das?\nCONFIRM: Ja bitte eintragen')
+    expect(turn.confirm).toBe(true)
+    expect(turn.message).toBe('Passt das?')
+  })
+
+  it('zwei Zeilen sind eine Wahl — und beide verschwinden', () => {
+    const turn = parseGeorgeConfirm('Passt das?\nCONFIRM:\nCONFIRM:')
+    expect(turn.confirm).toBe(true)
+    expect(turn.message).toBe('Passt das?')
+  })
+
+  it('ein CONFIRM mitten im Satz ist keins', () => {
+    const turn = parseGeorgeConfirm('Wir schreiben CONFIRM: als Wort in diesen Satz.')
+    expect(turn.confirm).toBe(false)
+    expect(turn.message).toBe('Wir schreiben CONFIRM: als Wort in diesen Satz.')
+  })
+
+  it('OHNE die Zeile bleibt alles, wie es war (Rückwärts-Vertrag)', () => {
+    expect(parseGeorgeConfirm('Was loben eure Kunden?'))
+      .toEqual({ message: 'Was loben eure Kunden?', confirm: false })
+  })
+
+  it('versteht CRLF', () => {
+    expect(parseGeorgeConfirm('Passt das?\r\nCONFIRM:').confirm).toBe(true)
+  })
+
+  it('FÄLLT AUS FELDTEXT UND CHAT — wie jedes andere Bedienelement', () => {
+    // Der Entwurfs-Fall kennt gar keine Bestätigungs-Zeile; schriebe das Modell
+    // trotzdem eine, stünde sie sonst wörtlich im Brand-Dokument.
+    const turn = parseGeorgeTurn([
+      'BASIS: Aus eurer Antwort.',
+      'DRAFT:',
+      'Wir rösten in kleinen Mengen.',
+      'CONFIRM:',
+      'ASK: Trifft das?',
+    ].join('\n'))
+    expect(turn.draft).toBe('Wir rösten in kleinen Mengen.')
+    expect(turn.message).not.toContain('CONFIRM')
+    expect(stripGeorgeTurnMarkers('Passt das?\nCONFIRM:')).toBe('Passt das?')
+  })
+
+  it('der Strom-Putzer hält die angebrochene Zeile zurück', () => {
+    // „C" könnte noch ein `CONFIRM:` werden — flösse es als Text durch, müsste
+    // es eine Zeichenkette später wieder verschwinden, und Deltas kennen kein
+    // Zurück.
+    const scrub = createGeorgeTurnScrubber()
+    expect(scrub('Passt das?\n')).toBe('Passt das?\n')
+    expect(scrub('C')).toBe('')
+    expect(scrub('ONFIRM:')).toBe('')
   })
 })
 

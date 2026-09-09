@@ -37,6 +37,20 @@
  * Georges EMPFEHLUNG bleibt bewusst Prosa im Zug: sie ist ein Satz mit
  * Begründung, kein Etikett auf einem Knopf.
  *
+ * ── DER SECHSTE MARKER IST DIE BESTÄTIGUNG (Davids Entscheidung 2026-09-09) ─
+ * `CONFIRM:` sagt: „biete ihm jetzt die Wahl an" — die Bühne rendert daraus
+ * ZWEI Knöpfe („Passt so, bestätigen" / „Ich ergänze noch etwas"). Er ist
+ * damit derselbe Vertragstyp wie `OPTION:` und verschwindet aus dem sichtbaren
+ * Text VOLLSTÄNDIG.
+ *
+ * Er trägt bewusst KEINE Beschriftung: die beiden Knopf-Texte kommen aus dem
+ * Locale-Katalog (`brand.workspace.confirmChoice.*`), wie jeder andere Knopf
+ * der Werkstatt. Ein vom Modell geschriebenes Etikett wäre in der zweiten
+ * Sprache erfunden — und der Klick auf „Passt so, bestätigen" ist keine
+ * ANTWORT (die liefe als Text in den Slot), sondern löst `confirmSlot()` aus.
+ * Alles hinter dem Doppelpunkt fällt deshalb weg; die Zeile ist ein Schalter,
+ * kein Satz.
+ *
  * ── DREI DINGE, DIE MAN NICHT „VEREINFACHEN" DARF ─────────────────────────
  * 1. **Der Rückfall ist der Stand von vorher.** Findet `parseGeorgeTurn` keinen
  *    Marker (altes Modell, ignorierter Vertrag), ist der ganze Text Entwurf UND
@@ -57,8 +71,11 @@ import {
   normalizeBrandTurnOptions,
 } from '../../shared/brandGeneration'
 
-/** Die fünf Marker. Reihenfolge egal, aber jeder steht am ZEILENANFANG. */
-export const GEORGE_TURN_MARKERS = ['QUESTION:', 'BASIS:', 'DRAFT:', 'ASK:', 'OPTION:'] as const
+/** Die sechs Marker. Reihenfolge egal, aber jeder steht am ZEILENANFANG. */
+export const GEORGE_TURN_MARKERS = ['QUESTION:', 'BASIS:', 'DRAFT:', 'ASK:', 'OPTION:', 'CONFIRM:'] as const
+
+/** Die Marker, die als BEDIENELEMENT ganz aus dem Text fallen (s. Kopf). */
+const CONTROL_MARKERS = new Set<string>(['OPTION:', 'CONFIRM:'])
 
 export interface GeorgeTurn {
   outcome: BrandGenerationOutcome
@@ -106,11 +123,12 @@ export function parseGeorgeTurn(raw: string): GeorgeTurn {
   const head = lines[draftIndex]!.slice('DRAFT:'.length).trim()
   const body = lines
     .slice(draftIndex + 1, askIndex >= 0 ? askIndex : lines.length)
-    // EIN BEDIENELEMENT GEHÖRT NIE IN EIN FELD: eine verirrte `OPTION:`-Zeile
-    // stünde sonst wörtlich im Brand-Dokument. Der Entwurfs-Fall kennt gar
-    // keine Optionen (die Route liest sie nur bei einer Rückfrage) — hier fällt
-    // trotzdem, was das Modell entgegen dem Auftrag schreibt.
-    .filter(line => !line.startsWith('OPTION:'))
+    // EIN BEDIENELEMENT GEHÖRT NIE IN EIN FELD: eine verirrte `OPTION:`- oder
+    // `CONFIRM:`-Zeile stünde sonst wörtlich im Brand-Dokument. Der
+    // Entwurfs-Fall kennt gar keine davon (die Route liest sie nur im
+    // Gespräch) — hier fällt trotzdem, was das Modell entgegen dem Auftrag
+    // schreibt.
+    .filter(line => !CONTROL_MARKERS.has(markerAt(line) ?? ''))
   const draft = [...(head ? [head] : []), ...body].join('\n').trim()
 
   const basis = basisIndex >= 0 && basisIndex < draftIndex
@@ -129,16 +147,16 @@ export function parseGeorgeTurn(raw: string): GeorgeTurn {
  * Die Marker aus einem Text nehmen — für die Sprechblase, nie für den Slot.
  *
  * Eine reine `DRAFT:`-Zeile VERSCHWINDET ganz (sie trennt nur), eine
- * `OPTION:`-Zeile IMMER (sie ist ein Knopf, kein Satz — s. Kopf), jeder andere
- * Marker verliert nur sein Etikett. Das Ergebnis liest sich als zusammenhängender
- * Zug: ein Satz Begründung, der Entwurf, eine Frage.
+ * `OPTION:`- oder `CONFIRM:`-Zeile IMMER (sie ist ein Knopf, kein Satz — s.
+ * Kopf), jeder andere Marker verliert nur sein Etikett. Das Ergebnis liest sich
+ * als zusammenhängender Zug: ein Satz Begründung, der Entwurf, eine Frage.
  */
 export function stripGeorgeTurnMarkers(text: string): string {
   const out: string[] = []
   for (const line of text.split('\n')) {
     const marker = markerAt(line)
     if (!marker) { out.push(line); continue }
-    if (marker === 'OPTION:') continue
+    if (CONTROL_MARKERS.has(marker)) continue
     const rest = line.slice(marker.length).replace(/^ +/, '')
     if (marker === 'DRAFT:' && rest === '') continue
     out.push(rest)
@@ -181,6 +199,40 @@ export function parseGeorgeOptions(raw: string): GeorgeTurnOptions {
   // sondern ein Formular — die ersten drei gewinnen, weil sie im Zug zuerst
   // begründet wurden.
   return { message: kept.join('\n').trim(), options: normalizeBrandTurnOptions(labels) }
+}
+
+/** Was aus einem Zug an Bestätigungs-Angebot herauszulesen war. */
+export interface GeorgeTurnConfirm {
+  /** Der Zug OHNE die `CONFIRM:`-Zeilen — alle anderen Marker bleiben stehen. */
+  message: string
+  /** Bietet dieser Zug die Wahl „bestätigen / noch etwas ergänzen" an? */
+  confirm: boolean
+}
+
+/**
+ * DAS BESTÄTIGUNGS-ANGEBOT AUS EINEM ZUG ZIEHEN (Davids Entscheidung
+ * 2026-09-09).
+ *
+ * ── SIE LÄUFT VOR `parseGeorgeOptions`, UND BEIDE VOR JEDEM STRIP ─────────
+ * Dieselbe Reihenfolge-Regel wie bei den Optionen: `stripGeorgeTurnMarkers`
+ * wirft die Zeilen weg, wer danach fragt, findet nichts mehr. Zwei Leser statt
+ * eines, weil sie zwei verschiedene Dinge beantworten — „welche Antworten
+ * biete ich an" und „darf hier bestätigt werden" — und der zweite auch dann
+ * gilt, wenn es gar keine Optionen gibt.
+ *
+ * MEHRERE `CONFIRM:`-Zeilen sind dasselbe wie eine: die Wahl gibt es einmal.
+ * WAS hinter dem Doppelpunkt steht, wird nicht gelesen (s. Kopf) — die
+ * Beschriftungen gehören dem Locale-Katalog.
+ */
+export function parseGeorgeConfirm(raw: string): GeorgeTurnConfirm {
+  const lines = raw.replace(/\r\n/g, '\n').split('\n')
+  const kept: string[] = []
+  let confirm = false
+  for (const line of lines) {
+    if (line.startsWith('CONFIRM:')) { confirm = true; continue }
+    kept.push(line)
+  }
+  return { message: kept.join('\n').trim(), confirm }
 }
 
 /**

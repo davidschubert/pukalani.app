@@ -26,7 +26,11 @@ import { type BrandStepKey, slotById, slotsForStep } from './slotRegistry'
  *  3. `chapterEffortMinutes` — der Umfang eines Kapitels („11 Sessions,
  *     ~14 Min"), Summe aus der Registry.
  *  4. `decideAutoAdvance` — DARF jetzt gewechselt werden? Der Auto-Weiter aus
- *     §5, mit allen Sperren an EINER Stelle.
+ *     §5, mit allen Sperren an EINER Stelle. Seit Davids Entscheidung vom
+ *     2026-09-09 bedient er nur noch den ERÖFFNUNGSZUG und das Vertagen; nach
+ *     einer Bestätigung wechselt nichts mehr von selbst.
+ *  4a. `resolveContinueTarget` — wohin führt der KNOPF „Weiter zu …", der seit
+ *     derselben Entscheidung an die Stelle des Sprungs getreten ist?
  *  5. `resolveAcceptanceStage` — WAS zeigt die Finale Abnahme unter der Liste?
  *     Blocker, Frage oder „Weiter zu Kapitel …" (§5a Schritte 3 und 4).
  *  6. `restartWordMatches` — ist der Knopf „Bestätigen" im Schutz-Layer frei?
@@ -246,6 +250,59 @@ export function decideAutoAdvance(input: BrandAutoAdvanceInput): BrandAutoAdvanc
   if (!next) return STAY
   if ('acceptance' in next) return { kind: 'acceptance', stepKey: next.stepKey }
   if (next.sessionKey === input.from) return STAY
+  return { kind: 'session', stepKey: next.stepKey, sessionKey: next.sessionKey }
+}
+
+// ── 3a · Der Weiter-Knopf nach dem Abschlusszug ───────────────────────────
+
+export interface BrandContinueInput {
+  /** Das Kapitel, in dem der Abschluss stattgefunden hat. */
+  stepKey: BrandStepKey
+  /** Die Session, deren Bestätigung den Abschlusszug gebracht hat. `''` = keiner. */
+  from: string
+  /** Was in DIESEM Augenblick offen ist — der Mensch darf weitergeklickt haben. */
+  active: string
+  /** Der Wegweiser aus dem Abschluss-Frame (`resolveNextStop`, serverseitig). */
+  next: BrandNextSessionRef | null
+  /** Läuft gerade ein Strom? Dann ist der Zug noch nicht zu Ende. */
+  streaming: boolean
+}
+
+export type BrandContinueTarget =
+  | { kind: 'none' }
+  | { kind: 'session', stepKey: BrandStepKey, sessionKey: string }
+  | { kind: 'acceptance', stepKey: BrandStepKey }
+
+const NO_CONTINUE: BrandContinueTarget = { kind: 'none' }
+
+/**
+ * WOHIN FÜHRT DER KNOPF „WEITER ZU …"? (Davids Entscheidung 2026-09-09,
+ * Session-Abschluss.)
+ *
+ * ── DIE UMKEHRUNG VON `decideAutoAdvance` ────────────────────────────────
+ * Dieselbe Frage, andere Antwortpflicht: `decideAutoAdvance` entscheidet, ob
+ * die Seite VON SELBST wechseln darf — im Zweifel `stay`. Diese hier
+ * entscheidet, ob ein KNOPF dasteht, den ein Mensch drückt. Deshalb fehlen die
+ * drei Sperren, die dort das Wegreissen der Seite verhindern (offene
+ * Speicherung, Konflikt): sie gehören zum Klick, und der geht ohnehin über
+ * `goToSession`, das vorher ausspült. Geblieben sind die zwei, die den Knopf
+ * SINNLOS machten: ein noch laufender Zug und ein Mensch, der schon woanders
+ * ist.
+ *
+ * ── OHNE ZIEL ZEIGT ER AUF DIE ABNAHME, NIE INS LEERE ────────────────────
+ * `resolveNextStop` antwortet `null`, wenn keine Frage mehr offen ist, aber
+ * noch ein Pflicht-Wert fehlt (ein Entwurf auf der Bühne etwa). Für den
+ * AUTO-Weiter heisst das „bleib" — hier wäre ein fehlender Knopf eine
+ * Sackgasse direkt nach einer Bestätigung. Der ehrliche Weg ist die Finale
+ * Abnahme: dort steht Zeile für Zeile, was dem Kapitel noch fehlt.
+ */
+export function resolveContinueTarget(input: BrandContinueInput): BrandContinueTarget {
+  if (!input.from || input.streaming) return NO_CONTINUE
+  if (input.from !== input.active) return NO_CONTINUE
+  const next = input.next
+  if (!next || 'acceptance' in next) return { kind: 'acceptance', stepKey: input.stepKey }
+  // Ein „Weiter" auf die eben geschlossene Session wäre ein Knopf im Kreis.
+  if (next.sessionKey === input.from) return NO_CONTINUE
   return { kind: 'session', stepKey: next.stepKey, sessionKey: next.sessionKey }
 }
 

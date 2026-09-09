@@ -12,6 +12,7 @@ import {
   needsOpeningTurn,
   resolveAcceptanceStage,
   resolveActiveSession,
+  resolveContinueTarget,
   restartWordMatches,
 } from '../shared/brandWorkspaceNav'
 import { BRAND_SLOTS, slotsForStep } from '../shared/slotRegistry'
@@ -219,6 +220,73 @@ describe('decideAutoAdvance', () => {
   it('meldet das Kapitelende eigens (seit 3c-ii springt die Seite darauf)', () => {
     expect(decideAutoAdvance({ ...base, next: { stepKey: 'context', acceptance: true } }))
       .toEqual({ kind: 'acceptance', stepKey: 'context' })
+  })
+
+  /**
+   * WER RUFT IHN NOCH? (Davids Entscheidung 2026-09-09.)
+   *
+   * Die REGEL ist unverändert — sie sagt weiterhin „wechseln", wenn alle vier
+   * Sperren offen sind. Was sich gedreht hat, sind die AUFRUFER: nach einer
+   * Antwort und nach einer Bestätigung wird sie nicht mehr gefragt (die Bühne
+   * zeigt dort den Weiter-Knopf). Geblieben ist der Eröffnungszug einer
+   * Entwurfs-Session, der zur ersten Katalog-Frage springt — Davids
+   * Entscheidung (8) vom 2026-09-08, und genau dieses Verhalten steht hier.
+   */
+  it('der Eröffnungszug einer Entwurfs-Session springt weiter — das BLEIBT', () => {
+    // `a.pitch` ist eine Ableitung: George eröffnet dort und der Wegweiser
+    // zeigt auf die erste echte Frage des Kapitels.
+    expect(decideAutoAdvance({ ...base, from: FIRST, active: FIRST }))
+      .toEqual({ kind: 'session', stepKey: 'context', sessionKey: SECOND })
+  })
+})
+
+/**
+ * DER WEITER-KNOPF NACH DEM ABSCHLUSSZUG (Davids Entscheidung 2026-09-09) —
+ * die Umkehrung von `decideAutoAdvance`: dort „im Zweifel bleiben", hier „im
+ * Zweifel einen Weg anbieten".
+ */
+describe('resolveContinueTarget', () => {
+  const base = {
+    stepKey: 'context' as const,
+    from: FIRST,
+    active: FIRST,
+    next: { stepKey: 'context' as const, sessionKey: SECOND },
+    streaming: false,
+  }
+
+  it('zeigt auf die Session, die der Server genannt hat', () => {
+    expect(resolveContinueTarget(base))
+      .toEqual({ kind: 'session', stepKey: 'context', sessionKey: SECOND })
+  })
+
+  it('OHNE Abschluss steht kein Knopf da', () => {
+    expect(resolveContinueTarget({ ...base, from: '' })).toEqual({ kind: 'none' })
+  })
+
+  it('verschwindet, wenn der Mensch inzwischen woanders steht', () => {
+    expect(resolveContinueTarget({ ...base, active: THIRD })).toEqual({ kind: 'none' })
+  })
+
+  it('verschwindet, solange der Abschlusszug noch schreibt', () => {
+    expect(resolveContinueTarget({ ...base, streaming: true })).toEqual({ kind: 'none' })
+  })
+
+  it('zeigt auf die Finale Abnahme, wenn das Kapitel durch ist', () => {
+    expect(resolveContinueTarget({ ...base, next: { stepKey: 'context', acceptance: true } }))
+      .toEqual({ kind: 'acceptance', stepKey: 'context' })
+  })
+
+  it('OHNE Ziel zeigt er auf die Abnahme — nie ins Leere', () => {
+    // `null` heisst „keine Frage mehr offen, aber es fehlt ein Pflicht-Wert".
+    // Für den AUTO-Weiter ist das „bleib"; für einen Knopf direkt nach einer
+    // Bestätigung wäre es eine Sackgasse.
+    expect(resolveContinueTarget({ ...base, next: null }))
+      .toEqual({ kind: 'acceptance', stepKey: 'context' })
+  })
+
+  it('zeigt nie auf die eben geschlossene Session', () => {
+    expect(resolveContinueTarget({ ...base, next: { stepKey: 'context', sessionKey: FIRST } }))
+      .toEqual({ kind: 'none' })
   })
 })
 

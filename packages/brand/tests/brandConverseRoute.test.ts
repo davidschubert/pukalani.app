@@ -1079,6 +1079,186 @@ describe('Der Eröffnungszug', () => {
 })
 
 /**
+ * DER ABSCHLUSSZUG (Davids Entscheidung 2026-09-09, DECISION-LOG Punkt 10) —
+ * der dritte Zug einer Session, nach Eröffnung und Antwort.
+ *
+ * Drei Aussagen tragen ihn, und keine steht in einer puren Funktion: er läuft
+ * NUR über einer bestätigten Session, sein ZIEL kommt aus `resolveNextStop`
+ * (nicht aus Georges Urteil), und er nennt die übersprungenen Sessions mit
+ * ihrer BESCHRIFTUNG — eine rohe Slot-Id wäre der Live-Fund vom 2026-09-03 an
+ * genau der Stelle, an der der Mensch weiterklicken soll.
+ */
+describe('Der Abschlusszug', () => {
+  /** Alle Fragen bis `a.complaints` beantwortet, `a.origin` bestätigt. */
+  function confirmedThrough(...slotIds: string[]): void {
+    stepRow.slots = JSON.stringify(Object.fromEntries(
+      slotIds.map(id => [id, { confirmed: 'Wir haben 2019 angefangen.' }]),
+    ))
+    stepRows = [stepRow, stepRowFor('pvm')]
+  }
+
+  beforeEach(() => {
+    confirmedThrough('a.origin')
+    body = { closing: true, sessionKey: 'a.origin' }
+  })
+
+  it('würdigt und nennt das ZIEL — ohne eine Zeile des Menschen zu schreiben', async () => {
+    const { event, chunks } = fakeEvent()
+    await handler(event)
+
+    expect(readBack(chunks).at(-1)!.type).toBe('generation.completed')
+    expect(lastPrompt).toContain('TASK: CLOSE this session')
+    expect(lastPrompt).toContain('ASK NOTHING in this turn')
+    // Das Ziel ist die nächste offene Frage — mit ihrer Beschriftung, nicht als Id.
+    expect(lastPrompt).toContain(brandSlotPromptLabel('a.customerPraise', 'de', 'new', 'solo'))
+    expect(lastPrompt).not.toContain('"a.customerPraise"')
+    // Genau EINE Zeile im Verlauf: die des Beraters.
+    expect(messageRows).toHaveLength(1)
+    expect(messageRows[0]).toMatchObject({ role: 'george', sessionKey: 'a.origin' })
+    expect(JSON.parse(String(messageRows[0]!.parts))).toMatchObject({ kind: 'closing' })
+  })
+
+  it('NENNT die übersprungenen Sessions — bestätigte und vertagte', async () => {
+    // `a.customerPraise` ist schon bestätigt, `a.complaints` vertagt: der
+    // Wegweiser zeigt auf `a.oneThing`, und George soll den Sprung erklären
+    // („Kundenstimmen hast du schon beantwortet, weiter mit …").
+    stepRow.slots = JSON.stringify({
+      'a.origin': { confirmed: 'steht' },
+      'a.customerPraise': { confirmed: 'steht' },
+      'a.complaints': { confirmed: 'steht', deferred: true },
+    })
+    stepRows = [stepRow, stepRowFor('pvm')]
+    const { event } = fakeEvent()
+    await handler(event)
+
+    expect(lastPrompt).toContain('THESE PARTS ARE ALREADY SETTLED')
+    expect(lastPrompt).toContain(brandSlotPromptLabel('a.customerPraise', 'de', 'new', 'solo'))
+    expect(lastPrompt).toContain(brandSlotPromptLabel('a.oneThing', 'de', 'new', 'solo'))
+  })
+
+  it('OHNE Ziel verweist er auf die Finale Abnahme', async () => {
+    confirmedThrough(...confirmableRequiredSlotsForStep('context').map(slot => slot.id))
+    body = { closing: true, sessionKey: 'a.origin' }
+    const { event, chunks } = fakeEvent()
+    await handler(event)
+
+    expect(lastPrompt).toContain('THERE IS NO FURTHER SESSION in this chapter')
+    expect(lastPrompt).not.toContain('WHERE IT GOES ON')
+    // Und der Wegweiser im Frame zeigt dorthin, wo der Knopf hinführt.
+    expect(readBack(chunks).at(-1)).toMatchObject({
+      type: 'generation.completed',
+      next: { stepKey: 'context', acceptance: true },
+    })
+  })
+
+  it('der Wegweiser reist MIT — die Bühne baut daraus den Weiter-Knopf', async () => {
+    const { event, chunks } = fakeEvent()
+    await handler(event)
+    expect(readBack(chunks).at(-1)).toMatchObject({
+      type: 'generation.completed',
+      // Keine Frage gestellt ⇒ kein `slotId`, sonst verschluckte die Bühne die
+      // Katalog-Frage der nächsten Session.
+      slotId: '',
+      next: { stepKey: 'context', sessionKey: 'a.customerPraise' },
+    })
+  })
+
+  it('ÜBER EINER UNBESTÄTIGTEN SESSION läuft er nicht — geprüft am Server', async () => {
+    // Der Rumpf sagt nur, dass ein Abschluss gewünscht ist. Ein „Gründungs-
+    // impuls steht" über einem offenen Feld wäre dieselbe Lüge wie die
+    // Nachfrage über einem Häkchen, nur mit vertauschten Rollen.
+    stepRow.slots = JSON.stringify({ 'a.origin': { latestDraft: 'Wir haben 2019 angefangen.' } })
+    stepRows = [stepRow, stepRowFor('pvm')]
+    const { event, res } = fakeEvent()
+
+    expect(await handler(event)).toEqual({ conversed: false, skipped: true })
+    expect(res.headed).toBe(false)
+    expect(aiCompleteStream).not.toHaveBeenCalled()
+    expect(hits).toEqual([])
+  })
+
+  it('ein Abschlusszug MIT Text ist ein Rumpf-Fehler', async () => {
+    body = { closing: true, sessionKey: 'a.origin', text: 'Danke!' }
+    const { event } = fakeEvent()
+    await expect(handler(event)).rejects.toMatchObject({ status: 400, data: { code: 'invalid_body' } })
+  })
+
+  it('erster UND letzter Zug zugleich ist ein Rumpf-Fehler', async () => {
+    body = { closing: true, opening: true, sessionKey: 'a.origin' }
+    const { event } = fakeEvent()
+    await expect(handler(event)).rejects.toMatchObject({ status: 400, data: { code: 'invalid_body' } })
+  })
+})
+
+/**
+ * DIE BESTÄTIGUNG IM AUFTRAG (converse-14) — der Widerspruch aus Davids
+ * Klick-Test, gemessen an der Route: kennt der Prompt den Zustand der Session,
+ * und trägt der Zug den Knopf nur dort, wo er auch wirkt?
+ */
+describe('Bestätigung und Nachfrage wissen voneinander', () => {
+  it('BESTÄTIGTE Session ⇒ kein Nachbohren mehr im Auftrag', async () => {
+    stepRow.slots = JSON.stringify({ 'a.customerPraise': { confirmed: 'Sie loben die Röstung.' } })
+    stepRows = [stepRow, stepRowFor('pvm')]
+    body = { text: 'Und was heißt das für uns?', sessionKey: 'a.customerPraise' }
+    const { event } = fakeEvent()
+    await handler(event)
+
+    expect(lastPrompt).toContain('THIS SESSION IS ALREADY CONFIRMED')
+    expect(lastPrompt).not.toContain('IF THE ANSWER IS THIN')
+    // Und kein Knopf: bestätigt ist bestätigt.
+    expect(lastPrompt).not.toContain('A LINE THAT READS EXACTLY `CONFIRM:`')
+  })
+
+  it('UNBESTÄTIGT MIT WERT ⇒ der Auftrag bietet den Knopf an', async () => {
+    stepRow.slots = JSON.stringify({ 'a.customerPraise': { latestDraft: 'Sie loben die Röstung.' } })
+    stepRows = [stepRow, stepRowFor('pvm')]
+    body = { text: 'Sie loben die Röstung.', sessionKey: 'a.customerPraise' }
+    const { event } = fakeEvent()
+    await handler(event)
+
+    expect(lastPrompt).toContain('A LINE THAT READS EXACTLY `CONFIRM:`')
+    expect(lastPrompt).toContain('IF THE ANSWER IS THIN')
+  })
+
+  it('LEERES FELD ⇒ kein Angebot (der Klick liefe in `slot_empty`)', async () => {
+    body = { text: 'Weiß ich noch nicht.', sessionKey: 'a.customerPraise' }
+    const { event } = fakeEvent()
+    await handler(event)
+    expect(lastPrompt).not.toContain('A LINE THAT READS EXACTLY `CONFIRM:`')
+  })
+
+  it('der Marker wird zum Frame — und fällt aus Text und Feld', async () => {
+    stepRow.slots = JSON.stringify({ 'a.customerPraise': { latestDraft: 'Sie loben die Röstung.' } })
+    stepRows = [stepRow, stepRowFor('pvm')]
+    body = { text: 'Sie loben die Röstung.', sessionKey: 'a.customerPraise' }
+    modelText = 'Das trägt für mich schon.\nCONFIRM:'
+    const { event, chunks } = fakeEvent()
+    await handler(event)
+
+    const completed = readBack(chunks).at(-1)
+    expect(completed).toMatchObject({ type: 'generation.completed', confirm: true })
+    // In der Sprechblase steht der Marker NIE — er ist ein Knopf, kein Satz.
+    const georgeRow = messageRows.find(row => row.role === 'george')
+    expect(String(georgeRow!.body)).toBe('Das trägt für mich schon.')
+    expect(JSON.parse(String(georgeRow!.parts))).toMatchObject({ confirm: true })
+  })
+
+  it('EIN ANGEBOT OHNE DECKUNG WIRD VERWORFEN', async () => {
+    // Das Modell setzt den Marker auf Zuruf; ob es etwas zu bestätigen gibt,
+    // weiss nur der Server. Ohne dieses UND stünde ein Knopf da, dessen Klick
+    // garantiert eine Absage kassiert.
+    modelText = 'Erzähl mir mehr.\nCONFIRM:'
+    body = { text: 'Hm.', sessionKey: 'a.customerPraise' }
+    const { event, chunks } = fakeEvent()
+    await handler(event)
+
+    const completed = readBack(chunks).at(-1) as { confirm?: boolean }
+    expect(completed.confirm).toBeUndefined()
+    expect(String(messageRows.find(row => row.role === 'george')!.body)).toBe('Erzähl mir mehr.')
+  })
+})
+
+/**
  * DIE SAMMEL-SESSION (`a.facts`) — die EINE Stelle, an der diese Route in
  * `brand_steps` schreibt.
  *

@@ -119,6 +119,15 @@ export interface BrandStreamMessage {
    * Text. FEHLEN sie, rendert die Bühne keine Chips; das ist der Normalfall.
    */
   options?: readonly string[]
+  /**
+   * BIETET DIESER ZUG DIE BESTÄTIGUNG AN? (Davids Entscheidung 2026-09-09.)
+   *
+   * Aus dem Abschluss-Frame (`confirm`), nie aus dem Text — genau wie
+   * `options`. `true` heisst: unter der Blase stehen zwei Knöpfe, „Passt so,
+   * bestätigen" und „Ich ergänze noch etwas". FEHLT es, ist der Zug eine
+   * gewöhnliche Nachfrage; das ist der Normalfall.
+   */
+  confirm?: boolean
 }
 
 const EMPTY_PROGRESS: BrandStepProgress = { requiredTotal: 0, requiredFilled: 0, pct: 0 }
@@ -645,6 +654,18 @@ const setup = () => {
   }
 
   /**
+   * DAS BESTÄTIGUNGS-ANGEBOT AN SEINEN ZUG HÄNGEN (Davids Entscheidung
+   * 2026-09-09) — dieselbe Bauart und dieselbe Begründung wie
+   * `setGeorgeMessageOptions`: eine eigene Aktion, VOR dem Abschluss gerufen,
+   * damit der Zug in EINEM Schritt fertig und beknopft wird.
+   */
+  function setGeorgeMessageConfirm(generationId: string): void {
+    streamMessages.value = streamMessages.value.map(message => (message.id === generationId
+      ? { ...message, confirm: true }
+      : message))
+  }
+
+  /**
    * DIE GESTREAMTE BLASE SPRICHT DIE SPRACHE DER SEITE (Live-Fund 2026-09-04):
    * bei einem Choice-Slot streamt das Modell die Wert-Zeile mit — die rohe Id
    * (`sage`) stand wörtlich im Chat. Der Server tauscht sie nur in der
@@ -685,6 +706,12 @@ const setup = () => {
     return options.length ? options : undefined
   }
 
+  /** Dasselbe für das Bestätigungs-Angebot (`{ kind: 'reply', confirm: true }`). */
+  function confirmFromParts(parts: unknown): boolean {
+    if (parts === null || typeof parts !== 'object') return false
+    return (parts as { confirm?: unknown }).confirm === true
+  }
+
   /**
    * DER VERLAUF EINER SESSION (BW2 §6, brand-011) — beim Umschalten geladen,
    * nicht auf Vorrat.
@@ -718,6 +745,9 @@ const setup = () => {
           pending: false,
           ...(message.role === 'george' && optionsFromParts(message.parts)
             ? { options: optionsFromParts(message.parts) }
+            : {}),
+          ...(message.role === 'george' && confirmFromParts(message.parts)
+            ? { confirm: true }
             : {}),
         }))
       return response.messages.some(message => message.role === 'george')
@@ -1234,6 +1264,7 @@ const setup = () => {
     beginGeorgeMessage,
     appendGeorgeDelta,
     setGeorgeMessageOptions,
+    setGeorgeMessageConfirm,
     localizeGeorgeChoiceMessage,
     endGeorgeMessage,
     mark,

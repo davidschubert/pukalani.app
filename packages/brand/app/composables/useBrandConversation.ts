@@ -81,6 +81,13 @@ export interface BrandConverseInput {
    * `{ conversed: false, skipped: true }`.
    */
   opening?: true
+  /**
+   * ABSCHLUSSZUG: die Session ist bestätigt, George würdigt sie in einem Satz
+   * und sagt, wohin es weitergeht (Davids Entscheidung 2026-09-09). Die Route
+   * prüft die Bestätigung selbst und antwortet sonst
+   * `{ conversed: false, skipped: true }` — sie glaubt dem Rumpf nicht.
+   */
+  closing?: true
   /** Die Session, in der dieser Zug stattfindet (BW2 §6) — seit 3c-i immer gesetzt. */
   sessionKey?: string
   /** Der Frage-Slot, dessen Antwort das war — bei einer freien Frage keiner. */
@@ -216,9 +223,12 @@ export function useBrandConversation(
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Accept': 'text/event-stream' },
           body: JSON.stringify({
-            // BEIM ERÖFFNUNGSZUG DARF KEIN `text` MITREISEN: das Schema weist
-            // „opening mit Text" ausdrücklich ab (zwei Formen, ein Rumpf).
-            ...(input.opening ? { opening: true } : { text: input.text }),
+            // BEIM ERÖFFNUNGS- UND BEIM ABSCHLUSSZUG DARF KEIN `text`
+            // MITREISEN: das Schema weist beides ausdrücklich ab (drei Formen,
+            // ein Rumpf).
+            ...(input.opening
+              ? { opening: true }
+              : input.closing ? { closing: true } : { text: input.text }),
             ...(input.sessionKey ? { sessionKey: input.sessionKey } : {}),
             ...(input.slotId ? { slotId: input.slotId } : {}),
             ...(input.question?.trim() ? { question: input.question.trim() } : {}),
@@ -281,6 +291,10 @@ export function useBrandConversation(
             // in EINEM Schritt fertig und beknopft wird — sonst rendert die
             // Bühne für einen Wimpernschlag eine Frage ohne ihre Knöpfe.
             if (item.options?.length) store.setGeorgeMessageOptions(item.generationId, item.options)
+            // Das BESTÄTIGUNGS-Angebot (Davids Entscheidung 2026-09-09) — aus
+            // demselben Grund vor dem Abschluss: der Zug wird in EINEM Schritt
+            // fertig und beknopft.
+            if (item.confirm) store.setGeorgeMessageConfirm(item.generationId)
             // Der Wegweiser des Servers (§5) — gelesen, nie gerechnet.
             nextStop.value = item.next ?? null
             store.endGeorgeMessage(item.generationId)

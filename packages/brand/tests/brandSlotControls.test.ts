@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import {
+  type BrandCardActionInput,
   type BrandSlotControlsInput,
   brandChapterProgress,
+  brandLogCardAction,
   brandSlotControls,
 } from '../shared/brandSlotControls'
 
@@ -260,5 +262,54 @@ describe('brandChapterProgress', () => {
       controls({}),
     ])
     expect(result.pct).toBe(33)
+  })
+})
+
+/**
+ * BEFUND 18 (David, 2026-09-09) — WELCHER KNOPF AUF EINER KARTE IM NOTIZBLOCK
+ * STEHT.
+ *
+ * Der Befund war ein Wort: jede Karte sagte „Korrigieren", auch die leeren.
+ * Auf einer Karte, die „Noch offen — kommt im Gespräch" trägt, gibt es aber
+ * nichts zu korrigieren, sondern etwas zu TUN — und was, hängt an der
+ * Arbeitsform. Diese Regel ist der Ort, an dem das einmal entschieden wird.
+ */
+describe('brandLogCardAction (Befund 18)', () => {
+  function card(overrides: Partial<BrandCardActionInput> = {}): BrandCardActionInput {
+    return {
+      confirmed: false,
+      hasValue: false,
+      askable: true,
+      confirmable: true,
+      generatable: false,
+      ...overrides,
+    }
+  }
+
+  it('LEERE FRAGE ⇒ „Beantworten"', () => {
+    expect(brandLogCardAction(card())).toBe('answer')
+  })
+
+  it('LEERE ABLEITUNG mit Entwurfs-Knopf ⇒ „Entwerfen"', () => {
+    expect(brandLogCardAction(card({ askable: false, generatable: true }))).toBe('draft')
+  })
+
+  it('MIT WERT ⇒ „Korrigieren" — bestätigt wie unbestätigt', () => {
+    expect(brandLogCardAction(card({ hasValue: true }))).toBe('revise')
+    expect(brandLogCardAction(card({ hasValue: true, confirmed: true }))).toBe('revise')
+    // Auch eine bestätigte Ableitung: dort ist „Korrigieren" die einzige Tür.
+    expect(brandLogCardAction(card({ confirmed: true, askable: false }))).toBe('revise')
+  })
+
+  it('LEER UND NICHT ENTWERFBAR ⇒ gar kein Knopf', () => {
+    // Die deterministisch gerechneten Felder der Design-Kapitel (`h.ramp`,
+    // `i.scale`) füllen die Panels darüber. Ein Knopf führte auf eine leere
+    // Bühne — schlimmer als keiner.
+    expect(brandLogCardAction(card({ askable: false, generatable: false }))).toBe('none')
+  })
+
+  it('NICHT BESTÄTIGBAR ⇒ gar kein Knopf (der Paarvergleich)', () => {
+    expect(brandLogCardAction(card({ confirmable: false }))).toBe('none')
+    expect(brandLogCardAction(card({ confirmable: false, hasValue: true }))).toBe('none')
   })
 })

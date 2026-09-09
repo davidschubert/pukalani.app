@@ -18,6 +18,7 @@ import {
   isAcceptanceView,
   needsOpeningTurn,
   resolveActiveSession,
+  resolveContinueTarget,
 } from '../../../../shared/brandWorkspaceNav'
 import { brandDerivedDividerSlot } from '../../../../shared/brandSessionGroups'
 import { affectsView, brandAnswerWritesSlot } from '../../../../shared/brandSessions'
@@ -76,7 +77,9 @@ import {
   slotReadiness,
 } from '../../../../shared/brandSlotReadiness'
 import {
+  type BrandCardAction,
   type BrandSlotControls,
+  brandLogCardAction,
   brandSlotControls,
 } from '../../../../shared/brandSlotControls'
 import {
@@ -538,6 +541,38 @@ function readinessOf(slot: BrandSlot): BrandSlotReadiness {
 }
 
 /**
+ * DER ABSCHLUSS EINER SESSION (Davids Entscheidung 2026-09-09, DECISION-LOG
+ * Punkt 10) — zwei Zeilen Zustand, aus denen der Weiter-Knopf entsteht.
+ *
+ * ── WARUM DAS HIER OBEN STEHT ────────────────────────────────────────────
+ * `nextSlot` liest `closedSession`, und `nextSlot` wird über `turns` vom
+ * Scroll-Watcher schon beim ANLEGEN ausgewertet (s. der TDZ-Hinweis an
+ * `completion`). Weiter unten deklariert wäre das exakt der Prod-500 vom
+ * 2026-09-03.
+ *
+ * `closingFrom` ist die Session, deren Bestätigung den Abschluss ausgelöst hat;
+ * `closingNext` der Wegweiser, den der Server dazu geliefert hat. Beide fallen
+ * beim Session-Wechsel — ein Knopf „Weiter zu …" unter einem fremden Gespräch
+ * wäre ein Angebot ohne Anlass.
+ */
+const closingFrom = ref('')
+const closingNext = ref<BrandNextSessionRef | null>(null)
+
+watch(activeSessionKey, () => { closingFrom.value = ''; closingNext.value = null })
+
+/**
+ * IST DIE OFFENE SESSION GERADE ABGESCHLOSSEN WORDEN?
+ *
+ * Daran hängt die zweite Hälfte von Davids Entscheidung: „keine nächste
+ * Katalogfrage als graue Zeile in der alten Session". Ohne diese Zeile rechnete
+ * `nextSlot` nach der Bestätigung weiter die nächste offene FRAGE des Kapitels
+ * — und die Bühne hängte sie als stillen Zug unter den Abschluss, in einer
+ * Session, die bereits zu ist.
+ */
+const closedSession = computed(() =>
+  closingFrom.value !== '' && closingFrom.value === activeSessionKey.value)
+
+/**
  * DIE AKTIVE SESSION BEANSPRUCHT IHRE EIGENE BÜHNE (Kailua-Befund 5, Weg B).
  *
  * Die Regel steht pur nebenan (`brandStageClaim`) samt Begründung; hier werden
@@ -596,6 +631,11 @@ const completion = computed(() =>
  * den Gesprächs-Zug (Kailua-Befund 5, Nebenbefund).
  */
 const nextSlot = computed<BrandSlot | null>(() => {
+  // ── UND SEIT DEM SESSION-ABSCHLUSS: EINE GESCHLOSSENE SESSION FRAGT NICHTS
+  // MEHR (Davids Entscheidung 2026-09-09). Der Abschlusszug steht, der
+  // Weiter-Knopf darunter — die nächste Katalog-Frage gehört der NÄCHSTEN
+  // Session, nicht als graue Zeile unter diese hier.
+  if (closedSession.value) return null
   const claim = stageClaim.value
   if (claim) {
     return claim.module === 'answer' || claim.module === 'options' ? activeSlot.value : null
@@ -620,6 +660,13 @@ interface StageTurn {
    * die `OPTION:`-Zeilen heraus).
    */
   options?: readonly string[]
+  /**
+   * BIETET DIESER ZUG DIE BESTÄTIGUNG AN? (Davids Entscheidung 2026-09-09.)
+   * Zwei Knöpfe unter der Blase — „Passt so, bestätigen" löst `confirmSlot()`
+   * aus, „Ich ergänze noch etwas" gibt das Wort zurück ans Eingabefeld. Sie
+   * kommen aus dem Abschluss-Frame, nie aus dem Text.
+   */
+  confirm?: boolean
 }
 
 const streamed = computed<StageTurn[]>(() => store.streamMessages.map(message => ({
@@ -628,6 +675,7 @@ const streamed = computed<StageTurn[]>(() => store.streamMessages.map(message =>
   text: message.text,
   pending: message.pending,
   options: message.options,
+  confirm: message.confirm,
 })))
 
 /**
@@ -763,6 +811,52 @@ const optionTurnId = computed<string | null>(() => {
 })
 
 /**
+ * WELCHER ZUG SEINE BESTÄTIGUNGS-KNÖPFE ZEIGT (Davids Entscheidung
+ * 2026-09-09) — höchstens EINER, und nur solange es etwas zu bestätigen gibt.
+ *
+ * ── DIESELBE RÜCKWÄRTSSUCHE WIE BEI DEN OPTIONEN, AUS DEMSELBEN GRUND ─────
+ * Zwischen Georges Zug und dem Ende der Liste kann die Katalog-Frage stehen;
+ * an „letzter Zug" geknüpft wären die Knöpfe still verschwunden. Die Suche
+ * bricht bei der ersten eigenen Antwort ab: wer weitergeschrieben hat, hat die
+ * Wahl beantwortet.
+ *
+ * ── DREI SPERREN, DIE ALLE DASSELBE SAGEN: ES GIBT NICHTS ZU BESTÄTIGEN ───
+ * Ein laufender Zug (der Knopf schickte in eine Sperre), eine bereits
+ * bestätigte Session (der Klick liefe in `already_confirmed`) und der eigene
+ * Wegklick („Ich ergänze noch etwas"). Der Server prüft dasselbe noch einmal —
+ * hier geht es darum, dass kein Knopf dasteht, der garantiert eine Absage
+ * kassiert.
+ */
+const confirmDismissed = ref('')
+
+const confirmTurnId = computed<string | null>(() => {
+  if (conversation.pending.value) return null
+  const session = activeSessionKey.value
+  if (!session || store.slotConfirmed(session)) return null
+  const list = turns.value
+  for (let index = list.length - 1; index >= 0; index -= 1) {
+    const turn = list[index]!
+    if (turn.role === 'user') return null
+    if (turn.confirm && !turn.pending) return turn.id === confirmDismissed.value ? null : turn.id
+  }
+  return null
+})
+
+/** Das Eingabefeld — „Ich ergänze noch etwas" gibt ihm den Fokus zurück. */
+const promptBox = ref<HTMLElement | null>(null)
+
+/**
+ * „ICH ERGÄNZE NOCH ETWAS" ist bewusst KEINE `OPTION:`-Zeile (die liefe als
+ * Antwort-TEXT in den Slot — genau der Schaden, den `readsLikeQuestion` an
+ * anderer Stelle abfängt). Der Knopf tut das Kleinstmögliche: er räumt die Wahl
+ * weg und setzt den Cursor dorthin, wo weitergeschrieben wird.
+ */
+function keepWriting(turnId: string): void {
+  confirmDismissed.value = turnId
+  promptBox.value?.querySelector('textarea')?.focus()
+}
+
+/**
  * Der Klick auf einen Chip geht denselben Weg wie eine getippte Antwort —
  * `answerFromGeorge` ist der EINE Sende-Pfad (Prompt, eigene Formulierung,
  * Auswahl-Karte hängen alle daran). Ein zweiter Weg hier hiesse: eine Regel
@@ -885,7 +979,23 @@ async function answerFromGeorge(text: string): Promise<void> {
     store.setSlotValue(slot.id, text)
     autosave.schedule()
   }
-  await autoAdvance(from, conversation.nextStop.value)
+  /**
+   * UND HIER WIRD NICHT MEHR GESPRUNGEN (Davids Entscheidung 2026-09-09,
+   * DECISION-LOG Punkt 10: „Kein automatischer Sprung mehr mitten im
+   * Gespräch").
+   *
+   * Bis hierher stand an dieser Stelle `autoAdvance(from,
+   * conversation.nextStop.value)` — und sie feuerte nach JEDER Antwort: sobald
+   * ein Wert im Feld stand, galt die Session für `resolveNextStop` als
+   * beantwortet, und der Wegweiser zeigte auf die nächste. Der Mensch las
+   * Georges Rückfrage, und die Seite zog ihm die Session unter der Hand weg —
+   * die zwei Knöpfe darunter („Passt so, bestätigen" / „Ich ergänze noch
+   * etwas") wären nie klickbar gewesen.
+   *
+   * Eine Session verlässt man jetzt über GENAU ZWEI Wege: die Bestätigung (dann
+   * kommt der Abschlusszug mit seinem Knopf) und das Vertagen. Beide sind ein
+   * Klick, keiner ist eine Nebenwirkung.
+   */
 }
 
 /**
@@ -1006,6 +1116,28 @@ async function goToSession(sessionId: string): Promise<void> {
 }
 
 /**
+ * DIE OFFENE SESSION IN DIE ADRESSE SCHREIBEN — ohne zu wechseln.
+ *
+ * ── WARUM ES DAS BRAUCHT (und zwar seit dem Session-Abschluss) ───────────
+ * Ohne `?s=` rechnet `resolveActiveSession` die aktive Session aus den
+ * ZUSTÄNDEN: die erste OFFENE des Kapitels. Beim ersten Betreten steht deshalb
+ * nichts in der Adresse — und in dem Augenblick, in dem der Mensch bestätigt,
+ * ist seine Session nicht mehr offen und die Rechnung nennt lautlos die
+ * nächste. Bis heute fiel das nicht auf: der Auto-Weiter navigierte ohnehin
+ * sofort dorthin. Jetzt bliebe der Mensch stehen, während die Bühne unter ihm
+ * die Session tauschte — und der Weiter-Knopf verschwände, noch bevor er ihn
+ * sieht (`closingFrom !== activeSessionKey`).
+ *
+ * Kein `autosave.flush()` davor, anders als bei `goToSession`: hier wird nichts
+ * gewechselt und nichts neu geladen — es wird nur festgehalten, wo man ohnehin
+ * schon steht.
+ */
+async function pinSession(sessionId: string): Promise<void> {
+  if (!sessionId || sessionQuery.value === sessionId) return
+  await navigateTo({ query: { ...route.query, s: sessionId } })
+}
+
+/**
  * DER FELD-LINK EINES BEFUND-CHIPS (§8) — er darf die KAPITEL-GRENZE
  * überschreiten.
  *
@@ -1054,10 +1186,19 @@ async function goToAcceptance(): Promise<void> {
  * (`decideAutoAdvance`), hier steht nur, was daraus folgt.
  *
  * Das Kapitelende (`acceptance`) springt seit Paket 3c-ii MIT: die Seite gibt
- * es jetzt. Wer seinen letzten Pflicht-Wert bestätigt, steht danach vor der
- * Liste seines Kapitels — dieselbe Bewegung wie zwischen zwei Sessions, nur
- * eine Ebene höher. Alle vier Sperren gelten unverändert (Strom, offene
- * Speicherung, Konflikt, überstimmter Mensch): sie stehen in der puren Regel.
+ * es jetzt. Alle vier Sperren gelten unverändert (Strom, offene Speicherung,
+ * Konflikt, überstimmter Mensch): sie stehen in der puren Regel.
+ *
+ * ── SEIT DEM 2026-09-09 BLEIBEN ZWEI AUFRUFER, UND NUR ZWEI ──────────────
+ * Davids Entscheidung („kein automatischer Sprung mehr mitten im Gespräch")
+ * hat die zwei anderen entfernt: die ANTWORT (sie sprang, sobald ein Wert im
+ * Feld stand — mitten in Georges Rückfrage hinein) und die BESTÄTIGUNG (dort
+ * steht jetzt der Abschlusszug mit seinem Weiter-Knopf, s. `confirmSlot`).
+ *
+ * Geblieben sind: der ERÖFFNUNGSZUG einer Entwurfs-Session — er springt zur
+ * ersten Katalog-Frage, und das ist ausdrücklich gewollt (Davids Entscheidung
+ * (8) vom 2026-09-08: „Georges Interview läuft zuerst durch die echten
+ * Fragen") — und das VERTAGEN, das genau dafür da ist, hier wegzukommen.
  */
 async function autoAdvance(from: string, next: BrandNextSessionRef | null): Promise<void> {
   const decision = decideAutoAdvance({
@@ -1205,14 +1346,81 @@ async function closeSession(slotId: string): Promise<BrandNextSessionRef | null>
   }
 }
 
+/**
+ * BESTÄTIGEN — UND DANACH FÜHRT GEORGE (Davids Entscheidung 2026-09-09,
+ * DECISION-LOG Punkt 10).
+ *
+ * ── WAS SICH GEDREHT HAT ─────────────────────────────────────────────────
+ * Hier stand `autoAdvance(slotId, next)`: die Bestätigung sprang wortlos in die
+ * nächste Session. Jetzt bleibt die Seite stehen, George spricht EINEN
+ * Abschlusszug („Gründungsimpuls steht …"), und darunter erscheint ein Knopf
+ * „Weiter zu <Session>". Der Mensch geht weiter, nicht die Seite.
+ *
+ * ── DER KNOPF KOMMT AUCH OHNE GEORGE ─────────────────────────────────────
+ * `closingFrom`/`closingNext` werden VOR dem Zug gesetzt und nicht aus ihm.
+ * Ist die KI aus, die Drossel voll oder der Anbieter kaputt, gibt es keinen
+ * Abschlusszug — aber der Weg muss trotzdem weitergehen. Ohne diese
+ * Reihenfolge wäre jede ausgefallene Zugabe eine Sackgasse (und mit dem
+ * gefallenen Auto-Weiter gäbe es keinen zweiten Ausgang mehr).
+ *
+ * ── NUR DIE OFFENE SESSION BEKOMMT EINEN ABSCHLUSS ───────────────────────
+ * Wer rechts im Notizblock die Karte eines ANDEREN Feldes bestätigt, hat kein
+ * Gespräch darüber geführt — ein Abschlusszug in einem fremden Faden wäre ein
+ * Kommentar zu etwas, das nebenan passiert ist. Das war auch vorher so: der
+ * Auto-Weiter blieb bei `from !== active` stehen.
+ */
 async function confirmSlot(slotId: string): Promise<void> {
   editingSlotId.value = null
+  // ZUERST FESTHALTEN, WO WIR STEHEN (s. `pinSession`): die Bestätigung nimmt
+  // der Session ihren Zustand `open`, und ohne `?s=` würde die Rechnung danach
+  // lautlos die nächste nennen.
+  if (slotId === activeSessionKey.value) await pinSession(slotId)
   store.setSlotConfirmed(slotId, true)
   await autosave.flush()
   if (!stepKey.value) return
   // Die lokale Grundfassung ist der RÜCKFALL, nicht die Regel (s. oben).
   const next = await closeSession(slotId) ?? resolveNextStop(stepKey.value, slotFacts.value)
-  await autoAdvance(slotId, next)
+  if (slotId !== activeSessionKey.value) return
+
+  closingFrom.value = slotId
+  closingNext.value = next
+  await conversation.converse({ closing: true, sessionKey: slotId })
+  // Der Wegweiser des ABSCHLUSSZUGES ist der jüngere: er ist auf dem
+  // Server-Stand NACH der Bestätigung gerechnet. Kam kein Zug (KI aus,
+  // Drossel), bleibt der von `closeSession` stehen.
+  if (conversation.nextStop.value) closingNext.value = conversation.nextStop.value
+}
+
+/**
+ * WOHIN FÜHRT DER WEITER-KNOPF — die Regel steht pur nebenan
+ * (`resolveContinueTarget`), hier stehen nur die vier Tatsachen.
+ */
+const continueTarget = computed(() => (stepKey.value
+  ? resolveContinueTarget({
+      stepKey: stepKey.value,
+      from: closingFrom.value,
+      active: activeSessionKey.value,
+      next: closingNext.value,
+      streaming: conversation.pending.value,
+    })
+  : { kind: 'none' as const }))
+
+/** Die Beschriftung des Ziels — dieselbe wie in der Leiste und im Notizblock. */
+const continueLabel = computed<string>(() => {
+  const target = continueTarget.value
+  if (target.kind !== 'session') return ''
+  const slot = slots.value.find(entry => entry.id === target.sessionKey)
+    ?? slotById(target.sessionKey)
+  return slot ? slotLabel(slot) : target.sessionKey
+})
+
+async function continueToNext(): Promise<void> {
+  const target = continueTarget.value
+  if (target.kind === 'none') return
+  closingFrom.value = ''
+  closingNext.value = null
+  if (target.kind === 'acceptance') { await goToAcceptance(); return }
+  await goToSession(target.sessionKey)
 }
 
 // ── Die Korrektur-Regel (BW2 Paket 6, §9) ────────────────────────────────
@@ -1582,6 +1790,17 @@ function renderedAbove(slotId: string): boolean {
  * erste offene Pflicht-Feld.
  */
 const stageModule = computed<BrandStageModule>(() => {
+  /**
+   * EINE GESCHLOSSENE SESSION ZEIGT KEIN MODUL MEHR (Davids Entscheidung
+   * 2026-09-09).
+   *
+   * Ohne diese Zeile fiele `pendingCard` nach der Bestätigung auf das erste
+   * offene Pflicht-Feld des Kapitels zurück, und unter dem Abschlusszug stünde
+   * die Entwurfs- oder Bestätigungs-Karte eines FREMDEN Feldes — genau der
+   * Themenwechsel, den `brandStageClaim` seit Kailua-Befund 5 verhindert. Das
+   * Einzige, was hier noch zu tun ist, ist der Weiter-Knopf.
+   */
+  if (closedSession.value) return 'none'
   if (stageClaim.value && pendingCard.value) return stageClaim.value.module
   if (nextSlot.value) return nextSlot.value.type === 'choice' ? 'options' : 'answer'
   if (completion.value && !completion.value.slotsReady) {
@@ -1806,6 +2025,14 @@ interface LogCard {
   /** Nur im laufenden Kapitel: die Bedienelemente. */
   controls: BrandSlotControls | null
   /**
+   * WELCHER KNOPF AUF DIESER KARTE STEHT (Davids Befund 18, 2026-09-09) —
+   * „Korrigieren", „Beantworten", „Entwerfen" oder keiner. Die Regel ist pur
+   * (`brandLogCardAction`) und dort begründet; hier steht nur ihr Ergebnis.
+   * Für ein FREMDES Kapitel bleibt es 'none': dort führt der Weg über den
+   * Baustein selbst, nicht über eine Karte.
+   */
+  action: BrandCardAction
+  /**
    * DIE OFFENEN BEFUNDE AN DIESEM FELD (§8, Paket 5) — gefiltert über die
    * Slot-Id, nicht über das Kapitel: ein Konflikt gehört zwei Feldern, und der
    * Chip steht an beiden. Der Store trägt die Befunde des OFFENEN Kapitels;
@@ -1937,6 +2164,13 @@ function chapterCards(chapter: LogChapter): LogCard[] {
       confirmed: entry.controls.state === 'confirmed',
       placeholder: slotPlaceholder(entry.slot),
       controls: entry.controls,
+      action: brandLogCardAction({
+        confirmed: entry.controls.state === 'confirmed',
+        hasValue: store.slotValue(entry.slot.id).trim().length > 0,
+        askable: entry.slot.type === 'question' || entry.slot.type === 'choice',
+        confirmable: slotIsConfirmable(entry.slot),
+        generatable: entry.slot.generator !== 'none',
+      }),
       findings: findingsForSlot(entry.slot.id),
       reviewNotes: store.sessions[entry.slot.id]?.notes ?? '',
       missing: store.sessions[entry.slot.id]?.missing ?? [],
@@ -1957,6 +2191,8 @@ function chapterCards(chapter: LogChapter): LogCard[] {
     confirmed: brandSlotIsConfirmed(loaded[slot.id]),
     placeholder: slotPlaceholder(slot),
     controls: null,
+    // Fremdes Kapitel: die Karte ist eine Auskunft, kein Bedienfeld (s. `action`).
+    action: 'none' as const,
     findings: findingsForSlot(slot.id),
     // Notizen und Prüf-Stand stehen in der `sessions`-Karte, und die gibt es
     // nur für das OFFENE Kapitel — der lesende Abruf holt bewusst nur Slots.
@@ -3388,6 +3624,31 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
               />
             </div>
 
+            <!-- DIE BESTÄTIGUNG ALS BEDIENELEMENT (Davids Entscheidung
+                 2026-09-09): George fragt nach ODER sagt, dass es ihm reicht —
+                 entschieden wird per Knopf, nie durch getippten Text
+                 (converse-11: er behauptet nie, etwas eingetragen zu haben).
+                 „Passt so" löst dieselbe `confirmSlot()` aus wie die Karte
+                 rechts; „Ich ergänze noch etwas" gibt nur das Wort zurück. -->
+            <div
+              v-if="turn.id === confirmTurnId"
+              role="group" :aria-label="t('brand.workspace.confirmChoice.label')"
+              class="mt-3 flex flex-wrap gap-2"
+            >
+              <UButton
+                size="sm" class="rounded-full" icon="i-ph-check"
+                :label="t('brand.workspace.confirmChoice.confirm')"
+                :disabled="conversation.pending.value"
+                @click="confirmSlot(activeSessionKey)"
+              />
+              <UButton
+                size="sm" color="neutral" variant="soft" class="rounded-full"
+                :label="t('brand.workspace.confirmChoice.more')"
+                :disabled="conversation.pending.value"
+                @click="keepWriting(turn.id)"
+              />
+            </div>
+
             <!-- Die Antwort-Module hängen am LETZTEN Zug: die Frage steht
                  immer ÜBER den Aktionen (Davids Korrekturrunde 1). -->
             <template v-if="index === turns.length - 1 && turn.role === 'george'">
@@ -3704,6 +3965,23 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
           </div>
         </div>
 
+        <!-- DER WEITER-KNOPF (Davids Entscheidung 2026-09-09) — er steht an
+             der Stelle, an der bis heute der automatische Sprung passierte.
+             Sein ZIEL kommt aus der Regel (`resolveNextStop` auf dem Server,
+             `resolveContinueTarget` hier), nie aus Georges Urteil: eine
+             Navigation, die ein Modell entscheidet, wäre nichtdeterministisch.
+             Er steht auch dann da, wenn der Abschlusszug ausgefallen ist —
+             sonst wäre eine ausgefallene Zugabe eine Sackgasse. -->
+        <div v-if="continueTarget.kind !== 'none'" style="padding-left: 2.65rem">
+          <UButton
+            class="rounded-full" trailing-icon="i-ph-arrow-right"
+            :label="continueTarget.kind === 'acceptance'
+              ? t('brand.workspace.continueAcceptance')
+              : t('brand.workspace.continueTo', { field: continueLabel })"
+            @click="continueToNext"
+          />
+        </div>
+
         <!-- DIE SESSION-ZEILE (BW2 3c-i): wofür das Feld gebraucht wird, und
              der vierte Ausgang „Später". Sie steht UNTER dem Gespräch und auf
              dessen Text-Flucht — über den Zügen wäre sie ein Kopf, und die
@@ -3780,7 +4058,7 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
              Ansage ohne Tür. Der Auto-Weiter geht denselben Weg von selbst;
              dieser Satz fängt den ab, bei dem eine Sperre gegriffen hat. -->
         <button
-          v-if="completion?.slotsReady" type="button"
+          v-if="completion?.slotsReady && continueTarget.kind === 'none'" type="button"
           class="bw-pending flex items-center gap-1.5 text-left underline"
           style="padding-left: 2.65rem"
           @click="goToAcceptance"
@@ -3820,21 +4098,26 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
     <template #stage-footer>
       <!-- KEIN PROMPT IN DER ABNAHME (§5a): dort wird gelesen und abgenommen,
            nicht gesprochen. Ein Feld, das an George schickt, während George
-           gar nicht da ist, wäre ein Versprechen ohne Empfänger. -->
-      <UChatPrompt
-        v-if="!acceptanceView"
-        v-model="promptDraft" :placeholder="t('brand.workspace.george.placeholder')"
-        :disabled="!promptEnabled" :autofocus="false" class="w-full"
-        :ui="{ root: 'has-[textarea:focus-visible]:outline-none has-[textarea:focus-visible]:ring-default' }"
-        @submit="submitPrompt" @keydown.tab="promptTab"
-      >
-        <template #footer>
-          <UChatPromptSubmit
-            class="ml-auto" size="sm" color="neutral"
-            :disabled="!promptEnabled || !promptDraft.trim() || conversation.pending.value"
-          />
-        </template>
-      </UChatPrompt>
+           gar nicht da ist, wäre ein Versprechen ohne Empfänger.
+           Die Hülle trägt den Ref: „Ich ergänze noch etwas" setzt den Cursor
+           zurück ins Feld, und ein Ref auf die Komponente selbst gäbe nur ihre
+           Instanz, nicht das <textarea> darin. -->
+      <div ref="promptBox" class="w-full">
+        <UChatPrompt
+          v-if="!acceptanceView"
+          v-model="promptDraft" :placeholder="t('brand.workspace.george.placeholder')"
+          :disabled="!promptEnabled" :autofocus="false" class="w-full"
+          :ui="{ root: 'has-[textarea:focus-visible]:outline-none has-[textarea:focus-visible]:ring-default' }"
+          @submit="submitPrompt" @keydown.tab="promptTab"
+        >
+          <template #footer>
+            <UChatPromptSubmit
+              class="ml-auto" size="sm" color="neutral"
+              :disabled="!promptEnabled || !promptDraft.trim() || conversation.pending.value"
+            />
+          </template>
+        </UChatPrompt>
+      </div>
     </template>
 
     <!-- RECHTS: der Log — je Kapitel eine Sektion, je Entscheidung eine
@@ -3977,8 +4260,21 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
                     @click="reviseSlot(card.id)"
                   />
                   <template v-else-if="card.controls.showConfirm">
+                    <!-- BEFUND 18 (David, 2026-09-09): eine LEERE Karte sagt
+                         nicht „Korrigieren" — dort ist nichts zu korrigieren.
+                         Eine Frage-Session bekommt „Beantworten", eine
+                         Ableitung „Entwerfen"; beide springen in die Session,
+                         wo das Modul der Bühne den Rest macht. Welcher Knopf
+                         wohin gehört, rechnet `brandLogCardAction`. -->
                     <UButton
-                      v-if="card.controls.editable"
+                      v-if="card.action === 'answer' || card.action === 'draft'"
+                      size="xs" color="neutral" variant="ghost" class="rounded-full"
+                      :icon="card.action === 'answer' ? 'i-ph-chat-circle-dots' : 'i-ph-pen-nib'"
+                      :label="card.action === 'answer' ? t('brand.workspace.answerSlot') : t('brand.workspace.draftSlot')"
+                      @click="goToSession(card.id)"
+                    />
+                    <UButton
+                      v-else-if="card.controls.editable"
                       size="xs" color="neutral" variant="ghost" class="rounded-full"
                       icon="i-ph-pencil-simple"
                       :label="editingSlotId === card.id ? t('brand.workspace.reviseDone') : t('brand.workspace.reviseSlot')"

@@ -145,6 +145,17 @@ export interface BrandGenerationCompletedData {
    */
   options?: readonly string[]
   /**
+   * DAS BESTÄTIGUNGS-ANGEBOT (Davids Entscheidung 2026-09-09, Session-
+   * Abschluss): dieser Zug bietet die Wahl „Passt so, bestätigen" / „Ich
+   * ergänze noch etwas" an — die Bühne rendert daraus zwei Knöpfe.
+   *
+   * Ein BOOLEAN und keine Beschriftungen: die Texte stehen im Locale-Katalog,
+   * und der erste Knopf ist ohnehin keine Antwort, sondern löst `confirmSlot()`
+   * aus (`georgeTurn.ts`). OPTIONAL wie `options` — fehlt es, gibt es keine
+   * Knöpfe, also exakt das Verhalten von vorher.
+   */
+  confirm?: boolean
+  /**
    * AUTO-WEITER (BW2 §5, Paket 3a): Kapitel und Session, die nach diesem Zug
    * als nächste offen sind — gerechnet vom SERVER aus dem gespeicherten Stand,
    * nie vom Client vorgeschlagen.

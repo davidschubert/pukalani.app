@@ -54,6 +54,14 @@ export function createBrandConverseSchema() {
      * Weg, dieselbe Sache zu sagen.
      */
     opening: z.literal(true).optional(),
+    /**
+     * ABSCHLUSSZUG (Davids Entscheidung 2026-09-09): der eine Zug NACH einer
+     * Bestätigung. Wie `opening` nur `true` und wie dieser ohne Text — es hat
+     * niemand geschrieben, der Mensch hat einen Knopf gedrückt. Beide
+     * schliessen sich aus: ein Zug ist entweder der erste einer Session oder
+     * ihr letzter.
+     */
+    closing: z.literal(true).optional(),
     /** Wortlaut dieser Frage, wie die Oberfläche ihn gezeigt hat. */
     question: z.string().max(400).optional(),
     /** Der Slot, dessen Frage die Oberfläche als nächste zeigt (wird geprüft). */
@@ -66,13 +74,18 @@ export function createBrandConverseSchema() {
     uiLocale: z.enum(BRAND_UI_LOCALES).optional(),
     idempotencyKey: z.string().min(1).max(128).optional(),
   }).strict().superRefine((body, ctx) => {
-    // ZWEI FORMEN, EIN RUMPF — und sie schliessen sich aus: ein Eröffnungszug
-    // hat keinen Text (es hat niemand geschrieben), jeder andere Zug hat
-    // einen. Ohne diese Prüfung wäre „opening mit Text" ein stiller dritter
-    // Fall, in dem der Prompt behauptet, es habe niemand etwas gesagt.
-    if (body.opening) {
+    // DREI FORMEN, EIN RUMPF — und sie schliessen sich aus: ein Eröffnungszug
+    // und ein Abschlusszug haben keinen Text (es hat niemand geschrieben),
+    // jeder andere Zug hat einen. Ohne diese Prüfung wäre „opening mit Text"
+    // ein stiller vierter Fall, in dem der Prompt behauptet, es habe niemand
+    // etwas gesagt.
+    if (body.opening && body.closing) {
+      ctx.addIssue({ code: 'custom', path: ['closing'], message: 'a turn is either the first or the last' })
+      return
+    }
+    if (body.opening || body.closing) {
       if (body.text) {
-        ctx.addIssue({ code: 'custom', path: ['text'], message: 'opening turns carry no text' })
+        ctx.addIssue({ code: 'custom', path: ['text'], message: 'opening and closing turns carry no text' })
       }
       return
     }
