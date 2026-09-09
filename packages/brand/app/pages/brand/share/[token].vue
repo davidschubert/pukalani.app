@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { BwTocLink } from '../../../components/BwReadingToc.vue'
 import { buildBrandFoundation } from '../../../../shared/brandFoundation'
 import type { BrandShareViewResponse } from '../../../../shared/types/brand'
 
@@ -95,16 +94,20 @@ const chapters = computed(() => {
     ...(source.presetId
       ? { direction: { id: source.presetId, version: source.presetVersion } }
       : {}),
+    // DAS EINGEFRORENE PRESET (Paket D8, §2.8): ein v2-Snapshot trägt es, ein
+    // v1-Snapshot nie. Gefragt wird deshalb nach dem FELD und nicht nach
+    // `schemaVersion` — auch eine v2-Marke ohne fertiges Brand Design hat
+    // keines, und ein alter Link muss ohne Sonderweg lesbar bleiben.
+    ...(source.design ? { design: source.design } : {}),
   }).chapters
 })
 
-const tocLinks = computed<BwTocLink[]>(() => chapters.value.map((chapter, index) => ({
-  id: chapter.anchor,
-  text: t(chapter.titleKey),
-  // Der Snapshot kennt nur Bestätigtes — `pending` kann es hier nicht geben.
-  state: chapter.state === 'locked' ? 'locked' : 'done',
-  counter: String(index).padStart(2, '0'),
-})))
+/**
+ * Dasselbe Verzeichnis wie privat (`useBrandFoundationToc`) — inklusive der
+ * fünf Unterpunkte, wenn der Snapshot ein Preset trägt (v2, Paket D8). Der
+ * Snapshot kennt nur Bestätigtes, `pending` kann es hier also nicht geben.
+ */
+const tocLinks = useBrandFoundationToc(() => chapters.value)
 
 /**
  * DIE MESSENGER-VORSCHAU (§2.6): `og:title`/`og:description` trotz `noindex`
@@ -174,6 +177,7 @@ function print(): void {
           <BwFoundationChapter
             v-for="(chapter, index) in chapters" :key="chapter.id"
             :chapter="chapter" :index="index" variant="share"
+            :design-stand="stand"
           />
         </div>
         <template #right>

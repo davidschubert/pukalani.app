@@ -143,17 +143,46 @@ function chapterState(chapter: BrandDocumentChapter): string {
  * ist die Tatsache, an der die Finale Abnahme hängt —, und rechts steht die
  * KURZFORM `7/11`: die Langform bricht in dieser Spalte um (s. Komponente).
  */
-const tocLinks = computed<BwTocLink[]>(() => chapters.value.map(chapter => ({
-  // Die Sprungmarke IST der Kapitel-Schlüssel — die Seite stempelt ihn als
-  // `id` an ihre Abschnitte; ein zweiter Anker-Begriff wäre eine zweite
-  // Wahrheit.
-  id: chapter.stepKey,
-  text: t(`brand.steps.${chapter.stepKey}`),
-  state: chapter.storedState === 'done'
-    ? 'done'
-    : chapter.state === 'active' ? 'active' : chapter.state === 'locked' ? 'locked' : 'open',
-  counter: `${chapter.acceptance.accepted}/${chapter.acceptance.total}`,
-})))
+const tocLinks = computed<BwTocLink[]>(() => {
+  const links: BwTocLink[] = chapters.value.map(chapter => ({
+    // Die Sprungmarke IST der Kapitel-Schlüssel — die Seite stempelt ihn als
+    // `id` an ihre Abschnitte; ein zweiter Anker-Begriff wäre eine zweite
+    // Wahrheit.
+    id: chapter.stepKey,
+    text: t(`brand.steps.${chapter.stepKey}`),
+    state: chapter.storedState === 'done'
+      ? 'done'
+      : chapter.state === 'active' ? 'active' : chapter.state === 'locked' ? 'locked' : 'open',
+    counter: `${chapter.acceptance.accepted}/${chapter.acceptance.total}`,
+  }))
+  // „Visuelle Identität" steht am ENDE und trägt keinen Abnahme-Zähler: sie
+  // wird hier nicht abgenommen (das passiert in den sechs Kapiteln der
+  // Werkstatt), sie steht hier, weil sie zum Branding gehört (D8).
+  if (design.value) {
+    links.push({ id: 'visuell', text: t('brand.foundation.design.title'), state: 'done' })
+  }
+  return links
+})
+
+/**
+ * DAS ERGEBNIS VON BRAND DESIGN (Paket D8, §2.8) — dieselbe Fläche wie in
+ * Kapitel 10 der Leseansicht, aus demselben Preset.
+ *
+ * Es steht hier als LESE-Abschnitt und nicht als sechs Abnahme-Kapitel: die
+ * Werte der Schicht 2 sind Vokabular-Ids, Hex-Farben und gerechnete Tabellen,
+ * und ein `BwSessionBlock` mit `snappy` darin wäre eine Abnahme-Karte, die
+ * niemand beurteilen kann. Korrigiert wird in der Werkstatt — der Weg dorthin
+ * steht am Rail.
+ */
+const design = computed(() => view.value?.design ?? null)
+/** Der Markenname für die Wortmarke im Board — dieselbe Quelle wie der Titel. */
+const brandTitle = computed(() => store.profile?.title || view.value?.title || '')
+const designStand = computed(() => {
+  const value = Date.parse(view.value?.designStand ?? '')
+  return Number.isFinite(value)
+    ? new Intl.DateTimeFormat(locale.value, { dateStyle: 'long' }).format(value)
+    : ''
+})
 
 const overall = computed(() => {
   let accepted = 0
@@ -522,6 +551,26 @@ useBrandTitle(() => (store.profile?.title || view.value?.title || t('brand.docum
             @field="goToField"
             @decided="findingDecided"
             @stale="doc.refresh()"
+          />
+        </section>
+
+        <!-- DAS ERGEBNIS VON BRAND DESIGN (D8) — eine Fläche, kein Abnahme-
+             Abschnitt (s. Skript). Sie steht NACH den Kapiteln des Weges: sie
+             ist ihr Ergebnis, nicht eines davon. -->
+        <section v-if="design" id="visuell" class="flex flex-col gap-3">
+          <div class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+            <h2 class="text-[20px] font-extralight leading-tight tracking-tight">
+              {{ t('brand.foundation.design.title') }}
+            </h2>
+            <NuxtLink
+              :to="localePath(`/brand/${profileId}/design`)"
+              class="bw-label flex-none underline" style="color: var(--bw-muted)"
+            >{{ t('brand.foundation.design.boardLink') }}</NuxtLink>
+          </div>
+          <BwDesignChapterBody
+            :preset="design" :title="brandTitle" :stand="designStand"
+            :kept-drafts="view?.designKeptDrafts ?? 0"
+            :board-to="localePath(`/brand/${profileId}/design`)"
           />
         </section>
 

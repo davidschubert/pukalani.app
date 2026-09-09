@@ -663,6 +663,18 @@ export const BRAND_STAGE_SOURCE_SLOTS: Readonly<Partial<Record<BrandStepKey, rea
    * Überschrift und Wortmarke — ein Icon hat weder das eine noch das andere.
    */
   imagery: ['g.mix', 'h.base', 'h.neutral', 'h.accent', 'i.pair', 'result.direction'],
+  /**
+   * DIE BEWEGUNG BRAUCHT DIE GANZE MARKE (D7).
+   *
+   * Dieses Kapitel zeigt keine eigene Fläche: es spielt die Szene ab, die aus
+   * Farbwelt, Schriftpaar UND den Schrift-Regeln besteht — nur so ist zu
+   * beurteilen, ob 240 ms zu DIESER Marke passen. `i.rules` gehört anders als
+   * in D6 dazu, weil die Wortmarke im Kopf der Szene mit Gewicht, Laufweite und
+   * Versalien gesetzt wird (dieselbe Liste wie beim Zeichen); `g.mix` belegt
+   * Tempo und kinetisches Zeichen vor (DNA „Bewegungs-Charakter"),
+   * `result.direction` trägt wie überall nur den Rückfall der Farbwelt.
+   */
+  motion: ['g.mix', 'h.base', 'h.neutral', 'h.accent', 'i.pair', 'i.rules', 'result.direction'],
 }
 
 /** Die Quell-Slots einer Bühne — leer, wo sie keine braucht. */

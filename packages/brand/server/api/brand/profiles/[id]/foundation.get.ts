@@ -8,6 +8,7 @@ import type {
   BrandFoundationStepState,
 } from '../../../../../shared/types/brand'
 import { loadBrandDocumentContext } from '../../../../utils/brandAcceptance'
+import { brandDesignStand, loadBrandDesignPreset } from '../../../../utils/brandDesignPreset'
 import { recordBrandEvent } from '../../../../utils/brandEvents'
 import { confirmedSlotValues, toStoryView } from '../../../../utils/brandStore'
 
@@ -63,10 +64,11 @@ export default defineEventHandler(async (event): Promise<BrandFoundationResponse
     // Übersprungene Kapitel sind nicht das, was diese Marke IST (§2.2) — sie
     // fehlen hier wie im Dokument und wie im Snapshot.
     if (entry.state === 'skipped') continue
-    // Und Brand Design ist (noch) nicht Teil der Leseansicht: Kapitel 10 zeigt
-    // bis **D8** die Schranke, nicht sechs leere Abschnitte. Stünden sie hier,
-    // zählte die Kopfzeile „x von 12 abgenommen" plötzlich Kapitel mit, die
-    // niemand öffnen kann.
+    // DIE SECHS DESIGN-KAPITEL SIND EIN KAPITEL (D8, §2.8): sie erscheinen
+    // NICHT als sechs Text-Abschnitte, sondern gebündelt als das volle
+    // Kapitel 10 „Visuelle Identität" — ihre Werte sind Vokabular-Ids, Hex und
+    // gerechnete Tabellen, kein Fliesstext. Gelesen werden sie deshalb unten
+    // als PRESET (`loadBrandDesignPreset`), nicht hier als Wertliste.
     if (isBrandDesignStep(entry.stepKey)) continue
     const row = byStepKey.get(entry.stepKey)
     const openConflicts = blockingFindingSlots(
@@ -108,6 +110,16 @@ export default defineEventHandler(async (event): Promise<BrandFoundationResponse
     .find(slot => slot.slotId === 'result.direction')?.value ?? ''
   const direction = brandDirectionById(chosenDirection.trim())
 
+  /**
+   * DAS ERGEBNIS VON BRAND DESIGN (D8, §2.8) — dieselbe Arbeitsteilung wie bei
+   * der Richtung: die Route holt es, der Renderer stellt es dar.
+   *
+   * Es entsteht aus den bestätigten Werten der sechs Kapitel und ist `null`,
+   * solange eines davon nicht abgenommen ist — dann bleibt Kapitel 10 die
+   * Schranke mit der gewählten Richtung, unverändert seit G4.
+   */
+  const design = await loadBrandDesignPreset(event, profile, stepRows)
+
   await recordBrandEvent(event, {
     type: 'foundation.viewed',
     profileId: profile.$id,
@@ -133,11 +145,25 @@ export default defineEventHandler(async (event): Promise<BrandFoundationResponse
       ...(direction
         ? { direction: { id: direction.id, version: String(BRAND_DIRECTIONS_VERSION) } }
         : {}),
+      ...(design.preset ? { design: design.preset } : {}),
     }),
     chapters,
+    /**
+     * DER ZÄHLER RECHNET KAPITEL 10 MIT, SOBALD DAS PRESET STEHT (D8).
+     *
+     * Er zählt sonst die Kapitel der WERKSTATT (dort wird abgenommen). Brand
+     * Design hat sechs eigene Kapitel, aber im HANDBUCH ist es genau eines —
+     * und es ist abgenommen, denn ohne sechs Abnahmen gäbe es das Preset nicht
+     * (`loadBrandDesignPreset`). Also +1 auf beiden Seiten: „10 von 10"
+     * bedeutet dasselbe wie „9 von 9" vorher, nur mit der visuellen Identität
+     * darin. Sechs Zeilen dazuzuzählen hiesse dagegen, eine Foundation mit
+     * fünfzehn Kapiteln zu behaupten, die niemand so liest.
+     */
     accepted: {
-      chapters: chapters.filter(chapter => chapter.storedState === 'done').length,
-      total: chapters.length,
+      chapters: chapters.filter(chapter => chapter.storedState === 'done').length
+        + (design.preset ? 1 : 0),
+      total: chapters.length + (design.preset ? 1 : 0),
     },
+    ...(design.preset ? { designStand: brandDesignStand(stepRows) } : {}),
   }
 })

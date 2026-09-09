@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   BRAND_DISCOVER_PAGE_MAX,
   BRAND_DISCOVER_PAGE_SIZE,
+  brandDiscoverOgPath,
   discoverPurposeLine,
   discoverScoreOf,
   discoverVoiceLine,
@@ -153,16 +154,18 @@ describe('Discover: Brand of the Day (Entscheidung 6)', () => {
 })
 
 describe('Discover: ähnliche Marken (§4.2)', () => {
-  const current = item({ slug: 'kailua', archetype: 'sage', paletteId: 'bread' })
+  const current = item({ slug: 'kailua', archetype: 'sage', paletteId: 'bread', industry: 'food' })
 
-  it('gleicher Archetyp zuerst, dann gleiche Farbwelt', () => {
+  it('Archetyp zuerst, dann Farbwelt, dann Branche (D4)', () => {
     const similar = similarDiscoverEntries(current, [
-      item({ slug: 'farbe', archetype: 'ruler', paletteId: 'bread' }),
-      item({ slug: 'archetyp', archetype: 'sage', paletteId: 'moss' }),
+      item({ slug: 'branche', archetype: 'ruler', paletteId: 'moss', industry: 'food' }),
+      item({ slug: 'farbe', archetype: 'ruler', paletteId: 'bread', industry: 'agency' }),
+      item({ slug: 'archetyp', archetype: 'sage', paletteId: 'moss', industry: 'agency' }),
     ])
     expect(similar).toEqual([
       { slug: 'archetyp', title: 'Kailua Coffee Co.', paletteId: 'moss', reason: 'archetype' },
       { slug: 'farbe', title: 'Kailua Coffee Co.', paletteId: 'bread', reason: 'palette' },
+      { slug: 'branche', title: 'Kailua Coffee Co.', paletteId: 'moss', reason: 'industry' },
     ])
   })
 
@@ -176,13 +179,57 @@ describe('Discover: ähnliche Marken (§4.2)', () => {
     ])
   })
 
+  it('eine Marke mit gleicher Branche UND gleicher Farbwelt steht einmal da — als „palette"', () => {
+    const similar = similarDiscoverEntries(current, [
+      item({ slug: 'beides', archetype: 'ruler', paletteId: 'bread', industry: 'food' }),
+    ])
+    expect(similar).toEqual([
+      { slug: 'beides', title: 'Kailua Coffee Co.', paletteId: 'bread', reason: 'palette' },
+    ])
+  })
+
+  it('`unknown` ist keine Branche und damit kein gemeinsamer Nenner', () => {
+    // „unknown" heisst „ging aus dem Auftritt nicht hervor" (brandIndustries.ts)
+    // und ist zugleich der Vorgabewert von `toDiscoverItem` — wäre es ein
+    // Nenner, wäre in einer jungen Galerie jede Marke jeder anderen ähnlich.
+    const unknownCurrent = item({ slug: 'ohne-branche', archetype: '', paletteId: '', industry: 'unknown' })
+    expect(similarDiscoverEntries(unknownCurrent, [
+      item({ slug: 'auch-ohne', archetype: '', paletteId: '', industry: 'unknown' }),
+    ])).toEqual([])
+  })
+
   it('hält den Deckel und macht aus einem LEEREN Archetyp keinen Nenner', () => {
     const candidates = Array.from({ length: 8 }, (_, index) =>
       item({ slug: `s${index}`, archetype: 'sage', paletteId: 'moss' }))
     expect(similarDiscoverEntries(current, candidates)).toHaveLength(4)
 
-    const nameless = item({ slug: 'ohne', archetype: '', paletteId: '' })
-    expect(similarDiscoverEntries(nameless, [item({ slug: 'x', archetype: '', paletteId: '' })])).toEqual([])
+    // Auch die Branche darf den Deckel nicht sprengen: acht Kandidaten teilen
+    // NUR sie, vier kommen an.
+    const onlyIndustry = Array.from({ length: 8 }, (_, index) =>
+      item({ slug: `i${index}`, archetype: 'ruler', paletteId: 'moss', industry: 'food' }))
+    expect(similarDiscoverEntries(current, onlyIndustry)).toHaveLength(4)
+
+    const nameless = item({ slug: 'ohne', archetype: '', paletteId: '', industry: '' })
+    expect(similarDiscoverEntries(nameless, [
+      item({ slug: 'x', archetype: '', paletteId: '', industry: '' }),
+    ])).toEqual([])
+  })
+})
+
+describe('Discover: der Pfad des Vorschaubilds (D4)', () => {
+  it('EINE Wahrheit für Seite und Route', () => {
+    expect(brandDiscoverOgPath('kailua-coffee-co')).toBe('/og/discover/kailua-coffee-co.png')
+    // Grossschreibung in einem weitergeschickten Link ist eine Bedienspur,
+    // kein Angriff — sie führt auf denselben Pfad.
+    expect(brandDiscoverOgPath('  Kailua-Coffee-Co ')).toBe('/og/discover/kailua-coffee-co.png')
+  })
+
+  it('was nicht wie ein Slug aussieht, bekommt KEINEN Pfad', () => {
+    // Der Dateiname der Ablage darf nie aus roher Eingabe entstehen — deshalb
+    // hört die Kette schon hier auf, nicht erst beim Escapen.
+    for (const bad of ['', '   ', '../../etc/passwd', 'a/b', '-führend', 'x'.repeat(200)]) {
+      expect(brandDiscoverOgPath(bad)).toBe('')
+    }
   })
 })
 

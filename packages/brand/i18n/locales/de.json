@@ -908,8 +908,8 @@
         }
       },
       "generate": {
-        "start": "George, entwirf das",
-        "again": "George, versuch es nochmal",
+        "start": "{voice}, entwirf das",
+        "again": "{voice}, versuch es nochmal",
         "stop": "Stopp",
         "hintPlaceholder": "Hinweis — z. B. wärmer, kürzer, weniger Fachsprache",
         "hintLabel": "Hinweis für George",
@@ -2116,7 +2116,8 @@
       },
       "note": {
         "visuell": "Gehört zum Fundament dazu, entsteht aber erst im Brand Design — hergeleitet aus dem, was oben steht.",
-        "ki-texte": "Ein fester Rahmen, gefüllt aus euren Werten — keine eigene Erfindung, so aktuell wie die Kapitel darüber."
+        "ki-texte": "Ein fester Rahmen, gefüllt aus euren Werten — keine eigene Erfindung, so aktuell wie die Kapitel darüber.",
+        "visuellDone": "Im Brand Design entschieden — Farbwelt, Schriftpaar, Zeichen, Bildsprache und Bewegung, hergeleitet aus dem, was oben steht."
       },
       "visual": {
         "follows": "folgt in Brand Design",
@@ -2245,6 +2246,47 @@
           "name": "Klassisch & Ernst",
           "reason": "Schiefer, eine klassische Serif, breite Ränder. Sieht in zehn Jahren so aus wie heute — das ist der Punkt."
         }
+      },
+      "design": {
+        "title": "Visuelle Identität",
+        "stand": "Stand {date}",
+        "farbwelt": "Farbwelt",
+        "typografie": "Typografie",
+        "zeichen": "Zeichen",
+        "bildsprache": "Bildsprache",
+        "bewegung": "Bewegung",
+        "ramp": {
+          "light": "Hell",
+          "dark": "Dunkel"
+        },
+        "board": {
+          "colors": "Farbwelt",
+          "type": "Typografie",
+          "mark": "Zeichen",
+          "imagery": "Bildsprache",
+          "motion": "Bewegung"
+        },
+        "tileAlt": "Bild-Prinzip, abstrahiert",
+        "markNote": "Gesetzte Beispiele aus Schriftpaar und Farbwelt — eine Vorlage für die Designer-Arbeit, kein fertiges Logo.",
+        "drafts": "1 behaltener KI-Entwurf | {count} behaltene KI-Entwürfe",
+        "draftsNote": "Entwürfe sind Ideen für die Designer-Arbeit, keine geprüften Logos. Sie bleiben privat: sie stehen weder im geteilten Link noch im Druck.",
+        "boardHint": "Dasselbe Board als eigene Ansicht, druckbar:",
+        "boardLink": "Visuelle Identität öffnen",
+        "correctHint": "Dieses Board entscheidet nichts. Korrigiert wird in den Kapiteln — rechts der Weg dorthin.",
+        "eyebrow": "Ergebnis-Board",
+        "headline": "Visuelle Identität auf einer Fläche",
+        "lead": "Farbwelt, Schriftpaar, Zeichen, Bild-Prinzipien und Bewegung. Dasselbe Board steht als Kopf von Kapitel 10 in eurer Brand Foundation.",
+        "print": "Drucken / PDF",
+        "inDocument": "Im Dokument lesen",
+        "correctTitle": "Korrigieren",
+        "correctLead": "Jede Fläche des Boards gehört zu einem Kapitel. Wer etwas ändern will, geht dorthin — das Board zieht nach.",
+        "privateTitle": "Was hier nicht steht",
+        "privateLead": "Eure Vorbilder und die behaltenen KI-Entwürfe. Beides ist privat und reist weder ins Board noch in den geteilten Link.",
+        "lockedTitle": "Noch nicht fertig",
+        "lockedLead": "Das Board entsteht, sobald alle sechs Kapitel von Brand Design abgenommen sind.",
+        "lockedProgress": "{done} von {total} Kapiteln",
+        "toChapter": "Weiter im Brand Design",
+        "progressTitle": "Brand Design"
       }
     },
     "session": {
@@ -2559,7 +2601,8 @@
           "title": "Ähnliche Marken",
           "all": "Alle ansehen",
           "archetype": "gleicher Archetyp",
-          "palette": "gleiche Farbwelt"
+          "palette": "gleiche Farbwelt",
+          "industry": "gleiche Branche"
         },
         "cta": {
           "body": "Gefällt euch, wie das gebaut ist? Marken sind keine Vorlagen — aber der Weg dorthin steht euch offen.",
@@ -2925,6 +2968,52 @@
         "title": "Do & Don’t",
         "tag": "k.dodont · gerechnet aus euren drei Entscheidungen",
         "intro": "Sechs Paare: die vier Achsen eures Prinzips, dazu Illustration und Icons. Jedes Do hat sein Don’t — erst das Paar macht die Regel prüfbar."
+      }
+    },
+    "motion": {
+      "tempo": {
+        "title": "Tempo",
+        "tag": "l.tempo · aus eurer DNA",
+        "intro": "Tempo liest man nicht, man sieht es. Die drei Fassungen stehen nebeneinander und laufen gleichzeitig — klickt „Übergang abspielen“ und entscheidet, welche nach euch aussieht.",
+        "proposed": "Aus eurer DNA",
+        "play": "Übergang abspielen",
+        "reduced": "Weniger Bewegung simulieren",
+        "reducedOn": "Weniger Bewegung: an",
+        "note": {
+          "calm": "Langsam anlaufend, sanft ausklingend. Wirkt ruhig und sicher — und ein wenig gemächlich.",
+          "lively": "Kürzer, mit leichtem Überschwingen: wach und freundlich, aber unruhiger auf langen Seiten.",
+          "snappy": "Fast ohne Anlauf. Wirkt effizient und nimmt der Marke einen Teil ihrer Ruhe."
+        }
+      },
+      "transitions": {
+        "title": "Übergänge",
+        "tag": "l.transitions · drei Dauern, ein Versatz",
+        "intro": "Mehr Tokens heißt mehr Streit im Team. Drei reichen — sie hängen alle am Tempo oben und ändern sich mit ihm. Genau diese Namen gehen später ins Handbuch und in den Code.",
+        "col": {
+          "token": "Token",
+          "duration": "Dauer",
+          "easing": "Kurve",
+          "usage": "Wofür"
+        }
+      },
+      "scene": {
+        "title": "In der Anwendung",
+        "intro": "Dieselbe Fläche im gewählten Tempo: Karten blenden versetzt ein, der Knopf reagiert beim Überfahren. Hell und dunkel schaltet ihr an der Szene selbst um.",
+        "note": "Alles hier läuft mit {duration} Grunddauer. Der Schalter oben zeigt, was Menschen sehen, die im Betriebssystem weniger Bewegung eingestellt haben — dann steht der Endzustand sofort."
+      },
+      "logo": {
+        "title": "Kinetisches Zeichen",
+        "tag": "l.logo",
+        "intro": "Bewegt sich euer Zeichen? Ein Ja kostet eine eigene Datei, die jemand pflegen muss — und eine Fassung ohne Bewegung. Ein Nein ist eine Entscheidung, keine Auslassung.",
+        "note": {
+          "no": "Das Zeichen steht still — auch im Vorspann. Spart eine Datei, die sonst niemand aktuell hält.",
+          "yes": "Ein Aufbau von 800 ms für Vorspann und Ladefläche. Danach steht das Zeichen; im Fließtext bewegt es sich nie."
+        }
+      },
+      "rules": {
+        "title": "Bewegungs-Regeln",
+        "tag": "l.rules · aus euren zwei Entscheidungen",
+        "intro": "Sechs Sätze, jeder an einer echten Seite nachprüfbar. Die letzte Zeile gilt immer und lässt sich nicht abwählen: weniger Bewegung heißt Endzustand, nicht Zeitlupe."
       }
     },
     "scene": {

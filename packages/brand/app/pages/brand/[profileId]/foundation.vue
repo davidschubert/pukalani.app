@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type { BwSidebarBrand } from '../../../components/BwWorkspaceSidebar.vue'
 import type { BwRailLayer, BwRailStep } from '../../../components/BwProgressRail.vue'
-import type { BwTocLink } from '../../../components/BwReadingToc.vue'
 import { brandChoiceDisplayLabel } from '../../../../shared/brandChoiceOptions'
 import {
   type BrandFoundationBlock,
@@ -192,12 +191,23 @@ const acceptedPct = computed(() => (accepted.value.total === 0
   ? 0
   : Math.round((accepted.value.chapters / accepted.value.total) * 100)))
 
-const tocLinks = computed<BwTocLink[]>(() => chapters.value.map((entry, index) => ({
-  id: entry.chapter.anchor,
-  text: t(entry.chapter.titleKey),
-  state: entry.chapter.state,
-  counter: String(index).padStart(2, '0'),
-})))
+/**
+ * Das Verzeichnis rechts — EINE Regel für alle drei Lese-Ansichten
+ * (`useBrandFoundationToc`). Seit Kapitel 10 voll sein kann (D8), trägt es
+ * dessen fünf Unterpunkte.
+ */
+const tocLinks = useBrandFoundationToc(() => chapters.value.map(entry => entry.chapter))
+
+/**
+ * DER STAND DES BOARDS und der Weg zu seiner eigenen Ansicht (D8). Beide
+ * stehen nur, wenn es das Preset gibt — die Route `/brand/:id/design` zeigt
+ * ohne Preset ihre Sperr-Fläche, und ein Link dorthin wäre aus dem Handbuch
+ * heraus eine Einladung ins Leere.
+ */
+const designStand = computed(() => formatDate(view.value?.designStand ?? ''))
+const designBoardTo = computed<string | null>(() => (view.value?.designStand
+  ? localePath(`/brand/${profileId.value}/design`)
+  : null))
 
 // ── „Auf einer Seite" (§1.5, HubSpot-Muster) ──────────────────────────────
 
@@ -946,6 +956,8 @@ useBrandTitle(() => (title.value || t('brand.foundation.title')))
           :direction-to="directionTo"
           :design-to="designTo"
           :design-unlocked-at="store.profile?.designUnlockedAt ?? null"
+          :design-board-to="designBoardTo"
+          :design-stand="designStand"
           variant="private"
         />
       </div>

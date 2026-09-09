@@ -9,41 +9,41 @@ import {
   statementsAgree,
 } from '../shared/marketExtractRules'
 import type { MarketAiAnswer } from '../shared/marketExtractRules'
+import {
+  EVIDENCE_QUOTE_MAX,
+  evidenceIsGrounded as coreEvidenceIsGrounded,
+  normalizeEvidenceText,
+} from '../../core/shared/evidenceGrounding'
+import { MARKET_EVIDENCE_MAX } from '../shared/marketProfile'
 
 /**
  * BELEG-RIEGEL, HÄUFIGKEIT UND KONSENS (Plan §2.2, §7.4, §7.5 b) — die drei
  * Regeln, die über eine Modell-Ausgabe entscheiden, je mit GEGENPROBE.
  */
 
-describe('evidenceIsGrounded — der Beleg-Riegel', () => {
-  const page = 'Wir  rösten in kleinen\nMengen, direkt von der Farm. Jede Woche frisch.'
+describe('der Beleg-Riegel kommt aus core — die Hülle reicht ihn weiter', () => {
+  /**
+   * Die REGEL und alle ihre Gegenproben stehen seit BI1 I1a in
+   * `core/tests/evidenceGrounding.test.ts` (unverändert mitgezogen). Hier
+   * bleibt die andere Frage: gibt `shared/marketExtractRules.ts` sie unter den
+   * MARKT-Namen wirklich weiter? Ein Tippfehler im Re-Export baut sonst
+   * anstandslos und liefert einen zweiten, leeren Riegel.
+   */
+  it('exportiert DIESELBEN Bindungen, nicht Kopien', () => {
+    expect(evidenceIsGrounded).toBe(coreEvidenceIsGrounded)
+    expect(normalizeEvidence).toBe(normalizeEvidenceText)
+  })
 
-  it('findet ein wörtliches Zitat trotz anderem Weissraum', () => {
+  it('beisst unter dem alten Namen — mit GEGENPROBE', () => {
+    const page = 'Wir  rösten in kleinen\nMengen, direkt von der Farm.'
     expect(evidenceIsGrounded({ quote: 'Wir rösten in kleinen Mengen', pageText: page })).toBe(true)
-  })
-
-  it('verzeiht typografische Anführungszeichen und Gedankenstriche', () => {
-    const typographic = 'Sie sagt „frisch“ – jede Woche.'
-    expect(evidenceIsGrounded({ quote: 'Sie sagt "frisch" - jede Woche.', pageText: typographic })).toBe(true)
-  })
-
-  it('GEGENPROBE: ein erfundenes Zitat fällt durch', () => {
     expect(evidenceIsGrounded({ quote: 'Wir rösten ausschliesslich biologisch', pageText: page })).toBe(false)
   })
 
-  it('GEGENPROBE: eine andere SCHREIBWEISE ist kein Zitat', () => {
-    // Gross-/Kleinschreibung wird bewusst NICHT normalisiert (s. Kopf der
-    // Regel) — sonst wäre die Zitatschranke eine Erzählung.
-    expect(evidenceIsGrounded({ quote: 'wir rösten in kleinen mengen', pageText: page })).toBe(false)
-  })
-
-  it('GEGENPROBE: ein leeres oder zu langes Zitat fällt durch', () => {
-    expect(evidenceIsGrounded({ quote: '   ', pageText: page })).toBe(false)
-    expect(evidenceIsGrounded({ quote: 'x'.repeat(201), pageText: `x${'x'.repeat(400)}` })).toBe(false)
-  })
-
-  it('normalizeEvidence zieht Weissraum zusammen, ohne die Schreibweise zu ändern', () => {
-    expect(normalizeEvidence('  Frisch\n  geröstet  ')).toBe('Frisch geröstet')
+  it('die Zitatschranke des Vertrags IST die des Fundaments', () => {
+    // Zwei verschiedene Zahlen für dieselbe Rechtsfrage wären eine Einladung,
+    // die kleinere zu vergessen (§ 51 UrhG, §1.7 Nr. 4).
+    expect(MARKET_EVIDENCE_MAX).toBe(EVIDENCE_QUOTE_MAX)
   })
 })
 

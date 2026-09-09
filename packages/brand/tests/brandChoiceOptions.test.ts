@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import {
   BRAND_ARCHETYPES,
+  BRAND_STAGE_CHOICE_SLOTS,
   BRAND_ARCHITECTURE_MODELS,
   BRAND_DNA_SOURCES,
   brandChoiceContract,
@@ -382,5 +383,68 @@ describe('swapBrandChoiceValueLine — die Wert-Zeile spricht die Sprache der Se
 
   it('ohne Vertrag ist der Aufruf ein No-op', () => {
     expect(swapBrandChoiceValueLine('a.pitch', 'sage', 'de')).toBe('sage')
+  })
+})
+
+describe('Die Auswahl-Sessions von Brand Design (D8)', () => {
+  /**
+   * DER NEBENBEFUND AUS D7: „rohe Katalog-Ids (`snappy`, `yes`) als
+   * Antworttext im Gespräch". Ohne Vertrag ist die Anzeige eines Wertes der
+   * Wert selbst — dieser Block ist die Gegenprobe dazu.
+   */
+  const CASES: readonly [string, string, string][] = [
+    ['i.pair', 'editorial', 'Redaktionell'],
+    ['i.scale', 'loud', 'Plakativ'],
+    ['j.kind', 'word', 'Wortmarke'],
+    ['j.pick', 'monogram', 'Monogramm'],
+    ['k.illustration', 'line', 'Linie'],
+    ['k.icons', 'bold', 'Kräftig'],
+    ['l.tempo', 'snappy', 'Knapp'],
+    ['l.logo', 'yes', 'Ja — kinetisches Zeichen'],
+  ]
+
+  it('löst jede gespeicherte Id in eine Lesefassung auf', () => {
+    for (const [slotId, stored, display] of CASES) {
+      expect(brandChoiceDisplayLabel(slotId, stored, 'de'), slotId).toBe(display)
+      // Englisch muss ETWAS anderes als die Id sein — welcher Text, sagt der
+      // Katalog; hier zählt nur, dass keine Id durchrutscht.
+      expect(brandChoiceDisplayLabel(slotId, stored, 'en'), slotId).not.toBe(stored)
+    }
+  })
+
+  it('kennt die Menge und weist alles andere ab', () => {
+    for (const [slotId] of CASES) {
+      const contract = brandChoiceContract(slotId)
+      expect(contract?.kind, slotId).toBe('closed')
+      expect(checkBrandChoiceDraft(contract!, 'irgendwas Erfundenes').ok, slotId).toBe(false)
+    }
+  })
+
+  it('tauscht die Id auch in einer Sprechblase', () => {
+    expect(swapBrandChoiceValueLine('l.tempo', 'BASIS-Satz.\n\nsnappy', 'de'))
+      .toBe('BASIS-Satz.\n\nKnapp')
+  })
+
+  it('lässt einen unbekannten Alt-Wert stehen, statt ihn zu verschlucken', () => {
+    expect(brandChoiceDisplayLabel('l.tempo', 'zügig', 'de')).toBe('zügig')
+  })
+
+  it('steht in der Liste der Slots mit eigener Bühne — sonst gäbe es doppelte Karten', () => {
+    for (const [slotId] of CASES) {
+      expect(BRAND_STAGE_CHOICE_SLOTS, slotId).toContain(slotId)
+    }
+    // Die zwei Vorgänger stehen weiterhin darin (G4 und D2c).
+    expect(BRAND_STAGE_CHOICE_SLOTS).toContain('result.direction')
+    expect(BRAND_STAGE_CHOICE_SLOTS).toContain('g.board')
+  })
+
+  it('nennt für jede Session eine Rückfrage in beiden Sprachen', () => {
+    for (const [slotId] of CASES) {
+      const contract = brandChoiceContract(slotId)!
+      expect(brandChoiceFallbackQuestion(contract, 'de').length, slotId).toBeGreaterThan(10)
+      expect(brandChoiceFallbackQuestion(contract, 'en').length, slotId).toBeGreaterThan(10)
+      // Die Prompt-Regel zählt die Ids auf — sonst rät ein Modell.
+      expect(brandChoicePromptRule(contract).join(' '), slotId).toContain('EXACTLY ONE')
+    }
   })
 })

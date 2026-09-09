@@ -317,26 +317,48 @@ export function pickDiscoverFeatured<T extends { featuredAt?: string | null }>(
 // ── Ähnliche Marken ────────────────────────────────────────────────────────
 
 /**
- * „ÄHNLICHE MARKEN" — gleicher Archetyp zuerst, dann gleiche Farbwelt (§4.2,
- * Entscheidung 8: „mit fester Regel-Beschriftung").
+ * Die Branche, die keine ist (`brandIndustries.ts`): „ging aus dem Auftritt
+ * nicht hervor". Sie steht IN der Facetten-Liste (man kann danach filtern) und
+ * ist trotzdem kein gemeinsamer Nenner für „Ähnliche Marken" — deshalb hier
+ * als benannte Konstante statt als Zeichenkette mitten in der Regel.
+ */
+const BRAND_DISCOVER_INDUSTRY_UNKNOWN = 'unknown'
+
+/**
+ * „ÄHNLICHE MARKEN" — gleicher Archetyp zuerst, dann gleiche Farbwelt, dann
+ * gleiche Branche (§4.2, Entscheidung 8: „mit fester Regel-Beschriftung";
+ * Branche ergänzt in D4).
  *
- * Das sind die zwei Facetten, die nur wir haben. Der GRUND reist als Id mit
- * (`archetype` / `palette`) und nicht als Satz: die Kachel schreibt ihn in der
- * Sprache des Lesers hin, und ein Server, der fertige Sätze schickt, kann sie
- * weder übersetzen noch umformulieren.
+ * Das sind die drei Facetten, die nur wir haben. Der GRUND reist als Id mit
+ * (`archetype` / `palette` / `industry`) und nicht als Satz: die Kachel
+ * schreibt ihn in der Sprache des Lesers hin, und ein Server, der fertige
+ * Sätze schickt, kann sie weder übersetzen noch umformulieren.
+ *
+ * ── WARUM DIE BRANCHE ZULETZT KOMMT ──────────────────────────────────────
+ * Sie ist der SCHWÄCHSTE der drei Gründe und trotzdem der, den ein Besucher
+ * am ehesten sucht („zeig mir noch ein Café"). Zwei Marken teilen einen
+ * Archetyp, weil sie dieselbe Haltung gewählt haben, und eine Farbwelt, weil
+ * sie gleich aussehen — eine Branche teilen sie, weil sie im selben Gewerbe
+ * arbeiten. Das sagt über das FUNDAMENT am wenigsten, füllt die vier Plätze
+ * aber genau dann, wenn die Galerie noch klein ist und die beiden starken
+ * Töpfe leer bleiben.
  *
  * ── SICH SELBST NIE, JEDE MARKE HÖCHSTENS EINMAL ─────────────────────────
  * Eine Marke mit gleichem Archetyp UND gleicher Farbwelt steht in beiden
- * Töpfen; sie erscheint einmal, mit dem STÄRKEREN Grund (Archetyp). Ohne die
+ * Töpfen; sie erscheint einmal, mit dem STÄRKSTEN Grund (Archetyp). Ohne die
  * Entdopplung stünde dieselbe Kachel zweimal nebeneinander — und die zweite
  * mit der schwächeren Begründung.
  *
  * Ein LEERER Archetyp (Bestandszeile ohne bestätigten `d.primary`) ist kein
  * gemeinsamer Nenner: '' === '' wäre sonst der Grund, aus dem alle Marken ohne
- * Archetyp einander ähnlich sind.
+ * Archetyp einander ähnlich sind. Bei der Branche gilt dasselbe für `unknown`
+ * — der Wert heisst „ging aus dem Auftritt nicht hervor" (Kopf von
+ * `brandIndustries.ts`) und ist damit ausdrücklich KEINE Auskunft, aus der
+ * eine Ähnlichkeit folgen dürfte. `toDiscoverItem` setzt ihn als Vorgabe,
+ * eine ganze Galerie junger Marken wäre sonst untereinander „ähnlich".
  */
 export function similarDiscoverEntries(
-  current: Pick<BrandDiscoverItem, 'slug' | 'archetype' | 'paletteId'>,
+  current: Pick<BrandDiscoverItem, 'slug' | 'archetype' | 'paletteId' | 'industry'>,
   candidates: readonly BrandDiscoverItem[],
   max: number = BRAND_DISCOVER_SIMILAR_MAX,
 ): BrandDiscoverSimilar[] {
@@ -359,7 +381,47 @@ export function similarDiscoverEntries(
       if (item.paletteId === current.paletteId) take(item, 'palette')
     }
   }
+  if (current.industry && current.industry !== BRAND_DISCOVER_INDUSTRY_UNKNOWN) {
+    for (const item of candidates) {
+      if (item.industry === current.industry) take(item, 'industry')
+    }
+  }
   return out
+}
+
+// ── Das Vorschaubild einer Anatomie ────────────────────────────────────────
+
+/**
+ * Die Form eines Slugs in einer ADRESSE — dieselbe wie in
+ * `server/utils/brandDiscover.ts`. Bewusst zweimal aufgeschrieben und nicht
+ * geteilt: dort ist sie die Wache VOR einer Datenbank-Abfrage, hier die Wache
+ * VOR einem Dateinamen. Fiele die eine Entscheidung, soll die andere stehen
+ * bleiben.
+ */
+const DISCOVER_OG_SLUG = /^[a-z0-9][a-z0-9-]{0,159}$/
+
+/**
+ * DER PFAD DES VORSCHAUBILDS EINER ANATOMIE — `/og/discover/<slug>.png`.
+ *
+ * EINE Wahrheit für ZWEI Aufrufer: die Seite trägt den Pfad über
+ * `useBrandOgImage()` in den Kopf ein (`useLocaleSeoHead()` macht die absolute
+ * URL), die Route liefert das Bild darunter aus. Stünde die Zeichenkette an
+ * beiden Stellen, wäre ein Umzug des Pfades ein stilles og:image-404 — und ein
+ * kaputtes Vorschaubild sieht niemand, der die Seite selbst aufruft.
+ *
+ * AUSGELIEFERT WIRD ES VON DER APP, NICHT VOM LAYER: die Route lebt in
+ * `apps/branding/server/routes/og/discover/[slug].get.ts` (Kompositions-
+ * Ebene — sie darf `packages/themes` für den Rasterizer kennen, dieser Layer
+ * nicht, CONCEPT.md A14; die Endung `.png` schneidet die Route selbst ab, ein
+ * Nitro-Parameter deckt immer das ganze Segment). Der Playground des Layers hat sie deshalb NICHT; dort
+ * bleibt der Kopf ohne og:image, was der ehrliche Zustand ist.
+ *
+ * '' heisst „kein Bild": ein Slug, der nicht wie ein Slug aussieht, bekommt
+ * keinen Pfad statt eines escapten Sonderfalls.
+ */
+export function brandDiscoverOgPath(slug: string): string {
+  const value = String(slug ?? '').trim().toLowerCase()
+  return DISCOVER_OG_SLUG.test(value) ? `/og/discover/${value}.png` : ''
 }
 
 // ── Zwei Zeilen aus dem Fundament ──────────────────────────────────────────

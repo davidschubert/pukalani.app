@@ -27,6 +27,8 @@
  * trotzdem füllt, erfindet sie.
  */
 
+import { EVIDENCE_QUOTE_MAX } from '../../core/shared/evidenceGrounding'
+
 /** Die zehn Felder, die man von AUSSEN über eine Marke sagen kann (§2.2). */
 export const MARKET_FIELD_IDS = [
   'categoryLanguage',
@@ -77,8 +79,15 @@ export const MARKET_FIELDS: readonly MarketFieldDefinition[] = [
   { id: 'distinctiveAsset', slotIds: ['ep.distinctiveAsset'], form: 'shortText' },
 ]
 
-/** Zitatschranke je Feld (§1.7 Nr. 4) — die Zahl gehört zum Vertrag. */
-export const MARKET_EVIDENCE_MAX = 200
+/**
+ * Zitatschranke je Feld (§1.7 Nr. 4) — die Zahl gehört zum Vertrag, aber sie
+ * ist nicht MEHR die einzige Stelle: seit BI1 I1a steht die Schranke des § 51
+ * UrhG EINMAL im Fundament (`EVIDENCE_QUOTE_MAX`), und Brand Insights leitet
+ * seine `INSIGHTS_QUOTE_MAX` aus derselben Zahl ab. Der MARKT-Name bleibt, weil
+ * er im ganzen Layer und im Ablage-Schema steht — zwei verschiedene ZAHLEN für
+ * dieselbe Rechtsfrage wären dagegen eine Einladung, die kleinere zu vergessen.
+ */
+export const MARKET_EVIDENCE_MAX: number = EVIDENCE_QUOTE_MAX
 
 /** Höchstzahl Wettbewerber je Branding (§2.9 Nr. 8). */
 export const MARKET_COMPETITORS_MAX = 5

@@ -1,5 +1,5 @@
 import type { MarketAiStatement, MarketFieldId, MarketFrequency } from './marketProfile'
-import { MARKET_EVIDENCE_MAX } from './marketProfile'
+import { normalizeEvidenceText } from '../../core/shared/evidenceGrounding'
 
 /**
  * DIE DREI REINEN REGELN DER EXTRAKTION (Plan §2.2, §7.4, §7.5 b) — der
@@ -14,59 +14,24 @@ import { MARKET_EVIDENCE_MAX } from './marketProfile'
 // ── 1. Der Beleg-Riegel (§2.2, §2.9 Nr. 4) ─────────────────────────────────
 
 /**
- * DIE NORMALISIERUNG FÜR DEN VERGLEICH: Weissraum wird zusammengezogen,
- * typografische Anführungszeichen und Bindestriche werden auf ihre einfache
- * Form gebracht.
+ * DER RIEGEL LIEGT SEIT BI1 I1a IM FUNDAMENT (`core/shared/evidenceGrounding`).
  *
- * ── WARUM SO WENIG UND NICHT MEHR ─────────────────────────────────────────
- * GROSS-/KLEINSCHREIBUNG BLEIBT (der Auftrag sagt es ausdrücklich): ein Zitat,
- * das die Schreibweise ändert, ist kein Zitat mehr. Wer hier zusätzlich
- * kleinschreibt, lässt „WIR RÖSTEN SELBST" als Beleg für „wir rösten selbst"
- * durchgehen — und ab da ist die Zitatschranke eine Erzählung.
+ * Brand Insights stellt dieselbe Frage an eine redaktionelle Quelle, und ein
+ * Produkt-Layer importiert keinen anderen (CONCEPT.md A14). Hier bleiben nur
+ * die MARKT-Namen stehen: jede Aufrufstelle im Layer (`marketExtract.ts`,
+ * `marketReportRules.ts`) und jeder Test lesen weiter `normalizeEvidence` und
+ * `evidenceIsGrounded` von hier — der Umzug ändert im market-Layer nichts
+ * ausser dieser Datei.
  *
- * Weissraum MUSS dagegen weg: die Text-Extraktion zieht Zeilenumbrüche und
- * Einrückungen des Quelltexts zusammen, ein Modell gibt sie anders zurück, und
- * an dieser Kleinigkeit stürbe sonst jeder ehrliche Beleg.
- *
- * Typografische Zeichen ebenso: „" ' ' – — sind dieselben Zeichen wie " ' -,
- * nur hübscher gesetzt; ein Modell tippt sie regelmässig anders als die Seite.
+ * Die Zitatschranke wandert NICHT mit: `MARKET_EVIDENCE_MAX` in
+ * `marketProfile.ts` LEITET SICH jetzt aus `EVIDENCE_QUOTE_MAX` ab, damit
+ * dieselbe Rechtsfrage nur eine Zahl hat.
  */
-export function normalizeEvidence(value: string): string {
-  return value
-    .replace(/[‘’‚‛]/g, '\'')
-    .replace(/[“”„‟«»]/g, '"')
-    .replace(/[‐-―−]/g, '-')
-    // Geschütztes Leerzeichen als ESCAPE geschrieben: als Zeichen ist es im
-    // Quelltext unsichtbar, und ESLint verbietet es zu Recht.
-    .replace(/\u00A0/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim()
-}
-
-export interface EvidenceCheckInput {
-  /** Das Zitat, wie das Modell es geliefert hat. */
-  readonly quote: string
-  /** Der Text GENAU DER SEITE, die das Modell als Quelle genannt hat. */
-  readonly pageText: string
-}
-
-/**
- * STEHT DAS ZITAT WIRKLICH DA?
- *
- * Der Riegel ist absichtlich stumpf: Zeichenkette in Zeichenkette, nach der
- * Normalisierung oben. Kein Fuzzy-Vergleich, keine Ähnlichkeit, keine
- * „ungefähre" Übereinstimmung — ein Beleg, der nur ungefähr dasteht, ist
- * erfunden, und die Zitatschranke (§1.7 Nr. 4) schützt uns nur, solange wir
- * wörtlich zitieren.
- *
- * LEER ⇒ NEIN: ein Feld ohne Zitat hat keinen Beleg, und ein Feld ohne Beleg
- * gibt es nicht (§2.2).
- */
-export function evidenceIsGrounded(input: EvidenceCheckInput): boolean {
-  const quote = normalizeEvidence(input.quote)
-  if (!quote || quote.length > MARKET_EVIDENCE_MAX) return false
-  return normalizeEvidence(input.pageText).includes(quote)
-}
+export {
+  evidenceIsGrounded,
+  normalizeEvidenceText as normalizeEvidence,
+} from '../../core/shared/evidenceGrounding'
+export type { EvidenceCheckInput } from '../../core/shared/evidenceGrounding'
 
 // ── 2. Die Häufigkeit (§7.4) ───────────────────────────────────────────────
 
@@ -88,7 +53,7 @@ export const MARKET_FREQUENCY_CORE_MIN = 25
  * Slogan im Fuss). Das Ende ist der Teil, den eine Seite kürzt.
  */
 export function evidenceCore(quote: string): string {
-  const normalized = normalizeEvidence(quote)
+  const normalized = normalizeEvidenceText(quote)
   if (normalized.length <= MARKET_FREQUENCY_CORE_MIN) return normalized
   const cut = normalized.slice(0, MARKET_FREQUENCY_CORE_MIN)
   const lastSpace = cut.lastIndexOf(' ')
@@ -121,7 +86,7 @@ export function countEvidenceFrequency(
    * gemeldet — die Häufigkeits-Angabe wäre für kurze Sätze systematisch
    * falsch gewesen.
    */
-  const normalized = normalizeEvidence(quote)
+  const normalized = normalizeEvidenceText(quote)
   if (normalized.length < MARKET_FREQUENCY_CORE_MIN) {
     // Ein zu kurzes Zitat wird nicht gezählt, sondern als „einmal"
     // ausgewiesen: eine 0 sähe aus wie „steht nirgends", und das wäre falsch —
@@ -132,7 +97,7 @@ export function countEvidenceFrequency(
   if (!core) return { pages: Math.min(1, of), of }
   let hits = 0
   for (const text of pages.values()) {
-    if (normalizeEvidence(text).includes(core)) hits++
+    if (normalizeEvidenceText(text).includes(core)) hits++
   }
   return { pages: hits, of }
 }
@@ -198,8 +163,8 @@ export function tokenJaccard(left: string, right: string): number {
  * die Wortmengen.
  */
 export function statementsAgree(left: string, right: string): boolean {
-  const a = normalizeEvidence(left).toLowerCase().replace(/[.!?]+$/, '')
-  const b = normalizeEvidence(right).toLowerCase().replace(/[.!?]+$/, '')
+  const a = normalizeEvidenceText(left).toLowerCase().replace(/[.!?]+$/, '')
+  const b = normalizeEvidenceText(right).toLowerCase().replace(/[.!?]+$/, '')
   if (!a || !b) return false
   if (a === b) return true
   return tokenJaccard(a, b) >= MARKET_AI_CONSENSUS_JACCARD

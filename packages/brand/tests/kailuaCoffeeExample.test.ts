@@ -179,24 +179,50 @@ describe('Kailua Coffee Co. — was der Renderer daraus baut', () => {
     expect(ids).not.toContain('name')
   })
 
-  it('gibt jedem Kapitel Inhalt — und nur dem visuellen die Schranke', () => {
+  it('gibt jedem Kapitel Inhalt — und KEINEM mehr die Schranke (Brand Design D8)', () => {
     for (const chapter of view.chapters) {
       expect(chapter.blocks.length, `${chapter.id} ist leer`).toBeGreaterThan(0)
       const locked = chapter.blocks.filter(block => block.kind === 'locked')
-      if (chapter.id === 'visuell') {
-        // DIE SCHRANKE BLEIBT, AUCH MIT RICHTUNG (Paket G4): gewählt ist eine
-        // WELT, gebaut wird sie in Brand Design. Was davor steht, sind genau
-        // zwei Blöcke — die Richtung und ihre drei Farben.
-        expect(chapter.state).toBe('locked')
-        expect(locked).toHaveLength(5)
-        expect(chapter.blocks.map(block => block.kind))
-          .toEqual(['direction', 'swatches', 'locked', 'locked', 'locked', 'locked', 'locked'])
-      }
-      else {
-        expect(chapter.state).toBe('done')
-        expect(locked, `${chapter.id} trägt eine Schranke`).toHaveLength(0)
-      }
+      expect(locked, `${chapter.id} trägt eine Schranke`).toHaveLength(0)
+      expect(chapter.state).toBe('done')
     }
+  })
+
+  it('zeigt Kapitel 10 VOLL — ein Preset statt Schranke und Richtung (D8)', () => {
+    const visual = view.chapters.find(chapter => chapter.id === 'visuell')!
+    // MIT PRESET GEWINNT DAS PRESET: die gewählte Richtung war die Ansage,
+    // das Preset ist das Gebaute. Beides nebeneinander wären zwei Farbwelten
+    // und die Frage, welche gilt.
+    expect(visual.blocks.map(block => block.kind)).toEqual(['design'])
+    const block = visual.blocks[0]!
+    expect(block.kind === 'design' && block.title).toBe('Kailua Coffee Co.')
+    // Der Block trägt NIE eine Entwurfs-Id — nur ihre Zahl (§1.11 b).
+    expect(block.kind === 'design' && block.keptDrafts).toBe(0)
+    expect(block.kind === 'design' && 'keptDrafts' in block.preset.mark).toBe(false)
+  })
+
+  it('rechnet die visuelle Identität aus der echten Maschine', () => {
+    const visual = view.chapters.find(chapter => chapter.id === 'visuell')!
+    const block = visual.blocks[0]!
+    if (block.kind !== 'design') throw new Error('Kapitel 10 trägt keinen design-Block')
+    const preset = block.preset
+    expect(preset.color.base).toBe('#4a3123')
+    expect(preset.color.accent).toBe('#2f4a3a')
+    expect(preset.type.pair).toBe('editorial')
+    expect(preset.motion.tempo).toBe('calm')
+    // Elf Stufen je Rampe, fünf Rollen, sechs geprüfte Paare, acht Setzungen
+    // — die Zahlen des Katalogs, nicht die einer Abschrift.
+    expect(Object.keys(preset.color.rampLight)).toHaveLength(11)
+    expect(Object.keys(preset.color.rampDark)).toHaveLength(11)
+    expect(preset.color.roles).toHaveLength(5)
+    expect(preset.color.contrastPairs).toHaveLength(6)
+    expect(preset.mark.examples).toHaveLength(8)
+    expect(preset.mark.examples.every(svg => svg.startsWith('<svg'))).toBe(true)
+    // Der Markenname steht escaped in der Wortmarke (kein rohes `&`, `<`).
+    expect(preset.mark.examples[0]).toContain('Kailua Coffee Co.')
+    expect(preset.motion.transitions.map(token => token.durationMs)).toEqual([120, 240, 384, 60])
+    expect(preset.motion.rules.length).toBeGreaterThan(0)
+    expect(preset.imagery.dodont.length).toBeGreaterThan(0)
   })
 
   it('paart Werte, Ton-Wörter und Do & Dont so, wie die Seite es zeigt', () => {

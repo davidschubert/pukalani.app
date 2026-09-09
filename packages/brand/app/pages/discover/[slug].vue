@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { BRAND_CHECK_CATEGORIES } from '../../../shared/brandCheck'
 import { brandChoiceDisplayLabel } from '../../../shared/brandChoiceOptions'
-import { discoverPurposeLine, discoverVoiceLine } from '../../../shared/brandDiscover'
+import { brandDiscoverOgPath, discoverPurposeLine, discoverVoiceLine } from '../../../shared/brandDiscover'
 import { BRAND_PALETTES } from '../../../shared/brandPalette'
 import type { BrandDiscoverEntryResponse } from '../../../shared/types/brand'
 
@@ -106,6 +106,43 @@ useSeoMeta({
   // dann nicht, wenn die Seite eine freundliche Rückkehr anbietet.
   robots: () => (missing.value || isPreview.value ? 'noindex, nofollow' : 'index, follow'),
 })
+
+/**
+ * DAS VORSCHAUBILD DIESER ANATOMIE (D4) — die Farbwelt der Marke mit ihrer
+ * Wortmarke, 1200×630 PNG.
+ *
+ * Eingetragen wird nur der PFAD; die absolute URL, die Maße und `twitter:card`
+ * macht `useLocaleSeoHead()` im Core — der EINE Kopf-Aufruf jeder App
+ * (CLAUDE.md). Der Pfad selbst kommt aus `brandDiscoverOgPath()`, damit Seite
+ * und Route dieselbe Wahrheit lesen.
+ *
+ * AUSGELIEFERT WIRD ES VON DER APP `branding` (Kompositions-Ebene): der
+ * Rasterizer lebt in `packages/themes`, und ein Produkt-Layer darf ihn nicht
+ * kennen (CONCEPT.md A14). Im Playground DIESES Layers gibt es die Route
+ * deshalb nicht — dort bleibt der Kopf ohne og:image.
+ *
+ * KEIN BILD FÜR 404 UND VORSCHAU: beide tragen `noindex`, und ein og:image auf
+ * eine Seite, die es nicht (mehr) öffentlich gibt, wäre dieselbe Lüge im Kopf
+ * wie ein Tag auf ein 404.
+ *
+ * ── ZURÜCKSETZEN IST PFLICHT, NICHT KOSMETIK ─────────────────────────────
+ * `useBrandOgImage()` ist ein APP-WEITER State (useState). Bliebe er stehen,
+ * trüge die nächste Seite im selben Client-Lauf die Vorschau einer fremden
+ * Marke — auf `/erstgespraech` stünde dann „Kailua Coffee Co." im geteilten
+ * Link. Beide Haken sind bewusst da: `onBeforeRouteLeave` greift beim
+ * Weiterklicken (die Komponente lebt da noch), `onUnmounted` beim Abräumen
+ * ohne Navigation.
+ */
+const ogImage = useBrandOgImage()
+const discoverOgImage = computed(() => {
+  if (missing.value || isPreview.value) return null
+  const path = brandDiscoverOgPath(slug.value)
+  return path ? { path, width: 1200, height: 630, type: 'image/png' } : null
+})
+ogImage.value = discoverOgImage.value
+watch(discoverOgImage, (value) => { ogImage.value = value })
+onBeforeRouteLeave(() => { ogImage.value = null })
+onUnmounted(() => { ogImage.value = null })
 
 /**
  * Der Brotkrumen als JSON-LD (§4.2: „nur `WebPage` + BreadcrumbList" — kein

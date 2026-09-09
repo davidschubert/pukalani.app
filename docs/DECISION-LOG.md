@@ -7,6 +7,74 @@ die kleinen, verstreuten Beschlüsse.
 
 ---
 
+## 2026-09-08 — Brand Insights (BI1): Prototyp-Runde 1 — fünf Entscheidungen; Products-Seite als eigenes Vorhaben
+
+**Anlass:** Der Prototyp I0 steht seit dem 2026-09-08 im eigenen Playground (Port 3013, sechs
+Bildschirme, Vertrag mit 48 Tests). Beim Bauen blieben fünf Fragen offen, die der Prototyp nicht
+selbst beantworten konnte ([plans/BRAND-INSIGHTS.md](plans/BRAND-INSIGHTS.md) §9.10). David hat
+sie am selben Tag beantwortet — die Tabelle Frage · Entscheidung · Empfehlung war · Leitplanke
+steht in **§11.2**. **Vier von fünf folgen der Empfehlung; eine weicht ab (2, Opportunity-Zahl).**
+Die **Freigabe des Prototyps** (Phase 4 des Workflows) steht weiterhin aus — David klickt die
+sechs Bildschirme selbst.
+
+**Entscheidungen (David):** (1) **Beleg-Riegel nach `core`** — `evidenceIsGrounded` und der
+Herabsetzungs-/Namensfilter (`createMarketDisparagementGuard`) ziehen aus `packages/market/shared`
+nach `packages/core/shared`, **die Namen verlieren dabei das `market`-Präfix** (im Fundament-Layer
+wäre es eine Lüge); `market` re-exportiert, damit keine Aufrufstelle bricht, `insights` importiert
+später aus `core`. Der dritte Weg — abschreiben — war der teuerste: zwei Riegel driften, und
+dieser hier hält Rechtsrisiko auf. Das ist ein **eigenes Paket I1a** (Plan §9.9), es läuft bereits
+parallel und **darf vor der Prototyp-Abnahme laufen**, weil ein Fundament-Baustein auch dann
+richtig ist, wenn Brand Insights nie gebaut würde. (2) **Opportunity-Zahl auf 100 normiert, mit
+Fussnote** (die eine Abweichung, s. u.). (3) **Redaktion auf drei Adressen** — Liste, Editor,
+Radar; die Untereinander-Ansicht war eine Prototyp-Hilfe, §9.4 bleibt wie geschrieben.
+(4) **Ein Beitrag ohne redigierte Zielsprache bleibt in der Journal-Liste sichtbar**, mit dem
+Hinweis „Nur auf English"; ausgeblendet wird er erst, wenn der Sprachfilter ausdrücklich gesetzt
+ist. Begründung: ein vorhandener Beitrag, den die Liste verschweigt, ist für den Leser nicht von
+einem fehlenden zu unterscheiden. (5) **Korrekturweg als Knopf am Seitenende — auf Profil, Duell
+und Ranking**: überall dort, wo über eine fremde Marke etwas behauptet wird, steht der Weg zum
+Widerspruch an derselben Stelle. Kein eigener Menüpunkt, kein Banner.
+
+**Die eine Abweichung — (2) Opportunity-Zahl auf 100 statt „44 von 60".** Die Empfehlung wollte
+die Zahl als „44 von 60 · 3 von 5 Signalen" zeigen, weil der Nenner dann selbst erzählt, dass
+zwei der fünf Signale (Suchnachfrage, Konkurrenz) noch keine Datenquelle haben. David hat sich
+für die normierte Zahl entschieden, weil sie sich besser liest. **Drei Leitplanken kaufen die
+Ehrlichkeit zurück:** **(a)** die Fussnote nennt **immer**, aus wie vielen der fünf Signale
+gerechnet wurde („aus 3 von 5 Signalen") — sie ist Pflicht, nicht Zierde; **(b)** die Normierung
+ist eine **pure Funktion mit Test** (`insightsOpportunity`), kein Rechenweg in einer Vorlage;
+**(c)** kommen Signale dazu, **ändert sich die Skala nicht**, nur die Fussnote. Damit bleibt eine
+44 über Monate dieselbe 44, während „von 60" bei jedem neuen Signal eine neue Bedeutung bekommen
+hätte. Nachbesserung am Prototyp läuft.
+
+**Nebenbefund, entschieden: die Products-Seite wird ein eigenes Vorhaben.** Die Hauptnavigation
+des Klickdummys trug einen Punkt „Products" mit sieben Produktnamen, der auf `/products` zeigte —
+eine Seite, die es nicht gibt; seit dem 404-Audit vom 2026-09-03 ist der Punkt ausgeblendet
+(Regel in `BwSiteNav.vue`: die Navigation zeigt nur echte Ziele). **Entscheidung:** ein **eigenes
+kleines Vorhaben NACH Insights** — Übersicht plus je eine Marketing-Seite pro Produkt, die Namen
+aus den Manifesten, je Produkt entweder ein Preis oder der Weg ins Erstgespräch; davor eine kurze
+Konzeptrunde zu Texten und Reihenfolge. Der Nav-Punkt kehrt **erst mit den Seiten** zurück.
+Geparkt als **PS1** in [OPEN-ITEMS.md](OPEN-ITEMS.md). **Verworfen:** die Seiten nebenbei in BI1
+mitzunehmen (anderes Publikum, andere Texte, eigene Preis-Entscheidungen — das wäre ein zweites
+Vorhaben im Bauch des ersten), und den Nav-Punkt vorab zurückzuholen und auf einen Anker zeigen
+zu lassen (genau das hat das 404-Audit abgeräumt).
+
+---
+
+## 2026-09-08 — Brand Wizard: ein ABGELEHNTER Befund kommt nicht wieder (Kehrtwende zu BW2 Paket 6)
+
+**Anlass:** Beim Kailua-Durchlauf (Discover D5) liess sich das Kapitel „Werte" nie abnehmen:
+ein Konflikt-Befund (b.conviction ↔ c.discovery2) wurde zweimal mit Grund abgelehnt
+(`POST …/findings/<id>` 200) und stand nach dem nächsten Kapitel-Blick wieder offen da — die
+Dedup in `writeBrandFindings` prüfte nur gegen OFFENE Befunde („ein entschiedener Befund
+blockiert keine neue Zeile", BW2 Paket 6). **Entscheidung:** Dedup gegen offene UND abgelehnte
+Befunde (Schlüssel Art + Felder); nur ANGENOMMENE bleiben draussen, weil ihre Korrektur das
+Feld ändert und ein neuer Konflikt danach ein echter Hinweis ist. Ein abgelehnter Befund ist
+eine Entscheidung des Menschen, die der Prüfblick nicht durch Wiederholung überstimmen darf.
+Preis: ändert sich ein beteiligtes Feld später wirklich, bleibt derselbe Konflikt-Typ über
+dieselben Felder stumm — bewusst hingenommen; ein Werte-Hash je Befund wäre der nächste Schritt,
+falls das je auffällt. Commit `53be8792`.
+
+---
+
 ## 2026-09-08 — Session-Token-Hygiene: CLAUDE.md wird KERN + pfadgebundene `.claude/rules/`
 
 **Anlass:** Eine Session stand bei 655k Tokens Kontext (Messages 547k, CLAUDE.md +
@@ -64,6 +132,12 @@ Vertrag `core/shared/communityNavigation.ts` nicht (flache Liste, ab dem sechste
    jeder Site) — nicht je Community: die Nav ist rollen-gefiltert, eine Owner-Reihenfolge ginge
    für einen Moderator nicht auf. Beide Varianten („je Instanz", „beides") verworfen.
 4. **Reihenfolge der Pakete:** Wording → Site-Nav → Dashboard-Nav, jedes mit Check-in.
+
+**Nachtrag Prototyp-Runde (David, 2026-09-08):** Paket 2 zunächst „Korrekturen zuerst" —
+das Standard-Menü von branding.supply soll **Products → Brand Score · Discover Brands · About ·
+Team** sein. Folge: der Bauplan (Registry `pukalani.chrome.nav`) darf Gruppen VORGEBEN
+(`parent`, `to: ''` = Aufklapper ohne Seite; Zusage 9 in `resolveCommunityNav`) — nicht bloß
+eine gespeicherte Wahl je Instanz. Danach freigegeben und gemergt.
 
 **Beantwortet damit auch Davids Frage „geht das für alle pukalani.app-Sites?":** ja — das
 Dashboard-Layout gehört dem admin-Layer und ist in jeder App dasselbe; eine Überschreibung dort

@@ -10,6 +10,8 @@ import {
   loadStepRows,
   requireProfileIdParam,
 } from '../../../../utils/brandStore'
+import { brandDesignSnapshotPreset } from '../../../../../shared/brandDesignValues'
+import { loadBrandDesignPreset } from '../../../../utils/brandDesignPreset'
 import { buildBrandSnapshot } from '../../../../utils/brandSnapshot'
 import { hashBrandShareToken } from '../../../../utils/brandShares'
 import { recordBrandEvent } from '../../../../utils/brandEvents'
@@ -87,7 +89,22 @@ export default defineEventHandler(async (event): Promise<BrandSharePublishRespon
   await readValidatedBody(event, createBrandSharePublishSchema().parse)
 
   const stepRows = await loadStepRows(event, profileId)
-  const { snapshot, payload } = buildBrandSnapshot(profile, stepRows)
+
+  /**
+   * DAS PRESET REIST MIT — OHNE DIE BEHALTENEN ENTWÜRFE (D8, §2.8/§1.11 b).
+   *
+   * Der Empfänger eines Links soll die visuelle Identität SEHEN (das ist der
+   * halbe Grund, ihn zu verschicken); die KI-Entwürfe soll er nie sehen. Beides
+   * hält `brandDesignSnapshotPreset` — und der Typ dahinter lässt das Feld gar
+   * nicht erst zu, statt sich auf Disziplin zu verlassen.
+   *
+   * Ohne fertige Schicht 2 ist `preset` null, und der Snapshot bleibt inhaltlich
+   * das, was er vor D8 war (nur mit `schemaVersion: 2`).
+   */
+  const { preset } = await loadBrandDesignPreset(event, profile, stepRows)
+  const { snapshot, payload } = buildBrandSnapshot(profile, stepRows, {
+    ...(preset ? { design: brandDesignSnapshotPreset(preset) } : {}),
+  })
 
   const now = new Date()
   const expiresAt = new Date(now.getTime() + SHARE_TTL_MS).toISOString()

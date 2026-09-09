@@ -1,13 +1,19 @@
 # Brand Insights — Redaktionskonzept (BI1)
 
-Status: **Konzept ENTSCHIEDEN 2026-09-08** — der **Prototyp I0 kann starten**;
-der **Bau I1+** wartet auf DB1 und den Anwalt (§6). Vorgeschichte:
+Status: **Prototyp I0 gebaut, Runde 1 entschieden 2026-09-08 — Freigabe des
+Prototyps offen (David klickt die sechs Screens auf 3013).** Die fünf Fragen der
+Prototyp-Runde 1 sind beantwortet (§9.10, Tabelle in §11); der **Bau I1+** wartet
+auf DB1 und den Anwalt (§6), **I1a (Beleg-Riegel nach `core`) läuft bereits**
+(§9.9). Vorgeschichte:
 Redaktionskonzept ENTSCHIEDEN 2026-09-07 (Davids zwölf Antworten, §1) ·
 Konzeptrunde GESCHRIEBEN 2026-09-08 (§9 die Vorschläge, §10 die acht Fragen) ·
-**am 2026-09-08 beantwortet — die acht Entscheidungen stehen in §11**. Nach
+**am 2026-09-08 beantwortet — die acht Entscheidungen stehen in §11** ·
+**Prototyp-Runde 1 am 2026-09-08 entschieden (fünf weitere Zeilen in §11)**. Nach
 [referenz/WORKFLOW.md](../referenz/WORKFLOW.md) ist damit Phase 2 (Konzeption)
-abgeschlossen und Phase 3 (Prototyp) frei; vor Davids Prototyp-Abnahme wird
-nichts gebaut. Dieses Dokument hält fest, WAS entschieden ist und welche
+abgeschlossen und Phase 3 (Prototyp) ausgeführt; vor Davids Prototyp-Abnahme
+(Phase 4) wird an I1+ nichts gebaut — **einzige Ausnahme ist I1a**, ein
+Fundament-Baustein im `core`-Layer, der von Brand Insights unabhängig
+richtig ist. Dieses Dokument hält fest, WAS entschieden ist und welche
 Leitplanken daran hängen — es ist keine Arbeitsliste. Was von BI1 offen ist,
 steht ausschliesslich in [OPEN-ITEMS.md](../OPEN-ITEMS.md) (Zeile `BI1`).
 
@@ -1053,13 +1059,22 @@ mit vier Stücken — einem je Format —, nicht mit neunzehn.
 
 | # | Paket | Inhalt | Gate |
 | --- | --- | --- | --- |
-| **I0** | **Prototyp am Dummy mit echten Datenformen** | die vier Formate im brand-Playground an das Konzept angeglichen: Journal-Liste mit Format-/Themenfilter, Artikel mit TOC, Profil als Dossier, Duell mit `facts`-Zeilen inkl. Belegspalte, Ranking mit Methodik-Zeile; Redaktions-Editor als Skizze (zwei Sprach-Reiter, Quellen-Panel, Prüfregeln als Liste) | **Davids Abnahme** (Phase 4 des Workflows) |
+| **I0** ✅ | **Prototyp mit echten Datenformen — GEBAUT 2026-09-08 (§9.10)** | die vier Formate im brand-Playground an das Konzept angeglichen: Journal-Liste mit Format-/Themenfilter, Artikel mit TOC, Profil als Dossier, Duell mit `facts`-Zeilen inkl. Belegspalte, Ranking mit Methodik-Zeile; Redaktions-Editor als Skizze (zwei Sprach-Reiter, Quellen-Panel, Prüfregeln als Liste). GEBAUT im EIGENEN Playground (`packages/insights/.playground`, Port 3013) statt im brand-Playground — dort baut eine andere Sitzung an Discover/Brand Design. **Nachbesserung aus Runde 1: Radar-Zahl auf 100 normiert + Fußnote (läuft)** | **Davids Abnahme** (Phase 4 des Workflows) — offen |
+| **I1a** ⏳ | **Beleg-Riegel nach `core`** *(neu 2026-09-08, §11 Runde-1-Frage 1 — **läuft**)* | `evidenceIsGrounded` und der Herabsetzungs-/Namensfilter (`createMarketDisparagementGuard`) ziehen aus `packages/market/shared` nach `packages/core/shared`, **Namen ohne `market`-Präfix**; `market` re-exportiert (keine Aufrufstelle bricht), `insights` importiert später aus `core`. Fundament-Baustein, kein Insights-Bau | **kein Gate** — steht VOR I1 und ist auch ohne BI1 richtig; läuft parallel als eigenes Code-Paket |
 | **I1** | **Layer + Schema + Vertrag** | Layer `insights` mit Manifest, Eintrag in `apps/branding/site.manifest.ts`, `LAYER_ORDER`, Bilanz-Block, ESLint-Block; Migration (`insights_posts`, `insights_brands`, `insights_corrections`); Vertrag zum brand-Layer; `insights.manage` in `core/shared/authz.ts` (eigener Commit); GDPR-Contributor; Schema-Parität-Soll | **Davids Ja zur Prod-Migration** (vor dem Code-Deploy) · Zuschnitt entschieden: §11 Frage 1 |
 | **I2** | **Dashboard + KI-Entwurf** | Liste (`UTable`), Editor mit `UEditor` und zwei Sprach-Reitern, Quellen-Panel mit deterministischer Beleg-Prüfung, die sechs Prüfregeln vor `review`, Zustands-Umschalter, Vorschau, Übersetzen-Endpunkt mit Drossel, `aiCompleteJson`-Entwurf mit `insights-d-1` | I1 · Zuschnitt entschieden: §11 Fragen 4 und 7 |
 | **I4** | **Themenradar** *(vorgezogen 2026-09-08, §11 Frage 6)* | kuratierte Kanalliste, `playlistItems.list` + `videos.list`, `insights_topics` (nur die API-Zahlen je Video, ≤ 30 Tage oder täglich neu) mit Sweep, unsere Opportunity-Zahl aus drei Signalen, Betreiber-Ansicht in der Themen-Liste; **keine Kommentar-Texte, keine Nutzernamen** | **eigenes Gate:** Davids Ja (gegeben) · **Google-Cloud-Projekt mit API-Schlüssel (David)** · die Anwaltsantwort BI1-2 gilt für **alles über Metadaten hinaus**, nicht für den Radar als solchen (§9.6) |
 | **I3** | **Öffentliche Seiten** | `/insights`, `/insights/<slug>`, `/brands/<slug>`, `/duels/<a>-vs-<b>`, `/rankings`, `/topics/<slug>`; Korrektur-/Entfernungs-Formular; SEO (og:image, JSON-LD, hreflang, `noindex` für Entwürfe), Sitemap, Nav-Punkt, 301 aus `slugHistory` | I2 · **Anwaltsantworten BI1-3 und BI1-4** (ohne sie geht kein Markenprofil live, §6) |
 | **I5** | **Newsletter** | `insights_subscribers` mit Double-Opt-in nach dem Warteliste-Muster, Bestätigungs- und Abmelde-Weg, Eintrags-Formular je Format und zentral, Versand | **eigenes Gate:** Rechtstexte (A1/BS1 R2) · Zuschnitt entschieden: §11 Frage 5 |
 | **I6** | **Launch-Paket** | die vier Beispiel-Beiträge (einer je Format), dann die restlichen fünfzehn Stücke aus §9.8; danach der Wochentakt | I3 · Davids Redaktionszeit |
+
+**Warum I1a schon läuft, obwohl die Prototyp-Abnahme aussteht.** I1a verschiebt
+zwei bestehende, getestete Funktionen des `market`-Layers in den Fundament-Layer
+`core`. Das ist auch dann richtig, wenn Brand Insights nie gebaut würde: heute
+kann nur `market` seinen eigenen Beleg-Riegel benutzen, und ein zweiter Layer
+müsste ihn abschreiben (§9.10 Frage 1 nennt das den teuersten Weg — zwei Riegel
+driften). Deshalb ist I1a **kein** vorgezogener Insights-Bau, sondern
+Fundament-Arbeit, und es darf vor Davids Abnahme laufen.
 
 **Reihenfolge-Regel (geändert am 2026-09-08).** **I4 steht jetzt VOR I3** und
 darf auch parallel dazu laufen: Davids Entscheidung ist, dass die Themen von
@@ -1079,6 +1094,102 @@ Beiträge hat nichts zu versenden, und sein Gate sind die Rechtstexte (BS1 R2).
 Es sollte stehen, wenn **I3** live geht — sonst ist Davids Reichweiten-Ziel ab
 dem ersten öffentlichen Beitrag wieder unbeobachtet. Es ist aber **kein Gate**
 von I3: eine Seite, die niemand zählt, ist immer noch eine Seite.
+
+### 9.10 I0 gebaut — Davids Korrekturrunden (2026-09-08)
+
+**Stand: der Prototyp läuft.** Eigener Layer `packages/insights` (Manifest,
+Sprachkatalog de+en, `pukalani.insights.enabled` Default aus, ESLint-Topf
+`PRODUCTS`, Bilanz-Block) plus ein eigener Playground auf **Port 3013**
+(`pnpm --filter @pukalani/insights dev`). Sechs Bildschirme, alle zweisprachig
+(`/…` englisch, `/de/…` deutsch):
+
+| Adresse | Was zu beurteilen ist |
+| --- | --- |
+| `/de/insights/demo/journal` | Journal-Liste über alle vier Formate: Themen-Chips, Format-/Sprach-/Sortier-Auswahl, Raster ↔ Liste über `?display=`. „Meistgelesen" steht **sichtbar gesperrt** mit dem Grund daneben (Plausible, §11 Frage 3) |
+| `/de/insights/demo/artikel` | Artikel mit `UContentToc` (Scrollspy kommt mitgeliefert — der handgebaute des Klickdummys ist weg), Quellenliste mit „Eigenaussage" ↔ „Fremdquelle", erwähnte Marken mit Score-Ring, **kein Autorenname** (Entscheidung 4) |
+| `/de/insights/demo/profil` | Markenprofil einer FREMDEN Marke: Farbwelt-Hero mit der Wortmarke als Schrift, acht Score-Kategorien mit Methodik-Link, Zeichen und Historie je mit Beleg-Nummer, Korrekturweg — und darunter **dieselbe Seite im Zustand „auf Wunsch entfernt"** |
+| `/de/insights/demo/duell` | Statistik-Tafel: acht Dimensionen gespiegelt, Sieger je Zeile, „Zahlen & Fakten" mit **Belegspalte**, alphabetischer Slug |
+| `/de/insights/demo/ranking` | Zehn Plätze, Ausgabe-Nummer, Stand-Datum, Methodik-Zeile — und die **Lücke auf Platz 7** („auf Wunsch entfernt", ohne Neunummerierung) |
+| `/de/insights/demo/redaktion` | Redaktion: Liste als `UTable`, Editor mit `UEditor` und zwei Sprach-Reitern, Quellen-Panel mit **deterministischer Beleg-Ampel**, die sechs Prüfregeln als Liste mit Fundstelle, Übersetzen-Knopf mit `translationReviewed`-Häkchen, Themenradar |
+
+**Der Vertrag ist mitgebaut, nicht skizziert.** `packages/insights/shared/insightsPost.ts`
+trägt die Formen aus §9.3 als Typen UND Zod-Schemas: Beitrag (vier Formate,
+`baseLocale`, beide Fassungen, `translationReviewed`), Quelle (Art, Herausgeber,
+Datum, Zitat ≤ 200, Lizenz), Duell-Fakt mit `sourceIndex`, eingefrorenes
+Ranking (zehn Plätze, Lücke), Marken-Entität mit `removed`-Zustand,
+Radar-Video (nur die erlaubten API-Zahlen) — dazu die puren Rechnungen
+(`insightsPublicFassung`, `insightsReadingMinutes`, `insightsDuelSlug`,
+`insightsOpportunity`) und die **sechs Prüfregeln** als eine Funktion.
+48 Tests, jede rechtlich teure Regel mit Gegenprobe (Zitat > 200 fällt,
+Fremdquelle ohne Datum fällt, elf Plätze fallen); die Demo-Daten des
+Playgrounds gehen durch dasselbe Schema.
+
+**Erfunden, und zwar absichtlich.** Der Prototyp zeigt die Kaffee-Welt des
+Marktvergleichs (Upcountry Roast Co., Pacific Bean Supply, Kona Trading,
+Island Grind, dazu weitere `.example`-Namen fürs Ranking). Keine reale Marke,
+kein fremdes Logo — für eine echte Marke gäbe es hier nur erfundene Belege,
+und genau das verbietet das Produkt sich selbst.
+
+**Drei Dinge, die der Prototyp bewusst NICHT tut.** Er speichert nichts, ruft
+kein Modell und hat keine Route; er ändert die echte `BwSiteNav` nicht (die
+Navigations-Vorschau lebt als eigene Hülle im Playground, damit Davids
+404-Audit vom 2026-09-03 nicht rückgängig gemacht wird); und er importiert
+nichts aus `packages/brand` — Score-Ring, Farbwelt und Archetyp-Namen kommen
+als Prop oder Slot herein, wie `MkBrandScore` es im market-Layer vormacht. Die
+ESLint-Ausnahme `insights → brand` kommt deshalb erst mit I1, zusammen mit dem
+Vertrag.
+
+**Davids Runde 1 — beantwortet am 2026-09-08** (die Tabelle
+Frage · Entscheidung · Empfehlung war · Leitplanke steht in **§11**; vier von
+fünf folgen der Empfehlung, Frage 2 weicht ab):
+
+1. **Wem gehört der Beleg-Riegel?** `evidenceIsGrounded` und
+   `createMarketDisparagementGuard` liegen im **market**-Layer, und ein
+   Produkt-Layer importiert keinen anderen (CONCEPT A14). Der Prototyp reicht
+   beide als Funktion herein; I1/I2 muss entscheiden: nach `core` ziehen, über
+   den brand-Vertrag führen — oder abschreiben (das wäre der teuerste Weg,
+   zwei Riegel driften).
+   → **Entschieden: nach `core` ziehen** (nach Empfehlung). Beide Funktionen
+   wandern von `packages/market/shared` nach `packages/core/shared`, **die
+   Namen verlieren dabei das `market`-Präfix** (im Fundament-Layer wäre es eine
+   Lüge); `market` re-exportiert, damit keine Aufrufstelle bricht, `insights`
+   importiert aus `core`. Das ist **eigenes Paket I1a** (§9.9) und **läuft
+   bereits** — es geht vor I1 und ist auch ohne BI1 richtig.
+2. **Heisst die Opportunity-Zahl „von 60"?** Drei Signale zu je 0–20, sichtbar
+   als „44 von 60 · 3 von 5 Signalen". Die Alternative wäre eine auf 0–100
+   normalisierte Zahl mit Fussnote — sie liest sich besser und verschweigt,
+   dass zwei Summanden fehlen.
+   → **Entschieden: auf 100 normiert, mit Fussnote** — **abweichend** von der
+   Empfehlung „44 von 60". Drei Leitplanken kaufen die Ehrlichkeit zurück, die
+   „von 60" mitbrachte: **(a)** die Fussnote nennt IMMER, aus wie vielen der
+   fünf Signale gerechnet wurde („aus 3 von 5 Signalen") — sie ist Pflicht,
+   nicht Zierde; **(b)** die Normierung ist eine **pure Funktion mit Test**
+   (`insightsOpportunity`), kein Rechenweg in einer Vorlage; **(c)** kommen
+   Signale dazu, **ändert sich die Skala nicht** — nur die Fussnote. Damit
+   bleibt eine 44 über Monate dieselbe 44, während „von 60" bei jedem neuen
+   Signal eine neue Bedeutung bekommen hätte.
+3. **Gehört die Redaktion auf EINE Seite?** Der Prototyp zeigt Liste, Editor
+   und Radar untereinander, damit der Zusammenhang sichtbar ist; §9.4 sieht
+   drei Adressen vor.
+   → **Entschieden: drei Adressen** — Liste, Editor, Radar (nach Empfehlung,
+   §9.4 bleibt wie geschrieben). Die Untereinander-Ansicht war eine
+   Prototyp-Hilfe, damit der Zusammenhang auf einem Bildschirm sichtbar wird;
+   im Produkt sind es drei Seiten.
+4. **Zeigt die Journal-Liste einen Beitrag, dessen Sprachfassung fehlt?** Der
+   Prototyp tut es (mit dem Hinweis „Nur auf English") und blendet ihn erst
+   aus, wenn der Sprachfilter gesetzt ist. Die Gegenoption wäre, ihn auf der
+   deutschen Oberfläche gar nicht erst zu zeigen.
+   → **Entschieden: er bleibt sichtbar, mit dem Hinweis „Nur auf English"**
+   (nach Empfehlung). Ein vorhandener Beitrag, den die Liste verschweigt, ist
+   für den Leser nicht von einem fehlenden zu unterscheiden. Ausgeblendet wird
+   er weiterhin erst, wenn der Sprachfilter ausdrücklich gesetzt ist —
+   „redigierte Zielsprache" heisst `translationReviewed === true` (§11 Frage 4).
+5. **Reicht der Korrekturweg als Knopf am Seitenende?** Er steht heute auf der
+   Profil-Seite; Duell und Ranking tragen ihn in I3 an derselben Stelle.
+   → **Entschieden: ja, Knopf am Seitenende — auf Profil, Duell UND Ranking**
+   (nach Empfehlung). Drei Seiten, eine Stelle, ein Formular: überall dort, wo
+   über eine fremde Marke etwas behauptet wird, steht der Weg zum Widerspruch
+   am selben Ort. Kein eigener Menüpunkt und kein aufdringliches Banner.
 
 ---
 
@@ -1241,8 +1352,10 @@ Formate.
 
 ## 11. Entscheidungen (David, 2026-09-08)
 
-Die acht Fragen aus §10, beantwortet. §10 bleibt als Protokoll stehen — dort
-stehen die Optionen, hier steht, was gilt. **Sieben von acht Antworten folgen
+Zwei Runden, zwei Tabellen. Zuerst die **acht Fragen aus §10** (Konzeptrunde),
+darunter in **§11.2** die **fünf Fragen aus §9.10** (Prototyp-Runde 1). §10 und
+§9.10 bleiben als Protokoll stehen — dort stehen die Optionen, hier steht, was
+gilt. **Sieben von acht Antworten folgen
 der Empfehlung; eine weicht ab (6, Themenradar) und trägt dafür vier
 ausdrückliche Leitplanken.** Damit ist Phase 2 (Konzeption) abgeschlossen:
 **Prototyp I0 kann starten, der Bau I1+ wartet auf DB1 und den Anwalt (§6).**
@@ -1282,7 +1395,22 @@ folgt, steht nicht als Vorsatz da, sondern als Zuschnitt:
    für **alles über Metadaten hinaus**. Der Metadaten-Radar darf davor laufen;
    was er nicht darf, steht in (a) und (b).
 
-### 11.2 Was jetzt bei David liegt
+### 11.2 Prototyp-Runde 1 (David, 2026-09-08)
+
+Die fünf Fragen aus §9.10, beantwortet. **Vier von fünf folgen der Empfehlung;
+eine weicht ab (2, Opportunity-Zahl) und trägt dafür drei Leitplanken.** Das ist
+Runde 1 der Prototyp-Phase — **die Freigabe des Prototyps (Phase 4) steht
+weiterhin aus**, David klickt die sechs Bildschirme auf Port 3013 selbst.
+
+| # | Frage | Entscheidung | Empfehlung war | Leitplanke |
+| --- | --- | --- | --- | --- |
+| 1 | Wem gehört der Beleg-Riegel? | **Nach `core` ziehen:** `evidenceIsGrounded` und der Herabsetzungs-/Namensfilter (`createMarketDisparagementGuard`) wandern von `packages/market/shared` nach `packages/core/shared` | nach Empfehlung | **Die Namen verlieren das `market`-Präfix** — im Fundament-Layer wäre es eine Lüge. `market` **re-exportiert**, damit keine Aufrufstelle bricht; `insights` importiert später aus `core`, nicht aus `market` (CONCEPT A14: ein Produkt-Layer importiert keinen anderen). Eigenes Paket **I1a** (§9.9), es **läuft** und steht VOR I1 — als Fundament-Baustein darf es vor Davids Prototyp-Abnahme laufen, weil es auch ohne BI1 richtig ist |
+| 2 | Heisst die Opportunity-Zahl „von 60"? | **Auf 100 normiert, mit Fussnote** | **abweichend** — „44 von 60 · 3 von 5 Signalen" | Drei Leitplanken kaufen die Ehrlichkeit zurück, die „von 60" mitbrachte: **(a)** die Fussnote nennt **immer**, aus wie vielen der fünf Signale gerechnet wurde („aus 3 von 5 Signalen") — Pflicht, nicht Zierde; **(b)** die Normierung ist eine **pure Funktion mit Test** (`insightsOpportunity`), kein Rechenweg in einer Vorlage; **(c)** kommen Signale dazu, **ändert sich die Skala nicht**, nur die Fussnote. Eine 44 bleibt damit über Monate dieselbe 44 |
+| 3 | Gehört die Redaktion auf EINE Seite? | **Drei Adressen:** Liste, Editor, Radar | nach Empfehlung | §9.4 bleibt wie geschrieben. Die Untereinander-Ansicht war eine Prototyp-Hilfe, damit der Zusammenhang auf einen Bildschirm passt — sie ist kein Entwurf der Redaktions-Oberfläche |
+| 4 | Beitrag ohne redigierte Zielsprache in der Journal-Liste? | **Bleibt sichtbar**, mit dem Hinweis „Nur auf English" | nach Empfehlung | Ein vorhandener Beitrag, den die Liste verschweigt, ist für den Leser nicht von einem fehlenden zu unterscheiden. Ausgeblendet wird er erst, wenn der **Sprachfilter ausdrücklich gesetzt** ist. „Redigierte Zielsprache" heisst `translationReviewed === true` (§11 Frage 4 der Konzeptrunde) — eine unbestätigte Maschinenfassung zählt nicht als Fassung |
+| 5 | Reicht der Korrekturweg als Knopf am Seitenende? | **Ja — auf Profil, Duell und Ranking**, jeweils am Seitenende | nach Empfehlung | Drei Seiten, eine Stelle, ein Formular (`insights_corrections`, §9.3): überall dort, wo über eine **fremde** Marke etwas behauptet wird, steht der Weg zum Widerspruch am selben Ort. Kein eigener Menüpunkt, kein Banner. Kommt mit **I3** |
+
+### 11.3 Was jetzt bei David liegt
 
 Nichts davon hält den Prototyp I0 auf — er läuft im Playground gegen Dummy-Daten.
 
@@ -1294,7 +1422,12 @@ Nichts davon hält den Prototyp I0 auf — er läuft im Playground gegen Dummy-D
   (Verantwortlicher) geht **kein Markenprofil live** (§6). Die YouTube-Frage
   (BI1-2) ist Gate nur für alles über Metadaten hinaus.
 - **DB1-Rest** (D4/D5) — BI1 erbt von dort die öffentlichen Marken-Seiten.
-- **Prototyp-Abnahme I0** — Phase 4 des Workflows.
+- **Prototyp-Abnahme I0** — Phase 4 des Workflows. Runde 1 ist entschieden
+  (§11.2); offen ist die **Freigabe** — die sechs Bildschirme auf Port 3013.
+- **Products-Seite** — der Nav-Punkt „Products" zeigte im Klickdummy auf
+  `/products` und ist seit dem 404-Audit ausgeblendet. Entschieden am
+  2026-09-08: **eigenes kleines Vorhaben NACH Insights**, geparkt als **PS1**
+  in [OPEN-ITEMS.md](../OPEN-ITEMS.md) — es gehört nicht in BI1.
 
 ---
 

@@ -845,6 +845,65 @@ Karten-/Knopf-Texte, der Bild-Prompt samt vier Blickwinkeln (Entwurf des
 Baus). Offen: Preset-Anschluss `keptDrafts` (D8); Karten-Disclaimer nicht
 im SSR (Karten laden nach `onMounted`).
 
+**Stand D7 (Bewegung):** GEBAUT und geprüft 2026-09-09 (Commits b3e72002,
+b19ece83, a7179568) — das letzte der sechs Werkstatt-Kapitel. Pure Regeln
+`shared/brandDesignMotion.ts` (Tempo-Vorbelegung aus DNA `motion`, Tokens
+`motion.fast/base/slow` als Faktor 0,5/1/1,6 der Grunddauer + Stagger 60 ms,
+Übergangs-Liste mit Kurve je Zeile — auch in der Versatz-Zeile, weil Slot-
+Wert und Preset dieselbe Tabelle sind; kinetisches Zeichen mit ZWEI
+Optionen ja/nein (Konzept §2.7, D0-Vokabular, Prototyp — nicht drei wie im
+Auftrag), sechs Regeln inkl. Dauer-Deckel „nichts länger als motion.slow"
+und dem nicht abwählbaren `reduced-motion`-Satz), alle `l.*` ohne
+Generator. Bühne `BwMotionPanel` (drei Tempos als drei Szenen mit
+`playKey`, Token-Tabelle, Übergänge, kinetisches Zeichen mit Wortmarken-
+Probe, Regeln, Schalter „Weniger Bewegung simulieren"). Beweis 352/352
+(Abschnitt 30), 2 615 Tests; eigener Klick, gemessen an `--ds-dur`/
+`--ds-ease` der Szene: Ruhig 240 ms → Knapp 120 ms (cubic-bezier .4/0/.2/1)
+→ Lebendig 180 ms (.34/1.4/.64/1), Tokens 60/120/192 bzw. 90/180/288,
+Schalter ⇒ Text-Zustand „Werte: 240 ms · …", 0 verschachtelte Buttons.
+Nach Abnahme zeigt der Rail „6 von 6 Kapiteln", der Ergebnis-Punkt wird
+frei (zeigt bis D8 auf `foundation#visuell`). Inhalts-Gate: Tempo-Namen
+(Ruhig · Lebendig · Knapp) und Karten-Texte, Übergangs-Zwecke, die sechs
+Regel-Sätze, Setzung 800 ms für den Zeichen-Aufbau. Bestandsmuster: rohe
+Katalog-Ids („snappy", „yes") als Antworttext im Gespräch — D8 braucht
+dafür eine Lesefassung im Dokument.
+
+**Stand D8 (Kapitel 10 voll, Ergebnis-Board, Snapshot v2, Beispiel):**
+GEBAUT und geprüft 2026-09-09 (Commits b53944a3, bea1b1ef, 8b9897b3,
+b1cebaf2, a6ba1602). Preset aus der Wahrheit: `shared/brandDesignValues.ts`
+(Rückwege der sechs Kapitel ⇒ `buildBrandDesign`; die acht SVG-Setzungen
+werden GERECHNET, nicht aus `j.examples` gelesen; `BRAND_DESIGN_PRESET_SLOTS`
+= 17 Slots), `server/utils/brandDesignPreset.ts` (`null`, solange ein
+Kapitel nicht abgenommen; `keptDrafts` nur im privaten Preset, nie im
+Snapshot). Kapitel 10 = EIN Block-Typ `design` in `buildBrandFoundation`
+(verdrängt Schranke UND Richtung, Entwürfe nur als Zahl), Bausteine
+`BwDesignChapterBody` + `BwDesignBoard` (Port des Prototyps, Druck-CSS),
+Seite `/brand/:id/design` + Route `design.get.ts` (Sperr-Fläche „x von 6"
+ohne Preset), eine TOC-Regel `useBrandFoundationToc` mit fünf Unterankern
+(`visuell-farbwelt` …), Rail-Ergebnispunkt zeigt auf `/design`. Snapshot v2:
+`schemaVersion: 2` immer, `design`/`presetId`/`presetVersion` nur mit
+fertiger Schicht; Renderer fragt nach dem FELD (v1 lesbar); nur der Share-
+Link reicht das Preset durch, Discover-Veröffentlichung bewusst nicht
+(dauerhaft/indexierbar = eigene Entscheidung). Beispiel:
+`shared/examples/kailuaCoffeeDesign.ts` gerechnet aus `buildBrandDesign`.
+Nachzügler: acht Auswahl-Verträge für die Schicht-2-Ids (Lesefassung statt
+`snappy`/`yes`/`word` in Gespräch, Log-Karte, Dokument), „Frida, entwirf
+das" über `voice.name`, `isBrandMarkSvg` als Riegel vor `v-html`. Beweis
+381/381 (Abschnitt 31) + Share 47/47 mit fallender Gegenprobe 36/47,
+2 646 Tests; eigener Klick auf `/beispiel/kailua-coffee`: Kapitel 10 mit
+fünf Ankern, 13 SVGs, Token-Tabelle, kein Entwurfs-Hinweis (öffentlich),
+0 verschachtelte Buttons, 0 Fehler. Bewusst nicht: die sechs Design-Kapitel
+stehen NICHT als Abnahme-Karten in „Euer Branding" (Werte sind Ids/Hex/
+Tabellen — sie erscheinen als EIN Lese-Abschnitt); persistierte Chat-
+Historie zeigt bei Karten-Klicks weiter die rohe Id (Read-Path-Tausch =
+eigener kleiner Schnitt); `button-light`-Paar offen. Offene Frage: der
+Snapshot trägt die Design-Werte doppelt (Preset + rohe Slot-Werte in
+`chapters`, Registry-`shareable`) — gerendert wird nichts davon; ob die
+sechs Kapitel aus `chapters` fallen, sobald ein Preset dabei ist,
+entscheidet D9/David. Inhalts-Gate: Reihenfolge und Erklärsatz von Kapitel
+10, Board-Seite (Kopfzeile, rechte Spalte, Sperr-Fläche), Entwurfs-Hinweis,
+Beispiel-Briefing (Entwurf des Baus), acht Rückfragen der Auswahl-Verträge.
+
 | # | Paket | Inhalt | Gate |
 | --- | --- | --- | --- |
 | D0 | Verträge | Registry-Steps + Sessions (Struktur), Vokabulare, Font-Paar-Katalog, `BrandDesignPreset`, `buildBrandDesign`, Ramp-Import als Vertrag, Journey mit Freischaltung | — |

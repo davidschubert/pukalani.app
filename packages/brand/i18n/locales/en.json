@@ -908,8 +908,8 @@
         }
       },
       "generate": {
-        "start": "George, draft this",
-        "again": "George, try again",
+        "start": "{voice}, draft this",
+        "again": "{voice}, try again",
         "stop": "Stop",
         "hintPlaceholder": "Hint — e.g. warmer, shorter, less jargon",
         "hintLabel": "Hint for George",
@@ -2116,7 +2116,8 @@
       },
       "note": {
         "visuell": "Part of the foundation, but it takes shape in Brand Design — derived from everything above.",
-        "ki-texte": "A fixed frame filled with your own values — nothing invented, as current as the chapters above."
+        "ki-texte": "A fixed frame filled with your own values — nothing invented, as current as the chapters above.",
+        "visuellDone": "Decided in Brand Design — colour world, type pair, mark, imagery and motion, derived from everything above."
       },
       "visual": {
         "follows": "follows in Brand Design",
@@ -2245,6 +2246,47 @@
           "name": "Classic & Serious",
           "reason": "Slate, a classic serif, wide margins. It will look in ten years the way it looks today — that is the point."
         }
+      },
+      "design": {
+        "title": "Visual identity",
+        "stand": "As of {date}",
+        "farbwelt": "Colour world",
+        "typografie": "Typography",
+        "zeichen": "Mark",
+        "bildsprache": "Imagery",
+        "bewegung": "Motion",
+        "ramp": {
+          "light": "Light",
+          "dark": "Dark"
+        },
+        "board": {
+          "colors": "Colour world",
+          "type": "Typography",
+          "mark": "Mark",
+          "imagery": "Imagery",
+          "motion": "Motion"
+        },
+        "tileAlt": "Imagery principle, abstracted",
+        "markNote": "Settings built from your type pair and colour world — a brief for the design work, not a finished logo.",
+        "drafts": "1 kept AI draft | {count} kept AI drafts",
+        "draftsNote": "Drafts are ideas for the design work, not vetted logos. They stay private: they appear neither in the shared link nor in print.",
+        "boardHint": "The same board as its own view, printable:",
+        "boardLink": "Open visual identity",
+        "correctHint": "This board decides nothing. Corrections happen in the chapters — the way there is on the right.",
+        "eyebrow": "Result board",
+        "headline": "Your visual identity on one surface",
+        "lead": "Colour world, type pair, mark, imagery principles and motion. The same board heads chapter 10 of your brand foundation.",
+        "print": "Print / PDF",
+        "inDocument": "Read in the document",
+        "correctTitle": "Correct",
+        "correctLead": "Every area of the board belongs to a chapter. To change something, go there — the board follows.",
+        "privateTitle": "What is not here",
+        "privateLead": "Your references and the kept AI drafts. Both are private and travel neither into the board nor into the shared link.",
+        "lockedTitle": "Not finished yet",
+        "lockedLead": "The board appears once all six Brand Design chapters are signed off.",
+        "lockedProgress": "{done} of {total} chapters",
+        "toChapter": "Continue in Brand Design",
+        "progressTitle": "Brand Design"
       }
     },
     "session": {
@@ -2559,7 +2601,8 @@
           "title": "Similar brands",
           "all": "See all",
           "archetype": "same archetype",
-          "palette": "same colour world"
+          "palette": "same colour world",
+          "industry": "same industry"
         },
         "cta": {
           "body": "Like how this is built? Brands are not templates — but the road there is open to you.",
@@ -2925,6 +2968,52 @@
         "title": "Do & Don’t",
         "tag": "k.dodont · computed from your three decisions",
         "intro": "Six pairs: the four axes of your principle plus illustration and icons. Every do has its do-not — the pair is what makes the rule checkable."
+      }
+    },
+    "motion": {
+      "tempo": {
+        "title": "Tempo",
+        "tag": "l.tempo · from your DNA",
+        "intro": "Nobody reads a tempo, you see it. The three versions stand side by side and run at the same time — hit “Play the transition” and decide which one looks like you.",
+        "proposed": "From your DNA",
+        "play": "Play the transition",
+        "reduced": "Simulate reduced motion",
+        "reducedOn": "Reduced motion: on",
+        "note": {
+          "calm": "Slow to start, gentle to settle. It reads as calm and certain — and a little unhurried.",
+          "lively": "Shorter, with a slight overshoot: awake and friendly, but restless on long pages.",
+          "snappy": "Almost no run-up. It reads as efficient and takes some of the calm out of the brand."
+        }
+      },
+      "transitions": {
+        "title": "Transitions",
+        "tag": "l.transitions · three durations, one offset",
+        "intro": "More tokens means more arguing in the team. Three are enough — they all hang on the tempo above and change with it. These exact names go into the manual and into the code.",
+        "col": {
+          "token": "Token",
+          "duration": "Duration",
+          "easing": "Curve",
+          "usage": "What for"
+        }
+      },
+      "scene": {
+        "title": "In the product",
+        "intro": "The same surface in the chosen tempo: cards fade in with an offset, the button reacts on hover. Light and dark you switch on the scene itself.",
+        "note": "Everything here runs on a base duration of {duration}. The switch above shows what people see who have set reduced motion in their operating system — the end state simply stands."
+      },
+      "logo": {
+        "title": "Kinetic mark",
+        "tag": "l.logo",
+        "intro": "Does your mark move? A yes costs one more file somebody has to maintain — and a version without movement. A no is a decision, not an omission.",
+        "note": {
+          "no": "The mark stands still — in an intro as well. It saves a file nobody would keep up to date.",
+          "yes": "An 800 ms build for intros and loading screens. After that the mark stands; inside body copy it never moves."
+        }
+      },
+      "rules": {
+        "title": "Motion rules",
+        "tag": "l.rules · from your two decisions",
+        "intro": "Six sentences, each one checkable on a real page. The last line always applies and cannot be switched off: reduced motion means the end state, not slow motion."
       }
     },
     "scene": {

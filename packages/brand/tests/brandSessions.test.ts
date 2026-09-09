@@ -406,6 +406,12 @@ describe('evaluateInvariants — was ein Test prüfen kann (§3a Nr. 6)', () => 
       // Satz stünde sonst bestätigt im Slot und im Preset.
       ['k.illustration', [{ kind: 'oneOf', terms: ['none', 'line', 'area', 'organic'] }]],
       ['k.icons', [{ kind: 'oneOf', terms: ['regular', 'fill', 'bold'] }]],
+      // Brand Design D7: Tempo und kinetisches Zeichen. Auch sie halten eine
+      // Katalog-Id — und beim Tempo hängt daran mehr als eine Anzeige: ohne
+      // gültige Id findet `buildBrandDesign` weder Dauer noch Kurve und liefert
+      // `null`, obwohl das Kapitel abgeschlossen wäre.
+      ['l.tempo', [{ kind: 'oneOf', terms: ['calm', 'lively', 'snappy'] }]],
+      ['l.logo', [{ kind: 'oneOf', terms: ['no', 'yes'] }]],
     ])
   })
 

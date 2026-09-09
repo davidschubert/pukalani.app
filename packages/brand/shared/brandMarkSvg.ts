@@ -72,6 +72,25 @@ export interface BrandMarkSvgOptions {
   readonly title?: string
 }
 
+/**
+ * IST DAS EINE SETZUNG AUS DIESER DATEI? (Brand Design D8)
+ *
+ * Die Setzungen stehen als fertige Zeichenketten im PRESET und werden von der
+ * Oberfläche mit `v-html` gesetzt — im Kapitel 10, im Ergebnis-Board und, das
+ * ist der Punkt, aus einem EINGEFRORENEN Snapshot. Was aus einer Ablage kommt,
+ * wird geprüft, bevor es als Markup gilt: eine Zeichenkette, die nicht mit
+ * `<svg` beginnt oder ein `<script` enthält, ist keine Setzung dieser Datei
+ * und wird nicht gerendert.
+ *
+ * Sie ersetzt die Escapes NICHT (der Markenname bleibt escaped, s. u.): sie ist
+ * die zweite Masche für den Fall, dass jemals etwas anderes als diese Datei in
+ * das Feld schreibt.
+ */
+export function isBrandMarkSvg(value: string): boolean {
+  const text = value.trim()
+  return text.startsWith('<svg') && text.endsWith('</svg>') && !/<\s*script/i.test(text)
+}
+
 /** Text für den XML-Inhalt entschärfen (s. Kopf: die einzige fremde Eingabe). */
 export function escapeXml(value: string): string {
   return value
