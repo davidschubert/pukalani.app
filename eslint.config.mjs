@@ -40,7 +40,7 @@ const FOUNDATION = ['core', 'system', 'moderation', 'admin', 'billing', 'themes'
 // unten — enger als onboarding/control, weil er in Apps läuft, die den
 // control-Layer gar nicht mitliefern und ihn deshalb auch nicht kennen dürfen.
 const SEAM = ['blueprint', 'onboarding', 'control', 'domains']
-const PRODUCTS = ['comments', 'posts', 'events', 'courses', 'tickets', 'runner', 'feedback', 'media', 'activity', 'pages', 'analytics', 'messages', 'brand', 'market']
+const PRODUCTS = ['comments', 'posts', 'events', 'courses', 'tickets', 'runner', 'feedback', 'media', 'activity', 'pages', 'analytics', 'messages', 'brand', 'market', 'insights']
 
 // Stimmt die Aufteilung noch mit dem Dateisystem überein? Ein neuer Layer ohne
 // Topf soll den Lint SOFORT brechen — sonst wächst wieder eine stille Lücke.
@@ -286,6 +286,15 @@ export default createConfigForNuxt({
    * von dort. Die Regel hier kann das nicht erzwingen — sie erlaubt den
    * Ziel-Layer, nicht die Quelldatei —, aber der Kopf jener Datei sagt es,
    * und eine zweite Sprungstelle fällt in der Durchsicht auf.
+   */
+  /**
+   * KEINE DRITTE AUSNAHME FÜR `insights` — NOCH NICHT (BI1, Paket I0).
+   * Der Layer trägt dasselbe `requires: ['brand']` wie `market`, importiert
+   * aber im Prototyp NICHTS aus einem fremden Layer: was dem brand-Layer
+   * gehört (Score-Ring, Farbwelt, Archetyp-Namen), kommt als Prop oder Slot
+   * in die `In*`-Komponenten. Die Ausnahme kommt mit I1 zusammen mit dem
+   * Vertrag in `packages/insights/server/contracts/` — vorher wäre sie eine
+   * Erlaubnis für etwas, das es nicht gibt.
    */
   files: ['packages/market/**'],
   rules: {
