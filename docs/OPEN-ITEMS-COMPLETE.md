@@ -60,7 +60,12 @@ sechs Einträge, Kartenfarbe, liegt oben auf — per `elementFromPoint` geprüft
 Wächter nach Rebase: manifests 26/9, i18n-keys 304/18 Felder, doc-links,
 Lint core/brand/branding, Typecheck core/branding, core 1623 Tests, brand 2769,
 branding 28. Davids Freigabe 2026-09-09 (Prototyp = echte Seiten; Brand-Check
-im Aufklapper auf die Marketing-Seite, wie gebaut).
+im Aufklapper auf die Marketing-Seite, wie gebaut). **Prod-Beweis:** Deploy-Lauf
+34409516032, `https://branding.supply/api/health` → `.build` = **66110cbe**;
+live `/products`, `/products/market-comparison`, `/de/produkte`,
+`/de/produkte/marktvergleich`, `/de/produkte/brand-book-kit` → 200,
+`/de/products` → 302 auf `/de/produkte`; Aufklapper live 544 × 280 px, sechs
+Links auf `/de/produkte/…`, Preis-Zeile „149 € netto je Branding, einmalig".
 
 **Gelernt:** (1) Der Nuxt-UI-Aufklapper (`UNavigationMenu`, waagerecht) wird
 nie breiter als die Menüleiste: Reka misst `--reka-navigation-menu-viewport-
