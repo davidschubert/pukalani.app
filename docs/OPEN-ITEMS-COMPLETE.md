@@ -59,7 +59,10 @@ per Server-SDK, Dev-Projekt portfolio-g4ml, Test-User `paket6-klickbeweis` mit L
 Reload, nach Reload persistent, Editor zeigt Ausgeblendetes gedimmt, ⌘K findet es weiter,
 Zurücksetzen ⇒ Ausgangslage; Gegenproben ungültige Id 400, 101 Ids 400, ohne Session 401,
 unbekannte Id angenommen und wirkungslos. Alle Gates grün (test/lint/typecheck/i18n-keys/
-single-copy/manifests/bilanz/lint:scripts).
+single-copy/manifests/bilanz/lint:scripts). LIVE: Build 5bbb3b8f auf branding.supply (`/api/health`),
+Klick hinter dem Login (Davids Chrome, de): „Warteliste" ausblenden + „Website" hoch + Speichern
+⇒ PUT 200, Seitenleiste ohne Reload „Übersicht · Website · Seiten · Management · …";
+Zurücksetzen ⇒ `dashboardNav: null`, Ausgangslage zurück.
 
 **Gelernt:** (1) **`$fetch` mit `body: null` schickt GAR KEINEN Body** — die Route sah `undefined`
 und antwortete 400; „Zurücksetzen" schickt deshalb `{}`, und ein FEHLENDER Body bleibt bewusst 400
