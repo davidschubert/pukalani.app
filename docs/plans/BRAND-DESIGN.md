@@ -845,6 +845,29 @@ Karten-/Knopf-Texte, der Bild-Prompt samt vier Blickwinkeln (Entwurf des
 Baus). Offen: Preset-Anschluss `keptDrafts` (D8); Karten-Disclaimer nicht
 im SSR (Karten laden nach `onMounted`).
 
+**Stand D7 (Bewegung):** GEBAUT und geprüft 2026-09-09 (Commits b3e72002,
+b19ece83, a7179568) — das letzte der sechs Werkstatt-Kapitel. Pure Regeln
+`shared/brandDesignMotion.ts` (Tempo-Vorbelegung aus DNA `motion`, Tokens
+`motion.fast/base/slow` als Faktor 0,5/1/1,6 der Grunddauer + Stagger 60 ms,
+Übergangs-Liste mit Kurve je Zeile — auch in der Versatz-Zeile, weil Slot-
+Wert und Preset dieselbe Tabelle sind; kinetisches Zeichen mit ZWEI
+Optionen ja/nein (Konzept §2.7, D0-Vokabular, Prototyp — nicht drei wie im
+Auftrag), sechs Regeln inkl. Dauer-Deckel „nichts länger als motion.slow"
+und dem nicht abwählbaren `reduced-motion`-Satz), alle `l.*` ohne
+Generator. Bühne `BwMotionPanel` (drei Tempos als drei Szenen mit
+`playKey`, Token-Tabelle, Übergänge, kinetisches Zeichen mit Wortmarken-
+Probe, Regeln, Schalter „Weniger Bewegung simulieren"). Beweis 352/352
+(Abschnitt 30), 2 615 Tests; eigener Klick, gemessen an `--ds-dur`/
+`--ds-ease` der Szene: Ruhig 240 ms → Knapp 120 ms (cubic-bezier .4/0/.2/1)
+→ Lebendig 180 ms (.34/1.4/.64/1), Tokens 60/120/192 bzw. 90/180/288,
+Schalter ⇒ Text-Zustand „Werte: 240 ms · …", 0 verschachtelte Buttons.
+Nach Abnahme zeigt der Rail „6 von 6 Kapiteln", der Ergebnis-Punkt wird
+frei (zeigt bis D8 auf `foundation#visuell`). Inhalts-Gate: Tempo-Namen
+(Ruhig · Lebendig · Knapp) und Karten-Texte, Übergangs-Zwecke, die sechs
+Regel-Sätze, Setzung 800 ms für den Zeichen-Aufbau. Bestandsmuster: rohe
+Katalog-Ids („snappy", „yes") als Antworttext im Gespräch — D8 braucht
+dafür eine Lesefassung im Dokument.
+
 | # | Paket | Inhalt | Gate |
 | --- | --- | --- | --- |
 | D0 | Verträge | Registry-Steps + Sessions (Struktur), Vokabulare, Font-Paar-Katalog, `BrandDesignPreset`, `buildBrandDesign`, Ramp-Import als Vertrag, Journey mit Freischaltung | — |
