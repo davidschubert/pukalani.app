@@ -223,6 +223,73 @@ widersprechen sich Text und Maß beim ersten Nachschnitt.
 
 ---
 
+### Klick-Test-Befunde 13–18: Modal nie Demo, Anrede nach Weiche, Leiste hakt sofort, Kapitel-Reihenfolge, Session-Abschluss „George führt", Notizblock-Knöpfe ✅ 2026-09-09
+
+**Was:** Davids eigener Durchgang als Testnutzer an einer neuen Marke (Freelancer Supply), direkt
+nach den Kailua-Läufen. Sechs Befunde, drei davon Produktentscheidungen (DECISION-LOG 2026-09-09
+(9) und (10)), alle am selben Tag gebaut und live; dazu zwei Nachzüge und eine Wortlaut-Entscheidung.
+- **13 — Modal führte in die Demo** (`4413b5cd`): „Neues Branding" aus dem Avatar-Menü landete auf dem
+  Klickdummy `/brand/demo/werte`. `BwNewBrandModal` hatte `mode: 'demo'` als VOREINSTELLUNG, und
+  BwSiteNav + BwBrandSwitcher übergaben keinen Modus (Altbestand seit 2026-09-03; der Befund-6-Lauf
+  hatte nur die drei Aufrufer umgebaut, die „live" schon sagten). Jetzt beide über `useBrandCreate`,
+  Voreinstellung `live`, nur der Playground sagt `mode="demo"`.
+- **14 — „ihr" für einen Solo-Gründer** (`34a3ef7c`, `converse-13`): die Team-Weiche W3 erreichte nur
+  die Feld-Beschriftungen (`brandSlotPromptLabel`), nie den Auftrag. Jetzt `addressLines`: solo ⇒ eine
+  Person im Singular (du/dich/dein, keine erfundenen Mitgründer), team ⇒ ihr/euch/euer; ohne Weiche
+  bleibt der Auftrag wie zuvor. Route reicht `profileFacts(profile).team` durch; Route-Test am Solo-
+  Profil.
+- **15 — Leiste hakte erst nach Reload ab** (`86537da6`): die PATCH-Antwort trägt Slots + `revision`,
+  aber keine Session-Zustände (rechnet der Server nur im vollen Abruf). Der Autosave lädt nach einem
+  Rumpf mit Bestätigung `refreshStep` (Gespräch und offene Eingabe bleiben); bestätigte Sessions zeigen
+  keine Minuten mehr („die Zeit verschwindet hinten dran").
+- **16 — Ableitungen vor den Fragen verwirrten** (`953c0261` + `6770a2ce`, Entscheidung (9), gegen
+  die Empfehlung „nur Kontext"): ALLE Kapitel geprüft. Fünf umgebaut (context, pvm, verbal, imagery,
+  motion), Trenner „Daraus abgeleitet" in Leiste, Abnahme und Dokument; pure Regel
+  `brandSessionGroups.ts` + Wächter `validateSessionOrder` (saubere Teilung ODER nachgewiesene
+  blockierende Abhängigkeit). Sieben Kapitel bleiben gemischt, weil eine Frage aus einer Ableitung
+  schöpft; in archetype/manifesto rücken die abhängigkeitsfreien Menschenfragen trotzdem vor
+  (Nachfrage, nach Empfehlung), color bleibt begründet (beide Fragen schöpfen aus h.base). Session-
+  Inhalte-Referenz zweimal über `print:sessions` neu erzeugt (reiner Reorder).
+- **17 — Session-Abschluss: George führt** (`b39eaeb0`, `converse-14`, Entscheidung (10)): der Auftrag
+  kennt jetzt den Session-Zustand (`sessionConfirmed`) — bestätigt ⇒ kein Bohren; unbestätigt ⇒
+  Marker `CONFIRM:` als Bedienelement (Knöpfe „Passt so, bestätigen" / „Ich ergänze noch etwas", Texte
+  aus dem Katalog). Abschlusszug `closing` nur bei bestätigter Session: würdigen, Übersprungene nennen
+  (`skippedSessionsBetween`, gesperrte fallen weg), Ziel aus `resolveNextStop` als Beschriftung — die
+  Bühne rendert „Weiter zu …", ohne Ziel zur Finalen Abnahme. Eröffnungszug spiegelt ein bis zwei Sätze
+  Bekanntes (`chapterAnswers`). Der Auto-Sprung nach Bestätigung UND nach jeder Antwort entfällt (er
+  hätte die Knöpfe unklickbar gemacht); nur die Eröffnung einer Entwurfs-Session springt weiter (8).
+  Neu gefunden: ohne `?s=` rechnete die Bühne nach der Bestätigung still die nächste Session —
+  `pinSession` hält sie in der Adresse. Davids Rückfrage „wohin, wenn das Nächste schon beantwortet
+  ist?" beantwortet die Regel, nicht George: übersprungen wird, was bestätigt/vertagt ist, und George
+  spricht es aus.
+- **18 — leere Karten sagten „Korrigieren"** (`b39eaeb0`): pure Regel `brandLogCardAction` — leer +
+  Frage „Beantworten", leer + Ableitung „Entwerfen" (beide springen per `?s=` in die Session), mit Wert
+  „Korrigieren"; Bestätigen bleibt leer deaktiviert mit Hinweis.
+- **Nachzüge:** sieben Werkstatt-Texte sprechen mit der Stimme des Kapitels (`{voice}`, in Design-
+  Kapiteln Frida; `95533300`); die fünf Drossel-Meldungen sind stimmneutral (Davids Wortlaut-
+  Entscheidung: die Grenze gehört dem Werkzeug, nicht der Person). Startseite: der Kailua-Teaser führt
+  auf `/discover/kailua-coffee-co`, `/beispiel/kailua-coffee` (de+en) antwortet 301, Alt-Seite und
+  ihr i18n-Block entfernt, Sitemap führt den Pfad als bewussten Ausschluss.
+
+**Live-Beweise:** Builds `54737e39` (14/15), `953c0261` + `6d787e2e` (16), `b39eaeb0` (17/18),
+`d1e04658` (Nachzüge: `/de/beispiel/kailua-coffee` → 301 auf `/de/discover/kailua-coffee-co`, en
+ebenso, Startseite verlinkt die Anatomie). Gates je Commit: brand 2755 → 2824 Tests, branding 28,
+Lint, Typecheck, i18n-Keys, Bilanz. Die Wizard-Fixes liegen hinter dem Login — Davids Durchgang durch
+den Session-Abschluss steht in OPEN-ITEMS BW1.
+
+**Gelernt:** (1) Eine Attrappe darf nie die Voreinstellung sein — der Demo-Zweig einer Komponente ist
+eine ausdrückliche Wahl, und „an drei Orten" heißt grep über ALLE Render-Stellen. (2) Eine Weiche, die
+nur Beschriftungen erreicht, ist für den Auftrag unsichtbar; jede Produktwahl, die das Gespräch
+prägen soll, braucht eine ausformulierte Regel je Fall (du/ihr), nicht „address them correctly".
+(3) Ein Deploy kann RÜCKWÄRTS laufen: bei parallelen Wellen gewinnt die ältere in Arbeit, die neueren
+werden abgebrochen — der Wächter prüft deshalb Vorfahrschaft, nicht Gleichheit, und meldet den
+Zwischenstand ehrlich. (4) Navigation ist eine Regel, kein Modell-Urteil: „wohin weiter" rechnet der
+Server deterministisch, George spricht nur aus, was die Regel sagt. (5) Der Testnutzer sieht die
+Registry-Reihenfolge als Erzählung — Ableitungen vor Fragen lasen sich wie übersprungene Fragen; die
+Ordnung der Registry ist Produkt, nicht Implementierungsdetail.
+
+---
+
 ### Kailua-Befunde 1–6: kein 409 gegen leere Serverfassung, Zähler aus dem Server-Stand, Sammel-Wert gehört dem Server, Anlage-Modal springt in die Werkstatt ✅ 2026-09-09
 
 **Was:** Die sieben Bedien-Befunde aus dem ERSTEN Kailua-Wizard-Lauf (2026-09-08). Davids
