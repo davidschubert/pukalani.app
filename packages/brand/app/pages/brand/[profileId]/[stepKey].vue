@@ -78,6 +78,12 @@ import {
   type BrandSlotControls,
   brandSlotControls,
 } from '../../../../shared/brandSlotControls'
+import {
+  type BrandStageClaim,
+  type BrandStageModule,
+  brandStageAwaitsDraftAnswer,
+  brandStageClaim,
+} from '../../../../shared/brandStageModule'
 import type {
   BrandFindingDecisionResponse,
   BrandFindingView,
@@ -500,6 +506,60 @@ const nextQuestion = computed(() =>
   (stepKey.value ? resolveNextQuestion(stepKey.value, slotFacts.value) : null))
 
 /**
+ * ── DAS BEREITSCHAFTS-GATE, SCHON VOR DEM KLICK ──────────────────────────
+ * Dieselbe pure Regel wie in der Route (`slotReadiness`), aus denselben
+ * Quellen. Die Route ist die Durchsetzung, das hier ist die Ehrlichkeit:
+ * statt eines Knopfes, der gleich ein 409 kassiert, steht da ein Satz, WAS
+ * fehlt. `coveredSteps` ist bewusst nur der GELADENE Baustein — Quell-Slots
+ * anderer Bausteine kennt der Browser nicht, und die Regel lässt im Zweifel
+ * durch (der Server prüft mit allen neun Zeilen).
+ *
+ * SIE STEHT HIER OBEN, weil `stageClaim` sie braucht und `nextSlot` wiederum
+ * `stageClaim` — und `nextSlot` wird über `turns` vom Scroll-Watcher schon
+ * beim ANLEGEN ausgewertet (s. den TDZ-Hinweis an `completion`). Weiter unten
+ * bei den Karten stehend wäre sie genau der Prod-500 vom 2026-09-03.
+ */
+const slotValues = computed<Record<string, string>>(() => {
+  const values: Record<string, string> = {}
+  for (const id of new Set([...Object.keys(store.serverSlots), ...Object.keys(store.localEdits)])) {
+    values[id] = store.slotValue(id)
+  }
+  return values
+})
+
+function readinessOf(slot: BrandSlot): BrandSlotReadiness {
+  return slotReadiness(slot.id, {
+    startCard: store.profile?.startCard ?? { websiteUrl: '', industry: '', about: '', audience: '' },
+    hasSiteAnalysis: Boolean(store.profile?.siteAnalysis.analyzedAt),
+    records: slotValues.value,
+    coveredSteps: store.stepKey ? [store.stepKey] : [],
+  })
+}
+
+/**
+ * DIE AKTIVE SESSION BEANSPRUCHT IHRE EIGENE BÜHNE (Kailua-Befund 5, Weg B).
+ *
+ * Die Regel steht pur nebenan (`brandStageClaim`) samt Begründung; hier werden
+ * nur die fünf Tatsachen zusammengetragen. `canGenerate` ist WÖRTLICH
+ * `showGenerate` aus `brandSlotControls` (generierbar UND bereit) — dieselbe
+ * Rechnung wie auf der Karte, damit Modul und Knopf nie auseinanderlaufen.
+ */
+const stageClaim = computed<BrandStageClaim | null>(() => {
+  const active = activeSlot.value
+  if (!active) return null
+  const generatable = active.generator !== 'none'
+  return brandStageClaim({
+    id: active.id,
+    type: active.type,
+    confirmable: slotIsConfirmable(active),
+    generatable,
+    canGenerate: generatable && readinessOf(active).ready,
+    hasValue: store.slotValue(active.id).length > 0,
+    confirmed: store.slotConfirmed(active.id),
+  })
+})
+
+/**
  * MUSS VOR `turns` DEKLARIERT SEIN (Prod-500 am 2026-09-03): `turns` liest
  * `completion`, und der Scroll-Watcher (`watch(() => turns.value.length)`)
  * wertet seine Quelle beim ANLEGEN aus — im Browser also mitten im Setup.
@@ -526,13 +586,18 @@ const completion = computed(() =>
  * rechnet weiter seine eigene Reihenfolge und verwirft einen Wortlaut, der
  * nicht dazu passt (`nextQuestionKnown: false`) — das ist die bestehende,
  * gewollte Arbeitsteilung, nicht ein Nebeneffekt dieser Änderung.
+ *
+ * ── UND SEIT WEG B: EINE ENTWURFS-SESSION HAT HIER GAR KEINE FRAGE ────────
+ * Beansprucht die aktive Session die Bühne mit ihrem Entwurfs- oder
+ * Bestätigungs-Modul, ist `null` die richtige Antwort — NICHT die nächste
+ * Katalog-Frage des Kapitels. Genau die stand vorher hier: Session `a.pitch`,
+ * Bühnen-Frage `a.origin`, und dieselbe fremde Id reiste als `nextSlotId` in
+ * den Gesprächs-Zug (Kailua-Befund 5, Nebenbefund).
  */
 const nextSlot = computed<BrandSlot | null>(() => {
-  const active = activeSlot.value
-  if (active
-    && (active.type === 'question' || active.type === 'choice')
-    && !slotFacts.value[active.id]?.hasValue) {
-    return active
+  const claim = stageClaim.value
+  if (claim) {
+    return claim.module === 'answer' || claim.module === 'options' ? activeSlot.value : null
   }
   return slots.value.find(slot => slot.id === nextQuestion.value?.slotId) ?? null
 })
@@ -583,6 +648,31 @@ const turns = computed<StageTurn[]>(() => {
     // eure Überzeugung?" / „Meine Fragen sind durch" (Davids
     // Durchspiel-Audit 2026-09-03, Pukalani Studio pvm).
     if (busy || conversation.spoke.value || spoken.length > 0) return spoken
+    /**
+     * DIE BÜHNE SITZT AUF EINER ENTWURFS-SESSION (Kailua-Befund 5, Weg B) —
+     * dann gehört der Satz IHR, und zwar allein.
+     *
+     * „Meine Fragen sind durch" wäre hier eine glatte Falschaussage: das
+     * Kapitel kann zehn offene Fragen haben, sie sind nur gerade nicht dran
+     * (`nextSlot` ist `null`, WEIL die aktive Session die Bühne beansprucht).
+     * Genannt wird das Feld der SESSION, nicht das erste offene Pflicht-Feld
+     * des Kapitels — das wäre wieder ein fremdes.
+     */
+    const claim = stageClaim.value
+    if (claim && (claim.module === 'draft' || claim.module === 'confirm')) {
+      const slot = slots.value.find(entry => entry.id === claim.slotId)
+      if (slot) {
+        const hasValue = store.slotValue(slot.id).trim().length > 0
+        return [...spoken, {
+          id: 'done',
+          role: 'george',
+          text: t(
+            `brand.workspace.george.${hasValue ? 'nextConfirm' : 'nextDraft'}`,
+            { field: slotLabel(slot) },
+          ),
+        }]
+      }
+    }
     // „Keine Frage mehr" ist NICHT „nichts mehr offen" (brandJourney.ts erklärt
     // die zwei Fragen): Bühnen-Entwürfe wie `b.mission` stellt George nie als
     // Frage. Solange solche Pflicht-Felder unbestätigt sind, behauptete der
@@ -1341,32 +1431,6 @@ watch([routeStepKey, activeSessionKey], () => {
   staleHidden.value = false
 })
 
-/**
- * ── DAS BEREITSCHAFTS-GATE, SCHON VOR DEM KLICK ──────────────────────────
- * Dieselbe pure Regel wie in der Route (`slotReadiness`), aus denselben
- * Quellen. Die Route ist die Durchsetzung, das hier ist die Ehrlichkeit:
- * statt eines Knopfes, der gleich ein 409 kassiert, steht da ein Satz, WAS
- * fehlt. `coveredSteps` ist bewusst nur der GELADENE Baustein — Quell-Slots
- * anderer Bausteine kennt der Browser nicht, und die Regel lässt im Zweifel
- * durch (der Server prüft mit allen neun Zeilen).
- */
-const slotValues = computed<Record<string, string>>(() => {
-  const values: Record<string, string> = {}
-  for (const id of new Set([...Object.keys(store.serverSlots), ...Object.keys(store.localEdits)])) {
-    values[id] = store.slotValue(id)
-  }
-  return values
-})
-
-function readinessOf(slot: BrandSlot): BrandSlotReadiness {
-  return slotReadiness(slot.id, {
-    startCard: store.profile?.startCard ?? { websiteUrl: '', industry: '', about: '', audience: '' },
-    hasSiteAnalysis: Boolean(store.profile?.siteAnalysis.analyzedAt),
-    records: slotValues.value,
-    coveredSteps: store.stepKey ? [store.stepKey] : [],
-  })
-}
-
 /** Die Bedarfs-Schlüssel tragen Punkte (`startcard.about`), i18n-Knoten nicht. */
 const READINESS_KEYS: Record<BrandReadinessNeed, string> = {
   'startcard.about': 'startcardAbout',
@@ -1456,19 +1520,6 @@ const generationNotice = computed<string | null>(() => {
 // ── Das Antwort-Modul im Zug ──────────────────────────────────────────────
 
 /**
- * GENAU EIN MODUL IST DRAN — die Bühne fragt nie zwei Dinge gleichzeitig.
- *
- * 'answer'  offene Menschenfrage → Beispiel-Link, geantwortet wird im Prompt
- * 'options' offene Auswahl       → volle Zeilen, „Übermitteln" unten rechts
- * 'draft'   George entwirft/hat entworfen → Nochmal · Korrigieren · Übernehmen
- * 'confirm' es steht ein Text, der nur noch bestätigt werden muss
- * 'gate'    alle Pflicht-Slots bestätigt → die Konfidenz-Weiche
- * 'none'    nichts offen und nichts zu bestätigen (kommt praktisch nur vor,
- *           während der Baustein gerade abgeschlossen wird)
- */
-type StageModule = 'answer' | 'options' | 'draft' | 'confirm' | 'gate' | 'none'
-
-/**
  * WELCHE KARTE DIE BÜHNE ZEIGT — die AKTIVE Session, sonst der erste
  * Pflicht-Slot ohne Bestätigung (Registry-Reihenfolge).
  *
@@ -1485,30 +1536,6 @@ const pendingCard = computed<BrandSlotCard | null>(() => {
   }
   const first = completion.value?.missingRequired[0]
   return first ? cardFor(first) : null
-})
-
-/**
- * DIE AKTIVE ABLEITUNG GEHT VOR (Brand Design D2c, am Klick-Beweis gefunden).
- *
- * `nextSlot` liefert immer die erste unbeantwortete FRAGE des Kapitels, und
- * solange es eine gibt, zeigt die Bühne deren Modul. Für eine Ableitung, die
- * WEITER VORNE steht, hiess das: sie bekam nie ihren Übernehmen-Knopf. Im
- * Kapitel `dna` ist das kein Sonderfall, sondern die Regel — `g.dna`,
- * `g.boards` und `g.reading` stehen alle vor der Board-Wahl, und der Mensch
- * kam an keiner davon vorbei.
- *
- * Die Bedingung ist eng gehalten, damit sie nichts Bestehendes verschiebt:
- * sie greift NUR, wenn der Mensch die Session selbst angesteuert hat (`?s=`),
- * sie bestätigbar und KEINE Frage ist (Fragen haben ihr eigenes Modul), sie
- * schon einen Wert trägt und noch nicht bestätigt ist. Ohne Wert bleibt es bei
- * der nächsten Frage — eine leere Karte mit einem Knopf, der nichts übernimmt,
- * wäre der schlechtere Zustand.
- */
-const activeAwaitsConfirm = computed(() => {
-  const active = activeSlot.value
-  if (!active || !slotIsConfirmable(active)) return false
-  if (active.type === 'question' || active.type === 'choice') return false
-  return store.slotValue(active.id).length > 0 && !store.slotConfirmed(active.id)
 })
 
 /**
@@ -1539,10 +1566,22 @@ function renderedAbove(slotId: string): boolean {
   return RENDERED_ABOVE.has(slotId)
 }
 
-const stageModule = computed<StageModule>(() => {
-  if (activeAwaitsConfirm.value && pendingCard.value) {
-    return pendingCard.value.controls.showGenerate ? 'draft' : 'confirm'
-  }
+/**
+ * WELCHES MODUL DIE BÜHNE ZEIGT — die Rangfolge in drei Zeilen.
+ *
+ * 1. DIE AKTIVE SESSION, wenn sie die Bühne beansprucht (`brandStageClaim`,
+ *    pur und dort begründet). Das ist die Vorfahrt aus Weg B: die Bühne zeigt
+ *    das Modul des Feldes, auf dem der Mensch sitzt — nie das eines anderen.
+ * 2. SONST die nächste Katalog-Frage des Kapitels (Grundfassung).
+ * 3. SONST das erste offene Pflicht-Feld, und ganz zuletzt die Weiche.
+ *
+ * `pendingCard` bleibt daneben stehen: sie beantwortet die zweite Frage —
+ * WELCHE Karte das Modul rendert. Für einen Anspruch der aktiven Session ist
+ * das dieselbe Session (beide fragen `activeSlot`), für die Zeilen 2/3 das
+ * erste offene Pflicht-Feld.
+ */
+const stageModule = computed<BrandStageModule>(() => {
+  if (stageClaim.value && pendingCard.value) return stageClaim.value.module
   if (nextSlot.value) return nextSlot.value.type === 'choice' ? 'options' : 'answer'
   if (completion.value && !completion.value.slotsReady) {
     const card = pendingCard.value
@@ -1551,6 +1590,20 @@ const stageModule = computed<StageModule>(() => {
   }
   return completion.value?.slotsReady ? 'gate' : 'none'
 })
+
+/**
+ * DAS ANTWORT-MODUL EINER ENTWURFS-SESSION (Kailua-Befund 5, Weg B).
+ *
+ * Steht auf einer Entwurfs-Session noch nichts, zeigt die Bühne Georges Frage
+ * zu GENAU DIESEM Feld und ein Eingabefeld darunter. Der getippte Text ist
+ * kein Chat-Zug und wird kein Feldwert: er reist als HINWEIS in
+ * `generateSlot()` — dieselbe Mechanik wie „Nochmal, mit Hinweis", nur ohne
+ * den Umweg über einen Knopf, den es beim ersten Mal noch gar nicht gibt.
+ */
+const stageAwaitsDraftAnswer = computed(() => brandStageAwaitsDraftAnswer(
+  stageClaim.value,
+  stageClaim.value ? store.slotValue(stageClaim.value.slotId).length > 0 : false,
+))
 
 /**
  * „JETZT WÄRE DER ENTWURF DRAN" (Davids Befund 8b, 2026-09-09).
@@ -3432,7 +3485,44 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
                       ? t('brand.dna.card.above')
                       : slotDisplayValue(pendingCard.slot.id, store.slotValue(pendingCard.slot.id)) }}
                   </p>
+                  <!-- DAS ANTWORT-MODUL EINER ENTWURFS-SESSION (Kailua-Befund
+                       5, Weg B): „Noch offen — kommt im Gespräch" zeigte auf
+                       ein Gespräch, in dem nichts entstand — für diese Felder
+                       gibt es keine Katalog-Frage, also fragte niemand. Jetzt
+                       steht hier Georges Frage zu GENAU diesem Feld, und die
+                       Antwort darunter steuert den Entwurf. -->
+                  <template v-else-if="stageAwaitsDraftAnswer">
+                    <p class="mt-3">
+                      {{ t('brand.workspace.stage.draftAnswer', { voice: voice.name, field: slotLabel(pendingCard.slot) }) }}
+                    </p>
+                    <p v-if="pendingCard.slot.helpKey" class="bw-msg-help mt-2">{{ t(pendingCard.slot.helpKey) }}</p>
+                  </template>
                   <p v-else class="bw-pending mt-3">{{ t('brand.workspace.stage.pending') }}</p>
+                </div>
+
+                <!-- DIE ANTWORT-ZEILE. Sie steht VOR den Knöpfen, weil sie
+                     hier die Hauptsache ist — bei „Nochmal, mit Hinweis"
+                     (unten) ist es umgekehrt: dort ist der Knopf die
+                     Hauptsache und das Feld sein Ausklapp. Derselbe Weg für
+                     beide: der Text geht als Hinweis in `generateSlot()`,
+                     nie in den Chat und nie als Feldwert. -->
+                <div v-if="stageAwaitsDraftAnswer && pendingCard.controls.showHint" class="mt-3 flex items-center gap-2">
+                  <UInput
+                    size="sm" class="flex-1" maxlength="500"
+                    :model-value="hints[pendingCard.slot.id] ?? ''"
+                    :placeholder="t('brand.workspace.generate.answerPlaceholder')"
+                    :aria-label="t('brand.workspace.generate.answerLabel', { voice: voice.name })"
+                    :disabled="generation.streaming.value"
+                    @update:model-value="value => hints = { ...hints, [pendingCard!.slot.id]: String(value) }"
+                    @keydown.enter="generateSlot(pendingCard!.slot)"
+                  />
+                  <UButton
+                    size="sm" color="neutral" variant="ghost" class="bw-send rounded-full"
+                    icon="i-ph-arrow-right"
+                    :aria-label="t('brand.workspace.generate.answerLabel', { voice: voice.name })"
+                    :disabled="generation.streaming.value"
+                    @click="generateSlot(pendingCard.slot)"
+                  />
                 </div>
 
                 <!-- ZU WENIG IST ZU WENIG: statt eines Knopfes, der in ein 409
@@ -3512,7 +3602,11 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
                     </button>
                   </template>
                 </div>
-                <div v-if="hintOpen && pendingCard.controls.showHint" class="mt-2 flex items-center gap-2">
+                <!-- Die Hinweis-Zeile des zweiten Anlaufs. `!stageAwaitsDraftAnswer`
+                     schliesst sie gegen die Antwort-Zeile oben aus: zwei
+                     Felder für dieselbe Eingabe wären zwei Wahrheiten
+                     darüber, was gleich in den Entwurf geht. -->
+                <div v-if="hintOpen && pendingCard.controls.showHint && !stageAwaitsDraftAnswer" class="mt-2 flex items-center gap-2">
                   <UInput
                     size="sm" class="flex-1" maxlength="500"
                     :model-value="hints[pendingCard.slot.id] ?? ''"

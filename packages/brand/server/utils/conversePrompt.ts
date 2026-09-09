@@ -47,6 +47,27 @@ import { BRAND_CONVERSE_HISTORY_CHARS, formatStartCard } from './georgePrompt'
 /**
  * Steht in jeder Gesprächs-Nachricht; steigt bei jeder inhaltlichen Änderung.
  *
+ * `converse-12` (2026-09-08, Kailua-Befunde 5 und 7 — Davids zwei
+ * Entscheidungen): DREI Änderungen, alle drei am ABSCHLUSS des Zuges und am
+ * Gedächtnis.
+ *
+ *  1. DER ZUG SIEHT DAS GANZE KAPITEL. Der Verlauf ist seit brand-011 auf die
+ *     SESSION geschnitten (und bleibt es — ein Gespräch findet in einer
+ *     Session statt). George konnte deshalb eine Frage aus einer FRÜHEREN
+ *     Session desselben Kapitels erneut stellen: für ihn hatte sie nie
+ *     stattgefunden. Neu reist eine kompakte Liste mit (`chapterAnswers`) —
+ *     Frage-Beschriftung plus Kurzfassung der Antwort, NICHT der Chat.
+ *  2. DER ZWEIG OHNE KATALOG-FRAGE ZEIGT AUF DEN KNOPF. `converse-3` liess
+ *     George „das erste dieser Felder voranbringen" — im Gespräch, in dem
+ *     nichts entsteht (converse-11: er kann nichts schreiben). Der Mensch
+ *     bekam so Zug um Zug denselben Vorschlag und sah sein Feld leer bleiben.
+ *     Jetzt benennt der Zug das Feld UND den Knopf, der es füllt.
+ *  3. EINE ENTWURFS-SESSION HAT KEINE FREMDE FRAGE. Sitzt der Mensch auf einer
+ *     Ableitung oder einem Bühnen-Entwurf (`draftField`), schliesst der Zug
+ *     nicht mit der Katalog-Frage eines ANDEREN Feldes — genau das tat er
+ *     vorher (Session `a.pitch`, Frage `a.origin`; Kailua-Befund 5,
+ *     Nebenbefund).
+ *
  * `converse-7` (2026-09-04, BW2 Paket 2b — Gegenlese-Runde): der Bauplan ist
  * derselbe, was er transportiert nicht. Vierzehn Auswahl-Sessions haben ihre
  * Nachfrage zurück (`maxProbes: 0` hatte sie im selben Atemzug verboten, in
@@ -124,7 +145,7 @@ import { BRAND_CONVERSE_HISTORY_CHARS, formatStartCard } from './georgePrompt'
  * heisst er „Frida, entwirf das", und ein fest verdrahteter George-Satz wäre
  * dort schlicht falsch.
  */
-export const BRAND_CONVERSE_PROMPT_VERSION = 'converse-11'
+export const BRAND_CONVERSE_PROMPT_VERSION = 'converse-12'
 
 /**
  * Was ein Mensch in EINEM Zug schreiben darf. Grosszügiger als der Hinweis
@@ -145,6 +166,25 @@ export const BRAND_CONVERSE_TEXT_MAX = 2_000
  * nicht im Geplauder.
  */
 export const BRAND_CONVERSE_HISTORY_MAX = 6
+
+/**
+ * WIE VIELE BEANTWORTETE FRAGEN DER ANDEREN SESSIONS mitreisen (converse-12).
+ *
+ * Acht, weil das grösste Kapitel zwölf Sessions hat und der Zug damit auch im
+ * schlimmsten Fall die Mehrheit des Kapitels kennt — ohne dass der Block den
+ * Verlauf, die Werte und die Startkarte an die Wand drückt. Genommen werden
+ * die JÜNGSTEN: was zuletzt besprochen wurde, ist das, was George gerade
+ * versehentlich noch einmal fragen würde.
+ */
+export const BRAND_CHAPTER_ANSWERS_MAX = 8
+
+/**
+ * Der Zeichen-Deckel je Antwort in diesem Block. Deutlich enger als der
+ * Verlaufs-Deckel: hier geht es um „das ist beantwortet, und ungefähr womit",
+ * nicht um den Wortlaut — der VOLLE Wert steht ohnehin im Block der
+ * Kapitel-Werte, sobald er in einem Feld gelandet ist.
+ */
+export const BRAND_CHAPTER_ANSWER_CHARS = 220
 
 /** Deckel für die beiden Fragen-Wortlaute aus der Oberfläche. */
 export const BRAND_CONVERSE_QUESTION_MAX = 400
@@ -357,6 +397,23 @@ export interface BrandConverseInstructionOptions {
    * an einem optionalen Feld hängen.
    */
   draftButton?: string
+  /**
+   * DIE AKTIVE SESSION IST EINE ENTWURFS-SESSION (converse-12, Kailua-Befund 5
+   * — Davids „Weg B"): die menschliche Beschriftung des Feldes, auf dem der
+   * Mensch gerade sitzt, wenn dieses Feld KEINE Katalog-Frage ist (Ableitung
+   * oder Bühnen-Entwurf) und noch nicht bestätigt wurde.
+   *
+   * Sie entscheidet den ABSCHLUSS des Zuges: er gehört diesem Feld und seinem
+   * Knopf, nicht der nächsten offenen Frage des Kapitels. Vorher schloss der
+   * Zug mit der Frage eines FREMDEN Feldes — die Bühne zeigte `a.pitch`, die
+   * Frage kam zu `a.origin`, und die Antwort darauf landete in einer Session,
+   * zu der sie nicht gehörte.
+   *
+   * FEHLT sie (der Normalfall: eine Frage-Session, ein fertiges Kapitel oder
+   * ein Client ohne Session-Schlüssel), bleibt der Abschluss wortgleich der
+   * von converse-11.
+   */
+  draftField?: string
 }
 
 /**
@@ -475,8 +532,10 @@ function replyTaskLines(): string[] {
      * zeigt (er ist auf die Session geschnitten, brand-011).
      */
     'NEVER ASK AGAIN WHAT IS ALREADY ANSWERED: every field that carries a value in "what has been '
-    + 'captured in this chapter so far" is settled. Build on it, refine it, or challenge it where it '
-    + 'contradicts something — but do not put the same question back on the table. Only fields marked '
+    + 'captured in this chapter so far" is settled, and so is everything under "questions already '
+    + 'answered in this chapter" — those were answered in earlier sessions of this same chapter, which '
+    + 'you cannot see in the history above. Build on them, refine them, or challenge them where they '
+    + 'contradict something — but do not put the same question back on the table. Only fields marked '
     + '"(not answered yet)" are still open.',
   ]
 }
@@ -504,6 +563,16 @@ function openingTaskLines(options: BrandConverseInstructionOptions): string[] {
     + 'they told you — and says in one short clause what follows from it for this session.',
     'NEVER introduce yourself, never greet them again, never explain what this tool does and never '
     + 'summarise what has happened so far. You have been talking to this person all along.',
+    /**
+     * DER ERÖFFNUNGSZUG BRAUCHT DIE REGEL AM DRINGENDSTEN (converse-12): eine
+     * frische Session hat KEINEN eigenen Verlauf (er ist auf sie geschnitten,
+     * brand-011), und der Auftrag oben lädt ausdrücklich zum Anknüpfen ein.
+     * Ohne diese Zeile ist der erste Satz einer Session der wahrscheinlichste
+     * Ort, an dem eine längst beantwortete Frage wieder aufgemacht wird.
+     */
+    'DO NOT RE-OPEN WHAT IS SETTLED: the inputs below list what this chapter has already captured and '
+    + 'which questions its earlier sessions already answered. Never ask any of them again — pick up what '
+    + 'they said and go on from there.',
     ...(options.staleSources?.length
       ? [
           'THIS SESSION IS BEING REVISITED: a field it draws on has changed since they confirmed this '
@@ -669,8 +738,37 @@ function briefLines(brief: BrandConverseBriefOptions | null | undefined): string
   return lines
 }
 
+/**
+ * DER KNOPF, WÖRTLICH — oder die ehrliche Umschreibung, wenn sein Name fehlt.
+ * Beide Zweige unten brauchen denselben Halbsatz, und zwei Fassungen davon
+ * liefen beim ersten Umbenennen auseinander.
+ */
+function draftButtonClause(options: BrandConverseInstructionOptions): string {
+  return options.draftButton
+    ? `press "${options.draftButton}" next to this conversation`
+    : 'ask you to draft it with the button next to this conversation'
+}
+
 /** Der Abschluss des Zuges — vier Lagen, vier ehrliche Antworten (s. Kopf). */
 function nextQuestionLines(options: BrandConverseInstructionOptions): string[] {
+  /**
+   * DIE ENTWURFS-SESSION GEHT VOR (converse-12): sie ist das Feld, auf dem der
+   * Mensch SITZT. Eine Katalog-Frage gibt es dafür nicht — sie steht in der
+   * Registry gar nicht als fragbar —, und die nächste offene Frage des
+   * Kapitels gehört einem anderen Feld. Der Zug schliesst deshalb HIER, an
+   * dem einen Ort, an dem dieses Feld entsteht.
+   */
+  if (options.draftField) {
+    return [
+      `THE FIELD THEY ARE SITTING ON IS NOT A QUESTION: "${options.draftField}" is something you draft `
+      + 'for them. Close your turn on THIS field and no other — never close with a question that belongs '
+      + 'to a different field, and never announce that you are writing it.',
+      `Say in one clause what you would build the draft on, then tell them plainly that it appears when `
+      + `they ${draftButtonClause(options)} — and that whatever they type into the line next to that `
+      + 'button steers what you draft. Where you truly lack the material, ask ONE small question about '
+      + 'THIS field instead.',
+    ]
+  }
   if (!options.hasNextQuestion) {
     // converse-3: „keine Frage mehr" heisst erst dann „nichts mehr offen",
     // wenn auch kein Pflicht-Feld mehr auf Bestätigung wartet. Dazwischen
@@ -680,12 +778,22 @@ function nextQuestionLines(options: BrandConverseInstructionOptions): string[] {
     if (options.openFieldLabels.length) {
       return [
         'THERE ARE NO MORE CATALOG QUESTIONS in this chapter, but it is NOT finished: these fields are '
-        + `still open and get shaped right here in the conversation — ${options.openFieldLabels.join(' · ')}. `
+        + `still open and are drafted by you, not asked — ${options.openFieldLabels.join(' · ')}. `
         + 'Never claim the chapter is done or that nothing is open. If they ask what is left, name exactly '
         + 'these fields.',
-        'Close your turn by moving the FIRST of those fields forward: either put ONE concrete proposal for '
-        + 'it on the table, built from what you already know, and ask whether it fits — or, where you truly '
-        + 'lack the material, ask ONE small question that would unlock it.',
+        /**
+         * converse-12 (Kailua-Befund 5): der Zweig hiess bis hierher „bring
+         * das erste dieser Felder voran" — im GESPRÄCH, in dem nichts
+         * entsteht. George legte also Zug um Zug einen Vorschlag vor, der
+         * Mensch stimmte zu, und das Feld blieb leer: die Anweisung zeigte
+         * auf einen Weg, den es nicht gibt. Jetzt benennt sie den EINEN Ort,
+         * an dem das Feld wirklich entsteht.
+         */
+        'Close your turn on the FIRST of those fields: name it in their words, say in one clause what you '
+        + `would build it on, and tell them plainly that the written version appears when they `
+        + `${draftButtonClause(options)} — the line next to that button takes whatever they want you to `
+        + 'keep in mind. Where you truly lack the material for it, ask ONE small question that would '
+        + 'unlock it instead, but never leave the impression that the field fills itself by talking.',
       ]
     }
     return [
@@ -723,6 +831,26 @@ export interface BrandConverseInputsOptions {
   slots: readonly BrandSlotDependency[]
   /** Die letzten Nachrichten dieses Bausteins, ÄLTESTE zuerst. */
   history: readonly BrandConverseHistoryTurn[]
+  /**
+   * DIE BEANTWORTETEN FRAGEN DER ANDEREN SESSIONS DIESES KAPITELS
+   * (converse-12, Kailua-Befund 7 — Davids Entscheidung).
+   *
+   * Der VERLAUF oben ist auf die laufende Session geschnitten (brand-011, und
+   * das bleibt so: ein Gespräch findet in einer Session statt). Damit sah
+   * George alles nicht, was in den Sessions davor besprochen wurde — und
+   * stellte deren Fragen ein zweites Mal.
+   *
+   * ── WAS HIER BEWUSST NICHT DRINSTEHT ────────────────────────────────────
+   * Der Chat dieser Sessions. Zwölf Sessions mal sechs Züge wären der halbe
+   * Wizard in jedem Zug; gebraucht wird die AUSKUNFT „das ist beantwortet,
+   * und ungefähr womit". Deshalb: Frage-Beschriftung plus Kurzfassung der
+   * Antwort, gedeckelt in Zahl (`BRAND_CHAPTER_ANSWERS_MAX`) und Zeichen
+   * (`BRAND_CHAPTER_ANSWER_CHARS`).
+   *
+   * Leer heisst KEIN BLOCK — eine Überschrift ohne Inhalt liest ein Modell
+   * als Lücke und füllt sie (dieselbe Regel wie beim Eröffnungszug).
+   */
+  chapterAnswers?: readonly { label: string, answer: string }[]
   /** Wortlaut der Frage, die gerade beantwortet wurde — '' bei einer freien Frage. */
   answeredQuestion: string
   /**
@@ -773,6 +901,21 @@ export function formatBrandConverseInputs(options: BrandConverseInputsOptions): 
         // `formatDependencies`).
         return `[${entry.label ?? entry.slotId}]\n${value || '(not answered yet)'}`
       }),
+    ].join('\n\n'))
+  }
+
+  /**
+   * ZWISCHEN DEN WERTEN UND DEM VERLAUF (converse-12) — und das ist die
+   * richtige Nachbarschaft: der Block sagt dasselbe wie die Werte („ist
+   * beantwortet"), nur für Fragen, deren Antwort noch in keinem Feld steht.
+   * Vor dem Verlauf, weil er ÄLTER ist als er.
+   */
+  if (options.chapterAnswers?.length) {
+    blocks.push([
+      '[questions already answered in this chapter, in earlier sessions]',
+      ...options.chapterAnswers
+        .slice(0, BRAND_CHAPTER_ANSWERS_MAX)
+        .map(entry => `[${entry.label}]\n${clamp(entry.answer, BRAND_CHAPTER_ANSWER_CHARS)}`),
     ].join('\n\n'))
   }
 

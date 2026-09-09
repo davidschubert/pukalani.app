@@ -875,6 +875,7 @@
         "title": "Euer Brand-Dokument",
         "empty": "Hier steht noch nichts — es füllt sich, während ihr antwortet.",
         "pending": "Noch offen — kommt im Gespräch.",
+        "draftAnswer": "Was soll {voice} für „{field}“ wissen? Schreibt es hier hinein — daraus entsteht der Entwurf.",
         "pairsPlaceholder": "Der Archetypen-Vergleich ist ein eigenes Instrument und kommt mit einer späteren Phase.",
         "notEditable": "Das leitet George ab — hier tippt niemand."
       },
@@ -921,6 +922,8 @@
         "stop": "Stopp",
         "hintPlaceholder": "Hinweis — z. B. wärmer, kürzer, weniger Fachsprache",
         "hintLabel": "Hinweis für George",
+        "answerPlaceholder": "Stichworte, Sätze — alles, was ihr dazu wisst",
+        "answerLabel": "Antwort für {voice}",
         "aiDisabled": "George entwirft gerade nicht. Du kannst alles ganz normal weiterschreiben.",
         "noGenerator": "Für dieses Feld gibt es noch keinen Entwurf von George. Schreib es selbst — es wird gespeichert.",
         "busy": "George schreibt schon an einer anderen Stelle. Einen Moment noch.",

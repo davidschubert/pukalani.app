@@ -875,6 +875,7 @@
         "title": "Your brand document",
         "empty": "Nothing here yet — it fills up as you answer.",
         "pending": "Still open — comes up in the conversation.",
+        "draftAnswer": "What should {voice} know for “{field}”? Write it here — that is what the draft is built from.",
         "pairsPlaceholder": "The archetype comparison is its own instrument and arrives with a later phase.",
         "notEditable": "George derives this — you can't type here."
       },
@@ -921,6 +922,8 @@
         "stop": "Stop",
         "hintPlaceholder": "Hint — e.g. warmer, shorter, less jargon",
         "hintLabel": "Hint for George",
+        "answerPlaceholder": "Notes, sentences — whatever you know about it",
+        "answerLabel": "Answer for {voice}",
         "aiDisabled": "George is not drafting right now. You can keep writing as usual.",
         "noGenerator": "There is no George draft for this field yet. Write it yourself — it will be saved.",
         "busy": "George is already writing somewhere else. One moment.",
