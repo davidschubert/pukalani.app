@@ -126,6 +126,15 @@ export default defineEventHandler(async (event) => {
    */
   await recordTermsAcceptance(event, session.userId)
 
+  /**
+   * UNTERNEHMER-BESTÄTIGUNG (BS1 R1c) — dieselbe Arbeitsteilung eine Zeile
+   * darüber, nur mit einem eigenen Schalter: ohne das zweite Häkchen kommt
+   * dieses Formular nicht bis zum POST (`requireBusiness`), festgehalten
+   * wird aber, was der Server selbst weiß — dass DIESE App nur Unternehmen
+   * aufnimmt. No-Op ohne `pukalani.auth.businessOnly`. Best-effort.
+   */
+  await recordBusinessConfirmation(event, session.userId)
+
   // Nicht-blockierende E-Mail-Verifizierung (pukalani.auth.verification): die
   // Bestätigungs-Mail geht über die Instanz-SMTP raus, der User ist trotzdem
   // sofort eingeloggt. Best-effort — ein Mail-Fehler darf den Signup nie

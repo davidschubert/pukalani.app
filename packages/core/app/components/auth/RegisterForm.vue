@@ -85,7 +85,19 @@ const termsHref = computed(() => (termsUrl.value.startsWith('/') ? localePath(te
  * Ohne Häkchen kein Hinweis: er hinge sonst an nichts.
  */
 const termsDraft = computed(() => requireTerms.value && appConfig.pukalani?.auth?.termsDraft === true)
-const schema = computed(() => createRegisterFormSchema(t, { requireTerms: requireTerms.value }))
+/**
+ * NUR FÜR UNTERNEHMEN UND SELBSTSTÄNDIGE (BS1 R1c, Davids Entscheidung vom
+ * 2026-09-08): ein ZWEITES Pflicht-Häkchen, wenn die App B2B ist. Es hängt an
+ * einem eigenen Schalter (`businessOnly`) und nicht an `termsUrl` — die AGB
+ * sagen, welchem TEXT jemand zustimmt, dieses Häkchen sagt, WER zustimmt.
+ * Festgehalten wird die Bestätigung server-seitig aus derselben Config
+ * (`server/utils/businessConfirmation.ts`), nicht aus diesem Feld.
+ */
+const requireBusiness = computed(() => appConfig.pukalani?.auth?.businessOnly === true)
+const schema = computed(() => createRegisterFormSchema(t, {
+  requireTerms: requireTerms.value,
+  requireBusiness: requireBusiness.value,
+}))
 
 // Eingegebene E-Mail + Name überleben den Wechsel Login ↔ Register ↔ Code
 const sharedEmail = useState('pukalani-auth-email', () => '')
@@ -98,9 +110,25 @@ const state = reactive<RegisterFormInput>({
   password: '',
   passwordConfirm: '',
   terms: false,
+  business: false,
 })
 watch(() => state.email, (value) => { sharedEmail.value = value })
 watch(() => state.name, (value) => { sharedName.value = value })
+
+/**
+ * DER GOOGLE-KNOPF IST DIE HINTERTÜR, WENN MAN IHN LÄSST (U14, erweitert um
+ * BS1 R1c): er ist gesperrt, solange EIN Pflicht-Häkchen offen ist — nicht nur
+ * das AGB-Häkchen. Sonst wäre „nur Unternehmen" eine Zusage, die man mit einem
+ * Klick daneben umgeht.
+ *
+ * Der Hinweis nennt das ZUERST offene Häkchen; zwei Gründe in einem Titel
+ * würden nur die Frage verschieben, welcher davon gemeint ist.
+ */
+const oauthBlockedBy = computed(() => {
+  if (requireTerms.value && !state.terms) return t('auth.register.termsLabel')
+  if (requireBusiness.value && !state.business) return t('auth.register.businessLabel')
+  return ''
+})
 
 async function onSubmit(event: FormSubmitEvent<RegisterFormInput>) {
   loading.value = true
@@ -225,6 +253,11 @@ async function onSubmit(event: FormSubmitEvent<RegisterFormInput>) {
         <p v-if="termsDraft" class="mt-1 text-xs text-muted" data-terms-draft>{{ t('auth.register.termsDraftNotice') }}</p>
       </UFormField>
 
+      <UFormField v-if="requireBusiness" name="business">
+        <UCheckbox v-model="state.business" :label="t('auth.register.businessLabel')" data-business-check />
+        <p class="mt-1 text-xs text-muted" data-business-notice>{{ t('auth.register.businessNotice') }}</p>
+      </UFormField>
+
       <UButton type="submit" block size="lg" :loading="loading">{{ t('auth.register.submit') }}</UButton>
     </UForm>
 
@@ -237,11 +270,13 @@ async function onSubmit(event: FormSubmitEvent<RegisterFormInput>) {
       beim Passwort-Weg nicht (`terms` ist reine UI-Validierung, s. onSubmit).
       Damit ist der Google-Weg genauso streng wie der bestehende, und nicht
       strenger vorgetäuscht.
+      SEIT BS1 R1c gilt dasselbe für das Unternehmer-Häkchen: gesperrt ist der
+      Knopf, solange EINES der beiden Pflicht-Häkchen offen ist.
     -->
     <AuthOauthButtons
       separator="before"
-      :disabled="requireTerms && !state.terms"
-      :disabled-hint="t('auth.register.termsLabel')"
+      :disabled="oauthBlockedBy !== ''"
+      :disabled-hint="oauthBlockedBy || undefined"
     />
 
     <p v-if="termsUrl" class="text-center">

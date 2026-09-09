@@ -25,6 +25,15 @@ export interface PukalaniUserPrefs extends Models.Preferences {
   termsAcceptedAt?: string
   /** Die Fassung dazu (`pukalani.auth.termsVersion`); '' = keine benannt. */
   termsVersion?: string
+  /**
+   * Wann dieses Konto bestätigt hat, als Unternehmer/in oder Selbstständige/r
+   * zu handeln (ISO) — gesetzt bei der Anlage, nur in Apps mit
+   * `pukalani.auth.businessOnly` (BS1 R1c, Regel in
+   * shared/businessConfirmation.ts). BEWUSST OHNE Fassungsfeld: hier wird
+   * keinem Text zugestimmt, sondern eine Eigenschaft der Person erklärt.
+   * Fehlt bei jedem Konto von VOR dieser Änderung.
+   */
+  businessConfirmedAt?: string
 }
 
 export type CurrentUser = Models.User<PukalaniUserPrefs>

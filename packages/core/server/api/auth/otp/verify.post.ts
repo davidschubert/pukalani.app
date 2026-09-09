@@ -44,6 +44,14 @@ export default defineEventHandler(async (event) => {
        */
       await recordTermsAcceptance(event, session.userId)
 
+      /**
+       * UNTERNEHMER-BESTÄTIGUNG (BS1 R1c) — an derselben Stelle und mit
+       * derselben `isFirstJoin`-Abgrenzung: der Code-Weg fragt das Häkchen
+       * nur im register-Modus ab, und nur dort entsteht ein neues Konto.
+       * No-Op ohne `pukalani.auth.businessOnly`.
+       */
+      await recordBusinessConfirmation(event, session.userId)
+
       // Activity-Feed: der verifizierte OTP-Beitritt ist der Beitritts-Moment
       // (das Anlegen beim Token-Versand wäre verfrüht — unverifizierte E-Mail).
       await recordActivity(event, {

@@ -123,6 +123,14 @@ export default defineEventHandler(async (event) => {
      */
     await recordTermsAcceptance(event, session.userId)
 
+    /**
+     * UNTERNEHMER-BESTÄTIGUNG (BS1 R1c) — und hier gilt Wort für Wort
+     * dasselbe wie oben: kein Formularfeld, gebunden durch den gesperrten
+     * Knopf neben BEIDEN Häkchen (`oauthBlockedBy` in `RegisterForm.vue`),
+     * festgehalten aus der Config. No-Op ohne `pukalani.auth.businessOnly`.
+     */
+    await recordBusinessConfirmation(event, session.userId)
+
     await recordActivity(event, {
       actorId: session.userId,
       actorName: user?.name ?? '',

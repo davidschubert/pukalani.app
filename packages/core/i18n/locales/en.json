@@ -29,6 +29,8 @@
       "termsLabel": "I accept the Terms and Conditions",
       "termsDraftNotice": "Draft, under review by our lawyers — the binding version will replace it after the review. We record which version you agreed to.",
       "termsLink": "Read Terms and Conditions",
+      "businessLabel": "I am acting as a business or self-employed person, not as a consumer",
+      "businessNotice": "Our offer is intended for businesses and self-employed people only — that is why we ask.",
       "invitedEmailNote": "This address is fixed: the invitation was sent to it."
     },
     "logout": "Sign out",
@@ -151,6 +153,7 @@
     "passwordMismatch": "The passwords do not match",
     "passwordConfirmRequired": "Please confirm the password",
     "termsRequired": "Please accept the Terms and Conditions",
+    "businessRequired": "Please confirm that you are acting as a business or self-employed person",
     "mfaCodeInvalid": "That code is not right."
   },
   "ui": {

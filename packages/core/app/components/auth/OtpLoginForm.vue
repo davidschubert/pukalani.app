@@ -37,9 +37,17 @@ const localePath = useLocalePath()
 const termsHref = computed(() => (termsUrl.value.startsWith('/') ? localePath(termsUrl.value) : termsUrl.value))
 /** Der Entwurfs-Hinweis am Häkchen — dieselbe Regel wie dort (BS1 R1). */
 const termsDraft = computed(() => requireTerms.value && appConfig.pukalani?.auth?.termsDraft === true)
+/**
+ * NUR FÜR UNTERNEHMEN UND SELBSTSTÄNDIGE (BS1 R1c) — dieselbe Regel wie im
+ * Passwort-Formular, mit derselben Abgrenzung wie beim AGB-Häkchen: nur im
+ * register-Modus. Wer sich mit einem BESTEHENDEN Konto per Code anmeldet, hat
+ * die Frage bei der Anlage schon beantwortet.
+ */
+const requireBusiness = computed(() => props.register === true && appConfig.pukalani?.auth?.businessOnly === true)
 
 const schema = computed(() => createOtpRequestSchema(t, {
   requireTerms: requireTerms.value,
+  requireBusiness: requireBusiness.value,
   requireName: props.register === true,
 }))
 
@@ -50,6 +58,7 @@ const state = reactive<OtpRequestInput>({
   email: sharedEmail.value,
   name: props.register ? sharedName.value : '',
   terms: false,
+  business: false,
 })
 // Namen nur im Register-Kontext mit dem Passwort-Register-Formular teilen
 watch(() => state.name, (value) => { if (props.register) sharedName.value = value ?? '' })
@@ -207,6 +216,10 @@ async function verify() {
       <UFormField v-if="requireTerms" name="terms">
         <UCheckbox v-model="state.terms" :label="t('auth.register.termsLabel')" />
         <p v-if="termsDraft" class="mt-1 text-xs text-muted" data-terms-draft>{{ t('auth.register.termsDraftNotice') }}</p>
+      </UFormField>
+      <UFormField v-if="requireBusiness" name="business">
+        <UCheckbox v-model="state.business" :label="t('auth.register.businessLabel')" data-business-check />
+        <p class="mt-1 text-xs text-muted" data-business-notice>{{ t('auth.register.businessNotice') }}</p>
       </UFormField>
       <UButton type="submit" block size="lg" :loading="loading">{{ t('auth.otp.requestCode') }}</UButton>
       <p v-if="requireTerms" class="text-center">

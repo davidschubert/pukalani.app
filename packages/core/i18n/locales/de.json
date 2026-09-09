@@ -29,6 +29,8 @@
       "termsLabel": "Ich akzeptiere die AGB",
       "termsDraftNotice": "Entwurf, in anwaltlicher Prüfung — die verbindliche Fassung ersetzt sie nach der Prüfung. Wir halten fest, welcher Fassung du zugestimmt hast.",
       "termsLink": "AGB lesen",
+      "businessLabel": "Ich handle als Unternehmer/in oder Selbstständige/r, nicht als Verbraucher/in",
+      "businessNotice": "Unser Angebot richtet sich ausschliesslich an Unternehmen und Selbstständige — deshalb fragen wir das hier.",
       "invitedEmailNote": "Diese Adresse steht fest: An sie ging die Einladung."
     },
     "logout": "Abmelden",
@@ -151,6 +153,7 @@
     "passwordMismatch": "Die Passwörter stimmen nicht überein",
     "passwordConfirmRequired": "Bitte das Passwort bestätigen",
     "termsRequired": "Bitte akzeptiere die AGB",
+    "businessRequired": "Bitte bestätige, dass du als Unternehmer/in oder Selbstständige/r handelst",
     "mfaCodeInvalid": "Der Code stimmt nicht."
   },
   "ui": {

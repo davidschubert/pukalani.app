@@ -45,12 +45,22 @@ export function createRegisterSchema(t: TranslateFn = identity) {
 export interface RegisterFormOptions {
   /** true = AGB-Checkbox ist Pflicht (pukalani.auth.termsUrl gesetzt) */
   requireTerms?: boolean
+  /**
+   * true = Unternehmer-Häkchen ist Pflicht (`pukalani.auth.businessOnly`,
+   * BS1 R1c). Ein ZWEITES Häkchen neben den AGB und kein gemeinsames: die
+   * beiden Zusagen hängen an verschiedenen Schaltern und beantworten
+   * verschiedene Fragen (welcher Text — wer zustimmt).
+   */
+  requireBusiness?: boolean
 }
 
 /**
- * Formular-Variante des Register-Schemas: Confirm-Password (+ optional AGB).
+ * Formular-Variante des Register-Schemas: Confirm-Password (+ optional AGB,
+ * + optional Unternehmer-Bestätigung).
  * Der Server validiert weiterhin nur name/email/password (registerSchema) —
- * passwordConfirm/terms sind reine UI-Belange.
+ * passwordConfirm/terms/business sind reine UI-Belange. Was am Konto
+ * festgehalten wird, entscheidet der Server aus seiner eigenen Config
+ * (`server/utils/termsAcceptance.ts`, `server/utils/businessConfirmation.ts`).
  */
 export function createRegisterFormSchema(t: TranslateFn = identity, options: RegisterFormOptions = {}) {
   return createRegisterSchema(t)
@@ -58,6 +68,9 @@ export function createRegisterFormSchema(t: TranslateFn = identity, options: Reg
       passwordConfirm: z.string(t('validation.required')).min(1, t('validation.passwordConfirmRequired')),
       terms: options.requireTerms
         ? z.literal(true, t('validation.termsRequired'))
+        : z.boolean().optional(),
+      business: options.requireBusiness
+        ? z.literal(true, t('validation.businessRequired'))
         : z.boolean().optional(),
     })
     .refine(data => data.password === data.passwordConfirm, {
@@ -101,11 +114,18 @@ export interface OtpRequestOptions {
   requireTerms?: boolean
   /** true = Name ist Pflicht (register-Modus, analog zur Passwort-Registrierung) */
   requireName?: boolean
+  /**
+   * true = Unternehmer-Häkchen ist Pflicht (register-Modus +
+   * `pukalani.auth.businessOnly`, BS1 R1c). Der reine LOGIN bestehender Konten
+   * bleibt friktionsfrei — dieselbe Abgrenzung wie bei `requireTerms`.
+   */
+  requireBusiness?: boolean
 }
 
 /**
  * E-Mail-Schritt des OTP-Formulars: Name (im Register-Modus Pflicht, sonst optional)
- * + optionale AGB-Pflicht. Der Name wird nach dem Verify gesetzt.
+ * + optionale AGB-Pflicht + optionale Unternehmer-Bestätigung. Der Name wird
+ * nach dem Verify gesetzt.
  */
 export function createOtpRequestSchema(t: TranslateFn = identity, options: OtpRequestOptions = {}) {
   return z.object({
@@ -115,6 +135,9 @@ export function createOtpRequestSchema(t: TranslateFn = identity, options: OtpRe
       : z.union([z.string().min(2, t('validation.nameMin')), z.literal('')], t('validation.nameMin')).optional(),
     terms: options.requireTerms
       ? z.literal(true, t('validation.termsRequired'))
+      : z.boolean().optional(),
+    business: options.requireBusiness
+      ? z.literal(true, t('validation.businessRequired'))
       : z.boolean().optional(),
   })
 }

@@ -258,6 +258,30 @@ export default defineAppConfig({
        * über den Reifegrad des Textes dahinter.
        */
       termsDraft: false,
+      /**
+       * NUR FÜR UNTERNEHMEN UND SELBSTSTÄNDIGE (BS1 R1c, Davids Entscheidung
+       * vom 2026-09-08): true = in JEDEM Registrierungsweg steht ein zweites
+       * PFLICHT-Häkchen „Ich handle als Unternehmer/in oder Selbstständige/r",
+       * und bei der Konto-Anlage wird `businessConfirmedAt` in die
+       * Account-Prefs geschrieben (`server/utils/businessConfirmation.ts`).
+       *
+       * Ein BOOLEAN und kein i18n-Schlüssel: Text und Begründung gehören dem
+       * Core und stehen in seinen Locale-Dateien (`auth.register.
+       * businessLabel` + `businessNotice`), damit jede App sie in beiden
+       * Sprachen hat. Ein Schlüssel in der Config wäre ein Versprechen, das
+       * `pnpm check:i18n-keys` einlösen müsste — für einen Satz, der überall
+       * derselbe ist. (Dieselbe Abwägung wie bei `termsDraft`.)
+       *
+       * Core-Default AUS — und das ist mehr als die übliche Vorsicht: der
+       * Schalter schliesst Verbraucher AUS. In einer App, die auch
+       * Privatpersonen aufnimmt (jede Pool-Community, portfolio, comments),
+       * wäre das Häkchen eine Hürde vor einer Tür, die offen sein soll.
+       *
+       * ER IST UNABHÄNGIG VON `termsUrl`: die AGB sagen, WELCHEM Text jemand
+       * zustimmt, dieser Schalter sagt, WER zustimmt. Eine App kann das eine
+       * ohne das andere verlangen, deshalb zwei Schalter und zwei Häkchen.
+       */
+      businessOnly: false,
       /** Passwortloser Login per E-Mail-Code (Appwrite Email-OTP) —
        *  Ergänzung zum Passwort-Login, kein Ersatz */
       otp: false,
