@@ -7,6 +7,43 @@ die kleinen, verstreuten Beschlüsse.
 
 ---
 
+## 2026-09-09 — Brand Book & Kit (Produkt 03): Strategie freigegeben — ein Produkt, dritte Schicht, DTCG-Kit, BS1-Einmalpreis 149 € netto
+
+**Anlass:** „Starte die Strategie-Runde für Produkt 03 Book & Kit" — Phase 1 des Workflows
+(docs/plans/BRAND-BOOK-KIT.md §1: Bestandsaufnahme der sechs Startseiten-Artefakte am Code,
+Zielbild „Lieferpaket aus Foundation + Design: Handbuch, Tokens, Brand Context, Assets — alles
+gerechnet, nichts neu entschieden", Konkurrenz Frontify/Corebook°/standards.site/Bynder ·
+Looka/Canva/Tailor Brands · DTCG 2025.10/Style Dictionary v5/Figma/Tailwind v4 · llms.txt/design.md,
+Hypothesen H1–H10). Befund dabei: die Schranke steht schon (drei gesperrte Export-Einträge der
+Leseansicht mit Etikett „Brand Book & Kit"), und „24 Kapitel" ist ein Versprechen ohne Zählung.
+
+**Entscheidungen (David, Fragenrunde — sieben nach Empfehlung, eine dagegen):** (1) **EIN
+Produkt „Book & Kit"**, keine Trennung in Book und Kit. (2) **Dritte Schicht derselben Werkstatt
+in `packages/brand`** — wie bei Produkt 02 greift die Silo-Regel „neues Produkt ⇒ eigener Layer"
+bewusst nicht: Book & Kit setzt Dokument, Zustandsmaschine und Reise-Regel (`sessionTravels`)
+fort; ein eigener Layer bräuchte drei Verträge (Preset, Renderer, Reise-Regel) für null neue
+Datenhoheit — erst „Connect" (MCP/API, Phase 3+) wäre eine eigene Datenwelt. (3) **Brand Context
+als sechs Dateien:** `brand.md`, `brand.json`, `tokens.json` (W3C DTCG 2025.10 als KANONISCHE
+Quelle), `tokens.css` (abgeleitet: Themes-Variablen + Tailwind-v4-`@theme`), Zeichen-SVGs,
+`LICENSES.md` (Schriften benannt, keine Dateien); Figma über DTCG-Import, kein Plugin. (4) **Book &
+Kit = der BS1-Einmalpreis „Ableitung"** (mit Marktvergleich im selben Preis, Beta-Konten frei,
+Freischaltung über das Z1-Webhook-Feld + Betreiber-Schalter); Foundation-Leseansicht inkl.
+Kapitel 11 bleibt frei; Brand Design ist KEINE Voraussetzung — Tokens und Zeichen zeigen ohne
+Preset ehrlich „kommt mit Brand Design". (5) **Gliederung statt Zahl:** 12 Foundation-Kapitel +
+Regel-Kapitel Zeichen-/Farb-/Typografie-Anwendung, Pressekit (Ableitung), Nomenklatur und
+AI-Guidelines (KI); **Content-Kompass und 90-Tage-Plan gehen nach Produkt 04**, die
+Startseiten-Copy bekommt Produkt-Etiketten und die echte Kapitelzahl. (6) **Zwei KI-Kapitel,
+keine neue Stimme** — Otto (Nomenklatur), Nika (AI-Guidelines), George übergibt; „Rex" aus dem
+Team-Text (Rest der Hunde-Welt) verschwindet, die Rolle heißt „Produktion". (7) **Extraktion des
+Ist-Zustands** (Relaunch-Einstieg, H6 aus Produkt 02) wird ein **eigener Baustein NACH Book &
+Kit**, nicht Teil von 03. (8) **Betrag: 149 € netto je Branding** — GEGEN die Empfehlung „offen
+lassen bis Z1"; Leitplanke: Eingabe für den Z1-Preis-Katalog (`exclusive`), erscheint vor Z1
+nirgends im Produkt, an der Schranke steht weiter kein Preis, die Beta bleibt frei. Damit ist
+BS1 §9.2 Nr. 1+2 (Name „die Ableitung" = Marktvergleich + Book & Kit; Betrag) inhaltlich
+beantwortet. Nächster Schritt: Konzeption (§2), erst auf Davids Startwort.
+
+---
+
 ## 2026-09-09 — Brand Design: Abnahme durch Vertrauen, Vorhaben geschlossen
 
 **Kontext:** Nach A1 lag David die Abnahme-Liste der Inhalts-Gates D1–D8 mit Fundstellen vor

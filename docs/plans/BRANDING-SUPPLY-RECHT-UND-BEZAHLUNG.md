@@ -1063,10 +1063,16 @@ stehen, damit nachvollziehbar ist, wie sie beantwortet wurden:
 
 1. **Name des Kaufgegenstands.** Vorschlag: **ein** Preis je Branding für „die
    Ableitung" = Marktvergleich + später Book & Kit. Wie das auf der Seite und
-   auf der Rechnung heisst, legt David fest.
-2. **Der Betrag** — und ob es beim EINEN Preis bleibt oder später nach Produkt
-   (`market`, `design`) getrennt wird. Beides sind Eingaben für den
-   Preis-Katalog in Z1.
+   auf der Rechnung heisst, legt David fest. — **Inhaltlich BEANTWORTET
+   2026-09-09** (Book-&-Kit-Strategie, [BRAND-BOOK-KIT.md](BRAND-BOOK-KIT.md)
+   §1.11 d): Book & Kit ist Teil desselben Einmalpreises „Ableitung"; nur der
+   Wortlaut auf Seite und Rechnung bleibt Z1-Eingabe.
+2. ~~**Der Betrag** — und ob es beim EINEN Preis bleibt oder später nach Produkt
+   (`market`, `design`) getrennt wird.~~ — **BEANTWORTET 2026-09-09: 149 € netto
+   je Branding, EIN Preis** (Davids Entscheidung in der Book-&-Kit-Fragenrunde,
+   §1.11 dort). Eingabe für den Preis-Katalog in Z1 (`exclusive`); vor Z1
+   erscheint der Betrag nirgends im Produkt, an der Schranke steht weiter kein
+   Preis, die Beta bleibt frei.
 3. ~~**Welcher Generator** die Grundfassung liefert (Frage 2)~~ —
    **BEANTWORTET 2026-09-08: activeMind** für die Erstfassung, **Wechsel zu
    eRecht24 Premium** mit R3/Fassung 2 oder spätestens vor dem Öffnen der Beta
