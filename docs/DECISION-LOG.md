@@ -289,6 +289,17 @@ eine gespeicherte Wahl je Instanz. Danach freigegeben und gemergt.
 Dashboard-Layout gehört dem admin-Layer und ist in jeder App dasselbe; eine Überschreibung dort
 gilt für Pool, Silo und Kontroll-Host gleichermaßen.
 
+**Nachtrag Paket 3 (David, 2026-09-08 — Freigabe am Prototyp „wie gebaut"):** drei Zuschnitt-
+Fragen, alle nach Empfehlung entschieden (Konzept: docs/archiv/DASHBOARD-NAV-JE-PERSON.md):
+(E1) **Gruppen UND Einträge** sortierbar — ein Eintrag wechselt die Gruppe nie (Gruppen sind
+Ebenen); (E2) **Ausblenden ja**, mit der ⌘K-Suche als Rückweg (sie liest die unpersonalisierte
+Liste) und „Zurücksetzen"; (E3) Bedienung als **Konto-Reiter „Navigation"** unter
+/dashboard/settings, nicht als Modus in der Seitenleiste (die ist einklappbar, auf Mobil ein
+Slideover, mit Tooltips — drei Darstellungen für einen Bearbeitungsmodus). Gespeichert in
+`prefs.dashboardNav` (`groups`/`items`/`hidden`), angewendet NACH den Ort-/Rollen-/Produkt-
+Filtern; „Übersicht" und der Betreiber-Unterbau bleiben fest. Verworfen: „Ohne Ausblenden",
+„nur Einträge", „Seitenleisten-Modus".
+
 ---
 
 ## 2026-09-08 — Brand Insights (BI1): Konzeptrunde — acht Entscheidungen

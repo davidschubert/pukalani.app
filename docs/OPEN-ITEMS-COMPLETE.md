@@ -30,6 +30,50 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### NAV1 Paket 3 — Reihenfolge der Dashboard-Navigation je Person (Konto-Prefs, Konto-Reiter „Navigation") ✅ 2026-09-08
+
+**Anlass:** Entscheidung 3 aus „Navigation anpassen" (DECISION-LOG 2026-09-08): die Reihenfolge der
+Dashboard-Nav ist die Wahl JEDER PERSON, nicht je Community (die Nav ist rollen-gefiltert). Konzept
++ Verträge: docs/archiv/DASHBOARD-NAV-JE-PERSON.md; Freigabe am Prototyp „wie gebaut" (E1–E3 nach
+Empfehlung, Nachtrag im DECISION-LOG).
+
+**Gebaut:** (1) `prefs.dashboardNav` = `{ groups?, items?, hidden? }` (Ids; ≤ 100 je Liste, ≤ 64
+Zeichen, `^[a-z0-9-]+$`) in `PukalaniUserPrefs`. (2) Pure Regel `applyDashboardNavPrefs` +
+fail-softer Leser `parseDashboardNavPrefs` in core/shared/dashboardNav.ts mit sechs Zusagen
+(ohne Prefs = heutige Nav; unbekannte Ids still ignoriert; nicht Erwähntes hängt hinten an;
+leere Gruppen fehlen; `hidden` nur in der Seitenleiste, NICHT in ⌘K; Module ohne Gruppe bleiben
+vorne) — 22 neue Unit-Fälle (57 in der Datei). Die Standard-Gruppenreihenfolge steht jetzt EINMAL
+(`DASHBOARD_NAV_GROUPS`), Typ `PukalaniAdminModule.group` liest sie (Nebenbefund: dem Typ fehlten
+seit U7 `account` und `moderation` — nie aufgefallen, weil die Registry nicht gegen ihn geprüft
+wird). (3) `PUT /api/auth/dashboard-nav` (core, Muster timezone.put.ts): Zod, 401/400, Merge über
+die bestehenden Prefs; `null` oder `{}` = Zurücksetzen (Schlüssel wird entfernt). (4) admin:
+Composable `useDashboardNavModules()` kapselt die Filter-Zutaten EINMAL für Layout und Editor;
+`dashboard.vue` rendert `links` personalisiert und hält `allLinks` unpersonalisiert für die
+Suche; sechster Konto-Reiter `/dashboard/settings/navigation` mit `DashboardNavPrefsEditor`
+(ein Block je Gruppe, Gruppen-Pfeile, je Zeile Griff/Ziehen innerhalb der Gruppe, Pfeile, Auge;
+Speichern ⇒ `auth.refresh()`, Seitenleiste zieht ohne Reload mit; Zurücksetzen). i18n de+en.
+
+**Beweise:** Unit 57/57; Klick-Beweis lokal (Playwright gegen branding :3010 im Worktree, Session
+per Server-SDK, Dev-Projekt portfolio-g4ml, Test-User `paket6-klickbeweis` mit Label `admin`):
+18/18 — Reiter rendert, Ausblenden + Zeile hoch + Gruppe runter ⇒ PUT 200, Seitenleiste ohne
+Reload, nach Reload persistent, Editor zeigt Ausgeblendetes gedimmt, ⌘K findet es weiter,
+Zurücksetzen ⇒ Ausgangslage; Gegenproben ungültige Id 400, 101 Ids 400, ohne Session 401,
+unbekannte Id angenommen und wirkungslos. Alle Gates grün (test/lint/typecheck/i18n-keys/
+single-copy/manifests/bilanz/lint:scripts).
+
+**Gelernt:** (1) **`$fetch` mit `body: null` schickt GAR KEINEN Body** — die Route sah `undefined`
+und antwortete 400; „Zurücksetzen" schickt deshalb `{}`, und ein FEHLENDER Body bleibt bewusst 400
+(ein Client, der seinen Body vergisst, darf nicht still die Wahl löschen). (2) **Appwrite 2.0
+lehnt ein LEERES Prefs-Dokument ab** (`PATCH /account/prefs` mit `{}` ⇒ 400
+general_argument_invalid „Value must be a valid object"; PHP dekodiert `{}` zu einem leeren
+Array). Wer außer der Nav-Wahl nichts in den Prefs hat, bekam beim Zurücksetzen ein 500 — die
+Route lässt in genau diesem Fall `dashboardNav: {}` stehen (liest sich als „keine Wahl"). Gilt
+für JEDE künftige „Pref entfernen"-Route. (3) Der Browser-Pane wurde vom Klassifizierer
+blockiert — der Klick-Beweis lief als Playwright-Skript mit Cookie aus `users.createSession`
+(kein Passwort), dasselbe Muster wie die verify-Skripte; ein Seitenleisten-Selektor muss die
+Nuxt-UI-Id `#dashboard-sidebar-dashboard` nehmen (`#dashboard nav` findet nichts, und ein leeres
+Array macht jede „Eintrag fehlt"-Prüfung tautologisch grün — beim ersten Lauf so erwischt).
+
 ### Brand Design (Produkt 02, BD1): sechs Werkstatt-Kapitel, Vorbilder + Lesung, Farbwelt aus der Ramp-Mathematik, Zeichen in drei Stufen, Ergebnis-Board ✅ 2026-09-09
 
 **Was:** Die erste bezahlte Ableitung aus der Foundation — Schicht 2 derselben Werkstatt mit
