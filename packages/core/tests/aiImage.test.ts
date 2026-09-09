@@ -30,8 +30,21 @@ vi.stubGlobal('createError', (init: Record<string, unknown>) =>
 vi.stubGlobal('readInstanceSecret', async () => '')
 vi.stubGlobal('logEvent', () => {})
 vi.stubGlobal('useRuntimeConfig', () => ({ aiKey: 'k-test', public: { appwriteDatabaseId: 'db' } }))
+
+/**
+ * Die `app_config`-Zeile ist HIER umschaltbar, weil zwei Zusagen an ihr
+ * hängen: der Laufzeit-Override (`aiImageModel`) und die Zusage, dass ein
+ * LESEFEHLER kein Fehler ist, sondern der Build-Default. Der Default bleibt
+ * der Wurf — so misst jeder bestehende Fall unverändert den Build-Stand.
+ */
+let appConfigRow: Record<string, unknown> | Error = new Error('kein app_config in diesem Test')
 vi.stubGlobal('createAdminClient', () => ({
-  tablesDB: { getRow: async () => { throw new Error('kein app_config in diesem Test') } },
+  tablesDB: {
+    getRow: async () => {
+      if (appConfigRow instanceof Error) throw appConfigRow
+      return appConfigRow
+    },
+  },
 }))
 vi.stubGlobal('resolveAiKey', async () => 'k-test')
 
@@ -41,6 +54,7 @@ const {
   buildAiImageRequestBody,
   clampAiImages,
   getAiImageConfig,
+  getEffectiveAiImageConfig,
   isAiImageConfigured,
   parseAiImageDataUrl,
 } = await import('../server/utils/aiImage')
@@ -72,6 +86,7 @@ function sentBody(): Record<string, unknown> {
 
 beforeEach(() => {
   fetchMock.mockClear()
+  appConfigRow = new Error('kein app_config in diesem Test')
   fetchMock.mockImplementation(async () => imageMessage([pngUrl]))
   appConfig.pukalani.ai = {
     enabled: false,
@@ -235,5 +250,69 @@ describe('aiImage', () => {
       json: async () => ({}),
     }) as never)
     await expect(aiImage(event, 'p')).rejects.toMatchObject({ statusCode: 502 })
+  })
+
+  /**
+   * DER RUMPF DES ANBIETERS BLEIBT DRAUSSEN (Audit-Befund 2026-09-09): er
+   * zitiert je nach Anbieter die Anfrage zurück, und die trägt hier den
+   * Prompt — also Kundeninhalte. Ins Log gehören Status und Kennung.
+   */
+  it('im Log stehen Status + Kennung statt des Rumpfes', async () => {
+    const logged: string[] = []
+    const spy = vi.spyOn(console, 'error').mockImplementation((...args: unknown[]) => {
+      logged.push(args.map(String).join(' '))
+    })
+    fetchMock.mockImplementationOnce(async () => ({
+      ok: false,
+      status: 400,
+      text: async () => JSON.stringify({
+        error: { code: 'invalid_request_error', message: 'prompt war: GEHEIM' },
+      }),
+      json: async () => ({}),
+    }) as never)
+    await expect(aiImage(event, 'p', { label: 'test' })).rejects.toMatchObject({ statusCode: 502 })
+    spy.mockRestore()
+    expect(logged.join('\n')).toContain('400 (invalid_request_error)')
+    expect(logged.join('\n')).not.toContain('GEHEIM')
+  })
+
+  /**
+   * GATE UND AUFRUF LESEN DIESELBE QUELLE (Audit-Befund 2026-09-09) — dieselbe
+   * Begründung wie beim Vision-Transport.
+   */
+  it('ohne `options.model` gilt der Laufzeit-Override, nicht der Build-Default', async () => {
+    appConfig.pukalani.ai = { imageModel: '', baseUrl: 'https://openrouter.test/api/v1' }
+    appConfigRow = { $id: 'global', aiImageModel: 'runtime/image' }
+    expect(await isAiImageConfigured(event)).toBe(true)
+    await aiImage(event, 'p')
+    expect(sentBody().model).toBe('runtime/image')
+  })
+
+  it('mit `options.model` bleibt die Wahl des Aufrufers stehen', async () => {
+    appConfigRow = { $id: 'global', aiImageModel: 'runtime/image' }
+    await aiImage(event, 'p', { model: 'caller/image' })
+    expect(sentBody().model).toBe('caller/image')
+  })
+})
+
+describe('getEffectiveAiImageConfig', () => {
+  it('Zeile OHNE Feld ⇒ Build-Default (die Spalte gibt es noch nirgends)', async () => {
+    appConfigRow = { $id: 'global' }
+    const config = await getEffectiveAiImageConfig(event)
+    expect(config.model).toBe('test/image')
+    expect(config.defaultModel).toBe('test/image')
+    expect(config.enabled).toBe(true)
+  })
+
+  it('leeres Feld zählt als „nicht gesetzt", nicht als Abschaltung', async () => {
+    appConfigRow = { $id: 'global', aiImageModel: '   ' }
+    expect((await getEffectiveAiImageConfig(event)).model).toBe('test/image')
+  })
+
+  it('`getRow` wirft ⇒ Build-Default statt Fehler (best-effort)', async () => {
+    appConfigRow = new Error('Appwrite gerade nicht erreichbar')
+    const config = await getEffectiveAiImageConfig(event)
+    expect(config.model).toBe('test/image')
+    expect(config.enabled).toBe(true)
   })
 })

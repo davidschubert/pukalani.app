@@ -1,5 +1,5 @@
 import type { H3Event } from 'h3'
-import type { AiProviderRouting } from './aiComplete'
+import { type AiProviderRouting, aiProviderErrorTag } from './aiComplete'
 
 /**
  * BILDER ERZEUGEN — der Bild-Transport des Core (Konzept
@@ -303,7 +303,17 @@ export async function aiImage(
   prompt: string,
   options: AiImageOptions = {},
 ): Promise<AiImageResult[]> {
-  const defaults = getAiImageConfig()
+  /**
+   * Das Modell darf explizit übergeben werden, sonst gilt die EFFEKTIVE
+   * Config — dieselbe Quelle, die `isAiImageConfigured()` liest.
+   *
+   * Vorher stand hier `getAiImageConfig()` (der Build-Default), während das
+   * GATE schon die effektive Config befragte: mit einem Laufzeit-Override in
+   * `app_config` sagte das Gate „ja" und der Aufruf lief ins leere
+   * Build-Modell — also 503 trotz konfigurierter Instanz (Audit-Befund
+   * 2026-09-09). Mit `options.model` fragt hier NIEMAND die Datenbank.
+   */
+  const defaults = options.model ? getAiImageConfig() : await getEffectiveAiImageConfig(event)
   const label = options.label ?? 'core'
   const model = options.model ?? defaults.model
   const baseUrl = (options.baseUrl ?? defaults.baseUrl).replace(/\/$/, '')
@@ -338,10 +348,10 @@ export async function aiImage(
       })),
     })
     if (!res.ok) {
-      // Die MELDUNG des Anbieters — nie der Prompt (er trägt Kundeninhalte).
-      console.error(
-        `[${label}] KI-Bild-API ${res.status}: ${(await res.text()).slice(0, 300)}`,
-      )
+      // STATUS UND KENNUNG, NIE DER RUMPF: ein Fehler-Rumpf zitiert je nach
+      // Anbieter Teile der Anfrage zurück — hier also den Prompt, der
+      // Kundeninhalte trägt (`aiProviderErrorTag`, Audit-Befund 2026-09-09).
+      console.error(`[${label}] KI-Bild-API ${res.status}${aiProviderErrorTag(await res.text())}`)
       throw createError({ status: 502, statusText: 'AI provider unavailable' })
     }
     const payload = await res.json() as {

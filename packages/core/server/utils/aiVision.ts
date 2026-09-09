@@ -1,5 +1,5 @@
 import type { H3Event } from 'h3'
-import type { AiProviderRouting } from './aiComplete'
+import { type AiProviderRouting, aiProviderErrorTag } from './aiComplete'
 
 /**
  * BILDER LESEN — der Vision-Transport des Core (Konzept
@@ -49,6 +49,34 @@ const DEFAULT_TIMEOUT_MS = 60_000
 
 /** Bild-Aufrufe antworten strukturiert und kurz — mehr als das ist Geschwätz. */
 const DEFAULT_MAX_TOKENS = 1500
+
+/**
+ * DIE EINGANGS-KLEMME DES TRANSPORTS (Audit-Befund 2026-09-09).
+ *
+ * ── WARUM DER TRANSPORT ÜBERHAUPT KLEMMT ──────────────────────────────────
+ * Bis hierher prüfte `aiVision` nur `images.length === 0`. Nach oben stand
+ * nichts: ein Konsument, der versehentlich eine ungeklemmte Liste reicht,
+ * baute einen Body aus beliebig vielen base64-Blöcken und schickte ihn ab —
+ * der Speicher geht beim `JSON.stringify` drauf, der Anbieter antwortet nach
+ * einer Minute mit einer 413, und bezahlt ist der Versuch trotzdem. Eine
+ * Sicherung gehört deshalb in die SCHNITTSTELLE und nicht in die Disziplin
+ * der Aufrufer (dieselbe Lehre wie bei der Index-Fabrik der Migrationen).
+ *
+ * ── ZWEI DECKEL, ZWEI ORTE ────────────────────────────────────────────────
+ * Das hier ist die TRANSPORT-Sicherung, nicht der Produkt-Deckel. Der Produkt-
+ * Deckel bleibt beim Konsumenten (`brandInspirationReading.ts`: 12 Bilder à
+ * 5 MB = 60 MB) und ist damit ENGER als diese Zahlen — genau so soll es sein:
+ * ein Produkt sagt, was es zumutet, der Transport sagt, was er überhaupt noch
+ * abschickt. Hier zu klemmen, was das Produkt erlaubt, hiesse zwei Wahrheiten
+ * über dieselbe Zahl zu führen.
+ *
+ * Geworfen wird VOR jedem Netzaufruf — eine Anfrage, die der Transport selbst
+ * für zu gross hält, darf einen Anbieter nicht erreichen.
+ */
+export const AI_VISION_MAX_IMAGES = 16
+
+/** Summe ALLER Bild-Bytes eines Zuges (base64 bläht sie danach um ⅓ auf). */
+export const AI_VISION_MAX_BYTES = 64_000_000
 
 export interface AiVisionConfig {
   /** `false` = kein Vision-Modell konfiguriert (Core-Default). */
@@ -254,7 +282,19 @@ export async function aiVision(
   prompt: string,
   options: AiVisionOptions = {},
 ): Promise<string> {
-  const defaults = getAiVisionConfig()
+  /**
+   * Das Modell darf explizit übergeben werden, sonst gilt die EFFEKTIVE
+   * Config — dieselbe Quelle, die `isAiVisionConfigured()` liest.
+   *
+   * Vorher stand hier `getAiVisionConfig()` (der Build-Default), während das
+   * GATE eine Zeile weiter oben schon die effektive Config befragte: mit einem
+   * Laufzeit-Override in `app_config` sagte das Gate „ja" und der Aufruf lief
+   * ins leere Build-Modell — also 503 trotz konfigurierter Instanz
+   * (Audit-Befund 2026-09-09). Mit `options.model` fragt hier NIEMAND die
+   * Datenbank: der Aufrufer hat seine Wahl schon getroffen, und die `baseUrl`
+   * ist in beiden Fassungen dieselbe.
+   */
+  const defaults = options.model ? getAiVisionConfig() : await getEffectiveAiVisionConfig(event)
   const label = options.label ?? 'core'
   const model = options.model ?? defaults.model
   const baseUrl = (options.baseUrl ?? defaults.baseUrl).replace(/\/$/, '')
@@ -271,6 +311,16 @@ export async function aiVision(
 
   // Nur KENNZAHLEN — nie die Bytes, nie den Prompt (s. Kopf).
   const totalBytes = images.reduce((sum, image) => sum + image.bytes.length, 0)
+
+  // Die Transport-Klemme, VOR dem Netzaufruf (s. `AI_VISION_MAX_IMAGES`).
+  if (images.length > AI_VISION_MAX_IMAGES) {
+    console.error(`[${label}] KI-Vision abgewiesen: ${images.length} Bilder (max ${AI_VISION_MAX_IMAGES})`)
+    throw createError({ status: 413, statusText: 'AI vision got too many images' })
+  }
+  if (totalBytes > AI_VISION_MAX_BYTES) {
+    console.error(`[${label}] KI-Vision abgewiesen: ${totalBytes} Bytes (max ${AI_VISION_MAX_BYTES})`)
+    throw createError({ status: 413, statusText: 'AI vision got too many bytes' })
+  }
 
   const controller = new AbortController()
   const timeout = setTimeout(() => controller.abort(), options.timeoutMs ?? DEFAULT_TIMEOUT_MS)
@@ -293,9 +343,12 @@ export async function aiVision(
       })),
     })
     if (!res.ok) {
+      // STATUS UND KENNUNG, NIE DER RUMPF: ein Fehler-Rumpf zitiert je nach
+      // Anbieter Teile der Anfrage zurück — hier also Kunden-Bilder
+      // (`aiProviderErrorTag`, Audit-Befund 2026-09-09).
       console.error(
-        `[${label}] KI-Vision-API ${res.status} (${images.length} Bilder, ${totalBytes} Bytes): `
-        + `${(await res.text()).slice(0, 300)}`,
+        `[${label}] KI-Vision-API ${res.status}${aiProviderErrorTag(await res.text())} `
+        + `(${images.length} Bilder, ${totalBytes} Bytes)`,
       )
       throw createError({ status: 502, statusText: 'AI provider unavailable' })
     }
