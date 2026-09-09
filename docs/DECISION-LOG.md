@@ -131,6 +131,16 @@ zur ersten Katalog-Frage, das Antwort-Modul steht beim ersten Besuch nur kurz �
 Interview läuft zuerst durch die echten Fragen, Pitch/Kategorie/Wettbewerber/Zielgruppen-Skizze
 entstehen danach aus dem Material, und dort steht das Modul stabil. Verworfen: Auto-Weiter hält auf
 Entwurfs-Sessions an; Registry-Reihenfolge des Kontext-Kapitels umbauen.
+(9) **NACHGEZOGEN am selben Tag, Davids Klick-Test als Testnutzer — die Reihenfolge WIRD umgebaut,
+in ALLEN Kapiteln:** „Die ersten vier Einträge sind keine Fragen, sondern Ableitungen? Dann sollten
+wir die Reihenfolge logisch aufbauen — mich als Testuser verwirrt das." Entscheidung (gegen die
+Empfehlung „nur Kontext"): in jedem Foundation-Kapitel stehen die Fragen zuerst, die Ableitungen
+danach, mit einem Trenner „Daraus abgeleitet" in Leiste und Abnahme; Auto-Weiter bleibt wie in (8).
+Hebt den zweiten „Verworfen"-Punkt aus (8) auf. Verworfen: nur Trenner ohne Umbau; nur Kontext.
+Dazu zwei Befunde aus demselben Test, ohne Frage gefixt: George sprach einen Solo-Gründer mit „ihr"
+an (die Team-Weiche erreichte nur die Beschriftungen — `converse-13`), und die Kapitel-Leiste hakte
+bestätigte Sessions erst nach Reload ab (die PATCH-Antwort trägt keine Session-Zustände — der
+Autosave lädt nach einer Bestätigung nach).
 
 ---
 
