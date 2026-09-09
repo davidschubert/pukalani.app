@@ -52,7 +52,13 @@ const props = withDefaults(defineProps<{
   /** Die Anlage ist gescheitert — der Satz steht neben dem Knopf, nicht im Nichts. */
   failed?: boolean
 }>(), {
-  mode: 'demo',
+  // LIVE IST DIE VOREINSTELLUNG (2026-09-09, Davids Test): zwei Aufrufer in der
+  // App (Site-Navigation, Marken-Umschalter) übergaben keinen Modus und
+  // verlinkten deshalb auf den Klickdummy `/brand/demo/werte` — David landete
+  // nach der Anlage in der Demo. Wer die Demo will, sagt es (`mode="demo"`,
+  // nur der Playground); ein vergessener Prop darf nie mehr in die Attrappe
+  // führen.
+  mode: 'live',
   to: '/brand/demo/werte',
   loading: false,
   failed: false,

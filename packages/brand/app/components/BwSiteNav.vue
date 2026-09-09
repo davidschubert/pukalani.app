@@ -5,6 +5,7 @@
  *  Werkstatt-Topbar. */
 import type { NavigationMenuItem } from '@nuxt/ui'
 import { navMenuChildren } from '../../../core/shared/communityNavigation'
+import type { BwNewBrandSubmit } from './BwNewBrandModal.vue'
 
 const route = useRoute()
 /* Die Beschriftungen laufen seit 2026-09-01 über i18n (`brand.nav.*`) —
@@ -109,8 +110,21 @@ const menuItems = computed<NavigationMenuItem[]>(() => items.value.map((item) =>
   }
 }))
 
-/* Neue Brand oeffnet das Start-Modal von jeder Seite aus. */
+/* Neue Brand oeffnet das Start-Modal von jeder Seite aus — im LIVE-Modus
+ * (2026-09-09, Davids Test): ohne Modus stand das Modal in der Demo und
+ * führte nach der Anlage auf `/brand/demo/werte`. Anlage + Sprung ins erste
+ * Kapitel kommen aus `useBrandCreate()`, wie auf der Brands-Übersicht. */
 const newBrandOpen = ref(false)
+const {
+  contentLocales: newBrandLocales,
+  creating: newBrandCreating,
+  failed: newBrandFailed,
+  create: createBrand,
+} = useBrandCreate()
+
+async function createFromModal(payload: BwNewBrandSubmit): Promise<void> {
+  if (await createBrand(payload)) newBrandOpen.value = false
+}
 
 /* DAS KONTO IST ECHT (Nacht 2026-09-03): das Avatar trug ein hartkodiertes
  * „DS", „Abmelden" war ein toter Menüpunkt, und ein Gast sah ein Konto-Menü
@@ -222,7 +236,11 @@ const userMenu = computed(() => [[
     <template #right>
       <!-- Runde 189 (David): Meine Brands + Neue Brand leben im
            Avatar-Menue — rechts steht nur noch das Konto. -->
-      <BwNewBrandModal v-model:open="newBrandOpen" />
+      <BwNewBrandModal
+        v-model:open="newBrandOpen" mode="live"
+        :content-locales="newBrandLocales" :loading="newBrandCreating" :failed="newBrandFailed"
+        @submit="createFromModal"
+      />
       <UDropdownMenu v-if="isLoggedIn" :items="userMenu">
         <button :aria-label="t('brand.nav.accountMenu')" class="grid place-items-center"><UAvatar :text="initials" size="md" /></button>
       </UDropdownMenu>

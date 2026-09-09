@@ -82,6 +82,6 @@ const newBrandOpen = ref(false)
       </div>
       <BwSiteFooter />
     </div>
-    <BwNewBrandModal v-model:open="newBrandOpen" />
+    <BwNewBrandModal v-model:open="newBrandOpen" mode="demo" />
   </div>
 </template>
