@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import {
   INSIGHTS_OPPORTUNITY_MAX,
+  INSIGHTS_OPPORTUNITY_SIGNALS,
+  INSIGHTS_OPPORTUNITY_SIGNALS_PLANNED,
   INSIGHTS_QUOTE_MAX,
   INSIGHTS_RANKING_PLACES,
   INSIGHTS_TOPICS,
@@ -202,13 +204,40 @@ describe('Öffentliche Fassung', () => {
 describe('Prüfregeln vor der Redaktion', () => {
   const post = insightsPostSchema.parse(article())
 
+  /**
+   * Der Beleg-Riegel kommt seit BI1 I1a aus dem Fundament
+   * (`core/shared/evidenceGrounding.ts`) und wird nicht mehr als Funktion
+   * hereingereicht — herein kommt der ROHTEXT je Quellen-Adresse. Die Prüfung
+   * ist damit case-SENSITIV, wie im Marktvergleich.
+   */
+  const PRESS_PAGE = `Kona Herald · ${PRESS.quote} Der Rest des Artikels.`
+
   it('meldet nichts, wenn alles steht', () => {
-    expect(insightsReviewIssues(post, { quoteGrounded: () => true, knownBrandIds: [], methodologyLinked: true })).toEqual([])
+    expect(insightsReviewIssues(post, {
+      sourceTexts: { [PRESS.url]: PRESS_PAGE },
+      knownBrandIds: [],
+      methodologyLinked: true,
+    })).toEqual([])
   })
 
   it('GEGENPROBE: ein nicht belegtes Zitat blockiert und nennt die Stelle', () => {
-    const issues = insightsReviewIssues(post, { quoteGrounded: (_source, index) => index !== 1 })
+    const issues = insightsReviewIssues(post, {
+      sourceTexts: { [PRESS.url]: 'Der Artikel sagt etwas ganz anderes.' },
+    })
     expect(issues).toEqual([{ code: 'quote_not_grounded', at: { kind: 'source', index: 1 } }])
+  })
+
+  it('GEGENPROBE: eine andere SCHREIBWEISE ist kein Beleg', () => {
+    // Der Prototyp prüfte case-insensitiv und hätte das durchgelassen.
+    const issues = insightsReviewIssues(post, {
+      sourceTexts: { [PRESS.url]: PRESS_PAGE.toLowerCase() },
+    })
+    expect(issues).toEqual([{ code: 'quote_not_grounded', at: { kind: 'source', index: 1 } }])
+  })
+
+  it('OHNE Rohtext prüft die Regel gar nicht — und behauptet es auch nicht', () => {
+    // Kein stiller Durchlass: die Lücke ist sichtbar, weil niemand „grün" sagt.
+    expect(insightsReviewIssues(post, {})).toEqual([])
   })
 
   it('GEGENPROBE: ein Treffer des Herabsetzungsfilters blockiert und zeigt das Wort', () => {
@@ -276,11 +305,44 @@ describe('Rechnungen', () => {
     expect(insightsPopularity(1, 0)).toBe(0)
   })
 
-  it('rechnet DREI Signale und nicht fünf (§11.1 Nr. 2)', () => {
+  /**
+   * DIE ZAHL IST AUF 100 GENORMT, DIE FUSSNOTE TRÄGT DIE WAHRHEIT (Davids
+   * Entscheidung 2026-09-08 gegen „44 von 60").
+   */
+  it('normiert auf 100 statt auf die Zahl der Signale', () => {
     const fresh = insightsOpportunity({ popularity: 2, ageDays: 0, relevance: 1 })
+    // GEGENPROBE zum alten Verhalten: drei volle Signale sind 100, nicht 60.
     expect(fresh.score).toBe(INSIGHTS_OPPORTUNITY_MAX)
-    expect(INSIGHTS_OPPORTUNITY_MAX).toBe(60)
-    // Halbwertszeit 90 Tage: aus 20 werden 10.
+    expect(INSIGHTS_OPPORTUNITY_MAX).toBe(100)
+    expect(fresh.score).not.toBe(60)
+    // Und sie sagt IMMER, aus wie vielen von fünf sie kommt.
+    expect(fresh.signals).toBe(3)
+    expect(fresh.of).toBe(5)
+    expect(INSIGHTS_OPPORTUNITY_SIGNALS_PLANNED).toHaveLength(5)
+    expect(INSIGHTS_OPPORTUNITY_SIGNALS).toHaveLength(3)
+  })
+
+  it('rechnet aus den VORHANDENEN Signalen — ein fehlendes schrumpft den Nenner nicht', () => {
+    // Zwei volle Signale sind ebenfalls 100: der Durchschnitt entscheidet,
+    // nicht die Summe. Was die Zahl wert ist, sagt `signals`.
+    const zwei = insightsOpportunity({ popularity: 2, ageDays: 0 })
+    expect(zwei.score).toBe(100)
+    expect(zwei.signals).toBe(2)
+    expect(zwei.relevance).toBeNull()
+    // Halbes Alter, volle Performance, keine Relevanz ⇒ (20 + 10) / 40.
+    const halb = insightsOpportunity({ popularity: 2, ageDays: 90 })
+    expect(halb.score).toBe(75)
+  })
+
+  it('GEGENPROBE: KEIN Signal ergibt keine Zahl — nicht die 0', () => {
+    const leer = insightsOpportunity({})
+    expect(leer.score).toBeNull()
+    expect(leer.signals).toBe(0)
+    // Eine 0 wäre eine Bewertung, wo gar nicht gemessen wurde.
+    expect(leer.score).not.toBe(0)
+  })
+
+  it('behält die Signal-Kurven — Halbwertszeit 90 Tage, Boden bei 0', () => {
     expect(insightsOpportunity({ popularity: 0, ageDays: 90, relevance: 0 }).age).toBe(10)
     expect(insightsOpportunity({ popularity: 0, ageDays: 10_000, relevance: 0 }).score).toBe(0)
   })

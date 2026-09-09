@@ -117,9 +117,10 @@
       "ageDays": "{count} days",
       "topic": "Topic",
       "opportunity": "Opportunity",
-      "opportunityOf": "{score} of {max}",
-      "signals": "3 of 5 signals",
-      "formula": "Performance (views ÷ subscribers) + age (half-life 90 days) + relevance (closeness to our topics), 0–20 each. Search demand and competition are missing as long as there is no data source for them.",
+      "opportunityOf": "{score} of 100",
+      "opportunityNone": "no score",
+      "signals": "from {count} of {total} signals",
+      "formula": "Normalised to 100: the average of the signals we have (0–20 each), computed from {count} of {total} signals. Three of them work today: performance (views ÷ subscribers), age (half-life 90 days) and relevance (closeness to our topics). Search demand and competition are missing as long as there is no data source for them.",
       "empty": "No run yet. The radar needs an API key."
     },
     "editor": {

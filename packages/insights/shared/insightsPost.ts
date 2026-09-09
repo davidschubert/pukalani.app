@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { EVIDENCE_QUOTE_MAX, evidenceIsGrounded } from '../../core/shared/evidenceGrounding'
 
 /**
  * DER REDAKTIONS-VERTRAG VON BRAND INSIGHTS (Plan §9.3,
@@ -79,11 +80,12 @@ export function insightsSourceIsThirdParty(kind: InsightsSourceKind): boolean {
 /**
  * DIE ZITATSCHRANKE (§4.1 b, § 51 UrhG). Sie steht im Schema, im
  * Redaktions-Formular und in der Prüfregel vor `review` — dieselbe Zahl, EINE
- * Stelle. 200 ist dieselbe Schranke wie im Marktvergleich
- * (`MARKET_EVIDENCE_MAX`); zwei verschiedene Zahlen für dieselbe Rechtsfrage
- * wären eine Einladung, die kleinere zu vergessen.
+ * Stelle. Seit BI1 I1a ist diese eine Stelle das FUNDAMENT
+ * (`core/shared/evidenceGrounding.ts`): der Marktvergleich leitet sein
+ * `MARKET_EVIDENCE_MAX` aus derselben Konstante ab. Zwei verschiedene Zahlen
+ * für dieselbe Rechtsfrage wären eine Einladung, die kleinere zu vergessen.
  */
-export const INSIGHTS_QUOTE_MAX = 200
+export const INSIGHTS_QUOTE_MAX: number = EVIDENCE_QUOTE_MAX
 
 /** Alte Slugs je Zeile (§9.2) — ≤ 5, damit die 301-Suche eine Grenze hat. */
 export const INSIGHTS_SLUG_HISTORY_MAX = 5
@@ -143,8 +145,8 @@ const dateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'YYYY-MM-DD')
  *
  * WAS DAS SCHEMA NICHT KANN: prüfen, ob das Zitat WÖRTLICH in der Quelle
  * steht. Das ist deterministisch möglich, braucht aber den abgerufenen Text —
- * die Prüfung sitzt deshalb in `insightsReviewIssues()` als hereingereichte
- * Funktion (s. dort, samt der offenen Frage, wem sie gehört).
+ * die Prüfung sitzt deshalb in `insightsReviewIssues()` und ruft dort den
+ * Beleg-Riegel des Fundaments (`core/shared/evidenceGrounding.ts`, BI1 I1a).
  */
 export const insightsSourceSchema = z.object({
   url: z.url().max(512),
@@ -415,28 +417,42 @@ export interface InsightsReviewIssue {
 }
 
 /**
- * WAS VON AUSSEN HEREINKOMMT — und warum es nicht hier drin steht.
+ * WAS VON AUSSEN HEREINKOMMT — und was seit BI1 I1a nicht mehr.
  *
- * `quoteGrounded` ist die DETERMINISTISCHE Beleg-Prüfung (§9.4: „der prüft
- * deterministisch, nicht mit KI"). Sie existiert bereits als
- * `evidenceIsGrounded` in `market/shared/marketExtractRules.ts` — und genau
- * dort liegt das Problem: `market` und `insights` sind ZWEI Produkt-Layer, und
- * ein Produkt-Layer importiert keinen anderen (CONCEPT A14, ESLint-Backstop).
- * Der Riegel wird deshalb HEREINGEREICHT statt abgeschrieben; wohin die
- * Funktion gehört (core? brand-Vertrag?), ist eine Entscheidung für I1/I2 und
- * steht als offene Frage im Prototyp-Bericht. Abschreiben wäre der teurere
- * Fehler: zwei Riegel driften, und der schwächere gewinnt.
+ * ── DIE BELEG-PRÜFUNG IST JETZT EINE REGEL, KEINE ÜBERGABE ───────────────
+ * Der Prototyp reichte sie als FUNKTION herein: sie existierte nur im
+ * market-Layer (`evidenceIsGrounded`), und ein Produkt-Layer importiert keinen
+ * anderen (CONCEPT A14, ESLint-Backstop). Die offene Frage aus dem
+ * Prototyp-Bericht („core? brand-Vertrag?") ist mit I1a beantwortet — der
+ * Riegel liegt im FUNDAMENT (`core/shared/evidenceGrounding.ts`) und wird von
+ * hier direkt gerufen. Herein kommen nur noch die DATEN, die er braucht: der
+ * Rohtext je Quellen-Adresse.
  *
- * `flagText` ist derselbe Fall für den Namens- und Herabsetzungsfilter
- * (`createMarketDisparagementGuard` / `checkMarketTexts`).
+ * Das ist mehr als eine Aufräum-Arbeit. Eine hereingereichte Prüfung darf
+ * jeder Aufrufer anders bauen — der Prototyp tat es case-INSENSITIV, der
+ * Riegel des Marktvergleichs case-SENSITIV. Die schwächere Fassung hätte „WIR
+ * RÖSTEN SELBST" als Beleg für „wir rösten selbst" durchgelassen, und ab da
+ * wäre die Zitatschranke eine Erzählung. Jetzt gibt es nur eine Fassung.
  *
- * FEHLT eine der beiden Funktionen, prüft diese Regel sie NICHT — und das ist
- * kein stiller Durchlass, sondern der Grund, warum der Aufrufer sie stellt:
- * eine Prüfung, die ohne Text „grün" sagt, wäre eine Lüge; eine, die sie gar
- * nicht erst behauptet, ist eine Lücke, die man sieht.
+ * ── `flagText` BLEIBT BEWUSST EINE ÜBERGABE ──────────────────────────────
+ * Der Namens- und Herabsetzungsfilter liegt seit I1a EBENFALLS im Fundament
+ * (`createDisparagementGuard`), aber er braucht etwas, das es im Prototyp noch
+ * nicht gibt: die Liste der KANDIDATEN, gegen die gesperrt wird. Sie entsteht
+ * mit I1 aus den Marken-Zeilen eines Beitrags. Bis dahin stellt der Aufrufer
+ * die Funktion — den Riegel hier schon einzubauen hiesse, ihn mit einer leeren
+ * Kandidatenliste zu bauen, und das sähe aus wie eine Prüfung.
+ *
+ * FEHLEN die Daten bzw. die Funktion, prüft diese Regel sie NICHT — und das
+ * ist kein stiller Durchlass, sondern der Grund, warum der Aufrufer sie
+ * stellt: eine Prüfung, die ohne Text „grün" sagt, wäre eine Lüge; eine, die
+ * sie gar nicht erst behauptet, ist eine Lücke, die man sieht.
  */
 export interface InsightsReviewContext {
-  quoteGrounded?: (source: InsightsSource, index: number) => boolean
+  /**
+   * Der Rohtext je Quellen-Adresse — nur damit ist die Beleg-Prüfung
+   * deterministisch. Eine Quelle OHNE Eintrag wird nicht geprüft (s. Kopf).
+   */
+  sourceTexts?: Readonly<Record<string, string>>
   flagText?: (text: string) => readonly string[]
   /** Die `insights_brands`-Zeilen, die es wirklich gibt (Regel 6). */
   knownBrandIds?: readonly string[]
@@ -460,7 +476,8 @@ export function insightsReviewIssues(post: InsightsPost, context: InsightsReview
     if (source.quote.length > INSIGHTS_QUOTE_MAX) {
       issues.push({ code: 'quote_too_long', at: { kind: 'source', index } })
     }
-    if (source.quote && context.quoteGrounded && !context.quoteGrounded(source, index)) {
+    const pageText = context.sourceTexts?.[source.url]
+    if (source.quote && pageText !== undefined && !evidenceIsGrounded({ quote: source.quote, pageText })) {
       issues.push({ code: 'quote_not_grounded', at: { kind: 'source', index } })
     }
     // 2 — Herausgeber, Datum, Lizenz.
@@ -637,9 +654,33 @@ export type InsightsRadarVideo = z.infer<typeof insightsRadarVideoSchema>
 /** Höchstens 30 Kalendertage (YouTube API Services Developer Policies III.E.4). */
 export const INSIGHTS_RADAR_RETENTION_DAYS = 30
 
-/** Je Signal 0–20 (§9.6). DREI davon, nicht fünf — s. `insightsOpportunity()`. */
-export const INSIGHTS_OPPORTUNITY_SIGNALS = ['performance', 'age', 'relevance'] as const
-export const INSIGHTS_OPPORTUNITY_MAX = INSIGHTS_OPPORTUNITY_SIGNALS.length * 20
+/**
+ * DIE FÜNF SIGNALE, DIE DER PLAN VORSIEHT (§9.6) — und die drei, die HEUTE
+ * eine Datenquelle haben.
+ *
+ * Beide Listen stehen da, weil die Zahl beide braucht: gerechnet wird aus den
+ * VORHANDENEN, ausgewiesen wird „aus n von 5". Eine einzelne Liste könnte das
+ * eine oder das andere sagen, nie beides.
+ */
+export const INSIGHTS_OPPORTUNITY_SIGNALS_PLANNED = [
+  'performance',
+  'age',
+  'relevance',
+  'searchDemand',
+  'competition',
+] as const
+export type InsightsOpportunitySignal = (typeof INSIGHTS_OPPORTUNITY_SIGNALS_PLANNED)[number]
+
+/** Was heute rechnen kann — für Ahrefs und Search Console gibt es nichts. */
+export const INSIGHTS_OPPORTUNITY_SIGNALS: readonly InsightsOpportunitySignal[] = [
+  'performance',
+  'age',
+  'relevance',
+]
+
+/** Je Signal 0–20 (§9.6); die ausgewiesene Zahl ist auf 0–100 normiert. */
+export const INSIGHTS_OPPORTUNITY_SIGNAL_MAX = 20
+export const INSIGHTS_OPPORTUNITY_MAX = 100
 
 /** Halbwertszeit des Alters-Signals in Tagen (§9.6). */
 export const INSIGHTS_OPPORTUNITY_HALF_LIFE_DAYS = 90
@@ -655,14 +696,27 @@ export function insightsPopularity(views: number, subscribers: number): number {
 }
 
 /**
- * UNSERE ZAHL — und sie heisst, was sie rechnet (§9.6, §11.1 Nr. 2).
+ * UNSERE ZAHL — auf 0–100 normiert, mit der Zahl ihrer Signale daneben
+ * (§9.6, §11.1 Nr. 2; Davids Entscheidung 2026-09-08 GEGEN „44 von 60").
  *
- * Drei Signale zu je 0–20, Summe 0–60. Der Plan nennt fünf (zusätzlich
- * Suchnachfrage und Konkurrenz); für die zwei gibt es heute keine Datenquelle
- * — kein Ahrefs, keine Search Console auf branding.supply. Ein Score, der
- * fünf behauptet und drei rechnet, ist die teurere Variante: er sähe aus wie
- * ein schlechtes Ergebnis, wo in Wahrheit zwei Summanden fehlen. Deshalb
- * zeigt die Oberfläche „44 von 60 · 3 Signale" und nicht „44 von 100".
+ * ── WARUM NICHT MEHR „44 VON 60" ─────────────────────────────────────────
+ * Der Plan nennt fünf Signale; für Suchnachfrage und Konkurrenz gibt es heute
+ * keine Datenquelle — kein Ahrefs, keine Search Console auf branding.supply.
+ * Der Prototyp löste das mit einem kleineren NENNER: „44 von 60 · 3 Signale".
+ * Ehrlich war das, lesbar nicht — eine Skala, die sich mit der Datenlage
+ * ändert, macht zwei Läufe unvergleichbar (dasselbe Video hiesse morgen „44
+ * von 100", weil ein viertes Signal dazukam, und niemand wüsste, ob es besser
+ * geworden ist). Genormt wird deshalb auf 100: der DURCHSCHNITT der
+ * vorhandenen Signale, mal fünf. Wie belastbar die Zahl ist, sagt nicht mehr
+ * der Nenner, sondern die Fussnote — „aus 3 von 5 Signalen", IMMER, auch wenn
+ * eines Tages alle fünf da sind.
+ *
+ * ── KEINE SIGNALE ⇒ KEINE ZAHL ───────────────────────────────────────────
+ * `score` ist dann `null` und nicht `0`. Eine 0 wäre eine Bewertung („das
+ * Video taugt nichts"), wo in Wahrheit gar nicht gemessen wurde. Dieselbe
+ * Unterscheidung wie bei einem fehlenden Feld im Marktvergleich: leer ist eine
+ * Aussage, erfunden wäre ein Fehler. Auch die EINZELNEN Signale sind `number |
+ * null` — ein fehlender Wert ist kein Nullpunkt.
  *
  * Die Zahl ist UNSERE (Leitplanke a): sie wird aus API-Werten gerechnet, ist
  * ein eigenes Ergebnis und fällt nicht unter das Aggregations-Verbot für
@@ -670,25 +724,52 @@ export function insightsPopularity(views: number, subscribers: number): number {
  * steht sie mit ihrem Stand da, wie jede andere Messung.
  */
 export interface InsightsOpportunity {
-  performance: number
-  age: number
-  relevance: number
-  score: number
+  /** Je 0–20, oder `null` wenn es für dieses Signal keinen Wert gibt. */
+  performance: number | null
+  age: number | null
+  relevance: number | null
+  /** 0–100 aus den VORHANDENEN Signalen — `null`, wenn keines vorliegt. */
+  score: number | null
+  /** Aus wie vielen Signalen die Zahl gerechnet ist. */
+  signals: number
+  /** Wie viele der Plan vorsieht — der Nenner der Fussnote, immer 5. */
+  of: number
 }
 
 export function insightsOpportunity(input: {
-  popularity: number
-  ageDays: number
+  /** Aufrufe ÷ Abonnenten. Fehlt sie, fehlt das Signal — kein Ersatzwert. */
+  popularity?: number
+  ageDays?: number
   /** Nähe zu unseren acht Clustern, 0–1 (Schlagwortliste, §9.6). */
-  relevance: number
+  relevance?: number
 }): InsightsOpportunity {
-  const clamp = (value: number) => Math.max(0, Math.min(20, Math.round(value)))
+  const max = INSIGHTS_OPPORTUNITY_SIGNAL_MAX
+  const clamp = (value: number) => Math.max(0, Math.min(max, Math.round(value)))
   // Popularität 1.0 (so viele Aufrufe wie Abonnenten) = volle 20 Punkte.
-  const performance = clamp(Math.min(1, input.popularity) * 20)
+  const performance = input.popularity === undefined
+    ? null
+    : clamp(Math.min(1, Math.max(0, input.popularity)) * max)
   // Halbwertszeit 90 Tage: heute 20, nach 90 Tagen 10, nach 180 Tagen 5.
-  const age = clamp(20 * 0.5 ** (Math.max(0, input.ageDays) / INSIGHTS_OPPORTUNITY_HALF_LIFE_DAYS))
-  const relevance = clamp(Math.max(0, Math.min(1, input.relevance)) * 20)
-  return { performance, age, relevance, score: performance + age + relevance }
+  const age = input.ageDays === undefined
+    ? null
+    : clamp(max * 0.5 ** (Math.max(0, input.ageDays) / INSIGHTS_OPPORTUNITY_HALF_LIFE_DAYS))
+  const relevance = input.relevance === undefined
+    ? null
+    : clamp(Math.max(0, Math.min(1, input.relevance)) * max)
+
+  const present = [performance, age, relevance].filter((value): value is number => value !== null)
+  const score = present.length === 0
+    ? null
+    : Math.round(present.reduce((sum, value) => sum + value, 0) / (present.length * max) * INSIGHTS_OPPORTUNITY_MAX)
+
+  return {
+    performance,
+    age,
+    relevance,
+    score,
+    signals: present.length,
+    of: INSIGHTS_OPPORTUNITY_SIGNALS_PLANNED.length,
+  }
 }
 
 // ── 8. Liste: filtern und sortieren (§9.5) ─────────────────────────────────

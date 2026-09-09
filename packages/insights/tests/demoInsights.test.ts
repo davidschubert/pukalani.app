@@ -5,6 +5,7 @@ import {
   DEMO_FLAG_WORDS,
   DEMO_POSTS,
   DEMO_RADAR,
+  DEMO_RELEVANCE,
   DEMO_SOURCE_TEXTS,
   demoBrand,
   demoScore,
@@ -14,8 +15,11 @@ import {
   INSIGHTS_RANKING_PLACES,
   insightsBrandSchema,
   insightsPostSchema,
+  insightsOpportunity,
+  insightsPopularity,
   insightsReviewIssues,
 } from '../shared/insightsPost'
+import { evidenceIsGrounded } from '../../core/shared/evidenceGrounding'
 
 /**
  * DIE DEMO-DATEN GEGEN DEN VERTRAG (Plan §9.9, Paket I0).
@@ -30,12 +34,11 @@ import {
  * den Demo-Rohtexten — bis auf das eine, das absichtlich falsch ist. Wer hier
  * einen Satz ändert, ohne den anderen mitzuziehen, baut genau die Lüge ein,
  * die das Produkt nie erzählen darf.
+ *
+ * GEPRÜFT WIRD MIT DEM ECHTEN RIEGEL (BI1 I1a). Bis dahin stand hier eine
+ * eigene, case-INSENSITIVE Hilfsfunktion — sie war schwächer als die Regel des
+ * Produkts, und ein Beweis, der milder prüft als die Wirklichkeit, ist keiner.
  */
-
-function grounded(quote: string, text: string): boolean {
-  const normalize = (value: string) => value.replace(/\s+/g, ' ').trim().toLowerCase()
-  return normalize(text).includes(normalize(quote))
-}
 
 describe('Demo-Daten', () => {
   it('validiert jeden Beitrag gegen den Vertrag', () => {
@@ -109,7 +112,7 @@ describe('Belege der Demo-Quellen', () => {
         if (!source.quote) continue
         const text = DEMO_SOURCE_TEXTS[source.url]
         if (!text) continue
-        expect(grounded(source.quote, text), `${post.slug} · ${source.url}`).toBe(true)
+        expect(evidenceIsGrounded({ quote: source.quote, pageText: text }), `${post.slug} · ${source.url}`).toBe(true)
       }
     }
   })
@@ -117,13 +120,13 @@ describe('Belege der Demo-Quellen', () => {
   it('GEGENPROBE: der Entwurf trägt bewusst ein Zitat, das nicht in der Quelle steht', () => {
     const source = DEMO_DRAFT.sources[0]
     expect(source).toBeDefined()
-    expect(grounded(source!.quote, DEMO_SOURCE_TEXTS[source!.url] ?? '')).toBe(false)
+    expect(evidenceIsGrounded({ quote: source!.quote, pageText: DEMO_SOURCE_TEXTS[source!.url] ?? '' })).toBe(false)
   })
 })
 
 describe('Der Entwurf des Redaktions-Screens', () => {
   const issues = insightsReviewIssues(DEMO_DRAFT, {
-    quoteGrounded: source => grounded(source.quote, DEMO_SOURCE_TEXTS[source.url] ?? ''),
+    sourceTexts: DEMO_SOURCE_TEXTS,
     flagText: text => DEMO_FLAG_WORDS.filter(word => text.toLowerCase().includes(word)),
     knownBrandIds: DEMO_BRANDS.map(brand => brand.slug),
     methodologyLinked: true,
@@ -145,6 +148,24 @@ describe('Der Entwurf des Redaktions-Screens', () => {
 })
 
 describe('Themenradar', () => {
+  it('zeigt beide Belastbarkeiten — drei Signale UND zwei (Fussnote „aus n von 5")', () => {
+    // Eine Fussnote, in der `n` nie schwankt, beweist nichts. Genau eine
+    // Demo-Zeile hat deshalb kein Relevanz-Signal (DEMO_RELEVANCE), und die
+    // Zahl wird dort aus zwei statt drei Signalen gerechnet — auf DERSELBEN
+    // 100er-Skala, weil sonst zwei Zeilen unvergleichbar wären.
+    const signale = DEMO_RADAR.map(video => insightsOpportunity({
+      popularity: insightsPopularity(video.views, video.channelSubscribers),
+      ageDays: 30,
+      relevance: DEMO_RELEVANCE[video.videoId],
+    }))
+    expect(new Set(signale.map(s => s.signals))).toEqual(new Set([2, 3]))
+    for (const s of signale) {
+      expect(s.of).toBe(5)
+      expect(s.score).not.toBeNull()
+      expect(s.score!).toBeLessThanOrEqual(100)
+    }
+  })
+
   it('speichert je Video nur die erlaubten Zahlen (§9.6 a)', () => {
     expect(DEMO_RADAR.length).toBeGreaterThan(0)
     for (const video of DEMO_RADAR) {

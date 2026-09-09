@@ -117,9 +117,10 @@
       "ageDays": "{count} Tage",
       "topic": "Thema",
       "opportunity": "Opportunity",
-      "opportunityOf": "{score} von {max}",
-      "signals": "3 von 5 Signalen",
-      "formula": "Performance (Aufrufe ÷ Abonnenten) + Alter (Halbwertszeit 90 Tage) + Relevanz (Nähe zu unseren Themen), je 0–20. Suchnachfrage und Konkurrenz fehlen, solange es dafür keine Datenquelle gibt.",
+      "opportunityOf": "{score} von 100",
+      "opportunityNone": "keine Zahl",
+      "signals": "aus {count} von {total} Signalen",
+      "formula": "Auf 100 genormt: der Durchschnitt der vorhandenen Signale (je 0–20), aus {count} von {total} Signalen gerechnet. Heute rechnen drei: Performance (Aufrufe ÷ Abonnenten), Alter (Halbwertszeit 90 Tage) und Relevanz (Nähe zu unseren Themen). Suchnachfrage und Konkurrenz fehlen, solange es dafür keine Datenquelle gibt.",
       "empty": "Noch kein Lauf. Der Radar braucht einen API-Schlüssel."
     },
     "editor": {

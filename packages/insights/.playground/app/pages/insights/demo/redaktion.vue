@@ -117,7 +117,7 @@ const knownBrandIds = computed(() => DEMO_BRANDS.map(brand => brand.slug))
       <section class="mt-12">
         <InRadar
           :videos="DEMO_RADAR" :locale="readerLocale" :today="DEMO_TODAY"
-          :resolve-relevance="video => DEMO_RELEVANCE[video.videoId] ?? 0.5"
+          :resolve-relevance="video => DEMO_RELEVANCE[video.videoId]"
         />
       </section>
 

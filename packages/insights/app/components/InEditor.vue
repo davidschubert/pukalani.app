@@ -14,6 +14,7 @@ import {
   insightsReadingMinutes,
   insightsReviewIssues,
 } from '../../shared/insightsPost'
+import { evidenceIsGrounded } from '../../../core/shared/evidenceGrounding'
 import { insightsDay, insightsHost } from '../utils/insightsFormat'
 
 /**
@@ -29,9 +30,10 @@ import { insightsDay, insightsHost } from '../utils/insightsFormat'
  *     offen ist — und die Liste sagt, welche und wo.
  *  2. **Der Beleg wird deterministisch geprüft**, nicht mit KI (§9.4): steht
  *     das Zitat WÖRTLICH in der Quelle? Die Ampel je Quelle ist genau diese
- *     Antwort. Die Prüf-FUNKTION kommt von aussen herein — sie liegt heute im
- *     market-Layer (`evidenceIsGrounded`), und ein Produkt-Layer importiert
- *     keinen anderen (CONCEPT A14). Wem sie künftig gehört, entscheidet I1/I2.
+ *     Antwort. Der Riegel liegt seit BI1 I1a im FUNDAMENT
+ *     (`core/shared/evidenceGrounding.ts`) und wird von hier gerufen — der
+ *     Prototyp hatte ihn noch selbst gebaut, und zwar case-INSENSITIV: „WIR
+ *     RÖSTEN SELBST" wäre als Beleg für „wir rösten selbst" durchgegangen.
  *  3. **Die zweite Fassung ist eine Fassung, kein Cache** (§11 Frage 4). Der
  *     Übersetzen-Knopf legt einen ENTWURF an; öffentlich wird er erst mit dem
  *     Häkchen „redigiert". Bis dahin steht über dem Feld, dass er maschinell
@@ -119,11 +121,7 @@ const editorStarterKit = { strike: false as const }
 const checked = ref<Record<number, boolean>>({})
 
 function quoteGrounded(source: InsightsSource): boolean {
-  const text = props.sourceTexts?.[source.url] ?? ''
-  const normalize = (value: string) => value.replace(/\s+/g, ' ').trim().toLowerCase()
-  const quote = normalize(source.quote)
-  if (!quote || quote.length > INSIGHTS_QUOTE_MAX) return false
-  return normalize(text).includes(quote)
+  return evidenceIsGrounded({ quote: source.quote, pageText: props.sourceTexts?.[source.url] ?? '' })
 }
 
 function checkEvidence(index: number): void {
@@ -141,7 +139,7 @@ function checkEvidence(index: number): void {
 // ── Die sechs Prüfregeln ───────────────────────────────────────────────────
 
 const issues = computed<InsightsReviewIssue[]>(() => insightsReviewIssues(draft, {
-  quoteGrounded: source => quoteGrounded(source),
+  sourceTexts: props.sourceTexts,
   flagText: text => (props.flagWords ?? []).filter(word => text.toLowerCase().includes(word.toLowerCase())),
   knownBrandIds: props.knownBrandIds,
   methodologyLinked: props.methodologyLinked,

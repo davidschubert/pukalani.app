@@ -2,7 +2,8 @@
 import type { TableColumn } from '@nuxt/ui'
 import type { InsightsOpportunity, InsightsRadarVideo } from '../../shared/insightsPost'
 import {
-  INSIGHTS_OPPORTUNITY_MAX,
+  INSIGHTS_OPPORTUNITY_SIGNALS,
+  INSIGHTS_OPPORTUNITY_SIGNALS_PLANNED,
   INSIGHTS_RADAR_RETENTION_DAYS,
   insightsOpportunity,
   insightsPopularity,
@@ -21,13 +22,18 @@ import { insightsDaysBetween, insightsNumber } from '../utils/insightsFormat'
  * begrenzt (III.E.4) — der Satz darüber steht in der Oberfläche und nicht nur
  * im Plan, weil er das Verhalten der Tabelle erklärt: sie ist kurzlebig.
  *
- * ── UNSERE ZAHL HEISST, WAS SIE RECHNET ─────────────────────────────────
- * „44 von 60 · 3 Signale" und nicht „44 von 100". Der Plan nennt fünf
+ * ── UNSERE ZAHL IST AUF 100 GENORMT, DIE FUSSNOTE TRÄGT DIE WAHRHEIT ────
+ * „73" von 100, und daneben IMMER „aus n von 5 Signalen" (Davids Entscheidung
+ * 2026-09-08 gegen die alte Anzeige „44 von 60"). Der Plan nennt fünf
  * Signale; für Suchnachfrage und Konkurrenz gibt es heute keine Datenquelle
- * (§11.1 Nr. 2). Ein Score, der fünf behauptet und drei rechnet, sähe aus wie
- * ein schlechtes Ergebnis, wo in Wahrheit zwei Summanden fehlen. Die Formel
- * hängt als Tooltip an der Spalte — eine Zahl ohne Rechenweg ist eine
- * Behauptung.
+ * (§11.1 Nr. 2). Ein mitwachsender NENNER wäre ehrlich, aber unlesbar: zwei
+ * Läufe liessen sich nicht vergleichen, sobald ein viertes Signal dazukommt.
+ * Genormt wird deshalb auf 100, und wie belastbar die Zahl ist, sagt die
+ * Fussnote. Die Formel hängt als Tooltip an der Spalte — eine Zahl ohne
+ * Rechenweg ist eine Behauptung.
+ *
+ * KEIN SIGNAL ⇒ KEINE ZAHL: die Zelle zeigt dann einen Strich, keine 0. Eine
+ * 0 wäre eine Bewertung, wo gar nicht gemessen wurde.
  *
  * ── `UTable` IST DER STANDARD (Davids B6-Regel) ─────────────────────────
  * Sortierung, Spaltenbreiten und Zeilenverhalten kommen mitgeliefert; eine
@@ -39,8 +45,13 @@ const props = defineProps<{
   /** Der Stichtag, gegen den das Alter gerechnet wird — nie `new Date()` im
    *  Rendern: das ist auf dem Server ein anderer Wert als im Browser. */
   today: string
-  /** Nähe zu unseren Themenclustern (0–1), je Video — in I4 aus Schlagwörtern. */
-  resolveRelevance?: (video: InsightsRadarVideo) => number
+  /**
+   * Nähe zu unseren Themenclustern (0–1), je Video — in I4 aus Schlagwörtern.
+   * `undefined` heisst „für dieses Video kein Relevanz-Signal": die Zahl wird
+   * dann aus zwei Signalen gerechnet und sagt es in ihrer Fussnote. Ein
+   * geratener Mittelwert (früher 0.5) wäre eine erfundene Messung.
+   */
+  resolveRelevance?: (video: InsightsRadarVideo) => number | undefined
 }>()
 
 const { t } = useI18n()
@@ -58,10 +69,11 @@ const rows = computed<RadarRow[]>(() => props.videos.map((video) => {
     opportunity: insightsOpportunity({
       popularity: insightsPopularity(video.views, video.channelSubscribers),
       ageDays,
-      relevance: props.resolveRelevance ? props.resolveRelevance(video) : 0.5,
+      relevance: props.resolveRelevance?.(video),
     }),
   }
-}).sort((a, b) => b.opportunity.score - a.opportunity.score))
+  // Ohne Zahl ans Ende — `null` ist kein kleiner Wert, sondern keiner.
+}).sort((a, b) => (b.opportunity.score ?? -1) - (a.opportunity.score ?? -1)))
 
 const columns = computed<TableColumn<RadarRow>[]>(() => [
   { accessorKey: 'channelTitle', header: () => t('insights.radar.channel') },
@@ -73,13 +85,21 @@ const columns = computed<TableColumn<RadarRow>[]>(() => [
   { id: 'age', header: () => t('insights.radar.age') },
   { id: 'opportunity', header: () => t('insights.radar.opportunity') },
 ])
+
+/* Der Rechenweg NENNT die drei heutigen Signale und sagt, aus wie vielen die
+ * Zahl in DIESER Zeile entstanden ist — nicht, wie viele es im Schnitt sind. */
+function formulaFor(opportunity: InsightsOpportunity): string {
+  return t('insights.radar.formula', { count: opportunity.signals, total: opportunity.of })
+}
 </script>
 
 <template>
   <section>
     <div class="flex flex-wrap items-baseline justify-between gap-3">
       <h2 class="text-lg font-medium">{{ t('insights.radar.title') }}</h2>
-      <p class="bw-label" style="color: var(--bw-muted)">{{ t('insights.radar.signals') }}</p>
+      <p class="bw-label" style="color: var(--bw-muted)">
+        {{ t('insights.radar.signals', { count: INSIGHTS_OPPORTUNITY_SIGNALS.length, total: INSIGHTS_OPPORTUNITY_SIGNALS_PLANNED.length }) }}
+      </p>
     </div>
     <p class="mt-1 text-sm leading-relaxed" style="color: var(--bw-ink-soft)">{{ t('insights.radar.lead') }}</p>
     <p class="bw-pending mt-2">{{ t('insights.radar.retention', { days: INSIGHTS_RADAR_RETENTION_DAYS }) }}</p>
@@ -119,9 +139,17 @@ const columns = computed<TableColumn<RadarRow>[]>(() => [
           </span>
         </template>
         <template #opportunity-cell="{ row }">
-          <UTooltip :text="t('insights.radar.formula')">
+          <UTooltip :text="formulaFor(row.original.opportunity)">
             <span class="bw-label tabular-nums" style="color: var(--bw-accent)">
-              {{ t('insights.radar.opportunityOf', { score: row.original.opportunity.score, max: INSIGHTS_OPPORTUNITY_MAX }) }}
+              <template v-if="row.original.opportunity.score === null">
+                {{ t('insights.radar.opportunityNone') }}
+              </template>
+              <template v-else>
+                {{ t('insights.radar.opportunityOf', { score: row.original.opportunity.score }) }}
+                <span style="color: var(--bw-muted)">
+                  · {{ t('insights.radar.signals', { count: row.original.opportunity.signals, total: row.original.opportunity.of }) }}
+                </span>
+              </template>
             </span>
           </UTooltip>
         </template>

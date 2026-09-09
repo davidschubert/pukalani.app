@@ -47,9 +47,10 @@ export const DEMO_TODAY = '2026-09-08'
  * Beleg-Prüfung (§9.4: „der prüft deterministisch, nicht mit KI").
  *
  * Im Produkt holt der Server die Seite über den SSRF-festen Abruf des
- * brand-Layers und lässt `evidenceIsGrounded` entscheiden, ob das Zitat
- * WÖRTLICH darin steht. Hier steht der Text als Zeichenkette daneben — mit
- * demselben Ergebnis und derselben Härte.
+ * brand-Layers; entschieden wird auch dort mit `evidenceIsGrounded` aus dem
+ * Fundament (`core/shared/evidenceGrounding.ts`, BI1 I1a). Hier steht der Text
+ * als Zeichenkette daneben — dieselbe Funktion, dasselbe Ergebnis, dieselbe
+ * Härte.
  *
  * EINE QUELLE IST ABSICHTLICH FALSCH BELEGT (`pacificbean.example/about`):
  * ein Prototyp, in dem alles klappt, zeigt den wichtigsten Zustand nie. Die
@@ -603,11 +604,18 @@ const radarSeeds = [
 
 export const DEMO_RADAR: readonly InsightsRadarVideo[] = radarSeeds.map(seed => insightsRadarVideoSchema.parse(seed))
 
-/** Nähe zu unseren acht Clustern (0–1) — in I4 aus einer Schlagwortliste. */
+/**
+ * Nähe zu unseren acht Clustern (0–1) — in I4 aus einer Schlagwortliste.
+ *
+ * `demo-radar-4` FEHLT ABSICHTLICH. Die Opportunity-Zahl ist seit dem
+ * 2026-09-08 auf 100 genormt und trägt ihre Belastbarkeit in der Fussnote
+ * („aus n von 5 Signalen"); eine Fussnote, in der `n` nie schwankt, beweist
+ * nichts. Diese eine Zeile zeigt den Fall „aus 2 von 5" — und dass ein
+ * fehlendes Signal FEHLT, statt als 0.5 geraten zu werden.
+ */
 export const DEMO_RELEVANCE: Record<string, number> = {
   'demo-radar-1': 0.95,
   'demo-radar-2': 0.7,
   'demo-radar-3': 0.85,
-  'demo-radar-4': 0.6,
   'demo-radar-5': 0.9,
 }
