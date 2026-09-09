@@ -39,8 +39,20 @@ export type FdBlock =
   | { kind: 'chips', label?: string, items: { word: string, sample: string }[] }
   /** Do & Don't als Paare (§2.4 — aus Wort-Leitfaden und Tabu-Wörtern). */
   | { kind: 'dodont', label?: string, pairs: { doText: string, dontText: string }[] }
-  /** Tabelle (Namens-Kandidaten, Prüf-Tabelle). */
+  /** Tabelle (Namens-Kandidaten, Prüf-Tabelle, Rollen/Kontrast/Skala). */
   | { kind: 'table', label?: string, columns: string[], rows: string[][] }
+  /**
+   * DIE DREI BLOCK-ARTEN DER ANWENDUNGS-KAPITEL (Book & Kit, Konzept
+   * docs/plans/BRAND-BOOK-KIT.md §2.5). Sie stehen hier bei den anderen und
+   * nicht in `demoKit.ts`, weil ein Block-Typ dem RENDERER gehört
+   * (`FdChapter.vue`) und nicht dem Kapitel, das ihn zuerst benutzt.
+   */
+  /** Nummerierte Regel-Liste mit optionalem Don’t darunter. */
+  | { kind: 'rules', label?: string, items: { text: string, dont?: string }[] }
+  /** Kopierbare Vorlage (Prompt) — Zweck oben, Text darunter, Vermerk unten. */
+  | { kind: 'prompt', label?: string, title: string, text: string, note?: string }
+  /** Ansprechperson, die BY DESIGN öffentlich reist (§2.4 `p.contact`). */
+  | { kind: 'contact', label?: string, name: string, role: string, email: string, note?: string }
   /** Die sichtbare Schranke (§2.5): Element, ein Satz, das Produkt dahinter. */
   | { kind: 'locked', title: string, text: string, product: string }
   /** Farbrampe der gewählten Richtung (nur mit `?richtung=`). */

@@ -1,6 +1,18 @@
 <script setup lang="ts">
 /** Clickdummy: "Meine Brands" (Dashboard-Modul-Vorschau). */
 const newBrandOpen = ref(false)
+
+/** Die acht Screens des BK1-Prototyps (docs/plans/BRAND-BOOK-KIT.md §2.15). */
+const bk1Screens: { num: string, label: string, note: string, to: string }[] = [
+  { num: 'Screen 1', label: 'Kit — voll', note: 'Brand Context, Tokens hell/dunkel, Zeichen, Pressekit, Lizenzen, Bündel.', to: '/brand/demo/kit' },
+  { num: 'Screen 2', label: 'Kit — ohne Brand Design', note: 'Dieselbe Seite mit drei ruhigen Sperr-Flächen. Kein Preis, ein Gespräch.', to: '/brand/demo/kit?design=none' },
+  { num: 'Screen 3', label: 'Brand Book', note: 'Die Leseansicht mit Nomenklatur, Anwendungs-Kapiteln, Pressekit, AI-Guidelines.', to: '/brand/demo/foundation?design=done&kit=done' },
+  { num: 'Screen 4', label: 'Kapitel AI-Guidelines', note: 'Nika: Umfang, Freigabe, Leitplanken als Entwurf, drei Prompt-Vorlagen.', to: '/brand/demo/kit/aiguide' },
+  { num: 'Screen 5', label: 'Kapitel Nomenklatur', note: 'Otto: Produkttypen als Chips, Namensmuster auf der Bühne, Regeln.', to: '/brand/demo/kit/nomenclature' },
+  { num: 'Screen 6', label: 'Kapitel Pressekit', note: 'George: Fakten-Freigabe (Opt-in), Presse-Kontakt mit Vorlagen, Vorschau.', to: '/brand/demo/kit/presskit' },
+  { num: 'Screen 7', label: 'Betreiber — Freischaltungen', note: 'Eine Tabelle, zwei Spalten: Brand Design und Ableitung, mit Bestätigung.', to: '/brand/demo/kit/unlock' },
+  { num: 'Screen 8', label: 'Anatomie mit „Das Kit"', note: 'Das öffentliche Beispiel-Kit auf der Discover-Seite von Kailua.', to: '/brand/demo/anatomie?kit=1' },
+]
 </script>
 
 <template>
@@ -58,6 +70,31 @@ const newBrandOpen = ref(false)
           </div>
         </div>
       </div>
+      <!-- KLICKDUMMY PRODUKT 03 (docs/plans/BRAND-BOOK-KIT.md §2.15): die acht
+           Screens an EINER Stelle. Sie hängen nicht an einer Marken-Kachel,
+           weil sie zwei Zustände derselben Marke zeigen (mit und ohne
+           Ableitung) — und weil ein Betreiber-Screen dazugehört. -->
+      <div class="mt-20">
+        <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+          <h2 class="text-lg font-medium">Brand Book &amp; Kit (BK1-Prototyp)</h2>
+          <p class="bw-label" style="color: var(--bw-muted)">Kailua Coffee Co. · acht Screens</p>
+        </div>
+        <p class="mt-2 max-w-3xl text-sm leading-relaxed" style="color: var(--bw-ink-soft)">
+          Die dritte Schicht: Book &amp; Kit entscheidet nichts mehr, sondern liefert aus — das Handbuch als Leseansicht, das Kit als Dateien (Design-Tokens, brand.md, brand.json, Zeichen, Pressekit).
+        </p>
+        <div class="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <NuxtLink
+            v-for="screen in bk1Screens" :key="screen.to"
+            :to="screen.to"
+            class="bw-card bw-card--hover flex flex-col p-5"
+          >
+            <p class="bw-label" style="color: var(--bw-muted)">{{ screen.num }}</p>
+            <p class="mt-1.5 text-sm font-medium">{{ screen.label }}</p>
+            <p class="mt-1 flex-1 text-sm leading-relaxed" style="color: var(--bw-ink-soft)">{{ screen.note }}</p>
+          </NuxtLink>
+        </div>
+      </div>
+
       <!-- Beispiel-Brand-Teaser + Leerzustand nebeneinander (Runde 134) -->
       <div class="mt-20 grid items-stretch gap-6 lg:grid-cols-2">
       <NuxtLink to="/brand/demo/beispiel" class="bw-card bw-card--hover grid items-center gap-6 p-8 sm:grid-cols-[10rem_minmax(0,1fr)]">

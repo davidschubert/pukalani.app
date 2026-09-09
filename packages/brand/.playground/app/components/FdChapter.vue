@@ -30,6 +30,36 @@ const props = withDefaults(defineProps<{
 
 const isPrivate = computed(() => props.variant === 'private')
 const num = computed(() => String(props.index).padStart(2, '0'))
+
+/* WELCHES PRODUKT HINTER DER SCHRANKE STEHT, sagt der Block selbst (BK1
+ * §2.5): Kapitel 10 wartet auf Brand Design, die Anwendungs-Kapitel auf Book
+ * & Kit. Vorher stand „folgt in Brand Design" fest im Markup — mit dem
+ * zweiten Produkt wäre das die erste Stelle, an der die Seite etwas
+ * Falsches behauptet. */
+const lockedProduct = computed(() => {
+  const first = props.chapter.blocks.find(block => block.kind === 'locked')
+  return first?.kind === 'locked' ? first.product : 'Brand Design'
+})
+const lockedIsKit = computed(() => lockedProduct.value === 'Brand Book & Kit')
+
+/* KOPIEREN (Book & Kit §2.3 `n.prompts`): eine Vorlage wird übernommen, nicht
+ * gelesen — deshalb ist der Knopf echt und nicht angedeutet. Der Merker hält
+ * das Etikett der zuletzt kopierten Vorlage, damit bei mehreren Blöcken nur
+ * der geklickte „Kopiert" zeigt. */
+const copiedPrompt = ref<string | null>(null)
+
+async function copyPrompt(label: string, text: string): Promise<void> {
+  try {
+    await navigator.clipboard.writeText(text)
+  }
+  catch {
+    /* Ohne Erlaubnis (oder ohne sicheren Kontext) gibt es keine Zwischenablage.
+     * Der Dummy zeigt die Rückmeldung trotzdem: er beweist die FORM, und ein
+     * stiller Fehlschlag wäre die unehrlichere der beiden Auskünfte. */
+  }
+  copiedPrompt.value = label
+  window.setTimeout(() => { copiedPrompt.value = null }, 1600)
+}
 </script>
 
 <template>
@@ -42,7 +72,7 @@ const num = computed(() => String(props.index).padStart(2, '0'))
       >noch nicht abgenommen</span>
       <span v-else-if="chapter.state === 'locked'" class="bw-state">
         <UIcon name="i-ph-lock-simple" class="size-3.5" />
-        folgt in Brand Design
+        folgt in {{ lockedProduct }}
       </span>
     </div>
     <h2 class="mt-1 text-[26px] font-extralight leading-tight tracking-tight">{{ chapter.title }}</h2>
@@ -50,7 +80,7 @@ const num = computed(() => String(props.index).padStart(2, '0'))
 
     <!-- GESPERRT BEIM FREMDLESER: ein Satz, kein Angebot (§2.6). -->
     <p v-if="chapter.state === 'locked' && !isPrivate" class="mt-4 text-sm leading-relaxed" style="color: var(--bw-ink-soft)">
-      Visuelle Identität: folgt in Brand Design.
+      {{ chapter.title }}: folgt in {{ lockedProduct }}.
     </p>
 
     <div v-else class="mt-5 flex flex-col gap-7">
@@ -152,6 +182,56 @@ const num = computed(() => String(props.index).padStart(2, '0'))
           </div>
         </div>
 
+        <!-- REGELN (Book & Kit §2.5): nummeriert, weil man sie zitiert — „Regel
+             3" ist im Team eine Adresse. Das Don’t steht UNTER der Regel und
+             nicht daneben: es ist ihre Begründung, kein zweiter Wert. -->
+        <div v-else-if="block.kind === 'rules'">
+          <p v-if="block.label" class="bw-label" style="color: var(--bw-muted)">{{ block.label }}</p>
+          <ol class="mt-2.5 flex flex-col gap-2.5">
+            <li v-for="(rule, r) in block.items" :key="`rule-${r}`" class="flex items-start gap-3">
+              <span class="bw-label mt-0.5 flex-none tabular-nums" style="color: var(--bw-muted)">{{ String(r + 1).padStart(2, '0') }}</span>
+              <span class="min-w-0 flex-1">
+                <span class="block text-sm leading-relaxed">{{ rule.text }}</span>
+                <span v-if="rule.dont" class="mt-1 flex items-start gap-2 text-sm leading-relaxed" style="color: var(--bw-muted)">
+                  <UIcon name="i-ph-x-circle-fill" class="mt-0.5 size-4 flex-none" style="color: var(--bw-stale)" />
+                  <span class="min-w-0">{{ rule.dont }}</span>
+                </span>
+              </span>
+            </li>
+          </ol>
+        </div>
+
+        <!-- VORLAGE ZUM KOPIEREN (§2.3 `n.prompts`): der Text steht in Mono und
+             mit erhaltenen Zeilenumbrüchen — er wird nicht gelesen, er wird
+             übernommen. Der Knopf schreibt echt in die Zwischenablage. -->
+        <div v-else-if="block.kind === 'prompt'" class="fd-box rounded-2xl px-5 py-4" style="background: var(--bw-surface)">
+          <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+            <p class="text-sm font-medium">{{ block.label }}</p>
+            <UButton
+              class="fd-noprint ms-auto rounded-full"
+              size="xs" color="neutral" variant="outline"
+              :icon="copiedPrompt === block.label ? 'i-ph-check' : 'i-ph-copy'"
+              :label="copiedPrompt === block.label ? 'Kopiert' : 'Kopieren'"
+              style="background: var(--bw-surface-hi)"
+              @click="copyPrompt(block.label ?? '', block.text)"
+            />
+          </div>
+          <p class="bw-label mt-1" style="color: var(--bw-muted)">{{ block.title }}</p>
+          <pre class="fd-prompt mt-3">{{ block.text }}</pre>
+          <p v-if="block.note" class="bw-pending mt-3">{{ block.note }}</p>
+        </div>
+
+        <!-- ANSPRECHPERSON (§2.4 `p.contact`): der Vermerk „reist öffentlich"
+             steht AM Block und nicht im Kleingedruckten — genau das ist die
+             Zusage, die der Mensch vor der Abnahme gesehen haben muss. -->
+        <div v-else-if="block.kind === 'contact'" class="fd-box rounded-2xl px-5 py-4" style="background: var(--bw-surface)">
+          <p v-if="block.label" class="bw-label" style="color: var(--bw-muted)">{{ block.label }}</p>
+          <p class="mt-2 text-sm font-medium">{{ block.name }}</p>
+          <p class="text-sm leading-relaxed" style="color: var(--bw-ink-soft)">{{ block.role }}</p>
+          <p class="mt-1 text-sm leading-relaxed" style="color: var(--bw-ink-soft)">{{ block.email }}</p>
+          <p v-if="block.note" class="bw-pending mt-3">{{ block.note }}</p>
+        </div>
+
         <!-- DIE SICHTBARE SCHRANKE (§2.5): was dort entsteht, woraus — und
              welches Produkt es liefert. Ehrlich beschriftet statt weggelassen. -->
         <div
@@ -208,8 +288,17 @@ const num = computed(() => String(props.index).padStart(2, '0'))
 
     <!-- EIN CTA je Schranken-Kapitel, nicht je Abschnitt — und nur privat. -->
     <div v-if="chapter.state === 'locked' && isPrivate" class="fd-noprint mt-5 flex flex-wrap items-center gap-2">
-      <UButton label="Im Brand Design entscheiden" trailing-icon="i-ph-arrow-right" class="rounded-full" />
-      <UButton label="Erstgespräch buchen" color="neutral" variant="outline" class="rounded-full" style="background: var(--bw-surface-hi)" />
+      <!-- KEIN PREIS an der Schranke (BK1 §1.11 d): dort steht ein Gespräch,
+           keine Zahl. Bei Book & Kit ist das Erstgespräch der EINZIGE Weg —
+           ein „jetzt entscheiden" gäbe es dort nicht, es ist ja gesperrt. -->
+      <UButton v-if="!lockedIsKit" label="Im Brand Design entscheiden" trailing-icon="i-ph-arrow-right" class="rounded-full" />
+      <UButton
+        label="Erstgespräch buchen"
+        :color="lockedIsKit ? 'primary' : 'neutral'"
+        :variant="lockedIsKit ? 'solid' : 'outline'"
+        class="rounded-full"
+        :style="lockedIsKit ? undefined : 'background: var(--bw-surface-hi)'"
+      />
     </div>
   </section>
 </template>
@@ -218,10 +307,24 @@ const num = computed(() => String(props.index).padStart(2, '0'))
 /* DRUCK (§2.6): Seitenumbruch je Kapitel, keine Knöpfe, keine Karten-Schatten
  * — Papier braucht Linien, keine Tiefe. Die Kopfzeile mit Marke und Stand
  * setzt die Seite (foundation.vue/share.vue), nicht das Kapitel. */
+/* Die Vorlage steht in Mono mit erhaltenen Umbrüchen und bricht lange Zeilen
+ * um — ein Prompt-Block, der quer scrollt, lässt den Seitenkörper mitscrollen. */
+.fd-prompt {
+  font-family: var(--bw-font-mono);
+  font-size: 12px;
+  line-height: 20px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: var(--bw-ink-soft);
+  margin: 0;
+}
+
 @media print {
   .fd-chapter { break-before: page; break-inside: auto; }
   .fd-chapter:first-child { break-before: auto; }
   .fd-noprint { display: none !important; }
   .fd-box { background: transparent !important; border: 1px solid #ddd; border-radius: 8px; }
+  /* Tabellen der Anwendungs-Kapitel nicht über den Seitenrand reißen (§2.5). */
+  .fd-chapter table { break-inside: avoid; }
 }
 </style>

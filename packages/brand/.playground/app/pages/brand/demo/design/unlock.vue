@@ -35,6 +35,18 @@ useHead({ title: 'Betreiber · Brand Design freischalten' })
   <div class="bw-root min-h-dvh px-6 pb-16">
     <BwSiteNav />
     <div class="mx-auto max-w-4xl">
+      <!-- BK1 (docs/plans/BRAND-BOOK-KIT.md §2.20 Nr. 5): diese Seite wird zu
+           `/dashboard/brand-unlocks` mit ZWEI Spalten je Marke. Der Zeiger
+           steht hier oben, damit niemand die alte Fassung für die aktuelle
+           hält — im Produkt leitet die alte Route weiter. -->
+      <div class="bw-frame mb-6 flex flex-wrap items-center gap-x-3 gap-y-2 px-5 py-4" style="background: var(--bw-surface)">
+        <UIcon name="i-ph-arrow-bend-up-right" class="size-4 flex-none" style="color: var(--bw-muted)" />
+        <p class="min-w-0 flex-1 text-sm leading-relaxed" style="color: var(--bw-ink-soft)">
+          Diese Seite wird mit Book &amp; Kit zu „Freischaltungen" — eine Tabelle mit zwei Spalten je Marke: Brand Design und Ableitung.
+        </p>
+        <NuxtLink to="/brand/demo/kit/unlock" class="bw-label underline underline-offset-4" style="color: var(--bw-ink)">Zur neuen Seite</NuxtLink>
+      </div>
+
       <div class="mb-8">
         <p class="bw-label uppercase tracking-widest" style="color: var(--bw-muted)">Betreiber-Konsole · Ausschnitt</p>
         <h1 class="mt-1 text-2xl font-semibold">Brandings</h1>

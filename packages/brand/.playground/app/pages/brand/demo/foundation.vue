@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import type { BwSidebarBrand } from '../../../../../app/components/BwWorkspaceSidebar.vue'
-import { demoRailWithDesign } from '../../../utils/demoRail'
+import type { FdChapterData } from '../../../utils/demoFoundation'
+import { demoRailWithDesign, demoRailWithKit } from '../../../utils/demoRail'
 import { demoDirectionChapter, demoFoundation } from '../../../utils/demoFoundation'
+import { demoAiGuidelinesChapter, demoNomenclatureChapter, demoPresskitChapter, demoUsageChapters } from '../../../utils/demoKit'
 
 /**
  * KLICKDUMMY „BRAND FOUNDATION" — die PRIVATE Leseansicht (Konzept
@@ -45,15 +47,51 @@ const designState = computed<'locked' | 'unlocked' | 'done'>(() =>
  * Zustände, in denen es überhaupt gerendert wird. */
 const designChapterState = computed<'unlocked' | 'done'>(() => (designState.value === 'done' ? 'done' : 'unlocked'))
 
-const chapters = computed(() => demoFoundation.chapters.map((chapter) => {
-  if (chapter.id !== 'visuell') return chapter
-  /* Nach Brand Design ist das Kapitel ABGENOMMEN — es zählt dann mit, und die
-   * Überschrift trägt kein „folgt in Brand Design" mehr. */
-  if (designState.value === 'done') {
-    return { ...chapter, state: 'done' as const, note: `Im Brand Design entschieden — Stand ${demoFoundation.brand.standDate}.` }
+/**
+ * SCREEN 3 DES BK1-PROTOTYPS (docs/plans/BRAND-BOOK-KIT.md §2.5, §2.15):
+ * `?kit=done` = die Ableitung ist freigeschaltet und die drei Kapitel sind
+ * abgenommen. Dann wächst DIESELBE Leseansicht um fünf Kapitel, und Kapitel 11
+ * heißt „AI-Guidelines" (Anker `ki-texte` bleibt — verschickte Tieflinks
+ * dürfen nicht ins Leere zeigen, §2.17).
+ *
+ * OHNE `kit=done` bleiben die drei Anwendungs-Kapitel als SCHRANKE stehen
+ * („Book & Kit ist Teil der Ableitung"), und Nomenklatur wie Pressekit
+ * entfallen ganz: ohne gelaufenes Kapitel gibt es keinen Wert, und ein leeres
+ * Kapitel wäre eine Lücke, die etwas behauptet (dieselbe Regel wie bei
+ * „Markenarchitektur" in `demoFoundation.ts`).
+ */
+const kitDone = computed(() => route.query.kit === 'done')
+
+const chapters = computed<FdChapterData[]>(() => {
+  const base = demoFoundation.chapters.map((chapter): FdChapterData => {
+    if (chapter.id === 'ki-texte' && kitDone.value) return demoAiGuidelinesChapter()
+    if (chapter.id !== 'visuell') return chapter
+    /* Nach Brand Design ist das Kapitel ABGENOMMEN — es zählt dann mit, und die
+     * Überschrift trägt kein „folgt in Brand Design" mehr. */
+    if (designState.value === 'done') {
+      return { ...chapter, state: 'done' as const, note: `Im Brand Design entschieden — Stand ${demoFoundation.brand.standDate}.` }
+    }
+    return directionChosen.value ? demoDirectionChapter : chapter
+  })
+
+  /* Die Anwendungs-Kapitel erscheinen erst, wenn Brand Design überhaupt im
+   * Spiel ist: auf der unberührten Foundation-Ansicht (Schicht 2 gesperrt)
+   * wären drei zusätzliche Schlösser Lärm — dort steht die Schranke schon in
+   * Kapitel 10 und sagt dasselbe. */
+  const usage = designState.value === 'locked' && !kitDone.value ? [] : demoUsageChapters(kitDone.value)
+  const result: FdChapterData[] = []
+  for (const chapter of base) {
+    /* Nomenklatur steht NACH „Positionierung" (dort, wo bei einer Marke mit
+     * Untermarken das Kapitel „Markenarchitektur" stünde), die drei
+     * Anwendungs-Kapitel direkt NACH „Visuelle Identität", das Pressekit VOR
+     * „Regeln für KI-Texte" — die Reihenfolge aus §2.5. */
+    if (chapter.id === 'ki-texte' && kitDone.value) result.push(demoPresskitChapter())
+    result.push(chapter)
+    if (chapter.id === 'positionierung' && kitDone.value) result.push(demoNomenclatureChapter())
+    if (chapter.id === 'visuell') result.push(...usage)
   }
-  return directionChosen.value ? demoDirectionChapter : chapter
-}))
+  return result
+})
 
 /* DER EINZIGE ZÄHLER DER SEITE (§2.6) — und er zählt, was abnehmbar IST:
  * das gesperrte Kapitel gehört der Schranke, nicht der Abnahme. */
@@ -66,11 +104,15 @@ const acceptedPct = computed(() => Math.round((acceptedCount.value / counted.val
  * (Entscheidung §6 d). „Erreichbar" heisst für einen Ergebnis-Punkt `done` —
  * die Sidebar sperrt jeden anderen Zustand (BwWorkspaceSidebar.stepDisabled).
  * Die SCHICHT 2 hängt am `?design=`-Zweig: gesperrt bleibt sie der heutige
- * Erklär-Layer, freigeschaltet wird sie zur echten Gruppe mit sechs Kapiteln. */
-const railLayers = computed(() => demoRailWithDesign({
-  unlocked: designState.value !== 'locked',
-  done: designState.value === 'done',
-}))
+ * Erklär-Layer, freigeschaltet wird sie zur echten Gruppe mit sechs Kapiteln.
+ * Mit `kit=done` übernimmt `demoRailWithKit`: dann ist auch Schicht 3 eine
+ * echte Gruppe mit drei Kapiteln und dem Ergebnis-Punkt „Kit". */
+const railLayers = computed(() => (kitDone.value
+  ? demoRailWithKit({ unlocked: true, done: true })
+  : demoRailWithDesign({
+      unlocked: designState.value !== 'locked',
+      done: designState.value === 'done',
+    })))
 
 const sidebarBrands: BwSidebarBrand[] = [
   { id: 'kailua', title: 'Kailua Coffee Co.', path: 'Neue Marke', flag: 'i-circle-flags-us', current: true },
@@ -95,16 +137,51 @@ interface FdExportItem {
   sub?: string
   locked?: boolean
   disabled?: boolean
+  to?: string
+  children?: FdExportItem[]
   onSelect?: () => void
 }
-const exportItems: FdExportItem[][] = [
+/* MIT DER ABLEITUNG WERDEN DIE DREI EINTRÄGE ECHT (BK1 §2.7): Untermenüs mit
+ * den Dateien, Klick führt auf die Lieferseite — dort steht Vorschau,
+ * Kopieren und Laden. Ohne Ableitung bleiben sie gesperrt wie heute; das
+ * Etikett nennt weiterhin das Produkt dahinter. */
+const exportItems = computed<FdExportItem[][]>(() => [
   [{ label: 'Drucken / PDF', icon: 'i-ph-printer', sub: 'Browser-Druck mit Print-Layout', onSelect: print }],
-  [
-    { label: 'brand.md · brand.json', icon: 'i-ph-brackets-curly', sub: 'Brand Context für KI-Agenten · Brand Book & Kit', locked: true, disabled: true },
-    { label: 'Design-Tokens', icon: 'i-ph-palette', sub: 'CSS, Tailwind, JSON · Brand Book & Kit', locked: true, disabled: true },
-    { label: 'Assets.zip', icon: 'i-ph-file-zip', sub: 'Logos, Vorlagen, Pressekit · Brand Book & Kit', locked: true, disabled: true },
-  ],
-]
+  kitDone.value
+    ? [
+        {
+          label: 'Brand Context',
+          icon: 'i-ph-brackets-curly',
+          sub: 'Für KI-Agenten — als System-Prompt einsetzbar',
+          children: [
+            { label: 'brand.md', sub: 'Markdown, direkt einsetzbar', to: '/brand/demo/kit' },
+            { label: 'brand.json', sub: 'Maschinenlesbar, schemaVersion 1', to: '/brand/demo/kit' },
+          ],
+        },
+        {
+          label: 'Design-Tokens',
+          icon: 'i-ph-palette',
+          sub: 'Hell und dunkel in einer Datei',
+          children: [
+            { label: 'tokens.json', sub: 'DTCG 2025.10 — Figma, Style Dictionary', to: '/brand/demo/kit' },
+            { label: 'tokens.css', sub: 'CSS-Variablen + Tailwind-@theme', to: '/brand/demo/kit' },
+          ],
+        },
+        {
+          label: 'Bündel',
+          icon: 'i-ph-file-zip',
+          sub: 'Alle Dateien, Zeichen, Lizenzen, README',
+          children: [
+            { label: 'Kit als .zip laden', sub: 'Stand 9. September 2026', to: '/brand/demo/kit' },
+          ],
+        },
+      ]
+    : [
+        { label: 'brand.md · brand.json', icon: 'i-ph-brackets-curly', sub: 'Brand Context für KI-Agenten · Brand Book & Kit', locked: true, disabled: true },
+        { label: 'Design-Tokens', icon: 'i-ph-palette', sub: 'CSS, Tailwind, JSON · Brand Book & Kit', locked: true, disabled: true },
+        { label: 'Assets.zip', icon: 'i-ph-file-zip', sub: 'Zeichen, Pressekit, Lizenzen · Brand Book & Kit', locked: true, disabled: true },
+      ],
+])
 
 /* Screen 4: der Share-Dialog. Er schaltet nur seinen Zustand um — kein
  * Backend, kein Token, kein Ablauf-Rechnen (das kann `share.post.ts` längst). */

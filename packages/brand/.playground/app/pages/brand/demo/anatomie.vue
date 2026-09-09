@@ -28,6 +28,26 @@ import { BRAND_GRADIENTS } from '../../../../../shared/brandPalette'
 
 const KAILUA_GRADIENT = BRAND_GRADIENTS[0]!
 
+/**
+ * BK1-PROTOTYP, SCREEN 8 (docs/plans/BRAND-BOOK-KIT.md §2.7 „Beispiel",
+ * §2.15 Nr. 8): mit `?kit=1` bekommt die Anatomie den Abschnitt „Das Kit".
+ *
+ * Er zeigt, dass das Beispiel-Branding nicht nur ein Dokument ist, sondern
+ * BENUTZBARE Dateien hat — öffentlich, statisch aus dem Beispiel gerechnet
+ * (im Produkt `Cache-Control: public`), ohne Konto-Daten. Das ist die
+ * ehrlichste Werbung, die es für Produkt 03 gibt: man kann es anfassen,
+ * bevor man es kauft.
+ */
+const route = useRoute()
+const showKit = computed(() => route.query.kit === '1')
+
+const kitTiles = [
+  { file: 'brand.md', what: 'Der Brand Context als Markdown — als System-Prompt einsetzbar.', icon: 'i-ph-file-text' },
+  { file: 'tokens.json', what: 'Design-Tokens nach DTCG 2025.10, hell und dunkel in einer Datei.', icon: 'i-ph-palette' },
+  { file: 'marks/', what: 'Wortmarke und Monogramm als SVG, je hell, dunkel und einfarbig.', icon: 'i-ph-shapes' },
+  { file: 'Pressekit', what: 'Boilerplates in drei Längen, Tagline, freigegebene Fakten.', icon: 'i-ph-newspaper' },
+]
+
 /* Steckbrief — nur Felder aus dem Snapshot (§4.2). */
 const steckbrief = [
   ['Branche', 'Lebensmittel und Getränke'],
@@ -198,6 +218,33 @@ function closeReport(): void {
             </section>
           </article>
         </div>
+
+        <!-- DAS KIT (BK1 §2.7 „Beispiel") — nur mit `?kit=1`. -->
+        <section v-if="showKit" class="mt-16">
+          <div class="flex flex-wrap items-baseline justify-between gap-3">
+            <h2 class="text-lg font-medium">Das Kit</h2>
+            <NuxtLink to="/brand/demo/kit" class="bw-label inline-flex items-center gap-1.5" style="color: var(--bw-muted)">
+              Ganzes Kit ansehen <UIcon name="i-ph-arrow-up-right" class="size-3.5" />
+            </NuxtLink>
+          </div>
+          <p class="mt-2 max-w-2xl text-sm leading-relaxed" style="color: var(--bw-ink-soft)">
+            Beispiel-Kit — öffentlich, aus dem Beispiel-Branding gerechnet. Dieselben Dateien bekommt jede Marke, die Book &amp; Kit hat: bei jedem Abruf neu gerechnet, nirgends gespeichert.
+          </p>
+          <div class="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <NuxtLink
+              v-for="tile in kitTiles" :key="tile.file"
+              to="/brand/demo/kit"
+              class="bw-card bw-card--hover flex flex-col p-6"
+            >
+              <UIcon :name="tile.icon" class="size-5" style="color: var(--bw-muted)" />
+              <p class="mt-3 text-sm font-medium">{{ tile.file }}</p>
+              <p class="mt-1.5 flex-1 text-sm leading-relaxed" style="color: var(--bw-ink-soft)">{{ tile.what }}</p>
+              <p class="bw-label mt-4 inline-flex items-center gap-1.5" style="color: var(--bw-muted)">
+                Ansehen <UIcon name="i-ph-arrow-right" class="size-3.5" />
+              </p>
+            </NuxtLink>
+          </div>
+        </section>
 
         <!-- ÄHNLICHE MARKEN — die zwei Facetten, die nur wir haben. -->
         <section class="mt-16">

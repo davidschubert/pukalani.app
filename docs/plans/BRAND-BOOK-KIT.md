@@ -788,6 +788,62 @@ der Start des Prototyps (§2.15) sind Davids ausgesprochenes Go** (WORKFLOW
 
 ---
 
+## 3. Prototyp (Phase 3) — gebaut 2026-09-09, zur Abnahme
+
+Klickdummy im Playground (`packages/brand/.playground`, Port 3009; im
+Browser-Fenster über den Launch-Eintrag `brand-gespraech` auf 3031), acht
+Screens nach §2.15 mit Kailua Coffee Co., gebaut von einem Opus-Lauf nach
+Brief, geprüft von Fable (Lint, Typen, SSR, Konsole, Sichtprüfung je Screen):
+
+| # | Route | Zeigt |
+| --- | --- | --- |
+| 1 | `/brand/demo/kit` | Lieferseite: Bündel-Knopf mit Dateiname und Stand, Brand Context (`brand.md` gerendert + Kopieren/Laden, `brand.json` aufklappbar), Design-Tokens (Rampen hell/dunkel ECHT gerechnet, Rollen je Modus mit Hex und Kontrast-Urteil, `tokens.json`/`tokens.css` als Code), Zeichen in drei Varianten, Pressekit, Lizenzen, README-Zeile; rechts „Korrigieren" mit dem Weg in die Kapitel und der Reise-Regel-Erklärung |
+| 2 | `/brand/demo/kit?design=none` | dieselbe Seite ohne Preset: Tokens, Zeichen, Lizenzen als ruhige Sperr-Fläche „Kommt mit Brand Design" + Erstgespräch-CTA, kein Preis; Bündel-Zeile „drei Kacheln fehlen" |
+| 3 | `/brand/demo/foundation?design=done&kit=done` | Leseansicht mit 16 Kapiteln: Nomenklatur (04), Zeichen-/Farb-/Typografie-Anwendung (11–13), Pressekit (14), AI-Guidelines (15, Anker `ki-texte`); Export-Menü mit echten Untermenüs |
+| 4 | `/brand/demo/kit/aiguide` | Nika: `n.scope` (vier Karten), `n.review` (drei), `n.guardrails` (Entwurf in vier Gruppen mit Herkunft je Zeile, „Das halte ich fest"/„Korrigieren"), `n.prompts` (drei Vorlagen, pur, Kopieren) |
+| 5 | `/brand/demo/kit/nomenclature` | Otto: `m.types` (Chips, Mehrfachwahl), `m.patterns` (je Typ ein Muster mit Herkunft und Beispiel), `m.rules` (fünf Regeln zum Abhaken); Hinweis „nur auf dem Weg mit Markenarchitektur" |
+| 6 | `/brand/demo/kit/presskit` | George: `p.facts` (fünf Fakten, Opt-in je Eintrag, Default keiner), `p.contact` mit den drei Vorlage-Karten (§2.20 Nr. 3), `p.summary` |
+| 7 | `/brand/demo/kit/unlock` | Betreiber „Freischaltungen": UTable mit zwei Spalten (Brand Design · Ableitung), Bestätigung, Chip „Frei seit … · via operator/beta", Ereigniszeile |
+| 8 | `/brand/demo/anatomie?kit=1` | Kailua-Anatomie mit Abschnitt „Das Kit" (vier Kacheln, „Ganzes Kit ansehen") |
+| + | `/brand/demo/foundation?design=done` | Gegenprobe ohne Freischaltung: Anwendungs-Kapitel mit Schloss im Inhaltsverzeichnis, Kapitel 11 heißt weiter „Regeln für KI-Texte" |
+
+Bausteine: `utils/demoKit.ts` (Daten + pure Rechnungen `demoTokensJson`,
+`demoTokensCss`, `demoBrandMd`, `demoBrandJson`, Kapitel-Bauer),
+`FdKitWorkspace.vue` (Hülle Schicht 3 mit Berater je Kapitel), `FdKitMark.vue`,
+`FdKitLocked.vue`, drei neue Block-Arten `rules`/`prompt`/`contact` in
+`FdChapter.vue`, `demoRailWithKit()`; Rail-Layer „Brand Book & Kit" auf die
+BK1-Copy gezogen (kein „Templates", kein „Strategy Playbook").
+
+**Beweise:** Lint grün (`pnpm --filter @pukalani/brand lint`); `tsc --strict`
+über `demoKit.ts` ohne Befund (der Worktree-Typecheck meldet 13 723
+vorbestehende Auto-Import-Fehler, keiner in den neuen Dateien — dieselbe
+Klemme wie BD1 D0); alle neun Routen SSR 200, 0 Konsolenfehler bei 1440×2400
+(Playwright-Skript im Scratchpad); Token-Deckungsgleichheit: 34 Hex in
+`tokens.css`, 0 fehlen in `tokens.json`, jede Rolle in beiden Modi und beiden
+CSS-Blöcken; `brand.md` 69 Zeilen, ohne Design 65.
+
+**Abweichungen vom Brief, im Bau entschieden:** (1) die neuen Kapitel-Bauer
+liegen in `demoKit.ts`, nicht in `demoFoundation.ts` (sonst Zirkel
+demoFoundation → demoKit → demoFoundation); (2) zwei Hilfs-Komponenten mehr
+(Sperr-Fläche dreimal, Zeichen sechsmal auf der Seite); (3) die Anwendungs-
+Kapitel erscheinen erst ab `?design=` ungleich `locked` — auf der unberührten
+BF1-Ansicht sagt Kapitel 10 die Schranke schon; (4) Kailua steht im Dummy auf
+dem Architektur-Weg (zweiter Ausschank, Abo-Programm), damit das Kapitel
+zeigbar ist — die Hinweis-Zeile nennt das; (5) Rampen-/Rollen-Tabellen der
+Lieferseite handgebaut (Farbflächen in echter Markenfarbe), `UTable` bei
+Lizenzen und Freischaltungen.
+
+**Fables Sichtbefunde, vor der Vorlage behoben:** Kontrast-Chip „nur große
+Schrift" überlagerte in der Zweier-Reihe den Rollen-Namen ⇒ drei Spalten
+(Name/Hex übereinander, Urteil `auto`, `whitespace-nowrap`) und Kurzform
+„AA groß"; die Freischaltungs-Tabelle lief bei 1440 px aus der Karte ⇒
+Spaltenkopf „Ableitung" kurz, Marken-Zelle `max-w-[22rem]` mit Umbruch.
+
+Nächster Schritt: Davids Abnahme am lebenden Objekt (Korrekturen direkt am
+Dummy), dann Pakete K0–K8 (§2.18).
+
+---
+
 ## Anhang A — Recherche-Quellen (2026-09-08)
 
 | Quelle | Sorte | Kernaussage für uns |
