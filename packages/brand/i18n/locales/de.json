@@ -2600,7 +2600,8 @@
           "title": "Ähnliche Marken",
           "all": "Alle ansehen",
           "archetype": "gleicher Archetyp",
-          "palette": "gleiche Farbwelt"
+          "palette": "gleiche Farbwelt",
+          "industry": "gleiche Branche"
         },
         "cta": {
           "body": "Gefällt euch, wie das gebaut ist? Marken sind keine Vorlagen — aber der Weg dorthin steht euch offen.",

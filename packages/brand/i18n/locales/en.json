@@ -2600,7 +2600,8 @@
           "title": "Similar brands",
           "all": "See all",
           "archetype": "same archetype",
-          "palette": "same colour world"
+          "palette": "same colour world",
+          "industry": "same industry"
         },
         "cta": {
           "body": "Like how this is built? Brands are not templates — but the road there is open to you.",
