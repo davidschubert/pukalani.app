@@ -601,11 +601,18 @@ try {
    * seinen Hauptpunkt gewandert und nicht bloss umsortiert. Der Auslöser trägt
    * dafür den Haken `data-nav-group="<id>"`.
    *
-   * Gearbeitet wird mit den Einträgen, die nach dem Tarif-Wechsel in
-   * Abschnitt 14 noch übrig sind (`/discussions` und die CMS-Seite
-   * `/guidelines`) — beides wird vorher NACHGESEHEN und nicht angenommen.
+   * TARIF ZUERST ZURÜCK: Abschnitt 14 hat kunde-a auf `basic` gesetzt, und
+   * `basic` sperrt auch `/discussions` — der erste Lauf am 2026-09-08 war
+   * hier viermal rot, weil die „Kinder" gar nicht mehr im Menü standen (die
+   * Gruppen-Prüfung wäre damit eine Tautologie gewesen). Deshalb erst auf
+   * `pro` (enthält alles), auf das SSR-HTML warten, und die Vorbedingung
+   * NACHSEHEN statt annehmen.
    */
   console.log('\n15. Unterpunkte: Gruppe, Kinder, und was passiert, wenn der Hauptpunkt ausgeht')
+  await control.updateRow({ databaseId, tableId: 'communities', rowId: siteA.communityId, data: { plan: 'pro' } })
+  const upgraded = await waitForSsr(siteA.host, html => hrefsOf(html).includes('/discussions'))
+  check(`kunde-a steht wieder auf Tarif "pro" (nach ${Math.round(upgraded.ms / 1000)} s)`, upgraded.ok,
+    JSON.stringify(hrefsOf(upgraded.html)))
   const beforeGroup = await patchNav(siteA.host, ownerCookieA, [])
   check('Vorbedingung: zurück auf das Standard-Menü → 200', beforeGroup.status === 200, `Status ${beforeGroup.status}`)
   const plainHtml2 = await page(siteA.host, '/')

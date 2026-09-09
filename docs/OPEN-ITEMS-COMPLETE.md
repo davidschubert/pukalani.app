@@ -78,6 +78,30 @@ Worktree schreibt — es ging nur gut, weil er noch keine getrackte Datei angefa
 
 ---
 
+### Navigation: komplette Testrunde Silo + Pool (Davids „teste du alles") ✅ 2026-09-08
+
+**Was:** Nach Paket 2 und dem Silo-Fix eine volle Runde mit eigenen Klicks und den drei
+Pool-Beweisen. LIVE branding.supply (eingeloggt, PATCH-Antworten mitgeschnitten): umbenennen
+(Team → „Unser Team"), umordnen, Discover unter Products einrücken, externen Link anlegen
+(target=_blank + rel=noopener im SSR-HTML), speichern 200, Neuladen hält den Stand, SSR-Kopf
+zeigt genau die Wahl; dann Gruppe ausblenden (Kinder rücken hoch, Hinweis „steht als
+Hauptpunkt, weil …"), About ausblenden, Link entfernen, speichern 200, SSR-Kopf stimmt;
+Zurücksetzen 200 ⇒ Standard „Products → Brand Score · Discover Brands · About · Team" zurück;
+Validierung: http-Link ⇒ Fehlertext + Knopf gesperrt. Sucheintrag: Beschreibung speichern 200,
+nach Neuladen da, leeren 200. Weiterleitung: /nav-test ⇒ 301, entfernt ⇒ 404. POOL lokal
+(control 3164 + platform 3165 aus dem Worktree): verify-community-navigation 87/87,
+verify-community-redirects 61/61, verify-community-seo 49/49.
+
+**Gelernt:** (1) Der erste Pool-Lauf war in Abschnitt 15 viermal rot — nicht der Code, das
+Skript: Abschnitt 14 setzt die Community auf `basic`, und `basic` sperrt auch `/discussions`,
+das 15 als Kind nutzen wollte. Die „Gruppen-Prüfung" wäre eine Tautologie gewesen (Kinder
+fehlen wegen des Tarifs, nicht wegen der Gruppe) — genau deshalb prüft der Abschnitt seine
+Vorbedingung NACH statt sie anzunehmen. Kur: Tarif vor 15 zurück auf `pro`, auf das SSR-HTML
+warten. (2) Im ferngesteuerten Chrome-Tab kommen Klicks per Referenz nach einem `navigate`
+nicht mehr an (Tab ist `visibilityState: hidden`) — Klicks per JavaScript auf den ECHTEN
+Knopf funktionieren und messen dieselben Handler. (3) Pool-Klick im Browser blieb aus:
+David ist auf demo.pukalani.app nicht eingeloggt, und Anmelden mache ich nicht selbst.
+
 ### Sucheintrag + Weiterleitungen speichern im Silo (NAV1-Nebenbefund) ✅ 2026-09-08
 
 **Was:** Davids Auftrag „fix die neu gefundenen Probleme": `PATCH /api/pages/seo` und
