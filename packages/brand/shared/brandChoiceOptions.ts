@@ -53,7 +53,18 @@
  * DIESE DATEI IST PUR: kein i18n, kein H3, kein Appwrite.
  */
 
-import { BRAND_DNA_BOARD_KINDS } from './brandDesignVocab'
+import {
+  BRAND_DNA_BOARD_KINDS,
+  BRAND_ICON_OPTIONS,
+  BRAND_ILLUSTRATION_OPTIONS,
+  BRAND_LOGO_MOTION_OPTIONS,
+  BRAND_MARK_KINDS,
+  BRAND_MARK_SETTINGS,
+  BRAND_TEMPO_OPTIONS,
+  BRAND_TYPE_SCALES,
+  type BrandDesignTerm,
+} from './brandDesignVocab'
+import { BRAND_FONT_PAIRS } from './brandFontPairs'
 import { BRAND_DIRECTION_OPTIONS } from './brandDirections'
 
 /** Eine legale Option einer GESCHLOSSENEN Auswahl. */
@@ -450,6 +461,136 @@ export const BRAND_NEUTRAL_CHOICE_OPTIONS: readonly BrandChoiceOption[] = [
   },
 ]
 
+/**
+ * DIE AUSWAHL-IDS VON BRAND DESIGN ALS OPTIONEN (Brand Design D8).
+ *
+ * ── WARUM SIE ÜBERHAUPT EINEN VERTRAG BRAUCHEN ───────────────────────────
+ * Ohne Vertrag ist die Anzeige eines gespeicherten Wertes der Wert selbst —
+ * und der ist hier eine Katalog-Id. Im Gespräch, in der Log-Karte und im
+ * Brand-Dokument stand deshalb wörtlich `snappy`, `yes`, `word` (D7-Stand,
+ * Nebenbefund: „rohe Katalog-Ids als Antworttext"). Ein Mensch hat auf einer
+ * Karte „Knapp" geklickt; was er danach liest, muss „Knapp" sein.
+ *
+ * ── DIE MENGEN STEHEN IM VOKABULAR, NICHT HIER ───────────────────────────
+ * Gebaut aus `brandDesignVocab.ts` bzw. dem Schriftpaar-Katalog — dieselbe
+ * Regel wie bei `BRAND_DNA_BOARD_OPTIONS`: eine zweite, abgeschriebene Liste
+ * wäre beim ersten neuen Wert die Stelle, an der Name und Regel auseinander-
+ * laufen. `label`/`hint` sind ENGLISCH wie der ganze Prompt-Kern.
+ *
+ * ── `copyKey` ZEIGT INS LEERE, UND DAS IST RICHTIG ───────────────────────
+ * Jeder dieser Slots hat eine eigene Bühne (`BwTypePanel`, `BwMarkPanel`,
+ * `BwImageryPanel`, `BwMotionPanel`) mit gerenderten Karten — Schriftproben,
+ * SVG-Setzungen, laufende Szenen. Text-Karten daneben wären dieselbe Wahl ein
+ * zweites Mal, deshalb blendet `choiceCardsFor` sie aus (wie `g.board` und
+ * `result.direction`). Der Vertrag beschreibt trotzdem, was in dem Feld stehen
+ * DARF — und genau dafür ist er da.
+ */
+function designOptions(
+  terms: readonly BrandDesignTerm[],
+  copyPrefix: string,
+): readonly BrandChoiceOption[] {
+  return terms.map(term => ({
+    id: term.id,
+    label: term.en,
+    hint: term.en,
+    display: { de: term.de, en: term.en },
+    copyKey: `${copyPrefix}.${term.id}`,
+  }))
+}
+
+/** Die sechs Schriftpaare — ihr Name ist zweisprachig gepflegt (D4). */
+export const BRAND_FONT_PAIR_OPTIONS: readonly BrandChoiceOption[] = BRAND_FONT_PAIRS.map(pair => ({
+  id: pair.id,
+  label: pair.nameEn,
+  hint: `${pair.headingFamily} + ${pair.bodyFamily}`,
+  display: { de: pair.nameDe, en: pair.nameEn },
+  copyKey: `brand.choice.fontPair.${pair.id}`,
+}))
+
+/**
+ * DIE ACHT AUSWAHL-SESSIONS DER SCHICHT 2 — je Slot eine Menge und eine
+ * Rückfrage.
+ *
+ * Sie stehen als TABELLE und nicht als acht handgeschriebene Verträge: die
+ * einzigen Unterschiede sind Slot, Menge und die zwei Sätze — acht Kopien
+ * derselben fünf Zeilen wären acht Gelegenheiten, eine davon zu vergessen.
+ */
+const DESIGN_CONTRACTS: readonly BrandChoiceContract[] = [
+  {
+    slotId: 'i.pair',
+    options: BRAND_FONT_PAIR_OPTIONS,
+    stray: 'Do not invent a seventh pair, do not name a single typeface, and do not combine two pairs.',
+    de: 'Welches der Paare passt zu eurer Marke? Die Probe darüber zeigt beide Schriften in eurer Farbwelt.',
+    en: 'Which of the pairs fits your brand? The specimen above shows both typefaces in your colour world.',
+  },
+  {
+    slotId: 'i.scale',
+    options: designOptions(BRAND_TYPE_SCALES, 'brand.choice.typeScale'),
+    stray: 'Do not invent a fourth level, do not give a pixel size — the field holds one id.',
+    de: 'Wie laut soll eure Hierarchie sein — ruhig, dicht oder plakativ?',
+    en: 'How loud should your hierarchy be — calm, dense or bold?',
+  },
+  {
+    slotId: 'j.kind',
+    options: designOptions(BRAND_MARK_KINDS, 'brand.choice.markKind'),
+    stray: 'Do not invent a fifth direction, do not merge two, and do not describe a logo in words.',
+    de: 'Welche Richtung soll euer Zeichen nehmen — Wortmarke, Bildmarke, Kombination oder Monogramm?',
+    en: 'Which direction should your mark take — wordmark, pictorial, combination or monogram?',
+  },
+  {
+    slotId: 'j.pick',
+    options: designOptions(BRAND_MARK_SETTINGS, 'brand.choice.markSetting'),
+    stray: 'There are exactly two settings — do not invent a third and do not answer "both".',
+    de: 'Welche der zwei Setzungen soll als Vorzugs-Beispiel im Briefing stehen?',
+    en: 'Which of the two settings should be the preferred example in the brief?',
+  },
+  {
+    slotId: 'k.illustration',
+    options: designOptions(BRAND_ILLUSTRATION_OPTIONS, 'brand.choice.illustration'),
+    stray: 'Do not invent a fifth language and do not answer "depends" — the field holds one id.',
+    de: 'Welche Illustrations-Sprache passt — oder bewusst keine?',
+    en: 'Which illustration language fits — or deliberately none?',
+  },
+  {
+    slotId: 'k.icons',
+    options: designOptions(BRAND_ICON_OPTIONS, 'brand.choice.iconSet'),
+    stray: 'Do not invent a fourth icon set and do not name a library — the field holds one id.',
+    de: 'Welcher Icon-Satz passt zu eurer Schrift — Linie, Fläche oder kräftig?',
+    en: 'Which icon set fits your typeface — line, filled or bold?',
+  },
+  {
+    slotId: 'l.tempo',
+    options: designOptions(BRAND_TEMPO_OPTIONS, 'brand.choice.tempo'),
+    stray: 'Do not invent a fourth tempo, do not give a duration in milliseconds — the field holds one id.',
+    de: 'Wie schnell soll sich eure Marke bewegen — ruhig, lebendig oder knapp?',
+    en: 'How fast should your brand move — calm, lively or snappy?',
+  },
+  {
+    slotId: 'l.logo',
+    options: designOptions(BRAND_LOGO_MOTION_OPTIONS, 'brand.choice.logoMotion'),
+    stray: 'There is no "maybe" and no third option — the field holds one id.',
+    de: 'Soll sich euer Zeichen bewegen — oder still stehen?',
+    en: 'Should your mark move — or stand still?',
+  },
+].map(entry => ({
+  slotId: entry.slotId,
+  kind: 'closed' as const,
+  options: entry.options,
+  strayRule: entry.stray,
+  fallbackQuestion: { de: entry.de, en: entry.en },
+}))
+
+/**
+ * DIE SLOTS MIT EIGENER BÜHNE — sie bekommen KEINE Text-Karten (s. o.).
+ * `result.direction` und `g.board` standen schon vorher als Einzelfälle in der
+ * Werkstatt; seit D8 sind es zehn, und zehn Einzelfälle gehören in eine Liste.
+ */
+export const BRAND_STAGE_CHOICE_SLOTS: readonly string[] = [
+  'result.direction',
+  'g.board',
+  ...DESIGN_CONTRACTS.map(contract => contract.slotId),
+]
+
 const CONTRACTS: readonly BrandChoiceContract[] = [...BASE_CONTRACTS, {
   /**
    * DIE WEICHE (`g.source`) — geschlossen, zwei Optionen (s.
@@ -544,7 +685,7 @@ const CONTRACTS: readonly BrandChoiceContract[] = [...BASE_CONTRACTS, {
     de: 'Sollen eure Flächen einen Hauch eurer Marken-Farbe tragen — oder bewusst warm oder kühl sein?',
     en: 'Should your surfaces carry a hint of your brand colour — or be deliberately warm or cool?',
   },
-}]
+}, ...DESIGN_CONTRACTS]
 
 const CONTRACTS_BY_SLOT = new Map<string, BrandChoiceContract>(
   CONTRACTS.map(contract => [contract.slotId, contract]),

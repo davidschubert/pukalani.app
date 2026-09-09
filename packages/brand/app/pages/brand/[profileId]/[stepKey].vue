@@ -43,6 +43,7 @@ import {
 } from '../../../../shared/brandAutosaveDiff'
 import { brandAiRejectionMessageKey } from '../../../../shared/brandAiLimits'
 import {
+  BRAND_STAGE_CHOICE_SLOTS,
   brandChoiceContract,
   brandChoiceDisplayLabel,
 } from '../../../../shared/brandChoiceOptions'
@@ -695,7 +696,20 @@ async function answerFromGeorge(text: string): Promise<void> {
   const question = slot ? t(questionKeyFor(slot, pathKind.value, teamKind.value)) : ''
 
   if (slot) store.setSlotValue(slot.id, text)
-  store.addUserMessage(`answer-${slot?.id ?? 'free'}-${store.streamMessages.length}`, text)
+  /**
+   * DIE EIGENE BLASE ZEIGT DIE LESEFASSUNG, DER SLOT BEHÄLT DIE ID (D8).
+   *
+   * Ein Karten-Klick schickt die Katalog-Id (`snappy`, `yes`) — gespeichert
+   * gehört sie, gelesen nie: der Mensch hat auf „Knapp" geklickt und sah
+   * danach `snappy` in seiner eigenen Sprechblase. `slotDisplayValue` ist
+   * dieselbe Auflösung wie in Log-Karte und Handbuch; für jeden Slot ohne
+   * Vertrag gibt sie den Text unverändert zurück (getippte Antworten bleiben
+   * also wörtlich stehen).
+   */
+  store.addUserMessage(
+    `answer-${slot?.id ?? 'free'}-${store.streamMessages.length}`,
+    slot ? slotDisplayValue(slot.id, text) : text,
+  )
   if (slot) autosave.schedule()
 
   const upcoming = nextSlot.value
@@ -1447,8 +1461,6 @@ async function submitChoice(): Promise<void> {
 
 /** Die eine Session, die statt Text-Karten eine Farbwelt zeigt (Paket G4). */
 const DIRECTION_SLOT = 'result.direction'
-/** Und die eine, die statt Text-Karten drei gerenderte Szenen zeigt (D2c). */
-const BOARD_SLOT = 'g.board'
 
 /**
  * DIE GESCHLOSSENE AUSWAHL BEKOMMT KARTEN (P4, Infografik §12.3).
@@ -1466,17 +1478,14 @@ const BOARD_SLOT = 'g.board'
  * sein Textfeld — dort IST der Text die Antwort.
  */
 function choiceCardsFor(slotId: string): BwChoiceCard[] {
-  // DIE RICHTUNG HAT IHRE EIGENE KARTE (Paket G4): `result.direction` ist ein
-  // geschlossener Vertrag mit `editor: 'cards'` und fiele deshalb hier
-  // hinein — sie zeigt aber eine Farbwelt und ein Schriftpaar, nicht drei
-  // Zeilen Text (`BwDirectionCard`, s. dessen Kopf). Ohne diese Zeile stünden
-  // die drei Textzeilen ihrer nicht vorhandenen Karten-Copy im Markup.
-  if (slotId === DIRECTION_SLOT) return []
-  // DASSELBE FÜR DIE MOODBOARDS (D2c): `g.board` ist ein geschlossener Vertrag
-  // mit `editor: 'cards'` — seine Karten zeigen aber eine gerenderte SZENE
-  // (`BwBoardCard`), nicht drei Zeilen Text. Der Vertrag steht trotzdem, damit
-  // im Handbuch „Wie vorgeschlagen" steht und nicht die rohe Id `proposed`.
-  if (slotId === BOARD_SLOT) return []
+  // SLOTS MIT EIGENER BÜHNE BEKOMMEN KEINE TEXT-KARTEN (Liste in
+  // `brandChoiceOptions.ts`): `result.direction` zeigt eine Farbwelt (G4),
+  // `g.board` drei gerenderte Szenen (D2c), und seit D8 haben auch die acht
+  // Auswahl-Sessions der Schicht 2 ihre eigenen Karten — Schriftproben,
+  // SVG-Setzungen, laufende Szenen. Ihre Verträge stehen trotzdem, damit im
+  // Handbuch „Knapp" steht und nicht die rohe Id `snappy`; ohne diese Zeile
+  // stünden daneben drei Textzeilen einer Karten-Copy, die es nicht gibt.
+  if (BRAND_STAGE_CHOICE_SLOTS.includes(slotId)) return []
   if (slotById(slotId)?.editor !== 'cards') return []
   const contract = brandChoiceContract(slotId)
   if (!contract || contract.kind !== 'closed') return []
@@ -2163,12 +2172,13 @@ const railLayers = computed<BwRailLayer[]>(() => [{
  * Balken unten rechts (`overallProgress`) bleibt die FOUNDATION; die
  * Begründung steht bei `resolveProfileProgress` und im Store.
  *
- * ── DER ERGEBNIS-PUNKT ZEIGT HEUTE AUF KAPITEL 10 ────────────────────────
- * „Visuelle Identität" bekommt mit **D8** seine eigene Ansicht
- * (`/brand/:id/design`). Bis dahin führt er auf den Anker `#visuell` der
- * Foundation-Leseansicht: dort steht, was gilt (heute die Schranke, nach D8
- * das volle Kapitel). Ein Punkt ohne Ziel wäre ein toter Knopf, eine Adresse
- * ohne Seite ein 404.
+ * ── DER ERGEBNIS-PUNKT HAT SEINE EIGENE ANSICHT (D8) ─────────────────────
+ * „Visuelle Identität" führt auf `/brand/:id/design` — das Ergebnis-Board als
+ * eigene Seite (§2.8). Die Adresse steht IMMER da, auch solange die sechs
+ * Kapitel nicht fertig sind: die Seite zeigt dann den Stand („x von 6") statt
+ * eines 404. Der Punkt selbst wird trotzdem erst bei `done` freigegeben
+ * (`BwProgressRail` rendert ihn als Knopf) — die Seite ist der Weg dorthin,
+ * nicht die Belohnung dafür.
  */
 const designRailLayer = computed<BwRailLayer>(() => {
   const doneCount = store.designSteps.filter(entry => entry.state === 'done').length
@@ -2237,7 +2247,7 @@ const designRailLayer = computed<BwRailLayer>(() => {
         label: t('brand.designLayer.result'),
         icon: '',
         state: doneCount === store.designSteps.length ? 'done' : 'open',
-        to: `${localePath(`/brand/${profileId.value}/foundation`)}#visuell`,
+        to: localePath(`/brand/${profileId.value}/design`),
       },
     ],
   }
@@ -3285,8 +3295,10 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
                     />
                   </template>
                   <template v-else>
-                    <!-- Leerer Slot: George legt vor („George, entwirf das",
-                         EIN Klick). Steht schon etwas da, geht es nur noch
+                    <!-- Leerer Slot: die STIMME dieses Kapitels legt vor
+                         („George, entwirf das" — in den Design-Kapiteln
+                         „Frida, entwirf das", D8: der Name kommt aus `voice`,
+                         nicht aus dem Katalogtext). Steht schon etwas da, geht es nur noch
                          MIT Hinweis weiter — „nochmal genauso" wäre ein Klick
                          ins Ungefähre. Die Weiche ist der WERT, nicht
                          `showHint` (das sagt nur „generierbar und bereit"):
@@ -3296,7 +3308,9 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
                     <UButton
                       size="sm" color="neutral" variant="ghost" class="rounded-full"
                       icon="i-ph-sparkle"
-                      :label="store.slotValue(pendingCard.slot.id) ? t('brand.workspace.retryWithHint') : t('brand.workspace.generate.start')"
+                      :label="store.slotValue(pendingCard.slot.id)
+                        ? t('brand.workspace.retryWithHint')
+                        : t('brand.workspace.generate.start', { voice: voice.name })"
                       :loading="generation.streaming.value"
                       :disabled="generation.streaming.value"
                       :aria-expanded="store.slotValue(pendingCard.slot.id) ? hintOpen : undefined"
