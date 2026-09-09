@@ -127,6 +127,11 @@ export function sessionsAffectedBy(
  * fallen samt ihren Sessions heraus. Nach der Freischaltung zählen sie mit —
  * ohne zweite Regel, weil die Journey dann keinen `design_locked` mehr trägt.
  *
+ * SEIT K0 GILT DASSELBE FÜR SCHICHT 3 (`derivation_locked`): Brand Book & Kit
+ * liegt ohne Freischaltung nicht auf dem Weg, seine Sessions zählen also
+ * ebenso wenig mit. Nach der Freischaltung zählen sie mit — ohne zweite Regel,
+ * weil die Journey dann keinen `derivation_locked` mehr trägt.
+ *
  * Bewusst KEINE Änderung an `sessionsAffectedBy`: Korrektur-Kaskade und
  * Neustart-Kosten rechnen weiter mit der vollen Hülle (ein gesperrtes
  * Design-Feld ist leer, eine Kaskade dorthin kostet nichts).
@@ -143,7 +148,15 @@ export function affectsView(
   sessions: readonly BrandSessionConfig[] = BRAND_SLOTS,
 ): BrandAffectsView {
   const affected = sessionsAffectedBy(sessionId, sessions)
-  const hidden = new Set(journey.filter(entry => entry.reason === 'design_locked').map(entry => entry.stepKey))
+  // ZWEI GRÜNDE, DIESELBE FRAGE (K0): `design_locked` ist ein gesperrtes
+  // Kapitel der Schicht 2, `derivation_locked` ein Kapitel der Schicht 3, das
+  // ohne Freischaltung gar nicht auf dem Weg liegt. Für den Hinweis bedeuten
+  // beide dasselbe — der Mensch hat dieses Kapitel in seiner Oberfläche nicht,
+  // also darf es auch nicht in „fliesst in N Felder ein" mitzählen.
+  const HIDDEN_REASONS: readonly string[] = ['design_locked', 'derivation_locked']
+  const hidden = new Set(journey
+    .filter(entry => entry.reason !== null && HIDDEN_REASONS.includes(entry.reason))
+    .map(entry => entry.stepKey))
   const steps = journey
     .map(entry => entry.stepKey)
     .filter(candidate => !hidden.has(candidate) && affected.byStep[candidate]?.length)

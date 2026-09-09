@@ -81,6 +81,7 @@ import {
   type BrandStepProgress,
   confirmableRequiredSlotsForStep,
   isBrandDesignStep,
+  isBrandKitStep,
   slotById,
   slotIsConfirmable,
   slotIsFilled,
@@ -145,6 +146,23 @@ export interface BrandProfileFacts {
    * gesperrt: das ist genau der Zustand, den jede Bestands-Marke hat.
    */
   designUnlockedAt?: string | null
+  /**
+   * DIE FREISCHALTUNG DER ABLEITUNG (Konzept BRAND-BOOK-KIT.md §2.8) — Schicht
+   * 3 (Brand Book & Kit) und die Lieferseite hängen daran.
+   *
+   * EIN BOOLEAN und kein Zeitstempel, anders als bei Brand Design: die
+   * Freischaltung hat DREI Quellen (Beta-Konto mit `brand_access`,
+   * Betreiber-Knopf, später der Stripe-Webhook), und nur eine davon ist eine
+   * Spalte. Die pure Regel `resolveDerivationAccess` (K1) legt sie zusammen;
+   * hier steht ausschliesslich ihr Ergebnis — sonst gäbe es zwei Stellen, die
+   * dieselbe Frage beantworten, und die Journey kennte nur die halbe Wahrheit.
+   *
+   * OPTIONAL getypt und Default `false`, weil die Spalte ADDITIV dazukommt
+   * (Migration **brand-025**, Paket K1). Bis dahin liest `profileFacts()`
+   * nichts und Schicht 3 liegt nicht auf dem Weg — genau der Zustand, den jede
+   * Bestands-Marke hat.
+   */
+  derivationUnlocked?: boolean
 }
 
 /** Der gelesene Stand EINER `brand_steps`-Zeile. */
@@ -177,6 +195,19 @@ export type BrandStepStateReason =
    * beide Fälle `awaiting_previous` nennte, könnte sie nie auseinanderhalten.
    */
   | 'design_locked'
+  /**
+   * SCHICHT 3 IST NICHT FREIGESCHALTET (Konzept BRAND-BOOK-KIT.md §2.8) —
+   * derselbe Gedanke wie `design_locked`, aber ein ANDERER Zustand: Brand Book
+   * & Kit liegt ohne Freischaltung gar nicht erst AUF DEM WEG (`skipped`),
+   * statt gesperrt darauf zu stehen.
+   *
+   * Der Unterschied ist die D0-Lehre: ein `locked`-Kapitel zählt in jeder
+   * Fortschritts-Formel mit, die es nicht ausdrücklich ausklammert — Schicht 2
+   * brauchte dafür vier Klemmen und einen Klick-Beweis, um den fünften Leser
+   * zu finden. Ein Kapitel, das nicht auf dem Weg liegt, fällt überall
+   * gleichzeitig heraus, weil `skipped` schon überall behandelt wird.
+   */
+  | 'derivation_locked'
 
 export interface BrandJourneyStep {
   stepKey: BrandStepKey
@@ -190,12 +221,16 @@ export interface BrandJourneyStep {
   confidence: BrandConfidence | null
 }
 
-/** Die zwei weichen-abhängigen Bausteine. */
-const OPTIONAL_STEPS: readonly BrandStepKey[] = ['architecture', 'naming']
+/**
+ * Die weichen-abhängigen Bausteine. `nomenclature` steht seit K0 dabei: sie
+ * erbt die Weiche W4 von `architecture` (§2.20 Nr. 4) und ist damit genauso
+ * optional wie ihr Vorbild — die Leiste soll sie auch so beschriften.
+ */
+const OPTIONAL_STEPS: readonly BrandStepKey[] = ['architecture', 'naming', 'nomenclature']
 
 interface StepInclusion {
   included: boolean
-  reason: 'junction_off' | 'junction_undecided' | null
+  reason: 'junction_off' | 'junction_undecided' | 'derivation_locked' | null
 }
 
 /**
@@ -219,6 +254,19 @@ function includeStep(profile: BrandProfileFacts, stepKey: BrandStepKey): StepInc
     return brandNamingIncluded(profile)
       ? { included: true, reason: null }
       : { included: false, reason: 'junction_off' }
+  }
+  // ── SCHICHT 3 LIEGT NUR AUF DEM WEG, WENN DIE ABLEITUNG OFFEN IST ────────
+  // (Konzept BRAND-BOOK-KIT.md §2.8, K0). NICHT „gesperrt" wie Schicht 2,
+  // sondern gar nicht erst auf dem Weg — s. `derivation_locked`.
+  if (isBrandKitStep(stepKey)) {
+    if (!profile.derivationUnlocked) return { included: false, reason: 'derivation_locked' }
+    // NOMENKLATUR NUR AUF DEM B2-WEG (§2.20 Nr. 4): sie ist der Ausbau der
+    // Markenarchitektur, und ohne Untermarken gibt es kein Muster, das zu
+    // bestätigen wäre. Sie erbt deshalb WÖRTLICH die Weiche von `architecture`
+    // — inklusive `junction_undecided`, solange W4 unbeantwortet ist. Solo-
+    // Marken bekommen ihre Schreibweisen in `n.guardrails`.
+    if (stepKey === 'nomenclature') return includeStep(profile, 'architecture')
+    return { included: true, reason: null }
   }
   return { included: true, reason: null }
 }
@@ -444,8 +492,19 @@ export function resolveBrandJourney(
    * hätte nichts, woraus Frida ableiten könnte, und eine fertige Foundation
    * ohne Freischaltung ist der Normalfall jeder Bestands-Marke.
    */
-  const designOpen = Boolean(profile.designUnlockedAt)
-    && factsByStep.get('result')?.state === 'done'
+  const foundationDone = factsByStep.get('result')?.state === 'done'
+  const designOpen = Boolean(profile.designUnlockedAt) && foundationDone
+
+  /**
+   * SCHICHT 3 REIHT SICH NICHT HINTER SCHICHT 2 EIN (§1.11 d: „Brand Design
+   * ist KEINE Voraussetzung"). Die Kette `previousDone` läuft von oben nach
+   * unten durch — ohne diesen Schnitt stünden die drei Kit-Kapitel bei einer
+   * freigeschalteten Marke OHNE Brand Design auf `awaiting_previous`, weil das
+   * gesperrte `motion` die Kette gerissen hat. Der Einstieg von Schicht 3 ist
+   * dieselbe Bedingung wie der von Schicht 2: die Foundation hat ihr
+   * Ergebnis-Kapitel abgeschlossen (§2.1).
+   */
+  let enteredKitLayer = false
 
   return BRAND_STEP_KEYS.map((stepKey): BrandJourneyStep => {
     const inclusion = includeStep(profile, stepKey)
@@ -476,6 +535,11 @@ export function resolveBrandJourney(
       previousDone = false
       firstOnPath = false
       return { ...base, state: 'locked', reason: 'design_locked' }
+    }
+
+    if (isBrandKitStep(stepKey) && !enteredKitLayer) {
+      enteredKitLayer = true
+      previousDone = foundationDone
     }
 
     const stored = facts?.state ?? 'open'
@@ -509,7 +573,8 @@ export function resolveBrandJourney(
  * hin (die Werkstatt zeigte sonst „Schließ das Kapitel davor ab" für ein
  * Kapitel, vor dem gar nichts fehlt).
  */
-export type BrandStepEntryDenial = 'unknown_step' | 'locked' | 'skipped' | 'design_locked'
+export type BrandStepEntryDenial =
+  | 'unknown_step' | 'locked' | 'skipped' | 'design_locked' | 'derivation_locked'
 
 export interface BrandStepEntryDecision {
   allowed: boolean
@@ -533,7 +598,14 @@ export function canEnterBrandStep(
     // `data.code` an ihr 403, und die Werkstatt macht daraus den richtigen Satz.
     return { allowed: false, reason: step.reason === 'design_locked' ? 'design_locked' : 'locked' }
   }
-  if (step.state === 'skipped') return { allowed: false, reason: 'skipped' }
+  // ÜBERSPRUNGEN HAT SEIT K0 ZWEI GRÜNDE, und sie sagen etwas anderes: eine
+  // abgewählte Weiche („dieses Kapitel gehört nicht zu eurem Weg") und die
+  // fehlende Freischaltung der Ableitung („dieses Produkt ist für diese Marke
+  // noch nicht geöffnet"). Derselbe Zuschnitt wie bei `design_locked` — der
+  // Grund reist mit, die Oberfläche macht daraus den richtigen Satz.
+  if (step.state === 'skipped') {
+    return { allowed: false, reason: step.reason === 'derivation_locked' ? 'derivation_locked' : 'skipped' }
+  }
   return { allowed: true, reason: null }
 }
 

@@ -232,15 +232,37 @@ export const BRAND_DESIGN_STEP_KEYS = [
   'motion',
 ] as const
 
-/** Alle Kapitel beider Schichten, in Weg-Reihenfolge. */
+/**
+ * SCHICHT 3 — die drei Kapitel von Brand Book & Kit (Konzept
+ * docs/plans/BRAND-BOOK-KIT.md §2.1–§2.4, Paket K0), ADDITIV hinter Brand
+ * Design.
+ *
+ * Eigene Konstante NEBEN `BRAND_DESIGN_STEP_KEYS` aus derselben Begründung wie
+ * dort: mehrere Rechnungen meinen ausdrücklich EINE Schicht (§2.1). Die Ids
+ * sind so unveränderlich wie die der Foundation — sie stehen in
+ * `brand_steps.stepKey` und in der Adresse der Werkstatt.
+ *
+ * Die UI-Namen (§2.20 Nr. 6: Nomenklatur · AI-Guidelines · Pressekit) stehen
+ * im Locale-Katalog, nicht hier — `presskit` bleibt die Id, „Pressekit" ist
+ * ihr deutscher Name.
+ */
+export const BRAND_KIT_STEP_KEYS = [
+  'nomenclature',
+  'aiguide',
+  'presskit',
+] as const
+
+/** Alle Kapitel aller drei Schichten, in Weg-Reihenfolge. */
 export const BRAND_STEP_KEYS = [
   ...BRAND_FOUNDATION_STEP_KEYS,
   ...BRAND_DESIGN_STEP_KEYS,
+  ...BRAND_KIT_STEP_KEYS,
 ] as const
 export type BrandStepKey = (typeof BRAND_STEP_KEYS)[number]
 
 export type BrandFoundationStepKey = (typeof BRAND_FOUNDATION_STEP_KEYS)[number]
 export type BrandDesignStepKey = (typeof BRAND_DESIGN_STEP_KEYS)[number]
+export type BrandKitStepKey = (typeof BRAND_KIT_STEP_KEYS)[number]
 
 /**
  * Gehört dieses Kapitel zu Brand Design (Schicht 2)? — die EINE Stelle, die
@@ -249,6 +271,11 @@ export type BrandDesignStepKey = (typeof BRAND_DESIGN_STEP_KEYS)[number]
  */
 export function isBrandDesignStep(stepKey: string): stepKey is BrandDesignStepKey {
   return (BRAND_DESIGN_STEP_KEYS as readonly string[]).includes(stepKey)
+}
+
+/** Dieselbe Frage für Schicht 3 (Brand Book & Kit) — dieselbe Begründung. */
+export function isBrandKitStep(stepKey: string): stepKey is BrandKitStepKey {
+  return (BRAND_KIT_STEP_KEYS as readonly string[]).includes(stepKey)
 }
 
 /** Füllweg des Slots — die Buchstaben F/K/A/B des Katalogs §3, plus `special`. */
@@ -618,6 +645,13 @@ const AUDIENCE_EXCEPTIONS: Readonly<Record<string, BrandSessionAudience>> = {
   // Der VORRAT, aus dem gewählt wird (`g.board`) — wie `c.candidates` und
   // `f.candidates`. Im Handbuch steht das gewählte Board, nicht die drei.
   'g.boards': 'internal',
+
+  // ── Brand Book & Kit, Schicht 3 (K0) ───────────────────────────────────
+  // Der PRESSE-KONTAKT ist eine Menschenfrage und trotzdem eine Festlegung:
+  // er steht im Pressekit, in `brand.md` und in jeder Datei, die die Marke
+  // weitergibt (§2.4). Er reist BY DESIGN — genau deshalb sagt die Werkstatt
+  // es vor der Abnahme laut (`p.contact`, Leiter in `sessionContent.ts`).
+  'p.contact': 'foundation',
 }
 
 /**
@@ -979,6 +1013,63 @@ export const BRAND_SLOTS: readonly BrandSlot[] = [
   // PUR: Dauern, Easing und Versatz als Token-Satz aus dem Tempo.
   defineSession({ id: 'l.transitions', stepId: 'motion', type: 'derivation', required: true, kind: 'structured', maxLength: LONG, editor: 'none', generator: 'none', dependencies: ['l.tempo'] }),
   defineSession({ id: 'l.rules', stepId: 'motion', type: 'stage-edit', required: true, kind: 'list', maxLength: LONG, editor: 'stage', generator: 'none', dependencies: ['l.tempo', 'l.transitions', 'l.logo'] }),
+
+  // ══ SCHICHT 3 · BRAND BOOK & KIT (Konzept §2.2–§2.4, Paket K0) ═══════════
+  // Sie stehen NACH Brand Design, weil sie danach kommen — und weil die
+  // Rückwärts-Regel der `dependencies` es verlangt: jede Session hier schöpft
+  // aus bestätigten Werten der Schichten davor, nie umgekehrt.
+  //
+  // ── HIER ENTSTEHT NICHTS NEUES ──────────────────────────────────────────
+  // §1.11 a: „Book & Kit = kuratieren/exportieren". Zwei Sessions entwerfen
+  // (`m.patterns`, `n.guardrails`), alles andere wählt aus einem Katalog,
+  // bestätigt eine Herleitung oder rechnet PUR zusammen (`n.prompts`,
+  // `p.summary` — null KI-Aufrufe, §2.11).
+  //
+  // ── WAS HIER HEUTE NOCH NICHT STEHT ─────────────────────────────────────
+  // Die Kataloge als Auswahl-VERTRÄGE (`brandChoiceOptions.ts`): `m.types`,
+  // `n.scope` und `n.review` haben ihre geschlossenen Mengen in
+  // `brandKitVocab.ts`, aber noch keinen Vertrag — den bekommen sie mit K5,
+  // zusammen mit den Karten. Dasselbe Verhältnis wie bei Schicht 2, wo die
+  // Verträge erst mit D2a/D3 dazukamen.
+
+  // ── M · Nomenklatur (§2.2, Otto) — 3 ────────────────────────────────────
+  // MEHRFACHWAHL aus `BRAND_NAME_TYPES`; `kind: 'list'`, weil mehrere Ids im
+  // Feld stehen — eine `choice` hielte genau eine.
+  defineSession({ id: 'm.types', stepId: 'nomenclature', type: 'choice', required: true, kind: 'list', maxLength: SHORT, editor: 'chips', generator: 'none' }),
+  defineSession({ id: 'm.patterns', stepId: 'nomenclature', type: 'derivation', required: true, kind: 'structured', maxLength: LONG, editor: 'stage', generator: 'draft', dependencies: ['b2.model', 'b2.rule', 'f.decision', 'd.toneWords', 'm.types'] }),
+  defineSession({ id: 'm.rules', stepId: 'nomenclature', type: 'stage-edit', required: true, kind: 'list', maxLength: LONG, editor: 'stage', generator: 'none', dependencies: ['m.patterns'] }),
+
+  // ── N · AI-Guidelines (§2.3, Nika) — 4 ──────────────────────────────────
+  defineSession({ id: 'n.scope', stepId: 'aiguide', type: 'choice', required: true, kind: 'choice', maxLength: SHORT, editor: 'cards', generator: 'none' }),
+  defineSession({ id: 'n.review', stepId: 'aiguide', type: 'choice', required: true, kind: 'choice', maxLength: SHORT, editor: 'cards', generator: 'none' }),
+  // `m.rules` steht als Quelle drin und ist trotzdem OPTIONAL erreichbar: ohne
+  // Markenarchitektur läuft `nomenclature` nicht (§2.20 Nr. 4), und dann
+  // stehen die Schreibweisen HIER — genau dafür ist die Abhängigkeit da.
+  defineSession({ id: 'n.guardrails', stepId: 'aiguide', type: 'derivation', required: true, kind: 'structured', maxLength: LONG, editor: 'stage', generator: 'draft', dependencies: ['c.final', 'd.toneWords', 'd.voiceSamples', 'd.vocabulary', 'ep.vocabulary', 'm.rules'] }),
+  // PUR (§2.11): drei Vorlagen, aus Werten und Leitplanken gerechnet — kein
+  // Modell-Lauf, deshalb `generator: 'none'` und `editor: 'none'`.
+  defineSession({ id: 'n.prompts', stepId: 'aiguide', type: 'derivation', required: true, kind: 'structured', maxLength: LONG, editor: 'none', generator: 'none', dependencies: ['d.primary', 'd.toneWords', 'd.voiceSamples', 'n.guardrails'] }),
+
+  // ── P · Pressekit (§2.4, George) — 3 ────────────────────────────────────
+  //
+  // ── DIE EINE AUSNAHME DER REISE-REGEL, UND WARUM SIE KEINE IST ──────────
+  // `p.facts` schöpft aus `a.facts` — der EINZIGEN Quelle dieser Schicht, die
+  // `sensitivity: 'internal'` trägt — und ist selbst `public`/`foundation`
+  // (§2.10). Das ist keine Durchreichung, sondern eine bewusste AUSWAHL: der
+  // Wert dieser Session ist ein NEUER Wert, den ein Mensch Eintrag für Eintrag
+  // freigegeben hat (Voreinstellung: keiner). `a.facts` bleibt unverändert
+  // intern und reist nie — die Reise-Regel gilt also weiter wörtlich, sie wird
+  // nur nicht auf einen Wert angewandt, den es vorher nicht gab.
+  // `validateSlotRegistry` lässt das durch (es prüft `sensitivity` GEGEN
+  // `audience`, nicht gegen die Quellen); `tests/brandKitRegistry.test.ts`
+  // nagelt fest, dass es bei GENAU dieser einen Session bleibt.
+  defineSession({ id: 'p.facts', stepId: 'presskit', type: 'choice', required: true, kind: 'list', maxLength: SHORT, editor: 'chips', generator: 'none', dependencies: ['a.facts'] }),
+  // OPTIONAL (§2.19 Nr. 3): ein Pressekit ohne Ansprechperson ist ärmer, aber
+  // kein halbes — ein `required: true` hielte das Kapitel für jede Marke auf,
+  // die die Zuständigkeit erst klären muss.
+  defineSession({ id: 'p.contact', stepId: 'presskit', type: 'question', required: false, kind: 'structured', maxLength: SHORT, editor: 'text', generator: 'none' }),
+  // PUR (§2.11): die Vorschau ist eine Zusammenstellung, kein Entwurf.
+  defineSession({ id: 'p.summary', stepId: 'presskit', type: 'derivation', required: true, kind: 'structured', maxLength: LONG, editor: 'none', generator: 'none', dependencies: ['ep.taglines', 'ep.boilerplates', 'p.facts', 'p.contact'] }),
 ]
 
 const SLOTS_BY_ID = new Map<string, BrandSlot>(BRAND_SLOTS.map(slot => [slot.id, slot]))

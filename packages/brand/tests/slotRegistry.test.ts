@@ -4,6 +4,7 @@ import { computeSourcesHash } from '../shared/brandSessions'
 import {
   BRAND_DESIGN_STEP_KEYS,
   BRAND_FOUNDATION_STEP_KEYS,
+  BRAND_KIT_STEP_KEYS,
   BRAND_SLOTS,
   BRAND_SLOT_MAX_LENGTH,
   BRAND_STEP_KEYS,
@@ -15,6 +16,7 @@ import {
   dependencyClosure,
   exampleKeyFor,
   isBrandDesignStep,
+  isBrandKitStep,
   partKeyFor,
   questionKeyFor,
   requiredSlotsForStep,
@@ -55,7 +57,7 @@ describe('Registry-Invarianten (die echte Liste)', () => {
     expect(new Set(ids).size).toBe(ids.length)
   })
 
-  it('kennt die neun Bausteine der Foundation und die sechs von Brand Design', () => {
+  it('kennt die neun Bausteine der Foundation, die sechs von Brand Design und die drei von Book & Kit', () => {
     expect([...BRAND_FOUNDATION_STEP_KEYS]).toEqual([
       'context', 'pvm', 'architecture', 'values',
       'archetype', 'manifesto', 'verbal', 'naming', 'result',
@@ -64,17 +66,27 @@ describe('Registry-Invarianten (die echte Liste)', () => {
     expect([...BRAND_DESIGN_STEP_KEYS]).toEqual([
       'dna', 'color', 'type', 'mark', 'imagery', 'motion',
     ])
+    // Schicht 3 (Konzept BRAND-BOOK-KIT.md §2.1) — ADDITIV hinter Brand Design.
+    expect([...BRAND_KIT_STEP_KEYS]).toEqual([
+      'nomenclature', 'aiguide', 'presskit',
+    ])
     expect([...BRAND_STEP_KEYS])
-      .toEqual([...BRAND_FOUNDATION_STEP_KEYS, ...BRAND_DESIGN_STEP_KEYS])
+      .toEqual([...BRAND_FOUNDATION_STEP_KEYS, ...BRAND_DESIGN_STEP_KEYS, ...BRAND_KIT_STEP_KEYS])
     for (const slot of BRAND_SLOTS) {
       expect(BRAND_STEP_KEYS).toContain(slot.stepId)
     }
   })
 
-  it('`isBrandDesignStep` trennt die zwei Schichten — und nur sie', () => {
+  it('`isBrandDesignStep` / `isBrandKitStep` trennen die drei Schichten — und nur sie', () => {
     for (const stepKey of BRAND_DESIGN_STEP_KEYS) expect(isBrandDesignStep(stepKey)).toBe(true)
     for (const stepKey of BRAND_FOUNDATION_STEP_KEYS) expect(isBrandDesignStep(stepKey)).toBe(false)
+    for (const stepKey of BRAND_KIT_STEP_KEYS) expect(isBrandDesignStep(stepKey)).toBe(false)
     expect(isBrandDesignStep('gibt-es-nicht')).toBe(false)
+
+    for (const stepKey of BRAND_KIT_STEP_KEYS) expect(isBrandKitStep(stepKey)).toBe(true)
+    for (const stepKey of BRAND_FOUNDATION_STEP_KEYS) expect(isBrandKitStep(stepKey)).toBe(false)
+    for (const stepKey of BRAND_DESIGN_STEP_KEYS) expect(isBrandKitStep(stepKey)).toBe(false)
+    expect(isBrandKitStep('gibt-es-nicht')).toBe(false)
   })
 
   it('lässt jede Abhängigkeit auf einen existierenden Slot zeigen', () => {
@@ -216,6 +228,11 @@ describe('Slot-Zählung je Baustein (der Katalog ist die Quelle)', () => {
     mark: 5,
     imagery: 4,
     motion: 4,
+    // Schicht 3 (Konzept BRAND-BOOK-KIT.md §2.2–§2.4): Nomenklatur 3 ·
+    // AI-Guidelines 4 · Pressekit 3.
+    nomenclature: 3,
+    aiguide: 4,
+    presskit: 3,
   }
 
   for (const stepKey of BRAND_STEP_KEYS) {
@@ -224,14 +241,18 @@ describe('Slot-Zählung je Baustein (der Katalog ist die Quelle)', () => {
     })
   }
 
-  it('sind zusammen 97 Slots — 68 Foundation, 29 Brand Design', () => {
-    expect(BRAND_SLOTS.length).toBe(97)
-    expect(Object.values(expected).reduce((a, b) => a + b, 0)).toBe(97)
-    const foundation = BRAND_SLOTS.filter(slot => !isBrandDesignStep(slot.stepId))
+  it('sind zusammen 107 Slots — 68 Foundation, 29 Brand Design, 10 Book & Kit', () => {
+    expect(BRAND_SLOTS.length).toBe(107)
+    expect(Object.values(expected).reduce((a, b) => a + b, 0)).toBe(107)
+    const foundation = BRAND_SLOTS.filter(slot =>
+      !isBrandDesignStep(slot.stepId) && !isBrandKitStep(slot.stepId))
     expect(foundation).toHaveLength(68)
     // 29, nicht die „~27" des Konzepts §2.11: die Zahl dort ist eine Schätzung
     // vor dem Schnitt — gezählt sind 7 + 6 + 3 + 5 + 4 + 4.
-    expect(BRAND_SLOTS.length - foundation.length).toBe(29)
+    expect(BRAND_SLOTS.filter(slot => isBrandDesignStep(slot.stepId))).toHaveLength(29)
+    // 10, die „~8" aus BRAND-BOOK-KIT.md §2.1 ist ebenfalls eine Schätzung vor
+    // dem Schnitt — gezählt sind 3 + 4 + 3.
+    expect(BRAND_SLOTS.filter(slot => isBrandKitStep(slot.stepId))).toHaveLength(10)
   })
 
   it('trägt die Ids des Katalogs wörtlich', () => {
@@ -240,14 +261,16 @@ describe('Slot-Zählung je Baustein (der Katalog ist die Quelle)', () => {
     }
   })
 
-  it('kennt genau sechs nicht-pflichtige Slots, jeder mit Grund', () => {
+  it('kennt genau sieben nicht-pflichtige Slots, jeder mit Grund', () => {
     // Drei in der Foundation (keine Texte zu analysieren · nur im Team gefragt ·
-    // ausdrücklich freiwillig) und drei in Brand Design: die Vorbilder und ihre
-    // Lesung gibt es nur auf dem Weg MIT Vorbildern (`g.source`), die
-    // KI-Entwürfe sind ein Angebot und keine Station.
+    // ausdrücklich freiwillig), drei in Brand Design (die Vorbilder und ihre
+    // Lesung gibt es nur auf dem Weg MIT Vorbildern, die KI-Entwürfe sind ein
+    // Angebot und keine Station) — und seit K0 einer in Book & Kit: der
+    // Presse-Kontakt ist ausdrücklich optional (§2.19 Nr. 3), ein Pressekit
+    // ohne Ansprechperson ist ärmer, aber kein halbes.
     expect(BRAND_SLOTS.filter(slot => !slot.required).map(slot => slot.id))
       .toEqual(['a.toneAnalysis', 'c.teamFilter', 'result.rating',
-        'g.inspiration', 'g.reading', 'j.drafts'])
+        'g.inspiration', 'g.reading', 'j.drafts', 'p.contact'])
   })
 })
 
@@ -296,8 +319,11 @@ describe('BRAND_FOUNDATION_STEP_KEYS — das Ergebnis steht am Ende der Foundati
     // Zusage der Kachel hängt aber an der FOUNDATION, und genau die steht
     // jetzt in einer eigenen Liste; `resolveProfileProgress` rechnet über sie.
     expect(BRAND_FOUNDATION_STEP_KEYS.at(-1)).toBe('result')
-    expect(BRAND_STEP_KEYS.at(-1)).toBe('motion')
-    expect(isBrandDesignStep(BRAND_STEP_KEYS.at(-1)!)).toBe(true)
+    // Seit K0 steht hinter Brand Design noch Schicht 3 — die Zusage der Kachel
+    // hängt weiter allein an `BRAND_FOUNDATION_STEP_KEYS`.
+    expect(BRAND_STEP_KEYS.at(-1)).toBe('presskit')
+    expect(isBrandKitStep(BRAND_STEP_KEYS.at(-1)!)).toBe(true)
+    expect(BRAND_DESIGN_STEP_KEYS.at(-1)).toBe('motion')
   })
 })
 
@@ -614,6 +640,9 @@ describe('Session-Vertrag', () => {
       // vertraulich ⇒ intern (Verbindungsregel)
       'g.reading',
       'g.boards',
+      // Book & Kit K0: der Presse-Kontakt ist eine Menschenfrage und trotzdem
+      // eine Festlegung — er steht im Pressekit und reist BY DESIGN (§2.4).
+      'p.contact',
     ])
   })
 
@@ -701,9 +730,13 @@ describe('Session-Vertrag', () => {
     // Foundation: 29 Fragen + 1 Sammlung (a.facts) + 15 Auswahlen = 45. Die
     // Registry führt dort 16 `choice`-Slots, aber `a.facts` ist davon die
     // Sammlung (Plan, Anhang A). Brand Design legt 11 Auswahlen dazu.
-    expect(BRAND_SLOTS.filter(asks)).toHaveLength(56)
+    expect(BRAND_SLOTS.filter(asks)).toHaveLength(61)
     expect(BRAND_SLOTS.filter(session => asks(session) && isBrandDesignStep(session.stepId)))
       .toHaveLength(11)
+    // Book & Kit legt vier Auswahlen (`m.types`, `n.scope`, `n.review`,
+    // `p.facts`) und eine Menschenfrage (`p.contact`) dazu.
+    expect(BRAND_SLOTS.filter(session => asks(session) && isBrandKitStep(session.stepId)))
+      .toHaveLength(5)
 
     expect(validateSlotRegistry(mutate('a.origin', {
       ladder: { opening: '', probes: [], reframes: [] },
@@ -719,7 +752,9 @@ describe('Session-Vertrag', () => {
     // Foundation: 11 Ableitungen + 11 Entwürfe + `ep.taglines` (Auswahl mit
     // Kandidaten-Generator) = 23. Brand Design legt 10 Ableitungen und 6
     // Entwürfe dazu.
-    expect(drafts).toHaveLength(39)
+    // Book & Kit legt vier Ableitungen (`m.patterns`, `n.guardrails`,
+    // `n.prompts`, `p.summary`) und einen Entwurf (`m.rules`) dazu.
+    expect(drafts).toHaveLength(44)
     for (const session of drafts) {
       for (const pathKind of ['new', 'relaunch'] as const) {
         expect(session.examples[pathKind].de.length, `${session.id}/${pathKind}/de`).toBeGreaterThan(0)
@@ -753,6 +788,10 @@ describe('Session-Vertrag', () => {
       'j.kind', 'j.pick', 'j.drafts',
       'k.illustration', 'k.icons',
       'l.tempo', 'l.logo',
+      // Book & Kit K0: dieselbe Sorte — vier reine AUSWAHLEN aus geschlossenen
+      // Mengen und die Kontaktfrage, deren „Beispiel" der Composer-Platzhalter
+      // ist (`brand.example.p.contact`), nicht ein Formvorbild im Prompt.
+      'm.types', 'n.scope', 'n.review', 'p.facts', 'p.contact',
     ])
   })
 
@@ -784,8 +823,8 @@ describe('Session-Vertrag', () => {
     // freigeschaltete Schicht mit eigener Uhr — sie hier mitzuzählen hiesse,
     // eine Kommunikationslinie an einem Produkt zu messen, das der Kunde ohne
     // Freischaltung gar nicht sieht.
-    const active = BRAND_SLOTS.filter(session =>
-      !session.deactivated && !isBrandDesignStep(session.stepId))
+    const active = BRAND_SLOTS.filter(session => !session.deactivated
+      && !isBrandDesignStep(session.stepId) && !isBrandKitStep(session.stepId))
     const minutes = (sessions: readonly BrandSlot[]) =>
       sessions.reduce((sum, session) => sum + session.effort.minutes, 0)
     const base = minutes(active.filter(session => !OPTIONAL.includes(session.stepId)))
@@ -905,6 +944,9 @@ describe('Session-Vertrag', () => {
         'a.facts',
         'b2.visibility', 'b2.roleOfMaster', 'b2.namingPattern', 'b2.model', 'b2.rule',
         'c.livedExamples', 'c.conflictRule', 'c.teamFilter',
+        // Book & Kit K0: wer die Presse-Zuständigkeit erst klären muss, soll
+        // das Kapitel trotzdem abschliessen können (§2.19 Nr. 3).
+        'p.contact',
       ])
   })
 

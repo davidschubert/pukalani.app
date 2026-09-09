@@ -12,7 +12,7 @@ import type {
   BrandStepKey,
   BrandStepProgress,
 } from '../../shared/slotRegistry'
-import { isBrandDesignStep, slotById } from '../../shared/slotRegistry'
+import { isBrandDesignStep, isBrandKitStep, slotById } from '../../shared/slotRegistry'
 import {
   type BrandLocalSlotEdit,
   type BrandSlotPatch,
@@ -342,11 +342,28 @@ const setup = () => {
    */
   const railSteps = computed<BrandJourneyStep[]>(
     () => journey.value.filter(entry =>
-      entry.state !== 'skipped' && !isBrandDesignStep(entry.stepKey)),
+      entry.state !== 'skipped' && !isBrandDesignStep(entry.stepKey) && !isBrandKitStep(entry.stepKey)),
   )
 
   const designSteps = computed<BrandJourneyStep[]>(
     () => journey.value.filter(entry => isBrandDesignStep(entry.stepKey)),
+  )
+
+  /**
+   * `kitSteps` = die drei Kapitel von BRAND BOOK & KIT (K0, Konzept §2.7).
+   * Derselbe Zuschnitt wie `designSteps` und aus demselben Grund: ein eigenes,
+   * extra freigeschaltetes Produkt bekommt einen eigenen Layer mit eigenem
+   * Fortschritt. Sie stehen IMMER in der Liste — ohne Freischaltung als
+   * gesperrte Schicht mit Erklär-Text.
+   *
+   * ACHTUNG, DER ZUSTAND IST EIN ANDERER ALS BEI SCHICHT 2: ein nicht
+   * freigeschaltetes Kit-Kapitel ist `skipped`, kein `locked` (D0-Lehre, s.
+   * `derivation_locked` in `brandJourney.ts`). Der Filter fragt deshalb NICHT
+   * nach `state`, sondern nur nach der Schicht — sonst wäre die gesperrte
+   * Schicht leer statt gesperrt.
+   */
+  const kitSteps = computed<BrandJourneyStep[]>(
+    () => journey.value.filter(entry => isBrandKitStep(entry.stepKey)),
   )
 
   /**
@@ -357,6 +374,15 @@ const setup = () => {
    */
   const designOpen = computed(
     () => designSteps.value.some(entry => entry.reason !== 'design_locked'),
+  )
+
+  /**
+   * IST BRAND BOOK & KIT FÜR DIESE MARKE OFFEN? — dieselbe Frage an dieselbe
+   * Quelle (die Journey, nicht ein Profil-Feld): die pure Regel legt
+   * Freischaltung und Weichen zusammen, hier steht nur ihr Ergebnis.
+   */
+  const kitOpen = computed(
+    () => kitSteps.value.some(entry => entry.reason !== 'derivation_locked'),
   )
 
   function canEnter(candidate: string): boolean {
@@ -373,7 +399,14 @@ const setup = () => {
    * Kapitel 10).
    */
   function neighbourStep(direction: -1 | 1): BrandStepKey | null {
-    const path = stepKey.value && isBrandDesignStep(stepKey.value) ? designSteps.value : railSteps.value
+    // DREI SCHICHTEN, DREI WEGE (K0): „weiter"/„zurück" bleiben INNERHALB der
+    // eigenen Schicht — jede ist ein eigenes Produkt, und ein Übergang, den
+    // niemand angeboten hat, wäre ein Sprung zwischen Produkten.
+    const path = stepKey.value && isBrandKitStep(stepKey.value)
+      ? kitSteps.value
+      : stepKey.value && isBrandDesignStep(stepKey.value)
+        ? designSteps.value
+        : railSteps.value
     const index = path.findIndex(entry => entry.stepKey === stepKey.value)
     if (index < 0) return null
     const target = path[index + direction]
@@ -1239,6 +1272,8 @@ const setup = () => {
     railSteps,
     designSteps,
     designOpen,
+    kitSteps,
+    kitOpen,
     slotValue,
     slotConfirmed,
     canEnter,

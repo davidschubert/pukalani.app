@@ -32,6 +32,7 @@ import {
   type BrandTeamKind,
   exampleKeyFor,
   isBrandDesignStep,
+  isBrandKitStep,
   partLabelKeyFor,
   questionKeyFor,
   slotById,
@@ -2615,7 +2616,7 @@ const railLayers = computed<BwRailLayer[]>(() => [{
     // Zusatzprodukt kommt danach.
     ...navExtras.value,
   ],
-}, designRailLayer.value])
+}, designRailLayer.value, kitRailLayer.value])
 
 /**
  * DER ZWEITE LAYER: BRAND DESIGN (Konzept §2.1/§2.10, Paket D1, Prototyp
@@ -2713,6 +2714,68 @@ const designRailLayer = computed<BwRailLayer>(() => {
     ],
   }
 })
+
+/**
+ * WELCHE SCHICHT STEHT ÜBER DEM KAPITEL-NAMEN? — drei Produkte, drei Namen
+ * (K0; bis dahin waren es zwei).
+ *
+ * Sie steht als Rechnung und nicht als verschachtelter Ausdruck im Markup: mit
+ * der dritten Schicht wäre das dort ein zweifach geschachtelter Bedingungs-
+ * Ausdruck in einer Zeile, die ohnehin schon 200 Zeichen lang ist.
+ */
+const currentLayerLabelKey = computed(() => {
+  if (stepKey.value && isBrandKitStep(stepKey.value)) return 'brand.kitLayer.label'
+  if (stepKey.value && isBrandDesignStep(stepKey.value)) return 'brand.designLayer.label'
+  return 'brand.workspace.railLayer'
+})
+
+/**
+ * DER DRITTE LAYER: BRAND BOOK & KIT (Konzept docs/plans/BRAND-BOOK-KIT.md
+ * §2.7, Paket K0, Prototyp `demoRail.ts` Layer `book` + `demoRailWithKit`).
+ *
+ * ── K0 BAUT NUR DIE SCHRANKE ─────────────────────────────────────────────
+ * Er steht bei jeder Marke da, und heute steht er bei JEDER Marke GESPERRT:
+ * die Freischaltung („Ableitung") gibt es erst mit K1, die drei Kapitel
+ * bekommen ihre Seiten mit K5 und die Lieferseite „Kit" mit K6. Der gesperrte
+ * Zustand ist trotzdem schon der richtige — eine Schicht, die man nicht sieht,
+ * kann man nicht wollen, und die Auskunft „das gibt es, so kommt ihr dran" ist
+ * die halbe Produktseite (dieselbe Begründung wie bei Brand Design D1).
+ *
+ * Der offene Zweig ist deshalb bewusst NICHT vorweggenommen: er hätte heute
+ * keine Adresse, auf die er zeigen könnte, und ein Punkt ohne Ziel ist die
+ * Sorte Vorschuss, die niemand einlöst.
+ *
+ * ── DIE COPY IST DIE DES PROTOTYPS ───────────────────────────────────────
+ * Kein „Templates", kein „Strategy Playbook" (die gehören zu Produkt 04,
+ * §2.16): Brand Book · Kit & Brand Context · Pressekit. Der Sperrsatz ist
+ * „Teil der Ableitung" (§2.7) und nicht „baut auf eurer Foundation auf" — das
+ * ist der Satz von Schicht 2 und hier schlicht falsch.
+ */
+const kitRailLayer = computed<BwRailLayer>(() => ({
+  id: 'kit',
+  label: t('brand.kitLayer.label'),
+  locked: true,
+  lockedNote: t('brand.kitLayer.lockedNote'),
+  info: {
+    description: t('brand.kitLayer.info'),
+    minutes: t('brand.session.minutes', {
+      minutes: store.kitSteps.reduce((sum, entry) => sum + chapterEffortMinutes(entry.stepKey), 0),
+    }),
+    bausteine: store.kitSteps.map(entry => ({
+      label: t(`brand.steps.${entry.stepKey}`),
+      note: t(`brand.stepInfo.${entry.stepKey}`),
+    })),
+  },
+  // Die Punkte stehen auch gesperrt komplett da (Runde 85, David) — mit
+  // Schloss im Status-Kreis statt versteckter Liste.
+  steps: store.kitSteps.map((entry): BwRailStep => ({
+    id: entry.stepKey,
+    label: t(`brand.steps.${entry.stepKey}`),
+    icon: '',
+    state: 'locked',
+    info: railInfo(entry),
+  })),
+}))
 
 /** Ein Kapitel ist anklickbar, sobald die pure Regel den Eintritt erlaubt. */
 function canEnterStep(entry: BrandJourneyStep): boolean {
@@ -3410,7 +3473,7 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
                Foundation" stand über „Moodboard" der Name der falschen Schicht
                — die eine Stelle, an der die Werkstatt behauptet hätte, Brand
                Design sei ein Kapitel der Foundation. -->
-          <p class="bw-label uppercase tracking-wider" style="color: var(--bw-muted)">{{ t(stepKey && isBrandDesignStep(stepKey) ? 'brand.designLayer.label' : 'brand.workspace.railLayer') }}</p>
+          <p class="bw-label uppercase tracking-wider" style="color: var(--bw-muted)">{{ t(currentLayerLabelKey) }}</p>
           <p class="truncate font-semibold">{{ stepKey ? t(`brand.steps.${stepKey}`) : '' }}</p>
         </div>
         <!-- Der Log-Toggle wirkt nur, wo es eine Log-SPALTE gibt: unter 768 px

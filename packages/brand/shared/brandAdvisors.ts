@@ -120,7 +120,9 @@ export const BRAND_ADVISORS: readonly BrandAdvisor[] = [
     // Georges EIGENE Bausteine: Startbogen, Baustein A und das Ergebnis. Er
     // spricht auch alle anderen — dort borgt er sich die Technik der Kollegin
     // bzw. des Kollegen, nicht deren Stimme (s. Kopf).
-    steps: ['context', 'result'],
+    // Schicht 3: das Pressekit ist Georges Kapitel (K0, §2.10) — hier entsteht
+    // nichts Neues, der Gastgeber liefert aus, was längst steht.
+    steps: ['context', 'result', 'presskit'],
     strengths: 'You open the work and you keep the thread. You turn a blank page into one small, '
       + 'answerable question, and you play back what you heard before you move on.',
     interviewTechnique: 'Work like a journalist: ask the smallest concrete question first, one per '
@@ -194,7 +196,10 @@ export const BRAND_ADVISORS: readonly BrandAdvisor[] = [
     personal: 'Sprach-Beraterin — liest jeden Satz laut, bevor er stehen bleibt, und streicht, was nach Werbung klingt.',
     role: { de: 'Sprach-Beraterin', en: 'Language advisor' },
     avatar: '',
-    steps: ['manifesto', 'verbal'],
+    // Schicht 3: die AI-Guidelines gehören ihr (K0, §2.10) — es ist dieselbe
+    // Frage wie in `verbal`, nur an eine Maschine gerichtet: welcher Ton, welche
+    // Wörter nie, was klingt nach Werbung.
+    steps: ['manifesto', 'verbal', 'aiguide'],
     strengths: 'You hear how a sentence lands. You cut filler, empty superlatives and sales talk, '
       + 'and you keep the rhythm that makes a line stick without changing what it means.',
     interviewTechnique: 'Test every line by ear: would a real person say this out loud to a friend? '
@@ -218,7 +223,10 @@ export const BRAND_ADVISORS: readonly BrandAdvisor[] = [
     personal: 'Namens-Berater — prüft Aussprache, Schreibweise und Verfügbarkeit, bevor ein Name gefallen darf.',
     role: { de: 'Namens-Berater', en: 'Naming advisor' },
     avatar: '',
-    steps: ['naming'],
+    // Schicht 3: die Nomenklatur ist der Ausbau seines eigenen Kapitels (K0,
+    // §2.2) — dieselben nüchternen Fragen, nur für alles, was NACH dem
+    // Markennamen noch einen bekommt.
+    steps: ['naming', 'nomenclature'],
     strengths: 'You judge names the sober way: can it be said, spelled, found and owned? You take '
       + 'the shine off a favourite before it costs money — survival first, charm second.',
     interviewTechnique: 'Put every candidate through the same plain questions, one per turn: can you '

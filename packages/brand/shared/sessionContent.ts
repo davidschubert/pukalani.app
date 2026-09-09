@@ -3888,4 +3888,314 @@ export const SESSION_CONTENT: Readonly<Record<string, BrandSessionContent>> = {
       },
     ),
   },
+
+  // ══ SCHICHT 3 · BRAND BOOK & KIT (Konzept §2.2–§2.4, Paket K0) ═══════════
+  //
+  // K0: INHALTE SIND DAVIDS GATE IN K5 (§2.18). Ziele, Leitern,
+  // Qualitätsmerkmale und Beispiele stehen hier in einer BRAUCHBAREN, aber
+  // PROVISORISCHEN Fassung — abgeleitet aus dem freigegebenen Prototyp
+  // (`.playground/app/utils/demoKit.ts`) und dem Konzept, nicht gegengelesen.
+  // Paket K5 fasst genau diese Texte an; die Struktur darüber bleibt unberührt
+  // (dasselbe Verhältnis wie BW2 Paket 1 zu Paket 2 und D0 zu D1).
+  //
+  // WAS DIESE SCHICHT VON DEN BEIDEN ANDEREN UNTERSCHEIDET: hier entsteht
+  // NICHTS Neues (§1.11 a — „Book & Kit = kuratieren/exportieren"). Jede
+  // Session bestätigt, wählt aus oder rechnet zusammen, was in Foundation und
+  // Design längst steht. Die Ziele sagen das ausdrücklich, damit kein Modell
+  // anfängt, hier eine zweite Marke zu erfinden.
+  //
+  // Beispiel-Betriebe dieser Schicht: Sprachschule mit Kursreihen (neue Marke)
+  // / Fahrradwerkstatt mit zweiter Filiale (Relaunch) — bewusst zwei Branchen,
+  // die in Schicht 1 und 2 nicht vorkommen (s. Kopf, „Die Beispielwelt").
+
+  // ── M · Nomenklatur (§2.2, Otto) ────────────────────────────────────────
+  'm.types': {
+    goal: 'settle which kinds of things this brand actually needs names for, chosen from the catalogue '
+      + 'of five — products, services, programmes, places, digital.',
+    quality: [
+      'Every chosen kind has at least one real example in this brand, today or planned.',
+      'A kind they do not have is left out — the list is what needs naming, not what sounds ambitious.',
+      'The choice comes from the catalogue; nothing is typed in freely.',
+    ],
+    antiPatterns: [
+      'Ticking all five because none of them is wrong in principle.',
+      'A kind chosen for something that will exist "some day" without anyone planning it.',
+    ],
+    ladder: {
+      opening: 'ask which of the five kinds of things they give names to today — and which they already '
+        + 'know will come; name one example per kind from their own answers.',
+      probes: [
+        'if they name only the obvious kind, ask about the things around it: a course, a second '
+          + 'location, a newsletter',
+      ],
+      reframes: [
+        'if they start proposing names, say that names come in the next session and ask only which '
+          + 'kinds there are',
+      ],
+    },
+    form: { person: 'none', tense: 'present' },
+    // EINE Nachfrage, abweichend von der Arbeitsform (`choose` fragt sonst
+    // nicht nach): die erste Antwort nennt fast immer nur das Offensichtliche,
+    // und ein vergessener Typ fehlt danach dem ganzen Kapitel.
+    answers: { maxProbes: 1 },
+  },
+  'm.patterns': {
+    goal: 'draft one naming pattern per chosen kind, each with one example and the line in the '
+      + 'foundation it follows from.',
+    quality: [
+      'Every chosen kind has exactly one pattern — no kind is left without one.',
+      'Every pattern is a rule someone else could apply tomorrow, not a description of taste.',
+      'Every pattern names its source: the architecture model, the naming rule, the decided name or a '
+        + 'tone word.',
+      'Every pattern carries one example that obeys it.',
+    ],
+    antiPatterns: [
+      'A pattern that only says "fits the brand" — that is the conclusion, not the rule.',
+      'Two patterns for the same kind, so that nobody knows which one applies.',
+      'An example that breaks its own pattern.',
+    ],
+    form: { person: 'none', tense: 'present' },
+    examples: pathExamples(
+      {
+        de: 'Programm / Format: Dachmarke + Substantiv ohne Anglizismus — „Sprachhaus Tafelrunde". '
+          + 'Herkunft: Architektur-Modell „eine Marke" und Tabu-Wort „Experience".',
+        en: 'Programme or format: umbrella brand plus a plain noun — "Sprachhaus Tafelrunde". Source: '
+          + 'the architecture model "one brand" and the banned word "experience".',
+      },
+      {
+        de: 'Ort / Filiale: Dachmarke + Stadtteil, nie eine Nummer — „Radwerk Weststadt". Herkunft: Wert '
+          + '„Nähe" — ein Ort hat einen Namen, keine Filialnummer.',
+        en: 'Place: umbrella brand plus the district, never a number — "Radwerk Weststadt". Source: the '
+          + 'value "closeness" — a place has a name, not a branch number.',
+      },
+    ),
+  },
+  'm.rules': {
+    goal: 'confirm the naming rules that follow from the patterns: capitalisation, separators, the order '
+      + 'of umbrella brand and product, and what is never done.',
+    quality: [
+      'Every rule can be checked against a name without asking anybody.',
+      'There is one rule about the order of umbrella brand and product.',
+      'There is at least one rule that says what is NEVER done.',
+      'No rule contradicts a pattern from the session before.',
+    ],
+    antiPatterns: [
+      'A rule that says "keep it consistent" — that is the wish, not the rule.',
+      'A rule that repeats a pattern in other words instead of adding the part the pattern leaves open.',
+    ],
+    form: { person: 'none', tense: 'present' },
+    examples: pathExamples(
+      {
+        de: 'Die Dachmarke steht vorn: „Sprachhaus Abendkurs", nie „Abendkurs by Sprachhaus".',
+        en: 'The umbrella brand comes first: "Sprachhaus Abendkurs", never "Abendkurs by Sprachhaus".',
+      },
+      {
+        de: 'In Adressen und Dateinamen alles klein und mit Bindestrich; nie zwei Namen für dieselbe '
+          + 'Sache — die Werkstatt heisst an der Tür so wie auf der Rechnung.',
+        en: 'In addresses and file names everything is lower case with hyphens; never two names for one '
+          + 'thing — the workshop is called the same on the door and on the invoice.',
+      },
+    ),
+  },
+
+  // ── N · AI-Guidelines (§2.3, Nika) ──────────────────────────────────────
+  'n.scope': {
+    goal: 'settle what AI may produce in the name of this brand: drafts for everything, text only, '
+      + 'internal only, or nothing customer-facing.',
+    quality: [
+      'The answer is one of the four offered ways, not a description of a workflow.',
+      'The choice matches what they actually do today — not what sounds responsible.',
+      'They understand that this answer travels: it goes into brand.md, which other people and their '
+        + 'tools will read.',
+    ],
+    antiPatterns: [
+      'A choice of "nothing" out of caution, while the same people use AI daily — the guideline would '
+        + 'be a rule nobody keeps.',
+      'An answer that mixes scope and approval ("only with review") — approval is the next session.',
+    ],
+    ladder: {
+      opening: 'ask plainly what AI is allowed to produce for them, name the four ways in one sentence '
+        + 'each, and say which one most brands their size end up with.',
+      probes: [],
+      reframes: [
+        'if they answer with who checks it, say that the check is the next question and ask only what '
+          + 'may be produced',
+      ],
+    },
+    form: { person: 'none', tense: 'present' },
+  },
+  'n.review': {
+    goal: 'settle the approval rule: every publication read by a human, a spot check, or a rule that '
+      + 'depends on the channel.',
+    quality: [
+      'The answer is one of the three offered rules.',
+      'The rule names a person or a role, not a hope.',
+      'The rule can be kept on a normal working day, at the volume they really publish.',
+    ],
+    antiPatterns: [
+      'A rule so strict that the first busy week breaks it.',
+      'A spot check without a number — "now and then" is not a rule.',
+    ],
+    ladder: {
+      opening: 'ask who reads a text before it goes out, and offer the three rules with what each one '
+        + 'costs in a normal week.',
+      probes: [],
+      reframes: [
+        'if they say "it depends", ask them to name the channel it depends on — that is the third rule',
+      ],
+    },
+    form: { person: 'none', tense: 'present' },
+  },
+  'n.guardrails': {
+    goal: 'draft the guardrails as a list: tone parameters, taboos, the spelling of brand marks, and '
+      + 'the topics this brand does not speak about — each line taken from a settled value.',
+    quality: [
+      'Every line comes from a confirmed value above and says which one.',
+      'The tone parameters are the tone words with one voice sample each, not adjectives added here.',
+      'The taboos are the words already banned in the vocabulary sessions, not new ones.',
+      'The spelling rules name the brand marks that really exist: title, tagline, product names.',
+    ],
+    antiPatterns: [
+      'A guardrail invented here because it sounds sensible — the list is a summary, not a new decision.',
+      'A taboo that contradicts a word the brand uses on its own website.',
+      'A line so general that no text could ever break it.',
+    ],
+    form: { person: 'none', tense: 'present' },
+    examples: pathExamples(
+      {
+        de: 'Ton: „ruhig" — kurze Sätze, kein Ausrufezeichen. Stimmprobe: „Der Kurs beginnt am 3. März. '
+          + 'Zehn Plätze." Herkunft: Ton-Wort „ruhig" plus eure Stimmprobe.',
+        en: 'Tone: "quiet" — short sentences, no exclamation marks. Voice sample: "The course starts on '
+          + '3 March. Ten places." Source: the tone word "quiet" plus your voice sample.',
+      },
+      {
+        de: 'Tabu: „Rundum-sorglos", „Premium", „Experience". Herkunft: eure Meiden-Liste aus dem '
+          + 'Wort-Leitfaden — sie gilt für KI wortgleich.',
+        en: 'Taboo: "all-round carefree", "premium", "experience". Source: your avoid list from the '
+          + 'word guide — it applies to AI word for word.',
+      },
+    ),
+  },
+  'n.prompts': {
+    goal: 'assemble three ready-to-copy prompt templates from the settled values and the guardrails: a '
+      + 'system prompt, a social post, and an email to customers.',
+    quality: [
+      'Each template stands on its own: someone can paste it into a chat without adding context.',
+      'Each template carries the guardrails, not a summary of them.',
+      'Nothing in the templates is new — every sentence traces back to a confirmed value.',
+      'The system prompt is the short form of brand.md, in the same words.',
+    ],
+    antiPatterns: [
+      'A template that asks the model to "be creative" — that is exactly the instruction the guardrails '
+        + 'exist against.',
+      'A fourth template, because three is what a person keeps at hand.',
+      'A placeholder nobody can fill, because the value behind it was never settled.',
+    ],
+    form: { person: 'none', tense: 'present' },
+    examples: pathExamples(
+      {
+        de: 'System-Prompt: „Du schreibst für Sprachhaus. Ton: ruhig, gerade heraus. Nie: Superlative, '
+          + '„Experience". Immer: Termin und Platzzahl im ersten Satz."',
+        en: 'System prompt: "You write for Sprachhaus. Tone: quiet, straightforward. Never: '
+          + 'superlatives, the word experience. Always: date and number of places in the first sentence."',
+      },
+      {
+        de: 'Social-Post: „Ein Satz, was es gibt. Ein Satz, für wen. Ein Satz, wo. Keine Emojis, kein '
+          + 'Ausrufezeichen — so wie eure Aushänge in der Werkstatt."',
+        en: 'Social post: "One sentence on what it is. One on who it is for. One on where. No emoji, no '
+          + 'exclamation marks — the way your workshop notices read."',
+      },
+    ),
+  },
+
+  // ── P · Pressekit (§2.4, George) ────────────────────────────────────────
+  //
+  // `p.facts` IST DIE AUSNAHME DER REISE-REGEL (§2.10) und trotzdem kein Loch
+  // darin: der Wert dieser Session ist NICHT `a.facts`, sondern eine bewusste
+  // AUSWAHL daraus. `a.facts` bleibt `internal` und reist nie; was hier
+  // entsteht, ist ein neuer, öffentlicher Wert, den ein Mensch Eintrag für
+  // Eintrag freigegeben hat (Voreinstellung: keiner).
+  'p.facts': {
+    goal: 'settle which of the facts from the profile may travel into the press kit — one opt-in per '
+      + 'entry, nothing released by default.',
+    quality: [
+      'Every released fact is one a stranger may read, today and in a year.',
+      'Nothing is released just because it is true — the question is whether it should be public.',
+      'A fact that stays back keeps its reason, so the decision can be read again later.',
+      'The released text is the fact itself, not a summary of several.',
+    ],
+    antiPatterns: [
+      'Releasing everything at once because the list is short.',
+      'Releasing a number that is a negotiating position: revenue, margins, the share of one customer.',
+      'Rewriting a fact while releasing it, so that the press kit says something the profile does not.',
+    ],
+    ladder: {
+      opening: 'go through the facts one by one and ask for each whether it may be public; say plainly '
+        + 'that nothing travels unless they say so.',
+      probes: [],
+      reframes: [
+        'if they want to release everything at once, take the two most sensitive entries and ask about '
+          + 'those two alone',
+      ],
+    },
+    form: { person: 'none', tense: 'present' },
+  },
+  'p.contact': {
+    goal: 'settle the press contact — name, role and email of one person the press may write to.',
+    quality: [
+      'There is exactly one person, with a role that says why they are the one to ask.',
+      'The email is one that is actually read; a shared mailbox is fine if somebody reads it.',
+      'They have seen, before confirming, that this line travels publicly.',
+    ],
+    antiPatterns: [
+      'A private mobile number given because the field was there.',
+      'Two contacts, so that a journalist has to guess which one to try.',
+      'A reference to the account holder instead of a confirmed text — the account may change hands '
+        + 'later, and the press kit would change with it silently.',
+    ],
+    ladder: {
+      opening: 'offer the contacts already on file as a template — the account holder and, if there is '
+        + 'one, the contact from the intro call — and say that this line will be public.',
+      probes: [
+        'if they hesitate, ask who takes the call when a local paper rings on a Tuesday morning',
+      ],
+      reframes: [
+        'if nobody is responsible yet, say that the entry is optional and the press kit works without it',
+      ],
+    },
+    form: { person: 'none', tense: 'present' },
+    // Optional (§2.4) — und darum ausdrücklich vertagbar: wer die Zuständigkeit
+    // erst klären muss, soll das Kapitel trotzdem abschliessen können.
+    answers: { allowDefer: true },
+  },
+  'p.summary': {
+    goal: 'lay out the press kit as it will be read: boilerplates in three lengths, the tagline, the '
+      + 'mark settings, the released facts and the contact — nothing new, only assembled.',
+    quality: [
+      'Every part comes from a confirmed value; the preview invents no sentence of its own.',
+      'A part that is missing is named as missing, not filled with something similar.',
+      'No fact appears that was not released in the session before.',
+      'The whole thing reads as one page, not as a list of fields.',
+    ],
+    antiPatterns: [
+      'A boilerplate rewritten here because it reads better in this context.',
+      'A fact from the profile that nobody released.',
+      'An empty section rendered as if it were finished.',
+    ],
+    form: { person: 'none', tense: 'present' },
+    examples: pathExamples(
+      {
+        de: 'Kurz: „Sprachhaus ist eine Sprachschule in Mainz mit Abendkursen für Erwachsene." Tagline, '
+          + 'Wortmarke, zwei freigegebene Fakten, Kontakt.',
+        en: 'Short: "Sprachhaus is a language school in Mainz with evening courses for adults." Tagline, '
+          + 'wordmark, two released facts, contact.',
+      },
+      {
+        de: 'Ohne Design: Boilerplates, Tagline und Fakten stehen; der Abschnitt „Zeichen" nennt offen, '
+          + 'dass er mit Brand Design kommt.',
+        en: 'Without design: boilerplates, tagline and facts are there; the "marks" section says plainly '
+          + 'that it arrives with Brand Design.',
+      },
+    ),
+  },
 }
