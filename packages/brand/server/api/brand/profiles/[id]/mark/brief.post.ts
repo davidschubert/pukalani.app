@@ -13,7 +13,7 @@ import {
 } from '../../../../../utils/brandMarkBrief'
 
 /**
- * DAS ZEICHEN-BRIEFING ERZEUGEN (Konzept docs/plans/BRAND-DESIGN.md §2.5
+ * DAS ZEICHEN-BRIEFING ERZEUGEN (Konzept docs/archiv/BRAND-DESIGN.md §2.5
  * Stufe 1, Paket D5a) — EIN Text-Lauf über Foundation, DNA und die schon
  * beschlossenen Kapitel.
  *

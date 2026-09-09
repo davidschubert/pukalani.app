@@ -12,7 +12,7 @@ import { recordBrandEvent } from '../../../../../utils/brandEvents'
 
 /**
  * BETREIBER: DIE FREISCHALTUNG ZURÜCKNEHMEN (`users.manage`, Konzept
- * docs/plans/BRAND-DESIGN.md §2.10, Paket D1).
+ * docs/archiv/BRAND-DESIGN.md §2.10, Paket D1).
  *
  * ── SIE LÖSCHT NICHTS ─────────────────────────────────────────────────────
  * Geleert werden die zwei Spalten, mehr nicht. Die sechs `brand_steps`-Zeilen

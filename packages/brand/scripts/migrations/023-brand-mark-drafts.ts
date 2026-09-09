@@ -1,6 +1,6 @@
 /**
  * Migration brand-023: DIE KI-ENTWÜRFE DES ZEICHENS — Tabelle
- * `brand_mark_drafts` und Bucket `brand-drafts` (docs/plans/BRAND-DESIGN.md
+ * `brand_mark_drafts` und Bucket `brand-drafts` (docs/archiv/BRAND-DESIGN.md
  * §2.5 Stufe 3 / §2.11, Paket D5c; Davids Freigabe im DECISION-LOG
  * 2026-09-08).
  *

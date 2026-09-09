@@ -4,7 +4,7 @@ import { BRAND_LOGO_MOTION_OPTIONS, BRAND_TEMPO_OPTIONS, brandTermLabel } from '
 import { useBrandWorkspaceStore } from '../stores/brandWorkspace'
 
 /**
- * DIE BEWEGUNG (Kapitel `motion`, Konzept docs/plans/BRAND-DESIGN.md §2.7,
+ * DIE BEWEGUNG (Kapitel `motion`, Konzept docs/archiv/BRAND-DESIGN.md §2.7,
  * Paket D7) — gebaut nach dem freigegebenen Prototyp
  * (`.playground/app/pages/brand/demo/design/motion.vue`), mit einem Zusatz: die
  * drei Tempos stehen als drei SZENEN nebeneinander und spielen GLEICHZEITIG.

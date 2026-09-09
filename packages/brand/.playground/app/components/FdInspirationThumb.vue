@@ -3,7 +3,7 @@ import type { DsInspiration } from '../utils/demoDesign'
 
 /**
  * DIE ATTRAPPE EINES HOCHGELADENEN VORBILDS (Konzept
- * docs/plans/BRAND-DESIGN.md §2.2 `g.inspiration`).
+ * docs/archiv/BRAND-DESIGN.md §2.2 `g.inspiration`).
  *
  * Fünf abstrakte Kompositionen im Seitenverhältnis eines Screenshots — eine
  * Website, eine Typo-Probe, eine Palette, ein Zeichen, ein Foto-Raster. Sie

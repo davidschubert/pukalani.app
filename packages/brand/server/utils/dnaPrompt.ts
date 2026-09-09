@@ -6,7 +6,7 @@ import {
 import { brandReadingVocabLines } from '../../shared/brandReading'
 
 /**
- * DER AUFTRAG DES DNA-VORSCHLAGS (Brand Design D2c, docs/plans/BRAND-DESIGN.md
+ * DER AUFTRAG DES DNA-VORSCHLAGS (Brand Design D2c, docs/archiv/BRAND-DESIGN.md
  * §2.2 Schritt 4).
  *
  * PUR: keine Fetches, kein H3Event, kein Appwrite, kein i18n. Dieselbe

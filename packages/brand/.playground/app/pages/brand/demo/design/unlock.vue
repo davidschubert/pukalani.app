@@ -3,7 +3,7 @@ import { DS_UNLOCK_ROWS } from '../../../../utils/demoDesign'
 
 /**
  * BETREIBER-AUSSCHNITT „BRAND DESIGN FREISCHALTEN" (Konzept
- * docs/plans/BRAND-DESIGN.md §2.10, Prototyp-Screen 8, zweite Hälfte).
+ * docs/archiv/BRAND-DESIGN.md §2.10, Prototyp-Screen 8, zweite Hälfte).
  *
  * Das Geschäftsmodell der ersten Fassung ist STUDIO-BEGLEITET (§1.11 d): kein
  * Stripe, kein Preis, keine Selbstbedienung. Freigeschaltet wird je Marke

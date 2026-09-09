@@ -40,7 +40,7 @@ import {
 } from './brandStore'
 
 /**
- * DIE LESUNG DER VORBILDER — DER LAUF (Konzept docs/plans/BRAND-DESIGN.md
+ * DIE LESUNG DER VORBILDER — DER LAUF (Konzept docs/archiv/BRAND-DESIGN.md
  * §2.2 Schritt 3, Paket D2b).
  *
  * EIN Aufruf über ALLE Bilder, nicht einer je Bild. Das ist keine Sparsamkeit,

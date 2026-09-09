@@ -4,7 +4,7 @@ import type { BrandSceneColors, BrandSceneFonts, BrandSceneMotion } from '../../
 import { BRAND_RAMP_SHADES, type BrandRamp } from '../../shared/types/brand'
 
 /**
- * DIE ANWENDUNGS-SZENE (Konzept docs/plans/BRAND-DESIGN.md §2.9,
+ * DIE ANWENDUNGS-SZENE (Konzept docs/archiv/BRAND-DESIGN.md §2.9,
  * Entscheidung §1.11 c, Paket D2c).
  *
  * EINE Komponente, sechs Zustände: dieselbe Szene ist die Vorschau in JEDEM

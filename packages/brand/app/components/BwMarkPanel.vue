@@ -11,7 +11,7 @@ import type { BrandMarkBriefResponse } from '../../shared/types/brand'
 import { useBrandWorkspaceStore } from '../stores/brandWorkspace'
 
 /**
- * DAS ZEICHEN (Kapitel `mark`, Konzept docs/plans/BRAND-DESIGN.md §2.5,
+ * DAS ZEICHEN (Kapitel `mark`, Konzept docs/archiv/BRAND-DESIGN.md §2.5,
  * Davids Entscheidung §1.11 b, Pakete D5a + D5b) — gebaut nach dem
  * freigegebenen Prototyp (`.playground/app/pages/brand/demo/design/mark.vue`)
  * mit Davids Korrektur „vier Richtungs-Karten nebeneinander".

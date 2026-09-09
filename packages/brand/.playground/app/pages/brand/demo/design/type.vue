@@ -10,7 +10,7 @@ import {
 } from '../../../../utils/demoDesign'
 
 /**
- * KAPITEL „TYPOGRAFIE" (Konzept docs/plans/BRAND-DESIGN.md §2.4, Prototyp-
+ * KAPITEL „TYPOGRAFIE" (Konzept docs/archiv/BRAND-DESIGN.md §2.4, Prototyp-
  * Screen 3) — Paar-Karten mit ECHTEN Schriften, Specimen, Regeln mit
  * Live-Wirkung.
  *

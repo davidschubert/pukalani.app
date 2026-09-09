@@ -5,7 +5,7 @@ export default defineNuxtConfig({
     port: 3009,
   },
 
-  // Brand-Design-Dummy (docs/plans/BRAND-DESIGN.md §2.4/§2.17): die sieben
+  // Brand-Design-Dummy (docs/archiv/BRAND-DESIGN.md §2.4/§2.17): die sieben
   // kuratierten Schriftfamilien der Typografie-Vorschau. Sie MÜSSEN in einer
   // vom Build gesehenen CSS-Datei stehen, sonst self-hostet @nuxt/fonts sie
   // nicht und die Vorschau zeigt Systemschriften — der Kopf der Datei sagt,

@@ -19,7 +19,7 @@ import {
 } from '../../../../../../utils/brandMarkDrafts'
 
 /**
- * DIE KI-ENTWÜRFE ERZEUGEN (Konzept docs/plans/BRAND-DESIGN.md §2.5 Stufe 3,
+ * DIE KI-ENTWÜRFE ERZEUGEN (Konzept docs/archiv/BRAND-DESIGN.md §2.5 Stufe 3,
  * Davids Entscheidung §1.11 b, Paket D5c) — EIN Lauf, vier Bilder.
  *
  * ── DIE PRÜFREIHENFOLGE: VON BILLIG NACH TEUER ───────────────────────────

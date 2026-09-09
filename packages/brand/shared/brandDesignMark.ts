@@ -11,7 +11,7 @@ import { brandSlotValueView, formatBrandSlotStructured } from './brandSlotFormat
 
 /**
  * DAS ZEICHEN — die REGELN von Kapitel 4, pur (Konzept
- * docs/plans/BRAND-DESIGN.md §2.5, Davids Entscheidung §1.11 b, Pakete
+ * docs/archiv/BRAND-DESIGN.md §2.5, Davids Entscheidung §1.11 b, Pakete
  * D5a + D5b).
  *
  * ── VIER SESSIONS, EINE DATEI, WEIL SIE EINE KETTE SIND ───────────────────

@@ -44,7 +44,7 @@ import { BRAND_MARK_DRAFT_ANGLES, brandMarkDraftPrompt } from './markPrompt'
 
 /**
  * DIE KI-ENTWÜRFE DES ZEICHENS — DER SPEICHER UND DER LAUF (Konzept
- * docs/plans/BRAND-DESIGN.md §2.5 Stufe 3 / §2.13, Paket D5c).
+ * docs/archiv/BRAND-DESIGN.md §2.5 Stufe 3 / §2.13, Paket D5c).
  *
  * ── DIE DATEI IST DIE WAHRHEIT, DIE ZEILE BESCHREIBT SIE ──────────────────
  * Zeilen-Id = Datei-Id (Migration brand-023), wörtlich wie bei den Vorbildern.

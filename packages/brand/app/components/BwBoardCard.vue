@@ -3,7 +3,7 @@ import type { BrandDnaBoard } from '../../shared/brandDesignDna'
 import { brandSceneColors, brandSceneFonts } from '../../shared/brandDesignScene'
 
 /**
- * EIN MOODBOARD ALS KARTE (`g.board`, Konzept docs/plans/BRAND-DESIGN.md §2.2
+ * EIN MOODBOARD ALS KARTE (`g.board`, Konzept docs/archiv/BRAND-DESIGN.md §2.2
  * Schritt 5, Paket D2c).
  *
  * ── SIE ZEIGT DIE WELT, STATT SIE ZU BESCHREIBEN ─────────────────────────

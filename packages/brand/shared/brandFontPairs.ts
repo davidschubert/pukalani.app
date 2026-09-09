@@ -1,6 +1,6 @@
 /**
  * DER SCHRIFTPAAR-KATALOG VON BRAND DESIGN (Konzept
- * docs/plans/BRAND-DESIGN.md §2.4, Paket D0).
+ * docs/archiv/BRAND-DESIGN.md §2.4, Paket D0).
  *
  * Sechs kuratierte Paare: die fünf aus docs/referenz/THEMES-CONCEPT-V2.md §3.5
  * plus das eine Paar des G4-Richtungs-Katalogs (`contrast`, Sora + Inter), das

@@ -19,7 +19,7 @@ import type { BrandDesignSnapshotPreset, BrandDesignValues } from '../types/bran
 
 /**
  * DIE VISUELLE IDENTITÄT DER BEISPIEL-MARKE „KAILUA COFFEE CO." (Konzept
- * docs/plans/BRAND-DESIGN.md §2.8, Paket D8).
+ * docs/archiv/BRAND-DESIGN.md §2.8, Paket D8).
  *
  * ── WARUM SIE GERECHNET UND NICHT ABGESCHRIEBEN IST ──────────────────────
  * Die Werte unten sind ENTSCHEIDUNGEN (Basisfarbe Roast, Akzent Palm,

@@ -17,7 +17,7 @@ import {
 } from '../../../../../utils/brandInspirationStore'
 
 /**
- * DEN DNA-VORSCHLAG RECHNEN (Konzept docs/plans/BRAND-DESIGN.md §2.2 Schritt
+ * DEN DNA-VORSCHLAG RECHNEN (Konzept docs/archiv/BRAND-DESIGN.md §2.2 Schritt
  * 4, Paket D2c) — EIN Text-Lauf über die Foundation dieser Marke.
  *
  * ── DIE PRÜFREIHENFOLGE: VON BILLIG NACH TEUER ───────────────────────────

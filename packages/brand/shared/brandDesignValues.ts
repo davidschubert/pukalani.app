@@ -19,7 +19,7 @@ import type { BrandDesignPreset, BrandDesignValues } from './types/brand'
 
 /**
  * DER WEG VON DEN BESTÄTIGTEN SLOT-WERTEN ZUM PRESET (Konzept
- * docs/plans/BRAND-DESIGN.md §2.8, Paket D8).
+ * docs/archiv/BRAND-DESIGN.md §2.8, Paket D8).
  *
  * ── WARUM ES DIESE DATEI GIBT ─────────────────────────────────────────────
  * `buildBrandDesign(values)` steht seit D0 und rechnet aus einem

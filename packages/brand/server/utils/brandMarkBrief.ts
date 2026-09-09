@@ -43,7 +43,7 @@ import {
 } from './brandStore'
 
 /**
- * DAS ZEICHEN-BRIEFING — DER LAUF (Konzept docs/plans/BRAND-DESIGN.md §2.5
+ * DAS ZEICHEN-BRIEFING — DER LAUF (Konzept docs/archiv/BRAND-DESIGN.md §2.5
  * Stufe 1, Paket D5a).
  *
  * EIN Text-Lauf über Foundation, DNA und die schon beschlossenen Kapitel

@@ -3,7 +3,7 @@ import type { BrandReadingEntry } from './brandReading'
 import { formatBrandSlotStructured } from './brandSlotFormat'
 
 /**
- * DIE VORBILDER — die REGELN, pur (Konzept docs/plans/BRAND-DESIGN.md §2.2
+ * DIE VORBILDER — die REGELN, pur (Konzept docs/archiv/BRAND-DESIGN.md §2.2
  * Schritt 2, Paket D2a).
  *
  * ── WARUM DIESE DATEI NEBEN `brandDesignVocab.ts` STEHT ───────────────────

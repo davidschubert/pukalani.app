@@ -1,6 +1,6 @@
 /**
  * DIE PURE REGEL VON BRAND DESIGN — aus den bestätigten Slot-Werten der sechs
- * Kapitel wird EIN `BrandDesignPreset` (Konzept docs/plans/BRAND-DESIGN.md
+ * Kapitel wird EIN `BrandDesignPreset` (Konzept docs/archiv/BRAND-DESIGN.md
  * §2.8, Paket D0).
  *
  * ── DIESELBE WAHRHEIT WIE `buildBrandFoundation`, KEIN SPIEGEL ────────────

@@ -1,6 +1,6 @@
 /**
  * DER PRODUKT-BEWEIS DER SCHICHT 2 „BRAND DESIGN" (Konzept
- * docs/plans/BRAND-DESIGN.md §2.18, Paket D9) — EIN Lauf von der gesperrten
+ * docs/archiv/BRAND-DESIGN.md §2.18, Paket D9) — EIN Lauf von der gesperrten
  * Schicht bis zum geteilten Abbild.
  *
  * ── WARUM ER NEBEN `verify-brand-sessions.mjs` STEHT ─────────────────────

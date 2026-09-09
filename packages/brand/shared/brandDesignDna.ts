@@ -16,7 +16,7 @@ import { brandSlotValueView, formatBrandSlotStructured } from './brandSlotFormat
 
 /**
  * DER DNA-VORSCHLAG, DIE DREI BOARDS UND DER MIX — die REGELN, pur (Konzept
- * docs/plans/BRAND-DESIGN.md §2.2 Schritte 4–5, Paket D2c).
+ * docs/archiv/BRAND-DESIGN.md §2.2 Schritte 4–5, Paket D2c).
  *
  * ── DREI SESSIONS, EINE DATEI, WEIL SIE EINE KETTE SIND ───────────────────
  * `g.dna` ist der VORSCHLAG (ein Text-KI-Lauf), `g.boards` sind drei

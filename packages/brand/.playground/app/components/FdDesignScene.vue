@@ -2,7 +2,7 @@
 import { type DsRamp, type DsSceneColors, type DsSceneFonts, type DsSceneMotion, DS_SHADES, dsContrast } from '../utils/demoDesign'
 
 /**
- * DIE ANWENDUNGS-SZENE (Konzept docs/plans/BRAND-DESIGN.md §2.9,
+ * DIE ANWENDUNGS-SZENE (Konzept docs/archiv/BRAND-DESIGN.md §2.9,
  * Entscheidung §1.11 c) — die künftige `BwDesignScene` des brand-Layers.
  *
  * EINE Komponente, sechs Zustände: dieselbe Szene ist die Vorschau in JEDEM

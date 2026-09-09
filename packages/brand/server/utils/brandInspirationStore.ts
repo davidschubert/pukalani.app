@@ -26,7 +26,7 @@ import {
 } from './brandStore'
 
 /**
- * DIE VORBILDER — DER SPEICHER (Konzept docs/plans/BRAND-DESIGN.md §2.2/§2.13,
+ * DIE VORBILDER — DER SPEICHER (Konzept docs/archiv/BRAND-DESIGN.md §2.2/§2.13,
  * Paket D2a).
  *
  * ── DIE DATEI IST DIE WAHRHEIT, DIE ZEILE BESCHREIBT SIE ──────────────────

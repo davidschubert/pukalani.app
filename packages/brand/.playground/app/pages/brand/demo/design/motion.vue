@@ -11,7 +11,7 @@ import {
 } from '../../../../utils/demoDesign'
 
 /**
- * KAPITEL „BEWEGUNG" (Konzept docs/plans/BRAND-DESIGN.md §2.7, Prototyp-
+ * KAPITEL „BEWEGUNG" (Konzept docs/archiv/BRAND-DESIGN.md §2.7, Prototyp-
  * Screen 6; UI-Name „Bewegung" statt „Motion" nach §2.19 Frage 3).
  *
  * DIE VORSCHAU IST DIE ENTSCHEIDUNG: Tempo liest man nicht, man sieht es.

@@ -7,7 +7,7 @@ import { BRAND_RAMP_SHADES, type BrandDesignSnapshotPreset } from '../../shared/
 
 /**
  * DAS VOLLE KAPITEL 10 — „VISUELLE IDENTITÄT" (Konzept
- * docs/plans/BRAND-DESIGN.md §2.8, Paket D8; Form abgenommen am Klickdummy
+ * docs/archiv/BRAND-DESIGN.md §2.8, Paket D8; Form abgenommen am Klickdummy
  * `FdDesignChapter`).
  *
  * ── WARUM EINE EIGENE KOMPONENTE UND KEINE NEUEN BLOCK-ARTEN ─────────────

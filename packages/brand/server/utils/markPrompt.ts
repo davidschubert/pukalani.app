@@ -2,7 +2,7 @@ import { BRAND_MARK_BRIEF_FIELD_MAX } from '../../shared/brandDesignMark'
 
 /**
  * DER AUFTRAG DES ZEICHEN-BRIEFINGS (Brand Design D5a,
- * docs/plans/BRAND-DESIGN.md §2.5 Stufe 1).
+ * docs/archiv/BRAND-DESIGN.md §2.5 Stufe 1).
  *
  * PUR: keine Fetches, kein H3Event, kein Appwrite, kein i18n — dieselbe
  * Begründung wie bei `dnaPrompt.ts` und `readingPrompt.ts`: an diesen Sätzen
@@ -121,7 +121,7 @@ export function brandMarkBriefPrompt(input: BrandMarkBriefPromptInput): string {
 
 /**
  * DER AUFTRAG AN DAS BILDMODELL (Brand Design D5c,
- * docs/plans/BRAND-DESIGN.md §2.5 Stufe 3, Davids Entscheidung §1.11 b).
+ * docs/archiv/BRAND-DESIGN.md §2.5 Stufe 3, Davids Entscheidung §1.11 b).
  *
  * ── ER STEHT NEBEN DEM BRIEFING-PROMPT, NICHT DARIN ───────────────────────
  * Beide gehören zum Zeichen, aber sie sprechen mit verschiedenen Modellen über

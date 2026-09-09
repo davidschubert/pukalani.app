@@ -11,7 +11,7 @@ import { brandSlotStoredValue, parseSlotRecords } from '../../../../../utils/bra
 
 /**
  * DIE VORBILDER DIESER MARKE — Bereich, Notiz und Nummer, KEIN Bild
- * (Konzept docs/plans/BRAND-DESIGN.md §2.2, Paket D2a).
+ * (Konzept docs/archiv/BRAND-DESIGN.md §2.2, Paket D2a).
  *
  * Das Bild holt die Werkstatt je Karte über `…/inspiration/:id/image`; eine
  * Liste, die Bild-Bytes trägt, wäre bei zwölf Screenshots ein Vielfaches der

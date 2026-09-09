@@ -10,7 +10,7 @@ import type { BrandDnaProposeResponse } from '../../shared/types/brand'
 import { useBrandWorkspaceStore } from '../stores/brandWorkspace'
 
 /**
- * DER DNA-VORSCHLAG (`g.dna`, Konzept docs/plans/BRAND-DESIGN.md §2.2 Schritt
+ * DER DNA-VORSCHLAG (`g.dna`, Konzept docs/archiv/BRAND-DESIGN.md §2.2 Schritt
  * 4, Paket D2c).
  *
  * Gebaut nach dem freigegebenen Prototyp

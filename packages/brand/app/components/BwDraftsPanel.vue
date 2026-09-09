@@ -12,7 +12,7 @@ import type {
 
 /**
  * STUFE 3 DES ZEICHENS: DIE KI-ENTWÜRFE (`j.drafts`, Konzept
- * docs/plans/BRAND-DESIGN.md §2.5 Stufe 3, Davids Entscheidung §1.11 b,
+ * docs/archiv/BRAND-DESIGN.md §2.5 Stufe 3, Davids Entscheidung §1.11 b,
  * Paket D5c) — gebaut nach dem freigegebenen Prototyp
  * (`.playground/app/pages/brand/demo/design/mark.vue`, Stufe 3).
  *

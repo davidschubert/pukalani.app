@@ -24,7 +24,7 @@ import {
 } from '../../../../../utils/brandInspirationStore'
 
 /**
- * DIE VORBILDER LESEN (Konzept docs/plans/BRAND-DESIGN.md §2.2 Schritt 3,
+ * DIE VORBILDER LESEN (Konzept docs/archiv/BRAND-DESIGN.md §2.2 Schritt 3,
  * Paket D2b) — EIN Lauf über alle Bilder dieser Marke.
  *
  * ── DIE PRÜFREIHENFOLGE: VON BILLIG NACH TEUER ───────────────────────────

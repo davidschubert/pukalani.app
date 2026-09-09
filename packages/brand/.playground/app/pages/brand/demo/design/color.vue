@@ -17,7 +17,7 @@ import {
 } from '../../../../utils/demoDesign'
 
 /**
- * KAPITEL „FARBWELT" (Konzept docs/plans/BRAND-DESIGN.md §2.3, Prototyp-
+ * KAPITEL „FARBWELT" (Konzept docs/archiv/BRAND-DESIGN.md §2.3, Prototyp-
  * Screen 2) — Basisfarbe, Ramp hell/dunkel, Grundton, Akzent, Rollen,
  * Kontrast-Matrix.
  *

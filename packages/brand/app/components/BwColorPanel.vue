@@ -14,7 +14,7 @@ import { BRAND_NEUTRAL_OPTIONS } from '../../shared/brandDesignVocab'
 import { BRAND_RAMP_SHADES } from '../../shared/types/brand'
 
 /**
- * DIE FARBWELT (Kapitel `color`, Konzept docs/plans/BRAND-DESIGN.md §2.3,
+ * DIE FARBWELT (Kapitel `color`, Konzept docs/archiv/BRAND-DESIGN.md §2.3,
  * Paket D3) — gebaut nach dem freigegebenen Prototyp
  * (`.playground/app/pages/brand/demo/design/color.vue`): Basisfarbe, Rampe
  * hell/dunkel mit zwei Szenen, Grundton, Akzent, Rollen, Kontrast-Matrix.

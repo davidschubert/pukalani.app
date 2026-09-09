@@ -11,7 +11,7 @@ import {
 } from '../../../../utils/demoDesign'
 
 /**
- * KAPITEL „BILDSPRACHE" (Konzept docs/plans/BRAND-DESIGN.md §2.6, Prototyp-
+ * KAPITEL „BILDSPRACHE" (Konzept docs/archiv/BRAND-DESIGN.md §2.6, Prototyp-
  * Screen 5) — drei Bild-Prinzipien, Illustration, Icons, Do & Don't.
  *
  * KEINE FOTOS, UND ZWAR AUS EINEM GRUND (§1.4): ein Stock-Bild würde die

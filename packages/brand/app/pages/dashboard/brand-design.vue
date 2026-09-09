@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /**
- * BETREIBER: BRAND DESIGN FREISCHALTEN (Konzept docs/plans/BRAND-DESIGN.md
+ * BETREIBER: BRAND DESIGN FREISCHALTEN (Konzept docs/archiv/BRAND-DESIGN.md
  * §2.10, Prototyp-Screen 8 zweite Hälfte, Paket D1).
  *
  * ── WARUM EINE EIGENE SEITE UND KEINE SPALTE IN /dashboard/brands ─────────

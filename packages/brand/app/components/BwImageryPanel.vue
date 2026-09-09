@@ -13,7 +13,7 @@ import {
 import { BRAND_ICON_OPTIONS, BRAND_ILLUSTRATION_OPTIONS, brandTermLabel } from '../../shared/brandDesignVocab'
 
 /**
- * DIE BILDSPRACHE (Kapitel `imagery`, Konzept docs/plans/BRAND-DESIGN.md §2.6,
+ * DIE BILDSPRACHE (Kapitel `imagery`, Konzept docs/archiv/BRAND-DESIGN.md §2.6,
  * Paket D6) — gebaut nach dem freigegebenen Prototyp
  * (`.playground/app/pages/brand/demo/design/imagery.vue`) mit Davids Korrektur
  * „Icons UNTER der Illustration, nicht daneben".

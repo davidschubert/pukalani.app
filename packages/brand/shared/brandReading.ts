@@ -3,7 +3,7 @@ import { brandSlotValueView, formatBrandSlotStructured } from './brandSlotFormat
 
 /**
  * DIE LESUNG DER VORBILDER — die REGELN, pur (Konzept
- * docs/plans/BRAND-DESIGN.md §2.2 Schritt 3, Paket D2b).
+ * docs/archiv/BRAND-DESIGN.md §2.2 Schritt 3, Paket D2b).
  *
  * ── WAS EINE LESUNG IST, UND WAS SIE NICHT IST ────────────────────────────
  * Sie ist eine DNA-BELEGUNG mit Urteil, kein Geschmacksurteil und keine

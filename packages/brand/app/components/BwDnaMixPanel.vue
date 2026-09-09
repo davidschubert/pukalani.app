@@ -8,7 +8,7 @@ import { BRAND_DNA_DIMENSIONS } from '../../shared/brandDesignVocab'
 import { brandSceneColors, brandSceneFonts } from '../../shared/brandDesignScene'
 
 /**
- * MIX & MATCH UND „EUER STAND" (`g.mix`, Konzept docs/plans/BRAND-DESIGN.md
+ * MIX & MATCH UND „EUER STAND" (`g.mix`, Konzept docs/archiv/BRAND-DESIGN.md
  * §2.2 Schritt 5, Paket D2c).
  *
  * ── DAS LOCK-MUSTER, UND WARUM ES AUS EINEM KATALOG SCHÖPFT ──────────────

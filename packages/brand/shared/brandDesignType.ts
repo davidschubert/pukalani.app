@@ -13,7 +13,7 @@ import { brandSlotValueView, formatBrandSlotStructured } from './brandSlotFormat
 
 /**
  * DIE TYPOGRAFIE — die REGELN von Kapitel 3, pur (Konzept
- * docs/plans/BRAND-DESIGN.md §2.4, Paket D4).
+ * docs/archiv/BRAND-DESIGN.md §2.4, Paket D4).
  *
  * ── DREI SESSIONS, EINE DATEI, WEIL SIE EINE KETTE SIND ───────────────────
  * `i.pair` ist die Wahl, `i.scale` die Hierarchie darüber, `i.rules` die drei

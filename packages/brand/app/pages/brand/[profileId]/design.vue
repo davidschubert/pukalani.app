@@ -8,7 +8,7 @@ import { useBrandWorkspaceStore } from '../../../stores/brandWorkspace'
 import { BRAND_FOUNDATION_RAIL_STEP, useBrandFoundationRailStep } from '../../../composables/useBrandFoundationRailStep'
 
 /**
- * DAS ERGEBNIS-BOARD ALS EIGENE ANSICHT (Konzept docs/plans/BRAND-DESIGN.md
+ * DAS ERGEBNIS-BOARD ALS EIGENE ANSICHT (Konzept docs/archiv/BRAND-DESIGN.md
  * §2.8, Davids Entscheidung 2026-09-08; Form abgenommen am Klickdummy
  * `/brand/demo/design/board`) — LESEN, nicht entscheiden.
  *
