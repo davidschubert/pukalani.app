@@ -726,6 +726,30 @@ export interface BrandDocumentResponse {
   /** ALLE offenen Befunde des Brandings — kapitelübergreifend, wie die Tabelle. */
   findings: BrandFindingView[]
   review: BrandDocumentReviewState
+  /**
+   * DAS ERGEBNIS VON BRAND DESIGN (Paket D8, §2.8) — `null`, solange es keines
+   * gibt.
+   *
+   * Das Arbeits-Dokument bekommt damit denselben Abschnitt „Visuelle
+   * Identität" wie die Leseansicht, gerendert aus demselben Preset. Was es
+   * NICHT bekommt, sind die sechs Design-Kapitel als sechs Abnahme-Abschnitte:
+   * abgenommen wird in der Werkstatt, und ihre Werte sind Vokabular-Ids, Hex
+   * und gerechnete Tabellen — sechs Blöcke mit `snappy` und `#4a3123` darin
+   * wären eine Abnahme-Liste, die niemand lesen kann.
+   */
+  design: BrandDesignSnapshotPreset | null
+  /** ISO-Datum des Standes wie `BrandFoundationResponse.designStand`. */
+  designStand: string
+  /**
+   * WIE VIELE KI-ENTWÜRFE BEHALTEN WURDEN — eine ZAHL, nie eine Id (§1.11 b).
+   *
+   * Sie steht neben `design` und nicht darin: `BrandDesignSnapshotPreset` lässt
+   * `keptDrafts` bewusst nicht zu, damit kein Schreiber sie versehentlich
+   * mitschickt. Der Hinweis „n behaltene Entwürfe — privat" gehört trotzdem in
+   * BEIDE privaten Ansichten; stünde er nur in der einen, hinge eine
+   * Leitplanke an der Wahl der Seite.
+   */
+  designKeptDrafts: number
 }
 
 /**
@@ -771,6 +795,42 @@ export interface BrandFoundationResponse {
   view: BrandFoundationView
   chapters: BrandFoundationStepState[]
   accepted: { chapters: number, total: number }
+  /**
+   * DER STAND DES VOLLEN KAPITELS 10 (Brand Design D8) — ISO-Datum, leer, wenn
+   * es kein Preset gibt.
+   *
+   * Es ist der Zeitpunkt, an dem zuletzt an einem der sechs Design-Kapitel
+   * geschrieben wurde (`$updatedAt` der Zeilen), NICHT `lastActivityAt` des
+   * Profils: ein Board mit dem Datum eines Tippfehlers in der Tagline wäre eine
+   * Auskunft über etwas anderes. Formatiert wird es in der Sprache des Lesers.
+   */
+  designStand?: string
+}
+
+/**
+ * DAS ERGEBNIS-BOARD ALS EIGENE ANSICHT (`GET /api/brand/profiles/:id/design`,
+ * Brand Design D8, §2.8).
+ *
+ * ── WARUM EINE EIGENE ROUTE UND NICHT DIE FOUNDATION ─────────────────────
+ * Die Board-Seite liest EIN Preset und sonst nichts. Über die Foundation-Route
+ * zu gehen hiesse, für eine Fläche das ganze Handbuch zu bauen (zwölf Kapitel,
+ * Abnahme-Zustände, ein `foundation.viewed` im Funnel) — und die Seite hinge an
+ * einer Antwort, deren grösserer Teil sie nichts angeht.
+ *
+ * `preset: null` ist der ehrliche Normalfall, solange die Schicht läuft; `done`
+ * und `total` sagen, wie weit sie ist, damit die Sperr-Fläche nicht raten muss.
+ */
+export interface BrandDesignResponse {
+  profileId: string
+  title: string
+  contentLocale: string
+  /** `null`, solange nicht alle sechs Kapitel abgenommen sind. */
+  preset: BrandDesignPreset | null
+  /** Wie viele der sechs Kapitel stehen. */
+  done: number
+  total: number
+  /** ISO-Datum wie `BrandFoundationResponse.designStand`; leer = keines. */
+  stand: string
 }
 
 /**

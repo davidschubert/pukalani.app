@@ -178,6 +178,23 @@ export function brandMotionTokens(tempoId: string, locale: string): BrandMotionT
   }))
 }
 
+/**
+ * WOFÜR EIN TOKEN DA IST — der Zweck OHNE das Tempo (Brand Design D8).
+ *
+ * Kapitel 10 und das Ergebnis-Board lesen ihre Dauern aus dem PRESET (dort
+ * stehen sie eingefroren) und brauchen von hier nur noch den Zweck. Sie über
+ * `brandMotionTokens(tempo, locale)` zu holen hiesse, die Zahlen ein zweites
+ * Mal zu rechnen — und ein eingefrorener Snapshot zeigte dann die Zahlen von
+ * heute unter den Werten von damals.
+ *
+ * Leer bei unbekanntem Token: eine erfundene Zweckzeile wäre eine Regel, die
+ * niemand aufgeschrieben hat.
+ */
+export function brandMotionTokenUsage(tokenId: string, locale: string): string {
+  const usage = BRAND_MOTION_TOKEN_USAGE[tokenId]
+  return usage ? textOf(usage, locale) : ''
+}
+
 /** Die Dauer EINES Tokens in ms — 0, wenn es das Token hier nicht gibt. */
 export function brandMotionDuration(tempoId: string, tokenId: string): number {
   return brandMotionTransitions(tempoId).find(token => token.id === tokenId)?.durationMs ?? 0

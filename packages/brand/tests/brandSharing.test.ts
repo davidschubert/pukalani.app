@@ -125,12 +125,17 @@ describe('der Snapshot trägt nur Festlegungen', () => {
     )
     expect(builder).toContain('brandShareableSlotValues(confirmedSlotValues(row))')
 
+    //
+    // SEIT BRAND DESIGN D8 nimmt der Bauer eine OPTION entgegen (das
+    // eingefrorene Preset). Geprüft wird deshalb der Aufruf mit Profil und
+    // Zeilen — nicht die genaue Klammer: die Zusage ist „beide Routen fahren
+    // DIESEN Bauer", nicht „beide Routen rufen ihn mit zwei Argumenten".
     for (const route of ['share.post.ts', 'publication.post.ts']) {
       const source = readFileSync(
         new URL(`../server/api/brand/profiles/[id]/${route}`, import.meta.url),
         'utf8',
       )
-      expect(source).toContain('buildBrandSnapshot(profile, stepRows)')
+      expect(source).toContain('buildBrandSnapshot(profile, stepRows')
     }
   })
 })

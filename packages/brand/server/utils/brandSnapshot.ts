@@ -1,7 +1,8 @@
+import { BRAND_DESIGN_PRESET_VERSION } from '../../shared/brandDesign'
 import { BRAND_DIRECTIONS_VERSION, brandDirectionById } from '../../shared/brandDirections'
 import { resolveBrandJourney } from '../../shared/brandJourney'
 import { brandShareableSlotValues } from '../../shared/brandSharing'
-import type { BrandShareSnapshot } from '../../shared/types/brand'
+import type { BrandDesignSnapshotPreset, BrandShareSnapshot } from '../../shared/types/brand'
 import {
   type BrandProfileRow,
   type BrandStepRow,
@@ -39,7 +40,7 @@ import {
  * Link muss danach weiter lesbar bleiben; deshalb steht die Zahl IM Snapshot
  * und nicht in einer Spalte, die man beim Lesen erst nachschlagen müsste.
  */
-export const BRAND_SNAPSHOT_SCHEMA_VERSION = 1
+export const BRAND_SNAPSHOT_SCHEMA_VERSION = 2
 
 /** Zod-Zusage aus Schema-Anhang §4 — dieselbe Grenze für beide Aufrufer. */
 export const BRAND_SNAPSHOT_MAX = 400_000
@@ -75,9 +76,28 @@ export interface BrandSnapshotResult {
  * der Spalte, nicht der Handlung, und zwei Routen mit zwei Zahlen wären eine
  * Grenze, die je nach Knopf woanders liegt.
  */
+export interface BrandSnapshotOptions {
+  /**
+   * DAS EINGEFRORENE PRESET (Brand Design D8, §2.8) — OHNE die behaltenen
+   * KI-Entwürfe.
+   *
+   * Der TYP lässt `keptDrafts` nicht zu (`BrandDesignSnapshotPreset`), also
+   * kann kein Aufrufer sie versehentlich durchreichen; wer ein volles Preset
+   * hat, schickt es durch `brandDesignSnapshotPreset()`.
+   *
+   * Es kommt als OPTION herein und wird hier nicht selbst geladen: von den
+   * zwei Aufrufern reicht es heute nur das TEILEN durch. Die VERÖFFENTLICHUNG
+   * (Discover) lässt es bewusst weg — sie ist dauerhaft und indexierbar, und
+   * ob eine Marke ihre volle visuelle Identität so ins Netz stellt, ist eine
+   * eigene Entscheidung und nicht der Nebeneffekt eines Formatschritts.
+   */
+  readonly design?: BrandDesignSnapshotPreset
+}
+
 export function buildBrandSnapshot(
   profile: BrandProfileRow,
   stepRows: readonly BrandStepRow[],
+  options: BrandSnapshotOptions = {},
 ): BrandSnapshotResult {
   const journey = resolveBrandJourney(profileFacts(profile), toStepFacts(stepRows))
   const byStepKey = new Map(stepRows.map(row => [row.stepKey, row]))
@@ -100,6 +120,25 @@ export function buildBrandSnapshot(
       // statt als leere Überschrift dazustehen.
       .filter(chapter => chapter.slots.length > 0),
     ...directionPreset(byStepKey.get('result')),
+    /**
+     * MIT PRESET GEWINNT DAS PRESET (D8, §2.8): `presetId` wird
+     * `design:<profileId>` und `presetVersion` die Fassung des PRESET-FORMATS.
+     *
+     * Die Felder tragen bis dahin die gewählte RICHTUNG — und das ist kein
+     * Namenskonflikt, sondern eine Reihenfolge: die Richtung war die Ansage,
+     * das Preset ist das Gebaute. Der Renderer der Share-Seite reicht
+     * `presetId` als Richtung weiter; ein `design:…` kennt der Richtungs-
+     * Katalog nicht, also fällt die Richtung dort still heraus — genau
+     * richtig, denn Kapitel 10 zeigt dann das volle Ergebnis und nicht die
+     * Ansage davor.
+     */
+    ...(options.design
+      ? {
+          design: options.design,
+          presetId: `design:${profile.$id}`,
+          presetVersion: String(BRAND_DESIGN_PRESET_VERSION),
+        }
+      : {}),
   }
 
   const payload = JSON.stringify(snapshot)
