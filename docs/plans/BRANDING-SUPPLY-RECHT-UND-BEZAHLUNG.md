@@ -1077,7 +1077,7 @@ stehen, damit nachvollziehbar ist, wie sie beantwortet wurden:
    MARKETING-Seiten `/products/*` erscheint der Betrag ab sofort („149 € netto
    je Branding, einmalig, zzgl. USt — Beta-Konten frei, Kauf folgt"); die
    Werkstatt-Schranke bleibt bis Z1 bei „Preis im Erstgespräch"
-   ([PRODUCTS-SEITE.md](PRODUCTS-SEITE.md) §5).
+   ([PRODUCTS-SEITE.md](../archiv/PRODUCTS-SEITE.md) §5).
 3. ~~**Welcher Generator** die Grundfassung liefert (Frage 2)~~ —
    **BEANTWORTET 2026-09-08: activeMind** für die Erstfassung, **Wechsel zu
    eRecht24 Premium** mit R3/Fassung 2 oder spätestens vor dem Öffnen der Beta

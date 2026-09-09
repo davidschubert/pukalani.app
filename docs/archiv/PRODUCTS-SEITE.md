@@ -1,9 +1,10 @@
 # Products-Seite auf branding.supply (PS1) — Konzept
 
-Status: **Konzept ENTSCHIEDEN 2026-09-09 (sechs Antworten in §8) — Prototyp läuft.**
-Danach Prototyp (echte Nuxt-UI-Komponenten, Dev-Port aus dem Worktree),
-Freigabe, Umsetzung, Beweis, Deploy. Kürzel in OPEN-ITEMS: **PS1**.
-Arbeitsablauf: docs/referenz/WORKFLOW.md. Auftrag im Wortlaut: DECISION-LOG
+Status: **AUSGEFÜHRT 2026-09-09** — Konzept entschieden (§8), Prototyp = die
+echten Seiten im Worktree (Port 3017), von David freigegeben, gebaut, auf `main`
+(Commits 0d3c9c26 · 7ec39e34 · 83bff531 · 68e31fee), Deploy-Beweis in
+[OPEN-ITEMS-COMPLETE.md](../OPEN-ITEMS-COMPLETE.md). Archiv, keine Arbeitsliste.
+Arbeitsablauf: [WORKFLOW.md](../referenz/WORKFLOW.md). Auftrag im Wortlaut: DECISION-LOG
 2026-09-08 (BI1, „Nebenbefund, entschieden: die Products-Seite wird ein eigenes
 Vorhaben").
 

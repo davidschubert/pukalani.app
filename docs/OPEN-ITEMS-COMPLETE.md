@@ -30,6 +30,56 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### PS1 — Products-Seite auf branding.supply: Übersicht, fünf Produktseiten, deutsche Slugs, Nav-Aufklapper zurück ✅ 2026-09-09
+
+**Auftrag (DECISION-LOG 2026-09-08, Nebenbefund BI1):** Übersicht plus je eine
+Marketing-Seite pro Produkt, Namen aus den Manifesten, je Produkt Preis oder
+Erstgespräch; der Nav-Punkt „Products" kehrt erst mit den Seiten zurück.
+Konzept + sechs Entscheidungen: [PRODUCTS-SEITE.md](archiv/PRODUCTS-SEITE.md) §8
+(DECISION-LOG 2026-09-09).
+
+**Gebaut (Commits 0d3c9c26 Konzept · 7ec39e34 core · 83bff531 branding ·
+68e31fee Fix):** `/products` + `/products/{brand-check,brand-foundation,
+market-comparison,brand-design,brand-book-kit}` in `apps/branding` (die App
+kennt alle ihre Produkte, ein Layer die anderen nicht — A14), deutsch
+`/de/produkte/…` und `/de/produkte/marktvergleich` per `defineI18nRoute`
+(`customRoutes: 'page'` ist der i18n-Default, `localePath('/products/…')` löst
+je Sprache auf; `/de/products` leitet nuxt-i18n selbst per 302 auf
+`/de/produkte`). Geteilter Rahmen `ProductPage.vue` + `ProductPriceLine.vue`,
+Preis als EINE Konstante `apps/branding/shared/productPricing.ts` (149 € netto,
+reist als `{price}` — steht in keiner Locale-Datei). Übersicht mit zwei
+abgeblendeten „Kommt"-Karten (Experience, Monitoring). Nav-Registry: core kennt
+`descriptionKey` (Vertrag statt Schlüssel-Konvention, FIELDS-Zeile im
+i18n-Wächter, 5 Tests), die App trägt `products` (`to: '/products'`) + fünf
+Kinder mit Icon + Beschreibung ein; `brand.nav.product.wizard` ohne George.
+
+**Beweis:** Worktree-Server auf 3017 (`.env` aus `~/.appwrite-secrets`, danach
+gelöscht), alle neun Routen 200 mit übersetzten Titeln, 0× `Detected HTML`,
+eigener Klick auf Übersicht, Marktvergleich-Seite und Aufklapper (544 × 260 px,
+sechs Einträge, Kartenfarbe, liegt oben auf — per `elementFromPoint` geprüft).
+Wächter nach Rebase: manifests 26/9, i18n-keys 304/18 Felder, doc-links,
+Lint core/brand/branding, Typecheck core/branding, core 1623 Tests, brand 2769,
+branding 28. Davids Freigabe 2026-09-09 (Prototyp = echte Seiten; Brand-Check
+im Aufklapper auf die Marketing-Seite, wie gebaut).
+
+**Gelernt:** (1) Der Nuxt-UI-Aufklapper (`UNavigationMenu`, waagerecht) wird
+nie breiter als die Menüleiste: Reka misst `--reka-navigation-menu-viewport-
+width` am CONTENT, und der ist im Theme `absolute w-full` des Viewports — eine
+Fixpunkt-Schleife bei der Leistenbreite. `w-max` am Content half nicht (die
+erste Messung blieb stehen), `sm:w-[34rem]` am Viewport verlor gegen die
+Variablen-Klasse `sm:w-(--reka-…)` (tailwind-merge kennt die Kurzform nicht als
+`w-`-Klasse, beide bleiben, die Variable gewinnt in der CSS-Reihenfolge).
+**`sm:min-w-[34rem]` am Viewport** ist die Lösung: andere Eigenschaft, schlägt
+jede kleinere Breite, Reka misst danach den vollen Content (544 px) und klammert
+rechts korrekt. (2) `viewport: 'bw-root'` allein malt teleportierte Flächen im
+Seiten-Grund — auf dunklem Grund unsichtbar; `bw-overlay` dazu (brand.css Runde
+19c gilt auch hier). (3) Ein Dropdown-Kind ist Marketing-Copy: der alte
+Klickdummy-Schlüssel nannte George, die Rolle-vor-Name-Regel (2026-09-04) griff
+erst, als der Text sichtbar wurde. (4) Screenshot-Messungen am offenen Menü
+IMMER über eine eindeutige Klasse (`.bw-overlay`) — der erste
+`[data-state=open]` im DOM war einmal ein anderes Element (Höhe 0, Opazität 0)
+und täuschte ein Render-Problem vor, das es nicht gab.
+
 ### Sucheintrag-Beschreibung gilt auch im Silo (NAV1-Nebenbefund, letzte offene Entscheidung) ✅ 2026-09-09
 
 **Anlass:** Beim Abschluss von NAV1 blieb eine Frage offen (Zeile `13 · NAV1` in OPEN-ITEMS):

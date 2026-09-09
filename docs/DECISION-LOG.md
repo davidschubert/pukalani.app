@@ -11,7 +11,7 @@ die kleinen, verstreuten Beschlüsse.
 
 **Anlass:** Vorhaben PS1 (Nebenbefund aus BI1, 2026-09-08) — Übersicht plus je
 eine Marketing-Seite pro Produkt, der Nav-Punkt „Products" kehrt erst mit den
-Seiten zurück. Konzeptrunde als [docs/plans/PRODUCTS-SEITE.md](plans/PRODUCTS-SEITE.md),
+Seiten zurück. Konzeptrunde als [docs/archiv/PRODUCTS-SEITE.md](archiv/PRODUCTS-SEITE.md),
 Bestand geprüft: von den sieben Klickdummy-Kindern existieren fünf (Brand-Check,
 Foundation, Marktvergleich, Brand Design, Book & Kit in Konzeption), zwei nicht
 (Experience, Monitoring); Insights ist Redaktion, kein Produkt.
