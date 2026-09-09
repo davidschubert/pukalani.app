@@ -1,4 +1,4 @@
-import { sessionTravels, slotById } from './slotRegistry'
+import { isBrandDesignStep, sessionTravels, slotById } from './slotRegistry'
 
 /**
  * WAS DAS KONTO VERLASSEN DARF — PUR (BF1 §3a Nr. 7; eingelöst in MV1 M5).
@@ -79,4 +79,43 @@ export function brandShareableSlotValues<T extends BrandShareableSlotValue>(
   values: readonly T[],
 ): T[] {
   return values.filter(entry => isBrandSlotShareable(entry.slotId))
+}
+
+/**
+ * REIST DIESES KAPITEL? — die zweite, GRÖBERE Frage neben `isBrandSlotShareable`
+ * (Brand Design D9, Davids Entscheidung 2026-09-09: „der Link trägt nur, was er
+ * zeigt").
+ *
+ * Die sechs Kapitel von Brand Design (`isBrandDesignStep`) stehen im Snapshot
+ * NICHT als rohe Slot-Werte. Ihr Ergebnis reist als PRESET (`BrandShareSnapshot.
+ * design`) — eine gerechnete, gerenderte Fassung derselben Wahrheit; die rohen
+ * Werte daneben wären dieselbe Marke ein zweites Mal, als Katalog-Ids, Hex-Töne
+ * und Token-Tabellen, die kein Leser je zu sehen bekommt.
+ *
+ * ── WARUM IMMER UND NICHT „SOBALD EIN PRESET DABEI IST" ───────────────────
+ * Davids Satz war „sobald ein Preset dabei ist". Die schärfere Fassung kostet
+ * nichts Sichtbares und deckt zwei Fälle mehr ab, die derselbe Gedanke meint:
+ *
+ *  1. DIE VERÖFFENTLICHUNG (Discover) reicht bewusst KEIN Preset durch — sie
+ *     ist dauerhaft und indexierbar (Kopf von `BrandSnapshotOptions.design`).
+ *     Unter der wörtlichen Fassung behielte ausgerechnet SIE die rohen
+ *     Design-Werte, und zwar für immer. Das ist die Umkehrung der Entscheidung.
+ *  2. EINE HALBFERTIGE SCHICHT hat noch kein Preset. Ihre bestätigten Werte
+ *     sind Ids und Hex-Töne ohne Rendering — auch ein gesperrtes Kapitel steht
+ *     in der Journey (`state: 'locked'`, nicht `'skipped'`) und käme mit.
+ *
+ * Sichtbar ändert sich nichts: der Renderer liest die Design-`chapters`
+ * NIRGENDS (`BRAND_FOUNDATION_SOURCE_STEPS.visuell` ist leer, Kapitel 10 baut
+ * ausschliesslich aus `input.design`). Die Zusage ist mit
+ * `tests/brandFoundationDesign.test.ts` und dem Beweis belegt.
+ *
+ * ── FAIL-OPEN, UND DAS IST HIER RICHTIG ──────────────────────────────────
+ * Ein unbekannter `stepKey` (alter Snapshot, künftiges Kapitel) reist mit —
+ * anders als bei den SLOTS. Das Netz darunter ist `isBrandSlotShareable`: die
+ * WERTE eines fremden Kapitels laufen weiterhin durch den fail-closed-Filter,
+ * das Kapitel selbst ist nur eine Überschrift. Fail-closed hier hiesse, dass
+ * ein umbenanntes Kapitel seinen Inhalt still verliert.
+ */
+export function isBrandChapterShareable(stepKey: string): boolean {
+  return !isBrandDesignStep(stepKey)
 }

@@ -38,7 +38,9 @@
  *     Board-Seite gehört dem Besitzer (200) und sonst niemandem (404).
  *  7. DER SNAPSHOT STEIGT AUF v2: `schemaVersion: 2`, das Preset ohne
  *     `keptDrafts`, kein Vorbild, keine Lesung, kein Entwurf — auch nicht als
- *     roher Slot-Wert in `chapters`. Ein v1-Abbild bleibt lesbar.
+ *     roher Slot-Wert in `chapters` — seit D9 fällt dort das ganze KAPITEL,
+ *     die visuelle Identität reist ausschliesslich als Preset. Ein v1-Abbild
+ *     bleibt lesbar.
  *  8. DIE RÜCKNAHME NIMMT NICHTS WEG: die Kapitel sind wieder `design_locked`,
  *     die Werte stehen unverändert in der Ablage, und die zweite Freischaltung
  *     findet den ganzen Stand vor.
@@ -431,6 +433,9 @@ function waitForRateWindow(sinceMs) {
  * geprüft wird die Kette darum herum. Die tragenden Werte (Basisfarbe, Paar,
  * Richtung, Prinzip, Tempo) sind echt, denn aus ihnen rechnet das Preset.
  */
+/** Die sechs Kapitel der Schicht 2 — dieselbe Liste wie `BRAND_DESIGN_STEP_KEYS`. */
+const DESIGN_STEP_KEYS = ['dna', 'color', 'type', 'mark', 'imagery', 'motion']
+
 const BASE_HEX = '#4a3123'
 const ACCENT_HEX = '#22392f'
 
@@ -1136,6 +1141,32 @@ try {
   checkAbsent('keine Lesung im Abbild', rawSnapshot, 'g.reading')
   checkAbsent('kein KI-Entwurf im Abbild', rawSnapshot, 'j.drafts')
   checkAbsent('auch kein Prompt-Hash eines Entwurfs', rawSnapshot, 'promptHash')
+
+  /**
+   * D9 (Davids Entscheidung 2026-09-09): DIE SECHS DESIGN-KAPITEL STEHEN NUR
+   * NOCH ALS PRESET DARIN. Vor D9 trug das Abbild sie DOPPELT — einmal
+   * gerechnet als `design`, einmal roh als Slot-Werte in `chapters`, die kein
+   * Renderer je gelesen hat. Geprüft wird je Kapitel EIN reisefähiger Slot
+   * (die internen stehen schon oben) plus der Kapitel-Kopf selbst; das Preset
+   * daneben bleibt vollständig — die Zusagen darüber messen es.
+   */
+  const rawChapters = JSON.stringify(snapshot?.chapters ?? [])
+  for (const [stepKey, slotId] of [
+    ['dna', 'g.dna'],
+    ['color', 'h.base'],
+    ['type', 'i.pair'],
+    ['mark', 'j.kind'],
+    ['imagery', 'k.photo'],
+    ['motion', 'l.tempo'],
+  ]) {
+    checkAbsent(`kein roher Slot-Wert des Kapitels „${stepKey}" in \`chapters\``, rawChapters, slotId)
+    checkAbsent(`… und kein Kapitel-Kopf „${stepKey}"`, rawChapters, `"stepKey":"${stepKey}"`)
+  }
+  // Die positive Hälfte desselben Gedankens: `chapters` ist nicht einfach leer.
+  check('… die Foundation-Kapitel stehen weiterhin in `chapters`',
+    (snapshot?.chapters ?? []).length > 0
+    && (snapshot?.chapters ?? []).every(chapter => !DESIGN_STEP_KEYS.includes(chapter.stepKey)),
+    JSON.stringify((snapshot?.chapters ?? []).map(chapter => chapter.stepKey)))
   if (draftsStub && keptDraftId) {
     checkAbsent('und keine Entwurfs-Id', rawSnapshot, keptDraftId)
   }

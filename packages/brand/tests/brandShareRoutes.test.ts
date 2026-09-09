@@ -242,6 +242,41 @@ describe('GET /api/brand/share/:token — was der zweite Leser bekommt', () => {
     expect((await viewRoute(event)).snapshot.chapters).toEqual([])
   })
 
+  /**
+   * BRAND DESIGN D9 (Davids Entscheidung 2026-09-09): die sechs Design-Kapitel
+   * stehen NICHT als rohe Slot-Werte im Abbild. Der Schreibweg lässt sie seit
+   * D9 nicht mehr hinein — jede Zeile aus der Zeit ZWISCHEN D8 und D9 trägt sie
+   * aber noch, und die API liefert sie ohne diesen Filter aus. Dieselbe Lage
+   * wie bei den internen Sessions vor MV1 M5, dieselbe Kur.
+   */
+  it('ein v2-Abbild von VOR D9 gibt seine rohen Design-Werte nicht mehr heraus', async () => {
+    shareRows = [shareRow({
+      snapshot: JSON.stringify({
+        schemaVersion: 2,
+        title: 'X',
+        contentLocale: 'de',
+        story: '',
+        chapters: [
+          { stepKey: 'context', slots: [{ slotId: 'a.pitch', value: 'Eine Rösterei.' }] },
+          { stepKey: 'color', slots: [{ slotId: 'h.base', value: '#b98a5e' }] },
+          { stepKey: 'motion', slots: [{ slotId: 'l.tempo', value: 'snappy' }] },
+        ],
+        presetId: 'design:p1',
+        presetVersion: '1',
+        design: { version: 1, color: { base: '#b98a5e' } },
+      }),
+    })]
+    const result = await viewRoute(event)
+    expect(result.snapshot.chapters.map(chapter => chapter.stepKey)).toEqual(['context'])
+    const payload = JSON.stringify(result.snapshot.chapters)
+    expect(payload).not.toContain('h.base')
+    expect(payload).not.toContain('l.tempo')
+    // GEGENPROBE: das PRESET bleibt unangetastet — die visuelle Identität ist
+    // der halbe Grund, den Link zu verschicken.
+    expect(JSON.stringify(result.snapshot)).toContain('#b98a5e')
+    expect(result.snapshot.chapters[0]!.slots[0]!.value).toBe('Eine Rösterei.')
+  })
+
   it('die vier Schutz-Köpfe stehen an der Antwort', async () => {
     shareRows = [shareRow()]
     await viewRoute(event)
