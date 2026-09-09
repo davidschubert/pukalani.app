@@ -1,11 +1,11 @@
 # Brand Book & Kit (Produkt 03) — Strategie
 
-Status: **Konzept FREIGEGEBEN 2026-09-09** („Konzept freigegeben, bau den
-Prototyp im Playground") — §2 ist verbindlich inkl. §2.20. **Phase 3
-(Prototyp, §3) im Bau:** Klickdummy in `packages/brand/.playground`, acht
-Screens nach §2.15. Vorgeschichte: Strategie geschrieben 2026-09-08,
-freigegeben 2026-09-09 (§1.11); Konzeption geschrieben und ihre sechs Fragen
-beantwortet 2026-09-09 (§2.19/§2.20). Kürzel in OPEN-ITEMS: **BK1**.
+Status: **PROTOTYP FREIGEGEBEN 2026-09-09 („Prototyp freigegeben, K0
+starten") — Phase 5, Pakete K0–K8 nach §2.18 VERBINDLICH, K0 läuft.**
+Vorgeschichte: Strategie geschrieben 2026-09-08, freigegeben 2026-09-09
+(§1.11); Konzeption geschrieben, sechs Fragen beantwortet, Konzept freigegeben
+2026-09-09 (§2.19/§2.20); Prototyp gebaut und geprüft 2026-09-09 (§3).
+Kürzel in OPEN-ITEMS: **BK1**.
 
 Arbeitsablauf: docs/referenz/WORKFLOW.md (Strategie ist Phase 1). Vorlage für
 Aufbau und Tiefe: docs/archiv/BRAND-DESIGN.md §1 (Produkt 02).
@@ -739,7 +739,7 @@ Stripe-Checkout selbst (BS1 Z1) · Änderung am Snapshot-Format (bleibt v2).
 - **Zwei Sprachen:** Regel-Kapitel und `brand.md` sind in `contentLocale`;
   Dateinamen und Token-Namen sind sprachneutral (`motion.fast`-Regel).
 
-### 2.18 Pakete (Skizze — verbindlich erst nach Prototyp-Freigabe)
+### 2.18 Pakete (VERBINDLICH seit Prototyp-Freigabe 2026-09-09)
 
 | Paket | Inhalt | Gate (David) | Beweis |
 | --- | --- | --- | --- |
@@ -788,7 +788,7 @@ der Start des Prototyps (§2.15) sind Davids ausgesprochenes Go** (WORKFLOW
 
 ---
 
-## 3. Prototyp (Phase 3) — gebaut 2026-09-09, zur Abnahme
+## 3. Prototyp (Phase 3) — gebaut 2026-09-09, FREIGEGEBEN 2026-09-09 (eingefroren)
 
 Klickdummy im Playground (`packages/brand/.playground`, Port 3009; im
 Browser-Fenster über den Launch-Eintrag `brand-gespraech` auf 3031), acht
