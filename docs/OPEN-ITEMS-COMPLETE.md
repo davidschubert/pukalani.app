@@ -126,6 +126,24 @@ sofort zurückkehrt, ist an jeder Aufrufstelle eine falsche Zusage; Serialisieru
 Funktion, nicht in die Disziplin der Aufrufer. (3) Eine Revision, die der Server meldet, gehört
 IMMER in den Store — aus jeder Antwort, nicht nur aus dem Autosave.
 
+**Befund 5 — Weg B + Kapitel-Verlauf ✅ 2026-09-09, Commit `cc6310c2` (Opus-Lauf, im Hauptloop
+geprüft):** Ursache an der Registry bestätigt — `slotsForStep('context')` beginnt mit vier
+nicht-fragbaren Entwurfs-Sessions, `resolveActiveSession` nahm die erste OFFENE (Pitch), die Bühne
+rechnete ihr Modul aber aus der ersten offenen FRAGE (Herkunft); daraus folgten beide Befunde (kein
+Entwurfs-Knopf für das Feld, auf dem der Mensch saß; `sessionKey: a.pitch` bei `nextSlotId:
+a.origin`). Pure Regel `brandStageClaim` (`shared/brandStageModule.ts`): die aktive Session
+bestimmt Modul und Feld, leer + entwerfbar ⇒ `draft` mit Georges Frage zum Feld (Label +
+Hilfetext aus dem Katalog, ein neuer Satz mit `{voice}`) und Eingabezeile → `hints[slot.id]` →
+`generateSlot()`; `nextSlot` ist null, solange die aktive Session die Bühne hält. Prompt:
+`draftField` schließt den Zug auf dem eigenen Feld, `openFieldLabels` nennt Feld + Knopf.
+`converse-12`: `loadBrandChapterAnswers` — EIN Lesezugriff je Zug (`Query.limit(60)`), jüngste
+Antwort je fremder Session des Kapitels, Deckel 8 × 220 Zeichen, Block im Rumpf, „NEVER ASK
+AGAIN" beruft sich darauf; Eröffnungszug trägt die Liste plus eigene Regel; Session-Schnitt des
+Verlaufs bleibt. Tests brand 2753 (+28). Auto-Weiter bleibt (David, DECISION-LOG (8)).
+**Gelernt:** eine Entscheidung, die über drei Computeds verteilt ist (`activeAwaitsConfirm`,
+`nextSlot`, `stageModule`), hat keinen Ort, an dem sie falsch sein kann — erst die eine pure Regel
+machte den Fehler benennbar und testbar.
+
 ---
 
 ### Kailua-Wizard-Befunde 8/9/10/12: George behauptet nichts, leere Bestätigung erklärt sich, „Alle abnehmen", Handbuch-Kapitel „Stimme" geteilt ✅ 2026-09-09

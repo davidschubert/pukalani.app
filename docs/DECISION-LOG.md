@@ -88,6 +88,12 @@ Gesprächs-Prompt sieht die beantworteten Fragen des ganzen Kapitels** (Nebenbef
 per Session geschnitten, der Generator liest kapitelweit — George konnte Fragen früherer Sessions
 wiederholen): nur die Liste Frage + Kurzantwort reist mit, der Session-Schnitt des Chat-Verlaufs
 (brand-011) bleibt. Verworfen: Session-Schnitt auch für die Wiederholungs-Regel.
+(8) **Auto-Weiter bleibt; die Entwurfs-Felder kommen NACH den Fragen** (Nebenbefund aus dem
+Weg-B-Lauf, nach Empfehlung): nach dem Eröffnungszug einer Entwurfs-Session springt §5 Auto-Weiter
+zur ersten Katalog-Frage, das Antwort-Modul steht beim ersten Besuch nur kurz — gewollt: Georges
+Interview läuft zuerst durch die echten Fragen, Pitch/Kategorie/Wettbewerber/Zielgruppen-Skizze
+entstehen danach aus dem Material, und dort steht das Modul stabil. Verworfen: Auto-Weiter hält auf
+Entwurfs-Sessions an; Registry-Reihenfolge des Kontext-Kapitels umbauen.
 
 ---
 
