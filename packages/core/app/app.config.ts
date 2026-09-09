@@ -98,8 +98,10 @@ export default defineAppConfig({
        *    unter der Überschrift „Community-Einstellungen" am irreführendsten.
        *
        * Deshalb ein `configFlag` (Core-Default AUS, wie jedes Core-Gate) statt
-       * einer Liste, die man je App wiederholt. AN steht er in apps/comments —
-       * dem EINEN lebenden Silo (SILO-REGEL, DECISION-LOG 2026-08-04).
+       * einer Liste, die man je App wiederholt. AN steht er in den Silo-Apps
+       * comments, portfolio und branding (SILO-REGEL, DECISION-LOG 2026-08-04
+       * und 2026-08-31); die Hülle heißt dort „Website-Einstellungen" (Davids
+       * Wort vom 2026-09-08).
        */
       instanceTabs: false,
     },

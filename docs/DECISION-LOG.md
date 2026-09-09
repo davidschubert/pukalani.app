@@ -37,6 +37,40 @@ Kalender, Drive, Obsidian, Figma, Linear + Marketing-/PM-/Productivity-/Design-P
 
 ---
 
+## 2026-09-08 — Navigation anpassen: vier Entscheidungen (Wording · Site-Nav mit Unterpunkten · Dashboard-Nav je Person)
+
+**Anlass:** Auf branding.supply war der Reiter „Navigation" unter /dashboard/community/navigation
+leer, und der Menüpunkt hieß „Community-Einstellungen", obwohl die Site keine Community ist.
+Befund: der Editor kennt nur `pukalani.chrome.nav` (dort registriert der brand-Layer nichts) und
+veröffentlichte CMS-Seiten ohne Rechtsseiten (auf branding gibt es nur die drei Rechtsseiten) —
+und selbst gefüllt hätte er nichts bewirkt, weil der EINZIGE Leser der gespeicherten Wahl das
+blueprint-Layout ist, während `BwSiteNav.vue` eine feste Liste rendert. Unterpunkte kennt der
+Vertrag `core/shared/communityNavigation.ts` nicht (flache Liste, ab dem sechsten Eintrag ein
+„Mehr"-Menü). Die Reihenfolge der DASHBOARD-Navigation ist überall fest (Gruppen im Layout,
+`order` in der Registry), ohne Laufzeit-Überschreibung.
+
+**Entscheidungen (David, 2026-09-08):**
+
+1. **Site-Navigation direkt MIT Unterpunkten** (Abweichung von der Empfehlung „erst flach,
+   dann Unterpunkte"): ein Durchgang — Vertrag additiv um Kinder erweitern, Editor mit Ziehen in
+   einen Hauptpunkt, gerendert in `BwSiteNav` (branding) UND im blueprint-Layout (Pool), damit
+   Pool und Silo dasselbe Produktverhalten zeigen (PRODUKT-BILANZ). Der brand-Layer registriert
+   seine Routen in `chrome.nav`, damit der Editor Kandidaten hat. Prototyp vor der Freigabe.
+2. **Die Hülle heißt im Silo „Website-Einstellungen"** (nicht „Instanz-Einstellungen" — für einen
+   Kunden ist „Instanz" Technik). Derselbe Schalter `admin.instanceTabs`, neues Label in de/en, der
+   i18n-Schlüssel `instanceSettings` bleibt (Label ≠ Key). AN jetzt in comments, portfolio und
+   branding; die vier Betreiber-Reiter kommen mit.
+3. **Reihenfolge der Dashboard-Navigation ist die Wahl JEDER PERSON** (Prefs des Kontos, gilt auf
+   jeder Site) — nicht je Community: die Nav ist rollen-gefiltert, eine Owner-Reihenfolge ginge
+   für einen Moderator nicht auf. Beide Varianten („je Instanz", „beides") verworfen.
+4. **Reihenfolge der Pakete:** Wording → Site-Nav → Dashboard-Nav, jedes mit Check-in.
+
+**Beantwortet damit auch Davids Frage „geht das für alle pukalani.app-Sites?":** ja — das
+Dashboard-Layout gehört dem admin-Layer und ist in jeder App dasselbe; eine Überschreibung dort
+gilt für Pool, Silo und Kontroll-Host gleichermaßen.
+
+---
+
 ## 2026-09-08 — Brand Insights (BI1): Konzeptrunde — acht Entscheidungen
 
 **Anlass:** Die Konzeptrunde vom 2026-09-08 hat aus den zehn offenen Fragen des Redaktions-

@@ -162,6 +162,18 @@ export default defineAppConfig({
      * zwar erst dann: sie ist die einzige Stelle, an der ein Besucher erfährt,
      * dass er einen ungeprüften Text vor sich hat.
      */
+    /**
+     * DIE HÜLLE UNTEN LINKS HEISST „WEBSITE-EINSTELLUNGEN" (Davids Entscheidung
+     * 2026-09-08, DECISION-LOG „Navigation anpassen"): diese Site ist ein Silo
+     * ohne Community, und der Menüpunkt hieß trotzdem „Community-Einstellungen"
+     * — eine falsche Auskunft über eine Fläche, in der die Rechtsseiten und
+     * die Navigation DIESER Website stehen. Der Schalter ist derselbe wie in
+     * apps/comments (Begründung dort und an `instanceTabs` in
+     * packages/core/app/app.config.ts): er benennt die Hülle um UND hängt die
+     * vier Betreiber-Reiter Produkte · Speicher · Konfiguration · System
+     * hinein — hier richtig, denn der Betreiber dieser Instanz ist David.
+     */
+    admin: { instanceTabs: true },
     pages: {
       draftNotice: ['imprint', 'privacy', 'terms'],
     },
