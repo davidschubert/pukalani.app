@@ -904,6 +904,34 @@ entscheidet D9/David. Inhalts-Gate: Reihenfolge und Erklärsatz von Kapitel
 10, Board-Seite (Kopfzeile, rechte Spalte, Sperr-Fläche), Entwurfs-Hinweis,
 Beispiel-Briefing (Entwurf des Baus), acht Rückfragen der Auswahl-Verträge.
 
+**Stand D9 (Gesamtbeweis):** GEBAUT und geprüft 2026-09-09 (Commits
+20e1a646, eba0188f, 45fbe367, 1dd8c405). `packages/brand/scripts/
+verify-brand-design.mjs` (`pnpm --filter @pukalani/brand verify:design`) —
+EIN Produkt-Beweis über die ganze Schicht, 117 Zusagen in ~90 s: Sperre vor
+der Freischaltung (sechs Routen 404, Board 200 „0 von 6"), Betreiber-
+Freischaltung mit 401/403/409 + Ereignis, BEIDE Wege der Weiche in zwei
+Marken, sechs Kapitel mit Vorbelegung aus dem Vorgänger (H5), Preset mit
+sechs Teilen, Kapitel 10 + Board (Besitzer 200 / fremd 404), Snapshot v2
+ohne Vorbild/Lesung/Entwurf/Prompt-Hash (Gegenprobe `VERIFY_EXPECT_LEAK=1`
+⇒ 107/117), Rücknahme ohne Datenverlust, vier Deckel (429/429/429/409),
+Funnel ohne Inhalte, GDPR (Export = Metadaten, Löschung räumt beide
+Buckets). Dazu Sessions-Beweis 383/383, Share 47/47 (Gegenprobe 36/47),
+2 651 Tests. Zwei Härtungen: (a) das Knopf-Paar `button-light` misst
+dieselbe adaptive Schriftfarbe wie die Szene (`brandAccentInk`: Papier ODER
+Rampe 950 auf Akzent, je nach höherem Kontrast) — PRODUKT-WIRKUNG: helle
+Akzente bestehen jetzt, durch fällt der Mittelton (411 Katalog-Töne fallen
+weiter); (b) der persistierte Verlauf liefert bei Karten-Klicks die
+Lesefassung statt der rohen Id (`swapBrandChoiceValueLine` im Lese-Pfad,
+idempotent). Nicht angefasst: der eingefrorene Prototyp `demoDesign.ts`.
+**Alle Pakete D0–D9 sind gebaut; es folgen Audit (Sicherheit: Datentür,
+Buckets, ZDR; Leitplanken a–e; Nicht-Ziele §2.16; die zwei Härtungen) und
+Davids Abnahme mit den Inhalts-Gates aus D1–D8.** Offene Fragen an David:
+(1) Kontrast-Regel — darf ein heller Akzent mit dunkler Schrift bestehen,
+oder trägt ein Marken-Knopf immer hellen Text? (2) Design-Werte doppelt im
+Snapshot (Preset + rohe Slot-Werte)? (3) Klickdummy mitziehen oder
+einfrieren? (4) §2.14 nennt `design.step.completed`, gebaut ist der
+generische `step.completed` mit `stepKey` — Konzept nachziehen?
+
 | # | Paket | Inhalt | Gate |
 | --- | --- | --- | --- |
 | D0 | Verträge | Registry-Steps + Sessions (Struktur), Vokabulare, Font-Paar-Katalog, `BrandDesignPreset`, `buildBrandDesign`, Ramp-Import als Vertrag, Journey mit Freischaltung | — |
