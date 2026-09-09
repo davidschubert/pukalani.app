@@ -1154,6 +1154,25 @@ watch(() => store.invariantRejection, (rejection) => {
   })
 })
 
+/**
+ * DER SERVER HAT EINE BESTÄTIGUNG OHNE WERT ABGEWIESEN (400 `slot_empty`,
+ * Befund 9) — ein Satz statt eines stillen „Nicht gespeichert".
+ *
+ * Der Weg dorthin ist eng (die Bühne schaltet den Knopf ab), aber er ist da:
+ * zweiter Tab, geleertes Feld, überholter Stand. Dieselbe Form wie beim
+ * Invarianten-Verstoss — der Store hat die Absicht schon zurückgenommen, hier
+ * steht nur noch die Auskunft.
+ */
+watch(() => store.emptyConfirmRejection, (slotId) => {
+  if (!slotId) return
+  store.dismissEmptyConfirmRejection()
+  toast.add({
+    color: 'warning',
+    title: t('brand.workspace.confirmEmpty'),
+    description: t('brand.workspace.confirmNeedsValue'),
+  })
+})
+
 function invariantMessage(slotId: string, invariant: BrandInvariant | null): string {
   const field = fieldLabel(slotId)
   if (!invariant) return t('brand.invariant.generic', { field })
@@ -1205,6 +1224,14 @@ async function keepSessionValid(): Promise<void> {
 /** Der Hinweis je Slot („wärmer", „kürzer") — lokal, nie gespeichert. */
 const hints = ref<Record<string, string>>({})
 const hintOpen = ref(false)
+
+/**
+ * EIN GESPRÄCHSZUG IST GERADE ZU ENDE GEGANGEN (Befund 8b) — die Flanke, an
+ * der die Hervorhebung des Entwurfs-Knopfes hängt. Sie steht hier oben, weil
+ * `generateSlot` sie beim Klick löscht; die Bedingung selbst (`draftNudge`)
+ * wohnt unten bei `stageModule`, wo sie hingehört.
+ */
+const turnEnded = ref(false)
 
 /**
  * Die Bedien-Zustände der Bühne hängen am BAUSTEIN und fallen mit ihm — und
@@ -1306,6 +1333,8 @@ function cardFor(slotId: string): BrandSlotCard | null {
  * shared-Ordner stehen — der Klickdummy dokumentiert den Balken weiter. */
 
 async function generateSlot(slot: BrandSlot): Promise<void> {
+  // Der Hinweis hat seinen Zweck erfüllt, sobald geklickt wurde (Befund 8b).
+  turnEnded.value = false
   await generation.generate(slot.id, hints.value[slot.id] ?? '')
   // Der Hinweis hat gewirkt oder nicht — stehen bleiben soll er nicht, sonst
   // reist er stillschweigend in den nächsten Versuch.
@@ -1429,6 +1458,33 @@ const stageModule = computed<StageModule>(() => {
     return card.controls.showGenerate ? 'draft' : 'confirm'
   }
   return completion.value?.slotsReady ? 'gate' : 'none'
+})
+
+/**
+ * „JETZT WÄRE DER ENTWURF DRAN" (Davids Befund 8b, 2026-09-09).
+ *
+ * George kann kein Feld schreiben (converse-11) — er sagt jetzt selbst, dass
+ * der Entwurf über den Knopf entsteht. Damit dieser Satz nicht ins Leere zeigt,
+ * tritt der Knopf nach einem Gesprächszug SICHTBAR hervor, solange die aktuelle
+ * Karte im Entwurfs-Modul steht und noch nichts drinsteht.
+ *
+ * DEZENT UND VON SELBST VERGÄNGLICH: die Hervorhebung ist eine Fassung des
+ * bestehenden Knopfes (solid statt ghost), kein Blinken und kein zweiter Knopf.
+ * Sie fällt beim ersten Klick, beim Wechsel der Karte — und ohnehin in dem
+ * Augenblick, in dem ein Wert dasteht: die Bedingung IST der leere Wert.
+ */
+watch(() => conversation.pending.value, (now, before) => {
+  // Nur die FLANKE „lief und ist fertig" — der Anfang eines Zuges sagt nichts.
+  if (now || !before) return
+  turnEnded.value = true
+})
+
+watch(() => pendingCard.value?.slot.id ?? '', () => { turnEnded.value = false })
+
+const draftNudge = computed(() => {
+  if (!turnEnded.value || stageModule.value !== 'draft') return false
+  const card = pendingCard.value
+  return card !== null && store.slotValue(card.slot.id).length === 0
 })
 
 /**
@@ -3282,6 +3338,14 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
                 <!-- ZU WENIG IST ZU WENIG: statt eines Knopfes, der in ein 409
                      läuft, steht hier ruhig, was fehlt. -->
                 <p v-if="pendingCard.note" class="bw-pending mt-2">{{ pendingCard.note }}</p>
+                <!-- NOCH GAR NICHTS DA (Befund 9): der Bestätigen-Knopf ist
+                     abgeschaltet — bis hierher sah man ihm das kaum an, und ein
+                     Klick tat nichts, ohne es zu sagen. Jetzt steht der Grund
+                     daneben. Die Regel ist pur (`showConfirmBlockedNote`) und
+                     schliesst sich mit dem Bedarfs-Satz darüber aus. -->
+                <p v-if="pendingCard.controls.showConfirmBlockedNote" class="bw-pending mt-2">
+                  {{ t('brand.workspace.confirmNeedsValue') }}
+                </p>
 
                 <!-- Links die WEITER-Wege (nochmal, frühere Fassungen),
                      rechts die ABSCHLUSS-Wege (korrigieren, übernehmen) —
@@ -3305,8 +3369,14 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
                          mit showHint stand auf jungfräulichen Feldern
                          „Nochmal, mit Hinweis", obwohl es nie ein erstes Mal
                          gab (Davids Durchspiel-Audit 2026-09-03). -->
+                    <!-- NACH EINEM GESPRÄCHSZUG TRITT ER HERVOR (Befund 8b):
+                         George hat eben gesagt, dass der Entwurf hier entsteht
+                         — dann darf der Knopf nicht wie ein Nebenweg aussehen.
+                         Eine Fassung, kein zweiter Knopf und kein Blinken; sie
+                         fällt beim Klick und mit dem ersten Wert. -->
                     <UButton
-                      size="sm" color="neutral" variant="ghost" class="rounded-full"
+                      size="sm" color="neutral" class="rounded-full"
+                      :variant="draftNudge ? 'solid' : 'ghost'"
                       icon="i-ph-sparkle"
                       :label="store.slotValue(pendingCard.slot.id)
                         ? t('brand.workspace.retryWithHint')
@@ -3384,6 +3454,12 @@ useBrandTitle(() => (store.profile?.title || t('brand.brands.card.untitled')))
                   </p>
                   <p v-else class="bw-pending mt-2">{{ t('brand.workspace.stage.pending') }}</p>
                 </div>
+                <!-- Befund 9, zweite Stelle: dieselbe Auskunft an derselben
+                     Regel — ein abgeschalteter Knopf ohne Begründung ist ein
+                     stiller No-op, egal in welchem Modul er steht. -->
+                <p v-if="pendingCard.controls.showConfirmBlockedNote" class="bw-pending mb-2">
+                  {{ t('brand.workspace.confirmNeedsValue') }}
+                </p>
                 <p class="mb-2 font-medium">{{ t('brand.workspace.confirmQuestion') }}</p>
                 <div class="flex flex-wrap items-center justify-end gap-2">
                   <button

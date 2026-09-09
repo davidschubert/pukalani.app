@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { brandChoiceDisplayLabel } from '../../shared/brandChoiceOptions'
+import { brandSessionAcceptable } from '../../shared/brandJourney'
 import { brandSlotValueView } from '../../shared/brandSlotFormat'
 import { slotById } from '../../shared/slotRegistry'
 import type {
@@ -126,8 +127,15 @@ const value = computed(() => brandSlotValueView(
   brandChoiceDisplayLabel(props.session.slotId, props.session.value, locale.value),
 ))
 
-/** Abnehmbar ist, was bestätigt und noch nicht abgenommen ist (§5a Schritt 2). */
-const acceptable = computed(() => props.session.confirmed && !props.session.accepted)
+/**
+ * Abnehmbar ist, was bestätigt und noch nicht abgenommen ist (§5a Schritt 2).
+ *
+ * Die Regel steht seit Befund 10 PUR nebenan (`brandSessionAcceptable`), weil
+ * „Alle abnehmen" dieselbe Menge treffen muss — und der Server sie ebenfalls
+ * liest. Drei Ausdrücke für eine Frage liefen unweigerlich auseinander: ein
+ * Sammel-Knopf, der eine Zeile stehen lässt, an der ein Haken angeboten wird.
+ */
+const acceptable = computed(() => brandSessionAcceptable(props.session))
 </script>
 
 <template>

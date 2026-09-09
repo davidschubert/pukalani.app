@@ -255,6 +255,11 @@ describe('buildBrandFoundation — die Blöcke', () => {
     })
   })
 
+  /**
+   * DER WORT-LEITFADEN STEHT IM MESSAGING-KAPITEL (Befund 12, 2026-09-09) —
+   * nicht mehr unter „Stimme": Do & Don't sind der Wortschatz, mit dem die
+   * Marke schreibt, und die Stimme wartet seither nicht mehr auf `verbal`.
+   */
   it('paart Do und Don’t — bei ungleicher Länge bleibt die andere Hälfte LEER', () => {
     const blocks = blocksOf({
       title: '', contentLocale: 'de', story: null,
@@ -265,7 +270,7 @@ describe('buildBrandFoundation — die Blöcke', () => {
           value: '- benutzen: unsere Bohnen\n- benutzen: von Hand\n- meiden: Premium-Selektion',
         }],
       }],
-    }, 'stimme')
+    }, 'messaging')
     expect(blocks.find(block => block.kind === 'dodont')).toEqual({
       kind: 'dodont',
       labelKey: 'brand.foundation.label.doDont',
@@ -274,6 +279,33 @@ describe('buildBrandFoundation — die Blöcke', () => {
         { doText: 'von Hand', dontText: '' },
       ],
     })
+  })
+
+  it('GEGENPROBE: unter „Stimme" steht der Leitfaden NICHT mehr', () => {
+    const view = buildBrandFoundation({
+      title: '', contentLocale: 'de', story: null,
+      chapters: [
+        {
+          stepKey: 'archetype',
+          slots: [{ slotId: 'd.toneWords', value: '- ruhig' }],
+        },
+        {
+          stepKey: 'verbal',
+          slots: [
+            { slotId: 'ep.keyMessages', value: '## Für Cafés\nWir liefern dienstags.' },
+            { slotId: 'ep.vocabulary', value: '- benutzen: unsere Bohnen\n- meiden: Premium-Selektion' },
+          ],
+        },
+      ],
+    })
+    const voice = view.chapters.find(chapter => chapter.id === 'stimme')!
+    expect(voice.blocks.some(block => block.kind === 'dodont')).toBe(false)
+
+    // Und im Messaging-Kapitel steht er NACH den Kernbotschaften.
+    const messaging = view.chapters.find(chapter => chapter.id === 'messaging')!
+    const kinds = messaging.blocks.map(block => block.kind)
+    expect(kinds).toContain('dodont')
+    expect(kinds.indexOf('dodont')).toBeGreaterThan(0)
   })
 
   it('füllt den KI-Rahmen aus Ton-Wörtern, Tabu-Wörtern und Werten', () => {
@@ -399,7 +431,17 @@ describe('brandFoundationPendingStep — was noch nicht abgenommen ist', () => {
 
   it('nennt das erste offene Quell-Kapitel', () => {
     expect(brandFoundationPendingStep('stimme', accepted({ archetype: false }))).toBe('archetype')
-    expect(brandFoundationPendingStep('stimme', accepted({ verbal: false }))).toBe('verbal')
+    expect(brandFoundationPendingStep('messaging', accepted({ verbal: false }))).toBe('verbal')
+  })
+
+  /**
+   * BEFUND 12 (Davids Entscheidung 2026-09-09): „Persönlichkeit & Stimme" hing
+   * an ZWEI Werkstatt-Kapiteln, weil der Wort-Leitfaden dort gerendert wurde —
+   * ein abgenommener Archetyp las sich deshalb als „noch nicht abgenommen".
+   */
+  it('WARTET NICHT MEHR auf „Sprache & Messaging"', () => {
+    expect(BRAND_FOUNDATION_SOURCE_STEPS.stimme).toEqual(['archetype'])
+    expect(brandFoundationPendingStep('stimme', accepted({ verbal: false }))).toBeNull()
   })
 
   it('GEGENPROBE: alles abgenommen ⇒ null', () => {

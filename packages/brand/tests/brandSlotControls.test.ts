@@ -72,6 +72,29 @@ describe('brandSlotControls — der offene Slot', () => {
     expect(brandSlotControls(input({ hasValue: true })).showRevise).toBe(false)
   })
 
+  /**
+   * BEFUND 9 (Davids Durchlauf 2026-09-08): „Übernehmen & bestätigen" auf einer
+   * Karte, die „Noch offen — kommt im Gespräch" sagt, tat nichts und sagte
+   * nichts. Der Knopf WAR abgeschaltet — er sah nur nicht danach aus. Jetzt
+   * steht daneben, was fehlt.
+   */
+  it('SAGT bei leerem Feld, was dem Bestätigen fehlt — und nur dann', () => {
+    expect(brandSlotControls(input()).showConfirmBlockedNote).toBe(true)
+    // Steht ein Wert da, ist der Knopf offen und der Satz gegenstandslos.
+    expect(brandSlotControls(input({ hasValue: true })).showConfirmBlockedNote).toBe(false)
+    // Bestätigt: es fehlt nichts mehr.
+    expect(brandSlotControls(input({ hasValue: true, confirmed: true })).showConfirmBlockedNote).toBe(false)
+    // Ein Slot ohne Bestätigung (Paarvergleich) hat keinen Knopf — und
+    // deshalb auch keine Absage daneben.
+    expect(brandSlotControls(input({ confirmable: false })).showConfirmBlockedNote).toBe(false)
+  })
+
+  it('sagt es NICHT ein zweites Mal, wenn schon der Bedarfs-Satz dasteht', () => {
+    const blocked = brandSlotControls(input({ ready: false }))
+    expect(blocked.showReadinessNote).toBe(true)
+    expect(blocked.showConfirmBlockedNote).toBe(false)
+  })
+
   it('zeigt ENTWEDER den Bedarfs-Satz ODER die Werkzeuge, nie beides', () => {
     const blocked = brandSlotControls(input({ ready: false }))
     expect(blocked.showReadinessNote).toBe(true)

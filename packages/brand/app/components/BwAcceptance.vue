@@ -3,6 +3,7 @@ import {
   BRAND_SETTABLE_CONFIDENCE_VALUES,
   type BrandConfidence,
 } from '../../shared/brandJourney'
+import { brandSessionAcceptable } from '../../shared/brandJourney'
 import {
   resolveAcceptanceStage,
   restartWordMatches,
@@ -17,6 +18,7 @@ import type {
   BrandFindingDecisionResponse,
   BrandRestartImpactResponse,
   BrandSessionAcceptResponse,
+  BrandStepAcceptAllResponse,
   BrandStepAcceptanceResponse,
   BrandStepRestartResponse,
   BrandStepReviewResponse,
@@ -237,6 +239,79 @@ async function accept(session: BrandAcceptanceSessionView): Promise<void> {
   }
   finally {
     accepting.value = null
+  }
+}
+
+/**
+ * „ALLE ABNEHMEN" (Davids Befund 10, 2026-09-09) — der Weg für den, der die
+ * Seite ganz gelesen hat.
+ *
+ * ── DIESELBE REGEL WIE DER EINZEL-KNOPF, UND ZWAR WÖRTLICH ────────────────
+ * `brandSessionAcceptable` ist die pure Regel, an der auch `BwSessionBlock`
+ * seinen Haken zeigt (bestätigt und noch nicht abgenommen). Zwei Rechnungen
+ * nebeneinander hiessen: der Sammel-Knopf lässt eine Zeile stehen, die daneben
+ * einen Haken anbietet.
+ *
+ * ── EIN AUFRUF, NICHT ELF ─────────────────────────────────────────────────
+ * Jede Abnahme dreht die `revision` weiter — elf Aufrufe wären elf abhängige
+ * Runden, und der erste 409 liesse das Kapitel halb abgenommen zurück. Die
+ * Route macht daraus einen Schreibvorgang; WELCHE Zeilen sie anfasst, rechnet
+ * sie selbst aus ihrem eigenen Stand (deshalb schickt dieser Aufruf keine
+ * Liste, nur die Fassung).
+ *
+ * Der Knopf verschwindet, sobald nichts mehr abzunehmen ist.
+ */
+const acceptableSessions = computed(() => sessions.value.filter(brandSessionAcceptable))
+
+const acceptingAll = ref(false)
+
+async function acceptAll(): Promise<void> {
+  if (acceptingAll.value || acceptableSessions.value.length === 0) return
+  acceptingAll.value = true
+  try {
+    const response = await $fetch<BrandStepAcceptAllResponse>(
+      `/api/brand/profiles/${props.profileId}/steps/${props.stepKey}/accept-all`,
+      { method: 'POST', body: { revision: revision.value } },
+    )
+    revision.value = response.revision
+    counter.value = response.acceptance
+    const done = new Set(response.accepted)
+    if (acceptance.data.value) {
+      acceptance.data.value = {
+        ...acceptance.data.value,
+        revision: response.revision,
+        acceptance: response.acceptance,
+        sessions: acceptance.data.value.sessions.map(entry => (done.has(entry.slotId)
+          ? { ...entry, accepted: true, deferred: false }
+          : entry)),
+      }
+    }
+    // Leiste und Werkstatt-Zähler lesen aus dem Store — wie beim einzelnen Haken.
+    store.applySessionAcceptances(response)
+    // WAS LIEGEN BLIEB, WIRD GESAGT (je Feld, nicht als Summe): ein „2 von 11
+    // gingen nicht" schickte den Menschen auf die Suche.
+    for (const entry of response.failed) {
+      toast.add({
+        color: 'warning',
+        title: t('brand.acceptance.acceptFailed'),
+        description: `${fieldLabel(entry.slotId)} · ${t('brand.acceptance.reloadHint')}`,
+      })
+    }
+    if (response.failed.length) await acceptance.refresh()
+  }
+  catch (error) {
+    const reason = (error as { data?: { reason?: string } }).data?.reason
+    toast.add({
+      color: 'warning',
+      title: t('brand.acceptance.acceptFailed'),
+      description: reason === 'revision_conflict' ? t('brand.acceptance.reloadHint') : undefined,
+    })
+    // Ein 409 heisst „dein Stand ist alt" — dieselbe Antwort wie beim einzelnen
+    // Abnehmen: nachholen statt den Menschen vor toten Knöpfen stehen lassen.
+    await acceptance.refresh()
+  }
+  finally {
+    acceptingAll.value = false
   }
 }
 
@@ -515,6 +590,23 @@ async function confirmRestart(): Promise<void> {
 
     <p v-if="acceptance.error.value" class="bw-pending">{{ t('brand.acceptance.loadFailed') }}</p>
 
+    <!-- ALLE ABNEHMEN (Befund 10): wer die Seite ganz gelesen hat, hat sie ALLE
+         gelesen. Er steht ÜBER der Liste, weil er für sie gilt, und er
+         verschwindet, sobald nichts mehr offen ist — ein Knopf ohne Wirkung ist
+         kein Angebot (dieselbe Regel wie beim Bestätigen in der Werkstatt). -->
+    <div v-if="acceptableSessions.length" class="flex flex-wrap items-center justify-between gap-2">
+      <p class="bw-label" style="color: var(--bw-muted)">
+        {{ t('brand.acceptance.acceptAllHint', { count: acceptableSessions.length }) }}
+      </p>
+      <UButton
+        size="xs" color="neutral" variant="outline" class="rounded-full"
+        icon="i-ph-checks"
+        :loading="acceptingAll" :disabled="accepting !== null"
+        :label="t('brand.acceptance.acceptAll')"
+        @click="acceptAll"
+      />
+    </div>
+
     <!-- DIE LISTE: ein Block je Session, in Registry-Reihenfolge. Eine
          optionale Session ohne Wert steht grau dabei — mit Beispiel und leerer
          Eingabe (§5a Schritt 1). Die OPTIK des Blocks wohnt in
@@ -524,7 +616,7 @@ async function confirmRestart(): Promise<void> {
       :session="session" :profile-id="profileId"
       :accepting="accepting === session.slotId"
       :keeping="keeping === session.slotId"
-      :busy="accepting !== null"
+      :busy="accepting !== null || acceptingAll"
       @accept="accept(session)"
       @keep="keep(session)"
       @edit="edit(session)"

@@ -85,14 +85,56 @@ describe('Die Zug-Regel steht im Auftrag', () => {
     expect(instruction).toMatch(/Never invent options where the question is open/)
   })
 
-  it('die Fassung steigt mit — converse-10', () => {
+  /**
+   * BEFUND 8 (Davids Kailua-Durchlauf 2026-09-08): George sagte „Ich trage Der
+   * Weise als primären Archetyp ein und Der Schöpfer als sekundären" — und trug
+   * nichts ein. Er kann es nicht: dieser Auftrag trägt keinen Marker, der einen
+   * Slot schriebe (s. „KEIN FELD, NIRGENDS" weiter unten). Die Regel muss also
+   * im Auftrag stehen, sonst ist die Architektur richtig und der Mensch wartet
+   * trotzdem.
+   */
+  it('converse-11: VERBIETET die Behauptung, etwas eingetragen zu haben', () => {
+    const instruction = brandConverseInstruction(BOTH)
+    expect(instruction).toMatch(/YOU CANNOT WRITE ANYTHING DOWN/)
+    expect(instruction).toMatch(/never say that you are entering, noting, recording, saving/)
+    // Und der Grund, damit die Regel nicht als Marotte gelesen wird.
+    expect(instruction).toMatch(/waiting for something that will never appear/)
+  })
+
+  it('converse-11: NENNT den Knopf, der den Entwurf wirklich erzeugt', () => {
+    const instruction = brandConverseInstruction({ ...BOTH, draftButton: 'George, entwirf das' })
+    expect(instruction).toMatch(/WHEN THEY NAME A CONCRETE DECISION/)
+    expect(instruction).toContain('press "George, entwirf das" next to this conversation')
+    // Er ist die EINE Ausnahme von „nie über die Mechanik reden" — ohne diesen
+    // Halbsatz löschen sich die beiden Regeln gegenseitig aus.
+    expect(instruction).toMatch(/ONE part of this workspace you may name out loud/)
+  })
+
+  it('converse-11: der Name kommt von aussen — in Brand Design heisst er anders', () => {
+    // Der Knopf trägt die STIMME des Kapitels (D8). Ein fest verdrahteter
+    // George-Satz stünde in den sechs Design-Kapiteln neben einem Knopf, den es
+    // dort nicht gibt.
+    const frida = brandConverseInstruction({ ...BOTH, draftButton: 'Frida, entwirf das' })
+    expect(frida).toContain('press "Frida, entwirf das" next to this conversation')
+    expect(frida).not.toContain('George, entwirf das')
+  })
+
+  it('converse-11: OHNE Namen bleibt das Verbot stehen — nur ohne Knopf-Wortlaut', () => {
+    const instruction = brandConverseInstruction(BOTH)
+    expect(instruction).toMatch(/YOU CANNOT WRITE ANYTHING DOWN/)
+    expect(instruction).toMatch(/with the button next to this conversation/)
+    expect(instruction).not.toMatch(/press "/)
+  })
+
+  it('die Fassung steigt mit — converse-11', () => {
     // Ohne den Anstieg behaupteten Züge aus converse-3, aus diesem Auftrag zu
     // stammen (dieselbe Regel wie bei GEORGE_PROMPT_VERSION). converse-6 war
     // der Session-Block (BW2 Paket 3a); converse-7 die Gegenlese-Runde
     // (Paket 2b); converse-8 ist der „hat mitgelesen"-Block (Paket 4);
     // converse-9 der Eröffnungszug einer VERALTETEN Session (Paket 6, §9);
-    // converse-10 der Markt-Block (MV1 M3).
-    expect(BRAND_CONVERSE_PROMPT_VERSION).toBe('converse-10')
+    // converse-10 der Markt-Block (MV1 M3); converse-11 das Verbot der
+    // Eintrags-Behauptung samt Verweis auf den Entwurfs-Knopf (Befund 8).
+    expect(BRAND_CONVERSE_PROMPT_VERSION).toBe('converse-11')
   })
 
   it('würdigt Substanz — aber verbietet das Lob ohne Deckung', () => {

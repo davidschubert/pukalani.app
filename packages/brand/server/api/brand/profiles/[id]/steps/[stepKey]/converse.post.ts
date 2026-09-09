@@ -1,6 +1,11 @@
 import { ID } from 'node-appwrite'
 import { createBrandConverseSchema } from '../../../../../../../schemas/brandConverse'
-import { colleagueForStep, techniqueForStep } from '../../../../../../../shared/brandAdvisors'
+import {
+  BRAND_DESIGN_VOICE,
+  BRAND_VOICE,
+  colleagueForStep,
+  techniqueForStep,
+} from '../../../../../../../shared/brandAdvisors'
 import { BRAND_SUBSTANCE_MIN_WORDS, nextCollectPart } from '../../../../../../../shared/brandSessions'
 import { formatBrandSlotStructured } from '../../../../../../../shared/brandSlotFormat'
 import {
@@ -19,6 +24,7 @@ import { resolveBrandUiLocale } from '../../../../../../../shared/brandUiLocale'
 import {
   type BrandSlot,
   type BrandSlotStateFacts,
+  isBrandDesignStep,
   slotById,
   slotsForStep,
 } from '../../../../../../../shared/slotRegistry'
@@ -64,6 +70,7 @@ import {
 } from '../../../../../../utils/conversePrompt'
 import { georgeSystemPrompt } from '../../../../../../utils/georgePrompt'
 import {
+  brandDraftButtonLabel,
   brandSessionPartLabel,
   brandSessionPartQuestion,
   brandSlotPromptLabel,
@@ -689,6 +696,17 @@ export default defineEventHandler(async (event): Promise<BrandConverseResponse |
         hasNextQuestion: Boolean(next),
         nextQuestionKnown: nextQuestion.length > 0,
         openFieldLabels,
+        /**
+         * DER KNOPF, DER WIRKLICH ENTWIRFT (converse-11, Befund 8): George darf
+         * nie behaupten, etwas eingetragen zu haben — er darf aber sagen, wo
+         * der Entwurf herkommt. Die STIMME des Kapitels entscheidet den Namen
+         * (in Brand Design steht dort „Frida, entwirf das"); gerechnet wird sie
+         * wie in der Werkstatt, damit im Chat und auf dem Knopf dasselbe steht.
+         */
+        draftButton: brandDraftButtonLabel(
+          uiLocale,
+          (isBrandDesignStep(stepKey) ? BRAND_DESIGN_VOICE : BRAND_VOICE).name,
+        ),
         session: sessionOptions,
         ...(brief ? { brief: brief.options } : {}),
         ...(body.opening ? { opening: true, chapterIntro } : {}),

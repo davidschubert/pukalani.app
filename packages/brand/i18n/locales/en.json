@@ -783,6 +783,8 @@
       "reviseDone": "Done revising",
       "confirmQuestion": "Does that work as a basis?",
       "acceptAndConfirm": "Accept & confirm",
+      "confirmNeedsValue": "Draft it or write it yourself first — then you can accept it.",
+      "confirmEmpty": "There is nothing here yet that could be confirmed.",
       "retryWithHint": "Again, with a hint",
       "submitChoice": "Submit",
       "turnOptions": {
@@ -1960,6 +1962,8 @@
       "notes": "Note",
       "valueEmpty": "No input yet — optional.",
       "accept": "Sign off",
+      "acceptAll": "Sign off all",
+      "acceptAllHint": "{count} confirmed rows are still waiting to be signed off.",
       "accepted": "Signed off",
       "edit": "Edit",
       "toSession": "Go to session",

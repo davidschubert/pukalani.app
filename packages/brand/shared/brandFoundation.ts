@@ -283,9 +283,19 @@ export const BRAND_FOUNDATION_SOURCE_STEPS: Readonly<
   positionierung: ['pvm'],
   architektur: ['architecture'],
   werte: ['values'],
-  // Ton-Wörter und Stimmproben stehen in `archetype`, der Wort-Leitfaden
-  // (`ep.vocabulary`, die Do-Seite) in `verbal`.
-  stimme: ['archetype', 'verbal'],
+  /**
+   * NUR `archetype` (Davids Entscheidung 2026-09-09, Befund 12).
+   *
+   * Bis hierher stand hier `['archetype', 'verbal']`, weil der WORT-LEITFADEN
+   * (`ep.vocabulary`, die Do-&-Don't-Seite) im Stimme-Kapitel gerendert wurde.
+   * In der Leseansicht hiess das: wer den Archetyp abgenommen hatte, las
+   * trotzdem „noch nicht abgenommen" an „Persönlichkeit & Stimme" — und der
+   * Vermerk sprang in ein Kapitel, das mit Archetyp, Ziel-Gefühl, Ton-Wörtern
+   * und Stimmproben nichts zu tun hat. Der Leitfaden ist mit demselben Schritt
+   * ins MESSAGING-Kapitel gewandert (s. `messagingBlocks`), also wartet die
+   * Stimme auch nicht mehr auf ihn.
+   */
+  stimme: ['archetype'],
   manifest: ['manifesto'],
   messaging: ['verbal'],
   name: ['naming'],
@@ -652,8 +662,16 @@ function valueBlocks(values: Map<string, string>): BrandFoundationBlock[] {
   return blocks
 }
 
-/** Kapitel 6 — Archetyp, Ton-Wörter mit Probe, Do & Don't (§2.2/§2.4). */
-function voiceBlocks(values: Map<string, string>, guide: VocabularySides): BrandFoundationBlock[] {
+/**
+ * Kapitel 6 — Archetyp, Ziel-Gefühl, Ton-Wörter mit Probe (§2.2).
+ *
+ * DER WORT-LEITFADEN STEHT SEIT DEM 2026-09-09 IM MESSAGING-KAPITEL (Befund
+ * 12, Davids Entscheidung): Do & Don't sind der Wortschatz, mit dem die Marke
+ * SCHREIBT — sie gehören zu Tagline, Boilerplates und Kernbotschaften. Solange
+ * sie hier standen, hing das Stimme-Kapitel an zwei Werkstatt-Kapiteln und
+ * blieb offen, obwohl der Archetyp längst abgenommen war.
+ */
+function voiceBlocks(values: Map<string, string>): BrandFoundationBlock[] {
   const blocks: BrandFoundationBlock[] = []
   blocks.push(...choiceBlock(values, `${LABEL}.archetype`, ['d.primary', 'd.secondary']))
   blocks.push(...textBlock(textOf(values, 'd.emotion'), `${LABEL}.emotion`))
@@ -674,7 +692,20 @@ function voiceBlocks(values: Map<string, string>, guide: VocabularySides): Brand
   if (restSamples.length > 0) {
     blocks.push({ kind: 'list', labelKey: `${LABEL}.voiceSamples`, items: restSamples })
   }
+  return blocks
+}
 
+/**
+ * DER WORT-LEITFADEN (§2.4) — Do & Don't als Paare, dazu die Zeilen ohne
+ * Seiten-Marke.
+ *
+ * Eigene Funktion seit Befund 12: er hat das Kapitel gewechselt (Stimme →
+ * Messaging), und ein Umzug ist leichter zu lesen, wenn dabei kein Code
+ * umgeschrieben wird. Bei ungleich langen Seiten bleibt die andere Hälfte LEER
+ * — ein erfundenes Paar legte der Marke ein Wort in den Mund.
+ */
+function vocabularyBlocks(guide: VocabularySides): BrandFoundationBlock[] {
+  const blocks: BrandFoundationBlock[] = []
   const pairCount = Math.max(guide.use.length, guide.avoid.length)
   if (pairCount > 0) {
     blocks.push({
@@ -727,8 +758,14 @@ function nameBlocks(values: Map<string, string>): BrandFoundationBlock[] {
   return blocks
 }
 
-/** Kapitel 8 — Tagline, Boilerplates, Kernbotschaften (§2.2). */
-function messagingBlocks(values: Map<string, string>): BrandFoundationBlock[] {
+/**
+ * Kapitel 8 — Tagline, Boilerplates, Kernbotschaften und seit Befund 12 der
+ * WORT-LEITFADEN (§2.2/§2.4).
+ *
+ * Er steht NACH den Kernbotschaften und VOR dem verbalen Erkennungszeichen:
+ * erst was die Marke sagt, dann mit welchen Wörtern sie es sagt.
+ */
+function messagingBlocks(values: Map<string, string>, guide: VocabularySides): BrandFoundationBlock[] {
   const blocks: BrandFoundationBlock[] = []
   const taglines = sentenceEntries(viewOf(values, 'ep.taglines'))
   if (taglines.length === 1) blocks.push({ kind: 'lead', text: taglines[0]!, labelKey: `${LABEL}.tagline` })
@@ -736,6 +773,7 @@ function messagingBlocks(values: Map<string, string>): BrandFoundationBlock[] {
 
   blocks.push(...blocksAsCards(viewOf(values, 'ep.boilerplates'), `${LABEL}.boilerplates`))
   blocks.push(...blocksAsCards(viewOf(values, 'ep.keyMessages'), `${LABEL}.keyMessages`))
+  blocks.push(...vocabularyBlocks(guide))
   blocks.push(...textBlock(textOf(values, 'ep.distinctiveAsset'), `${LABEL}.distinctiveAsset`))
   return blocks
 }
@@ -900,9 +938,9 @@ export function buildBrandFoundation(input: BrandFoundationInput): BrandFoundati
       ],
     },
     { id: 'werte', blocks: valueBlocks(values) },
-    { id: 'stimme', blocks: voiceBlocks(values, guide) },
+    { id: 'stimme', blocks: voiceBlocks(values) },
     { id: 'manifest', blocks: manifestoBlocks(values) },
-    { id: 'messaging', blocks: messagingBlocks(values) },
+    { id: 'messaging', blocks: messagingBlocks(values, guide) },
     { id: 'name', blocks: nameBlocks(values) },
     {
       id: 'visuell',

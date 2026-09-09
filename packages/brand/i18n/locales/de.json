@@ -783,6 +783,8 @@
       "reviseDone": "Korrigieren beenden",
       "confirmQuestion": "Passt das so als Grundlage?",
       "acceptAndConfirm": "Übernehmen & bestätigen",
+      "confirmNeedsValue": "Erst entwerfen oder selbst schreiben — dann lässt sich das übernehmen.",
+      "confirmEmpty": "Hier steht noch nichts, was sich bestätigen liesse.",
       "retryWithHint": "Nochmal, mit Hinweis",
       "submitChoice": "Übermitteln",
       "turnOptions": {
@@ -1960,6 +1962,8 @@
       "notes": "Notiz",
       "valueEmpty": "Noch keine Eingabe — optional.",
       "accept": "Abnehmen",
+      "acceptAll": "Alle abnehmen",
+      "acceptAllHint": "{count} bestätigte Zeilen warten noch auf die Abnahme.",
       "accepted": "Abgenommen",
       "edit": "Bearbeiten",
       "toSession": "Zur Session",

@@ -75,6 +75,25 @@ export function brandSessionPartLabel(slot: BrandSlot, part: string, contentLoca
   return lookup(ROOTS[contentLocale] ?? ROOTS.en, partLabelKeyFor(slot, part)) ?? part
 }
 
+/**
+ * DER NAME DES ENTWURFS-KNOPFES (converse-11, Befund 8) — „George, entwirf
+ * das", in den Design-Kapiteln „Frida, entwirf das".
+ *
+ * IN DER SPRACHE DER SEITE, nicht der Marke: der Knopf steht in der Oberfläche,
+ * und George nennt ihn in einem Chat-Zug, der ohnehin der Chat-Sprache folgt
+ * (Regel 9 des System-Prompts). Deshalb `uiLocale` und nicht `contentLocale` —
+ * die einzige Stelle dieser Datei, an der das so herum gilt.
+ *
+ * Gelesen wird derselbe Katalog-Eintrag, den die Bühne rendert
+ * (`brand.workspace.generate.start`) — ein zweiter Satz hier wäre beim ersten
+ * Umbenennen still falsch. Fehlt er (unbekannte Sprache), gibt es `''`, und der
+ * Prompt nennt den Knopf schlicht nicht beim Namen.
+ */
+export function brandDraftButtonLabel(uiLocale: string, voiceName: string): string {
+  const template = lookup(ROOTS[uiLocale] ?? ROOTS.en, 'brand.workspace.generate.start')
+  return template ? template.replace('{voice}', voiceName) : ''
+}
+
 /** Dieselbe Beschriftung für eine ganze Dependency-Liste (Prompt-Aufbau). */
 export function labelSlotDependencies<T extends { slotId: string }>(
   dependencies: readonly T[],

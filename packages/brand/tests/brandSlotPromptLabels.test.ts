@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { brandSlotPromptLabel, labelSlotDependencies } from '../server/utils/brandSlotPromptLabels'
+import {
+  brandDraftButtonLabel,
+  brandSlotPromptLabel,
+  labelSlotDependencies,
+} from '../server/utils/brandSlotPromptLabels'
+import { BRAND_DESIGN_VOICE, BRAND_VOICE } from '../shared/brandAdvisors'
 import { formatDependencies } from '../server/utils/georgePrompt'
 import { formatBrandConverseInputs } from '../server/utils/conversePrompt'
 import { BRAND_STEP_KEYS, slotsForStep } from '../shared/slotRegistry'
@@ -86,5 +91,30 @@ describe('Formatter drucken Labels, nie Ids', () => {
     })
     expect(inputs).not.toContain('[a.oneThing]')
     expect(inputs).toContain('[ohne.label]')
+  })
+})
+
+/**
+ * DER ENTWURFS-KNOPF IM PROMPT (converse-11, Befund 8): George verweist auf
+ * ihn, statt zu behaupten, er trage etwas ein. Sein Name kommt aus DEMSELBEN
+ * Katalog-Eintrag, den die Bühne rendert — sonst nennt der Chat einen Knopf,
+ * den es so nicht gibt.
+ */
+describe('brandDraftButtonLabel', () => {
+  it('setzt die Stimme in den Katalog-Satz — in beiden Sprachen', () => {
+    expect(brandDraftButtonLabel('de', BRAND_VOICE.name)).toBe(`${BRAND_VOICE.name}, entwirf das`)
+    expect(brandDraftButtonLabel('en', BRAND_VOICE.name)).toBe(`${BRAND_VOICE.name}, draft this`)
+  })
+
+  it('trägt in den Design-Kapiteln die ANDERE Stimme (D8)', () => {
+    const label = brandDraftButtonLabel('de', BRAND_DESIGN_VOICE.name)
+    expect(label).toContain(BRAND_DESIGN_VOICE.name)
+    expect(label).not.toContain(BRAND_VOICE.name)
+  })
+
+  it('fällt auf Englisch zurück und lässt keinen Platzhalter stehen', () => {
+    const label = brandDraftButtonLabel('fr', BRAND_VOICE.name)
+    expect(label).toBe(`${BRAND_VOICE.name}, draft this`)
+    expect(label).not.toContain('{voice}')
   })
 })
