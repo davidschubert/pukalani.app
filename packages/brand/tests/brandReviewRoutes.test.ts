@@ -411,7 +411,28 @@ describe('Die Befund-Dedup', () => {
     expect(findingRows[0]!.why).toBe('reibt sich')
   })
 
-  it('ein ENTSCHIEDENER Befund blockiert keine neue Zeile mehr', async () => {
+  it('ein ANGENOMMENER Befund blockiert keine neue Zeile — seine Korrektur hat das Feld verändert', async () => {
+    findingRows.push({
+      $id: 'f0',
+      $createdAt: '2026-09-04T00:00:00.000Z',
+      profileId: 'p1',
+      stepKey: 'values',
+      kind: 'conflict',
+      slots: JSON.stringify(['b.purpose', 'c.final']),
+      why: 'alt',
+      status: 'accepted',
+      sourceSession: 'c.final',
+    })
+    aiQueue = [answer({ findings: [CONFLICT] }), answer({ findings: [CONFLICT] })]
+    body = { revision: 2 }
+    await close(event)
+    expect(findingRows).toHaveLength(2)
+  })
+
+  it('ein ABGELEHNTER Befund kommt NICHT wieder — die Entscheidung des Menschen gilt (Kailua, 2026-09-08)', async () => {
+    // Vorher blockierten nur OFFENE Befunde die Dedup: ein mit Grund abgelehnter
+    // Konflikt kam beim nächsten Blick als neue offene Zeile zurück, und das
+    // Kapitel liess sich nie abnehmen.
     findingRows.push({
       $id: 'f0',
       $createdAt: '2026-09-04T00:00:00.000Z',
@@ -421,12 +442,14 @@ describe('Die Befund-Dedup', () => {
       slots: JSON.stringify(['b.purpose', 'c.final']),
       why: 'alt',
       status: 'dismissed',
+      dismissReason: 'Das ist Absicht.',
       sourceSession: 'c.final',
     })
     aiQueue = [answer({ findings: [CONFLICT] }), answer({ findings: [CONFLICT] })]
     body = { revision: 2 }
     await close(event)
-    expect(findingRows).toHaveLength(2)
+    expect(findingRows).toHaveLength(1)
+    expect(findingRows[0]!.status).toBe('dismissed')
   })
 })
 

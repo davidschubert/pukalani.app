@@ -223,11 +223,18 @@ export async function writeBrandFindings(
 ): Promise<BrandFindingRow[]> {
   if (!request.findings.length) return []
 
-  const existing = await listBrandFindings(event, request.profileId, 'open')
-  const seen = new Set(existing.map(row => brandFindingKey({
-    kind: toKind(row.kind),
-    slots: parseSlots(row.slots),
-  })))
+  // Dedupliziert gegen OFFENE und ABGELEHNTE Befunde (2026-09-08, live
+  // erwischt beim Kailua-Durchlauf): ein mit Grund abgelehnter Konflikt kam
+  // beim nächsten Kapitel-Blick als neue offene Zeile wieder — derselbe Streit
+  // über dieselben Felder, und das Kapitel liess sich nie abnehmen. Ein
+  // abgelehnter Befund ist eine ENTSCHEIDUNG des Menschen; der Prüfblick darf
+  // sie nicht durch Wiederholung überstimmen. Angenommene Befunde bleiben
+  // draussen: ihre Korrektur ändert das Feld, und ein NEUER Konflikt danach ist
+  // ein echter neuer Hinweis.
+  const existing = await listBrandFindings(event, request.profileId)
+  const seen = new Set(existing
+    .filter(row => toStatus(row.status) !== 'accepted')
+    .map(row => brandFindingKey({ kind: toKind(row.kind), slots: parseSlots(row.slots) })))
 
   const written: BrandFindingRow[] = []
   const { tablesDB, databaseId } = brandDb(event)
