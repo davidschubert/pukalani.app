@@ -7,6 +7,29 @@ die kleinen, verstreuten Beschlüsse.
 
 ---
 
+## 2026-09-09 — Sucheintrag: die Owner-Beschreibung gilt auch im Silo
+
+**Anlass:** Nebenbefund aus NAV1 (letzte offene Entscheidung der Zeile `13 · NAV1`): den
+Sucheintrag unter `/dashboard/community/seo` gibt es auf jeder Site, aber von seinen zwei
+Werten wirkte im Silo nur `noindex` — das sitzt in `useLocaleSeoHead()` und gilt der ganzen
+Community. Die BESCHREIBUNG las genau EINE Datei, `apps/platform/app/pages/index.vue`. Auf
+branding.supply und portfolio stand im Kopf der Startseite weiter der fest verdrahtete Text,
+egal was der Owner eintrug — ein Feld, das man ausfüllen kann und das nichts bewirkt.
+
+**Entscheidung (David):** ja — die Beschreibung aus dem Sucheintrag überschreibt auch auf
+Silo-Sites mit eigener Startseite die Seiten-Beschreibung, genau wie heute schon im Pool.
+Der bisherige Text bleibt der Rückfall (`home.seoDescription` auf branding,
+`HOME_META.description` auf portfolio), ein leeres Feld ändert also nichts — dieselbe Zusage wie in
+`resolveCommunitySeo` seit U15: keine Zeile heisst heutiges Verhalten. Gerechnet wird es
+ab jetzt an EINER Stelle, `useCommunitySeoDescription()` in core; die drei Startseiten
+reichen nur noch ihren Rückfall herein. `noindex` bleibt bewusst dort, wo es liegt.
+
+**Verworfen:** Silo-Sites behalten ihren eigenen, im Code stehenden Text — dann wäre der
+Sucheintrag dort eine Fläche ohne Wirkung, und wir müssten das Feld je Site ausblenden statt
+es zu bedienen.
+
+---
+
 ## 2026-09-09 — Brand Book & Kit (Produkt 03): Konzeption geschrieben, sechs Konzept-Entscheidungen
 
 **Anlass:** „Starte die Konzeption (Phase 2) für BK1" — §2 in docs/plans/BRAND-BOOK-KIT.md:

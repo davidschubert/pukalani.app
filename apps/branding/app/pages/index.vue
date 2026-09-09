@@ -48,11 +48,21 @@ const { t, locale } = useI18n()
 const localePath = useLocalePath()
 const { isLoggedIn } = useCurrentUser()
 
+/**
+ * Die Beschreibung im Kopf kommt seit 2026-09-09 aus dem Sucheintrag
+ * (/dashboard/community/seo), sonst wie bisher aus `home.seoDescription`.
+ * Davids Entscheidung: die Owner-Beschreibung gilt auf JEDER Site, nicht nur
+ * auf der Pool-Startseite — sonst wäre das Feld hier eine Fläche ohne Wirkung.
+ * `noindex`, der zweite Wert derselben Zeile, gilt der ganzen Site und sitzt
+ * deshalb weiterhin allein in `useLocaleSeoHead()`.
+ */
+const seoDescription = useCommunitySeoDescription(() => t('home.seoDescription'))
+
 useSeoMeta({
   title: () => t('home.seoTitle'),
-  description: () => t('home.seoDescription'),
+  description: () => seoDescription.value,
   ogTitle: () => t('home.title'),
-  ogDescription: () => t('home.seoDescription'),
+  ogDescription: () => seoDescription.value,
 })
 useHead({
   script: computed(() => [jsonLdScript({
@@ -64,7 +74,7 @@ useHead({
         'name': 'Branding Supply',
         'url': 'https://branding.supply',
         'inLanguage': locale.value,
-        'description': t('home.seoDescription'),
+        'description': seoDescription.value,
       },
     ],
   })]),

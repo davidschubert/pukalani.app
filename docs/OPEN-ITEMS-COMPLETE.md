@@ -30,6 +30,34 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### Sucheintrag-Beschreibung gilt auch im Silo (NAV1-Nebenbefund, letzte offene Entscheidung) ✅ 2026-09-09
+
+**Anlass:** Beim Abschluss von NAV1 blieb eine Frage offen (Zeile `13 · NAV1` in OPEN-ITEMS):
+den Sucheintrag unter `/dashboard/community/seo` gibt es auf jeder Site, aber von seinen zwei
+Werten wirkte im Silo nur `noindex` — das sitzt in `useLocaleSeoHead()` und gilt der ganzen
+Community. Die BESCHREIBUNG las genau EINE Datei, die Pool-Startseite. Auf branding.supply und
+portfolio stand im Kopf der Startseite weiter der fest verdrahtete Text, egal was der Owner
+eintrug. Davids Entscheidung 2026-09-09 (DECISION-LOG): die Owner-Beschreibung gilt auf JEDER
+Site, der bisherige Text bleibt der Rückfall.
+
+**Gebaut:** (1) `packages/core/app/composables/useCommunitySeoDescription.ts` — EINE Stelle, die
+`useCommunitySeoSettings()` mit der puren Regel `resolveCommunitySeo` (core/shared/communitySeo.ts)
+zusammensteckt: `useCommunitySeoDescription(fallback: MaybeRefOrGetter<string | null | undefined>):
+ComputedRef<string>`, `''` heisst weiterhin „kein description-Tag" (S5). `noindex` bleibt bewusst
+draussen — der zweite Wert derselben Zeile gilt der ganzen Community und gehört in den EINEN
+Kopf-Aufruf. (2) Drei Leser: `apps/platform/app/pages/index.vue` (Inline-Rechnung ersetzt,
+Verhalten identisch — Rückfall bleibt der Anriss der home-Seite, `|| undefined` lässt das Tag
+weg), `apps/branding/app/pages/index.vue` (`description` + `ogDescription` in `useSeoMeta` und die
+`description` des `WebSite`-Knotens im JSON-LD; Rückfall `home.seoDescription`),
+`apps/portfolio/app/pages/index.vue` (`usePortfolioSeo({ description })` und die `description` des
+`WebPage`-Knotens; Rückfall `HOME_META.description`). Unangetastet bleiben `personDescription`
+(Person-Knoten) und `serviceDescription` (ProfessionalService) — die beschreiben die Person und
+das Angebot, nicht die Site.
+
+**Beweis:** siehe unten.
+
+---
+
 ### NAV1 Paket 3 — Reihenfolge der Dashboard-Navigation je Person (Konto-Prefs, Konto-Reiter „Navigation") ✅ 2026-09-08
 
 **Anlass:** Entscheidung 3 aus „Navigation anpassen" (DECISION-LOG 2026-09-08): die Reihenfolge der
