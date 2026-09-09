@@ -30,6 +30,24 @@ nicht auf Anhieb funktionierte, steht am Ende des Eintrags eine Zeile
 
 ---
 
+### Sucheintrag + Weiterleitungen speichern im Silo (NAV1-Nebenbefund) ✅ 2026-09-08
+
+**Was:** Davids Auftrag „fix die neu gefundenen Probleme": `PATCH /api/pages/seo` und
+`PATCH /api/pages/redirects` antworteten ohne Mandanten-Kontext 404 — dieselbe Falle wie
+bei der Navigation. Die Row-Id-Regel ist jetzt EINE (`core/shared/communitySettingsRow.ts`,
+`communitySettingsRowIdFor(event)` in core/server/utils) für alle drei Ablagen, Routen UND
+Lese-Middlewares (die brachen im Silo ebenfalls ab — eine gespeicherte Weiterleitung hätte
+dort nie gegriffen).
+
+**Beweis:** lokal (Dev-Instanz) PATCH 200, `/de/alt-test` ⇒ 301 `/de/about`, Gegenprobe 404,
+`noindex` ⇒ robots-Meta; LIVE auf branding.supply per Klick: Weiterleitung `/nav-test` ⇒ 301
+`/de/about`, entfernt ⇒ 404, Sucheintrag speichert; core 1566 Tests, Lint, Typecheck.
+
+**Gelernt:** Wer eine Regel „nachzieht", zieht sie an EINE Stelle — drei Routen mit derselben
+Zeile wären die nächste Drift. Und: Leser prüfen, nicht nur Schreiber — die Middlewares hätten
+den Silo weiter ignoriert. Nebenbefund: die Sucheintrag-BESCHREIBUNG liest nur die
+Pool-Startseite; im Silo wirkt bisher nur `noindex` (offen in OPEN-ITEMS).
+
 ### Website-Navigation mit Unterpunkten + Silo-Ablage (NAV1 Paket 2) ✅ 2026-09-08
 
 **Was:** Davids Screenshot vom 2026-09-08: der Navigations-Editor auf branding.supply war leer
